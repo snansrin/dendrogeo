@@ -11,7 +11,7 @@
 <meta property="og:title" content="DendroGeo — Küresel Ağaç Envanteri ve Karbon Veri Sistemi">
 <meta property="og:description" content="Ağaç envanteri ve karbon stoğu verisi, tek merkezde. Onaylı küresel veri, harita ve istatistikler.">
 <meta property="og:image" content="social-preview.png">
-<meta property="og:url" content="https://snansrin.github.io/dendrogeo-v2/">
+<meta property="og:url" content="https://snansrin.github.io/dendrogeo/">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="DendroGeo — Küresel Ağaç Envanteri">
 <meta name="twitter:description" content="Ağaç envanteri ve karbon stoğu verisi, tek merkezde.">
@@ -23,6 +23,7 @@
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
+<script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
 <style>
 :root{--bg:#f7f6f2;--surface:#fff;--ink:#182420;--mut:#68766e;--line:#e6e3d9;--green:#1e6f4b;--green-dk:#14532d;--tint:#eaf3ec;--amber:#c77d2e;--amber-tint:#f8efe2;--red:#c2452d;--blue:#2b6cb0;--r:14px;--sh:0 1px 2px rgba(20,30,25,.05),0 10px 28px rgba(20,30,25,.07)}
 *{box-sizing:border-box;margin:0}html{scroll-behavior:smooth}
@@ -196,9 +197,9 @@ tr.done td{opacity:.55}tr.done td b{text-decoration:line-through}
    <button class="btn sm ghost" onclick="authTab('reg')">Kayıt</button>
    <button class="btn sm ghost" onclick="authTab('reset')">Şifre Yenile</button>
   </div>
-  <form id="fLogin"><div class="lbl">E‑posta</div><input id="liEmail" type="email" required><div class="lbl" style="margin-top:12px">Parola</div><input id="liPass" type="password" required><button class="btn" style="width:100%;margin-top:16px">Giriş Yap</button></form>
-  <form id="fReg" style="display:none"><div class="lbl">Ad Soyad</div><input id="rgName" required><div class="lbl" style="margin-top:10px">Kurum</div><input id="rgOrg"><div class="lbl" style="margin-top:10px">E‑posta</div><input id="rgEmail" type="email" required><div class="lbl" style="margin-top:10px">Parola</div><input id="rgPass" type="password" minlength="6" required><button class="btn" style="width:100%;margin-top:16px">Hesap Oluştur</button></form>
-  <form id="fReset" style="display:none"><div class="lbl">E‑posta</div><input id="rsEmail" type="email" required><button class="btn" style="width:100%;margin-top:16px">Sıfırlama Gönder</button></form>
+  <form id="fLogin"><div class="lbl">E‑posta</div><input id="liEmail" type="email" required><div class="lbl" style="margin-top:12px">Parola</div><input id="liPass" type="password" required><div class="cf-turnstile" data-sitekey="0x4AAAAAAEkJfXuFvNgUrwUb" style="margin-top:14px"></div><button class="btn" style="width:100%;margin-top:16px">Giriş Yap</button>
+  <form id="fReg" style="display:none"><div class="lbl">Ad Soyad</div><input id="rgName" required><div class="lbl" style="margin-top:10px">Kurum</div><input id="rgOrg"><div class="lbl" style="margin-top:10px">E‑posta</div><input id="rgEmail" type="email" required><div class="lbl" style="margin-top:10px">Parola</div><input id="rgPass" type="password" minlength="6" required><div class="cf-turnstile" data-sitekey="0x4AAAAAAEkJfXuFvNgUrwUb" style="margin-top:14px"></div><button class="btn" style="width:100%;margin-top:16px">Hesap Oluştur</button></form>
+  <form id="fReset" style="display:none"><div class="lbl">E‑posta</div><input id="rsEmail" type="email" required><div class="cf-turnstile" data-sitekey="0x4AAAAAAEkJfXuFvNgUrwUb" style="margin-top:14px"></div><button class="btn" style="width:100%;margin-top:16px">Sıfırlama Gönder</button></form>
   <div id="authMsg" style="margin-top:12px;font-size:.85rem;min-height:1.2em"></div>
  </div>
 </div></section>
@@ -207,6 +208,37 @@ tr.done td{opacity:.55}tr.done td b{text-decoration:line-through}
   <div><h4>DendroGeo</h4><p>Küresel Ağaç Envanteri ve Karbon Veri Sistemi.</p></div>
   <div><h4>Referanslar</h4><p>Chave et al. 2014 · IPCC 2006<br>As ve ark. 2001 · Tolunay 2013<br>OGM 299 Nolu Tebliğ 2017</p></div>
   <div><h4>Sistem</h4><p>v11.0 · <span class="mono">ÇEVRİMİÇİ</span></p></div>
+ </div>
+ <div style="margin-top:34px;padding-top:30px;border-top:1px solid rgba(255,255,255,.18)">
+  <div class="grid g2" style="gap:24px">
+   <div>
+    <h4 style="color:#9fd0ae;font-size:.72rem;letter-spacing:.16em;text-transform:uppercase;margin-bottom:12px">📚 Kaynakça</h4>
+    <div style="font-size:.78rem;line-height:1.7;color:#cfe0d4">
+     <div>• Chave J, Réjou-Méchain M, et al. (2014). <i>Pantropical biomass allometries</i>. Global Ecology and Biogeography, 23(1), 132-146.</div>
+     <div>• IPCC (2006). <i>Guidelines for National Greenhouse Gas Inventories</i>. Vol. 4, Chapter 4: Forest Land.</div>
+     <div>• As N, Asan A, Okur OD (2001). <i>Türkiye Orman Ağaçlarının Odun Özellikleri</i>. Orman Bakanlığı Yayınları.</div>
+     <div>• Tolunay D (2013). <i>Türkiye'deki Ağaç Türlerinin Odun Yoğunluk Değerleri</i>. İstanbul Üniversitesi Orman Fakültesi.</div>
+     <div>• OGM (2017). <i>299 Nolu Tebliğ — Orman Ürünlerinin Özellikleri</i>. Orman Genel Müdürlüğü.</div>
+     <div>• Bozkurt Y, Erdin N (2000). <i>Önemli Ağaçların Teknik Özellikleri</i>. İÜ Orman Fakültesi.</div>
+    </div>
+   </div>
+   <div>
+    <h4 style="color:#9fd0ae;font-size:.72rem;letter-spacing:.16em;text-transform:uppercase;margin-bottom:12px">📝 Atıf & Lisans</h4>
+    <div class="card" style="background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.15);padding:14px">
+     <div class="mono" style="font-size:.72rem;color:#fff;line-height:1.7;background:rgba(0,0,0,.25);padding:10px;border-radius:6px">
+      ŞİRİN, S. &amp; ŞİRİN, N. (2026). <i>DendroGeo: Global Tree Inventory &amp; Carbon Data System</i>. Retrieved from https://snansrin.github.io/dendrogeo/
+     </div>
+     <div style="font-size:.75rem;color:#cfe0d4;margin-top:10px">
+      <b style="color:#fff">Veri Lisansı:</b> CC BY-NC 4.0 — Ticari olmayan kullanımda, kaynak gösterilerek serbestçe paylaşılabilir.
+     </div>
+    </div>
+    <h4 style="color:#9fd0ae;font-size:.72rem;letter-spacing:.16em;text-transform:uppercase;margin:18px 0 10px">⚖️ Politikalar</h4>
+    <div style="font-size:.78rem;color:#cfe0d4;line-height:1.6">
+     <div><a href="#" onclick="alert('KVKK: Yalnızca e-posta, ad ve kurum bilgileriniz saklanır. Hesap istediğinizde tüm verileriniz silinebilir. Çerez kullanılmamaktadır.');return false;" style="color:#9fd0ae;text-decoration:underline">KVKK Aydınlatma Metni</a></div>
+     <div style="margin-top:4px"><a href="#" onclick="alert('Veri Doğruluk: GPS doğruluğu ±10m altında, bitki örtüsü ≥%10 ve pozlama 25-245 aralığında olmayan çekimler reddedilir. Tüm kayıtlar admin onayından sonra yayımlanır.');return false;" style="color:#9fd0ae;text-decoration:underline">Veri Doğruluk Politikası</a></div>
+    </div>
+   </div>
+  </div>
  </div>
  <div class="credit">
   <div class="thesis">🎓 Bu proje; <b>Nagihan ŞİRİN</b>'in <i>"Kent Parklarının Karbon Depolama Performansının Saptanması"</i> adlı doktora çalışması kapsamında gerçekleştirilmiştir.</div>
@@ -404,6 +436,17 @@ tr.done td{opacity:.55}tr.done td b{text-decoration:line-through}
     <div class="grid g2">
      <div class="tblwrap"><table><thead><tr><th>Ülke</th><th>Kayıt</th><th>Karbon(t)</th><th>Ort.Çap</th><th>Ort.Yükseklik(m)</th></tr></thead><tbody id="wCountryT"></tbody></table></div>
      <div class="tblwrap"><table><thead><tr><th>Şehir</th><th>Kayıt</th><th>Karbon(t)</th></tr></thead><tbody id="wCityT"></tbody></table></div>
+    </div>
+      </div>
+   <div class="card" style="margin-top:18px;border-left:4px solid var(--blue)">
+    <div class="shead" style="margin-bottom:12px"><span class="no">🆚</span><h2 style="font-size:1.15rem">Park Karşılaştırma — Karbon Performansı</h2><span class="rule"></span></div>
+    <div id="parkCompare"></div>
+   </div>
+   <div class="card" style="margin-top:18px;border-left:4px solid var(--amber)">
+    <div class="shead" style="margin-bottom:12px"><span class="no">📄</span><h2 style="font-size:1.15rem">Park Raporu</h2><span class="rule"></span></div>
+    <div class="grid g3">
+     <div><div class="lbl">Park / Proje</div><select id="repProject"></select></div>
+     <div style="align-self:end"><button class="btn amber" onclick="parkReport()">📄 Rapor Oluştur</button></div>
     </div>
    </div>
   </div>
@@ -605,9 +648,9 @@ function showAuth(){
 function authTab(t){["login","reg","reset"].forEach(x=>{const id="f"+x[0].toUpperCase()+x.slice(1);if($(id))$(id).style.display=(x===t?"block":"none");});}
 function amsg(t,e){const m=$("authMsg");if(m){m.textContent=t;m.style.color=e?"var(--red)":"var(--green-dk)";}}
 
-$("fLogin")&&($("fLogin").onsubmit=async e=>{e.preventDefault();const r=await sb.auth.signInWithPassword({email:$("liEmail").value,password:$("liPass").value});if(r.error)return amsg(r.error.message,1);boot();});
-$("fReg")&&($("fReg").onsubmit=async e=>{e.preventDefault();const r=await sb.auth.signUp({email:$("rgEmail").value,password:$("rgPass").value,options:{data:{full_name:$("rgName").value,organization:$("rgOrg").value}}});if(r.error)return amsg(r.error.message,1);amsg(r.data.session?"Hesap oluşturuldu.":"Doğrulama e‑postası gönderildi.",0);});
-$("fReset")&&($("fReset").onsubmit=async e=>{e.preventDefault();const r=await sb.auth.resetPasswordForEmail($("rsEmail").value);if(r.error)return amsg(r.error.message,1);amsg("Sıfırlama bağlantısı gönderildi.",0);});
+$("fLogin")&&($("fLogin").onsubmit=async e=>{e.preventDefault();const tok=turnstile.getResponse();if(!tok)return amsg("Lütfen bot doğrulamasını tamamlayın.",1);const r=await sb.auth.signInWithPassword({email:$("liEmail").value,password:$("liPass").value,options:{captchaToken:tok}});if(r.error)return amsg(r.error.message,1);turnstile.reset();boot();});
+$("fReg")&&($("fReg").onsubmit=async e=>{e.preventDefault();const tok=turnstile.getResponse();if(!tok)return amsg("Lütfen bot doğrulamasını tamamlayın.",1);const r=await sb.auth.signUp({email:$("rgEmail").value,password:$("rgPass").value,options:{data:{full_name:$("rgName").value,organization:$("rgOrg").value},captchaToken:tok}});if(r.error)return amsg(r.error.message,1);turnstile.reset();amsg(r.data.session?"Hesap oluşturuldu.":"Doğrulama e‑postası gönderildi.",0);});
+$("fReset")&&($("fReset").onsubmit=async e=>{e.preventDefault();const tok=turnstile.getResponse();if(!tok)return amsg("Lütfen bot doğrulamasını tamamlayın.",1);const r=await sb.auth.resetPasswordForEmail($("rsEmail").value,{captchaToken:tok});if(r.error)return amsg(r.error.message,1);turnstile.reset();amsg("Sıfırlama bağlantısı gönderildi.",0);});
 async function logout(){await sb.auth.signOut();location.reload();}
 
 async function boot(){
@@ -1092,6 +1135,7 @@ async function loadWorld(){
   const t=await sb.from("v_city").select("*");
   $("wCityT").innerHTML=(t.data||[]).slice(0,30).map(r=>`<tr><td>${r.city}</td><td>${r.records}</td><td>${r.carbon_t}</td></tr>`).join("")||"<tr><td colspan=3>—</td></tr>";
   loadApprovedMarkers(worldMap,3000,(n,rows)=>renderAnalysis(rows,"worldAnalysis"));
+  loadParkCompare();
  }catch(e){}
 }
 
@@ -1266,6 +1310,64 @@ async function updateRole(id,role){
 async function toggleU(id,act){
  if(PROFILE.role!=="owner")return alert("🛡 Bu yetki yalnızca kurucuya aittir.");
  await sb.from("profiles").update({active:act}).eq("id",id);loadUsers();
+}
+
+/* ============ PARK KARŞILAŞTIRMA + RAPOR ============ */
+let PARK_DATA=[];
+async function loadParkCompare(){
+ const{data}=await sb.from("measurements").select("carbon_kg,dbh_cm,height_m,species,grp,projects(name,city)").eq("status","Onaylı").limit(5000);
+ PARK_DATA=data||[];
+ const by={};
+ PARK_DATA.forEach(r=>{
+  const name=r.projects?.name||"—";
+  const p=by[name]=by[name]||{name,city:r.projects?.city||"—",n:0,c:0,dbh:0,h:0};
+  p.n++;p.c+=(r.carbon_kg||0);p.dbh+=(r.dbh_cm||0);p.h+=(r.height_m||0);
+ });
+ const list=Object.values(by).sort((a,b)=>b.c-a.c);
+ const max=list.length?list[0].c:1;
+ const el=$("parkCompare");if(!el)return;
+ el.innerHTML=list.length?list.map((p,i)=>`
+  <div style="display:flex;align-items:center;gap:12px;margin-bottom:10px;padding:8px 12px;background:var(--bg);border-radius:10px">
+   <div class="mono" style="width:26px;height:26px;border-radius:50%;background:${i===0?"var(--green)":"var(--line)"};color:${i===0?"#fff":"var(--mut)"};display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.75rem;flex:0 0 auto">${i+1}</div>
+   <div style="flex:1;min-width:0">
+    <div style="font-size:.85rem;font-weight:700">${p.name} ${i===0?'<span class="badge on">🏆 En İyi</span>':""}</div>
+    <div style="font-size:.7rem;color:var(--mut)">${p.city} · ${p.n} kayıt · ort. çap ${(p.dbh/p.n).toFixed(1)} cm · ort. boy ${(p.h/p.n).toFixed(1)} m</div>
+   </div>
+   <div style="width:120px;background:var(--line);border-radius:4px;height:8px;overflow:hidden;flex:0 0 auto"><div style="height:100%;width:${(p.c/max*100).toFixed(0)}%;background:var(--green)"></div></div>
+   <div class="mono" style="width:70px;text-align:right;font-weight:600;flex:0 0 auto">${(p.c/1000).toFixed(2)} t</div>
+  </div>`).join(""):'<div style="color:var(--mut);font-size:.85rem">Henüz onaylı kayıt yok.</div>';
+ const rep=$("repProject");
+ if(rep)rep.innerHTML=list.map(p=>`<option>${p.name}</option>`).join("")||'<option value="">—</option>';
+}
+function parkReport(){
+ const name=$("repProject").value;
+ const rows=PARK_DATA.filter(r=>(r.projects?.name||"—")===name);
+ if(!rows.length)return alert("Bu park için onaylı kayıt yok.");
+ const n=rows.length;
+ const c=rows.reduce((a,r)=>a+(r.carbon_kg||0),0);
+ const dbh=(rows.reduce((a,r)=>a+(r.dbh_cm||0),0)/n).toFixed(1);
+ const h=(rows.reduce((a,r)=>a+(r.height_m||0),0)/n).toFixed(1);
+ const ib=rows.filter(r=>r.grp==="İBRELİ").length, ya=rows.filter(r=>r.grp==="YAPRAKLI").length;
+ const pct=x=>n?((x/n)*100).toFixed(1):"0";
+ const bySp={};
+ rows.forEach(r=>{const s=bySp[r.species]=bySp[r.species]||{n:0,c:0,dbh:0,h:0,grp:r.grp||"DİĞER"};s.n++;s.c+=(r.carbon_kg||0);s.dbh+=(r.dbh_cm||0);s.h+=(r.height_m||0);});
+ const spRows=Object.entries(bySp).sort((a,b)=>b[1].c-a[1].c);
+ const html=`
+  <div class="grid g4" style="margin-bottom:14px">
+   <div class="stat" style="padding:12px"><div class="lbl">Kayıt</div><div class="val" style="font-size:1.1rem">${n}</div></div>
+   <div class="stat" style="padding:12px"><div class="lbl">Karbon</div><div class="val" style="font-size:1.1rem">${(c/1000).toFixed(2)} t</div></div>
+   <div class="stat" style="padding:12px"><div class="lbl">Ort. Çap</div><div class="val" style="font-size:1.1rem">${dbh} cm</div></div>
+   <div class="stat" style="padding:12px"><div class="lbl">Ort. Boy</div><div class="val" style="font-size:1.1rem">${h} m</div></div>
+  </div>
+  <div style="font-size:.78rem;color:var(--mut);margin-bottom:12px">🌲 İbreli %${pct(ib)} · 🍃 Yapraklı %${pct(ya)} · Diğer %${pct(n-ib-ya)} · ${new Date().toLocaleDateString("tr-TR")}</div>
+  <table><thead><tr><th>Tür</th><th>Latince</th><th>Grup</th><th>Adet</th><th>Karbon (kg)</th><th>Ort. Çap</th><th>Ort. Boy</th></tr></thead><tbody>
+  ${spRows.map(([sp,v])=>`<tr><td>${sp}</td><td style="font-style:italic">${LATIN[sp]&&LATIN[sp]!=="—"?LATIN[sp]:"—"}</td><td>${v.grp}</td><td>${v.n}</td><td>${v.c.toFixed(1)}</td><td>${(v.dbh/v.n).toFixed(1)}</td><td>${(v.h/v.n).toFixed(1)}</td></tr>`).join("")}
+  </tbody></table>`;
+ const csv="\uFEFFPARK,"+name+"\nSEHIR,"+(rows[0].projects?.city||"—")+"\nTARIH,"+new Date().toLocaleDateString("tr-TR")+"\nKAYIT,"+n+"\nTOPLAM_KARBON_KG,"+c.toFixed(1)+"\nTOPLAM_KARBON_T,"+(c/1000).toFixed(2)+"\nORT_CAP_CM,"+dbh+"\nORT_BOY_M,"+h+"\nIBRELI_%,"+pct(ib)+"\nYAPRAKLI_%,"+pct(ya)+"\n\nTUR,LATIN,GRUP,ADET,KARBON_KG,ORT_CAP_CM,ORT_BOY_M\n"+spRows.map(([sp,v])=>[sp,LATIN[sp]||"—",v.grp,v.n,v.c.toFixed(1),(v.dbh/v.n).toFixed(1),(v.h/v.n).toFixed(1)].join(",")).join("\n")+"\n";
+ $("pvTitle").textContent="📄 "+name+" — Park Raporu";
+ $("pvBody").innerHTML=html;
+ $("pvDownload").onclick=()=>dl(csv,name.replace(/\s+/g,"_")+"_rapor.csv");
+ $("previewModal").classList.add("on");
 }
 
 boot();
