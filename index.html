@@ -681,7 +681,7 @@ function authTab(t){
   if(TS[tsId]){try{turnstile.reset(TS[tsId]);}catch(e){}}
  },120);
 }
-window.TS={};
+const TS = window.TS = {};
 function initTurnstile(){
  if(typeof turnstile==="undefined"){setTimeout(initTurnstile,500);return;}
  ["tsLogin","tsReg","tsReset"].forEach(id=>{
