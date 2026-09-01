@@ -699,6 +699,7 @@ function tsToken(id){
  if(typeof turnstile==="undefined"||!TS[id])return null;
  try{return turnstile.getResponse(TS[id])||null;}catch(e){return null;}
 }
+function amsg(t,e){const m=$("authMsg");if(m){m.textContent=t;m.style.color=e?"var(--red)":"var(--green-dk)";}}
 function toast(msg,type="ok",icon=""){
  const wrap=$("toastWrap");if(!wrap)return;
  const t=document.createElement("div");
@@ -709,6 +710,7 @@ function toast(msg,type="ok",icon=""){
  setTimeout(()=>{if(t.parentNode){t.classList.add("bye");setTimeout(()=>t.remove(),300);}},4500);
 }
 
+function amsg(t,e){const m=$("authMsg");if(m){m.textContent=t;m.style.color=e?"var(--red)":"var(--green-dk)";}}
 async function doLogin(){
  const email=$("liEmail").value;
  const pass=$("liPass").value;
