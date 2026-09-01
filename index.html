@@ -176,9 +176,12 @@ tr.done td{opacity:.55}tr.done td b{text-decoration:line-through}
  <div id="worldMapLanding" style="height:380px;border-radius:var(--r);border:1px solid var(--line)"></div>
  <p style="color:var(--mut);font-size:.8rem;margin-top:8px">🟢 Onaylı noktalara dokunun → ölçüm bilgisi + fotoğraf balonu.</p>
  <div id="landingAnalysis" style="margin-top:20px"></div>
- <div class="cols" style="grid-template-columns:1fr 1fr;margin-top:20px">
-  <div class="card tblwrap"><table id="tblCountry"><thead><tr><th>Ülke</th><th>Kayıt</th><th>Karbon(t)</th><th>Ort.DBH</th><th>Ort.Yükseklik(m)</th></tr></thead><tbody></tbody></table></div>
-  <div class="card tblwrap"><table id="tblCity"><thead><tr><th>Şehir</th><th>Kayıt</th><th>Karbon(t)</th></tr></thead><tbody></tbody></table></div>
+  <div class="card" style="margin-top:20px;border-left:4px solid var(--green)">
+  <div class="shead" style="margin-bottom:12px"><span class="no">🌍</span><h2 style="font-size:1.15rem">Bölgesel Dağılım</h2><span class="rule"></span></div>
+  <div class="grid g2">
+   <div class="tblwrap"><table id="tblCountry"><thead><tr><th>Ülke</th><th>Kayıt</th><th>Karbon(t)</th><th>Ort.DBH</th><th>Ort.Yükseklik(m)</th></tr></thead><tbody></tbody></table></div>
+   <div class="tblwrap"><table id="tblCity"><thead><tr><th>Şehir</th><th>Kayıt</th><th>Karbon(t)</th></tr></thead><tbody></tbody></table></div>
+  </div>
  </div>
 </div></section>
 <section class="blk" id="istatistik"><div class="wrap">
@@ -252,15 +255,9 @@ tr.done td{opacity:.55}tr.done td b{text-decoration:line-through}
     <div class="shead" style="margin-bottom:14px"><span class="no">🌳</span><h2 style="font-size:1.15rem">Kişisel Ağaç Analizi</h2><span class="rule"></span></div>
     <div id="myAnalysis"></div>
    </div>
-    <div class="grid g2" style="margin-top:18px">
-    <div class="card" style="border-left:4px solid var(--amber)">
-     <div class="shead" style="margin-bottom:12px"><span class="no">🌲</span><h2 style="font-size:1.1rem">Tür Dağılımım</h2><span class="rule"></span></div>
-     <div id="mySpeciesList"></div>
-    </div>
-    <div class="card" style="border-left:4px solid var(--blue)">
-     <div class="shead" style="margin-bottom:12px"><span class="no">📈</span><h2 style="font-size:1.1rem">Karbon Trendi</h2><span class="rule"></span><span class="mono" style="font-size:.72rem;color:var(--mut)">son 10 kayıt</span></div>
-     <canvas id="chCarbon" height="140"></canvas>
-    </div>
+     <div class="card" style="margin-top:18px;border-left:4px solid var(--blue)">
+    <div class="shead" style="margin-bottom:12px"><span class="no">📈</span><h2 style="font-size:1.15rem">Karbon Trendi</h2><span class="rule"></span><span class="mono" style="font-size:.72rem;color:var(--mut)">son 10 kayıt · kg</span></div>
+    <canvas id="chCarbon" height="110"></canvas>
    </div>
   </div>
 
@@ -402,9 +399,12 @@ tr.done td{opacity:.55}tr.done td b{text-decoration:line-through}
    <div id="worldMap" style="margin-bottom:8px"></div>
    <p style="color:var(--mut);font-size:.8rem;margin-bottom:18px">🟢 Noktalara dokunun → bilgi + fotoğraf balonu.</p>
    <div id="worldAnalysis" style="margin-bottom:18px"></div>
-   <div class="grid g2">
-    <div class="card tblwrap"><table><thead><tr><th>Ülke</th><th>Kayıt</th><th>Karbon(t)</th><th>Ort.Çap</th><th>Ort.Yükseklik(m)</th></tr></thead><tbody id="wCountryT"></tbody></table></div>
-    <div class="card tblwrap"><table><thead><tr><th>Şehir</th><th>Kayıt</th><th>Karbon(t)</th></tr></thead><tbody id="wCityT"></tbody></table></div>
+      <div class="card" style="border-left:4px solid var(--green)">
+    <div class="shead" style="margin-bottom:12px"><span class="no">🌍</span><h2 style="font-size:1.15rem">Bölgesel Dağılım</h2><span class="rule"></span></div>
+    <div class="grid g2">
+     <div class="tblwrap"><table><thead><tr><th>Ülke</th><th>Kayıt</th><th>Karbon(t)</th><th>Ort.Çap</th><th>Ort.Yükseklik(m)</th></tr></thead><tbody id="wCountryT"></tbody></table></div>
+     <div class="tblwrap"><table><thead><tr><th>Şehir</th><th>Kayıt</th><th>Karbon(t)</th></tr></thead><tbody id="wCityT"></tbody></table></div>
+    </div>
    </div>
   </div>
 
@@ -930,7 +930,6 @@ async function loadDash(){
  const{data}=await sb.from("measurements").select("*").eq("owner",USER.id);
  $("dMy").textContent=(data||[]).length;
  $("dCarbon").textContent=((data||[]).reduce((a,r)=>a+(r.carbon_kg||0),0)).toFixed(0);
- renderSpeciesList(data||[],"mySpeciesList");
  drawChart("chCarbon","bar",(data||[]).slice(0,10).map(r=>"P"+r.point_id),(data||[]).slice(0,10).map(r=>r.carbon_kg));
  renderAnalysis(data||[],"myAnalysis");
 }
@@ -951,7 +950,8 @@ function renderSpeciesList(rows,elId){
 }
 function drawChart(id,type,labels,data){
  if(charts[id])charts[id].destroy();
- charts[id]=new Chart($(id),{type,data:{labels,datasets:[{data,backgroundColor:["#1e6f4b","#c77d2e","#2b6cb0","#c2452d","#7c3aed","#0891b2","#92400e","#d97706"]}]},options:{plugins:{legend:{display:false}},scales:type==="bar"?{y:{ticks:{color:"#68766e"}},x:{ticks:{color:"#68766e"}}}:undefined}});
+ const pal=["#14532d","#1e6f4b","#2e8b57","#3aa76d","#6aa84f","#8fbc6d","#c77d2e","#d97706","#92400e","#4c9a52"];
+ charts[id]=new Chart($(id),{type,data:{labels,datasets:[{data,backgroundColor:(c)=>pal[c.dataIndex%pal.length],borderRadius:8,borderSkipped:false,barPercentage:.6}]},options:{plugins:{legend:{display:false}},scales:type==="bar"?{y:{grid:{color:"rgba(20,30,25,.06)"},ticks:{color:"#68766e"}},x:{grid:{display:false},ticks:{color:"#68766e"}}}:undefined}});
 }
 
 /* ============ AKTİF VERİ ANALİZİ (İbreli/Yapraklı yüzde, ort. çap/boy, tür dağılımı) ============ */
