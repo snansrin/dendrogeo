@@ -252,14 +252,14 @@ tr.done td{opacity:.55}tr.done td b{text-decoration:line-through}
     <div class="shead" style="margin-bottom:14px"><span class="no">🌳</span><h2 style="font-size:1.15rem">Kişisel Ağaç Analizi</h2><span class="rule"></span></div>
     <div id="myAnalysis"></div>
    </div>
-   <div class="grid g2">
-    <div class="card">
-     <div class="lbl" style="margin-bottom:10px">🌲 Tür Dağılımım</div>
-     <canvas id="chSpecies" height="180"></canvas>
+    <div class="grid g2" style="margin-top:18px">
+    <div class="card" style="border-left:4px solid var(--amber)">
+     <div class="shead" style="margin-bottom:12px"><span class="no">🌲</span><h2 style="font-size:1.1rem">Tür Dağılımım</h2><span class="rule"></span></div>
+     <div id="mySpeciesList"></div>
     </div>
-    <div class="card">
-     <div class="lbl" style="margin-bottom:10px">📈 Karbon Trendi (son 10)</div>
-     <canvas id="chCarbon" height="180"></canvas>
+    <div class="card" style="border-left:4px solid var(--blue)">
+     <div class="shead" style="margin-bottom:12px"><span class="no">📈</span><h2 style="font-size:1.1rem">Karbon Trendi</h2><span class="rule"></span><span class="mono" style="font-size:.72rem;color:var(--mut)">son 10 kayıt</span></div>
+     <canvas id="chCarbon" height="140"></canvas>
     </div>
    </div>
   </div>
@@ -930,10 +930,24 @@ async function loadDash(){
  const{data}=await sb.from("measurements").select("*").eq("owner",USER.id);
  $("dMy").textContent=(data||[]).length;
  $("dCarbon").textContent=((data||[]).reduce((a,r)=>a+(r.carbon_kg||0),0)).toFixed(0);
- const sp={};(data||[]).forEach(r=>sp[r.species]=(sp[r.species]||0)+1);
- drawChart("chSpecies","doughnut",Object.keys(sp),Object.values(sp));
+ renderSpeciesList(data||[],"mySpeciesList");
  drawChart("chCarbon","bar",(data||[]).slice(0,10).map(r=>"P"+r.point_id),(data||[]).slice(0,10).map(r=>r.carbon_kg));
  renderAnalysis(data||[],"myAnalysis");
+}
+function renderSpeciesList(rows,elId){
+ const el=$(elId);if(!el)return;
+ const sp={};
+ rows.forEach(r=>{sp[r.species]=sp[r.species]||{n:0,grp:r.grp||"DİĞER"};sp[r.species].n++;});
+ const total=rows.length;
+ const pct=n=>total?((n/total)*100).toFixed(1):"0.0";
+ const top=Object.entries(sp).sort((a,b)=>b[1].n-a[1].n).slice(0,6);
+ if(!top.length){el.innerHTML='<div style="color:var(--mut);font-size:.85rem;padding:10px">Henüz kayıt yok.</div>';return;}
+ el.innerHTML=top.map(([name,v])=>`<div style="display:flex;align-items:center;gap:10px;margin-bottom:7px">
+  <span style="width:8px;height:8px;border-radius:50%;background:${GROUP_COLOR[v.grp]};flex:0 0 auto"></span>
+  <span style="flex:1;font-size:.82rem;font-weight:600">${name} <i style="color:var(--mut);font-weight:400">${LATIN[name]&&LATIN[name]!=="—"?"· "+LATIN[name]:""}</i></span>
+  <span style="width:100px;background:var(--line);border-radius:4px;height:6px;overflow:hidden"><span style="display:block;height:100%;width:${pct(v.n)}%;background:${GROUP_COLOR[v.grp]}"></span></span>
+  <span class="mono" style="font-size:.75rem;width:48px;text-align:right">${v.n} (${pct(v.n)}%)</span>
+ </div>`).join("");
 }
 function drawChart(id,type,labels,data){
  if(charts[id])charts[id].destroy();
