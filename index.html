@@ -149,7 +149,7 @@ tr.done td{opacity:.55}tr.done td b{text-decoration:line-through}
 }
 </style>
 </head>
-<<body>
+<body>
 <div id="toastWrap"></div>
 <div id="landing">
 <div id="topnav"><div class="wrap">
@@ -1237,12 +1237,14 @@ async function loadAdmin(){
 }
 async function approveMeas(id){
  const{error}=await sb.from("measurements").update({status:"Onaylı",shared:true}).eq("id",id);
- if(error)return alert("Hata: "+error.message);
+ if(error)return toast("Hata: "+error.message,"err");
+ toast("Kayıt onaylandı","ok","✓");
  loadAdmin();loadWorld();
 }
 async function rejectMeas(id){
  const{error}=await sb.from("measurements").update({status:"Red",shared:false}).eq("id",id);
- if(error)return alert("Hata: "+error.message);
+ if(error)return toast("Hata: "+error.message,"err");
+ toast("Kayıt reddedildi","warn","🚫");
  loadAdmin();
 }
 async function loadStorageStats(){
