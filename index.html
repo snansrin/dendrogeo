@@ -143,7 +143,8 @@ tr.done td{opacity:.55}tr.done td b{text-decoration:line-through}
  .statband{grid-template-columns:1fr 1fr}.statband div{padding:14px}.val{font-size:1.15rem}
  #topnav .links{display:none}#topnav .wrap{padding:12px 16px;gap:12px}
  .hero{padding:44px 0 26px}section.blk{padding:40px 0}.wrap{padding:0 16px}
-#map,#navMap,#worldMap,#worldMapLanding{height:300px;isolation:isolate;position:relative;z-index:1}
+#map,#navMap,#worldMap,#worldMapLanding{height:300px;isolation:isolate;position:relative;z-index:1 !important}
+#map .leaflet-container,#navMap .leaflet-container,#worldMap .leaflet-container,#worldMapLanding .leaflet-container{z-index:1 !important}
  #main{padding:14px}.card{padding:16px}td,th{font-size:.7rem;padding:7px 6px}
  #apptop{padding:0 12px;gap:8px}.cols{grid-template-columns:1fr}.credit .thesis{font-size:1rem}
 }
