@@ -735,11 +735,14 @@ $("fReset")&&($("fReset").onsubmit=async e=>{
  if(!tok)return amsg("Doğrulama widget'ı hazır değil. Sayfayı yenileyip tekrar deneyin.",1);
  
  const email=$("rsEmail").value;
+ const redirectURL=window.location.origin+window.location.pathname.replace(/\/+$/,"")+"/";
+ 
  console.log("Şifre sıfırlama isteği:",email);
+ console.log("Redirect URL:",redirectURL);
  
  const r=await sb.auth.resetPasswordForEmail(email,{
   captchaToken:tok,
-  redirectTo:window.location.origin+window.location.pathname
+  redirectTo:redirectURL
  });
  
  console.log("Supabase yanıtı:",r);
