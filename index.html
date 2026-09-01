@@ -73,7 +73,7 @@ section.blk{padding:64px 0;border-top:1px solid var(--line)}
 .cols h3{font-size:.75rem;letter-spacing:.16em;text-transform:uppercase;color:var(--green);margin-bottom:10px}
 .cols p{color:var(--mut);font-size:.92rem}
 .formula{background:var(--surface);border:1px solid var(--line);border-left:3px solid var(--green);border-radius:8px;padding:10px 14px;font-family:"IBM Plex Mono",monospace;font-size:.85rem;margin:8px 0;overflow-x:auto}
-#map,#navMap,#worldMap,#worldMapLanding{height:420px;border-radius:var(--r);border:1px solid var(--line)}
+#map,#navMap,#worldMap,#worldMapLanding{height:420px;border-radius:var(--r);border:1px solid var(--line);isolation:isolate;position:relative;z-index:1}
 footer{background:var(--green-dk);color:#cfe0d4;padding:44px 0;font-size:.85rem}
 footer h4{color:#fff;font-size:.72rem;letter-spacing:.16em;text-transform:uppercase;margin-bottom:12px}
 .credit{margin-top:34px;border-top:1px solid rgba(255,255,255,.18);padding-top:30px;text-align:center}
@@ -143,7 +143,7 @@ tr.done td{opacity:.55}tr.done td b{text-decoration:line-through}
  .statband{grid-template-columns:1fr 1fr}.statband div{padding:14px}.val{font-size:1.15rem}
  #topnav .links{display:none}#topnav .wrap{padding:12px 16px;gap:12px}
  .hero{padding:44px 0 26px}section.blk{padding:40px 0}.wrap{padding:0 16px}
- #map,#navMap,#worldMap,#worldMapLanding{height:300px}
+#map,#navMap,#worldMap,#worldMapLanding{height:300px;isolation:isolate;position:relative;z-index:1}
  #main{padding:14px}.card{padding:16px}td,th{font-size:.7rem;padding:7px 6px}
  #apptop{padding:0 12px;gap:8px}.cols{grid-template-columns:1fr}.credit .thesis{font-size:1rem}
 }
@@ -733,10 +733,24 @@ $("fReset")&&($("fReset").onsubmit=async e=>{
  let tok=tsToken("tsReset");
  if(!tok){await new Promise(r=>setTimeout(r,2500));tok=tsToken("tsReset");}
  if(!tok)return amsg("Doğrulama widget'ı hazır değil. Sayfayı yenileyip tekrar deneyin.",1);
- const r=await sb.auth.resetPasswordForEmail($("rsEmail").value,{captchaToken:tok});
- if(r.error)return amsg(r.error.message,1);
+ 
+ const email=$("rsEmail").value;
+ console.log("Şifre sıfırlama isteği:",email);
+ 
+ const r=await sb.auth.resetPasswordForEmail(email,{
+  captchaToken:tok,
+  redirectTo:window.location.origin+window.location.pathname
+ });
+ 
+ console.log("Supabase yanıtı:",r);
+ 
+ if(r.error){
+  console.error("Şifre sıfırlama hatası:",r.error);
+  return amsg("Hata: "+r.error.message,1);
+ }
+ 
  try{turnstile.reset(TS.tsReset);}catch(e){}
- amsg("Sıfırlama bağlantısı gönderildi.",0);
+ amsg("✓ Sıfırlama bağlantısı e-postanıza gönderildi. Spam klasörünü de kontrol edin.",0);
 });
 async function logout(){await sb.auth.signOut();location.reload();}
 
