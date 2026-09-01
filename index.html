@@ -482,23 +482,26 @@ const QUOTA_MB=500;
 let USER=null,PROFILE=null,GPS=null,WP=[],navTarget=null,charts={},map=null,navMap=null,worldMap=null,worldMapL=null,EDIT_ID=null,EDIT_PROJ=null,liveLoaded=false,PROJ_LIST=[],photoOk=false;
 
 /* ============ TÜR VERİTABANI (TR adı, Latince adı, yoğunluk ρ kg/m3) ============ */
+/* ============ TÜR VERİTABANI — KAYNAK TABLOYLA BİREBİR ============
+   Tabloda olan tür: tablo değeri · Tabloda olmayan: grup GENEL değeri (fallback) */
 const SPECIES_DATA={
  "İBRELİ":[
   {tr:"GÖKNAR",lat:"Abies spp.",rho:350},
   {tr:"SEDİR",lat:"Cedrus libani",rho:430},
+  {tr:"HİMALAYA SEDİRİ",lat:"Cedrus deodara",rho:430},
   {tr:"ARDIÇ",lat:"Juniperus spp.",rho:460},
   {tr:"LADİN",lat:"Picea orientalis",rho:358},
-  {tr:"GÜMÜŞ LADİN",lat:"Picea pungens",rho:365},
   {tr:"KIZILÇAM",lat:"Pinus brutia",rho:478},
   {tr:"KARAÇAM",lat:"Pinus nigra",rho:470},
   {tr:"SARIÇAM",lat:"Pinus sylvestris",rho:426},
   {tr:"FISTIK ÇAMI",lat:"Pinus pinea",rho:470},
   {tr:"HALEP ÇAMI",lat:"Pinus halepensis",rho:480},
-  {tr:"MAVİ SEDİR",lat:"Cedrus atlantica 'Glauca'",rho:420},
-  {tr:"SERVİ",lat:"Cupressus sempervirens",rho:446},
-  {tr:"MAZI (YALANCI SERVİ)",lat:"Thuja orientalis",rho:400},
-  {tr:"PORSUK",lat:"Taxus baccata",rho:590},
-  {tr:"KRİPTOMERYA",lat:"Cryptomeria japonica",rho:340},
+  {tr:"GÜMÜŞ LADİN",lat:"Picea pungens",rho:null},
+  {tr:"MAVİ SEDİR",lat:"Cedrus atlantica 'Glauca'",rho:null},
+  {tr:"SERVİ",lat:"Cupressus sempervirens",rho:null},
+  {tr:"MAZI (YALANCI SERVİ)",lat:"Thuja orientalis",rho:null},
+  {tr:"PORSUK",lat:"Taxus baccata",rho:null},
+  {tr:"KRİPTOMERYA",lat:"Cryptomeria japonica",rho:null},
   {tr:"DİĞER İBRELİ",lat:"Coniferae spp.",rho:null}
  ],
  "YAPRAKLI":[
@@ -509,24 +512,24 @@ const SPECIES_DATA={
   {tr:"SIĞLA",lat:"Liquidambar orientalis",rho:468},
   {tr:"KAVAK",lat:"Populus spp.",rho:350},
   {tr:"KIZILAĞAÇ",lat:"Alnus glutinosa",rho:407},
-  {tr:"ÇINAR",lat:"Platanus orientalis",rho:560},
-  {tr:"SÖĞÜT",lat:"Salix alba",rho:540},
-  {tr:"AKÇAAĞAÇ",lat:"Acer spp.",rho:590},
-  {tr:"IHLAMUR",lat:"Tilia spp.",rho:490},
-  {tr:"AT KESTANESİ",lat:"Aesculus hippocastanum",rho:555},
-  {tr:"KESTANE",lat:"Castanea sativa",rho:540},
-  {tr:"HUŞ",lat:"Betula pendula",rho:610},
-  {tr:"KARAAĞAÇ",lat:"Ulmus minor",rho:560},
-  {tr:"DUT",lat:"Morus alba",rho:600},
-  {tr:"YALANCI AKASYA",lat:"Robinia pseudoacacia",rho:720},
-  {tr:"MANOLYA",lat:"Magnolia grandiflora",rho:480},
-  {tr:"SÜS ELMASI",lat:"Malus spp.",rho:660},
-  {tr:"SÜS ERİĞİ",lat:"Prunus cerasifera",rho:600},
-  {tr:"KATALPA",lat:"Catalpa bignonioides",rho:400},
-  {tr:"GLEDİÇYA",lat:"Gleditsia triacanthos",rho:600},
-  {tr:"JAPON SOFORASI",lat:"Styphnolobium japonicum",rho:640},
-  {tr:"DEFNE",lat:"Laurus nobilis",rho:580},
-  {tr:"AMBERAĞACI",lat:"Liquidambar styraciflua",rho:520},
+  {tr:"ÇINAR",lat:"Platanus orientalis",rho:null},
+  {tr:"SÖĞÜT",lat:"Salix alba",rho:null},
+  {tr:"AKÇAAĞAÇ",lat:"Acer spp.",rho:null},
+  {tr:"IHLAMUR",lat:"Tilia spp.",rho:null},
+  {tr:"AT KESTANESİ",lat:"Aesculus hippocastanum",rho:null},
+  {tr:"KESTANE",lat:"Castanea sativa",rho:null},
+  {tr:"HUŞ",lat:"Betula pendula",rho:null},
+  {tr:"KARAAĞAÇ",lat:"Ulmus minor",rho:null},
+  {tr:"DUT",lat:"Morus alba",rho:null},
+  {tr:"YALANCI AKASYA",lat:"Robinia pseudoacacia",rho:null},
+  {tr:"MANOLYA",lat:"Magnolia grandiflora",rho:null},
+  {tr:"SÜS ELMASI",lat:"Malus spp.",rho:null},
+  {tr:"SÜS ERİĞİ",lat:"Prunus cerasifera",rho:null},
+  {tr:"KATALPA",lat:"Catalpa bignonioides",rho:null},
+  {tr:"GLEDİÇYA",lat:"Gleditsia triacanthos",rho:null},
+  {tr:"JAPON SOFORASI",lat:"Styphnolobium japonicum",rho:null},
+  {tr:"DEFNE",lat:"Laurus nobilis",rho:null},
+  {tr:"AMBERAĞACI",lat:"Liquidambar styraciflua",rho:null},
   {tr:"DİĞER YAPRAKLI",lat:"Angiosperm spp.",rho:null}
  ],
  "DİĞER":[
@@ -534,7 +537,8 @@ const SPECIES_DATA={
   {tr:"DİĞER",lat:"—",rho:null}
  ]
 };
-/* Grup varsayılan yoğunlukları (tür listede/rho bilinmiyorsa "diğer" hesap yöntemi burada devreye girer) */const GROUP_DEFAULT_RHO={"İBRELİ":446,"YAPRAKLI":541,"DİĞER":493};
+/* Tabloda olmayanlar → GENEL satırları: İbreliler 0,446 · Yapraklılar 0,541 (Tolunay 2013; NIR Turkey 2017; 299 Nolu Tebliğ 2017) */
+const GROUP_DEFAULT_RHO={"İBRELİ":446,"YAPRAKLI":541,"DİĞER":493};
 /* Geriye dönük uyumluluk + hızlı erişim haritaları */
 const species={}; const rho={}; const LATIN={};
 Object.keys(SPECIES_DATA).forEach(g=>{
