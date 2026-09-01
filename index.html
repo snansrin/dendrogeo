@@ -224,9 +224,9 @@ tr.done td{opacity:.55}tr.done td b{text-decoration:line-through}
    <button class="btn sm ghost" onclick="authTab('reg')">Kayıt</button>
    <button class="btn sm ghost" onclick="authTab('reset')">Şifre Yenile</button>
   </div>
-  <form id="fLogin"><div class="lbl">E‑posta</div><input id="liEmail" type="email" required><div class="lbl" style="margin-top:12px">Parola</div><input id="liPass" type="password" required><div id="tsLogin" style="margin-top:14px;min-height:65px"></div><button class="btn" style="width:100%;margin-top:16px">Giriş Yap</button></form>
-  <form id="fReg" style="display:none"><div class="lbl">Ad Soyad</div><input id="rgName" required><div class="lbl" style="margin-top:10px">Kurum</div><input id="rgOrg"><div class="lbl" style="margin-top:10px">E‑posta</div><input id="rgEmail" type="email" required><div class="lbl" style="margin-top:10px">Parola</div><input id="rgPass" type="password" minlength="6" required><div id="tsReg" style="margin-top:14px;min-height:65px"></div><button class="btn" style="width:100%;margin-top:16px">Hesap Oluştur</button></form>
-  <form id="fReset" style="display:none"><div class="lbl">E‑posta</div><input id="rsEmail" type="email" required><div id="tsReset" style="margin-top:14px;min-height:65px"></div><button class="btn" style="width:100%;margin-top:16px">Sıfırlama Gönder</button></form>
+<form id="fLogin" onsubmit="return false;"><div class="lbl">E‑posta</div><input id="liEmail" type="email" required><div class="lbl" style="margin-top:12px">Parola</div><input id="liPass" type="password" required><div id="tsLogin" style="margin-top:14px;min-height:65px"></div><button type="button" class="btn" style="width:100%;margin-top:16px" onclick="doLogin()">Giriş Yap</button></form>
+<form id="fReg" style="display:none" onsubmit="return false;"><div class="lbl">Ad Soyad</div><input id="rgName" required><div class="lbl" style="margin-top:10px">Kurum</div><input id="rgOrg"><div class="lbl" style="margin-top:10px">E‑posta</div><input id="rgEmail" type="email" required><div class="lbl" style="margin-top:10px">Parola</div><input id="rgPass" type="password" minlength="6" required><div id="tsReg" style="margin-top:14px;min-height:65px"></div><button type="button" class="btn" style="width:100%;margin-top:16px" onclick="doRegister()">Hesap Oluştur</button></form>
+<form id="fReset" style="display:none" onsubmit="return false;"><div class="lbl">E‑posta</div><input id="rsEmail" type="email" required><div id="tsReset" style="margin-top:14px;min-height:65px"></div><button type="button" class="btn" style="width:100%;margin-top:16px" onclick="sendResetEmail()">Sıfırlama Gönder</button></form>
   <div id="authMsg" style="margin-top:12px;font-size:.85rem;min-height:1.2em"></div>
  </div>
 </div></section>
@@ -709,37 +709,116 @@ function toast(msg,type="ok",icon=""){
  setTimeout(()=>{if(t.parentNode){t.classList.add("bye");setTimeout(()=>t.remove(),300);}},4500);
 }
 
-$("fLogin")&&($("fLogin").onsubmit=async e=>{
- e.preventDefault();
+async function doLogin(){
+ const email=$("liEmail").value;
+ const pass=$("liPass").value;
+ if(!email||!pass){
+  amsg("E-posta ve parola gerekli.",1);
+  return;
+ }
+ 
+ amsg("Giriş yapılıyor...",0);
+ 
  let tok=tsToken("tsLogin");
- if(!tok){await new Promise(r=>setTimeout(r,2500));tok=tsToken("tsLogin");}
- if(!tok)return amsg("Doğrulama widget'ı hazır değil. Sayfayı yenileyip tekrar deneyin.",1);
- const r=await sb.auth.signInWithPassword({email:$("liEmail").value,password:$("liPass").value,options:{captchaToken:tok}});
- if(r.error)return amsg(r.error.message,1);
+ if(!tok){
+  await new Promise(r=>setTimeout(r,2500));
+  tok=tsToken("tsLogin");
+ }
+ if(!tok){
+  amsg("Doğrulama widget'ı hazır değil. Sayfayı yenileyip tekrar deneyin.",1);
+  return;
+ }
+ 
+ const r=await sb.auth.signInWithPassword({
+  email:email,
+  password:pass,
+  options:{captchaToken:tok}
+ });
+ 
+ if(r.error){
+  amsg(r.error.message,1);
+  return;
+ }
+ 
  try{turnstile.reset(TS.tsLogin);}catch(e){}
  boot();
-});
-$("fReg")&&($("fReg").onsubmit=async e=>{
- e.preventDefault();
+}
+async function doRegister(){
+ const name=$("rgName").value;
+ const email=$("rgEmail").value;
+ const pass=$("rgPass").value;
+ 
+ if(!name||!email||!pass){
+  amsg("Tüm alanları doldurun.",1);
+  return;
+ }
+ 
+ if(pass.length<6){
+  amsg("Parola en az 6 karakter olmalı.",1);
+  return;
+ }
+ 
+ amsg("Hesap oluşturuluyor...",0);
+ 
  let tok=tsToken("tsReg");
- if(!tok){await new Promise(r=>setTimeout(r,2500));tok=tsToken("tsReg");}
- if(!tok)return amsg("Doğrulama widget'ı hazır değil. Sayfayı yenileyip tekrar deneyin.",1);
- const r=await sb.auth.signUp({email:$("rgEmail").value,password:$("rgPass").value,options:{data:{full_name:$("rgName").value,organization:$("rgOrg").value},captchaToken:tok}});
- if(r.error)return amsg(r.error.message,1);
+ if(!tok){
+  await new Promise(r=>setTimeout(r,2500));
+  tok=tsToken("tsReg");
+ }
+ if(!tok){
+  amsg("Doğrulama widget'ı hazır değil. Sayfayı yenileyip tekrar deneyin.",1);
+  return;
+ }
+ 
+ const r=await sb.auth.signUp({
+  email:email,
+  password:pass,
+  options:{
+   data:{
+    full_name:name,
+    organization:$("rgOrg").value
+   },
+   captchaToken:tok
+  }
+ });
+ 
+ if(r.error){
+  amsg(r.error.message,1);
+  return;
+ }
+ 
  try{turnstile.reset(TS.tsReg);}catch(e){}
  amsg(r.data.session?"Hesap oluşturuldu.":"Doğrulama e‑postası gönderildi.",0);
-});
-$("fReset")&&($("fReset").onsubmit=async e=>{
- e.preventDefault();
- let tok=tsToken("tsReset");
- if(!tok){await new Promise(r=>setTimeout(r,2500));tok=tsToken("tsReset");}
- if(!tok)return amsg("Doğrulama widget'ı hazır değil. Sayfayı yenileyip tekrar deneyin.",1);
- 
+}
+async function sendResetEmail(){
  const email=$("rsEmail").value;
+ if(!email){
+  amsg("Lütfen e-posta adresinizi girin.",1);
+  return;
+ }
+ 
+ amsg("Doğrulama kontrol ediliyor...",0);
+ 
+ let tok=tsToken("tsReset");
+ if(!tok){
+  amsg("Widget yükleniyor, lütfen bekleyin...",0);
+  await new Promise(r=>setTimeout(r,2500));
+  tok=tsToken("tsReset");
+ }
+ 
+ if(!tok){
+  amsg("Doğrulama widget'ı hazır değil. Sayfayı yenileyip tekrar deneyin.",1);
+  return;
+ }
+ 
+ amsg("Şifre sıfırlama talebi gönderiliyor...",0);
+ 
  const redirectURL=window.location.origin+window.location.pathname.replace(/\/+$/,"")+"/";
  
- console.log("Şifre sıfırlama isteği:",email);
+ console.log("=== ŞİFRE SIFIRLAMA DEBUG ===");
+ console.log("Email:",email);
  console.log("Redirect URL:",redirectURL);
+ console.log("Token:",tok);
  
  const r=await sb.auth.resetPasswordForEmail(email,{
   captchaToken:tok,
@@ -747,15 +826,17 @@ $("fReset")&&($("fReset").onsubmit=async e=>{
  });
  
  console.log("Supabase yanıtı:",r);
+ console.log("===========================");
  
  if(r.error){
   console.error("Şifre sıfırlama hatası:",r.error);
-  return amsg("Hata: "+r.error.message,1);
+  amsg("Hata: "+r.error.message,1);
+  return;
  }
  
  try{turnstile.reset(TS.tsReset);}catch(e){}
  amsg("✓ Sıfırlama bağlantısı e-postanıza gönderildi. Spam klasörünü de kontrol edin.",0);
-});
+}
 async function logout(){await sb.auth.signOut();location.reload();}
 
 async function boot(){
