@@ -134,6 +134,34 @@ tr.done td{opacity:.55}tr.done td b{text-decoration:line-through}
 /* Tablo satırı tıklanabilir */
 .clickable-row{cursor:pointer;transition:background .15s}
 .clickable-row:hover{background:var(--tint)}
+/* Live pulse animasyonu */
+.live-dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:#22c55e;margin-right:8px;box-shadow:0 0 0 0 rgba(34,197,94,.7);animation:livePulse 2s infinite}
+@keyframes livePulse{0%{box-shadow:0 0 0 0 rgba(34,197,94,.7)}70%{box-shadow:0 0 0 10px rgba(34,197,94,0)}100%{box-shadow:0 0 0 0 rgba(34,197,94,0)}}
+
+/* Feature kartları */
+.feature{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:28px 24px;box-shadow:var(--sh);transition:transform .2s, box-shadow .2s;position:relative;overflow:hidden}
+.feature:hover{transform:translateY(-3px);box-shadow:0 6px 20px rgba(20,30,25,.1)}
+.feature::before{content:"";position:absolute;top:0;left:0;width:100%;height:3px;background:linear-gradient(90deg,var(--green),var(--amber))}
+.feature .ico{width:48px;height:48px;border-radius:12px;background:var(--tint);display:flex;align-items:center;justify-content:center;font-size:1.5rem;margin-bottom:16px}
+.feature h3{font-family:Fraunces,serif;font-size:1.25rem;color:var(--green-dk);margin-bottom:10px;font-weight:600}
+.feature p{color:var(--mut);font-size:.92rem;line-height:1.6;margin:0}
+.feature ul{list-style:none;margin-top:14px;padding:0}
+.feature ul li{font-size:.82rem;color:var(--ink);padding:4px 0 4px 20px;position:relative}
+.feature ul li::before{content:"✓";position:absolute;left:0;color:var(--green);font-weight:700}
+
+/* Timeline adımları */
+.steps{display:grid;grid-template-columns:repeat(3,1fr);gap:24px;position:relative;margin-top:32px}
+.steps::before{content:"";position:absolute;top:32px;left:10%;right:10%;height:2px;background:linear-gradient(90deg,var(--green),var(--amber),var(--green));opacity:.3}
+.step{text-align:center;position:relative}
+.step .num{width:64px;height:64px;border-radius:50%;background:var(--surface);border:3px solid var(--green);display:flex;align-items:center;justify-content:center;font-family:"IBM Plex Mono",monospace;font-size:1.5rem;font-weight:700;color:var(--green-dk);margin:0 auto 16px;position:relative;z-index:2;box-shadow:var(--sh)}
+.step h4{font-family:Fraunces,serif;font-size:1.1rem;color:var(--green-dk);margin-bottom:8px;font-weight:600}
+.step p{color:var(--mut);font-size:.88rem;line-height:1.5;max-width:280px;margin:0 auto}
+.step .sub{font-family:"IBM Plex Mono",monospace;font-size:.72rem;color:var(--amber);margin-top:8px;letter-spacing:.1em}
+
+@media(max-width:900px){
+ .steps{grid-template-columns:1fr;gap:32px}
+ .steps::before{display:none}
+}
 @media(max-width:900px){
  #layout{display:block;min-height:auto}
  #side{display:flex;overflow-x:auto;padding:8px 12px;gap:6px;border-bottom:1px solid var(--line);border-right:0;position:sticky;top:56px;z-index:40;background:#fbfaf7}
@@ -146,7 +174,10 @@ tr.done td{opacity:.55}tr.done td b{text-decoration:line-through}
 #map,#navMap,#worldMap,#worldMapLanding{height:300px;isolation:isolate;position:relative;z-index:1 !important}
 #map .leaflet-container,#navMap .leaflet-container,#worldMap .leaflet-container,#worldMapLanding .leaflet-container{z-index:1 !important}
  #main{padding:14px}.card{padding:16px}td,th{font-size:.7rem;padding:7px 6px}
- #apptop{padding:0 12px;gap:8px}.cols{grid-template-columns:1fr}.credit .thesis{font-size:1rem}
+#apptop{padding:0 12px;gap:8px}.cols{grid-template-columns:1fr}.credit .thesis{font-size:1rem}
+ .method-grid{grid-template-columns:1fr !important}
+ .feature{padding:22px 18px}
+ .feature h3{font-size:1.1rem}
 }
 </style>
 </head>
@@ -159,9 +190,13 @@ tr.done td{opacity:.55}tr.done td b{text-decoration:line-through}
  <button class="btn sm" onclick="showAuth()">Giriş / Kayıt</button>
 </div></div>
 <div class="hero"><div class="wrap">
- <div class="kick">KÜRESEL AĞAÇ ENVANTERİ · KARBON VERİ SİSTEMİ</div>
- <h1>Ağaç envanteri ve karbon stoğu verisi, tek merkezde.</h1>
- <p class="lead">DendroGeo; ağaç ölçüm verilerinin konum bilgisiyle kaydedilmesi, biyokütle ve karbon değerlerinin hesaplanması ve bu verilerin şehir, ülke ve dünya ölçeğinde istatistiksel olarak analiz edilmesi için geliştirilen web tabanlı bir veri platformudur.</p>
+ <div class="kick"><span class="live-dot"></span>SAHADAN VERİTABANINA · BİLİMSEL KARBON ENVANTERİ</div>
+ <h1>Bir ağacın karbonunu<br>saniyeler içinde hesaplayın.</h1>
+ <p class="lead">DendroGeo; sahadaki GPS ölçümünden küresel karbon haritasına uzanan <b>tek entegre bilimsel platformdur</b>. Çap ve boy ölçümünüzü alın, canlı fotoğraf denetiminden geçirin — Chave et al. (2014) allometrik formülleri biyokütle ve karbon stoğunu otomatik hesaplasın. Admin onayından sonra veriniz dünya haritasında yayında.</p>
+ <div style="display:flex;gap:12px;flex-wrap:wrap;margin-top:28px">
+  <a href="#sistem" class="btn">🔬 Sistemi Keşfet</a>
+  <button class="btn ghost" onclick="showAuth()">🌲 Hemen Başla</button>
+ </div>
  <div class="statband">
   <div><div class="val" id="stRec">—</div><div class="lbl">Toplam Kayıt</div></div>
   <div><div class="val" id="stCountry">—</div><div class="lbl">Ülke</div></div>
@@ -170,13 +205,43 @@ tr.done td{opacity:.55}tr.done td b{text-decoration:line-through}
  </div>
 </div></div>
 <section class="blk" id="sistem"><div class="wrap">
- <div class="shead"><span class="no">01</span><h2>Sistem</h2><span class="rule"></span></div>
- <div class="cols">
-  <div><h3>Web Platformu</h3><p>Kayıt, giriş, e‑posta doğrulama ve şifre yenileme içeren çok kullanıcılı veri girişi arayüzü. Her kayıt kullanıcı hesabı ve zaman damgası ile ilişkilendirilir.</p></div>
-  <div><h3>Saha Navigasyonu</h3><p>Waypoint yükleme, en yakın yapılmamış noktaya ok‑mesafe‑pusula ile yönlendirme, varışta otomatik POINT ID. Liste projeye kalıcı kaydedilir.</p></div>
-  <div><h3>Veri Merkezi</h3><p>Merkezi veritabanı; admin onaylı yayın akışı, dünya‑ülke‑şehir agregasyonları, rol bazlı yetki (kurucu / denetçi / kullanıcı).</p></div>
+ <div class="shead"><span class="no">01</span><h2>Sistemin Üç Temel Direği</h2><span class="rule"></span></div>
+ <div class="cols" style="grid-template-columns:repeat(3,1fr)">
+  <div class="feature">
+   <div class="ico">🛰</div>
+   <h3>Sahadan Veri</h3>
+   <p>GPS uydu bağlantısıyla santimetre hassasiyetinde konum, canlı fotoğraf analiziyle bitki örtüsü ve pozlama denetimi.</p>
+   <ul>
+    <li>Gerçek zamanlı GPS ±3 m</li>
+    <li>Waypoint pusula navigasyonu</li>
+    <li>Çevrimdışı ölçüm + senkronizasyon</li>
+    <li>Cihaz üstü görsel QA/QC</li>
+   </ul>
+  </div>
+  <div class="feature">
+   <div class="ico">🧮</div>
+   <h3>Bilimsel Hesap</h3>
+   <p>Uluslararası kabul görmüş allometrik formüllerle AGB, BHB, toplam biyokütle ve karbon stoğu saniyeler içinde.</p>
+   <ul>
+    <li>Chave et al. 2014 (pantropikal)</li>
+    <li>IPCC 2006 kök biyokütlesi</li>
+    <li>44 tür için ρ yoğunluk değeri</li>
+    <li>Eğim düzeltmesi ve hacim hesabı</li>
+   </ul>
+  </div>
+  <div class="feature">
+   <div class="ico">🌍</div>
+   <h3>Küresel Analiz</h3>
+   <p>Admin onaylı merkezi veritabanı; şehir, ülke ve park bazlı agregasyonlar, QGIS uyumlu dışa aktarım.</p>
+   <ul>
+    <li>Ülke/Şehir/Park karşılaştırma</li>
+    <li>CSV, GeoJSON, QGIS export</li>
+    <li>İnteraktif karbon haritası</li>
+    <li>CC BY‑NC 4.0 açık veri lisansı</li>
+   </ul>
+  </div>
  </div>
- <div style="margin-top:26px" class="card tblwrap"><table><thead><tr><th>Rol</th><th>Yetki</th></tr></thead><tbody>
+ <div style="margin-top:36px" class="card tblwrap"><table><thead><tr><th>Rol</th><th>Yetki</th></tr></thead><tbody>
   <tr><td>Ziyaretçi</td><td>Yalnızca onaylanmış kayıtları, istatistikleri ve haritayı görüntüler</td></tr>
   <tr><td>Kullanıcı</td><td>Proje ve ölçüm oluşturur; kendi kayıtlarını onay beklerken de görür</td></tr>
   <tr><td>Denetçi (Admin)</td><td>Kayıtları onaylar/reddeder, moderasyon ve toplu dışa aktarım</td></tr>
@@ -184,19 +249,49 @@ tr.done td{opacity:.55}tr.done td b{text-decoration:line-through}
  </tbody></table></div>
 </div></section>
 <section class="blk" id="yontem"><div class="wrap">
- <div class="shead"><span class="no">02</span><h2>Yöntem</h2><span class="rule"></span></div>
- <div class="cols" style="grid-template-columns:1fr 1fr">
-  <div>
-   <div class="formula">DBH = Çevre ÷ π</div>
-   <div class="formula">A = π·(DBH/2)² ; A<sub>yatay</sub> = A·cos(eğim)</div>
-   <div class="formula">V = A·H·f <span style="color:var(--mut)">(f: 0.5)</span></div>
-   <div class="formula">AGB = 0.0673·(ρ·DBH²·H)^0.976 <span style="color:var(--mut)">— Chave et al., 2014</span></div>
-   <div class="formula">BHB = AGB·0.26 ; C = (AGB+BHB)·0.47 <span style="color:var(--mut)">— IPCC 2006</span></div>
-   <div class="formula">C<sub>AGB</sub> = AGB·0.47 ; C<sub>BHB</sub> = BHB·0.47</div>
-   <p style="color:var(--mut);font-size:.8rem;margin-top:12px">Odun yoğunlukları (ρ): As ve ark. 2001 · Tolunay 2013 · OGM 299 Nolu Tebliğ 2017.</p>
+ <div class="shead"><span class="no">02</span><h2>Sahadan Haritaya — Üç Adımda</h2><span class="rule"></span></div>
+ <p style="color:var(--mut);max-width:70ch;font-size:1.02rem">Her ölçüm, sahadaki cihazınızdan dünya haritasına uzanan kontrollü bir akıştan geçer. Hiçbir kayıt admin onayı olmadan bilimsel veri havuzuna girmez.</p>
+ 
+ <div class="steps">
+  <div class="step">
+   <div class="num">1</div>
+   <h4>Sahada Ölç</h4>
+   <p>GPS ile konumunuzu sabitleyin, waypoint pusulasıyla ağaca yönelin. Çap (çevre/π), boy ve grup bilgilerini girin.</p>
+   <div class="sub">±3 M · GPS · FOTOĞRAF</div>
   </div>
-  <div><h3 style="font-size:.75rem;letter-spacing:.16em;text-transform:uppercase;color:var(--green);margin-bottom:10px">Veri Doğruluk Politikası</h3>
-   <p style="color:var(--mut);font-size:.92rem">Her kayıt için koordinat, GPS doğruluğu (m), operatör ve zaman damgası saklanır. Fotoğraflar cihaz üstü görüntü analiziyle denetlenir (bitki örtüsü + pozlama kontrolü); hatalı çekimler reddedilir. Kayıtlar admin onayı olmadan dünya verisine işlenmez. DBH ≤ 500 cm, boy ≤ 100 m denetimi uygulanır.</p></div>
+  <div class="step">
+   <div class="num">2</div>
+   <h4>Otomatik Hesap</h4>
+   <p>Cihaz üzerinde canlı fotoğraf analizi bitki örtüsü ve pozlamayı denetler. Ardından Chave et al. (2014) formülleri biyokütle ve karbon stoğunu hesaplar.</p>
+   <div class="sub">AGB · BHB · C · m³</div>
+  </div>
+  <div class="step">
+   <div class="num">3</div>
+   <h4>Küresel Yayın</h4>
+   <p>Kayıt admin onayından sonra dünya haritasında görünür. Ülke, şehir ve park agregasyonlarına dahil edilir; QGIS ve CSV olarak dışa aktarılabilir.</p>
+   <div class="sub">ONAY → HARİTA → EXPORT</div>
+  </div>
+ </div>
+
+ <div style="margin-top:56px;display:grid;grid-template-columns:1fr 1fr;gap:24px" class="method-grid">
+  <div class="card" style="border-left:4px solid var(--green)">
+   <div style="font-family:Fraunces,serif;font-size:1.1rem;color:var(--green-dk);font-weight:600;margin-bottom:14px">📐 Allometrik Formüller</div>
+   <div class="formula">DBH = Çevre ÷ π</div>
+   <div class="formula">AGB = 0.0673·(ρ·DBH²·H)<sup>0.976</sup> <span style="color:var(--mut)">— Chave 2014</span></div>
+   <div class="formula">BHB = AGB·0.26 <span style="color:var(--mut)">— IPCC 2006</span></div>
+   <div class="formula">C = (AGB+BHB)·0.47</div>
+   <p style="color:var(--mut);font-size:.78rem;margin-top:12px">44 ağaç türü için As ve ark. 2001 · Tolunay 2013 · OGM 299 Nolu Tebliğ 2017 kaynaklı ρ yoğunluk değerleri.</p>
+  </div>
+  <div class="card" style="border-left:4px solid var(--amber)">
+   <div style="font-family:Fraunces,serif;font-size:1.1rem;color:var(--green-dk);font-weight:600;margin-bottom:14px">🔬 Veri Doğruluk Politikası</div>
+   <ul style="list-style:none;padding:0;margin:0">
+    <li style="padding:8px 0 8px 24px;position:relative;color:var(--ink);font-size:.88rem"><span style="position:absolute;left:0;color:var(--green);font-weight:700">✓</span>GPS doğruluğu ±10 m altında olmalı</li>
+    <li style="padding:8px 0 8px 24px;position:relative;color:var(--ink);font-size:.88rem"><span style="position:absolute;left:0;color:var(--green);font-weight:700">✓</span>Fotoğrafta bitki örtüsü ≥ %10</li>
+    <li style="padding:8px 0 8px 24px;position:relative;color:var(--ink);font-size:.88rem"><span style="position:absolute;left:0;color:var(--green);font-weight:700">✓</span>Pozlama 25–245 aralığında</li>
+    <li style="padding:8px 0 8px 24px;position:relative;color:var(--ink);font-size:.88rem"><span style="position:absolute;left:0;color:var(--green);font-weight:700">✓</span>DBH ≤ 500 cm, boy ≤ 100 m</li>
+    <li style="padding:8px 0 8px 24px;position:relative;color:var(--ink);font-size:.88rem"><span style="position:absolute;left:0;color:var(--green);font-weight:700">✓</span>Admin onayı zorunlu</li>
+   </ul>
+  </div>
  </div>
 </div></section>
 <section class="blk" id="veri"><div class="wrap">
