@@ -671,7 +671,22 @@ function showAuth(){
  const box=$("authBox");box.classList.remove("auth-glow");void box.offsetWidth;box.classList.add("auth-glow");
  setTimeout(()=>box.classList.remove("auth-glow"),3000);
 }
-function authTab(t){["login","reg","reset"].forEach(x=>{const id="f"+x[0].toUpperCase()+x.slice(1);if($(id))$(id).style.display=(x===t?"block":"none");});}
+function authTab(t){
+ ["login","reg","reset"].forEach(x=>{
+  const id="f"+x[0].toUpperCase()+x.slice(1);
+  if($(id))$(id).style.display=(x===t?"block":"none");
+ });
+ setTimeout(()=>{
+  if(typeof turnstile!=='undefined'){
+   try{
+    document.querySelectorAll('.cf-turnstile').forEach(el=>{
+     try{turnstile.reset(el);}catch(e){}
+     try{turnstile.render(el);}catch(e){}
+    });
+   }catch(e){}
+  }
+ },80);
+}
 function amsg(t,e){const m=$("authMsg");if(m){m.textContent=t;m.style.color=e?"var(--red)":"var(--green-dk)";}}
 function toast(msg,type="ok",icon=""){
  const wrap=$("toastWrap");if(!wrap)return;
@@ -683,9 +698,51 @@ function toast(msg,type="ok",icon=""){
  setTimeout(()=>{if(t.parentNode){t.classList.add("bye");setTimeout(()=>t.remove(),300);}},4500);
 }
 
-$("fLogin")&&($("fLogin").onsubmit=async e=>{e.preventDefault();const tok=turnstile.getResponse();if(!tok)return amsg("Lütfen bot doğrulamasını tamamlayın.",1);const r=await sb.auth.signInWithPassword({email:$("liEmail").value,password:$("liPass").value,options:{captchaToken:tok}});if(r.error)return amsg(r.error.message,1);turnstile.reset();boot();});
-$("fReg")&&($("fReg").onsubmit=async e=>{e.preventDefault();const tok=turnstile.getResponse();if(!tok)return amsg("Lütfen bot doğrulamasını tamamlayın.",1);const r=await sb.auth.signUp({email:$("rgEmail").value,password:$("rgPass").value,options:{data:{full_name:$("rgName").value,organization:$("rgOrg").value},captchaToken:tok}});if(r.error)return amsg(r.error.message,1);turnstile.reset();amsg(r.data.session?"Hesap oluşturuldu.":"Doğrulama e‑postası gönderildi.",0);});
-$("fReset")&&($("fReset").onsubmit=async e=>{e.preventDefault();const tok=turnstile.getResponse();if(!tok)return amsg("Lütfen bot doğrulamasını tamamlayın.",1);const r=await sb.auth.resetPasswordForEmail($("rsEmail").value,{captchaToken:tok});if(r.error)return amsg(r.error.message,1);turnstile.reset();amsg("Sıfırlama bağlantısı gönderildi.",0);});
+$("fLogin")&&($("fLogin").onsubmit=async e=>{
+ e.preventDefault();
+ const getToken=()=>{try{const w=document.querySelector("#fLogin .cf-turnstile");return w?turnstile.getResponse(w):turnstile.getResponse();}catch(e){return null;}};
+ let tok=getToken();
+ if(!tok){
+  try{turnstile.execute();}catch(e){}
+  await new Promise(r=>setTimeout(r,2000));
+  tok=getToken();
+ }
+ if(!tok)return amsg("Bot doğrulaması tamamlanmadı. Lütfen widget'a tıklayıp tekrar deneyin.",1);
+ const r=await sb.auth.signInWithPassword({email:$("liEmail").value,password:$("liPass").value,options:{captchaToken:tok}});
+ if(r.error)return amsg(r.error.message,1);
+ try{turnstile.reset();}catch(e){}
+ boot();
+});
+$("fReg")&&($("fReg").onsubmit=async e=>{
+ e.preventDefault();
+ const getToken=()=>{try{const w=document.querySelector("#fReg .cf-turnstile");return w?turnstile.getResponse(w):turnstile.getResponse();}catch(e){return null;}};
+ let tok=getToken();
+ if(!tok){
+  try{turnstile.execute();}catch(e){}
+  await new Promise(r=>setTimeout(r,2000));
+  tok=getToken();
+ }
+ if(!tok)return amsg("Bot doğrulaması tamamlanmadı. Lütfen widget'a tıklayıp tekrar deneyin.",1);
+ const r=await sb.auth.signUp({email:$("rgEmail").value,password:$("rgPass").value,options:{data:{full_name:$("rgName").value,organization:$("rgOrg").value},captchaToken:tok}});
+ if(r.error)return amsg(r.error.message,1);
+ try{turnstile.reset();}catch(e){}
+ amsg(r.data.session?"Hesap oluşturuldu.":"Doğrulama e‑postası gönderildi.",0);
+});
+$("fReset")&&($("fReset").onsubmit=async e=>{
+ e.preventDefault();
+ const getToken=()=>{try{const w=document.querySelector("#fReset .cf-turnstile");return w?turnstile.getResponse(w):turnstile.getResponse();}catch(e){return null;}};
+ let tok=getToken();
+ if(!tok){
+  try{turnstile.execute();}catch(e){}
+  await new Promise(r=>setTimeout(r,2000));
+  tok=getToken();
+ }
+ if(!tok)return amsg("Bot doğrulaması tamamlanmadı. Lütfen widget'a tıklayıp tekrar deneyin.",1);
+ const r=await sb.auth.resetPasswordForEmail($("rsEmail").value,{captchaToken:tok});
+ if(r.error)return amsg(r.error.message,1);
+ try{turnstile.reset();}catch(e){}
+ amsg("Sıfırlama bağlantısı gönderildi.",0);
+});
 async function logout(){await sb.auth.signOut();location.reload();}
 
 async function boot(){
