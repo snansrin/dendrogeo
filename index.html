@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self' 'unsafe-inline' 'unsafe-eval' data: blob: https://cdn.jsdelivr.net https://unpkg.com https://*.tile.openstreetmap.org https://*.supabase.co https://fonts.googleapis.com https://fonts.gstatic.com">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self' 'unsafe-inline' 'unsafe-eval' data: blob: https://cdn.jsdelivr.net https://unpkg.com https://*.tile.openstreetmap.org https://*.supabase.co https://fonts.googleapis.com https://fonts.gstatic.com https://challenges.cloudflare.com">
 <title>DendroGeo — Küresel Ağaç Envanteri ve Karbon Veri Sistemi</title>
 <meta name="description" content="DendroGeo; ağaç ölçüm verilerinin konum bilgisiyle kaydedilmesi, biyokütle ve karbon değerlerinin hesaplanması ve şehir-ülke-dünya ölçeğinde analizi için web tabanlı veri platformu.">
 <meta name="theme-color" content="#14532d">
@@ -223,9 +223,9 @@ tr.done td{opacity:.55}tr.done td b{text-decoration:line-through}
    <button class="btn sm ghost" onclick="authTab('reg')">Kayıt</button>
    <button class="btn sm ghost" onclick="authTab('reset')">Şifre Yenile</button>
   </div>
-  <form id="fLogin"><div class="lbl">E‑posta</div><input id="liEmail" type="email" required><div class="lbl" style="margin-top:12px">Parola</div><input id="liPass" type="password" required><div class="cf-turnstile" data-sitekey="0x4AAAAAAEkJfXuFvNgUrwUb" style="margin-top:14px"></div><button class="btn" style="width:100%;margin-top:16px">Giriş Yap</button></form>
-  <form id="fReg" style="display:none"><div class="lbl">Ad Soyad</div><input id="rgName" required><div class="lbl" style="margin-top:10px">Kurum</div><input id="rgOrg"><div class="lbl" style="margin-top:10px">E‑posta</div><input id="rgEmail" type="email" required><div class="lbl" style="margin-top:10px">Parola</div><input id="rgPass" type="password" minlength="6" required><div class="cf-turnstile" data-sitekey="0x4AAAAAAEkJfXuFvNgUrwUb" style="margin-top:14px"></div><button class="btn" style="width:100%;margin-top:16px">Giriş Yap</button></form>
-  <form id="fReg" style="display:none"><div class="lbl">E‑posta</div><input id="rsEmail" type="email" required><div class="cf-turnstile" data-sitekey="0x4AAAAAAEkJfXuFvNgUrwUb" style="margin-top:14px"></div><button class="btn" style="width:100%;margin-top:16px">Sıfırlama Gönder</button></form>
+  <form id="fLogin"><div class="lbl">E‑posta</div><input id="liEmail" type="email" required><div class="lbl" style="margin-top:12px">Parola</div><input id="liPass" type="password" required><div id="tsLogin" style="margin-top:14px;min-height:65px"></div><button class="btn" style="width:100%;margin-top:16px">Giriş Yap</button></form>
+  <form id="fReg" style="display:none"><div class="lbl">Ad Soyad</div><input id="rgName" required><div class="lbl" style="margin-top:10px">Kurum</div><input id="rgOrg"><div class="lbl" style="margin-top:10px">E‑posta</div><input id="rgEmail" type="email" required><div class="lbl" style="margin-top:10px">Parola</div><input id="rgPass" type="password" minlength="6" required><div id="tsReg" style="margin-top:14px;min-height:65px"></div><button class="btn" style="width:100%;margin-top:16px">Hesap Oluştur</button></form>
+  <form id="fReset" style="display:none"><div class="lbl">E‑posta</div><input id="rsEmail" type="email" required><div id="tsReset" style="margin-top:14px;min-height:65px"></div><button class="btn" style="width:100%;margin-top:16px">Sıfırlama Gönder</button></form>
   <div id="authMsg" style="margin-top:12px;font-size:.85rem;min-height:1.2em"></div>
  </div>
 </div></section>
@@ -676,18 +676,28 @@ function authTab(t){
   const id="f"+x[0].toUpperCase()+x.slice(1);
   if($(id))$(id).style.display=(x===t?"block":"none");
  });
+ const tsId=t==="login"?"tsLogin":t==="reg"?"tsReg":"tsReset";
  setTimeout(()=>{
-  if(typeof turnstile!=='undefined'){
-   try{
-    document.querySelectorAll('.cf-turnstile').forEach(el=>{
-     try{turnstile.reset(el);}catch(e){}
-     try{turnstile.render(el);}catch(e){}
-    });
-   }catch(e){}
-  }
- },80);
+  if(TS[tsId]){try{turnstile.reset(TS[tsId]);}catch(e){}}
+ },120);
 }
-function amsg(t,e){const m=$("authMsg");if(m){m.textContent=t;m.style.color=e?"var(--red)":"var(--green-dk)";}}
+window.TS={};
+function initTurnstile(){
+ if(typeof turnstile==="undefined"){setTimeout(initTurnstile,500);return;}
+ ["tsLogin","tsReg","tsReset"].forEach(id=>{
+  const el=$(id);
+  if(el&&!TS[id]){
+   try{TS[id]=turnstile.render(el,{sitekey:"0x4AAAAAAEkJfXuFvNgUrwUb",theme:"light"});}
+   catch(e){console.log("TS render error",id,e);}
+  }
+ });
+}
+if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",initTurnstile);
+else initTurnstile();
+function tsToken(id){
+ if(typeof turnstile==="undefined"||!TS[id])return null;
+ try{return turnstile.getResponse(TS[id])||null;}catch(e){return null;}
+}
 function toast(msg,type="ok",icon=""){
  const wrap=$("toastWrap");if(!wrap)return;
  const t=document.createElement("div");
@@ -700,47 +710,32 @@ function toast(msg,type="ok",icon=""){
 
 $("fLogin")&&($("fLogin").onsubmit=async e=>{
  e.preventDefault();
- const getToken=()=>{try{const w=document.querySelector("#fLogin .cf-turnstile");return w?turnstile.getResponse(w):turnstile.getResponse();}catch(e){return null;}};
- let tok=getToken();
- if(!tok){
-  try{turnstile.execute();}catch(e){}
-  await new Promise(r=>setTimeout(r,2000));
-  tok=getToken();
- }
- if(!tok)return amsg("Bot doğrulaması tamamlanmadı. Lütfen widget'a tıklayıp tekrar deneyin.",1);
+ let tok=tsToken("tsLogin");
+ if(!tok){await new Promise(r=>setTimeout(r,2500));tok=tsToken("tsLogin");}
+ if(!tok)return amsg("Doğrulama widget'ı hazır değil. Sayfayı yenileyip tekrar deneyin.",1);
  const r=await sb.auth.signInWithPassword({email:$("liEmail").value,password:$("liPass").value,options:{captchaToken:tok}});
  if(r.error)return amsg(r.error.message,1);
- try{turnstile.reset();}catch(e){}
+ try{turnstile.reset(TS.tsLogin);}catch(e){}
  boot();
 });
 $("fReg")&&($("fReg").onsubmit=async e=>{
  e.preventDefault();
- const getToken=()=>{try{const w=document.querySelector("#fReg .cf-turnstile");return w?turnstile.getResponse(w):turnstile.getResponse();}catch(e){return null;}};
- let tok=getToken();
- if(!tok){
-  try{turnstile.execute();}catch(e){}
-  await new Promise(r=>setTimeout(r,2000));
-  tok=getToken();
- }
- if(!tok)return amsg("Bot doğrulaması tamamlanmadı. Lütfen widget'a tıklayıp tekrar deneyin.",1);
+ let tok=tsToken("tsReg");
+ if(!tok){await new Promise(r=>setTimeout(r,2500));tok=tsToken("tsReg");}
+ if(!tok)return amsg("Doğrulama widget'ı hazır değil. Sayfayı yenileyip tekrar deneyin.",1);
  const r=await sb.auth.signUp({email:$("rgEmail").value,password:$("rgPass").value,options:{data:{full_name:$("rgName").value,organization:$("rgOrg").value},captchaToken:tok}});
  if(r.error)return amsg(r.error.message,1);
- try{turnstile.reset();}catch(e){}
+ try{turnstile.reset(TS.tsReg);}catch(e){}
  amsg(r.data.session?"Hesap oluşturuldu.":"Doğrulama e‑postası gönderildi.",0);
 });
 $("fReset")&&($("fReset").onsubmit=async e=>{
  e.preventDefault();
- const getToken=()=>{try{const w=document.querySelector("#fReset .cf-turnstile");return w?turnstile.getResponse(w):turnstile.getResponse();}catch(e){return null;}};
- let tok=getToken();
- if(!tok){
-  try{turnstile.execute();}catch(e){}
-  await new Promise(r=>setTimeout(r,2000));
-  tok=getToken();
- }
- if(!tok)return amsg("Bot doğrulaması tamamlanmadı. Lütfen widget'a tıklayıp tekrar deneyin.",1);
+ let tok=tsToken("tsReset");
+ if(!tok){await new Promise(r=>setTimeout(r,2500));tok=tsToken("tsReset");}
+ if(!tok)return amsg("Doğrulama widget'ı hazır değil. Sayfayı yenileyip tekrar deneyin.",1);
  const r=await sb.auth.resetPasswordForEmail($("rsEmail").value,{captchaToken:tok});
  if(r.error)return amsg(r.error.message,1);
- try{turnstile.reset();}catch(e){}
+ try{turnstile.reset(TS.tsReset);}catch(e){}
  amsg("Sıfırlama bağlantısı gönderildi.",0);
 });
 async function logout(){await sb.auth.signOut();location.reload();}
