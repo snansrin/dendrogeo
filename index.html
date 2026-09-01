@@ -240,17 +240,27 @@ tr.done td{opacity:.55}tr.done td b{text-decoration:line-through}
  </div>
  <div id="main">
 
-  <div class="view on" id="v-dash">
-   <h2 class="disp" style="margin-bottom:16px">Genel Bakış</h2>
-   <div class="grid g4" style="margin-bottom:18px">
-    <div class="stat"><div class="lbl">Kayıtlarım</div><div class="val" id="dMy">0</div></div>
-    <div class="stat"><div class="lbl">Karbonum (kg)</div><div class="val" id="dCarbon">0</div></div>
-    <div class="stat"><div class="lbl">Waypoint</div><div class="val" id="dWp">0</div></div>
-    <div class="stat"><div class="lbl">Ziyaret</div><div class="val" id="dVisit">0</div></div>
+   <div class="view on" id="v-dash">
+   <div class="shead" style="margin-bottom:18px"><span class="no">📊</span><h2 style="font-size:1.6rem">Genel Bakış</h2><span class="rule"></span><span class="mono" style="font-size:.78rem;color:var(--mut)">Kişisel Analiz Paneli</span></div>
+   <div class="grid g4" style="margin-bottom:22px">
+    <div class="stat" style="border-left:3px solid var(--green);padding-left:18px"><div class="lbl">📋 Kayıtlarım</div><div class="val" id="dMy">0</div></div>
+    <div class="stat" style="border-left:3px solid var(--amber);padding-left:18px"><div class="lbl">🌱 Karbonum</div><div class="val" id="dCarbon">0</div><div style="font-size:.72rem;color:var(--mut);margin-top:4px">kg CO₂ eşdeğer</div></div>
+    <div class="stat" style="border-left:3px solid var(--blue);padding-left:18px"><div class="lbl">📍 Waypoint</div><div class="val" id="dWp">0</div></div>
+    <div class="stat" style="border-left:3px solid var(--red);padding-left:18px"><div class="lbl">✅ Tamamlanan</div><div class="val" id="dVisit">0</div></div>
+   </div>
+   <div class="card" style="margin-bottom:18px;border-left:4px solid var(--green)">
+    <div class="shead" style="margin-bottom:14px"><span class="no">🌳</span><h2 style="font-size:1.15rem">Kişisel Ağaç Analizi</h2><span class="rule"></span></div>
+    <div id="myAnalysis"></div>
    </div>
    <div class="grid g2">
-    <div class="card"><div class="lbl">Tür Dağılımım</div><canvas id="chSpecies" height="180"></canvas></div>
-    <div class="card"><div class="lbl">Karbon (son kayıtlar)</div><canvas id="chCarbon" height="180"></canvas></div>
+    <div class="card">
+     <div class="lbl" style="margin-bottom:10px">🌲 Tür Dağılımım</div>
+     <canvas id="chSpecies" height="180"></canvas>
+    </div>
+    <div class="card">
+     <div class="lbl" style="margin-bottom:10px">📈 Karbon Trendi (son 10)</div>
+     <canvas id="chCarbon" height="180"></canvas>
+    </div>
    </div>
   </div>
 
@@ -703,7 +713,7 @@ function fillSpecies(){
  const g=$("mGroup").value,s=$("mSpecies");
  if(!g){s.disabled=true;s.innerHTML="";$("latinName").textContent="";return;}
  s.disabled=false;
- s.innerHTML='<option value="">Seç</option>'+(SPECIES_DATA[g]||[]).map(x=>`<option value="${x.tr}">${x.tr}</option>`).join("");
+ s.innerHTML='<option value="">Seç</option>'+(SPECIES_DATA[g]||[]).map(x=>`<option value="${x.tr}">${x.tr}${x.lat && x.lat!=="—"?" · "+x.lat:""}</option>`).join("");
  $("latinName").textContent="";
 }
 function showLatin(){
@@ -920,12 +930,14 @@ async function loadDash(){
  const sp={};(data||[]).forEach(r=>sp[r.species]=(sp[r.species]||0)+1);
  drawChart("chSpecies","doughnut",Object.keys(sp),Object.values(sp));
  drawChart("chCarbon","bar",(data||[]).slice(0,10).map(r=>"P"+r.point_id),(data||[]).slice(0,10).map(r=>r.carbon_kg));
+ renderAnalysis(data||[],"myAnalysis");
 }
 function drawChart(id,type,labels,data){
  if(charts[id])charts[id].destroy();
  charts[id]=new Chart($(id),{type,data:{labels,datasets:[{data,backgroundColor:["#1e6f4b","#c77d2e","#2b6cb0","#c2452d","#7c3aed","#0891b2","#92400e","#d97706"]}]},options:{plugins:{legend:{display:false}},scales:type==="bar"?{y:{ticks:{color:"#68766e"}},x:{ticks:{color:"#68766e"}}}:undefined}});
 }
 
+/* ============ AKTİF VERİ ANALİZİ (İbreli/Yapraklı yüzde, ort. çap/boy, tür dağılımı) ============ */
 /* ============ AKTİF VERİ ANALİZİ (İbreli/Yapraklı yüzde, ort. çap/boy, tür dağılımı) ============ */
 function renderAnalysis(rows,elId){
  const el=$(elId);if(!el)return;
@@ -943,38 +955,47 @@ function renderAnalysis(rows,elId){
  const pct=n=>total?((n/total)*100).toFixed(1):"0.0";
  const avgDbh=total?(rows.reduce((a,r)=>a+(r.dbh_cm||0),0)/total).toFixed(1):"0";
  const avgH=total?(rows.reduce((a,r)=>a+(r.height_m||0),0)/total).toFixed(1):"0";
+ const ibPct=pct(groups["İBRELİ"].n);
+ const yaPct=pct(groups["YAPRAKLI"].n);
+ const diPct=pct(groups["DİĞER"].n);
  const topSpecies=Object.entries(bySpecies).sort((a,b)=>b[1].n-a[1].n).slice(0,6);
- const cvId=elId+"_cv";
+ 
  el.innerHTML=`
   <div class="card">
-   <div class="lbl" style="margin-bottom:14px">🌳 Ağaç Çeşitliliği & Yapısal Analiz <span style="text-transform:none;letter-spacing:0;color:var(--mut)">(${total} onaylı kayıt)</span></div>
-   <div class="grid g2">
-    <div>
-     <canvas id="${cvId}" height="200"></canvas>
-     <div style="display:flex;justify-content:center;gap:14px;margin-top:10px;font-size:.78rem;flex-wrap:wrap">
-      <span><span style="display:inline-block;width:10px;height:10px;border-radius:3px;background:${GROUP_COLOR["İBRELİ"]};margin-right:5px"></span>İbreli %${pct(groups["İBRELİ"].n)}</span>
-      <span><span style="display:inline-block;width:10px;height:10px;border-radius:3px;background:${GROUP_COLOR["YAPRAKLI"]};margin-right:5px"></span>Yapraklı %${pct(groups["YAPRAKLI"].n)}</span>
-      <span><span style="display:inline-block;width:10px;height:10px;border-radius:3px;background:${GROUP_COLOR["DİĞER"]};margin-right:5px"></span>Diğer %${pct(groups["DİĞER"].n)}</span>
-     </div>
+   <div class="shead" style="margin-bottom:14px"><span class="no">🌳</span><h2 style="font-size:1.15rem">Ağaç Çeşitliliği & Yapısal Analiz</h2><span class="rule"></span><span class="mono" style="font-size:.78rem;color:var(--mut)">${total} onaylı kayıt</span></div>
+   
+   <!-- Grup dağılımı yatay bar -->
+   <div style="margin-bottom:18px">
+    <div class="lbl" style="margin-bottom:8px">Grup Dağılımı</div>
+    <div style="display:flex;justify-content:space-between;font-size:.78rem;margin-bottom:6px;color:var(--mut)">
+     <span><span style="display:inline-block;width:10px;height:10px;border-radius:3px;background:${GROUP_COLOR["İBRELİ"]};margin-right:5px"></span>İbreli <b style="color:var(--ink)">${ibPct}%</b></span>
+     <span><span style="display:inline-block;width:10px;height:10px;border-radius:3px;background:${GROUP_COLOR["YAPRAKLI"]};margin-right:5px"></span>Yapraklı <b style="color:var(--ink)">${yaPct}%</b></span>
+     <span><span style="display:inline-block;width:10px;height:10px;border-radius:3px;background:${GROUP_COLOR["DİĞER"]};margin-right:5px"></span>Diğer <b style="color:var(--ink)">${diPct}%</b></span>
     </div>
-    <div>
-     <div class="grid g2" style="margin-bottom:14px">
-      <div class="stat"><div class="lbl">Ort. Çap (DBH)</div><div class="val" style="font-size:1.1rem">${avgDbh} cm</div></div>
-      <div class="stat"><div class="lbl">Ort. Yükseklik</div><div class="val" style="font-size:1.1rem">${avgH} m</div></div>
-      <div class="stat"><div class="lbl">İbreli Ort.Boy</div><div class="val" style="font-size:1.1rem;color:${GROUP_COLOR["İBRELİ"]}">${groups["İBRELİ"].n?(groups["İBRELİ"].h/groups["İBRELİ"].n).toFixed(1):"—"} m</div></div>
-      <div class="stat"><div class="lbl">Yapraklı Ort.Boy</div><div class="val" style="font-size:1.1rem;color:${GROUP_COLOR["YAPRAKLI"]}">${groups["YAPRAKLI"].n?(groups["YAPRAKLI"].h/groups["YAPRAKLI"].n).toFixed(1):"—"} m</div></div>
-     </div>
-     <div class="lbl" style="margin-bottom:8px">En Yaygın 6 Tür</div>
-     ${topSpecies.map(([sp,v])=>`<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
-       <div style="flex:1;font-size:.78rem" title="${LATIN[sp]||''}">${sp}</div>
-       <div style="flex:2;background:var(--line);border-radius:6px;height:8px;overflow:hidden"><div style="height:100%;width:${pct(v.n)}%;background:${GROUP_COLOR[v.grp]}"></div></div>
-       <div class="mono" style="font-size:.72rem;color:var(--mut);width:38px;text-align:right">%${pct(v.n)}</div>
-      </div>`).join("")}
+    <div style="display:flex;height:14px;border-radius:7px;overflow:hidden;background:var(--line)">
+     <div style="width:${ibPct}%;background:${GROUP_COLOR["İBRELİ"]};transition:width .6s"></div>
+     <div style="width:${yaPct}%;background:${GROUP_COLOR["YAPRAKLI"]};transition:width .6s"></div>
+     <div style="width:${diPct}%;background:${GROUP_COLOR["DİĞER"]};transition:width .6s"></div>
     </div>
    </div>
+   
+   <!-- Ortalamalar -->
+   <div class="grid g4" style="margin-bottom:18px">
+    <div class="stat" style="padding:14px"><div class="lbl">Ort. Çap</div><div class="val" style="font-size:1.15rem">${avgDbh} <span style="font-size:.7rem;font-weight:400">cm</span></div></div>
+    <div class="stat" style="padding:14px"><div class="lbl">Ort. Boy</div><div class="val" style="font-size:1.15rem">${avgH} <span style="font-size:.7rem;font-weight:400">m</span></div></div>
+    <div class="stat" style="padding:14px"><div class="lbl" style="color:${GROUP_COLOR["İBRELİ"]}">İbreli Ort.Boy</div><div class="val" style="font-size:1.15rem">${groups["İBRELİ"].n?(groups["İBRELİ"].h/groups["İBRELİ"].n).toFixed(1):"—"} <span style="font-size:.7rem;font-weight:400">m</span></div></div>
+    <div class="stat" style="padding:14px"><div class="lbl" style="color:${GROUP_COLOR["YAPRAKLI"]}">Yapraklı Ort.Boy</div><div class="val" style="font-size:1.15rem">${groups["YAPRAKLI"].n?(groups["YAPRAKLI"].h/groups["YAPRAKLI"].n).toFixed(1):"—"} <span style="font-size:.7rem;font-weight:400">m</span></div></div>
+   </div>
+   
+   <!-- Top 6 tür -->
+   <div class="lbl" style="margin-bottom:10px">En Yaygın 6 Tür</div>
+   ${topSpecies.map(([sp,v])=>`<div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;padding:6px 10px;background:var(--bg);border-radius:8px">
+     <div style="width:8px;height:8px;border-radius:50%;background:${GROUP_COLOR[v.grp]}"></div>
+     <div style="flex:1;min-width:0"><div style="font-size:.82rem;font-weight:600">${sp}</div><div style="font-size:.68rem;color:var(--mut);font-style:italic">${LATIN[sp]||""}</div></div>
+     <div style="width:100px;background:var(--line);border-radius:4px;height:6px;overflow:hidden"><div style="height:100%;width:${pct(v.n)}%;background:${GROUP_COLOR[v.grp]}"></div></div>
+     <div class="mono" style="font-size:.78rem;color:var(--ink);font-weight:600;width:42px;text-align:right">${v.n} <span style="color:var(--mut);font-weight:400">(${pct(v.n)}%)</span></div>
+    </div>`).join("")}
   </div>`;
- if(charts[cvId])charts[cvId].destroy();
- charts[cvId]=new Chart($(cvId),{type:"doughnut",data:{labels:["İbreli","Yapraklı","Diğer"],datasets:[{data:[groups["İBRELİ"].n,groups["YAPRAKLI"].n,groups["DİĞER"].n],backgroundColor:[GROUP_COLOR["İBRELİ"],GROUP_COLOR["YAPRAKLI"],GROUP_COLOR["DİĞER"]],borderWidth:2,borderColor:"#fff"}]},options:{plugins:{legend:{display:false}},cutout:"62%"}});
 }
 
 /* ============ ZİYARETÇİ SAYACI ============ */
