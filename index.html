@@ -224,7 +224,7 @@ tr.done td{opacity:.55}tr.done td b{text-decoration:line-through}
    <button class="btn sm ghost" onclick="authTab('reg')">Kayıt</button>
    <button class="btn sm ghost" onclick="authTab('reset')">Şifre Yenile</button>
   </div>
-<form id="fLogin" onsubmit="return false;"><div class="lbl">E‑posta</div><input id="liEmail" type="email" required><div class="lbl" style="margin-top:12px">Parola</div><input id="liPass" type="password" required><div id="tsLogin" style="margin-top:14px;min-height:65px"></div><button type="button" class="btn" style="width:100%;margin-top:16px" onclick="doLogin()">Giriş Yap</button><button type="button" class="btn ghost" style="width:100%;margin-top:8px" onclick="sendMagicLink()">🔗 Giriş Linki Gönder (Şifresiz)</button></form>
+<form id="fLogin" onsubmit="return false;"><div class="lbl">E‑posta</div><input id="liEmail" type="email" required><div class="lbl" style="margin-top:12px">Parola</div><input id="liPass" type="password" required><div id="tsLogin" style="margin-top:14px;min-height:65px"></div><button type="button" class="btn" style="width:100%;margin-top:16px" onclick="doLogin()">Giriş Yap</button></form>
 <form id="fReg" style="display:none" onsubmit="return false;"><div class="lbl">Ad Soyad</div><input id="rgName" required><div class="lbl" style="margin-top:10px">Kurum</div><input id="rgOrg"><div class="lbl" style="margin-top:10px">E‑posta</div><input id="rgEmail" type="email" required><div class="lbl" style="margin-top:10px">Parola</div><input id="rgPass" type="password" minlength="6" required><div id="tsReg" style="margin-top:14px;min-height:65px"></div><button type="button" class="btn" style="width:100%;margin-top:16px" onclick="doRegister()">Hesap Oluştur</button></form>
 <form id="fReset" style="display:none" onsubmit="return false;"><div class="lbl">E‑posta</div><input id="rsEmail" type="email" required><div id="tsReset" style="margin-top:14px;min-height:65px"></div><button type="button" class="btn" style="width:100%;margin-top:16px" onclick="sendResetEmail()">Sıfırlama Gönder</button></form>
   <div id="authMsg" style="margin-top:12px;font-size:.85rem;min-height:1.2em"></div>
@@ -712,53 +712,8 @@ function toast(msg,type="ok",icon=""){
 
 function amsg(t,e){const m=$("authMsg");if(m){m.textContent=t;m.style.color=e?"var(--red)":"var(--green-dk)";}}
 
-async function sendMagicLink(){
- const email=$("liEmail").value;
- if(!email){
-  amsg("Lütfen e-posta adresinizi girin.",1);
-  return;
- }
- 
- amsg("Giriş linki hazırlanıyor...",0);
- 
- let tok=tsToken("tsLogin");
- if(!tok){
-  await new Promise(r=>setTimeout(r,2500));
-  tok=tsToken("tsLogin");
- }
- if(!tok){
-  amsg("Doğrulama widget'ı hazır değil. Sayfayı yenileyip tekrar deneyin.",1);
-  return;
- }
- 
- const redirectURL=window.location.origin+window.location.pathname.replace(/\/+$/,"")+"/";
- 
- console.log("=== MAGIC LINK DEBUG ===");
- console.log("Email:",email);
- console.log("Redirect URL:",redirectURL);
- 
- const r=await sb.auth.signInWithOtp({
-  email:email,
-  options:{
-   captchaToken:tok,
-   emailRedirectTo:redirectURL
-  }
- });
- 
- console.log("Magic link yanıtı:",r);
- console.log("========================");
- 
- if(r.error){
-  console.error("Magic link hatası:",r.error);
-  amsg("Hata: "+r.error.message,1);
-  return;
- }
- 
- try{turnstile.reset(TS.tsLogin);}catch(e){}
- amsg("✓ Giriş linki e-postanıza gönderildi. Maildeki linke tıklayarak giriş yapabilirsiniz.",0);
-}
-
 async function doLogin(){
+
  const email=$("liEmail").value;
  const pass=$("liPass").value;
  if(!email||!pass){
