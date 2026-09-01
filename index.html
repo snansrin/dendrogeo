@@ -62,7 +62,9 @@ td{padding:9px 10px;border-bottom:1px solid var(--line);font-family:"IBM Plex Mo
 .hero .kick{font-family:"IBM Plex Mono",monospace;font-size:11px;letter-spacing:.3em;color:var(--amber);text-transform:uppercase}
 .hero h1{font-family:Fraunces,serif;font-size:clamp(2.2rem,5vw,4rem);line-height:1.06;color:var(--green-dk);margin:16px 0;font-weight:600;max-width:20ch}
 .hero .lead{color:var(--mut);max-width:60ch;font-size:1.05rem}
-.hero-grid{display:grid;grid-template-columns:1.05fr .95fr;gap:48px;align-items:center}
+.hero-grid{display:grid;grid-template-columns:1.2fr .8fr;gap:36px;align-items:center}
+.hero-art{position:relative}
+.hero-art svg{width:100%;height:auto;display:block;max-width:440px;margin-left:auto}
 .hero-art{position:relative}
 .hero-art svg{width:100%;height:auto;display:block}
 .canopy{animation:sway 7s ease-in-out infinite;transform-origin:280px 396px}
@@ -77,6 +79,24 @@ td{padding:9px 10px;border-bottom:1px solid var(--line);font-family:"IBM Plex Mo
 .chip.c2{animation-delay:1.4s}
 .chip.c3{animation-delay:2.6s}
 @keyframes chipfloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-9px)}}
+.bob{animation:bob 3.2s ease-in-out infinite}
+.bob.b2{animation-delay:.7s}
+.bob.b3{animation-delay:1.4s}
+@keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-4px)}}
+.eye{transform-box:fill-box;transform-origin:center;animation:blink 4.5s infinite}
+.eye.e2{animation-delay:1.5s}
+.eye.e3{animation-delay:2.8s}
+@keyframes blink{0%,90%,100%{transform:scaleY(1)}95%{transform:scaleY(.15)}}
+.sun{transform-box:fill-box;transform-origin:center;animation:sunpulse 5s ease-in-out infinite}
+@keyframes sunpulse{0%,100%{transform:scale(1);opacity:.8}50%{transform:scale(1.15);opacity:1}}
+.butterfly{animation:flutter 10s ease-in-out infinite}
+@keyframes flutter{0%{transform:translate(0,0)}20%{transform:translate(-34px,-28px)}45%{transform:translate(-12px,-52px)}70%{transform:translate(28px,-24px)}100%{transform:translate(0,0)}}
+.wing{transform-box:fill-box;transform-origin:center;animation:flap .35s ease-in-out infinite alternate}
+.wing.w2{animation-delay:.15s}
+@keyframes flap{from{transform:scaleX(1)}to{transform:scaleX(.4)}}
+.leaf{animation:fall 8s linear infinite}
+.leaf.l2{animation-delay:4s}
+@keyframes fall{0%{transform:translate(0,0) rotate(0deg);opacity:0}12%{opacity:1}100%{transform:translate(-70px,190px) rotate(320deg);opacity:0}}
 @media(max-width:960px){.hero-grid{grid-template-columns:1fr}.hero-art{display:none}}
 .statband{display:grid;grid-template-columns:repeat(4,1fr);border:1px solid var(--line);border-radius:var(--r);overflow:hidden;background:var(--surface);box-shadow:var(--sh);margin-top:36px}
 .statband div{padding:20px;border-right:1px solid var(--line)}.statband div:last-child{border-right:0}
@@ -216,8 +236,12 @@ tr.done td{opacity:.55}tr.done td b{text-decoration:line-through}
     <button class="btn ghost" onclick="showAuth()">🌲 Hemen Başla</button>
    </div>
   </div>
-  <div class="hero-art" aria-hidden="true">
+   <div class="hero-art" aria-hidden="true">
    <svg viewBox="0 0 560 440" fill="none">
+    <g class="sun">
+     <circle cx="472" cy="72" r="30" fill="#f8efe2"/>
+     <circle cx="472" cy="72" r="20" fill="#c77d2e" opacity=".55"/>
+    </g>
     <circle cx="290" cy="205" r="175" fill="#eaf3ec"/>
     <ellipse cx="280" cy="402" rx="252" ry="22" fill="#dfe9e0"/>
     <g opacity=".55">
@@ -238,8 +262,15 @@ tr.done td{opacity:.55}tr.done td b{text-decoration:line-through}
      <circle cx="255" cy="170" r="5" fill="#9fd0ae"/>
      <circle cx="300" cy="105" r="5" fill="#9fd0ae"/>
     </g>
+    <g class="leaf"><ellipse cx="330" cy="140" rx="6" ry="3.5" fill="#3aa76d"/></g>
+    <g class="leaf l2"><ellipse cx="245" cy="160" rx="5" ry="3" fill="#2e8b57"/></g>
+    <g class="butterfly">
+     <ellipse class="wing" cx="385" cy="211" rx="7" ry="9" fill="#c77d2e" opacity=".85"/>
+     <ellipse class="wing w2" cx="399" cy="211" rx="7" ry="9" fill="#2b6cb0" opacity=".85"/>
+     <rect x="390" y="205" width="4" height="13" rx="2" fill="#182420"/>
+    </g>
     <ellipse class="tape" cx="280" cy="300" rx="27" ry="9" stroke="#c77d2e" stroke-width="3" stroke-dasharray="6 5"/>
-    <g>
+    <g class="bob">
      <rect x="200" y="340" width="9" height="54" rx="4" fill="#182420"/>
      <rect x="215" y="340" width="9" height="54" rx="4" fill="#182420"/>
      <rect x="196" y="290" width="32" height="56" rx="12" fill="#2b6cb0"/>
@@ -247,8 +278,11 @@ tr.done td{opacity:.55}tr.done td b{text-decoration:line-through}
      <circle cx="270" cy="302" r="5.5" fill="#e8b98a"/>
      <circle cx="212" cy="274" r="12" fill="#e8b98a"/>
      <path d="M200 272 a12 12 0 0 1 24 0 z" fill="#14532d"/>
+     <circle class="eye" cx="208" cy="272" r="1.8" fill="#182420"/>
+     <circle class="eye" cx="216" cy="272" r="1.8" fill="#182420"/>
+     <path d="M207 278 q5 4 10 0" stroke="#182420" stroke-width="1.5" fill="none" stroke-linecap="round"/>
     </g>
-    <g>
+    <g class="bob b2">
      <line class="sight" x1="362" y1="238" x2="294" y2="122" stroke="#c77d2e" stroke-width="2.5" stroke-dasharray="7 6"/>
      <rect x="392" y="344" width="9" height="52" rx="4" fill="#182420"/>
      <rect x="407" y="344" width="9" height="52" rx="4" fill="#182420"/>
@@ -258,13 +292,21 @@ tr.done td{opacity:.55}tr.done td b{text-decoration:line-through}
      <rect x="356" y="234" width="18" height="11" rx="2.5" fill="#182420"/>
      <circle cx="404" cy="272" r="12" fill="#8d5a3a"/>
      <path d="M392 270 a12 12 0 0 1 24 0 z" fill="#182420"/>
+     <circle class="eye e2" cx="400" cy="270" r="1.8" fill="#182420"/>
+     <circle class="eye e2" cx="408" cy="270" r="1.8" fill="#182420"/>
+     <path d="M399 276 q5 4 10 0" stroke="#182420" stroke-width="1.5" fill="none" stroke-linecap="round"/>
     </g>
-    <g>
+    <g class="bob b3">
      <circle class="pulse" cx="163" cy="346" r="10" stroke="#2b6cb0" stroke-width="2"/>
      <circle class="pulse p2" cx="163" cy="346" r="10" stroke="#2b6cb0" stroke-width="2"/>
      <rect x="118" y="352" width="30" height="42" rx="12" fill="#1e6f4b" transform="rotate(-6 133 373)"/>
      <circle cx="137" cy="340" r="11" fill="#e8b98a"/>
-     <path d="M126 338 a11 11 0 0 1 22 0 z" fill="#c77d2e"/>
+     <path d="M126 338 a11 11 0 0 1 22 0 z" fill="#6d452c"/>
+     <circle cx="149" cy="333" r="4.5" fill="#c2452d"/>
+     <path d="M150 335 q11 7 8 20" stroke="#6d452c" stroke-width="5" stroke-linecap="round"/>
+     <circle class="eye e3" cx="133" cy="338" r="1.6" fill="#182420"/>
+     <circle class="eye e3" cx="141" cy="338" r="1.6" fill="#182420"/>
+     <path d="M132 344 q4 3 8 0" stroke="#182420" stroke-width="1.4" fill="none" stroke-linecap="round"/>
      <rect x="150" y="356" width="22" height="15" rx="3" fill="#14532d"/>
      <rect x="153" y="359" width="16" height="9" rx="1.5" fill="#9fd0ae"/>
     </g>
