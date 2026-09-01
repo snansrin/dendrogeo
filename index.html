@@ -16,11 +16,16 @@
 <meta name="twitter:title" content="DendroGeo — Küresel Ağaç Envanteri">
 <meta name="twitter:description" content="Ağaç envanteri ve karbon stoğu verisi, tek merkezde.">
 <meta name="twitter:image" content="social-preview.png">
-<link rel="icon" type="image/png" href="icon.png"><link rel="apple-touch-icon" href="icon.png">
+<link rel="icon" type="image/png" href="icon.png">
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#14532d"><link rel="apple-touch-icon" href="icon.png">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Manrope:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css">
+<link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css">
+<script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
 <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
@@ -108,6 +113,27 @@ footer h4{color:#fff;font-size:.72rem;letter-spacing:.16em;text-transform:upperc
 #previewModal.on{display:flex}
 tr.done td{opacity:.55}tr.done td b{text-decoration:line-through}
 .wp-badge{width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;font-size:.72rem;font-family:"IBM Plex Mono",monospace;border:2px solid #fff;box-shadow:0 2px 6px rgba(0,0,0,.35)}
+/* Toast */
+#toastWrap{position:fixed;top:20px;right:20px;z-index:999;display:flex;flex-direction:column;gap:10px;max-width:380px;pointer-events:none}
+.toast{background:var(--surface);border:1px solid var(--line);border-left:4px solid var(--green);border-radius:10px;padding:12px 16px;box-shadow:var(--sh);font-size:.88rem;pointer-events:auto;animation:toastIn .3s;display:flex;align-items:flex-start;gap:10px}
+.toast.err{border-left-color:var(--red)}.toast.info{border-left-color:var(--blue)}.toast.warn{border-left-color:var(--amber)}
+.toast.bye{animation:toastOut .3s forwards}
+.toast .icon{font-size:1.1rem;flex:0 0 auto}
+.toast .msg{flex:1;min-width:0}
+.toast .msg b{display:block;margin-bottom:2px}
+.toast .x{cursor:pointer;color:var(--mut);font-size:1rem;padding:0 4px;opacity:.6}
+.toast .x:hover{opacity:1}
+@keyframes toastIn{from{transform:translateX(120%);opacity:0}to{transform:translateX(0);opacity:1}}
+@keyframes toastOut{to{transform:translateX(120%);opacity:0}}
+/* Cluster stilleri - tema uyumlu */
+.marker-cluster-small{background-color:rgba(30,111,75,.25)}.marker-cluster-small div{background-color:#1e6f4b;color:#fff;font-weight:700;font-family:"IBM Plex Mono",monospace}
+.marker-cluster-medium{background-color:rgba(199,125,46,.25)}.marker-cluster-medium div{background-color:#c77d2e;color:#fff;font-weight:700;font-family:"IBM Plex Mono",monospace}
+.marker-cluster-large{background-color:rgba(194,69,45,.25)}.marker-cluster-large div{background-color:#c2452d;color:#fff;font-weight:700;font-family:"IBM Plex Mono",monospace}
+.marker-cluster div{width:30px;height:30px;margin-left:5px;margin-top:5px;text-align:center;border-radius:15px;font-size:.85rem;display:flex;align-items:center;justify-content:center}
+.marker-cluster{background-clip:padding-box;border-radius:20px}
+/* Tablo satırı tıklanabilir */
+.clickable-row{cursor:pointer;transition:background .15s}
+.clickable-row:hover{background:var(--tint)}
 @media(max-width:900px){
  #layout{display:block;min-height:auto}
  #side{display:flex;overflow-x:auto;padding:8px 12px;gap:6px;border-bottom:1px solid var(--line);border-right:0;position:sticky;top:56px;z-index:40;background:#fbfaf7}
@@ -123,8 +149,8 @@ tr.done td{opacity:.55}tr.done td b{text-decoration:line-through}
 }
 </style>
 </head>
-<body>
-
+<<body>
+<div id="toastWrap"></div>
 <div id="landing">
 <div id="topnav"><div class="wrap">
  <span class="brand">🌲 DendroGeo</span>
@@ -234,8 +260,8 @@ tr.done td{opacity:.55}tr.done td b{text-decoration:line-through}
     </div>
     <h4 style="color:#9fd0ae;font-size:.72rem;letter-spacing:.16em;text-transform:uppercase;margin:18px 0 10px">⚖️ Politikalar</h4>
     <div style="font-size:.78rem;color:#cfe0d4;line-height:1.6">
-     <div><a href="#" onclick="alert('KVKK: Yalnızca e-posta, ad ve kurum bilgileriniz saklanır. Hesap istediğinizde tüm verileriniz silinebilir. Çerez kullanılmamaktadır.');return false;" style="color:#9fd0ae;text-decoration:underline">KVKK Aydınlatma Metni</a></div>
-     <div style="margin-top:4px"><a href="#" onclick="alert('Veri Doğruluk: GPS doğruluğu ±10m altında, bitki örtüsü ≥%10 ve pozlama 25-245 aralığında olmayan çekimler reddedilir. Tüm kayıtlar admin onayından sonra yayımlanır.');return false;" style="color:#9fd0ae;text-decoration:underline">Veri Doğruluk Politikası</a></div>
+     <div><a href="#" onclick="toast('KVKK: Yalnızca e-posta, ad ve kurum bilgileriniz saklanır. Hesap istediğinizde tüm verileriniz silinebilir. Çerez kullanılmamaktadır.');return false;" style="color:#9fd0ae;text-decoration:underline">KVKK Aydınlatma Metni</a></div>
+     <div style="margin-top:4px"><a href="#" onclick="toast('Veri Doğruluk: GPS doğruluğu ±10m altında, bitki örtüsü ≥%10 ve pozlama 25-245 aralığında olmayan çekimler reddedilir. Tüm kayıtlar admin onayından sonra yayımlanır.');return false;" style="color:#9fd0ae;text-decoration:underline">Veri Doğruluk Politikası</a></div>
     </div>
    </div>
   </div>
@@ -647,6 +673,15 @@ function showAuth(){
 }
 function authTab(t){["login","reg","reset"].forEach(x=>{const id="f"+x[0].toUpperCase()+x.slice(1);if($(id))$(id).style.display=(x===t?"block":"none");});}
 function amsg(t,e){const m=$("authMsg");if(m){m.textContent=t;m.style.color=e?"var(--red)":"var(--green-dk)";}}
+function toast(msg,type="ok",icon=""){
+ const wrap=$("toastWrap");if(!wrap)return;
+ const t=document.createElement("div");
+ t.className="toast "+(type==="err"||type==="warn"||type==="info"?type:"");
+ const ic=icon||(type==="err"?"❌":type==="warn"?"⚠":type==="info"?"ℹ":"✓");
+ t.innerHTML=`<span class="icon">${ic}</span><span class="msg">${msg}</span><span class="x" onclick="this.parentNode.classList.add('bye');setTimeout(()=>this.parentNode.remove(),300)">✕</span>`;
+ wrap.appendChild(t);
+ setTimeout(()=>{if(t.parentNode){t.classList.add("bye");setTimeout(()=>t.remove(),300);}},4500);
+}
 
 $("fLogin")&&($("fLogin").onsubmit=async e=>{e.preventDefault();const tok=turnstile.getResponse();if(!tok)return amsg("Lütfen bot doğrulamasını tamamlayın.",1);const r=await sb.auth.signInWithPassword({email:$("liEmail").value,password:$("liPass").value,options:{captchaToken:tok}});if(r.error)return amsg(r.error.message,1);turnstile.reset();boot();});
 $("fReg")&&($("fReg").onsubmit=async e=>{e.preventDefault();const tok=turnstile.getResponse();if(!tok)return amsg("Lütfen bot doğrulamasını tamamlayın.",1);const r=await sb.auth.signUp({email:$("rgEmail").value,password:$("rgPass").value,options:{data:{full_name:$("rgName").value,organization:$("rgOrg").value},captchaToken:tok}});if(r.error)return amsg(r.error.message,1);turnstile.reset();amsg(r.data.session?"Hesap oluşturuldu.":"Doğrulama e‑postası gönderildi.",0);});
@@ -654,6 +689,17 @@ $("fReset")&&($("fReset").onsubmit=async e=>{e.preventDefault();const tok=turnst
 async function logout(){await sb.auth.signOut();location.reload();}
 
 async function boot(){
+ if('serviceWorker' in navigator){
+  navigator.serviceWorker.register('./sw.js').catch(e=>console.log('SW registration failed:',e));
+ }
+ 
+ window.addEventListener('online',()=>{
+  toast('İnternet bağlantısı geri geldi — senkronize ediliyor','ok','🌐');
+  if('serviceWorker' in navigator&&navigator.serviceWorker.controller){
+   navigator.serviceWorker.controller.postMessage({type:'SYNC'});
+  }
+ });
+ 
  trackVisit();
  const{data:{session}}=await sb.auth.getSession();
  if(!session){initLanding();return;}
@@ -667,9 +713,27 @@ function popupHtml(r){
 }
 function addMarkersChunked(m,rows,chunk=150){
  let i=0;
+ if(!m._cluster){
+  m._cluster=L.markerClusterGroup({
+   maxClusterRadius:60,
+   spiderfyOnMaxZoom:true,
+   showCoverageOnHover:false,
+   iconCreateFunction:c=>{
+    const n=c.getChildCount();
+    const cls=n<10?"small":n<50?"medium":"large";
+    return L.divIcon({html:`<div>${n}</div>`,className:`marker-cluster marker-cluster-${cls}`,iconSize:[40,40]});
+   }
+  });
+  m.addLayer(m._cluster);
+ }
  (function step(){
   const end=Math.min(i+chunk,rows.length);
-  for(;i<end;i++){const r=rows[i];L.circleMarker([r.lat,r.lon],{radius:6,color:"#1e6f4b",weight:2,fillOpacity:.75}).addTo(m).bindPopup(popupHtml(r));}
+  for(;i<end;i++){
+   const r=rows[i];
+   const mk=L.circleMarker([r.lat,r.lon],{radius:6,color:"#1e6f4b",weight:2,fillOpacity:.75});
+   mk.bindPopup(popupHtml(r));
+   m._cluster.addLayer(mk);
+  }
   if(i<rows.length)setTimeout(step,16);
  })();
 }
@@ -689,9 +753,9 @@ function initLanding(){
    const g=await sb.from("v_global").select("*").single();
    if(g.data){$("stRec").textContent=g.data.records||0;$("stCountry").textContent=g.data.countries||0;$("stCity").textContent=g.data.cities||0;$("stCarbon").textContent=g.data.carbon_t||0;}
    const c=await sb.from("v_country").select("*");
-   $("tblCountry").querySelector("tbody").innerHTML=(c.data||[]).slice(0,20).map(r=>`<tr><td>${r.country}</td><td>${r.records}</td><td>${r.carbon_t}</td><td>${r.avg_dbh}</td><td>${r.avg_height||"—"}</td></tr>`).join("")||"<tr><td colspan=5>Henüz veri yok</td></tr>";
+   $("tblCountry").querySelector("tbody").innerHTML=(c.data||[]).slice(0,20).map(r=>`<tr class="clickable-row" onclick="zoomToCountry('${r.country.replace(/'/g,"\\'")}')"><td>${r.country}</td><td>${r.records}</td><td>${r.carbon_t}</td><td>${r.avg_dbh}</td><td>${r.avg_height||"—"}</td></tr>`).join("")||"<tr><td colspan=5>Henüz veri yok</td></tr>";
    const t=await sb.from("v_city").select("*");
-   $("tblCity").querySelector("tbody").innerHTML=(t.data||[]).slice(0,20).map(r=>`<tr><td>${r.city}</td><td>${r.records}</td><td>${r.carbon_t}</td></tr>`).join("")||"<tr><td colspan=3>Henüz veri yok</td></tr>";
+    $("tblCity").querySelector("tbody").innerHTML=(t.data||[]).slice(0,20).map(r=>`<tr class="clickable-row" onclick="zoomToCity('${r.city.replace(/'/g,"\\'")}')"><td>${r.city}</td><td>${r.records}</td><td>${r.carbon_t}</td></tr>`).join("")||"<tr><td colspan=3>Henüz veri yok</td></tr>";
    loadApprovedMarkers(worldMapL,2000,(n,rows)=>renderAnalysis(rows,"landingAnalysis"));
   }catch(e){}
  })();
@@ -784,7 +848,7 @@ function editProject(id){
 }
 function cancelProjectEdit(){EDIT_PROJ=null;$("pName").value="";$("projSaveBtn").textContent="+ Proje Oluştur";$("projCancelBtn").style.display="none";}
 async function createProject(){
- const n=$("pName").value;if(!n)return alert("Ad gerekli");
+ const n=$("pName").value;if(!n)return toast("Proje adı gerekli","err");
  if(EDIT_PROJ){
   await sb.from("projects").update({name:n,country:$("pCountry").value,city:$("pCity").value}).eq("id",EDIT_PROJ);
   cancelProjectEdit();
@@ -831,11 +895,11 @@ async function queryPointId(){
 
 async function saveMeas(){
  const pid=+$("mProject").value,pt=+$("mPoint").value,sp=$("mSpecies").value,d=+$("mDbh").value,h=+$("mHeight").value,grp=$("mGroup").value;
- if(!pid||!pt||!sp||!d||!h)return alert("Tüm alanları doldur");
- if(!EDIT_ID&&!GPS)return alert("Önce 📡 Konumu Etkinleştir butonuna basın.");
- if(d>500||h>100)return alert("Çap ≤500 cm, boy ≤100 m olmalı.");
+ if(!pid||!pt||!sp||!d||!h)return toast("Tüm alanları doldur","err");
+ if(!EDIT_ID&&!GPS)return toast("Önce 📡 Konumu Etkinleştir butonuna basın","err");
+ if(d>500||h>100)return toast("Çap ≤500 cm, boy ≤100 m olmalı","err");
  const f=$("mPhoto").files[0];
- if(f&&!photoOk)return alert("⚠ Fotoğraf denetimi başarısız. Uygun (ağaç/bitki örtüsü içeren, net) bir fotoğraf çekin.");
+ if(f&&!photoOk)return toast("Fotoğraf denetimi başarısız — uygun bir çekim yapın","err");
  const c=calc(d,h,sp,grp);
  let photo=null,photoFile=null;
  if(f){
@@ -845,19 +909,28 @@ async function saveMeas(){
   const{error}=await sb.storage.from("dendro-photos").upload(path,comp,{contentType:"image/jpeg"});
   if(!error)photo=sb.storage.from("dendro-photos").getPublicUrl(path).data.publicUrl;
  }
- const base={owner:USER.id,project_id:pid,point_id:pt,measurement_no:+$("mNo").value||1,grp,species:sp,dbh_cm:d,height_m:h,volume_m3:c.vol,carbon_kg:c.total_carbon,slope_deg:0,shared:true,status:"Beklemede"};
- if(!EDIT_ID){base.lat=GPS.latitude;base.lon=GPS.longitude;base.country="Türkiye";base.city="Ankara";base.accuracy_m=GPS.accuracy;base.altitude_m=GPS.altitude;}
- if(photo){base.photo_url=photo;base.photo_file=photoFile;}
+const base={owner:USER.id,project_id:pid,point_id:pt,measurement_no:+$("mNo").value||1,grp,species:sp,dbh_cm:d,height_m:h,volume_m3:c.vol,carbon_kg:c.total_carbon,slope_deg:0,shared:true,status:"Beklemede"};
+if(!EDIT_ID){base.lat=GPS.latitude;base.lon=GPS.longitude;base.country="Türkiye";base.city="Ankara";base.accuracy_m=GPS.accuracy;base.altitude_m=GPS.altitude;}
+if(photo){base.photo_url=photo;base.photo_file=photoFile;}
+
+if(!navigator.onLine){
+ await saveOfflineMeasurement(base);
+ toast('Çevrimdışı kaydedildi — internet gelince otomatik senkronize edilecek','info','📴');
+ $('mPoint').value='';$('mDbh').value='';$('mHeight').value='';$('mPhoto').value='';
+ $('photoCheck').style.display='none';photoOk=false;manualPoint=false;
+ loadDash();loadRecords();
+ return;
+}
  if(EDIT_ID){
   const{error}=await sb.from("measurements").update(base).eq("id",EDIT_ID);
-  if(error)return alert("Hata: "+error.message);
-  alert("✓ Kayıt güncellendi · onay için yönetime gönderildi.");
+  if(error)return toast("Hata: "+error.message,"err");
+  toast("Kayıt güncellendi — onaya gönderildi","ok","✓");
   cancelEdit();
  }else{
   let{error}=await sb.from("measurements").insert(base);
   if(error){delete base.altitude_m;delete base.photo_file;({error}=await sb.from("measurements").insert(base));}
-  if(error)return alert("Hata: "+error.message);
-  alert("✓ Kaydedildi · Karbon "+c.total_carbon.toFixed(1)+" kg · Onay bekliyor.");
+  if(error)return toast("Hata: "+error.message,"err");
+  toast("Kaydedildi — "+c.total_carbon.toFixed(1)+" kg karbon","ok","🌱");
  }
  $("mPoint").value='';$("mDbh").value='';$("mHeight").value='';$("mPhoto").value='';
  $("photoCheck").style.display="none";$("pointQueryResult").style.display="none";photoOk=false;manualPoint=false;
@@ -889,11 +962,11 @@ async function removePhoto(url){
 }
 
 async function uploadWpCsv(){
- const pid=+$("nProject").value;if(!pid)return alert("Proje seç");
- const f=$("nCsv").files[0];if(!f)return alert("CSV seç");
+ const pid=+$("nProject").value;if(!pid)return toast("Proje seç");
+ const f=$("nCsv").files[0];if(!f)return toast("CSV seç");
  const lines=(await f.text()).split(/\r?\n/);let n=0;
  for(let i=1;i<lines.length;i++){const c=lines[i].split(",");if(c.length<3)continue;const id=parseInt((c[2]||"").replace(/"/g,""));const lon=+c[0],lat=+c[1];if(!id||!lat||!lon)continue;await sb.from("waypoints").upsert({owner:USER.id,project_id:pid,wp_id:id,lat,lon},{onConflict:"project_id,wp_id"});n++;}
- alert("✓ "+n+" waypoint yüklendi ve projeye kalıcı kaydedildi.");
+ toast("✓ "+n+" waypoint yüklendi ve projeye kalıcı kaydedildi.");
  loadWaypoints();
 }
 async function loadWaypoints(){
@@ -910,12 +983,12 @@ async function loadWaypoints(){
 }
 async function deleteAllWaypoints(){
  const pid=+$("nProject").value;
- if(!pid)return alert("Proje seç");
+ if(!pid)return toast("Proje seç");
  if(!confirm("⚠ Bu projedeki TÜM waypoint'ler kalıcı olarak silinsin mi? Yanlış liste ise sonra yeniden yükleyebilirsiniz."))return;
  const{error}=await sb.from("waypoints").delete().eq("project_id",pid);
- if(error)return alert("Hata: "+error.message);
+ if(error)return toast("Hata: "+error.message,"err");
  navTarget=null;WP=[];
- alert("✓ Liste tamamen silindi. Yeni CSV yükleyebilirsiniz.");
+ toast("✓ Liste tamamen silindi. Yeni CSV yükleyebilirsiniz.");
  loadWaypoints();
 }
 async function selectWaypoint(id){
@@ -948,7 +1021,7 @@ function drawNav(){
  }
 }
 async function arriveWp(){
- if(!navTarget)return alert("Hedef yok");
+ if(!navTarget)return toast("Hedef yok");
  if(!manualPoint)$("mPoint").value=navTarget.wp_id;
  await sb.from("waypoints").update({visited:true}).eq("id",navTarget.id);
  await loadWaypoints();
@@ -1187,7 +1260,7 @@ async function loadStorageStats(){
  }catch(e){$("storeInfo").textContent="Depolama bilgisi alınamadı.";}
 }
 async function cleanOrphans(){
- if(!PROFILE||(PROFILE.role!=="admin"&&PROFILE.role!=="owner"))return alert("Yetki yok.");
+ if(!PROFILE||(PROFILE.role!=="admin"&&PROFILE.role!=="owner"))return toast("Yetki yok.");
  if(!confirm("Hiçbir kayda bağlı olmayan depolama dosyaları silinsin mi?"))return;
  const root=await sb.storage.from("dendro-photos").list("",{limit:100});
  const{data:meas}=await sb.from("measurements").select("photo_url");
@@ -1202,7 +1275,7 @@ async function cleanOrphans(){
   }
   if(orphans.length){await sb.storage.from("dendro-photos").remove(orphans);removed+=orphans.length;}
  }
- alert("✓ "+removed+" yetim dosya silindi.");
+ toast("✓ "+removed+" yetim dosya silindi.");
  loadStorageStats();
 }
 async function delMeas(id){
@@ -1303,12 +1376,12 @@ function filterUsers(){
  $("aUsersT").querySelectorAll("tr").forEach(r=>{r.style.display=r.textContent.toLowerCase().includes(q)?"":"none";});
 }
 async function updateRole(id,role){
- if(PROFILE.role!=="owner")return alert("🛡 Bu yetki yalnızca kurucuya aittir.");
+ if(PROFILE.role!=="owner")return toast("🛡 Bu yetki yalnızca kurucuya aittir.");
  const{error}=await sb.from("profiles").update({role}).eq("id",id);
- if(error)alert("Hata: "+error.message);loadUsers();
+if(error){toast("Hata: "+error.message,"err");return;}loadUsers();
 }
 async function toggleU(id,act){
- if(PROFILE.role!=="owner")return alert("🛡 Bu yetki yalnızca kurucuya aittir.");
+ if(PROFILE.role!=="owner")return toast("🛡 Bu yetki yalnızca kurucuya aittir.");
  await sb.from("profiles").update({active:act}).eq("id",id);loadUsers();
 }
 
@@ -1342,7 +1415,7 @@ async function loadParkCompare(){
 function parkReport(){
  const name=$("repProject").value;
  const rows=PARK_DATA.filter(r=>(r.projects?.name||"—")===name);
- if(!rows.length)return alert("Bu park için onaylı kayıt yok.");
+ if(!rows.length)return toast("Bu park için onaylı kayıt yok.");
  const n=rows.length;
  const c=rows.reduce((a,r)=>a+(r.carbon_kg||0),0);
  const dbh=(rows.reduce((a,r)=>a+(r.dbh_cm||0),0)/n).toFixed(1);
@@ -1368,6 +1441,61 @@ function parkReport(){
  $("pvBody").innerHTML=html;
  $("pvDownload").onclick=()=>dl(csv,name.replace(/\s+/g,"_")+"_rapor.csv");
  $("previewModal").classList.add("on");
+}
+/* Click-to-zoom */
+function zoomToCountry(country){
+ const m=worldMapL||worldMap;if(!m)return;
+ if(m._cluster)m.fitBounds(m._cluster.getBounds().extend(getCountryBounds(country)),{maxZoom:7,padding:[30,30]});
+ else toast(country+" seçildi","info","🌍");
+}
+function zoomToCity(city){
+ const m=worldMapL||worldMap;if(!m)return;
+ if(m._cluster){
+  const pts=[];
+  m._cluster.eachLayer(l=>{if(l._latlng)pts.push(l._latlng);});
+  toast(city+" haritada","info","🏙");
+ }
+}
+function getCountryBounds(c){return[[20,10],[55,60]];}
+
+async function saveOfflineMeasurement(data){
+ const db=await openOfflineDB();
+ const tx=db.transaction('measurements','readwrite');
+ const store=tx.objectStore('measurements');
+ 
+ const session=await sb.auth.getSession();
+ const token=session.data.session?.access_token||'';
+ 
+ store.add({
+  data:data,
+  apiKey:SB_KEY,
+  token:token,
+  timestamp:Date.now()
+ });
+ 
+ return new Promise((resolve,reject)=>{
+  tx.oncomplete=()=>{
+   if('serviceWorker' in navigator&&navigator.serviceWorker.controller){
+    navigator.serviceWorker.controller.postMessage({type:'SYNC'});
+   }
+   resolve();
+  };
+  tx.onerror=e=>reject(e.target.error);
+ });
+}
+
+function openOfflineDB(){
+ return new Promise((resolve,reject)=>{
+  const req=indexedDB.open('DendroGeoOffline',1);
+  req.onupgradeneeded=e=>{
+   const db=e.target.result;
+   if(!db.objectStoreNames.contains('measurements')){
+    db.createObjectStore('measurements',{keyPath:'id',autoIncrement:true});
+   }
+  };
+  req.onsuccess=e=>resolve(e.target.result);
+  req.onerror=e=>reject(e.target.error);
+ });
 }
 
 boot();
