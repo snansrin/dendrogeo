@@ -251,13 +251,13 @@ tr.done td{opacity:.55}tr.done td b{text-decoration:line-through}
 .cols,.cols-3,.footer-cols{grid-template-columns:1fr}
 }
 /* === HERO SAHNE — Tek seferlik öğrenci animasyonu === */
-.hero-art{position:absolute;left:0;top:-80px;width:100%;z-index:0;pointer-events:none;overflow:visible}
+.hero-art{position:absolute;right:40px;top:120px;width:600px;z-index:0;pointer-events:none;overflow:visible}}
 .hero-art svg{width:100%;height:auto;display:block;overflow:visible}
 .walkerA,.walkerB{will-change:transform}
 .walkerA{animation:visitA 12s ease-in-out 1 both}
 .walkerB{animation:visitB 12s ease-in-out 1 both}
-@keyframes visitA{0%{transform:translateX(-350px);opacity:0}5%{opacity:1}18%{transform:translateX(50px)}55%{transform:translateX(50px)}78%{transform:translateX(500px);opacity:1}100%{transform:translateX(600px);opacity:0}}
-@keyframes visitB{0%{transform:translateX(-400px);opacity:0}5%{opacity:1}18%{transform:translateX(0px)}55%{transform:translateX(0px)}78%{transform:translateX(450px);opacity:1}100%{transform:translateX(550px);opacity:0}}
+@keyframes visitA{0%{transform:translateX(-300px);opacity:0}5%{opacity:1}18%{transform:translateX(150px)}55%{transform:translateX(150px)}78%{transform:translateX(600px);opacity:1}100%{transform:translateX(700px);opacity:0}}
+@keyframes visitB{0%{transform:translateX(-350px);opacity:0}5%{opacity:1}18%{transform:translateX(100px)}55%{transform:translateX(100px)}78%{transform:translateX(550px);opacity:1}100%{transform:translateX(650px);opacity:0}}
 .legA,.legB,.legC,.legD{transform-box:fill-box;transform-origin:50% 0}
 .legA{animation:stepA 12s linear 1 both}
 .legB{animation:stepB 12s linear 1 both}
@@ -277,9 +277,9 @@ tr.done td{opacity:.55}tr.done td b{text-decoration:line-through}
 @keyframes flash{0%,38%,48%,100%{opacity:0}42%,46%{opacity:1}}
 .tail{transform-box:fill-box;transform-origin:0 0;animation:tailsw 2.4s ease-in-out 3}
 .chip{top:auto;bottom:auto}
-.chip.c1{top:45%;left:50%}
-.chip.c2{top:22%;left:65%}
-.chip.c3{top:60%;left:58%}
+.chip.c1{top:50%;left:75%}
+.chip.c2{top:30%;left:85%}
+.chip.c3{top:70%;left:80%}
 @media(max-width:960px){.hero-art{display:none}}
 </style>
 </head>
@@ -304,10 +304,10 @@ tr.done td{opacity:.55}tr.done td b{text-decoration:line-through}
    </div>
   </div>
   <div class="hero-art" aria-hidden="true">
-   <svg viewBox="-200 0 900 300" fill="none">
-    <path d="M-200 228 Q100 222 300 226 T700 226" stroke="#9cc39c" stroke-width="3" stroke-linecap="round"/>
-    <path d="M-180 236 C100 232 300 238 680 234" stroke="#e6e3d9" stroke-width="4" stroke-linecap="round" stroke-dasharray=".5 11"/>
-      <g transform="translate(100,0)">
+    <svg viewBox="0 0 800 300" fill="none">
+    <path d="M0 228 Q200 222 400 226 T800 226" stroke="#9cc39c" stroke-width="3" stroke-linecap="round"/>
+    <path d="M20 236 C200 232 400 238 780 234" stroke="#e6e3d9" stroke-width="4" stroke-linecap="round" stroke-dasharray=".5 11"/>
+      <g transform="translate(500,0)">
      <ellipse cx="345" cy="230" rx="42" ry="6" fill="#182420" opacity=".08"/>
      <path d="M338 230 C337 196 340 160 342 122 L351 122 C353 160 355 196 355 230 Z" fill="#8a5a3b"/>
      <path d="M342 134 C334 122 328 116 320 110" stroke="#8a5a3b" stroke-width="4" stroke-linecap="round"/>
