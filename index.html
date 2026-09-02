@@ -264,9 +264,15 @@ tr.done td{opacity:.55}tr.done td b{text-decoration:line-through}
 @keyframes stepA{0%,20%,55%,80%,100%{transform:rotate(0)}4%{transform:rotate(22deg)}8%{transform:rotate(-20deg)}12%{transform:rotate(22deg)}16%{transform:rotate(-16deg)}59%{transform:rotate(22deg)}63%{transform:rotate(-20deg)}67%{transform:rotate(22deg)}71%{transform:rotate(-16deg)}77%{transform:rotate(10deg)}}
 @keyframes stepB{0%,20%,55%,80%,100%{transform:rotate(0)}4%{transform:rotate(-22deg)}8%{transform:rotate(20deg)}12%{transform:rotate(-22deg)}16%{transform:rotate(16deg)}59%{transform:rotate(-22deg)}63%{transform:rotate(20deg)}67%{transform:rotate(-22deg)}71%{transform:rotate(16deg)}77%{transform:rotate(-10deg)}}
 .bendA{transform-box:fill-box;transform-origin:50% 100%;animation:bend 12s ease-in-out 1 both}
-@keyframes bend{0%,22%,52%,100%{transform:rotate(0)}28%,46%{transform:rotate(-18deg)}}
-.penA{transform-box:fill-box;transform-origin:0 0;animation:write 12s linear 1 both}
-@keyframes write{0%,26%,50%,100%{transform:rotate(0)}30%{transform:rotate(12deg)}34%{transform:rotate(-8deg)}38%{transform:rotate(10deg)}42%{transform:rotate(-6deg)}46%{transform:rotate(4deg)}}
+@keyframes bend{0%,22%,52%,100%{transform:rotate(0)}28%,46%{transform:rotate(-12deg)}}
+.penA{transform-box:fill-box;transform-origin:0% 50%;animation:reach 12s ease-in-out 1 both}
+@keyframes reach{
+  0%,24%,50%,100%{transform:rotate(0) translateX(0)}
+  28%{transform:rotate(-15deg) translateX(35px)}
+  34%{transform:rotate(-10deg) translateX(40px)}
+  40%{transform:rotate(-12deg) translateX(38px)}
+  46%{transform:rotate(-10deg) translateX(40px)}
+}
 .sightwin{animation:sightWin 12s linear 1 both, dashmove 2s linear 4}
 @keyframes sightWin{0%,22%,52%,100%{opacity:0}26%,48%{opacity:1}}
 .tapewin{animation:tapeWin 12s linear 1 both, dashmove 2s linear 4}
@@ -320,44 +326,64 @@ tr.done td{opacity:.55}tr.done td b{text-decoration:line-through}
     <ellipse class="tapewin" cx="671" cy="176" rx="24" ry="8" stroke="#c77d2e" stroke-width="2.5" stroke-dasharray="5 4"/>
     <line class="sightwin" x1="500" y1="182" x2="676" y2="96" stroke="#c77d2e" stroke-width="2.5" stroke-dasharray="7 6"/>
     <g class="walkerA">
-     <ellipse cx="590" cy="231" rx="15" ry="3.5" fill="#182420" opacity=".08"/>
-     <rect x="582" y="224" width="11" height="6" rx="3" fill="#fff" stroke="#e6e3d9"/>
-     <rect x="593" y="224" width="11" height="6" rx="3" fill="#fff" stroke="#e6e3d9"/>
-     <rect class="legA" x="584" y="198" width="7" height="28" rx="3.5" fill="#3b5a7a"/>
-     <rect class="legB" x="594" y="198" width="7" height="28" rx="3.5" fill="#3b5a7a"/>
-     <g class="bendA">
-      <rect x="573" y="170" width="9" height="26" rx="4" fill="#1e6f4b"/>
-      <rect x="578" y="168" width="21" height="34" rx="9" fill="#c77d2e"/>
-      <rect x="580" y="174" width="17" height="22" rx="2" fill="#fff" stroke="#c77d2e"/>
-      <path d="M583 178 h11 M583 181 h9" stroke="#9cc39c" stroke-width="1.2"/>
-      <g class="penA"><path d="M586 190 L592 196" stroke="#c77d2e" stroke-width="2" stroke-linecap="round"/></g>
-      <rect x="596" y="172" width="52" height="6" rx="3" fill="#f2c19a"/>
-      <circle cx="648" cy="175" r="3.5" fill="#f2c19a"/>
-      <circle cx="589" cy="158" r="9" fill="#f2c19a"/>
-      <path d="M580 156 a9 9 0 0 1 18 0 z" fill="#4a2f1d"/>
-      <circle cx="585" cy="158" r="1.2" fill="#182420"/><circle cx="593" cy="158" r="1.2" fill="#182420"/>
-      <path d="M585 162 q3 2.5 6 0" stroke="#182420" stroke-width="1.4" stroke-linecap="round"/>
+     <ellipse cx="590" cy="231" rx="18" ry="4" fill="#182420" opacity=".08"/>
+     <g class="legB" style="transform-origin:584px 200px">
+      <path d="M584,200 L584,216" stroke="#2c3e50" stroke-width="8" stroke-linecap="round"/>
+      <path d="M584,216 L582,228" stroke="#2c3e50" stroke-width="7" stroke-linecap="round"/>
+      <ellipse cx="582" cy="229" rx="6" ry="3" fill="#1a252f"/>
+     </g>
+     <g class="legA" style="transform-origin:596px 200px">
+      <path d="M596,200 L596,216" stroke="#2c3e50" stroke-width="8" stroke-linecap="round"/>
+      <path d="M596,216 L598,228" stroke="#2c3e50" stroke-width="7" stroke-linecap="round"/>
+      <ellipse cx="598" cy="229" rx="6" ry="3" fill="#1a252f"/>
+     </g>
+     <g class="bendA" style="transform-origin:590px 200px">
+      <path d="M580,172 L570,190 L575,208" stroke="#f2c19a" stroke-width="6" stroke-linecap="round" fill="none"/>
+      <rect x="565" y="200" width="20" height="14" rx="2" fill="#fff" stroke="#c77d2e" stroke-width="1"/>
+      <path d="M568,204 h14 M568,208 h12" stroke="#9cc39c" stroke-width="1"/>
+      <path d="M590,168 L590,172" stroke="#f2c19a" stroke-width="5"/>
+      <path d="M580,172 L600,172 L602,200 L578,200 Z" fill="#c77d2e"/>
+      <path d="M585,172 L590,176 L595,172" stroke="#a0621f" stroke-width="1" fill="none"/>
+      <path d="M600,172 L615,180" stroke="#f2c19a" stroke-width="6" stroke-linecap="round"/>
+      <g class="penA" style="transform-origin:615px 180px">
+       <path d="M615,180 L640,176" stroke="#f2c19a" stroke-width="5" stroke-linecap="round"/>
+       <circle cx="640" cy="176" r="4" fill="#f2c19a"/>
+      </g>
+      <circle cx="590" cy="158" r="10" fill="#f2c19a"/>
+      <path d="M581,155 Q581,148 590,147 Q599,148 599,155" fill="#4a2f1d"/>
+      <circle cx="587" cy="158" r="1.3" fill="#182420"/>
+      <circle cx="593" cy="158" r="1.3" fill="#182420"/>
+      <path d="M587,162 q3 2 6 0" stroke="#182420" stroke-width="1.2" stroke-linecap="round" fill="none"/>
      </g>
     </g>
     <g class="walkerB">
-     <ellipse cx="520" cy="231" rx="15" ry="3.5" fill="#182420" opacity=".08"/>
-     <rect x="512" y="224" width="11" height="6" rx="3" fill="#fff" stroke="#e6e3d9"/>
-     <rect x="523" y="224" width="11" height="6" rx="3" fill="#fff" stroke="#e6e3d9"/>
-     <rect class="legC" x="514" y="202" width="6" height="24" rx="3" fill="#14532d"/>
-     <rect class="legD" x="524" y="202" width="6" height="24" rx="3" fill="#14532d"/>
-     <rect x="509" y="166" width="24" height="40" rx="10" fill="#1e6f4b"/>
-     <path d="M521 168 v36" stroke="#9fd0ae" stroke-width="2" opacity=".8"/>
-     <rect x="497" y="172" width="10" height="18" rx="3" fill="#e8b98a"/>
-     <rect x="485" y="186" width="20" height="14" rx="2.5" fill="#182420"/>
-     <rect x="488" y="189" width="14" height="8" rx="1" fill="#eaf3ec"/>
-     <rect x="490" y="193" width="2" height="3" fill="#1e6f4b"/><rect x="493" y="191" width="2" height="5" fill="#c77d2e"/>
-     <circle class="flash" cx="495" cy="186" r="4" fill="#fff"/>
-     <circle cx="521" cy="156" r="9" fill="#e8b98a"/>
-     <path d="M512 154 a9 9 0 0 1 18 0 z" fill="#6d452c"/>
-     <g class="tail"><circle cx="530" cy="151" r="5" fill="#6d452c"/><path d="M532 154 q8 6 5 18" stroke="#6d452c" stroke-width="4" stroke-linecap="round"/></g>
-     <circle cx="530" cy="146" r="3" fill="#c2452d"/>
-     <circle cx="518" cy="156" r="1.2" fill="#182420"/><circle cx="524" cy="156" r="1.2" fill="#182420"/>
-     <path d="M518 160 q3 2.5 6 0" stroke="#182420" stroke-width="1.4" stroke-linecap="round"/>
+     <ellipse cx="520" cy="231" rx="18" ry="4" fill="#182420" opacity=".08"/>
+     <g class="legD" style="transform-origin:514px 200px">
+      <path d="M514,200 L514,216" stroke="#14532d" stroke-width="8" stroke-linecap="round"/>
+      <path d="M514,216 L513,228" stroke="#14532d" stroke-width="7" stroke-linecap="round"/>
+      <ellipse cx="513" cy="229" rx="6" ry="3" fill="#0d2818"/>
+     </g>
+     <g class="legC" style="transform-origin:526px 200px">
+      <path d="M526,200 L526,216" stroke="#14532d" stroke-width="8" stroke-linecap="round"/>
+      <path d="M526,216 L527,228" stroke="#14532d" stroke-width="7" stroke-linecap="round"/>
+      <ellipse cx="527" cy="229" rx="6" ry="3" fill="#0d2818"/>
+     </g>
+     <path d="M512,172 L505,190 L508,205" stroke="#e8b98a" stroke-width="6" stroke-linecap="round" fill="none"/>
+     <path d="M520,168 L520,172" stroke="#e8b98a" stroke-width="5"/>
+     <path d="M512,172 L528,172 L530,200 L510,200 Z" fill="#1e6f4b"/>
+     <path d="M520,172 v28" stroke="#9fd0ae" stroke-width="2" opacity=".8"/>
+     <path d="M528,172 L548,162 L570,172" stroke="#e8b98a" stroke-width="6" stroke-linecap="round" fill="none"/>
+     <rect x="568" y="168" width="18" height="10" rx="2" fill="#182420"/>
+     <rect x="570" y="170" width="14" height="6" rx="1" fill="#eaf3ec"/>
+     <rect x="572" y="172" width="2" height="2" fill="#1e6f4b"/>
+     <rect x="575" y="171" width="2" height="3" fill="#c77d2e"/>
+     <circle cx="520" cy="158" r="10" fill="#e8b98a"/>
+     <g class="tail">
+      <path d="M512,155 Q510,148 520,147 Q530,148 528,155 L532,170 Q528,172 526,175 Q524,172 522,170 Z" fill="#6d452c"/>
+     </g>
+     <circle cx="517" cy="158" r="1.3" fill="#182420"/>
+     <circle cx="523" cy="158" r="1.3" fill="#182420"/>
+     <path d="M517,162 q3 2 6 0" stroke="#182420" stroke-width="1.2" stroke-linecap="round" fill="none"/>
     </g>
    </svg>
    <div class="chip c1"><span style="color:var(--amber)">●</span> DBH 42 cm</div>
