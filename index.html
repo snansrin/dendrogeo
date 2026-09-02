@@ -256,8 +256,8 @@ tr.done td{opacity:.55}tr.done td b{text-decoration:line-through}
 .walkerA,.walkerB{will-change:transform}
 .walkerA{animation:visitA 12s ease-in-out 1 both}
 .walkerB{animation:visitB 12s ease-in-out 1 both}
-@keyframes visitA{0%{transform:translateX(-350px);opacity:0}5%{opacity:1}18%{transform:translateX(-50px)}55%{transform:translateX(-50px)}78%{transform:translateX(400px);opacity:1}100%{transform:translateX(500px);opacity:0}}
-@keyframes visitB{0%{transform:translateX(-400px);opacity:0}5%{opacity:1}18%{transform:translateX(-100px)}55%{transform:translateX(-100px)}78%{transform:translateX(350px);opacity:1}100%{transform:translateX(450px);opacity:0}}
+@keyframes visitA{0%{transform:translateX(-350px);opacity:0}5%{opacity:1}18%{transform:translateX(50px)}55%{transform:translateX(50px)}78%{transform:translateX(500px);opacity:1}100%{transform:translateX(600px);opacity:0}}
+@keyframes visitB{0%{transform:translateX(-400px);opacity:0}5%{opacity:1}18%{transform:translateX(0px)}55%{transform:translateX(0px)}78%{transform:translateX(450px);opacity:1}100%{transform:translateX(550px);opacity:0}}
 .legA,.legB,.legC,.legD{transform-box:fill-box;transform-origin:50% 0}
 .legA{animation:stepA 12s linear 1 both}
 .legB{animation:stepB 12s linear 1 both}
@@ -277,9 +277,9 @@ tr.done td{opacity:.55}tr.done td b{text-decoration:line-through}
 @keyframes flash{0%,38%,48%,100%{opacity:0}42%,46%{opacity:1}}
 .tail{transform-box:fill-box;transform-origin:0 0;animation:tailsw 2.4s ease-in-out 3}
 .chip{top:auto;bottom:auto}
-.chip.c1{top:45%;left:38%}
-.chip.c2{top:22%;left:52%}
-.chip.c3{top:60%;left:45%}
+.chip.c1{top:45%;left:50%}
+.chip.c2{top:22%;left:65%}
+.chip.c3{top:60%;left:58%}
 @media(max-width:960px){.hero-art{display:none}}
 </style>
 </head>
@@ -304,10 +304,10 @@ tr.done td{opacity:.55}tr.done td b{text-decoration:line-through}
    </div>
   </div>
   <div class="hero-art" aria-hidden="true">
-   <svg viewBox="-200 0 840 300" fill="none">
-    <path d="M-200 228 Q100 222 300 226 T640 226" stroke="#9cc39c" stroke-width="3" stroke-linecap="round"/>
-    <path d="M-180 236 C100 232 300 238 620 234" stroke="#e6e3d9" stroke-width="4" stroke-linecap="round" stroke-dasharray=".5 11"/>
-      <g transform="translate(80,0)">
+   <svg viewBox="-200 0 900 300" fill="none">
+    <path d="M-200 228 Q100 222 300 226 T700 226" stroke="#9cc39c" stroke-width="3" stroke-linecap="round"/>
+    <path d="M-180 236 C100 232 300 238 680 234" stroke="#e6e3d9" stroke-width="4" stroke-linecap="round" stroke-dasharray=".5 11"/>
+      <g transform="translate(100,0)">
      <ellipse cx="345" cy="230" rx="42" ry="6" fill="#182420" opacity=".08"/>
      <path d="M338 230 C337 196 340 160 342 122 L351 122 C353 160 355 196 355 230 Z" fill="#8a5a3b"/>
      <path d="M342 134 C334 122 328 116 320 110" stroke="#8a5a3b" stroke-width="4" stroke-linecap="round"/>
@@ -320,8 +320,9 @@ tr.done td{opacity:.55}tr.done td b{text-decoration:line-through}
       <circle cx="335" cy="86" r="11" fill="#3aa76d" opacity=".5"/>
       <circle cx="361" cy="106" r="4" fill="#9fd0ae"/><circle cx="331" cy="114" r="3.5" fill="#9fd0ae"/>
      </g>
+     <ellipse class="tapewin" cx="346" cy="176" rx="11" ry="4" stroke="#c77d2e" stroke-width="2.5" stroke-dasharray="5 4"/>
+     <line class="sightwin" x1="262" y1="180" x2="365" y2="96" stroke="#c77d2e" stroke-width="2.5" stroke-dasharray="7 6"/>
     </g>
-    <ellipse class="tapewin" cx="346" cy="176" rx="11" ry="4" stroke="#c77d2e" stroke-width="2.5" stroke-dasharray="5 4"/>
     <g class="walkerA">
      <ellipse cx="306" cy="231" rx="15" ry="3.5" fill="#182420" opacity=".08"/>
      <rect x="298" y="224" width="11" height="6" rx="3" fill="#fff" stroke="#e6e3d9"/>
@@ -342,8 +343,7 @@ tr.done td{opacity:.55}tr.done td b{text-decoration:line-through}
       <path d="M302 162 q3 2.5 6 0" stroke="#182420" stroke-width="1.4" stroke-linecap="round"/>
      </g>
     </g>
-    <g class="walkerB">
-     <line class="sightwin" x1="262" y1="180" x2="365" y2="96" stroke="#c77d2e" stroke-width="2.5" stroke-dasharray="7 6"/>
+     <g class="walkerB">
      <ellipse cx="252" cy="231" rx="15" ry="3.5" fill="#182420" opacity=".08"/>
      <rect x="244" y="224" width="11" height="6" rx="3" fill="#fff" stroke="#e6e3d9"/>
      <rect x="255" y="224" width="11" height="6" rx="3" fill="#fff" stroke="#e6e3d9"/>
