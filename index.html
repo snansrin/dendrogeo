@@ -903,7 +903,7 @@ function fullRow(r){
  const d=new Date(r.created_at);
  const pf=r.photo_file||(r.photo_url?("P"+String(r.point_id).padStart(3,"0")+"_M"+(r.measurement_no||1)+".JPG"):"");
  const q=v=>`"${(v||"").toString().replace(/"/g,'""')}"`;
- return [r.point_id,r.measurement_no||1,d.toLocaleDateString("tr-TR"),d.toLocaleTimeString("tr-TR"),r.lat,r.lon,(r.altitude_m??""),(r.altitude_m??""),(r.satellites??""),(r.hdop??""),(r.accuracy_m??""),slope,q(r.grp),q(r.species),q(LATIN[r.species]||""),(Math.PI*(r.dbh_cm||0)).toFixed(2),r.dbh_cm,r.height_m,area.toFixed(4),hArea.toFixed(4),vol.toFixed(4),agb.toFixed(1),bhb.toFixed(1),bio.toFixed(1),(r.carbon_kg||bio*0.47).toFixed(2),(agb*0.47).toFixed(1),(bhb*0.47).toFixed(1),pf].join(",");
+return [r.point_id,r.measurement_no||1,d.toLocaleDateString("tr-TR"),d.toLocaleTimeString("tr-TR"),r.lat,r.lon,(r.altitude_m??""),(r.altitude_median_m??r.altitude_m??""),(r.satellites??""),(r.hdop??""),(r.accuracy_m??""),slope,q(r.grp),q(r.species),q(LATIN[r.species]||""),(Math.PI*(r.dbh_cm||0)).toFixed(2),r.dbh_cm,r.height_m,area.toFixed(4),hArea.toFixed(4),vol.toFixed(4),agb.toFixed(1),bhb.toFixed(1),bio.toFixed(1),(r.carbon_kg||bio*0.47).toFixed(2),(agb*0.47).toFixed(1),(bhb*0.47).toFixed(1),pf].join(",");
 }
 function fullCSV(rows){return "\uFEFF"+FULL_HEAD+"\n"+rows.map(fullRow).join("\n")+"\n";}
 
@@ -1298,7 +1298,6 @@ async function autoFillPointId(){
  if(manualPoint||EDIT_ID)return;
  const pid=+$("mProject").value;
  if(!pid||!GPS)return;
- if($("mPoint").value)return;
  const{data}=await sb.from("waypoints").select("*").eq("project_id",pid).eq("visited",false);
  if(!data||data.length===0)return;
  const nearest=data.sort((a,b)=>hav(GPS.latitude,GPS.longitude,a.lat,a.lon)-hav(GPS.latitude,GPS.longitude,b.lat,b.lon))[0];
@@ -1326,25 +1325,49 @@ async function saveMeas(){
  if(!pid||!pt||!sp||!d||!h)return toast("Tüm alanları doldur","err");
  if(!EDIT_ID&&!GPS)return toast("Önce 📡 Konumu Etkinleştir butonuna basın","err");
  if(d>500||h>100)return toast("Çap ≤500 cm, boy ≤100 m olmalı","err");
- const f=$("mPhoto").files[0];
- if(f&&!photoOk)return toast("Fotoğraf denetimi başarısız — uygun bir çekim yapın","err");
+const f=$("mPhoto").files[0];
+if(f){
+  if(!photoOk){
+    // checkPhoto çağrılmamış veya başarısız
+    const box=$("photoCheck");
+    if(box.style.display==="none"||!box.innerHTML){
+      return toast("Önce fotoğrafı kontrol edin — 'Fotoğraf denetleniyor' mesajını bekleyin","err");
+    }
+    return toast("Fotoğraf denetimi başarısız — uygun bir çekim yapın","err");
+  }
+}
  const c=calc(d,h,sp,grp);
- let photo=null,photoFile=null;
- if(f){
+let photo=null,photoFile=null;
+const base={owner:USER.id,project_id:pid,point_id:pt,measurement_no:+$("mNo").value||1,grp,species:sp,dbh_cm:d,height_m:h,volume_m3:c.vol,carbon_kg:c.total_carbon,slope_deg:0,shared:true,status:"Beklemede"};
+if(!EDIT_ID){base.lat=GPS.latitude;base.lon=GPS.longitude;base.country="Türkiye";base.city="Ankara";base.accuracy_m=GPS.accuracy;base.altitude_m=GPS.altitude;}
+
+// ✅ ÇEVRIMDIŞI KONTROLÜ ÖNCE (upload'tan önce)
+if(!navigator.onLine){
+  if(f){
+    base.photo_file="P"+String(pt).padStart(3,"0")+"_M"+(+$("mNo").value||1)+".JPG";
+    base._pending_photo=true;
+  }
+  await saveOfflineMeasurement(base);
+  toast('Çevrimdışı kaydedildi — internet gelince senkronize','info','📴');
+  $('mPoint').value='';$('mDbh').value='';$('mHeight').value='';
+  $('mPhoto').value='';$('photoCheck').style.display='none';
+  photoOk=false;manualPoint=false;
+  loadDash();loadRecords();
+  return;
+}
+
+// ✅ ONLINE İSE FOTOĞRAFI YÜKLE
+if(f){
   const comp=await compress(f);
   photoFile="P"+String(pt).padStart(3,"0")+"_M"+(+$("mNo").value||1)+".JPG";
   const path=USER.id+"/"+Date.now()+".jpg";
   const{error}=await sb.storage.from("dendro-photos").upload(path,comp,{contentType:"image/jpeg"});
-  if(!error)photo=sb.storage.from("dendro-photos").getPublicUrl(path).data.publicUrl;
- }
-const base={owner:USER.id,project_id:pid,point_id:pt,measurement_no:+$("mNo").value||1,grp,species:sp,dbh_cm:d,height_m:h,volume_m3:c.vol,carbon_kg:c.total_carbon,slope_deg:0,shared:true,status:"Beklemede"};
-if(!EDIT_ID){base.lat=GPS.latitude;base.lon=GPS.longitude;base.country="Türkiye";base.city="Ankara";base.accuracy_m=GPS.accuracy;base.altitude_m=GPS.altitude;}
-if(photo){base.photo_url=photo;base.photo_file=photoFile;}
-
-// 1. Form validate
-// 2. base objesini oluştur (lat/lon dahil)
-// 3. OFFLINE KONTROLÜ BURAYA GELMELİ (upload'tan önce)
-if(!navigator.onLine){
+  if(!error){
+    photo=sb.storage.from("dendro-photos").getPublicUrl(path).data.publicUrl;
+    base.photo_url=photo;
+    base.photo_file=photoFile;
+  }
+}
  await saveOfflineMeasurement(base);
  toast('Çevrimdışı kaydedildi — internet gelince senkronize','info','📴');
  $('mPoint').value='';$('mDbh').value='';$('mHeight').value='';
@@ -1398,9 +1421,48 @@ async function removePhoto(url){
 async function uploadWpCsv(){
  const pid=+$("nProject").value;if(!pid)return toast("Proje seç");
  const f=$("nCsv").files[0];if(!f)return toast("CSV seç");
- const lines=(await f.text()).split(/\r?\n/);let n=0;
- for(let i=1;i<lines.length;i++){const c=lines[i].split(",");if(c.length<3)continue;const id=parseInt((c[2]||"").replace(/"/g,""));const lon=+c[0],lat=+c[1];if(!id||!lat||!lon)continue;await sb.from("waypoints").upsert({owner:USER.id,project_id:pid,wp_id:id,lat,lon},{onConflict:"project_id,wp_id"});n++;}
- toast("✓ "+n+" waypoint yüklendi ve projeye kalıcı kaydedildi.");
+ const lines=(await f.text()).split(/\r?\n/);let n=0,skipped=0;
+ 
+ // Başlık satırını oku ve sütun indekslerini bul
+ const header=lines[0].split(",").map(h=>h.trim().toLowerCase().replace(/"/g,""));
+ const idIdx=header.findIndex(h=>h==="id"||h==="point_id"||h==="wp_id");
+ const latIdx=header.findIndex(h=>h==="lat"||h==="y"||h==="latitude");
+ const lonIdx=header.findIndex(h=>h==="lon"||h==="x"||h==="longitude");
+ 
+ if(idIdx===-1||latIdx===-1||lonIdx===-1){
+   toast("CSV formatı hatalı: id, lat, lon sütunları bulunamadı","err");
+   return;
+ }
+ 
+ for(let i=1;i<lines.length;i++){
+   const line=lines[i].trim();
+   if(!line)continue;
+   
+   // Basit CSV parsing (tırnak içinde virgül yoksa)
+   const c=line.split(",");
+   if(c.length<3)continue;
+   
+   const idStr=(c[idIdx]||"").replace(/"/g,"").trim();
+   const id=parseInt(idStr);
+   const lon=parseFloat(c[lonIdx]);
+   const lat=parseFloat(c[latIdx]);
+   
+   if(!id||isNaN(lat)||isNaN(lon)||lat===0||lon===0){
+     skipped++;
+     continue;
+   }
+   
+   await sb.from("waypoints").upsert({
+     owner:USER.id,
+     project_id:pid,
+     wp_id:id,
+     lat,
+     lon
+   },{onConflict:"project_id,wp_id"});
+   n++;
+ }
+ 
+ toast(`✓ ${n} waypoint yüklendi`+(skipped>0?`, ${skipped} satır atlandı`:""),"ok");
  loadWaypoints();
 }
 async function loadWaypoints(){
