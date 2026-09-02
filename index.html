@@ -62,7 +62,8 @@ td{padding:9px 10px;border-bottom:1px solid var(--line);font-family:"IBM Plex Mo
 .hero .kick{font-family:"IBM Plex Mono",monospace;font-size:11px;letter-spacing:.3em;color:var(--amber);text-transform:uppercase}
 .hero h1{font-family:Fraunces,serif;font-size:clamp(2.2rem,5vw,4rem);line-height:1.06;color:var(--green-dk);margin:16px 0;font-weight:600;max-width:20ch}
 .hero .lead{color:var(--mut);max-width:60ch;font-size:1.05rem}
-.hero-grid{display:grid;grid-template-columns:1.1fr .9fr;gap:36px;align-items:center}
+.hero-grid{display:grid;grid-template-columns:1fr;gap:36px;align-items:center;position:relative}
+.hero-copy{position:relative;z-index:2;max-width:640px}
 .canopy{animation:sway 7s ease-in-out infinite;transform-origin:347px 230px}
 @keyframes sway{0%,100%{transform:rotate(-1.2deg)}50%{transform:rotate(1.2deg)}}
 .tape{animation:dashmove 2.5s linear infinite}
@@ -244,35 +245,33 @@ tr.done td{opacity:.55}tr.done td b{text-decoration:line-through}
  .feature{padding:22px 18px}
  .feature h3{font-size:1.1rem}
 }
-/* === HERO SAHNE — Öğrenci animasyonu === */
-.hero-art{position:relative;margin-left:auto;max-width:430px;width:100%;animation:artIn 1s ease-out both}
-.hero-art svg{width:100%;height:auto;display:block;border-radius:18px;overflow:visible}
-@keyframes artIn{from{opacity:0;transform:translateX(-40px)}to{opacity:1;transform:translateX(0)}}
+/* === HERO SAHNE — Tek seferlik öğrenci animasyonu === */
+.hero-art{position:absolute;right:0;top:50%;transform:translateY(-50%);width:min(480px,55%);z-index:0;pointer-events:none;overflow:visible}
+.hero-art svg{width:100%;height:auto;display:block;overflow:visible}
 .walkerA,.walkerB{will-change:transform}
-.walkerA{animation:visitA 14s ease-in-out infinite}
-.walkerB{animation:visitB 14s ease-in-out infinite}
-@keyframes visitA{0%{transform:translateX(-140px)}18%{transform:translateX(0)}60%{transform:translateX(0)}82%,100%{transform:translateX(160px)}}
-@keyframes visitB{0%{transform:translateX(-220px)}18%{transform:translateX(0)}60%{transform:translateX(0)}82%,100%{transform:translateX(80px)}}
+.walkerA{animation:visitA 9s ease-in-out 1 both}
+.walkerB{animation:visitB 9s ease-in-out 1 both}
+@keyframes visitA{0%{transform:translateX(-200px);opacity:0}8%{opacity:1}22%{transform:translateX(0)}60%{transform:translateX(0)}85%{transform:translateX(180px);opacity:1}100%{transform:translateX(220px);opacity:0}}
+@keyframes visitB{0%{transform:translateX(-260px);opacity:0}8%{opacity:1}22%{transform:translateX(0)}60%{transform:translateX(0)}85%{transform:translateX(140px);opacity:1}100%{transform:translateX(180px);opacity:0}}
 .legA,.legB,.legC,.legD{transform-box:fill-box;transform-origin:50% 0}
-.legA{animation:stepA 14s linear infinite}
-.legB{animation:stepB 14s linear infinite}
-.legC{animation:stepB 14s linear infinite}
-.legD{animation:stepA 14s linear infinite}
-@keyframes stepA{0%,18%,60%,82%,100%{transform:rotate(0)}5%{transform:rotate(22deg)}9%{transform:rotate(-20deg)}13%{transform:rotate(22deg)}17%{transform:rotate(-14deg)}63%{transform:rotate(22deg)}67%{transform:rotate(-20deg)}71%{transform:rotate(22deg)}75%{transform:rotate(-14deg)}79%{transform:rotate(6deg)}}
-@keyframes stepB{0%,18%,60%,82%,100%{transform:rotate(0)}5%{transform:rotate(-22deg)}9%{transform:rotate(20deg)}13%{transform:rotate(-22deg)}17%{transform:rotate(14deg)}63%{transform:rotate(-22deg)}67%{transform:rotate(20deg)}71%{transform:rotate(-22deg)}75%{transform:rotate(14deg)}79%{transform:rotate(-6deg)}}
-.bendA{transform-box:fill-box;transform-origin:50% 100%;animation:bend 14s ease-in-out infinite}
-@keyframes bend{0%,32%,58%,100%{transform:rotate(0)}38%,52%{transform:rotate(-14deg)}}
-.penA{transform-box:fill-box;transform-origin:0 0;animation:write 14s linear infinite}
-@keyframes write{0%,50%,72%,100%{transform:rotate(0)}54%{transform:rotate(12deg)}58%{transform:rotate(-8deg)}62%{transform:rotate(10deg)}66%{transform:rotate(-6deg)}}
-.sightwin{animation:sightWin 14s linear infinite, dashmove 3s linear infinite}
-@keyframes sightWin{0%,22%,64%,100%{opacity:0}26%,58%{opacity:1}}
-.tapewin{animation:tapeWin 14s linear infinite, dashmove 2.5s linear infinite}
-@keyframes tapeWin{0%,36%,60%,100%{opacity:0}40%,56%{opacity:1}}
-.flash{animation:flash 14s linear infinite}
-@keyframes flash{0%,44%,52%,100%{opacity:0}46%,50%{opacity:1}}
-.tail{transform-box:fill-box;transform-origin:0 0;animation:tailsw 2.4s ease-in-out infinite}
-@keyframes tailsw{0%,100%{transform:rotate(-6deg)}50%{transform:rotate(8deg)}}
-@media(max-width:960px){.hero-art{display:none}.hero-grid{grid-template-columns:1fr !important}}
+.legA{animation:stepA 9s linear 1 both}
+.legB{animation:stepB 9s linear 1 both}
+.legC{animation:stepB 9s linear 1 both}
+.legD{animation:stepA 9s linear 1 both}
+@keyframes stepA{0%,22%,60%,85%,100%{transform:rotate(0)}4%{transform:rotate(20deg)}8%{transform:rotate(-18deg)}12%{transform:rotate(20deg)}16%{transform:rotate(-14deg)}20%{transform:rotate(6deg)}64%{transform:rotate(20deg)}68%{transform:rotate(-18deg)}72%{transform:rotate(20deg)}76%{transform:rotate(-14deg)}80%{transform:rotate(6deg)}}
+@keyframes stepB{0%,22%,60%,85%,100%{transform:rotate(0)}4%{transform:rotate(-20deg)}8%{transform:rotate(18deg)}12%{transform:rotate(-20deg)}16%{transform:rotate(14deg)}20%{transform:rotate(-6deg)}64%{transform:rotate(-20deg)}68%{transform:rotate(18deg)}72%{transform:rotate(-20deg)}76%{transform:rotate(14deg)}80%{transform:rotate(-6deg)}}
+.bendA{transform-box:fill-box;transform-origin:50% 100%;animation:bend 9s ease-in-out 1 both}
+@keyframes bend{0%,28%,55%,100%{transform:rotate(0)}34%,48%{transform:rotate(-14deg)}}
+.penA{transform-box:fill-box;transform-origin:0 0;animation:write 9s linear 1 both}
+@keyframes write{0%,46%,65%,100%{transform:rotate(0)}50%{transform:rotate(12deg)}54%{transform:rotate(-8deg)}58%{transform:rotate(10deg)}62%{transform:rotate(-6deg)}}
+.sightwin{animation:sightWin 9s linear 1 both, dashmove 2s linear 3}
+@keyframes sightWin{0%,24%,62%,100%{opacity:0}28%,56%{opacity:1}}
+.tapewin{animation:tapeWin 9s linear 1 both, dashmove 2s linear 3}
+@keyframes tapeWin{0%,32%,58%,100%{opacity:0}36%,52%{opacity:1}}
+.flash{animation:flash 9s linear 1 both}
+@keyframes flash{0%,40%,48%,100%{opacity:0}42%,46%{opacity:1}}
+.tail{transform-box:fill-box;transform-origin:0 0;animation:tailsw 2.4s ease-in-out 3}
+@media(max-width:960px){.hero-art{display:none}}
 </style>
 </head>
 <body>
@@ -283,9 +282,10 @@ tr.done td{opacity:.55}tr.done td b{text-decoration:line-through}
  <div class="links"><a href="#sistem">Sistem</a><a href="#yontem">Yöntem</a><a href="#veri">Veri & Harita</a><a href="#istatistik">İstatistik</a></div>
  <button class="btn sm" onclick="showAuth()">Giriş / Kayıt</button>
 </div></div>
+
 <div class="hero"><div class="wrap">
  <div class="hero-grid">
-  <div>
+  <div class="hero-copy">
    <div class="kick"><span class="live-dot"></span>SAHADAN VERİTABANINA · BİLİMSEL KARBON ENVANTERİ</div>
    <h1>Bir ağacın karbonunu<br>saniyeler içinde hesaplayın.</h1>
    <p class="lead">DendroGeo; sahadaki GPS ölçümünden küresel karbon haritasına uzanan <b>tek entegre bilimsel platformdur</b>. Çap ve boy ölçümünüzü alın, canlı fotoğraf denetiminden geçirin — Chave et al. (2014) allometrik formülleri biyokütle ve karbon stoğunu otomatik hesaplasın. Admin onayından sonra veriniz dünya haritasında yayında.</p>
@@ -293,16 +293,9 @@ tr.done td{opacity:.55}tr.done td b{text-decoration:line-through}
     <a href="#sistem" class="btn">🔬 Sistemi Keşfet</a>
     <button class="btn ghost" onclick="showAuth()">🌲 Hemen Başla</button>
    </div>
-   </div>
+  </div>
   <div class="hero-art" aria-hidden="true">
    <svg viewBox="0 0 440 300" fill="none">
-    <defs>
-     <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#eef6ee"/><stop offset="1" stop-color="#fbfaf7"/></linearGradient>
-    </defs>
-    <rect width="440" height="300" rx="18" fill="url(#sky)"/>
-    <circle cx="380" cy="46" r="22" fill="#f8efe2"/>
-    <circle cx="380" cy="46" r="13" fill="#c77d2e" opacity=".7"/>
-    <g class="cloud" fill="#fff" opacity=".85"><ellipse cx="90" cy="42" rx="22" ry="9"/><ellipse cx="72" cy="47" rx="14" ry="7"/><ellipse cx="108" cy="47" rx="14" ry="7"/></g>
     <path d="M0 228 Q110 222 220 226 T440 226" stroke="#9cc39c" stroke-width="3" stroke-linecap="round"/>
     <path d="M20 236 C120 232 260 238 420 234" stroke="#e6e3d9" stroke-width="4" stroke-linecap="round" stroke-dasharray=".5 11"/>
     <ellipse cx="345" cy="230" rx="42" ry="6" fill="#182420" opacity=".08"/>
@@ -365,7 +358,7 @@ tr.done td{opacity:.55}tr.done td b{text-decoration:line-through}
   </div>
  </div>
  <div class="statband">
-  <div><div class="val" id="stRec">—</div><div class="lbl">Toplam Kayıt</div></div>
+ <div><div class="val" id="stRec">—</div><div class="lbl">Toplam Kayıt</div></div>
   <div><div class="val" id="stCountry">—</div><div class="lbl">Ülke</div></div>
   <div><div class="val" id="stCity">—</div><div class="lbl">Şehir</div></div>
   <div><div class="val" id="stCarbon">—</div><div class="lbl">Karbon (t)</div></div>
