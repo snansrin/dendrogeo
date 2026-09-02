@@ -1,4 +1,3 @@
-@@ -1,1944 +1,1942 @@
 <!doctype html>
 <html lang="tr">
 <head>
@@ -257,8 +256,6 @@ tr.done td{opacity:.55}tr.done td b{text-decoration:line-through}
 .walkerA,.walkerB{will-change:transform}
 .walkerA{animation:visitA 12s ease-in-out 1 both}
 .walkerB{animation:visitB 12s ease-in-out 1 both}
-@keyframes visitA{0%{transform:translateX(-350px);opacity:0}5%{opacity:1}18%{transform:translateX(50px)}55%{transform:translateX(50px)}78%{transform:translateX(500px);opacity:1}100%{transform:translateX(600px);opacity:0}}
-@keyframes visitB{0%{transform:translateX(-400px);opacity:0}5%{opacity:1}18%{transform:translateX(0px)}55%{transform:translateX(0px)}78%{transform:translateX(450px);opacity:1}100%{transform:translateX(550px);opacity:0}}
 @keyframes visitA{0%{transform:translateX(-600px);opacity:0}6%{opacity:1}20%{transform:translateX(0)}55%{transform:translateX(0)}80%{transform:translateX(300px);opacity:1}100%{transform:translateX(360px);opacity:0}}
 @keyframes visitB{0%{transform:translateX(-600px);opacity:0}6%{opacity:1}20%{transform:translateX(0)}55%{transform:translateX(0)}80%{transform:translateX(300px);opacity:1}100%{transform:translateX(360px);opacity:0}}
 .legA,.legB,.legC,.legD{transform-box:fill-box;transform-origin:50% 0}
@@ -266,28 +263,20 @@ tr.done td{opacity:.55}tr.done td b{text-decoration:line-through}
 .legB{animation:stepB 12s linear 1 both}
 .legC{animation:stepB 12s linear 1 both}
 .legD{animation:stepA 12s linear 1 both}
-@keyframes stepA{0%,18%,55%,78%,100%{transform:rotate(0)}3%{transform:rotate(22deg)}7%{transform:rotate(-20deg)}11%{transform:rotate(22deg)}15%{transform:rotate(-16deg)}59%{transform:rotate(22deg)}63%{transform:rotate(-20deg)}67%{transform:rotate(22deg)}71%{transform:rotate(-16deg)}75%{transform:rotate(6deg)}}
-@keyframes stepB{0%,18%,55%,78%,100%{transform:rotate(0)}3%{transform:rotate(-22deg)}7%{transform:rotate(20deg)}11%{transform:rotate(-22deg)}15%{transform:rotate(16deg)}59%{transform:rotate(-22deg)}63%{transform:rotate(20deg)}67%{transform:rotate(-22deg)}71%{transform:rotate(16deg)}75%{transform:rotate(-6deg)}}
 @keyframes stepA{0%,20%,55%,80%,100%{transform:rotate(0)}4%{transform:rotate(22deg)}8%{transform:rotate(-20deg)}12%{transform:rotate(22deg)}16%{transform:rotate(-16deg)}59%{transform:rotate(22deg)}63%{transform:rotate(-20deg)}67%{transform:rotate(22deg)}71%{transform:rotate(-16deg)}77%{transform:rotate(10deg)}}
 @keyframes stepB{0%,20%,55%,80%,100%{transform:rotate(0)}4%{transform:rotate(-22deg)}8%{transform:rotate(20deg)}12%{transform:rotate(-22deg)}16%{transform:rotate(16deg)}59%{transform:rotate(-22deg)}63%{transform:rotate(20deg)}67%{transform:rotate(-22deg)}71%{transform:rotate(16deg)}77%{transform:rotate(-10deg)}}
 .bendA{transform-box:fill-box;transform-origin:50% 100%;animation:bend 12s ease-in-out 1 both}
 @keyframes bend{0%,22%,52%,100%{transform:rotate(0)}28%,46%{transform:rotate(-18deg)}}
 .penA{transform-box:fill-box;transform-origin:0 0;animation:write 12s linear 1 both}
-@keyframes write{0%,28%,50%,100%{transform:rotate(0)}32%{transform:rotate(12deg)}36%{transform:rotate(-8deg)}40%{transform:rotate(10deg)}44%{transform:rotate(-6deg)}48%{transform:rotate(4deg)}}
 @keyframes write{0%,26%,50%,100%{transform:rotate(0)}30%{transform:rotate(12deg)}34%{transform:rotate(-8deg)}38%{transform:rotate(10deg)}42%{transform:rotate(-6deg)}46%{transform:rotate(4deg)}}
 .sightwin{animation:sightWin 12s linear 1 both, dashmove 2s linear 4}
 @keyframes sightWin{0%,22%,52%,100%{opacity:0}26%,48%{opacity:1}}
 .tapewin{animation:tapeWin 12s linear 1 both, dashmove 2s linear 4}
-@keyframes tapeWin{0%,26%,50%,100%{opacity:0}30%,46%{opacity:1}}
 @keyframes tapeWin{0%,24%,50%,100%{opacity:0}28%,46%{opacity:1}}
 .flash{animation:flash 12s linear 1 both}
-@keyframes flash{0%,38%,48%,100%{opacity:0}42%,46%{opacity:1}}
 @keyframes flash{0%,36%,44%,100%{opacity:0}38%,42%{opacity:1}}
 .tail{transform-box:fill-box;transform-origin:0 0;animation:tailsw 2.4s ease-in-out 3}
 .chip{top:auto;bottom:auto}
-.chip.c1{top:45%;left:50%}
-.chip.c2{top:22%;left:65%}
-.chip.c3{top:60%;left:58%}
 .chip.c1{top:46%;left:72%}
 .chip.c2{top:22%;left:84%}
 .chip.c3{top:60%;left:78%}
@@ -314,25 +303,6 @@ tr.done td{opacity:.55}tr.done td b{text-decoration:line-through}
     <button class="btn ghost" onclick="showAuth()">🌲 Hemen Başla</button>
    </div>
   </div>
-  <div class="hero-art" aria-hidden="true">
-   <svg viewBox="-200 0 900 300" fill="none">
-    <path d="M-200 228 Q100 222 300 226 T700 226" stroke="#9cc39c" stroke-width="3" stroke-linecap="round"/>
-    <path d="M-180 236 C100 232 300 238 680 234" stroke="#e6e3d9" stroke-width="4" stroke-linecap="round" stroke-dasharray=".5 11"/>
-      <g transform="translate(100,0)">
-     <ellipse cx="345" cy="230" rx="42" ry="6" fill="#182420" opacity=".08"/>
-     <path d="M338 230 C337 196 340 160 342 122 L351 122 C353 160 355 196 355 230 Z" fill="#8a5a3b"/>
-     <path d="M342 134 C334 122 328 116 320 110" stroke="#8a5a3b" stroke-width="4" stroke-linecap="round"/>
-     <path d="M351 134 C359 122 365 116 373 110" stroke="#8a5a3b" stroke-width="4" stroke-linecap="round"/>
-     <g class="canopy">
-      <circle cx="347" cy="100" r="40" fill="#1e6f4b"/>
-      <circle cx="319" cy="116" r="26" fill="#2e8b57"/>
-      <circle cx="375" cy="116" r="26" fill="#2e8b57"/>
-      <circle cx="347" cy="72" r="27" fill="#2e8b57"/>
-      <circle cx="335" cy="86" r="11" fill="#3aa76d" opacity=".5"/>
-      <circle cx="361" cy="106" r="4" fill="#9fd0ae"/><circle cx="331" cy="114" r="3.5" fill="#9fd0ae"/>
-     </g>
-     <ellipse class="tapewin" cx="346" cy="176" rx="11" ry="4" stroke="#c77d2e" stroke-width="2.5" stroke-dasharray="5 4"/>
-     <line class="sightwin" x1="262" y1="180" x2="365" y2="96" stroke="#c77d2e" stroke-width="2.5" stroke-dasharray="7 6"/>
     <div class="hero-art" aria-hidden="true">
    <svg viewBox="0 0 800 300" fill="none">
     <path d="M0 228 Q200 222 400 226 T800 226" stroke="#9cc39c" stroke-width="3" stroke-linecap="round"/>
@@ -349,12 +319,6 @@ tr.done td{opacity:.55}tr.done td b{text-decoration:line-through}
      <circle cx="660" cy="86" r="11" fill="#3aa76d" opacity=".5"/>
      <circle cx="686" cy="106" r="4" fill="#9fd0ae"/><circle cx="656" cy="114" r="3.5" fill="#9fd0ae"/>
     </g>
-     <g class="walkerA">
-     <ellipse cx="406" cy="231" rx="15" ry="3.5" fill="#182420" opacity=".08"/>
-     <rect x="398" y="224" width="11" height="6" rx="3" fill="#fff" stroke="#e6e3d9"/>
-     <rect x="409" y="224" width="11" height="6" rx="3" fill="#fff" stroke="#e6e3d9"/>
-     <rect class="legA" x="400" y="198" width="7" height="28" rx="3.5" fill="#3b5a7a"/>
-     <rect class="legB" x="410" y="198" width="7" height="28" rx="3.5" fill="#3b5a7a"/>
     <ellipse class="tapewin" cx="671" cy="176" rx="24" ry="8" stroke="#c77d2e" stroke-width="2.5" stroke-dasharray="5 4"/>
     <line class="sightwin" x1="500" y1="182" x2="676" y2="96" stroke="#c77d2e" stroke-width="2.5" stroke-dasharray="7 6"/>
     <g class="walkerA">
@@ -364,17 +328,6 @@ tr.done td{opacity:.55}tr.done td b{text-decoration:line-through}
      <rect class="legA" x="584" y="198" width="7" height="28" rx="3.5" fill="#3b5a7a"/>
      <rect class="legB" x="594" y="198" width="7" height="28" rx="3.5" fill="#3b5a7a"/>
      <g class="bendA">
-      <rect x="389" y="170" width="9" height="26" rx="4" fill="#1e6f4b"/>
-      <rect x="394" y="168" width="21" height="34" rx="9" fill="#c77d2e"/>
-      <rect x="396" y="174" width="17" height="22" rx="2" fill="#fff" stroke="#c77d2e"/>
-      <path d="M399 178 h11 M399 181 h9" stroke="#9cc39c" stroke-width="1.2"/>
-      <g class="penA"><path d="M402 190 L408 196" stroke="#c77d2e" stroke-width="2" stroke-linecap="round"/></g>
-      <rect x="413" y="174" width="14" height="6" rx="3" fill="#f2c19a"/>
-      <circle cx="428" cy="177" r="3" fill="#f2c19a"/>
-      <circle cx="405" cy="158" r="9" fill="#f2c19a"/>
-      <path d="M396 156 a9 9 0 0 1 18 0 z" fill="#4a2f1d"/>
-      <circle cx="401" cy="158" r="1.2" fill="#182420"/><circle cx="409" cy="158" r="1.2" fill="#182420"/>
-      <path d="M402 162 q3 2.5 6 0" stroke="#182420" stroke-width="1.4" stroke-linecap="round"/>
       <rect x="573" y="170" width="9" height="26" rx="4" fill="#1e6f4b"/>
       <rect x="578" y="168" width="21" height="34" rx="9" fill="#c77d2e"/>
       <rect x="580" y="174" width="17" height="22" rx="2" fill="#fff" stroke="#c77d2e"/>
@@ -388,25 +341,6 @@ tr.done td{opacity:.55}tr.done td b{text-decoration:line-through}
       <path d="M585 162 q3 2.5 6 0" stroke="#182420" stroke-width="1.4" stroke-linecap="round"/>
      </g>
     </g>
-         <g class="walkerB">
-     <ellipse cx="352" cy="231" rx="15" ry="3.5" fill="#182420" opacity=".08"/>
-     <rect x="344" y="224" width="11" height="6" rx="3" fill="#fff" stroke="#e6e3d9"/>
-     <rect x="355" y="224" width="11" height="6" rx="3" fill="#fff" stroke="#e6e3d9"/>
-     <rect class="legC" x="346" y="202" width="6" height="24" rx="3" fill="#14532d"/>
-     <rect class="legD" x="356" y="202" width="6" height="24" rx="3" fill="#14532d"/>
-     <rect x="341" y="166" width="24" height="40" rx="10" fill="#1e6f4b"/>
-     <path d="M353 168 v36" stroke="#9fd0ae" stroke-width="2" opacity=".8"/>
-     <rect x="332" y="172" width="10" height="18" rx="3" fill="#e8b98a"/>
-     <rect x="320" y="186" width="20" height="14" rx="2.5" fill="#182420"/>
-     <rect x="323" y="189" width="14" height="8" rx="1" fill="#eaf3ec"/>
-     <rect x="325" y="193" width="2" height="3" fill="#1e6f4b"/><rect x="328" y="191" width="2" height="5" fill="#c77d2e"/>
-     <circle class="flash" cx="330" cy="186" r="4" fill="#fff"/>
-     <circle cx="353" cy="156" r="9" fill="#e8b98a"/>
-     <path d="M344 154 a9 9 0 0 1 18 0 z" fill="#6d452c"/>
-     <g class="tail"><circle cx="362" cy="151" r="5" fill="#6d452c"/><path d="M364 154 q8 6 5 18" stroke="#6d452c" stroke-width="4" stroke-linecap="round"/></g>
-     <circle cx="362" cy="146" r="3" fill="#c2452d"/>
-     <circle cx="350" cy="156" r="1.2" fill="#182420"/><circle cx="356" cy="156" r="1.2" fill="#182420"/>
-     <path d="M350 160 q3 2.5 6 0" stroke="#182420" stroke-width="1.4" stroke-linecap="round"/>
     <g class="walkerB">
      <ellipse cx="520" cy="231" rx="15" ry="3.5" fill="#182420" opacity=".08"/>
      <rect x="512" y="224" width="11" height="6" rx="3" fill="#fff" stroke="#e6e3d9"/>
@@ -487,7 +421,7 @@ tr.done td{opacity:.55}tr.done td b{text-decoration:line-through}
 <section class="blk" id="yontem"><div class="wrap">
  <div class="shead"><span class="no">02</span><h2>Sahadan Haritaya — Üç Adımda</h2><span class="rule"></span></div>
  <p style="color:var(--mut);max-width:70ch;font-size:1.02rem">Her ölçüm, sahadaki cihazınızdan dünya haritasına uzanan kontrollü bir akıştan geçer. Hiçbir kayıt admin onayı olmadan bilimsel veri havuzuna girmez.</p>
-
+ 
  <div class="steps">
   <div class="step">
    <div class="num">1</div>
@@ -1049,9 +983,9 @@ async function doLogin(){
   amsg("E-posta ve parola gerekli.",1);
   return;
  }
-
+ 
  amsg("Giriş yapılıyor...",0);
-
+ 
  let tok=tsToken("tsLogin");
  if(!tok){
   await new Promise(r=>setTimeout(r,2500));
@@ -1061,18 +995,18 @@ async function doLogin(){
   amsg("Doğrulama widget'ı hazır değil. Sayfayı yenileyip tekrar deneyin.",1);
   return;
  }
-
+ 
  const r=await sb.auth.signInWithPassword({
   email:email,
   password:pass,
   options:{captchaToken:tok}
  });
-
+ 
  if(r.error){
   amsg(r.error.message,1);
   return;
  }
-
+ 
  try{turnstile.reset(TS.tsLogin);}catch(e){}
  boot();
 }
@@ -1080,19 +1014,19 @@ async function doRegister(){
  const name=$("rgName").value;
  const email=$("rgEmail").value;
  const pass=$("rgPass").value;
-
+ 
  if(!name||!email||!pass){
   amsg("Tüm alanları doldurun.",1);
   return;
  }
-
+ 
  if(pass.length<6){
   amsg("Parola en az 6 karakter olmalı.",1);
   return;
  }
-
+ 
  amsg("Hesap oluşturuluyor...",0);
-
+ 
  let tok=tsToken("tsReg");
  if(!tok){
   await new Promise(r=>setTimeout(r,2500));
@@ -1102,7 +1036,7 @@ async function doRegister(){
   amsg("Doğrulama widget'ı hazır değil. Sayfayı yenileyip tekrar deneyin.",1);
   return;
  }
-
+ 
  const r=await sb.auth.signUp({
   email:email,
   password:pass,
@@ -1114,12 +1048,12 @@ async function doRegister(){
    captchaToken:tok
   }
  });
-
+ 
  if(r.error){
   amsg(r.error.message,1);
   return;
  }
-
+ 
  try{turnstile.reset(TS.tsReg);}catch(e){}
  amsg(r.data.session?"Hesap oluşturuldu.":"Doğrulama e‑postası gönderildi.",0);
 }
@@ -1129,44 +1063,44 @@ async function sendResetEmail(){
   amsg("Lütfen e-posta adresinizi girin.",1);
   return;
  }
-
+ 
  amsg("Doğrulama kontrol ediliyor...",0);
-
+ 
  let tok=tsToken("tsReset");
  if(!tok){
   amsg("Widget yükleniyor, lütfen bekleyin...",0);
   await new Promise(r=>setTimeout(r,2500));
   tok=tsToken("tsReset");
  }
-
+ 
  if(!tok){
   amsg("Doğrulama widget'ı hazır değil. Sayfayı yenileyip tekrar deneyin.",1);
   return;
  }
-
+ 
  amsg("Şifre sıfırlama talebi gönderiliyor...",0);
-
+ 
  const redirectURL=window.location.origin+window.location.pathname.replace(/\/+$/,"")+"/";
-
+ 
  console.log("=== ŞİFRE SIFIRLAMA DEBUG ===");
  console.log("Email:",email);
  console.log("Redirect URL:",redirectURL);
  console.log("Token:",tok);
-
+ 
  const r=await sb.auth.resetPasswordForEmail(email,{
   captchaToken:tok,
   redirectTo:redirectURL
  });
-
+ 
  console.log("Supabase yanıtı:",r);
  console.log("===========================");
-
+ 
  if(r.error){
   console.error("Şifre sıfırlama hatası:",r.error);
   amsg("Hata: "+r.error.message,1);
   return;
  }
-
+ 
  try{turnstile.reset(TS.tsReset);}catch(e){}
  amsg("✓ Sıfırlama bağlantısı e-postanıza gönderildi. Spam klasörünü de kontrol edin.",0);
 }
@@ -1176,14 +1110,14 @@ async function boot(){
  if('serviceWorker' in navigator){
   navigator.serviceWorker.register('./sw.js').catch(e=>console.log('SW registration failed:',e));
  }
-
+ 
  window.addEventListener('online',()=>{
   toast('İnternet bağlantısı geri geldi — senkronize ediliyor','ok','🌐');
   if('serviceWorker' in navigator&&navigator.serviceWorker.controller){
    navigator.serviceWorker.controller.postMessage({type:'SYNC'});
   }
  });
-
+ 
  trackVisit();
  const{data:{session}}=await sb.auth.getSession();
  if(!session){initLanding();return;}
@@ -1594,7 +1528,7 @@ function renderAnalysis(rows,elId){
  const yaPct=pct(groups["YAPRAKLI"].n);
  const diPct=pct(groups["DİĞER"].n);
  const topSpecies=Object.entries(bySpecies).sort((a,b)=>b[1].n-a[1].n).slice(0,6);
-
+ 
  el.innerHTML=`
   <div class="card">
    <div class="shead" style="margin-bottom:14px"><span class="no">🌳</span><h2 style="font-size:1.15rem">Ağaç Çeşitliliği & Yapısal Analiz</h2><span class="rule"></span><span class="mono" style="font-size:.78rem;color:var(--mut)">${total} onaylı kayıt</span></div>
@@ -1966,17 +1900,17 @@ async function saveOfflineMeasurement(data){
  const db=await openOfflineDB();
  const tx=db.transaction('measurements','readwrite');
  const store=tx.objectStore('measurements');
-
+ 
  const session=await sb.auth.getSession();
  const token=session.data.session?.access_token||'';
-
+ 
  store.add({
   data:data,
   apiKey:SB_KEY,
   token:token,
   timestamp:Date.now()
  });
-
+ 
  return new Promise((resolve,reject)=>{
   tx.oncomplete=()=>{
    if('serviceWorker' in navigator&&navigator.serviceWorker.controller){
