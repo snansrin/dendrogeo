@@ -111,31 +111,27 @@ td{padding:9px 10px;border-bottom:1px solid var(--line);font-family:"IBM Plex Mo
 .soildot{transform-box:fill-box;transform-origin:center;animation:soilpulse 3s ease-in-out infinite}
 .soildot.s2{animation-delay:1s}.soildot.s3{animation-delay:2s}.soildot.s4{animation-delay:1.5s}
 @keyframes soilpulse{0%,100%{transform:scale(1);opacity:.5}50%{transform:scale(1.5);opacity:1}}
-.walkerA{animation:visitA 18s ease-in-out infinite}
-.walkerB{animation:visitB 18s ease-in-out infinite}
-@keyframes visitA{0%{transform:translateX(-240px)}16%{transform:translateX(0)}56%{transform:translateX(0)}76%,100%{transform:translateX(360px)}}
-@keyframes visitB{0%{transform:translateX(-430px)}16%{transform:translateX(0)}56%{transform:translateX(0)}76%,100%{transform:translateX(230px)}}
-.legA,.legB,.legC,.legD{transform-box:fill-box;transform-origin:50% 0}
-.legA{animation:stepA 18s linear infinite}
-.legB{animation:stepB 18s linear infinite}
-.legC{animation:stepB 18s linear infinite}
-.legD{animation:stepA 18s linear infinite}
-@keyframes stepA{0%,16%,56%,76%,100%{transform:rotate(0)}3%{transform:rotate(26deg)}7%{transform:rotate(-22deg)}11%{transform:rotate(24deg)}15%{transform:rotate(-16deg)}59%{transform:rotate(26deg)}63%{transform:rotate(-22deg)}67%{transform:rotate(24deg)}71%{transform:rotate(-16deg)}75%{transform:rotate(8deg)}}
-@keyframes stepB{0%,16%,56%,76%,100%{transform:rotate(0)}3%{transform:rotate(-24deg)}7%{transform:rotate(22deg)}11%{transform:rotate(-24deg)}15%{transform:rotate(16deg)}59%{transform:rotate(-26deg)}63%{transform:rotate(22deg)}67%{transform:rotate(-24deg)}71%{transform:rotate(16deg)}75%{transform:rotate(-8deg)}}
-.sightwin{animation:sightWin 18s linear infinite, dashmove 3s linear infinite}
-@keyframes sightWin{0%,18%,58%,100%{opacity:0}24%,52%{opacity:1}}
-.tapewin{animation:tapeWin 18s linear infinite, dashmove 2.5s linear infinite}
-@keyframes tapeWin{0%,17%,57%,100%{opacity:0}22%,52%{opacity:1}}
+
 .tail{transform-box:fill-box;transform-origin:0 0;animation:tailsw 2.4s ease-in-out infinite}
 @keyframes tailsw{0%,100%{transform:rotate(-6deg)}50%{transform:rotate(8deg)}}
 .statband{display:grid;grid-template-columns:repeat(4,1fr);border:1px solid var(--line);border-radius:var(--r);overflow:hidden;background:var(--surface);box-shadow:var(--sh);margin-top:36px}
-.statband div{padding:20px;border-right:1px solid var(--line)}.statband div:last-child{border-right:0}
+.statband>div{
+ padding:20px;
+ border-right:1px solid var(--line);
+}
+
+.statband>div:last-child{
+ border-right:0;
+}
 section.blk{padding:64px 0;border-top:1px solid var(--line)}
 .shead{display:flex;align-items:baseline;gap:16px;margin-bottom:28px}
 .shead .no{font-family:"IBM Plex Mono",monospace;color:var(--amber);font-size:.85rem}
 .shead h2{font-family:Fraunces,serif;font-size:1.8rem;color:var(--green-dk);font-weight:600}
 .shead .rule{flex:1;height:1px;background:var(--line)}
-.cols{display:grid;grid-template-columns:repeat(3,1fr);gap:24px}.cols>*{min-width:0}
+.cols{display:grid;grid-template-columns:repeat(3,1fr);gap:24px}
+.cols-3{grid-template-columns:repeat(3,1fr)}
+.footer-cols{grid-template-columns:2fr 1fr 1fr}
+.cols>*{min-width:0}
 .cols h3{font-size:.75rem;letter-spacing:.16em;text-transform:uppercase;color:var(--green);margin-bottom:10px}
 .cols p{color:var(--mut);font-size:.92rem}
 .formula{background:var(--surface);border:1px solid var(--line);border-left:3px solid var(--green);border-radius:8px;padding:10px 14px;font-family:"IBM Plex Mono",monospace;font-size:.85rem;margin:8px 0;overflow-x:auto}
@@ -225,8 +221,17 @@ tr.done td{opacity:.55}tr.done td b{text-decoration:line-through}
 .step .sub{font-family:"IBM Plex Mono",monospace;font-size:.72rem;color:var(--amber);margin-top:8px;letter-spacing:.1em}
 
 @media(max-width:900px){
- .steps{grid-template-columns:1fr;gap:32px}
- .steps::before{display:none}
+ .statband{
+  grid-template-columns:1fr 1fr;
+ }
+
+ .statband>div{
+  padding:14px;
+ }
+
+ .val{
+  font-size:1.15rem;
+ }
 }
 @media(max-width:900px){
  #layout{display:block;min-height:auto}
@@ -234,7 +239,6 @@ tr.done td{opacity:.55}tr.done td b{text-decoration:line-through}
  #side .item{white-space:nowrap;margin-bottom:0;padding:9px 13px;font-size:.78rem;flex:0 0 auto}
  #side .sec{display:none}
  .g2,.g3,.g4{grid-template-columns:1fr}
- .statband{grid-template-columns:1fr 1fr}.statband div{padding:14px}.val{font-size:1.15rem}
  #topnav .links{display:none}#topnav .wrap{padding:12px 16px;gap:12px}
  .hero{padding:44px 0 26px}section.blk{padding:40px 0}.wrap{padding:0 16px}
 #map,#navMap,#worldMap,#worldMapLanding{height:300px;isolation:isolate;position:relative;z-index:1 !important}
@@ -244,33 +248,38 @@ tr.done td{opacity:.55}tr.done td b{text-decoration:line-through}
  .method-grid{grid-template-columns:1fr !important}
  .feature{padding:22px 18px}
  .feature h3{font-size:1.1rem}
+.cols,.cols-3,.footer-cols{grid-template-columns:1fr}
 }
 /* === HERO SAHNE — Tek seferlik öğrenci animasyonu === */
-.hero-art{position:absolute;right:0;top:50%;transform:translateY(-50%);width:min(480px,55%);z-index:0;pointer-events:none;overflow:visible}
+.hero-art{position:absolute;left:0;top:8%;width:100%;z-index:0;pointer-events:none;overflow:visible}
 .hero-art svg{width:100%;height:auto;display:block;overflow:visible}
 .walkerA,.walkerB{will-change:transform}
-.walkerA{animation:visitA 9s ease-in-out 1 both}
-.walkerB{animation:visitB 9s ease-in-out 1 both}
-@keyframes visitA{0%{transform:translateX(-200px);opacity:0}8%{opacity:1}22%{transform:translateX(0)}60%{transform:translateX(0)}85%{transform:translateX(180px);opacity:1}100%{transform:translateX(220px);opacity:0}}
-@keyframes visitB{0%{transform:translateX(-260px);opacity:0}8%{opacity:1}22%{transform:translateX(0)}60%{transform:translateX(0)}85%{transform:translateX(140px);opacity:1}100%{transform:translateX(180px);opacity:0}}
+.walkerA{animation:visitA 12s ease-in-out 1 both}
+.walkerB{animation:visitB 12s ease-in-out 1 both}
+@keyframes visitA{0%{transform:translateX(-350px);opacity:0}5%{opacity:1}18%{transform:translateX(-50px)}55%{transform:translateX(-50px)}78%{transform:translateX(400px);opacity:1}100%{transform:translateX(500px);opacity:0}}
+@keyframes visitB{0%{transform:translateX(-400px);opacity:0}5%{opacity:1}18%{transform:translateX(-100px)}55%{transform:translateX(-100px)}78%{transform:translateX(350px);opacity:1}100%{transform:translateX(450px);opacity:0}}
 .legA,.legB,.legC,.legD{transform-box:fill-box;transform-origin:50% 0}
-.legA{animation:stepA 9s linear 1 both}
-.legB{animation:stepB 9s linear 1 both}
-.legC{animation:stepB 9s linear 1 both}
-.legD{animation:stepA 9s linear 1 both}
-@keyframes stepA{0%,22%,60%,85%,100%{transform:rotate(0)}4%{transform:rotate(20deg)}8%{transform:rotate(-18deg)}12%{transform:rotate(20deg)}16%{transform:rotate(-14deg)}20%{transform:rotate(6deg)}64%{transform:rotate(20deg)}68%{transform:rotate(-18deg)}72%{transform:rotate(20deg)}76%{transform:rotate(-14deg)}80%{transform:rotate(6deg)}}
-@keyframes stepB{0%,22%,60%,85%,100%{transform:rotate(0)}4%{transform:rotate(-20deg)}8%{transform:rotate(18deg)}12%{transform:rotate(-20deg)}16%{transform:rotate(14deg)}20%{transform:rotate(-6deg)}64%{transform:rotate(-20deg)}68%{transform:rotate(18deg)}72%{transform:rotate(-20deg)}76%{transform:rotate(14deg)}80%{transform:rotate(-6deg)}}
-.bendA{transform-box:fill-box;transform-origin:50% 100%;animation:bend 9s ease-in-out 1 both}
-@keyframes bend{0%,28%,55%,100%{transform:rotate(0)}34%,48%{transform:rotate(-14deg)}}
-.penA{transform-box:fill-box;transform-origin:0 0;animation:write 9s linear 1 both}
-@keyframes write{0%,46%,65%,100%{transform:rotate(0)}50%{transform:rotate(12deg)}54%{transform:rotate(-8deg)}58%{transform:rotate(10deg)}62%{transform:rotate(-6deg)}}
-.sightwin{animation:sightWin 9s linear 1 both, dashmove 2s linear 3}
-@keyframes sightWin{0%,24%,62%,100%{opacity:0}28%,56%{opacity:1}}
-.tapewin{animation:tapeWin 9s linear 1 both, dashmove 2s linear 3}
-@keyframes tapeWin{0%,32%,58%,100%{opacity:0}36%,52%{opacity:1}}
-.flash{animation:flash 9s linear 1 both}
-@keyframes flash{0%,40%,48%,100%{opacity:0}42%,46%{opacity:1}}
+.legA{animation:stepA 12s linear 1 both}
+.legB{animation:stepB 12s linear 1 both}
+.legC{animation:stepB 12s linear 1 both}
+.legD{animation:stepA 12s linear 1 both}
+@keyframes stepA{0%,18%,55%,78%,100%{transform:rotate(0)}3%{transform:rotate(22deg)}7%{transform:rotate(-20deg)}11%{transform:rotate(22deg)}15%{transform:rotate(-16deg)}59%{transform:rotate(22deg)}63%{transform:rotate(-20deg)}67%{transform:rotate(22deg)}71%{transform:rotate(-16deg)}75%{transform:rotate(6deg)}}
+@keyframes stepB{0%,18%,55%,78%,100%{transform:rotate(0)}3%{transform:rotate(-22deg)}7%{transform:rotate(20deg)}11%{transform:rotate(-22deg)}15%{transform:rotate(16deg)}59%{transform:rotate(-22deg)}63%{transform:rotate(20deg)}67%{transform:rotate(-22deg)}71%{transform:rotate(16deg)}75%{transform:rotate(-6deg)}}
+.bendA{transform-box:fill-box;transform-origin:50% 100%;animation:bend 12s ease-in-out 1 both}
+@keyframes bend{0%,22%,52%,100%{transform:rotate(0)}28%,46%{transform:rotate(-18deg)}}
+.penA{transform-box:fill-box;transform-origin:0 0;animation:write 12s linear 1 both}
+@keyframes write{0%,28%,50%,100%{transform:rotate(0)}32%{transform:rotate(12deg)}36%{transform:rotate(-8deg)}40%{transform:rotate(10deg)}44%{transform:rotate(-6deg)}48%{transform:rotate(4deg)}}
+.sightwin{animation:sightWin 12s linear 1 both, dashmove 2s linear 4}
+@keyframes sightWin{0%,22%,52%,100%{opacity:0}26%,48%{opacity:1}}
+.tapewin{animation:tapeWin 12s linear 1 both, dashmove 2s linear 4}
+@keyframes tapeWin{0%,26%,50%,100%{opacity:0}30%,46%{opacity:1}}
+.flash{animation:flash 12s linear 1 both}
+@keyframes flash{0%,38%,48%,100%{opacity:0}42%,46%{opacity:1}}
 .tail{transform-box:fill-box;transform-origin:0 0;animation:tailsw 2.4s ease-in-out 3}
+.chip{top:auto;bottom:auto}
+.chip.c1{top:45%;left:38%}
+.chip.c2{top:22%;left:52%}
+.chip.c3{top:60%;left:45%}
 @media(max-width:960px){.hero-art{display:none}}
 </style>
 </head>
@@ -295,9 +304,9 @@ tr.done td{opacity:.55}tr.done td b{text-decoration:line-through}
    </div>
   </div>
   <div class="hero-art" aria-hidden="true">
-   <svg viewBox="0 0 440 300" fill="none">
-    <path d="M0 228 Q110 222 220 226 T440 226" stroke="#9cc39c" stroke-width="3" stroke-linecap="round"/>
-    <path d="M20 236 C120 232 260 238 420 234" stroke="#e6e3d9" stroke-width="4" stroke-linecap="round" stroke-dasharray=".5 11"/>
+   <svg viewBox="-200 0 840 300" fill="none">
+    <path d="M-200 228 Q100 222 300 226 T640 226" stroke="#9cc39c" stroke-width="3" stroke-linecap="round"/>
+    <path d="M-180 236 C100 232 300 238 620 234" stroke="#e6e3d9" stroke-width="4" stroke-linecap="round" stroke-dasharray=".5 11"/>
     <ellipse cx="345" cy="230" rx="42" ry="6" fill="#182420" opacity=".08"/>
     <path d="M338 230 C337 196 340 160 342 122 L351 122 C353 160 355 196 355 230 Z" fill="#8a5a3b"/>
     <path d="M342 134 C334 122 328 116 320 110" stroke="#8a5a3b" stroke-width="4" stroke-linecap="round"/>
@@ -353,8 +362,9 @@ tr.done td{opacity:.55}tr.done td b{text-decoration:line-through}
      <path d="M250 160 q3 2.5 6 0" stroke="#182420" stroke-width="1.4" stroke-linecap="round"/>
     </g>
    </svg>
-   <div class="chip" style="top:0;left:0"><span style="color:var(--amber)">●</span> DBH 42 cm</div>
-   <div class="chip c2" style="top:6%;right:0"><span style="color:var(--green)">●</span> C 128 kg</div>
+   <div class="chip c1"><span style="color:var(--amber)">●</span> DBH 42 cm</div>
+   <div class="chip c2"><span style="color:var(--green)">●</span> C 128 kg</div>
+   <div class="chip c3"><span style="color:var(--blue)">●</span> H 14.5 m</div>
   </div>
  </div>
  <div class="statband">
@@ -366,7 +376,7 @@ tr.done td{opacity:.55}tr.done td b{text-decoration:line-through}
 </div></div>
 <section class="blk" id="sistem"><div class="wrap">
  <div class="shead"><span class="no">01</span><h2>Sistemin Üç Temel Direği</h2><span class="rule"></span></div>
- <div class="cols" style="grid-template-columns:repeat(3,1fr)">
+<div class="cols cols-3">
   <div class="feature">
    <div class="ico">🛰</div>
    <h3>Sahadan Veri</h3>
@@ -486,7 +496,7 @@ tr.done td{opacity:.55}tr.done td b{text-decoration:line-through}
  </div>
 </div></section>
 <footer><div class="wrap">
- <div class="cols" style="grid-template-columns:2fr 1fr 1fr">
+ <div class="cols footer-cols">
   <div><h4>DendroGeo</h4><p>Küresel Ağaç Envanteri ve Karbon Veri Sistemi.</p></div>
   <div><h4>Referanslar</h4><p>Chave et al. 2014 · IPCC 2006<br>As ve ark. 2001 · Tolunay 2013<br>OGM 299 Nolu Tebliğ 2017</p></div>
   <div><h4>Sistem</h4><p>v11.0 · <span class="mono">ÇEVRİMİÇİ</span></p></div>
@@ -1155,8 +1165,12 @@ function addMarkersChunked(m,rows,chunk=150){
 }
 async function loadApprovedMarkers(m,limit,done){
  try{
-  const{data}=await sb.from("measurements").select("lat,lon,point_id,species,dbh_cm,height_m,carbon_kg,photo_url,grp").eq("status","Onaylı").limit(limit);
-  addMarkersChunked(m,data||[]);done&&done((data||[]).length,data||[]);
+  const{data}=await sb.from("measurements")
+   .select("lat,lon,point_id,species,dbh_cm,height_m,carbon_kg,photo_url,grp")
+   .eq("status","Onaylı").limit(limit);
+  const rows=(data||[]).filter(r=>Number.isFinite(+r.lat)&&Number.isFinite(+r.lon));
+  addMarkersChunked(m,rows);
+  done&&done(rows.length,rows);
  }catch(e){done&&done(0,[]);}
 }
 function initLanding(){
@@ -1329,14 +1343,20 @@ const base={owner:USER.id,project_id:pid,point_id:pt,measurement_no:+$("mNo").va
 if(!EDIT_ID){base.lat=GPS.latitude;base.lon=GPS.longitude;base.country="Türkiye";base.city="Ankara";base.accuracy_m=GPS.accuracy;base.altitude_m=GPS.altitude;}
 if(photo){base.photo_url=photo;base.photo_file=photoFile;}
 
+// 1. Form validate
+// 2. base objesini oluştur (lat/lon dahil)
+// 3. OFFLINE KONTROLÜ BURAYA GELMELİ (upload'tan önce)
 if(!navigator.onLine){
  await saveOfflineMeasurement(base);
- toast('Çevrimdışı kaydedildi — internet gelince otomatik senkronize edilecek','info','📴');
- $('mPoint').value='';$('mDbh').value='';$('mHeight').value='';$('mPhoto').value='';
- $('photoCheck').style.display='none';photoOk=false;manualPoint=false;
+ toast('Çevrimdışı kaydedildi — internet gelince senkronize','info','📴');
+ $('mPoint').value='';$('mDbh').value='';$('mHeight').value='';
+ $('mPhoto').value='';$('photoCheck').style.display='none';
+ photoOk=false;manualPoint=false;
  loadDash();loadRecords();
  return;
 }
+// 4. Online ise fotoğrafı yükle
+// 5. Supabase insert/update
  if(EDIT_ID){
   const{error}=await sb.from("measurements").update(base).eq("id",EDIT_ID);
   if(error)return toast("Hata: "+error.message,"err");
