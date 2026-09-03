@@ -780,7 +780,7 @@ tr.done td{opacity:.55}tr.done td b{text-decoration:line-through}
     </div>
    </div>
       <div class="card" style="margin-bottom:18px;border-left:4px solid var(--blue)">
-    <div class="shead" style="margin-bottom:12px"><span class="no">✉️</span><h2 style="font-size:1.2rem">Aktif Talepler</h2><span class="rule"></span><span class="mono" style="font-size:.78rem;color:var(--amber)">Bekleyen: <b id="aReqPending">0</b></span></div>
+    <div class="shead" style="margin-bottom:12px"><span class="no">✉️</span><h2 style="font-size:1.2rem">Aktif Talepler</h2><span class="rule"></span><span class="mono" style="font-size:.78rem;color:var(--amber)">Bekleyen: <b id="aReqPendingMini">0</b></span></div>
     <div class="tblwrap"><table><thead><tr><th>Kullanıcı</th><th>E‑posta</th><th>Filtre</th><th>Tarih</th><th>Durum</th><th>İşlem</th></tr></thead><tbody id="aReqT"></tbody></table></div>
    </div>
    <div class="card" id="closedRequestsWrap" style="margin-bottom:18px;border-left:4px solid var(--mut);display:none">
@@ -909,19 +909,22 @@ function calc(dbh,h,sp,grp){
 /* ============ KONUMDAN İL/ÜLKE ALGILAMA (Reverse Geocoding) ============ */
 /* TÜRKİYE'de il adı "state" alanındadır (admin_level=4); ilçe "city/town" alanına düşer.
    Kesin il için TR'de ÖNCE state okunur; diğer ülkelerde standart zincir. */
+/* ============ KONUMDAN İL/ÜLKE ALGILAMA ============ */
+/* TÜRKİYE'de il adı "state" alanındadır (admin_level=4); ilçe "city/town"a düşer.
+   TR için KESİN çözüm: önce state oku → ilçe asla gelmez. */
 async function reverseGeocode(lat,lon){
-try{
-const r=await fetch("https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat="+lat+"&lon+"&accept-language=tr");
-if(!r.ok)return null;
-const j=await r.json();const a=j.address||{};
-const cc=(a.country_code||"").toLowerCase();
-const city=cc==="tr"
- ?(a.state||a.province||a.city||null)
- :(a.city||a.town||a.village||a.municipality||a.state||null);
-const country=a.country||null;
-if(!city&&!country)return null;
-return{city:city||"Bilinmiyor",country:country||"Bilinmiyor"};
-}catch(e){return null;}
+ try{
+  const r=await fetch("https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat="+lat+"&lon="+lon+"&accept-language=tr",{headers:{Accept:"application/json"}});
+  if(!r.ok)return null;
+  const j=await r.json();const a=j.address||{};
+  const cc=(a.country_code||"").toLowerCase();
+  const city=cc==="tr"
+   ?(a.state||a.province||a.city||null)
+   :(a.city||a.town||a.village||a.municipality||a.state||null);
+  const country=a.country||null;
+  if(!city&&!country)return null;
+  return{city:city||"Bilinmiyor",country:country||"Bilinmiyor"};
+ }catch(e){return null;}
 }
 const FULL_HEAD="POINT_ID,MEASUREMENT_NO,DATE,TIME_TR,LATITUDE,LONGITUDE,GPS_ALTITUDE_M,GPS_ALTITUDE_MEDIAN_M,SATELLITES,HDOP,EST_ERROR_M,SLOPE_DEG,TREE_GROUP,TREE_SPECIES,LATIN_NAME,CIRCUMFERENCE_CM,DBH_CM,TREE_HEIGHT_M,CALC_AREA_M2,HORIZONTAL_AREA_M2,CALC_VOLUME_M3,AGB_KG,BHB_KG,TOTAL_BIOMASS_KG,CARBON_KG,AGB_CARBON_KG,BHB_CARBON_KG,PHOTO_FILE";
 function fullRow(r){
@@ -1631,27 +1634,24 @@ async function sendDataRequest(){
  const project_name=$("reqProject").value.trim()||null;
  const note=$("reqNote").value.trim()||null;
  const m=$("reqMsg");
- 
- // Aynı filtreden Beklemede talep var mı kontrol et
-try{
-const{data:pending}=await sb.from("data_requests")
-.select("country,city,project_name")
-.eq("user_id",USER.id)
-.eq("status","Beklemede");
-const norm=v=>(v||"").toString().trim().toLowerCase();
-const duplicate=(pending||[]).some(f=>norm(f.country)===norm(country)&&norm(f.city)===norm(city)&&norm(f.project_name)===norm(project_name));
-if(duplicate){
-   toast("⚠️ Bu talep zaten gönderildi — cevap bekleniyor","warn","✉️");
+ try{
+  const{data:pending}=await sb.from("data_requests")
+   .select("country,city,project_name,status")
+   .eq("user_id",USER.id)
+   .in("status",["Beklemede","İşleme Alındı"]);
+  const norm=v=>(v||"").toString().trim().toLowerCase();
+  const dup=(pending||[]).find(f=>norm(f.country)===norm(country)&&norm(f.city)===norm(city)&&norm(f.project_name)===norm(project_name));
+  if(dup){
+   toast("⚠️ Bu veri talebiniz zaten alındı — yönetici onayı bekleniyor","warn","✉️");
    m.style.color="var(--amber)";
-   m.textContent="⚠ Aynı filtreyle zaten bir talep bekliyor. Yönetici yanıt verene kadar yeni talep oluşturulamaz.";
+   m.textContent="⚠ Aynı filtreyle bir talebiniz zaten "+(dup.status==="Beklemede"?"beklemede":"işleme alındı")+". Yönetici yanıt verene kadar yeni talep oluşturulamaz.";
    return;
   }
- }catch(e){console.log("Duplikasyon kontrolü:",e);}
- 
-const body={user_id:USER.id,email:PROFILE?.email||USER.email,country,city,project_name,note,status:"Beklemede"};
-const{error}=await sb.from("data_requests").insert(body);
+ }catch(e){console.log("Dup kontrolü:",e);}
+ const body={user_id:USER.id,email:PROFILE?.email||USER.email,country,city,project_name,note,status:"Beklemede"};
+ const{error}=await sb.from("data_requests").insert(body);
  if(error){m.style.color="var(--red)";m.textContent="Hata: "+error.message;return;}
- toast("✓ Talep gönderildi — yönetici yanıt verince bildirim alacaksın","ok","✉️");
+ toast("✓ Talep gönderildi — yönetici yanıtı bekleniyor","ok","✉️");
  m.style.color="var(--green-dk)";m.textContent="✓ Talebiniz yönetime iletildi, hazır olduğunda e‑postanıza gönderilecek.";
  $("reqCountry").value="";$("reqCity").value="";$("reqProject").value="";$("reqNote").value="";
  loadMyRequests();
@@ -1843,6 +1843,7 @@ async function loadRequests(){
  const closed=reqs.filter(r=>r.status==="Tamamlandı"||r.status==="Reddedildi");
  
  $("aReqPending").textContent=pending.length;
+ $("aReqPendingMini").textContent=pending.length;
  $("aReqClosed").textContent=closed.length;
  
  // AKTİF TALEPLER TABLOSU
