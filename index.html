@@ -658,13 +658,13 @@ tr.done td{opacity:.55}tr.done td b{text-decoration:line-through}
   <div class="view" id="v-map"><h2 class="disp" style="margin-bottom:16px">Canlı Harita</h2><div id="mapLoad" class="alert info">⏳ Onaylı kayıtlar yükleniyor…</div><div id="map"></div><p style="color:var(--mut);font-size:.8rem;margin-top:8px">🟢 Noktalara dokunun → bilgi + fotoğraf balonu.</p><div id="liveAnalysis" style="margin-top:18px"></div></div>
 
   <div class="view" id="v-projects">
-   <h2 class="disp" style="margin-bottom:16px">Projeler</h2>
-   <div class="card" style="margin-bottom:16px">
-    <div class="grid g3">
-    <div><div class="lbl">Ülke</div><select id="reqCountry" onchange="reqCountryChanged()"><option value="">Tümü</option></select></div>
-    <div><div class="lbl">Şehir</div><select id="reqCity" onchange="reqCityChanged()"><option value="">Tümü</option></select></div>
-    <div><div class="lbl">Proje / Park</div><select id="reqProject"><option value="">Tümü</option></select></div>
-   </div>
+<h2 class="disp" style="margin-bottom:16px">Projeler</h2>
+<div class="card" style="margin-bottom:16px">
+<div class="grid g3">
+<div><div class="lbl">Proje Adı</div><input id="pName"></div>
+<div><div class="lbl">Ülke</div><input id="pCountry" value="Türkiye"></div>
+<div><div class="lbl">Şehir</div><input id="pCity" value="Ankara"></div>
+</div>
     <div style="display:flex;gap:8px;margin-top:10px">
      <button class="btn sm" id="projSaveBtn" onclick="createProject()">+ Proje Oluştur</button>
      <button class="btn sm ghost" id="projCancelBtn" style="display:none" onclick="cancelProjectEdit()">Vazgeç</button>
@@ -690,9 +690,9 @@ tr.done td{opacity:.55}tr.done td b{text-decoration:line-through}
     <div class="shead" style="margin-bottom:14px"><span class="no">✉️</span><h2 style="font-size:1.2rem">Yöneticiden Veri Talep Et</h2></div>
     <p style="color:var(--mut);font-size:.85rem;margin-bottom:12px">Belirli bir ülke / şehir / proje (kent parkı) için tüm onaylı veriyi yönetici tarafında hazırlanmış olarak e‑postanıza almak isterseniz talep oluşturun.</p>
     <div class="grid g3">
-     <div><div class="lbl">Ülke </div><input id="reqCountry" placeholder="Örn. Türkiye"></div>
-     <div><div class="lbl">Şehir </div><input id="reqCity" placeholder="Örn. Ankara"></div>
-     <div><div class="lbl">Proje / Park </div><input id="reqProject" placeholder="Örn. Kuğulu Park"></div>
+     <div><div class="lbl">Ülke</div><select id="reqCountry" onchange="reqCountryChanged()"><option value="">Tümü</option></select></div>
+<div><div class="lbl">Şehir</div><select id="reqCity" onchange="reqCityChanged()"><option value="">Tümü</option></select></div>
+<div><div class="lbl">Proje / Park</div><select id="reqProject"><option value="">Tümü</option></select></div>
     </div>
     <div style="margin-top:10px"><div class="lbl">Not</div><input id="reqNote" placeholder="İsteğe dair kısa not"></div>
     <button class="btn blue sm" style="margin-top:12px" onclick="sendDataRequest()">✉️ Talep Gönder</button>
