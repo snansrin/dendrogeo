@@ -661,10 +661,11 @@ tr.done td{opacity:.55}tr.done td b{text-decoration:line-through}
    <h2 class="disp" style="margin-bottom:16px">Projeler</h2>
    <div class="card" style="margin-bottom:16px">
     <div class="grid g3">
-    <div><div class="lbl">Ülke</div><select id="reqCountry" onchange="reqCountryChanged()"><option value="">Tümü</option></select></div>
-    <div><div class="lbl">Şehir</div><select id="reqCity" onchange="reqCityChanged()"><option value="">Tümü</option></select></div>
-    <div><div class="lbl">Proje / Park</div><select id="reqProject"><option value="">Tümü</option></select></div>
-   </div>
+<div class="grid g3">
+<div><div class="lbl">Proje Adı</div><input id="pName"></div>
+<div><div class="lbl">Ülke</div><input id="pCountry" value="Türkiye"></div>
+<div><div class="lbl">Şehir</div><input id="pCity" value="Ankara"></div>
+</div>
     <div style="display:flex;gap:8px;margin-top:10px">
      <button class="btn sm" id="projSaveBtn" onclick="createProject()">+ Proje Oluştur</button>
      <button class="btn sm ghost" id="projCancelBtn" style="display:none" onclick="cancelProjectEdit()">Vazgeç</button>
@@ -690,9 +691,9 @@ tr.done td{opacity:.55}tr.done td b{text-decoration:line-through}
     <div class="shead" style="margin-bottom:14px"><span class="no">✉️</span><h2 style="font-size:1.2rem">Yöneticiden Veri Talep Et</h2></div>
     <p style="color:var(--mut);font-size:.85rem;margin-bottom:12px">Belirli bir ülke / şehir / proje (kent parkı) için tüm onaylı veriyi yönetici tarafında hazırlanmış olarak e‑postanıza almak isterseniz talep oluşturun.</p>
     <div class="grid g3">
-     <div><div class="lbl">Ülke </div><input id="reqCountry" placeholder="Örn. Türkiye"></div>
-     <div><div class="lbl">Şehir </div><input id="reqCity" placeholder="Örn. Ankara"></div>
-     <div><div class="lbl">Proje / Park </div><input id="reqProject" placeholder="Örn. Kuğulu Park"></div>
+     <div><div class="lbl">Ülke</div><select id="reqCountry" onchange="reqCountryChanged()"><option value="">Tümü</option></select></div>
+    <div><div class="lbl">Şehir</div><select id="reqCity" onchange="reqCityChanged()"><option value="">Tümü</option></select></div>
+    <div><div class="lbl">Proje / Park</div><select id="reqProject"><option value="">Tümü</option></select></div>
     </div>
     <div style="margin-top:10px"><div class="lbl">Not</div><input id="reqNote" placeholder="İsteğe dair kısa not"></div>
     <button class="btn blue sm" style="margin-top:12px" onclick="sendDataRequest()">✉️ Talep Gönder</button>
@@ -825,6 +826,7 @@ const SB_URL="https://xjbpounwdxrhelmixvqm.supabase.co";
 const SB_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhqYnBvdW53ZHhyaGVsbWl4dnFtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODgxMDA1NzIsImV4cCI6MjEwMzY3NjU3Mn0.Q5b4ys1TkyhMffGaN9bR9A3nr4L4-8G5UBJY4iC4Dkk";
 const sb=supabase.createClient(SB_URL,SB_KEY);
 const $=id=>document.getElementById(id);
+const NL=String.fromCharCode(10),CR=String.fromCharCode(13);
 const QUOTA_MB=500;
 let USER=null,PROFILE=null,GPS=null,WP=[],navTarget=null,charts={},map=null,navMap=null,worldMap=null,worldMapL=null,EDIT_ID=null,EDIT_PROJ=null,liveLoaded=false,PROJ_LIST=[],photoOk=false;
 
@@ -939,7 +941,7 @@ function fullRow(r){
  const q=v=>`"${(v||"").toString().replace(/"/g,'""')}"`;
  return [r.point_id,r.measurement_no||1,d.toLocaleDateString("tr-TR"),d.toLocaleTimeString("tr-TR"),r.lat,r.lon,(r.altitude_m??""),(r.altitude_m??""),(r.satellites??""),(r.hdop??""),(r.accuracy_m??""),slope,q(r.grp),q(r.species),q(LATIN[r.species]||""),(Math.PI*(r.dbh_cm||0)).toFixed(2),r.dbh_cm,r.height_m,area.toFixed(4),hArea.toFixed(4),vol.toFixed(4),agb.toFixed(1),bhb.toFixed(1),bio.toFixed(1),(r.carbon_kg||bio*0.47).toFixed(2),(agb*0.47).toFixed(1),(bhb*0.47).toFixed(1),pf].join(",");
 }
-function fullCSV(rows){return "\uFEFF"+FULL_HEAD+"\n"+rows.map(fullRow).join("\n")+"\n";}
+function fullCSV(rows){return "﻿"+FULL_HEAD+NL+rows.map(fullRow).join(NL)+NL;}
 
 function loadImg(file){return new Promise((res,rej)=>{const u=URL.createObjectURL(file);const i=new Image();i.onload=()=>res({i,u});i.onerror=rej;i.src=u;});}
 async function checkPhoto(e){
@@ -1439,7 +1441,7 @@ async function removePhoto(url){
 async function uploadWpCsv(){
  const pid=+$("nProject").value;if(!pid)return toast("Proje seç");
  const f=$("nCsv").files[0];if(!f)return toast("CSV seç");
- const lines=(await f.text()).split(/\r?\n/);let n=0;
+const lines=(await f.text()).split(NL).map(s=>s.replace(CR,""));let n=0;
  for(let i=1;i<lines.length;i++){const c=lines[i].split(",");if(c.length<3)continue;const id=parseInt((c[2]||"").replace(/"/g,""));const lon=+c[0],lat=+c[1];if(!id||!lat||!lon)continue;await sb.from("waypoints").upsert({owner:USER.id,project_id:pid,wp_id:id,lat,lon},{onConflict:"project_id,wp_id"});n++;}
  toast("✓ "+n+" waypoint yüklendi ve projeye kalıcı kaydedildi.");
  loadWaypoints();
@@ -1681,7 +1683,7 @@ function dl(content,name){const a=document.createElement("a");a.href=URL.createO
 function openPreview(title,content,isCSV,fname){
  $("pvTitle").textContent=title;
  if(isCSV){
-  const lines=content.replace(/^\uFEFF/,"").split("\n").filter(Boolean).slice(0,100);
+const lines=content.replace(/^﻿/,"").split(NL).filter(Boolean).slice(0,100);
   let html="<table><thead><tr>"+lines[0].split(",").map(h=>`<th>${h}</th>`).join("")+"</tr></thead><tbody>";
   for(let i=1;i<lines.length;i++)html+="<tr>"+lines[i].split(",").map(c=>`<td>${c}</td>`).join("")+"</tr>";
   $("pvBody").innerHTML=html+"</tbody></table>";
@@ -1944,7 +1946,7 @@ async function fulfillRequest(id){
  const{data}=await q;
  dl(fullCSV(data||[]),"dendrogeo_talep_"+id+".csv");
  const subject=encodeURIComponent("DendroGeo Veri Talebiniz Hazır");
- const bodyTxt="Merhaba,\n\nTalep ettiğiniz veri seti hazırlandı ve indirildi. Bu e-postaya indirilen CSV dosyasını EK olarak eklemeyi unutmayın.\n\nFiltre: Ülke="+(req.country||"Tümü")+", Şehir="+(req.city||"Tümü")+", Proje/Park="+(req.project_name||"Tümü")+"\n\nDendroGeo";
+const bodyTxt=["Merhaba","","Talep ettiğiniz veri seti hazırlandı ve indirildi. Bu e-postaya indirilen CSV dosyasını EK olarak eklemeyi unutmayın.","Filtre: Ülke="+(req.country||"Tümü")+", Şehir="+(req.city||"Tümü")+", Proje/Park="+(req.project_name||"Tümü"),"","DendroGeo"].join(NL);
  window.open("mailto:"+(req.email||"")+"?subject="+subject+"&body="+encodeURIComponent(bodyTxt),"_blank");
  await sb.from("data_requests").update({status:"Tamamlandı",fulfilled_at:new Date().toISOString()}).eq("id",id);
  loadRequests();
@@ -2031,7 +2033,7 @@ function parkReport(){
   <table><thead><tr><th>Tür</th><th>Latince</th><th>Grup</th><th>Adet</th><th>Karbon (kg)</th><th>Ort. Çap</th><th>Ort. Boy</th></tr></thead><tbody>
   ${spRows.map(([sp,v])=>`<tr><td>${sp}</td><td style="font-style:italic">${LATIN[sp]&&LATIN[sp]!=="—"?LATIN[sp]:"—"}</td><td>${v.grp}</td><td>${v.n}</td><td>${v.c.toFixed(1)}</td><td>${(v.dbh/v.n).toFixed(1)}</td><td>${(v.h/v.n).toFixed(1)}</td></tr>`).join("")}
   </tbody></table>`;
- const csv="\uFEFFPARK,"+name+"\nSEHIR,"+(rows[0].projects?.city||"—")+"\nTARIH,"+new Date().toLocaleDateString("tr-TR")+"\nKAYIT,"+n+"\nTOPLAM_KARBON_KG,"+c.toFixed(1)+"\nTOPLAM_KARBON_T,"+(c/1000).toFixed(2)+"\nORT_CAP_CM,"+dbh+"\nORT_BOY_M,"+h+"\nIBRELI_%,"+pct(ib)+"\nYAPRAKLI_%,"+pct(ya)+"\n\nTUR,LATIN,GRUP,ADET,KARBON_KG,ORT_CAP_CM,ORT_BOY_M\n"+spRows.map(([sp,v])=>[sp,LATIN[sp]||"—",v.grp,v.n,v.c.toFixed(1),(v.dbh/v.n).toFixed(1),(v.h/v.n).toFixed(1)].join(",")).join("\n")+"\n";
+const csv=["﻿PARK,"+name,"SEHIR,"+(rows[0].projects?.city||"—"),"TARIH,"+new Date().toLocaleDateString("tr-TR"),"KAYIT,"+n,"TOPLAM_KARBON_KG,"+c.toFixed(1),"TOPLAM_KARBON_T,"+(c/1000).toFixed(2),"ORT_CAP_CM,"+dbh,"ORT_BOY_M,"+h,"IBRELI_%,"+pct(ib),"YAPRAKLI_%,"+pct(ya),"TUR,LATIN,GRUP,ADET,KARBON_KG,ORT_CAP_CM,ORT_BOY_M"].concat(spRows.map(([sp,v])=>[sp,LATIN[sp]||"—",v.grp,v.n,v.c.toFixed(1),(v.dbh/v.n).toFixed(1),(v.h/v.n).toFixed(1)].join(","))).join(NL)+NL;
  $("pvTitle").textContent="📄 "+name+" — Park Raporu";
  $("pvBody").innerHTML=html;
  $("pvDownload").onclick=()=>dl(csv,name.replace(/\s+/g,"_")+"_rapor.csv");
