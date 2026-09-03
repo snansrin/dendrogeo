@@ -907,17 +907,21 @@ function calc(dbh,h,sp,grp){
 }
 
 /* ============ KONUMDAN ŞEHİR/ÜLKE ALGILAMA (Reverse Geocoding) ============ */
+/* Türkiye'de Nominatim "city" alanına çoğunlukla İLÇE/SEMT yazar (Çankaya, Etimesgut...).
+   İl (şehir) adı admin_level=4 olduğu için "state" alanındadır → TR'de önce state kullanılır. */
 async function reverseGeocode(lat,lon){
- try{
-  const r=await fetch("https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat="+lat+"&lon="+lon+"&accept-language=tr",{headers:{Accept:"application/json"}});
-  if(!r.ok)return null;
-  const j=await r.json();
-  const a=j.address||{};
-  const city=a.city||a.town||a.village||a.municipality||a.county||a.state||null;
-  const country=a.country||null;
-  if(!city&&!country)return null;
-  return{city:city||"Bilinmiyor",country:country||"Bilinmiyor"};
- }catch(e){return null;}
+try{
+const r=await fetch("https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat="+lat+"&lon="+lon+"&accept-language=tr",{headers:{Accept:"application/json"}});
+if(!r.ok)return null;
+const j=await r.json();const a=j.address||{};
+const country=a.country||null;
+const isTR=((a.country_code||"").toLowerCase()==="tr")||/türkiye|turkey/i.test(country||"");
+const city=isTR
+?(a.state||a.province||a.city||a.town||"Bilinmiyor")
+:(a.city||a.town||a.village||a.municipality||a.state||"Bilinmiyor");
+if(!city&&!country)return null;
+return{city:city||"Bilinmiyor",country:country||"Bilinmiyor"};
+}catch(e){return null;}
 }
 const FULL_HEAD="POINT_ID,MEASUREMENT_NO,DATE,TIME_TR,LATITUDE,LONGITUDE,GPS_ALTITUDE_M,GPS_ALTITUDE_MEDIAN_M,SATELLITES,HDOP,EST_ERROR_M,SLOPE_DEG,TREE_GROUP,TREE_SPECIES,LATIN_NAME,CIRCUMFERENCE_CM,DBH_CM,TREE_HEIGHT_M,CALC_AREA_M2,HORIZONTAL_AREA_M2,CALC_VOLUME_M3,AGB_KG,BHB_KG,TOTAL_BIOMASS_KG,CARBON_KG,AGB_CARBON_KG,BHB_CARBON_KG,PHOTO_FILE";
 function fullRow(r){
