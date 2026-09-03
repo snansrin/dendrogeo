@@ -691,10 +691,25 @@ tr.done td{opacity:.55}tr.done td b{text-decoration:line-through}
     <div class="shead" style="margin-bottom:14px"><span class="no">✉️</span><h2 style="font-size:1.2rem">Yöneticiden Veri Talep Et</h2></div>
     <p style="color:var(--mut);font-size:.85rem;margin-bottom:12px">Belirli bir ülke / şehir / proje (kent parkı) için tüm onaylı veriyi yönetici tarafında hazırlanmış olarak e‑postanıza almak isterseniz talep oluşturun.</p>
     <div class="grid g3">
-     <div><div class="lbl">Ülke</div><select id="reqCountry" onchange="reqCountryChanged()"><option value="">Tümü</option></select></div>
-    <div><div class="lbl">Şehir</div><select id="reqCity" onchange="reqCityChanged()"><option value="">Tümü</option></select></div>
-    <div><div class="lbl">Proje / Park</div><select id="reqProject"><option value="">Tümü</option></select></div>
-    </div>
+ <div>
+  <div class="lbl">Ülke</div>
+  <select id="reqCountry" onchange="reqCountryChanged()">
+   <option value="">Tümü</option>
+  </select>
+ </div>
+    <div>
+  <div class="lbl">Şehir</div>
+  <select id="reqCity" onchange="reqCityChanged()">
+   <option value="">Tümü</option>
+  </select>
+ </div>
+    <div>
+  <div class="lbl">Proje / Park</div>
+  <select id="reqProject">
+   <option value="">Tümü</option>
+  </select>
+ </div>
+</div>
     <div style="margin-top:10px"><div class="lbl">Not</div><input id="reqNote" placeholder="İsteğe dair kısa not"></div>
     <button class="btn blue sm" style="margin-top:12px" onclick="sendDataRequest()">✉️ Talep Gönder</button>
     <div id="reqMsg" style="margin-top:10px;font-size:.85rem"></div>
@@ -1230,7 +1245,8 @@ function startShell(){
  $("landing").style.display="none";$("shell").style.display="block";
  if(PROFILE){$("whoami").textContent=PROFILE.full_name;
   if(PROFILE.role==="admin"||PROFILE.role==="owner"){$("roleBadge").style.display="inline";$("roleBadge").textContent=PROFILE.role==="owner"?"KURUCU":"ADMIN";$("roleBadge").className=PROFILE.role==="owner"?"badge on":"badge admin";$("adminSec").style.display="block";$("miAdmin").style.display="flex";$("miUsers").style.display="flex";}}
-initMaps();loadProjects();loadDash();loadRecords();loadWorld();loadMyRequests();loadRequestOptions();
+initMaps();loadProjects();loadDash();loadRecords();loadWorld();loadMyRequests();
+if(typeof loadRequestOptions==="function") loadRequestOptions();
 }
 
 function go(v){
@@ -1245,7 +1261,7 @@ function go(v){
  if(v==="world")setTimeout(()=>worldMap&&worldMap.invalidateSize(),150);
 if(v==="admin")loadAdmin();
 if(v==="users")loadUsers();
-if(v==="export")loadRequestOptions();
+if(v==="export" && typeof loadRequestOptions==="function")loadRequestOptions();
 }
 
 async function loadLiveMap(){
@@ -1632,31 +1648,71 @@ async function loadVisitStats(){
 /* ============ VERİ TALEBİ (kullanıcı → yönetici) ============ */
 async function sendDataRequest(){
  if(!USER)return;
- const country=$("reqCountry").value.trim()||null;
- const city=$("reqCity").value.trim()||null;
- const project_name=$("reqProject").value.trim()||null;
- const note=$("reqNote").value.trim()||null;
- const m=$("reqMsg");
+
+ const country = dgVal("reqCountry") || null;
+ const city = dgVal("reqCity") || null;
+ const project_name = dgVal("reqProject") || null;
+ const note = dgVal("reqNote") || null;
+ const m = $("reqMsg");
+
  try{
-  const{data:pending}=await sb.from("data_requests")
+  const {data:pending} = await sb.from("data_requests")
    .select("country,city,project_name,status")
    .eq("user_id",USER.id)
    .in("status",["Beklemede","İşleme Alındı"]);
-  const norm=v=>(v||"").toString().trim().toLowerCase();
-  const dup=(pending||[]).find(f=>norm(f.country)===norm(country)&&norm(f.city)===norm(city)&&norm(f.project_name)===norm(project_name));
-  if(dup){
-   toast("⚠️ Bu veri talebiniz zaten alındı — yönetici onayı bekleniyor","warn","✉️");
-   m.style.color="var(--amber)";
-   m.textContent="⚠ Aynı filtreyle bir talebiniz zaten "+(dup.status==="Beklemede"?"beklemede":"işleme alındı")+". Yönetici yanıt verene kadar yeni talep oluşturulamaz.";
+
+  const duplicate = (pending || []).some(f =>
+   dgNorm(f.country) === dgNorm(country) &&
+   dgNorm(f.city) === dgNorm(city) &&
+   dgNorm(f.project_name) === dgNorm(project_name)
+  );
+
+  if(duplicate){
+   toast("⚠️ Bu veri talebiniz zaten alındı — yönetici yanıtı bekleniyor","warn","✉️");
+   if(m){
+    m.style.color = "var(--amber)";
+    m.textContent = "⚠ Aynı ülke / şehir / proje filtresi için bekleyen talebiniz var. Yönetici indirip yanıtlayana veya reddedene kadar tekrar gönderilemez.";
+   }
    return;
   }
- }catch(e){console.log("Dup kontrolü:",e);}
- const body={user_id:USER.id,email:PROFILE?.email||USER.email,country,city,project_name,note,status:"Beklemede"};
- const{error}=await sb.from("data_requests").insert(body);
- if(error){m.style.color="var(--red)";m.textContent="Hata: "+error.message;return;}
+ }catch(e){
+  console.log("Talep tekrar kontrolü hatası:", e);
+ }
+
+ const body = {
+  user_id: USER.id,
+  email: PROFILE?.email || USER.email,
+  country,
+  city,
+  project_name,
+  note,
+  status: "Beklemede"
+ };
+
+ const {error} = await sb.from("data_requests").insert(body);
+
+ if(error){
+  if(m){
+   m.style.color = "var(--red)";
+   m.textContent = "Hata: " + error.message;
+  }
+  toast("Talep oluşturulamadı: " + error.message,"err","❌");
+  return;
+ }
+
  toast("✓ Talep gönderildi — yönetici yanıtı bekleniyor","ok","✉️");
- m.style.color="var(--green-dk)";m.textContent="✓ Talebiniz yönetime iletildi, hazır olduğunda e‑postanıza gönderilecek.";
- $("reqCountry").value="";$("reqCity").value="";$("reqProject").value="";$("reqNote").value="";
+
+ if(m){
+  m.style.color = "var(--green-dk)";
+  m.textContent = "✓ Talebiniz yönetime iletildi, hazır olduğunda e‑postanıza gönderilecek.";
+ }
+
+ if($("reqCountry"))$("reqCountry").value = "";
+ if($("reqCity"))$("reqCity").value = "";
+ if($("reqProject"))$("reqProject").value = "";
+ if($("reqNote"))$("reqNote").value = "";
+
+ if(typeof loadRequestOptions==="function") loadRequestOptions();
  loadMyRequests();
 }
 async function loadMyRequests(){
@@ -1804,73 +1860,119 @@ function filterAdminMeas(){
  $("aMeasT").querySelectorAll("tr").forEach(r=>{r.style.display=r.textContent.toLowerCase().includes(q)?"":"none";});
 }
 
-/* ============ GERÇEK ZAMANLI BAĞIMLI FİLTRELER (Ülke→Şehir→Proje) ============ */
-let REQ_ROWS=[],REQ_PROJECTS=[],ADM_ROWS=[],ADM_PROJECTS=[];
-function listCountries(rows,projects){
- const s=new Set();
- (rows||[]).forEach(r=>{const v=(r.country||"").trim();if(v)s.add(v);});
- (projects||[]).forEach(p=>{const v=(p.country||"").trim();if(v)s.add(v);});
- return [...s].sort((a,b)=>a.localeCompare(b,"tr"));
+/* ============ TALEP FORMU: GÜVENLİ BAĞIMLI ÜLKE → ŞEHİR → PROJE FİLTRESİ ============ */
+/* Global let çakışması yapmaz, ilgili HTML yoksa hata vermez. */
+
+window.DG_REQ = window.DG_REQ || {
+ rows: [],
+ projects: []
+};
+
+function dgNorm(v){
+ return (v ?? "").toString().trim().toLocaleLowerCase("tr-TR");
 }
-function listCities(rows,projects,country){
- const s=new Set();
- (rows||[]).forEach(r=>{const c=(r.country||"").trim(),v=(r.city||"").trim();if(v&&(!country||c===country))s.add(v);});
- (projects||[]).forEach(p=>{const c=(p.country||"").trim(),v=(p.city||"").trim();if(v&&(!country||c===country))s.add(v);});
- return [...s].sort((a,b)=>a.localeCompare(b,"tr"));
+
+function dgVal(id){
+ const el = $(id);
+ return el ? (el.value || "").trim() : "";
 }
-function listProjects(projects,country,city,withId){
- const list=(projects||[])
-  .filter(p=>(!country||(p.country||"").trim()===country)&&(!city||(p.city||"").trim()===city))
-  .sort((a,b)=>(a.name||"").localeCompare(b.name||"","tr"));
- return withId?list.map(p=>({v:String(p.id),label:p.name+(p.city?" · "+p.city:"")})) : list.map(p=>p.name);
-}
-function fillSelect(sel,opts){
- if(!sel)return;
- const cur=sel.value;
- sel.innerHTML='<option value="">Tümü</option>'+opts.map(o=>{
-  const isObj=typeof o==="object";
-  const v=isObj?o.v:o,label=isObj?o.label:o;
-  return `<option value="${v}"${v===cur?" selected":""}>${label}</option>`;
+
+function dgReqFillSelect(id, opts){
+ const sel = $(id);
+ if(!sel) return;
+
+ const cur = sel.value || "";
+ sel.innerHTML = '<option value="">Tümü</option>' + (opts || []).map(o => {
+  const v = (o || "").toString();
+  return '<option value="' + v.replace(/"/g,"&quot;") + '"' + (v === cur ? ' selected' : '') + '>' + v + '</option>';
  }).join("");
- if(sel.value!==cur)sel.value="";
+
+ if(cur && ![...sel.options].some(o => o.value === cur)){
+  sel.value = "";
+ }
 }
-/* --- Kullanıcı talep formu --- */
+
+function dgReqCountries(){
+ const s = new Set();
+
+ (window.DG_REQ.rows || []).forEach(r => {
+  const v = (r.country || "").trim();
+  if(v) s.add(v);
+ });
+
+ (window.DG_REQ.projects || []).forEach(p => {
+  const v = (p.country || "").trim();
+  if(v) s.add(v);
+ });
+
+ return [...s].sort((a,b) => a.localeCompare(b,"tr"));
+}
+
+function dgReqCities(country){
+ const s = new Set();
+
+ (window.DG_REQ.rows || []).forEach(r => {
+  const c = (r.country || "").trim();
+  const v = (r.city || "").trim();
+  if(v && (!country || c === country)) s.add(v);
+ });
+
+ (window.DG_REQ.projects || []).forEach(p => {
+  const c = (p.country || "").trim();
+  const v = (p.city || "").trim();
+  if(v && (!country || c === country)) s.add(v);
+ });
+
+ return [...s].sort((a,b) => a.localeCompare(b,"tr"));
+}
+
+function dgReqProjects(country, city){
+ const s = new Set();
+
+ (window.DG_REQ.projects || []).forEach(p => {
+  const pc = (p.country || "").trim();
+  const pcity = (p.city || "").trim();
+  const name = (p.name || "").trim();
+
+  if(!name) return;
+  if(country && pc !== country) return;
+  if(city && pcity !== city) return;
+
+  s.add(name);
+ });
+
+ return [...s].sort((a,b) => a.localeCompare(b,"tr"));
+}
+
 async function loadRequestOptions(){
  try{
-  const [m,p]=await Promise.all([
+  if(!$("reqCountry") || !$("reqCity") || !$("reqProject")) return;
+
+  const [m, p] = await Promise.all([
    sb.from("measurements").select("country,city").eq("status","Onaylı").limit(5000),
-   sb.from("projects").select("id,name,country,city").order("name")
+   sb.from("projects").select("name,country,city").order("name")
   ]);
-  REQ_ROWS=m.data||[];REQ_PROJECTS=p.data||[];
-  fillSelect($("reqCountry"),listCountries(REQ_ROWS,REQ_PROJECTS));
+
+  window.DG_REQ.rows = m.data || [];
+  window.DG_REQ.projects = p.data || [];
+
+  dgReqFillSelect("reqCountry", dgReqCountries());
   reqCountryChanged();
- }catch(e){}
+ }catch(e){
+  console.log("Talep filtreleri yüklenemedi:", e);
+ }
 }
+
 function reqCountryChanged(){
- fillSelect($("reqCity"),listCities(REQ_ROWS,REQ_PROJECTS,$("reqCountry").value));
+ const country = dgVal("reqCountry");
+ dgReqFillSelect("reqCity", dgReqCities(country));
  reqCityChanged();
 }
+
 function reqCityChanged(){
- fillSelect($("reqProject"),listProjects(REQ_PROJECTS,$("reqCountry").value,$("reqCity").value,false));
-}
-/* --- Yönetici paneli --- */
-async function loadAdminExportFilters(){
- try{
-  const [m,p]=await Promise.all([
-   sb.from("measurements").select("country,city"),
-   sb.from("projects").select("id,name,country,city").order("name")
-  ]);
-  ADM_ROWS=m.data||[];ADM_PROJECTS=p.data||[];
-  fillSelect($("admExpCountry"),listCountries(ADM_ROWS,ADM_PROJECTS));
-  admCountryChanged();
- }catch(e){}
-}
-function admCountryChanged(){
- fillSelect($("admExpCity"),listCities(ADM_ROWS,ADM_PROJECTS,$("admExpCountry").value));
- admCityChanged();
-}
-function admCityChanged(){
- fillSelect($("admExpProject"),listProjects(ADM_PROJECTS,$("admExpCountry").value,$("admExpCity").value,true));
+ const country = dgVal("reqCountry");
+ const city = dgVal("reqCity");
+ dgReqFillSelect("reqProject", dgReqProjects(country, city));
 }
 /* ============ YÖNETİCİ: KULLANICI VERİ TALEPLERİ ============ */
 async function loadRequests(){
@@ -1879,9 +1981,9 @@ async function loadRequests(){
  const pending=reqs.filter(r=>r.status!=="Tamamlandı"&&r.status!=="Reddedildi");
  const closed=reqs.filter(r=>r.status==="Tamamlandı"||r.status==="Reddedildi");
  
- $("aReqPending").textContent=pending.length;
- $("aReqPendingMini").textContent=pending.length;
- $("aReqClosed").textContent=closed.length;
+ if($("aReqPending"))$("aReqPending").textContent=pending.length;
+if($("aReqPendingMini"))$("aReqPendingMini").textContent=pending.length;
+if($("aReqClosed"))$("aReqClosed").textContent=closed.length;
  
  // AKTİF TALEPLER TABLOSU
  $("aReqT").innerHTML=pending.length?pending.map(r=>{
