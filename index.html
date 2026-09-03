@@ -778,9 +778,20 @@ tr.done td{opacity:.55}tr.done td b{text-decoration:line-through}
      <button class="btn amber" onclick="adminExportQgis()">🧾 QGIS Detaylı</button>
     </div>
    </div>
-   <div class="card" style="margin-bottom:18px;border-left:4px solid var(--blue)">
-    <div class="shead" style="margin-bottom:12px"><span class="no">✉️</span><h2 style="font-size:1.2rem">Kullanıcı Veri Talepleri</h2></div>
-    <div class="tblwrap"><table><thead><tr><th>Kullanıcı</th><th>E‑posta</th><th>Filtre</th><th>Not</th><th>Tarih</th><th>Durum</th><th>İşlem</th></tr></thead><tbody id="aReqT"></tbody></table></div>
+      <div class="card" style="margin-bottom:18px;border-left:4px solid var(--blue)">
+    <div class="shead" style="margin-bottom:12px"><span class="no">✉️</span><h2 style="font-size:1.2rem">Aktif Talepler</h2><span class="rule"></span><span class="mono" style="font-size:.78rem;color:var(--amber)">Bekleyen: <b id="aReqPending">0</b></span></div>
+    <div class="tblwrap"><table><thead><tr><th>Kullanıcı</th><th>E‑posta</th><th>Filtre</th><th>Tarih</th><th>Durum</th><th>İşlem</th></tr></thead><tbody id="aReqT"></tbody></table></div>
+   </div>
+   <div class="card" id="closedRequestsWrap" style="margin-bottom:18px;border-left:4px solid var(--mut);display:none">
+    <div class="shead" style="margin-bottom:12px;cursor:pointer" onclick="document.getElementById('closedReqBody').style.display=document.getElementById('closedReqBody').style.display==='none'?'block':'none'">
+     <span class="no">📦</span>
+     <h2 style="font-size:1.2rem">Tamamlanan / Reddedilen Talepler</h2>
+     <span class="rule"></span>
+     <span class="mono" style="font-size:.78rem;color:var(--mut)">Arşiv: <b id="aReqClosed">0</b> · Aç/Kapat ▼</span>
+    </div>
+    <div id="closedReqBody" style="display:none">
+     <div class="tblwrap"><table><thead><tr><th>Kullanıcı</th><th>E‑posta</th><th>Filtre</th><th>Talep</th><th>Kapanış</th><th>Durum</th></tr></thead><tbody id="closedReqT"></tbody></table></div>
+    </div>
    </div>
    <div class="card tblwrap">
     <div class="shead" style="margin-bottom:12px"><span class="no">📋</span><h2 style="font-size:1.2rem">Ölçüm Onay & Moderasyon</h2></div>
@@ -1591,10 +1602,53 @@ async function loadVisitStats(){
 /* ============ VERİ TALEBİ (kullanıcı → yönetici) ============ */
 async function sendDataRequest(){
  if(!USER)return;
- const body={user_id:USER.id,email:PROFILE?.email||USER.email,country:$("reqCountry").value||null,city:$("reqCity").value||null,project_name:$("reqProject").value||null,note:$("reqNote").value||null};
- const{error}=await sb.from("data_requests").insert(body);
+ const country=$("reqCountry").value||null;
+ const city=$("reqCity").value||null;
+ const project_name=$("reqProject").value||null;
+ const note=$("reqNote").value||null;
  const m=$("reqMsg");
+ 
+ // Aynı filtreden Beklemede talep var mı kontrol et
+ try{
+  const{data:existing}=await sb.from("data_requests")
+   .select("id,status")
+   .eq("user_id",USER.id)
+   .eq("status","Beklemede")
+   .eq("country",country||"")
+   .eq("city",city||"")
+   .eq("project_name",project_name||"")
+   .limit(1);
+  
+  // Eğer filtre alanları null ise ayrı sorgu (Supabase null eq desteği sınırlı)
+  let duplicate=false;
+  if(existing&&existing.length>0){
+   // Filtre eşleşmesini manuel kontrol et
+   for(const ex of existing){
+    const full=await sb.from("data_requests").select("*").eq("id",ex.id).single();
+    if(full.data){
+     const f=full.data;
+     if((f.country||null)===(country||null) && 
+        (f.city||null)===(city||null) && 
+        (f.project_name||null)===(project_name||null)){
+      duplicate=true;
+      break;
+     }
+    }
+   }
+  }
+  
+  if(duplicate){
+   toast("⚠️ Bu talep zaten gönderildi — cevap bekleniyor","warn","✉️");
+   m.style.color="var(--amber)";
+   m.textContent="⚠ Aynı filtreyle zaten bir talep bekliyor. Yönetici yanıt verene kadar yeni talep oluşturulamaz.";
+   return;
+  }
+ }catch(e){console.log("Duplikasyon kontrolü:",e);}
+ 
+ const body={user_id:USER.id,email:PROFILE?.email||USER.email,country,city,project_name,note};
+ const{error}=await sb.from("data_requests").insert(body);
  if(error){m.style.color="var(--red)";m.textContent="Hata: "+error.message;return;}
+ toast("✓ Talep gönderildi — yönetici yanıt verince bildirim alacaksın","ok","✉️");
  m.style.color="var(--green-dk)";m.textContent="✓ Talebiniz yönetime iletildi, hazır olduğunda e‑postanıza gönderilecek.";
  $("reqCountry").value="";$("reqCity").value="";$("reqProject").value="";$("reqNote").value="";
  loadMyRequests();
@@ -1765,13 +1819,60 @@ async function adminExportGeo(){
 async function loadRequests(){
  const{data}=await sb.from("data_requests").select("*,profiles(full_name)").order("created_at",{ascending:false});
  const reqs=data||[];
- $("aReqPending").textContent=reqs.filter(r=>r.status==="Beklemede").length;
- $("aReqT").innerHTML=reqs.map(r=>{
+ const pending=reqs.filter(r=>r.status!=="Tamamlandı"&&r.status!=="Reddedildi");
+ const closed=reqs.filter(r=>r.status==="Tamamlandı"||r.status==="Reddedildi");
+ 
+ $("aReqPending").textContent=pending.length;
+ $("aReqClosed").textContent=closed.length;
+ 
+ // AKTİF TALEPLER TABLOSU
+ $("aReqT").innerHTML=pending.length?pending.map(r=>{
   const filt=[r.country,r.city,r.project_name].filter(Boolean).join(" / ")||"Tüm Veri";
-  const bc=r.status==="Tamamlandı"?"on":(r.status==="İşleme Alındı"?"admin":"off");
-  return `<tr><td>${r.profiles?.full_name||"—"}</td><td>${r.email||"—"}</td><td>${filt}</td><td>${r.note||"—"}</td><td>${new Date(r.created_at).toLocaleDateString("tr-TR")}</td><td><span class="badge ${bc}">${r.status}</span></td><td>${r.status!=="Tamamlandı"?`<button class="btn sm blue" onclick="fulfillRequest(${r.id})">📥✉️ İndir ve Yanıtla</button>`:"—"}</td></tr>`;
- }).join("")||"<tr><td colspan=7>Talep yok.</td></tr>";
+  const hasNote=r.note&&r.note.trim().length>0;
+  return `<tr>
+   <td>${r.profiles?.full_name||"—"}</td>
+   <td>${r.email||"—"}</td>
+   <td><b>${filt}</b></td>
+   <td>${new Date(r.created_at).toLocaleDateString("tr-TR")}</td>
+   <td><span class="badge admin">${r.status}</span></td>
+   <td style="display:flex;gap:4px;flex-wrap:wrap">
+    <button class="btn sm blue" onclick="fulfillRequest(${r.id})">📥✉️ İndir ve Yanıtla</button>
+    <button class="btn sm red" onclick="rejectRequest(${r.id})">🚫 Reddet</button>
+   </td>
+  </tr>${hasNote?`<tr><td colspan="6" style="background:var(--tint);font-size:.78rem;color:var(--mut);white-space:normal;padding:8px 12px;line-height:1.5"><b style="color:var(--green-dk)">📝 Not:</b> ${r.note}</td></tr>`:""}`;
+ }).join(""):"<tr><td colspan=6 style='text-align:center;color:var(--mut)'>Bekleyen talep yok</td></tr>";
+ 
+ // TAMAMLANAN/REDDEDİLENLER (COLLAPSIBLE)
+ const closedWrap=$("closedRequestsWrap");
+ if(closed.length>0){
+  closedWrap.style.display="block";
+  $("aReqClosed").textContent=closed.length;
+  $("closedReqT").innerHTML=closed.map(r=>{
+   const filt=[r.country,r.city,r.project_name].filter(Boolean).join(" / ")||"Tüm Veri";
+   const bc=r.status==="Tamamlandı"?"on":"off";
+   const hasNote=r.note&&r.note.trim().length>0;
+   const closedDate=r.fulfilled_at?new Date(r.fulfilled_at).toLocaleDateString("tr-TR"):"";
+   return `<tr>
+    <td>${r.profiles?.full_name||"—"}</td>
+    <td>${r.email||"—"}</td>
+    <td>${filt}</td>
+    <td>${new Date(r.created_at).toLocaleDateString("tr-TR")}</td>
+    <td>${closedDate}</td>
+    <td><span class="badge ${bc}">${r.status}</span></td>
+   </tr>${hasNote?`<tr><td colspan="6" style="background:var(--tint);font-size:.78rem;color:var(--mut);white-space:normal;padding:8px 12px;line-height:1.5"><b style="color:var(--green-dk)">📝 Not:</b> ${r.note}</td></tr>`:""}`;
+  }).join("");
+ }else{
+  closedWrap.style.display="none";
+ }
 }
+async function rejectRequest(id){
+ if(!confirm("Bu talebi reddetmek istediğinizden emin misiniz? Kullanıcıya yanıt gönderilmez, talep arşive kaldırılır."))return;
+ const{error}=await sb.from("data_requests").update({status:"Reddedildi",fulfilled_at:new Date().toISOString()}).eq("id",id);
+ if(error){toast("Hata: "+error.message,"err");return;}
+ toast("✓ Talep reddedildi","warn","🚫");
+ loadRequests();
+}
+
 async function fulfillRequest(id){
  const{data:req}=await sb.from("data_requests").select("*").eq("id",id).single();
  if(!req)return;
