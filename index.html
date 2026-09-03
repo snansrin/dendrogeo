@@ -661,10 +661,10 @@ tr.done td{opacity:.55}tr.done td b{text-decoration:line-through}
    <h2 class="disp" style="margin-bottom:16px">Projeler</h2>
    <div class="card" style="margin-bottom:16px">
     <div class="grid g3">
-    <div><div class="lbl">Ülke</div><select id="reqCountry" onchange="reqCountryChanged()"><option value="">Tümü</option></select></div>
-    <div><div class="lbl">Şehir</div><select id="reqCity" onchange="reqCityChanged()"><option value="">Tümü</option></select></div>
-    <div><div class="lbl">Proje / Park</div><select id="reqProject"><option value="">Tümü</option></select></div>
-   </div>
+<div><div class="lbl">Ülke</div><select id="reqCountry" onchange="reqCountryChanged()"><option value="">Tümü</option></select></div>
+<div><div class="lbl">Şehir</div><select id="reqCity" onchange="reqCityChanged()"><option value="">Tümü</option></select></div>
+<div><div class="lbl">Proje / Park</div><select id="reqProject"><option value="">Tümü</option></select></div>
+</div>
     <div style="display:flex;gap:8px;margin-top:10px">
      <button class="btn sm" id="projSaveBtn" onclick="createProject()">+ Proje Oluştur</button>
      <button class="btn sm ghost" id="projCancelBtn" style="display:none" onclick="cancelProjectEdit()">Vazgeç</button>
@@ -1228,7 +1228,7 @@ function startShell(){
  $("landing").style.display="none";$("shell").style.display="block";
  if(PROFILE){$("whoami").textContent=PROFILE.full_name;
   if(PROFILE.role==="admin"||PROFILE.role==="owner"){$("roleBadge").style.display="inline";$("roleBadge").textContent=PROFILE.role==="owner"?"KURUCU":"ADMIN";$("roleBadge").className=PROFILE.role==="owner"?"badge on":"badge admin";$("adminSec").style.display="block";$("miAdmin").style.display="flex";$("miUsers").style.display="flex";}}
-initMaps();loadProjects();loadDash();loadRecords();loadWorld();loadMyRequests();loadRequestOptions();
+initMaps();loadProjects();loadDash();loadRecords();loadWorld();loadMyRequests();loadRequestOptions();loadRequestOptions();
 }
 
 function go(v){
@@ -1626,7 +1626,49 @@ async function loadVisitStats(){
   $("aVisit7").textContent=w.count??0;
  }catch(e){$("aVisitTotal").textContent="—";}
 }
-
+/* ============ TALEP FORMU: BAĞIMLI ÜLKE→ŞEHİR→PROJE FİLTRESİ ============ */
+let REQ_ROWS=[],REQ_PROJECTS=[];
+async function loadRequestOptions(){
+ try{
+  const [m,p]=await Promise.all([
+   sb.from("measurements").select("country,city").eq("status","Onaylı").limit(5000),
+   sb.from("projects").select("name,country,city").order("name")
+  ]);
+  REQ_ROWS=m.data||[];REQ_PROJECTS=p.data||[];
+  fillReqSelect($("reqCountry"),reqCountryList());
+  reqCountryChanged();
+ }catch(e){}
+}
+function reqCountryList(){
+ const s=new Set();
+ (REQ_ROWS||[]).forEach(r=>{const v=(r.country||"").trim();if(v)s.add(v);});
+ (REQ_PROJECTS||[]).forEach(p=>{const v=(p.country||"").trim();if(v)s.add(v);});
+ return [...s].sort((a,b)=>a.localeCompare(b,"tr"));
+}
+function reqCityList(country){
+ const s=new Set();
+ (REQ_ROWS||[]).forEach(r=>{const c=(r.country||"").trim(),v=(r.city||"").trim();if(v&&(!country||c===country))s.add(v);});
+ (REQ_PROJECTS||[]).forEach(p=>{const c=(p.country||"").trim(),v=(p.city||"").trim();if(v&&(!country||c===country))s.add(v);});
+ return [...s].sort((a,b)=>a.localeCompare(b,"tr"));
+}
+function reqProjectList(country,city){
+ return (REQ_PROJECTS||[])
+  .filter(p=>(!country||(p.country||"").trim()===country)&&(!city||(p.city||"").trim()===city))
+  .map(p=>p.name).sort((a,b)=>a.localeCompare(b,"tr"));
+}
+function fillReqSelect(sel,opts){
+ if(!sel)return;
+ const cur=sel.value;
+ sel.innerHTML='<option value="">Tümü</option>'+opts.map(o=>`<option${o===cur?" selected":""}>${o}</option>`).join("");
+ if(sel.value!==cur)sel.value="";
+}
+function reqCountryChanged(){
+ fillReqSelect($("reqCity"),reqCityList($("reqCountry").value));
+ reqCityChanged();
+}
+function reqCityChanged(){
+ fillReqSelect($("reqProject"),reqProjectList($("reqCountry").value,$("reqCity").value));
+}
 /* ============ VERİ TALEBİ (kullanıcı → yönetici) ============ */
 async function sendDataRequest(){
  if(!USER)return;
