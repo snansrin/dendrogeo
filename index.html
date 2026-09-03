@@ -661,10 +661,10 @@ tr.done td{opacity:.55}tr.done td b{text-decoration:line-through}
    <h2 class="disp" style="margin-bottom:16px">Projeler</h2>
    <div class="card" style="margin-bottom:16px">
     <div class="grid g3">
-     <div><div class="lbl">Proje Adı</div><input id="pName"></div>
-     <div><div class="lbl">Ülke</div><input id="pCountry" value="Türkiye"></div>
-     <div><div class="lbl">Şehir</div><input id="pCity" value="Ankara"></div>
-    </div>
+    <div><div class="lbl">Ülke</div><select id="reqCountry" onchange="reqCountryChanged()"><option value="">Tümü</option></select></div>
+    <div><div class="lbl">Şehir</div><select id="reqCity" onchange="reqCityChanged()"><option value="">Tümü</option></select></div>
+    <div><div class="lbl">Proje / Park</div><select id="reqProject"><option value="">Tümü</option></select></div>
+   </div>
     <div style="display:flex;gap:8px;margin-top:10px">
      <button class="btn sm" id="projSaveBtn" onclick="createProject()">+ Proje Oluştur</button>
      <button class="btn sm ghost" id="projCancelBtn" style="display:none" onclick="cancelProjectEdit()">Vazgeç</button>
@@ -768,9 +768,9 @@ tr.done td{opacity:.55}tr.done td b{text-decoration:line-through}
     <div class="shead" style="margin-bottom:12px"><span class="no">📦</span><h2 style="font-size:1.2rem">Toplu Dışa Aktarım (Tüm Kullanıcılar)</h2></div>
     <p style="color:var(--mut);font-size:.82rem;margin-bottom:10px">Kullanıcı ayrımı yapılmadan sistemdeki <b>tüm veri</b>, seçtiğiniz filtrelere göre dışa aktarılır.</p>
     <div class="grid g4">
-     <div><div class="lbl">Ülke</div><select id="admExpCountry"><option value="">Tümü</option></select></div>
-     <div><div class="lbl">Şehir</div><select id="admExpCity"><option value="">Tümü</option></select></div>
-     <div><div class="lbl">Proje / Park</div><select id="admExpProject"><option value="">Tümü</option></select></div>
+     <div><div class="lbl">Ülke</div><select id="admExpCountry" onchange="admCountryChanged()"><option value="">Tümü</option></select></div>
+<div><div class="lbl">Şehir</div><select id="admExpCity" onchange="admCityChanged()"><option value="">Tümü</option></select></div>
+<div><div class="lbl">Proje / Park</div><select id="admExpProject"><option value="">Tümü</option></select></div>
      <div><div class="lbl">Durum</div><select id="admExpStatus"><option value="">Tümü</option><option value="Onaylı">Onaylı</option><option value="Beklemede">Beklemede</option><option value="Red">Red</option></select></div>
     </div>
     <div class="grid g3" style="margin-top:12px">
@@ -1228,7 +1228,7 @@ function startShell(){
  $("landing").style.display="none";$("shell").style.display="block";
  if(PROFILE){$("whoami").textContent=PROFILE.full_name;
   if(PROFILE.role==="admin"||PROFILE.role==="owner"){$("roleBadge").style.display="inline";$("roleBadge").textContent=PROFILE.role==="owner"?"KURUCU":"ADMIN";$("roleBadge").className=PROFILE.role==="owner"?"badge on":"badge admin";$("adminSec").style.display="block";$("miAdmin").style.display="flex";$("miUsers").style.display="flex";}}
- initMaps();loadProjects();loadDash();loadRecords();loadWorld();loadMyRequests();
+initMaps();loadProjects();loadDash();loadRecords();loadWorld();loadMyRequests();loadRequestOptions();
 }
 
 function go(v){
@@ -1241,8 +1241,9 @@ function go(v){
  if(v==="map")setTimeout(()=>{map&&map.invalidateSize();if(!liveLoaded){liveLoaded=true;loadLiveMap();}},150);
  if(v==="nav")setTimeout(()=>{navMap&&navMap.invalidateSize();loadWaypoints();},150);
  if(v==="world")setTimeout(()=>worldMap&&worldMap.invalidateSize(),150);
- if(v==="admin")loadAdmin();
- if(v==="users")loadUsers();
+if(v==="admin")loadAdmin();
+if(v==="users")loadUsers();
+if(v==="export")loadRequestOptions();
 }
 
 async function loadLiveMap(){
@@ -1801,40 +1802,74 @@ function filterAdminMeas(){
  $("aMeasT").querySelectorAll("tr").forEach(r=>{r.style.display=r.textContent.toLowerCase().includes(q)?"":"none";});
 }
 
-/* ============ YÖNETİCİ: FİLTRELİ TÜM VERİ DIŞA AKTARIMI ============ */
-async function loadAdminExportFilters(){
+/* ============ GERÇEK ZAMANLI BAĞIMLI FİLTRELER (Ülke→Şehir→Proje) ============ */
+let REQ_ROWS=[],REQ_PROJECTS=[],ADM_ROWS=[],ADM_PROJECTS=[];
+function listCountries(rows,projects){
+ const s=new Set();
+ (rows||[]).forEach(r=>{const v=(r.country||"").trim();if(v)s.add(v);});
+ (projects||[]).forEach(p=>{const v=(p.country||"").trim();if(v)s.add(v);});
+ return [...s].sort((a,b)=>a.localeCompare(b,"tr"));
+}
+function listCities(rows,projects,country){
+ const s=new Set();
+ (rows||[]).forEach(r=>{const c=(r.country||"").trim(),v=(r.city||"").trim();if(v&&(!country||c===country))s.add(v);});
+ (projects||[]).forEach(p=>{const c=(p.country||"").trim(),v=(p.city||"").trim();if(v&&(!country||c===country))s.add(v);});
+ return [...s].sort((a,b)=>a.localeCompare(b,"tr"));
+}
+function listProjects(projects,country,city,withId){
+ const list=(projects||[])
+  .filter(p=>(!country||(p.country||"").trim()===country)&&(!city||(p.city||"").trim()===city))
+  .sort((a,b)=>(a.name||"").localeCompare(b.name||"","tr"));
+ return withId?list.map(p=>({v:String(p.id),label:p.name+(p.city?" · "+p.city:"")})) : list.map(p=>p.name);
+}
+function fillSelect(sel,opts){
+ if(!sel)return;
+ const cur=sel.value;
+ sel.innerHTML='<option value="">Tümü</option>'+opts.map(o=>{
+  const isObj=typeof o==="object";
+  const v=isObj?o.v:o,label=isObj?o.label:o;
+  return `<option value="${v}"${v===cur?" selected":""}>${label}</option>`;
+ }).join("");
+ if(sel.value!==cur)sel.value="";
+}
+/* --- Kullanıcı talep formu --- */
+async function loadRequestOptions(){
  try{
-  const{data:meas}=await sb.from("measurements").select("country,city");
-  const countries=[...new Set((meas||[]).map(m=>m.country).filter(Boolean))].sort();
-  const cities=[...new Set((meas||[]).map(m=>m.city).filter(Boolean))].sort();
-  const curC=$("admExpCountry").value,curCi=$("admExpCity").value,curP=$("admExpProject").value;
-  $("admExpCountry").innerHTML='<option value="">Tümü</option>'+countries.map(c=>`<option ${c===curC?"selected":""}>${c}</option>`).join("");
-  $("admExpCity").innerHTML='<option value="">Tümü</option>'+cities.map(c=>`<option ${c===curCi?"selected":""}>${c}</option>`).join("");
-  const{data:projs}=await sb.from("projects").select("id,name,country,city").order("name");
-  $("admExpProject").innerHTML='<option value="">Tümü</option>'+(projs||[]).map(p=>`<option value="${p.id}" ${String(p.id)===curP?"selected":""}>${p.name}${p.city?" · "+p.city:""}</option>`).join("");
+  const [m,p]=await Promise.all([
+   sb.from("measurements").select("country,city").eq("status","Onaylı").limit(5000),
+   sb.from("projects").select("id,name,country,city").order("name")
+  ]);
+  REQ_ROWS=m.data||[];REQ_PROJECTS=p.data||[];
+  fillSelect($("reqCountry"),listCountries(REQ_ROWS,REQ_PROJECTS));
+  reqCountryChanged();
  }catch(e){}
 }
-async function buildAdminFilterQuery(overrides){
- let q=sb.from("measurements").select("*");
- const c=(overrides&&overrides.country)??$("admExpCountry").value;
- const ci=(overrides&&overrides.city)??$("admExpCity").value;
- const p=(overrides&&overrides.project)??$("admExpProject").value;
- const st=(overrides&&overrides.status)??$("admExpStatus").value;
- if(c)q=q.eq("country",c);
- if(ci)q=q.eq("city",ci);
- if(p)q=q.eq("project_id",p);
- if(st)q=q.eq("status",st);
- const{data}=await q;
- return data||[];
+function reqCountryChanged(){
+ fillSelect($("reqCity"),listCities(REQ_ROWS,REQ_PROJECTS,$("reqCountry").value));
+ reqCityChanged();
 }
-async function adminExportCSV(){const data=await buildAdminFilterQuery();dl(fullCSV(data),"dendrogeo_admin_tum_veri.csv");}
-async function adminExportQgis(){const data=await buildAdminFilterQuery();dl(fullCSV(data),"dendrogeo_admin_qgis.csv");}
-async function adminExportGeo(){
- const data=await buildAdminFilterQuery();
- const gj={type:"FeatureCollection",features:data.map(r=>({type:"Feature",geometry:{type:"Point",coordinates:[r.lon,r.lat]},properties:{point:r.point_id,species:r.species,latin:LATIN[r.species]||"",dbh:r.dbh_cm,height:r.height_m,carbon:r.carbon_kg,photo:r.photo_url||""}}))};
- dl(JSON.stringify(gj,null,2),"dendrogeo_admin.geojson");
+function reqCityChanged(){
+ fillSelect($("reqProject"),listProjects(REQ_PROJECTS,$("reqCountry").value,$("reqCity").value,false));
 }
-
+/* --- Yönetici paneli --- */
+async function loadAdminExportFilters(){
+ try{
+  const [m,p]=await Promise.all([
+   sb.from("measurements").select("country,city"),
+   sb.from("projects").select("id,name,country,city").order("name")
+  ]);
+  ADM_ROWS=m.data||[];ADM_PROJECTS=p.data||[];
+  fillSelect($("admExpCountry"),listCountries(ADM_ROWS,ADM_PROJECTS));
+  admCountryChanged();
+ }catch(e){}
+}
+function admCountryChanged(){
+ fillSelect($("admExpCity"),listCities(ADM_ROWS,ADM_PROJECTS,$("admExpCountry").value));
+ admCityChanged();
+}
+function admCityChanged(){
+ fillSelect($("admExpProject"),listProjects(ADM_PROJECTS,$("admExpCountry").value,$("admExpCity").value,true));
+}
 /* ============ YÖNETİCİ: KULLANICI VERİ TALEPLERİ ============ */
 async function loadRequests(){
  const{data}=await sb.from("data_requests").select("*,profiles(full_name)").order("created_at",{ascending:false});
