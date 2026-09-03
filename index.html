@@ -906,19 +906,19 @@ function calc(dbh,h,sp,grp){
  return{agb,bhb,bio,c_agb:agb*0.47,c_bhb:bhb*0.47,total_carbon:bio*0.47,vol:Math.PI*Math.pow(dbh/200,2)*h*0.5};
 }
 
-/* ============ KONUMDAN ŞEHİR/ÜLKE ALGILAMA (Reverse Geocoding) ============ */
-/* Türkiye'de Nominatim "city" alanına çoğunlukla İLÇE/SEMT yazar (Çankaya, Etimesgut...).
-   İl (şehir) adı admin_level=4 olduğu için "state" alanındadır → TR'de önce state kullanılır. */
+/* ============ KONUMDAN İL/ÜLKE ALGILAMA (Reverse Geocoding) ============ */
+/* TÜRKİYE'de il adı "state" alanındadır (admin_level=4); ilçe "city/town" alanına düşer.
+   Kesin il için TR'de ÖNCE state okunur; diğer ülkelerde standart zincir. */
 async function reverseGeocode(lat,lon){
 try{
-const r=await fetch("https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat="+lat+"&lon="+lon+"&accept-language=tr",{headers:{Accept:"application/json"}});
+const r=await fetch("https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat="+lat+"&lon+"&accept-language=tr");
 if(!r.ok)return null;
 const j=await r.json();const a=j.address||{};
+const cc=(a.country_code||"").toLowerCase();
+const city=cc==="tr"
+ ?(a.state||a.province||a.city||null)
+ :(a.city||a.town||a.village||a.municipality||a.state||null);
 const country=a.country||null;
-const isTR=((a.country_code||"").toLowerCase()==="tr")||/türkiye|turkey/i.test(country||"");
-const city=isTR
-?(a.state||a.province||a.city||a.town||"Bilinmiyor")
-:(a.city||a.town||a.village||a.municipality||a.state||"Bilinmiyor");
 if(!city&&!country)return null;
 return{city:city||"Bilinmiyor",country:country||"Bilinmiyor"};
 }catch(e){return null;}
@@ -1626,42 +1626,21 @@ async function loadVisitStats(){
 /* ============ VERİ TALEBİ (kullanıcı → yönetici) ============ */
 async function sendDataRequest(){
  if(!USER)return;
- const country=$("reqCountry").value||null;
- const city=$("reqCity").value||null;
- const project_name=$("reqProject").value||null;
- const note=$("reqNote").value||null;
+ const country=$("reqCountry").value.trim()||null;
+ const city=$("reqCity").value.trim()||null;
+ const project_name=$("reqProject").value.trim()||null;
+ const note=$("reqNote").value.trim()||null;
  const m=$("reqMsg");
  
  // Aynı filtreden Beklemede talep var mı kontrol et
- try{
-  const{data:existing}=await sb.from("data_requests")
-   .select("id,status")
-   .eq("user_id",USER.id)
-   .eq("status","Beklemede")
-   .eq("country",country||"")
-   .eq("city",city||"")
-   .eq("project_name",project_name||"")
-   .limit(1);
-  
-  // Eğer filtre alanları null ise ayrı sorgu (Supabase null eq desteği sınırlı)
-  let duplicate=false;
-  if(existing&&existing.length>0){
-   // Filtre eşleşmesini manuel kontrol et
-   for(const ex of existing){
-    const full=await sb.from("data_requests").select("*").eq("id",ex.id).single();
-    if(full.data){
-     const f=full.data;
-     if((f.country||null)===(country||null) && 
-        (f.city||null)===(city||null) && 
-        (f.project_name||null)===(project_name||null)){
-      duplicate=true;
-      break;
-     }
-    }
-   }
-  }
-  
-  if(duplicate){
+try{
+const{data:pending}=await sb.from("data_requests")
+.select("country,city,project_name")
+.eq("user_id",USER.id)
+.eq("status","Beklemede");
+const norm=v=>(v||"").toString().trim().toLowerCase();
+const duplicate=(pending||[]).some(f=>norm(f.country)===norm(country)&&norm(f.city)===norm(city)&&norm(f.project_name)===norm(project_name));
+if(duplicate){
    toast("⚠️ Bu talep zaten gönderildi — cevap bekleniyor","warn","✉️");
    m.style.color="var(--amber)";
    m.textContent="⚠ Aynı filtreyle zaten bir talep bekliyor. Yönetici yanıt verene kadar yeni talep oluşturulamaz.";
