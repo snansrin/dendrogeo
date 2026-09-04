@@ -1224,11 +1224,15 @@ function initLanding(){
  trackVisit();
 }
 
-function startShell(){
- $("landing").style.display="none";$("shell").style.display="block";
+async function startShell(){
+$("landing").style.display="none";$("shell").style.display="block";
  if(PROFILE){$("whoami").textContent=PROFILE.full_name;
   if(PROFILE.role==="admin"||PROFILE.role==="owner"){$("roleBadge").style.display="inline";$("roleBadge").textContent=PROFILE.role==="owner"?"KURUCU":"ADMIN";$("roleBadge").className=PROFILE.role==="owner"?"badge on":"badge admin";$("adminSec").style.display="block";$("miAdmin").style.display="flex";$("miUsers").style.display="flex";}}
-initMaps();loadProjects();loadDash();loadRecords();loadWorld();loadMyRequests();loadRequestOptions();
+initMaps();
+await loadProjects();
+await loadWaypoints();
+loadDash();loadRecords();loadWorld();loadMyRequests();loadRequestOptions();
+autoFillPointId();
 }
 
 function go(v){
@@ -1237,8 +1241,9 @@ function go(v){
  document.querySelectorAll("#side .item").forEach(i=>i.classList.remove("on"));
  const items=document.querySelectorAll("#side .item");
  const idx={dash:0,measure:1,nav:2,map:3,projects:4,records:5,export:6,world:7,admin:8,users:9};
- if(items[idx[v]])items[idx[v]].classList.add("on");
- if(v==="map")setTimeout(()=>{map&&map.invalidateSize();if(!liveLoaded){liveLoaded=true;loadLiveMap();}},150);
+if(items[idx[v]])items[idx[v]].classList.add("on");
+if(v==="dash"){loadWaypoints().then(()=>loadDash());}
+if(v==="map")setTimeout(()=>{map&&map.invalidateSize();if(!liveLoaded){liveLoaded=true;loadLiveMap();}},150);
  if(v==="nav")setTimeout(()=>{navMap&&navMap.invalidateSize();loadWaypoints();},150);
  if(v==="world")setTimeout(()=>worldMap&&worldMap.invalidateSize(),150);
 if(v==="admin")loadAdmin();
@@ -1330,14 +1335,24 @@ async function deleteProject(id){
 
 let manualPoint=false;
 async function autoFillPointId(){
- if(manualPoint||EDIT_ID)return;
- const pid=+$("mProject").value;
- if(!pid||!GPS)return;
- if($("mPoint").value)return;
- const{data}=await sb.from("waypoints").select("*").eq("project_id",pid).eq("visited",false);
- if(!data||data.length===0)return;
- const nearest=data.sort((a,b)=>hav(GPS.latitude,GPS.longitude,a.lat,a.lon)-hav(GPS.latitude,GPS.longitude,b.lat,b.lon))[0];
- $("mPoint").value=nearest.wp_id;
+if(manualPoint||EDIT_ID)return;
+const pid=+$("mProject").value;
+if(!pid)return;
+if($("mPoint").value)return;
+try{
+// 1) GPS açık + ziyaret edilmemiş waypoint varsa → en yakın waypoint
+if(GPS){
+const{data}=await sb.from("waypoints").select("*").eq("project_id",pid).eq("visited",false);
+if(data&&data.length){
+const nearest=data.sort((a,b)=>hav(GPS.latitude,GPS.longitude,a.lat,a.lon)-hav(GPS.latitude,GPS.longitude,b.lat,b.lon))[0];
+$("mPoint").value=nearest.wp_id;
+return;
+}
+}
+// 2) Waypoint yoksa → projedeki son point_id + 1 (proje boşsa 1)
+const{data}=await sb.from("measurements").select("point_id").eq("project_id",pid).order("point_id",{ascending:false}).limit(1);
+$("mPoint").value=(data&&data.length)?((data[0].point_id||0)+1):1;
+}catch(e){}
 }
 
 async function queryPointId(){
@@ -1363,8 +1378,9 @@ async function saveMeas(){
  if(d>500||h>100)return toast("Çap ≤500 cm, boy ≤100 m olmalı","err");
  const f=$("mPhoto").files[0];
  if(f&&!photoOk)return toast("Fotoğraf denetimi başarısız — uygun bir çekim yapın","err");
- const c=calc(d,h,sp,grp);
- let photo=null,photoFile=null;
+const wasEdit=!!EDIT_ID;
+const c=calc(d,h,sp,grp);
+let photo=null,photoFile=null;
  if(f){
   const comp=await compress(f);
   photoFile="P"+String(pt).padStart(3,"0")+"_M"+(+$("mNo").value||1)+".JPG";
@@ -1407,9 +1423,10 @@ if(!navigator.onLine){
   if(error)return toast("Hata: "+error.message,"err");
   toast("Kaydedildi — "+c.total_carbon.toFixed(1)+" kg karbon","ok","🌱");
  }
- $("mPoint").value='';$("mDbh").value='';$("mHeight").value='';$("mPhoto").value='';
- $("photoCheck").style.display="none";$("pointQueryResult").style.display="none";photoOk=false;manualPoint=false;
- loadDash();loadRecords();
+$("mPoint").value='';$("mDbh").value='';$("mHeight").value='';$("mPhoto").value='';
+$("photoCheck").style.display="none";$("pointQueryResult").style.display="none";photoOk=false;manualPoint=false;
+loadDash();loadRecords();loadWaypoints();
+if(!wasEdit)autoFillPointId();
 }
 function cancelEdit(){EDIT_ID=null;manualPoint=false;$("editBanner").style.display="none";$("saveBtn").textContent="💾 Hesapla ve Kaydet";}
 async function editRec(id){
