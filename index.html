@@ -2070,32 +2070,46 @@ function zoomToCity(city){
 }
 function getCountryBounds(c){return[[20,10],[55,60]];}
 
-async function saveOfflineMeasurement(data){
- const db=await openOfflineDB();
- const tx=db.transaction('measurements','readwrite');
- const store=tx.objectStore('measurements');
- 
- const session=await sb.auth.getSession();
- const token=session.data.session?.access_token||'';
- 
- store.add({
-  data:data,
-  apiKey:SB_KEY,
-  token:token,
-  timestamp:Date.now()
- });
- 
- return new Promise((resolve,reject)=>{
-  tx.oncomplete=()=>{
-   if('serviceWorker' in navigator&&navigator.serviceWorker.controller){
-    navigator.serviceWorker.controller.postMessage({type:'SYNC'});
-   }
-   resolve();
-  };
-  tx.onerror=e=>reject(e.target.error);
- });
+async function saveOfflineMeasurement(data) {
+    const db = await openOfflineDB();
+    const tx = db.transaction('measurements', 'readwrite');
+    const store = tx.objectStore('measurements');
+    const session = await sb.auth.getSession();
+    const token = session.data.session?.access_token || '';
+    
+    // Fotoğraf dosyasını Blob olarak sakla (base64 değil, daha verimli)
+    const photoInput = $('mPhoto');
+    let photoBlob = null;
+    if (photoInput.files && photoInput.files[0]) {
+        photoBlob = photoInput.files[0];
+    }
+    
+    store.add({
+        data: { ...data, photoBlob: photoBlob },
+        apiKey: SB_KEY,
+        token: token,
+        timestamp: Date.now()
+    });
+    
+    return new Promise((resolve, reject) => {
+        tx.oncomplete = () => {
+            // Background sync kaydı
+            if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
+                navigator.serviceWorker.controller.postMessage({ type: 'SYNC' });
+            }
+            // Background Sync API (Chrome/Edge)
+            if (navigator.serviceWorker && navigator.serviceWorker.ready) {
+                navigator.serviceWorker.ready.then(reg => {
+                    if (reg.sync) {
+                        reg.sync.register('sync-measurements').catch(() => {});
+                    }
+                });
+            }
+            resolve();
+        };
+        tx.onerror = e => reject(e.target.error);
+    });
 }
-
 function openOfflineDB(){
  return new Promise((resolve,reject)=>{
   const req=indexedDB.open('DendroGeoOffline',1);
