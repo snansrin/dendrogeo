@@ -1,60 +1,53 @@
-const CACHE_NAME='dendrogeo-v1';
-const urlsToCache=['./','./index.html','./manifest.json'];
+/* DendroGeo Service Worker — v13 (network-first + eski önbellek temizliği) */
+const CACHE = "dendrogeo-v13";
+const CORE = ["./", "./index.html", "./manifest.json", "./icon.png"];
 
-self.addEventListener('install',e=>{
- e.waitUntil(caches.open(CACHE_NAME).then(cache=>cache.addAll(urlsToCache)));
+self.addEventListener("install", (e) => {
+  e.waitUntil(
+    caches.open(CACHE).then((c) => c.addAll(CORE)).then(() => self.skipWaiting())
+  );
 });
 
-self.addEventListener('fetch',e=>{
- e.respondWith(
-  caches.match(e.request).then(response=>response||fetch(e.request).catch(()=>caches.match('./index.html')))
- );
+self.addEventListener("activate", (e) => {
+  e.waitUntil(
+    caches.keys()
+      .then((keys) => Promise.all(keys.filter((k) => k !== CACHE).map((k) => caches.delete(k))))
+      .then(() => self.clients.claim())
+      .then(() => self.clients.matchAll({ type: "window" }).then((cs) => {
+        cs.forEach((c) => { try { c.navigate(c.url); } catch (e) {} });
+      }))
+  );
 });
 
-self.addEventListener('sync',e=>{
- if(e.tag==='sync-measurements'){
-  e.waitUntil(syncOfflineData());
- }
-});
+self.addEventListener("fetch", (e) => {
+  const req = e.request;
+  if (req.method !== "GET") return;
 
-async function syncOfflineData(){
- const db=await openDB();
- const tx=db.transaction('measurements','readonly');
- const store=tx.objectStore('measurements');
- const all=await store.getAll();
- 
- for(const record of all){
-  try{
-   const response=await fetch('https://xjbpounwdxrhelmixvqm.supabase.co/rest/v1/measurements',{
-    method:'POST',
-    headers:{
-     'Content-Type':'application/json',
-     'apikey':record.apiKey,
-     'Authorization':'Bearer '+record.token
-    },
-    body:JSON.stringify(record.data)
-   });
-   
-   if(response.ok){
-    const tx2=db.transaction('measurements','readwrite');
-    tx2.objectStore('measurements').delete(record.id);
-   }
-  }catch(err){
-   console.log('Sync failed, will retry:',err);
+  // SAYFA (navigation) → NETWORK-FIRST: yeni sürüm ANINDA gelir
+  if (req.mode === "navigate") {
+    e.respondWith(
+      fetch(req)
+        .then((res) => {
+          const copy = res.clone();
+          caches.open(CACHE).then((c) => c.put(req, copy));
+          return res;
+        })
+        .catch(() => caches.match(req).then((m) => m || caches.match("./index.html")))
+    );
+    return;
   }
- }
-}
 
-function openDB(){
- return new Promise((resolve,reject)=>{
-  const req=indexedDB.open('DendroGeoOffline',1);
-  req.onupgradeneeded=e=>{
-   const db=e.target.result;
-   if(!db.objectStoreNames.contains('measurements')){
-    db.createObjectStore('measurements',{keyPath:'id',autoIncrement:true});
-   }
-  };
-  req.onsuccess=e=>resolve(e.target.result);
-  req.onerror=e=>reject(e.target.error);
- });
-}
+  // Diğer dosyalar → stale-while-revalidate (önbellek + arka planda güncelle)
+  e.respondWith(
+    caches.match(req).then((cached) => {
+      const fetched = fetch(req).then((res) => {
+        if (res && (res.ok || res.type === "opaque")) {
+          const copy = res.clone();
+          caches.open(CACHE).then((c) => c.put(req, copy));
+        }
+        return res;
+      }).catch(() => cached);
+      return cached || fetched;
+    })
+  );
+});
