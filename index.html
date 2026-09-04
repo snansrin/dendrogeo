@@ -1143,12 +1143,20 @@ async function boot(){
   navigator.serviceWorker.register('./sw.js').catch(e=>console.log('SW registration failed:',e));
  }
  
- window.addEventListener('online',()=>{
-  toast('İnternet bağlantısı geri geldi — senkronize ediliyor','ok','🌐');
-  if('serviceWorker' in navigator&&navigator.serviceWorker.controller){
-   navigator.serviceWorker.controller.postMessage({type:'SYNC'});
-  }
- });
+window.addEventListener('online',()=>{
+toast('İnternet bağlantısı geri geldi — senkronize ediliyor','ok','🌐');
+if('serviceWorker' in navigator&&navigator.serviceWorker.controller){
+navigator.serviceWorker.controller.postMessage({type:'SYNC'});
+}
+});
+if('serviceWorker' in navigator){
+navigator.serviceWorker.addEventListener('message',e=>{
+if(e.data&&e.data.type==='SYNC_DONE'){
+toast('✓ '+(e.data.count||0)+' kayıt senkronize edildi','ok','☁️');
+loadDash();loadRecords();
+}
+});
+}
  
  trackVisit();
  const{data:{session}}=await sb.auth.getSession();
@@ -2070,45 +2078,29 @@ function zoomToCity(city){
 }
 function getCountryBounds(c){return[[20,10],[55,60]];}
 
-async function saveOfflineMeasurement(data) {
-    const db = await openOfflineDB();
-    const tx = db.transaction('measurements', 'readwrite');
-    const store = tx.objectStore('measurements');
-    const session = await sb.auth.getSession();
-    const token = session.data.session?.access_token || '';
-    
-    // Fotoğraf dosyasını Blob olarak sakla (base64 değil, daha verimli)
-    const photoInput = $('mPhoto');
-    let photoBlob = null;
-    if (photoInput.files && photoInput.files[0]) {
-        photoBlob = photoInput.files[0];
-    }
-    
-    store.add({
-        data: { ...data, photoBlob: photoBlob },
-        apiKey: SB_KEY,
-        token: token,
-        timestamp: Date.now()
-    });
-    
-    return new Promise((resolve, reject) => {
-        tx.oncomplete = () => {
-            // Background sync kaydı
-            if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
-                navigator.serviceWorker.controller.postMessage({ type: 'SYNC' });
-            }
-            // Background Sync API (Chrome/Edge)
-            if (navigator.serviceWorker && navigator.serviceWorker.ready) {
-                navigator.serviceWorker.ready.then(reg => {
-                    if (reg.sync) {
-                        reg.sync.register('sync-measurements').catch(() => {});
-                    }
-                });
-            }
-            resolve();
-        };
-        tx.onerror = e => reject(e.target.error);
-    });
+async function saveOfflineMeasurement(data){
+const db=await openOfflineDB();
+const tx=db.transaction('measurements','readwrite');
+const store=tx.objectStore('measurements');
+const session=await sb.auth.getSession();
+const token=session.data.session?.access_token||'';
+const clientId=(crypto.randomUUID?crypto.randomUUID():Date.now()+'-'+Math.random().toString(36).slice(2));
+store.add({
+clientId:clientId,
+data:{...data,client_id:clientId},
+apiKey:SB_KEY,
+token:token,
+timestamp:Date.now()
+});
+return new Promise((resolve,reject)=>{
+tx.oncomplete=()=>{
+if('serviceWorker' in navigator&&navigator.serviceWorker.controller){
+navigator.serviceWorker.controller.postMessage({type:'SYNC'});
+}
+resolve();
+};
+tx.onerror=e=>reject(e.target.error);
+});
 }
 function openOfflineDB(){
  return new Promise((resolve,reject)=>{
