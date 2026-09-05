@@ -1138,21 +1138,16 @@ async function sendResetEmail(){
 }
 async function logout(){await sb.auth.signOut();location.reload();}
 
-let _bootDone = false; // boot sadece 1 kez çalışsın
-
 async function boot(){
-    if (_bootDone) return; // İkinci kez çağrılırsa çık
-    _bootDone = true;
-    
     // 1. Service Worker'ı kaydet
     if('serviceWorker' in navigator){
         navigator.serviceWorker.register('./sw.js').catch(e=>console.log('SW registration failed:',e));
     }
     
-    // 2. Online event listener SADECE BİR KEZ ekle
-    window.addEventListener('online', () => {
+    // 2. İnternet geri geldiğinde tetiklenecek olay
+    window.addEventListener('online',()=>{
         toast('İnternet bağlantısı geri geldi — senkronize ediliyor','ok','🌐');
-        setTimeout(() => syncOfflineData(), 1000); // 1 sn bekle, session hazır olsun
+        syncOfflineData(); // SW'ye mesaj göndermek yerine direkt main thread sync
     });
     
     // 3. Ziyaretçi sayacı
@@ -1168,11 +1163,11 @@ async function boot(){
     PROFILE=p;
     startShell();
     
-    // 6. Sayfa açıldığında online ise kuyruğu senkronize et
+    // 6. SAYFA AÇILDIĞINDA ONLINE İSE KUYRUĞU KONTROL ET VE SENKRONİZE ET
     if (navigator.onLine) {
-        setTimeout(() => syncOfflineData(), 2000);
+        syncOfflineData();
     }
-}
+} // <-- FONKSİYON SADECE BURADA KAPANIYOR, ALTINA HİÇBİR ŞEY GELMEYECEK
 
 function popupHtml(r){
  return `<div style="min-width:140px"><b>P${r.point_id}</b> · ${r.species||""}<br><span style="font-size:.75rem;color:#68766e">Çap: ${r.dbh_cm||"—"} cm · Boy: ${r.height_m||"—"} m<br>Karbon: ${(r.carbon_kg||0).toFixed(1)} kg</span>`+(r.photo_url?`<br><img src="${r.photo_url}" style="width:160px;border-radius:8px;margin-top:6px">`:"")+`</div>`;
@@ -2151,26 +2146,22 @@ function uuidv4() {
 }
 
 async function saveOfflineMeasurement(data){
-    const db = await openOfflineDB();
-    const tx = db.transaction('measurements','readwrite');
-    const store = tx.objectStore('measurements');
+    const db=await openOfflineDB();
+    const tx=db.transaction('measurements','readwrite');
+    const store=tx.objectStore('measurements');
     
-    // Her offline ölçüme client_id ekle (duplicate önleme için)
+    // Her offline ölçüme benzersiz client_id ata (duplicate önleme)
     if (!data.client_id) {
         data.client_id = uuidv4();
     }
     
     store.add({
-        data: data,
-        timestamp: Date.now()
+        data:data,
+        timestamp:Date.now()
     });
-    
     return new Promise((resolve,reject)=>{
-        tx.oncomplete = () => {
-            console.log('[Offline] Veri IndexedDB\'ye kaydedildi:', data.client_id);
-            resolve();
-        };
-        tx.onerror = e => reject(e.target.error);
+        tx.oncomplete=()=>resolve();
+        tx.onerror=e=>reject(e.target.error);
     });
 }
 
@@ -2189,36 +2180,24 @@ function openOfflineDB(){
 }
 async function syncOfflineData() {
     if (!navigator.onLine) return;
-    if (!USER) {
-        console.warn('[Sync] Kullanıcı giriş yapmamış, senkronizasyon atlanıyor');
-        return;
-    }
-    
+    if (!USER) return;
     try {
         const db = await openOfflineDB();
         const tx = db.transaction('measurements', 'readonly');
         const store = tx.objectStore('measurements');
         const req = store.getAll();
-        
         req.onsuccess = async () => {
             const records = req.result || [];
-            if (!records.length) {
-                console.log('[Sync] ✅ Kuyruk boş.');
-                return;
-            }
-            
-            console.log(`[Sync] 🚀 ${records.length} offline ölçüm senkronize ediliyor...`);
+            if (!records.length) return;
+            console.log(`[App] 🚀 ${records.length} offline ölçüm senkronize ediliyor...`);
             let synced = 0;
             let failed = 0;
             let lastError = null;
-            
             for (const record of records) {
                 const { data } = record;
                 try {
                     let photoUrl = null;
                     let photoFile = null;
-                    
-                    // 1. Fotoğraf Varsa Supabase Storage'a Yükle
                     if (data.photoBlob) {
                         photoFile = `P${String(data.point_id).padStart(3, '0')}_M${data.measurement_no || 1}.JPG`;
                         const path = `${data.owner}/${Date.now()}_${record.id}.jpg`;
@@ -2226,72 +2205,52 @@ async function syncOfflineData() {
                         if (!error) {
                             photoUrl = sb.storage.from('dendro-photos').getPublicUrl(path).data.publicUrl;
                         } else {
-                            console.warn('[Sync] Fotoğraf hatası:', error.message);
+                            console.warn('Fotoğraf yüklenemedi:', error.message);
                             failed++;
                             lastError = 'Fotoğraf: ' + error.message;
                             continue;
                         }
                     }
-                    
-                    // 2. Payload hazırla
                     const payload = { ...data };
-                    if (photoUrl) {
-                        payload.photo_url = photoUrl;
-                        payload.photo_file = photoFile;
-                    }
-                    delete payload.photoBlob; // Blob DB'ye gitmez
+                    if (photoUrl) { payload.photo_url = photoUrl; payload.photo_file = photoFile; }
+                    delete payload.photoBlob;
+                    if (data.client_id) payload.client_id = data.client_id;
                     
-                    // ⭐ KRİTİK: client_id payload'a ekle (duplicate önleme)
-                    if (data.client_id) {
-                        payload.client_id = data.client_id;
-                    }
-                    
-                    console.log('[Sync] Insert ediliyor:', payload.point_id, 'client_id:', payload.client_id);
-                    
-                    // 3. Supabase'e insert et
                     const { error } = await sb.from('measurements').insert(payload);
-                    
                     if (!error) {
-                        // ✅ Başarılı → kuyruktan sil
                         const delTx = db.transaction('measurements', 'readwrite');
                         delTx.objectStore('measurements').delete(record.id);
                         synced++;
-                        console.log(`[Sync] ✅ P${data.point_id} başarıyla senkronize edildi`);
                     } else if (error.code === '23505') {
-                        // ⚠️ Duplicate key → zaten kaydedilmiş, kuyruktan sil
-                        console.warn(`[Sync] ⚠️ P${data.point_id} zaten mevcut (duplicate), kuyruktan siliniyor`);
+                        // Duplicate → zaten var, kuyruktan sil
                         const delTx = db.transaction('measurements', 'readwrite');
                         delTx.objectStore('measurements').delete(record.id);
                     } else {
-                        // ❌ Gerçek hata → kullanıcıya göster!
-                        console.error('[Sync] ❌ Insert hatası:', error);
+                        // ⚠️ GERÇEK HATA → KULLANICIYA GÖSTER
+                        console.error('[Sync] ❌ Insert hatası:', error.message);
                         failed++;
                         lastError = error.message;
-                        toast(`❌ P${data.point_id} senkronize edilemedi: ${error.message}`, 'err', '⚠️');
-                        break; // Sırayı bozma, diğer online'da tekrar dene
+                        toast(`❌ P${data.point_id} kaydedilemedi: ${error.message}`, 'err', '⚠️');
                     }
                 } catch (err) {
                     console.error('[Sync] Record hatası:', err);
                     failed++;
                     lastError = err.message;
-                    break;
                 }
             }
-            
-            // 📢 Sonuç bildirimi
             if (synced > 0) {
-                toast(`✅ ${synced} çevrimdışı ölçüm senkronize edildi!`, 'ok', '🔄');
+                toast(`${synced} çevrimdışı ölçüm senkronize edildi!`, 'ok', '🔄');
                 if ($('v-dash').classList.contains('on')) loadDash();
                 if ($('v-records').classList.contains('on')) loadRecords();
                 if ($('v-admin').classList.contains('on')) loadAdmin();
                 if ($('v-world').classList.contains('on')) loadWorld();
             }
             if (failed > 0) {
-                toast(`⚠️ ${failed} ölçüm başarısız. Hata: ${lastError}`, 'err', '❌');
+                toast(`${failed} ölçüm başarısız: ${lastError}`, 'err', '❌');
             }
         };
     } catch (e) {
-        console.error("[Sync] Kritik hata:", e);
+        console.error("Sync DB hatası:", e);
         toast('Senkronizasyon hatası: ' + e.message, 'err', '❌');
     }
 }
