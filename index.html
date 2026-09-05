@@ -1,4 +1,3 @@
-//çalışan versiyon kayıt 
 <!doctype html>
 <html lang="tr">
 <head>
@@ -1430,19 +1429,16 @@ async function saveMeas(){
         if(geo)toast("📍 Konum algılandı: "+geo.city+" / "+geo.country,"info","🗺️");
     }
     
-    // 3. OFFLINE KONTROLÜ (Fotoğraf ve veriyi IndexedDB'ye kaydet)
+     // 3. OFFLINE KONTROLÜ (Fotoğraf ve veriyi IndexedDB'ye kaydet)
     if(!navigator.onLine){
         if(photoBlob) base.photoBlob = photoBlob;
         if(photoFile) base.photo_file = photoFile;
+        base.client_id = uuidv4(); // Benzersiz ID (duplicate önleme)
+        
         await saveOfflineMeasurement(base);
         toast('Çevrimdışı kaydedildi — internet gelince senkronize','info','📴');
         
-        // Background Sync tetikle (Sekme kapatılsa bile çalışır)
-        if ('serviceWorker' in navigator && 'SyncManager' in window) {
-            navigator.serviceWorker.ready.then(reg => {
-                reg.sync.register('sync-measurements').catch(e => console.log('Sync register failed:', e));
-            });
-        }
+        // ✅ Background Sync register KALDIRILDI (artık ana thread yönetiyor)
         
         $('mPoint').value='';
         $('mDbh').value='';
@@ -2141,30 +2137,32 @@ function zoomToCity(city){
 }
 function getCountryBounds(c){return[[20,10],[55,60]];}
 
+// 🎲 UUID v4 üretici (client_id için)
+function uuidv4() {
+    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => {
+        const r = Math.random() * 16 | 0;
+        return (c === 'x' ? r : (r & 0x3 | 0x8)).toString(16);
+    });
+}
+
 async function saveOfflineMeasurement(data){
- const db=await openOfflineDB();
- const tx=db.transaction('measurements','readwrite');
- const store=tx.objectStore('measurements');
- 
- const session=await sb.auth.getSession();
- const token=session.data.session?.access_token||'';
- 
- store.add({
-  data:data,
-  apiKey:SB_KEY,
-  token:token,
-  timestamp:Date.now()
- });
- 
- return new Promise((resolve,reject)=>{
-  tx.oncomplete=()=>{
-   if('serviceWorker' in navigator&&navigator.serviceWorker.controller){
-    navigator.serviceWorker.controller.postMessage({type:'SYNC'});
-   }
-   resolve();
-  };
-  tx.onerror=e=>reject(e.target.error);
- });
+    const db=await openOfflineDB();
+    const tx=db.transaction('measurements','readwrite');
+    const store=tx.objectStore('measurements');
+    
+    // Her offline ölçüme benzersiz client_id ata (duplicate önleme)
+    if (!data.client_id) {
+        data.client_id = uuidv4();
+    }
+    
+    store.add({
+        data:data,
+        timestamp:Date.now()
+    });
+    return new Promise((resolve,reject)=>{
+        tx.oncomplete=()=>resolve();
+        tx.onerror=e=>reject(e.target.error);
+    });
 }
 
 function openOfflineDB(){
@@ -2187,21 +2185,16 @@ async function syncOfflineData() {
         const tx = db.transaction('measurements', 'readonly');
         const store = tx.objectStore('measurements');
         const req = store.getAll();
-        
         req.onsuccess = async () => {
             const records = req.result || [];
             if (!records.length) return;
-            
             console.log(`[App] 🚀 ${records.length} offline ölçüm senkronize ediliyor...`);
             let synced = 0;
-            
             for (const record of records) {
                 const { data } = record;
                 try {
                     let photoUrl = null;
                     let photoFile = null;
-                    
-                    // 1. Fotoğraf Varsa Yükle
                     if (data.photoBlob) {
                         photoFile = `P${String(data.point_id).padStart(3, '0')}_M${data.measurement_no || 1}.JPG`;
                         const path = `${data.owner}/${Date.now()}_${record.id}.jpg`;
@@ -2210,38 +2203,39 @@ async function syncOfflineData() {
                             photoUrl = sb.storage.from('dendro-photos').getPublicUrl(path).data.publicUrl;
                         } else {
                             console.warn('Fotoğraf yüklenemedi:', error);
-                            continue; // Fotoğraf yüklenemezse ölçümü gönderme, kuyrukta kalsın
+                            continue; 
                         }
                     }
-                    
-                    // 2. Ölçümü Kaydet
                     const payload = { ...data };
                     if (photoUrl) {
                         payload.photo_url = photoUrl;
                         payload.photo_file = photoFile;
                     }
-                    delete payload.photoBlob; // Blob veritabanına gitmez
+                    delete payload.photoBlob; 
+                    if (data.client_id) payload.client_id = data.client_id; // Duplicate önleme
                     
                     const { error } = await sb.from('measurements').insert(payload);
                     if (!error) {
-                        // Başarılı → kuyruktan sil
                         const delTx = db.transaction('measurements', 'readwrite');
                         delTx.objectStore('measurements').delete(record.id);
                         synced++;
                         console.log(`✅ P${data.point_id} senkronize edildi`);
+                    } else if (error.code === '23505') {
+                        // Duplicate key hatası → zaten senkronize edilmiş, kuyruktan sil
+                        console.warn(`⚠️ P${data.point_id} zaten mevcut, kuyruktan siliniyor`);
+                        const delTx = db.transaction('measurements', 'readwrite');
+                        delTx.objectStore('measurements').delete(record.id);
                     } else {
                         console.warn('Ölçüm kaydedilemedi:', error);
-                        break; // Veri bütünlüğü için sırayı bozma
+                        break; 
                     }
                 } catch (err) {
                     console.error('Senkronizasyon hatası:', err);
                     break;
                 }
             }
-            
             if (synced > 0) {
                 toast(`${synced} çevrimdışı ölçüm başarıyla senkronize edildi!`, 'ok', '🔄');
-                // Hangi ekrandaysa orayı yenile
                 if ($('v-dash').classList.contains('on')) loadDash();
                 if ($('v-records').classList.contains('on')) loadRecords();
                 if ($('v-admin').classList.contains('on')) loadAdmin();
@@ -2252,7 +2246,6 @@ async function syncOfflineData() {
         console.error("Sync DB hatası:", e);
     }
 }
-
 boot();
 </script>
 </body>
