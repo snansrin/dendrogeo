@@ -1008,88 +1008,58 @@ function toast(msg,type="ok",icon=""){
 }
 
 async function doLogin(){
-
- const email=$("liEmail").value;
- const pass=$("liPass").value;
- if(!email||!pass){
-  amsg("E-posta ve parola gerekli.",1);
-  return;
- }
- 
- amsg("Giriş yapılıyor...",0);
- 
- let tok=tsToken("tsLogin");
- if(!tok){
-  await new Promise(r=>setTimeout(r,2500));
-  tok=tsToken("tsLogin");
- }
- if(!tok){
-  amsg("Doğrulama widget'ı hazır değil. Sayfayı yenileyip tekrar deneyin.",1);
-  return;
- }
- 
- const r=await sb.auth.signInWithPassword({
-  email:email,
-  password:pass,
-  options:{captchaToken:tok}
- });
- 
- if(r.error){
-  amsg(r.error.message,1);
-  return;
- }
- 
- try{turnstile.reset(TS.tsLogin);}catch(e){}
- boot();
-}
-async function doRegister(){
- const name=$("rgName").value;
- const email=$("rgEmail").value;
- const pass=$("rgPass").value;
- 
- if(!name||!email||!pass){
-  amsg("Tüm alanları doldurun.",1);
-  return;
- }
- 
- if(pass.length<6){
-  amsg("Parola en az 6 karakter olmalı.",1);
-  return;
- }
- 
- amsg("Hesap oluşturuluyor...",0);
- 
- let tok=tsToken("tsReg");
- if(!tok){
-  await new Promise(r=>setTimeout(r,2500));
-  tok=tsToken("tsReg");
- }
- if(!tok){
-  amsg("Doğrulama widget'ı hazır değil. Sayfayı yenileyip tekrar deneyin.",1);
-  return;
- }
- 
- const r=await sb.auth.signUp({
-  email:email,
-  password:pass,
-  options:{
-   data:{
-    full_name:name,
-    organization:$("rgOrg").value
-   },
-   captchaToken:tok
-  }
- });
- 
- if(r.error){
-  amsg(r.error.message,1);
-  return;
- }
- 
- try{turnstile.reset(TS.tsReg);}catch(e){}
- amsg(r.data.session?"Hesap oluşturuldu.":"Doğrulama e‑postası gönderildi.",0);
-}
-async function sendResetEmail(){
+    const email = $("liEmail").value;
+    const pass = $("liPass").value;
+    
+    if(!email || !pass){
+        amsg("E-posta ve parola gerekli.", 1);
+        return;
+    }
+    
+    amsg("Giriş yapılıyor...", 0);
+    
+    // Turnstile token'ı al
+    let tok = tsToken("tsLogin");
+    if(!tok){
+        await new Promise(r => setTimeout(r, 2500));
+        tok = tsToken("tsLogin");
+    }
+    if(!tok){
+        amsg("Doğrulama widget'ı hazır değil. Sayfayı yenileyip tekrar deneyin.", 1);
+        return;
+    }
+    
+    // Supabase'e giriş yap
+    const r = await sb.auth.signInWithPassword({
+        email: email,
+        password: pass,
+        options: { captchaToken: tok }
+    });
+    
+    if(r.error){
+        amsg(r.error.message, 1);
+        try { turnstile.reset(TS.tsLogin); } catch(e){}
+        return;
+    }
+    
+    // Başarılı → widget'ı sıfırla ve UI'ı başlat
+    try { turnstile.reset(TS.tsLogin); } catch(e){}
+    
+    // Session'ı al
+    USER = r.data.user;
+    
+    // Profil yükle
+    const { data: p } = await sb.from("profiles").select("*").eq("id", USER.id).single();
+    PROFILE = p;
+    
+    // Arayüzü başlat
+    startShell();
+    
+    // Online ise kuyruğu senkronize et
+    if (navigator.onLine) {
+        setTimeout(() => syncOfflineData(), 2000);
+    }
+}async function sendResetEmail(){
  const email=$("rsEmail").value;
  if(!email){
   amsg("Lütfen e-posta adresinizi girin.",1);
@@ -1138,19 +1108,25 @@ async function sendResetEmail(){
 }
 async function logout(){await sb.auth.signOut();location.reload();}
 
+let _bootDone = false; // boot sadece 1 kez çalışsın
+
 async function boot(){
-    // 1. Service Worker'ı kaydet
-    if('serviceWorker' in navigator){
+    // 1. Service Worker'ı kaydet (sadece bir kez)
+    if('serviceWorker' in navigator && !window._swRegistered){
         navigator.serviceWorker.register('./sw.js').catch(e=>console.log('SW registration failed:',e));
+        window._swRegistered = true;
     }
     
-    // 2. İnternet geri geldiğinde tetiklenecek olay
-    window.addEventListener('online',()=>{
-        toast('İnternet bağlantısı geri geldi — senkronize ediliyor','ok','🌐');
-        syncOfflineData(); // SW'ye mesaj göndermek yerine direkt main thread sync
-    });
+    // 2. Online listener SADECE BİR KEZ eklensin (çift toast önleme)
+    if(!window._onlineListenerSet){
+        window._onlineListenerSet = true;
+        window.addEventListener('online',()=>{
+            toast('İnternet bağlantısı geri geldi — senkronize ediliyor','ok','🌐');
+            setTimeout(() => syncOfflineData(), 1500);
+        });
+    }
     
-    // 3. Ziyaretçi sayacı
+    // 3. Ziyaretçi sayacı (her zaman çalışsın, sessionStorage zaten kontrol ediyor)
     trackVisit();
     
     // 4. Oturum kontrolü
@@ -1163,11 +1139,11 @@ async function boot(){
     PROFILE=p;
     startShell();
     
-    // 6. SAYFA AÇILDIĞINDA ONLINE İSE KUYRUĞU KONTROL ET VE SENKRONİZE ET
+    // 6. Online ise kuyruğu senkronize et
     if (navigator.onLine) {
-        syncOfflineData();
+        setTimeout(() => syncOfflineData(), 2000);
     }
-} // <-- FONKSİYON SADECE BURADA KAPANIYOR, ALTINA HİÇBİR ŞEY GELMEYECEK
+}
 
 function popupHtml(r){
  return `<div style="min-width:140px"><b>P${r.point_id}</b> · ${r.species||""}<br><span style="font-size:.75rem;color:#68766e">Çap: ${r.dbh_cm||"—"} cm · Boy: ${r.height_m||"—"} m<br>Karbon: ${(r.carbon_kg||0).toFixed(1)} kg</span>`+(r.photo_url?`<br><img src="${r.photo_url}" style="width:160px;border-radius:8px;margin-top:6px">`:"")+`</div>`;
@@ -2146,22 +2122,26 @@ function uuidv4() {
 }
 
 async function saveOfflineMeasurement(data){
-    const db=await openOfflineDB();
-    const tx=db.transaction('measurements','readwrite');
-    const store=tx.objectStore('measurements');
+    const db = await openOfflineDB();
+    const tx = db.transaction('measurements','readwrite');
+    const store = tx.objectStore('measurements');
     
-    // Her offline ölçüme benzersiz client_id ata (duplicate önleme)
+    // Her offline ölçüme client_id ekle (duplicate önleme için)
     if (!data.client_id) {
         data.client_id = uuidv4();
     }
     
     store.add({
-        data:data,
-        timestamp:Date.now()
+        data: data,
+        timestamp: Date.now()
     });
+    
     return new Promise((resolve,reject)=>{
-        tx.oncomplete=()=>resolve();
-        tx.onerror=e=>reject(e.target.error);
+        tx.oncomplete = () => {
+            console.log('[Offline] Veri IndexedDB\'ye kaydedildi:', data.client_id);
+            resolve();
+        };
+        tx.onerror = e => reject(e.target.error);
     });
 }
 
@@ -2180,24 +2160,36 @@ function openOfflineDB(){
 }
 async function syncOfflineData() {
     if (!navigator.onLine) return;
-    if (!USER) return;
+    if (!USER) {
+        console.warn('[Sync] Kullanıcı giriş yapmamış, senkronizasyon atlanıyor');
+        return;
+    }
+    
     try {
         const db = await openOfflineDB();
         const tx = db.transaction('measurements', 'readonly');
         const store = tx.objectStore('measurements');
         const req = store.getAll();
+        
         req.onsuccess = async () => {
             const records = req.result || [];
-            if (!records.length) return;
-            console.log(`[App] 🚀 ${records.length} offline ölçüm senkronize ediliyor...`);
+            if (!records.length) {
+                console.log('[Sync] ✅ Kuyruk boş.');
+                return;
+            }
+            
+            console.log(`[Sync] 🚀 ${records.length} offline ölçüm senkronize ediliyor...`);
             let synced = 0;
             let failed = 0;
             let lastError = null;
+            
             for (const record of records) {
                 const { data } = record;
                 try {
                     let photoUrl = null;
                     let photoFile = null;
+                    
+                    // 1. Fotoğraf Varsa Supabase Storage'a Yükle
                     if (data.photoBlob) {
                         photoFile = `P${String(data.point_id).padStart(3, '0')}_M${data.measurement_no || 1}.JPG`;
                         const path = `${data.owner}/${Date.now()}_${record.id}.jpg`;
@@ -2205,52 +2197,72 @@ async function syncOfflineData() {
                         if (!error) {
                             photoUrl = sb.storage.from('dendro-photos').getPublicUrl(path).data.publicUrl;
                         } else {
-                            console.warn('Fotoğraf yüklenemedi:', error.message);
+                            console.warn('[Sync] Fotoğraf hatası:', error.message);
                             failed++;
                             lastError = 'Fotoğraf: ' + error.message;
                             continue;
                         }
                     }
-                    const payload = { ...data };
-                    if (photoUrl) { payload.photo_url = photoUrl; payload.photo_file = photoFile; }
-                    delete payload.photoBlob;
-                    if (data.client_id) payload.client_id = data.client_id;
                     
+                    // 2. Payload hazırla
+                    const payload = { ...data };
+                    if (photoUrl) {
+                        payload.photo_url = photoUrl;
+                        payload.photo_file = photoFile;
+                    }
+                    delete payload.photoBlob; // Blob DB'ye gitmez
+                    
+                    // ⭐ KRİTİK: client_id payload'a ekle (duplicate önleme)
+                    if (data.client_id) {
+                        payload.client_id = data.client_id;
+                    }
+                    
+                    console.log('[Sync] Insert ediliyor:', payload.point_id, 'client_id:', payload.client_id);
+                    
+                    // 3. Supabase'e insert et
                     const { error } = await sb.from('measurements').insert(payload);
+                    
                     if (!error) {
+                        // ✅ Başarılı → kuyruktan sil
                         const delTx = db.transaction('measurements', 'readwrite');
                         delTx.objectStore('measurements').delete(record.id);
                         synced++;
+                        console.log(`[Sync] ✅ P${data.point_id} başarıyla senkronize edildi`);
                     } else if (error.code === '23505') {
-                        // Duplicate → zaten var, kuyruktan sil
+                        // ⚠️ Duplicate key → zaten kaydedilmiş, kuyruktan sil
+                        console.warn(`[Sync] ⚠️ P${data.point_id} zaten mevcut (duplicate), kuyruktan siliniyor`);
                         const delTx = db.transaction('measurements', 'readwrite');
                         delTx.objectStore('measurements').delete(record.id);
                     } else {
-                        // ⚠️ GERÇEK HATA → KULLANICIYA GÖSTER
-                        console.error('[Sync] ❌ Insert hatası:', error.message);
+                        // ❌ Gerçek hata → kullanıcıya göster!
+                        console.error('[Sync] ❌ Insert hatası:', error);
                         failed++;
                         lastError = error.message;
-                        toast(`❌ P${data.point_id} kaydedilemedi: ${error.message}`, 'err', '⚠️');
+                        toast(`❌ P${data.point_id} senkronize edilemedi: ${error.message}`, 'err', '⚠️');
+                        break; // Sırayı bozma, diğer online'da tekrar dene
                     }
                 } catch (err) {
                     console.error('[Sync] Record hatası:', err);
                     failed++;
                     lastError = err.message;
+                    break;
                 }
             }
+            
+            // 📢 Sonuç bildirimi
             if (synced > 0) {
-                toast(`${synced} çevrimdışı ölçüm senkronize edildi!`, 'ok', '🔄');
+                toast(`✅ ${synced} çevrimdışı ölçüm senkronize edildi!`, 'ok', '🔄');
                 if ($('v-dash').classList.contains('on')) loadDash();
                 if ($('v-records').classList.contains('on')) loadRecords();
                 if ($('v-admin').classList.contains('on')) loadAdmin();
                 if ($('v-world').classList.contains('on')) loadWorld();
             }
             if (failed > 0) {
-                toast(`${failed} ölçüm başarısız: ${lastError}`, 'err', '❌');
+                toast(`⚠️ ${failed} ölçüm başarısız. Hata: ${lastError}`, 'err', '❌');
             }
         };
     } catch (e) {
-        console.error("Sync DB hatası:", e);
+        console.error("[Sync] Kritik hata:", e);
         toast('Senkronizasyon hatası: ' + e.message, 'err', '❌');
     }
 }
