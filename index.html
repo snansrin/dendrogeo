@@ -1384,69 +1384,96 @@ async function saveMeas(){
     if(!pid||!pt||!sp||!d||!h)return toast("Tüm alanları doldur","err");
     if(!EDIT_ID&&!GPS)return toast("Önce 📡 Konumu Etkinleştir butonuna basın","err");
     if(d>500||h>100)return toast("Çap ≤500 cm, boy ≤100 m olmalı","err");
+    
     const f=$("mPhoto").files[0];
     if(f&&!photoOk)return toast("Fotoğraf denetimi başarısız — uygun bir çekim yapın","err");
+    
     const c=calc(d,h,sp,grp);
     const wasEdit=!!EDIT_ID;
-    let photo=null,photoFile=null;
     
-    if(f){
-        const comp = await compress(f); // Artık asla takılmayacak
-        photoFile="P"+String(pt).padStart(3,"0")+"_M"+(+$("mNo").value||1)+".JPG";
-        const path=USER.id+"/"+Date.now()+".jpg";
-        const{error}=await sb.storage.from("dendro-photos").upload(path,comp,{contentType:"image/jpeg"});
-        if(!error)photo=sb.storage.from("dendro-photos").getPublicUrl(path).data.publicUrl;
-    }
-    
-    const base={owner:USER.id,project_id:pid,point_id:pt,measurement_no:+$("mNo").value||1,grp,species:sp,dbh_cm:d,height_m:h,volume_m3:c.vol,carbon_kg:c.total_carbon,slope_deg:0,shared:true,status:"Beklemede"};
+    // Temel veri objesini hazırla
+    const base={
+        owner:USER.id, project_id:pid, point_id:pt, measurement_no:+$("mNo").value||1,
+        grp, species:sp, dbh_cm:d, height_m:h, volume_m3:c.vol, carbon_kg:c.total_carbon,
+        slope_deg:0, shared:true, status:"Beklemede"
+    };
     
     if(!EDIT_ID){
-        base.lat=GPS.latitude;base.lon=GPS.longitude;base.accuracy_m=GPS.accuracy;base.altitude_m=GPS.altitude;
+        base.lat=GPS.latitude; base.lon=GPS.longitude; 
+        base.accuracy_m=GPS.accuracy; base.altitude_m=GPS.altitude;
         const geo=await reverseGeocode(GPS.latitude,GPS.longitude);
         base.country=geo?geo.country:"Bilinmiyor";
         base.city=geo?geo.city:"Bilinmiyor";
-        if(geo)toast("📍 Konum algılandı: "+geo.city+" / "+geo.country,"info","🗺️");
+        if(geo) toast("📍 Konum algılandı: "+geo.city+" / "+geo.country,"info","🗺️");
     }
-    if(photo){base.photo_url=photo;base.photo_file=photoFile;}
 
+    // 🛑 1. ADIM: ÇEVRİMDIŞI KONTROLÜ (İnternet yoksa Supabase'e hiç bağlanma)
     if(!navigator.onLine){
-        const offlineBlob = f ? await compress(f) : null;
+        let offlineBlob = null;
+        if(f) {
+            offlineBlob = await compress(f); // Sadece bir kez sıkıştır
+        }
         await saveOfflineMeasurement(base, offlineBlob);
         toast('Çevrimdışı kaydedildi — internet gelince senkronize','info','📴');
-        $('mPoint').value='';$('mDbh').value='';$('mHeight').value='';
-        $('mPhoto').value='';$('photoCheck').style.display='none';
-        photoOk=false;manualPoint=false;
-        loadDash();loadRecords();
-        return;
+        
+        // Formu temizle
+        $('mPoint').value=''; $('mDbh').value=''; $('mHeight').value='';
+        $('mPhoto').value=''; $('photoCheck').style.display='none';
+        photoOk=false; manualPoint=false;
+        loadDash(); loadRecords();
+        return; // Fonksiyonu burada güvenle sonlandır
     }
 
+    // 🟢 2. ADIM: ÇEVRİMİÇİ İŞLEMLER (Fotoğraf Yükleme ve DB Kaydı)
+    let photo=null, photoFile=null;
+    if(f){
+        const comp = await compress(f); 
+        photoFile="P"+String(pt).padStart(3,"0")+"_M"+(+$("mNo").value||1)+".JPG";
+        const path=USER.id+"/"+Date.now()+".jpg";
+        const{error}=await sb.storage.from("dendro-photos").upload(path,comp,{contentType:"image/jpeg"});
+        if(!error) photo=sb.storage.from("dendro-photos").getPublicUrl(path).data.publicUrl;
+    }
+    
+    if(photo){
+        base.photo_url=photo;
+        base.photo_file=photoFile;
+    }
+
+    // 🟢 3. ADIM: VERİTABANI GÜNCELLEME / EKLEME
     if(EDIT_ID){
         // ESKİ FOTOĞRAFI BUL (Depolama şişmesini önlemek için KRİTİK)
         const { data: oldRec } = await sb.from("measurements").select("photo_url").eq("id", EDIT_ID).single();
         const oldPhotoUrl = oldRec?.photo_url;
 
         const{error}=await sb.from("measurements").update(base).eq("id",EDIT_ID);
-        if(error)return toast("Hata: "+error.message,"err");
+        if(error) return toast("Hata: "+error.message,"err");
         
         // Eğer yeni fotoğraf yüklendiyse ve eskisi varsa, eskiyi çöpe at
-        if (photo && oldPhotoUrl) {
+        if (photo && oldPhotoUrl && photo !== oldPhotoUrl) {
             await removePhoto(oldPhotoUrl);
         }
         
         toast("Kayıt güncellendi — onaya gönderildi","ok","✓");
         cancelEdit();
-    }else{
+    } else {
         let{error}=await sb.from("measurements").insert(base);
-        if(error){delete base.altitude_m;delete base.photo_file;({error}=await sb.from("measurements").insert(base));}
-        if(error)return toast("Hata: "+error.message,"err");
+        if(error){
+            // Fallback (bazı eski sütunlar yoksa)
+            delete base.altitude_m; delete base.photo_file;
+            ({error}=await sb.from("measurements").insert(base));
+        }
+        if(error) return toast("Hata: "+error.message,"err");
         toast("Kaydedildi — "+c.total_carbon.toFixed(1)+" kg karbon","ok","🌱");
     }
-    $("mPoint").value='';$("mDbh").value='';$("mHeight").value='';$("mPhoto").value='';
-    $("photoCheck").style.display="none";$("pointQueryResult").style.display="none";photoOk=false;manualPoint=false;
-    loadDash();loadRecords();loadWaypoints();
-    if(!wasEdit)autoFillPointId();
-}
-function cancelEdit(){EDIT_ID=null;manualPoint=false;$("editBanner").style.display="none";$("saveBtn").textContent="💾 Hesapla ve Kaydet";}
+    
+    // Formu temizle ve yenile
+    $("mPoint").value=''; $("mDbh").value=''; $("mHeight").value=''; $("mPhoto").value='';
+    $("photoCheck").style.display="none"; $("pointQueryResult").style.display="none"; 
+    photoOk=false; manualPoint=false;
+    
+    loadDash(); loadRecords(); loadWaypoints();
+    if(!wasEdit) autoFillPointId();
+}function cancelEdit(){EDIT_ID=null;manualPoint=false;$("editBanner").style.display="none";$("saveBtn").textContent="💾 Hesapla ve Kaydet";}
 async function editRec(id){
  const{data}=await sb.from("measurements").select("*").eq("id",id).single();
  if(!data)return;
@@ -2085,11 +2112,12 @@ async function saveOfflineMeasurement(data, compressedBlob = null) {
     const token = session.data.session?.access_token || '';
     
     store.add({
-        data: { ...data, photoBlob: compressedBlob }, // Orijinal değil, sıkıştırılmış blob
+        data: { ...data, photoBlob: compressedBlob }, // Orijinal değil, sıkıştırılmış blob saklanır
         apiKey: SB_KEY,
         token: token,
         timestamp: Date.now()
     });
+    
     return new Promise((resolve, reject) => {
         tx.oncomplete = () => {
             if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
