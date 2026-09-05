@@ -2036,24 +2036,101 @@ async function rejectRequest(id){
 }
 
 async function fulfillRequest(id){
- const{data:req}=await sb.from("data_requests").select("*").eq("id",id).single();
- if(!req)return;
- let projIds=null;
- if(req.project_name){
-  const{data:projs}=await sb.from("projects").select("id").ilike("name","%"+req.project_name+"%");
-  projIds=(projs||[]).map(p=>p.id);
- }
- let q=sb.from("measurements").select("*").eq("status","Onaylı");
- if(req.country)q=q.eq("country",req.country);
- if(req.city)q=q.eq("city",req.city);
- if(projIds)q=q.in("project_id",projIds.length?projIds:[-1]);
- const{data}=await q;
- dl(fullCSV(data||[]),"dendrogeo_talep_"+id+".csv");
- const subject=encodeURIComponent("DendroGeo Veri Talebiniz Hazır");
- const bodyTxt="Merhaba,\n\nTalep ettiğiniz veri seti hazırlandı ve indirildi. Bu e-postaya indirilen CSV dosyasını EK olarak eklemeyi unutmayın.\n\nFiltre: Ülke="+(req.country||"Tümü")+", Şehir="+(req.city||"Tümü")+", Proje/Park="+(req.project_name||"Tümü")+"\n\nDendroGeo";
- window.open("mailto:"+(req.email||"")+"?subject="+subject+"&body="+encodeURIComponent(bodyTxt),"_blank");
- await sb.from("data_requests").update({status:"Tamamlandı",fulfilled_at:new Date().toISOString()}).eq("id",id);
- loadRequests();
+    const {data:req} = await sb.from("data_requests").select("*").eq("id",id).single();
+    if(!req) return;
+    
+    let projIds = null;
+    if(req.project_name){
+        const {data:projs} = await sb.from("projects").select("id").ilike("name","%"+req.project_name+"%");
+        projIds = (projs||[]).map(p=>p.id);
+    }
+    
+    let q = sb.from("measurements").select("*").eq("status","Onaylı");
+    if(req.country)  q = q.eq("country", req.country);
+    if(req.city)     q = q.eq("city",    req.city);
+    if(projIds)      q = q.in("project_id", projIds.length ? projIds : [-1]);
+    
+    const {data} = await q;
+    const rows = data || [];
+    const n = rows.length;
+    const totalC = rows.reduce((a,r) => a + (r.carbon_kg||0), 0);
+    const countries = new Set(rows.map(r=>r.country).filter(Boolean));
+    const cities    = new Set(rows.map(r=>r.city).filter(Boolean));
+    
+    if(n === 0){
+        if(!confirm("Bu filtreye uyan onaylı kayıt bulunamadı. Yine de kullanıcıya bilgilendirme maili göndermek ister misiniz?")) return;
+    } else {
+        dl(fullCSV(rows), "dendrogeo_talep_" + id + ".csv");
+    }
+    
+    // 📧 Profesyonel & detaylı e-posta metni
+    const bugun = new Date().toLocaleDateString("tr-TR", { day:'numeric', month:'long', year:'numeric' });
+    
+    const bodyLines = [
+        "Merhaba " + (req.profiles?.full_name || "Değerli Kullanıcımız") + ",",
+        "",
+        "DendroGeo'daki veri talebiniz başarıyla hazırlandı. 🌲",
+        "",
+        "📊 TALEP ÖZETİ",
+        "─────────────────────────",
+        "• Ülke      : " + (req.country || "Tümü"),
+        "• Şehir     : " + (req.city    || "Tümü"),
+        "• Proje/Park: " + (req.project_name || "Tümü"),
+        (req.note ? "• Notunuz   : " + req.note : ""),
+        "",
+        "📈 VERİ SETİ İÇERİĞİ",
+        "─────────────────────────",
+        "• Toplam kayıt     : " + n + " ağaç ölçümü",
+        "• Toplam karbon    : " + (totalC/1000).toFixed(2) + " ton C",
+        "• Kapsanan ülke    : " + countries.size,
+        "• Kapsanan şehir   : " + cities.size,
+        "• Hazırlanma tarihi: " + bugun,
+        "",
+        "📎 EKTE YER ALAN DOSYA",
+        "─────────────────────────",
+        "Veri seti CSV formatında hazırlanmıştır. Lütfen bu e-postaya indirilen CSV dosyasını EK olarak ekleyiniz.",
+        "",
+        "CSV sütunları: POINT_ID, LATITUDE, LONGITUDE, TREE_GROUP, TREE_SPECIES, DBH_CM, HEIGHT_M, AGB_KG, BHB_KG, TOTAL_BIOMASS_KG, CARBON_KG, PHOTO_FILE ve daha fazlasını içerir.",
+        "",
+        "🗺 QGIS'DE NASIL AÇILIR?",
+        "─────────────────────────",
+        "1. QGIS → Layer → Add Layer → Add Delimited Text Layer",
+        "2. X = LONGITUDE, Y = LATITUDE, CRS = EPSG:4326",
+        "3. Fotoğraf balonu için katman özelliklerinde Map Tip özelliğini kullanabilirsiniz.",
+        "   Detaylı rehber: https://snansrin.github.io/dendrogeo/ → Dışa Aktar bölümü",
+        "",
+        "📜 VERİ LİSANSI",
+        "─────────────────────────",
+        "Bu veri CC BY-NC 4.0 lisansı altındadır. Ticari olmayan amaçlarla, kaynak gösterilerek serbestçe kullanılabilir.",
+        "",
+        "Atıf önerisi:",
+        "ŞİRİN, S. & ŞİRİN, N. (2026). DendroGeo: Global Tree Inventory & Carbon Data System. https://snansrin.github.io/dendrogeo/",
+        "",
+        "Herhangi bir sorunuz olursa bu e-postayı yanıtlayarak bize ulaşabilirsiniz.",
+        "",
+        "İyi çalışmalar dileriz,",
+        "DendroGeo Ekibi 🌲",
+        "Nagihan ŞİRİN — Doktora Araştırması",
+        "Sinan ŞİRİN    — Sistem Geliştirici",
+    ];
+    
+    const bodyTxt = bodyLines.filter(l => l !== "").join("\n");
+    const subject = encodeURIComponent("✅ DendroGeo Veri Talebiniz Hazırlandı — " + n + " kayıt, " + (totalC/1000).toFixed(2) + " t C");
+    
+    window.open(
+        "mailto:" + (req.email || "") +
+        "?subject=" + subject +
+        "&body=" + encodeURIComponent(bodyTxt),
+        "_blank"
+    );
+    
+    await sb.from("data_requests").update({
+        status: "Tamamlandı",
+        fulfilled_at: new Date().toISOString()
+    }).eq("id", id);
+    
+    toast("✓ Mail hazırlandı — CSV'yi ekleyip gönderin", "ok", "📧");
+    loadRequests();
 }
 
 let USERS_CACHE=[];
