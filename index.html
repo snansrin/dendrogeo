@@ -2180,6 +2180,7 @@ function openOfflineDB(){
 }
 async function syncOfflineData() {
     if (!navigator.onLine) return;
+    if (!USER) return;
     try {
         const db = await openOfflineDB();
         const tx = db.transaction('measurements', 'readonly');
@@ -2190,6 +2191,8 @@ async function syncOfflineData() {
             if (!records.length) return;
             console.log(`[App] 🚀 ${records.length} offline ölçüm senkronize ediliyor...`);
             let synced = 0;
+            let failed = 0;
+            let lastError = null;
             for (const record of records) {
                 const { data } = record;
                 try {
@@ -2202,48 +2205,53 @@ async function syncOfflineData() {
                         if (!error) {
                             photoUrl = sb.storage.from('dendro-photos').getPublicUrl(path).data.publicUrl;
                         } else {
-                            console.warn('Fotoğraf yüklenemedi:', error);
-                            continue; 
+                            console.warn('Fotoğraf yüklenemedi:', error.message);
+                            failed++;
+                            lastError = 'Fotoğraf: ' + error.message;
+                            continue;
                         }
                     }
                     const payload = { ...data };
-                    if (photoUrl) {
-                        payload.photo_url = photoUrl;
-                        payload.photo_file = photoFile;
-                    }
-                    delete payload.photoBlob; 
-                    if (data.client_id) payload.client_id = data.client_id; // Duplicate önleme
+                    if (photoUrl) { payload.photo_url = photoUrl; payload.photo_file = photoFile; }
+                    delete payload.photoBlob;
+                    if (data.client_id) payload.client_id = data.client_id;
                     
                     const { error } = await sb.from('measurements').insert(payload);
                     if (!error) {
                         const delTx = db.transaction('measurements', 'readwrite');
                         delTx.objectStore('measurements').delete(record.id);
                         synced++;
-                        console.log(`✅ P${data.point_id} senkronize edildi`);
                     } else if (error.code === '23505') {
-                        // Duplicate key hatası → zaten senkronize edilmiş, kuyruktan sil
-                        console.warn(`⚠️ P${data.point_id} zaten mevcut, kuyruktan siliniyor`);
+                        // Duplicate → zaten var, kuyruktan sil
                         const delTx = db.transaction('measurements', 'readwrite');
                         delTx.objectStore('measurements').delete(record.id);
                     } else {
-                        console.warn('Ölçüm kaydedilemedi:', error);
-                        break; 
+                        // ⚠️ GERÇEK HATA → KULLANICIYA GÖSTER
+                        console.error('[Sync] ❌ Insert hatası:', error.message);
+                        failed++;
+                        lastError = error.message;
+                        toast(`❌ P${data.point_id} kaydedilemedi: ${error.message}`, 'err', '⚠️');
                     }
                 } catch (err) {
-                    console.error('Senkronizasyon hatası:', err);
-                    break;
+                    console.error('[Sync] Record hatası:', err);
+                    failed++;
+                    lastError = err.message;
                 }
             }
             if (synced > 0) {
-                toast(`${synced} çevrimdışı ölçüm başarıyla senkronize edildi!`, 'ok', '🔄');
+                toast(`${synced} çevrimdışı ölçüm senkronize edildi!`, 'ok', '🔄');
                 if ($('v-dash').classList.contains('on')) loadDash();
                 if ($('v-records').classList.contains('on')) loadRecords();
                 if ($('v-admin').classList.contains('on')) loadAdmin();
                 if ($('v-world').classList.contains('on')) loadWorld();
             }
+            if (failed > 0) {
+                toast(`${failed} ölçüm başarısız: ${lastError}`, 'err', '❌');
+            }
         };
     } catch (e) {
         console.error("Sync DB hatası:", e);
+        toast('Senkronizasyon hatası: ' + e.message, 'err', '❌');
     }
 }
 boot();
