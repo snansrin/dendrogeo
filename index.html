@@ -3,19 +3,179 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="google-site-verification" content="b8R2BtUI2XYHvOY5jqh18Binkcs_-tILJCLjs9H6LNE" />
 <meta http-equiv="Content-Security-Policy" content="default-src 'self' 'unsafe-inline' 'unsafe-eval' data: blob: https://cdn.jsdelivr.net https://unpkg.com https://*.tile.openstreetmap.org https://nominatim.openstreetmap.org https://*.supabase.co https://fonts.googleapis.com https://fonts.gstatic.com https://challenges.cloudflare.com">
 <title>DendroGeo — Küresel Ağaç Envanteri ve Karbon Veri Sistemi</title>
-<meta name="description" content="DendroGeo; ağaç ölçüm verilerinin konum bilgisiyle kaydedilmesi, biyokütle ve karbon değerlerinin hesaplanması ve şehir-ülke-dünya ölçeğinde analizi için web tabanlı veri platformu.">
-<meta name="theme-color" content="#14532d">
+
+
+<!-- === SEO META === -->
+<meta name="description" content="DendroGeo: GPS ölçümünden küresel karbon haritasına uzanan bilimsel ağaç envanteri platformu. Chave et al. (2014) allometrik formülleriyle AGB, BHB ve karbon stoğu hesaplayın. CC BY-NC 4.0 açık veri.">
+<meta name="keywords" content="ağaç envanteri, karbon hesaplama, biyokütle, allometrik denklem, DBH, çap ölçümü, ağaç boyu, kent parkları karbon, orman karbon stoğu, Chave 2014, IPCC 2006, QGIS ağaç haritası, ağaç veri tabanı, tree inventory, carbon sequestration, biomass equation, forest carbon, urban tree carbon, DendroGeo">
+<meta name="author" content="Sinan ŞİRİN, Nagihan ŞİRİN">
+<meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">
+<meta name="googlebot" content="index, follow">
+<meta name="language" content="Turkish">
+<meta name="revisit-after" content="7 days">
+<meta name="rating" content="General">
+<meta name="distribution" content="global">
+<link rel="canonical" href="https://snansrin.github.io/dendrogeo/">
+
+<!-- === OPEN GRAPH (Facebook, LinkedIn, WhatsApp) === -->
 <meta property="og:type" content="website">
+<meta property="og:site_name" content="DendroGeo">
 <meta property="og:title" content="DendroGeo — Küresel Ağaç Envanteri ve Karbon Veri Sistemi">
-<meta property="og:description" content="Ağaç envanteri ve karbon stoğu verisi, tek merkezde. Onaylı küresel veri, harita ve istatistikler.">
-<meta property="og:image" content="social-preview.png">
+<meta property="og:description" content="Sahadaki GPS ölçümünden küresel karbon haritasına uzanan tek entegre bilimsel platform. Chave et al. (2014) allometrik formülleri ile anında biyokütle ve karbon hesabı.">
+<meta property="og:image" content="https://snansrin.github.io/dendrogeo/social-preview.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="DendroGeo - Ağaç Envanteri ve Karbon Veri Sistemi">
 <meta property="og:url" content="https://snansrin.github.io/dendrogeo/">
+<meta property="og:locale" content="tr_TR">
+<meta property="og:locale:alternate" content="en_US">
+
+<!-- === TWITTER CARD === -->
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="DendroGeo — Küresel Ağaç Envanteri">
-<meta name="twitter:description" content="Ağaç envanteri ve karbon stoğu verisi, tek merkezde.">
-<meta name="twitter:image" content="social-preview.png">
+<meta name="twitter:description" content="Bir ağacın karbonunu saniyeler içinde hesaplayın. GPS + fotoğraf + allometrik formüller + admin onay = küresel karbon haritası.">
+<meta name="twitter:image" content="https://snansrin.github.io/dendrogeo/social-preview.png">
+<meta name="twitter:image:alt" content="DendroGeo önizleme">
+
+<!-- === JSON-LD YAPILANDIRILMIŞ VERİ (Google için çok önemli) === -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "WebApplication",
+      "@id": "https://snansrin.github.io/dendrogeo/#app",
+      "name": "DendroGeo",
+      "alternateName": "Global Tree Inventory & Carbon Data System",
+      "url": "https://snansrin.github.io/dendrogeo/",
+      "description": "GPS ölçümünden küresel karbon haritasına uzanan bilimsel ağaç envanteri ve karbon veri platformu. Chave et al. (2014) allometrik formülleri, IPCC 2006 kök biyokütlesi, QGIS uyumlu dışa aktarım.",
+      "applicationCategory": "ScienceApplication",
+      "applicationSubCategory": "Environmental Science",
+      "operatingSystem": "Web, PWA, iOS, Android",
+      "browserRequirements": "Requires JavaScript, HTML5, Geolocation API",
+      "softwareVersion": "11.0",
+      "datePublished": "2026-08-30",
+      "dateModified": "2026-09-05",
+      "inLanguage": ["tr-TR", "en-US"],
+      "isAccessibleForFree": true,
+      "license": "https://creativecommons.org/licenses/by-nc/4.0/",
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "USD"
+      },
+      "author": [
+        {
+          "@type": "Person",
+          "name": "Sinan ŞİRİN",
+          "jobTitle": "Sistem Geliştirici",
+          "url": "https://github.com/snansrin"
+        },
+        {
+          "@type": "Person",
+          "name": "Nagihan ŞİRİN",
+          "jobTitle": "Doktora Adayı - Peyzaj Mimarlığı"
+        }
+      ],
+      "keywords": "tree inventory, carbon sequestration, biomass equation, allometry, DBH, urban forest, forest carbon, QGIS, Chave 2014, IPCC"
+    },
+    {
+      "@type": "Dataset",
+      "@id": "https://snansrin.github.io/dendrogeo/#dataset",
+      "name": "DendroGeo Global Tree Inventory Dataset",
+      "description": "Admin onaylı ağaç ölçüm verileri: GPS konumu, DBH, boy, tür, AGB, BHB, karbon stoğu, fotoğraf. CSV ve GeoJSON formatında dışa aktarılabilir.",
+      "url": "https://snansrin.github.io/dendrogeo/",
+      "license": "https://creativecommons.org/licenses/by-nc/4.0/",
+      "creator": {
+        "@type": "Organization",
+        "name": "DendroGeo Project"
+      },
+      "distribution": [
+        {
+          "@type": "DataDownload",
+          "encodingFormat": "text/csv",
+          "contentUrl": "https://snansrin.github.io/dendrogeo/"
+        },
+        {
+          "@type": "DataDownload",
+          "encodingFormat": "application/geo+json",
+          "contentUrl": "https://snansrin.github.io/dendrogeo/"
+        }
+      ],
+      "spatialCoverage": {
+        "@type": "Place",
+        "name": "Global"
+      },
+      "temporalCoverage": "2026/..",
+      "measurementTechnique": "Field measurement with GPS + allometric equations (Chave 2014)",
+      "variableMeasured": [
+        {"@type": "PropertyValue", "name": "DBH (cm)"},
+        {"@type": "PropertyValue", "name": "Tree Height (m)"},
+        {"@type": "PropertyValue", "name": "Above-ground biomass (kg)"},
+        {"@type": "PropertyValue", "name": "Carbon stock (kg)"}
+      ]
+    },
+    {
+      "@type": "ScholarlyArticle",
+      "@id": "https://snansrin.github.io/dendrogeo/#thesis",
+      "headline": "Kent Parklarının Karbon Depolama Performansının Saptanması",
+      "author": {
+        "@type": "Person",
+        "name": "Nagihan ŞİRİN"
+      },
+      "description": "Doktora araştırması kapsamında geliştirilen DendroGeo platformu ile kent parklarındaki ağaçların karbon depolama kapasitesinin ölçülmesi ve analizi.",
+      "datePublished": "2026",
+      "inLanguage": "tr-TR",
+      "isPartOf": {
+        "@type": "CreativeWork",
+        "name": "Doktora Tezi"
+      }
+    },
+    {
+      "@type": "FAQPage",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "Bir ağacın karbonu nasıl hesaplanır?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "DendroGeo'da ağacın çapı (DBH) ve boyu ölçülür, ardından Chave et al. (2014) formülüyle AGB = 0.0673·(ρ·DBH²·H)^0.976 hesaplanır. Kök biyokütlesi IPCC 2006'ya göre BHB = AGB·0.26 olarak eklenir. Toplam karbon = (AGB+BHB)·0.47 formülüyle bulunur."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "DendroGeo nedir?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "DendroGeo, GPS ölçümü, canlı fotoğraf denetimi ve bilimsel allometrik formülleri birleştiren; admin onaylı verileri küresel haritada gösteren açık kaynaklı bir ağaç envanteri ve karbon veri sistemidir."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Veriler hangi formatta dışa aktarılır?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "DendroGeo verileri CSV (bilimsel format), GeoJSON (web haritaları) ve QGIS uyumlu fotoğraf eşleştirmeli CSV formatlarında dışa aktarılabilir. CC BY-NC 4.0 lisansı altındadır."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Hangi ağaç türleri destekleniyor?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Sistem, Türkiye'deki 44 ağaç türü için As ve ark. (2001), Tolunay (2013) ve OGM 299 Nolu Tebliğ (2017) kaynaklı odun yoğunluğu (ρ) değerlerini içerir. İbreli, yapraklı ve diğer gruplar için varsayılan yoğunluk değerleri de desteklenir."
+          }
+        }
+      ]
+    }
+  ]
+}
+</script>
 <link rel="icon" type="image/png" href="icon.png">
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#14532d"><link rel="apple-touch-icon" href="icon.png">
