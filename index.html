@@ -1059,7 +1059,53 @@ async function doLogin(){
     if (navigator.onLine) {
         setTimeout(() => syncOfflineData(), 2000);
     }
-}async function sendResetEmail(){
+}
+async function doRegister(){
+    const name=$("rgName").value;
+    const email=$("rgEmail").value;
+    const pass=$("rgPass").value;
+    if(!name||!email||!pass){
+        amsg("Tüm alanları doldurun.",1);
+        return;
+    }
+    if(pass.length<6){
+        amsg("Parola en az 6 karakter olmalı.",1);
+        return;
+    }
+    amsg("Hesap oluşturuluyor...",0);
+    let tok=tsToken("tsReg");
+    if(!tok){
+        await new Promise(r=>setTimeout(r,2500));
+        tok=tsToken("tsReg");
+    }
+    if(!tok){
+        amsg("Doğrulama widget'ı hazır değil. Sayfayı yenileyip tekrar deneyin.",1);
+        return;
+    }
+    
+    // ✅ Onay maili bu adrese dönsün (404 hatasını kökten çözer)
+    const redirectURL = window.location.origin + window.location.pathname.replace(/\/+$/,"") + "/";
+    
+    const r=await sb.auth.signUp({
+        email:email,
+        password:pass,
+        options:{
+            data:{
+                full_name:name,
+                organization:$("rgOrg").value
+            },
+            captchaToken:tok,
+            redirectTo:redirectURL
+        }
+    });
+    if(r.error){
+        amsg(r.error.message,1);
+        return;
+    }
+    try{turnstile.reset(TS.tsReg);}catch(e){}
+    amsg(r.data.session?"Hesap oluşturuldu.":"✓ Doğrulama e‑postası gönderildi — maildeki linke tıklayın.",0);
+}
+async function sendResetEmail(){
  const email=$("rsEmail").value;
  if(!email){
   amsg("Lütfen e-posta adresinizi girin.",1);
