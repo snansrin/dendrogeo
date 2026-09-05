@@ -1,0 +1,19 @@
+# DendroGeo robots.txt
+User-agent: *
+Allow: /
+
+# Sitemap
+Sitemap: https://snansrin.github.io/dendrogeo/sitemap.xml
+
+# Kötü botları engelle (opsiyonel, performans için)
+User-agent: AhrefsBot
+Crawl-delay: 10
+
+User-agent: SemrushBot
+Crawl-delay: 10
+
+User-agent: MJ12bot
+Disallow: /
+
+User-agent: DotBot
+Disallow: /
