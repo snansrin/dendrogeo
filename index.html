@@ -573,7 +573,7 @@ tr.done td{opacity:.55}tr.done td b{text-decoration:line-through}
     <div class="stat" style="border-left:3px solid var(--green);padding-left:18px"><div class="lbl">📋 Kayıtlarım</div><div class="val" id="dMy">0</div></div>
     <div class="stat" style="border-left:3px solid var(--amber);padding-left:18px"><div class="lbl">🌱 Karbonum</div><div class="val" id="dCarbon">0</div><div style="font-size:.72rem;color:var(--mut);margin-top:4px">kg CO₂ eşdeğer</div></div>
     <div class="stat" style="border-left:3px solid var(--blue);padding-left:18px"><div class="lbl">📍 Waypoint</div><div class="val" id="dWp">0</div></div>
-    <div class="stat" style="border-left:3px solid var(--red);padding-left:18px"><div class="lbl">✅ Tamamlanan</div><div class="val" id="dVisit">0</div><button class="btn sm red" style="margin-top:8px;font-size:.65rem" onclick="clearOfflineQueue()">🧹 Kuyruğu Temizle</button></div>
+    <div class="stat" style="border-left:3px solid var(--red);padding-left:18px"><div class="lbl">✅ Tamamlanan</div><div class="val" id="dVisit">0</div></div>
    </div>
    <div class="card" style="margin-bottom:18px;border-left:4px solid var(--green)">
     <div class="shead" style="margin-bottom:14px"><span class="no">🌳</span><h2 style="font-size:1.15rem">Kişisel Ağaç Analizi</h2><span class="rule"></span></div>
@@ -1143,24 +1143,12 @@ async function boot(){
   navigator.serviceWorker.register('./sw.js').catch(e=>console.log('SW registration failed:',e));
  }
  
-let syncDebounce = null;
-window.addEventListener('online', () => {
-if (syncDebounce) clearTimeout(syncDebounce);
-syncDebounce = setTimeout(() => {
-toast('İnternet bağlantısı geri geldi — senkronize ediliyor', 'ok', '🌐');
-if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
-navigator.serviceWorker.controller.postMessage({ type: 'SYNC' });
-}
-}, 2000);
-});
-if('serviceWorker' in navigator){
-navigator.serviceWorker.addEventListener('message',e=>{
-if(e.data&&e.data.type==='SYNC_DONE'){
-toast('✓ '+(e.data.count||0)+' kayıt senkronize edildi','ok','☁️');
-loadDash();loadRecords();
-}
-});
-}
+ window.addEventListener('online',()=>{
+  toast('İnternet bağlantısı geri geldi — senkronize ediliyor','ok','🌐');
+  if('serviceWorker' in navigator&&navigator.serviceWorker.controller){
+   navigator.serviceWorker.controller.postMessage({type:'SYNC'});
+  }
+ });
  
  trackVisit();
  const{data:{session}}=await sb.auth.getSession();
@@ -1384,128 +1372,89 @@ async function queryPointId(){
 }
 
 async function saveMeas(){
-    const pid=+$("mProject").value,pt=+$("mPoint").value,sp=$("mSpecies").value,d=+$("mDbh").value,h=+$("mHeight").value,grp=$("mGroup").value;
-    if(!pid||!pt||!sp||!d||!h)return toast("Tüm alanları doldur","err");
-    if(!EDIT_ID&&!GPS)return toast("Önce 📡 Konumu Etkinleştir butonuna basın","err");
-    if(d>500||h>100)return toast("Çap ≤500 cm, boy ≤100 m olmalı","err");
-    
-    const f=$("mPhoto").files[0];
-    if(f&&!photoOk)return toast("Fotoğraf denetimi başarısız — uygun bir çekim yapın","err");
-    
-    const c=calc(d,h,sp,grp);
-    const wasEdit=!!EDIT_ID;
-    
-    // Temel veri objesini hazırla
-    const base={
-        owner:USER.id, project_id:pid, point_id:pt, measurement_no:+$("mNo").value||1,
-        grp, species:sp, dbh_cm:d, height_m:h, volume_m3:c.vol, carbon_kg:c.total_carbon,
-        slope_deg:0, shared:true, status:"Beklemede"
-    };
-    
-    if(!EDIT_ID){
-        base.lat=GPS.latitude; base.lon=GPS.longitude; 
-        base.accuracy_m=GPS.accuracy; base.altitude_m=GPS.altitude;
-        const geo=await reverseGeocode(GPS.latitude,GPS.longitude);
-        base.country=geo?geo.country:"Bilinmiyor";
-        base.city=geo?geo.city:"Bilinmiyor";
-        if(geo) toast("📍 Konum algılandı: "+geo.city+" / "+geo.country,"info","🗺️");
-    }
+ const pid=+$("mProject").value,pt=+$("mPoint").value,sp=$("mSpecies").value,d=+$("mDbh").value,h=+$("mHeight").value,grp=$("mGroup").value;
+ if(!pid||!pt||!sp||!d||!h)return toast("Tüm alanları doldur","err");
+ if(!EDIT_ID&&!GPS)return toast("Önce 📡 Konumu Etkinleştir butonuna basın","err");
+ if(d>500||h>100)return toast("Çap ≤500 cm, boy ≤100 m olmalı","err");
+ const f=$("mPhoto").files[0];
+ if(f&&!photoOk)return toast("Fotoğraf denetimi başarısız — uygun bir çekim yapın","err");
+const wasEdit=!!EDIT_ID;
+const c=calc(d,h,sp,grp);
+let photo=null,photoFile=null;
+ if(f){
+  const comp=await compress(f);
+  photoFile="P"+String(pt).padStart(3,"0")+"_M"+(+$("mNo").value||1)+".JPG";
+  const path=USER.id+"/"+Date.now()+".jpg";
+  const{error}=await sb.storage.from("dendro-photos").upload(path,comp,{contentType:"image/jpeg"});
+  if(!error)photo=sb.storage.from("dendro-photos").getPublicUrl(path).data.publicUrl;
+ }
+const base={owner:USER.id,project_id:pid,point_id:pt,measurement_no:+$("mNo").value||1,grp,species:sp,dbh_cm:d,height_m:h,volume_m3:c.vol,carbon_kg:c.total_carbon,slope_deg:0,shared:true,status:"Beklemede"};
+if(!EDIT_ID){
+ base.lat=GPS.latitude;base.lon=GPS.longitude;base.accuracy_m=GPS.accuracy;base.altitude_m=GPS.altitude;
+ const geo=await reverseGeocode(GPS.latitude,GPS.longitude);
+ base.country=geo?geo.country:"Bilinmiyor";
+ base.city=geo?geo.city:"Bilinmiyor";
+ if(geo)toast("📍 Konum algılandı: "+geo.city+" / "+geo.country,"info","🗺️");
+}
+if(photo){base.photo_url=photo;base.photo_file=photoFile;}
 
-    // 🛑 1. ADIM: ÇEVRİMDIŞI KONTROLÜ (İnternet yoksa Supabase'e hiç bağlanma)
-    if(!navigator.onLine){
-        let offlineBlob = null;
-        if(f) {
-            offlineBlob = await compress(f); // Sadece bir kez sıkıştır
-        }
-        await saveOfflineMeasurement(base, offlineBlob);
-        toast('Çevrimdışı kaydedildi — internet gelince senkronize','info','📴');
-        
-        // Formu temizle
-        $('mPoint').value=''; $('mDbh').value=''; $('mHeight').value='';
-        $('mPhoto').value=''; $('photoCheck').style.display='none';
-        photoOk=false; manualPoint=false;
-        loadDash(); loadRecords();
-        return; // Fonksiyonu burada güvenle sonlandır
-    }
-
-    // 🟢 2. ADIM: ÇEVRİMİÇİ İŞLEMLER (Fotoğraf Yükleme ve DB Kaydı)
-    let photo=null, photoFile=null;
-    if(f){
-        const comp = await compress(f); 
-        photoFile="P"+String(pt).padStart(3,"0")+"_M"+(+$("mNo").value||1)+".JPG";
-        const path=USER.id+"/"+Date.now()+".jpg";
-        const{error}=await sb.storage.from("dendro-photos").upload(path,comp,{contentType:"image/jpeg"});
-        if(!error) photo=sb.storage.from("dendro-photos").getPublicUrl(path).data.publicUrl;
-    }
-    
-    if(photo){
-        base.photo_url=photo;
-        base.photo_file=photoFile;
-    }
-
-    // 🟢 3. ADIM: VERİTABANI GÜNCELLEME / EKLEME
-    if(EDIT_ID){
-        // ESKİ FOTOĞRAFI BUL (Depolama şişmesini önlemek için KRİTİK)
-        const { data: oldRec } = await sb.from("measurements").select("photo_url").eq("id", EDIT_ID).single();
-        const oldPhotoUrl = oldRec?.photo_url;
-
-        const{error}=await sb.from("measurements").update(base).eq("id",EDIT_ID);
-        if(error) return toast("Hata: "+error.message,"err");
-        
-        // Eğer yeni fotoğraf yüklendiyse ve eskisi varsa, eskiyi çöpe at
-        if (photo && oldPhotoUrl && photo !== oldPhotoUrl) {
-            await removePhoto(oldPhotoUrl);
-        }
-        
-        toast("Kayıt güncellendi — onaya gönderildi","ok","✓");
-        cancelEdit();
-    } else {
-        let{error}=await sb.from("measurements").insert(base);
-        if(error){
-            // Fallback (bazı eski sütunlar yoksa)
-            delete base.altitude_m; delete base.photo_file;
-            ({error}=await sb.from("measurements").insert(base));
-        }
-        if(error) return toast("Hata: "+error.message,"err");
-        toast("Kaydedildi — "+c.total_carbon.toFixed(1)+" kg karbon","ok","🌱");
-    }
-    
-    // Formu temizle ve yenile
-    $("mPoint").value=''; $("mDbh").value=''; $("mHeight").value=''; $("mPhoto").value='';
-    $("photoCheck").style.display="none"; $("pointQueryResult").style.display="none"; 
-    photoOk=false; manualPoint=false;
-    
-    loadDash(); loadRecords(); loadWaypoints();
-    if(!wasEdit) autoFillPointId();
+// 1. Form validate
+// 2. base objesini oluştur (lat/lon dahil)
+// 3. OFFLINE KONTROLÜ BURAYA GELMELİ (upload'tan önce)
+if(!navigator.onLine){
+ await saveOfflineMeasurement(base);
+ toast('Çevrimdışı kaydedildi — internet gelince senkronize','info','📴');
+ $('mPoint').value='';$('mDbh').value='';$('mHeight').value='';
+ $('mPhoto').value='';$('photoCheck').style.display='none';
+ photoOk=false;manualPoint=false;
+ loadDash();loadRecords();
+ return;
+}
+// 4. Online ise fotoğrafı yükle
+// 5. Supabase insert/update
+ if(EDIT_ID){
+  const{error}=await sb.from("measurements").update(base).eq("id",EDIT_ID);
+  if(error)return toast("Hata: "+error.message,"err");
+  toast("Kayıt güncellendi — onaya gönderildi","ok","✓");
+  cancelEdit();
+ }else{
+  let{error}=await sb.from("measurements").insert(base);
+  if(error){delete base.altitude_m;delete base.photo_file;({error}=await sb.from("measurements").insert(base));}
+  if(error)return toast("Hata: "+error.message,"err");
+  toast("Kaydedildi — "+c.total_carbon.toFixed(1)+" kg karbon","ok","🌱");
+ }
+$("mPoint").value='';$("mDbh").value='';$("mHeight").value='';$("mPhoto").value='';
+$("photoCheck").style.display="none";$("pointQueryResult").style.display="none";photoOk=false;manualPoint=false;
+loadDash();loadRecords();loadWaypoints();
+if(!wasEdit)autoFillPointId();
 }
 function cancelEdit(){EDIT_ID=null;manualPoint=false;$("editBanner").style.display="none";$("saveBtn").textContent="💾 Hesapla ve Kaydet";}
 async function editRec(id){
-const{data}=await sb.from("measurements").select("*").eq("id",id).single();
-if(!data)return;
-EDIT_ID=id;
-$("mProject").value=data.project_id;
-$("mPoint").value=data.point_id;$("mNo").value=data.measurement_no||1;
-$("mGroup").value=data.grp||"";fillSpecies();$("mSpecies").value=data.species;showLatin();
-$("mDbh").value=data.dbh_cm;$("mHeight").value=data.height_m;
-$("editBanner").style.display="block";$("saveBtn").textContent="💾 Kaydı Güncelle";
-liveCalc();go("measure");
+ const{data}=await sb.from("measurements").select("*").eq("id",id).single();
+ if(!data)return;
+ EDIT_ID=id;
+ $("mProject").value=data.project_id;
+ $("mPoint").value=data.point_id;$("mNo").value=data.measurement_no||1;
+ $("mGroup").value=data.grp||"";fillSpecies();$("mSpecies").value=data.species;showLatin();
+ $("mDbh").value=data.dbh_cm;$("mHeight").value=data.height_m;
+ $("editBanner").style.display="block";$("saveBtn").textContent="💾 Kaydı Güncelle";
+ liveCalc();go("measure");
 }
-function compress(f){
-return new Promise(res=>{
-const i=new Image(),u=URL.createObjectURL(f);
-i.onload=()=>{
-const m=1024,sc=Math.min(1,m/Math.max(i.width,i.height));
-const c=document.createElement("canvas");
-c.width=i.width*sc;c.height=i.height*sc;
-c.getContext("2d").drawImage(i,0,0,c.width,c.height);
-c.toBlob(b=>{URL.revokeObjectURL(u);res(b);},"image/jpeg",.7);
-};
-i.onerror=()=>{URL.revokeObjectURL(u);res(f);};
-i.src=u;
-});
+function compress(f){return new Promise(res=>{const i=new Image(),u=URL.createObjectURL(f);i.onload=()=>{const m=1024,sc=Math.min(1,m/Math.max(i.width,i.height)),c=document.createElement("canvas");c.width=i.width*sc;c.height=i.height*sc;c.getContext("2d").drawImage(i,0,0,c.width,c.height);c.toBlob(b=>{URL.revokeObjectURL(u);res(b);},"image/jpeg",.7);};i.src=u;});}
+async function removePhoto(url){
+ if(!url)return;
+ try{
+  let p=url.split("/dendro-photos/")[1];
+  if(p){await sb.storage.from("dendro-photos").remove([p]);}
+ }catch(e){}
+ try{
+  const p2=decodeURIComponent(url.split("/dendro-photos/")[1]||"");
+  if(p2)await sb.storage.from("dendro-photos").remove([p2]);
+ }catch(e){}
 }
-async function uploadWpCsv(){ 
-const pid=+$("nProject").value;if(!pid)return toast("Proje seç");
+
+async function uploadWpCsv(){
+ const pid=+$("nProject").value;if(!pid)return toast("Proje seç");
  const f=$("nCsv").files[0];if(!f)return toast("CSV seç");
  const lines=(await f.text()).split(/\r?\n/);let n=0;
  for(let i=1;i<lines.length;i++){const c=lines[i].split(",");if(c.length<3)continue;const id=parseInt((c[2]||"").replace(/"/g,""));const lon=+c[0],lat=+c[1];if(!id||!lat||!lon)continue;await sb.from("waypoints").upsert({owner:USER.id,project_id:pid,wp_id:id,lat,lon},{onConflict:"project_id,wp_id"});n++;}
@@ -1580,41 +1529,10 @@ async function loadRecords(){
  }).join("")||"<tr><td colspan=9>Kayıt yok</td></tr>";
 }
 async function delRec(id){
-if(!confirm("Kayıt tamamen silinsin mi?"))return;
-try {
-const { data, error: selErr } = await sb.from("measurements").select("photo_url").eq("id",id).single();
-if (selErr) console.warn("Select error:", selErr);
-if(data && data.photo_url) await removePhoto(data.photo_url);
-const { error: delErr } = await sb.from("measurements").delete().eq("id",id);
-if (delErr) {
-toast("Silme hatası: " + delErr.message, "err");
-console.error("Delete error:", delErr);
-return;
-}
-toast("Kayıt silindi", "ok", "🗑️");
-loadRecords();loadDash();
-} catch(e) {
-toast("Beklenmeyen hata: " + e.message, "err");
-}
-}
-
-async function delMeas(id){
-if(!confirm("Kayıt silinsin mi?"))return;
-try {
-const { data, error: selErr } = await sb.from("measurements").select("photo_url").eq("id",id).single();
-if (selErr) console.warn("Select error:", selErr);
-if(data && data.photo_url) await removePhoto(data.photo_url);
-const { error: delErr } = await sb.from("measurements").delete().eq("id",id);
-if (delErr) {
-toast("Silme hatası: " + delErr.message, "err");
-console.error("Delete error:", delErr);
-return;
-}
-toast("Kayıt silindi", "ok", "🗑️");
-loadAdmin();
-} catch(e) {
-toast("Beklenmeyen hata: " + e.message, "err");
-}
+ if(!confirm("Kayıt tamamen silinsin mi?"))return;
+ const{data}=await sb.from("measurements").select("photo_url").eq("id",id).single();
+ if(data)await removePhoto(data.photo_url);
+ await sb.from("measurements").delete().eq("id",id);loadRecords();loadDash();
 }
 async function loadDash(){
  const{data}=await sb.from("measurements").select("*").eq("owner",USER.id);
@@ -2152,49 +2070,32 @@ function zoomToCity(city){
 }
 function getCountryBounds(c){return[[20,10],[55,60]];}
 
-async function saveOfflineMeasurement(data, compressedBlob = null) {
-const db = await openOfflineDB();
-const tx = db.transaction('measurements', 'readwrite');
-const store = tx.objectStore('measurements');
-const session = await sb.auth.getSession();
-const token = session.data.session?.access_token || '';
-store.add({
-data: { ...data, photoBlob: compressedBlob },
-apiKey: SB_KEY,
-token: token,
-timestamp: Date.now()
-});
-return new Promise((resolve, reject) => {
-tx.oncomplete = () => {
-// 🛑 DÜZELTME: postMessage ile SW'yi spam yapma, sadece Background Sync kullan.
-// Bu sayede SW aynı anda 3 kez tetiklenip aynı kaydı 3 kez yüklemez.
-if (navigator.serviceWorker && navigator.serviceWorker.ready) {
-navigator.serviceWorker.ready.then(reg => {
-if (reg.sync) {
-reg.sync.register('sync-measurements').catch(() => {});
-} else if (navigator.onLine && navigator.serviceWorker.controller) {
-// Safari gibi Background Sync olmayan tarayıcılarda manuel tetikle
-navigator.serviceWorker.controller.postMessage({ type: 'SYNC' });
+async function saveOfflineMeasurement(data){
+ const db=await openOfflineDB();
+ const tx=db.transaction('measurements','readwrite');
+ const store=tx.objectStore('measurements');
+ 
+ const session=await sb.auth.getSession();
+ const token=session.data.session?.access_token||'';
+ 
+ store.add({
+  data:data,
+  apiKey:SB_KEY,
+  token:token,
+  timestamp:Date.now()
+ });
+ 
+ return new Promise((resolve,reject)=>{
+  tx.oncomplete=()=>{
+   if('serviceWorker' in navigator&&navigator.serviceWorker.controller){
+    navigator.serviceWorker.controller.postMessage({type:'SYNC'});
+   }
+   resolve();
+  };
+  tx.onerror=e=>reject(e.target.error);
+ });
 }
-});
-}
-resolve();
-};
-tx.onerror = e => reject(e.target.error);
-});
-}
-async function clearOfflineQueue(){
-try{
-const db=await openOfflineDB();
-await new Promise((res,rej)=>{
-const tx=db.transaction('measurements','readwrite');
-tx.objectStore('measurements').clear();
-tx.oncomplete=()=>res();
-tx.onerror=()=>rej(tx.error);
-});
-toast("✓ Çevrimdışı kuyruk temizlendi","ok","🧹");
-}catch(e){toast("Hata: "+e.message,"err");}
-}
+
 function openOfflineDB(){
  return new Promise((resolve,reject)=>{
   const req=indexedDB.open('DendroGeoOffline',1);
