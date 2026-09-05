@@ -1,40 +1,52 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
-        xmlns:xhtml="http://www.w3.org/1999/xhtml">
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+
+  <!-- Ana Sayfa -->
   <url>
     <loc>https://snansrin.github.io/dendrogeo/</loc>
     <lastmod>2026-09-05</lastmod>
     <changefreq>weekly</changefreq>
     <priority>1.0</priority>
   </url>
+
+  <!-- Sistem Bölümü -->
   <url>
     <loc>https://snansrin.github.io/dendrogeo/#sistem</loc>
     <lastmod>2026-09-05</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
+
+  <!-- Yöntem Bölümü -->
   <url>
     <loc>https://snansrin.github.io/dendrogeo/#yontem</loc>
     <lastmod>2026-09-05</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
+
+  <!-- Veri & Harita -->
   <url>
     <loc>https://snansrin.github.io/dendrogeo/#veri</loc>
     <lastmod>2026-09-05</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.9</priority>
   </url>
+
+  <!-- İstatistik -->
   <url>
     <loc>https://snansrin.github.io/dendrogeo/#istatistik</loc>
     <lastmod>2026-09-05</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.7</priority>
   </url>
+
+  <!-- Erişim (Kayıt/Giriş) -->
   <url>
     <loc>https://snansrin.github.io/dendrogeo/#erisim</loc>
     <lastmod>2026-09-05</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
+
 </urlset>
