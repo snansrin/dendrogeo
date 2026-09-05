@@ -1168,15 +1168,7 @@ async function boot(){
     if (navigator.onLine) {
         syncOfflineData();
     }
-}
- 
- trackVisit();
- const{data:{session}}=await sb.auth.getSession();
- if(!session){initLanding();return;}
- USER=session.user;
- const{data:p}=await sb.from("profiles").select("*").eq("id",USER.id).single();
- PROFILE=p;startShell();
-}
+} // <-- FONKSİYON SADECE BURADA KAPANIYOR, ALTINA HİÇBİR ŞEY GELMEYECEK
 
 function popupHtml(r){
  return `<div style="min-width:140px"><b>P${r.point_id}</b> · ${r.species||""}<br><span style="font-size:.75rem;color:#68766e">Çap: ${r.dbh_cm||"—"} cm · Boy: ${r.height_m||"—"} m<br>Karbon: ${(r.carbon_kg||0).toFixed(1)} kg</span>`+(r.photo_url?`<br><img src="${r.photo_url}" style="width:160px;border-radius:8px;margin-top:6px">`:"")+`</div>`;
