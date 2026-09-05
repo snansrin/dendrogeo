@@ -1,11 +1,13 @@
-# DendroGeo robots.txt
+# DendroGeo - Küresel Ağaç Envanteri ve Karbon Veri Sistemi
+# https://snansrin.github.io/dendrogeo/
+
 User-agent: *
 Allow: /
 
 # Sitemap
 Sitemap: https://snansrin.github.io/dendrogeo/sitemap.xml
 
-# Kötü botları engelle (opsiyonel, performans için)
+# Kötü niyetli botları yavaşlat (opsiyonel, SEO için önerilir)
 User-agent: AhrefsBot
 Crawl-delay: 10
 
@@ -17,3 +19,6 @@ Disallow: /
 
 User-agent: DotBot
 Disallow: /
+
+User-agent: BLEXBot
+Crawl-delay: 10
