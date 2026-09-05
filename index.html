@@ -1143,10 +1143,16 @@ async function boot(){
   navigator.serviceWorker.register('./sw.js').catch(e=>console.log('SW registration failed:',e));
  }
  
-window.addEventListener('online',()=>{
-toast('İnternet bağlantısı geri geldi — senkronize ediliyor','ok','🌐');
-if('serviceWorker' in navigator&&navigator.serviceWorker.controller){
-navigator.serviceWorker.controller.postMessage({type:'SYNC'});
+let syncDebounce = null;
+window.addEventListener('online', () => {
+if (syncDebounce) clearTimeout(syncDebounce);
+syncDebounce = setTimeout(() => {
+toast('İnternet bağlantısı geri geldi — senkronize ediliyor', 'ok', '🌐');
+if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
+navigator.serviceWorker.controller.postMessage({ type: 'SYNC' });
+}
+}, 2000); // 2 saniye bekle, bağlantı istikrarlı olsun ve çoklu tetiklenme önlensin
+});Worker.controller.postMessage({type:'SYNC'});
 }
 });
 if('serviceWorker' in navigator){
@@ -1576,10 +1582,41 @@ async function loadRecords(){
  }).join("")||"<tr><td colspan=9>Kayıt yok</td></tr>";
 }
 async function delRec(id){
- if(!confirm("Kayıt tamamen silinsin mi?"))return;
- const{data}=await sb.from("measurements").select("photo_url").eq("id",id).single();
- if(data)await removePhoto(data.photo_url);
- await sb.from("measurements").delete().eq("id",id);loadRecords();loadDash();
+if(!confirm("Kayıt tamamen silinsin mi?"))return;
+try {
+const { data, error: selErr } = await sb.from("measurements").select("photo_url").eq("id",id).single();
+if (selErr) console.warn("Select error:", selErr);
+if(data && data.photo_url) await removePhoto(data.photo_url);
+const { error: delErr } = await sb.from("measurements").delete().eq("id",id);
+if (delErr) {
+toast("Silme hatası: " + delErr.message, "err");
+console.error("Delete error:", delErr);
+return;
+}
+toast("Kayıt silindi", "ok", "🗑️");
+loadRecords();loadDash();
+} catch(e) {
+toast("Beklenmeyen hata: " + e.message, "err");
+}
+}
+
+async function delMeas(id){
+if(!confirm("Kayıt silinsin mi?"))return;
+try {
+const { data, error: selErr } = await sb.from("measurements").select("photo_url").eq("id",id).single();
+if (selErr) console.warn("Select error:", selErr);
+if(data && data.photo_url) await removePhoto(data.photo_url);
+const { error: delErr } = await sb.from("measurements").delete().eq("id",id);
+if (delErr) {
+toast("Silme hatası: " + delErr.message, "err");
+console.error("Delete error:", delErr);
+return;
+}
+toast("Kayıt silindi", "ok", "🗑️");
+loadAdmin();
+} catch(e) {
+toast("Beklenmeyen hata: " + e.message, "err");
+}
 }
 async function loadDash(){
  const{data}=await sb.from("measurements").select("*").eq("owner",USER.id);
@@ -2118,35 +2155,35 @@ function zoomToCity(city){
 function getCountryBounds(c){return[[20,10],[55,60]];}
 
 async function saveOfflineMeasurement(data, compressedBlob = null) {
-    const db = await openOfflineDB();
-    const tx = db.transaction('measurements', 'readwrite');
-    const store = tx.objectStore('measurements');
-    const session = await sb.auth.getSession();
-    const token = session.data.session?.access_token || '';
-    
-    store.add({
-        data: { ...data, photoBlob: compressedBlob }, // Orijinal değil, sıkıştırılmış blob saklanır
-        apiKey: SB_KEY,
-        token: token,
-        timestamp: Date.now()
-    });
-    
-    return new Promise((resolve, reject) => {
-        tx.oncomplete = () => {
-            if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
-                navigator.serviceWorker.controller.postMessage({ type: 'SYNC' });
-            }
-            if (navigator.serviceWorker && navigator.serviceWorker.ready) {
-                navigator.serviceWorker.ready.then(reg => {
-                    if (reg.sync) {
-                        reg.sync.register('sync-measurements').catch(() => {});
-                    }
-                });
-            }
-            resolve();
-        };
-        tx.onerror = e => reject(e.target.error);
-    });
+const db = await openOfflineDB();
+const tx = db.transaction('measurements', 'readwrite');
+const store = tx.objectStore('measurements');
+const session = await sb.auth.getSession();
+const token = session.data.session?.access_token || '';
+store.add({
+data: { ...data, photoBlob: compressedBlob },
+apiKey: SB_KEY,
+token: token,
+timestamp: Date.now()
+});
+return new Promise((resolve, reject) => {
+tx.oncomplete = () => {
+// 🛑 DÜZELTME: postMessage ile SW'yi spam yapma, sadece Background Sync kullan.
+// Bu sayede SW aynı anda 3 kez tetiklenip aynı kaydı 3 kez yüklemez.
+if (navigator.serviceWorker && navigator.serviceWorker.ready) {
+navigator.serviceWorker.ready.then(reg => {
+if (reg.sync) {
+reg.sync.register('sync-measurements').catch(() => {});
+} else if (navigator.onLine && navigator.serviceWorker.controller) {
+// Safari gibi Background Sync olmayan tarayıcılarda manuel tetikle
+navigator.serviceWorker.controller.postMessage({ type: 'SYNC' });
+}
+});
+}
+resolve();
+};
+tx.onerror = e => reject(e.target.error);
+});
 }
 function openOfflineDB(){
  return new Promise((resolve,reject)=>{
