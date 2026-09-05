@@ -1384,124 +1384,84 @@ async function saveMeas(){
     if(!pid||!pt||!sp||!d||!h)return toast("Tüm alanları doldur","err");
     if(!EDIT_ID&&!GPS)return toast("Önce 📡 Konumu Etkinleştir butonuna basın","err");
     if(d>500||h>100)return toast("Çap ≤500 cm, boy ≤100 m olmalı","err");
-    
     const f=$("mPhoto").files[0];
     if(f&&!photoOk)return toast("Fotoğraf denetimi başarısız — uygun bir çekim yapın","err");
-    
     const c=calc(d,h,sp,grp);
     const wasEdit=!!EDIT_ID;
+    let photo=null,photoFile=null;
     
-    // Temel veri objesini hazırla
-    const base={
-        owner:USER.id, project_id:pid, point_id:pt, measurement_no:+$("mNo").value||1,
-        grp, species:sp, dbh_cm:d, height_m:h, volume_m3:c.vol, carbon_kg:c.total_carbon,
-        slope_deg:0, shared:true, status:"Beklemede"
-    };
-    
-    if(!EDIT_ID){
-        base.lat=GPS.latitude; base.lon=GPS.longitude; 
-        base.accuracy_m=GPS.accuracy; base.altitude_m=GPS.altitude;
-        const geo=await reverseGeocode(GPS.latitude,GPS.longitude);
-        base.country=geo?geo.country:"Bilinmiyor";
-        base.city=geo?geo.city:"Bilinmiyor";
-        if(geo) toast("📍 Konum algılandı: "+geo.city+" / "+geo.country,"info","🗺️");
-    }
-
-    // 🛑 1. ADIM: ÇEVRİMDIŞI KONTROLÜ (İnternet yoksa Supabase'e hiç bağlanma)
-    if(!navigator.onLine){
-        let offlineBlob = null;
-        if(f) {
-            offlineBlob = await compress(f); // Sadece bir kez sıkıştır
-        }
-        await saveOfflineMeasurement(base, offlineBlob);
-        toast('Çevrimdışı kaydedildi — internet gelince senkronize','info','📴');
-        
-        // Formu temizle
-        $('mPoint').value=''; $('mDbh').value=''; $('mHeight').value='';
-        $('mPhoto').value=''; $('photoCheck').style.display='none';
-        photoOk=false; manualPoint=false;
-        loadDash(); loadRecords();
-        return; // Fonksiyonu burada güvenle sonlandır
-    }
-
-    // 🟢 2. ADIM: ÇEVRİMİÇİ İŞLEMLER (Fotoğraf Yükleme ve DB Kaydı)
-    let photo=null, photoFile=null;
     if(f){
-        const comp = await compress(f); 
+        const comp = await compress(f); // Artık asla takılmayacak
         photoFile="P"+String(pt).padStart(3,"0")+"_M"+(+$("mNo").value||1)+".JPG";
         const path=USER.id+"/"+Date.now()+".jpg";
         const{error}=await sb.storage.from("dendro-photos").upload(path,comp,{contentType:"image/jpeg"});
-        if(!error) photo=sb.storage.from("dendro-photos").getPublicUrl(path).data.publicUrl;
+        if(!error)photo=sb.storage.from("dendro-photos").getPublicUrl(path).data.publicUrl;
     }
     
-    if(photo){
-        base.photo_url=photo;
-        base.photo_file=photoFile;
+    const base={owner:USER.id,project_id:pid,point_id:pt,measurement_no:+$("mNo").value||1,grp,species:sp,dbh_cm:d,height_m:h,volume_m3:c.vol,carbon_kg:c.total_carbon,slope_deg:0,shared:true,status:"Beklemede"};
+    
+    if(!EDIT_ID){
+        base.lat=GPS.latitude;base.lon=GPS.longitude;base.accuracy_m=GPS.accuracy;base.altitude_m=GPS.altitude;
+        const geo=await reverseGeocode(GPS.latitude,GPS.longitude);
+        base.country=geo?geo.country:"Bilinmiyor";
+        base.city=geo?geo.city:"Bilinmiyor";
+        if(geo)toast("📍 Konum algılandı: "+geo.city+" / "+geo.country,"info","🗺️");
+    }
+    if(photo){base.photo_url=photo;base.photo_file=photoFile;}
+
+    if(!navigator.onLine){
+        const offlineBlob = f ? await compress(f) : null;
+        await saveOfflineMeasurement(base, offlineBlob);
+        toast('Çevrimdışı kaydedildi — internet gelince senkronize','info','📴');
+        $('mPoint').value='';$('mDbh').value='';$('mHeight').value='';
+        $('mPhoto').value='';$('photoCheck').style.display='none';
+        photoOk=false;manualPoint=false;
+        loadDash();loadRecords();
+        return;
     }
 
-    // 🟢 3. ADIM: VERİTABANI GÜNCELLEME / EKLEME
     if(EDIT_ID){
         // ESKİ FOTOĞRAFI BUL (Depolama şişmesini önlemek için KRİTİK)
         const { data: oldRec } = await sb.from("measurements").select("photo_url").eq("id", EDIT_ID).single();
         const oldPhotoUrl = oldRec?.photo_url;
 
         const{error}=await sb.from("measurements").update(base).eq("id",EDIT_ID);
-        if(error) return toast("Hata: "+error.message,"err");
+        if(error)return toast("Hata: "+error.message,"err");
         
         // Eğer yeni fotoğraf yüklendiyse ve eskisi varsa, eskiyi çöpe at
-        if (photo && oldPhotoUrl && photo !== oldPhotoUrl) {
+        if (photo && oldPhotoUrl) {
             await removePhoto(oldPhotoUrl);
         }
         
         toast("Kayıt güncellendi — onaya gönderildi","ok","✓");
         cancelEdit();
-    } else {
+    }else{
         let{error}=await sb.from("measurements").insert(base);
-        if(error){
-            // Fallback (bazı eski sütunlar yoksa)
-            delete base.altitude_m; delete base.photo_file;
-            ({error}=await sb.from("measurements").insert(base));
-        }
-        if(error) return toast("Hata: "+error.message,"err");
+        if(error){delete base.altitude_m;delete base.photo_file;({error}=await sb.from("measurements").insert(base));}
+        if(error)return toast("Hata: "+error.message,"err");
         toast("Kaydedildi — "+c.total_carbon.toFixed(1)+" kg karbon","ok","🌱");
     }
-    
-    // Formu temizle ve yenile
-    $("mPoint").value=''; $("mDbh").value=''; $("mHeight").value=''; $("mPhoto").value='';
-    $("photoCheck").style.display="none"; $("pointQueryResult").style.display="none"; 
-    photoOk=false; manualPoint=false;
-    
-    loadDash(); loadRecords(); loadWaypoints();
-    if(!wasEdit) autoFillPointId();
+    $("mPoint").value='';$("mDbh").value='';$("mHeight").value='';$("mPhoto").value='';
+    $("photoCheck").style.display="none";$("pointQueryResult").style.display="none";photoOk=false;manualPoint=false;
+    loadDash();loadRecords();loadWaypoints();
+    if(!wasEdit)autoFillPointId();
 }
 function cancelEdit(){EDIT_ID=null;manualPoint=false;$("editBanner").style.display="none";$("saveBtn").textContent="💾 Hesapla ve Kaydet";}
 async function editRec(id){
-const{data}=await sb.from("measurements").select("*").eq("id",id).single();
-if(!data)return;
-EDIT_ID=id;
-$("mProject").value=data.project_id;
-$("mPoint").value=data.point_id;$("mNo").value=data.measurement_no||1;
-$("mGroup").value=data.grp||"";fillSpecies();$("mSpecies").value=data.species;showLatin();
-$("mDbh").value=data.dbh_cm;$("mHeight").value=data.height_m;
-$("editBanner").style.display="block";$("saveBtn").textContent="💾 Kaydı Güncelle";
-liveCalc();go("measure");
+ const{data}=await sb.from("measurements").select("*").eq("id",id).single();
+ if(!data)return;
+ EDIT_ID=id;
+ $("mProject").value=data.project_id;
+ $("mPoint").value=data.point_id;$("mNo").value=data.measurement_no||1;
+ $("mGroup").value=data.grp||"";fillSpecies();$("mSpecies").value=data.species;showLatin();
+ $("mDbh").value=data.dbh_cm;$("mHeight").value=data.height_m;
+ $("editBanner").style.display="block";$("saveBtn").textContent="💾 Kaydı Güncelle";
+ liveCalc();go("measure");
 }
-function compress(f){
-return new Promise(res=>{
-const i=new Image(),u=URL.createObjectURL(f);
-i.onload=()=>{
-const m=1024,sc=Math.min(1,m/Math.max(i.width,i.height));
-const c=document.createElement("canvas");
-c.width=i.width*sc;c.height=i.height*sc;
-c.getContext("2d").drawImage(i,0,0,c.width,c.height);
-c.toBlob(b=>{URL.revokeObjectURL(u);res(b);},"image/jpeg",.7);
-};
-i.onerror=()=>{URL.revokeObjectURL(u);res(f);};
-i.src=u;
-});
-}
-async function uploadWpCsv(){ 
-const pid=+$("nProject").value;if(!pid)return toast("Proje seç");
+compress
+
+async function uploadWpCsv(){
+ const pid=+$("nProject").value;if(!pid)return toast("Proje seç");
  const f=$("nCsv").files[0];if(!f)return toast("CSV seç");
  const lines=(await f.text()).split(/\r?\n/);let n=0;
  for(let i=1;i<lines.length;i++){const c=lines[i].split(",");if(c.length<3)continue;const id=parseInt((c[2]||"").replace(/"/g,""));const lon=+c[0],lat=+c[1];if(!id||!lat||!lon)continue;await sb.from("waypoints").upsert({owner:USER.id,project_id:pid,wp_id:id,lat,lon},{onConflict:"project_id,wp_id"});n++;}
@@ -2125,12 +2085,11 @@ async function saveOfflineMeasurement(data, compressedBlob = null) {
     const token = session.data.session?.access_token || '';
     
     store.add({
-        data: { ...data, photoBlob: compressedBlob }, // Orijinal değil, sıkıştırılmış blob saklanır
+        data: { ...data, photoBlob: compressedBlob }, // Orijinal değil, sıkıştırılmış blob
         apiKey: SB_KEY,
         token: token,
         timestamp: Date.now()
     });
-    
     return new Promise((resolve, reject) => {
         tx.oncomplete = () => {
             if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
