@@ -1597,7 +1597,17 @@ async function saveMeas(){
         shared:true,
         status:"Beklemede"
     };
-    
+    // 5. Supabase insert/update
+// ⭐ EKLENEN: Her insert'te client_id ekle (duplicate koruması)
+if (!base.client_id) base.client_id = uuidv4();
+
+if(EDIT_ID){
+    const{error}=await sb.from("measurements").update(base).eq("id",EDIT_ID);
+    // ...
+}else{
+    let{error}=await sb.from("measurements").insert(base);
+    // ...
+}
     if(!EDIT_ID){
         base.lat=GPS.latitude;
         base.lon=GPS.longitude;
