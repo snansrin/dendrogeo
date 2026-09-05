@@ -1151,9 +1151,7 @@ toast('İnternet bağlantısı geri geldi — senkronize ediliyor', 'ok', '🌐'
 if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
 navigator.serviceWorker.controller.postMessage({ type: 'SYNC' });
 }
-}, 2000); // 2 saniye bekle, bağlantı istikrarlı olsun ve çoklu tetiklenme önlensin
-});Worker.controller.postMessage({type:'SYNC'});
-}
+}, 2000);
 });
 if('serviceWorker' in navigator){
 navigator.serviceWorker.addEventListener('message',e=>{
