@@ -573,7 +573,7 @@ tr.done td{opacity:.55}tr.done td b{text-decoration:line-through}
     <div class="stat" style="border-left:3px solid var(--green);padding-left:18px"><div class="lbl">📋 Kayıtlarım</div><div class="val" id="dMy">0</div></div>
     <div class="stat" style="border-left:3px solid var(--amber);padding-left:18px"><div class="lbl">🌱 Karbonum</div><div class="val" id="dCarbon">0</div><div style="font-size:.72rem;color:var(--mut);margin-top:4px">kg CO₂ eşdeğer</div></div>
     <div class="stat" style="border-left:3px solid var(--blue);padding-left:18px"><div class="lbl">📍 Waypoint</div><div class="val" id="dWp">0</div></div>
-    <div class="stat" style="border-left:3px solid var(--red);padding-left:18px"><div class="lbl">✅ Tamamlanan</div><div class="val" id="dVisit">0</div></div>
+    <div class="stat" style="border-left:3px solid var(--red);padding-left:18px"><div class="lbl">✅ Tamamlanan</div><div class="val" id="dVisit">0</div><button class="btn sm red" style="margin-top:8px;font-size:.65rem" onclick="clearOfflineQueue()">🧹 Kuyruğu Temizle</button></div>
    </div>
    <div class="card" style="margin-bottom:18px;border-left:4px solid var(--green)">
     <div class="shead" style="margin-bottom:14px"><span class="no">🌳</span><h2 style="font-size:1.15rem">Kişisel Ağaç Analizi</h2><span class="rule"></span></div>
@@ -2184,6 +2184,18 @@ resolve();
 };
 tx.onerror = e => reject(e.target.error);
 });
+}
+async function clearOfflineQueue(){
+try{
+const db=await openOfflineDB();
+await new Promise((res,rej)=>{
+const tx=db.transaction('measurements','readwrite');
+tx.objectStore('measurements').clear();
+tx.oncomplete=()=>res();
+tx.onerror=()=>rej(tx.error);
+});
+toast("✓ Çevrimdışı kuyruk temizlendi","ok","🧹");
+}catch(e){toast("Hata: "+e.message,"err");}
 }
 function openOfflineDB(){
  return new Promise((resolve,reject)=>{
