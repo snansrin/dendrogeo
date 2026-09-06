@@ -205,6 +205,7 @@ button{cursor:pointer;font:inherit}input,select{font:inherit}
 .val{font-family:"IBM Plex Mono",monospace;font-size:1.5rem;color:var(--green);font-weight:600}
 input,select{width:100%;background:#fff;border:1px solid var(--line);border-radius:10px;color:var(--ink);padding:11px 12px}
 input:focus,select:focus{outline:2px solid var(--green);border-color:var(--green)}
+input::placeholder{color:#aeb8b1;font-style:italic;opacity:.75}
 .tblwrap{overflow-x:auto;-webkit-overflow-scrolling:touch;min-width:0}
 table{width:100%;border-collapse:collapse;font-size:.82rem}
 th{background:var(--tint);color:var(--green-dk);text-align:left;padding:10px;font-size:.68rem;letter-spacing:.1em;text-transform:uppercase;white-space:nowrap}
@@ -752,7 +753,7 @@ tr.done td{opacity:.55}tr.done td b{text-decoration:line-through}
      <div class="gpsring" id="gpsRing"><div class="val" id="gpsAcc">—</div><div class="lbl">doğruluk (m)</div></div>
      <div id="gpsState" class="alert info" style="margin-top:12px">Konum servisi kapalı.</div>
      <button class="btn blue" style="width:100%" onclick="startGps()">📡 Konumu Etkinleştir</button>
-     <div id="iosHint" class="alert info" style="display:none;margin-top:10px"><b>iPhone kullanıcısı mısınız?</b><br><span style="font-size:.85rem">Ayarlar → Safari → Konum → "Kullanırken İzin Ver" seçin, sayfayı yenileyin.</span></div>
+     <div id="iosHint" class="alert info" style="display:none;margin-top:10px"><b>iPhone kullanıcısı mısınız?</b><br><span style="font-size:.85rem">Ayarlar → Gizlilik ve Güvenlik → Konum Servisleri →Safari Siteleri→ "Uygulamayı Kullanırken" seçin, sayfayı yenileyin.</span></div>
      <div class="grid g2" style="margin-top:14px">
       <div><div class="lbl">Enlem</div><div class="mono" id="gLat">—</div></div>
       <div><div class="lbl">Boylam</div><div class="mono" id="gLon">—</div></div>
@@ -773,8 +774,8 @@ tr.done td{opacity:.55}tr.done td b{text-decoration:line-through}
      </div>
      <div id="latinName" class="mono" style="font-size:.76rem;color:var(--mut);font-style:italic;margin-top:4px"></div>
      <div class="grid g2" style="margin-top:10px">
-      <div><div class="lbl">Çap (cm)</div><input id="mDbh" type="number" step="0.1" oninput="liveCalc()"></div>
-      <div><div class="lbl">Boy (m)</div><input id="mHeight" type="number" step="0.1" oninput="liveCalc()"></div>
+      <div><div class="lbl">Çap (cm)</div><input id="mDbh" type="number" step="0.1" oninput="liveCalc()" placeholder="örn: 52"></div>
+      <div><div class="lbl">Boy (m)</div><input id="mHeight" type="number" step="0.1" oninput="liveCalc()" placeholder="örn: 7,2"></div>
      </div>
      <div class="lbl" style="margin-top:12px">📸 Fotoğraf (canlı çekim)</div>
      <input type="file" id="mPhoto" accept="image/*" capture="environment" onchange="checkPhoto(event)">
@@ -983,6 +984,7 @@ const SB_URL="https://xjbpounwdxrhelmixvqm.supabase.co";
 const SB_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhqYnBvdW53ZHhyaGVsbWl4dnFtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODgxMDA1NzIsImV4cCI6MjEwMzY3NjU3Mn0.Q5b4ys1TkyhMffGaN9bR9A3nr4L4-8G5UBJY4iC4Dkk";
 const sb=supabase.createClient(SB_URL,SB_KEY);
 const $=id=>document.getElementById(id);
+const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const QUOTA_MB=500;
 let USER=null,PROFILE=null,GPS=null,WP=[],navTarget=null,charts={},map=null,navMap=null,worldMap=null,worldMapL=null,EDIT_ID=null,EDIT_PROJ=null,liveLoaded=false,PROJ_LIST=[],photoOk=false;
 
@@ -1350,7 +1352,7 @@ async function boot(){
 }
 
 function popupHtml(r){
- return `<div style="min-width:140px"><b>P${r.point_id}</b> · ${r.species||""}<br><span style="font-size:.75rem;color:#68766e">Çap: ${r.dbh_cm||"—"} cm · Boy: ${r.height_m||"—"} m<br>Karbon: ${(r.carbon_kg||0).toFixed(1)} kg</span>`+(r.photo_url?`<br><img src="${r.photo_url}" style="width:160px;border-radius:8px;margin-top:6px">`:"")+`</div>`;
+ return `<div style="min-width:140px"><b>P${r.point_id}</b> · ${esc(r.species)}<br><span style="font-size:.75rem;color:#68766e">Çap: ${r.dbh_cm||"—"} cm · Boy: ${r.height_m||"—"} m<br>Karbon: ${(r.carbon_kg||0).toFixed(1)} kg</span>`+(r.photo_url?`<br><img src="${esc(r.photo_url)}" style="width:160px;border-radius:8px;margin-top:6px">`:"")+`</div>`;
 }
 function addMarkersChunked(m,rows,chunk=150){
  let i=0;
@@ -1406,9 +1408,9 @@ function initLanding(){
    const g=await sb.from("v_global").select("*").single();
    if(g.data){$("stRec").textContent=g.data.records||0;$("stCountry").textContent=g.data.countries||0;$("stCity").textContent=g.data.cities||0;$("stCarbon").textContent=g.data.carbon_t||0;}
    const c=await sb.from("v_country").select("*");
-   $("tblCountry").querySelector("tbody").innerHTML=(c.data||[]).slice(0,20).map(r=>`<tr class="clickable-row" onclick="zoomToCountry('${r.country.replace(/'/g,"\\'")}')"><td>${r.country}</td><td>${r.records}</td><td>${r.carbon_t}</td><td>${r.avg_dbh}</td><td>${r.avg_height||"—"}</td></tr>`).join("")||"<tr><td colspan=5>Henüz veri yok</td></tr>";
+   $("tblCountry").querySelector("tbody").innerHTML=(c.data||[]).slice(0,20).map(r=>`<tr class="clickable-row" onclick="zoomToCountry('${esc(r.country)}')"><td>${esc(r.country)}</td><td>${r.records}</td><td>${r.carbon_t}</td><td>${r.avg_dbh}</td><td>${r.avg_height||"—"}</td></tr>`).join("")||"<tr><td colspan=5>Henüz veri yok</td></tr>";
    const t=await sb.from("v_city").select("*");
-    $("tblCity").querySelector("tbody").innerHTML=(t.data||[]).slice(0,20).map(r=>`<tr class="clickable-row" onclick="zoomToCity('${r.city.replace(/'/g,"\\'")}')"><td>${r.city}</td><td>${r.records}</td><td>${r.carbon_t}</td></tr>`).join("")||"<tr><td colspan=3>Henüz veri yok</td></tr>";
+    $("tblCity").querySelector("tbody").innerHTML=(t.data||[]).slice(0,20).map(r=>`<tr class="clickable-row" onclick="zoomToCity('${esc(r.city)}')"><td>${esc(r.city)}</td><td>${r.records}</td><td>${r.carbon_t}</td></tr>`).join("")||"<tr><td colspan=3>Henüz veri yok</td></tr>";
    loadApprovedMarkers(worldMapL,2000,(n,rows)=>renderAnalysis(rows,"landingAnalysis"));
   }catch(e){}
  })();
@@ -1553,8 +1555,8 @@ async function queryPointId(){
  if(data&&data.length>0){
   const r=data[0];
   res.style.display="block";res.className="alert info";
-  res.innerHTML=`✓ <b>P${r.point_id}</b> · ${r.species} · Çap ${r.dbh_cm} cm · Boy ${r.height_m} m · Karbon ${(r.carbon_kg||0).toFixed(1)} kg · Durum: <b>${r.status||"Beklemede"}</b>`+
-   (r.photo_url?`<br><img src="${r.photo_url}" style="width:140px;border-radius:8px;margin-top:6px">`:"")+
+  res.innerHTML=`✓ <b>P${r.point_id}</b> · ${esc(r.species)} · Çap ${r.dbh_cm} cm · Boy ${r.height_m} m · Karbon ${(r.carbon_kg||0).toFixed(1)} kg · Durum: <b>${r.status||"Beklemede"}</b>`+
+   (r.photo_url?`<br><img src="${esc(r.photo_url)}" style="width:140px;border-radius:8px;margin-top:6px">`:"")+
    `<br><button class="btn sm blue" onclick="editRec(${r.id})" style="margin-top:8px">✏️ Düzenle & Güncelle</button> <button class="btn sm red" onclick="delRec(${r.id})" style="margin-top:8px">🗑️ Tamamen Sil</button>`;
  }else{
   res.style.display="block";res.className="alert info";
@@ -1616,7 +1618,7 @@ if(EDIT_ID){
         const geo=await reverseGeocode(GPS.latitude,GPS.longitude);
         base.country=geo?geo.country:"Bilinmiyor";
         base.city=geo?geo.city:"Bilinmiyor";
-        if(geo)toast("📍 Konum algılandı: "+geo.city+" / "+geo.country,"info","🗺️");
+        if(geo)toast("📍 Konum algılandı: "+esc(geo.city)+" / "+esc(geo.country),"info","🗺️");
     }
     
      // 3. OFFLINE KONTROLÜ (Fotoğraf ve veriyi IndexedDB'ye kaydet)
@@ -1782,7 +1784,7 @@ async function loadRecords(){
  $("recTable").innerHTML=(data||[]).map(r=>{
   const st=r.status||"Beklemede";
   const bc=st==="Onaylı"?"on":(st==="Red"?"off":"admin");
-  return `<tr><td>${r.projects?.name||"—"}</td><td>${r.point_id}</td><td>${r.species}</td><td>${r.dbh_cm}</td><td>${r.height_m}</td><td>${(r.carbon_kg||0).toFixed(1)}</td><td>${r.photo_url?"📷":"—"}</td><td><span class="badge ${bc}">${st==="Beklemede"?"Onay Bekliyor":st}</span></td><td style="display:flex;gap:4px"><button class="btn sm blue" onclick="editRec(${r.id})">✏️</button><button class="btn sm red" onclick="delRec(${r.id})">Sil</button></td></tr>`;
+  return `<tr><td>${esc(r.projects?.name)||"—"}</td><td>${r.point_id}</td><td>${esc(r.species)}</td><td>${r.dbh_cm}</td><td>${r.height_m}</td><td>${(r.carbon_kg||0).toFixed(1)}</td><td>${r.photo_url?"📷":"—"}</td><td><span class="badge ${bc}">${st==="Beklemede"?"Onay Bekliyor":st}</span></td><td style="display:flex;gap:4px"><button class="btn sm blue" onclick="editRec(${r.id})">✏️</button><button class="btn sm red" onclick="delRec(${r.id})">Sil</button></td></tr>`;
  }).join("")||"<tr><td colspan=9>Kayıt yok</td></tr>";
 }
 async function delRec(id){
@@ -1808,7 +1810,7 @@ function renderSpeciesList(rows,elId){
  if(!top.length){el.innerHTML='<div style="color:var(--mut);font-size:.85rem;padding:10px">Henüz kayıt yok.</div>';return;}
  el.innerHTML=top.map(([name,v])=>`<div style="display:flex;align-items:center;gap:10px;margin-bottom:7px">
   <span style="width:8px;height:8px;border-radius:50%;background:${GROUP_COLOR[v.grp]};flex:0 0 auto"></span>
-  <span style="flex:1;font-size:.82rem;font-weight:600">${name} <i style="color:var(--mut);font-weight:400">${LATIN[name]&&LATIN[name]!=="—"?"· "+LATIN[name]:""}</i></span>
+  <span style="flex:1;font-size:.82rem;font-weight:600">${esc(name)} <i style="color:var(--mut);font-weight:400">${LATIN[name]&&LATIN[name]!=="—"?"· "+esc(LATIN[name]):""}</i></span>
   <span style="width:100px;background:var(--line);border-radius:4px;height:6px;overflow:hidden"><span style="display:block;height:100%;width:${pct(v.n)}%;background:${GROUP_COLOR[v.grp]}"></span></span>
   <span class="mono" style="font-size:.75rem;width:48px;text-align:right">${v.n} (${pct(v.n)}%)</span>
  </div>`).join("");
@@ -1873,7 +1875,7 @@ function renderAnalysis(rows,elId){
    <div class="lbl" style="margin-bottom:10px">En Yaygın 6 Tür</div>
    ${topSpecies.map(([sp,v])=>`<div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;padding:6px 10px;background:var(--bg);border-radius:8px">
      <div style="width:8px;height:8px;border-radius:50%;background:${GROUP_COLOR[v.grp]}"></div>
-     <div style="flex:1;min-width:0"><div style="font-size:.82rem;font-weight:600">${sp}</div><div style="font-size:.68rem;color:var(--mut);font-style:italic">${LATIN[sp]||""}</div></div>
+     <div style="flex:1;min-width:0"><div style="font-size:.82rem;font-weight:600">${esc(sp)}</div><div style="font-size:.68rem;color:var(--mut);font-style:italic">${esc(LATIN[sp])||""}</div></div>
      <div style="width:100px;background:var(--line);border-radius:4px;height:6px;overflow:hidden"><div style="height:100%;width:${pct(v.n)}%;background:${GROUP_COLOR[v.grp]}"></div></div>
      <div class="mono" style="font-size:.78rem;color:var(--ink);font-weight:600;width:42px;text-align:right">${v.n} <span style="color:var(--mut);font-weight:400">(${pct(v.n)}%)</span></div>
     </div>`).join("")}
@@ -1936,9 +1938,9 @@ async function loadMyRequests(){
  const{data}=await sb.from("data_requests").select("*").eq("user_id",USER.id).order("created_at",{ascending:false});
  const el=$("myRequests");if(!el)return;
  el.innerHTML=(data&&data.length)?"<div class='lbl' style='margin:10px 0 6px'>Taleplerim</div>"+data.map(r=>{
-  const filt=[r.country,r.city,r.project_name].filter(Boolean).join(" / ")||"Tüm Veri";
+  const filt=[esc(r.country),esc(r.city),esc(r.project_name)].filter(Boolean).join(" / ")||"Tüm Veri";
   const bc=r.status==="Tamamlandı"?"on":(r.status==="İşleme Alındı"?"admin":"off");
-  return `<div style="display:flex;justify-content:space-between;gap:8px;padding:6px 0;border-bottom:1px solid var(--line);font-size:.82rem"><span>${filt}</span><span class="badge ${bc}">${r.status}</span></div>`;
+  return `<div style="display:flex;justify-content:space-between;gap:8px;padding:6px 0;border-bottom:1px solid var(--line);font-size:.82rem"><span>${esc(filt)}</span><span class="badge ${bc}">${r.status}</span></div>`;
  }).join(""):"";
 }
 
@@ -1957,9 +1959,9 @@ function openPreview(title,content,isCSV,fname){
  if(isCSV){
   const lines=content.replace(/^\uFEFF/,"").split("\n").filter(Boolean).slice(0,100);
   let html="<table><thead><tr>"+lines[0].split(",").map(h=>`<th>${h}</th>`).join("")+"</tr></thead><tbody>";
-  for(let i=1;i<lines.length;i++)html+="<tr>"+lines[i].split(",").map(c=>`<td>${c}</td>`).join("")+"</tr>";
+  for(let i=1;i<lines.length;i++)html+="<tr>"+lines[i].split(",").map(c=>`<td>${esc(c)}</td>`).join("")+"</tr>";
   $("pvBody").innerHTML=html+"</tbody></table>";
- }else{$("pvBody").innerHTML=`<pre style="font-size:.75rem;white-space:pre-wrap">${content.slice(0,20000)}</pre>`;}
+ }else{$("pvBody").innerHTML=`<pre style="font-size:.75rem;white-space:pre-wrap">${esc(content.slice(0,20000))}</pre>`;}
  $("pvDownload").onclick=()=>dl(content,fname);
  $("previewModal").classList.add("on");
 }
@@ -1972,9 +1974,9 @@ async function loadWorld(){
   const g=await sb.from("v_global").select("*").single();
   if(g.data){$("wRec").textContent=g.data.records||0;$("wCountry").textContent=g.data.countries||0;$("wCity").textContent=g.data.cities||0;$("wCarbon").textContent=g.data.carbon_t||0;}
   const c=await sb.from("v_country").select("*");
-  $("wCountryT").innerHTML=(c.data||[]).slice(0,30).map(r=>`<tr><td>${r.country}</td><td>${r.records}</td><td>${r.carbon_t}</td><td>${r.avg_dbh}</td><td>${r.avg_height||"—"}</td></tr>`).join("")||"<tr><td colspan=5>—</td></tr>";
+  $("wCountryT").innerHTML=(c.data||[]).slice(0,30).map(r=>`<tr><td>${esc(r.country)}</td><td>${r.records}</td><td>${r.carbon_t}</td><td>${r.avg_dbh}</td><td>${r.avg_height||"—"}</td></tr>`).join("")||"<tr><td colspan=5>—</td></tr>";
   const t=await sb.from("v_city").select("*");
-  $("wCityT").innerHTML=(t.data||[]).slice(0,30).map(r=>`<tr><td>${r.city}</td><td>${r.records}</td><td>${r.carbon_t}</td></tr>`).join("")||"<tr><td colspan=3>—</td></tr>";
+  $("wCityT").innerHTML=(t.data||[]).slice(0,30).map(r=>`<tr><td>${esc(r.city)}</td><td>${r.records}</td><td>${r.carbon_t}</td></tr>`).join("")||"<tr><td colspan=3>—</td></tr>";
   loadApprovedMarkers(worldMap,3000,(n,rows)=>renderAnalysis(rows,"worldAnalysis"));
   loadParkCompare();
  }catch(e){}
@@ -1996,7 +1998,7 @@ async function loadAdmin(){
   const act=st==="Onaylı"
    ?`<button class="btn sm red" onclick="rejectMeas(${x.id})">🚫 Reddet</button>`
    :`<button class="btn sm" onclick="approveMeas(${x.id})">✓ Onayla</button>`;
-  return `<tr><td>${x.profiles?.full_name||"—"}</td><td>${x.point_id}</td><td>${x.species}<br><span class="mono" style="font-size:.68rem;color:var(--mut);text-transform:none;letter-spacing:0">${LATIN[x.species]||""}</span></td><td><b>${x.dbh_cm}</b></td><td><b>${x.height_m}</b></td><td>${(x.carbon_kg||0).toFixed(1)}</td><td>${x.photo_url?`<a href="${x.photo_url}" target="_blank"><img src="${x.photo_url}" style="width:40px;height:40px;object-fit:cover;border-radius:6px"></a>`:"—"}</td><td><span class="badge ${bc}">${st}</span></td><td style="display:flex;gap:4px">${act}<button class="btn sm red" onclick="delMeas(${x.id})">🗑️</button></td></tr>`;
+  return `<tr><td>${esc(x.profiles?.full_name)||"—"}</td><td>${x.point_id}</td><td>${esc(x.species)}<br><span class="mono" style="font-size:.68rem;color:var(--mut);text-transform:none;letter-spacing:0">${esc(LATIN[x.species])||""}</span></td><td><b>${x.dbh_cm}</b></td><td><b>${x.height_m}</b></td><td>${(x.carbon_kg||0).toFixed(1)}</td><td>${x.photo_url?`<a href="${esc(x.photo_url)}" target="_blank"><img src="${esc(x.photo_url)}" style="width:40px;height:40px;object-fit:cover;border-radius:6px"></a>`:"—"}</td><td><span class="badge ${bc}">${st}</span></td><td style="display:flex;gap:4px">${act}<button class="btn sm red" onclick="delMeas(${x.id})">🗑️</button></td></tr>`;
  }).join("")||"<tr><td colspan=9>Kayıt yok.</td></tr>";
  loadStorageStats();
  loadVisitStats();
@@ -2102,7 +2104,7 @@ function fillSelect(sel,opts){
  sel.innerHTML='<option value="">Tümü</option>'+opts.map(o=>{
   const isObj=typeof o==="object";
   const v=isObj?o.v:o,label=isObj?o.label:o;
-  return `<option value="${v}"${v===cur?" selected":""}>${label}</option>`;
+  return `<option value="${esc(v)}"${v===cur?" selected":""}>${esc(label)}</option>`;
  }).join("");
  if(sel.value!==cur)sel.value="";
 }
@@ -2157,19 +2159,19 @@ async function loadRequests(){
  
  // AKTİF TALEPLER TABLOSU
  $("aReqT").innerHTML=pending.length?pending.map(r=>{
-  const filt=[r.country,r.city,r.project_name].filter(Boolean).join(" / ")||"Tüm Veri";
+  const filt=[esc(r.country),esc(r.city),esc(r.project_name)].filter(Boolean).join(" / ")||"Tüm Veri";
   const hasNote=r.note&&r.note.trim().length>0;
   return `<tr>
-   <td>${r.profiles?.full_name||"—"}</td>
-   <td>${r.email||"—"}</td>
-   <td><b>${filt}</b></td>
+   <td>${esc(r.profiles?.full_name)||"—"}</td>
+   <td>${esc(r.email)||"—"}</td>
+   <td><b>${esc(filt)}</b></td>
    <td>${new Date(r.created_at).toLocaleDateString("tr-TR")}</td>
    <td><span class="badge admin">${r.status}</span></td>
    <td style="display:flex;gap:4px;flex-wrap:wrap">
     <button class="btn sm blue" onclick="fulfillRequest(${r.id})">📥✉️ İndir ve Yanıtla</button>
     <button class="btn sm red" onclick="rejectRequest(${r.id})">🚫 Reddet</button>
    </td>
-  </tr>${hasNote?`<tr><td colspan="6" style="background:var(--tint);font-size:.78rem;color:var(--mut);white-space:normal;padding:8px 12px;line-height:1.5"><b style="color:var(--green-dk)">📝 Not:</b> ${r.note}</td></tr>`:""}`;
+  </tr>${hasNote?`<tr><td colspan="6" style="background:var(--tint);font-size:.78rem;color:var(--mut);white-space:normal;padding:8px 12px;line-height:1.5"><b style="color:var(--green-dk)">📝 Not:</b> ${esc(r.note)}</td></tr>`:""}`;
  }).join(""):"<tr><td colspan=6 style='text-align:center;color:var(--mut)'>Bekleyen talep yok</td></tr>";
  
  // TAMAMLANAN/REDDEDİLENLER (COLLAPSIBLE)
@@ -2178,18 +2180,18 @@ async function loadRequests(){
   closedWrap.style.display="block";
   $("aReqClosed").textContent=closed.length;
   $("closedReqT").innerHTML=closed.map(r=>{
-   const filt=[r.country,r.city,r.project_name].filter(Boolean).join(" / ")||"Tüm Veri";
+   const filt=[esc(r.country),esc(r.city),esc(r.project_name)].filter(Boolean).join(" / ")||"Tüm Veri";
    const bc=r.status==="Tamamlandı"?"on":"off";
    const hasNote=r.note&&r.note.trim().length>0;
    const closedDate=r.fulfilled_at?new Date(r.fulfilled_at).toLocaleDateString("tr-TR"):"";
    return `<tr>
-    <td>${r.profiles?.full_name||"—"}</td>
-    <td>${r.email||"—"}</td>
-    <td>${filt}</td>
+    <td>${esc(r.profiles?.full_name)||"—"}</td>
+    <td>${esc(r.email)||"—"}</td>
+    <td>${esc(filt)}</td>
     <td>${new Date(r.created_at).toLocaleDateString("tr-TR")}</td>
     <td>${closedDate}</td>
     <td><span class="badge ${bc}">${r.status}</span></td>
-   </tr>${hasNote?`<tr><td colspan="6" style="background:var(--tint);font-size:.78rem;color:var(--mut);white-space:normal;padding:8px 12px;line-height:1.5"><b style="color:var(--green-dk)">📝 Not:</b> ${r.note}</td></tr>`:""}`;
+   </tr>${hasNote?`<tr><td colspan="6" style="background:var(--tint);font-size:.78rem;color:var(--mut);white-space:normal;padding:8px 12px;line-height:1.5"><b style="color:var(--green-dk)">📝 Not:</b> ${esc(r.note)}</td></tr>`:""}`;
   }).join("");
  }else{
   closedWrap.style.display="none";
@@ -2314,7 +2316,7 @@ async function loadUsers(){
   if(ownerRow)act="<span style='color:var(--mut);font-size:.7rem'>🛡 Korunuyor</span>";
   else if(I_AM_OWNER)act=`<select onchange="updateRole('${x.id}',this.value)" style="padding:4px;border-radius:6px;border:1px solid var(--line)"><option value="user" ${x.role==="user"?"selected":""}>Kullanıcı</option><option value="admin" ${x.role==="admin"?"selected":""}>Denetçi</option></select> <button class="btn sm ${x.active?"red":"blue"}" onclick="toggleU('${x.id}',${!x.active})">${x.active?"Pasifleştir":"Aktifleştir"}</button>`;
   else act="<span style='color:var(--mut);font-size:.7rem'>Salt okunur</span>";
-  return `<tr><td>${x.email||"—"}</td><td>${x.full_name||"—"}</td><td>${roleBadge}</td><td><span class="badge ${x.active?"on":"off"}">${x.active?"Aktif":"Pasif"}</span></td><td style="display:flex;gap:6px;align-items:center">${act}</td></tr>`;
+  return `<tr><td>${esc(x.email)||"—"}</td><td>${esc(x.full_name)||"—"}</td><td>${roleBadge}</td><td><span class="badge ${x.active?"on":"off"}">${x.active?"Aktif":"Pasif"}</span></td><td style="display:flex;gap:6px;align-items:center">${act}</td></tr>`;
  }).join("");
 }
 function filterUsers(){
@@ -2349,14 +2351,14 @@ async function loadParkCompare(){
   <div style="display:flex;align-items:center;gap:12px;margin-bottom:10px;padding:8px 12px;background:var(--bg);border-radius:10px">
    <div class="mono" style="width:26px;height:26px;border-radius:50%;background:${i===0?"var(--green)":"var(--line)"};color:${i===0?"#fff":"var(--mut)"};display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.75rem;flex:0 0 auto">${i+1}</div>
    <div style="flex:1;min-width:0">
-    <div style="font-size:.85rem;font-weight:700">${p.name} ${i===0?'<span class="badge on">🏆 En İyi</span>':""}</div>
-    <div style="font-size:.7rem;color:var(--mut)">${p.city} · ${p.n} kayıt · ort. çap ${(p.dbh/p.n).toFixed(1)} cm · ort. boy ${(p.h/p.n).toFixed(1)} m</div>
+    <div style="font-size:.85rem;font-weight:700">${esc(p.name)} ${i===0?'<span class="badge on">🏆 En İyi</span>':""}</div>
+    <div style="font-size:.7rem;color:var(--mut)">${esc(p.city)} · ${p.n} kayıt · ort. çap ${(p.dbh/p.n).toFixed(1)} cm · ort. boy ${(p.h/p.n).toFixed(1)} m</div>
    </div>
    <div style="width:120px;background:var(--line);border-radius:4px;height:8px;overflow:hidden;flex:0 0 auto"><div style="height:100%;width:${(p.c/max*100).toFixed(0)}%;background:var(--green)"></div></div>
    <div class="mono" style="width:70px;text-align:right;font-weight:600;flex:0 0 auto">${(p.c/1000).toFixed(2)} t</div>
   </div>`).join(""):'<div style="color:var(--mut);font-size:.85rem">Henüz onaylı kayıt yok.</div>';
  const rep=$("repProject");
- if(rep)rep.innerHTML=list.map(p=>`<option>${p.name}</option>`).join("")||'<option value="">—</option>';
+ if(rep)rep.innerHTML=list.map(p=>`<option>${esc(p.name)}</option>`).join("")||'<option value="">—</option>';
 }
 function parkReport(){
  const name=$("repProject").value;
