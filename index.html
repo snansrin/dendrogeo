@@ -1626,6 +1626,8 @@ if(EDIT_ID){
         if(photoBlob) base.photoBlob = photoBlob;
         if(photoFile) base.photo_file = photoFile;
         base.client_id = uuidv4(); // Benzersiz ID (duplicate önleme)
+if(EDIT_ID) base._editId = EDIT_ID; // ✅ çevrimdışı düzenleme işareti
+await saveOfflineMeasurement(base);
         
         await saveOfflineMeasurement(base);
         toast('Çevrimdışı kaydedildi — internet gelince senkronize','info','📴');
@@ -2144,7 +2146,33 @@ function admCountryChanged(){
  admCityChanged();
 }
 function admCityChanged(){
- fillSelect($("admExpProject"),listProjects(ADM_PROJECTS,$("admExpCountry").value,$("admExpCity").value,true));
+fillSelect($("admExpProject"),listProjects(ADM_PROJECTS,$("admExpCountry").value,$("admExpCity").value,true));
+}
+/* --- TOPLU DIŞA AKTARIM (Admin) --- */
+function adminFilteredQuery(){
+let q=sb.from("measurements").select("*,projects(name)");
+const c=$("admExpCountry").value,ci=$("admExpCity").value,p=$("admExpProject").value,s=$("admExpStatus").value;
+if(c)q=q.eq("country",c);
+if(ci)q=q.eq("city",ci);
+if(p)q=q.eq("project_id",+p);
+if(s)q=q.eq("status",s);
+return q;
+}
+async function adminExportCSV(){
+const{data}=await adminFilteredQuery();const rows=data||[];
+if(!rows.length)return toast("Filtreye uyan kayıt yok","warn");
+dl(fullCSV(rows),"dendrogeo_toplu.csv");toast("✓ "+rows.length+" kayıt dışa aktarıldı","ok","📥");
+}
+async function adminExportQgis(){
+const{data}=await adminFilteredQuery();const rows=data||[];
+if(!rows.length)return toast("Filtreye uyan kayıt yok","warn");
+dl(fullCSV(rows),"dendrogeo_qgis_detayli.csv");toast("✓ "+rows.length+" kayıt dışa aktarıldı","ok","🧾");
+}
+async function adminExportGeo(){
+const{data}=await adminFilteredQuery();const rows=data||[];
+if(!rows.length)return toast("Filtreye uyan kayıt yok","warn");
+const gj={type:"FeatureCollection",features:rows.map(r=>({type:"Feature",geometry:{type:"Point",coordinates:[r.lon,r.lat]},properties:{point:r.point_id,species:r.species,latin:LATIN[r.species]||"",dbh:r.dbh_cm,height:r.height_m,carbon:r.carbon_kg,status:r.status,photo:r.photo_url||""}}))};
+dl(JSON.stringify(gj,null,2),"dendrogeo_toplu.geojson");toast("✓ "+rows.length+" kayıt dışa aktarıldı","ok","🗺");
 }
 /* ============ YÖNETİCİ: KULLANICI VERİ TALEPLERİ ============ */
 async function loadRequests(){
@@ -2512,9 +2540,18 @@ async function syncOfflineData() {
                     
                     console.log('[Sync] Insert ediliyor:', payload.point_id, 'client_id:', payload.client_id);
                     
-                    // 3. Supabase'e insert et
-                    const { error } = await sb.from('measurements').insert(payload);
-                    
+                    // 3. Supabase'e insert et (offline düzenleme ise UPDATE)
+			const editId = data._editId || null;
+			delete payload._editId;
+			let error;
+			if (editId) {
+ 			 const res = await sb.from('measurements').update(payload).eq('id', editId);
+ 			 error = res.error;
+			} else {
+			  const res = await sb.from('measurements').insert(payload);
+ 			 error = res.error;
+			}
+                   
                     if (!error) {
                         // ✅ Başarılı → kuyruktan sil
                         const delTx = db.transaction('measurements', 'readwrite');
