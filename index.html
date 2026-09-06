@@ -863,7 +863,7 @@ tr.done td{opacity:.55}tr.done td b{text-decoration:line-through}
     <ol class="guide">
      <li><b>CSV'yi içe aktar:</b> QGIS → <code>Layer → Add Layer → Add Delimited Text Layer</code>. <code>X = LONGITUDE</code>, <code>Y = LATITUDE</code>, CRS = <code>EPSG:4326</code>.</li>
      <li><b>Tüm veriler katman olur:</b> AGB, BHB, biyokütle, karbon sütunları öznitelik tablosuna işlenir. <code>Identify (i)</code> ile bilgi balonu açılır.</li>
-     <li><b>Fotoğraf klasörü:</b> Fotoğrafları tek klasöre koy (örn. <code>C:/dendro_foto/</code>). Dosya adları <code>PHOTO_FILE</code> ile aynı olmalı.</li>
+     <li><b>Yöntem A — İnternetten (önerilen):</b> Katman Özellikleri → <code>Display</code> → HTML Map Tip:<br><code>&lt;img src='[% "PHOTO_URL" %]' width='220'&gt;</code><br>İnternet bağlantısı varken fotoğraflar otomatik yüklenir, yerel klasöre gerek yok.</li><li><b>Yöntem B — Yerel klasör:</b> Fotoğrafları tek klasöre koy (örn. <code>C:/dendro_foto/</code>). Dosya adları <code>PHOTO_FILE</code> ile aynı olmalı. Map Tip:<br><code>&lt;img src="file:///C:/dendro_foto/[% "PHOTO_FILE" %]" width="220"&gt;</code></li>
      <li><b>Fotoğraf balonu:</b> Katman Özellikleri → <code>Display</code> → HTML Map Tip:<br><code>&lt;img src="file:///C:/dendro_foto/[% "PHOTO_FILE" %]" width="220"&gt;</code></li>
      <li><b>Etkinleştir:</b> <code>View → Show Map Tips</code>.</li>
      <li><b>Etiket:</b> Labels → <code>POINT_ID</code>.</li>
