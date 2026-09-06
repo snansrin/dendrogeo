@@ -1086,7 +1086,7 @@ async function reverseGeocode(lat,lon){
   return{city:city||"Bilinmiyor",country:country||"Bilinmiyor"};
  }catch(e){return null;}
 }
-const FULL_HEAD="POINT_ID,MEASUREMENT_NO,DATE,TIME_TR,LATITUDE,LONGITUDE,GPS_ALTITUDE_M,GPS_ALTITUDE_MEDIAN_M,SATELLITES,HDOP,EST_ERROR_M,SLOPE_DEG,TREE_GROUP,TREE_SPECIES,LATIN_NAME,CIRCUMFERENCE_CM,DBH_CM,TREE_HEIGHT_M,CALC_AREA_M2,HORIZONTAL_AREA_M2,CALC_VOLUME_M3,AGB_KG,BHB_KG,TOTAL_BIOMASS_KG,CARBON_KG,AGB_CARBON_KG,BHB_CARBON_KG,PHOTO_FILE";
+const FULL_HEAD="POINT_ID,MEASUREMENT_NO,DATE,TIME_TR,LATITUDE,LONGITUDE,GPS_ALTITUDE_M,GPS_ALTITUDE_MEDIAN_M,SATELLITES,HDOP,EST_ERROR_M,SLOPE_DEG,TREE_GROUP,TREE_SPECIES,LATIN_NAME,CIRCUMFERENCE_CM,DBH_CM,TREE_HEIGHT_M,CALC_AREA_M2,HORIZONTAL_AREA_M2,CALC_VOLUME_M3,AGB_KG,BHB_KG,TOTAL_BIOMASS_KG,CARBON_KG,AGB_CARBON_KG,BHB_CARBON_KG,PHOTO_FILE,PHOTO_URL,DATE_ISO";
 function fullRow(r){
  const c=calc(r.dbh_cm,r.height_m,r.species,r.grp);
  const slope=+(r.slope_deg||0);
@@ -1097,7 +1097,7 @@ function fullRow(r){
  const d=new Date(r.created_at);
  const pf=r.photo_file||(r.photo_url?("P"+String(r.point_id).padStart(3,"0")+"_M"+(r.measurement_no||1)+".JPG"):"");
  const q=v=>`"${(v||"").toString().replace(/"/g,'""')}"`;
- return [r.point_id,r.measurement_no||1,d.toLocaleDateString("tr-TR"),d.toLocaleTimeString("tr-TR"),r.lat,r.lon,(r.altitude_m??""),(r.altitude_m??""),(r.satellites??""),(r.hdop??""),(r.accuracy_m??""),slope,q(r.grp),q(r.species),q(LATIN[r.species]||""),(Math.PI*(r.dbh_cm||0)).toFixed(2),r.dbh_cm,r.height_m,area.toFixed(4),hArea.toFixed(4),vol.toFixed(4),agb.toFixed(1),bhb.toFixed(1),bio.toFixed(1),(r.carbon_kg||bio*0.47).toFixed(2),(agb*0.47).toFixed(1),(bhb*0.47).toFixed(1),pf].join(",");
+ return [r.point_id,r.measurement_no||1,d.toLocaleDateString("tr-TR"),d.toLocaleTimeString("tr-TR"),r.lat,r.lon,(r.altitude_m??""),(r.altitude_m??""),(r.satellites??""),(r.hdop??""),(r.accuracy_m??""),slope,q(r.grp),q(r.species),q(LATIN[r.species]||""),(Math.PI*(r.dbh_cm||0)).toFixed(2),r.dbh_cm,r.height_m,area.toFixed(4),hArea.toFixed(4),vol.toFixed(4),agb.toFixed(1),bhb.toFixed(1),bio.toFixed(1),(r.carbon_kg||bio*0.47).toFixed(2),(agb*0.47).toFixed(1),(bhb*0.47).toFixed(1),pf,q(r.photo_url||""),d.toISOString().slice(0,10)].join(",");
 }
 function fullCSV(rows){return "\uFEFF"+FULL_HEAD+"\n"+rows.map(fullRow).join("\n")+"\n";}
 
