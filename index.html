@@ -1602,14 +1602,6 @@ async function saveMeas(){
     // 5. Supabase insert/update
 // ⭐ EKLENEN: Her insert'te client_id ekle (duplicate koruması)
 if (!base.client_id) base.client_id = uuidv4();
-
-if(EDIT_ID){
-    const{error}=await sb.from("measurements").update(base).eq("id",EDIT_ID);
-    // ...
-}else{
-    let{error}=await sb.from("measurements").insert(base);
-    // ...
-}
     if(!EDIT_ID){
         base.lat=GPS.latitude;
         base.lon=GPS.longitude;
@@ -1627,7 +1619,6 @@ if(EDIT_ID){
         if(photoFile) base.photo_file = photoFile;
         base.client_id = uuidv4(); // Benzersiz ID (duplicate önleme)
 if(EDIT_ID) base._editId = EDIT_ID; // ✅ çevrimdışı düzenleme işareti
-await saveOfflineMeasurement(base);
         
         await saveOfflineMeasurement(base);
         toast('Çevrimdışı kaydedildi — internet gelince senkronize','info','📴');
@@ -2308,7 +2299,7 @@ async function fulfillRequest(id){
         "",
         "İyi çalışmalar dileriz,",
         "DendroGeo Ekibi 🌲",
-        "Nagihan ŞİRİN — Doktora Adayı",
+        "Nagihan ŞİRİN — Doktora Öğrencisi",
         "Sinan ŞİRİN    — Sistem Geliştirici",
     ];
     
