@@ -84,8 +84,14 @@
     },
     {
       "@type": "Dataset",
-      "@id": "https://dendrogeo.org/#dataset",
-      "name": "DendroGeo Global Tree Inventory Dataset",
+	"@id": "https://dendrogeo.org/#dataset",
+	"name": "DendroGeo Global Tree Inventory Dataset",
+	"identifier": {
+  	"@type": "PropertyValue",
+ 	 "propertyID": "DOI",
+  "value": "10.5281/zenodo.22646300"
+},
+"sameAs": "https://doi.org/10.5281/zenodo.22646300",
       "description": "Admin onaylı ağaç ölçüm verileri: GPS konumu, DBH, boy, tür, AGB, BHB, karbon stoğu, fotoğraf. CSV ve GeoJSON formatında dışa aktarılabilir.",
       "url": "https://dendrogeo.org/",
       "license": "https://creativecommons.org/licenses/by-nc/4.0/",
@@ -615,7 +621,7 @@ tr.done td{opacity:.55}tr.done td b{text-decoration:line-through}
    <div style="font-family:Fraunces,serif;font-size:1.1rem;color:var(--green-dk);font-weight:600;margin-bottom:14px">🔬 Veri Doğruluk Politikası</div>
    <ul style="list-style:none;padding:0;margin:0">
     <li style="padding:8px 0 8px 24px;position:relative;color:var(--ink);font-size:.88rem"><span style="position:absolute;left:0;color:var(--green);font-weight:700">✓</span>GPS doğruluğu ±10 m altında olmalı</li>
-    <li style="padding:8px 0 8px 24px;position:relative;color:var(--ink);font-size:.88rem"><span style="position:absolute;left:0;color:var(--green);font-weight:700">✓</span>Fotoğrafta bitki örtüsü ≥ %10</li>
+    <li style="padding:8px 0 8px 24px;position:relative;color:var(--ink);font-size:.88rem"><span style="position:absolute;left:0;color:var(--green);font-weight:700">✓</span>Fotoğrafta bitki örtüsü ≥ %40</li>
     <li style="padding:8px 0 8px 24px;position:relative;color:var(--ink);font-size:.88rem"><span style="position:absolute;left:0;color:var(--green);font-weight:700">✓</span>Pozlama 25–245 aralığında</li>
     <li style="padding:8px 0 8px 24px;position:relative;color:var(--ink);font-size:.88rem"><span style="position:absolute;left:0;color:var(--green);font-weight:700">✓</span>DBH ≤ 500 cm, boy ≤ 100 m</li>
     <li style="padding:8px 0 8px 24px;position:relative;color:var(--ink);font-size:.88rem"><span style="position:absolute;left:0;color:var(--green);font-weight:700">✓</span>Admin onayı zorunlu</li>
@@ -677,7 +683,7 @@ tr.done td{opacity:.55}tr.done td b{text-decoration:line-through}
     <h4 style="color:#9fd0ae;font-size:.72rem;letter-spacing:.16em;text-transform:uppercase;margin-bottom:12px">📝 Atıf & Lisans</h4>
     <div class="card" style="background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.15);padding:14px">
      <div class="mono" style="font-size:.72rem;color:#fff;line-height:1.7;background:rgba(0,0,0,.25);padding:10px;border-radius:6px">
-      ŞİRİN, S. &amp; ŞİRİN, N. (2026). <i>DendroGeo: Global Tree Inventory &amp; Carbon Data System</i>. Retrieved from https://dendrogeo.org/
+      ŞİRİN, S. &amp; ŞİRİN, N. (2026). <i>DendroGeo: Global Tree Inventory &amp; Carbon Data System</i> (Version 1.0.0) [Dataset]. Zenodo. https://doi.org/10.5281/zenodo.22646300
      </div>
      <div style="font-size:.75rem;color:#cfe0d4;margin-top:10px">
       <b style="color:#fff">Veri Lisansı:</b> CC BY-NC 4.0 — Ticari olmayan kullanımda, kaynak gösterilerek serbestçe paylaşılabilir.
@@ -686,7 +692,7 @@ tr.done td{opacity:.55}tr.done td b{text-decoration:line-through}
     <h4 style="color:#9fd0ae;font-size:.72rem;letter-spacing:.16em;text-transform:uppercase;margin:18px 0 10px">⚖️ Politikalar</h4>
     <div style="font-size:.78rem;color:#cfe0d4;line-height:1.6">
      <div><a href="#" onclick="toast('KVKK: Yalnızca e-posta, ad ve kurum bilgileriniz saklanır. Hesap istediğinizde tüm verileriniz silinebilir. Çerez kullanılmamaktadır.');return false;" style="color:#9fd0ae;text-decoration:underline">KVKK Aydınlatma Metni</a></div>
-     <div style="margin-top:4px"><a href="#" onclick="toast('Veri Doğruluk: GPS doğruluğu ±10m altında, bitki örtüsü ≥%10 ve pozlama 25-245 aralığında olmayan çekimler reddedilir. Tüm kayıtlar admin onayından sonra yayımlanır.');return false;" style="color:#9fd0ae;text-decoration:underline">Veri Doğruluk Politikası</a></div>
+     <div style="margin-top:4px"><a href="#" onclick="toast('Veri Doğruluk: GPS doğruluğu ±10m altında, bitki örtüsü ≥%40 ve pozlama 25-245 aralığında olmayan çekimler reddedilir. Tüm kayıtlar admin onayından sonra yayımlanır.');return false;" style="color:#9fd0ae;text-decoration:underline">Veri Doğruluk Politikası</a></div>
     </div>
    </div>
   </div>
@@ -1116,10 +1122,10 @@ async function checkPhoto(e){
   for(let p=0;p<d.length;p+=4){const R=d[p],G=d[p+1],B=d[p+2];if(2*G-R-B>20&&G>50)veg++;br+=(R+G+B)/3;}
   const n=d.length/4;const vegR=veg/n;br/=n;
   for(let y=1;y<S-1;y+=2)for(let xx=1;xx<S-1;xx+=2){const a=(y*S+xx)*4,b2=(y*S+xx+1)*4;edge+=Math.abs(d[a]-d[b2]);}
-  const ok=vegR>=0.10&&br>25&&br<245;
+  const ok=vegR>=0.40&&br>25&&br<245;
   photoOk=ok;
   if(ok){box.className="alert ok";box.innerHTML=`✓ <b>Fotoğraf uygun</b> · Bitki örtüsü: %${(vegR*100).toFixed(1)} · Pozlama: ${br.toFixed(0)}/255`;}
-  else{box.className="alert err";box.innerHTML=`⚠ <b>Fotoğraf uygun değil</b> · Bitki örtüsü: %${(vegR*100).toFixed(1)} (min %10) · Pozlama: ${br.toFixed(0)}.<br>Ağacı/net bitki örtüsünü gösteren, karanlık olmayan bir çekim yapın.`;}
+  else{box.className="alert err";box.innerHTML=`⚠ <b>Fotoğraf uygun değil</b> · Bitki örtüsü: %${(vegR*100).toFixed(1)} (min %40) · Pozlama: ${br.toFixed(0)}.<br>Ağacı/net bitki örtüsünü gösteren, karanlık olmayan bir çekim yapın.`;}
  }catch(err){photoOk=false;box.className="alert err";box.innerHTML="⚠ Fotoğraf okunamadı, tekrar deneyin.";}
 }
 
@@ -2293,7 +2299,7 @@ async function fulfillRequest(id){
         "Bu veri CC BY-NC 4.0 lisansı altındadır. Ticari olmayan amaçlarla, kaynak gösterilerek serbestçe kullanılabilir.",
         "",
         "Atıf önerisi:",
-        "ŞİRİN, S. & ŞİRİN, N. (2026). DendroGeo: Global Tree Inventory & Carbon Data System. https://dendrogeo.org/",
+        ŞİRİN, S. & ŞİRİN, N. (2026). DendroGeo: Global Tree Inventory & Carbon Data System (Version 1.0.0) [Dataset]. Zenodo. https://doi.org/10.5281/zenodo.22646300
         "",
         "Herhangi bir sorunuz olursa bu e-postayı yanıtlayarak bize ulaşabilirsiniz.",
         "",
