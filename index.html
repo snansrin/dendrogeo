@@ -1282,50 +1282,32 @@ async function doRegister(){
     amsg(r.data.session?"Hesap oluşturuldu.":"✓ Doğrulama e‑postası gönderildi — maildeki linke tıklayın.",0);
 }
 async function sendResetEmail(){
- const email=$("rsEmail").value;
- if(!email){
-  amsg("Lütfen e-posta adresinizi girin.",1);
-  return;
- }
- 
- amsg("Doğrulama kontrol ediliyor...",0);
- 
- let tok=tsToken("tsReset");
- if(!tok){
-  amsg("Widget yükleniyor, lütfen bekleyin...",0);
-  await new Promise(r=>setTimeout(r,2500));
-  tok=tsToken("tsReset");
- }
- 
- if(!tok){
-  amsg("Doğrulama widget'ı hazır değil. Sayfayı yenileyip tekrar deneyin.",1);
-  return;
- }
- 
- amsg("Şifre sıfırlama talebi gönderiliyor...",0);
- 
- const redirectURL=window.location.origin+window.location.pathname.replace(/\/+$/,"")+"/";
- 
-console.log("Supabase yanıtı:",r);
-console.log("===========================");
- 
- const r=await sb.auth.resetPasswordForEmail(email,{
-  captchaToken:tok,
-  redirectTo:redirectURL
- });
- 
- console.log("Supabase yanıtı:",r);
- console.log("===========================");
- 
- if(r.error){
-  console.error("Şifre sıfırlama hatası:",r.error);
-  amsg("Hata: "+r.error.message,1);
-  return;
- }
- 
- try{turnstile.reset(TS.tsReset);}catch(e){}
- amsg("✓ Sıfırlama bağlantısı e-postanıza gönderildi. Spam klasörünü de kontrol edin.",0);
+const email=$("rsEmail").value;
+if(!email){amsg("Lütfen e-posta adresinizi girin.",1);return;}
+let tok=tsToken("tsReset");
+if(!tok){
+amsg("Widget yükleniyor, lütfen bekleyin...",0);
+await new Promise(r=>setTimeout(r,2500));
+tok=tsToken("tsReset");
 }
+if(!tok){amsg("Doğrulama widget'ı hazır değil. Sayfayı yenileyip tekrar deneyin.",1);return;}
+amsg("Şifre sıfırlama talebi gönderiliyor...",0);
+const redirectURL=window.location.origin+window.location.pathname.replace(/\/+$/,"")+"/";
+try{
+const r=await sb.auth.resetPasswordForEmail(email,{captchaToken:tok,redirectTo:redirectURL});
+if(r&&r.error){
+amsg("Hata: "+r.error.message,1);
+try{turnstile.reset(TS.tsReset);}catch(e){}
+return;
+}
+try{turnstile.reset(TS.tsReset);}catch(e){}
+amsg("✓ Sıfırlama bağlantısı e-postanıza gönderildi. Spam klasörünü de kontrol edin.",0);
+}catch(e){
+amsg("Beklenmeyen hata: "+(e&&e.message?e.message:String(e)),1);
+try{turnstile.reset(TS.tsReset);}catch(e2){}
+}
+}
+
 async function logout(){await sb.auth.signOut();location.reload();}
 
 let _bootDone = false; // boot sadece 1 kez çalışsın
@@ -2245,7 +2227,7 @@ async function rejectRequest(id){
 }
 
 async function fulfillRequest(id){
-    const {data:req} = await sb.from("data_requests").select("*").eq("id",id).single();
+   const {data:req} = await sb.from("data_requests").select("*,profiles(full_name)").eq("id",id).single();
     if(!req) return;
     
     let projIds = null;
@@ -2285,7 +2267,7 @@ async function fulfillRequest(id){
         "• Ülke      : " + (req.country || "Tümü"),
         "• Şehir     : " + (req.city    || "Tümü"),
         "• Proje/Park: " + (req.project_name || "Tümü"),
-        (req.note ? "• Notunuz   : " + req.note : ""),
+       (req.note ? "• Notunuz   : " + req.note : null),
         "",
         "📈 VERİ SETİ İÇERİĞİ",
         "─────────────────────────",
@@ -2323,7 +2305,7 @@ async function fulfillRequest(id){
         "Sinan ŞİRİN    — Sistem Geliştirici",
     ];
     
-    const bodyTxt = bodyLines.filter(l => l !== "").join("\n");
+    const bodyTxt = bodyLines.filter(l => l !== null).join("\n");
     const subject = encodeURIComponent("✅ DendroGeo Veri Talebiniz Hazırlandı — " + n + " kayıt, " + (totalC/1000).toFixed(2) + " t C");
     
     window.open(
@@ -2423,27 +2405,30 @@ function parkReport(){
   <table><thead><tr><th>Tür</th><th>Latince</th><th>Grup</th><th>Adet</th><th>Karbon (kg)</th><th>Ort. Çap</th><th>Ort. Boy</th></tr></thead><tbody>
   ${spRows.map(([sp,v])=>`<tr><td>${sp}</td><td style="font-style:italic">${LATIN[sp]&&LATIN[sp]!=="—"?LATIN[sp]:"—"}</td><td>${v.grp}</td><td>${v.n}</td><td>${v.c.toFixed(1)}</td><td>${(v.dbh/v.n).toFixed(1)}</td><td>${(v.h/v.n).toFixed(1)}</td></tr>`).join("")}
   </tbody></table>`;
- const csv="\uFEFFPARK,"+name+"\nSEHIR,"+(rows[0].projects?.city||"—")+"\nTARIH,"+new Date().toLocaleDateString("tr-TR")+"\nKAYIT,"+n+"\nTOPLAM_KARBON_KG,"+c.toFixed(1)+"\nTOPLAM_KARBON_T,"+(c/1000).toFixed(2)+"\nORT_CAP_CM,"+dbh+"\nORT_BOY_M,"+h+"\nIBRELI_%,"+pct(ib)+"\nYAPRAKLI_%,"+pct(ya)+"\n\nTUR,LATIN,GRUP,ADET,KARBON_KG,ORT_CAP_CM,ORT_BOY_M\n"+spRows.map(([sp,v])=>[sp,LATIN[sp]||"—",v.grp,v.n,v.c.toFixed(1),(v.dbh/v.n).toFixed(1),(v.h/v.n).toFixed(1)].join(",")).join("\n")+"\n";
+ const csv="\uFEFFPARK,\""+name.replace(/"/g,'""')+"\"+"\nSEHIR,"+(rows[0].projects?.city||"—")+"\nTARIH,"+new Date().toLocaleDateString("tr-TR")+"\nKAYIT,"+n+"\nTOPLAM_KARBON_KG,"+c.toFixed(1)+"\nTOPLAM_KARBON_T,"+(c/1000).toFixed(2)+"\nORT_CAP_CM,"+dbh+"\nORT_BOY_M,"+h+"\nIBRELI_%,"+pct(ib)+"\nYAPRAKLI_%,"+pct(ya)+"\n\nTUR,LATIN,GRUP,ADET,KARBON_KG,ORT_CAP_CM,ORT_BOY_M\n"+spRows.map(([sp,v])=>[sp,LATIN[sp]||"—",v.grp,v.n,v.c.toFixed(1),(v.dbh/v.n).toFixed(1),(v.h/v.n).toFixed(1)].join(",")).join("\n")+"\n";
  $("pvTitle").textContent="📄 "+name+" — Park Raporu";
  $("pvBody").innerHTML=html;
  $("pvDownload").onclick=()=>dl(csv,name.replace(/\s+/g,"_")+"_rapor.csv");
  $("previewModal").classList.add("on");
 }
 /* Click-to-zoom */
-function zoomToCountry(country){
- const m=worldMapL||worldMap;if(!m)return;
- if(m._cluster)m.fitBounds(m._cluster.getBounds().extend(getCountryBounds(country)),{maxZoom:7,padding:[30,30]});
- else toast(country+" seçildi","info","🌍");
+async function zoomToCountry(country){
+const m=worldMapL||worldMap;if(!m)return;
+const{data}=await sb.from("measurements").select("lat,lon").eq("status","Onaylı").eq("country",country).limit(2000);
+fitRows(m,data,country,"🌍");
 }
-function zoomToCity(city){
- const m=worldMapL||worldMap;if(!m)return;
- if(m._cluster){
-  const pts=[];
-  m._cluster.eachLayer(l=>{if(l._latlng)pts.push(l._latlng);});
-  toast(city+" haritada","info","🏙");
- }
+async function zoomToCity(city){
+const m=worldMapL||worldMap;if(!m)return;
+const{data}=await sb.from("measurements").select("lat,lon").eq("status","Onaylı").eq("city",city).limit(2000);
+fitRows(m,data,city,"🏙");
 }
-function getCountryBounds(c){return[[20,10],[55,60]];}
+function fitRows(m,rows,label,icon){
+const pts=(rows||[]).filter(r=>Number.isFinite(+r.lat)&&Number.isFinite(+r.lon));
+if(!pts.length)return toast(label+" için onaylı nokta yok","warn",icon);
+const b=L.latLngBounds(pts.map(r=>[+r.lat,+r.lon]));
+m.fitBounds(b.pad(0.25),{maxZoom:12});
+toast(label+" haritada","info",icon);
+}
 
 // 🎲 UUID v4 üretici (client_id için)
 function uuidv4() {
