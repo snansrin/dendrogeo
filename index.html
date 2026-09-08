@@ -1318,7 +1318,6 @@ try{turnstile.reset(TS.tsReset);}catch(e2){}
 
 async function logout(){await sb.auth.signOut();location.reload();}
 
-let _bootDone = false; // boot sadece 1 kez çalışsın
 
 async function boot(){
     // 1. Service Worker'ı kaydet (sadece bir kez)
@@ -1512,10 +1511,10 @@ async function loadProjects(){
  if(!USER)return;
  const{data}=await sb.from("projects").select("*").eq("owner",USER.id);
  PROJ_LIST=data||[];
- const opts=PROJ_LIST.map(p=>`<option value="${p.id}">${p.name}</option>`).join("");
+ const opts=PROJ_LIST.map(p=>`<option value="${p.id}">${esc(p.name)}</option>`).join("");
  $("mProject").innerHTML=opts||"<option value=''>Önce proje oluşturun</option>";
  $("nProject").innerHTML=opts||"<option value=''>Önce proje oluşturun</option>";
- $("projTable").innerHTML=PROJ_LIST.map(p=>`<tr><td>${p.id}</td><td>${p.name}</td><td>${p.country||"—"}</td><td>${p.city||"—"}</td><td>${new Date(p.created_at).toLocaleDateString("tr-TR")}</td><td style="display:flex;gap:4px"><button class="btn sm blue" onclick="editProject(${p.id})">✏️</button><button class="btn sm red" onclick="deleteProject(${p.id})">🗑</button></td></tr>`).join("")||"<tr><td colspan=6>Proje yok</td></tr>";
+ $("projTable").innerHTML=PROJ_LIST.map(p=>`<tr><td>${p.id}</td><td>${esc(p.name)}</td><td>${esc(p.country||"—")}</td><td>${esc(p.city||"—")}</td><td>${new Date(p.created_at).toLocaleDateString("tr-TR")}</td><td style="display:flex;gap:4px"><button class="btn sm blue" onclick="editProject(${p.id})">✏️</button><button class="btn sm red" onclick="deleteProject(${p.id})">🗑</button></td></tr>`).join("")||"<tr><td colspan=6>Proje yok</td></tr>";
 }
 function editProject(id){
  const p=PROJ_LIST.find(x=>x.id===id);if(!p)return;
@@ -1952,7 +1951,16 @@ async function loadMyRequests(){
  }).join(""):"";
 }
 
-async function getMine(){const{data}=await sb.from("measurements").select("*,projects(name)").eq("owner",USER.id);return data||[];}
+async function getMine(){
+let out=[],from=0,step=1000;
+for(;;){
+const{data}=await sb.from("measurements").select("*,projects(name)").eq("owner",USER.id).order("created_at",{ascending:false}).range(from,from+step-1);
+out=out.concat(data||[]);
+if(!data||data.length<step)break;
+from+=step;
+}
+return out;
+}
 async function exportCSV(){const d=await getMine();dl(fullCSV(d),"dendrogeo.csv");}
 async function exportQgis(){const d=await getMine();dl(fullCSV(d),"dendrogeo_qgis.csv");}
 async function exportGeo(){
@@ -1999,7 +2007,8 @@ async function loadAdmin(){
   sb.from("v_global").select("*").single()
  ]);
  const users=uRes.data||[],meas=mRes.data||[],projs=pRes.data||[],global=gRes.data||{};
- $("aUsers").textContent=users.length;$("aRec").textContent=meas.length;$("aProj").textContent=projs.length;$("aCarbon").textContent=global.carbon_t||0;
+const cnt=await sb.from("measurements").select("*",{count:"exact",head:true});
+$("aUsers").textContent=users.length;$("aRec").textContent=cnt.count??meas.length;$("aProj").textContent=projs.length;$("aCarbon").textContent=global.carbon_t||0;
  $("aMeasT").innerHTML=meas.slice(0,300).map(x=>{
   const st=x.status||"Beklemede";
   const bc=st==="Onaylı"?"on":(st==="Red"?"off":"admin");
@@ -2165,18 +2174,29 @@ if(p)q=q.eq("project_id",+p);
 if(s)q=q.eq("status",s);
 return q;
 }
+async function adminFilteredRows(){
+let out=[],from=0,step=1000;
+for(;;){
+const{data,error}=await adminFilteredQuery().order("created_at").range(from,from+step-1);
+if(error)throw new Error(error.message);
+out=out.concat(data||[]);
+if(!data||data.length<step)break;
+from+=step;
+}
+return out;
+}
 async function adminExportCSV(){
-const{data}=await adminFilteredQuery();const rows=data||[];
+const rows=await adminFilteredRows();
 if(!rows.length)return toast("Filtreye uyan kayıt yok","warn");
 dl(fullCSV(rows),"dendrogeo_toplu.csv");toast("✓ "+rows.length+" kayıt dışa aktarıldı","ok","📥");
 }
 async function adminExportQgis(){
-const{data}=await adminFilteredQuery();const rows=data||[];
+const rows=await adminFilteredRows();
 if(!rows.length)return toast("Filtreye uyan kayıt yok","warn");
 dl(fullCSV(rows),"dendrogeo_qgis_detayli.csv");toast("✓ "+rows.length+" kayıt dışa aktarıldı","ok","🧾");
 }
 async function adminExportGeo(){
-const{data}=await adminFilteredQuery();const rows=data||[];
+const rows=await adminFilteredRows();
 if(!rows.length)return toast("Filtreye uyan kayıt yok","warn");
 const gj={type:"FeatureCollection",features:rows.map(r=>({type:"Feature",geometry:{type:"Point",coordinates:[r.lon,r.lat]},properties:{point:r.point_id,species:r.species,latin:LATIN[r.species]||"",dbh:r.dbh_cm,height:r.height_m,carbon:r.carbon_kg,status:r.status,photo:r.photo_url||""}}))};
 dl(JSON.stringify(gj,null,2),"dendrogeo_toplu.geojson");toast("✓ "+rows.length+" kayıt dışa aktarıldı","ok","🗺");
@@ -2446,7 +2466,8 @@ toast(label+" haritada","info",icon);
 
 // 🎲 UUID v4 üretici (client_id için)
 function uuidv4() {
-    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => {
+if (window.crypto && crypto.randomUUID) return crypto.randomUUID();
+return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => {
         const r = Math.random() * 16 | 0;
         return (c === 'x' ? r : (r & 0x3 | 0x8)).toString(16);
     });
