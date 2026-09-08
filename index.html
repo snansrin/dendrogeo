@@ -986,6 +986,7 @@ tr.done td{opacity:.55}tr.done td b{text-decoration:line-through}
 <div class="lbl" style="margin-top:10px">Yeni Parola (tekrar)</div><input id="rcPass2" type="password" minlength="6">
 <div id="rcMsg" style="margin-top:10px;font-size:.85rem;min-height:1.2em"></div>
 <button class="btn" style="width:100%;margin-top:14px" onclick="saveNewPassword()">💾 Parolayı Güncelle</button>
+<button class="btn ghost sm" style="width:100%;margin-top:8px" onclick="cancelRecovery()">Şimdi Değil</button>
 </div>
 </div>
 <div id="previewModal"><div class="card" style="max-width:960px;width:100%;max-height:82vh;display:flex;flex-direction:column">
@@ -998,7 +999,14 @@ tr.done td{opacity:.55}tr.done td b{text-decoration:line-through}
 "use strict";
 const SB_URL="https://xjbpounwdxrhelmixvqm.supabase.co";
 const SB_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhqYnBvdW53ZHhyaGVsbWl4dnFtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODgxMDA1NzIsImV4cCI6MjEwMzY3NjU3Mn0.Q5b4ys1TkyhMffGaN9bR9A3nr4L4-8G5UBJY4iC4Dkk";
+const INITIAL_HASH=window.location.hash||"";
 const sb=supabase.createClient(SB_URL,SB_KEY);
+sb.auth.onAuthStateChange((event)=>{
+if(event==="PASSWORD_RECOVERY"){
+const m=document.getElementById("recoveryModal");
+if(m)m.style.display="flex";
+}
+});
 const $=id=>document.getElementById(id);
 const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const QUOTA_MB=500;
@@ -1336,7 +1344,7 @@ async function boot(){
 if(!session){initLanding();return;}
 USER=session.user;
 // 🔑 Şifre sıfırlama linkinden geldiyse → yeni parola ekranını aç
-if(/type=recovery/.test(window.location.hash)){
+if(/type=recovery/.test(INITIAL_HASH)){
 $("recoveryModal").style.display="flex";
 return;
 }
@@ -2643,6 +2651,10 @@ function checkBackupReminder(){
   const last=localStorage.getItem("dg_lastBackup");
   const days=last?(Date.now()-new Date(last).getTime())/86400000:999;
   if(days>7) toast("⚠ Son tam yedeğin üzerinden "+Math.floor(days)+" gün geçti — bugünkü yedeği alın","warn","💾");
+}
+function cancelRecovery(){
+$("recoveryModal").style.display="none";
+location.assign(window.location.pathname);
 }
 async function saveNewPassword(){
 const p1=$("rcPass").value,p2=$("rcPass2").value,m=$("rcMsg");
