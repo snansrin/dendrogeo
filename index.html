@@ -928,6 +928,7 @@ tr.done td{opacity:.55}tr.done td b{text-decoration:line-through}
     <div class="mono" id="storeInfo" style="font-size:.75rem;color:var(--mut)">Hesaplanıyor…</div>
     <button class="btn sm amber" style="margin-top:10px" onclick="cleanOrphans()">🧹 Yetim Dosyaları Temizle</button>
     <button class="btn sm blue" style="margin-top:10px;margin-left:8px" onclick="reGeocodeAll()">🌍 Şehirleri Yeniden Algıla</button>
+    <button class="btn sm" style="margin-top:10px;margin-left:8px" onclick="fullBackup()">💾 Tam Yedek İndir (JSON)</button>
    </div>
    <div class="card" style="margin-bottom:18px;border-left:4px solid var(--amber)">
     <div class="shead" style="margin-bottom:12px"><span class="no">📦</span><h2 style="font-size:1.2rem">Toplu Dışa Aktarım (Tüm Kullanıcılar)</h2></div>
@@ -977,7 +978,16 @@ tr.done td{opacity:.55}tr.done td b{text-decoration:line-through}
  </div>
 </div>
 </div>
-
+<div id="recoveryModal" style="display:none;position:fixed;inset:0;background:rgba(20,30,25,.6);z-index:300;align-items:center;justify-content:center;padding:20px">
+<div class="card auth" style="max-width:420px;width:100%">
+<h3 class="disp" style="margin-bottom:8px">🔑 Yeni Parola Belirle</h3>
+<p style="color:var(--mut);font-size:.85rem;margin-bottom:14px">Şifre sıfırlama bağlantısı doğrulandı. Yeni parolanızı belirleyin.</p>
+<div class="lbl">Yeni Parola</div><input id="rcPass" type="password" minlength="6">
+<div class="lbl" style="margin-top:10px">Yeni Parola (tekrar)</div><input id="rcPass2" type="password" minlength="6">
+<div id="rcMsg" style="margin-top:10px;font-size:.85rem;min-height:1.2em"></div>
+<button class="btn" style="width:100%;margin-top:14px" onclick="saveNewPassword()">💾 Parolayı Güncelle</button>
+</div>
+</div>
 <div id="previewModal"><div class="card" style="max-width:960px;width:100%;max-height:82vh;display:flex;flex-direction:column">
  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px"><b id="pvTitle">Önizleme</b><button class="btn sm red" onclick="closePreview()">✕ Kapat</button></div>
  <div id="pvBody" class="tblwrap" style="overflow:auto;flex:1"></div>
@@ -1296,10 +1306,8 @@ async function sendResetEmail(){
  
  const redirectURL=window.location.origin+window.location.pathname.replace(/\/+$/,"")+"/";
  
- console.log("=== ŞİFRE SIFIRLAMA DEBUG ===");
- console.log("Email:",email);
- console.log("Redirect URL:",redirectURL);
- console.log("Token:",tok);
+console.log("Supabase yanıtı:",r);
+console.log("===========================");
  
  const r=await sb.auth.resetPasswordForEmail(email,{
   captchaToken:tok,
@@ -1343,8 +1351,13 @@ async function boot(){
     
     // 4. Oturum kontrolü
     const{data:{session}}=await sb.auth.getSession();
-    if(!session){initLanding();return;}
-    USER=session.user;
+if(!session){initLanding();return;}
+USER=session.user;
+// 🔑 Şifre sıfırlama linkinden geldiyse → yeni parola ekranını aç
+if(/type=recovery/.test(window.location.hash)){
+$("recoveryModal").style.display="flex";
+return;
+}
     
     // 5. Profil yükle ve arayüzü başlat
     const{data:p}=await sb.from("profiles").select("*").eq("id",USER.id).single();
@@ -2000,6 +2013,7 @@ async function loadAdmin(){
   return `<tr><td>${esc(x.profiles?.full_name)||"—"}</td><td>${x.point_id}</td><td>${esc(x.species)}<br><span class="mono" style="font-size:.68rem;color:var(--mut);text-transform:none;letter-spacing:0">${esc(LATIN[x.species])||""}</span></td><td><b>${x.dbh_cm}</b></td><td><b>${x.height_m}</b></td><td>${(x.carbon_kg||0).toFixed(1)}</td><td>${x.photo_url?`<a href="${esc(x.photo_url)}" target="_blank"><img src="${esc(x.photo_url)}" style="width:40px;height:40px;object-fit:cover;border-radius:6px"></a>`:"—"}</td><td><span class="badge ${bc}">${st}</span></td><td style="display:flex;gap:4px">${act}<button class="btn sm red" onclick="delMeas(${x.id})">🗑️</button></td></tr>`;
  }).join("")||"<tr><td colspan=9>Kayıt yok.</td></tr>";
  loadStorageStats();
+ checkBackupReminder();
  loadVisitStats();
  loadRequests();
  loadAdminExportFilters();
@@ -2592,6 +2606,68 @@ async function syncOfflineData() {
         console.error("[Sync] Kritik hata:", e);
         toast('Senkronizasyon hatası: ' + e.message, 'err', '❌');
     }
+}
+/* ============ TAM YEDEK (JSON) — Tez verisi sigortası ============ */
+async function fetchAllRows(table, orderCol){
+  let out=[], from=0, step=1000;
+  for(;;){
+    const {data,error}=await sb.from(table).select("*").order(orderCol).range(from, from+step-1);
+    if(error) throw new Error(table+": "+error.message);
+    out=out.concat(data||[]);
+    if(!data||data.length<step) break;
+    from+=step;
+  }
+  return out;
+}
+async function fullBackup(){
+  if(!PROFILE||(PROFILE.role!=="admin"&&PROFILE.role!=="owner")) return toast("Yetki yok.","err");
+  toast("Yedek hazırlanıyor…","info","💾");
+  try{
+    const meas = await fetchAllRows("measurements","created_at");
+    const projs = await fetchAllRows("projects","id");
+    const wps = await fetchAllRows("waypoints","id");
+    let reqs = [];
+    try{ reqs = await fetchAllRows("data_requests","created_at"); }catch(e){ reqs = []; }
+    const backup={
+      app:"DendroGeo",
+      schema_version:"1.0.0",
+      doi:"10.5281/zenodo.22646300",
+      exported_at:new Date().toISOString(),
+      exported_by:(PROFILE&&PROFILE.full_name)||"",
+      counts:{measurements:meas.length,projects:projs.length,waypoints:wps.length,data_requests:reqs.length},
+      measurements:meas,
+      projects:projs,
+      waypoints:wps,
+      data_requests:reqs
+    };
+    const name="dendrogeo_yedek_"+new Date().toISOString().slice(0,10)+".json";
+    const a=document.createElement("a");
+    a.href=URL.createObjectURL(new Blob([JSON.stringify(backup,null,2)],{type:"application/json"}));
+    a.download=name;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(()=>URL.revokeObjectURL(a.href),5000);
+    localStorage.setItem("dg_lastBackup", new Date().toISOString());
+    toast("✓ Yedek indirildi: "+name+" ("+meas.length+" ölçüm)","ok","💾");
+  }catch(e){
+    toast("Yedek hatası: "+e.message,"err","❌");
+  }
+}
+function checkBackupReminder(){
+  const last=localStorage.getItem("dg_lastBackup");
+  const days=last?(Date.now()-new Date(last).getTime())/86400000:999;
+  if(days>7) toast("⚠ Son tam yedeğin üzerinden "+Math.floor(days)+" gün geçti — bugünkü yedeği alın","warn","💾");
+}
+async function saveNewPassword(){
+const p1=$("rcPass").value,p2=$("rcPass2").value,m=$("rcMsg");
+if(p1.length<6){m.textContent="Parola en az 6 karakter olmalı.";m.style.color="var(--red)";return;}
+if(p1!==p2){m.textContent="Parolalar eşleşmiyor.";m.style.color="var(--red)";return;}
+const{error}=await sb.auth.updateUser({password:p1});
+if(error){m.textContent="Hata: "+error.message;m.style.color="var(--red)";return;}
+toast("✓ Parola güncellendi — yeni parolanızla giriş yapın","ok","🔑");
+history.replaceState(null,"",window.location.pathname);
+location.reload();
 }
 boot();
 </script>
