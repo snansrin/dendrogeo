@@ -1340,11 +1340,17 @@ async function boot(){
     trackVisit();
     
     // 4. Oturum kontrolü
-    const{data:{session}}=await sb.auth.getSession();
+const{data:{session}}=await sb.auth.getSession();
+const isRecovery=/type=recovery/.test(INITIAL_HASH);
+if(isRecovery&&!session){
+initLanding();
+setTimeout(()=>{toast("Bu sıfırlama bağlantısı kullanılmış veya süresi dolmuş. Yeni bir sıfırlama maili isteyin.","warn","🔑");showAuth();authTab("reset");},400);
+return;
+}
 if(!session){initLanding();return;}
 USER=session.user;
 // 🔑 Şifre sıfırlama linkinden geldiyse → yeni parola ekranını aç
-if(/type=recovery/.test(INITIAL_HASH)){
+if(isRecovery){
 $("recoveryModal").style.display="flex";
 return;
 }
