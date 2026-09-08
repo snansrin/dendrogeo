@@ -2405,7 +2405,7 @@ function parkReport(){
   <table><thead><tr><th>Tür</th><th>Latince</th><th>Grup</th><th>Adet</th><th>Karbon (kg)</th><th>Ort. Çap</th><th>Ort. Boy</th></tr></thead><tbody>
   ${spRows.map(([sp,v])=>`<tr><td>${sp}</td><td style="font-style:italic">${LATIN[sp]&&LATIN[sp]!=="—"?LATIN[sp]:"—"}</td><td>${v.grp}</td><td>${v.n}</td><td>${v.c.toFixed(1)}</td><td>${(v.dbh/v.n).toFixed(1)}</td><td>${(v.h/v.n).toFixed(1)}</td></tr>`).join("")}
   </tbody></table>`;
- const csv="\uFEFFPARK,\""+name.replace(/"/g,'""')+"\"+"\nSEHIR,"+(rows[0].projects?.city||"—")+"\nTARIH,"+new Date().toLocaleDateString("tr-TR")+"\nKAYIT,"+n+"\nTOPLAM_KARBON_KG,"+c.toFixed(1)+"\nTOPLAM_KARBON_T,"+(c/1000).toFixed(2)+"\nORT_CAP_CM,"+dbh+"\nORT_BOY_M,"+h+"\nIBRELI_%,"+pct(ib)+"\nYAPRAKLI_%,"+pct(ya)+"\n\nTUR,LATIN,GRUP,ADET,KARBON_KG,ORT_CAP_CM,ORT_BOY_M\n"+spRows.map(([sp,v])=>[sp,LATIN[sp]||"—",v.grp,v.n,v.c.toFixed(1),(v.dbh/v.n).toFixed(1),(v.h/v.n).toFixed(1)].join(",")).join("\n")+"\n";
+ const csv="\uFEFF"+["PARK,\""+name.replace(/"/g,'""')+"\"","SEHIR,"+(rows[0].projects?.city||"—"),"TARIH,"+new Date().toLocaleDateString("tr-TR"),"KAYIT,"+n,"TOPLAM_KARBON_KG,"+c.toFixed(1),"TOPLAM_KARBON_T,"+(c/1000).toFixed(2),"ORT_CAP_CM,"+dbh,"ORT_BOY_M,"+h,"IBRELI_%,"+pct(ib),"YAPRAKLI_%,"+pct(ya),"TUR,LATIN,GRUP,ADET,KARBON_KG,ORT_CAP_CM,ORT_BOY_M"].concat(spRows.map(([sp,v])=>[sp,LATIN[sp]||"—",v.grp,v.n,v.c.toFixed(1),(v.dbh/v.n).toFixed(1),(v.h/v.n).toFixed(1)].join(","))).join("\n")+"\n";
  $("pvTitle").textContent="📄 "+name+" — Park Raporu";
  $("pvBody").innerHTML=html;
  $("pvDownload").onclick=()=>dl(csv,name.replace(/\s+/g,"_")+"_rapor.csv");
