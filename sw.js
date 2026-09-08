@@ -163,7 +163,7 @@ async function networkFirst(request, cacheName) {
         const response = await fetch(request);
         if (response.ok) {
             const cache = await caches.open(cacheName);
-            cache.put(request, response.clone());
+            if (request.url.startsWith("http")) cache.put(request, response.clone());
         }
         return response;
     } catch (err) {
