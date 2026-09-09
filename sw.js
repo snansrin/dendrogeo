@@ -227,4 +227,4 @@ self.addEventListener('notificationclick', event => {
     );
 });
 
-console.log('[SW] 🌲 DendroGeo Service Worker v2.1 (Cache-Only) Yüklendi.');
+console.log('[SW] 🌲 DendroGeo Service Worker v2.2 (Cache-Only) Yüklendi.');
