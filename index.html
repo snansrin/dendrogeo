@@ -221,9 +221,8 @@ td{padding:9px 10px;border-bottom:1px solid var(--line);font-family:"IBM Plex Mo
 #topnav{position:sticky;top:0;z-index:50;background:rgba(247,246,242,.95);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
 #topnav .wrap{display:flex;align-items:center;gap:26px;padding:14px 24px}
 .brand{display:flex;gap:10px;align-items:center;font-family:Fraunces,serif;font-weight:700;font-size:1.3rem;color:var(--green-dk)}
-.brand-img{width:34px;height:34px;object-fit:contain;border-radius:9px;flex:0 0 auto;box-shadow:var(--sh)}
-#apptop .logo{display:flex;align-items:center;gap:8px}
-#apptop .logo .brand-img{width:27px;height:27px;border-radius:7px}
+.brand-logo{width:34px;height:34px;object-fit:contain;border-radius:9px;flex:0 0 auto}
+#apptop .brand-logo{width:27px;height:27px;border-radius:7px}
 #topnav .links{margin-left:auto;display:flex;gap:22px;font-size:.88rem;font-weight:600}
 #topnav .links a{color:var(--ink);text-decoration:none}#topnav .links a:hover{color:var(--green)}
 .hero{padding:84px 0 56px}
@@ -311,7 +310,7 @@ footer h4{color:#fff;font-size:.72rem;letter-spacing:.16em;text-transform:upperc
 .credit .prod{font-family:"IBM Plex Mono",monospace;font-size:.75rem;letter-spacing:.2em;color:#9fd0ae;text-transform:uppercase}
 #shell{display:none;min-height:100vh}
 #apptop{position:sticky;top:0;z-index:60;display:flex;align-items:center;gap:10px;padding:0 16px;height:56px;background:rgba(247,246,242,.95);backdrop-filter:blur(10px);border-bottom:1px solid var(--line);flex-wrap:nowrap}
-#apptop .logo{font-family:Fraunces,serif;font-weight:700;font-size:1.1rem;color:var(--green-dk);flex:0 0 auto}
+#apptop .logo{display:flex;align-items:center;gap:8px;font-family:Fraunces,serif;font-weight:700;font-size:1.1rem;color:var(--green-dk);flex:0 0 auto}
 #apptop .right{margin-left:auto;display:flex;gap:8px;align-items:center;flex-wrap:nowrap;min-width:0}
 #whoami{max-width:36vw;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 #layout{display:grid;grid-template-columns:240px 1fr;min-height:calc(100vh - 58px)}
@@ -455,7 +454,7 @@ tr.done td{opacity:.55}tr.done td b{text-decoration:line-through}
 <div id="toastWrap"></div>
 <div id="landing">
 <div id="topnav"><div class="wrap">
-<span class="brand"><img class="brand-img" src="logo.png" alt="DendroGeo">DendroGeo</span>
+<span class="brand"><img class="brand-logo" src="logo.png" alt="DendroGeo">DendroGeo</span>
  <div class="links"><a href="#sistem">Sistem</a><a href="#yontem">Yöntem</a><a href="#veri">Veri & Harita</a><a href="#istatistik">İstatistik</a></div>
  <button class="btn sm" onclick="showAuth()">Giriş / Kayıt</button>
 </div></div>
@@ -709,7 +708,7 @@ tr.done td{opacity:.55}tr.done td b{text-decoration:line-through}
 
 <div id="shell">
 <div id="apptop">
-<span class="logo"><img class="brand-img" src="logo.png" alt="">DendroGeo</span>
+<span class="logo"><img class="brand-logo" src="logo.png" alt="">DendroGeo</span>
  <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:var(--green);box-shadow:0 0 0 3px rgba(30,111,75,.25)"></span>
  <div class="right">
   <span class="mono" id="whoami" style="font-size:.8rem;color:var(--mut)"></span>
@@ -2336,10 +2335,11 @@ async function fulfillRequest(id){
 "",
         "Herhangi bir sorunuz olursa bu e-postayı yanıtlayarak bize ulaşabilirsiniz.",
         "",
-        "İyi çalışmalar dileriz,",
-        "DendroGeo Ekibi 🌲",
-        "Nagihan ŞİRİN — Doktora Öğrencisi",
-        "Sinan ŞİRİN    — Sistem Geliştirici",
+       "İyi çalışmalar dileriz,",
+	"DendroGeo Ekibi",
+	"Nagihan ŞİRİN — Doktora Öğrencisi · Sinan ŞİRİN — Sistem Geliştirici",
+	"Küresel Ağaç Envanteri ve Karbon Veri Sistemi",
+	"https://dendrogeo.org · DOI: 10.5281/zenodo.22646300",
     ];
     
     const bodyTxt = bodyLines.filter(l => l !== null).join("\n");
