@@ -1,7 +1,7 @@
 {
-  "name": "DendroGeo — Ağaç Envanteri",
+  "name": "DendroGeo — Küresel Ağaç Envanteri ve Karbon Veri Sistemi",
   "short_name": "DendroGeo",
-  "description": "Küresel ağaç envanteri ve karbon veri sistemi",
+  "description": "GPS ölçümünden küresel karbon haritasına uzanan bilimsel ağaç envanteri ve karbon veri platformu.",
   "start_url": "./",
   "display": "standalone",
   "background_color": "#f7f6f2",
