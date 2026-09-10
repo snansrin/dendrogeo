@@ -2,20 +2,15 @@
   "name": "DendroGeo — Küresel Ağaç Envanteri ve Karbon Veri Sistemi",
   "short_name": "DendroGeo",
   "description": "GPS ölçümünden küresel karbon haritasına uzanan bilimsel ağaç envanteri ve karbon veri platformu.",
-  "start_url": "./",
+  "lang": "tr",
+  "start_url": "/",
+  "scope": "/",
   "display": "standalone",
   "background_color": "#f7f6f2",
   "theme_color": "#14532d",
   "icons": [
-    {
-      "src": "icon.png",
-      "sizes": "192x192",
-      "type": "image/png"
-    },
-    {
-      "src": "icon.png",
-      "sizes": "512x512",
-      "type": "image/png"
-    }
+    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
   ]
 }
