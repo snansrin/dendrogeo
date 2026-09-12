@@ -1,0 +1,2375 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="google-site-verification" content="b8R2BtUI2XYHvOY5jqh18Binkcs_-tILJCLjs9H6LNE" />
+<meta http-equiv="Content-Security-Policy" content="default-src 'self' 'unsafe-inline' data: blob: https://cdn.jsdelivr.net https://unpkg.com https://*.tile.openstreetmap.org https://nominatim.openstreetmap.org https://*.supabase.co https://fonts.googleapis.com https://fonts.gstatic.com https://challenges.cloudflare.com">
+<title>DendroGeo — Küresel Ağaç Envanteri ve Karbon Veri Sistemi</title>
+
+
+<!-- === SEO META === -->
+<meta name="description" content="DendroGeo: GPS ölçümünden küresel karbon haritasına uzanan bilimsel ağaç envanteri platformu. Chave 2014 formülleriyle anında biyokütle ve karbon hesabı.">
+<meta name="keywords" content="ağaç envanteri, karbon hesaplama, biyokütle, allometrik denklem, DBH, çap ölçümü, ağaç boyu, kent parkları karbon, orman karbon stoğu, Chave 2014, IPCC 2006, QGIS ağaç haritası, ağaç veri tabanı, tree inventory, carbon sequestration, biomass equation, forest carbon, urban tree carbon, DendroGeo">
+<meta name="author" content="Sinan ŞİRİN, Nagihan ŞİRİN">
+<meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">
+<meta name="googlebot" content="index, follow">
+<meta name="language" content="Turkish">
+<meta name="revisit-after" content="7 days">
+<meta name="rating" content="General">
+<meta name="distribution" content="global">
+<link rel="canonical" href="https://dendrogeo.org/">
+
+<!-- === OPEN GRAPH (Facebook, LinkedIn, WhatsApp) === -->
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="DendroGeo">
+<meta property="og:title" content="DendroGeo — Küresel Ağaç Envanteri ve Karbon Veri Sistemi">
+<meta property="og:description" content="GPS ölçümünden küresel karbon haritasına: Chave 2014 formülleriyle anında biyokütle ve karbon stoğu hesabı.">
+<meta property="og:image" content="https://dendrogeo.org/social-preview.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="DendroGeo - Ağaç Envanteri ve Karbon Veri Sistemi">
+<meta property="og:url" content="https://dendrogeo.org/">
+<meta property="og:locale" content="tr_TR">
+<meta property="og:locale:alternate" content="en_US">
+
+<!-- === TWITTER CARD === -->
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="DendroGeo — Küresel Ağaç Envanteri">
+<meta name="twitter:description" content="Bir ağacın karbonunu saniyeler içinde hesaplayın. GPS + fotoğraf + allometrik formüller + admin onay = küresel karbon haritası.">
+<meta name="twitter:image" content="https://dendrogeo.org/social-preview.png">
+<meta name="twitter:image:alt" content="DendroGeo önizleme">
+
+<!-- === JSON-LD YAPILANDIRILMIŞ VERİ (Google için çok önemli) === -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "WebApplication",
+      "@id": "https://dendrogeo.org/#app",
+      "name": "DendroGeo",
+      "alternateName": "Global Tree Inventory & Carbon Data System",
+      "url": "https://dendrogeo.org/",
+      "description": "GPS ölçümünden küresel karbon haritasına uzanan bilimsel ağaç envanteri ve karbon veri platformu. Chave et al. (2014) allometrik formülleri, IPCC 2006 kök biyokütlesi, QGIS uyumlu dışa aktarım.",
+      "applicationCategory": "ScienceApplication",
+      "applicationSubCategory": "Environmental Science",
+      "operatingSystem": "Web, PWA, iOS, Android",
+      "browserRequirements": "Requires JavaScript, HTML5, Geolocation API",
+      "softwareVersion": "11.0",
+      "datePublished": "2026-08-30",
+      "dateModified": "2026-09-05",
+      "inLanguage": ["tr-TR", "en-US"],
+      "isAccessibleForFree": true,
+      "license": "https://creativecommons.org/licenses/by-nc/4.0/",
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "USD"
+      },
+      "author": [
+        {
+          "@type": "Person",
+          "name": "Sinan ŞİRİN",
+          "jobTitle": "Sistem Geliştirici",
+          "url": "https://github.com/snansrin"
+        },
+        {
+          "@type": "Person",
+          "name": "Nagihan ŞİRİN",
+          "jobTitle": "Doktora Öğrencisi - Peyzaj Mimarlığı"
+        }
+      ],
+      "keywords": "tree inventory, carbon sequestration, biomass equation, allometry, DBH, urban forest, forest carbon, QGIS, Chave 2014, IPCC"
+    },
+    {
+      "@type": "Dataset",
+	"@id": "https://dendrogeo.org/#dataset",
+	"name": "DendroGeo Global Tree Inventory Dataset",
+	"identifier": {
+  	"@type": "PropertyValue",
+ 	 "propertyID": "DOI",
+  "value": "10.5281/zenodo.22646300"
+},
+"sameAs": "https://doi.org/10.5281/zenodo.22646300",
+      "description": "Admin onaylı ağaç ölçüm verileri: GPS konumu, DBH, boy, tür, AGB, BHB, karbon stoğu, fotoğraf. CSV ve GeoJSON formatında dışa aktarılabilir.",
+      "url": "https://dendrogeo.org/",
+      "license": "https://creativecommons.org/licenses/by-nc/4.0/",
+      "creator": {
+        "@type": "Organization",
+        "name": "DendroGeo Project"
+      },
+      "distribution": [
+        {
+          "@type": "DataDownload",
+          "encodingFormat": "text/csv",
+          "contentUrl": "https://dendrogeo.org/"
+        },
+        {
+          "@type": "DataDownload",
+          "encodingFormat": "application/geo+json",
+          "contentUrl": "https://dendrogeo.org/"
+        }
+      ],
+      "spatialCoverage": {
+        "@type": "Place",
+        "name": "Global"
+      },
+      "temporalCoverage": "2026/..",
+      "measurementTechnique": "Field measurement with GPS + allometric equations (Chave 2014)",
+      "variableMeasured": [
+        {"@type": "PropertyValue", "name": "DBH (cm)"},
+        {"@type": "PropertyValue", "name": "Tree Height (m)"},
+        {"@type": "PropertyValue", "name": "Above-ground biomass (kg)"},
+        {"@type": "PropertyValue", "name": "Carbon stock (kg)"}
+      ]
+    },
+    {
+      "@type": "ScholarlyArticle",
+      "@id": "https://dendrogeo.org/#thesis",
+      "headline": "Kent Parklarının Karbon Depolama Performansının Saptanması",
+      "author": {
+        "@type": "Person",
+        "name": "Nagihan ŞİRİN"
+      },
+      "description": "Doktora araştırması kapsamında geliştirilen DendroGeo platformu ile kent parklarındaki ağaçların karbon depolama kapasitesinin ölçülmesi ve analizi.",
+      "datePublished": "2026",
+      "inLanguage": "tr-TR",
+      "isPartOf": {
+        "@type": "CreativeWork",
+        "name": "Doktora Tezi"
+      }
+    },
+    {
+      "@type": "FAQPage",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "Bir ağacın karbonu nasıl hesaplanır?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "DendroGeo'da ağacın çapı (DBH) ve boyu ölçülür, ardından Chave et al. (2014) formülüyle AGB = 0.0673·(ρ·DBH²·H)^0.976 hesaplanır. Kök biyokütlesi IPCC 2006'ya göre BHB = AGB·0.26 olarak eklenir. Toplam karbon = (AGB+BHB)·0.47 formülüyle bulunur."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "DendroGeo nedir?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "DendroGeo, GPS ölçümü, canlı fotoğraf denetimi ve bilimsel allometrik formülleri birleştiren; admin onaylı verileri küresel haritada gösteren açık kaynaklı bir ağaç envanteri ve karbon veri sistemidir."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Veriler hangi formatta dışa aktarılır?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "DendroGeo verileri CSV (bilimsel format), GeoJSON (web haritaları) ve QGIS uyumlu fotoğraf eşleştirmeli CSV formatlarında dışa aktarılabilir. CC BY-NC 4.0 lisansı altındadır."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Hangi ağaç türleri destekleniyor?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Sistem, Türkiye'deki 44 ağaç türü için As ve ark. (2001), Tolunay (2013) ve OGM 299 Nolu Tebliğ (2017) kaynaklı odun yoğunluğu (ρ) değerlerini içerir. İbreli, yapraklı ve diğer gruplar için varsayılan yoğunluk değerleri de desteklenir."
+          }
+        }
+      ]
+    }
+  ]
+}
+</script>
+<link rel="icon" type="image/png" href="icon.png?v=2">
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#14532d"><link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Manrope:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css">
+<link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css">
+<script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="src/config/supabase.js?v=1"></script>
+<script src="src/config/constants.js?v=1"></script>
+<script src="src/config/species.js?v=1"></script>
+<script src="src/utils/geo.js?v=1"></script>
+<script src="src/services/allometry.js?v=1"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
+<script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+<link rel="stylesheet" href="css/style.css?v=1">
+</head>
+<body>
+<div id="toastWrap"></div>
+<div id="landing">
+<div id="topnav"><div class="wrap">
+<span class="brand"><img class="brand-logo" src="logo.png" alt="DendroGeo">DendroGeo</span>
+ <div class="links"><a href="#sistem">Sistem</a><a href="#yontem">Yöntem</a><a href="#veri">Veri & Harita</a><a href="#istatistik">İstatistik</a></div>
+ <button class="btn sm" onclick="showAuth()">Giriş / Kayıt</button>
+</div></div>
+
+<div class="hero"><div class="wrap">
+ <div class="hero-grid">
+  <div class="hero-copy">
+   <div class="kick"><span class="live-dot"></span>SAHADAN VERİTABANINA · BİLİMSEL KARBON ENVANTERİ</div>
+   <h1>Bir ağacın karbonunu<br>saniyeler içinde hesaplayın.</h1>
+   <p class="lead">DendroGeo; sahadaki GPS ölçümünden küresel karbon haritasına uzanan <b>tek entegre bilimsel platformdur</b>. Çap ve boy ölçümünüzü alın, canlı fotoğraf denetiminden geçirin — Chave et al. (2014) allometrik formülleri biyokütle ve karbon stoğunu otomatik hesaplasın. Admin onayından sonra veriniz dünya haritasında yayında.</p>
+   <div style="display:flex;gap:12px;flex-wrap:wrap;margin-top:28px">
+    <a href="#sistem" class="btn">🔬 Sistemi Keşfet</a>
+    <button class="btn ghost" onclick="showAuth()">🌲 Hemen Başla</button>
+   </div>
+  </div>
+    <div class="hero-art" aria-hidden="true">
+   <svg viewBox="0 0 800 300" fill="none">
+    <path d="M0 228 Q200 222 400 226 T800 226" stroke="#9cc39c" stroke-width="3" stroke-linecap="round"/>
+    <path d="M20 236 C200 232 400 238 780 234" stroke="#e6e3d9" stroke-width="4" stroke-linecap="round" stroke-dasharray=".5 11"/>
+    <ellipse cx="670" cy="230" rx="42" ry="6" fill="#182420" opacity=".08"/>
+    <path d="M663 230 C662 196 665 160 667 122 L676 122 C678 160 680 196 679 230 Z" fill="#8a5a3b"/>
+    <path d="M667 134 C659 122 653 116 645 110" stroke="#8a5a3b" stroke-width="4" stroke-linecap="round"/>
+    <path d="M676 134 C684 122 690 116 698 110" stroke="#8a5a3b" stroke-width="4" stroke-linecap="round"/>
+    <g class="canopy" style="transform-origin:670px 230px">
+     <circle cx="672" cy="100" r="40" fill="#1e6f4b"/>
+     <circle cx="644" cy="116" r="26" fill="#2e8b57"/>
+     <circle cx="700" cy="116" r="26" fill="#2e8b57"/>
+     <circle cx="672" cy="72" r="27" fill="#2e8b57"/>
+     <circle cx="660" cy="86" r="11" fill="#3aa76d" opacity=".5"/>
+     <circle cx="686" cy="106" r="4" fill="#9fd0ae"/><circle cx="656" cy="114" r="3.5" fill="#9fd0ae"/>
+    </g>
+    <ellipse class="tapewin" cx="671" cy="176" rx="24" ry="8" stroke="#c77d2e" stroke-width="2.5" stroke-dasharray="5 4"/>
+    <line class="sightwin" x1="553" y1="186" x2="676" y2="96" stroke="#c77d2e" stroke-width="2.5" stroke-dasharray="7 6"/>
+    <g class="walkerA">
+     <ellipse cx="629" cy="231" rx="15" ry="3.5" fill="#182420" opacity=".08"/>
+     <rect x="621" y="224" width="11" height="6" rx="3" fill="#fff" stroke="#e6e3d9"/>
+     <rect x="632" y="224" width="11" height="6" rx="3" fill="#fff" stroke="#e6e3d9"/>
+     <rect class="legA" x="623" y="198" width="7" height="28" rx="3.5" fill="#3b5a7a"/>
+     <rect class="legB" x="633" y="198" width="7" height="28" rx="3.5" fill="#3b5a7a"/>
+     <g class="bendA">
+      <rect x="612" y="170" width="9" height="26" rx="4" fill="#1e6f4b"/>
+      <rect x="617" y="168" width="21" height="34" rx="9" fill="#c77d2e"/>
+      <rect x="619" y="174" width="17" height="22" rx="2" fill="#fff" stroke="#c77d2e"/>
+      <path d="M622 178 h11 M622 181 h9" stroke="#9cc39c" stroke-width="1.2"/>
+      <g class="penA"><path d="M625 190 L631 196" stroke="#c77d2e" stroke-width="2" stroke-linecap="round"/></g>
+      <rect x="636" y="174" width="14" height="6" rx="3" fill="#f2c19a"/>
+      <circle cx="651" cy="177" r="3" fill="#f2c19a"/>
+      <circle cx="628" cy="158" r="9" fill="#f2c19a"/>
+      <path d="M619 156 a9 9 0 0 1 18 0 z" fill="#4a2f1d"/>
+      <circle cx="624" cy="158" r="1.2" fill="#182420"/><circle cx="632" cy="158" r="1.2" fill="#182420"/>
+      <path d="M625 162 q3 2.5 6 0" stroke="#182420" stroke-width="1.4" stroke-linecap="round"/>
+     </g>
+    </g>
+    <g class="walkerB">
+     <ellipse cx="575" cy="231" rx="15" ry="3.5" fill="#182420" opacity=".08"/>
+     <rect x="567" y="224" width="11" height="6" rx="3" fill="#fff" stroke="#e6e3d9"/>
+     <rect x="578" y="224" width="11" height="6" rx="3" fill="#fff" stroke="#e6e3d9"/>
+     <rect class="legC" x="569" y="202" width="6" height="24" rx="3" fill="#14532d"/>
+     <rect class="legD" x="579" y="202" width="6" height="24" rx="3" fill="#14532d"/>
+     <rect x="564" y="166" width="24" height="40" rx="10" fill="#1e6f4b"/>
+     <path d="M576 168 v36" stroke="#9fd0ae" stroke-width="2" opacity=".8"/>
+     <rect x="555" y="172" width="10" height="18" rx="3" fill="#e8b98a"/>
+     <rect x="543" y="186" width="20" height="14" rx="2.5" fill="#182420"/>
+     <rect x="546" y="189" width="14" height="8" rx="1" fill="#eaf3ec"/>
+     <rect x="548" y="193" width="2" height="3" fill="#1e6f4b"/><rect x="551" y="191" width="2" height="5" fill="#c77d2e"/>
+     <circle class="flash" cx="553" cy="186" r="4" fill="#fff"/>
+     <circle cx="576" cy="156" r="9" fill="#e8b98a"/>
+     <path d="M567 154 a9 9 0 0 1 18 0 z" fill="#6d452c"/>
+     <g class="tail"><circle cx="585" cy="151" r="5" fill="#6d452c"/><path d="M587 154 q8 6 5 18" stroke="#6d452c" stroke-width="4" stroke-linecap="round"/></g>
+     <circle cx="585" cy="146" r="3" fill="#c2452d"/>
+     <circle cx="573" cy="156" r="1.2" fill="#182420"/><circle cx="579" cy="156" r="1.2" fill="#182420"/>
+     <path d="M573 160 q3 2.5 6 0" stroke="#182420" stroke-width="1.4" stroke-linecap="round"/>
+    </g>
+   </svg>
+   <div class="chip c1"><span style="color:var(--amber)">●</span> DBH 68 cm</div>
+   <div class="chip c2"><span style="color:var(--green)">●</span> C 539.9 kg</div>
+   <div class="chip c3"><span style="color:var(--blue)">●</span> H 8.3 m</div>
+  </div>
+ </div>
+ <div class="statband">
+ <div><div class="val" id="stRec">—</div><div class="lbl">Toplam Kayıt</div></div>
+  <div><div class="val" id="stCountry">—</div><div class="lbl">Ülke</div></div>
+  <div><div class="val" id="stCity">—</div><div class="lbl">Şehir</div></div>
+  <div><div class="val" id="stCarbon">—</div><div class="lbl">Karbon (t)</div></div>
+ </div>
+</div></div>
+<section class="blk" id="sistem"><div class="wrap">
+ <div class="shead"><span class="no">01</span><h2>Sistemin Üç Temel Direği</h2><span class="rule"></span></div>
+<div class="cols cols-3">
+  <div class="feature">
+   <div class="ico">🛰</div>
+   <h3>Sahadan Veri</h3>
+   <p>GPS uydu bağlantısıyla santimetre hassasiyetinde konum, canlı fotoğraf analiziyle bitki örtüsü ve pozlama denetimi.</p>
+   <ul>
+    <li>Gerçek zamanlı GPS ±3 m</li>
+    <li>Waypoint pusula navigasyonu</li>
+    <li>Çevrimdışı ölçüm + senkronizasyon</li>
+    <li>Cihaz üstü görsel QA/QC</li>
+   </ul>
+  </div>
+  <div class="feature">
+   <div class="ico">🧮</div>
+   <h3>Bilimsel Hesap</h3>
+   <p>Uluslararası kabul görmüş allometrik formüllerle AGB, BHB, toplam biyokütle ve karbon stoğu saniyeler içinde.</p>
+   <ul>
+    <li>Chave et al. 2014 (pantropikal)</li>
+    <li>IPCC 2006 kök biyokütlesi</li>
+    <li>44 tür için ρ yoğunluk değeri</li>
+    <li>Eğim düzeltmesi ve hacim hesabı</li>
+   </ul>
+  </div>
+  <div class="feature">
+   <div class="ico">🌍</div>
+   <h3>Küresel Analiz</h3>
+   <p>Admin onaylı merkezi veritabanı; şehir, ülke ve park bazlı agregasyonlar, QGIS uyumlu dışa aktarım.</p>
+   <ul>
+    <li>Ülke/Şehir/Park karşılaştırma</li>
+    <li>CSV, GeoJSON, QGIS export</li>
+    <li>İnteraktif karbon haritası</li>
+    <li>CC BY‑NC 4.0 açık veri lisansı</li>
+   </ul>
+  </div>
+ </div>
+ <div style="margin-top:36px" class="card tblwrap"><table><thead><tr><th>Rol</th><th>Yetki</th></tr></thead><tbody>
+  <tr><td>Ziyaretçi</td><td>Yalnızca onaylanmış kayıtları, istatistikleri ve haritayı görüntüler</td></tr>
+  <tr><td>Kullanıcı</td><td>Proje ve ölçüm oluşturur; kendi kayıtlarını onay beklerken de görür</td></tr>
+  <tr><td>Denetçi (Admin)</td><td>Kayıtları onaylar/reddeder, moderasyon ve toplu dışa aktarım</td></tr>
+  <tr><td>Kurucu</td><td>Tüm yetkiler + kullanıcı/rol yönetimi (değiştirilemez)</td></tr>
+ </tbody></table></div>
+</div></section>
+<section class="blk" id="yontem"><div class="wrap">
+ <div class="shead"><span class="no">02</span><h2>Sahadan Haritaya — Üç Adımda</h2><span class="rule"></span></div>
+ <p style="color:var(--mut);max-width:70ch;font-size:1.02rem">Her ölçüm, sahadaki cihazınızdan dünya haritasına uzanan kontrollü bir akıştan geçer. Hiçbir kayıt admin onayı olmadan bilimsel veri havuzuna girmez.</p>
+ 
+ <div class="steps">
+  <div class="step">
+   <div class="num">1</div>
+   <h4>Sahada Ölç</h4>
+   <p>GPS ile konumunuzu sabitleyin, waypoint pusulasıyla ağaca yönelin. Çap (çevre/π), boy ve grup bilgilerini girin.</p>
+   <div class="sub">±3 M · GPS · FOTOĞRAF</div>
+  </div>
+  <div class="step">
+   <div class="num">2</div>
+   <h4>Otomatik Hesap</h4>
+   <p>Cihaz üzerinde canlı fotoğraf analizi bitki örtüsü ve pozlamayı denetler. Ardından Chave et al. (2014) formülleri biyokütle ve karbon stoğunu hesaplar.</p>
+   <div class="sub">AGB · BHB · C · m³</div>
+  </div>
+  <div class="step">
+   <div class="num">3</div>
+   <h4>Küresel Yayın</h4>
+   <p>Kayıt admin onayından sonra dünya haritasında görünür. Ülke, şehir ve park agregasyonlarına dahil edilir; QGIS ve CSV olarak dışa aktarılabilir.</p>
+   <div class="sub">ONAY → HARİTA → EXPORT</div>
+  </div>
+ </div>
+
+ <div style="margin-top:56px;display:grid;grid-template-columns:1fr 1fr;gap:24px" class="method-grid">
+  <div class="card" style="border-left:4px solid var(--green)">
+   <div style="font-family:Fraunces,serif;font-size:1.1rem;color:var(--green-dk);font-weight:600;margin-bottom:14px">📐 Allometrik Formüller</div>
+   <div class="formula">DBH = Çevre ÷ π</div>
+   <div class="formula">AGB = 0.0673·(ρ·DBH²·H)<sup>0.976</sup> <span style="color:var(--mut)">— Chave 2014</span></div>
+   <div class="formula">BHB = AGB·0.26 <span style="color:var(--mut)">— IPCC 2006</span></div>
+   <div class="formula">C = (AGB+BHB)·0.47</div>
+   <p style="color:var(--mut);font-size:.78rem;margin-top:12px">44 ağaç türü için As ve ark. 2001 · Tolunay 2013 · OGM 299 Nolu Tebliğ 2017 kaynaklı ρ yoğunluk değerleri.</p>
+  </div>
+  <div class="card" style="border-left:4px solid var(--amber)">
+   <div style="font-family:Fraunces,serif;font-size:1.1rem;color:var(--green-dk);font-weight:600;margin-bottom:14px">🔬 Veri Doğruluk Politikası</div>
+   <ul style="list-style:none;padding:0;margin:0">
+    <li style="padding:8px 0 8px 24px;position:relative;color:var(--ink);font-size:.88rem"><span style="position:absolute;left:0;color:var(--green);font-weight:700">✓</span>GPS doğruluğu ±10 m altında olmalı</li>
+    <li style="padding:8px 0 8px 24px;position:relative;color:var(--ink);font-size:.88rem"><span style="position:absolute;left:0;color:var(--green);font-weight:700">✓</span>Fotoğrafta bitki örtüsü ≥ %25</li>
+    <li style="padding:8px 0 8px 24px;position:relative;color:var(--ink);font-size:.88rem"><span style="position:absolute;left:0;color:var(--green);font-weight:700">✓</span>Pozlama 25–245 aralığında</li>
+    <li style="padding:8px 0 8px 24px;position:relative;color:var(--ink);font-size:.88rem"><span style="position:absolute;left:0;color:var(--green);font-weight:700">✓</span>DBH ≤ 500 cm, boy ≤ 100 m</li>
+    <li style="padding:8px 0 8px 24px;position:relative;color:var(--ink);font-size:.88rem"><span style="position:absolute;left:0;color:var(--green);font-weight:700">✓</span>Admin onayı zorunlu</li>
+   </ul>
+  </div>
+ </div>
+</div></section>
+<section class="blk" id="veri"><div class="wrap">
+ <div class="shead"><span class="no">03</span><h2>Veri & Harita</h2><span class="rule"></span></div>
+ <div id="worldMapLanding" style="height:380px;border-radius:var(--r);border:1px solid var(--line)"></div>
+ <p style="color:var(--mut);font-size:.8rem;margin-top:8px">🟢 Onaylı noktalara dokunun → ölçüm bilgisi + fotoğraf balonu.</p>
+ <div id="landingAnalysis" style="margin-top:20px"></div>
+  <div class="card" style="margin-top:20px;border-left:4px solid var(--green)">
+  <div class="shead" style="margin-bottom:12px"><span class="no">🌍</span><h2 style="font-size:1.15rem">Bölgesel Dağılım</h2><span class="rule"></span></div>
+  <div class="grid g2">
+   <div class="tblwrap"><table id="tblCountry"><thead><tr><th>Ülke</th><th>Kayıt</th><th>Karbon(t)</th><th>Ort.DBH</th><th>Ort.Yükseklik(m)</th></tr></thead><tbody></tbody></table></div>
+   <div class="tblwrap"><table id="tblCity"><thead><tr><th>Şehir</th><th>Kayıt</th><th>Karbon(t)</th></tr></thead><tbody></tbody></table></div>
+  </div>
+ </div>
+</div></section>
+<section class="blk" id="istatistik"><div class="wrap">
+ <div class="shead"><span class="no">04</span><h2>İstatistik</h2><span class="rule"></span></div>
+ <p style="color:var(--mut);max-width:70ch">Agregasyonlar <span class="mono">v_global, v_country, v_city</span> görünümlerinden hesaplanır; yalnızca onaylı kayıtlar istatistiğe girer.</p>
+</div></section>
+<section class="blk" id="erisim" style="border-top:0"><div class="wrap">
+ <div class="shead"><span class="no">05</span><h2>Erişim</h2><span class="rule"></span></div>
+ <div class="card auth" id="authBox">
+  <div style="display:flex;gap:8px;margin-bottom:16px">
+   <button class="btn sm" onclick="authTab('login')">Giriş</button>
+   <button class="btn sm ghost" onclick="authTab('reg')">Kayıt</button>
+   <button class="btn sm ghost" onclick="authTab('reset')">Şifre Yenile</button>
+  </div>
+<form id="fLogin" onsubmit="return false;"><div class="lbl">E‑posta</div><input id="liEmail" type="email" required><div class="lbl" style="margin-top:12px">Parola</div><input id="liPass" type="password" required><div id="tsLogin" style="margin-top:14px;min-height:65px"></div><button type="button" class="btn" style="width:100%;margin-top:16px" onclick="doLogin()">Giriş Yap</button></form>
+<form id="fReg" style="display:none" onsubmit="return false;"><div class="lbl">Ad Soyad</div><input id="rgName" required><div class="lbl" style="margin-top:10px">Kurum</div><input id="rgOrg"><div class="lbl" style="margin-top:10px">E‑posta</div><input id="rgEmail" type="email" required><div class="lbl" style="margin-top:10px">Parola</div><input id="rgPass" type="password" minlength="6" required><div id="tsReg" style="margin-top:14px;min-height:65px"></div><button type="button" class="btn" style="width:100%;margin-top:16px" onclick="doRegister()">Hesap Oluştur</button></form>
+<form id="fReset" style="display:none" onsubmit="return false;"><div class="lbl">E‑posta</div><input id="rsEmail" type="email" required><div id="tsReset" style="margin-top:14px;min-height:65px"></div><button type="button" class="btn" style="width:100%;margin-top:16px" onclick="sendResetEmail()">Sıfırlama Gönder</button></form>
+  <div id="authMsg" style="margin-top:12px;font-size:.85rem;min-height:1.2em"></div>
+ </div>
+</div></section>
+<footer><div class="wrap">
+ <div class="cols footer-cols">
+  <div><h4>DendroGeo</h4><p>Küresel Ağaç Envanteri ve Karbon Veri Sistemi.</p></div>
+  <div><h4>Referanslar</h4><p>Chave et al. 2014 · IPCC 2006<br>As ve ark. 2001 · Tolunay 2013<br>OGM 299 Nolu Tebliğ 2017</p></div>
+  <div><h4>Sistem</h4><p>v11.0 · <span class="mono">ÇEVRİMİÇİ</span></p></div>
+ </div>
+ <div style="margin-top:34px;padding-top:30px;border-top:1px solid rgba(255,255,255,.18)">
+  <div class="grid g2" style="gap:24px">
+   <div>
+    <h4 style="color:#9fd0ae;font-size:.72rem;letter-spacing:.16em;text-transform:uppercase;margin-bottom:12px">📚 Kaynakça</h4>
+    <div style="font-size:.78rem;line-height:1.7;color:#cfe0d4">
+     <div>• Chave J, Réjou-Méchain M, et al. (2014). <i>Pantropical biomass allometries</i>. Global Ecology and Biogeography, 23(1), 132-146.</div>
+     <div>• IPCC (2006). <i>Guidelines for National Greenhouse Gas Inventories</i>. Vol. 4, Chapter 4: Forest Land.</div>
+     <div>• As N, Asan A, Okur OD (2001). <i>Türkiye Orman Ağaçlarının Odun Özellikleri</i>. Orman Bakanlığı Yayınları.</div>
+     <div>• Tolunay D (2013). <i>Türkiye'deki Ağaç Türlerinin Odun Yoğunluk Değerleri</i>. İstanbul Üniversitesi Orman Fakültesi.</div>
+     <div>• OGM (2017). <i>299 Nolu Tebliğ — Orman Ürünlerinin Özellikleri</i>. Orman Genel Müdürlüğü.</div>
+     <div>• Bozkurt Y, Erdin N (2000). <i>Önemli Ağaçların Teknik Özellikleri</i>. İÜ Orman Fakültesi.</div>
+    </div>
+   </div>
+   <div>
+    <h4 style="color:#9fd0ae;font-size:.72rem;letter-spacing:.16em;text-transform:uppercase;margin-bottom:12px">📝 Atıf & Lisans</h4>
+    <div class="card" style="background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.15);padding:14px">
+     <div class="mono" style="font-size:.72rem;color:#fff;line-height:1.7;background:rgba(0,0,0,.25);padding:10px;border-radius:6px">
+      ŞİRİN, S. &amp; ŞİRİN, N. (2026). <i>DendroGeo: Global Tree Inventory &amp; Carbon Data System</i> (Version 1.0.0) [Dataset]. Zenodo. https://doi.org/10.5281/zenodo.22646300
+     </div>
+     <div style="font-size:.75rem;color:#cfe0d4;margin-top:10px">
+      <b style="color:#fff">Veri Lisansı:</b> CC BY-NC 4.0 — Ticari olmayan kullanımda, kaynak gösterilerek serbestçe paylaşılabilir.
+     </div>
+    </div>
+    <h4 style="color:#9fd0ae;font-size:.72rem;letter-spacing:.16em;text-transform:uppercase;margin:18px 0 10px">⚖️ Politikalar</h4>
+    <div style="font-size:.78rem;color:#cfe0d4;line-height:1.6">
+     <div><a href="#" onclick="toast('KVKK: Yalnızca e-posta, ad ve kurum bilgileriniz saklanır. Hesap istediğinizde tüm verileriniz silinebilir. Çerez kullanılmamaktadır.');return false;" style="color:#9fd0ae;text-decoration:underline">KVKK Aydınlatma Metni</a></div>
+     <div style="margin-top:4px"><a href="#" onclick="toast('Veri Doğruluk: GPS doğruluğu ±10m altında, bitki örtüsü ≥%25 ve pozlama 25-245 aralığında olmayan çekimler reddedilir. Tüm kayıtlar admin onayından sonra yayımlanır.');return false;" style="color:#9fd0ae;text-decoration:underline">Veri Doğruluk Politikası</a></div>
+    </div>
+   </div>
+  </div>
+ </div>
+ <div class="credit">
+  <div class="thesis">🎓 Bu proje; <b>Nagihan ŞİRİN</b>'in <i>"Kent Parklarının Karbon Depolama Performansının Saptanması"</i> adlı doktora çalışması kapsamında gerçekleştirilmiştir.</div>
+  <div class="prod">Üretici · Sinan ŞİRİN</div>
+ </div>
+</div></footer>
+</div>
+
+<div id="shell">
+<div id="apptop">
+<span class="logo"><img class="brand-logo" src="logo.png" alt="">DendroGeo</span>
+ <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:var(--green);box-shadow:0 0 0 3px rgba(30,111,75,.25)"></span>
+ <div class="right">
+  <span class="mono" id="whoami" style="font-size:.8rem;color:var(--mut)"></span>
+  <span class="badge admin" id="roleBadge" style="display:none">ADMIN</span>
+  <button class="btn sm red" onclick="logout()">Çıkış</button>
+ </div>
+</div>
+<div id="layout">
+ <div id="side">
+  <div class="sec">Saha</div>
+  <div class="item on" onclick="go('dash')">📊 Panel</div>
+  <div class="item" onclick="go('measure')">📏 Yeni Ölçüm</div>
+  <div class="item" onclick="go('nav')">🧭 Waypoint</div>
+  <div class="item" onclick="go('map')">🗺️ Canlı Harita</div>
+  <div class="sec">Veri</div>
+  <div class="item" onclick="go('projects')">📁 Projeler</div>
+  <div class="item" onclick="go('records')">📋 Kayıtlarım</div>
+  <div class="item" onclick="go('export')">💾 Dışa Aktar</div>
+  <div class="item" onclick="go('world')">🌍 Dünya Verisi</div>
+  <div class="sec" id="adminSec" style="display:none">Yönetim</div>
+  <div class="item" id="miAdmin" style="display:none" onclick="go('admin')">🔐 Ölçüm Yönetimi</div>
+  <div class="item" id="miUsers" style="display:none" onclick="go('users')">👥 Kullanıcılar</div>
+ </div>
+ <div id="main">
+
+   <div class="view on" id="v-dash">
+   <div class="shead" style="margin-bottom:18px"><span class="no">📊</span><h2 style="font-size:1.6rem">Genel Bakış</h2><span class="rule"></span><span class="mono" style="font-size:.78rem;color:var(--mut)">Kişisel Analiz Paneli</span></div>
+   <div class="grid g4" style="margin-bottom:22px">
+    <div class="stat" style="border-left:3px solid var(--green);padding-left:18px"><div class="lbl">📋 Kayıtlarım</div><div class="val" id="dMy">0</div></div>
+    <div class="stat" style="border-left:3px solid var(--amber);padding-left:18px"><div class="lbl">🌱 Karbonum</div><div class="val" id="dCarbon">0</div><div style="font-size:.72rem;color:var(--mut);margin-top:4px">kg CO₂ eşdeğer</div></div>
+    <div class="stat" style="border-left:3px solid var(--blue);padding-left:18px"><div class="lbl">📍 Waypoint</div><div class="val" id="dWp">0</div></div>
+    <div class="stat" style="border-left:3px solid var(--red);padding-left:18px"><div class="lbl">✅ Tamamlanan</div><div class="val" id="dVisit">0</div></div>
+   </div>
+   <div class="card" style="margin-bottom:18px;border-left:4px solid var(--green)">
+    <div class="shead" style="margin-bottom:14px"><span class="no">🌳</span><h2 style="font-size:1.15rem">Kişisel Ağaç Analizi</h2><span class="rule"></span></div>
+    <div id="myAnalysis"></div>
+   </div>
+     <div class="card" style="margin-top:18px;border-left:4px solid var(--blue)">
+    <div class="shead" style="margin-bottom:12px"><span class="no">📈</span><h2 style="font-size:1.15rem">Karbon Trendi</h2><span class="rule"></span><span class="mono" style="font-size:.72rem;color:var(--mut)">son 10 kayıt · kg</span></div>
+    <canvas id="chCarbon" height="110"></canvas>
+   </div>
+  </div>
+
+  <div class="view" id="v-measure">
+   <h2 class="disp" style="margin-bottom:16px">Yeni Ölçüm</h2>
+   <div id="editBanner" class="alert info" style="display:none">✏️ <b>Düzenleme modu:</b> mevcut kaydı güncelliyorsunuz. <button class="btn sm ghost" style="margin-left:10px" onclick="cancelEdit()">Vazgeç</button></div>
+   <div class="grid g2">
+    <div class="card">
+     <div class="lbl" style="margin-bottom:10px">🛰 GPS / Uydu</div>
+     <div class="gpsring" id="gpsRing"><div class="val" id="gpsAcc">—</div><div class="lbl">doğruluk (m)</div></div>
+     <div id="gpsState" class="alert info" style="margin-top:12px">Konum servisi kapalı.</div>
+     <button class="btn blue" style="width:100%" onclick="startGps()">📡 Konumu Etkinleştir</button>
+     <div id="iosHint" class="alert info" style="display:none;margin-top:10px"><b>iPhone kullanıcısı mısınız?</b><br><span style="font-size:.85rem">Ayarlar → Gizlilik ve Güvenlik → Konum Servisleri →Safari Siteleri→ "Uygulamayı Kullanırken" seçin, sayfayı yenileyin.</span></div>
+     <div class="grid g2" style="margin-top:14px">
+      <div><div class="lbl">Enlem</div><div class="mono" id="gLat">—</div></div>
+      <div><div class="lbl">Boylam</div><div class="mono" id="gLon">—</div></div>
+      <div><div class="lbl">Rakım</div><div class="mono" id="gAlt">—</div></div>
+      <div><div class="lbl">Sinyal</div><div class="mono" id="gQ">—</div></div>
+     </div>
+    </div>
+    <div class="card">
+     <div class="lbl">Proje</div><select id="mProject" onchange="if(!manualPoint)autoFillPointId()"></select>
+     <div class="grid g2" style="margin-top:10px">
+      <div><div class="lbl">POINT ID</div><div style="display:flex;gap:6px"><input id="mPoint" type="number" oninput="manualPoint=true"><button class="btn sm blue" style="white-space:nowrap" onclick="queryPointId()">🔍 Sorgula</button></div></div>
+      <div><div class="lbl">Ölçüm No</div><input id="mNo" type="number" value="1"></div>
+     </div>
+     <div id="pointQueryResult" class="alert info" style="display:none;margin-top:10px"></div>
+     <div class="grid g2" style="margin-top:10px">
+      <div><div class="lbl">Grup</div><select id="mGroup" onchange="fillSpecies()"><option value="">Seç</option><option>İBRELİ</option><option>YAPRAKLI</option><option>DİĞER</option></select></div>
+      <div><div class="lbl">Tür (Latince)</div><select id="mSpecies" disabled onchange="showLatin()"></select></div>
+     </div>
+     <div id="latinName" class="mono" style="font-size:.76rem;color:var(--mut);font-style:italic;margin-top:4px"></div>
+     <div class="grid g2" style="margin-top:10px">
+      <div><div class="lbl">Çap (cm)</div><input id="mDbh" type="number" step="0.1" oninput="liveCalc()" placeholder="örn: 52"></div>
+      <div><div class="lbl">Boy (m)</div><input id="mHeight" type="number" step="0.1" oninput="liveCalc()" placeholder="örn: 7,2"></div>
+     </div>
+     <div class="lbl" style="margin-top:12px">📸 Fotoğraf (canlı çekim)</div>
+     <input type="file" id="mPhoto" accept="image/*" capture="environment" onchange="checkPhoto(event)">
+     <div id="photoCheck" class="alert info" style="display:none;margin-top:8px"></div>
+     <div id="liveCalc" class="alert ok" style="display:none"></div>
+     <button class="btn" id="saveBtn" style="width:100%;margin-top:14px" onclick="saveMeas()">💾 Hesapla ve Kaydet</button>
+    </div>
+   </div>
+  </div>
+
+  <div class="view" id="v-nav">
+   <h2 class="disp" style="margin-bottom:16px">Waypoint Navigasyon</h2>
+   <div class="grid g2">
+    <div class="card">
+     <div class="lbl">Proje</div><select id="nProject" onchange="loadWaypoints()"></select>
+     <div class="lbl" style="margin:12px 0 6px">Waypoints.csv Yükle (X,Y,id)</div>
+     <input type="file" id="nCsv" accept=".csv">
+     <div style="display:flex;gap:8px;flex-wrap:wrap">
+      <button class="btn blue sm" style="margin-top:8px" onclick="uploadWpCsv()">⬆ Waypoint Yükle</button>
+      <button class="btn red sm" style="margin-top:8px" onclick="deleteAllWaypoints()">🗑 Listeyi Tamamen Sil</button>
+     </div>
+     <div id="navInfo" class="alert info" style="margin-top:12px">Liste projeye kalıcı kaydedilir; tekrar yüklemeye gerek yok.</div>
+     <div style="display:flex;gap:20px;align-items:center;margin-top:14px">
+      <svg class="arrow" id="navArrow" viewBox="0 0 100 100"><path d="M50 5 L70 70 L50 55 L30 70 Z" fill="var(--green)"/></svg>
+      <div><div class="val" id="navDist">—</div><div class="lbl">hedefe mesafe</div><div class="mono" id="navTarget" style="color:var(--amber);margin-top:6px">—</div></div>
+     </div>
+     <button class="btn" style="width:100%;margin-top:14px" onclick="arriveWp()">🎯 Vardım → Ölçüme Geç</button>
+     <div style="margin-top:24px;border-top:1px solid var(--line);padding-top:16px">
+      <div class="lbl" style="margin-bottom:10px">📍 Waypoint Listesi <span style="text-transform:none;letter-spacing:0">(üstü çizili = yapıldı)</span></div>
+      <div class="tblwrap" style="max-height:300px;overflow-y:auto;border:1px solid var(--line);border-radius:10px">
+       <table><thead><tr><th>ID</th><th>Enlem</th><th>Boylam</th><th>Durum</th><th>İşlem</th></tr></thead><tbody id="wpListTable"></tbody></table>
+      </div>
+     </div>
+    </div>
+    <div class="card"><div id="navMap"></div><div class="lbl" style="margin-top:8px">🔴 waypoint (numaralı, tıkla=hedef) · 🟢 yapıldı · 🔵 konumun</div></div>
+   </div>
+  </div>
+
+  <div class="view" id="v-map"><h2 class="disp" style="margin-bottom:16px">Canlı Harita</h2><div id="mapLoad" class="alert info">⏳ Onaylı kayıtlar yükleniyor…</div><div id="map"></div><p style="color:var(--mut);font-size:.8rem;margin-top:8px">🟢 Noktalara dokunun → bilgi + fotoğraf balonu.</p><div id="liveAnalysis" style="margin-top:18px"></div></div>
+
+  <div class="view" id="v-projects">
+<h2 class="disp" style="margin-bottom:16px">Projeler</h2>
+<div class="card" style="margin-bottom:16px">
+<div class="grid g3">
+<div><div class="lbl">Proje Adı</div><input id="pName"></div>
+<div><div class="lbl">Ülke</div><input id="pCountry" value="Türkiye"></div>
+<div><div class="lbl">Şehir</div><input id="pCity" value="Ankara"></div>
+</div>
+    <div style="display:flex;gap:8px;margin-top:10px">
+     <button class="btn sm" id="projSaveBtn" onclick="createProject()">+ Proje Oluştur</button>
+     <button class="btn sm ghost" id="projCancelBtn" style="display:none" onclick="cancelProjectEdit()">Vazgeç</button>
+    </div>
+   </div>
+   <div class="card tblwrap"><table><thead><tr><th>ID</th><th>Ad</th><th>Ülke</th><th>Şehir</th><th>Tarih</th><th>İşlem</th></tr></thead><tbody id="projTable"></tbody></table></div>
+  </div>
+
+  <div class="view" id="v-records">
+   <h2 class="disp" style="margin-bottom:16px">Kayıtlarım</h2>
+   <div class="alert info">Kayıtlarınız admin onayından sonra dünya verisinde yayınlanır.</div>
+   <div class="card tblwrap"><table><thead><tr><th>Proje</th><th>Nokta</th><th>Tür</th><th>Çap</th><th>Boy</th><th>Karbon</th><th>Foto</th><th>Durum</th><th>İşlem</th></tr></thead><tbody id="recTable"></tbody></table></div>
+  </div>
+
+  <div class="view" id="v-export">
+   <h2 class="disp" style="margin-bottom:16px">Dışa Aktar</h2>
+   <div class="grid g3">
+    <div class="card"><b>📥 Standart CSV</b><p style="color:var(--mut);font-size:.8rem;margin:6px 0 12px">Tam bilimsel format (AGB/BHB/Karbon)</p><div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn sm" onclick="exportCSV()">İndir</button><button class="btn sm ghost" onclick="previewCSV()">Görüntüle</button></div></div>
+    <div class="card"><b>🗺 GeoJSON</b><p style="color:var(--mut);font-size:.8rem;margin:6px 0 12px">QGIS / web harita katmanı</p><div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn sm blue" onclick="exportGeo()">İndir</button><button class="btn sm ghost" onclick="previewGeo()">Görüntüle</button></div></div>
+    <div class="card"><b>🧾 QGIS CSV</b><p style="color:var(--mut);font-size:.8rem;margin:6px 0 12px">Fotoğraf eşleştirmeli saha formatı</p><div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn sm amber" onclick="exportQgis()">İndir</button><button class="btn sm ghost" onclick="previewCSV()">Görüntüle</button></div></div>
+   </div>
+   <div class="card" style="margin-top:20px;border-left:4px solid var(--blue)">
+    <div class="shead" style="margin-bottom:14px"><span class="no">✉️</span><h2 style="font-size:1.2rem">Yöneticiden Veri Talep Et</h2></div>
+    <p style="color:var(--mut);font-size:.85rem;margin-bottom:12px">Belirli bir ülke / şehir / proje (kent parkı) için tüm onaylı veriyi yönetici tarafında hazırlanmış olarak e‑postanıza almak isterseniz talep oluşturun.</p>
+    <div class="grid g3">
+     <div><div class="lbl">Ülke</div><select id="reqCountry" onchange="reqCountryChanged()"><option value="">Tümü</option></select></div>
+<div><div class="lbl">Şehir</div><select id="reqCity" onchange="reqCityChanged()"><option value="">Tümü</option></select></div>
+<div><div class="lbl">Proje / Park</div><select id="reqProject"><option value="">Tümü</option></select></div>
+    </div>
+    <div style="margin-top:10px"><div class="lbl">Not</div><input id="reqNote" placeholder="İsteğe dair kısa not"></div>
+    <button class="btn blue sm" style="margin-top:12px" onclick="sendDataRequest()">✉️ Talep Gönder</button>
+    <div id="reqMsg" style="margin-top:10px;font-size:.85rem"></div>
+    <div id="myRequests" style="margin-top:14px"></div>
+   </div>
+   <div class="card" style="margin-top:20px;border-left:4px solid var(--amber)">
+    <div class="shead" style="margin-bottom:14px"><span class="no">📘</span><h2 style="font-size:1.2rem">QGIS Fotoğraf Aktarım Rehberi</h2></div>
+    <ol class="guide">
+     <li><b>CSV'yi içe aktar:</b> QGIS → <code>Layer → Add Layer → Add Delimited Text Layer</code>. <code>X = LONGITUDE</code>, <code>Y = LATITUDE</code>, CRS = <code>EPSG:4326</code>.</li>
+     <li><b>Tüm veriler katman olur:</b> AGB, BHB, biyokütle, karbon sütunları öznitelik tablosuna işlenir. <code>Identify (i)</code> ile bilgi balonu açılır.</li>
+     <li><b>Yöntem A — İnternetten (önerilen):</b> Katman Özellikleri → <code>Display</code> → HTML Map Tip:<br><code>&lt;img src='[% "PHOTO_URL" %]' width='220'&gt;</code><br>İnternet bağlantısı varken fotoğraflar otomatik yüklenir, yerel klasöre gerek yok.</li><li><b>Yöntem B — Yerel klasör:</b> Fotoğrafları tek klasöre koy (örn. <code>C:/dendro_foto/</code>). Dosya adları <code>PHOTO_FILE</code> ile aynı olmalı. Map Tip:<br><code>&lt;img src="file:///C:/dendro_foto/[% "PHOTO_FILE" %]" width="220"&gt;</code></li>
+     <li><b>Fotoğraf balonu:</b> Katman Özellikleri → <code>Display</code> → HTML Map Tip:<br><code>&lt;img src="file:///C:/dendro_foto/[% "PHOTO_FILE" %]" width="220"&gt;</code></li>
+     <li><b>Etkinleştir:</b> <code>View → Show Map Tips</code>.</li>
+     <li><b>Etiket:</b> Labels → <code>POINT_ID</code>.</li>
+    </ol>
+   </div>
+  </div>
+
+  <div class="view" id="v-world">
+   <h2 class="disp" style="margin-bottom:16px">🌍 Dünya Verisi</h2>
+   <div class="grid g4" style="margin-bottom:18px">
+    <div class="stat"><div class="lbl">Toplam Kayıt</div><div class="val" id="wRec">0</div></div>
+    <div class="stat"><div class="lbl">Ülke</div><div class="val" id="wCountry">0</div></div>
+    <div class="stat"><div class="lbl">Şehir</div><div class="val" id="wCity">0</div></div>
+    <div class="stat"><div class="lbl">Karbon (t)</div><div class="val" id="wCarbon">0</div></div>
+   </div>
+   <div id="worldMap" style="margin-bottom:8px"></div>
+   <p style="color:var(--mut);font-size:.8rem;margin-bottom:18px">🟢 Noktalara dokunun → bilgi + fotoğraf balonu.</p>
+   <div id="worldAnalysis" style="margin-bottom:18px"></div>
+      <div class="card" style="border-left:4px solid var(--green)">
+    <div class="shead" style="margin-bottom:12px"><span class="no">🌍</span><h2 style="font-size:1.15rem">Bölgesel Dağılım</h2><span class="rule"></span></div>
+    <div class="grid g2">
+     <div class="tblwrap"><table><thead><tr><th>Ülke</th><th>Kayıt</th><th>Karbon(t)</th><th>Ort.Çap</th><th>Ort.Yükseklik(m)</th></tr></thead><tbody id="wCountryT"></tbody></table></div>
+     <div class="tblwrap"><table><thead><tr><th>Şehir</th><th>Kayıt</th><th>Karbon(t)</th></tr></thead><tbody id="wCityT"></tbody></table></div>
+    </div>
+      </div>
+   <div class="card" style="margin-top:18px;border-left:4px solid var(--blue)">
+    <div class="shead" style="margin-bottom:12px"><span class="no">🆚</span><h2 style="font-size:1.15rem">Park Karşılaştırma — Karbon Performansı</h2><span class="rule"></span></div>
+    <div id="parkCompare"></div>
+   </div>
+   <div class="card" style="margin-top:18px;border-left:4px solid var(--amber)">
+    <div class="shead" style="margin-bottom:12px"><span class="no">📄</span><h2 style="font-size:1.15rem">Park Raporu</h2><span class="rule"></span></div>
+    <div class="grid g3">
+     <div><div class="lbl">Park / Proje</div><select id="repProject"></select></div>
+     <div style="align-self:end"><button class="btn amber" onclick="parkReport()">📄 Rapor Oluştur</button></div>
+    </div>
+   </div>
+  </div>
+
+  <div class="view" id="v-admin">
+   <h2 class="disp" style="margin-bottom:16px">🔐 Ölçüm Yönetimi & Onay</h2>
+   <div class="grid g4" style="margin-bottom:18px">
+    <div class="stat"><div class="lbl">Kullanıcı</div><div class="val" id="aUsers">0</div></div>
+    <div class="stat"><div class="lbl">Kayıt</div><div class="val" id="aRec">0</div></div>
+    <div class="stat"><div class="lbl">Karbon (t)</div><div class="val" id="aCarbon">0</div></div>
+    <div class="stat"><div class="lbl">Proje</div><div class="val" id="aProj">0</div></div>
+   </div>
+   <div class="grid g4" style="margin-bottom:18px">
+    <div class="stat"><div class="lbl">👁 Toplam Ziyaretçi</div><div class="val" id="aVisitTotal">0</div></div>
+    <div class="stat"><div class="lbl">👁 Bugün</div><div class="val" id="aVisitToday">0</div></div>
+    <div class="stat"><div class="lbl">👁 Son 7 Gün</div><div class="val" id="aVisit7">0</div></div>
+    <div class="stat"><div class="lbl">✉️ Bekleyen Talep</div><div class="val" id="aReqPending">0</div></div>
+   </div>
+   <div class="card" style="margin-bottom:18px">
+    <div class="lbl">💽 Depolama Kullanımı</div>
+    <div style="height:10px;background:var(--line);border-radius:6px;margin:10px 0 6px;overflow:hidden"><div id="storeBar" style="height:100%;width:0%;background:var(--green);transition:width .6s"></div></div>
+    <div class="mono" id="storeInfo" style="font-size:.75rem;color:var(--mut)">Hesaplanıyor…</div>
+    <button class="btn sm amber" style="margin-top:10px" onclick="cleanOrphans()">🧹 Yetim Dosyaları Temizle</button>
+    <button class="btn sm blue" style="margin-top:10px;margin-left:8px" onclick="reGeocodeAll()">🌍 Şehirleri Yeniden Algıla</button>
+    <button class="btn sm" style="margin-top:10px;margin-left:8px" onclick="fullBackup()">💾 Tam Yedek İndir (JSON)</button>
+   </div>
+   <div class="card" style="margin-bottom:18px;border-left:4px solid var(--amber)">
+    <div class="shead" style="margin-bottom:12px"><span class="no">📦</span><h2 style="font-size:1.2rem">Toplu Dışa Aktarım (Tüm Kullanıcılar)</h2></div>
+    <p style="color:var(--mut);font-size:.82rem;margin-bottom:10px">Kullanıcı ayrımı yapılmadan sistemdeki <b>tüm veri</b>, seçtiğiniz filtrelere göre dışa aktarılır.</p>
+    <div class="grid g4">
+     <div><div class="lbl">Ülke</div><select id="admExpCountry" onchange="admCountryChanged()"><option value="">Tümü</option></select></div>
+<div><div class="lbl">Şehir</div><select id="admExpCity" onchange="admCityChanged()"><option value="">Tümü</option></select></div>
+<div><div class="lbl">Proje / Park</div><select id="admExpProject"><option value="">Tümü</option></select></div>
+     <div><div class="lbl">Durum</div><select id="admExpStatus"><option value="">Tümü</option><option value="Onaylı">Onaylı</option><option value="Beklemede">Beklemede</option><option value="Red">Red</option></select></div>
+    </div>
+    <div class="grid g3" style="margin-top:12px">
+     <button class="btn" onclick="adminExportCSV()">📥 Filtreli CSV</button>
+     <button class="btn blue" onclick="adminExportGeo()">🗺 Filtreli GeoJSON</button>
+     <button class="btn amber" onclick="adminExportQgis()">🧾 QGIS Detaylı</button>
+    </div>
+   </div>
+      <div class="card" style="margin-bottom:18px;border-left:4px solid var(--blue)">
+    <div class="shead" style="margin-bottom:12px"><span class="no">✉️</span><h2 style="font-size:1.2rem">Aktif Talepler</h2><span class="rule"></span><span class="mono" style="font-size:.78rem;color:var(--amber)">Bekleyen: <b id="aReqPendingMini">0</b></span></div>
+    <div class="tblwrap"><table><thead><tr><th>Kullanıcı</th><th>E‑posta</th><th>Filtre</th><th>Tarih</th><th>Durum</th><th>İşlem</th></tr></thead><tbody id="aReqT"></tbody></table></div>
+   </div>
+   <div class="card" id="closedRequestsWrap" style="margin-bottom:18px;border-left:4px solid var(--mut);display:none">
+    <div class="shead" style="margin-bottom:12px;cursor:pointer" onclick="document.getElementById('closedReqBody').style.display=document.getElementById('closedReqBody').style.display==='none'?'block':'none'">
+     <span class="no">📦</span>
+     <h2 style="font-size:1.2rem">Tamamlanan / Reddedilen Talepler</h2>
+     <span class="rule"></span>
+     <span class="mono" style="font-size:.78rem;color:var(--mut)">Arşiv: <b id="aReqClosed">0</b> · Aç/Kapat ▼</span>
+    </div>
+    <div id="closedReqBody" style="display:none">
+     <div class="tblwrap"><table><thead><tr><th>Kullanıcı</th><th>E‑posta</th><th>Filtre</th><th>Talep</th><th>Kapanış</th><th>Durum</th></tr></thead><tbody id="closedReqT"></tbody></table></div>
+    </div>
+   </div>
+   <div class="card tblwrap">
+    <div class="shead" style="margin-bottom:12px"><span class="no">📋</span><h2 style="font-size:1.2rem">Ölçüm Onay & Moderasyon</h2></div>
+    <input type="text" id="adminMeasSearch" placeholder="🔍 Ara..." oninput="filterAdminMeas()" style="max-width:100%;margin-bottom:12px">
+    <table><thead><tr><th>Kullanıcı</th><th>Nokta</th><th>Tür</th><th>Çap</th><th>Boy</th><th>Karbon</th><th>Foto</th><th>Durum</th><th>İşlem</th></tr></thead><tbody id="aMeasT"></tbody></table>
+   </div>
+  </div>
+
+  <div class="view" id="v-users">
+   <h2 class="disp" style="margin-bottom:16px">👥 Kullanıcı Yönetimi</h2>
+   <div class="card tblwrap">
+    <input type="text" id="userSearch" placeholder="🔍 E‑posta veya ad ara..." oninput="filterUsers()" style="max-width:100%;margin-bottom:12px">
+    <table><thead><tr><th>E‑posta</th><th>Ad Soyad</th><th>Rol</th><th>Durum</th><th>İşlem</th></tr></thead><tbody id="aUsersT"></tbody></table>
+   </div>
+  </div>
+
+ </div>
+</div>
+</div>
+<div id="recoveryModal" style="display:none;position:fixed;inset:0;background:rgba(20,30,25,.6);z-index:300;align-items:center;justify-content:center;padding:20px">
+<div class="card auth" style="max-width:420px;width:100%">
+<h3 class="disp" style="margin-bottom:8px">🔑 Yeni Parola Belirle</h3>
+<p style="color:var(--mut);font-size:.85rem;margin-bottom:14px">Şifre sıfırlama bağlantısı doğrulandı. Yeni parolanızı belirleyin.</p>
+<div class="lbl">Yeni Parola</div><input id="rcPass" type="password" minlength="6">
+<div class="lbl" style="margin-top:10px">Yeni Parola (tekrar)</div><input id="rcPass2" type="password" minlength="6">
+<div id="rcMsg" style="margin-top:10px;font-size:.85rem;min-height:1.2em"></div>
+<button class="btn" style="width:100%;margin-top:14px" onclick="saveNewPassword()">💾 Parolayı Güncelle</button>
+<button class="btn ghost sm" style="width:100%;margin-top:8px" onclick="cancelRecovery()">Şimdi Değil</button>
+</div>
+</div>
+<div id="previewModal"><div class="card" style="max-width:960px;width:100%;max-height:82vh;display:flex;flex-direction:column">
+ <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px"><b id="pvTitle">Önizleme</b><button class="btn sm red" onclick="closePreview()">✕ Kapat</button></div>
+ <div id="pvBody" class="tblwrap" style="overflow:auto;flex:1"></div>
+ <button class="btn" style="margin-top:12px" id="pvDownload">📥 İndir</button>
+</div></div>
+
+<script>
+"use strict";
+
+sb.auth.onAuthStateChange((event)=>{
+if(event==="PASSWORD_RECOVERY"){
+const m=document.getElementById("recoveryModal");
+if(m)m.style.display="flex";
+}
+});
+
+let USER=null,PROFILE=null,GPS=null,WP=[],navTarget=null,charts={},map=null,navMap=null,worldMap=null,worldMapL=null,EDIT_ID=null,EDIT_PROJ=null,liveLoaded=false,PROJ_LIST=[],photoOk=false;
+
+
+
+
+
+
+
+/* ============ KONUMDAN İL/ÜLKE ALGILAMA (Reverse Geocoding) ============ */
+/* TÜRKİYE'de il adı "state" alanındadır (admin_level=4); ilçe "city/town" alanına düşer.
+   Kesin il için TR'de ÖNCE state okunur; diğer ülkelerde standart zincir. */
+/* ============ KONUMDAN İL/ÜLKE ALGILAMA ============ */
+/* TÜRKİYE'de il adı "state" alanındadır (admin_level=4); ilçe "city/town"a düşer.
+   TR için KESİN çözüm: önce state oku → ilçe asla gelmez. */
+async function reverseGeocode(lat,lon){
+ try{
+  const r=await fetch("https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat="+lat+"&lon="+lon+"&accept-language=tr",{headers:{Accept:"application/json"}});
+  if(!r.ok)return null;
+  const j=await r.json();const a=j.address||{};
+  const cc=(a.country_code||"").toLowerCase();
+  const city=cc==="tr"
+   ?(a.state||a.province||a.city||null)
+   :(a.city||a.town||a.village||a.municipality||a.state||null);
+  const country=a.country||null;
+  if(!city&&!country)return null;
+  return{city:city||"Bilinmiyor",country:country||"Bilinmiyor"};
+ }catch(e){return null;}
+}
+const FULL_HEAD="POINT_ID,MEASUREMENT_NO,DATE,TIME_TR,LATITUDE,LONGITUDE,GPS_ALTITUDE_M,GPS_ALTITUDE_MEDIAN_M,SATELLITES,HDOP,EST_ERROR_M,SLOPE_DEG,TREE_GROUP,TREE_SPECIES,LATIN_NAME,CIRCUMFERENCE_CM,DBH_CM,TREE_HEIGHT_M,CALC_AREA_M2,HORIZONTAL_AREA_M2,CALC_VOLUME_M3,AGB_KG,BHB_KG,TOTAL_BIOMASS_KG,CARBON_KG,AGB_CARBON_KG,BHB_CARBON_KG,PHOTO_FILE,PHOTO_URL,DATE_ISO";
+function fullRow(r){
+ const c=calc(r.dbh_cm,r.height_m,r.species,r.grp);
+ const slope=+(r.slope_deg||0);
+ const agb=r.agb_kg||c.agb,bhb=r.bhb_kg||c.bhb,bio=agb+bhb;
+ const area=Math.PI*Math.pow((r.dbh_cm||0)/200,2);
+ const hArea=area*Math.cos(slope*Math.PI/180);
+ const vol=area*(r.height_m||0)*0.5;
+ const d=new Date(r.created_at);
+ const pf=r.photo_file||(r.photo_url?("P"+String(r.point_id).padStart(3,"0")+"_M"+(r.measurement_no||1)+".JPG"):"");
+ const q=v=>`"${(v||"").toString().replace(/"/g,'""')}"`;
+ return [r.point_id,r.measurement_no||1,d.toLocaleDateString("tr-TR"),d.toLocaleTimeString("tr-TR"),r.lat,r.lon,(r.altitude_m??""),(r.altitude_m??""),(r.satellites??""),(r.hdop??""),(r.accuracy_m??""),slope,q(r.grp),q(r.species),q(LATIN[r.species]||""),(Math.PI*(r.dbh_cm||0)).toFixed(2),r.dbh_cm,r.height_m,area.toFixed(4),hArea.toFixed(4),vol.toFixed(4),agb.toFixed(1),bhb.toFixed(1),bio.toFixed(1),(r.carbon_kg||bio*0.47).toFixed(2),(agb*0.47).toFixed(1),(bhb*0.47).toFixed(1),pf,q(r.photo_url||""),d.toISOString().slice(0,10)].join(",");
+}
+function fullCSV(rows){return "\uFEFF"+FULL_HEAD+"\n"+rows.map(fullRow).join("\n")+"\n";}
+
+function loadImg(file){return new Promise((res,rej)=>{const u=URL.createObjectURL(file);const i=new Image();i.onload=()=>res({i,u});i.onerror=rej;i.src=u;});}
+async function checkPhoto(e){
+ const f=e.target.files[0],box=$("photoCheck");
+ if(!f){photoOk=false;box.style.display="none";return;}
+ if(!f.type.startsWith("image/")){photoOk=false;box.className="alert err";box.style.display="block";box.innerHTML="⚠ Yalnızca görsel dosyası yükleyin.";return;}
+ box.style.display="block";box.className="alert info";box.innerHTML="⏳ Fotoğraf denetleniyor…";
+ try{
+  const{i,u}=await loadImg(f);
+  const S=120,c=document.createElement("canvas");c.width=S;c.height=S;
+  const x=c.getContext("2d");x.drawImage(i,0,0,S,S);URL.revokeObjectURL(u);
+  const d=x.getImageData(0,0,S,S).data;
+  let veg=0,br=0,edge=0;
+  for(let p=0;p<d.length;p+=4){const R=d[p],G=d[p+1],B=d[p+2];if(2*G-R-B>20&&G>50)veg++;br+=(R+G+B)/3;}
+  const n=d.length/4;const vegR=veg/n;br/=n;
+  for(let y=1;y<S-1;y+=2)for(let xx=1;xx<S-1;xx+=2){const a=(y*S+xx)*4,b2=(y*S+xx+1)*4;edge+=Math.abs(d[a]-d[b2]);}
+  const ok=vegR>=0.25&&br>25&&br<245;
+  photoOk=ok;
+  if(ok){box.className="alert ok";box.innerHTML=`✓ <b>Fotoğraf uygun</b> · Bitki örtüsü: %${(vegR*100).toFixed(1)} · Pozlama: ${br.toFixed(0)}/255`;}
+  else{box.className="alert err";box.innerHTML=`⚠ <b>Fotoğraf uygun değil</b> · Bitki örtüsü: %${(vegR*100).toFixed(1)} (min %25) · Pozlama: ${br.toFixed(0)}.<br>Ağacı/net bitki örtüsünü gösteren, karanlık olmayan bir çekim yapın.`;}
+ }catch(err){photoOk=false;box.className="alert err";box.innerHTML="⚠ Fotoğraf okunamadı, tekrar deneyin.";}
+}
+
+function showAuth(){
+ const el=$("erisim");if(!el)return;
+ el.scrollIntoView({behavior:"smooth"});authTab("login");
+ const box=$("authBox");box.classList.remove("auth-glow");void box.offsetWidth;box.classList.add("auth-glow");
+ setTimeout(()=>box.classList.remove("auth-glow"),3000);
+}
+function authTab(t){
+ ["login","reg","reset"].forEach(x=>{
+  const id="f"+x[0].toUpperCase()+x.slice(1);
+  if($(id))$(id).style.display=(x===t?"block":"none");
+ });
+ const tsId=t==="login"?"tsLogin":t==="reg"?"tsReg":"tsReset";
+ setTimeout(()=>{
+  if(TS[tsId]){try{turnstile.reset(TS[tsId]);}catch(e){}}
+ },120);
+}
+const TS = window.TS = {};
+function initTurnstile(){
+ if(typeof turnstile==="undefined"){setTimeout(initTurnstile,500);return;}
+ ["tsLogin","tsReg","tsReset"].forEach(id=>{
+  const el=$(id);
+  if(el&&!TS[id]){
+   try{TS[id]=turnstile.render(el,{sitekey:"0x4AAAAAAEkJfXuFvNgUrwUb",theme:"light"});}
+   catch(e){console.log("TS render error",id,e);}
+  }
+ });
+}
+if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",initTurnstile);
+else initTurnstile();
+function tsToken(id){
+ if(typeof turnstile==="undefined"||!TS[id])return null;
+ try{return turnstile.getResponse(TS[id])||null;}catch(e){return null;}
+}
+function amsg(t,e){const m=$("authMsg");if(m){m.textContent=t;m.style.color=e?"var(--red)":"var(--green-dk)";}}
+function toast(msg,type="ok",icon=""){
+ const wrap=$("toastWrap");if(!wrap)return;
+ const t=document.createElement("div");
+ t.className="toast "+(type==="err"||type==="warn"||type==="info"?type:"");
+ const ic=icon||(type==="err"?"❌":type==="warn"?"⚠":type==="info"?"ℹ":"✓");
+ t.innerHTML=`<span class="icon">${ic}</span><span class="msg">${msg}</span><span class="x" onclick="this.parentNode.classList.add('bye');setTimeout(()=>this.parentNode.remove(),300)">✕</span>`;
+ wrap.appendChild(t);
+ setTimeout(()=>{if(t.parentNode){t.classList.add("bye");setTimeout(()=>t.remove(),300);}},4500);
+}
+
+async function doLogin(){
+    const email = $("liEmail").value;
+    const pass = $("liPass").value;
+    
+    if(!email || !pass){
+        amsg("E-posta ve parola gerekli.", 1);
+        return;
+    }
+    
+    amsg("Giriş yapılıyor...", 0);
+    
+    // Turnstile token'ı al
+    let tok = tsToken("tsLogin");
+    if(!tok){
+        await new Promise(r => setTimeout(r, 2500));
+        tok = tsToken("tsLogin");
+    }
+    if(!tok){
+        amsg("Doğrulama widget'ı hazır değil. Sayfayı yenileyip tekrar deneyin.", 1);
+        return;
+    }
+    
+    // Supabase'e giriş yap
+    const r = await sb.auth.signInWithPassword({
+        email: email,
+        password: pass,
+        options: { captchaToken: tok }
+    });
+    
+    if(r.error){
+        amsg(r.error.message, 1);
+        try { turnstile.reset(TS.tsLogin); } catch(e){}
+        return;
+    }
+    
+    // Başarılı → widget'ı sıfırla ve UI'ı başlat
+    try { turnstile.reset(TS.tsLogin); } catch(e){}
+    
+    // Session'ı al
+    USER = r.data.user;
+    
+    // Profil yükle
+    const { data: p } = await sb.from("profiles").select("*").eq("id", USER.id).single();
+    PROFILE = p;
+    
+    // Arayüzü başlat
+    startShell();
+    
+    // Online ise kuyruğu senkronize et
+    if (navigator.onLine) {
+        setTimeout(() => syncOfflineData(), 2000);
+    }
+}
+async function doRegister(){
+    const name=$("rgName").value;
+    const email=$("rgEmail").value;
+    const pass=$("rgPass").value;
+    if(!name||!email||!pass){
+        amsg("Tüm alanları doldurun.",1);
+        return;
+    }
+    if(pass.length<6){
+        amsg("Parola en az 6 karakter olmalı.",1);
+        return;
+    }
+    amsg("Hesap oluşturuluyor...",0);
+    let tok=tsToken("tsReg");
+    if(!tok){
+        await new Promise(r=>setTimeout(r,2500));
+        tok=tsToken("tsReg");
+    }
+    if(!tok){
+        amsg("Doğrulama widget'ı hazır değil. Sayfayı yenileyip tekrar deneyin.",1);
+        return;
+    }
+    
+    // ✅ Onay maili bu adrese dönsün (404 hatasını kökten çözer)
+    const redirectURL = window.location.origin + window.location.pathname.replace(/\/+$/,"") + "/";
+    
+    const r=await sb.auth.signUp({
+        email:email,
+        password:pass,
+        options:{
+            data:{
+                full_name:name,
+                organization:$("rgOrg").value
+            },
+            captchaToken:tok,
+            redirectTo:redirectURL
+        }
+    });
+    if(r.error){
+        amsg(r.error.message,1);
+        return;
+    }
+    try{turnstile.reset(TS.tsReg);}catch(e){}
+    amsg(r.data.session?"Hesap oluşturuldu.":"✓ Doğrulama e‑postası gönderildi — maildeki linke tıklayın.",0);
+}
+async function sendResetEmail(){
+const email=$("rsEmail").value;
+if(!email){amsg("Lütfen e-posta adresinizi girin.",1);return;}
+let tok=tsToken("tsReset");
+if(!tok){
+amsg("Widget yükleniyor, lütfen bekleyin...",0);
+await new Promise(r=>setTimeout(r,2500));
+tok=tsToken("tsReset");
+}
+if(!tok){amsg("Doğrulama widget'ı hazır değil. Sayfayı yenileyip tekrar deneyin.",1);return;}
+amsg("Şifre sıfırlama talebi gönderiliyor...",0);
+const redirectURL=window.location.origin+window.location.pathname.replace(/\/+$/,"")+"/";
+try{
+const r=await sb.auth.resetPasswordForEmail(email,{captchaToken:tok,redirectTo:redirectURL});
+if(r&&r.error){
+amsg("Hata: "+r.error.message,1);
+try{turnstile.reset(TS.tsReset);}catch(e){}
+return;
+}
+try{turnstile.reset(TS.tsReset);}catch(e){}
+amsg("✓ Sıfırlama bağlantısı e-postanıza gönderildi. Spam klasörünü de kontrol edin.",0);
+}catch(e){
+amsg("Beklenmeyen hata: "+(e&&e.message?e.message:String(e)),1);
+try{turnstile.reset(TS.tsReset);}catch(e2){}
+}
+}
+
+async function logout(){await sb.auth.signOut();location.reload();}
+
+
+async function boot(){
+    // 1. Service Worker'ı kaydet (sadece bir kez)
+    if('serviceWorker' in navigator && !window._swRegistered){
+        navigator.serviceWorker.register('./sw.js').catch(e=>console.log('SW registration failed:',e));
+        window._swRegistered = true;
+    }
+    
+    // 2. Online listener SADECE BİR KEZ eklensin (çift toast önleme)
+    if(!window._onlineListenerSet){
+        window._onlineListenerSet = true;
+        window.addEventListener('online',()=>{
+            toast('İnternet bağlantısı geri geldi — senkronize ediliyor','ok','🌐');
+            setTimeout(() => syncOfflineData(), 1500);
+        });
+    }
+    
+    // 3. Ziyaretçi sayacı (her zaman çalışsın, sessionStorage zaten kontrol ediyor)
+    trackVisit();
+    
+    // 4. Oturum kontrolü
+const{data:{session}}=await sb.auth.getSession();
+const isRecovery=/type=recovery/.test(INITIAL_HASH);
+if(isRecovery&&!session){
+initLanding();
+setTimeout(()=>{toast("Bu sıfırlama bağlantısı kullanılmış veya süresi dolmuş. Yeni bir sıfırlama maili isteyin.","warn","🔑");showAuth();authTab("reset");},400);
+return;
+}
+if(!session){initLanding();return;}
+USER=session.user;
+// 🔑 Şifre sıfırlama linkinden geldiyse → yeni parola ekranını aç
+if(isRecovery){
+$("recoveryModal").style.display="flex";
+return;
+}
+    
+    // 5. Profil yükle ve arayüzü başlat
+    const{data:p}=await sb.from("profiles").select("*").eq("id",USER.id).single();
+    PROFILE=p;
+    startShell();
+    
+    // 6. Online ise kuyruğu senkronize et
+    if (navigator.onLine) {
+        setTimeout(() => syncOfflineData(), 2000);
+    }
+}
+
+function popupHtml(r){
+ return `<div style="min-width:140px"><b>P${r.point_id}</b> · ${esc(r.species)}<br><span style="font-size:.75rem;color:#68766e">Çap: ${r.dbh_cm||"—"} cm · Boy: ${r.height_m||"—"} m<br>Karbon: ${(r.carbon_kg||0).toFixed(1)} kg</span>`+(r.photo_url?`<br><img src="${esc(r.photo_url)}" style="width:160px;border-radius:8px;margin-top:6px">`:"")+`</div>`;
+}
+function addMarkersChunked(m,rows,chunk=150){
+ let i=0;
+ if(!m._cluster){
+  m._cluster=L.markerClusterGroup({
+   maxClusterRadius:80,
+   spiderfyOnMaxZoom:true,
+   showCoverageOnHover:false,
+   disableClusteringAtZoom:15,
+   iconCreateFunction:c=>{
+    const n=c.getChildCount();
+    const cls=n<10?"small":n<50?"medium":"large";
+    return L.divIcon({html:`<div>${n}</div>`,className:`marker-cluster marker-cluster-${cls}`,iconSize:[40,40]});
+   }
+  });
+  m.addLayer(m._cluster);
+ }
+ (function step(){
+  const end=Math.min(i+chunk,rows.length);
+  for(;i<end;i++){
+   const r=rows[i];
+   const mk=L.marker([r.lat,r.lon],{
+    icon:L.divIcon({
+     className:'tree-marker',
+     html:`<div style="width:14px;height:14px;border-radius:50%;background:#1e6f4b;border:2px solid #fff;box-shadow:0 2px 6px rgba(0,0,0,.35)"></div>`,
+     iconSize:[18,18],
+     iconAnchor:[9,9]
+    })
+   });
+   mk.bindPopup(popupHtml(r));
+   m._cluster.addLayer(mk);
+  }
+  if(i<rows.length)setTimeout(step,16);
+ })();
+}
+async function loadApprovedMarkers(m,limit,done){
+ try{
+  const{data}=await sb.from("measurements")
+   .select("lat,lon,point_id,species,dbh_cm,height_m,carbon_kg,photo_url,grp")
+   .eq("status","Onaylı").limit(limit);
+  const rows=(data||[]).filter(r=>Number.isFinite(+r.lat)&&Number.isFinite(+r.lon));
+  addMarkersChunked(m,rows);
+  done&&done(rows.length,rows);
+ }catch(e){done&&done(0,[]);}
+}
+function initLanding(){
+ $("landing").style.display="block";$("shell").style.display="none";
+ if(worldMapL)worldMapL.remove();
+ worldMapL=L.map("worldMapLanding").setView([39,35],3);
+ L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png").addTo(worldMapL);
+ (async()=>{
+  try{
+   const g=await sb.from("v_global").select("*").single();
+   if(g.data){$("stRec").textContent=g.data.records||0;$("stCountry").textContent=g.data.countries||0;$("stCity").textContent=g.data.cities||0;$("stCarbon").textContent=g.data.carbon_t||0;}
+   const c=await sb.from("v_country").select("*");
+   $("tblCountry").querySelector("tbody").innerHTML=(c.data||[]).slice(0,20).map(r=>`<tr class="clickable-row" onclick="zoomToCountry('${esc(r.country)}')"><td>${esc(r.country)}</td><td>${r.records}</td><td>${r.carbon_t}</td><td>${r.avg_dbh}</td><td>${r.avg_height||"—"}</td></tr>`).join("")||"<tr><td colspan=5>Henüz veri yok</td></tr>";
+   const t=await sb.from("v_city").select("*");
+    $("tblCity").querySelector("tbody").innerHTML=(t.data||[]).slice(0,20).map(r=>`<tr class="clickable-row" onclick="zoomToCity('${esc(r.city)}')"><td>${esc(r.city)}</td><td>${r.records}</td><td>${r.carbon_t}</td></tr>`).join("")||"<tr><td colspan=3>Henüz veri yok</td></tr>";
+   loadApprovedMarkers(worldMapL,2000,(n,rows)=>renderAnalysis(rows,"landingAnalysis"));
+  }catch(e){}
+ })();
+ trackVisit();
+}
+
+async function startShell(){
+$("landing").style.display="none";$("shell").style.display="block";
+ if(PROFILE){$("whoami").textContent=PROFILE.full_name;
+  if(PROFILE.role==="admin"||PROFILE.role==="owner"){$("roleBadge").style.display="inline";$("roleBadge").textContent=PROFILE.role==="owner"?"KURUCU":"ADMIN";$("roleBadge").className=PROFILE.role==="owner"?"badge on":"badge admin";$("adminSec").style.display="block";$("miAdmin").style.display="flex";$("miUsers").style.display="flex";}}
+initMaps();
+await loadProjects();
+await loadWaypoints();
+loadDash();loadRecords();loadWorld();loadMyRequests();loadRequestOptions();
+autoFillPointId();
+}
+
+function go(v){
+ document.querySelectorAll(".view").forEach(x=>x.classList.remove("on"));
+ $("v-"+v).classList.add("on");
+ document.querySelectorAll("#side .item").forEach(i=>i.classList.remove("on"));
+ const items=document.querySelectorAll("#side .item");
+ const idx={dash:0,measure:1,nav:2,map:3,projects:4,records:5,export:6,world:7,admin:8,users:9};
+if(items[idx[v]])items[idx[v]].classList.add("on");
+if(v==="dash"){loadWaypoints().then(()=>loadDash());}
+if(v==="map")setTimeout(()=>{map&&map.invalidateSize();if(!liveLoaded){liveLoaded=true;loadLiveMap();}},150);
+ if(v==="nav")setTimeout(()=>{navMap&&navMap.invalidateSize();loadWaypoints();},150);
+ if(v==="world")setTimeout(()=>worldMap&&worldMap.invalidateSize(),150);
+if(v==="admin")loadAdmin();
+if(v==="users")loadUsers();
+if(v==="export")loadRequestOptions();
+}
+
+async function loadLiveMap(){
+ const el=$("mapLoad");
+ await loadApprovedMarkers(map,3000,(n,rows)=>{
+  el.textContent="✓ "+n+" onaylı kayıt yüklendi · noktaya dokun → bilgi + fotoğraf.";
+  el.className="alert ok";setTimeout(()=>el.style.display="none",3000);
+  renderAnalysis(rows,"liveAnalysis");
+ });
+}
+
+async function startGps(){
+ const gpsMsg=(t,e)=>{const g=$("gpsState");g.textContent=t;g.className="alert "+(e?"err":"info");};
+ if(!navigator.geolocation)return gpsMsg("Tarayıcı konum desteklemiyor.",1);
+ if(/iPhone|iPad|iPod/.test(navigator.userAgent))$("iosHint").style.display="block";
+ try{if(navigator.permissions&&navigator.permissions.query){const p=await navigator.permissions.query({name:"geolocation"});if(p.state==="denied")return gpsMsg("Konum izni reddedildi. Ayarlar→Safari→Konum.",1);}}catch(e){}
+ gpsMsg("Konum alınıyor…",0);
+ const opts={enableHighAccuracy:true,timeout:15000,maximumAge:0};
+ const onOk=p=>{GPS=p.coords;updGps();navigator.geolocation.watchPosition(p2=>{GPS=p2.coords;updGps();},()=>{},{...opts,maximumAge:1000});};
+ const onErr=e=>{
+  if(e.code===1)return gpsMsg("İzin reddedildi. iPhone: Ayarlar→Safari→Konum→Kullanırken İzin Ver.",1);
+  if(e.code===3){try{navigator.geolocation.getCurrentPosition(onOk,()=>gpsMsg("GPS başarısız: dışarıda tekrar deneyin.",1),opts);}catch(err){gpsMsg("GPS hatası.",1);}return;}
+  gpsMsg("GPS hatası: "+e.message,1);
+ };
+ try{navigator.geolocation.getCurrentPosition(onOk,onErr,opts);}catch(e){gpsMsg("Konum başlatılamadı.",1);}
+}
+function updGps(){
+ const a=GPS.accuracy;
+ $("gpsAcc").textContent=a.toFixed(0);$("gLat").textContent=GPS.latitude.toFixed(6);$("gLon").textContent=GPS.longitude.toFixed(6);
+ $("gAlt").textContent=(GPS.altitude||0).toFixed(0)+" m";
+ const q=a<10?"ÇOK İYİ":a<20?"İYİ":a<40?"ORTA":"ZAYIF";
+ $("gQ").textContent=q;
+ $("gpsRing").className="gpsring "+(a<10?"good":a<30?"mid":"bad");
+ $("gpsState").textContent="🛰 GPS aktif · ±"+a.toFixed(1)+" m · "+q;$("gpsState").className="alert ok";
+ if(map&&GPS){if(window._me)map.removeLayer(window._me);window._me=L.circleMarker([GPS.latitude,GPS.longitude],{radius:7,color:"#2b6cb0",weight:3,fillOpacity:.9}).addTo(map).bindPopup("Konumun");}
+ drawNav();autoFillPointId();
+}
+
+function fillSpecies(){
+ const g=$("mGroup").value,s=$("mSpecies");
+ if(!g){s.disabled=true;s.innerHTML="";$("latinName").textContent="";return;}
+ s.disabled=false;
+ s.innerHTML='<option value="">Seç</option>'+(SPECIES_DATA[g]||[]).map(x=>`<option value="${x.tr}">${x.tr}${x.lat && x.lat!=="—"?" · "+x.lat:""}</option>`).join("");
+ $("latinName").textContent="";
+}
+function showLatin(){
+ const sp=$("mSpecies").value;
+ $("latinName").textContent=(LATIN[sp]&&LATIN[sp]!=="—")?("🔬 "+LATIN[sp]):"";
+}
+function liveCalc(){const d=+$("mDbh").value,h=+$("mHeight").value,sp=$("mSpecies").value,grp=$("mGroup").value,box=$("liveCalc");if(!d||!h||!sp){box.style.display="none";return;}const c=calc(d,h,sp,grp);box.style.display="block";box.innerHTML=`Karbon: <b>${c.total_carbon.toFixed(1)} kg</b> · AGB: ${c.agb.toFixed(1)} · BHB: ${c.bhb.toFixed(1)} · Hacim: ${c.vol.toFixed(2)} m³`;}
+
+async function loadProjects(){
+ if(!USER)return;
+ const{data}=await sb.from("projects").select("*").eq("owner",USER.id);
+ PROJ_LIST=data||[];
+ const opts=PROJ_LIST.map(p=>`<option value="${p.id}">${esc(p.name)}</option>`).join("");
+ $("mProject").innerHTML=opts||"<option value=''>Önce proje oluşturun</option>";
+ $("nProject").innerHTML=opts||"<option value=''>Önce proje oluşturun</option>";
+ $("projTable").innerHTML=PROJ_LIST.map(p=>`<tr><td>${p.id}</td><td>${esc(p.name)}</td><td>${esc(p.country||"—")}</td><td>${esc(p.city||"—")}</td><td>${new Date(p.created_at).toLocaleDateString("tr-TR")}</td><td style="display:flex;gap:4px"><button class="btn sm blue" onclick="editProject(${p.id})">✏️</button><button class="btn sm red" onclick="deleteProject(${p.id})">🗑</button></td></tr>`).join("")||"<tr><td colspan=6>Proje yok</td></tr>";
+}
+function editProject(id){
+ const p=PROJ_LIST.find(x=>x.id===id);if(!p)return;
+ EDIT_PROJ=id;$("pName").value=p.name;$("pCountry").value=p.country||"";$("pCity").value=p.city||"";
+ $("projSaveBtn").textContent="💾 Projeyi Güncelle";$("projCancelBtn").style.display="inline-block";
+}
+function cancelProjectEdit(){EDIT_PROJ=null;$("pName").value="";$("projSaveBtn").textContent="+ Proje Oluştur";$("projCancelBtn").style.display="none";}
+async function createProject(){
+ const n=$("pName").value;if(!n)return toast("Proje adı gerekli","err");
+ if(EDIT_PROJ){
+  await sb.from("projects").update({name:n,country:$("pCountry").value,city:$("pCity").value}).eq("id",EDIT_PROJ);
+  cancelProjectEdit();
+ }else{
+  await sb.from("projects").insert({owner:USER.id,name:n,country:$("pCountry").value,city:$("pCity").value});
+ }
+ loadProjects();
+}
+async function deleteProject(id){
+ const{count}=await sb.from("measurements").select("*",{count:"exact",head:true}).eq("project_id",id);
+ if(!confirm("Proje silinsin mi? Bağlı "+(count||0)+" ölçüm ve waypoint'ler de silinebilir."))return;
+ await sb.from("waypoints").delete().eq("project_id",id);
+ await sb.from("projects").delete().eq("id",id);
+ loadProjects();
+}
+
+let manualPoint=false;
+async function autoFillPointId(){
+if(manualPoint||EDIT_ID)return;
+const pid=+$("mProject").value;
+if(!pid)return;
+if($("mPoint").value)return;
+try{
+// 1) GPS açık + ziyaret edilmemiş waypoint varsa → en yakın waypoint
+if(GPS){
+const{data}=await sb.from("waypoints").select("*").eq("project_id",pid).eq("visited",false);
+if(data&&data.length){
+const nearest=data.sort((a,b)=>hav(GPS.latitude,GPS.longitude,a.lat,a.lon)-hav(GPS.latitude,GPS.longitude,b.lat,b.lon))[0];
+$("mPoint").value=nearest.wp_id;
+return;
+}
+}
+// 2) Waypoint yoksa → projedeki son point_id + 1 (proje boşsa 1)
+const{data}=await sb.from("measurements").select("point_id").eq("project_id",pid).order("point_id",{ascending:false}).limit(1);
+$("mPoint").value=(data&&data.length)?((data[0].point_id||0)+1):1;
+}catch(e){}
+}
+
+async function queryPointId(){
+ const pid=+$("mProject").value,pt=+$("mPoint").value,res=$("pointQueryResult");
+ if(!pid||!pt){res.style.display="none";return;}
+ const{data}=await sb.from("measurements").select("*").eq("project_id",pid).eq("point_id",pt).order("created_at",{ascending:false}).limit(1);
+ if(data&&data.length>0){
+  const r=data[0];
+  res.style.display="block";res.className="alert info";
+  res.innerHTML=`✓ <b>P${r.point_id}</b> · ${esc(r.species)} · Çap ${r.dbh_cm} cm · Boy ${r.height_m} m · Karbon ${(r.carbon_kg||0).toFixed(1)} kg · Durum: <b>${r.status||"Beklemede"}</b>`+
+   (r.photo_url?`<br><img src="${esc(r.photo_url)}" style="width:140px;border-radius:8px;margin-top:6px">`:"")+
+   `<br><button class="btn sm blue" onclick="editRec(${r.id})" style="margin-top:8px">✏️ Düzenle & Güncelle</button> <button class="btn sm red" onclick="delRec(${r.id})" style="margin-top:8px">🗑️ Tamamen Sil</button>`;
+ }else{
+  res.style.display="block";res.className="alert info";
+  res.innerHTML=`ℹ P${pt} için kayıt yok · Yeni kayıt oluşturulacak.`;
+ }
+}
+
+async function saveMeas(){
+    const pid=+$("mProject").value,pt=+$("mPoint").value,sp=$("mSpecies").value,d=+$("mDbh").value,h=+$("mHeight").value,grp=$("mGroup").value;
+    if(!pid||!pt||!sp||!d||!h)return toast("Tüm alanları doldur","err");
+    if(!EDIT_ID&&!GPS)return toast("Önce 📡 Konumu Etkinleştir butonuna basın","err");
+    if(d>500||h>100)return toast("Çap ≤500 cm, boy ≤100 m olmalı","err");
+    
+    const f=$("mPhoto").files[0];
+    if(f&&!photoOk)return toast("Fotoğraf denetimi başarısız — uygun bir çekim yapın","err");
+    
+    const wasEdit=!!EDIT_ID;
+    const c=calc(d,h,sp,grp);
+    
+    // 1. Fotoğrafı sıkıştır (henüz upload etme, sadece Blob olarak hazırla)
+    let photoBlob = null;
+    let photoFile = null;
+    if(f){
+        photoBlob = await compress(f);
+        photoFile = "P"+String(pt).padStart(3,"0")+"_M"+(+$("mNo").value||1)+".JPG";
+    }
+    
+    // 2. base objesini oluştur
+    const base={
+        owner:USER.id,
+        project_id:pid,
+        point_id:pt,
+        measurement_no:+$("mNo").value||1,
+        grp,species:sp,
+        dbh_cm:d,
+        height_m:h,
+        volume_m3:c.vol,
+        carbon_kg:c.total_carbon,
+        slope_deg:0,
+        shared:true,
+        status:"Beklemede"
+    };
+    // 5. Supabase insert/update
+// ⭐ EKLENEN: Her insert'te client_id ekle (duplicate koruması)
+if (!base.client_id) base.client_id = uuidv4();
+    if(!EDIT_ID){
+        base.lat=GPS.latitude;
+        base.lon=GPS.longitude;
+        base.accuracy_m=GPS.accuracy;
+        base.altitude_m=GPS.altitude;
+        const geo=await reverseGeocode(GPS.latitude,GPS.longitude);
+        base.country=geo?geo.country:"Bilinmiyor";
+        base.city=geo?geo.city:"Bilinmiyor";
+        if(geo)toast("📍 Konum algılandı: "+esc(geo.city)+" / "+esc(geo.country),"info","🗺️");
+    }
+    
+     // 3. OFFLINE KONTROLÜ (Fotoğraf ve veriyi IndexedDB'ye kaydet)
+    if(!navigator.onLine){
+        if(photoBlob) base.photoBlob = photoBlob;
+        if(photoFile) base.photo_file = photoFile;
+        base.client_id = uuidv4(); // Benzersiz ID (duplicate önleme)
+if(EDIT_ID) base._editId = EDIT_ID; // ✅ çevrimdışı düzenleme işareti
+        
+        await saveOfflineMeasurement(base);
+        toast('Çevrimdışı kaydedildi — internet gelince senkronize','info','📴');
+        
+        // ✅ Background Sync register KALDIRILDI (artık ana thread yönetiyor)
+        
+        $('mPoint').value='';
+        $('mDbh').value='';
+        $('mHeight').value='';
+        $('mPhoto').value='';
+        $('photoCheck').style.display='none';
+        photoOk=false;
+        manualPoint=false;
+        loadDash();
+        loadRecords();
+        return;
+    }
+    
+    // 4. ONLINE: Fotoğrafı Supabase Storage'a yükle
+    let photoUrl = null;
+    if(photoBlob){
+        const path = USER.id+"/"+Date.now()+".jpg";
+        const {error} = await sb.storage.from("dendro-photos").upload(path, photoBlob, {contentType:"image/jpeg"});
+        if(!error){
+            photoUrl = sb.storage.from("dendro-photos").getPublicUrl(path).data.publicUrl;
+        }
+    }
+    if(photoUrl){
+        base.photo_url = photoUrl;
+        base.photo_file = photoFile;
+    }
+    
+    // 5. Supabase insert/update
+    if(EDIT_ID){
+        const{error}=await sb.from("measurements").update(base).eq("id",EDIT_ID);
+        if(error)return toast("Hata: "+error.message,"err");
+        toast("Kayıt güncellendi — onaya gönderildi","ok","✓");
+        cancelEdit();
+    }else{
+        let{error}=await sb.from("measurements").insert(base);
+        if(error){delete base.altitude_m;delete base.photo_file;({error}=await sb.from("measurements").insert(base));}
+        if(error)return toast("Hata: "+error.message,"err");
+        toast("Kaydedildi — "+c.total_carbon.toFixed(1)+" kg karbon","ok","🌱");
+    }
+    
+    $("mPoint").value='';
+    $("mDbh").value='';
+    $("mHeight").value='';
+    $("mPhoto").value='';
+    $("photoCheck").style.display="none";
+    $("pointQueryResult").style.display="none";
+    photoOk=false;
+    manualPoint=false;
+    loadDash();
+    loadRecords();
+    loadWaypoints();
+    if(!wasEdit)autoFillPointId();
+}
+function cancelEdit(){EDIT_ID=null;manualPoint=false;$("editBanner").style.display="none";$("saveBtn").textContent="💾 Hesapla ve Kaydet";}
+async function editRec(id){
+ const{data}=await sb.from("measurements").select("*").eq("id",id).single();
+ if(!data)return;
+ EDIT_ID=id;
+ $("mProject").value=data.project_id;
+ $("mPoint").value=data.point_id;$("mNo").value=data.measurement_no||1;
+ $("mGroup").value=data.grp||"";fillSpecies();$("mSpecies").value=data.species;showLatin();
+ $("mDbh").value=data.dbh_cm;$("mHeight").value=data.height_m;
+ $("editBanner").style.display="block";$("saveBtn").textContent="💾 Kaydı Güncelle";
+ liveCalc();go("measure");
+}
+function compress(f){
+return new Promise(res=>{
+const i=new Image(),u=URL.createObjectURL(f);
+i.onload=()=>{const m=1024,sc=Math.min(1,m/Math.max(i.width,i.height)),c=document.createElement("canvas");c.width=i.width*sc;c.height=i.height*sc;c.getContext("2d").drawImage(i,0,0,c.width,c.height);c.toBlob(b=>{URL.revokeObjectURL(u);res(b);},"image/jpeg",.7);};i.src=u;});}
+async function removePhoto(url){
+ if(!url)return;
+ try{
+  let p=url.split("/dendro-photos/")[1];
+  if(p){await sb.storage.from("dendro-photos").remove([p]);}
+ }catch(e){}
+ try{
+  const p2=decodeURIComponent(url.split("/dendro-photos/")[1]||"");
+  if(p2)await sb.storage.from("dendro-photos").remove([p2]);
+ }catch(e){}
+}
+
+async function uploadWpCsv(){
+ const pid=+$("nProject").value;if(!pid)return toast("Proje seç");
+ const f=$("nCsv").files[0];if(!f)return toast("CSV seç");
+ const lines=(await f.text()).split(/\r?\n/);let n=0;
+ for(let i=1;i<lines.length;i++){const c=lines[i].split(",");if(c.length<3)continue;const id=parseInt((c[2]||"").replace(/"/g,""));const lon=+c[0],lat=+c[1];if(!id||!lat||!lon)continue;await sb.from("waypoints").upsert({owner:USER.id,project_id:pid,wp_id:id,lat,lon},{onConflict:"project_id,wp_id"});n++;}
+ toast("✓ "+n+" waypoint yüklendi ve projeye kalıcı kaydedildi.");
+ loadWaypoints();
+}
+async function loadWaypoints(){
+ const pid=+$("nProject").value;
+ if(!pid){$("wpListTable").innerHTML="<tr><td colspan=5 style='text-align:center;color:var(--mut)'>Önce proje seçin.</td></tr>";return;}
+ const{data}=await sb.from("waypoints").select("*").eq("project_id",pid).order("wp_id",{ascending:true});
+ WP=data||[];
+ if(navTarget&&navTarget.project_id!==pid)navTarget=null;
+ drawNav();
+ $("dWp").textContent=WP.length;$("dVisit").textContent=WP.filter(w=>w.visited).length;
+ const done=WP.filter(w=>w.visited).length;
+ $("navInfo").innerHTML=`📌 <b>${WP.length}</b> waypoint kayıtlı · <b>${done}</b> yapıldı · <b>${WP.length-done}</b> bekliyor. Liste kalıcıdır.`;
+ $("wpListTable").innerHTML=WP.length?WP.map(w=>`<tr class="${w.visited?'done':''}"><td><b>P${w.wp_id}</b></td><td>${w.lat.toFixed(6)}</td><td>${w.lon.toFixed(6)}</td><td>${w.visited?'<span class="badge on">✓ Yapıldı</span>':'<span class="badge admin">Bekliyor</span>'}</td><td>${w.visited?'':`<button class="btn sm blue" onclick="selectWaypoint(${w.id})">🎯 Hedef</button>`}</td></tr>`).join(""):"<tr><td colspan=5 style='text-align:center;color:var(--mut)'>Bu projede waypoint yok. CSV yükleyin.</td></tr>";
+}
+async function deleteAllWaypoints(){
+ const pid=+$("nProject").value;
+ if(!pid)return toast("Proje seç");
+ if(!confirm("⚠ Bu projedeki TÜM waypoint'ler kalıcı olarak silinsin mi? Yanlış liste ise sonra yeniden yükleyebilirsiniz."))return;
+ const{error}=await sb.from("waypoints").delete().eq("project_id",pid);
+ if(error)return toast("Hata: "+error.message,"err");
+ navTarget=null;WP=[];
+ toast("✓ Liste tamamen silindi. Yeni CSV yükleyebilirsiniz.");
+ loadWaypoints();
+}
+async function selectWaypoint(id){
+ const w=WP.find(x=>x.id===id);if(!w)return;
+ navTarget=w;
+ if(!manualPoint)$("mPoint").value=w.wp_id;
+ drawNav();
+}
+function initMaps(){
+ if(!map){map=L.map("map").setView([39.99,32.65],12);L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png").addTo(map);}
+ if(!navMap){navMap=L.map("navMap").setView([39.992,32.6498],15);L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png").addTo(navMap);}
+ if(!worldMap){worldMap=L.map("worldMap").setView([39,35],3);L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png").addTo(worldMap);}
+}
+function drawNav(){
+ if(!navMap)return;
+ navMap.eachLayer(l=>{if(l._wp)navMap.removeLayer(l);});
+ WP.forEach(w=>{
+  const icon=L.divIcon({className:"",html:`<div class="wp-badge" style="background:${w.visited?"#16a34a":"#e11d48"}">${w.wp_id}</div>`,iconSize:[26,26],iconAnchor:[13,13]});
+  const m=L.marker([w.lat,w.lon],{icon}).addTo(navMap);m._wp=1;
+  m.bindPopup(w.visited?"<s>P"+w.wp_id+"</s> ✓ Yapıldı":"P"+w.wp_id+" · Hedef yapmak için tıkla");
+  m.on("click",()=>{selectWaypoint(w.id);});
+ });
+ if(GPS){const me=L.circleMarker([GPS.latitude,GPS.longitude],{radius:8,color:"#2b6cb0",weight:3,fillOpacity:.9}).addTo(navMap);me._wp=1;
+  if(!navTarget){const ts=WP.filter(w=>!w.visited);if(ts.length)navTarget=ts.sort((a,b)=>hav(GPS.latitude,GPS.longitude,a.lat,a.lon)-hav(GPS.latitude,GPS.longitude,b.lat,b.lon))[0];}
+  if(navTarget&&!navTarget.visited){const d=hav(GPS.latitude,GPS.longitude,navTarget.lat,navTarget.lon),b=brg(GPS.latitude,GPS.longitude,navTarget.lat,navTarget.lon);
+   $("navDist").textContent=Math.round(d)+" m";$("navTarget").textContent="Hedef: P"+navTarget.wp_id+" · "+Math.round(b)+"°";
+   $("navArrow").style.transform="rotate("+b+"deg)";
+   const ln=L.polyline([[GPS.latitude,GPS.longitude],[navTarget.lat,navTarget.lon]],{color:"#c2452d",dashArray:"5,8",weight:2}).addTo(navMap);ln._wp=1;
+  }else{$("navDist").textContent="—";$("navTarget").textContent="Hedef seç / tamamlandı";$("navArrow").style.transform="rotate(0)";}
+ }
+}
+async function arriveWp(){
+ if(!navTarget)return toast("Hedef yok");
+ if(!manualPoint)$("mPoint").value=navTarget.wp_id;
+ await sb.from("waypoints").update({visited:true}).eq("id",navTarget.id);
+ await loadWaypoints();
+ go("measure");
+}
+
+async function loadRecords(){
+ const{data}=await sb.from("measurements").select("*,projects(name)").eq("owner",USER.id).order("created_at",{ascending:false});
+ $("recTable").innerHTML=(data||[]).map(r=>{
+  const st=r.status||"Beklemede";
+  const bc=st==="Onaylı"?"on":(st==="Red"?"off":"admin");
+  return `<tr><td>${esc(r.projects?.name)||"—"}</td><td>${r.point_id}</td><td>${esc(r.species)}</td><td>${r.dbh_cm}</td><td>${r.height_m}</td><td>${(r.carbon_kg||0).toFixed(1)}</td><td>${r.photo_url?"📷":"—"}</td><td><span class="badge ${bc}">${st==="Beklemede"?"Onay Bekliyor":st}</span></td><td style="display:flex;gap:4px"><button class="btn sm blue" onclick="editRec(${r.id})">✏️</button><button class="btn sm red" onclick="delRec(${r.id})">Sil</button></td></tr>`;
+ }).join("")||"<tr><td colspan=9>Kayıt yok</td></tr>";
+}
+async function delRec(id){
+ if(!confirm("Kayıt tamamen silinsin mi?"))return;
+ const{data}=await sb.from("measurements").select("photo_url").eq("id",id).single();
+ if(data)await removePhoto(data.photo_url);
+ await sb.from("measurements").delete().eq("id",id);loadRecords();loadDash();
+}
+async function loadDash(){
+ const{data}=await sb.from("measurements").select("*").eq("owner",USER.id);
+ $("dMy").textContent=(data||[]).length;
+ $("dCarbon").textContent=((data||[]).reduce((a,r)=>a+(r.carbon_kg||0),0)).toFixed(0);
+ drawChart("chCarbon","bar",(data||[]).slice(0,10).map(r=>"P"+r.point_id),(data||[]).slice(0,10).map(r=>r.carbon_kg));
+ renderAnalysis(data||[],"myAnalysis");
+}
+function renderSpeciesList(rows,elId){
+ const el=$(elId);if(!el)return;
+ const sp={};
+ rows.forEach(r=>{sp[r.species]=sp[r.species]||{n:0,grp:r.grp||"DİĞER"};sp[r.species].n++;});
+ const total=rows.length;
+ const pct=n=>total?((n/total)*100).toFixed(1):"0.0";
+ const top=Object.entries(sp).sort((a,b)=>b[1].n-a[1].n).slice(0,6);
+ if(!top.length){el.innerHTML='<div style="color:var(--mut);font-size:.85rem;padding:10px">Henüz kayıt yok.</div>';return;}
+ el.innerHTML=top.map(([name,v])=>`<div style="display:flex;align-items:center;gap:10px;margin-bottom:7px">
+  <span style="width:8px;height:8px;border-radius:50%;background:${GROUP_COLOR[v.grp]};flex:0 0 auto"></span>
+  <span style="flex:1;font-size:.82rem;font-weight:600">${esc(name)} <i style="color:var(--mut);font-weight:400">${LATIN[name]&&LATIN[name]!=="—"?"· "+esc(LATIN[name]):""}</i></span>
+  <span style="width:100px;background:var(--line);border-radius:4px;height:6px;overflow:hidden"><span style="display:block;height:100%;width:${pct(v.n)}%;background:${GROUP_COLOR[v.grp]}"></span></span>
+  <span class="mono" style="font-size:.75rem;width:48px;text-align:right">${v.n} (${pct(v.n)}%)</span>
+ </div>`).join("");
+}
+function drawChart(id,type,labels,data){
+ if(charts[id])charts[id].destroy();
+ const pal=["#14532d","#1e6f4b","#2e8b57","#3aa76d","#6aa84f","#8fbc6d","#c77d2e","#d97706","#92400e","#4c9a52"];
+ charts[id]=new Chart($(id),{type,data:{labels,datasets:[{data,backgroundColor:(c)=>pal[c.dataIndex%pal.length],borderRadius:8,borderSkipped:false,barPercentage:.6}]},options:{plugins:{legend:{display:false}},scales:type==="bar"?{y:{grid:{color:"rgba(20,30,25,.06)"},ticks:{color:"#68766e"}},x:{grid:{display:false},ticks:{color:"#68766e"}}}:undefined}});
+}
+
+/* ============ AKTİF VERİ ANALİZİ (İbreli/Yapraklı yüzde, ort. çap/boy, tür dağılımı) ============ */
+/* ============ AKTİF VERİ ANALİZİ (İbreli/Yapraklı yüzde, ort. çap/boy, tür dağılımı) ============ */
+function renderAnalysis(rows,elId){
+ const el=$(elId);if(!el)return;
+ rows=rows||[];
+ if(!rows.length){el.innerHTML="";return;}
+ const groups={"İBRELİ":{n:0,dbh:0,h:0},"YAPRAKLI":{n:0,dbh:0,h:0},"DİĞER":{n:0,dbh:0,h:0}};
+ const bySpecies={};
+ rows.forEach(r=>{
+  const g=groups[r.grp]?r.grp:"DİĞER";
+  groups[g].n++;groups[g].dbh+=(r.dbh_cm||0);groups[g].h+=(r.height_m||0);
+  bySpecies[r.species]=bySpecies[r.species]||{n:0,grp:g};
+  bySpecies[r.species].n++;
+ });
+ const total=rows.length;
+ const pct=n=>total?((n/total)*100).toFixed(1):"0.0";
+ const avgDbh=total?(rows.reduce((a,r)=>a+(r.dbh_cm||0),0)/total).toFixed(1):"0";
+ const avgH=total?(rows.reduce((a,r)=>a+(r.height_m||0),0)/total).toFixed(1):"0";
+ const ibPct=pct(groups["İBRELİ"].n);
+ const yaPct=pct(groups["YAPRAKLI"].n);
+ const diPct=pct(groups["DİĞER"].n);
+ const topSpecies=Object.entries(bySpecies).sort((a,b)=>b[1].n-a[1].n).slice(0,6);
+ 
+ el.innerHTML=`
+  <div class="card">
+   <div class="shead" style="margin-bottom:14px"><span class="no">🌳</span><h2 style="font-size:1.15rem">Ağaç Çeşitliliği & Yapısal Analiz</h2><span class="rule"></span><span class="mono" style="font-size:.78rem;color:var(--mut)">${total} onaylı kayıt</span></div>
+   
+   <!-- Grup dağılımı yatay bar -->
+   <div style="margin-bottom:18px">
+    <div class="lbl" style="margin-bottom:8px">Grup Dağılımı</div>
+    <div style="display:flex;justify-content:space-between;font-size:.78rem;margin-bottom:6px;color:var(--mut)">
+     <span><span style="display:inline-block;width:10px;height:10px;border-radius:3px;background:${GROUP_COLOR["İBRELİ"]};margin-right:5px"></span>İbreli <b style="color:var(--ink)">${ibPct}%</b></span>
+     <span><span style="display:inline-block;width:10px;height:10px;border-radius:3px;background:${GROUP_COLOR["YAPRAKLI"]};margin-right:5px"></span>Yapraklı <b style="color:var(--ink)">${yaPct}%</b></span>
+     <span><span style="display:inline-block;width:10px;height:10px;border-radius:3px;background:${GROUP_COLOR["DİĞER"]};margin-right:5px"></span>Diğer <b style="color:var(--ink)">${diPct}%</b></span>
+    </div>
+    <div style="display:flex;height:14px;border-radius:7px;overflow:hidden;background:var(--line)">
+     <div style="width:${ibPct}%;background:${GROUP_COLOR["İBRELİ"]};transition:width .6s"></div>
+     <div style="width:${yaPct}%;background:${GROUP_COLOR["YAPRAKLI"]};transition:width .6s"></div>
+     <div style="width:${diPct}%;background:${GROUP_COLOR["DİĞER"]};transition:width .6s"></div>
+    </div>
+   </div>
+   
+   <!-- Ortalamalar -->
+   <div class="grid g4" style="margin-bottom:18px">
+    <div class="stat" style="padding:14px"><div class="lbl">Ort. Çap</div><div class="val" style="font-size:1.15rem">${avgDbh} <span style="font-size:.7rem;font-weight:400">cm</span></div></div>
+    <div class="stat" style="padding:14px"><div class="lbl">Ort. Boy</div><div class="val" style="font-size:1.15rem">${avgH} <span style="font-size:.7rem;font-weight:400">m</span></div></div>
+    <div class="stat" style="padding:14px"><div class="lbl" style="color:${GROUP_COLOR["İBRELİ"]}">İbreli Ort.Boy</div><div class="val" style="font-size:1.15rem">${groups["İBRELİ"].n?(groups["İBRELİ"].h/groups["İBRELİ"].n).toFixed(1):"—"} <span style="font-size:.7rem;font-weight:400">m</span></div></div>
+    <div class="stat" style="padding:14px"><div class="lbl" style="color:${GROUP_COLOR["YAPRAKLI"]}">Yapraklı Ort.Boy</div><div class="val" style="font-size:1.15rem">${groups["YAPRAKLI"].n?(groups["YAPRAKLI"].h/groups["YAPRAKLI"].n).toFixed(1):"—"} <span style="font-size:.7rem;font-weight:400">m</span></div></div>
+   </div>
+   
+   <!-- Top 6 tür -->
+   <div class="lbl" style="margin-bottom:10px">En Yaygın 6 Tür</div>
+   ${topSpecies.map(([sp,v])=>`<div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;padding:6px 10px;background:var(--bg);border-radius:8px">
+     <div style="width:8px;height:8px;border-radius:50%;background:${GROUP_COLOR[v.grp]}"></div>
+     <div style="flex:1;min-width:0"><div style="font-size:.82rem;font-weight:600">${esc(sp)}</div><div style="font-size:.68rem;color:var(--mut);font-style:italic">${esc(LATIN[sp])||""}</div></div>
+     <div style="width:100px;background:var(--line);border-radius:4px;height:6px;overflow:hidden"><div style="height:100%;width:${pct(v.n)}%;background:${GROUP_COLOR[v.grp]}"></div></div>
+     <div class="mono" style="font-size:.78rem;color:var(--ink);font-weight:600;width:42px;text-align:right">${v.n} <span style="color:var(--mut);font-weight:400">(${pct(v.n)}%)</span></div>
+    </div>`).join("")}
+  </div>`;
+}
+
+/* ============ ZİYARETÇİ SAYACI ============ */
+async function trackVisit(){
+ try{
+  if(sessionStorage.getItem("dg_visited"))return;
+  sessionStorage.setItem("dg_visited","1");
+  await sb.from("site_visits").insert({});
+ }catch(e){}
+}
+async function loadVisitStats(){
+ try{
+  const total=await sb.from("site_visits").select("*",{count:"exact",head:true});
+  $("aVisitTotal").textContent=total.count??0;
+  const today=new Date();today.setHours(0,0,0,0);
+  const t=await sb.from("site_visits").select("*",{count:"exact",head:true}).gte("visited_at",today.toISOString());
+  $("aVisitToday").textContent=t.count??0;
+  const d7=new Date(Date.now()-7*86400000);
+  const w=await sb.from("site_visits").select("*",{count:"exact",head:true}).gte("visited_at",d7.toISOString());
+  $("aVisit7").textContent=w.count??0;
+ }catch(e){$("aVisitTotal").textContent="—";}
+}
+
+/* ============ VERİ TALEBİ (kullanıcı → yönetici) ============ */
+async function sendDataRequest(){
+ if(!USER)return;
+ const country=$("reqCountry").value.trim()||null;
+ const city=$("reqCity").value.trim()||null;
+ const project_name=$("reqProject").value.trim()||null;
+ const note=$("reqNote").value.trim()||null;
+ const m=$("reqMsg");
+ try{
+  const{data:pending}=await sb.from("data_requests")
+   .select("country,city,project_name,status")
+   .eq("user_id",USER.id)
+   .in("status",["Beklemede","İşleme Alındı"]);
+  const norm=v=>(v||"").toString().trim().toLowerCase();
+  const dup=(pending||[]).find(f=>norm(f.country)===norm(country)&&norm(f.city)===norm(city)&&norm(f.project_name)===norm(project_name));
+  if(dup){
+   toast("⚠️ Bu veri talebiniz zaten alındı — yönetici onayı bekleniyor","warn","✉️");
+   m.style.color="var(--amber)";
+   m.textContent="⚠ Aynı filtreyle bir talebiniz zaten "+(dup.status==="Beklemede"?"beklemede":"işleme alındı")+". Yönetici yanıt verene kadar yeni talep oluşturulamaz.";
+   return;
+  }
+ }catch(e){console.log("Dup kontrolü:",e);}
+ const body={user_id:USER.id,email:PROFILE?.email||USER.email,country,city,project_name,note,status:"Beklemede"};
+ const{error}=await sb.from("data_requests").insert(body);
+ if(error){m.style.color="var(--red)";m.textContent="Hata: "+error.message;return;}
+ toast("✓ Talep gönderildi — yönetici yanıtı bekleniyor","ok","✉️");
+ m.style.color="var(--green-dk)";m.textContent="✓ Talebiniz yönetime iletildi, hazır olduğunda e‑postanıza gönderilecek.";
+ $("reqCountry").value="";$("reqCity").value="";$("reqProject").value="";$("reqNote").value="";
+ loadMyRequests();
+}
+async function loadMyRequests(){
+ if(!USER)return;
+ const{data}=await sb.from("data_requests").select("*").eq("user_id",USER.id).order("created_at",{ascending:false});
+ const el=$("myRequests");if(!el)return;
+ el.innerHTML=(data&&data.length)?"<div class='lbl' style='margin:10px 0 6px'>Taleplerim</div>"+data.map(r=>{
+  const filt=[esc(r.country),esc(r.city),esc(r.project_name)].filter(Boolean).join(" / ")||"Tüm Veri";
+  const bc=r.status==="Tamamlandı"?"on":(r.status==="İşleme Alındı"?"admin":"off");
+  return `<div style="display:flex;justify-content:space-between;gap:8px;padding:6px 0;border-bottom:1px solid var(--line);font-size:.82rem"><span>${esc(filt)}</span><span class="badge ${bc}">${r.status}</span></div>`;
+ }).join(""):"";
+}
+
+async function getMine(){
+let out=[],from=0,step=1000;
+for(;;){
+const{data}=await sb.from("measurements").select("*,projects(name)").eq("owner",USER.id).order("created_at",{ascending:false}).range(from,from+step-1);
+out=out.concat(data||[]);
+if(!data||data.length<step)break;
+from+=step;
+}
+return out;
+}
+async function exportCSV(){const d=await getMine();dl(fullCSV(d),"dendrogeo.csv");}
+async function exportQgis(){const d=await getMine();dl(fullCSV(d),"dendrogeo_qgis.csv");}
+async function exportGeo(){
+ const d=await getMine();
+ const gj={type:"FeatureCollection",features:d.map(r=>({type:"Feature",geometry:{type:"Point",coordinates:[r.lon,r.lat]},properties:{point:r.point_id,species:r.species,latin:LATIN[r.species]||"",dbh:r.dbh_cm,height:r.height_m,carbon:r.carbon_kg,photo:r.photo_url||""}}))};
+ dl(JSON.stringify(gj,null,2),"dendrogeo.geojson");
+}
+function dl(content,name){const a=document.createElement("a");a.href=URL.createObjectURL(new Blob([content],{type:"text/csv;charset=utf-8;"}));a.download=name;a.click();}
+
+function openPreview(title,content,isCSV,fname){
+ $("pvTitle").textContent=title;
+ if(isCSV){
+  const lines=content.replace(/^\uFEFF/,"").split("\n").filter(Boolean).slice(0,100);
+  let html="<table><thead><tr>"+lines[0].split(",").map(h=>`<th>${h}</th>`).join("")+"</tr></thead><tbody>";
+  for(let i=1;i<lines.length;i++)html+="<tr>"+lines[i].split(",").map(c=>`<td>${esc(c)}</td>`).join("")+"</tr>";
+  $("pvBody").innerHTML=html+"</tbody></table>";
+ }else{$("pvBody").innerHTML=`<pre style="font-size:.75rem;white-space:pre-wrap">${esc(content.slice(0,20000))}</pre>`;}
+ $("pvDownload").onclick=()=>dl(content,fname);
+ $("previewModal").classList.add("on");
+}
+function closePreview(){$("previewModal").classList.remove("on");}
+async function previewCSV(){const d=await getMine();openPreview("CSV Önizleme (ilk 100 satır)",fullCSV(d),true,"dendrogeo.csv");}
+async function previewGeo(){const d=await getMine();const gj={type:"FeatureCollection",features:d.map(r=>({type:"Feature",geometry:{type:"Point",coordinates:[r.lon,r.lat]},properties:{point:r.point_id,species:r.species,carbon:r.carbon_kg}}))};openPreview("GeoJSON Önizleme",JSON.stringify(gj,null,2),false,"dendrogeo.geojson");}
+
+async function loadWorld(){
+ try{
+  const g=await sb.from("v_global").select("*").single();
+  if(g.data){$("wRec").textContent=g.data.records||0;$("wCountry").textContent=g.data.countries||0;$("wCity").textContent=g.data.cities||0;$("wCarbon").textContent=g.data.carbon_t||0;}
+  const c=await sb.from("v_country").select("*");
+  $("wCountryT").innerHTML=(c.data||[]).slice(0,30).map(r=>`<tr><td>${esc(r.country)}</td><td>${r.records}</td><td>${r.carbon_t}</td><td>${r.avg_dbh}</td><td>${r.avg_height||"—"}</td></tr>`).join("")||"<tr><td colspan=5>—</td></tr>";
+  const t=await sb.from("v_city").select("*");
+  $("wCityT").innerHTML=(t.data||[]).slice(0,30).map(r=>`<tr><td>${esc(r.city)}</td><td>${r.records}</td><td>${r.carbon_t}</td></tr>`).join("")||"<tr><td colspan=3>—</td></tr>";
+  loadApprovedMarkers(worldMap,3000,(n,rows)=>renderAnalysis(rows,"worldAnalysis"));
+  loadParkCompare();
+ }catch(e){}
+}
+
+async function loadAdmin(){
+ if(!PROFILE||(PROFILE.role!=="admin"&&PROFILE.role!=="owner"))return;
+ const[uRes,mRes,pRes,gRes]=await Promise.all([
+  sb.from("profiles").select("*"),
+  sb.from("measurements").select("*,profiles(full_name)").order("created_at",{ascending:false}),
+  sb.from("projects").select("*"),
+  sb.from("v_global").select("*").single()
+ ]);
+ const users=uRes.data||[],meas=mRes.data||[],projs=pRes.data||[],global=gRes.data||{};
+const cnt=await sb.from("measurements").select("*",{count:"exact",head:true});
+$("aUsers").textContent=users.length;$("aRec").textContent=cnt.count??meas.length;$("aProj").textContent=projs.length;$("aCarbon").textContent=global.carbon_t||0;
+ $("aMeasT").innerHTML=meas.slice(0,300).map(x=>{
+  const st=x.status||"Beklemede";
+  const bc=st==="Onaylı"?"on":(st==="Red"?"off":"admin");
+  const act=st==="Onaylı"
+   ?`<button class="btn sm red" onclick="rejectMeas(${x.id})">🚫 Reddet</button>`
+   :`<button class="btn sm" onclick="approveMeas(${x.id})">✓ Onayla</button>`;
+  return `<tr><td>${esc(x.profiles?.full_name)||"—"}</td><td>${x.point_id}</td><td>${esc(x.species)}<br><span class="mono" style="font-size:.68rem;color:var(--mut);text-transform:none;letter-spacing:0">${esc(LATIN[x.species])||""}</span></td><td><b>${x.dbh_cm}</b></td><td><b>${x.height_m}</b></td><td>${(x.carbon_kg||0).toFixed(1)}</td><td>${x.photo_url?`<a href="${esc(x.photo_url)}" target="_blank"><img src="${esc(x.photo_url)}" style="width:40px;height:40px;object-fit:cover;border-radius:6px"></a>`:"—"}</td><td><span class="badge ${bc}">${st}</span></td><td style="display:flex;gap:4px">${act}<button class="btn sm red" onclick="delMeas(${x.id})">🗑️</button></td></tr>`;
+ }).join("")||"<tr><td colspan=9>Kayıt yok.</td></tr>";
+ loadStorageStats();
+ checkBackupReminder();
+ loadVisitStats();
+ loadRequests();
+ loadAdminExportFilters();
+}
+async function approveMeas(id){
+ const{error}=await sb.from("measurements").update({status:"Onaylı",shared:true}).eq("id",id);
+ if(error)return toast("Hata: "+error.message,"err");
+ toast("Kayıt onaylandı","ok","✓");
+ loadAdmin();loadWorld();
+}
+async function rejectMeas(id){
+ const{error}=await sb.from("measurements").update({status:"Red",shared:false}).eq("id",id);
+ if(error)return toast("Hata: "+error.message,"err");
+ toast("Kayıt reddedildi","warn","🚫");
+ loadAdmin();
+}
+async function loadStorageStats(){
+ try{
+  const root=await sb.storage.from("dendro-photos").list("",{limit:100});
+  let bytes=0,count=0;
+  for(const f of (root.data||[])){
+   const sub=await sb.storage.from("dendro-photos").list(f.name,{limit:1000});
+   (sub.data||[]).forEach(file=>{bytes+=(file.metadata&&file.metadata.size)||0;count++;});
+  }
+  const mb=bytes/1048576;
+  $("storeBar").style.width=Math.min(100,(mb/QUOTA_MB)*100)+"%";
+  $("storeBar").style.background=mb/QUOTA_MB>0.8?"var(--red)":(mb/QUOTA_MB>0.6?"var(--amber)":"var(--green)");
+  $("storeInfo").textContent=count+" fotoğraf · "+mb.toFixed(1)+" MB / "+QUOTA_MB+" MB";
+ }catch(e){$("storeInfo").textContent="Depolama bilgisi alınamadı.";}
+}
+async function cleanOrphans(){
+ if(!PROFILE||(PROFILE.role!=="admin"&&PROFILE.role!=="owner"))return toast("Yetki yok.");
+ if(!confirm("Hiçbir kayda bağlı olmayan depolama dosyaları silinsin mi?"))return;
+ const root=await sb.storage.from("dendro-photos").list("",{limit:100});
+ const{data:meas}=await sb.from("measurements").select("photo_url");
+ const urls=new Set((meas||[]).map(m=>m.photo_url).filter(Boolean));
+ let removed=0;
+ for(const f of (root.data||[])){
+  const sub=await sb.storage.from("dendro-photos").list(f.name,{limit:1000});
+  const orphans=[];
+  for(const file of (sub.data||[])){
+   const pub=sb.storage.from("dendro-photos").getPublicUrl(f.name+"/"+file.name).data.publicUrl;
+   if(!urls.has(pub))orphans.push(f.name+"/"+file.name);
+  }
+  if(orphans.length){await sb.storage.from("dendro-photos").remove(orphans);removed+=orphans.length;}
+ }
+ toast("✓ "+removed+" yetim dosya silindi.");
+ loadStorageStats();
+}
+async function reGeocodeAll(){
+ if(!PROFILE||(PROFILE.role!=="admin"&&PROFILE.role!=="owner"))return toast("Yetki yok.");
+ if(!confirm("Tüm kayıtların şehir/ülke bilgisi GPS koordinatından yeniden algılansın mı? (Nominatim limiti ~1 istek/sn)"))return;
+ const{data}=await sb.from("measurements").select("id,lat,lon,city,country");
+ let done=0;
+ for(const r of (data||[])){
+  if(!Number.isFinite(+r.lat)||!Number.isFinite(+r.lon))continue;
+  const geo=await reverseGeocode(r.lat,r.lon);
+  if(geo&&(geo.city!==r.city||geo.country!==r.country)){
+   await sb.from("measurements").update({city:geo.city,country:geo.country}).eq("id",r.id);
+   done++;
+  }
+  await new Promise(res=>setTimeout(res,1100));
+ }
+ toast("✓ "+done+" kaydın şehri güncellendi","ok","🌍");
+ loadWorld();loadAdmin();
+}
+async function delMeas(id){
+ if(!confirm("Kayıt silinsin mi?"))return;
+ const{data}=await sb.from("measurements").select("photo_url").eq("id",id).single();
+ if(data)await removePhoto(data.photo_url);
+ await sb.from("measurements").delete().eq("id",id);loadAdmin();
+}
+function filterAdminMeas(){
+ const q=$("adminMeasSearch").value.toLowerCase();
+ $("aMeasT").querySelectorAll("tr").forEach(r=>{r.style.display=r.textContent.toLowerCase().includes(q)?"":"none";});
+}
+
+/* ============ GERÇEK ZAMANLI BAĞIMLI FİLTRELER (Ülke→Şehir→Proje) ============ */
+let REQ_ROWS=[],REQ_PROJECTS=[],ADM_ROWS=[],ADM_PROJECTS=[];
+function listCountries(rows,projects){
+ const s=new Set();
+ (rows||[]).forEach(r=>{const v=(r.country||"").trim();if(v)s.add(v);});
+ (projects||[]).forEach(p=>{const v=(p.country||"").trim();if(v)s.add(v);});
+ return [...s].sort((a,b)=>a.localeCompare(b,"tr"));
+}
+function listCities(rows,projects,country){
+ const s=new Set();
+ (rows||[]).forEach(r=>{const c=(r.country||"").trim(),v=(r.city||"").trim();if(v&&(!country||c===country))s.add(v);});
+ (projects||[]).forEach(p=>{const c=(p.country||"").trim(),v=(p.city||"").trim();if(v&&(!country||c===country))s.add(v);});
+ return [...s].sort((a,b)=>a.localeCompare(b,"tr"));
+}
+function listProjects(projects,country,city,withId){
+ const list=(projects||[])
+  .filter(p=>(!country||(p.country||"").trim()===country)&&(!city||(p.city||"").trim()===city))
+  .sort((a,b)=>(a.name||"").localeCompare(b.name||"","tr"));
+ return withId?list.map(p=>({v:String(p.id),label:p.name+(p.city?" · "+p.city:"")})) : list.map(p=>p.name);
+}
+function fillSelect(sel,opts){
+ if(!sel)return;
+ const cur=sel.value;
+ sel.innerHTML='<option value="">Tümü</option>'+opts.map(o=>{
+  const isObj=typeof o==="object";
+  const v=isObj?o.v:o,label=isObj?o.label:o;
+  return `<option value="${esc(v)}"${v===cur?" selected":""}>${esc(label)}</option>`;
+ }).join("");
+ if(sel.value!==cur)sel.value="";
+}
+/* --- Kullanıcı talep formu --- */
+async function loadRequestOptions(){
+ try{
+  const [m,p]=await Promise.all([
+   sb.from("measurements").select("country,city").eq("status","Onaylı").limit(5000),
+   sb.from("projects").select("id,name,country,city").order("name")
+  ]);
+  REQ_ROWS=m.data||[];REQ_PROJECTS=p.data||[];
+  fillSelect($("reqCountry"),listCountries(REQ_ROWS,REQ_PROJECTS));
+  reqCountryChanged();
+ }catch(e){}
+}
+function reqCountryChanged(){
+ fillSelect($("reqCity"),listCities(REQ_ROWS,REQ_PROJECTS,$("reqCountry").value));
+ reqCityChanged();
+}
+function reqCityChanged(){
+ fillSelect($("reqProject"),listProjects(REQ_PROJECTS,$("reqCountry").value,$("reqCity").value,false));
+}
+/* --- Yönetici paneli --- */
+async function loadAdminExportFilters(){
+ try{
+  const [m,p]=await Promise.all([
+   sb.from("measurements").select("country,city"),
+   sb.from("projects").select("id,name,country,city").order("name")
+  ]);
+  ADM_ROWS=m.data||[];ADM_PROJECTS=p.data||[];
+  fillSelect($("admExpCountry"),listCountries(ADM_ROWS,ADM_PROJECTS));
+  admCountryChanged();
+ }catch(e){}
+}
+function admCountryChanged(){
+ fillSelect($("admExpCity"),listCities(ADM_ROWS,ADM_PROJECTS,$("admExpCountry").value));
+ admCityChanged();
+}
+function admCityChanged(){
+fillSelect($("admExpProject"),listProjects(ADM_PROJECTS,$("admExpCountry").value,$("admExpCity").value,true));
+}
+/* --- TOPLU DIŞA AKTARIM (Admin) --- */
+function adminFilteredQuery(){
+let q=sb.from("measurements").select("*,projects(name)");
+const c=$("admExpCountry").value,ci=$("admExpCity").value,p=$("admExpProject").value,s=$("admExpStatus").value;
+if(c)q=q.eq("country",c);
+if(ci)q=q.eq("city",ci);
+if(p)q=q.eq("project_id",+p);
+if(s)q=q.eq("status",s);
+return q;
+}
+async function adminFilteredRows(){
+let out=[],from=0,step=1000;
+for(;;){
+const{data,error}=await adminFilteredQuery().order("created_at").range(from,from+step-1);
+if(error)throw new Error(error.message);
+out=out.concat(data||[]);
+if(!data||data.length<step)break;
+from+=step;
+}
+return out;
+}
+async function adminExportCSV(){
+const rows=await adminFilteredRows();
+if(!rows.length)return toast("Filtreye uyan kayıt yok","warn");
+dl(fullCSV(rows),"dendrogeo_toplu.csv");toast("✓ "+rows.length+" kayıt dışa aktarıldı","ok","📥");
+}
+async function adminExportQgis(){
+const rows=await adminFilteredRows();
+if(!rows.length)return toast("Filtreye uyan kayıt yok","warn");
+dl(fullCSV(rows),"dendrogeo_qgis_detayli.csv");toast("✓ "+rows.length+" kayıt dışa aktarıldı","ok","🧾");
+}
+async function adminExportGeo(){
+const rows=await adminFilteredRows();
+if(!rows.length)return toast("Filtreye uyan kayıt yok","warn");
+const gj={type:"FeatureCollection",features:rows.map(r=>({type:"Feature",geometry:{type:"Point",coordinates:[r.lon,r.lat]},properties:{point:r.point_id,species:r.species,latin:LATIN[r.species]||"",dbh:r.dbh_cm,height:r.height_m,carbon:r.carbon_kg,status:r.status,photo:r.photo_url||""}}))};
+dl(JSON.stringify(gj,null,2),"dendrogeo_toplu.geojson");toast("✓ "+rows.length+" kayıt dışa aktarıldı","ok","🗺");
+}
+/* ============ YÖNETİCİ: KULLANICI VERİ TALEPLERİ ============ */
+async function loadRequests(){
+ const{data}=await sb.from("data_requests").select("*,profiles(full_name)").order("created_at",{ascending:false});
+ const reqs=data||[];
+ const pending=reqs.filter(r=>r.status!=="Tamamlandı"&&r.status!=="Reddedildi");
+ const closed=reqs.filter(r=>r.status==="Tamamlandı"||r.status==="Reddedildi");
+ 
+ $("aReqPending").textContent=pending.length;
+ $("aReqPendingMini").textContent=pending.length;
+ $("aReqClosed").textContent=closed.length;
+ 
+ // AKTİF TALEPLER TABLOSU
+ $("aReqT").innerHTML=pending.length?pending.map(r=>{
+  const filt=[esc(r.country),esc(r.city),esc(r.project_name)].filter(Boolean).join(" / ")||"Tüm Veri";
+  const hasNote=r.note&&r.note.trim().length>0;
+  return `<tr>
+   <td>${esc(r.profiles?.full_name)||"—"}</td>
+   <td>${esc(r.email)||"—"}</td>
+   <td><b>${esc(filt)}</b></td>
+   <td>${new Date(r.created_at).toLocaleDateString("tr-TR")}</td>
+   <td><span class="badge admin">${r.status}</span></td>
+   <td style="display:flex;gap:4px;flex-wrap:wrap">
+    <button class="btn sm blue" onclick="fulfillRequest(${r.id})">📥✉️ İndir ve Yanıtla</button>
+    <button class="btn sm red" onclick="rejectRequest(${r.id})">🚫 Reddet</button>
+   </td>
+  </tr>${hasNote?`<tr><td colspan="6" style="background:var(--tint);font-size:.78rem;color:var(--mut);white-space:normal;padding:8px 12px;line-height:1.5"><b style="color:var(--green-dk)">📝 Not:</b> ${esc(r.note)}</td></tr>`:""}`;
+ }).join(""):"<tr><td colspan=6 style='text-align:center;color:var(--mut)'>Bekleyen talep yok</td></tr>";
+ 
+ // TAMAMLANAN/REDDEDİLENLER (COLLAPSIBLE)
+ const closedWrap=$("closedRequestsWrap");
+ if(closed.length>0){
+  closedWrap.style.display="block";
+  $("aReqClosed").textContent=closed.length;
+  $("closedReqT").innerHTML=closed.map(r=>{
+   const filt=[esc(r.country),esc(r.city),esc(r.project_name)].filter(Boolean).join(" / ")||"Tüm Veri";
+   const bc=r.status==="Tamamlandı"?"on":"off";
+   const hasNote=r.note&&r.note.trim().length>0;
+   const closedDate=r.fulfilled_at?new Date(r.fulfilled_at).toLocaleDateString("tr-TR"):"";
+   return `<tr>
+    <td>${esc(r.profiles?.full_name)||"—"}</td>
+    <td>${esc(r.email)||"—"}</td>
+    <td>${esc(filt)}</td>
+    <td>${new Date(r.created_at).toLocaleDateString("tr-TR")}</td>
+    <td>${closedDate}</td>
+    <td><span class="badge ${bc}">${r.status}</span></td>
+   </tr>${hasNote?`<tr><td colspan="6" style="background:var(--tint);font-size:.78rem;color:var(--mut);white-space:normal;padding:8px 12px;line-height:1.5"><b style="color:var(--green-dk)">📝 Not:</b> ${esc(r.note)}</td></tr>`:""}`;
+  }).join("");
+ }else{
+  closedWrap.style.display="none";
+ }
+}
+async function rejectRequest(id){
+ if(!confirm("Bu talebi reddetmek istediğinizden emin misiniz? Kullanıcıya yanıt gönderilmez, talep arşive kaldırılır."))return;
+ const{error}=await sb.from("data_requests").update({status:"Reddedildi",fulfilled_at:new Date().toISOString()}).eq("id",id);
+ if(error){toast("Hata: "+error.message,"err");return;}
+ toast("✓ Talep reddedildi","warn","🚫");
+ loadRequests();
+}
+
+async function fulfillRequest(id){
+   const {data:req} = await sb.from("data_requests").select("*,profiles(full_name)").eq("id",id).single();
+    if(!req) return;
+    
+    let projIds = null;
+    if(req.project_name){
+        const {data:projs} = await sb.from("projects").select("id").ilike("name","%"+req.project_name+"%");
+        projIds = (projs||[]).map(p=>p.id);
+    }
+    
+    let q = sb.from("measurements").select("*").eq("status","Onaylı");
+    if(req.country)  q = q.eq("country", req.country);
+    if(req.city)     q = q.eq("city",    req.city);
+    if(projIds)      q = q.in("project_id", projIds.length ? projIds : [-1]);
+    
+    const {data} = await q;
+    const rows = data || [];
+    const n = rows.length;
+    const totalC = rows.reduce((a,r) => a + (r.carbon_kg||0), 0);
+    const countries = new Set(rows.map(r=>r.country).filter(Boolean));
+    const cities    = new Set(rows.map(r=>r.city).filter(Boolean));
+    
+    if(n === 0){
+        if(!confirm("Bu filtreye uyan onaylı kayıt bulunamadı. Yine de kullanıcıya bilgilendirme maili göndermek ister misiniz?")) return;
+    } else {
+        dl(fullCSV(rows), "dendrogeo_talep_" + id + ".csv");
+    }
+    
+    // 📧 Profesyonel & detaylı e-posta metni
+    const bugun = new Date().toLocaleDateString("tr-TR", { day:'numeric', month:'long', year:'numeric' });
+    
+    const bodyLines = [
+        "Merhaba " + (req.profiles?.full_name || "Değerli Kullanıcımız") + ",",
+        "",
+        "DendroGeo'daki veri talebiniz başarıyla hazırlandı. 🌲",
+        "",
+        "📊 TALEP ÖZETİ",
+        "─────────────────────────",
+        "• Ülke      : " + (req.country || "Tümü"),
+        "• Şehir     : " + (req.city    || "Tümü"),
+        "• Proje/Park: " + (req.project_name || "Tümü"),
+       (req.note ? "• Notunuz   : " + req.note : null),
+        "",
+        "📈 VERİ SETİ İÇERİĞİ",
+        "─────────────────────────",
+        "• Toplam kayıt     : " + n + " ağaç ölçümü",
+        "• Toplam karbon    : " + (totalC/1000).toFixed(2) + " ton C",
+        "• Kapsanan ülke    : " + countries.size,
+        "• Kapsanan şehir   : " + cities.size,
+        "• Hazırlanma tarihi: " + bugun,
+        "",
+        "📎 EKTE YER ALAN DOSYA",
+        "─────────────────────────",
+        "Veri seti CSV formatında hazırlanmıştır.",
+        "",
+        "CSV sütunları: POINT_ID, LATITUDE, LONGITUDE, TREE_GROUP, TREE_SPECIES, DBH_CM, HEIGHT_M, AGB_KG, BHB_KG, TOTAL_BIOMASS_KG, CARBON_KG, PHOTO_FILE ve daha fazlasını içerir.",
+        "",
+        "🗺 QGIS'DE NASIL AÇILIR?",
+        "─────────────────────────",
+        "1. QGIS → Layer → Add Layer → Add Delimited Text Layer",
+        "2. X = LONGITUDE, Y = LATITUDE, CRS = EPSG:4326",
+        "3. Fotoğraf balonu için katman özelliklerinde Map Tip özelliğini kullanabilirsiniz.",
+        "   Detaylı rehber: https://dendrogeo.org/ → Dışa Aktar bölümü",
+        "",
+        "📜 VERİ LİSANSI",
+        "─────────────────────────",
+        "Bu veri CC BY-NC 4.0 lisansı altındadır. Ticari olmayan amaçlarla, kaynak gösterilerek serbestçe kullanılabilir.",
+        "",
+        "Atıf önerisi:",
+"ŞİRİN, S. & ŞİRİN, N. (2026). DendroGeo: Global Tree Inventory & Carbon Data System (Version 1.0.0) [Dataset]. Zenodo. https://doi.org/10.5281/zenodo.22646300",
+"",
+        "Herhangi bir sorunuz olursa bu e-postayı yanıtlayarak bize ulaşabilirsiniz.",
+        "",
+       "İyi çalışmalar dileriz,",
+	"DendroGeo Ekibi",
+	"Nagihan ŞİRİN — Doktora Öğrencisi · Sinan ŞİRİN — Sistem Geliştirici",
+	"Küresel Ağaç Envanteri ve Karbon Veri Sistemi",
+	"https://dendrogeo.org · DOI: 10.5281/zenodo.22646300",
+    ];
+    
+    const bodyTxt = bodyLines.filter(l => l !== null).join("\n");
+    const subject = encodeURIComponent("✅ DendroGeo Veri Talebiniz Hazırlandı — " + n + " kayıt, " + (totalC/1000).toFixed(2) + " t C");
+    
+    window.open(
+        "mailto:" + (req.email || "") +
+        "?subject=" + subject +
+        "&body=" + encodeURIComponent(bodyTxt),
+        "_blank"
+    );
+    
+    await sb.from("data_requests").update({
+        status: "Tamamlandı",
+        fulfilled_at: new Date().toISOString()
+    }).eq("id", id);
+    
+    toast("✓ Mail hazırlandı — CSV'yi ekleyip gönderin", "ok", "📧");
+    loadRequests();
+}
+
+let USERS_CACHE=[];
+async function loadUsers(){
+ if(!PROFILE||(PROFILE.role!=="admin"&&PROFILE.role!=="owner"))return;
+ const I_AM_OWNER=PROFILE.role==="owner";
+ const{data}=await sb.from("profiles").select("*");
+ USERS_CACHE=data||[];
+ $("aUsersT").innerHTML=USERS_CACHE.map(x=>{
+  const ownerRow=x.role==="owner";
+  const roleBadge=ownerRow?'<span class="badge" style="background:var(--green-dk);color:#fff">KURUCU</span>':(x.role==="admin"?'<span class="badge admin">DENETÇİ</span>':'<span class="badge on">KULLANICI</span>');
+  let act="";
+  if(ownerRow)act="<span style='color:var(--mut);font-size:.7rem'>🛡 Korunuyor</span>";
+  else if(I_AM_OWNER)act=`<select onchange="updateRole('${x.id}',this.value)" style="padding:4px;border-radius:6px;border:1px solid var(--line)"><option value="user" ${x.role==="user"?"selected":""}>Kullanıcı</option><option value="admin" ${x.role==="admin"?"selected":""}>Denetçi</option></select> <button class="btn sm ${x.active?"red":"blue"}" onclick="toggleU('${x.id}',${!x.active})">${x.active?"Pasifleştir":"Aktifleştir"}</button>`;
+  else act="<span style='color:var(--mut);font-size:.7rem'>Salt okunur</span>";
+  return `<tr><td>${esc(x.email)||"—"}</td><td>${esc(x.full_name)||"—"}</td><td>${roleBadge}</td><td><span class="badge ${x.active?"on":"off"}">${x.active?"Aktif":"Pasif"}</span></td><td style="display:flex;gap:6px;align-items:center">${act}</td></tr>`;
+ }).join("");
+}
+function filterUsers(){
+ const q=$("userSearch").value.toLowerCase();
+ $("aUsersT").querySelectorAll("tr").forEach(r=>{r.style.display=r.textContent.toLowerCase().includes(q)?"":"none";});
+}
+async function updateRole(id,role){
+ if(PROFILE.role!=="owner")return toast("🛡 Bu yetki yalnızca kurucuya aittir.");
+ const{error}=await sb.from("profiles").update({role}).eq("id",id);
+if(error){toast("Hata: "+error.message,"err");return;}loadUsers();
+}
+async function toggleU(id,act){
+ if(PROFILE.role!=="owner")return toast("🛡 Bu yetki yalnızca kurucuya aittir.");
+ await sb.from("profiles").update({active:act}).eq("id",id);loadUsers();
+}
+
+/* ============ PARK KARŞILAŞTIRMA + RAPOR ============ */
+let PARK_DATA=[];
+async function loadParkCompare(){
+ const{data}=await sb.from("measurements").select("carbon_kg,dbh_cm,height_m,species,grp,projects(name,city)").eq("status","Onaylı").limit(5000);
+ PARK_DATA=data||[];
+ const by={};
+ PARK_DATA.forEach(r=>{
+  const name=r.projects?.name||"—";
+  const p=by[name]=by[name]||{name,city:r.projects?.city||"—",n:0,c:0,dbh:0,h:0};
+  p.n++;p.c+=(r.carbon_kg||0);p.dbh+=(r.dbh_cm||0);p.h+=(r.height_m||0);
+ });
+ const list=Object.values(by).sort((a,b)=>b.c-a.c);
+ const max=list.length?list[0].c:1;
+ const el=$("parkCompare");if(!el)return;
+ el.innerHTML=list.length?list.map((p,i)=>`
+  <div style="display:flex;align-items:center;gap:12px;margin-bottom:10px;padding:8px 12px;background:var(--bg);border-radius:10px">
+   <div class="mono" style="width:26px;height:26px;border-radius:50%;background:${i===0?"var(--green)":"var(--line)"};color:${i===0?"#fff":"var(--mut)"};display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.75rem;flex:0 0 auto">${i+1}</div>
+   <div style="flex:1;min-width:0">
+    <div style="font-size:.85rem;font-weight:700">${esc(p.name)} ${i===0?'<span class="badge on">🏆 En İyi</span>':""}</div>
+    <div style="font-size:.7rem;color:var(--mut)">${esc(p.city)} · ${p.n} kayıt · ort. çap ${(p.dbh/p.n).toFixed(1)} cm · ort. boy ${(p.h/p.n).toFixed(1)} m</div>
+   </div>
+   <div style="width:120px;background:var(--line);border-radius:4px;height:8px;overflow:hidden;flex:0 0 auto"><div style="height:100%;width:${(p.c/max*100).toFixed(0)}%;background:var(--green)"></div></div>
+   <div class="mono" style="width:70px;text-align:right;font-weight:600;flex:0 0 auto">${(p.c/1000).toFixed(2)} t</div>
+  </div>`).join(""):'<div style="color:var(--mut);font-size:.85rem">Henüz onaylı kayıt yok.</div>';
+ const rep=$("repProject");
+ if(rep)rep.innerHTML=list.map(p=>`<option>${esc(p.name)}</option>`).join("")||'<option value="">—</option>';
+}
+function parkReport(){
+ const name=$("repProject").value;
+ const rows=PARK_DATA.filter(r=>(r.projects?.name||"—")===name);
+ if(!rows.length)return toast("Bu park için onaylı kayıt yok.");
+ const n=rows.length;
+ const c=rows.reduce((a,r)=>a+(r.carbon_kg||0),0);
+ const dbh=(rows.reduce((a,r)=>a+(r.dbh_cm||0),0)/n).toFixed(1);
+ const h=(rows.reduce((a,r)=>a+(r.height_m||0),0)/n).toFixed(1);
+ const ib=rows.filter(r=>r.grp==="İBRELİ").length, ya=rows.filter(r=>r.grp==="YAPRAKLI").length;
+ const pct=x=>n?((x/n)*100).toFixed(1):"0";
+ const bySp={};
+ rows.forEach(r=>{const s=bySp[r.species]=bySp[r.species]||{n:0,c:0,dbh:0,h:0,grp:r.grp||"DİĞER"};s.n++;s.c+=(r.carbon_kg||0);s.dbh+=(r.dbh_cm||0);s.h+=(r.height_m||0);});
+ const spRows=Object.entries(bySp).sort((a,b)=>b[1].c-a[1].c);
+ const html=`
+  <div class="grid g4" style="margin-bottom:14px">
+   <div class="stat" style="padding:12px"><div class="lbl">Kayıt</div><div class="val" style="font-size:1.1rem">${n}</div></div>
+   <div class="stat" style="padding:12px"><div class="lbl">Karbon</div><div class="val" style="font-size:1.1rem">${(c/1000).toFixed(2)} t</div></div>
+   <div class="stat" style="padding:12px"><div class="lbl">Ort. Çap</div><div class="val" style="font-size:1.1rem">${dbh} cm</div></div>
+   <div class="stat" style="padding:12px"><div class="lbl">Ort. Boy</div><div class="val" style="font-size:1.1rem">${h} m</div></div>
+  </div>
+  <div style="font-size:.78rem;color:var(--mut);margin-bottom:12px">🌲 İbreli %${pct(ib)} · 🍃 Yapraklı %${pct(ya)} · Diğer %${pct(n-ib-ya)} · ${new Date().toLocaleDateString("tr-TR")}</div>
+  <table><thead><tr><th>Tür</th><th>Latince</th><th>Grup</th><th>Adet</th><th>Karbon (kg)</th><th>Ort. Çap</th><th>Ort. Boy</th></tr></thead><tbody>
+  ${spRows.map(([sp,v])=>`<tr><td>${sp}</td><td style="font-style:italic">${LATIN[sp]&&LATIN[sp]!=="—"?LATIN[sp]:"—"}</td><td>${v.grp}</td><td>${v.n}</td><td>${v.c.toFixed(1)}</td><td>${(v.dbh/v.n).toFixed(1)}</td><td>${(v.h/v.n).toFixed(1)}</td></tr>`).join("")}
+  </tbody></table>`;
+ const csv="\uFEFF"+["PARK,\""+name.replace(/"/g,'""')+"\"","SEHIR,"+(rows[0].projects?.city||"—"),"TARIH,"+new Date().toLocaleDateString("tr-TR"),"KAYIT,"+n,"TOPLAM_KARBON_KG,"+c.toFixed(1),"TOPLAM_KARBON_T,"+(c/1000).toFixed(2),"ORT_CAP_CM,"+dbh,"ORT_BOY_M,"+h,"IBRELI_%,"+pct(ib),"YAPRAKLI_%,"+pct(ya),"TUR,LATIN,GRUP,ADET,KARBON_KG,ORT_CAP_CM,ORT_BOY_M"].concat(spRows.map(([sp,v])=>[sp,LATIN[sp]||"—",v.grp,v.n,v.c.toFixed(1),(v.dbh/v.n).toFixed(1),(v.h/v.n).toFixed(1)].join(","))).join("\n")+"\n";
+ $("pvTitle").textContent="📄 "+name+" — Park Raporu";
+ $("pvBody").innerHTML=html;
+ $("pvDownload").onclick=()=>dl(csv,name.replace(/\s+/g,"_")+"_rapor.csv");
+ $("previewModal").classList.add("on");
+}
+/* Click-to-zoom */
+async function zoomToCountry(country){
+const m=worldMapL||worldMap;if(!m)return;
+const{data}=await sb.from("measurements").select("lat,lon").eq("status","Onaylı").eq("country",country).limit(2000);
+fitRows(m,data,country,"🌍");
+}
+async function zoomToCity(city){
+const m=worldMapL||worldMap;if(!m)return;
+const{data}=await sb.from("measurements").select("lat,lon").eq("status","Onaylı").eq("city",city).limit(2000);
+fitRows(m,data,city,"🏙");
+}
+function fitRows(m,rows,label,icon){
+const pts=(rows||[]).filter(r=>Number.isFinite(+r.lat)&&Number.isFinite(+r.lon));
+if(!pts.length)return toast(label+" için onaylı nokta yok","warn",icon);
+const b=L.latLngBounds(pts.map(r=>[+r.lat,+r.lon]));
+m.fitBounds(b.pad(0.25),{maxZoom:12});
+toast(label+" haritada","info",icon);
+}
+
+// 🎲 UUID v4 üretici (client_id için)
+function uuidv4() {
+if (window.crypto && crypto.randomUUID) return crypto.randomUUID();
+return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => {
+        const r = Math.random() * 16 | 0;
+        return (c === 'x' ? r : (r & 0x3 | 0x8)).toString(16);
+    });
+}
+
+async function saveOfflineMeasurement(data){
+    const db = await openOfflineDB();
+    const tx = db.transaction('measurements','readwrite');
+    const store = tx.objectStore('measurements');
+    
+    // Her offline ölçüme client_id ekle (duplicate önleme için)
+    if (!data.client_id) {
+        data.client_id = uuidv4();
+    }
+    
+    store.add({
+        data: data,
+        timestamp: Date.now()
+    });
+    
+    return new Promise((resolve,reject)=>{
+        tx.oncomplete = () => {
+            console.log('[Offline] Veri IndexedDB\'ye kaydedildi:', data.client_id);
+            resolve();
+        };
+        tx.onerror = e => reject(e.target.error);
+    });
+}
+
+function openOfflineDB(){
+ return new Promise((resolve,reject)=>{
+  const req=indexedDB.open('DendroGeoOffline',1);
+  req.onupgradeneeded=e=>{
+   const db=e.target.result;
+   if(!db.objectStoreNames.contains('measurements')){
+    db.createObjectStore('measurements',{keyPath:'id',autoIncrement:true});
+   }
+  };
+  req.onsuccess=e=>resolve(e.target.result);
+  req.onerror=e=>reject(e.target.error);
+ });
+}
+async function syncOfflineData() {
+    if (!navigator.onLine) return;
+    if (!USER) {
+        console.warn('[Sync] Kullanıcı giriş yapmamış, senkronizasyon atlanıyor');
+        return;
+    }
+    
+    try {
+        const db = await openOfflineDB();
+        const tx = db.transaction('measurements', 'readonly');
+        const store = tx.objectStore('measurements');
+        const req = store.getAll();
+        
+        req.onsuccess = async () => {
+            const records = req.result || [];
+            if (!records.length) {
+                console.log('[Sync] ✅ Kuyruk boş.');
+                return;
+            }
+            
+            console.log(`[Sync] 🚀 ${records.length} offline ölçüm senkronize ediliyor...`);
+            let synced = 0;
+            let failed = 0;
+            let lastError = null;
+            
+            for (const record of records) {
+                const { data } = record;
+                try {
+                    let photoUrl = null;
+                    let photoFile = null;
+                    
+                    // 1. Fotoğraf Varsa Supabase Storage'a Yükle
+                    if (data.photoBlob) {
+                        photoFile = `P${String(data.point_id).padStart(3, '0')}_M${data.measurement_no || 1}.JPG`;
+                        const path = `${data.owner}/${Date.now()}_${record.id}.jpg`;
+                        const { error } = await sb.storage.from('dendro-photos').upload(path, data.photoBlob, { contentType: 'image/jpeg' });
+                        if (!error) {
+                            photoUrl = sb.storage.from('dendro-photos').getPublicUrl(path).data.publicUrl;
+                        } else {
+                            console.warn('[Sync] Fotoğraf hatası:', error.message);
+                            failed++;
+                            lastError = 'Fotoğraf: ' + error.message;
+                            continue;
+                        }
+                    }
+                    
+                    // 2. Payload hazırla
+                    const payload = { ...data };
+                    if (photoUrl) {
+                        payload.photo_url = photoUrl;
+                        payload.photo_file = photoFile;
+                    }
+                    delete payload.photoBlob; // Blob DB'ye gitmez
+                    
+                    // ⭐ KRİTİK: client_id payload'a ekle (duplicate önleme)
+                    if (data.client_id) {
+                        payload.client_id = data.client_id;
+                    }
+                    
+                    console.log('[Sync] Insert ediliyor:', payload.point_id, 'client_id:', payload.client_id);
+                    
+                    // 3. Supabase'e insert et (offline düzenleme ise UPDATE)
+			const editId = data._editId || null;
+			delete payload._editId;
+			let error;
+			if (editId) {
+ 			 const res = await sb.from('measurements').update(payload).eq('id', editId);
+ 			 error = res.error;
+			} else {
+			  const res = await sb.from('measurements').insert(payload);
+ 			 error = res.error;
+			}
+                   
+                    if (!error) {
+                        // ✅ Başarılı → kuyruktan sil
+                        const delTx = db.transaction('measurements', 'readwrite');
+                        delTx.objectStore('measurements').delete(record.id);
+                        synced++;
+                        console.log(`[Sync] ✅ P${data.point_id} başarıyla senkronize edildi`);
+                    } else if (error.code === '23505') {
+                        // ⚠️ Duplicate key → zaten kaydedilmiş, kuyruktan sil
+                        console.warn(`[Sync] ⚠️ P${data.point_id} zaten mevcut (duplicate), kuyruktan siliniyor`);
+                        const delTx = db.transaction('measurements', 'readwrite');
+                        delTx.objectStore('measurements').delete(record.id);
+                    } else {
+                        // ❌ Gerçek hata → kullanıcıya göster!
+                        console.error('[Sync] ❌ Insert hatası:', error);
+                        failed++;
+                        lastError = error.message;
+                        toast(`❌ P${data.point_id} senkronize edilemedi: ${error.message}`, 'err', '⚠️');
+                        break; // Sırayı bozma, diğer online'da tekrar dene
+                    }
+                } catch (err) {
+                    console.error('[Sync] Record hatası:', err);
+                    failed++;
+                    lastError = err.message;
+                    break;
+                }
+            }
+            
+            // 📢 Sonuç bildirimi
+            if (synced > 0) {
+                toast(`✅ ${synced} çevrimdışı ölçüm senkronize edildi!`, 'ok', '🔄');
+                if ($('v-dash').classList.contains('on')) loadDash();
+                if ($('v-records').classList.contains('on')) loadRecords();
+                if ($('v-admin').classList.contains('on')) loadAdmin();
+                if ($('v-world').classList.contains('on')) loadWorld();
+            }
+            if (failed > 0) {
+                toast(`⚠️ ${failed} ölçüm başarısız. Hata: ${lastError}`, 'err', '❌');
+            }
+        };
+    } catch (e) {
+        console.error("[Sync] Kritik hata:", e);
+        toast('Senkronizasyon hatası: ' + e.message, 'err', '❌');
+    }
+}
+/* ============ TAM YEDEK (JSON) — Tez verisi sigortası ============ */
+async function fetchAllRows(table, orderCol){
+  let out=[], from=0, step=1000;
+  for(;;){
+    const {data,error}=await sb.from(table).select("*").order(orderCol).range(from, from+step-1);
+    if(error) throw new Error(table+": "+error.message);
+    out=out.concat(data||[]);
+    if(!data||data.length<step) break;
+    from+=step;
+  }
+  return out;
+}
+async function fullBackup(){
+  if(!PROFILE||(PROFILE.role!=="admin"&&PROFILE.role!=="owner")) return toast("Yetki yok.","err");
+  toast("Yedek hazırlanıyor…","info","💾");
+  try{
+    const meas = await fetchAllRows("measurements","created_at");
+    const projs = await fetchAllRows("projects","id");
+    const wps = await fetchAllRows("waypoints","id");
+    let reqs = [];
+    try{ reqs = await fetchAllRows("data_requests","created_at"); }catch(e){ reqs = []; }
+    const backup={
+      app:"DendroGeo",
+      schema_version:"1.0.0",
+      doi:"10.5281/zenodo.22646300",
+      exported_at:new Date().toISOString(),
+      exported_by:(PROFILE&&PROFILE.full_name)||"",
+      counts:{measurements:meas.length,projects:projs.length,waypoints:wps.length,data_requests:reqs.length},
+      measurements:meas,
+      projects:projs,
+      waypoints:wps,
+      data_requests:reqs
+    };
+    const name="dendrogeo_yedek_"+new Date().toISOString().slice(0,10)+".json";
+    const a=document.createElement("a");
+    a.href=URL.createObjectURL(new Blob([JSON.stringify(backup,null,2)],{type:"application/json"}));
+    a.download=name;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(()=>URL.revokeObjectURL(a.href),5000);
+    localStorage.setItem("dg_lastBackup", new Date().toISOString());
+    toast("✓ Yedek indirildi: "+name+" ("+meas.length+" ölçüm)","ok","💾");
+  }catch(e){
+    toast("Yedek hatası: "+e.message,"err","❌");
+  }
+}
+function checkBackupReminder(){
+  const last=localStorage.getItem("dg_lastBackup");
+  const days=last?(Date.now()-new Date(last).getTime())/86400000:999;
+  if(days>7) toast("⚠ Son tam yedeğin üzerinden "+Math.floor(days)+" gün geçti — bugünkü yedeği alın","warn","💾");
+}
+function cancelRecovery(){
+$("recoveryModal").style.display="none";
+location.assign(window.location.pathname);
+}
+async function saveNewPassword(){
+const p1=$("rcPass").value,p2=$("rcPass2").value,m=$("rcMsg");
+if(p1.length<6){m.textContent="Parola en az 6 karakter olmalı.";m.style.color="var(--red)";return;}
+if(p1!==p2){m.textContent="Parolalar eşleşmiyor.";m.style.color="var(--red)";return;}
+const{error}=await sb.auth.updateUser({password:p1});
+if(error){m.textContent="Hata: "+error.message;m.style.color="var(--red)";return;}
+toast("✓ Parola güncellendi — yeni parolanızla giriş yapın","ok","🔑");
+history.replaceState(null,"",window.location.pathname);
+location.reload();
+}
+boot();
+</script>
+</body>
+</html>
