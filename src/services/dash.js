@@ -3,7 +3,7 @@
 Panel, analiz, grafikler, kayıtlar, dünya verisi yükleme */
 
 // 1. Kayıtlarım tablosu
-async function loadRecords(){
+async function loadRecords(){ 
  const{data}=await sb.from("measurements").select("*,projects(name)").eq("owner",USER.id).order("created_at",{ascending:false});
  $("recTable").innerHTML=(data||[]).map(r=>{
   const st=r.status||"Beklemede";
