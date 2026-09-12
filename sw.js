@@ -1,5 +1,5 @@
 // ============================================================
-// 🌲 DendroGeo Service Worker v2.1 (Cache-Only, Production-Ready)
+// 🌲 DendroGeo Service Worker v2.4 (Cache-Only, Production-Ready)
 // Harita tile cache, fotoğraf cache, LRU temizliği
 // NOT: Senkronizasyon artık Ana Thread (Supabase JS SDK) tarafından yapılıyor
 // ============================================================
@@ -227,4 +227,4 @@ self.addEventListener('notificationclick', event => {
     );
 });
 
-console.log('[SW] 🌲 DendroGeo Service Worker v2.2 (Cache-Only) Yüklendi.');
+console.log('[SW] 🌲 DendroGeo Service Worker v2.4 (Cache-Only) Yüklendi.');
