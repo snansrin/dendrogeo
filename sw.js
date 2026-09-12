@@ -19,7 +19,7 @@ const CORE_ASSETS = [
     '/', '/index.html', '/manifest.json', '/icon.png', '/social-preview.png', '/css/style.css',
     '/src/config/supabase.js', '/src/config/constants.js', '/src/config/species.js', 
     '/src/utils/geo.js', '/src/services/allometry.js', '/src/services/auth.js','/src/services/export.js', '/src/services/offline.js',
-    '/src/services/admin.js','/src/services/world.js', '/src/services/measure.js',
+    '/src/services/admin.js','/src/services/world.js', '/src/services/measure.js','/src/services/map.js',
     'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css',
     'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js',
     'https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css',
