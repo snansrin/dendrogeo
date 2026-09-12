@@ -1,5 +1,5 @@
 // ============================================================
-// 🌲 DendroGeo Service Worker v2.4 (Cache-Only, Production-Ready)
+// 🌲 DendroGeo Service Worker v2.5 (Cache-Only, Production-Ready)
 // Harita tile cache, fotoğraf cache, LRU temizliği
 // NOT: Senkronizasyon artık Ana Thread (Supabase JS SDK) tarafından yapılıyor
 // ============================================================
@@ -16,7 +16,7 @@ const MAX_IMAGES = 500;
 const MAX_API_CACHE = 150;
 
 const CORE_ASSETS = [
-    '/', '/index.html', '/manifest.json', '/icon.png', '/social-preview.png',
+    '/', '/index.html', '/manifest.json', '/icon.png', '/social-preview.png', '/css/style.css',
     'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css',
     'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js',
     'https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css',
@@ -227,4 +227,4 @@ self.addEventListener('notificationclick', event => {
     );
 });
 
-console.log('[SW] 🌲 DendroGeo Service Worker v2.4 (Cache-Only) Yüklendi.');
+console.log('[SW] 🌲 DendroGeo Service Worker v2.5 (Cache-Only) Yüklendi.');
