@@ -4,7 +4,7 @@
 // NOT: Senkronizasyon artık Ana Thread (Supabase JS SDK) tarafından yapılıyor
 // ============================================================
 
-const CACHE_VERSION = 'dendrogeo-sw-v2-r4';
+const CACHE_VERSION = 'dendrogeo-sw-v2-r5';
 const STATIC_CACHE = `static-${CACHE_VERSION}`;
 const TILE_CACHE = `tiles-${CACHE_VERSION}`;
 const API_CACHE = `api-${CACHE_VERSION}`;
@@ -84,19 +84,13 @@ self.addEventListener('fetch', event => {
     }
 
     if (url.hostname.includes('supabase.co')) {
+        // Sadece public fotoğrafları cache'le (popup balonları için)
         if (url.pathname.includes('/storage/v1/object/public/')) {
             event.respondWith(cacheFirstWithLimit(request, IMG_CACHE, MAX_IMAGES));
             return;
         }
-        if (
-            url.pathname.includes('/auth/v1/') ||
-            url.pathname.includes('/rest/v1/rpc/') ||
-            (url.pathname.includes('/storage/v1/object/') && request.method !== 'GET')
-        ) {
-            event.respondWith(networkOnly(request));
-            return;
-        }
-        event.respondWith(networkFirstWithLimit(request, API_CACHE, MAX_API_CACHE));
+        // REST/Auth/RPC istekleri → doğrudan tarayıcı ağına yönlendir (CORS-güvenli passthrough)
+        event.respondWith(fetch(request));
         return;
     }
 
@@ -179,7 +173,7 @@ async function networkFirst(request, cacheName) {
 async function staleWhileRevalidate(request, cacheName) {
     const cache = await caches.open(cacheName);
     const cached = await cache.match(request);
-        const fetchPromise = fetch(request)
+    const fetchPromise = fetch(request)
         .then(response => {
             if (response.ok) cache.put(request, response.clone()).catch(() => {});
             return response;
