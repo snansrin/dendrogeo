@@ -62,6 +62,7 @@ self.addEventListener('fetch', event => {
     const { request } = event;
     if (request.method !== 'GET') return;
     const url = new URL(request.url);
+    if (url.protocol !== 'http:' && url.protocol !== 'https:') return;
 
     if (url.hostname.includes('tile.openstreetmap.org')) {
         event.respondWith(cacheFirstWithLimit(request, TILE_CACHE, MAX_TILES));
@@ -175,9 +176,9 @@ async function networkFirst(request, cacheName) {
 async function staleWhileRevalidate(request, cacheName) {
     const cache = await caches.open(cacheName);
     const cached = await cache.match(request);
-    const fetchPromise = fetch(request)
+        const fetchPromise = fetch(request)
         .then(response => {
-            if (response.ok) cache.put(request, response.clone());
+            if (response.ok) cache.put(request, response.clone()).catch(() => {});
             return response;
         })
         .catch(() => cached);
@@ -227,4 +228,4 @@ self.addEventListener('notificationclick', event => {
     );
 });
 
-console.log('[SW] 🌲 DendroGeo Service Worker v2.5 (Cache-Only) Yüklendi.');
+console.log('[SW] 🌲 DendroGeo Service Worker v2.6 (Cache-Only) Yüklendi.');
