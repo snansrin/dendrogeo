@@ -124,8 +124,8 @@ function drawNav(){
   const me=L.marker([GPS.latitude,GPS.longitude],{
    icon:L.divIcon({
     className:"",
-    html:`<div class="loc-marker">${b!=null?`<div class="arrow" style="transform:rotate(${b}deg)"></div>`:""}<div class="dot"></div></div>`,
-    iconSize:[20,20],iconAnchor:[10,10]
+    html:`<div class="loc-marker">${b!=null?`<svg class="nav-arrow-svg" viewBox="0 0 100 100" style="transform:rotate(${b}deg)"><path d="M50 5 L70 70 L50 55 L30 70 Z" fill="#2b6cb0" stroke="#fff" stroke-width="4"/></svg>`:""}<div class="dot"></div></div>`,
+    iconSize:[48,48],iconAnchor:[24,24]
    }),
    zIndexOffset:1000
   }).addTo(navMap);me._wp=1;
