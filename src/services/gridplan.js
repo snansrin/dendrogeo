@@ -20,7 +20,7 @@ const OVERPASS_URLS=[
  "https://overpass.osm.ch/api/interpreter"
 ];
 
-// === SPATIAL INDEX ===
+// === SPATIAL INDEX ===   
 function buildSpatialIndex(points, cellSize){
  const idx={};
  for(const p of points){
