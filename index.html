@@ -192,60 +192,6 @@
 <script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
-<script>
-var map=null, navMap=null, worldMap=null, worldMapL=null;
-var WP=[], navTarget=null, GPS=null;
-var USER=null, PROFILE=null;
-var manualPoint=false, PROJ_LIST=[];
-var EDIT_ID=null, EDIT_PROJ=null;
-var liveLoaded=false, photoOk=false;
-var charts={}, USERS_CACHE=[];
-var REQ_ROWS=[], REQ_PROJECTS=[], ADM_ROWS=[], ADM_PROJECTS=[];
-var PARK_DATA=[];
-var INITIAL_HASH=window.location.hash||"";
-
-function $(id){ return document.getElementById(id); }
-
-function esc(s){
- return String(s==null?'':s).replace(/[&<>"']/g,function(c){
-  return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];
- });
-}
-
-function toast(msg,type,icon){
- var wrap=$("toastWrap");
- if(!wrap){console.log("[toast]",msg);return;}
- var t=document.createElement("div");
- t.className="toast "+(type==="err"||type==="warn"||type==="info"?type:"");
- var ic=icon||(type==="err"?"❌":type==="warn"?"⚠":type==="info"?"ℹ":"✓");
- t.innerHTML='<span class="icon">'+ic+'</span><span class="msg">'+msg+'</span><span class="x" onclick="this.parentNode.classList.add(\'bye\');setTimeout(()=>this.parentNode.remove(),300)">✕</span>';
- wrap.appendChild(t);
- setTimeout(function(){
-  if(t.parentNode){t.classList.add("bye");setTimeout(function(){t.remove();},300);}
- },4500);
-}
-
-function hav(a,b,c,d){
- var R=6371000,r=Math.PI/180;
- var x=Math.sin((c-a)*r/2)**2+Math.cos(a*r)*Math.cos(c*r)*Math.sin((d-b)*r/2)**2;
- return 2*R*Math.atan2(Math.sqrt(x),Math.sqrt(1-x));
-}
-
-function brg(a,b,c,d){
- var r=Math.PI/180;
- var y=Math.sin((d-b)*r)*Math.cos(c*r);
- var x=Math.cos(a*r)*Math.sin(c*r)-Math.sin(a*r)*Math.cos(c*r)*Math.cos((d-b)*r);
- return (Math.atan2(y,x)/r+360)%360;
-}
-
-function uuidv4(){
- if(window.crypto&&crypto.randomUUID)return crypto.randomUUID();
- return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g,function(c){
-  var r=Math.random()*16|0;
-  return (c==='x'?r:(r&0x3|0x8)).toString(16);
- });
-}
-</script>
 <script src="src/config/supabase.js?v=1"></script>
 <script src="src/config/constants.js?v=1"></script>
 <script src="src/config/species.js?v=1"></script>
