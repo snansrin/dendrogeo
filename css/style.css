@@ -253,3 +253,55 @@ tr.done td{opacity:.55}tr.done td b{text-decoration:line-through}
 .chip.c2{top:22%;left:84%}
 .chip.c3{top:50%;left:85%}
 @media(max-width:960px){.hero-art{display:none}}
+/* =====================================================
+   🗺 HARİTA GÖRSEL TASARIM v2 (waypoint + konum işareti)
+   ===================================================== */
+
+/* --- Konum işareti: pulse halka + merkez nokta + yön oku --- */
+.loc-marker{position:relative;width:22px;height:22px}
+.loc-marker .pulse{
+  position:absolute;inset:0;border-radius:50%;
+  background:rgba(43,108,176,.35);
+  animation:locPulse 2s ease-out infinite;
+}
+.loc-marker .dot{
+  position:absolute;left:50%;top:50%;width:12px;height:12px;
+  margin:-6px 0 0 -6px;border-radius:50%;
+  background:#2b6cb0;border:2.5px solid #fff;
+  box-shadow:0 1px 5px rgba(0,0,0,.45);
+}
+.loc-marker .headwrap{position:absolute;inset:0}
+.loc-marker .headwrap .arrow{
+  position:absolute;left:50%;top:-11px;margin-left:-5px;
+  width:0;height:0;
+  border-left:5px solid transparent;
+  border-right:5px solid transparent;
+  border-bottom:12px solid #2b6cb0;
+  filter:drop-shadow(0 1px 2px rgba(0,0,0,.4));
+}
+@keyframes locPulse{
+  0%{transform:scale(.6);opacity:.9}
+  100%{transform:scale(2.6);opacity:0}
+}
+
+/* --- Waypoint badge v2: harita pini (damla) formu --- */
+.wp-badge2{
+  display:flex;align-items:center;justify-content:center;
+  width:28px;height:28px;
+  border-radius:50% 50% 50% 6px;
+  transform:rotate(-45deg);
+  background:var(--wpbg,#e11d48);
+  border:2px solid #fff;
+  box-shadow:0 2px 8px rgba(0,0,0,.35);
+}
+.wp-badge2 span{
+  transform:rotate(45deg);
+  color:#fff;font-weight:800;font-size:.7rem;
+  font-family:'IBM Plex Mono',monospace;
+}
+.wp-badge2.done{background:#16a34a !important}
+.wp-badge2.target{animation:wpTarget 1.2s ease-in-out infinite}
+@keyframes wpTarget{
+  0%,100%{box-shadow:0 2px 8px rgba(0,0,0,.35),0 0 0 0 rgba(225,29,72,.55)}
+  50%{box-shadow:0 2px 8px rgba(0,0,0,.35),0 0 0 9px rgba(225,29,72,0)}
+}
