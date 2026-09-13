@@ -191,6 +191,7 @@
 <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css">
 <script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
 <script>
 var map=null, navMap=null, worldMap=null, worldMapL=null;
 var WP=[], navTarget=null, GPS=null;
@@ -914,7 +915,19 @@ if(v==="admin")loadAdmin();
 if(v==="users")loadUsers();
 if(v==="export")loadRequestOptions();
 }
-
+function showAuth(){
+ var el=$("erisim");
+ if(!el)return;
+ el.scrollIntoView({behavior:"smooth"});
+ if(typeof authTab==="function") authTab("login");
+ var box=$("authBox");
+ if(box){
+  box.classList.remove("auth-glow");
+  void box.offsetWidth;
+  box.classList.add("auth-glow");
+  setTimeout(function(){box.classList.remove("auth-glow");},3000);
+ }
+}
 boot();
 </script>
 </body>
