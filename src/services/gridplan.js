@@ -4,7 +4,7 @@ Park sınırı algılama (Overpass API) + grid tabanlı ölçüm planlama
 v4: multi-ring + su filtresi + kara/su alan ayrımı + otomatik waypoint */
 
 let PARK_POLY=null,PARK_LAYER=null,PARK_MODE=false,PARK_CLICK_BOUND=false,PARK_CANDS=[];
-let WATER_RINGS=[],WATER_LAYER=null;
+let WATER_RINGS=[],WATER_LAYER=null,IMP_RINGS=[],IMP_LAYER=null;
 const GRID_CELLS=[];
 let GRID_LAYER=null,WP_AUTO_LAYER=null;
 
@@ -16,15 +16,17 @@ const OVERPASS_URLS=[
 
 // 1) Overpass: park + su sorgusu (3 mirror, 504'e dayanıklı)
 async function queryPark(lat,lon,radius=1200){
- const q=`[out:json][timeout:20];(way["leisure"~"park|garden|nature_reserve|common|recreation_ground|playground|pitch"](around:${radius},${lat},${lon});way["landuse"~"forest|grass|meadow|recreation_ground"](around:${radius},${lat},${lon});relation["leisure"~"park|garden|nature_reserve|common|recreation_ground"](around:${radius},${lat},${lon});way["natural"="water"](around:${radius},${lat},${lon});way["waterway"~"riverbank|canal|dock|basin"](around:${radius},${lat},${lon});relation["natural"="water"](around:${radius},${lat},${lon}););out geom;`;
+ const q=`[out:json][timeout:20];(way["leisure"~"park|garden|nature_reserve|common|recreation_ground|playground|pitch"](around:${radius},${lat},${lon});way["landuse"~"forest|grass|meadow|recreation_ground"](around:${radius},${lat},${lon});relation["leisure"~"park|garden|nature_reserve|common|recreation_ground"](around:${radius},${lat},${lon});way["natural"="water"](around:${radius},${lat},${lon});way["waterway"~"riverbank|canal|dock|basin"](around:${radius},${lat},${lon});relation["natural"="water"](around:${radius},${lat},${lon});way["building"](around:${radius},${lat},${lon});way["highway"~"residential|primary|secondary|tertiary|service|footway|path|cycleway|track"](around:${radius},${lat},${lon});way["landuse"~"commercial|industrial|retail|construction"](around:${radius},${lat},${lon}););out geom;`;
  for(const url of OVERPASS_URLS){
   try{
    const res=await fetch(url+"?data="+encodeURIComponent(q));
    if(!res.ok){console.warn("[GridPlan] "+url+" → HTTP "+res.status);continue;}
    const json=await res.json();
    const cands=[];WATER_RINGS=[];
+      IMP_RINGS=[];
    for(const el of (json.elements||[])){
     if(isWater(el)){const wr=extractRings(el);if(wr)WATER_RINGS=WATER_RINGS.concat(wr);continue;}
+    if(isImpervious(el)){const ir=extractRings(el);if(ir)IMP_RINGS=IMP_RINGS.concat(ir);continue;}
     const rings=extractRings(el);
     if(!rings||!rings.length)continue;
     cands.push({rings,name:(el.tags&&el.tags.name)||null,area:polyArea(rings)});
@@ -57,7 +59,27 @@ function isWater(el){
  const t=el.tags||{};
  return t.natural==="water"||t.landuse==="reservoir"||t.landuse==="basin"||t.leisure==="swimming_pool"||!!t.waterway;
 }
+// 3b) Eleman katı zemin mi? (bina, yol, plaza)
+function isImpervious(el){
+ const t=el.tags||{};
+ return !!t.building||!!t.highway||t.landuse==="commercial"||t.landuse==="industrial"||t.landuse==="retail"||t.landuse==="construction";
+}
 
+// 3c) Nokta katı zeminde mi
+function pointInImpervious(lat,lon){
+ return IMP_RINGS.some(r=>pointInPolygon(lat,lon,r));
+}
+
+// 3d) Nokta suya yakın mı (5m buffer)
+function nearWater(lat,lon,bufferDeg=0.00005){
+ for(const ring of WATER_RINGS){
+  for(const p of ring){
+   const dx=p[1]-lon,dy=p[0]-lat;
+   if(dx*dx+dy*dy<bufferDeg*bufferDeg)return true;
+  }
+ }
+ return false;
+}
 // 4) Nokta su içinde mi
 function pointInWater(lat,lon){
  return WATER_RINGS.some(r=>pointInPolygon(lat,lon,r));
@@ -150,6 +172,7 @@ function drawPark(park){
  PARK_POLY=park.rings;
  PARK_LAYER=L.polygon(park.rings,{color:"#2b6cb0",weight:2.5,dashArray:"6,6",fillColor:"#3b82f6",fillOpacity:.10,interactive:false}).addTo(map);
  if(WATER_RINGS.length)WATER_LAYER=L.polygon(WATER_RINGS,{color:"#2563eb",weight:1,fillColor:"#60a5fa",fillOpacity:.4,interactive:false}).addTo(map);
+ if(IMP_RINGS.length)IMP_LAYER=L.polygon(IMP_RINGS,{color:"#6b7280",weight:.5,fillColor:"#9ca3af",fillOpacity:.25,interactive:false}).addTo(map);
  map.fitBounds(PARK_LAYER.getBounds(),{padding:[30,30]});
  const waterArea=WATER_RINGS.length?polyArea(WATER_RINGS):0;
  const landArea=Math.max(0,park.area-waterArea);
@@ -182,7 +205,8 @@ function drawPark(park){
 function clearPark(){
  if(PARK_LAYER&&map){map.removeLayer(PARK_LAYER);PARK_LAYER=null;}
  if(WATER_LAYER&&map){map.removeLayer(WATER_LAYER);WATER_LAYER=null;}
- WATER_RINGS=[];
+ if(IMP_LAYER&&map){map.removeLayer(IMP_LAYER);IMP_LAYER=null;}
+ WATER_RINGS=[];IMP_RINGS=[];
  PARK_POLY=null;
  const pi=$("parkInfo");
  if(pi){pi.style.display="none";pi.innerHTML="";}
@@ -221,12 +245,16 @@ async function buildGrid(){
    if(w0>=maxLon)break;
    const w1=w0+dLon;
    const cLat=s0+dLat/2,cLon=w0+dLon/2;
-   if(!pointInPark(cLat,cLon,PARK_POLY))continue;
-   if(pointInWater(cLat,cLon))continue;
-   let wc=0;
+      if(!pointInPark(cLat,cLon,PARK_POLY))continue;
+   if(pointInWater(cLat,cLon)||pointInImpervious(cLat,cLon))continue;
+   if(nearWater(cLat,cLon))continue;
+   let wc=0,ic=0;
    const corners=[[s0,w0],[s0,w1],[s1,w0],[s1,w1]];
-   for(const cc of corners)if(pointInWater(cc[0],cc[1]))wc++;
-   if(wc>=2)continue;
+   for(const cc of corners){
+    if(pointInWater(cc[0],cc[1]))wc++;
+    if(pointInImpervious(cc[0],cc[1]))ic++;
+   }
+   if(wc>=2||ic>=2)continue;
    const cell={lat:cLat,lon:cLon,s0,s1,w0,w1,n:0};
    cellMap[rI+"_"+cI]=cell;GRID_CELLS.push(cell);
   }
