@@ -6,7 +6,7 @@ v3: multi-ring (yolun böldüğü parklar) + en büyük kapsayıcı varsayılan 
 let PARK_POLY=null,PARK_LAYER=null,PARK_MODE=false,PARK_CLICK_BOUND=false,PARK_CANDS=[];
 let WATER_RINGS=[],WATER_LAYER=null;
 const GRID_CELLS=[];
-let GRID_LAYER=null;
+let GRID_LAYER=null,WP_AUTO_LAYER=null;
 
 const OVERPASS_URLS=[
  "https://overpass-api.de/api/interpreter",
@@ -158,7 +158,7 @@ function drawPark(park){
  $("parkInfo").innerHTML=`<b>🌳 ${esc(park.name||"İsimsiz Park")}</b> · Alan: <b>${ha} ha</b>${parca>1?" · Parça: "+parca:""}${alt}`+
   `<div style="margin-top:10px;display:flex;gap:8px;align-items:center;flex-wrap:wrap">`+
   `<label style="font-size:.8rem">Proje:</label>`+
-  `<select id="gridProject">`+(PROJ_LIST.length?PROJ_LIST.map(p=>`<option value="${p.id}">${esc(p.name)}</option>`).join(""):`<option value="0">Önce proje oluştur</option>`)+`</select>`+
+  `<select id="gridProject">`+((typeof PROJ_LIST!=="undefined"&&PROJ_LIST.length)?PROJ_LIST.map(p=>`<option value="${p.id}">${esc(p.name)}</option>`).join(""):`<option value="0">Önce proje oluştur</option>`)+`</select>`+
   `<label style="font-size:.8rem">Grid:</label>`+
   `<select id="gridSize"><option value="10">10×10 m (yoğun)</option><option value="20" selected>20×20 m (önerilen)</option><option value="50">50×50 m (geniş)</option></select>`+
   `<label style="font-size:.8rem">Yeterli eşik:</label>`+
@@ -208,8 +208,8 @@ async function buildGrid(){
  for(let rI=0;;rI++){
   const s0=minLat+rI*dLat;if(s0>=maxLat)break;
   for(let cI=0;;cI++){
-   const w0=minLon+cI*dLon;if(w0>=maxLon)break;
-    const cLat=s0+dLat/2,cLon=w0+dLon/2;
+   const w0=minLon+cI*dLon,w1=w0+dLon;if(w0>=maxLon)break;
+   const cLat=s0+dLat/2,cLon=w0+dLon/2;
    if(!pointInPark(cLat,cLon,PARK_POLY))continue;
    if(pointInWater(cLat,cLon))continue;
    let wc=0;
@@ -241,13 +241,15 @@ async function buildGrid(){
   `<span style="color:#16a34a">🟢 Yeterli (${thresh}+): ${g} (%${pct(g)})</span> · `+
   `<span style="color:#b45309">🟡 Az: ${y} (%${pct(y)})</span> · `+
   `<span style="color:#e11d48">🔴 Boş: ${r0} (%${pct(r0)})</span><br>`+
-  `💡 Öneri: <b>${r0}</b> boş hücreye en az 1'er ölçüm yapın.`;
+  `💡 Öneri: <b>${r0}</b> boş hücreye en az 1'er ölçüm yapın.`+
+  (r0>0?`<div style="margin-top:8px"><button class="btn sm blue" onclick="createWaypointsFromGrid()">📍 Waypoint Oluştur (${r0})</button></div>`:"");
  toast("✓ Grid hazır: "+tot+" hücre ("+r0+" boş)","ok","🔲");
 }
 
 // 13) Grid'i temizle
 function clearGrid(){
  if(GRID_LAYER&&map){map.removeLayer(GRID_LAYER);GRID_LAYER=null;}
+ if(WP_AUTO_LAYER&&map){map.removeLayer(WP_AUTO_LAYER);WP_AUTO_LAYER=null;}
  GRID_CELLS.length=0;
  const gs=$("gridSummary");if(gs)gs.innerHTML="";
 }
@@ -261,4 +263,26 @@ function toggleWpVis(){
  if(!WP_AUTO_LAYER)return;
  if(map.hasLayer(WP_AUTO_LAYER)){map.removeLayer(WP_AUTO_LAYER);$("wpVisBtn").textContent="📍 Waypoint: GİZLİ";}
  else{map.addLayer(WP_AUTO_LAYER);$("wpVisBtn").textContent="📍 Waypoint: GÖRÜNÜR";}
+}
+
+// 16) Boş hücrelere otomatik waypoint üret
+async function createWaypointsFromGrid(){
+ if(!GRID_CELLS.length)return toast("Önce grid oluştur","warn");
+ const pid=+$("gridProject").value||0;
+ if(!pid)return toast("Önce proje seç veya oluştur","warn");
+ const empty=GRID_CELLS.filter(c=>c.n===0);
+ if(!empty.length)return toast("Boş hücre yok — park tamamen kapsanmış 🎉","ok");
+ if(empty.length>500&&!confirm(empty.length+" waypoint oluşturulacak.\nNavigasyon listesi uzayabilir.\n\nDevam edilsin mi?"))return;
+ const{data:mx}=await sb.from("waypoints").select("wp_id").eq("project_id",pid).order("wp_id",{ascending:false}).limit(1);
+ let next=(mx&&mx.length?mx[0].wp_id:0)+1;
+ const first=next;
+ const rows=empty.map(c=>({owner:USER.id,project_id:pid,wp_id:next++,lat:+c.lat.toFixed(6),lon:+c.lon.toFixed(6),visited:false}));
+ const{error}=await sb.from("waypoints").insert(rows);
+ if(error)return toast("Hata: "+error.message,"err");
+ if(WP_AUTO_LAYER&&map)map.removeLayer(WP_AUTO_LAYER);
+ WP_AUTO_LAYER=L.layerGroup().addTo(map);
+ rows.forEach(r=>L.circleMarker([r.lat,r.lon],{radius:5,color:"#fff",weight:1.5,fillColor:"#e11d48",fillOpacity:.95,interactive:false}).addTo(WP_AUTO_LAYER));
+ $("nProject").value=String(pid);
+ loadWaypoints();
+ toast("✓ "+rows.length+" waypoint oluşturuldu (P"+first+"–P"+(next-1)+"). 🧭 Waypoint sekmesinde hazır.","ok","📍");
 }
