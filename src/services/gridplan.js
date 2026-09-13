@@ -1,7 +1,7 @@
 "use strict";
 /* ===== DendroGeo v2 · src/services/gridplan.js v7 =====
 Park sınırı + grid planlama + su/katı zemin filtresi
-+ MANUEL WAYPOINT SEÇİMİ (FİLTRE MUAF) */
++ MANUEL WAYPOINT SEÇİMİ (FİLTRE MUAF) */   
 
 let PARK_POLY=null,PARK_LAYER=null,PARK_MODE=false,PARK_CLICK_BOUND=false,PARK_CANDS=[];
 let WATER_RINGS=[],WATER_LAYER=null;
