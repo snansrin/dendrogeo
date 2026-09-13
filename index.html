@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="google-site-verification" content="b8R2BtUI2XYHvOY5jqh18Binkcs_-tILJCLjs9H6LNE" />
-<meta http-equiv="Content-Security-Policy" content="default-src 'self' 'unsafe-inline' data: blob: https://cdn.jsdelivr.net https://unpkg.com https://*.tile.openstreetmap.org https://nominatim.openstreetmap.org https://*.supabase.co https://fonts.googleapis.com https://fonts.gstatic.com https://challenges.cloudflare.com">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self' 'unsafe-inline' data: blob: https://cdn.jsdelivr.net https://unpkg.com https://*.tile.openstreetmap.org https://nominatim.openstreetmap.org https://*.supabase.co https://fonts.googleapis.com https://fonts.gstatic.com https://challenges.cloudflare.com https://overpass-api.de https://overpass.kumi.systems">
 <title>DendroGeo — Küresel Ağaç Envanteri ve Karbon Veri Sistemi</title>
 
 
@@ -203,6 +203,7 @@
 <script src="src/services/world.js?v=1"></script>
 <script src="src/services/measure.js?v=1"></script>
 <script src="src/services/map.js?v=1"></script>
+<script src="src/services/gridplan.js?v=1"></script>
 <script src="src/services/dash.js?v=1"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
 <link rel="stylesheet" href="css/style.css?v=2">
@@ -579,7 +580,13 @@
    </div>
   </div>
 
-  <div class="view" id="v-map"><h2 class="disp" style="margin-bottom:16px">Canlı Harita</h2><div id="mapLoad" class="alert info">⏳ Onaylı kayıtlar yükleniyor…</div><div id="map"></div><p style="color:var(--mut);font-size:.8rem;margin-top:8px">🟢 Noktalara dokunun → bilgi + fotoğraf balonu.</p><div id="liveAnalysis" style="margin-top:18px"></div></div>
+<div class="view" id="v-map"><h2 class="disp" style="margin-bottom:16px">Canlı Harita</h2>
+<div style="display:flex;gap:10px;align-items:center;margin-bottom:10px;flex-wrap:wrap">
+ <button class="btn sm blue" id="parkModeBtn" onclick="toggleParkMode()">🌳 Park Analizi Modu: KAPALI</button>
+ <span id="parkModeHint" style="font-size:.78rem;color:var(--mut)">Açınca haritada bir parkın içine tıkla → sınırı otomatik algılanır.</span>
+</div>
+<div id="mapLoad" class="alert info">⏳ Onaylı kayıtlar yükleniyor…</div><div id="map"></div>
+<div id="parkInfo" class="card" style="display:none;margin-top:12px;border-left:4px solid var(--blue)"></div><p style="color:var(--mut);font-size:.8rem;margin-top:8px">🟢 Noktalara dokunun → bilgi + fotoğraf balonu.</p><div id="liveAnalysis" style="margin-top:18px"></div></div>
 
   <div class="view" id="v-projects">
 <h2 class="disp" style="margin-bottom:16px">Projeler</h2>
