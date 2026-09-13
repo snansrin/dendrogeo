@@ -5,7 +5,7 @@
  *
  * PARK + GRID + GERÇEK GEOMETRİK FİLTRE
  *                 
- * Filtreler:
+ * Filtreler:                  
  *  - Park dışı
  *  - Göl / su
  *  - Suya 15 m güvenlik mesafesi
