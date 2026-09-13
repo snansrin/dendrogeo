@@ -257,21 +257,19 @@ tr.done td{opacity:.55}tr.done td b{text-decoration:line-through}
    🗺 HARİTA GÖRSEL TASARIM v2 (waypoint + konum işareti)
    ===================================================== */
 
-/* --- Konum işareti: basit mavi nokta + hedefe göre yön oku --- */
-.loc-marker{position:relative;width:20px;height:20px}
+/* --- Konum işareti: mavi nokta + GERÇEK navigasyon oku (paneldekiyle aynı) --- */
+.loc-marker{position:relative;width:48px;height:48px}
+.loc-marker .nav-arrow-svg{
+  position:absolute;inset:0;width:100%;height:100%;
+  transform-origin:50% 50%;
+  filter:drop-shadow(0 1px 2px rgba(0,0,0,.45));
+}
 .loc-marker .dot{
   position:absolute;left:50%;top:50%;width:14px;height:14px;
   margin:-7px 0 0 -7px;border-radius:50%;
   background:#2b6cb0;border:2.5px solid #fff;
   box-shadow:0 1px 5px rgba(0,0,0,.45);
-}
-.loc-marker .arrow{
-  position:absolute;left:50%;top:-10px;margin-left:-5px;
-  width:0;height:0;
-  border-left:6px solid transparent;
-  border-right:6px solid transparent;
-  border-bottom:14px solid #2b6cb0;
-  filter:drop-shadow(0 1px 2px rgba(0,0,0,.4));
+  z-index:2;
 }
 
 /* --- Waypoint badge: damla/pin formu (animasyon YOK) --- */
