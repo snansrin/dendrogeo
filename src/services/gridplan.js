@@ -10,7 +10,7 @@ const GRID_CELLS=[];
 let GRID_LAYER=null,WP_AUTO_LAYER=null;
 const SELECTED_CELLS=new Set(); 
 
-// SPATIAL INDEX
+// SPATIAL INDEX            
 let WATER_SPATIAL=null, IMP_SPATIAL=null;
 const SPATIAL_CELL_SIZE=0.0002; // ~22m
 
