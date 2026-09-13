@@ -1,7 +1,7 @@
 "use strict";
 /* ===== DendroGeo v2 · src/services/gridplan.js =====
 Park sınırı algılama (Overpass API) + grid tabanlı ölçüm planlama
-v3: multi-ring (yolun böldüğü parklar) + en büyük kapsayıcı varsayılan + grid analizi */
+v4: multi-ring + su filtresi + kara/su alan ayrımı + otomatik waypoint */
 
 let PARK_POLY=null,PARK_LAYER=null,PARK_MODE=false,PARK_CLICK_BOUND=false,PARK_CANDS=[];
 let WATER_RINGS=[],WATER_LAYER=null;
@@ -10,16 +10,17 @@ let GRID_LAYER=null,WP_AUTO_LAYER=null;
 
 const OVERPASS_URLS=[
  "https://overpass-api.de/api/interpreter",
- "https://overpass.kumi.systems/api/interpreter"
+ "https://overpass.kumi.systems/api/interpreter",
+ "https://overpass.osm.ch/api/interpreter"
 ];
 
-// 1) Overpass: tıklanan noktanın etrafındaki yeşil alanları bul (büyükten küçüğe)
+// 1) Overpass: park + su sorgusu (3 mirror, 504'e dayanıklı)
 async function queryPark(lat,lon,radius=1200){
  const q=`[out:json][timeout:20];(way["leisure"~"park|garden|nature_reserve|common|recreation_ground|playground|pitch"](around:${radius},${lat},${lon});way["landuse"~"forest|grass|meadow|recreation_ground"](around:${radius},${lat},${lon});relation["leisure"~"park|garden|nature_reserve|common|recreation_ground"](around:${radius},${lat},${lon});way["natural"="water"](around:${radius},${lat},${lon});way["waterway"~"riverbank|canal|dock|basin"](around:${radius},${lat},${lon});relation["natural"="water"](around:${radius},${lat},${lon}););out geom;`;
  for(const url of OVERPASS_URLS){
   try{
    const res=await fetch(url+"?data="+encodeURIComponent(q));
-   if(!res.ok)continue;
+   if(!res.ok){console.warn("[GridPlan] "+url+" → HTTP "+res.status);continue;}
    const json=await res.json();
    const cands=[];WATER_RINGS=[];
    for(const el of (json.elements||[])){
@@ -32,12 +33,12 @@ async function queryPark(lat,lon,radius=1200){
    const inside=cands.filter(c=>pointInPark(lat,lon,c.rings));
    const pool=(inside.length?inside:cands).slice().sort((a,b)=>b.area-a.area);
    return pool;
-  }catch(e){}
+  }catch(e){console.warn("[GridPlan] "+url+" hata:",e);}
  }
  return null;
 }
 
-// 2) OSM elemanından halka(lar) çıkar — kopuk parçalar ayrı halka kalır
+// 2) OSM elemanından halka(lar) çıkar
 function extractRings(el){
  if(el.type==="way"&&el.geometry){
   const r=el.geometry.map(g=>[g.lat,g.lon]);
@@ -50,18 +51,19 @@ function extractRings(el){
  }
  return null;
 }
-// 3b) Eleman su mu?
+
+// 3) Eleman su mu?
 function isWater(el){
  const t=el.tags||{};
  return t.natural==="water"||t.landuse==="reservoir"||t.landuse==="basin"||t.leisure==="swimming_pool"||!!t.waterway;
 }
 
-// 3c) Nokta su içinde mi
+// 4) Nokta su içinde mi
 function pointInWater(lat,lon){
  return WATER_RINGS.some(r=>pointInPolygon(lat,lon,r));
 }
 
-// 3) Uç uca bağlı way'leri birleştir, kopuk parçaları ayrı halka bırak
+// 5) Kopuk way'leri zincirle
 function joinWaysToRings(ways){
  const rings=[];
  const remaining=ways.slice();
@@ -86,7 +88,7 @@ function joinWaysToRings(ways){
  return rings;
 }
 
-// 4) Nokta tek halka içinde mi (ray casting)
+// 6) Nokta halka içinde mi (ray casting)
 function pointInPolygon(lat,lon,ring){
  let inside=false;
  for(let i=0,j=ring.length-1;i<ring.length;j=i++){
@@ -96,15 +98,16 @@ function pointInPolygon(lat,lon,ring){
  return inside;
 }
 
-// 5) Nokta çok parçalı parkın HERHANGİ bir parçasında mı
+// 7) Nokta çok parçalı parkta mı
 function pointInPark(lat,lon,rings){
  return rings.some(r=>pointInPolygon(lat,lon,r));
 }
 
-// 6) Tüm parçaların toplam alanı (m²)
+// 8) Alan hesapla (m²)
 function polyArea(rings){
  let total=0;
  for(const ring of rings){
+  if(!ring||ring.length<3)continue;
   const lat0=ring[0][0]*Math.PI/180;
   const kx=111320*Math.cos(lat0),ky=110540;
   let a=0;
@@ -116,7 +119,7 @@ function polyArea(rings){
  return total;
 }
 
-// 7) Park modu aç/kapat
+// 9) Park modu aç/kapat
 function toggleParkMode(){
  PARK_MODE=!PARK_MODE;
  const b=$("parkModeBtn");
@@ -127,7 +130,7 @@ function toggleParkMode(){
  if(!PARK_MODE){PARK_CANDS=[];clearPark();}
 }
 
-// 8) Harita tıklama olayını bir kez bağla
+// 10) Harita tıklama olayı
 function bindParkClick(){
  if(PARK_CLICK_BOUND||!map)return;
  PARK_CLICK_BOUND=true;
@@ -135,27 +138,30 @@ function bindParkClick(){
   if(!PARK_MODE)return;
   toast("🌳 Park sınırı sorgulanıyor…","info");
   const parks=await queryPark(e.latlng.lat,e.latlng.lng);
-  if(!parks||!parks.length)return toast("Burada park bulunamadı. Bir parkın içine tıkla.","warn");
+  if(!parks||!parks.length)return toast("Burada park bulunamadı veya Overpass sunucuları yoğun. 10 sn sonra tekrar dene.","warn");
   PARK_CANDS=parks;
   drawPark(parks[0]);
  });
 }
 
-// 9) Park sınırını çiz (çok parçalı + alternatif seçici + grid kontrolleri)
+// 11) Park sınırını çiz (kara/su ayrımı)
 function drawPark(park){
  clearPark();clearGrid();
  PARK_POLY=park.rings;
  PARK_LAYER=L.polygon(park.rings,{color:"#2b6cb0",weight:2.5,dashArray:"6,6",fillColor:"#3b82f6",fillOpacity:.10,interactive:false}).addTo(map);
  if(WATER_RINGS.length)WATER_LAYER=L.polygon(WATER_RINGS,{color:"#2563eb",weight:1,fillColor:"#60a5fa",fillOpacity:.4,interactive:false}).addTo(map);
  map.fitBounds(PARK_LAYER.getBounds(),{padding:[30,30]});
- const ha=(park.area/10000).toFixed(2);
+ const waterArea=WATER_RINGS.length?polyArea(WATER_RINGS):0;
+ const landArea=Math.max(0,park.area-waterArea);
+ const haLand=(landArea/10000).toFixed(1);
+ const haWater=(waterArea/10000).toFixed(1);
  const parca=park.rings.length;
  const alt=PARK_CANDS.length>1
   ?`<div style="margin-top:8px;font-size:.8rem">🔁 Alan seç: <select id="parkAlt" onchange="switchPark(+this.value)">`+
-   PARK_CANDS.map((c,i)=>`<option value="${i}"${c===park?" selected":""}>${esc(c.name||"İsimsiz")} · ${(c.area/10000).toFixed(1)} ha</option>`).join("")+
+   PARK_CANDS.map((c,i)=>`<option value="${i}"${c===park?" selected":""}>${esc(c.name||"İsimsiz")} · ${((c.area-waterArea)/10000).toFixed(1)} ha</option>`).join("")+
    `</select></div>`:"";
  $("parkInfo").style.display="block";
- $("parkInfo").innerHTML=`<b>🌳 ${esc(park.name||"İsimsiz Park")}</b> · Alan: <b>${ha} ha</b>${parca>1?" · Parça: "+parca:""}${alt}`+
+ $("parkInfo").innerHTML=`<b>🌳 ${esc(park.name||"İsimsiz Park")}</b> · <b>Kara: ${haLand} ha</b>${haWater>0.1?" · Su: "+haWater+" ha":""}${parca>1?" · Parça: "+parca:""}${alt}`+
   `<div style="margin-top:10px;display:flex;gap:8px;align-items:center;flex-wrap:wrap">`+
   `<label style="font-size:.8rem">Proje:</label>`+
   `<select id="gridProject">`+((typeof PROJ_LIST!=="undefined"&&PROJ_LIST.length)?PROJ_LIST.map(p=>`<option value="${p.id}">${esc(p.name)}</option>`).join(""):`<option value="0">Önce proje oluştur</option>`)+`</select>`+
@@ -169,9 +175,10 @@ function drawPark(park){
   `<button class="btn sm" id="wpVisBtn" onclick="toggleWpVis()">📍 Waypoint: GÖRÜNÜR</button>`+
   `<button class="btn sm" onclick="clearGrid()">✕ Temizle</button></div>`+
   `<div id="gridSummary" style="margin-top:10px;font-size:.85rem;line-height:1.7"></div>`;
- toast("✓ Park sınırı algılandı: "+ha+" hektar"+(parca>1?" ("+parca+" parça)":""),"ok","🌳");
+ toast("✓ Park algılandı: "+haLand+" ha kara"+(haWater>0.1?" + "+haWater+" ha su":""),"ok","🌳");
 }
-// 10) Park katmanını temizle
+
+// 12) Park katmanını temizle
 function clearPark(){
  if(PARK_LAYER&&map){map.removeLayer(PARK_LAYER);PARK_LAYER=null;}
  if(WATER_LAYER&&map){map.removeLayer(WATER_LAYER);WATER_LAYER=null;}
@@ -181,13 +188,13 @@ function clearPark(){
  if(pi){pi.style.display="none";pi.innerHTML="";}
 }
 
-// 11) Alternatif alana geç
+// 13) Alternatif alana geç
 function switchPark(i){
  const p=PARK_CANDS[i];
  if(p)drawPark(p);
 }
 
-// 12) Grid oluştur + renklendir + analiz özeti
+// 14) Grid oluştur (SU FİLTRELİ, s1/w1 TANIMLI)
 async function buildGrid(){
  if(!PARK_POLY||!PARK_POLY.length)return toast("Önce park seç");
  const size=+$("gridSize").value||20;
@@ -206,9 +213,13 @@ async function buildGrid(){
  const cellMap={};
  GRID_CELLS.length=0;
  for(let rI=0;;rI++){
-  const s0=minLat+rI*dLat;if(s0>=maxLat)break;
+  const s0=minLat+rI*dLat;
+  if(s0>=maxLat)break;
+  const s1=s0+dLat;
   for(let cI=0;;cI++){
-   const w0=minLon+cI*dLon,w1=w0+dLon;if(w0>=maxLon)break;
+   const w0=minLon+cI*dLon;
+   if(w0>=maxLon)break;
+   const w1=w0+dLon;
    const cLat=s0+dLat/2,cLon=w0+dLon/2;
    if(!pointInPark(cLat,cLon,PARK_POLY))continue;
    if(pointInWater(cLat,cLon))continue;
@@ -216,7 +227,7 @@ async function buildGrid(){
    const corners=[[s0,w0],[s0,w1],[s1,w0],[s1,w1]];
    for(const cc of corners)if(pointInWater(cc[0],cc[1]))wc++;
    if(wc>=2)continue;
-   const cell={lat:cLat,lon:cLon,s0,s1:s0+dLat,w0,w1:w0+dLon,n:0};
+   const cell={lat:cLat,lon:cLon,s0,s1,w0,w1,n:0};
    cellMap[rI+"_"+cI]=cell;GRID_CELLS.push(cell);
   }
  }
@@ -246,14 +257,15 @@ async function buildGrid(){
  toast("✓ Grid hazır: "+tot+" hücre ("+r0+" boş)","ok","🔲");
 }
 
-// 13) Grid'i temizle
+// 15) Grid'i temizle
 function clearGrid(){
  if(GRID_LAYER&&map){map.removeLayer(GRID_LAYER);GRID_LAYER=null;}
  if(WP_AUTO_LAYER&&map){map.removeLayer(WP_AUTO_LAYER);WP_AUTO_LAYER=null;}
  GRID_CELLS.length=0;
  const gs=$("gridSummary");if(gs)gs.innerHTML="";
 }
-// 15) Katman görünürlük kontrolleri
+
+// 16) Katman görünürlük kontrolleri
 function toggleGridVis(){
  if(!GRID_LAYER)return;
  if(map.hasLayer(GRID_LAYER)){map.removeLayer(GRID_LAYER);$("gridVisBtn").textContent="🔲 Grid: GİZLİ";}
@@ -265,7 +277,7 @@ function toggleWpVis(){
  else{map.addLayer(WP_AUTO_LAYER);$("wpVisBtn").textContent="📍 Waypoint: GÖRÜNÜR";}
 }
 
-// 16) Boş hücrelere otomatik waypoint üret
+// 17) Boş hücrelere otomatik waypoint üret
 async function createWaypointsFromGrid(){
  if(!GRID_CELLS.length)return toast("Önce grid oluştur","warn");
  const pid=+$("gridProject").value||0;
