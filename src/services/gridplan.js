@@ -622,7 +622,7 @@ async function queryPark(
 ){
 
  const q=
- `[out:json][timeout:20];(`+
+ `[out:json][timeout:25];(`+
 
  `way["leisure"~"park|garden|nature_reserve|common|recreation_ground|playground|pitch"](around:${radius},${lat},${lon});`+
 
