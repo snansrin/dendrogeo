@@ -48,10 +48,10 @@ const WATER_CLEARANCE_M=15;
 const IMP_CLEARANCE_M=10;
 
 const OVERPASS_URLS=[
- "https://overpass.kumi.systems/api/interpreter",
- "https://overpass.osm.ch/api/interpreter",
+ "https://overpass.private.coffee/api/interpreter",
  "https://overpass.openstreetmap.fr/api/interpreter",
- "https://maps.mail.ru/osm/tools/overpass/api/interpreter",
+ "https://overpass.osm.ch/api/interpreter",
+ "https://overpass.kumi.systems/api/interpreter",
  "https://overpass-api.de/api/interpreter"
 ];
 
