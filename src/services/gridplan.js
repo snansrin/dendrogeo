@@ -1,18 +1,20 @@
 "use strict";
 /* ===== DendroGeo v2 · src/services/gridplan.js =====
-Park sınırı algılama (Overpass API) + grid tabanlı ölçüm planlama */
+Park sınırı algılama (Overpass API) + grid tabanlı ölçüm planlama
+v2: multi-ring destek — yol/derenin böldüğü parklar (Dikmen vb.) artık çalışır */
 
 let PARK_POLY=null,PARK_LAYER=null,PARK_MODE=false,PARK_CLICK_BOUND=false;
-const GRID_CELLS=[],GRID_LAYER=null;
+const GRID_CELLS=[];
+let GRID_LAYER=null;
 
 const OVERPASS_URLS=[
  "https://overpass-api.de/api/interpreter",
  "https://overpass.kumi.systems/api/interpreter"
 ];
 
-// 1) Overpass: tıklanan noktanın etrafındaki parkı bul
-async function queryPark(lat,lon,radius=150){
- const q=`[out:json][timeout:15];(way["leisure"~"park|garden|nature_reserve"](around:${radius},${lat},${lon});relation["leisure"~"park|garden|nature_reserve"](around:${radius},${lat},${lon}););out geom;`;
+// 1) Overpass: tıklanan noktanın etrafındaki yeşil alanı bul
+async function queryPark(lat,lon,radius=1200){
+ const q=`[out:json][timeout:20];(way["leisure"~"park|garden|nature_reserve|common|recreation_ground|playground|pitch"](around:${radius},${lat},${lon});way["landuse"~"forest|grass|meadow|recreation_ground"](around:${radius},${lat},${lon});relation["leisure"~"park|garden|nature_reserve|common|recreation_ground"](around:${radius},${lat},${lon}););out geom;`;
  for(const url of OVERPASS_URLS){
   try{
    const res=await fetch(url+"?data="+encodeURIComponent(q));
@@ -20,12 +22,12 @@ async function queryPark(lat,lon,radius=150){
    const json=await res.json();
    const cands=[];
    for(const el of (json.elements||[])){
-    const poly=extractPoly(el);
-    if(!poly||poly.length<3)continue;
-    cands.push({poly,name:(el.tags&&el.tags.name)||null,area:polyArea(poly)});
+    const rings=extractRings(el);
+    if(!rings||!rings.length)continue;
+    cands.push({rings,name:(el.tags&&el.tags.name)||null,area:polyArea(rings)});
    }
    if(!cands.length)continue;
-   const inside=cands.filter(c=>pointInPolygon(lat,lon,c.poly));
+   const inside=cands.filter(c=>pointInPark(lat,lon,c.rings));
    const pool=inside.length?inside:cands;
    pool.sort((a,b)=>a.area-b.area);
    return pool[0];
@@ -34,39 +36,76 @@ async function queryPark(lat,lon,radius=150){
  return null;
 }
 
-// 2) OSM elemanından polygon çıkar
-function extractPoly(el){
- if(el.type==="way"&&el.geometry)return el.geometry.map(g=>[g.lat,g.lon]);
+// 2) OSM elemanından halka(lar) çıkar — kopuk parçalar ayrı halka kalır
+function extractRings(el){
+ if(el.type==="way"&&el.geometry){
+  const r=el.geometry.map(g=>[g.lat,g.lon]);
+  return r.length>2?[r]:null;
+ }
  if(el.type==="relation"&&el.members){
-  const outer=el.members.filter(m=>m.role==="outer"&&m.geometry);
-  if(outer.length===1)return outer[0].geometry.map(g=>[g.lat,g.lon]);
-  if(outer.length>1){let pts=[];outer.forEach(m=>{pts=pts.concat(m.geometry.map(g=>[g.lat,g.lon]));});return pts;}
+  const outer=el.members.filter(m=>m.role==="outer"&&m.geometry).map(m=>m.geometry.map(g=>[g.lat,g.lon]));
+  if(!outer.length)return null;
+  return joinWaysToRings(outer);
  }
  return null;
 }
 
-// 3) Nokta polygon içinde mi (ray casting)
-function pointInPolygon(lat,lon,poly){
+// 3) Uç uca bağlı way'leri birleştir, kopuk parçaları ayrı halka bırak
+function joinWaysToRings(ways){
+ const rings=[];
+ const remaining=ways.slice();
+ const eq=(a,b)=>Math.abs(a[0]-b[0])<1e-9&&Math.abs(a[1]-b[1])<1e-9;
+ while(remaining.length){
+  const chain=remaining.shift().slice();
+  let merged=true,guard=ways.length*2+10;
+  while(merged&&guard-->0){
+   merged=false;
+   for(let i=0;i<remaining.length;i++){
+    const w=remaining[i],head=chain[0],tail=chain[chain.length-1];
+    const w0=w[0],w1=w[w.length-1];
+    if(eq(tail,w0)){chain.push(...w.slice(1));merged=true;}
+    else if(eq(tail,w1)){chain.push(...w.slice().reverse().slice(1));merged=true;}
+    else if(eq(head,w1)){chain.unshift(...w.slice(0,-1));merged=true;}
+    else if(eq(head,w0)){chain.unshift(...w.slice().reverse().slice(0,-1));merged=true;}
+    if(merged){remaining.splice(i,1);break;}
+   }
+  }
+  if(chain.length>2)rings.push(chain);
+ }
+ return rings;
+}
+
+// 4) Nokta tek halka içinde mi (ray casting)
+function pointInPolygon(lat,lon,ring){
  let inside=false;
- for(let i=0,j=poly.length-1;i<poly.length;j=i++){
-  const yi=poly[i][0],xi=poly[i][1],yj=poly[j][0],xj=poly[j][1];
+ for(let i=0,j=ring.length-1;i<ring.length;j=i++){
+  const yi=ring[i][0],xi=ring[i][1],yj=ring[j][0],xj=ring[j][1];
   if(((yi>lat)!==(yj>lat))&&(lon<(xj-xi)*(lat-yi)/(yj-yi)+xi))inside=!inside;
  }
  return inside;
 }
 
-// 4) Polygon alanı (m²) — equirectangular yaklaşım
-function polyArea(poly){
- const lat0=poly[0][0]*Math.PI/180;
- const kx=111320*Math.cos(lat0),ky=110540;
- let a=0;
- for(let i=0,j=poly.length-1;i<poly.length;j=i++){
-  a+=(poly[j][1]*kx)*(poly[i][0]*ky)-(poly[i][1]*kx)*(poly[j][0]*ky);
- }
- return Math.abs(a/2);
+// 5) Nokta çok parçalı parkın HERHANGİ bir parçasında mı
+function pointInPark(lat,lon,rings){
+ return rings.some(r=>pointInPolygon(lat,lon,r));
 }
 
-// 5) Park modu aç/kapat
+// 6) Tüm parçaların toplam alanı (m²)
+function polyArea(rings){
+ let total=0;
+ for(const ring of rings){
+  const lat0=ring[0][0]*Math.PI/180;
+  const kx=111320*Math.cos(lat0),ky=110540;
+  let a=0;
+  for(let i=0,j=ring.length-1;i<ring.length;j=i++){
+   a+=(ring[j][1]*kx)*(ring[i][0]*ky)-(ring[i][1]*kx)*(ring[j][0]*ky);
+  }
+  total+=Math.abs(a/2);
+ }
+ return total;
+}
+
+// 7) Park modu aç/kapat
 function toggleParkMode(){
  PARK_MODE=!PARK_MODE;
  const b=$("parkModeBtn");
@@ -77,7 +116,7 @@ function toggleParkMode(){
  if(!PARK_MODE)clearPark();
 }
 
-// 6) Harita tıklama olayını bir kez bağla
+// 8) Harita tıklama olayını bir kez bağla
 function bindParkClick(){
  if(PARK_CLICK_BOUND||!map)return;
  PARK_CLICK_BOUND=true;
@@ -90,19 +129,20 @@ function bindParkClick(){
  });
 }
 
-// 7) Park sınırını çiz
+// 9) Park sınırını çiz (çok parçalı destekli)
 function drawPark(park){
  clearPark();
- PARK_POLY=park.poly;
- PARK_LAYER=L.polygon(park.poly,{color:"#2b6cb0",weight:2.5,dashArray:"6,6",fillColor:"#3b82f6",fillOpacity:.10,interactive:false}).addTo(map);
+ PARK_POLY=park.rings;
+ PARK_LAYER=L.polygon(park.rings,{color:"#2b6cb0",weight:2.5,dashArray:"6,6",fillColor:"#3b82f6",fillOpacity:.10,interactive:false}).addTo(map);
  map.fitBounds(PARK_LAYER.getBounds(),{padding:[30,30]});
  const ha=(park.area/10000).toFixed(2);
+ const parca=park.rings.length;
  $("parkInfo").style.display="block";
- $("parkInfo").innerHTML=`<b>🌳 ${esc(park.name||"İsimsiz Park")}</b> · Alan: <b>${ha} ha</b> · Sınır: ${park.poly.length} köşe noktası<br><span style="font-size:.8rem;color:var(--mut)">✓ Sınır algılandı. Grid boyutu seçimi ve hücre analizi bir sonraki adımda gelecek.</span>`;
- toast("✓ Park sınırı algılandı: "+ha+" hektar","ok","🌳");
+ $("parkInfo").innerHTML=`<b>🌳 ${esc(park.name||"İsimsiz Park")}</b> · Alan: <b>${ha} ha</b> · Parça: ${parca} · Köşe: ${park.rings.reduce((t,r)=>t+r.length,0)} nokta<br><span style="font-size:.8rem;color:var(--mut)">✓ Sınır algılandı${parca>1?" (yol/derenin böldüğü parçalar dahil)":""}. Grid adımı bir sonraki fazda.</span>`;
+ toast("✓ Park sınırı algılandı: "+ha+" hektar"+(parca>1?" ("+parca+" parça)":""),"ok","🌳");
 }
 
-// 8) Park katmanını temizle
+// 10) Park katmanını temizle
 function clearPark(){
  if(PARK_LAYER&&map){map.removeLayer(PARK_LAYER);PARK_LAYER=null;}
  PARK_POLY=null;
