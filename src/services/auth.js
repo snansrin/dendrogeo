@@ -28,6 +28,22 @@ if(TS[tsId]){try{turnstile.reset(TS[tsId]);}catch(e){}}
 },120);
 }
 const TS = window.TS = {};
+function loadTurnstileScript(){
+ if(window._tsLoadStarted||typeof turnstile!=="undefined")return;
+ window._tsLoadStarted=true;
+ const s=document.createElement("script");
+ s.src="https://challenges.cloudflare.com/turnstile/v0/api.js";
+ s.async=true;
+ document.head.appendChild(s);
+}
+function scheduleTurnstile(){
+ const el=document.getElementById("erisim");
+ if(!el||!("IntersectionObserver" in window)){loadTurnstileScript();return;}
+ const io=new IntersectionObserver(es=>{
+  if(es.some(e=>e.isIntersecting)){loadTurnstileScript();io.disconnect();}
+ },{rootMargin:"300px"});
+ io.observe(el);
+}
 function initTurnstile(){
 if(typeof turnstile==="undefined"){setTimeout(initTurnstile,500);return;}
 ["tsLogin","tsReg","tsReset"].forEach(id=>{
@@ -38,8 +54,8 @@ catch(e){console.log("TS render error",id,e);}
 }
 });
 }
-if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",initTurnstile);
-else initTurnstile();
+if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",()=>{initTurnstile();scheduleTurnstile();});
+else{initTurnstile();scheduleTurnstile();}
 function tsToken(id){
 if(typeof turnstile==="undefined"||!TS[id])return null;
 try{return turnstile.getResponse(TS[id])||null;}catch(e){return null;}
