@@ -7,7 +7,7 @@
  *                 
  * Filtreler:                  
  *  - Park dışı
- *  - Göl / su
+ *  - Göl / su            
  *  - Suya 15 m güvenlik mesafesi
  *  - Bina
  *  - Bina/yapıya 10 m güvenlik mesafesi
