@@ -19,7 +19,7 @@ Disallow: /?view=measure
 Disallow: /?view=nav
 
 # API endpoint'leri taranmasın (Supabase)
-Disallow: /*.supabase.co/
+
 
 # Site haritası
 Sitemap: https://dendrogeo.org/sitemap.xml
