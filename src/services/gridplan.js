@@ -738,10 +738,6 @@ function clearPark(){
  if(PARK_LAYER&&map){map.removeLayer(PARK_LAYER);PARK_LAYER=null;}
  if(WATER_LAYER&&map){map.removeLayer(WATER_LAYER);WATER_LAYER=null;}
  if(IMP_LAYER&&map){map.removeLayer(IMP_LAYER);IMP_LAYER=null;}
- WATER_RINGS=[];
- WATER_LINES=[];
- IMP_RINGS=[];
- IMP_LINES=[];
  PARK_POLY=null;
 }
 
