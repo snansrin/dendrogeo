@@ -109,7 +109,55 @@ function isCellValid(s0,s1,w0,w1){
  if(!isValidSpot(s1,w1))return false;
  return true;
 }
+function extractRings(el){
+ if(el.type==="way"&&el.geometry){
+  const r=el.geometry.map(g=>[g.lat,g.lon]);
+  return r.length>2?[r]:null;
+ }
+ if(el.type==="relation"&&el.members){
+  const outer=el.members.filter(m=>m.role==="outer"&&m.geometry).map(m=>m.geometry.map(g=>[g.lat,g.lon]));
+  if(!outer.length)return null;
+  return joinWaysToRings(outer);
+ }
+ return null;
+}
 
+function collectImpNodes(el){
+ if(el.geometry)el.geometry.forEach(g=>IMP_NODES.push([g.lat,g.lon]));
+}
+
+function pointInWater(lat,lon){
+ return WATER_RINGS.some(r=>pointInPolygon(lat,lon,r));
+}
+
+function nearWater(lat,lon){
+ const pts=querySpatial(WATER_SPATIAL, lat, lon);
+ if(!pts)return false;
+ const b2=0.000135*0.000135;
+ for(const p of pts){
+  const dx=p[1]-lon,dy=p[0]-lat;
+  if(dx*dx+dy*dy<b2)return true;
+ }
+ return false;
+}
+
+function nearImpervious(lat,lon){
+ const pts=querySpatial(IMP_SPATIAL, lat, lon);
+ if(!pts)return false;
+ const b2=0.00009*0.00009;
+ for(const p of pts){
+  const dx=p[1]-lon,dy=p[0]-lat;
+  if(dx*dx+dy*dy<b2)return true;
+ }
+ return false;
+}
+
+function isValidSpot(lat,lon){
+ if(pointInWater(lat,lon))return false;
+ if(nearWater(lat,lon))return false;
+ if(nearImpervious(lat,lon))return false;
+ return true;
+}
 function joinWaysToRings(ways){
  const rings=[],rem=ways.slice();
  const eq=(a,b)=>Math.abs(a[0]-b[0])<1e-9&&Math.abs(a[1]-b[1])<1e-9;
