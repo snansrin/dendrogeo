@@ -4,7 +4,7 @@ Harita init, marker yönetimi, waypoint CRUD, navigasyon çizimi
 + Güvenlik kontrolleri (null-safe) */
 
 // ============================================================ 
-// 1. MARKER HTML ÜRETİCİ
+// 1. MARKER HTML ÜRETİCİ 
 // ============================================================
 function popupHtml(r){
  if(!r) return "";
