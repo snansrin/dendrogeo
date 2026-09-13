@@ -337,6 +337,7 @@ function drawGridLayer(){
    L.DomEvent.stopPropagation(e);
    toggleCellSelection(cell.id,rect);
   });
+  rect._cellId=cell.id; 
   rect.bindTooltip(`Hücre ${cell.id} · ${cell.n} ölçüm · Tıkla: seç/kaldır`,{sticky:true});
  });
  
