@@ -202,8 +202,8 @@
 <script src="src/services/admin.js?v=1"></script>
 <script src="src/services/world.js?v=1"></script>
 <script src="src/services/measure.js?v=1"></script>
-<script src="src/services/map.js?v=2"></script>
-<script src="src/services/gridplan.js?v=20"></script>
+<script src="src/services/map.js?v=1"></script>
+<script src="src/services/gridplan.js?v=5"></script>
 <script src="src/services/dash.js?v=1"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
 <link rel="stylesheet" href="css/style.css?v=2">
@@ -764,8 +764,8 @@
 <script>
 "use strict";
 
-let USER=null,PROFILE=null,GPS=null,WP=[],navTarget=null,charts={},map=null,navMap=null,worldMap=null,worldMapL=null,EDIT_ID=null,EDIT_PROJ=null,liveLoaded=false,PROJ_LIST=[],photoOk=false,manualPoint=false,USERS_CACHE=[],REQ_ROWS=[],REQ_PROJECTS=[],ADM_ROWS=[],ADM_PROJECTS=[],PARK_DATA=[];
-const INITIAL_HASH=window.location.hash||"";
+let USER=null,PROFILE=null,GPS=null,WP=[],navTarget=null,charts={},map=null,navMap=null,worldMap=null,worldMapL=null,EDIT_ID=null,EDIT_PROJ=null,liveLoaded=false,PROJ_LIST=[],photoOk=false;
+
 
 function toast(msg,type="ok",icon=""){
  const wrap=$("toastWrap");if(!wrap)return;
