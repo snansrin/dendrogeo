@@ -8,7 +8,7 @@ let WATER_RINGS=[],WATER_LAYER=null;
 let IMP_NODES=[],IMP_LAYER=null;
 const GRID_CELLS=[];
 let GRID_LAYER=null,WP_AUTO_LAYER=null;
-const SELECTED_CELLS=new Set();
+const SELECTED_CELLS=new Set(); 
 
 // SPATIAL INDEX
 let WATER_SPATIAL=null, IMP_SPATIAL=null;
