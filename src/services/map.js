@@ -110,10 +110,9 @@ function drawNav(){
  navMap.eachLayer(l=>{if(l._wp)navMap.removeLayer(l);});
  WP.forEach(w=>{
   const done=w.visited;
-  const isTarget=navTarget&&navTarget.id===w.id&&!done;
   const icon=L.divIcon({
    className:"",
-   html:`<div class="wp-badge2 ${done?"done":""} ${isTarget?"target":""}" style="--wpbg:${done?"#16a34a":"#e11d48"}"><span>${w.wp_id}</span></div>`,
+   html:`<div class="wp-badge2 ${done?"done":""}" style="--wpbg:${done?"#16a34a":"#e11d48"}"><span>${w.wp_id}</span></div>`,
    iconSize:[28,28],iconAnchor:[14,24]
   });
   const m=L.marker([w.lat,w.lon],{icon}).addTo(navMap);m._wp=1;
@@ -121,19 +120,19 @@ function drawNav(){
   m.on("click",()=>{selectWaypoint(w.id);});
  });
  if(GPS){
-  const hd=(GPS.heading!=null&&isFinite(GPS.heading))?GPS.heading:null;
+  const b=(navTarget&&!navTarget.visited)?brg(GPS.latitude,GPS.longitude,navTarget.lat,navTarget.lon):null;
   const me=L.marker([GPS.latitude,GPS.longitude],{
    icon:L.divIcon({
     className:"",
-    html:`<div class="loc-marker">${hd!=null?`<div class="headwrap" style="transform:rotate(${hd}deg)"><div class="arrow"></div></div>`:""}<div class="pulse"></div><div class="dot"></div></div>`,
-    iconSize:[22,22],iconAnchor:[11,11]
+    html:`<div class="loc-marker">${b!=null?`<div class="arrow" style="transform:rotate(${b}deg)"></div>`:""}<div class="dot"></div></div>`,
+    iconSize:[20,20],iconAnchor:[10,10]
    }),
    zIndexOffset:1000
   }).addTo(navMap);me._wp=1;
   if(!navTarget){const ts=WP.filter(w=>!w.visited);if(ts.length)navTarget=ts.sort((a,b)=>hav(GPS.latitude,GPS.longitude,a.lat,a.lon)-hav(GPS.latitude,GPS.longitude,b.lat,b.lon))[0];}
-  if(navTarget&&!navTarget.visited){const d=hav(GPS.latitude,GPS.longitude,navTarget.lat,navTarget.lon),b=brg(GPS.latitude,GPS.longitude,navTarget.lat,navTarget.lon);
-   $("navDist").textContent=Math.round(d)+" m";$("navTarget").textContent="Hedef: P"+navTarget.wp_id+" · "+Math.round(b)+"°";
-   $("navArrow").style.transform="rotate("+b+"deg)";
+  if(navTarget&&!navTarget.visited){const d=hav(GPS.latitude,GPS.longitude,navTarget.lat,navTarget.lon),bearing=brg(GPS.latitude,GPS.longitude,navTarget.lat,navTarget.lon);
+   $("navDist").textContent=Math.round(d)+" m";$("navTarget").textContent="Hedef: P"+navTarget.wp_id+" · "+Math.round(bearing)+"°";
+   $("navArrow").style.transform="rotate("+bearing+"deg)";
    const ln=L.polyline([[GPS.latitude,GPS.longitude],[navTarget.lat,navTarget.lon]],{color:"#c2452d",dashArray:"5,8",weight:2}).addTo(navMap);ln._wp=1;
   }else{$("navDist").textContent="—";$("navTarget").textContent="Hedef seç / tamamlandı";$("navArrow").style.transform="rotate(0)";}
  }
