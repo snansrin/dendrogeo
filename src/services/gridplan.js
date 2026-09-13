@@ -174,7 +174,8 @@ async function buildGrid(){
  const size=+$("gridSize").value||20;
  const thresh=+$("gridThresh").value||3;
  const est=Math.round(polyArea(PARK_POLY)/(size*size));
- if(est>400)return toast("⚠ ~"+est+" hücre çok yoğun. Daha büyük grid boyutu seç.","warn");
+ if(est>2000)return toast("⚠ ~"+est+" hücre çok yoğun (maks 2000). 50×50 m seç.","err");
+ if(est>600&&!confirm(`⚠ ~${est} hücre oluşturulacak.\nHarita biraz yavaşlayabilir.\n\nDevam edilsin mi?`))return;
  clearGrid();
  let minLat=90,maxLat=-90,minLon=180,maxLon=-180;
  PARK_POLY.forEach(r=>r.forEach(p=>{
