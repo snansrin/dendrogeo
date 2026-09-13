@@ -1,17 +1,16 @@
 "use strict";
-/* ===== DendroGeo v2 · src/services/gridplan.js v6 =====
-Park sınırı + grid planlama + su/katı zemin filtresi (buffer zone)
-+ MANUEL WAYPOINT SEÇİMİ + SPATIAL OPTİMİZASYON */
+/* ===== DendroGeo v2 · src/services/gridplan.js v7 =====
+Park sınırı + grid planlama + su/katı zemin filtresi
++ MANUEL WAYPOINT SEÇİMİ (FİLTRE MUAF) */
 
 let PARK_POLY=null,PARK_LAYER=null,PARK_MODE=false,PARK_CLICK_BOUND=false,PARK_CANDS=[];
 let WATER_RINGS=[],WATER_LAYER=null;
 let IMP_NODES=[],IMP_LAYER=null;
 const GRID_CELLS=[];
 let GRID_LAYER=null,WP_AUTO_LAYER=null;
-const SELECTED_CELLS=new Set(); // Manuel seçilen hücreler
-let SELECTION_LAYER=null;
+const SELECTED_CELLS=new Set();
 
-// SPATIAL INDEX (performans için)
+// SPATIAL INDEX
 let WATER_SPATIAL=null, IMP_SPATIAL=null;
 const SPATIAL_CELL_SIZE=0.0002; // ~22m
 
@@ -21,7 +20,7 @@ const OVERPASS_URLS=[
  "https://overpass.osm.ch/api/interpreter"
 ];
 
-// === SPATIAL INDEX OLUŞTURMA ===
+// === SPATIAL INDEX ===
 function buildSpatialIndex(points, cellSize){
  const idx={};
  for(const p of points){
@@ -39,7 +38,7 @@ function querySpatial(spatial, lat, lon){
  return idx[key]||null;
 }
 
-// === OVERPASS SORGUSU ===
+// === OVERPASS ===
 async function queryPark(lat,lon,radius=1200){
  const q=`[out:json][timeout:20];(way["leisure"~"park|garden|nature_reserve|common|recreation_ground|playground|pitch"](around:${radius},${lat},${lon});way["landuse"~"forest|grass|meadow|recreation_ground"](around:${radius},${lat},${lon});relation["leisure"~"park|garden|nature_reserve|common|recreation_ground"](around:${radius},${lat},${lon});way["natural"="water"](around:${radius},${lat},${lon});way["waterway"~"riverbank|canal|dock|basin"](around:${radius},${lat},${lon});relation["natural"="water"](around:${radius},${lat},${lon});way["building"](around:${radius},${lat},${lon});way["highway"~"residential|primary|secondary|tertiary|service|footway|path|cycleway|track|unclassified"](around:${radius},${lat},${lon});way["landuse"~"commercial|industrial|retail|construction"](around:${radius},${lat},${lon}););out geom;`;
  for(const url of OVERPASS_URLS){
@@ -57,11 +56,8 @@ async function queryPark(lat,lon,radius=1200){
    }
    if(!cands.length)continue;
    const inside=cands.filter(c=>pointInPark(lat,lon,c.rings));
-   
-   // SPATIAL INDEX OLUŞTUR
    WATER_SPATIAL=buildSpatialIndex(WATER_RINGS.flat(), SPATIAL_CELL_SIZE);
    IMP_SPATIAL=buildSpatialIndex(IMP_NODES, SPATIAL_CELL_SIZE);
-   
    return (inside.length?inside:cands).slice().sort((a,b)=>b.area-a.area);
   }catch(e){}
  }
@@ -105,11 +101,10 @@ function pointInWater(lat,lon){
  return WATER_RINGS.some(r=>pointInPolygon(lat,lon,r));
 }
 
-// === HIZLI FİLTRELER (spatial index kullanır) ===
 function nearWater(lat,lon){
  const pts=querySpatial(WATER_SPATIAL, lat, lon);
  if(!pts)return false;
- const b2=0.000135*0.000135; // ~15m
+ const b2=0.000135*0.000135;
  for(const p of pts){
   const dx=p[1]-lon,dy=p[0]-lat;
   if(dx*dx+dy*dy<b2)return true;
@@ -120,7 +115,7 @@ function nearWater(lat,lon){
 function nearImpervious(lat,lon){
  const pts=querySpatial(IMP_SPATIAL, lat, lon);
  if(!pts)return false;
- const b2=0.00009*0.00009; // ~10m
+ const b2=0.00009*0.00009;
  for(const p of pts){
   const dx=p[1]-lon,dy=p[0]-lat;
   if(dx*dx+dy*dy<b2)return true;
@@ -128,7 +123,6 @@ function nearImpervious(lat,lon){
  return false;
 }
 
-// Nokta uygun mu? (grid ve waypoint için TEK FONKSİYON)
 function isValidSpot(lat,lon){
  if(pointInWater(lat,lon))return false;
  if(nearWater(lat,lon))return false;
@@ -136,22 +130,17 @@ function isValidSpot(lat,lon){
  return true;
 }
 
-// HÜCRE TAMAMEN GEÇERLİ Mİ? (merkez + 4 köşe + 4 kenar ortası)
-function isCellFullyValid(s0,s1,w0,w1){
- const dLat=(s1-s0)/2, dLon=(w1-w0)/2;
+// HÜCRE GEÇERLİ Mİ? — Sadece merkez + 4 köşe (kenar ortası YOK)
+function isCellValid(s0,s1,w0,w1){
  const cLat=(s0+s1)/2, cLon=(w0+w1)/2;
- // Merkez
+ // Park içinde mi?
+ if(!pointInPark(cLat,cLon,PARK_POLY))return false;
+ // Merkez + 4 köşe su/yol/bina değil mi?
  if(!isValidSpot(cLat,cLon))return false;
- // 4 köşe
  if(!isValidSpot(s0,w0))return false;
  if(!isValidSpot(s0,w1))return false;
  if(!isValidSpot(s1,w0))return false;
  if(!isValidSpot(s1,w1))return false;
- // 4 kenar ortası
- if(!isValidSpot(s0,cLon))return false;
- if(!isValidSpot(s1,cLon))return false;
- if(!isValidSpot(cLat,w0))return false;
- if(!isValidSpot(cLat,w1))return false;
  return true;
 }
 
@@ -233,23 +222,31 @@ function drawPark(park){
   IMP_NODES.forEach(p=>L.circleMarker(p,{radius:1.5,color:"#9ca3af",fillColor:"#9ca3af",fillOpacity:.5,weight:0,interactive:false}).addTo(IMP_LAYER));
  }
  map.fitBounds(PARK_LAYER.getBounds(),{padding:[30,30]});
+ 
+ // UYARI: Park çok büyükse bilgilendir
+ const totalArea=park.area/10000;
  const waterArea=WATER_RINGS.length?polyArea(WATER_RINGS):0;
  const landArea=Math.max(0,park.area-waterArea);
  const haLand=(landArea/10000).toFixed(1);
  const haWater=(waterArea/10000).toFixed(1);
- const parca=park.rings.length;
+ 
+ let sizeWarn="";
+ if(totalArea>50){
+  sizeWarn=`<div style="margin-top:6px;padding:8px;background:#fef3c7;border-radius:8px;font-size:.78rem;color:#92400e">⚠️ Park alanı çok büyük (${totalArea.toFixed(1)} ha). Grid oluşturmak yerine manuel waypoint kullanmanız önerilir.</div>`;
+ }
+ 
  const alt=PARK_CANDS.length>1
   ?`<div style="margin-top:8px;font-size:.8rem">🔁 Alan seç: <select id="parkAlt" onchange="switchPark(+this.value)">`+
    PARK_CANDS.map((c,i)=>`<option value="${i}"${c===park?" selected":""}>${esc(c.name||"İsimsiz")} · ${((c.area-waterArea)/10000).toFixed(1)} ha</option>`).join("")+
    `</select></div>`:"";
  $("parkInfo").style.display="block";
- $("parkInfo").innerHTML=`<b>🌳 ${esc(park.name||"İsimsiz Park")}</b> · <b>Kara: ${haLand} ha</b>${haWater>0.1?" · Su: "+haWater+" ha":""}${parca>1?" · Parça: "+parca:""}${alt}`+
-  `<div style="font-size:.75rem;color:var(--mut);margin-top:4px">🔒 Filtre: suya 15m + yol/binaya 10m mesafe korunur (merkez+köşe+kenar kontrolü)</div>`+
+ $("parkInfo").innerHTML=`<b>🌳 ${esc(park.name||"İsimsiz Park")}</b> · <b>Kara: ${haLand} ha</b>${haWater>0.1?" · Su: "+haWater+" ha":""}${alt}${sizeWarn}`+
+  `<div style="font-size:.75rem;color:var(--mut);margin-top:4px">🔒 Filtre: suya 15m + yol/binaya 10m (merkez+köşe kontrolü)</div>`+
   `<div style="margin-top:10px;display:flex;gap:8px;align-items:center;flex-wrap:wrap">`+
   `<label style="font-size:.8rem">Proje:</label>`+
   `<select id="gridProject">`+((typeof PROJ_LIST!=="undefined"&&PROJ_LIST.length)?PROJ_LIST.map(p=>`<option value="${p.id}">${esc(p.name)}</option>`).join(""):`<option value="0">Önce proje oluştur</option>`)+`</select>`+
   `<label style="font-size:.8rem">Grid:</label>`+
-  `<select id="gridSize"><option value="10">10×10 m (yoğun)</option><option value="20" selected>20×20 m (önerilen)</option><option value="50">50×50 m (geniş)</option></select>`+
+  `<select id="gridSize"><option value="10">10×10 m</option><option value="20" selected>20×20 m</option><option value="50">50×50 m</option></select>`+
   `<label style="font-size:.8rem">Yeterli eşik:</label>`+
   `<select id="gridThresh"><option value="1">1+</option><option value="2">2+</option><option value="3" selected>3+</option><option value="5">5+</option></select></div>`+
   `<div style="margin-top:8px;display:flex;gap:8px;align-items:center;flex-wrap:wrap">`+
@@ -277,8 +274,8 @@ async function buildGrid(){
  const size=+$("gridSize").value||20;
  const thresh=+$("gridThresh").value||3;
  const est=Math.round(polyArea(PARK_POLY)/(size*size));
- if(est>2000)return toast("⚠ ~"+est+" hücre çok yoğun (maks 2000). 50×50 m seç.","err");
- if(est>600&&!confirm(`⚠ ~${est} hücre oluşturulacak.\nHarita biraz yavaşlayabilir.\n\nDevam edilsin mi?`))return;
+ if(est>3000)return toast("⚠ ~"+est+" hücre çok yoğun. 50×50 m seç.","err");
+ if(est>800&&!confirm(`⚠ ~${est} hücre oluşturulacak.\nDevam?`))return;
  clearGrid();
  let minLat=90,maxLat=-90,minLon=180,maxLon=-180;
  PARK_POLY.forEach(r=>r.forEach(p=>{
@@ -288,6 +285,7 @@ async function buildGrid(){
  const lat0=minLat*Math.PI/180;
  const dLat=size/110540,dLon=size/(111320*Math.cos(lat0));
  const cellMap={};GRID_CELLS.length=0;
+ 
  for(let rI=0;;rI++){
   const s0=minLat+rI*dLat,s1=s0+dLat;
   if(s0>=maxLat)break;
@@ -295,19 +293,23 @@ async function buildGrid(){
    const w0=minLon+cI*dLon,w1=w0+dLon;
    if(w0>=maxLon)break;
    const cLat=s0+dLat/2,cLon=w0+dLon/2;
-   if(!pointInPark(cLat,cLon,PARK_POLY))continue;
-   // TAM HÜCRE FİLTRESİ: merkez + köşe + kenar (su/yol/bina)
-   if(!isCellFullyValid(s0,s1,w0,w1))continue;
+   
+   // SADECE PARK İÇİ + SU/YOL/BİNA DEĞİL
+   if(!isCellValid(s0,s1,w0,w1))continue;
+   
    const cell={lat:cLat,lon:cLon,s0,s1,w0,w1,n:0,id:rI+"_"+cI};
    cellMap[cell.id]=cell;GRID_CELLS.push(cell);
   }
  }
+ 
  const{data}=await sb.from("measurements").select("lat,lon").eq("status","Onaylı")
   .gte("lat",minLat).lte("lat",maxLat).gte("lon",minLon).lte("lon",maxLon).limit(5000);
  (data||[]).forEach(m=>{
   const cell=cellMap[Math.floor((m.lat-minLat)/dLat)+"_"+Math.floor((m.lon-minLon)/dLon)];
   if(cell)cell.n++;
  });
+ 
+ SELECTED_CELLS.clear();
  drawGridLayer();
  toast("✓ Grid hazır: "+GRID_CELLS.length+" hücre","ok","🔲");
 }
@@ -317,10 +319,12 @@ function drawGridLayer(){
  GRID_LAYER=L.layerGroup().addTo(map);
  const thresh=+$("gridThresh")?.value||3;
  let g=0,y=0,r0=0;
+ 
  GRID_CELLS.forEach(cell=>{
   const col=cell.n===0?"#e11d48":cell.n<thresh?"#f59e0b":"#16a34a";
   if(cell.n===0)r0++;else if(cell.n<thresh)y++;else g++;
   const isSel=SELECTED_CELLS.has(cell.id);
+  
   const rect=L.rectangle([[cell.s0,cell.w0],[cell.s1,cell.w1]],{
    color:isSel?"#1d4ed8":col,
    weight:isSel?3:1.2,
@@ -328,9 +332,14 @@ function drawGridLayer(){
    fillOpacity:isSel?.55:.32,
    interactive:true
   }).addTo(GRID_LAYER);
-  rect.on("click",()=>toggleCellSelection(cell.id,rect));
-  rect.bindTooltip(`Hücre ${cell.id} · ${cell.n} ölçüm`,{sticky:true});
+  
+  rect.on("click",(e)=>{
+   L.DomEvent.stopPropagation(e);
+   toggleCellSelection(cell.id,rect);
+  });
+  rect.bindTooltip(`Hücre ${cell.id} · ${cell.n} ölçüm · Tıkla: seç/kaldır`,{sticky:true});
  });
+ 
  updateGridSummary(g,y,r0);
 }
 
@@ -345,10 +354,10 @@ function updateGridSummary(g,y,r0){
   `<span style="color:#b45309">🟡 Az: ${y} (%${pct(y)})</span> · `+
   `<span style="color:#e11d48">🔴 Boş: ${r0} (%${pct(r0)})</span><br>`+
   (selCount>0?`<b style="color:#1d4ed8">🔵 Seçili: ${selCount} hücre</b><br>`:"")+
-  `💡 Boş hücrelere tıklayarak manuel seçim yapabilirsiniz.<br>`+
+  `💡 Hücrelere tıklayarak manuel seçim yapabilirsiniz.<br>`+
   `<div style="margin-top:8px;display:flex;gap:6px;flex-wrap:wrap">`+
-  (r0>0?`<button class="btn sm blue" onclick="createWaypointsFromGrid('auto')">📍 Otomatik Waypoint (${r0} boş)</button>`:"")+
-  (selCount>0?`<button class="btn sm" style="background:#1d4ed8;color:#fff" onclick="createWaypointsFromGrid('manual')">📍 Seçili Hücrelere Waypoint (${selCount})</button>`:"")+
+  (r0>0?`<button class="btn sm blue" onclick="createWaypointsFromGrid('auto')">📍 Otomatik (${r0} boş)</button>`:"")+
+  (selCount>0?`<button class="btn sm" style="background:#1d4ed8;color:#fff" onclick="createWaypointsFromGrid('manual')">📍 Seçili (${selCount})</button>`:"")+
   (selCount>0?`<button class="btn sm ghost" onclick="clearCellSelection()">✕ Seçimi Temizle</button>`:"")+
   `</div>`;
 }
@@ -358,23 +367,40 @@ function toggleCellSelection(cellId, rect){
   SELECTED_CELLS.delete(cellId);
   const cell=GRID_CELLS.find(c=>c.id===cellId);
   if(cell){
-   const col=cell.n===0?"#e11d48":cell.n<(+$("gridThresh").value)?"#f59e0b":"#16a34a";
+   const thresh=+$("gridThresh")?.value||3;
+   const col=cell.n===0?"#e11d48":cell.n<thresh?"#f59e0b":"#16a34a";
    rect.setStyle({color:col,weight:1.2,fillColor:col,fillOpacity:.32});
   }
  }else{
   SELECTED_CELLS.add(cellId);
   rect.setStyle({color:"#1d4ed8",weight:3,fillColor:"#3b82f6",fillOpacity:.55});
  }
- // Özet güncelle
  let g=0,y=0,r0=0;
- const thresh=+$("gridThresh").value||3;
+ const thresh=+$("gridThresh")?.value||3;
  GRID_CELLS.forEach(c=>{if(c.n===0)r0++;else if(c.n<thresh)y++;else g++;});
  updateGridSummary(g,y,r0);
 }
 
 function clearCellSelection(){
  SELECTED_CELLS.clear();
- drawGridLayer();
+ // Sadece stilleri sıfırla, grid'i yeniden çizme
+ if(GRID_LAYER){
+  const thresh=+$("gridThresh")?.value||3;
+  GRID_LAYER.eachLayer(l=>{
+   if(l.setStyle&&l._bounds){
+    const cellId=l._cellId;
+    const cell=GRID_CELLS.find(c=>c.id===cellId);
+    if(cell){
+     const col=cell.n===0?"#e11d48":cell.n<thresh?"#f59e0b":"#16a34a";
+     l.setStyle({color:col,weight:1.2,fillColor:col,fillOpacity:.32});
+    }
+   }
+  });
+ }
+ let g=0,y=0,r0=0;
+ const thresh=+$("gridThresh")?.value||3;
+ GRID_CELLS.forEach(c=>{if(c.n===0)r0++;else if(c.n<thresh)y++;else g++;});
+ updateGridSummary(g,y,r0);
 }
 
 function clearGrid(){
@@ -403,16 +429,15 @@ async function createWaypointsFromGrid(mode){
  let targetCells=[];
  if(mode==="manual"){
   if(!SELECTED_CELLS.size)return toast("Önce hücre seçin","warn");
+  // MANUEL SEÇİMDE FİLTRE YOK — kullanıcı bilinçli seçti
   targetCells=GRID_CELLS.filter(c=>SELECTED_CELLS.has(c.id));
  }else{
+  // OTOMATİK MODDA FİLTRE VAR — sadece boş ve geçerli hücreler
   targetCells=GRID_CELLS.filter(c=>c.n===0);
  }
  
- // GÜVENLİK AĞI: hücreyi tekrar filtrele
- targetCells=targetCells.filter(c=>isCellFullyValid(c.s0,c.s1,c.w0,c.w1));
- 
  if(!targetCells.length)return toast("Uygun hücre yok","warn");
- if(targetCells.length>500&&!confirm(targetCells.length+" waypoint oluşturulacak.\n\nDevam edilsin mi?"))return;
+ if(targetCells.length>500&&!confirm(targetCells.length+" waypoint oluşturulacak.\nDevam?"))return;
  
  const{data:mx}=await sb.from("waypoints").select("wp_id").eq("project_id",pid).order("wp_id",{ascending:false}).limit(1);
  let next=(mx&&mx.length?mx[0].wp_id:0)+1;
