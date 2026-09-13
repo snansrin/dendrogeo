@@ -613,7 +613,7 @@ function isCellValid(
  return true;
 }
 
-/* =========================================================
+/* =========================================================           
  * OVERPASS
  * ========================================================= */
 
@@ -624,7 +624,7 @@ async function queryPark(
 ){
 
  const q=
- `[out:json][timeout:25];(`+
+ `[out:json][timeout:45];(`+
 
  `way["leisure"~"park|garden|nature_reserve|common|recreation_ground|playground|pitch"](around:${radius},${lat},${lon});`+
 
