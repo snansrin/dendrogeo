@@ -819,7 +819,11 @@ function uuidv4(){
 <script>
 "use strict";
 
-
+async function boot(){
+    if(typeof initTurnstile==="function") setTimeout(initTurnstile,500);
+    
+    // 1. Service Worker'ı kaydet (sadece bir kez)
+    if('serviceWorker' in navigator && !window._swRegistered){
 
 async function boot(){
     // 1. Service Worker'ı kaydet (sadece bir kez)
