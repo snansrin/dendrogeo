@@ -137,3 +137,29 @@ function drawNav(){
   }else{$("navDist").textContent="—";$("navTarget").textContent="Hedef seç / tamamlandı";$("navArrow").style.transform="rotate(0)";}
  }
 }
+/* =========================================================
+ * MODÜL 2: HARİTA KATMANI SEÇİMİ
+ * ========================================================= */
+
+function switchBaseLayer(type){
+ if(!map)return;
+ 
+ // Mevcut tile layer'ı bul ve kaldır
+ map.eachLayer(l=>{
+  if(l._url)map.removeLayer(l);
+ });
+ 
+ const urls={
+  osm:"https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+  sat:"https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
+  topo:"https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png"
+ };
+ const attr={
+  osm:'© OpenStreetMap',
+  sat:'© Esri World Imagery',
+  topo:'© OpenTopoMap (CC-BY-SA)'
+ };
+ 
+ L.tileLayer(urls[type],{attribution:attr[type]}).addTo(map);
+ toast("✓ Harita: "+(type==="osm"?"Sokak":(type==="sat"?"Uydu":"Topoğrafik")),"ok","🗺️");
+}
