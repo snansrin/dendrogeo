@@ -5,7 +5,7 @@
  *
  * İKİ AŞAMALI OVERPASS: Önce park, sonra park içinde su/bina
  * GERÇEK GEOMETRİK FİLTRE: Hücrenin tamamı kontrol edilir
- * ========================================================= */  
+ * ========================================================= */
 
 let PARK_POLY=null;
 let PARK_LAYER=null;
@@ -726,6 +726,7 @@ function drawPark(park){
   `<button class="btn sm" id="gridVisBtn" onclick="toggleGridVis()">🔲 Grid: GÖRÜNÜR</button>`+
   `<button class="btn sm" id="wpVisBtn" onclick="toggleWpVis()">📍 Waypoint: GÖRÜNÜR</button>`+
   `<button class="btn sm" onclick="runLandCoverAnalysis()">🌿 Yeşil/Sert Analizi</button>`+
+  `<button class="btn sm ghost" onclick="downloadParkImage()">🖼️ Park Görseli (PNG)</button>`+
   `<button class="btn sm" onclick="clearGrid()">✕ Temizle</button>`+
   `</div>`+
   `<div id="landCoverReport" style="margin-top:8px;font-size:.82rem;line-height:1.6"></div>`+
@@ -1226,4 +1227,123 @@ async function runLandCoverAnalysis(){
   `<span style="color:var(--mut)">Toplam park: ${ha(nPark)} ha</span>`;
 
  toast("✓ Arazi örtüsü analizi tamam","ok","🌿");
+}
+
+/* =========================================================
+ * MODÜL 2: PARK RAPOR GÖRSELİ (PNG)
+ * ========================================================= */
+
+function downloadParkImage(){
+ if(!PARK_POLY||!PARK_POLY.length)return toast("Önce park seç","warn");
+
+ const W=1600,H=1200;
+ const canvas=document.createElement("canvas");
+ canvas.width=W;canvas.height=H;
+ const ctx=canvas.getContext("2d");
+
+ // Arka plan
+ ctx.fillStyle="#ffffff";
+ ctx.fillRect(0,0,W,H);
+
+ // Bbox
+ let minLat=90,maxLat=-90,minLon=180,maxLon=-180;
+ PARK_POLY.forEach(r=>r.forEach(p=>{
+  if(p[0]<minLat)minLat=p[0];if(p[0]>maxLat)maxLat=p[0];
+  if(p[1]<minLon)minLon=p[1];if(p[1]>maxLon)maxLon=p[1];
+ }));
+ const pad=0.0005;
+ minLat-=pad;maxLat+=pad;minLon-=pad;maxLon+=pad;
+ const dLat=maxLat-minLat,dLon=maxLon-minLon;
+ const scale=Math.min((W-120)/dLon,(H-160)/dLat);
+ const ox=(W-dLon*scale)/2, oy=(H-dLat*scale)/2;
+
+ const toXY=(lat,lon)=>([ox+(lon-minLon)*scale, oy+(maxLat-lat)*scale]);
+
+ // Grid çiz
+ GRID_CELLS.forEach(c=>{
+  const [x0,y0]=toXY(c.s0,c.w0);
+  const [x1,y1]=toXY(c.s1,c.w1);
+  const col=c.n===0?"#e11d48":(c.n<3?"#f59e0b":"#16a34a");
+  ctx.fillStyle=col+"55";
+  ctx.strokeStyle=col;ctx.lineWidth=1;
+  ctx.fillRect(x0,y0,x1-x0,y1-y0);
+  ctx.strokeRect(x0,y0,x1-x0,y1-y0);
+ });
+
+ // Sert zemin (bina)
+ IMP_RINGS.forEach(r=>{
+  if(!r||r.length<3)return;
+  ctx.fillStyle="#9ca3af44";ctx.strokeStyle="#6b7280";ctx.lineWidth=1;
+  ctx.beginPath();
+  r.forEach((p,i)=>{const [x,y]=toXY(p[0],p[1]);i===0?ctx.moveTo(x,y):ctx.lineTo(x,y);});
+  ctx.closePath();ctx.fill();ctx.stroke();
+ });
+
+ // Su
+ WATER_RINGS.forEach(r=>{
+  if(!r||r.length<3)return;
+  ctx.fillStyle="#60a5fa88";ctx.strokeStyle="#2563eb";ctx.lineWidth=1.5;
+  ctx.beginPath();
+  r.forEach((p,i)=>{const [x,y]=toXY(p[0],p[1]);i===0?ctx.moveTo(x,y):ctx.lineTo(x,y);});
+  ctx.closePath();ctx.fill();ctx.stroke();
+ });
+
+ // Park sınırı
+ ctx.strokeStyle="#2b6cb0";ctx.lineWidth=3;ctx.setLineDash([12,8]);
+ PARK_POLY.forEach(r=>{
+  ctx.beginPath();
+  r.forEach((p,i)=>{const [x,y]=toXY(p[0],p[1]);i===0?ctx.moveTo(x,y):ctx.lineTo(x,y);});
+  ctx.closePath();ctx.stroke();
+ });
+ ctx.setLineDash([]);
+
+ // Waypoint
+ (LAST_WP_ROWS.length?LAST_WP_ROWS:WP).forEach(r=>{
+  const [x,y]=toXY(r.lat,r.lon);
+  ctx.fillStyle="#e11d48";
+  ctx.beginPath();ctx.arc(x,y,5,0,Math.PI*2);ctx.fill();
+  ctx.strokeStyle="#fff";ctx.lineWidth=1.5;ctx.stroke();
+ });
+
+ // Başlık
+ ctx.fillStyle="#1f2937";ctx.font="bold 22px system-ui";
+ const name=(PARK_CANDS[0]&&PARK_CANDS[0].name)||"İsimsiz Park";
+ ctx.fillText("🌳 "+name+" — Park Raporu",30,38);
+ ctx.font="14px system-ui";ctx.fillStyle="#6b7280";
+ const ha=(polyArea(PARK_POLY)/10000).toFixed(1);
+ ctx.fillText("Toplam: "+ha+" ha · Hücre: "+GRID_CELLS.length+" · Waypoint: "+(LAST_WP_ROWS.length||WP.length)+" · "+new Date().toLocaleDateString("tr-TR"),30,60);
+
+ // Lejant
+ const lg=[
+  ["#16a34a","Yeterli ölçüm"],
+  ["#f59e0b","Az ölçüm"],
+  ["#e11d48","Boş / Waypoint"],
+  ["#60a5fa","Su"],
+  ["#9ca3af","Sert zemin"]
+ ];
+ lg.forEach((e,i)=>{
+  const y=H-140+i*22;
+  ctx.fillStyle=e[0];ctx.fillRect(W-260,y,16,14);
+  ctx.strokeStyle="#333";ctx.strokeRect(W-260,y,16,14);
+  ctx.fillStyle="#1f2937";ctx.font="13px system-ui";
+  ctx.fillText(e[1],W-238,y+12);
+ });
+
+ // Ölçek çubuğu
+ const mPerPx=(dLon*111320*Math.cos((minLat+maxLat)/2*Math.PI/180))/scale/W*W;
+ const barM=200;
+ const barPx=barM/(mPerPx||1);
+ ctx.fillStyle="#1f2937";
+ ctx.fillRect(30,H-40,barPx,8);
+ ctx.font="bold 12px system-ui";
+ ctx.fillText(barM+" m",30+barPx+8,H-32);
+
+ // İndir
+ canvas.toBlob(b=>{
+  const u=URL.createObjectURL(b);
+  const a=document.createElement("a");
+  a.href=u;a.download="dendrogeo_park_"+name.replace(/[^a-z0-9_]/gi,"_")+".png";a.click();
+  setTimeout(()=>URL.revokeObjectURL(u),1000);
+  toast("✓ Park görseli indirildi","ok","🖼️");
+ },"image/png");
 }
