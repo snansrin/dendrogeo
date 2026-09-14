@@ -26,13 +26,14 @@ let GRID_LAYER=null;
 let WP_AUTO_LAYER=null;
 
 const SELECTED_CELLS=new Set();
+let LAST_WP_ROWS=[];
 
 /* =========================================================
  * AYARLAR
  * ========================================================= */
 
-const WATER_CLEARANCE_M=15;
-const IMP_CLEARANCE_M=10;
+const WATER_CLEARANCE_M=1;
+const IMP_CLEARANCE_M=1;
 
 const OVERPASS_URLS=[
  "https://overpass.private.coffee/api/interpreter",
@@ -664,6 +665,10 @@ function drawPark(park){
  const landArea=Math.max(0,park.area-waterArea);
  const haLand=(landArea/10000).toFixed(1);
  const haWater=(waterArea/10000).toFixed(1);
+ let impArea=0;
+ IMP_RINGS.forEach(r=>{impArea+=polyArea([r]);});
+ IMP_LINES.forEach(l=>{impArea+=lineLengthM(l)*7;});
+ const haImp=(impArea/10000).toFixed(1);
 
  let sizeWarn="";
  if(totalArea>50){
@@ -689,7 +694,8 @@ function drawPark(park){
  $("parkInfo").innerHTML=
   `<b>🌳 ${esc(park.name||"İsimsiz Park")}</b> · `+
   `<b>Kara: ${haLand} ha</b>`+
-  (haWater>0.1?" · Su: "+haWater+" ha":"")+
+   (haWater>0.1?" · Su: "+haWater+" ha":"")+
+  ` · Sert zemin: ~${haImp} ha`+
   alt+sizeWarn+
   `<div style="font-size:.75rem;color:var(--mut);margin-top:4px">`+
   `🔒 Filtre: göl/su ${WATER_CLEARANCE_M}m · bina/yol ${IMP_CLEARANCE_M}m · tam hücre geometrik kontrol`+
@@ -719,8 +725,10 @@ function drawPark(park){
   `<button class="btn sm blue" onclick="buildGrid()">🔲 Grid Oluştur</button>`+
   `<button class="btn sm" id="gridVisBtn" onclick="toggleGridVis()">🔲 Grid: GÖRÜNÜR</button>`+
   `<button class="btn sm" id="wpVisBtn" onclick="toggleWpVis()">📍 Waypoint: GÖRÜNÜR</button>`+
+  `<button class="btn sm" onclick="runLandCoverAnalysis()">🌿 Yeşil/Sert Analizi</button>`+
   `<button class="btn sm" onclick="clearGrid()">✕ Temizle</button>`+
   `</div>`+
+  `<div id="landCoverReport" style="margin-top:8px;font-size:.82rem;line-height:1.6"></div>`+
   `<div id="gridSummary" style="margin-top:10px;font-size:.85rem;line-height:1.7"></div>`;
 
  toast(
@@ -884,7 +892,9 @@ function updateGridSummary(g,y,r0){
   `<div style="margin-top:8px;display:flex;gap:6px;flex-wrap:wrap">`+
   (r0>0?`<button class="btn sm blue" onclick="createWaypointsFromGrid('auto')">📍 Otomatik (${r0} boş)</button>`:"")+
   (selCount>0?`<button class="btn sm" style="background:#1d4ed8;color:#fff" onclick="createWaypointsFromGrid('manual')">📍 Seçili (${selCount})</button>`:"")+
-  (selCount>0?`<button class="btn sm ghost" onclick="clearCellSelection()">✕ Seçimi Temizle</button>`:"")+
+    (selCount>0?`<button class="btn sm ghost" onclick="clearCellSelection()">✕ Seçimi Temizle</button>`:"")+
+  `<button class="btn sm ghost" onclick="downloadGridGeoJSON()">📥 Grid GeoJSON</button>`+
+  `<button class="btn sm ghost" onclick="downloadWaypointsCSV()">📥 Waypoint CSV</button>`+
   `</div>`;
 }
 
@@ -1037,7 +1047,7 @@ async function createWaypointsFromGrid(mode){
   lon:+c.lon.toFixed(6),
   visited:false
  }));
-
+ LAST_WP_ROWS=rows;
  const{error}=await sb.from("waypoints").insert(rows);
 
  if(error){
@@ -1062,4 +1072,158 @@ async function createWaypointsFromGrid(mode){
 
  toast("✓ "+rows.length+" waypoint oluşturuldu (P"+first+"–P"+(next-1)+")","ok","📍");
  clearCellSelection();
+}
+/* =========================================================
+ * MODÜL 1: ÇIKTILAR + ARAZİ ÖRTÜSÜ ANALİZİ
+ * ========================================================= */
+
+function lineLengthM(l){
+ let len=0;
+ for(let i=1;i<l.length;i++){
+  const dy=(l[i][0]-l[i-1][0])*110540;
+  const dx=(l[i][1]-l[i-1][1])*111320*Math.cos(l[i][0]*Math.PI/180);
+  len+=Math.sqrt(dx*dx+dy*dy);
+ }
+ return len;
+}
+
+function downloadBlob(name,mime,text){
+ const b=new Blob([text],{type:mime});
+ const u=URL.createObjectURL(b);
+ const a=document.createElement("a");
+ a.href=u;a.download=name;a.click();
+ setTimeout(()=>URL.revokeObjectURL(u),1000);
+}
+
+function downloadGridGeoJSON(){
+ if(!GRID_CELLS.length)return toast("Önce grid oluştur","warn");
+ const thresh=+$("gridThresh")?.value||3;
+ const fc={
+  type:"FeatureCollection",
+  features:GRID_CELLS.map(c=>({
+   type:"Feature",
+   properties:{
+    id:c.id,
+    olcum:c.n,
+    durum:c.n===0?"bos":(c.n<thresh?"az":"yeterli")
+   },
+   geometry:{
+    type:"Polygon",
+    coordinates:[[[c.w0,c.s0],[c.w1,c.s0],[c.w1,c.s1],[c.w0,c.s1],[c.w0,c.s0]]]
+   }
+  }))
+ };
+ downloadBlob("dendrogeo_grid.geojson","application/geo+json",JSON.stringify(fc,null,2));
+ toast("✓ Grid GeoJSON indirildi ("+GRID_CELLS.length+" hücre)","ok","📥");
+}
+
+function downloadWaypointsCSV(){
+ const rows=LAST_WP_ROWS.length?LAST_WP_ROWS:WP;
+ if(!rows||!rows.length)return toast("İndirilecek waypoint yok","warn");
+ let csv="wp_id,lat,lon,visited\n";
+ rows.forEach(r=>{csv+=r.wp_id+","+r.lat+","+r.lon+","+(r.visited?1:0)+"\n";});
+ downloadBlob("dendrogeo_waypoints.csv","text/csv",csv);
+ toast("✓ "+rows.length+" waypoint CSV indirildi","ok","📥");
+}
+
+function buildNodeIndex(lines){
+ const idx={};
+ const cs=0.0004;
+ lines.forEach(l=>l.forEach(p=>{
+  const k=Math.floor(p[0]/cs)+"_"+Math.floor(p[1]/cs);
+  (idx[k]=idx[k]||[]).push(p);
+ }));
+ return {idx,cs};
+}
+
+function nearLineIndex(index,lat,lon,dist){
+ const cs=index.cs;
+ const i0=Math.floor(lat/cs), j0=Math.floor(lon/cs);
+ const d2=dist*dist;
+ for(let i=i0-1;i<=i0+1;i++){
+  for(let j=j0-1;j<=j0+1;j++){
+   const arr=index.idx[i+"_"+j];
+   if(!arr)continue;
+   for(const p of arr){
+    const dy=(p[0]-lat)*110540;
+    const dx=(p[1]-lon)*111320*Math.cos(lat*Math.PI/180);
+    if(dx*dx+dy*dy<d2)return true;
+   }
+  }
+ }
+ return false;
+}
+
+/* Yeşil/sert zemin — TEK SEFERLİK, sadece park içi 10m örneklem */
+async function runLandCoverAnalysis(){
+ if(!PARK_POLY||!PARK_POLY.length)return toast("Önce park seç");
+ const rep=$("landCoverReport");
+ if(rep)rep.innerHTML="⏳ Arazi örtüsü sorgulanıyor…";
+ toast("🌿 Yeşil/sert zemin sorgusu (tek seferlik)…","info");
+
+ let minLat=90,maxLat=-90,minLon=180,maxLon=-180;
+ PARK_POLY.forEach(r=>r.forEach(p=>{
+  if(p[0]<minLat)minLat=p[0];
+  if(p[0]>maxLat)maxLat=p[0];
+  if(p[1]<minLon)minLon=p[1];
+  if(p[1]>maxLon)maxLon=p[1];
+ }));
+ const pad=0.0002;
+ const bbox=`${minLat-pad},${minLon-pad},${maxLat+pad},${maxLon+pad}`;
+
+ const q=`[out:json][timeout:60];(`+
+  `way["landuse"~"grass|forest|meadow|orchard|vineyard|greenfield"](${bbox});`+
+  `way["leisure"~"garden|park|nature_reserve|recreation_ground"](${bbox});`+
+  `way["natural"~"scrub|heath|grassland"](${bbox});`+
+  `);out geom;`;
+
+ let GREEN=[];
+ for(const url of OVERPASS_URLS){
+  try{
+   const res=await fetch(url+"?data="+encodeURIComponent(q));
+   if(!res.ok)continue;
+   const json=await res.json();
+   for(const el of (json.elements||[])){
+    const rings=extractRings(el);
+    if(rings)GREEN.push(...rings);
+   }
+   break;
+  }catch(e){}
+ }
+
+ const lineIdx=buildNodeIndex(IMP_LINES);
+ const stepLat=10/110540;
+ const stepLon=10/(111320*Math.cos(((minLat+maxLat)/2)*Math.PI/180));
+
+ let nPark=0,nWater=0,nImp=0,nGreen=0,nOther=0;
+
+ for(let la=minLat;la<=maxLat;la+=stepLat){
+  for(let lo=minLon;lo<=maxLon;lo+=stepLon){
+   if(!pointInPark(la,lo,PARK_POLY))continue;
+   nPark++;
+   if(pointInWater(la,lo)){nWater++;continue;}
+   let imp=false;
+   for(const r of IMP_RINGS){
+    if(pointInPolygon(la,lo,r)){imp=true;break;}
+   }
+   if(!imp&&nearLineIndex(lineIdx,la,lo,5))imp=true;
+   if(imp){nImp++;continue;}
+   let gr=false;
+   for(const r of GREEN){
+    if(pointInPolygon(la,lo,r)){gr=true;break;}
+   }
+   if(gr){nGreen++;continue;}
+   nOther++;
+  }
+ }
+
+ const cellM2=100;
+ const ha=v=>(v*cellM2/10000).toFixed(1);
+
+ if(rep)rep.innerHTML=
+  `<b>🌿 Arazi Örtüsü</b> (10m örneklem, sadece park içi)<br>`+
+  `🟩 Yeşil: <b>${ha(nGreen)} ha</b> · 🟫 Sert: <b>${ha(nImp)} ha</b> · 🟦 Su: <b>${ha(nWater)} ha</b> · ⬜ Diğer: <b>${ha(nOther)} ha</b><br>`+
+  `<span style="color:var(--mut)">Toplam park: ${ha(nPark)} ha</span>`;
+
+ toast("✓ Arazi örtüsü analizi tamam","ok","🌿");
 }
