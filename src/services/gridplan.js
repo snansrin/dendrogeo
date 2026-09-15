@@ -1,7 +1,7 @@
 "use strict";
-/* DendroGeo v2 · gridplan.js v31 — PARK ANALYSIS FIXED */           
+/* DendroGeo v2 · gridplan.js v32 — MODERN UI (fonksiyonlar aynen korundu) */
 
-let PARK_POLY=null;        
+let PARK_POLY=null;
 let PARK_HOLES=[];
 let PARK_LAYER=null;
 let PARK_MODE=false;
@@ -67,9 +67,7 @@ function ringGeodesicArea(ring){
 function polyArea(rings){
   if(!rings)return 0;
 
-  /* Relation / structured geometry */
   if(!Array.isArray(rings) && rings.outer){
-
     let outerArea=0;
     let innerArea=0;
 
@@ -88,7 +86,6 @@ function polyArea(rings){
     return Math.max(0,outerArea-innerArea);
   }
 
-  /* Normal array */
   let total=0;
 
   for(const ring of rings){
@@ -212,9 +209,7 @@ function pointInPolygon(lat,lon,ring){
 function pointInPark(lat,lon,rings){
   if(!rings)return false;
 
-  /* Normal outer ring array */
   if(Array.isArray(rings)){
-
     if(!rings.length)return false;
 
     const insideOuter=rings.some(r=>
@@ -230,9 +225,7 @@ function pointInPark(lat,lon,rings){
     return !insideHole;
   }
 
-  /* Structured relation */
   if(rings.outer){
-
     const insideOuter=rings.outer.some(r=>
       pointInPolygon(lat,lon,r)
     );
@@ -274,7 +267,6 @@ function onSegment(a,b,p){
 }
 
 function segmentsIntersect(a,b,c,d){
-
   const o1=orientation(a,b,c);
   const o2=orientation(a,b,d);
   const o3=orientation(c,d,a);
@@ -300,7 +292,6 @@ function rectCorners(r){
 }
 
 function segmentIntersectsRect(a,b,rect){
-
   const cs=rectCorners(rect);
 
   for(let i=0;i<4;i++){
@@ -385,7 +376,6 @@ function geometryIntersectsRect(
   }
 
   for(let i=0;i<pts.length;i++){
-
     const a=pts[i];
     const b=pts[(i+1)%pts.length];
 
@@ -434,7 +424,6 @@ function geometryLineIntersectsRect(
   );
 
   for(let i=0;i<pts.length-1;i++){
-
     if(
       segmentIntersectsRect(
         pts[i],
@@ -483,7 +472,6 @@ function cellInsidePark(
   ];
 
   for(const p of corners){
-
     if(
       pointInPark(
         p[0],
@@ -528,7 +516,6 @@ function isCellValid(
   );
 
   for(const w of WATER_RINGS){
-
     if(
       geometryIntersectsRect(
         w,
@@ -542,7 +529,6 @@ function isCellValid(
   }
 
   for(const l of WATER_LINES){
-
     if(
       geometryLineIntersectsRect(
         l,
@@ -556,7 +542,6 @@ function isCellValid(
   }
 
   for(const b of IMP_RINGS){
-
     if(
       geometryIntersectsRect(
         b,
@@ -570,7 +555,6 @@ function isCellValid(
   }
 
   for(const l of GRID_BLOCK_LINES){
-
     if(
       geometryLineIntersectsRect(
         l,
@@ -596,7 +580,6 @@ async function queryPark(
   lon,
   radius=1200
 ){
-
   const q1=
     `[out:json][timeout:25];(`+
     `way["leisure"~"park|garden|nature_reserve|common|recreation_ground"](around:${radius},${lat},${lon});`+
@@ -606,9 +589,7 @@ async function queryPark(
   let parkData=null;
 
   for(const url of OVERPASS_URLS){
-
     try{
-
       const res=await fetch(
         url+
         "?data="+
@@ -619,7 +600,6 @@ async function queryPark(
 
       parkData=await res.json();
       break;
-
     }catch(e){}
   }
 
@@ -634,7 +614,6 @@ async function queryPark(
   const cands=[];
 
   for(const el of parkData.elements){
-
     const geometry=extractRings(el);
 
     if(!geometry)continue;
@@ -662,10 +641,6 @@ async function queryPark(
 
   if(!cands.length)return null;
 
-
-  /*
-   * Noktayı içeren adayları bul.
-   */
   const inside=cands.filter(c=>
     pointInPark(
       lat,
@@ -674,53 +649,25 @@ async function queryPark(
     )
   );
 
-
-  /*
-   * En doğru aday:
-   *
-   * 1. Tıklanan noktayı içersin.
-   * 2. Aynı noktayı içerenler içinde en küçük
-   *    alanlı polygon seçilsin.
-   *
-   * Böylece yakındaki büyük recreation_ground
-   * veya başka büyük alanın seçilme ihtimali azalır.
-   */
   let sorted;
 
   if(inside.length){
-
     sorted=inside
       .slice()
       .sort((a,b)=>{
-
-        /*
-         * Aynı isimli parkları mümkün olduğunca
-         * alanına göre değerlendir.
-         */
         if(a.name&&b.name&&a.name===b.name){
           return a.area-b.area;
         }
 
         return a.area-b.area;
       });
-
   }else{
-
-    /*
-     * Noktayı içeren aday yoksa en küçük
-     * makul adaydan başla.
-     */
     sorted=cands
       .slice()
       .sort((a,b)=>a.area-b.area);
   }
 
   const park=sorted[0];
-
-
-  /* =====================================================
-     WATER QUERY
-  ===================================================== */
 
   WATER_RINGS=[];
   WATER_LINES=[];
@@ -737,13 +684,11 @@ async function queryPark(
 
   parkOuter.forEach(r=>
     r.forEach(p=>{
-
       if(p[0]<minLat)minLat=p[0];
       if(p[0]>maxLat)maxLat=p[0];
 
       if(p[1]<minLon)minLon=p[1];
       if(p[1]>maxLon)maxLon=p[1];
-
     })
   );
 
@@ -753,32 +698,22 @@ async function queryPark(
     `${minLat-pad},${minLon-pad},`+
     `${maxLat+pad},${maxLon+pad}`;
 
-
   const q2=
     `[out:json][timeout:60];(`+
-
     `way["natural"="water"](${bbox});`+
     `relation["natural"="water"](${bbox});`+
-
     `way["landuse"="reservoir"](${bbox});`+
     `relation["landuse"="reservoir"](${bbox});`+
-
     `way["landuse"="basin"](${bbox});`+
     `relation["landuse"="basin"](${bbox});`+
-
     `way["leisure"="swimming_pool"](${bbox});`+
     `relation["leisure"="swimming_pool"](${bbox});`+
-
     `way["waterway"="riverbank"](${bbox});`+
     `relation["waterway"="riverbank"](${bbox});`+
-
     `);out geom;`;
 
-
   for(const url of OVERPASS_URLS){
-
     try{
-
       const res=await fetch(
         url+
         "?data="+
@@ -790,24 +725,18 @@ async function queryPark(
       const json=await res.json();
 
       for(const el of (json.elements||[])){
-
         if(!isWater(el))continue;
 
-
         if(el.type==="relation"){
-
           const r=extractRings(el);
 
           if(!r)continue;
 
           if(Array.isArray(r)){
-
             r.forEach(rr=>
               WATER_RINGS.push(rr)
             );
-
           }else if(r.outer){
-
             r.outer.forEach(rr=>
               WATER_RINGS.push(rr)
             );
@@ -816,7 +745,6 @@ async function queryPark(
           continue;
         }
 
-
         if(!el.geometry)continue;
 
         const line=el.geometry.map(g=>[
@@ -824,22 +752,16 @@ async function queryPark(
           g.lon
         ]);
 
-
         if(isClosedLine(line)){
-
           WATER_RINGS.push(line);
-
         }else if(line.length>1){
-
           WATER_LINES.push(line);
         }
       }
 
       break;
-
     }catch(e){}
   }
-
 
   const pb={
     minLat,
@@ -847,7 +769,6 @@ async function queryPark(
     minLon,
     maxLon
   };
-
 
   WATER_RINGS=
     WATER_RINGS.filter(r=>
@@ -858,7 +779,6 @@ async function queryPark(
       )
     );
 
-
   WATER_LINES=
     WATER_LINES.filter(l=>
       lineTouchesPark(
@@ -867,7 +787,6 @@ async function queryPark(
         pb
       )
     );
-
 
   return sorted;
 }
@@ -878,7 +797,6 @@ async function queryPark(
 ========================================================= */
 
 async function queryDetailedCoverage(){
-
   if(
     !PARK_POLY||
     !PARK_POLY.length
@@ -890,25 +808,20 @@ async function queryDetailedCoverage(){
   IMP_LINES=[];
   GRID_BLOCK_LINES=[];
 
-
   let minLat=90;
   let maxLat=-90;
   let minLon=180;
   let maxLon=-180;
 
-
   PARK_POLY.forEach(r=>
     r.forEach(p=>{
-
       if(p[0]<minLat)minLat=p[0];
       if(p[0]>maxLat)maxLat=p[0];
 
       if(p[1]<minLon)minLon=p[1];
       if(p[1]>maxLon)maxLon=p[1];
-
     })
   );
-
 
   const pad=0.0003;
 
@@ -916,28 +829,18 @@ async function queryDetailedCoverage(){
     `${minLat-pad},${minLon-pad},`+
     `${maxLat+pad},${maxLon+pad}`;
 
-
   const q=
     `[out:json][timeout:60];(`+
-
     `way["building"](${bbox});`+
     `relation["building"](${bbox});`+
-
     `way["highway"](${bbox});`+
-
     `way["amenity"~"parking|bicycle_parking|motorcycle_parking"](${bbox});`+
-
     `way["leisure"~"pitch|track|playground"](${bbox});`+
-
     `way["surface"~"asphalt|concrete|paving_stones|sett|concrete:plates|concrete:lanes|cobblestone|bricks|metal|wood"](${bbox});`+
-
     `);out geom;`;
 
-
   for(const url of OVERPASS_URLS){
-
     try{
-
       const res=await fetch(
         url+
         "?data="+
@@ -948,21 +851,16 @@ async function queryDetailedCoverage(){
 
       const json=await res.json();
 
-
       for(const el of (json.elements||[])){
-
         if(isWater(el))continue;
-
         if(!isImpervious(el))continue;
 
         collectImperviousGeometry(el);
       }
 
       break;
-
     }catch(e){}
   }
-
 
   const pb={
     minLat,
@@ -970,7 +868,6 @@ async function queryDetailedCoverage(){
     minLon,
     maxLon
   };
-
 
   IMP_RINGS=
     IMP_RINGS.filter(r=>
@@ -981,7 +878,6 @@ async function queryDetailedCoverage(){
       )
     );
 
-
   IMP_LINES=
     IMP_LINES.filter(l=>
       lineTouchesPark(
@@ -990,7 +886,6 @@ async function queryDetailedCoverage(){
         pb
       )
     );
-
 
   GRID_BLOCK_LINES=
     GRID_BLOCK_LINES.filter(l=>
@@ -1001,9 +896,7 @@ async function queryDetailedCoverage(){
       )
     );
 
-
   refreshImpLayer();
-
 
   console.log(
     "✓ Detaylı → Poligon:",
@@ -1023,25 +916,20 @@ function ringTouchesPark(
   parkRings,
   pb
 ){
-
   if(!ring||ring.length<3)return false;
-
 
   let minLat=90;
   let maxLat=-90;
   let minLon=180;
   let maxLon=-180;
 
-
   for(const p of ring){
-
     if(p[0]<minLat)minLat=p[0];
     if(p[0]>maxLat)maxLat=p[0];
 
     if(p[1]<minLon)minLon=p[1];
     if(p[1]>maxLon)maxLon=p[1];
   }
-
 
   if(
     maxLat<pb.minLat ||
@@ -1052,12 +940,7 @@ function ringTouchesPark(
     return false;
   }
 
-
-  /*
-   * Vertex kontrolü
-   */
   for(const p of ring){
-
     if(
       pointInPark(
         p[0],
@@ -1069,10 +952,6 @@ function ringTouchesPark(
     }
   }
 
-
-  /*
-   * Merkez
-   */
   const centerLat=(minLat+maxLat)/2;
   const centerLon=(minLon+maxLon)/2;
 
@@ -1086,12 +965,7 @@ function ringTouchesPark(
     return true;
   }
 
-
-  /*
-   * Kenar orta noktaları
-   */
   for(let i=0;i<ring.length-1;i++){
-
     const a=ring[i];
     const b=ring[i+1];
 
@@ -1109,35 +983,28 @@ function ringTouchesPark(
     }
   }
 
-
   return false;
 }
-
 
 function lineTouchesPark(
   line,
   parkRings,
   pb
 ){
-
   if(!line||line.length<2)return false;
-
 
   let minLat=90;
   let maxLat=-90;
   let minLon=180;
   let maxLon=-180;
 
-
   for(const p of line){
-
     if(p[0]<minLat)minLat=p[0];
     if(p[0]>maxLat)maxLat=p[0];
 
     if(p[1]<minLon)minLon=p[1];
     if(p[1]>maxLon)maxLon=p[1];
   }
-
 
   if(
     maxLat<pb.minLat ||
@@ -1148,12 +1015,7 @@ function lineTouchesPark(
     return false;
   }
 
-
-  /*
-   * Vertex kontrolü
-   */
   for(const p of line){
-
     if(
       pointInPark(
         p[0],
@@ -1165,16 +1027,9 @@ function lineTouchesPark(
     }
   }
 
-
-  /*
-   * Her segmenti yaklaşık 10 m aralıklarla
-   * örnekle.
-   */
   for(let i=0;i<line.length-1;i++){
-
     const a=line[i];
     const b=line[i+1];
-
 
     const midLat=(a[0]+b[0])/2;
 
@@ -1186,13 +1041,11 @@ function lineTouchesPark(
       111320*
       Math.cos(midLat*Math.PI/180);
 
-
     const len=
       Math.sqrt(
         dx*dx+
         dy*dy
       );
-
 
     const steps=
       Math.max(
@@ -1200,9 +1053,7 @@ function lineTouchesPark(
         Math.ceil(len/10)
       );
 
-
     for(let k=1;k<steps;k++){
-
       const t=k/steps;
 
       const lat=
@@ -1212,7 +1063,6 @@ function lineTouchesPark(
       const lon=
         a[1]+
         (b[1]-a[1])*t;
-
 
       if(
         pointInPark(
@@ -1226,7 +1076,6 @@ function lineTouchesPark(
     }
   }
 
-
   return false;
 }
 
@@ -1236,14 +1085,11 @@ function lineTouchesPark(
 ========================================================= */
 
 function extractRings(el){
-
   function closeRing(r){
-
     if(!r||r.length<3)return null;
 
     const a=r[0];
     const b=r[r.length-1];
-
 
     if(
       Math.abs(a[0]-b[0])>1e-9 ||
@@ -1255,19 +1101,13 @@ function extractRings(el){
       ]);
     }
 
-
     return r.length>=4?r:null;
   }
 
-
-  /*
-   * Normal way
-   */
   if(
     el.type==="way" &&
     el.geometry
   ){
-
     const r=el.geometry.map(g=>[
       g.lat,
       g.lon
@@ -1280,15 +1120,10 @@ function extractRings(el){
       : null;
   }
 
-
-  /*
-   * Relation
-   */
   if(
     el.type==="relation" &&
     el.members
   ){
-
     const outerWays=
       el.members
         .filter(m=>
@@ -1301,7 +1136,6 @@ function extractRings(el){
             g.lon
           ])
         );
-
 
     const innerWays=
       el.members
@@ -1316,7 +1150,6 @@ function extractRings(el){
           ])
         );
 
-
     const outer=
       joinWaysToRings(
         outerWays
@@ -1327,9 +1160,7 @@ function extractRings(el){
         innerWays
       );
 
-
     if(!outer.length)return null;
-
 
     return{
       outer,
@@ -1337,64 +1168,49 @@ function extractRings(el){
     };
   }
 
-
   return null;
 }
 
-
 function joinWaysToRings(ways){
-
   const rings=[];
   const rem=ways.slice();
-
 
   const eq=(a,b)=>
     Math.abs(a[0]-b[0])<1e-9 &&
     Math.abs(a[1]-b[1])<1e-9;
 
-
   while(rem.length){
-
     const ch=
       rem.shift().slice();
-
 
     let merged=true;
     let guard=
       ways.length*2+10;
 
-
     while(
       merged &&
       guard-->0
     ){
-
       merged=false;
 
-
       for(let i=0;i<rem.length;i++){
-
         const w=rem[i];
 
         const head=ch[0];
         const tail=ch[ch.length-1];
 
-
         if(eq(tail,w[0])){
-
           ch.push(
             ...w.slice(1)
           );
 
           merged=true;
-
         }else if(
           eq(
             tail,
             w[w.length-1]
           )
         ){
-
           ch.push(
             ...w
               .slice()
@@ -1403,27 +1219,23 @@ function joinWaysToRings(ways){
           );
 
           merged=true;
-
         }else if(
           eq(
             head,
             w[w.length-1]
           )
         ){
-
           ch.unshift(
             ...w.slice(0,-1)
           );
 
           merged=true;
-
         }else if(
           eq(
             head,
             w[0]
           )
         ){
-
           ch.unshift(
             ...w
               .slice()
@@ -1434,18 +1246,14 @@ function joinWaysToRings(ways){
           merged=true;
         }
 
-
         if(merged){
-
           rem.splice(i,1);
           break;
         }
       }
     }
 
-
     if(ch.length>2){
-
       if(
         !eq(
           ch[0],
@@ -1458,11 +1266,9 @@ function joinWaysToRings(ways){
         ]);
       }
 
-
       rings.push(ch);
     }
   }
-
 
   return rings;
 }
@@ -1473,7 +1279,6 @@ function joinWaysToRings(ways){
 ========================================================= */
 
 function isWater(el){
-
   const t=el.tags||{};
 
   return(
@@ -1491,14 +1296,12 @@ function isWater(el){
 ========================================================= */
 
 function isImpervious(el){
-
   const t=el.tags||{};
 
   const surface=
     String(
       t.surface||""
     ).toLowerCase();
-
 
   const hardSurfaces=new Set([
     "asphalt",
@@ -1513,28 +1316,16 @@ function isImpervious(el){
     "wood"
   ]);
 
-
-  /*
-   * Binalar
-   */
   if(t.building){
     return true;
   }
 
-
-  /*
-   * Açıkça sert yüzey
-   */
   if(
     hardSurfaces.has(surface)
   ){
     return true;
   }
 
-
-  /*
-   * Otopark
-   */
   if(
     t.amenity==="parking" ||
     t.amenity==="bicycle_parking" ||
@@ -1543,10 +1334,6 @@ function isImpervious(el){
     return true;
   }
 
-
-  /*
-   * Spor alanları
-   */
   if(
     (
       t.leisure==="pitch" ||
@@ -1558,17 +1345,11 @@ function isImpervious(el){
     return true;
   }
 
-
-  /*
-   * Yollar
-   */
   if(t.highway){
-
     const hw=
       String(
         t.highway
       ).toLowerCase();
-
 
     const softWays=new Set([
       "footway",
@@ -1580,31 +1361,19 @@ function isImpervious(el){
       "track"
     ]);
 
-
-    /*
-     * Yumuşak yollarda yalnızca açıkça
-     * sert yüzey varsa sert say.
-     */
     if(
       softWays.has(hw)
     ){
       return hardSurfaces.has(surface);
     }
 
-
-    /*
-     * Motorlu araç yolları
-     */
     return true;
   }
-
 
   return false;
 }
 
-
 function isClosedLine(l){
-
   return(
     l &&
     l.length>2 &&
@@ -1625,11 +1394,9 @@ function isClosedLine(l){
 ========================================================= */
 
 function roadHalfWidth(hw){
-
   hw=
     String(hw||"")
       .toLowerCase();
-
 
   if(/^motorway$/.test(hw))return 6;
   if(/^trunk$/.test(hw))return 5.5;
@@ -1660,21 +1427,13 @@ function roadHalfWidth(hw){
 ========================================================= */
 
 function collectImperviousGeometry(el){
-
-  /*
-   * Relation
-   */
   if(el.type==="relation"){
-
     const r=extractRings(el);
 
     if(!r)return;
 
-
     if(Array.isArray(r)){
-
       r.forEach(rr=>{
-
         if(
           rr &&
           rr.length>=3
@@ -1682,11 +1441,8 @@ function collectImperviousGeometry(el){
           IMP_RINGS.push(rr);
         }
       });
-
     }else if(r.outer){
-
       r.outer.forEach(rr=>{
-
         if(
           rr &&
           rr.length>=3
@@ -1696,13 +1452,10 @@ function collectImperviousGeometry(el){
       });
     }
 
-
     return;
   }
 
-
   if(!el.geometry)return;
-
 
   const pts=
     el.geometry.map(g=>[
@@ -1710,9 +1463,7 @@ function collectImperviousGeometry(el){
       g.lon
     ]);
 
-
   if(pts.length<2)return;
-
 
   const t=el.tags||{};
 
@@ -1720,7 +1471,6 @@ function collectImperviousGeometry(el){
     String(
       t.surface||""
     ).toLowerCase();
-
 
   const hardSurfaces=new Set([
     "asphalt",
@@ -1735,16 +1485,11 @@ function collectImperviousGeometry(el){
     "wood"
   ]);
 
-
   const isArea=
     !!t.building ||
-
     t.amenity==="parking" ||
-
     t.amenity==="bicycle_parking" ||
-
     t.amenity==="motorcycle_parking" ||
-
     (
       (
         t.leisure==="pitch" ||
@@ -1753,36 +1498,18 @@ function collectImperviousGeometry(el){
       ) &&
       hardSurfaces.has(surface)
     ) ||
-
     hardSurfaces.has(surface);
 
-
-  /*
-   * Kapalı polygon
-   */
   if(isClosedLine(pts)){
-
     if(isArea){
-
       IMP_RINGS.push(pts);
       return;
     }
 
-
-    /*
-     * Kapalı ama sert olarak tanımlanmamış
-     * polygon ise alma.
-     */
     return;
   }
 
-
-  /*
-   * Alan olması gereken ama kapanmamış
-   * OSM geometry
-   */
   if(isArea){
-
     const c=pts.slice();
 
     c.push([
@@ -1795,22 +1522,15 @@ function collectImperviousGeometry(el){
     return;
   }
 
-
-  /*
-   * Line
-   */
   let w=0;
 
-
   if(t.highway){
-
     const width=
       parseFloat(
         String(
           t.width||""
         ).replace(",",".")
       );
-
 
     if(
       Number.isFinite(width) &&
@@ -1823,29 +1543,17 @@ function collectImperviousGeometry(el){
         t.highway
       );
     }
-
   }else if(t.surface){
-
     w=3;
-
   }else{
-
     w=2;
   }
-
 
   IMP_LINES.push({
     pts,
     w
   });
 
-
-  /*
-   * Gerçek araç yolları grid'i bloklasın.
-   *
-   * footway/path/cycleway/pedestrian/
-   * steps/bridleway/track bloklamasın.
-   */
   if(
     t.highway &&
     !/^(footway|path|cycleway|steps|pedestrian|bridleway|track)$/
@@ -1853,7 +1561,6 @@ function collectImperviousGeometry(el){
         String(t.highway).toLowerCase()
       )
   ){
-
     GRID_BLOCK_LINES.push(pts);
   }
 }
@@ -1864,7 +1571,6 @@ function collectImperviousGeometry(el){
 ========================================================= */
 
 function toggleParkMode(){
-
   PARK_MODE=!PARK_MODE;
 
   const b=$("parkModeBtn");
@@ -1885,27 +1591,21 @@ function toggleParkMode(){
         :"blue"
     );
 
-
   $("parkModeHint").textContent=
     PARK_MODE
       ?"Şimdi parkın içine tıkla."
       :"Açınca parka tıkla.";
 
-
   bindParkClick();
 
-
   if(!PARK_MODE){
-
     PARK_CANDS=[];
 
     clearPark();
   }
 }
 
-
 function bindParkClick(){
-
   if(
     PARK_CLICK_BOUND ||
     !map
@@ -1913,22 +1613,17 @@ function bindParkClick(){
     return;
   }
 
-
   PARK_CLICK_BOUND=true;
-
 
   map.on(
     "click",
     async e=>{
-
       if(!PARK_MODE)return;
-
 
       toast(
         "🌳 Park sorgulanıyor…",
         "info"
       );
-
 
       const parks=
         await queryPark(
@@ -1936,18 +1631,15 @@ function bindParkClick(){
           e.latlng.lng
         );
 
-
       if(
         !parks ||
         !parks.length
       ){
-
         return toast(
           "Park bulunamadı.",
           "warn"
         );
       }
-
 
       PARK_CANDS=parks;
 
@@ -1960,7 +1652,7 @@ function bindParkClick(){
 
 
 /* =========================================================
-   DRAW PARK
+   DRAW PARK (MODERN UI)
 ========================================================= */
 
 function drawPark(park){
@@ -1968,12 +1660,10 @@ function drawPark(park){
   clearPark();
   clearGrid();
 
-
   PARK_POLY=
     Array.isArray(park.rings)
       ? park.rings
       : park.rings.outer;
-
 
   PARK_HOLES=
     Array.isArray(park.rings)
@@ -1982,10 +1672,8 @@ function drawPark(park){
         park.rings.inner||[]
       );
 
-
   PARK_LAYER=
     L.layerGroup().addTo(map);
-
 
   L.polygon(
     PARK_POLY,
@@ -1999,9 +1687,7 @@ function drawPark(park){
     }
   ).addTo(PARK_LAYER);
 
-
   PARK_HOLES.forEach(r=>{
-
     L.polygon(
       r,
       {
@@ -2014,15 +1700,9 @@ function drawPark(park){
     ).addTo(PARK_LAYER);
   });
 
-
-  /*
-   * WATER
-   */
   if(WATER_RINGS.length){
-
     WATER_LAYER=
       L.layerGroup().addTo(map);
-
 
     WATER_RINGS.forEach(r=>
       L.polygon(
@@ -2038,15 +1718,11 @@ function drawPark(park){
     );
   }
 
-
   if(WATER_LINES.length){
-
     if(!WATER_LAYER){
-
       WATER_LAYER=
         L.layerGroup().addTo(map);
     }
-
 
     WATER_LINES.forEach(l=>
       L.polyline(
@@ -2061,7 +1737,6 @@ function drawPark(park){
     );
   }
 
-
   map.fitBounds(
     PARK_LAYER.getBounds(),
     {
@@ -2069,10 +1744,8 @@ function drawPark(park){
     }
   );
 
-
   const haTotal=
     parkAreaHa().toFixed(1);
-
 
   const alt=
     PARK_CANDS.length>1
@@ -2090,128 +1763,184 @@ function drawPark(park){
       :
       "";
 
-
   $("parkInfo").style.display="block";
-
 
   $("parkInfo").innerHTML=
 
-    `<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">`+
-
-      `<b style="font-size:1.08rem">🌳 ${esc(park.name||"İsimsiz Park")}</b>`+
-
-      `<span style="background:#14532d;color:#fff;font-size:.78rem;padding:3px 12px;border-radius:999px">`+
-        `Toplam: ${haTotal} ha`+
+    `<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:14px">`+
+      `<b style="font-size:1.15rem">🌳 ${esc(park.name||"İsimsiz Park")}</b>`+
+      `<span class="dg-png-badge">`+
+        `${haTotal} ha`+
       `</span>`+
-
-      `<span id="refBadge" style="font-size:.75rem;color:var(--mut)"></span>`+
-
+      `<span id="refBadge" class="dg-png-ref" style="display:none"></span>`+
       alt+
-
     `</div>`+
 
+    `<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px">`+
 
-    `<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:12px;margin-top:12px">`+
+      `<div class="dg-png-card">`+
+        `<div class="dg-png-head">`+
+          `<div>`+
+            `<div class="dg-png-kicker">1 · GRID & WAYPOINT</div>`+
+            `<div class="dg-png-title">🔲 Grid sistemi</div>`+
+            `<div class="dg-png-sub">Ölçüm alanını otomatik böl</div>`+
+          `</div>`+
+        `</div>`+
 
-   `<div style="border:1px solid var(--line);border-radius:10px;padding:12px">`+
-    `<div style="font-size:.7rem;letter-spacing:.08em;color:var(--mut);margin-bottom:8px">1 · GRID & WAYPOINT</div>`+
-    `<label style="font-size:.78rem;display:block">Proje<select id="gridProject" style="width:100%;padding:5px;border-radius:6px;border:1px solid var(--line);margin-top:2px">`+
-    (typeof PROJ_LIST!=="undefined"&&PROJ_LIST.length?PROJ_LIST.map(p=>`<option value="${p.id}">${esc(p.name)}</option>`).join(""):`<option value="0">Önce proje oluştur</option>`)+`</select></label>`+
-    `<label style="font-size:.78rem;display:block;margin-top:6px">Grid<select id="gridSize" style="width:100%;padding:5px;border-radius:6px;border:1px solid var(--line);margin-top:2px">`+
-     `<option value="10">10×10 m</option><option value="20" selected>20×20 m</option><option value="50">50×50 m</option></select></label>`+
-    `<label style="font-size:.78rem;display:block;margin-top:6px">Referans (ha)<input id="refHa" type="number" step="0.1" placeholder="50.8" style="width:100%;padding:5px;border-radius:6px;border:1px solid var(--line);margin-top:2px" onchange="setRefHa(this.value)"></label>`+
-    `<button class="btn sm blue" style="width:100%;margin-top:8px" onclick="buildGrid()">🔲 Grid Oluştur</button>`+
-   `</div>`+
-   `<div style="border:1px solid var(--line);border-radius:10px;padding:12px">`+
-    `<div style="font-size:.7rem;letter-spacing:.08em;color:var(--mut);margin-bottom:8px">2 · YÜZEY ANALİZİ</div>`+
-    `<button class="btn sm" style="width:100%" onclick="runLandCoverAnalysis()">🌿 Yüzey Örtüsü Analizi</button>`+
-    `<div style="font-size:.72rem;color:var(--mut);margin-top:6px">Bina·yol·otopark·saha·kort·su (park içi, 3m örnekleme)</div>`+
-   `</div>`+
-     `<div class="dg-png-card">`+
+        `<div class="dg-png-fields">`+
+          `<div class="dg-png-field">`+
+            `<label class="dg-png-label">PROJE</label>`+
+            `<select id="gridProject" class="dg-png-select">`+
+              (typeof PROJ_LIST!=="undefined"&&PROJ_LIST.length
+                ? PROJ_LIST.map(p=>`<option value="${p.id}">${esc(p.name)}</option>`).join("")
+                : `<option value="0">Önce proje oluştur</option>`)+
+            `</select>`+
+          `</div>`+
 
-  `<div class="dg-png-head">`+
-    `<div>`+
-      `<div class="dg-png-kicker">3 · RAPOR PNG</div>`+
-      `<div class="dg-png-title">🖼️ Harita çıktısı</div>`+
-    `</div>`+
-  `</div>`+
+          `<div class="dg-png-field">`+
+            `<label class="dg-png-label">GRID BOYUTU</label>`+
+            `<select id="gridSize" class="dg-png-select">`+
+              `<option value="10">10 × 10 m · Hassas</option>`+
+              `<option value="20" selected>20 × 20 m · Standart</option>`+
+              `<option value="50">50 × 50 m · Hızlı</option>`+
+            `</select>`+
+          `</div>`+
 
-  `<label class="dg-png-label">ALTLIK</label>`+
+          `<div class="dg-png-field">`+
+            `<label class="dg-png-label">REFERANS ALAN (HA)</label>`+
+            `<input id="refHa" type="number" step="0.1" placeholder="örn. 50.8" class="dg-png-input" onchange="setRefHa(this.value)">`+
+          `</div>`+
+        `</div>`+
 
-  `<select id="pngBg" class="dg-png-select">`+
-    `<option value="vector">Vektör · Temiz</option>`+
-    `<option value="osm">OSM · Sokak</option>`+
-    `<option value="sat">Uydu</option>`+
-    `<option value="topo">Topoğrafik</option>`+
-  `</select>`+
-
-  `<div style="height:12px"></div>`+
-
-  `<label class="dg-png-label">GÖRÜNÜM KATMANLARI</label>`+
-
-  `<div class="dg-png-options">`+
-
-    `<label class="dg-png-option">`+
-      `<span class="dg-png-icon">🔲</span>`+
-      `<span class="dg-png-copy">`+
-        `<strong>Grid hücreleri</strong>`+
-        `<span>Analiz hücrelerini haritada göster</span>`+
-      `</span>`+
-      `<input type="checkbox" id="chkPngGrid" checked>`+
-      `<span class="dg-png-switch"></span>`+
-    `</label>`+
-
-    `<label class="dg-png-option">`+
-      `<span class="dg-png-icon">📍</span>`+
-      `<span class="dg-png-copy">`+
-        `<strong>Waypoint'ler</strong>`+
-        `<span>Ölçüm noktalarını görüntüle</span>`+
-      `</span>`+
-      `<input type="checkbox" id="chkPngWp" checked>`+
-      `<span class="dg-png-switch"></span>`+
-    `</label>`+
-
-    `<label class="dg-png-option">`+
-      `<span class="dg-png-icon">💧</span>`+
-      `<span class="dg-png-copy">`+
-        `<strong>Su / sert zemin</strong>`+
-        `<span>Su ve yapısal yüzeyleri göster</span>`+
-      `</span>`+
-      `<input type="checkbox" id="chkPngCover" checked>`+
-      `<span class="dg-png-switch"></span>`+
-    `</label>`+
-
-  `</div>`+
-
-  `<button class="btn sm ghost dg-png-download" onclick="downloadParkImage()">`+
-    `🖼️ PNG İndir`+
-`</button>`+
-
-`</div>`+
-
-      `<div style="border:1px solid var(--line);border-radius:10px;padding:12px">`+
-
-        `<div style="font-size:.7rem;letter-spacing:.08em;color:var(--mut);margin-bottom:8px">4 · KATMANLAR</div>`+
-
-        `<button class="btn sm" id="gridVisBtn" style="width:100%" onclick="toggleGridVis()">🔲 Grid: GÖRÜNÜR</button>`+
-
-        `<button class="btn sm" id="wpVisBtn" style="width:100%;margin-top:4px" onclick="toggleWpVis()">📍 WP: GÖRÜNÜR</button>`+
-
-        `<button class="btn sm red" style="width:100%;margin-top:4px" onclick="clearGrid()">✕ Temizle</button>`+
-
+        `<button class="dg-png-btn primary" onclick="buildGrid()">`+
+          `🔲 Grid Oluştur`+
+        `</button>`+
       `</div>`+
 
+      `<div class="dg-png-card">`+
+        `<div class="dg-png-head">`+
+          `<div>`+
+            `<div class="dg-png-kicker">2 · YÜZEY ANALİZİ</div>`+
+            `<div class="dg-png-title">🌿 Arazi örtüsü</div>`+
+            `<div class="dg-png-sub">Bina · yol · otopark · saha · su</div>`+
+          `</div>`+
+          `<span class="dg-png-badge blue">3m örnekleme</span>`+
+        `</div>`+
+
+        `<button class="dg-png-btn primary" onclick="runLandCoverAnalysis()">`+
+          `🌿 Yüzey Örtüsü Analizi`+
+        `</button>`+
+
+        `<div class="dg-png-sub" style="font-size:.68rem">`+
+          `Park sınırının içinde tek sorgu. Yeşil + Sert + Su = Toplam.`+
+        `</div>`+
+      `</div>`+
+
+      `<div class="dg-png-card">`+
+        `<div class="dg-png-head">`+
+          `<div>`+
+            `<div class="dg-png-kicker">3 · RAPOR PNG</div>`+
+            `<div class="dg-png-title">🖼️ Harita çıktısı</div>`+
+            `<div class="dg-png-sub">Park şeklinde yüksek çözünürlük</div>`+
+          `</div>`+
+        `</div>`+
+
+        `<div class="dg-png-field">`+
+          `<label class="dg-png-label">ALTLIK</label>`+
+          `<select id="pngBg" class="dg-png-select">`+
+            `<option value="vector">Vektör · Temiz beyaz</option>`+
+            `<option value="osm">OSM · Sokak</option>`+
+            `<option value="sat">Uydu</option>`+
+            `<option value="topo">Topoğrafik</option>`+
+          `</select>`+
+        `</div>`+
+
+        `<div class="dg-png-field">`+
+          `<label class="dg-png-label">GÖRÜNÜM KATMANLARI</label>`+
+          `<div class="dg-png-options">`+
+
+            `<label class="dg-png-option">`+
+              `<span class="dg-png-icon">🔲</span>`+
+              `<span class="dg-png-copy">`+
+                `<strong>Grid hücreleri</strong>`+
+                `<span>Analiz hücrelerini göster</span>`+
+              `</span>`+
+              `<input type="checkbox" id="chkPngGrid" checked>`+
+              `<span class="dg-png-switch"></span>`+
+            `</label>`+
+
+            `<label class="dg-png-option">`+
+              `<span class="dg-png-icon">📍</span>`+
+              `<span class="dg-png-copy">`+
+                `<strong>Waypoint'ler</strong>`+
+                `<span>Ölçüm noktaları</span>`+
+              `</span>`+
+              `<input type="checkbox" id="chkPngWp" checked>`+
+              `<span class="dg-png-switch"></span>`+
+            `</label>`+
+
+            `<label class="dg-png-option">`+
+              `<span class="dg-png-icon">💧</span>`+
+              `<span class="dg-png-copy">`+
+                `<strong>Su / sert zemin</strong>`+
+                `<span>Yapısal yüzeyler</span>`+
+              `</span>`+
+              `<input type="checkbox" id="chkPngCover" checked>`+
+              `<span class="dg-png-switch"></span>`+
+            `</label>`+
+
+          `</div>`+
+        `</div>`+
+
+        `<button class="dg-png-btn ghost" onclick="downloadParkImage()">`+
+          `🖼️ PNG İndir`+
+        `</button>`+
+      `</div>`+
+
+      `<div class="dg-png-card">`+
+        `<div class="dg-png-head">`+
+          `<div>`+
+            `<div class="dg-png-kicker">4 · KATMANLAR</div>`+
+            `<div class="dg-png-title">🗺️ Görünürlük</div>`+
+            `<div class="dg-png-sub">Harita üzerindeki katmanlar</div>`+
+          `</div>`+
+        `</div>`+
+
+        `<div class="dg-png-options">`+
+
+          `<label class="dg-png-option">`+
+            `<span class="dg-png-icon">🔲</span>`+
+            `<span class="dg-png-copy">`+
+              `<strong>Grid hücreleri</strong>`+
+              `<span>Harita üzerinde göster</span>`+
+            `</span>`+
+            `<input type="checkbox" id="togGrid" checked onchange="toggleGridVis()">`+
+            `<span class="dg-png-switch"></span>`+
+          `</label>`+
+
+          `<label class="dg-png-option">`+
+            `<span class="dg-png-icon">📍</span>`+
+            `<span class="dg-png-copy">`+
+              `<strong>Waypoint'ler</strong>`+
+              `<span>Ölçüm noktalarını göster</span>`+
+            `</span>`+
+            `<input type="checkbox" id="togWp" checked onchange="toggleWpVis()">`+
+            `<span class="dg-png-switch"></span>`+
+          `</label>`+
+
+        `</div>`+
+
+        `<button class="dg-png-btn red sm" onclick="clearGrid()">`+
+          `✕ Tümünü Temizle`+
+        `</button>`+
+      `</div>`+
 
     `</div>`+
 
-
-    `<div id="landCoverReport" style="margin-top:10px;font-size:.82rem;line-height:1.6"></div>`+
-
-    `<div id="gridSummary" style="margin-top:10px;font-size:.85rem;line-height:1.7"></div>`;
-
+    `<div id="landCoverReport" class="dg-png-result" style="display:none"></div>`+
+    `<div id="gridSummary" class="dg-png-result" style="display:none"></div>`;
 
   renderRefBadge();
-
 
   toast(
     "✓ Park algılandı: "+
@@ -2221,6 +1950,12 @@ function drawPark(park){
     "🌳"
   );
 }
+
+
+/* =========================================================
+   MODERN UI STYLES
+========================================================= */
+
 function ensurePngUiStyles(){
   if(document.getElementById("dgPngUiStyles")) return;
 
@@ -2230,61 +1965,104 @@ function ensurePngUiStyles(){
   style.textContent = `
     .dg-png-card{
       border:1px solid var(--line);
-      border-radius:12px;
-      padding:12px;
+      border-radius:14px;
+      padding:14px;
       background:var(--bg);
+      display:flex;
+      flex-direction:column;
+      gap:10px;
     }
 
     .dg-png-head{
       display:flex;
-      align-items:center;
+      align-items:flex-start;
       justify-content:space-between;
-      margin-bottom:12px;
+      gap:10px;
     }
 
     .dg-png-kicker{
-      font-size:.68rem;
-      letter-spacing:.09em;
+      font-size:.66rem;
+      letter-spacing:.12em;
       color:var(--mut);
       font-weight:700;
       margin-bottom:3px;
+      text-transform:uppercase;
     }
 
     .dg-png-title{
-      font-size:.86rem;
+      font-size:.92rem;
       font-weight:700;
-      line-height:1.2;
+      line-height:1.25;
     }
+
+    .dg-png-sub{
+      font-size:.72rem;
+      color:var(--mut);
+      line-height:1.4;
+      margin-top:2px;
+    }
+
+    .dg-png-badge{
+      display:inline-flex;
+      align-items:center;
+      gap:4px;
+      padding:3px 9px;
+      border-radius:999px;
+      font-size:.68rem;
+      font-weight:700;
+      background:rgba(34,197,94,.12);
+      color:#16a34a;
+      white-space:nowrap;
+    }
+
+    .dg-png-badge.amber{background:rgba(245,158,11,.14);color:#b45309;}
+    .dg-png-badge.blue{background:rgba(59,130,246,.14);color:#1d4ed8;}
 
     .dg-png-label{
       display:block;
-      font-size:.64rem;
-      letter-spacing:.08em;
+      font-size:.62rem;
+      letter-spacing:.1em;
       font-weight:700;
       color:var(--mut);
-      margin-bottom:6px;
+      margin-bottom:5px;
+      text-transform:uppercase;
     }
 
-    .dg-png-select{
+    .dg-png-fields{
+      display:flex;
+      flex-direction:column;
+      gap:8px;
+    }
+
+    .dg-png-field{
+      display:flex;
+      flex-direction:column;
+    }
+
+    .dg-png-select,
+    .dg-png-input{
       width:100%;
-      min-height:34px;
-      padding:6px 9px;
+      min-height:36px;
+      padding:7px 10px;
       border:1px solid var(--line);
-      border-radius:8px;
+      border-radius:9px;
       background:var(--bg);
       color:inherit;
-      font-size:.76rem;
+      font-size:.8rem;
+      font-family:inherit;
       outline:none;
-      cursor:pointer;
+      transition:border-color .15s ease, box-shadow .15s ease;
     }
 
-    .dg-png-select:focus{
+    .dg-png-select:focus,
+    .dg-png-input:focus{
       border-color:#22c55e;
+      box-shadow:0 0 0 3px rgba(34,197,94,.12);
     }
 
     .dg-png-options{
       border:1px solid var(--line);
-      border-radius:10px;
+      border-radius:11px;
       overflow:hidden;
       background:var(--bg);
     }
@@ -2293,13 +2071,12 @@ function ensurePngUiStyles(){
       position:relative;
       display:flex;
       align-items:center;
-      gap:9px;
-      min-height:53px;
-      padding:8px 10px;
+      gap:10px;
+      min-height:54px;
+      padding:9px 11px;
       cursor:pointer;
-      transition:
-        background .16s ease,
-        transform .08s ease;
+      transition:background .16s ease, transform .08s ease;
+      user-select:none;
     }
 
     .dg-png-option + .dg-png-option{
@@ -2307,7 +2084,7 @@ function ensurePngUiStyles(){
     }
 
     .dg-png-option:hover{
-      background:rgba(128,128,128,.07);
+      background:rgba(128,128,128,.06);
     }
 
     .dg-png-option:active{
@@ -2323,14 +2100,14 @@ function ensurePngUiStyles(){
     }
 
     .dg-png-icon{
-      width:29px;
-      height:29px;
-      flex:0 0 29px;
+      width:30px;
+      height:30px;
+      flex:0 0 30px;
       display:grid;
       place-items:center;
-      border-radius:8px;
+      border-radius:9px;
       background:rgba(128,128,128,.10);
-      font-size:.88rem;
+      font-size:.92rem;
     }
 
     .dg-png-copy{
@@ -2340,17 +2117,17 @@ function ensurePngUiStyles(){
 
     .dg-png-copy strong{
       display:block;
-      font-size:.75rem;
+      font-size:.78rem;
       font-weight:700;
-      line-height:1.2;
+      line-height:1.25;
     }
 
     .dg-png-copy span{
       display:block;
       margin-top:2px;
       color:var(--mut);
-      font-size:.64rem;
-      line-height:1.2;
+      font-size:.66rem;
+      line-height:1.3;
     }
 
     .dg-png-switch{
@@ -2384,33 +2161,98 @@ function ensurePngUiStyles(){
       transform:translateX(16px);
     }
 
-    .dg-png-download{
-      width:100% !important;
-      min-height:38px !important;
-      margin-top:10px !important;
-      border-radius:9px !important;
-      font-weight:700 !important;
+    .dg-png-btn{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      gap:6px;
+      width:100%;
+      min-height:40px;
+      padding:9px 14px;
+      border-radius:10px;
+      border:1px solid transparent;
+      font-size:.82rem;
+      font-weight:700;
       letter-spacing:.01em;
+      cursor:pointer;
+      transition:transform .08s ease, box-shadow .18s ease, background .15s ease, border-color .15s ease;
+      background:var(--btn-bg, #14532d);
+      color:var(--btn-fg, #fff);
+      font-family:inherit;
     }
 
-    .dg-png-download:hover{
+    .dg-png-btn:hover{
       transform:translateY(-1px);
+      box-shadow:0 4px 12px rgba(0,0,0,.08);
     }
 
-    .dg-png-download:active{
+    .dg-png-btn:active{
       transform:translateY(0);
+      box-shadow:none;
+    }
+
+    .dg-png-btn.primary{
+      background:linear-gradient(180deg, #16a34a, #15803d);
+      color:#fff;
+    }
+
+    .dg-png-btn.blue{
+      background:linear-gradient(180deg, #3b82f6, #1d4ed8);
+      color:#fff;
+    }
+
+    .dg-png-btn.ghost{
+      background:transparent;
+      color:inherit;
+      border-color:var(--line);
+    }
+
+    .dg-png-btn.ghost:hover{
+      background:rgba(128,128,128,.06);
+    }
+
+    .dg-png-btn.red{
+      background:linear-gradient(180deg, #ef4444, #b91c1c);
+      color:#fff;
+    }
+
+    .dg-png-btn.sm{
+      min-height:34px;
+      font-size:.76rem;
+      padding:6px 12px;
+    }
+
+    .dg-png-result{
+      margin-top:10px;
+      padding:12px;
+      border:1px solid var(--line);
+      border-radius:11px;
+      background:var(--bg);
+      font-size:.82rem;
+      line-height:1.6;
+    }
+
+    #refBadge.dg-png-ref{
+      display:inline-flex;
+      align-items:center;
+      gap:4px;
+      padding:2px 9px;
+      border-radius:999px;
+      font-size:.7rem;
+      font-weight:600;
+      background:rgba(20,83,45,.1);
     }
   `;
 
   document.head.appendChild(style);
 }
 
+
 /* =========================================================
    CLEAR
 ========================================================= */
 
 function clearPark(){
-
   if(
     PARK_LAYER &&
     map
@@ -2421,7 +2263,6 @@ function clearPark(){
 
     PARK_LAYER=null;
   }
-
 
   if(
     WATER_LAYER &&
@@ -2434,7 +2275,6 @@ function clearPark(){
     WATER_LAYER=null;
   }
 
-
   if(
     IMP_LAYER &&
     map
@@ -2445,7 +2285,6 @@ function clearPark(){
 
     IMP_LAYER=null;
   }
-
 
   PARK_POLY=null;
   PARK_HOLES=[];
@@ -2461,9 +2300,7 @@ function clearPark(){
   LANDCOVER=null;
 }
 
-
 function switchPark(i){
-
   const p=PARK_CANDS[i];
 
   if(p){
@@ -2477,7 +2314,6 @@ function switchPark(i){
 ========================================================= */
 
 async function buildGrid(){
-
   if(
     !PARK_POLY||
     !PARK_POLY.length
@@ -2487,11 +2323,9 @@ async function buildGrid(){
     );
   }
 
-
   const size=
     +$("gridSize").value||
     20;
-
 
   const est=
     Math.round(
@@ -2499,9 +2333,7 @@ async function buildGrid(){
       (size*size)
     );
 
-
   if(est>3000){
-
     return toast(
       "⚠ ~"+
       est+
@@ -2509,7 +2341,6 @@ async function buildGrid(){
       "err"
     );
   }
-
 
   if(
     est>800 &&
@@ -2520,28 +2351,22 @@ async function buildGrid(){
     return;
   }
 
-
   clearGrid();
-
 
   let minLat=90;
   let maxLat=-90;
   let minLon=180;
   let maxLon=-180;
 
-
   PARK_POLY.forEach(r=>
     r.forEach(p=>{
-
       if(p[0]<minLat)minLat=p[0];
       if(p[0]>maxLat)maxLat=p[0];
 
       if(p[1]<minLon)minLon=p[1];
       if(p[1]>maxLon)maxLon=p[1];
-
     })
   );
-
 
   const lat0=
     (
@@ -2549,10 +2374,8 @@ async function buildGrid(){
     )*
     Math.PI/180;
 
-
   const dLat=
     size/110540;
-
 
   const dLon=
     size/
@@ -2564,14 +2387,11 @@ async function buildGrid(){
       )
     );
 
-
   const cellMap={};
 
   GRID_CELLS.length=0;
 
-
   for(let rI=0;;rI++){
-
     const s0=
       minLat+
       rI*dLat;
@@ -2579,12 +2399,9 @@ async function buildGrid(){
     const s1=
       s0+dLat;
 
-
     if(s0>=maxLat)break;
 
-
     for(let cI=0;;cI++){
-
       const w0=
         minLon+
         cI*dLon;
@@ -2592,9 +2409,7 @@ async function buildGrid(){
       const w1=
         w0+dLon;
 
-
       if(w0>=maxLon)break;
-
 
       if(
         !isCellValid(
@@ -2607,7 +2422,6 @@ async function buildGrid(){
         continue;
       }
 
-
       const cell={
         lat:(s0+s1)/2,
         lon:(w0+w1)/2,
@@ -2619,13 +2433,11 @@ async function buildGrid(){
         id:rI+"_"+cI
       };
 
-
       cellMap[cell.id]=cell;
 
       GRID_CELLS.push(cell);
     }
   }
-
 
   const{data}=await sb
     .from("measurements")
@@ -2637,9 +2449,7 @@ async function buildGrid(){
     .lte("lon",maxLon)
     .limit(5000);
 
-
   (data||[]).forEach(m=>{
-
     const cell=
       cellMap[
         Math.floor(
@@ -2653,17 +2463,14 @@ async function buildGrid(){
         )
       ];
 
-
     if(cell){
       cell.n++;
     }
   });
 
-
   SELECTED_CELLS.clear();
 
   drawGridLayer();
-
 
   toast(
     "✓ Grid hazır: "+
@@ -2680,7 +2487,6 @@ async function buildGrid(){
 ========================================================= */
 
 function drawGridLayer(){
-
   if(
     GRID_LAYER &&
     map
@@ -2690,32 +2496,25 @@ function drawGridLayer(){
     );
   }
 
-
   GRID_LAYER=
     L.layerGroup().addTo(map);
-
 
   let g=0;
   let r0=0;
 
-
   GRID_CELLS.forEach(cell=>{
-
     const col=
       cell.n===0
-        ?" #e11d48".trim()
+        ?"#e11d48"
         :"#16a34a";
-
 
     if(cell.n===0)r0++;
     else g++;
-
 
     const isSel=
       SELECTED_CELLS.has(
         cell.id
       );
-
 
     const rect=
       L.rectangle(
@@ -2726,7 +2525,7 @@ function drawGridLayer(){
         {
           color:
             isSel
-              ?" #1d4ed8".trim()
+              ?"#1d4ed8"
               :col,
 
           weight:
@@ -2736,7 +2535,7 @@ function drawGridLayer(){
 
           fillColor:
             isSel
-              ?" #3b82f6".trim()
+              ?"#3b82f6"
               :col,
 
           fillOpacity:
@@ -2750,15 +2549,12 @@ function drawGridLayer(){
         GRID_LAYER
       );
 
-
     rect._cellId=
       cell.id;
-
 
     rect.on(
       "click",
       e=>{
-
         L.DomEvent.stopPropagation(
           e
         );
@@ -2770,7 +2566,6 @@ function drawGridLayer(){
       }
     );
 
-
     rect.bindTooltip(
       `Hücre ${cell.id} · ${cell.n} ölçüm`,
       {
@@ -2779,22 +2574,21 @@ function drawGridLayer(){
     );
   });
 
-
   updateGridSummary(
     g,
     r0
   );
 }
 
-
 function updateGridSummary(
   g,
   r0
 ){
+  const gs=$("gridSummary");
+  if(gs)gs.style.display="block";
 
   const tot=
     GRID_CELLS.length;
-
 
   const pct=v=>
     tot
@@ -2803,12 +2597,10 @@ function updateGridSummary(
       )
       :0;
 
-
   const selCount=
     SELECTED_CELLS.size;
 
-
-  $("gridSummary").innerHTML=
+  gs.innerHTML=
 
     `<b>📊 Grid</b> · `+
     `${$("gridSize")?.value||20}×${$("gridSize")?.value||20} m<br>`+
@@ -2867,31 +2659,25 @@ function toggleCellSelection(
   cellId,
   rect
 ){
-
   if(
     SELECTED_CELLS.has(
       cellId
     )
   ){
-
     SELECTED_CELLS.delete(
       cellId
     );
-
 
     const cell=
       GRID_CELLS.find(
         c=>c.id===cellId
       );
 
-
     if(cell){
-
       const col=
         cell.n===0
-          ?" #e11d48".trim()
+          ?"#e11d48"
           :"#16a34a";
-
 
       rect.setStyle({
         color:col,
@@ -2900,13 +2686,10 @@ function toggleCellSelection(
         fillOpacity:.32
       });
     }
-
   }else{
-
     SELECTED_CELLS.add(
       cellId
     );
-
 
     rect.setStyle({
       color:"#1d4ed8",
@@ -2916,17 +2699,13 @@ function toggleCellSelection(
     });
   }
 
-
   let g=0;
   let r0=0;
 
-
   GRID_CELLS.forEach(c=>{
-
     if(c.n===0)r0++;
     else g++;
   });
-
 
   updateGridSummary(
     g,
@@ -2934,21 +2713,15 @@ function toggleCellSelection(
   );
 }
 
-
 function clearCellSelection(){
-
   SELECTED_CELLS.clear();
 
-
   if(GRID_LAYER){
-
     GRID_LAYER.eachLayer(l=>{
-
       if(
         l.setStyle &&
         l._cellId
       ){
-
         const cell=
           GRID_CELLS.find(
             c=>
@@ -2956,14 +2729,11 @@ function clearCellSelection(){
               l._cellId
           );
 
-
         if(cell){
-
           const col=
             cell.n===0
-              ?" #e11d48".trim()
+              ?"#e11d48"
               :"#16a34a";
-
 
           l.setStyle({
             color:col,
@@ -2976,17 +2746,13 @@ function clearCellSelection(){
     });
   }
 
-
   let g=0;
   let r0=0;
 
-
   GRID_CELLS.forEach(c=>{
-
     if(c.n===0)r0++;
     else g++;
   });
-
 
   updateGridSummary(
     g,
@@ -2994,14 +2760,11 @@ function clearCellSelection(){
   );
 }
 
-
 function clearGrid(){
-
   if(
     GRID_LAYER &&
     map
   ){
-
     map.removeLayer(
       GRID_LAYER
     );
@@ -3009,12 +2772,10 @@ function clearGrid(){
     GRID_LAYER=null;
   }
 
-
   if(
     WP_AUTO_LAYER &&
     map
   ){
-
     map.removeLayer(
       WP_AUTO_LAYER
     );
@@ -3022,78 +2783,50 @@ function clearGrid(){
     WP_AUTO_LAYER=null;
   }
 
-
   GRID_CELLS.length=0;
 
   SELECTED_CELLS.clear();
 
-
   const gs=
     $("gridSummary");
 
-
   if(gs){
     gs.innerHTML="";
+    gs.style.display="none";
   }
-}
 
+  const togGrid=$("togGrid");
+  if(togGrid)togGrid.checked=true;
+
+  const togWp=$("togWp");
+  if(togWp)togWp.checked=true;
+}
 
 function toggleGridVis(){
-
   if(!GRID_LAYER)return;
 
+  const togEl=$("togGrid");
 
-  if(
-    map.hasLayer(
-      GRID_LAYER
-    )
-  ){
-
-    map.removeLayer(
-      GRID_LAYER
-    );
-
-    $("gridVisBtn").textContent=
-      "🔲 Grid: GİZLİ";
-
+  if(map.hasLayer(GRID_LAYER)){
+    map.removeLayer(GRID_LAYER);
+    if(togEl)togEl.checked=false;
   }else{
-
-    map.addLayer(
-      GRID_LAYER
-    );
-
-    $("gridVisBtn").textContent=
-      "🔲 Grid: GÖRÜNÜR";
+    map.addLayer(GRID_LAYER);
+    if(togEl)togEl.checked=true;
   }
 }
 
-
 function toggleWpVis(){
-
   if(!WP_AUTO_LAYER)return;
 
+  const togEl=$("togWp");
 
-  if(
-    map.hasLayer(
-      WP_AUTO_LAYER
-    )
-  ){
-
-    map.removeLayer(
-      WP_AUTO_LAYER
-    );
-
-    $("wpVisBtn").textContent=
-      "📍 WP: GİZLİ";
-
+  if(map.hasLayer(WP_AUTO_LAYER)){
+    map.removeLayer(WP_AUTO_LAYER);
+    if(togEl)togEl.checked=false;
   }else{
-
-    map.addLayer(
-      WP_AUTO_LAYER
-    );
-
-    $("wpVisBtn").textContent=
-      "📍 WP: GÖRÜNÜR";
+    map.addLayer(WP_AUTO_LAYER);
+    if(togEl)togEl.checked=true;
   }
 }
 
@@ -3103,27 +2836,21 @@ function toggleWpVis(){
 ========================================================= */
 
 async function createWaypointsFromGrid(mode){
-
   if(!GRID_CELLS.length){
-
     return toast(
       "Önce grid oluştur"
     );
   }
 
-
   const pid=
     +$("gridProject").value||
     0;
 
-
   if(!pid){
-
     return toast(
       "Önce proje seç"
     );
   }
-
 
   let targetCells=
     mode==="manual"
@@ -3136,25 +2863,20 @@ async function createWaypointsFromGrid(mode){
         c=>c.n===0
       );
 
-
   if(
     mode==="manual" &&
     !SELECTED_CELLS.size
   ){
-
     return toast(
       "Önce hücre seçin"
     );
   }
 
-
   if(!targetCells.length){
-
     return toast(
       "Uygun hücre yok"
     );
   }
-
 
   if(
     targetCells.length>500 &&
@@ -3165,7 +2887,6 @@ async function createWaypointsFromGrid(mode){
   ){
     return;
   }
-
 
   const{data:mx}=await sb
     .from("waypoints")
@@ -3179,7 +2900,6 @@ async function createWaypointsFromGrid(mode){
     )
     .limit(1);
 
-
   let next=
     (
       mx&&
@@ -3188,9 +2908,7 @@ async function createWaypointsFromGrid(mode){
         :0
     )+1;
 
-
   const first=next;
-
 
   const rows=
     targetCells.map(c=>({
@@ -3202,17 +2920,13 @@ async function createWaypointsFromGrid(mode){
       visited:false
     }));
 
-
   LAST_WP_ROWS=rows;
-
 
   const{error}=await sb
     .from("waypoints")
     .insert(rows);
 
-
   if(error){
-
     return toast(
       "Hata: "+
       error.message,
@@ -3220,24 +2934,19 @@ async function createWaypointsFromGrid(mode){
     );
   }
 
-
   if(
     WP_AUTO_LAYER &&
     map
   ){
-
     map.removeLayer(
       WP_AUTO_LAYER
     );
   }
 
-
   WP_AUTO_LAYER=
     L.layerGroup().addTo(map);
 
-
   rows.forEach(r=>
-
     L.circleMarker(
       [
         r.lat,
@@ -3256,26 +2965,21 @@ async function createWaypointsFromGrid(mode){
     )
   );
 
-
   $("nProject").value=
     String(pid);
 
-
   loadWaypoints();
-
 
   toast(
     "✓ "+
     rows.length+
     " waypoint (P"+
-    first+
-    "–P"+
+    first+"–P"+
     (next-1)+
     ")",
     "ok",
     "📍"
   );
-
 
   clearCellSelection();
 }
@@ -3286,16 +2990,12 @@ async function createWaypointsFromGrid(mode){
 ========================================================= */
 
 function lineLengthM(l){
-
   let len=0;
 
-
   for(let i=1;i<l.length;i++){
-
     const dy=
       (l[i][0]-l[i-1][0])*
       110540;
-
 
     const dx=
       (l[i][1]-l[i-1][1])*
@@ -3305,24 +3005,20 @@ function lineLengthM(l){
         Math.PI/180
       );
 
-
     len+=Math.sqrt(
       dx*dx+
       dy*dy
     );
   }
 
-
   return len;
 }
-
 
 function downloadBlob(
   name,
   mime,
   text
 ){
-
   const b=
     new Blob(
       [text],
@@ -3331,21 +3027,17 @@ function downloadBlob(
       }
     );
 
-
   const u=
     URL.createObjectURL(b);
-
 
   const a=
     document.createElement(
       "a"
     );
 
-
   a.href=u;
   a.download=name;
   a.click();
-
 
   setTimeout(
     ()=>URL.revokeObjectURL(u),
@@ -3353,23 +3045,18 @@ function downloadBlob(
   );
 }
 
-
 function downloadGridGeoJSON(){
-
   if(!GRID_CELLS.length){
-
     return toast(
       "Önce grid"
     );
   }
-
 
   const fc={
     type:"FeatureCollection",
 
     features:
       GRID_CELLS.map(c=>({
-
         type:"Feature",
 
         properties:{
@@ -3397,7 +3084,6 @@ function downloadGridGeoJSON(){
       }))
   };
 
-
   downloadBlob(
     "dendrogeo_grid.geojson",
     "application/geo+json",
@@ -3408,7 +3094,6 @@ function downloadGridGeoJSON(){
     )
   );
 
-
   toast(
     "✓ Grid indirildi",
     "ok",
@@ -3416,32 +3101,25 @@ function downloadGridGeoJSON(){
   );
 }
 
-
 function downloadWaypointsCSV(){
-
   const rows=
     LAST_WP_ROWS.length
       ?LAST_WP_ROWS
       :WP;
 
-
   if(
     !rows||
     !rows.length
   ){
-
     return toast(
       "WP yok"
     );
   }
 
-
   let csv=
     "wp_id,lat,lon,visited\n";
 
-
   rows.forEach(r=>{
-
     csv+=
       r.wp_id+
       ","+
@@ -3453,13 +3131,11 @@ function downloadWaypointsCSV(){
       "\n";
   });
 
-
   downloadBlob(
     "dendrogeo_wp.csv",
     "text/csv",
     csv
   );
-
 
   toast(
     "✓ "+
@@ -3481,49 +3157,40 @@ function pointToSegmentDistanceM(
   a,
   b
 ){
-
   const refLat=
     lat*
     Math.PI/180;
-
 
   const ax=
     (a[1]-lon)*
     111320*
     Math.cos(refLat);
 
-
   const ay=
     (a[0]-lat)*
     110540;
-
 
   const bx=
     (b[1]-lon)*
     111320*
     Math.cos(refLat);
 
-
   const by=
     (b[0]-lat)*
     110540;
 
-
   const dx=bx-ax;
   const dy=by-ay;
-
 
   if(
     dx===0 &&
     dy===0
   ){
-
     return Math.sqrt(
       ax*ax+
       ay*ay
     );
   }
-
 
   const t=
     Math.max(
@@ -3541,16 +3208,13 @@ function pointToSegmentDistanceM(
       )
     );
 
-
   const px=
     ax+
     t*dx;
 
-
   const py=
     ay+
     t*dy;
-
 
   return Math.sqrt(
     px*px+
@@ -3558,15 +3222,12 @@ function pointToSegmentDistanceM(
   );
 }
 
-
 function nearLineW(
   lines,
   lat,
   lon
 ){
-
   for(const l of lines){
-
     const pts=l.pts;
 
     if(
@@ -3576,9 +3237,7 @@ function nearLineW(
       continue;
     }
 
-
     for(let i=0;i<pts.length-1;i++){
-
       if(
         pointToSegmentDistanceM(
           lat,
@@ -3592,7 +3251,6 @@ function nearLineW(
     }
   }
 
-
   return false;
 }
 
@@ -3602,24 +3260,19 @@ function nearLineW(
 ========================================================= */
 
 function refreshImpLayer(){
-
   if(
     IMP_LAYER &&
     map
   ){
-
     map.removeLayer(
       IMP_LAYER
     );
   }
 
-
   IMP_LAYER=
     L.layerGroup().addTo(map);
 
-
   IMP_RINGS.forEach(r=>
-
     L.polygon(
       r,
       {
@@ -3634,9 +3287,7 @@ function refreshImpLayer(){
     )
   );
 
-
   IMP_LINES.forEach(l=>
-
     L.polyline(
       l.pts,
       {
@@ -3657,44 +3308,35 @@ function refreshImpLayer(){
 ========================================================= */
 
 async function runLandCoverAnalysis(){
-
   if(
     !PARK_POLY||
     !PARK_POLY.length
   ){
-
     return toast(
       "Önce park seç"
     );
   }
 
-
   const rep=
     $("landCoverReport");
 
-
   if(rep){
-
+    rep.style.display="block";
     rep.innerHTML=
       "⏳ Detaylı sorgu (bina·yol·otopark·saha·kort)…";
   }
-
 
   toast(
     "🌿 Park içi detaylı sorgu…",
     "info"
   );
 
-
   await queryDetailedCoverage();
 
-
   if(rep){
-
     rep.innerHTML=
       "⏳ Hesaplanıyor…";
   }
-
 
   const lineIdx=
     IMP_LINES.map(l=>({
@@ -3702,35 +3344,25 @@ async function runLandCoverAnalysis(){
       w:l.w
     }));
 
-
   let minLat=90;
   let maxLat=-90;
   let minLon=180;
   let maxLon=-180;
 
-
   PARK_POLY.forEach(r=>
     r.forEach(p=>{
-
       if(p[0]<minLat)minLat=p[0];
       if(p[0]>maxLat)maxLat=p[0];
 
       if(p[1]<minLon)minLon=p[1];
       if(p[1]>maxLon)maxLon=p[1];
-
     })
   );
 
-
-  /*
-   * 3 metre örnekleme
-   */
   const SAMPLE_M=3;
-
 
   const stepLat=
     SAMPLE_M/110540;
-
 
   const stepLon=
     SAMPLE_M/
@@ -3744,25 +3376,21 @@ async function runLandCoverAnalysis(){
       )
     );
 
-
   let nPark=0;
   let nWater=0;
   let nImp=0;
   let nGreen=0;
-
 
   for(
     let la=minLat;
     la<=maxLat;
     la+=stepLat
   ){
-
     for(
       let lo=minLon;
       lo<=maxLon;
       lo+=stepLon
     ){
-
       if(
         !pointInPark(
           la,
@@ -3773,22 +3401,11 @@ async function runLandCoverAnalysis(){
         continue;
       }
 
-
       nPark++;
-
-
-      /* ===============================================
-         WATER
-      =============================================== */
 
       let inWater=false;
 
-
-      /*
-       * Water polygons
-       */
       for(const r of WATER_RINGS){
-
         if(
           pointInPolygon(
             la,
@@ -3796,20 +3413,13 @@ async function runLandCoverAnalysis(){
             r
           )
         ){
-
           inWater=true;
           break;
         }
       }
 
-
-      /*
-       * Water lines
-       */
       if(!inWater){
-
         for(const l of WATER_LINES){
-
           if(
             !l||
             l.length<2
@@ -3817,9 +3427,7 @@ async function runLandCoverAnalysis(){
             continue;
           }
 
-
           for(let i=0;i<l.length-1;i++){
-
             const d=
               pointToSegmentDistanceM(
                 la,
@@ -3828,36 +3436,24 @@ async function runLandCoverAnalysis(){
                 l[i+1]
               );
 
-
             if(d<=3){
-
               inWater=true;
               break;
             }
           }
 
-
           if(inWater)break;
         }
       }
 
-
       if(inWater){
-
         nWater++;
         continue;
       }
 
-
-      /* ===============================================
-         IMPERVIOUS
-      =============================================== */
-
       let imp=false;
 
-
       for(const r of IMP_RINGS){
-
         if(
           pointInPolygon(
             la,
@@ -3865,12 +3461,10 @@ async function runLandCoverAnalysis(){
             r
           )
         ){
-
           imp=true;
           break;
         }
       }
-
 
       if(
         !imp &&
@@ -3880,38 +3474,24 @@ async function runLandCoverAnalysis(){
           lo
         )
       ){
-
         imp=true;
       }
 
-
       if(imp){
-
         nImp++;
         continue;
       }
 
-
-      /*
-       * Geri kalan alan yeşil kabul edilir.
-       */
       nGreen++;
     }
   }
 
-
-  /*
-   * Çapraz kontrol.
-   */
   let cross=0;
 
-
   IMP_RINGS.forEach(r=>{
-
     let vin=0;
 
     for(const p of r){
-
       if(
         pointInPark(
           p[0],
@@ -3922,7 +3502,6 @@ async function runLandCoverAnalysis(){
         vin++;
       }
     }
-
 
     cross+=
       polyArea([r])*
@@ -3933,14 +3512,10 @@ async function runLandCoverAnalysis(){
       );
   });
 
-
   IMP_LINES.forEach(l=>{
-
     let vin=0;
 
-
     for(const p of l.pts){
-
       if(
         pointInPark(
           p[0],
@@ -3951,7 +3526,6 @@ async function runLandCoverAnalysis(){
         vin++;
       }
     }
-
 
     cross+=
       lineLengthM(l.pts)*
@@ -3963,10 +3537,8 @@ async function runLandCoverAnalysis(){
       );
   });
 
-
   const totalHa=
     parkAreaHa();
-
 
   const ha=v=>
     (
@@ -3980,7 +3552,6 @@ async function runLandCoverAnalysis(){
       totalHa
     ).toFixed(1);
 
-
   const pct=v=>
     nPark
       ?Math.round(
@@ -3988,9 +3559,7 @@ async function runLandCoverAnalysis(){
       )
       :0;
 
-
   LANDCOVER={
-
     green:
       +ha(nGreen),
 
@@ -4004,35 +3573,23 @@ async function runLandCoverAnalysis(){
       +totalHa.toFixed(1)
   };
 
-
   const row=(
     color,
     label,
     haV,
     pv
   )=>
-
     `<div style="display:flex;align-items:center;gap:8px;margin:4px 0">`+
-
       `<span style="width:12px;height:12px;border-radius:3px;background:${color};flex:none"></span>`+
-
       `<span style="width:52px;font-size:.8rem">${label}</span>`+
-
       `<div style="flex:1;height:10px;background:var(--line);border-radius:5px;overflow:hidden">`+
-
         `<div style="height:100%;width:${pv}%;background:${color};transition:width .6s"></div>`+
-
       `</div>`+
-
       `<b style="font-size:.8rem;width:74px;text-align:right">${haV} ha</b>`+
-
       `<span style="font-size:.72rem;color:var(--mut);width:38px">%${pv}</span>`+
-
     `</div>`;
 
-
   if(rep){
-
     rep.innerHTML=
 
       `<b>🌿 Yüzey Örtüsü</b> `+
@@ -4062,18 +3619,13 @@ async function runLandCoverAnalysis(){
       )+
 
       `<div style="font-size:.72rem;color:var(--mut);margin-top:6px">`+
-
         `Toplam: <b>${totalHa.toFixed(1)} ha</b> · `+
         `Yeşil+Sert+Su = Toplam<br>`+
-
         `Örnekleme: ${SAMPLE_M} m · `+
         `Örnek nokta: ${nPark.toLocaleString("tr-TR")}<br>`+
-
         `Çapraz kontrol: ~${(cross/10000).toFixed(1)} ha sert`+
-
       `</div>`;
   }
-
 
   toast(
     "✓ Analiz tamam",
@@ -4098,9 +3650,7 @@ async function drawTiles(
   ox,
   oy
 ){
-
   const urls={
-
     osm:(x,y,z)=>
       `https://tile.openstreetmap.org/${z}/${x}/${y}.png`,
 
@@ -4110,7 +3660,6 @@ async function drawTiles(
     topo:(x,y,z)=>
       `https://a.tile.opentopomap.org/${z}/${x}/${y}.png`
   };
-
 
   const zoom=
     Math.min(
@@ -4125,13 +3674,11 @@ async function drawTiles(
       )
     );
 
-
   const n=
     Math.pow(
       2,
       zoom
     );
-
 
   const x0=
     Math.floor(
@@ -4140,7 +3687,6 @@ async function drawTiles(
       n
     );
 
-
   const x1=
     Math.floor(
       (maxLon+180)/
@@ -4148,13 +3694,10 @@ async function drawTiles(
       n
     );
 
-
   const yFor=lat=>{
-
     const r=
       lat*
       Math.PI/180;
-
 
     return Math.floor(
       (
@@ -4170,14 +3713,11 @@ async function drawTiles(
     );
   };
 
-
   const y0=yFor(maxLat);
   const y1=yFor(minLat);
 
-
   const lonOf=x=>
     x/n*360-180;
-
 
   const latOf=y=>
     Math.atan(
@@ -4191,29 +3731,23 @@ async function drawTiles(
     180/
     Math.PI;
 
-
   const imgs=[];
-
 
   for(
     let x=x0;
     x<=x1;
     x++
   ){
-
     for(
       let y=y0;
       y<=y1;
       y++
     ){
-
       const img=
         new Image();
 
-
       img.crossOrigin=
         "anonymous";
-
 
       img.src=
         urls[bg](
@@ -4221,7 +3755,6 @@ async function drawTiles(
           y,
           zoom
         );
-
 
       imgs.push({
         img,
@@ -4231,12 +3764,9 @@ async function drawTiles(
     }
   }
 
-
   try{
-
     await Promise.all(
       imgs.map(o=>
-
         o.img.decode
           ?
           o.img.decode()
@@ -4249,15 +3779,11 @@ async function drawTiles(
           )
       )
     );
-
   }catch(e){
-
     return false;
   }
 
-
   for(const o of imgs){
-
     const p0=[
       ox+
       (
@@ -4273,7 +3799,6 @@ async function drawTiles(
       )*
       scale
     ];
-
 
     const p1=[
       ox+
@@ -4291,7 +3816,6 @@ async function drawTiles(
       scale
     ];
 
-
     ctx.drawImage(
       o.img,
       p0[0],
@@ -4301,21 +3825,16 @@ async function drawTiles(
     );
   }
 
-
   try{
-
     ctx.getImageData(
       0,
       0,
       1,
       1
     );
-
   }catch(e){
-
     return false;
   }
-
 
   return true;
 }
@@ -4326,17 +3845,14 @@ async function drawTiles(
 ========================================================= */
 
 async function downloadParkImage(){
-
   if(
     !PARK_POLY||
     !PARK_POLY.length
   ){
-
     return toast(
       "Önce park seç"
     );
   }
-
 
   const bg=
     $("pngBg")
@@ -4344,7 +3860,6 @@ async function downloadParkImage(){
       $("pngBg").value
       :
       "vector";
-
 
   const incGrid=
     (
@@ -4356,7 +3871,6 @@ async function downloadParkImage(){
     ) &&
     GRID_CELLS.length>0;
 
-
   const incWp=
     $("chkPngWp")
       ?
@@ -4364,14 +3878,12 @@ async function downloadParkImage(){
       :
       true;
 
-
   const incCover=
     $("chkPngCover")
       ?
       $("chkPngCover").checked
       :
       true;
-
 
   const wpRows=
     (
@@ -4386,43 +3898,34 @@ async function downloadParkImage(){
       )
     );
 
-
   const showWp=
     incWp &&
     wpRows.length>0;
 
-
   const W=1600;
   const H=1200;
-
 
   const canvas=
     document.createElement(
       "canvas"
     );
 
-
   canvas.width=W;
   canvas.height=H;
 
-
   const ctx=
     canvas.getContext("2d");
-
 
   const mapC=
     document.createElement(
       "canvas"
     );
 
-
   mapC.width=W;
   mapC.height=H;
 
-
   const mctx=
     mapC.getContext("2d");
-
 
   mctx.fillStyle="#ffffff";
   mctx.fillRect(
@@ -4432,25 +3935,20 @@ async function downloadParkImage(){
     H
   );
 
-
   let minLat=90;
   let maxLat=-90;
   let minLon=180;
   let maxLon=-180;
 
-
   PARK_POLY.forEach(r=>
     r.forEach(p=>{
-
       if(p[0]<minLat)minLat=p[0];
       if(p[0]>maxLat)maxLat=p[0];
 
       if(p[1]<minLon)minLon=p[1];
       if(p[1]>maxLon)maxLon=p[1];
-
     })
   );
-
 
   const pad=.0004;
 
@@ -4459,13 +3957,11 @@ async function downloadParkImage(){
   minLon-=pad;
   maxLon+=pad;
 
-
   const dLat=
     maxLat-minLat;
 
   const dLon=
     maxLon-minLon;
-
 
   const scale=
     Math.min(
@@ -4473,14 +3969,11 @@ async function downloadParkImage(){
       (H-200)/dLat
     );
 
-
   const ox=
     (W-dLon*scale)/2;
 
-
   const oy=
     (H-dLat*scale)/2+30;
-
 
   const toXY=(lat,lon)=>[
     ox+
@@ -4492,9 +3985,7 @@ async function downloadParkImage(){
     scale
   ];
 
-
   if(bg!=="vector"){
-
     const ok=
       await drawTiles(
         mctx,
@@ -4508,18 +3999,14 @@ async function downloadParkImage(){
         oy
       );
 
-
     if(!ok){
-
       mctx.fillStyle="#ffffff";
-
       mctx.fillRect(
         0,
         0,
         W,
         H
       );
-
 
       toast(
         "⚠ Tile yüklenemedi",
@@ -4528,18 +4015,14 @@ async function downloadParkImage(){
     }
   }
 
-
   if(incCover){
-
     IMP_RINGS.forEach(r=>{
-
       if(
         !r||
         r.length<3
       ){
         return;
       }
-
 
       mctx.fillStyle=
         "#ef444444";
@@ -4549,28 +4032,21 @@ async function downloadParkImage(){
 
       mctx.lineWidth=1;
 
-
       mctx.beginPath();
 
-
       r.forEach((p,i)=>{
-
         const xy=
           toXY(
             p[0],
             p[1]
           );
 
-
         if(i===0){
-
           mctx.moveTo(
             xy[0],
             xy[1]
           );
-
         }else{
-
           mctx.lineTo(
             xy[0],
             xy[1]
@@ -4578,18 +4054,14 @@ async function downloadParkImage(){
         }
       });
 
-
       mctx.closePath();
       mctx.fill();
       mctx.stroke();
     });
 
-
     IMP_LINES.forEach(l=>{
-
       mctx.strokeStyle=
         "#ef444466";
-
 
       mctx.lineWidth=
         Math.max(
@@ -4599,28 +4071,21 @@ async function downloadParkImage(){
           55660
         );
 
-
       mctx.beginPath();
 
-
       l.pts.forEach((p,i)=>{
-
         const xy=
           toXY(
             p[0],
             p[1]
           );
 
-
         if(i===0){
-
           mctx.moveTo(
             xy[0],
             xy[1]
           );
-
         }else{
-
           mctx.lineTo(
             xy[0],
             xy[1]
@@ -4628,20 +4093,16 @@ async function downloadParkImage(){
         }
       });
 
-
       mctx.stroke();
     });
 
-
     WATER_RINGS.forEach(r=>{
-
       if(
         !r||
         r.length<3
       ){
         return;
       }
-
 
       mctx.fillStyle=
         "#3b82f699";
@@ -4651,71 +4112,54 @@ async function downloadParkImage(){
 
       mctx.lineWidth=1.5;
 
-
       mctx.beginPath();
 
-
       r.forEach((p,i)=>{
-
         const xy=
           toXY(
             p[0],
             p[1]
           );
 
-
         if(i===0){
-
           mctx.moveTo(
             xy[0],
             xy[1]
           );
-
         }else{
-
           mctx.lineTo(
             xy[0],
             xy[1]
           );
         }
       });
-
 
       mctx.closePath();
       mctx.fill();
       mctx.stroke();
     });
 
-
     WATER_LINES.forEach(l=>{
-
       mctx.strokeStyle=
         "#3b82f699";
 
       mctx.lineWidth=2;
 
-
       mctx.beginPath();
 
-
       l.forEach((p,i)=>{
-
         const xy=
           toXY(
             p[0],
             p[1]
           );
 
-
         if(i===0){
-
           mctx.moveTo(
             xy[0],
             xy[1]
           );
-
         }else{
-
           mctx.lineTo(
             xy[0],
             xy[1]
@@ -4723,22 +4167,17 @@ async function downloadParkImage(){
         }
       });
 
-
       mctx.stroke();
     });
   }
 
-
   if(incGrid){
-
     GRID_CELLS.forEach(c=>{
-
       const a=
         toXY(
           c.s0,
           c.w0
         );
-
 
       const b=
         toXY(
@@ -4746,12 +4185,10 @@ async function downloadParkImage(){
           c.w1
         );
 
-
       const col=
         c.n===0
           ?"#e11d48"
           :"#16a34a";
-
 
       mctx.fillStyle=
         col+"66";
@@ -4761,14 +4198,12 @@ async function downloadParkImage(){
 
       mctx.lineWidth=1;
 
-
       mctx.fillRect(
         a[0],
         a[1],
         b[0]-a[0],
         b[1]-a[1]
       );
-
 
       mctx.strokeRect(
         a[0],
@@ -4779,39 +4214,25 @@ async function downloadParkImage(){
     });
   }
 
-
-  /*
-   * Park clip
-   *
-   * Outer + inner hole.
-   */
   mctx.globalCompositeOperation=
     "destination-in";
 
-
   mctx.beginPath();
 
-
   PARK_POLY.forEach(r=>{
-
     r.forEach((p,i)=>{
-
       const xy=
         toXY(
           p[0],
           p[1]
         );
 
-
       if(i===0){
-
         mctx.moveTo(
           xy[0],
           xy[1]
         );
-
       }else{
-
         mctx.lineTo(
           xy[0],
           xy[1]
@@ -4819,31 +4240,23 @@ async function downloadParkImage(){
       }
     });
 
-
     mctx.closePath();
   });
-
 
   PARK_HOLES.forEach(r=>{
-
     r.forEach((p,i)=>{
-
       const xy=
         toXY(
           p[0],
           p[1]
         );
 
-
       if(i===0){
-
         mctx.moveTo(
           xy[0],
           xy[1]
         );
-
       }else{
-
         mctx.lineTo(
           xy[0],
           xy[1]
@@ -4851,17 +4264,13 @@ async function downloadParkImage(){
       }
     });
 
-
     mctx.closePath();
   });
-
 
   mctx.fill("evenodd");
 
-
   mctx.globalCompositeOperation=
     "source-over";
-
 
   ctx.fillStyle="#ffffff";
 
@@ -4872,17 +4281,12 @@ async function downloadParkImage(){
     H
   );
 
-
   ctx.drawImage(
     mapC,
     0,
     0
   );
 
-
-  /*
-   * Park outer boundary
-   */
   ctx.strokeStyle=
     "#2b6cb0";
 
@@ -4893,30 +4297,22 @@ async function downloadParkImage(){
     8
   ]);
 
-
   PARK_POLY.forEach(r=>{
-
     ctx.beginPath();
 
-
     r.forEach((p,i)=>{
-
       const xy=
         toXY(
           p[0],
           p[1]
         );
 
-
       if(i===0){
-
         ctx.moveTo(
           xy[0],
           xy[1]
         );
-
       }else{
-
         ctx.lineTo(
           xy[0],
           xy[1]
@@ -4924,41 +4320,28 @@ async function downloadParkImage(){
       }
     });
 
-
     ctx.closePath();
     ctx.stroke();
   });
-
 
   ctx.setLineDash([]);
 
-
-  /*
-   * Holes
-   */
   PARK_HOLES.forEach(r=>{
-
     ctx.beginPath();
 
-
     r.forEach((p,i)=>{
-
       const xy=
         toXY(
           p[0],
           p[1]
         );
 
-
       if(i===0){
-
         ctx.moveTo(
           xy[0],
           xy[1]
         );
-
       }else{
-
         ctx.lineTo(
           xy[0],
           xy[1]
@@ -4966,29 +4349,20 @@ async function downloadParkImage(){
       }
     });
 
-
     ctx.closePath();
     ctx.stroke();
   });
 
-
-  /*
-   * WP
-   */
   if(showWp){
-
     wpRows.forEach(w=>{
-
       const xy=
         toXY(
           w.lat,
           w.lon
         );
 
-
       ctx.fillStyle=
         "#e11d48";
-
 
       ctx.beginPath();
 
@@ -5002,13 +4376,11 @@ async function downloadParkImage(){
 
       ctx.fill();
 
-
       ctx.strokeStyle="#fff";
       ctx.lineWidth=1.5;
       ctx.stroke();
     });
   }
-
 
   const name=
     (
@@ -5017,10 +4389,8 @@ async function downloadParkImage(){
     ) ||
     "İsimsiz Park";
 
-
   const haTotal=
     parkAreaHa().toFixed(1);
-
 
   ctx.fillStyle=
     "#14532d";
@@ -5032,12 +4402,10 @@ async function downloadParkImage(){
     64
   );
 
-
   ctx.fillStyle="#fff";
 
   ctx.font=
     "bold 24px system-ui";
-
 
   ctx.fillText(
     "🌳 "+
@@ -5047,7 +4415,6 @@ async function downloadParkImage(){
     40
   );
 
-
   const lines=[
     "DendroGeo · Park Raporu",
     "Park: "+name,
@@ -5056,9 +4423,7 @@ async function downloadParkImage(){
       " ha (geodezik)"
   ];
 
-
   if(PARK_REF_HA){
-
     lines.push(
       "Referans: "+
       PARK_REF_HA+
@@ -5077,9 +4442,7 @@ async function downloadParkImage(){
     );
   }
 
-
   if(LANDCOVER){
-
     lines.push(
       "Yeşil "+
       LANDCOVER.green+
@@ -5091,9 +4454,7 @@ async function downloadParkImage(){
     );
   }
 
-
   if(incGrid){
-
     lines.push(
       "Grid: "+
       GRID_CELLS.length+
@@ -5101,15 +4462,12 @@ async function downloadParkImage(){
     );
   }
 
-
   if(showWp){
-
     lines.push(
       "Waypoint: "+
       wpRows.length
     );
   }
-
 
   lines.push(
     "Altlık: "+
@@ -5132,24 +4490,19 @@ async function downloadParkImage(){
       )
   );
 
-
   const bw=380;
   const bh=
     lines.length*
     24+
     20;
 
-
   ctx.fillStyle=
     "rgba(255,255,255,.95)";
-
 
   ctx.strokeStyle=
     "#94a3b8";
 
-
   ctx.lineWidth=1;
-
 
   ctx.fillRect(
     W-bw-24,
@@ -5158,7 +4511,6 @@ async function downloadParkImage(){
     bh
   );
 
-
   ctx.strokeRect(
     W-bw-24,
     H-bh-24,
@@ -5166,17 +4518,13 @@ async function downloadParkImage(){
     bh
   );
 
-
   ctx.fillStyle=
     "#1f2937";
-
 
   ctx.font=
     "13px system-ui";
 
-
   lines.forEach((t,i)=>{
-
     ctx.fillText(
       t,
       W-bw-8,
@@ -5185,12 +4533,9 @@ async function downloadParkImage(){
     );
   });
 
-
   const lg=[];
 
-
   if(incGrid){
-
     lg.push(
       [
         "#16a34a",
@@ -5203,9 +4548,7 @@ async function downloadParkImage(){
     );
   }
 
-
   if(showWp){
-
     lg.push(
       [
         "#e11d48",
@@ -5214,9 +4557,7 @@ async function downloadParkImage(){
     );
   }
 
-
   if(incCover){
-
     lg.push(
       [
         "#3b82f6",
@@ -5229,7 +4570,6 @@ async function downloadParkImage(){
     );
   }
 
-
   lg.push(
     [
       "#2b6cb0",
@@ -5237,20 +4577,15 @@ async function downloadParkImage(){
     ]
   );
 
-
   ctx.font=
     "13px system-ui";
 
-
   lg.forEach((e,i)=>{
-
     const y=
       90+
       i*22;
 
-
     ctx.fillStyle=e[0];
-
 
     ctx.fillRect(
       W-190,
@@ -5258,7 +4593,6 @@ async function downloadParkImage(){
       16,
       14
     );
-
 
     ctx.strokeStyle="#333";
 
@@ -5269,10 +4603,8 @@ async function downloadParkImage(){
       14
     );
 
-
     ctx.fillStyle=
       "#1f2937";
-
 
     ctx.fillText(
       e[1],
@@ -5280,7 +4612,6 @@ async function downloadParkImage(){
       y+12
     );
   });
-
 
   const mPerDeg=
     111320*
@@ -5291,16 +4622,13 @@ async function downloadParkImage(){
       Math.PI/180
     );
 
-
   const barPx=
     200*
     scale/
     mPerDeg;
 
-
   ctx.fillStyle=
     "#1f2937";
-
 
   ctx.fillRect(
     24,
@@ -5309,10 +4637,8 @@ async function downloadParkImage(){
     8
   );
 
-
   ctx.font=
     "bold 12px system-ui";
-
 
   ctx.fillText(
     "200 m",
@@ -5322,24 +4648,19 @@ async function downloadParkImage(){
     H-28
   );
 
-
   canvas.toBlob(
     b=>{
-
       const u=
         URL.createObjectURL(
           b
         );
-
 
       const a=
         document.createElement(
           "a"
         );
 
-
       a.href=u;
-
 
       a.download=
         "dendrogeo_"+
@@ -5349,22 +4670,18 @@ async function downloadParkImage(){
         )+
         "_rapor.png";
 
-
       a.click();
-
 
       setTimeout(
         ()=>URL.revokeObjectURL(u),
         1000
       );
 
-
       toast(
         "✓ PNG indirildi",
         "ok",
         "🖼️"
       );
-
     },
     "image/png"
   );
@@ -5376,71 +4693,41 @@ async function downloadParkImage(){
 ========================================================= */
 
 function setRefHa(v){
-
   PARK_REF_HA=
     parseFloat(v);
-
 
   if(
     !isFinite(
       PARK_REF_HA
     )
   ){
-
     PARK_REF_HA=null;
   }
-
 
   renderRefBadge();
 }
 
-
 function renderRefBadge(){
+  const el=$("refBadge");
+  if(!el)return;
 
-  const el=
-    $("refBadge");
-
-
-  if(
-    !el||
-    !PARK_REF_HA||
-    !PARK_POLY
-  ){
-
-    if(el){
-      el.textContent="";
-    }
-
+  if(!PARK_REF_HA||!PARK_POLY){
+    el.style.display="none";
+    el.textContent="";
     return;
   }
 
+  const ha=parkAreaHa();
+  const dev=Math.abs(((ha-PARK_REF_HA)/PARK_REF_HA)*100);
 
-  const ha=
-    parkAreaHa();
+  el.style.display="inline-flex";
+  el.textContent="Referans: "+PARK_REF_HA+" ha · Sapma: %"+dev.toFixed(1);
 
-
-  const dev=
-    Math.abs(
-      (
-        (
-          ha-
-          PARK_REF_HA
-        )/
-        PARK_REF_HA
-      )*
-      100
-    );
-
-
-  el.textContent=
-    "· Referans: "+
-    PARK_REF_HA+
-    " ha · Sapma: %"+
-    dev.toFixed(1);
-
-
-  el.style.color=
-    dev<3
-      ?"#14532d"
-      :"#b45309";
+  if(dev<3){
+    el.style.background="rgba(22,163,74,.12)";
+    el.style.color="#16a34a";
+  }else{
+    el.style.background="rgba(245,158,11,.14)";
+    el.style.color="#b45309";
+  }
 }
