@@ -1,5 +1,5 @@
 "use strict";
-/* DendroGeo v2 · gridplan.js v31 — TEMİZ FINAL */
+/* DendroGeo v2 · gridplan.js v30 — SON FINAL */
 
 let PARK_POLY=null,PARK_LAYER=null,PARK_MODE=false,PARK_CLICK_BOUND=false,PARK_CANDS=[];
 let WATER_RINGS=[],WATER_LINES=[],WATER_LAYER=null;
@@ -121,9 +121,9 @@ function isCellValid(s0,s1,w0,w1){
  return true;
 }
 
-/* HIZLI PARK SORGUSU: sadece park sınırı + su (5-10 sn) */
+/* HIZLI: park sınırı + su */
 async function queryPark(lat,lon,radius=1200){
- const q1=`[out:json][timeout:25];(way["leisure"~"park|garden|nature_reserve|common|recreation_ground|playground|pitch"](around:${radius},${lat},${lon});relation["leisure"~"park|garden|nature_reserve|common|recreation_ground"](around:${radius},${lat},${lon}););out geom;`;
+ const q1=`[out:json][timeout:25];(way["leisure"~"park|garden|nature_reserve|common|recreation_ground"](around:${radius},${lat},${lon});relation["leisure"~"park|garden|nature_reserve|common|recreation_ground"](around:${radius},${lat},${lon}););out geom;`;
  let parkData=null;
  for(const url of OVERPASS_URLS){
   try{const res=await fetch(url+"?data="+encodeURIComponent(q1));if(!res.ok)continue;parkData=await res.json();break;}catch(e){}
@@ -161,11 +161,10 @@ async function queryPark(lat,lon,radius=1200){
  const pb={minLat,maxLat,minLon,maxLon};
  WATER_RINGS=WATER_RINGS.filter(r=>ringTouchesPark(r,park.rings,pb));
  WATER_LINES=WATER_LINES.filter(l=>lineTouchesPark(l,park.rings,pb));
- console.log("✓ Park + su:",WATER_RINGS.length+WATER_LINES.length);
  return sorted;
 }
 
-/* DETAYLI SORGU: bina + yol + otopark + surface (sadece analiz butonu çağırır) */
+/* DETAYLI: bina + yol + otopark + SAHA/KORT + surface */
 async function queryDetailedCoverage(){
  if(!PARK_POLY||!PARK_POLY.length)return;
  IMP_RINGS=[];IMP_LINES=[];GRID_BLOCK_LINES=[];
@@ -177,7 +176,8 @@ async function queryDetailedCoverage(){
   `way["building"](${bbox});relation["building"](${bbox});`+
   `way["highway"](${bbox});`+
   `way["amenity"~"parking|bicycle_parking|motorcycle_parking"](${bbox});`+
-  `way["surface"~"paved|asphalt|concrete|paving_stones|sett"](${bbox});`+
+  `way["leisure"~"pitch|track|playground"](${bbox});`+
+  `way["surface"~"paved|asphalt|concrete|paving_stones|sett|artificial_turf"](${bbox});`+
   `way["landuse"~"commercial|industrial|retail|construction"](${bbox});`+
   `);out geom;`;
  for(const url of OVERPASS_URLS){
@@ -186,20 +186,9 @@ async function queryDetailedCoverage(){
    if(!res.ok)continue;
    const json=await res.json();
    for(const el of (json.elements||[])){
-    const t=el.tags||{};
-    if(el.type==="relation"){const r=extractRings(el);if(r)r.forEach(rr=>IMP_RINGS.push(rr));continue;}
-    if(!el.geometry)continue;
-    const pts=el.geometry.map(g=>[g.lat,g.lon]);
-    if(pts.length<2)continue;
-    if(isClosedLine(pts)){IMP_RINGS.push(pts);continue;}
-    let w=0;
-    if(t.highway)w=roadHalfWidth(t.highway);
-    else if(t.amenity&&t.amenity.indexOf("parking")>=0)w=0;
-    else if(t.surface)w=3;
-    else w=2;
-    IMP_LINES.push({pts,w,tags:t});
-    if(t.highway&&!/^(footway|path|cycleway|steps|pedestrian|track)/.test(t.highway))GRID_BLOCK_LINES.push(pts);
-    else if(t.amenity&&t.amenity.indexOf("parking")>=0)GRID_BLOCK_LINES.push(pts);
+    if(isWater(el))continue;
+    if(!isImpervious(el))continue;
+    collectImperviousGeometry(el);
    }
    break;
   }catch(e){}
@@ -209,7 +198,7 @@ async function queryDetailedCoverage(){
  IMP_LINES=IMP_LINES.filter(l=>lineTouchesPark(l.pts,PARK_POLY,pb));
  GRID_BLOCK_LINES=GRID_BLOCK_LINES.filter(l=>lineTouchesPark(l,PARK_POLY,pb));
  refreshImpLayer();
- console.log("✓ Detaylı → Bina:",IMP_RINGS.length,"Yol+otopark:",IMP_LINES.length);
+ console.log("✓ Detaylı → Poligon:",IMP_RINGS.length,"Çizgi:",IMP_LINES.length);
 }
 
 function ringTouchesPark(ring,parkRings,pb){
@@ -241,12 +230,39 @@ function extractRings(el){
  return null;
 }
 function isWater(el){const t=el.tags||{};return t.natural==="water"||t.landuse==="reservoir"||t.landuse==="basin"||t.leisure==="swimming_pool"||!!t.waterway;}
+function isImpervious(el){
+ const t=el.tags||{};
+ return !!t.building||!!t.highway||
+  t.landuse==="commercial"||t.landuse==="industrial"||t.landuse==="retail"||t.landuse==="construction"||
+  t.leisure==="pitch"||t.leisure==="track"||t.leisure==="playground"||
+  !!t.surface||
+  (t.amenity&&t.amenity.indexOf("parking")>=0);
+}
 function isClosedLine(l){return l&&l.length>2&&Math.abs(l[0][0]-l[l.length-1][0])<1e-9&&Math.abs(l[0][1]-l[l.length-1][1])<1e-9;}
 function roadHalfWidth(hw){
  if(/^(motorway|trunk)/.test(hw))return 15;if(/^primary/.test(hw))return 12;if(/^secondary/.test(hw))return 10;
  if(/^tertiary/.test(hw))return 8;if(/^(unclassified|residential)/.test(hw))return 7;if(/^service/.test(hw))return 4;
  if(/^living_street/.test(hw))return 5;if(/^(footway|path|pedestrian|cycleway|steps)/.test(hw))return 1.5;
  if(/^track/.test(hw))return 3;return 6;
+}
+/* Bina/saha/kort: kapalı değilse OTOMATİK KAPAT → poligon olur */
+function collectImperviousGeometry(el){
+ if(el.type==="relation"){const r=extractRings(el);if(r)r.forEach(rr=>IMP_RINGS.push(rr));return;}
+ if(!el.geometry)return;
+ const pts=el.geometry.map(g=>[g.lat,g.lon]);
+ if(pts.length<2)return;
+ const t=el.tags||{};
+ const isArea=!!t.building||t.leisure==="pitch"||t.leisure==="track"||t.leisure==="playground"||
+  (t.amenity&&t.amenity.indexOf("parking")>=0)||
+  t.landuse==="commercial"||t.landuse==="industrial"||t.landuse==="retail"||t.landuse==="construction";
+ if(isClosedLine(pts)){IMP_RINGS.push(pts);return;}
+ if(isArea){const c=pts.slice();c.push([pts[0][0],pts[0][1]]);IMP_RINGS.push(c);return;}
+ let w=0;
+ if(t.highway)w=roadHalfWidth(t.highway);
+ else if(t.surface)w=3;
+ else w=2;
+ IMP_LINES.push({pts,w});
+ if(t.highway&&!/^(footway|path|cycleway|steps|pedestrian)/.test(t.highway))GRID_BLOCK_LINES.push(pts);
 }
 function joinWaysToRings(ways){
  const rings=[],rem=ways.slice();
@@ -312,9 +328,9 @@ function drawPark(park){
    `<b style="font-size:1.08rem">🌳 ${esc(park.name||"İsimsiz Park")}</b>`+
    `<span style="background:#14532d;color:#fff;font-size:.78rem;padding:3px 12px;border-radius:999px">Toplam: ${haTotal} ha</span>`+
    `<span id="refBadge" style="font-size:.75rem;color:var(--mut)"></span>`+alt+`</div>`+
-  `<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px;margin-top:12px">`+
+  `<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:12px;margin-top:12px">`+
    `<div style="border:1px solid var(--line);border-radius:10px;padding:12px">`+
-    `<div style="font-size:.7rem;letter-spacing:.08em;color:var(--mut);margin-bottom:8px">1 · GRID</div>`+
+    `<div style="font-size:.7rem;letter-spacing:.08em;color:var(--mut);margin-bottom:8px">1 · GRID & WAYPOINT</div>`+
     `<label style="font-size:.78rem;display:block">Proje<select id="gridProject" style="width:100%;padding:5px;border-radius:6px;border:1px solid var(--line);margin-top:2px">`+
     (typeof PROJ_LIST!=="undefined"&&PROJ_LIST.length?PROJ_LIST.map(p=>`<option value="${p.id}">${esc(p.name)}</option>`).join(""):`<option value="0">Önce proje oluştur</option>`)+`</select></label>`+
     `<label style="font-size:.78rem;display:block;margin-top:6px">Grid<select id="gridSize" style="width:100%;padding:5px;border-radius:6px;border:1px solid var(--line);margin-top:2px">`+
@@ -323,24 +339,24 @@ function drawPark(park){
     `<button class="btn sm blue" style="width:100%;margin-top:8px" onclick="buildGrid()">🔲 Grid Oluştur</button>`+
    `</div>`+
    `<div style="border:1px solid var(--line);border-radius:10px;padding:12px">`+
-    `<div style="font-size:.7rem;letter-spacing:.08em;color:var(--mut);margin-bottom:8px">2 · ANALİZ</div>`+
+    `<div style="font-size:.7rem;letter-spacing:.08em;color:var(--mut);margin-bottom:8px">2 · YÜZEY ANALİZİ</div>`+
     `<button class="btn sm" style="width:100%" onclick="runLandCoverAnalysis()">🌿 Yüzey Örtüsü Analizi</button>`+
-    `<div style="font-size:.72rem;color:var(--mut);margin-top:6px">Bina+yol+otopark+su+yeşil (park içi)</div>`+
-    `<div style="margin-top:10px;border-top:1px solid var(--line);padding-top:8px">`+
-     `<div style="font-size:.72rem;color:var(--mut);margin-bottom:4px">PNG ayarları</div>`+
-     `<select id="pngBg" style="width:100%;padding:5px;border-radius:6px;border:1px solid var(--line);font-size:.78rem">`+
-      `<option value="vector">Vektör (temiz)</option><option value="osm">OSM sokak</option>`+
-      `<option value="sat">Uydu</option><option value="topo">Topoğrafik</option></select>`+
-     `<div style="display:grid;grid-template-columns:1fr 1fr;gap:4px;margin-top:6px">`+
-      `<label style="font-size:.75rem;display:flex;align-items:center;gap:4px"><input type="checkbox" id="chkPngGrid" checked> Grid</label>`+
-      `<label style="font-size:.75rem;display:flex;align-items:center;gap:4px"><input type="checkbox" id="chkPngWp" checked> WP</label>`+
-      `<label style="font-size:.75rem;display:flex;align-items:center;gap:4px"><input type="checkbox" id="chkPngCover" checked> Su/Sert</label>`+
-     `</div>`+
-     `<button class="btn sm ghost" style="width:100%;margin-top:6px" onclick="downloadParkImage()">🖼️ PNG İndir</button>`+
-    `</div>`+
+    `<div style="font-size:.72rem;color:var(--mut);margin-top:6px">Bina·yol·otopark·saha·kort·su (park içi)</div>`+
    `</div>`+
    `<div style="border:1px solid var(--line);border-radius:10px;padding:12px">`+
-    `<div style="font-size:.7rem;letter-spacing:.08em;color:var(--mut);margin-bottom:8px">3 · KATMAN</div>`+
+    `<div style="font-size:.7rem;letter-spacing:.08em;color:var(--mut);margin-bottom:8px">3 · RAPOR PNG</div>`+
+    `<select id="pngBg" style="width:100%;padding:5px;border-radius:6px;border:1px solid var(--line);font-size:.78rem">`+
+     `<option value="vector">Vektör (temiz)</option><option value="osm">OSM sokak</option>`+
+     `<option value="sat">Uydu</option><option value="topo">Topoğrafik</option></select>`+
+    `<div style="display:flex;flex-direction:column;gap:4px;margin-top:8px">`+
+     `<label style="font-size:.76rem;display:flex;align-items:center;gap:6px"><input type="checkbox" id="chkPngGrid" checked style="margin:0"> Grid hücreleri</label>`+
+     `<label style="font-size:.76rem;display:flex;align-items:center;gap:6px"><input type="checkbox" id="chkPngWp" checked style="margin:0"> Waypoint'ler</label>`+
+     `<label style="font-size:.76rem;display:flex;align-items:center;gap:6px"><input type="checkbox" id="chkPngCover" checked style="margin:0"> Su / sert zemin</label>`+
+    `</div>`+
+    `<button class="btn sm ghost" style="width:100%;margin-top:8px" onclick="downloadParkImage()">🖼️ PNG İndir</button>`+
+   `</div>`+
+   `<div style="border:1px solid var(--line);border-radius:10px;padding:12px">`+
+    `<div style="font-size:.7rem;letter-spacing:.08em;color:var(--mut);margin-bottom:8px">4 · KATMANLAR</div>`+
     `<button class="btn sm" id="gridVisBtn" style="width:100%" onclick="toggleGridVis()">🔲 Grid: GÖRÜNÜR</button>`+
     `<button class="btn sm" id="wpVisBtn" style="width:100%;margin-top:4px" onclick="toggleWpVis()">📍 WP: GÖRÜNÜR</button>`+
     `<button class="btn sm red" style="width:100%;margin-top:4px" onclick="clearGrid()">✕ Temizle</button>`+
@@ -410,7 +426,7 @@ function updateGridSummary(g,r0){
  const selCount=SELECTED_CELLS.size;
  $("gridSummary").innerHTML=
   `<b>📊 Grid</b> · ${$("gridSize")?.value||20}×${$("gridSize")?.value||20} m<br>`+
-  `Toplam: <b>${tot}</b> · 🟢 Ölçülmüş: ${g} · 🔴 Boş: ${r0}<br>`+
+  `Toplam: <b>${tot}</b> · 🟢 Ölçülmüş: ${g} (%${pct(g)}) · 🔴 Boş: ${r0} (%${pct(r0)})<br>`+
   (selCount>0?`<b style="color:#1d4ed8">🔵 Seçili: ${selCount}</b><br>`:"")+
   `<div style="margin-top:8px;display:flex;gap:6px;flex-wrap:wrap">`+
   (r0>0?`<button class="btn sm blue" onclick="createWaypointsFromGrid('auto')">📍 Otomatik (${r0})</button>`:"")+
@@ -523,11 +539,10 @@ function refreshImpLayer(){
  IMP_LINES.forEach(l=>L.polyline(l.pts,{color:"#ef4444",weight:2.5,opacity:.35,interactive:false}).addTo(IMP_LAYER));
 }
 
-/* YÜZEY ÖRTÜSÜ: detaylı sorgu + örneklem */
 async function runLandCoverAnalysis(){
  if(!PARK_POLY||!PARK_POLY.length)return toast("Önce park seç");
  const rep=$("landCoverReport");
- if(rep)rep.innerHTML="⏳ Detaylı sorgu yapılıyor (bina+yol+otopark)…";
+ if(rep)rep.innerHTML="⏳ Detaylı sorgu (bina·yol·otopark·saha·kort)…";
  toast("🌿 Park içi detaylı sorgu…","info");
  await queryDetailedCoverage();
  if(rep)rep.innerHTML="⏳ Hesaplanıyor…";
@@ -566,7 +581,7 @@ async function runLandCoverAnalysis(){
   `<b style="font-size:.8rem;width:74px;text-align:right">${haV} ha</b>`+
   `<span style="font-size:.72rem;color:var(--mut);width:38px">%${pv}</span></div>`;
  if(rep)rep.innerHTML=
-  `<b>🌿 Yüzey Örtüsü</b>`+
+  `<b>🌿 Yüzey Örtüsü</b> <span style="font-size:.72rem;color:var(--mut)">(bina·yol·otopark·saha·kort dahil)</span>`+
   row("#16a34a","Yeşil",ha(nGreen),pct(nGreen))+
   row("#ef4444","Sert",ha(nImp),pct(nImp))+
   row("#3b82f6","Su",ha(nWater),pct(nWater))+
