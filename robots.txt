@@ -1,6 +1,5 @@
 # DendroGeo robots.txt
-# https://dendrogeo.org/robots.txt
-
+# https://dendrogeo.org/robots.txt   
 User-agent: *
 Allow: /
 Allow: /index.html
