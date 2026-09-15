@@ -656,8 +656,8 @@ function nearLineW(index,lat,lon){
 function refreshImpLayer(){
  if(IMP_LAYER&&map)map.removeLayer(IMP_LAYER);
  IMP_LAYER=L.layerGroup().addTo(map);
- IMP_RINGS.forEach(r=>L.polygon(r,{color:"#9ca3af",weight:.7,fillColor:"#9ca3af",fillOpacity:.18,interactive:false}).addTo(IMP_LAYER));
- IMP_LINES.forEach(l=>L.polyline(l.pts,{color:"#9ca3af",weight:2,opacity:.45,interactive:false}).addTo(IMP_LAYER));
+ IMP_RINGS.forEach(r=>L.polygon(r,{color:"#dc2626",weight:.8,fillColor:"#ef4444",fillOpacity:.22,interactive:false}).addTo(IMP_LAYER));
+ IMP_LINES.forEach(l=>L.polyline(l.pts,{color:"#ef4444",weight:2.5,opacity:.35,interactive:false}).addTo(IMP_LAYER));
 }
 
 /* Yüzey örtüsü: TEK SEFERLİK özel sorgu · YALNIZCA park içi
