@@ -1,7 +1,7 @@
 "use strict";
 /* DendroGeo v2 · gridplan.js v31 — PARK ANALYSIS FIXED */           
 
-let PARK_POLY=null;
+let PARK_POLY=null;        
 let PARK_HOLES=[];
 let PARK_LAYER=null;
 let PARK_MODE=false;
