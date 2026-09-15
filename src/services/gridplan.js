@@ -13,6 +13,7 @@ let GRID_LAYER=null,WP_AUTO_LAYER=null;
 const SELECTED_CELLS=new Set();
 let LAST_WP_ROWS=[];
 let PARK_REF_HA=null;
+let LANDCOVER=null;
 
 const WATER_CLEARANCE_M=1;
 const IMP_CLEARANCE_M=1;
@@ -371,8 +372,8 @@ function drawPark(park){
  }
  if(IMP_RINGS.length||IMP_LINES.length){
   IMP_LAYER=L.layerGroup().addTo(map);
-  IMP_RINGS.forEach(r=>L.polygon(r,{color:"#9ca3af",weight:.7,fillColor:"#9ca3af",fillOpacity:.18,interactive:false}).addTo(IMP_LAYER));
-  IMP_LINES.forEach(l=>L.polyline(l.pts,{color:"#9ca3af",weight:2,opacity:.45,interactive:false}).addTo(IMP_LAYER));
+  IMP_RINGS.forEach(r=>L.polygon(r,{color:"#dc2626",weight:.8,fillColor:"#ef4444",fillOpacity:.22,interactive:false}).addTo(IMP_LAYER));
+  IMP_LINES.forEach(l=>L.polyline(l.pts,{color:"#ef4444",weight:2.5,opacity:.35,interactive:false}).addTo(IMP_LAYER));
  }
  map.fitBounds(PARK_LAYER.getBounds(),{padding:[30,30]});
 
@@ -617,6 +618,19 @@ function downloadWaypointsCSV(){
  toast("✓ "+rows.length+" waypoint CSV indirildi","ok","📥");
 }
 
+function densifyLine(pts, stepM){
+ const out=[];
+ for(let i=0;i<pts.length-1;i++){
+  const a=pts[i], b=pts[i+1];
+  const dy=(b[0]-a[0])*110540;
+  const dx=(b[1]-a[1])*111320*Math.cos(a[0]*Math.PI/180);
+  const len=Math.sqrt(dx*dx+dy*dy);
+  const n=Math.max(1, Math.ceil(len/stepM));
+  for(let k=0;k<n;k++) out.push([a[0]+(b[0]-a[0])*k/n, a[1]+(b[1]-a[1])*k/n]);
+ }
+ out.push(pts[pts.length-1]);
+ return out;
+}
 /* ---------- ARAZİ ÖRTÜSÜ (5m örneklem, yol genişlikli) ---------- */
 function buildNodeIndexW(lines){
  const idx={},cs=0.0004;
@@ -710,7 +724,8 @@ async function runLandCoverAnalysis(){
  refreshImpLayer();
 
  /* 5m örneklem — yalnızca park içi */
- const lineIdx=buildNodeIndexW(IMP_LINES);
+ const denseLines=hardLines.map(l=>({pts:densifyLine(l.pts,4),w:l.w}));
+ const lineIdx=buildNodeIndexW(denseLines);
  const stepLat=5/110540;
  const stepLon=5/(111320*Math.cos(((minLat+maxLat)/2)*Math.PI/180));
  let nPark=0,nWater=0,nImp=0,nGreen=0;
@@ -738,9 +753,10 @@ async function runLandCoverAnalysis(){
   cross+=lineLengthM(l.pts)*(l.w*2)*(l.pts.length?vin/l.pts.length:0);
  });
 
- const cellM2=25;
- const ha=v=>(v*cellM2/10000).toFixed(1);
+  const totalHa=polyArea(PARK_POLY)/10000;
+ const ha=v=>((v/Math.max(1,nPark))*totalHa).toFixed(1);
  const pct=v=>nPark?Math.round(v/nPark*100):0;
+ LANDCOVER={green:+ha(nGreen),hard:+ha(nImp),water:+ha(nWater),total:+totalHa.toFixed(1)};
  const row=(color,label,haV,pv)=>
   `<div style="display:flex;align-items:center;gap:8px;margin:4px 0">`+
   `<span style="width:12px;height:12px;border-radius:3px;background:${color};flex:none"></span>`+
@@ -752,11 +768,11 @@ async function runLandCoverAnalysis(){
  if(rep)rep.innerHTML=
   `<b>🌿 Yüzey Örtüsü Analizi</b> <span style="color:var(--mut);font-size:.72rem">(5m örneklem · yalnızca park içi · tek sorgu)</span>`+
   row("#16a34a","Yeşil",ha(nGreen),pct(nGreen))+
-  row("#78716c","Sert",ha(nImp),pct(nImp))+
-  row("#2563eb","Su",ha(nWater),pct(nWater))+
+  row("#ef4444","Sert",ha(nImp),pct(nImp))+
+  row("#3b82f6","Su",ha(nWater),pct(nWater))+
   `<div style="font-size:.72rem;color:var(--mut);margin-top:6px">`+
-  `Toplam: <b>${ha(nPark)} ha</b> · Sert = bina+yol+otopark+kaplı yüzey · Yeşil = çim+toprak+ağaçlık<br>`+
-  `Geometrik çapraz kontrol: ~${(cross/10000).toFixed(1)} ha sert</div>`;
+  `Toplam: <b>${totalHa.toFixed(1)} ha</b> (geodezik) · Yeşil+Sert+Su = Toplam (tutarlı)<br>`+
+  `Çapraz kontrol: geometrik sert ≈ ${(cross/10000).toFixed(1)} ha · örneklem-geometri uyumu %${Math.max(0,Math.round(100-Math.abs(+ha(nImp)-cross/10000)/Math.max(cross/10000,0.1)*100))}</div>`;
  toast("✓ Yüzey örtüsü analizi tamam","ok","🌿");
 }
 
@@ -824,20 +840,20 @@ async function downloadParkImage(){
  if(incCover){
   IMP_RINGS.forEach(r=>{
    if(!r||r.length<3)return;
-   mctx.fillStyle="#9ca3af55";mctx.strokeStyle="#6b7280";mctx.lineWidth=1;
+mctx.fillStyle="#ef444444";mctx.strokeStyle="#dc2626";mctx.lineWidth=1;
    mctx.beginPath();
    r.forEach((p,i)=>{const xy=toXY(p[0],p[1]);i===0?mctx.moveTo(xy[0],xy[1]):mctx.lineTo(xy[0],xy[1]);});
    mctx.closePath();mctx.fill();mctx.stroke();
   });
   IMP_LINES.forEach(l=>{
-   mctx.strokeStyle="#6b728088";mctx.lineWidth=Math.max(1.5,l.w*scale/55660);
+  mctx.strokeStyle="#ef444466";mctx.lineWidth=Math.max(1.5,l.w*scale/55660);
    mctx.beginPath();
    l.pts.forEach((p,i)=>{const xy=toXY(p[0],p[1]);i===0?mctx.moveTo(xy[0],xy[1]):mctx.lineTo(xy[0],xy[1]);});
    mctx.stroke();
   });
   WATER_RINGS.forEach(r=>{
    if(!r||r.length<3)return;
-   mctx.fillStyle="#60a5fa99";mctx.strokeStyle="#2563eb";mctx.lineWidth=1.5;
+   mctx.fillStyle="#3b82f699";mctx.strokeStyle="#1d4ed8";mctx.lineWidth=1.5;
    mctx.beginPath();
    r.forEach((p,i)=>{const xy=toXY(p[0],p[1]);i===0?mctx.moveTo(xy[0],xy[1]):mctx.lineTo(xy[0],xy[1]);});
    mctx.closePath();mctx.fill();mctx.stroke();
@@ -894,7 +910,8 @@ async function downloadParkImage(){
   "Toplam alan: "+haTotal+" ha (geodezik)",
   ...(PARK_REF_HA?["Referans: "+PARK_REF_HA+" ha (sapma %"+Math.abs(((polyArea(PARK_POLY)/10000-PARK_REF_HA)/PARK_REF_HA)*100).toFixed(1)+")"]:[]),
   incGrid?("Grid: "+GRID_CELLS.length+" hücre ("+($("gridSize")?.value||20)+"×"+($("gridSize")?.value||20)+" m)"):"Grid: —",
-  showWp?("Waypoint: "+wpRows.length):"Waypoint: —",
+    ...(LANDCOVER?["Yüzey: Yeşil "+LANDCOVER.green+" ha · Sert "+LANDCOVER.hard+" ha · Su "+LANDCOVER.water+" ha"]:[]),
+showWp?("Waypoint: "+wpRows.length):"Waypoint: —",
   "Altlık: "+(bg==="vector"?"Vektör":(bg==="osm"?"OSM":(bg==="sat"?"Uydu":"Topo")))+" · "+new Date().toLocaleDateString("tr-TR")
  ];
  const bw=380,bh=lines.length*24+20;
@@ -906,7 +923,7 @@ async function downloadParkImage(){
  const lg=[];
  if(incGrid){lg.push(["#16a34a","Ölçülmüş"],["#e11d48","Boş"]);}
  if(showWp)lg.push(["#e11d48","Waypoint"]);
- if(incCover){lg.push(["#60a5fa","Su"],["#9ca3af","Sert zemin"]);}
+ if(incCover){lg.push(["#3b82f6","Su"],["#ef4444","Sert zemin"]);}
  lg.push(["#2b6cb0","Park sınırı"]);
  ctx.font="13px system-ui";
  lg.forEach((e,i)=>{
