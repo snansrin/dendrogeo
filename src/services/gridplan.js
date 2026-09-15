@@ -225,7 +225,6 @@ function ringTouchesPark(ring,parkRings,pb){
  for(const p of ring){if(pointInPark(p[0],p[1],parkRings))inCount++;}
  return inCount>=ring.length*0.5;
 }
-}
 function lineTouchesPark(line,parkRings,pb){
  let a=90,b=-90,c=180,d=-180;
  for(const p of line){if(p[0]<a)a=p[0];if(p[0]>b)b=p[0];if(p[1]<c)c=p[1];if(p[1]>d)d=p[1];}
