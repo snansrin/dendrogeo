@@ -1718,9 +1718,11 @@ function drawPark(park){
     );
   }
 
+
   if(WATER_LINES.length){
+
     if(!WATER_LAYER){
-      WATER_LAYER=
+      WATER_LAYER =
         L.layerGroup().addTo(map);
     }
 
@@ -1737,14 +1739,32 @@ function drawPark(park){
     );
   }
 
-  map.fitBounds(
-    PARK_LAYER.getBounds(),
-    {
-      padding:[30,30]
-    }
-  );
 
-  const haTotal=
+  /* =====================================================
+     PARK BOUNDS
+  ===================================================== */
+
+  const parkBounds = L.latLngBounds(PARK_POLY);
+
+  if(PARK_HOLES && PARK_HOLES.length){
+    PARK_HOLES.forEach(ring=>{
+      ring.forEach(p=>{
+        parkBounds.extend(p);
+      });
+    });
+  }
+
+  if(parkBounds.isValid()){
+    map.fitBounds(
+      parkBounds,
+      {
+        padding:[30,30]
+      }
+    );
+  }
+
+
+  const haTotal =
     parkAreaHa().toFixed(1);
 
   const alt=
