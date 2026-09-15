@@ -1,12 +1,11 @@
-
 "use strict";
-/ DendroGeo v2 · gridplan.js v38 — TÜM SORUNLAR DÜZELTİLDİ /
+/* DendroGeo v2 · gridplan.js v38 — TÜM SORUNLAR DÜZELTİLDİ */
 
 let PARK_POLY=null;
 let PARK_HOLES=[];
 let PARK_LAYER=null;
 let PARK_MODE=false;
-let PARKCLICKBOUND=false;
+let PARK_CLICK_BOUND=false;
 let PARK_CANDS=[];
 
 let WATER_RINGS=[];
@@ -17,20 +16,20 @@ let IMP_RINGS=[];
 let IMP_LINES=[];
 let IMP_LAYER=null;
 
-let GRIDBLOCKLINES=[];
+let GRID_BLOCK_LINES=[];
 
 const GRID_CELLS=[];
 let GRID_LAYER=null;
-let WPAUTOLAYER=null;
+let WP_AUTO_LAYER=null;
 
 const SELECTED_CELLS=new Set();
 
-let LASTWPROWS=[];
-let PARKREFHA=null;
+let LAST_WP_ROWS=[];
+let PARK_REF_HA=null;
 let LANDCOVER=null;
 
-const WATERCLEARANCEM=1;
-const IMPCLEARANCEM=1;
+const WATER_CLEARANCE_M=1;
+const IMP_CLEARANCE_M=1;
 
 const OVERPASS_URLS=[
   "https://overpass.private.coffee/api/interpreter",
@@ -40,6 +39,7 @@ const OVERPASS_URLS=[
   "https://overpass-api.de/api/interpreter"
 ];
 
+
 /* =========================================================
    AREA
 ========================================================= */
@@ -48,7 +48,31 @@ function ringGeodesicArea(ring){
   const R=6378137;
   let t=0;
 
-  for(let i=0;i=3){
+  for(let i=0;i<ring.length;i++){
+    const p1=ring[i];
+    const p2=ring[(i+1)%ring.length];
+
+    const l1=p1[1]*Math.PI/180;
+    const l2=p2[1]*Math.PI/180;
+
+    const f1=p1[0]*Math.PI/180;
+    const f2=p2[0]*Math.PI/180;
+
+    t+=(l2-l1)*(2+Math.sin(f1)+Math.sin(f2));
+  }
+
+  return Math.abs(t*R*R/2);
+}
+
+function polyArea(rings){
+  if(!rings)return 0;
+
+  if(!Array.isArray(rings) && rings.outer){
+    let outerArea=0;
+    let innerArea=0;
+
+    for(const ring of rings.outer){
+      if(ring&&ring.length>=3){
         outerArea+=ringGeodesicArea(ring);
       }
     }
@@ -65,7 +89,50 @@ function ringGeodesicArea(ring){
   let total=0;
 
   for(const ring of rings){
-    if(!ring||ring.lengthmaxX)maxX=q.x;
+    if(!ring||ring.length<3)continue;
+    total+=ringGeodesicArea(ring);
+  }
+
+  return total;
+}
+
+function parkAreaM2(){
+  if(!PARK_POLY)return 0;
+
+  return polyArea({
+    outer:PARK_POLY,
+    inner:PARK_HOLES
+  });
+}
+
+function parkAreaHa(){
+  return parkAreaM2()/10000;
+}
+
+
+/* =========================================================
+   GEOMETRY
+========================================================= */
+
+function projectPoint(lat,lon,refLat){
+  return {
+    x:lon*111320*Math.cos(refLat*Math.PI/180),
+    y:lat*110540
+  };
+}
+
+function ringBBox(ring,refLat){
+  let minX=Infinity;
+  let minY=Infinity;
+  let maxX=-Infinity;
+  let maxY=-Infinity;
+
+  for(const p of ring){
+    const q=projectPoint(p[0],p[1],refLat);
+
+    if(q.x<minX)minX=q.x;
+    if(q.y<minY)minY=q.y;
+    if(q.x>maxX)maxX=q.x;
     if(q.y>maxY)maxY=q.y;
   }
 
@@ -88,8 +155,10 @@ function expandBBox(x,d){
 
 function bboxesOverlap(a,b){
   return !(
-    a.maxXb.maxX ||
-    a.maxYb.maxY
+    a.maxX<b.minX ||
+    a.minX>b.maxX ||
+    a.maxY<b.minY ||
+    a.minY>b.maxY
   );
 }
 
@@ -98,9 +167,35 @@ function pointInPolygonXY(x,y,poly){
 
   for(
     let i=0,j=poly.length-1;
-    iy)!==(yj>y)) &&
+    i<poly.length;
+    j=i++
+  ){
+    const xi=poly[i].x;
+    const yi=poly[i].y;
+
+    const xj=poly[j].x;
+    const yj=poly[j].y;
+
+    if(
+      ((yi>y)!==(yj>y)) &&
       (
-        x
+        x<
+        (xj-xi)*(y-yi)/(yj-yi)+xi
+      )
+    ){
+      inside=!inside;
+    }
+  }
+
+  return inside;
+}
+
+function pointInPolygon(lat,lon,ring){
+  if(!ring||ring.length<3)return false;
+
+  const p=projectPoint(lat,lon,lat);
+
+  const poly=ring.map(q=>
     projectPoint(q[0],q[1],lat)
   );
 
@@ -147,6 +242,7 @@ function pointInPark(lat,lon,rings){
   return false;
 }
 
+
 /* =========================================================
    SEGMENT / RECT
 ========================================================= */
@@ -156,18 +252,91 @@ function orientation(a,b,c){
     (b.x-a.x)*(c.y-a.y)-
     (b.y-a.y)*(c.x-a.x);
 
-  if(Math.abs(v)0?1:2;
+  if(Math.abs(v)<1e-9)return 0;
+
+  return v>0?1:2;
 }
 
 function onSegment(a,b,p){
   return(
     p.x>=Math.min(a.x,b.x)-1e-9 &&
-    p.x=Math.min(a.y,b.y)-1e-9 &&
-    p.y=rect.minX &&
-    a.x=rect.minY &&
-    a.y=rect.minX &&
-    b.x=rect.minY &&
-    b.y
+    p.x<=Math.max(a.x,b.x)+1e-9 &&
+    p.y>=Math.min(a.y,b.y)-1e-9 &&
+    p.y<=Math.max(a.y,b.y)+1e-9
+  );
+}
+
+function segmentsIntersect(a,b,c,d){
+  const o1=orientation(a,b,c);
+  const o2=orientation(a,b,d);
+  const o3=orientation(c,d,a);
+  const o4=orientation(c,d,b);
+
+  if(o1!==o2&&o3!==o4)return true;
+
+  if(o1===0&&onSegment(a,b,c))return true;
+  if(o2===0&&onSegment(a,b,d))return true;
+  if(o3===0&&onSegment(c,d,a))return true;
+  if(o4===0&&onSegment(c,d,b))return true;
+
+  return false;
+}
+
+function rectCorners(r){
+  return[
+    {x:r.minX,y:r.minY},
+    {x:r.maxX,y:r.minY},
+    {x:r.maxX,y:r.maxY},
+    {x:r.minX,y:r.maxY}
+  ];
+}
+
+function segmentIntersectsRect(a,b,rect){
+  const cs=rectCorners(rect);
+
+  for(let i=0;i<4;i++){
+    if(
+      segmentsIntersect(
+        a,
+        b,
+        cs[i],
+        cs[(i+1)%4]
+      )
+    ){
+      return true;
+    }
+  }
+
+  if(
+    a.x>=rect.minX &&
+    a.x<=rect.maxX &&
+    a.y>=rect.minY &&
+    a.y<=rect.maxY
+  ){
+    return true;
+  }
+
+  if(
+    b.x>=rect.minX &&
+    b.x<=rect.maxX &&
+    b.y>=rect.minY &&
+    b.y<=rect.maxY
+  ){
+    return true;
+  }
+
+  return false;
+}
+
+function geometryIntersectsRect(
+  points,
+  rect,
+  refLat,
+  bufferM=0
+){
+  if(!points||points.length<2)return false;
+
+  const pts=points.map(p=>
     projectPoint(
       p[0],
       p[1],
@@ -192,8 +361,61 @@ function onSegment(a,b,p){
   for(const p of pts){
     if(
       p.x>=testRect.minX &&
-      p.x=testRect.minY &&
-      p.y
+      p.x<=testRect.maxX &&
+      p.y>=testRect.minY &&
+      p.y<=testRect.maxY
+    ){
+      return true;
+    }
+  }
+
+  for(const c of rectCorners(testRect)){
+    if(pointInPolygonXY(c.x,c.y,pts)){
+      return true;
+    }
+  }
+
+  for(let i=0;i<pts.length;i++){
+    const a=pts[i];
+    const b=pts[(i+1)%pts.length];
+
+    if(
+      segmentIntersectsRect(
+        a,
+        b,
+        testRect
+      )
+    ){
+      return true;
+    }
+  }
+
+  return false;
+}
+
+function geometryLineIntersectsRect(
+  points,
+  rect,
+  refLat,
+  bufferM=0
+){
+  if(!points||points.length<2)return false;
+
+  const sourceBox=expandBBox(
+    ringBBox(points,refLat),
+    bufferM
+  );
+
+  const testRect=expandBBox(
+    rect,
+    bufferM
+  );
+
+  if(!bboxesOverlap(sourceBox,testRect)){
+    return false;
+  }
+
+  const pts=points.map(p=>
     projectPoint(
       p[0],
       p[1],
@@ -201,7 +423,87 @@ function onSegment(a,b,p){
     )
   );
 
-  for(let i=0;i=2;
+  for(let i=0;i<pts.length-1;i++){
+    if(
+      segmentIntersectsRect(
+        pts[i],
+        pts[i+1],
+        testRect
+      )
+    ){
+      return true;
+    }
+  }
+
+  return false;
+}
+
+
+/* =========================================================
+   SEGMENT INTERSECTION (lat/lon) — YENİ
+   Park sınırıyla kesişen geometrileri yakalar
+========================================================= */
+
+function segmentsIntersectLatLon(a1,a2,b1,b2){
+  const refLat=(a1[0]+a2[0]+b1[0]+b2[0])/4;
+  const cosLat=Math.cos(refLat*Math.PI/180);
+  const ax=a1[1]*111320*cosLat;
+  const ay=a1[0]*110540;
+  const bx=a2[1]*111320*cosLat;
+  const by=a2[0]*110540;
+  const cx=b1[1]*111320*cosLat;
+  const cy=b1[0]*110540;
+  const dx=b2[1]*111320*cosLat;
+  const dy=b2[0]*110540;
+  return segmentsIntersect({x:ax,y:ay},{x:bx,y:by},{x:cx,y:cy},{x:dx,y:dy});
+}
+
+
+/* =========================================================
+   PARK / GRID
+========================================================= */
+
+function cellInsidePark(
+  s0,
+  s1,
+  w0,
+  w1
+){
+  const cLat=(s0+s1)/2;
+  const cLon=(w0+w1)/2;
+
+  if(
+    !pointInPark(
+      cLat,
+      cLon,
+      PARK_POLY
+    )
+  ){
+    return false;
+  }
+
+  let inCount=0;
+
+  const corners=[
+    [s0,w0],
+    [s0,w1],
+    [s1,w1],
+    [s1,w0]
+  ];
+
+  for(const p of corners){
+    if(
+      pointInPark(
+        p[0],
+        p[1],
+        PARK_POLY
+      )
+    ){
+      inCount++;
+    }
+  }
+
+  return inCount>=2;
 }
 
 function isCellValid(
@@ -239,7 +541,7 @@ function isCellValid(
         w,
         cellRect,
         cLat,
-        WATERCLEARANCEM
+        WATER_CLEARANCE_M
       )
     ){
       return false;
@@ -252,7 +554,7 @@ function isCellValid(
         l,
         cellRect,
         cLat,
-        WATERCLEARANCEM
+        WATER_CLEARANCE_M
       )
     ){
       return false;
@@ -265,20 +567,20 @@ function isCellValid(
         b,
         cellRect,
         cLat,
-        IMPCLEARANCEM
+        IMP_CLEARANCE_M
       )
     ){
       return false;
     }
   }
 
-  for(const l of GRIDBLOCKLINES){
+  for(const l of GRID_BLOCK_LINES){
     if(
       geometryLineIntersectsRect(
         l,
         cellRect,
         cLat,
-        IMPCLEARANCEM
+        IMP_CLEARANCE_M
       )
     ){
       return false;
@@ -287,6 +589,7 @@ function isCellValid(
 
   return true;
 }
+
 
 /* =========================================================
    PARK QUERY — DÜZELTİLDİ: water tag + geniş bbox
@@ -298,10 +601,10 @@ async function queryPark(
   radius=1200
 ){
   const q1=
-    [out:json][timeout:25];(+
-    way"leisure"~"park|garden|naturereserve|common|recreationground";+
-    relation"leisure"~"park|garden|naturereserve|common|recreationground";+
-    );out geom;;
+    `[out:json][timeout:25];(`+
+    `way["leisure"~"park|garden|nature_reserve|common|recreation_ground"](around:${radius},${lat},${lon});`+
+    `relation["leisure"~"park|garden|nature_reserve|common|recreation_ground"](around:${radius},${lat},${lon});`+
+    `);out geom;`;
 
   let parkData=null;
 
@@ -401,35 +704,37 @@ async function queryPark(
 
   parkOuter.forEach(r=>
     r.forEach(p=>{
-      if(p[0]maxLat)maxLat=p[0];
+      if(p[0]<minLat)minLat=p[0];
+      if(p[0]>maxLat)maxLat=p[0];
 
-      if(p[1]maxLon)maxLon=p[1];
+      if(p[1]<minLon)minLon=p[1];
+      if(p[1]>maxLon)maxLon=p[1];
     })
   );
 
-  / DÜZELTME: pad 0.0003 → 0.0005 (≈55m) /
+  /* DÜZELTME: pad 0.0003 → 0.0005 (≈55m) */
   const pad=0.0005;
 
   const bbox=
-    ${minLat-pad},${minLon-pad},+
-    ${maxLat+pad},${maxLon+pad};
+    `${minLat-pad},${minLon-pad},`+
+    `${maxLat+pad},${maxLon+pad}`;
 
-  / DÜZELTME: water tag eklendi /
+  /* DÜZELTME: water tag eklendi */
   const q2=
-    [out:json][timeout:60];(+
-    way"natural"="water";+
-    relation"natural"="water";+
-    way"water";+
-    relation"water";+
-    way"landuse"="reservoir";+
-    relation"landuse"="reservoir";+
-    way"landuse"="basin";+
-    relation"landuse"="basin";+
-    way"leisure"="swimming_pool";+
-    relation"leisure"="swimming_pool";+
-    way"waterway"="riverbank";+
-    relation"waterway"="riverbank";+
-    );out geom;;
+    `[out:json][timeout:60];(`+
+    `way["natural"="water"](${bbox});`+
+    `relation["natural"="water"](${bbox});`+
+    `way["water"](${bbox});`+
+    `relation["water"](${bbox});`+
+    `way["landuse"="reservoir"](${bbox});`+
+    `relation["landuse"="reservoir"](${bbox});`+
+    `way["landuse"="basin"](${bbox});`+
+    `relation["landuse"="basin"](${bbox});`+
+    `way["leisure"="swimming_pool"](${bbox});`+
+    `relation["leisure"="swimming_pool"](${bbox});`+
+    `way["waterway"="riverbank"](${bbox});`+
+    `relation["waterway"="riverbank"](${bbox});`+
+    `);out geom;`;
 
   for(const url of OVERPASS_URLS){
     try{
@@ -508,11 +813,12 @@ async function queryPark(
     );
 
   console.log(
-    ✓ Su: ${WATERRINGS.length} poligon, ${WATERLINES.length} çizgi
+    `✓ Su: ${WATER_RINGS.length} poligon, ${WATER_LINES.length} çizgi`
   );
 
   return sorted;
 }
+
 
 /* =========================================================
    DETAILED COVERAGE QUERY — DÜZELTİLDİ: relation eklendi
@@ -528,7 +834,7 @@ async function queryDetailedCoverage(){
 
   IMP_RINGS=[];
   IMP_LINES=[];
-  GRIDBLOCKLINES=[];
+  GRID_BLOCK_LINES=[];
 
   let minLat=90;
   let maxLat=-90;
@@ -537,34 +843,36 @@ async function queryDetailedCoverage(){
 
   PARK_POLY.forEach(r=>
     r.forEach(p=>{
-      if(p[0]maxLat)maxLat=p[0];
+      if(p[0]<minLat)minLat=p[0];
+      if(p[0]>maxLat)maxLat=p[0];
 
-      if(p[1]maxLon)maxLon=p[1];
+      if(p[1]<minLon)minLon=p[1];
+      if(p[1]>maxLon)maxLon=p[1];
     })
   );
 
-  / DÜZELTME: pad 0.0003 → 0.0005 /
+  /* DÜZELTME: pad 0.0003 → 0.0005 */
   const pad=0.0005;
 
   const bbox=
-    ${minLat-pad},${minLon-pad},+
-    ${maxLat+pad},${maxLon+pad};
+    `${minLat-pad},${minLon-pad},`+
+    `${maxLat+pad},${maxLon+pad}`;
 
-  / DÜZELTME: relation sorguları eklendi /
+  /* DÜZELTME: relation sorguları eklendi */
   const q=
-    [out:json][timeout:90];(+
-    way"building";+
-    relation"building";+
-    way"highway";+
-    relation"highway";+
-    way"amenity"~"parking|bicycleparking|motorcycleparking";+
-    relation"amenity"~"parking|bicycleparking|motorcycleparking";+
-    way"leisure"~"pitch|track|playground";+
-    relation"leisure"~"pitch|track|playground";+
-    way"surface"~"asphalt|concrete|paving_stones|sett|concrete:plates|concrete:lanes|cobblestone|bricks|metal|wood";+
-    relation"surface"~"asphalt|concrete|paving_stones|sett|concrete:plates|concrete:lanes|cobblestone|bricks|metal|wood";+
-    way"man_made"~"pier|bridge";+
-    );out geom;;
+    `[out:json][timeout:90];(`+
+    `way["building"](${bbox});`+
+    `relation["building"](${bbox});`+
+    `way["highway"](${bbox});`+
+    `relation["highway"](${bbox});`+
+    `way["amenity"~"parking|bicycle_parking|motorcycle_parking"](${bbox});`+
+    `relation["amenity"~"parking|bicycle_parking|motorcycle_parking"](${bbox});`+
+    `way["leisure"~"pitch|track|playground"](${bbox});`+
+    `relation["leisure"~"pitch|track|playground"](${bbox});`+
+    `way["surface"~"asphalt|concrete|paving_stones|sett|concrete:plates|concrete:lanes|cobblestone|bricks|metal|wood"](${bbox});`+
+    `relation["surface"~"asphalt|concrete|paving_stones|sett|concrete:plates|concrete:lanes|cobblestone|bricks|metal|wood"](${bbox});`+
+    `way["man_made"~"pier|bridge"](${bbox});`+
+    `);out geom;`;
 
   for(const url of OVERPASS_URLS){
     try{
@@ -587,7 +895,7 @@ async function queryDetailedCoverage(){
         collected++;
       }
 
-      console.log(✓ Coverage: ${collected} element toplandı);
+      console.log(`✓ Coverage: ${collected} element toplandı`);
       break;
     }catch(e){}
   }
@@ -620,8 +928,8 @@ async function queryDetailedCoverage(){
       )
     );
 
-  GRIDBLOCKLINES=
-    GRIDBLOCKLINES.filter(l=>
+  GRID_BLOCK_LINES=
+    GRID_BLOCK_LINES.filter(l=>
       lineTouchesPark(
         l,
         PARK_POLY,
@@ -630,11 +938,12 @@ async function queryDetailedCoverage(){
     );
 
   console.log(
-    ✓ Coverage filtre: Rings ${beforeRings}→${IMPRINGS.length}, Lines ${beforeLines}→${IMPLINES.length}
+    `✓ Coverage filtre: Rings ${beforeRings}→${IMP_RINGS.length}, Lines ${beforeLines}→${IMP_LINES.length}`
   );
 
   refreshImpLayer();
 }
+
 
 /* =========================================================
    PARK INTERSECTION — DÜZELTİLDİ: segment kesişimi eklendi
@@ -645,21 +954,33 @@ function ringTouchesPark(
   parkRings,
   pb
 ){
-  if(!ring||ring.lengthmaxLat)maxLat=p[0];
+  if(!ring||ring.length<3)return false;
 
-    if(p[1]maxLon)maxLon=p[1];
+  let minLat=90;
+  let maxLat=-90;
+  let minLon=180;
+  let maxLon=-180;
+
+  for(const p of ring){
+    if(p[0]<minLat)minLat=p[0];
+    if(p[0]>maxLat)maxLat=p[0];
+
+    if(p[1]<minLon)minLon=p[1];
+    if(p[1]>maxLon)maxLon=p[1];
   }
 
-  / DÜZELTME: bbox buffer 50m /
+  /* DÜZELTME: bbox buffer 50m */
   const buf=0.0005;
   if(
-    maxLatpb.maxLat+buf ||
-    maxLonpb.maxLon+buf
+    maxLat<pb.minLat-buf ||
+    minLat>pb.maxLat+buf ||
+    maxLon<pb.minLon-buf ||
+    minLon>pb.maxLon+buf
   ){
     return false;
   }
 
-  / Test 1: Herhangi bir vertex park içinde mi? /
+  /* Test 1: Herhangi bir vertex park içinde mi? */
   for(const p of ring){
     if(
       pointInPark(
@@ -672,7 +993,7 @@ function ringTouchesPark(
     }
   }
 
-  / Test 2: Merkez nokta /
+  /* Test 2: Merkez nokta */
   const centerLat=(minLat+maxLat)/2;
   const centerLon=(minLon+maxLon)/2;
 
@@ -686,22 +1007,72 @@ function ringTouchesPark(
     return true;
   }
 
-  / Test 3: Kenar orta noktaları /
-  for(let i=0;imaxLat)maxLat=p[0];
+  /* Test 3: Kenar orta noktaları */
+  for(let i=0;i<ring.length-1;i++){
+    const a=ring[i];
+    const b=ring[i+1];
 
-    if(p[1]maxLon)maxLon=p[1];
+    const lat=(a[0]+b[0])/2;
+    const lon=(a[1]+b[1])/2;
+
+    if(
+      pointInPark(
+        lat,
+        lon,
+        parkRings
+      )
+    ){
+      return true;
+    }
   }
 
-  / DÜZELTME: bbox buffer 50m /
+  /* DÜZELTME Test 4: Segment-segment kesişimi */
+  const parkOuter=Array.isArray(parkRings)?parkRings:(parkRings.outer||[]);
+  for(const pRing of parkOuter){
+    for(let i=0;i<pRing.length-1;i++){
+      for(let j=0;j<ring.length-1;j++){
+        if(segmentsIntersectLatLon(pRing[i],pRing[i+1],ring[j],ring[j+1])){
+          return true;
+        }
+      }
+    }
+  }
+
+  return false;
+}
+
+function lineTouchesPark(
+  line,
+  parkRings,
+  pb
+){
+  if(!line||line.length<2)return false;
+
+  let minLat=90;
+  let maxLat=-90;
+  let minLon=180;
+  let maxLon=-180;
+
+  for(const p of line){
+    if(p[0]<minLat)minLat=p[0];
+    if(p[0]>maxLat)maxLat=p[0];
+
+    if(p[1]<minLon)minLon=p[1];
+    if(p[1]>maxLon)maxLon=p[1];
+  }
+
+  /* DÜZELTME: bbox buffer 50m */
   const buf=0.0005;
   if(
-    maxLatpb.maxLat+buf ||
-    maxLonpb.maxLon+buf
+    maxLat<pb.minLat-buf ||
+    minLat>pb.maxLat+buf ||
+    maxLon<pb.minLon-buf ||
+    minLon>pb.maxLon+buf
   ){
     return false;
   }
 
-  / Test 1: Herhangi bir vertex park içinde mi? /
+  /* Test 1: Herhangi bir vertex park içinde mi? */
   for(const p of line){
     if(
       pointInPark(
@@ -714,8 +1085,87 @@ function ringTouchesPark(
     }
   }
 
-  / Test 2: Yoğun örnekleme (5m aralık) /
-  for(let i=0;i1e-7 ||
+  /* Test 2: Yoğun örnekleme (5m aralık) */
+  for(let i=0;i<line.length-1;i++){
+    const a=line[i];
+    const b=line[i+1];
+
+    const midLat=(a[0]+b[0])/2;
+
+    const dy=
+      (b[0]-a[0])*110540;
+
+    const dx=
+      (b[1]-a[1])*
+      111320*
+      Math.cos(midLat*Math.PI/180);
+
+    const len=
+      Math.sqrt(
+        dx*dx+
+        dy*dy
+      );
+
+    /* DÜZELTME: 10m → 5m örnekleme */
+    const steps=
+      Math.max(
+        1,
+        Math.ceil(len/5)
+      );
+
+    for(let k=1;k<steps;k++){
+      const t=k/steps;
+
+      const lat=
+        a[0]+
+        (b[0]-a[0])*t;
+
+      const lon=
+        a[1]+
+        (b[1]-a[1])*t;
+
+      if(
+        pointInPark(
+          lat,
+          lon,
+          parkRings
+        )
+      ){
+        return true;
+      }
+    }
+  }
+
+  /* DÜZELTME Test 3: Segment-segment kesişimi */
+  const parkOuter=Array.isArray(parkRings)?parkRings:(parkRings.outer||[]);
+  for(const pRing of parkOuter){
+    for(let i=0;i<pRing.length-1;i++){
+      for(let j=0;j<line.length-1;j++){
+        if(segmentsIntersectLatLon(pRing[i],pRing[i+1],line[j],line[j+1])){
+          return true;
+        }
+      }
+    }
+  }
+
+  return false;
+}
+
+
+/* =========================================================
+   OSM GEOMETRY — DÜZELTİLDİ: tolerans gevşetildi
+========================================================= */
+
+function extractRings(el){
+  function closeRing(r){
+    if(!r||r.length<3)return null;
+
+    const a=r[0];
+    const b=r[r.length-1];
+
+    /* DÜZELTME: tolerans 1e-9 → 1e-7 (≈1cm) */
+    if(
+      Math.abs(a[0]-b[0])>1e-7 ||
       Math.abs(a[1]-b[1])>1e-7
     ){
       r.push([
@@ -798,13 +1248,87 @@ function joinWaysToRings(ways){
   const rings=[];
   const rem=ways.slice();
 
-  / DÜZELTME: tolerans 1e-9 → 1e-6 (≈11cm) /
+  /* DÜZELTME: tolerans 1e-9 → 1e-6 (≈11cm) */
   const eq=(a,b)=>
-    Math.abs(a[0]-b[0])0
+    Math.abs(a[0]-b[0])<1e-6 &&
+    Math.abs(a[1]-b[1])<1e-6;
+
+  while(rem.length){
+    const ch=
+      rem.shift().slice();
+
+    let merged=true;
+    /* DÜZELTME: guard ways*2+10 → ways²+100 */
+    let guard=
+      ways.length*ways.length+100;
+
+    while(
+      merged &&
+      guard-->0
     ){
       merged=false;
 
-      for(let i=0;i2){
+      for(let i=0;i<rem.length;i++){
+        const w=rem[i];
+
+        const head=ch[0];
+        const tail=ch[ch.length-1];
+
+        if(eq(tail,w[0])){
+          ch.push(
+            ...w.slice(1)
+          );
+
+          merged=true;
+        }else if(
+          eq(
+            tail,
+            w[w.length-1]
+          )
+        ){
+          ch.push(
+            ...w
+              .slice()
+              .reverse()
+              .slice(1)
+          );
+
+          merged=true;
+        }else if(
+          eq(
+            head,
+            w[w.length-1]
+          )
+        ){
+          ch.unshift(
+            ...w.slice(0,-1)
+          );
+
+          merged=true;
+        }else if(
+          eq(
+            head,
+            w[0]
+          )
+        ){
+          ch.unshift(
+            ...w
+              .slice()
+              .reverse()
+              .slice(0,-1)
+          );
+
+          merged=true;
+        }
+
+        if(merged){
+          rem.splice(i,1);
+          break;
+        }
+      }
+    }
+
+    if(ch.length>2){
       if(
         !eq(
           ch[0],
@@ -824,6 +1348,7 @@ function joinWaysToRings(ways){
   return rings;
 }
 
+
 /* =========================================================
    WATER — DÜZELTİLDİ: water tag eklendi
 ========================================================= */
@@ -840,6 +1365,7 @@ function isWater(el){
     t.waterway==="riverbank"
   );
 }
+
 
 /* =========================================================
    IMPERVIOUS
@@ -939,14 +1465,14 @@ function isImpervious(el){
     return true;
   }
 
-  if(t.manmade==="pier"||t.manmade==="bridge"){
+  if(t.man_made==="pier"||t.man_made==="bridge"){
     return true;
   }
 
   return false;
 }
 
-/ DÜZELTME: tolerans 1e-9 → 1e-7 /
+/* DÜZELTME: tolerans 1e-9 → 1e-7 */
 function isClosedLine(l){
   return(
     l &&
@@ -954,7 +1480,60 @@ function isClosedLine(l){
     Math.abs(
       l[0][0]-
       l[l.length-1][0]
-    ){
+    )<1e-7 &&
+    Math.abs(
+      l[0][1]-
+      l[l.length-1][1]
+    )<1e-7
+  );
+}
+
+
+/* =========================================================
+   ROAD WIDTH
+========================================================= */
+
+function roadHalfWidth(hw){
+  hw=
+    String(hw||"")
+      .toLowerCase();
+
+  if(/^motorway$/.test(hw))return 6;
+  if(/^trunk$/.test(hw))return 5.5;
+  if(/^primary$/.test(hw))return 5;
+  if(/^secondary$/.test(hw))return 4.5;
+  if(/^tertiary$/.test(hw))return 4;
+
+  if(/^residential$/.test(hw))return 3;
+  if(/^unclassified$/.test(hw))return 3;
+  if(/^living_street$/.test(hw))return 3;
+
+  if(/^service$/.test(hw))return 2.5;
+
+  if(/^footway$/.test(hw))return 1;
+  if(/^path$/.test(hw))return 1;
+  if(/^cycleway$/.test(hw))return 1.2;
+  if(/^pedestrian$/.test(hw))return 1.5;
+  if(/^steps$/.test(hw))return 1;
+  if(/^bridleway$/.test(hw))return 1;
+  if(/^track$/.test(hw))return 1.5;
+
+  return 3;
+}
+
+
+/* =========================================================
+   COLLECT IMPERVIOUS
+========================================================= */
+
+function collectImperviousGeometry(el){
+  if(el.type==="relation"){
+    const r=extractRings(el);
+
+    if(!r)return;
+
+    if(Array.isArray(r)){
+      r.forEach(rr=>{
         if(
           rr &&
           rr.length>=3
@@ -984,8 +1563,161 @@ function isClosedLine(l){
       g.lon
     ]);
 
-  if(pts.length0 &&
-      width{
+  if(pts.length<2)return;
+
+  const t=el.tags||{};
+
+  const surface=
+    String(
+      t.surface||""
+    ).toLowerCase().trim();
+
+  const hardSurfaces=new Set([
+    "asphalt",
+    "concrete",
+    "paving_stones",
+    "sett",
+    "concrete:plates",
+    "concrete:lanes",
+    "cobblestone",
+    "bricks",
+    "metal",
+    "wood"
+  ]);
+
+  const isArea=
+    !!t.building ||
+    t.amenity==="parking" ||
+    t.amenity==="bicycle_parking" ||
+    t.amenity==="motorcycle_parking" ||
+    (
+      (
+        t.leisure==="pitch" ||
+        t.leisure==="track" ||
+        t.leisure==="playground"
+      ) &&
+      hardSurfaces.has(surface)
+    ) ||
+    hardSurfaces.has(surface);
+
+  if(isClosedLine(pts)){
+    if(isArea){
+      IMP_RINGS.push(pts);
+      return;
+    }
+
+    return;
+  }
+
+  if(isArea){
+    const c=pts.slice();
+
+    c.push([
+      pts[0][0],
+      pts[0][1]
+    ]);
+
+    IMP_RINGS.push(c);
+
+    return;
+  }
+
+  let w=0;
+
+  if(t.highway){
+    const width=
+      parseFloat(
+        String(
+          t.width||""
+        ).replace(",",".")
+      );
+
+    if(
+      Number.isFinite(width) &&
+      width>0 &&
+      width<30
+    ){
+      w=width/2;
+    }else{
+      w=roadHalfWidth(
+        t.highway
+      );
+    }
+  }else if(hardSurfaces.has(surface)){
+    w=3;
+  }else{
+    w=2;
+  }
+
+  IMP_LINES.push({
+    pts,
+    w
+  });
+
+  if(
+    t.highway &&
+    !/^(footway|path|cycleway|steps|pedestrian|bridleway|track)$/
+      .test(
+        String(t.highway).toLowerCase()
+      )
+  ){
+    GRID_BLOCK_LINES.push(pts);
+  }
+}
+
+
+/* =========================================================
+   PARK MODE
+========================================================= */
+
+function toggleParkMode(){
+  PARK_MODE=!PARK_MODE;
+
+  const b=$("parkModeBtn");
+
+  b.textContent=
+    "🌳 Park Analizi: "+
+    (
+      PARK_MODE
+        ?"AÇIK"
+        :"KAPALI"
+    );
+
+  b.className=
+    "btn sm "+
+    (
+      PARK_MODE
+        ?""
+        :"blue"
+    );
+
+  $("parkModeHint").textContent=
+    PARK_MODE
+      ?"Şimdi parkın içine tıkla."
+      :"Açınca parka tıkla.";
+
+  bindParkClick();
+
+  if(!PARK_MODE){
+    PARK_CANDS=[];
+
+    clearPark();
+  }
+}
+
+function bindParkClick(){
+  if(
+    PARK_CLICK_BOUND ||
+    !map
+  ){
+    return;
+  }
+
+  PARK_CLICK_BOUND=true;
+
+  map.on(
+    "click",
+    async e=>{
       if(!PARK_MODE)return;
 
       toast(
@@ -1017,6 +1749,7 @@ function isClosedLine(l){
     }
   );
 }
+
 
 /* =========================================================
    DRAW PARK (MODERN UI)
@@ -1106,7 +1839,7 @@ function drawPark(park){
 
   const parkBounds = L.latLngBounds(PARK_POLY);
 
-  if(PARKHOLES && PARKHOLES.length){
+  if(PARK_HOLES && PARK_HOLES.length){
     PARK_HOLES.forEach(ring=>{
       ring.forEach(p=>{
         parkBounds.extend(p);
@@ -1129,16 +1862,16 @@ function drawPark(park){
   const alt=
     PARK_CANDS.length>1
       ?
-      +
+      `<select id="parkAlt" onchange="switchPark(+this.value)" style="font-size:.8rem;padding:4px 8px;border-radius:6px;border:1px solid var(--line)">`+
       PARK_CANDS
         .map(
           (c,i)=>
-            +
-            ${esc(c.name||"Alan "+(i+1))} · ${(c.area/10000).toFixed(1)} ha+
-            
+            `<option value="${i}"${c===park?" selected":""}>`+
+            `${esc(c.name||"Alan "+(i+1))} · ${(c.area/10000).toFixed(1)} ha`+
+            `</option>`
         )
         .join("")+
-      
+      `</select>`
       :
       "";
 
@@ -1146,178 +1879,178 @@ function drawPark(park){
 
   $("parkInfo").innerHTML=
 
-    +
-      🌳 ${esc(park.name||"İsimsiz Park")}+
-      +
-        ${haTotal} ha+
-      +
-      +
+    `<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:14px">`+
+      `<b style="font-size:1.15rem">🌳 ${esc(park.name||"İsimsiz Park")}</b>`+
+      `<span class="dg-png-badge">`+
+        `${haTotal} ha`+
+      `</span>`+
+      `<span id="refBadge" class="dg-png-ref" style="display:none"></span>`+
       alt+
-    +
+    `</div>`+
 
-    +
+    `<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px">`+
 
-      +
-        +
-          +
-            1 · GRID & WAYPOINT+
-            🔲 Grid sistemi+
-            Ölçüm alanını otomatik böl+
-          +
-        +
+      `<div class="dg-png-card">`+
+        `<div class="dg-png-head">`+
+          `<div>`+
+            `<div class="dg-png-kicker">1 · GRID & WAYPOINT</div>`+
+            `<div class="dg-png-title">🔲 Grid sistemi</div>`+
+            `<div class="dg-png-sub">Ölçüm alanını otomatik böl</div>`+
+          `</div>`+
+        `</div>`+
 
-        +
-          +
-            PROJE+
-            +
-              (typeof PROJLIST!=="undefined"&&PROJLIST.length
-                ? PROJ_LIST.map(p=>${esc(p.name)}).join("")
-                : Önce proje oluştur)+
-            +
-          +
+        `<div class="dg-png-fields">`+
+          `<div class="dg-png-field">`+
+            `<label class="dg-png-label">PROJE</label>`+
+            `<select id="gridProject" class="dg-png-select">`+
+              (typeof PROJ_LIST!=="undefined"&&PROJ_LIST.length
+                ? PROJ_LIST.map(p=>`<option value="${p.id}">${esc(p.name)}</option>`).join("")
+                : `<option value="0">Önce proje oluştur</option>`)+
+            `</select>`+
+          `</div>`+
 
-          +
-            GRID BOYUTU+
-            +
-              10 × 10 m · Hassas+
-              20 × 20 m · Standart+
-              50 × 50 m · Hızlı+
-            +
-          +
+          `<div class="dg-png-field">`+
+            `<label class="dg-png-label">GRID BOYUTU</label>`+
+            `<select id="gridSize" class="dg-png-select">`+
+              `<option value="10">10 × 10 m · Hassas</option>`+
+              `<option value="20" selected>20 × 20 m · Standart</option>`+
+              `<option value="50">50 × 50 m · Hızlı</option>`+
+            `</select>`+
+          `</div>`+
 
-          +
-            REFERANS ALAN (HA)+
-            +
-          +
-        +
+          `<div class="dg-png-field">`+
+            `<label class="dg-png-label">REFERANS ALAN (HA)</label>`+
+            `<input id="refHa" type="number" step="0.1" placeholder="örn. 50.8" class="dg-png-input" onchange="setRefHa(this.value)">`+
+          `</div>`+
+        `</div>`+
 
-        +
-          🔲 Grid Oluştur+
-        +
-      +
+        `<button class="dg-png-btn primary" onclick="buildGrid()">`+
+          `🔲 Grid Oluştur`+
+        `</button>`+
+      `</div>`+
 
-      +
-        +
-          +
-            2 · YÜZEY ANALİZİ+
-            🌿 Arazi örtüsü+
-            Bina · yol · otopark · saha · su+
-          +
-          3m örnekleme+
-        +
+      `<div class="dg-png-card">`+
+        `<div class="dg-png-head">`+
+          `<div>`+
+            `<div class="dg-png-kicker">2 · YÜZEY ANALİZİ</div>`+
+            `<div class="dg-png-title">🌿 Arazi örtüsü</div>`+
+            `<div class="dg-png-sub">Bina · yol · otopark · saha · su</div>`+
+          `</div>`+
+          `<span class="dg-png-badge blue">3m örnekleme</span>`+
+        `</div>`+
 
-        +
-          🌿 Yüzey Örtüsü Analizi+
-        +
+        `<button class="dg-png-btn primary" onclick="runLandCoverAnalysis()">`+
+          `🌿 Yüzey Örtüsü Analizi`+
+        `</button>`+
 
-        +
-          Park sınırının içinde tek sorgu. Yeşil + Sert + Su = Toplam.+
-        +
-      +
+        `<div class="dg-png-sub" style="font-size:.68rem">`+
+          `Park sınırının içinde tek sorgu. Yeşil + Sert + Su = Toplam.`+
+        `</div>`+
+      `</div>`+
 
-      +
-        +
-          +
-            3 · RAPOR PNG+
-            🖼️ Harita çıktısı+
-            Park şeklinde yüksek çözünürlük+
-          +
-        +
+      `<div class="dg-png-card">`+
+        `<div class="dg-png-head">`+
+          `<div>`+
+            `<div class="dg-png-kicker">3 · RAPOR PNG</div>`+
+            `<div class="dg-png-title">🖼️ Harita çıktısı</div>`+
+            `<div class="dg-png-sub">Park şeklinde yüksek çözünürlük</div>`+
+          `</div>`+
+        `</div>`+
 
-        +
-          ALTLIK+
-          +
-            Vektör · Temiz beyaz+
-            OSM · Sokak+
-            Uydu+
-            Topoğrafik+
-          +
-        +
+        `<div class="dg-png-field">`+
+          `<label class="dg-png-label">ALTLIK</label>`+
+          `<select id="pngBg" class="dg-png-select">`+
+            `<option value="vector">Vektör · Temiz beyaz</option>`+
+            `<option value="osm">OSM · Sokak</option>`+
+            `<option value="sat">Uydu</option>`+
+            `<option value="topo">Topoğrafik</option>`+
+          `</select>`+
+        `</div>`+
 
-        +
-          GÖRÜNÜM KATMANLARI+
-          +
+        `<div class="dg-png-field">`+
+          `<label class="dg-png-label">GÖRÜNÜM KATMANLARI</label>`+
+          `<div class="dg-png-options">`+
 
-            +
-              🔲+
-              +
-                Grid hücreleri+
-                Analiz hücrelerini göster+
-              +
-              +
-              +
-            +
+            `<label class="dg-png-option">`+
+              `<span class="dg-png-icon">🔲</span>`+
+              `<span class="dg-png-copy">`+
+                `<strong>Grid hücreleri</strong>`+
+                `<span>Analiz hücrelerini göster</span>`+
+              `</span>`+
+              `<input type="checkbox" id="chkPngGrid" checked>`+
+              `<span class="dg-png-switch"></span>`+
+            `</label>`+
 
-            +
-              📍+
-              +
-                Waypoint'ler+
-                Ölçüm noktaları+
-              +
-              +
-              +
-            +
+            `<label class="dg-png-option">`+
+              `<span class="dg-png-icon">📍</span>`+
+              `<span class="dg-png-copy">`+
+                `<strong>Waypoint'ler</strong>`+
+                `<span>Ölçüm noktaları</span>`+
+              `</span>`+
+              `<input type="checkbox" id="chkPngWp" checked>`+
+              `<span class="dg-png-switch"></span>`+
+            `</label>`+
 
-            +
-              💧+
-              +
-                Su / sert zemin+
-                Yapısal yüzeyler+
-              +
-              +
-              +
-            +
+            `<label class="dg-png-option">`+
+              `<span class="dg-png-icon">💧</span>`+
+              `<span class="dg-png-copy">`+
+                `<strong>Su / sert zemin</strong>`+
+                `<span>Yapısal yüzeyler</span>`+
+              `</span>`+
+              `<input type="checkbox" id="chkPngCover" checked>`+
+              `<span class="dg-png-switch"></span>`+
+            `</label>`+
 
-          +
-        +
+          `</div>`+
+        `</div>`+
 
-        +
-          🖼️ PNG İndir+
-        +
-      +
+        `<button class="dg-png-btn ghost" onclick="downloadParkImage()">`+
+          `🖼️ PNG İndir`+
+        `</button>`+
+      `</div>`+
 
-      +
-        +
-          +
-            4 · KATMANLAR+
-            🗺️ Görünürlük+
-            Harita üzerindeki katmanlar+
-          +
-        +
+      `<div class="dg-png-card">`+
+        `<div class="dg-png-head">`+
+          `<div>`+
+            `<div class="dg-png-kicker">4 · KATMANLAR</div>`+
+            `<div class="dg-png-title">🗺️ Görünürlük</div>`+
+            `<div class="dg-png-sub">Harita üzerindeki katmanlar</div>`+
+          `</div>`+
+        `</div>`+
 
-        +
+        `<div class="dg-png-options">`+
 
-          +
-            🔲+
-            +
-              Grid hücreleri+
-              Harita üzerinde göster+
-            +
-            +
-            +
-          +
+          `<label class="dg-png-option">`+
+            `<span class="dg-png-icon">🔲</span>`+
+            `<span class="dg-png-copy">`+
+              `<strong>Grid hücreleri</strong>`+
+              `<span>Harita üzerinde göster</span>`+
+            `</span>`+
+            `<input type="checkbox" id="togGrid" checked onchange="toggleGridVis()">`+
+            `<span class="dg-png-switch"></span>`+
+          `</label>`+
 
-          +
-            📍+
-            +
-              Waypoint'ler+
-              Ölçüm noktalarını göster+
-            +
-            +
-            +
-          +
+          `<label class="dg-png-option">`+
+            `<span class="dg-png-icon">📍</span>`+
+            `<span class="dg-png-copy">`+
+              `<strong>Waypoint'ler</strong>`+
+              `<span>Ölçüm noktalarını göster</span>`+
+            `</span>`+
+            `<input type="checkbox" id="togWp" checked onchange="toggleWpVis()">`+
+            `<span class="dg-png-switch"></span>`+
+          `</label>`+
 
-        +
+        `</div>`+
 
-        +
-          ✕ Tümünü Temizle+
-        +
-      +
+        `<button class="dg-png-btn red sm" onclick="clearGrid()">`+
+          `✕ Tümünü Temizle`+
+        `</button>`+
+      `</div>`+
 
-    +
+    `</div>`+
 
-    +
-    ;
+    `<div id="landCoverReport" class="dg-png-result" style="display:none"></div>`+
+    `<div id="gridSummary" class="dg-png-result" style="display:none"></div>`;
 
   renderRefBadge();
 
@@ -1330,6 +2063,7 @@ function drawPark(park){
   );
 }
 
+
 /* =========================================================
    MODERN UI STYLES
 ========================================================= */
@@ -1340,7 +2074,7 @@ function ensurePngUiStyles(){
   const style = document.createElement("style");
   style.id = "dgPngUiStyles";
 
-  style.textContent = 
+  style.textContent = `
     .dg-png-card{border:1px solid var(--line);border-radius:14px;padding:14px;background:var(--bg);display:flex;flex-direction:column;gap:10px}
     .dg-png-head{display:flex;align-items:flex-start;justify-content:space-between;gap:10px}
     .dg-png-kicker{font-size:.66rem;letter-spacing:.12em;color:var(--mut);font-weight:700;margin-bottom:3px;text-transform:uppercase}
@@ -1379,22 +2113,23 @@ function ensurePngUiStyles(){
     .dg-png-btn.sm{min-height:34px;font-size:.76rem;padding:6px 12px}
     .dg-png-result{margin-top:10px;padding:12px;border:1px solid var(--line);border-radius:11px;background:var(--bg);font-size:.82rem;line-height:1.6}
     #refBadge.dg-png-ref{display:inline-flex;align-items:center;gap:4px;padding:2px 9px;border-radius:999px;font-size:.7rem;font-weight:600;background:rgba(20,83,45,.1)}
-  ;
+  `;
 
   document.head.appendChild(style);
 }
+
 
 /* =========================================================
    CLEAR
 ========================================================= */
 
 function clearPark(){
-  if(PARKLAYER&&map){map.removeLayer(PARKLAYER);PARK_LAYER=null;}
-  if(WATERLAYER&&map){map.removeLayer(WATERLAYER);WATER_LAYER=null;}
-  if(IMPLAYER&&map){map.removeLayer(IMPLAYER);IMP_LAYER=null;}
-  PARKPOLY=null;PARKHOLES=[];
-  WATERRINGS=[];WATERLINES=[];
-  IMPRINGS=[];IMPLINES=[];GRIDBLOCKLINES=[];
+  if(PARK_LAYER&&map){map.removeLayer(PARK_LAYER);PARK_LAYER=null;}
+  if(WATER_LAYER&&map){map.removeLayer(WATER_LAYER);WATER_LAYER=null;}
+  if(IMP_LAYER&&map){map.removeLayer(IMP_LAYER);IMP_LAYER=null;}
+  PARK_POLY=null;PARK_HOLES=[];
+  WATER_RINGS=[];WATER_LINES=[];
+  IMP_RINGS=[];IMP_LINES=[];GRID_BLOCK_LINES=[];
   LANDCOVER=null;
 }
 
@@ -1403,22 +2138,23 @@ function switchPark(i){
   if(p)drawPark(p);
 }
 
+
 /* =========================================================
    GRID
 ========================================================= */
 
 async function buildGrid(){
-  if(!PARKPOLY||!PARKPOLY.length)return toast("Önce park seç");
+  if(!PARK_POLY||!PARK_POLY.length)return toast("Önce park seç");
   const size=+$("gridSize").value||20;
   const est=Math.round(parkAreaM2()/(size*size));
   if(est>3000)return toast("⚠ ~"+est+" hücre çok yoğun.","err");
-  if(est>800&&!confirm(⚠ ~${est} hücre.\nDevam?))return;
+  if(est>800&&!confirm(`⚠ ~${est} hücre.\nDevam?`))return;
   clearGrid();
 
   let minLat=90,maxLat=-90,minLon=180,maxLon=-180;
   PARK_POLY.forEach(r=>r.forEach(p=>{
-    if(p[0]maxLat)maxLat=p[0];
-    if(p[1]maxLon)maxLon=p[1];
+    if(p[0]<minLat)minLat=p[0];if(p[0]>maxLat)maxLat=p[0];
+    if(p[1]<minLon)minLon=p[1];if(p[1]>maxLon)maxLon=p[1];
   }));
 
   const lat0=((minLat+maxLat)/2)*Math.PI/180;
@@ -1457,7 +2193,7 @@ async function buildGrid(){
 }
 
 function drawGridLayer(){
-  if(GRIDLAYER&&map)map.removeLayer(GRIDLAYER);
+  if(GRID_LAYER&&map)map.removeLayer(GRID_LAYER);
   GRID_LAYER=L.layerGroup().addTo(map);
   let g=0,r0=0;
   GRID_CELLS.forEach(cell=>{
@@ -1470,7 +2206,7 @@ function drawGridLayer(){
     }).addTo(GRID_LAYER);
     rect._cellId=cell.id;
     rect.on("click",e=>{L.DomEvent.stopPropagation(e);toggleCellSelection(cell.id,rect);});
-    rect.bindTooltip(Hücre ${cell.id} · ${cell.n} ölçüm,{sticky:true});
+    rect.bindTooltip(`Hücre ${cell.id} · ${cell.n} ölçüm`,{sticky:true});
   });
   updateGridSummary(g,r0);
 }
@@ -1482,16 +2218,16 @@ function updateGridSummary(g,r0){
   const pct=v=>tot?Math.round(v/tot*100):0;
   const selCount=SELECTED_CELLS.size;
   gs.innerHTML=
-    📊 Grid · ${$("gridSize")?.value||20}×${$("gridSize")?.value||20} m+
-    Toplam: ${tot} · 🟢 Ölçülmüş: ${g} (%${pct(g)}) · 🔴 Boş: ${r0} (%${pct(r0)})+
-    (selCount>0?🔵 Seçili: ${selCount}:"")+
-    +
-    (r0>0?📍 Otomatik (${r0}):"")+
-    (selCount>0?📍 Seçili (${selCount}):"")+
-    (selCount>0?✕ Seçimi Temizle:"")+
-    📥 GeoJSON+
-    📥 WP CSV+
-    ;
+    `<b>📊 Grid</b> · ${$("gridSize")?.value||20}×${$("gridSize")?.value||20} m<br>`+
+    `Toplam: <b>${tot}</b> · 🟢 Ölçülmüş: ${g} (%${pct(g)}) · 🔴 Boş: ${r0} (%${pct(r0)})<br>`+
+    (selCount>0?`<b style="color:#1d4ed8">🔵 Seçili: ${selCount}</b><br>`:"")+
+    `<div style="margin-top:8px;display:flex;gap:6px;flex-wrap:wrap">`+
+    (r0>0?`<button class="btn sm blue" onclick="createWaypointsFromGrid('auto')">📍 Otomatik (${r0})</button>`:"")+
+    (selCount>0?`<button class="btn sm" style="background:#1d4ed8;color:#fff" onclick="createWaypointsFromGrid('manual')">📍 Seçili (${selCount})</button>`:"")+
+    (selCount>0?`<button class="btn sm ghost" onclick="clearCellSelection()">✕ Seçimi Temizle</button>`:"")+
+    `<button class="btn sm ghost" onclick="downloadGridGeoJSON()">📥 GeoJSON</button>`+
+    `<button class="btn sm ghost" onclick="downloadWaypointsCSV()">📥 WP CSV</button>`+
+    `</div>`;
 }
 
 function toggleCellSelection(cellId,rect){
@@ -1516,7 +2252,7 @@ function clearCellSelection(){
   if(GRID_LAYER){
     GRID_LAYER.eachLayer(l=>{
       if(l.setStyle&&l._cellId){
-        const cell=GRIDCELLS.find(c=>c.id===l.cellId);
+        const cell=GRID_CELLS.find(c=>c.id===l._cellId);
         if(cell){
           const col=cell.n===0?"#e11d48":"#16a34a";
           l.setStyle({color:col,weight:1.2,fillColor:col,fillOpacity:.32});
@@ -1530,9 +2266,9 @@ function clearCellSelection(){
 }
 
 function clearGrid(){
-  if(GRIDLAYER&&map){map.removeLayer(GRIDLAYER);GRID_LAYER=null;}
-  if(WPAUTOLAYER&&map){map.removeLayer(WPAUTOLAYER);WPAUTOLAYER=null;}
-  GRIDCELLS.length=0;SELECTEDCELLS.clear();
+  if(GRID_LAYER&&map){map.removeLayer(GRID_LAYER);GRID_LAYER=null;}
+  if(WP_AUTO_LAYER&&map){map.removeLayer(WP_AUTO_LAYER);WP_AUTO_LAYER=null;}
+  GRID_CELLS.length=0;SELECTED_CELLS.clear();
   const gs=$("gridSummary");
   if(gs){gs.innerHTML="";gs.style.display="none";}
   const togGrid=$("togGrid");if(togGrid)togGrid.checked=true;
@@ -1542,16 +2278,17 @@ function clearGrid(){
 function toggleGridVis(){
   if(!GRID_LAYER)return;
   const togEl=$("togGrid");
-  if(map.hasLayer(GRIDLAYER)){map.removeLayer(GRIDLAYER);if(togEl)togEl.checked=false;}
+  if(map.hasLayer(GRID_LAYER)){map.removeLayer(GRID_LAYER);if(togEl)togEl.checked=false;}
   else{map.addLayer(GRID_LAYER);if(togEl)togEl.checked=true;}
 }
 
 function toggleWpVis(){
-  if(!WPAUTOLAYER)return;
+  if(!WP_AUTO_LAYER)return;
   const togEl=$("togWp");
-  if(map.hasLayer(WPAUTOLAYER)){map.removeLayer(WPAUTOLAYER);if(togEl)togEl.checked=false;}
-  else{map.addLayer(WPAUTOLAYER);if(togEl)togEl.checked=true;}
+  if(map.hasLayer(WP_AUTO_LAYER)){map.removeLayer(WP_AUTO_LAYER);if(togEl)togEl.checked=false;}
+  else{map.addLayer(WP_AUTO_LAYER);if(togEl)togEl.checked=true;}
 }
+
 
 /* =========================================================
    WAYPOINT
@@ -1562,29 +2299,29 @@ async function createWaypointsFromGrid(mode){
   const pid=+$("gridProject").value||0;
   if(!pid)return toast("Önce proje seç");
   let targetCells=mode==="manual"
-    ?GRIDCELLS.filter(c=>SELECTEDCELLS.has(c.id))
+    ?GRID_CELLS.filter(c=>SELECTED_CELLS.has(c.id))
     :GRID_CELLS.filter(c=>c.n===0);
   if(mode==="manual"&&!SELECTED_CELLS.size)return toast("Önce hücre seçin");
   if(!targetCells.length)return toast("Uygun hücre yok");
   if(targetCells.length>500&&!confirm(targetCells.length+" waypoint?\nDevam?"))return;
 
   const{data:mx}=await sb.from("waypoints").select("wp_id")
-    .eq("projectid",pid).order("wpid",{ascending:false}).limit(1);
+    .eq("project_id",pid).order("wp_id",{ascending:false}).limit(1);
   let next=(mx&&mx.length?mx[0].wp_id:0)+1;
   const first=next;
   const rows=targetCells.map(c=>({
-    owner:USER.id,projectid:pid,wpid:next++,
+    owner:USER.id,project_id:pid,wp_id:next++,
     lat:+c.lat.toFixed(6),lon:+c.lon.toFixed(6),visited:false
   }));
-  LASTWPROWS=rows;
+  LAST_WP_ROWS=rows;
   const{error}=await sb.from("waypoints").insert(rows);
   if(error)return toast("Hata: "+error.message,"err");
 
-  if(WPAUTOLAYER&&map)map.removeLayer(WPAUTOLAYER);
-  WPAUTOLAYER=L.layerGroup().addTo(map);
+  if(WP_AUTO_LAYER&&map)map.removeLayer(WP_AUTO_LAYER);
+  WP_AUTO_LAYER=L.layerGroup().addTo(map);
   rows.forEach(r=>L.circleMarker([r.lat,r.lon],{
     radius:5,color:"#fff",weight:1.5,fillColor:"#e11d48",fillOpacity:.95,interactive:false
-  }).addTo(WPAUTOLAYER));
+  }).addTo(WP_AUTO_LAYER));
 
   $("nProject").value=String(pid);
   loadWaypoints();
@@ -1592,13 +2329,27 @@ async function createWaypointsFromGrid(mode){
   clearCellSelection();
 }
 
+
 /* =========================================================
    LINE UTILITIES
 ========================================================= */
 
 function lineLengthM(l){
   let len=0;
-  for(let i=1;iURL.revokeObjectURL(u),1000);
+  for(let i=1;i<l.length;i++){
+    const dy=(l[i][0]-l[i-1][0])*110540;
+    const dx=(l[i][1]-l[i-1][1])*111320*Math.cos(l[i][0]*Math.PI/180);
+    len+=Math.sqrt(dx*dx+dy*dy);
+  }
+  return len;
+}
+
+function downloadBlob(name,mime,text){
+  const b=new Blob([text],{type:mime});
+  const u=URL.createObjectURL(b);
+  const a=document.createElement("a");
+  a.href=u;a.download=name;a.click();
+  setTimeout(()=>URL.revokeObjectURL(u),1000);
 }
 
 function downloadGridGeoJSON(){
@@ -1613,7 +2364,7 @@ function downloadGridGeoJSON(){
 }
 
 function downloadWaypointsCSV(){
-  const rows=LASTWPROWS.length?LASTWPROWS:WP;
+  const rows=LAST_WP_ROWS.length?LAST_WP_ROWS:WP;
   if(!rows||!rows.length)return toast("WP yok");
   let csv="wp_id,lat,lon,visited\n";
   rows.forEach(r=>{csv+=r.wp_id+","+r.lat+","+r.lon+","+(r.visited?1:0)+"\n";});
@@ -1621,76 +2372,149 @@ function downloadWaypointsCSV(){
   toast("✓ "+rows.length+" WP","ok","📥");
 }
 
+
 /* =========================================================
    LAND COVER GEOMETRY
 ========================================================= */
 
 function pointToSegmentDistanceM(lat,lon,a,b){
   const refLat=lat*Math.PI/180;
-  const ax=(a[1]-lon)111320Math.cos(refLat);
+  const ax=(a[1]-lon)*111320*Math.cos(refLat);
   const ay=(a[0]-lat)*110540;
-  const bx=(b[1]-lon)111320Math.cos(refLat);
+  const bx=(b[1]-lon)*111320*Math.cos(refLat);
   const by=(b[0]-lat)*110540;
   const dx=bx-ax,dy=by-ay;
-  if(dx===0&&dy===0)return Math.sqrt(axax+ayay);
-  const t=Math.max(0,Math.min(1,(-axdx-aydy)/(dxdx+dydy)));
-  const px=ax+tdx,py=ay+tdy;
-  return Math.sqrt(pxpx+pypy);
+  if(dx===0&&dy===0)return Math.sqrt(ax*ax+ay*ay);
+  const t=Math.max(0,Math.min(1,(-ax*dx-ay*dy)/(dx*dx+dy*dy)));
+  const px=ax+t*dx,py=ay+t*dy;
+  return Math.sqrt(px*px+py*py);
 }
 
 function nearLineW(lines,lat,lon){
   for(const l of lines){
-    if(!l||!l.pts||l.pts.length{
-    if(!r||r.length{
-    if(!l||!l.pts||l.pts.length({pts:l.pts,w:l.w}));
+    if(!l||!l.pts||l.pts.length<2)continue;
+    const w=Number.isFinite(l.w)?Math.max(0,l.w):0;
+    for(let i=0;i<l.pts.length-1;i++){
+      if(pointToSegmentDistanceM(lat,lon,l.pts[i],l.pts[i+1])<=w)return true;
+    }
+  }
+  return false;
+}
+
+
+/* =========================================================
+   IMP LAYER
+========================================================= */
+
+function refreshImpLayer(){
+  if(IMP_LAYER&&map)map.removeLayer(IMP_LAYER);
+  IMP_LAYER=L.layerGroup().addTo(map);
+  IMP_RINGS.forEach(r=>{
+    if(!r||r.length<3)return;
+    L.polygon(r,{
+      color:"#dc2626",weight:.8,fillColor:"#ef4444",fillOpacity:.22,interactive:false
+    }).addTo(IMP_LAYER);
+  });
+  IMP_LINES.forEach(l=>{
+    if(!l||!l.pts||l.pts.length<2)return;
+    L.polyline(l.pts,{
+      color:"#ef4444",weight:2.5,opacity:.35,interactive:false
+    }).addTo(IMP_LAYER);
+  });
+}
+
+
+/* =========================================================
+   LAND COVER ANALYSIS
+========================================================= */
+
+async function runLandCoverAnalysis(){
+  if(!PARK_POLY||!PARK_POLY.length)return toast("Önce park seç");
+  const rep=$("landCoverReport");
+  if(rep){rep.style.display="block";rep.innerHTML="⏳ Detaylı sorgu (bina·yol·otopark·saha·kort)…";}
+  toast("🌿 Park içi detaylı sorgu…","info");
+
+  await queryDetailedCoverage();
+
+  if(rep)rep.innerHTML="⏳ Hesaplanıyor…";
+
+  const lineIdx=IMP_LINES.map(l=>({pts:l.pts,w:l.w}));
 
   let minLat=90,maxLat=-90,minLon=180,maxLon=-180;
   PARK_POLY.forEach(r=>r.forEach(p=>{
-    if(p[0]maxLat)maxLat=p[0];
-    if(p[1]maxLon)maxLon=p[1];
+    if(p[0]<minLat)minLat=p[0];if(p[0]>maxLat)maxLat=p[0];
+    if(p[1]<minLon)minLon=p[1];if(p[1]>maxLon)maxLon=p[1];
   }));
 
   const SAMPLE_M=3;
   const stepLat=SAMPLE_M/110540;
-  const stepLon=SAMPLE_M/(111320Math.cos(((minLat+maxLat)/2)Math.PI/180));
+  const stepLon=SAMPLE_M/(111320*Math.cos(((minLat+maxLat)/2)*Math.PI/180));
 
   let nPark=0,nWater=0,nImp=0,nGreen=0;
 
-  for(let la=minLat;la=3&&pointInPolygon(la,lo,r)){inWater=true;break;}
+  for(let la=minLat;la<=maxLat;la+=stepLat){
+    for(let lo=minLon;lo<=maxLon;lo+=stepLon){
+      if(!pointInPark(la,lo,PARK_POLY))continue;
+      nPark++;
+
+      let inWater=false;
+      for(const r of WATER_RINGS){
+        if(r&&r.length>=3&&pointInPolygon(la,lo,r)){inWater=true;break;}
       }
       if(!inWater){
         for(const l of WATER_LINES){
-          if(!l||l.length((v/Math.max(1,nPark))*totalHa).toFixed(1);
+          if(!l||l.length<2)continue;
+          for(let i=0;i<l.length-1;i++){
+            if(pointToSegmentDistanceM(la,lo,l[i],l[i+1])<=3){inWater=true;break;}
+          }
+          if(inWater)break;
+        }
+      }
+      if(inWater){nWater++;continue;}
+
+      let imp=false;
+      for(const r of IMP_RINGS){
+        if(pointInPolygon(la,lo,r)){imp=true;break;}
+      }
+      if(!imp&&nearLineW(lineIdx,la,lo))imp=true;
+      if(imp){nImp++;continue;}
+      nGreen++;
+    }
+  }
+
+  const totalHa=parkAreaHa();
+  const ha=v=>((v/Math.max(1,nPark))*totalHa).toFixed(1);
   const pct=v=>nPark?Math.round(v/nPark*100):0;
 
   LANDCOVER={green:+ha(nGreen),hard:+ha(nImp),water:+ha(nWater),total:+totalHa.toFixed(1)};
 
   const row=(color,label,haV,pv)=>
-    +
-      +
-      ${label}+
-      +
-        +
-      +
-      ${haV} ha+
-      %${pv}+
-    ;
+    `<div style="display:flex;align-items:center;gap:8px;margin:4px 0">`+
+      `<span style="width:12px;height:12px;border-radius:3px;background:${color};flex:none"></span>`+
+      `<span style="width:52px;font-size:.8rem">${label}</span>`+
+      `<div style="flex:1;height:10px;background:var(--line);border-radius:5px;overflow:hidden">`+
+        `<div style="height:100%;width:${pv}%;background:${color};transition:width .6s"></div>`+
+      `</div>`+
+      `<b style="font-size:.8rem;width:74px;text-align:right">${haV} ha</b>`+
+      `<span style="font-size:.72rem;color:var(--mut);width:38px">%${pv}</span>`+
+    `</div>`;
 
   if(rep){
     rep.innerHTML=
-      🌿 Yüzey Örtüsü (bina·yol·otopark·saha·kort dahil)+
+      `<b>🌿 Yüzey Örtüsü</b> <span style="font-size:.72rem;color:var(--mut)">(bina·yol·otopark·saha·kort dahil)</span>`+
       row("#16a34a","Yeşil",ha(nGreen),pct(nGreen))+
       row("#ef4444","Sert",ha(nImp),pct(nImp))+
       row("#3b82f6","Su",ha(nWater),pct(nWater))+
-      +
-        Toplam: ${totalHa.toFixed(1)} ha · Yeşil+Sert+Su = Toplam+
-        Örnekleme: ${SAMPLE_M} m · Örnek nokta: ${nPark.toLocaleString("tr-TR")}+
-        Sert poligon: ${IMPRINGS.length} · Sert çizgi: ${IMPLINES.length} · Su poligon: ${WATER_RINGS.length}+
-      ;
+      `<div style="font-size:.72rem;color:var(--mut);margin-top:6px">`+
+        `Toplam: <b>${totalHa.toFixed(1)} ha</b> · Yeşil+Sert+Su = Toplam<br>`+
+        `Örnekleme: ${SAMPLE_M} m · Örnek nokta: ${nPark.toLocaleString("tr-TR")}<br>`+
+        `Sert poligon: ${IMP_RINGS.length} · Sert çizgi: ${IMP_LINES.length} · Su poligon: ${WATER_RINGS.length}`+
+      `</div>`;
   }
 
   toast("✓ Analiz tamam","ok","🌿");
 }
+
 
 /* =========================================================
    TILE DRAW
@@ -1698,9 +2522,9 @@ function nearLineW(lines,lat,lon){
 
 async function drawTiles(ctx,bg,minLat,minLon,maxLat,maxLon,scale,ox,oy){
   const urls={
-    osm:(x,y,z)=>https://tile.openstreetmap.org/${z}/${x}/${y}.png,
-    sat:(x,y,z)=>https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/${z}/${y}/${x},
-    topo:(x,y,z)=>https://a.tile.opentopomap.org/${z}/${x}/${y}.png`
+    osm:(x,y,z)=>`https://tile.openstreetmap.org/${z}/${x}/${y}.png`,
+    sat:(x,y,z)=>`https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/${z}/${y}/${x}`,
+    topo:(x,y,z)=>`https://a.tile.opentopomap.org/${z}/${x}/${y}.png`
   };
   const zoom=Math.min(19,Math.max(3,Math.round(Math.log2(360*scale/256))));
   const n=Math.pow(2,zoom);
@@ -1712,30 +2536,40 @@ async function drawTiles(ctx,bg,minLat,minLon,maxLat,maxLon,scale,ox,oy){
   };
   const y0=yFor(maxLat),y1=yFor(minLat);
   const lonOf=x=>x/n*360-180;
-  const latOf=y=>Math.atan(Math.sinh(Math.PI(1-2y/n)))*180/Math.PI;
+  const latOf=y=>Math.atan(Math.sinh(Math.PI*(1-2*y/n)))*180/Math.PI;
   const imgs=[];
-  for(let x=x0;xo.img.decode?o.img.decode():new Promise((res,rej)=>{o.img.onload=res;o.img.onerror=rej;})));
+  for(let x=x0;x<=x1;x++){
+    for(let y=y0;y<=y1;y++){
+      const img=new Image();
+      img.crossOrigin="anonymous";
+      img.src=urls[bg](x,y,zoom);
+      imgs.push({img,x,y});
+    }
+  }
+  try{
+    await Promise.all(imgs.map(o=>o.img.decode?o.img.decode():new Promise((res,rej)=>{o.img.onload=res;o.img.onerror=rej;})));
   }catch(e){return false;}
   for(const o of imgs){
-    const p0=[ox+(lonOf(o.x)-minLon)scale,oy+(maxLat-latOf(o.y))scale];
-    const p1=[ox+(lonOf(o.x+1)-minLon)scale,oy+(maxLat-latOf(o.y+1))scale];
+    const p0=[ox+(lonOf(o.x)-minLon)*scale,oy+(maxLat-latOf(o.y))*scale];
+    const p1=[ox+(lonOf(o.x+1)-minLon)*scale,oy+(maxLat-latOf(o.y+1))*scale];
     ctx.drawImage(o.img,p0[0],p0[1],p1[0]-p0[0],p1[1]-p0[1]);
   }
   try{ctx.getImageData(0,0,1,1);}catch(e){return false;}
   return true;
 }
 
+
 /* =========================================================
    PNG
 ========================================================= */
 
 async function downloadParkImage(){
-  if(!PARKPOLY||!PARKPOLY.length)return toast("Önce park seç");
+  if(!PARK_POLY||!PARK_POLY.length)return toast("Önce park seç");
   const bg=$("pngBg")?$("pngBg").value:"vector";
   const incGrid=($("chkPngGrid")?$("chkPngGrid").checked:true)&&GRID_CELLS.length>0;
   const incWp=$("chkPngWp")?$("chkPngWp").checked:true;
   const incCover=$("chkPngCover")?$("chkPngCover").checked:true;
-  const wpRows=(LASTWPROWS.length?LASTWPROWS:WP).filter(w=>pointInPark(w.lat,w.lon,PARK_POLY));
+  const wpRows=(LAST_WP_ROWS.length?LAST_WP_ROWS:WP).filter(w=>pointInPark(w.lat,w.lon,PARK_POLY));
   const showWp=incWp&&wpRows.length>0;
   const W=1600,H=1200;
   const canvas=document.createElement("canvas");
@@ -1748,15 +2582,15 @@ async function downloadParkImage(){
 
   let minLat=90,maxLat=-90,minLon=180,maxLon=-180;
   PARK_POLY.forEach(r=>r.forEach(p=>{
-    if(p[0]maxLat)maxLat=p[0];
-    if(p[1]maxLon)maxLon=p[1];
+    if(p[0]<minLat)minLat=p[0];if(p[0]>maxLat)maxLat=p[0];
+    if(p[1]<minLon)minLon=p[1];if(p[1]>maxLon)maxLon=p[1];
   }));
   const pad=.0004;
   minLat-=pad;maxLat+=pad;minLon-=pad;maxLon+=pad;
   const dLat=maxLat-minLat,dLon=maxLon-minLon;
   const scale=Math.min((W-140)/dLon,(H-200)/dLat);
-  const ox=(W-dLonscale)/2,oy=(H-dLatscale)/2+30;
-  const toXY=(lat,lon)=>[ox+(lon-minLon)scale,oy+(maxLat-lat)scale];
+  const ox=(W-dLon*scale)/2,oy=(H-dLat*scale)/2+30;
+  const toXY=(lat,lon)=>[ox+(lon-minLon)*scale,oy+(maxLat-lat)*scale];
 
   if(bg!=="vector"){
     const ok=await drawTiles(mctx,bg,minLat,minLon,maxLat,maxLon,scale,ox,oy);
@@ -1765,18 +2599,24 @@ async function downloadParkImage(){
 
   if(incCover){
     IMP_RINGS.forEach(r=>{
-      if(!r||r.length{const xy=toXY(p[0],p[1]);if(i===0)mctx.moveTo(xy[0],xy[1]);else mctx.lineTo(xy[0],xy[1]);});
+      if(!r||r.length<3)return;
+      mctx.fillStyle="#ef444444";mctx.strokeStyle="#dc2626";mctx.lineWidth=1;
+      mctx.beginPath();
+      r.forEach((p,i)=>{const xy=toXY(p[0],p[1]);if(i===0)mctx.moveTo(xy[0],xy[1]);else mctx.lineTo(xy[0],xy[1]);});
       mctx.closePath();mctx.fill();mctx.stroke();
     });
     IMP_LINES.forEach(l=>{
       mctx.strokeStyle="#ef444466";
-      mctx.lineWidth=Math.max(1.5,(l.w2)scale/110540);
+      mctx.lineWidth=Math.max(1.5,(l.w*2)*scale/110540);
       mctx.beginPath();
       l.pts.forEach((p,i)=>{const xy=toXY(p[0],p[1]);if(i===0)mctx.moveTo(xy[0],xy[1]);else mctx.lineTo(xy[0],xy[1]);});
       mctx.stroke();
     });
     WATER_RINGS.forEach(r=>{
-      if(!r||r.length{const xy=toXY(p[0],p[1]);if(i===0)mctx.moveTo(xy[0],xy[1]);else mctx.lineTo(xy[0],xy[1]);});
+      if(!r||r.length<3)return;
+      mctx.fillStyle="#3b82f699";mctx.strokeStyle="#1d4ed8";mctx.lineWidth=1.5;
+      mctx.beginPath();
+      r.forEach((p,i)=>{const xy=toXY(p[0],p[1]);if(i===0)mctx.moveTo(xy[0],xy[1]);else mctx.lineTo(xy[0],xy[1]);});
       mctx.closePath();mctx.fill();mctx.stroke();
     });
     WATER_LINES.forEach(l=>{
