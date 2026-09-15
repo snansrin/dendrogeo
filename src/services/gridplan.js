@@ -692,7 +692,7 @@ async function queryPark(
     })
   );
 
-  const pad=0.0003;
+    const pad=0.0005;
 
   const bbox=
     `${minLat-pad},${minLon-pad},`+
@@ -702,6 +702,8 @@ async function queryPark(
     `[out:json][timeout:60];(`+
     `way["natural"="water"](${bbox});`+
     `relation["natural"="water"](${bbox});`+
+    `way["water"](${bbox});`+
+    `relation["water"](${bbox});`+
     `way["landuse"="reservoir"](${bbox});`+
     `relation["landuse"="reservoir"](${bbox});`+
     `way["landuse"="basin"](${bbox});`+
@@ -823,20 +825,25 @@ async function queryDetailedCoverage(){
     })
   );
 
-  const pad=0.0003;
+const pad=0.0005;
 
   const bbox=
     `${minLat-pad},${minLon-pad},`+
     `${maxLat+pad},${maxLon+pad}`;
 
   const q=
-    `[out:json][timeout:60];(`+
+    `[out:json][timeout:90];(`+
     `way["building"](${bbox});`+
     `relation["building"](${bbox});`+
     `way["highway"](${bbox});`+
+    `relation["highway"](${bbox});`+
     `way["amenity"~"parking|bicycle_parking|motorcycle_parking"](${bbox});`+
+    `relation["amenity"~"parking|bicycle_parking|motorcycle_parking"](${bbox});`+
     `way["leisure"~"pitch|track|playground"](${bbox});`+
+    `relation["leisure"~"pitch|track|playground"](${bbox});`+
     `way["surface"~"asphalt|concrete|paving_stones|sett|concrete:plates|concrete:lanes|cobblestone|bricks|metal|wood"](${bbox});`+
+    `relation["surface"~"asphalt|concrete|paving_stones|sett|concrete:plates|concrete:lanes|cobblestone|bricks|metal|wood"](${bbox});`+
+    `way["man_made"~"pier|bridge"](${bbox});`+
     `);out geom;`;
 
   for(const url of OVERPASS_URLS){
@@ -906,7 +913,23 @@ async function queryDetailedCoverage(){
   );
 }
 
+/* =========================================================
+   SEGMENT INTERSECTION (lat/lon)
+========================================================= */
 
+function segmentsIntersectLatLon(a1,a2,b1,b2){
+  const refLat=(a1[0]+a2[0]+b1[0]+b2[0])/4;
+  const cosLat=Math.cos(refLat*Math.PI/180);
+  const ax=a1[1]*111320*cosLat;
+  const ay=a1[0]*110540;
+  const bx=a2[1]*111320*cosLat;
+  const by=a2[0]*110540;
+  const cx=b1[1]*111320*cosLat;
+  const cy=b1[0]*110540;
+  const dx=b2[1]*111320*cosLat;
+  const dy=b2[0]*110540;
+  return segmentsIntersect({x:ax,y:ay},{x:bx,y:by},{x:cx,y:cy},{x:dx,y:dy});
+}
 /* =========================================================
    PARK INTERSECTION
 ========================================================= */
@@ -931,11 +954,12 @@ function ringTouchesPark(
     if(p[1]>maxLon)maxLon=p[1];
   }
 
+  const buf=0.0005;
   if(
-    maxLat<pb.minLat ||
-    minLat>pb.maxLat ||
-    maxLon<pb.minLon ||
-    minLon>pb.maxLon
+    maxLat<pb.minLat-buf ||
+    minLat>pb.maxLat+buf ||
+    maxLon<pb.minLon-buf ||
+    minLon>pb.maxLon+buf
   ){
     return false;
   }
@@ -965,7 +989,7 @@ function ringTouchesPark(
     return true;
   }
 
-  for(let i=0;i<ring.length-1;i++){
+    for(let i=0;i<ring.length-1;i++){
     const a=ring[i];
     const b=ring[i+1];
 
@@ -980,6 +1004,17 @@ function ringTouchesPark(
       )
     ){
       return true;
+    }
+  }
+
+  const parkOuter=Array.isArray(parkRings)?parkRings:(parkRings.outer||[]);
+  for(const pRing of parkOuter){
+    for(let i=0;i<pRing.length-1;i++){
+      for(let j=0;j<ring.length-1;j++){
+        if(segmentsIntersectLatLon(pRing[i],pRing[i+1],ring[j],ring[j+1])){
+          return true;
+        }
+      }
     }
   }
 
@@ -1006,11 +1041,12 @@ function lineTouchesPark(
     if(p[1]>maxLon)maxLon=p[1];
   }
 
+  const buf=0.0005;
   if(
-    maxLat<pb.minLat ||
-    minLat>pb.maxLat ||
-    maxLon<pb.minLon ||
-    minLon>pb.maxLon
+    maxLat<pb.minLat-buf ||
+    minLat>pb.maxLat+buf ||
+    maxLon<pb.minLon-buf ||
+    minLon>pb.maxLon+buf
   ){
     return false;
   }
@@ -1047,10 +1083,10 @@ function lineTouchesPark(
         dy*dy
       );
 
-    const steps=
+   const steps=
       Math.max(
         1,
-        Math.ceil(len/10)
+        Math.ceil(len/5)
       );
 
     for(let k=1;k<steps;k++){
@@ -1064,7 +1100,7 @@ function lineTouchesPark(
         a[1]+
         (b[1]-a[1])*t;
 
-      if(
+         if(
         pointInPark(
           lat,
           lon,
@@ -1072,6 +1108,17 @@ function lineTouchesPark(
         )
       ){
         return true;
+      }
+    }
+  }
+
+  const parkOuter=Array.isArray(parkRings)?parkRings:(parkRings.outer||[]);
+  for(const pRing of parkOuter){
+    for(let i=0;i<pRing.length-1;i++){
+      for(let j=0;j<line.length-1;j++){
+        if(segmentsIntersectLatLon(pRing[i],pRing[i+1],line[j],line[j+1])){
+          return true;
+        }
       }
     }
   }
@@ -1092,8 +1139,8 @@ function extractRings(el){
     const b=r[r.length-1];
 
     if(
-      Math.abs(a[0]-b[0])>1e-9 ||
-      Math.abs(a[1]-b[1])>1e-9
+      Math.abs(a[0]-b[0])>1e-7 ||
+      Math.abs(a[1]-b[1])>1e-7
     ){
       r.push([
         a[0],
@@ -1175,17 +1222,17 @@ function joinWaysToRings(ways){
   const rings=[];
   const rem=ways.slice();
 
-  const eq=(a,b)=>
-    Math.abs(a[0]-b[0])<1e-9 &&
-    Math.abs(a[1]-b[1])<1e-9;
+    const eq=(a,b)=>
+    Math.abs(a[0]-b[0])<1e-6 &&
+    Math.abs(a[1]-b[1])<1e-6;
 
   while(rem.length){
     const ch=
       rem.shift().slice();
 
     let merged=true;
-    let guard=
-      ways.length*2+10;
+  let guard=
+      ways.length*ways.length+100;
 
     while(
       merged &&
@@ -1283,6 +1330,7 @@ function isWater(el){
 
   return(
     t.natural==="water" ||
+    !!t.water ||
     t.landuse==="reservoir" ||
     t.landuse==="basin" ||
     t.leisure==="swimming_pool" ||
@@ -1437,11 +1485,11 @@ function isClosedLine(l){
     Math.abs(
       l[0][0]-
       l[l.length-1][0]
-    )<1e-9 &&
+    )<1e-7 &&
     Math.abs(
       l[0][1]-
       l[l.length-1][1]
-    )<1e-9
+    )<1e-7
   );
 }
 
