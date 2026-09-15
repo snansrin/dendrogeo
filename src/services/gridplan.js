@@ -2113,7 +2113,20 @@ function drawPark(park){
 
     `<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:12px;margin-top:12px">`+
 
-
+   `<div style="border:1px solid var(--line);border-radius:10px;padding:12px">`+
+    `<div style="font-size:.7rem;letter-spacing:.08em;color:var(--mut);margin-bottom:8px">1 · GRID & WAYPOINT</div>`+
+    `<label style="font-size:.78rem;display:block">Proje<select id="gridProject" style="width:100%;padding:5px;border-radius:6px;border:1px solid var(--line);margin-top:2px">`+
+    (typeof PROJ_LIST!=="undefined"&&PROJ_LIST.length?PROJ_LIST.map(p=>`<option value="${p.id}">${esc(p.name)}</option>`).join(""):`<option value="0">Önce proje oluştur</option>`)+`</select></label>`+
+    `<label style="font-size:.78rem;display:block;margin-top:6px">Grid<select id="gridSize" style="width:100%;padding:5px;border-radius:6px;border:1px solid var(--line);margin-top:2px">`+
+     `<option value="10">10×10 m</option><option value="20" selected>20×20 m</option><option value="50">50×50 m</option></select></label>`+
+    `<label style="font-size:.78rem;display:block;margin-top:6px">Referans (ha)<input id="refHa" type="number" step="0.1" placeholder="50.8" style="width:100%;padding:5px;border-radius:6px;border:1px solid var(--line);margin-top:2px" onchange="setRefHa(this.value)"></label>`+
+    `<button class="btn sm blue" style="width:100%;margin-top:8px" onclick="buildGrid()">🔲 Grid Oluştur</button>`+
+   `</div>`+
+   `<div style="border:1px solid var(--line);border-radius:10px;padding:12px">`+
+    `<div style="font-size:.7rem;letter-spacing:.08em;color:var(--mut);margin-bottom:8px">2 · YÜZEY ANALİZİ</div>`+
+    `<button class="btn sm" style="width:100%" onclick="runLandCoverAnalysis()">🌿 Yüzey Örtüsü Analizi</button>`+
+    `<div style="font-size:.72rem;color:var(--mut);margin-top:6px">Bina·yol·otopark·saha·kort·su (park içi, 3m örnekleme)</div>`+
+   `</div>`+
      `<div class="dg-png-card">`+
 
   `<div class="dg-png-head">`+
