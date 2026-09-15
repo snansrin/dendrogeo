@@ -82,46 +82,35 @@
       ],
       "keywords": "tree inventory, carbon sequestration, biomass equation, allometry, DBH, urban forest, forest carbon, QGIS, Chave 2014, IPCC"
     },
-    {
+      {
       "@type": "Dataset",
-	"@id": "https://dendrogeo.org/#dataset",
-	"name": "DendroGeo Global Tree Inventory Dataset",
-	"identifier": {
-  	"@type": "PropertyValue",
- 	 "propertyID": "DOI",
-  "value": "10.5281/zenodo.22646300"
-},
-"sameAs": "https://doi.org/10.5281/zenodo.22646300",
+      "@id": "https://dendrogeo.org/#dataset",
+      "name": "DendroGeo Global Tree Inventory Dataset",
       "description": "Admin onaylı ağaç ölçüm verileri: GPS konumu, DBH, boy, tür, AGB, BHB, karbon stoğu, fotoğraf. CSV ve GeoJSON formatında dışa aktarılabilir.",
       "url": "https://dendrogeo.org/",
+      "identifier": "https://doi.org/10.5281/zenodo.22646300",
+      "sameAs": "https://doi.org/10.5281/zenodo.22646300",
       "license": "https://creativecommons.org/licenses/by-nc/4.0/",
-      "creator": {
-        "@type": "Organization",
-        "name": "DendroGeo Project"
-      },
-      "distribution": [
-        {
-          "@type": "DataDownload",
-          "encodingFormat": "text/csv",
-          "contentUrl": "https://dendrogeo.org/"
-        },
-        {
-          "@type": "DataDownload",
-          "encodingFormat": "application/geo+json",
-          "contentUrl": "https://dendrogeo.org/"
-        }
-      ],
+      "datePublished": "2026-08-30",
+      "dateModified": "2026-09-16",
+      "temporalCoverage": "2026-08-30/..",
       "spatialCoverage": {
         "@type": "Place",
-        "name": "Global"
+        "name": "Global",
+        "geo": { "@type": "GeoShape", "box": "-90 -180 90 180" }
       },
-      "temporalCoverage": "2026/..",
-      "measurementTechnique": "Field measurement with GPS + allometric equations (Chave 2014)",
+      "creator": { "@type": "Organization", "name": "DendroGeo Project" },
+      "keywords": "tree inventory, carbon sequestration, biomass, DBH, urban forest, forest carbon",
+      "measurementTechnique": "Field GPS measurement + allometric equations (Chave 2014)",
       "variableMeasured": [
-        {"@type": "PropertyValue", "name": "DBH (cm)"},
-        {"@type": "PropertyValue", "name": "Tree Height (m)"},
-        {"@type": "PropertyValue", "name": "Above-ground biomass (kg)"},
-        {"@type": "PropertyValue", "name": "Carbon stock (kg)"}
+        { "@type": "PropertyValue", "name": "DBH (cm)" },
+        { "@type": "PropertyValue", "name": "Tree Height (m)" },
+        { "@type": "PropertyValue", "name": "Above-ground biomass (kg)" },
+        { "@type": "PropertyValue", "name": "Carbon stock (kg)" }
+      ],
+      "distribution": [
+        { "@type": "DataDownload", "encodingFormat": "text/csv", "contentUrl": "https://dendrogeo.org/" },
+        { "@type": "DataDownload", "encodingFormat": "application/geo+json", "contentUrl": "https://dendrogeo.org/" }
       ]
     },
     {
@@ -203,7 +192,7 @@
 <script src="src/services/world.js?v=1"></script>
 <script src="src/services/measure.js?v=1"></script>
 <script src="src/services/map.js?v=6"></script>
-<script src="src/services/gridplan.js?v=23"></script>
+<script src="src/services/gridplan.js?v=24"></script>
 <script src="src/services/dash.js?v=1"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
 <link rel="stylesheet" href="css/style.css?v=2">
