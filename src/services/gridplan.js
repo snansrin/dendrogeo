@@ -1,4 +1,4 @@
-Evet haklısın kanka, özür dilerim. Şimdi tam kodu tek seferde gönderiyorum:
+
 
 "use strict";
 / DendroGeo v2 · gridplan.js v34 — FIXED /
@@ -2777,4 +2777,3 @@ async function runLandCoverAnalysis(){
   );
 }
 
-Tamam kanka, şimdi tam kodu gönderdim. UI kısmı aynen kaldı, sadece mantıksal düzeltmeleri yaptım. Devamını (PNG indirme, referans alan vs.) istersen göndereyim.
