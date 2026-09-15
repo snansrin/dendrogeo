@@ -186,10 +186,13 @@ async function queryPark(lat,lon,radius=1200){
  }));
  const pad=0.0003;
  const bbox=`${minLat-pad},${minLon-pad},${maxLat+pad},${maxLon+pad}`;
- const q2=`[out:json][timeout:60];(`+
+  const q2=`[out:json][timeout:60];(`+
   `way["natural"="water"](${bbox});relation["natural"="water"](${bbox});`+
   `way["building"](${bbox});`+
   `way["highway"~"motorway|trunk|primary|secondary|tertiary|unclassified|residential|service|living_street|footway|path|cycleway|track|pedestrian"](${bbox});`+
+  `way["amenity"~"parking|bicycle_parking|motorcycle_parking"](${bbox});`+
+  `way["surface"~"paved|asphalt|concrete|paving_stones|sett"](${bbox});`+
+  `way["landuse"~"commercial|industrial|retail|construction"](${bbox});`+
   `);out geom;`;
  for(const url of OVERPASS_URLS){
   try{
@@ -218,17 +221,18 @@ function ringTouchesPark(ring,parkRings,pb){
  let a=90,b=-90,c=180,d=-180;
  for(const p of ring){if(p[0]<a)a=p[0];if(p[0]>b)b=p[0];if(p[1]<c)c=p[1];if(p[1]>d)d=p[1];}
  if(b<pb.minLat||a>pb.maxLat||d<pb.minLon||c>pb.maxLon)return false;
- for(const p of ring)if(pointInPark(p[0],p[1],parkRings))return true;
- for(const pr of parkRings)for(const p of pr)if(pointInPolygon(p[0],p[1],ring))return true;
- return false;
+ let inCount=0;
+ for(const p of ring){if(pointInPark(p[0],p[1],parkRings))inCount++;}
+ return inCount>=ring.length*0.5;
+}
 }
 function lineTouchesPark(line,parkRings,pb){
  let a=90,b=-90,c=180,d=-180;
  for(const p of line){if(p[0]<a)a=p[0];if(p[0]>b)b=p[0];if(p[1]<c)c=p[1];if(p[1]>d)d=p[1];}
  if(b<pb.minLat||a>pb.maxLat||d<pb.minLon||c>pb.maxLon)return false;
- for(const p of line)if(pointInPark(p[0],p[1],parkRings))return true;
- const m=line[Math.floor(line.length/2)];
- return pointInPark(m[0],m[1],parkRings);
+ let inCount=0;
+ for(const p of line){if(pointInPark(p[0],p[1],parkRings))inCount++;}
+ return inCount>=line.length*0.3;
 }
 
 /* ---------- OSM AYRIŞTIRMA ---------- */
@@ -412,9 +416,9 @@ function drawPark(park){
      `<option value="sat">Uydu görüntüsü</option><option value="topo">Topoğrafik</option>`+
     `</select></label>`+
     `<div style="font-size:.75rem;color:var(--mut);margin:6px 0 4px">PNG içeriği:</div>`+
-    `<label style="font-size:.78rem;display:block"><input type="checkbox" id="chkPngGrid" checked> Grid</label>`+
-    `<label style="font-size:.78rem;display:block"><input type="checkbox" id="chkPngWp" checked> Waypoint</label>`+
-    `<label style="font-size:.78rem;display:block"><input type="checkbox" id="chkPngCover" checked> Su / sert zemin</label>`+
+    `<label style="font-size:.78rem;display:flex;align-items:center;gap:6px;margin:2px 0"><input type="checkbox" id="chkPngGrid" checked style="margin:0"> Grid</label>`+
+    `<label style="font-size:.78rem;display:flex;align-items:center;gap:6px;margin:2px 0"><input type="checkbox" id="chkPngWp" checked style="margin:0"> Waypoint</label>`+
+    `<label style="font-size:.78rem;display:flex;align-items:center;gap:6px;margin:2px 0"><input type="checkbox" id="chkPngCover" checked style="margin:0"> Su / sert zemin</label>`+
     `<button class="btn sm ghost" style="width:100%;margin-top:8px" onclick="downloadParkImage()">🖼️ Rapor PNG İndir</button>`+
    `</div>`+
    `<div style="border:1px solid var(--line);border-radius:10px;padding:10px">`+
@@ -666,68 +670,19 @@ function refreshImpLayer(){
    SU = mevcut su katmanı */
 async function runLandCoverAnalysis(){
  if(!PARK_POLY||!PARK_POLY.length)return toast("Önce park seç");
+ if(!IMP_RINGS.length&&!IMP_LINES.length)return toast("Önce park seç (veri yok)","warn");
  const rep=$("landCoverReport");
- if(rep)rep.innerHTML="⏳ Park içi yüzey sorgusu (tek seferlik)…";
- toast("🌿 Park sınırının İÇİ taranıyor…","info");
+ if(rep)rep.innerHTML="⏳ Hesaplanıyor…";
 
+ const lineIdx=buildNodeIndexW(IMP_LINES.map(l=>({pts:densifyLine(l.pts,4),w:l.w})));
+ const stepLat=5/110540;
  let minLat=90,maxLat=-90,minLon=180,maxLon=-180;
  PARK_POLY.forEach(r=>r.forEach(p=>{
   if(p[0]<minLat)minLat=p[0];if(p[0]>maxLat)maxLat=p[0];
   if(p[1]<minLon)minLon=p[1];if(p[1]>maxLon)maxLon=p[1];
  }));
- const pad=0.0002;
- const bbox=`${minLat-pad},${minLon-pad},${maxLat+pad},${maxLon+pad}`;
-
- const q=`[out:json][timeout:60];(`+
-  `way["building"](${bbox});relation["building"](${bbox});`+
-  `way["highway"](${bbox});`+
-  `way["amenity"~"parking|bicycle_parking|motorcycle_parking"](${bbox});`+
-  `way["surface"~"paved|asphalt|concrete|paving_stones|sett"](${bbox});`+
-  `way["landuse"~"commercial|industrial|retail|construction"](${bbox});`+
-  `);out geom;`;
-
- let hardRings=[],hardLines=[];
- for(const url of OVERPASS_URLS){
-  try{
-   const res=await fetch(url+"?data="+encodeURIComponent(q));
-   if(!res.ok)continue;
-   const json=await res.json();
-   for(const el of (json.elements||[])){
-    const t=el.tags||{};
-    if(el.type==="relation"){
-     const rr=extractRings(el);
-     if(rr)rr.forEach(r=>hardRings.push(r));
-     continue;
-    }
-    if(!el.geometry)continue;
-    const pts=el.geometry.map(g=>[g.lat,g.lon]);
-    if(pts.length<2)continue;
-    if(isClosedLine(pts)){hardRings.push(pts);continue;}
-    let w=0;
-    if(t.highway)w=roadHalfWidth(t.highway);
-    else if(t.surface)w=3;
-    else w=2;
-    hardLines.push({pts,w});
-   }
-   break;
-  }catch(e){}
- }
-
- const pb={minLat,maxLat,minLon,maxLon};
- hardRings=hardRings.filter(r=>ringTouchesPark(r,PARK_POLY,pb));
- hardLines=hardLines.filter(l=>lineTouchesPark(l.pts,PARK_POLY,pb));
-
- /* Küresel katmanları da zenginleştir (grid + PNG bundan faydalanır) */
- IMP_RINGS=hardRings.slice();
- IMP_LINES=hardLines.map(l=>({pts:l.pts,w:l.w}));
- GRID_BLOCK_LINES=hardLines.filter(l=>l.w>=4).map(l=>l.pts);
- refreshImpLayer();
-
- /* 5m örneklem — yalnızca park içi */
- const denseLines=hardLines.map(l=>({pts:densifyLine(l.pts,4),w:l.w}));
- const lineIdx=buildNodeIndexW(denseLines);
- const stepLat=5/110540;
  const stepLon=5/(111320*Math.cos(((minLat+maxLat)/2)*Math.PI/180));
+
  let nPark=0,nWater=0,nImp=0,nGreen=0;
  for(let la=minLat;la<=maxLat;la+=stepLat){
   for(let lo=minLon;lo<=maxLon;lo+=stepLon){
@@ -742,7 +697,6 @@ async function runLandCoverAnalysis(){
   }
  }
 
- /* Geometrik çapraz kontrol */
  let cross=0;
  IMP_RINGS.forEach(r=>{
   let vin=0;for(const p of r)if(pointInPark(p[0],p[1],PARK_POLY))vin++;
@@ -753,10 +707,11 @@ async function runLandCoverAnalysis(){
   cross+=lineLengthM(l.pts)*(l.w*2)*(l.pts.length?vin/l.pts.length:0);
  });
 
-  const totalHa=polyArea(PARK_POLY)/10000;
+ const totalHa=polyArea(PARK_POLY)/10000;
  const ha=v=>((v/Math.max(1,nPark))*totalHa).toFixed(1);
  const pct=v=>nPark?Math.round(v/nPark*100):0;
  LANDCOVER={green:+ha(nGreen),hard:+ha(nImp),water:+ha(nWater),total:+totalHa.toFixed(1)};
+
  const row=(color,label,haV,pv)=>
   `<div style="display:flex;align-items:center;gap:8px;margin:4px 0">`+
   `<span style="width:12px;height:12px;border-radius:3px;background:${color};flex:none"></span>`+
@@ -766,16 +721,15 @@ async function runLandCoverAnalysis(){
   `<span style="font-size:.72rem;color:var(--mut);width:38px">%${pv}</span></div>`;
 
  if(rep)rep.innerHTML=
-  `<b>🌿 Yüzey Örtüsü Analizi</b> <span style="color:var(--mut);font-size:.72rem">(5m örneklem · yalnızca park içi · tek sorgu)</span>`+
+  `<b>🌿 Yüzey Örtüsü Analizi</b> <span style="color:var(--mut);font-size:.72rem">(5m örneklem · park içi)</span>`+
   row("#16a34a","Yeşil",ha(nGreen),pct(nGreen))+
   row("#ef4444","Sert",ha(nImp),pct(nImp))+
   row("#3b82f6","Su",ha(nWater),pct(nWater))+
   `<div style="font-size:.72rem;color:var(--mut);margin-top:6px">`+
-  `Toplam: <b>${totalHa.toFixed(1)} ha</b> (geodezik) · Yeşil+Sert+Su = Toplam (tutarlı)<br>`+
-  `Çapraz kontrol: geometrik sert ≈ ${(cross/10000).toFixed(1)} ha · örneklem-geometri uyumu %${Math.max(0,Math.round(100-Math.abs(+ha(nImp)-cross/10000)/Math.max(cross/10000,0.1)*100))}</div>`;
+  `Toplam: <b>${totalHa.toFixed(1)} ha</b> · Yeşil+Sert+Su = Toplam<br>`+
+  `Çapraz kontrol: ~${(cross/10000).toFixed(1)} ha sert · uyum %${Math.max(0,Math.round(100-Math.abs(+ha(nImp)-cross/10000)/Math.max(cross/10000,0.1)*100))}</div>`;
  toast("✓ Yüzey örtüsü analizi tamam","ok","🌿");
 }
-
 /* ---------- PNG RAPOR (harita katmanlı) ---------- */
 async function drawTiles(ctx,bg,minLat,minLon,maxLat,maxLon,scale,ox,oy){
  const urls={
