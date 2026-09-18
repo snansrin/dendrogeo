@@ -3725,7 +3725,7 @@ function dgLcm10RenderRows(sat,totalM2){
          row("❓","Sınıflandırılamayan",sat.unknownM2,"#6b7280");
 }
 
-async function runLandCoverAnalysis(){
+async function dgSatelliteRun(){
   if(!PARK_POLY||!PARK_POLY.length){
     return toast("Önce park seç","warn","🌳");
   }
@@ -3819,7 +3819,7 @@ async function runLandCoverAnalysis(){
   toast("✓ Copernicus LCM-10 uydu analizi tamamlandı","ok","🛰️");
 }
 
-window.runLandCoverAnalysis=runLandCoverAnalysis;
+
 
 /* =========================================================
    TILE DRAW
@@ -6108,3 +6108,7 @@ async function dgV49Run(){
 
 window.runLandCoverAnalysis=dgV49Run;
 
+
+
+// FINAL ANALYSIS ROUTER: satellite classification is the active engine.
+window.runLandCoverAnalysis=dgSatelliteRun;
