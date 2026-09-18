@@ -4001,6 +4001,11 @@ async function dgSatelliteRun(){
    * 11 rangeland
    *
    * The raster is categorical. Do not interpolate it.
+   *
+   * This service is a Tiled Imagery Layer published in EPSG:4326.
+   * Esri's documentation/community record shows that attempts to force
+   * a 3857 export can fail with HTTP 400; native 4326 export is therefore
+   * intentional here.
    */
   const classify=code=>{
     if(code===1)return "water";
@@ -4011,22 +4016,36 @@ async function dgSatelliteRun(){
   };
 
   /*
-   * If the server returns the categorical raster as a color-mapped PNG,
-   * these are the standard Dynamic World/Esri land-cover colors. If it
-   * returns a raw grayscale U8 image, the first channel is the class code.
+   * IMPORTANT:
+   * Esri 2020 Land Cover V2 is a thematic/categorical service.
+   * Its rendered colors are NOT the Dynamic World palette previously used
+   * here. The official Esri/Impact Observatory palette is:
+   *
+   * 1 Water          #1A5BAB
+   * 2 Trees          #358221
+   * 3 Grass          #A7D282
+   * 4 Flooded Veg.   #87D19E
+   * 5 Crops          #FFDB5C
+   * 6 Scrub/Shrub    #EECFA8
+   * 7 Built Area     #ED022A
+   * 8 Bare Ground    #EDE9E4
+   * 9 Snow/Ice       #F2FAFF
+   * 10 Clouds        #C8C8C8
+   *
+   * The previous palette mismatch was capable of turning genuine green
+   * pixels into unrelated classes. Never use a generic RGB palette here.
    */
   const palette={
-    1:[65,155,223],
-    2:[57,125,73],
-    3:[136,176,83],
-    4:[122,135,198],
-    5:[228,150,53],
-    6:[223,195,90],
-    7:[196,40,27],
-    8:[165,155,143],
-    9:[179,159,225],
-    10:[255,255,255],
-    11:[198,208,93]
+    1:[26,91,171],
+    2:[53,130,33],
+    3:[167,210,130],
+    4:[135,209,158],
+    5:[255,219,92],
+    6:[238,207,168],
+    7:[237,2,42],
+    8:[237,233,228],
+    9:[242,250,255],
+    10:[200,200,200]
   };
 
   const nearestPaletteCode=(r,g,b)=>{
@@ -4039,7 +4058,7 @@ async function dgSatelliteRun(){
         best=Number(code);
       }
     }
-    return bestD<=900?best:0;
+    return bestD<=3600?best:0;
   };
 
   const rasterCode=(r,g,b,a)=>{
@@ -4101,40 +4120,50 @@ async function dgSatelliteRun(){
     const lat0=bbox.minLat+(bbox.maxLat-bbox.minLat)*(iy/ny);
     const lat1=bbox.minLat+(bbox.maxLat-bbox.minLat)*((iy+1)/ny);
 
-    const a=to3857(lon0,lat0);
-    const b=to3857(lon1,lat1);
-
     return {
       minLon:lon0,maxLon:lon1,
-      minLat:lat0,maxLat:lat1,
-      xmin:Math.min(a[0],b[0]),
-      ymin:Math.min(a[1],b[1]),
-      xmax:Math.max(a[0],b[0]),
-      ymax:Math.max(a[1],b[1])
+      minLat:lat0,maxLat:lat1
     };
   };
 
   const fetchTile=async(tile)=>{
-    const tw=Math.max(1,Math.ceil((tile.xmax-tile.xmin)/10));
-    const th=Math.max(1,Math.ceil((tile.ymax-tile.ymin)/10));
+    /*
+     * This service is natively published in WGS84 (EPSG:4326).
+     * A 3857 export request is known to return HTTP 400 for this
+     * particular tiled imagery service. Keep bbox/imageSR in 4326.
+     * Pixel dimensions are derived from ground metres at the tile centre.
+     */
+    const latC=(tile.minLat+tile.maxLat)/2;
+    const tileWidthM=
+      Math.max(1,(tile.maxLon-tile.minLon)*111320*
+        Math.max(0.15,Math.cos(latC*Math.PI/180)));
+    const tileHeightM=
+      Math.max(1,(tile.maxLat-tile.minLat)*111320);
 
-    const sizeW=Math.min(MAX_PIXELS_PER_SIDE,tw);
-    const sizeH=Math.min(MAX_PIXELS_PER_SIDE,th);
+    const sizeW=Math.min(
+      MAX_PIXELS_PER_SIDE,
+      Math.max(1,Math.round(tileWidthM/10))
+    );
+    const sizeH=Math.min(
+      MAX_PIXELS_PER_SIDE,
+      Math.max(1,Math.round(tileHeightM/10))
+    );
 
     const params=new URLSearchParams({
       f:"image",
       bbox:[
-        tile.xmin,
-        tile.ymin,
-        tile.xmax,
-        tile.ymax
+        tile.minLon,
+        tile.minLat,
+        tile.maxLon,
+        tile.maxLat
       ].join(","),
-      bboxSR:"3857",
-      imageSR:"3857",
+      bboxSR:"4326",
+      imageSR:"4326",
       size:sizeW+","+sizeH,
       format:"png",
       interpolation:"RSP_NearestNeighbor",
-      adjustAspectRatio:"false"
+      adjustAspectRatio:"false",
+      transparent:"false"
     });
 
     const url=SERVICE+"?"+params.toString();
@@ -4335,7 +4364,7 @@ async function dgSatelliteRun(){
     satellitePixels:received,
 
     method:
-      "Esri Global Land Cover 2020 V2 · Sentinel-2 · 10 m · exportImage categorical map · nearest-neighbour",
+      "Esri Global Land Cover 2020 V2 · Sentinel-2 · 10 m · native EPSG:4326 thematic export · nearest-neighbour",
 
     source:
       "Impact Observatory · Esri · Sentinel-2 L2A/L2B derived 2020 LULC",
