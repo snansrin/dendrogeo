@@ -29,6 +29,47 @@ let PARK_REF_HA=null;
 let PARK_SELECTED_AREA_M2=null;
 let LANDCOVER=null;
 
+/* Reference-area helpers are intentionally local to the active gridplan module.
+ * gridplan_core.js is an older parallel implementation and is not loaded by index.html. */
+function parkAreaHa(){
+  if(!PARK_POLY) return 0;
+  let m2=0;
+  for(const ring of PARK_POLY){
+    if(Array.isArray(ring) && ring.length>=3) m2 += ringGeodesicArea(ring);
+  }
+  for(const ring of (PARK_HOLES||[])){
+    if(Array.isArray(ring) && ring.length>=3) m2 -= ringGeodesicArea(ring);
+  }
+  return Math.max(0,m2)/10000;
+}
+
+function setRefHa(v){
+  const n=parseFloat(v);
+  PARK_REF_HA=Number.isFinite(n)&&n>0?n:null;
+  renderRefBadge();
+}
+
+function renderRefBadge(){
+  const el=$("refBadge");
+  if(!el) return;
+  if(!(PARK_REF_HA>0) || !PARK_POLY){
+    el.style.display="none";
+    el.textContent="";
+    return;
+  }
+  const ha=parkAreaHa();
+  if(!(ha>0)){
+    el.style.display="none";
+    el.textContent="";
+    return;
+  }
+  const dev=Math.abs(((ha-PARK_REF_HA)/PARK_REF_HA)*100);
+  el.style.display="inline-flex";
+  el.textContent="Referans: "+PARK_REF_HA.toFixed(2)+" ha · Sapma: %"+dev.toFixed(1);
+  el.style.background=dev<3?"rgba(22,163,74,.12)":"rgba(245,158,11,.14)";
+  el.style.color=dev<3?"#16a34a":"#b45309";
+}
+
 const WATER_CLEARANCE_M=1;
 const IMP_CLEARANCE_M=1;
 
@@ -3850,26 +3891,42 @@ async function dgSatelliteRun(){
       returnFirstValueOnly:"true",
       interpolation:"RSP_NearestNeighbor",
       mosaicRule:JSON.stringify({
+        mosaicMethod:"esriMosaicAttribute",
         where:"Year = 2020",
-        mosaicMethod:"ByAttribute",
         sortField:"Year",
         ascending:true
       }),
       pixelSize:"10,10",
-      outFields:"Year"
+      returnGeometry:"false"
     });
 
     let data;
     try{
-      const res=await fetch(SERVICE+"?"+params.toString(),{
-        method:"GET",
-        mode:"cors",
-        cache:"no-store",
-        headers:{Accept:"application/json"}
-      });
-      if(!res.ok)throw new Error("getSamples HTTP "+res.status);
+      const controller=new AbortController();
+      const timer=setTimeout(()=>controller.abort(),20000);
+      let res;
+      try{
+        res=await fetch(SERVICE+"?"+params.toString(),{
+          method:"GET",
+          mode:"cors",
+          cache:"no-store",
+          signal:controller.signal,
+          headers:{Accept:"application/json"}
+        });
+      }finally{
+        clearTimeout(timer);
+      }
+      if(!res.ok){
+        const body=await res.text().catch(()=> "");
+        throw new Error("getSamples HTTP "+res.status+(body?" · "+body.slice(0,240):""));
+      }
       data=await res.json();
-      if(data.error)throw new Error(data.error.message||"ImageServer getSamples hatası");
+      if(data.error){
+        const detail=data.error.details&&data.error.details.length
+          ? " · "+data.error.details.join(" | ")
+          : "";
+        throw new Error((data.error.message||"ImageServer getSamples hatası")+detail);
+      }
     }catch(err){
       console.error("Sentinel-2 getSamples:",err);
       if(rep){
@@ -3889,7 +3946,12 @@ async function dgSatelliteRun(){
     }
 
     for(const s of samples){
-      const code=Number(String(s.value||"").split(",")[0]);
+      const raw=s.value;
+      const code=Number(
+        typeof raw==="number"
+          ? raw
+          : String(raw??"").split(",")[0].trim()
+      );
       if(!Number.isFinite(code)||code===0)continue;
 
       const group=classify(code);
