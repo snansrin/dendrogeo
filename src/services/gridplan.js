@@ -3758,18 +3758,19 @@ async function dgSatelliteRun(){
   const rep=$("landCoverReport");
   if(rep){
     rep.style.display="block";
-    rep.innerHTML="⏳ Sentinel-2 10 m arazi örtüsü rasterı okunuyor…";
+    rep.innerHTML="⏳ Sentinel-2 10 m arazi örtüsü sınıfları doğrudan ImageServer'dan örnekleniyor…";
   }
 
-  // Verified public ArcGIS ImageServer.
-  // Product: Sentinel-2 10m Land Cover Time Series.
-  // Produced by Impact Observatory, Microsoft and Esri.
-  // The service metadata reports 10 m pixels and U8 classes 1..11.
+  /*
+   * Do not download/render a TIFF in the browser.
+   * ArcGIS ImageServer's official getSamples operation returns the
+   * categorical raster pixel value directly. This avoids browser
+   * TIFF/CORS/encoding problems while preserving the actual class code.
+   */
   const SERVICE=
     "https://ic.imagery1.arcgis.com/arcgis/rest/services/"+
-    "Sentinel2_10m_LandCover/ImageServer/exportImage";
+    "Sentinel2_10m_LandCover/ImageServer/getSamples";
 
-  const b=dgParkBBox();
   const to3857=(lon,lat)=>{
     const x=lon*20037508.34/180;
     let y=Math.log(Math.tan((90+lat)*Math.PI/360))/(Math.PI/180);
@@ -3777,118 +3778,157 @@ async function dgSatelliteRun(){
     return [x,y];
   };
 
-  const sw=to3857(b.minLon,b.minLat);
-  const ne=to3857(b.maxLon,b.maxLat);
-  const bbox3857=[sw[0],sw[1],ne[0],ne[1]];
-  const width=Math.max(1,Math.min(2048,Math.ceil(
-    Math.abs(ne[0]-sw[0])/10
-  )));
-  const height=Math.max(1,Math.min(2048,Math.ceil(
-    Math.abs(ne[1]-sw[1])/10
-  )));
-
-  const params=new URLSearchParams({
-    f:"image",
-    bbox:bbox3857.join(","),
-    bboxSR:"3857",
-    imageSR:"3857",
-    size:width+","+height,
-    format:"tiff",
-    pixelType:"U8",
-    interpolation:"RSP_NearestNeighbor",
-    noData:"0",
-    mosaicRule:JSON.stringify({
-      where:"Year = 2020",
-      mosaicMethod:"ByAttribute",
-      sortField:"Year",
-      ascending:true
-    })
-  });
-
-  const url=SERVICE+"?"+params.toString();
-
-  let image;
-  try{
-    if(typeof GeoTIFF==="undefined"||!GeoTIFF.fromArrayBuffer)
-      throw new Error("GeoTIFF.js yüklenmedi");
-
-    const res=await fetch(url,{
-      method:"GET",
-      mode:"cors",
-      cache:"no-store",
-      headers:{Accept:"image/tiff"}
-    });
-
-    if(!res.ok)throw new Error("Sentinel-2 Land Cover HTTP "+res.status);
-
-    const buf=await res.arrayBuffer();
-    if(buf.byteLength<100)throw new Error("Geçersiz/boş TIFF");
-
-    const tif=await GeoTIFF.fromArrayBuffer(buf);
-    image=await tif.getImage();
-  }catch(err){
-    console.error("Sentinel-2 10m ImageServer/GeoTIFF:",err);
-    if(rep){
-      rep.innerHTML=
-        "<b>❌ Sentinel-2 10 m rasterı okunamadı.</b><br>"+
-        "<span style='font-size:.75rem;color:var(--mut)'>"+
-        "ArcGIS Sentinel-2 10 m Land Cover servisinden kategorik TIFF alınamadı. "+
-        "OSM sonucu yerine konulmadı.</span>";
-    }
-    return toast("10 m uydu verisi alınamadı.","err","🛰️");
-  }
-
-  const ras=await image.readRasters({interleave:false});
-  const values=ras[0];
-  const iw=image.getWidth(), ih=image.getHeight();
-  const bb=image.getBoundingBox();
-
-  const toLonLat=(x,y)=>{
+  const to4326=(x,y)=>{
     const lon=x/20037508.34*180;
     let lat=y/20037508.34*180;
     lat=180/Math.PI*(2*Math.atan(Math.exp(lat*Math.PI/180))-Math.PI/2);
     return [lon,lat];
   };
 
-  const green=new Set([2,3,4,5,6,11]);
+  /*
+   * Build a real ~10 m sampling lattice over the selected park.
+   * The service returns the categorical pixel value at each requested
+   * point. We batch <= 900 points per request, below the service's
+   * documented approximate 1000-sample limit.
+   */
+  const bbox=dgParkBBox();
+  const centerLat=(bbox.minLat+bbox.maxLat)/2;
+  const mLat=111320;
+  const mLon=111320*Math.cos(centerLat*Math.PI/180);
+  const stepLat=10/mLat;
+  const stepLon=10/Math.max(1,mLon);
+
+  const points=[];
+  for(let lat=bbox.minLat+stepLat/2;lat<bbox.maxLat;lat+=stepLat){
+    for(let lon=bbox.minLon+stepLon/2;lon<bbox.maxLon;lon+=stepLon){
+      if(pointInPark(lat,lon,{outer:PARK_POLY,inner:PARK_HOLES||[]})){
+        const [x,y]=to3857(lon,lat);
+        points.push([x,y]);
+      }
+    }
+  }
+
+  if(!points.length){
+    const msg="Park içinde 10 m uydu örnek noktası üretilemedi";
+    console.error(msg);
+    if(rep)rep.innerHTML="<b>❌ "+msg+"</b>";
+    return toast(msg,"err","🛰️");
+  }
+
   const areas={green:0,hard:0,water:0,other:0,unknown:0};
   const counts={green:0,hard:0,water:0,other:0,unknown:0};
-  let pixels=0;
+  let received=0;
 
-  for(let y=0;y<ih;y++){
-    for(let x=0;x<iw;x++){
-      const code=Number(values[y*iw+x]);
+  // Sentinel-2 Land Cover classes published by Esri:
+  // 1 water, 2 trees, 3 grass, 4 flooded vegetation,
+  // 5 crops, 6 shrub/scrub, 7 built, 8 bare,
+  // 9 snow/ice, 10 clouds, 11 rangeland.
+  const green=new Set([2,3,4,5,6,11]);
+
+  const classify=code=>{
+    if(code===1)return "water";
+    if(code===7)return "hard";
+    if(green.has(code))return "green";
+    if(code===8||code===9||code===10)return "other";
+    return "unknown";
+  };
+
+  const batchSize=900;
+  const batches=Math.ceil(points.length/batchSize);
+
+  for(let bi=0;bi<batches;bi++){
+    const pts=points.slice(bi*batchSize,(bi+1)*batchSize);
+    const geometry={
+      points:pts,
+      spatialReference:{wkid:3857}
+    };
+
+    const params=new URLSearchParams({
+      f:"json",
+      geometryType:"esriGeometryMultipoint",
+      geometry:JSON.stringify(geometry),
+      returnFirstValueOnly:"true",
+      interpolation:"RSP_NearestNeighbor",
+      mosaicRule:JSON.stringify({
+        where:"Year = 2020",
+        mosaicMethod:"ByAttribute",
+        sortField:"Year",
+        ascending:true
+      }),
+      pixelSize:"10,10",
+      outFields:"Year"
+    });
+
+    let data;
+    try{
+      const res=await fetch(SERVICE+"?"+params.toString(),{
+        method:"GET",
+        mode:"cors",
+        cache:"no-store",
+        headers:{Accept:"application/json"}
+      });
+      if(!res.ok)throw new Error("getSamples HTTP "+res.status);
+      data=await res.json();
+      if(data.error)throw new Error(data.error.message||"ImageServer getSamples hatası");
+    }catch(err){
+      console.error("Sentinel-2 getSamples:",err);
+      if(rep){
+        rep.innerHTML=
+          "<b>❌ 10 m uydu sınıf verisi okunamadı.</b><br>"+
+          "<span style='font-size:.75rem;color:var(--mut)'>"+
+          "ArcGIS Sentinel-2 ImageServer getSamples isteği başarısız oldu: "+
+          String(err.message||err)+"</span>";
+      }
+      return toast("10 m uydu sınıf verisi alınamadı.","err","🛰️");
+    }
+
+    const samples=Array.isArray(data.samples)?data.samples:[];
+    if(!samples.length){
+      console.warn("Sentinel-2 batch boş döndü",bi,data);
+      continue;
+    }
+
+    for(const s of samples){
+      const code=Number(String(s.value||"").split(",")[0]);
       if(!Number.isFinite(code)||code===0)continue;
 
-      const mx=bb[0]+(x+0.5)*(bb[2]-bb[0])/iw;
-      const my=bb[3]-(y+0.5)*(bb[3]-bb[1])/ih;
-      const [lon,lat]=toLonLat(mx,my);
+      const group=classify(code);
+      const loc=s.location||{};
+      const xy=s.location?[
+        Number(s.location.x),Number(s.location.y)
+      ]:pts[received]||null;
 
-      if(!pointInPark(lat,lon,{
-        outer:PARK_POLY,
-        inner:PARK_HOLES||[]
-      }))continue;
+      if(!xy||!Number.isFinite(xy[0])||!Number.isFinite(xy[1]))continue;
 
-      let group="unknown";
-      if(code===1)group="water";
-      else if(code===7)group="hard";
-      else if(green.has(code))group="green";
-      else if(code===8||code===9||code===10)group="other";
+      const [lon,lat]=to4326(xy[0],xy[1]);
 
+      // One Sentinel-2 pixel is 10 x 10 m nominally. Use the same
+      // geodesic cell calculation used elsewhere in DendroGeo.
+      const dLat=stepLat/2;
+      const dLon=stepLon/2;
       const area=dgWgs84CellAreaM2(
-        lat-(Math.abs(toLonLat(mx,my-(bb[3]-bb[1])/ih)[1]-lat)/2),
-        lat+(Math.abs(toLonLat(mx,my-(bb[3]-bb[1])/ih)[1]-lat)/2),
-        lon-(Math.abs(toLonLat(mx+(bb[2]-bb[0])/iw,my)[0]-lon)/2),
-        lon+(Math.abs(toLonLat(mx+(bb[2]-bb[0])/iw,my)[0]-lon)/2)
+        lat-dLat,lat+dLat,lon-dLon,lon+dLon
       );
 
       areas[group]+=area;
       counts[group]++;
-      pixels++;
+      received++;
+    }
+
+    if(rep){
+      rep.innerHTML=
+        "⏳ Sentinel-2 10 m sınıflandırması… "+
+        Math.min(received,points.length).toLocaleString("tr-TR")+
+        " / "+points.length.toLocaleString("tr-TR")+" piksel";
     }
   }
 
-  if(!pixels)throw new Error("Park içinde geçerli 10 m uydu pikseli bulunamadı");
+  if(!received){
+    const msg="ImageServer geçerli Sentinel-2 sınıf değeri döndürmedi";
+    console.error(msg);
+    if(rep)rep.innerHTML="<b>❌ "+msg+"</b>";
+    return toast(msg,"err","🛰️");
+  }
 
   const totalM2=Object.values(areas).reduce((s,v)=>s+v,0);
   const totalHa=totalM2/10000;
@@ -3903,9 +3943,9 @@ async function dgSatelliteRun(){
     other:+(areas.other/10000).toFixed(2),
     unknown:+(areas.unknown/10000).toFixed(2),
     sampleM:10,
-    sampleCount:pixels,
-    satellitePixels:pixels,
-    method:"Esri Sentinel-2 10m Land Cover · 2020 · categorical raster",
+    sampleCount:received,
+    satellitePixels:received,
+    method:"Sentinel-2 10m Land Cover · ImageServer getSamples · 2020",
     source:"Impact Observatory / Microsoft / Esri"
   };
 
@@ -3932,20 +3972,19 @@ async function dgSatelliteRun(){
       row("🟫","Diğer",areas.other)+
       row("❓","Sınıflandırılamayan",areas.unknown)+
       "<div style='font-size:.72rem;color:var(--mut);margin-top:9px'>"+
-      "Uydu alanı: <b>"+totalHa.toFixed(2)+" ha</b> · "+
+      "Uydu örnek alanı: <b>"+totalHa.toFixed(2)+" ha</b> · "+
       "OSM geometrisi: <b>"+geometricHa.toFixed(2)+" ha</b>"+
       (refHa!==null?" · Harici referans: <b>"+refHa.toFixed(2)+" ha</b>":"")+
-      "<br>10 m raster · Park içi geçerli piksel: <b>"+
-      pixels.toLocaleString("tr-TR")+"</b></div>"+
+      "<br>Nominal 10 m piksel · Geçerli uydu örneği: <b>"+
+      received.toLocaleString("tr-TR")+"</b></div>"+
       "<div style='font-size:.68rem;color:var(--mut);margin-top:8px'>"+
       "Sert/yapılı = sınıf 7 · Su = sınıf 1 · "+
-      "yeşil = sınıf 2,3,4,5,6,11. "+
-      "OSM nihai alana dahil edilmedi.</div>"+
+      "yeşil = sınıf 2,3,4,5,6,11. OSM nihai alana dahil edilmedi.</div>"+
       "<div style='font-size:.68rem;color:var(--mut);margin-top:7px'>"+
       "Kaynak: Impact Observatory · Microsoft · Esri · Sentinel-2 10 m.</div>";
   }
 
-  console.log("DENDROGEO · Sentinel-2 10m Land Cover",LANDCOVER,{counts,areas});
+  console.log("DENDROGEO · Sentinel-2 10m getSamples",LANDCOVER,{counts,areas});
   toast("✓ 10 m Sentinel-2 arazi örtüsü analizi tamamlandı","ok","🛰️");
 }
 
