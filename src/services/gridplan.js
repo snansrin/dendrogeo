@@ -3530,236 +3530,296 @@ function refreshImpLayer(){
 }
 
 
+
 /* =========================================================
-   SATELLITE LAND-COVER SOURCE
-   ESA WorldCover 2021 v200 — 10 m
+   DENDROGEO — SCIENTIFIC SATELLITE LAND-COVER ENGINE
+   Copernicus LCFM / LCM-10 (2020) · 10 m
+   ---------------------------------------------------------
+   Satellite classification is the primary source.
+   OSM is validation/context only; it does not fill missing
+   satellite classes or force a green/hard residual.
 ========================================================= */
-const DG_WC_CACHE=new Map();
-const DG_WC_URL_PREFIX="https://esa-worldcover.s3.eu-central-1.amazonaws.com/v200/2021/map/";
-function dgPadInt(v,n){return String(Math.abs(v)).padStart(n,"0");}
-function dgWorldCoverTileName(lat0,lon0){
-  return (lat0>=0?"N":"S")+dgPadInt(lat0,2)+(lon0>=0?"E":"W")+dgPadInt(lon0,3);
+
+const DG_LCM10_WMS="https://titiler.terrascope.be/wms";
+const DG_LCM10_YEAR="2020";
+const DG_LCM10_RES_M=10;
+
+const DG_LCM10_PALETTE={
+  10:[0x00,0x64,0x00],20:[0xff,0xbb,0x22],30:[0xff,0xff,0x4c],
+  40:[0xf0,0x96,0xff],50:[0x00,0x96,0xa0],60:[0x00,0xcf,0x75],
+  70:[0xfa,0xe6,0xa0],80:[0xb4,0xb4,0xb4],90:[0xfa,0x00,0x00],
+  100:[0x00,0x64,0xc8],110:[0xf0,0xf0,0xf0],254:[0x0a,0x0a,0x0a]
+};
+
+const DG_LCM10_CLASS_NAMES={
+  10:"Ağaç örtüsü",20:"Çalılık",30:"Çayır",40:"Tarım alanı",
+  50:"Otsu sulak alan",60:"Mangrov",70:"Yosun / liken",
+  80:"Çıplak / seyrek bitki",90:"Yapılı alan",100:"Kalıcı su",
+  110:"Kar / buz",254:"Sınıflandırılamayan"
+};
+
+function dgLcm10ClassGroup(code){
+  if(code===100)return "water";
+  if(code===90)return "hard";
+  if([10,20,30,40,50,60,70].includes(code))return "green";
+  if([80,110].includes(code))return "other";
+  return "unknown";
 }
-function dgWorldCoverTileUrl(lat0,lon0){
-  return DG_WC_URL_PREFIX+"ESA_WorldCover_10m_2021_v200_"+dgWorldCoverTileName(lat0,lon0)+"_Map.tif";
-}
-function dgAuthalicCellAreaM2(lat0,lat1,lon0,lon1){
-  const R=6371007.1809,dLon=(lon1-lon0)*Math.PI/180;
-  return Math.abs(R*R*dLon*(Math.sin(lat1*Math.PI/180)-Math.sin(lat0*Math.PI/180)));
-}
-function dgWorldCoverClass(code){
-  if(code===80)return "water";
-  if(code===50)return "hard";
-  if(code===10||code===20||code===30||code===40||code===90||code===95||code===100)return "green";
-  if(code===60)return "soft";
-  return "other";
-}
-async function dgReadWorldCoverForPark(osm){
-  if(typeof GeoTIFF==="undefined"||!GeoTIFF.fromUrl)throw new Error("GeoTIFF.js yüklenmedi.");
-  let minLat=90,maxLat=-90,minLon=180,maxLon=-180;
-  for(const ring of PARK_POLY)for(const p of ring){
-    minLat=Math.min(minLat,p[0]);maxLat=Math.max(maxLat,p[0]);
-    minLon=Math.min(minLon,p[1]);maxLon=Math.max(maxLon,p[1]);
+
+function dgLcm10PixelCode(r,g,b){
+  let best=254,bestD=Infinity;
+  for(const [code,rgb] of Object.entries(DG_LCM10_PALETTE)){
+    const dr=r-rgb[0],dg=g-rgb[1],db=b-rgb[2];
+    const d=dr*dr+dg*dg+db*db;
+    if(d<bestD){bestD=d;best=Number(code);}
   }
-  const latStart=Math.floor(minLat/3)*3;
-  const latEnd=Math.floor((maxLat-1e-10)/3)*3;
-  const lonStart=Math.floor(minLon/3)*3;
-  const lonEnd=Math.floor((maxLon-1e-10)/3)*3;
-  const result={source:"ESA WorldCover 2021 v200 · 10 m",pixels:0,waterM2:0,hardM2:0,greenM2:0,softM2:0,otherM2:0,byClass:{}};
-  const osmLineIdx=osm.lineIdx||[];
-  const osmWaterIdx=osm.waterIdx||[];
-  const osmImpIdx=osm.impIdx||[];
+  return Math.sqrt(bestD)<=12?best:254;
+}
 
-  for(let tileLat=latStart;tileLat<=latEnd;tileLat+=3){
-    for(let tileLon=lonStart;tileLon<=lonEnd;tileLon+=3){
-      const x0=Math.max(minLon,tileLon),x1=Math.min(maxLon,tileLon+3);
-      const y0=Math.max(minLat,tileLat),y1=Math.min(maxLat,tileLat+3);
-      if(x0>=x1||y0>=y1)continue;
-      const url=dgWorldCoverTileUrl(tileLat,tileLon);
-      let tiff=DG_WC_CACHE.get(url);
-      if(!tiff){
-        console.log("→ ESA WorldCover:",url);
-        tiff=await GeoTIFF.fromUrl(url,{cacheSize:32,maxRanges:4});
-        DG_WC_CACHE.set(url,tiff);
-      }
-      const image=await tiff.getImage();
-      const bbox=image.getBoundingBox();
-      const res=image.getResolution();
-      const sx=Math.abs(res[0]),sy=Math.abs(res[1]);
-      const px0=Math.max(0,Math.floor((x0-bbox[0])/sx));
-      const px1=Math.min(image.getWidth(),Math.ceil((x1-bbox[0])/sx));
-      const py0=Math.max(0,Math.floor((bbox[3]-y1)/sy));
-      const py1=Math.min(image.getHeight(),Math.ceil((bbox[3]-y0)/sy));
-      if(px1<=px0||py1<=py0)continue;
-      const raster=await image.readRasters({window:[px0,py0,px1,py1],samples:[0]});
-      const values=raster[0],width=raster.width,height=raster.height;
-      for(let yy=0;yy<height;yy++){
-        const py=py0+yy,latTop=bbox[3]-py*sy,latBottom=latTop-sy,latCenter=(latTop+latBottom)/2;
-        for(let xx=0;xx<width;xx++){
-          const px=px0+xx,lonLeft=bbox[0]+px*sx,lonRight=lonLeft+sx,lonCenter=(lonLeft+lonRight)/2;
-          if(!pointInPark(latCenter,lonCenter,{outer:PARK_POLY,inner:PARK_HOLES||[]}))continue;
-          const code=Number(values[yy*width+xx]);
-          if(!Number.isFinite(code)||code===0)continue;
-          const area=dgAuthalicCellAreaM2(latBottom,latTop,lonLeft,lonRight);
-          /*
-           * Her 10 m WorldCover pikseli önce OSM geometrisiyle
-           * aynı noktada test edilir. OSM'de gerçek su/sert geometri
-           * varsa OSM kazanır; OSM yeşil/boş bırakmışsa bağımsız
-           * WorldCover sınıfı kullanılır. Böylece iki kaynağın
-           * alanlarını toplamak yerine aynı piksel tek kez sınıflanır.
-           */
-          const osmClass=dgPointClassAt(
-            latCenter,
-            lonCenter,
-            osmWaterIdx,
-            osmImpIdx,
-            osmLineIdx
-          );
-          const cls=osmClass==="water"
-            ?"water"
-            :osmClass==="hard"
-              ?"hard"
-              :dgWorldCoverClass(code);
-
-          result.pixels++;
-          result.byClass[code]=(result.byClass[code]||0)+area;
-
-          if(cls==="water")result.waterM2+=area;
-          else if(cls==="hard")result.hardM2+=area;
-          else if(cls==="green"||cls==="soft")result.greenM2+=area;
-          else result.otherM2+=area;
-        }
-      }
+function dgParkBBox(){
+  let minLat=90,maxLat=-90,minLon=180,maxLon=-180;
+  for(const ring of (PARK_POLY||[])){
+    for(const p of ring){
+      minLat=Math.min(minLat,p[0]);maxLat=Math.max(maxLat,p[0]);
+      minLon=Math.min(minLon,p[1]);maxLon=Math.max(maxLon,p[1]);
     }
   }
-  return result;
+  return {minLat,maxLat,minLon,maxLon};
 }
-function dgPointClassAt(lat,lon,waterIdx,impIdx,lineIdx){
-  const sampleP=projectPoint(lat,lon,(PARK_POLY[0]?.[0]?.[0])||39);
-  for(const item of waterIdx){
-    const b=item.bbox;
-    if(sampleP.x<b.minX||sampleP.x>b.maxX||sampleP.y<b.minY||sampleP.y>b.maxY)continue;
-    if(pointInPolygon(lat,lon,item.ring))return "water";
+
+function dgLcm10ImageDimensions(b){
+  const midLat=(b.minLat+b.maxLat)/2;
+  const widthM=Math.abs(b.maxLon-b.minLon)*111320*Math.cos(midLat*Math.PI/180);
+  const heightM=Math.abs(b.maxLat-b.minLat)*110540;
+  let width=Math.max(96,Math.ceil(widthM/DG_LCM10_RES_M));
+  let height=Math.max(96,Math.ceil(heightM/DG_LCM10_RES_M));
+  const maxDim=2048;
+  if(width>maxDim||height>maxDim){
+    const scale=Math.min(maxDim/width,maxDim/height);
+    width=Math.max(96,Math.floor(width*scale));
+    height=Math.max(96,Math.floor(height*scale));
   }
-  for(const l of WATER_LINES){
-    if(!l||l.length<2)continue;
-    for(let i=0;i<l.length-1;i++)if(pointToSegmentDistanceM(lat,lon,l[i],l[i+1])<=3)return "water";
-  }
-  for(const item of impIdx){
-    const b=item.bbox;
-    if(sampleP.x<b.minX||sampleP.x>b.maxX||sampleP.y<b.minY||sampleP.y>b.maxY)continue;
-    if(pointInPolygon(lat,lon,item.ring))return "hard";
-  }
-  if(nearLineW(lineIdx,lat,lon))return "hard";
-  return "green";
+  return {width,height,widthM,heightM};
 }
-async function dgRunOsm3mAnalysis(){
-  const ref=(PARK_POLY[0]?.[0]?.[0])||39;
-  const lineIdx=IMP_LINES.map(l=>({pts:l.pts,w:l.w,bbox:ringBBox(l.pts,ref)}));
-  const waterIdx=WATER_RINGS.map(r=>({ring:r,bbox:ringBBox(r,ref)}));
-  const impIdx=IMP_RINGS.map(r=>({ring:r,bbox:ringBBox(r,ref)}));
-  let minLat=90,maxLat=-90,minLon=180,maxLon=-180;
-  PARK_POLY.forEach(r=>r.forEach(p=>{minLat=Math.min(minLat,p[0]);maxLat=Math.max(maxLat,p[0]);minLon=Math.min(minLon,p[1]);maxLon=Math.max(maxLon,p[1]);}));
-  const SAMPLE_M=3,stepLat=SAMPLE_M/110540,stepLon=SAMPLE_M/(111320*Math.cos(((minLat+maxLat)/2)*Math.PI/180));
-  const out={sampleM:SAMPLE_M,park:0,water:0,hard:0,green:0,lineIdx,waterIdx,impIdx,minLat,maxLat,minLon,maxLon};
-  for(let la=minLat;la<=maxLat;la+=stepLat)for(let lo=minLon;lo<=maxLon;lo+=stepLon){
-    if(!pointInPark(la,lo,PARK_POLY))continue;
-    out.park++;
-    const cls=dgPointClassAt(la,lo,waterIdx,impIdx,lineIdx);
-    if(cls==="water")out.water++;else if(cls==="hard")out.hard++;else out.green++;
-  }
-  return out;
-}
-function dgFuseOsmAndSatellite(osm,sat){
-  const totalM2=parkAreaM2();
 
-  /*
-   * WorldCover pikselleri OSM ile piksel merkezinde zaten
-   * birleştirildi. Bu nedenle burada toplama/katsayı yoktur.
-   * Uydu alanı doğrudan hibrit sınıflandırmanın sonucudur.
-   */
-  const classified=sat.waterM2+sat.hardM2+sat.greenM2+sat.otherM2;
-
-  if(classified<=0){
-    return{
-      totalM2,
-      waterM2:(osm.water/osm.park)*totalM2,
-      hardM2:(osm.hard/osm.park)*totalM2,
-      greenM2:(osm.green/osm.park)*totalM2,
-      osmM2:{
-        water:(osm.water/osm.park)*totalM2,
-        hard:(osm.hard/osm.park)*totalM2,
-        green:(osm.green/osm.park)*totalM2
-      },
-      satelliteM2:null
-    };
+async function dgFetchLcm10Raster(){
+  const b=dgParkBBox();
+  if(!Number.isFinite(b.minLat)||!Number.isFinite(b.maxLat)||
+     !Number.isFinite(b.minLon)||!Number.isFinite(b.maxLon)||
+     b.minLat>=b.maxLat||b.minLon>=b.maxLon){
+    throw new Error("Park bbox geçersiz.");
   }
 
-  const waterM2=sat.waterM2;
-  const hardM2=sat.hardM2;
-  const greenM2=Math.max(0,totalM2-waterM2-hardM2);
+  const dim=dgLcm10ImageDimensions(b);
+  const params=new URLSearchParams({
+    service:"WMS",request:"GetMap",version:"1.1.1",
+    layers:"lcfm-lcm-10_map",styles:"",srs:"EPSG:4326",
+    bbox:b.minLon+","+b.minLat+","+b.maxLon+","+b.maxLat,
+    width:String(dim.width),height:String(dim.height),
+    format:"image/png",transparent:"false",time:"2020-01-01"
+  });
+  const url=DG_LCM10_WMS+"?"+params.toString();
 
-  return{
-    totalM2,
-    waterM2,
-    hardM2,
-    greenM2,
-    osmM2:{
-      water:(osm.water/osm.park)*totalM2,
-      hard:(osm.hard/osm.park)*totalM2,
-      green:(osm.green/osm.park)*totalM2
-    },
-    satelliteM2:{
-      water:sat.waterM2,
-      hard:sat.hardM2,
-      green:sat.greenM2
-    }
+  console.log("→ Copernicus LCM-10 WMS:",url);
+
+  const res=await fetch(url,{method:"GET",mode:"cors",cache:"no-store",
+    headers:{Accept:"image/png"}});
+  if(!res.ok)throw new Error("LCM-10 WMS HTTP "+res.status);
+
+  const type=res.headers.get("content-type")||"";
+  if(!type.toLowerCase().includes("image")){
+    const txt=await res.text().catch(()=> "");
+    throw new Error("LCM-10 WMS görüntü döndürmedi: "+txt.slice(0,160));
+  }
+
+  const blob=await res.blob();
+  const bitmap=await createImageBitmap(blob);
+  const canvas=document.createElement("canvas");
+  canvas.width=bitmap.width;canvas.height=bitmap.height;
+  const ctx=canvas.getContext("2d",{willReadFrequently:true});
+  ctx.drawImage(bitmap,0,0);bitmap.close();
+
+  return {
+    bbox:b,width:canvas.width,height:canvas.height,
+    widthM:dim.widthM,heightM:dim.heightM,
+    data:ctx.getImageData(0,0,canvas.width,canvas.height).data
   };
 }
 
-/* =========================================================
-   LAND COVER ANALYSIS — HYBRID SCIENTIFIC ENGINE
-========================================================= */
-async function runLandCoverAnalysis(){
-  if(!PARK_POLY||!PARK_POLY.length)return toast("Önce park seç","warn","🌳");
-  const rep=$("landCoverReport");
-  if(rep){rep.style.display="block";rep.innerHTML="⏳ OSM arazi geometrileri okunuyor…";}
-  toast("🌿 OSM + uydu arazi örtüsü analizi başlıyor…","info");
-  const coverageOk=await queryDetailedCoverage();
-  if(!coverageOk){
-    if(rep)rep.innerHTML="❌ OSM yüzey verisi alınamadı. Overpass yanıt vermiyor.";
-    return toast("OSM yüzey verisi alınamadı.","err","⚠️");
-  }
-  if(rep)rep.innerHTML="⏳ 3 m OSM örneklemesi hesaplanıyor…";
-  const osm=await dgRunOsm3mAnalysis();
-  let sat=null;
-  if(rep)rep.innerHTML="⏳ ESA WorldCover 2021 · 10 m bağımsız arazi örtüsü okunuyor…";
-  try{sat=await dgReadWorldCoverForPark(osm);}catch(err){console.warn("ESA WorldCover okunamadı; OSM sonucu korunuyor:",err);}
-  const totalM2=parkAreaM2();
-  const fused=sat&&sat.pixels>0
-    ?dgFuseOsmAndSatellite(osm,sat)
-    :{totalM2,waterM2:(osm.water/osm.park)*totalM2,hardM2:(osm.hard/osm.park)*totalM2,greenM2:(osm.green/osm.park)*totalM2,osmM2:{water:(osm.water/osm.park)*totalM2,hard:(osm.hard/osm.park)*totalM2,green:(osm.green/osm.park)*totalM2},satelliteM2:null};
-  const waterHa=fused.waterM2/10000,hardHa=fused.hardM2/10000,greenHa=fused.greenM2/10000,totalHa=totalM2/10000;
-  LANDCOVER={green:+greenHa.toFixed(2),hard:+hardHa.toFixed(2),water:+waterHa.toFixed(2),total:+totalHa.toFixed(2),method:sat?"OSM + ESA WorldCover 2021 v200 (10 m) + OSM 3 m validation":"OSM 3 m",sampleM:3,sampleCount:osm.park,satellitePixels:sat?.pixels||0};
-  const pct=v=>totalM2>0?Math.round(v/totalM2*100):0;
-  const row=(color,label,haV,pv)=>'<div style="display:flex;align-items:center;gap:8px;margin:4px 0"><span style="width:12px;height:12px;border-radius:3px;background:'+color+';flex:none"></span><span style="width:52px;font-size:.8rem">'+label+'</span><div style="flex:1;height:10px;background:var(--line);border-radius:5px;overflow:hidden"><div style="height:100%;width:'+pv+'%;background:'+color+';transition:width .6s"></div></div><b style="font-size:.8rem;width:74px;text-align:right">'+haV.toFixed(1)+' ha</b><span style="font-size:.72rem;color:var(--mut);width:38px">%'+pv+'</span></div>';
-  if(rep){
-    rep.innerHTML='<b>🌿 Yüzey Örtüsü</b> <span style="font-size:.72rem;color:var(--mut)">(bina·yol·otopark·saha·kort dahil)</span>'+
-      row("#16a34a","Yeşil",greenHa,pct(fused.greenM2))+
-      row("#ef4444","Sert",hardHa,pct(fused.hardM2))+
-      row("#3b82f6","Su",waterHa,pct(fused.waterM2))+
-      '<div style="font-size:.72rem;color:var(--mut);margin-top:6px">Toplam: <b>'+totalHa.toFixed(1)+' ha</b> · Yeşil+Sert+Su = Toplam<br>Örnekleme: 3 m · Örnek nokta: '+osm.park.toLocaleString("tr-TR")+'</div>'+
-      (sat?'<div style="font-size:.7rem;color:var(--mut);margin-top:8px">Uydu: ESA WorldCover 2021 v200 · 10 m · '+sat.pixels.toLocaleString("tr-TR")+' piksel</div>':'<div style="font-size:.7rem;color:#b45309;margin-top:8px">⚠ ESA WorldCover okunamadı; sonuç OSM 3 m ölçümünden üretildi.</div>')+
-      '<div style="font-size:.68rem;color:var(--mut);margin-top:8px">Yöntem: OSM geometrileri birincil; ESA WorldCover bağımsız 10 m kontrol ve eksik su/yerleşik yüzeyleri yakalamak için kullanılır. Sabit oran/katsayı veya park özelinde hedef değer kullanılmaz.</div>';
-  }
-  console.group("========== BİLİMSEL YÜZEY ANALİZİ ==========");
-  console.log("Park:",totalM2.toFixed(1),"m²");
-  console.log("OSM 3 m:",fused.osmM2,"samples:",osm.park);
-  if(sat)console.log("ESA WorldCover 10 m:",{waterM2:sat.waterM2,hardM2:sat.hardM2,greenM2:sat.greenM2,pixels:sat.pixels,byClass:sat.byClass});
-  console.log("Fused:",{waterM2:fused.waterM2,hardM2:fused.hardM2,greenM2:fused.greenM2});
-  console.groupEnd();
-  toast("✓ Bilimsel yüzey analizi tamamlandı","ok","🌿");
+function dgPixelBounds(b,w,h,x,y){
+  return {
+    lon0:b.minLon+(x/w)*(b.maxLon-b.minLon),
+    lon1:b.minLon+((x+1)/w)*(b.maxLon-b.minLon),
+    lat1:b.maxLat-(y/h)*(b.maxLat-b.minLat),
+    lat0:b.maxLat-((y+1)/h)*(b.maxLat-b.minLat)
+  };
 }
+
+function dgWgs84CellAreaM2(lat0,lat1,lon0,lon1){
+  const R=6371007.1809;
+  const p0=lat0*Math.PI/180,p1=lat1*Math.PI/180;
+  const dl=(lon1-lon0)*Math.PI/180;
+  return Math.abs(R*R*dl*(Math.sin(p1)-Math.sin(p0)));
+}
+
+function dgLcm10AreaFromRaster(raster){
+  const b=raster.bbox,w=raster.width,h=raster.height,d=raster.data;
+  const out={
+    source:"Copernicus LCFM LCM-10 2020 · 10 m",
+    totalM2:0,classifiedM2:0,greenM2:0,hardM2:0,waterM2:0,
+    otherM2:0,unknownM2:0,pixels:0,usedPixels:0,
+    byClassM2:{},byClassPixels:{},effectivePixelM2:0
+  };
+
+  for(let y=0;y<h;y++){
+    for(let x=0;x<w;x++){
+      const pb=dgPixelBounds(b,w,h,x,y);
+      const lat=(pb.lat0+pb.lat1)/2;
+      const lon=(pb.lon0+pb.lon1)/2;
+
+      if(!pointInPark(lat,lon,{outer:PARK_POLY,inner:PARK_HOLES||[]}))continue;
+
+      const i=(y*w+x)*4;
+      const code=dgLcm10PixelCode(d[i],d[i+1],d[i+2]);
+      const area=dgWgs84CellAreaM2(pb.lat0,pb.lat1,pb.lon0,pb.lon1);
+
+      out.totalM2+=area;out.pixels++;
+      out.byClassM2[code]=(out.byClassM2[code]||0)+area;
+      out.byClassPixels[code]=(out.byClassPixels[code]||0)+1;
+
+      const group=dgLcm10ClassGroup(code);
+      if(group==="green"){
+        out.greenM2+=area;out.classifiedM2+=area;out.usedPixels++;
+      }else if(group==="hard"){
+        out.hardM2+=area;out.classifiedM2+=area;out.usedPixels++;
+      }else if(group==="water"){
+        out.waterM2+=area;out.classifiedM2+=area;out.usedPixels++;
+      }else if(group==="other"){
+        out.otherM2+=area;out.classifiedM2+=area;out.usedPixels++;
+      }else{
+        out.unknownM2+=area;
+      }
+    }
+  }
+
+  out.effectivePixelM2=out.pixels?out.totalM2/out.pixels:0;
+  return out;
+}
+
+function dgLcm10RenderRows(sat,totalM2){
+  const pct=m2=>totalM2>0?Math.round(m2/totalM2*100):0;
+  const row=(emoji,label,m2,color)=>{
+    const p=pct(m2);
+    return '<div style="display:flex;align-items:center;gap:8px;margin:5px 0">'+
+      '<span style="width:18px;text-align:center">'+emoji+'</span>'+
+      '<span style="width:116px;font-size:.8rem">'+label+'</span>'+
+      '<div style="flex:1;height:10px;background:var(--line);border-radius:5px;overflow:hidden">'+
+      '<div style="height:100%;width:'+p+'%;background:'+color+'"></div></div>'+
+      '<b style="font-size:.8rem;width:72px;text-align:right">'+(m2/10000).toFixed(2)+' ha</b>'+
+      '<span style="font-size:.72rem;color:var(--mut);width:36px">%'+p+'</span></div>';
+  };
+  return row("🌿","Yeşil / vejetasyon",sat.greenM2,"#16a34a")+
+         row("🧱","Yapılı / sert",sat.hardM2,"#ef4444")+
+         row("💧","Su",sat.waterM2,"#2563eb")+
+         row("🟫","Çıplak / diğer",sat.otherM2,"#a16207")+
+         row("❓","Sınıflandırılamayan",sat.unknownM2,"#6b7280");
+}
+
+async function runLandCoverAnalysis(){
+  if(!PARK_POLY||!PARK_POLY.length){
+    return toast("Önce park seç","warn","🌳");
+  }
+
+  const rep=$("landCoverReport");
+  if(rep){
+    rep.style.display="block";
+    rep.innerHTML="⏳ Copernicus LCM-10 · 10 m uydu arazi örtüsü indiriliyor…";
+  }
+
+  toast("🛰️ Copernicus LCM-10 uydu analizi başlıyor…","info");
+
+  let raster=null;
+  try{
+    raster=await dgFetchLcm10Raster();
+  }catch(err){
+    console.error("LCM-10 WMS okunamadı:",err);
+    if(rep){
+      rep.innerHTML="<b>❌ Copernicus LCM-10 verisi okunamadı.</b><br>"+
+        '<span style="font-size:.75rem;color:var(--mut)">Tarayıcı Terrascope WMS kaynağına erişemedi. OSM verisini sessizce sert/yeşil sonucu yerine koymuyoruz.</span>';
+    }
+    return toast("LCM-10 uydu verisi alınamadı.","err","🛰️");
+  }
+
+  if(rep)rep.innerHTML="⏳ 10 m LCM-10 pikselleri park sınırıyla kesiştiriliyor…";
+
+  const sat=dgLcm10AreaFromRaster(raster);
+  const geometricM2=parkAreaM2();
+
+  if(!sat.pixels||sat.totalM2<=0){
+    if(rep)rep.innerHTML="❌ LCM-10 içinde park alanına ait piksel bulunamadı.";
+    return toast("LCM-10 park alanını sınıflandıramadı.","err","🛰️");
+  }
+
+  const greenM2=sat.greenM2,hardM2=sat.hardM2,waterM2=sat.waterM2;
+  const otherM2=sat.otherM2,unknownM2=sat.unknownM2;
+  const classifiedM2=greenM2+hardM2+waterM2+otherM2;
+  const sumM2=classifiedM2+unknownM2;
+
+  LANDCOVER={
+    green:+(greenM2/10000).toFixed(2),
+    hard:+(hardM2/10000).toFixed(2),
+    water:+(waterM2/10000).toFixed(2),
+    other:+(otherM2/10000).toFixed(2),
+    unknown:+(unknownM2/10000).toFixed(2),
+    total:+(sumM2/10000).toFixed(2),
+    geometricTotal:+(geometricM2/10000).toFixed(2),
+    method:"Copernicus LCFM LCM-10 2020 · 10 m WMS raster · WGS84 pixel-area correction",
+    sampleM:10,sampleCount:sat.pixels,satellitePixels:sat.pixels,
+    classPixels:sat.byClassPixels
+  };
+
+  const referenceHa=Number.isFinite(Number(PARK_REF_HA))?Number(PARK_REF_HA):null;
+  const geometricHa=geometricM2/10000;
+  const classifiedHa=classifiedM2/10000;
+  const unknownHa=unknownM2/10000;
+  const totalRasterHa=sumM2/10000;
+
+  const refLine=referenceHa!==null
+    ? "Harici referans: <b>"+referenceHa.toFixed(2)+" ha</b> · OSM park geometrisi: <b>"+
+      geometricHa.toFixed(2)+" ha</b> · fark: <b>"+Math.abs(referenceHa-geometricHa).toFixed(2)+" ha</b>"
+    : "OSM park geometrisi: <b>"+geometricHa.toFixed(2)+" ha</b>";
+
+  if(rep){
+    rep.innerHTML=
+      '<b>🛰️ Yüzey Örtüsü · Copernicus LCM-10</b>'+
+      '<span style="font-size:.72rem;color:var(--mut)"> (2020 · 10 m)</span>'+
+      dgLcm10RenderRows(sat,sumM2)+
+      '<div style="font-size:.72rem;color:var(--mut);margin-top:9px">'+
+        'Rasterdan hesaplanan alan: <b>'+totalRasterHa.toFixed(2)+' ha</b><br>'+
+        'Sınıflandırılmış: <b>'+classifiedHa.toFixed(2)+' ha</b> · '+
+        'Sınıflandırılamayan: <b>'+unknownHa.toFixed(2)+' ha</b><br>'+
+        refLine+'<br>'+
+        'Raster: '+sat.width+'×'+sat.height+' · Park içi piksel: '+sat.pixels.toLocaleString("tr-TR")+
+        ' · ortalama piksel alanı: '+sat.effectivePixelM2.toFixed(1)+' m²</div>'+
+      '<div style="font-size:.7rem;color:#166534;margin-top:8px">✓ Nihai sınıflandırma uydu verisinden geliyor. OSM sert yüzey alanı sonucu belirlemiyor.</div>'+
+      '<div style="font-size:.68rem;color:var(--mut);margin-top:8px">'+
+        'Yapılı/sert = LCM-10 “Built-up” kod 90; yeşil = 10,20,30,40,50,60,70; '+
+        'su = 100; çıplak/diğer = 80,110; sınıflandırılamayan = 254.</div>'+
+      '<div style="font-size:.68rem;color:var(--mut);margin-top:7px">'+
+        'Kaynak: European Union Copernicus Land Monitoring Service (LCFM). Ürün Sentinel-1 ve Sentinel-2 verileriyle üretilmiş 10 m LCM-10 haritasıdır.</div>';
+  }
+
+  console.group("========== DENDROGEO · LCM-10 ==========");
+  console.log("OSM geometric area:",geometricHa,"ha");
+  console.log("LCM-10 raster area:",totalRasterHa,"ha");
+  console.log("LCM-10 classes:",{greenM2,hardM2,waterM2,otherM2,unknownM2,classifiedM2,pixels:sat.pixels});
+  console.log("Class pixels:",sat.byClassPixels);
+  console.groupEnd();
+
+  toast("✓ Copernicus LCM-10 uydu analizi tamamlandı","ok","🛰️");
+}
+
+window.runLandCoverAnalysis=runLandCoverAnalysis;
 
 /* =========================================================
    TILE DRAW
