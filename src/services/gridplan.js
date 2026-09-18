@@ -26,6 +26,7 @@ const SELECTED_CELLS=new Set();
 
 let LAST_WP_ROWS=[];
 let PARK_REF_HA=null;
+let PARK_SELECTED_AREA_M2=null;
 let LANDCOVER=null;
 
 const WATER_CLEARANCE_M=1;
@@ -33,14 +34,13 @@ const IMP_CLEARANCE_M=1;
 
 const OVERPASS_URLS=[
   "https://overpass.private.coffee/api/interpreter",
+  "https://maps.mail.ru/osm/tools/overpass/api/interpreter",
   "https://lz4.overpass-api.de/api/interpreter",
-  "https://z.overpass-api.de/api/interpreter",
-  "https://overpass-api.de/api/interpreter",
-  "https://overpass.openstreetmap.fr/api/interpreter",
-  "https://overpass.kumi.systems/api/interpreter"
+  "https://z.overpass-api.de/api/interpreter"
 ];
 
 const OVERPASS_CACHE=new Map();
+const OVERPASS_HEALTH=new Map();
 let OVERPASS_BUSY=Promise.resolve();
 let LAST_OVERPASS_ERROR=null;
 
@@ -49,14 +49,14 @@ function sleep(ms){
 }
 
 function overpassCacheKey(query){
-  return query.replace(/\\s+/g," ").trim();
+  return query.replace(/\s+/g," ").trim();
 }
 
 async function overpassRequest(query,label="OSM"){
   const key=overpassCacheKey(query);
   const cached=OVERPASS_CACHE.get(key);
 
-  if(cached && (Date.now()-cached.time)<120000){
+  if(cached && (Date.now()-cached.time)<10*60*1000){
     console.log("✓ Overpass cache:",label);
     return cached.data;
   }
@@ -67,19 +67,50 @@ async function overpassRequest(query,label="OSM"){
   await previous;
 
   try{
-    for(let i=0;i<OVERPASS_URLS.length;i++){
-      const url=OVERPASS_URLS[i];
+    const now=Date.now();
+    const candidates=OVERPASS_URLS
+      .map((url,index)=>({
+        url,index,
+        badUntil:OVERPASS_HEALTH.get(url)?.badUntil||0,
+        lastOk:OVERPASS_HEALTH.get(url)?.lastOk||0
+      }))
+      .filter(x=>x.badUntil<=now)
+      .sort((a,b)=>{
+        if(a.lastOk!==b.lastOk)return b.lastOk-a.lastOk;
+        return a.index-b.index;
+      });
+
+    const ordered=candidates.length
+      ? candidates
+      : OVERPASS_URLS.map((url,index)=>({url,index,badUntil:0,lastOk:0}));
+
+    /*
+     * A public Overpass server can legitimately take time, but a dead
+     * endpoint must never hold the user for minutes. Each endpoint gets
+     * a strict browser-side budget. Failed endpoints are temporarily
+     * quarantined so the next park does not repeat the same timeout.
+     */
+    for(const item of ordered){
+      const url=item.url;
+      const controller=new AbortController();
+      const timer=setTimeout(()=>controller.abort(),8000);
 
       try{
+        console.log("→ Overpass:",label,url);
+
         const res=await fetch(url,{
           method:"POST",
           headers:{
             "Content-Type":"application/x-www-form-urlencoded;charset=UTF-8",
             "Accept":"application/json",
-            "User-Agent":"DendroGeo/2.0 (dendrogeo.org)"
+            "Referer":location.origin
           },
-          body:"data="+encodeURIComponent(query)
+          body:"data="+encodeURIComponent(query),
+          signal:controller.signal,
+          cache:"no-store"
         });
+
+        clearTimeout(timer);
 
         if(res.ok){
           const data=await res.json();
@@ -89,7 +120,10 @@ async function overpassRequest(query,label="OSM"){
               time:Date.now(),
               data
             });
-
+            OVERPASS_HEALTH.set(url,{
+              lastOk:Date.now(),
+              badUntil:0
+            });
             LAST_OVERPASS_ERROR=null;
             console.log("✓ Overpass:",label,url,data.elements.length);
             return data;
@@ -99,21 +133,33 @@ async function overpassRequest(query,label="OSM"){
         const status=res.status;
 
         if(status===429){
-          console.warn("Overpass 429:",url,"→ sonraki sunucu deneniyor");
+          OVERPASS_HEALTH.set(url,{lastOk:item.lastOk,badUntil:Date.now()+30000});
+          console.warn("Overpass 429:",url,"→ 30 sn karantinaya alındı");
           continue;
         }
 
         if(status===408 || status===425 || status>=500){
-          console.warn("Overpass",status,url,"→ sonraki sunucu deneniyor");
+          OVERPASS_HEALTH.set(url,{lastOk:item.lastOk,badUntil:Date.now()+60000});
+          console.warn("Overpass",status,url,"→ 60 sn karantinaya alındı");
           continue;
         }
 
         const body=await res.text().catch(()=> "");
         LAST_OVERPASS_ERROR=label+" HTTP "+status+" "+body.slice(0,180);
         console.warn("Overpass hata:",LAST_OVERPASS_ERROR);
+        OVERPASS_HEALTH.set(url,{lastOk:item.lastOk,badUntil:Date.now()+30000});
       }catch(err){
-        LAST_OVERPASS_ERROR=label+" "+(err?.message||String(err));
-        console.warn("Overpass bağlantı:",url,LAST_OVERPASS_ERROR);
+        clearTimeout(timer);
+        const msg=err?.name==="AbortError"
+          ? "timeout (8s)"
+          : (err?.message||String(err));
+
+        LAST_OVERPASS_ERROR=label+" "+msg;
+        OVERPASS_HEALTH.set(url,{
+          lastOk:item.lastOk,
+          badUntil:Date.now()+60000
+        });
+        console.warn("Overpass bağlantı:",url,msg,"→ 60 sn karantina");
       }
     }
   }finally{
@@ -181,6 +227,9 @@ function polyArea(rings){
 }
 
 function parkAreaM2(){
+  if(Number.isFinite(PARK_SELECTED_AREA_M2) && PARK_SELECTED_AREA_M2>0){
+    return PARK_SELECTED_AREA_M2;
+  }
   if(!PARK_POLY)return 0;
 
   return polyArea({
@@ -1818,6 +1867,7 @@ function bindParkClick(){
 ========================================================= */
 
 function drawPark(park){
+  PARK_SELECTED_AREA_M2=Number.isFinite(Number(park?.area)) ? Number(park.area) : null;
   ensurePngUiStyles();
 
   /*
