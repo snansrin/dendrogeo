@@ -28,6 +28,7 @@ let LAST_WP_ROWS=[];
 let PARK_REF_HA=null;
 let PARK_SELECTED_AREA_M2=null;
 let LANDCOVER=null;
+let LANDCOVER_SAMPLES=[];
 
 /* Reference-area helpers are intentionally local to the active gridplan module.
  * gridplan_core.js is an older parallel implementation and is not loaded by index.html. */
@@ -640,6 +641,49 @@ function cellInsidePark(
   return inCount>=2;
 }
 
+/* =========================================================
+   SATELLITE CELL VALIDATION
+   Sentinel-2 samples are retained at their real coordinates so the
+   grid can use the classified pixels instead of only the aggregate
+   hectares report.
+========================================================= */
+function satelliteGroupForCell(s0,s1,w0,w1){
+  if(!Array.isArray(LANDCOVER_SAMPLES)||!LANDCOVER_SAMPLES.length){
+    return null;
+  }
+
+  const counts={green:0,hard:0,water:0,other:0,unknown:0};
+  let total=0;
+
+  for(const p of LANDCOVER_SAMPLES){
+    if(p.lat>=s0 && p.lat<=s1 && p.lon>=w0 && p.lon<=w1){
+      const g=p.group||"unknown";
+      counts[g]=(counts[g]||0)+1;
+      total++;
+    }
+  }
+
+  if(!total)return null;
+
+  let dominant="unknown";
+  let dominantN=-1;
+  for(const k of Object.keys(counts)){
+    if(counts[k]>dominantN){
+      dominant=k;
+      dominantN=counts[k];
+    }
+  }
+
+  return {
+    dominant,
+    counts,
+    total,
+    greenRatio:counts.green/total,
+    hardRatio:counts.hard/total,
+    waterRatio:counts.water/total
+  };
+}
+
 function isCellValid(
   s0,
   s1,
@@ -717,6 +761,24 @@ function isCellValid(
         IMP_CLEARANCE_M
       )
     ){
+      return false;
+    }
+  }
+
+  /*
+   * Satellite land-cover is an additional evidence layer. OSM remains
+   * the hard geometric exclusion layer above. When satellite samples
+   * are available, a grid cell is accepted only when its 10 m samples
+   * are predominantly green/vegetated. Water and built pixels therefore
+   * cannot become planting-grid cells just because OSM geometry missed them.
+   *
+   * A 20 m grid cell normally contains about four 10 m samples. Requiring
+   * a green majority avoids rejecting a cell because of one mixed boundary
+   * pixel while still excluding water/built cells.
+   */
+  const sat=satelliteGroupForCell(s0,s1,w0,w1);
+  if(sat){
+    if(sat.dominant!=="green"){
       return false;
     }
   }
@@ -2518,6 +2580,7 @@ function clearPark(){
   GRID_BLOCK_LINES=[];
 
   LANDCOVER=null;
+  LANDCOVER_SAMPLES=[];
 }
 
 function switchPark(i){
@@ -3905,9 +3968,10 @@ async function dgSatelliteRun(){
       interpolation:"RSP_NearestNeighbor",
       mosaicRule:JSON.stringify({
         mosaicMethod:"esriMosaicAttribute",
-        where:"Year = 2020",
         sortField:"Year",
-        ascending:true
+        sortValue:2020,
+        ascending:true,
+        mosaicOperation:"MT_FIRST"
       }),
       pixelSize:"10,10",
       returnGeometry:"false"
@@ -4115,6 +4179,13 @@ async function dgSatelliteRun(){
       areas[group]+=area;
       counts[group]++;
       received++;
+
+      LANDCOVER_SAMPLES.push({
+        lat,
+        lon,
+        code,
+        group
+      });
     }
 
     if(rep){
@@ -4149,7 +4220,11 @@ async function dgSatelliteRun(){
     sampleCount:received,
     satellitePixels:received,
     method:"Sentinel-2 10m Land Cover · ImageServer getSamples · 2020",
-    source:"Impact Observatory / Microsoft / Esri"
+    source:"Impact Observatory / Microsoft / Esri",
+    sampleGroups:LANDCOVER_SAMPLES,
+    classCounts:Object.fromEntries(
+      Object.entries(counts).map(([k,v])=>[k,v])
+    )
   };
 
   const pct=v=>totalM2?Math.round(v/totalM2*100):0;
@@ -4183,6 +4258,12 @@ async function dgSatelliteRun(){
       "<div style='font-size:.68rem;color:var(--mut);margin-top:8px'>"+
       "Sert/yapılı = sınıf 7 · Su = sınıf 1 · "+
       "yeşil = sınıf 2,3,4,5,6,11. OSM nihai alana dahil edilmedi.</div>"+
+      "<div style='font-size:.68rem;color:var(--mut);margin-top:6px'>"+
+      "Ham sınıf sayıları: <b>1/Su="+(counts.water||0)+"</b> · "+
+      "<b>2-6,11/Yeşil="+(counts.green||0)+"</b> · "+
+      "<b>7/Sert="+(counts.hard||0)+"</b> · "+
+      "<b>8-10/Diğer="+(counts.other||0)+"</b> · "+
+      "<b>Bilinmeyen="+(counts.unknown||0)+"</b></div>"+
       "<div style='font-size:.68rem;color:var(--mut);margin-top:7px'>"+
       "Kaynak: Impact Observatory · Microsoft · Esri · Sentinel-2 10 m.</div>";
   }
