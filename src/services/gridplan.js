@@ -4058,4 +4058,7 @@ async function dgSatelliteRun(){
 // Inline HTML handlers require these public entry points.
 window.toggleParkMode=toggleParkMode;
 window.bindParkClick=bindParkClick;
+window.clearPark=clearPark;
+window.runLandCoverAnalysis=dgSatelliteRun;
+window.bindParkClick=bindParkClick;
 window.runLandCoverAnalysis=dgSatelliteRun;
