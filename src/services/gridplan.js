@@ -33,11 +33,95 @@ const IMP_CLEARANCE_M=1;
 
 const OVERPASS_URLS=[
   "https://overpass.private.coffee/api/interpreter",
+  "https://lz4.overpass-api.de/api/interpreter",
+  "https://z.overpass-api.de/api/interpreter",
+  "https://overpass-api.de/api/interpreter",
   "https://overpass.openstreetmap.fr/api/interpreter",
-  "https://overpass.osm.ch/api/interpreter",
-  "https://overpass.kumi.systems/api/interpreter",
-  "https://overpass-api.de/api/interpreter"
+  "https://overpass.kumi.systems/api/interpreter"
 ];
+
+const OVERPASS_CACHE=new Map();
+let OVERPASS_BUSY=Promise.resolve();
+let LAST_OVERPASS_ERROR=null;
+
+function sleep(ms){
+  return new Promise(resolve=>setTimeout(resolve,ms));
+}
+
+function overpassCacheKey(query){
+  return query.replace(/\\s+/g," ").trim();
+}
+
+async function overpassRequest(query,label="OSM"){
+  const key=overpassCacheKey(query);
+  const cached=OVERPASS_CACHE.get(key);
+
+  if(cached && (Date.now()-cached.time)<120000){
+    console.log("✓ Overpass cache:",label);
+    return cached.data;
+  }
+
+  let release;
+  const previous=OVERPASS_BUSY;
+  OVERPASS_BUSY=new Promise(resolve=>{release=resolve;});
+  await previous;
+
+  try{
+    for(let i=0;i<OVERPASS_URLS.length;i++){
+      const url=OVERPASS_URLS[i];
+
+      try{
+        const res=await fetch(url,{
+          method:"POST",
+          headers:{
+            "Content-Type":"application/x-www-form-urlencoded;charset=UTF-8",
+            "Accept":"application/json",
+            "User-Agent":"DendroGeo/2.0 (dendrogeo.org)"
+          },
+          body:"data="+encodeURIComponent(query)
+        });
+
+        if(res.ok){
+          const data=await res.json();
+
+          if(data && Array.isArray(data.elements)){
+            OVERPASS_CACHE.set(key,{
+              time:Date.now(),
+              data
+            });
+
+            LAST_OVERPASS_ERROR=null;
+            console.log("✓ Overpass:",label,url,data.elements.length);
+            return data;
+          }
+        }
+
+        const status=res.status;
+
+        if(status===429){
+          console.warn("Overpass 429:",url,"→ sonraki sunucu deneniyor");
+          continue;
+        }
+
+        if(status===408 || status===425 || status>=500){
+          console.warn("Overpass",status,url,"→ sonraki sunucu deneniyor");
+          continue;
+        }
+
+        const body=await res.text().catch(()=> "");
+        LAST_OVERPASS_ERROR=label+" HTTP "+status+" "+body.slice(0,180);
+        console.warn("Overpass hata:",LAST_OVERPASS_ERROR);
+      }catch(err){
+        LAST_OVERPASS_ERROR=label+" "+(err?.message||String(err));
+        console.warn("Overpass bağlantı:",url,LAST_OVERPASS_ERROR);
+      }
+    }
+  }finally{
+    release();
+  }
+
+  return null;
+}
 
 
 /* =========================================================
@@ -581,33 +665,23 @@ async function queryPark(
   radius=1200
 ){
   const q1=
-    `[out:json][timeout:25];(`+
+    `[out:json][timeout:35];(`+
     `way["leisure"~"park|garden|nature_reserve|common|recreation_ground"](around:${radius},${lat},${lon});`+
     `relation["leisure"~"park|garden|nature_reserve|common|recreation_ground"](around:${radius},${lat},${lon});`+
-    `);out geom;`;
+    `);`+
+    `out geom;`;
 
-  let parkData=null;
-
-  for(const url of OVERPASS_URLS){
-    try{
-      const res=await fetch(
-        url+
-        "?data="+
-        encodeURIComponent(q1)
-      );
-
-      if(!res.ok)continue;
-
-      parkData=await res.json();
-      break;
-    }catch(e){}
-  }
+  const parkData=await overpassRequest(q1,"park");
 
   if(
     !parkData||
     !parkData.elements||
     !parkData.elements.length
   ){
+    console.warn(
+      "Park sorgusu başarısız.",
+      LAST_OVERPASS_ERROR||"OSM veri döndürmedi."
+    );
     return null;
   }
 
@@ -649,150 +723,12 @@ async function queryPark(
     )
   );
 
-  let sorted;
-
-  if(inside.length){
-    sorted=inside
-      .slice()
-      .sort((a,b)=>{
-        if(a.name&&b.name&&a.name===b.name){
-          return a.area-b.area;
-        }
-
-        return a.area-b.area;
-      });
-  }else{
-    sorted=cands
-      .slice()
-      .sort((a,b)=>a.area-b.area);
-  }
-
-  const park=sorted[0];
-
-  WATER_RINGS=[];
-  WATER_LINES=[];
-
-  let minLat=90;
-  let maxLat=-90;
-  let minLon=180;
-  let maxLon=-180;
-
-  const parkOuter=
-    Array.isArray(park.rings)
-      ? park.rings
-      : park.rings.outer;
-
-  parkOuter.forEach(r=>
-    r.forEach(p=>{
-      if(p[0]<minLat)minLat=p[0];
-      if(p[0]>maxLat)maxLat=p[0];
-
-      if(p[1]<minLon)minLon=p[1];
-      if(p[1]>maxLon)maxLon=p[1];
-    })
-  );
-
-    const pad=0.0005;
-
-  const bbox=
-    `${minLat-pad},${minLon-pad},`+
-    `${maxLat+pad},${maxLon+pad}`;
-
-  const q2=
-    `[out:json][timeout:60];(`+
-    `way["natural"="water"](${bbox});`+
-    `relation["natural"="water"](${bbox});`+
-    `way["water"](${bbox});`+
-    `relation["water"](${bbox});`+
-    `way["landuse"="reservoir"](${bbox});`+
-    `relation["landuse"="reservoir"](${bbox});`+
-    `way["landuse"="basin"](${bbox});`+
-    `relation["landuse"="basin"](${bbox});`+
-    `way["leisure"="swimming_pool"](${bbox});`+
-    `relation["leisure"="swimming_pool"](${bbox});`+
-    `way["waterway"="riverbank"](${bbox});`+
-    `relation["waterway"="riverbank"](${bbox});`+
-    `);out geom;`;
-
-  for(const url of OVERPASS_URLS){
-    try{
-      const res=await fetch(
-        url+
-        "?data="+
-        encodeURIComponent(q2)
-      );
-
-      if(!res.ok)continue;
-
-      const json=await res.json();
-
-      for(const el of (json.elements||[])){
-        if(!isWater(el))continue;
-
-        if(el.type==="relation"){
-          const r=extractRings(el);
-
-          if(!r)continue;
-
-          if(Array.isArray(r)){
-            r.forEach(rr=>
-              WATER_RINGS.push(rr)
-            );
-          }else if(r.outer){
-            r.outer.forEach(rr=>
-              WATER_RINGS.push(rr)
-            );
-          }
-
-          continue;
-        }
-
-        if(!el.geometry)continue;
-
-        const line=el.geometry.map(g=>[
-          g.lat,
-          g.lon
-        ]);
-
-        if(isClosedLine(line)){
-          WATER_RINGS.push(line);
-        }else if(line.length>1){
-          WATER_LINES.push(line);
-        }
-      }
-
-      break;
-    }catch(e){}
-  }
-
-  const pb={
-    minLat,
-    maxLat,
-    minLon,
-    maxLon
-  };
-
-  WATER_RINGS=
-    WATER_RINGS.filter(r=>
-      ringTouchesPark(
-        r,
-        park.rings,
-        pb
-      )
-    );
-
-  WATER_LINES=
-    WATER_LINES.filter(l=>
-      lineTouchesPark(
-        l,
-        park.rings,
-        pb
-      )
-    );
+  const sorted=inside.length
+    ? inside.slice().sort((a,b)=>a.area-b.area)
+    : cands.slice().sort((a,b)=>a.area-b.area);
 
   return sorted;
 }
-
 
 /* =========================================================
    DETAILED COVERAGE QUERY
@@ -803,12 +739,14 @@ async function queryDetailedCoverage(){
     !PARK_POLY||
     !PARK_POLY.length
   ){
-    return;
+    return false;
   }
 
   IMP_RINGS=[];
   IMP_LINES=[];
   GRID_BLOCK_LINES=[];
+  WATER_RINGS=[];
+  WATER_LINES=[];
 
   let minLat=90;
   let maxLat=-90;
@@ -819,54 +757,112 @@ async function queryDetailedCoverage(){
     r.forEach(p=>{
       if(p[0]<minLat)minLat=p[0];
       if(p[0]>maxLat)maxLat=p[0];
-
       if(p[1]<minLon)minLon=p[1];
       if(p[1]>maxLon)maxLon=p[1];
     })
   );
 
-const pad=0.0005;
+  const pad=0.0005;
 
   const bbox=
     `${minLat-pad},${minLon-pad},`+
     `${maxLat+pad},${maxLon+pad}`;
 
+  /*
+   * TEK sorgu:
+   * Su + bina + building:part + yol + area:highway +
+   * otopark + spor alanları + sert surface.
+   *
+   * Böylece aynı park için 2-3 ayrı Overpass çağrısı
+   * yapmak yerine tek veri seti kullanıyoruz.
+   */
   const q=
     `[out:json][timeout:90];(`+
+    `way["natural"="water"](${bbox});`+
+    `relation["natural"="water"](${bbox});`+
+    `way["water"](${bbox});`+
+    `relation["water"](${bbox});`+
+    `way["landuse"~"reservoir|basin"](${bbox});`+
+    `relation["landuse"~"reservoir|basin"](${bbox});`+
+    `way["leisure"="swimming_pool"](${bbox});`+
+    `relation["leisure"="swimming_pool"](${bbox});`+
+    `way["waterway"="riverbank"](${bbox});`+
+    `relation["waterway"="riverbank"](${bbox});`+
+
     `way["building"](${bbox});`+
     `relation["building"](${bbox});`+
+    `way["building:part"](${bbox});`+
+    `relation["building:part"](${bbox});`+
     `way["highway"](${bbox});`+
-    `relation["highway"](${bbox});`+
+    `way["area:highway"](${bbox});`+
+    `relation["area:highway"](${bbox});`+
+    `way["landuse"="highway"](${bbox});`+
+    `relation["landuse"="highway"](${bbox});`+
     `way["amenity"~"parking|bicycle_parking|motorcycle_parking"](${bbox});`+
     `relation["amenity"~"parking|bicycle_parking|motorcycle_parking"](${bbox});`+
     `way["leisure"~"pitch|track|playground"](${bbox});`+
     `relation["leisure"~"pitch|track|playground"](${bbox});`+
-    `way["surface"~"asphalt|concrete|paving_stones|sett|concrete:plates|concrete:lanes|cobblestone|bricks|metal|wood"](${bbox});`+
-    `relation["surface"~"asphalt|concrete|paving_stones|sett|concrete:plates|concrete:lanes|cobblestone|bricks|metal|wood"](${bbox});`+
+    `way["surface"~"asphalt|paved|concrete|paving_stones|sett|concrete:plates|concrete:lanes|cobblestone|bricks|metal"](${bbox});`+
+    `relation["surface"~"asphalt|paved|concrete|paving_stones|sett|concrete:plates|concrete:lanes|cobblestone|bricks|metal"](${bbox});`+
     `way["man_made"~"pier|bridge"](${bbox});`+
+    `relation["man_made"~"pier|bridge"](${bbox});`+
     `);out geom;`;
 
-  for(const url of OVERPASS_URLS){
-    try{
-      const res=await fetch(
-        url+
-        "?data="+
-        encodeURIComponent(q)
-      );
+  const json=await overpassRequest(q,"yüzey+su");
 
-      if(!res.ok)continue;
+  if(!json){
+    console.warn(
+      "Detaylı yüzey sorgusu başarısız:",
+      LAST_OVERPASS_ERROR
+    );
+    return false;
+  }
 
-      const json=await res.json();
+  const seenWater=new Set();
+  const seenImp=new Set();
 
-      for(const el of (json.elements||[])){
-        if(isWater(el))continue;
-        if(!isImpervious(el))continue;
+  for(const el of (json.elements||[])){
+    const id=el.type+":"+el.id;
 
-        collectImperviousGeometry(el);
+    if(isWater(el)){
+      if(seenWater.has(id))continue;
+      seenWater.add(id);
+
+      if(el.type==="relation"){
+        const r=extractRings(el);
+
+        if(r){
+          if(Array.isArray(r)){
+            r.forEach(rr=>{
+              if(rr&&rr.length>=3)WATER_RINGS.push(rr);
+            });
+          }else if(r.outer){
+            r.outer.forEach(rr=>{
+              if(rr&&rr.length>=3)WATER_RINGS.push(rr);
+            });
+          }
+        }
+        continue;
       }
 
-      break;
-    }catch(e){}
+      if(!el.geometry)continue;
+
+      const pts=el.geometry.map(g=>[g.lat,g.lon]);
+
+      if(isClosedLine(pts)){
+        WATER_RINGS.push(pts);
+      }else if(pts.length>1){
+        WATER_LINES.push(pts);
+      }
+
+      continue;
+    }
+
+    if(!isImpervious(el))continue;
+    if(seenImp.has(id))continue;
+
+    seenImp.add(id);
+    collectImperviousGeometry(el);
   }
 
   const pb={
@@ -876,43 +872,42 @@ const pad=0.0005;
     maxLon
   };
 
-  IMP_RINGS=
-    IMP_RINGS.filter(r=>
-      ringTouchesPark(
-        r,
-        PARK_POLY,
-        pb
-      )
-    );
+  WATER_RINGS=WATER_RINGS.filter(r=>
+    ringTouchesPark(r,PARK_POLY,pb)
+  );
 
-  IMP_LINES=
-    IMP_LINES.filter(l=>
-      lineTouchesPark(
-        l.pts,
-        PARK_POLY,
-        pb
-      )
-    );
+  WATER_LINES=WATER_LINES.filter(l=>
+    lineTouchesPark(l,PARK_POLY,pb)
+  );
 
-  GRID_BLOCK_LINES=
-    GRID_BLOCK_LINES.filter(l=>
-      lineTouchesPark(
-        l,
-        PARK_POLY,
-        pb
-      )
-    );
+  IMP_RINGS=IMP_RINGS.filter(r=>
+    ringTouchesPark(r,PARK_POLY,pb)
+  );
 
+  IMP_LINES=IMP_LINES.filter(l=>
+    lineTouchesPark(l.pts,PARK_POLY,pb)
+  );
+
+  GRID_BLOCK_LINES=GRID_BLOCK_LINES.filter(l=>
+    lineTouchesPark(l,PARK_POLY,pb)
+  );
+
+  refreshWaterLayer();
   refreshImpLayer();
 
   console.log(
-    "✓ Detaylı → Poligon:",
+    "✓ Detaylı → Su polygon:",
+    WATER_RINGS.length,
+    "Su çizgi:",
+    WATER_LINES.length,
+    "Sert polygon:",
     IMP_RINGS.length,
-    "Çizgi:",
+    "Sert çizgi:",
     IMP_LINES.length
   );
-}
 
+  return true;
+}
 /* =========================================================
    SEGMENT INTERSECTION (lat/lon)
 ========================================================= */
@@ -1321,6 +1316,38 @@ function joinWaysToRings(ways){
 }
 
 
+
+function refreshWaterLayer(){
+  if(WATER_LAYER && map){
+    map.removeLayer(WATER_LAYER);
+  }
+
+  WATER_LAYER=L.layerGroup().addTo(map);
+
+  WATER_RINGS.forEach(r=>{
+    if(!r||r.length<3)return;
+
+    L.polygon(r,{
+      color:"#2563eb",
+      weight:1,
+      fillColor:"#60a5fa",
+      fillOpacity:.42,
+      interactive:false
+    }).addTo(WATER_LAYER);
+  });
+
+  WATER_LINES.forEach(l=>{
+    if(!l||l.length<2)return;
+
+    L.polyline(l,{
+      color:"#2563eb",
+      weight:2,
+      opacity:.55,
+      interactive:false
+    }).addTo(WATER_LAYER);
+  });
+}
+
 /* =========================================================
    WATER
 ========================================================= */
@@ -1357,6 +1384,7 @@ function isImpervious(el){
 
   const hardSurfaces=new Set([
     "asphalt",
+    "paved",
     "concrete",
     "paving_stones",
     "sett",
@@ -1364,7 +1392,8 @@ function isImpervious(el){
     "concrete:lanes",
     "cobblestone",
     "bricks",
-    "metal"
+    "metal",
+    "wood"
   ]);
 
   const softSurfaces=new Set([
@@ -1386,7 +1415,17 @@ function isImpervious(el){
   /*
    * Binalar
    */
-  if(t.building){
+  if(
+    t.building ||
+    t["building:part"]
+  ){
+    return true;
+  }
+
+  if(
+    t["area:highway"] ||
+    t.landuse==="highway"
+  ){
     return true;
   }
 
@@ -1596,6 +1635,8 @@ function collectImperviousGeometry(el){
     t.amenity==="parking" ||
     t.amenity==="bicycle_parking" ||
     t.amenity==="motorcycle_parking" ||
+    !!t["area:highway"] ||
+    t.landuse==="highway" ||
     (
       (
         t.leisure==="pitch" ||
@@ -1645,9 +1686,24 @@ function collectImperviousGeometry(el){
     ){
       w=width/2;
     }else{
-      w=roadHalfWidth(
-        t.highway
+      const lanes=parseFloat(
+        String(t.lanes||"").replace(",",".")
       );
+
+      if(
+        Number.isFinite(lanes) &&
+        lanes>0 &&
+        lanes<10
+      ){
+        w=Math.max(
+          1.25,
+          (lanes*3.0)/2
+        );
+      }else{
+        w=roadHalfWidth(
+          t.highway
+        );
+      }
     }
   }else if(hardSurfaces.has(surface)){
     w=3;
@@ -1763,6 +1819,12 @@ function bindParkClick(){
 
 function drawPark(park){
   ensurePngUiStyles();
+
+  /*
+   * queryPark artık sadece park geometrisini getiriyor.
+   * clearPark() güvenle çalışabilir; su/yüzey verisi
+   * yüzey analizinde tek sorguyla yüklenecek.
+   */
   clearPark();
   clearGrid();
 
@@ -1806,42 +1868,7 @@ function drawPark(park){
     ).addTo(PARK_LAYER);
   });
 
-  if(WATER_RINGS.length){
-    WATER_LAYER=
-      L.layerGroup().addTo(map);
-
-    WATER_RINGS.forEach(r=>
-      L.polygon(
-        r,
-        {
-          color:"#2563eb",
-          weight:1,
-          fillColor:"#60a5fa",
-          fillOpacity:.4,
-          interactive:false
-        }
-      ).addTo(WATER_LAYER)
-    );
-  }
-
-  if(WATER_LINES.length){
-    if(!WATER_LAYER){
-      WATER_LAYER=
-        L.layerGroup().addTo(map);
-    }
-
-    WATER_LINES.forEach(l=>
-      L.polyline(
-        l,
-        {
-          color:"#2563eb",
-          weight:2,
-          opacity:.5,
-          interactive:false
-        }
-      ).addTo(WATER_LAYER)
-    );
-  }
+  /* Su katmanı yüzey sorgusundan sonra refreshWaterLayer() ile çizilir. */
 
   /* =====================================================
      PARK BOUNDS (manuel, L.layerGroup getBounds yok)
@@ -3503,7 +3530,22 @@ async function runLandCoverAnalysis(){
     "info"
   );
 
-  await queryDetailedCoverage();
+  const coverageOk=await queryDetailedCoverage();
+
+  if(!coverageOk){
+    if(rep){
+      rep.innerHTML=
+        "❌ OSM yüzey verisi alınamadı. " +
+        "Overpass sunucuları şu anda yanıt vermiyor. " +
+        "Park geometrisi korunuyor; tekrar deneyebilirsiniz.";
+    }
+
+    return toast(
+      "OSM yüzey verisi alınamadı.",
+      "err",
+      "⚠️"
+    );
+  }
 
   if(rep){
     rep.innerHTML=
@@ -3513,8 +3555,24 @@ async function runLandCoverAnalysis(){
   const lineIdx=
     IMP_LINES.map(l=>({
       pts:l.pts,
-      w:l.w
+      w:l.w,
+      bbox:ringBBox(l.pts,(
+        (PARK_POLY[0]?.[0]?.[0])||
+        39
+      ))
     }));
+
+  const sampleRefLat=(PARK_POLY[0]?.[0]?.[0])||39;
+
+  const waterIdx=WATER_RINGS.map(r=>({
+    ring:r,
+    bbox:ringBBox(r,sampleRefLat)
+  }));
+
+  const impIdx=IMP_RINGS.map(r=>({
+    ring:r,
+    bbox:ringBBox(r,sampleRefLat)
+  }));
 
   let minLat=90;
   let maxLat=-90;
@@ -3585,21 +3643,18 @@ async function runLandCoverAnalysis(){
        * Öncelik 1:
        * Kapalı su alanı
        */
-      for(const r of WATER_RINGS){
-        if(
-          !r ||
-          r.length<3
-        ){
-          continue;
-        }
+      const sampleP=projectPoint(la,lo,sampleRefLat);
 
+      for(const item of waterIdx){
+        const b=item.bbox;
         if(
-          pointInPolygon(
-            la,
-            lo,
-            r
-          )
-        ){
+          sampleP.x<b.minX ||
+          sampleP.x>b.maxX ||
+          sampleP.y<b.minY ||
+          sampleP.y>b.maxY
+        )continue;
+
+        if(pointInPolygon(la,lo,item.ring)){
           inWater=true;
           break;
         }
@@ -3662,14 +3717,16 @@ async function runLandCoverAnalysis(){
         continue;
       }
 
-      for(const r of IMP_RINGS){
+      for(const item of impIdx){
+        const b=item.bbox;
         if(
-          pointInPolygon(
-            la,
-            lo,
-            r
-          )
-        ){
+          sampleP.x<b.minX ||
+          sampleP.x>b.maxX ||
+          sampleP.y<b.minY ||
+          sampleP.y>b.maxY
+        )continue;
+
+        if(pointInPolygon(la,lo,item.ring)){
           imp=true;
           break;
         }
