@@ -3554,7 +3554,7 @@ function dgWorldCoverClass(code){
   if(code===60)return "soft";
   return "other";
 }
-async function dgReadWorldCoverForPark(){
+async function dgReadWorldCoverForPark(osm){
   if(typeof GeoTIFF==="undefined"||!GeoTIFF.fromUrl)throw new Error("GeoTIFF.js yüklenmedi.");
   let minLat=90,maxLat=-90,minLon=180,maxLon=-180;
   for(const ring of PARK_POLY)for(const p of ring){
@@ -3566,6 +3566,10 @@ async function dgReadWorldCoverForPark(){
   const lonStart=Math.floor(minLon/3)*3;
   const lonEnd=Math.floor((maxLon-1e-10)/3)*3;
   const result={source:"ESA WorldCover 2021 v200 · 10 m",pixels:0,waterM2:0,hardM2:0,greenM2:0,softM2:0,otherM2:0,byClass:{}};
+  const osmLineIdx=osm.lineIdx||[];
+  const osmWaterIdx=osm.waterIdx||[];
+  const osmImpIdx=osm.impIdx||[];
+
   for(let tileLat=latStart;tileLat<=latEnd;tileLat+=3){
     for(let tileLon=lonStart;tileLon<=lonEnd;tileLon+=3){
       const x0=Math.max(minLon,tileLon),x1=Math.min(maxLon,tileLon+3);
@@ -3597,13 +3601,32 @@ async function dgReadWorldCoverForPark(){
           const code=Number(values[yy*width+xx]);
           if(!Number.isFinite(code)||code===0)continue;
           const area=dgAuthalicCellAreaM2(latBottom,latTop,lonLeft,lonRight);
-          const cls=dgWorldCoverClass(code);
+          /*
+           * Her 10 m WorldCover pikseli önce OSM geometrisiyle
+           * aynı noktada test edilir. OSM'de gerçek su/sert geometri
+           * varsa OSM kazanır; OSM yeşil/boş bırakmışsa bağımsız
+           * WorldCover sınıfı kullanılır. Böylece iki kaynağın
+           * alanlarını toplamak yerine aynı piksel tek kez sınıflanır.
+           */
+          const osmClass=dgPointClassAt(
+            latCenter,
+            lonCenter,
+            osmWaterIdx,
+            osmImpIdx,
+            osmLineIdx
+          );
+          const cls=osmClass==="water"
+            ?"water"
+            :osmClass==="hard"
+              ?"hard"
+              :dgWorldCoverClass(code);
+
           result.pixels++;
           result.byClass[code]=(result.byClass[code]||0)+area;
+
           if(cls==="water")result.waterM2+=area;
           else if(cls==="hard")result.hardM2+=area;
-          else if(cls==="green")result.greenM2+=area;
-          else if(cls==="soft")result.softM2+=area;
+          else if(cls==="green"||cls==="soft")result.greenM2+=area;
           else result.otherM2+=area;
         }
       }
@@ -3649,12 +3672,49 @@ async function dgRunOsm3mAnalysis(){
 }
 function dgFuseOsmAndSatellite(osm,sat){
   const totalM2=parkAreaM2();
-  let waterM2=(osm.water/osm.park)*totalM2;
-  let hardM2=(osm.hard/osm.park)*totalM2;
-  const osmWaterRatio=osm.water/osm.park,osmHardRatio=osm.hard/osm.park;
-  waterM2=Math.min(totalM2,waterM2+Math.max(0,sat.waterM2-sat.waterM2*osmWaterRatio));
-  hardM2=Math.min(totalM2-waterM2,hardM2+Math.max(0,sat.hardM2-sat.hardM2*osmHardRatio));
-  return{totalM2,waterM2,hardM2,greenM2:Math.max(0,totalM2-waterM2-hardM2),osmM2:{water:(osm.water/osm.park)*totalM2,hard:(osm.hard/osm.park)*totalM2,green:(osm.green/osm.park)*totalM2},satelliteM2:{water:sat.waterM2,hard:sat.hardM2,green:sat.greenM2}};
+
+  /*
+   * WorldCover pikselleri OSM ile piksel merkezinde zaten
+   * birleştirildi. Bu nedenle burada toplama/katsayı yoktur.
+   * Uydu alanı doğrudan hibrit sınıflandırmanın sonucudur.
+   */
+  const classified=sat.waterM2+sat.hardM2+sat.greenM2+sat.otherM2;
+
+  if(classified<=0){
+    return{
+      totalM2,
+      waterM2:(osm.water/osm.park)*totalM2,
+      hardM2:(osm.hard/osm.park)*totalM2,
+      greenM2:(osm.green/osm.park)*totalM2,
+      osmM2:{
+        water:(osm.water/osm.park)*totalM2,
+        hard:(osm.hard/osm.park)*totalM2,
+        green:(osm.green/osm.park)*totalM2
+      },
+      satelliteM2:null
+    };
+  }
+
+  const waterM2=sat.waterM2;
+  const hardM2=sat.hardM2;
+  const greenM2=Math.max(0,totalM2-waterM2-hardM2);
+
+  return{
+    totalM2,
+    waterM2,
+    hardM2,
+    greenM2,
+    osmM2:{
+      water:(osm.water/osm.park)*totalM2,
+      hard:(osm.hard/osm.park)*totalM2,
+      green:(osm.green/osm.park)*totalM2
+    },
+    satelliteM2:{
+      water:sat.waterM2,
+      hard:sat.hardM2,
+      green:sat.greenM2
+    }
+  };
 }
 
 /* =========================================================
@@ -3674,7 +3734,7 @@ async function runLandCoverAnalysis(){
   const osm=await dgRunOsm3mAnalysis();
   let sat=null;
   if(rep)rep.innerHTML="⏳ ESA WorldCover 2021 · 10 m bağımsız arazi örtüsü okunuyor…";
-  try{sat=await dgReadWorldCoverForPark();}catch(err){console.warn("ESA WorldCover okunamadı; OSM sonucu korunuyor:",err);}
+  try{sat=await dgReadWorldCoverForPark(osm);}catch(err){console.warn("ESA WorldCover okunamadı; OSM sonucu korunuyor:",err);}
   const totalM2=parkAreaM2();
   const fused=sat&&sat.pixels>0
     ?dgFuseOsmAndSatellite(osm,sat)
