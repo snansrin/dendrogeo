@@ -3801,19 +3801,23 @@ async function dgSatelliteRun(){
 
       if(rep)rep.innerHTML="⏳ ESA WorldCover COG erişim bağlantısı hazırlanıyor…";
 
-      const signUrl="https://planetarycomputer.microsoft.com/api/sas/v1/sign?href="+
-        encodeURIComponent(asset.href);
+      // Use the collection SAS token instead of the per-URL sign
+      // endpoint. This avoids browser/IP-bound "sip" signatures.
+      const tokenRes=await fetch(
+        "https://planetarycomputer.microsoft.com/api/sas/v1/token/esa-worldcover",
+        {method:"GET",mode:"cors",cache:"no-store",
+         headers:{Accept:"application/json"}}
+      );
 
-      const rr=await fetch(signUrl,{
-        method:"GET",mode:"cors",cache:"no-store",
-        headers:{Accept:"application/json"}
-      });
+      if(!tokenRes.ok)
+        throw new Error("WorldCover token servisi HTTP "+tokenRes.status);
 
-      if(!rr.ok)throw new Error("WorldCover imza servisi HTTP "+rr.status);
+      const tokenJson=await tokenRes.json();
+      const token=tokenJson.token;
+      if(!token)throw new Error("WorldCover token servisi token döndürmedi");
 
-      const signed=await rr.json();
-      const href=signed.href||signed.url;
-      if(!href)throw new Error("WorldCover imza servisi URL döndürmedi");
+      const sep=asset.href.includes("?")?"&":"?";
+      const href=asset.href+sep+token;
 
       if(rep)rep.innerHTML="⏳ ESA WorldCover 2021 · 10 m COG okunuyor…";
 
