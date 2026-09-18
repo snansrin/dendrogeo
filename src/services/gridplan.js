@@ -3754,141 +3754,218 @@ function dgLcm10RenderRows(sat,totalM2){
 
 async function dgSatelliteRun(){
   if(!PARK_POLY||!PARK_POLY.length)return toast("Önce park seç","warn","🌳");
-  const rep=$("landCoverReport");
-  if(rep){rep.style.display="block";rep.innerHTML="⏳ ESA WorldCover 2021 · 10 m gerçek raster okunuyor…";}
-  toast("🛰️ ESA WorldCover uydu analizi başlıyor…","info");
 
-  // Use the official ESA WorldCover COG directly. No Terrascope/WMS.
-  const b=dgParkBBox();
-  const dim=dgLcm10ImageDimensions(b);
-  const tiles=[];
-  const la0=Math.floor(b.minLat/3)*3, la1=Math.floor((b.maxLat-1e-10)/3)*3;
-  const lo0=Math.floor(b.minLon/3)*3, lo1=Math.floor((b.maxLon-1e-10)/3)*3;
+  const rep=$("landCoverReport");
+  if(rep){
+    rep.style.display="block";
+    rep.innerHTML="⏳ ESA WorldCover 2021 · STAC üzerinden gerçek 10 m raster aranıyor…";
+  }
+
+  toast("🛰️ ESA WorldCover STAC analizi başlıyor…","info");
 
   try{
-    if(typeof GeoTIFF==="undefined"||!GeoTIFF.fromUrl)throw new Error("GeoTIFF.js yüklenmedi");
+    if(typeof GeoTIFF==="undefined"||!GeoTIFF.fromUrl)
+      throw new Error("GeoTIFF.js yüklenmedi");
 
-    for(let la=la0;la<=la1;la+=3){
-      for(let lo=lo0;lo<=lo1;lo+=3){
-        const name=(la>=0?"N":"S")+String(Math.abs(la)).padStart(2,"0")+
-          (lo>=0?"E":"W")+String(Math.abs(lo)).padStart(3,"0");
-        const url="https://esa-worldcover.s3.eu-central-1.amazonaws.com/v200/2021/map/"+
-          "ESA_WorldCover_10m_2021_v200_"+name+"_Map.tif";
+    const b=dgParkBBox();
 
-        if(rep)rep.innerHTML="⏳ ESA WorldCover 2021 · "+name+" rasterı okunuyor…";
+    /*
+     * The previous direct ESA S3 URL was valid as a data location but
+     * browser-side CORS/range access is not reliable. We therefore use
+     * Microsoft's public Planetary Computer STAC catalogue and its
+     * anonymous SAS signing endpoint. The raster itself remains the
+     * official ESA WorldCover 2021 v200 COG.
+     */
+    const stacUrl=new URL("https://planetarycomputer.microsoft.com/api/stac/v1/search");
+    stacUrl.searchParams.set("collections","esa-worldcover");
+    stacUrl.searchParams.set("bbox",
+      [b.minLon,b.minLat,b.maxLon,b.maxLat].join(","));
+    stacUrl.searchParams.set("limit","10");
 
-        let image=WC_CACHE.get(url);
-        if(!image){
-          image=await GeoTIFF.fromUrl(url,{cacheSize:8,maxRanges:64,allowFullFile:true});
-          WC_CACHE.set(url,image);
+    const sr=await fetch(stacUrl.toString(),{
+      method:"GET",mode:"cors",cache:"no-store",
+      headers:{Accept:"application/geo+json,application/json"}
+    });
+
+    if(!sr.ok)throw new Error("Planetary Computer STAC HTTP "+sr.status);
+
+    const sj=await sr.json();
+    const items=Array.isArray(sj.features)?sj.features:[];
+    if(!items.length)throw new Error("WorldCover STAC içinde parkı kapsayan öğe bulunamadı");
+
+    const tiles=[];
+
+    for(const item of items){
+      const asset=item.assets?.map||item.assets?.Map||item.assets?.data;
+      if(!asset?.href)continue;
+
+      if(rep)rep.innerHTML="⏳ ESA WorldCover COG erişim bağlantısı hazırlanıyor…";
+
+      const signUrl="https://planetarycomputer.microsoft.com/api/sas/v1/sign?href="+
+        encodeURIComponent(asset.href);
+
+      const rr=await fetch(signUrl,{
+        method:"GET",mode:"cors",cache:"no-store",
+        headers:{Accept:"application/json"}
+      });
+
+      if(!rr.ok)throw new Error("WorldCover imza servisi HTTP "+rr.status);
+
+      const signed=await rr.json();
+      const href=signed.href||signed.url;
+      if(!href)throw new Error("WorldCover imza servisi URL döndürmedi");
+
+      if(rep)rep.innerHTML="⏳ ESA WorldCover 2021 · 10 m COG okunuyor…";
+
+      const image=await GeoTIFF.fromUrl(href,{
+        cacheSize:8,maxRanges:64,allowFullFile:true
+      });
+
+      const bb=image.getBoundingBox();
+      const rs=image.getResolution();
+      const sx=Math.abs(rs[0]),sy=Math.abs(rs[1]);
+
+      const x0=Math.max(b.minLon,bb[0]);
+      const x1=Math.min(b.maxLon,bb[2]);
+      const y0=Math.max(b.minLat,bb[1]);
+      const y1=Math.min(b.maxLat,bb[3]);
+
+      if(x0>=x1||y0>=y1)continue;
+
+      const px0=Math.max(0,Math.floor((x0-bb[0])/sx));
+      const px1=Math.min(image.getWidth(),Math.ceil((x1-bb[0])/sx));
+      const py0=Math.max(0,Math.floor((bb[3]-y1)/sy));
+      const py1=Math.min(image.getHeight(),Math.ceil((bb[3]-y0)/sy));
+
+      if(px1<=px0||py1<=py0)continue;
+
+      const r=await image.readRasters({
+        window:[px0,py0,px1,py1],
+        samples:[0]
+      });
+
+      tiles.push({
+        bb,sx,sy,px0,py0,w:r.width,h:r.height,v:r[0]
+      });
+    }
+
+    if(!tiles.length)
+      throw new Error("WorldCover rasterında park alanını kesen piksel bulunamadı");
+
+    if(rep)rep.innerHTML="⏳ WorldCover 10 m pikselleri park sınırıyla kesiştiriliyor…";
+
+    const green=new Set([10,20,30,40,90,95,100]);
+    const counts={green:0,hard:0,water:0,other:0,unknown:0};
+    const areas={green:0,hard:0,water:0,other:0,unknown:0};
+    let pixels=0;
+
+    for(const t of tiles){
+      for(let y=0;y<t.h;y++){
+        for(let x=0;x<t.w;x++){
+          const lon=t.bb[0]+(t.px0+x+0.5)*t.sx;
+          const lat=t.bb[3]-(t.py0+y+0.5)*t.sy;
+
+          if(!pointInPark(lat,lon,{
+            outer:PARK_POLY,
+            inner:PARK_HOLES||[]
+          }))continue;
+
+          const code=Number(t.v[y*t.w+x]);
+          if(!Number.isFinite(code)||code===0)continue;
+
+          const lat0=lat-t.sy/2,lat1=lat+t.sy/2;
+          const lon0=lon-t.sx/2,lon1=lon+t.sx/2;
+          const area=dgWgs84CellAreaM2(lat0,lat1,lon0,lon1);
+
+          pixels++;
+
+          let group="unknown";
+          if(code===50)group="hard";
+          else if(code===80)group="water";
+          else if(green.has(code))group="green";
+          else if(code===60||code===70)group="other";
+
+          counts[group]++;
+          areas[group]+=area;
         }
-
-        const bb=image.getBoundingBox();
-        const rs=image.getResolution();
-        const sx=Math.abs(rs[0]),sy=Math.abs(rs[1]);
-
-        const x0=Math.max(b.minLon,lo),x1=Math.min(b.maxLon,lo+3);
-        const y0=Math.max(b.minLat,la),y1=Math.min(b.maxLat,la+3);
-        if(x0>=x1||y0>=y1)continue;
-
-        const px0=Math.max(0,Math.floor((x0-bb[0])/sx));
-        const px1=Math.min(image.getWidth(),Math.ceil((x1-bb[0])/sx));
-        const py0=Math.max(0,Math.floor((bb[3]-y1)/sy));
-        const py1=Math.min(image.getHeight(),Math.ceil((bb[3]-y0)/sy));
-        if(px1<=px0||py1<=py0)continue;
-
-        const r=await image.readRasters({window:[px0,py0,px1,py1],samples:[0]});
-        tiles.push({bb,sx,sy,px0,py0,w:r.width,h:r.height,v:r[0],la,lo});
       }
     }
 
-    if(!tiles.length)throw new Error("Park alanını kapsayan WorldCover rasterı bulunamadı");
-  }catch(e){
-    console.error("ESA WorldCover COG:",e);
-    if(rep)rep.innerHTML="<b>❌ ESA WorldCover okunamadı.</b><br><span style='font-size:.75rem;color:var(--mut)'>Resmî ESA COG dosyasına tarayıcı erişimi başarısız oldu. OSM sonucu kullanılmadı.</span>";
-    return toast("ESA WorldCover verisi alınamadı.","err","🛰️");
-  }
+    if(!pixels)throw new Error("Park içinde geçerli WorldCover pikseli bulunamadı");
 
-  if(rep)rep.innerHTML="⏳ WorldCover 10 m pikselleri park sınırıyla kesiştiriliyor…";
+    const totalM2=Object.values(areas).reduce((a,v)=>a+v,0);
+    const totalHa=totalM2/10000;
+    const geometricHa=parkAreaM2()/10000;
 
-  const green=new Set([10,20,30,40,90,95,100]);
-  const counts={green:0,hard:0,water:0,other:0,unknown:0};
-  const areas={green:0,hard:0,water:0,other:0,unknown:0};
-  let pixels=0;
+    LANDCOVER={
+      total:+totalHa.toFixed(2),
+      geometricTotal:+geometricHa.toFixed(2),
+      green:+(areas.green/10000).toFixed(2),
+      hard:+(areas.hard/10000).toFixed(2),
+      water:+(areas.water/10000).toFixed(2),
+      other:+(areas.other/10000).toFixed(2),
+      unknown:+(areas.unknown/10000).toFixed(2),
+      sampleM:10,
+      sampleCount:pixels,
+      satellitePixels:pixels,
+      method:"ESA WorldCover 2021 v200 · Planetary Computer STAC + signed COG · WGS84 pixel-area calculation",
+      source:"ESA WorldCover 2021 v200"
+    };
 
-  for(const t of tiles){
-    for(let y=0;y<t.h;y++){
-      for(let x=0;x<t.w;x++){
-        const lon=t.bb[0]+(t.px0+x+0.5)*t.sx;
-        const lat=t.bb[3]-(t.py0+y+0.5)*t.sy;
-        if(!pointInPark(lat,lon,{outer:PARK_POLY,inner:PARK_HOLES||[]}))continue;
+    const pct=v=>totalM2?Math.round(v/totalM2*100):0;
 
-        const code=Number(t.v[y*t.w+x]);
-        if(!Number.isFinite(code)||code===0)continue;
-        const lat0=lat-t.sy/2,lat1=lat+t.sy/2;
-        const lon0=lon-t.sx/2,lon1=lon+t.sx/2;
-        const area=dgWgs84CellAreaM2(lat0,lat1,lon0,lon1);
-        pixels++;
+    const row=(emoji,label,m2)=>{
+      const p=pct(m2);
+      return "<div style='display:flex;align-items:center;gap:8px;margin:5px 0'>"+
+        "<span style='width:18px'>"+emoji+"</span>"+
+        "<span style='width:116px;font-size:.8rem'>"+label+"</span>"+
+        "<div style='flex:1;height:10px;background:var(--line);border-radius:5px;overflow:hidden'>"+
+        "<div style='height:100%;width:"+p+"%;background:var(--line-strong)'></div></div>"+
+        "<b style='width:72px;text-align:right;font-size:.8rem'>"+
+        (m2/10000).toFixed(2)+" ha</b>"+
+        "<span style='width:36px;font-size:.72rem'>%"+p+"</span></div>";
+    };
 
-        let group="unknown";
-        if(code===50)group="hard";
-        else if(code===80)group="water";
-        else if(green.has(code))group="green";
-        else if(code===60||code===70)group="other";
+    if(rep){
+      const refHa=Number.isFinite(Number(PARK_REF_HA))?Number(PARK_REF_HA):null;
 
-        counts[group]++;
-        areas[group]+=area;
-      }
+      rep.innerHTML=
+        "<b>🛰️ Arazi Örtüsü · ESA WorldCover 2021</b>"+
+        row("🌿","Yeşil / bitkisel",areas.green)+
+        row("🧱","Yapılı / sert",areas.hard)+
+        row("💧","Su",areas.water)+
+        row("🟫","Diğer",areas.other)+
+        row("❓","Sınıflandırılamayan",areas.unknown)+
+        "<div style='font-size:.72rem;color:var(--mut);margin-top:9px'>"+
+        "Uydu alanı: <b>"+totalHa.toFixed(2)+" ha</b> · "+
+        "OSM geometrisi: <b>"+geometricHa.toFixed(2)+" ha</b>"+
+        (refHa!==null?" · Harici referans: <b>"+refHa.toFixed(2)+" ha</b>":"")+
+        "<br>10 m raster · Park içi geçerli uydu pikseli: <b>"+
+        pixels.toLocaleString("tr-TR")+"</b></div>"+
+        "<div style='font-size:.68rem;color:var(--mut);margin-top:8px'>"+
+        "Sert/yapılı = WorldCover sınıf 50 · Su = sınıf 80 · "+
+        "yeşil/vejetasyon = 10,20,30,40,90,95,100. "+
+        "OSM sınıflandırmayı tamamlamak için kullanılmadı.</div>"+
+        "<div style='font-size:.68rem;color:var(--mut);margin-top:7px'>"+
+        "Kaynak: ESA WorldCover 2021 v200 · Sentinel-1 + Sentinel-2 · 10 m.</div>";
     }
+
+    console.log("DENDROGEO · ESA WorldCover 2021",LANDCOVER,{counts,areas});
+    toast("✓ ESA WorldCover uydu analizi tamamlandı","ok","🛰️");
+
+  }catch(err){
+    console.error("ESA WorldCover STAC/COG:",err);
+
+    if(rep){
+      rep.innerHTML=
+        "<b>❌ Uydu arazi örtüsü verisi okunamadı.</b><br>"+
+        "<span style='font-size:.75rem;color:var(--mut)'>"+
+        "ESA WorldCover STAC/COG erişimi başarısız oldu. OSM sert zemin veya "+
+        "OSM'den türetilmiş yeşil alan sonucu kullanılmadı.</span>";
+    }
+
+    return toast("Uydu arazi örtüsü verisi alınamadı.","err","🛰️");
   }
-
-  const totalM2=Object.values(areas).reduce((a,v)=>a+v,0);
-  const totalHa=totalM2/10000;
-  const geometricHa=parkAreaM2()/10000;
-
-  LANDCOVER={
-    total:+totalHa.toFixed(2),
-    geometricTotal:+geometricHa.toFixed(2),
-    green:+(areas.green/10000).toFixed(2),
-    hard:+(areas.hard/10000).toFixed(2),
-    water:+(areas.water/10000).toFixed(2),
-    other:+(areas.other/10000).toFixed(2),
-    unknown:+(areas.unknown/10000).toFixed(2),
-    sampleM:10,sampleCount:pixels,satellitePixels:pixels,
-    method:"ESA WorldCover 2021 v200 · official 10 m COG · WGS84 pixel-area calculation",
-    source:"ESA WorldCover 2021 v200"
-  };
-
-  const pct=v=>totalM2?Math.round(v/totalM2*100):0;
-  const row=(emoji,label,m2)=>{
-    const p=pct(m2);
-    return "<div style='display:flex;align-items:center;gap:8px;margin:5px 0'>"+
-      "<span style='width:18px'>"+emoji+"</span><span style='width:116px;font-size:.8rem'>"+label+"</span>"+
-      "<div style='flex:1;height:10px;background:var(--line);border-radius:5px;overflow:hidden'>"+
-      "<div style='height:100%;width:"+p+"%;background:var(--line-strong)'></div></div>"+
-      "<b style='width:72px;text-align:right;font-size:.8rem'>"+(m2/10000).toFixed(2)+" ha</b>"+
-      "<span style='width:36px;font-size:.72rem'>%"+p+"</span></div>";
-  };
-
-  if(rep){
-    const refHa=Number.isFinite(Number(PARK_REF_HA))?Number(PARK_REF_HA):null;
-    rep.innerHTML="<b>🛰️ Arazi Örtüsü · ESA WorldCover 2021</b>"+
-      row("🌿","Yeşil / bitkisel",areas.green)+
-      row("🧱","Yapılı / sert",areas.hard)+
-      row("💧","Su",areas.water)+
-      row("🟫","Diğer",areas.other)+
-      row("❓","Sınıflandırılamayan",areas.unknown)+
-      "<div style='font-size:.72rem;color:var(--mut);margin-top:9px'>"+
-      "Uydu alanı: <b>"+totalHa.toFixed(2)+" ha</b> · OSM geometrisi: <b>"+geometricHa.toFixed(2)+" ha</b>"+
-      (refHa!==null?" · Harici referans: <b>"+refHa.toFixed(2)+" ha</b>":"")+
-      "<br>10 m raster · Park içi uydu pikseli: <b>"+pixels.toLocaleString("tr-TR")+"</b></div>"+
-      "<div style='font-size:.68rem;color:var(--mut);margin-top:8px'>"+
-      "Sert/yapılı = WorldCover sınıf 50 · Su = sınıf 80 · yeşil/vejetasyon = 10,20,30,40,90,95,100. "+
-      "OSM, sınıflandırmayı tamamlamak için kullanılmadı.</div>";
-  }
-
-  console.log("DENDROGEO WorldCover 2021",LANDCOVER,{counts,areas});
-  toast("✓ ESA WorldCover uydu analizi tamamlandı","ok","🛰️");
 }
 
 window.runLandCoverAnalysis=dgSatelliteRun;
