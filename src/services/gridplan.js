@@ -5458,7 +5458,7 @@ async function runLandCoverAnalysis(){
   const stepLat=SAMPLE_M/110540;
   const stepLon=SAMPLE_M/(111320*Math.cos(((minLat+maxLat)/2)*Math.PI/180));
 
-  const waterIndex=dgBuildSpatialIndex([...WATER_RINGS,...WATER_LINES,...DG_WATER_HOLES],minLat,minLon,60);
+  const waterIndex=dgBuildSpatialIndex([...WATER_RINGS,...DG_WATER_HOLES],minLat,minLon,60);
   const impIndex=dgBuildSpatialIndex([...IMP_RINGS,...IMP_LINES],minLat,minLon,60);
 
   let nPark=0,nWater=0,nImp=0,nGreen=0;
