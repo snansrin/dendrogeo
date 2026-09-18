@@ -4,7 +4,7 @@
 let PARK_POLY=null;
 let PARK_HOLES=[]; 
 let PARK_LAYER=null;
-let PARK_MODE=false;
+let PARK_MODE=false; 
 let PARK_CLICK_BOUND=false; 
 let PARK_CANDS=[];
 
