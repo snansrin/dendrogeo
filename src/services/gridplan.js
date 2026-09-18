@@ -4132,13 +4132,9 @@ async function dgSatelliteRun(){
       bboxSR:"3857",
       imageSR:"3857",
       size:sizeW+","+sizeH,
-      format:"png32",
-      pixelType:"U8",
-      noData:"0",
+      format:"png",
       interpolation:"RSP_NearestNeighbor",
-      renderingRule:JSON.stringify({
-        rasterFunction:"None"
-      })
+      adjustAspectRatio:"false"
     });
 
     const url=SERVICE+"?"+params.toString();
@@ -4339,7 +4335,7 @@ async function dgSatelliteRun(){
     satellitePixels:received,
 
     method:
-      "Esri Global Land Cover 2020 V2 · Sentinel-2 · 10 m · exportImage · nearest-neighbour",
+      "Esri Global Land Cover 2020 V2 · Sentinel-2 · 10 m · exportImage categorical map · nearest-neighbour",
 
     source:
       "Impact Observatory · Esri · Sentinel-2 L2A/L2B derived 2020 LULC",
