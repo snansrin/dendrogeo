@@ -742,25 +742,14 @@ function renderSatelliteSamples(){
 
   SATELLITE_LAYER.addTo(map);
 
-  // ESA WorldCover is a visualization/independent visual cross-check.
-  // Its WMS is intentionally not used as the numeric analysis source.
-  try{
-    if(WORLD_COVER_LAYER)map.removeLayer(WORLD_COVER_LAYER);
-    WORLD_COVER_LAYER=L.tileLayer.wms(
-      "https://services.terrascope.be/wms/v2",
-      {
-        layers:"WORLDCOVER_2020_MAP",
-        format:"image/png",
-        transparent:true,
-        version:"1.1.1",
-        opacity:.28,
-        attribution:"© ESA WorldCover project 2020 / Copernicus"
-      }
-    );
-    WORLD_COVER_LAYER.addTo(map);
-  }catch(e){
-    console.warn("ESA WorldCover görsel katmanı eklenemedi:",e);
-  }
+  /*
+   * Do not add the ESA WorldCover WMS here.
+   * ESA explicitly documents its WMS as a cartographic visualization
+   * mechanism, not an analysis source. Keeping it out of the numeric
+   * workflow also removes the unnecessary Terrascope CSP dependency.
+   * A future numeric WorldCover implementation should read the official
+   * COG data, not RGB WMS pixels.
+   */
 }
 
 function isCellValid(
@@ -2027,7 +2016,7 @@ function bindParkClick(){
    DRAW PARK (MODERN UI)
 ========================================================= */
 
-function drawPark(park){
+async function drawPark(park){
   PARK_SELECTED_AREA_M2=Number.isFinite(Number(park?.area)) ? Number(park.area) : null;
   ensurePngUiStyles();
 
@@ -2078,6 +2067,18 @@ function drawPark(park){
       }
     ).addTo(PARK_LAYER);
   });
+
+  /*
+   * OSM hard-exclusion geometry MUST be loaded before the grid can be
+   * considered valid. Previously queryDetailedCoverage() existed but was
+   * never called from drawPark(), which meant buildings, roads, parking
+   * and water arrays stayed empty and the grid could be drawn over them.
+   */
+  const coverageOk=await queryDetailedCoverage();
+  if(!coverageOk){
+    console.warn("DENDROGEO QC: OSM detailed coverage could not be loaded.");
+    toast("⚠ OSM bina/yol/su geometrisi alınamadı; grid bilimsel olarak eksik olabilir.","warn","🗺️");
+  }
 
   /* Su katmanı yüzey sorgusundan sonra refreshWaterLayer() ile çizilir. */
 
@@ -4007,6 +4008,11 @@ async function dgSatelliteRun(){
     return toast(msg,"err","🛰️");
   }
 
+  // A run must be idempotent. Re-running the analysis for the same park
+  // must never append the previous run's samples into the new statistics.
+  LANDCOVER_SAMPLES=[];
+  LANDCOVER=null;
+
   const areas={green:0,hard:0,water:0,other:0,unknown:0};
   const counts={green:0,hard:0,water:0,other:0,unknown:0};
   const osmAreas={open:0,hard:0,water:0};
@@ -4044,10 +4050,103 @@ async function dgSatelliteRun(){
   const MAX_URL_CHARS=7000;
   const MAX_POINTS_PER_BATCH=250;
 
+  /*
+   * IMPORTANT QC CHANGE:
+   * The ImageServer is a time-series mosaic. The service advertises
+   * Year as a catalog field and allows raster IDs to be queried spatially.
+   * We therefore first ask the catalog which 2020 rasters actually
+   * intersect this park, then lock those raster IDs for getSamples().
+   * This avoids relying only on the service's global default mosaic order.
+   */
+  const queryRasterIdsForPark=async()=>{
+    const qService=SERVICE.replace("/getSamples","/query");
+    const c1=to3857(bbox.minLon,bbox.minLat);
+    const c2=to3857(bbox.maxLon,bbox.maxLat);
+
+    const geometry={
+      xmin:Math.min(c1[0],c2[0]),
+      ymin:Math.min(c1[1],c2[1]),
+      xmax:Math.max(c1[0],c2[0]),
+      ymax:Math.max(c1[1],c2[1]),
+      spatialReference:{wkid:3857}
+    };
+
+    const params=new URLSearchParams({
+      f:"json",
+      where:"Year = 2020",
+      geometryType:"esriGeometryEnvelope",
+      geometry:JSON.stringify(geometry),
+      inSR:"3857",
+      spatialRel:"esriSpatialRelIntersects",
+      returnIdsOnly:"true",
+      returnGeometry:"false",
+      pixelSize:"10,10"
+    });
+
+    const res=await fetch(qService+"?"+params.toString(),{
+      method:"GET",
+      mode:"cors",
+      cache:"no-store",
+      headers:{Accept:"application/json"}
+    });
+
+    if(!res.ok){
+      throw new Error("ImageServer catalog query HTTP "+res.status);
+    }
+
+    const data=await res.json();
+
+    if(data.error){
+      throw new Error(
+        (data.error.message||"ImageServer catalog query hatası")+
+        (data.error.details?.length?" · "+data.error.details.join(" | "):"")
+      );
+    }
+
+    const ids=Array.isArray(data.objectIds)
+      ?data.objectIds.map(Number).filter(Number.isFinite)
+      :[];
+
+    console.log(
+      "Sentinel-2 2020 katalog QC:",
+      ids.length,
+      "raster",
+      ids
+    );
+
+    if(!ids.length){
+      throw new Error(
+        "Park bbox içinde Year = 2020 rasterı bulunamadı"
+      );
+    }
+
+    // The live service advertises maxMosaicImageCount=20.
+    // Never silently discard intersecting rasters because that would
+    // create an undocumented spatial bias in the scientific result.
+    if(ids.length>20){
+      throw new Error(
+        "Park bbox için "+ids.length+
+        " adet 2020 rasterı bulundu; servis limiti 20 olduğu için "+
+        "sonuç güvenli biçimde mozaiklenemiyor."
+      );
+    }
+
+    return ids;
+  };
+
+  const rasterIds=await queryRasterIdsForPark();
+
   const buildSampleParams=pts=>{
     const geometry={
       points:pts,
       spatialReference:{wkid:3857}
+    };
+
+    const mosaicRule={
+      mosaicMethod:"esriMosaicLockRaster",
+      lockRasterIds:rasterIds,
+      ascending:true,
+      mosaicOperation:"MT_FIRST"
     };
 
     return new URLSearchParams({
@@ -4056,16 +4155,10 @@ async function dgSatelliteRun(){
       geometry:JSON.stringify(geometry),
       returnFirstValueOnly:"true",
       interpolation:"RSP_NearestNeighbor",
-      mosaicRule:JSON.stringify({
-        mosaicMethod:"esriMosaicAttribute",
-        where:"Year = 2020",
-        sortField:"Year",
-        sortValue:2020,
-        ascending:true,
-        mosaicOperation:"MT_FIRST"
-      }),
+      mosaicRule:JSON.stringify(mosaicRule),
       pixelSize:"10,10",
-      returnGeometry:"false"
+      returnGeometry:"false",
+      outFields:"Year,Name,ProductName"
     });
   };
 
@@ -4231,6 +4324,19 @@ async function dgSatelliteRun(){
       const group=classify(code);
       const loc=s.location||null;
 
+      // Server-side catalog provenance check. A valid response is not
+      // accepted as a 2020 observation unless the returned catalog
+      // metadata confirms Year=2020.
+      const sampleYear=Number(s.attributes?.Year);
+      if(Number.isFinite(sampleYear) && sampleYear!==2020){
+        console.warn(
+          "Sentinel-2 QC: 2020 beklenirken farklı yıl döndü:",
+          sampleYear,
+          s
+        );
+        continue;
+      }
+
       /*
        * getSamples returns the sampled location. Only use an index
        * fallback when the service returned exactly one result per input
@@ -4284,7 +4390,10 @@ async function dgSatelliteRun(){
         lon,
         code,
         group,
-        osmGroup
+        osmGroup,
+        year:Number.isFinite(sampleYear)?sampleYear:2020,
+        rasterId:Number.isFinite(Number(s.rasterId))?Number(s.rasterId):null,
+        resolution:Number.isFinite(Number(s.resolution))?Number(s.resolution):null
       });
     }
 
@@ -4319,8 +4428,8 @@ async function dgSatelliteRun(){
     sampleM:10,
     sampleCount:received,
     satellitePixels:received,
-    method:"Sentinel-2 10m Land Cover · ImageServer getSamples · 2020",
-    source:"Impact Observatory / Microsoft / Esri",
+    method:"Sentinel-2 10m Land Cover · ImageServer getSamples · spatially locked 2020 rasters",
+    source:"Impact Observatory · Microsoft · Esri",
     sampleGroups:LANDCOVER_SAMPLES,
     classCounts:Object.fromEntries(
       Object.entries(counts).map(([k,v])=>[k,v])
@@ -4376,12 +4485,34 @@ async function dgSatelliteRun(){
       "<b>8-10/Diğer="+(counts.other||0)+"</b> · "+
       "<b>Bilinmeyen="+(counts.unknown||0)+"</b></div>"+
       "<div style='font-size:.68rem;color:var(--mut);margin-top:7px'>"+
-      "Kaynak: Impact Observatory · Microsoft · Esri · Sentinel-2 10 m.</div>";
+      "Kaynak: Impact Observatory · Microsoft · Esri · Sentinel-2 10 m. "+
+      "Raster seçimi: park bbox + Year=2020 + LockRaster.</div>";
   }
 
   renderSatelliteSamples();
-  console.log("DENDROGEO · Sentinel-2 10m getSamples",LANDCOVER,{counts,areas,osmCounts,osmAreas});
-  toast("✓ 10 m Sentinel-2 + OSM çapraz kontrolü tamamlandı","ok","🛰️");
+  const totalSamples=received;
+  const waterPct=totalM2?areas.water/totalM2:0;
+  const hardPct=totalM2?areas.hard/totalM2:0;
+
+  if(hardPct>0.70 && osmAreas.hard/Math.max(totalM2,1)<0.20){
+    LANDCOVER.qualityWarning=
+      "QC WARNING: Sentinel-2 built sınıfı ile OSM sert-zemin geometrisi arasında büyük fark var. "+
+      "Class 7 bina alanı olarak yorumlanmamalıdır.";
+  }else{
+    LANDCOVER.qualityWarning="";
+  }
+
+  console.log(
+    "DENDROGEO · Sentinel-2 10m getSamples",
+    LANDCOVER,
+    {counts,areas,osmCounts,osmAreas,totalSamples}
+  );
+
+  if(LANDCOVER.qualityWarning){
+    toast("⚠ Uydu/OSM arasında büyük sınıf farkı var; sonuç QC uyarısı taşıyor.","warn","🛰️");
+  }else{
+    toast("✓ 10 m Sentinel-2 + OSM çapraz kontrolü tamamlandı","ok","🛰️");
+  }
 }
 
 // Inline HTML handlers require these public entry points.
