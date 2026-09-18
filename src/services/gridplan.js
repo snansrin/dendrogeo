@@ -3541,8 +3541,10 @@ function refreshImpLayer(){
 ========================================================= */
 
 const DG_LCM10_WMS="https://titiler.terrascope.be/wms";
+const DG_WORLDCOVER_WMS="https://titiler.terrascope.be/wms";
 const DG_LCM10_YEAR="2020";
 const DG_LCM10_RES_M=10;
+let DG_SATELLITE_SOURCE="Copernicus LCM-10 2020";
 
 const DG_LCM10_PALETTE={
   10:[0x00,0x64,0x00],20:[0xff,0xbb,0x22],30:[0xff,0xff,0x4c],
@@ -3611,28 +3613,53 @@ async function dgFetchLcm10Raster(){
   }
 
   const dim=dgLcm10ImageDimensions(b);
-  const params=new URLSearchParams({
-    service:"WMS",request:"GetMap",version:"1.1.1",
-    layers:"lcfm-lcm-10_map",styles:"",srs:"EPSG:4326",
-    bbox:b.minLon+","+b.minLat+","+b.maxLon+","+b.maxLat,
-    width:String(dim.width),height:String(dim.height),
-    format:"image/png",transparent:"false",time:"2020-01-01"
-  });
-  const url=DG_LCM10_WMS+"?"+params.toString();
+  const sources=[
+    {layer:"lcfm-lcm-10_map",label:"Copernicus LCM-10 2020"},
+    {layer:"esa-worldcover-map-10m-2021-v2_map",label:"ESA WorldCover 2021 v200"}
+  ];
+  let lastError=null;
 
-  console.log("→ Copernicus LCM-10 WMS:",url);
+  for(const source of sources){
+    try{
+      const params=new URLSearchParams({
+        service:"WMS",request:"GetMap",version:"1.1.1",
+        layers:source.layer,styles:"",srs:"EPSG:4326",
+        bbox:b.minLon+","+b.minLat+","+b.maxLon+","+b.maxLat,
+        width:String(dim.width),height:String(dim.height),
+        format:"image/png",transparent:"false"
+      });
 
-  const res=await fetch(url,{method:"GET",mode:"cors",cache:"no-store",
-    headers:{Accept:"image/png"}});
-  if(!res.ok)throw new Error("LCM-10 WMS HTTP "+res.status);
+      const url=(source.label.startsWith("ESA")?DG_WORLDCOVER_WMS:DG_LCM10_WMS)+"?"+params.toString();
+      console.log("→ Uydu WMS:",source.label,url);
 
-  const type=res.headers.get("content-type")||"";
-  if(!type.toLowerCase().includes("image")){
-    const txt=await res.text().catch(()=> "");
-    throw new Error("LCM-10 WMS görüntü döndürmedi: "+txt.slice(0,160));
+      const res=await fetch(url,{method:"GET",mode:"cors",cache:"no-store",
+        headers:{Accept:"image/png"}});
+      if(!res.ok)throw new Error(source.label+" WMS HTTP "+res.status);
+
+      const type=res.headers.get("content-type")||"";
+      if(!type.toLowerCase().includes("image"))
+        throw new Error(source.label+" WMS görüntü döndürmedi");
+
+      const blob=await res.blob();
+      DG_SATELLITE_SOURCE=source.label;
+      const bitmap=await createImageBitmap(blob);
+      const canvas=document.createElement("canvas");
+      canvas.width=bitmap.width;canvas.height=bitmap.height;
+      const ctx=canvas.getContext("2d",{willReadFrequently:true});
+      ctx.drawImage(bitmap,0,0);bitmap.close();
+
+      return {
+        bbox:b,width:canvas.width,height:canvas.height,
+        widthM:dim.widthM,heightM:dim.heightM,
+        data:ctx.getImageData(0,0,canvas.width,canvas.height).data
+      };
+    }catch(e){
+      console.warn("Uydu kaynağı başarısız:",source.label,e);
+      lastError=e;
+    }
   }
 
-  const blob=await res.blob();
+  throw lastError||new Error("Uydu WMS kaynakları okunamadı");
   const bitmap=await createImageBitmap(blob);
   const canvas=document.createElement("canvas");
   canvas.width=bitmap.width;canvas.height=bitmap.height;
@@ -3773,7 +3800,7 @@ async function dgSatelliteRun(){
     unknown:+(unknownM2/10000).toFixed(2),
     total:+(sumM2/10000).toFixed(2),
     geometricTotal:+(geometricM2/10000).toFixed(2),
-    method:"Copernicus LCFM LCM-10 2020 · 10 m WMS raster · WGS84 pixel-area correction",
+    method:DG_SATELLITE_SOURCE+" · 10 m WMS raster · WGS84 pixel-area correction",
     sampleM:10,sampleCount:sat.pixels,satellitePixels:sat.pixels,
     classPixels:sat.byClassPixels
   };
