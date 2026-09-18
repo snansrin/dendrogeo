@@ -3874,17 +3874,30 @@ async function dgSatelliteRun(){
     return "unknown";
   };
 
-  const batchSize=900;
-  const batches=Math.ceil(points.length/batchSize);
+  /*
+   * ArcGIS ImageServer getSamples accepts the request parameters as
+   * query parameters. The official REST operation is documented as GET;
+   * do NOT move these parameters into a POST body because the public
+   * ImageServer endpoint is not documented as a POST operation.
+   *
+   * The previous implementation sent 900 multipoint coordinates in one
+   * URL. That produced HTTP 414 (Request-URI Too Large). We therefore
+   * build each batch dynamically and keep the final encoded URL below a
+   * conservative browser/proxy-safe limit.
+   *
+   * The service itself reports a maximum record count of 1000, so the
+   * point-count ceiling remains comfortably below that limit.
+   */
+  const MAX_URL_CHARS=7000;
+  const MAX_POINTS_PER_BATCH=250;
 
-  for(let bi=0;bi<batches;bi++){
-    const pts=points.slice(bi*batchSize,(bi+1)*batchSize);
+  const buildSampleParams=pts=>{
     const geometry={
       points:pts,
       spatialReference:{wkid:3857}
     };
 
-    const params=new URLSearchParams({
+    return new URLSearchParams({
       f:"json",
       geometryType:"esriGeometryMultipoint",
       geometry:JSON.stringify(geometry),
@@ -3899,14 +3912,85 @@ async function dgSatelliteRun(){
       pixelSize:"10,10",
       returnGeometry:"false"
     });
+  };
+
+  /*
+   * Find the largest safe batch for the current point array. Coordinates
+   * vary slightly in string length, so a fixed number of points alone is
+   * not enough to guarantee that the URL stays small.
+   */
+  const makeBatches=allPoints=>{
+    const batches=[];
+    let cursor=0;
+
+    while(cursor<allPoints.length){
+      const remaining=allPoints.length-cursor;
+      let lo=1;
+      let hi=Math.min(MAX_POINTS_PER_BATCH,remaining);
+      let best=0;
+
+      while(lo<=hi){
+        const mid=Math.floor((lo+hi)/2);
+        const candidate=allPoints.slice(cursor,cursor+mid);
+        const params=buildSampleParams(candidate);
+        const urlLength=(SERVICE+"?"+params.toString()).length;
+
+        if(urlLength<=MAX_URL_CHARS){
+          best=mid;
+          lo=mid+1;
+        }else{
+          hi=mid-1;
+        }
+      }
+
+      if(best<1){
+        throw new Error(
+          "Tek Sentinel-2 örnek noktası bile güvenli URL sınırına sığmadı"
+        );
+      }
+
+      batches.push(allPoints.slice(cursor,cursor+best));
+      cursor+=best;
+    }
+
+    return batches;
+  };
+
+  let batches;
+  try{
+    batches=makeBatches(points);
+  }catch(err){
+    console.error("Sentinel-2 batch oluşturma:",err);
+    if(rep){
+      rep.innerHTML=
+        "<b>❌ Sentinel-2 örnek istekleri hazırlanamadı.</b><br>"+
+        "<span style='font-size:.75rem;color:var(--mut)'>"+
+        String(err.message||err)+"</span>";
+    }
+    return toast("Sentinel-2 örnek istekleri hazırlanamadı.","err","🛰️");
+  }
+
+  console.log(
+    "Sentinel-2 getSamples:",
+    points.length.toLocaleString("tr-TR"),
+    "nokta →",
+    batches.length.toLocaleString("tr-TR"),
+    "URL-güvenli batch"
+  );
+
+  for(let bi=0;bi<batches.length;bi++){
+    const pts=batches[bi];
+    const params=buildSampleParams(pts);
+    const requestUrl=SERVICE+"?"+params.toString();
 
     let data;
     try{
       const controller=new AbortController();
       const timer=setTimeout(()=>controller.abort(),20000);
+
       let res;
       try{
-        res=await fetch(SERVICE+"?"+params.toString(),{
+        res=await fetch(requestUrl,{
           method:"GET",
           mode:"cors",
           cache:"no-store",
@@ -3916,51 +4000,103 @@ async function dgSatelliteRun(){
       }finally{
         clearTimeout(timer);
       }
+
       if(!res.ok){
         const body=await res.text().catch(()=> "");
-        throw new Error("getSamples HTTP "+res.status+(body?" · "+body.slice(0,240):""));
+        throw new Error(
+          "getSamples HTTP "+res.status+
+          (body?" · "+body.slice(0,240):"")
+        );
       }
+
       data=await res.json();
+
       if(data.error){
-        const detail=data.error.details&&data.error.details.length
-          ? " · "+data.error.details.join(" | ")
-          : "";
-        throw new Error((data.error.message||"ImageServer getSamples hatası")+detail);
+        const detail=
+          data.error.details&&data.error.details.length
+            ? " · "+data.error.details.join(" | ")
+            : "";
+
+        throw new Error(
+          (data.error.message||"ImageServer getSamples hatası")+
+          detail
+        );
       }
     }catch(err){
-      console.error("Sentinel-2 getSamples:",err);
+      console.error(
+        "Sentinel-2 getSamples batch "+(bi+1)+"/"+batches.length+":",
+        err
+      );
+
       if(rep){
         rep.innerHTML=
           "<b>❌ 10 m uydu sınıf verisi okunamadı.</b><br>"+
           "<span style='font-size:.75rem;color:var(--mut)'>"+
           "ArcGIS Sentinel-2 ImageServer getSamples isteği başarısız oldu: "+
-          String(err.message||err)+"</span>";
+          String(err.message||err)+
+          " · batch "+(bi+1)+"/"+batches.length+
+          "</span>";
       }
-      return toast("10 m uydu sınıf verisi alınamadı.","err","🛰️");
+
+      return toast(
+        "10 m uydu sınıf verisi alınamadı.",
+        "err",
+        "🛰️"
+      );
     }
 
-    const samples=Array.isArray(data.samples)?data.samples:[];
+    const samples=
+      Array.isArray(data.samples)
+        ? data.samples
+        : [];
+
     if(!samples.length){
-      console.warn("Sentinel-2 batch boş döndü",bi,data);
+      console.warn(
+        "Sentinel-2 batch boş döndü",
+        bi,
+        data
+      );
       continue;
     }
 
-    for(const s of samples){
+    for(let si=0;si<samples.length;si++){
+      const s=samples[si];
       const raw=s.value;
+
       const code=Number(
         typeof raw==="number"
           ? raw
           : String(raw??"").split(",")[0].trim()
       );
-      if(!Number.isFinite(code)||code===0)continue;
+
+      if(!Number.isFinite(code)||code===0){
+        continue;
+      }
 
       const group=classify(code);
-      const loc=s.location||{};
-      const xy=s.location?[
-        Number(s.location.x),Number(s.location.y)
-      ]:pts[received]||null;
+      const loc=s.location||null;
 
-      if(!xy||!Number.isFinite(xy[0])||!Number.isFinite(xy[1]))continue;
+      /*
+       * getSamples returns the sampled location. Only use an index
+       * fallback when the service returned exactly one result per input
+       * point; otherwise an index fallback could associate a class with
+       * the wrong coordinate.
+       */
+      const xy=loc
+        ? [Number(loc.x),Number(loc.y)]
+        : (
+          samples.length===pts.length
+            ? pts[si]
+            : null
+        );
+
+      if(
+        !xy||
+        !Number.isFinite(xy[0])||
+        !Number.isFinite(xy[1])
+      ){
+        continue;
+      }
 
       const [lon,lat]=to4326(xy[0],xy[1]);
 
@@ -3968,8 +4104,12 @@ async function dgSatelliteRun(){
       // geodesic cell calculation used elsewhere in DendroGeo.
       const dLat=stepLat/2;
       const dLon=stepLon/2;
+
       const area=dgWgs84CellAreaM2(
-        lat-dLat,lat+dLat,lon-dLon,lon+dLon
+        lat-dLat,
+        lat+dLat,
+        lon-dLon,
+        lon+dLon
       );
 
       areas[group]+=area;
@@ -3981,7 +4121,8 @@ async function dgSatelliteRun(){
       rep.innerHTML=
         "⏳ Sentinel-2 10 m sınıflandırması… "+
         Math.min(received,points.length).toLocaleString("tr-TR")+
-        " / "+points.length.toLocaleString("tr-TR")+" piksel";
+        " / "+points.length.toLocaleString("tr-TR")+
+        " piksel · batch "+(bi+1)+"/"+batches.length;
     }
   }
 
