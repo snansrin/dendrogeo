@@ -3854,6 +3854,43 @@ async function dgSatelliteRun(){
 
     if(rep)rep.innerHTML="⏳ WorldCover 10 m pikselleri park sınırıyla kesiştiriliyor…";
 
+    // OSM is loaded only as an independent validation layer.
+    // It never changes the satellite classification or fills missing pixels.
+    const osmAvailable=await queryDetailedCoverage();
+
+    const osmValidation={
+      satelliteHardM2:0, satelliteWaterM2:0,
+      hardAlsoMappedByOsmM2:0, waterAlsoMappedByOsmM2:0,
+      satelliteHardNotMappedOsmM2:0, satelliteWaterNotMappedOsmM2:0,
+      osmHardOnOtherSatelliteM2:0, osmWaterOnOtherSatelliteM2:0,
+      osmHardMappedM2:0, osmWaterMappedM2:0
+    };
+
+    function dgOsmPointClass(lat,lon){
+      let water=false,hard=false;
+
+      for(const r of WATER_RINGS){
+        if(pointInPolygon(lat,lon,r)){water=true;break;}
+      }
+      if(!water){
+        for(const l of WATER_LINES){
+          for(let i=0;i<l.length-1;i++){
+            if(pointToSegmentDistanceM(lat,lon,l[i],l[i+1])<=WATER_CLEARANCE_M){
+              water=true;break;
+            }
+          }
+          if(water)break;
+        }
+      }
+
+      for(const r of IMP_RINGS){
+        if(pointInPolygon(lat,lon,r)){hard=true;break;}
+      }
+      if(!hard && nearLineW(IMP_LINES,lat,lon))hard=true;
+
+      return {water,hard};
+    }
+
     const green=new Set([10,20,30,40,90,95,100]);
     const counts={green:0,hard:0,water:0,other:0,unknown:0};
     const areas={green:0,hard:0,water:0,other:0,unknown:0};
@@ -3884,6 +3921,29 @@ async function dgSatelliteRun(){
           else if(code===80)group="water";
           else if(green.has(code))group="green";
           else if(code===60||code===70)group="other";
+
+          if(osmAvailable){
+            const oc=dgOsmPointClass(lat,lon);
+
+            if(group==="hard"){
+              osmValidation.satelliteHardM2+=area;
+              if(oc.hard)osmValidation.hardAlsoMappedByOsmM2+=area;
+              else osmValidation.satelliteHardNotMappedOsmM2+=area;
+            }else if(group==="water"){
+              osmValidation.satelliteWaterM2+=area;
+              if(oc.water)osmValidation.waterAlsoMappedByOsmM2+=area;
+              else osmValidation.satelliteWaterNotMappedOsmM2+=area;
+            }
+
+            if(oc.hard){
+              osmValidation.osmHardMappedM2+=area;
+              if(group!=="hard")osmValidation.osmHardOnOtherSatelliteM2+=area;
+            }
+            if(oc.water){
+              osmValidation.osmWaterMappedM2+=area;
+              if(group!=="water")osmValidation.osmWaterOnOtherSatelliteM2+=area;
+            }
+          }
 
           counts[group]++;
           areas[group]+=area;
@@ -3948,6 +4008,32 @@ async function dgSatelliteRun(){
         "OSM sınıflandırmayı tamamlamak için kullanılmadı.</div>"+
         "<div style='font-size:.68rem;color:var(--mut);margin-top:7px'>"+
         "Kaynak: ESA WorldCover 2021 v200 · Sentinel-1 + Sentinel-2 · 10 m.</div>";
+
+      if(osmAvailable){
+        const hardCov=areas.hard>0
+          ?100*osmValidation.hardAlsoMappedByOsmM2/areas.hard:0;
+        const waterCov=areas.water>0
+          ?100*osmValidation.waterAlsoMappedByOsmM2/areas.water:0;
+
+        rep.innerHTML +=
+          "<div style='margin-top:10px;padding-top:8px;border-top:1px solid var(--line)'>"+
+          "<b>🔎 OSM bağımsız kontrol</b>"+
+          "<div style='font-size:.7rem;color:var(--mut);margin-top:5px'>"+
+          "OSM sonucu nihai alana eklenmedi; yalnızca uydu sınıflarını kontrol ediyor.</div>"+
+          "<div style='font-size:.72rem;margin-top:6px'>"+
+          "🧱 Uydu sert alanının OSM'de de işaretli kısmı: <b>"+
+          hardCov.toFixed(1)+"%</b> · "+
+          "uyduda sert, OSM'de işaretsiz: <b>"+
+          (osmValidation.satelliteHardNotMappedOsmM2/10000).toFixed(2)+" ha</b><br>"+
+          "💧 Uydu su alanının OSM'de de işaretli kısmı: <b>"+
+          waterCov.toFixed(1)+"%</b> · "+
+          "uyduda su, OSM'de işaretsiz: <b>"+
+          (osmValidation.satelliteWaterNotMappedOsmM2/10000).toFixed(2)+" ha</b><br>"+
+          "OSM sert, uyduda başka sınıf: <b>"+
+          (osmValidation.osmHardOnOtherSatelliteM2/10000).toFixed(2)+" ha</b> · "+
+          "OSM su, uyduda başka sınıf: <b>"+
+          (osmValidation.osmWaterOnOtherSatelliteM2/10000).toFixed(2)+" ha</b>"+
+          "</div></div>";
     }
 
     console.log("DENDROGEO · ESA WorldCover 2021",LANDCOVER,{counts,areas});
