@@ -3531,356 +3531,175 @@ function refreshImpLayer(){
 
 
 /* =========================================================
-   LAND COVER ANALYSIS (GÜÇLENDİRİLDİ)
-   - Su kontrolü öncelikli
-   - Sert zeminde su tekrar kontrolü
+   SATELLITE LAND-COVER SOURCE
+   ESA WorldCover 2021 v200 — 10 m
 ========================================================= */
-
-async function runLandCoverAnalysis(){
-  if(
-    !PARK_POLY||
-    !PARK_POLY.length
-  ){
-    return toast(
-      "Önce park seç"
-    );
+const DG_WC_CACHE=new Map();
+const DG_WC_URL_PREFIX="https://esa-worldcover.s3.eu-central-1.amazonaws.com/v200/2021/map/";
+function dgPadInt(v,n){return String(Math.abs(v)).padStart(n,"0");}
+function dgWorldCoverTileName(lat0,lon0){
+  return (lat0>=0?"N":"S")+dgPadInt(lat0,2)+(lon0>=0?"E":"W")+dgPadInt(lon0,3);
+}
+function dgWorldCoverTileUrl(lat0,lon0){
+  return DG_WC_URL_PREFIX+"ESA_WorldCover_10m_2021_v200_"+dgWorldCoverTileName(lat0,lon0)+"_Map.tif";
+}
+function dgAuthalicCellAreaM2(lat0,lat1,lon0,lon1){
+  const R=6371007.1809,dLon=(lon1-lon0)*Math.PI/180;
+  return Math.abs(R*R*dLon*(Math.sin(lat1*Math.PI/180)-Math.sin(lat0*Math.PI/180)));
+}
+function dgWorldCoverClass(code){
+  if(code===80)return "water";
+  if(code===50)return "hard";
+  if(code===10||code===20||code===30||code===40||code===90||code===95||code===100)return "green";
+  if(code===60)return "soft";
+  return "other";
+}
+async function dgReadWorldCoverForPark(){
+  if(typeof GeoTIFF==="undefined"||!GeoTIFF.fromUrl)throw new Error("GeoTIFF.js yüklenmedi.");
+  let minLat=90,maxLat=-90,minLon=180,maxLon=-180;
+  for(const ring of PARK_POLY)for(const p of ring){
+    minLat=Math.min(minLat,p[0]);maxLat=Math.max(maxLat,p[0]);
+    minLon=Math.min(minLon,p[1]);maxLon=Math.max(maxLon,p[1]);
   }
-
-  const rep=
-    $("landCoverReport");
-
-  if(rep){
-    rep.style.display="block";
-    rep.innerHTML=
-      "⏳ Detaylı sorgu (bina·yol·otopark·saha·kort)…";
-  }
-
-  toast(
-    "🌿 Park içi detaylı sorgu…",
-    "info"
-  );
-
-  const coverageOk=await queryDetailedCoverage();
-
-  if(!coverageOk){
-    if(rep){
-      rep.innerHTML=
-        "❌ OSM yüzey verisi alınamadı. " +
-        "Overpass sunucuları şu anda yanıt vermiyor. " +
-        "Park geometrisi korunuyor; tekrar deneyebilirsiniz.";
-    }
-
-    return toast(
-      "OSM yüzey verisi alınamadı.",
-      "err",
-      "⚠️"
-    );
-  }
-
-  if(rep){
-    rep.innerHTML=
-      "⏳ Hesaplanıyor…";
-  }
-
-  const lineIdx=
-    IMP_LINES.map(l=>({
-      pts:l.pts,
-      w:l.w,
-      bbox:ringBBox(l.pts,(
-        (PARK_POLY[0]?.[0]?.[0])||
-        39
-      ))
-    }));
-
-  const sampleRefLat=(PARK_POLY[0]?.[0]?.[0])||39;
-
-  const waterIdx=WATER_RINGS.map(r=>({
-    ring:r,
-    bbox:ringBBox(r,sampleRefLat)
-  }));
-
-  const impIdx=IMP_RINGS.map(r=>({
-    ring:r,
-    bbox:ringBBox(r,sampleRefLat)
-  }));
-
-  let minLat=90;
-  let maxLat=-90;
-  let minLon=180;
-  let maxLon=-180;
-
-  PARK_POLY.forEach(r=>
-    r.forEach(p=>{
-      if(p[0]<minLat)minLat=p[0];
-      if(p[0]>maxLat)maxLat=p[0];
-
-      if(p[1]<minLon)minLon=p[1];
-      if(p[1]>maxLon)maxLon=p[1];
-    })
-  );
-
-  const SAMPLE_M=3;
-
-  const stepLat=
-    SAMPLE_M/110540;
-
-  const stepLon=
-    SAMPLE_M/
-    (
-      111320*
-      Math.cos(
-        (
-          (minLat+maxLat)/2
-        )*
-        Math.PI/180
-      )
-    );
-
-  let nPark=0;
-  let nWater=0;
-  let nImp=0;
-  let nGreen=0;
-
-  for(
-    let la=minLat;
-    la<=maxLat;
-    la+=stepLat
-  ){
-    for(
-      let lo=minLon;
-      lo<=maxLon;
-      lo+=stepLon
-    ){
-      if(
-        !pointInPark(
-          la,
-          lo,
-          PARK_POLY
-        )
-      ){
-        continue;
+  const latStart=Math.floor(minLat/3)*3;
+  const latEnd=Math.floor((maxLat-1e-10)/3)*3;
+  const lonStart=Math.floor(minLon/3)*3;
+  const lonEnd=Math.floor((maxLon-1e-10)/3)*3;
+  const result={source:"ESA WorldCover 2021 v200 · 10 m",pixels:0,waterM2:0,hardM2:0,greenM2:0,softM2:0,otherM2:0,byClass:{}};
+  for(let tileLat=latStart;tileLat<=latEnd;tileLat+=3){
+    for(let tileLon=lonStart;tileLon<=lonEnd;tileLon+=3){
+      const x0=Math.max(minLon,tileLon),x1=Math.min(maxLon,tileLon+3);
+      const y0=Math.max(minLat,tileLat),y1=Math.min(maxLat,tileLat+3);
+      if(x0>=x1||y0>=y1)continue;
+      const url=dgWorldCoverTileUrl(tileLat,tileLon);
+      let tiff=DG_WC_CACHE.get(url);
+      if(!tiff){
+        console.log("→ ESA WorldCover:",url);
+        tiff=await GeoTIFF.fromUrl(url,{cacheSize:32,maxRanges:4});
+        DG_WC_CACHE.set(url,tiff);
       }
-
-      nPark++;
-
-      /* ===============================================
-         SU KONTROLÜ (ÖNCELİKLİ)
-      =============================================== */
-
-      let inWater=false;
-
-      /*
-       * Öncelik 1:
-       * Kapalı su alanı
-       */
-      const sampleP=projectPoint(la,lo,sampleRefLat);
-
-      for(const item of waterIdx){
-        const b=item.bbox;
-        if(
-          sampleP.x<b.minX ||
-          sampleP.x>b.maxX ||
-          sampleP.y<b.minY ||
-          sampleP.y>b.maxY
-        )continue;
-
-        if(pointInPolygon(la,lo,item.ring)){
-          inWater=true;
-          break;
+      const image=await tiff.getImage();
+      const bbox=image.getBoundingBox();
+      const res=image.getResolution();
+      const sx=Math.abs(res[0]),sy=Math.abs(res[1]);
+      const px0=Math.max(0,Math.floor((x0-bbox[0])/sx));
+      const px1=Math.min(image.getWidth(),Math.ceil((x1-bbox[0])/sx));
+      const py0=Math.max(0,Math.floor((bbox[3]-y1)/sy));
+      const py1=Math.min(image.getHeight(),Math.ceil((bbox[3]-y0)/sy));
+      if(px1<=px0||py1<=py0)continue;
+      const raster=await image.readRasters({window:[px0,py0,px1,py1],samples:[0]});
+      const values=raster[0],width=raster.width,height=raster.height;
+      for(let yy=0;yy<height;yy++){
+        const py=py0+yy,latTop=bbox[3]-py*sy,latBottom=latTop-sy,latCenter=(latTop+latBottom)/2;
+        for(let xx=0;xx<width;xx++){
+          const px=px0+xx,lonLeft=bbox[0]+px*sx,lonRight=lonLeft+sx,lonCenter=(lonLeft+lonRight)/2;
+          if(!pointInPark(latCenter,lonCenter,{outer:PARK_POLY,inner:PARK_HOLES||[]}))continue;
+          const code=Number(values[yy*width+xx]);
+          if(!Number.isFinite(code)||code===0)continue;
+          const area=dgAuthalicCellAreaM2(latBottom,latTop,lonLeft,lonRight);
+          const cls=dgWorldCoverClass(code);
+          result.pixels++;
+          result.byClass[code]=(result.byClass[code]||0)+area;
+          if(cls==="water")result.waterM2+=area;
+          else if(cls==="hard")result.hardM2+=area;
+          else if(cls==="green")result.greenM2+=area;
+          else if(cls==="soft")result.softM2+=area;
+          else result.otherM2+=area;
         }
       }
-
-      /*
-       * Öncelik 2:
-       * Su çizgileri (3 m buffer)
-       */
-      if(!inWater){
-        for(const l of WATER_LINES){
-          if(
-            !l||
-            l.length<2
-          ){
-            continue;
-          }
-
-          for(let i=0;i<l.length-1;i++){
-            const d=
-              pointToSegmentDistanceM(
-                la,
-                lo,
-                l[i],
-                l[i+1]
-              );
-
-            if(d<=3){
-              inWater=true;
-              break;
-            }
-          }
-
-          if(inWater)break;
-        }
-      }
-
-      /*
-       * SU HER ŞEYDEN ÖNCE.
-       * Su olan nokta sert zemin olarak
-       * kesinlikle sayılmayacak.
-       */
-      if(inWater){
-        nWater++;
-        continue;
-      }
-
-
-      /* ===============================================
-         SERT ZEMİN KONTROLÜ
-      =============================================== */
-
-      let imp=false;
-
-      /*
-       * Ekstra güvenlik:
-       * Su noktası kesinlikle sert değildir.
-       */
-      if(inWater){
-        continue;
-      }
-
-      for(const item of impIdx){
-        const b=item.bbox;
-        if(
-          sampleP.x<b.minX ||
-          sampleP.x>b.maxX ||
-          sampleP.y<b.minY ||
-          sampleP.y>b.maxY
-        )continue;
-
-        if(pointInPolygon(la,lo,item.ring)){
-          imp=true;
-          break;
-        }
-      }
-
-      if(
-        !imp &&
-        nearLineW(
-          lineIdx,
-          la,
-          lo
-        )
-      ){
-        imp=true;
-      }
-
-      if(imp){
-        nImp++;
-        continue;
-      }
-
-      /*
-       * Geri kalan alan yeşil kabul edilir.
-       */
-      nGreen++;
     }
   }
-
-  const totalHa=
-    parkAreaHa();
-
-  const ha=v=>
-    (
-      (
-        v/
-        Math.max(
-          1,
-          nPark
-        )
-      )*
-      totalHa
-    ).toFixed(1);
-
-  const pct=v=>
-    nPark
-      ?Math.round(
-        v/nPark*100
-      )
-      :0;
-
-  LANDCOVER={
-    green:
-      +ha(nGreen),
-
-    hard:
-      +ha(nImp),
-
-    water:
-      +ha(nWater),
-
-    total:
-      +totalHa.toFixed(1)
-  };
-
-  const row=(
-    color,
-    label,
-    haV,
-    pv
-  )=>
-    `<div style="display:flex;align-items:center;gap:8px;margin:4px 0">`+
-      `<span style="width:12px;height:12px;border-radius:3px;background:${color};flex:none"></span>`+
-      `<span style="width:52px;font-size:.8rem">${label}</span>`+
-      `<div style="flex:1;height:10px;background:var(--line);border-radius:5px;overflow:hidden">`+
-        `<div style="height:100%;width:${pv}%;background:${color};transition:width .6s"></div>`+
-      `</div>`+
-      `<b style="font-size:.8rem;width:74px;text-align:right">${haV} ha</b>`+
-      `<span style="font-size:.72rem;color:var(--mut);width:38px">%${pv}</span>`+
-    `</div>`;
-
-  if(rep){
-    rep.innerHTML=
-
-      `<b>🌿 Yüzey Örtüsü</b> `+
-      `<span style="font-size:.72rem;color:var(--mut)">`+
-      `(bina·yol·otopark·saha·kort dahil)`+
-      `</span>`+
-
-      row(
-        "#16a34a",
-        "Yeşil",
-        ha(nGreen),
-        pct(nGreen)
-      )+
-
-      row(
-        "#ef4444",
-        "Sert",
-        ha(nImp),
-        pct(nImp)
-      )+
-
-      row(
-        "#3b82f6",
-        "Su",
-        ha(nWater),
-        pct(nWater)
-      )+
-
-      `<div style="font-size:.72rem;color:var(--mut);margin-top:6px">`+
-        `Toplam: <b>${totalHa.toFixed(1)} ha</b> · `+
-        `Yeşil+Sert+Su = Toplam<br>`+
-        `Örnekleme: ${SAMPLE_M} m · `+
-        `Örnek nokta: ${nPark.toLocaleString("tr-TR")}`+
-      `</div>`;
+  return result;
+}
+function dgPointClassAt(lat,lon,waterIdx,impIdx,lineIdx){
+  const sampleP=projectPoint(lat,lon,(PARK_POLY[0]?.[0]?.[0])||39);
+  for(const item of waterIdx){
+    const b=item.bbox;
+    if(sampleP.x<b.minX||sampleP.x>b.maxX||sampleP.y<b.minY||sampleP.y>b.maxY)continue;
+    if(pointInPolygon(lat,lon,item.ring))return "water";
   }
-
-  toast(
-    "✓ Analiz tamam",
-    "ok",
-    "🌿"
-  );
+  for(const l of WATER_LINES){
+    if(!l||l.length<2)continue;
+    for(let i=0;i<l.length-1;i++)if(pointToSegmentDistanceM(lat,lon,l[i],l[i+1])<=3)return "water";
+  }
+  for(const item of impIdx){
+    const b=item.bbox;
+    if(sampleP.x<b.minX||sampleP.x>b.maxX||sampleP.y<b.minY||sampleP.y>b.maxY)continue;
+    if(pointInPolygon(lat,lon,item.ring))return "hard";
+  }
+  if(nearLineW(lineIdx,lat,lon))return "hard";
+  return "green";
+}
+async function dgRunOsm3mAnalysis(){
+  const ref=(PARK_POLY[0]?.[0]?.[0])||39;
+  const lineIdx=IMP_LINES.map(l=>({pts:l.pts,w:l.w,bbox:ringBBox(l.pts,ref)}));
+  const waterIdx=WATER_RINGS.map(r=>({ring:r,bbox:ringBBox(r,ref)}));
+  const impIdx=IMP_RINGS.map(r=>({ring:r,bbox:ringBBox(r,ref)}));
+  let minLat=90,maxLat=-90,minLon=180,maxLon=-180;
+  PARK_POLY.forEach(r=>r.forEach(p=>{minLat=Math.min(minLat,p[0]);maxLat=Math.max(maxLat,p[0]);minLon=Math.min(minLon,p[1]);maxLon=Math.max(maxLon,p[1]);}));
+  const SAMPLE_M=3,stepLat=SAMPLE_M/110540,stepLon=SAMPLE_M/(111320*Math.cos(((minLat+maxLat)/2)*Math.PI/180));
+  const out={sampleM:SAMPLE_M,park:0,water:0,hard:0,green:0,lineIdx,waterIdx,impIdx,minLat,maxLat,minLon,maxLon};
+  for(let la=minLat;la<=maxLat;la+=stepLat)for(let lo=minLon;lo<=maxLon;lo+=stepLon){
+    if(!pointInPark(la,lo,PARK_POLY))continue;
+    out.park++;
+    const cls=dgPointClassAt(la,lo,waterIdx,impIdx,lineIdx);
+    if(cls==="water")out.water++;else if(cls==="hard")out.hard++;else out.green++;
+  }
+  return out;
+}
+function dgFuseOsmAndSatellite(osm,sat){
+  const totalM2=parkAreaM2();
+  let waterM2=(osm.water/osm.park)*totalM2;
+  let hardM2=(osm.hard/osm.park)*totalM2;
+  const osmWaterRatio=osm.water/osm.park,osmHardRatio=osm.hard/osm.park;
+  waterM2=Math.min(totalM2,waterM2+Math.max(0,sat.waterM2-sat.waterM2*osmWaterRatio));
+  hardM2=Math.min(totalM2-waterM2,hardM2+Math.max(0,sat.hardM2-sat.hardM2*osmHardRatio));
+  return{totalM2,waterM2,hardM2,greenM2:Math.max(0,totalM2-waterM2-hardM2),osmM2:{water:(osm.water/osm.park)*totalM2,hard:(osm.hard/osm.park)*totalM2,green:(osm.green/osm.park)*totalM2},satelliteM2:{water:sat.waterM2,hard:sat.hardM2,green:sat.greenM2}};
 }
 
+/* =========================================================
+   LAND COVER ANALYSIS — HYBRID SCIENTIFIC ENGINE
+========================================================= */
+async function runLandCoverAnalysis(){
+  if(!PARK_POLY||!PARK_POLY.length)return toast("Önce park seç","warn","🌳");
+  const rep=$("landCoverReport");
+  if(rep){rep.style.display="block";rep.innerHTML="⏳ OSM arazi geometrileri okunuyor…";}
+  toast("🌿 OSM + uydu arazi örtüsü analizi başlıyor…","info");
+  const coverageOk=await queryDetailedCoverage();
+  if(!coverageOk){
+    if(rep)rep.innerHTML="❌ OSM yüzey verisi alınamadı. Overpass yanıt vermiyor.";
+    return toast("OSM yüzey verisi alınamadı.","err","⚠️");
+  }
+  if(rep)rep.innerHTML="⏳ 3 m OSM örneklemesi hesaplanıyor…";
+  const osm=await dgRunOsm3mAnalysis();
+  let sat=null;
+  if(rep)rep.innerHTML="⏳ ESA WorldCover 2021 · 10 m bağımsız arazi örtüsü okunuyor…";
+  try{sat=await dgReadWorldCoverForPark();}catch(err){console.warn("ESA WorldCover okunamadı; OSM sonucu korunuyor:",err);}
+  const totalM2=parkAreaM2();
+  const fused=sat&&sat.pixels>0
+    ?dgFuseOsmAndSatellite(osm,sat)
+    :{totalM2,waterM2:(osm.water/osm.park)*totalM2,hardM2:(osm.hard/osm.park)*totalM2,greenM2:(osm.green/osm.park)*totalM2,osmM2:{water:(osm.water/osm.park)*totalM2,hard:(osm.hard/osm.park)*totalM2,green:(osm.green/osm.park)*totalM2},satelliteM2:null};
+  const waterHa=fused.waterM2/10000,hardHa=fused.hardM2/10000,greenHa=fused.greenM2/10000,totalHa=totalM2/10000;
+  LANDCOVER={green:+greenHa.toFixed(2),hard:+hardHa.toFixed(2),water:+waterHa.toFixed(2),total:+totalHa.toFixed(2),method:sat?"OSM + ESA WorldCover 2021 v200 (10 m) + OSM 3 m validation":"OSM 3 m",sampleM:3,sampleCount:osm.park,satellitePixels:sat?.pixels||0};
+  const pct=v=>totalM2>0?Math.round(v/totalM2*100):0;
+  const row=(color,label,haV,pv)=>'<div style="display:flex;align-items:center;gap:8px;margin:4px 0"><span style="width:12px;height:12px;border-radius:3px;background:'+color+';flex:none"></span><span style="width:52px;font-size:.8rem">'+label+'</span><div style="flex:1;height:10px;background:var(--line);border-radius:5px;overflow:hidden"><div style="height:100%;width:'+pv+'%;background:'+color+';transition:width .6s"></div></div><b style="font-size:.8rem;width:74px;text-align:right">'+haV.toFixed(1)+' ha</b><span style="font-size:.72rem;color:var(--mut);width:38px">%'+pv+'</span></div>';
+  if(rep){
+    rep.innerHTML='<b>🌿 Yüzey Örtüsü</b> <span style="font-size:.72rem;color:var(--mut)">(bina·yol·otopark·saha·kort dahil)</span>'+
+      row("#16a34a","Yeşil",greenHa,pct(fused.greenM2))+
+      row("#ef4444","Sert",hardHa,pct(fused.hardM2))+
+      row("#3b82f6","Su",waterHa,pct(fused.waterM2))+
+      '<div style="font-size:.72rem;color:var(--mut);margin-top:6px">Toplam: <b>'+totalHa.toFixed(1)+' ha</b> · Yeşil+Sert+Su = Toplam<br>Örnekleme: 3 m · Örnek nokta: '+osm.park.toLocaleString("tr-TR")+'</div>'+
+      (sat?'<div style="font-size:.7rem;color:var(--mut);margin-top:8px">Uydu: ESA WorldCover 2021 v200 · 10 m · '+sat.pixels.toLocaleString("tr-TR")+' piksel</div>':'<div style="font-size:.7rem;color:#b45309;margin-top:8px">⚠ ESA WorldCover okunamadı; sonuç OSM 3 m ölçümünden üretildi.</div>')+
+      '<div style="font-size:.68rem;color:var(--mut);margin-top:8px">Yöntem: OSM geometrileri birincil; ESA WorldCover bağımsız 10 m kontrol ve eksik su/yerleşik yüzeyleri yakalamak için kullanılır. Sabit oran/katsayı veya park özelinde hedef değer kullanılmaz.</div>';
+  }
+  console.group("========== BİLİMSEL YÜZEY ANALİZİ ==========");
+  console.log("Park:",totalM2.toFixed(1),"m²");
+  console.log("OSM 3 m:",fused.osmM2,"samples:",osm.park);
+  if(sat)console.log("ESA WorldCover 10 m:",{waterM2:sat.waterM2,hardM2:sat.hardM2,greenM2:sat.greenM2,pixels:sat.pixels,byClass:sat.byClass});
+  console.log("Fused:",{waterM2:fused.waterM2,hardM2:fused.hardM2,greenM2:fused.greenM2});
+  console.groupEnd();
+  toast("✓ Bilimsel yüzey analizi tamamlandı","ok","🌿");
+}
 
 /* =========================================================
    TILE DRAW
