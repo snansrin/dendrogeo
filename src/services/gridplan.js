@@ -5591,3 +5591,267 @@ function wcAt(lat,lon,d){for(const r of d.rasters){const px=Math.floor((lon-r.bb
 async function run(){if(!PARK_POLY||!PARK_POLY.length)return toast("Önce park seç","warn","🌳");const rep=$("landCoverReport");if(rep){rep.style.display="block";rep.innerHTML="⏳ OSM gerçek yüzey geometrileri okunuyor…";}toast("🌿 Gerçek arazi örtüsü analizi başlıyor…","info");const c=await osm();let wc=null;try{if(rep)rep.innerHTML="⏳ ESA WorldCover 2021 v200 · 10 m okunuyor…";wc=await world(c);}catch(e){console.warn("v47 WorldCover:",e);}if(rep)rep.innerHTML="⏳ 3 m örnekleme ve kaynak birleştirme…";const sl=3/110540,mid=(c.minLat+c.maxLat)/2,so=3/(111320*Math.cos(mid*Math.PI/180));let n=0,w=0,h=0,g=0,o=0,osmN=0,satN=0,unknown=0;for(let lat=c.minLat;lat<=c.maxLat;lat+=sl)for(let lon=c.minLon;lon<=c.maxLon;lon+=so){if(!pointInPark(lat,lon,PARK_POLY))continue;n++;let cls=null;for(const x of c.wp)if(hit(x.x,lat,lon)&&poly(lat,lon,x.g)){cls="water";break;}if(!cls)for(const x of c.wl)if(hit(x.x,lat,lon)&&near(lat,lon,x.p,x.w)){cls="water";break;}if(!cls)for(const x of c.hp)if(hit(x.x,lat,lon)&&poly(lat,lon,x.g)){cls="hard";break;}if(!cls)for(const x of c.hl)if(hit(x.x,lat,lon)&&near(lat,lon,x.p,x.w)){cls="hard";break;}if(cls)osmN++;else if(wc){cls=wcAt(lat,lon,wc);if(cls)satN++;}if(!cls){cls="other";unknown++;}if(cls==="water")w++;else if(cls==="hard")h++;else if(cls==="green")g++;else o++;}if(!n)throw new Error("Park içinde örnek üretilemedi");const total=parkAreaM2(),scale=total/n,waterM=w*scale,hardM=h*scale,greenM=g*scale,otherM=o*scale;LANDCOVER={total:+(total/10000).toFixed(2),water:+(waterM/10000).toFixed(2),hard:+(hardM/10000).toFixed(2),green:+(greenM/10000).toFixed(2),other:+(otherM/10000).toFixed(2),sampleM:3,sampleCount:n,osmKnownSamples:osmN,worldCoverSamples:satN,unknownSamples:unknown,scientific:true,method:wc?"OSM + ESA WorldCover 2021 v200 · 3 m":"OSM · 3 m"};const pct=v=>Math.round(v/total*100);const row=(col,label,v)=>{const p=pct(v);return "<div style=\"display:flex;align-items:center;gap:8px;margin:5px 0\"><span style=\"width:12px;height:12px;border-radius:3px;background:"+col+";flex:none\"></span><span style=\"width:78px;font-size:.8rem\">"+label+"</span><div style=\"flex:1;height:10px;background:var(--line);border-radius:5px;overflow:hidden\"><div style=\"height:100%;width:"+p+"%;background:"+col+"\"></div></div><b style=\"font-size:.8rem;width:76px;text-align:right\">"+(v/10000).toFixed(2)+" ha</b><span style=\"font-size:.72rem;color:var(--mut);width:34px\">%"+p+"</span></div>";};if(rep)rep.innerHTML="<b>🌿 Arazi Örtüsü</b> <span style=\"font-size:.7rem;color:var(--mut)\">OSM + ESA WorldCover</span>"+row("#16a34a","Yeşil",greenM)+row("#ef4444","Sert",hardM)+row("#3b82f6","Su",waterM)+row("#9ca3af","Diğer / belirsiz",otherM)+"<div style=\"font-size:.72rem;color:var(--mut);margin-top:7px\">Toplam: <b>"+(total/10000).toFixed(2)+" ha</b> · Sınıflar toplamı: <b>"+((greenM+hardM+waterM+otherM)/10000).toFixed(2)+" ha</b><br>Örnekleme: <b>3 m</b> · Örnek nokta: <b>"+n.toLocaleString("tr-TR")+"</b></div><div style=\"font-size:.69rem;color:var(--mut);margin-top:7px\">OSM doğrudan: <b>"+osmN.toLocaleString("tr-TR")+"</b> · WorldCover: <b>"+satN.toLocaleString("tr-TR")+"</b> · Belirsiz: <b>"+unknown.toLocaleString("tr-TR")+"</b></div>"+(wc?"<div style=\"font-size:.69rem;color:var(--mut);margin-top:6px\">Uydu: <b>ESA WorldCover 2021 v200 · 10 m</b>. 50=Built-up, 80=kalıcı su, 10/20/30/40/90/95/100=vejetasyon; 60/70=diğer.</div>":"<div style=\"font-size:.69rem;color:#b45309;margin-top:6px\">⚠ ESA WorldCover okunamadı. OSM'nin bilmediği alanlar yeşile zorlanmadı.</div>")+"<div style=\"font-size:.68rem;color:var(--mut);margin-top:7px\">Toplam alan seçilen OSM park geometrisidir; hiçbir hedef değere ayarlanmaz.</div>";console.group("DENDROGEO v47");console.log({parkM2:total,samples:n,osmKnown:osmN,worldCover:satN,unknown,greenM2:greenM,hardM2:hardM,waterM2:waterM,otherM2:otherM});console.groupEnd();toast("✓ Kaynak tabanlı analiz tamamlandı","ok","🌿");}
 window.runLandCoverAnalysis=run;window.DG_PARK_ANALYSIS={version:"47",geometricAreaHa:()=>PARK_POLY?parkAreaM2()/10000:null,result:()=>LANDCOVER,method:()=>LANDCOVER&&LANDCOVER.method||null};
 })();
+
+/* =========================================================
+   DENDROGEO V48 LAND COVER ENGINE
+   OSM fiziksel arazi örtüsü + açıkça etiketlenmiş sert yüzey
+   - leisure=park tek başına yeşil sayılmaz.
+   - OSM'de fiziksel örtüyü ifade eden natural/landuse/landcover/surface
+     etiketleri kullanılır.
+   - Açık highway çizgileri yalnızca gerçek width=* varsa sert alan
+     olarak örneklenir; lanes'tan genişlik tahmini yapılmaz.
+   - Bilinmeyen alan yeşile veya serte zorlanmaz.
+========================================================= */
+
+async function dgV48LoadCoverage(){
+  if(!PARK_POLY||!PARK_POLY.length)return null;
+
+  let minLat=90,maxLat=-90,minLon=180,maxLon=-180;
+  for(const ring of PARK_POLY){
+    for(const p of ring){
+      minLat=Math.min(minLat,p[0]); maxLat=Math.max(maxLat,p[0]);
+      minLon=Math.min(minLon,p[1]); maxLon=Math.max(maxLon,p[1]);
+    }
+  }
+
+  const pad=0.00035;
+  const bbox=`${minLat-pad},${minLon-pad},${maxLat+pad},${maxLon+pad}`;
+
+  const q=
+    `[out:json][timeout:90];(`+
+    // Water
+    `way["natural"="water"](${bbox});relation["natural"="water"](${bbox});`+
+    `way["water"](${bbox});relation["water"](${bbox});`+
+    `way["waterway"="riverbank"](${bbox});relation["waterway"="riverbank"](${bbox});`+
+    `way["landuse"~"^(reservoir|basin|salt_pond)$"](${bbox});relation["landuse"~"^(reservoir|basin|salt_pond)$"](${bbox});`+
+    `way["leisure"="swimming_pool"](${bbox});relation["leisure"="swimming_pool"](${bbox});`+
+    // Hard polygons/features
+    `way["building"](${bbox});relation["building"](${bbox});`+
+    `way["building:part"](${bbox});relation["building:part"](${bbox});`+
+    `way["amenity"~"^(parking|bicycle_parking|motorcycle_parking)$"](${bbox});relation["amenity"~"^(parking|bicycle_parking|motorcycle_parking)$"](${bbox});`+
+    `way["area:highway"](${bbox});relation["area:highway"](${bbox});`+
+    `way["landuse"="highway"](${bbox});relation["landuse"="highway"](${bbox});`+
+    `way["leisure"~"^(pitch|track|playground)$"](${bbox});relation["leisure"~"^(pitch|track|playground)$"](${bbox});`+
+    `way["surface"~"^(asphalt|paved|concrete|paving_stones|sett|cobblestone|bricks|metal|concrete:plates|concrete:lanes)$"](${bbox});`+
+    `relation["surface"~"^(asphalt|paved|concrete|paving_stones|sett|cobblestone|bricks|metal|concrete:plates|concrete:lanes)$"](${bbox});`+
+    `way["man_made"~"^(pier|bridge)$"](${bbox});relation["man_made"~"^(pier|bridge)$"](${bbox});`+
+    // Green / vegetated areas
+    `way["natural"~"^(wood|scrub|grassland|heath|fell|wetland|shrubbery)$"](${bbox});relation["natural"~"^(wood|scrub|grassland|heath|fell|wetland|shrubbery)$"](${bbox});`+
+    `way["landuse"~"^(forest|grass|meadow|recreation_ground|village_green|orchard|vineyard|greenery)$"](${bbox});relation["landuse"~"^(forest|grass|meadow|recreation_ground|village_green|orchard|vineyard|greenery)$"](${bbox});`+
+    `way["landcover"](${bbox});relation["landcover"](${bbox});`+
+    `way["leisure"="garden"](${bbox});relation["leisure"="garden"](${bbox});`+
+    // Bare / other explicit covers
+    `way["natural"~"^(sand|bare_rock|scree|shingle|mud|blockfield)$"](${bbox});relation["natural"~"^(sand|bare_rock|scree|shingle|mud|blockfield)$"](${bbox});`+
+    `way["surface"~"^(gravel|fine_gravel|ground|dirt|earth|sand|mud|pebblestone|compacted|unhewn_cobblestone)$"](${bbox});relation["surface"~"^(gravel|fine_gravel|ground|dirt|earth|sand|mud|pebblestone|compacted|unhewn_cobblestone)$"](${bbox});`+
+    // Linear features: width is read, never inferred.
+    `way["highway"](${bbox});`+
+    `);out geom;`;
+
+  const data=await overpassRequest(q,"V48 arazi örtüsü");
+  if(!data)return null;
+
+  const seen=new Set();
+  const water=[],hard=[],green=[],other=[],hardLines=[];
+  const stats={water:0,hard:0,green:0,other:0,unknown:0};
+
+  const addRing=(arr,ring)=>{
+    if(ring&&ring.length>=3)arr.push(ring);
+  };
+
+  const ringsFromElement=el=>{
+    if(el.type==="relation"){
+      const r=extractRings(el);
+      if(!r)return [];
+      if(Array.isArray(r))return r.filter(x=>x&&x.length>=3);
+      return (r.outer||[]).filter(x=>x&&x.length>=3);
+    }
+    if(!el.geometry)return [];
+    const pts=el.geometry.map(p=>[p.lat,p.lon]);
+    return isClosedLine(pts)?[pts]:[];
+  };
+
+  const explicitWidth=tags=>{
+    const n=parseFloat(String(tags?.width??"").replace(",","."));
+    return Number.isFinite(n)&&n>0&&n<40 ? n : 0;
+  };
+
+  const classFor=tags=>{
+    const t=tags||{};
+    const natural=String(t.natural||"").toLowerCase();
+    const landuse=String(t.landuse||"").toLowerCase();
+    const landcover=String(t.landcover||"").toLowerCase();
+    const surface=String(t.surface||"").toLowerCase();
+    const leisure=String(t.leisure||"").toLowerCase();
+
+    if(t.building||t["building:part"])return "hard";
+    if(t.amenity==="parking"||t.amenity==="bicycle_parking"||t.amenity==="motorcycle_parking")return "hard";
+    if(t["area:highway"]||landuse==="highway")return "hard";
+    if(t.man_made==="pier"||t.man_made==="bridge")return "hard";
+    if(["asphalt","paved","concrete","paving_stones","sett","cobblestone","bricks","metal","concrete:plates","concrete:lanes"].includes(surface))return "hard";
+    if(["pitch","track","playground"].includes(leisure) &&
+       ["asphalt","paved","concrete","paving_stones","rubber","rubber_tiles"].includes(surface))return "hard";
+
+    if(natural==="water"||t.water||natural==="wetland"&&t.wetland==="water")return "water";
+    if(t.waterway==="riverbank"||landuse==="reservoir"||landuse==="basin"||landuse==="salt_pond"||leisure==="swimming_pool")return "water";
+
+    if(["wood","scrub","grassland","heath","fell","wetland","shrubbery"].includes(natural))return "green";
+    if(["forest","grass","meadow","recreation_ground","village_green","orchard","vineyard","greenery"].includes(landuse))return "green";
+    if(leisure==="garden")return "green";
+    if(["trees","tree","greenery","grass","shrub","shrubbery","moss","herbaceous_vegetation"].includes(landcover))return "green";
+    if(surface==="grass")return "green";
+
+    if(["sand","bare_rock","scree","shingle","mud","blockfield"].includes(natural))return "other";
+    if(["gravel","fine_gravel","ground","dirt","earth","sand","mud","pebblestone","compacted","unhewn_cobblestone"].includes(surface))return "other";
+    return null;
+  };
+
+  for(const el of (data.elements||[])){
+    const key=el.type+":"+el.id;
+    if(seen.has(key))continue;
+    seen.add(key);
+
+    const t=el.tags||{};
+    const cls=classFor(t);
+    const rings=ringsFromElement(el);
+
+    if(cls==="water")rings.forEach(r=>addRing(water,r));
+    else if(cls==="hard")rings.forEach(r=>addRing(hard,r));
+    else if(cls==="green")rings.forEach(r=>addRing(green,r));
+    else if(cls==="other")rings.forEach(r=>addRing(other,r));
+
+    if(el.type==="way"&&Array.isArray(el.geometry)&&el.geometry.length>1&&t.highway){
+      const width=explicitWidth(t);
+      if(width>0){
+        hardLines.push({pts:el.geometry.map(p=>[p.lat,p.lon]),w:width/2});
+      }
+    }
+  }
+
+  return {minLat,maxLat,minLon,maxLon,water,hard,green,other,hardLines,stats};
+}
+
+function dgV48PointInAny(lat,lon,items){
+  for(const ring of items){
+    if(pointInPolygon(lat,lon,ring))return true;
+  }
+  return false;
+}
+
+function dgV48ClassAt(lat,lon,src){
+  // Physical-cover priority: water > hard > explicit green > explicit bare/other.
+  if(dgV48PointInAny(lat,lon,src.water))return "water";
+  if(dgV48PointInAny(lat,lon,src.hard))return "hard";
+  if(nearLineW(src.hardLines,lat,lon))return "hard";
+  if(dgV48PointInAny(lat,lon,src.green))return "green";
+  if(dgV48PointInAny(lat,lon,src.other))return "other";
+  return "unknown";
+}
+
+async function dgV48Sample(src){
+  const lat0=(src.minLat+src.maxLat)/2;
+  const stepLat=3/110540;
+  const stepLon=3/(111320*Math.cos(lat0*Math.PI/180));
+  const out={sampleM:3,park:0,water:0,hard:0,green:0,other:0,unknown:0};
+
+  for(let lat=src.minLat;lat<=src.maxLat;lat+=stepLat){
+    for(let lon=src.minLon;lon<=src.maxLon;lon+=stepLon){
+      if(!pointInPark(lat,lon,PARK_POLY))continue;
+      out.park++;
+      const cls=dgV48ClassAt(lat,lon,src);
+      if(cls==="water")out.water++;
+      else if(cls==="hard")out.hard++;
+      else if(cls==="green")out.green++;
+      else if(cls==="other")out.other++;
+      else out.unknown++;
+    }
+  }
+  return out;
+}
+
+async function dgV48Run(){
+  if(!PARK_POLY||!PARK_POLY.length)return toast("Önce park seç","warn","🌳");
+  const rep=$("landCoverReport");
+  if(rep){
+    rep.style.display="block";
+    rep.innerHTML="⏳ OSM fiziksel arazi örtüsü ve yüzey geometrileri okunuyor…";
+  }
+  toast("🌿 OSM gerçek arazi örtüsü analizi başlıyor…","info");
+
+  const src=await dgV48LoadCoverage();
+  if(!src){
+    if(rep)rep.innerHTML="❌ OSM arazi örtüsü verisi alınamadı.";
+    return toast("OSM verisi alınamadı.","err","⚠️");
+  }
+
+  if(rep)rep.innerHTML="⏳ 3 m örnekleme ile park sınıfları hesaplanıyor…";
+  const s=await dgV48Sample(src);
+  if(!s.park){
+    if(rep)rep.innerHTML="❌ Park içinde örnek üretilemedi.";
+    return toast("Park örneklenemedi.","err","⚠️");
+  }
+
+  const totalM2=parkAreaM2();
+  const scale=totalM2/s.park;
+  const waterM2=s.water*scale;
+  const hardM2=s.hard*scale;
+  const greenM2=s.green*scale;
+  const otherM2=s.other*scale;
+  const unknownM2=s.unknown*scale;
+
+  const ha=v=>v/10000;
+  const pct=v=>totalM2>0?Math.round(v/totalM2*100):0;
+
+  LANDCOVER={
+    green:+ha(greenM2).toFixed(2),
+    hard:+ha(hardM2).toFixed(2),
+    water:+ha(waterM2).toFixed(2),
+    other:+ha(otherM2).toFixed(2),
+    unknown:+ha(unknownM2).toFixed(2),
+    total:+ha(totalM2).toFixed(2),
+    method:"OSM fiziksel arazi örtüsü + 3 m örnekleme",
+    sampleM:3,
+    sampleCount:s.park,
+    sourceCounts:{water:s.water,hard:s.hard,green:s.green,other:s.other,unknown:s.unknown}
+  };
+
+  const row=(label,emoji,haV)=>{
+    const p=pct(haV*10000);
+    return `<div style="display:flex;align-items:center;gap:8px;margin:5px 0">
+      <span style="width:18px;text-align:center">${emoji}</span>
+      <span style="width:92px;font-size:.8rem">${label}</span>
+      <div style="flex:1;height:10px;background:var(--line);border-radius:5px;overflow:hidden">
+        <div style="height:100%;width:${p}%;background:currentColor"></div>
+      </div>
+      <b style="font-size:.8rem;width:72px;text-align:right">${haV.toFixed(2)} ha</b>
+      <span style="font-size:.72rem;color:var(--mut);width:36px">% ${p}</span>
+    </div>`;
+  };
+
+  if(rep){
+    rep.innerHTML=
+      `<b>🌿 Arazi Örtüsü · OSM</b> <span style="font-size:.72rem;color:var(--mut)">(fiziksel örtü etiketleri)</span>`+
+      row("Yeşil","🌿",ha(greenM2))+
+      row("Sert","🧱",ha(hardM2))+
+      row("Su","💧",ha(waterM2))+
+      row("Diğer","🟫",ha(otherM2))+
+      row("Bilinmeyen","❓",ha(unknownM2))+
+      `<div style="font-size:.72rem;color:var(--mut);margin-top:8px">
+        Toplam: <b>${ha(totalM2).toFixed(2)} ha</b> · Sınıflar toplamı: <b>${ha(totalM2).toFixed(2)} ha</b><br>
+        Örnekleme: 3 m · Örnek nokta: ${s.park.toLocaleString("tr-TR")}<br>
+        Doğrudan OSM sınıflı: ${(s.park-s.unknown).toLocaleString("tr-TR")} · Bilinmeyen: ${s.unknown.toLocaleString("tr-TR")}<br>
+        Kaynak: OpenStreetMap/Overpass. Park sınırı seçilen OSM geometrisidir.
+      </div>`+
+      `<div style="font-size:.68rem;color:#b45309;margin-top:8px">⚠ ESA WorldCover 2021 COG doğrudan tarayıcı analizine uygun şekilde doğrulanamadığı için bu sürüm WorldCover'ı sonuçlara katmıyor; OSM verisini yeşile/serte zorlamıyor.</div>`;
+  }
+
+  console.group("========== DENDROGEO V48 ==========");
+  console.log("OSM örnekleme:",s);
+  console.log("Alan m²:",totalM2);
+  console.log("Tahmini alan m²:",{waterM2,hardM2,greenM2,otherM2,unknownM2});
+  console.groupEnd();
+
+  toast("✓ OSM arazi örtüsü analizi tamamlandı","ok","🌿");
+}
+
+window.runLandCoverAnalysis=dgV48Run;
+
