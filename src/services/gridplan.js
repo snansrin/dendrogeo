@@ -3953,390 +3953,362 @@ async function dgSatelliteRun(){
   const rep=$("landCoverReport");
   if(rep){
     rep.style.display="block";
-    rep.innerHTML="⏳ 2020 · 10 m arazi örtüsü rasterı park alanına göre indiriliyor ve piksel piksel sınıflandırılıyor…";
+    rep.innerHTML="⏳ 2020 · 10 m LULC: park poligonu doğrudan raster istatistiğine gönderiliyor…";
   }
 
   /*
-   * SCIENTIFIC DATA SOURCE
-   * ----------------------
-   * Use the static Esri 2020 Land Cover V2 ImageServer instead of the
-   * time-series Sentinel2_10m_LandCover mosaic. The V2 product is a
-   * global 10 m 2020 LULC map derived from Sentinel-2 and is documented
-   * as a 10 m land-cover product. We request the categorical raster with
-   * nearest-neighbour resampling and "None" rendering so the browser
-   * receives the class raster, not a basemap visualization.
+   * FINAL SATELLITE ARCHITECTURE
+   * ----------------------------
+   * We no longer use the old Esri ImageServer exportImage endpoint.
+   *
+   * That service is published as a Tiled Imagery Layer with
+   * capabilities "Image,TilesOnly" and LERC2D tiles. Esri Community
+   * documents that exportImage requests against this service can return
+   * HTTP 400 and that the service is in WGS84/non-Web-Mercator form.
+   *
+   * For scientific analysis the Microsoft Planetary Computer STAC/COG
+   * copy is a much cleaner machine-readable source:
+   *   collection: io-lulc-9-class
+   *   resolution: 10 m
+   *   source: Impact Observatory / Sentinel-2
+   *
+   * We ask TiTiler/STAC for statistics of the ACTUAL PARK POLYGON.
+   * This is fundamentally different from sprinkling points over a bbox:
+   * raster cells are read from the COG and the polygon coverage of edge
+   * cells is accounted for by the statistics service.
    */
-  const SERVICE=
-    "https://tiledimageservices.arcgis.com/P3ePLMYs2RVChkJx/arcgis/rest/services/"+
-    "Esri_2020_Land_Cover_V2/ImageServer/exportImage";
+  const STAC=
+    "https://planetarycomputer.microsoft.com/api/stac/v1";
+  const TITILER=
+    "https://planetarycomputer.microsoft.com/api/data/v1";
+  const COLLECTION="io-lulc-9-class";
 
-  const to3857=(lon,lat)=>{
-    const x=lon*20037508.34/180;
-    let y=Math.log(Math.tan((90+lat)*Math.PI/360))/(Math.PI/180);
-    y=y*20037508.34/180;
-    return [x,y];
+  const toGeoJSON=()=>{
+    const outers=Array.isArray(PARK_POLY)?PARK_POLY:[];
+    if(!outers.length)throw new Error("Park polygon boş.");
+
+    const rings=outers.map(ring=>
+      ring.map(p=>[Number(p[1]),Number(p[0])])
+    ).filter(r=>r.length>=3);
+
+    if(!rings.length)throw new Error("Park polygon geçersiz.");
+
+    /*
+     * The current park selector normally has one outer ring plus
+     * PARK_HOLES. Preserve holes exactly when there is one outer ring.
+     * For multiple outer rings, each outer is represented independently.
+     */
+    if(rings.length===1){
+      const holes=(PARK_HOLES||[])
+        .map(r=>r.map(p=>[Number(p[1]),Number(p[0])]))
+        .filter(r=>r.length>=3);
+
+      return {
+        type:"Feature",
+        properties:{},
+        geometry:{
+          type:"Polygon",
+          coordinates:[rings[0],...holes]
+        }
+      };
+    }
+
+    return {
+      type:"FeatureCollection",
+      features:rings.map(r=>({
+        type:"Feature",
+        properties:{},
+        geometry:{
+          type:"Polygon",
+          coordinates:[r]
+        }
+      }))
+    };
   };
 
-  const to4326=(x,y)=>{
-    const lon=x/20037508.34*180;
-    let lat=y/20037508.34*180;
-    lat=180/Math.PI*(2*Math.atan(Math.exp(lat*Math.PI/180))-Math.PI/2);
-    return [lon,lat];
-  };
+  const parkFeature=toGeoJSON();
 
   const bbox=dgParkBBox();
 
+  if(
+    !Number.isFinite(bbox.minLat)||
+    !Number.isFinite(bbox.maxLat)||
+    !Number.isFinite(bbox.minLon)||
+    !Number.isFinite(bbox.maxLon)
+  ){
+    return toast("Park sınırı geçersiz.","err","🛰️");
+  }
+
   /*
-   * Dynamic World / Esri 2020 class semantics:
+   * 1) Find the current 2020 item(s) intersecting the park.
+   * The 9-class V1 collection is explicitly documented by Microsoft as
+   * the updated 2020 replacement for the older Esri 10-class service.
+   */
+  const searchRes=await fetch(STAC+"/search",{
+    method:"POST",
+    headers:{
+      "Content-Type":"application/json",
+      Accept:"application/geo+json"
+    },
+    body:JSON.stringify({
+      collections:[COLLECTION],
+      intersects:parkFeature.geometry,
+      datetime:"2020-01-01T00:00:00Z/2020-12-31T23:59:59Z",
+      limit:20
+    })
+  });
+
+  if(!searchRes.ok){
+    throw new Error(
+      "Planetary Computer STAC search HTTP "+
+      searchRes.status
+    );
+  }
+
+  const search=await searchRes.json();
+
+  if(search.type!=="FeatureCollection"||!Array.isArray(search.features)){
+    throw new Error("Planetary Computer STAC geçerli FeatureCollection döndürmedi.");
+  }
+
+  /*
+   * Deduplicate by item id. UTM supercells can overlap the requested
+   * park bbox, so the analysis must not count the same item twice.
+   */
+  const items=[];
+  const seen=new Set();
+
+  for(const item of search.features){
+    if(!item||!item.id||seen.has(item.id))continue;
+
+    const itemYear=String(
+      item.properties?.datetime||
+      item.properties?.["start_datetime"]||
+      ""
+    );
+
+    if(itemYear && !itemYear.startsWith("2020"))continue;
+
+    seen.add(item.id);
+    items.push(item);
+  }
+
+  if(!items.length){
+    throw new Error(
+      "Park ile kesişen 2020 Planetary Computer LULC rasterı bulunamadı."
+    );
+  }
+
+  console.log(
+    "DENDROGEO · Planetary Computer 2020 LULC items:",
+    items.map(x=>x.id)
+  );
+
+  /*
+   * 2) For every intersecting COG item, request categorical statistics
+   * for the park geometry. TiTiler's POST statistics endpoint explicitly
+   * supports GeoJSON and coverage-aware raster statistics.
+   *
+   * Classes in the updated 9-class product:
    * 1 water
    * 2 trees
-   * 3 grass
    * 4 flooded vegetation
    * 5 crops
-   * 6 shrub/scrub
-   * 7 built
+   * 7 built area
    * 8 bare ground
    * 9 snow/ice
    * 10 clouds
    * 11 rangeland
-   *
-   * The raster is categorical. Do not interpolate it.
-   *
-   * This service is a Tiled Imagery Layer published in EPSG:4326.
-   * Esri's documentation/community record shows that attempts to force
-   * a 3857 export can fail with HTTP 400; native 4326 export is therefore
-   * intentional here.
    */
-  const classify=code=>{
+  const CLASS_CODES=[1,2,4,5,7,8,9,10,11];
+
+  const aggregate={};
+  for(const code of CLASS_CODES)aggregate[code]=0;
+
+  let statsCount=0;
+  let usedItems=0;
+
+  const parseCategoryCounts=(stats)=>{
+    /*
+     * TiTiler versions have exposed categorical results in slightly
+     * different JSON shapes. Accept the documented categorical object,
+     * a direct categories map, or a histogram representation.
+     */
+    const b=stats?.b1||stats?.data?.b1||stats;
+
+    const out={};
+
+    const candidates=[
+      b?.categories,
+      b?.category_counts,
+      b?.counts
+    ];
+
+    for(const obj of candidates){
+      if(obj&&typeof obj==="object"&&!Array.isArray(obj)){
+        for(const [k,v] of Object.entries(obj)){
+          const code=Number(k);
+          const n=Number(v);
+          if(CLASS_CODES.includes(code)&&Number.isFinite(n)){
+            out[code]=(out[code]||0)+n;
+          }
+        }
+      }
+    }
+
+    if(Object.keys(out).length)return out;
+
+    /*
+     * Fallback for NumPy-style histogram:
+     * histogram=[counts,bins].
+     * With range 0..12 and 12 bins, integer class N belongs to bin N.
+     */
+    const h=b?.histogram;
+
+    if(
+      Array.isArray(h)&&
+      h.length===2&&
+      Array.isArray(h[0])&&
+      Array.isArray(h[1])
+    ){
+      const countsArr=h[0];
+      const bins=h[1];
+
+      for(const code of CLASS_CODES){
+        let idx=-1;
+
+        for(let i=0;i<countsArr.length;i++){
+          const lo=Number(bins[i]);
+          const hi=Number(bins[i+1]);
+
+          if(
+            Number.isFinite(lo)&&
+            Number.isFinite(hi)&&
+            code>=lo&&
+            code<hi
+          ){
+            idx=i;
+            break;
+          }
+        }
+
+        if(idx>=0){
+          const n=Number(countsArr[idx]);
+          if(Number.isFinite(n))out[code]=(out[code]||0)+n;
+        }
+      }
+    }
+
+    return out;
+  };
+
+  for(const item of items){
+    const itemUrl=
+      item.links?.find(x=>x.rel==="self")?.href||
+      STAC+"/collections/"+encodeURIComponent(COLLECTION)+
+      "/items/"+encodeURIComponent(item.id);
+
+    const params=new URLSearchParams();
+
+    params.set("url",itemUrl);
+    params.append("assets","data");
+    params.set("categorical","true");
+
+    for(const code of CLASS_CODES){
+      params.append("c",String(code));
+    }
+
+    params.set("resampling","nearest");
+    params.set("nodata","0");
+    params.set("cover_scale","100");
+
+    const statsRes=await fetch(
+      TITILER+"/stac/statistics?"+params.toString(),
+      {
+        method:"POST",
+        headers:{
+          "Content-Type":"application/geo+json",
+          Accept:"application/json"
+        },
+        body:JSON.stringify(parkFeature)
+      }
+    );
+
+    if(!statsRes.ok){
+      const body=await statsRes.text().catch(()=> "");
+      throw new Error(
+        "Planetary Computer TiTiler statistics HTTP "+
+        statsRes.status+
+        (body?" · "+body.slice(0,240):"")
+      );
+    }
+
+    const stats=await statsRes.json();
+    const counts=parseCategoryCounts(stats);
+
+    const itemTotal=Object.values(counts)
+      .reduce((a,v)=>a+Number(v||0),0);
+
+    if(!itemTotal){
+      console.warn(
+        "DENDROGEO · LULC item istatistikleri boş:",
+        item.id,
+        stats
+      );
+      continue;
+    }
+
+    for(const code of CLASS_CODES){
+      aggregate[code]+=Number(counts[code]||0);
+    }
+
+    statsCount+=itemTotal;
+    usedItems++;
+
+    console.log(
+      "DENDROGEO · LULC item:",
+      item.id,
+      counts,
+      stats
+    );
+  }
+
+  if(!statsCount){
+    throw new Error(
+      "Planetary Computer 2020 LULC istatistikleri park için piksel döndürmedi."
+    );
+  }
+
+  const codeToGroup=code=>{
     if(code===1)return "water";
+    if([2,4,5,11].includes(code))return "green";
     if(code===7)return "hard";
-    if([2,3,4,5,6,11].includes(code))return "green";
     if([8,9,10].includes(code))return "other";
     return "unknown";
   };
 
-  /*
-   * IMPORTANT:
-   * Esri 2020 Land Cover V2 is a thematic/categorical service.
-   * Its rendered colors are NOT the Dynamic World palette previously used
-   * here. The official Esri/Impact Observatory palette is:
-   *
-   * 1 Water          #1A5BAB
-   * 2 Trees          #358221
-   * 3 Grass          #A7D282
-   * 4 Flooded Veg.   #87D19E
-   * 5 Crops          #FFDB5C
-   * 6 Scrub/Shrub    #EECFA8
-   * 7 Built Area     #ED022A
-   * 8 Bare Ground    #EDE9E4
-   * 9 Snow/Ice       #F2FAFF
-   * 10 Clouds        #C8C8C8
-   *
-   * The previous palette mismatch was capable of turning genuine green
-   * pixels into unrelated classes. Never use a generic RGB palette here.
-   */
-  const palette={
-    1:[26,91,171],
-    2:[53,130,33],
-    3:[167,210,130],
-    4:[135,209,158],
-    5:[255,219,92],
-    6:[238,207,168],
-    7:[237,2,42],
-    8:[237,233,228],
-    9:[242,250,255],
-    10:[200,200,200]
+  const areas={
+    green:0,
+    hard:0,
+    water:0,
+    other:0,
+    unknown:0
   };
 
-  const nearestPaletteCode=(r,g,b)=>{
-    let best=0,bestD=Infinity;
-    for(const [code,rgb] of Object.entries(palette)){
-      const dr=r-rgb[0],dg=g-rgb[1],db=b-rgb[2];
-      const d=dr*dr+dg*dg+db*db;
-      if(d<bestD){
-        bestD=d;
-        best=Number(code);
-      }
-    }
-    return bestD<=3600?best:0;
+  const counts={
+    green:0,
+    hard:0,
+    water:0,
+    other:0,
+    unknown:0
   };
 
-  const rasterCode=(r,g,b,a)=>{
-    if(a===0)return 0;
+  for(const code of CLASS_CODES){
+    const n=Number(aggregate[code]||0);
+    const group=codeToGroup(code);
 
-    /*
-     * Raw categorical U8 response.
-     * Accept only 1..11; values outside this range are not silently
-     * coerced into a class.
-     */
-    if(r===g && g===b && r>=1 && r<=11){
-      return r;
-    }
-
-    return nearestPaletteCode(r,g,b);
-  };
-
-  const osmAreas={open:0,hard:0,water:0};
-  const osmCounts={open:0,hard:0,water:0};
-  const areas={green:0,hard:0,water:0,other:0,unknown:0};
-  const counts={green:0,hard:0,water:0,other:0,unknown:0};
-
-  LANDCOVER_SAMPLES=[];
-  LANDCOVER=null;
-
-  let received=0;
-  let rasterPixels=0;
-  let unknownPixels=0;
-  let osmOpenWaterM2=0;
-
-  /*
-   * Use small 10 m tiles. This avoids the ImageServer 4000x4000 export
-   * limit and also keeps browser memory bounded for large parks.
-   */
-  const centerLat=(bbox.minLat+bbox.maxLat)/2;
-  const mLat=111320;
-  const mLon=111320*Math.max(0.15,Math.cos(centerLat*Math.PI/180));
-
-  const widthM=Math.max(1,(bbox.maxLon-bbox.minLon)*mLon);
-  const heightM=Math.max(1,(bbox.maxLat-bbox.minLat)*mLat);
-
-  const MAX_PIXELS_PER_SIDE=1400;
-  const tileWidthM=MAX_PIXELS_PER_SIDE*10;
-  const tileHeightM=MAX_PIXELS_PER_SIDE*10;
-
-  const nx=Math.max(1,Math.ceil(widthM/tileWidthM));
-  const ny=Math.max(1,Math.ceil(heightM/tileHeightM));
-
-  const totalTiles=nx*ny;
-
-  console.log(
-    "DENDROGEO · Esri 2020 Land Cover V2:",
-    {widthM,heightM,nx,ny,totalTiles}
-  );
-
-  const makeTileBbox=(ix,iy)=>{
-    const lon0=bbox.minLon+(bbox.maxLon-bbox.minLon)*(ix/nx);
-    const lon1=bbox.minLon+(bbox.maxLon-bbox.minLon)*((ix+1)/nx);
-    const lat0=bbox.minLat+(bbox.maxLat-bbox.minLat)*(iy/ny);
-    const lat1=bbox.minLat+(bbox.maxLat-bbox.minLat)*((iy+1)/ny);
-
-    return {
-      minLon:lon0,maxLon:lon1,
-      minLat:lat0,maxLat:lat1
-    };
-  };
-
-  const fetchTile=async(tile)=>{
-    /*
-     * This service is natively published in WGS84 (EPSG:4326).
-     * A 3857 export request is known to return HTTP 400 for this
-     * particular tiled imagery service. Keep bbox/imageSR in 4326.
-     * Pixel dimensions are derived from ground metres at the tile centre.
-     */
-    const latC=(tile.minLat+tile.maxLat)/2;
-    const tileWidthM=
-      Math.max(1,(tile.maxLon-tile.minLon)*111320*
-        Math.max(0.15,Math.cos(latC*Math.PI/180)));
-    const tileHeightM=
-      Math.max(1,(tile.maxLat-tile.minLat)*111320);
-
-    const sizeW=Math.min(
-      MAX_PIXELS_PER_SIDE,
-      Math.max(1,Math.round(tileWidthM/10))
-    );
-    const sizeH=Math.min(
-      MAX_PIXELS_PER_SIDE,
-      Math.max(1,Math.round(tileHeightM/10))
-    );
-
-    const params=new URLSearchParams({
-      f:"image",
-      bbox:[
-        tile.minLon,
-        tile.minLat,
-        tile.maxLon,
-        tile.maxLat
-      ].join(","),
-      bboxSR:"4326",
-      imageSR:"4326",
-      size:sizeW+","+sizeH,
-      format:"png",
-      interpolation:"RSP_NearestNeighbor",
-      adjustAspectRatio:"false",
-      transparent:"false"
-    });
-
-    const url=SERVICE+"?"+params.toString();
-
-    const res=await fetch(url,{
-      method:"GET",
-      mode:"cors",
-      cache:"no-store",
-      headers:{Accept:"image/png"}
-    });
-
-    if(!res.ok){
-      const body=await res.text().catch(()=> "");
-      throw new Error(
-        "Esri exportImage HTTP "+res.status+
-        (body?" · "+body.slice(0,180):"")
-      );
-    }
-
-    const blob=await res.blob();
-    const bitmap=await createImageBitmap(blob);
-
-    const canvas=document.createElement("canvas");
-    canvas.width=bitmap.width;
-    canvas.height=bitmap.height;
-
-    const ctx=canvas.getContext("2d",{
-      willReadFrequently:true
-    });
-
-    ctx.drawImage(bitmap,0,0);
-    bitmap.close();
-
-    return {
-      tile,
-      width:canvas.width,
-      height:canvas.height,
-      data:ctx.getImageData(
-        0,0,canvas.width,canvas.height
-      ).data
-    };
-  };
-
-  /*
-   * A 10 m exported image is a raster analysis product. Each pixel is
-   * accounted only when its centre lies inside the park. Edge pixels are
-   * explicitly flagged as nominal 100 m² cells; they are not falsely
-   * reported as exact intersection areas.
-   */
-  for(let iy=0;iy<ny;iy++){
-    for(let ix=0;ix<nx;ix++){
-      const tile=makeTileBbox(ix,iy);
-
-      let raster;
-      try{
-        raster=await fetchTile(tile);
-      }catch(err){
-        console.error(
-          "Esri 2020 Land Cover tile başarısız:",
-          ix,iy,err
-        );
-
-        if(rep){
-          rep.innerHTML=
-            "<b>❌ 2020 · 10 m arazi örtüsü rasterı okunamadı.</b><br>"+
-            "<span style='font-size:.75rem;color:var(--mut)'>"+
-            String(err.message||err)+
-            "</span>";
-        }
-
-        return toast(
-          "2020 · 10 m arazi örtüsü rasterı okunamadı.",
-          "err",
-          "🛰️"
-        );
-      }
-
-      const {width,height,data}=raster;
-
-      for(let py=0;py<height;py++){
-        for(let px=0;px<width;px++){
-          const fx=(px+0.5)/width;
-          const fy=(py+0.5)/height;
-
-          const lon=
-            tile.minLon+
-            fx*(tile.maxLon-tile.minLon);
-
-          const lat=
-            tile.maxLat-
-            fy*(tile.maxLat-tile.minLat);
-
-          if(!pointInPark(
-            lat,
-            lon,
-            {outer:PARK_POLY,inner:PARK_HOLES||[]}
-          )){
-            continue;
-          }
-
-          const i=(py*width+px)*4;
-          const code=rasterCode(
-            data[i],
-            data[i+1],
-            data[i+2],
-            data[i+3]
-          );
-
-          rasterPixels++;
-
-          const area=100; // nominal 10 m × 10 m
-
-          if(!code){
-            unknownPixels++;
-            continue;
-          }
-
-          const group=classify(code);
-          areas[group]+=area;
-          counts[group]++;
-
-          const osmGroup=osmSampleGroup(lat,lon);
-          osmCounts[osmGroup]++;
-
-          if(osmGroup==="open"){
-            osmAreas.open+=area;
-            if(group==="water"){
-              osmOpenWaterM2+=area;
-            }
-          }else if(osmGroup==="hard"){
-            osmAreas.hard+=area;
-          }else if(osmGroup==="water"){
-            osmAreas.water+=area;
-          }
-
-          received++;
-
-          LANDCOVER_SAMPLES.push({
-            lat,
-            lon,
-            code,
-            group,
-            osmGroup,
-            year:2020,
-            rasterId:null,
-            resolution:10
-          });
-        }
-      }
-
-      if(rep){
-        const done=iy*nx+ix+1;
-        rep.innerHTML=
-          "⏳ Esri 2020 Land Cover V2 · 10 m piksel analizi… "+
-          done+" / "+totalTiles+
-          " raster karo · "+
-          received.toLocaleString("tr-TR")+" geçerli piksel";
-      }
-    }
-  }
-
-  if(!received){
-    const msg=
-      "2020 Land Cover rasterından park içinde geçerli sınıf pikseli alınamadı";
-
-    console.error(msg,{
-      rasterPixels,
-      unknownPixels
-    });
-
-    if(rep)rep.innerHTML="<b>❌ "+msg+"</b>";
-
-    return toast(msg,"err","🛰️");
+    counts[group]+=n;
+    areas[group]+=n*100;
   }
 
   const totalM2=
@@ -4346,12 +4318,67 @@ async function dgSatelliteRun(){
     areas.other+
     areas.unknown;
 
-  const totalHa=totalM2/10000;
-  const geometricHa=parkAreaM2()/10000;
+  const geometricM2=parkAreaM2();
 
+  const osmAreas={
+    open:0,
+    hard:0,
+    water:0
+  };
+
+  const osmCounts={
+    open:0,
+    hard:0,
+    water:0
+  };
+
+  /*
+   * OSM cross-check remains independent. We deliberately do not replace
+   * satellite classes with OSM classes.
+   */
+  const sampleStep=10;
+
+  for(
+    let lat=bbox.minLat+sampleStep/111320/2;
+    lat<bbox.maxLat;
+    lat+=sampleStep/111320
+  ){
+    const lonStep=
+      sampleStep/
+      (111320*Math.max(
+        0.15,
+        Math.cos(lat*Math.PI/180)
+      ));
+
+    for(
+      let lon=bbox.minLon+lonStep/2;
+      lon<bbox.maxLon;
+      lon+=lonStep
+    ){
+      if(!pointInPark(
+        lat,
+        lon,
+        {outer:PARK_POLY,inner:PARK_HOLES||[]}
+      ))continue;
+
+      const osmGroup=osmSampleGroup(lat,lon);
+
+      osmCounts[osmGroup]++;
+      osmAreas[osmGroup]+=100;
+    }
+  }
+
+  LANDCOVER_SAMPLES=[];
+  LANDCOVER=null;
+
+  /*
+   * Store class-level counts rather than thousands of artificial
+   * point observations. The authoritative satellite observation is
+   * the raster statistic returned by TiTiler.
+   */
   LANDCOVER={
-    total:+totalHa.toFixed(2),
-    geometricTotal:+geometricHa.toFixed(2),
+    total:+(totalM2/10000).toFixed(2),
+    geometricTotal:+(geometricM2/10000).toFixed(2),
 
     green:+(areas.green/10000).toFixed(2),
     hard:+(areas.hard/10000).toFixed(2),
@@ -4360,35 +4387,40 @@ async function dgSatelliteRun(){
     unknown:+(areas.unknown/10000).toFixed(2),
 
     sampleM:10,
-    sampleCount:received,
-    satellitePixels:received,
+    sampleCount:Math.round(statsCount),
+    satellitePixels:Math.round(statsCount),
 
     method:
-      "Esri Global Land Cover 2020 V2 · Sentinel-2 · 10 m · native EPSG:4326 thematic export · nearest-neighbour",
+      "Microsoft Planetary Computer · io-lulc-9-class · 2020 · COG · GeoJSON polygon statistics",
 
     source:
-      "Impact Observatory · Esri · Sentinel-2 L2A/L2B derived 2020 LULC",
+      "Impact Observatory / Microsoft Planetary Computer / Sentinel-2",
 
-    sampleGroups:LANDCOVER_SAMPLES,
-
-    classCounts:counts,
+    classCounts:{
+      ...counts,
+      raw:{...aggregate}
+    },
 
     osmOpen:+(osmAreas.open/10000).toFixed(2),
     osmHard:+(osmAreas.hard/10000).toFixed(2),
     osmWater:+(osmAreas.water/10000).toFixed(2),
-    osmSampleCount:received,
+    osmSampleCount:
+      osmCounts.open+
+      osmCounts.hard+
+      osmCounts.water,
 
     suitableM2:Math.max(
       0,
-      osmAreas.open-osmOpenWaterM2
+      osmAreas.open
     ),
 
-    rasterPixels,
-    unknownPixels,
+    rasterItems:items.map(x=>x.id),
+    rasterItemCount:usedItems,
 
     scientificNote:
-      "Uydu LULC sınıf 7 'built' bina footprint'i değildir. "+
-      "Bina, yol, otopark ve diğer sert yüzeylerin kesin dışlamasında OSM geometrisi kullanılır."
+      "Uydu sınıfları doğrudan 10 m COG rasterından alınmıştır. "+
+      "Park poligonu TiTiler raster istatistiğine doğrudan uygulanır; "+
+      "bina/yol footprint'i için bağımsız OSM geometrisi kullanılır."
   };
 
   const pct=v=>
@@ -4409,14 +4441,9 @@ async function dgSatelliteRun(){
       "<span style='width:36px;font-size:.72rem'>%"+p+"</span></div>";
   };
 
-  const refHa=
-    Number.isFinite(Number(PARK_REF_HA))
-      ?Number(PARK_REF_HA)
-      :null;
-
   if(rep){
     rep.innerHTML=
-      "<b>🛰️ Arazi Örtüsü · Esri Global Land Cover 2020 / Sentinel-2 / 10 m</b>"+
+      "<b>🛰️ Arazi Örtüsü · Planetary Computer / Sentinel-2 / 10 m · 2020</b>"+
       row("🌿","Yeşil / vejetasyon",areas.green)+
       row("🧱","Yapılı / built",areas.hard)+
       row("💧","Su",areas.water)+
@@ -4424,82 +4451,74 @@ async function dgSatelliteRun(){
       row("❓","Sınıflandırılamayan",areas.unknown)+
 
       "<div style='font-size:.72rem;color:var(--mut);margin-top:9px'>"+
-      "Uydu örnek alanı: <b>"+totalHa.toFixed(2)+" ha</b> · "+
-      "OSM geometrisi: <b>"+geometricHa.toFixed(2)+" ha</b>"+
-      (refHa!==null
-        ?" · Harici referans: <b>"+refHa.toFixed(2)+" ha</b>"
-        :"")+
-      "<br>Nominal 10 m piksel · Geçerli uydu örneği: <b>"+
-      received.toLocaleString("tr-TR")+"</b>"+
-      " · Raster pikselleri: <b>"+
-      rasterPixels.toLocaleString("tr-TR")+
-      "</b></div>"+
+      "Uydu alanı: <b>"+(totalM2/10000).toFixed(2)+" ha</b> · "+
+      "OSM park alanı: <b>"+(geometricM2/10000).toFixed(2)+" ha</b>"+
+      "<br>10 m nominal raster · Polygon istatistiği · "+
+      "<b>"+Math.round(statsCount).toLocaleString("tr-TR")+
+      "</b> eşdeğer piksel alanı · "+
+      "<b>"+usedItems+"</b> raster item</div>"+
 
       "<div style='font-size:.68rem;color:var(--mut);margin-top:8px'>"+
-      "<b>Yorum:</b> Uydu sınıfı arazi örtüsü/kullanımını gösterir; "+
-      "tek tek bina footprint'i değildir. Class 7 'built' sonucu doğrudan "+
-      "bina alanı olarak raporlanmaz. Grid dışlamasında OSM bina/yol/su geometrisi esas alınır."+
-      "</div>"+
+      "<b>Veri yöntemi:</b> Park bbox'ına nokta serpiştirilmedi. "+
+      "Park poligonu doğrudan 2020 kategorik COG rasterına uygulanarak "+
+      "10 m hücre sınıfları alan ağırlıklı olarak hesaplandı.</div>"+
 
       "<div style='font-size:.68rem;color:var(--mut);margin-top:6px'>"+
-      "OSM 10 m çapraz kontrolü: <b>Açık="+
+      "<b>OSM çapraz kontrolü:</b> Açık="+
       (osmAreas.open/10000).toFixed(2)+
-      " ha</b> · <b>Sert="+
+      " ha · Sert="+
       (osmAreas.hard/10000).toFixed(2)+
-      " ha</b> · <b>Su="+
+      " ha · Su="+
       (osmAreas.water/10000).toFixed(2)+
-      " ha</b>.</div>"+
+      " ha.</div>"+
 
       "<div style='font-size:.68rem;color:var(--mut);margin-top:6px'>"+
-      "Ham sınıf sayıları: <b>1/Su="+
-      (counts.water||0)+
-      "</b> · <b>2-6,11/Yeşil="+
-      (counts.green||0)+
-      "</b> · <b>7/Built="+
-      (counts.hard||0)+
-      "</b> · <b>8-10/Diğer="+
-      (counts.other||0)+
-      "</b> · <b>Bilinmeyen="+
-      (counts.unknown||0)+
+      "Ham sınıflar: "+
+      "<b>Su="+(aggregate[1]||0).toFixed(2)+
+      "</b> · <b>Ağaç="+(aggregate[2]||0).toFixed(2)+
+      "</b> · <b>Sel/vejetasyon="+(aggregate[4]||0).toFixed(2)+
+      "</b> · <b>Tarım="+(aggregate[5]||0).toFixed(2)+
+      "</b> · <b>Built="+(aggregate[7]||0).toFixed(2)+
+      "</b> · <b>Çıplak="+(aggregate[8]||0).toFixed(2)+
+      "</b> · <b>Kar="+(aggregate[9]||0).toFixed(2)+
+      "</b> · <b>Bulut="+(aggregate[10]||0).toFixed(2)+
+      "</b> · <b>Rangeland="+(aggregate[11]||0).toFixed(2)+
       "</b></div>"+
 
       "<div style='font-size:.68rem;color:var(--mut);margin-top:7px'>"+
-      "Kaynak: Impact Observatory / Esri · Sentinel-2 tabanlı Global Land Cover 2020 V2 · 10 m. "+
-      "Analiz: exportImage + nearest-neighbour; sınıf değerleri görselleştirilmiş sürekli görüntüden değil, "+
-      "kategorik rasterdan okunur.</div>";
+      "Kaynak: Impact Observatory / Microsoft Planetary Computer · "+
+      "10m Annual Land Use Land Cover (9-class) · 2020 · CC BY 4.0. "+
+      "Her piksel 10 m nominal çözünürlüktedir; park kenarındaki hücreler "+
+      "GeoJSON coverage hesabıyla ağırlanır.</div>";
   }
-
-  renderSatelliteSamples();
 
   /*
-   * QC: A park cannot automatically be declared wrong merely because
-   * satellite and OSM disagree. Instead expose a reproducible warning
-   * and retain both independent measurements.
+   * We no longer paint fake sample dots. If the visual satellite layer
+   * is needed, it should be a TiTiler categorical tile layer derived from
+   * the same STAC item(s), so visualization and numeric analysis use the
+   * exact same source.
    */
-  const satHardPct=totalM2?areas.hard/totalM2:0;
-  const osmHardPct=totalM2?osmAreas.hard/totalM2:0;
-
-  if(
-    satHardPct>0.70 &&
-    osmHardPct<0.20
-  ){
-    LANDCOVER.qualityWarning=
-      "QC WARNING: uydu 'built' sınıfı ile OSM sert-zemin geometrisi arasında büyük fark var. "+
-      "Bu nedenle built alanı bina alanı olarak yorumlanmamalıdır.";
-  }else{
-    LANDCOVER.qualityWarning="";
+  if(SATELLITE_LAYER){
+    try{map.removeLayer(SATELLITE_LAYER);}catch(_){}
+    SATELLITE_LAYER=null;
   }
 
+  const satHardPct=totalM2?areas.hard/totalM2:0;
+  const osmHardPct=geometricM2?osmAreas.hard/geometricM2:0;
+
+  LANDCOVER.qualityWarning=
+    satHardPct>0.70&&osmHardPct<0.20
+      ?"QC WARNING: uydu built sınıfı ile OSM sert-zemin geometrisi arasında büyük fark var. "+
+       "Built sınıfı bina footprint'i olarak yorumlanmamalıdır."
+      :"";
+
   console.log(
-    "DENDROGEO · Esri Global Land Cover 2020 V2",
+    "DENDROGEO · Planetary Computer 2020 LULC polygon statistics",
     LANDCOVER,
     {
-      counts,
-      areas,
-      osmCounts,
+      rawClassAreas:aggregate,
       osmAreas,
-      rasterPixels,
-      unknownPixels
+      items:items.map(x=>x.id)
     }
   );
 
@@ -4511,7 +4530,7 @@ async function dgSatelliteRun(){
     );
   }else{
     toast(
-      "✓ 2020 · 10 m uydu arazi örtüsü + OSM çapraz kontrolü tamamlandı",
+      "✓ 2020 · 10 m polygon tabanlı uydu analizi tamamlandı",
       "ok",
       "🛰️"
     );
