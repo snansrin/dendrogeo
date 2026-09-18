@@ -5374,7 +5374,7 @@ async function dgQueryDetailedCoverage(){
   }
 
   for(const el of (json.elements||[])){
-    if(dgIsWater(el))continue;
+    if(dgWaterElement(el))continue;
     dgCollectImpervious(el);
   }
 
@@ -5394,7 +5394,7 @@ async function dgQueryDetailedCoverage(){
 
 function dgBuildSpatialIndex(items,minLat,minLon,bucketM=60){
   const latStep=bucketM/110540;
-  const lonStep=bucketM/(111320*Math.cos(((minLat+maxLat)/2)*Math.PI/180));
+  const lonStep=bucketM/(111320*Math.cos(minLat*Math.PI/180));
   const idx=new Map();
 
   function add(item){
