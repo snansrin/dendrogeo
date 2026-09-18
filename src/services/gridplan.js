@@ -5855,3 +5855,196 @@ async function dgV48Run(){
 
 window.runLandCoverAnalysis=dgV48Run;
 
+
+
+/* =========================================================
+   DENDROGEO V49 — PARK SURFACE ANALYSIS
+   Stable OSM geometry engine + explicit green residual.
+   
+   IMPORTANT:
+   - The previous V48 removed the existing highway-width model and
+     therefore under-counted hard surface while leaving most park
+     interior unclassified.
+   - V49 restores the stable, already-used OSM water/impervious
+     geometry collector.
+   - Inside a selected feature tagged as a park, the remaining area
+     after mapped water + mapped hard surfaces is reported as
+     "park green/residual". This is an OSM-derived residual, NOT a
+     satellite measurement.
+   - ESA WorldCover is not silently substituted or used when its COG
+     cannot be read.
+========================================================= */
+
+async function dgV49Run(){
+  if(!PARK_POLY||!PARK_POLY.length){
+    return toast("Önce park seç","warn","🌳");
+  }
+
+  const rep=$("landCoverReport");
+  if(rep){
+    rep.style.display="block";
+    rep.innerHTML="⏳ OSM su ve sert yüzey geometrileri okunuyor…";
+  }
+
+  toast("🌿 Park yüzey analizi başlıyor…","info");
+
+  // Use the stable collector already used elsewhere in DendroGeo.
+  const ok=await queryDetailedCoverage();
+  if(!ok){
+    if(rep)rep.innerHTML="❌ OSM yüzey verisi alınamadı.";
+    return toast("OSM yüzey verisi alınamadı.","err","⚠️");
+  }
+
+  if(rep){
+    rep.innerHTML="⏳ 3 m örnekleme ile su / sert / park-yeşil alan hesaplanıyor…";
+  }
+
+  const ref=(PARK_POLY[0]?.[0]?.[0])||39;
+  const waterIdx=WATER_RINGS.map(r=>({ring:r,bbox:ringBBox(r,ref)}));
+  const impIdx=IMP_RINGS.map(r=>({ring:r,bbox:ringBBox(r,ref)}));
+  const lineIdx=IMP_LINES.map(l=>({
+    pts:l.pts,
+    w:Number.isFinite(l.w)?l.w:0,
+    bbox:ringBBox(l.pts,ref)
+  }));
+
+  let minLat=90,maxLat=-90,minLon=180,maxLon=-180;
+  PARK_POLY.forEach(r=>r.forEach(p=>{
+    minLat=Math.min(minLat,p[0]);
+    maxLat=Math.max(maxLat,p[0]);
+    minLon=Math.min(minLon,p[1]);
+    maxLon=Math.max(maxLon,p[1]);
+  }));
+
+  const sampleM=3;
+  const midLat=(minLat+maxLat)/2;
+  const stepLat=sampleM/110540;
+  const stepLon=sampleM/(111320*Math.cos(midLat*Math.PI/180));
+
+  const s={
+    park:0,
+    water:0,
+    hard:0,
+    green:0,
+    other:0,
+    unknown:0
+  };
+
+  for(let lat=minLat;lat<=maxLat;lat+=stepLat){
+    for(let lon=minLon;lon<=maxLon;lon+=stepLon){
+      if(!pointInPark(lat,lon,PARK_POLY))continue;
+
+      s.park++;
+
+      const cls=dgPointClassAt(
+        lat,
+        lon,
+        waterIdx,
+        impIdx,
+        lineIdx
+      );
+
+      if(cls==="water"){
+        s.water++;
+      }else if(cls==="hard"){
+        s.hard++;
+      }else{
+        /*
+         * Park polygon is the selected analysis domain.
+         * After explicit water and hard OSM geometry is removed,
+         * the remaining park interior is the park's green/residual
+         * class for this OSM-only calculation.
+         */
+        s.green++;
+      }
+    }
+  }
+
+  if(!s.park){
+    if(rep)rep.innerHTML="❌ Park içinde örnek üretilemedi.";
+    return toast("Park örneklenemedi.","err","⚠️");
+  }
+
+  const geometricM2=parkAreaM2();
+  const sampleAreaM2=geometricM2/s.park;
+
+  const waterM2=s.water*sampleAreaM2;
+  const hardM2=s.hard*sampleAreaM2;
+  const greenM2=s.green*sampleAreaM2;
+  const totalM2=geometricM2;
+
+  const sumM2=waterM2+hardM2+greenM2;
+  const residualM2=Math.max(0,totalM2-sumM2);
+
+  const ha=v=>v/10000;
+  const pct=v=>totalM2>0?Math.round(v/totalM2*100):0;
+
+  LANDCOVER={
+    green:+ha(greenM2).toFixed(2),
+    hard:+ha(hardM2).toFixed(2),
+    water:+ha(waterM2).toFixed(2),
+    other:0,
+    unknown:0,
+    total:+ha(totalM2).toFixed(2),
+    method:"OSM su + sert yüzey geometrileri, 3 m örnekleme; kalan park içi alan yeşil/residual",
+    sampleM:3,
+    sampleCount:s.park,
+    sourceCounts:{
+      water:s.water,
+      hard:s.hard,
+      green:s.green
+    }
+  };
+
+  const row=(emoji,label,m2)=>{
+    const h=ha(m2);
+    const p=pct(m2);
+    return `<div style="display:flex;align-items:center;gap:8px;margin:5px 0">
+      <span style="width:18px;text-align:center">${emoji}</span>
+      <span style="width:92px;font-size:.8rem">${label}</span>
+      <div style="flex:1;height:10px;background:var(--line);border-radius:5px;overflow:hidden">
+        <div style="height:100%;width:${p}%;background:currentColor"></div>
+      </div>
+      <b style="font-size:.8rem;width:72px;text-align:right">${h.toFixed(2)} ha</b>
+      <span style="font-size:.72rem;color:var(--mut);width:36px">% ${p}</span>
+    </div>`;
+  };
+
+  const referenceHa=Number.isFinite(Number(PARK_REF_HA))
+    ?Number(PARK_REF_HA)
+    :null;
+  const geometryHa=ha(totalM2);
+  const refLine=referenceHa!==null
+    ?`Harici referans alanı: <b>${referenceHa.toFixed(2)} ha</b> · OSM geometrisi: <b>${geometryHa.toFixed(2)} ha</b> · fark: <b>${Math.abs(geometryHa-referenceHa).toFixed(2)} ha</b>`
+    :`OSM geometrik alanı: <b>${geometryHa.toFixed(2)} ha</b>`;
+
+  if(rep){
+    rep.innerHTML=
+      `<b>🌿 Arazi Örtüsü · OSM</b> <span style="font-size:.72rem;color:var(--mut)">(geometrik yüzey analizi)</span>`+
+      row("🌿","Yeşil",greenM2)+
+      row("🧱","Sert",hardM2)+
+      row("💧","Su",waterM2)+
+      `<div style="font-size:.72rem;color:var(--mut);margin-top:8px">
+        Toplam analiz alanı: <b>${geometryHa.toFixed(2)} ha</b><br>
+        ${refLine}<br>
+        Örnekleme: 3 m · Örnek nokta: ${s.park.toLocaleString("tr-TR")}<br>
+        Su ve sert yüzey: OSM'de açıkça eşleşen geometriler + OSM highway genişlik modeli.<br>
+        Yeşil: su/sert yüzeylerden arta kalan seçili park alanı.
+      </div>`+
+      `<div style="font-size:.68rem;color:#b45309;margin-top:8px">
+        ⚠ Bu sonuç ESA WorldCover uydu sınıflandırması değildir. WorldCover COG tarayıcı erişimi doğrulanmadan sonuca katılmıyor.
+      </div>`;
+  }
+
+  console.group("========== DENDROGEO V49 ==========");
+  console.log("Geometric area:",geometryHa,"ha");
+  console.log("Reference area:",referenceHa,"ha");
+  console.log("3m samples:",s);
+  console.log("Estimated m²:",{waterM2,hardM2,greenM2,residualM2});
+  console.groupEnd();
+
+  toast("✓ Park yüzey analizi tamamlandı","ok","🌿");
+}
+
+window.runLandCoverAnalysis=dgV49Run;
+
