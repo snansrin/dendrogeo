@@ -29,6 +29,8 @@ let PARK_REF_HA=null;
 let PARK_SELECTED_AREA_M2=null;
 let LANDCOVER=null;
 let LANDCOVER_SAMPLES=[];
+let SATELLITE_LAYER=null;
+let WORLD_COVER_LAYER=null;
 
 /* Reference-area helpers are intentionally local to the active gridplan module.
  * gridplan_core.js is an older parallel implementation and is not loaded by index.html. */
@@ -684,6 +686,83 @@ function satelliteGroupForCell(s0,s1,w0,w1){
   };
 }
 
+function pointNearAnyLine(lat,lon,lines,maxDistanceM){
+  for(const line of (lines||[])){
+    if(!Array.isArray(line)||line.length<2)continue;
+    for(let i=0;i<line.length-1;i++){
+      if(pointToSegmentDistanceM(lat,lon,line[i],line[i+1])<=maxDistanceM){
+        return true;
+      }
+    }
+  }
+  return false;
+}
+
+function osmSampleGroup(lat,lon){
+  for(const r of (WATER_RINGS||[])){
+    if(pointInPolygon(lat,lon,r))return "water";
+  }
+  if(pointNearAnyLine(lat,lon,WATER_LINES,1))return "water";
+
+  for(const r of (IMP_RINGS||[])){
+    if(pointInPolygon(lat,lon,r))return "hard";
+  }
+  if(pointNearAnyLine(lat,lon,IMP_LINES.map(x=>x.pts||[]),1))return "hard";
+  if(pointNearAnyLine(lat,lon,GRID_BLOCK_LINES,1))return "hard";
+
+  return "open";
+}
+
+function renderSatelliteSamples(){
+  if(!map)return;
+
+  if(SATELLITE_LAYER)map.removeLayer(SATELLITE_LAYER);
+  SATELLITE_LAYER=L.layerGroup();
+
+  for(const p of (LANDCOVER_SAMPLES||[])){
+    const osm=p.osmGroup||"open";
+    const sat=p.group||"unknown";
+
+    let fill="#16a34a";
+    if(osm==="water" || sat==="water") fill="#2563eb";
+    else if(osm==="hard") fill="#dc2626";
+    else if(sat==="hard") fill="#f97316";
+    else if(sat==="other") fill="#a16207";
+    else if(sat==="unknown") fill="#6b7280";
+
+    L.circleMarker([p.lat,p.lon],{
+      radius:2.8,
+      color:fill,
+      weight:0,
+      fillColor:fill,
+      fillOpacity:.55,
+      interactive:false
+    }).addTo(SATELLITE_LAYER);
+  }
+
+  SATELLITE_LAYER.addTo(map);
+
+  // ESA WorldCover is a visualization/independent visual cross-check.
+  // Its WMS is intentionally not used as the numeric analysis source.
+  try{
+    if(WORLD_COVER_LAYER)map.removeLayer(WORLD_COVER_LAYER);
+    WORLD_COVER_LAYER=L.tileLayer.wms(
+      "https://services.terrascope.be/wms/v2",
+      {
+        layers:"WORLDCOVER_2020_MAP",
+        format:"image/png",
+        transparent:true,
+        version:"1.1.1",
+        opacity:.28,
+        attribution:"© ESA WorldCover project 2020 / Copernicus"
+      }
+    );
+    WORLD_COVER_LAYER.addTo(map);
+  }catch(e){
+    console.warn("ESA WorldCover görsel katmanı eklenemedi:",e);
+  }
+}
+
 function isCellValid(
   s0,
   s1,
@@ -766,21 +845,20 @@ function isCellValid(
   }
 
   /*
-   * Satellite land-cover is an additional evidence layer. OSM remains
-   * the hard geometric exclusion layer above. When satellite samples
-   * are available, a grid cell is accepted only when its 10 m samples
-   * are predominantly green/vegetated. Water and built pixels therefore
-   * cannot become planting-grid cells just because OSM geometry missed them.
+   * Satellite data are evidence, not a building-footprint source.
    *
-   * A 20 m grid cell normally contains about four 10 m samples. Requiring
-   * a green majority avoids rejecting a cell because of one mixed boundary
-   * pixel while still excluding water/built cells.
+   * Important: Esri's Sentinel-2 LULC product is a land-use/land-cover
+   * product and its "built area" class can include urban open space,
+   * yards, parks and small groves. Therefore class 7 MUST NOT be treated
+   * as a literal building footprint. OSM building/highway geometry above
+   * remains the hard exclusion layer for grid planning.
+   *
+   * Water is different: when a 10 m satellite sample is predominantly
+   * water, reject the cell even if OSM has missed the feature.
    */
   const sat=satelliteGroupForCell(s0,s1,w0,w1);
-  if(sat){
-    if(sat.dominant!=="green"){
-      return false;
-    }
+  if(sat && sat.waterRatio>=0.50){
+    return false;
   }
 
   return true;
@@ -2568,6 +2646,16 @@ function clearPark(){
     IMP_LAYER=null;
   }
 
+  if(SATELLITE_LAYER && map){
+    map.removeLayer(SATELLITE_LAYER);
+    SATELLITE_LAYER=null;
+  }
+
+  if(WORLD_COVER_LAYER && map){
+    map.removeLayer(WORLD_COVER_LAYER);
+    WORLD_COVER_LAYER=null;
+  }
+
   PARK_POLY=null;
   PARK_HOLES=[];
 
@@ -3921,6 +4009,8 @@ async function dgSatelliteRun(){
 
   const areas={green:0,hard:0,water:0,other:0,unknown:0};
   const counts={green:0,hard:0,water:0,other:0,unknown:0};
+  const osmAreas={open:0,hard:0,water:0};
+  const osmCounts={open:0,hard:0,water:0};
   let received=0;
 
   // Sentinel-2 Land Cover classes published by Esri:
@@ -3968,6 +4058,7 @@ async function dgSatelliteRun(){
       interpolation:"RSP_NearestNeighbor",
       mosaicRule:JSON.stringify({
         mosaicMethod:"esriMosaicAttribute",
+        where:"Year = 2020",
         sortField:"Year",
         sortValue:2020,
         ascending:true,
@@ -4178,13 +4269,22 @@ async function dgSatelliteRun(){
 
       areas[group]+=area;
       counts[group]++;
+
+      const osmGroup=osmSampleGroup(lat,lon);
+      const osmAreaKey=osmGroup==="open"?"open":osmGroup;
+      if(osmAreas[osmAreaKey]!==undefined){
+        osmAreas[osmAreaKey]+=area;
+        osmCounts[osmAreaKey]++;
+      }
+
       received++;
 
       LANDCOVER_SAMPLES.push({
         lat,
         lon,
         code,
-        group
+        group,
+        osmGroup
       });
     }
 
@@ -4224,7 +4324,13 @@ async function dgSatelliteRun(){
     sampleGroups:LANDCOVER_SAMPLES,
     classCounts:Object.fromEntries(
       Object.entries(counts).map(([k,v])=>[k,v])
-    )
+    ),
+    osmOpen:+(osmAreas.open/10000).toFixed(2),
+    osmHard:+(osmAreas.hard/10000).toFixed(2),
+    osmWater:+(osmAreas.water/10000).toFixed(2),
+    osmSampleCount:received,
+    suitableM2:Math.max(0,osmAreas.open-areas.water),
+    scientificNote:"Esri class 7 is LULC built/urban, not a literal building footprint; OSM geometry is used for hard exclusions."
   };
 
   const pct=v=>totalM2?Math.round(v/totalM2*100):0;
@@ -4256,8 +4362,13 @@ async function dgSatelliteRun(){
       "<br>Nominal 10 m piksel · Geçerli uydu örneği: <b>"+
       received.toLocaleString("tr-TR")+"</b></div>"+
       "<div style='font-size:.68rem;color:var(--mut);margin-top:8px'>"+
-      "Sert/yapılı = sınıf 7 · Su = sınıf 1 · "+
-      "yeşil = sınıf 2,3,4,5,6,11. OSM nihai alana dahil edilmedi.</div>"+
+      "<b>ÖNEMLİ:</b> Esri sınıf 7 = LULC 'built/urban'. Bu sınıf park, küçük koruluk, avlu ve kentsel açık alanları da içerebilir; bu nedenle bina alanı olarak yorumlanmaz. "+
+      "Gerçek bina/yol/su dışlamasında OSM geometrisi kullanılır.</div>"+
+      "<div style='font-size:.68rem;color:var(--mut);margin-top:6px'>"+
+      "OSM 10 m örnekleme: <b>Açık/uygun="+(osmAreas.open/10000).toFixed(2)+" ha</b> · "+
+      "<b>Sert="+(osmAreas.hard/10000).toFixed(2)+" ha</b> · "+
+      "<b>Su="+(osmAreas.water/10000).toFixed(2)+" ha</b>. "+
+      "Uydu su pikselleri grid hücrelerinde ek kontrol olarak kullanılır.</div>"+
       "<div style='font-size:.68rem;color:var(--mut);margin-top:6px'>"+
       "Ham sınıf sayıları: <b>1/Su="+(counts.water||0)+"</b> · "+
       "<b>2-6,11/Yeşil="+(counts.green||0)+"</b> · "+
@@ -4268,8 +4379,9 @@ async function dgSatelliteRun(){
       "Kaynak: Impact Observatory · Microsoft · Esri · Sentinel-2 10 m.</div>";
   }
 
-  console.log("DENDROGEO · Sentinel-2 10m getSamples",LANDCOVER,{counts,areas});
-  toast("✓ 10 m Sentinel-2 arazi örtüsü analizi tamamlandı","ok","🛰️");
+  renderSatelliteSamples();
+  console.log("DENDROGEO · Sentinel-2 10m getSamples",LANDCOVER,{counts,areas,osmCounts,osmAreas});
+  toast("✓ 10 m Sentinel-2 + OSM çapraz kontrolü tamamlandı","ok","🛰️");
 }
 
 // Inline HTML handlers require these public entry points.
