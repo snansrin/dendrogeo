@@ -4034,6 +4034,7 @@ async function dgSatelliteRun(){
           "OSM su, uyduda başka sınıf: <b>"+
           (osmValidation.osmWaterOnOtherSatelliteM2/10000).toFixed(2)+" ha</b>"+
           "</div></div>";
+      }
     }
 
     console.log("DENDROGEO · ESA WorldCover 2021",LANDCOVER,{counts,areas});
