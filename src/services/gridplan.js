@@ -3779,7 +3779,7 @@ async function dgSatelliteRun(){
 
         let image=WC_CACHE.get(url);
         if(!image){
-          image=await GeoTIFF.fromUrl(url,{cacheSize:8,maxRanges:32});
+          image=await GeoTIFF.fromUrl(url,{cacheSize:8,maxRanges:64,allowFullFile:true});
           WC_CACHE.set(url,image);
         }
 
@@ -3824,6 +3824,7 @@ async function dgSatelliteRun(){
         if(!pointInPark(lat,lon,{outer:PARK_POLY,inner:PARK_HOLES||[]}))continue;
 
         const code=Number(t.v[y*t.w+x]);
+        if(!Number.isFinite(code)||code===0)continue;
         const lat0=lat-t.sy/2,lat1=lat+t.sy/2;
         const lon0=lon-t.sx/2,lon1=lon+t.sx/2;
         const area=dgWgs84CellAreaM2(lat0,lat1,lon0,lon1);
@@ -3882,7 +3883,7 @@ async function dgSatelliteRun(){
       (refHa!==null?" · Harici referans: <b>"+refHa.toFixed(2)+" ha</b>":"")+
       "<br>10 m raster · Park içi uydu pikseli: <b>"+pixels.toLocaleString("tr-TR")+"</b></div>"+
       "<div style='font-size:.68rem;color:var(--mut);margin-top:8px'>"+
-      "Sert/yapılı = WorldCover sınıf 50 · Su = sınıf 80 · yeşil = 10,20,30,40,90,95,100. "+
+      "Sert/yapılı = WorldCover sınıf 50 · Su = sınıf 80 · yeşil/vejetasyon = 10,20,30,40,90,95,100. "+
       "OSM, sınıflandırmayı tamamlamak için kullanılmadı.</div>";
   }
 
