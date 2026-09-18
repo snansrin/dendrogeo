@@ -3758,124 +3758,189 @@ async function dgSatelliteRun(){
   const rep=$("landCoverReport");
   if(rep){
     rep.style.display="block";
-    rep.innerHTML="⏳ ESA WorldCover 2021 · STAC üzerinden gerçek 10 m raster aranıyor…";
+    rep.innerHTML="⏳ Sentinel-2 · Esri 10 m Land Cover 2020 rasterı indiriliyor…";
   }
+  toast("🛰️ 10 m uydu arazi örtüsü analizi başlıyor…","info");
 
-  toast("🛰️ ESA WorldCover STAC analizi başlıyor…","info");
+  /*
+   * IMPORTANT ARCHITECTURE:
+   * - Satellite classification is the PRIMARY result.
+   * - OSM is OPTIONAL validation only. An Overpass/OSM error must NEVER
+   *   abort the satellite calculation.
+   * - We deliberately do not use Terrascope WMS or Planetary Computer here.
+   *
+   * Esri's 2020 global LULC is a 10 m Sentinel-2-derived classification
+   * served through a public ArcGIS ImageServer. We request a nearest-
+   * neighbour PNG from the ImageServer and decode its published palette.
+   */
+  const ESRI_LC_URL=
+    "https://tiledimageservices.arcgis.com/P3ePLMYs2RVChkJx/arcgis/rest/services/"+
+    "Esri_2020_Land_Cover_V2/ImageServer/exportImage";
 
+  const b=dgParkBBox();
+  const dim=dgLcm10ImageDimensions(b);
+
+  // Keep the request genuinely close to 10 m/pixel and within ArcGIS limits.
+  const width=Math.max(1,Math.min(2048,Math.ceil(dim.widthM/10)));
+  const height=Math.max(1,Math.min(2048,Math.ceil(dim.heightM/10)));
+
+  const params=new URLSearchParams({
+    f:"image",
+    bbox:[b.minLon,b.minLat,b.maxLon,b.maxLat].join(","),
+    bboxSR:"4326",
+    imageSR:"4326",
+    size:width+","+height,
+    format:"png32",
+    pixelType:"U8",
+    interpolation:"RSP_NearestNeighbor",
+    noDataInterpretation:"esriNoDataMatch",
+    transparent:"false"
+  });
+
+  const url=ESRI_LC_URL+"?"+params.toString();
+
+  let bitmap;
   try{
-    if(typeof GeoTIFF==="undefined"||!GeoTIFF.fromUrl)
-      throw new Error("GeoTIFF.js yüklenmedi");
+    if(rep)rep.innerHTML="⏳ Sentinel-2 · Esri 10 m sınıflandırma rasterı okunuyor…";
 
-    const b=dgParkBBox();
-
-    /*
-     * The previous direct ESA S3 URL was valid as a data location but
-     * browser-side CORS/range access is not reliable. We therefore use
-     * Microsoft's public Planetary Computer STAC catalogue and its
-     * anonymous SAS signing endpoint. The raster itself remains the
-     * official ESA WorldCover 2021 v200 COG.
-     */
-    const stacUrl=new URL("https://planetarycomputer.microsoft.com/api/stac/v1/search");
-    stacUrl.searchParams.set("collections","esa-worldcover");
-    stacUrl.searchParams.set("bbox",
-      [b.minLon,b.minLat,b.maxLon,b.maxLat].join(","));
-    stacUrl.searchParams.set("limit","10");
-
-    const sr=await fetch(stacUrl.toString(),{
-      method:"GET",mode:"cors",cache:"no-store",
-      headers:{Accept:"application/geo+json,application/json"}
+    const res=await fetch(url,{
+      method:"GET",
+      mode:"cors",
+      cache:"no-store",
+      headers:{Accept:"image/png"}
     });
 
-    if(!sr.ok)throw new Error("Planetary Computer STAC HTTP "+sr.status);
+    if(!res.ok)throw new Error("Esri ImageServer HTTP "+res.status);
 
-    const sj=await sr.json();
-    const items=Array.isArray(sj.features)?sj.features:[];
-    if(!items.length)throw new Error("WorldCover STAC içinde parkı kapsayan öğe bulunamadı");
+    const blob=await res.blob();
+    bitmap=await createImageBitmap(blob);
+  }catch(err){
+    console.error("Esri 10m ImageServer:",err);
+    if(rep){
+      rep.innerHTML=
+        "<b>❌ 10 m uydu verisi okunamadı.</b><br>"+
+        "<span style='font-size:.75rem;color:var(--mut)'>"+
+        "Esri Sentinel-2 10 m ImageServer erişimi başarısız oldu. "+
+        "OSM sonucu yerine konulmadı.</span>";
+    }
+    return toast("10 m uydu verisi alınamadı.","err","🛰️");
+  }
 
-    const tiles=[];
+  const canvas=document.createElement("canvas");
+  canvas.width=bitmap.width;
+  canvas.height=bitmap.height;
+  const ctx=canvas.getContext("2d",{willReadFrequently:true});
+  ctx.drawImage(bitmap,0,0);
+  bitmap.close();
 
-    for(const item of items){
-      const asset=item.assets?.map||item.assets?.Map||item.assets?.data;
-      if(!asset?.href)continue;
+  const img=ctx.getImageData(0,0,canvas.width,canvas.height);
+  const px=img.data;
 
-      if(rep)rep.innerHTML="⏳ ESA WorldCover COG erişim bağlantısı hazırlanıyor…";
+  /*
+   * Published Esri 2020 LULC palette:
+   * 1 water       #1A5BAB
+   * 2 trees       #358221
+   * 3 grass       #A7D282
+   * 4 flooded veg #87D19E
+   * 5 crops       #FFDB5C
+   * 6 scrub       #EECFA8
+   * 7 built       #ED022A
+   * 8 bare        #EDE9E4
+   * 9 snow/ice    #F2FAFF
+   * 10 clouds     #C8C8C8
+   *
+   * We classify by nearest published palette colour, but reject distant
+   * colours so white/no-data is not silently converted into land cover.
+   */
+  const palette=[
+    {code:1,group:"water",rgb:[26,91,171]},
+    {code:2,group:"green",rgb:[53,130,33]},
+    {code:3,group:"green",rgb:[167,210,130]},
+    {code:4,group:"green",rgb:[135,209,158]},
+    {code:5,group:"green",rgb:[255,219,92]},
+    {code:6,group:"green",rgb:[238,207,168]},
+    {code:7,group:"hard",rgb:[237,2,42]},
+    {code:8,group:"other",rgb:[237,233,228]},
+    {code:9,group:"other",rgb:[242,250,255]},
+    {code:10,group:"unknown",rgb:[200,200,200]}
+  ];
 
-      // Use the collection SAS token instead of the per-URL sign
-      // endpoint. This avoids browser/IP-bound "sip" signatures.
-      const tokenRes=await fetch(
-        "https://planetarycomputer.microsoft.com/api/sas/v1/token/esa-worldcover",
-        {method:"GET",mode:"cors",cache:"no-store",
-         headers:{Accept:"application/json"}}
+  const nearest=(r,g,b)=>{
+    let best=null,bd=Infinity;
+    for(const p of palette){
+      const dr=r-p.rgb[0],dg=g-p.rgb[1],db=b-p.rgb[2];
+      const d=dr*dr+dg*dg+db*db;
+      if(d<bd){bd=d;best=p;}
+    }
+    return {p:best,d:Math.sqrt(bd)};
+  };
+
+  const areas={green:0,hard:0,water:0,other:0,unknown:0};
+  const counts={green:0,hard:0,water:0,other:0,unknown:0};
+  let pixels=0;
+
+  const cellLon=(b.maxLon-b.minLon)/canvas.width;
+  const cellLat=(b.maxLat-b.minLat)/canvas.height;
+
+  for(let y=0;y<canvas.height;y++){
+    for(let x=0;x<canvas.width;x++){
+      const i=(y*canvas.width+x)*4;
+      const alpha=px[i+3];
+      if(alpha<10)continue;
+
+      const lon=b.minLon+(x+0.5)*cellLon;
+      const lat=b.maxLat-(y+0.5)*cellLat;
+
+      if(!pointInPark(lat,lon,{
+        outer:PARK_POLY,
+        inner:PARK_HOLES||[]
+      }))continue;
+
+      const q=nearest(px[i],px[i+1],px[i+2]);
+
+      // Published palette colours should be exact. A modest tolerance
+      // handles server encoding without accepting unrelated colours.
+      const group=q.d<=18?q.p.group:"unknown";
+
+      const area=dgWgs84CellAreaM2(
+        lat-cellLat/2,lat+cellLat/2,
+        lon-cellLon/2,lon+cellLon/2
       );
 
-      if(!tokenRes.ok)
-        throw new Error("WorldCover token servisi HTTP "+tokenRes.status);
-
-      const tokenJson=await tokenRes.json();
-      const token=tokenJson.token;
-      if(!token)throw new Error("WorldCover token servisi token döndürmedi");
-
-      const sep=asset.href.includes("?")?"&":"?";
-      const href=asset.href+sep+token;
-
-      if(rep)rep.innerHTML="⏳ ESA WorldCover 2021 · 10 m COG okunuyor…";
-
-      const image=await GeoTIFF.fromUrl(href,{
-        cacheSize:8,maxRanges:64,allowFullFile:true
-      });
-
-      const bb=image.getBoundingBox();
-      const rs=image.getResolution();
-      const sx=Math.abs(rs[0]),sy=Math.abs(rs[1]);
-
-      const x0=Math.max(b.minLon,bb[0]);
-      const x1=Math.min(b.maxLon,bb[2]);
-      const y0=Math.max(b.minLat,bb[1]);
-      const y1=Math.min(b.maxLat,bb[3]);
-
-      if(x0>=x1||y0>=y1)continue;
-
-      const px0=Math.max(0,Math.floor((x0-bb[0])/sx));
-      const px1=Math.min(image.getWidth(),Math.ceil((x1-bb[0])/sx));
-      const py0=Math.max(0,Math.floor((bb[3]-y1)/sy));
-      const py1=Math.min(image.getHeight(),Math.ceil((bb[3]-y0)/sy));
-
-      if(px1<=px0||py1<=py0)continue;
-
-      const r=await image.readRasters({
-        window:[px0,py0,px1,py1],
-        samples:[0]
-      });
-
-      tiles.push({
-        bb,sx,sy,px0,py0,w:r.width,h:r.height,v:r[0]
-      });
+      areas[group]+=area;
+      counts[group]++;
+      pixels++;
     }
+  }
 
-    if(!tiles.length)
-      throw new Error("WorldCover rasterında park alanını kesen piksel bulunamadı");
+  if(!pixels)throw new Error("Park içinde geçerli uydu pikseli bulunamadı");
 
-    if(rep)rep.innerHTML="⏳ WorldCover 10 m pikselleri park sınırıyla kesiştiriliyor…";
+  const totalM2=Object.values(areas).reduce((s,v)=>s+v,0);
+  const totalHa=totalM2/10000;
+  const geometricHa=parkAreaM2()/10000;
 
-    // OSM is loaded only as an independent validation layer.
-    // It never changes the satellite classification or fills missing pixels.
-    const osmAvailable=await queryDetailedCoverage();
+  /*
+   * OSM validation is deliberately isolated. If Overpass/OSM is down,
+   * satellite results remain valid and are still displayed.
+   */
+  let osmAvailable=false;
+  let osmValidation={
+    satelliteHardM2:0,satelliteWaterM2:0,
+    hardAlsoMappedByOsmM2:0,waterAlsoMappedByOsmM2:0,
+    satelliteHardNotMappedOsmM2:0,satelliteWaterNotMappedOsmM2:0,
+    osmHardOnOtherSatelliteM2:0,osmWaterOnOtherSatelliteM2:0
+  };
 
-    const osmValidation={
-      satelliteHardM2:0, satelliteWaterM2:0,
-      hardAlsoMappedByOsmM2:0, waterAlsoMappedByOsmM2:0,
-      satelliteHardNotMappedOsmM2:0, satelliteWaterNotMappedOsmM2:0,
-      osmHardOnOtherSatelliteM2:0, osmWaterOnOtherSatelliteM2:0,
-      osmHardMappedM2:0, osmWaterMappedM2:0
-    };
+  try{
+    osmAvailable=!!(await queryDetailedCoverage());
 
-    function dgOsmPointClass(lat,lon){
+    const osmClass=(lat,lon)=>{
       let water=false,hard=false;
 
       for(const r of WATER_RINGS){
         if(pointInPolygon(lat,lon,r)){water=true;break;}
       }
+
       if(!water){
         for(const l of WATER_LINES){
           for(let i=0;i<l.length-1;i++){
@@ -3893,172 +3958,136 @@ async function dgSatelliteRun(){
       if(!hard && nearLineW(IMP_LINES,lat,lon))hard=true;
 
       return {water,hard};
-    }
+    };
 
-    const green=new Set([10,20,30,40,90,95,100]);
-    const counts={green:0,hard:0,water:0,other:0,unknown:0};
-    const areas={green:0,hard:0,water:0,other:0,unknown:0};
-    let pixels=0;
+    // Validate with a representative sample of satellite pixels rather
+    // than making OSM determine the final area.
+    const step=Math.max(1,Math.floor(pixels/12000));
+    let n=0;
 
-    for(const t of tiles){
-      for(let y=0;y<t.h;y++){
-        for(let x=0;x<t.w;x++){
-          const lon=t.bb[0]+(t.px0+x+0.5)*t.sx;
-          const lat=t.bb[3]-(t.py0+y+0.5)*t.sy;
+    for(let y=0;y<canvas.height;y+=1){
+      for(let x=0;x<canvas.width;x+=1){
+        if(n%step!==0){n++;continue;}
 
-          if(!pointInPark(lat,lon,{
-            outer:PARK_POLY,
-            inner:PARK_HOLES||[]
-          }))continue;
+        const i=(y*canvas.width+x)*4;
+        if(px[i+3]<10){n++;continue;}
 
-          const code=Number(t.v[y*t.w+x]);
-          if(!Number.isFinite(code)||code===0)continue;
+        const lon=b.minLon+(x+0.5)*cellLon;
+        const lat=b.maxLat-(y+0.5)*cellLat;
+        if(!pointInPark(lat,lon,{outer:PARK_POLY,inner:PARK_HOLES||[]})){n++;continue;}
 
-          const lat0=lat-t.sy/2,lat1=lat+t.sy/2;
-          const lon0=lon-t.sx/2,lon1=lon+t.sx/2;
-          const area=dgWgs84CellAreaM2(lat0,lat1,lon0,lon1);
+        const q=nearest(px[i],px[i+1],px[i+2]);
+        if(q.d>18){n++;continue;}
 
-          pixels++;
+        const group=q.p.group;
+        const oc=osmClass(lat,lon);
+        const area=dgWgs84CellAreaM2(
+          lat-cellLat/2,lat+cellLat/2,
+          lon-cellLon/2,lon+cellLon/2
+        );
 
-          let group="unknown";
-          if(code===50)group="hard";
-          else if(code===80)group="water";
-          else if(green.has(code))group="green";
-          else if(code===60||code===70)group="other";
-
-          if(osmAvailable){
-            const oc=dgOsmPointClass(lat,lon);
-
-            if(group==="hard"){
-              osmValidation.satelliteHardM2+=area;
-              if(oc.hard)osmValidation.hardAlsoMappedByOsmM2+=area;
-              else osmValidation.satelliteHardNotMappedOsmM2+=area;
-            }else if(group==="water"){
-              osmValidation.satelliteWaterM2+=area;
-              if(oc.water)osmValidation.waterAlsoMappedByOsmM2+=area;
-              else osmValidation.satelliteWaterNotMappedOsmM2+=area;
-            }
-
-            if(oc.hard){
-              osmValidation.osmHardMappedM2+=area;
-              if(group!=="hard")osmValidation.osmHardOnOtherSatelliteM2+=area;
-            }
-            if(oc.water){
-              osmValidation.osmWaterMappedM2+=area;
-              if(group!=="water")osmValidation.osmWaterOnOtherSatelliteM2+=area;
-            }
-          }
-
-          counts[group]++;
-          areas[group]+=area;
+        if(group==="hard"){
+          osmValidation.satelliteHardM2+=area;
+          if(oc.hard)osmValidation.hardAlsoMappedByOsmM2+=area;
+          else osmValidation.satelliteHardNotMappedOsmM2+=area;
         }
+        if(group==="water"){
+          osmValidation.satelliteWaterM2+=area;
+          if(oc.water)osmValidation.waterAlsoMappedByOsmM2+=area;
+          else osmValidation.satelliteWaterNotMappedOsmM2+=area;
+        }
+        if(oc.hard&&group!=="hard")osmValidation.osmHardOnOtherSatelliteM2+=area;
+        if(oc.water&&group!=="water")osmValidation.osmWaterOnOtherSatelliteM2+=area;
+
+        n++;
       }
     }
-
-    if(!pixels)throw new Error("Park içinde geçerli WorldCover pikseli bulunamadı");
-
-    const totalM2=Object.values(areas).reduce((a,v)=>a+v,0);
-    const totalHa=totalM2/10000;
-    const geometricHa=parkAreaM2()/10000;
-
-    LANDCOVER={
-      total:+totalHa.toFixed(2),
-      geometricTotal:+geometricHa.toFixed(2),
-      green:+(areas.green/10000).toFixed(2),
-      hard:+(areas.hard/10000).toFixed(2),
-      water:+(areas.water/10000).toFixed(2),
-      other:+(areas.other/10000).toFixed(2),
-      unknown:+(areas.unknown/10000).toFixed(2),
-      sampleM:10,
-      sampleCount:pixels,
-      satellitePixels:pixels,
-      method:"ESA WorldCover 2021 v200 · Planetary Computer STAC + signed COG · WGS84 pixel-area calculation",
-      source:"ESA WorldCover 2021 v200"
-    };
-
-    const pct=v=>totalM2?Math.round(v/totalM2*100):0;
-
-    const row=(emoji,label,m2)=>{
-      const p=pct(m2);
-      return "<div style='display:flex;align-items:center;gap:8px;margin:5px 0'>"+
-        "<span style='width:18px'>"+emoji+"</span>"+
-        "<span style='width:116px;font-size:.8rem'>"+label+"</span>"+
-        "<div style='flex:1;height:10px;background:var(--line);border-radius:5px;overflow:hidden'>"+
-        "<div style='height:100%;width:"+p+"%;background:var(--line-strong)'></div></div>"+
-        "<b style='width:72px;text-align:right;font-size:.8rem'>"+
-        (m2/10000).toFixed(2)+" ha</b>"+
-        "<span style='width:36px;font-size:.72rem'>%"+p+"</span></div>";
-    };
-
-    if(rep){
-      const refHa=Number.isFinite(Number(PARK_REF_HA))?Number(PARK_REF_HA):null;
-
-      rep.innerHTML=
-        "<b>🛰️ Arazi Örtüsü · ESA WorldCover 2021</b>"+
-        row("🌿","Yeşil / bitkisel",areas.green)+
-        row("🧱","Yapılı / sert",areas.hard)+
-        row("💧","Su",areas.water)+
-        row("🟫","Diğer",areas.other)+
-        row("❓","Sınıflandırılamayan",areas.unknown)+
-        "<div style='font-size:.72rem;color:var(--mut);margin-top:9px'>"+
-        "Uydu alanı: <b>"+totalHa.toFixed(2)+" ha</b> · "+
-        "OSM geometrisi: <b>"+geometricHa.toFixed(2)+" ha</b>"+
-        (refHa!==null?" · Harici referans: <b>"+refHa.toFixed(2)+" ha</b>":"")+
-        "<br>10 m raster · Park içi geçerli uydu pikseli: <b>"+
-        pixels.toLocaleString("tr-TR")+"</b></div>"+
-        "<div style='font-size:.68rem;color:var(--mut);margin-top:8px'>"+
-        "Sert/yapılı = WorldCover sınıf 50 · Su = sınıf 80 · "+
-        "yeşil/vejetasyon = 10,20,30,40,90,95,100. "+
-        "OSM sınıflandırmayı tamamlamak için kullanılmadı.</div>"+
-        "<div style='font-size:.68rem;color:var(--mut);margin-top:7px'>"+
-        "Kaynak: ESA WorldCover 2021 v200 · Sentinel-1 + Sentinel-2 · 10 m.</div>";
-
-      if(osmAvailable){
-        const hardCov=areas.hard>0
-          ?100*osmValidation.hardAlsoMappedByOsmM2/areas.hard:0;
-        const waterCov=areas.water>0
-          ?100*osmValidation.waterAlsoMappedByOsmM2/areas.water:0;
-
-        rep.innerHTML +=
-          "<div style='margin-top:10px;padding-top:8px;border-top:1px solid var(--line)'>"+
-          "<b>🔎 OSM bağımsız kontrol</b>"+
-          "<div style='font-size:.7rem;color:var(--mut);margin-top:5px'>"+
-          "OSM sonucu nihai alana eklenmedi; yalnızca uydu sınıflarını kontrol ediyor.</div>"+
-          "<div style='font-size:.72rem;margin-top:6px'>"+
-          "🧱 Uydu sert alanının OSM'de de işaretli kısmı: <b>"+
-          hardCov.toFixed(1)+"%</b> · "+
-          "uyduda sert, OSM'de işaretsiz: <b>"+
-          (osmValidation.satelliteHardNotMappedOsmM2/10000).toFixed(2)+" ha</b><br>"+
-          "💧 Uydu su alanının OSM'de de işaretli kısmı: <b>"+
-          waterCov.toFixed(1)+"%</b> · "+
-          "uyduda su, OSM'de işaretsiz: <b>"+
-          (osmValidation.satelliteWaterNotMappedOsmM2/10000).toFixed(2)+" ha</b><br>"+
-          "OSM sert, uyduda başka sınıf: <b>"+
-          (osmValidation.osmHardOnOtherSatelliteM2/10000).toFixed(2)+" ha</b> · "+
-          "OSM su, uyduda başka sınıf: <b>"+
-          (osmValidation.osmWaterOnOtherSatelliteM2/10000).toFixed(2)+" ha</b>"+
-          "</div></div>";
-      }
-    }
-
-    console.log("DENDROGEO · ESA WorldCover 2021",LANDCOVER,{counts,areas});
-    toast("✓ ESA WorldCover uydu analizi tamamlandı","ok","🛰️");
-
-  }catch(err){
-    console.error("ESA WorldCover STAC/COG:",err);
-
-    if(rep){
-      rep.innerHTML=
-        "<b>❌ Uydu arazi örtüsü verisi okunamadı.</b><br>"+
-        "<span style='font-size:.75rem;color:var(--mut)'>"+
-        "ESA WorldCover STAC/COG erişimi başarısız oldu. OSM sert zemin veya "+
-        "OSM'den türetilmiş yeşil alan sonucu kullanılmadı.</span>";
-    }
-
-    return toast("Uydu arazi örtüsü verisi alınamadı.","err","🛰️");
+  }catch(e){
+    console.warn("OSM bağımsız doğrulama başarısız; uydu sonucu korunuyor:",e);
+    osmAvailable=false;
   }
-}
 
+  LANDCOVER={
+    total:+totalHa.toFixed(2),
+    geometricTotal:+geometricHa.toFixed(2),
+    green:+(areas.green/10000).toFixed(2),
+    hard:+(areas.hard/10000).toFixed(2),
+    water:+(areas.water/10000).toFixed(2),
+    other:+(areas.other/10000).toFixed(2),
+    unknown:+(areas.unknown/10000).toFixed(2),
+    sampleM:10,
+    sampleCount:pixels,
+    satellitePixels:pixels,
+    method:"Esri 2020 Global Land Cover · Sentinel-2 · 10 m · ArcGIS ImageServer",
+    source:"Esri 2020 Land Cover"
+  };
+
+  const pct=v=>totalM2?Math.round(v/totalM2*100):0;
+  const row=(emoji,label,m2)=>{
+    const p=pct(m2);
+    return "<div style='display:flex;align-items:center;gap:8px;margin:5px 0'>"+
+      "<span style='width:18px'>"+emoji+"</span>"+
+      "<span style='width:116px;font-size:.8rem'>"+label+"</span>"+
+      "<div style='flex:1;height:10px;background:var(--line);border-radius:5px;overflow:hidden'>"+
+      "<div style='height:100%;width:"+p+"%;background:var(--line-strong)'></div></div>"+
+      "<b style='width:72px;text-align:right;font-size:.8rem'>"+
+      (m2/10000).toFixed(2)+" ha</b>"+
+      "<span style='width:36px;font-size:.72rem'>%"+p+"</span></div>";
+  };
+
+  if(rep){
+    const refHa=Number.isFinite(Number(PARK_REF_HA))?Number(PARK_REF_HA):null;
+
+    rep.innerHTML=
+      "<b>🛰️ Arazi Örtüsü · Esri 2020 / Sentinel-2 · 10 m</b>"+
+      row("🌿","Yeşil / vejetasyon",areas.green)+
+      row("🧱","Yapılı / sert",areas.hard)+
+      row("💧","Su",areas.water)+
+      row("🟫","Diğer / çıplak",areas.other)+
+      row("❓","Sınıflandırılamayan",areas.unknown)+
+      "<div style='font-size:.72rem;color:var(--mut);margin-top:9px'>"+
+      "Uydu alanı: <b>"+totalHa.toFixed(2)+" ha</b> · "+
+      "OSM geometrisi: <b>"+geometricHa.toFixed(2)+" ha</b>"+
+      (refHa!==null?" · Harici referans: <b>"+refHa.toFixed(2)+" ha</b>":"")+
+      "<br>10 m uydu rasterı · Park içi piksel: <b>"+
+      pixels.toLocaleString("tr-TR")+"</b></div>"+
+      "<div style='font-size:.68rem;color:var(--mut);margin-top:8px'>"+
+      "Sert/yapılı = Esri sınıf 7 · Su = sınıf 1 · "+
+      "yeşil = ağaç + çim + sulak vejetasyon + tarım + çalı sınıfları. "+
+      "OSM nihai sınıflandırmaya dahil edilmedi.</div>"+
+      "<div style='font-size:.68rem;color:var(--mut);margin-top:7px'>"+
+      "Kaynak: Esri 2020 Global Land Cover · Sentinel-2 · 10 m.</div>";
+
+    if(osmAvailable){
+      const hc=areas.hard>0
+        ?100*osmValidation.hardAlsoMappedByOsmM2/Math.max(1,osmValidation.satelliteHardM2):0;
+      const wc=areas.water>0
+        ?100*osmValidation.waterAlsoMappedByOsmM2/Math.max(1,osmValidation.satelliteWaterM2):0;
+
+      rep.innerHTML+=
+        "<div style='margin-top:10px;padding-top:8px;border-top:1px solid var(--line)'>"+
+        "<b>🔎 OSM bağımsız kontrol</b>"+
+        "<div style='font-size:.7rem;color:var(--mut);margin-top:5px'>"+
+        "OSM sonucu değiştirmiyor; yalnızca uydu sınıflandırmasının bağımsız kontrolü.</div>"+
+        "<div style='font-size:.72rem;margin-top:6px'>"+
+        "🧱 Uydu sert alanı + OSM uyumu: <b>"+hc.toFixed(1)+"%</b><br>"+
+        "🧱 Uyduda sert, OSM'de işaretsiz: <b>"+
+        (osmValidation.satelliteHardNotMappedOsmM2/10000).toFixed(2)+" ha</b><br>"+
+        "💧 Uydu su + OSM uyumu: <b>"+wc.toFixed(1)+"%</b><br>"+
+        "💧 Uyduda su, OSM'de işaretsiz: <b>"+
+        (osmValidation.satelliteWaterNotMappedOsmM2/10000).toFixed(2)+" ha</b><br>"+
+        "OSM sert, uyduda başka sınıf: <b>"+
+        (osmValidation.osmHardOnOtherSatelliteM2/10000).toFixed(2)+" ha</b></div></div>";
+    }else{
+      rep.innerHTML+=
+        "<div style='font-size:.68rem;color:var(--mut);margin-top:8px'>"+
+        "OSM bağımsız kontrolü bu çalıştırmada kullanılamadı; uydu sonucu bundan etkilenmedi.</div>";
+    }
+  }
+
+  console.log("DENDROGEO · Esri 10m Sentinel-2",LANDCOVER,{counts,areas});
+  toast("✓ 10 m uydu analizi tamamlandı","ok","🛰️");
+}
 
 // Inline HTML handlers require these public entry points.
 window.toggleParkMode=toggleParkMode;
