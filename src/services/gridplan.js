@@ -5577,3 +5577,458 @@ window.DG_PARK_ANALYSIS={
 };
 
 })();
+
+
+/* =========================================================
+   DENDROGEO v38 — SURFACE ANALYSIS ENGINE
+   Scientific/data-quality patch:
+   - Park selection no longer performs a second water request.
+   - Water is loaded AFTER park state is committed.
+   - Multipolygon water keeps inner islands/holes.
+   - Overpass endpoints race in parallel with timeout.
+   - Hard-surface query covers buildings, area:highway, roads,
+     parking, sports areas, paved surfaces and structures.
+   - Open roads remain buffered lines; no fake polygons.
+   - Width/est_width/lanes are used before fallback widths.
+   - Spatial bucket index makes 3 m sampling practical.
+   - Water always has priority over impervious.
+========================================================= */
+(function(){
+  "use strict";
+
+  let DG_WATER_HOLES=[];
+  let DG_WATER_KEY="";
+  let DG_WATER_READY=false;
+  const DG_WATER_CACHE=new Map();
+  const DG_IMP_CACHE=new Map();
+
+  const DG_HARD_SURFACES=new Set([
+    "paved","asphalt","chipseal","concrete","concrete:plates",
+    "concrete:lanes","paving_stones","paving_stones:30","sett",
+    "cobblestone","unhewn_cobblestone","bricks","metal",
+    "metal_grid","wood","tiles","acrylic","plastic","rubber",
+    "tartan","rubber_tiles"
+  ]);
+
+  const DG_SOFT_SURFACES=new Set([
+    "grass","dirt","earth","ground","gravel","fine_gravel",
+    "sand","mud","unpaved","compacted","woodchips","pebbles",
+    "pebblestone","clay","artificial_turf","stepping_stones"
+  ]);
+
+  const DG_SOFT_HIGHWAYS=new Set([
+    "footway","path","cycleway","steps","pedestrian",
+    "bridleway","track"
+  ]);
+
+  function dgBBox(){
+    let minLat=90,maxLat=-90,minLon=180,maxLon=-180;
+    const rings=[...(PARK_POLY||[]),...(PARK_HOLES||[])];
+    for(const r of rings) for(const p of (r||[])){
+      minLat=Math.min(minLat,p[0]); maxLat=Math.max(maxLat,p[0]);
+      minLon=Math.min(minLon,p[1]); maxLon=Math.max(maxLon,p[1]);
+    }
+    const pad=0.00035;
+    return {minLat:minLat-pad,maxLat:maxLat+pad,minLon:minLon-pad,maxLon:maxLon+pad};
+  }
+
+  async function dgFetchJson(query,timeoutMs=10000){
+    const attempts=OVERPASS_URLS.map(url=>(async()=>{
+      const ac=new AbortController();
+      const timer=setTimeout(()=>ac.abort(),timeoutMs);
+      try{
+        const res=await fetch(url+"?data="+encodeURIComponent(query),{
+          signal:ac.signal,
+          headers:{Accept:"application/json"}
+        });
+        if(!res.ok)throw new Error("HTTP "+res.status);
+        const json=await res.json();
+        if(!json || !Array.isArray(json.elements))throw new Error("Invalid Overpass JSON");
+        return json;
+      }finally{
+        clearTimeout(timer);
+      }
+    })());
+    try{
+      const winner=await Promise.any(attempts);
+      return winner;
+    }catch(e){
+      console.warn("DendroGeo Overpass: all endpoints failed",e);
+      return {elements:[]};
+    }
+  }
+
+  function dgParkKey(){
+    const a=(PARK_POLY||[]).flat().slice(0,12);
+    return JSON.stringify(a);
+  }
+
+  function dgPushWaterGeometry(el){
+    if(!el) return;
+    if(el.type==="relation"){
+      const r=extractRings(el);
+      if(!r)return;
+      if(Array.isArray(r)){
+        for(const ring of r) if(ring&&ring.length>=4) WATER_RINGS.push(ring);
+      }else{
+        for(const ring of (r.outer||[])) if(ring&&ring.length>=4) WATER_RINGS.push(ring);
+        for(const ring of (r.inner||[])) if(ring&&ring.length>=4) DG_WATER_HOLES.push(ring);
+      }
+      return;
+    }
+    if(!el.geometry)return;
+    const pts=el.geometry.map(g=>[g.lat,g.lon]);
+    if(pts.length<2)return;
+    if(isClosedLine(pts)) WATER_RINGS.push(pts);
+    else WATER_LINES.push(pts);
+  }
+
+  async function dgLoadWater(force=false){
+    if(!PARK_POLY||!PARK_POLY.length)return;
+    const key=dgParkKey();
+    if(!force && DG_WATER_READY && DG_WATER_KEY===key)return;
+    if(!force && DG_WATER_CACHE.has(key)){
+      const v=DG_WATER_CACHE.get(key);
+      WATER_RINGS=v.rings.slice();
+      WATER_LINES=v.lines.slice();
+      DG_WATER_HOLES=v.holes.slice();
+      DG_WATER_KEY=key; DG_WATER_READY=true;
+      dgRenderWater();
+      return;
+    }
+
+    WATER_RINGS=[]; WATER_LINES=[]; DG_WATER_HOLES=[];
+    const b=dgBBox();
+    const bbox=`${b.minLat},${b.minLon},${b.maxLat},${b.maxLon}`;
+    const q=`[out:json][timeout:45];(
+      way["natural"="water"](${bbox});
+      relation["natural"="water"](${bbox});
+      way["water"](${bbox});
+      relation["water"](${bbox});
+      way["landuse"~"reservoir|basin|salt_pond"](${bbox});
+      relation["landuse"~"reservoir|basin|salt_pond"](${bbox});
+      way["leisure"="swimming_pool"](${bbox});
+      relation["leisure"="swimming_pool"](${bbox});
+      way["waterway"="riverbank"](${bbox});
+      relation["waterway"="riverbank"](${bbox});
+      way["waterway"~"river|canal|stream|drain|ditch"](${bbox});
+    );out geom;`;
+
+    const json=await dgFetchJson(q,10000);
+    for(const el of (json.elements||[])){
+      if(isWater(el))dgPushWaterGeometry(el);
+    }
+
+    const pb={
+      minLat:b.minLat,maxLat:b.maxLat,minLon:b.minLon,maxLon:b.maxLon
+    };
+    WATER_RINGS=WATER_RINGS.filter(r=>ringTouchesPark(r,PARK_POLY,pb));
+    DG_WATER_HOLES=DG_WATER_HOLES.filter(r=>ringTouchesPark(r,PARK_POLY,pb));
+    WATER_LINES=WATER_LINES.filter(l=>lineTouchesPark(l,PARK_POLY,pb));
+
+    DG_WATER_CACHE.set(key,{
+      rings:WATER_RINGS.slice(),lines:WATER_LINES.slice(),holes:DG_WATER_HOLES.slice()
+    });
+    DG_WATER_KEY=key; DG_WATER_READY=true;
+    dgRenderWater();
+    console.log("✓ Su katmanı:",WATER_RINGS.length,"alan,",DG_WATER_HOLES.length,"ada/hole,",WATER_LINES.length,"çizgi");
+  }
+
+  function dgRenderWater(){
+    if(WATER_LAYER&&map)map.removeLayer(WATER_LAYER);
+    WATER_LAYER=L.layerGroup().addTo(map);
+
+    for(const r of WATER_RINGS){
+      if(r&&r.length>=4)L.polygon(r,{
+        color:"#2563eb",weight:1.2,fillColor:"#3b82f6",
+        fillOpacity:.42,interactive:false
+      }).addTo(WATER_LAYER);
+    }
+    for(const l of WATER_LINES){
+      if(l&&l.length>=2)L.polyline(l,{
+        color:"#2563eb",weight:3,opacity:.65,interactive:false
+      }).addTo(WATER_LAYER);
+    }
+    /* Multipolygon islands are deliberately not painted as water. */
+  }
+
+  function dgPointInWater(lat,lon){
+    let inside=false;
+    for(const r of WATER_RINGS){
+      if(r&&r.length>=4&&pointInPolygon(lat,lon,r)){inside=true;break;}
+    }
+    if(!inside)return false;
+    for(const h of DG_WATER_HOLES){
+      if(h&&h.length>=4&&pointInPolygon(lat,lon,h))return false;
+    }
+    for(const l of WATER_LINES){
+      if(!l||l.length<2)continue;
+      for(let i=0;i<l.length-1;i++){
+        if(pointToSegmentDistanceM(lat,lon,l[i],l[i+1])<=2.5)return true;
+      }
+    }
+    return true;
+  }
+
+  function dgSurfaceIsImpervious(el){
+    const t=el.tags||{};
+    const s=String(t.surface||"").toLowerCase().trim();
+
+    if(t.building || t["building:part"])return true;
+    if(t["area:highway"])return !DG_SOFT_SURFACES.has(s);
+    if(t.amenity==="parking"||t.amenity==="bicycle_parking"||t.amenity==="motorcycle_parking")
+      return !DG_SOFT_SURFACES.has(s);
+    if(t.man_made==="pier"||t.man_made==="bridge")return true;
+    if(t.barrier==="wall"||t.barrier==="retaining_wall")return true;
+    if(DG_HARD_SURFACES.has(s))return true;
+    if(DG_SOFT_SURFACES.has(s))return false;
+
+    if(t.leisure==="pitch"||t.leisure==="track"||t.leisure==="playground")
+      return DG_HARD_SURFACES.has(s);
+
+    if(t.highway){
+      const hw=String(t.highway).toLowerCase();
+      if(DG_SOFT_HIGHWAYS.has(hw)){
+        return DG_HARD_SURFACES.has(s);
+      }
+      if(s==="")return true;
+      return !DG_SOFT_SURFACES.has(s);
+    }
+    return false;
+  }
+
+  function dgWidthHalf(el){
+    const t=el.tags||{};
+    const direct=parseFloat(String(t.width||"").replace(",","."));
+    const estimated=parseFloat(String(t["est_width"]||"").replace(",","."));
+    if(Number.isFinite(direct)&&direct>0&&direct<50)return direct/2;
+    if(Number.isFinite(estimated)&&estimated>0&&estimated<50)return estimated/2;
+    const lanes=parseFloat(String(t.lanes||"").replace(",","."));
+    if(t.highway && Number.isFinite(lanes)&&lanes>0&&lanes<10)
+      return Math.max(1.5,(lanes*3.25)/2);
+    return roadHalfWidth(t.highway);
+  }
+
+  function dgCollect(el){
+    if(!dgSurfaceIsImpervious(el))return;
+    if(el.type==="relation"){
+      const r=extractRings(el);
+      if(!r)return;
+      const outers=Array.isArray(r)?r:(r.outer||[]);
+      for(const ring of outers)if(ring&&ring.length>=4)IMP_RINGS.push(ring);
+      return;
+    }
+    if(!el.geometry)return;
+    const pts=el.geometry.map(g=>[g.lat,g.lon]);
+    if(pts.length<2)return;
+    const t=el.tags||{};
+    const area=!!t["area:highway"] || t.area==="yes" || !!t.building ||
+      t.amenity==="parking"||t.amenity==="bicycle_parking"||t.amenity==="motorcycle_parking"||
+      t.man_made==="pier" || t.leisure==="pitch"||t.leisure==="playground";
+    if(isClosedLine(pts) && area){
+      IMP_RINGS.push(pts);
+      return;
+    }
+    if(isClosedLine(pts) && t.highway && t.area!=="yes" && !t["area:highway"]){
+      /* A closed routable highway is still a centerline/roundabout, not an area. */
+    }
+    const w=t.highway?dgWidthHalf(el):(DG_HARD_SURFACES.has(String(t.surface||"").toLowerCase())?2:1.5);
+    IMP_LINES.push({pts,w});
+    if(t.highway && !DG_SOFT_HIGHWAYS.has(String(t.highway).toLowerCase()))
+      GRID_BLOCK_LINES.push(pts);
+  }
+
+  function dgBuildIndex(items,latStepM=80){
+    const idx=new Map();
+    const key=(r,c)=>r+"|"+c;
+    const latStep=latStepM/110540;
+    const add=(lat,lon,item)=>{
+      const r=Math.floor(lat/latStep);
+      const lonStep=latStepM/(111320*Math.max(.15,Math.cos(lat*Math.PI/180)));
+      const c=Math.floor(lon/lonStep);
+      const k=key(r,c);
+      let a=idx.get(k); if(!a)idx.set(k,a=[]); a.push(item);
+    };
+    for(const item of items){
+      const pts=item.pts||item;
+      if(!pts||!pts.length)continue;
+      let minLat=90,maxLat=-90,minLon=180,maxLon=-180;
+      for(const p of pts){minLat=Math.min(minLat,p[0]);maxLat=Math.max(maxLat,p[0]);minLon=Math.min(minLon,p[1]);maxLon=Math.max(maxLon,p[1]);}
+      const r0=Math.floor(minLat/latStep),r1=Math.floor(maxLat/latStep);
+      const lonStep=latStepM/(111320*Math.max(.15,Math.cos(((minLat+maxLat)/2)*Math.PI/180)));
+      const c0=Math.floor(minLon/lonStep),c1=Math.floor(maxLon/lonStep);
+      for(let rr=r0;rr<=r1;rr++)for(let cc=c0;cc<=c1;cc++){
+        const k=key(rr,cc);let a=idx.get(k);if(!a)idx.set(k,a=[]);a.push(item);
+      }
+    }
+    return {idx,latStep,latStepM};
+  }
+
+  function dgCandidates(index,lat,lon){
+    const r=Math.floor(lat/index.latStep);
+    const lonStep=index.latStepM/(111320*Math.max(.15,Math.cos(lat*Math.PI/180)));
+    const c=Math.floor(lon/lonStep);
+    const out=[];const seen=new Set();
+    for(let dr=-1;dr<=1;dr++)for(let dc=-1;dc<=1;dc++){
+      const a=index.idx.get((r+dr)+"|"+(c+dc))||[];
+      for(const x of a)if(!seen.has(x)){seen.add(x);out.push(x);}
+    }
+    return out;
+  }
+
+  async function dgLoadImpervious(force=false){
+    if(!PARK_POLY||!PARK_POLY.length)return;
+    const key=dgParkKey();
+    if(!force&&DG_IMP_CACHE.has(key)){
+      const v=DG_IMP_CACHE.get(key);
+      IMP_RINGS=v.rings.slice();IMP_LINES=v.lines.map(x=>({pts:x.pts.slice(),w:x.w}));
+      GRID_BLOCK_LINES=v.blocks.slice();refreshImpLayer();return;
+    }
+    IMP_RINGS=[];IMP_LINES=[];GRID_BLOCK_LINES=[];
+    const b=dgBBox();
+    const bbox=`${b.minLat},${b.minLon},${b.maxLat},${b.maxLon}`;
+    const q=`[out:json][timeout:60];(
+      way["building"](${bbox});
+      relation["building"](${bbox});
+      way["building:part"](${bbox});
+      way["highway"](${bbox});
+      relation["highway"](${bbox});
+      way["area:highway"](${bbox});
+      relation["area:highway"](${bbox});
+      way["amenity"~"parking|bicycle_parking|motorcycle_parking"](${bbox});
+      relation["amenity"~"parking|bicycle_parking|motorcycle_parking"](${bbox});
+      way["leisure"~"pitch|track|playground"](${bbox});
+      relation["leisure"~"pitch|track|playground"](${bbox});
+      way["surface"](${bbox});
+      relation["surface"](${bbox});
+      way["man_made"~"pier|bridge"](${bbox});
+      relation["man_made"~"pier|bridge"](${bbox});
+      way["barrier"~"wall|retaining_wall"](${bbox});
+      relation["barrier"~"wall|retaining_wall"](${bbox});
+    );out geom;`;
+    const json=await dgFetchJson(q,12000);
+    for(const el of (json.elements||[])){
+      if(isWater(el))continue;
+      dgCollect(el);
+    }
+    const pb={minLat:b.minLat,maxLat:b.maxLat,minLon:b.minLon,maxLon:b.maxLon};
+    IMP_RINGS=IMP_RINGS.filter(r=>ringTouchesPark(r,PARK_POLY,pb));
+    IMP_LINES=IMP_LINES.filter(l=>lineTouchesPark(l.pts,PARK_POLY,pb));
+    GRID_BLOCK_LINES=GRID_BLOCK_LINES.filter(l=>lineTouchesPark(l,PARK_POLY,pb));
+    DG_IMP_CACHE.set(key,{rings:IMP_RINGS.slice(),lines:IMP_LINES.map(x=>({pts:x.pts.slice(),w:x.w})),blocks:GRID_BLOCK_LINES.slice()});
+    refreshImpLayer();
+    console.log("✓ Sert zemin:",IMP_RINGS.length,"alan,",IMP_LINES.length,"çizgi");
+  }
+
+  /* Park query: park boundary only. Water is intentionally deferred until
+     drawPark has installed PARK_POLY/PARK_HOLES, fixing the old lifecycle bug. */
+  queryPark=async function(lat,lon,radius=1200){
+    const q=`[out:json][timeout:25];(
+      way["leisure"~"park|garden|nature_reserve|common|recreation_ground"](around:${radius},${lat},${lon});
+      relation["leisure"~"park|garden|nature_reserve|common|recreation_ground"](around:${radius},${lat},${lon});
+    );out geom;`;
+    const json=await dgFetchJson(q,9000);
+    const cands=[];
+    for(const el of (json.elements||[])){
+      const geometry=extractRings(el); if(!geometry)continue;
+      const area=polyArea(geometry);
+      cands.push({rings:geometry,name:(el.tags&&el.tags.name)||null,area,type:el.type,id:el.id});
+    }
+    const inside=cands.filter(c=>pointInPark(lat,lon,c.rings));
+    const sorted=(inside.length?inside:cands).slice().sort((a,b)=>a.area-b.area);
+    return sorted;
+  };
+
+  const DG_oldDrawPark=drawPark;
+  drawPark=function(park){
+    DG_WATER_READY=false; DG_WATER_KEY="";
+    WATER_RINGS=[]; WATER_LINES=[]; DG_WATER_HOLES=[];
+    DG_oldDrawPark(park);
+    dgLoadWater(true).catch(e=>console.warn("Su yükleme:",e));
+  };
+
+  queryDetailedCoverage=async function(){
+    await dgLoadWater(false);
+    await dgLoadImpervious(true);
+  };
+
+  runLandCoverAnalysis=async function(){
+    if(!PARK_POLY||!PARK_POLY.length)return toast("Önce park seç");
+    const rep=$("landCoverReport");
+    if(rep){rep.style.display="block";rep.innerHTML="⏳ Su + bina + yol + otopark + saha verileri indiriliyor…";}
+    toast("🌿 Yüzey verileri paralel alınıyor…","info");
+
+    await dgLoadWater(false);
+    await dgLoadImpervious(false);
+
+    const waterIdx=dgBuildIndex([...WATER_RINGS,...DG_WATER_HOLES,WATER_LINES],100);
+    const impIdx=dgBuildIndex([...IMP_RINGS,...IMP_LINES],100);
+
+    let minLat=90,maxLat=-90,minLon=180,maxLon=-180;
+    for(const r of PARK_POLY)for(const p of r){
+      minLat=Math.min(minLat,p[0]);maxLat=Math.max(maxLat,p[0]);
+      minLon=Math.min(minLon,p[1]);maxLon=Math.max(maxLon,p[1]);
+    }
+
+    const SAMPLE_M=3;
+    const stepLat=SAMPLE_M/110540;
+    const mid=(minLat+maxLat)/2;
+    const stepLon=SAMPLE_M/(111320*Math.cos(mid*Math.PI/180));
+
+    let nPark=0,nWater=0,nImp=0,nGreen=0;
+    for(let la=minLat;la<=maxLat;la+=stepLat){
+      for(let lo=minLon;lo<=maxLon;lo+=stepLon){
+        if(!pointInPark(la,lo,PARK_POLY))continue;
+        nPark++;
+
+        /* Water is always evaluated first. */
+        let water=dgPointInWater(la,lo);
+        if(!water){
+          for(const g of dgCandidates(waterIdx,la,lo)){
+            const pts=g.pts||g;
+            if(pts===WATER_LINES.find(x=>x===pts)){} /* keep branch cheap */
+          }
+        }
+        if(water){nWater++;continue;}
+
+        let imp=false;
+        for(const g of dgCandidates(impIdx,la,lo)){
+          if(g.pts){
+            const w=Math.max(0,Number(g.w)||0);
+            for(let i=0;i<g.pts.length-1;i++){
+              if(pointToSegmentDistanceM(la,lo,g.pts[i],g.pts[i+1])<=w){imp=true;break;}
+            }
+          }else if(pointInPolygon(la,lo,g)){imp=true;}
+          if(imp)break;
+        }
+        if(imp)nImp++;else nGreen++;
+      }
+    }
+
+    const totalHa=parkAreaHa();
+    const ha=v=>((v/Math.max(1,nPark))*totalHa).toFixed(1);
+    const pct=v=>nPark?Math.round(v/nPark*100):0;
+
+    LANDCOVER={green:+ha(nGreen),hard:+ha(nImp),water:+ha(nWater),total:+totalHa.toFixed(1)};
+    const row=(color,label,h,p)=>`<div style="display:flex;align-items:center;gap:8px;margin:4px 0"><span style="width:12px;height:12px;border-radius:3px;background:${color};flex:none"></span><span style="width:52px;font-size:.8rem">${label}</span><div style="flex:1;height:10px;background:var(--line);border-radius:5px;overflow:hidden"><div style="height:100%;width:${p}%;background:${color};transition:width .6s"></div></div><b style="font-size:.8rem;width:74px;text-align:right">${h} ha</b><span style="font-size:.72rem;color:var(--mut);width:38px;text-align:right">% ${p}</span></div>`;
+    if(rep){
+      rep.innerHTML=`<b>🌿 Yüzey Örtüsü</b> <span style="font-size:.72rem;color:var(--mut)">(OSM fiziksel yüzey verileri)</span>`+
+        row("#16a34a","Yeşil",ha(nGreen),pct(nGreen))+
+        row("#ef4444","Sert",ha(nImp),pct(nImp))+
+        row("#3b82f6","Su",ha(nWater),pct(nWater))+
+        `<div style="font-size:.72rem;color:var(--mut);margin-top:6px">Toplam: <b>${totalHa.toFixed(1)} ha</b> · Yeşil+Sert+Su = Toplam<br>Örnekleme: ${SAMPLE_M} m · Nokta: ${nPark.toLocaleString("tr-TR")}</div>`;
+    }
+    toast("✓ Yüzey analizi tamam","ok","🌿");
+  };
+
+  /* Fix water/impervious priority for grid validity too. */
+  const DG_oldIsCellValid=isCellValid;
+  isCellValid=function(s0,s1,w0,w1){
+    const cLat=(s0+s1)/2;
+    const cLon=(w0+w1)/2;
+    if(dgPointInWater(cLat,cLon))return false;
+    return DG_oldIsCellValid(s0,s1,w0,w1);
+  };
+
+  console.log("DendroGeo v38 surface engine loaded");
+})();
