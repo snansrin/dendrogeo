@@ -4,11 +4,11 @@ User-agent: *
 Allow: /
 Allow: /index.html
 Allow: /manifest.json
-Allow: /social-preview.png
+Allow: /social-preview.jpg
 Allow: /logo.png
 Allow: /icon.png
 Allow: /icon-192.png
-Allow: /icon-512.png
+
 Allow: /apple-touch-icon.png
 
 # Admin paneli ve uygulama içi taranmasın (SEO'ya katkısı yok, gereksiz crawl bütçesi)

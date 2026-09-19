@@ -34,7 +34,7 @@ const MAX_API_CACHE = 150;   // Nominatim vb. API yanıtları
 const MAX_RUNTIME = 400;     // ?v=NNN sürümlü script/style kopyaları
 
 const CORE_ASSETS = [
-    '/', '/index.html', '/manifest.json', '/icon.png', '/social-preview.png', '/css/style.css',
+    '/', '/index.html', '/manifest.json', '/icon.png', '/social-preview.jpg', '/css/style.css',
     '/src/config/supabase.js', '/src/config/constants.js', '/src/config/species.js', 
     '/src/utils/geo.js', '/src/utils/truncation.js', '/src/services/allometry.js', '/src/services/auth.js','/src/services/export.js', '/src/services/offline.js',
     '/src/services/admin.js','/src/services/world.js', '/src/services/measure.js','/src/services/map.js','/src/services/landcover.js','/src/services/gridplan.js','/src/services/dash.js',
@@ -109,9 +109,12 @@ self.addEventListener('fetch', event => {
         return;
     }
 
+    /* NOT: unpkg.com ve cdn.jsdelivr.net dalları buradaydı; kütüphaneler
+     * vendor/ altına alınınca (c71f239) bu sitenin artık o origin'lere HİÇ
+     * isteği kalmadı, yani dallar ölü koddu ve kaldırıldı. Bir gün yeniden
+     * bir CDN kullanılırsa buraya geri eklenmeli ve CSP'ye de yazılmalı —
+     * scripts/check-csp.mjs bu tutarlılığı denetliyor. */
     if (
-        url.hostname.includes('cdn.jsdelivr.net') ||
-        url.hostname.includes('unpkg.com') ||
         url.hostname.includes('fonts.googleapis.com') ||
         url.hostname.includes('fonts.gstatic.com') ||
         url.hostname.includes('challenges.cloudflare.com')
