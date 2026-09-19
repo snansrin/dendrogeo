@@ -4636,7 +4636,9 @@ function dgSatelliteClassCSV(){
     ["park_area_ha",LANDCOVER.total],
     ["method",LANDCOVER.method],
     ["source_url",LANDCOVER.sourceUrl],
-    ["raster_cells_histogram",LANDCOVER.histogramPixelCount]
+    ["raster_cells_histogram",LANDCOVER.histogramPixelCount],
+    ["nodata_cells",LANDCOVER.histogramNoDataCount],
+    ["unmapped_cells",LANDCOVER.histogramUnknownCount]
   ];
 
   const rows=[
@@ -4892,25 +4894,18 @@ function dgRenderSatelliteReport(
         DG_S2_CLASS_COLORS[5]
       )+
       dgSatelliteReportRow(
-        "🧱",
-        "Yapılı / built",
-        landcover.hardHa.toFixed(2),
-        " ha",
-        DG_S2_CLASS_COLORS[7]
-      )+
-      dgSatelliteReportRow(
-        "💧",
-        "Su",
-        landcover.waterHa.toFixed(2),
-        " ha",
-        DG_S2_CLASS_COLORS[1]
-      )+
-      dgSatelliteReportRow(
         "☁️",
         "Bulut / maskeli",
         landcover.maskedHa.toFixed(2),
         " ha",
         DG_S2_CLASS_COLORS[10]
+      )+
+      dgSatelliteReportRow(
+        "⚠️",
+        "NoData / eşlenemeyen",
+        landcover.histogramUnmappedAreaHa.toFixed(2),
+        " ha",
+        "#92400e"
       )+
     "</div>"+
     "<div style='font-size:.69rem;color:var(--mut);margin-top:10px'>"+
@@ -5093,6 +5088,14 @@ async function dgSatelliteRun(){
       histogramPixelCount-classCountTotal
     );
 
+    const histogramNoDataCount=
+      Number(histogramRaw[0]||0);
+
+    const histogramUnknownCount=Math.max(
+      0,
+      unmappedCount-histogramNoDataCount
+    );
+
     const classAreasM2={};
     for(const code of DG_S2_OFFICIAL_CODES){
       classAreasM2[code]=
@@ -5160,7 +5163,7 @@ async function dgSatelliteRun(){
       for(const code of DG_S2_OFFICIAL_CODES){
         const hp=
           Number(classCounts[code]||0)/
-          histogramPixelCount;
+          directClassTotals;
 
         const dp=
           Number(direct.counts[code]||0)/
@@ -5262,6 +5265,16 @@ async function dgSatelliteRun(){
         unmappedCount/
         histogramPixelCount*
         100,
+      histogramNoDataCount,
+      histogramNoDataPct:
+        histogramNoDataCount/
+        histogramPixelCount*
+        100,
+      histogramUnknownCount,
+      histogramUnknownPct:
+        histogramUnknownCount/
+        histogramPixelCount*
+        100,
 
       classAreasM2,
       classPercent,
@@ -5295,7 +5308,10 @@ async function dgSatelliteRun(){
         parkM2,
 
       cloudAreaM2:maskedM2,
-      noDataAreaM2:unmappedM2,
+      noDataAreaM2:
+        parkM2*
+        histogramNoDataCount/
+        histogramPixelCount,
       missingAreaM2:
         direct.missing/
         Math.max(1,direct.requested)*
