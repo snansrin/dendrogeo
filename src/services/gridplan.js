@@ -4638,7 +4638,7 @@ function dgSatelliteClassCSV(){
     ["park_area_ha",LANDCOVER.total],
     ["method",LANDCOVER.method],
     ["source_url",LANDCOVER.sourceUrl],
-    ["raster_cells_histogram",LANDCOVER.histogramPixelCount],
+    ["primary_10m_sample_count",LANDCOVER.sampleCount],
     ["nodata_cells",LANDCOVER.histogramNoDataCount],
     ["unmapped_cells",LANDCOVER.histogramUnknownCount]
   ];
@@ -4860,7 +4860,7 @@ function dgRenderSatelliteReport(
   rep.innerHTML=
     "<b>🛰️ Arazi Örtüsü · Sentinel-2 / 10 m · 2020</b>"+
     "<div style='font-size:.70rem;color:var(--mut);margin:7px 0 10px'>"+
-      "<b>Ana sayısal sonuç: ArcGIS zonal histogramı.</b> "+
+      "<b>Ana sayısal sonuç: deterministik 10 m örnekleme.</b> "+
       "Yüzdeler, park polygonu içinde raster sınıf hücrelerinin "+
       "sunucu tarafında hesaplanan frekanslarından türetilir. "+
       "getSamples yalnızca bağımsız QC örneklemesidir ve "+
@@ -4905,7 +4905,7 @@ function dgRenderSatelliteReport(
       dgSatelliteReportRow(
         "⚠️",
         "NoData / eşlenemeyen",
-        landcover.histogramUnmappedAreaHa.toFixed(2),
+        Number(landcover.unclassifiedAreaHa||0).toFixed(2),
         " ha",
         "#92400e"
       )+
@@ -4913,7 +4913,7 @@ function dgRenderSatelliteReport(
     "<div style='font-size:.69rem;color:var(--mut);margin-top:10px'>"+
       "<b>Park geometrisi:</b> "+
       (parkM2/10000).toFixed(2)+
-      " ha · <b>Histogram raster hücresi:</b> "+
+      " ha · <b>10 m örnek:</b> "+
       landcover.histogramPixelCount.toLocaleString("tr-TR")+
       " · <b>getSamples QC:</b> "+
       landcover.directSampleCount.toLocaleString("tr-TR")+
