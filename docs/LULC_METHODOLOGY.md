@@ -28,25 +28,30 @@ Raster values 3 (old Grass) and 6 (old Scrub) are legacy values from the older r
 
 ## Numerical method
 
-The primary area calculation uses ArcGIS:
+The primary numerical result uses ArcGIS ImageServer `getSamples` with a deterministic **10 m multipoint lattice** generated inside the selected park polygon.
 
-`computeStatisticsHistograms`
+For each lattice point:
 
-with the actual selected park polygon and the explicit 2020 mosaic rule.
+- the point is sent directly as part of a multipoint request;
+- `pixelSize=10,10` is requested;
+- `RSP_NearestNeighbor` is requested;
+- the mosaic is explicitly locked to **Year = 2020**.
+
+ArcGIS documents that multipoint geometries use the supplied points directly, so the returned class values form a reproducible sampling frame. citeturn5search0
 
 For each class:
 
-`class_area = park_area * class_pixel_count / histogram_pixel_count`
+`class_area = park_area × valid_class_sample_count / requested_sample_count`
 
-The denominator is the histogram raster-cell count returned by the image service, not the number of client-side sampling points.
+The measured park area remains the geometric reference area. Missing/NoData/unknown samples are retained as an explicitly unclassified remainder and are **not** redistributed among classes.
 
-Unmapped/NoData bins are retained and reported instead of being silently redistributed across land-cover classes.
+This is a reproducible 10 m nearest-neighbor sample-derived estimate. It is not presented as an exact census of every source raster cell or as sub-pixel boundary accuracy.
 
 ## Independent QC
 
-The application also calls ArcGIS `getSamples` using a deterministic 10 m sampling lattice inside the park polygon.
+The application also calls ArcGIS `computeStatisticsHistograms` for the same park geometry and 2020 mosaic. ArcGIS documents that this operation computes statistics/histograms from source pixels requested for the projected geometry's extent; therefore its returned histogram count is not used as DendroGeo's primary park-pixel denominator. citeturn2search0turn2search2
 
-These are **sample points**, not the raster's zonal pixel count. Their class proportions are compared with the server-side histogram distribution. QC samples never overwrite the primary zonal result.
+The histogram is retained as an independent distribution QC. DendroGeo compares normalized class distributions and reports a QC warning when the largest class-share difference exceeds the configured threshold. QC never overwrites the primary result.
 
 ## Outputs
 
