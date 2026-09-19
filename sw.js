@@ -4,7 +4,7 @@
 // NOT: Senkronizasyon artık Ana Thread (Supabase JS SDK) tarafından yapılıyor
 // ============================================================
 
-const CACHE_VERSION = 'dendrogeo-sw-v2-r28';
+const CACHE_VERSION = 'dendrogeo-sw-v2-r29';
 const STATIC_CACHE = `static-${CACHE_VERSION}`;
 const TILE_CACHE = `tiles-${CACHE_VERSION}`;
 const API_CACHE = `api-${CACHE_VERSION}`;
@@ -19,7 +19,7 @@ const CORE_ASSETS = [
     '/', '/index.html', '/manifest.json', '/icon.png', '/social-preview.png', '/css/style.css',
     '/src/config/supabase.js', '/src/config/constants.js', '/src/config/species.js', 
     '/src/utils/geo.js', '/src/services/allometry.js', '/src/services/auth.js','/src/services/export.js', '/src/services/offline.js',
-    '/src/services/admin.js','/src/services/world.js', '/src/services/measure.js','/src/services/map.js','/src/services/gridplan.js','/src/services/dash.js',
+    '/src/services/admin.js','/src/services/world.js', '/src/services/measure.js','/src/services/map.js','/src/services/landcover.js','/src/services/gridplan.js','/src/services/dash.js',
     'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css',
     'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js',
     'https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css',
@@ -92,6 +92,16 @@ self.addEventListener('fetch', event => {
         return;
     }
 
+    if (
+        url.hostname.includes('planetarycomputer.microsoft.com') ||
+        url.hostname.endsWith('.blob.core.windows.net') ||
+        url.hostname.endsWith('.s3.us-west-2.amazonaws.com')
+    ) {
+        // STAC and COG reads are scientific inputs; do not persist stale responses.
+        event.respondWith(networkOnly(request));
+        return;
+    }
+
     if (url.hostname.includes('supabase.co')) {
         // Sadece public fotoğrafları cache'le (popup balonları için)
         if (url.pathname.includes('/storage/v1/object/public/')) {
@@ -100,12 +110,6 @@ self.addEventListener('fetch', event => {
         }
         // REST/Auth/RPC istekleri → doğrudan tarayıcı ağına yönlendir (CORS-güvenli passthrough)
         event.respondWith(fetch(request));
-        return;
-    }
-
-    if (url.hostname.includes('ic.imagery1.arcgis.com') && url.pathname.includes('/Sentinel2_10m_LandCover/ImageServer/')) {
-        // Scientific land-cover requests must never be served from a stale SW cache.
-        event.respondWith(networkOnly(request));
         return;
     }
 
@@ -249,4 +253,4 @@ self.addEventListener('notificationclick', event => {
     );
 });
 
-console.log('[SW] 🌲 DendroGeo Service Worker v2.10 r28 — network-first app assets');
+console.log('[SW] 🌲 DendroGeo Service Worker v2.10 r29 — network-first app assets');
