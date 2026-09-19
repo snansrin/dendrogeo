@@ -1,5 +1,5 @@
 "use strict";
-/* DendroGeo v2 · gridplan.js v121 — LULC locked-catalog source-cell zonal analysis */           
+/* DendroGeo v2 · gridplan.js v122 — LULC locked-catalog source-cell zonal analysis */           
   
 let PARK_POLY=null;
 let PARK_HOLES=[]; 
@@ -4197,7 +4197,7 @@ function dgHistogramTotal(hist){
   );
 }
 
-function dgBuildExportImageUrl(){
+function dgBuildExportImageUrl(lockRasterIds=null){
   const b=dgParkBBox();
 
   const sw=dgLonLatToWebMercator(b.minLat,b.minLon);
@@ -4250,7 +4250,7 @@ function dgBuildExportImageUrl(){
     format:"png32",
     interpolation:"RSP_NearestNeighbor",
     time:DG_S2_START_MS+","+DG_S2_END_MS,
-    mosaicRule:JSON.stringify(dgBuildMosaicRule()),
+    mosaicRule:JSON.stringify(dgBuildMosaicRule(lockRasterIds)),
     renderingRule:JSON.stringify({
       rasterFunction:
         "Cartographic Renderer for Visualization and Analysis"
@@ -4273,8 +4273,8 @@ function dgBuildExportImageUrl(){
   };
 }
 
-async function dgFetchSatelliteRaster(){
-  const built=dgBuildExportImageUrl();
+async function dgFetchSatelliteRaster(lockRasterIds=null){
+  const built=dgBuildExportImageUrl(lockRasterIds);
 
   const res=await fetch(
     built.url,
@@ -4591,7 +4591,9 @@ async function dgDirectSatelliteSamples(){
  const counts={},classAreasM2={};for(const code of DG_S2_OFFICIAL_CODES){counts[code]=0;classAreasM2[code]=0;}
  let noData=0,unknown=0,legacyRemapped=0,locationMissing=0,assignedAreaM2=0;const sampleRows=[];
  for(const sample of samples){const rawCode=dgParseSampleClass(sample),normalized=dgS2NormalizeCode(rawCode),ll=dgSampleLocationToLonLat(sample);if(!ll){locationMissing++;continue;}const xy=dgLonLatToWebMercator(ll.lat,ll.lon),cell=cellByKey.get(Math.round(xy.x*1000)+":"+Math.round(xy.y*1000));if(!cell)throw new Error("ArcGIS örnek konumu kaynak-grid hücresiyle eşleştirilemedi.");const cellArea=Number(cell.areaM2)||0;assignedAreaM2+=cellArea;if(rawCode===null){noData++;continue;}if(rawCode===3||rawCode===6)legacyRemapped++;if(normalized===null){unknown++;continue;}counts[normalized]++;classAreasM2[normalized]+=cellArea;sampleRows.push({id:sampleRows.length+1,lat:+ll.lat.toFixed(7),lon:+ll.lon.toFixed(7),rawClassCode:rawCode,classCode:normalized,className:DG_S2_CLASS_NAMES[normalized],group:dgS2Group(normalized),areaM2:cellArea});}
- const classified=Object.values(classAreasM2).reduce((sum,n)=>sum+(Number(n)||0),0);if(!classified)throw new Error("ArcGIS getSamples döndü ancak hiçbir geçerli raster hücresi sınıflandırılamadı.");
+ const classifiedAreaM2=Object.values(classAreasM2).reduce((sum,n)=>sum+(Number(n)||0),0);
+ const classifiedCount=Object.values(counts).reduce((sum,n)=>sum+(Number(n)||0),0);
+ if(!classifiedCount||!(classifiedAreaM2>0))throw new Error("ArcGIS getSamples döndü ancak hiçbir geçerli raster hücresi sınıflandırılamadı.");
  console.log(
    "DENDROGEO · 2020 LULC ham sınıflar:",
    {...counts},
@@ -4603,7 +4605,26 @@ async function dgDirectSatelliteSamples(){
      ])
    )
  );
- return{points:cells.map(c=>[c.x,c.y]),cells,samples:sampleRows,counts,classAreasM2,requested:cells.length,returned:samples.length,missing:Math.max(0,cells.length-samples.length),noData,unknown,legacyRemapped,locationMissing,classified,classifiedAreaM2:classifiedAreaM2,assignedAreaM2,intersectionAreaM2:plan.intersectionAreaM2,errors,lockRasterIds};
+ return{
+  points:cells.map(c=>[c.x,c.y]),
+  cells,
+  samples:sampleRows,
+  counts,
+  classAreasM2,
+  requested:cells.length,
+  returned:samples.length,
+  missing:Math.max(0,cells.length-samples.length),
+  noData,
+  unknown,
+  legacyRemapped,
+  locationMissing,
+  classified:classifiedCount,
+  classifiedAreaM2,
+  assignedAreaM2,
+  intersectionAreaM2:plan.intersectionAreaM2,
+  errors,
+  lockRasterIds
+};
 }
 let DG_S2_LEGEND=null;
 
@@ -5173,6 +5194,7 @@ async function dgSatelliteRun(){
       directMaxClassShareDiffPct:0,
 
       sampleRows:direct.samples,
+      lockRasterIds:[...(direct.lockRasterIds||[])],
 
       legacyClassPixels:
         (direct.legacyRemapped||0),
@@ -5225,7 +5247,9 @@ async function dgSatelliteRun(){
      */
     try{
       const visualRaster=
-        await dgFetchSatelliteRaster();
+        await dgFetchSatelliteRaster(
+          LANDCOVER.lockRasterIds
+        );
 
       await dgRenderSatelliteRaster(
         visualRaster
