@@ -3881,6 +3881,24 @@ function dgRenderSatelliteCells(){
   }
 }
 
+function dgSatelliteReportRow(emoji,label,m2,totalM2){
+  const p=totalM2>0 ? m2/totalM2*100 : 0;
+
+  return(
+    "<div style='display:flex;align-items:center;gap:8px;margin:5px 0'>"+
+    "<span style='width:18px'>"+emoji+"</span>"+
+    "<span style='width:125px;font-size:.8rem'>"+label+"</span>"+
+    "<div style='flex:1;height:10px;background:var(--line);border-radius:5px;overflow:hidden'>"+
+    "<div style='height:100%;width:"+
+    Math.min(100,p).toFixed(1)+
+    "%;background:var(--line-strong)'></div></div>"+
+    "<b style='width:78px;text-align:right;font-size:.8rem'>"+
+    (m2/10000).toFixed(2)+" ha</b>"+
+    "<span style='width:42px;font-size:.72rem'>%"+
+    p.toFixed(1)+"</span></div>"
+  );
+}
+
 async function dgSatelliteRun(){
   if(
     !PARK_POLY||
@@ -4324,10 +4342,10 @@ async function dgSatelliteRun(){
   if(rep){
     rep.innerHTML=
       "<b>🛰️ Arazi Örtüsü · Sentinel-2 / 10 m · 2020</b>"+
-      row("🌿","Yeşil / vejetasyon",grouped.green*100)+
-      row("🧱","Yapılı / built",grouped.hard*100)+
-      row("💧","Su",grouped.water*100)+
-      row("🟫","Diğer",grouped.other*100)+
+      dgSatelliteReportRow("🌿","Yeşil / vejetasyon",grouped.green*100,validAreaM2)+
+      dgSatelliteReportRow("🧱","Yapılı / built",grouped.hard*100,validAreaM2)+
+      dgSatelliteReportRow("💧","Su",grouped.water*100,validAreaM2)+
+      dgSatelliteReportRow("🟫","Diğer",grouped.other*100,validAreaM2)+
 
       "<div style='font-size:.72rem;color:var(--mut);margin-top:10px'>"+
       "Park geometrisi: <b>"+
