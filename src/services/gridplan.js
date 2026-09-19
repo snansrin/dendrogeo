@@ -4638,7 +4638,6 @@ async function dgDirectSatelliteSamples(){
    "· kaynak hücre:",
    cells.length
  );
- );
  const samples=[],errors=[],CONCURRENCY=3;
  const requestCells=chunk=>dgGetSamplesChunk(
     chunk.map(c=>[
