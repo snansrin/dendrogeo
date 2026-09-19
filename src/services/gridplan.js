@@ -5147,7 +5147,35 @@ async function dgSatelliteRun(){
      * getSamples is independent from the zonal histogram and cannot
      * overwrite the primary area calculation.
      */
-    const direct=await dgDirectSatelliteSamples();
+    let direct={
+      counts:Object.fromEntries(
+        DG_S2_OFFICIAL_CODES.map(code=>[code,0])
+      ),
+      requested:0,
+      returned:0,
+      missing:0,
+      noData:0,
+      unknown:0,
+      legacyRemapped:0,
+      locationMissing:0,
+      classified:0,
+      samples:[],
+      errors:[],
+      qcError:""
+    };
+
+    try{
+      direct=await dgDirectSatelliteSamples();
+    }catch(qcErr){
+      direct.qcError=
+        qcErr?.message||
+        String(qcErr);
+
+      console.warn(
+        "DENDROGEO · Sentinel-2 getSamples QC başarısız:",
+        qcErr
+      );
+    }
 
     const directClassTotals=
       DG_S2_OFFICIAL_CODES.reduce(
@@ -5367,6 +5395,7 @@ async function dgSatelliteRun(){
       directInvalidSamples:direct.unknown,
       directLegacyRemapped:direct.legacyRemapped,
       directLocationMissing:direct.locationMissing,
+      directQcError:direct.qcError||"",
       directSampleCoveragePct:
         direct.requested>0
           ?direct.classified/
@@ -5423,6 +5452,17 @@ async function dgSatelliteRun(){
           )
       }
     };
+
+    if(direct.qcError){
+      LANDCOVER.qualityWarning+=
+        (
+          LANDCOVER.qualityWarning
+            ?" ":""
+        )+
+        "Bağımsız getSamples QC çalıştırılamadı: "+
+        direct.qcError+
+        ". Ana zonal histogram sonucu korunmuştur.";
+    }
 
     if(unmappedCount>0){
       LANDCOVER.qualityWarning+=
