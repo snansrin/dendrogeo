@@ -633,26 +633,27 @@ function cellInsidePark(
     const rb=ringBBox(ring,cLat);
     if(!bboxesOverlap(rb,rect))continue;
 
-    for(const p of ring){
-      const q=projectPoint(p[0],p[1],cLat);
+    /*
+     * Any cell intersecting or lying inside a park hole is invalid.
+     * Testing the hole's own centroid was insufficient when a cell
+     * was fully enclosed by a larger hole.
+     */
+    if(pointInPolygon(cLat,cLon,ring))return false;
 
-      if(
-        q.x>=rect.minX&&q.x<=rect.maxX&&
-        q.y>=rect.minY&&q.y<=rect.maxY
-      ){
-        return false;
-      }
+    for(const corner of corners){
+      if(pointInPolygon(corner[0],corner[1],ring))return false;
     }
 
-    const center=ring.reduce(
-      (a,p)=>[
-        a[0]+p[0]/ring.length,
-        a[1]+p[1]/ring.length
-      ],
-      [0,0]
-    );
-
-    if(pointInPolygon(center[0],center[1],ring))return false;
+    if(
+      geometryIntersectsRect(
+        ring,
+        rect,
+        cLat,
+        0
+      )
+    ){
+      return false;
+    }
   }
 
   return true;
@@ -2795,6 +2796,7 @@ function clearPark(){
   }
 PARK_POLY=null;
   PARK_HOLES=[];
+  PARK_SELECTED_AREA_M2=null;
 
   WATER_RINGS=[];
   WATER_LINES=[];
