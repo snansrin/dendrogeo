@@ -4871,7 +4871,7 @@ function dgRenderSatelliteReport(
         "<thead><tr>"+
           "<th></th>"+
           "<th>Sınıf</th>"+
-          "<th>Raster hücresi</th>"+
+          "<th>10 m örnek</th>"+
           "<th>Alan</th>"+
           "<th>%</th>"+
         "</tr></thead>"+
@@ -4939,19 +4939,11 @@ function dgRenderSatelliteReport(
 
 async function dgSatelliteRun(){
   if(!PARK_POLY||!PARK_POLY.length){
-    return toast(
-      "Önce park seç",
-      "warn",
-      "🌳"
-    );
+    return toast("Önce park seç","warn","🌳");
   }
 
   if(SATELLITE_RUNNING){
-    return toast(
-      "🛰️ Uydu analizi zaten çalışıyor.",
-      "info",
-      "🛰️"
-    );
+    return toast("🛰️ Uydu analizi zaten çalışıyor.","info","🛰️");
   }
 
   SATELLITE_RUNNING=true;
@@ -4962,157 +4954,65 @@ async function dgSatelliteRun(){
       rep.style.display="block";
       rep.innerHTML=
         "⏳ Sentinel-2 / 10 m / 2020 · "+
-        "server-side zonal raster analizi yapılıyor…";
+        "deterministik 10 m örnekleme ve bağımsız raster QC çalışıyor…";
     }
 
     LANDCOVER=null;
     LANDCOVER_SAMPLES=[];
 
     const parkM2=parkAreaM2();
-
     if(!(parkM2>0)){
-      throw new Error(
-        "Park alanı hesaplanamadı."
-      );
+      throw new Error("Park alanı hesaplanamadı.");
     }
 
     /*
-     * PRIMARY RESULT
-     * -----------------------------
-     * computeStatisticsHistograms is the authoritative zonal result.
+     * PRIMARY NUMERIC RESULT
+     * ----------------------
+     * ArcGIS getSamples is used with a deterministic 10 m multipoint
+     * lattice generated inside the actual park polygon. Multipoint
+     * locations are sampled directly by the service, with 10 m pixel
+     * size and nearest-neighbor interpolation. This avoids treating
+     * computeStatisticsHistograms' requested source extent as a zonal
+     * pixel count.
      */
-    const attempts=[1200,800,500,300];
-    let data=null;
-    let lastError=null;
-    let usedVertices=0;
-    let usedUrlLength=0;
-
-    for(const maxVertices of attempts){
-      try{
-        const url=dgBuildHistogramUrl(
-          maxVertices
-        );
-
-        usedVertices=maxVertices;
-        usedUrlLength=url.length;
-
-        const res=await fetch(
-          url,
-          {
-            method:"GET",
-            mode:"cors",
-            cache:"no-store",
-            headers:{Accept:"application/json"}
-          }
-        );
-
-        const body=await res.text();
-
-        if(!res.ok){
-          throw new Error(
-            "HTTP "+res.status+
-            " · "+body.slice(0,300)
-          );
-        }
-
-        data=JSON.parse(body);
-
-        if(data?.error){
-          throw new Error(
-            (data.error.message||
-              "ArcGIS histogram hatası")+
-            (
-              Array.isArray(data.error.details)&&
-              data.error.details.length
-                ?" · "+data.error.details.join(" | ")
-                :""
-            )
-          );
-        }
-
-        if(
-          !Array.isArray(data.histograms)||
-          !data.histograms[0]
-        ){
-          throw new Error(
-            "ArcGIS histogram döndürmedi."
-          );
-        }
-
-        break;
-      }catch(err){
-        lastError=err;
-
-        console.warn(
-          "ArcGIS zonal histogram denemesi:",
-          maxVertices,
-          err
-        );
-      }
-    }
-
-    if(!data){
+    let direct;
+    try{
+      direct=await dgDirectSatelliteSamples();
+    }catch(sampleErr){
       throw new Error(
-        "Park polygonu için ArcGIS zonal histogram alınamadı. "+
-        (lastError?.message||
-          "Bilinmeyen servis hatası")+
-        " · URL="+usedUrlLength+
-        " karakter"
+        "10 m Sentinel-2 örnekleme alınamadı: "+
+        (sampleErr?.message||String(sampleErr))
       );
     }
 
-    const hist=data.histograms[0];
-    const histogramRaw=dgHistogramCountsRaw(hist);
-    const classCounts=dgHistogramCounts(hist);
-    const histogramPixelCount=dgHistogramTotal(hist);
+    const requested=Number(direct.requested)||0;
+    const returned=Number(direct.returned)||0;
+    const classified=Number(direct.classified)||0;
 
-    if(histogramPixelCount<=0){
+    if(requested<=0||classified<=0){
       throw new Error(
-        "Park içinde histogram geçerli raster hücresi döndürmedi."
+        "Park içinde geçerli 10 m Sentinel-2 sınıf örneği bulunamadı."
       );
     }
-
-    /*
-     * All histogram bins are conserved. Official classes (plus legacy
-     * remap) become the 9-class schema; every remaining bin is retained
-     * as unmapped instead of silently disappearing.
-     */
-    const classCountTotal=
-      DG_S2_OFFICIAL_CODES.reduce(
-        (sum,code)=>
-          sum+
-          Number(classCounts[code]||0),
-        0
-      );
-
-    const unmappedCount=Math.max(
-      0,
-      histogramPixelCount-classCountTotal
-    );
-
-    const histogramNoDataCount=
-      Number(histogramRaw[0]||0);
-
-    const histogramUnknownCount=Math.max(
-      0,
-      unmappedCount-histogramNoDataCount
-    );
 
     const classAreasM2={};
+    const classPercent={};
+
     for(const code of DG_S2_OFFICIAL_CODES){
+      const count=Number(direct.counts?.[code]||0);
+
+      /*
+       * The deterministic 10 m lattice is the sampling frame. The
+       * park's measured geodesic area is distributed according to
+       * the observed class share, while missing/NoData observations
+       * remain explicitly unclassified.
+       */
       classAreasM2[code]=
         parkM2*
-        (
-          Number(classCounts[code]||0)/
-          histogramPixelCount
-        );
-    }
+        (count/Math.max(1,requested));
 
-    const classPercent={};
-    for(const code of DG_S2_OFFICIAL_CODES){
       classPercent[code]=
-        Number(classCounts[code]||0)/
-        histogramPixelCount*
+        count/Math.max(1,requested)*
         100;
     }
 
@@ -5136,81 +5036,179 @@ async function dgSatelliteRun(){
       naturalVegetationM2+
       cropsM2;
 
-    const unmappedM2=
+    const unclassifiedCount=Math.max(
+      0,
+      requested-classified
+    );
+
+    const unclassifiedM2=
       parkM2*
-      (
-        unmappedCount/
-        histogramPixelCount
-      );
+      (unclassifiedCount/Math.max(1,requested));
 
     /*
-     * SECONDARY QC
-     * -----------------------------
-     * getSamples is independent from the zonal histogram and cannot
-     * overwrite the primary area calculation.
+     * SECONDARY SERVER QC
+     * -------------------
+     * ArcGIS computeStatisticsHistograms is useful for an independent
+     * distribution check, but its response is not used as the primary
+     * raster-cell denominator because the API requests source pixels
+     * for the polygon's projected extent. Its count can therefore
+     * represent the requested source extent rather than the park's
+     * exact 10 m lattice.
      */
-    let direct={
-      counts:Object.fromEntries(
+    let histogram={
+      ok:false,
+      raw:{},
+      classes:Object.fromEntries(
         DG_S2_OFFICIAL_CODES.map(code=>[code,0])
       ),
-      requested:0,
-      returned:0,
-      missing:0,
+      total:0,
       noData:0,
       unknown:0,
-      legacyRemapped:0,
-      locationMissing:0,
-      classified:0,
-      samples:[],
-      errors:[],
-      qcError:""
+      error:""
     };
 
     try{
-      direct=await dgDirectSatelliteSamples();
-    }catch(qcErr){
-      direct.qcError=
-        qcErr?.message||
-        String(qcErr);
+      const attempts=[1200,800,500,300];
+      let data=null;
+      let lastError=null;
 
-      console.warn(
-        "DENDROGEO · Sentinel-2 getSamples QC başarısız:",
-        qcErr
-      );
+      for(const maxVertices of attempts){
+        try{
+          const url=dgBuildHistogramUrl(maxVertices);
+          const res=await fetch(
+            url,
+            {
+              method:"GET",
+              mode:"cors",
+              cache:"no-store",
+              headers:{Accept:"application/json"}
+            }
+          );
+
+          const body=await res.text();
+
+          if(!res.ok){
+            throw new Error(
+              "HTTP "+res.status+" · "+body.slice(0,300)
+            );
+          }
+
+          data=JSON.parse(body);
+
+          if(data?.error){
+            throw new Error(
+              (data.error.message||"ArcGIS histogram hatası")+
+              (
+                Array.isArray(data.error.details)&&
+                data.error.details.length
+                  ?" · "+data.error.details.join(" | ")
+                  :""
+              )
+            );
+          }
+
+          if(
+            !Array.isArray(data.histograms)||
+            !data.histograms[0]
+          ){
+            throw new Error("ArcGIS histogram döndürmedi.");
+          }
+
+          break;
+        }catch(err){
+          lastError=err;
+        }
+      }
+
+      if(!data){
+        throw new Error(
+          lastError?.message||
+          "ArcGIS histogram alınamadı."
+        );
+      }
+
+      const hist=data.histograms[0];
+      const raw=dgHistogramCountsRaw(hist);
+      const classes=dgHistogramCounts(hist);
+      const total=dgHistogramTotal(hist);
+
+      if(total<=0){
+        throw new Error(
+          "ArcGIS histogram geçerli hücre döndürmedi."
+        );
+      }
+
+      const officialTotal=
+        DG_S2_OFFICIAL_CODES.reduce(
+          (s,code)=>
+            s+
+            Number(classes[code]||0),
+          0
+        );
+
+      histogram={
+        ok:true,
+        raw,
+        classes,
+        total,
+        noData:Number(raw[0]||0),
+        unknown:Math.max(
+          0,
+          total-officialTotal
+        ),
+        error:"",
+        min:Number(hist.min),
+        max:Number(hist.max),
+        size:Number(hist.size)
+      };
+    }catch(histErr){
+      histogram.error=
+        histErr?.message||
+        String(histErr);
     }
 
-    const directClassTotals=
-      DG_S2_OFFICIAL_CODES.reduce(
-        (s,code)=>
-          s+
-          Number(direct.counts[code]||0),
-        0
-      );
+    let qcMaxDiff=0;
 
-    let directMaxDiff=0;
+    if(
+      histogram.ok&&
+      histogram.total>0&&
+      classified>0
+    ){
+      /*
+       * Compare class composition after normalizing both datasets to
+       * their own valid/classified populations. This is a distribution
+       * QC only, not an area replacement.
+       */
+      const histogramClassTotal=
+        DG_S2_OFFICIAL_CODES.reduce(
+          (s,code)=>
+            s+
+            Number(histogram.classes[code]||0),
+          0
+        );
 
-    if(directClassTotals>0){
-      for(const code of DG_S2_OFFICIAL_CODES){
-        const hp=
-          Number(classCounts[code]||0)/
-          histogramPixelCount;
+      if(histogramClassTotal>0){
+        for(const code of DG_S2_OFFICIAL_CODES){
+          const sampleShare=
+            Number(direct.counts?.[code]||0)/
+            classified;
 
-        const dp=
-          Number(direct.counts[code]||0)/
-          directClassTotals;
+          const histogramShare=
+            Number(histogram.classes?.[code]||0)/
+            histogramClassTotal;
 
-        directMaxDiff=
-          Math.max(
-            directMaxDiff,
-            Math.abs(hp-dp)
+          qcMaxDiff=Math.max(
+            qcMaxDiff,
+            Math.abs(sampleShare-histogramShare)
           );
+        }
       }
     }
 
     const directClassSamplePct=
-      directClassTotals>0
-        ?directClassTotals/direct.requested*100
-        :0;
+      classified/
+      Math.max(1,requested)*
+      100;
 
     LANDCOVER={
       total:+(parkM2/10000).toFixed(2),
@@ -5245,18 +5243,18 @@ async function dgSatelliteRun(){
       ).toFixed(2),
 
       naturalVegetationHa:+(
-         naturalVegetationM2/10000
-       ).toFixed(2),
+        naturalVegetationM2/10000
+      ).toFixed(2),
 
-       totalVegetationHa:+(
-         totalVegetationM2/10000
-       ).toFixed(2),
+      totalVegetationHa:+(
+        totalVegetationM2/10000
+      ).toFixed(2),
 
-       maskedHa:+(
-         maskedM2/10000
-       ).toFixed(2),
+      maskedHa:+(
+        maskedM2/10000
+      ).toFixed(2),
 
-       crops:+(
+      crops:+(
         cropsM2/10000
       ).toFixed(2),
 
@@ -5275,20 +5273,23 @@ async function dgSatelliteRun(){
       sampleM:DG_S2_LULC_PIXEL_M,
 
       /*
-       * These are explicitly histogram raster cells, not getSamples points.
+       * These counts are deterministic 10 m sample locations, NOT
+       * claims of exact raster-cell census.
        */
-      sampleCount:histogramPixelCount,
-      satellitePixels:histogramPixelCount,
-      requestedSamples:direct.requested,
-      returnedSamples:direct.returned,
+      sampleCount:requested,
+      satelliteSamples:requested,
+      satellitePixels:requested,
+      requestedSamples:requested,
+      returnedSamples:returned,
       missingSamples:direct.missing,
       invalidSamples:direct.unknown,
       noDataSamples:direct.noData,
-      maskedSamples:direct.counts[10]||0,
+      maskedSamples:Number(direct.counts?.[10]||0),
 
       method:
-        "ArcGIS ImageServer computeStatisticsHistograms · "+
-        "gerçek park polygonu · Year=2020 · 10 m sınıflandırılmış raster",
+        "ArcGIS ImageServer getSamples · deterministic 10 m "+
+        "multipoint lattice inside park polygon · Year=2020 · "+
+        "NearestNeighbor",
 
       source:
         "Impact Observatory · Microsoft · Esri · "+
@@ -5296,27 +5297,10 @@ async function dgSatelliteRun(){
 
       sourceUrl:DG_S2_LULC_SERVICE,
 
-      rawClassCounts:classCounts,
-      histogramRaw,
-      histogramPixelCount,
-      histogramUnmappedCount:unmappedCount,
-      histogramUnmappedAreaHa:+(
-        unmappedM2/10000
-      ).toFixed(4),
-      histogramUnmappedPct:
-        unmappedCount/
-        histogramPixelCount*
-        100,
-      histogramNoDataCount,
-      histogramNoDataPct:
-        histogramNoDataCount/
-        histogramPixelCount*
-        100,
-      histogramUnknownCount,
-      histogramUnknownPct:
-        histogramUnknownCount/
-        histogramPixelCount*
-        100,
+      /*
+       * Primary class counts come directly from getSamples.
+       */
+      rawClassCounts:{...direct.counts},
 
       classAreasM2,
       classPercent,
@@ -5328,119 +5312,120 @@ async function dgSatelliteRun(){
         water:waterM2,
         other:otherM2,
         masked:maskedM2,
-        nodata:unmappedM2
+        nodata:unclassifiedM2
       },
 
       resolutionM:DG_S2_LULC_PIXEL_M,
-
       geometricAreaM2:parkM2,
 
-      /*
-       * Histogram-derived observed area conserves all returned bins
-       * except an explicitly tracked unmapped remainder.
-       */
       validAreaM2:
         parkM2-
-        unmappedM2,
+        unclassifiedM2,
 
       sampledAreaM2:parkM2,
+
       returnedAreaM2:
-        direct.returned/
-        Math.max(1,direct.requested)*
+        classified/
+        Math.max(1,requested)*
         parkM2,
 
       cloudAreaM2:maskedM2,
+
       noDataAreaM2:
         parkM2*
-        histogramNoDataCount/
-        histogramPixelCount,
+        (
+          Number(direct.noData||0)/
+          Math.max(1,requested)
+        ),
+
       missingAreaM2:
-        direct.missing/
-        Math.max(1,direct.requested)*
-        parkM2,
+        parkM2*
+        (
+          Number(direct.missing||0)/
+          Math.max(1,requested)
+        ),
 
-      unclassifiedAreaM2:unmappedM2,
+      unclassifiedAreaM2:unclassifiedM2,
 
-      coveragePct:
-        parkM2>0
-          ?(parkM2-unmappedM2)/
-           parkM2*
-           100
-          :0,
+      coveragePct:directClassSamplePct,
 
-      /*
-       * These are secondary QC metrics and must not be confused with
-       * raster zonal coverage.
-       */
       returnedCoveragePct:
-        direct.returned/
-        Math.max(1,direct.requested)*
+        returned/
+        Math.max(1,requested)*
         100,
 
-      classifiedCoveragePct:
-        parkM2>0
-          ?(parkM2-unmappedM2)/
-           parkM2*
-           100
-          :0,
+      classifiedCoveragePct:directClassSamplePct,
 
-      histogramMin:Number(hist.min),
-      histogramMax:Number(hist.max),
-      histogramSize:Number(hist.size),
+      /*
+       * Histogram is retained strictly as an independent QC dataset.
+       */
+      histogramClassCounts:histogram.classes,
+      histogramRaw:histogram.raw,
+      histogramPixelCount:histogram.total,
+      histogramAllBins:histogram.total,
+      histogramNoDataCount:histogram.noData,
+      histogramUnknownCount:histogram.unknown,
 
-      histogramBinWidth:
-        Number(hist.max)>Number(hist.min)&&
-        Number(hist.size)
-          ?(
-            Number(hist.max)-
-            Number(hist.min)
-           )/
-           Number(hist.size)
-          :null,
+      histogramUnmappedCount:histogram.unknown,
+      histogramUnmappedAreaHa:+(
+        (
+          parkM2*
+          (
+            histogram.unknown/
+            Math.max(1,histogram.total)
+          )
+        )/10000
+      ).toFixed(4),
+      histogramUnmappedPct:
+        histogram.unknown/
+        Math.max(1,histogram.total)*
+        100,
 
-      requestVertexLimit:usedVertices,
-      histogramUrlLength:usedUrlLength,
+      histogramNoDataPct:
+        histogram.noData/
+        Math.max(1,histogram.total)*
+        100,
 
-      directSampleCount:direct.classified,
-      directRequestedPoints:direct.requested,
-      directReturnedSamples:direct.returned,
-      directMissingSamples:direct.missing,
-      directNoDataSamples:direct.noData,
-      directInvalidSamples:direct.unknown,
-      directLegacyRemapped:direct.legacyRemapped,
-      directLocationMissing:direct.locationMissing,
-      directQcError:direct.qcError||"",
-      directSampleCoveragePct:
-        direct.requested>0
-          ?direct.classified/
-           direct.requested*
-           100
-          :0,
+      histogramUnknownPct:
+        histogram.unknown/
+        Math.max(1,histogram.total)*
+        100,
+
+      histogramMin:histogram.min??null,
+      histogramMax:histogram.max??null,
+      histogramSize:histogram.size??null,
+
+      directSampleCount:classified,
+      directRequestedPoints:requested,
+      directReturnedSamples:returned,
+      directMissingSamples:Number(direct.missing||0),
+      directNoDataSamples:Number(direct.noData||0),
+      directInvalidSamples:Number(direct.unknown||0),
+      directLegacyRemapped:Number(direct.legacyRemapped||0),
+      directLocationMissing:Number(direct.locationMissing||0),
+      directQcError:"",
+
+      directSampleCoveragePct:directClassSamplePct,
 
       directMaxClassShareDiffPct:
-        directMaxDiff*100,
+        qcMaxDiff*100,
 
       sampleRows:direct.samples,
 
       legacyClassPixels:
-        (histogramRaw[3]||0)+
-        (histogramRaw[6]||0),
+        (histogram.raw?.[3]||0)+
+        (histogram.raw?.[6]||0),
 
       qualityWarning:"",
-      rasterUnmatchedPixels:unmappedCount,
+
+      rasterUnmatchedPixels:histogram.unknown,
       rasterUnmatchedPct:
-        unmappedCount/
-        histogramPixelCount*
+        histogram.unknown/
+        Math.max(1,histogram.total)*
         100,
 
       rasterEffectivePixelM:DG_S2_LULC_PIXEL_M,
 
-      histogramClassCounts:classCounts,
-      histogramAllBins:histogramPixelCount,
-
-      /*
-       * Backward-compatible names used by other UI/export code.
-       */
       vegetationBreakdown:{
         trees:treesM2,
         flooded:floodedM2,
@@ -5449,87 +5434,73 @@ async function dgSatelliteRun(){
         legacyGrass:
           classAreasM2[11]*
           (
-            (histogramRaw[3]||0)/
+            (histogram.raw?.[3]||0)/
             Math.max(
               1,
-              (classCounts[11]||0)
+              (histogram.classes?.[11]||0)
             )
           ),
         legacyScrub:
           classAreasM2[11]*
           (
-            (histogramRaw[6]||0)/
+            (histogram.raw?.[6]||0)/
             Math.max(
               1,
-              (classCounts[11]||0)
+              (histogram.classes?.[11]||0)
             )
           )
       }
     };
 
-    if(direct.qcError){
-      LANDCOVER.qualityWarning+=
-        (
-          LANDCOVER.qualityWarning
-            ?" ":""
-        )+
-        "Bağımsız getSamples QC çalıştırılamadı: "+
-        direct.qcError+
-        ". Ana zonal histogram sonucu korunmuştur.";
+    if(histogram.error){
+      LANDCOVER.qualityWarning=
+        "Bağımsız ArcGIS histogram QC çalıştırılamadı: "+
+        histogram.error+
+        ". Ana 10 m örnekleme sonucu korunmuştur.";
     }
 
-    if(unmappedCount>0){
+    if(Number(direct.missing||0)>0){
       LANDCOVER.qualityWarning+=
-        "Histogramda 9 sınıfa eşlenemeyen "+
-        unmappedCount+
-        " raster hücresi var; bu hücreler sessizce sınıflara dağıtılmadı.";
+        (
+          LANDCOVER.qualityWarning?" ":""
+        )+
+        "İstenen 10 m örneklerin "+
+        Number(direct.missing)+
+        " tanesi servisten dönmedi.";
     }
 
-    if(LANDCOVER.legacyClassPixels>0){
+    if(Number(direct.noData||0)>0||Number(direct.unknown||0)>0){
       LANDCOVER.qualityWarning+=
         (
-          LANDCOVER.qualityWarning
-            ?" ":""
+          LANDCOVER.qualityWarning?" ":""
         )+
-        "Eski Grass/Scrub kodları 11 Rangeland altında normalize edildi.";
+        "Örneklemede "+
+        (
+          Number(direct.noData||0)+
+          Number(direct.unknown||0)
+        )+
+        " geçersiz/NoData sınıf bulundu.";
     }
 
-    if(direct.noData>0||direct.unknown>0){
+    if(Number(direct.legacyRemapped||0)>0){
       LANDCOVER.qualityWarning+=
         (
-          LANDCOVER.qualityWarning
-            ?" ":""
+          LANDCOVER.qualityWarning?" ":""
         )+
-        "getSamples QC içinde "+
-        (
-          direct.noData+
-          direct.unknown
-        )+
-        " örnek geçersiz/NoData döndü.";
-    }
-
-    if(direct.returned<direct.requested){
-      LANDCOVER.qualityWarning+=
-        (
-          LANDCOVER.qualityWarning
-            ?" ":""
-        )+
-        "getSamples tüm istenen örnek noktalarını döndürmedi.";
+        "Eski Grass/Scrub kodları Rangeland 11 altında normalize edildi.";
     }
 
     if(
-      directClassTotals>0&&
-      directMaxDiff>0.20
+      histogram.ok&&
+      qcMaxDiff>0.20
     ){
       LANDCOVER.qualityWarning+=
         (
-          LANDCOVER.qualityWarning
-            ?" ":""
+          LANDCOVER.qualityWarning?" ":""
         )+
-        "Bağımsız getSamples QC dağılımı ile zonal histogram "+
-        "arasındaki en büyük sınıf payı farkı %"+
-        (directMaxDiff*100).toFixed(1)+
-        ".";
+        "Bağımsız histogram QC ile 10 m örnek dağılımı arasındaki "+
+        "en büyük sınıf payı farkı %"+
+        (qcMaxDiff*100).toFixed(1)+".";
     }
 
     LANDCOVER.qualityWarning=
@@ -5543,16 +5514,11 @@ async function dgSatelliteRun(){
     );
 
     /*
-     * Visualization is a separate concern. A renderer failure cannot
-     * invalidate the zonal dataset.
+     * Visualization is separate from the numerical dataset.
      */
     try{
-      const visualRaster=
-        await dgFetchSatelliteRaster();
-
-      await dgRenderSatelliteRaster(
-        visualRaster
-      );
+      const visualRaster=await dgFetchSatelliteRaster();
+      await dgRenderSatelliteRaster(visualRaster);
     }catch(renderErr){
       LANDCOVER.visualizationError=
         renderErr?.message||
@@ -5560,20 +5526,17 @@ async function dgSatelliteRun(){
 
       LANDCOVER.qualityWarning+=
         (
-          LANDCOVER.qualityWarning
-            ?" ":""
+          LANDCOVER.qualityWarning?" ":""
         )+
-        "Sayısal zonal sonuç başarılı; harita katmanı üretilemedi: "+
+        "Sayısal LULC sonucu başarılı; harita katmanı üretilemedi: "+
         LANDCOVER.visualizationError;
 
-      if(rep){
-        dgRenderSatelliteReport(
-          rep,
-          parkM2,
-          LANDCOVER,
-          classAreasM2
-        );
-      }
+      dgRenderSatelliteReport(
+        rep,
+        parkM2,
+        LANDCOVER,
+        classAreasM2
+      );
 
       console.warn(
         "DENDROGEO · Sentinel-2 visualizasyon hatası:",
@@ -5582,19 +5545,19 @@ async function dgSatelliteRun(){
     }
 
     console.log(
-      "DENDROGEO · Sentinel-2 2020 zonal v5:",
+      "DENDROGEO · Sentinel-2 2020 10m deterministic LULC:",
       LANDCOVER
     );
 
     if(LANDCOVER.qualityWarning){
       toast(
-        "✓ 2020 · 10 m zonal analiz tamamlandı; QC notu var.",
+        "✓ 2020 · 10 m arazi örtüsü tamamlandı; QC notu var.",
         "warn",
         "🛰️"
       );
     }else{
       toast(
-        "✓ 2020 · 10 m zonal arazi örtüsü analizi tamamlandı.",
+        "✓ 2020 · 10 m arazi örtüsü analizi tamamlandı.",
         "ok",
         "🛰️"
       );
@@ -5615,7 +5578,7 @@ async function dgSatelliteRun(){
           esc(err?.message||String(err))+
         "</div>"+
         "<div style='font-size:.68rem;color:var(--mut);margin-top:7px'>"+
-          "Kısmi sonuç güvenilir kabul edilmedi ve rapora yazılmadı."+
+          "Geçersiz veya eksik sonuç rapora yazılmadı."+
         "</div>";
     }
 
