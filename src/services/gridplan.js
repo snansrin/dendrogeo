@@ -3711,7 +3711,7 @@ const DG_S2_CLASS_COLORS={
   8:"#a59b8f",
   9:"#a8ebff",
   10:"#616161",
-  11:"#8fbe78"
+  11:"#e3e2c3"
 };
 
 function dgS2Group(code){
@@ -4332,22 +4332,15 @@ async function dgSatelliteRun(){
     const classCounts=dgHistogramCounts(hist);
     const histogramAllBins=dgHistogramTotal(hist);
 
-    let validPixelCount=0;
-    let noDataPixelCount=0;
-
+    const noDataPixelCount=dgHistogramValueCount(hist,0);
+    let zonalPixelCount=noDataPixelCount;
     for(let code=1;code<=11;code++){
-      validPixelCount+=Number(classCounts[code])||0;
+      zonalPixelCount+=Number(classCounts[code])||0;
     }
 
-    /*
-     * Class 0 is normally NoData if present in the histogram.
-     * We don't use it in the area denominator.
-     */
-    noDataPixelCount=dgHistogramValueCount(hist,0);
-
-    if(validPixelCount<=0){
+    if(zonalPixelCount<=0){
       throw new Error(
-        "Park içinde geçerli 2020 LULC pikseli bulunamadı."
+        "Park içinde 2020 LULC histogramında kullanılabilir piksel bulunamadı."
       );
     }
 
@@ -4356,32 +4349,26 @@ async function dgSatelliteRun(){
       vegetation:0,
       hard:0,
       other:0,
-      masked:0
+      masked:0,
+      nodata:0
     };
 
     const classAreaByCode={};
+    classAreas.nodata=parkM2*(noDataPixelCount/zonalPixelCount);
 
     for(let code=1;code<=11;code++){
       const count=Number(classCounts[code])||0;
+      const areaM2=parkM2*(count/zonalPixelCount);
 
       if(dgS2OfficialClass(code)){
-        classAreaByCode[code]=
-          parkM2*(count/validPixelCount);
+        classAreaByCode[code]=areaM2;
       }
 
       const group=dgS2Group(code);
-
-      if(
-        Object.prototype.hasOwnProperty.call(
-          classAreas,
-          group
-        )
-      ){
-        classAreas[group]+=
-          parkM2*(count/validPixelCount);
+      if(Object.prototype.hasOwnProperty.call(classAreas,group)){
+        classAreas[group]+=areaM2;
       }
     }
-
     const classifiedAreaM2=
       classAreas.water+
       classAreas.vegetation+
@@ -4438,10 +4425,10 @@ async function dgSatelliteRun(){
       floodedVegetation:+((vegetationBreakdown.flooded)/10000).toFixed(2),
 
       sampleM:10,
-      sampleCount:validPixelCount,
-      satellitePixels:validPixelCount,
+      sampleCount:zonalPixelCount,
+      satellitePixels:zonalPixelCount,
       requestedSamples:0,
-      returnedSamples:validPixelCount,
+      returnedSamples:zonalPixelCount,
       missingSamples:0,
       invalidSamples:0,
       noDataSamples:noDataPixelCount,
@@ -4466,7 +4453,8 @@ async function dgSatelliteRun(){
         hard:classAreas.hard,
         water:classAreas.water,
         other:classAreas.other,
-        masked:classAreas.masked||0
+        masked:classAreas.masked||0,
+        nodata:classAreas.nodata||0
       },
 
       resolutionM:DG_S2_LULC_PIXEL_M,
@@ -4476,18 +4464,26 @@ async function dgSatelliteRun(){
       sampledAreaM2:parkM2,
       returnedAreaM2:parkM2,
       cloudAreaM2:classAreas.masked||0,
+      noDataAreaM2:classAreas.nodata||0,
 
-      missingAreaM2:0,
-      unclassifiedAreaM2:0,
+      missingAreaM2:classAreas.nodata||0,
+      unclassifiedAreaM2:
+        (classAreas.masked||0)+(classAreas.nodata||0),
 
-      coveragePct:100,
-      returnedCoveragePct:100,
+      coveragePct:
+        parkM2>0
+          ?classifiedAreaM2/parkM2*100
+          :0,
+      returnedCoveragePct:
+        parkM2>0
+          ?(classifiedAreaM2+(classAreas.masked||0))/parkM2*100
+          :0,
       classifiedCoveragePct:
         parkM2>0
           ?classifiedAreaM2/parkM2*100
           :0,
 
-      histogramPixelCount:validPixelCount,
+      histogramPixelCount:zonalPixelCount,
       histogramAllBins,
       histogramNoDataCount:noDataPixelCount,
 
@@ -4649,8 +4645,8 @@ async function dgSatelliteRun(){
         "<div style='font-size:.70rem;color:var(--mut);margin-top:10px'>"+
           "Park geometrisi: <b>"+
           (parkM2/10000).toFixed(2)+
-          " ha</b> · Geçerli sınıf pikselleri: <b>"+
-          validPixelCount.toLocaleString("tr-TR")+
+          " ha</b> · Zonal raster pikselleri: <b>"+
+          zonalPixelCount.toLocaleString("tr-TR")+
           "</b> · Histogram tüm binleri: <b>"+
           histogramAllBins.toLocaleString("tr-TR")+
           "</b>"+
