@@ -4569,14 +4569,15 @@ async function dgDirectSatelliteSamples(){
     );
   }
 
+  const returned=samples.length;
+  const requested=requestedPoints.length;
+
   if(samples.length!==requested){
     throw new Error(
       "ArcGIS getSamples eksik örnek döndürdü: "+
       samples.length+" / "+requested
     );
   }
-  const returned=samples.length;
-  const requested=requestedPoints.length;
   const missing=Math.max(
     0,
     requested-returned
@@ -4952,11 +4953,10 @@ function dgRenderSatelliteReport(
   rep.innerHTML=
     "<b>🛰️ Arazi Örtüsü · Sentinel-2 / 10 m · 2020</b>"+
     "<div style='font-size:.70rem;color:var(--mut);margin:7px 0 10px'>"+
-      "<b>Ana sayısal sonuç: deterministik 10 m örnekleme.</b> "+
-      "Yüzdeler, park polygonu içinde raster sınıf hücrelerinin "+
-      "sunucu tarafında hesaplanan frekanslarından türetilir. "+
-      "getSamples yalnızca bağımsız QC örneklemesidir ve "+
-      "örnek sayısı raster piksel sayısı değildir."+
+      "<b>Ana sayısal sonuç: park içi 10 m kaynak-grid piksel analizi.</b> "+
+      "Yüzdeler, park polygonu içinde kalan gerçek 10 m piksel merkezlerinin "+
+      "sınıf frekanslarından hesaplanır; OSM veya bina/su geometrileri "+
+      "Sentinel-2 sınıflarını değiştirmez."+
     "</div>"+
     "<div style='overflow:auto'>"+
       "<table>"+
@@ -5005,11 +5005,11 @@ function dgRenderSatelliteReport(
     "<div style='font-size:.69rem;color:var(--mut);margin-top:10px'>"+
       "<b>Park geometrisi:</b> "+
       (parkM2/10000).toFixed(2)+
-      " ha · <b>10 m örnek:</b> "+
+      " ha · <b>10 m raster pikseli:</b> "+
       landcover.histogramPixelCount.toLocaleString("tr-TR")+
-      " · <b>getSamples QC:</b> "+
-      landcover.directSampleCount.toLocaleString("tr-TR")+
-      " geçerli örnek · <b>İşlenemeyen/unmapped:</b> "+
+      " · <b>Raster alanı:</b> "+
+      Number(landcover.rasterAreaHa||0).toFixed(2)+" ha"+
+      " · <b>İşlenemeyen:</b> "+
       unmapped.toLocaleString("tr-TR")+
     "</div>"+
     "<div style='font-size:.68rem;color:var(--mut);margin-top:7px'>"+
@@ -5054,7 +5054,7 @@ async function dgSatelliteRun(){
       rep.style.display="block";
       rep.innerHTML=
         "⏳ Sentinel-2 / 10 m / 2020 · "+
-        "server-side zonal raster analizi yapılıyor…";
+        "park içi kaynak-grid piksel analizi yapılıyor…";
     }
 
     LANDCOVER=null;
@@ -5190,6 +5190,18 @@ async function dgSatelliteRun(){
       naturalVegetation:+(
         naturalVegetationM2/10000
       ).toFixed(2),
+      naturalVegetationHa:+(
+        naturalVegetationM2/10000
+      ).toFixed(2),
+      totalVegetationHa:+(
+        totalVegetationM2/10000
+      ).toFixed(2),
+      maskedHa:+(
+        maskedM2/10000
+      ).toFixed(2),
+      unclassifiedAreaHa:+(
+        unclassifiedM2/10000
+      ).toFixed(4),
 
       crops:+(
         cropsM2/10000
@@ -5253,7 +5265,7 @@ async function dgSatelliteRun(){
         water:waterM2,
         other:otherM2,
         masked:maskedM2,
-        nodata:unmappedM2
+        nodata:unclassifiedM2
       },
 
       resolutionM:DG_S2_LULC_PIXEL_M,
@@ -5301,15 +5313,7 @@ async function dgSatelliteRun(){
       histogramMax:null,
       histogramSize:null,
 
-      histogramBinWidth:
-        Number(hist.max)>Number(hist.min)&&
-        Number(hist.size)
-          ?(
-            Number(hist.max)-
-            Number(hist.min)
-           )/
-           Number(hist.size)
-          :null,
+      histogramBinWidth:null,
 
       requestVertexLimit:null,
       histogramUrlLength:0,
@@ -5334,14 +5338,13 @@ async function dgSatelliteRun(){
       sampleRows:direct.samples,
 
       legacyClassPixels:
-        (histogramRaw[3]||0)+
-        (histogramRaw[6]||0),
+        (direct.legacyRemapped||0),
 
       qualityWarning:"",
-      rasterUnmatchedPixels:unmappedCount,
+      rasterUnmatchedPixels:unclassifiedCount,
       rasterUnmatchedPct:
-        unmappedCount/
-        histogramPixelCount*
+        unclassifiedCount/
+        Math.max(1,requested)*
         100,
 
       rasterEffectivePixelM:DG_S2_LULC_PIXEL_M,
@@ -5357,24 +5360,8 @@ async function dgSatelliteRun(){
         flooded:floodedM2,
         crops:cropsM2,
         rangeland:rangelandM2,
-        legacyGrass:
-          classAreasM2[11]*
-          (
-            (histogramRaw[3]||0)/
-            Math.max(
-              1,
-              (classCounts[11]||0)
-            )
-          ),
-        legacyScrub:
-          classAreasM2[11]*
-          (
-            (histogramRaw[6]||0)/
-            Math.max(
-              1,
-              (classCounts[11]||0)
-            )
-          )
+        legacyGrass:0,
+        legacyScrub:0
       }
     };
 
