@@ -4388,10 +4388,12 @@ async function dgSatelliteRun(){
           offset+
           localIndex;
 
-        if(!returnedIndices.has(globalIndex)){
-          returnedIndices.add(globalIndex);
-          returnedAreaM2+=input.pixelAreaM2;
+        if(returnedIndices.has(globalIndex)){
+          continue;
         }
+
+        returnedIndices.add(globalIndex);
+        returnedAreaM2+=input.pixelAreaM2;
 
         const pixelAreaM2=input.pixelAreaM2;
 
