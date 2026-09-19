@@ -4711,86 +4711,34 @@ function dgSatelliteReportRow(
 }
 
 function dgSatelliteClassCSV(){
-  if(!LANDCOVER)return "";
+  if(!LANDCOVER)return"";
+  const q=v=>'"'+String(v??"").replace(/"/g,'""')+'"';
+  const rows=[[
+    "CLASS","SAMPLE_COUNT_10M","AREA_HA","PERCENT","YEAR","RESOLUTION_M"
+  ]];
 
-  const q=v=>
-    '"'+String(v??"").replace(/"/g,'""')+
-    '"';
-
-  const meta=[
-    ["dataset","Impact Observatory / Microsoft / Esri Sentinel-2 10m Land Cover"],
-    ["year",DG_S2_LULC_YEAR],
-    ["resolution_m",DG_S2_LULC_PIXEL_M],
-    ["park_area_ha",LANDCOVER.total],
-    ["method",LANDCOVER.method],
-    ["source_url",LANDCOVER.sourceUrl],
-    ["primary_10m_sample_count",LANDCOVER.sampleCount],
-    ["nodata_cells",LANDCOVER.histogramNoDataCount],
-    ["unmapped_cells",LANDCOVER.histogramUnknownCount]
-  ];
-
-  const rows=[
-    ["CLASS_CODE","CLASS_NAME","GROUP","SAMPLE_COUNT_10M","AREA_HA","PERCENT","YEAR","RESOLUTION_M"]
-  ];
-
-  for(const code of DG_S2_OFFICIAL_CODES){
-    const count=Number(LANDCOVER.rawClassCounts?.[code]||0);
-
+  for(const cls of DG_REPORT_CLASSES){
+    const r=LANDCOVER.reportClasses?.[cls.key];
     rows.push([
-      code,
-      q(DG_S2_CLASS_NAMES[code]),
-      q(dgS2Group(code)),
-      count,
-      Number(LANDCOVER.classAreasM2?.[code]||0)/10000,
-      Number(LANDCOVER.classPercent?.[code]||0),
+      q(cls.label),
+      Number(r?.count||0),
+      Number(r?.areaM2||0)/10000,
+      Number(r?.pct||0),
       DG_S2_LULC_YEAR,
       DG_S2_LULC_PIXEL_M
     ].join(","));
   }
 
-  const legacy3=Number(LANDCOVER.histogramRaw?.[3]||0);
-  const legacy6=Number(LANDCOVER.histogramRaw?.[6]||0);
-
   rows.push([
-    "META",
-    q("NO_DATA / UNMAPPED"),
-    q("quality_control"),
-    Number(LANDCOVER.histogramUnmappedCount||0),
-    Number(LANDCOVER.histogramUnmappedAreaHa||0),
-    Number(LANDCOVER.histogramUnmappedPct||0),
+    q("TOPLAM PARK ALANI"),
+    Number(LANDCOVER.sampleCount||0),
+    Number(LANDCOVER.reportAreaHa||0),
+    100,
     DG_S2_LULC_YEAR,
     DG_S2_LULC_PIXEL_M
   ].join(","));
 
-  rows.push([
-    "LEGACY_3",
-    q("Eski sınıf · Çayır → Rangeland 11"),
-    q("legacy"),
-    legacy3,
-    "",
-    "",
-    DG_S2_LULC_YEAR,
-    DG_S2_LULC_PIXEL_M
-  ].join(","));
-
-  rows.push([
-    "LEGACY_6",
-    q("Eski sınıf · Çalı / çalılık → Rangeland 11"),
-    q("legacy"),
-    legacy6,
-    "",
-    "",
-    DG_S2_LULC_YEAR,
-    DG_S2_LULC_PIXEL_M
-  ].join(","));
-
-  return(
-    "\uFEFF"+
-    meta.map(r=>q(r[0])+","+q(r[1])).join("\n")+
-    "\n\n"+
-    rows.join("\n")+
-    "\n"
-  );
+  return "\uFEFF"+rows.join("\n")+"\n";
 }
 
 function dgDownloadSatelliteClassCSV(){
