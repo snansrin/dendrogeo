@@ -1,5 +1,5 @@
 "use strict";
-/* DendroGeo v2 · gridplan.js v126 — LULC locked-catalog + raster-ID QC + histogram */           
+/* DendroGeo v2 · gridplan.js v127 — LULC PRIMARY-raster locked-catalog + raster-ID QC + histogram */           
   
 let PARK_POLY=null;
 let PARK_HOLES=[]; 
@@ -4007,7 +4007,7 @@ function dgBuildMosaicRule(lockRasterIds=null){
     sortField:"Year",
     sortValue:DG_S2_LULC_YEAR,
     ascending:true,
-    where:"Year = "+DG_S2_LULC_YEAR,
+    where:"Year = "+DG_S2_LULC_YEAR+" AND Category = 1",
     mosaicOperation:"MT_FIRST"
   };
 }
@@ -4633,7 +4633,7 @@ async function dgDirectSatelliteSamples(){
  const plan=dgBuild10mRasterCells(),cells=plan.cells,lockRasterIds=await dgGet2020RasterIds(),CHUNK=800,chunks=[];
  for(let i=0;i<cells.length;i+=CHUNK)chunks.push(cells.slice(i,i+CHUNK));
  console.log(
-   "DENDROGEO · 2020 raster katalog IDs:",
+   "DENDROGEO · 2020 PRIMARY raster katalog IDs:",
    lockRasterIds,
    "· kaynak hücre:",
    cells.length
