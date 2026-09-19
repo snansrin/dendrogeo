@@ -1,0 +1,21 @@
+# İşletim sistemi / editör artıkları
+.DS_Store
+Thumbs.db
+desktop.ini
+.vscode/
+.idea/
+*.swp
+
+# Yerel yedekler — indexsonyedek.html bir kez yanlışlıkla depoya girmişti
+*.bak
+*.old
+*sonyedek*
+*~
+
+# Bağımlılıklar (proje build adımı olmayan statik bir sitedir)
+node_modules/
+npm-debug.log*
+
+# Geçici çıktılar
+/tmp/
+*.local

@@ -1,0 +1,16 @@
+{
+  "name": "dendrogeo",
+  "version": "11.0.0",
+  "private": true,
+  "description": "DendroGeo — Küresel Ağaç Envanteri ve Karbon Veri Sistemi",
+  "type": "module",
+  "scripts": {
+    "test": "node --test test/",
+    "check:csp": "node scripts/check-csp.mjs",
+    "check:syntax": "node scripts/check-syntax.mjs",
+    "check": "npm run check:syntax && npm run check:csp && npm test"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
