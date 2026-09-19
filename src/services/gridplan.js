@@ -1,5 +1,5 @@
 "use strict";
-/* DendroGeo v2 · gridplan.js v106 — FINAL (su+sert iyileştirmeleri) */           
+/* DendroGeo v2 · gridplan.js v107 — FINAL (su+sert iyileştirmeleri) */           
   
 let PARK_POLY=null;
 let PARK_HOLES=[]; 
@@ -3677,6 +3677,32 @@ const DG_S2_LULC_PIXEL_M=10;
 const DG_S2_START_MS=Date.UTC(2020,0,1);
 const DG_S2_END_MS=Date.UTC(2021,0,1)-1;
 const DG_S2_MAX_EXPORT_PX=1800;
+const DG_S2_CLASS_RGB={};
+for(const code of Object.keys(DG_S2_CLASS_COLORS)){
+  const h=DG_S2_CLASS_COLORS[code].replace("#","");
+  DG_S2_CLASS_RGB[Number(code)]={
+    r:parseInt(h.slice(0,2),16),
+    g:parseInt(h.slice(2,4),16),
+    b:parseInt(h.slice(4,6),16)
+  };
+}
+
+function dgLonLatToWebMercator(lat,lon){
+  const R=6378137;
+  const clamped=Math.max(-85.05112878,Math.min(85.05112878,Number(lat)));
+  return{
+    x:R*Number(lon)*Math.PI/180,
+    y:R*Math.log(Math.tan(Math.PI/4+clamped*Math.PI/360))
+  };
+}
+
+function dgWebMercatorToLonLat(x,y){
+  const R=6378137;
+  return{
+    lon:Number(x)/R*180/Math.PI,
+    lat:(2*Math.atan(Math.exp(Number(y)/R))-Math.PI/2)*180/Math.PI
+  };
+}
 
 /*
  * Impact Observatory Maps for Good 9-class taxonomy.
@@ -3936,19 +3962,30 @@ function dgHistogramTotal(hist){
 function dgBuildExportImageUrl(){
   const b=dgParkBBox();
 
-  const midLat=(b.minLat+b.maxLat)/2;
-  const widthM=Math.abs(b.maxLon-b.minLon)*
-    111320*
-    Math.cos(midLat*Math.PI/180);
-  const heightM=Math.abs(b.maxLat-b.minLat)*110540;
+  const sw=dgLonLatToWebMercator(b.minLat,b.minLon);
+  const ne=dgLonLatToWebMercator(b.maxLat,b.maxLon);
+
+  const bbox3857={
+    minX:sw.x,
+    minY:sw.y,
+    maxX:ne.x,
+    maxY:ne.y
+  };
 
   const rawW=Math.max(
-    256,
-    Math.round(widthM/DG_S2_LULC_PIXEL_M)
+    1,
+    Math.ceil(
+      (bbox3857.maxX-bbox3857.minX)/
+      DG_S2_LULC_PIXEL_M
+    )
   );
+
   const rawH=Math.max(
-    256,
-    Math.round(heightM/DG_S2_LULC_PIXEL_M)
+    1,
+    Math.ceil(
+      (bbox3857.maxY-bbox3857.minY)/
+      DG_S2_LULC_PIXEL_M
+    )
   );
 
   const scale=Math.min(
@@ -3956,62 +3993,50 @@ function dgBuildExportImageUrl(){
     DG_S2_MAX_EXPORT_PX/Math.max(rawW,rawH)
   );
 
-  const width=Math.max(256,Math.round(rawW*scale));
-  const height=Math.max(256,Math.round(rawH*scale));
-
-  /*
-   * Explicit class colormap: never rely on a display renderer whose
-   * symbology can obscure the actual categorical values.
-   * Official current class colors are used where documented.
-   */
-  const colorMap=Object.entries(DG_S2_CLASS_COLORS)
-    .map(([code,hex])=>{
-      const h=hex.replace("#","");
-      return[
-        Number(code),
-        parseInt(h.slice(0,2),16),
-        parseInt(h.slice(2,4),16),
-        parseInt(h.slice(4,6),16)
-      ];
-    });
+  const width=Math.max(1,Math.round(rawW*scale));
+  const height=Math.max(1,Math.round(rawH*scale));
 
   const renderingRule={
-    rasterFunction:"Colormap",
-    rasterFunctionArguments:{
-      Colormap:colorMap,
-      Raster:"$$"
-    },
-    outputPixelType:"U8",
-    variableName:"Raster"
+    rasterFunction:
+      "Cartographic Renderer for Visualization and Analysis"
   };
 
   const params=new URLSearchParams({
     f:"image",
     bbox:[
-      b.minLon,
-      b.minLat,
-      b.maxLon,
-      b.maxLat
+      bbox3857.minX,
+      bbox3857.minY,
+      bbox3857.maxX,
+      bbox3857.maxY
     ].join(","),
-    bboxSR:"4326",
-    imageSR:"4326",
+    bboxSR:"3857",
+    imageSR:"3857",
     size:width+","+height,
     format:"png32",
     interpolation:"RSP_NearestNeighbor",
-    noData:"0",
     time:DG_S2_START_MS+","+DG_S2_END_MS,
     mosaicRule:JSON.stringify(dgBuildMosaicRule()),
     renderingRule:JSON.stringify(renderingRule)
   });
 
   return{
-    url:DG_S2_LULC_SERVICE+
+    url:
+      DG_S2_LULC_SERVICE+
       "/exportImage?"+
       params.toString(),
-    bbox:b,
+    bbox:{
+      minLat:b.minLat,
+      maxLat:b.maxLat,
+      minLon:b.minLon,
+      maxLon:b.maxLon
+    },
+    bbox3857,
     width,
     height,
-    renderingRule
+    effectivePixelM:{
+      x:(bbox3857.maxX-bbox3857.minX)/width,
+      y:(bbox3857.maxY-bbox3857.minY)/height
+    }
   };
 }
 
@@ -4050,8 +4075,10 @@ async function dgFetchSatelliteRaster(){
   return{
     blob:await res.blob(),
     bbox:built.bbox,
+    bbox3857:built.bbox3857,
     width:built.width,
-    height:built.height
+    height:built.height,
+    effectivePixelM:built.effectivePixelM
   };
 }
 
@@ -4109,6 +4136,139 @@ async function dgClipRasterBlobToPark(blob,bbox,width,height){
   return canvas.toDataURL("image/png");
 }
 
+async function dgAnalyzeRenderedRaster(raster){
+  const bitmap=await createImageBitmap(raster.blob);
+  const canvas=document.createElement("canvas");
+  canvas.width=raster.width;
+  canvas.height=raster.height;
+
+  const ctx=canvas.getContext("2d",{willReadFrequently:true});
+  if(!ctx){
+    bitmap.close();
+    throw new Error("Raster analizinde Canvas 2D açılamadı.");
+  }
+
+  ctx.drawImage(
+    bitmap,
+    0,
+    0,
+    raster.width,
+    raster.height
+  );
+  bitmap.close();
+
+  const pixels=ctx.getImageData(
+    0,
+    0,
+    raster.width,
+    raster.height
+  ).data;
+
+  const outer=(PARK_POLY||[]).map(r=>
+    (r||[]).map(p=>dgLonLatToWebMercator(p[0],p[1]))
+  );
+  const holes=(PARK_HOLES||[]).map(r=>
+    (r||[]).map(p=>dgLonLatToWebMercator(p[0],p[1]))
+  );
+
+  const counts={};
+  for(const code of [1,2,4,5,7,8,9,10,11]){
+    counts[code]=0;
+  }
+
+  let totalPixels=0;
+  let unmatchedPixels=0;
+
+  const dx=
+    (raster.bbox3857.maxX-raster.bbox3857.minX)/
+    raster.width;
+  const dy=
+    (raster.bbox3857.maxY-raster.bbox3857.minY)/
+    raster.height;
+
+  for(let py=0;py<raster.height;py++){
+    const y=
+      raster.bbox3857.maxY-
+      (py+0.5)*dy;
+
+    for(let px=0;px<raster.width;px++){
+      const x=
+        raster.bbox3857.minX+
+        (px+0.5)*dx;
+
+      let inside=false;
+
+      for(const ring of outer){
+        if(
+          Array.isArray(ring)&&
+          ring.length>=3&&
+          pointInPolygonXY(x,y,ring)
+        ){
+          inside=true;
+          break;
+        }
+      }
+
+      if(!inside)continue;
+
+      for(const ring of holes){
+        if(
+          Array.isArray(ring)&&
+          ring.length>=3&&
+          pointInPolygonXY(x,y,ring)
+        ){
+          inside=false;
+          break;
+        }
+      }
+
+      if(!inside)continue;
+
+      totalPixels++;
+
+      const idx=(py*raster.width+px)*4;
+      const r=pixels[idx];
+      const g=pixels[idx+1];
+      const b=pixels[idx+2];
+      const alpha=pixels[idx+3];
+
+      let bestCode=null;
+      let bestDist=Infinity;
+
+      for(const code of Object.keys(DG_S2_CLASS_RGB)){
+        const rgb=DG_S2_CLASS_RGB[Number(code)];
+        const dr=r-rgb.r;
+        const dg=g-rgb.g;
+        const db=b-rgb.b;
+        const dist=dr*dr+dg*dg+db*db;
+
+        if(dist<bestDist){
+          bestDist=dist;
+          bestCode=Number(code);
+        }
+      }
+
+      if(alpha===0||(!bestCode)||bestDist>900){
+        unmatchedPixels++;
+        continue;
+      }
+
+      counts[bestCode]++;
+    }
+  }
+
+  return{
+    classCounts:counts,
+    totalPixels,
+    unmatchedPixels,
+    unmatchedPct:
+      totalPixels>0
+        ?unmatchedPixels/totalPixels*100
+        :0,
+    effectivePixelM:raster.effectivePixelM
+  };
+}
+
 let DG_S2_LEGEND=null;
 
 function dgEnsureSatelliteLegend(){
@@ -4157,7 +4317,7 @@ function dgEnsureSatelliteLegend(){
   DG_S2_LEGEND.addTo(map);
 }
 
-async function dgRenderSatelliteRaster(){
+async function dgRenderSatelliteRaster(rasterData=null){
   if(!map)return;
 
   if(SATELLITE_LAYER){
@@ -4165,7 +4325,7 @@ async function dgRenderSatelliteRaster(){
     SATELLITE_LAYER=null;
   }
 
-  const raster=await dgFetchSatelliteRaster();
+  const raster=rasterData||await dgFetchSatelliteRaster();
 
   const imageUrl=await dgClipRasterBlobToPark(
     raster.blob,
@@ -4331,19 +4491,18 @@ async function dgSatelliteRun(){
     }
 
     const hist=data.histograms[0];
-    const classCounts=dgHistogramCounts(hist);
+    const histogramClassCounts=dgHistogramCounts(hist);
     const histogramAllBins=dgHistogramTotal(hist);
 
-    const noDataPixelCount=dgHistogramValueCount(hist,0);
-    let zonalPixelCount=noDataPixelCount;
-    for(let code=1;code<=11;code++){
-      zonalPixelCount+=Number(classCounts[code])||0;
-    }
+    const raster=await dgFetchSatelliteRaster();
+    const rasterAnalysis=await dgAnalyzeRenderedRaster(raster);
+
+    const classCounts=rasterAnalysis.classCounts;
+    const zonalPixelCount=rasterAnalysis.totalPixels;
+    const noDataPixelCount=rasterAnalysis.unmatchedPixels;
 
     if(zonalPixelCount<=0){
-      throw new Error(
-        "Park içinde 2020 LULC histogramında kullanılabilir piksel bulunamadı."
-      );
+      throw new Error("Park polygonu raster görüntüsünde piksel içermiyor.");
     }
 
     const classAreas={
@@ -4362,9 +4521,7 @@ async function dgSatelliteRun(){
       const count=Number(classCounts[code])||0;
       const areaM2=parkM2*(count/zonalPixelCount);
 
-      if(dgS2OfficialClass(code)){
-        classAreaByCode[code]=areaM2;
-      }
+      classAreaByCode[code]=areaM2;
 
       const group=dgS2Group(code);
       if(Object.prototype.hasOwnProperty.call(classAreas,group)){
@@ -4401,9 +4558,7 @@ async function dgSatelliteRun(){
       greenM2+
       vegetationBreakdown.crops;
 
-    const legacyPixels=
-      (classCounts[3]||0)+
-      (classCounts[6]||0);
+    const legacyPixels=0;
 
     LANDCOVER={
       total:+(parkM2/10000).toFixed(2),
@@ -4502,8 +4657,34 @@ async function dgSatelliteRun(){
       histogramUrlLength:usedUrlLength,
 
       legacyClassPixels:legacyPixels,
-      qualityWarning:""
+      qualityWarning:"",
+      rasterUnmatchedPixels:rasterAnalysis.unmatchedPixels,
+      rasterUnmatchedPct:rasterAnalysis.unmatchedPct,
+      rasterEffectivePixelM:rasterAnalysis.effectivePixelM,
+      histogramClassCounts,
+      histogramVsRasterWarning:""
     };
+
+    {
+      const hTotal=Object.values(histogramClassCounts)
+        .reduce((s,v)=>s+(Number(v)||0),0);
+      if(hTotal>0){
+        let maxDiff=0;
+        for(const code of [1,2,4,5,7,8,9,10,11]){
+          const hp=(histogramClassCounts[code]||0)/hTotal;
+          const rp=(classCounts[code]||0)/zonalPixelCount;
+          maxDiff=Math.max(maxDiff,Math.abs(hp-rp));
+        }
+        if(maxDiff>0.20){
+          LANDCOVER.histogramVsRasterWarning=
+            "Sunucu histogramı ile render edilmiş kategorik raster arasında "+
+            ">%20 sınıf payı farkı var; yüzde hesabında raster sonucu esas alındı.";
+          LANDCOVER.qualityWarning+=
+            (LANDCOVER.qualityWarning?" ":"")+
+            LANDCOVER.histogramVsRasterWarning;
+        }
+      }
+    }
 
     if(legacyPixels>0){
       LANDCOVER.qualityWarning=
@@ -4659,10 +4840,10 @@ async function dgSatelliteRun(){
           "kodlarıdır ve güncel üründe 11 altında birleştirilmiştir."+
         "</div>"+
         "<div style='font-size:.68rem;color:var(--mut);margin-top:7px'>"+
-          "<b>Harita:</b> Sınıf değerleri özel Colormap ile açıkça eşleniyor; "+
-          "built=7 kırmızı, water=1 mavi, trees=2 koyu yeşil, "+
-          "rangeland=11 açık yeşil. Böylece renderer görünümü ile sayısal "+
-          "sınıf sonucu karıştırılmıyor."+
+          "<b>Harita:</b> ArcGIS'in resmi kategorik Cartographic Renderer çıktısı "+
+          "ile aynı raster, piksel renklerinden sınıflandırılıyor. Sayısal sonuç "+
+          "ve harita aynı rasterdan üretiliyor; OSM su/sert yüzey katmanı bu "+
+          "hesabı değiştirmiyor."+
         "</div>"+
         (LANDCOVER.qualityWarning
           ?"<div style='margin-top:9px;padding:8px 10px;border-radius:8px;"+
@@ -4676,7 +4857,7 @@ async function dgSatelliteRun(){
      * Visualization failure must NOT erase a successful numeric result.
      */
     try{
-      await dgRenderSatelliteRaster();
+      await dgRenderSatelliteRaster(raster);
     }catch(renderErr){
       LANDCOVER.visualizationError=
         renderErr?.message||String(renderErr);
