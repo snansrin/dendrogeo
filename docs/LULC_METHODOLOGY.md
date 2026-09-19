@@ -81,4 +81,6 @@ Every exported record contains the dataset name, year, source URL, resolution, a
 
 Sentinel-2 2020 sorgusunda ImageServer raster kataloğundaki yalnızca **Category=1 (Primary)** öğeleri kullanılır. Overview ve diğer katalog kategorileri analize dahil edilmez. Seçili parkla kesişen Primary raster OBJECTID'leri katalog sorgusuyla bulunur ve analiz ile harita görselleştirmesinde aynı raster ID'leri LockRaster ile kullanılır. Böylece analiz ve harita farklı mozaik öğelerinden üretilemez.
 
-Analizden önce ayrıca aynı kilitli 2020 mozaik üzerinde ImageServer histogramı bağımsız QC olarak alınır. GetSamples ile histogram arasında sınıfın var/yok durumu çelişirse sonuç raporlanmaz; eksik veya çelişkili veri sessizce başka sınıfa dağıtılmaz.
+Ana sayısal sonuç artık ImageServer'dan **ham U8 raster** olarak 10 m kaynak-grid boyutunda dışa aktarılan görüntünün piksel değerlerinden üretilir. Export isteğinde `renderingRule=None`, `pixelType=U8`, `bandIds=0` ve `NearestNeighbor` kullanılır; böylece görsel renk paleti sınıf değerlerinin yerine geçmez. Her raster hücresi, aynı kaynak-grid hücresinin park polygonu ile gerçek kesişim alanıyla sınıfa yazılır.
+
+`getSamples` artık yalnızca küçük bir spot-QC yoludur; ana alan hesabını belirlemez. ArcGIS server-side histogram endpointi sonuç motorunun zorunlu bağımlılığı değildir ve erişilemediğinde ana 10 m raster analizi başarısız sayılmaz. Eksik/NoData veya beklenmeyen ham raster değerleri ise sessizce başka sınıfa dağıtılmaz.
