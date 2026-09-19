@@ -31,6 +31,17 @@ const BEYAZ_LISTE = new Set([
 function* kodDosyalari() {
   yield 'index.html';
   yield 'sw.js';
+  /* vendor/ BİLEREK TARANMIYOR.
+   * Üçüncü taraf paketlerin kaynak metninde belgeleme amaçlı URL'ler bulunur
+   * (ör. leaflet.js başlığındaki "https://leafletjs.com", supabase-js içindeki
+   * "https://www.jsdelivr.com/using-sri-with-dynamic-files" notu). Bunlar istek
+   * üretmez ama desen eşleştirmesi onları gerçek origin sanıp yanlış pozitif
+   * verir — bu betiğin ilk sürümünde tam olarak bu yaşandı.
+   *
+   * vendor dosyalarının GERÇEK ağ hedefleri çağıranın verdiği URL'lerdir
+   * (supabase-js → *.supabase.co, geotiff → Planetary Computer blob adresi) ve
+   * o origin'ler zaten src/ tarafındaki kullanımdan yakalanıp CSP'ye ekleniyor.
+   * vendor/ sözdizimi denetimine (check-syntax.mjs) tabi tutulmaya devam ediyor. */
   for (const dir of ['src/services', 'src/config', 'src/utils']) {
     const tam = join(ROOT, dir);
     if (!statSync(tam).isDirectory()) continue;

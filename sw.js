@@ -4,7 +4,7 @@
 // NOT: Senkronizasyon artık Ana Thread (Supabase JS SDK) tarafından yapılıyor
 // ============================================================
 
-const CACHE_VERSION = 'dendrogeo-sw-v2-r33';
+const CACHE_VERSION = 'dendrogeo-sw-v2-r34';
 
 /* İKİ AYRI STATİK CACHE — bu ayrım bilinçli ve önemli.
  *
@@ -38,14 +38,21 @@ const CORE_ASSETS = [
     '/src/config/supabase.js', '/src/config/constants.js', '/src/config/species.js', 
     '/src/utils/geo.js', '/src/utils/truncation.js', '/src/services/allometry.js', '/src/services/auth.js','/src/services/export.js', '/src/services/offline.js',
     '/src/services/admin.js','/src/services/world.js', '/src/services/measure.js','/src/services/map.js','/src/services/landcover.js','/src/services/gridplan.js','/src/services/dash.js',
-    'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css',
-    'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js',
-    'https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css',
-    'https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css',
-    'https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js',
-    'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2',
-    'https://cdn.jsdelivr.net/npm/chart.js@4',
-    'https://cdn.jsdelivr.net/npm/geotiff@2.1.3/dist-browser/geotiff.js',
+    /* Üçüncü taraf kütüphaneler artık depoda (vendor/) — bkz. vendor/VERSIONS.md.
+     * Aynı köken oldukları için SRI gerekmiyor ve çevrimdışı davranış
+     * deterministik: CDN erişilemezse ya da CDN'de farklı bir sürüm
+     * çözülürse uygulama etkilenmiyor. */
+    '/vendor/leaflet-1.9.4.css',
+    '/vendor/leaflet-1.9.4.js',
+    '/vendor/MarkerCluster-1.5.3.css',
+    '/vendor/MarkerCluster.Default-1.5.3.css',
+    '/vendor/leaflet.markercluster-1.5.3.js',
+    '/vendor/supabase-js-2.116.0.js',
+    '/vendor/chart.js-4.5.1.js',
+    '/vendor/geotiff-2.1.3.js',
+    /* Turnstile BİLEREK CDN'de bırakıldı: auth.js tarafından dinamik enjekte
+     * ediliyor ve Cloudflare bu betiği kendi sürümlüyor; sabitlemek widget
+     * güncellemelerini kırar. Bu yüzden CSP'de challenges.cloudflare.com duruyor. */
     'https://challenges.cloudflare.com/turnstile/v0/api.js',
     'https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Manrope:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap'
 ];

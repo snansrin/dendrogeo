@@ -31,7 +31,7 @@ function* yuru(dizin) {
 }
 
 const dosyalar = [join(ROOT, 'sw.js')];
-for (const d of ['src', 'scripts']) {
+for (const d of ['src', 'scripts', 'vendor']) {
   const tam = join(ROOT, d);
   if (statSync(tam).isDirectory()) dosyalar.push(...yuru(tam));
 }
