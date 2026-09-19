@@ -1,5 +1,5 @@
 "use strict";
-/* DendroGeo v2 · gridplan.js v136 — Clean 10m LULC bridge + OSM overlay separation */
+/* DendroGeo v2 · gridplan.js v137 — Clean land-cover bridge + native 10m LULC */
   
 let PARK_POLY=null;
 let PARK_HOLES=[]; 
@@ -27,6 +27,12 @@ const SELECTED_CELLS=new Set();
 let LAST_WP_ROWS=[];
 let PARK_REF_HA=null;
 let PARK_SELECTED_AREA_M2=null;
+let LANDCOVER=null;
+let LANDCOVER_SAMPLES=[];
+let SATELLITE_LAYER=null;
+let SATELLITE_RUNNING=false;
+let DG_PARK_PIXEL_GEOMETRY=null;
+
 /* Reference-area helpers are intentionally local to the active gridplan module.
  * gridplan_core.js is an older parallel implementation and is not loaded by index.html. */
 function setRefHa(v){
@@ -755,6 +761,58 @@ function osmSampleGroup(lat,lon){
    GRID CELL VALIDATION
 ========================================================= */
 
+function satelliteGroupForCell(s0,s1,w0,w1){
+  if(!Array.isArray(LANDCOVER_SAMPLES)||!LANDCOVER_SAMPLES.length){
+    return null;
+  }
+
+  const counts={
+    green:0,
+    hard:0,
+    water:0,
+    other:0
+  };
+
+  let total=0;
+
+  for(const p of LANDCOVER_SAMPLES){
+    if(
+      p.lat>=s0&&
+      p.lat<=s1&&
+      p.lon>=w0&&
+      p.lon<=w1
+    ){
+      const g=p.group||"other";
+      if(Object.prototype.hasOwnProperty.call(counts,g)){
+        counts[g]++;
+      }
+      total++;
+    }
+  }
+
+  if(!total)return null;
+
+  let dominant="other";
+  let best=-1;
+
+  for(const g of Object.keys(counts)){
+    if(counts[g]>best){
+      best=counts[g];
+      dominant=g;
+    }
+  }
+
+  return{
+    dominant,
+    counts,
+    total,
+    greenRatio:counts.green/total,
+    hardRatio:counts.hard/total,
+    waterRatio:counts.water/total,
+    otherRatio:counts.other/total
+  };
+}
+
 /* =========================================================
    GRID CELL VALIDATION
 ========================================================= */
@@ -926,10 +984,6 @@ async function queryPark(
    DETAILED COVERAGE QUERY
 ========================================================= */
 
-const SHOW_OSM_COVER_LAYERS=false;
-
-async function queryDetailedCoverage(){
-
 async function queryDetailedCoverage(){
   if(
     !PARK_POLY||
@@ -1088,11 +1142,7 @@ async function queryDetailedCoverage(){
     lineTouchesPark(l,PARK_POLY,pb)
   );
 
-  if(SHOW_OSM_COVER_LAYERS){
-    refreshWaterLayer();
-    refreshImpLayer();
-  }
-
+  // OSM surface geometry is kept as non-visual QC data for grid planning.
   console.log(
     "✓ Detaylı → Su polygon:",
     WATER_RINGS.length,
@@ -1522,15 +1572,17 @@ function refreshWaterLayer(){
 
   WATER_LAYER=L.layerGroup().addTo(map);
 
+  const satelliteMode=!!SATELLITE_LAYER;
+
   WATER_RINGS.forEach(r=>{
     if(!r||r.length<3)return;
 
     L.polygon(r,{
       color:"#2563eb",
-      weight:1,
-      dashArray:null,
+      weight:satelliteMode?2:1,
+      dashArray:satelliteMode?"6 4":null,
       fillColor:"#60a5fa",
-      fillOpacity:.42,
+      fillOpacity:satelliteMode?0:.42,
       interactive:false
     }).addTo(WATER_LAYER);
   });
@@ -1540,9 +1592,9 @@ function refreshWaterLayer(){
 
     L.polyline(l,{
       color:"#2563eb",
-      weight:2,
-      opacity:.55,
-      dashArray:null,
+      weight:satelliteMode?3:2,
+      opacity:satelliteMode?.9:.55,
+      dashArray:satelliteMode?"6 4":null,
       interactive:false
     }).addTo(WATER_LAYER);
   });
@@ -1554,6 +1606,8 @@ function refreshImpLayer(){
   }
 
   IMP_LAYER=L.layerGroup().addTo(map);
+  const satelliteMode=!!SATELLITE_LAYER;
+
   IMP_RINGS.forEach(r=>{
     if(!r || r.length<3){
       return;
@@ -1581,10 +1635,10 @@ function refreshImpLayer(){
       r,
       {
         color:"#dc2626",
-        weight:1,
-        dashArray:null,
+        weight:satelliteMode?2:1,
+        dashArray:satelliteMode?"6 4":null,
         fillColor:"#ef4444",
-        fillOpacity:.18,
+        fillOpacity:satelliteMode?0:.18,
         interactive:false
       }
     ).addTo(IMP_LAYER);
@@ -2192,8 +2246,13 @@ async function drawPark(park){
    * never called from drawPark(), which meant buildings, roads, parking
    * and water arrays stayed empty and the grid could be drawn over them.
    */
-  /* OSM yüzey geometrileri burada sorgulanmaz ve haritaya bindirilmez.
-   * Arazi örtüsü sayısal analizi yalnızca park polygonu + 10 m LULC verisidir. */
+  const coverageOk=await queryDetailedCoverage();
+  if(!coverageOk){
+    console.warn("DENDROGEO QC: OSM detailed coverage could not be loaded.");
+    toast("⚠ OSM bina/yol/su geometrisi alınamadı; grid bilimsel olarak eksik olabilir.","warn","🗺️");
+  }
+
+  /* Su katmanı yüzey sorgusundan sonra refreshWaterLayer() ile çizilir. */
 
   /* =====================================================
      PARK BOUNDS (manuel, L.layerGroup getBounds yok)
@@ -2760,6 +2819,10 @@ function clearPark(){
     IMP_LAYER=null;
   }
 
+  if(SATELLITE_LAYER && map){
+    map.removeLayer(SATELLITE_LAYER);
+    SATELLITE_LAYER=null;
+  }
 PARK_POLY=null;
   PARK_HOLES=[];
   PARK_SELECTED_AREA_M2=null;
@@ -2772,6 +2835,9 @@ PARK_POLY=null;
 
   GRID_BLOCK_LINES=[];
 
+  LANDCOVER=null;
+  LANDCOVER_SAMPLES=[];
+  DG_PARK_PIXEL_GEOMETRY=null;
 }
 
 function switchPark(i){
@@ -2794,16 +2860,6 @@ async function buildGrid(){
   ){
     return toast(
       "Önce park seç"
-    );
-  }
-
-  const coverageReady=
-    await queryDetailedCoverage();
-  if(!coverageReady){
-    return toast(
-      "⚠ Grid için OSM yüzey geometrileri alınamadı.",
-      "warn",
-      "🗺️"
     );
   }
 
@@ -3676,14 +3732,10 @@ function runLandCoverAnalysis(){
 }
 
 function downloadLandCoverClassCSV(){
-  if(!window.DG_LANDCOVER || !window.DG_LANDCOVER.getLast){
-    return toast("10 m arazi örtüsü modülü yüklenmedi.","err","🗺️");
+  if(window.DG_LANDCOVER && typeof window.DG_LANDCOVER.downloadClassCSV==="function"){
+    return window.DG_LANDCOVER.downloadClassCSV();
   }
-  const result=window.DG_LANDCOVER.getLast();
-  if(!result)return toast("Önce arazi örtüsü analizini çalıştırın.","warn","🗺️");
-  window.DG_LANDCOVER.downloadClassCSV
-    ? window.DG_LANDCOVER.downloadClassCSV()
-    : toast("CSV dışa aktarma modülü hazır değil.","err","📥");
+  return toast("CSV dışa aktarma modülü hazır değil.","err","📥");
 }
 
 function downloadLandCoverCellsGeoJSON(){
