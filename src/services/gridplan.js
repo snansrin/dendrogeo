@@ -1,5 +1,5 @@
 "use strict";
-/* DendroGeo v2 · gridplan.js v124 — LULC locked-catalog + histogram-QC zonal analysis */           
+/* DendroGeo v2 · gridplan.js v125 — LULC locked-catalog + raster-ID QC + histogram */           
   
 let PARK_POLY=null;
 let PARK_HOLES=[]; 
@@ -4638,6 +4638,7 @@ async function dgDirectSatelliteSamples(){
    "· kaynak hücre:",
    cells.length
  );
+ );
  const samples=[],errors=[],CONCURRENCY=3;
  const requestCells=chunk=>dgGetSamplesChunk(
     chunk.map(c=>[
@@ -4652,7 +4653,68 @@ async function dgDirectSatelliteSamples(){
  const cellByKey=new Map();for(const cell of cells)cellByKey.set(Math.round(cell.x*1000)+":"+Math.round(cell.y*1000),cell);
  const counts={},classAreasM2={};for(const code of DG_S2_OFFICIAL_CODES){counts[code]=0;classAreasM2[code]=0;}
  let noData=0,unknown=0,legacyRemapped=0,locationMissing=0,assignedAreaM2=0;const sampleRows=[];
- for(const sample of samples){const rawCode=dgParseSampleClass(sample),normalized=dgS2NormalizeCode(rawCode),ll=dgSampleLocationToLonLat(sample);if(!ll){locationMissing++;continue;}const xy=dgLonLatToWebMercator(ll.lat,ll.lon),cell=cellByKey.get(Math.round(xy.x*1000)+":"+Math.round(xy.y*1000));if(!cell)throw new Error("ArcGIS örnek konumu kaynak-grid hücresiyle eşleştirilemedi.");const cellArea=Number(cell.areaM2)||0;assignedAreaM2+=cellArea;if(rawCode===null){noData++;continue;}if(rawCode===3||rawCode===6)legacyRemapped++;if(normalized===null){unknown++;continue;}counts[normalized]++;classAreasM2[normalized]+=cellArea;sampleRows.push({id:sampleRows.length+1,lat:+ll.lat.toFixed(7),lon:+ll.lon.toFixed(7),rawClassCode:rawCode,classCode:normalized,className:DG_S2_CLASS_NAMES[normalized],group:dgS2Group(normalized),areaM2:cellArea});}
+ for(const sample of samples){
+   const rawCode=dgParseSampleClass(sample);
+   const normalized=dgS2NormalizeCode(rawCode);
+   const ll=dgSampleLocationToLonLat(sample);
+
+   if(!ll){
+     locationMissing++;
+     continue;
+   }
+
+   const sampleRasterId=Number(sample?.rasterId);
+   if(
+     Number.isFinite(sampleRasterId) &&
+     !lockRasterIds.includes(sampleRasterId)
+   ){
+     throw new Error(
+       "ArcGIS 2020 örneği kilitlenen rasterlar dışında bir rasterId döndürdü: "+
+       sampleRasterId
+     );
+   }
+
+   const xy=dgLonLatToWebMercator(ll.lat,ll.lon);
+   const cell=cellByKey.get(
+     Math.round(xy.x*1000)+":"+Math.round(xy.y*1000)
+   );
+
+   if(!cell){
+     throw new Error(
+       "ArcGIS örnek konumu kaynak-grid hücresiyle eşleştirilemedi."
+     );
+   }
+
+   const cellArea=Number(cell.areaM2)||0;
+   assignedAreaM2+=cellArea;
+
+   if(rawCode===null){
+     noData++;
+     continue;
+   }
+
+   if(rawCode===3||rawCode===6)legacyRemapped++;
+
+   if(normalized===null){
+     unknown++;
+     continue;
+   }
+
+   counts[normalized]++;
+   classAreasM2[normalized]+=cellArea;
+
+   sampleRows.push({
+     id:sampleRows.length+1,
+     lat:+ll.lat.toFixed(7),
+     lon:+ll.lon.toFixed(7),
+     rawClassCode:rawCode,
+     classCode:normalized,
+     className:DG_S2_CLASS_NAMES[normalized],
+     group:dgS2Group(normalized),
+     rasterId:Number.isFinite(sampleRasterId)?sampleRasterId:null,
+     areaM2:cellArea
+   });
+ }
  const classifiedAreaM2=Object.values(classAreasM2).reduce((sum,n)=>sum+(Number(n)||0),0);
  const classifiedCount=Object.values(counts).reduce((sum,n)=>sum+(Number(n)||0),0);
  if(!classifiedCount||!(classifiedAreaM2>0))throw new Error("ArcGIS getSamples döndü ancak hiçbir geçerli raster hücresi sınıflandırılamadı.");
@@ -5293,6 +5355,11 @@ async function dgSatelliteRun(){
 
       sampleRows:direct.samples,
       lockRasterIds:[...(direct.lockRasterIds||[])],
+      rasterIdCounts:direct.samples.reduce((acc,row)=>{
+        const id=String(row.rasterId??"unknown");
+        acc[id]=(acc[id]||0)+1;
+        return acc;
+      },{}),
 
       legacyClassPixels:
         (direct.legacyRemapped||0),
