@@ -1,5 +1,5 @@
 "use strict";
-/* DendroGeo v2 · gridplan.js v110 — FINAL (su+sert iyileştirmeleri) */           
+/* DendroGeo v2 · gridplan.js v111 — FINAL (su+sert iyileştirmeleri) */           
   
 let PARK_POLY=null;
 let PARK_HOLES=[]; 
@@ -4822,9 +4822,12 @@ async function dgSatelliteRun(){
 
       legacyClassPixels:legacyPixels,
       qualityWarning:"",
-      rasterUnmatchedPixels:rasterAnalysis.unmatchedPixels,
-      rasterUnmatchedPct:rasterAnalysis.unmatchedPct,
-      rasterEffectivePixelM:rasterAnalysis.effectivePixelM,
+      rasterUnmatchedPixels:direct.noData+direct.invalid,
+      rasterUnmatchedPct:
+        zonalPixelCount>0
+          ?(direct.noData+direct.invalid)/zonalPixelCount*100
+          :0,
+      rasterEffectivePixelM:DG_S2_LULC_PIXEL_M,
       histogramClassCounts,
       histogramVsRasterWarning:""
     };
