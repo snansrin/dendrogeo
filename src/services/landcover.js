@@ -410,6 +410,7 @@ function dgLcProcessTile(item,href,geometryWgs){
     const rowStart=win[1],colStart=win[0],localW=win[2]-win[0];
 
     for(let rr=0;rr<(win[3]-win[1]);rr++){
+      const globalRowEnd=rowStart+rr;
       let runStart=-1,runCls=null;
       for(let cc=0;cc<localW;cc++){
         const globalRow=rowStart+rr;
@@ -468,7 +469,7 @@ function dgLcProcessTile(item,href,geometryWgs){
         }
       }
       if(runStart>=0){
-        dgLcRunPush(runs,globalRow,runStart,win[2],runCls,meta,epsg);
+        dgLcRunPush(runs,globalRowEnd,runStart,win[2],runCls,meta,epsg);
       }
     }
 
