@@ -1,5 +1,5 @@
 "use strict";
-/* DendroGeo v2 · gridplan.js v108 — FINAL (su+sert iyileştirmeleri) */           
+/* DendroGeo v2 · gridplan.js v109 — FINAL (su+sert iyileştirmeleri) */           
   
 let PARK_POLY=null;
 let PARK_HOLES=[]; 
@@ -3683,16 +3683,6 @@ const DG_S2_LULC_PIXEL_M=10;
 const DG_S2_START_MS=Date.UTC(2020,0,1);
 const DG_S2_END_MS=Date.UTC(2021,0,1)-1;
 const DG_S2_MAX_EXPORT_PX=1800;
-const DG_S2_CLASS_RGB={};
-for(const code of Object.keys(DG_S2_CLASS_COLORS)){
-  const h=DG_S2_CLASS_COLORS[code].replace("#","");
-  DG_S2_CLASS_RGB[Number(code)]={
-    r:parseInt(h.slice(0,2),16),
-    g:parseInt(h.slice(2,4),16),
-    b:parseInt(h.slice(4,6),16)
-  };
-}
-
 function dgLonLatToWebMercator(lat,lon){
   const R=6378137;
   const clamped=Math.max(-85.05112878,Math.min(85.05112878,Number(lat)));
@@ -3745,6 +3735,16 @@ const DG_S2_CLASS_COLORS={
   10:"#616161",
   11:"#e3e2c3"
 };
+
+const DG_S2_CLASS_RGB={};
+for(const code of Object.keys(DG_S2_CLASS_COLORS)){
+  const h=DG_S2_CLASS_COLORS[code].replace("#","");
+  DG_S2_CLASS_RGB[Number(code)]={
+    r:parseInt(h.slice(0,2),16),
+    g:parseInt(h.slice(2,4),16),
+    b:parseInt(h.slice(4,6),16)
+  };
+}
 
 function dgS2Group(code){
   if(code===1)return "water";
