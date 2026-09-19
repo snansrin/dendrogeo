@@ -1,5 +1,5 @@
 "use strict";
-/* DendroGeo v2 · gridplan.js v122 — LULC locked-catalog source-cell zonal analysis */           
+/* DendroGeo v2 · gridplan.js v123 — LULC locked-catalog + histogram-QC zonal analysis */           
   
 let PARK_POLY=null;
 let PARK_HOLES=[]; 
@@ -4076,6 +4076,68 @@ async function dgGet2020RasterIds(){
   return ids;
 }
 
+async function dgFetchServerHistogram(lockRasterIds){
+  const params=new URLSearchParams({
+    f:"json",
+    geometryType:"esriGeometryPolygon",
+    geometry:JSON.stringify(dgBuildArcGISParkGeometry(1200)),
+    pixelSize:"10,10",
+    mosaicRule:JSON.stringify(dgBuildMosaicRule(lockRasterIds)),
+    time:DG_S2_START_MS+","+DG_S2_END_MS
+  });
+
+  const res=await fetch(
+    DG_S2_LULC_SERVICE+
+      "/computeStatisticsHistograms?"+
+      params.toString(),
+    {
+      method:"GET",
+      mode:"cors",
+      cache:"no-store",
+      headers:{Accept:"application/json"}
+    }
+  );
+
+  const body=await res.text();
+
+  if(!res.ok){
+    throw new Error(
+      "ArcGIS histogram HTTP "+
+      res.status+" · "+body.slice(0,300)
+    );
+  }
+
+  const data=JSON.parse(body);
+
+  if(data?.error){
+    throw new Error(
+      (data.error.message||"ArcGIS histogram hatası")+
+      (
+        Array.isArray(data.error.details)&&data.error.details.length
+          ?" · "+data.error.details.join(" | ")
+          :""
+      )
+    );
+  }
+
+  const hist=
+    Array.isArray(data.histograms)
+      ?data.histograms[0]
+      :null;
+
+  if(!hist||!Array.isArray(hist.counts)){
+    throw new Error(
+      "ArcGIS histogram sonucu boş veya geçersiz."
+    );
+  }
+
+  return{
+    raw:hist,
+    counts:dgHistogramCounts(hist),
+    total:dgHistogramTotal(hist)
+  };
+}
+
 function dgBuildHistogramUrl(maxVertices=1200){
   const params=new URLSearchParams({
     f:"json",
@@ -4953,6 +5015,52 @@ async function dgSatelliteRun(){
       );
     }
 
+    /*
+     * Independent server-side QC. It does not replace the boundary-area
+     * calculation; it verifies that the same locked 2020 mosaic contains
+     * the same categorical classes. A presence/absence disagreement means
+     * the raster selection is not trustworthy.
+     */
+    let serverHistogram;
+    try{
+      serverHistogram=
+        await dgFetchServerHistogram(
+          direct.lockRasterIds
+        );
+    }catch(histErr){
+      throw new Error(
+        "Sentinel-2 bağımsız histogram QC alınamadı: "+
+        (histErr?.message||String(histErr))
+      );
+    }
+
+    const histogramConflicts=[];
+
+    for(const code of DG_S2_OFFICIAL_CODES){
+      const directN=Number(direct.counts?.[code]||0);
+      const histN=Number(serverHistogram.counts?.[code]||0);
+
+      if((directN===0)!==(histN===0)){
+        histogramConflicts.push({
+          code,
+          direct:directN,
+          histogram:histN
+        });
+      }
+    }
+
+    if(histogramConflicts.length){
+      throw new Error(
+        "Sentinel-2 kaynak seçiminde yöntemler arası sınıf çakışması bulundu: "+
+        histogramConflicts.map(x=>
+          "kod "+x.code+
+          " getSamples="+x.direct+
+          " histogram="+x.histogram
+        ).join(", ")+
+        ". Sonuç üretilmedi."
+      );
+    }
+
     const PIXEL_AREA_M2=DG_S2_LULC_PIXEL_M*DG_S2_LULC_PIXEL_M;
     const classAreasM2={...direct.classAreasM2};
     const classPercent={};
@@ -5092,7 +5200,7 @@ async function dgSatelliteRun(){
       sourceUrl:DG_S2_LULC_SERVICE,
 
       rawClassCounts:{...direct.counts},
-      histogramRaw:{},
+      histogramRaw:serverHistogram.raw,
       histogramPixelCount:requested,
       histogramUnmappedCount:unclassifiedCount,
       histogramUnmappedAreaHa:+(
@@ -5195,6 +5303,8 @@ async function dgSatelliteRun(){
 
       sampleRows:direct.samples,
       lockRasterIds:[...(direct.lockRasterIds||[])],
+      serverHistogramCounts:{...serverHistogram.counts},
+      serverHistogramTotal:serverHistogram.total,
 
       legacyClassPixels:
         (direct.legacyRemapped||0),
@@ -5208,8 +5318,9 @@ async function dgSatelliteRun(){
 
       rasterEffectivePixelM:DG_S2_LULC_PIXEL_M,
 
-      histogramClassCounts:{...direct.counts},
-      histogramAllBins:requested,
+      histogramClassCounts:{...serverHistogram.counts},
+      histogramAllBins:serverHistogram.total,
+      histogramConflictCount:histogramConflicts.length,
 
       /*
        * Backward-compatible names used by other UI/export code.
