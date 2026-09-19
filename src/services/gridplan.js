@@ -4377,8 +4377,8 @@ async function dgSatelliteRun(){
           group
         )
       ){
-        classAreas[group]+
-          =parkM2*(count/validPixelCount);
+        classAreas[group]+=
+          parkM2*(count/validPixelCount);
       }
     }
 
