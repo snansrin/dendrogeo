@@ -4715,126 +4715,384 @@ function dgParseSampleClass(sample){
   return Number.isFinite(n)?Math.round(n):null;
 }
 
+async function dgFetchRawRasterGrid(cells,lockRasterIds){
+  if(!Array.isArray(cells)||!cells.length){
+    throw new Error("Ham raster için kaynak hücre bulunamadı.");
+  }
+
+  const spec=dgLulcGridSpec();
+
+  let minCol=Infinity;
+  let maxCol=-Infinity;
+  let minRow=Infinity;
+  let maxRow=-Infinity;
+
+  for(const cell of cells){
+    minCol=Math.min(minCol,cell.col);
+    maxCol=Math.max(maxCol,cell.col);
+    minRow=Math.min(minRow,cell.row);
+    maxRow=Math.max(maxRow,cell.row);
+  }
+
+  const width=maxCol-minCol+1;
+  const height=maxRow-minRow+1;
+
+  if(width>4000||height>4000){
+    throw new Error(
+      "Parkin 10 m kaynak-grid kapsamı tek ImageServer export isteğinin "+
+      "4000×4000 piksel limitini aşıyor: "+width+"×"+height+
+      ". Bu park için döşemeli ham raster export gerekiyor."
+    );
+  }
+
+  const bbox={
+    minX:spec.originX+minCol*spec.stepX,
+    maxX:spec.originX+(maxCol+1)*spec.stepX,
+    minY:spec.originY+minRow*spec.stepY,
+    maxY:spec.originY+(maxRow+1)*spec.stepY
+  };
+
+  const params=new URLSearchParams({
+    f:"image",
+    bbox:[
+      bbox.minX,
+      bbox.minY,
+      bbox.maxX,
+      bbox.maxY
+    ].join(","),
+    bboxSR:"3857",
+    imageSR:"3857",
+    size:width+","+height,
+    format:"png",
+    pixelType:"U8",
+    interpolation:"RSP_NearestNeighbor",
+    mosaicRule:JSON.stringify(
+      dgBuildMosaicRule(lockRasterIds)
+    ),
+    renderingRule:JSON.stringify({
+      rasterFunction:"None",
+      outputPixelType:"U8"
+    })
+  });
+
+  const res=await fetch(
+    DG_S2_LULC_SERVICE+
+      "/exportImage?"+
+      params.toString(),
+    {
+      method:"GET",
+      mode:"cors",
+      cache:"no-store",
+      headers:{Accept:"image/png"}
+    }
+  );
+
+  const bodyType=
+    String(res.headers.get("content-type")||"").toLowerCase();
+
+  if(!res.ok||!bodyType.includes("image")){
+    const body=await res.text().catch(()=> "");
+    throw new Error(
+      "ArcGIS ham 10 m raster export başarısız: HTTP "+
+      res.status+" · "+body.slice(0,300)
+    );
+  }
+
+  const blob=await res.blob();
+  const bitmap=await createImageBitmap(blob);
+
+  try{
+    if(bitmap.width!==width||bitmap.height!==height){
+      throw new Error(
+        "ArcGIS ham raster boyutu beklenenden farklı: "+
+        bitmap.width+"×"+bitmap.height+
+        " / "+width+"×"+height
+      );
+    }
+
+    const canvas=document.createElement("canvas");
+    canvas.width=width;
+    canvas.height=height;
+
+    const ctx=canvas.getContext("2d",{willReadFrequently:true});
+    if(!ctx){
+      throw new Error(
+        "Ham Sentinel-2 rasterı için Canvas 2D context oluşturulamadı."
+      );
+    }
+
+    ctx.drawImage(bitmap,0,0,width,height);
+
+    const image=ctx.getImageData(
+      0,
+      0,
+      width,
+      height
+    );
+
+    const rawClassByCell=new Map();
+    const rawCounts={};
+    const classAreasM2={};
+
+    for(const code of DG_S2_OFFICIAL_CODES){
+      rawCounts[code]=0;
+      classAreasM2[code]=0;
+    }
+
+    let noData=0;
+    let unknown=0;
+    let assignedAreaM2=0;
+    const sampleRows=[];
+
+    for(const cell of cells){
+      /*
+       * PNG coordinate origin is upper-left; the source-grid origin used
+       * here is the lower-left ImageServer extent.
+       */
+      const px=cell.col-minCol;
+      const py=maxRow-cell.row;
+      const idx=(py*width+px)*4;
+
+      const red=image.data[idx];
+      const green=image.data[idx+1];
+      const blue=image.data[idx+2];
+      const alpha=image.data[idx+3];
+
+      let rawCode=null;
+
+      if(alpha!==0){
+        /*
+         * A U8 single-band PNG is expected to be grayscale, so the three
+         * color channels carry the same source value. Reject colorized or
+         * stretched output instead of guessing a class from RGB colors.
+         */
+        if(red===green&&green===blue){
+          rawCode=Number(red);
+        }else{
+          unknown++;
+          continue;
+        }
+      }
+
+      const normalized=dgS2NormalizeCode(rawCode);
+      const areaM2=Number(cell.areaM2)||0;
+
+      assignedAreaM2+=areaM2;
+
+      if(rawCode===null||rawCode===0){
+        noData++;
+        continue;
+      }
+
+      if(normalized===null){
+        unknown++;
+        continue;
+      }
+
+      rawCounts[normalized]++;
+      classAreasM2[normalized]+=areaM2;
+
+      sampleRows.push({
+        id:sampleRows.length+1,
+        row:cell.row,
+        col:cell.col,
+        rawClassCode:rawCode,
+        classCode:normalized,
+        className:DG_S2_CLASS_NAMES[normalized],
+        group:dgS2Group(normalized),
+        areaM2:areaM2
+      });
+    }
+
+    const classifiedAreaM2=Object.values(classAreasM2).reduce(
+      (sum,n)=>sum+(Number(n)||0),
+      0
+    );
+
+    const classifiedCount=Object.values(rawCounts).reduce(
+      (sum,n)=>sum+(Number(n)||0),
+      0
+    );
+
+    if(!classifiedCount||!(classifiedAreaM2>0)){
+      throw new Error(
+        "Ham Sentinel-2 10 m rasterından hiçbir geçerli sınıf okunamadı. "+
+        "ImageServer export ham U8 değer yerine başka bir görüntü üretiyor olabilir."
+      );
+    }
+
+    const uniqueValues=Array.from(
+      new Set(
+        cells.map(cell=>{
+          const px=cell.col-minCol;
+          const py=maxRow-cell.row;
+          const idx=(py*width+px)*4;
+          const r=image.data[idx];
+          const g=image.data[idx+1];
+          const b=image.data[idx+2];
+          const a=image.data[idx+3];
+          return a===0
+            ?0
+            :(r===g&&g===b?r:-1);
+        })
+      )
+    ).sort((a,b)=>a-b);
+
+    console.log(
+      "DENDROGEO · HAM 10 m raster değerleri:",
+      uniqueValues,
+      "· sınıflar:",
+      {...rawCounts}
+    );
+
+    return{
+      counts:rawCounts,
+      classAreasM2,
+      sampleRows,
+      requested:cells.length,
+      returned:cells.length,
+      missing:0,
+      noData,
+      unknown,
+      legacyRemapped:0,
+      locationMissing:0,
+      classified:classifiedCount,
+      classifiedAreaM2,
+      assignedAreaM2,
+      intersectionAreaM2:cells.reduce(
+        (sum,c)=>sum+(Number(c.areaM2)||0),
+        0
+      ),
+      width,
+      height,
+      bbox,
+      uniqueValues
+    };
+  }finally{
+    bitmap.close();
+  }
+}
+
 async function dgDirectSatelliteSamples(){
- const plan=dgBuild10mRasterCells(),cells=plan.cells,lockRasterIds=await dgGet2020RasterIds(),CHUNK=800,chunks=[];
- for(let i=0;i<cells.length;i+=CHUNK)chunks.push(cells.slice(i,i+CHUNK));
- console.log(
-   "DENDROGEO · 2020 PRIMARY raster katalog IDs:",
-   lockRasterIds,
-   "· kaynak hücre:",
-   cells.length
- );
- const samples=[],errors=[],CONCURRENCY=3;
- const requestCells=chunk=>dgGetSamplesChunk(
-    chunk.map(c=>[
-      Math.round(c.x*1000)/1000,
-      Math.round(c.y*1000)/1000
-    ]),
+  const plan=dgBuild10mRasterCells();
+  const cells=plan.cells;
+  const lockRasterIds=await dgGet2020RasterIds();
+
+  console.log(
+    "DENDROGEO · 2020 PRIMARY raster katalog IDs:",
+    lockRasterIds,
+    "· kaynak hücre:",
+    cells.length
+  );
+
+  const raw=await dgFetchRawRasterGrid(
+    cells,
     lockRasterIds
   );
- for(let i=0;i<chunks.length;i+=CONCURRENCY){const results=await Promise.all(chunks.slice(i,i+CONCURRENCY).map(chunk=>requestCells(chunk).catch(error=>{errors.push(error);return[];})));for(const rows of results)samples.push(...rows);}
- if(errors.length)throw new Error(errors.length+" raster hücresi örnekleme paketi alınamadı.");
- if(samples.length!==cells.length)throw new Error("ArcGIS getSamples eksik kaynak hücre döndürdü: "+samples.length+" / "+cells.length);
- const cellByKey=new Map();for(const cell of cells)cellByKey.set(Math.round(cell.x*1000)+":"+Math.round(cell.y*1000),cell);
- const counts={},classAreasM2={};for(const code of DG_S2_OFFICIAL_CODES){counts[code]=0;classAreasM2[code]=0;}
- let noData=0,unknown=0,legacyRemapped=0,locationMissing=0,assignedAreaM2=0;const sampleRows=[];
- for(const sample of samples){
-   const rawCode=dgParseSampleClass(sample);
-   const normalized=dgS2NormalizeCode(rawCode);
-   const ll=dgSampleLocationToLonLat(sample);
 
-   if(!ll){
-     locationMissing++;
-     continue;
-   }
+  /*
+   * Small independent spot-check with getSamples.
+   * This is QC only and never drives the numeric result.
+   */
+  let sampleQcWarning="";
+  try{
+    const step=Math.max(
+      1,
+      Math.ceil(cells.length/64)
+    );
+    const qcCells=cells.filter((cell,i)=>i%step===0).slice(0,64);
+    const qcRows=await dgGetSamplesChunk(
+      qcCells.map(c=>[
+        Math.round(c.x*1000)/1000,
+        Math.round(c.y*1000)/1000
+      ]),
+      lockRasterIds
+    );
 
-   const sampleRasterId=Number(sample?.rasterId);
-   if(
-     Number.isFinite(sampleRasterId) &&
-     !lockRasterIds.includes(sampleRasterId)
-   ){
-     throw new Error(
-       "ArcGIS 2020 örneği kilitlenen rasterlar dışında bir rasterId döndürdü: "+
-       sampleRasterId
-     );
-   }
+    let mismatch=0;
 
-   const xy=dgLonLatToWebMercator(ll.lat,ll.lon);
-   const cell=cellByKey.get(
-     Math.round(xy.x*1000)+":"+Math.round(xy.y*1000)
-   );
+    for(let i=0;i<Math.min(qcRows.length,qcCells.length);i++){
+      const code=dgS2NormalizeCode(
+        dgParseSampleClass(qcRows[i])
+      );
 
-   if(!cell){
-     throw new Error(
-       "ArcGIS örnek konumu kaynak-grid hücresiyle eşleştirilemedi."
-     );
-   }
+      const cell=qcCells[i];
 
-   const cellArea=Number(cell.areaM2)||0;
-   assignedAreaM2+=cellArea;
+      /*
+       * The raw raster has already been decoded. Compare only the class
+       * code; area never comes from this QC path.
+       */
+      const px=cells.findIndex(
+        x=>x.row===cell.row&&x.col===cell.col
+      );
 
-   if(rawCode===null){
-     noData++;
-     continue;
-   }
+      const expected=
+        px>=0
+          ?raw.sampleRows.find(
+              x=>x.row===cell.row&&x.col===cell.col
+            )?.classCode??null
+          :null;
 
-   if(rawCode===3||rawCode===6)legacyRemapped++;
+      if(code!==expected){
+        mismatch++;
+      }
+    }
 
-   if(normalized===null){
-     unknown++;
-     continue;
-   }
+    if(
+      qcRows.length!==qcCells.length||
+      mismatch>0
+    ){
+      sampleQcWarning=
+        "getSamples spot-QC: "+
+        mismatch+
+        " sınıf farkı / "+
+        qcCells.length+
+        " kontrol noktası.";
+    }
+  }catch(qcErr){
+    sampleQcWarning=
+      "getSamples spot-QC kullanılamadı: "+
+      (qcErr?.message||String(qcErr));
+  }
 
-   counts[normalized]++;
-   classAreasM2[normalized]+=cellArea;
-
-   sampleRows.push({
-     id:sampleRows.length+1,
-     lat:+ll.lat.toFixed(7),
-     lon:+ll.lon.toFixed(7),
-     rawClassCode:rawCode,
-     classCode:normalized,
-     className:DG_S2_CLASS_NAMES[normalized],
-     group:dgS2Group(normalized),
-     rasterId:Number.isFinite(sampleRasterId)?sampleRasterId:null,
-     areaM2:cellArea
-   });
- }
- const classifiedAreaM2=Object.values(classAreasM2).reduce((sum,n)=>sum+(Number(n)||0),0);
- const classifiedCount=Object.values(counts).reduce((sum,n)=>sum+(Number(n)||0),0);
- if(!classifiedCount||!(classifiedAreaM2>0))throw new Error("ArcGIS getSamples döndü ancak hiçbir geçerli raster hücresi sınıflandırılamadı.");
- console.log(
-   "DENDROGEO · 2020 LULC ham sınıflar:",
-   {...counts},
-   "· alan m²:",
-   Object.fromEntries(
-     Object.entries(classAreasM2).map(([code,area])=>[
-       code,
-       +Number(area||0).toFixed(3)
-     ])
-   )
- );
- return{
-  points:cells.map(c=>[c.x,c.y]),
-  cells,
-  samples:sampleRows,
-  counts,
-  classAreasM2,
-  requested:cells.length,
-  returned:samples.length,
-  missing:Math.max(0,cells.length-samples.length),
-  noData,
-  unknown,
-  legacyRemapped,
-  locationMissing,
-  classified:classifiedCount,
-  classifiedAreaM2,
-  assignedAreaM2,
-  intersectionAreaM2:plan.intersectionAreaM2,
-  errors,
-  lockRasterIds
-};
+  return{
+    points:cells.map(c=>[c.x,c.y]),
+    cells,
+    samples:raw.sampleRows.map((row,i)=>({
+      id:i+1,
+      lat:null,
+      lon:null,
+      rawClassCode:row.rawClassCode,
+      classCode:row.classCode,
+      className:row.className,
+      group:row.group,
+      areaM2:row.areaM2,
+      row:row.row,
+      col:row.col
+    })),
+    counts:raw.counts,
+    classAreasM2:raw.classAreasM2,
+    requested:raw.requested,
+    returned:raw.returned,
+    missing:raw.missing,
+    noData:raw.noData,
+    unknown:raw.unknown,
+    legacyRemapped:raw.legacyRemapped,
+    locationMissing:raw.locationMissing,
+    classified:raw.classified,
+    classifiedAreaM2:raw.classifiedAreaM2,
+    assignedAreaM2:raw.assignedAreaM2,
+    intersectionAreaM2:raw.intersectionAreaM2,
+    errors:[],
+    lockRasterIds,
+    rawRasterWidth:raw.width,
+    rawRasterHeight:raw.height,
+    rawRasterBBox:raw.bbox,
+    rawRasterUniqueValues:raw.uniqueValues,
+    sampleQcWarning
+  };
 }
+
 let DG_S2_LEGEND=null;
 
 function dgEnsureSatelliteLegend(){
@@ -5125,8 +5383,9 @@ async function dgSatelliteRun(){
     const requested=Number(direct.requested)||0;
     const returned=Number(direct.returned)||0;
     const classified=Number(direct.classified)||0;
+    const classifiedAreaM2=Number(direct.classifiedAreaM2)||0;
 
-    if(requested<=0||classified<=0){
+    if(requested<=0||classified<=0||!(classifiedAreaM2>0)){
       throw new Error(
         "Park içinde geçerli 10 m Sentinel-2 sınıf örneği bulunamadı."
       );
@@ -5162,57 +5421,6 @@ async function dgSatelliteRun(){
       );
     }
 
-    /*
-     * Independent server-side histogram QC is optional. The ImageServer
-     * supports the operation, but a service can return an empty histogram
-     * for a particular mosaic/geometry request. That must not invalidate
-     * the primary getSamples zonal analysis.
-     */
-    let serverHistogram={
-      available:false,
-      reason:"Henüz çalıştırılmadı."
-    };
-
-    try{
-      serverHistogram=
-        await dgFetchServerHistogram(
-          direct.lockRasterIds
-        );
-    }catch(histErr){
-      serverHistogram={
-        available:false,
-        reason:histErr?.message||String(histErr)
-      };
-    }
-
-    const histogramConflicts=[];
-
-    if(serverHistogram.available){
-      for(const code of DG_S2_OFFICIAL_CODES){
-        const directN=Number(direct.counts?.[code]||0);
-        const histN=Number(serverHistogram.counts?.[code]||0);
-
-        if((directN===0)!==(histN===0)){
-          histogramConflicts.push({
-            code,
-            direct:directN,
-            histogram:histN
-          });
-        }
-      }
-
-      if(histogramConflicts.length){
-        console.warn(
-          "DENDROGEO · Sentinel-2 histogram QC sınıf farkı:",
-          histogramConflicts
-        );
-      }
-    }else{
-      console.warn(
-        "DENDROGEO · Sentinel-2 histogram QC kullanılamıyor:",
-        serverHistogram.reason
-      );
-    }
 
     const PIXEL_AREA_M2=DG_S2_LULC_PIXEL_M*DG_S2_LULC_PIXEL_M;
     const classAreasM2={...direct.classAreasM2};
@@ -5240,7 +5448,9 @@ async function dgSatelliteRun(){
     const naturalVegetationM2=reportGreenM2;
     const totalVegetationM2=reportGreenM2;
 
-    const unclassifiedCount=Number(direct.noData||0)+Number(direct.unknown||0);
+    const unclassifiedCount=
+      Number(direct.noData||0)+
+      Number(direct.unknown||0);
     const unclassifiedM2=Math.max(
       0,
       Number(direct.assignedAreaM2||0)-
@@ -5337,9 +5547,7 @@ async function dgSatelliteRun(){
       sourceUrl:DG_S2_LULC_SERVICE,
 
       rawClassCounts:{...direct.counts},
-      histogramRaw:serverHistogram.available
-        ?serverHistogram.raw
-        :null,
+      histogramRaw:null,
       histogramPixelCount:requested,
       histogramUnmappedCount:unclassifiedCount,
       histogramUnmappedAreaHa:+(
@@ -5368,14 +5576,8 @@ async function dgSatelliteRun(){
       sourceGridIntersectionAreaM2:report.sourceGridIntersectionAreaM2,
       areaClosureM2:report.closureM2,
       areaReconciliationFactor:report.reconciliationFactor,
-      serverHistogramCounts:
-        serverHistogram.available
-          ?{...serverHistogram.counts}
-          :null,
-      serverHistogramTotal:
-        serverHistogram.available
-          ?serverHistogram.total
-          :0,
+      serverHistogramCounts:null,
+      serverHistogramTotal:0,
 
       resolutionM:DG_S2_LULC_PIXEL_M,
 
@@ -5454,6 +5656,9 @@ async function dgSatelliteRun(){
 
       sampleRows:direct.samples,
       lockRasterIds:[...(direct.lockRasterIds||[])],
+      rawRasterWidth:direct.rawRasterWidth,
+      rawRasterHeight:direct.rawRasterHeight,
+      rawRasterUniqueValues:[...(direct.rawRasterUniqueValues||[])],
       rasterIdCounts:direct.samples.reduce((acc,row)=>{
         const id=String(row.rasterId??"unknown");
         acc[id]=(acc[id]||0)+1;
@@ -5463,7 +5668,7 @@ async function dgSatelliteRun(){
       legacyClassPixels:
         (direct.legacyRemapped||0),
 
-      qualityWarning:"",
+      qualityWarning:direct.sampleQcWarning||"",
       rasterUnmatchedPixels:unclassifiedCount,
       rasterUnmatchedPct:
         unclassifiedCount/
@@ -5472,15 +5677,9 @@ async function dgSatelliteRun(){
 
       rasterEffectivePixelM:DG_S2_LULC_PIXEL_M,
 
-      histogramClassCounts:
-        serverHistogram.available
-          ?{...serverHistogram.counts}
-          :null,
-      histogramAllBins:
-        serverHistogram.available
-          ?serverHistogram.total
-          :0,
-      histogramConflictCount:histogramConflicts.length,
+      histogramClassCounts:null,
+      histogramAllBins:0,
+      histogramConflictCount:null,
 
       /*
        * Backward-compatible names used by other UI/export code.
