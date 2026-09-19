@@ -826,7 +826,9 @@ window.DG_LANDCOVER_RENDER_REPORT=dgLcRenderReport;
 window.DG_LANDCOVER={
   analyze:dgLcAnalyze,
   clear:clearLandCover,
-  getLast:()=>DG_LC_LAST
+  getLast:()=>DG_LC_LAST,
+  downloadClassCSV:downloadLandCoverClassCSV,
+  downloadCellsGeoJSON:downloadLandCoverCellsGeoJSON
 };
 window.runLandCoverAnalysis=runLandCoverAnalysis;
 window.downloadLandCoverClassCSV=downloadLandCoverClassCSV;
