@@ -1,5 +1,5 @@
 "use strict";
-/* DendroGeo v2 · gridplan.js v120 — LULC true source-cell zonal analysis */           
+/* DendroGeo v2 · gridplan.js v121 — LULC locked-catalog source-cell zonal analysis */           
   
 let PARK_POLY=null;
 let PARK_HOLES=[]; 
@@ -3983,12 +3983,25 @@ function dgBuildArcGISParkGeometry(maxVertices=1200){
   };
 }
 
-function dgBuildMosaicRule(){
+function dgBuildMosaicRule(lockRasterIds=null){
   /*
-   * The service currently has Year as sort field and defaults to a
-   * different future sort value. Locking Year=2020 avoids accidental
-   * selection of another annual mosaic.
+   * Reproducible annual selection: query the raster catalog for the
+   * selected year and the selected park, then lock those raster IDs.
+   * This prevents another overlapping catalog item from being selected
+   * implicitly by the mosaic engine.
    */
+  const ids=Array.isArray(lockRasterIds)
+    ?lockRasterIds.map(Number).filter(Number.isFinite)
+    :[];
+
+  if(ids.length){
+    return{
+      mosaicMethod:"esriMosaicLockRaster",
+      lockRasterIds:ids,
+      mosaicOperation:"MT_FIRST"
+    };
+  }
+
   return{
     mosaicMethod:"esriMosaicAttribute",
     sortField:"Year",
@@ -3997,6 +4010,70 @@ function dgBuildMosaicRule(){
     where:"Year = "+DG_S2_LULC_YEAR,
     mosaicOperation:"MT_FIRST"
   };
+}
+
+async function dgGet2020RasterIds(){
+  const geometry=dgBuildArcGISParkGeometry(1200);
+  const params=new URLSearchParams({
+    f:"json",
+    where:"Year = "+DG_S2_LULC_YEAR,
+    geometryType:"esriGeometryPolygon",
+    geometry:JSON.stringify(geometry),
+    inSR:"4326",
+    spatialRel:"esriSpatialRelIntersects",
+    returnIdsOnly:"true"
+  });
+
+  const res=await fetch(
+    DG_S2_LULC_SERVICE+"/query?"+params.toString(),
+    {
+      method:"GET",
+      mode:"cors",
+      cache:"no-store",
+      headers:{Accept:"application/json"}
+    }
+  );
+
+  const body=await res.text();
+  if(!res.ok){
+    throw new Error(
+      "ArcGIS 2020 raster catalog sorgusu HTTP "+
+      res.status+" · "+body.slice(0,300)
+    );
+  }
+
+  const data=JSON.parse(body);
+  if(data?.error){
+    throw new Error(
+      (data.error.message||"ArcGIS raster katalog sorgusu başarısız")+
+      (
+        Array.isArray(data.error.details)&&data.error.details.length
+          ?" · "+data.error.details.join(" | ")
+          :""
+      )
+    );
+  }
+
+  const ids=Array.isArray(data.objectIds)
+    ?data.objectIds.map(Number).filter(Number.isFinite)
+    :[];
+
+  if(!ids.length){
+    throw new Error(
+      "Seçili parkla kesişen 2020 Sentinel-2 LULC rasterı bulunamadı."
+    );
+  }
+
+  if(ids.length>20){
+    throw new Error(
+      "Seçili park "+ids.length+
+      " adet 2020 raster kataloğu öğesine kesişiyor. "+
+      "Bu analiz tek mosaic isteğinde güvenli değil; rasterlar döşemeli "
+      +"olarak işlenmeden sonuç üretilmeyecek."
+    );
+  }
+
+  return ids;
 }
 
 function dgBuildHistogramUrl(maxVertices=1200){
@@ -4413,7 +4490,7 @@ function dgSampleLocationToLonLat(sample){
   return null;
 }
 
-async function dgGetSamplesChunk(points){
+async function dgGetSamplesChunk(points,lockRasterIds=null){
   const params=new URLSearchParams({
     f:"json",
     geometryType:"esriGeometryMultipoint",
@@ -4425,8 +4502,9 @@ async function dgGetSamplesChunk(points){
     interpolation:"RSP_NearestNeighbor",
     returnFirstValueOnly:"true",
     outFields:"*",
-    time:DG_S2_START_MS+","+DG_S2_END_MS,
-    mosaicRule:JSON.stringify(dgBuildMosaicRule())
+    mosaicRule:JSON.stringify(
+      dgBuildMosaicRule(lockRasterIds)
+    )
   });
 
   const res=await fetch(
@@ -4490,9 +4568,15 @@ function dgParseSampleClass(sample){
 }
 
 async function dgDirectSatelliteSamples(){
- const plan=dgBuild10mRasterCells(),cells=plan.cells,CHUNK=800,chunks=[];for(let i=0;i<cells.length;i+=CHUNK)chunks.push(cells.slice(i,i+CHUNK));
+ const plan=dgBuild10mRasterCells(),cells=plan.cells,lockRasterIds=await dgGet2020RasterIds(),CHUNK=800,chunks=[];
  const samples=[],errors=[],CONCURRENCY=3;
- const requestCells=chunk=>dgGetSamplesChunk(chunk.map(c=>[Math.round(c.x*1000)/1000,Math.round(c.y*1000)/1000]));
+ const requestCells=chunk=>dgGetSamplesChunk(
+    chunk.map(c=>[
+      Math.round(c.x*1000)/1000,
+      Math.round(c.y*1000)/1000
+    ]),
+    lockRasterIds
+  );
  for(let i=0;i<chunks.length;i+=CONCURRENCY){const results=await Promise.all(chunks.slice(i,i+CONCURRENCY).map(chunk=>requestCells(chunk).catch(error=>{errors.push(error);return[];})));for(const rows of results)samples.push(...rows);}
  if(errors.length)throw new Error(errors.length+" raster hücresi örnekleme paketi alınamadı.");
  if(samples.length!==cells.length)throw new Error("ArcGIS getSamples eksik kaynak hücre döndürdü: "+samples.length+" / "+cells.length);
