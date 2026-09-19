@@ -775,8 +775,23 @@ function toast(msg,type="ok",icon=""){
 async function boot(){
     // 1. Service Worker'ı kaydet (sadece bir kez)
     if('serviceWorker' in navigator && !window._swRegistered){
-        navigator.serviceWorker.register('./sw.js',{updateViaCache:'none'}).catch(e=>console.log('SW registration failed:',e));
         window._swRegistered = true;
+
+        navigator.serviceWorker.register('./sw.js',{updateViaCache:'none'})
+        .then(reg=>{
+            // Force a single reload when a newly deployed worker takes control.
+            // This prevents the current page from continuing to execute the
+            // previous LULC bundle after a successful deployment.
+            if(navigator.serviceWorker.controller){
+                navigator.serviceWorker.addEventListener('controllerchange',()=>{
+                    if(sessionStorage.getItem('dg_sw_runtime_reload')==='1')return;
+                    sessionStorage.setItem('dg_sw_runtime_reload','1');
+                    location.reload();
+                },{once:true});
+            }
+            return reg.update();
+        })
+        .catch(e=>console.log('SW registration failed:',e));
     }
     
     // 2. Online listener SADECE BİR KEZ eklensin (çift toast önleme)
