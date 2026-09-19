@@ -75,3 +75,10 @@ The published dataset has a global assessed average accuracy above 75%; this is 
 ## Reproducibility
 
 Every exported record contains the dataset name, year, source URL, resolution, and calculation method. The UI keeps the OSM water/impervious layers as independent structural QC; they do not silently replace satellite classes.
+
+
+## 2020 ImageServer raster seçimi
+
+Sentinel-2 2020 sorgusunda ImageServer raster kataloğundaki yalnızca **Category=1 (Primary)** öğeleri kullanılır. Overview ve diğer katalog kategorileri analize dahil edilmez. Seçili parkla kesişen Primary raster OBJECTID'leri katalog sorgusuyla bulunur ve analiz ile harita görselleştirmesinde aynı raster ID'leri LockRaster ile kullanılır. Böylece analiz ve harita farklı mozaik öğelerinden üretilemez.
+
+Analizden önce ayrıca aynı kilitli 2020 mozaik üzerinde ImageServer histogramı bağımsız QC olarak alınır. GetSamples ile histogram arasında sınıfın var/yok durumu çelişirse sonuç raporlanmaz; eksik veya çelişkili veri sessizce başka sınıfa dağıtılmaz.
