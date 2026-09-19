@@ -22,6 +22,11 @@ jobs:
       - name: Sözdizimi denetimi (tarayıcı semantiği)
         run: npm run check:syntax
 
+      # ?v= numaraları içerik hash'i olmalı; elle artırma unutulan/kaçan
+      # numaralar yüzünden repo ile canlı site iki kez ayrıştı.
+      - name: Sürüm numarası tutarlılığı
+        run: npm run check:versions
+
       # Koda yeni dış servis eklenip CSP güncellenmezse istek tarayıcı
       # tarafından sessizce kesilir. Bu daha önce planetarycomputer.microsoft.com
       # ve titiler.terrascope.be ile yaşandı (a5dabbc ile düzeltildi).

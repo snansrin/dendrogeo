@@ -8,7 +8,8 @@
     "test": "node --test test/",
     "check:csp": "node scripts/check-csp.mjs",
     "check:syntax": "node scripts/check-syntax.mjs",
-    "check": "npm run check:syntax && npm run check:csp && npm test"
+    "check:versions": "node scripts/version-sync.mjs --check",
+    "check": "npm run check:syntax && npm run check:versions && npm run check:csp && npm test"
   },
   "engines": {
     "node": ">=20"
