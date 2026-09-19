@@ -4,7 +4,7 @@
 // NOT: Senkronizasyon artık Ana Thread (Supabase JS SDK) tarafından yapılıyor
 // ============================================================
 
-const CACHE_VERSION = 'dendrogeo-sw-v2-r29';
+const CACHE_VERSION = 'dendrogeo-sw-v2-r30';
 const STATIC_CACHE = `static-${CACHE_VERSION}`;
 const TILE_CACHE = `tiles-${CACHE_VERSION}`;
 const API_CACHE = `api-${CACHE_VERSION}`;
@@ -27,6 +27,7 @@ const CORE_ASSETS = [
     'https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js',
     'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2',
     'https://cdn.jsdelivr.net/npm/chart.js@4',
+    'https://cdn.jsdelivr.net/npm/geotiff@2.1.3/dist-browser/geotiff.js',
     'https://challenges.cloudflare.com/turnstile/v0/api.js',
     'https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Manrope:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap'
 ];
@@ -253,4 +254,4 @@ self.addEventListener('notificationclick', event => {
     );
 });
 
-console.log('[SW] 🌲 DendroGeo Service Worker v2.10 r29 — network-first app assets');
+console.log('[SW] 🌲 DendroGeo Service Worker v2.10 r30 — network-first app assets');
