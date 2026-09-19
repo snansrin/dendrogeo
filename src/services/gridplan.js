@@ -1,5 +1,5 @@
 "use strict";
-/* DendroGeo v2 · gridplan.js v132 — Park-mode handler hardening + LULC raw U8 raster-cell engine
+/* DendroGeo v2 · gridplan.js v132 — Park-mode handler hardening + LULC raw U8 raster-cell engine */
   
 let PARK_POLY=null;
 let PARK_HOLES=[]; 
