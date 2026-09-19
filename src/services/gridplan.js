@@ -4644,7 +4644,7 @@ function dgSatelliteClassCSV(){
   ];
 
   const rows=[
-    ["CLASS_CODE","CLASS_NAME","GROUP","RASTER_CELL_COUNT","AREA_HA","PERCENT","YEAR","RESOLUTION_M"]
+    ["CLASS_CODE","CLASS_NAME","GROUP","SAMPLE_COUNT_10M","AREA_HA","PERCENT","YEAR","RESOLUTION_M"]
   ];
 
   for(const code of DG_S2_OFFICIAL_CODES){
@@ -5376,6 +5376,11 @@ async function dgSatelliteRun(){
           )
         )/10000
       ).toFixed(4),
+      unclassifiedCount,
+      unclassifiedAreaHa:+(
+        unclassifiedM2/10000
+      ).toFixed(4),
+
       histogramUnmappedPct:
         histogram.unknown/
         Math.max(1,histogram.total)*
