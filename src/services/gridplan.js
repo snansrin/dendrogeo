@@ -4923,6 +4923,15 @@ async function dgSatelliteRun(){
       );
     }
 
+    if(Number(direct.noData||0)>0 || Number(direct.unknown||0)>0){
+      throw new Error(
+        "10 m Sentinel-2 örneklerinde "+
+        Number(direct.noData||0)+" NoData ve "+
+        Number(direct.unknown||0)+" eşlenemeyen sınıf bulundu. "+
+        "Dört sınıflı park toplamı bozulmaması için sonuç üretilmedi."
+      );
+    }
+
     const PIXEL_AREA_M2=DG_S2_LULC_PIXEL_M*DG_S2_LULC_PIXEL_M;
     const classAreasM2={};
     const classPercent={};
