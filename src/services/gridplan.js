@@ -1,5 +1,5 @@
 "use strict";
-/* DendroGeo v2 · gridplan.js v117 — FINAL (su+sert iyileştirmeleri) */           
+/* DendroGeo v2 · gridplan.js v118 — LULC area-conserving analysis */           
   
 let PARK_POLY=null;
 let PARK_HOLES=[]; 
@@ -3694,6 +3694,41 @@ const DG_S2_MAX_EXPORT_PX=1800;
  */
 const DG_S2_OFFICIAL_CODES=[1,2,4,5,7,8,9,10,11];
 
+const DG_REPORT_CLASSES=[
+  {key:"green",label:"Yeşil alan",emoji:"🌿",codes:[2,4,5,11]},
+  {key:"water",label:"Su",emoji:"💧",codes:[1]},
+  {key:"hard",label:"Sert zemin",emoji:"🧱",codes:[7]},
+  {key:"bare",label:"Çıplak zemin",emoji:"🟫",codes:[8]}
+];
+
+function dgBuildAreaConservingReport(counts,parkM2){
+  const out={};
+  let reportCount=0;
+  for(const cls of DG_REPORT_CLASSES){
+    const n=cls.codes.reduce((sum,code)=>sum+(Number(counts?.[code])||0),0);
+    out[cls.key]={count:n,areaM2:0,pct:0,label:cls.label,emoji:cls.emoji};
+    reportCount+=n;
+  }
+  const excluded=[9,10].reduce((sum,code)=>sum+(Number(counts?.[code])||0),0);
+  if(excluded>0){
+    throw new Error("10 m rasterda "+excluded+" adet kar/buz veya bulut örneği bulundu. Dört sınıflı rapor park alanını bilimsel olarak eksiksiz dağıtamıyor.");
+  }
+  if(reportCount<=0) throw new Error("Dört yüzey sınıfından hiçbir geçerli 10 m örnek elde edilemedi.");
+
+  for(const cls of DG_REPORT_CLASSES){
+    const r=out[cls.key];
+    r.pct=r.count/reportCount*100;
+    r.areaM2=parkM2*r.count/reportCount;
+  }
+
+  const totalM2=Object.values(out).reduce((sum,r)=>sum+r.areaM2,0);
+  const largest=DG_REPORT_CLASSES.map(c=>out[c.key]).sort((a,b)=>b.areaM2-a.areaM2)[0];
+  if(largest) largest.areaM2+=parkM2-totalM2;
+
+  return{classes:out,count:reportCount,areaM2:parkM2,areaHa:parkM2/10000,excludedCount:excluded};
+}
+
+
 const DG_S2_CLASS_NAMES={
   1:"Su",
   2:"Ağaç",
@@ -4832,159 +4867,29 @@ function dgDownloadSatelliteSamplesGeoJSON(){
   );
 }
 
-function dgRenderSatelliteReport(
-  rep,
-  parkM2,
-  landcover,
-  classAreasM2
-){
+function dgRenderSatelliteReport(rep,parkM2,landcover){
   if(!rep)return;
-
-  const rows=
-    DG_S2_OFFICIAL_CODES.map(code=>{
-      const count=
-        Number(landcover.rawClassCounts?.[code]||0);
-      const area=
-        Number(classAreasM2?.[code]||0);
-      const pct=
-        Number(landcover.classPercent?.[code]||0);
-
-      const emoji=
-        code===1?"💧":
-        code===2?"🌳":
-        code===4?"🌊":
-        code===5?"🌾":
-        code===7?"🧱":
-        code===8?"🟫":
-        code===9?"❄️":
-        code===10?"☁️":
-        "🟩";
-
-      return(
-        "<tr>"+
-          "<td>"+emoji+"</td>"+
-          "<td><b>"+DG_S2_CLASS_NAMES[code]+"</b></td>"+
-          "<td class='mono'>"+
-            count.toLocaleString("tr-TR")+
-          "</td>"+
-          "<td class='mono'>"+
-            (area/10000).toFixed(2)+
-          "</td>"+
-          "<td class='mono'>%"+
-            pct.toFixed(1)+
-          "</td>"+
-        "</tr>"
-      );
-    }).join("");
-
-  const totalClass=
-    DG_S2_OFFICIAL_CODES.reduce(
-      (s,code)=>
-        s+
-        Number(landcover.rawClassCounts?.[code]||0),
-      0
-    );
-
-  const unmapped=
-    Number(landcover.histogramUnmappedCount||0);
-
-  const sampleWarn=
-    landcover.directSampleCount>0&&
-    landcover.directSampleCoveragePct<95
-      ?"<div style='margin-top:8px;padding:8px 10px;border-radius:8px;"+
-       "background:rgba(245,158,11,.10);color:#92400e;font-size:.68rem'>"+
-       "⚠ getSamples QC kapsamı %"+
-       landcover.directSampleCoveragePct.toFixed(1)+
-       " · eksik örnek: "+
-       landcover.directMissingSamples+
-       "</div>"
-      :"";
-
-  const warn=
-    landcover.qualityWarning
-      ?"<div style='margin-top:8px;padding:8px 10px;border-radius:8px;"+
-       "background:rgba(245,158,11,.10);color:#92400e;font-size:.68rem'>"+
-       "⚠ QC: "+esc(landcover.qualityWarning)+
-       "</div>"
-      :"";
+  const rows=DG_REPORT_CLASSES.map(cls=>{
+    const r=landcover.reportClasses?.[cls.key];
+    return r?("<tr><td>"+cls.emoji+"</td><td><b>"+cls.label+"</b></td><td class='mono'>"+Number(r.count||0).toLocaleString("tr-TR")+"</td><td class='mono'>"+(Number(r.areaM2||0)/10000).toFixed(2)+"</td><td class='mono'>%"+Number(r.pct||0).toFixed(1)+"</td></tr>"):"";
+  }).join("");
+  const totalReportedHa=DG_REPORT_CLASSES.reduce((sum,cls)=>sum+(Number(landcover.reportClasses?.[cls.key]?.areaM2)||0),0)/10000;
+  const qc=landcover.qualityWarning?"<div style='margin-top:8px;padding:8px 10px;border-radius:8px;background:rgba(245,158,11,.10);color:#92400e;font-size:.68rem'>⚠ QC: "+esc(landcover.qualityWarning)+"</div>":"";
 
   rep.innerHTML=
     "<b>🛰️ Arazi Örtüsü · Sentinel-2 / 10 m · 2020</b>"+
-    "<div style='font-size:.70rem;color:var(--mut);margin:7px 0 10px'>"+
-      "<b>Ana sayısal sonuç: park içi 10 m kaynak-grid piksel analizi.</b> "+
-      "Yüzdeler, park polygonu içinde kalan gerçek 10 m piksel merkezlerinin "+
-      "sınıf frekanslarından hesaplanır; OSM veya bina/su geometrileri "+
-      "Sentinel-2 sınıflarını değiştirmez."+
-    "</div>"+
-    "<div style='overflow:auto'>"+
-      "<table>"+
-        "<thead><tr>"+
-          "<th></th>"+
-          "<th>Sınıf</th>"+
-          "<th>10 m örnek</th>"+
-          "<th>Alan</th>"+
-          "<th>%</th>"+
-        "</tr></thead>"+
-        "<tbody>"+
-          rows+
-        "</tbody>"+
-      "</table>"+
-    "</div>"+
+    "<div style='font-size:.70rem;color:var(--mut);margin:7px 0 10px'><b>Ana sonuç: park alanına kapatılmış 10 m kaynak-grid sınıf dağılımı.</b> 10 m örnek frekansları parkın gerçek geometrik alanına uygulanır; sınırdaki pikseller park dışındaki alanları tam 100 m² olarak saymaz. OSM bina/yol/su geometrileri uydu sınıflarını değiştirmez.</div>"+
+    "<div style='overflow:auto'><table><thead><tr><th></th><th>Sınıf</th><th>10 m örnek</th><th>Alan (ha)</th><th>%</th></tr></thead><tbody>"+rows+"</tbody></table></div>"+
     "<div style='border-top:1px solid var(--line);margin-top:10px;padding-top:9px'>"+
-      dgSatelliteReportRow(
-        "🌿",
-        "Doğal / yeşil bitki örtüsü",
-        Number(landcover.naturalVegetationHa||0).toFixed(2),
-        " ha",
-        DG_S2_CLASS_COLORS[11]
-      )+
-      dgSatelliteReportRow(
-        "🌱",
-        "Toplam bitkisel örtü · tarım dahil",
-        Number(landcover.totalVegetationHa||0).toFixed(2),
-        " ha",
-        DG_S2_CLASS_COLORS[5]
-      )+
-      dgSatelliteReportRow(
-        "☁️",
-        "Bulut / maskeli",
-        Number(landcover.maskedHa||0).toFixed(2),
-        " ha",
-        DG_S2_CLASS_COLORS[10]
-      )+
-      dgSatelliteReportRow(
-        "⚠️",
-        "NoData / eşlenemeyen",
-        Number(landcover.unclassifiedAreaHa||0).toFixed(2),
-        " ha",
-        "#92400e"
-      )+
+      dgSatelliteReportRow("🌿","Yeşil alan",Number(landcover.reportClasses?.green?.areaM2||0)/10000," ha")+
+      dgSatelliteReportRow("💧","Su",Number(landcover.reportClasses?.water?.areaM2||0)/10000," ha")+
+      dgSatelliteReportRow("🧱","Sert zemin",Number(landcover.reportClasses?.hard?.areaM2||0)/10000," ha")+
+      dgSatelliteReportRow("🟫","Çıplak zemin",Number(landcover.reportClasses?.bare?.areaM2||0)/10000," ha")+
     "</div>"+
-    "<div style='font-size:.69rem;color:var(--mut);margin-top:10px'>"+
-      "<b>Park geometrisi:</b> "+
-      (parkM2/10000).toFixed(2)+
-      " ha · <b>10 m raster pikseli:</b> "+
-      landcover.histogramPixelCount.toLocaleString("tr-TR")+
-      " · <b>Raster alanı:</b> "+
-      Number(landcover.rasterAreaHa||0).toFixed(2)+" ha"+
-      " · <b>İşlenemeyen:</b> "+
-      unmapped.toLocaleString("tr-TR")+
-    "</div>"+
-    "<div style='font-size:.68rem;color:var(--mut);margin-top:7px'>"+
-      "<b>Taksonomi:</b> 1 Su · 2 Ağaç · 4 Taşkın vejetasyon · 5 Tarım · "+
-      "7 Yapılı alan · 8 Çıplak zemin · 9 Kar/buz · 10 Bulut · 11 Rangeland. "+
-      "Eski 3/6 değerleri dönerse 11 altında normalize edilir."+
-    "</div>"+
-    "<div style='display:flex;gap:7px;flex-wrap:wrap;margin-top:10px'>"+
-      "<button class='btn sm ghost' onclick='downloadSatelliteClassCSV()'>"+
-        "📥 Sınıf CSV"+
-      "</button>"+
-      "<button class='btn sm ghost' onclick='downloadSatelliteSamplesGeoJSON()'>"+
-        "📍 QC örnek GeoJSON"+
-      "</button>"+
-    "</div>"+
-    sampleWarn+
-    warn;
+    "<div style='font-size:.69rem;color:var(--mut);margin-top:10px'><b>Park alanı:</b> "+(parkM2/10000).toFixed(2)+" ha · <b>Raporlanan toplam:</b> "+totalReportedHa.toFixed(2)+" ha · <b>10 m örnek:</b> "+Number(landcover.sampleCount||0).toLocaleString("tr-TR")+"</div>"+
+    "<div style='font-size:.68rem;color:var(--mut);margin-top:7px'>Yeşil alan = ağaç + taşkın vejetasyon + tarım + rangeland; sert zemin = Built Area; çıplak zemin = Bare Ground. Bu dört sınıfın alanları toplamı park polygonunun geometrik alanına eşitlenmiştir.</div>"+
+    "<div style='display:flex;gap:7px;flex-wrap:wrap;margin-top:10px'><button class='btn sm ghost' onclick='downloadSatelliteClassCSV()'>📥 4 sınıf CSV</button></div>"+
+    qc;
 }
 
 async function dgSatelliteRun(){
@@ -5077,24 +4982,29 @@ async function dgSatelliteRun(){
     for(const code of DG_S2_OFFICIAL_CODES){
       const count=Number(direct.counts?.[code]||0);
       classAreasM2[code]=count*PIXEL_AREA_M2;
-      classPercent[code]=count/Math.max(1,requested)*100;
+      classPercent[code]=count/Math.max(1,classified)*100;
     }
 
-    const waterM2=classAreasM2[1]||0;
+    const report=dgBuildAreaConservingReport(direct.counts,parkM2);
+    const reportGreenM2=report.classes.green.areaM2;
+    const reportWaterM2=report.classes.water.areaM2;
+    const reportHardM2=report.classes.hard.areaM2;
+    const reportBareM2=report.classes.bare.areaM2;
+
     const treesM2=classAreasM2[2]||0;
     const floodedM2=classAreasM2[4]||0;
     const cropsM2=classAreasM2[5]||0;
     const hardM2=classAreasM2[7]||0;
-    const otherM2=(classAreasM2[8]||0)+(classAreasM2[9]||0);
+    const otherM2=classAreasM2[8]||0;
     const maskedM2=classAreasM2[10]||0;
     const rangelandM2=classAreasM2[11]||0;
 
-    const naturalVegetationM2=treesM2+floodedM2+rangelandM2;
-    const totalVegetationM2=naturalVegetationM2+cropsM2;
+    const naturalVegetationM2=reportGreenM2;
+    const totalVegetationM2=reportGreenM2;
 
     const unclassifiedCount=Math.max(0,requested-classified);
     const unclassifiedM2=unclassifiedCount*PIXEL_AREA_M2;
-    const rasterAreaM2=requested*PIXEL_AREA_M2;
+    const rasterAreaM2=parkM2;
 
     const histogram={
       ok:false,
@@ -5122,19 +5032,19 @@ async function dgSatelliteRun(){
       rasterAreaHa:+(rasterAreaM2/10000).toFixed(2),
 
       green:+(
-        naturalVegetationM2/10000
+        reportGreenM2/10000
       ).toFixed(2),
 
       hard:+(
-        hardM2/10000
+        reportHardM2/10000
       ).toFixed(2),
 
       water:+(
-        waterM2/10000
+        reportWaterM2/10000
       ).toFixed(2),
 
       other:+(
-        otherM2/10000
+        reportBareM2/10000
       ).toFixed(2),
 
       masked:+(
@@ -5142,7 +5052,7 @@ async function dgSatelliteRun(){
       ).toFixed(2),
 
       vegetation:+(
-        totalVegetationM2/10000
+        reportGreenM2/10000
       ).toFixed(2),
 
       naturalVegetation:+(
@@ -5217,14 +5127,17 @@ async function dgSatelliteRun(){
       classPercent,
 
       classCounts:{
-        green:naturalVegetationM2,
-        vegetation:totalVegetationM2,
-        hard:hardM2,
-        water:waterM2,
-        other:otherM2,
+        green:reportGreenM2,
+        vegetation:reportGreenM2,
+        hard:reportHardM2,
+        water:reportWaterM2,
+        other:reportBareM2,
         masked:maskedM2,
         nodata:unclassifiedM2
       },
+      reportClasses:report.classes,
+      reportAreaM2:report.areaM2,
+      reportAreaHa:report.areaHa,
 
       resolutionM:DG_S2_LULC_PIXEL_M,
 
@@ -5234,10 +5147,10 @@ async function dgSatelliteRun(){
        * Histogram-derived observed area conserves all returned bins
        * except an explicitly tracked unmapped remainder.
        */
-      validAreaM2:classified*PIXEL_AREA_M2,
+      validAreaM2:parkM2,
 
-      sampledAreaM2:rasterAreaM2,
-      returnedAreaM2:rasterAreaM2,
+      sampledAreaM2:parkM2,
+      returnedAreaM2:parkM2,
 
       cloudAreaM2:maskedM2,
       noDataAreaM2:(
@@ -5338,12 +5251,7 @@ async function dgSatelliteRun(){
     LANDCOVER.qualityWarning=
       LANDCOVER.qualityWarning.trim();
 
-    dgRenderSatelliteReport(
-      rep,
-      parkM2,
-      LANDCOVER,
-      classAreasM2
-    );
+    dgRenderSatelliteReport(rep,parkM2,LANDCOVER);
 
     /*
      * Visualization is a separate concern. A renderer failure cannot
@@ -5370,12 +5278,7 @@ async function dgSatelliteRun(){
         LANDCOVER.visualizationError;
 
       if(rep){
-        dgRenderSatelliteReport(
-          rep,
-          parkM2,
-          LANDCOVER,
-          classAreasM2
-        );
+        dgRenderSatelliteReport(rep,parkM2,LANDCOVER);
       }
 
       console.warn(
