@@ -1,5 +1,5 @@
 "use strict";
-/* DendroGeo v2 · gridplan.js v127 — LULC PRIMARY-raster locked-catalog + raster-ID QC + histogram */           
+/* DendroGeo v2 · gridplan.js v128 — LULC PRIMARY-raster locked-catalog + raster-ID QC + histogram */           
   
 let PARK_POLY=null;
 let PARK_HOLES=[]; 
@@ -4016,7 +4016,7 @@ async function dgGet2020RasterIds(){
   const geometry=dgBuildArcGISParkGeometry(1200);
   const params=new URLSearchParams({
     f:"json",
-    where:"Year = "+DG_S2_LULC_YEAR,
+    where:"Year = "+DG_S2_LULC_YEAR+" AND Category = 1",
     geometryType:"esriGeometryPolygon",
     geometry:JSON.stringify(geometry),
     inSR:"4326",
@@ -4060,7 +4060,7 @@ async function dgGet2020RasterIds(){
 
   if(!ids.length){
     throw new Error(
-      "Seçili parkla kesişen 2020 Sentinel-2 LULC rasterı bulunamadı."
+      "Seçili parkla kesişen 2020 Sentinel-2 PRIMARY LULC rasterı bulunamadı."
     );
   }
 
