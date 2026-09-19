@@ -124,17 +124,19 @@ E 488.012,4 / N 4.420.374,7 (±2 m). İleri→ters gidiş-dönüş < 1e-5°.
 
 ### 2.5 Arazi örtüsü (LULC) alan hesabı
 
-Veri: **Impact Observatory 10 m Annual LULC v02** (`io-lulc-annual-v02`),
-Planetary Computer STAC + SAS imzalı COG üzerinden. Yıl **2020'ye kilitli**.
+> **Otorite belge:** [`LULC_METHODOLOGY.md`](LULC_METHODOLOGY.md)
+> Bu bölüm yalnızca özetler; çelişki olursa LULC_METHODOLOGY.md geçerlidir.
 
-Yöntem: park poligonu UTM'ye projekte edilir; rasterin **gerçek kaynak
-hücreleriyle** (meta.dx/meta.dy, GeoTIFF metadata'sından) kesişimi alınır.
-Hücre başına alan, poligon ∩ hücre dikdörtgeninin düzlem alanıdır — yani
-alanlar hücre sayımıyla değil, **gerçek kesişim geometrisiyle** üretilir.
-Hücre toplamı park alanına 1e-9 göreli hatayla eşittir (birim test).
+Veri: **Impact Observatory 10 m Annual LULC v02** (CC BY 4.0), Planetary
+Computer STAC + SAS imzalı COG üzerinden; yıl **2020'ye kilitli**.
 
-Sınıflar 4 rapor grubuna indirgenir: Su, Yeşil, Yapılı, Diğer; NoData/
-Bulut/Kar maskelenir ve raporda ayrı satır olarak gösterilir.
+Özet yöntem: park poligonu UTM'ye projekte edilir; rasterin **gerçek kaynak
+hücreleriyle** (GeoTIFF metadata'sından okunan meta.dx/meta.dy) kesişimi
+alınır. Hücre başına alan, poligon ∩ hücre dikdörtgeninin düzlem alanıdır —
+alanlar hücre sayımıyla değil **gerçek kesişim geometrisiyle** üretilir;
+hücre toplamı park alanına 1e-9 göreli hatayla eşittir (birim test).
+Sınıflar 4 rapor grubuna indirgenir; NoData/Bulut/Kar maskelenir ve raporda
+ayrı satır gösterilir.
 
 ---
 
