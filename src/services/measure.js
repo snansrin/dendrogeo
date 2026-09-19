@@ -39,6 +39,27 @@ async function checkPhoto(e){
  }catch(err){photoOk=false;box.className="alert err";box.innerHTML="⚠ Fotoğraf okunamadı, tekrar deneyin.";}
 }
 /* --- 3. GPS --- */
+/* Ekran kilidi: saha ölçümü sırasında ekranın kararmasını engeller.
+ * iOS Safari ekran kilitlendiğinde konum izlemeyi kestiği için bu, ölçümün
+ * yarıda kalmasını önler. Sekme arka plana alınıp geri dönüldüğünde kilit
+ * kendiliğinden bırakıldığı için visibilitychange ile yeniden alınır.
+ * Desteklemeyen tarayıcılarda sessizce yok sayılır; ölçüm akışını etkilemez. */
+let WAKE_LOCK=null;
+async function acquireWakeLock(){
+ if(!("wakeLock" in navigator))return;
+ try{
+  if(WAKE_LOCK)return;
+  WAKE_LOCK=await navigator.wakeLock.request("screen");
+  WAKE_LOCK.addEventListener("release",()=>{WAKE_LOCK=null;});
+ }catch(e){WAKE_LOCK=null;}
+}
+if(!window._wakeLockHooked){
+ window._wakeLockHooked=true;
+ document.addEventListener("visibilitychange",()=>{
+  if(document.visibilityState==="visible"&&GPS)acquireWakeLock();
+ });
+}
+
 async function startGps(){
  const gpsMsg=(t,e)=>{const g=$("gpsState");g.textContent=t;g.className="alert "+(e?"err":"info");};
  if(!navigator.geolocation)return gpsMsg("Tarayıcı konum desteklemiyor.",1);
@@ -46,7 +67,7 @@ async function startGps(){
  try{if(navigator.permissions&&navigator.permissions.query){const p=await navigator.permissions.query({name:"geolocation"});if(p.state==="denied")return gpsMsg("Konum izni reddedildi. Ayarlar→Safari→Konum.",1);}}catch(e){}
  gpsMsg("Konum alınıyor…",0);
  const opts={enableHighAccuracy:true,timeout:15000,maximumAge:0};
- const onOk=p=>{GPS=p.coords;updGps();navigator.geolocation.watchPosition(p2=>{GPS=p2.coords;updGps();},()=>{},{...opts,maximumAge:1000});};
+ const onOk=p=>{GPS=p.coords;updGps();acquireWakeLock();navigator.geolocation.watchPosition(p2=>{GPS=p2.coords;updGps();},()=>{},{...opts,maximumAge:1000});};
  const onErr=e=>{
   if(e.code===1)return gpsMsg("İzin reddedildi. iPhone: Ayarlar→Safari→Konum→Kullanırken İzin Ver.",1);
   if(e.code===3){try{navigator.geolocation.getCurrentPosition(onOk,()=>gpsMsg("GPS başarısız: dışarıda tekrar deneyin.",1),opts);}catch(err){gpsMsg("GPS hatası.",1);}return;}

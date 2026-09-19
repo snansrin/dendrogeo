@@ -796,6 +796,25 @@ async function boot(){
         .catch(e=>console.log('SW registration failed:',e));
     }
     
+    // 1b. Kalıcı depolama izni iste.
+    //     Çevrimdışı kuyruk IndexedDB'de tutuluyor ve FOTOĞRAF BLOB'larını da
+    //     içeriyor (offline.js). Tarayıcılar bu veriyi "best effort" sayar:
+    //     iOS Safari ana ekrana KURULMAMIŞ bir PWA'nın IndexedDB/localStorage
+    //     verisini ~7 gün hareketsizlikten sonra silebilir, Android depolama
+    //     baskısında temizleyebilir. persist() bu tahliyeyi engellemeyi ister.
+    //     İzin verilmezse kullanıcı uyarılır — bu risk daha önce tamamen
+    //     görünmezdi: saha ekibi hafta içi ölçüm biriktirip hafta sonu siteyi
+    //     açmazsa kuyruğu boş bulabiliyordu.
+    if (navigator.storage?.persist && !window._persistChecked) {
+        window._persistChecked = true;
+        navigator.storage.persist().then(ok => {
+            window._storagePersisted = ok;
+            if (!ok) setTimeout(() => toast(
+                "Tarayıcı uzun süreli yerel depolamaya izin vermedi. Saha ölçümlerinizi " +
+                "aynı gün senkronlayın veya siteyi ana ekrana kurun.", "warn", "⚠️"), 2500);
+        }).catch(() => {});
+    }
+    
     // 2. Online listener SADECE BİR KEZ eklensin (çift toast önleme)
     if(!window._onlineListenerSet){
         window._onlineListenerSet = true;
