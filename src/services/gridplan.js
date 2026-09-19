@@ -1,5 +1,5 @@
 "use strict";
-/* DendroGeo v2 · gridplan.js v105 — FINAL (su+sert iyileştirmeleri) */           
+/* DendroGeo v2 · gridplan.js v106 — FINAL (su+sert iyileştirmeleri) */           
   
 let PARK_POLY=null;
 let PARK_HOLES=[]; 
@@ -3651,21 +3651,21 @@ function downloadWaypointsCSV(){
 
 
 /* =========================================================
-   DENDROGEO — SCIENTIFIC SATELLITE LAND-COVER ENGINE v3
+   DENDROGEO — SCIENTIFIC SATELLITE LAND-COVER ENGINE v4
    ---------------------------------------------------------
-   Numeric analysis:
-     ArcGIS ImageServer computeStatisticsHistograms over the
-     actual park polygon, using the native service resolution.
-
-   Visualization:
-     ArcGIS ImageServer exportImage using the official
-     Cartographic Renderer for Visualization and Analysis.
-
-   Structural QC:
-     OSM water/impervious layers are rendered above the satellite
-     raster. They never overwrite the raw satellite statistics.
-
-   This removes the old 8,000+ Leaflet-polygon rendering path.
+   Bilimsel yaklaşım:
+     1) Sayısal sonuç: ArcGIS ImageServer'ın gerçek park polygonu
+        üzerindeki computeStatisticsHistograms çıktısı.
+     2) Taksonomi: Impact Observatory / Esri Maps for Good 9-sınıf
+        land-cover kodları. Class 11 = Rangeland/Mera.
+     3) Alan: sınıf frekansı / geçerli histogram frekansı oranı,
+        bağımsız park geometrisi alanına uygulanır. Böylece
+        "örnek sayısı x 100 m²" gibi yanlış alan hesabı yapılmaz.
+     4) Görselleştirme: sunucu tarafı raster sınıf değerleri,
+        resmi sınıf renkleriyle açıkça Colormap üzerinden çizilir.
+        Varsayılan renderer'ın görünümüne güvenilmez.
+     5) OSM su/sert yüzey katmanları bağımsız QC'dir; uydu verisi
+        OSM ile sessizce değiştirilmez.
 ========================================================= */
 
 const DG_S2_LULC_SERVICE=
@@ -3678,13 +3678,21 @@ const DG_S2_START_MS=Date.UTC(2020,0,1);
 const DG_S2_END_MS=Date.UTC(2021,0,1)-1;
 const DG_S2_MAX_EXPORT_PX=1800;
 
+/*
+ * Impact Observatory Maps for Good 9-class taxonomy.
+ * Official current classes:
+ * 1 Water, 2 Trees, 4 Flooded Vegetation, 5 Crops,
+ * 7 Built, 8 Bare Ground, 9 Snow/Ice, 10 Clouds, 11 Rangeland.
+ * Values 3 and 6 belonged to older Grass/Scrub releases and were
+ * merged into 11 Rangeland in v1.1/v1.2.
+ */
 const DG_S2_CLASS_NAMES={
   1:"Su",
   2:"Ağaç",
-  3:"Çayır",
+  3:"Eski sınıf · Çayır",
   4:"Taşkın vejetasyon",
   5:"Tarım",
-  6:"Çalı / çalılık",
+  6:"Eski sınıf · Çalı / çalılık",
   7:"Yapılı alan",
   8:"Çıplak zemin",
   9:"Kar / buz",
@@ -3692,13 +3700,31 @@ const DG_S2_CLASS_NAMES={
   11:"Mera / rangeland"
 };
 
+const DG_S2_CLASS_COLORS={
+  1:"#419bdf",
+  2:"#397d49",
+  3:"#76a65b",
+  4:"#7a87c6",
+  5:"#e49635",
+  6:"#8fb35a",
+  7:"#c4281b",
+  8:"#a59b8f",
+  9:"#a8ebff",
+  10:"#616161",
+  11:"#8fbe78"
+};
+
 function dgS2Group(code){
   if(code===1)return "water";
-  if([2,3,4,5,6,11].includes(code))return "green";
+  if([2,3,4,5,6,11].includes(code))return "vegetation";
   if(code===7)return "hard";
   if(code===8||code===9)return "other";
   if(code===10)return "masked";
   return "unknown";
+}
+
+function dgS2OfficialClass(code){
+  return Object.prototype.hasOwnProperty.call(DG_S2_CLASS_NAMES,code);
 }
 
 function dgParkBBox(){
@@ -3825,10 +3851,10 @@ function dgBuildArcGISParkGeometry(maxVertices=1200){
 
 function dgBuildMosaicRule(){
   return{
-    ascending:true,
     mosaicMethod:"esriMosaicAttribute",
     sortField:"Year",
     sortValue:DG_S2_LULC_YEAR,
+    ascending:true,
     where:"Year = "+DG_S2_LULC_YEAR
   };
 }
@@ -3851,6 +3877,13 @@ function dgBuildHistogramUrl(maxVertices=1200){
     params.toString();
 }
 
+/*
+ * ArcGIS HistogramObject:
+ *   bin width = (max - min) / size
+ *   counts[i] = pixel count in bin i.
+ *
+ * Earlier code used (size-1), which is not the documented formula.
+ */
 function dgHistogramValueCount(hist,code){
   if(
     !hist||
@@ -3858,19 +3891,25 @@ function dgHistogramValueCount(hist,code){
     !hist.counts.length
   )return 0;
 
-  const size=Number(hist.size)||hist.counts.length;
+  const size=Math.max(
+    1,
+    Number(hist.size)||hist.counts.length
+  );
   const min=Number(hist.min);
   const max=Number(hist.max);
 
   if(
     !Number.isFinite(min)||
     !Number.isFinite(max)||
-    max===min||
-    size<2
+    max<=min
   )return 0;
 
-  const step=(max-min)/Math.max(1,size-1);
-  const index=Math.round((code-min)/step);
+  const width=(max-min)/size;
+  if(!(width>0))return 0;
+
+  const index=Math.floor(
+    (Number(code)-min)/width
+  );
 
   return index>=0&&index<hist.counts.length
     ?Number(hist.counts[index])||0
@@ -3885,15 +3924,31 @@ function dgHistogramCounts(hist){
   return out;
 }
 
+function dgHistogramTotal(hist){
+  if(!hist||!Array.isArray(hist.counts))return 0;
+  return hist.counts.reduce(
+    (s,v)=>s+(Number(v)||0),
+    0
+  );
+}
+
 function dgBuildExportImageUrl(){
   const b=dgParkBBox();
 
   const midLat=(b.minLat+b.maxLat)/2;
-  const widthM=Math.abs(b.maxLon-b.minLon)*111320*Math.cos(midLat*Math.PI/180);
+  const widthM=Math.abs(b.maxLon-b.minLon)*
+    111320*
+    Math.cos(midLat*Math.PI/180);
   const heightM=Math.abs(b.maxLat-b.minLat)*110540;
 
-  const rawW=Math.max(256,Math.round(widthM/DG_S2_LULC_PIXEL_M));
-  const rawH=Math.max(256,Math.round(heightM/DG_S2_LULC_PIXEL_M));
+  const rawW=Math.max(
+    256,
+    Math.round(widthM/DG_S2_LULC_PIXEL_M)
+  );
+  const rawH=Math.max(
+    256,
+    Math.round(heightM/DG_S2_LULC_PIXEL_M)
+  );
 
   const scale=Math.min(
     1,
@@ -3903,25 +3958,58 @@ function dgBuildExportImageUrl(){
   const width=Math.max(256,Math.round(rawW*scale));
   const height=Math.max(256,Math.round(rawH*scale));
 
+  /*
+   * Explicit class colormap: never rely on a display renderer whose
+   * symbology can obscure the actual categorical values.
+   * Official current class colors are used where documented.
+   */
+  const colorMap=Object.entries(DG_S2_CLASS_COLORS)
+    .map(([code,hex])=>{
+      const h=hex.replace("#","");
+      return[
+        Number(code),
+        parseInt(h.slice(0,2),16),
+        parseInt(h.slice(2,4),16),
+        parseInt(h.slice(4,6),16)
+      ];
+    });
+
+  const renderingRule={
+    rasterFunction:"Colormap",
+    rasterFunctionArguments:{
+      Colormap:colorMap,
+      Raster:"$$"
+    },
+    outputPixelType:"U8",
+    variableName:"Raster"
+  };
+
   const params=new URLSearchParams({
     f:"image",
-    bbox:b.minLon+","+b.minLat+","+b.maxLon+","+b.maxLat,
+    bbox:[
+      b.minLon,
+      b.minLat,
+      b.maxLon,
+      b.maxLat
+    ].join(","),
     bboxSR:"4326",
     imageSR:"4326",
     size:width+","+height,
     format:"png32",
     interpolation:"RSP_NearestNeighbor",
+    noData:"0",
     mosaicRule:JSON.stringify(dgBuildMosaicRule()),
-    renderingRule:JSON.stringify({
-      rasterFunction:"Cartographic Renderer for Visualization and Analysis"
-    })
+    renderingRule:JSON.stringify(renderingRule)
   });
 
   return{
-    url:DG_S2_LULC_SERVICE+"/exportImage?"+params.toString(),
+    url:DG_S2_LULC_SERVICE+
+      "/exportImage?"+
+      params.toString(),
     bbox:b,
     width,
-    height
+    height,
+    renderingRule
   };
 }
 
@@ -3941,7 +4029,8 @@ async function dgFetchSatelliteRaster(){
   if(!res.ok){
     const body=await res.text().catch(()=> "");
     throw new Error(
-      "ArcGIS exportImage HTTP "+res.status+" · "+body.slice(0,300)
+      "ArcGIS exportImage HTTP "+res.status+
+      " · "+body.slice(0,300)
     );
   }
 
@@ -3950,7 +4039,10 @@ async function dgFetchSatelliteRaster(){
   ).toLowerCase();
 
   if(!type.includes("image")){
-    throw new Error("ArcGIS exportImage görüntü yerine beklenmeyen içerik döndürdü.");
+    throw new Error(
+      "ArcGIS exportImage görüntü yerine "+
+      "beklenmeyen içerik döndürdü."
+    );
   }
 
   return{
@@ -4015,6 +4107,54 @@ async function dgClipRasterBlobToPark(blob,bbox,width,height){
   return canvas.toDataURL("image/png");
 }
 
+let DG_S2_LEGEND=null;
+
+function dgEnsureSatelliteLegend(){
+  if(!map)return;
+
+  if(DG_S2_LEGEND){
+    try{map.removeControl(DG_S2_LEGEND);}catch{}
+    DG_S2_LEGEND=null;
+  }
+
+  DG_S2_LEGEND=L.control({position:"bottomright"});
+
+  DG_S2_LEGEND.onAdd=function(){
+    const div=L.DomUtil.create(
+      "div",
+      "leaflet-control"
+    );
+
+    div.style.cssText=
+      "background:rgba(255,255,255,.94);"+
+      "padding:10px 11px;"+
+      "border-radius:10px;"+
+      "box-shadow:0 1px 5px rgba(0,0,0,.25);"+
+      "font:12px/1.25 Arial,sans-serif;"+
+      "max-width:220px;";
+
+    div.innerHTML=
+      "<b>Sentinel-2 / LULC 2020</b>"+
+      Object.keys(DG_S2_CLASS_NAMES)
+        .filter(code=>dgS2OfficialClass(Number(code))||[3,6].includes(Number(code)))
+        .map(code=>{
+          const c=DG_S2_CLASS_COLORS[code];
+          return(
+            "<div style='display:flex;align-items:center;gap:6px;margin-top:4px'>"+
+              "<span style='width:12px;height:12px;border-radius:2px;"+
+                "display:inline-block;background:"+c+";border:1px solid rgba(0,0,0,.18)'></span>"+
+              "<span>"+DG_S2_CLASS_NAMES[code]+"</span>"+
+            "</div>"
+          );
+        }).join("");
+
+    L.DomEvent.disableClickPropagation(div);
+    return div;
+  };
+
+  DG_S2_LEGEND.addTo(map);
+}
+
 async function dgRenderSatelliteRaster(){
   if(!map)return;
 
@@ -4024,6 +4164,7 @@ async function dgRenderSatelliteRaster(){
   }
 
   const raster=await dgFetchSatelliteRaster();
+
   const imageUrl=await dgClipRasterBlobToPark(
     raster.blob,
     raster.bbox,
@@ -4038,27 +4179,45 @@ async function dgRenderSatelliteRaster(){
       [raster.bbox.maxLat,raster.bbox.maxLon]
     ],
     {
-      opacity:.82,
+      opacity:.78,
       interactive:false,
       zIndex:20
     }
   ).addTo(map);
 
+  dgEnsureSatelliteLegend();
   refreshWaterLayer();
   refreshImpLayer();
 }
 
-function dgSatelliteReportRow(emoji,label,m2,totalM2,tone){
-  const p=totalM2>0?m2/totalM2*100:0;
+function dgSatelliteReportRow(
+  emoji,
+  label,
+  m2,
+  totalM2,
+  tone
+){
+  const p=
+    totalM2>0
+      ?m2/totalM2*100
+      :0;
+
   return(
-    "<div style=\"display:flex;align-items:center;gap:8px;margin:6px 0\">"+
-      "<span style=\"width:18px\">"+emoji+"</span>"+
-      "<span style=\"width:132px;font-size:.8rem\">"+label+"</span>"+
-      "<div style=\"flex:1;height:10px;background:var(--line);border-radius:5px;overflow:hidden\">"+
-        "<div style=\"height:100%;width:"+Math.min(100,Math.max(0,p)).toFixed(1)+"%;background:"+(tone||"var(--line-strong)")+"\"></div>"+
+    "<div style='display:flex;align-items:center;gap:8px;margin:5px 0'>"+
+      "<span style='width:18px'>"+emoji+"</span>"+
+      "<span style='width:145px;font-size:.78rem'>"+label+"</span>"+
+      "<div style='flex:1;height:9px;background:var(--line);border-radius:5px;overflow:hidden'>"+
+        "<div style='height:100%;width:"+
+          Math.min(100,Math.max(0,p)).toFixed(1)+
+          "%;background:"+(tone||"var(--line-strong)")+
+        "'></div>"+
       "</div>"+
-      "<b style=\"width:82px;text-align:right;font-size:.8rem\">"+(m2/10000).toFixed(2)+" ha</b>"+
-      "<span style=\"width:48px;font-size:.72rem\">%"+p.toFixed(1)+"</span>"+
+      "<b style='width:80px;text-align:right;font-size:.77rem'>"+
+        (m2/10000).toFixed(2)+" ha"+
+      "</b>"+
+      "<span style='width:46px;font-size:.70rem'>%"+
+        p.toFixed(1)+
+      "</span>"+
     "</div>"
   );
 }
@@ -4069,7 +4228,11 @@ async function dgSatelliteRun(){
   }
 
   if(SATELLITE_RUNNING){
-    return toast("🛰️ Uydu analizi zaten çalışıyor.","info","🛰️");
+    return toast(
+      "🛰️ Uydu analizi zaten çalışıyor.",
+      "info",
+      "🛰️"
+    );
   }
 
   SATELLITE_RUNNING=true;
@@ -4078,14 +4241,19 @@ async function dgSatelliteRun(){
   try{
     if(rep){
       rep.style.display="block";
-      rep.innerHTML="⏳ Sentinel-2 / 10 m / 2020 · park polygonu sunucu tarafında analiz ediliyor…";
+      rep.innerHTML=
+        "⏳ Sentinel-2 / 10 m / 2020 · "+
+        "park polygonu zonal histogram ile analiz ediliyor…";
     }
 
     LANDCOVER=null;
     LANDCOVER_SAMPLES=[];
 
     const parkM2=parkAreaM2();
-    if(!(parkM2>0))throw new Error("Park alanı hesaplanamadı.");
+
+    if(!(parkM2>0)){
+      throw new Error("Park alanı hesaplanamadı.");
+    }
 
     const attempts=[1200,800,500,300];
     let data=null;
@@ -4096,36 +4264,59 @@ async function dgSatelliteRun(){
     for(const maxVertices of attempts){
       try{
         const url=dgBuildHistogramUrl(maxVertices);
+
         usedVertices=maxVertices;
         usedUrlLength=url.length;
 
-        const res=await fetch(url,{
-          method:"GET",
-          mode:"cors",
-          cache:"no-store",
-          headers:{Accept:"application/json"}
-        });
+        const res=await fetch(
+          url,
+          {
+            method:"GET",
+            mode:"cors",
+            cache:"no-store",
+            headers:{Accept:"application/json"}
+          }
+        );
 
         const body=await res.text();
-        if(!res.ok)throw new Error("HTTP "+res.status+" · "+body.slice(0,300));
 
-        data=JSON.parse(body);
-        if(data?.error){
+        if(!res.ok){
           throw new Error(
-            (data.error.message||"ArcGIS histogram hatası")
-            +(Array.isArray(data.error.details)&&data.error.details.length
-              ?" · "+data.error.details.join(" | "):"")
+            "HTTP "+res.status+" · "+
+            body.slice(0,300)
           );
         }
 
-        if(!Array.isArray(data.histograms)||!data.histograms[0]){
-          throw new Error("ArcGIS histogram döndürmedi.");
+        data=JSON.parse(body);
+
+        if(data?.error){
+          throw new Error(
+            (data.error.message||
+              "ArcGIS histogram hatası")+
+            (Array.isArray(data.error.details)&&
+             data.error.details.length
+              ?" · "+data.error.details.join(" | ")
+              :"")
+          );
+        }
+
+        if(
+          !Array.isArray(data.histograms)||
+          !data.histograms[0]
+        ){
+          throw new Error(
+            "ArcGIS histogram döndürmedi."
+          );
         }
 
         break;
       }catch(err){
         lastError=err;
-        console.warn("ArcGIS zonal histogram denemesi:",maxVertices,err);
+        console.warn(
+          "ArcGIS zonal histogram denemesi:",
+          maxVertices,
+          err
+        );
       }
     }
 
@@ -4139,144 +4330,439 @@ async function dgSatelliteRun(){
 
     const hist=data.histograms[0];
     const classCounts=dgHistogramCounts(hist);
+    const histogramAllBins=dgHistogramTotal(hist);
 
-    let totalPixels=0;
+    let validPixelCount=0;
+    let noDataPixelCount=0;
+
     for(let code=1;code<=11;code++){
-      totalPixels+=classCounts[code]||0;
+      validPixelCount+=Number(classCounts[code])||0;
     }
 
-    if(totalPixels<=0){
-      throw new Error("Park içinde geçerli 2020 LULC pikseli bulunamadı.");
+    /*
+     * Class 0 is normally NoData if present in the histogram.
+     * We don't use it in the area denominator.
+     */
+    noDataPixelCount=dgHistogramValueCount(hist,0);
+
+    if(validPixelCount<=0){
+      throw new Error(
+        "Park içinde geçerli 2020 LULC pikseli bulunamadı."
+      );
     }
 
     const classAreas={
-      green:0,
-      hard:0,
       water:0,
+      vegetation:0,
+      hard:0,
       other:0,
       masked:0
     };
 
+    const classAreaByCode={};
+
     for(let code=1;code<=11;code++){
+      const count=Number(classCounts[code])||0;
+
+      if(dgS2OfficialClass(code)){
+        classAreaByCode[code]=
+          parkM2*(count/validPixelCount);
+      }
+
       const group=dgS2Group(code);
-      if(Object.prototype.hasOwnProperty.call(classAreas,group)){
-        classAreas[group]+=parkM2*(classCounts[code]||0)/totalPixels;
+
+      if(
+        Object.prototype.hasOwnProperty.call(
+          classAreas,
+          group
+        )
+      ){
+        classAreas[group]+
+          =parkM2*(count/validPixelCount);
       }
     }
 
     const classifiedAreaM2=
-      classAreas.green+
-      classAreas.hard+
       classAreas.water+
+      classAreas.vegetation+
+      classAreas.hard+
       classAreas.other;
+
+    const vegetationBreakdown={
+      trees:classAreaByCode[2]||0,
+      flooded:classAreaByCode[4]||0,
+      crops:classAreaByCode[5]||0,
+      rangeland:classAreaByCode[11]||0,
+      legacyGrass:classAreaByCode[3]||0,
+      legacyScrub:classAreaByCode[6]||0
+    };
+
+    const greenM2=
+      vegetationBreakdown.trees+
+      vegetationBreakdown.rangeland+
+      vegetationBreakdown.flooded+
+      vegetationBreakdown.legacyGrass+
+      vegetationBreakdown.legacyScrub;
+
+    /*
+     * "Vegetation" is the scientifically explicit aggregate.
+     * Cropland stays separate because it is managed land cover.
+     */
+    const allVegetationM2=
+      greenM2+
+      vegetationBreakdown.crops;
+
+    const legacyPixels=
+      (classCounts[3]||0)+
+      (classCounts[6]||0);
 
     LANDCOVER={
       total:+(parkM2/10000).toFixed(2),
       geometricTotal:+(parkM2/10000).toFixed(2),
-      green:+(classAreas.green/10000).toFixed(2),
+
+      /*
+       * Backward-compatible summary field:
+       * "green" = natural/green classes, excluding crops.
+       */
+      green:+(greenM2/10000).toFixed(2),
       hard:+(classAreas.hard/10000).toFixed(2),
       water:+(classAreas.water/10000).toFixed(2),
       other:+(classAreas.other/10000).toFixed(2),
-      masked:+(classAreas.masked/10000).toFixed(2),
+      masked:+((classAreas.masked||0)/10000).toFixed(2),
+
+      vegetation:+(allVegetationM2/10000).toFixed(2),
+      naturalVegetation:+(greenM2/10000).toFixed(2),
+      crops:+((vegetationBreakdown.crops)/10000).toFixed(2),
+      trees:+((vegetationBreakdown.trees)/10000).toFixed(2),
+      rangeland:+((vegetationBreakdown.rangeland)/10000).toFixed(2),
+      floodedVegetation:+((vegetationBreakdown.flooded)/10000).toFixed(2),
+
       sampleM:10,
-      sampleCount:totalPixels,
-      satellitePixels:totalPixels,
+      sampleCount:validPixelCount,
+      satellitePixels:validPixelCount,
       requestedSamples:0,
-      returnedSamples:totalPixels,
+      returnedSamples:validPixelCount,
       missingSamples:0,
       invalidSamples:0,
-      noDataSamples:0,
+      noDataSamples:noDataPixelCount,
       maskedSamples:classCounts[10]||0,
-      method:"ArcGIS ImageServer computeStatisticsHistograms · park polygon · native 10 m service resolution · Year 2020 + time extent",
-      source:"Impact Observatory · Microsoft · Esri · Sentinel-2 10 m Land Cover",
+
+      method:
+        "ArcGIS ImageServer computeStatisticsHistograms · "+
+        "gerçek park polygonu · native service resolution · "+
+        "2020 time extent + Year=2020",
+
+      source:
+        "Impact Observatory · Microsoft · Esri · "+
+        "Sentinel-2 10 m Land Cover",
+
       sourceUrl:DG_S2_LULC_SERVICE,
+
       rawClassCounts:classCounts,
-      classCounts:classAreas,
+      classAreasM2:classAreaByCode,
+      classCounts:{
+        green:greenM2,
+        vegetation:allVegetationM2,
+        hard:classAreas.hard,
+        water:classAreas.water,
+        other:classAreas.other,
+        masked:classAreas.masked||0
+      },
+
       resolutionM:DG_S2_LULC_PIXEL_M,
+
       validAreaM2:classifiedAreaM2,
       geometricAreaM2:parkM2,
       sampledAreaM2:parkM2,
       returnedAreaM2:parkM2,
-      cloudAreaM2:classAreas.masked,
+      cloudAreaM2:classAreas.masked||0,
+
       missingAreaM2:0,
       unclassifiedAreaM2:0,
+
       coveragePct:100,
       returnedCoveragePct:100,
-      classifiedCoveragePct:parkM2>0?classifiedAreaM2/parkM2*100:0,
-      histogramPixelCount:totalPixels,
+      classifiedCoveragePct:
+        parkM2>0
+          ?classifiedAreaM2/parkM2*100
+          :0,
+
+      histogramPixelCount:validPixelCount,
+      histogramAllBins,
+      histogramNoDataCount:noDataPixelCount,
+
       histogramMin:Number(hist.min),
       histogramMax:Number(hist.max),
       histogramSize:Number(hist.size),
+
+      histogramBinWidth:
+        Number(hist.max)>Number(hist.min)&&Number(hist.size)
+          ?(Number(hist.max)-Number(hist.min))/Number(hist.size)
+          :null,
+
       requestVertexLimit:usedVertices,
       histogramUrlLength:usedUrlLength,
+
+      legacyClassPixels:legacyPixels,
       qualityWarning:""
     };
 
-    if(classCounts[10]>0){
+    if(legacyPixels>0){
       LANDCOVER.qualityWarning=
-        "2020 LULC içinde "+
+        legacyPixels+
+        " piksel eski Grass/Scrub kodları (3/6) içeriyor. "+
+        "Bu değerler güncel Maps for Good taksonomisinde "+
+        "Rangeland (11) altında birleştirilmiş kabul edilir.";
+    }
+
+    if(classCounts[10]>0){
+      const cloudText=
         classCounts[10]+
-        " bulut/maskeli piksel bulundu; bu alan yeşil/sert/su/diğer sınıflarına dağıtılmadı.";
+        " bulut/maskeli piksel";
+
+      LANDCOVER.qualityWarning=
+        LANDCOVER.qualityWarning
+          ?LANDCOVER.qualityWarning+" Ayrıca "+cloudText+" bulundu."
+          :cloudText+
+           " bulundu; bulut alanı diğer sınıflara dağıtılmadı.";
+    }
+
+    /*
+     * Independent structural QC:
+     * OSM has geometry, but it is not used to rewrite the satellite
+     * result. We merely make disagreement visible.
+     */
+    const osmWaterEvidence=
+      (WATER_RINGS&&WATER_RINGS.length)||
+      (WATER_LINES&&WATER_LINES.length);
+
+    const osmHardEvidence=
+      (IMP_RINGS&&IMP_RINGS.length)||
+      (IMP_LINES&&IMP_LINES.length);
+
+    if(
+      osmWaterEvidence&&
+      (classAreas.water||0)<parkM2*0.005
+    ){
+      LANDCOVER.qualityWarning=
+        (LANDCOVER.qualityWarning
+          ?LANDCOVER.qualityWarning+" "
+          :"")+
+        "OSM park polygonunda su geometrisi var ancak "+
+        "uydu sınıfında su payı <%0.5; iki kaynak uyuşmuyor.";
+    }
+
+    if(
+      osmHardEvidence&&
+      (classAreas.hard||0)<parkM2*0.005
+    ){
+      LANDCOVER.qualityWarning=
+        (LANDCOVER.qualityWarning
+          ?LANDCOVER.qualityWarning+" "
+          :"")+
+        "OSM'de sert yüzey geometrisi var ancak uydu built payı "+
+        "<%0.5; iki kaynak uyuşmuyor.";
     }
 
     if(rep){
+      const codeRows=[1,2,4,5,7,8,9,10,11]
+        .map(code=>{
+          const count=classCounts[code]||0;
+          const area=classAreaByCode[code]||0;
+          const label=DG_S2_CLASS_NAMES[code];
+          const emoji=
+            code===1?"💧":
+            code===2?"🌳":
+            code===4?"🌊":
+            code===5?"🌾":
+            code===7?"🧱":
+            code===8?"🟫":
+            code===9?"❄️":
+            code===10?"☁️":
+            "🟩";
+
+          return dgSatelliteReportRow(
+            emoji,
+            label+
+              (code===11
+                ?" · vejetasyon"
+                :""),
+            area,
+            parkM2,
+            DG_S2_CLASS_COLORS[code]
+          );
+        }).join("");
+
       rep.innerHTML=
         "<b>🛰️ Arazi Örtüsü · Sentinel-2 / 10 m · 2020</b>"+
-        dgSatelliteReportRow("🌿","Yeşil / vejetasyon",classAreas.green,parkM2,"#16a34a")+
-        dgSatelliteReportRow("🧱","Yapılı / built",classAreas.hard,parkM2,"#dc2626")+
-        dgSatelliteReportRow("💧","Su",classAreas.water,parkM2,"#2563eb")+
-        dgSatelliteReportRow("🟫","Diğer",classAreas.other,parkM2,"#a16207")+
-        dgSatelliteReportRow("☁️","Bulut / maskeli",classAreas.masked,parkM2,"#6b7280")+
-        "<div style=\"font-size:.72rem;color:var(--mut);margin-top:10px\">"+
-          "Park geometrisi: <b>"+(parkM2/10000).toFixed(2)+" ha</b> · "+
-          "Zonal histogram pikselleri: <b>"+totalPixels.toLocaleString("tr-TR")+"</b> · "+
-          "Sınıflandırılmış alan: <b>"+(classifiedAreaM2/10000).toFixed(2)+" ha</b></div>"+
-        "<div style=\"font-size:.68rem;color:var(--mut);margin-top:7px\">"+
-          "<b>Yöntem:</b> ArcGIS <code>computeStatisticsHistograms</code> gerçek park polygonu üzerinde sınıf frekanslarını hesaplıyor. "+
-          "Hektar değerleri sınıf oranlarının bağımsız park geometrisi alanına dağıtılmasıyla elde ediliyor. "+
-          "İstemci tarafında binlerce 10 m Leaflet polygonu çizilmiyor.</div>"+
-        "<div style=\"font-size:.68rem;color:var(--mut);margin-top:7px\">"+
-          "<b>Harita:</b> ArcGIS’in resmi Cartographic Renderer çıktısı kullanılıyor; OSM su ve sert yüzey geometrileri bunun üstünde bağımsız QC katmanı olarak gösteriliyor.</div>"+
-        "<div style=\"font-size:.68rem;color:var(--mut);margin-top:7px\">"+
-          "<b>Ham sınıflar:</b> "+
-          Object.keys(DG_S2_CLASS_NAMES).map(code=>DG_S2_CLASS_NAMES[code]+"="+(classCounts[code]||0)).join(" · ")+
+        "<div style='font-size:.70rem;color:var(--mut);margin:7px 0 10px'>"+
+          "<b>Doğrudan sınıf sonucu</b> · Frekanslar gerçek park polygonu "+
+          "üzerinde ArcGIS zonal histogramından alınmıştır. "+
+          "Sınıf alanları bağımsız park geometrisi alanına oransal olarak "+
+          "uygulanmıştır."+
         "</div>"+
-        "<div style=\"font-size:.68rem;color:var(--mut);margin-top:7px\">"+
-          "<b>Veri notu:</b> Bu katman ham Sentinel-2 bant görüntüsü değil, Impact Observatory / Microsoft / Esri tarafından üretilen sınıflandırılmış 10 m LULC zaman serisidir. "+
-          "Class 7 built, bina footprint’i anlamına gelmez.</div>"+
+        codeRows+
+        "<div style='border-top:1px solid var(--line);margin-top:10px;padding-top:9px'>"+
+          dgSatelliteReportRow(
+            "🌿",
+            "Doğal / yeşil bitki örtüsü",
+            greenM2,
+            parkM2,
+            "#16a34a"
+          )+
+          dgSatelliteReportRow(
+            "🌱",
+            "Toplam bitkisel örtü",
+            allVegetationM2,
+            parkM2,
+            "#65a30d"
+          )+
+          dgSatelliteReportRow(
+            "🧱",
+            "Yapılı / built",
+            classAreas.hard,
+            parkM2,
+            DG_S2_CLASS_COLORS[7]
+          )+
+          dgSatelliteReportRow(
+            "💧",
+            "Su",
+            classAreas.water,
+            parkM2,
+            DG_S2_CLASS_COLORS[1]
+          )+
+          dgSatelliteReportRow(
+            "🟫",
+            "Diğer",
+            classAreas.other,
+            parkM2,
+            DG_S2_CLASS_COLORS[8]
+          )+
+          dgSatelliteReportRow(
+            "☁️",
+            "Bulut / maskeli",
+            classAreas.masked||0,
+            parkM2,
+            DG_S2_CLASS_COLORS[10]
+          )+
+        "</div>"+
+        "<div style='font-size:.70rem;color:var(--mut);margin-top:10px'>"+
+          "Park geometrisi: <b>"+
+          (parkM2/10000).toFixed(2)+
+          " ha</b> · Geçerli sınıf pikselleri: <b>"+
+          validPixelCount.toLocaleString("tr-TR")+
+          "</b> · Histogram tüm binleri: <b>"+
+          histogramAllBins.toLocaleString("tr-TR")+
+          "</b>"+
+        "</div>"+
+        "<div style='font-size:.68rem;color:var(--mut);margin-top:7px'>"+
+          "<b>Taksonomi:</b> Impact Observatory Maps for Good 9 sınıfı. "+
+          "Class 11 = Rangeland/Mera; 3 ve 6 eski sürümlerdeki Grass/Scrub "+
+          "kodlarıdır ve güncel üründe 11 altında birleştirilmiştir."+
+        "</div>"+
+        "<div style='font-size:.68rem;color:var(--mut);margin-top:7px'>"+
+          "<b>Harita:</b> Sınıf değerleri özel Colormap ile açıkça eşleniyor; "+
+          "built=7 kırmızı, water=1 mavi, trees=2 koyu yeşil, "+
+          "rangeland=11 açık yeşil. Böylece renderer görünümü ile sayısal "+
+          "sınıf sonucu karıştırılmıyor."+
+        "</div>"+
         (LANDCOVER.qualityWarning
-          ?"<div style=\"margin-top:9px;padding:8px 10px;border-radius:8px;background:rgba(245,158,11,.10);color:#92400e;font-size:.68rem\">⚠ QC: "+esc(LANDCOVER.qualityWarning)+"</div>"
+          ?"<div style='margin-top:9px;padding:8px 10px;border-radius:8px;"+
+             "background:rgba(245,158,11,.10);color:#92400e;font-size:.68rem'>"+
+             "⚠ QC: "+esc(LANDCOVER.qualityWarning)+
+             "</div>"
           :"");
     }
 
-    await dgRenderSatelliteRaster();
+    /*
+     * Visualization failure must NOT erase a successful numeric result.
+     */
+    try{
+      await dgRenderSatelliteRaster();
+    }catch(renderErr){
+      LANDCOVER.visualizationError=
+        renderErr?.message||String(renderErr);
 
-    console.log("DENDROGEO · Sentinel-2 2020 zonal:",LANDCOVER);
+      const warning=
+        "Sayısal zonal sonuç başarılı; harita katmanı üretilemedi: "+
+        LANDCOVER.visualizationError;
 
-    if(LANDCOVER.qualityWarning){
-      toast("✓ 2020 · 10 m uydu analizi tamamlandı; QC notu var.","warn","🛰️");
+      LANDCOVER.qualityWarning=
+        LANDCOVER.qualityWarning
+          ?LANDCOVER.qualityWarning+" "+warning
+          :warning;
+
+      if(rep){
+        rep.innerHTML+=
+          "<div style='margin-top:9px;padding:8px 10px;border-radius:8px;"+
+          "background:rgba(245,158,11,.10);color:#92400e;font-size:.68rem'>"+
+          "⚠ Görselleştirme: "+esc(LANDCOVER.visualizationError)+
+          "</div>";
+      }
+
+      console.warn(
+        "DENDROGEO · Sentinel-2 visualizasyon hatası:",
+        renderErr
+      );
+    }
+
+    console.log(
+      "DENDROGEO · Sentinel-2 2020 zonal v4:",
+      LANDCOVER
+    );
+
+    if(LANDCOVER.visualizationError){
+      toast(
+        "✓ 2020 zonal sonuç hazır; harita görüntüsü için QC uyarısı var.",
+        "warn",
+        "🛰️"
+      );
+    }else if(LANDCOVER.qualityWarning){
+      toast(
+        "✓ 2020 · 10 m zonal analiz tamamlandı; QC notu var.",
+        "warn",
+        "🛰️"
+      );
     }else{
-      toast("✓ 2020 · 10 m uydu zonal analizi tamamlandı","ok","🛰️");
+      toast(
+        "✓ 2020 · 10 m zonal arazi örtüsü analizi tamamlandı.",
+        "ok",
+        "🛰️"
+      );
     }
 
     return LANDCOVER;
   }catch(err){
-    console.error("DENDROGEO · Sentinel-2 analiz hatası:",err);
+    console.error(
+      "DENDROGEO · Sentinel-2 analiz hatası:",
+      err
+    );
 
     if(rep){
       rep.style.display="block";
       rep.innerHTML=
         "<b>❌ Sentinel-2 / 10 m analizi tamamlanamadı.</b>"+
-        "<div style=\"font-size:.74rem;color:var(--red);margin-top:7px\">"+esc(err?.message||String(err))+"</div>"+
-        "<div style=\"font-size:.68rem;color:var(--mut);margin-top:7px\">Kısmi sonuç rapora yazılmadı.</div>";
+        "<div style='font-size:.74rem;color:var(--red);margin-top:7px'>"+
+          esc(err?.message||String(err))+
+        "</div>"+
+        "<div style='font-size:.68rem;color:var(--mut);margin-top:7px'>"+
+          "Kısmi sonuç güvenilir kabul edilmedi ve rapora yazılmadı."+
+        "</div>";
     }
 
-    toast("Sentinel-2/LULC analizi hatası: "+(err?.message||String(err)),"err","🛰️");
+    toast(
+      "Sentinel-2/LULC analizi hatası: "+
+      (err?.message||String(err)),
+      "err",
+      "🛰️"
+    );
+
     return null;
   }finally{
     SATELLITE_RUNNING=false;
   }
 }
+
 // Inline HTML handlers require these public entry points.
 window.toggleParkMode=toggleParkMode;
 window.bindParkClick=bindParkClick;
