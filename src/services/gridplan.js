@@ -4569,6 +4569,13 @@ function dgParseSampleClass(sample){
 
 async function dgDirectSatelliteSamples(){
  const plan=dgBuild10mRasterCells(),cells=plan.cells,lockRasterIds=await dgGet2020RasterIds(),CHUNK=800,chunks=[];
+ for(let i=0;i<cells.length;i+=CHUNK)chunks.push(cells.slice(i,i+CHUNK));
+ console.log(
+   "DENDROGEO · 2020 raster katalog IDs:",
+   lockRasterIds,
+   "· kaynak hücre:",
+   cells.length
+ );
  const samples=[],errors=[],CONCURRENCY=3;
  const requestCells=chunk=>dgGetSamplesChunk(
     chunk.map(c=>[
@@ -4585,7 +4592,18 @@ async function dgDirectSatelliteSamples(){
  let noData=0,unknown=0,legacyRemapped=0,locationMissing=0,assignedAreaM2=0;const sampleRows=[];
  for(const sample of samples){const rawCode=dgParseSampleClass(sample),normalized=dgS2NormalizeCode(rawCode),ll=dgSampleLocationToLonLat(sample);if(!ll){locationMissing++;continue;}const xy=dgLonLatToWebMercator(ll.lat,ll.lon),cell=cellByKey.get(Math.round(xy.x*1000)+":"+Math.round(xy.y*1000));if(!cell)throw new Error("ArcGIS örnek konumu kaynak-grid hücresiyle eşleştirilemedi.");const cellArea=Number(cell.areaM2)||0;assignedAreaM2+=cellArea;if(rawCode===null){noData++;continue;}if(rawCode===3||rawCode===6)legacyRemapped++;if(normalized===null){unknown++;continue;}counts[normalized]++;classAreasM2[normalized]+=cellArea;sampleRows.push({id:sampleRows.length+1,lat:+ll.lat.toFixed(7),lon:+ll.lon.toFixed(7),rawClassCode:rawCode,classCode:normalized,className:DG_S2_CLASS_NAMES[normalized],group:dgS2Group(normalized),areaM2:cellArea});}
  const classified=Object.values(classAreasM2).reduce((sum,n)=>sum+(Number(n)||0),0);if(!classified)throw new Error("ArcGIS getSamples döndü ancak hiçbir geçerli raster hücresi sınıflandırılamadı.");
- return{points:cells.map(c=>[c.x,c.y]),cells,samples:sampleRows,counts,classAreasM2,requested:cells.length,returned:samples.length,missing:Math.max(0,cells.length-samples.length),noData,unknown,legacyRemapped,locationMissing,classified,assignedAreaM2,intersectionAreaM2:plan.intersectionAreaM2,errors};
+ console.log(
+   "DENDROGEO · 2020 LULC ham sınıflar:",
+   {...counts},
+   "· alan m²:",
+   Object.fromEntries(
+     Object.entries(classAreasM2).map(([code,area])=>[
+       code,
+       +Number(area||0).toFixed(3)
+     ])
+   )
+ );
+ return{points:cells.map(c=>[c.x,c.y]),cells,samples:sampleRows,counts,classAreasM2,requested:cells.length,returned:samples.length,missing:Math.max(0,cells.length-samples.length),noData,unknown,legacyRemapped,locationMissing,classified,classifiedAreaM2:classifiedAreaM2,assignedAreaM2,intersectionAreaM2:plan.intersectionAreaM2,errors,lockRasterIds};
 }
 let DG_S2_LEGEND=null;
 
