@@ -1,5 +1,18 @@
 "use strict";
-/* DendroGeo v2 · gridplan.js v139 — Restore park mode public exports */
+/* DendroGeo · gridplan.js — örneklem ızgarası planlayıcı (UI köprüsü)
+ *
+ * SÜRÜM NUMARALARI HAKKINDA: bu dosyanın sürümü index.html'deki ?v=NNN sorgu
+ * dizesidir. Eskiden burada ayrıca bir sürüm ibaresi duruyordu ve üç ayrı
+ * sürüm numarası (dosya içi yorum, ?v=, sw.js CACHE_VERSION) elle senkron
+ * tutulmak zorundaydı — dosya içi ibare kaldırıldı ki tek kaynak ?v= olsun.
+ *
+ * sw.js r32'den beri uygulama JS/CSS'i network-first ile yükleniyor ve
+ * controllerchange'te tek seferlik reload yapıyor; yani ?v= artırımı artık
+ * ZORUNLU DEĞİL, yalnızca önbelleği deterministik kırmak için kullanışlı.
+ *
+ * Arazi örtüsü / raster analizi bu dosyada DEĞİL, src/services/landcover.js
+ * içindedir (native 10 m COG motoru). Bu modül ızgara üretimi, park
+ * geometrisi, waypoint planlaması ve raporlama katmanıdır. */
   
 let PARK_POLY=null;
 let PARK_HOLES=[]; 
