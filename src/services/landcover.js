@@ -170,6 +170,10 @@ function dgLcRingBBoxXY(ring){
 }
 
 function dgLcBboxOverlap(a,b){
+  /* Savunmacı: a, dgLcProjectGeometry'nin atadığı _bbox'tur. Bugünkü çağrı
+   * yolunda daima doludur, ama halka başka bir yoldan gelirse a.maxX
+   * TypeError fırlatıyordu. Üstüşme yok saymak, analiz çökmesinden iyidir. */
+  if(!a||!b)return false;
   return !(a.maxX<=b.minX||a.minX>=b.maxX||a.maxY<=b.minY||a.minY>=b.maxY);
 }
 
@@ -463,6 +467,12 @@ function dgLcProcessTile(item,href,geometryWgs){
                 x:(x0+x1)/2,
                 y:(yBottom+yTop)/2
               },
+              /* Gerçek piksel ölçeği GeoTIFF metadata'sından. Alan hesabı
+               * zaten meta.dx/meta.dy ile yapılıyor; dışa aktarılan hücre
+               * poligonu da aynı değeri kullanmalı ki alan ile geometri
+               * birbirini tutsun. */
+              dx:meta.dx,
+              dy:meta.dy,
               epsg
             });
           }
@@ -651,11 +661,16 @@ function dgLcClassCsv(result){
 function dgLcCellsGeoJson(result){
   const features=result.cells.map((c,i)=>{
     const s=dgLcUtmInverse(c.center.x,c.center.y,c.epsg);
-    const half=DG_LC_PIXEL_M/2;
-    const p1=dgLcUtmInverse(c.center.x-half,c.center.y-half,c.epsg);
-    const p2=dgLcUtmInverse(c.center.x+half,c.center.y-half,c.epsg);
-    const p3=dgLcUtmInverse(c.center.x+half,c.center.y+half,c.epsg);
-    const p4=dgLcUtmInverse(c.center.x-half,c.center.y+half,c.epsg);
+    // Eski hali sabit DG_LC_PIXEL_M/2 kullanıyordu. Alanlar meta.dx/meta.dy
+    // ile hesaplandığı için, raster pikseli 10 m'den farklı olsaydı dışa
+    // aktarılan poligon ile raporlanan alan birbirini tutmazdı. Artık hücrenin
+    // kendi gerçek ölçeği kullanılıyor (DG_LC_PIXEL_M yalnızca yedek).
+    const halfX=(Number(c.dx)>0?Number(c.dx):DG_LC_PIXEL_M)/2;
+    const halfY=(Number(c.dy)>0?Number(c.dy):DG_LC_PIXEL_M)/2;
+    const p1=dgLcUtmInverse(c.center.x-halfX,c.center.y-halfY,c.epsg);
+    const p2=dgLcUtmInverse(c.center.x+halfX,c.center.y-halfY,c.epsg);
+    const p3=dgLcUtmInverse(c.center.x+halfX,c.center.y+halfY,c.epsg);
+    const p4=dgLcUtmInverse(c.center.x-halfX,c.center.y+halfY,c.epsg);
     return{
       type:"Feature",
       properties:{
@@ -670,6 +685,8 @@ function dgLcCellsGeoJson(result){
         center_lon:+s.lon.toFixed(7),
         year:DG_LC_YEAR,
         resolution_m:DG_LC_PIXEL_M,
+        pixel_dx_m:+Number(c.dx||DG_LC_PIXEL_M).toFixed(4),
+        pixel_dy_m:+Number(c.dy||DG_LC_PIXEL_M).toFixed(4),
         source:"Impact Observatory 10m Annual Land Use Land Cover V2"
       },
       geometry:{
