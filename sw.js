@@ -1,4 +1,4 @@
-// ============================================================
+// ============================================================ 
 // 🌲 DendroGeo Service Worker v2.10 (Cache-Only, Production-Ready)
 // Harita tile cache, fotoğraf cache, LRU temizliği
 // NOT: Senkronizasyon artık Ana Thread (Supabase JS SDK) tarafından yapılıyor
