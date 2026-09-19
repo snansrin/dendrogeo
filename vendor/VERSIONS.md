@@ -32,6 +32,30 @@ Bu dosyalar **depoya alınmış** üçüncü taraf kütüphanelerdir. Daha önce
 | `geotiff-2.1.3.js` | 2.1.3 | `https://cdn.jsdelivr.net/npm/geotiff@2.1.3/dist-browser/geotiff.js` |
 | `chart.js-4.5.1.js` | **4.5.1** | `https://cdn.jsdelivr.net/npm/chart.js@4` |
 
+### `images/` alt dizini
+
+`leaflet-1.9.4.css` göreli yol ile üç görsele başvuruyor:
+
+```css
+url(images/layers.png)   url(images/layers-2x.png)   url(images/marker-icon.png)
+```
+
+CSS artık `/vendor/` altında olduğu için bu yollar `/vendor/images/` olarak
+çözümleniyor. Uygulama **hiçbirini kullanmıyor** — tüm işaretçiler özel HTML ile
+`L.divIcon` üzerinden çiziliyor (`map.js:21, 31, 116, 128`), katman anahtarı da
+`L.control.layers` kullanmıyor. Yani bu dosyalar olmadan da site sorunsuz
+çalışırdı; yine de eklendiler (toplam ~6 KB) ki CSS'in başvurduğu yollar 404
+döndürmesin ve ileride varsayılan ikona düşen bir kod yazılırsa sessizce
+kırılmasın.
+
+| Dosya | Boyut | Kaynak |
+|---|---|---|
+| `images/layers.png` | 0,7 KB | `unpkg.com/leaflet@1.9.4/dist/images/layers.png` |
+| `images/layers-2x.png` | 1,2 KB | aynı |
+| `images/marker-icon.png` | 1,4 KB | aynı |
+| `images/marker-icon-2x.png` | 2,4 KB | aynı (CSS başvurmasa da `L.Icon.Default` arıyor) |
+| `images/marker-shadow.png` | 0,6 KB | aynı |
+
 Toplam ~0,9 MB. Dosyalar **bayt bayt upstream ile aynı** — doğrulamak için:
 
 ```bash
