@@ -1,5 +1,5 @@
 "use strict";
-/* DendroGeo v2 · gridplan.js v133 — Fix blocked header comment + Park-mode handler */
+/* DendroGeo v2 · gridplan.js v134 — Land-cover source reset + OSM overlay decoupling */
   
 let PARK_POLY=null;
 let PARK_HOLES=[]; 
@@ -27,8 +27,7 @@ const SELECTED_CELLS=new Set();
 let LAST_WP_ROWS=[];
 let PARK_REF_HA=null;
 let PARK_SELECTED_AREA_M2=null;
-let LANDCOVER=null;
-let LANDCOVER_SAMPLES=[];\nlet SATELLITE_RUNNING=false;
+let LANDCOVER=null;\nlet SATELLITE_RUNNING=false;
 let DG_PARK_PIXEL_GEOMETRY=null;
 
 /* Reference-area helpers are intentionally local to the active gridplan module.
@@ -758,58 +757,6 @@ function osmSampleGroup(lat,lon){
 /* =========================================================
    GRID CELL VALIDATION
 ========================================================= */
-
-function satelliteGroupForCell(s0,s1,w0,w1){
-  if(!Array.isArray(LANDCOVER_SAMPLES)||!LANDCOVER_SAMPLES.length){
-    return null;
-  }
-
-  const counts={
-    green:0,
-    hard:0,
-    water:0,
-    other:0
-  };
-
-  let total=0;
-
-  for(const p of LANDCOVER_SAMPLES){
-    if(
-      p.lat>=s0&&
-      p.lat<=s1&&
-      p.lon>=w0&&
-      p.lon<=w1
-    ){
-      const g=p.group||"other";
-      if(Object.prototype.hasOwnProperty.call(counts,g)){
-        counts[g]++;
-      }
-      total++;
-    }
-  }
-
-  if(!total)return null;
-
-  let dominant="other";
-  let best=-1;
-
-  for(const g of Object.keys(counts)){
-    if(counts[g]>best){
-      best=counts[g];
-      dominant=g;
-    }
-  }
-
-  return{
-    dominant,
-    counts,
-    total,
-    greenRatio:counts.green/total,
-    hardRatio:counts.hard/total,
-    waterRatio:counts.water/total,
-    otherRatio:counts.other/total
-  };
-}
 
 /* =========================================================
    GRID CELL VALIDATION
@@ -1574,15 +1521,14 @@ function refreshWaterLayer(){
 
   WATER_LAYER=L.layerGroup().addTo(map);
 
-  const satelliteMode=!!SATELLITE_LAYER;
 
   WATER_RINGS.forEach(r=>{
     if(!r||r.length<3)return;
 
     L.polygon(r,{
       color:"#2563eb",
-      weight:satelliteMode?2:1,
-      dashArray:satelliteMode?"6 4":null,
+      weight:1,
+      dashArray:null,
       fillColor:"#60a5fa",
       fillOpacity:satelliteMode?0:.42,
       interactive:false
@@ -1594,9 +1540,9 @@ function refreshWaterLayer(){
 
     L.polyline(l,{
       color:"#2563eb",
-      weight:satelliteMode?3:2,
-      opacity:satelliteMode?.9:.55,
-      dashArray:satelliteMode?"6 4":null,
+      weight:2,
+      opacity:.55,
+      dashArray:null,
       interactive:false
     }).addTo(WATER_LAYER);
   });
@@ -1608,7 +1554,6 @@ function refreshImpLayer(){
   }
 
   IMP_LAYER=L.layerGroup().addTo(map);
-  const satelliteMode=!!SATELLITE_LAYER;
 
   IMP_RINGS.forEach(r=>{
     if(!r || r.length<3){
@@ -1637,8 +1582,8 @@ function refreshImpLayer(){
       r,
       {
         color:"#dc2626",
-        weight:satelliteMode?2:1,
-        dashArray:satelliteMode?"6 4":null,
+        weight:1,
+        dashArray:null,
         fillColor:"#ef4444",
         fillOpacity:satelliteMode?0:.18,
         interactive:false
