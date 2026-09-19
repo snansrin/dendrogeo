@@ -28,7 +28,7 @@ Raster values 3 (old Grass) and 6 (old Scrub) are legacy values from the older r
 
 ## Numerical method
 
-The primary numerical result uses ArcGIS ImageServer `getSamples` with a deterministic **10 m multipoint lattice** generated inside the selected park polygon.
+The primary numerical result uses ArcGIS ImageServer `getSamples` with a deterministic **10 m multipoint lattice** generated inside the selected park polygon. The lattice is aligned to the published service grid origin and pixel size (EPSG:3857), rather than an arbitrary local 10 m grid.
 
 For each lattice point:
 
@@ -39,13 +39,20 @@ For each lattice point:
 
 ArcGIS documents that multipoint geometries use the supplied points directly, so the returned class values form a reproducible sampling frame. See https://developers.arcgis.com/rest/services-reference/enterprise/get-samples/.
 
-For each class:
+The four user-facing classes are:
 
-`class_area = park_area × valid_class_sample_count / requested_sample_count`
+- **Yeşil alan** = Trees (2) + Flooded Vegetation (4) + Crops (5) + Rangeland (11)
+- **Su** = Water (1)
+- **Sert zemin** = Built Area (7)
+- **Çıplak zemin** = Bare Ground (8)
 
-The measured park area remains the geometric reference area. Missing/NoData/unknown samples are retained as an explicitly unclassified remainder and are **not** redistributed among classes.
+The raw 10 m sample frequencies are converted to class shares and applied to the measured park polygon area:
 
-This is a reproducible 10 m nearest-neighbor sample-derived estimate. It is not presented as an exact census of every source raster cell or as sub-pixel boundary accuracy.
+`class_area = park_area × class_sample_count / valid_four_class_sample_count`
+
+This is intentional: a pixel whose center is inside an irregular park boundary must not contribute a full 100 m² when part of that pixel lies outside the park. The final four class areas therefore conserve the park polygon area exactly (apart from floating-point rounding, which is explicitly closed in the largest class). NoData, unknown codes, snow/ice or clouds are not silently redistributed; if they occur, the four-class report is rejected rather than presenting a false closed total.
+
+This is a reproducible 10 m nearest-neighbor, sample-frequency-derived park-area estimate. It is not presented as a sub-pixel boundary census; the area-conserving normalization prevents boundary pixels from inflating the park total.
 
 ## Independent QC
 
@@ -55,10 +62,7 @@ The histogram is retained as an independent distribution QC. DendroGeo compares 
 
 ## Outputs
 
-The UI can export:
-
-- `dendrogeo_lulc_2020_classes.csv`: class-level raster counts, hectares and percentages plus provenance metadata.
-- `dendrogeo_lulc_2020_qc_samples.geojson`: geolocated `getSamples` QC observations with raw and normalized class codes.
+The UI exports one compact four-class CSV containing sample counts, hectares, percentages, year and resolution. Detailed raster codes remain internal to the calculation engine.
 
 ## Interpretation
 
