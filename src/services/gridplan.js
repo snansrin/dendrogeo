@@ -4208,10 +4208,45 @@ async function dgSatelliteRun(){
       STAC+"/collections/"+encodeURIComponent(COLLECTION)+
       "/items/"+encodeURIComponent(item.id);
 
+    /*
+     * The Microsoft Data API deployment used by Planetary Computer does
+     * not expose /stac/statistics reliably (the live service returns 404).
+     * Instead, use the documented SAS signing API to obtain a readable COG
+     * URL, then use the live /cog/statistics POST endpoint. This avoids the
+     * broken STAC statistics route while keeping polygon-aware raster
+     * statistics and the exact categorical pixels.
+     */
+    const dataAsset=item.assets?.data;
+    if(!dataAsset?.href){
+      throw new Error("LULC STAC item'ında 'data' raster asset'i bulunamadı.");
+    }
+
+    const signUrl=
+      "https://planetarycomputer.microsoft.com/api/sas/v1/sign?href="+
+      encodeURIComponent(dataAsset.href);
+
+    const signRes=await fetch(signUrl,{
+      method:"GET",
+      headers:{Accept:"application/json"}
+    });
+
+    if(!signRes.ok){
+      throw new Error(
+        "Planetary Computer SAS sign HTTP "+signRes.status
+      );
+    }
+
+    const signed=await signRes.json();
+    const cogUrl=signed.href||signed.url;
+
+    if(!cogUrl){
+      throw new Error("Planetary Computer SAS sign yanıtında signed href yok.");
+    }
+
     const params=new URLSearchParams();
 
-    params.set("url",itemUrl);
-    params.append("assets","data");
+    params.set("url",cogUrl);
+    params.append("bidx","1");
     params.set("categorical","true");
 
     for(const code of CLASS_CODES){
@@ -4223,7 +4258,7 @@ async function dgSatelliteRun(){
     params.set("cover_scale","100");
 
     const statsRes=await fetch(
-      TITILER+"/stac/statistics?"+params.toString(),
+      TITILER+"/cog/statistics?"+params.toString(),
       {
         method:"POST",
         headers:{
@@ -4237,7 +4272,7 @@ async function dgSatelliteRun(){
     if(!statsRes.ok){
       const body=await statsRes.text().catch(()=> "");
       throw new Error(
-        "Planetary Computer TiTiler statistics HTTP "+
+        "Planetary Computer TiTiler COG statistics HTTP "+
         statsRes.status+
         (body?" · "+body.slice(0,240):"")
       );
