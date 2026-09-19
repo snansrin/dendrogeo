@@ -1,5 +1,5 @@
 "use strict";
-/* DendroGeo v2 · gridplan.js v37 — FINAL (su+sert iyileştirmeleri) */          
+/* DendroGeo v2 · gridplan.js v100 — FINAL (su+sert iyileştirmeleri) */          
   
 let PARK_POLY=null;
 let PARK_HOLES=[]; 
@@ -706,6 +706,62 @@ function osmSampleGroup(lat,lon){
   if(pointNearAnyLine(lat,lon,GRID_BLOCK_LINES,1))return "hard";
 
   return "open";
+}
+
+/* =========================================================
+   GRID CELL VALIDATION
+========================================================= */
+
+function satelliteGroupForCell(s0,s1,w0,w1){
+  if(!Array.isArray(LANDCOVER_SAMPLES)||!LANDCOVER_SAMPLES.length){
+    return null;
+  }
+
+  const counts={
+    green:0,
+    hard:0,
+    water:0,
+    other:0
+  };
+
+  let total=0;
+
+  for(const p of LANDCOVER_SAMPLES){
+    if(
+      p.lat>=s0&&
+      p.lat<=s1&&
+      p.lon>=w0&&
+      p.lon<=w1
+    ){
+      const g=p.group||"other";
+      if(Object.prototype.hasOwnProperty.call(counts,g)){
+        counts[g]++;
+      }
+      total++;
+    }
+  }
+
+  if(!total)return null;
+
+  let dominant="other";
+  let best=-1;
+
+  for(const g of Object.keys(counts)){
+    if(counts[g]>best){
+      best=counts[g];
+      dominant=g;
+    }
+  }
+
+  return{
+    dominant,
+    counts,
+    total,
+    greenRatio:counts.green/total,
+    hardRatio:counts.hard/total,
+    waterRatio:counts.water/total,
+    otherRatio:counts.other/total
+  };
 }
 
 /* =========================================================
@@ -4342,10 +4398,10 @@ async function dgSatelliteRun(){
   if(rep){
     rep.innerHTML=
       "<b>🛰️ Arazi Örtüsü · Sentinel-2 / 10 m · 2020</b>"+
-      dgSatelliteReportRow("🌿","Yeşil / vejetasyon",grouped.green*100,validAreaM2)+
-      dgSatelliteReportRow("🧱","Yapılı / built",grouped.hard*100,validAreaM2)+
-      dgSatelliteReportRow("💧","Su",grouped.water*100,validAreaM2)+
-      dgSatelliteReportRow("🟫","Diğer",grouped.other*100,validAreaM2)+
+      dgSatelliteReportRow("🌿","Yeşil / vejetasyon",grouped.green*100,nominalAreaM2)+
+      dgSatelliteReportRow("🧱","Yapılı / built",grouped.hard*100,nominalAreaM2)+
+      dgSatelliteReportRow("💧","Su",grouped.water*100,nominalAreaM2)+
+      dgSatelliteReportRow("🟫","Diğer",grouped.other*100,nominalAreaM2)+
 
       "<div style='font-size:.72rem;color:var(--mut);margin-top:10px'>"+
       "Park geometrisi: <b>"+
