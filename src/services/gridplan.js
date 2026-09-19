@@ -1530,7 +1530,7 @@ function refreshWaterLayer(){
       weight:1,
       dashArray:null,
       fillColor:"#60a5fa",
-      fillOpacity:satelliteMode?0:.42,
+      fillOpacity:.42,
       interactive:false
     }).addTo(WATER_LAYER);
   });
@@ -1585,7 +1585,7 @@ function refreshImpLayer(){
         weight:1,
         dashArray:null,
         fillColor:"#ef4444",
-        fillOpacity:satelliteMode?0:.18,
+        fillOpacity:.18,
         interactive:false
       }
     ).addTo(IMP_LAYER);
