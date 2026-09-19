@@ -710,115 +710,6 @@ function osmSampleGroup(lat,lon){
    GRID CELL VALIDATION
 ========================================================= */
 
-/* =========================================================
-   SATELLITE CELL VALIDATION
-   Sentinel-2 samples are retained at their real coordinates so the
-   grid can use the classified pixels instead of only the aggregate
-   hectares report.
-========================================================= */
-function satelliteGroupForCell(s0,s1,w0,w1){
-  if(!Array.isArray(LANDCOVER_SAMPLES)||!LANDCOVER_SAMPLES.length){
-    return null;
-  }
-
-  const counts={green:0,hard:0,water:0,other:0,unknown:0};
-  let total=0;
-
-  for(const p of LANDCOVER_SAMPLES){
-    if(p.lat>=s0 && p.lat<=s1 && p.lon>=w0 && p.lon<=w1){
-      const g=p.group||"unknown";
-      counts[g]=(counts[g]||0)+1;
-      total++;
-    }
-  }
-
-  if(!total)return null;
-
-  let dominant="unknown";
-  let dominantN=-1;
-  for(const k of Object.keys(counts)){
-    if(counts[k]>dominantN){
-      dominant=k;
-      dominantN=counts[k];
-    }
-  }
-
-  return {
-    dominant,
-    counts,
-    total,
-    greenRatio:counts.green/total,
-    hardRatio:counts.hard/total,
-    waterRatio:counts.water/total
-  };
-}
-
-function pointNearAnyLine(lat,lon,lines,maxDistanceM){
-  for(const line of (lines||[])){
-    if(!Array.isArray(line)||line.length<2)continue;
-    for(let i=0;i<line.length-1;i++){
-      if(pointToSegmentDistanceM(lat,lon,line[i],line[i+1])<=maxDistanceM){
-        return true;
-      }
-    }
-  }
-  return false;
-}
-
-function osmSampleGroup(lat,lon){
-  for(const r of (WATER_RINGS||[])){
-    if(pointInPolygon(lat,lon,r))return "water";
-  }
-  if(pointNearAnyLine(lat,lon,WATER_LINES,1))return "water";
-
-  for(const r of (IMP_RINGS||[])){
-    if(pointInPolygon(lat,lon,r))return "hard";
-  }
-  if(pointNearAnyLine(lat,lon,IMP_LINES.map(x=>x.pts||[]),1))return "hard";
-  if(pointNearAnyLine(lat,lon,GRID_BLOCK_LINES,1))return "hard";
-
-  return "open";
-}
-
-function renderSatelliteSamples(){
-  if(!map)return;
-
-  if(SATELLITE_LAYER)map.removeLayer(SATELLITE_LAYER);
-  SATELLITE_LAYER=L.layerGroup();
-
-  for(const p of (LANDCOVER_SAMPLES||[])){
-    const osm=p.osmGroup||"open";
-    const sat=p.group||"unknown";
-
-    let fill="#16a34a";
-    if(osm==="water" || sat==="water") fill="#2563eb";
-    else if(osm==="hard") fill="#dc2626";
-    else if(sat==="hard") fill="#f97316";
-    else if(sat==="other") fill="#a16207";
-    else if(sat==="unknown") fill="#6b7280";
-
-    L.circleMarker([p.lat,p.lon],{
-      radius:2.8,
-      color:fill,
-      weight:0,
-      fillColor:fill,
-      fillOpacity:.55,
-      interactive:false
-    }).addTo(SATELLITE_LAYER);
-  }
-
-  SATELLITE_LAYER.addTo(map);
-
-  /*
-   * Do not add the ESA WorldCover WMS here.
-   * ESA explicitly documents its WMS as a cartographic visualization
-   * mechanism, not an analysis source. Keeping it out of the numeric
-   * workflow also removes the unnecessary Terrascope CSP dependency.
-   * A future numeric WorldCover implementation should read the official
-   * COG data, not RGB WMS pixels.
-   */
-}
-
 function isCellValid(
   s0,
   s1,
@@ -1599,6 +1490,92 @@ function refreshWaterLayer(){
     }).addTo(WATER_LAYER);
   });
 }
+
+function refreshImpLayer(){
+  if(IMP_LAYER && map){
+    map.removeLayer(IMP_LAYER);
+  }
+
+  IMP_LAYER=L.layerGroup().addTo(map);
+
+  IMP_RINGS.forEach(r=>{
+    if(!r || r.length<3){
+      return;
+    }
+
+    let inside=0;
+
+    for(const p of r){
+      if(
+        pointInPark(
+          p[0],
+          p[1],
+          PARK_POLY
+        )
+      ){
+        inside++;
+      }
+    }
+
+    if(!inside){
+      return;
+    }
+
+    L.polygon(
+      r,
+      {
+        color:"#dc2626",
+        weight:1,
+        fillColor:"#ef4444",
+        fillOpacity:.18,
+        interactive:false
+      }
+    ).addTo(IMP_LAYER);
+  });
+
+  IMP_LINES.forEach(l=>{
+    if(
+      !l ||
+      !l.pts ||
+      l.pts.length<2
+    ){
+      return;
+    }
+
+    let inside=false;
+
+    for(const p of l.pts){
+      if(
+        pointInPark(
+          p[0],
+          p[1],
+          PARK_POLY
+        )
+      ){
+        inside=true;
+        break;
+      }
+    }
+
+    if(!inside){
+      return;
+    }
+
+    L.polyline(
+      l.pts,
+      {
+        color:"#ef4444",
+        weight:3,
+        opacity:.45,
+        interactive:false
+      }
+    ).addTo(IMP_LAYER);
+  });
+}
+
+
+
+
 
 /* =========================================================
    WATER
@@ -3605,18 +3582,18 @@ function dgS2Group(code){
   return "unknown";
 }
 
-function dgArcgisRing(ring,refLat,clockwise){
+function dgArcgisRing(ring,clockwise){
   if(!ring||ring.length<3)return null;
 
-  const out=ring.map(p=>{
-    const q=projectPoint(
-      Number(p[0]),
-      Number(p[1]),
-      refLat
-    );
-
-    return[q.x,q.y];
-  });
+  /*
+   * PARK_POLY stores [lat,lon]. ArcGIS polygon rings store [x,y] = [lon,lat].
+   * Keep the geometry in geographic WGS84 instead of pretending local
+   * metre coordinates are Web Mercator.
+   */
+  const out=ring.map(p=>[
+    Number(p[1]),
+    Number(p[0])
+  ]);
 
   let signed=0;
 
@@ -3629,7 +3606,9 @@ function dgArcgisRing(ring,refLat,clockwise){
       b[0]*a[1];
   }
 
-  if((signed<0)!==clockwise){
+  const isClockwise=signed<0;
+
+  if(isClockwise!==clockwise){
     out.reverse();
   }
 
@@ -3639,30 +3618,27 @@ function dgArcgisRing(ring,refLat,clockwise){
 }
 
 function dgBuildArcgisParkGeometry(){
-  const bbox=dgParkBBox();
-  const refLat=(bbox.minLat+bbox.maxLat)/2;
-
   const rings=[];
 
   for(const ring of (PARK_POLY||[])){
-    const out=dgArcgisRing(ring,refLat,true);
+    const out=dgArcgisRing(ring,true);
     if(out)rings.push(out);
   }
 
   for(const ring of (PARK_HOLES||[])){
-    const out=dgArcgisRing(ring,refLat,false);
+    const out=dgArcgisRing(ring,false);
     if(out)rings.push(out);
   }
 
   if(!rings.length){
-    throw new Error("Park polygonu ArcGIS geometry'ye dönüştürülemedi.");
+    throw new Error("Park sınırı ArcGIS polygonuna dönüştürülemedi.");
   }
 
   return{
     rings,
     spatialReference:{
-      wkid:102100,
-      latestWkid:3857
+      wkid:4326,
+      latestWkid:4326
     }
   };
 }
