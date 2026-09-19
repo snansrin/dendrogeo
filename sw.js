@@ -4,7 +4,7 @@
 // NOT: Senkronizasyon artık Ana Thread (Supabase JS SDK) tarafından yapılıyor
 // ============================================================
 
-const CACHE_VERSION = 'dendrogeo-sw-v2-r16';
+const CACHE_VERSION = 'dendrogeo-sw-v2-r17';
 const STATIC_CACHE = `static-${CACHE_VERSION}`;
 const TILE_CACHE = `tiles-${CACHE_VERSION}`;
 const API_CACHE = `api-${CACHE_VERSION}`;
@@ -69,6 +69,15 @@ self.addEventListener('fetch', event => {
 
     if (url.hostname.includes('tile.openstreetmap.org')) {
         event.respondWith(cacheFirstWithLimit(request, TILE_CACHE, MAX_TILES));
+        return;
+    }
+
+    // Application JS/CSS must not execute a stale deployment while online.
+    if (
+        url.origin === self.location.origin &&
+        (request.destination === 'script' || request.destination === 'style')
+    ) {
+        event.respondWith(networkFirstWithLimit(request, STATIC_CACHE, MAX_API_CACHE));
         return;
     }
 
@@ -154,8 +163,17 @@ async function networkFirstWithLimit(request, cacheName, limit) {
         }
         return response;
     } catch (err) {
-        const cached = await caches.match(request);
+        const cache = await caches.open(cacheName);
+        const cached = await cache.match(request);
         if (cached) return cached;
+
+        // Offline + versioned asset: fall back to the unversioned precache.
+        const url = new URL(request.url);
+        const fallback = await cache.match(
+            new Request(url.origin + url.pathname)
+        );
+        if (fallback) return fallback;
+
         return new Response(JSON.stringify({ error: 'Offline' }), {
             status: 503, headers: { 'Content-Type': 'application/json' }
         });
@@ -231,4 +249,4 @@ self.addEventListener('notificationclick', event => {
     );
 });
 
-console.log('[SW] 🌲 DendroGeo Service Worker v2.10 (Cache-Only) Yüklendi.');
+console.log('[SW] 🌲 DendroGeo Service Worker v2.10 r17 — network-first app assets');
