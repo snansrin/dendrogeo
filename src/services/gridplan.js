@@ -4884,21 +4884,21 @@ function dgRenderSatelliteReport(
       dgSatelliteReportRow(
         "🌿",
         "Doğal / yeşil bitki örtüsü",
-        landcover.naturalVegetationHa.toFixed(2),
+        Number(landcover.naturalVegetationHa||0).toFixed(2),
         " ha",
         DG_S2_CLASS_COLORS[11]
       )+
       dgSatelliteReportRow(
         "🌱",
         "Toplam bitkisel örtü · tarım dahil",
-        landcover.totalVegetationHa.toFixed(2),
+        Number(landcover.totalVegetationHa||0).toFixed(2),
         " ha",
         DG_S2_CLASS_COLORS[5]
       )+
       dgSatelliteReportRow(
         "☁️",
         "Bulut / maskeli",
-        landcover.maskedHa.toFixed(2),
+        Number(landcover.maskedHa||0).toFixed(2),
         " ha",
         DG_S2_CLASS_COLORS[10]
       )+
@@ -5193,7 +5193,7 @@ async function dgSatelliteRun(){
       for(const code of DG_S2_OFFICIAL_CODES){
         const hp=
           Number(classCounts[code]||0)/
-          directClassTotals;
+          histogramPixelCount;
 
         const dp=
           Number(direct.counts[code]||0)/
@@ -5244,7 +5244,19 @@ async function dgSatelliteRun(){
         naturalVegetationM2/10000
       ).toFixed(2),
 
-      crops:+(
+      naturalVegetationHa:+(
+         naturalVegetationM2/10000
+       ).toFixed(2),
+
+       totalVegetationHa:+(
+         totalVegetationM2/10000
+       ).toFixed(2),
+
+       maskedHa:+(
+         maskedM2/10000
+       ).toFixed(2),
+
+       crops:+(
         cropsM2/10000
       ).toFixed(2),
 
