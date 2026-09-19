@@ -5688,6 +5688,7 @@ async function dgSatelliteRun(){
       histogramClassCounts:null,
       histogramAllBins:0,
       histogramConflictCount:null,
+      histogramQC:"disabled-primary-raw-raster",
 
       /*
        * Backward-compatible names used by other UI/export code.
@@ -5701,18 +5702,6 @@ async function dgSatelliteRun(){
         legacyScrub:0
       }
     };
-
-    if(!serverHistogram.available){
-      LANDCOVER.qualityWarning+=
-        "ArcGIS histogram QC kullanılamadı; ana getSamples zonal sonucu bağımsız hücre sorgularından üretildi. "+
-        serverHistogram.reason;
-    }
-
-    if(histogramConflicts.length){
-      LANDCOVER.qualityWarning+=
-        (LANDCOVER.qualityWarning?" ":"")+
-        "Histogram QC ile getSamples arasında sınıf var/yok farkı görüldü; ana sonuç korunuyor, fark QC olarak kaydedildi.";
-    }
 
     if(unclassifiedCount>0){
       LANDCOVER.qualityWarning+=
