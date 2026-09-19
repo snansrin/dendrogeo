@@ -1,86 +1,104 @@
-# DendroGeo — Sentinel-2 / 10 m LULC Methodology
+# DendroGeo — 10 m Arazi Örtüsü / 2020 Yöntemi
 
-## Data source
+## 1. Amaç
 
-The application uses the ArcGIS ImageServer endpoint:
+DendroGeo park analizinde sınıflandırma sonucu seçilen park polygonu ile 10 m çözünürlüklü kategorik arazi örtüsü rasterının hücre-kesişimlerinden hesaplanır.
 
-`Sentinel2_10m_LandCover/ImageServer`
+Sistem örnek nokta oranını alana çevirmez, her hücreyi körlemesine 100 m² kabul etmez ve eksik alanı başka sınıflara zorla dağıtmaz.
 
-The current service is a global Sentinel-2 10 m land-cover time series produced by Impact Observatory, Microsoft and Esri. The service exposes a single U8 categorical band, supports the Year field, and currently reports ~10 m pixel size and annual coverage through 2025.
+## 2. Veri kaynağı
 
-Analysis is explicitly locked to **Year = 2020**.
+Kaynak ürün: Impact Observatory · 10m Annual Land Use Land Cover (9-class) V2.
 
-## Current 9-class taxonomy
+Ürün küresel yıllık 10 m arazi örtüsü haritalarını Cloud Optimized GeoTIFF (COG) biçiminde ve UTM kaynak karolarına hizalı olarak yayınlar. 2020 analizinde yalnızca gerekli veri karolarının data raster varlığı okunur. Lisans CC BY 4.0'dır.
 
-| Raster code | Class |
+Resmî kaynaklar:
+
+- https://planetarycomputer.microsoft.com/dataset/io-lulc-annual-v02
+- https://planetarycomputer.microsoft.com/api/stac/v1/collections/io-lulc-annual-v02
+- https://registry.opendata.aws/io-lulc/
+- https://www.impactobservatory.com/legal/lulc-methodology-accuracy.pdf
+
+## 3. Kaynak sınıflar
+
+| Kod | Sınıf |
 |---:|---|
-| 1 | Water |
-| 2 | Trees |
-| 4 | Flooded Vegetation |
-| 5 | Crops |
-| 7 | Built Area |
-| 8 | Bare Ground |
-| 9 | Snow/Ice |
-| 10 | Clouds |
-| 11 | Rangeland |
+| 1 | Su |
+| 2 | Ağaç |
+| 4 | Taşkın vejetasyon |
+| 5 | Tarım |
+| 7 | Yapılı alan |
+| 8 | Çıplak zemin |
+| 9 | Kar/buz |
+| 10 | Bulut |
+| 11 | Rangeland / mera |
 
-Raster values 3 (old Grass) and 6 (old Scrub) are legacy values from the older release. When they appear in a response they are normalized to current class 11 Rangeland.
+0 NoData olarak ele alınır.
 
-## Numerical method
+## 4. DendroGeo dört sınıf eşlemesi
 
-The primary numerical result uses ArcGIS ImageServer `getSamples` with a deterministic **10 m multipoint lattice** generated inside the selected park polygon. The lattice is aligned to the published service grid origin and pixel size (EPSG:3857), rather than an arbitrary local 10 m grid.
+| DendroGeo | Kaynak kodları |
+|---|---|
+| 🌿 Yeşil alan | 2, 4, 5, 11 |
+| 💧 Su | 1 |
+| 🧱 Sert zemin | 7 |
+| 🟫 Çıplak zemin | 8 |
 
-For each lattice point:
+Kod 9 ve 10 ile NoData dört sınıfa sessizce dağıtılmaz.
 
-- the point is sent directly as part of a multipoint request;
-- `pixelSize=10,10` is requested;
-- `RSP_NearestNeighbor` is requested;
-- the mosaic is explicitly locked to **Year = 2020**.
+## 5. Zonal alan hesabı
 
-ArcGIS documents that multipoint geometries use the supplied points directly, so the returned class values form a reproducible sampling frame. See https://developers.arcgis.com/rest/services-reference/enterprise/get-samples/.
+1. Kullanıcının seçtiği park polygonunun WGS84 geometrisi alınır.
+2. Polygon bounding box ile 2020 STAC araması yapılır.
+3. Polygonu kesen gerekli UTM COG karoları bulunur.
+4. Her karonun gerçek raster metadatasından piksel sınırı, boyutu ve kaynak grid çözünürlüğü alınır.
+5. Yalnızca polygon bbox ile kesişen raster penceresi COG üzerinden okunur.
+6. Her raster hücresinin polygon ile kesişim alanı çokgen-kutu kesişiminden hesaplanır.
+7. Rasterın kategorik hücre değeri bu kesişim alanına atanır.
+8. Her sınıfın alanı, hücre içinde polygon tarafından kapsanan gerçek alanların toplamıdır.
+9. Yüzdeler rasterın polygon içindeki gerçek kapsama alanına göre hesaplanır.
+10. Kaynak hücre sayısı yalnızca kalite kontrol bilgisidir; hektar hesabının girdisi değildir.
 
-The four user-facing classes are:
+Bu yaklaşım, coverage fraction / coverage area mantığıyla çalışan standart hassas zonal istatistik yöntemleriyle uyumludur.
 
-- **Yeşil alan** = Trees (2) + Flooded Vegetation (4) + Crops (5) + Rangeland (11)
-- **Su** = Water (1)
-- **Sert zemin** = Built Area (7)
-- **Çıplak zemin** = Bare Ground (8)
+## 6. Alan kapanış kalite kontrolü
 
-The raw 10 m sample frequencies are converted to class shares and applied to the measured park polygon area:
+Dört ana sınıfın toplamı, tüm raster hücreleri geçerli sınıflardan oluşuyorsa analiz alanını kapatır.
 
-`class_area = park_area × class_sample_count / valid_four_class_sample_count`
+NoData, kar/buz veya bulut hücresi bulunursa bu alanlar başka sınıflara aktarılmaz. Ayrı maskeli/veri dışı alan olarak gösterilir.
 
-This is intentional: a pixel whose center is inside an irregular park boundary must not contribute a full 100 m² when part of that pixel lies outside the park. The final four class areas therefore conserve the park polygon area exactly (apart from floating-point rounding, which is explicitly closed in the largest class). NoData, unknown codes, snow/ice or clouds are not silently redistributed; if they occur, the four-class report is rejected rather than presenting a false closed total.
+Raster-polygon kapsama alanı ile seçilen park polygonu arasında %0,5'ten büyük fark oluşursa analiz durdurulur. Sistem farkı oranlayarak kapatmaz.
 
-This is a reproducible 10 m nearest-neighbor, sample-frequency-derived park-area estimate. It is not presented as a sub-pixel boundary census; the area-conserving normalization prevents boundary pixels from inflating the park total.
+## 7. OSM'nin rolü
 
-## Independent QC
+OSM bina, yol, otopark ve su geometrileri arazi örtüsü sayısal sonucuna müdahale etmez.
 
-The application also calls ArcGIS `computeStatisticsHistograms` for the same park geometry and 2020 mosaic. ArcGIS documents that this operation requests source pixels at the specified resolution for the projected geometry's extent; therefore its returned histogram count is not used as DendroGeo's primary park-pixel denominator. See https://developers.arcgis.com/javascript/latest/references/core/layers/ImageryLayer/.
+Bu geometriler grid planlama gibi diğer işlevlerde kullanılabilir. Arazi örtüsü raporunun sınıf değeri yalnızca seçilen park polygonu ve 10 m LULC rasterından gelir.
 
-The histogram is retained as an independent distribution QC. DendroGeo compares normalized class distributions and reports a QC warning when the largest class-share difference exceeds the configured threshold. QC never overwrites the primary result.
+Arazi örtüsü analizi sırasında kırmızı bina/yol çizgileri otomatik olarak haritaya bindirilmez.
 
-## Outputs
+## 8. Görselleştirme
 
-The UI exports one compact four-class CSV containing sample counts, hectares, percentages, year and resolution. Detailed raster codes remain internal to the calculation engine.
+Harita üzerindeki sınıf görünümü yalnızca görsel doğrulama içindir. Sayısal alan hesabı görselleştirme katmanından bağımsızdır.
 
-## Interpretation
+Yeşil, su, sert zemin ve çıplak zemin sınıfları kaynak raster kodlarının DendroGeo gruplarına göre renklendirilir.
 
-The product is a classified land-cover dataset, not raw Sentinel-2 spectral imagery and not an object/footprint inventory.
+## 9. Dışa aktarma
 
-Class 7 Built Area represents the dataset's built-land-cover class. It must not be interpreted as an exact building-footprint polygon.
+CSV dört ana sınıfın kaynak hücre sayısını, alanını ve yüzde değerini içerir. Maskeli/NoData alanı ayrı bir QC satırı olarak tutulur.
 
-The published dataset has a global assessed average accuracy above 75%; this is a dataset-level assessment and is not a site-specific accuracy guarantee.
+GeoJSON çıktısı, geçerli 10 m raster hücrelerini ve polygon içindeki gerçek kesişim alanlarını içerir.
 
-## Reproducibility
+## 10. Yöntemin gerekçesi
 
-Every exported record contains the dataset name, year, source URL, resolution, and calculation method. The UI keeps the OSM water/impervious layers as independent structural QC; they do not silently replace satellite classes.
+Kaynak ürün COG olarak yayınlandığı için web uygulaması yalnızca gerekli raster pencerelerini okuyabilir. Ürünün UTM kaynak-gridine hizalı olması, kategorik 10 m hücrelerinin doğal raster koordinat sisteminde işlenmesini sağlar.
 
+Doğru ilke, hücre sınıfını polygon içinde kalan gerçek yüzölçümüyle ağırlıklandırmaktır. Salt hücre sayısını 10 m × 10 m ile çarpmak sınır hücrelerinde hata oluşturur.
 
-## 2020 ImageServer raster seçimi
+## 11. Kaynak ve doğruluk notu
 
-Sentinel-2 2020 sorgusunda ImageServer raster kataloğundaki yalnızca **Category=1 (Primary)** öğeleri kullanılır. Overview ve diğer katalog kategorileri analize dahil edilmez. Seçili parkla kesişen Primary raster OBJECTID'leri katalog sorgusuyla bulunur ve analiz ile harita görselleştirmesinde aynı raster ID'leri LockRaster ile kullanılır. Böylece analiz ve harita farklı mozaik öğelerinden üretilemez.
+Impact Observatory'nin yayınladığı yöntem/doğruluk özetinde yıllık haritaların bağımsız insan etiketleriyle doğrulandığı ve çoğunluk uzlaşımı ölçütünde yıllık haritaların en az yaklaşık %76 doğruluk düzeyine ulaştığı bildirilir.
 
-Ana sayısal sonuç artık ImageServer'dan **ham U8 raster** olarak 10 m kaynak-grid boyutunda dışa aktarılan görüntünün piksel değerlerinden üretilir. Export isteğinde `renderingRule=None`, `pixelType=U8`, `bandIds=0` ve `NearestNeighbor` kullanılır; böylece görsel renk paleti sınıf değerlerinin yerine geçmez. Her raster hücresi, aynı kaynak-grid hücresinin park polygonu ile gerçek kesişim alanıyla sınıfa yazılır.
+2024 tarihli bağımsız karşılaştırmalı çalışmada ESRI LULC ailesi için raporlanan genel doğruluk %85,0'dır. Bu değer belirli bir parkın gerçek sınıflandırma doğruluğunun garantisi değildir.
 
-`getSamples` artık yalnızca küçük bir spot-QC yoludur; ana alan hesabını belirlemez. ArcGIS server-side histogram endpointi sonuç motorunun zorunlu bağımlılığı değildir ve erişilemediğinde ana 10 m raster analizi başarısız sayılmaz. Eksik/NoData veya beklenmeyen ham raster değerleri ise sessizce başka sınıfa dağıtılmaz.
+Bu nedenle DendroGeo sonuçları park içindeki kaynak raster sınıflarının alan dağılımı olarak sunulur; bina sınırı veya yol geometrisi kadar ayrıntılı nesne envanteri olarak yorumlanmamalıdır.
