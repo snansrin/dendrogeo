@@ -1,5 +1,5 @@
 "use strict";
-/* DendroGeo v2 · gridplan.js v128 — LULC PRIMARY-raster locked-catalog + raster-ID QC + histogram */           
+/* DendroGeo v2 · gridplan.js v129 — LULC PRIMARY-raster locked-catalog + raster-ID QC + optional histogram */           
   
 let PARK_POLY=null;
 let PARK_HOLES=[]; 
@@ -3983,6 +3983,65 @@ function dgBuildArcGISParkGeometry(maxVertices=1200){
   };
 }
 
+function dgBuildArcGISParkGeometry3857(maxVertices=1200){
+  const rings=[];
+
+  for(const ring of (PARK_POLY||[])){
+    const r=dgSimplifyRingForRequest(
+      ring,
+      maxVertices
+    );
+
+    if(!r)continue;
+
+    const projected=r.map(p=>{
+      const xy=dgLonLatToWebMercator(
+        p[0],
+        p[1]
+      );
+      return[
+        xy.x,
+        xy.y
+      ];
+    });
+
+    if(projected.length>=4)rings.push(projected);
+  }
+
+  for(const ring of (PARK_HOLES||[])){
+    const r=dgSimplifyRingForRequest(
+      ring,
+      maxVertices
+    );
+
+    if(!r)continue;
+
+    const projected=r.map(p=>{
+      const xy=dgLonLatToWebMercator(
+        p[0],
+        p[1]
+      );
+      return[
+        xy.x,
+        xy.y
+      ];
+    });
+
+    if(projected.length>=4)rings.push(projected);
+  }
+
+  if(!rings.length){
+    throw new Error(
+      "ArcGIS için 3857 park polygonu üretilemedi."
+    );
+  }
+
+  return{
+    rings,
+    spatialReference:{wkid:3857}
+  };
+}
+
 function dgBuildMosaicRule(lockRasterIds=null){
   /*
    * Reproducible annual selection: query the raster catalog for the
@@ -4080,10 +4139,13 @@ async function dgFetchServerHistogram(lockRasterIds){
   const params=new URLSearchParams({
     f:"json",
     geometryType:"esriGeometryPolygon",
-    geometry:JSON.stringify(dgBuildArcGISParkGeometry(1200)),
+    geometry:JSON.stringify(
+      dgBuildArcGISParkGeometry3857(1200)
+    ),
     pixelSize:"10,10",
-    mosaicRule:JSON.stringify(dgBuildMosaicRule(lockRasterIds)),
-    time:DG_S2_START_MS+","+DG_S2_END_MS
+    mosaicRule:JSON.stringify(
+      dgBuildMosaicRule(lockRasterIds)
+    )
   });
 
   const res=await fetch(
@@ -4101,37 +4163,61 @@ async function dgFetchServerHistogram(lockRasterIds){
   const body=await res.text();
 
   if(!res.ok){
-    throw new Error(
-      "ArcGIS histogram HTTP "+
-      res.status+" · "+body.slice(0,300)
-    );
+    return{
+      available:false,
+      reason:
+        "HTTP "+res.status+
+        " · "+body.slice(0,300)
+    };
   }
 
-  const data=JSON.parse(body);
+  let data;
+  try{
+    data=JSON.parse(body);
+  }catch(e){
+    return{
+      available:false,
+      reason:"ArcGIS histogram JSON parse edilemedi.",
+      rawText:body.slice(0,500)
+    };
+  }
 
   if(data?.error){
-    throw new Error(
-      (data.error.message||"ArcGIS histogram hatası")+
-      (
-        Array.isArray(data.error.details)&&data.error.details.length
-          ?" · "+data.error.details.join(" | ")
-          :""
-      )
-    );
+    return{
+      available:false,
+      reason:
+        (data.error.message||"ArcGIS histogram hatası")+
+        (
+          Array.isArray(data.error.details)&&
+          data.error.details.length
+            ?" · "+data.error.details.join(" | ")
+            :""
+        )
+    };
   }
 
-  const hist=
+  const list=
     Array.isArray(data.histograms)
-      ?data.histograms[0]
-      :null;
+      ?data.histograms
+      :[];
 
-  if(!hist||!Array.isArray(hist.counts)){
-    throw new Error(
-      "ArcGIS histogram sonucu boş veya geçersiz."
-    );
+  const hist=list.find(h=>
+    h&&
+    Array.isArray(h.counts)&&
+    h.counts.length>0
+  );
+
+  if(!hist){
+    return{
+      available:false,
+      reason:
+        "ArcGIS histogram yanıtında kullanılabilir counts dizisi yok.",
+      raw:data
+    };
   }
 
   return{
+    available:true,
     raw:hist,
     counts:dgHistogramCounts(hist),
     total:dgHistogramTotal(hist)
@@ -5077,48 +5163,54 @@ async function dgSatelliteRun(){
     }
 
     /*
-     * Independent server-side QC. It does not replace the boundary-area
-     * calculation; it verifies that the same locked 2020 mosaic contains
-     * the same categorical classes. A presence/absence disagreement means
-     * the raster selection is not trustworthy.
+     * Independent server-side histogram QC is optional. The ImageServer
+     * supports the operation, but a service can return an empty histogram
+     * for a particular mosaic/geometry request. That must not invalidate
+     * the primary getSamples zonal analysis.
      */
-    let serverHistogram;
+    let serverHistogram={
+      available:false,
+      reason:"Henüz çalıştırılmadı."
+    };
+
     try{
       serverHistogram=
         await dgFetchServerHistogram(
           direct.lockRasterIds
         );
     }catch(histErr){
-      throw new Error(
-        "Sentinel-2 bağımsız histogram QC alınamadı: "+
-        (histErr?.message||String(histErr))
-      );
+      serverHistogram={
+        available:false,
+        reason:histErr?.message||String(histErr)
+      };
     }
 
     const histogramConflicts=[];
 
-    for(const code of DG_S2_OFFICIAL_CODES){
-      const directN=Number(direct.counts?.[code]||0);
-      const histN=Number(serverHistogram.counts?.[code]||0);
+    if(serverHistogram.available){
+      for(const code of DG_S2_OFFICIAL_CODES){
+        const directN=Number(direct.counts?.[code]||0);
+        const histN=Number(serverHistogram.counts?.[code]||0);
 
-      if((directN===0)!==(histN===0)){
-        histogramConflicts.push({
-          code,
-          direct:directN,
-          histogram:histN
-        });
+        if((directN===0)!==(histN===0)){
+          histogramConflicts.push({
+            code,
+            direct:directN,
+            histogram:histN
+          });
+        }
       }
-    }
 
-    if(histogramConflicts.length){
-      throw new Error(
-        "Sentinel-2 kaynak seçiminde yöntemler arası sınıf çakışması bulundu: "+
-        histogramConflicts.map(x=>
-          "kod "+x.code+
-          " getSamples="+x.direct+
-          " histogram="+x.histogram
-        ).join(", ")+
-        ". Sonuç üretilmedi."
+      if(histogramConflicts.length){
+        console.warn(
+          "DENDROGEO · Sentinel-2 histogram QC sınıf farkı:",
+          histogramConflicts
+        );
+      }
+    }else{
+      console.warn(
+        "DENDROGEO · Sentinel-2 histogram QC kullanılamıyor:",
+        serverHistogram.reason
       );
     }
 
@@ -5245,7 +5337,9 @@ async function dgSatelliteRun(){
       sourceUrl:DG_S2_LULC_SERVICE,
 
       rawClassCounts:{...direct.counts},
-      histogramRaw:serverHistogram.raw,
+      histogramRaw:serverHistogram.available
+        ?serverHistogram.raw
+        :null,
       histogramPixelCount:requested,
       histogramUnmappedCount:unclassifiedCount,
       histogramUnmappedAreaHa:+(
@@ -5274,8 +5368,14 @@ async function dgSatelliteRun(){
       sourceGridIntersectionAreaM2:report.sourceGridIntersectionAreaM2,
       areaClosureM2:report.closureM2,
       areaReconciliationFactor:report.reconciliationFactor,
-      serverHistogramCounts:{...serverHistogram.counts},
-      serverHistogramTotal:serverHistogram.total,
+      serverHistogramCounts:
+        serverHistogram.available
+          ?{...serverHistogram.counts}
+          :null,
+      serverHistogramTotal:
+        serverHistogram.available
+          ?serverHistogram.total
+          :0,
 
       resolutionM:DG_S2_LULC_PIXEL_M,
 
@@ -5372,8 +5472,14 @@ async function dgSatelliteRun(){
 
       rasterEffectivePixelM:DG_S2_LULC_PIXEL_M,
 
-      histogramClassCounts:{...serverHistogram.counts},
-      histogramAllBins:serverHistogram.total,
+      histogramClassCounts:
+        serverHistogram.available
+          ?{...serverHistogram.counts}
+          :null,
+      histogramAllBins:
+        serverHistogram.available
+          ?serverHistogram.total
+          :0,
       histogramConflictCount:histogramConflicts.length,
 
       /*
@@ -5388,6 +5494,18 @@ async function dgSatelliteRun(){
         legacyScrub:0
       }
     };
+
+    if(!serverHistogram.available){
+      LANDCOVER.qualityWarning+=
+        "ArcGIS histogram QC kullanılamadı; ana getSamples zonal sonucu bağımsız hücre sorgularından üretildi. "+
+        serverHistogram.reason;
+    }
+
+    if(histogramConflicts.length){
+      LANDCOVER.qualityWarning+=
+        (LANDCOVER.qualityWarning?" ":"")+
+        "Histogram QC ile getSamples arasında sınıf var/yok farkı görüldü; ana sonuç korunuyor, fark QC olarak kaydedildi.";
+    }
 
     if(unclassifiedCount>0){
       LANDCOVER.qualityWarning+=
