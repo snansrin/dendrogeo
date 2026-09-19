@@ -4766,6 +4766,7 @@ async function dgFetchRawRasterGrid(cells,lockRasterIds){
     format:"png",
     pixelType:"U8",
     interpolation:"RSP_NearestNeighbor",
+    bandIds:"0",
     mosaicRule:JSON.stringify(
       dgBuildMosaicRule(lockRasterIds)
     ),
@@ -4892,10 +4893,17 @@ async function dgFetchRawRasterGrid(cells,lockRasterIds){
       rawCounts[normalized]++;
       classAreasM2[normalized]+=areaM2;
 
+      const ll=dgWebMercatorToLonLat(
+        cell.x,
+        cell.y
+      );
+
       sampleRows.push({
         id:sampleRows.length+1,
         row:cell.row,
         col:cell.col,
+        lat:ll?.lat??null,
+        lon:ll?.lon??null,
         rawClassCode:rawCode,
         classCode:normalized,
         className:DG_S2_CLASS_NAMES[normalized],
@@ -5060,8 +5068,8 @@ async function dgDirectSatelliteSamples(){
     cells,
     samples:raw.sampleRows.map((row,i)=>({
       id:i+1,
-      lat:null,
-      lon:null,
+      lat:row.lat,
+      lon:row.lon,
       rawClassCode:row.rawClassCode,
       classCode:row.classCode,
       className:row.className,
