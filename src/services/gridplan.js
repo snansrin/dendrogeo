@@ -1,5 +1,5 @@
 "use strict";
-/* DendroGeo v2 · gridplan.js v125 — LULC locked-catalog + raster-ID QC + histogram */           
+/* DendroGeo v2 · gridplan.js v126 — LULC locked-catalog + raster-ID QC + histogram */           
   
 let PARK_POLY=null;
 let PARK_HOLES=[]; 
