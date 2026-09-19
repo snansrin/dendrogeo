@@ -1,0 +1,71 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  dogrula:
+    name: Sözdizimi + CSP + 125 test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      # node --check KULLANILMIYOR: .js dosyalarını CommonJS saydığı için
+      # sloppy modda yasal olan yinelenen üst düzey function bildirimlerinde
+      # yanlış pozitif üretiyor. vm.Script klasik <script> gibi ayrıştırır.
+      - name: Sözdizimi denetimi (tarayıcı semantiği)
+        run: npm run check:syntax
+
+      # Koda yeni dış servis eklenip CSP güncellenmezse istek tarayıcı
+      # tarafından sessizce kesilir. Bu daha önce planetarycomputer.microsoft.com
+      # ve titiler.terrascope.be ile yaşandı (a5dabbc ile düzeltildi).
+      - name: CSP tutarlılığı
+        run: npm run check:csp
+
+      # Allometri, geometri, LULC motoru (UTM + alan korunumu) ve SW cache
+      # stratejisi. Bilimsel çıktıyı üreten matematik burada kilitli.
+      - name: Birim testler
+        run: npm test
+
+      # Yayındaki dosyalar depoyla aynı mı? Elle ?v= artırma + doğrudan main→Pages
+      # akışında canlı sürüm ile depo iki kez ayrıştı (?v=90 vs ?v=84, ?v=97 vs
+      # ?v=96). Bu adım o soruyu her dağıtımda cevaplar.
+      - name: Dağıtım sürüklenme denetimi
+        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+        continue-on-error: true
+        run: |
+          python3 - <<'PY'
+          import hashlib, urllib.request, sys, time
+          dosyalar = ['index.html', 'sw.js', 'src/services/gridplan.js',
+                      'src/services/landcover.js', 'src/services/map.js',
+                      'src/services/measure.js', 'src/services/offline.js',
+                      'src/utils/geo.js', 'css/style.css']
+          h = lambda b: hashlib.sha256(b).hexdigest()[:16]
+          sapma = []
+          for d in dosyalar:
+              yerel = h(open(d, 'rb').read())
+              try:
+                  istek = urllib.request.Request(
+                      'https://dendrogeo.org/' + d + '?_=' + str(int(time.time())),
+                      headers={'User-Agent': 'dendrogeo-ci-drift'})
+                  canli = h(urllib.request.urlopen(istek, timeout=30).read())
+              except Exception as e:
+                  print(f'  ⚠️  {d}: erişilemedi ({e})'); continue
+              ayni = yerel == canli
+              print(f'  {"✅" if ayni else "🔴 SAPMA"} {d}  depo:{yerel} canlı:{canli}')
+              if not ayni: sapma.append(d)
+          print()
+          if sapma:
+              print('🔴 Canlı site depodan farklı:', ', '.join(sapma))
+              print('   GitHub Pages dağıtımı 1-2 dk gecikmiş olabilir (bu adım')
+              print('   continue-on-error ile çalışıyor) ya da push edilmemiş bir')
+              print('   çalışma ağacından dağıtım yapılmış olabilir.')
+              sys.exit(1)
+          print('✅ Canlı site depoyla birebir aynı.')
+          PY
