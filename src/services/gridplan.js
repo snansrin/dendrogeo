@@ -1582,7 +1582,7 @@ function refreshImpLayer(){
       {
         color:"#dc2626",
         weight:1,
-        dashArray:satelliteMode?"6 4":null,
+        dashArray:null,
         fillColor:"#ef4444",
         fillOpacity:.18,
         interactive:false
