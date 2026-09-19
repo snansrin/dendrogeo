@@ -1,5 +1,5 @@
 "use strict";
-/* DendroGeo v2 · gridplan.js v118 — LULC area-conserving analysis */           
+/* DendroGeo v2 · gridplan.js v119 — LULC true source-cell zonal analysis */           
   
 let PARK_POLY=null;
 let PARK_HOLES=[]; 
@@ -3701,31 +3701,14 @@ const DG_REPORT_CLASSES=[
   {key:"bare",label:"Çıplak zemin",emoji:"🟫",codes:[8]}
 ];
 
-function dgBuildAreaConservingReport(counts,parkM2){
-  const out={};
-  let reportCount=0;
-  for(const cls of DG_REPORT_CLASSES){
-    const n=cls.codes.reduce((sum,code)=>sum+(Number(counts?.[code])||0),0);
-    out[cls.key]={count:n,areaM2:0,pct:0,label:cls.label,emoji:cls.emoji};
-    reportCount+=n;
-  }
-  const excluded=[9,10].reduce((sum,code)=>sum+(Number(counts?.[code])||0),0);
-  if(excluded>0){
-    throw new Error("10 m rasterda "+excluded+" adet kar/buz veya bulut örneği bulundu. Dört sınıflı rapor park alanını bilimsel olarak eksiksiz dağıtamıyor.");
-  }
-  if(reportCount<=0) throw new Error("Dört yüzey sınıfından hiçbir geçerli 10 m örnek elde edilemedi.");
-
-  for(const cls of DG_REPORT_CLASSES){
-    const r=out[cls.key];
-    r.pct=r.count/reportCount*100;
-    r.areaM2=parkM2*r.count/reportCount;
-  }
-
-  const totalM2=Object.values(out).reduce((sum,r)=>sum+r.areaM2,0);
-  const largest=DG_REPORT_CLASSES.map(c=>out[c.key]).sort((a,b)=>b.areaM2-a.areaM2)[0];
-  if(largest) largest.areaM2+=parkM2-totalM2;
-
-  return{classes:out,count:reportCount,areaM2:parkM2,areaHa:parkM2/10000,excludedCount:excluded};
+function dgBuildAreaConservingReport(counts,parkM2,areaByCode=null){
+ const out={};let reportAreaM2=0,reportCount=0;
+ for(const cls of DG_REPORT_CLASSES){const n=cls.codes.reduce((sum,code)=>sum+(Number(counts?.[code])||0),0),area=cls.codes.reduce((sum,code)=>sum+(Number(areaByCode?.[code])||0),0);out[cls.key]={count:n,areaM2:area,pct:0,label:cls.label,emoji:cls.emoji};reportCount+=n;reportAreaM2+=area;}
+ const excluded=[9,10].reduce((sum,code)=>sum+(Number(counts?.[code])||0),0);if(excluded>0)throw new Error("10 m rasterda "+excluded+" adet kar/buz veya bulut hücresi bulundu. Dört sınıflı rapor bu hücreleri sessizce başka sınıfa aktarmıyor.");if(reportCount<=0||!(reportAreaM2>0))throw new Error("Dört yüzey sınıfından hiçbir geçerli 10 m raster alanı elde edilemedi.");
+ for(const cls of DG_REPORT_CLASSES)out[cls.key].pct=parkM2>0?out[cls.key].areaM2/parkM2*100:0;
+ const closure=parkM2-reportAreaM2;if(Math.abs(closure)>0.05)throw new Error("10 m raster/park kesişim alanı park alanını "+Math.abs(closure).toFixed(2)+" m² farkla kapatmıyor. Eksik raster alanı yeniden dağıtılmadı.");
+ const largest=DG_REPORT_CLASSES.map(c=>out[c.key]).sort((x,y)=>y.areaM2-x.areaM2)[0];if(largest)largest.areaM2+=closure;for(const cls of DG_REPORT_CLASSES)out[cls.key].pct=parkM2>0?out[cls.key].areaM2/parkM2*100:0;
+ return{classes:out,count:reportCount,areaM2:parkM2,areaHa:parkM2/10000,excludedCount:excluded,rasterIntersectionAreaM2:reportAreaM2,closureM2:closure};
 }
 
 
@@ -4292,69 +4275,24 @@ function dgParkRings3857(){
  * Deterministic 10 m query lattice in the service coordinate system.
  * This is a QC sample lattice, not the raster's exact zonal pixel grid.
  */
-function dgBuild10mSamplePoints(){
-  const bbox=dgParkBBox();
-
-  const sw=dgLonLatToWebMercator(
-    bbox.minLat,
-    bbox.minLon
-  );
-
-  const ne=dgLonLatToWebMercator(
-    bbox.maxLat,
-    bbox.maxLon
-  );
-
-  const rings=dgParkRings3857();
-  const points=[];
-
-  /*
-   * Sentinel2_10m_LandCover is a 3857 raster. Align the sampling
-   * centers to the service's published global raster extent rather
-   * than to an arbitrary x/y=0 grid. This prevents a systematic
-   * half-pixel/offset error at class boundaries.
-   */
-  const STEP_X=9.999998729879174;
-  const STEP_Y=10;
-  const ORIGIN_X=-20037507.0672;
-  const ORIGIN_Y=-15547304.29829992;
-
-  const firstCol=Math.ceil(
-    (sw.x-ORIGIN_X)/STEP_X-0.5
-  );
-  const lastCol=Math.floor(
-    (ne.x-ORIGIN_X)/STEP_X-0.5
-  );
-
-  const firstRow=Math.ceil(
-    (sw.y-ORIGIN_Y)/STEP_Y-0.5
-  );
-  const lastRow=Math.floor(
-    (ne.y-ORIGIN_Y)/STEP_Y-0.5
-  );
-
-  for(let row=firstRow;row<=lastRow;row++){
-    const y=
-      ORIGIN_Y+
-      (row+0.5)*STEP_Y;
-
-    for(let col=firstCol;col<=lastCol;col++){
-      const x=
-        ORIGIN_X+
-        (col+0.5)*STEP_X;
-
-      if(!dgPointInsideRings3857(x,y,rings))continue;
-
-      points.push([
-        Math.round(x*1000)/1000,
-        Math.round(y*1000)/1000
-      ]);
-    }
-  }
-
-  return points;
+function dgLulcGridSpec(){return{stepX:9.999998729879174,stepY:10,originX:-20037507.0672,originY:-15547304.29829992};}
+function dgClipPolygonRect(points,rect){
+ if(!Array.isArray(points)||points.length<3)return[];
+ const clip=(input,inside,intersect)=>{if(!input.length)return[];const out=[];let prev=input[input.length-1],prevIn=inside(prev);for(const curr of input){const currIn=inside(curr);if(currIn){if(!prevIn)out.push(intersect(prev,curr));out.push(curr);}else if(prevIn)out.push(intersect(prev,curr));prev=curr;prevIn=currIn;}return out;};
+ const ix=(p,q,x)=>{const dx=q.x-p.x;if(Math.abs(dx)<1e-12)return{x,y:p.y};const t=(x-p.x)/dx;return{x,y:p.y+(q.y-p.y)*t};};
+ const iy=(p,q,y)=>{const dy=q.y-p.y;if(Math.abs(dy)<1e-12)return{x:p.x,y};const t=(y-p.y)/dy;return{x:p.x+(q.x-p.x)*t,y};};
+ let out=points.slice();out=clip(out,p=>p.x>=rect.minX,(p,q)=>ix(p,q,rect.minX));out=clip(out,p=>p.x<=rect.maxX,(p,q)=>ix(p,q,rect.maxX));out=clip(out,p=>p.y>=rect.minY,(p,q)=>iy(p,q,rect.minY));out=clip(out,p=>p.y<=rect.maxY,(p,q)=>iy(p,q,rect.maxY));return out;
 }
-
+function dgWebMercatorPolygonGroundAreaM2(points){if(!Array.isArray(points)||points.length<3)return 0;const ring=points.map(p=>{const ll=dgWebMercatorToLonLat(p.x,p.y);return[ll.lat,ll.lon];});return ringGeodesicArea(ring);}
+function dgCellParkIntersectionAreaM2(rect,rings){let area=0;for(const ring of(rings.outer||[]))area+=dgWebMercatorPolygonGroundAreaM2(dgClipPolygonRect(ring,rect));for(const ring of(rings.holes||[]))area-=dgWebMercatorPolygonGroundAreaM2(dgClipPolygonRect(ring,rect));return Math.max(0,area);}
+function dgRectIntersectsRing(rect,ring){if(!Array.isArray(ring)||ring.length<3)return false;for(const p of ring)if(p.x>=rect.minX&&p.x<=rect.maxX&&p.y>=rect.minY&&p.y<=rect.maxY)return true;const corners=[{x:rect.minX,y:rect.minY},{x:rect.maxX,y:rect.minY},{x:rect.maxX,y:rect.maxY},{x:rect.minX,y:rect.maxY}];for(const c of corners)if(pointInPolygonXY(c.x,c.y,ring))return true;const rc=rectCorners(rect);for(let i=0;i<ring.length;i++){const p=ring[i],q=ring[(i+1)%ring.length];for(let j=0;j<4;j++)if(segmentsIntersect(p,q,rc[j],rc[(j+1)%4]))return true;}return false;}
+function dgBuild10mRasterCells(){
+ const bbox=dgParkBBox(),sw=dgLonLatToWebMercator(bbox.minLat,bbox.minLon),ne=dgLonLatToWebMercator(bbox.maxLat,bbox.maxLon),rings=dgParkRings3857(),spec=dgLulcGridSpec();
+ const firstCol=Math.floor((sw.x-spec.originX)/spec.stepX-.5)-1,lastCol=Math.ceil((ne.x-spec.originX)/spec.stepX-.5)+1,firstRow=Math.floor((sw.y-spec.originY)/spec.stepY-.5)-1,lastRow=Math.ceil((ne.y-spec.originY)/spec.stepY-.5)+1,cells=[];
+ for(let row=firstRow;row<=lastRow;row++){const y=spec.originY+(row+.5)*spec.stepY;for(let col=firstCol;col<=lastCol;col++){const x=spec.originX+(col+.5)*spec.stepX,rect={minX:x-spec.stepX/2,maxX:x+spec.stepX/2,minY:y-spec.stepY/2,maxY:y+spec.stepY/2};let hit=false;for(const ring of(rings.outer||[]))if(dgRectIntersectsRing(rect,ring)){hit=true;break;}if(!hit)continue;const areaM2=dgCellParkIntersectionAreaM2(rect,rings);if(areaM2>1e-6)cells.push({row,col,x,y,areaM2});}}
+ if(!cells.length)throw new Error("Park ile kesişen 10 m Sentinel-2 kaynak hücresi üretilemedi.");
+ return{cells,requested:cells.length,intersectionAreaM2:cells.reduce((sum,c)=>sum+c.areaM2,0)};
+}
 function dgSampleLocationToLonLat(sample){
   const loc=sample?.location||sample?.geometry||null;
   if(!loc)return null;
@@ -4460,151 +4398,19 @@ function dgParseSampleClass(sample){
 }
 
 async function dgDirectSatelliteSamples(){
-  const requestedPoints=dgBuild10mSamplePoints();
-
-  if(!requestedPoints.length){
-    throw new Error(
-      "Park içinde 10 m örnekleme noktası üretilemedi."
-    );
-  }
-
-  const CHUNK=800;
-  const chunks=[];
-
-  for(let i=0;i<requestedPoints.length;i+=CHUNK){
-    chunks.push(
-      requestedPoints.slice(i,i+CHUNK)
-    );
-  }
-
-  const samples=[];
-  const errors=[];
-  const CONCURRENCY=3;
-
-  for(let i=0;i<chunks.length;i+=CONCURRENCY){
-    const group=chunks.slice(i,i+CONCURRENCY);
-
-    const results=await Promise.all(
-      group.map(points=>
-        dgGetSamplesChunk(points)
-          .catch(error=>{
-            errors.push(error);
-            return [];
-          })
-      )
-    );
-
-    for(const rows of results){
-      samples.push(...rows);
-    }
-  }
-
-  if(!samples.length){
-    throw new Error(
-      "ArcGIS getSamples hiç örnek döndürmedi."
-    );
-  }
-
-  const counts={};
-  for(const code of DG_S2_OFFICIAL_CODES){
-    counts[code]=0;
-  }
-
-  let noData=0;
-  let unknown=0;
-  let legacyRemapped=0;
-  let locationMissing=0;
-
-  const sampleRows=[];
-
-  for(let i=0;i<samples.length;i++){
-    const sample=samples[i];
-    const rawCode=dgParseSampleClass(sample);
-    const normalized=dgS2NormalizeCode(rawCode);
-
-    if(rawCode===null){
-      noData++;
-      continue;
-    }
-
-    if(rawCode===3||rawCode===6){
-      legacyRemapped++;
-    }
-
-    if(normalized===null){
-      unknown++;
-      continue;
-    }
-
-    counts[normalized]++;
-
-    const ll=dgSampleLocationToLonLat(sample);
-    if(!ll){
-      locationMissing++;
-      continue;
-    }
-
-    sampleRows.push({
-      id:sampleRows.length+1,
-      lat:+ll.lat.toFixed(7),
-      lon:+ll.lon.toFixed(7),
-      rawClassCode:rawCode,
-      classCode:normalized,
-      className:DG_S2_CLASS_NAMES[normalized],
-      group:dgS2Group(normalized)
-    });
-  }
-
-  if(errors.length){
-    throw new Error(
-      errors.length+
-      " örnekleme paketi alınamadı."
-    );
-  }
-
-  const returned=samples.length;
-  const requested=requestedPoints.length;
-
-  if(samples.length!==requested){
-    throw new Error(
-      "ArcGIS getSamples eksik örnek döndürdü: "+
-      samples.length+" / "+requested
-    );
-  }
-  const missing=Math.max(
-    0,
-    requested-returned
-  );
-
-  const classified=
-    Object.values(counts)
-      .reduce(
-        (sum,n)=>sum+(Number(n)||0),
-        0
-      );
-
-  if(!classified){
-    throw new Error(
-      "ArcGIS getSamples döndü ancak hiçbir geçerli LULC sınıfı okunamadı."
-    );
-  }
-
-  return{
-    points:requestedPoints,
-    samples:sampleRows,
-    counts,
-    requested,
-    returned,
-    missing,
-    noData,
-    unknown,
-    legacyRemapped,
-    locationMissing,
-    classified,
-    errors
-  };
+ const plan=dgBuild10mRasterCells(),cells=plan.cells,CHUNK=800,chunks=[];for(let i=0;i<cells.length;i+=CHUNK)chunks.push(cells.slice(i,i+CHUNK));
+ const samples=[],errors=[],CONCURRENCY=3;
+ const requestCells=chunk=>dgGetSamplesChunk(chunk.map(c=>[Math.round(c.x*1000)/1000,Math.round(c.y*1000)/1000]));
+ for(let i=0;i<chunks.length;i+=CONCURRENCY){const results=await Promise.all(chunks.slice(i,i+CONCURRENCY).map(chunk=>requestCells(chunk).catch(error=>{errors.push(error);return[];})));for(const rows of results)samples.push(...rows);}
+ if(errors.length)throw new Error(errors.length+" raster hücresi örnekleme paketi alınamadı.");
+ if(samples.length!==cells.length)throw new Error("ArcGIS getSamples eksik kaynak hücre döndürdü: "+samples.length+" / "+cells.length);
+ const cellByKey=new Map();for(const cell of cells)cellByKey.set(Math.round(cell.x*1000)+":"+Math.round(cell.y*1000),cell);
+ const counts={},classAreasM2={};for(const code of DG_S2_OFFICIAL_CODES){counts[code]=0;classAreasM2[code]=0;}
+ let noData=0,unknown=0,legacyRemapped=0,locationMissing=0,assignedAreaM2=0;const sampleRows=[];
+ for(const sample of samples){const rawCode=dgParseSampleClass(sample),normalized=dgS2NormalizeCode(rawCode),ll=dgSampleLocationToLonLat(sample);if(!ll){locationMissing++;continue;}const xy=dgLonLatToWebMercator(ll.lat,ll.lon),cell=cellByKey.get(Math.round(xy.x*1000)+":"+Math.round(xy.y*1000));if(!cell)throw new Error("ArcGIS örnek konumu kaynak-grid hücresiyle eşleştirilemedi.");const cellArea=Number(cell.areaM2)||0;assignedAreaM2+=cellArea;if(rawCode===null){noData++;continue;}if(rawCode===3||rawCode===6)legacyRemapped++;if(normalized===null){unknown++;continue;}counts[normalized]++;classAreasM2[normalized]+=cellArea;sampleRows.push({id:sampleRows.length+1,lat:+ll.lat.toFixed(7),lon:+ll.lon.toFixed(7),rawClassCode:rawCode,classCode:normalized,className:DG_S2_CLASS_NAMES[normalized],group:dgS2Group(normalized),areaM2:cellArea});}
+ const classified=Object.values(classAreasM2).reduce((sum,n)=>sum+(Number(n)||0),0);if(!classified)throw new Error("ArcGIS getSamples döndü ancak hiçbir geçerli raster hücresi sınıflandırılamadı.");
+ return{points:cells.map(c=>[c.x,c.y]),cells,samples:sampleRows,counts,classAreasM2,requested:cells.length,returned:samples.length,missing:Math.max(0,cells.length-samples.length),noData,unknown,legacyRemapped,locationMissing,classified,assignedAreaM2,intersectionAreaM2:plan.intersectionAreaM2,errors};
 }
-
 let DG_S2_LEGEND=null;
 
 function dgEnsureSatelliteLegend(){
@@ -4698,6 +4504,8 @@ function dgSatelliteReportRow(
   suffix="",
   tone
 ){
+  const n=Number(value);
+  const shown=Number.isFinite(n)?n.toFixed(2):String(value??"");
   return(
     "<div style='display:flex;align-items:center;gap:8px;margin:5px 0'>"+
       "<span style='width:18px'>"+emoji+"</span>"+
@@ -4826,16 +4634,10 @@ function dgRenderSatelliteReport(rep,parkM2,landcover){
 
   rep.innerHTML=
     "<b>🛰️ Arazi Örtüsü · Sentinel-2 / 10 m · 2020</b>"+
-    "<div style='font-size:.70rem;color:var(--mut);margin:7px 0 10px'><b>Ana sonuç: park alanına kapatılmış 10 m kaynak-grid sınıf dağılımı.</b> 10 m örnek frekansları parkın gerçek geometrik alanına uygulanır; sınırdaki pikseller park dışındaki alanları tam 100 m² olarak saymaz. OSM bina/yol/su geometrileri uydu sınıflarını değiştirmez.</div>"+
-    "<div style='overflow:auto'><table><thead><tr><th></th><th>Sınıf</th><th>10 m örnek</th><th>Alan (ha)</th><th>%</th></tr></thead><tbody>"+rows+"</tbody></table></div>"+
-    "<div style='border-top:1px solid var(--line);margin-top:10px;padding-top:9px'>"+
-      dgSatelliteReportRow("🌿","Yeşil alan",Number(landcover.reportClasses?.green?.areaM2||0)/10000," ha")+
-      dgSatelliteReportRow("💧","Su",Number(landcover.reportClasses?.water?.areaM2||0)/10000," ha")+
-      dgSatelliteReportRow("🧱","Sert zemin",Number(landcover.reportClasses?.hard?.areaM2||0)/10000," ha")+
-      dgSatelliteReportRow("🟫","Çıplak zemin",Number(landcover.reportClasses?.bare?.areaM2||0)/10000," ha")+
-    "</div>"+
-    "<div style='font-size:.69rem;color:var(--mut);margin-top:10px'><b>Park alanı:</b> "+(parkM2/10000).toFixed(2)+" ha · <b>Raporlanan toplam:</b> "+totalReportedHa.toFixed(2)+" ha · <b>10 m örnek:</b> "+Number(landcover.sampleCount||0).toLocaleString("tr-TR")+"</div>"+
-    "<div style='font-size:.68rem;color:var(--mut);margin-top:7px'>Yeşil alan = ağaç + taşkın vejetasyon + tarım + rangeland; sert zemin = Built Area; çıplak zemin = Bare Ground. Bu dört sınıfın alanları toplamı park polygonunun geometrik alanına eşitlenmiştir.</div>"+
+    "<div style='font-size:.70rem;color:var(--mut);margin:7px 0 10px'><b>Ana sonuç: park polygonu ile gerçek 10 m kaynak-grid hücrelerinin kesişim alanları.</b> Her hücrenin yalnızca park içinde kalan kısmı alana katılır; sınır hücreleri tam 100 m² kabul edilmez. OSM bina/yol/su geometrileri uydu sınıflarını değiştirmez.</div>"+
+    "<div style='overflow:auto'><table><thead><tr><th></th><th>Sınıf</th><th>10 m hücre</th><th>Alan (ha)</th><th>%</th></tr></thead><tbody>"+rows+"</tbody></table></div>"+
+    "<div style='font-size:.69rem;color:var(--mut);margin-top:10px'><b>Park alanı:</b> "+(parkM2/10000).toFixed(2)+" ha · <b>Raporlanan toplam:</b> "+totalReportedHa.toFixed(2)+" ha · <b>Kaynak hücre:</b> "+Number(landcover.sampleCount||0).toLocaleString("tr-TR")+"</div>"+
+    "<div style='font-size:.68rem;color:var(--mut);margin-top:7px'>Yeşil alan = ağaç + taşkın vejetasyon + tarım + rangeland; sert zemin = Built Area; çıplak zemin = Bare Ground. Alanlar hücre/park kesişimlerinden hesaplanır; toplam park polygonu alanını kapatır.</div>"+
     "<div style='display:flex;gap:7px;flex-wrap:wrap;margin-top:10px'><button class='btn sm ghost' onclick='downloadSatelliteClassCSV()'>📥 4 sınıf CSV</button></div>"+
     qc;
 }
@@ -4933,16 +4735,15 @@ async function dgSatelliteRun(){
     }
 
     const PIXEL_AREA_M2=DG_S2_LULC_PIXEL_M*DG_S2_LULC_PIXEL_M;
-    const classAreasM2={};
+    const classAreasM2={...direct.classAreasM2};
     const classPercent={};
 
     for(const code of DG_S2_OFFICIAL_CODES){
       const count=Number(direct.counts?.[code]||0);
-      classAreasM2[code]=count*PIXEL_AREA_M2;
-      classPercent[code]=count/Math.max(1,classified)*100;
+      classPercent[code]=parkM2>0?Number(classAreasM2[code]||0)/parkM2*100:0;
     }
 
-    const report=dgBuildAreaConservingReport(direct.counts,parkM2);
+    const report=dgBuildAreaConservingReport(direct.counts,parkM2,classAreasM2);
     const reportGreenM2=report.classes.green.areaM2;
     const reportWaterM2=report.classes.water.areaM2;
     const reportHardM2=report.classes.hard.areaM2;
@@ -4959,9 +4760,9 @@ async function dgSatelliteRun(){
     const naturalVegetationM2=reportGreenM2;
     const totalVegetationM2=reportGreenM2;
 
-    const unclassifiedCount=Math.max(0,requested-classified);
-    const unclassifiedM2=unclassifiedCount*PIXEL_AREA_M2;
-    const rasterAreaM2=parkM2;
+    const unclassifiedCount=Number(direct.noData||0)+Number(direct.unknown||0);
+    const unclassifiedM2=Math.max(0,Number(direct.assignedAreaM2||0)-Number(direct.classified||0));
+    const rasterAreaM2=Number(direct.intersectionAreaM2||parkM2);
 
     const histogram={
       ok:false,
@@ -5059,8 +4860,8 @@ async function dgSatelliteRun(){
       maskedSamples:direct.counts[10]||0,
 
       method:
-        "ArcGIS ImageServer getSamples · exact 10 m source-grid pixel centers · "+
-        "park polygonu içi · Year=2020 · NearestNeighbor",
+        "ArcGIS ImageServer getSamples · gerçek 10 m kaynak-grid hücreleri · "+
+        "park polygonu ile hücre kesişim alanı · Year=2020 · NearestNeighbor",
 
       source:
         "Impact Observatory · Microsoft · Esri · "+
@@ -5104,10 +4905,9 @@ async function dgSatelliteRun(){
        * Histogram-derived observed area conserves all returned bins
        * except an explicitly tracked unmapped remainder.
        */
-      validAreaM2:parkM2,
-
-      sampledAreaM2:parkM2,
-      returnedAreaM2:parkM2,
+      validAreaM2:classified,
+      sampledAreaM2:direct.assignedAreaM2,
+      returnedAreaM2:direct.assignedAreaM2,
 
       cloudAreaM2:maskedM2,
       noDataAreaM2:(
@@ -5148,6 +4948,8 @@ async function dgSatelliteRun(){
 
       directSampleCount:direct.classified,
       directRequestedPoints:direct.requested,
+      rasterIntersectionAreaM2:direct.intersectionAreaM2,
+      rasterAreaClosureM2:parkM2-direct.intersectionAreaM2,
       directReturnedSamples:direct.returned,
       directMissingSamples:direct.missing,
       directNoDataSamples:direct.noData,
