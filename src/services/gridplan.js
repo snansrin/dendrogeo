@@ -1,5 +1,5 @@
 "use strict";
-/* DendroGeo v2 · gridplan.js v135 — Clean land-cover bridge + native 10m LULC */
+/* DendroGeo v2 · gridplan.js v136 — Clean 10m LULC bridge + OSM overlay separation */
   
 let PARK_POLY=null;
 let PARK_HOLES=[]; 
@@ -26,7 +26,7 @@ const SELECTED_CELLS=new Set();
 
 let LAST_WP_ROWS=[];
 let PARK_REF_HA=null;
-let PARK_SELECTED_AREA_M2=null;let LANDCOVER_SAMPLES=[];let SATELLITE_RUNNING=false;
+let PARK_SELECTED_AREA_M2=null;
 /* Reference-area helpers are intentionally local to the active gridplan module.
  * gridplan_core.js is an older parallel implementation and is not loaded by index.html. */
 function setRefHa(v){
@@ -926,7 +926,9 @@ async function queryPark(
    DETAILED COVERAGE QUERY
 ========================================================= */
 
-async const SHOW_OSM_COVER_LAYERS=false;
+const SHOW_OSM_COVER_LAYERS=false;
+
+async function queryDetailedCoverage(){
 
 async function queryDetailedCoverage(){
   if(
@@ -1520,17 +1522,15 @@ function refreshWaterLayer(){
 
   WATER_LAYER=L.layerGroup().addTo(map);
 
-  const satelliteMode=!!SATELLITE_LAYER;
-
   WATER_RINGS.forEach(r=>{
     if(!r||r.length<3)return;
 
     L.polygon(r,{
       color:"#2563eb",
-      weight:satelliteMode?2:1,
-      dashArray:satelliteMode?"6 4":null,
+      weight:1,
+      dashArray:null,
       fillColor:"#60a5fa",
-      fillOpacity:satelliteMode?0:.42,
+      fillOpacity:.42,
       interactive:false
     }).addTo(WATER_LAYER);
   });
@@ -1540,9 +1540,9 @@ function refreshWaterLayer(){
 
     L.polyline(l,{
       color:"#2563eb",
-      weight:satelliteMode?3:2,
-      opacity:satelliteMode?.9:.55,
-      dashArray:satelliteMode?"6 4":null,
+      weight:2,
+      opacity:.55,
+      dashArray:null,
       interactive:false
     }).addTo(WATER_LAYER);
   });
@@ -1554,8 +1554,6 @@ function refreshImpLayer(){
   }
 
   IMP_LAYER=L.layerGroup().addTo(map);
-  const satelliteMode=!!SATELLITE_LAYER;
-
   IMP_RINGS.forEach(r=>{
     if(!r || r.length<3){
       return;
@@ -1583,10 +1581,10 @@ function refreshImpLayer(){
       r,
       {
         color:"#dc2626",
-        weight:satelliteMode?2:1,
+        weight:1,
         dashArray:satelliteMode?"6 4":null,
         fillColor:"#ef4444",
-        fillOpacity:satelliteMode?0:.18,
+        fillOpacity:.18,
         interactive:false
       }
     ).addTo(IMP_LAYER);
@@ -2762,10 +2760,6 @@ function clearPark(){
     IMP_LAYER=null;
   }
 
-  if(SATELLITE_LAYER && map){
-    map.removeLayer(SATELLITE_LAYER);
-    SATELLITE_LAYER=null;
-  }
 PARK_POLY=null;
   PARK_HOLES=[];
   PARK_SELECTED_AREA_M2=null;
@@ -2778,9 +2772,6 @@ PARK_POLY=null;
 
   GRID_BLOCK_LINES=[];
 
-  LANDCOVER=null;
-  LANDCOVER_SAMPLES=[];
-  DG_PARK_PIXEL_GEOMETRY=null;
 }
 
 function switchPark(i){
