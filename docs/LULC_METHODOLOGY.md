@@ -37,7 +37,7 @@ For each lattice point:
 - `RSP_NearestNeighbor` is requested;
 - the mosaic is explicitly locked to **Year = 2020**.
 
-ArcGIS documents that multipoint geometries use the supplied points directly, so the returned class values form a reproducible sampling frame. citeturn5search0
+ArcGIS documents that multipoint geometries use the supplied points directly, so the returned class values form a reproducible sampling frame. See https://developers.arcgis.com/rest/services-reference/enterprise/get-samples/.
 
 For each class:
 
@@ -49,7 +49,7 @@ This is a reproducible 10 m nearest-neighbor sample-derived estimate. It is not 
 
 ## Independent QC
 
-The application also calls ArcGIS `computeStatisticsHistograms` for the same park geometry and 2020 mosaic. ArcGIS documents that this operation computes statistics/histograms from source pixels requested for the projected geometry's extent; therefore its returned histogram count is not used as DendroGeo's primary park-pixel denominator. citeturn2search0turn2search2
+The application also calls ArcGIS `computeStatisticsHistograms` for the same park geometry and 2020 mosaic. ArcGIS documents that this operation requests source pixels at the specified resolution for the projected geometry's extent; therefore its returned histogram count is not used as DendroGeo's primary park-pixel denominator. See https://developers.arcgis.com/javascript/latest/references/core/layers/ImageryLayer/.
 
 The histogram is retained as an independent distribution QC. DendroGeo compares normalized class distributions and reports a QC warning when the largest class-share difference exceeds the configured threshold. QC never overwrites the primary result.
 
