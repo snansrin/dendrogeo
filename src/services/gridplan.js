@@ -1,5 +1,5 @@
 "use strict";
-/* DendroGeo v2 · gridplan.js v119 — LULC true source-cell zonal analysis */           
+/* DendroGeo v2 · gridplan.js v120 — LULC true source-cell zonal analysis */           
   
 let PARK_POLY=null;
 let PARK_HOLES=[]; 
@@ -4759,7 +4759,7 @@ async function dgSatelliteRun(){
       rep.style.display="block";
       rep.innerHTML=
         "⏳ Sentinel-2 / 10 m / 2020 · "+
-        "park içi kaynak-grid piksel analizi yapılıyor…";
+        "park ile kesişen 10 m kaynak hücre analizi yapılıyor…";
     }
 
     LANDCOVER=null;
