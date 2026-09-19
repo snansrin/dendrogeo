@@ -4684,10 +4684,9 @@ async function dgSatelliteRun(){
     /*
      * PRIMARY NUMERIC RESULT
      * ----------------------
-     * Exact source-grid pixel-center sampling inside the selected park.
-     * The ArcGIS histogram endpoint is NOT used for area totals because
-     * Esri documents that its histogram is computed from the projected
-     * geometry's extent, not a polygon-clipped pixel census.
+     * Real source-grid cells intersecting the selected park are enumerated.
+     * Each source cell is sampled at its centre with nearest-neighbour, then
+     * only the cell/park intersection area is assigned to its class.
      */
     let direct;
     try{
@@ -4905,7 +4904,7 @@ async function dgSatelliteRun(){
        * Histogram-derived observed area conserves all returned bins
        * except an explicitly tracked unmapped remainder.
        */
-      validAreaM2:classified,
+      validAreaM2:direct.classifiedAreaM2,
       sampledAreaM2:direct.assignedAreaM2,
       returnedAreaM2:direct.assignedAreaM2,
 
@@ -4917,6 +4916,7 @@ async function dgSatelliteRun(){
       missingAreaM2:0,
 
       unclassifiedAreaM2:unclassifiedM2,
+      classifiedAreaM2:direct.classifiedAreaM2,
 
       coveragePct:
         requested>0
