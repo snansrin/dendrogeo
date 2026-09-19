@@ -3855,7 +3855,8 @@ function dgBuildMosaicRule(){
     sortField:"Year",
     sortValue:DG_S2_LULC_YEAR,
     ascending:true,
-    where:"Year = "+DG_S2_LULC_YEAR
+    where:"Year = "+DG_S2_LULC_YEAR,
+    mosaicOperation:"MT_FIRST"
   };
 }
 
@@ -3998,6 +3999,7 @@ function dgBuildExportImageUrl(){
     format:"png32",
     interpolation:"RSP_NearestNeighbor",
     noData:"0",
+    time:DG_S2_START_MS+","+DG_S2_END_MS,
     mosaicRule:JSON.stringify(dgBuildMosaicRule()),
     renderingRule:JSON.stringify(renderingRule)
   });
