@@ -1,5 +1,5 @@
 "use strict";
-/* DendroGeo v2 · gridplan.js v134 — Land-cover source reset + OSM overlay decoupling */
+/* DendroGeo v2 · gridplan.js v135 — Clean land-cover bridge + native 10m LULC */
   
 let PARK_POLY=null;
 let PARK_HOLES=[]; 
@@ -26,10 +26,7 @@ const SELECTED_CELLS=new Set();
 
 let LAST_WP_ROWS=[];
 let PARK_REF_HA=null;
-let PARK_SELECTED_AREA_M2=null;
-let LANDCOVER=null;\nlet SATELLITE_RUNNING=false;
-let DG_PARK_PIXEL_GEOMETRY=null;
-
+let PARK_SELECTED_AREA_M2=null;let LANDCOVER_SAMPLES=[];let SATELLITE_RUNNING=false;
 /* Reference-area helpers are intentionally local to the active gridplan module.
  * gridplan_core.js is an older parallel implementation and is not loaded by index.html. */
 function setRefHa(v){
@@ -929,7 +926,9 @@ async function queryPark(
    DETAILED COVERAGE QUERY
 ========================================================= */
 
-async function queryDetailedCoverage(renderLayers=true){
+async const SHOW_OSM_COVER_LAYERS=false;
+
+async function queryDetailedCoverage(){
   if(
     !PARK_POLY||
     !PARK_POLY.length
@@ -1087,7 +1086,7 @@ async function queryDetailedCoverage(renderLayers=true){
     lineTouchesPark(l,PARK_POLY,pb)
   );
 
-  if(renderLayers){
+  if(SHOW_OSM_COVER_LAYERS){
     refreshWaterLayer();
     refreshImpLayer();
   }
@@ -1521,16 +1520,17 @@ function refreshWaterLayer(){
 
   WATER_LAYER=L.layerGroup().addTo(map);
 
+  const satelliteMode=!!SATELLITE_LAYER;
 
   WATER_RINGS.forEach(r=>{
     if(!r||r.length<3)return;
 
     L.polygon(r,{
       color:"#2563eb",
-      weight:1,
-      dashArray:null,
+      weight:satelliteMode?2:1,
+      dashArray:satelliteMode?"6 4":null,
       fillColor:"#60a5fa",
-      fillOpacity:.42,
+      fillOpacity:satelliteMode?0:.42,
       interactive:false
     }).addTo(WATER_LAYER);
   });
@@ -1540,9 +1540,9 @@ function refreshWaterLayer(){
 
     L.polyline(l,{
       color:"#2563eb",
-      weight:2,
-      opacity:.55,
-      dashArray:null,
+      weight:satelliteMode?3:2,
+      opacity:satelliteMode?.9:.55,
+      dashArray:satelliteMode?"6 4":null,
       interactive:false
     }).addTo(WATER_LAYER);
   });
@@ -1554,6 +1554,7 @@ function refreshImpLayer(){
   }
 
   IMP_LAYER=L.layerGroup().addTo(map);
+  const satelliteMode=!!SATELLITE_LAYER;
 
   IMP_RINGS.forEach(r=>{
     if(!r || r.length<3){
@@ -1582,10 +1583,10 @@ function refreshImpLayer(){
       r,
       {
         color:"#dc2626",
-        weight:1,
-        dashArray:null,
+        weight:satelliteMode?2:1,
+        dashArray:satelliteMode?"6 4":null,
         fillColor:"#ef4444",
-        fillOpacity:.18,
+        fillOpacity:satelliteMode?0:.18,
         interactive:false
       }
     ).addTo(IMP_LAYER);
@@ -2193,10 +2194,8 @@ async function drawPark(park){
    * never called from drawPark(), which meant buildings, roads, parking
    * and water arrays stayed empty and the grid could be drawn over them.
    */
-  /*
-   * OSM yüzey geometrileri artık park seçimi sırasında otomatik çizilmez.
-   * Arazi örtüsü sayısal sonucu yalnızca park polygonu + 10 m rasterdan üretir.
-   */
+  /* OSM yüzey geometrileri burada sorgulanmaz ve haritaya bindirilmez.
+   * Arazi örtüsü sayısal analizi yalnızca park polygonu + 10 m LULC verisidir. */
 
   /* =====================================================
      PARK BOUNDS (manuel, L.layerGroup getBounds yok)
@@ -2309,7 +2308,7 @@ async function drawPark(park){
         `</button>`+
 
         `<div class="dg-png-sub" style="font-size:.68rem">`+
-          `Park polygonu + doğal 10 m UTM LULC rasterı ile coverage-weighted zonal analiz.`+
+          `Park polygonu + 10 m UTM LULC rasterı ile coverage-weighted zonal analiz.`+
         `</div>`+
       `</div>`+
 
@@ -2762,7 +2761,12 @@ function clearPark(){
 
     IMP_LAYER=null;
   }
-\nPARK_POLY=null;
+
+  if(SATELLITE_LAYER && map){
+    map.removeLayer(SATELLITE_LAYER);
+    SATELLITE_LAYER=null;
+  }
+PARK_POLY=null;
   PARK_HOLES=[];
   PARK_SELECTED_AREA_M2=null;
 
@@ -2774,6 +2778,9 @@ function clearPark(){
 
   GRID_BLOCK_LINES=[];
 
+  LANDCOVER=null;
+  LANDCOVER_SAMPLES=[];
+  DG_PARK_PIXEL_GEOMETRY=null;
 }
 
 function switchPark(i){
@@ -2799,14 +2806,14 @@ async function buildGrid(){
     );
   }
 
-  if(
-    !WATER_RINGS.length &&
-    !WATER_LINES.length &&
-    !IMP_RINGS.length &&
-    !IMP_LINES.length &&
-    !GRID_BLOCK_LINES.length
-  ){
-    await queryDetailedCoverage(false);
+  const coverageReady=
+    await queryDetailedCoverage();
+  if(!coverageReady){
+    return toast(
+      "⚠ Grid için OSM yüzey geometrileri alınamadı.",
+      "warn",
+      "🗺️"
+    );
   }
 
   const size=
@@ -3654,11 +3661,10 @@ function runLandCoverAnalysis(){
   }
 
   const parkArea=parkAreaM2();
-  const holes=PARK_HOLES||[];
 
   window.DG_LANDCOVER.analyze({
     outer:PARK_POLY,
-    holes,
+    holes:PARK_HOLES||[],
     parkAreaM2:parkArea
   }).then(result=>{
     if(window.DG_LANDCOVER_RENDER_REPORT){
@@ -3678,4 +3684,24 @@ function runLandCoverAnalysis(){
   });
 }
 
+function downloadLandCoverClassCSV(){
+  if(!window.DG_LANDCOVER || !window.DG_LANDCOVER.getLast){
+    return toast("10 m arazi örtüsü modülü yüklenmedi.","err","🗺️");
+  }
+  const result=window.DG_LANDCOVER.getLast();
+  if(!result)return toast("Önce arazi örtüsü analizini çalıştırın.","warn","🗺️");
+  window.DG_LANDCOVER.downloadClassCSV
+    ? window.DG_LANDCOVER.downloadClassCSV()
+    : toast("CSV dışa aktarma modülü hazır değil.","err","📥");
+}
+
+function downloadLandCoverCellsGeoJSON(){
+  if(window.DG_LANDCOVER && typeof window.DG_LANDCOVER.downloadCellsGeoJSON==="function"){
+    return window.DG_LANDCOVER.downloadCellsGeoJSON();
+  }
+  return toast("GeoJSON dışa aktarma modülü hazır değil.","err","📍");
+}
+
 window.runLandCoverAnalysis=runLandCoverAnalysis;
+window.downloadLandCoverClassCSV=downloadLandCoverClassCSV;
+window.downloadLandCoverCellsGeoJSON=downloadLandCoverCellsGeoJSON;
