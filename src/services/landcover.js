@@ -822,6 +822,7 @@ function clearLandCover(){
   dgLcClearLayer();
 }
 
+window.DG_LANDCOVER_RENDER_REPORT=dgLcRenderReport;
 window.DG_LANDCOVER={
   analyze:dgLcAnalyze,
   clear:clearLandCover,
