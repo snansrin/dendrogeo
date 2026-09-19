@@ -1,5 +1,5 @@
 "use strict";
-/* DendroGeo v2 · gridplan.js v107 — FINAL (su+sert iyileştirmeleri) */           
+/* DendroGeo v2 · gridplan.js v108 — FINAL (su+sert iyileştirmeleri) */           
   
 let PARK_POLY=null;
 let PARK_HOLES=[]; 
@@ -1573,14 +1573,17 @@ function refreshWaterLayer(){
 
   WATER_LAYER=L.layerGroup().addTo(map);
 
+  const satelliteMode=!!SATELLITE_LAYER;
+
   WATER_RINGS.forEach(r=>{
     if(!r||r.length<3)return;
 
     L.polygon(r,{
       color:"#2563eb",
-      weight:1,
+      weight:satelliteMode?2:1,
+      dashArray:satelliteMode?"6 4":null,
       fillColor:"#60a5fa",
-      fillOpacity:.42,
+      fillOpacity:satelliteMode?0:.42,
       interactive:false
     }).addTo(WATER_LAYER);
   });
@@ -1590,8 +1593,9 @@ function refreshWaterLayer(){
 
     L.polyline(l,{
       color:"#2563eb",
-      weight:2,
-      opacity:.55,
+      weight:satelliteMode?3:2,
+      opacity:satelliteMode?.9:.55,
+      dashArray:satelliteMode?"6 4":null,
       interactive:false
     }).addTo(WATER_LAYER);
   });
@@ -1603,6 +1607,7 @@ function refreshImpLayer(){
   }
 
   IMP_LAYER=L.layerGroup().addTo(map);
+  const satelliteMode=!!SATELLITE_LAYER;
 
   IMP_RINGS.forEach(r=>{
     if(!r || r.length<3){
@@ -1631,9 +1636,10 @@ function refreshImpLayer(){
       r,
       {
         color:"#dc2626",
-        weight:1,
+        weight:satelliteMode?2:1,
+        dashArray:satelliteMode?"6 4":null,
         fillColor:"#ef4444",
-        fillOpacity:.18,
+        fillOpacity:satelliteMode?0:.18,
         interactive:false
       }
     ).addTo(IMP_LAYER);
