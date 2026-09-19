@@ -1,5 +1,5 @@
 "use strict";
-/* DendroGeo · 10 m Land Cover Engine v2
+/* DendroGeo · 10 m Land Cover Engine v3
  * Native UTM COG + STAC + polygon/cell coverage analysis.
  *
  * The application does NOT query a live imagery service for classification.
@@ -764,40 +764,6 @@ async function dgLcAnalyze(params){
   return report;
 }
 
-function runLandCoverAnalysis(){
-  if(typeof PARK_POLY==="undefined"||!PARK_POLY||!PARK_POLY.length){
-    return toast("Önce park seç","warn","🌳");
-  }
-
-  const rep=$("landCoverReport");
-  if(rep){
-    rep.style.display="block";
-    rep.innerHTML="⏳ 10 m arazi örtüsü verisi alınıyor ve park/raster hücre kesişimleri hesaplanıyor…";
-  }
-
-  const holes=typeof PARK_HOLES!=="undefined"?PARK_HOLES:[];
-  const parkArea=typeof parkAreaM2==="function"?parkAreaM2():0;
-
-  dgLcAnalyze({
-    outer:PARK_POLY,
-    holes,
-    parkAreaM2:parkArea
-  }).then(result=>{
-    dgLcRenderReport(rep,result,parkArea);
-    toast("✓ 2020 · 10 m arazi örtüsü zonal analizi tamamlandı.","ok","🗺️");
-  }).catch(err=>{
-    console.error("DENDROGEO · Arazi örtüsü analizi:",err);
-    if(rep){
-      rep.style.display="block";
-      rep.innerHTML=
-        "<b>❌ 10 m arazi örtüsü analizi tamamlanamadı.</b>"+
-        "<div style='font-size:.74rem;color:var(--red);margin-top:7px'>"+esc(err?.message||String(err))+"</div>"+
-        "<div style='font-size:.68rem;color:var(--mut);margin-top:7px'>Geçersiz veya eksik sonuç rapora yazılmadı.</div>";
-    }
-    toast("Arazi örtüsü analizi hatası: "+(err?.message||String(err)),"err","🗺️");
-  });
-}
-
 function downloadLandCoverClassCSV(){
   if(!DG_LC_LAST)return toast("Önce arazi örtüsü analizini çalıştırın.","warn","🗺️");
   downloadBlob(
@@ -831,6 +797,5 @@ window.DG_LANDCOVER={
   downloadClassCSV:downloadLandCoverClassCSV,
   downloadCellsGeoJSON:downloadLandCoverCellsGeoJSON
 };
-window.runLandCoverAnalysis=runLandCoverAnalysis;
 window.downloadLandCoverClassCSV=downloadLandCoverClassCSV;
 window.downloadLandCoverCellsGeoJSON=downloadLandCoverCellsGeoJSON;
