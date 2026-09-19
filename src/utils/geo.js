@@ -3,13 +3,9 @@
 /*
  * DendroGeo shared geospatial utilities.
  *
- * Coordinates in the application are WGS84 [lat, lon]. 
- * ArcGIS Sentinel-2 10 m ImageServer uses Web Mercator (EPSG:3857).
- *
- * These conversion helpers intentionally live in a dependency that is
- * loaded BEFORE gridplan.js. Keeping them here prevents the LULC engine
- * from depending on a helper declared inside a large feature module and
- * gives cached gridplan builds a stable runtime dependency.
+ * Coordinates in the application are WGS84 [lat, lon].
+ * Projection helpers are generic and kept here so feature modules do not
+ * depend on one another for coordinate conversion.
  */
 
 function hav(a,b,c,d){
