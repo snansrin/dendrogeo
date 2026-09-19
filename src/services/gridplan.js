@@ -1,5 +1,5 @@
 "use strict";
-/* DendroGeo v2 · gridplan.js v123 — LULC locked-catalog + histogram-QC zonal analysis */           
+/* DendroGeo v2 · gridplan.js v124 — LULC locked-catalog + histogram-QC zonal analysis */           
   
 let PARK_POLY=null;
 let PARK_HOLES=[]; 
@@ -5088,28 +5088,12 @@ async function dgSatelliteRun(){
     const totalVegetationM2=reportGreenM2;
 
     const unclassifiedCount=Number(direct.noData||0)+Number(direct.unknown||0);
-    const unclassifiedM2=Math.max(0,Number(direct.assignedAreaM2||0)-Number(direct.classified||0));
+    const unclassifiedM2=Math.max(
+      0,
+      Number(direct.assignedAreaM2||0)-
+      Number(direct.classifiedAreaM2||0)
+    );
     const rasterAreaM2=Number(direct.intersectionAreaM2||parkM2);
-
-    const histogram={
-      ok:false,
-      raw:{},
-      classes:Object.fromEntries(
-        DG_S2_OFFICIAL_CODES.map(code=>[code,0])
-      ),
-      total:0,
-      noData:0,
-      unknown:0,
-      error:"disabled-primary"
-    };
-
-    /*
-     * Independent histogram is intentionally not used for numerical totals.
-     * The service documentation states that this endpoint requests source
-     * pixels for the projected geometry extent, which can include pixels
-     * outside an irregular park polygon.
-     */
-    const qcMaxDiff=0;
 
     LANDCOVER={
       total:+(parkM2/10000).toFixed(2),
@@ -5229,6 +5213,8 @@ async function dgSatelliteRun(){
       sourceGridIntersectionAreaM2:report.sourceGridIntersectionAreaM2,
       areaClosureM2:report.closureM2,
       areaReconciliationFactor:report.reconciliationFactor,
+      serverHistogramCounts:{...serverHistogram.counts},
+      serverHistogramTotal:serverHistogram.total,
 
       resolutionM:DG_S2_LULC_PIXEL_M,
 
@@ -5257,6 +5243,10 @@ async function dgSatelliteRun(){
       coveragePct:
         requested>0
           ?classified/requested*100
+          :0,
+      sourceGridAreaCoveragePct:
+        parkM2>0
+          ?direct.classifiedAreaM2/parkM2*100
           :0,
 
       /*
@@ -5303,8 +5293,6 @@ async function dgSatelliteRun(){
 
       sampleRows:direct.samples,
       lockRasterIds:[...(direct.lockRasterIds||[])],
-      serverHistogramCounts:{...serverHistogram.counts},
-      serverHistogramTotal:serverHistogram.total,
 
       legacyClassPixels:
         (direct.legacyRemapped||0),
