@@ -1,5 +1,5 @@
 "use strict";
-/* DendroGeo · 10 m Land Cover Engine v1
+/* DendroGeo · 10 m Land Cover Engine v2
  * Native UTM COG + STAC + polygon/cell coverage analysis.
  *
  * The application does NOT query a live imagery service for classification.
