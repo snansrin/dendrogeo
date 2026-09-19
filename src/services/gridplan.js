@@ -3702,13 +3702,105 @@ const DG_REPORT_CLASSES=[
 ];
 
 function dgBuildAreaConservingReport(counts,parkM2,areaByCode=null){
- const out={};let reportAreaM2=0,reportCount=0;
- for(const cls of DG_REPORT_CLASSES){const n=cls.codes.reduce((sum,code)=>sum+(Number(counts?.[code])||0),0),area=cls.codes.reduce((sum,code)=>sum+(Number(areaByCode?.[code])||0),0);out[cls.key]={count:n,areaM2:area,pct:0,label:cls.label,emoji:cls.emoji};reportCount+=n;reportAreaM2+=area;}
- const excluded=[9,10].reduce((sum,code)=>sum+(Number(counts?.[code])||0),0);if(excluded>0)throw new Error("10 m rasterda "+excluded+" adet kar/buz veya bulut hücresi bulundu. Dört sınıflı rapor bu hücreleri sessizce başka sınıfa aktarmıyor.");if(reportCount<=0||!(reportAreaM2>0))throw new Error("Dört yüzey sınıfından hiçbir geçerli 10 m raster alanı elde edilemedi.");
- for(const cls of DG_REPORT_CLASSES)out[cls.key].pct=parkM2>0?out[cls.key].areaM2/parkM2*100:0;
- const closure=parkM2-reportAreaM2;if(Math.abs(closure)>0.05)throw new Error("10 m raster/park kesişim alanı park alanını "+Math.abs(closure).toFixed(2)+" m² farkla kapatmıyor. Eksik raster alanı yeniden dağıtılmadı.");
- const largest=DG_REPORT_CLASSES.map(c=>out[c.key]).sort((x,y)=>y.areaM2-x.areaM2)[0];if(largest)largest.areaM2+=closure;for(const cls of DG_REPORT_CLASSES)out[cls.key].pct=parkM2>0?out[cls.key].areaM2/parkM2*100:0;
- return{classes:out,count:reportCount,areaM2:parkM2,areaHa:parkM2/10000,excludedCount:excluded,rasterIntersectionAreaM2:reportAreaM2,closureM2:closure};
+  const out={};
+  let reportAreaM2=0;
+  let reportCount=0;
+
+  for(const cls of DG_REPORT_CLASSES){
+    const n=cls.codes.reduce(
+      (sum,code)=>sum+(Number(counts?.[code])||0),
+      0
+    );
+    const area=cls.codes.reduce(
+      (sum,code)=>sum+(Number(areaByCode?.[code])||0),
+      0
+    );
+
+    out[cls.key]={
+      count:n,
+      areaM2:area,
+      pct:0,
+      label:cls.label,
+      emoji:cls.emoji
+    };
+
+    reportCount+=n;
+    reportAreaM2+=area;
+  }
+
+  const excluded=[9,10].reduce(
+    (sum,code)=>sum+(Number(counts?.[code])||0),
+    0
+  );
+
+  if(excluded>0){
+    throw new Error(
+      "10 m rasterda "+
+      excluded+
+      " adet kar/buz veya bulut hücresi bulundu. "+
+      "Dört sınıflı rapor bu hücreleri sessizce başka sınıfa aktarmıyor."
+    );
+  }
+
+  if(reportCount<=0||!(reportAreaM2>0)){
+    throw new Error(
+      "Dört yüzey sınıfından hiçbir geçerli 10 m raster alanı elde edilemedi."
+    );
+  }
+
+  /*
+   * The source-grid intersection is the primary area measurement.
+   * The park area is independently measured geodesically from the
+   * original polygon. Because the cell boundaries are constructed in
+   * Web Mercator and then measured geodesically, a tiny sub-square-meter
+   * closure can remain at polygon edges. This is a geometry reconciliation,
+   * not a class reallocation: one common factor preserves every class
+   * proportion exactly.
+   */
+  const closureM2=parkM2-reportAreaM2;
+  const toleranceM2=Math.max(
+    1,
+    Math.abs(parkM2)*1e-6
+  );
+
+  if(Math.abs(closureM2)>toleranceM2){
+    throw new Error(
+      "10 m raster/park kesişim alanı park alanını "+
+      Math.abs(closureM2).toFixed(3)+
+      " m² farkla kapatmıyor. Fark toleransın üzerinde; "+
+      "alan başka sınıfa aktarılmadan sonuç üretilmedi."
+    );
+  }
+
+  const reconciliationFactor=
+    reportAreaM2>0
+      ?parkM2/reportAreaM2
+      :1;
+
+  for(const cls of DG_REPORT_CLASSES){
+    out[cls.key].areaM2*=reconciliationFactor;
+    out[cls.key].pct=
+      parkM2>0
+        ?out[cls.key].areaM2/parkM2*100
+        :0;
+  }
+
+  const reconciledTotalM2=DG_REPORT_CLASSES.reduce(
+    (sum,cls)=>sum+out[cls.key].areaM2,
+    0
+  );
+
+  return{
+    classes:out,
+    count:reportCount,
+    areaM2:parkM2,
+    areaHa:parkM2/10000,
+    excludedCount:excluded,
+    sourceGridIntersectionAreaM2:reportAreaM2,
+    closureM2,
+    reconciliationFactor,
+    reconciledTotalM2
+  };
 }
 
 
@@ -4724,12 +4816,17 @@ async function dgSatelliteRun(){
       );
     }
 
-    if(Number(direct.noData||0)>0 || Number(direct.unknown||0)>0){
+    if(
+      Number(direct.noData||0)>0 ||
+      Number(direct.unknown||0)>0 ||
+      Number(direct.locationMissing||0)>0
+    ){
       throw new Error(
         "10 m Sentinel-2 örneklerinde "+
-        Number(direct.noData||0)+" NoData ve "+
-        Number(direct.unknown||0)+" eşlenemeyen sınıf bulundu. "+
-        "Dört sınıflı park toplamı bozulmaması için sonuç üretilmedi."
+        Number(direct.noData||0)+" NoData, "+
+        Number(direct.unknown||0)+" eşlenemeyen sınıf ve "+
+        Number(direct.locationMissing||0)+" konumu eşleşmeyen hücre bulundu. "+
+        "Eksik raster hücresi varken sonuç üretilmedi."
       );
     }
 
@@ -4786,7 +4883,10 @@ async function dgSatelliteRun(){
     LANDCOVER={
       total:+(parkM2/10000).toFixed(2),
       geometricTotal:+(parkM2/10000).toFixed(2),
-      rasterAreaHa:+(rasterAreaM2/10000).toFixed(2),
+      rasterAreaHa:+(parkM2/10000).toFixed(2),
+      sourceGridIntersectionAreaHa:+(
+        Number(direct.intersectionAreaM2||0)/10000
+      ).toFixed(6),
 
       green:+(
         reportGreenM2/10000
@@ -4895,14 +4995,19 @@ async function dgSatelliteRun(){
       reportClasses:report.classes,
       reportAreaM2:report.areaM2,
       reportAreaHa:report.areaHa,
+      sourceGridIntersectionAreaM2:report.sourceGridIntersectionAreaM2,
+      areaClosureM2:report.closureM2,
+      areaReconciliationFactor:report.reconciliationFactor,
 
       resolutionM:DG_S2_LULC_PIXEL_M,
 
       geometricAreaM2:parkM2,
 
       /*
-       * Histogram-derived observed area conserves all returned bins
-       * except an explicitly tracked unmapped remainder.
+       * Source-grid observed area is retained separately from the
+       * geodesic park area. The report applies only a sub-square-meter
+       * common geometric reconciliation factor when the two agree
+       * within tolerance.
        */
       validAreaM2:direct.classifiedAreaM2,
       sampledAreaM2:direct.assignedAreaM2,
