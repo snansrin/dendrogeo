@@ -1,5 +1,5 @@
 "use strict";
-/* DendroGeo v2 · gridplan.js v138 — Retired source cleanup + native 10m LULC */
+/* DendroGeo v2 · gridplan.js v139 — Restore park mode public exports */
   
 let PARK_POLY=null;
 let PARK_HOLES=[]; 
@@ -3682,3 +3682,7 @@ function downloadLandCoverCellsGeoJSON(){
 window.runLandCoverAnalysis=runLandCoverAnalysis;
 window.downloadLandCoverClassCSV=downloadLandCoverClassCSV;
 window.downloadLandCoverCellsGeoJSON=downloadLandCoverCellsGeoJSON;
+window.toggleParkMode=toggleParkMode;
+window.dgToggleParkMode=toggleParkMode;
+window.bindParkClick=bindParkClick;
+window.clearPark=clearPark;
