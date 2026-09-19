@@ -190,10 +190,12 @@ function fillSelect(sel,opts){
 async function loadRequestOptions(){
  try{
   const [m,p]=await Promise.all([
-   sb.from("measurements").select("country,city").eq("status","Onaylı").limit(5000),
+   sb.from("measurements").select("country,city",{count:"exact"}).eq("status","Onaylı").limit(5000),
    sb.from("projects").select("id,name,country,city").order("name")
   ]);
   REQ_ROWS=m.data||[];REQ_PROJECTS=p.data||[];
+  /* Ülke/şehir seçenek listeleri kesilmişse talep formunda eksik seçenek görünür. */
+  dgWarnIfTruncated(m.data,5000,"Talep formu seçenekleri",m.count);
   fillSelect($("reqCountry"),listCountries(REQ_ROWS,REQ_PROJECTS));
   reqCountryChanged();
  }catch(e){}

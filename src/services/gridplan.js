@@ -2913,15 +2913,20 @@ async function buildGrid(){
     }
   }
 
-  const{data}=await sb
+  const{data,count}=await sb
     .from("measurements")
-    .select("lat,lon")
+    .select("lat,lon",{count:"exact"})
     .eq("status","Onaylı")
     .gte("lat",minLat)
     .lte("lat",maxLat)
     .gte("lon",minLon)
     .lte("lon",maxLon)
     .limit(5000);
+
+  /* Bu sorgu zaten bbox ile sınırlı (doğru yaklaşım) ama 5000 üst sınırı var.
+   * Yoğun bir bölgede eşik aşılırsa hücre başına düşen ölçüm sayısı eksik
+   * kalır ve ızgara yoğunluk hesabı sessizce bozulur. */
+  dgWarnIfTruncated(data,5000,"Izgara ölçüm yoğunluğu",count);
 
   (data||[]).forEach(m=>{
     const cell=

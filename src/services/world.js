@@ -2,7 +2,10 @@
 /* ============ PARK KARŞILAŞTIRMA + RAPOR ============ */
 let PARK_DATA=[];
 async function loadParkCompare(){
- const{data}=await sb.from("measurements").select("carbon_kg,dbh_cm,height_m,species,grp,projects(name,city)").eq("status","Onaylı").limit(5000);
+ const{data,count}=await sb.from("measurements").select("carbon_kg,dbh_cm,height_m,species,grp,projects(name,city)",{count:"exact"}).eq("status","Onaylı").limit(5000);
+ /* Park sıralaması ve toplam karbon bu satırlardan hesaplanıyor; kesme varsa
+  * "🏆 En İyi" rozeti ve ton değerleri eksik kümeye dayanır. */
+ dgWarnIfTruncated(data,5000,"Park karşılaştırma",count);
  PARK_DATA=data||[];
  const by={};
  PARK_DATA.forEach(r=>{
@@ -59,12 +62,14 @@ function parkReport(){
 /* Click-to-zoom */
 async function zoomToCountry(country){
 const m=worldMapL||worldMap;if(!m)return;
-const{data}=await sb.from("measurements").select("lat,lon").eq("status","Onaylı").eq("country",country).limit(2000);
+const{data,count}=await sb.from("measurements").select("lat,lon",{count:"exact"}).eq("status","Onaylı").eq("country",country).limit(2000);
+dgWarnIfTruncated(data,2000,country+" (ülke yakınlaşma)",count);
 fitRows(m,data,country,"🌍");
 }
 async function zoomToCity(city){
 const m=worldMapL||worldMap;if(!m)return;
-const{data}=await sb.from("measurements").select("lat,lon").eq("status","Onaylı").eq("city",city).limit(2000);
+const{data,count}=await sb.from("measurements").select("lat,lon",{count:"exact"}).eq("status","Onaylı").eq("city",city).limit(2000);
+dgWarnIfTruncated(data,2000,city+" (şehir yakınlaşma)",count);
 fitRows(m,data,city,"🏙");
 }
 function fitRows(m,rows,label,icon){

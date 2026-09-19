@@ -69,6 +69,7 @@ export function loadApp({ sadece } = {}) {
     'src/config/constants.js',
     'src/config/species.js',
     'src/utils/geo.js',
+    'src/utils/truncation.js',
     'src/services/allometry.js',
     'src/services/landcover.js',
     'src/services/gridplan.js',
@@ -79,7 +80,8 @@ export function loadApp({ sadece } = {}) {
                    'GROUP_COLOR', 'QUOTA_MB', 'esc', '$',
                    'DG_LC_CODES', 'DG_LC_CLASSES', 'DG_LC_PIXEL_M', 'DG_LC_YEAR',
                    'DG_LC_COLLECTION', 'DG_LC_STAC', 'DG_LC_MAX_TILES',
-                   'DG_LC_MAX_READ_PIXELS', 'DG_LC_RENDER_LIMIT'];
+                   'DG_LC_MAX_READ_PIXELS', 'DG_LC_RENDER_LIMIT',
+                   'DG_TRUNCATION_WARNED'];
   const epilog = LEXICAL
     .map((n) => `if(typeof ${n}!=="undefined")__exports.${n}=${n};`)
     .join('');

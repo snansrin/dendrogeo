@@ -44,9 +44,12 @@ function addMarkersChunked(m,rows,chunk=150){
 // 3. Onaylı marker'ları getir
 async function loadApprovedMarkers(m,limit,done){
  try{
-  const{data}=await sb.from("measurements")
-   .select("lat,lon,point_id,species,dbh_cm,height_m,carbon_kg,photo_url,grp")
+  const{data,count}=await sb.from("measurements")
+   .select("lat,lon,point_id,species,dbh_cm,height_m,carbon_kg,photo_url,grp",{count:"exact"})
    .eq("status","Onaylı").limit(limit);
+  /* Limit aşımında UYAR: işaretçiler ve bu satırlardan hesaplanan toplam karbon
+   * kesilmiş kümeye dayanır. Bkz. src/utils/truncation.js */
+  dgWarnIfTruncated(data,limit,"Canlı harita",count);
   const rows=(data||[]).filter(r=>Number.isFinite(+r.lat)&&Number.isFinite(+r.lon));
   addMarkersChunked(m,rows);
   done&&done(rows.length,rows);
