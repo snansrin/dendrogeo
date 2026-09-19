@@ -4,7 +4,7 @@
 // NOT: Senkronizasyon artık Ana Thread (Supabase JS SDK) tarafından yapılıyor
 // ============================================================
 
-const CACHE_VERSION = 'dendrogeo-sw-v2-r6';
+const CACHE_VERSION = 'dendrogeo-sw-v2-r7';
 const STATIC_CACHE = `static-${CACHE_VERSION}`;
 const TILE_CACHE = `tiles-${CACHE_VERSION}`;
 const API_CACHE = `api-${CACHE_VERSION}`;
@@ -91,6 +91,12 @@ self.addEventListener('fetch', event => {
         }
         // REST/Auth/RPC istekleri → doğrudan tarayıcı ağına yönlendir (CORS-güvenli passthrough)
         event.respondWith(fetch(request));
+        return;
+    }
+
+    if (url.hostname.includes('ic.imagery1.arcgis.com') && url.pathname.includes('/Sentinel2_10m_LandCover/ImageServer/')) {
+        // Scientific land-cover requests must never be served from a stale SW cache.
+        event.respondWith(networkOnly(request));
         return;
     }
 
