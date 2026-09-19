@@ -768,7 +768,7 @@ function runLandCoverAnalysis(){
     return toast("Önce park seç","warn","🌳");
   }
 
-  const rep=$(\"landCoverReport\");
+  const rep=$("landCoverReport");
   if(rep){
     rep.style.display="block";
     rep.innerHTML="⏳ 10 m arazi örtüsü verisi alınıyor ve park/raster hücre kesişimleri hesaplanıyor…";
