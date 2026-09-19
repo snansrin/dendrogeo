@@ -4,7 +4,7 @@
 // NOT: Senkronizasyon artık Ana Thread (Supabase JS SDK) tarafından yapılıyor
 // ============================================================
 
-const CACHE_VERSION = 'dendrogeo-sw-v2-r31';
+const CACHE_VERSION = 'dendrogeo-sw-v2-r32';
 const STATIC_CACHE = `static-${CACHE_VERSION}`;
 const TILE_CACHE = `tiles-${CACHE_VERSION}`;
 const API_CACHE = `api-${CACHE_VERSION}`;
@@ -254,4 +254,4 @@ self.addEventListener('notificationclick', event => {
     );
 });
 
-console.log('[SW] 🌲 DendroGeo Service Worker v2.10 r31 — network-first app assets');
+console.log('[SW] 🌲 DendroGeo Service Worker v2.10 r32 — network-first app assets');
