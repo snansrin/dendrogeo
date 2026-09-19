@@ -30,6 +30,8 @@ let PARK_SELECTED_AREA_M2=null;
 let LANDCOVER=null;
 let LANDCOVER_SAMPLES=[];
 let SATELLITE_LAYER=null;
+let SATELLITE_RUNNING=false;
+let DG_PARK_PIXEL_GEOMETRY=null;
 
 /* Reference-area helpers are intentionally local to the active gridplan module.
  * gridplan_core.js is an older parallel implementation and is not loaded by index.html. */
@@ -656,6 +658,60 @@ function cellInsidePark(
   return true;
 }
 
+
+function pointToSegmentDistanceM(lat,lon,a,b){
+  const refLat=lat*Math.PI/180;
+  const ax=(a[1]-lon)*111320*Math.cos(refLat);
+  const ay=(a[0]-lat)*110540;
+  const bx=(b[1]-lon)*111320*Math.cos(refLat);
+  const by=(b[0]-lat)*110540;
+  const dx=bx-ax;
+  const dy=by-ay;
+
+  if(dx===0&&dy===0){
+    return Math.sqrt(ax*ax+ay*ay);
+  }
+
+  const denom=dx*dx+dy*dy;
+  const t=Math.max(
+    0,
+    Math.min(
+      1,
+      (-ax*dx-ay*dy)/denom
+    )
+  );
+
+  const px=ax+t*dx;
+  const py=ay+t*dy;
+
+  return Math.sqrt(px*px+py*py);
+}
+
+function pointNearImperviousLine(lat,lon,lines){
+  for(const line of (lines||[])){
+    if(!line||!Array.isArray(line.pts)||line.pts.length<2)continue;
+
+    const width=Number.isFinite(Number(line.w))
+      ?Math.max(0,Number(line.w))
+      :1;
+
+    for(let i=0;i<line.pts.length-1;i++){
+      if(
+        pointToSegmentDistanceM(
+          lat,
+          lon,
+          line.pts[i],
+          line.pts[i+1]
+        )<=width
+      ){
+        return true;
+      }
+    }
+  }
+
+  return false;
+}
+
 /* =========================================================
    OSM 10 m CROSS-CHECK
 ========================================================= */
@@ -691,15 +747,7 @@ function osmSampleGroup(lat,lon){
   for(const r of (IMP_RINGS||[])){
     if(pointInPolygon(lat,lon,r))return "hard";
   }
-
-  if(
-    pointNearAnyLine(
-      lat,
-      lon,
-      (IMP_LINES||[]).map(x=>x.pts||[]),
-      1
-    )
-  ){
+  if(pointNearImperviousLine(lat,lon,IMP_LINES)){
     return "hard";
   }
 
@@ -2752,6 +2800,7 @@ PARK_POLY=null;
 
   LANDCOVER=null;
   LANDCOVER_SAMPLES=[];
+  DG_PARK_PIXEL_GEOMETRY=null;
 }
 
 function switchPark(i){
@@ -3657,7 +3706,8 @@ function dgS2Group(code){
   if(code===1)return "water";
   if([2,3,4,5,6,11].includes(code))return "green";
   if(code===7)return "hard";
-  if([8,9,10].includes(code))return "other";
+  if(code===8||code===9)return "other";
+  if(code===10)return "masked";
   return "unknown";
 }
 
@@ -3729,7 +3779,188 @@ function dg3857ToLonLat(x,y){
   return[lon,lat];
 }
 
+function dgPolygonAreaXY(poly){
+  if(!Array.isArray(poly)||poly.length<3)return 0;
+
+  let area=0;
+  for(let i=0;i<poly.length;i++){
+    const a=poly[i];
+    const b=poly[(i+1)%poly.length];
+    area+=a.x*b.y-b.x*a.y;
+  }
+
+  return Math.abs(area)/2;
+}
+
+function dgClipPolygonXY(poly,inside,intersect){
+  if(!Array.isArray(poly)||!poly.length)return [];
+
+  const out=[];
+  let prev=poly[poly.length-1];
+  let prevInside=inside(prev);
+
+  for(const curr of poly){
+    const currInside=inside(curr);
+
+    if(currInside){
+      if(!prevInside){
+        const hit=intersect(prev,curr);
+        if(hit)out.push(hit);
+      }
+      out.push(curr);
+    }else if(prevInside){
+      const hit=intersect(prev,curr);
+      if(hit)out.push(hit);
+    }
+
+    prev=curr;
+    prevInside=currInside;
+  }
+
+  return out;
+}
+
+function dgClipRingToRectAreaXY(points,rect){
+  if(!Array.isArray(points)||points.length<3)return 0;
+
+  let poly=points.map(p=>({x:p.x,y:p.y}));
+
+  if(
+    poly.length>1 &&
+    poly[0].x===poly[poly.length-1].x &&
+    poly[0].y===poly[poly.length-1].y
+  ){
+    poly=poly.slice(0,-1);
+  }
+
+  const clipX=(x,keepGreater)=>{
+    poly=dgClipPolygonXY(
+      poly,
+      p=>keepGreater?p.x>=x:p.x<=x,
+      (a,b)=>{
+        const dx=b.x-a.x;
+        if(Math.abs(dx)<1e-12)return{x,y:a.y};
+        const t=(x-a.x)/dx;
+        return{x,y:a.y+t*(b.y-a.y)};
+      }
+    );
+  };
+
+  const clipY=(y,keepGreater)=>{
+    poly=dgClipPolygonXY(
+      poly,
+      p=>keepGreater?p.y>=y:p.y<=y,
+      (a,b)=>{
+        const dy=b.y-a.y;
+        if(Math.abs(dy)<1e-12)return{x:a.x,y};
+        const t=(y-a.y)/dy;
+        return{x:a.x+t*(b.x-a.x),y};
+      }
+    );
+  };
+
+  clipX(rect.minX,true);
+  clipX(rect.maxX,false);
+  clipY(rect.minY,true);
+  clipY(rect.maxY,false);
+
+  return dgPolygonAreaXY(poly);
+}
+
+function dgPrepareParkPixelGeometry(){
+  const prepare=rings=>
+    (rings||[])
+      .filter(r=>Array.isArray(r)&&r.length>=3)
+      .map(r=>{
+        const points=r.map(p=>{
+          const q=dgLonLatTo3857(
+            Number(p[1]),
+            Number(p[0])
+          );
+          return{x:q.x,y:q.y};
+        });
+
+        return{
+          points,
+          bbox:{
+            minX:Math.min(...points.map(p=>p.x)),
+            minY:Math.min(...points.map(p=>p.y)),
+            maxX:Math.max(...points.map(p=>p.x)),
+            maxY:Math.max(...points.map(p=>p.y))
+          }
+        };
+      });
+
+  DG_PARK_PIXEL_GEOMETRY={
+    outer:prepare(PARK_POLY),
+    inner:prepare(PARK_HOLES)
+  };
+}
+
+function dgParkPixelIntersectionFraction(x,y){
+  if(!DG_PARK_PIXEL_GEOMETRY){
+    dgPrepareParkPixelGeometry();
+  }
+
+  const d=DG_S2_LULC_PIXEL_M/2;
+  const rect={
+    minX:x-d,
+    minY:y-d,
+    maxX:x+d,
+    maxY:y+d
+  };
+
+  let area=0;
+
+  for(const ring of DG_PARK_PIXEL_GEOMETRY.outer){
+    if(!bboxesOverlap(ring.bbox,rect))continue;
+    area+=dgClipRingToRectAreaXY(
+      ring.points,
+      rect
+    );
+  }
+
+  for(const ring of DG_PARK_PIXEL_GEOMETRY.inner){
+    if(!bboxesOverlap(ring.bbox,rect))continue;
+    area-=dgClipRingToRectAreaXY(
+      ring.points,
+      rect
+    );
+  }
+
+  const total=
+    DG_S2_LULC_PIXEL_M*
+    DG_S2_LULC_PIXEL_M;
+
+  return Math.max(
+    0,
+    Math.min(
+      1,
+      area/total
+    )
+  );
+}
+
+function dgPixelGroundAreaM2(x,y){
+  const d=DG_S2_LULC_PIXEL_M/2;
+
+  const corners=[
+    dg3857ToLonLat(x-d,y-d),
+    dg3857ToLonLat(x+d,y-d),
+    dg3857ToLonLat(x+d,y+d),
+    dg3857ToLonLat(x-d,y+d)
+  ].map(ll=>[
+    ll[1],
+    ll[0]
+  ]);
+
+  return ringGeodesicArea(corners);
+}
+
+
 function dgBuildSampleLattice(){
+  dgPrepareParkPixelGeometry();
+
   const b=dgParkBBox();
 
   const min=dgLonLatTo3857(
@@ -3771,20 +4002,19 @@ function dgBuildSampleLattice(){
       x<maxX;
       x+=DG_S2_LULC_PIXEL_M
     ){
-      const ll=dg3857ToLonLat(x,y);
+      const fraction=
+        dgParkPixelIntersectionFraction(
+          x,
+          y
+        );
 
-      if(
-        !pointInPark(
-          ll[1],
-          ll[0],
-          {
-            outer:PARK_POLY,
-            inner:PARK_HOLES||[]
-          }
-        )
-      ){
-        continue;
-      }
+      if(!(fraction>0))continue;
+
+      const fullPixelArea=
+        dgPixelGroundAreaM2(
+          x,
+          y
+        );
 
       const key=
         Math.round(x/DG_S2_LULC_PIXEL_M)+":"+
@@ -3794,11 +4024,16 @@ function dgBuildSampleLattice(){
 
       seen.add(key);
 
+      const ll=dg3857ToLonLat(x,y);
+
       points.push({
         x,
         y,
         lat:ll[1],
-        lon:ll[0]
+        lon:ll[0],
+        pixelFraction:fraction,
+        pixelGroundAreaM2:fullPixelArea,
+        pixelAreaM2:fullPixelArea*fraction
       });
     }
   }
@@ -3829,7 +4064,8 @@ function dgBuildGetSamplesUrl(points){
     mosaicRule:JSON.stringify({
       ascending:true,
       mosaicMethod:"esriMosaicAttribute",
-      sortValue:null,
+      sortValue:DG_S2_LULC_YEAR,
+    sortField:"Year",
       where:"(Year = "+DG_S2_LULC_YEAR+")"
     }),
     outFields:"Year,Name,ProductName"
@@ -3956,10 +4192,7 @@ function dgSatelliteReportRow(emoji,label,m2,totalM2){
 }
 
 async function dgSatelliteRun(){
-  if(
-    !PARK_POLY||
-    !PARK_POLY.length
-  ){
+  if(!PARK_POLY||!PARK_POLY.length){
     return toast(
       "Önce park seç",
       "warn",
@@ -3967,524 +4200,680 @@ async function dgSatelliteRun(){
     );
   }
 
-  const rep=$("landCoverReport");
-
-  if(rep){
-    rep.style.display="block";
-    rep.innerHTML=
-      "⏳ Sentinel-2 / 10 m / 2020 · "+
-      "park içindeki sistematik 10 m örnekleri hazırlanıyor…";
-  }
-
-  LANDCOVER_SAMPLES=[];
-  LANDCOVER=null;
-
-  const lattice=dgBuildSampleLattice();
-
-  if(!lattice.length){
+  if(SATELLITE_RUNNING){
     return toast(
-      "Park içinde 10 m uydu örneği üretilemedi.",
-      "err",
+      "🛰️ Uydu analizi zaten çalışıyor.",
+      "info",
       "🛰️"
     );
   }
 
-  console.log(
-    "DENDROGEO · Sentinel-2 10 m lattice:",
-    {
-      parkAreaHa:(parkAreaM2()/10000).toFixed(2),
-      candidateSamples:lattice.length,
-      expectedSamples:Math.round(
-        parkAreaM2()/100
-      )
+  SATELLITE_RUNNING=true;
+
+  const rep=$("landCoverReport");
+
+  try{
+    if(rep){
+      rep.style.display="block";
+      rep.innerHTML=
+        "⏳ Sentinel-2 / 10 m / 2020 · "+
+        "parkın 10 m raster hücreleri hazırlanıyor…";
     }
-  );
 
-  const classCounts={
-    1:0,2:0,3:0,4:0,5:0,6:0,
-    7:0,8:0,9:0,10:0,11:0
-  };
+    LANDCOVER_SAMPLES=[];
+    LANDCOVER=null;
+    DG_PARK_PIXEL_GEOMETRY=null;
 
-  let noData=0;
-  let requested=0;
-  let returned=0;
-  let invalidValues=0;
-  let badYear=0;
-  let resolutionOff=0;
+    const lattice=dgBuildSampleLattice();
 
-  let offset=0;
+    if(!lattice.length){
+      throw new Error(
+        "Park ile kesişen 10 m örnek hücresi üretilemedi."
+      );
+    }
 
-  while(offset<lattice.length){
-    const count=
-      dgPickBatch(
-        lattice.slice(offset)
+    const parkM2=parkAreaM2();
+
+    const candidateAreaM2=
+      lattice.reduce(
+        (sum,p)=>
+          sum+
+          (Number.isFinite(p.pixelAreaM2)
+            ?p.pixelAreaM2
+            :0),
+        0
       );
 
-    const batch=
-      lattice.slice(
-        offset,
-        offset+count
-      );
-
-    const url=
-      dgBuildGetSamplesUrl(batch);
-
-    requested+=batch.length;
-
-    const res=await fetch(
-      url,
+    console.log(
+      "DENDROGEO · Sentinel-2 10 m lattice:",
       {
-        method:"GET",
-        mode:"cors",
-        cache:"no-store",
-        headers:{
-          Accept:"application/json"
-        }
+        parkAreaHa:(parkM2/10000).toFixed(2),
+        candidateSamples:lattice.length,
+        candidateAreaHa:(candidateAreaM2/10000).toFixed(2),
+        expectedSamples:Math.round(parkM2/100)
       }
     );
 
-    const body=await res.text();
+    const classCounts={
+      1:0,2:0,3:0,4:0,5:0,6:0,
+      7:0,8:0,9:0,10:0,11:0
+    };
 
-    if(!res.ok){
-      throw new Error(
-        "ArcGIS getSamples HTTP "+
-        res.status+
-        " · "+
-        body.slice(0,400)
-      );
-    }
+    const classAreas={
+      green:0,
+      hard:0,
+      water:0,
+      other:0
+    };
 
-    let data;
+    const osmAreas={
+      open:0,
+      hard:0,
+      water:0
+    };
 
-    try{
-      data=JSON.parse(body);
-    }catch{
-      throw new Error(
-        "ArcGIS getSamples JSON döndürmedi."
-      );
-    }
+    let noData=0;
+    let requested=0;
+    let returned=0;
+    let invalidValues=0;
+    let badYear=0;
+    let resolutionOff=0;
+    let maskedSamples=0;
+    let maskedAreaM2=0;
+    let returnedAreaM2=0;
+    let noDataAreaM2=0;
+    let invalidAreaM2=0;
+    let badYearAreaM2=0;
+    let resolutionOffAreaM2=0;
 
-    if(data?.error){
-      throw new Error(
-        (
-          data.error.message||
-          "ArcGIS getSamples hatası"
-        )+
-        (
-          Array.isArray(data.error.details)&&
-          data.error.details.length
-            ?" · "+data.error.details.join(" | ")
-            :""
-        )
-      );
-    }
+    const returnedIndices=new Set();
 
-    const samples=
-      Array.isArray(data.samples)
-        ?data.samples
-        :[];
+    let offset=0;
 
-    returned+=samples.length;
-
-    /*
-     * ArcGIS locationId is 1-based in documented responses. Use it for
-     * exact input-point fallback; otherwise preserve response location.
-     */
-    for(let si=0;si<samples.length;si++){
-      const sample=samples[si];
-
-      const code=
-        dgParseSampleCode(
-          sample.value
+    while(offset<lattice.length){
+      const count=
+        dgPickBatch(
+          lattice.slice(offset)
         );
 
-      if(!code){
-        noData++;
-        continue;
+      const batch=
+        lattice.slice(
+          offset,
+          offset+count
+        );
+
+      const url=
+        dgBuildGetSamplesUrl(batch);
+
+      requested+=batch.length;
+
+      const res=await fetch(
+        url,
+        {
+          method:"GET",
+          mode:"cors",
+          cache:"no-store",
+          headers:{
+            Accept:"application/json"
+          }
+        }
+      );
+
+      const body=await res.text();
+
+      if(!res.ok){
+        throw new Error(
+          "ArcGIS getSamples HTTP "+
+          res.status+
+          " · "+
+          body.slice(0,400)
+        );
       }
 
-      const sampleYear=
-        Number(sample.attributes?.Year);
+      let data;
 
-      if(
-        Number.isFinite(sampleYear)&&
-        sampleYear!==DG_S2_LULC_YEAR
-      ){
-        badYear++;
-        continue;
+      try{
+        data=JSON.parse(body);
+      }catch{
+        throw new Error(
+          "ArcGIS getSamples JSON döndürmedi."
+        );
       }
 
-      const resolution=
-        Number(sample.resolution);
-
-      if(
-        Number.isFinite(resolution)&&
-        Math.abs(
-          resolution-
-          DG_S2_LULC_PIXEL_M
-        )>1.5
-      ){
-        resolutionOff++;
+      if(data?.error){
+        throw new Error(
+          (
+            data.error.message||
+            "ArcGIS getSamples hatası"
+          )+
+          (
+            Array.isArray(data.error.details)&&
+            data.error.details.length
+              ?" · "+data.error.details.join(" | ")
+              :""
+          )
+        );
       }
 
-      let x;
-      let y;
+      const samples=
+        Array.isArray(data.samples)
+          ?data.samples
+          :[];
 
-      if(
-        sample.location&&
-        Number.isFinite(
-          Number(sample.location.x)
-        )&&
-        Number.isFinite(
-          Number(sample.location.y)
-        )
-      ){
-        x=Number(sample.location.x);
-        y=Number(sample.location.y);
-      }else{
-        const input=batch[si];
+      returned+=samples.length;
+
+      for(let si=0;si<samples.length;si++){
+        const sample=samples[si];
+
+        const lid=Number(sample.locationId);
+
+        const localIndex=
+          Number.isInteger(lid)&&
+          lid>=1&&
+          lid<=batch.length
+            ?lid-1
+            :si;
+
+        const input=batch[localIndex];
 
         if(!input){
           invalidValues++;
           continue;
         }
 
-        x=input.x;
-        y=input.y;
+        const globalIndex=
+          offset+
+          localIndex;
+
+        if(!returnedIndices.has(globalIndex)){
+          returnedIndices.add(globalIndex);
+          returnedAreaM2+=input.pixelAreaM2;
+        }
+
+        const pixelAreaM2=input.pixelAreaM2;
+
+        const code=
+          dgParseSampleCode(
+            sample.value
+          );
+
+        if(!code){
+          noData++;
+          noDataAreaM2+=pixelAreaM2;
+          continue;
+        }
+
+        const sampleYear=
+          Number(sample.attributes?.Year);
+
+        if(
+          Number.isFinite(sampleYear) &&
+          sampleYear!==DG_S2_LULC_YEAR
+        ){
+          badYear++;
+          badYearAreaM2+=pixelAreaM2;
+          continue;
+        }
+
+        const resolution=
+          Number(sample.resolution);
+
+        if(
+          Number.isFinite(resolution) &&
+          Math.abs(
+            resolution-
+            DG_S2_LULC_PIXEL_M
+          )>1.5
+        ){
+          resolutionOff++;
+          resolutionOffAreaM2+=pixelAreaM2;
+        }
+
+        const group=
+          dgS2Group(code);
+
+        classCounts[code]++;
+
+        if(group==="masked"){
+          maskedSamples++;
+          maskedAreaM2+=pixelAreaM2;
+          continue;
+        }
+
+        if(
+          !Object.prototype.hasOwnProperty.call(
+            classAreas,
+            group
+          )
+        ){
+          invalidValues++;
+          invalidAreaM2+=pixelAreaM2;
+          continue;
+        }
+
+        classAreas[group]+=pixelAreaM2;
+
+        LANDCOVER_SAMPLES.push({
+          x:input.x,
+          y:input.y,
+          lat:input.lat,
+          lon:input.lon,
+          code,
+          group,
+          pixelFraction:input.pixelFraction,
+          pixelGroundAreaM2:input.pixelGroundAreaM2,
+          pixelAreaM2,
+          resolution:
+            Number.isFinite(resolution)
+              ?resolution
+              :DG_S2_LULC_PIXEL_M,
+          rasterId:
+            Number.isFinite(
+              Number(sample.rasterId)
+            )
+              ?Number(sample.rasterId)
+              :null,
+          locationId:
+            Number.isInteger(lid)
+              ?lid
+              :null
+        });
       }
 
-      const ll=
-        dg3857ToLonLat(x,y);
+      offset+=batch.length;
 
-      const lat=ll[1];
-      const lon=ll[0];
+      if(rep){
+        rep.innerHTML=
+          "⏳ Sentinel-2 / 10 m / 2020 · "+
+          requested.toLocaleString("tr-TR")+
+          " / "+
+          lattice.length.toLocaleString("tr-TR")+
+          " raster örneği sorgulandı…";
+      }
+    }
 
-      /*
-       * A raster sample returned outside the park is not allowed into the
-       * scientific population, even if the service returned a value.
-       */
+    const missingIndices=[];
+
+    for(let i=0;i<lattice.length;i++){
+      if(!returnedIndices.has(i)){
+        missingIndices.push(i);
+      }
+    }
+
+    const missingAreaM2=
+      missingIndices.reduce(
+        (sum,i)=>
+          sum+
+          lattice[i].pixelAreaM2,
+        0
+      );
+
+    const classifiedAreaM2=
+      classAreas.green+
+      classAreas.hard+
+      classAreas.water+
+      classAreas.other;
+
+    const sampledCoveragePct=
+      parkM2>0
+        ?candidateAreaM2/parkM2*100
+        :0;
+
+    const returnedCoveragePct=
+      parkM2>0
+        ?returnedAreaM2/parkM2*100
+        :0;
+
+    const classifiedCoveragePct=
+      parkM2>0
+        ?classifiedAreaM2/parkM2*100
+        :0;
+
+    for(const p of LANDCOVER_SAMPLES){
+      const g=
+        osmSampleGroup(
+          p.lat,
+          p.lon
+        );
+
       if(
-        !pointInPark(
-          lat,
-          lon,
-          {
-            outer:PARK_POLY,
-            inner:PARK_HOLES||[]
-          }
+        Object.prototype.hasOwnProperty.call(
+          osmAreas,
+          g
         )
       ){
-        invalidValues++;
-        continue;
+        osmAreas[g]+=p.pixelAreaM2;
       }
-
-      const group=
-        dgS2Group(code);
-
-      classCounts[code]++;
-
-      LANDCOVER_SAMPLES.push({
-        x,
-        y,
-        lat,
-        lon,
-        code,
-        group,
-        resolution:
-          Number.isFinite(resolution)
-            ?resolution
-            :DG_S2_LULC_PIXEL_M,
-        rasterId:
-          Number.isFinite(
-            Number(sample.rasterId)
-          )
-            ?Number(sample.rasterId)
-            :null
-      });
     }
 
-    offset+=batch.length;
+    if(returned===0){
+      throw new Error(
+        "ArcGIS getSamples hiç örnek döndürmedi."
+      );
+    }
+
+    const unclassifiedAreaM2=
+      missingAreaM2+
+      noDataAreaM2+
+      badYearAreaM2+
+      invalidAreaM2;
+
+    const warnings=[];
+
+    if(
+      Math.abs(
+        sampledCoveragePct-100
+      )>2
+    ){
+      warnings.push(
+        "10 m raster hücrelerinin park kesişim alanı "+
+        sampledCoveragePct.toFixed(1)+
+        "% oranında temsil edildi."
+      );
+    }
+
+    const accountedAreaM2=
+      classifiedAreaM2+
+      maskedAreaM2+
+      unclassifiedAreaM2;
+
+    if(
+      Math.abs(
+        accountedAreaM2-returnedAreaM2
+      )>Math.max(5,parkM2*0.005)
+    ){
+      warnings.push(
+        "Alan bileşenleri ile ArcGIS yanıt alanı arasında QC farkı var."
+      );
+    }
+
+    if(noData>0){
+      warnings.push(
+        noData+
+        " örnek NoData/geçersiz sınıf döndürdü."
+      );
+    }
+
+    if(missingIndices.length>0){
+      warnings.push(
+        missingIndices.length+
+        " 10 m örneğin ArcGIS yanıtında karşılığı bulunamadı."
+      );
+    }
+
+    if(badYear>0){
+      warnings.push(
+        badYear+
+        " örnekte 2020 dışı raster yılı döndü."
+      );
+    }
+
+    if(resolutionOff>0){
+      warnings.push(
+        resolutionOff+
+        " örnekte 10 m dışı çözünürlük bildirildi."
+      );
+    }
+
+    if(maskedSamples>0){
+      warnings.push(
+        maskedSamples+
+        " Cloud sınıfı sınıflandırılmış örtü toplamına dahil edilmedi."
+      );
+    }
+
+    LANDCOVER={
+      total:+(
+        parkM2/10000
+      ).toFixed(2),
+
+      geometricTotal:+(
+        parkM2/10000
+      ).toFixed(2),
+
+      green:+(
+        classAreas.green/10000
+      ).toFixed(2),
+
+      hard:+(
+        classAreas.hard/10000
+      ).toFixed(2),
+
+      water:+(
+        classAreas.water/10000
+      ).toFixed(2),
+
+      other:+(
+        classAreas.other/10000
+      ).toFixed(2),
+
+      masked:+(
+        maskedAreaM2/10000
+      ).toFixed(2),
+
+      unknown:0,
+
+      sampleM:10,
+      candidateSampleCount:lattice.length,
+      sampleCount:LANDCOVER_SAMPLES.length,
+      satellitePixels:returnedIndices.size,
+
+      requestedSamples:requested,
+      returnedSamples:returned,
+      missingSamples:missingIndices.length,
+      invalidSamples:invalidValues,
+      noDataSamples:noData,
+      maskedSamples,
+
+      method:
+        "ArcGIS ImageServer getSamples · 10 m raster-cell intersection weighting · Year 2020 · nearest neighbour",
+
+      source:
+        "Impact Observatory · Microsoft · Esri · Sentinel-2 10 m Land Cover",
+
+      sourceUrl:
+        DG_S2_LULC_SERVICE,
+
+      rawClassCounts:
+        classCounts,
+
+      classCounts:
+        classAreas,
+
+      osmOpen:+(
+        osmAreas.open/10000
+      ).toFixed(2),
+
+      osmHard:+(
+        osmAreas.hard/10000
+      ).toFixed(2),
+
+      osmWater:+(
+        osmAreas.water/10000
+      ).toFixed(2),
+
+      osmSampleCount:
+        LANDCOVER_SAMPLES.length,
+
+      suitableM2:
+        osmAreas.open,
+
+      resolutionM:10,
+
+      validAreaM2:
+        classifiedAreaM2,
+
+      geometricAreaM2:
+        parkM2,
+
+      sampledAreaM2:
+        candidateAreaM2,
+
+      returnedAreaM2:
+        returnedAreaM2,
+
+      cloudAreaM2:
+        maskedAreaM2,
+
+      missingAreaM2:
+        missingAreaM2,
+
+      unclassifiedAreaM2:
+        unclassifiedAreaM2,
+
+      coveragePct:
+        sampledCoveragePct,
+
+      returnedCoveragePct:
+        returnedCoveragePct,
+
+      classifiedCoveragePct:
+        classifiedCoveragePct,
+
+      qualityWarning:
+        warnings.join(" ")
+    };
 
     if(rep){
+      const row=(emoji,label,m2)=>
+        dgSatelliteReportRow(
+          emoji,
+          label,
+          m2,
+          parkM2
+        );
+
       rep.innerHTML=
-        "⏳ Sentinel-2 / 10 m / 2020 · "+
-        requested.toLocaleString("tr-TR")+
-        " / "+
+        "<b>🛰️ Arazi Örtüsü · Sentinel-2 / 10 m · 2020</b>"+
+        row("🌿","Yeşil / vejetasyon",classAreas.green)+
+        row("🧱","Yapılı / built",classAreas.hard)+
+        row("💧","Su",classAreas.water)+
+        row("🟫","Diğer",classAreas.other)+
+        row("☁️","Bulut / maskeli",maskedAreaM2)+
+
+        "<div style='font-size:.72rem;color:var(--mut);margin-top:10px'>"+
+        "Park geometrisi: <b>"+
+        (parkM2/10000).toFixed(2)+
+        " ha</b> · Raster hücrelerinin parkla kesişen alanı: <b>"+
+        (candidateAreaM2/10000).toFixed(2)+
+        " ha</b> · Dönen örnek alanı: <b>"+
+        (returnedAreaM2/10000).toFixed(2)+
+        " ha</b></div>"+
+
+        "<div style='font-size:.68rem;color:var(--mut);margin-top:7px'>"+
+        "10 m hücre adayı: <b>"+
         lattice.length.toLocaleString("tr-TR")+
-        " örnek sorgulandı…";
+        "</b> · Yanıtlanan hücre: <b>"+
+        returnedIndices.size.toLocaleString("tr-TR")+
+        "</b> · Sınıflandırılmış alan: <b>"+
+        (classifiedAreaM2/10000).toFixed(2)+
+        " ha</b> · Bulut: <b>"+
+        (maskedAreaM2/10000).toFixed(2)+
+        " ha</b> · Eksik/NoData: <b>"+
+        (unclassifiedAreaM2/10000).toFixed(2)+
+        " ha</b></div>"+
+
+        "<div style='font-size:.68rem;color:var(--mut);margin-top:7px'>"+
+        "<b>Yöntem:</b> 10 m örnek noktaları ArcGIS "+
+        "<code>esriGeometryMultipoint</code> ile doğrudan örneklenir. "+
+        "Park sınırındaki hücreler, 10×10 m hücrenin park geometrisiyle "+
+        "kesişim oranı kadar ağırlıklandırılır; böylece sınır hücreleri "+
+        "körlemesine 100 m² sayılmaz. Kategorik LULC için "+
+        "<code>NearestNeighbour</code> kullanılır.</div>"+
+
+        "<div style='font-size:.68rem;color:var(--mut);margin-top:7px'>"+
+        "<b>OSM bağımsız çapraz kontrol:</b> Açık="+
+        (osmAreas.open/10000).toFixed(2)+
+        " ha · Sert="+
+        (osmAreas.hard/10000).toFixed(2)+
+        " ha · Su="+
+        (osmAreas.water/10000).toFixed(2)+
+        " ha.</div>"+
+
+        "<div style='font-size:.68rem;color:var(--mut);margin-top:7px'>"+
+        "<b>Ham sınıflar:</b> "+
+        Object.keys(DG_S2_CLASS_NAMES).map(
+          code=>
+            DG_S2_CLASS_NAMES[code]+"="+
+            (classCounts[code]||0)
+        ).join(" · ")+
+        "</div>"+
+
+        "<div style='font-size:.68rem;color:var(--mut);margin-top:7px'>"+
+        "<b>Veri kaynağı:</b> Impact Observatory / Microsoft / Esri "+
+        "10 m Sentinel-2 arazi örtüsü zaman serisi. Bu veri ham "+
+        "Sentinel-2 bant görüntüsü değil, sınıflandırılmış tematik "+
+        "LULC rasterıdır. Class 7 built sınıfıdır; tek tek bina "+
+        "footprint'i değildir. OSM bina/yol/otopark/su geometrisi "+
+        "ayrı dışlama ve çapraz kontrol katmanı olarak korunur.</div>"+
+
+        (
+          LANDCOVER.qualityWarning
+            ?"<div style='margin-top:9px;padding:8px 10px;border-radius:8px;background:rgba(245,158,11,.10);color:#92400e;font-size:.68rem'>"+
+             "⚠ QC: "+esc(LANDCOVER.qualityWarning)+
+             "</div>"
+            :""
+        );
     }
-  }
 
-  /*
-   * Duplicate physical samples are not counted twice.
-   */
-  const unique=new Map();
+    dgRenderSatelliteCells();
 
-  for(const p of LANDCOVER_SAMPLES){
-    const key=
-      Math.round(p.x/DG_S2_LULC_PIXEL_M)+":"+
-      Math.round(p.y/DG_S2_LULC_PIXEL_M);
+    console.log(
+      "DENDROGEO · Sentinel-2 getSamples 2020:",
+      LANDCOVER,
+      {
+        classCounts,
+        classAreas,
+        osmAreas,
+        candidateAreaM2,
+        returnedAreaM2,
+        classifiedAreaM2,
+        coveragePct:sampledCoveragePct
+      }
+    );
 
-    if(!unique.has(key)){
-      unique.set(key,p);
-    }
-  }
-
-  LANDCOVER_SAMPLES=[
-    ...unique.values()
-  ];
-
-  const grouped={
-    green:0,
-    hard:0,
-    water:0,
-    other:0
-  };
-
-  for(const p of LANDCOVER_SAMPLES){
-    grouped[p.group]=(grouped[p.group]||0)+1;
-  }
-
-  const validCount=
-    LANDCOVER_SAMPLES.length;
-
-  const nominalAreaM2=
-    validCount*
-    DG_S2_LULC_PIXEL_M*
-    DG_S2_LULC_PIXEL_M;
-
-  const parkM2=
-    parkAreaM2();
-
-  const coveragePct=
-    parkM2>0
-      ?nominalAreaM2/parkM2*100
-      :0;
-
-  const pct=v=>
-    validCount>0
-      ?v/validCount*100
-      :0;
-
-  const osm={
-    open:0,
-    hard:0,
-    water:0
-  };
-
-  for(const p of LANDCOVER_SAMPLES){
-    const g=
-      osmSampleGroup(
-        p.lat,
-        p.lon
+    if(LANDCOVER.qualityWarning){
+      toast(
+        "⚠ 10 m uydu analizi tamamlandı; QC uyarısı var.",
+        "warn",
+        "🛰️"
       );
-
-    osm[g]++;
-  }
-
-  const warnings=[];
-
-  if(
-    coveragePct<95||
-    coveragePct>105
-  ){
-    warnings.push(
-      "10 m örnek örtüsü park alanının "+
-      coveragePct.toFixed(1)+
-      "%'ine karşılık geliyor."
-    );
-  }
-
-  if(noData>0){
-    warnings.push(
-      noData+
-      " uydu örneğinde NoData/geçersiz sınıf döndü."
-    );
-  }
-
-  if(badYear>0){
-    warnings.push(
-      badYear+
-      " örnekte 2020 dışı raster metadata'sı döndü."
-    );
-  }
-
-  if(resolutionOff>0){
-    warnings.push(
-      resolutionOff+
-      " örneğin kaynak çözünürlüğü 10 m'den farklı."
-    );
-  }
-
-  LANDCOVER={
-    total:+(
-      nominalAreaM2/10000
-    ).toFixed(2),
-
-    geometricTotal:+(
-      parkM2/10000
-    ).toFixed(2),
-
-    green:+(
-      grouped.green*100/10000
-    ).toFixed(2),
-
-    hard:+(
-      grouped.hard*100/10000
-    ).toFixed(2),
-
-    water:+(
-      grouped.water*100/10000
-    ).toFixed(2),
-
-    other:+(
-      grouped.other*100/10000
-    ).toFixed(2),
-
-    unknown:0,
-
-    sampleM:10,
-    sampleCount:validCount,
-    satellitePixels:validCount,
-
-    requestedSamples:requested,
-    returnedSamples:returned,
-    invalidSamples:invalidValues,
-    noDataSamples:noData,
-
-    method:
-      "ArcGIS ImageServer getSamples · 10 m systematic multipoint lattice · Year 2020 · nearest neighbour",
-
-    source:
-      "Impact Observatory · Microsoft · Esri · Sentinel-2 10 m Land Cover",
-
-    rawClassCounts:classCounts,
-
-    classCounts:grouped,
-
-    osmOpen:+(
-      osm.open*100/10000
-    ).toFixed(2),
-
-    osmHard:+(
-      osm.hard*100/10000
-    ).toFixed(2),
-
-    osmWater:+(
-      osm.water*100/10000
-    ).toFixed(2),
-
-    osmSampleCount:
-      osm.open+
-      osm.hard+
-      osm.water,
-
-    suitableM2:
-      osm.open*100,
-
-    resolutionM:10,
-
-    validAreaM2:
-      nominalAreaM2,
-
-    geometricAreaM2:
-      parkM2,
-
-    coveragePct,
-
-    qualityWarning:
-      warnings.join(" ")
-  };
-
-  if(rep){
-    rep.innerHTML=
-      "<b>🛰️ Arazi Örtüsü · Sentinel-2 / 10 m · 2020</b>"+
-      dgSatelliteReportRow("🌿","Yeşil / vejetasyon",grouped.green*100,nominalAreaM2)+
-      dgSatelliteReportRow("🧱","Yapılı / built",grouped.hard*100,nominalAreaM2)+
-      dgSatelliteReportRow("💧","Su",grouped.water*100,nominalAreaM2)+
-      dgSatelliteReportRow("🟫","Diğer",grouped.other*100,nominalAreaM2)+
-
-      "<div style='font-size:.72rem;color:var(--mut);margin-top:10px'>"+
-      "Park geometrisi: <b>"+
-      (parkM2/10000).toFixed(2)+
-      " ha</b> · 10 m örneklenmiş alan: <b>"+
-      (nominalAreaM2/10000).toFixed(2)+
-      " ha</b><br>"+
-      "Geçerli 10 m örneği: <b>"+
-      validCount.toLocaleString("tr-TR")+
-      "</b> · İstenen: <b>"+
-      requested.toLocaleString("tr-TR")+
-      "</b> · Dönen: <b>"+
-      returned.toLocaleString("tr-TR")+
-      "</b> · NoData: <b>"+
-      noData.toLocaleString("tr-TR")+
-      "</b></div>"+
-
-      "<div style='font-size:.68rem;color:var(--mut);margin-top:8px'>"+
-      "<b>Yöntem:</b> Park bbox'ı değil, parkın içine düşen sistematik "+
-      "10 m örnek noktaları kullanıldı. Noktalar ArcGIS getSamples'a "+
-      "multipoint olarak güvenli batch'lerle gönderildi; 2020 seçimi "+
-      "<code>Year = 2020</code>, <code>esriMosaicAttribute</code>, "+
-      "<code>sortValue = null</code>; kategorik rasterda "+
-      "<code>NearestNeighbour</code>.</div>"+
-
-      "<div style='font-size:.68rem;color:var(--mut);margin-top:7px'>"+
-      "<b>OSM bağımsız 10 m çapraz kontrol:</b> "+
-      "Açık="+
-      (osm.open/100).toFixed(2)+
-      " ha · Sert="+
-      (osm.hard/100).toFixed(2)+
-      " ha · Su="+
-      (osm.water/100).toFixed(2)+
-      " ha.</div>"+
-
-      "<div style='font-size:.68rem;color:var(--mut);margin-top:7px'>"+
-      "<b>Ham sınıflar:</b> "+
-      Object.keys(DG_S2_CLASS_NAMES).map(
-        code=>
-          DG_S2_CLASS_NAMES[code]+"="+
-          (classCounts[code]||0)
-      ).join(" · ")+
-      "</div>"+
-
-      "<div style='font-size:.68rem;color:var(--mut);margin-top:7px'>"+
-      "<b>Bilimsel sınır:</b> Class 7 'built' LULC sınıfıdır; "+
-      "tek tek bina footprint'i değildir. Bina/yol/otopark/su "+
-      "dışlamasında OSM geometrisi esas alınır.</div>"+
-
-      (
-        LANDCOVER.qualityWarning
-          ?"<div style='margin-top:9px;padding:8px 10px;border-radius:8px;background:rgba(245,158,11,.10);color:#92400e;font-size:.68rem'>"+
-           "⚠ QC: "+esc(LANDCOVER.qualityWarning)+
-           "</div>"
-          :""
+    }else{
+      toast(
+        "✓ 2020 · 10 m park içi Sentinel-2 LULC analizi tamamlandı",
+        "ok",
+        "🛰️"
       );
-  }
-
-  dgRenderSatelliteCells();
-
-  console.log(
-    "DENDROGEO · Sentinel-2 getSamples 2020:",
-    LANDCOVER,
-    {
-      classCounts,
-      grouped,
-      osm,
-      coveragePct
     }
-  );
 
-  if(LANDCOVER.qualityWarning){
+    return LANDCOVER;
+  }catch(err){
+    console.error(
+      "DENDROGEO · Sentinel-2 analiz hatası:",
+      err
+    );
+
+    if(rep){
+      rep.style.display="block";
+      rep.innerHTML=
+        "<b>❌ Sentinel-2 / 10 m analizi tamamlanamadı.</b>"+
+        "<div style='font-size:.74rem;color:var(--red);margin-top:7px'>"+
+        esc(err?.message||String(err))+
+        "</div>"+
+        "<div style='font-size:.68rem;color:var(--mut);margin-top:7px'>"+
+        "Sonuç üretilmedi; kısmi örnekler bilimsel rapora yazılmadı.</div>";
+    }
+
     toast(
-      "⚠ 10 m uydu analizi tamamlandı; QC uyarısı var.",
-      "warn",
+      "Sentinel-2/LULC analizi hatası: "+
+      (err?.message||String(err)),
+      "err",
       "🛰️"
     );
-  }else{
-    toast(
-      "✓ 2020 · 10 m park içi Sentinel-2 analizi tamamlandı",
-      "ok",
-      "🛰️"
-    );
+
+    return null;
+  }finally{
+    SATELLITE_RUNNING=false;
   }
 }
 
@@ -4492,6 +4881,4 @@ async function dgSatelliteRun(){
 window.toggleParkMode=toggleParkMode;
 window.bindParkClick=bindParkClick;
 window.clearPark=clearPark;
-window.runLandCoverAnalysis=dgSatelliteRun;
-window.bindParkClick=bindParkClick;
 window.runLandCoverAnalysis=dgSatelliteRun;
