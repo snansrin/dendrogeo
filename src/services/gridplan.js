@@ -1,5 +1,5 @@
 "use strict";
-/* DendroGeo v2 · gridplan.js v131 — LULC raw U8 raster-cell engine · no histogram dependency
+/* DendroGeo v2 · gridplan.js v132 — Park-mode handler hardening + LULC raw U8 raster-cell engine
   
 let PARK_POLY=null;
 let PARK_HOLES=[]; 
@@ -2078,35 +2078,54 @@ function toggleParkMode(){
   PARK_MODE=!PARK_MODE;
 
   const b=$("parkModeBtn");
+  const hint=$("parkModeHint");
 
-  b.textContent=
-    "🌳 Park Analizi: "+
-    (
-      PARK_MODE
-        ?"AÇIK"
-        :"KAPALI"
+  if(b){
+    b.textContent=
+      "🌳 Park Analizi Modu: "+
+      (PARK_MODE?"AÇIK":"KAPALI");
+
+    b.classList.toggle("blue",!PARK_MODE);
+    b.setAttribute(
+      "aria-pressed",
+      PARK_MODE?"true":"false"
     );
+  }
 
-  b.className=
-    "btn sm "+
-    (
+  if(hint){
+    hint.textContent=
       PARK_MODE
-        ?""
-        :"blue"
-    );
-
-  $("parkModeHint").textContent=
-    PARK_MODE
-      ?"Şimdi parkın içine tıkla."
-      :"Açınca parka tıkla.";
+        ?"Şimdi haritada parkın içine tıkla."
+        :"Açınca haritada bir parkın içine tıkla → sınırı otomatik algılanır.";
+  }
 
   bindParkClick();
 
   if(!PARK_MODE){
     PARK_CANDS=[];
-
     clearPark();
+    return;
   }
+
+  if(!map){
+    PARK_MODE=false;
+    if(b){
+      b.textContent="🌳 Park Analizi Modu: KAPALI";
+      b.classList.add("blue");
+      b.setAttribute("aria-pressed","false");
+    }
+    if(hint){
+      hint.textContent=
+        "Harita henüz hazır değil; tekrar deneyin.";
+    }
+    return;
+  }
+
+  toast(
+    "🌳 Park Analizi modu açıldı. Haritada bir parkın içine tıklayın.",
+    "ok",
+    "🌳"
+  );
 }
 
 function bindParkClick(){
@@ -2124,32 +2143,44 @@ function bindParkClick(){
     async e=>{
       if(!PARK_MODE)return;
 
-      toast(
-        "🌳 Park sorgulanıyor…",
-        "info"
-      );
-
-      const parks=
-        await queryPark(
-          e.latlng.lat,
-          e.latlng.lng
+      try{
+        toast(
+          "🌳 Park sorgulanıyor…",
+          "info"
         );
 
-      if(
-        !parks ||
-        !parks.length
-      ){
-        return toast(
-          "Park bulunamadı.",
-          "warn"
+        const parks=
+          await queryPark(
+            e.latlng.lat,
+            e.latlng.lng
+          );
+
+        if(
+          !parks ||
+          !parks.length
+        ){
+          toast(
+            "Park bulunamadı.",
+            "warn"
+          );
+          return;
+        }
+
+        PARK_CANDS=parks;
+        await drawPark(parks[0]);
+      }catch(err){
+        console.error(
+          "DENDROGEO · Park tıklama hatası:",
+          err
+        );
+
+        toast(
+          "Park analizi başarısız: "+
+          (err?.message||String(err)),
+          "err",
+          "🌳"
         );
       }
-
-      PARK_CANDS=parks;
-
-      drawPark(
-        parks[0]
-      );
     }
   );
 }
@@ -5599,6 +5630,7 @@ async function dgSatelliteRun(){
 
 // Inline HTML handlers require these public entry points.
 window.toggleParkMode=toggleParkMode;
+window.dgToggleParkMode=toggleParkMode;
 window.bindParkClick=bindParkClick;
 window.clearPark=clearPark;
 window.runLandCoverAnalysis=dgSatelliteRun;
