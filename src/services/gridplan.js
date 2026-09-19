@@ -1,5 +1,5 @@
 "use strict";
-/* DendroGeo v2 · gridplan.js v109 — FINAL (su+sert iyileştirmeleri) */           
+/* DendroGeo v2 · gridplan.js v110 — FINAL (su+sert iyileştirmeleri) */           
   
 let PARK_POLY=null;
 let PARK_HOLES=[]; 
@@ -4142,136 +4142,263 @@ async function dgClipRasterBlobToPark(blob,bbox,width,height){
   return canvas.toDataURL("image/png");
 }
 
-async function dgAnalyzeRenderedRaster(raster){
-  const bitmap=await createImageBitmap(raster.blob);
-  const canvas=document.createElement("canvas");
-  canvas.width=raster.width;
-  canvas.height=raster.height;
+function dgParkRings3857(){
+  const outer=(PARK_POLY||[]).map(r=>
+    (r||[]).map(p=>
+      dgLonLatToWebMercator(p[0],p[1])
+    )
+  );
 
-  const ctx=canvas.getContext("2d",{willReadFrequently:true});
-  if(!ctx){
-    bitmap.close();
-    throw new Error("Raster analizinde Canvas 2D açılamadı.");
+  const holes=(PARK_HOLES||[]).map(r=>
+    (r||[]).map(p=>
+      dgLonLatToWebMercator(p[0],p[1])
+    )
+  );
+
+  return{outer,holes};
+}
+
+function dgPointInsideRings3857(x,y,rings){
+  let insideOuter=false;
+
+  for(const ring of (rings.outer||[])){
+    if(
+      Array.isArray(ring)&&
+      ring.length>=3&&
+      pointInPolygonXY(x,y,ring)
+    ){
+      insideOuter=true;
+      break;
+    }
   }
 
-  ctx.drawImage(
-    bitmap,
-    0,
-    0,
-    raster.width,
-    raster.height
-  );
-  bitmap.close();
+  if(!insideOuter)return false;
 
-  const pixels=ctx.getImageData(
-    0,
-    0,
-    raster.width,
-    raster.height
-  ).data;
+  for(const ring of (rings.holes||[])){
+    if(
+      Array.isArray(ring)&&
+      ring.length>=3&&
+      pointInPolygonXY(x,y,ring)
+    ){
+      return false;
+    }
+  }
 
-  const outer=(PARK_POLY||[]).map(r=>
-    (r||[]).map(p=>dgLonLatToWebMercator(p[0],p[1]))
+  return true;
+}
+
+/*
+ * Deterministic 10 m sampling lattice.
+ * The Sentinel-2 LULC service is EPSG:3857 with native ~10 m
+ * pixels, so samples are placed at 10 m spacing and queried with
+ * nearest-neighbour at 10 m. Each point is inside the actual park
+ * polygon (holes excluded).
+ */
+function dgBuild10mSamplePoints(){
+  const bbox=dgParkBBox();
+  const sw=dgLonLatToWebMercator(
+    bbox.minLat,
+    bbox.minLon
   );
-  const holes=(PARK_HOLES||[]).map(r=>
-    (r||[]).map(p=>dgLonLatToWebMercator(p[0],p[1]))
+  const ne=dgLonLatToWebMercator(
+    bbox.maxLat,
+    bbox.maxLon
   );
+
+  const rings=dgParkRings3857();
+  const points=[];
+
+  const step=DG_S2_LULC_PIXEL_M;
+  const minX=Math.floor(sw.x/step)*step+step/2;
+  const minY=Math.floor(sw.y/step)*step+step/2;
+  const maxX=ne.x;
+  const maxY=ne.y;
+
+  for(let y=minY;y<=maxY;y+=step){
+    for(let x=minX;x<=maxX;x+=step){
+      if(!dgPointInsideRings3857(x,y,rings))continue;
+
+      points.push([
+        Math.round(x*1000)/1000,
+        Math.round(y*1000)/1000
+      ]);
+    }
+  }
+
+  return points;
+}
+
+async function dgGetSamplesChunk(points){
+  const params=new URLSearchParams({
+    f:"json",
+    geometryType:"esriGeometryMultipoint",
+    geometry:JSON.stringify({
+      points,
+      spatialReference:{wkid:3857}
+    }),
+    pixelSize:"10,10",
+    interpolation:"RSP_NearestNeighbor",
+    returnFirstValueOnly:"true",
+    outFields:"*",
+    time:DG_S2_START_MS+","+DG_S2_END_MS,
+    mosaicRule:JSON.stringify(dgBuildMosaicRule())
+  });
+
+  const res=await fetch(
+    DG_S2_LULC_SERVICE+
+      "/getSamples?"+
+      params.toString(),
+    {
+      method:"GET",
+      mode:"cors",
+      cache:"no-store",
+      headers:{Accept:"application/json"}
+    }
+  );
+
+  const body=await res.text();
+
+  if(!res.ok){
+    throw new Error(
+      "ArcGIS getSamples HTTP "+res.status+
+      " · "+body.slice(0,300)
+    );
+  }
+
+  const data=JSON.parse(body);
+
+  if(data?.error){
+    throw new Error(
+      (data.error.message||"ArcGIS getSamples hatası")+
+      (
+        Array.isArray(data.error.details)&&
+        data.error.details.length
+          ?" · "+data.error.details.join(" | ")
+          :""
+      )
+    );
+  }
+
+  return Array.isArray(data.samples)
+    ?data.samples
+    :[];
+}
+
+function dgParseSampleClass(sample){
+  const raw=
+    sample?.value ??
+    sample?.pixelValue ??
+    null;
+
+  if(raw===null||raw===undefined)return null;
+
+  if(Array.isArray(raw)){
+    const n=Number(raw[0]);
+    return Number.isFinite(n)?Math.round(n):null;
+  }
+
+  const m=String(raw).match(/-?\d+(?:\.\d+)?/);
+  if(!m)return null;
+
+  const n=Number(m[0]);
+  return Number.isFinite(n)?Math.round(n):null;
+}
+
+async function dgDirectSatelliteSamples(){
+  const requestedPoints=dgBuild10mSamplePoints();
+
+  if(!requestedPoints.length){
+    throw new Error(
+      "Park içinde 10 m örnekleme noktası üretilemedi."
+    );
+  }
+
+  /*
+   * ImageServer's getSamples default limit is approximately 1,000.
+   * 800-point chunks leave headroom for the service limit.
+   */
+  const CHUNK=800;
+  const chunks=[];
+
+  for(let i=0;i<requestedPoints.length;i+=CHUNK){
+    chunks.push(
+      requestedPoints.slice(i,i+CHUNK)
+    );
+  }
+
+  const samples=[];
+  const errors=[];
+  const CONCURRENCY=3;
+
+  for(let i=0;i<chunks.length;i+=CONCURRENCY){
+    const group=chunks.slice(i,i+CONCURRENCY);
+
+    const results=await Promise.all(
+      group.map(points=>
+        dgGetSamplesChunk(points)
+          .catch(error=>{
+            errors.push(error);
+            return [];
+          })
+      )
+    );
+
+    for(const rows of results){
+      samples.push(...rows);
+    }
+  }
+
+  if(!samples.length){
+    throw new Error(
+      "ArcGIS getSamples hiç örnek döndürmedi."
+    );
+  }
 
   const counts={};
   for(const code of [1,2,4,5,7,8,9,10,11]){
     counts[code]=0;
   }
 
-  let totalPixels=0;
-  let unmatchedPixels=0;
+  let noData=0;
+  let invalid=0;
 
-  const dx=
-    (raster.bbox3857.maxX-raster.bbox3857.minX)/
-    raster.width;
-  const dy=
-    (raster.bbox3857.maxY-raster.bbox3857.minY)/
-    raster.height;
+  for(const sample of samples){
+    const code=dgParseSampleClass(sample);
 
-  for(let py=0;py<raster.height;py++){
-    const y=
-      raster.bbox3857.maxY-
-      (py+0.5)*dy;
+    if(code===null){
+      noData++;
+      continue;
+    }
 
-    for(let px=0;px<raster.width;px++){
-      const x=
-        raster.bbox3857.minX+
-        (px+0.5)*dx;
-
-      let inside=false;
-
-      for(const ring of outer){
-        if(
-          Array.isArray(ring)&&
-          ring.length>=3&&
-          pointInPolygonXY(x,y,ring)
-        ){
-          inside=true;
-          break;
-        }
-      }
-
-      if(!inside)continue;
-
-      for(const ring of holes){
-        if(
-          Array.isArray(ring)&&
-          ring.length>=3&&
-          pointInPolygonXY(x,y,ring)
-        ){
-          inside=false;
-          break;
-        }
-      }
-
-      if(!inside)continue;
-
-      totalPixels++;
-
-      const idx=(py*raster.width+px)*4;
-      const r=pixels[idx];
-      const g=pixels[idx+1];
-      const b=pixels[idx+2];
-      const alpha=pixels[idx+3];
-
-      let bestCode=null;
-      let bestDist=Infinity;
-
-      for(const code of Object.keys(DG_S2_CLASS_RGB)){
-        const rgb=DG_S2_CLASS_RGB[Number(code)];
-        const dr=r-rgb.r;
-        const dg=g-rgb.g;
-        const db=b-rgb.b;
-        const dist=dr*dr+dg*dg+db*db;
-
-        if(dist<bestDist){
-          bestDist=dist;
-          bestCode=Number(code);
-        }
-      }
-
-      if(alpha===0||(!bestCode)||bestDist>900){
-        unmatchedPixels++;
-        continue;
-      }
-
-      counts[bestCode]++;
+    if(Object.prototype.hasOwnProperty.call(counts,code)){
+      counts[code]++;
+    }else{
+      invalid++;
     }
   }
 
+  const returned=samples.length;
+  const requested=requestedPoints.length;
+  const missing=Math.max(0,requested-returned);
+  const classified=Object.values(counts)
+    .reduce((sum,n)=>sum+(Number(n)||0),0);
+
+  if(!classified){
+    throw new Error(
+      "ArcGIS getSamples döndü ancak hiçbir 1–11 LULC sınıfı okunamadı."
+    );
+  }
+
   return{
-    classCounts:counts,
-    totalPixels,
-    unmatchedPixels,
-    unmatchedPct:
-      totalPixels>0
-        ?unmatchedPixels/totalPixels*100
-        :0,
-    effectivePixelM:raster.effectivePixelM
+    points:requestedPoints,
+    counts,
+    requested,
+    returned,
+    missing,
+    noData,
+    invalid,
+    classified,
+    errors
   };
 }
 
@@ -4500,15 +4627,20 @@ async function dgSatelliteRun(){
     const histogramClassCounts=dgHistogramCounts(hist);
     const histogramAllBins=dgHistogramTotal(hist);
 
-    const raster=await dgFetchSatelliteRaster();
-    const rasterAnalysis=await dgAnalyzeRenderedRaster(raster);
+    /*
+     * PRIMARY ANALYSIS:
+     * direct numeric pixel values from ImageServer/getSamples.
+     * Histogram is QC only and never drives the percentages.
+     */
+    const direct=await dgDirectSatelliteSamples();
+    const classCounts=direct.counts;
 
-    const classCounts=rasterAnalysis.classCounts;
-    const zonalPixelCount=rasterAnalysis.totalPixels;
-    const noDataPixelCount=rasterAnalysis.unmatchedPixels;
+    const zonalPixelCount=direct.requested;
 
     if(zonalPixelCount<=0){
-      throw new Error("Park polygonu raster görüntüsünde piksel içermiyor.");
+      throw new Error(
+        "10 m örnekleme noktası bulunamadı."
+      );
     }
 
     const classAreas={
@@ -4521,19 +4653,34 @@ async function dgSatelliteRun(){
     };
 
     const classAreaByCode={};
-    classAreas.nodata=parkM2*(noDataPixelCount/zonalPixelCount);
 
     for(let code=1;code<=11;code++){
       const count=Number(classCounts[code])||0;
-      const areaM2=parkM2*(count/zonalPixelCount);
+      const areaM2=
+        parkM2*(count/zonalPixelCount);
 
       classAreaByCode[code]=areaM2;
 
       const group=dgS2Group(code);
-      if(Object.prototype.hasOwnProperty.call(classAreas,group)){
+
+      if(
+        Object.prototype.hasOwnProperty.call(
+          classAreas,
+          group
+        )
+      ){
         classAreas[group]+=areaM2;
       }
     }
+
+    classAreas.nodata=
+      parkM2*(
+        (direct.missing+
+         direct.noData+
+         direct.invalid)/
+        zonalPixelCount
+      );
+
     const classifiedAreaM2=
       classAreas.water+
       classAreas.vegetation+
@@ -4588,13 +4735,13 @@ async function dgSatelliteRun(){
       floodedVegetation:+((vegetationBreakdown.flooded)/10000).toFixed(2),
 
       sampleM:10,
-      sampleCount:zonalPixelCount,
-      satellitePixels:zonalPixelCount,
+      sampleCount:direct.classified,
+      satellitePixels:direct.classified,
       requestedSamples:0,
-      returnedSamples:zonalPixelCount,
-      missingSamples:0,
-      invalidSamples:0,
-      noDataSamples:noDataPixelCount,
+      returnedSamples:direct.returned,
+      missingSamples:direct.missing,
+      invalidSamples:direct.invalid,
+      noDataSamples:direct.noData,
       maskedSamples:classCounts[10]||0,
 
       method:
@@ -4624,14 +4771,17 @@ async function dgSatelliteRun(){
 
       validAreaM2:classifiedAreaM2,
       geometricAreaM2:parkM2,
-      sampledAreaM2:parkM2,
-      returnedAreaM2:parkM2,
+      sampledAreaM2:
+        parkM2*(direct.returned/zonalPixelCount),
+      returnedAreaM2:
+        parkM2*(direct.returned/zonalPixelCount),
       cloudAreaM2:classAreas.masked||0,
       noDataAreaM2:classAreas.nodata||0,
 
-      missingAreaM2:classAreas.nodata||0,
+      missingAreaM2:
+        parkM2*(direct.missing/zonalPixelCount),
       unclassifiedAreaM2:
-        (classAreas.masked||0)+(classAreas.nodata||0),
+        classAreas.nodata||0,
 
       coveragePct:
         parkM2>0
@@ -4639,16 +4789,16 @@ async function dgSatelliteRun(){
           :0,
       returnedCoveragePct:
         parkM2>0
-          ?(classifiedAreaM2+(classAreas.masked||0))/parkM2*100
+          ?direct.returned/zonalPixelCount*100
           :0,
       classifiedCoveragePct:
         parkM2>0
           ?classifiedAreaM2/parkM2*100
           :0,
 
-      histogramPixelCount:zonalPixelCount,
+      histogramPixelCount:histogramAllBins,
       histogramAllBins,
-      histogramNoDataCount:noDataPixelCount,
+      histogramNoDataCount:dgHistogramValueCount(hist,0),
 
       histogramMin:Number(hist.min),
       histogramMax:Number(hist.max),
@@ -4661,6 +4811,14 @@ async function dgSatelliteRun(){
 
       requestVertexLimit:usedVertices,
       histogramUrlLength:usedUrlLength,
+
+      directSampleCount:direct.classified,
+      directRequestedPoints:direct.requested,
+      directReturnedSamples:direct.returned,
+      directMissingSamples:direct.missing,
+      directNoDataSamples:direct.noData,
+      directInvalidSamples:direct.invalid,
+      directChunkErrors:direct.errors.length,
 
       legacyClassPixels:legacyPixels,
       qualityWarning:"",
@@ -4781,10 +4939,11 @@ async function dgSatelliteRun(){
       rep.innerHTML=
         "<b>🛰️ Arazi Örtüsü · Sentinel-2 / 10 m · 2020</b>"+
         "<div style='font-size:.70rem;color:var(--mut);margin:7px 0 10px'>"+
-          "<b>Doğrudan sınıf sonucu</b> · Frekanslar gerçek park polygonu "+
-          "üzerinde ArcGIS zonal histogramından alınmıştır. "+
-          "Sınıf alanları bağımsız park geometrisi alanına oransal olarak "+
-          "uygulanmıştır."+
+          "<b>Doğrudan sayısal piksel sonucu</b> · ArcGIS ImageServer "+
+          "getSamples ile gerçek park polygonu içinde 10 m aralıklı "+
+          "noktaların raster sınıf değerleri okunmuştur. "+
+          "Yüzdeler doğrudan sınıf sayılarından hesaplanmıştır; "+
+          "histogram yalnızca bağımsız QC olarak kullanılır."+
         "</div>"+
         codeRows+
         "<div style='border-top:1px solid var(--line);margin-top:10px;padding-top:9px'>"+
@@ -4846,10 +5005,10 @@ async function dgSatelliteRun(){
           "kodlarıdır ve güncel üründe 11 altında birleştirilmiştir."+
         "</div>"+
         "<div style='font-size:.68rem;color:var(--mut);margin-top:7px'>"+
-          "<b>Harita:</b> ArcGIS'in resmi kategorik Cartographic Renderer çıktısı "+
-          "ile aynı raster, piksel renklerinden sınıflandırılıyor. Sayısal sonuç "+
-          "ve harita aynı rasterdan üretiliyor; OSM su/sert yüzey katmanı bu "+
-          "hesabı değiştirmiyor."+
+          "<b>Harita:</b> ArcGIS'in resmi kategorik Cartographic Renderer "+
+          "çıktısı gösteriliyor. Sayısal sınıflandırma renklerden değil, "+
+          "ImageServer'ın doğrudan sayısal piksel değerlerinden yapılıyor. "+
+          "OSM su/sert yüzey katmanı yalnızca bağımsız QC'dir."+
         "</div>"+
         (LANDCOVER.qualityWarning
           ?"<div style='margin-top:9px;padding:8px 10px;border-radius:8px;"+
@@ -4863,7 +5022,8 @@ async function dgSatelliteRun(){
      * Visualization failure must NOT erase a successful numeric result.
      */
     try{
-      await dgRenderSatelliteRaster(raster);
+      const visualRaster=await dgFetchSatelliteRaster();
+      await dgRenderSatelliteRaster(visualRaster);
     }catch(renderErr){
       LANDCOVER.visualizationError=
         renderErr?.message||String(renderErr);
