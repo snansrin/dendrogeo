@@ -4,8 +4,25 @@
 // NOT: Senkronizasyon artık Ana Thread (Supabase JS SDK) tarafından yapılıyor
 // ============================================================
 
-const CACHE_VERSION = 'dendrogeo-sw-v2-r32';
-const STATIC_CACHE = `static-${CACHE_VERSION}`;
+const CACHE_VERSION = 'dendrogeo-sw-v2-r33';
+
+/* İKİ AYRI STATİK CACHE — bu ayrım bilinçli ve önemli.
+ *
+ * PRECACHE: CORE_ASSETS'in sorgusuz kopyaları. Yalnızca install sırasında
+ *           yazılır ve ASLA trim edilmez. Çevrimdışı yedeği buna dayanır.
+ * RUNTIME : çalışma zamanında eklenen ?v=NNN sürümlü script/style kopyaları.
+ *           Sınırlıdır, trim edilir.
+ *
+ * Neden ayrıldılar: eskiden ikisi de STATIC_CACHE içindeydi ve trimCache
+ * FIFO ile keys[0]'ı siliyordu. Cache.keys() ekleme sırasıyla döndüğü için
+ * keys[0] HER ZAMAN install'da eklenen bir precache girdisiydi. gridplan.js
+ * ?v=139'a ulaşana dek her sürüm yeni bir girdi ekledi; 150 limiti dolunca
+ * precache girdileri silinmeye başladı — yani networkFirstWithLimit'in
+ * çevrimdışı yedeği (origin+pathname) sessizce yok oluyordu. Uygulama
+ * çevrimiçiyken kusursuz çalıştığı için bu ancak sahada, bağlantı
+ * kesildiğinde fark edilirdi. */
+const PRECACHE = `precache-${CACHE_VERSION}`;
+const RUNTIME = `runtime-${CACHE_VERSION}`;
 const TILE_CACHE = `tiles-${CACHE_VERSION}`;
 const API_CACHE = `api-${CACHE_VERSION}`;
 const IMG_CACHE = `images-${CACHE_VERSION}`;
@@ -13,7 +30,8 @@ const OFFLINE_URL = '/';
 
 const MAX_TILES = 2000;
 const MAX_IMAGES = 500;
-const MAX_API_CACHE = 150;
+const MAX_API_CACHE = 150;   // Nominatim vb. API yanıtları
+const MAX_RUNTIME = 400;     // ?v=NNN sürümlü script/style kopyaları
 
 const CORE_ASSETS = [
     '/', '/index.html', '/manifest.json', '/icon.png', '/social-preview.png', '/css/style.css',
@@ -36,8 +54,8 @@ self.addEventListener('install', event => {
     console.log('[SW] 🌲 Kuruluyor...');
     self.skipWaiting();
     event.waitUntil(
-        caches.open(STATIC_CACHE).then(cache => {
-            console.log('[SW] Temel varlıklar cache\'leniyor');
+        caches.open(PRECACHE).then(cache => {
+            console.log('[SW] Temel varlıklar PRECACHE\'e yazılıyor (' + CORE_ASSETS.length + ' girdi)');
             return Promise.allSettled(
                 CORE_ASSETS.map(url => cache.add(url).catch(err => console.warn(`[SW] Cache başarısız: ${url}`, err)))
             );
@@ -51,8 +69,8 @@ self.addEventListener('activate', event => {
         caches.keys().then(keys => 
             Promise.all(
                 keys
-                    .filter(key => key.startsWith('static-') || key.startsWith('tiles-') || key.startsWith('api-') || key.startsWith('images-'))
-                    .filter(key => key !== STATIC_CACHE && key !== TILE_CACHE && key !== API_CACHE && key !== IMG_CACHE)
+                    .filter(key => key.startsWith('precache-') || key.startsWith('runtime-') || key.startsWith('static-') || key.startsWith('tiles-') || key.startsWith('api-') || key.startsWith('images-'))
+                    .filter(key => key !== PRECACHE && key !== RUNTIME && key !== TILE_CACHE && key !== API_CACHE && key !== IMG_CACHE)
                     .map(key => {
                         console.log(`[SW] 🗑️ Eski cache siliniyor: ${key}`);
                         return caches.delete(key);
@@ -74,11 +92,13 @@ self.addEventListener('fetch', event => {
     }
 
     // Application JS/CSS must not execute a stale deployment while online.
+    // Çalışma zamanı kopyaları RUNTIME'a yazılır (sınırlı, trim edilir);
+    // çevrimdışı yedeği PRECACHE'ten okunur (sınırsız ömürlü, trim edilmez).
     if (
         url.origin === self.location.origin &&
         (request.destination === 'script' || request.destination === 'style')
     ) {
-        event.respondWith(networkFirstWithLimit(request, STATIC_CACHE, MAX_API_CACHE));
+        event.respondWith(networkFirstWithLimit(request, RUNTIME, MAX_RUNTIME, PRECACHE));
         return;
     }
 
@@ -89,7 +109,7 @@ self.addEventListener('fetch', event => {
         url.hostname.includes('fonts.gstatic.com') ||
         url.hostname.includes('challenges.cloudflare.com')
     ) {
-        event.respondWith(staleWhileRevalidate(request, STATIC_CACHE));
+        event.respondWith(staleWhileRevalidate(request, RUNTIME));
         return;
     }
 
@@ -124,15 +144,20 @@ self.addEventListener('fetch', event => {
             fetch(request)
                 .then(response => {
                     const responseClone = response.clone();
-                    caches.open(STATIC_CACHE).then(cache => cache.put(request, responseClone));
+                    caches.open(RUNTIME).then(cache => cache.put(request, responseClone));
                     return response;
                 })
-                .catch(() => caches.match(OFFLINE_URL).then(res => res || caches.match('/index.html')))
+                // Çevrimdışı gezinme: PRECACHE'ten oku. caches.match()
+                // (cache adı verilmeyen) TÜM cache'leri arar; activate'te eski
+                // sürüm silinemediyse bayat bir kopya dönebilirdi.
+                .catch(() => caches.open(PRECACHE).then(c =>
+                    c.match(OFFLINE_URL).then(res => res || c.match('/index.html'))
+                ))
         );
         return;
     }
 
-    event.respondWith(staleWhileRevalidate(request, STATIC_CACHE));
+    event.respondWith(staleWhileRevalidate(request, RUNTIME));
 });
 
 // 📨 Sadece SKIP_WAITING için message dinle (sync YOK)
@@ -158,7 +183,17 @@ async function cacheFirstWithLimit(request, cacheName, limit) {
     }
 }
 
-async function networkFirstWithLimit(request, cacheName, limit) {
+/* Ağ öncelikli + sınırlı çalışma zamanı cache'i + PRECACHE yedeği.
+ *
+ * fallbackCache verilirse, çevrimdışıyken önce RUNTIME'da tam URL aranır,
+ * bulunamazsa PRECACHE'te sorgusuz yol (origin + pathname) aranır. Böylece
+ * "?v=139" ile istenen gridplan.js, install sırasında PRECACHE'e yazılmış
+ * sorgusuz kopyasından yüklenebilir.
+ *
+ * ÖNEMLİ: yedek ayrı cache'ten okunur. Eskiden tek cache kullanılıyordu ve
+ * trimCache FIFO ile precache girdilerini sildiği için bu yedek sessizce
+ * yok oluyordu (bkz. dosya başındaki PRECACHE/RUNTIME açıklaması). */
+async function networkFirstWithLimit(request, cacheName, limit, fallbackCache) {
     try {
         const response = await fetch(request);
         if (response.ok) {
@@ -174,9 +209,9 @@ async function networkFirstWithLimit(request, cacheName, limit) {
 
         // Offline + versioned asset: fall back to the unversioned precache.
         const url = new URL(request.url);
-        const fallback = await cache.match(
-            new Request(url.origin + url.pathname)
-        );
+        const unversioned = url.origin + url.pathname;
+        const fallbackSource = fallbackCache ? await caches.open(fallbackCache) : cache;
+        const fallback = await fallbackSource.match(new Request(unversioned));
         if (fallback) return fallback;
 
         return new Response(JSON.stringify({ error: 'Offline' }), {
@@ -207,7 +242,15 @@ async function staleWhileRevalidate(request, cacheName) {
             if (response.ok) cache.put(request, response.clone()).catch(() => {});
             return response;
         })
-        .catch(() => cached);
+        .catch(async () => {
+            if (cached) return cached;
+            // Ağ yok ve RUNTIME'da kopya yok → PRECACHE'teki sorgusuz kopya.
+            // Sabit sürümlü CDN dosyaları (leaflet@1.9.4, geotiff@2.1.3)
+            // CORE_ASSETS'te tam URL'leriyle durduğu için bu yedek çalışır.
+            const url = new URL(request.url);
+            const pre = await caches.open(PRECACHE);
+            return pre.match(request) || pre.match(new Request(url.origin + url.pathname));
+        });
     return cached || fetchPromise;
 }
 
@@ -221,11 +264,22 @@ async function networkOnly(request) {
     }
 }
 
+/* Cache'i limite indirir.
+ *
+ * İki düzeltme:
+ *  1) while döngüsü — eski hali `if` ile TEK girdi siliyordu; limit bir
+ *     seferde birden fazla aşılırsa (ör. toplu yükleme) yetişemiyordu.
+ *  2) keys.shift() FIFO'yu açıkça belgeler. Bu fonksiyon ARTIK PRECACHE
+ *     ÜZERİNDE ÇAĞRILMAMALI — precache çevrimdışı yedeğidir ve sınırsız
+ *     ömürlüdür. Yalnızca RUNTIME/TILE/API/IMG üzerinde çağrılır. */
 async function trimCache(cacheName, limit) {
     const cache = await caches.open(cacheName);
     const keys = await cache.keys();
-    if (keys.length > limit) {
-        await cache.delete(keys[0]);
+    let fazla = keys.length - limit;
+    while (fazla-- > 0) {
+        const enEski = keys.shift();
+        if (!enEski) break;
+        await cache.delete(enEski);
     }
 }
 
