@@ -4250,7 +4250,10 @@ async function dgSatelliteRun(){
         parkAreaHa:(parkM2/10000).toFixed(2),
         candidateSamples:lattice.length,
         candidateAreaHa:(candidateAreaM2/10000).toFixed(2),
-        expectedSamples:Math.round(parkM2/100)
+        candidateCoveragePct:
+          parkM2>0
+            ?candidateAreaM2/parkM2*100
+            :0
       }
     );
 
@@ -4427,6 +4430,7 @@ async function dgSatelliteRun(){
         ){
           resolutionOff++;
           resolutionOffAreaM2+=pixelAreaM2;
+          continue;
         }
 
         const group=
@@ -4556,7 +4560,8 @@ async function dgSatelliteRun(){
       missingAreaM2+
       noDataAreaM2+
       badYearAreaM2+
-      invalidAreaM2;
+      invalidAreaM2+
+      resolutionOffAreaM2;
 
     const warnings=[];
 
@@ -4611,7 +4616,7 @@ async function dgSatelliteRun(){
     if(resolutionOff>0){
       warnings.push(
         resolutionOff+
-        " örnekte 10 m dışı çözünürlük bildirildi."
+        " örnek 10 m dışı çözünürlük nedeniyle sınıflandırmadan çıkarıldı."
       );
     }
 
@@ -4663,6 +4668,7 @@ async function dgSatelliteRun(){
       missingSamples:missingIndices.length,
       invalidSamples:invalidValues,
       noDataSamples:noData,
+      resolutionOffSamples:resolutionOff,
       maskedSamples,
 
       method:
