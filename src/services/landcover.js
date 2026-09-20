@@ -74,16 +74,20 @@ const DG_LC_CODES={
   11:"Mera/rangeland"
 };
 
+/* Harita + rapor renk paleti (kullanıcı tercihi, 2026-09-20):
+ *   yeşil = AÇIK yeşil · su = mavi · sert zemin = gri · çıplak = kahverengi
+ * Harita katmanları ŞEFFAF çizilir (fillOpacity .38 / opacity .50). */
 const DG_LC_CLASSES=[
-  {key:"green",label:"Yeşil alan",emoji:"🌿",codes:[2,4,5,11],color:"#2e8b57"},
-  {key:"water",label:"Su",emoji:"💧",codes:[1],color:"#2563eb"},
-  {key:"hard",label:"Sert zemin",emoji:"🧱",codes:[7],color:"#c4281b"},
-  {key:"bare",label:"Çıplak zemin",emoji:"🟫",codes:[8],color:"#a59b8f"},
+  {key:"green",label:"Yeşil alan",emoji:"🌿",codes:[2,4,5,11],color:"#4ade80"},
+  {key:"water",label:"Su",emoji:"💧",codes:[1],color:"#3b82f6"},
+  {key:"hard",label:"Sert zemin",emoji:"🧱",codes:[7],color:"#64748b"},
+  {key:"bare",label:"Çıplak zemin",emoji:"🟫",codes:[8],color:"#8b5a2b"},
   {key:"other",label:"Diğer",emoji:"⬜",codes:[],color:"#94a3b8"}
 ];
 
 let DG_LC_LAYER=null;
 let DG_LC_LAST=null;
+let DG_LC_CHART=null;
 
 function dgLcFetchJson(url,options){
   return fetch(url,Object.assign({
@@ -752,10 +756,10 @@ function dgLcRenderRuns(runs){
       [[p1.lat,p1.lon],[p2.lat,p2.lon],[p3.lat,p3.lon],[p4.lat,p4.lon]],
       {
         color:cls.color,
-        weight:.8,
-        opacity:.55,
+        weight:.6,
+        opacity:.50,
         fillColor:cls.color,
-        fillOpacity:.48,
+        fillOpacity:.38,
         interactive:false,
         renderer:renderer||undefined
       }
@@ -888,6 +892,9 @@ function dgLcRenderReport(rep,result,parkAreaM2,extra){
       "<b>Ana kaynak:</b> "+(ex.primaryLabel||"")+". Seçili park polygonu ile 10 m raster hücrelerinin "+
       "GERÇEK kesişim alanı hesaplanır (hücre sayımı değil, tam poligon kesişimi). "+
       "EPSG:4326 karolarda hücre köşeleri analiz UTM'sine projekte edilir.</div>"+
+    "<div style='margin:2px 0 10px;padding:8px 10px;border:1px solid var(--line);border-radius:10px;background:var(--bg)'>"+
+      "<canvas id='lcBarCanvas' height='150' aria-label='Sınıf dağılımı bar grafiği (hektar)' role='img'></canvas>"+
+    "</div>"+
     "<div style='overflow:auto'><table><thead><tr><th></th><th>Sınıf</th><th>10 m hücre</th><th>Alan (ha)</th><th>%</th></tr></thead><tbody>"+
       rows+
     "</tbody></table></div>"+
@@ -908,6 +915,70 @@ function dgLcRenderReport(rep,result,parkAreaM2,extra){
       "<button class='btn sm ghost' onclick='downloadLandCoverClassCSV()'>📥 Sınıf CSV</button>"+
       "<button class='btn sm ghost' onclick='downloadLandCoverCellsGeoJSON()'>📍 Hücre GeoJSON</button>"+
     "</div>";
+
+  dgLcRenderBarChart(rep,R,ex);
+}
+
+/* Sınıf dağılımını YATAY BAR grafik olarak çizer.
+ * Çapraz kaynak varsa ikinci dataset eklenir → iki kaynağın anlaşmazlığı
+ * (ör. yeşil 22.26 ha vs 0 ha) görsel olarak anında görülür.
+ * Chart.js yüklü değilse sessizce atlanır; sayı tablosu zaten duruyor. */
+function dgLcRenderBarChart(rep,R,ex){
+  if(!rep||typeof rep.querySelector!=="function")return;
+  const cv=rep.querySelector("#lcBarCanvas");
+  if(!cv)return;
+  if(!window.Chart){console.warn("DENDROGEO · Chart.js yok, bar grafik atlandı.");return;}
+  try{
+    if(DG_LC_CHART){DG_LC_CHART.destroy();DG_LC_CHART=null;}
+    const GROUP_ORDER=["green","water","hard","bare","other"];
+    const aktif=GROUP_ORDER.filter(k=>(R.groupAreas?.[k]||0)>0||(ex.agreement&&ex.agreement[k]&&ex.agreement[k].crossHa>0));
+    const labels=aktif.map(k=>{
+      const cls=DG_LC_CLASSES.find(c=>c.key===k);
+      return cls.emoji+" "+cls.label;
+    });
+    const colors=aktif.map(k=>(DG_LC_CLASSES.find(c=>c.key===k)||{}).color||"#94a3b8");
+    const datasets=[{
+      label:ex.primaryLabel||"Ana kaynak",
+      data:aktif.map(k=>+((R.groupAreas?.[k]||0)/10000).toFixed(2)),
+      backgroundColor:colors.map(c=>c+"66"),   /* %40 dolgulu → şeffaf */
+      borderColor:colors,
+      borderWidth:1.2,
+      borderRadius:6,
+      borderSkipped:false,
+      barPercentage:.62
+    }];
+    if(ex.agreement){
+      datasets.push({
+        label:ex.crossLabel||"Çapraz kaynak",
+        data:aktif.map(k=>+(ex.agreement[k]?.crossHa||0).toFixed(2)),
+        backgroundColor:colors.map(c=>c+"22"),
+        borderColor:colors.map(c=>c+"88"),
+        borderWidth:1,
+        borderRadius:6,
+        borderSkipped:false,
+        barPercentage:.62
+      });
+    }
+    DG_LC_CHART=new Chart(cv,{
+      type:"bar",
+      data:{labels,datasets},
+      options:{
+        indexAxis:"y",
+        responsive:true,
+        maintainAspectRatio:false,
+        plugins:{
+          legend:{display:datasets.length>1,labels:{boxWidth:10,font:{size:10}}},
+          tooltip:{callbacks:{label:(c)=>" "+c.dataset.label+": "+c.parsed.x.toFixed(2)+" ha"}}
+        },
+        scales:{
+          x:{title:{display:true,text:"hektar",font:{size:10}},grid:{color:"rgba(20,30,25,.06)"},ticks:{font:{size:10}}},
+          y:{grid:{display:false},ticks:{font:{size:11}}}
+        }
+      }
+    });
+  }catch(err){
+    console.warn("DENDROGEO · bar grafik çizilemedi:",err);
+  }
 }
 
 function dgLcClassCsv(result,meta){
@@ -1168,6 +1239,7 @@ function downloadLandCoverCellsGeoJSON(){
 
 function clearLandCover(){
   DG_LC_LAST=null;
+  if(DG_LC_CHART){try{DG_LC_CHART.destroy();}catch(e){}DG_LC_CHART=null;}
   dgLcClearLayer();
 }
 

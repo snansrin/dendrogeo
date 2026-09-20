@@ -10,6 +10,7 @@
  */
 import { test, describe } from 'node:test';
 import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
 import { loadApp } from '../scripts/test-harness.mjs';
 
 const app = loadApp({ sadece: ['src/config/constants.js', 'src/utils/geo.js', 'src/services/landcover.js'] });
@@ -283,5 +284,90 @@ describe('dgLcRenderReport — render yolu (TDZ regresyonu)', () => {
 
   test('rep yoksa sessizce döner', () => {
     assert.doesNotThrow(() => app.dgLcRenderReport(null, REPORT, 500500));
+  });
+});
+
+describe('renk paleti ve şeffaflık (kullanıcı spesifikasyonu)', () => {
+  const renkler = Object.fromEntries(
+    // DG_LC_CLASSES vm realm'inden geliyor; düz okuma yeterli
+    [['green', null], ['water', null], ['hard', null], ['bare', null], ['other', null]]
+      .map(([k]) => [k, (app.DG_LC_CLASSES.find((c) => c.key === k) || {}).color])
+  );
+
+  test('yeşil = AÇIK yeşil, su = mavi, sert = gri, çıplak = kahverengi', () => {
+    assert.equal(renkler.green, '#4ade80');
+    assert.equal(renkler.water, '#3b82f6');
+    assert.equal(renkler.hard, '#64748b');
+    assert.equal(renkler.bare, '#8b5a2b');
+  });
+
+  test('kaynak kodunda şeffaflık değerleri duruyor (fill .38 / stroke .50)', () => {
+    const src = readFileSync(new URL('../src/services/landcover.js', import.meta.url), 'utf8');
+    assert.match(src, /fillOpacity:\.38/);
+    assert.match(src, /opacity:\.50/);
+  });
+});
+
+describe('dgLcRenderBarChart — bar grafik', () => {
+  const stub = () => {
+    const o = { _q: {} };
+    Object.defineProperty(o, 'innerHTML', { set(v) { o._v = v; }, get() { return o._v || ''; } });
+    o.querySelector = (sel) => (o._q[sel] = o._q[sel] || { id: sel.slice(1) });
+    return o;
+  };
+  const REPORT = {
+    groupCounts: { water: 1900, green: 3458, hard: 2422 },
+    groupAreasM2: { water: 125000, green: 222600, hard: 147100 },
+    classifiedAreaM2: 500500, maskedAreaM2: 0, maskedCount: 0,
+    sourceCells: 7780, rasterCoverageAreaM2: 500500,
+    year: 2021, primaryLabel: 'ESA 2021', crossLabel: 'IO 2020',
+    primaryCitation: 'ESA', crossCitation: 'IO',
+    agreement: { water: { primaryHa: 12.5, crossHa: 11.04, agreementPct: 94 },
+                 green: { primaryHa: 22.26, crossHa: 0, agreementPct: 0 },
+                 hard: { primaryHa: 14.71, crossHa: 39.01, agreementPct: 55 } },
+    crossError: null, patches: [],
+  };
+
+  test('canvas elemanı raporda var ve Chart yoksa çökmez', () => {
+    const rep = stub();
+    assert.doesNotThrow(() => app.dgLcRenderReport(rep, REPORT, 500500));
+    assert.ok(rep.innerHTML.includes('lcBarCanvas'));
+  });
+
+  test('⭐ Chart.js varsa yatay bar + çift dataset (ana + çapraz)', () => {
+    let cfg = null;
+    const created = [];
+    const rep = stub();
+    const ctx = app.__ctx || null;
+    // vm bağlamına sahte Chart enjekte et: loadApp ctx'i döndürmüyor; window'a yaz
+    // (harness ctx.window = ctx olduğu için app.window üzerinden erişilir)
+    const win = app.window;
+    win.Chart = class FakeChart {
+      constructor(cv, c) { cfg = c; created.push(c); }
+      destroy() {}
+    };
+    app.dgLcRenderReport(rep, REPORT, 500500);
+    assert.equal(created.length, 1, 'chart bir kez kurulmalı');
+    assert.equal(cfg.type, 'bar');
+    assert.equal(cfg.options.indexAxis, 'y', 'yatay bar');
+    assert.equal(cfg.data.datasets.length, 2, 'ana + çapraz dataset');
+    // NOT: vm realm'leri arasında deepEqual ÇALIŞMAZ (harness tuzak #2)
+    assert.equal(cfg.data.labels.join('|'), '🌿 Yeşil alan|💧 Su|🧱 Sert zemin');
+    assert.equal(cfg.data.datasets[0].data.join(','), '22.26,12.5,14.71');
+    assert.equal(cfg.data.datasets[1].data.join(','), '0,11.04,39.01');
+    // şeffaf dolgu: renk + alfa sufiksi
+    assert.match(cfg.data.datasets[0].backgroundColor[0], /#4ade8066$/);
+    win.Chart = undefined;
+  });
+
+  test('yeniden render eski chart\'ı destroy eder (canvas çakışması yok)', () => {
+    let destroys = 0;
+    const win = app.window;
+    win.Chart = class { constructor() {} destroy() { destroys++; } };
+    const rep = stub();
+    app.dgLcRenderReport(rep, REPORT, 500500);
+    app.dgLcRenderReport(rep, REPORT, 500500);
+    assert.equal(destroys, 1, 'ikinci render önceki instance\'ı kapatmalı');
+    win.Chart = undefined;
   });
 });
