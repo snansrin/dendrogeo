@@ -547,3 +547,72 @@ describe('v8: grid yeşil-alan kapısı + PNG dışa aktarım (canary)', () => {
     assert.match(src, /chk\("chkPngCover"\)/);
   });
 });
+
+describe('v9: sapma düzeltmesi + yapay havuz rafinasyonu + PNG park kıpı', () => {
+  const srcLc = readFileSync(new URL('../src/services/landcover.js', import.meta.url), 'utf8');
+  const srcGp = readFileSync(new URL('../src/services/gridplan.js', import.meta.url), 'utf8');
+
+  test('⭐ 4326 köşeleri hücre merkezi DEĞİL gerçek köşe (sapma kilidi)', () => {
+    assert.match(srcLc, /c0=\{lat:latBot,lon:lon0\}/);
+    assert.match(srcLc, /c2=\{lat:latTop,lon:lon1\}/);
+    // eski hata: inv() 4326'da argümanı yok sayıyordu
+    assert.ok(!srcLc.includes('isUtm?dgLcUtmInverse(p.x,p.y,analysisEpsg):{lat:(meta.maxY'),
+      'eski sapmalı inv() geri gelmemeli');
+  });
+
+  test('⭐ dgLcRefineWater: yapay havuz hücreleri suya geçer', () => {
+    const D = 0.0001;
+    const cell = (row, col, classKey) => {
+      const latTop = 40 - row * D, latBot = latTop - D;
+      const lon0 = 32 + col * D, lon1 = lon0 + D;
+      return { row, col, classKey, areaM2: 100, classCode: 50,
+        center: { lat: (latTop + latBot) / 2, lon: (lon0 + lon1) / 2 } };
+    };
+    const result = {
+      cells: [cell(0, 0, 'hard'), cell(0, 1, 'green'), cell(1, 0, 'water')],
+      groupCounts: { hard: 1, green: 1, water: 1 },
+      groupAreas: { hard: 100, green: 100, water: 100 },
+      maskedCount: 0, maskedAreaM2: 0, classifiedAreaM2: 300,
+    };
+    // havuz: (0,0) hücresini kapsayan küçük kare
+    const pool = [[39.99990, 32.00000], [39.99990, 32.00010], [39.99999, 32.00010], [39.99999, 32.00000]];
+    const n = app.dgLcRefineWater(result, [pool]);
+    assert.equal(n, 1, 'yalnız havuz içindeki hücre değişmeli');
+    assert.equal(result.cells[0].classKey, 'water');
+    assert.equal(result.cells[0].waterRefined, true);
+    assert.equal(result.groupCounts.hard, 0);
+    assert.equal(result.groupCounts.water, 2);
+    assert.equal(result.groupAreas.water, 200);
+    assert.equal(result.cells[2].classKey, 'water', 'zaten su olan dokunulmaz');
+  });
+
+  test('rafine edilecek su yoksa sayaçlar değişmez', () => {
+    const result = {
+      cells: [{ row: 0, col: 0, classKey: 'green', areaM2: 100, center: { lat: 41, lon: 33 } }],
+      groupCounts: { green: 1 }, groupAreas: { green: 100 },
+    };
+    assert.equal(app.dgLcRefineWater(result, []), 0);
+    assert.equal(app.dgLcRefineWater(result, [[[40, 32], [40, 32.001], [39.999, 32.001], [39.999, 32]]]), 0);
+    assert.equal(result.groupCounts.green, 1);
+  });
+
+  test('analyze OSM su poligonu çekip rafinasyonu bağlıyor', () => {
+    assert.match(srcLc, /dgLcFetchWaterPolygons\(bbox\)/);
+    assert.match(srcLc, /waterRefinedCells:waterRefined/);
+    assert.match(srcLc, /leisure\\?"=\\?"swimming_pool|leisure/);
+  });
+
+  test('⭐ waypoint: hücre merkezi hesaplanıyor (c.lat çökmesi geri gelemez)', () => {
+    assert.match(srcGp, /lat:\+\(\(\(c\.s0\+c\.s1\)\/2\)\.toFixed\(6\)\)/);
+    assert.ok(!srcGp.includes('lat:+c.lat.toFixed(6),'), 'eski çöken satır geri gelmemeli');
+  });
+
+  test('⭐ PNG: sınırlar yalnız park + çizim parka kırpılıyor', () => {
+    assert.match(srcGp, /ctx\.clip\("evenodd"\)/);
+    assert.ok(!srcGp.includes('if(opts.grid)(GRID_CELLS||[]).forEach(c=>{ext('),
+      'grid sınırları PNG bounds büyütmemeli');
+    assert.ok(!srcGp.includes('if(opts.wp)(WP||[]).forEach(w=>ext('),
+      'WP sınırları PNG bounds büyütmemeli');
+    assert.match(srcGp, /ctx\.restore\(\)/);
+  });
+});

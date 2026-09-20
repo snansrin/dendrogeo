@@ -3441,8 +3441,11 @@ async function createWaypointsFromGrid(mode){
       owner:USER.id,
       project_id:pid,
       wp_id:next++,
-      lat:+c.lat.toFixed(6),
-      lon:+c.lon.toFixed(6),
+      /* ⚠ WAYPOINT HATASI BURADAYDI: GRID_CELLS elemanlarında lat/lon
+       * alanı YOK (yalnız s0,s1,w0,w1,n,id) → c.lat.toFixed TypeError
+       * fırlatıyor, insert hiç çalışmıyordu. Merkez açıkça hesaplanır. */
+      lat:+(((c.s0+c.s1)/2).toFixed(6)),
+      lon:+(((c.w0+c.w1)/2).toFixed(6)),
       visited:false
     }));
 
@@ -3763,7 +3766,11 @@ function downloadParkImage(){
     return toast("Önce park seç","warn","🌳");
   }
   const chk=id=>{const e=document.getElementById(id);return !e||e.checked;};
-  const opts={grid:chk("chkPngGrid"),wp:chk("chkPngWp"),cover:chk("chkPngCover")};
+  /* KULLANICI İSTEĞİ (2026-09-20): "png sadece parkın alanı olsun, onun
+   * dışında bir şey gösterilmesin". Sınırlar YALNIZCA park polygonundan
+   * türer (grid/WP sınırları büyütmez); çizim park polygonuna kırpılır:
+   * park dışına kaymış waypoint/grid kalıntıları görünmez. */
+  const opts={grid:chk("chkPngGrid"),wp:chk("chkPngWp"),cover:chk("chkPngCover"),clipPark:true};
   const lc=(window.DG_LANDCOVER&&window.DG_LANDCOVER.getLast)?window.DG_LANDCOVER.getLast():null;
   try{
     /* sınırlar: park + seçili katmanlar */
@@ -3774,9 +3781,11 @@ function downloadParkImage(){
     };
     (PARK_POLY||[]).forEach(r=>(r||[]).forEach(p=>ext(p[0],p[1])));
     (PARK_HOLES||[]).forEach(r=>(r||[]).forEach(p=>ext(p[0],p[1])));
-    if(opts.grid)(GRID_CELLS||[]).forEach(c=>{ext(c.s0,c.w0);ext(c.s1,c.w1);});
-    if(opts.wp)(WP||[]).forEach(w=>ext(w.lat,w.lon));
     if(!(minLat<=maxLat&&minLon<=maxLon))return toast("Görüntü için sınır üretilemedi","err","🖼️");
+    /* ~15 m tampon: kenar çizgisi kırpılmasın */
+    const bufLat=15/110540;
+    const bufLon=15/(111320*Math.cos(((minLat+maxLat)/2)*Math.PI/180));
+    minLat-=bufLat;maxLat+=bufLat;minLon-=bufLon;maxLon+=bufLon;
 
     const lat0=(minLat+maxLat)/2;
     const MX=111320*Math.cos(lat0*Math.PI/180),MY=110540;
@@ -3806,6 +3815,25 @@ function downloadParkImage(){
     const haTxt="Park polygonu: "+(parkAreaM2()/10000).toFixed(2)+" ha";
     ctx.fillText(haTxt+"   ·   "+new Date().toLocaleString("tr-TR"),PAD+ctx.measureText("DendroGeo · Park Analizi   ").width+180,40);
 
+    /* PARK KIPI: park dışındaki hiçbir şey çizilmez */
+    ctx.save();
+    ctx.beginPath();
+    (PARK_POLY||[]).forEach(ring=>{
+      ring.forEach((p,i)=>{
+        const x=pr.X(p[1]),y=pr.Y(p[0]);
+        if(i===0)ctx.moveTo(x,y);else ctx.lineTo(x,y);
+      });
+      ctx.closePath();
+    });
+    (PARK_HOLES||[]).forEach(ring=>{
+      ring.forEach((p,i)=>{
+        const x=pr.X(p[1]),y=pr.Y(p[0]);
+        if(i===0)ctx.moveTo(x,y);else ctx.lineTo(x,y);
+      });
+      ctx.closePath();
+    });
+    ctx.clip("evenodd");
+
     /* 1) arazi örtüsü nesneleri */
     if(opts.cover&&lc&&lc.patches&&lc.patches.length){
       for(const pt of lc.patches){
@@ -3828,13 +3856,6 @@ function downloadParkImage(){
         ctx.stroke();
       }
     }
-
-    /* 2) park sınırı (kesikli) */
-    ctx.setLineDash([10,6]);
-    ctx.strokeStyle="#14532d";ctx.lineWidth=2.4;
-    (PARK_POLY||[]).forEach(r=>{dgPxRingPath(ctx,pr,r);ctx.stroke();});
-    (PARK_HOLES||[]).forEach(r=>{dgPxRingPath(ctx,pr,r);ctx.stroke();});
-    ctx.setLineDash([]);
 
     /* 3) grid hücreleri */
     if(opts.grid&&(GRID_CELLS||[]).length){
@@ -3863,6 +3884,16 @@ function downloadParkImage(){
         ctx.fillText("P"+w.wp_id,x+8,y+3);
       }
     }
+
+    /* kıpı kapat: lejant/ölçek/park sınırı park dışında serbest çizilsin */
+    ctx.restore();
+
+    /* 2) park sınırı (kesikli, kırpın üstünde ki tam görünsün) */
+    ctx.setLineDash([10,6]);
+    ctx.strokeStyle="#14532d";ctx.lineWidth=2.4;
+    (PARK_POLY||[]).forEach(r=>{dgPxRingPath(ctx,pr,r);ctx.stroke();});
+    (PARK_HOLES||[]).forEach(r=>{dgPxRingPath(ctx,pr,r);ctx.stroke();});
+    ctx.setLineDash([]);
 
     /* 5) lejant + ölçek + kuzey */
     const ly=H-LEGH+18;

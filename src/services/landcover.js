@@ -661,9 +661,26 @@ function dgLcProcessTile(item,href,geometryWgs,source){
         if(cells.length<10000){
           const cx=(quad[0].x+quad[1].x+quad[2].x+quad[3].x)/4;
           const cy=(quad[0].y+quad[1].y+quad[2].y+quad[3].y)/4;
-          const inv=p=>isUtm?dgLcUtmInverse(p.x,p.y,analysisEpsg):{lat:(meta.maxY-globalRow*meta.dy)-meta.dy/2,lon:(meta.minX+globalCol*meta.dx)+meta.dx/2};
-          const c0=inv(quad[0]),c1=inv(quad[1]),c2=inv(quad[2]),c3=inv(quad[3]);
-          const center=isUtm?inv({x:cx,y:cy}):{lat:(meta.maxY-globalRow*meta.dy)-meta.dy/2,lon:(meta.minX+globalCol*meta.dx)+meta.dx/2};
+          const inv=p=>dgLcUtmInverse(p.x,p.y,analysisEpsg);
+          /* ⚠️ SAPMA HATASI BURADAYDI: 4326 karolarında inv() argümanı yok
+           * sayıp dört köşeye de HÜCRE MERKEZİNİ yazıyordu. quadWgs dört aynı
+           * noktadan oluşuyor, halkalar hücre merkezlerinden kuruluyor, şekil
+           * yarımşar piksel kayıyor ve alan geri ölçekleme onu şişirip komşu
+           * sınıfların (su/ada) üzerine taşıyordu. Artık köşeler derece
+           * sınırlarından DOĞRUDAN hesaplanır. */
+          let c0,c1,c2,c3,center;
+          if(isUtm){
+            c0=inv(quad[0]);c1=inv(quad[1]);c2=inv(quad[2]);c3=inv(quad[3]);
+            center=inv({x:cx,y:cy});
+          }else{
+            const latTop=meta.maxY-globalRow*meta.dy,latBot=latTop-meta.dy;
+            const lon0=meta.minX+globalCol*meta.dx,lon1=lon0+meta.dx;
+            c0={lat:latBot,lon:lon0};
+            c1={lat:latBot,lon:lon1};
+            c2={lat:latTop,lon:lon1};
+            c3={lat:latTop,lon:lon0};
+            center={lat:(latTop+latBot)/2,lon:(lon0+lon1)/2};
+          }
           cells.push({
             row:globalRow,
             col:globalCol,
@@ -1193,6 +1210,88 @@ function dgLcHasGreen(){
   return !!(last&&last.patches&&last.patches.some(p=>(p.classKey||p.group)==="green"));
 }
 
+/* Yapay su havuzları / göletler: ESA WorldCover bunları sıklıkla "yapılı alan"
+ * sayar (Gençlik Parkı, Millet Bahçesi havuzları gibi — kullanıcı bildirimi).
+ * OSM'de bu havuzlar natural=water / leisure=swimming_pool olarak çizilidir.
+ * Park bbox'ı için OSM su poligonları çekilir ve hücre merkezleri içinde
+ * kalanlar SU sınıfına geçirilir. Böylece yapay havuzlar su alanına katılır. */
+const DG_OSM_WATER_MIRRORS=[
+  "https://overpass.private.coffee/api/interpreter",
+  "https://overpass.kumi.systems/api/interpreter",
+  "https://overpass-api.de/api/interpreter",
+  "https://lz4.overpass-api.de/api/interpreter"
+];
+async function dgLcFetchWaterPolygons(bbox){
+  const b=[bbox.minLat,bbox.minLon,bbox.maxLat,bbox.maxLon].join(",");
+  const sel="(nwr[\"natural\"=\"water\"]("+b+");nwr[\"waterway\"=\"riverbank\"]("+b+");"+
+             "nwr[\"leisure\"=\"swimming_pool\"]("+b+");nwr[\"landuse\"=\"basin\"]("+b+"););";
+  const q="[out:json][timeout:60];"+sel+"out geom;";
+  let data=null;
+  for(const url of DG_OSM_WATER_MIRRORS){
+    try{
+      const r=await fetch(url,{
+        method:"POST",
+        headers:{
+          "Content-Type":"application/x-www-form-urlencoded",
+          "User-Agent":"dendrogeo-lulc-qa/1.0 (scientific QA tool)",
+          "Accept":"application/json"
+        },
+        body:"data="+encodeURIComponent(q),
+        signal:AbortSignal.timeout(45000)
+      });
+      if(!r.ok)continue;
+      data=await r.json();
+      break;
+    }catch(err){/* sonraki ayna */}
+  }
+  const rings=[];
+  for(const el of (data&&data.elements)||[]){
+    if(el.type==="way"&&el.geometry&&el.geometry.length>=3){
+      rings.push(el.geometry.map(g=>[g.lat,g.lon]));
+    }else if(el.type==="relation"&&el.members){
+      const outer=el.members.filter(m=>m.role==="outer"||m.role==="");
+      const ring=[];
+      for(const m of outer)for(const g of (m.geometry||[]))ring.push([g.lat,g.lon]);
+      if(ring.length>=3)rings.push(ring);
+    }
+  }
+  return rings;
+}
+/* Hücreleri OSM su poligonlarına göre SU sınıfına geçirir.
+ * Dönen değer: değiştirilen hücre sayısı. Grup sayaçları/alanları ve
+ * maskeli alan tutarlı şekilde güncellenir; ham kaynak kod kırılımı
+ * (rawCounts) ESA'nın kendi çıktısı olarak DOKUNULMADAN kalır. */
+function dgLcRefineWater(result,waterRings){
+  if(!waterRings||!waterRings.length)return 0;
+  let n=0;
+  for(const cell of (result.cells||[])){
+    if(cell.classKey==="water")continue;
+    const lat=cell.center.lat,lon=cell.center.lon;
+    let inWater=false;
+    for(const rg of waterRings){
+      if(dgLcPointInRing(lat,lon,rg)){inWater=true;break;}
+    }
+    if(!inWater)continue;
+    const a=cell.areaM2||0;
+    const old=cell.classKey;
+    if(old){
+      result.groupCounts[old]=Math.max(0,(result.groupCounts[old]||1)-1);
+      result.groupAreas[old]=Math.max(0,(result.groupAreas[old]||a)-a);
+    }else{
+      result.maskedCount=Math.max(0,(result.maskedCount||1)-1);
+      result.maskedAreaM2=Math.max(0,(result.maskedAreaM2||a)-a);
+      result.classifiedAreaM2=(result.classifiedAreaM2||0)+a;
+    }
+    result.groupCounts.water=(result.groupCounts.water||0)+1;
+    result.groupAreas.water=(result.groupAreas.water||0)+a;
+    cell.classKey="water";
+    cell.classCode=80;
+    cell.waterRefined=true;
+    n++;
+  }
+  return n;
+}
+
 /* İki kaynağın grup alanları arasındaki uzlaşma (belirsizlik göstergesi) */
 function dgLcGroupAgreement(a,b){
   const out={};
@@ -1257,6 +1356,16 @@ async function dgLcAnalyze(params){
     console.warn("DENDROGEO · çapraz doğrulama kaynağı atlandı:",crossErr);
   }
 
+  /* Yapay havuz rafinasyonu (best-effort; Overpass yoksa analiz bozulmaz) */
+  let waterRefined=0;
+  try{
+    const wr=await dgLcFetchWaterPolygons(bbox);
+    waterRefined=dgLcRefineWater(result,wr);
+    if(waterRefined)console.log("DENDROGEO · OSM su rafinasyonu:",waterRefined,"hücre");
+  }catch(err){
+    console.warn("DENDROGEO · su rafinasyonu atlandı:",err);
+  }
+
   const patches=dgLcDetectPatches(result.cells);
   const agreement=cross?dgLcGroupAgreement(result,cross.result):null;
 
@@ -1285,6 +1394,7 @@ async function dgLcAnalyze(params){
       centroidLon:+pt.centroid.lon.toFixed(6)
     })),
     agreement,
+    waterRefinedCells:waterRefined,
     crossError:crossErr,
     primaryItems:prim.items,
     crossItems:cross?cross.items:null,
