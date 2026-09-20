@@ -3669,7 +3669,7 @@ function runLandCoverAnalysis(){
     if(window.DG_LANDCOVER_RENDER_REPORT){
       window.DG_LANDCOVER_RENDER_REPORT(rep,result,parkArea);
     }
-    toast("✓ 2020 · 10 m arazi örtüsü zonal analizi tamamlandı.","ok","🗺️");
+    toast("✓ 10 m arazi örtüsü analizi tamamlandı (ESA WorldCover 2021 + çapraz IO LULC 2020).","ok","🗺️");
   }).catch(err=>{
     console.error("DENDROGEO · Arazi örtüsü analizi:",err);
     if(rep){

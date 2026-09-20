@@ -127,16 +127,22 @@ E 488.012,4 / N 4.420.374,7 (±2 m). İleri→ters gidiş-dönüş < 1e-5°.
 > **Otorite belge:** [`LULC_METHODOLOGY.md`](LULC_METHODOLOGY.md)
 > Bu bölüm yalnızca özetler; çelişki olursa LULC_METHODOLOGY.md geçerlidir.
 
-Veri: **Impact Observatory 10 m Annual LULC v02** (CC BY 4.0), Planetary
-Computer STAC + SAS imzalı COG üzerinden; yıl **2020'ye kilitli**.
+**v4 (2026-09-20) itibaren çift kaynak:** birincil **ESA WorldCover 2021 v200**
+(10 m, 11 sınıf, EPSG:4326), çapraz doğrulama **IO LULC 2020** (10 m, UTM).
+Grup başına uzlaşma yüzdesi belirsizlik göstergesi olarak raporlanır.
 
-Özet yöntem: park poligonu UTM'ye projekte edilir; rasterin **gerçek kaynak
-hücreleriyle** (GeoTIFF metadata'sından okunan meta.dx/meta.dy) kesişimi
-alınır. Hücre başına alan, poligon ∩ hücre dikdörtgeninin düzlem alanıdır —
-alanlar hücre sayımıyla değil **gerçek kesişim geometrisiyle** üretilir;
-hücre toplamı park alanına 1e-9 göreli hatayla eşittir (birim test).
-Sınıflar 4 rapor grubuna indirgenir; NoData/Bulut/Kar maskelenir ve raporda
-ayrı satır gösterilir.
+Özet yöntem: park poligonu analiz UTM'sine projekte edilir; rasterin **gerçek
+kaynak hücreleriyle** kesişimi alınır. UTM karolarda hücre dikdörtgen,
+EPSG:4326 karolarda hücrenin derece köşeleri UTM'ye projekte edilip **tam
+dışbükey kesişim** hesaplanır (anizotropik ~7,1×9,3 m hücre şekli korunur).
+Alanlar hücre sayımıyla değil gerçek kesişim geometrisiyle üretilir; hücre
+toplamı park alanına %0,5 QA eşiği içinde eşittir. Ayrıca 4-yön bağlantılı
+bileşen analiziyle **nesneler** (su kütlesi, yeşil blok, yapılı parça)
+tanımlanır: nesne başına alan + alan-ağırlıklı merkez.
+
+Doğrulama örneği (canlı veri, `scripts/lulc-qa.mjs`): Göksu Parkı 50.05 ha →
+su 12.50 ha, sert 14.71 ha, yeşil 22.26 ha; QA farkı %0.000; saha bilgisiyle
+(su ~12,5 ha, sert ~15 ha) uyumlu.
 
 ---
 

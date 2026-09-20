@@ -451,11 +451,16 @@ describe('LULC sabitleri ve sınıf eşlemesi', () => {
     assert.equal(app.DG_LC_CODES[10], 'Bulut');
   });
 
-  test('⚠️ CANARY: hücre başına GeoJSON artık gerçek piksel ölçeğini taşıyor', () => {
-    // a4e6265 düzeltmesi: dgLcCellsGeoJson sabit DG_LC_PIXEL_M/2 kullanıyordu;
-    // artık c.dx/c.dy kullanılıyor. Biri sabite geri dönerse bu test kırılır.
+  test('⚠️ CANARY: hücre geometrisi GERÇEK köşelerden kuruluyor (sabit piksel varsayımı yok)', () => {
+    // a4e6265 hücre poligonunu sabit DG_LC_PIXEL_M/2'den gerçek meta.dx/dy'ye
+    // taşımıştı; v4 motoruyla hücreler artık doğrudan dört gerçek köşe
+    // (quadWgs) taşıyor — EPSG:4326 karolarda anizotropik hücre şekli korunur.
+    // Biri sabit piksel varsayımına geri dönerse bu test kırılır.
     const src = readFileSync(new URL('../src/services/landcover.js', import.meta.url), 'utf8');
-    assert.match(src, /halfX=\(Number\(c\.dx\)>0\?Number\(c\.dx\):DG_LC_PIXEL_M\)\/2/);
-    assert.match(src, /dx:meta\.dx/);
+    assert.match(src, /quadWgs/, 'hücreler gerçek köşe listesini taşımalı');
+    assert.match(src, /dgLcIntersectionAreaConvex\(geometry\.outer,geometry\.holes,quad\)/,
+      'alanlar tam dışbükey kesişimle hesaplanmalı');
+    assert.doesNotMatch(src, /const half=DG_LC_PIXEL_M\/2/,
+      'sabit piksel yarı-boyu geri gelmemeli');
   });
 });

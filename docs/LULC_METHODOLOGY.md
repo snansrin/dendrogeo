@@ -102,3 +102,65 @@ Impact Observatory'nin yayınladığı yöntem/doğruluk özetinde yıllık hari
 2024 tarihli bağımsız karşılaştırmalı çalışmada ESRI LULC ailesi için raporlanan genel doğruluk %85,0'dır. Bu değer belirli bir parkın gerçek sınıflandırma doğruluğunun garantisi değildir.
 
 Bu nedenle DendroGeo sonuçları park içindeki kaynak raster sınıflarının alan dağılımı olarak sunulur; bina sınırı veya yol geometrisi kadar ayrıntılı nesne envanteri olarak yorumlanmamalıdır.
+---
+
+## Güncelleme v4 (2026-09-20): çift kaynaklı motor + nesne tanımlama
+
+Bu bölüm önceki metni geçersiz kılmaz; motorun v4 ile kazandıkları eklenir.
+
+### 1. Neden değişti
+
+İki sorun vardı:
+
+1. **QA hatası (kök neden):** STAC `datetime` sorgusu io-lulc koleksiyonunda
+   2020 isteğine 2019 karosunu da döndürebiliyordu. Filtresiz kod iki karoyu
+   işleyip alanları topluyordu → `assigned ≈ 2 × park` →
+   "Raster/park alanı QA başarısız: %99.61 fark". Artık her item id/properties
+   üzerinden yıla göre süzülüyor (`dgLcItemMatchesYear`).
+2. **Tematik yetersizlik:** io-lulc (arızi kullanım ürünü) Göksu Parkı gibi
+   kentsel yeşil alanları "yapılı" sınıfına atıyordu (yeşil 0 ha, sert 39 ha).
+   Park ölçeğinde bilimsel olarak kullanılamazdı.
+
+### 2. Yeni kaynak düzeni
+
+| Rol | Ürün | Yıl | Çözünürlük | CRS |
+|---|---|---|---|---|
+| **Birincil** | ESA WorldCover v200 (Sentinel-1+2 füzyonu, 11 sınıf) | 2021 | 10 m | EPSG:4326 |
+| **Çapraz** | IO LULC v02 (9 sınıf) | 2020 | 10 m | UTM |
+
+ESA karoları derece uzayında olduğu için hücreler metrede anizotropiktir
+(~7,1 × 9,3 m, 40° enlemde). Hücrenin dört köşesi analiz UTM'sine projekte
+edilir ve park poligonuyla **tam dışbükey kesişim** (Sutherland-Hodgman,
+yarı-düzlem dizisi) alınır. Alanlar hücre sayımı değil gerçek kesişim
+alanıdır; hücre toplamı park alanına eşittir (QA eşiği %0,5).
+
+### 3. Çapraz doğrulama (belirsizlik)
+
+Her grup için iki kaynağın alanları raporlanır ve uzlaşma yüzdesi
+`100·(1−|a−b|/(a+b))` ile verilir. Göksu Parkı örneği:
+
+| Grup | ESA 2021 | IO LULC 2020 | Uzlaşma |
+|---|---|---|---|
+| Su | 12.50 ha | 11.04 ha | %94 |
+| Sert | 14.71 ha | 39.01 ha | %55 |
+| Yeşil | 22.26 ha | 0.00 ha | %0 |
+
+Uzlaşmanın düşük olduğu gruplarda birincil kaynak esas alınır; düşük uzlaşma
+**bilgi olarak** raporlanır (io-lulc'ın kentsel yeşil alan zaafı belgelenmiştir).
+
+### 4. Nesne tanımlama
+
+Aynı sınıfa ait 4-yön bitişik 10 m hücreler bağlantılı bileşen analiziyle
+tek nesne sayılır. Çıktı: nesne sayısı, nesne başına alan ve alan-ağırlıklı
+merkez (≥0,05 ha). Göksu Parkı'nda su kütlesi tek nesne olarak 12.47 ha
+çıkar; sert zemin ayrı bloklara (yol/meydan parçaları) ayrışır.
+
+### 5. Doğrulama
+
+* `scripts/lulc-qa.mjs --park "Göksu Parkı"`: Overpass'ten gerçek polygonu
+  çekip aynı boru hattını Node'da çalıştırır (tarayıcısız QA).
+* Göksu Parkı (way/423602737, 109 köşe, 50.05 ha):
+  su **12.50 ha**, sert **14.71 ha**, yeşil **22.26 ha**, QA farkı **%0.000**.
+  Saha bilgisiyle (su ~12,5 ha, sert ~15 ha) uyumlu.
+* `test/landcover-v4.test.mjs`: yıl filtresi regresyon kilidi, 4326 hücre
+  alanı, dışbükey kesişim ↔ rect denkliği, nesne/uzlaşma matematiği.

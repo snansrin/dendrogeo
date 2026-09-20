@@ -81,6 +81,7 @@ export function loadApp({ sadece } = {}) {
                    'DG_LC_CODES', 'DG_LC_CLASSES', 'DG_LC_PIXEL_M', 'DG_LC_YEAR',
                    'DG_LC_COLLECTION', 'DG_LC_STAC', 'DG_LC_MAX_TILES',
                    'DG_LC_MAX_READ_PIXELS', 'DG_LC_RENDER_LIMIT',
+                   'DG_LC_SOURCES', 'DG_ESA_GROUP', 'DG_ESA_CODES',
                    'DG_TRUNCATION_WARNED'];
   const epilog = LEXICAL
     .map((n) => `if(typeof ${n}!=="undefined")__exports.${n}=${n};`)
