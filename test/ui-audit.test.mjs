@@ -105,6 +105,14 @@ describe('eski format koruması (kullanıcı tercihi 2026-09-20)', () => {
     assert.ok(!/\.dg-png-title\{[\s\S]{0,80}?Fraunces/.test(gp), 'panel title Fraunces olmamalı');
   });
 
+  test('⭐ landing yayılması kalıcı önlem: .wrap override YOK', () => {
+    // .wrap{max-width:1120px;margin:0 auto} sitenin ortalanmış düzenidir;
+    // max-width:100% override'ı landing'i kenarlara yaymıştı.
+    assert.match(css, /\.wrap\{max-width:1120px;margin:0 auto/);
+    assert.ok(!css.includes('.wrap,.hero-art'), 'wrap override kalıntısı');
+    assert.ok(!/\.wrap\{max-width:100%\}/.test(css), 'wrap max-width:100% override');
+  });
+
   test('⭐ tür barları Grup Dağılımı ile AYNI stilde (14px yuvarlak bar)', () => {
     // Grup Dağılımı barı: display:flex;height:14px;border-radius:7px;background:var(--line)
     const grupBar = 'display:flex;height:14px;border-radius:7px;overflow:hidden;background:var(--line)';

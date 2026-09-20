@@ -319,9 +319,12 @@ html{overflow-x:hidden}
 @media (max-width:640px){
   input,select,textarea{font-size:16px}   /* iOS odak zoom'unu engeller */
 }
-.wrap,.hero-art,.statband,.card{max-width:100%}
-.card{overflow:hidden}
+/* NOT: .wrap'a dokunma! Özgün .wrap{max-width:...;margin:0 auto} kuralı
+   sitenin ortalanmış düzenini kurar; max-width:100% override'ı landing'i
+   kenarlara yayıp "yayıldı" görüntüsüne yol açmıştı (kullanıcı bildirimi).
+   Mobil taşma koruması yalnız table ve kart içi yatay kaydırmada. */
 table{max-width:100%}
+.card{overflow-x:auto}
 
 /* ---- YAZDIRMA: raporlar kağıda temiz çıksın ---- */
 @media print{
