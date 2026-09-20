@@ -263,23 +263,21 @@ describe('dgLcRenderReport — render yolu (TDZ regresyonu)', () => {
     assert.ok(rep.innerHTML.includes('12.50'), 'su alanı tabloda görünmeli');
   });
 
-  test('sınıf tablosu + çapraz doğrulama + nesneler bölümü üretir', () => {
+  test('tek blok: sınıf + uzlaşma + nesne bilgileri üretir', () => {
     const rep = stub();
     app.dgLcRenderReport(rep, REPORT, 500500);
     const h = rep.innerHTML;
     assert.ok(h.includes('Su'), 'sınıf adı');
     assert.ok(h.includes('12.50'), 'su ha değeri');
-    assert.ok(h.includes('Çapraz doğrulama'), 'çapraz bölümü');
-    assert.ok(h.includes('%94'), 'uzlaşma yüzdesi');
-    assert.ok(h.includes('Nesne tanımlama'), 'nesne bölümü');
-    assert.ok(h.includes('12.47'), 'nesne alanı');
+    assert.ok(h.includes('🔬 uzlaşma %94'), 'uzlaşma satır içinde');
+    assert.ok(h.includes('🧩'), 'nesne özeti satır içinde');
   });
 
   test('QA eşiği aşılınca uyarı notu çıkar', () => {
     const rep = stub();
     const kotu = Object.assign({}, RAW, { assignedAreaM2: 1001000 });
     app.dgLcRenderReport(rep, kotu, 500500);
-    assert.ok(rep.innerHTML.includes('geometrik kalite kontrolünden geçmedi'));
+    assert.ok(rep.innerHTML.includes('QA farkı'));
   });
 
   test('rep yoksa sessizce döner', () => {
@@ -304,11 +302,11 @@ describe('renk paleti ve şeffaflık (kullanıcı spesifikasyonu)', () => {
   test('kaynak kodunda şeffaflık değerleri duruyor (fill .38 / stroke .50)', () => {
     const src = readFileSync(new URL('../src/services/landcover.js', import.meta.url), 'utf8');
     assert.match(src, /fillOpacity:\.38/);
-    assert.match(src, /opacity:\.50/);
+    assert.match(src, /opacity:\.60/);
   });
 });
 
-describe('rapor görselleri — CSS barlar + nesne tablosu (sade tasarım)', () => {
+describe('⭐ TEK BLOK rapor (kullanıcı: "1 tane barlı ver, gerekli bilgiler içinde")', () => {
   const stub = () => {
     const o = {};
     Object.defineProperty(o, 'innerHTML', { set(v) { o._v = v; }, get() { return o._v || ''; } });
@@ -319,111 +317,155 @@ describe('rapor görselleri — CSS barlar + nesne tablosu (sade tasarım)', () 
     groupAreasM2: { water: 125000, green: 222600, hard: 147100 },
     classifiedAreaM2: 500500, maskedAreaM2: 0, maskedCount: 0,
     sourceCells: 7780, rasterCoverageAreaM2: 500500,
-    year: 2021, primaryLabel: 'ESA 2021', crossLabel: 'IO 2020',
-    primaryCitation: 'ESA', crossCitation: 'IO',
-    agreement: { water: { primaryHa: 12.5, crossHa: 11.04, agreementPct: 94 } },
+    year: 2021, primaryLabel: 'ESA WorldCover 2021', primaryCitation: 'ESA',
+    crossCitation: 'IO',
+    agreement: { water: { primaryHa: 12.5, crossHa: 11.04, agreementPct: 94 },
+                 green: { primaryHa: 22.26, crossHa: 0, agreementPct: 0 },
+                 hard: { primaryHa: 14.71, crossHa: 39.01, agreementPct: 55 } },
     crossError: null,
     patches: [
-      { group: 'water', areaHa: 12.47, cells: 1895, centroidLat: 39.99051, centroidLon: 32.64819 },
-      { group: 'green', areaHa: 19.87, cells: 3061, centroidLat: 39.99312, centroidLon: 32.65144 },
-      { group: 'green', areaHa: 1.10, cells: 176, centroidLat: 39.98869, centroidLon: 32.64590 },
+      { group: 'water', areaHa: 12.47, cells: 1895 },
+      { group: 'green', areaHa: 19.87, cells: 3061 },
+      { group: 'green', areaHa: 1.10, cells: 176 },
     ],
   };
 
-  test('⭐ bar bloğu: sınıf başına TEK satır, renkli şeffaf bar, ha + %', () => {
+  test('tek bar bloğu: sınıf başına bar + ha + % + ayrıntı satırı', () => {
     const rep = stub();
     app.dgLcRenderReport(rep, REPORT, 500500);
     const h = rep.innerHTML;
-    assert.ok(h.includes('Sınıf dağılımı (hektar)'), 'bar bloğu başlığı');
-    assert.ok(h.includes('#4ade8066'), 'yeşil bar şeffaf dolgu');
-    assert.ok(h.includes('#3b82f666'), 'su barı şeffaf dolgu');
-    assert.ok(h.includes('22.26 ha'), 'yeşil değer');
-    assert.ok(h.includes('12.50 ha'), 'su değer');
-    assert.ok(!h.includes('lcBarCanvas'), 'canvas yok — sade CSS bar');
-    assert.ok(!h.includes('new Chart'), 'Chart.js kalıntısı yok');
+    for (const [lab, ha, pct, hucre] of [
+      ['Yeşil alan', '22.26', '%44.5', '3.458 hücre'],
+      ['Su', '12.50', '%25.0', '1.900 hücre'],
+      ['Sert zemin', '14.71', '%29.4', '2.422 hücre'],
+    ]) {
+      assert.ok(h.includes(lab), lab + ' satırı');
+      assert.ok(h.includes(ha + ' ha'), lab + ' ha değeri');
+      assert.ok(h.includes(pct), lab + ' yüzdesi');
+      assert.ok(h.includes(hucre), lab + ' hücre sayısı');
+    }
+    // gerekli bilgiler aynı blokta: uzlaşma + nesne özeti
+    assert.ok(h.includes('🔬 uzlaşma %94'), 'su uzlaşması satır içinde');
+    assert.ok(h.includes('🧩 2 nesne'), 'yeşil nesne sayısı satır içinde');
+    assert.ok(h.includes('en büyük 19.87 ha'), 'en büyük nesne satır içinde');
   });
 
-  test('bar genişlikleri en büyük sınıfa göre ölçekli (%100 = en büyük)', () => {
+  test('⭐ ayrı tablo/kalabalık YOK: tek blok, canvas yok, ek başlık yok', () => {
     const rep = stub();
     app.dgLcRenderReport(rep, REPORT, 500500);
     const h = rep.innerHTML;
-    assert.ok(h.includes('width:100.0%'), 'en büyük sınıf (yeşil) tam genişlik');
-    // su 12.5/22.26 = %56.2
-    assert.ok(h.includes('width:56.2%'), 'su barı orantılı: ' + (h.match(/width:(\d+\.\d)%/g) || []).join(','));
+    assert.ok(!h.includes('<th>'), 'hiç tablo başlığı yok (tablo kalabalığı bitti)');
+    assert.ok(!h.includes('Çapraz doğrulama'), 'ayrı çapraz tablo yok');
+    assert.ok(!h.includes('Nesne tanımlama'), 'ayrı nesne tablo yok');
+    assert.ok(!h.includes('lcBarCanvas'), 'canvas yok');
+    assert.equal((h.match(/<table/g) || []).length, 0, 'hiç <table> yok');
   });
 
-  test('⭐ nesne tanımlama: virgül listesi değil KOMPAKT TABLO', () => {
+  test('QA durumu başlık satırında', () => {
+    const rep = stub();
+    app.dgLcRenderReport(rep, REPORT, 500500);
+    assert.ok(rep.innerHTML.includes('geometrik QA geçti'));
+    const rep2 = stub();
+    app.dgLcRenderReport(rep2, Object.assign({}, REPORT, { rasterCoverageAreaM2: 1001000 }), 500500);
+    assert.ok(rep2.innerHTML.includes('QA farkı'), 'kötü QA uyarısı');
+  });
+
+  test('park/analiz/hücre/kapsam + kaynaklar alt bilgide', () => {
     const rep = stub();
     app.dgLcRenderReport(rep, REPORT, 500500);
     const h = rep.innerHTML;
-    assert.ok(h.includes('Nesne tanımlama'), 'başlık');
-    assert.ok(h.includes('<th>Nesne</th>'), 'tablo sütunu');
-    assert.ok(h.includes('<th>En büyük ha</th>'), 'tablo sütunu');
-    assert.ok(h.includes('12.47'), 'su nesnesi alanı');
-    assert.ok(h.includes('39.9905'), 'su nesnesi merkezi');
-    assert.ok(!h.includes('nesne ·'), 'eski virgüllü liste biçimi kalktı');
-  });
-
-  test('çapraz doğrulama tablosu hala duruyor (barlara taşınmadı)', () => {
-    const rep = stub();
-    app.dgLcRenderReport(rep, REPORT, 500500);
-    assert.ok(rep.innerHTML.includes('Çapraz doğrulama'));
-    assert.ok(rep.innerHTML.includes('%94'));
+    assert.ok(h.includes('50.05 ha') || h.includes('50.05'), 'analiz alanı');
+    assert.ok(h.includes('7.780') || h.includes('7,780'), 'hücre sayısı: ' + (h.match(/[\d.,]+ hücre/g) || []).join('|'));
+    assert.ok(h.includes('ESA'), 'kaynak atfı');
   });
 });
 
-describe('⭐ harita katmanı — run EPSG regresyonu (görünmez katman hatası)', () => {
-  /* SAHADAKİ HATA: 4326 karoda run koordinatları DERECE iken run'a
-   * analysisEpsg (32636) yazılıyordu; render derece değerleri metre sanıp
-   * ters UTM uyguluyordu → poligonlar okyanusta (0,0) civarına çiziliyor,
-   * kullanıcı parkın üstünde hiçbir şey görmüyordu. */
-  test('kaynak kod: 4326 karoda runEpsg=4326 yazılır', () => {
-    const src = readFileSync(new URL('../src/services/landcover.js', import.meta.url), 'utf8');
-    assert.match(src, /const runEpsg=isUtm\?analysisEpsg:4326;/);
-    assert.doesNotMatch(src, /dgLcRunPush\(runs,globalRow,runStart,globalCol,runCls,meta,analysisEpsg\)/,
-      'runPush fonksiyonuna analysisEpsg verilmesi regresyondur');
-  });
-
-  test('renderRuns: epsg=4326 run derece kabul edilir (poligon Türkiye aralığında kalır)', () => {
-    const captured = [];
-    const fakeLayer = { addTo() { return this; }, };
-    app.window.L = {
-      layerGroup: () => ({ addTo: () => fakeLayer }),
-      polygon: (pts, opts) => { captured.push(pts); return { addTo() {} }; },
-      canvas: () => ({}),
+describe('⭐ yumuşak vektör çizim — halka çıkarma + Chaikin (kare kare değil)', () => {
+  const D = 0.0001;
+  const cell = (row, col, classKey) => {
+    const latTop = 40 - row * D, latBot = latTop - D;
+    const lon0 = 32 + col * D, lon1 = lon0 + D;
+    return {
+      row, col, epsg: 4326, classKey, areaM2: 100,
+      center: { lat: (latTop + latBot) / 2, lon: (lon0 + lon1) / 2 },
+      quadWgs: [[lon0, latBot], [lon1, latBot], [lon1, latTop], [lon0, latTop]],
     };
-    app.map = { removeLayer() {} };
-    app.dgLcRenderRuns([
-      { row: 1, col0: 1, col1: 2, classKey: 'water', epsg: 4326,
-        x0: 32.648, y0: 39.990, x1: 32.649, y1: 39.991 },
-    ]);
-    assert.equal(captured.length, 1, 'poligon çizilmeli');
-    for (const [lat, lon] of captured[0]) {
-      assert.ok(lat > 39 && lat < 41, 'lat Türkiye aralığında: ' + lat);
-      assert.ok(lon > 32 && lon < 33, 'lon Türkiye aralığında: ' + lon);
+  };
+  const shoelaceDeg = (ring) => {
+    let a = 0;
+    for (let i = 0; i < ring.length; i++) {
+      const p = ring[i], q = ring[(i + 1) % ring.length];
+      a += p[1] * q[0] - q[1] * p[0];
     }
-    app.map = undefined;
-    app.window.L = undefined;
+    return Math.abs(a) / 2;
+  };
+
+  test('2x2 blok → TEK dış halka, alanı 4 hücre', () => {
+    const cells = [cell(0, 0, 'water'), cell(0, 1, 'water'), cell(1, 0, 'water'), cell(1, 1, 'water')];
+    const rings = app.dgLcPatchRings(cells);
+    assert.equal(rings.length, 1, 'deliksiz bloktan tek halka');
+    // NOT: derece düzleminde shoelace ~1e-12 mutalakat hatası taşır;
+    // 1e-8 mertebesinde alanlarda göreli tolerans 1e-3 ancak anlamlı.
+    assert.ok(Math.abs(shoelaceDeg(rings[0]) - 4 * D * D) / (4 * D * D) < 1e-3,
+      'halka alanı = 4 hücre: ' + shoelaceDeg(rings[0]));
   });
 
-  test('renderRuns: epsg=32636 run metre kabul edilir (UTM ters dönüşüm)', () => {
+  test('3x3 halka (ortası boş) → dış halka + DELİK', () => {
+    const cells = [];
+    for (let r = 0; r < 3; r++) for (let c = 0; c < 3; c++) {
+      if (r === 1 && c === 1) continue;
+      cells.push(cell(r, c, 'green'));
+    }
+    const rings = app.dgLcPatchRings(cells);
+    assert.equal(rings.length, 2, 'dış halka + delik');
+    const outer = rings[0], hole = rings[1];
+    assert.ok(shoelaceDeg(outer) > shoelaceDeg(hole), 'dış halka daha büyük');
+    assert.ok(Math.abs(shoelaceDeg(hole) - 1 * D * D) / (D * D) < 1e-3, 'delik = 1 hücre');
+  });
+
+  test('Chaikin: nokta sayısı 2 turda 4x, alan biraz içe büzülür', () => {
+    const kare = [[40, 32], [40, 32.001], [39.999, 32.001], [39.999, 32]];
+    const sm = app.dgLcSmoothRing(kare, 2);
+    assert.equal(sm.length, 16);
+    const a0 = shoelaceDeg(kare), a1 = shoelaceDeg(sm);
+    assert.ok(a1 < a0 && a1 > a0 * 0.80, 'yumuşatma alanı sınırlı içe büker: ' + (a1 / a0));
+  });
+
+  test('detectPatches halkaları da döndürür (render nesneden çizer)', () => {
+    const cells = [cell(0, 0, 'water'), cell(0, 1, 'water'), cell(1, 0, 'water'), cell(1, 1, 'water')];
+    const [pt] = app.dgLcDetectPatches(cells, 0.005);
+    assert.ok(Array.isArray(pt.rings) && pt.rings.length >= 1, 'rings alanı var');
+    assert.ok(pt.rings[0].length >= 4, 'yumuşatılmış halka nokta sayısı');
+  });
+
+  test('dgLcRenderObjects: delikli nesne L.polygon([dış, delik]) olarak çizilir', () => {
     const captured = [];
     app.window.L = {
       layerGroup: () => ({ addTo: () => ({}) }),
-      polygon: (pts) => { captured.push(pts); return { addTo() {} }; },
+      polygon: (latlngs, opts) => { captured.push(latlngs); return { addTo() {} }; },
       canvas: () => ({}),
     };
     app.map = { removeLayer() {} };
-    app.dgLcRenderRuns([
-      { row: 1, col0: 1, col1: 2, classKey: 'green', epsg: 32636,
-        x0: 469600, y0: 4426500, x1: 469610, y1: 4426510 },
-    ]);
-    assert.equal(captured.length, 1);
-    for (const [lat, lon] of captured[0]) {
-      assert.ok(lat > 39 && lat < 41, 'UTM→WGS doğru: ' + lat);
-      assert.ok(lon > 32 && lon < 33, 'UTM→WGS doğru: ' + lon);
+    const cells = [];
+    for (let r = 0; r < 3; r++) for (let c = 0; c < 3; c++) {
+      if (r === 1 && c === 1) continue;
+      cells.push(cell(r, c, 'green'));
+    }
+    const [pt] = app.dgLcDetectPatches(cells, 0.005);
+    app.dgLcRenderObjects([pt]);
+    assert.equal(captured.length, 1, 'tek poligon');
+    assert.equal(captured[0].length, 2, 'dış halka + delik');
+    for (const ring of captured[0]) for (const ll of ring) {
+      assert.ok(ll[0] > 39.99 && ll[0] < 40.01, 'lat aralık: ' + ll[0]);
+      assert.ok(ll[1] > 31.99 && ll[1] < 32.01, 'lon aralık: ' + ll[1]);
     }
     app.map = undefined;
     app.window.L = undefined;
+  });
+
+  test('canary: kare bant render kodu tamamen kalktı', () => {
+    const src = readFileSync(new URL('../src/services/landcover.js', import.meta.url), 'utf8');
+    assert.ok(!src.includes('dgLcRenderRuns'), 'run bant render fonksiyonu yok');
+    assert.match(src, /dgLcRenderObjects\(patches\)/, 'analyze nesneleri çiziyor');
   });
 });

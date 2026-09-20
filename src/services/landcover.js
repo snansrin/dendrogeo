@@ -735,41 +735,32 @@ function dgLcMergeTileResults(parts){
   };
 }
 
-function dgLcRenderRuns(runs){
+/* Nesneleri YUMUŞAK VEKTÖR POLİGONLAR olarak çizer.
+ * Eskiden run bantları (dikdörtgen şeritler) çiziliyordu ve kullanıcı
+ * "kare kare" görüyordu. Artık her nesne: sınır izi → halkalar (delikli)
+ * → Chaikin yumuşatma → tek L.polygon. */
+function dgLcRenderObjects(patches){
   if(DG_LC_LAYER&&typeof map!=="undefined"&&map){
     map.removeLayer(DG_LC_LAYER);
     DG_LC_LAYER=null;
   }
   if(typeof map==="undefined"||!map||!window.L)return;
-  if(!runs.length)return;
-  if(runs.length>DG_LC_RENDER_LIMIT){
-    console.warn("DENDROGEO · 10 m görselleştirme atlandı: "+runs.length+" ardışık hücre bandı.");
-    return;
-  }
-  /* Binlerce bant SVG ile ağır olur; canvas renderer belirgin hızlandırır. */
+  if(!patches||!patches.length)return;
   const renderer=(typeof L.canvas==="function")?L.canvas({padding:.2}):null;
   DG_LC_LAYER=L.layerGroup().addTo(map);
-  for(const r of runs){
-    if(!r.classKey)continue;
-    /* EPSG:4326 karolarında run koordinatları zaten derecedir. */
-    const p1=r.epsg===4326?{lat:r.y0,lon:r.x0}:dgLcUtmInverse(r.x0,r.y0,r.epsg);
-    const p2=r.epsg===4326?{lat:r.y0,lon:r.x1}:dgLcUtmInverse(r.x1,r.y0,r.epsg);
-    const p3=r.epsg===4326?{lat:r.y1,lon:r.x1}:dgLcUtmInverse(r.x1,r.y1,r.epsg);
-    const p4=r.epsg===4326?{lat:r.y1,lon:r.x0}:dgLcUtmInverse(r.x0,r.y1,r.epsg);
-    const cls=DG_LC_CLASSES.find(c=>c.key===r.classKey);
-    if(!cls)continue;
-    L.polygon(
-      [[p1.lat,p1.lon],[p2.lat,p2.lon],[p3.lat,p3.lon],[p4.lat,p4.lon]],
-      {
-        color:cls.color,
-        weight:.6,
-        opacity:.50,
-        fillColor:cls.color,
-        fillOpacity:.38,
-        interactive:false,
-        renderer:renderer||undefined
-      }
-    ).addTo(DG_LC_LAYER);
+  for(const pt of patches){
+    const cls=DG_LC_CLASSES.find(c=>c.key===(pt.classKey||pt.group));
+    if(!cls||!pt.rings||!pt.rings.length)continue;
+    const latlngs=pt.rings.map(ring=>ring.map(p=>[p[0],p[1]]));
+    L.polygon(latlngs,{
+      color:cls.color,
+      weight:1.1,
+      opacity:.60,
+      fillColor:cls.color,
+      fillOpacity:.38,
+      interactive:false,
+      renderer:renderer||undefined
+    }).addTo(DG_LC_LAYER);
   }
 }
 
@@ -780,10 +771,12 @@ function dgLcClearLayer(){
   DG_LC_LAYER=null;
 }
 
+/* TEK BLOK rapor: kullanıcı isteği (2026-09-20) — "1 tane barlı ver ve
+ * gerekli bilgileri içersin". Sınıf başına TEK satır: bar + ha + % ve alt
+ * satırda gerekli ayrıntılar (hücre sayısı, çapraz uzlaşma, nesne özeti).
+ * Ayrı sınıf tablosu / çapraz tablo / nesne tablosu YOK — hepsi bu blokta. */
 function dgLcRenderReport(rep,result,parkAreaM2,extra){
   if(!rep)return;
-  /* analyze() rapor nesnesi ile ham result nesnesi aynı raporlayıcıyı
-   * kullanabilsin diye alan adları normalize edilir. */
   const R=result.groupAreas?result:{
     groupCounts:result.groupCounts||{},
     groupAreas:result.groupAreasM2||{},
@@ -797,10 +790,6 @@ function dgLcRenderReport(rep,result,parkAreaM2,extra){
     cells:result.cells,
     runs:result.runs
   };
-  /* Ekstra rapor alanları üç kaynaktan gelebilir (öncelik sırasıyla):
-   *   1) extra parametresi (çağranın açıkça verdikleri)
-   *   2) result'un KENDİSİ rapor biçimindeyse (report.agreement/patches/...)
-   *   3) DG_LC_LAST (analyze'in bıraktığı son durum — gridplan böyle çağırır) */
   const last=(typeof DG_LC_LAST!=="undefined"&&DG_LC_LAST&&DG_LC_LAST.report)?DG_LC_LAST.report:null;
   const exSrc=extra||(result.agreement||result.patches?result:last)||{};
   const ex={
@@ -808,159 +797,82 @@ function dgLcRenderReport(rep,result,parkAreaM2,extra){
     primaryLabel:exSrc.primaryLabel,
     primaryCitation:exSrc.primaryCitation,
     crossCitation:exSrc.crossCitation,
-    crossLabel:exSrc.crossLabel,
     agreement:exSrc.agreement,
     crossError:exSrc.crossError,
     patches:exSrc.patches
   };
   const analysisArea=R.assignedAreaM2;
   const GROUP_ORDER=["green","water","hard","bare","other"];
-  const rows=GROUP_ORDER.map(k=>{
-    const cls=DG_LC_CLASSES.find(c=>c.key===k);
-    const count=R.groupCounts?.[k]||0;
-    const area=R.groupAreas?.[k]||0;
-    if(!count&&!area)return"";
-    const pct=analysisArea>0?area/analysisArea*100:0;
-    return"<tr>"+
-      "<td>"+cls.emoji+"</td>"+
-      "<td><b>"+cls.label+"</b></td>"+
-      "<td class='mono'>"+count.toLocaleString("tr-TR")+"</td>"+
-      "<td class='mono'>"+(area/10000).toFixed(2)+"</td>"+
-      "<td class='mono'>%"+pct.toFixed(1)+"</td>"+
-      "</tr>";
-  }).join("");
 
-  /* Çapraz kaynak uzlaşma tablosu */
-  let crossHtml="";
-  if(ex.agreement){
-    const crows=GROUP_ORDER.map(k=>{
-      const a=ex.agreement[k];
-      if(!a||(!a.primaryHa&&!a.crossHa))return"";
-      const cls=DG_LC_CLASSES.find(c=>c.key===k);
-      const renk=a.agreementPct>=80?"var(--green-dk)":a.agreementPct>=60?"#92400e":"#991b1b";
-      return"<tr><td>"+cls.emoji+" "+cls.label+"</td>"+
-        "<td class='mono'>"+a.primaryHa.toFixed(2)+"</td>"+
-        "<td class='mono'>"+a.crossHa.toFixed(2)+"</td>"+
-        "<td class='mono' style='color:"+renk+"'>%"+a.agreementPct.toFixed(0)+"</td></tr>";
-    }).join("");
-    if(crows){
-      crossHtml="<div style='margin-top:10px'><b style='font-size:.72rem'>🔬 Çapraz doğrulama</b>"+
-        "<div style='font-size:.67rem;color:var(--mut);margin:4px 0 6px'>Bağımsız ikinci kaynak ("+
-        (ex.crossLabel||"")+") aynı polygon için:</div>"+
-        "<table><thead><tr><th>Grup</th><th>Ana (ha)</th><th>Çapraz (ha)</th><th>Uzlaşma</th></tr></thead><tbody>"+
-        crows+"</tbody></table></div>";
-    }
-  }else if(ex.crossError){
-    crossHtml="<div style='font-size:.67rem;color:var(--mut);margin-top:8px'>🔬 Çapraz doğrulama yapılamadı: "+
-      String(ex.crossError).slice(0,120)+"</div>";
+  const patchesBy={};
+  for(const pt of (ex.patches||[])){
+    const k=pt.classKey||pt.group;
+    (patchesBy[k]=patchesBy[k]||[]).push(pt);
   }
 
-  /* Nesne tanıma: kompakt tablo (virgül listesi yerine) */
-  const patchHtml=dgLcPatchTableHtml(ex.patches);
+  const aktif=GROUP_ORDER.filter(k=>(R.groupAreas?.[k]||0)>0);
+  const max=aktif.length?Math.max(...aktif.map(k=>R.groupAreas[k])):1;
 
-  const classifiedPct=analysisArea>0?R.classifiedAreaM2/analysisArea*100:0;
+  const rowsHtml=aktif.map(k=>{
+    const cls=DG_LC_CLASSES.find(c=>c.key===k);
+    const area=R.groupAreas[k]||0;
+    const count=R.groupCounts?.[k]||0;
+    const pct=analysisArea>0?area/analysisArea*100:0;
+    const w=max>0?Math.max(2,area/max*100):0;
+    const ag=ex.agreement?.[k];
+    const pl=patchesBy[k];
+    const sub=[
+      count.toLocaleString("tr-TR")+" hücre",
+      ag?("🔬 uzlaşma %"+ag.agreementPct.toFixed(0)):null,
+      pl&&pl.length?("🧩 "+pl.length+" nesne · en büyük "+
+        Math.max(...pl.map(p=>p.areaHa!=null?p.areaHa:(p.areaM2||0)/10000)).toFixed(2)+" ha"):null
+    ].filter(Boolean).join(" · ");
+    return"<div style='margin:8px 0'>"+
+      "<div style='display:flex;align-items:center;gap:8px'>"+
+        "<div style='flex:0 0 106px;font-size:.75rem;font-weight:700'>"+cls.emoji+" "+cls.label+"</div>"+
+        "<div style='flex:1;height:16px;background:rgba(20,30,25,.06);border-radius:8px;overflow:hidden'>"+
+          "<div style='height:100%;width:"+w.toFixed(1)+"%;background:"+cls.color+"66;border:1px solid "+cls.color+";border-radius:8px'></div>"+
+        "</div>"+
+        "<div class='mono' style='flex:0 0 108px;text-align:right;font-size:.75rem;font-weight:600'>"+
+          (area/10000).toFixed(2)+" ha <span style='color:var(--mut);font-weight:400'>%"+pct.toFixed(1)+"</span></div>"+
+      "</div>"+
+      "<div style='margin:2px 0 0 114px;font-size:.66rem;color:var(--mut)'>"+sub+"</div>"+
+    "</div>";
+  }).join("");
+
   const maskedPct=analysisArea>0?R.maskedAreaM2/analysisArea*100:0;
   const areaDeltaPct=parkAreaM2>0?Math.abs(analysisArea-parkAreaM2)/parkAreaM2*100:0;
-  const closureNote=areaDeltaPct>0.5
-    ?"<div style='margin-top:8px;padding:8px 10px;border-radius:8px;background:rgba(220,38,38,.08);color:#991b1b;font-size:.68rem'>⚠ Raster/park alanı farkı %"+areaDeltaPct.toFixed(2)+"; sonuç geometrik kalite kontrolünden geçmedi.</div>"
-    :"";
+  const qaOk=areaDeltaPct<=0.5;
   const maskNote=R.maskedAreaM2>0
-    ?"<div style='margin-top:8px;padding:8px 10px;border-radius:8px;background:rgba(245,158,11,.10);color:#92400e;font-size:.68rem'>⚠ Veri dışı/maskeli alan: <b>"+(R.maskedAreaM2/10000).toFixed(2)+" ha</b> (%"+maskedPct.toFixed(1)+"). Bu alan sınıflara dağıtılmadı.</div>"
-    :"";
-  const sourceDiff=areaDeltaPct<=0.5
-    ?"<span style='color:var(--green-dk)'>✓ Raster/park alanı geometrik QA geçti</span>"
+    ?"<div style='margin-top:8px;padding:7px 10px;border-radius:8px;background:rgba(245,158,11,.10);color:#92400e;font-size:.67rem'>⚠ Veri dışı/maskeli alan: <b>"+(R.maskedAreaM2/10000).toFixed(2)+" ha</b> (%"+maskedPct.toFixed(1)+").</div>"
     :"";
 
   rep.innerHTML=
     "<b>🗺️ Arazi Örtüsü · 10 m · "+(ex.primaryYear||2021)+"</b>"+
-    "<div style='font-size:.70rem;color:var(--mut);margin:7px 0 10px'>"+
-      "<b>Ana kaynak:</b> "+(ex.primaryLabel||"")+". Seçili park polygonu ile 10 m raster hücrelerinin "+
-      "GERÇEK kesişim alanı hesaplanır (hücre sayımı değil, tam poligon kesişimi). "+
-      "EPSG:4326 karolarda hücre köşeleri analiz UTM'sine projekte edilir.</div>"+
-    dgLcBarBlockHtml(R,analysisArea)+
-    "<div style='overflow:auto'><table><thead><tr><th></th><th>Sınıf</th><th>10 m hücre</th><th>Alan (ha)</th><th>%</th></tr></thead><tbody>"+
-      rows+
-    "</tbody></table></div>"+
-    crossHtml+
-    patchHtml+
-    "<div style='font-size:.69rem;color:var(--mut);margin-top:10px'>"+
-      "<b>Park polygonu:</b> "+(parkAreaM2/10000).toFixed(2)+" ha · "+
-      "<b>Analiz alanı:</b> "+(analysisArea/10000).toFixed(2)+" ha · "+
-      "<b>Kaynak hücre:</b> "+R.sourceCells.toLocaleString("tr-TR")+
-      (sourceDiff?" · "+sourceDiff:"")+
+    "<div style='font-size:.67rem;color:var(--mut);margin:5px 0 2px'>"+
+      (ex.primaryLabel||"")+
+      " · <span style='color:"+(qaOk?"var(--green-dk)":"#991b1b")+"'>"+
+      (qaOk?"✓ geometrik QA geçti (%"+areaDeltaPct.toFixed(2)+" fark)":"⚠ QA farkı %"+areaDeltaPct.toFixed(2))+
+      "</span></div>"+
+    "<div style='margin:6px 0 4px;padding:10px 12px;border:1px solid var(--line);border-radius:12px;background:var(--bg)'>"+
+      rowsHtml+
     "</div>"+
     maskNote+
-    closureNote+
-    "<div style='font-size:.67rem;color:var(--mut);margin-top:7px'>"+
-      "<b>Sınıflandırma kapsamı:</b> %"+classifiedPct.toFixed(1)+" · "+
-      "Kaynaklar: "+(ex.primaryCitation||"")+(ex.crossCitation?" + "+ex.crossCitation:"")+".</div>"+
+    "<div style='font-size:.66rem;color:var(--mut);margin-top:8px'>"+
+      "<b>Park:</b> "+(parkAreaM2/10000).toFixed(2)+" ha · "+
+      "<b>Analiz:</b> "+(analysisArea/10000).toFixed(2)+" ha · "+
+      "<b>Hücre:</b> "+R.sourceCells.toLocaleString("tr-TR")+" · "+
+      "<b>Kapsam:</b> %"+(analysisArea>0?R.classifiedAreaM2/analysisArea*100:0).toFixed(1)+
+    "</div>"+
+    "<div style='font-size:.64rem;color:var(--mut);margin-top:4px'>"+
+      "Kaynaklar: "+(ex.primaryCitation||"")+(ex.crossCitation?" + "+ex.crossCitation:"")+
+      (ex.crossError?" · çapraz kaynak atlandı":"")+
+    "</div>"+
     "<div style='display:flex;gap:7px;flex-wrap:wrap;margin-top:10px'>"+
       "<button class='btn sm ghost' onclick='downloadLandCoverClassCSV()'>📥 Sınıf CSV</button>"+
       "<button class='btn sm ghost' onclick='downloadLandCoverCellsGeoJSON()'>📍 Hücre GeoJSON</button>"+
     "</div>";
-
 }
-
-/* Sınıf dağılımı: tek sütunlu, sade CSS barları.
- * Tasarım hedefi: her sınıf TEK satır — emoji+ad | renkli şeffaf bar | ha + %.
- * Ekstra dataset/legend yok; çapraz kaynak karşılaştırması zaten ayrı
- * tabloda duruyor. */
-function dgLcBarBlockHtml(R,analysisArea){
-  const GROUP_ORDER=["green","water","hard","bare","other"];
-  const aktif=GROUP_ORDER.filter(k=>(R.groupAreas?.[k]||0)>0);
-  if(!aktif.length)return"";
-  const max=Math.max(...aktif.map(k=>R.groupAreas[k]));
-  const rowsHtml=aktif.map(k=>{
-    const cls=DG_LC_CLASSES.find(c=>c.key===k);
-    const area=R.groupAreas[k];
-    const pct=analysisArea>0?area/analysisArea*100:0;
-    const w=max>0?Math.max(2,area/max*100):0;
-    return"<div style='display:flex;align-items:center;gap:8px;margin:5px 0'>"+
-      "<div style='flex:0 0 108px;font-size:.72rem;font-weight:600'>"+cls.emoji+" "+cls.label+"</div>"+
-      "<div style='flex:1;height:14px;background:rgba(20,30,25,.06);border-radius:7px;overflow:hidden'>"+
-        "<div style='height:100%;width:"+w.toFixed(1)+"%;background:"+cls.color+"66;border:1px solid "+cls.color+";border-radius:7px'></div>"+
-      "</div>"+
-      "<div class='mono' style='flex:0 0 92px;text-align:right;font-size:.72rem'>"+(area/10000).toFixed(2)+" ha <span style='color:var(--mut)'>%"+pct.toFixed(1)+"</span></div>"+
-    "</div>";
-  }).join("");
-  return"<div style='margin:2px 0 10px;padding:9px 11px;border:1px solid var(--line);border-radius:10px;background:var(--bg)'>"+
-    "<div style='font-size:.68rem;color:var(--mut);margin-bottom:4px'>Sınıf dağılımı (hektar)</div>"+
-    rowsHtml+"</div>";
-}
-
-/* Nesne tanımlama: karma virgül listesi yerine kompakt tablo. */
-function dgLcPatchTableHtml(patches){
-  if(!patches||!patches.length)return"";
-  const byKey={};
-  for(const pt of patches){
-    const k=pt.classKey||pt.group;
-    (byKey[k]=byKey[k]||[]).push(pt);
-  }
-  const GROUP_ORDER=["green","water","hard","bare","other"];
-  const rows=GROUP_ORDER.filter(k=>byKey[k]).map(k=>{
-    const cls=DG_LC_CLASSES.find(c=>c.key===k);
-    const list=byKey[k];
-    const total=list.reduce((t,p)=>t+(p.areaHa!=null?p.areaHa:(p.areaM2||0)/10000),0);
-    const enBuyuk=list[0];
-    const enBuyukHa=enBuyuk.areaHa!=null?enBuyuk.areaHa:(enBuyuk.areaM2||0)/10000;
-    return"<tr>"+
-      "<td>"+cls.emoji+" "+cls.label+"</td>"+
-      "<td class='mono'>"+list.length+"</td>"+
-      "<td class='mono'>"+total.toFixed(2)+"</td>"+
-      "<td class='mono'>"+enBuyukHa.toFixed(2)+"</td>"+
-      "<td class='mono' style='color:var(--mut)'>"+enBuyuk.centroidLat.toFixed(4)+", "+enBuyuk.centroidLon.toFixed(4)+"</td>"+
-    "</tr>";
-  }).join("");
-  return"<div style='margin-top:10px'><b style='font-size:.72rem'>🧩 Nesne tanımlama</b>"+
-    "<div style='font-size:.67rem;color:var(--mut);margin:4px 0 6px'>Bağlantılı 10 m hücre bileşenleri (≥0,05 ha):</div>"+
-    "<table><thead><tr><th>Sınıf</th><th>Nesne</th><th>Toplam ha</th><th>En büyük ha</th><th>Merkez</th></tr></thead><tbody>"+
-    rows+"</tbody></table></div>";
-}
-
-/* Sınıf dağılımını YATAY BAR grafik olarak çizer.
- * Çapraz kaynak varsa ikinci dataset eklenir → iki kaynağın anlaşmazlığı
- * (ör. yeşil 22.26 ha vs 0 ha) görsel olarak anında görülür.
- * Chart.js yüklü değilse sessizce atlanır; sayı tablosu zaten duruyor. */
 
 function dgLcClassCsv(result,meta){
   const q=v=>'"'+String(v??"").replace(/"/g,'""')+'"';
@@ -1067,15 +979,155 @@ function dgLcDetectPatches(cells,minHa){
     if(area<threshold)continue;
     let wl=0,wo=0;
     for(const x of comp){wl+=x.center.lat*(x.areaM2||0);wo+=x.center.lon*(x.areaM2||0);}
+    /* Görsel katman için vektör halkalar: kare kare değil, yumuşak çizim.
+     * Rapor sayılarına dokunmaz (alan hücre kesişiminden gelir). */
+    let rings=[];
+    try{
+      rings=dgLcPatchRings(comp).map(r=>dgLcSmoothRing(r,2));
+    }catch(err){
+      console.warn("DENDROGEO · nesne halkası kurulamadı, atlandı:",err);
+    }
     patches.push({
       classKey:comp[0].classKey,
       areaM2:area,
       cells:comp.length,
-      centroid:{lat:wl/area,lon:wo/area}
+      centroid:{lat:wl/area,lon:wo/area},
+      rings
     });
   }
   patches.sort((a,b)=>b.areaM2-a.areaM2);
   return patches;
+}
+
+/* ---------- Piksel yığınını vektör halkalara çevir ----------
+ * Kare kare bant çizimi yerine: bir nesnenin (bağlantılı bileşen) hücre
+ * kümesinden SINIR İZİ çıkarılır → dış halka + delikler → Chaikin ile
+ * yumuşatılır. Sonuç haritada "gerçek çizim" gibi organik bir poligon
+ * olarak görünür. Sayısal hesaplar DEĞİŞMEZ (hâlâ tam hücre kesişimi);
+ * bu yalnızca görsel katman.
+ *
+ * Yöntem:
+ *  · her hücrenin 4 komşusuna bakılır; komşu nesneye ait değilse o kenar
+ *    SINIR kenarıdır ve bölgeyi tutarlı yönde dolaşan yönlü doğru parçası
+ *    olarak eklenir (paylaşılan kenarlar zaten hiç üretilmez)
+ *  · köşe noktaları zincirlenerek kapalı halkalar kurulur
+ *  · halkalar lat/lon'a çevrilir; işaretli alanla dış halka / delik ayrımı
+ *    yapılır, delikler dış halkanın içine yuvalanır (Leaflet hole sözdizimi)
+ *  · Chaikin (2 tur) köşeleri yumuşatır */
+function dgLcPatchRings(cells){
+  const key=c=>c.row+":"+c.col;
+  const set=new Set(cells.map(key));
+  const byKey=new Map(cells.map(c=>[key(c),c]));
+  /* köşe(r,c) → lat/lon: köşeye bitişik herhangi bir hücrenin quadWgs'inden */
+  const corner=(r,c)=>{
+    const src=byKey.get(r+":"+c)||byKey.get((r-1)+":"+c)||byKey.get(r+":"+ (c-1))||byKey.get((r-1)+":"+(c-1));
+    if(!src)return null;
+    // hücre (sr,sc) quadWgs: [0]=(lon0,latBot) [1]=(lon1,latBot) [2]=(lon1,latTop) [3]=(lon0,latTop)
+    const dr=r-src.row,dc=c-src.col;
+    if(dr===0&&dc===0)return src.quadWgs[3];
+    if(dr===0&&dc===1)return src.quadWgs[2];
+    if(dr===1&&dc===1)return src.quadWgs[1];
+    if(dr===1&&dc===0)return src.quadWgs[0];
+    return null;
+  };
+  const edges=[];   // [ [r,c], [r2,c2] ] yönlü köşe çiftleri
+  for(const c of cells){
+    const r=c.row,cc=c.col;
+    if(!set.has((r-1)+":"+cc))edges.push([[r,cc],[r,cc+1]]);       // kuzey
+    if(!set.has(r+":"+(cc+1)))edges.push([[r,cc+1],[r+1,cc+1]]);    // doğu
+    if(!set.has((r+1)+":"+cc))edges.push([[r+1,cc+1],[r+1,cc]]);    // güney
+    if(!set.has(r+":"+(cc-1)))edges.push([[r+1,cc],[r,cc]]);        // batı
+  }
+  const startMap=new Map();
+  for(const e of edges){
+    const k=e[0][0]+","+e[0][1];
+    if(!startMap.has(k))startMap.set(k,[]);
+    startMap.get(k).push(e);
+  }
+  const used=new Set();
+  const ringsGrid=[];
+  for(let i=0;i<edges.length;i++){
+    if(used.has(i))continue;
+    const ring=[edges[i][0]];
+    used.add(i);
+    let cur=edges[i][1];
+    let guard=0;
+    while(guard++<edges.length+1){
+      ring.push(cur);
+      const k=cur[0]+","+cur[1];
+      const opts=startMap.get(k)||[];
+      let next=null,nextIdx=-1;
+      for(const o of opts){
+        const idx=edges.indexOf(o);
+        if(!used.has(idx)){next=o;nextIdx=idx;break;}
+      }
+      if(nextIdx<0)break;
+      used.add(nextIdx);
+      cur=next[1];
+      if(cur[0]===ring[0][0]&&cur[1]===ring[0][1])break;
+    }
+    /* kapanışta başlangıç köşesi çift yazılmışsa tekilleştir —
+     * sonst sadeleştirme adımı köşeyi yutuyor ve halka alanı küçülüyordu */
+    if(ring.length>1&&ring[ring.length-1][0]===ring[0][0]&&ring[ring.length-1][1]===ring[0][1])ring.pop();
+    if(ring.length>=4)ringsGrid.push(ring);
+  }
+  /* grid köşelerinden lat/lon halkalarına */
+  const rings=[];
+  for(const rg of ringsGrid){
+    const pts=[];
+    for(const [r,c] of rg){
+      const w=corner(r,c);
+      if(!w)continue;
+      const last=pts[pts.length-1];
+      if(last&&last[0]===w[1]&&last[1]===w[0])continue;   // tekrar köşeyi at
+      pts.push([w[1],w[0]]);                               // [lat,lon]
+    }
+    if(pts.length>=3){
+      // doğrusal ardışık noktaları sadeleştir
+      const simp=[];
+      for(let i=0;i<pts.length;i++){
+        const a=pts[(i-1+pts.length)%pts.length],b=pts[i],c2=pts[(i+1)%pts.length];
+        const cross=(b[0]-a[0])*(c2[1]-b[1])-(b[1]-a[1])*(c2[0]-b[0]);
+        /* doğrusal (collinear) ara köşeleri at: yalnızca yön değişimi kalan
+         * köşeler korunur; sonst kare halka 12 noktayla gereksiz şişer */
+        if(Math.abs(cross)>1e-12)simp.push(b);
+      }
+      if(simp.length>=3)rings.push(simp);
+    }
+  }
+  if(!rings.length)return[];
+  /* dış halka / delik ayrımı: işaretli alan (lon,lat düzleminde) */
+  const signed=r=>{
+    let a=0;
+    for(let i=0;i<r.length;i++){
+      const p=r[i],q=r[(i+1)%r.length];
+      a+=p[1]*q[0]-q[1]*p[0];
+    }
+    return a/2;
+  };
+  const withSign=rings.map(r=>({pts:r,a:signed(r)}));
+  withSign.sort((x,y)=>Math.abs(y.a)-Math.abs(x.a));
+  const outer=withSign[0];
+  const holes=withSign.slice(1).filter(h=>Math.sign(h.a)!==Math.sign(outer.a));
+  return [outer.pts,...holes.map(h=>h.pts)];
+}
+
+/* Chaikin yumuşatma: kapalı halkada her kenarı 25/75 noktalarıyla değiştirir.
+ * 2 tur, piksel merdivenini organik bir eğriye çevirir. Alanı ~%1-2 içe
+ * büker — yalnızca GÖRSEL katmanda kullanılır, rapor sayılarına dokunmaz. */
+function dgLcSmoothRing(ring,iters){
+  let pts=ring.slice();
+  const n=iters==null?2:iters;
+  for(let k=0;k<n&&pts.length>=4;k++){
+    const out=[];
+    for(let i=0;i<pts.length;i++){
+      const p=pts[i],q=pts[(i+1)%pts.length];
+      out.push([0.75*p[0]+0.25*q[0],0.75*p[1]+0.25*q[1]]);
+      out.push([0.25*p[0]+0.75*q[0],0.25*p[1]+0.75*q[1]]);
+    }
+    pts=out;
+  }
+  return pts;
 }
 
 /* İki kaynağın grup alanları arasındaki uzlaşma (belirsizlik göstergesi) */
@@ -1190,7 +1242,7 @@ async function dgLcAnalyze(params){
   };
 
   DG_LC_LAST={report,result,crossResult:cross?cross.result:null,patches};
-  dgLcRenderRuns(result.runs);
+  dgLcRenderObjects(patches);
   return report;
 }
 
