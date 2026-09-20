@@ -87,7 +87,6 @@ const DG_LC_CLASSES=[
 
 let DG_LC_LAYER=null;
 let DG_LC_LAST=null;
-let DG_LC_CHART=null;
 
 function dgLcFetchJson(url,options){
   return fetch(url,Object.assign({
@@ -584,6 +583,13 @@ function dgLcProcessTile(item,href,geometryWgs,source){
       throw new Error("Park alanı tek karoda çok büyük; güvenli 10 m COG okuma sınırını aşıyor.");
     }
 
+    /* Run bantları meta uzayında (UTM karoda metre, 4326 karoda DERECE)
+     * tutulur. Render'da doğru ters dönüşüm seçilsin diye run'lara meta
+     * uzayının EPSG'si yazılır: 4326 karoda 4326 (derece), UTM karoda bölge.
+     * ⚠️ Buraya analysisEpsg yazmak SAHADAKİ GÖRÜNMEZ KATMAN HATASIYDI:
+     * derece değerler metre gibi ters UTM'ye sokulup okyanusa çiziliyordu. */
+    const runEpsg=isUtm?analysisEpsg:4326;
+
     const values=await image.readRasters({
       window:win,
       samples:[0],
@@ -636,7 +642,7 @@ function dgLcProcessTile(item,href,geometryWgs,source){
           maskedAreaM2+=area;
           maskedCount++;
           if(runStart>=0){
-            dgLcRunPush(runs,globalRow,runStart,globalCol,runCls,meta,analysisEpsg);
+            dgLcRunPush(runs,globalRow,runStart,globalCol,runCls,meta,runEpsg);
             runStart=-1;runCls=null;
           }
           continue;
@@ -648,7 +654,7 @@ function dgLcProcessTile(item,href,geometryWgs,source){
         if(runStart>=0&&runCls===classKey){
           /* bant devam ediyor */
         }else{
-          if(runStart>=0)dgLcRunPush(runs,globalRow,runStart,globalCol,runCls,meta,analysisEpsg);
+          if(runStart>=0)dgLcRunPush(runs,globalRow,runStart,globalCol,runCls,meta,runEpsg);
           runStart=globalCol;runCls=classKey;
         }
 
@@ -849,29 +855,8 @@ function dgLcRenderReport(rep,result,parkAreaM2,extra){
       String(ex.crossError).slice(0,120)+"</div>";
   }
 
-  /* Nesne tanıma: bağlı bileşenler */
-  let patchHtml="";
-  if(ex.patches&&ex.patches.length){
-    const byKey={};
-    /* patch nesneleri iki biçimde gelebilir: ham {classKey,areaM2} veya
-     * rapor biçimi {group,areaHa}. İkisi de desteklenir. */
-    for(const pt of ex.patches){
-      const k=pt.classKey||pt.group;
-      (byKey[k]=byKey[k]||[]).push(pt);
-    }
-    patchHtml="<div style='margin-top:10px'><b style='font-size:.72rem'>🧩 Nesne tanımlama</b>"+
-      "<div style='font-size:.67rem;color:var(--mut);margin:4px 0 6px'>Bağlantılı 10 m hücre bileşenleri (≥0,05 ha):</div>";
-    for(const k of GROUP_ORDER){
-      const list=byKey[k];
-      if(!list||!list.length)continue;
-      const cls=DG_LC_CLASSES.find(c=>c.key===k);
-      patchHtml+="<div style='font-size:.68rem;margin:3px 0'>"+cls.emoji+" <b>"+cls.label+":</b> "+
-        list.length+" nesne · "+
-        list.slice(0,4).map(pt=>((pt.areaHa!=null?pt.areaHa:(pt.areaM2||0)/10000)).toFixed(2)+" ha").join(", ")+
-        (list.length>4?" …":"")+"</div>";
-    }
-    patchHtml+="</div>";
-  }
+  /* Nesne tanıma: kompakt tablo (virgül listesi yerine) */
+  const patchHtml=dgLcPatchTableHtml(ex.patches);
 
   const classifiedPct=analysisArea>0?R.classifiedAreaM2/analysisArea*100:0;
   const maskedPct=analysisArea>0?R.maskedAreaM2/analysisArea*100:0;
@@ -892,9 +877,7 @@ function dgLcRenderReport(rep,result,parkAreaM2,extra){
       "<b>Ana kaynak:</b> "+(ex.primaryLabel||"")+". Seçili park polygonu ile 10 m raster hücrelerinin "+
       "GERÇEK kesişim alanı hesaplanır (hücre sayımı değil, tam poligon kesişimi). "+
       "EPSG:4326 karolarda hücre köşeleri analiz UTM'sine projekte edilir.</div>"+
-    "<div style='margin:2px 0 10px;padding:8px 10px;border:1px solid var(--line);border-radius:10px;background:var(--bg)'>"+
-      "<canvas id='lcBarCanvas' height='150' aria-label='Sınıf dağılımı bar grafiği (hektar)' role='img'></canvas>"+
-    "</div>"+
+    dgLcBarBlockHtml(R,analysisArea)+
     "<div style='overflow:auto'><table><thead><tr><th></th><th>Sınıf</th><th>10 m hücre</th><th>Alan (ha)</th><th>%</th></tr></thead><tbody>"+
       rows+
     "</tbody></table></div>"+
@@ -916,70 +899,68 @@ function dgLcRenderReport(rep,result,parkAreaM2,extra){
       "<button class='btn sm ghost' onclick='downloadLandCoverCellsGeoJSON()'>📍 Hücre GeoJSON</button>"+
     "</div>";
 
-  dgLcRenderBarChart(rep,R,ex);
+}
+
+/* Sınıf dağılımı: tek sütunlu, sade CSS barları.
+ * Tasarım hedefi: her sınıf TEK satır — emoji+ad | renkli şeffaf bar | ha + %.
+ * Ekstra dataset/legend yok; çapraz kaynak karşılaştırması zaten ayrı
+ * tabloda duruyor. */
+function dgLcBarBlockHtml(R,analysisArea){
+  const GROUP_ORDER=["green","water","hard","bare","other"];
+  const aktif=GROUP_ORDER.filter(k=>(R.groupAreas?.[k]||0)>0);
+  if(!aktif.length)return"";
+  const max=Math.max(...aktif.map(k=>R.groupAreas[k]));
+  const rowsHtml=aktif.map(k=>{
+    const cls=DG_LC_CLASSES.find(c=>c.key===k);
+    const area=R.groupAreas[k];
+    const pct=analysisArea>0?area/analysisArea*100:0;
+    const w=max>0?Math.max(2,area/max*100):0;
+    return"<div style='display:flex;align-items:center;gap:8px;margin:5px 0'>"+
+      "<div style='flex:0 0 108px;font-size:.72rem;font-weight:600'>"+cls.emoji+" "+cls.label+"</div>"+
+      "<div style='flex:1;height:14px;background:rgba(20,30,25,.06);border-radius:7px;overflow:hidden'>"+
+        "<div style='height:100%;width:"+w.toFixed(1)+"%;background:"+cls.color+"66;border:1px solid "+cls.color+";border-radius:7px'></div>"+
+      "</div>"+
+      "<div class='mono' style='flex:0 0 92px;text-align:right;font-size:.72rem'>"+(area/10000).toFixed(2)+" ha <span style='color:var(--mut)'>%"+pct.toFixed(1)+"</span></div>"+
+    "</div>";
+  }).join("");
+  return"<div style='margin:2px 0 10px;padding:9px 11px;border:1px solid var(--line);border-radius:10px;background:var(--bg)'>"+
+    "<div style='font-size:.68rem;color:var(--mut);margin-bottom:4px'>Sınıf dağılımı (hektar)</div>"+
+    rowsHtml+"</div>";
+}
+
+/* Nesne tanımlama: karma virgül listesi yerine kompakt tablo. */
+function dgLcPatchTableHtml(patches){
+  if(!patches||!patches.length)return"";
+  const byKey={};
+  for(const pt of patches){
+    const k=pt.classKey||pt.group;
+    (byKey[k]=byKey[k]||[]).push(pt);
+  }
+  const GROUP_ORDER=["green","water","hard","bare","other"];
+  const rows=GROUP_ORDER.filter(k=>byKey[k]).map(k=>{
+    const cls=DG_LC_CLASSES.find(c=>c.key===k);
+    const list=byKey[k];
+    const total=list.reduce((t,p)=>t+(p.areaHa!=null?p.areaHa:(p.areaM2||0)/10000),0);
+    const enBuyuk=list[0];
+    const enBuyukHa=enBuyuk.areaHa!=null?enBuyuk.areaHa:(enBuyuk.areaM2||0)/10000;
+    return"<tr>"+
+      "<td>"+cls.emoji+" "+cls.label+"</td>"+
+      "<td class='mono'>"+list.length+"</td>"+
+      "<td class='mono'>"+total.toFixed(2)+"</td>"+
+      "<td class='mono'>"+enBuyukHa.toFixed(2)+"</td>"+
+      "<td class='mono' style='color:var(--mut)'>"+enBuyuk.centroidLat.toFixed(4)+", "+enBuyuk.centroidLon.toFixed(4)+"</td>"+
+    "</tr>";
+  }).join("");
+  return"<div style='margin-top:10px'><b style='font-size:.72rem'>🧩 Nesne tanımlama</b>"+
+    "<div style='font-size:.67rem;color:var(--mut);margin:4px 0 6px'>Bağlantılı 10 m hücre bileşenleri (≥0,05 ha):</div>"+
+    "<table><thead><tr><th>Sınıf</th><th>Nesne</th><th>Toplam ha</th><th>En büyük ha</th><th>Merkez</th></tr></thead><tbody>"+
+    rows+"</tbody></table></div>";
 }
 
 /* Sınıf dağılımını YATAY BAR grafik olarak çizer.
  * Çapraz kaynak varsa ikinci dataset eklenir → iki kaynağın anlaşmazlığı
  * (ör. yeşil 22.26 ha vs 0 ha) görsel olarak anında görülür.
  * Chart.js yüklü değilse sessizce atlanır; sayı tablosu zaten duruyor. */
-function dgLcRenderBarChart(rep,R,ex){
-  if(!rep||typeof rep.querySelector!=="function")return;
-  const cv=rep.querySelector("#lcBarCanvas");
-  if(!cv)return;
-  if(!window.Chart){console.warn("DENDROGEO · Chart.js yok, bar grafik atlandı.");return;}
-  try{
-    if(DG_LC_CHART){DG_LC_CHART.destroy();DG_LC_CHART=null;}
-    const GROUP_ORDER=["green","water","hard","bare","other"];
-    const aktif=GROUP_ORDER.filter(k=>(R.groupAreas?.[k]||0)>0||(ex.agreement&&ex.agreement[k]&&ex.agreement[k].crossHa>0));
-    const labels=aktif.map(k=>{
-      const cls=DG_LC_CLASSES.find(c=>c.key===k);
-      return cls.emoji+" "+cls.label;
-    });
-    const colors=aktif.map(k=>(DG_LC_CLASSES.find(c=>c.key===k)||{}).color||"#94a3b8");
-    const datasets=[{
-      label:ex.primaryLabel||"Ana kaynak",
-      data:aktif.map(k=>+((R.groupAreas?.[k]||0)/10000).toFixed(2)),
-      backgroundColor:colors.map(c=>c+"66"),   /* %40 dolgulu → şeffaf */
-      borderColor:colors,
-      borderWidth:1.2,
-      borderRadius:6,
-      borderSkipped:false,
-      barPercentage:.62
-    }];
-    if(ex.agreement){
-      datasets.push({
-        label:ex.crossLabel||"Çapraz kaynak",
-        data:aktif.map(k=>+(ex.agreement[k]?.crossHa||0).toFixed(2)),
-        backgroundColor:colors.map(c=>c+"22"),
-        borderColor:colors.map(c=>c+"88"),
-        borderWidth:1,
-        borderRadius:6,
-        borderSkipped:false,
-        barPercentage:.62
-      });
-    }
-    DG_LC_CHART=new Chart(cv,{
-      type:"bar",
-      data:{labels,datasets},
-      options:{
-        indexAxis:"y",
-        responsive:true,
-        maintainAspectRatio:false,
-        plugins:{
-          legend:{display:datasets.length>1,labels:{boxWidth:10,font:{size:10}}},
-          tooltip:{callbacks:{label:(c)=>" "+c.dataset.label+": "+c.parsed.x.toFixed(2)+" ha"}}
-        },
-        scales:{
-          x:{title:{display:true,text:"hektar",font:{size:10}},grid:{color:"rgba(20,30,25,.06)"},ticks:{font:{size:10}}},
-          y:{grid:{display:false},ticks:{font:{size:11}}}
-        }
-      }
-    });
-  }catch(err){
-    console.warn("DENDROGEO · bar grafik çizilemedi:",err);
-  }
-}
 
 function dgLcClassCsv(result,meta){
   const q=v=>'"'+String(v??"").replace(/"/g,'""')+'"';
@@ -1239,7 +1220,6 @@ function downloadLandCoverCellsGeoJSON(){
 
 function clearLandCover(){
   DG_LC_LAST=null;
-  if(DG_LC_CHART){try{DG_LC_CHART.destroy();}catch(e){}DG_LC_CHART=null;}
   dgLcClearLayer();
 }
 

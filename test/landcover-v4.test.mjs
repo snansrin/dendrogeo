@@ -308,11 +308,10 @@ describe('renk paleti ve şeffaflık (kullanıcı spesifikasyonu)', () => {
   });
 });
 
-describe('dgLcRenderBarChart — bar grafik', () => {
+describe('rapor görselleri — CSS barlar + nesne tablosu (sade tasarım)', () => {
   const stub = () => {
-    const o = { _q: {} };
+    const o = {};
     Object.defineProperty(o, 'innerHTML', { set(v) { o._v = v; }, get() { return o._v || ''; } });
-    o.querySelector = (sel) => (o._q[sel] = o._q[sel] || { id: sel.slice(1) });
     return o;
   };
   const REPORT = {
@@ -322,52 +321,109 @@ describe('dgLcRenderBarChart — bar grafik', () => {
     sourceCells: 7780, rasterCoverageAreaM2: 500500,
     year: 2021, primaryLabel: 'ESA 2021', crossLabel: 'IO 2020',
     primaryCitation: 'ESA', crossCitation: 'IO',
-    agreement: { water: { primaryHa: 12.5, crossHa: 11.04, agreementPct: 94 },
-                 green: { primaryHa: 22.26, crossHa: 0, agreementPct: 0 },
-                 hard: { primaryHa: 14.71, crossHa: 39.01, agreementPct: 55 } },
-    crossError: null, patches: [],
+    agreement: { water: { primaryHa: 12.5, crossHa: 11.04, agreementPct: 94 } },
+    crossError: null,
+    patches: [
+      { group: 'water', areaHa: 12.47, cells: 1895, centroidLat: 39.99051, centroidLon: 32.64819 },
+      { group: 'green', areaHa: 19.87, cells: 3061, centroidLat: 39.99312, centroidLon: 32.65144 },
+      { group: 'green', areaHa: 1.10, cells: 176, centroidLat: 39.98869, centroidLon: 32.64590 },
+    ],
   };
 
-  test('canvas elemanı raporda var ve Chart yoksa çökmez', () => {
+  test('⭐ bar bloğu: sınıf başına TEK satır, renkli şeffaf bar, ha + %', () => {
     const rep = stub();
-    assert.doesNotThrow(() => app.dgLcRenderReport(rep, REPORT, 500500));
-    assert.ok(rep.innerHTML.includes('lcBarCanvas'));
+    app.dgLcRenderReport(rep, REPORT, 500500);
+    const h = rep.innerHTML;
+    assert.ok(h.includes('Sınıf dağılımı (hektar)'), 'bar bloğu başlığı');
+    assert.ok(h.includes('#4ade8066'), 'yeşil bar şeffaf dolgu');
+    assert.ok(h.includes('#3b82f666'), 'su barı şeffaf dolgu');
+    assert.ok(h.includes('22.26 ha'), 'yeşil değer');
+    assert.ok(h.includes('12.50 ha'), 'su değer');
+    assert.ok(!h.includes('lcBarCanvas'), 'canvas yok — sade CSS bar');
+    assert.ok(!h.includes('new Chart'), 'Chart.js kalıntısı yok');
   });
 
-  test('⭐ Chart.js varsa yatay bar + çift dataset (ana + çapraz)', () => {
-    let cfg = null;
-    const created = [];
+  test('bar genişlikleri en büyük sınıfa göre ölçekli (%100 = en büyük)', () => {
     const rep = stub();
-    const ctx = app.__ctx || null;
-    // vm bağlamına sahte Chart enjekte et: loadApp ctx'i döndürmüyor; window'a yaz
-    // (harness ctx.window = ctx olduğu için app.window üzerinden erişilir)
-    const win = app.window;
-    win.Chart = class FakeChart {
-      constructor(cv, c) { cfg = c; created.push(c); }
-      destroy() {}
+    app.dgLcRenderReport(rep, REPORT, 500500);
+    const h = rep.innerHTML;
+    assert.ok(h.includes('width:100.0%'), 'en büyük sınıf (yeşil) tam genişlik');
+    // su 12.5/22.26 = %56.2
+    assert.ok(h.includes('width:56.2%'), 'su barı orantılı: ' + (h.match(/width:(\d+\.\d)%/g) || []).join(','));
+  });
+
+  test('⭐ nesne tanımlama: virgül listesi değil KOMPAKT TABLO', () => {
+    const rep = stub();
+    app.dgLcRenderReport(rep, REPORT, 500500);
+    const h = rep.innerHTML;
+    assert.ok(h.includes('Nesne tanımlama'), 'başlık');
+    assert.ok(h.includes('<th>Nesne</th>'), 'tablo sütunu');
+    assert.ok(h.includes('<th>En büyük ha</th>'), 'tablo sütunu');
+    assert.ok(h.includes('12.47'), 'su nesnesi alanı');
+    assert.ok(h.includes('39.9905'), 'su nesnesi merkezi');
+    assert.ok(!h.includes('nesne ·'), 'eski virgüllü liste biçimi kalktı');
+  });
+
+  test('çapraz doğrulama tablosu hala duruyor (barlara taşınmadı)', () => {
+    const rep = stub();
+    app.dgLcRenderReport(rep, REPORT, 500500);
+    assert.ok(rep.innerHTML.includes('Çapraz doğrulama'));
+    assert.ok(rep.innerHTML.includes('%94'));
+  });
+});
+
+describe('⭐ harita katmanı — run EPSG regresyonu (görünmez katman hatası)', () => {
+  /* SAHADAKİ HATA: 4326 karoda run koordinatları DERECE iken run'a
+   * analysisEpsg (32636) yazılıyordu; render derece değerleri metre sanıp
+   * ters UTM uyguluyordu → poligonlar okyanusta (0,0) civarına çiziliyor,
+   * kullanıcı parkın üstünde hiçbir şey görmüyordu. */
+  test('kaynak kod: 4326 karoda runEpsg=4326 yazılır', () => {
+    const src = readFileSync(new URL('../src/services/landcover.js', import.meta.url), 'utf8');
+    assert.match(src, /const runEpsg=isUtm\?analysisEpsg:4326;/);
+    assert.doesNotMatch(src, /dgLcRunPush\(runs,globalRow,runStart,globalCol,runCls,meta,analysisEpsg\)/,
+      'runPush fonksiyonuna analysisEpsg verilmesi regresyondur');
+  });
+
+  test('renderRuns: epsg=4326 run derece kabul edilir (poligon Türkiye aralığında kalır)', () => {
+    const captured = [];
+    const fakeLayer = { addTo() { return this; }, };
+    app.window.L = {
+      layerGroup: () => ({ addTo: () => fakeLayer }),
+      polygon: (pts, opts) => { captured.push(pts); return { addTo() {} }; },
+      canvas: () => ({}),
     };
-    app.dgLcRenderReport(rep, REPORT, 500500);
-    assert.equal(created.length, 1, 'chart bir kez kurulmalı');
-    assert.equal(cfg.type, 'bar');
-    assert.equal(cfg.options.indexAxis, 'y', 'yatay bar');
-    assert.equal(cfg.data.datasets.length, 2, 'ana + çapraz dataset');
-    // NOT: vm realm'leri arasında deepEqual ÇALIŞMAZ (harness tuzak #2)
-    assert.equal(cfg.data.labels.join('|'), '🌿 Yeşil alan|💧 Su|🧱 Sert zemin');
-    assert.equal(cfg.data.datasets[0].data.join(','), '22.26,12.5,14.71');
-    assert.equal(cfg.data.datasets[1].data.join(','), '0,11.04,39.01');
-    // şeffaf dolgu: renk + alfa sufiksi
-    assert.match(cfg.data.datasets[0].backgroundColor[0], /#4ade8066$/);
-    win.Chart = undefined;
+    app.map = { removeLayer() {} };
+    app.dgLcRenderRuns([
+      { row: 1, col0: 1, col1: 2, classKey: 'water', epsg: 4326,
+        x0: 32.648, y0: 39.990, x1: 32.649, y1: 39.991 },
+    ]);
+    assert.equal(captured.length, 1, 'poligon çizilmeli');
+    for (const [lat, lon] of captured[0]) {
+      assert.ok(lat > 39 && lat < 41, 'lat Türkiye aralığında: ' + lat);
+      assert.ok(lon > 32 && lon < 33, 'lon Türkiye aralığında: ' + lon);
+    }
+    app.map = undefined;
+    app.window.L = undefined;
   });
 
-  test('yeniden render eski chart\'ı destroy eder (canvas çakışması yok)', () => {
-    let destroys = 0;
-    const win = app.window;
-    win.Chart = class { constructor() {} destroy() { destroys++; } };
-    const rep = stub();
-    app.dgLcRenderReport(rep, REPORT, 500500);
-    app.dgLcRenderReport(rep, REPORT, 500500);
-    assert.equal(destroys, 1, 'ikinci render önceki instance\'ı kapatmalı');
-    win.Chart = undefined;
+  test('renderRuns: epsg=32636 run metre kabul edilir (UTM ters dönüşüm)', () => {
+    const captured = [];
+    app.window.L = {
+      layerGroup: () => ({ addTo: () => ({}) }),
+      polygon: (pts) => { captured.push(pts); return { addTo() {} }; },
+      canvas: () => ({}),
+    };
+    app.map = { removeLayer() {} };
+    app.dgLcRenderRuns([
+      { row: 1, col0: 1, col1: 2, classKey: 'green', epsg: 32636,
+        x0: 469600, y0: 4426500, x1: 469610, y1: 4426510 },
+    ]);
+    assert.equal(captured.length, 1);
+    for (const [lat, lon] of captured[0]) {
+      assert.ok(lat > 39 && lat < 41, 'UTM→WGS doğru: ' + lat);
+      assert.ok(lon > 32 && lon < 33, 'UTM→WGS doğru: ' + lon);
+    }
+    app.map = undefined;
+    app.window.L = undefined;
   });
 });
