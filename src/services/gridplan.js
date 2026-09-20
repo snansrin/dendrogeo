@@ -2501,25 +2501,30 @@ function ensurePngUiStyles(){
       gap:10px;
     }
 
+    /* Panel başlıkları sitenin resmî hiyerarşisiyle BİREBİR aynı dilde:
+       mono amber kicker + Fraunces koyu yeşil başlık + soluk alt satır */
     .dg-png-kicker{
-      font-size:.66rem;
-      letter-spacing:.12em;
-      color:var(--mut);
-      font-weight:700;
+      font-family:"IBM Plex Mono",Consolas,monospace;
+      font-size:10.5px;
+      letter-spacing:.28em;
+      color:var(--amber);
+      font-weight:600;
       margin-bottom:3px;
       text-transform:uppercase;
     }
 
     .dg-png-title{
-      font-size:.92rem;
-      font-weight:700;
+      font-family:Fraunces,Georgia,serif;
+      font-size:1.05rem;
+      font-weight:600;
+      color:var(--green-dk);
       line-height:1.25;
     }
 
     .dg-png-sub{
-      font-size:.72rem;
+      font-size:.8rem;
       color:var(--mut);
-      line-height:1.4;
+      line-height:1.45;
       margin-top:2px;
     }
 

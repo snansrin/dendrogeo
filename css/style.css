@@ -310,3 +310,50 @@ tr.done td{opacity:.55}tr.done td b{text-decoration:line-through}
 ::selection{background:#14532d;color:#f7f6f2}
 /* Mobilde çift dokunma yakınlaştırma parlamasını azalt */
 button,a{-webkit-tap-highlight-color:transparent}
+
+/* ---- RESMİ TİPOGRAFİ HİYERARŞİSİ (2026-09-20) ----
+   Tüm sekme ve bölümler aynı başlık dilini konuşur:
+   h2 = bölüm başlığı (Fraunces, koyu yeşil), h3 = alt blok,
+   kicker = mono amber büyük harf, sub = soluk açıklama.
+   Kapak (hero) aynı aileyi kullanır; yalnız ölçeği büyüktür. */
+h2{
+  font-family:Fraunces,Georgia,serif;
+  font-weight:600;
+  color:var(--green-dk);
+  font-size:clamp(1.28rem,2.3vw,1.58rem);
+  line-height:1.15;
+  letter-spacing:-.01em;
+  margin:0 0 10px;
+}
+h3{
+  font-family:Fraunces,Georgia,serif;
+  font-weight:600;
+  color:var(--green-dk);
+  font-size:1.08rem;
+  line-height:1.25;
+  margin:0 0 6px;
+}
+.kick,.dg-png-kicker{
+  font-family:"IBM Plex Mono",Consolas,monospace;
+  font-size:10.5px;
+  letter-spacing:.28em;
+  color:var(--amber);
+  text-transform:uppercase;
+  font-weight:600;
+}
+.sec-sub,.dg-png-sub{
+  color:var(--mut);
+  font-size:.84rem;
+  line-height:1.45;
+}
+/* Kapak güven şeridi: kurumsal kimlik satırı */
+.trustrow{display:flex;gap:8px;flex-wrap:wrap;margin-top:16px}
+.trust{
+  font-family:"IBM Plex Mono",Consolas,monospace;
+  font-size:.68rem;
+  color:var(--mut);
+  border:1px solid var(--line);
+  border-radius:999px;
+  padding:4px 10px;
+  background:var(--surface);
+}

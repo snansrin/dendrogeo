@@ -82,3 +82,36 @@ describe('erişilebilirlik cilası', () => {
     assert.match(css, /prefers-reduced-motion/);
   });
 });
+
+describe('resmî tipografi hiyerarşisi (2026-09-20)', () => {
+  const css = readFileSync(join(ROOT, 'css/style.css'), 'utf8');
+  const html = readFileSync(join(ROOT, 'index.html'), 'utf8');
+  const gp = readFileSync(join(ROOT, 'src/services/gridplan.js'), 'utf8');
+
+  test('h2/h3 tek hiyerarşi: Fraunces + koyu yeşil', () => {
+    assert.match(css, /h2\{\s*font-family:Fraunces/);
+    assert.match(css, /h2\{[\s\S]{0,220}?color:var\(--green-dk\)/);
+    assert.match(css, /h3\{\s*font-family:Fraunces/);
+  });
+
+  test('⭐ h2/h3 üzerinde inline font-size KALMADI (hepsi aynı)', () => {
+    assert.ok(!/<h2[^>]*style="[^"]*font-size/.test(html), 'h2 inline font-size var');
+    assert.ok(!/<h3[^>]*style="[^"]*font-size/.test(html), 'h3 inline font-size var');
+    assert.ok(!/<h2 class="disp"/.test(html), 'disp class kalıntısı');
+  });
+
+  test('kicker dili tek: mono + amber (kapak ve panel aynı)', () => {
+    assert.match(css, /\.kick,\.dg-png-kicker\{/);
+    assert.match(css, /\.kick,\.dg-png-kicker\{[\s\S]{0,160}?color:var\(--amber\)/);
+    // panel enjekte CSS'i de aynı dili tanımlar
+    assert.match(gp, /\.dg-png-kicker\{[\s\S]{0,200}?color:var\(--amber\)/);
+    assert.match(gp, /\.dg-png-title\{[\s\S]{0,120}?font-family:Fraunces/);
+  });
+
+  test('kapak güven şeridi var (kurumsal kimlik)', () => {
+    assert.match(html, /class="trustrow"/);
+    assert.match(html, /DOI 10\.5281\/zenodo\.22646300/);
+    assert.match(html, /CC BY-NC 4\.0/);
+    assert.match(html, /Chave et al\. 2014/);
+  });
+});

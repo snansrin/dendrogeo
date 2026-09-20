@@ -195,10 +195,10 @@
 <script src="src/services/map.js?v=ec711385"></script>
 <script src="vendor/geotiff-2.1.3.js"></script>
 <script src="src/services/landcover.js?v=6e2a40cc"></script>
-<script src="src/services/gridplan.js?v=2758eb5e"></script>
+<script src="src/services/gridplan.js?v=b9b983ab"></script>
 <script src="src/services/dash.js?v=c289441e"></script>
 <script src="vendor/chart.js-4.5.1.js"></script>
-<link rel="stylesheet" href="css/style.css?v=c3972cc0">
+<link rel="stylesheet" href="css/style.css?v=c4f9d1ba">
 </head>
 <body>
 <div id="toastWrap"></div>
@@ -218,6 +218,12 @@
    <div style="display:flex;gap:12px;flex-wrap:wrap;margin-top:28px">
     <a href="#sistem" class="btn">🔬 Sistemi Keşfet</a>
     <button class="btn ghost" onclick="showAuth()">🌲 Hemen Başla</button>
+   </div>
+   <div class="trustrow">
+    <span class="trust">DOI 10.5281/zenodo.22646300</span>
+    <span class="trust">CC BY-NC 4.0</span>
+    <span class="trust">Chave et al. 2014 allometri</span>
+    <span class="trust">ESA WorldCover 2021 · 10 m</span>
    </div>
   </div>
     <div class="hero-art" aria-hidden="true">
@@ -387,7 +393,7 @@
  <p style="color:var(--mut);font-size:.8rem;margin-top:8px">🟢 Onaylı noktalara dokunun → ölçüm bilgisi + fotoğraf balonu.</p>
  <div id="landingAnalysis" style="margin-top:20px"></div>
   <div class="card" style="margin-top:20px;border-left:4px solid var(--green)">
-  <div class="shead" style="margin-bottom:12px"><span class="no">🌍</span><h2 style="font-size:1.15rem">Bölgesel Dağılım</h2><span class="rule"></span></div>
+  <div class="shead" style="margin-bottom:12px"><span class="no">🌍</span><h2>Bölgesel Dağılım</h2><span class="rule"></span></div>
   <div class="grid g2">
    <div class="tblwrap"><table id="tblCountry"><thead><tr><th>Ülke</th><th>Kayıt</th><th>Karbon(t)</th><th>Ort.DBH</th><th>Ort.Yükseklik(m)</th></tr></thead><tbody></tbody></table></div>
    <div class="tblwrap"><table id="tblCity"><thead><tr><th>Şehir</th><th>Kayıt</th><th>Karbon(t)</th></tr></thead><tbody></tbody></table></div>
@@ -485,7 +491,7 @@
  <div id="main">
 
    <div class="view on" id="v-dash">
-   <div class="shead" style="margin-bottom:18px"><span class="no">📊</span><h2 style="font-size:1.6rem">Genel Bakış</h2><span class="rule"></span><span class="mono" style="font-size:.78rem;color:var(--mut)">Kişisel Analiz Paneli</span></div>
+   <div class="shead" style="margin-bottom:18px"><span class="no">📊</span><h2>Genel Bakış</h2><span class="rule"></span><span class="mono" style="font-size:.78rem;color:var(--mut)">Kişisel Analiz Paneli</span></div>
    <div class="grid g4" style="margin-bottom:22px">
     <div class="stat" style="border-left:3px solid var(--green);padding-left:18px"><div class="lbl">📋 Kayıtlarım</div><div class="val" id="dMy">0</div></div>
     <div class="stat" style="border-left:3px solid var(--amber);padding-left:18px"><div class="lbl">🌱 Karbonum</div><div class="val" id="dCarbon">0</div><div style="font-size:.72rem;color:var(--mut);margin-top:4px">kg CO₂ eşdeğer</div></div>
@@ -493,17 +499,17 @@
     <div class="stat" style="border-left:3px solid var(--red);padding-left:18px"><div class="lbl">✅ Tamamlanan</div><div class="val" id="dVisit">0</div></div>
    </div>
    <div class="card" style="margin-bottom:18px;border-left:4px solid var(--green)">
-    <div class="shead" style="margin-bottom:14px"><span class="no">🌳</span><h2 style="font-size:1.15rem">Kişisel Ağaç Analizi</h2><span class="rule"></span></div>
+    <div class="shead" style="margin-bottom:14px"><span class="no">🌳</span><h2>Kişisel Ağaç Analizi</h2><span class="rule"></span></div>
     <div id="myAnalysis"></div>
    </div>
      <div class="card" style="margin-top:18px;border-left:4px solid var(--blue)">
-    <div class="shead" style="margin-bottom:12px"><span class="no">📈</span><h2 style="font-size:1.15rem">Karbon Trendi</h2><span class="rule"></span><span class="mono" style="font-size:.72rem;color:var(--mut)">son 10 kayıt · kg</span></div>
+    <div class="shead" style="margin-bottom:12px"><span class="no">📈</span><h2>Karbon Trendi</h2><span class="rule"></span><span class="mono" style="font-size:.72rem;color:var(--mut)">son 10 kayıt · kg</span></div>
     <canvas id="chCarbon" height="110"></canvas>
    </div>
   </div>
 
   <div class="view" id="v-measure">
-   <h2 class="disp" style="margin-bottom:16px">Yeni Ölçüm</h2>
+   <h2>Yeni Ölçüm</h2>
    <div id="editBanner" class="alert info" style="display:none">✏️ <b>Düzenleme modu:</b> mevcut kaydı güncelliyorsunuz. <button class="btn sm ghost" style="margin-left:10px" onclick="cancelEdit()">Vazgeç</button></div>
    <div class="grid g2">
     <div class="card">
@@ -545,7 +551,7 @@
   </div>
 
   <div class="view" id="v-nav">
-   <h2 class="disp" style="margin-bottom:16px">Waypoint Navigasyon</h2>
+   <h2>Waypoint Navigasyon</h2>
    <div class="grid g2">
     <div class="card">
      <div class="lbl">Proje</div><select id="nProject" onchange="loadWaypoints()"></select>
@@ -572,7 +578,7 @@
    </div>
   </div>
 
-<div class="view" id="v-map"><h2 class="disp" style="margin-bottom:16px">Canlı Harita</h2>
+<div class="view" id="v-map"><h2>Canlı Harita</h2>
 <div style="display:flex;gap:10px;align-items:center;margin-bottom:10px;flex-wrap:wrap">
  <button class="btn sm blue" id="parkModeBtn" onclick="window.dgToggleParkMode()">🌳 Park Analizi Modu: KAPALI</button>
  <label style="font-size:.82rem;margin-left:8px">Harita:</label>
@@ -587,7 +593,7 @@
 <div id="parkInfo" class="card" style="display:none;margin-top:12px;border-left:4px solid var(--blue)"></div><p style="color:var(--mut);font-size:.8rem;margin-top:8px">🟢 Noktalara dokunun → bilgi + fotoğraf balonu.</p><div id="liveAnalysis" style="margin-top:18px"></div></div>
 
   <div class="view" id="v-projects">
-<h2 class="disp" style="margin-bottom:16px">Projeler</h2>
+<h2>Projeler</h2>
 <div class="card" style="margin-bottom:16px">
 <div class="grid g3">
 <div><div class="lbl">Proje Adı</div><input id="pName"></div>
@@ -603,20 +609,20 @@
   </div>
 
   <div class="view" id="v-records">
-   <h2 class="disp" style="margin-bottom:16px">Kayıtlarım</h2>
+   <h2>Kayıtlarım</h2>
    <div class="alert info">Kayıtlarınız admin onayından sonra dünya verisinde yayınlanır.</div>
    <div class="card tblwrap"><table><thead><tr><th>Proje</th><th>Nokta</th><th>Tür</th><th>Çap</th><th>Boy</th><th>Karbon</th><th>Foto</th><th>Durum</th><th>İşlem</th></tr></thead><tbody id="recTable"></tbody></table></div>
   </div>
 
   <div class="view" id="v-export">
-   <h2 class="disp" style="margin-bottom:16px">Dışa Aktar</h2>
+   <h2>Dışa Aktar</h2>
    <div class="grid g3">
     <div class="card"><b>📥 Standart CSV</b><p style="color:var(--mut);font-size:.8rem;margin:6px 0 12px">Tam bilimsel format (AGB/BHB/Karbon)</p><div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn sm" onclick="exportCSV()">İndir</button><button class="btn sm ghost" onclick="previewCSV()">Görüntüle</button></div></div>
     <div class="card"><b>🗺 GeoJSON</b><p style="color:var(--mut);font-size:.8rem;margin:6px 0 12px">QGIS / web harita katmanı</p><div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn sm blue" onclick="exportGeo()">İndir</button><button class="btn sm ghost" onclick="previewGeo()">Görüntüle</button></div></div>
     <div class="card"><b>🧾 QGIS CSV</b><p style="color:var(--mut);font-size:.8rem;margin:6px 0 12px">Fotoğraf eşleştirmeli saha formatı</p><div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn sm amber" onclick="exportQgis()">İndir</button><button class="btn sm ghost" onclick="previewCSV()">Görüntüle</button></div></div>
    </div>
    <div class="card" style="margin-top:20px;border-left:4px solid var(--blue)">
-    <div class="shead" style="margin-bottom:14px"><span class="no">✉️</span><h2 style="font-size:1.2rem">Yöneticiden Veri Talep Et</h2></div>
+    <div class="shead" style="margin-bottom:14px"><span class="no">✉️</span><h2>Yöneticiden Veri Talep Et</h2></div>
     <p style="color:var(--mut);font-size:.85rem;margin-bottom:12px">Belirli bir ülke / şehir / proje (kent parkı) için tüm onaylı veriyi yönetici tarafında hazırlanmış olarak e‑postanıza almak isterseniz talep oluşturun.</p>
     <div class="grid g3">
      <div><div class="lbl">Ülke</div><select id="reqCountry" onchange="reqCountryChanged()"><option value="">Tümü</option></select></div>
@@ -629,7 +635,7 @@
     <div id="myRequests" style="margin-top:14px"></div>
    </div>
    <div class="card" style="margin-top:20px;border-left:4px solid var(--amber)">
-    <div class="shead" style="margin-bottom:14px"><span class="no">📘</span><h2 style="font-size:1.2rem">QGIS Fotoğraf Aktarım Rehberi</h2></div>
+    <div class="shead" style="margin-bottom:14px"><span class="no">📘</span><h2>QGIS Fotoğraf Aktarım Rehberi</h2></div>
     <ol class="guide">
      <li><b>CSV'yi içe aktar:</b> QGIS → <code>Layer → Add Layer → Add Delimited Text Layer</code>. <code>X = LONGITUDE</code>, <code>Y = LATITUDE</code>, CRS = <code>EPSG:4326</code>.</li>
      <li><b>Tüm veriler katman olur:</b> AGB, BHB, biyokütle, karbon sütunları öznitelik tablosuna işlenir. <code>Identify (i)</code> ile bilgi balonu açılır.</li>
@@ -642,7 +648,7 @@
   </div>
 
   <div class="view" id="v-world">
-   <h2 class="disp" style="margin-bottom:16px">🌍 Dünya Verisi</h2>
+   <h2>🌍 Dünya Verisi</h2>
    <div class="grid g4" style="margin-bottom:18px">
     <div class="stat"><div class="lbl">Toplam Kayıt</div><div class="val" id="wRec">0</div></div>
     <div class="stat"><div class="lbl">Ülke</div><div class="val" id="wCountry">0</div></div>
@@ -653,18 +659,18 @@
    <p style="color:var(--mut);font-size:.8rem;margin-bottom:18px">🟢 Noktalara dokunun → bilgi + fotoğraf balonu.</p>
    <div id="worldAnalysis" style="margin-bottom:18px"></div>
       <div class="card" style="border-left:4px solid var(--green)">
-    <div class="shead" style="margin-bottom:12px"><span class="no">🌍</span><h2 style="font-size:1.15rem">Bölgesel Dağılım</h2><span class="rule"></span></div>
+    <div class="shead" style="margin-bottom:12px"><span class="no">🌍</span><h2>Bölgesel Dağılım</h2><span class="rule"></span></div>
     <div class="grid g2">
      <div class="tblwrap"><table><thead><tr><th>Ülke</th><th>Kayıt</th><th>Karbon(t)</th><th>Ort.Çap</th><th>Ort.Yükseklik(m)</th></tr></thead><tbody id="wCountryT"></tbody></table></div>
      <div class="tblwrap"><table><thead><tr><th>Şehir</th><th>Kayıt</th><th>Karbon(t)</th></tr></thead><tbody id="wCityT"></tbody></table></div>
     </div>
       </div>
    <div class="card" style="margin-top:18px;border-left:4px solid var(--blue)">
-    <div class="shead" style="margin-bottom:12px"><span class="no">🆚</span><h2 style="font-size:1.15rem">Park Karşılaştırma — Karbon Performansı</h2><span class="rule"></span></div>
+    <div class="shead" style="margin-bottom:12px"><span class="no">🆚</span><h2>Park Karşılaştırma — Karbon Performansı</h2><span class="rule"></span></div>
     <div id="parkCompare"></div>
    </div>
    <div class="card" style="margin-top:18px;border-left:4px solid var(--amber)">
-    <div class="shead" style="margin-bottom:12px"><span class="no">📄</span><h2 style="font-size:1.15rem">Park Raporu</h2><span class="rule"></span></div>
+    <div class="shead" style="margin-bottom:12px"><span class="no">📄</span><h2>Park Raporu</h2><span class="rule"></span></div>
     <div class="grid g3">
      <div><div class="lbl">Park / Proje</div><select id="repProject"></select></div>
      <div style="align-self:end"><button class="btn amber" onclick="parkReport()">📄 Rapor Oluştur</button></div>
@@ -673,7 +679,7 @@
   </div>
 
   <div class="view" id="v-admin">
-   <h2 class="disp" style="margin-bottom:16px">🔐 Ölçüm Yönetimi & Onay</h2>
+   <h2>🔐 Ölçüm Yönetimi & Onay</h2>
    <div class="grid g4" style="margin-bottom:18px">
     <div class="stat"><div class="lbl">Kullanıcı</div><div class="val" id="aUsers">0</div></div>
     <div class="stat"><div class="lbl">Kayıt</div><div class="val" id="aRec">0</div></div>
@@ -695,7 +701,7 @@
     <button class="btn sm" style="margin-top:10px;margin-left:8px" onclick="fullBackup()">💾 Tam Yedek İndir (JSON)</button>
    </div>
    <div class="card" style="margin-bottom:18px;border-left:4px solid var(--amber)">
-    <div class="shead" style="margin-bottom:12px"><span class="no">📦</span><h2 style="font-size:1.2rem">Toplu Dışa Aktarım (Tüm Kullanıcılar)</h2></div>
+    <div class="shead" style="margin-bottom:12px"><span class="no">📦</span><h2>Toplu Dışa Aktarım (Tüm Kullanıcılar)</h2></div>
     <p style="color:var(--mut);font-size:.82rem;margin-bottom:10px">Kullanıcı ayrımı yapılmadan sistemdeki <b>tüm veri</b>, seçtiğiniz filtrelere göre dışa aktarılır.</p>
     <div class="grid g4">
      <div><div class="lbl">Ülke</div><select id="admExpCountry" onchange="admCountryChanged()"><option value="">Tümü</option></select></div>
@@ -710,13 +716,13 @@
     </div>
    </div>
       <div class="card" style="margin-bottom:18px;border-left:4px solid var(--blue)">
-    <div class="shead" style="margin-bottom:12px"><span class="no">✉️</span><h2 style="font-size:1.2rem">Aktif Talepler</h2><span class="rule"></span><span class="mono" style="font-size:.78rem;color:var(--amber)">Bekleyen: <b id="aReqPendingMini">0</b></span></div>
+    <div class="shead" style="margin-bottom:12px"><span class="no">✉️</span><h2>Aktif Talepler</h2><span class="rule"></span><span class="mono" style="font-size:.78rem;color:var(--amber)">Bekleyen: <b id="aReqPendingMini">0</b></span></div>
     <div class="tblwrap"><table><thead><tr><th>Kullanıcı</th><th>E‑posta</th><th>Filtre</th><th>Tarih</th><th>Durum</th><th>İşlem</th></tr></thead><tbody id="aReqT"></tbody></table></div>
    </div>
    <div class="card" id="closedRequestsWrap" style="margin-bottom:18px;border-left:4px solid var(--mut);display:none">
     <div class="shead" style="margin-bottom:12px;cursor:pointer" onclick="document.getElementById('closedReqBody').style.display=document.getElementById('closedReqBody').style.display==='none'?'block':'none'">
      <span class="no">📦</span>
-     <h2 style="font-size:1.2rem">Tamamlanan / Reddedilen Talepler</h2>
+     <h2>Tamamlanan / Reddedilen Talepler</h2>
      <span class="rule"></span>
      <span class="mono" style="font-size:.78rem;color:var(--mut)">Arşiv: <b id="aReqClosed">0</b> · Aç/Kapat ▼</span>
     </div>
@@ -725,14 +731,14 @@
     </div>
    </div>
    <div class="card tblwrap">
-    <div class="shead" style="margin-bottom:12px"><span class="no">📋</span><h2 style="font-size:1.2rem">Ölçüm Onay & Moderasyon</h2></div>
+    <div class="shead" style="margin-bottom:12px"><span class="no">📋</span><h2>Ölçüm Onay & Moderasyon</h2></div>
     <input type="text" id="adminMeasSearch" placeholder="🔍 Ara..." oninput="filterAdminMeas()" style="max-width:100%;margin-bottom:12px">
     <table><thead><tr><th>Kullanıcı</th><th>Nokta</th><th>Tür</th><th>Çap</th><th>Boy</th><th>Karbon</th><th>Foto</th><th>Durum</th><th>İşlem</th></tr></thead><tbody id="aMeasT"></tbody></table>
    </div>
   </div>
 
   <div class="view" id="v-users">
-   <h2 class="disp" style="margin-bottom:16px">👥 Kullanıcı Yönetimi</h2>
+   <h2>👥 Kullanıcı Yönetimi</h2>
    <div class="card tblwrap">
     <input type="text" id="userSearch" placeholder="🔍 E‑posta veya ad ara..." oninput="filterUsers()" style="max-width:100%;margin-bottom:12px">
     <table><thead><tr><th>E‑posta</th><th>Ad Soyad</th><th>Rol</th><th>Durum</th><th>İşlem</th></tr></thead><tbody id="aUsersT"></tbody></table>
