@@ -1,82 +1,66 @@
-# supabase/ — veritabanı şeması ve güvenlik denetimi
+# supabase/ — veritabanı şeması, migration'lar ve güvenlik denetimi
 
-Bu dizin **boş bir iskelet olarak eklendi.** Amaç: projenin güvenlik modelinin
-tamamını taşıyan RLS politikalarını, trigger'ları, view tanımlarını ve
-constraint'leri repoya taşımak.
+Bu dizin projenin **gerçek şemasını** repoya taşır. Daha önce şema yalnızca
+Supabase kontrol panelinde yaşıyordu; artık her değişiklik version control'da.
 
-## Mevcut durum
+## Dosyalar
 
-Bu repoda, bu dizin eklenene kadar **tek satır SQL yoktu.** Şema yalnızca
-Supabase kontrol panelinde yaşıyor. `README.md` ve `SECURITY.md` şu iddiaları
-taşıyor:
+| Dosya | İçerik |
+|---|---|
+| `migrations/0001_init_v2_1.sql` | Çalışır durumdaki TAM şema (kullanıcı tarafından sağlanan v2.1 + SECURITY PATCH v1). Idempotent. **Üzerine değişiklik yapılmaz.** |
+| `migrations/0002_review_fixes.sql` | Kod incelemesinin 4 düzeltmesi (aşağıda). Idempotent. |
+| `dump-schema.sh` | Canlı şemayı `supabase db dump` ile yeniden dökmek için yardımcı |
+| `audit/rls-probe.sh` | Anon key ile 13 saldırı denemesi (yetki yükseltme dahil) |
+| `audit/RLS-DENETIM.md` | Denetim listesi + sonuç tablosu (doldurulacak) |
 
-> "All data access is enforced server-side via Row Level Security (RLS)
-> policies and database triggers. The `service_role` key is never exposed."
+## Nasıl uygulanır
 
-> "✅ Supabase Row Level Security (RLS) on all tables"
+Supabase SQL Editor'da sırayla:
 
-Anon key `src/config/supabase.js` içinde açık (bu **tasarım gereği ve doğru** —
-README'de belgelenmiş). Yani güvenliğin tek dayanağı RLS'in doğru olması.
-**Ama RLS politikaları depodan denetlenemiyor.** Bu, projenin en büyük
-bilinmeyeni ve statik kod incelemesiyle kapatılamaz.
+1. `0001_init_v2_1.sql` → Run (idempotent, tekrar tekrar güvenli)
+2. `0002_review_fixes.sql` → Run
+3. (Önerilir) `audit/rls-probe.sh`'i kendi makinenden çalıştır → sonuçları
+   `audit/RLS-DENETIM.md` tablosuna işle
 
-## Yapılacaklar
+## 0001'de doğru kurulu olanlar (inceleme onayı)
 
-### 1. Şemayı repoya aktar (5-15 dk)
+* Tüm tablolarda RLS açık; view'lar `security_invoker=true` (view'lar RLS'i
+  atlamaz — Supabase'de en sık yapılan hata burada).
+* `enforce_approval` trigger'ı: admin olmayan `status='Onaylı'` yapamaz
+  (istemci koduna güvenmeyen, sunucu tarafı onay zorlaması).
+* Storage izolasyonu: `(storage.foldername(name))[1] = auth.uid()::text` →
+  herkes yalnız kendi klasörüne yükler, kendi/admin siler.
+* `client_id` DEFAULT UUID + NOT NULL + UNIQUE → offline sync duplicate
+  engeli istemci unutsa bile DB seviyesinde.
+* `(project_id, point_id, measurement_no)` UNIQUE, mükerrer veri varsa
+  DO bloğu ile zarifçe atlanır.
+* `security definer` yardımcı fonksiyonlar `set search_path=public` ile
+  (search_path enjeksiyonuna kapalı).
+* İndeksler: owner/project/status/client_id/point + waypoints/project.
 
-```bash
-brew install supabase/tap/supabase      # veya npm i -g supabase
-supabase login
-./supabase/dump-schema.sh
-```
+## 0002'nin kapattığı 4 boşluk
 
-Çıktı: `supabase/migrations/0001_init.sql`. Bundan sonraki her değişiklik yeni
-numaralı dosya olarak eklenmeli (`0002_...sql`), mevcut dosya düzenlenmemeli.
+| # | Boşluk | Risk | Düzeltme |
+|---|---|---|---|
+| 1 | `profiles_update` yalnız `is_owner()` | Kullanıcı kendi adını/kurumunu düzenleyemiyordu | `id = auth.uid() or is_owner()` |
+| 2 | `profiles_select using(true)` | Giriş yapmış herkes TÜM e-postaları okuyabiliyordu (KVKK) | `id = auth.uid() or is_admin()` |
+| 3 | `wp_update/delete` yalnız satır sahibi | Proje sahibi kendi projesinin WP'lerini işaretleyip silemiyordu (`arriveWp` RLS'e takılırdı) | proje sahibi eklendi |
+| 4 | Coğrafi sorguda tekil indeks | Canlı harita `status + lat/lon` aralığıyla sorguluyor | `(status, lat, lon)` + `(status, country, city)` bileşik indeks |
 
-### 2. RLS denetimini yap → `supabase/audit/RLS-DENETIM.md`
+İstemci kodu denetlenerek doğrulandı: `profiles(full_name)` join'lerini yalnız
+admin görünümleri kullanıyor (admin.js), dolayısıyla #2 daraltması uygulama
+tarafında hiçbir şeyi kırmaz.
 
-Oradaki liste, **anon key ile giriş yapmadan** yapılması gereken saldırı
-denemelerini içeriyor. Hepsi reddedilmeli. Bu, projenin en kritik güvenlik
-testi ve şu ana kadar yapıldığına dair bir kayıt yok.
+## Bilinçli olarak dokunulmayanlar
 
-### 3. Şemada olması önerilen ama kodda izi olmayan alanlar
+* `grant usage on all sequences to anon`: anon yalnız `site_visits`'e insert
+  atar (ziyaret sayacı); identity dizisi için bu grant gerekli.
+* `enforce_approval` + storage folder izolasyonu doğru kurulu.
+* Denetim izi (`reviewed_by`, `reviewed_at`, `reject_reason`, `deleted_at`)
+  istenirse **ayrı bir 0003** olarak eklenmeli (geri alınabilirlik).
 
-Kod incelemesinde şu alanların **hiçbir yerde geçmediği** görüldü:
-`reviewed_by`, `reviewed_at`, `reject_reason`, `deleted_at`, `allometry_version`,
-`rho_used`. Bunlar için `supabase/migrations/0002_audit_columns.sql` önerilir —
-ayrıntı yol haritası belgesinde.
+## Kural
 
-## Bilinen şema yüzeyi (koddan çıkarıldı)
-
-Kod incelemesiyle tespit edilen tablo ve view'lar:
-
-| Nesne | Kodda geçme sayısı | Kullanım |
-|---|---|---|
-| `measurements` | 33 | ana tablo; admin onaylı yayın akışı |
-| `waypoints` | 9 | CSV'den yüklenen örneklem noktaları |
-| `projects` | 8 | |
-| `data_requests` | 7 | kullanıcı → yönetici veri talebi |
-| `profiles` | 6 | `role` alanı istemcide okunuyor (admin.js) |
-| `site_visits` | 4 | anonim sayaç — `insert({})`, kişisel veri yok |
-| `v_global` / `v_country` / `v_city` | 3 / 2 / 2 | view'lar (tanımları bilinmiyor) |
-| Storage bucket `dendro-photos` | — | yol: `${owner}/${Date.now()}_${id}.jpg` |
-
-RPC (`.rpc(...)`) kullanılmıyor; tüm erişim REST üzerinden.
-
-## Bilinmeyenler
-
-* `profiles.role` alanı **istemciden yazılabiliyor mu?** `admin.js` içindeki
-  `PROFILE.role !== "admin"` denetimi yalnızca arayüz içindir; gerçek koruma
-  RLS'te olmalı. Eğer `role` istemciden güncellenebiliyorsa **yetki yükseltme**
-  açığı vardır.
-* `dendro-photos` bucket'ında kullanıcı başına yol izolasyonu **politika ile**
-  mi sağlanıyor? Kod yolu doğru kuruyor ama başka bir kullanıcının yoluna
-  yazmayı engelleyen şey RLS/Storage politikası.
-* `measurements.status` değerleri bir `CHECK` constraint'i ile mi sınırlı?
-  Kod `"Onaylı"` / `"Beklemede"` / `"Reddedilen"` kullanıyor.
-* `status`, `lat`, `lon`, `owner`, `project_id` üzerinde **indeks var mı?**
-  Yoksa `.eq("status","Onaylı")` filtreleri ve bbox sorguları veri büyüdükçe
-  yavaşlar.
-* Silme davranışı: `.delete().eq("id",id)` kalıcı silme. CASCADE var mı?
-  Fotoğraf Storage nesneleri yetim kalıyor mu? (`admin.js`'teki `cleanOrphans()`
-  bu sorunun varlığına işaret ediyor.)
+* Yeni şema değişikliği = yeni numaralı dosya; mevcut dosya düzenlenmez.
+* Her migration idempotent yazılır (`if not exists` / `drop policy if exists`).
+* Policy değişikliği sonrası `audit/rls-probe.sh` çalıştırılır.
