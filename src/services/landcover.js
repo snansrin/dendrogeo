@@ -981,9 +981,23 @@ function dgLcDetectPatches(cells,minHa){
     for(const x of comp){wl+=x.center.lat*(x.areaM2||0);wo+=x.center.lon*(x.areaM2||0);}
     /* Görsel katman için vektör halkalar: kare kare değil, yumuşak çizim.
      * Rapor sayılarına dokunmaz (alan hücre kesişiminden gelir). */
-    let rings=[];
+    let rings=[],ringsRaw=[];
     try{
-      rings=dgLcPatchRings(comp).map(r=>dgLcSmoothRing(r,2));
+      ringsRaw=dgLcPatchRings(comp);
+      /* Yumuşatma köşeleri kestiği için halkayı bir miktar içe büker;
+       * komşu nesnelerin sınırları birbirinden uzaklaşmış görünüyordu
+       * (kullanıcı geri bildirimi 2026-09-20). Çözüm: TEK tur Chaikin +
+       * alan geri ölçekleme — yumuşak çizgi, gerçek boyut, bitişik sınırlar
+       * tekrar birbirine değer. */
+      rings=ringsRaw.map(r=>{
+        const sm=dgLcSmoothRing(r,1);
+        const a0=Math.abs(dgLcRingArea(r)),a1=Math.abs(dgLcRingArea(sm));
+        if(!(a0>0)||!(a1>0))return sm;
+        const f=Math.sqrt(a0/a1);
+        if(!Number.isFinite(f)||f<=1||f>1.5)return sm;
+        const c=dgLcRingCentroid(sm);
+        return sm.map(pt=>[c[0]+(pt[0]-c[0])*f,c[1]+(pt[1]-c[1])*f]);
+      });
     }catch(err){
       console.warn("DENDROGEO · nesne halkası kurulamadı, atlandı:",err);
     }
@@ -992,7 +1006,8 @@ function dgLcDetectPatches(cells,minHa){
       areaM2:area,
       cells:comp.length,
       centroid:{lat:wl/area,lon:wo/area},
-      rings
+      rings,
+      ringsRaw
     });
   }
   patches.sort((a,b)=>b.areaM2-a.areaM2);
@@ -1112,12 +1127,25 @@ function dgLcPatchRings(cells){
   return [outer.pts,...holes.map(h=>h.pts)];
 }
 
+/* Halka alanı (derece düzleminde shoelace) ve merkez — alan geri ölçekleme için. */
+function dgLcRingArea(ring){
+  let a=0;
+  for(let i=0;i<ring.length;i++){
+    const p=ring[i],q=ring[(i+1)%ring.length];
+    a+=p[0]*q[1]-q[0]*p[1];
+  }
+  return a/2;
+}
+function dgLcRingCentroid(ring){
+  let x=0,y=0;
+  for(const p of ring){x+=p[0];y+=p[1];}
+  return [x/ring.length,y/ring.length];
+}
 /* Chaikin yumuşatma: kapalı halkada her kenarı 25/75 noktalarıyla değiştirir.
- * 2 tur, piksel merdivenini organik bir eğriye çevirir. Alanı ~%1-2 içe
- * büker — yalnızca GÖRSEL katmanda kullanılır, rapor sayılarına dokunmaz. */
+ * YALNIZCA GÖRSEL katman; rapor sayılarına dokunmaz. */
 function dgLcSmoothRing(ring,iters){
   let pts=ring.slice();
-  const n=iters==null?2:iters;
+  const n=iters==null?1:iters;
   for(let k=0;k<n&&pts.length>=4;k++){
     const out=[];
     for(let i=0;i<pts.length;i++){
@@ -1128,6 +1156,41 @@ function dgLcSmoothRing(ring,iters){
     pts=out;
   }
   return pts;
+}
+
+/* Nokta halka içinde mi (ışın yöntemi, [lat,lon] halkaları). */
+function dgLcPointInRing(lat,lon,ring){
+  let ic=false;
+  for(let i=0,j=ring.length-1;i<ring.length;j=i++){
+    const yi=ring[i][0],xi=ring[i][1],yj=ring[j][0],xj=ring[j][1];
+    if((yi>lat)!==(yj>lat)&&lon<(xj-xi)*(lat-yi)/(yj-yi)+xi)ic=!ic;
+  }
+  return ic;
+}
+/* Nokta dış halka içinde ve deliklerde değil mi? */
+function dgLcPointInRings(lat,lon,rings){
+  if(!rings||!rings.length)return false;
+  if(!dgLcPointInRing(lat,lon,rings[0]))return false;
+  for(let i=1;i<rings.length;i++){
+    if(dgLcPointInRing(lat,lon,rings[i]))return false;
+  }
+  return true;
+}
+/* Bir koordinat LULC analizine göre YEŞİL nesne içinde mi?
+ * Grid sistemi bunu kullanır: ölçüm hücreleri yalnız yeşil alanda kurulur.
+ * Ham (yumuşatılmamış) halkalar kullanılır — hassasiyet için. */
+function dgLcIsGreen(lat,lon){
+  const last=DG_LC_LAST;
+  if(!last||!last.patches)return false;
+  for(const pt of last.patches){
+    if((pt.classKey||pt.group)!=="green")continue;
+    if(dgLcPointInRings(lat,lon,pt.ringsRaw||pt.rings))return true;
+  }
+  return false;
+}
+function dgLcHasGreen(){
+  const last=DG_LC_LAST;
+  return !!(last&&last.patches&&last.patches.some(p=>(p.classKey||p.group)==="green"));
 }
 
 /* İki kaynağın grup alanları arasındaki uzlaşma (belirsizlik göstergesi) */
@@ -1280,6 +1343,8 @@ window.DG_LANDCOVER={
   analyze:dgLcAnalyze,
   clear:clearLandCover,
   getLast:()=>DG_LC_LAST,
+  isGreen:dgLcIsGreen,
+  hasGreen:dgLcHasGreen,
   downloadClassCSV:downloadLandCoverClassCSV,
   downloadCellsGeoJSON:downloadLandCoverCellsGeoJSON
 };

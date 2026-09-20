@@ -469,3 +469,81 @@ describe('⭐ yumuşak vektör çizim — halka çıkarma + Chaikin (kare kare d
     assert.match(src, /dgLcRenderObjects\(patches\)/, 'analyze nesneleri çiziyor');
   });
 });
+
+describe('v8: alan korumalı yumuşatma + yeşil alan API\'si', () => {
+  const D = 0.0001;
+  const cell = (row, col, classKey) => {
+    const latTop = 40 - row * D, latBot = latTop - D;
+    const lon0 = 32 + col * D, lon1 = lon0 + D;
+    return {
+      row, col, epsg: 4326, classKey, areaM2: 100,
+      center: { lat: (latTop + latBot) / 2, lon: (lon0 + lon1) / 2 },
+      quadWgs: [[lon0, latBot], [lon1, latBot], [lon1, latTop], [lon0, latTop]],
+    };
+  };
+  const area = (ring) => Math.abs(app.dgLcRingArea(ring));
+
+  test('⭐ yumuşatılmış halka alanı ham halkayla aynı (sınırlar uzaklaşmaz)', () => {
+    const cells = [];
+    for (let r = 0; r < 5; r++) for (let c = 0; c < 5; c++) {
+      if ((r === 2 && c === 2)) continue;   // delikli ve girintili şekil
+      cells.push(cell(r, c, 'green'));
+    }
+    const [pt] = app.dgLcDetectPatches(cells, 0.005);
+    assert.ok(pt.ringsRaw && pt.ringsRaw.length >= 1, 'ham halkalar saklı');
+    assert.ok(pt.rings.length === pt.ringsRaw.length);
+    const a0 = area(pt.ringsRaw[0]), a1 = area(pt.rings[0]);
+    assert.ok(Math.abs(a1 - a0) / a0 < 0.02,
+      'alan korunmalı: ham ' + a0 + ' yumuşak ' + a1);
+    assert.notEqual(pt.rings[0].length, pt.ringsRaw[0].length,
+      'yumuşatma gerçekten uygulanmış olmalı');
+  });
+
+  test('nokta-halka testi: ışın yöntemi doğru', () => {
+    const kare = [[40, 32], [40, 32.001], [39.999, 32.001], [39.999, 32]];
+    assert.equal(app.dgLcPointInRing(39.9995, 32.0005, kare), true);
+    assert.equal(app.dgLcPointInRing(40.001, 32.0005, kare), false);
+    assert.equal(app.dgLcPointInRing(39.9995, 32.002, kare), false);
+  });
+
+  test('delikli halka: delik içindeki nokta YEŞİL değil', () => {
+    const outer = [[40, 32], [40, 32.003], [39.997, 32.003], [39.997, 32]];
+    const hole = [[39.999, 32.001], [39.999, 32.002], [39.998, 32.002], [39.998, 32.001]];
+    assert.equal(app.dgLcPointInRings(39.9975, 32.0005, [outer, hole]), true);
+    assert.equal(app.dgLcPointInRings(39.9985, 32.0015, [outer, hole]), false);
+  });
+
+  test('window.DG_LANDCOVER isGreen/hasGreen dışa açık', () => {
+    assert.equal(typeof app.window.DG_LANDCOVER.isGreen, 'function');
+    assert.equal(typeof app.window.DG_LANDCOVER.hasGreen, 'function');
+    assert.equal(app.window.DG_LANDCOVER.hasGreen(), false, 'analiz yoksa hasGreen false');
+    assert.equal(app.window.DG_LANDCOVER.isGreen(40, 32), false, 'analiz yoksa isGreen false');
+  });
+});
+
+describe('v8: grid yeşil-alan kapısı + PNG dışa aktarım (canary)', () => {
+  const src = readFileSync(new URL('../src/services/gridplan.js', import.meta.url), 'utf8');
+
+  test('isCellValid yeşil-alan kapısını içeriyor', () => {
+    assert.match(src, /DG_GREEN_ONLY&&/);
+    assert.match(src, /window\.DG_LANDCOVER\.isGreen\(cLat/);
+  });
+
+  test('UI: chkGreenOnly anahtarı var ve varsayılan AÇIK', () => {
+    assert.match(src, /id="chkGreenOnly" checked onchange="setGreenOnly\(this\.checked\)"/);
+    assert.match(src, /function setGreenOnly\(v\)/);
+  });
+
+  test('⭐ downloadParkImage TANIMLI (ölü buton regression kilidi)', () => {
+    assert.match(src, /function downloadParkImage\(\)\{/);
+    assert.match(src, /window\.downloadParkImage=downloadParkImage;/);
+    assert.match(src, /cv\.toBlob\(/, 'canvas PNG üretimi');
+    assert.ok(!src.includes('leaflet-image'), 'karo bazlı bağımlılık yok');
+  });
+
+  test('PNG katman anahtarları okunuyor (grid/wp/cover)', () => {
+    assert.match(src, /chk\("chkPngGrid"\)/);
+    assert.match(src, /chk\("chkPngWp"\)/);
+    assert.match(src, /chk\("chkPngCover"\)/);
+  });
+});
