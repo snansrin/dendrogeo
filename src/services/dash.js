@@ -85,11 +85,14 @@ function renderAnalysis(rows,elId){
    
    <!-- Top 6 tür -->
    <div class="lbl" style="margin-bottom:10px">En Yaygın 6 Tür</div>
-   ${topSpecies.map(([sp,v])=>`<div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;padding:6px 10px;background:var(--bg);border-radius:8px">
-     <div style="width:8px;height:8px;border-radius:50%;background:${GROUP_COLOR[v.grp]}"></div>
-     <div style="flex:1;min-width:0"><div style="font-size:.82rem;font-weight:600">${esc(sp)}</div><div style="font-size:.68rem;color:var(--mut);font-style:italic">${esc(LATIN[sp])||""}</div></div>
-     <div class="sp-bar"><i style="width:${pct(v.n)}%;background:${GROUP_COLOR[v.grp]}"></i></div>
-     <div class="mono" style="font-size:.78rem;color:var(--ink);font-weight:600;width:42px;text-align:right">${v.n} <span style="color:var(--mut);font-weight:400">(${pct(v.n)}%)</span></div>
+   ${topSpecies.map(([sp,v])=>`<div style="margin-bottom:12px">
+     <div style="display:flex;justify-content:space-between;font-size:.78rem;margin-bottom:6px;color:var(--mut)">
+      <span><span style="display:inline-block;width:10px;height:10px;border-radius:3px;background:${GROUP_COLOR[v.grp]};margin-right:5px"></span>${esc(sp)} <i style="font-style:italic;font-size:.7rem;color:var(--mut)">${esc(LATIN[sp])||""}</i></span>
+      <span><b style="color:var(--ink)">${v.n}</b> (${pct(v.n)}%)</span>
+     </div>
+     <div style="display:flex;height:14px;border-radius:7px;overflow:hidden;background:var(--line)">
+      <div style="width:${pct(v.n)}%;background:${GROUP_COLOR[v.grp]};transition:width .6s"></div>
+     </div>
     </div>`).join("")}
   </div>`;
 }

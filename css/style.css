@@ -311,51 +311,6 @@ tr.done td{opacity:.55}tr.done td b{text-decoration:line-through}
 /* Mobilde çift dokunma yakınlaştırma parlamasını azalt */
 button,a{-webkit-tap-highlight-color:transparent}
 
-/* ---- RESMİ TİPOGRAFİ HİYERARŞİSİ (2026-09-20) ----
-   Tüm sekme ve bölümler aynı başlık dilini konuşur:
-   h2 = bölüm başlığı (Fraunces, koyu yeşil), h3 = alt blok,
-   kicker = mono amber büyük harf, sub = soluk açıklama.
-   Kapak (hero) aynı aileyi kullanır; yalnız ölçeği büyüktür. */
-h2{
-  font-family:Fraunces,Georgia,serif;
-  font-weight:600;
-  color:var(--green-dk);
-  font-size:clamp(1.28rem,2.3vw,1.58rem);
-  line-height:1.15;
-  letter-spacing:-.01em;
-  margin:0 0 10px;
-}
-h3{
-  font-family:Fraunces,Georgia,serif;
-  font-weight:600;
-  color:var(--green-dk);
-  font-size:1.08rem;
-  line-height:1.25;
-  margin:0 0 6px;
-}
-.kick,.dg-png-kicker{
-  font-family:"IBM Plex Mono",Consolas,monospace;
-  font-size:10.5px;
-  letter-spacing:.28em;
-  color:var(--amber);
-  text-transform:uppercase;
-  font-weight:600;
-}
-.sec-sub,.dg-png-sub{
-  color:var(--mut);
-  font-size:.84rem;
-  line-height:1.45;
-}
-
-@media print{
-  #topnav,#apptop,#side,button,.dg-png-btn,.dg-png-options,.links,.trustrow{display:none!important}
-  body{background:#fff}
-  .view{display:none}
-  .view.on{display:block}
-  .card{box-shadow:none;border:1px solid #ccc;break-inside:avoid}
-  canvas{max-width:100%}
-}
-
 /* ---- MOBİL STABİLİTE (2026-09-20) ----
    · yatay overscroll'da zincirleme gezinme (sağa kaydırınca beyaz sayfa)
    · iOS input odaklanmasında sayfa zoom'u (küçülüp büyüme) */
@@ -368,14 +323,12 @@ html{overflow-x:hidden}
 .card{overflow:hidden}
 table{max-width:100%}
 
-/* ---- TÜR BARLARI: web modunda belirgin, mobilde kompakt ---- */
-.sp-bar{
-  flex:1 1 120px;
-  max-width:260px;
-  min-width:80px;
-  height:8px;
-  background:var(--line);
-  border-radius:5px;
-  overflow:hidden;
+/* ---- YAZDIRMA: raporlar kağıda temiz çıksın ---- */
+@media print{
+  #topnav,#apptop,#side,button,.dg-png-btn,.dg-png-options,.links{display:none!important}
+  body{background:#fff}
+  .view{display:none}
+  .view.on{display:block}
+  .card{box-shadow:none;border:1px solid #ccc;break-inside:avoid}
+  canvas{max-width:100%}
 }
-.sp-bar i{display:block;height:100%;border-radius:5px}

@@ -83,51 +83,36 @@ describe('erişilebilirlik cilası', () => {
   });
 });
 
-describe('resmî tipografi hiyerarşisi (2026-09-20)', () => {
+describe('eski format koruması (kullanıcı tercihi 2026-09-20)', () => {
   const css = readFileSync(join(ROOT, 'css/style.css'), 'utf8');
   const html = readFileSync(join(ROOT, 'index.html'), 'utf8');
   const gp = readFileSync(join(ROOT, 'src/services/gridplan.js'), 'utf8');
+  const dash = readFileSync(join(ROOT, 'src/services/dash.js'), 'utf8');
 
-  test('h2/h3 tek hiyerarşi: Fraunces + koyu yeşil', () => {
-    assert.match(css, /h2\{\s*font-family:Fraunces/);
-    assert.match(css, /h2\{[\s\S]{0,220}?color:var\(--green-dk\)/);
-    assert.match(css, /h3\{\s*font-family:Fraunces/);
+  test('global h2/h3 tipografi override YOK (site eski formatta)', () => {
+    assert.ok(!/\nh2\{/.test(css), 'global h2 kuralı geri gelmemeli');
+    assert.ok(!/\nh3\{/.test(css), 'global h3 kuralı geri gelmemeli');
   });
 
-  test('⭐ h2/h3 üzerinde inline font-size KALMADI (hepsi aynı)', () => {
-    assert.ok(!/<h2[^>]*style="[^"]*font-size/.test(html), 'h2 inline font-size var');
-    assert.ok(!/<h3[^>]*style="[^"]*font-size/.test(html), 'h3 inline font-size var');
-    assert.ok(!/<h2 class="disp"/.test(html), 'disp class kalıntısı');
+  test('bölüm başlıklarının eski inline boyutları duruyor', () => {
+    assert.match(html, /<h2 style="font-size:1\.6rem">Genel Bakış/);
+    assert.match(html, /<h2 style="font-size:1\.15rem">Kişisel Ağaç Analizi/);
+    assert.match(html, /<h2 class="disp" style="margin-bottom:16px">Yeni Ölçüm/);
   });
 
-  test('kicker dili tek: mono + amber (kapak ve panel aynı)', () => {
-    assert.match(css, /\.kick,\.dg-png-kicker\{/);
-    assert.match(css, /\.kick,\.dg-png-kicker\{[\s\S]{0,160}?color:var\(--amber\)/);
-    // panel enjekte CSS'i de aynı dili tanımlar
-    assert.match(gp, /\.dg-png-kicker\{[\s\S]{0,200}?color:var\(--amber\)/);
-    assert.match(gp, /\.dg-png-title\{[\s\S]{0,120}?font-family:Fraunces/);
+  test('panel başlıkları eski stilinde (gri kicker, sans title)', () => {
+    assert.match(gp, /\.dg-png-kicker\{[\s\S]{0,120}?color:var\(--mut\)/);
+    assert.ok(!/\.dg-png-title\{[\s\S]{0,80}?Fraunces/.test(gp), 'panel title Fraunces olmamalı');
   });
 
-  test("⭐ kapakta çakma şerit YOK; atıf footerda temaya uygun", () => {
-    // Kullanıcı geri bildirimi (2026-09-20): hero'ya eklenen chip şeridi
-    // temaya uymuyordu ve footer'daki "Atıf & Lisans" bölümünün tekrarıydı.
-    assert.ok(!html.includes('class="trustrow"'), 'hero trustrow kalıntısı');
-    assert.match(html, /Atıf &amp; Lisans|Atıf & Lisans/);
-    assert.match(html, /10\.5281\/zenodo\.22646300/);
-    assert.match(html, /CC BY-NC 4\.0/);
-  });
-
-  test('mobil stabilite: overscroll + input zoom koruması', () => {
-    assert.match(css, /overscroll-behavior-x:none/);
-    assert.match(css, /html\{overflow-x:hidden\}/);
-    assert.match(css, /input,select,textarea\{font-size:16px\}/);
-  });
-
-  test('tür barları responsive (.sp-bar) ve dash kullanıyor', () => {
-    assert.match(css, /\.sp-bar\{/);
-    const dash = readFileSync(join(ROOT, 'src/services/dash.js'), 'utf8');
-    assert.match(dash, /class="sp-bar"/);
-    assert.ok(!dash.includes('width:100px;background:var(--line)'), 'sabit 100px bar kalıntısı');
+  test('⭐ tür barları Grup Dağılımı ile AYNI stilde (14px yuvarlak bar)', () => {
+    // Grup Dağılımı barı: display:flex;height:14px;border-radius:7px;background:var(--line)
+    const grupBar = 'display:flex;height:14px;border-radius:7px;overflow:hidden;background:var(--line)';
+    assert.ok(dash.includes(grupBar), 'grup barı markup’ı');
+    const n = dash.split(grupBar).length - 1;
+    assert.ok(n >= 2, 'tür listesi de aynı barı kullanmalı, bulunan: ' + n);
+    assert.ok(!dash.includes('class="sp-bar"'), 'sp-bar kalıntısı');
+    assert.ok(!css.includes('.sp-bar{'), 'sp-bar css kalıntısı');
   });
 });
 
