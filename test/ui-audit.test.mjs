@@ -108,11 +108,26 @@ describe('resmî tipografi hiyerarşisi (2026-09-20)', () => {
     assert.match(gp, /\.dg-png-title\{[\s\S]{0,120}?font-family:Fraunces/);
   });
 
-  test('kapak güven şeridi var (kurumsal kimlik)', () => {
-    assert.match(html, /class="trustrow"/);
-    assert.match(html, /DOI 10\.5281\/zenodo\.22646300/);
+  test("⭐ kapakta çakma şerit YOK; atıf footerda temaya uygun", () => {
+    // Kullanıcı geri bildirimi (2026-09-20): hero'ya eklenen chip şeridi
+    // temaya uymuyordu ve footer'daki "Atıf & Lisans" bölümünün tekrarıydı.
+    assert.ok(!html.includes('class="trustrow"'), 'hero trustrow kalıntısı');
+    assert.match(html, /Atıf &amp; Lisans|Atıf & Lisans/);
+    assert.match(html, /10\.5281\/zenodo\.22646300/);
     assert.match(html, /CC BY-NC 4\.0/);
-    assert.match(html, /Chave et al\. 2014/);
+  });
+
+  test('mobil stabilite: overscroll + input zoom koruması', () => {
+    assert.match(css, /overscroll-behavior-x:none/);
+    assert.match(css, /html\{overflow-x:hidden\}/);
+    assert.match(css, /input,select,textarea\{font-size:16px\}/);
+  });
+
+  test('tür barları responsive (.sp-bar) ve dash kullanıyor', () => {
+    assert.match(css, /\.sp-bar\{/);
+    const dash = readFileSync(join(ROOT, 'src/services/dash.js'), 'utf8');
+    assert.match(dash, /class="sp-bar"/);
+    assert.ok(!dash.includes('width:100px;background:var(--line)'), 'sabit 100px bar kalıntısı');
   });
 });
 

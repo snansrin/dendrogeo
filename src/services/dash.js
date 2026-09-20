@@ -88,7 +88,7 @@ function renderAnalysis(rows,elId){
    ${topSpecies.map(([sp,v])=>`<div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;padding:6px 10px;background:var(--bg);border-radius:8px">
      <div style="width:8px;height:8px;border-radius:50%;background:${GROUP_COLOR[v.grp]}"></div>
      <div style="flex:1;min-width:0"><div style="font-size:.82rem;font-weight:600">${esc(sp)}</div><div style="font-size:.68rem;color:var(--mut);font-style:italic">${esc(LATIN[sp])||""}</div></div>
-     <div style="width:100px;background:var(--line);border-radius:4px;height:6px;overflow:hidden"><div style="height:100%;width:${pct(v.n)}%;background:${GROUP_COLOR[v.grp]}"></div></div>
+     <div class="sp-bar"><i style="width:${pct(v.n)}%;background:${GROUP_COLOR[v.grp]}"></i></div>
      <div class="mono" style="font-size:.78rem;color:var(--ink);font-weight:600;width:42px;text-align:right">${v.n} <span style="color:var(--mut);font-weight:400">(${pct(v.n)}%)</span></div>
     </div>`).join("")}
   </div>`;
