@@ -9,6 +9,7 @@ Supabase kontrol panelinde yaşıyordu; artık her değişiklik version control'
 |---|---|
 | `migrations/0001_init_v2_1.sql` | Çalışır durumdaki TAM şema (kullanıcı tarafından sağlanan v2.1 + SECURITY PATCH v1). Idempotent. **Üzerine değişiklik yapılmaz.** |
 | `migrations/0002_review_fixes.sql` | Kod incelemesinin 4 düzeltmesi (aşağıda). Idempotent. |
+| `migrations/0003_audit_and_agg.sql` | Denetim izi (reviewed_by/at, reject_reason, deleted_at) + onay damgası trigger'ı + `v_world_agg` toplulaştırma view'ı. Idempotent. |
 | `dump-schema.sh` | Canlı şemayı `supabase db dump` ile yeniden dökmek için yardımcı |
 | `audit/rls-probe.sh` | Anon key ile 13 saldırı denemesi (yetki yükseltme dahil) |
 | `audit/RLS-DENETIM.md` | Denetim listesi + sonuç tablosu (doldurulacak) |
@@ -19,7 +20,8 @@ Supabase SQL Editor'da sırayla:
 
 1. `0001_init_v2_1.sql` → Run (idempotent, tekrar tekrar güvenli)
 2. `0002_review_fixes.sql` → Run
-3. (Önerilir) `audit/rls-probe.sh`'i kendi makinenden çalıştır → sonuçları
+3. `0003_audit_and_agg.sql` → Run (denetim izi + toplulaştırma view'ı)
+4. (Önerilir) `audit/rls-probe.sh`'i kendi makinenden çalıştır → sonuçları
    `audit/RLS-DENETIM.md` tablosuna işle
 
 ## 0001'de doğru kurulu olanlar (inceleme onayı)

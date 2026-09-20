@@ -357,3 +357,13 @@ h3{
   padding:4px 10px;
   background:var(--surface);
 }
+
+/* ---- YAZDIRMA: raporlar kağıda temiz çıksın ---- */
+@media print{
+  #topnav,#apptop,#side,button,.dg-png-btn,.dg-png-options,.links,.trustrow{display:none!important}
+  body{background:#fff}
+  .view{display:none}
+  .view.on{display:block}
+  .card{box-shadow:none;border:1px solid #ccc;break-inside:avoid}
+  canvas{max-width:100%}
+}

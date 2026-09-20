@@ -184,21 +184,21 @@
 <script src="src/config/constants.js?v=9f758cd5"></script>
 <script src="src/config/species.js?v=597bfd9f"></script>
 <script src="src/utils/geo.js?v=3e796768"></script>
-<script src="src/utils/truncation.js?v=aa0d572e"></script>
+<script src="src/utils/truncation.js?v=f43c76b3"></script>
 <script src="src/services/allometry.js?v=23ec2992"></script>
 <script src="src/services/auth.js?v=7c805a8c"></script>
 <script src="src/services/export.js?v=cf96e318"></script>
-<script src="src/services/offline.js?v=5c16eb1d"></script>
+<script src="src/services/offline.js?v=8017c712"></script>
 <script src="src/services/admin.js?v=cf1d7bee"></script>
 <script src="src/services/world.js?v=9623fcee"></script>
 <script src="src/services/measure.js?v=9a57298b"></script>
 <script src="src/services/map.js?v=ec711385"></script>
 <script src="vendor/geotiff-2.1.3.js"></script>
-<script src="src/services/landcover.js?v=6e2a40cc"></script>
-<script src="src/services/gridplan.js?v=b9b983ab"></script>
-<script src="src/services/dash.js?v=c289441e"></script>
+<script src="src/services/landcover.js?v=a3055b2b"></script>
+<script src="src/services/gridplan.js?v=905ae2e7"></script>
+<script src="src/services/dash.js?v=c2db3d89"></script>
 <script src="vendor/chart.js-4.5.1.js"></script>
-<link rel="stylesheet" href="css/style.css?v=c4f9d1ba">
+<link rel="stylesheet" href="css/style.css?v=3b2c5110">
 </head>
 <body>
 <div id="toastWrap"></div>
@@ -467,6 +467,8 @@
 <span class="logo"><img class="brand-logo" src="logo.png" alt="">DendroGeo</span>
  <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:var(--green);box-shadow:0 0 0 3px rgba(30,111,75,.25)"></span>
  <div class="right">
+  <span class="badge admin" id="syncBadge" style="display:none" title="Senkron bekleyen ölçümler">⏳ 0</span>
+  <button class="btn sm ghost" id="installBtn" style="display:none" onclick="dgInstallApp()">📲 Uygulayı Kur</button>
   <span class="mono" id="whoami" style="font-size:.8rem;color:var(--mut)"></span>
   <span class="badge admin" id="roleBadge" style="display:none">ADMIN</span>
   <button class="btn sm red" onclick="logout()">Çıkış</button>

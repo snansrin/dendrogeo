@@ -115,3 +115,31 @@ describe('resmî tipografi hiyerarşisi (2026-09-20)', () => {
     assert.match(html, /Chave et al\. 2014/);
   });
 });
+
+describe('saha konforu: PWA kurulum + senkron rozeti + yazdırma', () => {
+  const html = readFileSync(join(ROOT, 'index.html'), 'utf8');
+  const off = readFileSync(join(ROOT, 'src/services/offline.js'), 'utf8');
+  const css = readFileSync(join(ROOT, 'css/style.css'), 'utf8');
+
+  test('üst barda senkron rozeti ve kur butonu var', () => {
+    assert.match(html, /id="syncBadge"/);
+    assert.match(html, /id="installBtn"/);
+    assert.match(html, /onclick="dgInstallApp\(\)"/);
+  });
+
+  test('beforeinstallprompt yakalanıyor ve buton gorunur oluyor', () => {
+    assert.match(off, /addEventListener\("beforeinstallprompt"/);
+    assert.match(off, /window\.dgInstallApp=dgInstallApp;/);
+  });
+
+  test('rozet kuyruk sayısını gösteriyor ve iki yerde güncelleniyor', () => {
+    assert.match(off, /async function updateSyncBadge\(\)/);
+    const calls = (off.match(/updateSyncBadge\(\);/g) || []).length;
+    assert.ok(calls >= 2, 'save ve sync sonrası güncellenmeli, bulunan: ' + calls);
+  });
+
+  test('yazdırma stilleri var (rapor kağıda temiz çıkar)', () => {
+    assert.match(css, /@media print/);
+    assert.match(css, /\.view\.on\{display:block\}/);
+  });
+});

@@ -17,6 +17,7 @@ const store = tx.objectStore('measurements');
 // Her offline ölçüme client_id ekle (duplicate önleme için)
 if (!data.client_id) {
 data.client_id = uuidv4();
+  updateSyncBadge();
 }
 store.add({
 data: data,
@@ -48,6 +49,7 @@ if (!navigator.onLine) return;
 if (!USER) {
 console.warn('[Sync] Kullanıcı giriş yapmamış, senkronizasyon atlanıyor');
 return;
+  updateSyncBadge();
 }
 try {
 const db = await openOfflineDB();
@@ -149,3 +151,52 @@ console.error("[Sync] Kritik hata:", e);
 toast('Senkronizasyon hatası: ' + e.message, 'err', '❌');
 }
 }
+
+/* ---- PWA KURULUM İSTEMİ (2026-09-20 Ar-Ge) ----
+   beforeinstallprompt'u yakala; üst barda "📲 Uygulayı Kur" göster.
+   iOS bu API'yi desteklemez → buton görünmez; Safari kullanıcıları
+   Paylaş → Ana Ekrana Ekle ile kurar (manifest zaten hazır). */
+let DG_DEFERRED_PROMPT=null;
+window.addEventListener("beforeinstallprompt",e=>{
+  e.preventDefault();
+  DG_DEFERRED_PROMPT=e;
+  const b=document.getElementById("installBtn");
+  if(b)b.style.display="";
+});
+async function dgInstallApp(){
+  if(!DG_DEFERRED_PROMPT){
+    return toast("Tarayıcı kurulum istemini göstermedi — menüden 'Ana ekrana ekle' deneyin.","warn","📲");
+  }
+  DG_DEFERRED_PROMPT.prompt();
+  const r=await DG_DEFERRED_PROMPT.userChoice.catch(()=>null);
+  DG_DEFERRED_PROMPT=null;
+  const b=document.getElementById("installBtn");
+  if(b)b.style.display="none";
+  if(r&&r.outcome==="accepted")toast("✓ Uygulama ana ekrana kuruluyor","ok","📲");
+}
+window.dgInstallApp=dgInstallApp;
+
+/* ---- SENKRON ROZETİ: kuyruktaki ölçüm sayısı üst barda ----
+   Saha kullanıcısı "kaç ölçümüm bekliyor?" sorusunun cevabını her an görür.
+   saveOfflineMeasurement ve syncOfflineData sonrası otomatik güncellenir. */
+async function updateSyncBadge(){
+  const b=document.getElementById("syncBadge");
+  if(!b)return;
+  try{
+    const db=await openOfflineDB();
+    const n=await new Promise((res,rej)=>{
+      const tx=db.transaction("measurements","readonly");
+      const c=tx.objectStore("measurements").count();
+      c.onsuccess=()=>res(c.result);
+      c.onerror=()=>rej(c.error);
+    });
+    if(n>0){
+      b.textContent="⏳ "+n;
+      b.title=n+" ölçüm senkron bekliyor";
+      b.style.display="";
+    }else{
+      b.style.display="none";
+    }
+  }catch(e){/* badge kozmetik; sessiz geç */}
+}
+window.updateSyncBadge=updateSyncBadge;
