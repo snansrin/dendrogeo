@@ -288,3 +288,25 @@ tr.done td{opacity:.55}tr.done td b{text-decoration:line-through}
   font-family:'IBM Plex Mono',monospace;
 }
 .wp-badge2.done{background:#16a34a !important}
+
+/* ---- 2026-09-20 son cilası: erişilebilirlik & dokunma konforu ---- */
+/* Klavye ile gezinmede görünür odak halkası (önceki durumda odak izi yoktu,
+   klavye kullanıcısı nerede olduğunu göremiyordu) */
+:focus-visible{
+  outline:3px solid #14532d;
+  outline-offset:2px;
+  border-radius:6px;
+}
+/* Hareket hassasiyeti olan kullanıcılar için animasyonları kapat */
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{
+    animation-duration:.01ms!important;
+    animation-iteration-count:1!important;
+    transition-duration:.01ms!important;
+    scroll-behavior:auto!important;
+  }
+}
+/* Metin seçimi marka renginde */
+::selection{background:#14532d;color:#f7f6f2}
+/* Mobilde çift dokunma yakınlaştırma parlamasını azalt */
+button,a{-webkit-tap-highlight-color:transparent}

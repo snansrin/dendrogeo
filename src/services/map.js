@@ -108,6 +108,38 @@ async function selectWaypoint(id){
  drawNav();
 }
 // 7. Navigasyon çizimi
+/* "🎯 Vardım → Ölçüme Geç" butonu (index.html:563) daha önce TANIMSIZ bir
+ * fonksiyon çağırıyordu (arriveWp hiç yazılmamıştı → ölü buton).
+ * Akış: aktif hedefi (yoksa GPS'e en yakın ziyaret edilmemiş WP) bul,
+ * uzaklık 50 m'den fazlaysa onay sor, DB'de visited işaretle, ölçüm
+ * formuna point id'yi yaz ve ölçüm sekmesine geç. */
+async function arriveWp(){
+  let w=navTarget;
+  if(!w||w.visited){
+    const ts=WP.filter(x=>!x.visited);
+    if(ts.length&&GPS){
+      w=ts.sort((a,b)=>
+        hav(GPS.latitude,GPS.longitude,a.lat,a.lon)-
+        hav(GPS.latitude,GPS.longitude,b.lat,b.lon))[0];
+    }
+  }
+  if(!w)return toast("Aktif waypoint yok","warn","🎯");
+  if(GPS){
+    const d=hav(GPS.latitude,GPS.longitude,w.lat,w.lon);
+    if(d>50&&!confirm("Hedeften "+d.toFixed(0)+" m uzaktasın.\nYine de 'vardım' işaretlensin mi?"))return;
+  }
+  const{error}=await sb.from("waypoints").update({visited:true}).eq("id",w.id);
+  if(error)return toast("Hata: "+error.message,"err","🎯");
+  w.visited=true;
+  navTarget=null;
+  if(!manualPoint)$("mPoint").value=w.wp_id;
+  drawNav();
+  loadWaypoints();
+  toast("✓ Vardın: P"+w.wp_id+" → ölçüme geç","ok","🎯");
+  go("measure");
+}
+window.arriveWp=arriveWp;
+
 function drawNav(){
  if(!navMap)return;
  navMap.eachLayer(l=>{if(l._wp)navMap.removeLayer(l);});
