@@ -220,3 +220,68 @@ describe('kaynak yapılandırması', () => {
     assert.equal(DG_LC_SOURCES.cross.year, 2020);
   });
 });
+
+describe('dgLcRenderReport — render yolu (TDZ regresyonu)', () => {
+  /* "Cannot access 'R' before initialization" hatası SAHADA yakalandı;
+   * render yolu test edilmiyordu. Bu blok hem rapor nesnesi hem ham result
+   * nesnesiyle render'ın çökmediğini ve beklenen bölümleri ürettiğini kilitler. */
+  const stub = () => {
+    const o = {};
+    Object.defineProperty(o, 'innerHTML', {
+      set(v) { o._v = v; }, get() { return o._v || ''; },
+    });
+    return o;
+  };
+  const REPORT = {
+    groupCounts: { water: 1900, green: 3458, hard: 2422 },
+    groupAreasM2: { water: 125000, green: 222600, hard: 147100 },
+    classifiedAreaM2: 500500, maskedAreaM2: 0, maskedCount: 0,
+    sourceCells: 7780, rasterCoverageAreaM2: 500500,
+    year: 2021, primaryLabel: 'ESA WorldCover 10 m · 2021 (v200)',
+    primaryCitation: 'ESA', crossCitation: 'IO',
+    agreement: { water: { primaryHa: 12.5, crossHa: 11.04, agreementPct: 94 } },
+    crossError: null,
+    patches: [{ group: 'water', areaHa: 12.47, cells: 1895, centroidLat: 39.99, centroidLon: 32.64 }],
+  };
+  const RAW = {
+    groupCounts: { water: 1900 }, groupAreas: { water: 125000 },
+    rawCounts: { 80: 1900 }, rawAreas: { 80: 125000 },
+    classifiedAreaM2: 500500, maskedAreaM2: 0, maskedCount: 0,
+    sourceCells: 7780, assignedAreaM2: 500500, cells: [], runs: [],
+  };
+
+  test('⭐ rapor nesnesiyle çökmez (TDZ kilidi)', () => {
+    const rep = stub();
+    assert.doesNotThrow(() => app.dgLcRenderReport(rep, REPORT, 500500));
+    assert.ok(rep.innerHTML.length > 500);
+  });
+
+  test('ham result nesnesiyle de çökmez', () => {
+    const rep = stub();
+    assert.doesNotThrow(() => app.dgLcRenderReport(rep, RAW, 500500));
+    assert.ok(rep.innerHTML.includes('12.50'), 'su alanı tabloda görünmeli');
+  });
+
+  test('sınıf tablosu + çapraz doğrulama + nesneler bölümü üretir', () => {
+    const rep = stub();
+    app.dgLcRenderReport(rep, REPORT, 500500);
+    const h = rep.innerHTML;
+    assert.ok(h.includes('Su'), 'sınıf adı');
+    assert.ok(h.includes('12.50'), 'su ha değeri');
+    assert.ok(h.includes('Çapraz doğrulama'), 'çapraz bölümü');
+    assert.ok(h.includes('%94'), 'uzlaşma yüzdesi');
+    assert.ok(h.includes('Nesne tanımlama'), 'nesne bölümü');
+    assert.ok(h.includes('12.47'), 'nesne alanı');
+  });
+
+  test('QA eşiği aşılınca uyarı notu çıkar', () => {
+    const rep = stub();
+    const kotu = Object.assign({}, RAW, { assignedAreaM2: 1001000 });
+    app.dgLcRenderReport(rep, kotu, 500500);
+    assert.ok(rep.innerHTML.includes('geometrik kalite kontrolünden geçmedi'));
+  });
+
+  test('rep yoksa sessizce döner', () => {
+    assert.doesNotThrow(() => app.dgLcRenderReport(null, REPORT, 500500));
+  });
+});

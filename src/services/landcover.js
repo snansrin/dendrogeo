@@ -60,7 +60,7 @@ const DG_ESA_GROUP={
 const DG_LC_PIXEL_M=10;
 const DG_LC_MAX_TILES=12;
 const DG_LC_MAX_READ_PIXELS=2500000;
-const DG_LC_RENDER_LIMIT=2500;
+const DG_LC_RENDER_LIMIT=6000;
 
 const DG_LC_CODES={
   1:"Su",
@@ -736,6 +736,8 @@ function dgLcRenderRuns(runs){
     console.warn("DENDROGEO · 10 m görselleştirme atlandı: "+runs.length+" ardışık hücre bandı.");
     return;
   }
+  /* Binlerce bant SVG ile ağır olur; canvas renderer belirgin hızlandırır. */
+  const renderer=(typeof L.canvas==="function")?L.canvas({padding:.2}):null;
   DG_LC_LAYER=L.layerGroup().addTo(map);
   for(const r of runs){
     if(!r.classKey)continue;
@@ -754,7 +756,8 @@ function dgLcRenderRuns(runs){
         opacity:.55,
         fillColor:cls.color,
         fillOpacity:.48,
-        interactive:false
+        interactive:false,
+        renderer:renderer||undefined
       }
     ).addTo(DG_LC_LAYER);
   }
@@ -776,23 +779,30 @@ function dgLcRenderReport(rep,result,parkAreaM2,extra){
     groupAreas:result.groupAreasM2||{},
     rawCounts:result.rawCounts||{},
     rawAreas:result.rawAreasM2||{},
-    classifiedAreaM2:R.classifiedAreaM2||0,
-    maskedAreaM2:R.maskedAreaM2||0,
+    classifiedAreaM2:result.classifiedAreaM2||0,
+    maskedAreaM2:result.maskedAreaM2||0,
     maskedCount:result.maskedCount||0,
     sourceCells:result.sourceCells||0,
     assignedAreaM2:result.rasterCoverageAreaM2||result.assignedAreaM2||0,
     cells:result.cells,
     runs:result.runs
   };
-  const ex=extra||((typeof DG_LC_LAST!=="undefined"&&DG_LC_LAST&&DG_LC_LAST.report)?{
-    primaryYear:DG_LC_LAST.report.year,
-    primaryLabel:DG_LC_LAST.report.primaryLabel,
-    primaryCitation:DG_LC_LAST.report.primaryCitation,
-    crossCitation:DG_LC_LAST.report.crossCitation,
-    agreement:DG_LC_LAST.report.agreement,
-    crossError:DG_LC_LAST.report.crossError,
-    patches:DG_LC_LAST.report.patches
-  }:{});
+  /* Ekstra rapor alanları üç kaynaktan gelebilir (öncelik sırasıyla):
+   *   1) extra parametresi (çağranın açıkça verdikleri)
+   *   2) result'un KENDİSİ rapor biçimindeyse (report.agreement/patches/...)
+   *   3) DG_LC_LAST (analyze'in bıraktığı son durum — gridplan böyle çağırır) */
+  const last=(typeof DG_LC_LAST!=="undefined"&&DG_LC_LAST&&DG_LC_LAST.report)?DG_LC_LAST.report:null;
+  const exSrc=extra||(result.agreement||result.patches?result:last)||{};
+  const ex={
+    primaryYear:exSrc.primaryYear!=null?exSrc.primaryYear:exSrc.year,
+    primaryLabel:exSrc.primaryLabel,
+    primaryCitation:exSrc.primaryCitation,
+    crossCitation:exSrc.crossCitation,
+    crossLabel:exSrc.crossLabel,
+    agreement:exSrc.agreement,
+    crossError:exSrc.crossError,
+    patches:exSrc.patches
+  };
   const analysisArea=R.assignedAreaM2;
   const GROUP_ORDER=["green","water","hard","bare","other"];
   const rows=GROUP_ORDER.map(k=>{
@@ -839,7 +849,12 @@ function dgLcRenderReport(rep,result,parkAreaM2,extra){
   let patchHtml="";
   if(ex.patches&&ex.patches.length){
     const byKey={};
-    for(const pt of ex.patches)(byKey[pt.classKey]=byKey[pt.classKey]||[]).push(pt);
+    /* patch nesneleri iki biçimde gelebilir: ham {classKey,areaM2} veya
+     * rapor biçimi {group,areaHa}. İkisi de desteklenir. */
+    for(const pt of ex.patches){
+      const k=pt.classKey||pt.group;
+      (byKey[k]=byKey[k]||[]).push(pt);
+    }
     patchHtml="<div style='margin-top:10px'><b style='font-size:.72rem'>🧩 Nesne tanımlama</b>"+
       "<div style='font-size:.67rem;color:var(--mut);margin:4px 0 6px'>Bağlantılı 10 m hücre bileşenleri (≥0,05 ha):</div>";
     for(const k of GROUP_ORDER){
@@ -848,7 +863,7 @@ function dgLcRenderReport(rep,result,parkAreaM2,extra){
       const cls=DG_LC_CLASSES.find(c=>c.key===k);
       patchHtml+="<div style='font-size:.68rem;margin:3px 0'>"+cls.emoji+" <b>"+cls.label+":</b> "+
         list.length+" nesne · "+
-        list.slice(0,4).map(pt=>(pt.areaM2/10000).toFixed(2)+" ha").join(", ")+
+        list.slice(0,4).map(pt=>((pt.areaHa!=null?pt.areaHa:(pt.areaM2||0)/10000)).toFixed(2)+" ha").join(", ")+
         (list.length>4?" …":"")+"</div>";
     }
     patchHtml+="</div>";

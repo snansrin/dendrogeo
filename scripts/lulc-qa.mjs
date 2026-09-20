@@ -274,12 +274,14 @@ const analyzeScript = `
   const geom = dgLcProjectGeometry(outer, holes, 32636);
   const parkAreaM2 = dgLcProjectedArea(geom);
   const rep = await dgLcAnalyze({ outer, holes, parkAreaM2 });
-  return { parkAreaM2, rep };
+  const last = window.DG_LANDCOVER.getLast();
+  return { parkAreaM2, rep, runs: last.result.runs.length, cells: last.result.cells.length };
 })()
 `;
 console.log('\n════════ UÇTAN UCA ANALİZ (dgLcAnalyze) ════════');
 try {
-  const { parkAreaM2, rep } = await vm.runInContext(analyzeScript, ctx2, { filename: 'qa-analyze.js' });
+  const { parkAreaM2, rep, runs, cells } = await vm.runInContext(analyzeScript, ctx2, { filename: 'qa-analyze.js' });
+  console.log(`  görsel katman: ${runs} run bandı · ${cells} hücre (render limiti şu an 2500)`);
   console.log(`  park polygonu : ${(parkAreaM2 / 10000).toFixed(2)} ha`);
   console.log(`  analiz alanı  : ${(rep.rasterCoverageAreaM2 / 10000).toFixed(2)} ha  (QA farkı %${rep.areaDeltaPct.toFixed(3)})`);
   console.log(`  kaynak        : ${rep.primaryLabel} · karolar: ${rep.primaryItems.join(', ')}`);
