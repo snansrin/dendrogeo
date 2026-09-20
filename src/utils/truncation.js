@@ -98,16 +98,3 @@ function dgWarnIfTruncated(rows, limit, context, total) {
  * `total` undefined gelirse kesme yine satır sayısından sezilir, yalnızca
  * mesaj daha az bilgilendirici olur.
  */
-function dgTruncationBadge(el, rows, limit, total) {
-  if (!el) return;
-  if (!dgIsTruncated(rows, limit, total)) {
-    el.textContent = "";
-    el.style.display = "none";
-    return;
-  }
-  // Toast ile aynı biçim: tr-TR binlik ayracı. İkisi farklı biçim kullanırsa
-  // aynı bilgi ekranda iki türlü görünür.
-  const n = Array.isArray(rows) ? rows.length : 0;
-  el.textContent = `⚠️ ilk ${n.toLocaleString("tr-TR")} kayıt`;
-  el.style.display = "";
-}

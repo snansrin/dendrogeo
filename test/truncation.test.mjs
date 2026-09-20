@@ -45,7 +45,7 @@ function kurVm() {
     ctx, { filename: 'truncation.js' }
   );
   vm.runInContext(
-    'this.__api = { dgIsTruncated, dgWarnIfTruncated, dgTruncationBadge, DG_TRUNCATION_WARNED };',
+    'this.__api = { dgIsTruncated, dgWarnIfTruncated, DG_TRUNCATION_WARNED };',
     ctx
   );
   return ctx.__api;
@@ -128,27 +128,5 @@ describe('dgWarnIfTruncated — kullanıcı uyarısı', () => {
     api.dgWarnIfTruncated(new Array(10).fill(1), 10, 'A', 50);
     api.dgWarnIfTruncated(new Array(10).fill(1), 10, 'B', 60);
     assert.equal(api.__proto__ === null ? null : undefined, undefined); // dokunma
-  });
-});
-
-describe('dgTruncationBadge — rozet yardımcı', () => {
-  const api = kurVm();
-
-  test('kesme yoksa rozeti gizler ve metni boşaltır', () => {
-    const el = { textContent: 'eski', style: { display: 'inline' } };
-    api.dgTruncationBadge(el, new Array(5).fill(1), 3000, 5);
-    assert.equal(el.textContent, '');
-    assert.equal(el.style.display, 'none');
-  });
-
-  test('kesme varsa rozet gösterir ve satır sayısını yazar', () => {
-    const el = { textContent: '', style: { display: 'none' } };
-    api.dgTruncationBadge(el, new Array(3000).fill(1), 3000, 4812);
-    assert.match(el.textContent, /3\.000/);
-    assert.equal(el.style.display, '');
-  });
-
-  test('el null ise çökmüyor', () => {
-    assert.doesNotThrow(() => api.dgTruncationBadge(null, [], 10, 0));
   });
 });

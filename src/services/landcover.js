@@ -126,19 +126,6 @@ function dgLcUtmEpsgForLatLon(lat,lon){
   return Number(lat)>=0?32600+zone:32700+zone;
 }
 
-function dgLcUtmEpsgFromItem(item,geoKeys){
-  const p=item?.properties||{};
-  const candidates=[
-    p["proj:epsg"],
-    p["proj:code"],
-    geoKeys?.ProjectedCSTypeGeoKey
-  ];
-  for(const v of candidates){
-    const n=Math.round(Number(v));
-    if((n>=32601&&n<=32660)||(n>=32701&&n<=32760))return n;
-  }
-  return null;
-}
 
 function dgLcUtmForward(lat,lon,epsg){
   const a=6378137;
@@ -319,6 +306,22 @@ function dgLcClipPolygonConvex(poly,clipRaw){
   return out;
 }
 /* Park poligonu (delikli) ∩ dışbükey hücre dörtgeni = m² */
+/* Dikdörtgen (eksen hizalı) hücre kesişimi — ESA geçişinden önceki sürüm.
+ * Üretimde dgLcIntersectionAreaConvex kullanılır; bu fonksiyon testlerde
+ * REFERANS gerçekleme olarak korunur (convex ile aynı sonucu üretmeli). */
+function dgLcIntersectionArea(outerRings,holeRings,rect){
+  let area=0;
+  for(const ring of (outerRings||[])){
+    if(!dgLcBboxOverlap(ring._bbox,rect))continue;
+    area+=dgLcPlanarArea(dgLcClipPolygonRect(ring,rect));
+  }
+  for(const ring of (holeRings||[])){
+    if(!dgLcBboxOverlap(ring._bbox,rect))continue;
+    area-=dgLcPlanarArea(dgLcClipPolygonRect(ring,rect));
+  }
+  return Math.max(0,area);
+}
+
 function dgLcIntersectionAreaConvex(outerRings,holeRings,quad){
   let area=0;
   for(const ring of (outerRings||[])){
@@ -349,20 +352,6 @@ function dgLcPlanarArea(poly){
   return Math.abs(s)/2;
 }
 
-function dgLcIntersectionArea(outerRings,holeRings,rect){
-  let area=0;
-  for(const ring of (outerRings||[])){
-    if(!dgLcBboxOverlap(ring._bbox,rect))continue;
-    const clipped=dgLcClipPolygonRect(ring,rect);
-    area+=dgLcPlanarArea(clipped);
-  }
-  for(const ring of (holeRings||[])){
-    if(!dgLcBboxOverlap(ring._bbox,rect))continue;
-    const clipped=dgLcClipPolygonRect(ring,rect);
-    area-=dgLcPlanarArea(clipped);
-  }
-  return Math.max(0,area);
-}
 
 function dgLcProjectGeometry(outer,holes,epsg){
   const projectRing=ring=>{

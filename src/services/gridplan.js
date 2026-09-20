@@ -98,9 +98,6 @@ const OVERPASS_HEALTH=new Map();
 let OVERPASS_BUSY=Promise.resolve();
 let LAST_OVERPASS_ERROR=null;
 
-function sleep(ms){
-  return new Promise(resolve=>setTimeout(resolve,ms));
-}
 
 function overpassCacheKey(query){
   return query.replace(/\s+/g," ").trim();
@@ -757,24 +754,6 @@ function pointNearAnyLine(lat,lon,lines,maxDistanceM){
   return false;
 }
 
-function osmSampleGroup(lat,lon){
-  for(const r of (WATER_RINGS||[])){
-    if(pointInPolygon(lat,lon,r))return "water";
-  }
-
-  if(pointNearAnyLine(lat,lon,WATER_LINES,1))return "water";
-
-  for(const r of (IMP_RINGS||[])){
-    if(pointInPolygon(lat,lon,r))return "hard";
-  }
-  if(pointNearImperviousLine(lat,lon,IMP_LINES)){
-    return "hard";
-  }
-
-  if(pointNearAnyLine(lat,lon,GRID_BLOCK_LINES,1))return "hard";
-
-  return "open";
-}
 
 /* =========================================================
    GRID CELL VALIDATION
@@ -1578,89 +1557,6 @@ function refreshWaterLayer(){
   });
 }
 
-function refreshImpLayer(){
-  if(IMP_LAYER && map){
-    map.removeLayer(IMP_LAYER);
-  }
-
-  IMP_LAYER=L.layerGroup().addTo(map);
-  const satelliteMode=!!SATELLITE_LAYER;
-
-  IMP_RINGS.forEach(r=>{
-    if(!r || r.length<3){
-      return;
-    }
-
-    let inside=0;
-
-    for(const p of r){
-      if(
-        pointInPark(
-          p[0],
-          p[1],
-          PARK_POLY
-        )
-      ){
-        inside++;
-      }
-    }
-
-    if(!inside){
-      return;
-    }
-
-    L.polygon(
-      r,
-      {
-        color:"#dc2626",
-        weight:satelliteMode?2:1,
-        dashArray:satelliteMode?"6 4":null,
-        fillColor:"#ef4444",
-        fillOpacity:.18,
-        interactive:false
-      }
-    ).addTo(IMP_LAYER);
-  });
-
-  IMP_LINES.forEach(l=>{
-    if(
-      !l ||
-      !l.pts ||
-      l.pts.length<2
-    ){
-      return;
-    }
-
-    let inside=false;
-
-    for(const p of l.pts){
-      if(
-        pointInPark(
-          p[0],
-          p[1],
-          PARK_POLY
-        )
-      ){
-        inside=true;
-        break;
-      }
-    }
-
-    if(!inside){
-      return;
-    }
-
-    L.polyline(
-      l.pts,
-      {
-        color:"#ef4444",
-        weight:3,
-        opacity:.45,
-        interactive:false
-      }
-    ).addTo(IMP_LAYER);
-  });
-}
 
 
 
@@ -3523,30 +3419,6 @@ async function createWaypointsFromGrid(mode){
    LINE UTILITIES
 ========================================================= */
 
-function lineLengthM(l){
-  let len=0;
-
-  for(let i=1;i<l.length;i++){
-    const dy=
-      (l[i][0]-l[i-1][0])*
-      110540;
-
-    const dx=
-      (l[i][1]-l[i-1][1])*
-      111320*
-      Math.cos(
-        l[i][0]*
-        Math.PI/180
-      );
-
-    len+=Math.sqrt(
-      dx*dx+
-      dy*dy
-    );
-  }
-
-  return len;
-}
 
 function downloadBlob(
   name,

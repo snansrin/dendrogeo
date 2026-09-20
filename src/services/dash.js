@@ -27,21 +27,6 @@ async function loadDash(){
  renderAnalysis(data||[],"myAnalysis");
 }
 // 4. Tür dağılımı listesi
-function renderSpeciesList(rows,elId){
- const el=$(elId);if(!el)return;
- const sp={};
- rows.forEach(r=>{sp[r.species]=sp[r.species]||{n:0,grp:r.grp||"DİĞER"};sp[r.species].n++;});
- const total=rows.length;
- const pct=n=>total?((n/total)*100).toFixed(1):"0.0";
- const top=Object.entries(sp).sort((a,b)=>b[1].n-a[1].n).slice(0,6);
- if(!top.length){el.innerHTML='<div style="color:var(--mut);font-size:.85rem;padding:10px">Henüz kayıt yok.</div>';return;}
- el.innerHTML=top.map(([name,v])=>`<div style="display:flex;align-items:center;gap:10px;margin-bottom:7px">
-  <span style="width:8px;height:8px;border-radius:50%;background:${GROUP_COLOR[v.grp]};flex:0 0 auto"></span>
-  <span style="flex:1;font-size:.82rem;font-weight:600">${esc(name)} <i style="color:var(--mut);font-weight:400">${LATIN[name]&&LATIN[name]!=="—"?"· "+esc(LATIN[name]):""}</i></span>
-  <span style="width:100px;background:var(--line);border-radius:4px;height:6px;overflow:hidden"><span style="display:block;height:100%;width:${pct(v.n)}%;background:${GROUP_COLOR[v.grp]}"></span></span>
-  <span class="mono" style="font-size:.75rem;width:48px;text-align:right">${v.n} (${pct(v.n)}%)</span>
- </div>`).join("");
-}
 // 5. Chart.js grafiği
 function drawChart(id,type,labels,data){
  if(charts[id])charts[id].destroy();
