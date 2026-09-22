@@ -16,7 +16,7 @@ DendroGeo üç adımda çalışır:
 
 1. **Sahada ölç** — çevrimdışı bile çalışan PWA: GPS konumu, çap (DBH), boy ve tür/grup; fotoğraf eklenirse tarayıcı içi QA/QC uygulanır. Ölçümler cihazda IndexedDB'de kuyruklanır, bağlantı gelince Supabase'e senkron olur.
 2. **Yönetici onaylasın** — yayınlanan her kayıt bir moderasyon akışından geçer; onaysız veri dünya haritasına çıkmaz.
-3. **Küresel harita ve istatistik** — onaylı kayıtlar Leaflet haritasında, ülke/şehir kırılımında ve park karşılaştırma raporlarında görünür. Arazi örtüsü analizi Sentinel-2 tabanlı 10 m LULC COG'undan hesaplanır.
+3. **Küresel harita ve istatistik** — onaylı kayıtlar Leaflet haritasında, ülke/şehir kırılımında ve park karşılaştırma raporlarında görünür. Park arazi örtüsü analizi ESA WorldCover 2021 v200 birincil kaynağı ve IO LULC 2020 çapraz kaynağıyla 10 m kategorik raster hücre kesişimlerinden hesaplanır.
 
 ### Bilimsel yöntem (özet)
 
