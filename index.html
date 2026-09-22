@@ -215,7 +215,7 @@
 <div id="landing">
 <div id="topnav"><div class="wrap">
 <span class="brand"><img class="brand-logo" src="logo.png" alt="DendroGeo">DendroGeo</span>
- <div class="links"><a href="#sistem">Sistem</a><a href="#yontem">Yöntem</a><a href="#veri">Veri & Harita</a><a href="#istatistik">İstatistik</a></div>
+ <div class="links"><a href="#sistem">Sistem</a><a href="#yontem">Yöntem</a><a href="#veri">Veri &amp; Harita</a><a href="#istatistik">İstatistik</a><a href="#bilgi-merkezi">Bilgi Merkezi &amp; Kaynaklar</a></div>
  <button class="btn sm" onclick="showAuth()">Giriş / Kayıt</button>
 </div></div>
 
@@ -289,9 +289,9 @@
      <path d="M573 160 q3 2.5 6 0" stroke="#182420" stroke-width="1.4" stroke-linecap="round"/>
     </g>
    </svg>
-   <div class="chip c1"><span style="color:var(--amber)">●</span> DBH · cm</div>
-   <div class="chip c2"><span style="color:var(--green)">●</span> Karbon · kg</div>
-   <div class="chip c3"><span style="color:var(--blue)">●</span> Boy · m</div>
+   <div class="chip c1"><span style="color:var(--amber)">●</span> DBH 68 cm</div>
+   <div class="chip c2"><span style="color:var(--green)">●</span> C 539.9 kg</div>
+   <div class="chip c3"><span style="color:var(--blue)">●</span> H 8.3 m</div>
   </div>
  </div>
  <div class="statband">
@@ -405,21 +405,21 @@
 </div></section>
 <section class="blk" id="istatistik"><div class="wrap">
  <div class="shead"><span class="no">04</span><h2>İstatistik</h2><span class="rule"></span></div>
- <p style="color:var(--mut);max-width:70ch">Landing istatistikleri Supabase toplulaştırma görünümlerinden yüklenir; uygulamanın yayınlanan küresel görünümünde yalnızca onaylı kayıtlar kullanılır.</p>
+ <p style="color:var(--mut);max-width:72ch">DendroGeo'da şimdiye kadar yayımlanan onaylı ağaç kayıtlarının genel görünümünü burada görebilirsiniz: kaç kayıt, kaç ülke ve şehir ile toplam tahmini karbon stoğu.</p>
  <div class="grid g4" style="margin-top:20px">
-  <div class="stat"><div class="lbl">Toplam Kayıt</div><div class="val" id="statRec">—</div><div style="font-size:.7rem;color:var(--mut);margin-top:4px">onaylı veri</div></div>
+  <div class="stat"><div class="lbl">Onaylı Kayıt</div><div class="val" id="statRec">—</div></div>
   <div class="stat"><div class="lbl">Ülke</div><div class="val" id="statCountry">—</div></div>
   <div class="stat"><div class="lbl">Şehir</div><div class="val" id="statCity">—</div></div>
-  <div class="stat"><div class="lbl">Karbon</div><div class="val" id="statCarbon">—</div><div style="font-size:.7rem;color:var(--mut);margin-top:4px">t</div></div>
+  <div class="stat"><div class="lbl">Karbon Stoğu <span class="mono">t</span></div><div class="val" id="statCarbon">—</div></div>
  </div>
  <div class="card" style="margin-top:18px;border-left:4px solid var(--blue)">
-  <b>Nasıl okunmalı?</b>
-  <p style="color:var(--mut);font-size:.82rem;margin:7px 0 0">Bu değerler saha örnekleminin ve onaylı kayıtların mevcut durumunu gösterir; küresel orman toplamı veya tüm kent ağaçlarının sayımı değildir.</p>
+  <b>Bu sayılar neyi gösteriyor?</b>
+  <p style="color:var(--mut);font-size:.82rem;margin:7px 0 0">Harita ve istatistiklerde yayınlanan, DendroGeo tarafından onaylanmış saha ölçümlerinin mevcut toplamını gösterir. Değerler zaman içinde yeni ölçümler eklendikçe değişebilir.</p>
  </div>
 </div></section>
 <section class="blk" id="bilgi-merkezi"><div class="wrap">
  <div class="shead"><span class="no">05</span><h2>Bilgi Merkezi & Kaynaklar</h2><span class="rule"></span></div>
- <p style="color:var(--mut);max-width:75ch">DendroGeo'nun yöntemini, veri kaynaklarını ve kullanım akışını aynı görsel dil içinde, kısa ve doğrulanabilir bilgi kartlarıyla inceleyin.</p>
+ <p style="color:var(--mut);max-width:75ch">DendroGeo'yu kullanırken ihtiyaç duyacağınız ölçüm, karbon hesabı, arazi örtüsü, park analizi ve veri paylaşımı bilgilerini tek yerde bulabilirsiniz.</p>
  <div class="cols cols-3 info-feature-grid" style="margin-top:22px">
   <a class="feature" href="/agac-envanteri/" style="text-decoration:none;color:inherit">
    <div class="ico">🌳</div><h3>Ağaç Envanteri</h3>
@@ -460,7 +460,7 @@
  </div></section>
 
 <section class="blk" id="erisim" style="border-top:0"><div class="wrap">
- <div class="shead"><span class="no">06</span><h2>Erişim</h2><span class="rule"></span></div>
+ <div class="shead"><span class="no">06</span><h2>Giriş / Kayıt</h2><span class="rule"></span></div>
  <div class="card auth" id="authBox">
   <div style="display:flex;gap:8px;margin-bottom:16px">
    <button class="btn sm" onclick="authTab('login')">Giriş</button>
