@@ -1,6 +1,6 @@
 # 🌲 DendroGeo
 
-**Küresel Ağaç Envanteri ve Karbon Veri Sistemi** — GPS ölçümünden küresel karbon haritasına uzanan, bilimsel yöntemli saha uygulaması.
+**Küresel Ağaç Envanteri ve Karbon Veri Sistemi** — GPS konumlu saha ölçümlerini biyokütle/karbon hesapları, onaylı harita ve park ölçeğinde analizlerle birleştiren web GIS uygulaması.
 
 🌐 **[dendrogeo.org](https://dendrogeo.org)** · 📖 [Yöntem](docs/methods.md) · 🛰️ [Arazi örtüsü](arazi-ortusu/) · 🔐 [Güvenlik](SECURITY.md) · 🗄️ [Veri erişimi](#veri-erişimi-ve-lisans)
 
@@ -14,14 +14,14 @@
 
 DendroGeo üç adımda çalışır:
 
-1. **Sahada ölç** — çevrimdışı bile çalışan PWA: GPS konumu, çap (DBH), boy, tür ve fotoğraf. Ölçümler cihazda IndexedDB'de kuyruklanır, bağlantı gelince Supabase'e senkron olur.
+1. **Sahada ölç** — çevrimdışı bile çalışan PWA: GPS konumu, çap (DBH), boy ve tür/grup; fotoğraf eklenirse tarayıcı içi QA/QC uygulanır. Ölçümler cihazda IndexedDB'de kuyruklanır, bağlantı gelince Supabase'e senkron olur.
 2. **Yönetici onaylasın** — yayınlanan her kayıt bir moderasyon akışından geçer; onaysız veri dünya haritasına çıkmaz.
 3. **Küresel harita ve istatistik** — onaylı kayıtlar Leaflet haritasında, ülke/şehir kırılımında ve park karşılaştırma raporlarında görünür. Arazi örtüsü analizi Sentinel-2 tabanlı 10 m LULC COG'undan hesaplanır.
 
 ### Bilimsel yöntem (özet)
 
 * **Biyokütle:** Chave vd. (2014) allometrik denklemi — `AGB = 0.0673 · (ρ·D²·H)^0.976`
-* **Kök biyokütlesi:** AGB × 0,26 · **Karbon oranı:** 0,47 (IPCC)
+* **Kök biyokütlesi:** AGB × 0,26 sistem varsayımı · **Karbon oranı:** 0,47 sistem varsayımı
 * **Odun yoğunluğu (ρ):** tür bazlı; bilinmeyen türler grup varsayılanına düşer (İbreli 446, Yapraklı 541, Diğer 493 kg/m³ — Tolunay 2013, NIR Turkey 2017)
 * **Hacim:** silindir × 0,5 gövde form faktörü
 * **Arazi örtüsü:** Birincil kaynak ESA WorldCover 2021 v200 (10 m, Sentinel-1 + Sentinel-2); IO LULC 2020 bağımsız çapraz doğrulama olarak kullanılır. Alanlar raster hücresi ile park polygonunun gerçek kesişimlerinden hesaplanır.
