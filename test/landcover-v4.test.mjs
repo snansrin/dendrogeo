@@ -616,3 +616,14 @@ describe('v9: sapma düzeltmesi + yapay havuz rafinasyonu + PNG park kıpı', ()
     assert.match(srcGp, /ctx\.restore\(\)/);
   });
 });
+
+
+test('LULC sayısal analizinde OSM geometrisiyle sınıf değiştirilmez', () => {
+  const src = readFileSync(new URL('../src/services/landcover.js', import.meta.url), 'utf8');
+  const start = src.indexOf('async function dgLcAnalyze(params)');
+  const end = src.indexOf('function downloadLandCoverClassCSV', start);
+  assert.ok(start >= 0 && end > start, 'dgLcAnalyze sınırları bulunamadı');
+  const body = src.slice(start, end);
+  assert.doesNotMatch(body, /dgLcRefineWater\s*\(\s*result/);
+  assert.match(body, /const prim=await dgLcAnalyzeSource\(DG_LC_SOURCES\.primary/);
+});
