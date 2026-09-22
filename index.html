@@ -137,7 +137,7 @@
           "name": "Bir ağacın karbon stoğu nasıl hesaplanır?",
           "acceptedAnswer": {
             "@type": "Answer",
-            "text": "DendroGeo'da ağacın çapı (DBH) ve boyu ölçülür, ardından Chave et al. (2014) formülüyle AGB = 0.0673·(ρ·DBH²·H)^0.976 hesaplanır. Kök biyokütlesi IPCC 2006'ya göre BHB = AGB·0.26 olarak eklenir. Toplam karbon = (AGB+BHB)·0.47 formülüyle bulunur."
+            "text": "DendroGeo'da DBH, boy ve odun yoğunluğu (ρ) ile Chave et al. (2014) denklemiyle AGB hesaplanır. Kök biyokütlesi sistemde kullanılan AGB × 0,26 oranıyla, karbon ise toplam biyokütlenin 0,47'si varsayımıyla hesaplanır."
           }
         },
         {
@@ -372,9 +372,8 @@
   <div class="card" style="border-left:4px solid var(--amber)">
    <div style="font-family:Fraunces,serif;font-size:1.1rem;color:var(--green-dk);font-weight:600;margin-bottom:14px">🔬 Veri Doğruluk Politikası</div>
    <ul style="list-style:none;padding:0;margin:0">
-    <li style="padding:8px 0 8px 24px;position:relative;color:var(--ink);font-size:.88rem"><span style="position:absolute;left:0;color:var(--green);font-weight:700">✓</span>GPS doğruluğu ±10 m altında olmalı</li>
-    <li style="padding:8px 0 8px 24px;position:relative;color:var(--ink);font-size:.88rem"><span style="position:absolute;left:0;color:var(--green);font-weight:700">✓</span>Fotoğrafta bitki örtüsü ≥ %25</li>
-    <li style="padding:8px 0 8px 24px;position:relative;color:var(--ink);font-size:.88rem"><span style="position:absolute;left:0;color:var(--green);font-weight:700">✓</span>Pozlama 25–245 aralığında</li>
+    <li style="padding:8px 0 8px 24px;position:relative;color:var(--ink);font-size:.88rem"><span style="position:absolute;left:0;color:var(--ink);font-weight:700">✓</span>GPS doğruluğu ölçümle kaydedilir; sabit ±10 m kayıt eşiği yoktur</li>
+    <li style="padding:8px 0 8px 24px;position:relative;color:var(--ink);font-size:.88rem"><span style="position:absolute;left:0;color:var(--ink);font-weight:700">✓</span>Fotoğraf eklenirse bitki örtüsü ≥ %25 ve pozlama 25–245 aralığı kontrol edilir</li>
     <li style="padding:8px 0 8px 24px;position:relative;color:var(--ink);font-size:.88rem"><span style="position:absolute;left:0;color:var(--green);font-weight:700">✓</span>DBH ≤ 500 cm, boy ≤ 100 m</li>
     <li style="padding:8px 0 8px 24px;position:relative;color:var(--ink);font-size:.88rem"><span style="position:absolute;left:0;color:var(--green);font-weight:700">✓</span>Admin onayı zorunlu</li>
    </ul>
@@ -384,7 +383,7 @@
 <section class="blk" id="veri"><div class="wrap">
  <div class="shead"><span class="no">03</span><h2>Veri & Harita</h2><span class="rule"></span></div>
  <div id="worldMapLanding" style="height:380px;border-radius:var(--r);border:1px solid var(--line)"></div>
- <p style="color:var(--mut);font-size:.8rem;margin-top:8px">🟢 Onaylı noktalara dokunun → ölçüm bilgisi + fotoğraf balonu.</p>
+ <p style="color:var(--mut);font-size:.8rem;margin-top:8px">🟢 Onaylı noktalara dokunun → ölçüm bilgisi + varsa fotoğraf.</p>
  <div id="landingAnalysis" style="margin-top:20px"></div>
   <div class="card" style="margin-top:20px;border-left:4px solid var(--green)">
   <div class="shead" style="margin-bottom:12px"><span class="no">🌍</span><h2 style="font-size:1.15rem">Bölgesel Dağılım</h2><span class="rule"></span></div>
@@ -414,7 +413,7 @@
  <div class="grid g3" style="margin-top:18px">
   <a class="card" href="/agac-envanteri/" style="text-decoration:none;color:inherit"><div class="ico">🌳</div><h3>Ağaç Envanteri</h3><p>Saha ölçümleri, GPS, DBH, boy, tür ve veri yaşam döngüsü.</p></a>
   <a class="card" href="/karbon-hesaplama/" style="text-decoration:none;color:inherit"><div class="ico">🧮</div><h3>Karbon Hesaplama</h3><p>Allometrik biyokütle ve karbon hesaplarının yöntemi ve sınırlılıkları.</p></a>
-  <a class="card" href="/arazi-ortusu/" style="text-decoration:none;color:inherit"><div class="ico">🛰</div><h3>Sentinel-2 Arazi Örtüsü</h3><p>10 m LULC sınıfları, park hücre kesişimleri ve veri kaynağı.</p></a>
+  <a class="card" href="/arazi-ortusu/" style="text-decoration:none;color:inherit"><div class="ico">🛰</div><h3>10 m Arazi Örtüsü</h3><p>WorldCover 2021 birincil sınıfları, IO LULC 2020 çapraz kontrolü ve park hücre kesişimleri.</p></a>
   <a class="card" href="/kent-parklari/" style="text-decoration:none;color:inherit"><div class="ico">🏞</div><h3>Kent Parkı Analizi</h3><p>Ağaç verisi, yüzey sınıfları ve park ölçeğinde GIS yaklaşımı.</p></a>
   <a class="card" href="/yontem/" style="text-decoration:none;color:inherit"><div class="ico">📐</div><h3>Bilimsel Yöntem</h3><p>Alan, geometri, biyokütle ve LULC hesaplama zincirinin özeti.</p></a>
   <a class="card" href="/veri/" style="text-decoration:none;color:inherit"><div class="ico">🗂</div><h3>Veri ve Dışa Aktarım</h3><p>CSV, GeoJSON, QGIS ve veri yaşam döngüsü hakkında bilgiler.</p></a>
