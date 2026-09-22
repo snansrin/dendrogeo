@@ -2,7 +2,7 @@
 
 **Küresel Ağaç Envanteri ve Karbon Veri Sistemi** — GPS ölçümünden küresel karbon haritasına uzanan, bilimsel yöntemli saha uygulaması.
 
-🌐 **[dendrogeo.org](https://dendrogeo.org)** · 📖 [Yöntem](docs/methods.md) · 🔐 [Güvenlik](SECURITY.md) · 🗄️ [Veri erişimi](#veri-erişimi-ve-lisans)
+🌐 **[dendrogeo.org](https://dendrogeo.org)** · 📖 [Yöntem](docs/methods.md) · 🛰️ [Arazi örtüsü](arazi-ortusu/) · 🔐 [Güvenlik](SECURITY.md) · 🗄️ [Veri erişimi](#veri-erişimi-ve-lisans)
 
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.22646300.svg)](https://doi.org/10.5281/zenodo.22646300)
 [![License: CC BY-NC 4.0](https://img.shields.io/badge/License-CC%20BY--NC%204.0-lightgrey.svg)](https://creativecommons.org/licenses/by-nc/4.0/)
@@ -24,7 +24,7 @@ DendroGeo üç adımda çalışır:
 * **Kök biyokütlesi:** AGB × 0,26 · **Karbon oranı:** 0,47 (IPCC)
 * **Odun yoğunluğu (ρ):** tür bazlı; bilinmeyen türler grup varsayılanına düşer (İbreli 446, Yapraklı 541, Diğer 493 kg/m³ — Tolunay 2013, NIR Turkey 2017)
 * **Hacim:** silindir × 0,5 gövde form faktörü
-* **Arazi örtüsü:** Impact Observatory 10 m yıllık LULC (v02), 2020 kilidi; alanlar UTM'de gerçek kaynak-hücre kesişimiyle hesaplanır
+* **Arazi örtüsü:** Birincil kaynak ESA WorldCover 2021 v200 (10 m, Sentinel-1 + Sentinel-2); IO LULC 2020 bağımsız çapraz doğrulama olarak kullanılır. Alanlar raster hücresi ile park polygonunun gerçek kesişimlerinden hesaplanır.
 
 Ayrıntı ve bilinen sınırlılıklar: [`docs/methods.md`](docs/methods.md)
 
