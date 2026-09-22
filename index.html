@@ -9,7 +9,7 @@
 
 
 <!-- === SEO META === -->                  
-<meta name="description" content="DendroGeo: GPS ölçümünden küresel karbon haritasına uzanan bilimsel ağaç envanteri platformu. Chave 2014 formülleriyle anında biyokütle ve karbon hesabı.">
+<meta name="description" content="DendroGeo: saha GPS ölçümü, ağaç biyokütlesi ve karbon hesabı, onaylı veri haritası ve 10 m arazi örtüsü analizi için web GIS platformu.">
 <meta name="keywords" content="ağaç envanteri, karbon hesaplama, biyokütle, allometrik denklem, DBH, çap ölçümü, ağaç boyu, kent parkları karbon, orman karbon stoğu, Chave 2014, IPCC 2006, QGIS ağaç haritası, ağaç veri tabanı, tree inventory, carbon sequestration, biomass equation, forest carbon, urban tree carbon, DendroGeo">
 <meta name="author" content="Sinan ŞİRİN, Nagihan ŞİRİN">
 <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">
@@ -24,7 +24,7 @@
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="DendroGeo">
 <meta property="og:title" content="DendroGeo — Küresel Ağaç Envanteri ve Karbon Veri Sistemi">
-<meta property="og:description" content="GPS ölçümünden küresel karbon haritasına: Chave 2014 formülleriyle anında biyokütle ve karbon stoğu hesabı.">
+<meta property="og:description" content="Saha GPS ölçümü, ağaç biyokütlesi ve karbon hesabı, onaylı veri haritası ve 10 m arazi örtüsü analizi.">
 <meta property="og:image" content="https://dendrogeo.org/social-preview.jpg">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
@@ -36,7 +36,7 @@
 <!-- === TWITTER CARD === -->
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="DendroGeo — Küresel Ağaç Envanteri">
-<meta name="twitter:description" content="Bir ağacın karbonunu saniyeler içinde hesaplayın. GPS + fotoğraf + allometrik formüller + admin onay = küresel karbon haritası.">
+<meta name="twitter:description" content="Ağaç ölçümünü konum, allometrik hesap ve onaylı veri haritasına bağlayan DendroGeo web GIS platformu.">
 <meta name="twitter:image" content="https://dendrogeo.org/social-preview.jpg">
 <meta name="twitter:image:alt" content="DendroGeo önizleme">
 
@@ -51,7 +51,7 @@
       "name": "DendroGeo",
       "alternateName": "Global Tree Inventory & Carbon Data System",
       "url": "https://dendrogeo.org/",
-      "description": "GPS ölçümünden küresel karbon haritasına uzanan bilimsel ağaç envanteri ve karbon veri platformu. Chave et al. (2014) allometrik formülleri, IPCC 2006 kök biyokütlesi, QGIS uyumlu dışa aktarım.",
+      "description": "Saha GPS ölçümünü ağaç envanteri, allometrik biyokütle\/karbon hesabı, onaylı harita ve 10 m arazi örtüsü analiziyle birleştiren bilimsel veri platformu.",
       "applicationCategory": "ScienceApplication",
       "applicationSubCategory": "Environmental Science",
       "operatingSystem": "Web, PWA, iOS, Android",
@@ -134,7 +134,7 @@
       "mainEntity": [
         {
           "@type": "Question",
-          "name": "Bir ağacın karbonu nasıl hesaplanır?",
+          "name": "Bir ağacın karbon stoğu nasıl hesaplanır?",
           "acceptedAnswer": {
             "@type": "Answer",
             "text": "DendroGeo'da ağacın çapı (DBH) ve boyu ölçülür, ardından Chave et al. (2014) formülüyle AGB = 0.0673·(ρ·DBH²·H)^0.976 hesaplanır. Kök biyokütlesi IPCC 2006'ya göre BHB = AGB·0.26 olarak eklenir. Toplam karbon = (AGB+BHB)·0.47 formülüyle bulunur."
@@ -158,10 +158,10 @@
         },
         {
           "@type": "Question",
-          "name": "Hangi ağaç türleri destekleniyor?",
+          "name": "Hangi tür ve odun yoğunluğu bilgileri kullanılıyor?",
           "acceptedAnswer": {
             "@type": "Answer",
-            "text": "Sistem, Türkiye'deki 44 ağaç türü için As ve ark. (2001), Tolunay (2013) ve OGM 299 Nolu Tebliğ (2017) kaynaklı odun yoğunluğu (ρ) değerlerini içerir. İbreli, yapraklı ve diğer gruplar için varsayılan yoğunluk değerleri de desteklenir."
+            "text": "Sistem tür ve grup seçimi içerir. Tür için doğrudan odun yoğunluğu (ρ) bulunmadığında ilgili grup için tanımlı varsayılan yoğunluk kullanılır; bu nedenle karbon sonucu kullanılan ρ varsayımıyla birlikte değerlendirilmelidir."
           }
         }
       ]
@@ -213,8 +213,8 @@
  <div class="hero-grid">
   <div class="hero-copy">
    <div class="kick"><span class="live-dot"></span>SAHADAN VERİTABANINA · BİLİMSEL KARBON ENVANTERİ</div>
-   <h1>Bir ağacın karbonunu<br>saniyeler içinde hesaplayın.</h1>
-   <p class="lead">DendroGeo; sahadaki GPS ölçümünden küresel karbon haritasına uzanan <b>tek entegre bilimsel platformdur</b>. Çap ve boy ölçümünüzü alın, canlı fotoğraf denetiminden geçirin — Chave et al. (2014) allometrik formülleri biyokütle ve karbon stoğunu otomatik hesaplasın. Admin onayından sonra veriniz dünya haritasında yayında.</p>
+   <h1>Bir ağacın tahmini karbon stoğunu<br>saniyeler içinde hesaplayın.</h1>
+   <p class="lead">DendroGeo; sahadaki GPS konumunu, ağaç çapı ve boy ölçümünü, tür/grup bilgisini ve isteğe bağlı fotoğraf kalite kontrolünü tek bir veri akışında birleştirir. Ölçümden biyokütle ve karbon tahminine geçilir; onaylanan kayıtlar harita ve istatistik katmanlarında yayımlanır. Park analizinde 10 m arazi örtüsü verisi ayrı bir veri kaynağı olarak işlenir.</p>
    <div style="display:flex;gap:12px;flex-wrap:wrap;margin-top:28px">
     <a href="#sistem" class="btn">🔬 Sistemi Keşfet</a>
     <button class="btn ghost" onclick="showAuth()">🌲 Hemen Başla</button>
@@ -279,9 +279,9 @@
      <path d="M573 160 q3 2.5 6 0" stroke="#182420" stroke-width="1.4" stroke-linecap="round"/>
     </g>
    </svg>
-   <div class="chip c1"><span style="color:var(--amber)">●</span> DBH 68 cm</div>
-   <div class="chip c2"><span style="color:var(--green)">●</span> C 539.9 kg</div>
-   <div class="chip c3"><span style="color:var(--blue)">●</span> H 8.3 m</div>
+   <div class="chip c1"><span style="color:var(--amber)">●</span> DBH · cm</div>
+   <div class="chip c2"><span style="color:var(--green)">●</span> Karbon · kg</div>
+   <div class="chip c3"><span style="color:var(--blue)">●</span> Boy · m</div>
   </div>
  </div>
  <div class="statband">
@@ -291,41 +291,29 @@
   <div><div class="val" id="stCarbon">—</div><div class="lbl">Karbon (t)</div></div>
  </div>
 </div></div>
-<section class="blk" id="bilgi-merkezi"><div class="wrap">
- <div class="shead"><span class="no">00</span><h2>DendroGeo Bilgi Merkezi</h2><span class="rule"></span></div>
- <p style="color:var(--mut);max-width:75ch">DendroGeo'nun ağaç envanteri, karbon hesaplama, kent parkı analizi ve Sentinel-2 arazi örtüsü yöntemleri hakkında bağımsız bilgi sayfaları.</p>
- <div class="grid g3" style="margin-top:18px">
-  <a class="card" href="/agac-envanteri/" style="text-decoration:none;color:inherit"><div class="ico">🌳</div><h3>Ağaç Envanteri</h3><p>Saha ölçümleri, GPS, DBH, boy, tür ve veri yaşam döngüsü.</p></a>
-  <a class="card" href="/karbon-hesaplama/" style="text-decoration:none;color:inherit"><div class="ico">🧮</div><h3>Karbon Hesaplama</h3><p>Allometrik biyokütle ve karbon hesaplarının yöntemi ve sınırlılıkları.</p></a>
-  <a class="card" href="/arazi-ortusu/" style="text-decoration:none;color:inherit"><div class="ico">🛰</div><h3>Sentinel-2 Arazi Örtüsü</h3><p>10 m LULC sınıfları, park hücre kesişimleri ve veri kaynağı.</p></a>
-  <a class="card" href="/kent-parklari/" style="text-decoration:none;color:inherit"><div class="ico">🏞</div><h3>Kent Parkı Analizi</h3><p>Ağaç verisi, yüzey sınıfları ve park ölçeğinde GIS yaklaşımı.</p></a>
-  <a class="card" href="/yontem/" style="text-decoration:none;color:inherit"><div class="ico">📐</div><h3>Bilimsel Yöntem</h3><p>Alan, geometri, biyokütle ve LULC hesaplama zincirinin özeti.</p></a>
-  <a class="card" href="/veri/" style="text-decoration:none;color:inherit"><div class="ico">🗂</div><h3>Veri ve Dışa Aktarım</h3><p>CSV, GeoJSON, QGIS ve veri yaşam döngüsü hakkında bilgiler.</p></a>
- </div>
- </div></section>
 <section class="blk" id="sistem"><div class="wrap">
  <div class="shead"><span class="no">01</span><h2>Sistemin Üç Temel Direği</h2><span class="rule"></span></div>
 <div class="cols cols-3">
   <div class="feature">
    <div class="ico">🛰</div>
    <h3>Sahadan Veri</h3>
-   <p>GPS uydu bağlantısıyla santimetre hassasiyetinde konum, canlı fotoğraf analiziyle bitki örtüsü ve pozlama denetimi.</p>
+   <p>GPS konumu ve cihazın bildirdiği doğruluk değeriyle saha ölçümünü konumlandırır; fotoğraf eklenirse tarayıcı içi kalite kontrolü uygulanır.</p>
    <ul>
-    <li>Gerçek zamanlı GPS ±3 m</li>
+    <li>GPS doğruluğu ölçümle kaydedilir</li>
     <li>Waypoint pusula navigasyonu</li>
     <li>Çevrimdışı ölçüm + senkronizasyon</li>
-    <li>Cihaz üstü görsel QA/QC</li>
+    <li>Fotoğraf için tarayıcı içi QA/QC</li>
    </ul>
   </div>
   <div class="feature">
    <div class="ico">🧮</div>
    <h3>Bilimsel Hesap</h3>
-   <p>Uluslararası kabul görmüş allometrik formüllerle AGB, BHB, toplam biyokütle ve karbon stoğu saniyeler içinde.</p>
+   <p>Belirlenen ölçüm değişkenleriyle AGB, BHB, toplam biyokütle ve karbon tahmini üretir.</p>
    <ul>
-    <li>Chave et al. 2014 (pantropikal)</li>
-    <li>IPCC 2006 kök biyokütlesi</li>
-    <li>44 tür için ρ yoğunluk değeri</li>
-    <li>Eğim düzeltmesi ve hacim hesabı</li>
+    <li>Chave et al. 2014 (DBH + boy + ρ)</li>
+    <li>AGB × 0,26 kök/gövde varsayımı</li>
+    <li>Tür ρ değeri yoksa grup varsayılanı</li>
+    <li>Hacim hesabı</li>
    </ul>
   </div>
   <div class="feature">
@@ -349,19 +337,19 @@
 </div></section>
 <section class="blk" id="yontem"><div class="wrap">
  <div class="shead"><span class="no">02</span><h2>Sahadan Haritaya — Üç Adımda</h2><span class="rule"></span></div>
- <p style="color:var(--mut);max-width:70ch;font-size:1.02rem">Her ölçüm, sahadaki cihazınızdan dünya haritasına uzanan kontrollü bir akıştan geçer. Hiçbir kayıt admin onayı olmadan bilimsel veri havuzuna girmez.</p>
+ <p style="color:var(--mut);max-width:70ch;font-size:1.02rem">Her ölçüm, saha verisinden hesaplamaya ve denetimli yayına uzanan kontrollü bir akıştan geçer. Yayınlanan küresel veri ve istatistik katmanlarına yalnızca onaylı kayıtlar dahil edilir.</p>
  
  <div class="steps">
   <div class="step">
    <div class="num">1</div>
    <h4>Sahada Ölç</h4>
-   <p>GPS ile konumunuzu sabitleyin, waypoint pusulasıyla ağaca yönelin. Çap (çevre/π), boy ve grup bilgilerini girin.</p>
-   <div class="sub">±3 M · GPS · FOTOĞRAF</div>
+   <p>GPS konumunu alın, waypoint pusulasıyla ağaca yönelin; DBH, boy ve grup/tür bilgilerini girin.</p>
+   <div class="sub">GPS · DBH · BOY · FOTOĞRAF</div>
   </div>
   <div class="step">
    <div class="num">2</div>
    <h4>Otomatik Hesap</h4>
-   <p>Cihaz üzerinde canlı fotoğraf analizi bitki örtüsü ve pozlamayı denetler. Ardından Chave et al. (2014) formülleri biyokütle ve karbon stoğunu hesaplar.</p>
+   <p>Fotoğraf eklenirse tarayıcı içi QA/QC uygulanır. Ardından Chave et al. (2014) modeliyle AGB hesaplanır; kök biyokütlesi ve karbon, sistemde tanımlı sabit varsayımlarla türetilir.</p>
    <div class="sub">AGB · BHB · C · m³</div>
   </div>
   <div class="step">
@@ -377,9 +365,9 @@
    <div style="font-family:Fraunces,serif;font-size:1.1rem;color:var(--green-dk);font-weight:600;margin-bottom:14px">📐 Allometrik Formüller</div>
    <div class="formula">DBH = Çevre ÷ π</div>
    <div class="formula">AGB = 0.0673·(ρ·DBH²·H)<sup>0.976</sup> <span style="color:var(--mut)">— Chave 2014</span></div>
-   <div class="formula">BHB = AGB·0.26 <span style="color:var(--mut)">— IPCC 2006</span></div>
+   <div class="formula">BHB = AGB·0.26 <span style="color:var(--mut)">— sistemde kullanılan sabit kök/gövde varsayımı</span></div>
    <div class="formula">C = (AGB+BHB)·0.47</div>
-   <p style="color:var(--mut);font-size:.78rem;margin-top:12px">44 ağaç türü için As ve ark. 2001 · Tolunay 2013 · OGM 299 Nolu Tebliğ 2017 kaynaklı ρ yoğunluk değerleri.</p>
+   <p style="color:var(--mut);font-size:.78rem;margin-top:12px">Tür/grup tablosunda 45 seçim kaydı bulunur; 17 kaydın doğrudan ρ değeri vardır, 28 kayıt grup varsayılanına düşer.</p>
   </div>
   <div class="card" style="border-left:4px solid var(--amber)">
    <div style="font-family:Fraunces,serif;font-size:1.1rem;color:var(--green-dk);font-weight:600;margin-bottom:14px">🔬 Veri Doğruluk Politikası</div>
@@ -408,10 +396,34 @@
 </div></section>
 <section class="blk" id="istatistik"><div class="wrap">
  <div class="shead"><span class="no">04</span><h2>İstatistik</h2><span class="rule"></span></div>
- <p style="color:var(--mut);max-width:70ch">Agregasyonlar <span class="mono">v_global, v_country, v_city</span> görünümlerinden hesaplanır; yalnızca onaylı kayıtlar istatistiğe girer.</p>
+ <p style="color:var(--mut);max-width:70ch">Landing istatistikleri Supabase toplulaştırma görünümlerinden yüklenir; uygulamanın yayınlanan küresel görünümünde yalnızca onaylı kayıtlar kullanılır.</p>
+ <div class="grid g4" style="margin-top:20px">
+  <div class="stat"><div class="lbl">Toplam Kayıt</div><div class="val" id="statRec">—</div><div style="font-size:.7rem;color:var(--mut);margin-top:4px">onaylı veri</div></div>
+  <div class="stat"><div class="lbl">Ülke</div><div class="val" id="statCountry">—</div></div>
+  <div class="stat"><div class="lbl">Şehir</div><div class="val" id="statCity">—</div></div>
+  <div class="stat"><div class="lbl">Karbon</div><div class="val" id="statCarbon">—</div><div style="font-size:.7rem;color:var(--mut);margin-top:4px">t</div></div>
+ </div>
+ <div class="card" style="margin-top:18px;border-left:4px solid var(--blue)">
+  <b>Nasıl okunmalı?</b>
+  <p style="color:var(--mut);font-size:.82rem;margin:7px 0 0">Bu değerler saha örnekleminin ve onaylı kayıtların mevcut durumunu gösterir; küresel orman toplamı veya tüm kent ağaçlarının sayımı değildir.</p>
+ </div>
 </div></section>
+<section class="blk" id="bilgi-merkezi"><div class="wrap">
+ <div class="shead"><span class="no">05</span><h2>Bilgi Merkezi & Kaynaklar</h2><span class="rule"></span></div>
+ <p style="color:var(--mut);max-width:75ch">DendroGeo'nun yöntemini, veri kaynaklarını ve kullanım akışını kısa ve doğrulanabilir bilgi sayfalarında topluyoruz.</p>
+ <div class="grid g3" style="margin-top:18px">
+  <a class="card" href="/agac-envanteri/" style="text-decoration:none;color:inherit"><div class="ico">🌳</div><h3>Ağaç Envanteri</h3><p>Saha ölçümleri, GPS, DBH, boy, tür ve veri yaşam döngüsü.</p></a>
+  <a class="card" href="/karbon-hesaplama/" style="text-decoration:none;color:inherit"><div class="ico">🧮</div><h3>Karbon Hesaplama</h3><p>Allometrik biyokütle ve karbon hesaplarının yöntemi ve sınırlılıkları.</p></a>
+  <a class="card" href="/arazi-ortusu/" style="text-decoration:none;color:inherit"><div class="ico">🛰</div><h3>Sentinel-2 Arazi Örtüsü</h3><p>10 m LULC sınıfları, park hücre kesişimleri ve veri kaynağı.</p></a>
+  <a class="card" href="/kent-parklari/" style="text-decoration:none;color:inherit"><div class="ico">🏞</div><h3>Kent Parkı Analizi</h3><p>Ağaç verisi, yüzey sınıfları ve park ölçeğinde GIS yaklaşımı.</p></a>
+  <a class="card" href="/yontem/" style="text-decoration:none;color:inherit"><div class="ico">📐</div><h3>Bilimsel Yöntem</h3><p>Alan, geometri, biyokütle ve LULC hesaplama zincirinin özeti.</p></a>
+  <a class="card" href="/veri/" style="text-decoration:none;color:inherit"><div class="ico">🗂</div><h3>Veri ve Dışa Aktarım</h3><p>CSV, GeoJSON, QGIS ve veri yaşam döngüsü hakkında bilgiler.</p></a>
+  <a class="card" href="/hakkimizda/" style="text-decoration:none;color:inherit"><div class="ico">🌿</div><h3>Proje Hakkında</h3><p>Projenin amacı, açık kaynak yapısı ve temel kaynakları.</p></a>
+ </div>
+ </div></section>
+
 <section class="blk" id="erisim" style="border-top:0"><div class="wrap">
- <div class="shead"><span class="no">05</span><h2>Erişim</h2><span class="rule"></span></div>
+ <div class="shead"><span class="no">06</span><h2>Erişim</h2><span class="rule"></span></div>
  <div class="card auth" id="authBox">
   <div style="display:flex;gap:8px;margin-bottom:16px">
    <button class="btn sm" onclick="authTab('login')">Giriş</button>
@@ -426,7 +438,7 @@
 </div></section>
 <footer><div class="wrap">
  <div class="cols footer-cols">
-  <div><h4>DendroGeo</h4><p>Küresel Ağaç Envanteri ve Karbon Veri Sistemi.</p></div>
+  <div><h4>DendroGeo</h4><p>Ağaç envanteri, karbon hesabı, harita ve park ölçeğinde arazi örtüsü analizi.</p></div>
   <div><h4>Referanslar</h4><p>Chave et al. 2014 · IPCC 2006<br>As ve ark. 2001 · Tolunay 2013<br>OGM 299 Nolu Tebliğ 2017</p></div>
   <div><h4>Sistem</h4><p>v11.0 · <span class="mono">ÇEVRİMİÇİ</span></p></div>
  </div>
@@ -456,7 +468,7 @@
     <h4 style="color:#9fd0ae;font-size:.72rem;letter-spacing:.16em;text-transform:uppercase;margin:18px 0 10px">⚖️ Politikalar</h4>
     <div style="font-size:.78rem;color:#cfe0d4;line-height:1.6">
      <div><a href="#" onclick="toast('KVKK: Yalnızca e-posta, ad ve kurum bilgileriniz saklanır. Hesap istediğinizde tüm verileriniz silinebilir. Çerez kullanılmamaktadır.');return false;" style="color:#9fd0ae;text-decoration:underline">KVKK Aydınlatma Metni</a></div>
-     <div style="margin-top:4px"><a href="#" onclick="toast('Veri Doğruluk: GPS doğruluğu ±10m altında, bitki örtüsü ≥%25 ve pozlama 25-245 aralığında olmayan çekimler reddedilir. Tüm kayıtlar admin onayından sonra yayımlanır.');return false;" style="color:#9fd0ae;text-decoration:underline">Veri Doğruluk Politikası</a></div>
+     <div style="margin-top:4px"><a href="#" onclick="toast('Veri Doğruluk: GPS doğruluğu ölçümle kaydedilir. Fotoğraf eklenirse bitki örtüsü ≥%25 ve pozlama 25-245 aralığı kontrol edilir. Tüm kayıtlar admin onayından sonra yayımlanır.');return false;" style="color:#9fd0ae;text-decoration:underline">Veri Doğruluk Politikası</a></div>
     </div>
    </div>
   </div>
@@ -598,7 +610,7 @@
  <span id="parkModeHint" style="font-size:.78rem;color:var(--mut)">Açınca haritada bir parkın içine tıkla → sınırı otomatik algılanır.</span>
 </div>
 <div id="mapLoad" class="alert info">⏳ Onaylı kayıtlar yükleniyor…</div><div id="map"></div>
-<div id="parkInfo" class="card" style="display:none;margin-top:12px;border-left:4px solid var(--blue)"></div><p style="color:var(--mut);font-size:.8rem;margin-top:8px">🟢 Noktalara dokunun → bilgi + fotoğraf balonu.</p><div id="liveAnalysis" style="margin-top:18px"></div></div>
+<div id="parkInfo" class="card" style="display:none;margin-top:12px;border-left:4px solid var(--blue)"></div><p style="color:var(--mut);font-size:.8rem;margin-top:8px">🟢 Noktalara dokunun → onaylı ölçüm bilgisi + varsa fotoğraf.</p><div id="liveAnalysis" style="margin-top:18px"></div></div>
 
   <div class="view" id="v-projects">
 <h2 class="disp" style="margin-bottom:16px">Projeler</h2>
@@ -880,7 +892,8 @@ function initLanding(){
  (async()=>{
   try{
    const g=await sb.from("v_global").select("*").single();
-   if(g.data){$("stRec").textContent=g.data.records||0;$("stCountry").textContent=g.data.countries||0;$("stCity").textContent=g.data.cities||0;$("stCarbon").textContent=g.data.carbon_t||0;}
+   if(g.data){$("stRec").textContent=g.data.records||0;$("stCountry").textContent=g.data.countries||0;$("stCity").textContent=g.data.cities||0;$("stCarbon").textContent=g.data.carbon_t||0;
+       $("statRec").textContent=g.data.records||0;$("statCountry").textContent=g.data.countries||0;$("statCity").textContent=g.data.cities||0;$("statCarbon").textContent=g.data.carbon_t||0;}
    const c=await sb.from("v_country").select("*");
    $("tblCountry").querySelector("tbody").innerHTML=(c.data||[]).slice(0,20).map(r=>`<tr class="clickable-row" onclick="zoomToCountry('${esc(r.country)}')"><td>${esc(r.country)}</td><td>${r.records}</td><td>${r.carbon_t}</td><td>${r.avg_dbh}</td><td>${r.avg_height||"—"}</td></tr>`).join("")||"<tr><td colspan=5>Henüz veri yok</td></tr>";
    const t=await sb.from("v_city").select("*");
