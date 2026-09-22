@@ -83,7 +83,7 @@ npm run check          # sözdizimi + ?v= tutarlılığı + CSP + 150 test
 npm test               # yalnız testler (node:test, bağımlılık gerektirmez)
 ```
 
-150 birim testi şunları kilitler: karbon hesabı (Chave 2014, ρ fallback,
+218 test şunları kilitler: karbon hesabı (Chave 2014, ρ fallback,
 NaN yayılmaması), jeodezik alan ve geometri, **UTM projeksiyonu** (bilinen
 referans değerlere karşı), Sutherland-Hodgman kırpma + alan korunumu,
 Service Worker'ın çevrimdışı yedeği ve vendor kütüphanelerin global kurulumu.
