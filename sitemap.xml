@@ -1,7 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-  <url>
-    <loc>https://dendrogeo.org/</loc>
-    <lastmod>2026-09-19</lastmod>
-  </url>
+  <url><loc>https://dendrogeo.org/</loc><lastmod>2026-09-22</lastmod></url>
+  <url><loc>https://dendrogeo.org/agac-envanteri/</loc><lastmod>2026-09-22</lastmod></url>
+  <url><loc>https://dendrogeo.org/karbon-hesaplama/</loc><lastmod>2026-09-22</lastmod></url>
+  <url><loc>https://dendrogeo.org/arazi-ortusu/</loc><lastmod>2026-09-22</lastmod></url>
+  <url><loc>https://dendrogeo.org/kent-parklari/</loc><lastmod>2026-09-22</lastmod></url>
+  <url><loc>https://dendrogeo.org/yontem/</loc><lastmod>2026-09-22</lastmod></url>
+  <url><loc>https://dendrogeo.org/veri/</loc><lastmod>2026-09-22</lastmod></url>
+  <url><loc>https://dendrogeo.org/hakkimizda/</loc><lastmod>2026-09-22</lastmod></url>
 </urlset>
