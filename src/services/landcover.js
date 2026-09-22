@@ -1345,15 +1345,9 @@ async function dgLcAnalyze(params){
     console.warn("DENDROGEO · çapraz doğrulama kaynağı atlandı:",crossErr);
   }
 
-  /* Yapay havuz rafinasyonu (best-effort; Overpass yoksa analiz bozulmaz) */
-  let waterRefined=0;
-  try{
-    const wr=await dgLcFetchWaterPolygons(bbox);
-    waterRefined=dgLcRefineWater(result,wr);
-    if(waterRefined)console.log("DENDROGEO · OSM su rafinasyonu:",waterRefined,"hücre");
-  }catch(err){
-    console.warn("DENDROGEO · su rafinasyonu atlandı:",err);
-  }
+  /* OSM, sayısal arazi örtüsü sınıfını değiştirmez.
+   * Park sınırı bulma / yardımcı GIS işleri ayrı bir katmandır; birincil
+   * raster sonucu burada olduğu gibi korunur. */
 
   const patches=dgLcDetectPatches(result.cells);
   const agreement=cross?dgLcGroupAgreement(result,cross.result):null;
