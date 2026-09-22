@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="tr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Sentinel-2 10 m Arazi Örtüsü Analizi | DendroGeo</title>
+<meta name="description" content="DendroGeo park sınırı içinde Sentinel-2 tabanlı 10 m arazi örtüsü sınıflarını kullanarak yeşil alan, su, sert zemin ve çıplak zemin dağılımını analiz eder.">
+<meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">
+<link rel="canonical" href="https://dendrogeo.org/arazi-ortusu/">
+<meta property="og:type" content="article"><meta property="og:site_name" content="DendroGeo">
+<meta property="og:title" content="Sentinel-2 10 m Arazi Örtüsü Analizi | DendroGeo"><meta property="og:description" content="DendroGeo park sınırı içinde Sentinel-2 tabanlı 10 m arazi örtüsü sınıflarını kullanarak yeşil alan, su, sert zemin ve çıplak zemin dağılımını analiz eder.">
+<meta property="og:url" content="https://dendrogeo.org/arazi-ortusu/">
+<link rel="icon" href="../icon.png">
+<link rel="stylesheet" href="../css/style.css?v=98461801">
+<style>:root{--bg:#f7f6f2;--ink:#182420;--mut:#64706a;--green:#14532d;--line:#dfe5df;--card:#fff}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.7 Arial,system-ui,sans-serif}
+.wrap{max-width:1040px;margin:auto;padding:0 22px}.top{padding:18px 0;border-bottom:1px solid var(--line);background:#fff;position:sticky;top:0}
+.nav{display:flex;align-items:center;justify-content:space-between;gap:18px}.brand{font-weight:800;color:var(--green);text-decoration:none;font-size:1.15rem}.links{display:flex;gap:14px;flex-wrap:wrap}.links a{color:var(--green);text-decoration:none;font-size:.92rem}
+main{padding:54px 0 70px}h1{font-size:clamp(2rem,5vw,3.3rem);line-height:1.08;margin:.2em 0 .35em}h2{margin-top:42px;line-height:1.2}h3{margin-top:25px}p,li{max-width:78ch}.lead{font-size:1.08rem;color:#46524c;max-width:75ch}.hero{padding:25px 0 10px}.tag{color:var(--green);font-weight:800;text-transform:uppercase;letter-spacing:.08em;font-size:.78rem}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:18px;margin-top:24px}.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:22px}.card h3{margin-top:0}.btn{display:inline-block;background:var(--green);color:white;text-decoration:none;padding:11px 16px;border-radius:10px;font-weight:700;margin:8px 8px 0 0}.btn.alt{background:white;color:var(--green);border:1px solid var(--line)}code{background:#eef2ee;padding:2px 5px;border-radius:5px}footer{border-top:1px solid var(--line);padding:28px 0;color:var(--mut);font-size:.9rem}table{border-collapse:collapse;width:100%;background:#fff;border:1px solid var(--line);border-radius:12px;overflow:hidden}th,td{padding:11px 12px;border-bottom:1px solid var(--line);text-align:left}th{background:#eef3ef;color:var(--green)}small{color:var(--mut)}</style>
+
+</head><body>
+<header class="top"><div class="wrap nav"><a class="brand" href="../">🌲 DendroGeo</a>
+<nav class="links" aria-label="Ana navigasyon"><a href="../">Ana Sayfa</a><a href="../agac-envanteri/">Ağaç Envanteri</a><a href="../karbon-hesaplama/">Karbon</a><a href="../arazi-ortusu/">Arazi Örtüsü</a><a href="../yontem/">Yöntem</a></nav></div></header>
+<main><div class="wrap"><div class="hero"><div class="tag">UYDU ANALİZİ</div><h1>Sentinel-2 10 m Arazi Örtüsü Analizi</h1><p class="lead">DendroGeo park sınırı içinde Sentinel-2 tabanlı 10 m arazi örtüsü sınıflarını kullanarak yeşil alan, su, sert zemin ve çıplak zemin dağılımını analiz eder.</p><a class="btn" href="../">DendroGeo uygulamasını aç</a></div><h2>Hangi sınıflar raporlanır?</h2>
+<table><thead><tr><th>Rapor sınıfı</th><th>Kaynak sınıflar</th></tr></thead><tbody>
+<tr><td>🌿 Yeşil alan</td><td>Ağaç, taşkın vejetasyon, tarım, rangeland</td></tr>
+<tr><td>💧 Su</td><td>Water</td></tr>
+<tr><td>🧱 Sert zemin</td><td>Built Area</td></tr>
+<tr><td>🟫 Çıplak zemin</td><td>Bare Ground</td></tr>
+</tbody></table>
+<h2>Alan hesabı</h2>
+<p>Analiz motoru 10 m kaynak-grid hücrelerini park polygonuyla kesiştirir. Hücrenin park dışında kalan kısmı hesaba dahil edilmez. Hücre sınıfı, Sentinel-2 LULC kaynağından nearest-neighbour ile örneklenir; alan ise hücre ile park geometrisinin kesişiminden türetilir.</p>
+<h2>2020 kaynak seçimi</h2>
+<p>Uygulamadaki güncel motor, 2020 yılı için ImageServer raster kataloğundaki Primary öğeleri seçip raster ID'lerini kilitleyerek analiz ile görselleştirmenin aynı yıllık kaynak kümesini kullanmasını hedefler. Ayrıntılı metodoloji ve kalite kontrolleri proje dokümanında açıklanır.</p>
+<h2>Önemli sınırlılık</h2>
+<p>10 m çözünürlükteki bir LULC ürününden elde edilen sınıf dağılımı, bina veya yol gibi tek tek küçük nesneleri saha ölçümü kesinliğinde ayırmayabilir. Sonuçlar park ölçeğinde arazi örtüsü dağılımı olarak yorumlanmalıdır.</p></div></main>
+<footer><div class="wrap">DendroGeo · Küresel Ağaç Envanteri ve Karbon Veri Sistemi · <a href="../">Ana sayfa</a> · <a href="../yontem/">Yöntem</a></div></footer>
+</body></html>
