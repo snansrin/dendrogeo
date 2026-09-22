@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="tr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Kent Parklarında Ağaç ve Yüzey Analizi | DendroGeo</title>
-<meta name="description" content="DendroGeo, kent parklarını ağaç envanteri, karbon verisi ve arazi örtüsü analiziyle birlikte incelemek için tasarlanmış bir web GIS uygulamasıdır.">
+<title>Kent Parklarında Ağaç ve Arazi Örtüsü Analizi | DendroGeo</title>
+<meta name="description" content="DendroGeo, kent parklarında saha ağaç envanterini, karbon hesaplamasını ve 10 m arazi örtüsü analizini birbirinden ayrılmış veri kaynaklarıyla inceleyen web GIS uygulamasıdır.">
 <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">
 <link rel="canonical" href="https://dendrogeo.org/kent-parklari/">
 <meta property="og:type" content="article"><meta property="og:site_name" content="DendroGeo">
@@ -18,11 +18,11 @@ main{padding:54px 0 70px}h1{font-size:clamp(2rem,5vw,3.3rem);line-height:1.08;ma
 </head><body>
 <header class="top"><div class="wrap nav"><a class="brand" href="../">🌲 DendroGeo</a>
 <nav class="links" aria-label="Ana navigasyon"><a href="../">Ana Sayfa</a><a href="../agac-envanteri/">Ağaç Envanteri</a><a href="../karbon-hesaplama/">Karbon</a><a href="../arazi-ortusu/">Arazi Örtüsü</a><a href="../yontem/">Yöntem</a></nav></div></header>
-<main><div class="wrap"><div class="hero"><div class="tag">PARK ANALİZİ</div><h1>Kent Parklarında Ağaç ve Yüzey Analizi</h1><p class="lead">DendroGeo, kent parklarını ağaç envanteri, karbon verisi ve arazi örtüsü analiziyle birlikte incelemek için tasarlanmış bir web GIS uygulamasıdır.</p><a class="btn" href="../">DendroGeo uygulamasını aç</a></div><h2>Park ölçeğinde yaklaşım</h2>
-<p>Park analizi, seçilmiş bir park polygonu üzerinde çalışır. OSM park geometrileri park sınırının bulunmasına yardımcı olur; Sentinel-2 LULC analizi ise yüzey sınıflarını ayrı bir veri kaynağından üretir. Bu iki veri kaynağı otomatik olarak birbirinin sınıfını değiştirmez.</p>
+<main><div class="wrap"><div class="hero"><div class="tag">PARK ANALİZİ</div><h1>Kent Parklarında Ağaç ve Arazi Örtüsü Analizi</h1><p class="lead">DendroGeo, kent parklarında ağaç envanteri ve karbon verisini saha kayıtlarından; arazi örtüsü dağılımını ise bağımsız 10 m kategorik raster kaynaklarından üretir.</p><a class="btn" href="../">DendroGeo uygulamasını aç</a></div><h2>Park ölçeğinde yaklaşım</h2>
+<p>Park analizi, seçilmiş bir park polygonu üzerinde çalışır. OSM park geometrisi park sınırını bulmak için kullanılabilir; arazi örtüsü sınıfları ise ayrı raster kaynaklarından hesaplanır. Bu veri kaynakları birbirinin sayısal sınıfını değiştirmez.</p>
 <div class="grid">
 <div class="card"><h3>Ağaç verisi</h3><p>Park içindeki onaylı ağaç kayıtları konum, tür, DBH, boy ve karbon alanları üzerinden incelenebilir.</p></div>
-<div class="card"><h3>Yüzey verisi</h3><p>10 m LULC analizi parkın yeşil, su, sert ve çıplak zemin bileşenlerini raporlar.</p></div>
+<div class="card"><h3>Yüzey verisi</h3><p>Birincil 10 m arazi örtüsü sonucu ESA WorldCover 2021 v200 sınıflarından, çapraz kontrol IO LULC 2020'den üretilir.</p></div>
 <div class="card"><h3>Harita ve dışa aktarım</h3><p>Sonuçlar haritada görüntülenebilir ve uygun veri formatlarıyla dışa aktarılabilir.</p></div>
 </div>
 <h2>Veri kaynaklarını birbirinden ayırmak</h2><p>Bilimsel yorumda park sınırı, saha ağacı verisi ve uydu arazi örtüsü aynı veri değildir. DendroGeo mimarisinin amacı bu kaynakların rollerini ayrı tutarak analiz zincirini izlenebilir hale getirmektir.</p></div></main>
