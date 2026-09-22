@@ -199,6 +199,16 @@
 <script src="src/services/dash.js?v=f5e14053"></script>
 <script src="vendor/chart.js-4.5.1.js"></script>
 <link rel="stylesheet" href="css/style.css?v=98461801">
+<style>
+.info-feature-grid{align-items:stretch}
+.info-feature-grid .feature{height:100%;display:flex;flex-direction:column}
+.info-feature-grid .feature .ico{flex:0 0 auto}
+.info-feature-grid .feature h3{margin-top:0}
+.info-feature-grid .feature p{flex:1}
+.info-feature-grid .feature ul{margin-bottom:0}
+.info-feature-grid .feature:hover{transform:translateY(-3px)}
+@media(max-width:900px){.info-feature-grid{grid-template-columns:1fr}}
+</style>
 </head>
 <body>
 <div id="toastWrap"></div>
@@ -409,15 +419,43 @@
 </div></section>
 <section class="blk" id="bilgi-merkezi"><div class="wrap">
  <div class="shead"><span class="no">05</span><h2>Bilgi Merkezi & Kaynaklar</h2><span class="rule"></span></div>
- <p style="color:var(--mut);max-width:75ch">DendroGeo'nun yöntemini, veri kaynaklarını ve kullanım akışını kısa ve doğrulanabilir bilgi sayfalarında topluyoruz.</p>
- <div class="grid g3" style="margin-top:18px">
-  <a class="card" href="/agac-envanteri/" style="text-decoration:none;color:inherit"><div class="ico">🌳</div><h3>Ağaç Envanteri</h3><p>Saha ölçümleri, GPS, DBH, boy, tür ve veri yaşam döngüsü.</p></a>
-  <a class="card" href="/karbon-hesaplama/" style="text-decoration:none;color:inherit"><div class="ico">🧮</div><h3>Karbon Hesaplama</h3><p>Allometrik biyokütle ve karbon hesaplarının yöntemi ve sınırlılıkları.</p></a>
-  <a class="card" href="/arazi-ortusu/" style="text-decoration:none;color:inherit"><div class="ico">🛰</div><h3>10 m Arazi Örtüsü</h3><p>WorldCover 2021 birincil sınıfları, IO LULC 2020 çapraz kontrolü ve park hücre kesişimleri.</p></a>
-  <a class="card" href="/kent-parklari/" style="text-decoration:none;color:inherit"><div class="ico">🏞</div><h3>Kent Parkı Analizi</h3><p>Ağaç verisi, yüzey sınıfları ve park ölçeğinde GIS yaklaşımı.</p></a>
-  <a class="card" href="/yontem/" style="text-decoration:none;color:inherit"><div class="ico">📐</div><h3>Bilimsel Yöntem</h3><p>Alan, geometri, biyokütle ve LULC hesaplama zincirinin özeti.</p></a>
-  <a class="card" href="/veri/" style="text-decoration:none;color:inherit"><div class="ico">🗂</div><h3>Veri ve Dışa Aktarım</h3><p>CSV, GeoJSON, QGIS ve veri yaşam döngüsü hakkında bilgiler.</p></a>
-  <a class="card" href="/hakkimizda/" style="text-decoration:none;color:inherit"><div class="ico">🌿</div><h3>Proje Hakkında</h3><p>Projenin amacı, açık kaynak yapısı ve temel kaynakları.</p></a>
+ <p style="color:var(--mut);max-width:75ch">DendroGeo'nun yöntemini, veri kaynaklarını ve kullanım akışını aynı görsel dil içinde, kısa ve doğrulanabilir bilgi kartlarıyla inceleyin.</p>
+ <div class="cols cols-3 info-feature-grid" style="margin-top:22px">
+  <a class="feature" href="/agac-envanteri/" style="text-decoration:none;color:inherit">
+   <div class="ico">🌳</div><h3>Ağaç Envanteri</h3>
+   <p>Saha ölçümleri, GPS, DBH, boy, tür/grup bilgisi ve veri yaşam döngüsü.</p>
+   <ul><li>GPS konumu</li><li>DBH · boy · tür</li><li>Çevrimdışı senkronizasyon</li></ul>
+  </a>
+  <a class="feature" href="/karbon-hesaplama/" style="text-decoration:none;color:inherit">
+   <div class="ico">🧮</div><h3>Karbon Hesaplama</h3>
+   <p>Allometrik biyokütle ve karbon hesabının kullanılan denklemi, varsayımları ve sınırlılıkları.</p>
+   <ul><li>Chave et al. 2014</li><li>ρ odun yoğunluğu</li><li>Varsayım şeffaflığı</li></ul>
+  </a>
+  <a class="feature" href="/arazi-ortusu/" style="text-decoration:none;color:inherit">
+   <div class="ico">🛰</div><h3>10 m Arazi Örtüsü</h3>
+   <p>Park polygonu üzerinde 10 m kategorik raster hücreleriyle yapılan alan analizinin veri ve QA yapısı.</p>
+   <ul><li>WorldCover 2021 v200</li><li>IO LULC 2020 çapraz kontrolü</li><li>Gerçek hücre kesişimi</li></ul>
+  </a>
+  <a class="feature" href="/kent-parklari/" style="text-decoration:none;color:inherit">
+   <div class="ico">🏞</div><h3>Kent Parkı Analizi</h3>
+   <p>Ağaç envanteri, karbon ve arazi örtüsünü aynı park bağlamında birbirinden ayrı veri kaynaklarıyla inceleyin.</p>
+   <ul><li>Park polygonu</li><li>Saha + raster ayrımı</li><li>GIS görünümü</li></ul>
+  </a>
+  <a class="feature" href="/yontem/" style="text-decoration:none;color:inherit">
+   <div class="ico">📐</div><h3>Bilimsel Yöntem</h3>
+   <p>Alan, geometri, biyokütle, karbon ve arazi örtüsü hesaplama zincirinin dayandığı yöntem özeti.</p>
+   <ul><li>Formüller</li><li>Projeksiyon ve alan</li><li>QA/QC</li></ul>
+  </a>
+  <a class="feature" href="/veri/" style="text-decoration:none;color:inherit">
+   <div class="ico">🗂</div><h3>Veri ve Dışa Aktarım</h3>
+   <p>Veri yaşam döngüsü, yayınlama modeli ve araştırma/GIS iş akışlarında kullanılan çıktı formatları.</p>
+   <ul><li>CSV</li><li>GeoJSON</li><li>QGIS iş akışı</li></ul>
+  </a>
+  <a class="feature" href="/hakkimizda/" style="text-decoration:none;color:inherit">
+   <div class="ico">🌿</div><h3>Proje Hakkında</h3>
+   <p>Projenin amacı, açık kaynak yapısı, mimarisi ve bilimsel veri yaklaşımının genel çerçevesi.</p>
+   <ul><li>Açık kaynak</li><li>Web GIS + PWA</li><li>GitHub kaynakları</li></ul>
+  </a>
  </div>
  </div></section>
 
