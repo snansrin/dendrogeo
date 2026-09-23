@@ -1374,8 +1374,8 @@ async function dgLcFetchRoadFeatures(bbox){
   const b=[bbox.minLat,bbox.minLon,bbox.maxLat,bbox.maxLon].join(",");
   const q=
     "[out:json][timeout:60];("+
-    "way[\\\"highway\\\"]("+b+");"+
-    "way[\\\"area:highway\\\"]("+b+");"+
+    "way[\"highway\"]("+b+");"+
+    "way[\"area:highway\"]("+b+");"+
     ");out tags geom;";
 
   let data=null;
