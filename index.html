@@ -866,16 +866,13 @@ async function boot(){
     //     iOS Safari ana ekrana KURULMAMIŞ bir PWA'nın IndexedDB/localStorage
     //     verisini ~7 gün hareketsizlikten sonra silebilir, Android depolama
     //     baskısında temizleyebilir. persist() bu tahliyeyi engellemeyi ister.
-    //     İzin verilmezse kullanıcı uyarılır — bu risk daha önce tamamen
-    //     görünmezdi: saha ekibi hafta içi ölçüm biriktirip hafta sonu siteyi
-    //     açmazsa kuyruğu boş bulabiliyordu.
+    //     İzin verilmezse bu tercih sessizce kaydedilir; her sayfa yüklemesinde
+    //     kullanıcıya uyarı gösterilmez. Saha kuyruğu için senkronizasyon rozeti
+    //     ve çevrimiçi olduğunda otomatik senkronizasyon kullanılmaya devam eder.
     if (navigator.storage?.persist && !window._persistChecked) {
         window._persistChecked = true;
         navigator.storage.persist().then(ok => {
             window._storagePersisted = ok;
-            if (!ok) setTimeout(() => toast(
-                "Tarayıcı uzun süreli yerel depolamaya izin vermedi. Saha ölçümlerinizi " +
-                "aynı gün senkronlayın veya siteyi ana ekrana kurun.", "warn", "⚠️"), 2500);
         }).catch(() => {});
     }
     
