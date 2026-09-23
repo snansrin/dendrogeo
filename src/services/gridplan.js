@@ -1112,10 +1112,16 @@ async function queryDetailedCoverage(){
     lineTouchesPark(l.pts,PARK_POLY,pb)
   );
 
-  GRID_BLOCK_LINES=GRID_BLOCK_LINES.filter(l=>
-    l&&Array.isArray(l.pts)&&
-    lineTouchesPark(l.pts,PARK_POLY,pb)
-  );
+  GRID_BLOCK_LINES=(GRID_BLOCK_LINES||[])
+    .map(l=>Array.isArray(l)
+      ?{pts:l,w:IMP_CLEARANCE_M}
+      :l
+    )
+    .filter(l=>
+      l&&Array.isArray(l.pts)&&
+      l.pts.length>=2&&
+      lineTouchesPark(l.pts,PARK_POLY,pb)
+    );
 
   // OSM surface geometry is kept as non-visual QC data for grid planning.
   console.log(
@@ -1964,7 +1970,10 @@ function collectImperviousGeometry(el){
         String(t.highway).toLowerCase()
       )
   ){
-    GRID_BLOCK_LINES.push(pts);
+    GRID_BLOCK_LINES.push({
+      pts,
+      w:Math.max(1,w)
+    });
   }
 }
 
