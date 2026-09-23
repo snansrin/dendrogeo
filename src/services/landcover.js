@@ -1670,7 +1670,11 @@ async function dgLcAnalyze(params){
   let roadRefined=0;
   try{
     const roadFeatures=await dgLcFetchRoadFeatures(bbox);
-    roadRefined=dgLcRefineHardByOsm(result,roadFeatures,result.epsg);
+    const roadEpsg=dgLcUtmEpsgForLatLon(
+      Number(outer?.[0]?.[0]?.[0]??40),
+      Number(outer?.[0]?.[0]?.[1]??32)
+    );
+    roadRefined=dgLcRefineHardByOsm(result,roadFeatures,roadEpsg);
     if(roadRefined>0){
       console.info("DENDROGEO · OSM yol rafinasyonu:",roadRefined,"10 m hücre SERT olarak işaretlendi.");
     }
