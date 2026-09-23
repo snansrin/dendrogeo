@@ -1358,16 +1358,21 @@ function dgLcRoadShouldRefine(tags){
   const hw=String(t.highway||"").toLowerCase();
   if(!hw)return false;
 
-  /* Araç/servis yolları açıkça yol geometrisidir. */
-  if([
-    "motorway","trunk","primary","secondary","tertiary",
-    "unclassified","residential","living_street","service"
-  ].includes(hw)){
-    return true;
-  }
+  /* KRİTİK QA KURALI:
+   * Bu rafinasyon "her highway = sert zemin" demek değildir.
+   * Park içindeki service/track/footway vb. yolların büyük bölümü
+   * asfalt olmak zorunda değildir. Sert sınıfa yalnız OSM'nin yüzey
+   * etiketi gerçekten sert bir malzeme gösteriyorsa girer.
+   * Böylece yolun etrafındaki yeşil/çıplak pikseller topluca sertleşmez. */
+  if(!dgLcRoadSurfaceIsHard(t.surface))return false;
 
-  /* Yaya/bisiklet yollarında yalnız açık yüzey etiketi sert kanıt sayılır. */
-  return dgLcRoadSurfaceIsHard(t.surface);
+  /* highway etiketi yalnızca gerçek yol tipini kaydetmek için kullanılır.
+   * Yüzey kanıtı yoksa yukarıdaki koşul nedeniyle sonuç sertleşmez. */
+  return [
+    "motorway","trunk","primary","secondary","tertiary",
+    "unclassified","residential","living_street","service",
+    "track","pedestrian","footway","path","cycleway","steps","bridleway"
+  ].includes(hw)||String(t["area:highway"]||"").toLowerCase()==="yes";
 }
 
 async function dgLcFetchRoadFeatures(bbox){
