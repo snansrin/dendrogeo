@@ -1377,7 +1377,7 @@ async function dgLcAnalyze(params){
       centroidLon:+pt.centroid.lon.toFixed(6)
     })),
     agreement,
-    waterRefinedCells:waterRefined,
+    waterRefinedCells:0,
     crossError:crossErr,
     primaryItems:prim.items,
     crossItems:cross?cross.items:null,
