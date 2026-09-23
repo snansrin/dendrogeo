@@ -1205,6 +1205,7 @@ function dgLcHasGreen(){
  * Park bbox'ı için OSM su poligonları çekilir ve hücre merkezleri içinde
  * kalanlar SU sınıfına geçirilir. Böylece yapay havuzlar su alanına katılır. */
 const DG_OSM_WATER_MIRRORS=[
+  "https://overpass.openstreetmap.fr/api/interpreter",
   "https://overpass.private.coffee/api/interpreter",
   "https://overpass.kumi.systems/api/interpreter",
   "https://overpass-api.de/api/interpreter",
@@ -1365,12 +1366,25 @@ async function dgLcAnalyze(params){
   const cross=await crossPromise;
   const crossErr=cross?null:"Çapraz kaynak alınamadı.";
 
-  /* ÖNEMLİ: OSM su poligonları sayısal LULC sınıfını değiştirmez.
-   * Özellikle sert zemin olarak sınıflanmış 10 m hücreleri OSM'de su
-   * poligonu var diye SU'ya çevrilmez. Su sonucu yalnızca raster
-   * sınıflandırmasından gelir; OSM yalnızca bağımsız görsel/QA kaynağıdır.
-   * Bu, park içindeki yol/sert zemin hücrelerinin yanlışlıkla suya
-   * dönüşmesini engeller ve yöntemin kaynak bağımsızlığını korur. */
+  /* YAPAY SU RAFİNASYONU:
+   * ESA WorldCover 10 m rasterı küçük/yapay havuzları bazen yeşil veya
+   * yapılı sınıfa atayabilir. OSM'deki açıkça water/pool/basin olarak
+   * etiketlenmiş su geometrileri bağımsız vektör kanıtı olarak kullanılır.
+   * Yalnızca hücre merkezi su geometrisinin içindeyse sınıf SU'ya çevrilir.
+   * Rasterın ham kodu/rawCounts değiştirilmez; raporda rafine hücre sayısı
+   * ayrıca belirtilir. OSM verisi yoksa veya alınamazsa raster sonucu aynen
+   * korunur. */
+
+  let waterRefined=0;
+  try{
+    const waterRings=await dgLcFetchWaterPolygons(bbox);
+    waterRefined=dgLcRefineWater(result,waterRings);
+    if(waterRefined>0){
+      console.info("DENDROGEO · OSM su rafinasyonu:",waterRefined,"10 m hücre SU olarak işaretlendi.");
+    }
+  }catch(err){
+    console.warn("DENDROGEO · OSM su rafinasyonu atlandı:",String(err&&err.message||err));
+  }
 
   const patches=dgLcDetectPatches(result.cells);
   const agreement=cross?dgLcGroupAgreement(result,cross.result):null;
@@ -1400,7 +1414,7 @@ async function dgLcAnalyze(params){
       centroidLon:+pt.centroid.lon.toFixed(6)
     })),
     agreement,
-    waterRefinedCells:0,
+    waterRefinedCells:waterRefined,
     crossError:crossErr,
     primaryItems:prim.items,
     crossItems:cross?cross.items:null,
