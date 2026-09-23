@@ -2244,7 +2244,7 @@ async function drawPark(park){
           `<span class="dg-png-badge blue">10 m LULC · 2020</span>`+
         `</div>`+
 
-        `<button class="dg-png-btn primary" onclick="runLandCoverAnalysis()">`+
+        `<button id="landCoverBtn" class="dg-png-btn primary" onclick="runLandCoverAnalysis()">`+
           `🌿 Yüzey Örtüsü Analizi`+
         `</button>`+
 
@@ -3554,6 +3554,10 @@ function downloadWaypointsCSV(){
 ========================================================= */
 
 function runLandCoverAnalysis(){
+  if(window._dgLandCoverBusy){
+    return toast("Arazi örtüsü analizi zaten çalışıyor.","info","🛰️");
+  }
+
   if(!window.DG_LANDCOVER || typeof window.DG_LANDCOVER.analyze!=="function"){
     return toast("10 m arazi örtüsü modülü yüklenmedi.","err","🗺️");
   }
@@ -3562,11 +3566,31 @@ function runLandCoverAnalysis(){
     return toast("Önce park seç","warn","🌳");
   }
 
+  window._dgLandCoverBusy=true;
+  const btn=$("landCoverBtn");
+  if(btn){
+    btn.disabled=true;
+    btn.dataset.oldText=btn.innerHTML;
+    btn.innerHTML="⏳ Analiz yapılıyor…";
+    btn.style.opacity=".65";
+    btn.style.cursor="wait";
+  }
+
   const rep=$("landCoverReport");
   if(rep){
     rep.style.display="block";
-    rep.innerHTML="⏳ 10 m arazi örtüsü analizi hazırlanıyor…";
+    rep.innerHTML=
+      "<b>🛰️ Arazi örtüsü analizi çalışıyor…</b>"+
+      "<div style='font-size:.72rem;color:var(--mut);margin-top:6px'>"+
+      "10 m raster verisi park polygonu ile kesiştiriliyor. Bu işlem bağlantıya göre biraz sürebilir; sonuç tamamlanmadan rapor yazılmayacak."+
+      "</div>";
   }
+
+  toast(
+    "Arazi örtüsü analizi başladı. 10 m raster verisi okunuyor…",
+    "info",
+    "🛰️"
+  );
 
   const parkArea=parkAreaM2();
 
@@ -3578,7 +3602,11 @@ function runLandCoverAnalysis(){
     if(window.DG_LANDCOVER_RENDER_REPORT){
       window.DG_LANDCOVER_RENDER_REPORT(rep,result,parkArea);
     }
-    toast("✓ 10 m arazi örtüsü analizi tamamlandı (ESA WorldCover 2021 + çapraz IO LULC 2020).","ok","🗺️");
+    toast(
+      "✓ 10 m arazi örtüsü analizi tamamlandı (ESA WorldCover 2021 + çapraz IO LULC 2020).",
+      "ok",
+      "🗺️"
+    );
   }).catch(err=>{
     console.error("DENDROGEO · Arazi örtüsü analizi:",err);
     if(rep){
@@ -3589,9 +3617,16 @@ function runLandCoverAnalysis(){
         "<div style='font-size:.68rem;color:var(--mut);margin-top:7px'>Geçersiz veya eksik sonuç rapora yazılmadı.</div>";
     }
     toast("Arazi örtüsü analizi hatası: "+(err?.message||String(err)),"err","🗺️");
+  }).finally(()=>{
+    window._dgLandCoverBusy=false;
+    if(btn){
+      btn.disabled=false;
+      btn.innerHTML=btn.dataset.oldText||"🌿 Yüzey Örtüsü Analizi";
+      btn.style.opacity="";
+      btn.style.cursor="";
+    }
   });
 }
-
 function downloadLandCoverClassCSV(){
   if(window.DG_LANDCOVER && typeof window.DG_LANDCOVER.downloadClassCSV==="function"){
     return window.DG_LANDCOVER.downloadClassCSV();
