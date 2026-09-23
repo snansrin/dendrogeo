@@ -1368,11 +1368,15 @@ function dgLcRoadShouldRefine(tags){
 
   /* highway etiketi yalnızca gerçek yol tipini kaydetmek için kullanılır.
    * Yüzey kanıtı yoksa yukarıdaki koşul nedeniyle sonuç sertleşmez. */
+  /* Land-cover sert zemin düzeltmesi yalnızca araç yolu karakterindeki
+   * highway tiplerini kullanır. Park içindeki yaya/bisiklet yolları asfalt
+   * etiketli olsa bile 10 m hücreyi otomatik olarak "Sert" yapmaz; aksi halde
+   * dar bir yürüyüş yolu çevresindeki yeşil pikseli yol gibi boyayabilir.
+   * Yaya yolları grid/erişim analizinde ayrıca ele alınabilir. */
   return [
     "motorway","trunk","primary","secondary","tertiary",
-    "unclassified","residential","living_street","service",
-    "track","pedestrian","footway","path","cycleway","steps","bridleway"
-  ].includes(hw)||String(t["area:highway"]||"").toLowerCase()==="yes";
+    "unclassified","residential","living_street","service"
+  ].includes(hw);
 }
 
 async function dgLcFetchRoadFeatures(bbox){
