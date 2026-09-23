@@ -2149,16 +2149,32 @@ async function drawPark(park){
   clearPark();
   clearGrid();
 
-  PARK_POLY=
-    Array.isArray(park.rings)
-      ? park.rings
-      : park.rings.outer;
+  const parkRings=park&&park.rings;
+
+  const validOuter=Array.isArray(parkRings)
+    ? parkRings
+    : (
+      parkRings &&
+      Array.isArray(parkRings.outer)
+        ? parkRings.outer
+        : null
+    );
+
+  if(!validOuter || !validOuter.some(r=>Array.isArray(r)&&r.length>=4)){
+    console.error("DENDROGEO · Geçersiz park geometrisi:",park);
+    return toast("Park geometrisi geçersiz veya eksik.","err","🌳");
+  }
+
+  PARK_POLY=validOuter;
 
   PARK_HOLES=
-    Array.isArray(park.rings)
+    Array.isArray(parkRings)
       ? []
       : (
-        park.rings.inner||[]
+        parkRings &&
+        Array.isArray(parkRings.inner)
+          ? parkRings.inner.filter(r=>Array.isArray(r)&&r.length>=4)
+          : []
       );
 
   PARK_LAYER=
