@@ -1338,8 +1338,18 @@ async function dgLcAnalyze(params){
   const bbox=dgLcBboxFromGeometry(outer,holes);
   const geom={outer,holes};
 
-  /* BİRİNCİL kaynak: ESA WorldCover */
-  const prim=await dgLcAnalyzeSource(DG_LC_SOURCES.primary,bbox,geom);
+  /* BİRİNCİL ve çapraz kaynak bağımsız ağ istekleri: aynı anda başlatılır.
+   * Birincil kaynak QA'dan geçmeden sonuç yayınlanmaz; çapraz kaynak yalnız
+   * bağımsız uzlaşma göstergesi üretir. */
+  const primPromise=dgLcAnalyzeSource(DG_LC_SOURCES.primary,bbox,geom);
+  const crossPromise=dgLcAnalyzeSource(DG_LC_SOURCES.cross,bbox,geom)
+    .catch(err=>{
+      const msg=String(err&&err.message||err);
+      console.warn("DENDROGEO · çapraz doğrulama kaynağı atlandı:",msg);
+      return null;
+    });
+
+  const prim=await primPromise;
   const result=prim.result;
   if(!(result.assignedAreaM2>0))throw new Error("Park polygonu ile 10 m raster hücreleri kesişmiyor.");
   const deltaPct=Math.abs(result.assignedAreaM2-parkAreaM2)/parkAreaM2*100;
@@ -1352,13 +1362,8 @@ async function dgLcAnalyze(params){
    * anda yürütülür; böylece iki raster kaynağının toplam ağ gecikmesi
    * kullanıcıya seri şekilde yansımaz. Çapraz kaynak başarısız olursa
    * birincil gerçek sonuç korunur. */
-  let cross=null,crossErr=null;
-  try{
-    cross=await dgLcAnalyzeSource(DG_LC_SOURCES.cross,bbox,geom);
-  }catch(err){
-    crossErr=String(err&&err.message||err);
-    console.warn("DENDROGEO · çapraz doğrulama kaynağı atlandı:",crossErr);
-  }
+  const cross=await crossPromise;
+  const crossErr=cross?null:"Çapraz kaynak alınamadı.";
 
   /* ÖNEMLİ: OSM su poligonları sayısal LULC sınıfını değiştirmez.
    * Özellikle sert zemin olarak sınıflanmış 10 m hücreleri OSM'de su
