@@ -930,7 +930,20 @@ async function queryPark(
 
   if(!cands.length)return null;
 
-  const inside=cands.filter(c=>
+  const validCands=cands.filter(c=>{
+    if(Array.isArray(c.rings)){
+      return c.rings.some(r=>Array.isArray(r)&&r.length>=4);
+    }
+    return !!(
+      c.rings &&
+      Array.isArray(c.rings.outer) &&
+      c.rings.outer.some(r=>Array.isArray(r)&&r.length>=4)
+    );
+  });
+
+  if(!validCands.length)return null;
+
+  const inside=validCands.filter(c=>
     pointInPark(
       lat,
       lon,
@@ -940,7 +953,7 @@ async function queryPark(
 
   const sorted=inside.length
     ? inside.slice().sort((a,b)=>a.area-b.area)
-    : cands.slice().sort((a,b)=>a.area-b.area);
+    : validCands.slice().sort((a,b)=>a.area-b.area);
 
   return sorted;
 }
@@ -1356,8 +1369,10 @@ function lineTouchesPark(
 ========================================================= */
 
 function extractRings(el){
+  if(!el || typeof el!=="object")return null;
+
   function closeRing(r){
-    if(!r||r.length<3)return null;
+    if(!Array.isArray(r)||r.length<3)return null;
 
     const a=r[0];
     const b=r[r.length-1];
@@ -1377,12 +1392,11 @@ function extractRings(el){
 
   if(
     el.type==="way" &&
-    el.geometry
+    Array.isArray(el.geometry)
   ){
-    const r=el.geometry.map(g=>[
-      g.lat,
-      g.lon
-    ]);
+    const r=el.geometry
+      .filter(g=>g && Number.isFinite(Number(g.lat)) && Number.isFinite(Number(g.lon)))
+      .map(g=>[Number(g.lat),Number(g.lon)]);
 
     const closed=closeRing(r);
 
@@ -1393,33 +1407,19 @@ function extractRings(el){
 
   if(
     el.type==="relation" &&
-    el.members
+    Array.isArray(el.members)
   ){
-    const outerWays=
-      el.members
-        .filter(m=>
-          m.role==="outer" &&
-          m.geometry
-        )
-        .map(m=>
-          m.geometry.map(g=>[
-            g.lat,
-            g.lon
-          ])
-        );
+    const validMember=m=>m && Array.isArray(m.geometry) && m.geometry.length>=2;
 
-    const innerWays=
-      el.members
-        .filter(m=>
-          m.role==="inner" &&
-          m.geometry
-        )
-        .map(m=>
-          m.geometry.map(g=>[
-            g.lat,
-            g.lon
-          ])
-        );
+    const outerWays=el.members
+      .filter(m=>m.role==="outer" && validMember(m))
+      .map(m=>m.geometry.filter(g=>g && Number.isFinite(Number(g.lat)) && Number.isFinite(Number(g.lon))).map(g=>[Number(g.lat),Number(g.lon)]))
+      .filter(w=>w.length>=2);
+
+    const innerWays=el.members
+      .filter(m=>m.role==="inner" && validMember(m))
+      .map(m=>m.geometry.filter(g=>g && Number.isFinite(Number(g.lat)) && Number.isFinite(Number(g.lon))).map(g=>[Number(g.lat),Number(g.lon)]))
+      .filter(w=>w.length>=2);
 
     const outer=
       joinWaysToRings(
@@ -1434,8 +1434,8 @@ function extractRings(el){
     if(!outer.length)return null;
 
     return{
-      outer,
-      inner
+      outer:outer.filter(r=>Array.isArray(r)&&r.length>=4),
+      inner:inner.filter(r=>Array.isArray(r)&&r.length>=4)
     };
   }
 
