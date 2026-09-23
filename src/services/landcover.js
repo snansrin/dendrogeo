@@ -1456,7 +1456,6 @@ function dgLcRoadTouchesCell(feature,cell,epsg){
   const pts=feature.pts||[];
   if(pts.length<2)return false;
 
-  /* Hücre köşeleri zaten analiz UTM'sinde tutuluyor. */
   const quadWgs=cell.quadWgs||[];
   if(quadWgs.length<4)return false;
 
@@ -1475,82 +1474,41 @@ function dgLcRoadTouchesCell(feature,cell,epsg){
     return{x:z.x,y:z.y};
   });
 
-  /* area:highway poligonuysa merkez/köşe testi yeterlidir. */
+  /* area:highway gerçek bir yüzey poligonuysa hücre ile gerçek
+   * geometrik kesişimi kabul et. */
   if(feature.area){
-    const inside=p=>{
+    const inside=(p,poly)=>{
       let hit=false;
-      for(let i=0,j=quad.length-1;i<quad.length;j=i++){
-        const a=quad[i],b=quad[j];
+      for(let i=0,j=poly.length-1;i<poly.length;j=i++){
+        const a=poly[i],b=poly[j];
         if(((a.y>p.y)!==(b.y>p.y))&&
-          p.x<(b.x-a.x)*(p.y-a.y)/(b.y-a.y)+a.x){
-          hit=!hit;
-        }
+          p.x<(b.x-a.x)*(p.y-a.y)/(b.y-a.y)+a.x)hit=!hit;
       }
       return hit;
     };
-
-    for(const p of road){
-      if(inside(p))return true;
-    }
-    for(const p of quad){
-      /* yol poligonunun içinde hücre köşesi */
-      let hit=false;
-      for(let i=0,j=road.length-1;i<road.length;j=i++){
-        const a=road[i],b=road[j];
-        if(((a.y>p.y)!==(b.y>p.y))&&
-          p.x<(b.x-a.x)*(p.y-a.y)/(b.y-a.y)+a.x){
-          hit=!hit;
-        }
-      }
-      if(hit)return true;
-    }
+    if(road.some(p=>inside(p,quad)))return true;
+    if(quad.some(p=>inside(p,road)))return true;
     return false;
   }
 
-  /* Çizgisel yol:
-   * Önce merkez hattının hücre kenarını kesip kesmediğine bak.
-   * Sonra yalnız hücre KÖŞELERİ yol genişliği tamponunun içindeyse kabul et.
+  /* Çizgisel yol için KORUYUCU kural:
+   * 10 m hücrenin tamamını sert yapmak ancak hücrenin merkezi gerçek
+   * yol genişliğinin içinde kalıyorsa mümkündür.
    *
-   * Eski yöntem merkez noktaya + hücre yarı köşegenine tampon ekliyordu.
-   * Bu, 10 m raster hücresinin yanındaki yeşil hücreleri de sert yapabiliyordu.
-   * Burada hücre yarı köşegeni artık yol genişliğine eklenmiyor. */
-  const pointInQuad=p=>{
-    let hit=false;
-    for(let i=0,j=quad.length-1;i<quad.length;j=i++){
-      const a=quad[i],b=quad[j];
-      if(((a.y>p.y)!==(b.y>p.y))&&
-        p.x<(b.x-a.x)*(p.y-a.y)/(b.y-a.y)+a.x)hit=!hit;
-    }
-    return hit;
-  };
-
-  const orientation=(a,b,p)=>(b.x-a.x)*(p.y-a.y)-(b.y-a.y)*(p.x-a.x);
-  const onSegment=(a,b,p)=>
-    Math.abs(orientation(a,b,p))<1e-7 &&
-    p.x>=Math.min(a.x,b.x)-1e-7&&p.x<=Math.max(a.x,b.x)+1e-7&&
-    p.y>=Math.min(a.y,b.y)-1e-7&&p.y<=Math.max(a.y,b.y)+1e-7;
-  const segmentsCross=(a,b,c,d)=>{
-    const o1=orientation(a,b,c),o2=orientation(a,b,d);
-    const o3=orientation(c,d,a),o4=orientation(c,d,b);
-    if(((o1>0&&o2<0)||(o1<0&&o2>0))&&
-       ((o3>0&&o4<0)||(o3<0&&o4>0)))return true;
-    return onSegment(a,b,c)||onSegment(a,b,d)||onSegment(c,d,a)||onSegment(c,d,b);
-  };
+   * Önceki iki sürümde:
+   *   - yarı köşegen eklendi,
+   *   - ardından hücreyi kesen ince bir yol bile tüm hücreyi sert yaptı.
+   * Bu, Göksu'daki yol kenarı yeşil alanlarını sertleştirebiliyordu.
+   *
+   * Şimdi komşu hücreler yalnızca yol genişliğinin gerçekten içinde
+   * kalıyorsa rafine edilir. Yol hücre merkezinden geçmiyorsa WorldCover
+   * sınıfı korunur. Böylece OSM yolu raster sınıfını ezmek için çok daha
+   * güçlü bir geometrik kanıt ister. */
+  const hw=Math.max(0,Number(feature.halfWidth)||0);
+  if(!(hw>0))return false;
 
   for(let i=0;i<road.length-1;i++){
-    const a=road[i],b=road[i+1];
-
-    /* Merkez hattı hücrenin içine giriyorsa yol hücreyi gerçekten kesiyor. */
-    if(pointInQuad(a)||pointInQuad(b))return true;
-    for(let j=0;j<quad.length;j++){
-      const q1=quad[j],q2=quad[(j+1)%quad.length];
-      if(segmentsCross(a,b,q1,q2))return true;
-    }
-
-    /* Merkez hattı hücreye girmese bile gerçek yol genişliği hücre
-     * köşesine ulaşıyorsa hücre gerçekten yol alanına temas ediyor. */
-    const hw=Math.max(0,Number(feature.halfWidth)||0);
-    if(hw>0&&quad.some(q=>dgLcPointSegmentDistanceXY(q,a,b)<=hw)){
+    if(dgLcPointSegmentDistanceXY(center,road[i],road[i+1])<=hw){
       return true;
     }
   }
