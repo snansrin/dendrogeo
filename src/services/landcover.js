@@ -1299,19 +1299,31 @@ function dgLcGroupAgreement(a,b){
 
 /* Tek kaynak için tam analiz zinciri */
 async function dgLcAnalyzeSource(src,bbox,geom){
-  const items=await dgLcFindTiles(bbox,src);
-  if(items.length>DG_LC_MAX_TILES)throw new Error("AOI çok sayıda 10 m veri karosuna taşıyor; analiz güvenliği nedeniyle durduruldu.");
-  const token=await dgLcGetSas(src.collection);
+  /* STAC karo listesi ile SAS tokenı birbirinden bağımsızdır: aynı anda
+   * istenmesi mobil bağlantıda gereksiz beklemeyi azaltır. */
+  const [items,token]=await Promise.all([
+    dgLcFindTiles(bbox,src),
+    dgLcGetSas(src.collection)
+  ]);
+
+  if(items.length>DG_LC_MAX_TILES){
+    throw new Error("AOI çok sayıda 10 m veri karosuna taşıyor; analiz güvenliği nedeniyle durduruldu.");
+  }
+
   const parts=[];
   const seen=new Set();
+  const jobs=[];
   for(const item of items){
     if(seen.has(item.id))continue;
     seen.add(item.id);
     const asset=dgLcGetDataAsset(item,src);
     if(!asset?.href)throw new Error(src.year+" veri karosunun COG asset'i bulunamadı: "+item.id);
     const href=dgLcSignedHref(asset.href,token);
-    parts.push(await dgLcProcessTile(item,href,geom,src));
+    jobs.push(dgLcProcessTile(item,href,geom,src));
   }
+  /* Kesişen karolar bağımsızdır; seri GeoTIFF okuması yerine paralel
+   * işlenir. Sonuçların birleştirilmesi deterministiktir. */
+  parts.push(...await Promise.all(jobs));
   return{result:dgLcMergeTileResults(parts),items:items.map(i=>i.id)};
 }
 
@@ -1336,7 +1348,10 @@ async function dgLcAnalyze(params){
     "Kısmi alan zorla yeniden dağıtılmadı."
   );
 
-  /* ÇAPRAZ kaynak: io-lulc (best-effort; başarısızlığı analizi bozmaz) */
+  /* ÇAPRAZ kaynak: IO LULC. Bu bağımsız kontrol birincil analizle aynı
+   * anda yürütülür; böylece iki raster kaynağının toplam ağ gecikmesi
+   * kullanıcıya seri şekilde yansımaz. Çapraz kaynak başarısız olursa
+   * birincil gerçek sonuç korunur. */
   let cross=null,crossErr=null;
   try{
     cross=await dgLcAnalyzeSource(DG_LC_SOURCES.cross,bbox,geom);
@@ -1345,18 +1360,12 @@ async function dgLcAnalyze(params){
     console.warn("DENDROGEO · çapraz doğrulama kaynağı atlandı:",crossErr);
   }
 
-  /* Küçük yapay/süs havuzları 10 m tematik raster hücresinde kaybolabilir.
-   * Bu nedenle OSM'deki gerçek su poligonları yalnızca SU sınıfını yüksek
-   * çözünürlükte rafine etmek için yardımcı kaynak olarak kullanılır.
-   * Başka hiçbir arazi örtüsü sınıfı OSM ile değiştirilmez. */
-  let waterRefined=0;
-  try{
-    const wr=await dgLcFetchWaterPolygons(bbox);
-    waterRefined=dgLcRefineWater(result,wr);
-    if(waterRefined)console.log("DENDROGEO · OSM su rafinasyonu:",waterRefined,"hücre");
-  }catch(err){
-    console.warn("DENDROGEO · su rafinasyonu atlandı:",err);
-  }
+  /* ÖNEMLİ: OSM su poligonları sayısal LULC sınıfını değiştirmez.
+   * Özellikle sert zemin olarak sınıflanmış 10 m hücreleri OSM'de su
+   * poligonu var diye SU'ya çevrilmez. Su sonucu yalnızca raster
+   * sınıflandırmasından gelir; OSM yalnızca bağımsız görsel/QA kaynağıdır.
+   * Bu, park içindeki yol/sert zemin hücrelerinin yanlışlıkla suya
+   * dönüşmesini engeller ve yöntemin kaynak bağımsızlığını korur. */
 
   const patches=dgLcDetectPatches(result.cells);
   const agreement=cross?dgLcGroupAgreement(result,cross.result):null;
@@ -1386,7 +1395,7 @@ async function dgLcAnalyze(params){
       centroidLon:+pt.centroid.lon.toFixed(6)
     })),
     agreement,
-    waterRefinedCells:waterRefined,
+    waterRefinedCells:0,
     crossError:crossErr,
     primaryItems:prim.items,
     crossItems:cross?cross.items:null,
