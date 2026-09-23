@@ -851,12 +851,18 @@ function isCellValid(
   }
 
   for(const l of (GRID_BLOCK_LINES||[])){
+    if(!l||!Array.isArray(l.pts)||l.pts.length<2)continue;
+
+    const buffer=Number.isFinite(l.w)
+      ?Math.max(0,l.w)
+      :IMP_CLEARANCE_M;
+
     if(
       geometryLineIntersectsRect(
-        l,
+        l.pts,
         cellRect,
         cLat,
-        IMP_CLEARANCE_M
+        buffer
       )
     )return false;
   }
@@ -1107,7 +1113,8 @@ async function queryDetailedCoverage(){
   );
 
   GRID_BLOCK_LINES=GRID_BLOCK_LINES.filter(l=>
-    lineTouchesPark(l,PARK_POLY,pb)
+    l&&Array.isArray(l.pts)&&
+    lineTouchesPark(l.pts,PARK_POLY,pb)
   );
 
   // OSM surface geometry is kept as non-visual QC data for grid planning.
