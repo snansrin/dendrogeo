@@ -1067,6 +1067,15 @@ async function queryDetailedCoverage(){
       continue;
     }
 
+    /*
+     * Footway/path/pedestrian gibi yaya geometrileri surface etiketi
+     * olmadığı için IMP olarak sınıflandırılmasa bile grid hücresini
+     * engellemelidir. Arazi örtüsü hesabına sert alan olarak eklenmez.
+     */
+    if(el.type==="way" && el.tags && el.tags.highway){
+      collectPedestrianGridBlocker(el);
+    }
+
     if(!isImpervious(el))continue;
     if(seenImp.has(id))continue;
 
@@ -1952,6 +1961,45 @@ function collectImperviousGeometry(el){
   }
 }
 
+
+/*
+ * Yaya yolları için ayrı grid engelleyici.
+ *
+ * ÖNEMLİ: footway/path/pedestrian vb. OSM'de surface etiketi boşsa
+ * isImpervious() bunları arazi-örtüsü "sert zemin" olarak sınıflandırmaz.
+ * Bu doğru davranıştır. Ancak grid planında yolun üzerinden örnek hücresi
+ * geçirilmesi de doğru değildir. Bu nedenle bu geometri yalnızca
+ * GRID_BLOCK_LINES'a eklenir; IMP_RINGS/IMP_LINES'a eklenmez.
+ */
+function collectPedestrianGridBlocker(el){
+  if(!el || !el.geometry || !el.tags || !el.tags.highway)return;
+
+  const hw=String(el.tags.highway).toLowerCase();
+  if(!/^(footway|path|cycleway|steps|pedestrian|bridleway|track)$/.test(hw))return;
+
+  const pts=el.geometry.map(g=>[g.lat,g.lon]);
+  if(pts.length<2)return;
+
+  const width=parseFloat(
+    String(el.tags.width||"").replace(",",".")
+  );
+
+  let halfWidth;
+  if(Number.isFinite(width) && width>0 && width<30){
+    halfWidth=width/2;
+  }else{
+    const lanes=parseFloat(
+      String(el.tags.lanes||"").replace(",",".")
+    );
+    if(Number.isFinite(lanes) && lanes>0 && lanes<10){
+      halfWidth=Math.max(1.25,(lanes*3.0)/2);
+    }else{
+      halfWidth=roadHalfWidth(hw);
+    }
+  }
+
+  GRID_BLOCK_LINES.push({pts,w:Math.max(1,halfWidth)});
+}
 
 /* =========================================================
    PARK MODE
