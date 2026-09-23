@@ -1345,9 +1345,18 @@ async function dgLcAnalyze(params){
     console.warn("DENDROGEO · çapraz doğrulama kaynağı atlandı:",crossErr);
   }
 
-  /* OSM, sayısal arazi örtüsü sınıfını değiştirmez.
-   * Park sınırı bulma / yardımcı GIS işleri ayrı bir katmandır; birincil
-   * raster sonucu burada olduğu gibi korunur. */
+  /* Küçük yapay/süs havuzları 10 m tematik raster hücresinde kaybolabilir.
+   * Bu nedenle OSM'deki gerçek su poligonları yalnızca SU sınıfını yüksek
+   * çözünürlükte rafine etmek için yardımcı kaynak olarak kullanılır.
+   * Başka hiçbir arazi örtüsü sınıfı OSM ile değiştirilmez. */
+  let waterRefined=0;
+  try{
+    const wr=await dgLcFetchWaterPolygons(bbox);
+    waterRefined=dgLcRefineWater(result,wr);
+    if(waterRefined)console.log("DENDROGEO · OSM su rafinasyonu:",waterRefined,"hücre");
+  }catch(err){
+    console.warn("DENDROGEO · su rafinasyonu atlandı:",err);
+  }
 
   const patches=dgLcDetectPatches(result.cells);
   const agreement=cross?dgLcGroupAgreement(result,cross.result):null;
@@ -1377,7 +1386,7 @@ async function dgLcAnalyze(params){
       centroidLon:+pt.centroid.lon.toFixed(6)
     })),
     agreement,
-    waterRefinedCells:0,
+    waterRefinedCells:waterRefined,
     crossError:crossErr,
     primaryItems:prim.items,
     crossItems:cross?cross.items:null,
