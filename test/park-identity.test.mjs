@@ -391,7 +391,7 @@ describe('parka bağlama YALNIZ yönetici (0006 + kullanıcı isteği 2026-09-24
 
   test('⭐ karşılaştırmadaki onarım düğmesi yalnız yöneticiye', () => {
     assert.match(worldSrc, /const admin=\(typeof dgIsAdmin==="function"\)\?dgIsAdmin\(\):false;/);
-    assert.match(worldSrc, /admin\s*\n?\s*\?`<button class="btn sm ghost" onclick="startParkScan/);
+    assert.match(worldSrc, /admin[\s\S]{0,60}\?`<button class="btn sm ghost[^"]*" onclick="startParkScan/);
     assert.match(worldSrc, /yönetici bağlayacak/, 'normal kullanıcıya açıklama gösterilmeli');
   });
 
@@ -410,6 +410,62 @@ describe('parka bağlama YALNIZ yönetici (0006 + kullanıcı isteği 2026-09-24
   test('algılama kartında bağlama seçenekleri yöneticiye göre süzülür', () => {
     assert.match(registry, /const admin=dgIsAdmin\(\);/);
     assert.match(registry, /const others=admin\s*\?/, 'yönetici değilse bağlanacak proje listesi boş');
+  });
+});
+
+describe('mobil düzen (kullanıcı: "telefondan güzel gözükmüyor")', () => {
+  const css = readFileSync(join(ROOT, 'css/style.css'), 'utf8');
+  const treeSrc = readFileSync(join(ROOT, 'src/services/admin-tree.js'), 'utf8');
+
+  test('karşılaştırma satırları SINIFLA çiziliyor (satır içi stil değil)', () => {
+    assert.match(world, /class="dg-cmp-row/);
+    assert.match(world, /dg-cmp-main/);
+    assert.match(world, /dg-cmp-bar/);
+    /* Eski sürümde düzen satır içi style ile kuruluyordu → media query işlemezdi */
+    const fn = world.slice(world.indexOf('function dgParkRowHTML'), world.indexOf('function dgPendingParksHTML'));
+    assert.ok(!/style="display:flex;align-items:center;gap:12px/.test(fn), 'satır içi flex düzeni geri gelmiş');
+  });
+
+  test('⭐ ≤640px: bar alta iner, satır sarar', () => {
+    assert.match(css, /@media\(max-width:640px\)\{[\s\S]*?\.dg-cmp-row\{flex-wrap:wrap/);
+    assert.match(css, /\.dg-cmp-bar\{flex:1 1 100%;width:auto;order:9\}/);
+  });
+
+  test('⭐ ≤640px: tablolar KART düzenine döner (data-label)', () => {
+    assert.match(css, /\.dg-cards thead\{display:none\}/);
+    assert.match(css, /\.dg-cards tbody td:before\{content:attr\(data-label\)/);
+    assert.match(css, /\.dg-cards tbody td\{[^}]*white-space:normal/);
+  });
+
+  test('park kimlikleri tablosu kart düzenini kullanıyor + etiketler var', () => {
+    assert.match(registry, /<table class="dg-cards">/);
+    for (const l of ['ID', 'Park Adı', 'Kimlik', 'Şehir', 'Alan', 'Proje', 'Kayıt', 'Kaynak', 'İşlem']) {
+      assert.match(registry, new RegExp('data-label="' + l + '"'), l + ' etiketi yok');
+    }
+  });
+
+  test('ağaçtaki ölçüm tablosu da kart düzeninde', () => {
+    assert.match(treeSrc, /<table class="dg-cards">/);
+    for (const l of ['Nokta', 'Tür', 'Karbon kg', 'Durum', 'İşlem']) {
+      assert.match(treeSrc, new RegExp('data-label="' + l + '"'), l + ' etiketi yok');
+    }
+  });
+
+  test('uzun adlar taşıp ekranı genişletmez (overflow-wrap)', () => {
+    assert.match(css, /\.dg-cmp-name\{[^}]*overflow-wrap:anywhere/);
+    assert.match(css, /\.dg-pend-name\{[^}]*overflow-wrap:anywhere/);
+    assert.match(css, /\.dg-key\{[^}]*overflow-wrap:anywhere/);
+  });
+
+  test('ağaç girintisi mobilde azalır, başlıklar sarar', () => {
+    assert.match(css, /\.dg-tree-proj,\.dg-tree-user\{margin-left:8px\}/);
+    assert.match(css, /\.dg-tree-park>summary,[\s\S]{0,80}gap:6px/);
+  });
+
+  test('işlem düğmeleri mobilde sarar (dg-act flex-wrap)', () => {
+    assert.match(css, /\.dg-act\{display:flex;gap:4px;flex-wrap:wrap/);
+    assert.match(registry, /<div class="dg-act">/);
+    assert.match(treeSrc, /<div class="dg-act">/);
   });
 });
 

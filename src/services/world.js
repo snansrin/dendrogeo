@@ -46,21 +46,24 @@ async function loadParkCompare(){
  dgFillReportOptions(linked,pending);
 }
 
+/* Karşılaştırma satırı — MOBİL UYUMLU (2026-09-24): eskiden tümü satır içi
+ * stildi, bu yüzden dar ekranda eziliyordu ve media query ile düzeltilemiyordu.
+ * Artık sınıflarla çiziliyor; css/style.css .dg-cmp-* kuralları 640px altında
+ * bar'ı alta alıyor, metni sarmalıyor. */
 function dgParkRowHTML(p,i,max){
  const n=Number(p.records)||0;
  const kg=Number(p.carbon_kg)||0;
  const area=Number(p.area_m2)||0;
  const perHa=area>0?(kg/1000)/(area/10000):null;
- const badge=i===0?'<span class="badge on">🏆 En İyi</span>':"";
  return `
-  <div style="display:flex;align-items:center;gap:12px;margin-bottom:10px;padding:8px 12px;background:var(--bg);border-radius:10px">
-   <div class="mono" style="width:26px;height:26px;border-radius:50%;background:${i===0?"var(--green)":"var(--line)"};color:${i===0?"#fff":"var(--mut)"};display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.75rem;flex:0 0 auto">${i+1}</div>
-   <div style="flex:1;min-width:0">
-    <div style="font-size:.85rem;font-weight:700">🌳 ${esc(p.park_name)} ${badge}</div>
-    <div style="font-size:.7rem;color:var(--mut)">${esc(p.city||"—")} · 👥 ${p.contributors||0} kişi · 📁 ${p.projects||0} proje · ${n} kayıt${p.species_n?` · ${p.species_n} tür`:""} · ort. çap ${(Number(p.avg_dbh)||0).toFixed(1)} cm · ort. boy ${(Number(p.avg_height)||0).toFixed(1)} m${area>0?` · ${dgFmtHa(area)}`:""}</div>
+  <div class="dg-cmp-row${i===0?" lead":""}">
+   <div class="dg-cmp-rank">${i+1}</div>
+   <div class="dg-cmp-main">
+    <div class="dg-cmp-name">🌳 ${esc(p.park_name)} ${i===0?'<span class="badge on">🏆 En İyi</span>':""}</div>
+    <div class="dg-cmp-meta">${esc(p.city||"—")} · 👥 ${p.contributors||0} kişi · 📁 ${p.projects||0} proje · ${n} kayıt${p.species_n?` · ${p.species_n} tür`:""} · ort. çap ${(Number(p.avg_dbh)||0).toFixed(1)} cm · ort. boy ${(Number(p.avg_height)||0).toFixed(1)} m${area>0?` · ${dgFmtHa(area)}`:""}</div>
    </div>
-   <div style="width:120px;background:var(--line);border-radius:4px;height:8px;overflow:hidden;flex:0 0 auto"><div style="height:100%;width:${max>0?(kg/max*100).toFixed(0):0}%;background:var(--green)"></div></div>
-   <div class="mono" style="width:96px;text-align:right;font-weight:600;flex:0 0 auto">${(kg/1000).toFixed(2)} t${perHa!==null?`<br><span style="font-weight:400;font-size:.66rem;color:var(--mut)">${perHa.toFixed(2)} t/ha</span>`:""}</div>
+   <div class="dg-cmp-ton">${(kg/1000).toFixed(2)} t${perHa!==null?`<span class="dg-cmp-ha">${perHa.toFixed(2)} t/ha</span>`:""}</div>
+   <div class="dg-cmp-bar"><div style="width:${max>0?(kg/max*100).toFixed(0):0}%"></div></div>
   </div>`;
 }
 
@@ -72,18 +75,19 @@ function dgPendingParksHTML(pending){
   * görmez; yalnız bilgilendirme görür. */
  const admin=(typeof dgIsAdmin==="function")?dgIsAdmin():false;
  return `
-  <div style="margin-top:16px;border-top:1px dashed var(--line);padding-top:12px">
-   <div class="lbl" style="margin-bottom:8px">⚠ PARK ALGILANMAMIŞ KAYITLAR <span style="text-transform:none;letter-spacing:0;font-weight:400">(sıralamaya dahil değil · ${n} kayıt)</span></div>
+  <div class="dg-pend-wrap">
+   <div class="lbl dg-pend-head">⚠ PARK ALGILANMAMIŞ KAYITLAR <span class="dg-pend-sub">(sıralamaya dahil değil · ${n} kayıt)</span></div>
    ${pending.map(p=>`
-    <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px;padding:6px 10px;background:var(--bg);border-radius:8px;opacity:.85">
-     <div style="flex:1;min-width:0;font-size:.78rem">${esc(p.park_name)} <span class="badge off">park yok</span>
-      <div style="font-size:.68rem;color:var(--mut)">${esc(p.city||"—")} · ${p.records} kayıt · ${(Number(p.carbon_kg)/1000).toFixed(2)} t</div>
+    <div class="dg-pend-row">
+     <div class="dg-pend-main">
+      <div class="dg-pend-name">${esc(p.park_name)} <span class="badge off">park yok</span></div>
+      <div class="dg-cmp-meta">${esc(p.city||"—")} · ${p.records} kayıt · ${(Number(p.carbon_kg)/1000).toFixed(2)} t</div>
      </div>
      ${admin
-       ?`<button class="btn sm ghost" onclick="startParkScan({returnTo:'world'})">🌳 Park Algıla</button>`
-       :`<span class="badge admin">🔐 yönetici bağlayacak</span>`}
+       ?`<button class="btn sm ghost dg-pend-act" onclick="startParkScan({returnTo:'world'})">🌳 Park Algıla</button>`
+       :`<span class="badge admin dg-pend-act">🔐 yönetici bağlayacak</span>`}
     </div>`).join("")}
-   <div style="font-size:.7rem;color:var(--mut);margin-top:6px">${admin
+   <div class="dg-pend-note">${admin
      ?`Bu kayıtlar park kimliği oluşturulmadan önce girilmiş. <b>🌳 Parkları Geri Doldur</b> aracı ölçüm merkezinden otomatik eşleştirir; tek tek bağlamak için satırdaki 🌳 düğmesini kullan.`
      :`Bu kayıtlar park kimliği oluşturulmadan önce girilmiş. Parka bağlama işlemi <b>yalnız yönetici</b> tarafından yapılır — yönetici eşleştirdiğinde bu satırlar yukarıdaki park sıralamasına taşınır.`}</div>
   </div>`;

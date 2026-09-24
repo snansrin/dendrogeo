@@ -217,17 +217,18 @@ function dgTreeRowHTML(r){
     ? `<button class="btn sm red" onclick="rejectMeas(${r.id})">🚫 Reddet</button>`
     : `<button class="btn sm" onclick="approveMeas(${r.id})">✓ Onayla</button>`;
   const d=r.created_at?new Date(r.created_at):null;
+  /* data-label: 640px altında tablo kart düzenine döner (css/style.css .dg-cards) */
   return `<tr>`+
-    `<td><b>P${esc(r.point_id)}</b>${r.measurement_no>1?`<span class="mono" style="font-size:.68rem"> /M${r.measurement_no}</span>`:""}</td>`+
-    `<td>${esc(r.species||"—")}<br><span class="mono" style="font-size:.66rem;color:var(--mut)">${esc((typeof LATIN!=="undefined"&&LATIN[r.species])||"")}</span></td>`+
-    `<td>${esc(r.grp||"—")}</td>`+
-    `<td>${r.dbh_cm??"—"}</td>`+
-    `<td>${r.height_m??"—"}</td>`+
-    `<td><b>${(Number(r.carbon_kg)||0).toFixed(1)}</b></td>`+
-    `<td>${r.photo_url?`<a href="${esc(r.photo_url)}" target="_blank" rel="noopener">📷</a>`:"—"}</td>`+
-    `<td>${dgBadge(st)}</td>`+
-    `<td class="mono" style="font-size:.68rem">${d?d.toLocaleDateString("tr-TR"):"—"}</td>`+
-    `<td style="display:flex;gap:4px">${act}<button class="btn sm red" onclick="delMeas(${r.id})">🗑️</button></td>`+
+    `<td data-label="Nokta"><b>P${esc(r.point_id)}</b>${r.measurement_no>1?`<span class="mono dg-sub"> /M${r.measurement_no}</span>`:""}</td>`+
+    `<td data-label="Tür">${esc(r.species||"—")}<br><span class="mono dg-sub">${esc((typeof LATIN!=="undefined"&&LATIN[r.species])||"")}</span></td>`+
+    `<td data-label="Grup">${esc(r.grp||"—")}</td>`+
+    `<td data-label="Çap">${r.dbh_cm??"—"}</td>`+
+    `<td data-label="Boy">${r.height_m??"—"}</td>`+
+    `<td data-label="Karbon kg"><b>${(Number(r.carbon_kg)||0).toFixed(1)}</b></td>`+
+    `<td data-label="Foto">${r.photo_url?`<a href="${esc(r.photo_url)}" target="_blank" rel="noopener">📷</a>`:"—"}</td>`+
+    `<td data-label="Durum">${dgBadge(st)}</td>`+
+    `<td data-label="Tarih" class="mono dg-sub">${d?d.toLocaleDateString("tr-TR"):"—"}</td>`+
+    `<td data-label="İşlem"><div class="dg-act">${act}<button class="btn sm red" onclick="delMeas(${r.id})">🗑️</button></div></td>`+
   `</tr>`;
 }
 
@@ -238,7 +239,7 @@ function dgTreeUserHTML(U){
       dgBekRozet(U.beklemede)+
       `<span class="dg-tree-meta">${U.n} kayıt · ${dgTon(U.c)} · ${dgDurumOzet(U)}</span>`+
     `</summary>`+
-    `<div class="dg-tree-body tblwrap"><table>`+
+    `<div class="dg-tree-body tblwrap"><table class="dg-cards">`+
       `<thead><tr><th>Nokta</th><th>Tür</th><th>Grup</th><th>Çap</th><th>Boy</th><th>Karbon kg</th><th>Foto</th><th>Durum</th><th>Tarih</th><th>İşlem</th></tr></thead>`+
       `<tbody>${U.rows.map(dgTreeRowHTML).join("")}</tbody>`+
     `</table></div>`+

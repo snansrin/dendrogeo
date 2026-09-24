@@ -250,3 +250,71 @@ canvas{max-width:100%}
 .dg-menu-badge{display:inline-block;margin-left:8px;padding:1px 7px;border-radius:999px;background:#e11d48;color:#fff;font-size:.66rem;font-weight:800;vertical-align:middle}
 .dg-flat>summary{cursor:pointer;font-size:.85rem;color:var(--mut);padding:6px 0}
 .dg-flat[open]>summary{color:var(--ink)}
+
+/* =========================================================
+   PARK KARŞILAŞTIRMA + MOBİL DÜZEN (2026-09-24)
+   Kullanıcı: "telefondan güzel gözükmüyor." Sebep: karşılaştırma satırları
+   ve yönetim tabloları SATIR İÇİ stille çiziliyordu → media query ile
+   düzeltilemiyordu, dar ekranda eziliyordu. Artık sınıflarla çiziliyor ve
+   640px altında: bar alta iner, metin sarar, tablolar KART düzenine döner.
+========================================================= */
+.dg-cmp-row{display:flex;align-items:center;gap:12px;margin-bottom:10px;padding:8px 12px;background:var(--bg);border-radius:10px}
+.dg-cmp-rank{width:26px;height:26px;border-radius:50%;background:var(--line);color:var(--mut);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.75rem;flex:0 0 auto}
+.dg-cmp-row.lead .dg-cmp-rank{background:var(--green);color:#fff}
+.dg-cmp-main{flex:1;min-width:0}
+.dg-cmp-name{font-size:.85rem;font-weight:700;overflow-wrap:anywhere}
+.dg-cmp-meta{font-size:.7rem;color:var(--mut);line-height:1.5}
+.dg-cmp-ton{width:96px;text-align:right;font-weight:600;flex:0 0 auto;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.8rem}
+.dg-cmp-ha{display:block;font-weight:400;font-size:.66rem;color:var(--mut)}
+.dg-cmp-bar{width:120px;height:8px;background:var(--line);border-radius:4px;overflow:hidden;flex:0 0 auto}
+.dg-cmp-bar>div{height:100%;background:var(--green)}
+
+.dg-pend-wrap{margin-top:16px;border-top:1px dashed var(--line);padding-top:12px}
+.dg-pend-head{margin-bottom:8px}
+.dg-pend-sub{text-transform:none;letter-spacing:0;font-weight:400}
+.dg-pend-row{display:flex;align-items:center;gap:10px;margin-bottom:6px;padding:6px 10px;background:var(--bg);border-radius:8px}
+.dg-pend-main{flex:1;min-width:0}
+.dg-pend-name{font-size:.78rem;overflow-wrap:anywhere}
+.dg-pend-act{flex:0 0 auto}
+.dg-pend-note{font-size:.7rem;color:var(--mut);margin-top:6px;line-height:1.55}
+
+/* yönetim araçları (park kimlikleri + ağaç satırları) */
+.dg-act{display:flex;gap:4px;flex-wrap:wrap;align-items:center}
+.dg-merge-sel{max-width:150px;font-size:.72rem}
+.dg-key{font-size:.68rem;overflow-wrap:anywhere}
+.dg-sub{font-size:.66rem;color:var(--mut)}
+.dg-parkadmin-wrap{max-height:420px;overflow:auto}
+.dg-parkadmin-note{font-size:.72rem;color:var(--mut);margin-top:8px;line-height:1.55}
+.dg-dup{background:rgba(245,158,11,.07)}
+
+/* ---------- MOBİL (≤640px) ---------- */
+@media(max-width:640px){
+  /* karşılaştırma: sıra no + ad + ton üstte, bar tam genişlikte altta */
+  .dg-cmp-row{flex-wrap:wrap;gap:8px;padding:10px}
+  .dg-cmp-rank{width:22px;height:22px;font-size:.7rem}
+  .dg-cmp-main{flex:1 1 55%}
+  .dg-cmp-name{font-size:.9rem}
+  .dg-cmp-meta{font-size:.68rem}
+  .dg-cmp-ton{width:auto;font-size:.78rem}
+  .dg-cmp-bar{flex:1 1 100%;width:auto;order:9}
+  .dg-pend-row{flex-wrap:wrap}
+  .dg-pend-main{flex:1 1 100%}
+
+  /* ⭐ TABLO → KART: thead gizlenir, her satır bir kutu, her hücre
+     "ETİKET  değer" satırı olur (data-label'dan). Yatay kaydırma biter. */
+  .dg-cards thead{display:none}
+  .dg-cards tbody tr{display:block;border:1px solid var(--line);border-radius:10px;margin-bottom:8px;padding:6px 10px;background:var(--surface)}
+  .dg-cards tbody td{display:flex;justify-content:space-between;align-items:center;gap:10px;white-space:normal;border:0;padding:5px 0;text-align:right}
+  .dg-cards tbody td:before{content:attr(data-label);font-weight:700;color:var(--mut);font-size:.62rem;letter-spacing:.08em;text-transform:uppercase;text-align:left;flex:0 0 auto}
+  .dg-cards .dg-act{justify-content:flex-end}
+  .dg-merge-sel{max-width:130px}
+  .dg-parkadmin-wrap{max-height:none;overflow:visible}
+
+  /* ağaç: girinti azalır, başlık ve meta sarar */
+  .dg-tree-proj,.dg-tree-user{margin-left:8px}
+  .dg-tree-park>summary,.dg-tree-proj>summary,.dg-tree-user>summary{padding:9px 10px;font-size:.82rem;gap:6px}
+  .dg-tree-meta{font-size:.66rem;line-height:1.5}
+  .dg-tree-act{margin-left:0}
+  .dg-tree-body{padding:6px 8px 10px}
+  .dg-tree-sum{font-size:.7rem}
+}
