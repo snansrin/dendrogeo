@@ -45,38 +45,56 @@ index.html                  ÜRETİLEN ARTİFAKT — partials'tan build edilir, 
 │   └── boot.html           src/ui/* tag'leri + </body></html>
 ├── css/
 │   ├── style.css           ortak design-token'lar + bileşenler + uygulama stilleri
-│   └── landing.css         ★ yalnız landing'e özgü stiller (alt sayfalar yüklemez)
+│   ├── landing.css         ★ yalnız landing'e özgü stiller (alt sayfalar yüklemez)
+│   └── park-panel.css      park paneli + PNG seçenekleri (eski CSS-in-JS yerine)
 ├── sw.js                   Service Worker — PRECACHE/RUNTIME ayrımı, offline
 ├── manifest.json           PWA
-├── vendor/                 Leaflet, MarkerCluster, Supabase JS, Chart.js, GeoTIFF
+├── vendor/                 Leaflet, MarkerCluster, Supabase JS, Chart.js*, GeoTIFF*
+│                           (* = Faz 7'den beri TEMBEL yüklenir: src/utils/lazylibs.js)
 └── src/
     ├── config/             supabase istemcisi, sabitler, tür + ρ tablosu
-    ├── utils/              geo (haversine, WebMercator), truncation (limit uyarısı)
+    ├── utils/              geo (haversine, WebMercator), truncation, lazylibs
     ├── ui/                 DOM yapıştırıcısı katmanı
     │   ├── state.js        global uygulama state'i (USER, map, WP, …) — TEK sahip
     │   ├── toast.js        bildirim baloncukları
     │   ├── landing.js      ★ initLanding() — landing modülünün beyni
-    │   └── shell.js        boot()/startShell()/go() — kabuk önyüklemesi
+    │   ├── shell.js        boot()/startShell()/go() — kabuk önyüklemesi
+    │   ├── park-panel.js   park modu + sonuç paneli (drawPark)
+    │   ├── park-export.js  GeoJSON/CSV/PNG indirmeleri + LULC köprüsü
+    │   └── lc-report.js    LULC vektör çizimi + tek blok HTML rapor
     └── services/
         ├── measure.js      saha formu, GPS, fotoğraf
         ├── offline.js      IndexedDB kuyruk + UUID dedup + senkron
         ├── map.js          canlı harita, waypoint navigasyonu
         ├── park-state.js   ┐
-        ├── osm-client.js   │ PARK ZİNCİRİ (eski gridplan.js, Faz 4'te bölündü;
-        ├── park-geometry.js│  yükleme sırası = bu sıra)
+        ├── osm-client.js   │ PARK ZİNCİRİ (eski gridplan.js; sıra önemli)
+        ├── park-geometry.js│
         ├── park-query.js   │
         ├── grid-engine.js  ┘
-        ├── landcover.js    10 m LULC COG motoru (UTM + hücre kesişimi)
+        ├── lc-config.js    ┐
+        ├── lc-geo.js       │
+        ├── lc-stac.js      │ LULC ZİNCİRİ (eski landcover.js; sıra önemli)
+        ├── lc-engine.js    │
+        ├── lc-osm.js       │
+        ├── lc-patches.js   ┘
+        ├── landcover.js    LULC facade — window.DG_LANDCOVER sözleşmesi
         ├── world.js        park karşılaştırma, ülke/şehir yakınlaşma
         ├── dash.js         kayıtlar, grafikler, analiz
-        ├── admin.js        onay/moderasyon, talepler, toplu dışa aktarım
+        ├── visit-stats.js  ┐
+        ├── data-requests.js│ YÖNETİM ZİNCİRİ (eski admin.js; sıra önemli)
+        ├── user-admin.js   │
+        ├── backup.js       ┘
+        ├── admin.js        onay/moderasyon çekirdeği + toplu dışa aktarım
         ├── export.js       CSV / QGIS / GeoJSON
+        ├── allometry.js    Chave 2014 biyokütle/karbon
         └── auth.js         giriş/kayıt + Cloudflare Turnstile
 ```
 
-`src/ui/park-panel.js` (park modu + sonuç paneli) ve `src/ui/park-export.js`
-(GeoJSON/CSV/PNG indirmeleri + LULC köprüsü) park zincirinin DOM katmanıdır;
-panel stilleri `css/park-panel.css`'tedir (eski CSS-in-JS enjeksiyonu yerine).
+**Tembel yükleme (Faz 7):** `vendor/geotiff-2.1.3.js` (317 KB) ve
+`vendor/chart.js-4.5.1.js` (208 KB) head'de senkron DEĞİL; `lazylibs.js`
+bunları LULC analizi / panel grafiği ilk kullanıldığında enjekte eder.
+Landing ziyaretçisinin ilk açılışı ~525 KB daha hafiftir. sw.js ikisini de
+PRECACHE'te tutar → çevrimdışı davranış aynıdır.
 
 **Modül değişikliği iş akışı:**
 
@@ -118,15 +136,19 @@ python3 -m http.server 8080        # herhangi bir statik sunucu olur
 ### Test ve denetimler
 
 ```bash
-npm run check          # sözdizimi + ?v= + build tutarlılığı + CSP + testler
+npm run check          # sözdizimi + ?v= + build + CSP + 240 test
 npm test               # yalnız testler (node:test, bağımlılık gerektirmez)
 npm run build          # index.html'i partials'tan üret (değişiklik sonrası)
 ```
 
-218 test şunları kilitler: karbon hesabı (Chave 2014, ρ fallback,
+240 test şunları kilitler: karbon hesabı (Chave 2014, ρ fallback,
 NaN yayılmaması), jeodezik alan ve geometri, **UTM projeksiyonu** (bilinen
-referans değerlere karşı), Sutherland-Hodgman kırpma + alan korunumu,
-Service Worker'ın çevrimdışı yedeği ve vendor kütüphanelerin global kurulumu.
+referans değerlerine karşı), Sutherland-Hodgman kırpma + alan korunumu,
+Service Worker'ın çevrimdışı yedeği, vendor kütüphanelerin global kurulumu,
+ölü buton/eksik ID denetimi, **modül kayıt bekçisi** (index↔disk↔CORE_ASSETS
+↔?v= zinciri + global ad çakışması), **partial→index derleme tutarlılığı ve
+landing↔shell izolasyonu**, kritik canlı düzeltmelerin canary'leri (STAC GET,
+RLS-safe sayaç) ve tembel yükleme kilitleri.
 
 GitHub Actions her push ve PR'da altı adım çalıştırır: sözdizimi (tarayıcı
 semantiğiyle), `?v=` tutarlılığı, **derleme tutarlılığı (index.html ==
