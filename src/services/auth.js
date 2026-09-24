@@ -111,6 +111,15 @@ if(pass.length<6){
 amsg("Parola en az 6 karakter olmalı.",1);
 return;
 }
+/* ⛔ KVKK AÇIK RIZA (2026-09-24): onay kutusu işaretlenmeden hesap açılamaz.
+ * Rıza yalnız UI'da kontrol edilmiyor; zaman damgasıyla auth metadata'sına da
+ * yazılıyor → sonradan "ben onaylamadım" tartışmasında kayıt vardır. */
+const consentEl=$("rgConsent");
+if(consentEl&&!consentEl.checked){
+amsg("Devam etmek için KVKK Aydınlatma Metni ve Gizlilik Politikası onay kutusunu işaretleyin.",1);
+if(consentEl.focus)consentEl.focus();
+return;
+}
 amsg("Hesap oluşturuluyor...",0);
 let tok=tsToken("tsReg");
 if(!tok){
@@ -128,7 +137,12 @@ password:pass,
 options:{
 data:{
 full_name:name,
-organization:$("rgOrg").value
+organization:$("rgOrg").value,
+/* KVKK rıza kaydı (denetim izi): neyi, ne zaman, hangi sürümü onayladı */
+kvkk_consent:true,
+kvkk_consent_at:new Date().toISOString(),
+kvkk_consent_version:"1.0",
+kvkk_consent_source:"kayit-formu"
 },
 captchaToken:tok,
 redirectTo:redirectURL

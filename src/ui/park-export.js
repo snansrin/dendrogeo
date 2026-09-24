@@ -450,6 +450,19 @@ function downloadParkImage(){
     ctx.font="700 12px system-ui,sans-serif";
     ctx.fillText("N",nx-4,ny+18);
 
+    /* TELİF/LİSANS SATIRI (ODbL türev eser şartı): park geometrisi OSM'den
+     * türetilir; üretilen PNG bir türev eserdir ve atıf gerektirir. Ayrıca
+     * DendroGeo'nun kendi lisansı (CC BY-NC 4.0) da belirtilir — çıktıyı
+     * paylaşan/yayınlayan kişi şartları görsün diye. */
+    ctx.fillStyle="#8a978f";
+    ctx.font="400 11px system-ui,sans-serif";
+    ctx.fillText(
+      "Park s\u0131n\u0131r\u0131 ve veriler: "+DG_ATTR_TEXT.osm+
+      "  \u00b7  DendroGeo (CC BY-NC 4.0)  \u00b7  dendrogeo.org  \u00b7  "+
+      new Date().toISOString().slice(0,10),
+      PAD, H-14
+    );
+
     /* kaynağa göre indirme adı */
     const name="dendrogeo_park_"+
       (opts.cover&&lc&&lc.patches?"lulc_":"")+

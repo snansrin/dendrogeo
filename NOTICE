@@ -1,0 +1,41 @@
+DendroGeo — Küresel Ağaç Envanteri ve Karbon Veri Sistemi
+Copyright (c) 2026 Nagihan ŞİRİN & Sinan ŞİRİN
+
+Bu çalışma (kaynak kodu, arayüz, belgeler ve yayımlanan veri seti) Creative
+Commons Attribution-NonCommercial 4.0 International (CC BY-NC 4.0) lisansı
+altındadır. Lisans metni: LICENSE dosyası ve
+https://creativecommons.org/licenses/by-nc/4.0/deed.tr
+
+Bu lisans KISACA şunu söyler:
+  ✅ Paylaşabilirsin — kopyala, dağıt (uygun atıfla)
+  ✅ Uyarlayabilirsin — türev çalışmalar (uygun atıfla)
+  ⛔ Ticari amaçla kullanamazsın (ticari kullanım için yazılı izin gerekir:
+     snansrin@gmail.com)
+  ⛔ Ek kısıtlama getiremezsin (teknolojik önlem / hukuki şart ekleyemezsin)
+
+ZORUNLU ATIF BİÇİMİ
+  Kod/arayüz için:
+    "DendroGeo: Küresel Ağaç Envanteri ve Karbon Veri Sistemi.
+     N. Şirin & S. Şirin (2026). https://github.com/snansrin/dendrogeo
+     Lisans: CC BY-NC 4.0"
+
+  Veri seti için (DOI ile, sürüm belirtilebilir):
+    "DendroGeo: Global Tree Inventory and Carbon Data System [Data set].
+     Zenodo. https://doi.org/10.5281/zenodo.22646300
+     Lisans: CC BY-NC 4.0"
+
+ÜÇÜNCÜ TARAF BİLEŞENLER (kendi lisanslarıyla kullanılır, CC BY-NC kapsamaz)
+  Leaflet 1.9.4                 BSD-2-Clause
+  Leaflet.markercluster 1.5.3   MIT
+  Supabase JS 2.116.0           MIT
+  Chart.js 4.5.1                MIT
+  GeoTIFF.js 2.1.3              MIT
+  OpenStreetMap verisi          ODbL 1.0 — atıf: "© OpenStreetMap contributors"
+  OpenTopoMap karoları          CC-BY-SA 3.0
+  Esri World Imagery            Esri kullanım koşulları (kaynak zinciri atfı)
+  ESA WorldCover 2021 v200      CC BY 4.0 (ESA)
+  IO LULC 2020                  CC BY 4.0
+
+Harita karoları ve arazi örtüsü raster'ları üçüncü taraf lisanslarına tabidir;
+DendroGeo arayüzünde kaynak atıfları bu yüzden görünür tutulur
+(Leaflet attribution + PNG çıktısındaki telif satırı).

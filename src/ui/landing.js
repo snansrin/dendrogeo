@@ -15,7 +15,7 @@ function initLanding(){
  $("landing").style.display="block";$("shell").style.display="none";
  if(worldMapL)worldMapL.remove();
  worldMapL=L.map("worldMapLanding").setView([39,35],3);
- L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png").addTo(worldMapL);
+ L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",{attribution:DG_ATTR.osm,maxZoom:19}).addTo(worldMapL);
  (async()=>{
   try{
    const g=await sb.from("v_global").select("*").single();

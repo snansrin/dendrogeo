@@ -62,6 +62,17 @@
       "inLanguage": ["tr-TR", "en-US"],
       "isAccessibleForFree": true,
       "license": "https://creativecommons.org/licenses/by-nc/4.0/",
+      "copyrightHolder": {
+        "@type": "Person",
+        "name": "Nagihan ŞİRİN & Sinan ŞİRİN"
+      },
+      "sameAs": [
+        "https://github.com/snansrin/dendrogeo",
+        "https://doi.org/10.5281/zenodo.22646300",
+        "https://zenodo.org/records/22646300"
+      ],
+      "termsOfService": "https://dendrogeo.org/kullanim-kosullari/",
+      "privacyPolicy": "https://dendrogeo.org/gizlilik/",
       "offers": {
         "@type": "Offer",
         "price": "0",
@@ -92,21 +103,32 @@
       "sameAs": "https://doi.org/10.5281/zenodo.22646300",
       "license": "https://creativecommons.org/licenses/by-nc/4.0/",
       "datePublished": "2026-08-30",
-      "dateModified": "2026-09-22",
+      "dateModified": "2026-09-24",
       "temporalCoverage": "2026-08-30/..",
       "spatialCoverage": {
         "@type": "Place",
         "name": "Global",
         "geo": { "@type": "GeoShape", "box": "-90 -180 90 180" }
       },
-      "creator": { "@type": "Organization", "name": "DendroGeo Project" },
-      "keywords": "tree inventory, carbon sequestration, biomass, DBH, urban forest, forest carbon",
-      "measurementTechnique": "Field GPS measurement + allometric equations (Chave 2014)",
+      "creator": [
+        { "@type": "Person", "name": "Nagihan ŞİRİN" },
+        { "@type": "Person", "name": "Sinan ŞİRİN" }
+      ],
+      "publisher": { "@type": "Organization", "name": "DendroGeo", "url": "https://dendrogeo.org/" },
+      "inLanguage": ["tr-TR", "en-US"],
+      "isBasedOn": [
+        { "@type": "CreativeWork", "name": "OpenStreetMap (park geometrileri)", "license": "https://opendatacommons.org/licenses/odbl/1-0/" },
+        { "@type": "CreativeWork", "name": "ESA WorldCover 2021 v200 (10 m)", "license": "https://creativecommons.org/licenses/by/4.0/" }
+      ],
+      "keywords": "tree inventory, carbon sequestration, biomass, DBH, urban forest, forest carbon, urban park, land cover, park identity, OpenStreetMap park geometry",
+      "measurementTechnique": "Field GPS measurement + allometric equations (Chave 2014); park geometry from OpenStreetMap via Overpass; 10 m land cover from ESA WorldCover 2021 v200 (cross-checked with IO LULC 2020)",
       "variableMeasured": [
         { "@type": "PropertyValue", "name": "DBH (cm)" },
         { "@type": "PropertyValue", "name": "Tree Height (m)" },
         { "@type": "PropertyValue", "name": "Above-ground biomass (kg)" },
-        { "@type": "PropertyValue", "name": "Carbon stock (kg)" }
+        { "@type": "PropertyValue", "name": "Carbon stock (kg)" },
+        { "@type": "PropertyValue", "name": "Park identity (OSM element key, park area ha)" },
+        { "@type": "PropertyValue", "name": "GPS accuracy (m) / altitude (m)" }
       ],
       "distribution": [
         { "@type": "DataDownload", "encodingFormat": "text/csv", "contentUrl": "https://dendrogeo.org/" },
@@ -181,7 +203,7 @@
 <script src="vendor/leaflet.markercluster-1.5.3.js"></script>
 <script src="vendor/supabase-js-2.116.0.js"></script>
 <script src="src/config/supabase.js?v=6b91ef6f"></script>
-<script src="src/config/constants.js?v=4f09ee06"></script>
+<script src="src/config/constants.js?v=8811f86e"></script>
 <script src="src/config/species.js?v=597bfd9f"></script>
 <script src="src/utils/geo.js?v=3e796768"></script>
 <script src="src/utils/truncation.js?v=f43c76b3"></script>
@@ -189,7 +211,7 @@
      src/utils/lazylibs.js ihtiyaç anında enjekte eder (LULC analizi / panel grafiği). -->
 <script src="src/utils/lazylibs.js?v=69622ff4"></script>
 <script src="src/services/allometry.js?v=23ec2992"></script>
-<script src="src/services/auth.js?v=305a44fa"></script>
+<script src="src/services/auth.js?v=61ed7e8c"></script>
 <script src="src/services/export.js?v=cf96e318"></script>
 <script src="src/services/offline.js?v=8017c712"></script>
 <!-- YÖNETİM ZİNCİRİ (Faz 6 — eski admin.js beş modüle bölündü) -->
@@ -204,7 +226,7 @@
 <script src="src/services/admin-tree.js?v=5ef73c1b"></script>
 <script src="src/services/world.js?v=6f6cb0dc"></script>
 <script src="src/services/measure.js?v=90a69014"></script>
-<script src="src/services/map.js?v=d8b3a582"></script>
+<script src="src/services/map.js?v=828dc397"></script>
 <!-- LULC ZİNCİRİ (Faz 5 — eski landcover.js altı modül + facade oldu; sıralama
      ÖNEMLİ: config → geo → stac → engine → osm → patches → report-UI → facade) -->
 <script src="src/services/lc-config.js?v=5c619380"></script>
@@ -228,9 +250,9 @@
 <script src="src/services/park-registry.js?v=7bbd1bcd"></script>
 <script src="src/services/grid-engine.js?v=c3e27b01"></script>
 <script src="src/ui/park-panel.js?v=0617a777"></script>
-<script src="src/ui/park-export.js?v=41a66aa5"></script>
+<script src="src/ui/park-export.js?v=bb746d64"></script>
 <script src="src/services/dash.js?v=bb7750f7"></script>
-<link rel="stylesheet" href="css/style.css?v=2ecbdc26">
+<link rel="stylesheet" href="css/style.css?v=0155c801">
 <link rel="stylesheet" href="css/landing.css?v=e875e230">
 <link rel="stylesheet" href="css/park-panel.css?v=10b49293">
 </head>
@@ -501,7 +523,14 @@
    <button class="btn sm ghost" onclick="authTab('reset')">Şifre Yenile</button>
   </div>
 <form id="fLogin" onsubmit="return false;"><div class="lbl">E‑posta</div><input id="liEmail" type="email" required><div class="lbl" style="margin-top:12px">Parola</div><input id="liPass" type="password" required><div id="tsLogin" style="margin-top:14px;min-height:65px"></div><button type="button" class="btn" style="width:100%;margin-top:16px" onclick="doLogin()">Giriş Yap</button></form>
-<form id="fReg" style="display:none" onsubmit="return false;"><div class="lbl">Ad Soyad</div><input id="rgName" required><div class="lbl" style="margin-top:10px">Kurum</div><input id="rgOrg"><div class="lbl" style="margin-top:10px">E‑posta</div><input id="rgEmail" type="email" required><div class="lbl" style="margin-top:10px">Parola</div><input id="rgPass" type="password" minlength="6" required><div id="tsReg" style="margin-top:14px;min-height:65px"></div><button type="button" class="btn" style="width:100%;margin-top:16px" onclick="doRegister()">Hesap Oluştur</button></form>
+<form id="fReg" style="display:none" onsubmit="return false;"><div class="lbl">Ad Soyad</div><input id="rgName" required><div class="lbl" style="margin-top:10px">Kurum</div><input id="rgOrg"><div class="lbl" style="margin-top:10px">E‑posta</div><input id="rgEmail" type="email" required><div class="lbl" style="margin-top:10px">Parola</div><input id="rgPass" type="password" minlength="6" required><div id="tsReg" style="margin-top:14px;min-height:65px"></div>
+ <!-- KVKK m.5/2-a AÇIK RIZA (2026-09-24): ad, e-posta, kurum + sonradan GPS ve
+      fotoğraf işleniyor; yurt dışı altyapı (Supabase/Google/Cloudflare) kullanılıyor.
+      Rıza olmadan kayıt engellenir; rıza zaman damgası auth metadata'sına yazılır
+      (doRegister → kvkk_consent_at) yani SONRADAN İNKÂR EDİLEMEZ KAYIT oluşur. -->
+ <label class="dg-consent" for="rgConsent"><input type="checkbox" id="rgConsent">
+  <span><a href="/aydinlatma/" target="_blank" rel="noopener">KVKK Aydınlatma Metni</a>&#39;ni ve <a href="/gizlilik/" target="_blank" rel="noopener">Gizlilik Politikası</a>&#39;nı okudum. Ad, e-posta, kurum bilgilerimin; saha ölçümlerimde <b>konum verimin</b> ve yüklersem <b>fotoğrafımın</b> bu belgelerde belirtilen amaçlarla işlenmesini, onaylanan ölçümlerin CC BY-NC 4.0 ile kamuya açık veri setinde yayımlanmasını ve hizmet sağlayıcılarının (Supabase, Google, Cloudflare) <b>yurt dışı altyapısında barındırılmasını</b> onaylıyorum. Rızamı dilediğim zaman geri çekebilirim.</span></label>
+ <button type="button" class="btn" style="width:100%;margin-top:16px" onclick="doRegister()">Hesap Oluştur</button></form>
 <form id="fReset" style="display:none" onsubmit="return false;"><div class="lbl">E‑posta</div><input id="rsEmail" type="email" required><div id="tsReset" style="margin-top:14px;min-height:65px"></div><button type="button" class="btn" style="width:100%;margin-top:16px" onclick="sendResetEmail()">Sıfırlama Gönder</button></form>
   <div id="authMsg" style="margin-top:12px;font-size:.85rem;min-height:1.2em"></div>
  </div>
@@ -511,7 +540,8 @@
   <div><h4>DendroGeo</h4><p>Ağaç envanteri, karbon hesabı, harita ve park ölçeğinde arazi örtüsü analizi.</p></div>
   <div><h4>Referanslar</h4><p>Chave et al. 2014 · IPCC 2006<br>As ve ark. 2001 · Tolunay 2013<br>OGM 299 Nolu Tebliğ 2017</p></div>
   <div><h4>Sistem</h4><p>v11.0 · <span class="mono">ÇEVRİMİÇİ</span></p>
-   <p style="margin-top:10px;font-size:.78rem"><a href="/gizlilik/" style="color:#cfe0d4">Gizlilik Politikası</a> · <a href="/kullanim-kosullari/" style="color:#cfe0d4">Kullanım Koşulları</a> · <a href="/hakkimizda/" style="color:#cfe0d4">Hakkımızda</a></p></div>
+   <p style="margin-top:10px;font-size:.78rem"><a href="/gizlilik/" style="color:#cfe0d4">Gizlilik Politikası</a> · <a href="/aydinlatma/" style="color:#cfe0d4">KVKK Aydınlatma</a> · <a href="/kullanim-kosullari/" style="color:#cfe0d4">Kullanım Koşulları</a> · <a href="/kunye/" style="color:#cfe0d4">Künye &amp; İletişim</a> · <a href="/hakkimizda/" style="color:#cfe0d4">Hakkımızda</a></p>
+   <p style="margin-top:8px;font-size:.72rem;color:#a9bcb0">🔒 Bu site izleme çerezi, reklam ve üçüncü taraf analitik kullanmaz. Kod CC BY-NC 4.0 · veri DOI: 10.5281/zenodo.22646300</p></div>
  </div>
  <div style="margin-top:34px;padding-top:30px;border-top:1px solid rgba(255,255,255,.18)">
   <div class="grid g2" style="gap:24px">
@@ -905,7 +935,7 @@
 
 <script src="src/ui/state.js?v=bfca986d"></script>
 <script src="src/ui/toast.js?v=4e9029ad"></script>
-<script src="src/ui/landing.js?v=e211345a"></script>
+<script src="src/ui/landing.js?v=5fbd6c41"></script>
 <script src="src/ui/shell.js?v=a5dfa2b5"></script>
 </body>
 </html>

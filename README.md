@@ -173,12 +173,12 @@ python3 -m http.server 8080        # herhangi bir statik sunucu olur
 ### Test ve denetimler
 
 ```bash
-npm run check          # sözdizimi + ?v= + build + CSP + 455 test
+npm run check          # sözdizimi + ?v= + build + CSP + 478 test
 npm test               # yalnız testler (node:test, bağımlılık gerektirmez)
 npm run build          # index.html'i partials'tan üret (değişiklik sonrası)
 ```
 
-455 test şunları kilitler: karbon hesabı (Chave 2014, ρ fallback,
+478 test şunları kilitler: karbon hesabı (Chave 2014, ρ fallback,
 NaN yayılmaması), jeodezik alan ve geometri, **UTM projeksiyonu** (bilinen
 referans değerlerine karşı), Sutherland-Hodgman kırpma + alan korunumu,
 Service Worker'ın çevrimdışı yedeği, vendor kütüphanelerin global kurulumu,
@@ -199,18 +199,32 @@ partials)**, CSP↔kod tutarlılığı, birim testler ve (yalnız `main`'e push'
 ## Veri erişimi ve lisans
 
 * **Uygulama içinde:** giriş yapmış kullanıcı kendi kayıtlarını CSV / QGIS CSV / GeoJSON olarak dışa aktarabilir.
-* **Lisans:** [CC BY-NC 4.0](https://creativecommons.org/licenses/by-nc/4.0/) — ticari olmayan kullanım, atıf şartıyla.
+* **Lisans:** [CC BY-NC 4.0](https://creativecommons.org/licenses/by-nc/4.0/) — **kod, belgeler ve veri seti birlikte**; ticari kullanım yazılı izne tabidir (`snansrin@gmail.com`).
+  Telif: **Nagihan ŞİRİN & Sinan ŞİRİN**. Ayrıntı: [`LICENSE`](LICENSE) (tam lisans metni) + [`NOTICE`](NOTICE) (atıf biçimi ve üçüncü taraf bileşenlerin kendi lisansları).
+  > ⚠ `LICENSE` eskiden **MIT** idi ve README rozeti/DOI ile çelişiyordu (2026-09-24'te CC BY-NC 4.0 ile değiştirildi). MIT'ten kalan türev çalışmalarınız varsa lisans durumunu netleştirin.
 * **Atıf:** Zenodo DOI [10.5281/zenodo.22646300](https://doi.org/10.5281/zenodo.22646300)
+* **Üçüncü taraf veri atıfları:** harita karoları ve park geometrileri **© OpenStreetMap contributors (ODbL)**; OpenTopoMap **CC-BY-SA**; Esri World Imagery kendi kaynak zinciriyle; arazi örtüsü **ESA WorldCover 2021 v200 (CC BY 4.0)** ve **IO LULC 2020**. Bu atıflar arayüzde Leaflet attribution kontrolünde ve PNG çıktısının telif satırında görünür tutulur (`src/config/constants.js → DG_ATTR`).
 
 ```bibtex
 @software{dendrogeo,
-  title  = {DendroGeo: Global Tree Inventory \& Carbon Data System},
-  author = {ŞİRİN, Sinan},
-  year   = {2026},
-  doi    = {10.5281/zenodo.22646300},
-  url    = {https://dendrogeo.org}
+  title    = {DendroGeo: Global Tree Inventory \& Carbon Data System},
+  author   = {\c{S}irin, Nagihan and \c{S}irin, Sinan},
+  year     = {2026},
+  doi      = {10.5281/zenodo.22646300},
+  url      = {https://dendrogeo.org},
+  license  = {CC-BY-NC-4.0}
 }
 ```
+
+### Yasal belgeler
+
+| Sayfa | İçerik |
+|---|---|
+| [`/gizlilik/`](https://dendrogeo.org/gizlilik/) | Gizlilik Politikası (12 bölüm: toplanan veriler, amaçlar, alt yükleniciler, KVKK m.11 hakları, çerez/yerel depolama, konum verisi) |
+| [`/aydinlatma/`](https://dendrogeo.org/aydinlatma/) | KVKK m.10 Aydınlatma Metni (veri sorumlusu kimliği, veri kategorileri, hukuki sebepler, yurt dışı aktarım, başvuru yolu) |
+| [`/kullanim-kosullari/`](https://dendrogeo.org/kullanim-kosullari/) | Kullanım Koşulları (hesap, kabul edilebilir kullanım, lisans/atıf, bilimsel sınırlılıklar) |
+| [`/kunye/`](https://dendrogeo.org/kunye/) | Künye & İletişim + **içerik kaldırma/düzeltme** başvuru süreci + erişilebilirlik beyanı |
+| [`SECURITY.md`](SECURITY.md) | Güvenlik açığı bildirimi |
 
 ---
 

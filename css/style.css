@@ -345,3 +345,15 @@ td a:has(.dg-thumb){display:inline-flex}
 @media(max-width:640px){
   .dg-thumb{width:44px;height:44px}
 }
+
+/* =========================================================
+   KVKK AÇIK RIZA KUTUSU (kayıt formu · 2026-09-24)
+   Metin uzun olduğu için dar ekranda da okunaklı olmalı;
+   bağlantılar yeni sekmede açılır (form verisi kaybolmasın).
+========================================================= */
+.dg-consent{display:flex;gap:10px;align-items:flex-start;margin-top:14px;padding:11px 12px;border:1px solid var(--line);border-radius:10px;background:var(--bg);cursor:pointer;font-size:.76rem;line-height:1.55;color:var(--mut)}
+.dg-consent input{margin-top:2px;flex:0 0 auto;width:18px;height:18px;accent-color:var(--green)}
+.dg-consent a{color:var(--green);font-weight:600}
+.dg-consent:hover{border-color:var(--green)}
+.dg-consent:focus-within{outline:2px solid var(--green);outline-offset:1px}
+@media(max-width:640px){.dg-consent{font-size:.74rem;padding:10px}}

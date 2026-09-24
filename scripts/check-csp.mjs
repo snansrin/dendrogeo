@@ -22,10 +22,17 @@ const BEYAZ_LISTE = new Set([
   'doi.org',                // atıf bağlantısı
   'zenodo.org',             // DOI rozeti
   'creativecommons.org',    // lisans bağlantısı
+  'opendatacommons.org',    // ODbL lisans bağlantısı (JSON-LD isBasedOn + atıf metni)
   'schema.org',             // JSON-LD @context (ağ isteği üretmez)
   'www.w3.org',             // XML ad alanları (sitemap, SVG)
   'github.com',
   'img.shields.io',
+  /* Leaflet attribution kontrolündeki <a href> hedefleri (2026-09-24):
+   * ODbL/CC-BY-SA atfı bağlantı vermek ZORUNDA, ama bu origin'lerden hiçbir
+   * kaynak yüklenmiyor (karolar *.tile.openstreetmap.org ve
+   * *.tile.opentopomap.org üzerinden gelir, ikisi de CSP'de tanımlı). */
+  'www.openstreetmap.org',
+  'opentopomap.org',
 ]);
 
 function* kodDosyalari() {

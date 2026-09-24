@@ -90,7 +90,7 @@ function makeWorld() {
 
   /* Sahte auth: OAuth akışının test edilebilmesi için signInWithOAuth
    * çağrılarını kaydeder, onAuthStateChange dinleyicilerini dışarı verir. */
-  const AUTH = { session: null, listeners: [], oauth: [], oauthError: null };
+  const AUTH = { session: null, listeners: [], oauth: [], oauthError: null, signups: [], signupError: null };
   const sbStub = {
     from: (t) => fromTable(t),
     storage: { from: () => ({ upload: async () => ({}), getPublicUrl: () => ({ data: { publicUrl: '' } }), remove: async () => ({}) }) },
@@ -98,6 +98,7 @@ function makeWorld() {
       getSession: async () => ({ data: { session: AUTH.session } }),
       onAuthStateChange: (cb) => { AUTH.listeners.push(cb); return { data: { subscription: { unsubscribe() {} } } }; },
       signInWithOAuth: async (o) => { AUTH.oauth.push(o); return { data: {}, error: AUTH.oauthError }; },
+      signUp: async (o) => { AUTH.signups.push(o); return { data: { user: { id: 'yeni' } }, error: AUTH.signupError }; },
       signOut: async () => ({ error: null }),
     },
   };
@@ -108,7 +109,7 @@ function makeWorld() {
     id, innerHTML: '', textContent: '', value: '', className: '', disabled: false,
     style: {}, dataset: {}, checked: false, files: [],
     classList: { add() {}, remove() {}, toggle() {}, contains: () => false },
-    scrollIntoView() {}, appendChild() {}, remove() {}, setAttribute() {},
+    scrollIntoView() {}, appendChild() {}, remove() {}, setAttribute() {}, focus() {}, blur() {},
     addEventListener() {}, querySelectorAll: () => [], offsetWidth: 0,
   });
   const document = {
@@ -1145,5 +1146,50 @@ describe('fotoğraf önizlemesi listelerde küçük görsel olarak çıkıyor', 
     assert.match(css, /\.dg-thumb\{width:40px;height:40px;object-fit:cover/);
     assert.match(css, /a:hover \.dg-thumb[^{]*\{transform:scale\(1\.08\)/);
     assert.match(css, /@media\(max-width:640px\)\{\s*\.dg-thumb\{width:44px;height:44px\}/);
+  });
+});
+
+/* =========================================================
+   13) KVKK AÇIK RIZA (kayıt kapısı)
+========================================================= */
+describe('kayıt formunda KVKK açık rızası zorunlu', () => {
+  const { AUTH } = W;
+
+  test('⭐ rıza kutusu işaretli değilse hesap AÇILMIYOR', async () => {
+    AUTH.signups.length = 0;
+    el('rgName').value = 'Ayşe Yılmaz';
+    el('rgEmail').value = 'ayse@example.com';
+    el('rgPass').value = 'parola123';
+    el('rgOrg').value = 'Üniversite';
+    el('rgConsent').checked = false;
+    run('tsToken=(id)=>"sahte-jeton";');
+    W.reset();
+    await run('doRegister()');
+    assert.equal(AUTH.signups.length, 0, 'rıza olmadan signUp çağrılmamalıydı');
+    assert.ok(TOASTS.some((t) => /onay kutusunu işaretleyin/i.test(t[0])), JSON.stringify(TOASTS));
+  });
+
+  test('⭐ rıza verilince kayıt gidiyor + zaman damgalı rıza kaydı yazılıyor', async () => {
+    AUTH.signups.length = 0;
+    el('rgConsent').checked = true;
+    W.reset();
+    W.route((st) => st.table === 'profiles' ? { data: [{ id: 'yeni', role: 'user', active: true }], error: null } : { data: [], error: null });
+    await run('doRegister()');
+    assert.equal(AUTH.signups.length, 1, 'kayıt gitmedi');
+    const d = AUTH.signups[0].options.data;
+    assert.equal(d.kvkk_consent, true);
+    assert.match(d.kvkk_consent_at, /^\d{4}-\d{2}-\d{2}T/, 'zaman damgası ISO olmalı');
+    assert.equal(d.kvkk_consent_version, '1.0');
+    assert.equal(d.full_name, 'Ayşe Yılmaz');
+  });
+
+  test('rıza metni aydınlatma + gizlilik sayfalarına bağlı', () => {
+    const html = readFileSync(join(ROOT, 'index.html'), 'utf8');
+    /* Bağlantılar <label> içinde, input'tan SONRA gelir → id'nin sonrasını kes. */
+    const i = html.indexOf('id="rgConsent"');
+    const seg = html.slice(i, i + 1400);
+    assert.match(seg, /\/aydinlatma\//);
+    assert.match(seg, /\/gizlilik\//);
+    assert.match(seg, /konum verimin/, 'konum verisi açıkça sayılmalı');
   });
 });

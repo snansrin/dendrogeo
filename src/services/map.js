@@ -66,9 +66,10 @@ async function loadLiveMap(){
 }
 // 5. Harita başlatma
 function initMaps(){
- if(!map){map=L.map("map").setView([39.99,32.65],12);L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png").addTo(map);}
- if(!navMap){navMap=L.map("navMap").setView([39.992,32.6498],15);L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png").addTo(navMap);}
- if(!worldMap){worldMap=L.map("worldMap").setView([39,35],3);L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png").addTo(worldMap);}
+ /* ODbL: her OSM karosu katmanında attribution zorunlu (eski hâlde yoktu). */
+ if(!map){map=L.map("map").setView([39.99,32.65],12);L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",{attribution:DG_ATTR.osm,maxZoom:19}).addTo(map);}
+ if(!navMap){navMap=L.map("navMap").setView([39.992,32.6498],15);L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",{attribution:DG_ATTR.osm,maxZoom:19}).addTo(navMap);}
+ if(!worldMap){worldMap=L.map("worldMap").setView([39,35],3);L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",{attribution:DG_ATTR.osm,maxZoom:19}).addTo(worldMap);}
 }
 // 6. Waypoint CRUD
 async function uploadWpCsv(){
@@ -193,11 +194,9 @@ function switchBaseLayer(type){
   sat:"https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
   topo:"https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png"
  };
- const attr={
-  osm:'© OpenStreetMap',
-  sat:'© Esri World Imagery',
-  topo:'© OpenTopoMap (CC-BY-SA)'
- };
+ /* Atıf metinleri tek kaynaktan (constants.js DG_ATTR): lisansların istediği
+  * tam biçim orada tutuluyor, burada kopya tutulmaz. */
+ const attr=DG_ATTR;
  
  L.tileLayer(urls[type],{attribution:attr[type]}).addTo(map);
  toast("✓ Harita: "+(type==="osm"?"Sokak":(type==="sat"?"Uydu":"Topoğrafik")),"ok","🗺️");
