@@ -66,7 +66,8 @@ describe('ID ve sekme denetimi', () => {
     const html = src['index.html'];
     const items = (html.match(/class="item/g) || []).length;
     assert.equal(items, 10);
-    assert.match(html, /users:9/);
+    // go() indeks haritası Faz 1'den beri src/ui/shell.js'te → tüm kaynaklarda ara
+    assert.match(all, /users:9/);
   });
 });
 
