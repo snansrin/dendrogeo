@@ -1,0 +1,29 @@
+# =====================================================================
+# SATIR SONU NORMALİZASYONU (2026-09-24)
+#
+# NEDEN: depo Windows'ta düzenleniyor, yamalar (git format-patch → git am)
+# farklı ortamlardan geçiyor. manifest.json CRLF ile commit edilmişti; yama
+# metni LF'ye dönüştüğünde `git am` şu hatayı veriyordu:
+#
+#   error: patch failed: manifest.json:1
+#   error: manifest.json: patch does not apply
+#   error: Did you hand edit your patch?
+#
+# ÇÖZÜM: birinci taraf metin dosyaları LF'te sabitlenir. vendor/ BİLEREK
+# hariç (üçüncü taraf dosyalarının baytlarına dokunmuyoruz — bütünlük
+# testleri ve PRECACHE hash'leri değişmesin). İkili dosyalar binary işaretli.
+# =====================================================================
+* text=auto eol=lf
+
+# Üçüncü taraf: olduğu gibi kalsın (leaflet CSS'i CRLF içeriyor)
+vendor/** -text
+
+# İkili dosyalar
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.webp binary
+*.woff binary
+*.woff2 binary

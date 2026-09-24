@@ -1,4 +1,5 @@
 {
+  "version": "3.0.0",
   "name": "DendroGeo — Küresel Ağaç Envanteri ve Karbon Veri Sistemi",
   "short_name": "DendroGeo",
   "description": "GPS ölçümünden küresel karbon haritasına uzanan bilimsel ağaç envanteri ve karbon veri platformu.",

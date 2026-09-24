@@ -4,7 +4,8 @@
 
 | Version | Supported          |
 | ------- | ------------------ |
-| 11.0.x  | ✅ Current         |
+| 3.0.x   | ✅ Current         |
+| < 3.0   | ❌ Not supported (dahili 11.x numaralandırması — bkz. CHANGELOG.md) |
 
 ## Reporting a Vulnerability
 

@@ -1,0 +1,100 @@
+# =====================================================================
+# CITATION.cff — Zenodo bu dosyayı OKUR
+# =====================================================================
+# GitHub'da bir Release yayımlandığında Zenodo deposunu arşivler ve
+# başlık / yazarlar / lisans / anahtar kelimeler / sürüm / tarih bilgilerini
+# BU DOSYADAN alır. Yani Zenodo metadata'sını elle doldurmak yerine burayı
+# doğru tutmak yeterlidir.
+#
+# Şema: Citation File Format 1.2.0 → https://citation-file-format.github.io/
+# Doğrulama: https://citation-file-format.github.io/validate.html
+#
+# ⚠ ORCID alanları yorumda bekliyor: Zenodo'da yazar profillerinin
+#   eşleşmesi ve atıf sayılarının doğru görünmesi için doldurulması önerilir.
+# =====================================================================
+
+cff-version: 1.2.0
+message: "DendroGeo'yu bir çalışmada kullandıysanız lütfen aşağıdaki gibi atıf yapın."
+title: "DendroGeo: Küresel Ağaç Envanteri ve Karbon Veri Sistemi"
+type: software
+
+abstract: >-
+  DendroGeo; GPS konumlu saha ağaç ölçümlerini (tür, grup, göğüs yüksekliği
+  çapı, boy) allometrik biyokütle ve karbon hesaplarıyla (Chave vd. 2014),
+  park kimliği bazlı toplulaştırmalarla ve 10 m çözünürlüklü arazi örtüsü
+  analizleriyle (ESA WorldCover 2021 v200 birincil, IO LULC 2020 çapraz
+  doğrulama) birleştiren, çevrimdışı çalışabilen açık kaynaklı bir web GIS
+  uygulamasıdır. Ölçümler yönetici onayından geçerek CC BY-NC 4.0 lisanslı,
+  DOI ile sürümlenmiş kamuya açık bir veri setine dönüşür. Park sınırları
+  OpenStreetMap geometrisinden türetilir ve her park tek bir kimlikte
+  toplanır; böylece aynı parkta çalışan farklı kullanıcıların verileri
+  karşılaştırmada tek satırda birleşir.
+
+authors:
+  - family-names: "ŞİRİN"
+    given-names: "Nagihan"
+    # orcid: "https://orcid.org/0000-0000-0000-0000"
+    # affiliation: "… Üniversitesi, Peyzaj Mimarlığı (doktora)"
+  - family-names: "ŞİRİN"
+    given-names: "Sinan"
+    alias: "snansrin"
+    # orcid: "https://orcid.org/0000-0000-0000-0000"
+
+# Kavram (concept) DOI: her zaman EN GÜNCEL sürüme çözümlenir.
+# Sürüme özel DOI'yi Zenodo release sonrası üretir (10.5281/zenodo.XXXXXXX).
+doi: "10.5281/zenodo.22646300"
+license: CC-BY-NC-4.0
+version: "3.0.0"
+date-released: "2026-09-24"
+
+repository-code: "https://github.com/snansrin/dendrogeo"
+url: "https://dendrogeo.org/"
+issue-tracker: "https://github.com/snansrin/dendrogeo/issues"
+license-url: "https://creativecommons.org/licenses/by-nc/4.0/"
+
+keywords:
+  - tree inventory
+  - forest inventory
+  - carbon sequestration
+  - aboveground biomass
+  - allometry
+  - Chave 2014
+  - DBH
+  - urban forest
+  - urban park
+  - park carbon performance
+  - land cover
+  - ESA WorldCover
+  - OpenStreetMap
+  - web GIS
+  - PWA
+  - field measurement
+  - Supabase
+  - Leaflet
+
+# Yazılım gereksinimleri ve ilgili çalışmalar (Zenodo "related identifiers")
+references:
+  - type: article
+    authors:
+      - family-names: "Chave"
+        given-names: "Jérôme"
+      - family-names: "Réjou-Méchain"
+        given-names: "Maxime"
+    title: "Improved allometric models to predict the aboveground biomass of tropical trees"
+    journal: "Global Change Biology"
+    year: 2014
+    notes: "AGB = 0.0673 · (ρ·D²·H)^0.976 — biyokütle hesabının temeli"
+  - type: report
+    authors:
+      - name: "IPCC"
+    title: "2006 IPCC Guidelines for National Greenhouse Gas Inventories, Vol. 4: Agriculture, Forestry and Other Land Use"
+    year: 2006
+    notes: "Karbon oranı (×0,47) ve kök biyokütlesi (×0,26) sistem varsayımları"
+  - type: book
+    authors:
+      - family-names: "Tolunay"
+        given-names: "Doğanay"
+    title: "Türkiye'deki Orman Ağaçlarının Odun Yoğunluğu Değerleri"
+    publisher: "Orman Bakanlığı Yayınları"
+    year: 2013
+    notes: "Tür/grup bazlı odun yoğunluğu (ρ) tablosu"

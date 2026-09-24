@@ -1,6 +1,6 @@
 {
   "name": "dendrogeo",
-  "version": "11.0.0",
+  "version": "3.0.0",
   "private": true,
   "description": "DendroGeo — Küresel Ağaç Envanteri ve Karbon Veri Sistemi",
   "type": "module",

@@ -173,12 +173,12 @@ python3 -m http.server 8080        # herhangi bir statik sunucu olur
 ### Test ve denetimler
 
 ```bash
-npm run check          # sözdizimi + ?v= + build + CSP + 478 test
+npm run check          # sözdizimi + ?v= + build + CSP + 503 test
 npm test               # yalnız testler (node:test, bağımlılık gerektirmez)
 npm run build          # index.html'i partials'tan üret (değişiklik sonrası)
 ```
 
-478 test şunları kilitler: karbon hesabı (Chave 2014, ρ fallback,
+503 test şunları kilitler: karbon hesabı (Chave 2014, ρ fallback,
 NaN yayılmaması), jeodezik alan ve geometri, **UTM projeksiyonu** (bilinen
 referans değerlerine karşı), Sutherland-Hodgman kırpma + alan korunumu,
 Service Worker'ın çevrimdışı yedeği, vendor kütüphanelerin global kurulumu,
@@ -187,7 +187,12 @@ Service Worker'ın çevrimdışı yedeği, vendor kütüphanelerin global kurulu
 landing↔shell izolasyonu**, kritik canlı düzeltmelerin canary'leri (STAC GET,
 RLS-safe sayaç), tembel yükleme kilitleri ve **park kimliği** (ad
 normalizasyonu + "park - etiket" adı + şema/trigger/view kilitleri;
-`park-flow.test.mjs` aynı akışı sahte Supabase üzerinde uçtan uca çalıştırır).
+`park-flow.test.mjs` aynı akışı sahte Supabase üzerinde uçtan uca çalıştırır),
+**hukuki uyum** (`compliance.test.mjs`: harita atıfları ODbL/Esri/CC-BY-SA, KVKK
+açık rıza kapısı, lisans tutarlılığı, depoda kişisel e-posta kalmadığı — hiçbiri
+bozulduğunda sayfa çökmediği için testle kilitlenir) ve **sürüm tutarlılığı**
+(`release.test.mjs`: sürüm numarasının yedi yerde aynı kalması + Zenodo'nun
+okuduğu `CITATION.cff` künyesi).
 
 GitHub Actions her push ve PR'da altı adım çalıştırır: sözdizimi (tarayıcı
 semantiğiyle), `?v=` tutarlılığı, **derleme tutarlılığı (index.html ==
