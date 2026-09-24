@@ -610,3 +610,83 @@ describe('park algılama ekranı: yönlendirme → kimlik → proje', () => {
     assert.equal(run('DG_PARK_CAND'), null);
   });
 });
+
+/* =========================================================
+   8) YÖNETİM AĞACI (park → proje → kullanıcı → ölçüm)
+========================================================= */
+describe('yönetim ağacı tüm veriyi hiyerarşik gösterir', () => {
+  const TREEROWS = [
+    { id: 1, owner: 'u1', project_id: 10, park_id: 7, carbon_kg: 100, status: 'Onaylı', species: 'Meşe', grp: 'YAPRAKLI', point_id: 1, measurement_no: 1, dbh_cm: 20, height_m: 7, photo_url: null, created_at: '2026-09-01T10:00:00Z',
+      profiles: { full_name: 'Ayşe Yılmaz' },
+      projects: { id: 10, name: 'Göksu Parkı - deneme', park_id: 7, park_name: 'Göksu Parkı', parks: { id: 7, name: 'Göksu Parkı', area_m2: 508000, city: 'Ankara' } } },
+    { id: 2, owner: 'u2', project_id: 11, park_id: 7, carbon_kg: 50, status: 'Beklemede', species: 'Çam', grp: 'İBRELİ', point_id: 2, measurement_no: 1, dbh_cm: 30, height_m: 9, photo_url: null, created_at: '2026-09-02T10:00:00Z',
+      profiles: { full_name: 'Burak Demir' },
+      projects: { id: 11, name: 'Göksu Parkı - kuzey', park_id: 7, park_name: 'Göksu Parkı', parks: { id: 7, name: 'Göksu Parkı', area_m2: 508000, city: 'Ankara' } } },
+    { id: 3, owner: 'u3', project_id: 12, park_id: null, carbon_kg: 20, status: 'Red', species: 'Söğüt', grp: 'DİĞER', point_id: 9, measurement_no: 1, dbh_cm: 12, height_m: 4, photo_url: null, created_at: '2026-08-01T10:00:00Z',
+      profiles: { full_name: 'Cem Kaya' },
+      projects: { id: 12, name: 'Ülkü', park_id: null, park_name: null, parks: null } },
+  ];
+
+  test('⭐ park düğümü → projeler → kullanıcılar → ölçüm satırları', async () => {
+    W.route((st) => st.table === 'measurements' ? { data: TREEROWS, count: 3, error: null } : { data: [], error: null });
+    run('DG_TREE_STATUS=""; DG_TREE_QUERY=""; DG_TREE_OPEN.clear();');
+    await run('loadAdminTree()');
+    const h = el('adminTree').innerHTML;
+    assert.ok(h.includes('Göksu Parkı'), 'park düğümü yok');
+    assert.ok(h.includes('Göksu Parkı - deneme') && h.includes('Göksu Parkı - kuzey'), 'projeler yok');
+    assert.ok(h.includes('Ayşe Yılmaz') && h.includes('Burak Demir'), 'kullanıcılar yok');
+    assert.ok(h.includes('approveMeas(1)') || h.includes('rejectMeas(1)'), 'satır işlem düğmeleri yok');
+    assert.ok(h.includes('50.8 ha'), 'park alanı yok');
+    assert.ok(h.includes('t/ha'), 'karbon yoğunluğu yok');
+  });
+
+  test('TÜM durumlar görünüyor (onaylı + bekleyen + red)', async () => {
+    const h = el('adminTree').innerHTML;
+    assert.ok(h.includes('Onay Bekliyor'), 'bekleyen rozeti');
+    assert.ok(h.includes('>Red<') || h.includes('Red</span>'), 'red rozeti');
+    assert.ok(h.includes('⚠ Park algılanmamış'), 'parksız proje düğümü');
+    assert.ok(h.includes('Ülkü'), 'parksız proje adı');
+  });
+
+  test('durum filtresi ağacı yeniden çizer', async () => {
+    run('dgTreeSetStatus("Red")');
+    const h = el('adminTree').innerHTML;
+    assert.ok(h.includes('Ülkü') && !h.includes('Göksu Parkı - deneme'), 'yalnız red kayıtları');
+    run('dgTreeSetStatus("")');
+  });
+
+  test('arama kullanıcı/tür adıyla süzer', async () => {
+    run('dgTreeSetQuery("burak")');
+    let h = el('adminTree').innerHTML;
+    assert.ok(h.includes('Burak Demir') && !h.includes('Ayşe Yılmaz'), h.slice(0, 200));
+    run('dgTreeSetQuery("söğüt")');
+    h = el('adminTree').innerHTML;
+    assert.ok(h.includes('Söğüt') && !h.includes('Meşe'));
+    run('dgTreeSetQuery("")');
+  });
+
+  test('⭐ sorgu hatası sessiz "kayıt yok"a dönüşmüyor', async () => {
+    W.route(() => ({ data: null, error: { message: 'could not find a relationship between measurements and parks' } }));
+    await run('loadAdminTree()');
+    const h = el('adminTree').innerHTML;
+    assert.ok(h.includes('Ölçümler okunamadı'), 'hata kutusu yok');
+    assert.ok(h.includes('veri silinmedi'), 'kullanıcıya güvence verilmeli');
+    assert.ok(h.includes('could not find a relationship'), 'hatanın kendisi görünmeli');
+    assert.ok(h.includes('loadAdminTree()'), 'yeniden dene düğmesi');
+  });
+
+  test('embed patlarsa yedek JOIN modu devreye girer', async () => {
+    W.route((st) => {
+      if (st.table === 'measurements' && String(st.select).includes('profiles(')) return { data: null, error: { message: 'embed bozuk' } };
+      if (st.table === 'measurements') return { data: TREEROWS.map((r) => ({ ...r, profiles: undefined, projects: undefined })) , error: null };
+      if (st.table === 'projects') return { data: [{ id: 10, name: 'Göksu Parkı - deneme', park_id: 7, park_name: 'Göksu Parkı', parks: { id: 7, name: 'Göksu Parkı', area_m2: 508000, city: 'Ankara' } }, { id: 11, name: 'Göksu Parkı - kuzey', park_id: 7, parks: { id: 7, name: 'Göksu Parkı', area_m2: 508000, city: 'Ankara' } }, { id: 12, name: 'Ülkü', park_id: null, parks: null }], error: null };
+      if (st.table === 'profiles') return { data: [{ id: 'u1', full_name: 'Ayşe Yılmaz' }, { id: 'u2', full_name: 'Burak Demir' }, { id: 'u3', full_name: 'Cem Kaya' }], error: null };
+      return { data: [], error: null };
+    });
+    run('DG_TREE_ERR=null;');
+    await run('loadAdminTree()');
+    const h = el('adminTree').innerHTML;
+    assert.ok(h.includes('Göksu Parkı') && h.includes('Ayşe Yılmaz'), 'yedek join ağacı kuramadı: ' + h.slice(0, 200));
+    assert.ok(!h.includes('Ölçümler okunamadı'), 'yedek çalışırken hata kutusu gösterilmemeli');
+  });
+});

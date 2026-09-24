@@ -18,6 +18,12 @@ async function loadAdmin(){
  const users=uRes.data||[],meas=mRes.data||[],projs=pRes.data||[],global=gRes.data||{};
 const cnt=await sb.from("measurements").select("*",{count:"exact",head:true});
 $("aUsers").textContent=users.length;$("aRec").textContent=cnt.count??meas.length;$("aProj").textContent=projs.length;$("aCarbon").textContent=global.carbon_t||0;
+ /* ⚠ SESSİZ "KAYIT YOK" TUZAĞI KAPANDI (2026-09-24): sorgu hata verirse
+  * tablo "Kayıt yok." diyordu ve kullanıcı verisinin silindiğini sanıyordu.
+  * Artık hatanın kendisi ekrana yazılır (ayrıntı: admin-tree.js dgTreeFetch). */
+ if(mRes.error){
+  $("aMeasT").innerHTML=`<tr><td colspan=9><div class="alert err"><b>⚠ Ölçümler okunamadı (veri silinmedi, sorgu hata veriyor):</b> <span class="mono" style="font-size:.72rem">${esc(mRes.error.message)}</span><br><span style="font-size:.8rem">Şema değişikliğinden sonra PostgREST önbelleği bayatlamış olabilir → Supabase'de birkaç dakika bekleyip 🔄 Yenile, ya da üstteki "Park → Proje → Kullanıcı" ağacının hata kutusundaki adımları izle.</span></div></td></tr>`;
+ }else
  $("aMeasT").innerHTML=meas.slice(0,300).map(x=>{
   const st=x.status||"Beklemede";
   const bc=st==="Onaylı"?"on":(st==="Red"?"off":"admin");
@@ -31,6 +37,9 @@ $("aUsers").textContent=users.length;$("aRec").textContent=cnt.count??meas.lengt
  loadVisitStats();
  loadRequests();
  loadAdminExportFilters();
+ /* Park → proje → kullanıcı ağacı (admin-tree.js). Onay/red/silme sonrası
+  * loadAdmin() yeniden çağrıldığı için ağaç da kendiliğinden tazelenir. */
+ if(typeof loadAdminTree==="function")loadAdminTree();
 }
 
 async function approveMeas(id){

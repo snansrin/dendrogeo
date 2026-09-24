@@ -197,7 +197,11 @@
 <script src="src/services/data-requests.js?v=ca6f827b"></script>
 <script src="src/services/user-admin.js?v=f80309ef"></script>
 <script src="src/services/backup.js?v=6682edc0"></script>
-<script src="src/services/admin.js?v=58079fb9"></script>
+<script src="src/services/admin.js?v=17c7884e"></script>
+<!-- YÖNETİM AĞACI (2026-09-24): park → proje → kullanıcı → ölçüm kademeli
+     görünümü + sorgu hatası görünürlüğü. admin.js'ten SONRA yüklenir
+     (approve/reject/del fonksiyonlarını çağırır). -->
+<script src="src/services/admin-tree.js?v=78fe0bb8"></script>
 <script src="src/services/world.js?v=ce6e53fc"></script>
 <script src="src/services/measure.js?v=f3a53646"></script>
 <script src="src/services/map.js?v=d8b3a582"></script>
@@ -221,12 +225,12 @@
      projeyi parka bağlar, ölçüm kapısını (park algılanmadan ölçüm yok) kurar.
      Sıra ÖNEMLİ: park-query'den sonra, grid-engine'den önce (grid panelindeki
      proje listesi bu modülden beslenir). -->
-<script src="src/services/park-registry.js?v=62fa1219"></script>
+<script src="src/services/park-registry.js?v=0155fa2a"></script>
 <script src="src/services/grid-engine.js?v=c3e27b01"></script>
 <script src="src/ui/park-panel.js?v=0617a777"></script>
 <script src="src/ui/park-export.js?v=41a66aa5"></script>
 <script src="src/services/dash.js?v=c134e567"></script>
-<link rel="stylesheet" href="css/style.css?v=52565883">
+<link rel="stylesheet" href="css/style.css?v=dfd872b3">
 <link rel="stylesheet" href="css/landing.css?v=e875e230">
 <link rel="stylesheet" href="css/park-panel.css?v=10b49293">
 </head>
@@ -824,8 +828,21 @@
      <div class="tblwrap"><table><thead><tr><th>Kullanıcı</th><th>E‑posta</th><th>Filtre</th><th>Talep</th><th>Kapanış</th><th>Durum</th></tr></thead><tbody id="closedReqT"></tbody></table></div>
     </div>
    </div>
+   <!-- PARK → PROJE → KULLANICI AĞACI (2026-09-24 · admin-tree.js).
+        Kullanıcı isteği: "park görülsün, parkı açınca projeler açılsın,
+        projeyi açınca kullanıcıları ve verilerini göreyim". Tüm durumlar
+        (onaylı + bekleyen + red) tek yerde, kademeli açılır. -->
+   <div class="card" style="margin-bottom:18px;border-left:4px solid var(--green)">
+    <div class="shead" style="margin-bottom:12px"><span class="no">🌳</span><h2 style="font-size:1.2rem">Park → Proje → Kullanıcı</h2><span class="rule"></span><span class="mono" style="font-size:.75rem;color:var(--mut)">tüm durumlar · kademeli açılır</span></div>
+    <div class="grid g3" style="margin-bottom:12px">
+     <div><div class="lbl">DURUM</div><select id="treeStatus" onchange="dgTreeSetStatus(this.value)"><option value="">Tümü (onaylı + bekleyen + red)</option><option value="Onaylı">✓ Onaylı</option><option value="Beklemede">⏳ Beklemede</option><option value="Red">🚫 Reddedilmiş</option></select></div>
+     <div><div class="lbl">ARAMA</div><input id="treeSearch" placeholder="park, proje, kullanıcı, tür, nokta…" oninput="dgTreeSetQuery(this.value)"></div>
+     <div style="align-self:end"><button class="btn sm blue" onclick="loadAdminTree()">🔄 Yenile</button></div>
+    </div>
+    <div id="adminTree"></div>
+   </div>
    <div class="card tblwrap">
-    <div class="shead" style="margin-bottom:12px"><span class="no">📋</span><h2 style="font-size:1.2rem">Ölçüm Onay & Moderasyon</h2></div>
+    <div class="shead" style="margin-bottom:12px"><span class="no">📋</span><h2 style="font-size:1.2rem">Ölçüm Onay & Moderasyon</h2><span class="rule"></span><span class="mono" style="font-size:.75rem;color:var(--mut)">düz liste · ilk 300 satır</span></div>
     <input type="text" id="adminMeasSearch" placeholder="🔍 Ara..." oninput="filterAdminMeas()" style="max-width:100%;margin-bottom:12px">
     <table><thead><tr><th>Kullanıcı</th><th>Nokta</th><th>Tür</th><th>Çap</th><th>Boy</th><th>Karbon</th><th>Foto</th><th>Durum</th><th>İşlem</th></tr></thead><tbody id="aMeasT"></tbody></table>
    </div>

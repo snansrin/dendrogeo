@@ -218,3 +218,23 @@ body{background:#fff}
 .card{box-shadow:none;border:1px solid #ccc;break-inside:avoid}
 canvas{max-width:100%}
 }
+
+/* =========================================================
+   YÖNETİM AĞACI — park → proje → kullanıcı (admin-tree.js)
+   <details>/<summary> ile kademeli açılır; JS durum tutmaz,
+   yalnız hangi düğümün açık olduğunu hatırlar.
+========================================================= */
+.dg-tree-sum{font-size:.75rem;color:var(--mut);margin-bottom:10px;display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.dg-tree-park,.dg-tree-proj,.dg-tree-user{border:1px solid var(--line);border-radius:10px;background:var(--surface);margin-bottom:8px}
+.dg-tree-park.pending{border-style:dashed;background:transparent}
+.dg-tree-park>summary,.dg-tree-proj>summary,.dg-tree-user>summary{cursor:pointer;padding:10px 12px;font-size:.85rem;display:flex;align-items:center;gap:8px;flex-wrap:wrap;list-style:none}
+.dg-tree-park>summary::-webkit-details-marker,.dg-tree-proj>summary::-webkit-details-marker,.dg-tree-user>summary::-webkit-details-marker{display:none}
+.dg-tree-park>summary:before,.dg-tree-proj>summary:before,.dg-tree-user>summary:before{content:"▸";color:var(--mut);font-size:.8rem;transition:transform .15s}
+.dg-tree-park[open]>summary:before,.dg-tree-proj[open]>summary:before,.dg-tree-user[open]>summary:before{transform:rotate(90deg)}
+.dg-tree-park[open]>summary,.dg-tree-proj[open]>summary,.dg-tree-user[open]>summary{border-bottom:1px solid var(--line)}
+.dg-tree-meta{font-size:.7rem;color:var(--mut);font-family:ui-monospace,SFMono-Regular,Menlo,monospace;letter-spacing:0;text-transform:none}
+.dg-tree-body{padding:8px 12px 12px}
+.dg-tree-proj{margin-left:16px}
+.dg-tree-user{margin-left:16px;background:var(--bg)}
+.dg-tree-user .dg-tree-body{padding:4px 8px 8px}
+.dg-tree-act{margin-left:auto}

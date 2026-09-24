@@ -93,6 +93,9 @@ export function loadApp({ sadece } = {}) {
      * bu zincirden yüklenir. ui/park-panel BİLEREK yok (DOM'a yapışır). */
     'src/services/park-registry.js',
     'src/services/grid-engine.js',
+    /* YÖNETİM AĞACI (2026-09-24): dgTreeGroup/dgTreeFilterRows saf
+     * fonksiyonları burada test edilir (DOM'a dokunan çizim kısmı değil). */
+    'src/services/admin-tree.js',
   ];
   const dosyalar = sadece ? SIRALAMA.filter((f) => sadece.includes(f)) : SIRALAMA;
 

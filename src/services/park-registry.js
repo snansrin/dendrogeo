@@ -849,55 +849,139 @@ function dgProjectOptionsForPark(parkId,fallbackAll){
    8. YÖNETİM: PARKLARI GERİ DOLDUR (eski projeler)
 ========================================================= */
 
-/* Park bağı olmayan projeleri, ölçümlerinin merkezinden OSM park sorgusuyla
- * eşleştirir. İKİ FAZLI: önce plan çıkarır ve önizleme gösterir (hiçbir şey
- * yazmaz), yönetici onaylayınca dgApplyBackfill() yazar. Sebep: bu araç eski
- * proje ADLARINI da değiştirir ("Göksu Parkı - <eski ad>"); sürpriz olmasın. */
+/* Park bağı olmayan projeleri ölçümlerinin merkezinden parkla eşleştirir.
+ * İKİ FAZLI: önce plan çıkarır + önizleme gösterir (hiçbir şey yazmaz),
+ * yönetici onaylayınca dgApplyBackfill() yazar. Sebep: bu araç proje ADLARINI
+ * da değiştirir ("Göksu Parkı - <eski ad>"); sürpriz olmasın.
+ *
+ * 2026-09-24 İYİLEŞTİRME (kullanıcı geri bildirimi: "otomatik geri doldurma
+ * çalışmadı, sadece Göksu'yu algılayabildim"):
+ *   · üç kademeli arama: 1500 m → 3500 m → ADA GÖRE OSM araması
+ *     (Dikmen Vadisi gibi, merkez noktası polygon dışında kalan ya da
+ *     OSM'de farklı etiketlenmiş yerler için)
+ *   · canlı ilerleme (kaçıncı proje, hangi ad) — 6 proje ~20 sn sürer,
+ *     eskiden kutu sabit durunca "çalışmıyor" sanılıyordu
+ *   · hiç eşleşmeyen proje için satırda "✍️ Elle park oluştur ve bağla":
+ *     ölçüm merkezinde, proje adıyla manuel park kimliği açar. Böylece
+ *     OSM'de park olmayan yerler de park bazlı karşılaştırmaya girer. */
+const dgSleep=ms=>new Promise(r=>setTimeout(r,ms));
+
+async function dgQueryParkSafe(lat,lon,radius){
+  try{
+    return await queryPark(lat,lon,radius);
+  }catch(e){
+    console.warn("DENDROGEO · park sorgusu ("+radius+" m) başarısız:",e);
+    return null;
+  }
+}
+
+/* Ada göre OSM araması: proje adının anlamlı sözcükleriyle leisure=park|garden|…
+ * elemanlarını 5 km yarıçapta arar. queryPark'ın "merkez noktası polygon
+ * içinde mi" varsayımına bağlı değildir. */
+async function dgQueryParkByName(lat,lon,projName){
+  const words=dgNormParkLoose(projName).split(" ").filter(w=>w.length>2);
+  if(!words.length||typeof overpassRequest!=="function")return null;
+  const re=words.join("|").replace(/["\\]/g,"");
+  if(!re)return null;
+  const leisure="park|garden|nature_reserve|common|recreation_ground";
+  const q=
+    `[out:json][timeout:35];(`+
+    `way["leisure"~"${leisure}"]["name"~"${re}",i](around:5000,${lat},${lon});`+
+    `relation["leisure"~"${leisure}"]["name"~"${re}",i](around:5000,${lat},${lon});`+
+    `way["landuse"~"recreation_ground|meadow|grass"]["name"~"${re}",i](around:5000,${lat},${lon});`+
+    `);out geom;`;
+  let json=null;
+  try{json=await overpassRequest(q,"park adıyla");}catch(e){return null;}
+  if(!json||!json.elements||!json.elements.length)return null;
+
+  const cands=[];
+  for(const el of json.elements){
+    if(typeof extractRings!=="function")break;
+    const rings=extractRings(el);
+    if(!rings)continue;
+    const area=(typeof polyArea==="function")?polyArea(rings):null;
+    cands.push({rings,name:(el.tags&&el.tags.name)||null,area,type:el.type,id:el.id});
+  }
+  if(!cands.length)return null;
+  cands.sort((a,b)=>(b.area||0)-(a.area||0));
+  return cands;
+}
+
+async function dgDetectParkForProject(lat,lon,projName){
+  let c=await dgQueryParkSafe(lat,lon,1500);
+  if(c&&c.length)return{cands:c,yol:"1500 m"};
+  await dgSleep(2100);
+  c=await dgQueryParkSafe(lat,lon,3500);
+  if(c&&c.length)return{cands:c,yol:"3500 m"};
+  await dgSleep(2100);
+  c=await dgQueryParkByName(lat,lon,projName);
+  if(c&&c.length)return{cands:c,yol:"ad araması"};
+  return{cands:null,yol:"bulunamadı"};
+}
+
+function dgBackfillProgress(i,n,label){
+  const box=$("backfillBox");
+  if(!box)return;
+  const pct=Math.round((i/n)*100);
+  box.style.display="block";
+  box.innerHTML=
+    `<div class="alert info" style="margin:6px 0">⏳ Park geri doldurma · <b>${i+1}/${n}</b> · ${esc(label)}<br>`+
+    `<span style="font-size:.78rem">Her proje için ölçüm merkezi hesaplanıp OSM'de park aranıyor `+
+    `(1500 m → 3500 m → ad araması). Overpass nezaketi için ~2 sn arayla.</span></div>`+
+    `<div style="height:8px;background:var(--line);border-radius:5px;overflow:hidden">`+
+    `<div style="height:100%;width:${pct}%;background:var(--green);transition:width .3s"></div></div>`;
+}
+
 async function backfillParks(){
   if(!PROFILE||(PROFILE.role!=="admin"&&PROFILE.role!=="owner"))return toast("Yetki yok.","err");
   const box=$("backfillBox");
 
+  if(!navigator.onLine){
+    if(box){box.style.display="block";box.innerHTML=`<div class="alert err">⛔ Park geri doldurma internet gerektirir (OSM/Overpass sorgusu).</div>`;}
+    return toast("Çevrimdışı: park geri doldurma çalışmaz.","err","📴");
+  }
+
   const{data:projs,error}=await sb.from("projects").select("id,name,owner,park_id,park_name,label,city,country");
-  if(error)return toast("Projeler okunamadı: "+esc(error.message),"err");
+  if(error){
+    if(box){box.style.display="block";box.innerHTML=`<div class="alert err">⚠ Projeler okunamadı: <span class="mono">${esc(error.message)}</span></div>`;}
+    return toast("Projeler okunamadı: "+esc(error.message),"err");
+  }
   const targets=(projs||[]).filter(p=>!p.park_id);
 
   if(!targets.length){
-    if(box){box.style.display="block";box.innerHTML=`<div class="alert ok">✓ Park bağı eksik proje yok.</div>`;}
+    if(box){box.style.display="block";box.innerHTML=`<div class="alert ok">✓ Park bağı eksik proje yok — hepsi bir parka bağlı.</div>`;}
     return toast("Park bağı eksik proje yok ✓","ok","🌳");
   }
 
-  if(box){
-    box.style.display="block";
-    box.innerHTML=`<div class="alert info">⏳ ${targets.length} proje taranıyor — her biri için ölçüm merkezi hesaplanıp OSM'de park aranıyor (Overpass nezaketi: ~2 sn arayla)…</div>`;
-  }
+  dgBackfillProgress(0,targets.length,targets[0].name);
 
   const plan=[];
-  for(const p of targets){
+  for(let i=0;i<targets.length;i++){
+    const p=targets[i];
+    dgBackfillProgress(i,targets.length,p.name);
+
     const{data:m}=await sb.from("measurements").select("lat,lon").eq("project_id",p.id).limit(1000);
     const pts=(m||[]).filter(r=>Number.isFinite(+r.lat)&&Number.isFinite(+r.lon));
     if(!pts.length){
-      plan.push({project:p,durum:"ölçüm yok",park:null});
+      plan.push({project:p,durum:"ölçüm yok",park:null,cand:null,lat:null,lon:null});
       continue;
     }
     const lat=pts.reduce((a,r)=>a+ +r.lat,0)/pts.length;
     const lon=pts.reduce((a,r)=>a+ +r.lon,0)/pts.length;
 
-    let cands=null;
-    try{cands=await queryPark(lat,lon,1500);}catch(e){}
-    await new Promise(r=>setTimeout(r,2100));
+    const found=await dgDetectParkForProject(lat,lon,p.name);
+    await dgSleep(2100);
 
-    if(!cands||!cands.length){
-      plan.push({project:p,durum:"OSM'de park yok",park:null,lat,lon});
+    if(!found.cands||!found.cands.length){
+      plan.push({project:p,durum:"OSM'de park yok",park:null,cand:null,lat,lon,n:pts.length});
       continue;
     }
-    const c=cands[0];
+    const c=found.cands[0];
+    const parkName=c.name||p.name;
     plan.push({
-      project:p,
-      durum:"eşleşti",
-      cand:c,
-      lat,lon,
-      parkName:c.name||"İsimsiz Park",
-      newName:dgProjectName(c.name||"İsimsiz Park",dgLabelFromLegacy(p.name,c.name||""))
+      project:p,durum:"eşleşti",yol:found.yol,cand:c,lat,lon,n:pts.length,
+      parkName,
+      newName:dgProjectName(parkName,dgLabelFromLegacy(p.name,parkName))
     });
   }
 
@@ -915,24 +999,33 @@ function dgRenderBackfillPlan(){
 
   box.style.display="block";
   box.innerHTML=
-    `<div class="alert info" style="margin:6px 0">Plan: <b>${ok.length}</b> proje parka bağlanacak · `+
-    `<b>${noPark.length}</b> projede OSM parkı yok (elle oluşturulmalı) · <b>${noMeas.length}</b> projede ölçüm yok.</div>`+
-    `<div class="tblwrap" style="max-height:320px;overflow:auto"><table>`+
-      `<thead><tr><th>Proje (eski ad)</th><th>Park</th><th>Yeni ad</th><th>Alan</th><th>Durum</th></tr></thead><tbody>`+
-      plan.map(x=>`<tr>`+
-        `<td>${esc(x.project.name)}</td>`+
-        `<td>${esc(x.parkName||"—")}</td>`+
-        `<td>${esc(x.newName||"—")}</td>`+
-        `<td>${x.cand?dgFmtHa(x.cand.area):"—"}</td>`+
-        `<td>${x.durum==="eşleşti"?'<span class="badge on">✓</span>':'<span class="badge admin">'+esc(x.durum)+'</span>'}</td>`+
-      `</tr>`).join("")+
+    `<div class="alert info" style="margin:6px 0">Plan: <b>${ok.length}</b> proje OSM parkıyla eşleşti · `+
+    `<b>${noPark.length}</b> projede OSM parkı yok (satırdaki ✍️ ile elle oluştur) · `+
+    `<b>${noMeas.length}</b> projede ölçüm yok.</div>`+
+    `<div class="tblwrap" style="max-height:340px;overflow:auto"><table>`+
+      `<thead><tr><th>Proje (eski ad)</th><th>Park</th><th>Yeni ad</th><th>Alan</th><th>Nasıl bulundu</th><th>Durum / İşlem</th></tr></thead><tbody>`+
+      plan.map(x=>{
+        const isOk=x.durum==="eşleşti";
+        const act=isOk
+          ? `<span class="badge on">✓ bağlanacak</span>`
+          : (x.lat!=null
+            ? `<span class="badge admin">${esc(x.durum)}</span> <button class="btn sm ghost" onclick="dgBackfillManual(${x.project.id})">✍️ Elle park oluştur ve bağla</button>`
+            : `<span class="badge off">${esc(x.durum)}</span>`);
+        return `<tr>`+
+          `<td>${esc(x.project.name)}<br><span class="mono" style="font-size:.66rem;color:var(--mut)">${x.n||0} ölçüm${x.lat!=null?` · ${x.lat.toFixed(5)},${x.lon.toFixed(5)}`:""}</span></td>`+
+          `<td>${esc(x.parkName||"—")}</td>`+
+          `<td>${esc(x.newName||"—")}</td>`+
+          `<td>${x.cand?dgFmtHa(x.cand.area):"—"}</td>`+
+          `<td class="mono" style="font-size:.68rem">${esc(x.yol||"—")}</td>`+
+          `<td>${act}</td>`+
+        `</tr>`;
+      }).join("")+
     `</tbody></table></div>`+
-    (ok.length
-      ? `<div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap">`+
-          `<button class="btn amber" onclick="dgApplyBackfill()">✓ Planı Uygula (${ok.length} proje)</button>`+
-          `<button class="btn sm ghost" onclick="dgCloseBackfill()">Kapat</button>`+
-        `</div>`
-      : `<div class="alert err" style="margin-top:8px">Bağlanacak proje çıkmadı. OSM'de olmayan parklar için Canlı Harita → Park Algılama → "elle oluştur" kullanın.</div>`);
+    `<div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap">`+
+      (ok.length?`<button class="btn amber" onclick="dgApplyBackfill()">✓ Planı Uygula (${ok.length} proje)</button>`:``)+
+      `<button class="btn sm ghost" onclick="dgCloseBackfill()">Kapat</button>`+
+    `</div>`+
+    (ok.length?``:`<div class="alert warn" style="margin-top:8px">OSM'de eşleşen park çıkmadı. Satırlardaki <b>✍️ Elle park oluştur ve bağla</b> düğmesi, ölçüm merkezinde o proje adıyla bir park kimliği açar — karşılaştırma yine park bazlı çalışır.</div>`);
 }
 
 function dgCloseBackfill(){
@@ -948,28 +1041,70 @@ async function dgApplyBackfill(){
   if(!confirm(plan.length+" proje parka bağlanacak ve adları yeniden kurulacak. Devam?"))return;
 
   let ok=0,fail=0;
-  for(const x of plan){
-    /* Park kimliğini yaz/oku (kayıt burada oluşur; aynı park birden çok
-     * projede geçiyorsa dgRegisterPark aynı satırı döndürür). */
+  for(let i=0;i<plan.length;i++){
+    const x=plan[i];
+    dgBackfillProgress(i,plan.length,x.project.name+" → bağlanıyor");
+
+    /* Park kimliğini yaz/oku (aynı park birden çok projede geçiyorsa
+     * dgRegisterPark aynı satırı döndürür → karşılaştırmada birleşirler). */
     const park=await dgRegisterPark(x.cand,{lat:x.lat,lon:x.lon,source:"backfill"});
     if(!park){fail++;continue;}
-
-    const{error}=await sb.from("projects").update({
-      park_id:park.id,
-      label:dgLabelFromLegacy(x.project.name,park.name)
-    }).eq("id",x.project.id);
-
-    if(error){fail++;console.warn("DENDROGEO · backfill proje hatası:",error.message);continue;}
-
-    try{
-      await sb.from("measurements").update({park_id:park.id}).eq("project_id",x.project.id).is("park_id",null);
-    }catch(e){}
-    ok++;
+    if(await dgLinkProjectToPark(x.project,park))ok++;else fail++;
   }
 
   toast(`✓ ${ok} proje parka bağlandı${fail?` · ${fail} hata`:""}`,fail?"warn":"ok","🌳");
   DG_BACKFILL_PLAN=null;
   dgCloseBackfill();
+  dgAfterBackfillWrites();
+}
+
+/* Tek proje için ortak bağlama adımları (geri doldurma + elle oluşturma). */
+async function dgLinkProjectToPark(proj,park){
+  const label=dgLabelFromLegacy(proj.name,park.name);
+  const{error}=await sb.from("projects").update({park_id:park.id,label}).eq("id",proj.id);
+  if(error){
+    console.warn("DENDROGEO · backfill proje hatası:",error.message);
+    toast("Bağlanamadı ("+esc(proj.name)+"): "+esc(error.message),"err");
+    return false;
+  }
+  /* Ölçümlerin denormalize park_id'sini doldur (view zaten yedekli okur,
+   * ama rapor/dışa aktarım tutarlılığı için satır düzeyinde de dursun). */
+  try{
+    await sb.from("measurements").update({park_id:park.id}).eq("project_id",proj.id).is("park_id",null);
+  }catch(e){}
+  return true;
+}
+
+/* OSM'de park bulunamayan proje: ölçüm merkezinde, proje adıyla MANUEL park
+ * kimliği aç ve bağla. Böylece "Ülkü", "Dikmen Vadisi" gibi yerler de park
+ * bazlı karşılaştırmaya girer. */
+async function dgBackfillManual(projectId){
+  if(!PROFILE||(PROFILE.role!=="admin"&&PROFILE.role!=="owner"))return toast("Yetki yok.","err");
+  const x=(DG_BACKFILL_PLAN||[]).find(k=>k.project.id===projectId);
+  if(!x||x.lat==null)return toast("Bu proje için ölçüm merkezi yok.","err");
+  const name=String(x.project.name||"").trim()||"İsimsiz Park";
+  if(!confirm(`"${name}" adıyla elle park kimliği oluşturulsun ve proje bağlansın mı?\nKonum: ölçümlerin merkezi (${x.lat.toFixed(5)}, ${x.lon.toFixed(5)})`))return;
+
+  const park=await dgRegisterPark(
+    {name,source:"manual",area:null},
+    {manual:true,lat:x.lat,lon:x.lon,source:"manual"}
+  );
+  if(!park)return toast("Park kimliği oluşturulamadı.","err","🌳");
+
+  const done=await dgLinkProjectToPark(x.project,park);
+  if(!done)return;
+
+  /* Plan satırını "eşleşti"ye çevir ki liste güncel kalsın */
+  x.durum="eşleşti";x.parkName=park.name;x.yol="elle oluşturuldu";
+  x.newName=dgProjectName(park.name,dgLabelFromLegacy(x.project.name,park.name));
+  x.cand={name:park.name,area:park.area_m2};
+
+  toast("✓ "+esc(park.name)+" oluşturuldu ve bağlandı","ok","🌳");
+  dgRenderBackfillPlan();
+  dgAfterBackfillWrites();
+}
+
+function dgAfterBackfillWrites(){
   if(typeof loadProjects==="function")loadProjects();
   if(typeof loadWorld==="function")loadWorld();
   if(typeof loadAdmin==="function")loadAdmin();
@@ -1046,3 +1181,4 @@ window.dgProjectChanged=dgProjectChanged;
 window.backfillParks=backfillParks;
 window.dgApplyBackfill=dgApplyBackfill;
 window.dgCloseBackfill=dgCloseBackfill;
+window.dgBackfillManual=dgBackfillManual;

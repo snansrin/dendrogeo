@@ -108,6 +108,7 @@ index.html                  ÜRETİLEN ARTİFAKT — partials'tan build edilir, 
         ├── user-admin.js   │
         ├── backup.js       ┘
         ├── admin.js        onay/moderasyon çekirdeği + toplu dışa aktarım
+        ├── admin-tree.js   ★ park→proje→kullanıcı ağacı + hata görünürlüğü
         ├── export.js       CSV / QGIS / GeoJSON
         ├── allometry.js    Chave 2014 biyokütle/karbon
         └── auth.js         giriş/kayıt + Cloudflare Turnstile
@@ -163,12 +164,12 @@ python3 -m http.server 8080        # herhangi bir statik sunucu olur
 ### Test ve denetimler
 
 ```bash
-npm run check          # sözdizimi + ?v= + build + CSP + 334 test
+npm run check          # sözdizimi + ?v= + build + CSP + 360 test
 npm test               # yalnız testler (node:test, bağımlılık gerektirmez)
 npm run build          # index.html'i partials'tan üret (değişiklik sonrası)
 ```
 
-334 test şunları kilitler: karbon hesabı (Chave 2014, ρ fallback,
+360 test şunları kilitler: karbon hesabı (Chave 2014, ρ fallback,
 NaN yayılmaması), jeodezik alan ve geometri, **UTM projeksiyonu** (bilinen
 referans değerlerine karşı), Sutherland-Hodgman kırpma + alan korunumu,
 Service Worker'ın çevrimdışı yedeği, vendor kütüphanelerin global kurulumu,
