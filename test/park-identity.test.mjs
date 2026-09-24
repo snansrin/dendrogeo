@@ -262,6 +262,44 @@ describe('migration 0004: park kimliği şeması', () => {
   });
 });
 
+describe('migration 0005: park adı yazım düzeni (Türkçe duyarlı)', () => {
+  const sql5 = readFileSync(join(ROOT, 'supabase/migrations/0005_park_name_case.sql'), 'utf8');
+
+  test('dg_tr_title Türkçe harfleri ELLE eşler (initcap ASCII yereli bozar)', () => {
+    assert.match(sql5, /create or replace function public\.dg_tr_title/);
+    assert.match(sql5, /when left\(w,1\) = 'i' then 'İ'/);
+    assert.match(sql5, /when left\(w,1\) = 'ı' then 'I'/);
+    /* initcap('işçi') → 'Işçi' (yanlış); bu yüzden ad düzeltmesinde kullanılmaz.
+     * Yorumlar VE string literalleri (COMMENT ON metni initcap'ten söz eder)
+     * ayıklandıktan sonra çalışan SQL'de initcap çağrısı olmamalı. */
+    const exec5 = sql5.replace(/--[^\n]*/g, '').replace(/'[^']*'/g, "''");
+    assert.ok(!/initcap\s*\(/.test(exec5), 'çalışan SQL initcap kullanmamalı');
+  });
+
+  test('⭐ tetikleyici yalnız TAMAMEN küçük harfli adları düzeltir (veri ezmez)', () => {
+    assert.match(sql5, /create trigger trg_park_name_case\s+before insert or update of name on public\.parks/);
+    assert.match(sql5, /new\.name !~ '\[A-ZİIŞĞÜÖÇ\]'/);
+  });
+
+  test('mevcut parklar + proje adları onarılır', () => {
+    assert.match(sql5, /update public\.parks\s+set name = public\.dg_tr_title\(name\)/);
+    /* projects.name'e doğrudan dokunulmaz: trg_compose_project_name (0004)
+     * park_name tazelenince adı zaten yeniden kurar — tek kaynak kuralı. */
+    assert.match(sql5, /update public\.projects p\s+set park_name = pk\.name/);
+    assert.ok(!/update public\.projects[\s\S]{0,80}set name\s*=/.test(sql5), 'proje adı elle yazılmamalı');
+  });
+
+  test('name_norm DEĞİŞMEZ (park eşleştirmesi bozulmasın)', () => {
+    assert.ok(!/set name_norm/.test(sql5), 'name_norm güncellenmemeli');
+    assert.match(sql5, /name_norm/); /* belgelenmiş olmalı */
+  });
+
+  test('idempotent', () => {
+    assert.match(sql5, /create or replace function/);
+    assert.match(sql5, /drop trigger if exists trg_park_name_case/);
+  });
+});
+
 /* =========================================================
    3) KABUK (index.html + modül kaydı)
 ========================================================= */

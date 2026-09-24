@@ -10,6 +10,7 @@ Supabase kontrol panelinde yaşıyordu; artık her değişiklik version control'
 | `migrations/0001_init_v2_1.sql` | Çalışır durumdaki TAM şema (kullanıcı tarafından sağlanan v2.1 + SECURITY PATCH v1). Idempotent. **Üzerine değişiklik yapılmaz.** |
 | `migrations/0002_review_fixes.sql` | Kod incelemesinin 4 düzeltmesi (aşağıda). Idempotent. |
 | `migrations/0003_audit_and_agg.sql` | Denetim izi (reviewed_by/at, reject_reason, deleted_at) + onay damgası trigger'ı + `v_world_agg` toplulaştırma view'ı. Idempotent. |
+| `migrations/0005_park_name_case.sql` | **Park adı yazım düzeni**: `dg_tr_title()` (Türkçe duyarlı: i→İ, ı→I) + yalnız tamamen küçük harfli adları düzelten tetikleyici + mevcut park/proje adlarının onarımı. Idempotent. |
 | `migrations/0004_parks.sql` | **Park kimliği**: `parks` tablosu (OSM elemanı = canonical anahtar), `projects.park_id/label/park_name`, `measurements.park_id`, `v_park_compare` view'ı, iki trigger (proje adı kurma + ölçüm kapısı). Idempotent. |
 | `dump-schema.sh` | Canlı şemayı `supabase db dump` ile yeniden dökmek için yardımcı |
 | `audit/rls-probe.sh` | Anon key ile 13 saldırı denemesi (yetki yükseltme dahil) |
@@ -23,7 +24,8 @@ Supabase SQL Editor'da sırayla:
 2. `0002_review_fixes.sql` → Run
 3. `0003_audit_and_agg.sql` → Run (denetim izi + toplulaştırma view'ı)
 4. `0004_parks.sql` → Run (park kimliği + ölçüm kapısı + karşılaştırma view'ı)
-5. (Önerilir) `audit/rls-probe.sh`'i kendi makinenden çalıştır → sonuçları
+5. `0005_park_name_case.sql` → Run (park adı yazım düzeni: "göksu parkı" → "Göksu Parkı")
+6. (Önerilir) `audit/rls-probe.sh`'i kendi makinenden çalıştır → sonuçları
    `audit/RLS-DENETIM.md` tablosuna işle
 
 > ⚠️ **Sıra önemli:** `0004` uygulanmadan site çökmez ama park kimliği devre
@@ -97,6 +99,15 @@ belirlediği ad olsun (Göksu Parkı - deneme). Park algılamadan ölçüm giril
 `v_park_compare` `security_invoker=true` → anon `projects` okuyamadığı için
 view anon'a boş döner (karşılaştırma zaten giriş sonrası yüklenir; proje
 adları kamusal veri değil).
+
+**Park adı yazımı (0005):** OSM'de ad küçük harfle yazılmışsa ("göksu parkı")
+bu ad proje adına, karşılaştırmaya ve raporlara yayılıyordu. `dg_tr_title()`
+Türkçe duyarlı başlık düzeni uygular (`initcap` kullanılmaz: `initcap('işçi')`
+→ `Işçı`, doğru olan `İşçi`). Tetikleyici **yalnız içinde hiç büyük harf
+olmayan** adları düzeltir — `KOCAELİ PARK` gibi bilinçli yazımlara dokunmaz.
+`name_norm` değişmez, dolayısıyla park eşleştirmesi bozulmaz; `projects.park_name`
+tazelendiğinde `trg_compose_project_name` proje adını da otomatik düzeltir
+("göksu parkı - deneme" → "Göksu Parkı - deneme").
 
 **İstemci tarafı:** `src/services/park-registry.js` (kimlik yazma, algılama
 akışı, ölçüm kapısı, geri doldurma aracı) + `test/park-identity.test.mjs`
