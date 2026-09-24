@@ -199,7 +199,7 @@ partials)**, CSP↔kod tutarlılığı, birim testler ve (yalnız `main`'e push'
 ## Veri erişimi ve lisans
 
 * **Uygulama içinde:** giriş yapmış kullanıcı kendi kayıtlarını CSV / QGIS CSV / GeoJSON olarak dışa aktarabilir.
-* **Lisans:** [CC BY-NC 4.0](https://creativecommons.org/licenses/by-nc/4.0/) — **kod, belgeler ve veri seti birlikte**; ticari kullanım yazılı izne tabidir (`snansrin@gmail.com`).
+* **Lisans:** [CC BY-NC 4.0](https://creativecommons.org/licenses/by-nc/4.0/) — **kod, belgeler ve veri seti birlikte**; ticari kullanım yazılı izne tabidir (`sinan@dendrogeo.org`).
   Telif: **Nagihan ŞİRİN & Sinan ŞİRİN**. Ayrıntı: [`LICENSE`](LICENSE) (tam lisans metni) + [`NOTICE`](NOTICE) (atıf biçimi ve üçüncü taraf bileşenlerin kendi lisansları).
   > ⚠ `LICENSE` eskiden **MIT** idi ve README rozeti/DOI ile çelişiyordu (2026-09-24'te CC BY-NC 4.0 ile değiştirildi). MIT'ten kalan türev çalışmalarınız varsa lisans durumunu netleştirin.
 * **Atıf:** Zenodo DOI [10.5281/zenodo.22646300](https://doi.org/10.5281/zenodo.22646300)

@@ -116,7 +116,7 @@ describe('KVKK: açık rıza ve aydınlatma', () => {
     assert.ok(existsSync(join(ROOT, p)), 'sayfa yok');
     const t = rd(p);
     assert.match(t, /Nagihan ŞİRİN &amp; Sinan ŞİRİN/, 'veri sorumlusu KİMLİĞİ yazılmalı');
-    assert.match(t, /snansrin@gmail\.com/);
+    assert.match(t, /sinan@dendrogeo\.org/);
     assert.match(t, /m\.5\/2-a/, 'hukuki sebep');
     assert.match(t, /meşru menfaat/);
     assert.match(t, /yurt dışına aktarım/i);
@@ -232,5 +232,53 @@ describe('JSON-LD: Dataset, atıf ve yasal belge bağlantıları', () => {
     assert.equal(app.privacyPolicy, 'https://dendrogeo.org/gizlilik/');
     assert.equal(app.termsOfService, 'https://dendrogeo.org/kullanim-kosullari/');
     assert.match(app.copyrightHolder.name, /Nagihan ŞİRİN & Sinan ŞİRİN/);
+  });
+});
+
+/* =========================================================
+   5) KİŞİSEL VERİ SIZINTISI (kullanıcı isteği 2026-09-24:
+      "her yere kişisel mailimi yazmışsın … gerçek mailimi verme")
+========================================================= */
+describe('depoda kişisel e-posta sızıntısı yok', () => {
+  /* Desen runtime'da kuruluyor: bu test dosyasının KENDİSİ eşleşmesin. */
+  const KISISEL = new RegExp('@' + ['gmail', 'hotmail', 'outlook', 'yahoo', 'icloud', 'yandex'].join('|@') + '\\.', 'i');
+  const ATLANACAK = /\.(png|jpe?g|gif|ico|svg|woff2?|ttf|eot|map|patch)$/i;
+
+  test('⭐ izlenen hiçbir metin dosyasında kişisel e-posta yok', () => {
+    const dosyalar = [];
+    const yuru = (d) => {
+      for (const a of readdirSync(d)) {
+        if (a === '.git' || a === 'node_modules' || a.startsWith('.')) continue;
+        const t = join(d, a);
+        if (statSync(t).isDirectory()) yuru(t);
+        else if (!ATLANACAK.test(a)) dosyalar.push(t);
+      }
+    };
+    yuru(ROOT);
+    assert.ok(dosyalar.length > 40, 'tarama dosya bulamadı: ' + dosyalar.length);
+    const sizen = [];
+    for (const f of dosyalar) {
+      let t; try { t = readFileSync(f, 'utf8'); } catch (e) { continue; }
+      if (KISISEL.test(t)) sizen.push(f.slice(ROOT.length + 1));
+    }
+    assert.deepEqual(sizen, [], 'kişisel e-posta içeren dosyalar: ' + sizen.join(', '));
+  });
+
+  test('⭐ iletişim adresi alan adı üzerinden (sinan@dendrogeo.org)', () => {
+    for (const f of ['kunye/index.html', 'gizlilik/index.html', 'aydinlatma/index.html', 'kullanim-kosullari/index.html', 'NOTICE']) {
+      assert.match(rd(f), /sinan@dendrogeo\.org/, f + ' alan adı adresi kullanmalı');
+    }
+  });
+
+  test('⭐ migration kurucu ataması gerçek e-posta İÇERMİYOR (depo herkese açık)', () => {
+    const m = rd('supabase/migrations/0001_init_v2_1.sql');
+    assert.ok(!/role='owner'.*where email='[^']*@[^']*'/s.test(m.replace(/^--.*$/gm, '')),
+      'çalışan SQL içinde gerçek e-posta olmamalı');
+    assert.match(m, /KENDI_HESAP_EPOSTANIZ/, 'kurulum talimatı placeholder ile verilmeli');
+    assert.match(m, /HERKESE AÇIK bir depoda/, 'gerekçe belgelenmeli');
+  });
+
+  test('güvenlik bildirimi ayrı adreste (security@dendrogeo.org)', () => {
+    assert.match(rd('SECURITY.md'), /security@dendrogeo\.org/);
   });
 });

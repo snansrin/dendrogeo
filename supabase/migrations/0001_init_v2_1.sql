@@ -254,7 +254,17 @@ insert into public.profiles (id, full_name, organization, email)
 select id, raw_user_meta_data->>'full_name', raw_user_meta_data->>'organization', email
 from auth.users on conflict (id) do nothing;
 
-update public.profiles set role='owner', active=true where email='snansrin@gmail.com';
+-- ⚠ KURUCU ATAMASI BİLEREK ÇALIŞTIRILMIYOR (2026-09-24):
+-- Bu dosya HERKESE AÇIK bir depoda duruyor; içine gerçek bir e-posta yazmak
+-- kişisel veri sızıntısıdır (eskiden burada kurucunun gmail adresi vardı).
+-- Kurulumdan sonra Supabase SQL Editor'da BİR KEZ elle çalıştırın:
+--
+--   update public.profiles set role='owner', active=true
+--    where email = 'KENDI_HESAP_EPOSTANIZ';
+--
+-- Mevcut kurulumda (dendrogeo.org) kurucu rolü zaten atanmış durumda;
+-- bu dosyanın tekrar çalıştırılması o rolü DÜŞÜRMEZ (update yorumda).
+-- Rol kontrolü:  select email, role from public.profiles where role='owner';
 
 -- 🛡 DendroGeo SECURITY PATCH v1
 

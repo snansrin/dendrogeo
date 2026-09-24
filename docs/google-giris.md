@@ -152,7 +152,7 @@ Sol menü: **Google Auth Platform → Clients** → **+ CREATE CLIENT**
 ## B4. (Sorun çıkarsa) Allow manual linking
 Supabase, **doğrulanmış** aynı e-postaya sahip kimlikleri normalde
 **otomatik birleştirir** (Google e-postaları doğrulanmış sayılır). Yani
-`snansrin@gmail.com` hem parola hem Google ile giriş yapabilir; tek kullanıcı,
+kayıtlı e-postanızla hem parola hem Google ile giriş yapabilirsiniz; tek kullanıcı,
 iki kimlik (`auth.identities`) olur.
 
 Yine de `identity_already_exists` hatası alırsan:
