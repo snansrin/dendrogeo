@@ -151,3 +151,48 @@ describe('saha konforu: PWA kurulum + senkron rozeti + yazdırma', () => {
     assert.match(css, /\.view\.on\{display:block\}/);
   });
 });
+
+/* YAPISAL DENGE (canlıda 2026-09-24 yaşandı):
+ * İki kart tek kartta birleştirilirken fazladan bir </div> kaldı. Sonuç:
+ * v-users bloğu #main'in DIŞINA taştı ve "👥 Kullanıcı Yönetimi" sayfası
+ * bozuk göründü — hiçbir JS hatası yok, saf HTML dengesi. Statik regex
+ * denetimleri (id/handler) bunu yakalamaz; div sayımı yakalar. */
+describe('yapısal denge: view blokları #main dışına taşmasın', () => {
+  const html = readFileSync(join(ROOT, 'index.html'), 'utf8');
+  const say = (t, re) => (t.match(re) || []).length;
+
+  test('⭐ index.html <div> / </div> sayısı eşit', () => {
+    const o = say(html, /<div\b/g), c = say(html, /<\/div>/g);
+    assert.equal(o, c, `${o} açılan / ${c} kapanan → fazla kapanış view'ları #main dışına iter`);
+  });
+
+  test('⭐ her v-* view bloğu kendi içinde dengeli', () => {
+    const pos = [...html.matchAll(/<div class="view[^"]*" id="(v-[\w-]+)"/g)];
+    assert.ok(pos.length >= 9, 'view blokları bulunamadı: ' + pos.length);
+    const bozuk = [];
+    for (let i = 0; i < pos.length - 1; i++) {
+      const seg = html.slice(pos[i].index, pos[i + 1].index);
+      const o = say(seg, /<div\b/g), c = say(seg, /<\/div>/g);
+      if (o !== c) bozuk.push(`${pos[i][1]}: ${o} açılan / ${c} kapanan`);
+    }
+    assert.deepEqual(bozuk, [], 'dengesiz view: ' + bozuk.join(' | '));
+  });
+
+  test('kaynak partials da dengeli (build öncesi yakala)', () => {
+    for (const f of ['partials/shell.html', 'partials/landing.html', 'partials/head.html']) {
+      const t = readFileSync(join(ROOT, f), 'utf8');
+      const o = say(t, /<div\b/g), c = say(t, /<\/div>/g);
+      assert.equal(o, c, `${f}: ${o}/${c}`);
+    }
+  });
+
+  test('v-users bloğu v-admin\'in İÇİNE kaçmıyor (somut vaka)', () => {
+    const a = html.indexOf('<div class="view" id="v-admin">');
+    const b = html.indexOf('<div class="view" id="v-users">');
+    const seg = html.slice(a, b);
+    assert.equal(say(seg, /<div\b/g), say(seg, /<\/div>/g),
+      'v-admin fazladan kapanış içeriyor → v-users #main dışına taşar');
+    /* v-users, #main içinde kalmalı: sonrasında hâlâ view kardeşi olmalı */
+    assert.ok(b > a, 'sıra bozuk');
+  });
+});
