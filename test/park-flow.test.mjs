@@ -677,7 +677,8 @@ describe('yönetim ağacı tüm veriyi hiyerarşik gösterir', () => {
 
   test('embed patlarsa yedek JOIN modu devreye girer', async () => {
     W.route((st) => {
-      if (st.table === 'measurements' && String(st.select).includes('profiles(')) return { data: null, error: { message: 'embed bozuk' } };
+      /* Gömülü sorgu FK adıyla tanınır: profiles!measurements_owner_fkey(...) */
+      if (st.table === 'measurements' && String(st.select).includes('profiles!')) return { data: null, error: { message: 'embed bozuk' } };
       if (st.table === 'measurements') return { data: TREEROWS.map((r) => ({ ...r, profiles: undefined, projects: undefined })) , error: null };
       if (st.table === 'projects') return { data: [{ id: 10, name: 'Göksu Parkı - deneme', park_id: 7, park_name: 'Göksu Parkı', parks: { id: 7, name: 'Göksu Parkı', area_m2: 508000, city: 'Ankara' } }, { id: 11, name: 'Göksu Parkı - kuzey', park_id: 7, parks: { id: 7, name: 'Göksu Parkı', area_m2: 508000, city: 'Ankara' } }, { id: 12, name: 'Ülkü', park_id: null, parks: null }], error: null };
       if (st.table === 'profiles') return { data: [{ id: 'u1', full_name: 'Ayşe Yılmaz' }, { id: 'u2', full_name: 'Burak Demir' }, { id: 'u3', full_name: 'Cem Kaya' }], error: null };

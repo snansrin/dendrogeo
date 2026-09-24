@@ -11,7 +11,13 @@ async function loadAdmin(){
  if(!PROFILE||(PROFILE.role!=="admin"&&PROFILE.role!=="owner"))return;
  const[uRes,mRes,pRes,gRes]=await Promise.all([
   sb.from("profiles").select("*"),
-  sb.from("measurements").select("*,profiles(full_name)").order("created_at",{ascending:false}),
+  /* ⚠ PGRST201 DÜZELTMESİ (2026-09-24, canlıda yakalandı): 0003 ile
+   * measurements'a reviewed_by FK'sı eklendi → profiles'a İKİ ilişki var
+   * (owner + reviewed_by). Çıplak "profiles(...)" gömüsü bu yüzden
+   * "Could not embed because more than one relationship was found" hatası
+   * veriyordu ve tablo sessizce "Kayıt yok." basıyordu (veri silinmemişti).
+   * FK adı açıkça belirtilir: profiles!measurements_owner_fkey. */
+  sb.from("measurements").select("*,profiles!measurements_owner_fkey(full_name)").order("created_at",{ascending:false}),
   sb.from("projects").select("*"),
   sb.from("v_global").select("*").single()
  ]);

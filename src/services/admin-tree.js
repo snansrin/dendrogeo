@@ -36,10 +36,15 @@ let DG_TREE_ERR=null;
    1. VERİ ÇEKME (yedek zincir + hata görünürlüğü)
 ========================================================= */
 
+/* ⚠ profiles gömüsü FK adıyla BELİRTİLMELİ: 0003 measurements'a reviewed_by
+ * eklediği için profiles'a iki ilişki var (owner + reviewed_by). Çıplak
+ * "profiles(...)" → PGRST201 "more than one relationship" → satır gelmez.
+ * (Canlıda 2026-09-24'te tam olarak bu yaşandı; test/critical-fixes kilitler.) */
 const DG_TREE_SEL_FULL=
   "id,point_id,measurement_no,species,grp,dbh_cm,height_m,carbon_kg,"+
   "status,photo_url,created_at,lat,lon,owner,project_id,park_id,"+
-  "profiles(full_name),"+
+  "reviewed_by,reviewed_at,"+
+  "profiles!measurements_owner_fkey(full_name),"+
   "projects(id,name,park_id,park_name,parks(id,name,area_m2,city,country))";
 
 /* Kademeli yedek: şema eskiyse (0004 yok) veya PostgREST şema önbelleği

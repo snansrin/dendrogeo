@@ -57,3 +57,48 @@ describe('QGIS rehberi içerik temizliği', () => {
     assert.ok(n <= 2, 'dendro_foto örneği beklenenden çok tekrar ediyor: ' + n);
   });
 });
+
+/* 4) PGRST201 — ÇOKLU İLİŞKİ TUZAĞI (canlıda 2026-09-24)
+ *
+ * 0003_audit_and_agg.sql measurements'a `reviewed_by uuid references profiles(id)`
+ * ekledi. O andan itibaren measurements→profiles arasında İKİ FK var (owner +
+ * reviewed_by) ve PostgREST çıplak `profiles(full_name)` gömüsünü çözemiyor:
+ *
+ *   PGRST201 "Could not embed because more than one relationship was found
+ *   for 'measurements' and 'profiles'"
+ *   hint: 'profiles!measurements_owner_fkey', 'profiles!measurements_reviewed_by_fkey'
+ *
+ * Sonuç: data=null. Eski kod `mRes.data||[]` ile bunu boş liste sandı ve
+ * yönetim tablosuna "Kayıt yok." bastı — kullanıcı verisinin silindiğini
+ * düşündü. İki ders kilitleniyor: (a) gömü FK adıyla belirtilmeli,
+ * (b) sorgu hatası asla sessizce "veri yok"a dönüşmemeli. */
+describe('PGRST201 çoklu ilişki: measurements→profiles gömüsü FK adıyla', () => {
+  const adm = readFileSync(join(ROOT, 'src/services/admin.js'), 'utf8');
+  const tree = readFileSync(join(ROOT, 'src/services/admin-tree.js'), 'utf8');
+  const dreq = readFileSync(join(ROOT, 'src/services/data-requests.js'), 'utf8');
+
+  test('⭐ admin.js ölçüm sorgusu profiles!measurements_owner_fkey kullanıyor', () => {
+    assert.match(adm, /measurements"\)\.select\("\*,profiles!measurements_owner_fkey\(full_name\)"\)/);
+  });
+
+  test('⭐ admin-tree.js aynı FK adını kullanıyor', () => {
+    assert.match(tree, /profiles!measurements_owner_fkey\(full_name\)/);
+  });
+
+  test('measurements üzerinde ÇIPLAK profiles( gömüsü kalmadı', () => {
+    const bad = [adm, tree].filter((f) => /measurements"[^;]{0,120}\.select\("[^"]*(?<!_fkey)profiles\(/.test(f));
+    assert.equal(bad.length, 0, 'çıplak profiles( gömüsü PGRST201 üretir');
+  });
+
+  test('data_requests tek FK olduğu için çıplak gömü güvenli (belgeleme)', () => {
+    /* data_requests.user_id → profiles: tek ilişki, PGRST201 riski yok. */
+    assert.match(dreq, /data_requests"\)\.select\("\*,profiles\(full_name\)"\)/);
+  });
+
+  test('⭐ sorgu hatası sessizce "Kayıt yok."a dönüşmüyor', () => {
+    assert.match(adm, /if\(mRes\.error\)\{/, 'hata dalı olmalı');
+    assert.match(adm, /veri silinmedi/, 'kullanıcıya güvence');
+    assert.match(tree, /Ölçümler okunamadı/, 'ağaçta hata kutusu');
+    assert.match(tree, /mode:"join"/, 'gömüsüz yedek sorgu');
+  });
+});
