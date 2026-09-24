@@ -8,7 +8,7 @@ async function loadRecords(){
  $("recTable").innerHTML=(data||[]).map(r=>{
   const st=r.status||"Beklemede";
   const bc=st==="Onaylı"?"on":(st==="Red"?"off":"admin");
-  return `<tr><td>${esc(r.projects?.name)||"—"}</td><td>${r.point_id}</td><td>${esc(r.species)}</td><td>${r.dbh_cm}</td><td>${r.height_m}</td><td>${(r.carbon_kg||0).toFixed(1)}</td><td>${r.photo_url?"📷":"—"}</td><td><span class="badge ${bc}">${st==="Beklemede"?"Onay Bekliyor":st}</span></td><td style="display:flex;gap:4px"><button class="btn sm blue" onclick="editRec(${r.id})">✏️</button><button class="btn sm red" onclick="delRec(${r.id})">Sil</button></td></tr>`;
+  return `<tr><td>${esc(r.projects?.name)||"—"}</td><td>${r.point_id}</td><td>${esc(r.species)}</td><td>${r.dbh_cm}</td><td>${r.height_m}</td><td>${(r.carbon_kg||0).toFixed(1)}</td><td>${dgThumb(r.photo_url)}</td><td><span class="badge ${bc}">${st==="Beklemede"?"Onay Bekliyor":st}</span></td><td style="display:flex;gap:4px"><button class="btn sm blue" onclick="editRec(${r.id})">✏️</button><button class="btn sm red" onclick="delRec(${r.id})">Sil</button></td></tr>`;
  }).join("")||"<tr><td colspan=9>Kayıt yok</td></tr>";
 }
 // 2. Kayıt sil

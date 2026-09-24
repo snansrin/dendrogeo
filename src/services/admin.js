@@ -36,7 +36,7 @@ $("aUsers").textContent=users.length;$("aRec").textContent=cnt.count??meas.lengt
   const act=st==="Onaylı"
    ?`<button class="btn sm red" onclick="rejectMeas(${x.id})">🚫 Reddet</button>`
    :`<button class="btn sm" onclick="approveMeas(${x.id})">✓ Onayla</button>`;
-  return `<tr><td>${esc(x.profiles?.full_name)||"—"}</td><td>${x.point_id}</td><td>${esc(x.species)}<br><span class="mono" style="font-size:.68rem;color:var(--mut);text-transform:none;letter-spacing:0">${esc(LATIN[x.species])||""}</span></td><td><b>${x.dbh_cm}</b></td><td><b>${x.height_m}</b></td><td>${(x.carbon_kg||0).toFixed(1)}</td><td>${x.photo_url?`<a href="${esc(x.photo_url)}" target="_blank"><img src="${esc(x.photo_url)}" style="width:40px;height:40px;object-fit:cover;border-radius:6px"></a>`:"—"}</td><td><span class="badge ${bc}">${st}</span></td><td style="display:flex;gap:4px">${act}<button class="btn sm red" onclick="delMeas(${x.id})">🗑️</button></td></tr>`;
+  return `<tr><td>${esc(x.profiles?.full_name)||"—"}</td><td>${x.point_id}</td><td>${esc(x.species)}<br><span class="mono" style="font-size:.68rem;color:var(--mut);text-transform:none;letter-spacing:0">${esc(LATIN[x.species])||""}</span></td><td><b>${x.dbh_cm}</b></td><td><b>${x.height_m}</b></td><td>${(x.carbon_kg||0).toFixed(1)}</td><td>${dgThumb(x.photo_url)}</td><td><span class="badge ${bc}">${st}</span></td><td style="display:flex;gap:4px">${act}<button class="btn sm red" onclick="delMeas(${x.id})">🗑️</button></td></tr>`;
  }).join("")||"<tr><td colspan=9>Kayıt yok.</td></tr>";
  loadStorageStats();
  checkBackupReminder();

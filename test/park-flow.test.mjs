@@ -1087,3 +1087,63 @@ describe('Google ile giriş', () => {
     assert.match(shell, /Google girişi tamamlanamadı/, 'başarısızlıkta kullanıcıya haber verilmeli');
   });
 });
+
+/* =========================================================
+   12) FOTOĞRAF ÖNİZLEMESİ (kullanıcı: "fotoğraflar küçük gözüksün")
+========================================================= */
+describe('fotoğraf önizlemesi listelerde küçük görsel olarak çıkıyor', () => {
+  const PH = 'https://xjbpounwdxrhelmixvqm.supabase.co/storage/v1/object/public/dendro-photos/u1/1.jpg';
+
+  test('⭐ ağaç satırında 40×40 kapak görseli + lazy yükleme', async () => {
+    /* Önceki bölüm PROFILE'ı "user" rolünde bırakmıştı; loadAdminTree yönetici
+     * değilse erken döner. Testler kendi ön koşulunu kurmalı (sıra bağımsızlığı). */
+    run('PROFILE={id:"u-1",role:"owner",full_name:"Kurucu"}; USER={id:"u-1"};');
+    W.route((st) => st.table === 'measurements' ? { data: [
+      { id: 5, owner: 'u1', project_id: 10, park_id: 5, carbon_kg: 120, status: 'Beklemede', species: 'KARAÇAM', grp: 'İBRELİ', point_id: 3, measurement_no: 1, dbh_cm: 37, height_m: 2, created_at: '2026-09-20T10:00:00Z', photo_url: PH,
+        profiles: { full_name: 'Sinan Şirin' },
+        projects: { id: 10, name: 'Atatürk Çocukları - deneme', park_id: 5, parks: { id: 5, name: 'Atatürk Çocukları ve Doğal Yaşam Parkı', area_m2: 852000, city: 'Ankara' } } },
+    ], count: 1, error: null } : { data: [], error: null });
+    run('DG_TREE_STATUS=""; DG_TREE_QUERY=""; DG_TREE_OPEN.clear(); DG_TREE_OPEN.add("p5"); DG_TREE_OPEN.add("j10");');
+    await run('loadAdminTree()');
+    const h = el('adminTree').innerHTML;
+    assert.ok(h.includes('<img class="dg-thumb"'), 'kapak görseli yok: ' + h.slice(0, 200));
+    assert.ok(h.includes('loading="lazy"'), 'uzun listede lazy şart');
+    assert.ok(h.includes('src="' + PH + '"'), 'foto adresi basılmadı');
+    assert.ok(h.includes('target="_blank"') && h.includes('rel="noopener"'), 'yeni sekmede açılmalı');
+    assert.ok(!/>📷</.test(h), 'eski emoji-only gösterim kalmamalı');
+  });
+
+  test('fotoğrafı olmayan satırda "—" (bozuk görsel yok)', () => {
+    run('DG_TREE_ROWS=[{id:6,owner:"u1",project_id:10,park_id:5,carbon_kg:10,status:"Onaylı",species:"HUŞ",grp:"YAPRAKLI",point_id:4,measurement_no:1,photo_url:null,profiles:{full_name:"A"},projects:{id:10,name:"x",park_id:5,parks:{id:5,name:"Göksu Parkı"}}}]');
+    run('dgTreeDraw()');
+    const h = el('adminTree').innerHTML;
+    assert.ok(!h.includes('<img'), 'görsel basılmamalı');
+    assert.ok(h.includes('—'), 'tire gösterilmeli');
+  });
+
+  test('XSS: foto adresi escape ediliyor', () => {
+    run('DG_TREE_ROWS=[{id:7,owner:"u1",project_id:10,park_id:5,carbon_kg:10,status:"Onaylı",species:"HUŞ",grp:"YAPRAKLI",point_id:5,measurement_no:1,photo_url:\'x" onerror="alert(1)\',profiles:{full_name:"A"},projects:{id:10,name:"x",park_id:5,parks:{id:5,name:"Göksu Parkı"}}}]');
+    run('dgTreeDraw()');
+    const h = el('adminTree').innerHTML;
+    assert.ok(!h.includes('onerror="alert(1)"'), 'ham onerror sızmamalı: ' + h.slice(h.indexOf('dg-thumb') - 40, h.indexOf('dg-thumb') + 160));
+    assert.ok(h.includes('&quot;'), 'tırnak escape edilmeli');
+  });
+
+  test('düz liste ve Kayıtlarım da aynı yardımcıyı kullanıyor', () => {
+    const adm = readFileSync(join(ROOT, 'src/services/admin.js'), 'utf8');
+    const dash = readFileSync(join(ROOT, 'src/services/dash.js'), 'utf8');
+    const consts = readFileSync(join(ROOT, 'src/config/constants.js'), 'utf8');
+    assert.match(consts, /const dgThumb=\(url,px\)=>\{/);
+    assert.match(consts, /loading="lazy"/);
+    assert.match(adm, /dgThumb\(x\.photo_url\)/);
+    assert.match(dash, /dgThumb\(r\.photo_url\)/);
+    assert.ok(!/width:40px;height:40px;object-fit:cover/.test(adm), 'satır içi stil kalıntısı');
+  });
+
+  test('CSS: 40×40 kapak, hover büyüme, mobilde 44px', () => {
+    const css = readFileSync(join(ROOT, 'css/style.css'), 'utf8');
+    assert.match(css, /\.dg-thumb\{width:40px;height:40px;object-fit:cover/);
+    assert.match(css, /a:hover \.dg-thumb[^{]*\{transform:scale\(1\.08\)/);
+    assert.match(css, /@media\(max-width:640px\)\{\s*\.dg-thumb\{width:44px;height:44px\}/);
+  });
+});

@@ -332,3 +332,16 @@ canvas{max-width:100%}
 .dg-oauth-sep{display:flex;align-items:center;gap:10px;margin:14px 0;color:var(--mut);font-size:.72rem;letter-spacing:.08em;text-transform:uppercase}
 .dg-oauth-sep:before,.dg-oauth-sep:after{content:"";flex:1;height:1px;background:var(--line)}
 .dg-oauth-wait{padding:10px 12px;margin-bottom:12px;border-radius:10px;background:#e8f0fa;border:1px solid var(--blue);color:var(--blue);font-size:.85rem}
+
+/* =========================================================
+   FOTOĞRAF ÖNİZLEMESİ (dgThumb · 2026-09-24)
+   Moderasyon listesi, onay ağacı ve "Kayıtlarım" aynı 40×40 kapak
+   görselini kullanır; üstüne gelince hafif büyür, tıklayınca yeni
+   sekmede tam boy açılır.
+========================================================= */
+.dg-thumb{width:40px;height:40px;object-fit:cover;border-radius:6px;border:1px solid var(--line);display:block;background:var(--bg);transition:transform .15s,border-color .15s}
+a:hover .dg-thumb,a:focus-visible .dg-thumb{transform:scale(1.08);border-color:var(--green)}
+td a:has(.dg-thumb){display:inline-flex}
+@media(max-width:640px){
+  .dg-thumb{width:44px;height:44px}
+}

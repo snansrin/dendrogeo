@@ -225,7 +225,7 @@ function dgTreeRowHTML(r){
     `<td data-label="Çap">${r.dbh_cm??"—"}</td>`+
     `<td data-label="Boy">${r.height_m??"—"}</td>`+
     `<td data-label="Karbon kg"><b>${(Number(r.carbon_kg)||0).toFixed(1)}</b></td>`+
-    `<td data-label="Foto">${r.photo_url?`<a href="${esc(r.photo_url)}" target="_blank" rel="noopener">📷</a>`:"—"}</td>`+
+    `<td data-label="Foto">${dgThumb(r.photo_url)}</td>`+
     `<td data-label="Durum">${dgBadge(st)}</td>`+
     `<td data-label="Tarih" class="mono dg-sub">${d?d.toLocaleDateString("tr-TR"):"—"}</td>`+
     `<td data-label="İşlem"><div class="dg-act">${act}<button class="btn sm red" onclick="delMeas(${r.id})">🗑️</button></div></td>`+
