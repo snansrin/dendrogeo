@@ -37,7 +37,7 @@ const CORE_ASSETS = [
     '/', '/index.html', '/manifest.json', '/icon.png', '/social-preview.jpg', '/css/style.css',
     '/css/landing.css',
     '/src/config/supabase.js', '/src/config/constants.js', '/src/config/species.js', 
-    '/src/utils/geo.js', '/src/utils/truncation.js', '/src/services/allometry.js', '/src/services/auth.js','/src/services/export.js', '/src/services/offline.js',
+    '/src/utils/geo.js', '/src/utils/truncation.js', '/src/utils/lazylibs.js', '/src/services/allometry.js', '/src/services/auth.js','/src/services/export.js', '/src/services/offline.js',
     /* YÖNETİM ZİNCİRİ (Faz 6): ziyaret sayacı, veri talepleri, kullanıcı yönetimi,
      * yedek ve moderasyon çekirdeği ayrı modüller. */
     '/src/services/visit-stats.js','/src/services/data-requests.js','/src/services/user-admin.js','/src/services/backup.js',

@@ -185,6 +185,9 @@
 <script src="src/config/species.js?v=597bfd9f"></script>
 <script src="src/utils/geo.js?v=3e796768"></script>
 <script src="src/utils/truncation.js?v=f43c76b3"></script>
+<!-- Faz 7: geotiff (317 KB) ve chart.js (208 KB) artık SENKRON yüklenmiyor;
+     src/utils/lazylibs.js ihtiyaç anında enjekte eder (LULC analizi / panel grafiği). -->
+<script src="src/utils/lazylibs.js?v=00000000"></script>
 <script src="src/services/allometry.js?v=23ec2992"></script>
 <script src="src/services/auth.js?v=7c805a8c"></script>
 <script src="src/services/export.js?v=cf96e318"></script>
@@ -198,7 +201,6 @@
 <script src="src/services/world.js?v=9623fcee"></script>
 <script src="src/services/measure.js?v=9a57298b"></script>
 <script src="src/services/map.js?v=ec711385"></script>
-<script src="vendor/geotiff-2.1.3.js"></script>
 <!-- LULC ZİNCİRİ (Faz 5 — eski landcover.js altı modül + facade oldu; sıralama
      ÖNEMLİ: config → geo → stac → engine → osm → patches → report-UI → facade) -->
 <script src="src/services/lc-config.js?v=00000000"></script>
@@ -219,7 +221,6 @@
 <script src="src/ui/park-panel.js?v=00000000"></script>
 <script src="src/ui/park-export.js?v=00000000"></script>
 <script src="src/services/dash.js?v=f5e14053"></script>
-<script src="vendor/chart.js-4.5.1.js"></script>
 <link rel="stylesheet" href="css/style.css?v=790e558b">
 <link rel="stylesheet" href="css/landing.css?v=e875e230">
 <link rel="stylesheet" href="css/park-panel.css?v=00000000">

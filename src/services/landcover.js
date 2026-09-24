@@ -11,6 +11,10 @@
  * lc-osm → lc-patches → ui/lc-report → bu dosya. */
 
 async function dgLcAnalyze(params){
+  /* Faz 7: GeoTIFF tembel yüklenir. Tarayıcıda dgEnsureGeoTIFF vardır;
+   * QA vm bağlamında (scripts/lulc-qa.mjs) GeoTIFF önceden yüklüdür ve
+   * ensure fonksiyonu tanımsızdır → guard atlanır. */
+  if(window.dgEnsureGeoTIFF)await window.dgEnsureGeoTIFF();
   if(!window.GeoTIFF)throw new Error("10 m COG okuyucu yüklenmedi.");
   const outer=params?.outer||[];
   const holes=params?.holes||[];

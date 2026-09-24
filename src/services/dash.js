@@ -28,7 +28,9 @@ async function loadDash(){
 }
 // 4. Tür dağılımı listesi
 // 5. Chart.js grafiği
-function drawChart(id,type,labels,data){
+async function drawChart(id,type,labels,data){
+ /* Faz 7: Chart.js tembel yüklenir; çağıranlar fire-and-forget bırakabilir. */
+ if(window.dgEnsureChart)await window.dgEnsureChart();
  if(charts[id])charts[id].destroy();
  const pal=["#14532d","#1e6f4b","#2e8b57","#3aa76d","#6aa84f","#8fbc6d","#c77d2e","#d97706","#92400e","#4c9a52"];
  charts[id]=new Chart($(id),{type,data:{labels,datasets:[{data,backgroundColor:(c)=>pal[c.dataIndex%pal.length],borderRadius:8,borderSkipped:false,barPercentage:.6}]},options:{plugins:{legend:{display:false}},scales:type==="bar"?{y:{grid:{color:"rgba(20,30,25,.06)"},ticks:{color:"#68766e"}},x:{grid:{display:false},ticks:{color:"#68766e"}}}:undefined}});

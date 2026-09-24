@@ -133,9 +133,15 @@ describe('vendor/ — dosya bütünlüğü', () => {
     }
   });
 
-  test('⭐ index.html içindeki HER vendor yolu diskte var', () => {
+  test('⭐ index.html + lazylibs içindeki HER vendor yolu diskte var', () => {
+    /* Faz 7: geotiff ve chart.js artık head'de senkron tag değil;
+     * src/utils/lazylibs.js ihtiyaç anında enjekte ediyor. */
     const html = readFileSync(join(ROOT, 'index.html'), 'utf8');
-    const yollar = [...html.matchAll(/(?:src|href)="(vendor\/[^"?]+)/g)].map((m) => m[1]);
+    const lazy = readFileSync(join(ROOT, 'src/utils/lazylibs.js'), 'utf8');
+    const yollar = [
+      ...[...html.matchAll(/(?:src|href)="(vendor\/[^"?]+)/g)].map((m) => m[1]),
+      ...[...lazy.matchAll(/"(vendor\/[^"?]+)"/g)].map((m) => m[1]),
+    ];
     assert.ok(yollar.length >= 8, 'vendor referansı bulunamadı: ' + yollar.length);
     for (const y of yollar) {
       assert.ok(readFileSync(join(ROOT, y)).length > 0, `${y} boş ya da yok`);
@@ -152,15 +158,23 @@ describe('vendor/ — dosya bütünlüğü', () => {
     }
   });
 
-  test('index.html ve sw.js aynı vendor listesini kullanıyor (sapma yok)', () => {
-    const html = new Set([...readFileSync(join(ROOT, 'index.html'), 'utf8')
-      .matchAll(/(?:src|href)="(vendor\/[^"?]+)/g)].map((m) => '/' + m[1]));
+  test('kullanılan vendor kümesi (index+lazylibs) ile sw.js PRECACHE birebir aynı', () => {
+    /* Faz 7: referanslar iki kaynaktan gelir — index.html senkron tag'leri VE
+     * lazylibs.js tembel yükleyicisi. İkisinin birleşimi CORE_ASSETS vendor
+     * kümesine eşit olmalı: precache'te hayalet dosya ya da precache'siz
+     * yükleme yolu kalmasın (çevrimdışı LULC/panel garantisi). */
+    const html = readFileSync(join(ROOT, 'index.html'), 'utf8');
+    const lazy = readFileSync(join(ROOT, 'src/utils/lazylibs.js'), 'utf8');
+    const kullanilan = new Set([
+      ...[...html.matchAll(/(?:src|href)="(vendor\/[^"?]+)/g)].map((m) => '/' + m[1]),
+      ...[...lazy.matchAll(/"(vendor\/[^"?]+)"/g)].map((m) => '/' + m[1]),
+    ]);
     const sw = new Set([...readFileSync(join(ROOT, 'sw.js'), 'utf8')
       .matchAll(/'(\/vendor\/[^']+)'/g)].map((m) => m[1]));
-    const htmlEksik = [...html].filter((x) => !sw.has(x));
-    const swEksik = [...sw].filter((x) => !html.has(x));
-    assert.deepEqual(htmlEksik, [], 'index.html yüklüyor ama precache\'te yok: ' + htmlEksik);
-    assert.deepEqual(swEksik, [], 'precache\'te var ama index.html yüklemiyor: ' + swEksik);
+    const precacheEksik = [...kullanilan].filter((x) => !sw.has(x));
+    const hayalet = [...sw].filter((x) => !kullanilan.has(x));
+    assert.deepEqual(precacheEksik, [], 'yükleniyor ama precache\'te yok: ' + precacheEksik);
+    assert.deepEqual(hayalet, [], 'precache\'te var ama hiçbir yerden yüklenmiyor: ' + hayalet);
   });
 
   test('CSS dosyaları gerçekten CSS (boş ya da HTML hata sayfası değil)', () => {
