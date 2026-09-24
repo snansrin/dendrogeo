@@ -88,12 +88,16 @@ function makeWorld() {
     return self;
   }
 
+  /* Sahte auth: OAuth akışının test edilebilmesi için signInWithOAuth
+   * çağrılarını kaydeder, onAuthStateChange dinleyicilerini dışarı verir. */
+  const AUTH = { session: null, listeners: [], oauth: [], oauthError: null };
   const sbStub = {
     from: (t) => fromTable(t),
     storage: { from: () => ({ upload: async () => ({}), getPublicUrl: () => ({ data: { publicUrl: '' } }), remove: async () => ({}) }) },
     auth: {
-      getSession: async () => ({ data: { session: null } }),
-      onAuthStateChange: () => ({ data: { subscription: { unsubscribe() {} } } }),
+      getSession: async () => ({ data: { session: AUTH.session } }),
+      onAuthStateChange: (cb) => { AUTH.listeners.push(cb); return { data: { subscription: { unsubscribe() {} } } }; },
+      signInWithOAuth: async (o) => { AUTH.oauth.push(o); return { data: {}, error: AUTH.oauthError }; },
       signOut: async () => ({ error: null }),
     },
   };
@@ -119,7 +123,7 @@ function makeWorld() {
   const ctx = {
     window: null, document,
     navigator: { onLine: true, userAgent: 'test', geolocation: null, permissions: null, storage: null },
-    location: { hash: '' },
+    location: { hash: '', search: '', origin: 'https://dendrogeo.org', pathname: '/', assign() {}, replace() {} },
     localStorage: { getItem: () => null, setItem() {} },
     sessionStorage: {
       getItem: (k) => (SS.has(String(k)) ? SS.get(String(k)) : null),
@@ -166,7 +170,7 @@ function makeWorld() {
   vm.runInContext('calc=(d,h,sp,gr)=>({total_carbon:123.4,agb:200,bhb:52,vol:1.1});', ctx);
 
   return {
-    ctx, LOG, TOASTS, GOES,
+    ctx, LOG, TOASTS, GOES, AUTH,
     el: (id) => document.getElementById(id),
     run: (code) => vm.runInContext(code, ctx),
     flush: (max = 20) => { let n = 0; while (TIMERS.length && n < max) { const f = TIMERS.shift(); n++; try { if (typeof f === 'function') f(); } catch (e) {} } TIMERS.length = 0; },
@@ -1001,5 +1005,85 @@ describe('parka bağlama yalnız yönetici — normal kullanıcı kilitli', () =
     assert.ok(ins, 'yeni proje oluşturulabilmeli');
     assert.equal(ins.rows.name, 'Göksu Parkı - deneme');
     assert.equal(ins.rows.park_id, 7);
+  });
+});
+
+/* =========================================================
+   11) GOOGLE İLE GİRİŞ (OAuth)
+========================================================= */
+describe('Google ile giriş', () => {
+  const { AUTH } = W;
+
+  test('⭐ düğme signInWithOAuth(provider:google) çağırıyor', async () => {
+    AUTH.oauth.length = 0; AUTH.oauthError = null;
+    await run('dgGoogleSignIn()');
+    assert.equal(AUTH.oauth.length, 1, 'OAuth çağrılmadı');
+    assert.equal(AUTH.oauth[0].provider, 'google');
+    assert.equal(AUTH.oauth[0].options.redirectTo, 'https://dendrogeo.org/', 'redirectTo origin+pathname olmalı');
+    assert.equal(AUTH.oauth[0].options.queryParams.prompt, 'select_account', 'sahada ortak tablet → hesap seçimi');
+  });
+
+  test('yönlendirme sırasında bekleme şeridi + düğme kilidi', async () => {
+    assert.equal(el('oauthWait').style.display, 'block');
+    assert.equal(el('googleBtn').disabled, true);
+  });
+
+  test('sağlayıcı kapalıysa anlaşılır mesaj (çökme yok)', async () => {
+    AUTH.oauth.length = 0;
+    AUTH.oauthError = { message: 'Provider google is not enabled' };
+    run('amsg=(t,e)=>{ __toasts.push([String(t),e?"err":"ok",""]); };');
+    await run('dgGoogleSignIn()');
+    const msg = TOASTS.map((t) => t[0]).join(' ');
+    assert.ok(msg.includes('henüz etkin değil'), msg.slice(0, 200));
+    assert.ok(msg.includes('docs/google-giris.md'), 'kurulum rehberine yönlendirmeli');
+    assert.equal(el('googleBtn').disabled, false, 'düğme tekrar kullanılabilir olmalı');
+    assert.equal(el('oauthWait').style.display, 'none');
+    AUTH.oauthError = null;
+  });
+
+  test('⭐ geri dönüş algılanıyor: ?code= (PKCE) ve #access_token (implicit)', () => {
+    W.ctx.location.search = ''; W.ctx.location.hash = '';
+    assert.equal(run('dgIsOAuthCallback()'), false);
+    W.ctx.location.search = '?code=0a1b2c';
+    assert.equal(run('dgIsOAuthCallback()'), true);
+    W.ctx.location.search = ''; W.ctx.location.hash = '#access_token=xyz';
+    assert.equal(run('dgIsOAuthCallback()'), true);
+    W.ctx.location.search = '?error=access_denied'; W.ctx.location.hash = '';
+    assert.equal(run('dgIsOAuthCallback()'), true);
+    assert.equal(run('dgOAuthError()'), 'access_denied');
+    W.ctx.location.search = '';
+  });
+
+  test('⭐ takas bitince oturum döner (SIGNED_IN)', async () => {
+    AUTH.listeners.length = 0;
+    const p = run('dgWaitForOAuthSession(5000)');
+    AUTH.listeners.forEach((cb) => cb('SIGNED_IN', { access_token: 'tok', user: { id: 'g1' } }));
+    const s = await p;
+    assert.ok(s && s.access_token === 'tok', 'oturum dönmedi');
+  });
+
+  test('takas boş dönerse null → landing + uyarı (sonsuz bekleme yok)', async () => {
+    AUTH.listeners.length = 0;
+    const p = run('dgWaitForOAuthSession(5000)');
+    AUTH.listeners.forEach((cb) => cb('INITIAL_SESSION', null));
+    W.flush();                     // INITIAL_SESSION sonrası tanınan ek süre
+    const s = await p;
+    assert.equal(s, null);
+  });
+
+  test('zaten oturum varsa dinleyiciyi beklemeden çözülür (yarış koruması)', async () => {
+    AUTH.listeners.length = 0;
+    AUTH.session = { access_token: 'onceki', user: { id: 'u1' } };
+    const s = await run('dgWaitForOAuthSession(5000)');
+    assert.ok(s && s.access_token === 'onceki');
+    AUTH.session = null;
+  });
+
+  test('boot() OAuth dönüşünde takası BEKLİYOR (landing\'e erken düşmesin)', () => {
+    const shell = readFileSync(join(ROOT, 'src/ui/shell.js'), 'utf8');
+    assert.match(shell, /dgIsOAuthCallback\(\)/);
+    assert.match(shell, /session=await dgWaitForOAuthSession\(\)/);
+    assert.match(shell, /dgCleanOAuthUrl\(\)/, '?code= kalıntısı temizlenmeli');
+    assert.match(shell, /Google girişi tamamlanamadı/, 'başarısızlıkta kullanıcıya haber verilmeli');
   });
 });

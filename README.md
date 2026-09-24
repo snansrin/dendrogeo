@@ -2,7 +2,7 @@
 
 **Küresel Ağaç Envanteri ve Karbon Veri Sistemi** — GPS konumlu saha ölçümlerini biyokütle/karbon hesapları, onaylı harita ve park ölçeğinde analizlerle birleştiren web GIS uygulaması.
 
-🌐 **[dendrogeo.org](https://dendrogeo.org)** · 📖 [Yöntem](docs/methods.md) · 🛰️ [Arazi örtüsü](arazi-ortusu/) · 🔐 [Güvenlik](SECURITY.md) · 🗄️ [Veri erişimi](#veri-erişimi-ve-lisans)
+🌐 **[dendrogeo.org](https://dendrogeo.org)** · 📖 [Yöntem](docs/methods.md) · 🛰️ [Arazi örtüsü](arazi-ortusu/) · 🔵 [Google ile giriş](docs/google-giris.md) · 🔐 [Güvenlik](SECURITY.md) · 🗄️ [Veri erişimi](#veri-erişimi-ve-lisans)
 
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.22646300.svg)](https://doi.org/10.5281/zenodo.22646300)
 [![License: CC BY-NC 4.0](https://img.shields.io/badge/License-CC%20BY--NC%204.0-lightgrey.svg)](https://creativecommons.org/licenses/by-nc/4.0/)
@@ -17,6 +17,11 @@ DendroGeo üç adımda çalışır:
 1. **Sahada ölç** — çevrimdışı bile çalışan PWA: GPS konumu, çap (DBH), boy ve tür/grup; fotoğraf eklenirse tarayıcı içi QA/QC uygulanır. Ölçümler cihazda IndexedDB'de kuyruklanır, bağlantı gelince Supabase'e senkron olur.
 2. **Yönetici onaylasın** — yayınlanan her kayıt bir moderasyon akışından geçer; onaysız veri dünya haritasına çıkmaz.
 3. **Küresel harita ve istatistik** — onaylı kayıtlar Leaflet haritasında, ülke/şehir kırılımında ve park karşılaştırma raporlarında görünür. Park arazi örtüsü analizi ESA WorldCover 2021 v200 birincil kaynağı ve IO LULC 2020 çapraz kaynağıyla 10 m kategorik raster hücre kesişimlerinden hesaplanır.
+
+**Giriş:** e-posta/parola (Cloudflare Turnstile korumalı) veya **🔵 Google ile
+devam et** (Supabase OAuth, PKCE). OAuth dönüşünde `boot()` kod takasının
+bitmesini bekler — aksi hâlde kullanıcı giriş olduğu hâlde landing'i görürdü.
+Panel ayarları ve tuzaklar: [`docs/google-giris.md`](docs/google-giris.md).
 
 ### Park kimliği: ölçüm → park → karşılaştırma
 
@@ -168,12 +173,12 @@ python3 -m http.server 8080        # herhangi bir statik sunucu olur
 ### Test ve denetimler
 
 ```bash
-npm run check          # sözdizimi + ?v= + build + CSP + 429 test
+npm run check          # sözdizimi + ?v= + build + CSP + 450 test
 npm test               # yalnız testler (node:test, bağımlılık gerektirmez)
 npm run build          # index.html'i partials'tan üret (değişiklik sonrası)
 ```
 
-429 test şunları kilitler: karbon hesabı (Chave 2014, ρ fallback,
+450 test şunları kilitler: karbon hesabı (Chave 2014, ρ fallback,
 NaN yayılmaması), jeodezik alan ve geometri, **UTM projeksiyonu** (bilinen
 referans değerlerine karşı), Sutherland-Hodgman kırpma + alan korunumu,
 Service Worker'ın çevrimdışı yedeği, vendor kütüphanelerin global kurulumu,

@@ -184,3 +184,124 @@ toast("✓ Parola güncellendi — yeni parolanızla giriş yapın","ok","🔑")
 history.replaceState(null,"",window.location.pathname);
 location.reload();
 }
+
+/* --- BLOK 5: GOOGLE İLE GİRİŞ (Supabase OAuth) ---
+ * Kurulum (tek seferlik, kod değişikliği gerektirmez):
+ *   1) Google Cloud Console → OAuth consent screen + Web application client
+ *      → Authorized redirect URI: https://<proje-ref>.supabase.co/auth/v1/callback
+ *   2) Supabase → Authentication → Providers → Google → Enable (Client ID + Secret)
+ *   3) Supabase → Authentication → URL Configuration → Site URL: https://dendrogeo.org
+ *   Ayrıntı: docs/google-giris.md
+ *
+ * Turnstile BİLEREK yok: doğrulama Google'ın kendi ekranında yapılıyor.
+ * (Turnstile yalnız parola formunda bot koruması için gerekli.) */
+function dgIsOAuthCallback(){
+ const s=(typeof window!=="undefined"&&window.location&&window.location.search)||"";
+ const h=(typeof window!=="undefined"&&window.location&&window.location.hash)||"";
+ return /[?&]code=/.test(s)||/access_token=/.test(h)||/[?&]error=/.test(s);
+}
+
+function dgOAuthError(){
+ const s=(typeof window!=="undefined"&&window.location&&window.location.search)||"";
+ const m=/[?&]error=([^&]+)/.exec(s);
+ return m?decodeURIComponent(m[1]):null;
+}
+
+/* OAuth geri dönüşünde supabase-js URL'deki ?code=… değerini ARKA PLANDA takas
+ * eder; bu sırada getSession() null dönebilir. Takas bitmeden landing'e
+ * düşersek kullanıcı "giriş olmadı" sanır → oturum gelene kadar beklenir.
+ * INITIAL_SESSION boş gelirse (takas hâlâ sürebilir) kısa bir ek süre tanınır. */
+function dgWaitForOAuthSession(timeoutMs){
+ const ms=Number(timeoutMs)||9000;
+ return new Promise(resolve=>{
+  let done=false,sub=null,grace=null;
+  const finish=s=>{
+   if(done)return;
+   done=true;
+   if(grace)clearTimeout(grace);
+   try{if(sub&&sub.subscription&&sub.subscription.unsubscribe)sub.subscription.unsubscribe();}catch(e){}
+   resolve(s||null);
+  };
+  try{
+   const r=sb.auth.onAuthStateChange((event,sess)=>{
+    if(event==="SIGNED_IN"||event==="USER_UPDATED"){finish(sess);return;}
+    if(event==="INITIAL_SESSION"){
+     if(sess){finish(sess);return;}
+     if(!grace)grace=setTimeout(()=>finish(null),1500);
+    }
+   });
+   sub=(r&&r.data)||null;
+  }catch(e){}
+  /* Yarış koruması: takas zaten bittiyse getSession dolu döner */
+  try{
+   Promise.resolve(sb.auth.getSession()).then(r=>{
+    const ses=r&&r.data?r.data.session:null;
+    if(ses)finish(ses);
+   }).catch(()=>{});
+  }catch(e){}
+  setTimeout(()=>finish(null),ms);
+ });
+}
+
+/* Adres çubuğundaki ?code=… kalıntısını temizle: yenilemede takas tekrar
+ * denenmesin, ekran görüntüsünde/paylaşılan bağlantıda kod görünmesin. */
+function dgCleanOAuthUrl(){
+ try{
+  if(window.history&&window.history.replaceState){
+   history.replaceState(null,"",window.location.pathname);
+  }
+ }catch(e){}
+}
+
+function dgShowOAuthWait(msg){
+ const el=$("oauthWait");
+ if(el){
+  el.style.display="block";
+  el.textContent=msg||"⏳ Google girişi tamamlanıyor…";
+ }
+}
+function dgHideOAuthWait(){
+ const el=$("oauthWait");
+ if(el)el.style.display="none";
+}
+
+async function dgGoogleSignIn(){
+ const btn=$("googleBtn");
+ if(btn){btn.disabled=true;}
+ amsg("Google'a yönlendiriliyorsun…",0);
+ dgShowOAuthWait("🔵 Google'a yönlendiriliyorsun…");
+
+ /* prompt=select_account: sahada ortak tablet kullanılıyor olabilir, kullanıcı
+  * hangi Google hesabıyla gireceğini seçebilsin. */
+ const redirectTo=window.location.origin+window.location.pathname.replace(/\/+$/,"")+"/";
+ let error=null;
+ try{
+  const r=await sb.auth.signInWithOAuth({
+   provider:"google",
+   options:{
+    redirectTo,
+    queryParams:{prompt:"select_account"}
+   }
+  });
+  error=r&&r.error?r.error:null;
+ }catch(e){error=e;}
+
+ if(error){
+  if(btn){btn.disabled=false;}
+  dgHideOAuthWait();
+  const m=String(error.message||error);
+  /* Sağlayıcı kapalıysa Supabase bunu söyler; kullanıcıya anlaşılır çevirisi */
+  amsg(/provider.*not|disabled|not enabled/i.test(m)
+   ? "Google girişi bu projede henüz etkin değil. Supabase → Authentication → Providers → Google → Enable (bkz. docs/google-giris.md)."
+   : "Google girişi başlatılamadı: "+m,1);
+  return;
+ }
+ /* Yönlendirme başladı; sayfa değişene kadar bekleme ekranı kalır. */
+}
+
+window.dgGoogleSignIn=dgGoogleSignIn;
+window.dgIsOAuthCallback=dgIsOAuthCallback;
+window.dgWaitForOAuthSession=dgWaitForOAuthSession;
+window.dgCleanOAuthUrl=dgCleanOAuthUrl;
+window.dgShowOAuthWait=dgShowOAuthWait;
+window.dgHideOAuthWait=dgHideOAuthWait;

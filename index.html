@@ -189,7 +189,7 @@
      src/utils/lazylibs.js ihtiyaç anında enjekte eder (LULC analizi / panel grafiği). -->
 <script src="src/utils/lazylibs.js?v=69622ff4"></script>
 <script src="src/services/allometry.js?v=23ec2992"></script>
-<script src="src/services/auth.js?v=7c805a8c"></script>
+<script src="src/services/auth.js?v=305a44fa"></script>
 <script src="src/services/export.js?v=cf96e318"></script>
 <script src="src/services/offline.js?v=8017c712"></script>
 <!-- YÖNETİM ZİNCİRİ (Faz 6 — eski admin.js beş modüle bölündü) -->
@@ -230,7 +230,7 @@
 <script src="src/ui/park-panel.js?v=0617a777"></script>
 <script src="src/ui/park-export.js?v=41a66aa5"></script>
 <script src="src/services/dash.js?v=c134e567"></script>
-<link rel="stylesheet" href="css/style.css?v=62b9b400">
+<link rel="stylesheet" href="css/style.css?v=5dc43ed6">
 <link rel="stylesheet" href="css/landing.css?v=e875e230">
 <link rel="stylesheet" href="css/park-panel.css?v=10b49293">
 </head>
@@ -486,6 +486,15 @@
 <section class="blk" id="erisim" style="border-top:0"><div class="wrap">
  <div class="shead"><span class="no">06</span><h2>Giriş / Kayıt</h2><span class="rule"></span></div>
  <div class="card auth" id="authBox">
+  <!-- GOOGLE İLE GİRİŞ (2026-09-24). OAuth akışı: supabase-js → Supabase
+       /auth/v1/authorize → Google → ?code=… ile geri dönüş → takas (boot()).
+       G logosu satır içi SVG: dış kaynak yok (CSP + çevrimdışı + PWA güvenli). -->
+  <div id="oauthWait" class="dg-oauth-wait" style="display:none">⏳ Google girişi tamamlanıyor…</div>
+  <button type="button" id="googleBtn" class="dg-google" onclick="dgGoogleSignIn()">
+   <svg width="18" height="18" viewBox="0 0 48 48" aria-hidden="true" focusable="false"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>
+   <span>Google ile devam et</span>
+  </button>
+  <div class="dg-oauth-sep"><span>veya</span></div>
   <div style="display:flex;gap:8px;margin-bottom:16px">
    <button class="btn sm" onclick="authTab('login')">Giriş</button>
    <button class="btn sm ghost" onclick="authTab('reg')">Kayıt</button>
@@ -896,6 +905,6 @@
 <script src="src/ui/state.js?v=bfca986d"></script>
 <script src="src/ui/toast.js?v=4e9029ad"></script>
 <script src="src/ui/landing.js?v=e211345a"></script>
-<script src="src/ui/shell.js?v=7e970e18"></script>
+<script src="src/ui/shell.js?v=a5dfa2b5"></script>
 </body>
 </html>

@@ -318,3 +318,17 @@ canvas{max-width:100%}
   .dg-tree-body{padding:6px 8px 10px}
   .dg-tree-sum{font-size:.7rem}
 }
+
+/* =========================================================
+   GOOGLE İLE GİRİŞ (2026-09-24)
+   Google'ın kendi buton yönergesi: açık zemin, ince kenarlık, koyu metin,
+   solda çok renkli G. Marka butonlarından (yeşil .btn) bilerek ayrışır.
+========================================================= */
+.dg-google{display:flex;align-items:center;justify-content:center;gap:10px;width:100%;padding:12px 16px;margin-bottom:4px;background:#fff;color:#1f1f1f;border:1px solid #dadce0;border-radius:10px;font:600 .9rem/1.2 Arial,system-ui,sans-serif;letter-spacing:.01em;cursor:pointer;transition:.15s;box-shadow:0 1px 2px rgba(0,0,0,.06)}
+.dg-google:hover{background:#f7f8f8;border-color:#c6c9cc}
+.dg-google:active{transform:translateY(1px)}
+.dg-google:disabled{opacity:.55;cursor:progress}
+.dg-google svg{flex:0 0 auto}
+.dg-oauth-sep{display:flex;align-items:center;gap:10px;margin:14px 0;color:var(--mut);font-size:.72rem;letter-spacing:.08em;text-transform:uppercase}
+.dg-oauth-sep:before,.dg-oauth-sep:after{content:"";flex:1;height:1px;background:var(--line)}
+.dg-oauth-wait{padding:10px 12px;margin-bottom:12px;border-radius:10px;background:#e8f0fa;border:1px solid var(--blue);color:var(--blue);font-size:.85rem}

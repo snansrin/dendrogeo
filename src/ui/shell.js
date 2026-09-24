@@ -55,7 +55,32 @@ async function boot(){
     trackVisit();
     
     // 4. Oturum kontrolü
-const{data:{session}}=await sb.auth.getSession();
+    /* GOOGLE/OAuth geri dönüşü (2026-09-24): supabase-js URL'deki ?code=…
+     * değerini arka planda takas eder; o anda getSession() null döner.
+     * Beklemezsek kullanıcı Google'dan döndüğü hâlde landing'i görür ve
+     * "giriş olmadı" sanır. Takas bitene kadar dgWaitForOAuthSession bekler. */
+    let session=null;
+    if(typeof dgIsOAuthCallback==="function"&&dgIsOAuthCallback()){
+        const oauthErr=(typeof dgOAuthError==="function")?dgOAuthError():null;
+        if(oauthErr){
+            dgShowOAuthWait("⚠ Google girişi iptal edildi veya başarısız: "+oauthErr);
+            initLanding();
+            setTimeout(()=>{toast("Google girişi tamamlanamadı: "+oauthErr,"err","🔵");},400);
+            return;
+        }
+        dgShowOAuthWait();
+        session=await dgWaitForOAuthSession();
+        if(session&&typeof dgCleanOAuthUrl==="function")dgCleanOAuthUrl();
+        if(typeof dgHideOAuthWait==="function")dgHideOAuthWait();
+        if(!session){
+            initLanding();
+            setTimeout(()=>{toast("Google girişi tamamlanamadı — tekrar dene veya e-posta/parola ile gir.","warn","🔵");},400);
+            return;
+        }
+    }else{
+        const r=await sb.auth.getSession();
+        session=r&&r.data?r.data.session:null;
+    }
 const isRecovery=/type=recovery/.test(INITIAL_HASH);
 if(isRecovery&&!session){
 initLanding();
