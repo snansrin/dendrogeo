@@ -6,10 +6,12 @@
   "type": "module",
   "scripts": {
     "test": "node --test test/",
+    "build": "node scripts/build-index.mjs --write",
+    "build:check": "node scripts/build-index.mjs --check",
     "check:csp": "node scripts/check-csp.mjs",
     "check:syntax": "node scripts/check-syntax.mjs",
     "check:versions": "node scripts/version-sync.mjs --check",
-    "check": "npm run check:syntax && npm run check:versions && npm run check:csp && npm test"
+    "check": "npm run check:syntax && npm run check:versions && npm run build:check && npm run check:csp && npm test"
   },
   "engines": {
     "node": ">=20"

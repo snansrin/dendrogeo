@@ -1,0 +1,305 @@
+<div id="landing">
+<div id="topnav"><div class="wrap">
+<span class="brand"><img class="brand-logo" src="logo.png" alt="DendroGeo">DendroGeo</span>
+ <div class="links"><a href="#sistem">Sistem</a><a href="#yontem">Yöntem</a><a href="#veri">Veri &amp; Harita</a><a href="#istatistik">İstatistik</a><a href="#bilgi-merkezi">Bilgi Merkezi &amp; Kaynaklar</a></div>
+ <button class="btn sm" onclick="showAuth()">Giriş / Kayıt</button>
+</div></div>
+
+<div class="hero"><div class="wrap">
+ <div class="hero-grid">
+  <div class="hero-copy">
+   <div class="kick"><span class="live-dot"></span>SAHADAN VERİTABANINA · BİLİMSEL KARBON ENVANTERİ</div>
+   <h1>Bir ağacın tahmini karbon stoğunu<br>saniyeler içinde hesaplayın.</h1>
+   <p class="lead">DendroGeo; sahadaki GPS konumunu, ağaç çapı ve boy ölçümünü, tür/grup bilgisini ve isteğe bağlı fotoğraf kalite kontrolünü tek bir veri akışında birleştirir. Ölçümden biyokütle ve karbon tahminine geçilir; onaylanan kayıtlar harita ve istatistik katmanlarında yayımlanır. Park analizinde 10 m arazi örtüsü verisi ayrı bir veri kaynağı olarak işlenir.</p>
+   <div style="display:flex;gap:12px;flex-wrap:wrap;margin-top:28px">
+    <a href="#sistem" class="btn">🔬 Sistemi Keşfet</a>
+    <button class="btn ghost" onclick="showAuth()">🌲 Hemen Başla</button>
+   </div>
+  </div>
+    <div class="hero-art" aria-hidden="true">
+   <svg viewBox="0 0 800 300" fill="none">
+    <path d="M0 228 Q200 222 400 226 T800 226" stroke="#9cc39c" stroke-width="3" stroke-linecap="round"/>
+    <path d="M20 236 C200 232 400 238 780 234" stroke="#e6e3d9" stroke-width="4" stroke-linecap="round" stroke-dasharray=".5 11"/>
+    <ellipse cx="670" cy="230" rx="42" ry="6" fill="#182420" opacity=".08"/>
+    <path d="M663 230 C662 196 665 160 667 122 L676 122 C678 160 680 196 679 230 Z" fill="#8a5a3b"/>
+    <path d="M667 134 C659 122 653 116 645 110" stroke="#8a5a3b" stroke-width="4" stroke-linecap="round"/>
+    <path d="M676 134 C684 122 690 116 698 110" stroke="#8a5a3b" stroke-width="4" stroke-linecap="round"/>
+    <g class="canopy" style="transform-origin:670px 230px">
+     <circle cx="672" cy="100" r="40" fill="#1e6f4b"/>
+     <circle cx="644" cy="116" r="26" fill="#2e8b57"/>
+     <circle cx="700" cy="116" r="26" fill="#2e8b57"/>
+     <circle cx="672" cy="72" r="27" fill="#2e8b57"/>
+     <circle cx="660" cy="86" r="11" fill="#3aa76d" opacity=".5"/>
+     <circle cx="686" cy="106" r="4" fill="#9fd0ae"/><circle cx="656" cy="114" r="3.5" fill="#9fd0ae"/>
+    </g>
+    <ellipse class="tapewin" cx="671" cy="176" rx="24" ry="8" stroke="#c77d2e" stroke-width="2.5" stroke-dasharray="5 4"/>
+    <line class="sightwin" x1="553" y1="186" x2="676" y2="96" stroke="#c77d2e" stroke-width="2.5" stroke-dasharray="7 6"/>
+    <g class="walkerA">
+     <ellipse cx="629" cy="231" rx="15" ry="3.5" fill="#182420" opacity=".08"/>
+     <rect x="621" y="224" width="11" height="6" rx="3" fill="#fff" stroke="#e6e3d9"/>
+     <rect x="632" y="224" width="11" height="6" rx="3" fill="#fff" stroke="#e6e3d9"/>
+     <rect class="legA" x="623" y="198" width="7" height="28" rx="3.5" fill="#3b5a7a"/>
+     <rect class="legB" x="633" y="198" width="7" height="28" rx="3.5" fill="#3b5a7a"/>
+     <g class="bendA">
+      <rect x="612" y="170" width="9" height="26" rx="4" fill="#1e6f4b"/>
+      <rect x="617" y="168" width="21" height="34" rx="9" fill="#c77d2e"/>
+      <rect x="619" y="174" width="17" height="22" rx="2" fill="#fff" stroke="#c77d2e"/>
+      <path d="M622 178 h11 M622 181 h9" stroke="#9cc39c" stroke-width="1.2"/>
+      <g class="penA"><path d="M625 190 L631 196" stroke="#c77d2e" stroke-width="2" stroke-linecap="round"/></g>
+      <rect x="636" y="174" width="14" height="6" rx="3" fill="#f2c19a"/>
+      <circle cx="651" cy="177" r="3" fill="#f2c19a"/>
+      <circle cx="628" cy="158" r="9" fill="#f2c19a"/>
+      <path d="M619 156 a9 9 0 0 1 18 0 z" fill="#4a2f1d"/>
+      <circle cx="624" cy="158" r="1.2" fill="#182420"/><circle cx="632" cy="158" r="1.2" fill="#182420"/>
+      <path d="M625 162 q3 2.5 6 0" stroke="#182420" stroke-width="1.4" stroke-linecap="round"/>
+     </g>
+    </g>
+    <g class="walkerB">
+     <ellipse cx="575" cy="231" rx="15" ry="3.5" fill="#182420" opacity=".08"/>
+     <rect x="567" y="224" width="11" height="6" rx="3" fill="#fff" stroke="#e6e3d9"/>
+     <rect x="578" y="224" width="11" height="6" rx="3" fill="#fff" stroke="#e6e3d9"/>
+     <rect class="legC" x="569" y="202" width="6" height="24" rx="3" fill="#14532d"/>
+     <rect class="legD" x="579" y="202" width="6" height="24" rx="3" fill="#14532d"/>
+     <rect x="564" y="166" width="24" height="40" rx="10" fill="#1e6f4b"/>
+     <path d="M576 168 v36" stroke="#9fd0ae" stroke-width="2" opacity=".8"/>
+     <rect x="555" y="172" width="10" height="18" rx="3" fill="#e8b98a"/>
+     <rect x="543" y="186" width="20" height="14" rx="2.5" fill="#182420"/>
+     <rect x="546" y="189" width="14" height="8" rx="1" fill="#eaf3ec"/>
+     <rect x="548" y="193" width="2" height="3" fill="#1e6f4b"/><rect x="551" y="191" width="2" height="5" fill="#c77d2e"/>
+     <circle class="flash" cx="553" cy="186" r="4" fill="#fff"/>
+     <circle cx="576" cy="156" r="9" fill="#e8b98a"/>
+     <path d="M567 154 a9 9 0 0 1 18 0 z" fill="#6d452c"/>
+     <g class="tail"><circle cx="585" cy="151" r="5" fill="#6d452c"/><path d="M587 154 q8 6 5 18" stroke="#6d452c" stroke-width="4" stroke-linecap="round"/></g>
+     <circle cx="585" cy="146" r="3" fill="#c2452d"/>
+     <circle cx="573" cy="156" r="1.2" fill="#182420"/><circle cx="579" cy="156" r="1.2" fill="#182420"/>
+     <path d="M573 160 q3 2.5 6 0" stroke="#182420" stroke-width="1.4" stroke-linecap="round"/>
+    </g>
+   </svg>
+   <div class="chip c1"><span style="color:var(--amber)">●</span> DBH 68 cm</div>
+   <div class="chip c2"><span style="color:var(--green)">●</span> C 539.9 kg</div>
+   <div class="chip c3"><span style="color:var(--blue)">●</span> H 8.3 m</div>
+  </div>
+ </div>
+ <div class="statband">
+ <div><div class="val" id="stRec">—</div><div class="lbl">Toplam Kayıt</div></div>
+  <div><div class="val" id="stCountry">—</div><div class="lbl">Ülke</div></div>
+  <div><div class="val" id="stCity">—</div><div class="lbl">Şehir</div></div>
+  <div><div class="val" id="stCarbon">—</div><div class="lbl">Karbon (t)</div></div>
+ </div>
+</div></div>
+<section class="blk" id="sistem"><div class="wrap">
+ <div class="shead"><span class="no">01</span><h2>Sistemin Üç Temel Direği</h2><span class="rule"></span></div>
+<div class="cols cols-3">
+  <div class="feature">
+   <div class="ico">🛰</div>
+   <h3>Sahadan Veri</h3>
+   <p>GPS konumu ve cihazın bildirdiği doğruluk değeriyle saha ölçümünü konumlandırır; fotoğraf eklenirse tarayıcı içi kalite kontrolü uygulanır.</p>
+   <ul>
+    <li>GPS doğruluğu ölçümle kaydedilir</li>
+    <li>Waypoint pusula navigasyonu</li>
+    <li>Çevrimdışı ölçüm + senkronizasyon</li>
+    <li>Fotoğraf için tarayıcı içi QA/QC</li>
+   </ul>
+  </div>
+  <div class="feature">
+   <div class="ico">🧮</div>
+   <h3>Bilimsel Hesap</h3>
+   <p>Belirlenen ölçüm değişkenleriyle AGB, BHB, toplam biyokütle ve karbon tahmini üretir.</p>
+   <ul>
+    <li>Chave et al. 2014 (DBH + boy + ρ)</li>
+    <li>AGB × 0,26 kök/gövde varsayımı</li>
+    <li>Tür ρ değeri yoksa grup varsayılanı</li>
+    <li>Hacim hesabı</li>
+   </ul>
+  </div>
+  <div class="feature">
+   <div class="ico">🌍</div>
+   <h3>Küresel Analiz</h3>
+   <p>Admin onaylı merkezi veritabanı; şehir, ülke ve park bazlı agregasyonlar, QGIS uyumlu dışa aktarım.</p>
+   <ul>
+    <li>Ülke/Şehir/Park karşılaştırma</li>
+    <li>CSV, GeoJSON, QGIS export</li>
+    <li>İnteraktif karbon haritası</li>
+    <li>CC BY‑NC 4.0 açık veri lisansı</li>
+   </ul>
+  </div>
+ </div>
+ <div style="margin-top:36px" class="card tblwrap"><table><thead><tr><th>Rol</th><th>Yetki</th></tr></thead><tbody>
+  <tr><td>Ziyaretçi</td><td>Yalnızca onaylanmış kayıtları, istatistikleri ve haritayı görüntüler</td></tr>
+  <tr><td>Kullanıcı</td><td>Proje ve ölçüm oluşturur; kendi kayıtlarını onay beklerken de görür</td></tr>
+  <tr><td>Denetçi (Admin)</td><td>Kayıtları onaylar/reddeder, moderasyon ve toplu dışa aktarım</td></tr>
+  <tr><td>Kurucu</td><td>Tüm yetkiler + kullanıcı/rol yönetimi (değiştirilemez)</td></tr>
+ </tbody></table></div>
+</div></section>
+<section class="blk" id="yontem"><div class="wrap">
+ <div class="shead"><span class="no">02</span><h2>Sahadan Haritaya — Üç Adımda</h2><span class="rule"></span></div>
+ <p style="color:var(--mut);max-width:70ch;font-size:1.02rem">Her ölçüm, saha verisinden hesaplamaya ve denetimli yayına uzanan kontrollü bir akıştan geçer. Yayınlanan küresel veri ve istatistik katmanlarına yalnızca onaylı kayıtlar dahil edilir.</p>
+ 
+ <div class="steps">
+  <div class="step">
+   <div class="num">1</div>
+   <h4>Sahada Ölç</h4>
+   <p>GPS konumunu alın, waypoint pusulasıyla ağaca yönelin; DBH, boy ve grup/tür bilgilerini girin.</p>
+   <div class="sub">GPS · DBH · BOY · FOTOĞRAF</div>
+  </div>
+  <div class="step">
+   <div class="num">2</div>
+   <h4>Otomatik Hesap</h4>
+   <p>Fotoğraf eklenirse tarayıcı içi QA/QC uygulanır. Ardından Chave et al. (2014) modeliyle AGB hesaplanır; kök biyokütlesi ve karbon, sistemde tanımlı sabit varsayımlarla türetilir.</p>
+   <div class="sub">AGB · BHB · C · m³</div>
+  </div>
+  <div class="step">
+   <div class="num">3</div>
+   <h4>Küresel Yayın</h4>
+   <p>Kayıt admin onayından sonra dünya haritasında görünür. Ülke, şehir ve park agregasyonlarına dahil edilir; QGIS ve CSV olarak dışa aktarılabilir.</p>
+   <div class="sub">ONAY → HARİTA → EXPORT</div>
+  </div>
+ </div>
+
+ <div style="margin-top:56px;display:grid;grid-template-columns:1fr 1fr;gap:24px" class="method-grid">
+  <div class="card" style="border-left:4px solid var(--green)">
+   <div style="font-family:Fraunces,serif;font-size:1.1rem;color:var(--green-dk);font-weight:600;margin-bottom:14px">📐 Allometrik Formüller</div>
+   <div class="formula">DBH = Çevre ÷ π</div>
+   <div class="formula">AGB = 0.0673·(ρ·DBH²·H)<sup>0.976</sup> <span style="color:var(--mut)">— Chave 2014</span></div>
+   <div class="formula">BHB = AGB·0.26 <span style="color:var(--mut)">— sistemde kullanılan sabit kök/gövde varsayımı</span></div>
+   <div class="formula">C = (AGB+BHB)·0.47</div>
+   <p style="color:var(--mut);font-size:.78rem;margin-top:12px">Tür/grup tablosunda 45 seçim kaydı bulunur; 17 kaydın doğrudan ρ değeri vardır, 28 kayıt grup varsayılanına düşer.</p>
+  </div>
+  <div class="card" style="border-left:4px solid var(--amber)">
+   <div style="font-family:Fraunces,serif;font-size:1.1rem;color:var(--green-dk);font-weight:600;margin-bottom:14px">🔬 Veri Doğruluk Politikası</div>
+   <ul style="list-style:none;padding:0;margin:0">
+    <li style="padding:8px 0 8px 24px;position:relative;color:var(--ink);font-size:.88rem"><span style="position:absolute;left:0;color:var(--ink);font-weight:700">✓</span>GPS doğruluğu ölçümle kaydedilir; sabit ±10 m kayıt eşiği yoktur</li>
+    <li style="padding:8px 0 8px 24px;position:relative;color:var(--ink);font-size:.88rem"><span style="position:absolute;left:0;color:var(--ink);font-weight:700">✓</span>Fotoğraf eklenirse bitki örtüsü ≥ %25 ve pozlama 25–245 aralığı kontrol edilir</li>
+    <li style="padding:8px 0 8px 24px;position:relative;color:var(--ink);font-size:.88rem"><span style="position:absolute;left:0;color:var(--green);font-weight:700">✓</span>DBH ≤ 500 cm, boy ≤ 100 m</li>
+    <li style="padding:8px 0 8px 24px;position:relative;color:var(--ink);font-size:.88rem"><span style="position:absolute;left:0;color:var(--green);font-weight:700">✓</span>Admin onayı zorunlu</li>
+   </ul>
+  </div>
+ </div>
+</div></section>
+<section class="blk" id="veri"><div class="wrap">
+ <div class="shead"><span class="no">03</span><h2>Veri & Harita</h2><span class="rule"></span></div>
+ <div id="worldMapLanding" style="height:380px;border-radius:var(--r);border:1px solid var(--line)"></div>
+ <p style="color:var(--mut);font-size:.8rem;margin-top:8px">🟢 Onaylı noktalara dokunun → ölçüm bilgisi + varsa fotoğraf.</p>
+ <div id="landingAnalysis" style="margin-top:20px"></div>
+  <div class="card" style="margin-top:20px;border-left:4px solid var(--green)">
+  <div class="shead" style="margin-bottom:12px"><span class="no">🌍</span><h2 style="font-size:1.15rem">Bölgesel Dağılım</h2><span class="rule"></span></div>
+  <div class="grid g2">
+   <div class="tblwrap"><table id="tblCountry"><thead><tr><th>Ülke</th><th>Kayıt</th><th>Karbon(t)</th><th>Ort.DBH</th><th>Ort.Yükseklik(m)</th></tr></thead><tbody></tbody></table></div>
+   <div class="tblwrap"><table id="tblCity"><thead><tr><th>Şehir</th><th>Kayıt</th><th>Karbon(t)</th></tr></thead><tbody></tbody></table></div>
+  </div>
+ </div>
+</div></section>
+<section class="blk" id="istatistik"><div class="wrap">
+ <div class="shead"><span class="no">04</span><h2>İstatistik</h2><span class="rule"></span></div>
+ <p style="color:var(--mut);max-width:72ch">DendroGeo'da şimdiye kadar yayımlanan onaylı ağaç kayıtlarının genel görünümünü burada görebilirsiniz: kaç kayıt, kaç ülke ve şehir ile toplam tahmini karbon stoğu.</p>
+ <div class="grid g4" style="margin-top:20px">
+  <div class="stat"><div class="lbl">Onaylı Kayıt</div><div class="val" id="statRec">—</div></div>
+  <div class="stat"><div class="lbl">Ülke</div><div class="val" id="statCountry">—</div></div>
+  <div class="stat"><div class="lbl">Şehir</div><div class="val" id="statCity">—</div></div>
+  <div class="stat"><div class="lbl">Karbon Stoğu <span class="mono">t</span></div><div class="val" id="statCarbon">—</div></div>
+ </div>
+ <div class="card" style="margin-top:18px;border-left:4px solid var(--blue)">
+  <b>Bu sayılar neyi gösteriyor?</b>
+  <p style="color:var(--mut);font-size:.82rem;margin:7px 0 0">Harita ve istatistiklerde yayınlanan, DendroGeo tarafından onaylanmış saha ölçümlerinin mevcut toplamını gösterir. Değerler zaman içinde yeni ölçümler eklendikçe değişebilir.</p>
+ </div>
+</div></section>
+<section class="blk" id="bilgi-merkezi"><div class="wrap">
+ <div class="shead"><span class="no">05</span><h2>Bilgi Merkezi & Kaynaklar</h2><span class="rule"></span></div>
+ <p style="color:var(--mut);max-width:75ch">DendroGeo'yu kullanırken ihtiyaç duyacağınız ölçüm, karbon hesabı, arazi örtüsü, park analizi ve veri paylaşımı bilgilerini tek yerde bulabilirsiniz.</p>
+ <div class="cols cols-3 info-feature-grid" style="margin-top:22px">
+  <a class="feature" href="/agac-envanteri/" style="text-decoration:none;color:inherit">
+   <div class="ico">🌳</div><h3>Ağaç Envanteri</h3>
+   <p>Saha ölçümleri, GPS, DBH, boy, tür/grup bilgisi ve veri yaşam döngüsü.</p>
+   <ul><li>GPS konumu</li><li>DBH · boy · tür</li><li>Çevrimdışı senkronizasyon</li></ul>
+  </a>
+  <a class="feature" href="/karbon-hesaplama/" style="text-decoration:none;color:inherit">
+   <div class="ico">🧮</div><h3>Karbon Hesaplama</h3>
+   <p>Allometrik biyokütle ve karbon hesabının kullanılan denklemi, varsayımları ve sınırlılıkları.</p>
+   <ul><li>Chave et al. 2014</li><li>ρ odun yoğunluğu</li><li>Varsayım şeffaflığı</li></ul>
+  </a>
+  <a class="feature" href="/arazi-ortusu/" style="text-decoration:none;color:inherit">
+   <div class="ico">🛰</div><h3>10 m Arazi Örtüsü</h3>
+   <p>Park polygonu üzerinde 10 m kategorik raster hücreleriyle yapılan alan analizinin veri ve QA yapısı.</p>
+   <ul><li>WorldCover 2021 v200</li><li>IO LULC 2020 çapraz kontrolü</li><li>Gerçek hücre kesişimi</li></ul>
+  </a>
+  <a class="feature" href="/kent-parklari/" style="text-decoration:none;color:inherit">
+   <div class="ico">🏞</div><h3>Kent Parkı Analizi</h3>
+   <p>Ağaç envanteri, karbon ve arazi örtüsünü aynı park bağlamında birbirinden ayrı veri kaynaklarıyla inceleyin.</p>
+   <ul><li>Park polygonu</li><li>Saha + raster ayrımı</li><li>GIS görünümü</li></ul>
+  </a>
+  <a class="feature" href="/yontem/" style="text-decoration:none;color:inherit">
+   <div class="ico">📐</div><h3>Bilimsel Yöntem</h3>
+   <p>Alan, geometri, biyokütle, karbon ve arazi örtüsü hesaplama zincirinin dayandığı yöntem özeti.</p>
+   <ul><li>Formüller</li><li>Projeksiyon ve alan</li><li>QA/QC</li></ul>
+  </a>
+  <a class="feature" href="/veri/" style="text-decoration:none;color:inherit">
+   <div class="ico">🗂</div><h3>Veri ve Dışa Aktarım</h3>
+   <p>Veri yaşam döngüsü, yayınlama modeli ve araştırma/GIS iş akışlarında kullanılan çıktı formatları.</p>
+   <ul><li>CSV</li><li>GeoJSON</li><li>QGIS iş akışı</li></ul>
+  </a>
+  <a class="feature" href="/hakkimizda/" style="text-decoration:none;color:inherit">
+   <div class="ico">🌿</div><h3>Proje Hakkında</h3>
+   <p>Projenin amacı, açık kaynak yapısı, mimarisi ve bilimsel veri yaklaşımının genel çerçevesi.</p>
+   <ul><li>Açık kaynak</li><li>Web GIS + PWA</li><li>GitHub kaynakları</li></ul>
+  </a>
+ </div>
+ </div></section>
+
+<section class="blk" id="erisim" style="border-top:0"><div class="wrap">
+ <div class="shead"><span class="no">06</span><h2>Giriş / Kayıt</h2><span class="rule"></span></div>
+ <div class="card auth" id="authBox">
+  <div style="display:flex;gap:8px;margin-bottom:16px">
+   <button class="btn sm" onclick="authTab('login')">Giriş</button>
+   <button class="btn sm ghost" onclick="authTab('reg')">Kayıt</button>
+   <button class="btn sm ghost" onclick="authTab('reset')">Şifre Yenile</button>
+  </div>
+<form id="fLogin" onsubmit="return false;"><div class="lbl">E‑posta</div><input id="liEmail" type="email" required><div class="lbl" style="margin-top:12px">Parola</div><input id="liPass" type="password" required><div id="tsLogin" style="margin-top:14px;min-height:65px"></div><button type="button" class="btn" style="width:100%;margin-top:16px" onclick="doLogin()">Giriş Yap</button></form>
+<form id="fReg" style="display:none" onsubmit="return false;"><div class="lbl">Ad Soyad</div><input id="rgName" required><div class="lbl" style="margin-top:10px">Kurum</div><input id="rgOrg"><div class="lbl" style="margin-top:10px">E‑posta</div><input id="rgEmail" type="email" required><div class="lbl" style="margin-top:10px">Parola</div><input id="rgPass" type="password" minlength="6" required><div id="tsReg" style="margin-top:14px;min-height:65px"></div><button type="button" class="btn" style="width:100%;margin-top:16px" onclick="doRegister()">Hesap Oluştur</button></form>
+<form id="fReset" style="display:none" onsubmit="return false;"><div class="lbl">E‑posta</div><input id="rsEmail" type="email" required><div id="tsReset" style="margin-top:14px;min-height:65px"></div><button type="button" class="btn" style="width:100%;margin-top:16px" onclick="sendResetEmail()">Sıfırlama Gönder</button></form>
+  <div id="authMsg" style="margin-top:12px;font-size:.85rem;min-height:1.2em"></div>
+ </div>
+</div></section>
+<footer><div class="wrap">
+ <div class="cols footer-cols">
+  <div><h4>DendroGeo</h4><p>Ağaç envanteri, karbon hesabı, harita ve park ölçeğinde arazi örtüsü analizi.</p></div>
+  <div><h4>Referanslar</h4><p>Chave et al. 2014 · IPCC 2006<br>As ve ark. 2001 · Tolunay 2013<br>OGM 299 Nolu Tebliğ 2017</p></div>
+  <div><h4>Sistem</h4><p>v11.0 · <span class="mono">ÇEVRİMİÇİ</span></p></div>
+ </div>
+ <div style="margin-top:34px;padding-top:30px;border-top:1px solid rgba(255,255,255,.18)">
+  <div class="grid g2" style="gap:24px">
+   <div>
+    <h4 style="color:#9fd0ae;font-size:.72rem;letter-spacing:.16em;text-transform:uppercase;margin-bottom:12px">📚 Kaynakça</h4>
+    <div style="font-size:.78rem;line-height:1.7;color:#cfe0d4">
+     <div>• Chave J, Réjou-Méchain M, et al. (2014). <i>Pantropical biomass allometries</i>. Global Ecology and Biogeography, 23(1), 132-146.</div>
+     <div>• IPCC (2006). <i>Guidelines for National Greenhouse Gas Inventories</i>. Vol. 4, Chapter 4: Forest Land.</div>
+     <div>• As N, Asan A, Okur OD (2001). <i>Türkiye Orman Ağaçlarının Odun Özellikleri</i>. Orman Bakanlığı Yayınları.</div>
+     <div>• Tolunay D (2013). <i>Türkiye'deki Ağaç Türlerinin Odun Yoğunluk Değerleri</i>. İstanbul Üniversitesi Orman Fakültesi.</div>
+     <div>• OGM (2017). <i>299 Nolu Tebliğ — Orman Ürünlerinin Özellikleri</i>. Orman Genel Müdürlüğü.</div>
+     <div>• Bozkurt Y, Erdin N (2000). <i>Önemli Ağaçların Teknik Özellikleri</i>. İÜ Orman Fakültesi.</div>
+    </div>
+   </div>
+   <div>
+    <h4 style="color:#9fd0ae;font-size:.72rem;letter-spacing:.16em;text-transform:uppercase;margin-bottom:12px">📝 Atıf & Lisans</h4>
+    <div class="card" style="background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.15);padding:14px">
+     <div class="mono" style="font-size:.72rem;color:#fff;line-height:1.7;background:rgba(0,0,0,.25);padding:10px;border-radius:6px">
+      ŞİRİN, S. &amp; ŞİRİN, N. (2026). <i>DendroGeo: Global Tree Inventory &amp; Carbon Data System</i> (Version 1.0.0) [Dataset]. Zenodo. https://doi.org/10.5281/zenodo.22646300
+     </div>
+     <div style="font-size:.75rem;color:#cfe0d4;margin-top:10px">
+      <b style="color:#fff">Veri Lisansı:</b> CC BY-NC 4.0 — Ticari olmayan kullanımda, kaynak gösterilerek serbestçe paylaşılabilir.
+     </div>
+    </div>
+    <h4 style="color:#9fd0ae;font-size:.72rem;letter-spacing:.16em;text-transform:uppercase;margin:18px 0 10px">⚖️ Politikalar</h4>
+    <div style="font-size:.78rem;color:#cfe0d4;line-height:1.6">
+     <div><a href="#" onclick="toast('KVKK: Yalnızca e-posta, ad ve kurum bilgileriniz saklanır. Hesap istediğinizde tüm verileriniz silinebilir. Çerez kullanılmamaktadır.');return false;" style="color:#9fd0ae;text-decoration:underline">KVKK Aydınlatma Metni</a></div>
+     <div style="margin-top:4px"><a href="#" onclick="toast('Veri Doğruluk: GPS doğruluğu ölçümle kaydedilir. Fotoğraf eklenirse bitki örtüsü ≥%25 ve pozlama 25-245 aralığı kontrol edilir. Tüm kayıtlar admin onayından sonra yayımlanır.');return false;" style="color:#9fd0ae;text-decoration:underline">Veri Doğruluk Politikası</a></div>
+    </div>
+   </div>
+  </div>
+ </div>
+ <div class="credit">
+  <div class="thesis">🎓 Bu proje; <b>Nagihan ŞİRİN</b>'in <i>"Kent Parklarının Karbon Depolama Performansının Saptanması"</i> adlı doktora çalışması kapsamında gerçekleştirilmiştir.</div>
+  <div class="prod">Üretici · Sinan ŞİRİN</div>
+ </div>
+</div></footer>
+</div>
+

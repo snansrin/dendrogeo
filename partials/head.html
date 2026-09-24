@@ -1,0 +1,205 @@
+<!doctype html>
+<html lang="tr">
+<head> 
+<meta charset="utf-8"> 
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="google-site-verification" content="b8R2BtUI2XYHvOY5jqh18Binkcs_-tILJCLjs9H6LNE" />
+<meta http-equiv="Content-Security-Policy" content="default-src 'self' 'unsafe-inline' data: blob: https://*.tile.openstreetmap.org https://nominatim.openstreetmap.org https://*.supabase.co https://fonts.googleapis.com https://fonts.gstatic.com https://challenges.cloudflare.com https://overpass-api.de https://lz4.overpass-api.de https://z.overpass-api.de https://overpass.kumi.systems https://overpass.osm.ch https://overpass.openstreetmap.fr https://overpass.private.coffee https://server.arcgisonline.com https://*.tile.opentopomap.org https://planetarycomputer.microsoft.com https://*.blob.core.windows.net https://*.s3.us-west-2.amazonaws.com">
+<title>DendroGeo — Küresel Ağaç Envanteri ve Karbon Veri Sistemi</title>
+
+
+<!-- === SEO META === -->                  
+<meta name="description" content="DendroGeo: saha GPS ölçümü, ağaç biyokütlesi ve karbon hesabı, onaylı veri haritası ve 10 m arazi örtüsü analizi için web GIS platformu.">
+<meta name="keywords" content="ağaç envanteri, karbon hesaplama, biyokütle, allometrik denklem, DBH, çap ölçümü, ağaç boyu, kent parkları karbon, orman karbon stoğu, Chave 2014, IPCC 2006, QGIS ağaç haritası, ağaç veri tabanı, tree inventory, carbon sequestration, biomass equation, forest carbon, urban tree carbon, DendroGeo">
+<meta name="author" content="Sinan ŞİRİN, Nagihan ŞİRİN">
+<meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">
+<meta name="googlebot" content="index, follow">
+<meta name="language" content="Turkish">
+<meta name="revisit-after" content="7 days">
+<meta name="rating" content="General">
+<meta name="distribution" content="global">
+<link rel="canonical" href="https://dendrogeo.org/">
+
+<!-- === OPEN GRAPH (Facebook, LinkedIn, WhatsApp) === -->
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="DendroGeo">
+<meta property="og:title" content="DendroGeo — Küresel Ağaç Envanteri ve Karbon Veri Sistemi">
+<meta property="og:description" content="Saha GPS ölçümü, ağaç biyokütlesi ve karbon hesabı, onaylı veri haritası ve 10 m arazi örtüsü analizi.">
+<meta property="og:image" content="https://dendrogeo.org/social-preview.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="DendroGeo - Ağaç Envanteri ve Karbon Veri Sistemi">
+<meta property="og:url" content="https://dendrogeo.org/">
+<meta property="og:locale" content="tr_TR">
+<meta property="og:locale:alternate" content="en_US">
+
+<!-- === TWITTER CARD === -->
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="DendroGeo — Küresel Ağaç Envanteri">
+<meta name="twitter:description" content="Ağaç ölçümünü konum, allometrik hesap ve onaylı veri haritasına bağlayan DendroGeo web GIS platformu.">
+<meta name="twitter:image" content="https://dendrogeo.org/social-preview.jpg">
+<meta name="twitter:image:alt" content="DendroGeo önizleme">
+
+<!-- === JSON-LD YAPILANDIRILMIŞ VERİ (Google için çok önemli) === -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "WebApplication",
+      "@id": "https://dendrogeo.org/#app",
+      "name": "DendroGeo",
+      "alternateName": "Global Tree Inventory & Carbon Data System",
+      "url": "https://dendrogeo.org/",
+      "description": "Saha GPS ölçümünü ağaç envanteri, allometrik biyokütle\/karbon hesabı, onaylı harita ve 10 m arazi örtüsü analiziyle birleştiren bilimsel veri platformu.",
+      "applicationCategory": "ScienceApplication",
+      "applicationSubCategory": "Environmental Science",
+      "operatingSystem": "Web, PWA, iOS, Android",
+      "browserRequirements": "Requires JavaScript, HTML5, Geolocation API",
+      "softwareVersion": "11.0",
+      "datePublished": "2026-08-30",
+      "dateModified": "2026-09-22",
+      "inLanguage": ["tr-TR", "en-US"],
+      "isAccessibleForFree": true,
+      "license": "https://creativecommons.org/licenses/by-nc/4.0/",
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "USD"
+      },
+      "author": [
+        {
+          "@type": "Person",
+          "name": "Sinan ŞİRİN",
+          "jobTitle": "Sistem Geliştirici",
+          "url": "https://github.com/snansrin"
+        },
+        {
+          "@type": "Person",
+          "name": "Nagihan ŞİRİN",
+          "jobTitle": "Doktora Öğrencisi - Peyzaj Mimarlığı"
+        }
+      ],
+      "keywords": "tree inventory, carbon sequestration, biomass equation, allometry, DBH, urban forest, forest carbon, QGIS, Chave 2014, IPCC"
+    },
+      {
+      "@type": "Dataset",
+      "@id": "https://dendrogeo.org/#dataset",
+      "name": "DendroGeo Global Tree Inventory Dataset",
+      "description": "Admin onaylı ağaç ölçüm verileri: GPS konumu, DBH, boy, tür, AGB, BHB, karbon stoğu, fotoğraf. CSV ve GeoJSON formatında dışa aktarılabilir.",
+      "url": "https://dendrogeo.org/",
+      "identifier": "https://doi.org/10.5281/zenodo.22646300",
+      "sameAs": "https://doi.org/10.5281/zenodo.22646300",
+      "license": "https://creativecommons.org/licenses/by-nc/4.0/",
+      "datePublished": "2026-08-30",
+      "dateModified": "2026-09-22",
+      "temporalCoverage": "2026-08-30/..",
+      "spatialCoverage": {
+        "@type": "Place",
+        "name": "Global",
+        "geo": { "@type": "GeoShape", "box": "-90 -180 90 180" }
+      },
+      "creator": { "@type": "Organization", "name": "DendroGeo Project" },
+      "keywords": "tree inventory, carbon sequestration, biomass, DBH, urban forest, forest carbon",
+      "measurementTechnique": "Field GPS measurement + allometric equations (Chave 2014)",
+      "variableMeasured": [
+        { "@type": "PropertyValue", "name": "DBH (cm)" },
+        { "@type": "PropertyValue", "name": "Tree Height (m)" },
+        { "@type": "PropertyValue", "name": "Above-ground biomass (kg)" },
+        { "@type": "PropertyValue", "name": "Carbon stock (kg)" }
+      ],
+      "distribution": [
+        { "@type": "DataDownload", "encodingFormat": "text/csv", "contentUrl": "https://dendrogeo.org/" },
+        { "@type": "DataDownload", "encodingFormat": "application/geo+json", "contentUrl": "https://dendrogeo.org/" }
+      ]
+    },
+    {
+      "@type": "ScholarlyArticle",
+      "@id": "https://dendrogeo.org/#thesis",
+      "headline": "Kent Parklarının Karbon Depolama Performansının Saptanması",
+      "author": {
+        "@type": "Person",
+        "name": "Nagihan ŞİRİN"
+      },
+      "description": "Doktora araştırması kapsamında geliştirilen DendroGeo platformu ile kent parklarındaki ağaçların karbon depolama kapasitesinin ölçülmesi ve analizi.",
+      "datePublished": "2026",
+      "inLanguage": "tr-TR",
+      "isPartOf": {
+        "@type": "CreativeWork",
+        "name": "Doktora Tezi"
+      }
+    },
+    {
+      "@type": "FAQPage",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "Bir ağacın karbon stoğu nasıl hesaplanır?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "DendroGeo'da DBH, boy ve odun yoğunluğu (ρ) ile Chave et al. (2014) denklemiyle AGB hesaplanır. Kök biyokütlesi sistemde kullanılan AGB × 0,26 oranıyla, karbon ise toplam biyokütlenin 0,47'si varsayımıyla hesaplanır."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "DendroGeo nedir?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "DendroGeo, saha GPS ölçümü, ağaç ölçümleri ve allometrik hesapları birleştirir; onaylı kayıtları küresel harita ve istatistiklerde sunar. Fotoğraf eklenirse tarayıcı içi kalite kontrolü uygulanır."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Veriler hangi formatta dışa aktarılır?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "DendroGeo verileri CSV (bilimsel format), GeoJSON (web haritaları) ve QGIS uyumlu fotoğraf eşleştirmeli CSV formatlarında dışa aktarılabilir. CC BY-NC 4.0 lisansı altındadır."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Hangi tür ve odun yoğunluğu bilgileri kullanılıyor?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Sistem tür ve grup seçimi içerir. Tür için doğrudan odun yoğunluğu (ρ) bulunmadığında ilgili grup için tanımlı varsayılan yoğunluk kullanılır; bu nedenle karbon sonucu kullanılan ρ varsayımıyla birlikte değerlendirilmelidir."
+          }
+        }
+      ]
+    }
+  ]
+}
+</script>
+<link rel="icon" type="image/png" href="icon.png?v=2">
+<link rel="manifest" href="manifest.json"> 
+<meta name="theme-color" content="#14532d"><link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Manrope:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="vendor/leaflet-1.9.4.css">
+<script src="vendor/leaflet-1.9.4.js"></script>
+<link rel="stylesheet" href="vendor/MarkerCluster-1.5.3.css">
+<link rel="stylesheet" href="vendor/MarkerCluster.Default-1.5.3.css">
+<script src="vendor/leaflet.markercluster-1.5.3.js"></script>
+<script src="vendor/supabase-js-2.116.0.js"></script>
+<script src="src/config/supabase.js?v=6b91ef6f"></script>
+<script src="src/config/constants.js?v=9f758cd5"></script>
+<script src="src/config/species.js?v=597bfd9f"></script>
+<script src="src/utils/geo.js?v=3e796768"></script>
+<script src="src/utils/truncation.js?v=f43c76b3"></script>
+<script src="src/services/allometry.js?v=23ec2992"></script>
+<script src="src/services/auth.js?v=7c805a8c"></script>
+<script src="src/services/export.js?v=cf96e318"></script>
+<script src="src/services/offline.js?v=8017c712"></script>
+<script src="src/services/admin.js?v=0be3d166"></script>
+<script src="src/services/world.js?v=9623fcee"></script>
+<script src="src/services/measure.js?v=9a57298b"></script>
+<script src="src/services/map.js?v=ec711385"></script>
+<script src="vendor/geotiff-2.1.3.js"></script>
+<script src="src/services/landcover.js?v=9efe364e"></script>
+<script src="src/services/gridplan.js?v=8ef200b4"></script>
+<script src="src/services/dash.js?v=f5e14053"></script>
+<script src="vendor/chart.js-4.5.1.js"></script>
+<link rel="stylesheet" href="css/style.css?v=790e558b">
+<link rel="stylesheet" href="css/landing.css?v=e875e230">
+</head>
+<body>
+<div id="toastWrap"></div>

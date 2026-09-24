@@ -27,6 +27,12 @@ jobs:
       - name: Sürüm numarası tutarlılığı
         run: npm run check:versions
 
+      # index.html bir ARTİFAKTTIR: partials/{head,landing,shell,boot}.html
+      # birleşiminden üretilir. Elle index.html düzenlenirse bu adım yakalar
+      # (düzeltme: npm run build ya da build-index.mjs --split).
+      - name: Derleme tutarlılığı (index.html == partials)
+        run: npm run build:check
+
       # Koda yeni dış servis eklenip CSP güncellenmezse istek tarayıcı
       # tarafından sessizce kesilir. Bu daha önce planetarycomputer.microsoft.com
       # ve titiler.terrascope.be ile yaşandı (a5dabbc ile düzeltildi).

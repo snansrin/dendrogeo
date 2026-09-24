@@ -1,0 +1,304 @@
+<div id="shell">
+<div id="apptop">
+<span class="logo"><img class="brand-logo" src="logo.png" alt="">DendroGeo</span>
+ <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:var(--green);box-shadow:0 0 0 3px rgba(30,111,75,.25)"></span>
+ <div class="right">
+  <span class="badge admin" id="syncBadge" style="display:none" title="Senkron bekleyen ölçümler">⏳ 0</span>
+  <button class="btn sm ghost" id="installBtn" style="display:none" onclick="dgInstallApp()">📲 Uygulayı Kur</button>
+  <span class="mono" id="whoami" style="font-size:.8rem;color:var(--mut)"></span>
+  <span class="badge admin" id="roleBadge" style="display:none">ADMIN</span>
+  <button class="btn sm red" onclick="logout()">Çıkış</button>
+ </div>
+</div>
+<div id="layout">
+ <div id="side">
+  <div class="sec">Saha</div>
+  <div class="item on" onclick="go('dash')">📊 Panel</div>
+  <div class="item" onclick="go('measure')">📏 Yeni Ölçüm</div>
+  <div class="item" onclick="go('nav')">🧭 Waypoint</div>
+  <div class="item" onclick="go('map')">🗺️ Canlı Harita</div>
+  <div class="sec">Veri</div>
+  <div class="item" onclick="go('projects')">📁 Projeler</div>
+  <div class="item" onclick="go('records')">📋 Kayıtlarım</div>
+  <div class="item" onclick="go('export')">💾 Dışa Aktar</div>
+  <div class="item" onclick="go('world')">🌍 Dünya Verisi</div>
+  <div class="sec" id="adminSec" style="display:none">Yönetim</div>
+  <div class="item" id="miAdmin" style="display:none" onclick="go('admin')">🔐 Ölçüm Yönetimi</div>
+  <div class="item" id="miUsers" style="display:none" onclick="go('users')">👥 Kullanıcılar</div>
+ </div>
+ <div id="main">
+
+   <div class="view on" id="v-dash">
+   <div class="shead" style="margin-bottom:18px"><span class="no">📊</span><h2 style="font-size:1.6rem">Genel Bakış</h2><span class="rule"></span><span class="mono" style="font-size:.78rem;color:var(--mut)">Kişisel Analiz Paneli</span></div>
+   <div class="grid g4" style="margin-bottom:22px">
+    <div class="stat" style="border-left:3px solid var(--green);padding-left:18px"><div class="lbl">📋 Kayıtlarım</div><div class="val" id="dMy">0</div></div>
+    <div class="stat" style="border-left:3px solid var(--amber);padding-left:18px"><div class="lbl">🌱 Karbonum</div><div class="val" id="dCarbon">0</div><div style="font-size:.72rem;color:var(--mut);margin-top:4px">kg CO₂ eşdeğer</div></div>
+    <div class="stat" style="border-left:3px solid var(--blue);padding-left:18px"><div class="lbl">📍 Waypoint</div><div class="val" id="dWp">0</div></div>
+    <div class="stat" style="border-left:3px solid var(--red);padding-left:18px"><div class="lbl">✅ Tamamlanan</div><div class="val" id="dVisit">0</div></div>
+   </div>
+   <div class="card" style="margin-bottom:18px;border-left:4px solid var(--green)">
+    <div class="shead" style="margin-bottom:14px"><span class="no">🌳</span><h2 style="font-size:1.15rem">Kişisel Ağaç Analizi</h2><span class="rule"></span></div>
+    <div id="myAnalysis"></div>
+   </div>
+     <div class="card" style="margin-top:18px;border-left:4px solid var(--blue)">
+    <div class="shead" style="margin-bottom:12px"><span class="no">📈</span><h2 style="font-size:1.15rem">Karbon Trendi</h2><span class="rule"></span><span class="mono" style="font-size:.72rem;color:var(--mut)">son 10 kayıt · kg</span></div>
+    <canvas id="chCarbon" height="110"></canvas>
+   </div>
+  </div>
+
+  <div class="view" id="v-measure">
+   <h2 class="disp" style="margin-bottom:16px">Yeni Ölçüm</h2>
+   <div id="editBanner" class="alert info" style="display:none">✏️ <b>Düzenleme modu:</b> mevcut kaydı güncelliyorsunuz. <button class="btn sm ghost" style="margin-left:10px" onclick="cancelEdit()">Vazgeç</button></div>
+   <div class="grid g2">
+    <div class="card">
+     <div class="lbl" style="margin-bottom:10px">🛰 GPS / Uydu</div>
+     <div class="gpsring" id="gpsRing"><div class="val" id="gpsAcc">—</div><div class="lbl">doğruluk (m)</div></div>
+     <div id="gpsState" class="alert info" style="margin-top:12px">Konum servisi kapalı.</div>
+     <button class="btn blue" style="width:100%" onclick="startGps()">📡 Konumu Etkinleştir</button>
+     <div id="iosHint" class="alert info" style="display:none;margin-top:10px"><b>iPhone kullanıcısı mısınız?</b><br><span style="font-size:.85rem">Ayarlar → Gizlilik ve Güvenlik → Konum Servisleri →Safari Siteleri→ "Uygulamayı Kullanırken" seçin, sayfayı yenileyin.</span></div>
+     <div class="grid g2" style="margin-top:14px">
+      <div><div class="lbl">Enlem</div><div class="mono" id="gLat">—</div></div>
+      <div><div class="lbl">Boylam</div><div class="mono" id="gLon">—</div></div>
+      <div><div class="lbl">Rakım</div><div class="mono" id="gAlt">—</div></div>
+      <div><div class="lbl">Sinyal</div><div class="mono" id="gQ">—</div></div>
+     </div>
+    </div>
+    <div class="card">
+     <div class="lbl">Proje</div><select id="mProject" onchange="if(!manualPoint)autoFillPointId()"></select>
+     <div class="grid g2" style="margin-top:10px">
+      <div><div class="lbl">POINT ID</div><div style="display:flex;gap:6px"><input id="mPoint" type="number" oninput="manualPoint=true"><button class="btn sm blue" style="white-space:nowrap" onclick="queryPointId()">🔍 Sorgula</button></div></div>
+      <div><div class="lbl">Ölçüm No</div><input id="mNo" type="number" value="1"></div>
+     </div>
+     <div id="pointQueryResult" class="alert info" style="display:none;margin-top:10px"></div>
+     <div class="grid g2" style="margin-top:10px">
+      <div><div class="lbl">Grup</div><select id="mGroup" onchange="fillSpecies()"><option value="">Seç</option><option>İBRELİ</option><option>YAPRAKLI</option><option>DİĞER</option></select></div>
+      <div><div class="lbl">Tür (Latince)</div><select id="mSpecies" disabled onchange="showLatin()"></select></div>
+     </div>
+     <div id="latinName" class="mono" style="font-size:.76rem;color:var(--mut);font-style:italic;margin-top:4px"></div>
+     <div class="grid g2" style="margin-top:10px">
+      <div><div class="lbl">Çap (cm)</div><input id="mDbh" type="number" step="0.1" oninput="liveCalc()" placeholder="örn: 52"></div>
+      <div><div class="lbl">Boy (m)</div><input id="mHeight" type="number" step="0.1" oninput="liveCalc()" placeholder="örn: 7,2"></div>
+     </div>
+     <div class="lbl" style="margin-top:12px">📸 Fotoğraf (canlı çekim)</div>
+     <input type="file" id="mPhoto" accept="image/*" capture="environment" onchange="checkPhoto(event)">
+     <div id="photoCheck" class="alert info" style="display:none;margin-top:8px"></div>
+     <div id="liveCalc" class="alert ok" style="display:none"></div>
+     <button class="btn" id="saveBtn" style="width:100%;margin-top:14px" onclick="saveMeas()">💾 Hesapla ve Kaydet</button>
+    </div>
+   </div>
+  </div>
+
+  <div class="view" id="v-nav">
+   <h2 class="disp" style="margin-bottom:16px">Waypoint Navigasyon</h2>
+   <div class="grid g2">
+    <div class="card">
+     <div class="lbl">Proje</div><select id="nProject" onchange="loadWaypoints()"></select>
+     <div class="lbl" style="margin:12px 0 6px">Waypoints.csv Yükle (X,Y,id)</div>
+     <input type="file" id="nCsv" accept=".csv">
+     <div style="display:flex;gap:8px;flex-wrap:wrap">
+      <button class="btn blue sm" style="margin-top:8px" onclick="uploadWpCsv()">⬆ Waypoint Yükle</button>
+      <button class="btn red sm" style="margin-top:8px" onclick="deleteAllWaypoints()">🗑 Listeyi Tamamen Sil</button>
+     </div>
+     <div id="navInfo" class="alert info" style="margin-top:12px">Liste projeye kalıcı kaydedilir; tekrar yüklemeye gerek yok.</div>
+     <div style="display:flex;gap:20px;align-items:center;margin-top:14px">
+      <svg class="arrow" id="navArrow" viewBox="0 0 100 100"><path d="M50 5 L70 70 L50 55 L30 70 Z" fill="var(--green)"/></svg>
+      <div><div class="val" id="navDist">—</div><div class="lbl">hedefe mesafe</div><div class="mono" id="navTarget" style="color:var(--amber);margin-top:6px">—</div></div>
+     </div>
+     <button class="btn" style="width:100%;margin-top:14px" onclick="arriveWp()">🎯 Vardım → Ölçüme Geç</button>
+     <div style="margin-top:24px;border-top:1px solid var(--line);padding-top:16px">
+      <div class="lbl" style="margin-bottom:10px">📍 Waypoint Listesi <span style="text-transform:none;letter-spacing:0">(üstü çizili = yapıldı)</span></div>
+      <div class="tblwrap" style="max-height:300px;overflow-y:auto;border:1px solid var(--line);border-radius:10px">
+       <table><thead><tr><th>ID</th><th>Enlem</th><th>Boylam</th><th>Durum</th><th>İşlem</th></tr></thead><tbody id="wpListTable"></tbody></table>
+      </div>
+     </div>
+    </div>
+    <div class="card"><div id="navMap"></div><div class="lbl" style="margin-top:8px">🔴 waypoint (numaralı, tıkla=hedef) · 🟢 yapıldı · 🔵 konumun</div></div>
+   </div>
+  </div>
+
+<div class="view" id="v-map"><h2 class="disp" style="margin-bottom:16px">Canlı Harita</h2>
+<div style="display:flex;gap:10px;align-items:center;margin-bottom:10px;flex-wrap:wrap">
+ <button class="btn sm blue" id="parkModeBtn" onclick="window.dgToggleParkMode()">🌳 Park Analizi Modu: KAPALI</button>
+ <label style="font-size:.82rem;margin-left:8px">Harita:</label>
+ <select id="baseLayerSelect" onchange="switchBaseLayer(this.value)" style="font-size:.82rem;padding:4px 8px;border-radius:6px;border:1px solid var(--line)">
+  <option value="osm">🗺️ Sokak</option>
+  <option value="sat">🛰️ Uydu</option>
+  <option value="topo">🏔️ Topoğrafik</option>
+ </select>
+ <span id="parkModeHint" style="font-size:.78rem;color:var(--mut)">Açınca haritada bir parkın içine tıkla → sınırı otomatik algılanır.</span>
+</div>
+<div id="mapLoad" class="alert info">⏳ Onaylı kayıtlar yükleniyor…</div><div id="map"></div>
+<div id="parkInfo" class="card" style="display:none;margin-top:12px;border-left:4px solid var(--blue)"></div><p style="color:var(--mut);font-size:.8rem;margin-top:8px">🟢 Noktalara dokunun → onaylı ölçüm bilgisi + varsa fotoğraf.</p><div id="liveAnalysis" style="margin-top:18px"></div></div>
+
+  <div class="view" id="v-projects">
+<h2 class="disp" style="margin-bottom:16px">Projeler</h2>
+<div class="card" style="margin-bottom:16px">
+<div class="grid g3">
+<div><div class="lbl">Proje Adı</div><input id="pName"></div>
+<div><div class="lbl">Ülke</div><input id="pCountry" value="Türkiye"></div>
+<div><div class="lbl">Şehir</div><input id="pCity" value="Ankara"></div>
+</div>
+    <div style="display:flex;gap:8px;margin-top:10px">
+     <button class="btn sm" id="projSaveBtn" onclick="createProject()">+ Proje Oluştur</button>
+     <button class="btn sm ghost" id="projCancelBtn" style="display:none" onclick="cancelProjectEdit()">Vazgeç</button>
+    </div>
+   </div>
+   <div class="card tblwrap"><table><thead><tr><th>ID</th><th>Ad</th><th>Ülke</th><th>Şehir</th><th>Tarih</th><th>İşlem</th></tr></thead><tbody id="projTable"></tbody></table></div>
+  </div>
+
+  <div class="view" id="v-records">
+   <h2 class="disp" style="margin-bottom:16px">Kayıtlarım</h2>
+   <div class="alert info">Kayıtlarınız admin onayından sonra dünya verisinde yayınlanır.</div>
+   <div class="card tblwrap"><table><thead><tr><th>Proje</th><th>Nokta</th><th>Tür</th><th>Çap</th><th>Boy</th><th>Karbon</th><th>Foto</th><th>Durum</th><th>İşlem</th></tr></thead><tbody id="recTable"></tbody></table></div>
+  </div>
+
+  <div class="view" id="v-export">
+   <h2 class="disp" style="margin-bottom:16px">Dışa Aktar</h2>
+   <div class="grid g3">
+    <div class="card"><b>📥 Standart CSV</b><p style="color:var(--mut);font-size:.8rem;margin:6px 0 12px">Tam bilimsel format (AGB/BHB/Karbon)</p><div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn sm" onclick="exportCSV()">İndir</button><button class="btn sm ghost" onclick="previewCSV()">Görüntüle</button></div></div>
+    <div class="card"><b>🗺 GeoJSON</b><p style="color:var(--mut);font-size:.8rem;margin:6px 0 12px">QGIS / web harita katmanı</p><div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn sm blue" onclick="exportGeo()">İndir</button><button class="btn sm ghost" onclick="previewGeo()">Görüntüle</button></div></div>
+    <div class="card"><b>🧾 QGIS CSV</b><p style="color:var(--mut);font-size:.8rem;margin:6px 0 12px">Fotoğraf eşleştirmeli saha formatı</p><div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn sm amber" onclick="exportQgis()">İndir</button><button class="btn sm ghost" onclick="previewCSV()">Görüntüle</button></div></div>
+   </div>
+   <div class="card" style="margin-top:20px;border-left:4px solid var(--blue)">
+    <div class="shead" style="margin-bottom:14px"><span class="no">✉️</span><h2 style="font-size:1.2rem">Yöneticiden Veri Talep Et</h2></div>
+    <p style="color:var(--mut);font-size:.85rem;margin-bottom:12px">Belirli bir ülke / şehir / proje (kent parkı) için tüm onaylı veriyi yönetici tarafında hazırlanmış olarak e‑postanıza almak isterseniz talep oluşturun.</p>
+    <div class="grid g3">
+     <div><div class="lbl">Ülke</div><select id="reqCountry" onchange="reqCountryChanged()"><option value="">Tümü</option></select></div>
+<div><div class="lbl">Şehir</div><select id="reqCity" onchange="reqCityChanged()"><option value="">Tümü</option></select></div>
+<div><div class="lbl">Proje / Park</div><select id="reqProject"><option value="">Tümü</option></select></div>
+    </div>
+    <div style="margin-top:10px"><div class="lbl">Not</div><input id="reqNote" placeholder="İsteğe dair kısa not"></div>
+    <button class="btn blue sm" style="margin-top:12px" onclick="sendDataRequest()">✉️ Talep Gönder</button>
+    <div id="reqMsg" style="margin-top:10px;font-size:.85rem"></div>
+    <div id="myRequests" style="margin-top:14px"></div>
+   </div>
+   <div class="card" style="margin-top:20px;border-left:4px solid var(--amber)">
+    <div class="shead" style="margin-bottom:14px"><span class="no">📘</span><h2 style="font-size:1.2rem">QGIS Fotoğraf Aktarım Rehberi</h2></div>
+    <ol class="guide">
+     <li><b>CSV'yi içe aktar:</b> QGIS → <code>Layer → Add Layer → Add Delimited Text Layer</code>. <code>X = LONGITUDE</code>, <code>Y = LATITUDE</code>, CRS = <code>EPSG:4326</code>.</li>
+     <li><b>Tüm veriler katman olur:</b> AGB, BHB, biyokütle, karbon sütunları öznitelik tablosuna işlenir. <code>Identify (i)</code> ile bilgi balonu açılır.</li>
+     <li><b>Yöntem A — İnternetten (önerilen):</b> Katman Özellikleri → <code>Display</code> → HTML Map Tip:<br><code>&lt;img src='[% "PHOTO_URL" %]' width='220'&gt;</code><br>İnternet bağlantısı varken fotoğraflar otomatik yüklenir, yerel klasöre gerek yok.</li><li><b>Yöntem B — Yerel klasör:</b> Fotoğrafları tek klasöre koy (örn. <code>C:/dendro_foto/</code>). Dosya adları <code>PHOTO_FILE</code> ile aynı olmalı. Map Tip:<br><code>&lt;img src="file:///C:/dendro_foto/[% "PHOTO_FILE" %]" width="220"&gt;</code></li>
+     <li><b>Etkinleştir:</b> <code>View → Show Map Tips</code>.</li>
+     <li><b>Etiket:</b> Labels → <code>POINT_ID</code>.</li>
+    </ol>
+   </div>
+  </div>
+
+  <div class="view" id="v-world">
+   <h2 class="disp" style="margin-bottom:16px">🌍 Dünya Verisi</h2>
+   <div class="grid g4" style="margin-bottom:18px">
+    <div class="stat"><div class="lbl">Toplam Kayıt</div><div class="val" id="wRec">0</div></div>
+    <div class="stat"><div class="lbl">Ülke</div><div class="val" id="wCountry">0</div></div>
+    <div class="stat"><div class="lbl">Şehir</div><div class="val" id="wCity">0</div></div>
+    <div class="stat"><div class="lbl">Karbon (t)</div><div class="val" id="wCarbon">0</div></div>
+   </div>
+   <div id="worldMap" style="margin-bottom:8px"></div>
+   <p style="color:var(--mut);font-size:.8rem;margin-bottom:18px">🟢 Noktalara dokunun → bilgi + fotoğraf balonu.</p>
+   <div id="worldAnalysis" style="margin-bottom:18px"></div>
+      <div class="card" style="border-left:4px solid var(--green)">
+    <div class="shead" style="margin-bottom:12px"><span class="no">🌍</span><h2 style="font-size:1.15rem">Bölgesel Dağılım</h2><span class="rule"></span></div>
+    <div class="grid g2">
+     <div class="tblwrap"><table><thead><tr><th>Ülke</th><th>Kayıt</th><th>Karbon(t)</th><th>Ort.Çap</th><th>Ort.Yükseklik(m)</th></tr></thead><tbody id="wCountryT"></tbody></table></div>
+     <div class="tblwrap"><table><thead><tr><th>Şehir</th><th>Kayıt</th><th>Karbon(t)</th></tr></thead><tbody id="wCityT"></tbody></table></div>
+    </div>
+      </div>
+   <div class="card" style="margin-top:18px;border-left:4px solid var(--blue)">
+    <div class="shead" style="margin-bottom:12px"><span class="no">🆚</span><h2 style="font-size:1.15rem">Park Karşılaştırma — Karbon Performansı</h2><span class="rule"></span></div>
+    <div id="parkCompare"></div>
+   </div>
+   <div class="card" style="margin-top:18px;border-left:4px solid var(--amber)">
+    <div class="shead" style="margin-bottom:12px"><span class="no">📄</span><h2 style="font-size:1.15rem">Park Raporu</h2><span class="rule"></span></div>
+    <div class="grid g3">
+     <div><div class="lbl">Park / Proje</div><select id="repProject"></select></div>
+     <div style="align-self:end"><button class="btn amber" onclick="parkReport()">📄 Rapor Oluştur</button></div>
+    </div>
+   </div>
+  </div>
+
+  <div class="view" id="v-admin">
+   <h2 class="disp" style="margin-bottom:16px">🔐 Ölçüm Yönetimi & Onay</h2>
+   <div class="grid g4" style="margin-bottom:18px">
+    <div class="stat"><div class="lbl">Kullanıcı</div><div class="val" id="aUsers">0</div></div>
+    <div class="stat"><div class="lbl">Kayıt</div><div class="val" id="aRec">0</div></div>
+    <div class="stat"><div class="lbl">Karbon (t)</div><div class="val" id="aCarbon">0</div></div>
+    <div class="stat"><div class="lbl">Proje</div><div class="val" id="aProj">0</div></div>
+   </div>
+   <div class="grid g4" style="margin-bottom:18px">
+    <div class="stat"><div class="lbl">👁 Toplam Ziyaretçi</div><div class="val" id="aVisitTotal">0</div></div>
+    <div class="stat"><div class="lbl">👁 Bugün</div><div class="val" id="aVisitToday">0</div></div>
+    <div class="stat"><div class="lbl">👁 Son 7 Gün</div><div class="val" id="aVisit7">0</div></div>
+    <div class="stat"><div class="lbl">✉️ Bekleyen Talep</div><div class="val" id="aReqPending">0</div></div>
+   </div>
+   <div class="card" style="margin-bottom:18px">
+    <div class="lbl">💽 Depolama Kullanımı</div>
+    <div style="height:10px;background:var(--line);border-radius:6px;margin:10px 0 6px;overflow:hidden"><div id="storeBar" style="height:100%;width:0%;background:var(--green);transition:width .6s"></div></div>
+    <div class="mono" id="storeInfo" style="font-size:.75rem;color:var(--mut)">Hesaplanıyor…</div>
+    <button class="btn sm amber" style="margin-top:10px" onclick="cleanOrphans()">🧹 Yetim Dosyaları Temizle</button>
+    <button class="btn sm blue" style="margin-top:10px;margin-left:8px" onclick="reGeocodeAll()">🌍 Şehirleri Yeniden Algıla</button>
+    <button class="btn sm" style="margin-top:10px;margin-left:8px" onclick="fullBackup()">💾 Tam Yedek İndir (JSON)</button>
+   </div>
+   <div class="card" style="margin-bottom:18px;border-left:4px solid var(--amber)">
+    <div class="shead" style="margin-bottom:12px"><span class="no">📦</span><h2 style="font-size:1.2rem">Toplu Dışa Aktarım (Tüm Kullanıcılar)</h2></div>
+    <p style="color:var(--mut);font-size:.82rem;margin-bottom:10px">Kullanıcı ayrımı yapılmadan sistemdeki <b>tüm veri</b>, seçtiğiniz filtrelere göre dışa aktarılır.</p>
+    <div class="grid g4">
+     <div><div class="lbl">Ülke</div><select id="admExpCountry" onchange="admCountryChanged()"><option value="">Tümü</option></select></div>
+<div><div class="lbl">Şehir</div><select id="admExpCity" onchange="admCityChanged()"><option value="">Tümü</option></select></div>
+<div><div class="lbl">Proje / Park</div><select id="admExpProject"><option value="">Tümü</option></select></div>
+     <div><div class="lbl">Durum</div><select id="admExpStatus"><option value="">Tümü</option><option value="Onaylı">Onaylı</option><option value="Beklemede">Beklemede</option><option value="Red">Red</option></select></div>
+    </div>
+    <div class="grid g3" style="margin-top:12px">
+     <button class="btn" onclick="adminExportCSV()">📥 Filtreli CSV</button>
+     <button class="btn blue" onclick="adminExportGeo()">🗺 Filtreli GeoJSON</button>
+     <button class="btn amber" onclick="adminExportQgis()">🧾 QGIS Detaylı</button>
+    </div>
+   </div>
+      <div class="card" style="margin-bottom:18px;border-left:4px solid var(--blue)">
+    <div class="shead" style="margin-bottom:12px"><span class="no">✉️</span><h2 style="font-size:1.2rem">Aktif Talepler</h2><span class="rule"></span><span class="mono" style="font-size:.78rem;color:var(--amber)">Bekleyen: <b id="aReqPendingMini">0</b></span></div>
+    <div class="tblwrap"><table><thead><tr><th>Kullanıcı</th><th>E‑posta</th><th>Filtre</th><th>Tarih</th><th>Durum</th><th>İşlem</th></tr></thead><tbody id="aReqT"></tbody></table></div>
+   </div>
+   <div class="card" id="closedRequestsWrap" style="margin-bottom:18px;border-left:4px solid var(--mut);display:none">
+    <div class="shead" style="margin-bottom:12px;cursor:pointer" onclick="document.getElementById('closedReqBody').style.display=document.getElementById('closedReqBody').style.display==='none'?'block':'none'">
+     <span class="no">📦</span>
+     <h2 style="font-size:1.2rem">Tamamlanan / Reddedilen Talepler</h2>
+     <span class="rule"></span>
+     <span class="mono" style="font-size:.78rem;color:var(--mut)">Arşiv: <b id="aReqClosed">0</b> · Aç/Kapat ▼</span>
+    </div>
+    <div id="closedReqBody" style="display:none">
+     <div class="tblwrap"><table><thead><tr><th>Kullanıcı</th><th>E‑posta</th><th>Filtre</th><th>Talep</th><th>Kapanış</th><th>Durum</th></tr></thead><tbody id="closedReqT"></tbody></table></div>
+    </div>
+   </div>
+   <div class="card tblwrap">
+    <div class="shead" style="margin-bottom:12px"><span class="no">📋</span><h2 style="font-size:1.2rem">Ölçüm Onay & Moderasyon</h2></div>
+    <input type="text" id="adminMeasSearch" placeholder="🔍 Ara..." oninput="filterAdminMeas()" style="max-width:100%;margin-bottom:12px">
+    <table><thead><tr><th>Kullanıcı</th><th>Nokta</th><th>Tür</th><th>Çap</th><th>Boy</th><th>Karbon</th><th>Foto</th><th>Durum</th><th>İşlem</th></tr></thead><tbody id="aMeasT"></tbody></table>
+   </div>
+  </div>
+
+  <div class="view" id="v-users">
+   <h2 class="disp" style="margin-bottom:16px">👥 Kullanıcı Yönetimi</h2>
+   <div class="card tblwrap">
+    <input type="text" id="userSearch" placeholder="🔍 E‑posta veya ad ara..." oninput="filterUsers()" style="max-width:100%;margin-bottom:12px">
+    <table><thead><tr><th>E‑posta</th><th>Ad Soyad</th><th>Rol</th><th>Durum</th><th>İşlem</th></tr></thead><tbody id="aUsersT"></tbody></table>
+   </div>
+  </div>
+
+ </div>
+</div>
+</div>
+<div id="recoveryModal" style="display:none;position:fixed;inset:0;background:rgba(20,30,25,.6);z-index:300;align-items:center;justify-content:center;padding:20px">
+<div class="card auth" style="max-width:420px;width:100%">
+<h3 class="disp" style="margin-bottom:8px">🔑 Yeni Parola Belirle</h3>
+<p style="color:var(--mut);font-size:.85rem;margin-bottom:14px">Şifre sıfırlama bağlantısı doğrulandı. Yeni parolanızı belirleyin.</p>
+<div class="lbl">Yeni Parola</div><input id="rcPass" type="password" minlength="6">
+<div class="lbl" style="margin-top:10px">Yeni Parola (tekrar)</div><input id="rcPass2" type="password" minlength="6">
+<div id="rcMsg" style="margin-top:10px;font-size:.85rem;min-height:1.2em"></div>
+<button class="btn" style="width:100%;margin-top:14px" onclick="saveNewPassword()">💾 Parolayı Güncelle</button>
+<button class="btn ghost sm" style="width:100%;margin-top:8px" onclick="cancelRecovery()">Şimdi Değil</button>
+</div>
+</div>
+<div id="previewModal"><div class="card" style="max-width:960px;width:100%;max-height:82vh;display:flex;flex-direction:column">
+ <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px"><b id="pvTitle">Önizleme</b><button class="btn sm red" onclick="closePreview()">✕ Kapat</button></div>
+ <div id="pvBody" class="tblwrap" style="overflow:auto;flex:1"></div>
+ <button class="btn" style="margin-top:12px" id="pvDownload">📥 İndir</button>
+</div></div>
+

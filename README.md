@@ -32,17 +32,31 @@ Ayrıntı ve bilinen sınırlılıklar: [`docs/methods.md`](docs/methods.md)
 
 ## Mimari
 
-Build adımı **yok**: statik tek sayfa uygulaması + PWA + Supabase.
+Dağıtılan site **statik** (GitHub Pages) + PWA + Supabase. Tek "build" adımı
+`index.html`'in `partials/` altındaki dört modülden **üretilmesidir**
+(`npm run build`) — derleyici/transpiler yok, klasik `<script>` etiketleri.
 
 ```
-index.html                  tüm görünümler (klasik <script> ile yüklenir)
-├── css/style.css
+index.html                  ÜRETİLEN ARTİFAKT — partials'tan build edilir, elle düzenlenmez
+├── partials/
+│   ├── head.html           doctype…</head> + <body> + #toastWrap (meta/SEO/JSON-LD/asset tag'leri)
+│   ├── landing.html        ★ LANDING MODÜLÜ: #topnav → hero → bölümler → footer
+│   ├── shell.html          uygulama kabuğu: #apptop, #side, v-* view'ları, modaller
+│   └── boot.html           src/ui/* tag'leri + </body></html>
+├── css/
+│   ├── style.css           ortak design-token'lar + bileşenler + uygulama stilleri
+│   └── landing.css         ★ yalnız landing'e özgü stiller (alt sayfalar yüklemez)
 ├── sw.js                   Service Worker — PRECACHE/RUNTIME ayrımı, offline
 ├── manifest.json           PWA
 ├── vendor/                 Leaflet, MarkerCluster, Supabase JS, Chart.js, GeoTIFF
 └── src/
     ├── config/             supabase istemcisi, sabitler, tür + ρ tablosu
     ├── utils/              geo (haversine, WebMercator), truncation (limit uyarısı)
+    ├── ui/                 DOM yapıştırıcısı katmanı
+    │   ├── state.js        global uygulama state'i (USER, map, WP, …) — TEK sahip
+    │   ├── toast.js        bildirim baloncukları
+    │   ├── landing.js      ★ initLanding() — landing modülünün beyni
+    │   └── shell.js        boot()/startShell()/go() — kabuk önyüklemesi
     └── services/
         ├── measure.js      saha formu, GPS, fotoğraf
         ├── offline.js      IndexedDB kuyruk + UUID dedup + senkron
@@ -55,6 +69,23 @@ index.html                  tüm görünümler (klasik <script> ile yüklenir)
         ├── export.js       CSV / QGIS / GeoJSON
         └── auth.js         giriş/kayıt + Cloudflare Turnstile
 ```
+
+**Modül değişikliği iş akışı:**
+
+```bash
+# landing'e bir şey ekleyeceksin → yalnız şunlara dokun:
+#   partials/landing.html · css/landing.css · src/ui/landing.js
+npm run build        # index.html'i yeniden üretir (?v= hash'leri tazelenir)
+npm run check        # sözdizimi + sürüm + build tutarlılığı + CSP + testler
+git add -A && git commit   # index.html DAHİL commit'le
+
+# index.html'i yanlışlıkla elle (örn. GitHub web) düzenlediysen:
+node scripts/build-index.mjs --split   # değişiklik partials'a geri emilir
+```
+
+Böylece bir landing değişikliği uygulama kabuğuna **fiziksel olarak** dokunamaz;
+kabuk değişikliği de landing'e dokunamaz. `test/build-consistency.test.mjs`
+bu izolasyonu CI'da kilitler.
 
 Veri modeli (Supabase/Postgres): `measurements`, `waypoints`, `projects`,
 `data_requests`, `profiles`, `site_visits` + `v_global/v_country/v_city` view'ları,
@@ -79,8 +110,9 @@ python3 -m http.server 8080        # herhangi bir statik sunucu olur
 ### Test ve denetimler
 
 ```bash
-npm run check          # sözdizimi + ?v= tutarlılığı + CSP + 150 test
+npm run check          # sözdizimi + ?v= + build tutarlılığı + CSP + testler
 npm test               # yalnız testler (node:test, bağımlılık gerektirmez)
+npm run build          # index.html'i partials'tan üret (değişiklik sonrası)
 ```
 
 218 test şunları kilitler: karbon hesabı (Chave 2014, ρ fallback,
@@ -88,9 +120,10 @@ NaN yayılmaması), jeodezik alan ve geometri, **UTM projeksiyonu** (bilinen
 referans değerlere karşı), Sutherland-Hodgman kırpma + alan korunumu,
 Service Worker'ın çevrimdışı yedeği ve vendor kütüphanelerin global kurulumu.
 
-GitHub Actions her push ve PR'da beş adım çalıştırır: sözdizimi (tarayıcı
-semantiğiyle), `?v=` tutarlılığı, CSP↔kod tutarlılığı, birim testler ve
-(yalnız `main`'e push'ta) **canlı site ↔ depo sürüklenme denetimi**.
+GitHub Actions her push ve PR'da altı adım çalıştırır: sözdizimi (tarayıcı
+semantiğiyle), `?v=` tutarlılığı, **derleme tutarlılığı (index.html ==
+partials)**, CSP↔kod tutarlılığı, birim testler ve (yalnız `main`'e push'ta)
+**canlı site ↔ depo sürüklenme denetimi** (dosya listesi index.html'den türetilir).
 
 ---
 
