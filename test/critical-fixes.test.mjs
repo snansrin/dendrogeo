@@ -16,7 +16,7 @@
  */
 import { test, describe } from 'node:test';
 import assert from 'node:assert/strict';
-import { readFileSync } from 'node:fs';
+import { readFileSync, readdirSync, statSync } from 'node:fs';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -100,5 +100,36 @@ describe('PGRST201 çoklu ilişki: measurements→profiles gömüsü FK adıyla'
     assert.match(adm, /veri silinmedi/, 'kullanıcıya güvence');
     assert.match(tree, /Ölçümler okunamadı/, 'ağaçta hata kutusu');
     assert.match(tree, /mode:"join"/, 'gömüsüz yedek sorgu');
+  });
+});
+
+/* 5) SUPABASE-JS ZİNCİR SIRASI (canlıda 2026-09-24)
+ *
+ * sb.from(t) bir PostgrestQueryBuilder döndürür: yalnız select/insert/update/
+ * delete/upsert vardır. order/limit/eq/range/single FİLTRE kurucusundadır ve
+ * ancak select()'ten (veya insert/update'den) SONRA çağrılabilir.
+ *
+ * admin-tree.js ilk sürümünde `sb.from("measurements").order(...)` yazılmıştı
+ * → TypeError: order is not a function → await reddedildi → yönetim ağacı
+ * sonsuza dek "⏳ Ölçümler yükleniyor…"da asılı kaldı. Bu canary desenin
+ * repoya bir daha girmesini engeller (tüm src/** taranır). */
+describe('supabase-js zincir sırası: from() sonrası doğrudan filtre metodu YOK', () => {
+  const dosyalar = [];
+  const yuru = (d) => { for (const a of readdirSync(d)) { const t = join(d, a); if (statSync(t).isDirectory()) yuru(t); else if (a.endsWith('.js')) dosyalar.push(t); } };
+  yuru(join(ROOT, 'src'));
+
+  const KOTU = /\.from\(\s*("[^"]*"|'[^']*')\s*\)\s*\.(order|limit|range|eq|neq|gt|gte|lt|lte|is|in|ilike|single|maybeSingle)\s*\(/;
+
+  test('⭐ hiçbir modül from() üzerine doğrudan order/limit/eq zincirlemiyor', () => {
+    const bozuk = dosyalar
+      .map((f) => [f, readFileSync(f, 'utf8')])
+      .filter(([, src]) => KOTU.test(src))
+      .map(([f, src]) => f.split('/src/')[1] + ' → ' + (src.match(KOTU) || [''])[0]);
+    assert.deepEqual(bozuk, [], 'geçersiz zincir (TypeError → ekran asılı kalır): ' + bozuk.join(' | '));
+  });
+
+  test('admin-tree sorgusu select → order → limit sırasını kullanıyor', () => {
+    const tree = readFileSync(join(ROOT, 'src/services/admin-tree.js'), 'utf8');
+    assert.match(tree, /\.select\(DG_TREE_SEL_FULL,\{count:"exact"\}\)\s*\.order\("created_at",\{ascending:false\}\)\s*\.limit\(1000\)/);
   });
 });

@@ -37,34 +37,59 @@ function makeWorld() {
   const SS = new Map();
   let ROUTER = () => ({ data: [], error: null });
 
-  function qb(table, st) {
+  /* SAHTE SUPABASE — API BİÇİMİNE SADIK (2026-09-24'te sıkılaştırıldı).
+   * İlk sürümde her metod aynı nesnedeydi; bu yüzden `sb.from(t).order(...)`
+   * gibi GERÇEKTE OLMAYAN bir zincir testte sessizce geçiyordu ve canlıda
+   * yönetim ağacı "⏳ yükleniyor"da asılı kaldı (TypeError: order is not a
+   * function). Artık supabase-js sözleşmesi birebir taklit edilir:
+   *   from(t)        → yalnız select | insert | update | delete | upsert
+   *   select()/...   → filtre kurucusu: eq, order, limit, range, single, …
+   * Yanlış zincir testi KIRMIZIYA düşürür. */
+  function chain(st) {
     const self = {
-      select(c) { st.select = c; return self; },
+      select(c, o) { st.select = c; if (o && o.count) st.count = o.count; return self; },
       eq(k, v) { st.filters.push({ op: 'eq', k, v }); return self; },
       neq(k, v) { st.filters.push({ op: 'neq', k, v }); return self; },
+      gt(k, v) { st.filters.push({ op: 'gt', k, v }); return self; },
       gte(k, v) { st.filters.push({ op: 'gte', k, v }); return self; },
+      lt(k, v) { st.filters.push({ op: 'lt', k, v }); return self; },
       lte(k, v) { st.filters.push({ op: 'lte', k, v }); return self; },
       is(k, v) { st.filters.push({ op: 'is', k, v }); return self; },
+      in(k, v) { st.filters.push({ op: 'in', k, v }); return self; },
+      ilike(k, v) { st.filters.push({ op: 'ilike', k, v }); return self; },
       order(k, o) { st.order = [k, o]; return self; },
       limit(n) { st.limit = n; return self; },
       range(a, b) { st.range = [a, b]; return self; },
       single() { st.single = true; return self; },
       maybeSingle() { st.single = true; return self; },
-      insert(rows) { st.op = 'insert'; st.rows = rows; return self; },
-      update(patch) { st.op = 'update'; st.patch = patch; return self; },
-      upsert(rows, o) { st.op = 'upsert'; st.rows = rows; st.onConflict = o; return self; },
-      delete() { st.op = 'delete'; return self; },
       then(res, rej) {
-        st.table = table;
-        LOG.push(JSON.parse(JSON.stringify({ ...st })));
+        st.table = st.table || table0;
+        try { LOG.push(JSON.parse(JSON.stringify({ ...st }))); } catch (e) { LOG.push({ ...st }); }
         Promise.resolve().then(() => ROUTER(st)).then(res, rej);
       },
     };
     return self;
   }
+  let table0 = null;
+  function fromTable(table) {
+    table0 = table;
+    const st0 = { table, filters: [], op: 'select' };
+    return {
+      select: (c, o) => { const st = { ...st0, select: c }; if (o && o.count) st.count = o.count; return chain2(table, st); },
+      insert: (rows) => chain2(table, { ...st0, op: 'insert', rows }),
+      update: (patch) => chain2(table, { ...st0, op: 'update', patch }),
+      upsert: (rows, o) => chain2(table, { ...st0, op: 'upsert', rows, onConflict: o }),
+      delete: () => chain2(table, { ...st0, op: 'delete' }),
+    };
+  }
+  function chain2(table, st) {
+    const self = chain(st);
+    st.table = table;
+    return self;
+  }
 
   const sbStub = {
-    from: (t) => qb(t, { filters: [], op: 'select' }),
+    from: (t) => fromTable(t),
     storage: { from: () => ({ upload: async () => ({}), getPublicUrl: () => ({ data: { publicUrl: '' } }), remove: async () => ({}) }) },
     auth: {
       getSession: async () => ({ data: { session: null } }),
@@ -675,6 +700,65 @@ describe('yönetim ağacı tüm veriyi hiyerarşik gösterir', () => {
     assert.ok(h.includes('loadAdminTree()'), 'yeniden dene düğmesi');
   });
 
+
+  test('⭐ onay bekleyen rozeti üç seviyede + yan menüde yanar', async () => {
+    W.route((st) => st.table === 'measurements' ? { data: TREEROWS, count: 3, error: null } : { data: [], error: null });
+    run('DG_TREE_STATUS=""; DG_TREE_QUERY=""; DG_TREE_OPEN.clear();');
+    await run('loadAdminTree()');
+    const h = el('adminTree').innerHTML;
+    assert.ok(h.includes('dg-pend'), '🔴 rozeti yok');
+    assert.ok((h.match(/🔴 1/g) || []).length >= 2, 'park ve proje seviyesinde rozet: ' + (h.match(/🔴 \d/g) || []).join(','));
+    const sum = el('adminPending').innerHTML;
+    assert.ok(sum.includes('1 kayıt onay bekliyor'), sum.slice(0, 160));
+    assert.ok(sum.includes('🌳 1 park') && sum.includes('👤 1 kullanıcı'), sum.slice(0, 200));
+    assert.equal(el('adminPendingBadge').textContent, '1', 'yan menü rozeti');
+    assert.equal(el('adminPendingBadge').style.display, 'inline-block');
+  });
+
+  test('"🔴 Bekleyenler" kısayolu yalnız bekleyeni gösterir', async () => {
+    run('dgTreeOnlyPending()');
+    const h = el('adminTree').innerHTML;
+    assert.ok(h.includes('Göksu Parkı - kuzey'), 'bekleyen kaydı olan proje görünmeli');
+    assert.ok(!h.includes('Göksu Parkı - deneme'), 'onaylı proje gizlenmeli');
+    assert.equal(el('treeStatus').value, 'Beklemede', 'filtre kutusu da senkron olmalı');
+    run('dgTreeSetStatus("")');
+  });
+
+  test('"Bekleyenleri aç" yalnız ilgili düğümleri açar', async () => {
+    run('DG_TREE_OPEN.clear(); dgTreeOpenPending();');
+    const open = run('Array.from(DG_TREE_OPEN)');
+    assert.ok(open.some((k) => k.startsWith('p')), 'park düğümü açıldı');
+    assert.ok(open.some((k) => k.startsWith('j')), 'proje düğümü açıldı');
+    assert.ok(open.some((k) => k.startsWith('u')), 'kullanıcı düğümü açıldı');
+    assert.ok(el('adminTree').innerHTML.includes('approveMeas(2)'), 'bekleyen satırın onay düğmesi görünür oldu');
+  });
+
+  test('⭐ sorgu JS istisnası fırlatırsa "yükleniyor"da ASILI KALMAZ', async () => {
+    W.route(() => { throw new Error('ağ koptu'); });
+    run('DG_TREE_ERR=null; DG_TREE_ROWS=[];');
+    await run('loadAdminTree()');
+    const h = el('adminTree').innerHTML;
+    assert.ok(!h.includes('Ölçümler yükleniyor'), 'kutuda hâlâ yükleniyor yazıyor → asılı kaldı');
+    assert.ok(h.includes('beklenmedik sorgu hatası') && h.includes('ağ koptu'), h.slice(0, 220));
+    assert.ok(h.includes('loadAdminTree()'), 'yeniden dene düğmesi olmalı');
+  });
+
+  test('bekleyen yoksa özet kutusu ve rozet gizlenir', async () => {
+    W.route((st) => st.table === 'measurements' ? { data: TREEROWS.filter((r) => r.status === 'Onaylı'), count: 1, error: null } : { data: [], error: null });
+    run('DG_TREE_STATUS="";');
+    await run('loadAdminTree()');
+    assert.equal(el('adminPending').style.display, 'none');
+    assert.equal(el('adminPendingBadge').style.display, 'none');
+    assert.ok(!el('adminTree').innerHTML.includes('dg-pend'), 'rozet basılmamalı');
+  });
+
+  test('yan menü rozeti sekme açılmadan da tazeleniyor (hafif count sorgusu)', async () => {
+    W.route((st) => (st.table === 'measurements' && st.limit === undefined ? { data: null, count: 7, error: null } : { data: [], error: null }));
+    el('adminPendingBadge').textContent = '';
+    await run('dgRefreshPendingBadge()');
+    assert.equal(el('adminPendingBadge').textContent, '7');
+  });
+
   test('embed patlarsa yedek JOIN modu devreye girer', async () => {
     W.route((st) => {
       /* Gömülü sorgu FK adıyla tanınır: profiles!measurements_owner_fkey(...) */
@@ -689,5 +773,30 @@ describe('yönetim ağacı tüm veriyi hiyerarşik gösterir', () => {
     const h = el('adminTree').innerHTML;
     assert.ok(h.includes('Göksu Parkı') && h.includes('Ayşe Yılmaz'), 'yedek join ağacı kuramadı: ' + h.slice(0, 200));
     assert.ok(!h.includes('Ölçümler okunamadı'), 'yedek çalışırken hata kutusu gösterilmemeli');
+  });
+});
+
+/* Sahte Supabase'in API biçimine sadık kaldığını doğrula: bu olmadan sıkılaştırma
+ * sessizce gevşeyebilir ve `from().order()` gibi geçersiz zincirler yine kaçardı. */
+describe('sahte Supabase, supabase-js sözleşmesini taklit ediyor', () => {
+  test('from() yalnız select/insert/update/delete/upsert verir', () => {
+    assert.equal(run('typeof sb.from("measurements").order'), 'undefined');
+    assert.equal(run('typeof sb.from("measurements").limit'), 'undefined');
+    assert.equal(run('typeof sb.from("measurements").eq'), 'undefined');
+    assert.equal(run('typeof sb.from("measurements").select'), 'function');
+    assert.equal(run('typeof sb.from("measurements").insert'), 'function');
+  });
+
+  test('order/limit/eq ancak select() sonrası var', () => {
+    assert.equal(run('typeof sb.from("measurements").select("*").order'), 'function');
+    assert.equal(run('typeof sb.from("measurements").select("*").limit'), 'function');
+    assert.equal(run('typeof sb.from("measurements").select("*").eq'), 'function');
+    assert.equal(run('typeof sb.from("measurements").select("*").single'), 'function');
+  });
+
+  test('geçersiz zincir gerçekten TypeError verir (canlıdaki hata)', () => {
+    let hata = null;
+    try { run('sb.from("measurements").order("created_at")'); } catch (e) { hata = e.message; }
+    assert.ok(hata && /not a function|is not defined/i.test(hata), 'sahte fazla gevşek: ' + hata);
   });
 });

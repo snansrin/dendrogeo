@@ -89,13 +89,26 @@ describe('dgTreeGroup — park → proje → kullanıcı hiyerarşisi', () => {
     assert.equal(pend.projects[0].name, 'Eski Proje X');
   });
 
-  test('sıralama her seviyede karbon azalan', () => {
+  test('⭐ sıralama: onay bekleyen önce, sonra karbon azalan (onay kuyruğu)', () => {
     /* Array.from ile test realm'ine kopyala: vm dizileri assert.deepEqual'da
      * "same structure but not reference-equal" verir (bkz. test-harness notu 2). */
-    const carbons = Array.from(t[0].projects, (p) => p.c);
-    assert.deepEqual(carbons, [...carbons].sort((a, b) => b - a));
+    const proj = Array.from(t[0].projects, (p) => [p.beklemede, p.c]);
+    /* Sıralama kuralı: önce bekleyen sayısı azalan, eşitse karbon azalan.
+     * (Karbon tek başına azalan DEĞİL — bekleyen iş üste çıkar, bu bilerek.) */
+    const kural = (a, b) => (b[0] - a[0]) || (b[1] - a[1]);
+    assert.deepEqual(proj, [...proj].sort(kural), 'sıralama kuralı bozuk: ' + JSON.stringify(proj));
+    assert.equal(proj[0][0], 1, 'onay bekleyen proje en üstte olmalı');
     const users = Array.from(t[0].projects[0].users, (u) => u.c);
     assert.deepEqual(users, [...users].sort((a, b) => b - a));
+  });
+
+  test('durum sayaçları park ve proje seviyesinde de toplanır (rozetler buradan)', () => {
+    assert.equal(t[0].beklemede, 1, 'park: 1 bekleyen');
+    assert.equal(t[0].onayli, 1);
+    assert.equal(t[0].red, 1);
+    const kuzey = t[0].projects.find((p) => p.name === 'Göksu Parkı - kuzey');
+    assert.equal(kuzey.beklemede, 1);
+    assert.equal(kuzey.red, 1);
   });
 
   test('eksik gömüler çökertmez (profiles/projects null)', () => {
@@ -153,7 +166,7 @@ describe('kabuk kaydı ve hata görünürlüğü', () => {
 
   test('durum filtresi üç durumu da sunuyor (onaylı + bekleyen + red)', () => {
     assert.match(idx, /<option value="Onaylı">✓ Onaylı<\/option>/);
-    assert.match(idx, /<option value="Beklemede">⏳ Beklemede<\/option>/);
+    assert.match(idx, /<option value="Beklemede">🔴 Onay bekleyenler<\/option>/);
     assert.match(idx, /<option value="Red">🚫 Reddedilmiş<\/option>/);
   });
 
@@ -179,6 +192,41 @@ describe('kabuk kaydı ve hata görünürlüğü', () => {
     assert.match(tree, /onclick="approveMeas\(/);
     assert.match(tree, /onclick="rejectMeas\(/);
     assert.match(tree, /onclick="delMeas\(/);
+  });
+
+  test('⭐ tek kart: düz liste katlanır <details> içinde (kalabalık değil)', () => {
+    assert.match(idx, /<h2 style="font-size:1\.2rem">Ölçüm Onay & Moderasyon<\/h2>/);
+    assert.match(idx, /<details class="dg-flat"[\s\S]{0,200}?<summary>📄 Düz liste/);
+    assert.match(idx, /id="aMeasT"/, 'düz liste kaldırılmadı, katlandı');
+    assert.equal((idx.match(/id="aMeasT"/g) || []).length, 1, 'tek moderasyon tablosu olmalı');
+  });
+
+  test('⭐ onay bekleyen rozetleri üç seviyede + yan menüde', () => {
+    assert.match(tree, /dgBekRozet\(P\.beklemede\)/, 'park rozeti');
+    assert.match(tree, /dgBekRozet\(J\.beklemede\)/, 'proje rozeti');
+    assert.match(tree, /dgBekRozet\(U\.beklemede\)/, 'kullanıcı rozeti');
+    assert.match(idx, /id="adminPendingBadge"/, 'yan menü rozeti');
+    assert.match(idx, /id="adminPending"/, 'onay kuyruğu özet kutusu');
+    assert.match(tree, /dgRefreshPendingBadge/, 'rozet sekme açılmadan güncellenmeli');
+    const shell = readFileSync(join(ROOT, 'src/ui/shell.js'), 'utf8');
+    assert.match(shell, /dgRefreshPendingBadge\(\)/, 'startShell rozeti tazelemeli');
+  });
+
+  test('bekleyenlere kısayol: sadece bekleyenler + bekleyen düğümleri aç', () => {
+    assert.match(idx, /onclick="dgTreeOnlyPending\(\)"/);
+    assert.match(idx, /onclick="dgTreeOpenPending\(\)"/);
+    assert.match(tree, /function dgTreeOnlyPending/);
+    assert.match(tree, /function dgTreeOpenPending/);
+  });
+
+  test('⭐ "yükleniyor"da asılı kalma koruması (canlıda yaşandı)', () => {
+    /* Sorgu JS istisnası fırlatırsa await reddedilir ve kutu sonsuza dek
+     * "⏳ Ölçümler yükleniyor…"da kalırdı → try/catch şart. */
+    const fn = tree.slice(tree.indexOf('async function loadAdminTree'), tree.indexOf('/* Filtrelenmiş ağacı çiz'));
+    assert.match(fn, /try\{\s*res=await dgTreeFetch\(\);/, 'sorgu try içinde olmalı');
+    assert.match(fn, /catch\(e\)\{/, 'yakalama yok');
+    assert.match(fn, /beklenmedik sorgu hatası/, 'sebep ekrana yazılmalı');
+    assert.match(fn, /çizim hatası/, 'çizim de korunmalı');
   });
 
   test('düğüm açık/kapalı durumu yeniden çizimde korunur', () => {

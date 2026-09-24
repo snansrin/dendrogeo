@@ -238,3 +238,15 @@ canvas{max-width:100%}
 .dg-tree-user{margin-left:16px;background:var(--bg)}
 .dg-tree-user .dg-tree-body{padding:4px 8px 8px}
 .dg-tree-act{margin-left:auto}
+
+/* =========================================================
+   ONAY KUYRUĞU ROZETLERİ (admin-tree.js · 2026-09-24)
+   🔴 her seviyede: park → proje → kullanıcı summary'sinde.
+========================================================= */
+.dg-pend{display:inline-flex;align-items:center;gap:3px;padding:2px 8px;border-radius:999px;font-size:.68rem;font-weight:800;background:rgba(225,29,72,.13);color:#be123c;white-space:nowrap}
+.dg-st-on{color:var(--green);font-weight:700}
+.dg-st-wait{color:#b45309;font-weight:700}
+.dg-st-off{color:var(--red);font-weight:700}
+.dg-menu-badge{display:inline-block;margin-left:8px;padding:1px 7px;border-radius:999px;background:#e11d48;color:#fff;font-size:.66rem;font-weight:800;vertical-align:middle}
+.dg-flat>summary{cursor:pointer;font-size:.85rem;color:var(--mut);padding:6px 0}
+.dg-flat[open]>summary{color:var(--ink)}

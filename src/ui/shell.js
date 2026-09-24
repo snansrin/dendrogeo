@@ -89,6 +89,9 @@ initMaps();
 await loadProjects();
 await loadWaypoints();
 loadDash();loadRecords();loadWorld();loadMyRequests();loadRequestOptions();
+ /* Yöneticiyse yan menüdeki 🔐 Ölçüm Yönetimi rozeti baştan güncel olsun
+  * (onay bekleyen sayısı). Sekmeyi açmadan da "iş var" görünsün. */
+ if(PROFILE&&(PROFILE.role==="admin"||PROFILE.role==="owner")&&typeof dgRefreshPendingBadge==="function")dgRefreshPendingBadge();
 autoFillPointId();
 }
 

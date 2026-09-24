@@ -51,11 +51,17 @@ const DG_TREE_SEL_FULL=
  * bayatsa tam embed hata verir. O zaman gömüsüz çekip istemcide birleştiririz
  * — kullanıcı hiçbir koşulda "veri yok" ile baş başa kalmaz. */
 async function dgTreeFetch(){
-  const base=()=>sb.from("measurements")
-    .order("created_at",{ascending:false});
-
+  /* ⚠ ZİNCİR SIRASI (canlıda 2026-09-24'te kutu "⏳ yükleniyor"da asılı kaldı):
+   * supabase-js'te `from()` yalnız select/insert/update/delete/upsert verir;
+   * order/limit/eq FİLTRE kurucusundadır ve ancak select()'ten sonra gelir.
+   * `sb.from(t).order(...)` → TypeError: order is not a function → await
+   * reddedilir → ekran sonsuza dek "yükleniyor"da kalırdı. Depodaki tüm diğer
+   * çağrılar .select(...).order(...) sırasını kullanır; burası istisnaydı. */
   /* 1) tam embed */
-  let r=await base().select(DG_TREE_SEL_FULL,{count:"exact"}).limit(1000);
+  let r=await sb.from("measurements")
+    .select(DG_TREE_SEL_FULL,{count:"exact"})
+    .order("created_at",{ascending:false})
+    .limit(1000);
   if(!r.error){
     dgWarnIfTruncated(r.data,1000,"Yönetim ağacı",r.count);
     return{rows:r.data||[],count:r.count,mode:"embed",error:null};
@@ -113,7 +119,7 @@ function dgTreeGroup(rows){
         area_m2:park&&park.area_m2?park.area_m2:null,
         city:(park&&park.city)||(proj&&proj.city)||"",
         projects:new Map(),
-        n:0,c:0
+        n:0,c:0,beklemede:0,onayli:0,red:0
       });
     }
     const P=parks.get(pKey);
@@ -126,7 +132,7 @@ function dgTreeGroup(rows){
         name:(proj&&proj.name)||("Proje #"+(r.project_id||0)),
         park_name:(proj&&proj.park_name)||null,
         users:new Map(),
-        n:0,c:0
+        n:0,c:0,beklemede:0,onayli:0,red:0
       });
     }
     const J=P.projects.get(jKey);
@@ -148,21 +154,26 @@ function dgTreeGroup(rows){
     const carbon=Number(r.carbon_kg)||0;
     U.rows.push(r);U.n++;U.c+=carbon;
     const st=r.status||"Beklemede";
-    if(st==="Onaylı")U.onayli++;else if(st==="Red")U.red++;else U.beklemede++;
+    /* Durum sayaçları her seviyede tutulur: onay ekranında "hangi parkta /
+     * projede / kimde onay bekliyor" rozetleri bunlardan çizilir. */
+    if(st==="Onaylı"){U.onayli++;J.onayli++;P.onayli++;}
+    else if(st==="Red"){U.red++;J.red++;P.red++;}
+    else{U.beklemede++;J.beklemede++;P.beklemede++;}
     J.n++;J.c+=carbon;
     P.n++;P.c+=carbon;
   });
 
   const out=[...parks.values()].map(P=>{
     P.projects=[...P.projects.values()].map(J=>{
-      J.users=[...J.users.values()].sort((a,b)=>b.c-a.c||b.n-a.n);
+      J.users=[...J.users.values()].sort((a,b)=>(b.beklemede-a.beklemede)||(b.c-a.c)||(b.n-a.n));
       return J;
-    }).sort((a,b)=>b.c-a.c||b.n-a.n);
+    }).sort((a,b)=>(b.beklemede-a.beklemede)||(b.c-a.c)||(b.n-a.n));
     return P;
   });
 
-  /* Parkı olmayan düğüm en alta, diğerleri karbona göre */
-  return out.sort((a,b)=>(a.pending-b.pending)||(b.c-a.c)||(b.n-a.n));
+  /* Parkı olmayan düğüm en alta; onun dışında ONAY BEKLEYEN önce, sonra karbon.
+   * Sebep: bu ekran bir onay kuyruğu — iş bekleyen yer en üstte olmalı. */
+  return out.sort((a,b)=>(a.pending-b.pending)||(b.beklemede-a.beklemede)||(b.c-a.c)||(b.n-a.n));
 }
 
 /* Filtre: durum + serbest metin (kullanıcı, tür, proje, nokta) */
@@ -184,6 +195,16 @@ function dgTreeFilterRows(rows,status,query){
 ========================================================= */
 
 const dgTon=kg=>(Number(kg||0)/1000).toFixed(2)+" t";
+
+/* Onay bekleyen rozeti: 🔴 + sayı. Sıfırsa hiç basılmaz (gürültü olmasın). */
+const dgBekRozet=n=>n>0?`<span class="dg-pend" title="${n} kayıt onay bekliyor">🔴 ${n}</span>`:"";
+const dgDurumOzet=o=>{
+  const p=[];
+  if(o.onayli)p.push(`<span class="dg-st-on">✓${o.onayli}</span>`);
+  if(o.beklemede)p.push(`<span class="dg-st-wait">⏳${o.beklemede}</span>`);
+  if(o.red)p.push(`<span class="dg-st-off">🚫${o.red}</span>`);
+  return p.join(" ");
+};
 const dgBadge=st=>{
   const bc=st==="Onaylı"?"on":(st==="Red"?"off":"admin");
   const tx=st==="Beklemede"?"Onay Bekliyor":st;
@@ -214,10 +235,8 @@ function dgTreeUserHTML(U){
   const open=DG_TREE_OPEN.has(U.key)?" open":"";
   return `<details class="dg-tree-user"${open} ontoggle="dgTreeToggle('${U.key}',this.open)">`+
     `<summary>👤 <b>${esc(U.name)}</b>`+
-      `<span class="dg-tree-meta">${U.n} kayıt · ${dgTon(U.c)}`+
-      `${U.onayli?` · <span style="color:var(--green)">✓${U.onayli}</span>`:""}`+
-      `${U.beklemede?` · <span style="color:#b45309">⏳${U.beklemede}</span>`:""}`+
-      `${U.red?` · <span style="color:var(--red)">🚫${U.red}</span>`:""}</span>`+
+      dgBekRozet(U.beklemede)+
+      `<span class="dg-tree-meta">${U.n} kayıt · ${dgTon(U.c)} · ${dgDurumOzet(U)}</span>`+
     `</summary>`+
     `<div class="dg-tree-body tblwrap"><table>`+
       `<thead><tr><th>Nokta</th><th>Tür</th><th>Grup</th><th>Çap</th><th>Boy</th><th>Karbon kg</th><th>Foto</th><th>Durum</th><th>Tarih</th><th>İşlem</th></tr></thead>`+
@@ -230,6 +249,7 @@ function dgTreeProjectHTML(P,J){
   const open=DG_TREE_OPEN.has(J.key)?" open":"";
   return `<details class="dg-tree-proj"${open} ontoggle="dgTreeToggle('${J.key}',this.open)">`+
     `<summary>📁 <b>${esc(J.name)}</b>`+
+      dgBekRozet(J.beklemede)+
       `<span class="dg-tree-meta">${J.users.length} kullanıcı · ${J.n} kayıt · ${dgTon(J.c)}</span>`+
     `</summary>`+
     `<div class="dg-tree-body">${J.users.map(U=>dgTreeUserHTML(U)).join("")}</div>`+
@@ -244,6 +264,7 @@ function dgTreeParkHTML(P){
   const perHa=P.area_m2?` · ${((P.c/1000)/(P.area_m2/10000)).toFixed(2)} t/ha`:"";
   return `<details class="dg-tree-park${P.pending?" pending":""}"${open} ontoggle="dgTreeToggle('${P.key}',this.open)">`+
     `<summary>${P.pending?"⚠":"🌳"} <b>${esc(P.name)}</b>`+
+      dgBekRozet(P.beklemede)+
       `<span class="dg-tree-meta">${esc(P.city||"")}${ha} · ${projN} proje · ${userN} kullanıcı · ${P.n} kayıt · ${dgTon(P.c)}${perHa}</span>`+
       (P.pending?`<button class="btn sm ghost dg-tree-act" onclick="dgTreePendingScan(event)">🌳 Park Algıla</button>`:"")+
     `</summary>`+
@@ -251,9 +272,87 @@ function dgTreeParkHTML(P){
   `</details>`;
 }
 
+/* ONAY KUYRUĞU ÖZETİ (kullanıcı isteği 2026-09-24):
+ * "hangi parktan/projeden/kullanıcıdan onaya veri gelirse yanında bildirim
+ * simgesi yansın, ben kontrol edip onaylayım". Rozetler üç seviyede de var
+ * (park/proje/kullanıcı summary'sinde 🔴 N); buradaki kutu genel özet +
+ * kısayollar, yan menüdeki 🔐 Ölçüm Yönetimi öğesinde de sayı rozeti yanar. */
+function dgRenderPendingSummary(){
+  const box=$("adminPending");
+  const all=dgTreeGroup(DG_TREE_ROWS);
+  const wait=all.reduce((a,P)=>a+(P.beklemede||0),0);
+  dgUpdateSidebarBadge(wait);
+  if(!box||!box.style)return;
+
+  if(!wait){
+    box.style.display="none";
+    box.innerHTML="";
+    return;
+  }
+  const parkN=all.filter(P=>P.beklemede>0).length;
+  const projN=all.reduce((a,P)=>a+P.projects.filter(J=>J.beklemede>0).length,0);
+  const userN=all.reduce((a,P)=>a+P.projects.reduce((b,J)=>b+J.users.filter(U=>U.beklemede>0).length,0),0);
+
+  box.style.display="block";
+  box.className="alert warn";
+  box.innerHTML=
+    `<b>⏳ ${wait} kayıt onay bekliyor</b> · 🌳 ${parkN} park · 📁 ${projN} proje · 👤 ${userN} kullanıcı`+
+    `<div style="margin-top:8px;display:flex;gap:8px;flex-wrap:wrap">`+
+      `<button class="btn sm amber" onclick="dgTreeOnlyPending()">🔴 Sadece bekleyenler</button>`+
+      `<button class="btn sm ghost" onclick="dgTreeOpenPending()">Bekleyen düğümleri aç</button>`+
+    `</div>`;
+}
+
+function dgUpdateSidebarBadge(n){
+  const b=$("adminPendingBadge");
+  if(!b||!b.style)return;
+  if(n>0){
+    b.style.display="inline-block";
+    b.textContent=n>99?"99+":String(n);
+  }else{
+    b.style.display="none";
+    b.textContent="";
+  }
+}
+
+/* Yan menü rozeti, yönetim sekmesi AÇILMADAN da güncel olsun diye ayrı bir
+ * hafif sorgu (head:true → yalnız sayı, satır çekilmez). */
+async function dgRefreshPendingBadge(){
+  try{
+    const{count,error}=await sb.from("measurements")
+      .select("*",{count:"exact",head:true}).eq("status","Beklemede");
+    if(!error)dgUpdateSidebarBadge(count||0);
+  }catch(e){}
+}
+
+function dgTreeOnlyPending(){
+  DG_TREE_STATUS="Beklemede";
+  const sel=$("treeStatus");
+  if(sel)sel.value="Beklemede";
+  dgTreeDraw();
+}
+
+/* Yalnız onay bekleyen kayıt içeren düğümleri açar (kuyrukta hızlı gezinme). */
+function dgTreeOpenPending(){
+  const rows=dgTreeFilterRows(DG_TREE_ROWS,DG_TREE_STATUS,DG_TREE_QUERY);
+  const tree=dgTreeGroup(rows);
+  tree.forEach(P=>{
+    if(!(P.beklemede>0))return;
+    DG_TREE_OPEN.add(P.key);
+    P.projects.forEach(J=>{
+      if(!(J.beklemede>0))return;
+      DG_TREE_OPEN.add(J.key);
+      J.users.forEach(U=>{if(U.beklemede>0)DG_TREE_OPEN.add(U.key);});
+    });
+  });
+  dgTreeRender(tree);
+}
+
 function dgTreeRender(tree){
   const el=$("adminTree");
   if(!el)return;
+
+  dgRenderPendingSummary();
 
   if(DG_TREE_ERR){
     el.innerHTML=
@@ -293,15 +392,35 @@ async function loadAdminTree(){
   const box=$("adminTree");
   if(box)box.innerHTML=`<div class="alert info">⏳ Ölçümler yükleniyor…</div>`;
 
-  const res=await dgTreeFetch();
-  DG_TREE_ROWS=res.rows||[];
-  DG_TREE_ERR=res.error&&(res.rows&&res.rows.length)?null:res.error;
+  /* ⚠ "YÜKLENIYOR"DA ASILI KALMA KORUMASI (canlıda yaşandı 2026-09-24):
+   * sorgu PostgREST hatası DEĞİL de bir JS istisnası fırlatırsa await reddedilir
+   * ve kutu sonsuza dek "⏳ Ölçümler yükleniyor…"da kalırdı. Artık her yol
+   * ya veri ya da SEBEP gösterir. */
+  let res=null;
+  try{
+    res=await dgTreeFetch();
+  }catch(e){
+    DG_TREE_ROWS=[];
+    DG_TREE_ERR="beklenmedik sorgu hatası: "+((e&&e.message)||String(e));
+    dgTreeDraw();
+    return;
+  }
 
-  if(res.mode!=="embed"&&res.error&&res.rows&&res.rows.length){
+  DG_TREE_ROWS=res.rows||[];
+  DG_TREE_ERR=(res.error&&DG_TREE_ROWS.length)?null:res.error;
+
+  if(res.mode!=="embed"&&res.error&&DG_TREE_ROWS.length){
     toast("⚠ Gömülü sorgu başarısız, yedek birleştirme kullanıldı: "+esc(res.error),"warn","🌳");
   }
 
-  dgTreeDraw();
+  try{
+    dgTreeDraw();
+  }catch(e){
+    DG_TREE_ERR="çizim hatası: "+((e&&e.message)||String(e));
+    if(box)box.innerHTML=`<div class="alert err"><b>⚠ Ağaç çizilemedi</b> `+
+      `<span class="mono" style="font-size:.72rem">${esc(DG_TREE_ERR)}</span> `+
+      `<button class="btn sm blue" onclick="loadAdminTree()">🔄 Yeniden dene</button></div>`;
+  }
 }
 
 /* Filtrelenmiş ağacı çiz (veri zaten DG_TREE_ROWS'ta) */
@@ -349,6 +468,9 @@ function dgTreeExpand(open){
 }
 
 window.loadAdminTree=loadAdminTree;
+window.dgRefreshPendingBadge=dgRefreshPendingBadge;
+window.dgTreeOnlyPending=dgTreeOnlyPending;
+window.dgTreeOpenPending=dgTreeOpenPending;
 window.dgTreeSetStatus=dgTreeSetStatus;
 window.dgTreeSetQuery=dgTreeSetQuery;
 window.dgTreeToggle=dgTreeToggle;

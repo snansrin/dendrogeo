@@ -23,7 +23,7 @@
   <div class="item" onclick="go('export')">💾 Dışa Aktar</div>
   <div class="item" onclick="go('world')">🌍 Dünya Verisi</div>
   <div class="sec" id="adminSec" style="display:none">Yönetim</div>
-  <div class="item" id="miAdmin" style="display:none" onclick="go('admin')">🔐 Ölçüm Yönetimi</div>
+  <div class="item" id="miAdmin" style="display:none" onclick="go('admin')">🔐 Ölçüm Yönetimi<span id="adminPendingBadge" class="dg-menu-badge" style="display:none"></span></div>
   <div class="item" id="miUsers" style="display:none" onclick="go('users')">👥 Kullanıcılar</div>
  </div>
  <div id="main">
@@ -285,23 +285,31 @@
      <div class="tblwrap"><table><thead><tr><th>Kullanıcı</th><th>E‑posta</th><th>Filtre</th><th>Talep</th><th>Kapanış</th><th>Durum</th></tr></thead><tbody id="closedReqT"></tbody></table></div>
     </div>
    </div>
-   <!-- PARK → PROJE → KULLANICI AĞACI (2026-09-24 · admin-tree.js).
-        Kullanıcı isteği: "park görülsün, parkı açınca projeler açılsın,
-        projeyi açınca kullanıcıları ve verilerini göreyim". Tüm durumlar
-        (onaylı + bekleyen + red) tek yerde, kademeli açılır. -->
+   <!-- ÖLÇÜM ONAY & MODERASYON — TEK KART (2026-09-24)
+        Kullanıcı isteği: "buradaki bilgiler park/proje/kullanıcı olarak açılır
+        pencere şeklinde olsun; düz liste çok karışık. Onay bekleyen veri hangi
+        parktan/projeden/kullanıcıdan geldiyse yanında bildirim simgesi yansın,
+        ben kontrol edip onaylayayım."
+        Düz liste KALDIRILMADI — en altta katlanır <details> içinde duruyor. -->
    <div class="card" style="margin-bottom:18px;border-left:4px solid var(--green)">
-    <div class="shead" style="margin-bottom:12px"><span class="no">🌳</span><h2 style="font-size:1.2rem">Park → Proje → Kullanıcı</h2><span class="rule"></span><span class="mono" style="font-size:.75rem;color:var(--mut)">tüm durumlar · kademeli açılır</span></div>
-    <div class="grid g3" style="margin-bottom:12px">
-     <div><div class="lbl">DURUM</div><select id="treeStatus" onchange="dgTreeSetStatus(this.value)"><option value="">Tümü (onaylı + bekleyen + red)</option><option value="Onaylı">✓ Onaylı</option><option value="Beklemede">⏳ Beklemede</option><option value="Red">🚫 Reddedilmiş</option></select></div>
+    <div class="shead" style="margin-bottom:12px"><span class="no">📋</span><h2 style="font-size:1.2rem">Ölçüm Onay & Moderasyon</h2><span class="rule"></span><span class="mono" style="font-size:.75rem;color:var(--mut)">Park → Proje → Kullanıcı · kademeli açılır</span></div>
+    <div id="adminPending" class="alert warn" style="display:none"></div>
+    <div class="grid g4" style="margin-bottom:12px">
+     <div><div class="lbl">DURUM</div><select id="treeStatus" onchange="dgTreeSetStatus(this.value)"><option value="">Tümü (onaylı + bekleyen + red)</option><option value="Beklemede">🔴 Onay bekleyenler</option><option value="Onaylı">✓ Onaylı</option><option value="Red">🚫 Reddedilmiş</option></select></div>
      <div><div class="lbl">ARAMA</div><input id="treeSearch" placeholder="park, proje, kullanıcı, tür, nokta…" oninput="dgTreeSetQuery(this.value)"></div>
-     <div style="align-self:end"><button class="btn sm blue" onclick="loadAdminTree()">🔄 Yenile</button></div>
+     <div style="align-self:end;display:flex;gap:6px;flex-wrap:wrap">
+      <button class="btn sm amber" onclick="dgTreeOnlyPending()">🔴 Bekleyenler</button>
+      <button class="btn sm ghost" onclick="dgTreeOpenPending()">Bekleyenleri aç</button>
+      <button class="btn sm blue" onclick="loadAdminTree()">🔄 Yenile</button>
+     </div>
     </div>
     <div id="adminTree"></div>
+    <details class="dg-flat" style="margin-top:14px">
+     <summary>📄 Düz liste (tüm kayıtlar · ilk 300 satır)</summary>
+     <input type="text" id="adminMeasSearch" placeholder="🔍 Ara..." oninput="filterAdminMeas()" style="max-width:100%;margin:10px 0">
+     <div class="tblwrap"><table><thead><tr><th>Kullanıcı</th><th>Nokta</th><th>Tür</th><th>Çap</th><th>Boy</th><th>Karbon</th><th>Foto</th><th>Durum</th><th>İşlem</th></tr></thead><tbody id="aMeasT"></tbody></table></div>
+    </details>
    </div>
-   <div class="card tblwrap">
-    <div class="shead" style="margin-bottom:12px"><span class="no">📋</span><h2 style="font-size:1.2rem">Ölçüm Onay & Moderasyon</h2><span class="rule"></span><span class="mono" style="font-size:.75rem;color:var(--mut)">düz liste · ilk 300 satır</span></div>
-    <input type="text" id="adminMeasSearch" placeholder="🔍 Ara..." oninput="filterAdminMeas()" style="max-width:100%;margin-bottom:12px">
-    <table><thead><tr><th>Kullanıcı</th><th>Nokta</th><th>Tür</th><th>Çap</th><th>Boy</th><th>Karbon</th><th>Foto</th><th>Durum</th><th>İşlem</th></tr></thead><tbody id="aMeasT"></tbody></table>
    </div>
   </div>
 
