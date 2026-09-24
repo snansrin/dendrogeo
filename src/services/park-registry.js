@@ -74,6 +74,14 @@ let DG_BACKFILL_PLAN=null;
 let DG_PARK_SCHEMA_OK=true;
 let DG_PARK_SCHEMA_WARNED=false;
 
+/* Yönetici mi? (owner/admin) — PARKA BAĞLAMA yetkisi yalnız bunlarda.
+ * Sunucu karşılığı: 0006_park_admin_only.sql → trg_enforce_park_admin
+ * (PARK_ADMIN_ONLY). İstemci düğmeyi gizler, sunucu kuralı zorlar. */
+function dgIsAdmin(){
+  return !!(typeof PROFILE!=="undefined"&&PROFILE&&
+    (PROFILE.role==="admin"||PROFILE.role==="owner"));
+}
+
 /* Proje adı ayracı — DB trigger'ı (compose_project_name) ile BİREBİR aynı. */
 const DG_PARK_SEP=" - ";
 
@@ -526,11 +534,16 @@ function dgRenderScanCard(forceManual){
     ? `DB #${park.id} · ${esc(park.osm_key||"")}`
     : `<span style="color:var(--red)">kimlik sunucuya yazılamadı</span>`;
 
-  const target=DG_PARK_TARGET_PROJ
+  /* Parka BAĞLAMA araçları yalnız yöneticiye görünür (0006 + kullanıcı isteği).
+   * Normal kullanıcı yalnız "yeni proje oluştur" görür. */
+  const admin=dgIsAdmin();
+  const target=(admin&&DG_PARK_TARGET_PROJ)
     ? (PROJ_LIST||[]).find(p=>p.id===DG_PARK_TARGET_PROJ)
     : null;
 
-  const others=(PROJ_LIST||[]).filter(p=>!p.park_id&&(!target||p.id!==target.id));
+  const others=admin
+    ? (PROJ_LIST||[]).filter(p=>!p.park_id&&(!target||p.id!==target.id))
+    : [];
 
   el.innerHTML=schemaWarn+steps+
     `<div class="alert ${park?"ok":"err"}" style="margin:6px 0">`+
@@ -563,6 +576,10 @@ function dgRenderScanCard(forceManual){
               `<button class="btn sm ghost" onclick="dgScanBindExisting()">🔗 Bağla</button>`+
             `</div>`
           : ``)+
+        (admin
+          ? ``
+          : `<div class="dg-tree-meta">🔐 Mevcut projeyi parka bağlama yetkisi yöneticide. `+
+            `Burada <b>yeni proje</b> oluşturabilirsin; eski projenin parka bağlanması için yöneticiye haber ver.</div>`)+
         (DG_PARK_SCAN&&DG_PARK_RETURN_TO
           ? `<button class="btn sm ghost" onclick="dgCancelScan()">Vazgeç</button>`
           : ``)+
@@ -689,6 +706,14 @@ async function dgScanBindExisting(){
 }
 
 async function dgLinkProject(pid){
+  /* ⛔ YALNIZ YÖNETİCİ (kullanıcı isteği 2026-09-24): MEVCUT bir projeyi
+   * parka bağlamak onarım işidir. Normal kullanıcı kendi YENİ projesini
+   * park algılayarak açmaya devam eder (dgScanCreateProject). Sunucu da
+   * aynı kuralı zorlar: trg_enforce_park_admin → PARK_ADMIN_ONLY. */
+  if(!dgIsAdmin()){
+    toast("⛔ Mevcut projeyi parka bağlama yetkisi yalnız yöneticide. Yeni proje için park algılayabilirsin.","err","🔐");
+    return null;
+  }
   const park=DG_PARK;
   if(!park)return toast("Önce park algıla","err","🌳");
   const proj=(PROJ_LIST||[]).find(p=>p.id===pid);
@@ -820,14 +845,23 @@ function dgParkGate(auto){
   if(!p.park_id){
     box.style.display="block";
     box.className="alert err";
-    box.innerHTML=
-      `<b>⛔ Bu projede park algılanmadı — ölçüm girilemez.</b><br>`+
-      `<span style="font-size:.82rem">Proje: <b>${esc(p.name)}</b>. `+
-      `Park algılamadan girilen ölçümler karşılaştırmada parka bağlanamıyor; `+
-      `bu yüzden önce park kimliği oluşturuluyor.</span>`+
-      `<div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap">`+
-        `<button class="btn sm blue" onclick="startParkScan({projectId:${p.id},returnTo:'measure'})">🌳 Parkı Algıla ve Bağla</button>`+
-      `</div>`;
+    /* Yönetici: projeyi parka bağlayabilir. Normal kullanıcı: bağlama yetkisi
+     * yok (0006 → PARK_ADMIN_ONLY), o yüzden yalnız "yeni proje" yolu gösterilir. */
+    box.innerHTML=dgIsAdmin()
+      ? `<b>⛔ Bu projede park algılanmadı — ölçüm girilemez.</b><br>`+
+        `<span style="font-size:.82rem">Proje: <b>${esc(p.name)}</b>. `+
+        `Park algılamadan girilen ölçümler karşılaştırmada parka bağlanamıyor; `+
+        `bu yüzden önce park kimliği oluşturuluyor.</span>`+
+        `<div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap">`+
+          `<button class="btn sm blue" onclick="startParkScan({projectId:${p.id},returnTo:'measure'})">🌳 Parkı Algıla ve Bağla</button>`+
+        `</div>`
+      : `<b>⛔ Bu proje parka bağlı değil — ölçüm girilemez.</b><br>`+
+        `<span style="font-size:.82rem">Proje: <b>${esc(p.name)}</b>. Mevcut projeyi parka bağlama yetkisi `+
+        `<b>yalnız yöneticide</b> 🔐. İki yol: (1) yönetici bu projeyi bağlasın, `+
+        `(2) aşağıdan park algılayıp <b>yeni proje</b> aç ve ölçümlere orada devam et.</span>`+
+        `<div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap">`+
+          `<button class="btn sm blue" onclick="startParkScan({returnTo:'measure'})">🌳 Park Algıla → Yeni Proje Oluştur</button>`+
+        `</div>`;
     if(save)save.disabled=true;
     /* ⭐ Otomatik yönlendirme: ölçüme geçmeye çalışan kullanıcı parkı
      * algılamadan forma ulaşamaz (proje başına bir kez). */
@@ -1262,6 +1296,7 @@ async function dgResyncProjectNames(parkId,knownName){
 }
 
 async function dgParkRename(id){
+  if(!dgIsAdmin())return toast("🔐 Bu işlem yalnız yöneticiye açık.","err");
   const p=DG_PARK_ADMIN_ROWS.find(x=>x.id===id);
   if(!p)return toast("Park bulunamadı","err");
   const nn=prompt("Park adı (örn. Göksu Parkı):",p.name);
@@ -1283,6 +1318,7 @@ function dgParkMergeFromSelect(id){
 }
 
 async function dgParkMergeInto(srcId,dstId){
+  if(!dgIsAdmin())return toast("🔐 Bu işlem yalnız yöneticiye açık.","err");
   srcId=+srcId;dstId=+dstId;
   if(!srcId||!dstId||srcId===dstId)return toast("Geçersiz birleştirme","err");
   const src=DG_PARK_ADMIN_ROWS.find(x=>x.id===srcId);
@@ -1310,6 +1346,7 @@ async function dgParkMergeInto(srcId,dstId){
 }
 
 async function dgParkDelete(id){
+  if(!dgIsAdmin())return toast("🔐 Bu işlem yalnız yöneticiye açık.","err");
   const p=DG_PARK_ADMIN_ROWS.find(x=>x.id===id);
   if(!p)return toast("Park bulunamadı","err");
   if(!confirm(
@@ -1408,3 +1445,4 @@ window.dgParkRename=dgParkRename;
 window.dgParkMergeInto=dgParkMergeInto;
 window.dgParkMergeFromSelect=dgParkMergeFromSelect;
 window.dgParkDelete=dgParkDelete;
+window.dgIsAdmin=dgIsAdmin;

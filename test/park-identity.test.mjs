@@ -354,6 +354,65 @@ describe('park kimlikleri yönetim aracı (yeniden adlandır · birleştir · si
   });
 });
 
+describe('parka bağlama YALNIZ yönetici (0006 + kullanıcı isteği 2026-09-24)', () => {
+  const sql6 = readFileSync(join(ROOT, 'supabase/migrations/0006_park_admin_only.sql'), 'utf8');
+  const worldSrc = readFileSync(join(ROOT, 'src/services/world.js'), 'utf8');
+
+  test('⭐ sunucu kuralı: park_id değişimini yalnız is_admin() yapabilir', () => {
+    assert.match(sql6, /create or replace function public\.enforce_park_admin\(\)/);
+    assert.match(sql6, /create trigger trg_enforce_park_admin\s+before update on public\.projects/);
+    assert.match(sql6, /new\.park_id is distinct from old\.park_id and not public\.is_admin\(\)/);
+    assert.match(sql6, /PARK_ADMIN_ONLY/);
+    assert.match(sql6, /errcode = 'DG0PA'/);
+  });
+
+  test('INSERT engellenmez (yeni proje açma herkesin hakkı — saha akışı)', () => {
+    assert.ok(!/before insert or update on public\.projects[\s\S]{0,200}enforce_park_admin/.test(sql6),
+      'trigger yalnız UPDATE olmalı; INSERT serbest kalmalı');
+    assert.match(sql6, /INSERT serbest/);
+  });
+
+  test('etiket/ad düzenlemesi serbest (yalnız park bağı kısıtlı)', () => {
+    assert.match(sql6, /park bağı DEĞİŞİYORSA denetle/);
+  });
+
+  test('istemci: dgLinkProject yönetici bekçisi taşıyor', () => {
+    const fn = registry.slice(registry.indexOf('async function dgLinkProject'), registry.indexOf('async function dgAfterProjectLinked'));
+    assert.match(fn, /if\(!dgIsAdmin\(\)\)\{/, 'bekçi yok');
+    assert.match(fn, /PARK_ADMIN_ONLY|yalnız yöneticide/, 'kullanıcıya sebep söylenmeli');
+  });
+
+  test('park kimliği araçları (adlandır/birleştir/sil) da bekçili', () => {
+    for (const fn of ['dgParkRename', 'dgParkMergeInto', 'dgParkDelete']) {
+      const body = registry.slice(registry.indexOf('async function ' + fn), registry.indexOf('async function ' + fn) + 400);
+      assert.match(body, /dgIsAdmin\(\)/, fn + ' bekçisiz');
+    }
+  });
+
+  test('⭐ karşılaştırmadaki onarım düğmesi yalnız yöneticiye', () => {
+    assert.match(worldSrc, /const admin=\(typeof dgIsAdmin==="function"\)\?dgIsAdmin\(\):false;/);
+    assert.match(worldSrc, /admin\s*\n?\s*\?`<button class="btn sm ghost" onclick="startParkScan/);
+    assert.match(worldSrc, /yönetici bağlayacak/, 'normal kullanıcıya açıklama gösterilmeli');
+  });
+
+  test('projeler tablosundaki 🌳 Bağla düğmesi yalnız yöneticiye', () => {
+    assert.match(measure, /dgIsAdmin\(\)[\s\S]{0,120}startParkScan\(\{projectId:/);
+    assert.match(measure, /yönetici bağlayacak/);
+  });
+
+  test('ölçüm kapısı yönetici olmayanı "yeni proje" yoluna yönlendirir', () => {
+    const fn = registry.slice(registry.indexOf('function dgParkGate'), registry.indexOf('/* Proje seçimi değişti'));
+    assert.match(fn, /dgIsAdmin\(\)\s*\?/, 'kapıda rol ayrımı olmalı');
+    assert.match(fn, /Park Algıla → Yeni Proje Oluştur/);
+    assert.match(fn, /yalnız yöneticide/);
+  });
+
+  test('algılama kartında bağlama seçenekleri yöneticiye göre süzülür', () => {
+    assert.match(registry, /const admin=dgIsAdmin\(\);/);
+    assert.match(registry, /const others=admin\s*\?/, 'yönetici değilse bağlanacak proje listesi boş');
+  });
+});
+
 /* =========================================================
    3) KABUK (index.html + modül kaydı)
 ========================================================= */

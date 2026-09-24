@@ -36,6 +36,10 @@ girilemez (istemci kapısı `dgParkGate`, sunucu kapısı `trg_enforce_park_link
 * **Eski veriler:** park bağı olmayan projeler kaybolmaz, "park algılanmamış"
   bölümünde ayrıca listelenir; Yönetim → **🌳 Parkları Geri Doldur** aracı
   bunları ölçüm merkezinden OSM parkıyla eşleştirir (önce önizleme, sonra onay).
+* **Yetki:** mevcut bir projeyi parka bağlamak (onarım) **yalnız yöneticiye**
+  açıktır — istemcide düğmeler gizlenir, sunucuda `trg_enforce_park_admin`
+  (`PARK_ADMIN_ONLY`) zorlar. Yeni proje açmak için park algılamak herkesin
+  hakkıdır (INSERT serbest), yoksa saha akışı kilitlenir.
 * **Şema yedeği:** `supabase/migrations/0004_parks.sql` uygulanmadıysa uygulama
   çökmez — park kimliği devre dışı kalır, karşılaştırma proje bazlı yedeğe
   düşer, kapı kilitlenmez ve ekranda migration uyarısı görünür.
@@ -164,12 +168,12 @@ python3 -m http.server 8080        # herhangi bir statik sunucu olur
 ### Test ve denetimler
 
 ```bash
-npm run check          # sözdizimi + ?v= + build + CSP + 405 test
+npm run check          # sözdizimi + ?v= + build + CSP + 421 test
 npm test               # yalnız testler (node:test, bağımlılık gerektirmez)
 npm run build          # index.html'i partials'tan üret (değişiklik sonrası)
 ```
 
-405 test şunları kilitler: karbon hesabı (Chave 2014, ρ fallback,
+421 test şunları kilitler: karbon hesabı (Chave 2014, ρ fallback,
 NaN yayılmaması), jeodezik alan ve geometri, **UTM projeksiyonu** (bilinen
 referans değerlerine karşı), Sutherland-Hodgman kırpma + alan korunumu,
 Service Worker'ın çevrimdışı yedeği, vendor kütüphanelerin global kurulumu,

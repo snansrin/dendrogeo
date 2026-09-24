@@ -901,3 +901,105 @@ describe('park kimlikleri: çift kimlik birleştirme + yeniden adlandırma', () 
     assert.ok(!LOG.some((l) => l.table === 'parks' && l.op === 'insert'), 'yeni park satırı açılmamalı');
   });
 });
+
+/* =========================================================
+   10) PARKA BAĞLAMA YALNIZ YÖNETİCİ (kullanıcı isteği 2026-09-24)
+========================================================= */
+describe('parka bağlama yalnız yönetici — normal kullanıcı kilitli', () => {
+  const PENDING_ROWS = [
+    { park_id: 7, park_name: 'Göksu Parkı', city: 'Ankara', records: 3, projects: 1, contributors: 1, carbon_kg: 380, avg_dbh: 20, avg_height: 7, species_n: 1, area_m2: 508000, park_pending: false },
+    { park_id: 0, park_name: 'Göksu Parkı - Göksu', city: 'Ankara', records: 1, projects: 1, contributors: 1, carbon_kg: 380, avg_dbh: 65, avg_height: 8, species_n: 1, area_m2: null, park_pending: true },
+  ];
+
+  test('normal kullanıcı: kapı "yeni proje" yolunu gösterir, bağlama düğmesi YOK', () => {
+    run('PROFILE={id:"u-9",role:"user",full_name:"Normal Kullanıcı"};');
+    run(`PROJ_LIST=[{id:2,name:"Ülkü",park_id:null,parks:null}];`);
+    el('mProject').innerHTML = '<option value="2">Ülkü</option>';
+    el('mProject').value = '2';
+    run('dgParkGate()');
+    const h = el('parkGate').innerHTML;
+    assert.equal(el('parkGate').className, 'alert err');
+    assert.equal(el('saveBtn').disabled, true, 'ölçüm yine kilitli olmalı');
+    assert.ok(h.includes('yalnız yöneticide'), h.slice(0, 200));
+    assert.ok(h.includes('Park Algıla → Yeni Proje Oluştur'), 'yeni proje yolu gösterilmeli');
+    assert.ok(!h.includes('Parkı Algıla ve Bağla'), 'bağlama düğmesi gizlenmeli');
+    assert.ok(!h.includes('projectId:2'), 'normal kullanıcı bağlamaya yönlendirilmemeli');
+  });
+
+  test('⭐ dgLinkProject normal kullanıcıda HİÇBİR ŞEY yazmaz', async () => {
+    run('DG_PARK={id:7,name:"Göksu Parkı",osm_key:"way/1",area_m2:508000};');
+    el('scanLabel').value = 'deneme';
+    W.reset();
+    W.route(() => ({ data: [], error: null }));
+    const out = await run('dgLinkProject(2)');
+    assert.equal(out, null);
+    assert.ok(!LOG.some((l) => l.table === 'projects' && l.op === 'update'), 'proje güncellenmemeliydi');
+    assert.ok(TOASTS.some((t) => t[0].includes('yalnız yöneticide')), JSON.stringify(TOASTS));
+  });
+
+  test('park kimliği araçları (adlandır/birleştir/sil) normal kullanıcıda yazmaz', async () => {
+    run('DG_PARK_ADMIN_ROWS=[{id:1,name:"a",osm_key:"manual/a",area_m2:1000},{id:2,name:"a",osm_key:"way/2",area_m2:1000}];');
+    run('__prompt="Yeni Ad"');
+    W.reset();
+    W.route(() => ({ data: [], error: null }));
+    await run('dgParkRename(1)');
+    await run('dgParkMergeInto(1,2)');
+    await run('dgParkDelete(1)');
+    assert.ok(!LOG.some((l) => l.op === 'update' || l.op === 'delete'), 'hiçbir yazma olmamalı: ' + JSON.stringify(LOG.map((l) => l.table + ':' + l.op)));
+    assert.ok(TOASTS.filter((t) => t[0].includes('yalnız yöneticiye açık')).length >= 3, JSON.stringify(TOASTS));
+    run('__prompt=undefined');
+  });
+
+  test('⭐ karşılaştırmada onarım düğmesi normal kullanıcıya görünmüyor', async () => {
+    W.route((st) => st.table === 'v_park_compare' ? { data: PENDING_ROWS, error: null } : { data: [], error: null });
+    await run('loadParkCompare()');
+    const h = el('parkCompare').innerHTML;
+    assert.ok(h.includes('PARK ALGILANMAMIŞ KAYITLAR'), 'bölüm durmalı (veri gizlenmez)');
+    assert.ok(h.includes('Göksu Parkı - Göksu'), 'kayıt listelenmeli');
+    assert.ok(!h.includes("startParkScan({returnTo:'world'})"), '🌳 Park Algıla düğmesi gizlenmeli');
+    assert.ok(h.includes('🔐 yönetici bağlayacak'), 'yerine açıklama gösterilmeli');
+    assert.ok(h.includes('yalnız yönetici'), 'kim yapacak söylenmeli');
+  });
+
+  test('projeler tablosunda 🌳 Bağla yerine "yönetici bağlayacak"', async () => {
+    W.route((st) => st.table === 'projects'
+      ? { data: [{ id: 2, name: 'Ülkü', park_id: null, created_at: '2026-08-01', parks: null }], error: null }
+      : { data: [], error: null });
+    run('USER={id:"u-9"};');
+    await run('loadProjects()');
+    const h = el('projTable').innerHTML;
+    assert.ok(h.includes('⛔ park yok'), 'durum görünmeli');
+    assert.ok(!h.includes('startParkScan({projectId:2'), 'bağlama düğmesi gizlenmeli');
+    assert.ok(h.includes('🔐 yönetici bağlayacak'), h.slice(0, 200));
+  });
+
+  test('yönetici aynı yerlerde düğmeleri GÖRÜR (kural tersine dönmez)', async () => {
+    run('PROFILE={id:"u-1",role:"owner",full_name:"Kurucu"}; USER={id:"u-1"};');
+    W.route((st) => {
+      if (st.table === 'v_park_compare') return { data: PENDING_ROWS, error: null };
+      if (st.table === 'projects') return { data: [{ id: 2, name: 'Ülkü', park_id: null, created_at: '2026-08-01', parks: null }], error: null };
+      return { data: [], error: null };
+    });
+    await run('loadProjects()');
+    assert.ok(el('projTable').innerHTML.includes('startParkScan({projectId:2'), 'yönetici bağlayabilmeli');
+    el('mProject').value = '2';
+    run('dgParkGate()');
+    assert.ok(el('parkGate').innerHTML.includes('Parkı Algıla ve Bağla'), 'yönetici kapıda bağlama görür');
+    await run('loadParkCompare()');
+    assert.ok(el('parkCompare').innerHTML.includes("startParkScan({returnTo:'world'})"), 'yönetici onarım düğmesini görür');
+    assert.ok(!el('parkCompare').innerHTML.includes('🔐 yönetici bağlayacak'), 'yöneticiye "yönetici bağlayacak" denmez');
+  });
+
+  test('normal kullanıcı YENİ proje açabilir (saha akışı kilitlenmedi)', async () => {
+    run('PROFILE={id:"u-9",role:"user",full_name:"Normal"};');
+    run('DG_PARK={id:7,name:"Göksu Parkı",osm_key:"way/1",area_m2:508000};');
+    el('pLabel').value = 'deneme'; el('pCountry').value = ''; el('pCity').value = '';
+    W.reset();
+    W.route((st) => st.table === 'projects' && st.op === 'insert' ? { data: { id: 33, ...st.rows }, error: null } : { data: [], error: null });
+    await run('createProject()');
+    const ins = lastInsert('projects');
+    assert.ok(ins, 'yeni proje oluşturulabilmeli');
+    assert.equal(ins.rows.name, 'Göksu Parkı - deneme');
+    assert.equal(ins.rows.park_id, 7);
+  });
+});

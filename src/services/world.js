@@ -67,6 +67,10 @@ function dgParkRowHTML(p,i,max){
 function dgPendingParksHTML(pending){
  if(!pending||!pending.length)return "";
  const n=pending.reduce((a,r)=>a+(Number(r.records)||0),0);
+ /* Parka bağlama/onarım YALNIZ YÖNETİCİ (kullanıcı isteği 2026-09-24 +
+  * 0006_park_admin_only.sql → PARK_ADMIN_ONLY). Normal kullanıcı düğmeyi
+  * görmez; yalnız bilgilendirme görür. */
+ const admin=(typeof dgIsAdmin==="function")?dgIsAdmin():false;
  return `
   <div style="margin-top:16px;border-top:1px dashed var(--line);padding-top:12px">
    <div class="lbl" style="margin-bottom:8px">⚠ PARK ALGILANMAMIŞ KAYITLAR <span style="text-transform:none;letter-spacing:0;font-weight:400">(sıralamaya dahil değil · ${n} kayıt)</span></div>
@@ -75,9 +79,13 @@ function dgPendingParksHTML(pending){
      <div style="flex:1;min-width:0;font-size:.78rem">${esc(p.park_name)} <span class="badge off">park yok</span>
       <div style="font-size:.68rem;color:var(--mut)">${esc(p.city||"—")} · ${p.records} kayıt · ${(Number(p.carbon_kg)/1000).toFixed(2)} t</div>
      </div>
-     <button class="btn sm ghost" onclick="startParkScan({returnTo:'world'})">🌳 Park Algıla</button>
+     ${admin
+       ?`<button class="btn sm ghost" onclick="startParkScan({returnTo:'world'})">🌳 Park Algıla</button>`
+       :`<span class="badge admin">🔐 yönetici bağlayacak</span>`}
     </div>`).join("")}
-   <div style="font-size:.7rem;color:var(--mut);margin-top:6px">Bu kayıtlar park kimliği oluşturulmadan önce girilmiş. Yönetici <b>🌳 Parkları Geri Doldur</b> aracıyla ölçüm merkezinden otomatik eşleştirebilir.</div>
+   <div style="font-size:.7rem;color:var(--mut);margin-top:6px">${admin
+     ?`Bu kayıtlar park kimliği oluşturulmadan önce girilmiş. <b>🌳 Parkları Geri Doldur</b> aracı ölçüm merkezinden otomatik eşleştirir; tek tek bağlamak için satırdaki 🌳 düğmesini kullan.`
+     :`Bu kayıtlar park kimliği oluşturulmadan önce girilmiş. Parka bağlama işlemi <b>yalnız yönetici</b> tarafından yapılır — yönetici eşleştirdiğinde bu satırlar yukarıdaki park sıralamasına taşınır.`}</div>
   </div>`;
 }
 

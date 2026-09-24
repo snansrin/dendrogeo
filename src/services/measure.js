@@ -128,7 +128,10 @@ async function loadProjects(){
   const park=p.parks&&p.parks.name?p.parks.name:(p.park_name||"");
   const parkCell=p.park_id
    ? `🌳 ${esc(park)}${p.parks&&p.parks.area_m2?`<br><span class="mono" style="font-size:.68rem;color:var(--mut)">${dgFmtHa(p.parks.area_m2)}</span>`:""}`
-   : `<span class="badge off">⛔ park yok</span><br><button class="btn sm blue" style="margin-top:4px" onclick="startParkScan({projectId:${p.id},returnTo:'projects'})">🌳 Bağla</button>`;
+   : `<span class="badge off">⛔ park yok</span><br>`+
+     (dgIsAdmin()
+       ? `<button class="btn sm blue" style="margin-top:4px" onclick="startParkScan({projectId:${p.id},returnTo:'projects'})">🌳 Bağla</button>`
+       : `<span style="font-size:.66rem;color:var(--mut)">🔐 yönetici bağlayacak</span>`);
   return `<tr><td>${p.id}</td><td>${parkCell}</td><td>${esc(p.name)}</td><td>${esc(p.country||"—")}</td><td>${esc(p.city||"—")}</td><td>${new Date(p.created_at).toLocaleDateString("tr-TR")}</td><td style="display:flex;gap:4px"><button class="btn sm blue" onclick="editProject(${p.id})">✏️</button><button class="btn sm red" onclick="deleteProject(${p.id})">🗑</button></td></tr>`;
  }).join("")||"<tr><td colspan=7>Proje yok — önce park algıla</td></tr>";
  dgRenderProjectParkBox();
