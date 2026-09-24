@@ -194,7 +194,16 @@
 <script src="src/services/measure.js?v=9a57298b"></script>
 <script src="src/services/map.js?v=ec711385"></script>
 <script src="vendor/geotiff-2.1.3.js"></script>
-<script src="src/services/landcover.js?v=9efe364e"></script>
+<!-- LULC ZİNCİRİ (Faz 5 — eski landcover.js altı modül + facade oldu; sıralama
+     ÖNEMLİ: config → geo → stac → engine → osm → patches → report-UI → facade) -->
+<script src="src/services/lc-config.js?v=00000000"></script>
+<script src="src/services/lc-geo.js?v=00000000"></script>
+<script src="src/services/lc-stac.js?v=00000000"></script>
+<script src="src/services/lc-engine.js?v=00000000"></script>
+<script src="src/services/lc-osm.js?v=00000000"></script>
+<script src="src/services/lc-patches.js?v=00000000"></script>
+<script src="src/ui/lc-report.js?v=00000000"></script>
+<script src="src/services/landcover.js?v=00000000"></script>
 <!-- PARK ZİNCİRİ (Faz 4 — eski gridplan.js yedi modüle bölündü; sıralama ÖNEMLİ:
      state → istemci → geometri → sorgu → motor → panel → export) -->
 <script src="src/services/park-state.js?v=00000000"></script>

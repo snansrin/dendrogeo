@@ -21,7 +21,8 @@ import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
-const lc = readFileSync(join(ROOT, 'src/services/landcover.js'), 'utf8');
+/* Faz 5: STAC katmanı lc-stac.js'e taşındı — canary yeni modülü okuyor. */
+const lc = readFileSync(join(ROOT, 'src/services/lc-stac.js'), 'utf8');
 const adm = readFileSync(join(ROOT, 'src/services/admin.js'), 'utf8');
 const idx = readFileSync(join(ROOT, 'index.html'), 'utf8');
 

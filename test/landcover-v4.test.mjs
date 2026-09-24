@@ -13,7 +13,10 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { loadApp } from '../scripts/test-harness.mjs';
 
-const app = loadApp({ sadece: ['src/config/constants.js', 'src/utils/geo.js', 'src/services/landcover.js'] });
+const app = loadApp({ sadece: ['src/config/constants.js', 'src/utils/geo.js',
+  'src/services/lc-config.js', 'src/services/lc-geo.js', 'src/services/lc-stac.js',
+  'src/services/lc-engine.js', 'src/services/lc-osm.js', 'src/services/lc-patches.js',
+  'src/ui/lc-report.js', 'src/services/landcover.js'] });
 const {
   dgLcEnsureCcw, dgLcClipPolygonConvex, dgLcIntersectionAreaConvex, dgLcQuadBBox,
   dgLcIntersectionArea, dgLcClipPolygonRect, dgLcPlanarArea, dgLcUtmForward,
@@ -300,7 +303,8 @@ describe('renk paleti ve şeffaflık (kullanıcı spesifikasyonu)', () => {
   });
 
   test('kaynak kodunda şeffaflık değerleri duruyor (fill .38 / stroke .50)', () => {
-    const src = readFileSync(new URL('../src/services/landcover.js', import.meta.url), 'utf8');
+    /* Faz 5: çizim kodu ui/lc-report.js'te */
+    const src = readFileSync(new URL('../src/ui/lc-report.js', import.meta.url), 'utf8');
     assert.match(src, /fillOpacity:\.38/);
     assert.match(src, /opacity:\.60/);
   });
@@ -555,7 +559,12 @@ describe('v8: grid yeşil-alan kapısı + PNG dışa aktarım (canary)', () => {
 });
 
 describe('v9: sapma düzeltmesi + yapay havuz rafinasyonu + PNG park kıpı', () => {
-  const srcLc = readFileSync(new URL('../src/services/landcover.js', import.meta.url), 'utf8');
+  /* Faz 5: LULC zinciri — facade + osm + engine birlikte taranır */
+  const srcLc = [
+    readFileSync(new URL('../src/services/landcover.js', import.meta.url), 'utf8'),
+    readFileSync(new URL('../src/services/lc-osm.js', import.meta.url), 'utf8'),
+    readFileSync(new URL('../src/services/lc-engine.js', import.meta.url), 'utf8'),
+  ].join('\n');
   /* Faz 4: waypoint üretimi grid-engine.js'te, PNG kırpma ui/park-export.js'te */
   const srcGp = [
     readFileSync(new URL('../src/services/grid-engine.js', import.meta.url), 'utf8'),
@@ -638,5 +647,7 @@ test('LULC: yapay su rafinasyonu açıkça bağlı ve ham raster kodları korunu
   assert.match(body, /dgLcFetchWaterPolygons\(bbox\)/);
   assert.match(body, /waterRefined=dgLcRefineWater\(result,waterRings\)/);
   assert.match(body, /waterRefinedCells:waterRefined/);
-  assert.match(src, /rawCounts\[raw\]=/);
+  /* Faz 5: ham raster sayaçları dgLcProcessTile içinde → lc-engine.js */
+  const engine = readFileSync(new URL('../src/services/lc-engine.js', import.meta.url), 'utf8');
+  assert.match(engine, /rawCounts\[raw\]=/);
 });

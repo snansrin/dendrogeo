@@ -38,7 +38,10 @@ const CORE_ASSETS = [
     '/css/landing.css',
     '/src/config/supabase.js', '/src/config/constants.js', '/src/config/species.js', 
     '/src/utils/geo.js', '/src/utils/truncation.js', '/src/services/allometry.js', '/src/services/auth.js','/src/services/export.js', '/src/services/offline.js',
-    '/src/services/admin.js','/src/services/world.js', '/src/services/measure.js','/src/services/map.js','/src/services/landcover.js',
+    '/src/services/admin.js','/src/services/world.js', '/src/services/measure.js','/src/services/map.js',
+    /* LULC ZİNCİRİ (Faz 5): eski landcover.js altı modüle bölündü; facade son sırada
+     * (window.DG_LANDCOVER'u o kurar, yükleme anında lc-* global'lerini referanslar). */
+    '/src/services/lc-config.js','/src/services/lc-geo.js','/src/services/lc-stac.js','/src/services/lc-engine.js','/src/services/lc-osm.js','/src/services/lc-patches.js','/src/ui/lc-report.js','/src/services/landcover.js',
     /* PARK ZİNCİRİ (Faz 4): eski gridplan.js yedi modüle bölündü — yükleme
      * sırası index.html ile aynı olmalı (state → client → geometry → query →
      * engine → panel → export). */

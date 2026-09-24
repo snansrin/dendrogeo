@@ -71,6 +71,15 @@ export function loadApp({ sadece } = {}) {
     'src/utils/geo.js',
     'src/utils/truncation.js',
     'src/services/allometry.js',
+    /* LULC ZİNCİRİ (Faz 5): index.html'deki sırayla. ui/lc-report facade'tan
+     * ÖNCE yüklenmeli (facade dgLcRenderReport'u yükleme anında referanslar). */
+    'src/services/lc-config.js',
+    'src/services/lc-geo.js',
+    'src/services/lc-stac.js',
+    'src/services/lc-engine.js',
+    'src/services/lc-osm.js',
+    'src/services/lc-patches.js',
+    'src/ui/lc-report.js',
     'src/services/landcover.js',
     /* PARK ZİNCİRİ (Faz 4): eski gridplan.js'in mantık modülleri, index.html'deki
      * yükleme sırasıyla. UI modülleri (src/ui/park-panel, src/ui/park-export)
@@ -88,7 +97,7 @@ export function loadApp({ sadece } = {}) {
                    'DG_LC_CODES', 'DG_LC_CLASSES', 'DG_LC_PIXEL_M', 'DG_LC_YEAR',
                    'DG_LC_COLLECTION', 'DG_LC_STAC', 'DG_LC_MAX_TILES',
                    'DG_LC_MAX_READ_PIXELS', 'DG_LC_RENDER_LIMIT',
-                   'DG_LC_SOURCES', 'DG_ESA_GROUP', 'DG_ESA_CODES',
+                   'DG_LC_SOURCES', 'DG_ESA_GROUP', 'DG_ESA_CODES', 'DG_LC_SAS', 'DG_OSM_WATER_MIRRORS', 'DG_LC_LAYER', 'DG_LC_LAST',
                    'DG_TRUNCATION_WARNED'];
   const epilog = LEXICAL
     .map((n) => `if(typeof ${n}!=="undefined")__exports.${n}=${n};`)

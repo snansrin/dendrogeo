@@ -25,7 +25,10 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { loadApp } from '../scripts/test-harness.mjs';
 
-const app = loadApp({ sadece: ['src/config/constants.js', 'src/utils/geo.js', 'src/services/landcover.js'] });
+const app = loadApp({ sadece: ['src/config/constants.js', 'src/utils/geo.js',
+  'src/services/lc-config.js', 'src/services/lc-geo.js', 'src/services/lc-stac.js',
+  'src/services/lc-engine.js', 'src/services/lc-osm.js', 'src/services/lc-patches.js',
+  'src/ui/lc-report.js', 'src/services/landcover.js'] });
 const {
   dgLcUtmForward, dgLcUtmInverse, dgLcUtmEpsgForLatLon,
   dgLcPlanarArea, dgLcClipPolygonRect, dgLcIntersectionArea,
@@ -456,7 +459,12 @@ describe('LULC sabitleri ve sınıf eşlemesi', () => {
     // taşımıştı; v4 motoruyla hücreler artık doğrudan dört gerçek köşe
     // (quadWgs) taşıyor — EPSG:4326 karolarda anizotropik hücre şekli korunur.
     // Biri sabit piksel varsayımına geri dönerse bu test kırılır.
-    const src = readFileSync(new URL('../src/services/landcover.js', import.meta.url), 'utf8');
+    /* Faz 5: motor lc-engine.js'te; canary tüm LULC zincirini tarar */
+    const src = ['lc-config','lc-geo','lc-stac','lc-engine','lc-osm','lc-patches']
+      .map((f) => readFileSync(new URL(`../src/services/${f}.js`, import.meta.url), 'utf8'))
+      .concat([readFileSync(new URL('../src/ui/lc-report.js', import.meta.url), 'utf8'),
+               readFileSync(new URL('../src/services/landcover.js', import.meta.url), 'utf8')])
+      .join('\n');
     assert.match(src, /quadWgs/, 'hücreler gerçek köşe listesini taşımalı');
     assert.match(src, /dgLcIntersectionAreaConvex\(geometry\.outer,geometry\.holes,quad\)/,
       'alanlar tam dışbükey kesişimle hesaplanmalı');

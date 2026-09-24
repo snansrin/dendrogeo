@@ -141,7 +141,7 @@ function baglam() {
   vm.runInContext(readFileSync(join(ROOT, 'src/services/landcover.js'), 'utf8'), ctx, { filename: 'landcover.js' });
   vm.runInContext('this.__api={dgLcFindTiles,dgLcGetSas,dgLcGetDataAsset,dgLcSignedHref,dgLcProcessTile,' +
     'dgLcMergeTileResults,dgLcProjectGeometry,dgLcProjectedArea,dgLcBboxFromGeometry,' +
-    'dgLcUtmEpsgFromItem,dgLcUtmEpsgForLatLon,dgLcUtmForward,dgLcImageMeta,dgLcWindowForPark,' +
+    'dgLcUtmEpsgForLatLon,dgLcUtmForward,dgLcImageMeta,dgLcWindowForPark,' +
     'DG_LC_CLASSES,dgLcReportClassForCode};', ctx);
   return ctx.__api;
 }
@@ -204,7 +204,11 @@ const script = `
     const tiff = await GeoTIFF.fromUrl(href);
     const image = await tiff.getImage();
     const keys = typeof image.getGeoKeys === 'function' ? image.getGeoKeys() : null;
-    const epsgItem = dgLcUtmEpsgFromItem(item, keys);
+    // EPSG türetme: dgLcProcessTile ile AYNI mantık (dgLcUtmEpsgFromItem artık yok)
+    const keyEpsg = Math.round(Number(keys && keys.ProjectedCSTypeGeoKey || 0));
+    const propEpsg = Math.round(Number(item?.properties?.["proj:epsg"] || 0));
+    const rasterEpsg = keyEpsg || propEpsg || 4326;
+    const epsgItem = (rasterEpsg >= 32601 && rasterEpsg <= 32760) ? rasterEpsg : 0;
     const epsgFall = dgLcUtmEpsgForLatLon(outer[0][0][0], outer[0][0][1]);
     const epsg = epsgItem || epsgFall;
     const geometry = dgLcProjectGeometry(outer, holes, epsg);
