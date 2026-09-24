@@ -12,15 +12,12 @@ import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
-const FILES = [
-  'index.html',
-  'src/config/supabase.js', 'src/config/constants.js', 'src/config/species.js',
-  'src/utils/geo.js', 'src/utils/truncation.js',
-  'src/services/allometry.js', 'src/services/auth.js', 'src/services/export.js',
-  'src/services/offline.js', 'src/services/admin.js', 'src/services/world.js',
-  'src/services/measure.js', 'src/services/map.js', 'src/services/landcover.js',
-  'src/services/gridplan.js', 'src/services/dash.js',
-];
+/* FILES artık ELLE tutulmuyor — index.html'deki <script src="src/..."> tag'lerinden
+ * TÜRETİLİYOR (modül kayıt bekçisi: test/module-registry.test.mjs). Yeni modül
+ * eklenince bu liste kendiliğinden güncellenir; "denetime eklemeyi unuttum" devri bitti. */
+const htmlKaynak = readFileSync(join(ROOT, 'index.html'), 'utf8');
+const srcJs = [...new Set([...htmlKaynak.matchAll(/<script\s+src="(src\/[^"?]+)/g)].map((m) => m[1]))];
+const FILES = ['index.html', ...srcJs];
 const src = Object.fromEntries(FILES.map((f) => [f, readFileSync(join(ROOT, f), 'utf8')]));
 const all = Object.values(src).join('\n');
 

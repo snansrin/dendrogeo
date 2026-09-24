@@ -7,7 +7,7 @@ on:
 
 jobs:
   dogrula:
-    name: Sözdizimi + CSP + 125 test
+    name: Sözdizimi + CSP + testler + dağıtım denetimi
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -46,11 +46,15 @@ jobs:
         continue-on-error: true
         run: |
           python3 - <<'PY'
-          import hashlib, urllib.request, sys, time
-          dosyalar = ['index.html', 'sw.js', 'src/services/gridplan.js',
-                      'src/services/landcover.js', 'src/services/map.js',
-                      'src/services/measure.js', 'src/services/offline.js',
-                      'src/utils/geo.js', 'css/style.css']
+          import hashlib, urllib.request, sys, time, re
+          # Liste ELLE tutulmuyor: index.html'deki tüm src/css/vendor varlıkları
+          # + çekirdek dosyalardan TÜRETİLİYOR. Yeni modül eklenince bu denetim
+          # onu kendiliğinden kapsar (unutulma devri bitti).
+          html = open('index.html', encoding='utf-8').read()
+          dosyalar = ['index.html', 'sw.js', 'manifest.json']
+          for m in re.finditer(r'(?:src|href)="((?:src|css|vendor)/[^"?]+)', html):
+              if m.group(1) not in dosyalar:
+                  dosyalar.append(m.group(1))
           h = lambda b: hashlib.sha256(b).hexdigest()[:16]
           sapma = []
           for d in dosyalar:
