@@ -3,6 +3,8 @@
 User-agent: *
 Allow: /
 Allow: /index.html
+Allow: /gizlilik/
+Allow: /kullanim-kosullari/
 Allow: /manifest.json
 Allow: /social-preview.jpg
 Allow: /logo.png

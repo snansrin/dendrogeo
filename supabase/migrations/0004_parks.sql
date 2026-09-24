@@ -131,7 +131,7 @@ create trigger trg_compose_project_name
 before insert or update on public.projects
 for each row execute function public.compose_project_name();
 
--- ============ 5) PARKSIZ PROJEYE ÖLÇüm GİRİLEMEZ (sunucu kapısı) ============
+-- ============ 5) PARKSIZ PROJEYE ÖLÇÜM GİRİLEMEZ (sunucu kapısı) ============
 create or replace function public.enforce_park_link() returns trigger
 language plpgsql security definer set search_path=public as $$
 declare

@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="tr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Gizlilik Politikası | DendroGeo</title>
+<meta name="description" content="DendroGeo hangi verileri toplar, neden işler, kimlerle paylaşır ve haklarınız nelerdir? GPS konumu, ağaç ölçümleri, fotoğraflar, Google girişi, çerez kullanımı ve KVKK m.11 hakları.">
+<meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">
+<link rel="canonical" href="https://dendrogeo.org/gizlilik/">
+<meta property="og:type" content="article"><meta property="og:site_name" content="DendroGeo">
+<meta property="og:title" content="Gizlilik Politikası | DendroGeo"><meta property="og:description" content="DendroGeo hangi verileri toplar, neden işler, kimlerle paylaşır ve haklarınız nelerdir? GPS konumu, ağaç ölçümleri, fotoğraflar, Google girişi, çerez kullanımı ve KVKK m.11 hakları.">
+<meta property="og:url" content="https://dendrogeo.org/gizlilik/">
+<link rel="icon" href="../icon.png">
+<link rel="stylesheet" href="../css/style.css">
+<style>:root{--bg:#f7f6f2;--ink:#182420;--mut:#64706a;--green:#14532d;--line:#dfe5df;--card:#fff}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.7 Arial,system-ui,sans-serif}
+.wrap{max-width:1040px;margin:auto;padding:0 22px}.top{padding:18px 0;border-bottom:1px solid var(--line);background:#fff;position:sticky;top:0}
+.nav{display:flex;align-items:center;justify-content:space-between;gap:18px}.brand{font-weight:800;color:var(--green);text-decoration:none;font-size:1.15rem}.links{display:flex;gap:14px;flex-wrap:wrap}.links a{color:var(--green);text-decoration:none;font-size:.92rem}
+main{padding:54px 0 70px}h1{font-size:clamp(2rem,5vw,3.3rem);line-height:1.08;margin:.2em 0 .35em}h2{margin-top:42px;line-height:1.2}h3{margin-top:25px}p,li{max-width:78ch}.lead{font-size:1.08rem;color:#46524c;max-width:75ch}.hero{padding:25px 0 10px}.tag{color:var(--green);font-weight:800;text-transform:uppercase;letter-spacing:.08em;font-size:.78rem}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:18px;margin-top:24px}.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:22px}.card h3{margin-top:0}.btn{display:inline-block;background:var(--green);color:white;text-decoration:none;padding:11px 16px;border-radius:10px;font-weight:700;margin:8px 8px 0 0}.btn.alt{background:white;color:var(--green);border:1px solid var(--line)}code{background:#eef2ee;padding:2px 5px;border-radius:5px}footer{border-top:1px solid var(--line);padding:28px 0;color:var(--mut);font-size:.9rem}table{border-collapse:collapse;width:100%;background:#fff;border:1px solid var(--line);border-radius:12px;overflow:hidden}th,td{padding:11px 12px;border-bottom:1px solid var(--line);text-align:left}th{background:#eef3ef;color:var(--green)}small{color:var(--mut)}</style>
+</head><body>
+<header class="top"><div class="wrap nav"><a class="brand" href="../">🌲 DendroGeo</a>
+<nav class="links" aria-label="Ana navigasyon"><a href="../">Ana Sayfa</a><a href="../agac-envanteri/">Ağaç Envanteri</a><a href="../karbon-hesaplama/">Karbon</a><a href="../arazi-ortusu/">Arazi Örtüsü</a><a href="../yontem/">Yöntem</a></nav></div></header>
+<main><div class="wrap">
+<div class="hero"><div class="tag">YASAL</div><h1>Gizlilik Politikası</h1>
+<p class="lead">DendroGeo, saha ağaç ölçümlerinden karbon verisi üreten açık kaynaklı bir web GIS uygulamasıdır. Bu politika; hangi verileri, neden, ne kadar süreyle ve kimlerle işlediğimizi, ayrıca haklarınızı açıklar. Son güncelleme: <b>24 Eylül 2026</b>.</p></div>
+
+<h2>1. Veri sorumlusu</h2>
+<p>DendroGeo projesi (<a href="https://dendrogeo.org">dendrogeo.org</a>) kapsamında işlenen kişisel veriler bakımından veri sorumlusu, projenin kurucusu ve yürütücüsüdür.</p>
+<p><b>İletişim:</b> <a href="mailto:snansrin@gmail.com">snansrin@gmail.com</a><br>
+<b>Kaynak kodu:</b> <a href="https://github.com/snansrin/dendrogeo">github.com/snansrin/dendrogeo</a> (CC BY-NC 4.0)<br>
+<b>Veri seti DOI:</b> 10.5281/zenodo.22646300</p>
+
+<h2>2. Toplanan veriler</h2>
+<div class="grid">
+<div class="card"><h3>2.1 Hesap verileri</h3><p>Kayıt sırasında: <b>e-posta adresi</b>, <b>ad soyad</b>, <b>kurum</b> (opsiyonel) ve parola özeti (parolanın kendisi değil, Supabase Auth tarafından geri döndürülemez biçimde hash'lenir).</p>
+<p><b>Google ile giriş</b> yaptığınızda Google'dan yalnız <b>ad</b> ve <b>e-posta adresi</b> alınır (profil resmi istenmez ve saklanmaz). Google'ın kendi veri işleme koşulları için <a href="https://policies.google.com/privacy">policies.google.com/privacy</a>.</p>
+<p>Hesap ayrıca sistem içi <b>rol</b> (kullanıcı / denetçi / kurucu) ve <b>aktiflik</b> bilgisi tutar.</p></div>
+<div class="card"><h3>2.2 Saha ölçüm verileri</h3><p>Uygulamanın bilimsel amacı gereği her ağaç ölçümünde şu alanlar kaydedilir:</p>
+<p><b>Konum:</b> GPS enlem, boylam, rakım ve doğruluk (m). Konum, karbon hesabının park/şehir/ülke ölçeğinde doğrulanabilmesi için <b>zorunludur</b>; doğruluk değeri de kalite kontrolü için saklanır.<br>
+<b>Ağaç verileri:</b> tür, grup (ibreli/yapraklı/diğer), göğüs yüksekliği çapı (DBH), boy, eğim, ölçüm numarası.<br>
+<b>Türetilen değerler:</b> hacim, biyokütle (AGB/BHB) ve karbon (Chave vd. 2014 allometrik denklemi).<br>
+<b>Fotoğraf:</b> yalnız siz yüklerseniz; yükleme öncesi tarayıcıda kalite denetimi yapılır, 1024 px'e sıkıştırılır.</p></div>
+<div class="card"><h3>2.3 Teknik ve kullanım verileri</h3><p><b>Ziyaret sayacı:</b> tarih damgası (IP adresi, tarayıcı parmak izi veya kimlik saklanmaz).<br>
+<b>Çevrimdışı kuyruk:</b> internet yokken girilen ölçümler <b>yalnızca kendi cihazınızda</b> (IndexedDB) tutulur, bağlantı gelince silinerek sunucuya aktarılır.<br>
+<b>Service Worker önbelleği:</b> uygulamanın çevrimdışı çalışması için harita karoları ve kod dosyaları cihazınızda önbelleğe alınır.<br>
+<b>Veri talebi formu:</b> e-posta, ülke/şehir, proje adı ve not (yalnız talebinize yanıt vermek için).</p></div>
+<div class="card"><h3>2.4 Toplanmayan veriler</h3><p>DendroGeo'da <b>izleme çerezi, reklam kimliği, üçüncü taraf analitik (Google Analytics vb.) ve reklam ağı yoktur.</b> Kullanıcı davranışı profillenmez, veri satılmaz veya kiralanmaz.</p></div>
+</div>
+
+<h2>3. İşleme amaçları ve hukuki sebepler</h2>
+<table><thead><tr><th>Amaç</th><th>Veri</th><th>Hukuki sebep (KVKK m.5)</th></tr></thead><tbody>
+<tr><td>Hesap oluşturma ve oturum yönetimi</td><td>E-posta, ad soyad, kurum</td><td>Açık rıza + sözleşmenin kurulması/ifası</td></tr>
+<tr><td>Bilimsel ağaç envanteri ve karbon hesabı</td><td>GPS, tür, çap, boy, foto</td><td>Sözleşmenin ifası + veri sorumlusunun meşru menfaati (kamuya açık bilimsel veri seti)</td></tr>
+<tr><td>Veri kalite kontrolü ve moderasyon</td><td>Ölçüm kayıtları, denetim izi</td><td>Meşru menfaat (bilimsel doğruluk)</td></tr>
+<tr><td>Kötüye kullanımın önlenmesi</td><td>Turnstile doğrulama jetonu</td><td>Meşru menfaat (güvenlik)</td></tr>
+<tr><td>Veri taleplerine yanıt</td><td>Talep formu içeriği</td><td>Açık rıza</td></tr>
+</tbody></table>
+
+<h2>4. Verilerin kimlerle paylaşıldığı</h2>
+<p>Verileriniz <b>satılmaz</b>. Yalnızca hizmetin çalışması için gerekli alt yüklenicilerle ve aşağıdaki amaçlarla paylaşılır:</p>
+<table><thead><tr><th>Sağlayıcı</th><th>Amaç</th><th>Paylaşılan veri</th></tr></thead><tbody>
+<tr><td>Supabase (veritabanı, kimlik doğrulama, dosya depolama)</td><td>Uygulamanın barındırılması</td><td>Hesap, ölçüm ve fotoğraf verileri</td></tr>
+<tr><td>Google (OAuth)</td><td>"Google ile devam et" girişi</td><td>Yalnız giriş anında ad + e-posta</td></tr>
+<tr><td>Cloudflare Turnstile</td><td>Parola formunda bot koruması</td><td>Doğrulama jetonu (kişisel veri değil)</td></tr>
+<tr><td>OpenStreetMap (karo sunucuları, Nominatim, Overpass API)</td><td>Harita altlığı, il/ülke ters coğraflama, park sınırı</td><td>Yaklaşık koordinat (istek bazında)</td></tr>
+<tr><td>Esri / ArcGIS Online, OpenTopoMap</td><td>Uydu ve topoğrafik altlık haritalar</td><td>Görüntülenen harita alanı</td></tr>
+<tr><td>Microsoft Planetary Computer + Azure Blob</td><td>ESA WorldCover 2021 (10 m arazi örtüsü)</td><td>Park sınırının coğrafi kutusu</td></tr>
+<tr><td>AWS S3 (us-west-2)</td><td>IO LULC 2020 çapraz doğrulama</td><td>Park sınırının coğrafi kutusu</td></tr>
+<tr><td>Google Fonts</td><td>Tipografi</td><td>Standart istek başlıkları</td></tr>
+</tbody></table>
+<p>Bu sağlayıcıların bir kısmı verileri yurt dışında işleyebilir. Uygulama, tarayıcınızın doğrudan bu sunucularla konuşması dışında kişisel veri aktarmaz; bağlantı listesi sayfanın <b>Content-Security-Policy</b> başlığında sabitlenmiştir (yeni bir dış servis eklenirse derleme denetimi başarısız olur).</p>
+
+<h2>5. Hangi veriler kamuya açıktır?</h2>
+<div class="card"><h3>Açık veri (bilimsel yayın)</h3><p>Yalnızca <b>moderasyondan geçmiş ("Onaylı") ölçümler</b> kamuya açıktır: konum, tür, çap, boy, türetilmiş karbon değerleri ve varsa fotoğraf. Bu küme <b>CC BY-NC 4.0</b> lisansıyla ve DOI ile yayımlanır; amaç bilimsel yeniden üretilebilirliktir.</p>
+<h3>Kamuya açık olmayan</h3><p><b>E-posta adresiniz, ad soyad, kurum, onay bekleyen/red edilen kayıtlar ve kullanıcı listesi</b> kamuya açık değildir. Veritabanında Satır Düzeyi Güvenlik (Row Level Security) uygulanır: onaylanmamış ölçümleri yalnız sahibi ve yöneticiler görür; e-posta adreslerini yalnız yöneticiler görür.</p></div>
+
+<h2>6. Saklama süresi</h2>
+<p>Hesap ve ölçüm verileri, hesabınız aktif olduğu sürece saklanır. Hesabınızı kapattığınızda profil ve ölçümler silinir; ancak <b>onaylanıp kamuya yayımlanmış</b> bilimsel veri seti kopyaları, yayımlanmış sürümün bütünlüğü (DOI) nedeniyle arşivde kalabilir. Fotoğraflar kaydın silinmesiyle birlikte depolamadan da kaldırılır. Ziyaret sayacı kayıtları kişisel veri içermez ve toplu olarak tutulur.</p>
+
+<h2>7. Haklarınız (KVKK m.11)</h2>
+<p>Aşağıdaki haklar için <a href="mailto:snansrin@gmail.com">snansrin@gmail.com</a> adresine yazabilirsiniz:</p>
+<div class="card"><p>• Kişisel verinizin işlenip işlenmediğini öğrenme ve buna ilişkin bilgi talep etme<br>
+• İşlenme amacını ve amacına uygun kullanılıp kullanılmadığını öğrenme<br>
+• Yurt içinde/yurt dışında aktarıldığı üçüncü kişileri bilme<br>
+• Eksik veya yanlış işlenmişse <b>düzeltilmesini</b> isteme<br>
+• KVKK m.7 kapsamında <b>silinmesini veya yok edilmesini</b> isteme<br>
+• Otomatik sistemlerce analiz edilmesi suretiyle aleyhinize bir sonucun ortaya çıkmasına <b>itiraz</b> etme<br>
+• Zarara uğramanız hâlinde tazminat talep etme</p></div>
+<p>Ayrıca uygulama içinden kendi kayıtlarınızı doğrudan yönetebilirsiniz: <b>📋 Kayıtlarım</b> bölümünde her ölçüm için ✏️ düzenleme ve 🗑️ silme düğmesi vardır. Talepler en geç <b>30 gün</b> içinde sonuçlandırılır.</p>
+
+<h2>8. Çerezler ve yerel depolama</h2>
+<p>DendroGeo <b>izleme çerezi kullanmaz</b>. Kullanılan yerel depolama:</p>
+<table><thead><tr><th>Teknoloji</th><th>Ne tutar</th><th>Neden</th></tr></thead><tbody>
+<tr><td>localStorage</td><td>Oturum belirteci (Supabase Auth)</td><td>Yenilemede oturumun korunması</td></tr>
+<tr><td>IndexedDB</td><td>Çevrimdışı ölçüm kuyruğu (fotoğraf dahil)</td><td>Sahada internet yokken veri kaybını önleme</td></tr>
+<tr><td>Service Worker Cache</td><td>Kod, stil ve harita karoları</td><td>Çevrimdışı çalışma ve hız</td></tr>
+</tbody></table>
+<p>Tarayıcı ayarlarından bu depolamayı her zaman temizleyebilirsiniz; temizlemeniz yalnızca cihazınızdaki kuyruğu ve önbelleği etkiler, sunucudaki onaylı verilerinizi silmez.</p>
+
+<h2>9. Güvenlik</h2>
+<p>Tüm trafik TLS (HTTPS) ile şifrelenir. Veritabanında <b>Row Level Security</b> zorunludur: her kullanıcı yalnızca yetkili olduğu satırları okuyabilir. Ölçümler yayımlanmadan önce <b>yönetici onayından</b> geçer; onay/red işlemleri kim ve ne zaman bilgisiyle <b>denetim izine</b> yazılır. Yönetici anahtarı (service_role) istemci kodunda ve kaynak deposunda <b>bulunmaz</b>. Parolalar Supabase Auth tarafından hash'lenir; parola formu Cloudflare Turnstile ile korunur.</p>
+
+<h2>10. Konum verisi hakkında özel not</h2>
+<p>Konum izni yalnız <b>siz "📡 Konumu Etkinleştir" düğmesine bastığınızda</b> istenir ve arka planda izleme yapılmaz. Koordinatlar ölçümün bilimsel geçerliliği için gereklidir (ağacın park içindeki konumu, arazi örtüsü kesişimi ve bölgesel toplulaştırma). Ölçüm sırasında ekran kilidini önlemek için Wake Lock API kullanılabilir; bu API konum verisi toplamaz. Konum verisi cihazınızda ayrıca izlenmez veya geçmiş olarak saklanmaz.</p>
+
+<h2>11. Çocukların gizliliği</h2>
+<p>DendroGeo 13 yaş altı kullanıcılara yönelik değildir ve bilerek çocuklardan veri toplamaz. Saha çalışması eğitim amaçlı kullanılacaksa hesap açma ve veri gönderme işlemi sorumlu yetişkin/eğitmen gözetiminde yapılmalıdır.</p>
+
+<h2>12. Değişiklikler</h2>
+<p>Bu politika güncellendiğinde sayfadaki "son güncelleme" tarihi değişir ve önemli değişikliklerde uygulama içinde bildirim gösterilir. Politikanın güncel hâli her zaman <a href="https://dendrogeo.org/gizlilik/">dendrogeo.org/gizlilik/</a> adresindedir.</p>
+
+<p style="margin-top:34px"><a class="btn" href="../">Uygulamaya dön</a> <a class="btn alt" href="../kullanim-kosullari/">Kullanım Koşulları</a> <a class="btn alt" href="../yontem/">Bilimsel Yöntem</a></p>
+</div></main>
+<footer><div class="wrap">DendroGeo · Küresel Ağaç Envanteri ve Karbon Veri Sistemi · <a href="../">Ana sayfa</a> · <a href="../gizlilik/">Gizlilik Politikası</a> · <a href="../kullanim-kosullari/">Kullanım Koşulları</a></div></footer>
+</body></html>
