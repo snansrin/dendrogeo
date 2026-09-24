@@ -217,6 +217,11 @@
 <script src="src/services/osm-client.js?v=00000000"></script>
 <script src="src/services/park-geometry.js?v=00000000"></script>
 <script src="src/services/park-query.js?v=00000000"></script>
+<!-- PARK KİMLİĞİ (2026-09-24): queryPark'ın bulduğu parkı public.parks'a yazar,
+     projeyi parka bağlar, ölçüm kapısını (park algılanmadan ölçüm yok) kurar.
+     Sıra ÖNEMLİ: park-query'den sonra, grid-engine'den önce (grid panelindeki
+     proje listesi bu modülden beslenir). -->
+<script src="src/services/park-registry.js?v=00000000"></script>
 <script src="src/services/grid-engine.js?v=00000000"></script>
 <script src="src/ui/park-panel.js?v=00000000"></script>
 <script src="src/ui/park-export.js?v=00000000"></script>

@@ -77,6 +77,11 @@ footer h4{color:#fff;font-size:.72rem;letter-spacing:.16em;text-transform:upperc
 .alert.ok{background:var(--tint);border:1px solid var(--green);color:var(--green-dk)}
 .alert.err{background:#fbeae6;border:1px solid var(--red);color:var(--red)}
 .alert.info{background:#e8f0fa;border:1px solid var(--blue);color:var(--blue)}
+/* Park kapısı (2026-09-24): "ölçüm girilemez" uyarıları kırmızı (err),
+ * şema/eksik veri uyarıları kehribar (warn). */
+.alert.warn{background:#fdf3e2;border:1px solid var(--amber);color:#92400e}
+.btn:disabled{opacity:.45;cursor:not-allowed;transform:none;box-shadow:none}
+.btn:disabled:hover{background:var(--green);transform:none}
 .auth{max-width:460px;margin:0 auto}
 @keyframes authGlow{0%{box-shadow:0 0 0 0 rgba(30,111,75,.5)}70%{box-shadow:0 0 0 22px rgba(30,111,75,0)}100%{box-shadow:0 0 0 0 rgba(30,111,75,0)}}
 .auth-glow{animation:authGlow 1.3s ease 2}

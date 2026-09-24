@@ -18,6 +18,28 @@ DendroGeo üç adımda çalışır:
 2. **Yönetici onaylasın** — yayınlanan her kayıt bir moderasyon akışından geçer; onaysız veri dünya haritasına çıkmaz.
 3. **Küresel harita ve istatistik** — onaylı kayıtlar Leaflet haritasında, ülke/şehir kırılımında ve park karşılaştırma raporlarında görünür. Park arazi örtüsü analizi ESA WorldCover 2021 v200 birincil kaynağı ve IO LULC 2020 çapraz kaynağıyla 10 m kategorik raster hücre kesişimlerinden hesaplanır.
 
+### Park kimliği: ölçüm → park → karşılaştırma
+
+Karşılaştırma **proje adlarına** değil, **algılanan parka** dayanır. Ölçüme
+geçmeden önce park algılama ekranı açılır; park bulunur, kimliği `public.parks`
+tablosuna yazılır ve proje adı `park adı - etiket` olarak kurulur
+(`Göksu Parkı - deneme`). Aynı parkı üç kişi ayrı projelerde çalışsa da
+karbon/kayıt/katılımcı sayıları tek satırda birleşir; park algılanmadan ölçüm
+girilemez (istemci kapısı `dgParkGate`, sunucu kapısı `trg_enforce_park_link`).
+
+* **Kimlik anahtarı:** OSM elemanı (`way/123456`). OSM'de park yoksa elle
+  oluşturulur (`manual/<ad>/<~100 m hücresi>`). Ad + konum çakışırsa farklı OSM
+  kimlikleri de TEK parkta birleşir (yarıçap park alanıyla büyür).
+* **Sıralama kaynağı:** `v_park_compare` view'ı (sunucu tarafı `group by park`)
+  → istemcide `.limit(5000)` kesilmesi yok; katkıda bulunan kişi sayısı, proje
+  sayısı, tür sayısı ve **t/ha** karbon yoğunluğu buradan gelir.
+* **Eski veriler:** park bağı olmayan projeler kaybolmaz, "park algılanmamış"
+  bölümünde ayrıca listelenir; Yönetim → **🌳 Parkları Geri Doldur** aracı
+  bunları ölçüm merkezinden OSM parkıyla eşleştirir (önce önizleme, sonra onay).
+* **Şema yedeği:** `supabase/migrations/0004_parks.sql` uygulanmadıysa uygulama
+  çökmez — park kimliği devre dışı kalır, karşılaştırma proje bazlı yedeğe
+  düşer, kapı kilitlenmez ve ekranda migration uyarısı görünür.
+
 ### Bilimsel yöntem (özet)
 
 * **Biyokütle:** Chave vd. (2014) allometrik denklemi — `AGB = 0.0673 · (ρ·D²·H)^0.976`
@@ -70,6 +92,7 @@ index.html                  ÜRETİLEN ARTİFAKT — partials'tan build edilir, 
         ├── osm-client.js   │ PARK ZİNCİRİ (eski gridplan.js; sıra önemli)
         ├── park-geometry.js│
         ├── park-query.js   │
+        ├── park-registry.js│ ★ park kimliği + ölçüm kapısı (2026-09-24)
         ├── grid-engine.js  ┘
         ├── lc-config.js    ┐
         ├── lc-geo.js       │
@@ -78,7 +101,7 @@ index.html                  ÜRETİLEN ARTİFAKT — partials'tan build edilir, 
         ├── lc-osm.js       │
         ├── lc-patches.js   ┘
         ├── landcover.js    LULC facade — window.DG_LANDCOVER sözleşmesi
-        ├── world.js        park karşılaştırma, ülke/şehir yakınlaşma
+        ├── world.js        park karşılaştırma (v_park_compare), ülke/şehir yakınlaşma
         ├── dash.js         kayıtlar, grafikler, analiz
         ├── visit-stats.js  ┐
         ├── data-requests.js│ YÖNETİM ZİNCİRİ (eski admin.js; sıra önemli)
@@ -114,9 +137,13 @@ kabuk değişikliği de landing'e dokunamaz. `test/build-consistency.test.mjs`
 bu izolasyonu CI'da kilitler.
 
 Veri modeli (Supabase/Postgres): `measurements`, `waypoints`, `projects`,
-`data_requests`, `profiles`, `site_visits` + `v_global/v_country/v_city` view'ları,
-Storage bucket `dendro-photos`. Erişimin tamamı **Row Level Security** ile
-sunucu tarafında zorunlu kılınır; `service_role` anahtarı hiçbir zaman repoda yoktur.
+`parks`, `data_requests`, `profiles`, `site_visits` +
+`v_global/v_country/v_city/v_world_agg/v_park_compare` view'ları,
+Storage bucket `dendro-photos`. `projects.park_id` projeyi fiziksel parka
+bağlar; proje adını `trg_compose_project_name` ("park - etiket"), ölçüm kapısını
+`trg_enforce_park_link` (`PARK_REQUIRED`) kurar. Erişimin tamamı **Row Level
+Security** ile sunucu tarafında zorunlu kılınır; `service_role` anahtarı hiçbir
+zaman repoda yoktur. Şema ayrıntısı: [`supabase/README.md`](supabase/README.md).
 
 ---
 
@@ -136,19 +163,21 @@ python3 -m http.server 8080        # herhangi bir statik sunucu olur
 ### Test ve denetimler
 
 ```bash
-npm run check          # sözdizimi + ?v= + build + CSP + 240 test
+npm run check          # sözdizimi + ?v= + build + CSP + 334 test
 npm test               # yalnız testler (node:test, bağımlılık gerektirmez)
 npm run build          # index.html'i partials'tan üret (değişiklik sonrası)
 ```
 
-240 test şunları kilitler: karbon hesabı (Chave 2014, ρ fallback,
+334 test şunları kilitler: karbon hesabı (Chave 2014, ρ fallback,
 NaN yayılmaması), jeodezik alan ve geometri, **UTM projeksiyonu** (bilinen
 referans değerlerine karşı), Sutherland-Hodgman kırpma + alan korunumu,
 Service Worker'ın çevrimdışı yedeği, vendor kütüphanelerin global kurulumu,
 ölü buton/eksik ID denetimi, **modül kayıt bekçisi** (index↔disk↔CORE_ASSETS
 ↔?v= zinciri + global ad çakışması), **partial→index derleme tutarlılığı ve
 landing↔shell izolasyonu**, kritik canlı düzeltmelerin canary'leri (STAC GET,
-RLS-safe sayaç) ve tembel yükleme kilitleri.
+RLS-safe sayaç), tembel yükleme kilitleri ve **park kimliği** (ad
+normalizasyonu + "park - etiket" adı + şema/trigger/view kilitleri;
+`park-flow.test.mjs` aynı akışı sahte Supabase üzerinde uçtan uca çalıştırır).
 
 GitHub Actions her push ve PR'da altı adım çalıştırır: sözdizimi (tarayıcı
 semantiğiyle), `?v=` tutarlılığı, **derleme tutarlılığı (index.html ==
@@ -190,6 +219,9 @@ Sorumlu güvenlik bildirimi için: **security@dendrogeo.org** — ayrıntılar
 Kısa vadede planlananlar (ayrıntılı analiz ve önceliklendirme depo dışı
 raporlarda tutuluyor):
 
+- [x] **Park kimliği** (2026-09-24): `parks` tablosu, park bazlı karşılaştırma (`v_park_compare`), ölçüm kapısı, `park adı - etiket` proje adı → `0004_parks.sql` + `src/services/park-registry.js`
+- [ ] Park polygon geometrisinin `parks`'a yazılması → Overpass/OSM çevrimdışıyken de park sınırını çizebilme
+- [ ] Yinelenen park kimliklerini birleştirme aracı (admin): iki `osm_key` → tek park, projeler ve ölçümler taşınır
 - [ ] İstatistikleri veritabanı tarafına taşıyan `v_world_agg` view'ı + haritada bbox sayfalama (istemci tarafı `.limit()` eşiğinin tamamen kalkması)
 - [ ] `allometry_version` / `rho_used` sütunları — yöntem sürümlemesi
 - [ ] ρ tablosunun literatür kaynaklarıyla doldurulması (28 türde eksik)

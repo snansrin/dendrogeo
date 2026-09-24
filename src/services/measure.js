@@ -100,34 +100,127 @@ function showLatin(){
 }
 function liveCalc(){const d=+$("mDbh").value,h=+$("mHeight").value,sp=$("mSpecies").value,grp=$("mGroup").value,box=$("liveCalc");if(!d||!h||!sp){box.style.display="none";return;}const c=calc(d,h,sp,grp);box.style.display="block";box.innerHTML=`Karbon: <b>${c.total_carbon.toFixed(1)} kg</b> · AGB: ${c.agb.toFixed(1)} · BHB: ${c.bhb.toFixed(1)} · Hacim: ${c.vol.toFixed(2)} m³`;}
 /* --- 5. PROJE CRUD --- */
+/* PROJE = PARK + ETİKET (2026-09-24).
+ * Proje adı artık serbest metin değil: park algılanır, kullanıcı bir etiket
+ * verir ("deneme") ve ad "Göksu Parkı - deneme" olur. Adı DB tarafında
+ * trg_compose_project_name kurar; istemci dgProjectName() ile AYNI string'i
+ * önizler. Park algılanmadan proje de ölçüm de açılamaz
+ * (sunucu kapısı: trg_enforce_park_link → PARK_REQUIRED). */
+let EDIT_PROJ_PARK=null;
+
 async function loadProjects(){
  if(!USER)return;
- const{data}=await sb.from("projects").select("*").eq("owner",USER.id);
+ /* parks gömüsü: projenin park kimliği + alanı (kapı kartı ve tablo için).
+  * Şema eskiyse (0004 uygulanmamış) PostgREST ilişkiyi bulamaz ve hata döner;
+  * o zaman düz select'e düşülür ki proje listesi tamamen boş kalmasın. */
+ let{data,error}=await sb.from("projects").select("*,parks(id,name,city,country,area_m2)").eq("owner",USER.id);
+ if(error){
+  dgParkSchemaMissing("projects↔parks: "+error.message);
+  const fb=await sb.from("projects").select("*").eq("owner",USER.id);
+  data=fb.data||[];
+ }
  PROJ_LIST=data||[];
- const opts=PROJ_LIST.map(p=>`<option value="${p.id}">${esc(p.name)}</option>`).join("");
- $("mProject").innerHTML=opts||"<option value=''>Önce proje oluşturun</option>";
- $("nProject").innerHTML=opts||"<option value=''>Önce proje oluşturun</option>";
- $("projTable").innerHTML=PROJ_LIST.map(p=>`<tr><td>${p.id}</td><td>${esc(p.name)}</td><td>${esc(p.country||"—")}</td><td>${esc(p.city||"—")}</td><td>${new Date(p.created_at).toLocaleDateString("tr-TR")}</td><td style="display:flex;gap:4px"><button class="btn sm blue" onclick="editProject(${p.id})">✏️</button><button class="btn sm red" onclick="deleteProject(${p.id})">🗑</button></td></tr>`).join("")||"<tr><td colspan=6>Proje yok</td></tr>";
+ const opts=PROJ_LIST.map(p=>`<option value="${p.id}">${esc(dgProjectOptionLabel(p))}</option>`).join("");
+ const empty="<option value=''>Önce park algıla → proje oluştur</option>";
+ $("mProject").innerHTML=opts||empty;
+ $("nProject").innerHTML=opts||empty;
+ $("projTable").innerHTML=PROJ_LIST.map(p=>{
+  const park=p.parks&&p.parks.name?p.parks.name:(p.park_name||"");
+  const parkCell=p.park_id
+   ? `🌳 ${esc(park)}${p.parks&&p.parks.area_m2?`<br><span class="mono" style="font-size:.68rem;color:var(--mut)">${dgFmtHa(p.parks.area_m2)}</span>`:""}`
+   : `<span class="badge off">⛔ park yok</span><br><button class="btn sm blue" style="margin-top:4px" onclick="startParkScan({projectId:${p.id},returnTo:'projects'})">🌳 Bağla</button>`;
+  return `<tr><td>${p.id}</td><td>${parkCell}</td><td>${esc(p.name)}</td><td>${esc(p.country||"—")}</td><td>${esc(p.city||"—")}</td><td>${new Date(p.created_at).toLocaleDateString("tr-TR")}</td><td style="display:flex;gap:4px"><button class="btn sm blue" onclick="editProject(${p.id})">✏️</button><button class="btn sm red" onclick="deleteProject(${p.id})">🗑</button></td></tr>`;
+ }).join("")||"<tr><td colspan=7>Proje yok — önce park algıla</td></tr>";
+ dgRenderProjectParkBox();
+ dgParkGate();
 }
+
+/* Projeler sekmesindeki "park" kutusu: hangi park algılanmış, ad nasıl olacak. */
+function dgRenderProjectParkBox(){
+ const box=$("projParkBox");
+ if(!box)return;
+ const park=EDIT_PROJ?EDIT_PROJ_PARK:DG_PARK;
+ if(park&&park.name){
+  box.className="alert ok";
+  box.innerHTML=`<b>🌳 Algılanan park: ${esc(park.name)}</b>${park.area_m2?" · "+dgFmtHa(park.area_m2):""}${park.osm_key?` · <span class="mono" style="font-size:.72rem">${esc(park.osm_key)}</span>`:""}`+
+   `<br><span style="font-size:.8rem">Proje adı otomatik "<b>${esc(park.name)}</b> - <i>etiket</i>" olacak. Aynı parkı başkaları da algıladığında veriler karşılaştırmada tek satırda birleşir.</span>`;
+  /* Park başka şehirdeyse ülke/şehir varsayılanlarını parkınkiyle tazele
+   * (kayıttan önce elle değiştirilebilir). */
+  if(park.city&&$("pCity")&&$("pCity").value==="Ankara")$("pCity").value=park.city;
+  if(park.country&&$("pCountry")&&$("pCountry").value==="Türkiye")$("pCountry").value=park.country;
+ }else{
+  box.className="alert err";
+  box.innerHTML=`<b>⛔ Park algılanmadı — proje oluşturulamaz.</b>`+
+   `<br><span style="font-size:.8rem">Önce Canlı Harita → Park Algılama ekranında parkın içine tıkla. OSM'de park yoksa "elle oluştur" ile kimlik açabilirsin.</span>`+
+   `<div style="margin-top:10px"><button class="btn sm blue" onclick="startParkScan({returnTo:'projects'})">🌳 Park Algılama Ekranına Git</button></div>`;
+ }
+ dgProjectNamePreview();
+}
+
+function dgProjectNamePreview(){
+ const el=$("pNamePreview");
+ if(!el)return;
+ const park=EDIT_PROJ?EDIT_PROJ_PARK:DG_PARK;
+ const label=($("pLabel")?$("pLabel").value:"").trim();
+ if(!park||!park.name){el.textContent="— (önce park algıla)";el.style.color="var(--mut)";return;}
+ el.textContent=dgProjectName(park.name,label);
+ el.style.color="var(--ink)";
+}
+
 function editProject(id){
  const p=PROJ_LIST.find(x=>x.id===id);if(!p)return;
- EDIT_PROJ=id;$("pName").value=p.name;$("pCountry").value=p.country||"";$("pCity").value=p.city||"";
+ EDIT_PROJ=id;
+ EDIT_PROJ_PARK=p.park_id
+  ? {id:p.park_id,name:(p.parks&&p.parks.name)||p.park_name||"",area_m2:(p.parks&&p.parks.area_m2)||null}
+  : null;
+ $("pLabel").value=p.label!=null?p.label:dgLabelFromLegacy(p.name,EDIT_PROJ_PARK?EDIT_PROJ_PARK.name:"");
+ $("pCountry").value=p.country||"";$("pCity").value=p.city||"";
  $("projSaveBtn").textContent="💾 Projeyi Güncelle";$("projCancelBtn").style.display="inline-block";
+ dgRenderProjectParkBox();
 }
-function cancelProjectEdit(){EDIT_PROJ=null;$("pName").value="";$("projSaveBtn").textContent="+ Proje Oluştur";$("projCancelBtn").style.display="none";}
+function cancelProjectEdit(){
+ EDIT_PROJ=null;EDIT_PROJ_PARK=null;
+ $("pLabel").value="";$("projSaveBtn").textContent="+ Proje Oluştur";$("projCancelBtn").style.display="none";
+ dgRenderProjectParkBox();
+}
 async function createProject(){
- const n=$("pName").value;if(!n)return toast("Proje adı gerekli","err");
+ const label=($("pLabel").value||"").trim();
+
  if(EDIT_PROJ){
-  await sb.from("projects").update({name:n,country:$("pCountry").value,city:$("pCity").value}).eq("id",EDIT_PROJ);
+  if(!EDIT_PROJ_PARK){
+   toast("Bu proje parka bağlı değil — önce park algıla.","err","🌳");
+   startParkScan({projectId:EDIT_PROJ,returnTo:"projects"});
+   return;
+  }
+  const{error}=await sb.from("projects").update({label,park_id:EDIT_PROJ_PARK.id,country:$("pCountry").value,city:$("pCity").value}).eq("id",EDIT_PROJ);
+  if(error)return toast("Hata: "+error.message,"err");
+  toast("✓ Proje güncellendi","ok","📁");
   cancelProjectEdit();
  }else{
-  await sb.from("projects").insert({owner:USER.id,name:n,country:$("pCountry").value,city:$("pCity").value});
+  const park=DG_PARK;
+  if(!park){
+   toast("Önce park algıla — park olmadan proje açılamaz.","err","🌳");
+   startParkScan({returnTo:"projects"});
+   return;
+  }
+  const{error}=await sb.from("projects").insert({
+   owner:USER.id,
+   park_id:park.id,
+   label,
+   /* DB trigger'ı aynı adı kurar; istemci de gönderir ki eski şemada da ad tutarlı kalsın. */
+   name:dgProjectName(park.name,label),
+   country:$("pCountry").value||park.country||"",
+   city:$("pCity").value||park.city||""
+  });
+  if(error)return toast("Hata: "+error.message,"err");
+  toast("✓ Proje oluşturuldu: "+dgProjectName(park.name,label),"ok","📁");
+  $("pLabel").value="";
  }
  loadProjects();
 }
 async function deleteProject(id){
  const{count}=await sb.from("measurements").select("*",{count:"exact",head:true}).eq("project_id",id);
- if(!confirm("Proje silinsin mi? Bağlı "+(count||0)+" ölçüm ve waypoint'ler de silinebilir."))return;
+ if(!confirm("Proje silinsin mi? Bağlı "+(count||0)+" ölçüm ve waypoint'ler de silinebilir.\n(Park kimliği silinmez — aynı parktaki diğer projelerin karşılaştırması devam eder.)"))return;
  await sb.from("waypoints").delete().eq("project_id",id);
  await sb.from("projects").delete().eq("id",id);
  loadProjects();
@@ -174,6 +267,16 @@ async function queryPointId(){
 async function saveMeas(){
     const pid=+$("mProject").value,pt=+$("mPoint").value,sp=$("mSpecies").value,d=+$("mDbh").value,h=+$("mHeight").value,grp=$("mGroup").value;
     if(!pid||!pt||!sp||!d||!h)return toast("Tüm alanları doldur","err");
+
+    /* ⛔ PARK KAPISI: park algılanmamış projeye ölçüm girilemez. Düzenleme
+     * (EDIT_ID) mevcut kaydı günceller, yeni ölçüm değildir → kapı uygulanmaz.
+     * Aynı kural sunucuda trg_enforce_park_link ile de zorlanır (PARK_REQUIRED). */
+    const gateProj=(PROJ_LIST||[]).find(p=>p.id===pid);
+    if(DG_PARK_SCHEMA_OK&&!EDIT_ID&&(!gateProj||!gateProj.park_id)){
+        toast("⛔ Bu projede park algılanmadı — ölçüm giremezsin. Park algılama ekranına yönlendiriliyorsun.","err","🌳");
+        startParkScan({projectId:pid||null,returnTo:"measure"});
+        return;
+    }
     if(!EDIT_ID&&!GPS)return toast("Önce 📡 Konumu Etkinleştir butonuna basın","err");
     if(d>500||h>100)return toast("Çap ≤500 cm, boy ≤100 m olmalı","err");
     
@@ -195,6 +298,9 @@ async function saveMeas(){
     const base={
         owner:USER.id,
         project_id:pid,
+        /* Denormalize park kimliği: v_park_compare hem bunu hem projects.park_id'i
+         * okur; dışa aktarımda park alanı/kimliği satır düzeyinde taşınır.
+         * Şema eskiyse sütun hiç gönderilmez (yoksa insert 42703 ile patlar). */
         point_id:pt,
         measurement_no:+$("mNo").value||1,
         grp,species:sp,
@@ -206,6 +312,8 @@ async function saveMeas(){
         shared:true,
         status:"Beklemede"
     };
+    if(DG_PARK_SCHEMA_OK)base.park_id=(gateProj&&gateProj.park_id)||null;
+
     // 5. Supabase insert/update
 // ⭐ EKLENEN: Her insert'te client_id ekle (duplicate koruması)
 if (!base.client_id) base.client_id = uuidv4();
@@ -286,7 +394,7 @@ if(EDIT_ID) base._editId = EDIT_ID; // ✅ çevrimdışı düzenleme işareti
 }
 
 /* --- 8. DÜZENLEME --- */
-function cancelEdit(){EDIT_ID=null;manualPoint=false;$("editBanner").style.display="none";$("saveBtn").textContent="💾 Hesapla ve Kaydet";}
+function cancelEdit(){EDIT_ID=null;manualPoint=false;$("editBanner").style.display="none";$("saveBtn").textContent="💾 Hesapla ve Kaydet";dgParkGate();}
 async function editRec(id){
  const{data}=await sb.from("measurements").select("*").eq("id",id).single();
  if(!data)return;
@@ -296,7 +404,7 @@ async function editRec(id){
  $("mGroup").value=data.grp||"";fillSpecies();$("mSpecies").value=data.species;showLatin();
  $("mDbh").value=data.dbh_cm;$("mHeight").value=data.height_m;
  $("editBanner").style.display="block";$("saveBtn").textContent="💾 Kaydı Güncelle";
- liveCalc();go("measure");
+ liveCalc();go("measure");dgProjectChanged();
 }
 /* --- 9. FOTOĞRAF İŞLEME --- */
 function compress(f){

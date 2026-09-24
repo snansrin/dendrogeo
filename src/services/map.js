@@ -135,6 +135,10 @@ async function arriveWp(){
   if(!manualPoint)$("mPoint").value=w.wp_id;
   drawNav();
   loadWaypoints();
+  /* Waypoint hangi projeye bağlıysa ölçüm formu da o projeye geçsin: park
+   * kapısı (dgParkGate) doğru projeyi değerlendirsin. go("measure") kapıyı
+   * zaten tazeliyor. (2026-09-24) */
+  if(w.project_id&&$("mProject"))$("mProject").value=String(w.project_id);
   toast("✓ Vardın: P"+w.wp_id+" → ölçüme geç","ok","🎯");
   go("measure");
 }

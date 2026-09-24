@@ -100,6 +100,10 @@ function go(v){
  const idx={dash:0,measure:1,nav:2,map:3,projects:4,records:5,export:6,world:7,admin:8,users:9};
 if(items[idx[v]])items[idx[v]].classList.add("on");
 if(v==="dash"){loadWaypoints().then(()=>loadDash());}
+ /* Ölçüm sekmesi her açıldığında park kapısı tazelenir: seçili projenin parkı
+  * yoksa form kilitli gelir ve kullanıcı park algılama ekranına yönlendirilir.
+  * (2026-09-24 · park-registry.js dgParkGate) */
+ if(v==="measure"&&typeof dgParkGate==="function")dgParkGate(true);
 if(v==="map")setTimeout(()=>{map&&map.invalidateSize();if(!liveLoaded){liveLoaded=true;loadLiveMap();}},150);
  if(v==="nav")setTimeout(()=>{navMap&&navMap.invalidateSize();loadWaypoints();},150);
  if(v==="world")setTimeout(()=>worldMap&&worldMap.invalidateSize(),150);

@@ -119,31 +119,13 @@ function bindParkClick(){
     async e=>{
       if(!PARK_MODE)return;
 
+      /* 2026-09-24: tıklama artık dgDetectAt'e gider (park-registry.js).
+       * Tek yol olmasının sebebi: aynı fonksiyon "konumumdan algıla" ve
+       * geri doldurma aracı tarafından da kullanılıyor; park bulunamazsa
+       * elle park oluşturma teklifini de o veriyor. Eskiden burada sadece
+       * "Park bulunamadı" toast'ı vardı ve kullanıcı kilitli kalıyordu. */
       try{
-        toast(
-          "🌳 Park sorgulanıyor…",
-          "info"
-        );
-
-        const parks=
-          await queryPark(
-            e.latlng.lat,
-            e.latlng.lng
-          );
-
-        if(
-          !parks ||
-          !parks.length
-        ){
-          toast(
-            "Park bulunamadı.",
-            "warn"
-          );
-          return;
-        }
-
-        PARK_CANDS=parks;
-        await drawPark(parks[0]);
+        await dgDetectAt(e.latlng.lat,e.latlng.lng);
       }catch(err){
         console.error(
           "DENDROGEO · Park tıklama hatası:",
@@ -175,6 +157,13 @@ async function drawPark(park){
    */
   clearPark();
   clearGrid();
+
+  /* PARK KİMLİĞİ (2026-09-24): algılanan park public.parks'a yazılır / oradan
+   * okunur. clearPark() oturum kimliğini sıfırladığı için kayıt BURADA (sonra)
+   * başlatılır; await ise aşağıda, ağır OSM yüzey sorgusuyla paralel yürür. */
+  const parkRegPromise=(typeof dgOnParkDrawn==="function")
+    ? dgOnParkDrawn(park)
+    : Promise.resolve(null);
 
   const parkRings=park&&park.rings;
 
@@ -272,6 +261,12 @@ async function drawPark(park){
   const haTotal =
     parkAreaHa().toFixed(1);
 
+  /* Kimlik satırı hazır mı? (kayıt başarısızsa null → kart uyarı gösterir) */
+  const parkRow=await parkRegPromise;
+  const parkProjects=(typeof PROJ_LIST!=="undefined"&&PROJ_LIST&&parkRow)
+    ? PROJ_LIST.filter(p=>p.park_id===parkRow.id)
+    : [];
+
   const alt=
     PARK_CANDS.length>1
       ?
@@ -297,8 +292,29 @@ async function drawPark(park){
       `<span class="dg-png-badge">`+
         `${haTotal} ha`+
       `</span>`+
+      dgParkIdChip(parkRow)+
       `<span id="refBadge" class="dg-png-ref" style="display:none"></span>`+
       alt+
+    `</div>`+
+
+    /* 0 · PARK KİMLİĞİ + PROJE: karşılaştırmanın park bazında toplanabilmesi
+     * için ölçümler parka bağlı bir projede olmalı. Kart, algılama akışının
+     * 3. adımına (proje oluştur/bağla) köprüdür. */
+    `<div class="dg-png-card" style="margin-bottom:12px">`+
+      `<div class="dg-png-head">`+
+        `<div>`+
+          `<div class="dg-png-kicker">0 · PARK KİMLİĞİ</div>`+
+          `<div class="dg-png-title">🌳 ${esc((parkRow&&parkRow.name)||park.name||"İsimsiz Park")}</div>`+
+          `<div class="dg-png-sub">`+
+            (parkRow
+              ? `kimlik #${parkRow.id} · ${esc(parkRow.osm_key||"")} · ${parkProjects.length} proje bağlı`
+              : `kimlik sunucuya yazılamadı — ölçüm girmeden önce 🔄 gerekir`)+
+          `</div>`+
+        `</div>`+
+        (parkRow
+          ? `<button class="dg-png-btn ghost sm" onclick="dgShowProjectStep()">📁 Proje oluştur / bağla</button>`
+          : `<button class="dg-png-btn red sm" onclick="dgRetryRegister()">🔄 Yeniden dene</button>`)+
+      `</div>`+
     `</div>`+
 
     `<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px">`+
@@ -316,9 +332,10 @@ async function drawPark(park){
           `<div class="dg-png-field">`+
             `<label class="dg-png-label">PROJE</label>`+
             `<select id="gridProject" class="dg-png-select">`+
-              (typeof PROJ_LIST!=="undefined"&&PROJ_LIST.length
-                ? PROJ_LIST.map(p=>`<option value="${p.id}">${esc(p.name)}</option>`).join("")
-                : `<option value="0">Önce proje oluştur</option>`)+
+              /* Yalnız bu parka bağlı projeler: waypoint/grid yanlış parka
+               * yazılmasın. Parkın projesi yoksa eski liste yedek olarak
+               * gösterilir (şema eski/park bağı yokken araç kilitlenmesin). */
+              dgProjectOptionsForPark(parkRow?parkRow.id:null,true)+
             `</select>`+
           `</div>`+
 
@@ -479,8 +496,9 @@ async function drawPark(park){
 
   toast(
     "✓ Park algılandı: "+
-    haTotal+
-    " ha",
+    ((parkRow&&parkRow.name)||park.name||"")+
+    " · "+haTotal+" ha"+
+    (parkRow?" · kimlik #"+parkRow.id:""),
     "ok",
     "🌳"
   );
@@ -527,6 +545,10 @@ function clearPark(){
 PARK_POLY=null;
   PARK_HOLES=[];
   PARK_SELECTED_AREA_M2=null;
+
+  /* Oturumun aktif park kimliği de düşer (proje bağı DB'de kalır; ölçüm
+   * kapısı PROJ_LIST üzerinden okur). */
+  if(typeof dgResetParkIdentity==="function")dgResetParkIdentity();
 
   WATER_RINGS=[];
   WATER_LINES=[];

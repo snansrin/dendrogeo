@@ -88,6 +88,10 @@ export function loadApp({ sadece } = {}) {
     'src/services/osm-client.js',
     'src/services/park-geometry.js',
     'src/services/park-query.js',
+    /* PARK KİMLİĞİ (2026-09-24): park-registry.js saf yardımcılarının
+     * (ad normalizasyonu, anahtar üretimi, proje adı kuralı) birim testleri
+     * bu zincirden yüklenir. ui/park-panel BİLEREK yok (DOM'a yapışır). */
+    'src/services/park-registry.js',
     'src/services/grid-engine.js',
   ];
   const dosyalar = sadece ? SIRALAMA.filter((f) => sadece.includes(f)) : SIRALAMA;
@@ -98,7 +102,8 @@ export function loadApp({ sadece } = {}) {
                    'DG_LC_COLLECTION', 'DG_LC_STAC', 'DG_LC_MAX_TILES',
                    'DG_LC_MAX_READ_PIXELS', 'DG_LC_RENDER_LIMIT',
                    'DG_LC_SOURCES', 'DG_ESA_GROUP', 'DG_ESA_CODES', 'DG_LC_SAS', 'DG_OSM_WATER_MIRRORS', 'DG_LC_LAYER', 'DG_LC_LAST',
-                   'DG_TRUNCATION_WARNED'];
+                   'DG_TRUNCATION_WARNED',
+                   'DG_PARK_SEP', 'DG_PARK_MATCH_M', 'DG_TR_FOLD'];
   const epilog = LEXICAL
     .map((n) => `if(typeof ${n}!=="undefined")__exports.${n}=${n};`)
     .join('');

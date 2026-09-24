@@ -49,6 +49,10 @@
   <div class="view" id="v-measure">
    <h2 class="disp" style="margin-bottom:16px">Yeni Ölçüm</h2>
    <div id="editBanner" class="alert info" style="display:none">✏️ <b>Düzenleme modu:</b> mevcut kaydı güncelliyorsunuz. <button class="btn sm ghost" style="margin-left:10px" onclick="cancelEdit()">Vazgeç</button></div>
+   <!-- PARK KAPISI (2026-09-24): seçili projenin parkı yoksa ölçüm kilitlenir ve
+        kullanıcı park algılama ekranına yönlendirilir. İstemci kapısı burası +
+        saveMeas(); sunucu kapısı 0004_parks.sql → trg_enforce_park_link. -->
+   <div id="parkGate" class="alert info" style="display:none"></div>
    <div class="grid g2">
     <div class="card">
      <div class="lbl" style="margin-bottom:10px">🛰 GPS / Uydu</div>
@@ -64,7 +68,7 @@
      </div>
     </div>
     <div class="card">
-     <div class="lbl">Proje</div><select id="mProject" onchange="if(!manualPoint)autoFillPointId()"></select>
+     <div class="lbl">Proje <span style="text-transform:none;letter-spacing:0;font-size:.72rem;color:var(--mut)">(park adı - etiket)</span></div><select id="mProject" onchange="dgProjectChanged()"></select>
      <div class="grid g2" style="margin-top:10px">
       <div><div class="lbl">POINT ID</div><div style="display:flex;gap:6px"><input id="mPoint" type="number" oninput="manualPoint=true"><button class="btn sm blue" style="white-space:nowrap" onclick="queryPointId()">🔍 Sorgula</button></div></div>
       <div><div class="lbl">Ölçüm No</div><input id="mNo" type="number" value="1"></div>
@@ -127,23 +131,32 @@
  </select>
  <span id="parkModeHint" style="font-size:.78rem;color:var(--mut)">Açınca haritada bir parkın içine tıkla → sınırı otomatik algılanır.</span>
 </div>
+<!-- PARK ALGILAMA EKRANI: ölçüm kapısı buraya yönlendirir (startParkScan).
+     Adım adım akış + park kimliği + proje oluşturma/bağlama park-registry.js'te. -->
+<div id="parkScanCard" class="card" style="display:none;margin-bottom:12px;border-left:4px solid var(--green)"></div>
 <div id="mapLoad" class="alert info">⏳ Onaylı kayıtlar yükleniyor…</div><div id="map"></div>
 <div id="parkInfo" class="card" style="display:none;margin-top:12px;border-left:4px solid var(--blue)"></div><p style="color:var(--mut);font-size:.8rem;margin-top:8px">🟢 Noktalara dokunun → onaylı ölçüm bilgisi + varsa fotoğraf.</p><div id="liveAnalysis" style="margin-top:18px"></div></div>
 
   <div class="view" id="v-projects">
 <h2 class="disp" style="margin-bottom:16px">Projeler</h2>
 <div class="card" style="margin-bottom:16px">
+    <!-- PROJE = PARK + ETİKET (2026-09-24). Proje adı serbest metin DEĞİL:
+         park algılandığında "Göksu Parkı - deneme" biçiminde DB tarafında
+         kurulur (trg_compose_project_name). Park algılanmadan proje açılamaz. -->
+    <div id="projParkBox" class="alert info" style="margin-bottom:12px"></div>
 <div class="grid g3">
-<div><div class="lbl">Proje Adı</div><input id="pName"></div>
+<div><div class="lbl">Proje Etiketi</div><input id="pLabel" placeholder="örn. deneme" oninput="dgProjectNamePreview()"></div>
 <div><div class="lbl">Ülke</div><input id="pCountry" value="Türkiye"></div>
 <div><div class="lbl">Şehir</div><input id="pCity" value="Ankara"></div>
 </div>
-    <div style="display:flex;gap:8px;margin-top:10px">
+    <div class="lbl" style="margin-top:12px">Proje Adı (otomatik)</div>
+    <div id="pNamePreview" class="mono" style="font-size:.95rem;padding:4px 0 2px;color:var(--mut)">—</div>
+    <div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap">
      <button class="btn sm" id="projSaveBtn" onclick="createProject()">+ Proje Oluştur</button>
      <button class="btn sm ghost" id="projCancelBtn" style="display:none" onclick="cancelProjectEdit()">Vazgeç</button>
     </div>
    </div>
-   <div class="card tblwrap"><table><thead><tr><th>ID</th><th>Ad</th><th>Ülke</th><th>Şehir</th><th>Tarih</th><th>İşlem</th></tr></thead><tbody id="projTable"></tbody></table></div>
+   <div class="card tblwrap"><table><thead><tr><th>ID</th><th>Park</th><th>Proje Adı</th><th>Ülke</th><th>Şehir</th><th>Tarih</th><th>İşlem</th></tr></thead><tbody id="projTable"></tbody></table></div>
   </div>
 
   <div class="view" id="v-records">
@@ -203,7 +216,8 @@
     </div>
       </div>
    <div class="card" style="margin-top:18px;border-left:4px solid var(--blue)">
-    <div class="shead" style="margin-bottom:12px"><span class="no">🆚</span><h2 style="font-size:1.15rem">Park Karşılaştırma — Karbon Performansı</h2><span class="rule"></span></div>
+    <div class="shead" style="margin-bottom:12px"><span class="no">🆚</span><h2 style="font-size:1.15rem">Park Karşılaştırma — Karbon Performansı</h2><span class="rule"></span><span class="mono" style="font-size:.75rem;color:var(--mut)">algılanan park bazında · proje adı değil</span></div>
+    <p style="color:var(--mut);font-size:.8rem;margin-bottom:12px">Aynı parkta çalışan herkesin verisi TEK satırda toplanır: park kimliği OSM elemanından türetilir, proje adları karşılaştırmayı bölmez.</p>
     <div id="parkCompare"></div>
    </div>
    <div class="card" style="margin-top:18px;border-left:4px solid var(--amber)">
@@ -235,7 +249,11 @@
     <div class="mono" id="storeInfo" style="font-size:.75rem;color:var(--mut)">Hesaplanıyor…</div>
     <button class="btn sm amber" style="margin-top:10px" onclick="cleanOrphans()">🧹 Yetim Dosyaları Temizle</button>
     <button class="btn sm blue" style="margin-top:10px;margin-left:8px" onclick="reGeocodeAll()">🌍 Şehirleri Yeniden Algıla</button>
+    <button class="btn sm blue" style="margin-top:10px;margin-left:8px" onclick="backfillParks()">🌳 Parkları Geri Doldur</button>
     <button class="btn sm" style="margin-top:10px;margin-left:8px" onclick="fullBackup()">💾 Tam Yedek İndir (JSON)</button>
+    <!-- Park bağı olmayan ESKİ projeleri ölçüm merkezinden OSM parkıyla eşleştirir.
+         İki fazlı: önce plan/önizleme (yazmaz), onaydan sonra dgApplyBackfill(). -->
+    <div id="backfillBox" style="display:none;margin-top:12px"></div>
    </div>
    <div class="card" style="margin-bottom:18px;border-left:4px solid var(--amber)">
     <div class="shead" style="margin-bottom:12px"><span class="no">📦</span><h2 style="font-size:1.2rem">Toplu Dışa Aktarım (Tüm Kullanıcılar)</h2></div>
