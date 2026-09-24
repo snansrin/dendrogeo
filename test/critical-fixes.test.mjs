@@ -23,7 +23,8 @@ import { fileURLToPath } from 'node:url';
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 /* Faz 5: STAC katmanı lc-stac.js'e taşındı — canary yeni modülü okuyor. */
 const lc = readFileSync(join(ROOT, 'src/services/lc-stac.js'), 'utf8');
-const adm = readFileSync(join(ROOT, 'src/services/admin.js'), 'utf8');
+/* Faz 6: ziyaret sayacı visit-stats.js'e taşındı */
+const adm = readFileSync(join(ROOT, 'src/services/visit-stats.js'), 'utf8');
 const idx = readFileSync(join(ROOT, 'index.html'), 'utf8');
 
 describe('STAC araması GET olmalı (CORS preflight tuzağı)', () => {

@@ -104,3 +104,27 @@ describe('modül erişilebilirliği', () => {
     assert.deepEqual(eksik, [], 'index.html’de link’i olmayan css: ' + eksik.join(', '));
   });
 });
+
+describe('global ad çakışması denetimi', () => {
+  /* Klasik <script> düzeninde aynı adlı iki üst düzey fonksiyon sessizce
+   * birbirini ezer (son yüklenen kazanır). Faz 1'de toast.js'e yanlışlıkla
+   * boot() kopyası girmişti; bu canary o sınıf kazayı kilitler.
+   * BEYAZ LİSTE: downloadLandCoverClassCSV/CellsGeoJSON bilinçli olarak hem
+   * landcover facade'ında hem ui/park-export.js sarmalayıcısında tanımlıdır
+   * (sarmalayıcı DG_LANDCOVER'a delege eder; yükleme sırası sabittir). */
+  const WHITELIST = new Set(['downloadLandCoverClassCSV', 'downloadLandCoverCellsGeoJSON']);
+
+  test('aynı üst düzey fonksiyon iki src dosyasında tanımlı değil', () => {
+    const srcJs = walk(join(ROOT, 'src')).filter((p) => p.endsWith('.js'));
+    const seen = new Map();
+    for (const p of srcJs) {
+      const code = readFileSync(join(ROOT, p), 'utf8');
+      for (const m of code.matchAll(/^(?:async\s+)?function\s+([A-Za-z_$][\w$]*)/gm)) {
+        const name = m[1];
+        if (WHITELIST.has(name)) continue;
+        if (seen.has(name)) assert.fail(`${name} hem ${seen.get(name)} hem ${p} içinde tanımlı`);
+        seen.set(name, p);
+      }
+    }
+  });
+});

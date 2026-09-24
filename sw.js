@@ -38,6 +38,9 @@ const CORE_ASSETS = [
     '/css/landing.css',
     '/src/config/supabase.js', '/src/config/constants.js', '/src/config/species.js', 
     '/src/utils/geo.js', '/src/utils/truncation.js', '/src/services/allometry.js', '/src/services/auth.js','/src/services/export.js', '/src/services/offline.js',
+    /* YÖNETİM ZİNCİRİ (Faz 6): ziyaret sayacı, veri talepleri, kullanıcı yönetimi,
+     * yedek ve moderasyon çekirdeği ayrı modüller. */
+    '/src/services/visit-stats.js','/src/services/data-requests.js','/src/services/user-admin.js','/src/services/backup.js',
     '/src/services/admin.js','/src/services/world.js', '/src/services/measure.js','/src/services/map.js',
     /* LULC ZİNCİRİ (Faz 5): eski landcover.js altı modüle bölündü; facade son sırada
      * (window.DG_LANDCOVER'u o kurar, yükleme anında lc-* global'lerini referanslar). */
