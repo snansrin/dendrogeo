@@ -522,7 +522,13 @@ describe('v8: alan korumalı yumuşatma + yeşil alan API\'si', () => {
 });
 
 describe('v8: grid yeşil-alan kapısı + PNG dışa aktarım (canary)', () => {
-  const src = readFileSync(new URL('../src/services/gridplan.js', import.meta.url), 'utf8');
+  /* Faz 4: eski gridplan.js üç modüle bölündü — canary aynı desenleri yeni
+   * dosyalarda arıyor (geometry=kapı, panel=UI anahtarı, export=PNG). */
+  const src = [
+    readFileSync(new URL('../src/services/park-geometry.js', import.meta.url), 'utf8'),
+    readFileSync(new URL('../src/ui/park-panel.js', import.meta.url), 'utf8'),
+    readFileSync(new URL('../src/ui/park-export.js', import.meta.url), 'utf8'),
+  ].join('\n');
 
   test('isCellValid yeşil-alan kapısını içeriyor', () => {
     assert.match(src, /DG_GREEN_ONLY&&/);
@@ -550,7 +556,11 @@ describe('v8: grid yeşil-alan kapısı + PNG dışa aktarım (canary)', () => {
 
 describe('v9: sapma düzeltmesi + yapay havuz rafinasyonu + PNG park kıpı', () => {
   const srcLc = readFileSync(new URL('../src/services/landcover.js', import.meta.url), 'utf8');
-  const srcGp = readFileSync(new URL('../src/services/gridplan.js', import.meta.url), 'utf8');
+  /* Faz 4: waypoint üretimi grid-engine.js'te, PNG kırpma ui/park-export.js'te */
+  const srcGp = [
+    readFileSync(new URL('../src/services/grid-engine.js', import.meta.url), 'utf8'),
+    readFileSync(new URL('../src/ui/park-export.js', import.meta.url), 'utf8'),
+  ].join('\n');
 
   test('⭐ 4326 köşeleri hücre merkezi DEĞİL gerçek köşe (sapma kilidi)', () => {
     assert.match(srcLc, /c0=\{lat:latBot,lon:lon0\}/);

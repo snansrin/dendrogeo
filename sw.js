@@ -38,11 +38,17 @@ const CORE_ASSETS = [
     '/css/landing.css',
     '/src/config/supabase.js', '/src/config/constants.js', '/src/config/species.js', 
     '/src/utils/geo.js', '/src/utils/truncation.js', '/src/services/allometry.js', '/src/services/auth.js','/src/services/export.js', '/src/services/offline.js',
-    '/src/services/admin.js','/src/services/world.js', '/src/services/measure.js','/src/services/map.js','/src/services/landcover.js','/src/services/gridplan.js','/src/services/dash.js',
+    '/src/services/admin.js','/src/services/world.js', '/src/services/measure.js','/src/services/map.js','/src/services/landcover.js',
+    /* PARK ZİNCİRİ (Faz 4): eski gridplan.js yedi modüle bölündü — yükleme
+     * sırası index.html ile aynı olmalı (state → client → geometry → query →
+     * engine → panel → export). */
+    '/src/services/park-state.js','/src/services/osm-client.js','/src/services/park-geometry.js','/src/services/park-query.js','/src/services/grid-engine.js','/src/ui/park-panel.js','/src/ui/park-export.js',
+    '/src/services/dash.js',
     /* UI katmanı (Faz 1): index.html'in inline <script> bloğu bu dört modüle
      * taşındı — global state, toast, landing beyni ve kabuk önyüklemesi.
      * Yükleme sırası index.html'de de aynıdır: state → toast → landing → shell. */
     '/src/ui/state.js', '/src/ui/toast.js', '/src/ui/landing.js', '/src/ui/shell.js',
+    '/css/park-panel.css',
     /* Üçüncü taraf kütüphaneler artık depoda (vendor/) — bkz. vendor/VERSIONS.md.
      * Aynı köken oldukları için SRI gerekmiyor ve çevrimdışı davranış
      * deterministik: CDN erişilemezse ya da CDN'de farklı bir sürüm

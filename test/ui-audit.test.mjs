@@ -84,7 +84,9 @@ describe('erişilebilirlik cilası', () => {
 describe('eski format koruması (kullanıcı tercihi 2026-09-20)', () => {
   const css = readFileSync(join(ROOT, 'css/style.css'), 'utf8');
   const html = readFileSync(join(ROOT, 'index.html'), 'utf8');
-  const gp = readFileSync(join(ROOT, 'src/services/gridplan.js'), 'utf8');
+  /* Faz 4: panel stilleri gridplan.js'teki CSS-in-JS enjeksiyonundan
+   * css/park-panel.css'e taşındı — tasarım kilidi aynı, hedef dosya yeni. */
+  const gp = readFileSync(join(ROOT, 'css/park-panel.css'), 'utf8');
   const dash = readFileSync(join(ROOT, 'src/services/dash.js'), 'utf8');
 
   test('global h2/h3 tipografi override YOK (site eski formatta)', () => {

@@ -1,0 +1,289 @@
+/* DendroGeo · css/park-panel.css — park paneli + PNG seçenekleri stilleri (Faz 4)
+ *
+ * Bu kurallar eskiden gridplan.js içindeki ensurePngUiStyles() tarafından
+ * çalışma zamanında <style id="dgPngUiStyles"> olarak ENJEKTE ediliyordu
+ * (296 satır CSS-in-JS). Faz 4'te gerçek bir dosyaya taşındı; içerik
+ * birebirdir (yalnız 4 boşluk girintisi soyuldu). Enjeksiyon fonksiyonu ve
+ * drawPark'taki çağrısı kaldırıldı — stiller artık head'den yüklenir,
+ * görsel sonuç aynıdır. @media print kuralları (style.css) .dg-png-btn ve
+ * .dg-png-options'ı gizlemeye devam eder. */
+.dg-png-card{
+  border:1px solid var(--line);
+  border-radius:14px;
+  padding:14px;
+  background:var(--bg);
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+}
+
+.dg-png-head{
+  display:flex;
+  align-items:flex-start;
+  justify-content:space-between;
+  gap:10px;
+}
+
+.dg-png-kicker{
+  font-size:.66rem;
+  letter-spacing:.12em;
+  color:var(--mut);
+  font-weight:700;
+  margin-bottom:3px;
+  text-transform:uppercase;
+}
+
+.dg-png-title{
+  font-size:.92rem;
+  font-weight:700;
+  line-height:1.25;
+}
+
+.dg-png-sub{
+  font-size:.72rem;
+  color:var(--mut);
+  line-height:1.4;
+  margin-top:2px;
+}
+
+.dg-png-badge{
+  display:inline-flex;
+  align-items:center;
+  gap:4px;
+  padding:3px 9px;
+  border-radius:999px;
+  font-size:.68rem;
+  font-weight:700;
+  background:rgba(34,197,94,.12);
+  color:#16a34a;
+  white-space:nowrap;
+}
+
+.dg-png-badge.amber{background:rgba(245,158,11,.14);color:#b45309;}
+.dg-png-badge.blue{background:rgba(59,130,246,.14);color:#1d4ed8;}
+
+.dg-png-label{
+  display:block;
+  font-size:.62rem;
+  letter-spacing:.1em;
+  font-weight:700;
+  color:var(--mut);
+  margin-bottom:5px;
+  text-transform:uppercase;
+}
+
+.dg-png-fields{
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+}
+
+.dg-png-field{
+  display:flex;
+  flex-direction:column;
+}
+
+.dg-png-select,
+.dg-png-input{
+  width:100%;
+  min-height:36px;
+  padding:7px 10px;
+  border:1px solid var(--line);
+  border-radius:9px;
+  background:var(--bg);
+  color:inherit;
+  font-size:.8rem;
+  font-family:inherit;
+  outline:none;
+  transition:border-color .15s ease, box-shadow .15s ease;
+}
+
+.dg-png-select:focus,
+.dg-png-input:focus{
+  border-color:#22c55e;
+  box-shadow:0 0 0 3px rgba(34,197,94,.12);
+}
+
+.dg-png-options{
+  border:1px solid var(--line);
+  border-radius:11px;
+  overflow:hidden;
+  background:var(--bg);
+}
+
+.dg-png-option{
+  position:relative;
+  display:flex;
+  align-items:center;
+  gap:10px;
+  min-height:54px;
+  padding:9px 11px;
+  cursor:pointer;
+  transition:background .16s ease, transform .08s ease;
+  user-select:none;
+}
+
+.dg-png-option + .dg-png-option{
+  border-top:1px solid var(--line);
+}
+
+.dg-png-option:hover{
+  background:rgba(128,128,128,.06);
+}
+
+.dg-png-option:active{
+  transform:scale(.995);
+}
+
+.dg-png-option input{
+  position:absolute;
+  opacity:0;
+  width:1px;
+  height:1px;
+  pointer-events:none;
+}
+
+.dg-png-icon{
+  width:30px;
+  height:30px;
+  flex:0 0 30px;
+  display:grid;
+  place-items:center;
+  border-radius:9px;
+  background:rgba(128,128,128,.10);
+  font-size:.92rem;
+}
+
+.dg-png-copy{
+  flex:1;
+  min-width:0;
+}
+
+.dg-png-copy strong{
+  display:block;
+  font-size:.78rem;
+  font-weight:700;
+  line-height:1.25;
+}
+
+.dg-png-copy span{
+  display:block;
+  margin-top:2px;
+  color:var(--mut);
+  font-size:.66rem;
+  line-height:1.3;
+}
+
+.dg-png-switch{
+  position:relative;
+  width:38px;
+  height:22px;
+  flex:0 0 38px;
+  border-radius:999px;
+  background:#aab2bd;
+  transition:background .18s ease;
+}
+
+.dg-png-switch::after{
+  content:"";
+  position:absolute;
+  width:16px;
+  height:16px;
+  left:3px;
+  top:3px;
+  border-radius:50%;
+  background:#fff;
+  box-shadow:0 1px 4px rgba(0,0,0,.25);
+  transition:transform .18s ease;
+}
+
+.dg-png-option input:checked + .dg-png-switch{
+  background:#16a34a;
+}
+
+.dg-png-option input:checked + .dg-png-switch::after{
+  transform:translateX(16px);
+}
+
+.dg-png-btn{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  gap:6px;
+  width:100%;
+  min-height:40px;
+  padding:9px 14px;
+  border-radius:10px;
+  border:1px solid transparent;
+  font-size:.82rem;
+  font-weight:700;
+  letter-spacing:.01em;
+  cursor:pointer;
+  transition:transform .08s ease, box-shadow .18s ease, background .15s ease, border-color .15s ease;
+  background:var(--btn-bg, #14532d);
+  color:var(--btn-fg, #fff);
+  font-family:inherit;
+}
+
+.dg-png-btn:hover{
+  transform:translateY(-1px);
+  box-shadow:0 4px 12px rgba(0,0,0,.08);
+}
+
+.dg-png-btn:active{
+  transform:translateY(0);
+  box-shadow:none;
+}
+
+.dg-png-btn.primary{
+  background:linear-gradient(180deg, #16a34a, #15803d);
+  color:#fff;
+}
+
+.dg-png-btn.blue{
+  background:linear-gradient(180deg, #3b82f6, #1d4ed8);
+  color:#fff;
+}
+
+.dg-png-btn.ghost{
+  background:transparent;
+  color:inherit;
+  border-color:var(--line);
+}
+
+.dg-png-btn.ghost:hover{
+  background:rgba(128,128,128,.06);
+}
+
+.dg-png-btn.red{
+  background:linear-gradient(180deg, #ef4444, #b91c1c);
+  color:#fff;
+}
+
+.dg-png-btn.sm{
+  min-height:34px;
+  font-size:.76rem;
+  padding:6px 12px;
+}
+
+.dg-png-result{
+  margin-top:10px;
+  padding:12px;
+  border:1px solid var(--line);
+  border-radius:11px;
+  background:var(--bg);
+  font-size:.82rem;
+  line-height:1.6;
+}
+
+#refBadge.dg-png-ref{
+  display:inline-flex;
+  align-items:center;
+  gap:4px;
+  padding:2px 9px;
+  border-radius:999px;
+  font-size:.7rem;
+  font-weight:600;
+  background:rgba(20,83,45,.1);
+}
+  

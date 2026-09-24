@@ -1,7 +1,7 @@
-/* geometry.test.mjs — gridplan.js içindeki saf geometri/jeodezi fonksiyonları.
+/* geometry.test.mjs — park zincirinin saf geometri/jeodezi fonksiyonları.
  *
- * Bu dosya projenin EN BÜYÜK modülünü (gridplan.js, ~4.500 satır) koruyan tek
- * test katmanıdır. Örneklem ızgarası planlayıcının doğruluğu tamamen bu
+ * Bu dosya projenin EN BÜYÜK mantık modülünü (eski gridplan.js, Faz 4'te
+ * src/services/park-geometry.js'e taşındı) koruyan tek test katmanıdır. Örneklem ızgarası planlayıcının doğruluğu tamamen bu
  * yardımcılara dayanır: alan hesabı yanlışsa hektar yanlış, hücre-park testi
  * yanlışsa ızgara park dışına taşar.
  *

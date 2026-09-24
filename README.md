@@ -61,7 +61,11 @@ index.html                  ÜRETİLEN ARTİFAKT — partials'tan build edilir, 
         ├── measure.js      saha formu, GPS, fotoğraf
         ├── offline.js      IndexedDB kuyruk + UUID dedup + senkron
         ├── map.js          canlı harita, waypoint navigasyonu
-        ├── gridplan.js     örneklem ızgarası planlayıcı
+        ├── park-state.js   ┐
+        ├── osm-client.js   │ PARK ZİNCİRİ (eski gridplan.js, Faz 4'te bölündü;
+        ├── park-geometry.js│  yükleme sırası = bu sıra)
+        ├── park-query.js   │
+        ├── grid-engine.js  ┘
         ├── landcover.js    10 m LULC COG motoru (UTM + hücre kesişimi)
         ├── world.js        park karşılaştırma, ülke/şehir yakınlaşma
         ├── dash.js         kayıtlar, grafikler, analiz
@@ -69,6 +73,10 @@ index.html                  ÜRETİLEN ARTİFAKT — partials'tan build edilir, 
         ├── export.js       CSV / QGIS / GeoJSON
         └── auth.js         giriş/kayıt + Cloudflare Turnstile
 ```
+
+`src/ui/park-panel.js` (park modu + sonuç paneli) ve `src/ui/park-export.js`
+(GeoJSON/CSV/PNG indirmeleri + LULC köprüsü) park zincirinin DOM katmanıdır;
+panel stilleri `css/park-panel.css`'tedir (eski CSS-in-JS enjeksiyonu yerine).
 
 **Modül değişikliği iş akışı:**
 

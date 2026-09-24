@@ -65,11 +65,17 @@ describe('landing ↔ shell izolasyonu', () => {
     }
   });
 
-  test('head.html tüm src/ui tag’lerini İÇERMEZ (boot.html’in işi)', () => {
-    assert.ok(!read('head.html').includes('src/ui/'), 'ui tag’leri head’e sızmış');
+  test('boot dosyaları head.html’de DEĞİL, boot.html’de (sıra kilidi)', () => {
+    const head = read('head.html');
+    for (const f of ['state.js', 'toast.js', 'landing.js', 'shell.js']) {
+      assert.ok(!head.includes('src/ui/' + f), 'boot dosyası head’e sızmış: ' + f);
+    }
     const boot = read('boot.html');
     for (const f of ['state.js', 'toast.js', 'landing.js', 'shell.js']) {
       assert.ok(boot.includes('src/ui/' + f), 'boot.html’de eksik: ' + f);
     }
+    // boot sırası: state → toast → landing → shell (shell.js sonunda boot() çağrısı var)
+    const pos = ['state.js', 'toast.js', 'landing.js', 'shell.js'].map((f) => boot.indexOf('src/ui/' + f));
+    assert.deepEqual(pos, [...pos].sort((a, b) => a - b), 'boot.html tag sırası bozuk');
   });
 });

@@ -195,11 +195,20 @@
 <script src="src/services/map.js?v=ec711385"></script>
 <script src="vendor/geotiff-2.1.3.js"></script>
 <script src="src/services/landcover.js?v=9efe364e"></script>
-<script src="src/services/gridplan.js?v=8ef200b4"></script>
+<!-- PARK ZİNCİRİ (Faz 4 — eski gridplan.js yedi modüle bölündü; sıralama ÖNEMLİ:
+     state → istemci → geometri → sorgu → motor → panel → export) -->
+<script src="src/services/park-state.js?v=78c0b4e3"></script>
+<script src="src/services/osm-client.js?v=16aaa145"></script>
+<script src="src/services/park-geometry.js?v=ff23581a"></script>
+<script src="src/services/park-query.js?v=fb33a0b7"></script>
+<script src="src/services/grid-engine.js?v=c3e27b01"></script>
+<script src="src/ui/park-panel.js?v=88bbfc36"></script>
+<script src="src/ui/park-export.js?v=41a66aa5"></script>
 <script src="src/services/dash.js?v=f5e14053"></script>
 <script src="vendor/chart.js-4.5.1.js"></script>
 <link rel="stylesheet" href="css/style.css?v=790e558b">
 <link rel="stylesheet" href="css/landing.css?v=e875e230">
+<link rel="stylesheet" href="css/park-panel.css?v=e5442b6b">
 </head>
 <body>
 <div id="toastWrap"></div>

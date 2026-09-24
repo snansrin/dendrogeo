@@ -72,7 +72,14 @@ export function loadApp({ sadece } = {}) {
     'src/utils/truncation.js',
     'src/services/allometry.js',
     'src/services/landcover.js',
-    'src/services/gridplan.js',
+    /* PARK ZİNCİRİ (Faz 4): eski gridplan.js'in mantık modülleri, index.html'deki
+     * yükleme sırasıyla. UI modülleri (src/ui/park-panel, src/ui/park-export)
+     * BİLEREK yüklenmez — DOM'a yapışırlar; onları ui-audit statik tarar. */
+    'src/services/park-state.js',
+    'src/services/osm-client.js',
+    'src/services/park-geometry.js',
+    'src/services/park-query.js',
+    'src/services/grid-engine.js',
   ];
   const dosyalar = sadece ? SIRALAMA.filter((f) => sadece.includes(f)) : SIRALAMA;
 
