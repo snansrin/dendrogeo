@@ -189,13 +189,13 @@
 <script src="src/services/auth.js?v=7c805a8c"></script>
 <script src="src/services/export.js?v=cf96e318"></script>
 <script src="src/services/offline.js?v=8017c712"></script>
-<script src="src/services/admin.js?v=cf1d7bee"></script>
+<script src="src/services/admin.js?v=0be3d166"></script>
 <script src="src/services/world.js?v=9623fcee"></script>
 <script src="src/services/measure.js?v=9a57298b"></script>
 <script src="src/services/map.js?v=ec711385"></script>
 <script src="vendor/geotiff-2.1.3.js"></script>
-<script src="src/services/landcover.js?v=6a381f3b"></script>
-<script src="src/services/gridplan.js?v=dbfa7cf3"></script>
+<script src="src/services/landcover.js?v=9efe364e"></script>
+<script src="src/services/gridplan.js?v=8ef200b4"></script>
 <script src="src/services/dash.js?v=f5e14053"></script>
 <script src="vendor/chart.js-4.5.1.js"></script>
 <link rel="stylesheet" href="css/style.css?v=98461801">
@@ -697,7 +697,6 @@
      <li><b>CSV'yi içe aktar:</b> QGIS → <code>Layer → Add Layer → Add Delimited Text Layer</code>. <code>X = LONGITUDE</code>, <code>Y = LATITUDE</code>, CRS = <code>EPSG:4326</code>.</li>
      <li><b>Tüm veriler katman olur:</b> AGB, BHB, biyokütle, karbon sütunları öznitelik tablosuna işlenir. <code>Identify (i)</code> ile bilgi balonu açılır.</li>
      <li><b>Yöntem A — İnternetten (önerilen):</b> Katman Özellikleri → <code>Display</code> → HTML Map Tip:<br><code>&lt;img src='[% "PHOTO_URL" %]' width='220'&gt;</code><br>İnternet bağlantısı varken fotoğraflar otomatik yüklenir, yerel klasöre gerek yok.</li><li><b>Yöntem B — Yerel klasör:</b> Fotoğrafları tek klasöre koy (örn. <code>C:/dendro_foto/</code>). Dosya adları <code>PHOTO_FILE</code> ile aynı olmalı. Map Tip:<br><code>&lt;img src="file:///C:/dendro_foto/[% "PHOTO_FILE" %]" width="220"&gt;</code></li>
-     <li><b>Fotoğraf balonu:</b> Katman Özellikleri → <code>Display</code> → HTML Map Tip:<br><code>&lt;img src="file:///C:/dendro_foto/[% "PHOTO_FILE" %]" width="220"&gt;</code></li>
      <li><b>Etkinleştir:</b> <code>View → Show Map Tips</code>.</li>
      <li><b>Etiket:</b> Labels → <code>POINT_ID</code>.</li>
     </ol>

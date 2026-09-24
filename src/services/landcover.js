@@ -410,19 +410,19 @@ function dgLcItemMatchesYear(item,year){
 }
 async function dgLcFindTiles(bbox,source){
   const src=source||DG_LC_SOURCES.cross;
-  const payload={
-    collections:[src.collection],
-    bbox:[bbox.minLon,bbox.minLat,bbox.maxLon,bbox.maxLat],
+  /* ⚠️ CORS: POST + application/json tarayıcıda preflight (OPTIONS) tetikler ve
+   * Planetary Computer /search OPTIONS isteğine 405 döner → analiz daha ilk
+   * adımda ölür (Node harness'ında CORS olmadığı için testler bunu YAKALAMAZ).
+   * GET + querystring "simple request"tir: preflight yok, yanıt ACAO:* ile
+   * gelir (2026-09-24 canlı doğrulandı). Bu yüzden arama daima GET'tir. */
+  const qs=new URLSearchParams({
+    collections:src.collection,
+    bbox:[bbox.minLon,bbox.minLat,bbox.maxLon,bbox.maxLat].join(","),
     datetime:src.year+"-01-01T00:00:00Z/"+src.year+"-12-31T23:59:59Z",
-    limit:DG_LC_MAX_TILES
-  };
-  const data=await dgLcFetchJson(DG_LC_STAC+"/search",{
-    method:"POST",
-    headers:{
-      Accept:"application/geo+json",
-      "Content-Type":"application/json"
-    },
-    body:JSON.stringify(payload)
+    limit:String(DG_LC_MAX_TILES)
+  });
+  const data=await dgLcFetchJson(DG_LC_STAC+"/search?"+qs.toString(),{
+    headers:{Accept:"application/geo+json"}
   });
   const ham=Array.isArray(data?.features)?data.features:[];
   const items=ham.filter(it=>dgLcItemMatchesYear(it,src.year));
