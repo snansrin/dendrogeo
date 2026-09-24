@@ -35,6 +35,7 @@ const MAX_RUNTIME = 400;     // ?v=NNN sürümlü script/style kopyaları
 
 const CORE_ASSETS = [
     '/', '/index.html', '/manifest.json', '/icon.png', '/social-preview.jpg', '/css/style.css',
+    '/css/landing.css',
     '/src/config/supabase.js', '/src/config/constants.js', '/src/config/species.js', 
     '/src/utils/geo.js', '/src/utils/truncation.js', '/src/services/allometry.js', '/src/services/auth.js','/src/services/export.js', '/src/services/offline.js',
     '/src/services/admin.js','/src/services/world.js', '/src/services/measure.js','/src/services/map.js','/src/services/landcover.js','/src/services/gridplan.js','/src/services/dash.js',
