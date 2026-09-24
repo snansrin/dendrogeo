@@ -255,6 +255,16 @@
          İki fazlı: önce plan/önizleme (yazmaz), onaydan sonra dgApplyBackfill(). -->
     <div id="backfillBox" style="display:none;margin-top:12px"></div>
    </div>
+   <!-- PARK KİMLİKLERİ (2026-09-24): canlıda aynı park iki kimlikle kayıtlıydı
+        (elle + OSM) ve karşılaştırma bölünüyordu; OSM'de adı olmayan poligonlar
+        da "İsimsiz Park" kalıyordu. Otomatik birleştirme BİLEREK yok: iki ayrı
+        park aynı adı taşıyabilir, karar yöneticide. -->
+   <div class="card" style="margin-bottom:18px;border-left:4px solid var(--green)">
+    <div class="shead" style="margin-bottom:12px"><span class="no">🌳</span><h2 style="font-size:1.2rem">Park Kimlikleri</h2><span class="rule"></span><span class="mono" style="font-size:.75rem;color:var(--mut)">yeniden adlandır · birleştir · sil</span></div>
+    <p style="color:var(--mut);font-size:.8rem;margin-bottom:10px">Aynı park iki kimlikle kayıtlıysa karşılaştırma <b>bölünür</b> — 🔀 ile birleştir. OSM'de adı olmayan park "İsimsiz Park" gelir, ✏️ ile ad ver (proje adları otomatik yeniden kurulur).</p>
+    <button class="btn sm blue" style="margin-bottom:10px" onclick="loadParkAdmin()">🔄 Parkları Yükle</button>
+    <div id="parkAdminBox"></div>
+   </div>
    <div class="card" style="margin-bottom:18px;border-left:4px solid var(--amber)">
     <div class="shead" style="margin-bottom:12px"><span class="no">📦</span><h2 style="font-size:1.2rem">Toplu Dışa Aktarım (Tüm Kullanıcılar)</h2></div>
     <p style="color:var(--mut);font-size:.82rem;margin-bottom:10px">Kullanıcı ayrımı yapılmadan sistemdeki <b>tüm veri</b>, seçtiğiniz filtrelere göre dışa aktarılır.</p>

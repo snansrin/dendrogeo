@@ -34,6 +34,7 @@ const app = loadApp();
 const {
   dgNormParkName, dgNormParkLoose, dgParkKey, dgManualParkKey,
   dgProjectName, dgLabelFromLegacy, dgParkMatchRadius, dgParkCenterFromRings,
+  dgTitleCaseTR, dgSuggestParkName,
   DG_PARK_SEP, DG_PARK_MATCH_M,
 } = app;
 
@@ -151,15 +152,36 @@ describe('eski proje adından etiket çıkarma (geri doldurma)', () => {
 });
 
 describe('eşleştirme yarıçapı + temsil noktası', () => {
-  test('taban yarıçap 250 m; büyük parkta alanla büyür', () => {
-    assert.equal(DG_PARK_MATCH_M, 250);
-    assert.equal(dgParkMatchRadius(null), 250);
-    assert.equal(dgParkMatchRadius(0), 250);
-    /* 40 ha → ~632 m kenar → yarıçap ~316 m (parkın iki ucu birleşebilsin) */
-    const r = dgParkMatchRadius(400000);
-    assert.ok(r > 300 && r < 330, 'r=' + r);
+  test('⭐ taban 400 m; büyük parkta sqrt(alan) (canlıdaki çift kimlik dersi)', () => {
+    /* 2026-09-24: canlıda aynı Göksu Parkı iki kimlikle kaydedildi (elle #1 +
+     * OSM way/423602737 #2). 50 ha park ~707 m kenar; eski yarıçap 354 m
+     * olduğu için elle tıklanan nokta OSM merkeziyle eşleşmedi. Yeni kural:
+     * sqrt(alan) → 50 ha için ~707 m. */
+    assert.equal(DG_PARK_MATCH_M, 400);
+    assert.equal(dgParkMatchRadius(null), 400);
+    assert.equal(dgParkMatchRadius(0), 400);
+    const r50 = dgParkMatchRadius(500000);
+    assert.ok(r50 > 700 && r50 < 715, 'r=' + r50);
+    const r40 = dgParkMatchRadius(400000);
+    assert.ok(r40 > 630 && r40 < 635, 'r=' + r40);
     /* 1 ha → tabanın altında kalmaz */
-    assert.equal(dgParkMatchRadius(10000), 250);
+    assert.equal(dgParkMatchRadius(10000), 400);
+  });
+
+  test('Türkçe duyarlı başlık düzeni (DB\'deki dg_tr_title ile aynı)', () => {
+    assert.equal(dgTitleCaseTR('göksu parkı'), 'Göksu Parkı');
+    assert.equal(dgTitleCaseTR('işçi parkı'), 'İşçi Parkı');
+    assert.equal(dgTitleCaseTR('ıhlamur vadisi'), 'Ihlamur Vadisi');
+    assert.equal(dgTitleCaseTR('KOCAELİ PARK'), 'KOCAELİ PARK', 'büyük harfli ad bozulmaz');
+    assert.equal(dgTitleCaseTR('  çok   boşluk  '), 'Çok Boşluk');
+    assert.equal(dgTitleCaseTR(''), '');
+  });
+
+  test('adsız OSM elemanı için proje adından öneri', () => {
+    assert.equal(dgSuggestParkName('afyon çocuk parkı'), 'Afyon Çocuk Parkı');
+    assert.equal(dgSuggestParkName('Afyon Çocuk parkı'), 'Afyon Çocuk parkı', 'zaten büyük harf içeriyor → dokunma');
+    assert.equal(dgSuggestParkName(''), 'İsimsiz Park');
+    assert.equal(dgSuggestParkName(null), 'İsimsiz Park');
   });
 
   test('halkalardan bbox merkezi ([lat,lon] sözleşmesi)', () => {
@@ -297,6 +319,38 @@ describe('migration 0005: park adı yazım düzeni (Türkçe duyarlı)', () => {
   test('idempotent', () => {
     assert.match(sql5, /create or replace function/);
     assert.match(sql5, /drop trigger if exists trg_park_name_case/);
+  });
+});
+
+describe('park kimlikleri yönetim aracı (yeniden adlandır · birleştir · sil)', () => {
+  test('kart + kontroller sayfada', () => {
+    assert.match(idx, /id="parkAdminBox"/);
+    assert.match(idx, /onclick="loadParkAdmin\(\)"/);
+    assert.match(idx, /<h2 style="font-size:1\.2rem">Park Kimlikleri<\/h2>/);
+  });
+
+  test('yönetim sekmesi açılınca park kimlikleri de yüklenir', () => {
+    assert.match(readFileSync(join(ROOT, 'src/services/admin.js'), 'utf8'), /loadParkAdmin\(\)/);
+  });
+
+  test('birleştirme projeleri + ölçümleri taşır, kaynağı siler', () => {
+    const fn = registry.slice(registry.indexOf('async function dgParkMergeInto'), registry.indexOf('async function dgParkDelete'));
+    assert.match(fn, /from\("projects"\)\.update\(\{park_id:dstId\}\)\.eq\("park_id",srcId\)/);
+    assert.match(fn, /from\("measurements"\)\.update\(\{park_id:dstId\}\)\.eq\("park_id",srcId\)/);
+    assert.match(fn, /from\("parks"\)\.delete\(\)\.eq\("id",srcId\)/);
+    assert.match(fn, /dgResyncProjectNames\(dstId\)/, 'proje adları hedef park adına göre kurulmalı');
+    assert.match(fn, /confirm\(/, 'onay istenmeli (kaynak kimlik siliniyor)');
+  });
+
+  test('yeniden adlandırma name_norm’u da günceller (eşleştirme bozulmasın)', () => {
+    const fn = registry.slice(registry.indexOf('async function dgParkRename'), registry.indexOf('function dgParkMergeFromSelect'));
+    assert.match(fn, /name_norm:dgNormParkName\(name\)/);
+    assert.match(fn, /dgResyncProjectNames\(id,name\)/, 'yeni ad doğrudan taşınmalı (ikinci sorgu/yarış olmasın)');
+  });
+
+  test('⭐ otomatik birleştirme YOK (aynı adlı iki ayrı park olabilir)', () => {
+    assert.ok(!/dgAutoMerge|autoMergeParks/.test(registry), 'sessiz birleştirme eklenmemeli');
+    assert.match(registry, /çift kimlik adayı var/i, 'araç yalnız ÖNERİR, kararı yönetici verir');
   });
 });
 

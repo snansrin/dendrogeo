@@ -164,12 +164,12 @@ python3 -m http.server 8080        # herhangi bir statik sunucu olur
 ### Test ve denetimler
 
 ```bash
-npm run check          # sözdizimi + ?v= + build + CSP + 386 test
+npm run check          # sözdizimi + ?v= + build + CSP + 401 test
 npm test               # yalnız testler (node:test, bağımlılık gerektirmez)
 npm run build          # index.html'i partials'tan üret (değişiklik sonrası)
 ```
 
-386 test şunları kilitler: karbon hesabı (Chave 2014, ρ fallback,
+401 test şunları kilitler: karbon hesabı (Chave 2014, ρ fallback,
 NaN yayılmaması), jeodezik alan ve geometri, **UTM projeksiyonu** (bilinen
 referans değerlerine karşı), Sutherland-Hodgman kırpma + alan korunumu,
 Service Worker'ın çevrimdışı yedeği, vendor kütüphanelerin global kurulumu,
@@ -223,7 +223,7 @@ raporlarda tutuluyor):
 - [x] **Park kimliği** (2026-09-24): `parks` tablosu, park bazlı karşılaştırma (`v_park_compare`), ölçüm kapısı, `park adı - etiket` proje adı → `0004_parks.sql` + `src/services/park-registry.js`
 - [x] **Park adı yazım düzeni** (2026-09-24): OSM'den küçük harfle gelen adlar Türkçe duyarlı başlık düzenine çevrilir (`0005_park_name_case.sql`) — `initcap` Türkçeyi bozduğu için elle eşleme
 - [ ] Park polygon geometrisinin `parks`'a yazılması → Overpass/OSM çevrimdışıyken de park sınırını çizebilme
-- [ ] Yinelenen park kimliklerini birleştirme aracı (admin): iki `osm_key` → tek park, projeler ve ölçümler taşınır
+- [x] **Yinelenen park kimlikleri aracı** (2026-09-24): Yönetim → 🌳 Park Kimlikleri — çift kimlikleri ad+mesafe ile bulur, ✏️ yeniden adlandırır, 🔀 birleştirir (projeler+ölçümler taşınır, adlar yeniden kurulur), 🗑️ siler. Canlıda aynı Göksu Parkı iki kimlikle kayıtlıydı
 - [ ] İstatistikleri veritabanı tarafına taşıyan `v_world_agg` view'ı + haritada bbox sayfalama (istemci tarafı `.limit()` eşiğinin tamamen kalkması)
 - [ ] `allometry_version` / `rho_used` sütunları — yöntem sürümlemesi
 - [ ] ρ tablosunun literatür kaynaklarıyla doldurulması (28 türde eksik)

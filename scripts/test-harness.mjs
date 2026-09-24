@@ -106,7 +106,7 @@ export function loadApp({ sadece } = {}) {
                    'DG_LC_MAX_READ_PIXELS', 'DG_LC_RENDER_LIMIT',
                    'DG_LC_SOURCES', 'DG_ESA_GROUP', 'DG_ESA_CODES', 'DG_LC_SAS', 'DG_OSM_WATER_MIRRORS', 'DG_LC_LAYER', 'DG_LC_LAST',
                    'DG_TRUNCATION_WARNED',
-                   'DG_PARK_SEP', 'DG_PARK_MATCH_M', 'DG_TR_FOLD'];
+                   'DG_PARK_SEP', 'DG_PARK_MATCH_M', 'DG_TR_FOLD', 'DG_TR_UP'];
   const epilog = LEXICAL
     .map((n) => `if(typeof ${n}!=="undefined")__exports.${n}=${n};`)
     .join('');

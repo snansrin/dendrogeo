@@ -197,7 +197,7 @@
 <script src="src/services/data-requests.js?v=ca6f827b"></script>
 <script src="src/services/user-admin.js?v=f80309ef"></script>
 <script src="src/services/backup.js?v=6682edc0"></script>
-<script src="src/services/admin.js?v=46e37abd"></script>
+<script src="src/services/admin.js?v=0801a7db"></script>
 <!-- YÖNETİM AĞACI (2026-09-24): park → proje → kullanıcı → ölçüm kademeli
      görünümü + sorgu hatası görünürlüğü. admin.js'ten SONRA yüklenir
      (approve/reject/del fonksiyonlarını çağırır). -->
@@ -225,7 +225,7 @@
      projeyi parka bağlar, ölçüm kapısını (park algılanmadan ölçüm yok) kurar.
      Sıra ÖNEMLİ: park-query'den sonra, grid-engine'den önce (grid panelindeki
      proje listesi bu modülden beslenir). -->
-<script src="src/services/park-registry.js?v=0155fa2a"></script>
+<script src="src/services/park-registry.js?v=0656ea95"></script>
 <script src="src/services/grid-engine.js?v=c3e27b01"></script>
 <script src="src/ui/park-panel.js?v=0617a777"></script>
 <script src="src/ui/park-export.js?v=41a66aa5"></script>
@@ -797,6 +797,16 @@
     <!-- Park bağı olmayan ESKİ projeleri ölçüm merkezinden OSM parkıyla eşleştirir.
          İki fazlı: önce plan/önizleme (yazmaz), onaydan sonra dgApplyBackfill(). -->
     <div id="backfillBox" style="display:none;margin-top:12px"></div>
+   </div>
+   <!-- PARK KİMLİKLERİ (2026-09-24): canlıda aynı park iki kimlikle kayıtlıydı
+        (elle + OSM) ve karşılaştırma bölünüyordu; OSM'de adı olmayan poligonlar
+        da "İsimsiz Park" kalıyordu. Otomatik birleştirme BİLEREK yok: iki ayrı
+        park aynı adı taşıyabilir, karar yöneticide. -->
+   <div class="card" style="margin-bottom:18px;border-left:4px solid var(--green)">
+    <div class="shead" style="margin-bottom:12px"><span class="no">🌳</span><h2 style="font-size:1.2rem">Park Kimlikleri</h2><span class="rule"></span><span class="mono" style="font-size:.75rem;color:var(--mut)">yeniden adlandır · birleştir · sil</span></div>
+    <p style="color:var(--mut);font-size:.8rem;margin-bottom:10px">Aynı park iki kimlikle kayıtlıysa karşılaştırma <b>bölünür</b> — 🔀 ile birleştir. OSM'de adı olmayan park "İsimsiz Park" gelir, ✏️ ile ad ver (proje adları otomatik yeniden kurulur).</p>
+    <button class="btn sm blue" style="margin-bottom:10px" onclick="loadParkAdmin()">🔄 Parkları Yükle</button>
+    <div id="parkAdminBox"></div>
    </div>
    <div class="card" style="margin-bottom:18px;border-left:4px solid var(--amber)">
     <div class="shead" style="margin-bottom:12px"><span class="no">📦</span><h2 style="font-size:1.2rem">Toplu Dışa Aktarım (Tüm Kullanıcılar)</h2></div>

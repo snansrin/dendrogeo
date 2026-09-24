@@ -136,7 +136,7 @@ function makeWorld() {
       layerGroup: () => ({ addTo: () => ({ clearLayers() {} }), clearLayers() {} }),
     },
     Chart: function () {}, supabase: { createClient: () => sbStub }, GeoTIFF: null,
-    alert: () => {}, confirm: () => true,
+    alert: () => {}, confirm: () => true, prompt: (m, d) => (ctx.__prompt === undefined ? d : ctx.__prompt),
     console: { log() {}, warn() {}, error() {} },
     /* setTimeout KUYRUĞA yazar: auth.js'teki turnstile retry döngüsü senkron
      * çalıştırılırsa yığın taşar. flush() ile elle boşaltılır. */
@@ -798,5 +798,106 @@ describe('sahte Supabase, supabase-js sözleşmesini taklit ediyor', () => {
     let hata = null;
     try { run('sb.from("measurements").order("created_at")'); } catch (e) { hata = e.message; }
     assert.ok(hata && /not a function|is not defined/i.test(hata), 'sahte fazla gevşek: ' + hata);
+  });
+});
+
+/* =========================================================
+   9) PARK KİMLİKLERİ — CANLIDAKİ ÇİFT KİMLİK SENARYOSU
+   (2026-09-24: aynı Göksu Parkı #1 elle + #2 OSM olarak kayıtlıydı)
+========================================================= */
+describe('park kimlikleri: çift kimlik birleştirme + yeniden adlandırma', () => {
+  const LIVE = [
+    { id: 1, name: 'Göksu Parkı', name_norm: 'goksu parki', osm_key: 'manual/goksu parki/39.972/32.659', osm_type: 'manual', source: 'manual', area_m2: 508000, city: 'Ankara', country: 'Türkiye', centroid_lat: 39.972, centroid_lon: 32.659 },
+    { id: 2, name: 'Göksu Parkı', name_norm: 'goksu parki', osm_key: 'way/423602737', osm_type: 'way', osm_id: 423602737, source: 'osm', area_m2: 501437, city: 'Ankara', country: 'Türkiye', centroid_lat: 39.9755, centroid_lon: 32.6551 },
+    { id: 7, name: 'İsimsiz Park', name_norm: 'isimsiz park', osm_key: 'relation/19482454', osm_type: 'relation', source: 'backfill', area_m2: 1840, city: 'Afyonkarahisar', country: 'Türkiye', centroid_lat: 38.75, centroid_lon: 30.54 },
+  ];
+
+  before(() => {
+    W.route((st) => {
+      if (st.table === 'parks') {
+        if (st.op === 'delete') return { data: null, error: null };
+        if (st.op === 'update') return { data: [{ id: (st.filters[0] || {}).v, ...st.patch }], error: null };
+        const idf = st.filters.find((f) => f.k === 'id');
+        return { data: idf ? LIVE.filter((p) => p.id === idf.v) : LIVE, error: null };
+      }
+      if (st.table === 'projects') return { data: [
+        { id: 10, name: 'Göksu Parkı - deneme', park_id: 1 },
+        { id: 11, name: 'Göksu Parkı - kuzey', park_id: 2 },
+        { id: 12, name: 'Afyon Çocuk parkı', park_id: 7 },
+      ], error: null };
+      if (st.table === 'measurements') return { data: [{ park_id: 1 }, { park_id: 1 }, { park_id: 2 }, { park_id: 7 }], error: null };
+      return { data: [], error: null };
+    });
+  });
+
+  test('⭐ çift kimlik otomatik bulunuyor: ad + mesafe + tek tık öneri', async () => {
+    await run('loadParkAdmin()');
+    const h = el('parkAdminBox').innerHTML;
+    assert.ok(h.includes('çift kimlik adayı'), 'uyarı yok');
+    assert.ok(h.includes('aradaki mesafe'), 'mesafe gösterilmeli (karar için ölçü)');
+    /* OSM kimliği hedef olmalı (canonical), elle oluşturulan kaynak */
+    assert.ok(h.includes('dgParkMergeInto(1,2)'), 'öneri: #1 → #2 (OSM). İçerik: ' + (h.match(/dgParkMergeInto\([^)]*\)/g) || []).join(','));
+    assert.ok(h.includes('#1') && h.includes('#2'), 'iki kimlik de listelenmeli');
+  });
+
+  test('adı olmayan park işaretleniyor (İsimsiz Park)', async () => {
+    const h = el('parkAdminBox').innerHTML;
+    assert.ok(h.includes('parkın adı yok'), 'adsız park uyarısı yok');
+    assert.ok(h.includes('#7'), 'adsız park id’si gösterilmeli');
+  });
+
+  test('tabloda proje/kayıt sayıları ve kaynak görünüyor', async () => {
+    const h = el('parkAdminBox').innerHTML;
+    assert.ok(h.includes('manual') && h.includes('backfill'), 'kaynak sütunu');
+    assert.ok(h.includes('50.8 ha') && h.includes('50.1 ha'), 'alanlar');
+  });
+
+  test('⭐ birleştirme: projeler + ölçümler taşınır, adlar kurulur, kaynak silinir', async () => {
+    W.reset();
+    await run('dgParkMergeInto(1,2)');
+    const pj = LOG.filter((l) => l.table === 'projects' && l.op === 'update');
+    assert.ok(pj.some((l) => l.patch.park_id === 2 && l.filters.some((f) => f.k === 'park_id' && f.v === 1)), 'projeler taşınmadı');
+    const mm = LOG.filter((l) => l.table === 'measurements' && l.op === 'update');
+    assert.ok(mm.some((l) => l.patch.park_id === 2), 'ölçümler taşınmadı');
+    assert.ok(pj.some((l) => l.patch.park_name === 'Göksu Parkı'), 'proje adları hedef park adıyla yeniden kurulmalı');
+    assert.ok(LOG.some((l) => l.table === 'parks' && l.op === 'delete' && l.filters.some((f) => f.k === 'id' && f.v === 1)), 'kaynak kimlik silinmeli');
+  });
+
+  test('geçersiz birleştirme reddedilir (kendi içine / hedef yok)', async () => {
+    W.reset();
+    await run('dgParkMergeInto(1,1)');
+    await run('dgParkMergeInto(1,0)');
+    assert.ok(!LOG.some((l) => l.op === 'delete'), 'kendi içine birleştirme silme yapmamalı');
+  });
+
+  test('⭐ yeniden adlandırma: name + name_norm + proje adları senkron', async () => {
+    run('__prompt="Afyon Çocuk Parkı"');
+    W.reset();
+    await run('dgParkRename(7)');
+    const up = LOG.find((l) => l.table === 'parks' && l.op === 'update');
+    assert.ok(up, 'park güncellenmedi');
+    assert.equal(up.patch.name, 'Afyon Çocuk Parkı');
+    assert.equal(up.patch.name_norm, 'afyon cocuk parki', 'eşleştirme anahtarı da güncellenmeli');
+    assert.ok(LOG.some((l) => l.table === 'projects' && l.op === 'update' && l.patch.park_name === 'Afyon Çocuk Parkı'),
+      'proje adları yeni park adıyla yeniden kurulmalı');
+    run('__prompt=undefined');
+  });
+
+  test('prompt iptal edilirse hiçbir şey yazılmaz', async () => {
+    run('__prompt=null');
+    W.reset();
+    await run('dgParkRename(7)');
+    assert.ok(!LOG.some((l) => l.op === 'update' || l.op === 'delete'), 'iptal = yazma yok');
+    run('__prompt=undefined');
+  });
+
+  test('⚠ yeni çift kimlik üretme: 50 ha parkta 700 m uzaktaki ad eşleşir', async () => {
+    /* Canlıdaki hatanın tekrarı: elle #1 (39.972,32.659) varken OSM way/423602737
+     * (~390 m uzakta) algılansa → TEK kimlikte birleşmeli, yeni satır açmamalı. */
+    run('DG_PARK_SESSION.clear(); DG_PARK_SCHEMA_OK=true;');
+    W.reset();
+    const got = await run('dgRegisterPark({name:"Göksu Parkı",type:"way",id:423602737,area:501437},{lat:39.9755,lon:32.6551})');
+    assert.equal(got.id, 1, 'mevcut kimliğe bağlanmalıydı, yeni satır açıldı: ' + JSON.stringify(got));
+    assert.ok(!LOG.some((l) => l.table === 'parks' && l.op === 'insert'), 'yeni park satırı açılmamalı');
   });
 });

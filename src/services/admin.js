@@ -46,6 +46,9 @@ $("aUsers").textContent=users.length;$("aRec").textContent=cnt.count??meas.lengt
  /* Park → proje → kullanıcı ağacı (admin-tree.js). Onay/red/silme sonrası
   * loadAdmin() yeniden çağrıldığı için ağaç da kendiliğinden tazelenir. */
  if(typeof loadAdminTree==="function")loadAdminTree();
+ /* Park kimlikleri (park-registry.js): çift kimlik/adı olmayan park uyarıları
+  * burada görünür; birleştir/yeniden adlandır/sil araçları aynı kartta. */
+ if(typeof loadParkAdmin==="function")loadParkAdmin();
 }
 
 async function approveMeas(id){
