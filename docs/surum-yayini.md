@@ -15,13 +15,19 @@ Zenodo ↔ GitHub entegrasyonu açık olmalı:
 1. <https://zenodo.org/> → **Log in with GitHub**
 2. Üst menü → **GitHub** → listede `snansrin/dendrogeo` → **ON**
    (Zenodo, depoya release webhook'u eklemek için yetki ister)
-3. Depoda ilk release yayımlandığında Zenodo otomatik olarak:
-   * bir **kavram DOI** (concept DOI) oluşturur → her zaman en güncel sürüme
-     çözümlenir: `10.5281/zenodo.22646300`
-   * her release için bir **sürüm DOI**'si üretir: `10.5281/zenodo.XXXXXXX`
+3. Her release için Zenodo bir **sürüm DOI**'si üretir: `10.5281/zenodo.XXXXXXX`
 
-> Kavram DOI'yi README/JSON-LD/CITATION.cff'te kullanmaya devam edin; sürüm
-> DOI'sini o sürüme atıf yaparken kullanın.
+> ⚠ **DendroGeo'da kavram (concept) DOI YOK.** v1.0.0 kaydı
+> (`10.5281/zenodo.22646300`) bağımsız oluşturulmuş; `conceptdoi: null`.
+> v3.0.0 (`10.5281/zenodo.22948643`) da ayrı bir kayıt. İki kayıt arasındaki bağ
+> Zenodo'da **Related works → "Is new version of"** ile kurulur.
+>
+> Sonuç: repodaki atıf referansları (README, CITATION.cff, JSON-LD, NOTICE,
+> künye) **her sürümde güncellenmek zorundadır** — `test/release.test.mjs`
+> DOI'nin tutarlı olduğunu kilitler. Yeni sürüm yayımlayınca:
+> 1. Zenodo'nun verdiği yeni sürüm DOI'sini al
+> 2. Depoda `grep -rn "<eski DOI>"` ile geçen yerleri değiştir
+> 3. `CITATION.cff`'e eski DOI'yi `identifiers` altında "önceki sürüm" olarak ekle
 
 ---
 
@@ -121,7 +127,7 @@ Release yayımlandıktan birkaç dakika sonra:
       (footer'da `vXX.X`, `sw.js` yeni CACHE_VERSION)
 - [ ] Yeni migration varsa Supabase'de çalıştırın ve doğrulama sorgularını koşun
 - [ ] Zenodo'nun kavram DOI'sinin en güncel sürüme çözümlendiğini kontrol edin:
-      <https://doi.org/10.5281/zenodo.22646300>
+      <https://doi.org/10.5281/zenodo.22948643> (yeni sürüm DOI'si)
 
 ---
 

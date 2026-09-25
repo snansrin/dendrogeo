@@ -40,9 +40,15 @@ authors:
     alias: "snansrin"
     # orcid: "https://orcid.org/0000-0000-0000-0000"
 
-# Kavram (concept) DOI: her zaman EN GÜNCEL sürüme çözümlenir.
-# Sürüme özel DOI'yi Zenodo release sonrası üretir (10.5281/zenodo.XXXXXXX).
-doi: "10.5281/zenodo.22646300"
+# ⚠ DendroGeo'da KAVRAM (concept) DOI yok: her Zenodo kaydı bağımsız ve
+# sürüme özel DOI taşıyor. Bu yüzden her yeni sürümde bu alan GÜNCELLENMELİ
+# (bkz. docs/surum-yayini.md). Kayıtlar Zenodo'da "Is new version of"
+# ilişkisiyle birbirine bağlanır.
+doi: "10.5281/zenodo.22948643"
+identifiers:
+  - type: doi
+    value: 10.5281/zenodo.22646300
+    description: "Önceki sürüm (v1.0.0, 2026-09-07)"
 license: CC-BY-NC-4.0
 version: "3.0.0"
 date-released: "2026-09-24"

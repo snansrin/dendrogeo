@@ -9,6 +9,10 @@ Yeni sürüm yayımlama adımları: [`docs/surum-yayini.md`](docs/surum-yayini.m
 
 ## [3.0.0] — 2026-09-24
 
+> 📦 **Zenodo:** [10.5281/zenodo.22948643](https://doi.org/10.5281/zenodo.22948643) ·
+> GitHub Release `v3.0.0` (commit `56c7c4f`) · önceki sürüm:
+> [10.5281/zenodo.22646300](https://doi.org/10.5281/zenodo.22646300) (v1.0.0)
+
 Bu sürüm **iki büyük mimari değişiklik** içerir: ölçümler artık proje adına değil
 **fiziksel park kimliğine** bağlanır ve giriş yöntemlerine **Google OAuth** eklenir.
 Ayrıca veri tabanı şeması genişlediği (0004→0006) ve **lisans MIT'ten CC BY-NC 4.0'a

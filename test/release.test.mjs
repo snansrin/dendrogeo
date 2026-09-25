@@ -82,11 +82,11 @@ describe('CITATION.cff — Zenodo künyesi', () => {
   });
 
   test('⭐ kavram DOI ve lisans diğer kaynaklarla tutarlı', () => {
-    assert.match(cff, /^doi: "10\.5281\/zenodo\.22646300"$/m);
+    assert.match(cff, /^doi: "10\.5281\/zenodo\.22948643"$/m);
     assert.match(cff, /^license: CC-BY-NC-4\.0$/m);
     assert.equal(pkg.license, 'CC-BY-NC-4.0');
     assert.equal(ds.license, 'https://creativecommons.org/licenses/by-nc/4.0/');
-    assert.equal(ds.identifier, 'https://doi.org/10.5281/zenodo.22646300');
+    assert.equal(ds.identifier, 'https://doi.org/10.5281/zenodo.22948643');
   });
 
   test('iki yazar da var (ŞİRİN, Nagihan + Sinan)', () => {
@@ -142,13 +142,13 @@ describe('yayım süreci belgelenmiş', () => {
     const r = rd('README.md');
     assert.match(r, /\\c\{S\}irin, Nagihan and \\c\{S\}irin, Sinan/);
     assert.match(r, /license\s*=\s*\{CC-BY-NC-4\.0\}/);
-    assert.match(r, /10\.5281\/zenodo\.22646300/);
+    assert.match(r, /10\.5281\/zenodo\.22948643/);
   });
 
   test('LICENSE + NOTICE mevcut ve CC BY-NC 4.0', () => {
     assert.match(rd('LICENSE'), /Attribution-NonCommercial 4\.0 International/);
     assert.match(rd('NOTICE'), /CC BY-NC 4\.0/);
-    assert.match(rd('NOTICE'), /10\.5281\/zenodo\.22646300/);
+    assert.match(rd('NOTICE'), /10\.5281\/zenodo\.22948643/);
   });
 });
 

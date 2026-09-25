@@ -137,7 +137,7 @@ describe('KVKK: açık rıza ve aydınlatma', () => {
   test('künye sayfası: sorumlu, atıf, içerik kaldırma süreci, erişilebilirlik', () => {
     const t = rd('kunye/index.html');
     assert.match(t, /Nagihan ŞİRİN &amp; Sinan ŞİRİN/);
-    assert.match(t, /10\.5281\/zenodo\.22646300/);
+    assert.match(t, /10\.5281\/zenodo\.22948643/);
     assert.match(t, /İçerik bildirimi ve kaldırma talebi/);
     assert.match(t, /7 gün/, 'bildirim değerlendirme süresi');
     assert.match(t, /Erişilebilirlik beyanı/);
@@ -171,7 +171,7 @@ describe('lisans tutarlılığı (CC BY-NC 4.0)', () => {
     const t = rd('NOTICE');
     assert.match(t, /Nagihan ŞİRİN & Sinan ŞİRİN/);
     assert.match(t, /CC BY-NC 4\.0/);
-    assert.match(t, /10\.5281\/zenodo\.22646300/);
+    assert.match(t, /10\.5281\/zenodo\.22948643/);
     assert.match(t, /OpenStreetMap verisi\s+ODbL/, 'ODbL atfı NOTICE’ta');
     assert.match(t, /Leaflet/, 'üçüncü taraf bileşenler kendi lisansıyla ayrışmalı');
   });
@@ -207,7 +207,7 @@ describe('JSON-LD: Dataset, atıf ve yasal belge bağlantıları', () => {
   });
 
   test('⭐ Dataset DOI + lisans + gerçek kişi yaratıcılar', () => {
-    assert.equal(ds.identifier, 'https://doi.org/10.5281/zenodo.22646300');
+    assert.equal(ds.identifier, 'https://doi.org/10.5281/zenodo.22948643');
     assert.match(ds.license, /by-nc\/4\.0/);
     assert.ok(Array.isArray(ds.creator) && ds.creator.length === 2, 'creator kişi listesi olmalı');
     assert.equal(ds.creator[0]['@type'], 'Person');

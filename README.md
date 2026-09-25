@@ -4,7 +4,7 @@
 
 🌐 **[dendrogeo.org](https://dendrogeo.org)** · 📖 [Yöntem](docs/methods.md) · 🛰️ [Arazi örtüsü](arazi-ortusu/) · 🔵 [Google ile giriş](docs/google-giris.md) · 🔐 [Güvenlik](SECURITY.md) · 🗄️ [Veri erişimi](#veri-erişimi-ve-lisans)
 
-[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.22646300.svg)](https://doi.org/10.5281/zenodo.22646300)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.22948643.svg)](https://doi.org/10.5281/zenodo.22948643)
 [![License: CC BY-NC 4.0](https://img.shields.io/badge/License-CC%20BY--NC%204.0-lightgrey.svg)](https://creativecommons.org/licenses/by-nc/4.0/)
 [![CI](https://github.com/snansrin/dendrogeo/actions/workflows/ci.yml/badge.svg)](https://github.com/snansrin/dendrogeo/actions/workflows/ci.yml)
 
@@ -207,7 +207,7 @@ partials)**, CSP↔kod tutarlılığı, birim testler ve (yalnız `main`'e push'
 * **Lisans:** [CC BY-NC 4.0](https://creativecommons.org/licenses/by-nc/4.0/) — **kod, belgeler ve veri seti birlikte**; ticari kullanım yazılı izne tabidir (`sinan@dendrogeo.org`).
   Telif: **Nagihan ŞİRİN & Sinan ŞİRİN**. Ayrıntı: [`LICENSE`](LICENSE) (tam lisans metni) + [`NOTICE`](NOTICE) (atıf biçimi ve üçüncü taraf bileşenlerin kendi lisansları).
   > ⚠ `LICENSE` eskiden **MIT** idi ve README rozeti/DOI ile çelişiyordu (2026-09-24'te CC BY-NC 4.0 ile değiştirildi). MIT'ten kalan türev çalışmalarınız varsa lisans durumunu netleştirin.
-* **Atıf:** Zenodo DOI [10.5281/zenodo.22646300](https://doi.org/10.5281/zenodo.22646300)
+* **Atıf:** Zenodo DOI [10.5281/zenodo.22948643](https://doi.org/10.5281/zenodo.22948643) (v3.0.0) · önceki sürüm: [10.5281/zenodo.22646300](https://doi.org/10.5281/zenodo.22646300) (v1.0.0)
 * **Üçüncü taraf veri atıfları:** harita karoları ve park geometrileri **© OpenStreetMap contributors (ODbL)**; OpenTopoMap **CC-BY-SA**; Esri World Imagery kendi kaynak zinciriyle; arazi örtüsü **ESA WorldCover 2021 v200 (CC BY 4.0)** ve **IO LULC 2020**. Bu atıflar arayüzde Leaflet attribution kontrolünde ve PNG çıktısının telif satırında görünür tutulur (`src/config/constants.js → DG_ATTR`).
 
 ```bibtex
@@ -215,7 +215,8 @@ partials)**, CSP↔kod tutarlılığı, birim testler ve (yalnız `main`'e push'
   title    = {DendroGeo: Global Tree Inventory \& Carbon Data System},
   author   = {\c{S}irin, Nagihan and \c{S}irin, Sinan},
   year     = {2026},
-  doi      = {10.5281/zenodo.22646300},
+  version  = {3.0.0},
+  doi      = {10.5281/zenodo.22948643},
   url      = {https://dendrogeo.org},
   license  = {CC-BY-NC-4.0}
 }
