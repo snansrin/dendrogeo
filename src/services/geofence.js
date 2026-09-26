@@ -15,8 +15,7 @@
  * istemci atlatılsa bile park dışı ölçüm INSERT/UPDATE'i REDDEDİLİR.
  *
  * EŞİKLER (DG_GEO): saha gerçeklerine göre seçildi, tek yerden değiştirilir:
- *   ACC_MAX_M  ±60 m   → bundan kaba GPS'le "doğrulandı" DAMGASI vurulmaz
- *                         (BLOK DEĞİL — saha geri bildirimiyle yumuşatıldı)
+ *   ACC_MAX_M  ±60 m   → bundan kaba GPS'le "doğrulandı" damgası vurulmaz
  *   MARGIN_M   40 m    → poligon kenarının bu kadar dışı GPS gürültüsü sayılır
  *                         (OSM poligonları da ±birkaç m kayar); ötesi RED
  *   FIX_MAX_AGE_S 120  → 2 dakikadan bayat fix "taze doğrulama" değildir
@@ -57,12 +56,8 @@ function dgGeoDecide(fix,park,opt){
  if(!fix||!Number.isFinite(+fix.lat)||!Number.isFinite(+fix.lon))
   return{ok:false,verified:false,inside:false,reason:"no-fix",distM:null,acc:null};
  const acc=Number.isFinite(+fix.acc)?+fix.acc:null;
- /* HASSASİYET BLOK DEĞİL, DAMGA EŞİĞİ (2026-09-26 saha geri bildirimi):
-  * şehir içinde/ağaç altında ±90-120 m telefon GPS'i NORMALDİR; bunu sert blok
-  * yapmak sahayı kilitlemişti ("±94 m izin vermiyor"). Artık hassasiyet yalnız
-  * "yerinde DOĞRULANDI" damgasını (geo_verified_at) kontrol eder; İÇERİDE/
-  * DIŞARIDA kararını geometri verir. Yanlış park ±94 m ile de REDDEDİLİR. */
- const accOk=acc==null||acc<=cfg.ACC_MAX_M;
+ if(acc!=null&&acc>cfg.ACC_MAX_M)
+  return{ok:false,verified:false,inside:false,reason:"acc",distM:null,acc};
  const geom=park.geom_json&&Array.isArray(park.geom_json.outer)?park.geom_json:null;
  const distM=park.centroid_lat!=null
   ?Math.round(hav(+fix.lat,+fix.lon,+park.centroid_lat,+park.centroid_lon)):null;
@@ -77,9 +72,9 @@ function dgGeoDecide(fix,park,opt){
  }
  const inside=pointInPark(+fix.lat,+fix.lon,geom);
  const edge=inside?0:(dgDistToParkM(+fix.lat,+fix.lon,geom)||Infinity);
- if(inside)return{ok:true,verified:accOk,accOk,inside:true,reason:"inside",distM,acc};
- if(edge<=cfg.MARGIN_M)return{ok:true,verified:accOk,accOk,inside:false,reason:"margin",distM,acc,edgeM:Math.round(edge)};
- return{ok:false,verified:false,accOk,inside:false,reason:"outside",distM,acc,edgeM:Math.round(edge)};
+ if(inside)return{ok:true,verified:true,inside:true,reason:"inside",distM,acc};
+ if(edge<=cfg.MARGIN_M)return{ok:true,verified:true,inside:false,reason:"margin",distM,acc,edgeM:Math.round(edge)};
+ return{ok:false,verified:false,inside:false,reason:"outside",distM,acc,edgeM:Math.round(edge)};
 }
 
 /* TAZE GPS FIX'İ. watchPosition'ın son değeri bayat olabileceği için doğrulama
@@ -121,8 +116,8 @@ async function dgVerifyAtPark(park,why){
  }
  const d=dgGeoDecide(fix,park);
  d.fix=fix;
- if(d.ok&&!d.verified&&d.accOk===false)
-  d.note="GPS hassasiyeti ±"+Math.round(d.acc)+" m (damga eşiği ±"+DG_GEO.ACC_MAX_M+" m): kayıt alınır ama 'yerinde doğrulandı' damgası yazılmaz.";
+ if(!d.ok&&d.reason==="acc")
+  d.message="GPS hassasiyeti ±"+Math.round(d.acc)+" m (eşik ±"+DG_GEO.ACC_MAX_M+" m). Açık alanda bekleyip yeniden dene.";
  if(!d.ok&&d.reason==="outside")
   d.message="Konumun "+(park.name||"park")+" DIŞINDA (kenara ~"+(d.edgeM!=null?d.edgeM:d.distM)+" m). Bu proje yalnızca bu parktan veri kabul eder — başka parktan giriş engellendi.";
  return d;

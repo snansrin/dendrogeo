@@ -86,25 +86,45 @@ describe('11 alt sayfa + kabuk: standart bağlama sözleşmesi', () => {
   });
 });
 
-describe('GPS butonu canlı UI dilinde (yüzey analizi kartı gibi)', () => {
-  test('buton birincil CTA ailesinden: .btn.block, inline width YOK', () => {
+describe('GPS butonu canlı UI dilinde (🌿 Yüzey Örtüsü Analizi kartıyla birebir)', () => {
+  test('buton LULC ile aynı aileden: .dg-png-btn.primary + id gpsBtn', () => {
     const m = shell.match(/<button[^>]*onclick="startGps\(\)"[^>]*>/);
     assert.ok(m, 'GPS butonu bulunmalı');
-    assert.match(m[0], /class="btn block"/, 'birincil CTA + tam genişlik standardı');
-    assert.doesNotMatch(m[0], /style="width:100%"/, 'inline genişlik kaldırılmalı');
-    assert.doesNotMatch(m[0], /btn blue/, 'mavi ayrışma kaldırılmalı');
+    assert.match(m[0], /id="gpsBtn"/, 'canlı durum için id şart');
+    assert.match(m[0], /class="dg-png-btn primary"/, 'LULC butonuyla aynı aile');
+    assert.doesNotMatch(m[0], /style="width:100%"/, 'inline genişlik yok');
+    assert.doesNotMatch(m[0], /btn blue/, 'ayrı tema yok');
   });
 
-  test('GPS bloğu standart alan kartı: .dg-fieldcard + .dg-kicker + .dg-sub', () => {
+  test('kart LULC kartıyla aynı iskelet: dg-png-card/head/kicker/title/sub/badge', () => {
     const i = shell.indexOf('id="gpsRing"');
-    const blok = shell.slice(i - 400, i + 600);
-    assert.match(blok, /class="card dg-fieldcard"/, 'kart standardı');
-    assert.match(blok, /class="dg-kicker"/, 'kicker standardı');
-    assert.match(blok, /class="dg-sub"/, 'alt başlık standardı');
+    const blok = shell.slice(i - 700, i + 700);
+    for (const c of ['dg-png-card', 'dg-png-head', 'dg-png-kicker', 'dg-png-title', 'dg-png-sub', 'dg-png-badge'])
+      assert.ok(blok.includes(c), c + ' GPS kartında olmalı');
   });
 
-  test('durum satırı standart alert ailesinden (JS className ile çakışmaz)', () => {
-    assert.match(shell, /id="gpsState" class="alert info"/, 'gpsState alert ailesinde kalmalı');
-    assert.match(css, /\.alert\.info\{/, "alert.info standardı css'te olmalı");
+  test('canlı durum LULC deseniyle birebir: disabled + ⏳ + oldText + opacity', () => {
+    const m = read('src/services/measure.js');
+    assert.match(m, /function dgGpsBtnBusy\(on\)/, 'canlı buton yardımcısı');
+    assert.match(m, /"⏳ Konum alınıyor…"/, 'LULC ile aynı ⏳ kalıbı');
+    assert.match(m, /b\.dataset\.oldText=b\.innerHTML/, 'eski metni sakla');
+    assert.match(m, /b\.style\.opacity="\.65"/, 'aynı solukluk');
+    assert.match(m, /b\.style\.cursor="wait"/, 'aynı imleç');
+    assert.match(m, /const onOk=p=>\{dgGpsBtnBusy\(false\);/, 'başarıda buton geri gelir');
+    assert.match(m, /if\(e\)dgGpsBtnBusy\(false\);/, 'hatada buton geri gelir');
+  });
+
+  test("yeni tema/animasyon YOK: css'e keyframes/spin eklenmedi", () => {
+    assert.doesNotMatch(css, /@keyframes/, 'ui-standard.css animasyon getirmemeli');
+    const pp = read('css/park-panel.css');
+    assert.match(pp, /\.dg-png-btn\{/, 'buton stili mevcut aileden gelir, yeniden tanımlanmaz');
+    assert.doesNotMatch(css, /\.dg-png-btn\{/, 'ui-standard mevcut bileşeni EZMEMELİ');
+  });
+
+  test('durum satırı ve rozet standart ailelerden', () => {
+    assert.match(shell, /id="gpsState" class="alert info"/, 'gpsState alert ailesinde');
+    assert.match(shell, /id="gpsBadge"/, 'canlı rozet');
+    const m = read('src/services/measure.js');
+    assert.match(m, /bd\.className="dg-png-badge "/, 'rozet LULC badge diliyle güncellenir');
   });
 });

@@ -9,6 +9,17 @@ Yeni sürüm yayımlama adımları: [`docs/surum-yayini.md`](docs/surum-yayini.m
 
 ## [Yayımlanmadı]
 
+### Değişti — 📡 Konumu Etkinleştir artık CANLI buton (🌿 Yüzey Örtüsü Analizi ile birebir)
+Kullanıcı: *"⏳ Analiz yapılıyor… gibi canlı buton yap; burayı incele ve buna
+göre yap; saçma sapan farklı buton/tema/animasyon istemiyorum."*
+- GPS kartı `dg-png-card` iskeletine geçti: `dg-png-head` + `dg-png-kicker`
+  ("1 · SAHA KONUMU") + `dg-png-title` + `dg-png-sub` + canlı `dg-png-badge`
+  (±m · ÇOK İYİ/İYİ/ORTA/ZAYIF) — yüzey analizi kartlarıyla aynı dil.
+- Buton `class="dg-png-btn primary"` (LULC butonuyla aynı aile) ve aynı canlı
+  desen: basınca `disabled` + "⏳ Konum alınıyor…" + opacity .65 + cursor wait;
+  başarı/hata anında eski metnine döner (`dataset.oldText`). Yeni CSS/animasyon
+  EKLENMEDİ (test kilidi: ui-standard.css'te @keyframes yok, .dg-png-btn ezilmez).
+
 ### Değişti — TEK tasarım sistemi: `css/ui-standard.css` (kullanıcı isteği)
 İstek: *"📡 Konumu Etkinleştir butonunu canlı UI/UX'e göre yap (yüzey analizi
 gibi); bütün sayfaların temaları, yazı stilleri, yazı renkleri, başlık/alt

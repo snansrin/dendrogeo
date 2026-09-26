@@ -79,17 +79,9 @@ describe('dgGeoDecide — poligon kararı', () => {
     assert.equal(d.ok, false, 'park içindeki delik alanda doğrulama olmamalı');
   });
 
-  test('⭐ GPS ±60 m üstüyse: kayıt AÇIK, damga KAPALI (saha kiletlenmez)', () => {
+  test('⭐ GPS hassasiyeti ±60 m üstüyse doğrulama YOK (kaba konumla damga vurulmaz)', () => {
     const d = decide(fix(39.91, 32.75, 120), PARK);
-    assert.equal(d.ok, true, "±94/±120 m telefon GPS’i sahayı bloklamamalı");
-    assert.equal(d.verified, false, 'kaba GPS ile "yerinde doğrulandı" damgası vurulmaz');
-    assert.equal(d.accOk, false);
-    assert.equal(d.reason, 'inside');
-  });
-
-  test('⭐ kaba GPS ile YANLIŞ park yine RED (çit gevşemedi)', () => {
-    const d = decide(fix(40.5, 33.5, 120), PARK);
-    assert.equal(d.ok, false); assert.equal(d.reason, 'outside');
+    assert.equal(d.ok, false); assert.equal(d.reason, 'acc');
   });
 
   test('fix yoksa RED (no-fix), park yoksa doğrulamasız OK (no-park)', () => {
@@ -141,19 +133,12 @@ describe('istemci kancaları yerinde (atlama yok)', () => {
     assert.match(govde, /if\(!dec\.ok\)return toast/, 'reddedilirse yükleme başlamamalı');
   });
 
-  test('doğrulama YALNIZ ölçüm/fotoğrafta; proje-park açılışında blok YOK (saha geri bildirimi)', () => {
+  test('dgScanCreateProject: proje açılışı doğrulamalı + geometri sunucuya yazılmalı', () => {
     const p = read('src/services/park-registry.js');
     const i = p.indexOf('async function dgScanCreateProject');
     const govde = p.slice(i, p.indexOf('async function dgScanLinkTarget', i));
-    assert.doesNotMatch(govde, /dgVerifyAtPark/, 'proje açılışı GPS ile bloklanmamalı (±94 m sahayı kilitlemişti)');
+    assert.match(govde, /dgVerifyAtPark\(park,"project"\)/, 'proje açılışı parkta doğrulanmalı');
     assert.match(govde, /dgPersistParkGeom\(park\)/, 'halkalar sunucuya yazılmalı');
-  });
-
-  test('scan kartında akıl karıştıran bağla düğmeleri YOK', () => {
-    const p = read('src/services/park-registry.js');
-    assert.doesNotMatch(p, /Bu parka bağla/, 'hedef projeye otomatik bağla düğmesi kaldırıldı');
-    assert.doesNotMatch(p, /dgScanBindExisting\(\)</, 'açıkta bağla düğmesi kaldırıldı');
-    assert.match(p, /dgScanCreateProject\(\)/, 'tek yol: yeni proje');
   });
 
   test('yönetici istisnası: dgGeoOverride + tablo düğmesi', () => {

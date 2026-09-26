@@ -553,9 +553,7 @@ function dgRenderScanCard(forceManual){
     `</div>`+
 
     (target
-      ? `<div class="alert info" style="margin:6px 0">📁 <b>${esc(target.name)}</b> projesi park bekliyor. `+
-        `Mevcut projeyi parka bağlama <b>yalnız yöneticide</b>: Yönetim → 🌳 Park Kimlikleri. `+
-        `Bu ekrandan yalnızca <b>yeni proje</b> açılır — akıl karıştıran bağla düğmeleri kaldırıldı (2026-09-26).</div>`
+      ? `<div class="alert info" style="margin:6px 0">📁 <b>${esc(target.name)}</b> projesi park bekliyordu. Bağlayınca ölçüm ekranına döneceksin.</div>`
       : ``)+
 
     `<div class="grid g2" style="gap:10px">`+
@@ -566,7 +564,18 @@ function dgRenderScanCard(forceManual){
         `<div id="scanNamePreview" class="mono" style="font-size:.85rem;padding:6px 0">${esc(dgProjectName((park&&park.name)||"",target?dgLabelFromLegacy(target.name,park&&park.name):""))}</div>`+
       `</div>`+
       `<div style="display:flex;flex-direction:column;gap:8px;justify-content:center">`+
+        (target
+          ? `<button class="btn" onclick="dgScanLinkTarget()">🔗 Bu parka bağla: ${esc(target.name)}</button>`
+          : ``)+
         `<button class="btn blue" onclick="dgScanCreateProject()">📁 Yeni proje oluştur</button>`+
+        (others.length
+          ? `<div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap">`+
+              `<select id="scanBindProject" class="dg-png-select" style="flex:1;min-width:150px">`+
+                others.map(p=>`<option value="${p.id}">${esc(p.name)}</option>`).join("")+
+              `</select>`+
+              `<button class="btn sm ghost" onclick="dgScanBindExisting()">🔗 Bağla</button>`+
+            `</div>`
+          : ``)+
         (admin
           ? ``
           : `<div class="dg-tree-meta">🔐 Mevcut projeyi parka bağlama yetkisi yöneticide. `+
@@ -666,6 +675,14 @@ async function dgScanCreateProject(){
   const labelEl=$("scanLabel");
   const label=labelEl?String(labelEl.value||"").trim():"";
 
+  /* 🛰 KONUM DOĞRULAMASI (0007): proje açılırken cihaz GERÇEKTEN parkta mı?
+   * Evden "park aç" denemesi ve YANLIŞ parkta proje açma burada kesilir.
+   * Sunucu tarafı: trg_project_requires_park (park_id zorunlu). */
+  if(typeof dgVerifyAtPark==="function"){
+    const dec=await dgVerifyAtPark(park,"project");
+    if(!dec.ok)return toast("⛔ "+esc(dec.message||"Konum doğrulanamadı: proje açmak için parkta olmalısın."),"err","🛰");
+  }
+
   const{data,error}=await sb.from("projects").insert({
     owner:USER.id,
     park_id:park.id,
@@ -693,6 +710,12 @@ async function dgScanLinkTarget(){
   await dgLinkProject(DG_PARK_TARGET_PROJ);
 }
 
+async function dgScanBindExisting(){
+  const sel=$("scanBindProject");
+  const pid=sel?+sel.value:0;
+  if(!pid)return toast("Proje seç","err");
+  await dgLinkProject(pid);
+}
 
 async function dgLinkProject(pid){
   /* ⛔ YALNIZ YÖNETİCİ (kullanıcı isteği 2026-09-24): MEVCUT bir projeyi
@@ -842,7 +865,7 @@ function dgParkGate(auto){
         `Park algılamadan girilen ölçümler karşılaştırmada parka bağlanamıyor; `+
         `bu yüzden önce park kimliği oluşturuluyor.</span>`+
         `<div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap">`+
-          `<button class="btn sm blue" onclick="go('admin')">🔐 Yönetim → 🌳 Park Kimlikleri'nden bağla</button>`+
+          `<button class="btn sm blue" onclick="startParkScan({projectId:${p.id},returnTo:'measure'})">🌳 Parkı Algıla ve Bağla</button>`+
         `</div>`
       : `<b>⛔ Bu proje parka bağlı değil — ölçüm girilemez.</b><br>`+
         `<span style="font-size:.82rem">Proje: <b>${esc(p.name)}</b>. Mevcut projeyi parka bağlama yetkisi `+
@@ -1445,6 +1468,7 @@ window.dgParkIdChip=dgParkIdChip;
 window.dgRetryRegister=dgRetryRegister;
 window.dgScanCreateProject=dgScanCreateProject;
 window.dgScanLinkTarget=dgScanLinkTarget;
+window.dgScanBindExisting=dgScanBindExisting;
 window.dgScanPreviewName=dgScanPreviewName;
 window.dgParkGate=dgParkGate;
 window.dgProjectChanged=dgProjectChanged;

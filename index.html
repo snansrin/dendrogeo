@@ -249,7 +249,7 @@
      (approve/reject/del fonksiyonlarını çağırır). -->
 <script src="src/services/admin-tree.js?v=5ef73c1b" defer></script>
 <script src="src/services/world.js?v=918cd92f" defer></script>
-<script src="src/services/measure.js?v=352cb55e" defer></script>
+<script src="src/services/measure.js?v=a34d68fe" defer></script>
 <script src="src/services/map.js?v=b3b6192d" defer></script>
 <!-- LULC ZİNCİRİ ARTIK TEMBEL (2026-09-25 · Faz 8): 8 dosya ilk yüklemede
      indirilmiyor. Yalnız "🌿 Yüzey Örtüsü Analizi"ne basan kullanıcı için
@@ -262,13 +262,13 @@
 <script src="src/services/park-state.js?v=78c0b4e3" defer></script>
 <script src="src/services/osm-client.js?v=16aaa145" defer></script>
 <script src="src/services/park-geometry.js?v=ff23581a" defer></script>
-<script src="src/services/geofence.js?v=a28e397f" defer></script>
+<script src="src/services/geofence.js?v=70eec0e4" defer></script>
 <script src="src/services/park-query.js?v=fb33a0b7" defer></script>
 <!-- PARK KİMLİĞİ (2026-09-24): queryPark'ın bulduğu parkı public.parks'a yazar,
      projeyi parka bağlar, ölçüm kapısını (park algılanmadan ölçüm yok) kurar.
      Sıra ÖNEMLİ: park-query'den sonra, grid-engine'den önce (grid panelindeki
      proje listesi bu modülden beslenir). -->
-<script src="src/services/park-registry.js?v=a947350c" defer></script>
+<script src="src/services/park-registry.js?v=213ef5eb" defer></script>
 <script src="src/services/grid-engine.js?v=c3e27b01" defer></script>
 <script src="src/ui/park-panel.js?v=0617a777" defer></script>
 <script src="src/ui/park-export.js?v=47f46346" defer></script>
@@ -663,14 +663,19 @@
         saveMeas(); sunucu kapısı 0004_parks.sql → trg_enforce_park_link. -->
    <div id="parkGate" class="alert info" style="display:none"></div>
    <div class="grid g2">
-    <div class="card dg-fieldcard">
-     <div>
-      <div class="dg-kicker">🛰 SAHA KONUMU</div>
-      <div class="dg-sub">Biyokütle ve jeodezik alan hesabı için saha koordinatı gereklidir.</div>
+    <div class="dg-png-card">
+     <div class="dg-png-head">
+      <div>
+       <div class="dg-png-kicker">1 · SAHA KONUMU</div>
+       <div class="dg-png-title">🛰 GPS / Uydu</div>
+       <div class="dg-png-sub">Biyokütle ve jeodezik alan için koordinat</div>
+      </div>
+      <span class="dg-png-badge" id="gpsBadge">konum kapalı</span>
      </div>
      <div class="gpsring" id="gpsRing"><div class="val" id="gpsAcc">—</div><div class="lbl">doğruluk (m)</div></div>
      <div id="gpsState" class="alert info">Konum servisi kapalı.</div>
-     <button class="btn block" onclick="startGps()">📡 Konumu Etkinleştir</button>
+     <button id="gpsBtn" class="dg-png-btn primary" onclick="startGps()">📡 Konumu Etkinleştir</button>
+     <div class="dg-png-sub" style="font-size:.68rem">Doğrulama eşiği ±60 m · park dışı kayıt sunucuda reddedilir (0007).</div>
      <div id="iosHint" class="alert info" style="display:none"><b>iPhone kullanıcısı mısınız?</b><br><span style="font-size:.85rem">Ayarlar → Gizlilik ve Güvenlik → Konum Servisleri →Safari Siteleri→ "Uygulamayı Kullanırken" seçin, sayfayı yenileyin.</span></div>
      <div class="grid g2" style="margin-top:14px">
       <div><div class="lbl">Enlem</div><div class="mono" id="gLat">—</div></div>

@@ -60,14 +60,25 @@ if(!window._wakeLockHooked){
  });
 }
 
+/* CANLI BUTON (2026-09-26 · kullanıcı isteği): 📡 Konumu Etkinleştir, 🌿 Yüzey
+ * Örtüsü Analizi butonuyla BİREBİR aynı davranışı kazanır (park-export.js
+ * runLandCoverAnalysis deseni): basınca disabled + "⏳ Konum alınıyor…" +
+ * opacity .65 + cursor wait; sonuçta eski metnine döner. Yeni tema/animasyon
+ * YOK — aynı sınıf (.dg-png-btn primary) ve aynı mekanizma. */
+function dgGpsBtnBusy(on){
+ const b=$("gpsBtn");if(!b)return;
+ if(on){b.dataset.oldText=b.innerHTML;b.innerHTML="⏳ Konum alınıyor…";b.disabled=true;b.style.opacity=".65";b.style.cursor="wait";}
+ else{b.disabled=false;b.innerHTML=b.dataset.oldText||"📡 Konumu Etkinleştir";b.style.opacity="";b.style.cursor="";}
+}
 async function startGps(){
- const gpsMsg=(t,e)=>{const g=$("gpsState");g.textContent=t;g.className="alert "+(e?"err":"info");};
+ const gpsMsg=(t,e)=>{const g=$("gpsState");g.textContent=t;g.className="alert "+(e?"err":"info");if(e)dgGpsBtnBusy(false);};
  if(!navigator.geolocation)return gpsMsg("Tarayıcı konum desteklemiyor.",1);
  if(/iPhone|iPad|iPod/.test(navigator.userAgent))$("iosHint").style.display="block";
  try{if(navigator.permissions&&navigator.permissions.query){const p=await navigator.permissions.query({name:"geolocation"});if(p.state==="denied")return gpsMsg("Konum izni reddedildi. Ayarlar→Safari→Konum.",1);}}catch(e){}
  gpsMsg("Konum alınıyor…",0);
+ dgGpsBtnBusy(true);
  const opts={enableHighAccuracy:true,timeout:15000,maximumAge:0};
- const onOk=p=>{GPS=p.coords;updGps();acquireWakeLock();navigator.geolocation.watchPosition(p2=>{GPS=p2.coords;updGps();},()=>{},{...opts,maximumAge:1000});};
+ const onOk=p=>{dgGpsBtnBusy(false);GPS=p.coords;updGps();acquireWakeLock();navigator.geolocation.watchPosition(p2=>{GPS=p2.coords;updGps();},()=>{},{...opts,maximumAge:1000});};
  const onErr=e=>{
   if(e.code===1)return gpsMsg("İzin reddedildi. iPhone: Ayarlar→Safari→Konum→Kullanırken İzin Ver.",1);
   if(e.code===3){try{navigator.geolocation.getCurrentPosition(onOk,()=>gpsMsg("GPS başarısız: dışarıda tekrar deneyin.",1),opts);}catch(err){gpsMsg("GPS hatası.",1);}return;}
@@ -83,6 +94,9 @@ function updGps(){
  $("gQ").textContent=q;
  $("gpsRing").className="gpsring "+(a<10?"good":a<30?"mid":"bad");
  $("gpsState").textContent="🛰 GPS aktif · ±"+a.toFixed(1)+" m · "+q;$("gpsState").className="alert ok";
+ /* rozet de LULC kartlarındaki dg-png-badge diliyle canlı güncellenir */
+ const bd=$("gpsBadge");
+ if(bd){bd.textContent="±"+a.toFixed(0)+" m · "+q;bd.className="dg-png-badge "+(a<10?"":(a<30?"blue":"amber"));}
  if(map&&GPS){if(window._me)map.removeLayer(window._me);window._me=L.circleMarker([GPS.latitude,GPS.longitude],{radius:7,color:"#2b6cb0",weight:3,fillOpacity:.9}).addTo(map).bindPopup("Konumun");}
  drawNav();autoFillPointId();
 }
@@ -346,7 +360,6 @@ if (!base.client_id) base.client_id = uuidv4();
         dgGeoStamp(base,dec);
         if(dec.verified)toast("🛰 Konum doğrulandı: "+esc(pk.data.name)+
           (dec.reason==="margin"?" (kenar payı)":"")+" · ±"+Math.round(dec.fix.acc)+" m","ok","🛰");
-        else if(dec.note)toast("⚠ "+esc(dec.note),"warn","🛰");
       }
     }
     
