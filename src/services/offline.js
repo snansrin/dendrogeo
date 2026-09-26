@@ -48,8 +48,11 @@ async function syncOfflineData() {
 if (!navigator.onLine) return;
 if (!USER) {
 console.warn('[Sync] Kullanıcı giriş yapmamış, senkronizasyon atlanıyor');
+/* ÖLÜ KOD DÜZELTİLDİ (2026-09-26): updateSyncBadge() çağrısı return'den
+ * SONRA yazılmıştı, yani hiç çalışmıyordu. Giriş yapılmamışken kuyruk
+ * doluysa rozet "bekliyor" durumunda takılı kalıyordu. */
+updateSyncBadge();
 return;
-  updateSyncBadge();
 }
 try {
 const db = await openOfflineDB();
@@ -141,6 +144,12 @@ if ($('v-dash').classList.contains('on')) loadDash();
 if ($('v-records').classList.contains('on')) loadRecords();
 if ($('v-admin').classList.contains('on')) loadAdmin();
 if ($('v-world').classList.contains('on')) loadWorld();
+/* CANLI HARİTA DA TAZELENMELİ (2026-09-26): senkronizasyon yeni kayıt
+ * yazıyor ama bu blok canlı haritayı hiç düşünmüyordu — sekme açıksa eski
+ * küme çizili kalıyordu. dgMarkLiveDirty() kapıyı düşürür; sekme açıksa
+ * doğrudan yeniden çizer. */
+dgMarkLiveDirty();
+if (typeof loadLiveMap === 'function' && $('v-map') && $('v-map').classList.contains('on')) loadLiveMap();
 }
 if (failed > 0) {
 toast(`⚠️ ${failed} ölçüm başarısız. Hata: ${lastError}`, 'err', '❌');

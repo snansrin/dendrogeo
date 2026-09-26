@@ -7,6 +7,81 @@ Yeni sürüm yayımlama adımları: [`docs/surum-yayini.md`](docs/surum-yayini.m
 
 ---
 
+## [Yayımlanmadı]
+
+### Düzeltildi — "onayladığım kayıt haritada görünmüyor" (2026-09-26)
+Kullanıcı bildirimi: *"son yüklenen veriyi onaylamama rağmen ne dünyada ne canlı
+haritada göremiyorum."* Veritabanı tarafı sağlamdı — kayıt `status='Onaylı'`,
+`shared=true`, RLS anon'a açık, REST aynı 12 satırı dönüyordu (canlı API'den
+doğrulandı). Sorun istemcideydi; gerçek Chrome ile canlı sitede ölçülerek dört
+ayrı kök neden kanıtlandı ve kapatıldı.
+
+- **Çift işaretçi (Dünya sekmesi):** `addMarkersChunked` küme varsa
+  TEMİZLEMEDEN ekliyordu. `loadWorld()` hem `startShell`'de hem her
+  `approveMeas`'ta çalıştığı için küme 12 → 24 → 36 diye şişiyordu
+  (ölçüldü: 2. `loadWorld` sonrası rozet "24", aynı nokta kümede 2 kez) ve
+  tür/karbon analizi iki kez sayıyordu. Artık `clearLayers()` + çakışan
+  turları iptal eden `_markerToken`. Ölçüm: 3 ardışık yükleme → 12/12/12, çift 0.
+- **Canlı harita bir kez yükleniyordu:** `go("map")` içindeki
+  `if(!liveLoaded){liveLoaded=true;loadLiveMap();}` kapısı yüzünden onaydan
+  sonra sekmeye dönen yönetici eski kümeyi görüyordu; F5 şarttı. Yeni
+  `DG_LIVE_DIRTY` bayrağı: onay/red/silme ve çevrimdışı senkronizasyon
+  `dgMarkLiveDirty()` çağırır, sekme açılınca tazelenir (bayat değilse gereksiz
+  sorgu atılmaz — ölçüldü: kirli 1 sorgu, temiz 0). Karta **↻ İşaretçileri
+  tazele** düğmesi eklendi.
+- **Sahte başarı mesajı:** `loadApprovedMarkers` sorgu `error`'ünü yok sayıyor,
+  `catch` de yutuyordu → `done(0,[])` → ekranda YEŞİL *"✓ 0 onaylı kayıt
+  yüklendi"*. `loadWorld()`'ün `catch(e){}`'sı ise her hatayı sessizce
+  gömüyordu. Artık hata 3. argümanla taşınır (`n=-1`), kırmızı kutu + ↻ çizilir;
+  `#worldErr` ve `#landingMapNote` ile Dünya/landing sekmeleri de açıklama basar.
+- **Yanlış teşhis → veri kaybı riski:** `v_park_compare` 42501 (permission
+  denied) döndüğünde `dgParkSchemaMissing` çağrılıyor, `DG_PARK_SCHEMA_OK=false`
+  oluyor, ÖLÇÜM KAPISI kapanıyor ve yeni kayıtlar `park_id=null` yazılıyordu
+  (`measure.js:278/318`). Yani geçici bir oturum/yetki hatası kalıcı veri
+  bütünlüğü kaybına dönüşüyordu. Yeni `dgIsSchemaError()` yalnız gerçek şema
+  hatalarını (42P01/42703/PGRST205) kabul eder; yetki/ağ hataları
+  `dgParkCompareDenied()`'e gider ve şema bayrağına DOKUNMAZ. Yönetici artık
+  zaten uygulanmış bir migration'ı yeniden çalıştırmaya yönlendirilmiyor.
+- **"Null Island" tuzağı:** `Number.isFinite(+r.lat)` filtresi `+null === 0`
+  olduğu için koordinatı NULL/boş gelen kaydı "geçerli" sayıp (0,0)a —
+  Gine Körfezi'ne — çiziyor, küme sayısına gerçek ağaç gibi katıyordu. Yeni
+  `dgValidCoord()` boş değeri, sınır dışını ve tam (0,0)ı reddeder; `world.js
+  fitRows` (ülke/şehir yakınlaştırma) da aynı doğrulamayı kullanır.
+- **Ölü kod:** `syncOfflineData()` içinde `updateSyncBadge()` çağrısı
+  `return`'den SONRA yazılmıştı (hiç çalışmıyordu) → giriş yapılmamışken senkron
+  rozeti takılı kalıyordu. Sıralama düzeltildi.
+
+Kilitler: `test/map-refresh.test.mjs` (25 test) — çift işaretçi, token iptali,
+hata iletimi, `DG_LIVE_DIRTY` kapısı, `dgIsSchemaError` sınıflandırması,
+şema bayrağının düşmemesi, ölü kod ve koordinat doğrulaması. 531 test yeşil (+25).
+
+### Değişti — ilk yükleme performansı (Faz 8)
+Ölçüm (canlı site, gzip açık): sorun boyut değil **istek sayısı ve bloklama**ydı —
+50 istek, 43 script'in tamamı `head`'de senkron, 10 dakikalık önbellek.
+
+- **43 senkron script → hepsi `defer`**: HTML ayrıştırması artık script'leri
+  beklemiyor, gövde hemen çiziliyor. `defer` belge sırasını koruduğu için modül
+  zinciri ve `boot()` zamanlaması değişmedi.
+- **LULC zinciri (8 modül) tembel**: `lazylibs.js → dgEnsureLulc()` yalnız
+  "🌿 Yüzey Örtüsü Analizi"ne basıldığında sırayla enjekte ediyor
+  (`async=false` → yürütme sırası korunur). `runLandCoverAnalysis()` artık
+  `async` ve zinciri `await` ediyor; yüklenemezse sebep kullanıcıya gösteriliyor.
+- **Google Fonts render'ı bloklamıyor**: `media="print"` + `onload="this.media='all'"`
+  + `preload` + `<noscript>` yedeği.
+- **8 ön bağlantı**: supabase.co (oturum sorgusu), challenges.cloudflare.com
+  (Turnstile), fonts.gstatic.com, a/b/c.tile.openstreetmap.org,
+  nominatim, overpass → DNS+TLS el sıkışması önceden.
+- **Landing haritası tembel**: `IntersectionObserver` (rootMargin 400px) + 6 sn
+  yedek; işaretçiler harita kurulunca yükleniyor (yarış bayrağıyla).
+
+Sonuç: istek **50 → 42**, wire **277 → 250 KB**, blokluyan script **43 → 0**.
+`sw.js` PRECACHE değişmedi → çevrimdışı davranış aynı.
+
+### Eklendi
+- `test/load-order.test.mjs`: tüm script etiketlerinin `defer` olduğu, LULC
+  zincirinin index.html'de BULUNMADIĞI ama `DG_LULC_CHAIN`'de doğru sırada
+  olduğu ve analiz köprüsünün zinciri beklediği kilitlendi.
+
 ## [3.0.0] — 2026-09-24
 
 > 📦 **Zenodo:** [10.5281/zenodo.22948643](https://doi.org/10.5281/zenodo.22948643) ·

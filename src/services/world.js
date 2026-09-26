@@ -25,8 +25,24 @@ async function loadParkCompare(){
  const{data,error}=await sb.from("v_park_compare").select("*").order("carbon_kg",{ascending:false});
 
  /* Şema eski (0004 çalıştırılmamış) → sayfa boş kalmasın diye proje bazlı
-  * eski toplama yedek olarak çalışır ve kullanıcıyı migration'a yönlendirir. */
+  * eski toplama yedek olarak çalışır ve kullanıcıyı migration'a yönlendirir.
+  *
+  * ⚠ HATA SINIFLANDIRMASI (2026-09-26): her hata "şema eski" DEĞİLDİR.
+  * v_park_compare bilinçli olarak YALNIZ authenticated'a açık
+  * (0004_parks.sql: "revoke select on public.v_park_compare from anon").
+  * Oturum yokken, JWT tazelenirken ya da token süresi dolmuşken 401/42501
+  * döner; eskiden bu da dgParkSchemaMissing'e gidiyordu. Sonuçları ağırdı:
+  *   · yönetici ZATEN UYGULANMIŞ bir migration'ı yeniden çalıştırmaya
+  *     yönlendiriliyordu ("0004_parks.sql çalıştırılmalı"),
+  *   · dgParkSchemaMissing DG_PARK_SCHEMA_OK=false yaptığı için ÖLÇÜM KAPISI
+  *     kapanıyor ve yeni kayıtlar park_id'siz yazılıyordu
+  *     (measure.js:278 gate, measure.js:318 park_id=null).
+  * Yetki/ağ hataları artık ayrı ele alınır; şema bayrağına DOKUNMAZ. */
  if(error){
+  if(!dgIsSchemaError(error)){
+   dgParkCompareDenied(error);
+   return;
+  }
   dgParkSchemaMissing("v_park_compare: "+error.message);
   return loadParkCompareLegacy(el);
  }
@@ -101,6 +117,26 @@ function dgFillReportOptions(linked,pending){
   (linked||[]).map(p=>opt(String(p.park_id),"🌳 "+p.park_name)).join("")
   +(pending||[]).map(p=>opt("proj:"+p.park_name,"⚠ "+p.park_name+" (park yok)")).join("")
   ||'<option value="">—</option>';
+}
+
+/* YETKİ/AĞ HATASI — şema bayrağına dokunmaz (2026-09-26).
+ * dgParkSchemaMissing'in aksine DG_PARK_SCHEMA_OK=false YAPMAZ: ölçüm kapısı
+ * ve park_id yazımı açık kalır. Kullanıcıya gerçek sebep söylenir. */
+function dgParkCompareDenied(error){
+ const code=(error&&(error.code||error.status))||"";
+ const msg=(error&&error.message)||String(error||"bilinmeyen hata");
+ console.warn("DENDROGEO · park karşılaştırma okunamadı (şema değil, yetki/ağ):",code,msg);
+ const el=$("parkCompare");
+ const adm=(typeof dgIsAdmin==="function")?dgIsAdmin():false;
+ if(el)el.innerHTML=
+  `<div class="alert warn" style="margin-bottom:10px"><b>⚠ Park karşılaştırması yüklenemedi.</b> `+
+  `Veritabanı şeması YERİNDE; sorun okuma yetkisi/oturum. `+
+  `<span class="mono" style="font-size:.72rem">${esc(code)} ${esc(msg)}</span><br>`+
+  `<span style="font-size:.8rem">${adm
+    ? "Oturumu yenileyip (F5) tekrar deneyin. Hata sürerse Supabase → SQL Editor'da <span class='mono'>select * from v_park_compare limit 1;</span> sorgusunu kendi rolünüzle çalıştırın."
+    : "Sayfayı yenileyin; sürerse yöneticiyle paylaşın."}</span> `+
+  `<button class="btn sm" style="margin-left:6px" onclick="loadParkCompare()">↻ Yeniden dene</button></div>`;
+ toast("Park karşılaştırması yüklenemedi: "+(code||msg),"warn","🌳");
 }
 
 /* Şema eskiyse (migration 0004 uygulanmamış) karşılaştırma proje bazlı eski
@@ -221,7 +257,9 @@ dgWarnIfTruncated(data,2000,city+" (şehir yakınlaşma)",count);
 fitRows(m,data,city,"🏙");
 }
 function fitRows(m,rows,label,icon){
-const pts=(rows||[]).filter(r=>Number.isFinite(+r.lat)&&Number.isFinite(+r.lon));
+/* dgValidCoord (map.js): +null===0 tuzağı yüzünden NULL koordinatlı satır
+ * (0,0)a "geçerli" diye geçip fitBounds'u Gine Körfezi'ne savuruyordu. */
+const pts=(rows||[]).filter(r=>dgValidCoord(r.lat,r.lon));
 if(!pts.length)return toast(label+" için onaylı nokta yok","warn",icon);
 const b=L.latLngBounds(pts.map(r=>[+r.lat,+r.lon]));
 m.fitBounds(b.pad(0.25),{maxZoom:12});

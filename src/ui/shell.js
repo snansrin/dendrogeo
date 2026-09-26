@@ -132,7 +132,14 @@ if(v==="dash"){loadWaypoints().then(()=>loadDash());}
   * yoksa form kilitli gelir ve kullanıcı park algılama ekranına yönlendirilir.
   * (2026-09-24 · park-registry.js dgParkGate) */
  if(v==="measure"&&typeof dgParkGate==="function")dgParkGate(true);
-if(v==="map")setTimeout(()=>{map&&map.invalidateSize();if(!liveLoaded){liveLoaded=true;loadLiveMap();}},150);
+ /* CANLI HARİTA TAZELEME KAPISI (2026-09-26 · kullanıcı bildirimi):
+  * ESKİ: if(!liveLoaded){liveLoaded=true;loadLiveMap();}
+  *      → sekme bir oturumda YALNIZ BİR KEZ yükleniyordu. Yönetici ölçümü
+  *        onaylayıp Canlı Harita'ya döndüğünde ESKİ küme çizili kalıyor,
+  *        "onayladığım kayıt haritada yok" durumu F5'e kadar sürüyordu.
+  * YENİ: ilk açılış VEYA veri bayatladıysa (onay/red/silme/senkronizasyon)
+  *      yeniden çeker; bayat değilse gereksiz sorgu atılmaz. */
+ if(v==="map")setTimeout(()=>{map&&map.invalidateSize();if(!liveLoaded||DG_LIVE_DIRTY)loadLiveMap();},150);
  if(v==="nav")setTimeout(()=>{navMap&&navMap.invalidateSize();loadWaypoints();},150);
  if(v==="world")setTimeout(()=>worldMap&&worldMap.invalidateSize(),150);
 if(v==="admin")loadAdmin();

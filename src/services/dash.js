@@ -99,7 +99,21 @@ function renderAnalysis(rows,elId){
   </div>`;
 }
 // 7. Dünya verisi yükle
+/* SESSİZ catch(e){} KALDIRILDI (2026-09-26).
+ *
+ * Bu blok v_global + v_country + v_city sorgularını VE işaretçi yüklemesini
+ * sarıyordu; içlerinden biri patladığında (RLS/42501, JWT tazelenirken 401,
+ * PostgREST şema önbelleği, ağ) Dünya sekmesi BOMBOŞ kalıyor ve ekranda
+ * hiçbir açıklama olmuyordu. Kullanıcının gördüğü tek şey "onayladığım veri
+ * ne dünyada ne canlı haritada var" — oysa veri veritabanında duruyordu.
+ * Projenin kendi ilkesi (park-registry: "sessiz başarısızlık yok") burada
+ * uygulanmıyordu. Artık sebep #worldErr kutusunda + ↻ Yeniden dene.
+ *
+ * İŞARETÇİ HATASI: loadApprovedMarkers artık hatayı 3. argümanla döndürüyor;
+ * başarısızlıkta analiz bloğu yanlış veriyle (boş küme) doldurulmuyor. */
 async function loadWorld(){
+ const box=$("worldErr");
+ if(box)box.style.display="none";
  try{
   const g=await sb.from("v_global").select("*").single();
   if(g.data){$("wRec").textContent=g.data.records||0;$("wCountry").textContent=g.data.countries||0;$("wCity").textContent=g.data.cities||0;$("wCarbon").textContent=g.data.carbon_t||0;}
@@ -107,7 +121,25 @@ async function loadWorld(){
   $("wCountryT").innerHTML=(c.data||[]).slice(0,30).map(r=>`<tr><td>${esc(r.country)}</td><td>${r.records}</td><td>${r.carbon_t}</td><td>${r.avg_dbh}</td><td>${r.avg_height||"—"}</td></tr>`).join("")||"<tr><td colspan=5>—</td></tr>";
   const t=await sb.from("v_city").select("*");
   $("wCityT").innerHTML=(t.data||[]).slice(0,30).map(r=>`<tr><td>${esc(r.city)}</td><td>${r.records}</td><td>${r.carbon_t}</td></tr>`).join("")||"<tr><td colspan=3>—</td></tr>";
-  loadApprovedMarkers(worldMap,3000,(n,rows)=>renderAnalysis(rows,"worldAnalysis"));
+  loadApprovedMarkers(worldMap,3000,(n,rows,err)=>{
+   if(err)return dgWorldError("İşaretçiler yüklenemedi: "+err);
+   dgMarkLiveDirty();   /* dünya tazelendi → canlı harita kümesi de bayat */
+   if(worldMap&&worldMap._clusterDegraded)
+     console.warn("DENDROGEO · dünya haritası kümelenmeden çizildi (markercluster yok)");
+   renderAnalysis(rows,"worldAnalysis");
+  });
   loadParkCompare();
- }catch(e){}
+ }catch(e){
+  dgWorldError((e&&(e.message||e))+"");
+ }
+}
+function dgWorldError(msg){
+ console.error("DENDROGEO · loadWorld:",msg);
+ const box=$("worldErr");
+ if(!box)return;
+ box.style.display="";
+ box.className="alert err";
+ box.innerHTML=`<b>⚠ Dünya verisi yüklenemedi</b> — sayılar/harita bu yüzden boş olabilir. Kayıt silinmedi: `+
+  `<span class="mono" style="font-size:.74rem">${esc(msg)}</span> `+
+  `<button class="btn sm" style="margin-left:6px" onclick="loadWorld()">↻ Yeniden dene</button>`;
 }

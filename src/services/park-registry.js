@@ -1402,7 +1402,29 @@ async function dgOnParkDrawn(cand){
    10. ŞEMA YEDEĞİ (migration 0004 henüz uygulanmadıysa)
 ========================================================= */
 
+/* GERÇEK ŞEMA EKSİĞİ Mİ? (2026-09-26)
+ * Yetki (42501/401/403), ağ ve zaman aşımı hataları şema eksiği DEĞİLDİR.
+ * Bu ayrım yapılmadığında dgParkSchemaMissing DG_PARK_SCHEMA_OK=false
+ * yapıyor, ölçüm kapısı (measure.js:278) kapanıyor ve yeni kayıtlar
+ * park_id=null yazılıyordu (measure.js:318) — yani GEÇİCİ bir 401 kalıcı
+ * veri bütünlüğü kaybına dönüşüyordu. */
+function dgIsSchemaError(err){
+ const code=String((err&&(err.code||err.status))||"");
+ const msg=String((err&&err.message)||err||"");
+ if(/^(42P01|42703|42883)$/.test(code))return true;           /* undefined table/column/function */
+ if(/PGRST205|PGRST202/.test(msg)||/PGRST205|PGRST202/.test(code))return true;  /* could not find the table/view */
+ return /does not exist|could not find the (table|view)|42P01|42703/i.test(msg);
+}
+
 function dgParkSchemaMissing(reason){
+ /* YANLIŞ ALARM KAPANDI (2026-09-26): yetki/ağ hatası buraya düşerse şema
+  * bayrağı DÜŞÜRÜLMEDEN yalnızca bilgi verilir. Gerçek şema eksiğinde
+  * davranış eskisiyle birebir aynı. */
+ if(!dgIsSchemaError(reason)){
+  console.warn("DENDROGEO · park kimliği okunamadı (şema değil, yetki/ağ):",reason);
+  toast("⚠ Park kimliği geçici olarak okunamadı (yetki/ağ). Şema sorunu değil — sayfayı yenileyin.","warn","🌳");
+  return;
+ }
  if(DG_PARK_SCHEMA_WARNED)return;
  DG_PARK_SCHEMA_WARNED=true;
  DG_PARK_SCHEMA_OK=false;

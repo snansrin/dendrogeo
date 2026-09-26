@@ -55,6 +55,10 @@ async function approveMeas(id){
  const{error}=await sb.from("measurements").update({status:"Onaylı",shared:true}).eq("id",id);
  if(error)return toast("Hata: "+error.message,"err");
  toast("Kayıt onaylandı","ok","✓");
+ /* Canlı haritayı bayat işaretle (2026-09-26): loadWorld() dünya sekmesini
+  * tazeliyordu ama Canlı Harita sekmesi liveLoaded kapısı yüzünden ESKİ
+  * kümede kalıyordu → onaylanan nokta F5'e kadar görünmüyordu. */
+ dgMarkLiveDirty();
  loadAdmin();loadWorld();
 }
 
@@ -62,6 +66,7 @@ async function rejectMeas(id){
  const{error}=await sb.from("measurements").update({status:"Red",shared:false}).eq("id",id);
  if(error)return toast("Hata: "+error.message,"err");
  toast("Kayıt reddedildi","warn","🚫");
+ dgMarkLiveDirty();   /* red edilen nokta da haritadan düşmeli */
  loadAdmin();
 }
 
@@ -122,7 +127,7 @@ async function delMeas(id){
  if(!confirm("Kayıt silinsin mi?"))return;
  const{data}=await sb.from("measurements").select("photo_url").eq("id",id).single();
  if(data)await removePhoto(data.photo_url);
- await sb.from("measurements").delete().eq("id",id);loadAdmin();
+ await sb.from("measurements").delete().eq("id",id);dgMarkLiveDirty();loadAdmin();
 }
 
 function filterAdminMeas(){

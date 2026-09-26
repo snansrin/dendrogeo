@@ -2,28 +2,84 @@
 /* ===== DendroGeo v2 · src/services/map.js =====
 Harita init, marker yönetimi, waypoint CRUD, navigasyon çizimi */
 
+/* KOORDİNAT DOĞRULAMASI (2026-09-26).
+ *
+ * ESKİ KOD:  rows=(data||[]).filter(r=>Number.isFinite(+r.lat)&&Number.isFinite(+r.lon));
+ * Tuzak: +null === 0 ve +"" === 0, Number.isFinite(0) ise TRUE. Yani lat/lon'u
+ * NULL ya da boş string gelen bir kayıt "geçerli" sayılıp (0,0) noktasına —
+ * Gine Körfezi'ndeki meşhur "Null Island"a — çiziliyor, üstelik küme
+ * rozetine ve renderAnalysis yüzdelerine gerçek bir ağaç gibi giriyordu.
+ * (Test bu davranışı yakaladı: 2 geçerli + 2 bozuk satır → 3 işaretçi.)
+ * Artık boş değer reddedilir ve küresel sınır kontrolü yapılır. Tam (0,0)
+ * da reddedilir: gerçek bir envanter noktası olması fiilen imkânsız. */
+function dgValidCoord(lat,lon){
+ if(lat===null||lat===undefined||lat==="")return false;
+ if(lon===null||lon===undefined||lon==="")return false;
+ const a=Number(lat),o=Number(lon);
+ if(!Number.isFinite(a)||!Number.isFinite(o))return false;
+ if(a<-90||a>90||o<-180||o>180)return false;
+ return !(a===0&&o===0);
+}
+
 // 1. Marker HTML üretici
 function popupHtml(r){
  return `<div style="min-width:140px"><b>P${r.point_id}</b> · ${esc(r.species)}<br><span style="font-size:.75rem;color:#68766e">Çap: ${r.dbh_cm||"—"} cm · Boy: ${r.height_m||"—"} m<br>Karbon: ${(r.carbon_kg||0).toFixed(1)} kg</span>`+(r.photo_url?`<br><img src="${esc(r.photo_url)}" style="width:160px;border-radius:8px;margin-top:6px">`:"")+`</div>`;
 }
 // 2. Marker yükleme (chunked)
+/* İDEMPOTENT (2026-09-26 · canlı tarayıcıda ölçüldü): küme zaten varsa ÖNCE
+ * clearLayers() çağrılır.
+ *
+ * ESKİ DAVRANIŞ (hata): loadWorld() hem startShell'de hem her approveMeas'ta
+ * hem park-registry'den çalışıyor; loadLiveMap() da sekme her açıldığında
+ * çağrılabiliyordu. addMarkersChunked küme varsa YENİDEN EKLEDİĞİ için aynı
+ * 12 kayıt kümeye 2., 3. kez biniyordu. Ölçüm (gerçek Chrome, canlı site):
+ *   1. loadWorld → cluster 12 işaretçi, rozet "12"
+ *   2. loadWorld → cluster 24 işaretçi, rozet "24"   ← yanlış sayı
+ *   3. onay başına +12 …
+ * Belirti kullanıcıya iki şekilde dönüyordu: "onayladığım kayıt haritada yok"
+ * (rozet/istatistik tutarsız) ve tür-karbon analizinin iki kez sayılması.
+ *
+ * TOKEN: chunk'lar setTimeout(step,16) ile parça parça eklendiği için iki
+ * yükleme çakışırsa ESKİ turun kalan chunk'ları clearLayers()'dan SONRA da
+ * eklenmeye devam ederdi. Her yükleme m._markerToken'ı artırır; bayat tur
+ * ilk adımında kendini iptal eder. */
 function addMarkersChunked(m,rows,chunk=150){
  let i=0;
  if(!m._cluster){
-  m._cluster=L.markerClusterGroup({
-   maxClusterRadius:80,
-   spiderfyOnMaxZoom:true,
-   showCoverageOnHover:false,
-   disableClusteringAtZoom:15,
-   iconCreateFunction:c=>{
-    const n=c.getChildCount();
-    const cls=n<10?"small":n<50?"medium":"large";
-    return L.divIcon({html:`<div>${n}</div>`,className:`marker-cluster marker-cluster-${cls}`,iconSize:[40,40]});
-   }
-  });
+  /* YEDEK KATMAN (2026-09-26 · kullanıcı bildirimi: "listede var, haritada yok").
+   * vendor/leaflet.markercluster-1.5.3.js HERHANGİ bir nedenle yüklenemezse
+   * (ağ filtresi/ reklam-engelleyici kuralı, önbellekte 404 gövdesi, SW'de
+   * bayat karma) L.markerClusterGroup TANIMSIZ kalıyordu. Eski kod o anda
+   * fırlatıyor, loadApprovedMarkers hatayı yutup "✓ 0 kayıt" basıyor ve
+   * KULLANICI LİSTELERİ DOLUYKEN BOŞ HARİTA görüyordu.
+   * Artık eklenti yoksa DÜZ L.layerGroup()'a düşülür: kümeleme olmaz ama
+   * noktalar TEK TEK çizilir — veri asla görünmez kalmaz. Bayrak, kullanıcıya
+   * amber bir not göstermek için kullanılır. */
+  if(typeof L.markerClusterGroup==="function"){
+   m._cluster=L.markerClusterGroup({
+    maxClusterRadius:80,
+    spiderfyOnMaxZoom:true,
+    showCoverageOnHover:false,
+    disableClusteringAtZoom:15,
+    iconCreateFunction:c=>{
+     const n=c.getChildCount();
+     const cls=n<10?"small":n<50?"medium":"large";
+     return L.divIcon({html:`<div>${n}</div>`,className:`marker-cluster marker-cluster-${cls}`,iconSize:[40,40]});
+    }
+   });
+   m._clusterDegraded=false;
+  }else{
+   console.warn("DENDROGEO · markercluster eklentisi yok → noktalar kümelenmeden çiziliyor");
+   m._cluster=L.layerGroup();
+   m._clusterDegraded=true;
+  }
   m.addLayer(m._cluster);
+ }else{
+  m._cluster.clearLayers();
  }
+ const token=m._markerToken=(m._markerToken||0)+1;
  (function step(){
+  if(token!==m._markerToken)return;   /* bayat tur: daha yeni bir yükleme başladı */
   const end=Math.min(i+chunk,rows.length);
   for(;i<end;i++){
    const r=rows[i];
@@ -42,27 +98,90 @@ function addMarkersChunked(m,rows,chunk=150){
  })();
 }
 // 3. Onaylı marker'ları getir
+/* HATA ARTIK SESSİZ DEĞİL (2026-09-26).
+ *
+ * ESKİ KOD:  const{data,count}=await sb.from(...)...   ← error YOKSAYILIYORDU
+ *            ...
+ *            }catch(e){done&&done(0,[]);}
+ *
+ * İki ayrı yol "boş harita"yı BAŞARI gibi gösteriyordu:
+ *   1) Sorgu error dönerse (RLS/42501, PostgREST şema önbelleği, JWT
+ *      tazelenirken 401, ağ kopması) data=null → rows=[] → done(0,[]) →
+ *      ekranda YEŞİL "✓ 0 onaylı kayıt yüklendi" kutusu.
+ *   2) addMarkersChunked fırlatırsa (ör. markercluster eklentisi yüklenmedi)
+ *      catch yutuyor → yine done(0,[]) → yine sahte yeşil.
+ * Kullanıcı "verim silindi mi?" diye bunu bildirdi; oysa veri veritabanında
+ * duruyordu. Artık done(n,rows,err) hata metnini 3. argümanla taşır ve
+ * başarısızlıkta n=-1 olur; çağıranlar kırmızı kutu + ↻ düğmesi gösterir.
+ *
+ * İMZA GERİYE UYUMLU: err argümanını okumayan eski çağıranlar çalışmaya
+ * devam eder (n=-1'i 0 gibi görürler); ama repo içindeki üç çağıran da
+ * (loadLiveMap, loadWorld, initLanding) güncellendi. */
 async function loadApprovedMarkers(m,limit,done){
+ if(!m){done&&done(-1,[],"Harita henüz kurulmadı (initMaps çağrılmadı)");return;}
  try{
-  const{data,count}=await sb.from("measurements")
+  const{data,count,error}=await sb.from("measurements")
    .select("lat,lon,point_id,species,dbh_cm,height_m,carbon_kg,photo_url,grp",{count:"exact"})
    .eq("status","Onaylı").limit(limit);
+  if(error)throw new Error((error.code?error.code+": ":"")+error.message);
   /* Limit aşımında UYAR: işaretçiler ve bu satırlardan hesaplanan toplam karbon
    * kesilmiş kümeye dayanır. Bkz. src/utils/truncation.js */
   dgWarnIfTruncated(data,limit,"Canlı harita",count);
-  const rows=(data||[]).filter(r=>Number.isFinite(+r.lat)&&Number.isFinite(+r.lon));
+  const rows=(data||[]).filter(r=>dgValidCoord(r.lat,r.lon));
   addMarkersChunked(m,rows);
-  done&&done(rows.length,rows);
- }catch(e){done&&done(0,[]);}
+  done&&done(rows.length,rows,null);
+ }catch(e){
+  const msg=(e&&(e.message||e))+"";
+  console.error("DENDROGEO · onaylı işaretçiler yüklenemedi:",msg);
+  done&&done(-1,[],msg);
+ }
 }
 // 4. Canlı harita
+/* İDEMPOTENT + TAZELENEBİLİR (2026-09-26).
+ *
+ * BİLDİRİLEN HATA: "son yüklenen veriyi onaylamama rağmen canlı haritada
+ * göremiyorum." Kök neden burası değil, ui/shell.js'teki kapıydı:
+ *   if(!liveLoaded){liveLoaded=true;loadLiveMap();}
+ * Yani Canlı Harita sekmesi bir oturumda YALNIZ BİR KEZ yükleniyordu;
+ * approveMeas() loadWorld()'ü tazelese de canlı haritayı tazelemiyordu.
+ * Kullanıcı onaydan sonra sekmeye dönünce ESKİ işaretçi kümesini görüyor,
+ * F5 atmadan yenisini göremiyordu.
+ *
+ * ÇÖZÜM: liveLoaded + DG_LIVE_DIRTY. Onay/red/silme ve çevrimdışı
+ * senkronizasyon dgMarkLiveDirty() çağırır; go("map") bayrağı görünce
+ * yeniden çeker. Elle tazelemek için karta ↻ düğmesi kondu (partials/shell.html). */
 async function loadLiveMap(){
  const el=$("mapLoad");
- await loadApprovedMarkers(map,3000,(n,rows)=>{
-  el.textContent="✓ "+n+" onaylı kayıt yüklendi · noktaya dokun → bilgi + fotoğraf.";
-  el.className="alert ok";setTimeout(()=>el.style.display="none",3000);
+ if(el){el.style.display="";el.className="alert info";el.textContent="⏳ Onaylı kayıtlar yükleniyor…";}
+ await loadApprovedMarkers(map,3000,(n,rows,err)=>{
+  dgMarkLiveLoaded(!err);
+  if(!el)return;
+  if(err){
+   el.style.display="";
+   el.className="alert err";
+   el.innerHTML=`<b>⚠ Onaylı kayıtlar yüklenemedi</b> — harita bu yüzden boş. Veri silinmedi: `+
+    `<span class="mono" style="font-size:.74rem">${esc(err)}</span> `+
+    `<button class="btn sm" style="margin-left:6px" onclick="loadLiveMap()">↻ Yeniden dene</button>`;
+   return;
+  }
+  /* Kümeleme eklentisi yüklenemediyse kullanıcıya SÖYLE (sessiz kalite kaybı
+   * olmasın): noktalar tek tek çizilir, balon yerine nokta görür. */
+  const deg=map&&map._clusterDegraded;
+  el.className=deg?"alert warn":"alert ok";
+  el.textContent=(deg?"⚠ ":"✓ ")+`${n} onaylı kayıt yüklendi · ${new Date().toLocaleTimeString("tr-TR")} · `+
+   (deg?"kümeleme eklentisi yüklenemedi, noktalar tek tek çizildi. ":"noktaya dokun → bilgi + fotoğraf.");
+  setTimeout(()=>el.style.display="none",6000);
   renderAnalysis(rows,"liveAnalysis");
  });
+}
+/* liveLoaded/DG_LIVE_DIRTY ui/state.js'te (body sonunda) bildiriliyor; bu
+ * fonksiyon yalnız ÇAĞRI ANINDA dokunduğu için yükleme sırası sorun değil.
+ * try/catch: harness/birim testlerde state.js yüklenmeyebilir. */
+function dgMarkLiveLoaded(ok){
+ try{liveLoaded=true;DG_LIVE_DIRTY=false;}catch(e){}
+}
+function dgMarkLiveDirty(){
+ try{DG_LIVE_DIRTY=true;}catch(e){}
 }
 // 5. Harita başlatma
 function initMaps(){

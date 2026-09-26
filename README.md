@@ -129,6 +129,31 @@ bunları LULC analizi / panel grafiği ilk kullanıldığında enjekte eder.
 Landing ziyaretçisinin ilk açılışı ~525 KB daha hafiftir. sw.js ikisini de
 PRECACHE'te tutar → çevrimdışı davranış aynıdır.
 
+**İlk yükleme performansı (Faz 8, 2026-09-25):** ölçülen sorun bayt değil
+**istek sayısı + bloklamaydı** — 43 script'in tamamı `head`'de senkrondu, yani
+tarayıcı hepsini indirip çalıştırmadan gövdeyi çizemiyordu (1 KB'lık dosya bile
+bir gidiş-dönüş ≈ 300 ms). Yapılanlar:
+
+| | Önce | Sonra |
+|---|---|---|
+| İlk yükleme isteği | 50 | **42** |
+| Wire (gzip) | 277 KB | **250 KB** |
+| **Blokluyan script** | **43** | **0** (`defer`) |
+| Render'ı bloklayan font CSS | var | **yok** (`media="print"` + `onload`) |
+| `preconnect`/`dns-prefetch` | 1 | **8** |
+| LULC zinciri (8 modül) | her ziyarette | **tembel** (`dgEnsureLulc`) |
+
+`defer` belge sırasını koruduğu için modül yükleme sırası (ve `boot()`'un en
+sonda çalışması) değişmez. LULC zinciri `DG_LULC_CHAIN` sırasıyla, `async=false`
+ile enjekte edilir (indirmeler paralel, yürütme sıralı — facade `lc-*`
+global'lerine yükleme anında dokunduğu için sıra şart). `sw.js` bu dosyaları
+PRECACHE'te tutmaya devam eder → çevrimdışı LULC davranışı aynıdır.
+Landing haritası da eleman görünür alana yaklaşınca kuruluyor
+(`IntersectionObserver`, 6 sn yedek) → karolar ilk yüklemede yarışmıyor.
+Kilitler: `test/load-order.test.mjs` (tüm etiketler `defer` mi, LULC
+index.html'de YOK mu, zincir sırası doğru mu, analiz köprüsü `await
+dgEnsureLulc()` yapıyor mu).
+
 **Modül değişikliği iş akışı:**
 
 ```bash
@@ -173,12 +198,12 @@ python3 -m http.server 8080        # herhangi bir statik sunucu olur
 ### Test ve denetimler
 
 ```bash
-npm run check          # sözdizimi + ?v= + build + CSP + 503 test
+npm run check          # sözdizimi + ?v= + build + CSP + 506 test
 npm test               # yalnız testler (node:test, bağımlılık gerektirmez)
 npm run build          # index.html'i partials'tan üret (değişiklik sonrası)
 ```
 
-503 test şunları kilitler: karbon hesabı (Chave 2014, ρ fallback,
+506 test şunları kilitler: karbon hesabı (Chave 2014, ρ fallback,
 NaN yayılmaması), jeodezik alan ve geometri, **UTM projeksiyonu** (bilinen
 referans değerlerine karşı), Sutherland-Hodgman kırpma + alan korunumu,
 Service Worker'ın çevrimdışı yedeği, vendor kütüphanelerin global kurulumu,

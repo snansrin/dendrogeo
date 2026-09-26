@@ -149,9 +149,20 @@ function downloadWaypointsCSV(){
    Numeric analysis lives in src/services/landcover.js.
 ========================================================= */
 
-function runLandCoverAnalysis(){
+async function runLandCoverAnalysis(){
   if(window._dgLandCoverBusy){
     return toast("Arazi örtüsü analizi zaten çalışıyor.","info","🛰️");
+  }
+
+  /* Faz 8: LULC zinciri artık TEMBEL — ilk kullanımda sırayla yüklenir.
+   * Yüklenemezse kullanıcıya sebep söylenir (sessiz başarısızlık yok). */
+  if(!window.DG_LANDCOVER && typeof dgEnsureLulc==="function"){
+    toast("🛰️ Arazi örtüsü modülü yükleniyor…","info");
+    try{
+      await dgEnsureLulc();
+    }catch(err){
+      return toast("Arazi örtüsü modülü yüklenemedi: "+((err&&err.message)||err),"err","🛰️");
+    }
   }
 
   if(!window.DG_LANDCOVER || typeof window.DG_LANDCOVER.analyze!=="function"){

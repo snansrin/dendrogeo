@@ -158,7 +158,12 @@ function makeWorld() {
   vm.createContext(ctx);
 
   const html = readFileSync(join(ROOT, 'index.html'), 'utf8');
-  const scripts = [...html.matchAll(/<script src="(src\/[^"?]+)[^"]*"><\/script>/g)].map((m) => m[1]);
+  const scripts = [...html.matchAll(/<script\s+src="(src\/[^"?]+)[^>]*><\/script>/g)].map((m) => m[1]);
+/* LULC zinciri tembel yüklendiği için index.html'de yok; ağaç/karşılaştırma
+ * testleri onu gerektirmiyor ama facade'ı kullanan akışlar için yüklüyoruz. */
+scripts.push('src/services/lc-config.js', 'src/services/lc-geo.js', 'src/services/lc-stac.js',
+  'src/services/lc-engine.js', 'src/services/lc-osm.js', 'src/services/lc-patches.js',
+  'src/ui/lc-report.js', 'src/services/landcover.js');
   for (const f of scripts) {
     vm.runInContext(readFileSync(join(ROOT, f), 'utf8'), ctx, { filename: f });
   }
