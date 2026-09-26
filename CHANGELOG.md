@@ -9,6 +9,35 @@ Yeni sürüm yayımlama adımları: [`docs/surum-yayini.md`](docs/surum-yayini.m
 
 ## [Yayımlanmadı]
 
+### Eklendi — konum doğrulaması + proje↔park kilidi (0007, kullanıcı isteği)
+İstek: *"proje yapılacağı zaman veya projeye fotoğraf ekleneceği zaman konumdan
+doğrulama alsın; aynı projeye farklı parklardan giriş yapılmasın; her proje park
+ile eşitlensin; hatalı girişlerin önüne geçilsin."* İki katmanlı çit:
+
+- **İstemci (`src/services/geofence.js`):** `dgFreshFix()` taze yüksek-hassasiyetli
+  GPS (≤120 sn bayatlık, ±60 m hassasiyet eşiği); `dgGeoDecide()` saf karar —
+  park poligonu içinde mi / kenara ≤40 m mi (GPS+OSM gürültü payı) / dışında mı.
+  Proje açılışı (`dgScanCreateProject`) ve ölçüm+fotoğraf kaydı (`saveMeas`)
+  doğrulanmadan BAŞLAMAZ; fotoğraf reddedilirse sunucuya hiç gitmez.
+  Doğrulama damgası satırda: `geo_verified_at`, `geo_acc_m`, `geo_dist_m`.
+- **Sunucu (`0007_geo_fence.sql`):** `trg_geo_fence` — istemci atlatılsa bile
+  (elle API, eski sürüm, çevrimdışı kuyruk) park dışı ölçüm INSERT/UPDATE'i
+  `23514` ile RED; tam poligon ray-casting (`dg_point_in_park`, jsonb),
+  geometrisi olmayan miras parklar için alan-yarıçaplı daire yedeği.
+  `trg_project_requires_park` — parksız yeni proje açılamaz ("her proje park
+  ile eşitlensin"). Yönetici istisnası `geo_override_by` ile audit izi bırakarak
+  mümkün; yetki sunucuda `is_admin()` ile yeniden denetlenir.
+- **Geometri sunucuda:** tarama halkası `parks.geom_json`'a yazılır
+  (`dgPersistParkGeom`, ≤500 nokta/halka) → çit daireyle değil poligonla karar
+  verir; yazılamazsa sessizce daire yedine düşer (saha bloklanmaz).
+- Eşikler tek yerde: `DG_GEO={ACC_MAX_M:60, MARGIN_M:40, FIX_MAX_AGE_S:120}`.
+- Geriye uyum: mevcut satırlara dokunulmaz; parksız miras projeler çit dışında
+  (onları `dgParkGate` + `trg_enforce_park_link` zaten kesiyor).
+
+Kilitler: `test/geofence.test.mjs` (20 test) — poligon/margin/red/delik/hassasiyet/
+miras-park kararları, halka sadeleştirme, saveMeas+proje+istisna kancaları,
+index↔sw yükleme sırası, migration tetik/errcode/security-definer denetimi.
+
 ### Düzeltildi — "onayladığım kayıt haritada görünmüyor" (2026-09-26)
 Kullanıcı bildirimi: *"son yüklenen veriyi onaylamama rağmen ne dünyada ne canlı
 haritada göremiyorum."* Veritabanı tarafı sağlamdı — kayıt `status='Onaylı'`,

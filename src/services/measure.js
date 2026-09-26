@@ -330,6 +330,24 @@ if (!base.client_id) base.client_id = uuidv4();
         base.city=geo?geo.city:"Bilinmiyor";
         if(geo)toast("📍 Konum algılandı: "+esc(geo.city)+" / "+esc(geo.country),"info","🗺️");
     }
+
+    /* 🛰 KONUM DOĞRULAMASI (0007 · kullanıcı isteği 2026-09-26): yeni ölçüm ve
+     * fotoğraf, projenin parkının DIŞINDAN girilemez. Taze GPS fix'i alınır,
+     * park poligonu (yoksa alan-yarıçaplı daire) ile karşılaştırılır; eşik
+     * dışındaysa yükleme HİÇ BAŞLAMAZ (fotoğraf sunucuya gitmez).
+     * Sunucu garantisi: trg_geo_fence (0007) — istemci atlatılsa bile park
+     * dışı INSERT/UPDATE reddedilir. Düzenleme (EDIT_ID) mevcut kaydı
+     * günceller → sahada olmayı gerektirmez. */
+    if(!EDIT_ID&&gateProj&&gateProj.park_id&&typeof dgVerifyAtPark==="function"){
+      const pk=await sb.from("parks").select("*").eq("id",gateProj.park_id).maybeSingle();
+      if(pk.data){
+        const dec=await dgVerifyAtPark(pk.data,"measure");
+        if(!dec.ok)return toast("⛔ "+esc(dec.message||("Konum doğrulanamadı ("+dec.reason+")")),"err","🛰");
+        dgGeoStamp(base,dec);
+        if(dec.verified)toast("🛰 Konum doğrulandı: "+esc(pk.data.name)+
+          (dec.reason==="margin"?" (kenar payı)":"")+" · ±"+Math.round(dec.fix.acc)+" m","ok","🛰");
+      }
+    }
     
      // 3. OFFLINE KONTROLÜ (Fotoğraf ve veriyi IndexedDB'ye kaydet)
     if(!navigator.onLine){

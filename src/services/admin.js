@@ -36,7 +36,7 @@ $("aUsers").textContent=users.length;$("aRec").textContent=cnt.count??meas.lengt
   const act=st==="Onaylı"
    ?`<button class="btn sm red" onclick="rejectMeas(${x.id})">🚫 Reddet</button>`
    :`<button class="btn sm" onclick="approveMeas(${x.id})">✓ Onayla</button>`;
-  return `<tr><td>${esc(x.profiles?.full_name)||"—"}</td><td>${x.point_id}</td><td>${esc(x.species)}<br><span class="mono" style="font-size:.68rem;color:var(--mut);text-transform:none;letter-spacing:0">${esc(LATIN[x.species])||""}</span></td><td><b>${x.dbh_cm}</b></td><td><b>${x.height_m}</b></td><td>${(x.carbon_kg||0).toFixed(1)}</td><td>${dgThumb(x.photo_url)}</td><td><span class="badge ${bc}">${st}</span></td><td style="display:flex;gap:4px">${act}<button class="btn sm red" onclick="delMeas(${x.id})">🗑️</button></td></tr>`;
+  return `<tr><td>${esc(x.profiles?.full_name)||"—"}</td><td>${x.point_id}</td><td>${esc(x.species)}<br><span class="mono" style="font-size:.68rem;color:var(--mut);text-transform:none;letter-spacing:0">${esc(LATIN[x.species])||""}</span></td><td><b>${x.dbh_cm}</b></td><td><b>${x.height_m}</b></td><td>${(x.carbon_kg||0).toFixed(1)}</td><td>${dgThumb(x.photo_url)}</td><td><span class="badge ${bc}">${st}</span></td><td style="display:flex;gap:4px">${act}<button class="btn sm ghost" title="Konum çiti istisnası işle (0007 · yalnız yönetici · audit izi kalır)" onclick="dgGeoOverride(${x.id})">🛰</button><button class="btn sm red" onclick="delMeas(${x.id})">🗑️</button></td></tr>`;
  }).join("")||"<tr><td colspan=9>Kayıt yok.</td></tr>";
  loadStorageStats();
  checkBackupReminder();
@@ -60,6 +60,19 @@ async function approveMeas(id){
   * kümede kalıyordu → onaylanan nokta F5'e kadar görünmüyordu. */
  dgMarkLiveDirty();
  loadAdmin();loadWorld();
+}
+
+/* 🛰 KONUM ÇİTİ İSTİSNASI (0007): saha gerçeği poligonla çatışabilir (yeni
+ * dikim alanı, OSM'de henüz olmayan park, kapalı bahçe). Yönetici istisna
+ * işlerse satıra geo_override_by yazılır (audit) ve trigger çiti atlar.
+ * Yetki sunucuda da denetlenir: tg_geo_fence → is_admin() yoksa 42501. */
+async function dgGeoOverride(id){
+ if(!PROFILE||(PROFILE.role!=="admin"&&PROFILE.role!=="owner"))return toast("Yetki yok.","err");
+ if(!confirm("Bu kayıt için KONUM ÇİTİ İSTİSNASI işlensin mi?\nSorumluluk işleyende; satıra audit izi (geo_override_by) yazılır."))return;
+ const{error}=await sb.from("measurements").update({geo_override_by:USER.id}).eq("id",id);
+ if(error)return toast("Hata: "+error.message,"err");
+ toast("🛰 Konum istisnası işlendi (audit izi satırda)","ok","🛰");
+ loadAdmin();
 }
 
 async function rejectMeas(id){

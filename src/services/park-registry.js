@@ -675,6 +675,14 @@ async function dgScanCreateProject(){
   const labelEl=$("scanLabel");
   const label=labelEl?String(labelEl.value||"").trim():"";
 
+  /* 🛰 KONUM DOĞRULAMASI (0007): proje açılırken cihaz GERÇEKTEN parkta mı?
+   * Evden "park aç" denemesi ve YANLIŞ parkta proje açma burada kesilir.
+   * Sunucu tarafı: trg_project_requires_park (park_id zorunlu). */
+  if(typeof dgVerifyAtPark==="function"){
+    const dec=await dgVerifyAtPark(park,"project");
+    if(!dec.ok)return toast("⛔ "+esc(dec.message||"Konum doğrulanamadı: proje açmak için parkta olmalısın."),"err","🛰");
+  }
+
   const{data,error}=await sb.from("projects").insert({
     owner:USER.id,
     park_id:park.id,
@@ -687,6 +695,10 @@ async function dgScanCreateProject(){
   }).select().single();
 
   if(error)return toast("Proje oluşturulamadı: "+esc(error.message),"err");
+
+  /* 0007: taramadaki halkayı sunucuya yaz → trg_geo_fence bundan sonra bu
+   * park için daire yedeği değil TAM POLİGON ile doğrular. */
+  if(typeof dgPersistParkGeom==="function")await dgPersistParkGeom(park);
 
   toast("✓ Proje hazır: "+esc(data.name),"ok","📁");
   await dgAfterProjectLinked(data);
