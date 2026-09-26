@@ -196,64 +196,76 @@
 <link rel="icon" type="image/png" href="icon.png?v=2">
 <link rel="manifest" href="manifest.json"> 
 <meta name="theme-color" content="#14532d"><link rel="apple-touch-icon" href="apple-touch-icon.png">
+<!-- ÖN BAĞLANTI (2026-09-25): oturum sorgusu, Turnstile ve harita karoları
+     için DNS+TLS el sıkışması önceden yapılır (~200-400 ms kazanç). -->
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Manrope:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="preconnect" href="https://xjbpounwdxrhelmixvqm.supabase.co" crossorigin>
+<link rel="preconnect" href="https://challenges.cloudflare.com">
+<!-- Karo sunucuları {s}.tile.openstreetmap.org (a/b/c) biçiminde kullanılıyor;
+     CSP'deki izin "*.tile.openstreetmap.org" olduğu için apex DEĞİL alt alan
+     adları yazılır (wildcard apex'i kapsamaz). -->
+<link rel="dns-prefetch" href="https://a.tile.openstreetmap.org">
+<link rel="dns-prefetch" href="https://b.tile.openstreetmap.org">
+<link rel="dns-prefetch" href="https://c.tile.openstreetmap.org">
+<link rel="dns-prefetch" href="https://nominatim.openstreetmap.org">
+<link rel="dns-prefetch" href="https://overpass-api.de">
+<!-- FONT RENDER'I BLOKLAMASIN: stylesheet media="print" ile gelir, onload'da
+     all'a döner → ilk çizim font CSS'ini beklemez; preload öncelikli indirir. -->
+<link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Manrope:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Manrope:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap" media="print" onload="this.media='all'">
+<noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Manrope:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap"></noscript>
 <link rel="stylesheet" href="vendor/leaflet-1.9.4.css">
-<script src="vendor/leaflet-1.9.4.js"></script>
+<script src="vendor/leaflet-1.9.4.js" defer></script>
 <link rel="stylesheet" href="vendor/MarkerCluster-1.5.3.css">
 <link rel="stylesheet" href="vendor/MarkerCluster.Default-1.5.3.css">
-<script src="vendor/leaflet.markercluster-1.5.3.js"></script>
-<script src="vendor/supabase-js-2.116.0.js"></script>
-<script src="src/config/supabase.js?v=6b91ef6f"></script>
-<script src="src/config/constants.js?v=9f758cd5"></script>
-<script src="src/config/species.js?v=597bfd9f"></script>
-<script src="src/utils/geo.js?v=3e796768"></script>
-<script src="src/utils/truncation.js?v=f43c76b3"></script>
+<script src="vendor/leaflet.markercluster-1.5.3.js" defer></script>
+<script src="vendor/supabase-js-2.116.0.js" defer></script>
+<script src="src/config/supabase.js?v=6b91ef6f" defer></script>
+<script src="src/config/constants.js?v=9f758cd5" defer></script>
+<script src="src/config/species.js?v=597bfd9f" defer></script>
+<script src="src/utils/geo.js?v=3e796768" defer></script>
+<script src="src/utils/truncation.js?v=f43c76b3" defer></script>
 <!-- Faz 7: geotiff (317 KB) ve chart.js (208 KB) artık SENKRON yüklenmiyor;
      src/utils/lazylibs.js ihtiyaç anında enjekte eder (LULC analizi / panel grafiği). -->
-<script src="src/utils/lazylibs.js?v=00000000"></script>
-<script src="src/services/allometry.js?v=23ec2992"></script>
-<script src="src/services/auth.js?v=7c805a8c"></script>
-<script src="src/services/export.js?v=cf96e318"></script>
-<script src="src/services/offline.js?v=8017c712"></script>
+<script src="src/utils/lazylibs.js?v=00000000" defer></script>
+<script src="src/services/allometry.js?v=23ec2992" defer></script>
+<script src="src/services/auth.js?v=7c805a8c" defer></script>
+<script src="src/services/export.js?v=cf96e318" defer></script>
+<script src="src/services/offline.js?v=8017c712" defer></script>
 <!-- YÖNETİM ZİNCİRİ (Faz 6 — eski admin.js beş modüle bölündü) -->
-<script src="src/services/visit-stats.js?v=00000000"></script>
-<script src="src/services/data-requests.js?v=00000000"></script>
-<script src="src/services/user-admin.js?v=00000000"></script>
-<script src="src/services/backup.js?v=00000000"></script>
-<script src="src/services/admin.js?v=00000000"></script>
+<script src="src/services/visit-stats.js?v=00000000" defer></script>
+<script src="src/services/data-requests.js?v=00000000" defer></script>
+<script src="src/services/user-admin.js?v=00000000" defer></script>
+<script src="src/services/backup.js?v=00000000" defer></script>
+<script src="src/services/admin.js?v=00000000" defer></script>
 <!-- YÖNETİM AĞACI (2026-09-24): park → proje → kullanıcı → ölçüm kademeli
      görünümü + sorgu hatası görünürlüğü. admin.js'ten SONRA yüklenir
      (approve/reject/del fonksiyonlarını çağırır). -->
-<script src="src/services/admin-tree.js?v=00000000"></script>
-<script src="src/services/world.js?v=9623fcee"></script>
-<script src="src/services/measure.js?v=9a57298b"></script>
-<script src="src/services/map.js?v=ec711385"></script>
-<!-- LULC ZİNCİRİ (Faz 5 — eski landcover.js altı modül + facade oldu; sıralama
-     ÖNEMLİ: config → geo → stac → engine → osm → patches → report-UI → facade) -->
-<script src="src/services/lc-config.js?v=00000000"></script>
-<script src="src/services/lc-geo.js?v=00000000"></script>
-<script src="src/services/lc-stac.js?v=00000000"></script>
-<script src="src/services/lc-engine.js?v=00000000"></script>
-<script src="src/services/lc-osm.js?v=00000000"></script>
-<script src="src/services/lc-patches.js?v=00000000"></script>
-<script src="src/ui/lc-report.js?v=00000000"></script>
-<script src="src/services/landcover.js?v=00000000"></script>
+<script src="src/services/admin-tree.js?v=00000000" defer></script>
+<script src="src/services/world.js?v=9623fcee" defer></script>
+<script src="src/services/measure.js?v=9a57298b" defer></script>
+<script src="src/services/map.js?v=ec711385" defer></script>
+<!-- LULC ZİNCİRİ ARTIK TEMBEL (2026-09-25 · Faz 8): 8 dosya ilk yüklemede
+     indirilmiyor. Yalnız "🌿 Yüzey Örtüsü Analizi"ne basan kullanıcı için
+     src/utils/lazylibs.js → dgEnsureLulc() sırayla enjekte eder
+     (lc-config → lc-geo → lc-stac → lc-engine → lc-osm → lc-patches →
+      ui/lc-report → landcover facade). sw.js PRECACHE'te tutmaya devam eder,
+     yani çevrimdışı davranış değişmez. Kazanç: ilk yüklemede 8 istek azalır. -->
 <!-- PARK ZİNCİRİ (Faz 4 — eski gridplan.js yedi modüle bölündü; sıralama ÖNEMLİ:
      state → istemci → geometri → sorgu → motor → panel → export) -->
-<script src="src/services/park-state.js?v=00000000"></script>
-<script src="src/services/osm-client.js?v=00000000"></script>
-<script src="src/services/park-geometry.js?v=00000000"></script>
-<script src="src/services/park-query.js?v=00000000"></script>
+<script src="src/services/park-state.js?v=00000000" defer></script>
+<script src="src/services/osm-client.js?v=00000000" defer></script>
+<script src="src/services/park-geometry.js?v=00000000" defer></script>
+<script src="src/services/park-query.js?v=00000000" defer></script>
 <!-- PARK KİMLİĞİ (2026-09-24): queryPark'ın bulduğu parkı public.parks'a yazar,
      projeyi parka bağlar, ölçüm kapısını (park algılanmadan ölçüm yok) kurar.
      Sıra ÖNEMLİ: park-query'den sonra, grid-engine'den önce (grid panelindeki
      proje listesi bu modülden beslenir). -->
-<script src="src/services/park-registry.js?v=00000000"></script>
-<script src="src/services/grid-engine.js?v=00000000"></script>
-<script src="src/ui/park-panel.js?v=00000000"></script>
-<script src="src/ui/park-export.js?v=00000000"></script>
-<script src="src/services/dash.js?v=f5e14053"></script>
+<script src="src/services/park-registry.js?v=00000000" defer></script>
+<script src="src/services/grid-engine.js?v=00000000" defer></script>
+<script src="src/ui/park-panel.js?v=00000000" defer></script>
+<script src="src/ui/park-export.js?v=00000000" defer></script>
+<script src="src/services/dash.js?v=f5e14053" defer></script>
 <link rel="stylesheet" href="css/style.css?v=790e558b">
 <link rel="stylesheet" href="css/landing.css?v=e875e230">
 <link rel="stylesheet" href="css/park-panel.css?v=00000000">

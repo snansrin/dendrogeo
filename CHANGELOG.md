@@ -7,6 +7,35 @@ Yeni sürüm yayımlama adımları: [`docs/surum-yayini.md`](docs/surum-yayini.m
 
 ---
 
+## [Yayımlanmadı]
+
+### Değişti — ilk yükleme performansı (Faz 8)
+Ölçüm (canlı site, gzip açık): sorun boyut değil **istek sayısı ve bloklama**ydı —
+50 istek, 43 script'in tamamı `head`'de senkron, 10 dakikalık önbellek.
+
+- **43 senkron script → hepsi `defer`**: HTML ayrıştırması artık script'leri
+  beklemiyor, gövde hemen çiziliyor. `defer` belge sırasını koruduğu için modül
+  zinciri ve `boot()` zamanlaması değişmedi.
+- **LULC zinciri (8 modül) tembel**: `lazylibs.js → dgEnsureLulc()` yalnız
+  "🌿 Yüzey Örtüsü Analizi"ne basıldığında sırayla enjekte ediyor
+  (`async=false` → yürütme sırası korunur). `runLandCoverAnalysis()` artık
+  `async` ve zinciri `await` ediyor; yüklenemezse sebep kullanıcıya gösteriliyor.
+- **Google Fonts render'ı bloklamıyor**: `media="print"` + `onload="this.media='all'"`
+  + `preload` + `<noscript>` yedeği.
+- **8 ön bağlantı**: supabase.co (oturum sorgusu), challenges.cloudflare.com
+  (Turnstile), fonts.gstatic.com, a/b/c.tile.openstreetmap.org,
+  nominatim, overpass → DNS+TLS el sıkışması önceden.
+- **Landing haritası tembel**: `IntersectionObserver` (rootMargin 400px) + 6 sn
+  yedek; işaretçiler harita kurulunca yükleniyor (yarış bayrağıyla).
+
+Sonuç: istek **50 → 42**, wire **277 → 250 KB**, blokluyan script **43 → 0**.
+`sw.js` PRECACHE değişmedi → çevrimdışı davranış aynı.
+
+### Eklendi
+- `test/load-order.test.mjs`: tüm script etiketlerinin `defer` olduğu, LULC
+  zincirinin index.html'de BULUNMADIĞI ama `DG_LULC_CHAIN`'de doğru sırada
+  olduğu ve analiz köprüsünün zinciri beklediği kilitlendi.
+
 ## [3.0.0] — 2026-09-24
 
 > 📦 **Zenodo:** [10.5281/zenodo.22948643](https://doi.org/10.5281/zenodo.22948643) ·

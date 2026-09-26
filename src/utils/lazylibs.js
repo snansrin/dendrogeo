@@ -62,5 +62,59 @@ function dgLcLoadWithRetry(src,globalName){
   });
 }
 
+/* =========================================================
+   LULC ZİNCİRİ — TEMBEL MODÜL YÜKLEME (2026-09-25 · Faz 8)
+========================================================= */
+/* NEDEN: 8 dosya (lc-config, lc-geo, lc-stac, lc-engine, lc-osm, lc-patches,
+ * ui/lc-report, landcover facade) her ziyaretçide senkron iniyordu; oysa
+ * yalnız "🌿 Yüzey Örtüsü Analizi"ne basan kullanıcı gerekiyor. İlk yüklemede
+ * 8 istek ve ~20 KB (gzip) azaldı.
+ *
+ * SIRA ŞART: zincir birbirinin global'lerini çağrı anında çözer ama facade
+ * (landcover.js) YÜKLEME ANINDA lc-* global'lerine dokunur → sıralı yüklenmeli.
+ * Dinamik eklenen script'lerde async=false yürütme sırasını belge sırasına
+ * sabitler (indirmeler paralel, yürütme sıralı).
+ *
+ * ?v= KULLANILMIYOR: sw.js network-first + PRECACHE zaten tazelik sağlıyor
+ * (depodaki sürüm politikası notu: "?v= artık ZORUNLU DEĞİL"). CORE_ASSETS
+ * sorgusuz yolları tuttuğu için çevrimdışı davranış değişmez. */
+const DG_LULC_CHAIN=[
+  "src/services/lc-config.js",
+  "src/services/lc-geo.js",
+  "src/services/lc-stac.js",
+  "src/services/lc-engine.js",
+  "src/services/lc-osm.js",
+  "src/services/lc-patches.js",
+  "src/ui/lc-report.js",
+  "src/services/landcover.js"
+];
+
+let DG_LULC_PROMISE=null;
+
+function dgLoadScriptOrdered(src){
+  return new Promise((resolve,reject)=>{
+    const s=document.createElement("script");
+    s.src=src;
+    s.async=false;           /* yürütme sırası belge sırası olsun */
+    s.onload=()=>resolve();
+    s.onerror=()=>reject(new Error(src+" yüklenemedi"));
+    document.head.appendChild(s);
+  });
+}
+
+function dgEnsureLulc(){
+  if(window.DG_LANDCOVER)return Promise.resolve();
+  if(!DG_LULC_PROMISE){
+    DG_LULC_PROMISE=DG_LULC_CHAIN
+      .reduce((z,src)=>z.then(()=>dgLoadScriptOrdered(src)),Promise.resolve())
+      .then(()=>{
+        if(!window.DG_LANDCOVER)throw new Error("LULC zinciri yüklendi ama DG_LANDCOVER facade oluşmadı");
+      })
+      .catch(err=>{DG_LULC_PROMISE=null;throw err;});
+  }
+  return DG_LULC_PROMISE;
+}
+
 window.dgEnsureGeoTIFF=dgEnsureGeoTIFF;
 window.dgEnsureChart=dgEnsureChart;
+window.dgEnsureLulc=dgEnsureLulc;
