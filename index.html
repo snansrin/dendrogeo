@@ -276,6 +276,10 @@
 <link rel="stylesheet" href="css/style.css?v=0155c801">
 <link rel="stylesheet" href="css/landing.css?v=e875e230">
 <link rel="stylesheet" href="css/park-panel.css?v=10b49293">
+<!-- TASARIM SİSTEMİ (2026-09-26): ui-standard.css BİLEREK en son
+     yüklenir — alt sayfaların kendi <style> bloklarını ve kabuktaki dağınık
+     eleman stillerini tek bilim dilinde hizalar (bkz. css/ui-standard.css). -->
+<link rel="stylesheet" href="css/ui-standard.css?v=d45e41a3">
 </head>
 <body>
 <div id="toastWrap"></div>
@@ -659,12 +663,15 @@
         saveMeas(); sunucu kapısı 0004_parks.sql → trg_enforce_park_link. -->
    <div id="parkGate" class="alert info" style="display:none"></div>
    <div class="grid g2">
-    <div class="card">
-     <div class="lbl" style="margin-bottom:10px">🛰 GPS / Uydu</div>
+    <div class="card dg-fieldcard">
+     <div>
+      <div class="dg-kicker">🛰 SAHA KONUMU</div>
+      <div class="dg-sub">Biyokütle ve jeodezik alan hesabı için saha koordinatı gereklidir.</div>
+     </div>
      <div class="gpsring" id="gpsRing"><div class="val" id="gpsAcc">—</div><div class="lbl">doğruluk (m)</div></div>
-     <div id="gpsState" class="alert info" style="margin-top:12px">Konum servisi kapalı.</div>
-     <button class="btn blue" style="width:100%" onclick="startGps()">📡 Konumu Etkinleştir</button>
-     <div id="iosHint" class="alert info" style="display:none;margin-top:10px"><b>iPhone kullanıcısı mısınız?</b><br><span style="font-size:.85rem">Ayarlar → Gizlilik ve Güvenlik → Konum Servisleri →Safari Siteleri→ "Uygulamayı Kullanırken" seçin, sayfayı yenileyin.</span></div>
+     <div id="gpsState" class="alert info">Konum servisi kapalı.</div>
+     <button class="btn block" onclick="startGps()">📡 Konumu Etkinleştir</button>
+     <div id="iosHint" class="alert info" style="display:none"><b>iPhone kullanıcısı mısınız?</b><br><span style="font-size:.85rem">Ayarlar → Gizlilik ve Güvenlik → Konum Servisleri →Safari Siteleri→ "Uygulamayı Kullanırken" seçin, sayfayı yenileyin.</span></div>
      <div class="grid g2" style="margin-top:14px">
       <div><div class="lbl">Enlem</div><div class="mono" id="gLat">—</div></div>
       <div><div class="lbl">Boylam</div><div class="mono" id="gLon">—</div></div>

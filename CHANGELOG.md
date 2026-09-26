@@ -9,6 +9,30 @@ Yeni sürüm yayımlama adımları: [`docs/surum-yayini.md`](docs/surum-yayini.m
 
 ## [Yayımlanmadı]
 
+### Değişti — TEK tasarım sistemi: `css/ui-standard.css` (kullanıcı isteği)
+İstek: *"📡 Konumu Etkinleştir butonunu canlı UI/UX'e göre yap (yüzey analizi
+gibi); bütün sayfaların temaları, yazı stilleri, yazı renkleri, başlık/alt
+başlık düzeni aynı olsun, bilimsel literatüre uygun; her sayfa/panel farklı
+olmasın, butonlar aynı olsun."*
+
+Ölçülen sorun: 11 alt sayfanın HER BİRİ kendi `<style>` bloğunda Arial gövde
+yazısı, farklı yeşil (#14532d), farklı buton/başlık ölçüleri tanımlıyordu;
+kabukta GPS butonu `.btn blue` + inline `width:100%` ile birincil CTA
+ailesinden ayrışıyordu.
+
+- **`css/ui-standard.css` (YENİ):** token anayasası (`--green:#1e6f4b`,
+  Fraunces/Manrope/IBM Plex Mono), tipografi ölçeği (kicker/h1/h2/h3/h4/sub/
+  meta), buton TEK aile (`.btn` + ghost/red/blue/amber/sm/lg/block), kart/
+  alert/badge/tablo/form standartları. Her sayfada kendi stilinden SONRA
+  yüklenir → aynı özgüllükte son kural kazanır; alt sayfaların Arial/dayatma
+  stilleri eleman seviyesinde hizalanır (kendi sınıfları bozulmaz).
+- **GPS bloğu** standart alan kartına geçti: `.card.dg-fieldcard` +
+  `.dg-kicker` + `.dg-sub` + `.btn.block` (yüzey analizi kartlarıyla aynı dil).
+- **11 alt sayfa** `../css/ui-standard.css` bağlar (kendi `</style>` sonrasında).
+- `sw.js` r40: PRECACHE'e ui-standard.css eklendi (çevrimdışı alt sayfalar da
+  standart görünür).
+Kilitler: `test/ui-standard.test.mjs` (10 test). 567 test yeşil · check ✅
+
 ### Eklendi — konum doğrulaması + proje↔park kilidi (0007, kullanıcı isteği)
 İstek: *"proje yapılacağı zaman veya projeye fotoğraf ekleneceği zaman konumdan
 doğrulama alsın; aynı projeye farklı parklardan giriş yapılmasın; her proje park
