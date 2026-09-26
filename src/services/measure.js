@@ -346,6 +346,7 @@ if (!base.client_id) base.client_id = uuidv4();
         dgGeoStamp(base,dec);
         if(dec.verified)toast("🛰 Konum doğrulandı: "+esc(pk.data.name)+
           (dec.reason==="margin"?" (kenar payı)":"")+" · ±"+Math.round(dec.fix.acc)+" m","ok","🛰");
+        else if(dec.note)toast("⚠ "+esc(dec.note),"warn","🛰");
       }
     }
     

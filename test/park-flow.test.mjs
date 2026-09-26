@@ -309,7 +309,9 @@ describe('ölçüm kapısı: park algılanmadan ölçüm yok', () => {
     run('dgParkGate()');
     assert.equal(el('parkGate').className, 'alert err');
     assert.equal(el('saveBtn').disabled, true);
-    assert.ok(el('parkGate').innerHTML.includes('startParkScan({projectId:2'), 'yönlendirme projeyi taşımalı');
+    /* 2026-09-26: bağla düğmeleri kalktı; kapı ya yönetim yolunu ya yeni proje
+     * yolunu gösterir. İkisi de 'park bekliyor' durumunu çözer. */
+    assert.ok(/Park Kimlikleri|yeni proje/i.test(el('parkGate').innerHTML), 'kapı çözüm yolunu göstermeli');
   });
 
   test('proje seçilmemişse park algılama ekranına gönderir', () => {
@@ -559,7 +561,10 @@ describe('park algılama ekranı: yönlendirme → kimlik → proje', () => {
     const card = el('parkScanCard').innerHTML;
     assert.equal((card.match(/dg-scan-step on/g) || []).length, 3, 'üç adım da açık olmalı');
     assert.ok(card.includes('way/123') && card.includes('42.3 ha') && card.includes('DB #7'), card.slice(0, 300));
-    assert.ok(card.includes('dgScanLinkTarget()'), 'hedef projeye bağlama butonu yok');
+    /* 2026-09-26 saha geri bildirimi: bağla düğmeleri kaldırıldı → kartta
+     * YALNIZ yeni proje yolu kalır; eski projeyi yönetici Park Kimlikleri'nden bağlar. */
+    assert.ok(!card.includes('dgScanLinkTarget()'), 'bağla butonu geri GELMEMELI');
+    assert.ok(card.includes('dgScanCreateProject()'), 'yeni proje butonu durmalı');
     assert.ok(card.includes('value="Eski Proje"'), 'etiket eski adı önermeli (ad kaybolmasın)');
   });
 
@@ -994,7 +999,7 @@ describe('parka bağlama yalnız yönetici — normal kullanıcı kilitli', () =
     assert.ok(el('projTable').innerHTML.includes('startParkScan({projectId:2'), 'yönetici bağlayabilmeli');
     el('mProject').value = '2';
     run('dgParkGate()');
-    assert.ok(el('parkGate').innerHTML.includes('Parkı Algıla ve Bağla'), 'yönetici kapıda bağlama görür');
+    assert.ok(el('parkGate').innerHTML.includes('Park Kimlikleri'), 'yönetici kapıda bağlama yolunu görür');
     await run('loadParkCompare()');
     assert.ok(el('parkCompare').innerHTML.includes("startParkScan({returnTo:'world'})"), 'yönetici onarım düğmesini görür');
     assert.ok(!el('parkCompare').innerHTML.includes('🔐 yönetici bağlayacak'), 'yöneticiye "yönetici bağlayacak" denmez');
