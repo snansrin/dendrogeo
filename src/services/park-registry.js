@@ -394,6 +394,29 @@ async function dgDetectAt(lat,lon,opt){
   return parks;
 }
 
+/* UZAKTAN PARK ARAMA: 1) kayıtlı parklarda ada göre bul (name_norm),
+ * 2) yoksa Nominatim'den koordinat → dgDetectAt (aynı boru hattı: queryPark →
+ * kimlik → DG_PARK). Konum BİLGİSİ gerektirmez → kullanıcı evden de proje açar. */
+async function dgScanSearchByName(name){
+ const q=String(name||"").trim();
+ if(!q)return toast("Önce park adını yaz.","warn","🔍");
+ const norm=(typeof dgNormParkName==="function"?dgNormParkName(q):q).toLocaleLowerCase("tr-TR");
+ try{
+  const{data}=await sb.from("parks").select("*").ilike("name_norm",norm+"%").order("name").limit(5);
+  if(data&&data.length){
+   DG_PARK_CAND=null;DG_PARK=data[0];dgRenderScanCard();
+   return toast("🌳 "+esc(data[0].name)+" seçildi — proje açabilirsin; ölçüm için parkta olman gerekir.","ok","🌳");
+  }
+ }catch(e){console.warn("DENDROGEO · uzak park arama (DB):",e.message);}
+ toast("🔍 "+q+" OSM'de aranıyor…","info","🌳");
+ try{
+  const r=await fetch("https://nominatim.openstreetmap.org/search?format=jsonv2&limit=1&q="+encodeURIComponent(q+" park"));
+  const j=await r.json();
+  if(!j||!j.length)return toast("Bulunamadı: haritada parkın içine tıkla ya da ✍️ elle oluştur.","warn","🔍");
+  return await dgDetectAt(+j[0].lat,+j[0].lon);
+ }catch(e){return toast("Arama hatası: "+esc(e.message)+" — haritada tıkla veya elle oluştur.","err","🔍");}
+}
+
 function dgDetectAtMyLocation(){
   if(!GPS){
     toast("Önce 📡 Konumu Etkinleştir","warn","🛰");
@@ -521,6 +544,17 @@ function dgRenderScanCard(forceManual){
       `<div style="display:flex;gap:8px;flex-wrap:wrap">`+
         `<button class="btn sm blue" onclick="dgToggleParkModeFromScan()">🌳 Park Modunu Aç</button>`+
         `<button class="btn sm" onclick="dgDetectAtMyLocation()">📍 Konumumdan Algıla</button>`+
+      `</div>`+
+      /* UZAKTAN PARK (2026-09-27 · kullanıcı isteği): "uzaktaki bir parka proje
+       * oluşturamıyorum". GPS yalnızca ÖNERİ içindir; ada göre arama herhangi
+       * bir yerdeki parkı bulur → proje açılabilir. ÖLÇÜM kapısı ayrı kalır:
+       * saveMeas konum çitiyle parkta olmayı zorunlu tutar. */
+      `<div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap">`+
+        `<input id="scanRemote" class="dg-png-input" placeholder="uzaktaki parkın adı (örn. Göksu Parkı, Mersin)" style="flex:1;min-width:200px">`+
+        `<button class="btn sm blue" onclick="dgScanSearchByName(document.getElementById('scanRemote').value)">🔍 Ada göre bul (uzak park)</button>`+
+      `</div>`+
+      `<div class="dg-tree-meta" style="margin-top:6px">Uzak parkta <b>proje açabilirsin</b>; ölçüm ve fotoğraf için parkta olman gerekir (konum çiti 0007).</div>`+
+      `<div style="display:flex;gap:8px;flex-wrap:wrap">`+
         `<button class="btn sm ghost" onclick="dgShowManualParkForm()">✍️ OSM'de yok — elle oluştur</button>`+
       `</div>`+
       dgManualFormHTML(showManual);
@@ -675,13 +709,6 @@ async function dgScanCreateProject(){
   const labelEl=$("scanLabel");
   const label=labelEl?String(labelEl.value||"").trim():"";
 
-  /* 🛰 KONUM DOĞRULAMASI (0007): proje açılırken cihaz GERÇEKTEN parkta mı?
-   * Evden "park aç" denemesi ve YANLIŞ parkta proje açma burada kesilir.
-   * Sunucu tarafı: trg_project_requires_park (park_id zorunlu). */
-  if(typeof dgVerifyAtPark==="function"){
-    const dec=await dgVerifyAtPark(park,"project");
-    if(!dec.ok)return toast("⛔ "+esc(dec.message||"Konum doğrulanamadı: proje açmak için parkta olmalısın."),"err","🛰");
-  }
 
   const{data,error}=await sb.from("projects").insert({
     owner:USER.id,
@@ -1459,6 +1486,7 @@ function dgSchemaWarnHTML(){
 
 window.startParkScan=startParkScan;
 window.dgDetectAtMyLocation=dgDetectAtMyLocation;
+window.dgScanSearchByName=dgScanSearchByName;
 window.dgCreateManualPark=dgCreateManualPark;
 window.dgShowManualParkForm=dgShowManualParkForm;
 window.dgToggleParkModeFromScan=dgToggleParkModeFromScan;

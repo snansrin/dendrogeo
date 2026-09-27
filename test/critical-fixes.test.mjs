@@ -155,3 +155,34 @@ describe('kaldığın yerden devam (sekme + kaydırma) — 2026-09-27', () => {
     assert.ok(writes >= 4, 'tüm storage erişimleri try/catch içinde, got ' + writes);
   });
 });
+
+describe('uzaktan proje + canlı kaydet butonu — 2026-09-27', () => {
+  const read2 = (p) => readFileSync(join(ROOT, p), 'utf8');
+  test('⭐ uzaktaki parka PROJE açılabilir: ada göre arama var ve GPS şartı yok', () => {
+    const pr = read2('src/services/park-registry.js');
+    assert.match(pr, /async function dgScanSearchByName/, 'ada göre arama fonksiyonu');
+    assert.match(pr, /window\.dgScanSearchByName=/, 'scan kartından çağrılabilir');
+    assert.match(pr, /id="scanRemote"/, 'arama kutusu scan kartında');
+    assert.match(pr, /Uzak parkta .*proje açabilirsin/, 'kural kullanıcıya yazılı söylenir');
+    const i = pr.indexOf('async function dgScanCreateProject');
+    const govde = pr.slice(i, pr.indexOf('async function dgScanLinkTarget', i));
+    assert.doesNotMatch(govde, /dgVerifyAtPark/, 'proje açılışında konum bloğu YOK');
+  });
+  test('ölçüm kapısı DURUYOR: saveMeas hâlâ konum doğruluyor', () => {
+    const m = read2('src/services/measure.js');
+    assert.match(m, /dgVerifyAtPark\(pk\.data,"measure"\)/, 'uzak parkta ölçüm hâlâ engelli');
+  });
+  test('⭐ Hesapla ve Kaydet CANLI buton (aynı desen: disabled + ⏳ + finally)', () => {
+    const m = read2('src/services/measure.js');
+    assert.match(m, /function dgSaveBusy\(on\)/, 'canlı yardımcı');
+    assert.match(m, /"⏳ Hesaplanıyor ve kaydediliyor…"/, '⏳ metni');
+    assert.match(m, /finally\{dgSaveBusy\(false\);\}/, 'her çıkış yolunda geri gelir');
+    assert.match(m, /async function dgSaveMeasInner/, 'iç gövde ayrı, sarmalayıcı dışta');
+  });
+  test('tam genişlik CTA' + '\u2019' + 'lar tek ailede (dg-png-btn)', () => {
+    const sh = read2('partials/shell.html');
+    assert.match(sh, /id="saveBtn"[^>]*class="dg-png-btn primary"|class="dg-png-btn primary" id="saveBtn"/, 'kaydet butonu ailede');
+    assert.match(sh, /class="dg-png-btn primary" style="margin-top:14px" onclick="arriveWp\(\)"/, 'vardım butonu ailede');
+    assert.doesNotMatch(sh, /class="btn" style="width:100%/, 'eski dağınık desen kalmamalı');
+  });
+});

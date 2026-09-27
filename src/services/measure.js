@@ -281,7 +281,21 @@ async function queryPointId(){
  }
 }
 /* --- 7. KAYDET (EN BÜYÜK) --- */
+/* CANLI BUTON (2026-09-27 · kullanıcı isteği): 💾 Hesapla ve Kaydet, 🌿 ve 📡
+ * butonlarıyla BİREBİR aynı deseni kullanır: basınca disabled + "⏳ …" +
+ * soluk + wait imleci; her çıkış yolunda (başarı/hata/erken return) finally
+ * ile geri gelir. Yeni tema yok — aynı aile, aynı mekanizma. */
+function dgSaveBusy(on){
+ const b=$("saveBtn");if(!b)return;
+ if(on){b.dataset.oldText=b.innerHTML;b.innerHTML="⏳ Hesaplanıyor ve kaydediliyor…";b.disabled=true;b.style.opacity=".65";b.style.cursor="wait";}
+ else{b.disabled=false;b.innerHTML=b.dataset.oldText||"💾 Hesapla ve Kaydet";b.style.opacity="";b.style.cursor="";}
+}
 async function saveMeas(){
+ dgSaveBusy(true);
+ try{return await dgSaveMeasInner();}
+ finally{dgSaveBusy(false);}
+}
+async function dgSaveMeasInner(){
     const pid=+$("mProject").value,pt=+$("mPoint").value,sp=$("mSpecies").value,d=+$("mDbh").value,h=+$("mHeight").value,grp=$("mGroup").value;
     if(!pid||!pt||!sp||!d||!h)return toast("Tüm alanları doldur","err");
 

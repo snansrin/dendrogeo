@@ -133,12 +133,16 @@ describe('istemci kancaları yerinde (atlama yok)', () => {
     assert.match(govde, /if\(!dec\.ok\)return toast/, 'reddedilirse yükleme başlamamalı');
   });
 
-  test('dgScanCreateProject: proje açılışı doğrulamalı + geometri sunucuya yazılmalı', () => {
+  test('doğrulama YALNIZ ölçümde; proje açılışında konum bloğu YOK (2026-09-27 kesin)', () => {
+    /* Kullanıcı: "uzaktaki bir parka proje oluşturamıyorum… sadece ölçüm
+     * giremeyim". Bu blok daha önce 'silindi' sanılıp testi güncellenmemişti;
+     * artık hem kod hem test tek doğruda. */
     const p = read('src/services/park-registry.js');
     const i = p.indexOf('async function dgScanCreateProject');
     const govde = p.slice(i, p.indexOf('async function dgScanLinkTarget', i));
-    assert.match(govde, /dgVerifyAtPark\(park,"project"\)/, 'proje açılışı parkta doğrulanmalı');
+    assert.doesNotMatch(govde, /dgVerifyAtPark/, 'proje açılışı GPS ile bloklanmamalı');
     assert.match(govde, /dgPersistParkGeom\(park\)/, 'halkalar sunucuya yazılmalı');
+    assert.match(p, /async function dgScanSearchByName/, 'uzak park için ada göre arama olmalı');
   });
 
   test('yönetici istisnası: dgGeoOverride + tablo düğmesi', () => {

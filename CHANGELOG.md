@@ -9,6 +9,23 @@ Yeni sürüm yayımlama adımları: [`docs/surum-yayini.md`](docs/surum-yayini.m
 
 ## [Yayımlanmadı]
 
+### Düzeltildi — uzaktaki parka proje açılabilir + tüm CTA'lar canlı/tek aile (2026-09-27)
+Kullanıcı: "uzaktaki bir parka proje oluşturamıyorum; proje oluşturabileyim,
+sadece ölçüm giremeyim; GPS parkı algılasın… Hesapla ve Kaydet butonu da canlı
+olsun, bütün butonlar aynı olsun."
+- **Park Algılama kartına 🔍 ada göre arama** (`dgScanSearchByName`): önce
+  kayıtlı parklarda `name_norm` arar, yoksa Nominatim koordinatı → `dgDetectAt`
+  (aynı boru hattı). GPS artık yalnız ÖNERİ; uzaktaki parka **proje açılır**.
+  ÖLÇÜM kapısı değişmedi: `saveMeas` konum çitiyle parkta olmayı zorunlu tutar
+  (kartta yazılı olarak da belirtilir).
+- **💾 Hesapla ve Kaydet CANLI:** 🌿/📡 ile birebir desen — `dgSaveBusy`:
+  disabled + "⏳ Hesaplanıyor ve kaydediliyor…" + soluk + wait; `finally` ile
+  her çıkış yolunda geri gelir.
+- **CTA tek aile:** tam genişlik birincil butonlar (Kaydet, 🎯 Vardım, parola)
+  `dg-png-btn primary`, ikincil `ghost`; eski `class="btn" style="width:100%"`
+  deseni kabukta kalmadı.
+Kilitler: critical-fixes +4 test. 576 test yeşil · check ✅
+
 ### Düzeltildi — Park Karşılaştırma kartı eski görünümünde + "kaldığın yerden devam"
 Kullanıcı: "barları küçültüp en üsttekini kaydırmışsın, eski haline getir;
 sayfayı yenilediğimde kaldığım yerden devam edebileyim."
