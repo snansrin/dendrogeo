@@ -19,6 +19,34 @@ takıldığında nereye bakılacağını anlatır. Raporun içeriği/biçimi iç
 Bekleme süresi: GitHub zamanlayıcısı 5 dakikada bir çalışır; yoğun saatlerde
 tetikleme 10–15 dakikayı bulabilir. Pages dağıtımı buna 1–2 dakika ekler.
 
+## 1b) Kısa yol (kullanıcı — 0009)
+
+Kullanıcılar **kendi park projelerinin** raporunu kendisi yayınlar
+(2026-09-28, `0009_user_report_publish.sql`):
+
+1. Uygulamada **📁 Projeler** sekmesini aç.
+2. Parkı bağlı projenin satırındaki **📄** düğmesine bas → tablonun altında
+   **Park Raporu** paneli açılır.
+3. Panelde durum görünür: yayınlanmış rapor varsa **🔗 Aç** + **📤 Paylaş**;
+   yoksa **📄 Yayınla**'ya bas → istek aynı kuyruğa (`report_requests`)
+   yazılır, birkaç dakika içinde kalıcı bağlantı panelde belirir.
+4. Bekleyen **kendi** isteğini **✖ Vazgeç** ile iptal edebilirsin.
+
+Sunucu kilitleri (RLS + `tg_report_request_gate`, iki katman):
+
+| Kilit | Kural | Hata kodu |
+|---|---|---|
+| Kimlik | İstek yalnız kendi adına (`requested_by = auth.uid()`) | `REPORT_NOT_SELF` |
+| Mülkiyet | Park, kullanıcının bir projesine bağlı olmalı | `REPORT_NOT_YOUR_PARK` |
+| Kendi verisi | Kullanıcının o parkta en az bir **onaylı** ölçümü olmalı | `REPORT_NO_OWN_DATA` |
+| Kota | Yönetici olmayan 24 saatte en fazla **3** istek açabilir | `REPORT_QUOTA` |
+| 0008'den aynen | Park başına tek bekleyen istek + parkta onaylı veri şartı | `23505` / `REPORT_NO_DATA` |
+
+Dürüstlük notu: rapor **park düzeyindedir** — yalnız isteyenin projesini değil,
+parktaki tüm onaylı ölçümleri kapsar (panel bunu kullanıcıya da söyler).
+Yönetici kartı ve hakları değişmez; Actions hattı aynı hattır (kimin istediğine
+bakmaz, kuyruğu anon anahtarla okur).
+
 ## 2) Hat nasıl akar
 
 ```
@@ -74,10 +102,12 @@ Başarısızlığın en sık üç nedeni:
 ## 5) Kurulum (bir kez)
 
 1. Supabase → SQL Editor → `supabase/migrations/0008_report_publish.sql` → Run.
-2. Depoyu push'la: `rapor-yayin.yml` kendiliğinden etkinleşir.
+2. Supabase → SQL Editor → `supabase/migrations/0009_user_report_publish.sql`
+   → Run (kullanıcılar kendi parkını yayınlayabilsin: mülkiyet + kota kilidi).
+3. Depoyu push'la: `rapor-yayin.yml` kendiliğinden etkinleşir.
    (GitHub → Actions → "Rapor Yayın Kuyruğu" → ilk koşuyu görmek istersen
    "Run workflow" da diyebilirsin; şart değil.)
-3. Uygulamada 🔐 Ölçüm Yönetimi → kart parkları listeliyorsa hat hazır.
+4. Uygulamada 🔐 Ölçüm Yönetimi → kart parkları listeliyorsa hat hazır.
 
 > GitHub, 60 gün boyunca **hiç** etkinlik olmayan depolarda zamanlanmış işleri
 > devre dışı bırakır ve e-posta gönderir. Gelirse: Actions → "Rapor Yayın
@@ -106,3 +136,10 @@ hash'in yayınlanmış sayfayla eşleşmesi), arayüz bağlantısı (kart yalnı
 vm'de gerçek davranış (bağlantı yalnız geçerli `DGR-YYYY-NNNN` kimliğinden
 kurulur → oynanmış günlük dosyası uygulama içine dış bağlantı sokamaz;
 yönetici olmayan istek açamaz).
+
+`test/user-publish.test.mjs` kullanıcı yayını hattını (0009) kilitler:
+mülkiyet + kendi onaylı verisi + 24 saatte 3 istek kotası + `requested_by =
+auth.uid()` (SQL), 📁 Projeler'deki 📄 düğmesi ve panelin kablolaması
+(arayüz), vm'de gerçek davranış (panel durumları, insert gövdesi/oturum
+anahtarı, kota–mülkiyet hata eşlemeleri, başkasının isteğinde ✖ Vazgeç yok,
+oynanmış günlük bağlantı sokamaz).

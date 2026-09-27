@@ -1,0 +1,1142 @@
+diff --git a/CHANGELOG.md b/CHANGELOG.md
+index 523cf71..93e1d47 100644
+--- a/CHANGELOG.md
++++ b/CHANGELOG.md
+@@ -9,6 +9,34 @@ Yeni sürüm yayımlama adımları: [`docs/surum-yayini.md`](docs/surum-yayini.m
+ 
+ ## [Yayımlanmadı]
+ 
++### Eklendi — Kullanıcılar kendi park projelerinin raporunu kendisi yayınlar (0009)
++Kullanıcı: **"kullanıcılar kendi park projelerini paylaşabilecek değil mi?"** →
++doğrudan yayın seçildi. Hat aynı hat (report_requests → rapor-yayin.yml →
++DGR + kalıcı bağlantı); değişen tek şey yetki kapısı.
++- `supabase/migrations/0009_user_report_publish.sql`: yönetici olmayan
++  kullanıcı, parkı için projesi varsa istek açabilir. Sunucu kilitleri (RLS +
++  `tg_report_request_gate`, iki katman): mülkiyet (`REPORT_NOT_YOUR_PARK`),
++  kendi onaylı ölçümü (`REPORT_NO_OWN_DATA`), 24 saatte 3 istek kotası
++  (`REPORT_QUOTA`), `requested_by = auth.uid()` (`REPORT_NOT_SELF`) +
++  `is_active()`. Kullanıcı yalnız kendi bekleyen isteğini iptal edebilir;
++  0008'in kilitleri (park başına tek bekleyen istek, onaylı veri şartı,
++  select anon'a açık, delete yalnız yönetici) aynen durur. Idempotent.
++- `src/services/report-publish.js`: kullanıcı bölümü — 📁 Projeler'de parkı
++  bağlı her satırda **📄** düğmesi, tablonun altında **Park Raporu** paneli
++  (durum rozeti, 🔗 Aç / 📤 Paylaş / 📄 Yayınla / 📄 Yeni sürüm / ✖ Vazgeç,
++  🛰 §4 tercihi, 25 sn'de bir kendiliğinden tazeleme). Yeni CSS yok; panel
++  kullanılmadığında `display:none` → sıfır yer kaplar. Yazma çekirdeği
++  (`dgPubInsertRequest` + hata eşleme) yönetici kartıyla ortak.
++- Dürüstlük: panel her kullanıcıya söyler — rapor **park düzeyindedir**
++  (parktaki tüm onaylı ölçümler), yayın kalıcıdır (hash ile dondurulur),
++  kota 24 saatte 3 istektir.
++- `sw.js`: CACHE_VERSION r42 · `docs/rapor-yayini.md`: kullanıcı kısa yolu +
++  kilit tablosu · `supabase/README.md`: 0009 satırı/bölümü + uygulama sırası.
++- Testler: 650 → 680 (`test/user-publish.test.mjs`: SQL kilitleri, 📄 düğmesi
++  kablolaması, vm'de panel durumları + insert gövdesi + kota/mülkiyet hata
++  eşlemeleri + başkasının isteğinde iptal yok + oynanmış günlük bağlantı
++  sokamaz; 0008 bekçileri değişmeden yeşil).
++
+ ### Eklendi — Site içinden rapor yayını: 📄 Yayınla → DGR bağlantısı kartta belirir
+ Kullanıcı: **"raporu site üstünden yayınlayacağım"** — GitHub Actions arayüzüne
+ gitmeden, uygulama içinden. Rapor motoru (R1+R3) aynı; değişen tek şey tetik:
+diff --git a/README.md b/README.md
+index 8d9e696..c7d6bd0 100644
+--- a/README.md
++++ b/README.md
+@@ -232,10 +232,13 @@ partials)**, CSP↔kod tutarlılığı, birim testler ve (yalnız `main`'e push'
+ 
+ Rapor yayınını iki ayrı iş akışı taşır: **`rapor-yayin.yml`** (5 dakikada bir)
+ site içinden gelen yayın isteklerini işler — yönetici GitHub arayüzüne gitmez,
+-🔐 Ölçüm Yönetimi → **📄 Bilimsel Rapor Yayını** kartında 📄 Yayınla der; istek
+-Supabase'deki `report_requests` kuyruğuna yazılır (0008), rapor
+-`rapor/DGR-YYYY-NNNN/` altına commit'lenir ve kalıcı bağlantı aynı kartta
+-belirir. İş Supabase'e **yazmaz**: anon anahtarla salt okur, sonucu
++🔐 Ölçüm Yönetimi → **📄 Bilimsel Rapor Yayını** kartında 📄 Yayınla der;
++**kullanıcılar da kendi park projelerinin raporunu kendisi yayınlar**
++(📁 Projeler → 📄; sunucu kilitleri: mülkiyet + kendi onaylı verisi + 24
++saatte 3 istek kotası, 0009). İstek Supabase'deki `report_requests`
++kuyruğuna yazılır (0008+0009), rapor `rapor/DGR-YYYY-NNNN/` altına
++commit'lenir ve kalıcı bağlantı aynı arayüzde belirir. İş Supabase'e
++**yazmaz**: anon anahtarla salt okur, sonucu
+ `rapor/yayin-kuyrugu.json` + git taşır (`service_role` anahtarı depoda
+ tutulmaz). **`rapor.yml`** (workflow_dispatch) elle tek park yayını için yedek
+ yoldur; ikisi de aynı üreticiyi (`publishPark()`) çağırır. Ayrıntı:
+diff --git a/docs/rapor-yayini.md b/docs/rapor-yayini.md
+index fddd8a4..14938ef 100644
+--- a/docs/rapor-yayini.md
++++ b/docs/rapor-yayini.md
+@@ -19,6 +19,34 @@ takıldığında nereye bakılacağını anlatır. Raporun içeriği/biçimi iç
+ Bekleme süresi: GitHub zamanlayıcısı 5 dakikada bir çalışır; yoğun saatlerde
+ tetikleme 10–15 dakikayı bulabilir. Pages dağıtımı buna 1–2 dakika ekler.
+ 
++## 1b) Kısa yol (kullanıcı — 0009)
++
++Kullanıcılar **kendi park projelerinin** raporunu kendisi yayınlar
++(2026-09-28, `0009_user_report_publish.sql`):
++
++1. Uygulamada **📁 Projeler** sekmesini aç.
++2. Parkı bağlı projenin satırındaki **📄** düğmesine bas → tablonun altında
++   **Park Raporu** paneli açılır.
++3. Panelde durum görünür: yayınlanmış rapor varsa **🔗 Aç** + **📤 Paylaş**;
++   yoksa **📄 Yayınla**'ya bas → istek aynı kuyruğa (`report_requests`)
++   yazılır, birkaç dakika içinde kalıcı bağlantı panelde belirir.
++4. Bekleyen **kendi** isteğini **✖ Vazgeç** ile iptal edebilirsin.
++
++Sunucu kilitleri (RLS + `tg_report_request_gate`, iki katman):
++
++| Kilit | Kural | Hata kodu |
++|---|---|---|
++| Kimlik | İstek yalnız kendi adına (`requested_by = auth.uid()`) | `REPORT_NOT_SELF` |
++| Mülkiyet | Park, kullanıcının bir projesine bağlı olmalı | `REPORT_NOT_YOUR_PARK` |
++| Kendi verisi | Kullanıcının o parkta en az bir **onaylı** ölçümü olmalı | `REPORT_NO_OWN_DATA` |
++| Kota | Yönetici olmayan 24 saatte en fazla **3** istek açabilir | `REPORT_QUOTA` |
++| 0008'den aynen | Park başına tek bekleyen istek + parkta onaylı veri şartı | `23505` / `REPORT_NO_DATA` |
++
++Dürüstlük notu: rapor **park düzeyindedir** — yalnız isteyenin projesini değil,
++parktaki tüm onaylı ölçümleri kapsar (panel bunu kullanıcıya da söyler).
++Yönetici kartı ve hakları değişmez; Actions hattı aynı hattır (kimin istediğine
++bakmaz, kuyruğu anon anahtarla okur).
++
+ ## 2) Hat nasıl akar
+ 
+ ```
+@@ -74,10 +102,12 @@ Başarısızlığın en sık üç nedeni:
+ ## 5) Kurulum (bir kez)
+ 
+ 1. Supabase → SQL Editor → `supabase/migrations/0008_report_publish.sql` → Run.
+-2. Depoyu push'la: `rapor-yayin.yml` kendiliğinden etkinleşir.
++2. Supabase → SQL Editor → `supabase/migrations/0009_user_report_publish.sql`
++   → Run (kullanıcılar kendi parkını yayınlayabilsin: mülkiyet + kota kilidi).
++3. Depoyu push'la: `rapor-yayin.yml` kendiliğinden etkinleşir.
+    (GitHub → Actions → "Rapor Yayın Kuyruğu" → ilk koşuyu görmek istersen
+    "Run workflow" da diyebilirsin; şart değil.)
+-3. Uygulamada 🔐 Ölçüm Yönetimi → kart parkları listeliyorsa hat hazır.
++4. Uygulamada 🔐 Ölçüm Yönetimi → kart parkları listeliyorsa hat hazır.
+ 
+ > GitHub, 60 gün boyunca **hiç** etkinlik olmayan depolarda zamanlanmış işleri
+ > devre dışı bırakır ve e-posta gönderir. Gelirse: Actions → "Rapor Yayın
+@@ -106,3 +136,10 @@ hash'in yayınlanmış sayfayla eşleşmesi), arayüz bağlantısı (kart yalnı
+ vm'de gerçek davranış (bağlantı yalnız geçerli `DGR-YYYY-NNNN` kimliğinden
+ kurulur → oynanmış günlük dosyası uygulama içine dış bağlantı sokamaz;
+ yönetici olmayan istek açamaz).
++
++`test/user-publish.test.mjs` kullanıcı yayını hattını (0009) kilitler:
++mülkiyet + kendi onaylı verisi + 24 saatte 3 istek kotası + `requested_by =
++auth.uid()` (SQL), 📁 Projeler'deki 📄 düğmesi ve panelin kablolaması
++(arayüz), vm'de gerçek davranış (panel durumları, insert gövdesi/oturum
++anahtarı, kota–mülkiyet hata eşlemeleri, başkasının isteğinde ✖ Vazgeç yok,
++oynanmış günlük bağlantı sokamaz).
+diff --git a/index.html b/index.html
+index f43f252..51e1286 100644
+--- a/index.html
++++ b/index.html
+@@ -251,9 +251,9 @@
+ <!-- BİLİMSEL RAPOR YAYINI (2026-09-27): site içinden yayın kuyruğu —
+      📄 Yayınla → report_requests (0008) → rapor-yayin.yml → rapor/DGR-…/
+      → kalıcı bağlantı + 📤 Paylaş. admin.js loadAdmin() bu modülü çağırır. -->
+-<script src="src/services/report-publish.js?v=fc7b0c6a" defer></script>
++<script src="src/services/report-publish.js?v=9254b644" defer></script>
+ <script src="src/services/world.js?v=918cd92f" defer></script>
+-<script src="src/services/measure.js?v=1cf8867b" defer></script>
++<script src="src/services/measure.js?v=35f84340" defer></script>
+ <script src="src/services/map.js?v=b3b6192d" defer></script>
+ <!-- LULC ZİNCİRİ ARTIK TEMBEL (2026-09-25 · Faz 8): 8 dosya ilk yüklemede
+      indirilmiyor. Yalnız "🌿 Yüzey Örtüsü Analizi"ne basan kullanıcı için
+@@ -789,6 +789,13 @@
+     </div>
+    </div>
+    <div class="card tblwrap"><table><thead><tr><th>ID</th><th>Park</th><th>Proje Adı</th><th>Ülke</th><th>Şehir</th><th>Tarih</th><th>İşlem</th></tr></thead><tbody id="projTable"></tbody></table></div>
++   <!-- KULLANICI RAPOR PANELİ (0009 · 2026-09-28): kullanıcılar KENDİ park
++        projelerinin bilimsel raporunu site içinden yayınlar — aynı kuyruk
++        (report_requests), aynı DGR kimliği, aynı kalıcı bağlantı. Sunucu
++        kilitleri: mülkiyet + kendi onaylı verisi + 24 saatte 3 istek kotası.
++        Boş + display:none → kullanılmadığında sıfır yer kaplar (düzen kaymaz);
++        yeni CSS yok. Modül: src/services/report-publish.js (kullanıcı bölümü). -->
++   <div id="dgUserPubBox" class="card" style="display:none;margin-top:12px"></div>
+   </div>
+ 
+   <div class="view" id="v-records">
+diff --git a/partials/shell.html b/partials/shell.html
+index a2f7aaa..f214787 100644
+--- a/partials/shell.html
++++ b/partials/shell.html
+@@ -174,6 +174,13 @@
+     </div>
+    </div>
+    <div class="card tblwrap"><table><thead><tr><th>ID</th><th>Park</th><th>Proje Adı</th><th>Ülke</th><th>Şehir</th><th>Tarih</th><th>İşlem</th></tr></thead><tbody id="projTable"></tbody></table></div>
++   <!-- KULLANICI RAPOR PANELİ (0009 · 2026-09-28): kullanıcılar KENDİ park
++        projelerinin bilimsel raporunu site içinden yayınlar — aynı kuyruk
++        (report_requests), aynı DGR kimliği, aynı kalıcı bağlantı. Sunucu
++        kilitleri: mülkiyet + kendi onaylı verisi + 24 saatte 3 istek kotası.
++        Boş + display:none → kullanılmadığında sıfır yer kaplar (düzen kaymaz);
++        yeni CSS yok. Modül: src/services/report-publish.js (kullanıcı bölümü). -->
++   <div id="dgUserPubBox" class="card" style="display:none;margin-top:12px"></div>
+   </div>
+ 
+   <div class="view" id="v-records">
+diff --git a/src/services/measure.js b/src/services/measure.js
+index 656898d..bb1cc49 100644
+--- a/src/services/measure.js
++++ b/src/services/measure.js
+@@ -146,10 +146,18 @@ async function loadProjects(){
+      (dgIsAdmin()
+        ? `<button class="btn sm blue" style="margin-top:4px" onclick="startParkScan({projectId:${p.id},returnTo:'projects'})">🌳 Bağla</button>`
+        : `<span style="font-size:.66rem;color:var(--mut)">🔐 yönetici bağlayacak</span>`);
+-  return `<tr><td>${p.id}</td><td>${parkCell}</td><td>${esc(p.name)}</td><td>${esc(p.country||"—")}</td><td>${esc(p.city||"—")}</td><td>${new Date(p.created_at).toLocaleDateString("tr-TR")}</td><td style="display:flex;gap:4px"><button class="btn sm blue" onclick="editProject(${p.id})">✏️</button><button class="btn sm red" onclick="deleteProject(${p.id})">🗑</button></td></tr>`;
++  /* 📄 (0009): parkı bağlı projede rapor paneli — kullanıcı kendi parkının
++   * bilimsel raporunu site içinden yayınlar/paylaşır. Parksız projede düğme
++   * yok (rapor park kimliği ister). Yetki kararı sunucuda (RLS + tetikleyici). */
++  const repBtn=p.park_id
++   ? `<button class="btn sm" onclick="dgUserPubOpen(${p.id})" title="Park raporu: yayınla / paylaş">📄</button>`
++   : "";
++  return `<tr><td>${p.id}</td><td>${parkCell}</td><td>${esc(p.name)}</td><td>${esc(p.country||"—")}</td><td>${esc(p.city||"—")}</td><td>${new Date(p.created_at).toLocaleDateString("tr-TR")}</td><td style="display:flex;gap:4px">${repBtn}<button class="btn sm blue" onclick="editProject(${p.id})">✏️</button><button class="btn sm red" onclick="deleteProject(${p.id})">🗑</button></td></tr>`;
+  }).join("")||"<tr><td colspan=7>Proje yok — önce park algıla</td></tr>";
+  dgRenderProjectParkBox();
+  dgParkGate();
++ /* Rapor paneli açıksa ve projesi listeden düştüyse paneli kapat (0009). */
++ if(typeof dgUserPubSync==="function")dgUserPubSync(PROJ_LIST);
+ }
+ 
+ /* Projeler sekmesindeki "park" kutusu: hangi park algılanmış, ad nasıl olacak. */
+diff --git a/src/services/report-publish.js b/src/services/report-publish.js
+index 5870f2f..8f25dc0 100644
+--- a/src/services/report-publish.js
++++ b/src/services/report-publish.js
+@@ -15,8 +15,12 @@
+  *      sessizce tazelenir → sayfayı yenilemeye gerek kalmaz.
+  *
+  * GÜVENLİK / DÜRÜSTLÜK
+- *   · İstek yazma YALNIZ yönetici (RLS + tg_report_request_gate); arayüz de
+- *     yönetici sekmesinde durur, ayrıca istemcide dgPubAdmin() kapısı var.
++ *   · Yönetici kartı (v-admin): istek yazma dgPubAdmin() kapısıyla korunur.
++ *   · KULLANICI TARAFI (0009_user_report_publish.sql): parkı için projesi olan
++ *     kullanıcı isteği KENDİSİ açar — sunucu kilitleri: mülkiyet (kendi
++ *     projesinin parkı), kendi onaylı ölçümü, 24 saatte 3 istek kotası,
++ *     requested_by = auth.uid(). İstemci kapısı yalnız UX'tir; yetki RLS +
++ *     tg_report_request_gate'te (iki katman, 0006/0008 deseni).
+  *   · Günlük dosyası Pages'te herkese açıktır. Bu yüzden bağlantı günlüğün
+  *     yazdığı metinden DEĞİL, biçimi doğrulanmış rapor kimliğinden kurulur
+  *     (DG_PUB_ID): bozulmuş/oynanmış bir günlük uygulama içine dış bağlantı
+@@ -196,41 +200,54 @@ function dgPubRender(){
+   'Eski raporlar DEĞİŞMEZ: yeni çözümleme yeni kimlik demektir. 🛰 kutusu işaretliyken §4 arazi örtüsü bağlamı da üretilir (birkaç dakika sürer).</div>';
+ }
+ 
+-/* ---------- yazma ---------- */
+-async function dgPublishReport(parkId){
+- if(!dgPubAdmin())return toast("Rapor yayını yalnız yönetici içindir.","err","📄");
+- const lulc=$("dgPubLulc")?$("dgPubLulc").checked!==false:true;
+- /* RLS-safe insert (trackVisit ile aynı desen): "Prefer: return=minimal" —
+-  * return=representation olsaydı RETURNING satırı politikaya takılıp istek
+-  * sessizce ölebilirdi. Oturum anahtarı şart: anon istek açamaz. */
++/* ---------- yazma (ortak çekirdek: yönetici kartı + kullanıcı paneli) ---------- */
++/* RLS-safe insert (trackVisit ile aynı desen): "Prefer: return=minimal" —
++ * return=representation olsaydı RETURNING satırı politikaya takılıp istek
++ * sessizce ölebilirdi. Oturum anahtarı şart: anon istek açamaz. */
++async function dgPubInsertRequest(parkId,lulc,note){
+  let token=SB_KEY;
+  try{const{data}=await sb.auth.getSession();if(data&&data.session&&data.session.access_token)token=data.session.access_token;}catch(e){}
+- let r=null;
+  try{
+-  r=await fetch(SB_URL+"/rest/v1/report_requests",{
++  const r=await fetch(SB_URL+"/rest/v1/report_requests",{
+    method:"POST",
+    headers:{"apikey":SB_KEY,"Authorization":"Bearer "+token,"Content-Type":"application/json","Prefer":"return=minimal"},
+-   body:JSON.stringify([{park_id:Number(parkId),with_lulc:lulc,status:"Beklemede",
+-    requested_by:(typeof USER!=="undefined"&&USER&&USER.id)||null,note:"uygulama içi yayın"}])
++   body:JSON.stringify([{park_id:Number(parkId),with_lulc:lulc!==false,status:"Beklemede",
++    requested_by:(typeof USER!=="undefined"&&USER&&USER.id)||null,note:note||"uygulama içi yayın"}])
+   });
+- }catch(e){return toast("Ağ hatası: "+esc(e.message),"err","📄");}
+- if(r.status===201||r.status===200){
++  const ok=r.status===201||r.status===200;
++  const txt=ok?"":((await r.text().catch(()=> ""))||"");
++  return{ok:ok,status:r.status,txt:txt};
++ }catch(e){return{ok:false,status:0,txt:"NETWORK "+((e&&e.message)||e)};}
++}
++
++/* Hata metni eşleme: PostgREST, RLS reddini ve tetikleyici hatalarını gövdede
++ * taşır (REPORT_QUOTA / REPORT_NOT_YOUR_PARK / REPORT_NO_OWN_DATA / …). */
++function dgPubInsertError(r){
++ const txt=String(r.txt||"");
++ if(!r.status||/^NETWORK/.test(txt))return"Ağ hatası: "+txt.replace(/^NETWORK\s*/,"").slice(0,160);
++ if(/does not exist|42P01/i.test(txt)||r.status===404)return"0008_report_publish.sql çalıştırılmalı (report_requests tablosu yok).";
++ if(/duplicate key|23505/i.test(txt))return"Bu park için bekleyen bir istek zaten var — kuyruktaki iş bitsin.";
++ if(/REPORT_QUOTA|DG0QT/i.test(txt))return"Günlük yayın isteği sınırına ulaştın (24 saatte 3) — sonra yeniden dene.";
++ if(/REPORT_NOT_YOUR_PARK|DG0NP/i.test(txt))return"Bu park senin projene bağlı değil — yalnız kendi parkının raporunu yayınlayabilirsin.";
++ if(/REPORT_NO_OWN_DATA|DG0ND/i.test(txt))return"Bu parkta onaylı ölçümün yok — ölçümlerin onaylanınca yayın isteyebilirsin.";
++ if(/REPORT_NOT_SELF|DG0NS/i.test(txt))return"Yayın isteği yalnız kendi adına açılabilir.";
++ if(/REPORT_NO_DATA|DGR0RD|22023/i.test(txt))return"Bu parkta onaylı ölçüm yok; rapor üretilemez.";
++ if(/42501|401|403|row-level|permission/i.test(txt))return"Yetki yok: bu park için yayın isteği açamazsın.";
++ return"İstek yazılamadı (HTTP "+r.status+"): "+txt.slice(0,160);
++}
++
++async function dgPublishReport(parkId){
++ if(!dgPubAdmin())return toast("Rapor yayını yalnız yönetici içindir.","err","📄");
++ const lulc=$("dgPubLulc")?$("dgPubLulc").checked!==false:true;
++ const r=await dgPubInsertRequest(parkId,lulc,"uygulama içi yayın");
++ if(r.ok){
+   toast("📄 Yayın isteği kuyruğa alındı — rapor birkaç dakika içinde burada bağlanacak.","ok","📄");
+   DG_PUB_STATE.pollCount=0;
+   await dgLoadPublishQueue();
+   dgPubSchedulePoll();
+   return;
+  }
+- const txt=(await r.text().catch(()=>""))||"";
+- const msg=(/does not exist|42P01/i.test(txt)||r.status===404)
+-  ? "0008_report_publish.sql çalıştırılmalı (report_requests tablosu yok)."
+-  : /duplicate key|23505/i.test(txt)
+-  ? "Bu park için bekleyen bir istek zaten var — kuyruktaki iş bitsin."
+-  : /22023|REPORT_NO_DATA/i.test(txt)
+-  ? "Bu parkta onaylı ölçüm yok; rapor üretilemez."
+-  : /42501|401|403|row-level|permission/i.test(txt)
+-  ? "Yetki yok: yayın isteğini yalnız yönetici açabilir."
+-  : ("İstek yazılamadı (HTTP "+r.status+"): "+txt.slice(0,160));
++ const msg=dgPubInsertError(r);
+  if(/0008_report_publish/.test(msg))DG_PUB_STATE.error="SCHEMA";
+  toast(msg,"err","📄");
+  dgPubRender();
+@@ -245,6 +262,204 @@ async function dgPublishCancel(id){
+  await dgLoadPublishQueue();
+ }
+ 
++/* ---------- KULLANICI TARAFI (0009): 📁 Projeler → 📄 Park Raporu ----------
++ * Parkı için projesi olan kullanıcı rapor isteğini KENDİSİ açar; sonuç aynı
++ * kuyruktan döner (rapor-yayin.yml → yayin-kuyrugu.json → kalıcı bağlantı).
++ * Yetki kararı SUNUCUDA (RLS + tg_report_request_gate): mülkiyet, kendi
++ * onaylı ölçümü, 24 saatte 3 istek, requested_by = auth.uid(). İstemci
++ * kapıları yalnız UX'tir — yetki sınırı DEĞİL. Yeni CSS yok: yönetici
++ * kartıyla aynı card/shead/badge/btn/alert/dg-tree-meta/mono aileleri.
++ * Panel durumu yönetici kartından AYRI tutulur (DG_USER_PUB): iki arayüz
++ * birbirinin verisini ezmez. */
++let DG_USER_PUB={projectId:0,parkId:0,parkName:"",requests:[],queue:null,ownApproved:null,error:"",timer:0,polls:0};
++
++/* Saf okuma yardımcıları (günlük dosyası parametrik: yönetici kartı kendi
++ * durumunu, kullanıcı paneli kendi durumunu verir). Kimlik biçimi DOĞRULANMADAN
++ * hiçbir girdi "yayınlandı" sayılmaz — oynanmış günlük dış bağlantı sokamaz. */
++function dgPubEntryIn(queue,reqId){
++ const es=(queue&&queue.entries)||[];
++ for(let i=es.length-1;i>=0;i--)if(String(es[i].request_id)===String(reqId))return es[i];
++ return null;
++}
++function dgPubPublishedInPark(queue,parkId){
++ const es=(queue&&queue.entries)||[];
++ for(let i=es.length-1;i>=0;i--){
++  const e=es[i];
++  if(e.status==="Yayınlandı"&&String(e.park_id)===String(parkId)&&DG_PUB_ID.test(String(e.report_id||"")))return e;
++ }
++ return null;
++}
++
++async function dgUserPubOpen(projectId){
++ const box=$("dgUserPubBox");if(!box)return;
++ if(typeof USER==="undefined"||!USER)return toast("Önce giriş yap.","err","📄");
++ const list=(typeof PROJ_LIST!=="undefined"&&Array.isArray(PROJ_LIST))?PROJ_LIST:[];
++ const p=list.find(x=>Number(x.id)===Number(projectId));
++ if(!p)return toast("Proje bulunamadı — listeden yeniden dene.","err","📄");
++ if(!p.park_id)return toast("Bu proje bir parka bağlı değil — rapor park kimliği ister.","err","🌳");
++ if(DG_USER_PUB.timer){clearInterval(DG_USER_PUB.timer);DG_USER_PUB.timer=0;}
++ DG_USER_PUB.projectId=Number(p.id);
++ DG_USER_PUB.parkId=Number(p.park_id);
++ DG_USER_PUB.parkName=(p.parks&&p.parks.name)||p.park_name||("park #"+p.park_id);
++ DG_USER_PUB.requests=[];DG_USER_PUB.error="";DG_USER_PUB.ownApproved=null;DG_USER_PUB.polls=0;
++ box.style.display="";
++ box.innerHTML='<div class="dg-tree-meta">⏳ Rapor durumu yükleniyor…</div>';
++ if(box.scrollIntoView)box.scrollIntoView({behavior:"smooth",block:"nearest"});
++ await dgUserPubRefresh();
++}
++
++async function dgUserPubRefresh(){
++ const st=DG_USER_PUB;if(!st.parkId)return;
++ try{
++  const{data,error}=await sb.from("report_requests")
++   .select("id,park_id,with_lulc,status,requested_by,created_at,cancelled_at")
++   .eq("park_id",st.parkId).order("created_at",{ascending:false}).limit(10);
++  if(error){
++   st.error=(error.code==="42P01"||/report_requests/i.test(error.message||""))
++    ?"SCHEMA"
++    :("İstekler okunamadı: "+(error.message||error.code||"bilinmeyen hata"));
++   st.requests=[];
++  }else{st.error="";st.requests=data||[];}
++ }catch(e){st.error="İstekler okunamadı: "+((e&&e.message)||e);st.requests=[];}
++ const[q,cnt]=await Promise.all([dgPubFetchQueue(),dgUserOwnApproved()]);
++ if(q)st.queue=q;
++ st.ownApproved=cnt;
++ dgUserPubRender();
++ dgUserPubSchedulePoll();
++}
++
++/* Bu projedeki kendi onaylı ölçüm sayısı (yalnız BİLGİ: yayın kararını
++ * sunucu verir — aynı parktaki başka projenin onaylı verisi de yeter). */
++async function dgUserOwnApproved(){
++ if(typeof USER==="undefined"||!USER||!DG_USER_PUB.projectId)return null;
++ try{
++  const{count}=await sb.from("measurements").select("*",{count:"exact",head:true})
++   .eq("project_id",DG_USER_PUB.projectId).eq("owner",USER.id).eq("status","Onaylı").is("deleted_at",null);
++  return Number(count||0);
++ }catch(e){return null;}
++}
++
++function dgUserPubRender(){
++ const box=$("dgUserPubBox");if(!box)return;
++ const st=DG_USER_PUB;
++ const close='<button class="btn sm ghost" onclick="dgUserPubClose()" title="Paneli kapat">✖ Kapat</button>';
++ if(st.error==="SCHEMA"){
++  box.innerHTML='<div class="shead" style="margin-bottom:10px"><span class="no">📄</span><h2 style="font-size:1.15rem">Park Raporu</h2><span class="rule"></span>'+close+'</div>'+
++   '<div class="alert warn">⚠ <b>Yayın kuyruğu veritabanında kurulu değil.</b> Yönetici Supabase → SQL Editor\'da '+
++   '<span class="mono">0008_report_publish.sql</span> ve <span class="mono">0009_user_report_publish.sql</span> dosyalarını çalıştırmalı.</div>';
++  return;
++ }
++ const mine=(typeof USER!=="undefined"&&USER&&USER.id)||"";
++ const pend=st.requests.find(r=>r.status==="Beklemede"&&!dgPubEntryIn(st.queue,r.id));
++ const pendOwn=!!(pend&&String(pend.requested_by||"")===String(mine));
++ const pub=dgPubPublishedInPark(st.queue,st.parkId);
++ const last=st.requests[0]||null;
++
++ let badge,note="";
++ if(pend){
++  const dk=Math.max(0,Math.round((Date.now()-new Date(pend.created_at||Date.now()).getTime())/60000));
++  badge='<span class="badge admin">Beklemede</span>';
++  note=(dk<1?"az önce":dk+" dk önce")+" kuyruğa alındı · yayın işi 5 dakikada bir çalışır"+(pendOwn?"":" · isteği başka bir katkıda bulunan açtı");
++ }else if(pub){
++  badge='<span class="badge on">Yayınlandı</span>';
++ }else if(last){
++  const e=dgPubEntryIn(st.queue,last.id);
++  if(e&&e.status==="Başarısız"){badge='<span class="badge off">Başarısız</span>';note="⚠ "+String(e.message||"üretim hatası").slice(0,140);}
++  else if(last.status==="Vazgeçildi"){badge='<span class="badge off">Vazgeçildi</span>';}
++  else{badge='<span class="badge off">Yayın yok</span>';}
++ }else{
++  badge='<span class="badge off">Yayın yok</span>';
++ }
++
++ const rid=(pub&&DG_PUB_ID.test(String(pub.report_id||"")))?String(pub.report_id):"";
++ const url=dgPubUrl(rid);
++ const act=[];
++ if(url){
++  act.push('<button class="btn sm blue" onclick="dgReportOpen(\''+rid+'\')" title="Raporu yeni sekmede aç">🔗 Aç</button>');
++  act.push('<button class="btn sm" onclick="dgReportShare(\''+rid+'\')" title="Bağlantıyı paylaş / panoya kopyala">📤 Paylaş</button>');
++ }
++ if(pend&&pendOwn)act.push('<button class="btn sm red" onclick="dgUserCancel(\''+esc(pend.id)+'\')" title="Bekleyen isteği iptal et">✖ Vazgeç</button>');
++ if(!pend)act.push('<button class="btn sm amber" onclick="dgUserPublish('+st.parkId+')" title="'+(url?"Yeni sürüm yayınla: eski rapor değişmez, yeni DGR kimliği alır":"Parkın bilimsel raporunu yayınla")+'">'+(url?"📄 Yeni sürüm":"📄 Yayınla")+"</button>");
++ const lulc=(!pend)?'<label style="font-size:.78rem;color:var(--mut);display:inline-flex;gap:6px;align-items:center"><input type="checkbox" id="dgUserPubLulc" checked> 🛰 Arazi örtüsü bölümü (§4) dahil — önerilir</label>':"";
++
++ const own=st.ownApproved===0
++  ? '<div class="alert warn" style="margin-top:10px">⚠ Bu projede <b>onaylı ölçümün görünmüyor</b>. Yayın isteği, parkta onaylı ölçümün varsa açılır — ölçülerin yönetici onayından geçince 📄 düğmesi çalışır.</div>'
++  : (st.ownApproved>0?'<div class="dg-tree-meta" style="margin-top:8px">✓ Bu projede '+Number(st.ownApproved)+" onaylı ölçümün var.</div>":"");
++
++ box.innerHTML=
++  (st.error?'<div class="alert err">⚠ '+esc(st.error)+"</div>":"")+
++  '<div class="shead" style="margin-bottom:10px"><span class="no">📄</span><h2 style="font-size:1.15rem">Park Raporu — '+esc(st.parkName)+'</h2><span class="rule"></span>'+close+"</div>"+
++  '<div style="display:flex;gap:10px;align-items:baseline;flex-wrap:wrap">'+badge+(note?'<span class="dg-tree-meta">'+esc(note)+"</span>":"")+"</div>"+
++  (url?'<div class="dg-tree-meta" style="margin-top:8px">Kalıcı bağlantı: <span class="mono">'+esc(url)+"</span>"+((pub&&pub.finished_at)?(" · yayın "+String(pub.finished_at).slice(0,10)):"")+"</div>":"")+
++  '<div class="dg-act" style="margin-top:10px;display:flex;gap:8px;align-items:center;flex-wrap:wrap">'+act.join("")+lulc+"</div>"+
++  own+
++  (st.queue===null?'<div class="dg-tree-meta" style="margin-top:8px">ℹ Yayın günlüğü okunamadı (çevrimdışı ya da dosya henüz yayınlanmadı) — istek gönderimi çalışır, durum alanı eksik kalabilir.</div>':"")+
++  '<div class="dg-parkadmin-note" style="margin-top:10px">Rapor <b>park düzeyindedir</b>: yalnız bu projeyi değil, parktaki <b>tüm onaylı ölçümleri</b> kapsar. '+
++  "Yayın kalıcıdır — içerik hash'i ile dondurulur, eski rapor DEĞİŞMEZ; yeni çözümleme yeni DGR kimliği alır. "+
++  "Üretim birkaç dakika sürer (kuyruk işi 5 dakikada bir çalışır); bağlantı bu panelde belirir. Yönetici olmayan kullanıcı 24 saatte en fazla 3 istek açabilir.</div>";
++}
++
++async function dgUserPublish(parkId){
++ if(typeof USER==="undefined"||!USER)return toast("Önce giriş yap.","err","📄");
++ const lulc=$("dgUserPubLulc")?$("dgUserPubLulc").checked!==false:true;
++ const r=await dgPubInsertRequest(parkId,lulc,"kullanıcı yayını (proje #"+(DG_USER_PUB.projectId||0)+")");
++ if(r.ok){
++  toast("📄 Yayın isteği kuyruğa alındı — rapor birkaç dakika içinde burada bağlanacak.","ok","📄");
++  DG_USER_PUB.polls=0;
++  await dgUserPubRefresh();
++  return;
++ }
++ const msg=dgPubInsertError(r);
++ if(/0008_report_publish/.test(msg))DG_USER_PUB.error="SCHEMA";
++ toast(msg,"err","📄");
++ dgUserPubRender();
++}
++
++async function dgUserCancel(id){
++ const mine=(typeof USER!=="undefined"&&USER&&USER.id)||"";
++ const row=DG_USER_PUB.requests.find(r=>String(r.id)===String(id));
++ const own=!!(row&&String(row.requested_by||"")===String(mine));
++ if(!own&&!dgPubAdmin())return toast("Yalnız kendi bekleyen isteğini iptal edebilirsin.","err","📄");
++ if(!confirm("Bekleyen yayın isteği iptal edilsin mi?"))return;
++ const{error}=await sb.from("report_requests").update({status:"Vazgeçildi",cancelled_at:new Date().toISOString()}).eq("id",id);
++ if(error)return toast("İptal edilemedi: "+esc(error.message),"err","📄");
++ toast("İstek iptal edildi.","ok","📄");
++ await dgUserPubRefresh();
++}
++
++/* Kendi bekleyen isteği varken ve panel görünürken 25 sn'de bir sessiz tazeleme
++ * (yönetici kartındaki dgPubSchedulePoll ile aynı desen ve sınırlar). */
++function dgUserPubSchedulePoll(){
++ if(DG_USER_PUB.timer){clearInterval(DG_USER_PUB.timer);DG_USER_PUB.timer=0;}
++ const mine=(typeof USER!=="undefined"&&USER&&USER.id)||"";
++ const waiting=DG_USER_PUB.requests.some(r=>r.status==="Beklemede"&&String(r.requested_by||"")===String(mine)&&!dgPubEntryIn(DG_USER_PUB.queue,r.id));
++ if(!waiting||DG_USER_PUB.polls>=DG_PUB_POLL_MAX)return;
++ DG_USER_PUB.timer=setInterval(async()=>{
++  DG_USER_PUB.polls++;
++  const v=$("v-projects");
++  if(v&&!v.classList.contains("on"))return;      /* sekme kapalı: ağ isteği atma */
++  if(document.hidden)return;                       /* arka plan sekmesi: bekle */
++  const box=$("dgUserPubBox");
++  if(!box||box.style.display==="none")return;      /* panel kapalı: bekle */
++  await dgUserPubRefresh();
++ },DG_PUB_POLL_MS);
++}
++
++function dgUserPubClose(){
++ if(DG_USER_PUB.timer){clearInterval(DG_USER_PUB.timer);DG_USER_PUB.timer=0;}
++ DG_USER_PUB.projectId=0;DG_USER_PUB.parkId=0;
++ const box=$("dgUserPubBox");
++ if(box){box.style.display="none";box.innerHTML="";}
++}
++
++/* loadProjects() her çizimde çağırır: paneli açık proje listeden silindiyse
++ * (proje silindi) panel kapanır — hayalet durum gösterilmez. */
++function dgUserPubSync(list){
++ if(!DG_USER_PUB.projectId)return;
++ const arr=Array.isArray(list)?list:[];
++ if(!arr.some(p=>Number(p.id)===DG_USER_PUB.projectId))dgUserPubClose();
++}
++
+ /* ---------- paylaş ---------- */
+ async function dgReportShare(reportId,parkName){
+  const url=dgPubUrl(reportId);
+@@ -305,3 +520,8 @@ window.dgPublishReport=dgPublishReport;
+ window.dgPublishCancel=dgPublishCancel;
+ window.dgReportShare=dgReportShare;
+ window.dgReportOpen=dgReportOpen;
++window.dgUserPubOpen=dgUserPubOpen;
++window.dgUserPubClose=dgUserPubClose;
++window.dgUserPublish=dgUserPublish;
++window.dgUserCancel=dgUserCancel;
++window.dgUserPubSync=dgUserPubSync;
+diff --git a/supabase/README.md b/supabase/README.md
+index 2b0bdd5..2784a41 100644
+--- a/supabase/README.md
++++ b/supabase/README.md
+@@ -14,7 +14,8 @@ Supabase kontrol panelinde yaşıyordu; artık her değişiklik version control'
+ | `migrations/0005_park_name_case.sql` | **Park adı yazım düzeni**: `dg_tr_title()` (Türkçe duyarlı: i→İ, ı→I) + yalnız tamamen küçük harfli adları düzelten tetikleyici + mevcut park/proje adlarının onarımı. Idempotent. |
+ | `migrations/0004_parks.sql` | **Park kimliği**: `parks` tablosu (OSM elemanı = canonical anahtar), `projects.park_id/label/park_name`, `measurements.park_id`, `v_park_compare` view'ı, iki trigger (proje adı kurma + ölçüm kapısı). Idempotent. |
+ | `migrations/0007_geo_fence.sql` | **Konum çiti**: `parks.geom_json`, `measurements.geo_verified_at/geo_dist_m/geo_acc_m/geo_override_by`, `dg_hav_m()` + `dg_point_in_park()` (ray-casting), `trg_geo_fence` (ölçüm parkın dışında ise INSERT/UPDATE reddi), `trg_project_requires_park`. Idempotent. |
+-| `migrations/0008_report_publish.sql` | **Site içinden rapor yayını**: `report_requests` kuyruğu (isteği yalnız `is_admin()` açar, okuma anon'a açık — Actions işi buradan okur), aynı park için tek bekleyen istek (kısmi unique index), `tg_report_request_gate` (yetki + onaylı veri şartı; `REPORT_ADMIN_ONLY`/`REPORT_NO_DATA`). Idempotent. |
++| `migrations/0008_report_publish.sql` | **Site içinden rapor yayını**: `report_requests` kuyruğu (isteği yalnız `is_admin()` açar — 0009'da kendi parkı için kullanıcıya da açıldı; okuma anon'a açık — Actions işi buradan okur), aynı park için tek bekleyen istek (kısmi unique index), `tg_report_request_gate` (yetki + onaylı veri şartı; `REPORT_ADMIN_ONLY`/`REPORT_NO_DATA`). Idempotent. |
++| `migrations/0009_user_report_publish.sql` | **Kullanıcılar kendi parkını yayınlar**: `tg_report_request_gate` genişletildi (yönetici olmayan için mülkiyet `REPORT_NOT_YOUR_PARK`, kendi onaylı verisi `REPORT_NO_OWN_DATA`, 24 saatte 3 istek kotası `REPORT_QUOTA`, `requested_by = auth.uid()` `REPORT_NOT_SELF`) + RLS insert/update: kullanıcı kendi bekleyen isteğini iptal edebilir. Idempotent, 0008'in üzerine. |
+ | `dump-schema.sh` | Canlı şemayı `supabase db dump` ile yeniden dökmek için yardımcı |
+ | `audit/rls-probe.sh` | Anon key ile 13 saldırı denemesi (yetki yükseltme dahil) |
+ | `audit/RLS-DENETIM.md` | Denetim listesi + sonuç tablosu (doldurulacak) |
+@@ -31,7 +32,8 @@ Supabase SQL Editor'da sırayla:
+ 6. `0006_park_admin_only.sql` → Run (park bağını yalnız yönetici değiştirsin)
+ 7. `0007_geo_fence.sql` → Run (konum çiti: ölçüm park poligonu dışında ise sunucu reddeder)
+ 8. `0008_report_publish.sql` → Run (site içinden rapor yayını kuyruğu)
+-9. (Önerilir) `audit/rls-probe.sh`'i kendi makinenden çalıştır → sonuçları
++9. `0009_user_report_publish.sql` → Run (kullanıcılar kendi parkının raporunu kendisi yayınlar: mülkiyet + kota kilidi)
++10. (Önerilir) `audit/rls-probe.sh`'i kendi makinenden çalıştır → sonuçları
+    `audit/RLS-DENETIM.md` tablosuna işle
+ 
+ > ⚠️ **Sıra önemli:** `0004` uygulanmadan site çökmez ama park kimliği devre
+@@ -117,6 +119,35 @@ Güvenlik notları:
+ > 0008 uygulanmazsa site çökmez: kart "0008_report_publish.sql çalıştırılmalı"
+ > uyarısını gösterir, diğer sekmeler etkilenmez.
+ 
++## 0009 — kullanıcılar kendi parkını yayınlar (2026-09-28)
++
++Kullanıcı isteği: **"kullanıcılar kendi park projelerini paylaşabilecek
++değil mi?"** → doğrudan yayın: parkı için projesi olan kullanıcı, yayın
++isteğini `report_requests` kuyruğuna **kendisi** yazar (📁 Projeler → 📄).
++Hat değişmez: aynı kuyruk, aynı Actions işi, aynı DGR kimliği, aynı kalıcı
++bağlantı. Yönetici hakkı aynen durur.
++
++Kötüye kullanıma karşı sunucu kilitleri (RLS + `tg_report_request_gate`, iki
++katman — istemci kapıları yalnız UX'tir):
++
++* **Mülkiyet**: yönetici olmayan yalnız kendi projesinin bağlı olduğu park
++  için istek açabilir (`REPORT_NOT_YOUR_PARK`, `DG0NP`).
++* **Kendi verisi**: isteyenin o parkta en az bir **onaylı** ölçümü olmalı
++  (`REPORT_NO_OWN_DATA`, `DG0ND`) — katkısı olmayan parkı yayınlayamaz.
++* **Kota**: yönetici olmayan 24 saatte en fazla **3** istek (`REPORT_QUOTA`,
++  `DG0QT`; iptal edilenler de sayılır → aç-kapat döngüsü kuyruğu yoramaz).
++* **Kimlik**: `requested_by = auth.uid()` (`REPORT_NOT_SELF`, `DG0NS`) +
++  RLS'te `is_active()` (engelli hesap istek açamaz).
++* **İptal**: kullanıcı yalnız KENDİ bekleyen isteğini `Vazgeçildi` yapabilir;
++  yöneticinin iptal hakkı değişmez. `select` (herkese) ve `delete` (yalnız
++  yönetici) 0008'deki gibi kalır.
++* 0008 kilitleri aynen: park başına TEK bekleyen istek (kısmi unique index),
++  parkta onaylı veri şartı (`REPORT_NO_DATA`), `status` kümesi kapalı.
++
++> 0009 uygulanmazsa kullanıcı 📄 düğmesine basınca sunucu reddeder ve panel
++> "Yetki yok" uyarısı gösterir; yönetici kartı 0008 ile çalışmaya devam eder.
++> Bekçi: `test/user-publish.test.mjs`.
++
+ ## 0004 — park kimliği modeli (2026-09-24)
+ 
+ Kullanıcı isteği: *"Karşılaştırmada projelere verilen adlar değil direkt
+diff --git a/supabase/migrations/0009_user_report_publish.sql b/supabase/migrations/0009_user_report_publish.sql
+new file mode 100644
+index 0000000..8fe7e21
+--- /dev/null
++++ b/supabase/migrations/0009_user_report_publish.sql
+@@ -0,0 +1,159 @@
++-- 0009_user_report_publish.sql — KULLANICILAR KENDİ PARKINI YAYINLAYABİLİR (2026-09-28)
++--
++-- KULLANICI İSTEĞİ: "kullanıcılar kendi park projelerini paylaşabilecek
++-- değil mi?" → doğrudan yayın seçildi: parkı için projesi olan kullanıcı,
++-- yayın isteğini kuyruğa KENDİSİ yazar; yönetici hakkı değişmez.
++--
++-- DEĞİŞEN TEK ŞEY YETKİ KAPISIDIR — hat aynı hat:
++--   report_requests (Beklemede) → rapor-yayin.yml (5 dk) → publish-queue.mjs
++--   → make-report.mjs → rapor/DGR-…/ + yayin-kuyrugu.json → kalıcı bağlantı.
++--   Actions tarafı kimin istediğine bakmaz; kuyruk anonim okunur (0008).
++--
++-- KİLİTLER (kötüye kullanım / Actions kuyruğu şişirmeye karşı, sunucu tarafı):
++--   1. MÜLKİYET   Yönetici olmayan kullanıcı YALNIZ kendi projesinin bağlı
++--                 olduğu park (projects.park_id) için istek açabilir.
++--   2. KENDİ VERİSİ İsteyenin o parkta EN AZ BİR ONAYLI ölçümü olmalı —
++--                 katkısı olmayan parkı yayınlayamaz.
++--   3. KOTA       Yönetici olmayan kullanıcı 24 saatte EN FAZLA 3 istek
++--                 açabilir (iptal edilenler de sayılır: aç-kapat döngüsü
++--                 kuyruğu yoramaz).
++--   4. KİMLİK     requested_by = auth.uid() zorunlu — başkası adına istek yok.
++--   5. AKTİFLİK   is_active() (0001 deseni): engelli hesap istek açamaz.
++--   6. 0008 KİLİTLERİ AYNEN DURUR: park başına TEK bekleyen istek (kısmi
++--      unique index), parkta onaylı veri şartı (REPORT_NO_DATA), sonuç
++--      tabloya yazılamaz (status kümesi kapalı), silme yalnız yönetici.
++--
++-- İPTAL: kullanıcı YALNIZ KENDİ bekleyen isteğini 'Vazgeçildi' yapabilir;
++--        yöneticinin iptal hakkı değişmez.
++--
++-- RLS + tetikleyici İKİ KATMAN (0006/0008 deseni): politika atlanırsa bile
++-- (service_role, gelecek bir politika hatası) tetikleyici aynı kuralları uygular.
++--
++-- Idempotent: tekrar tekrar çalıştırılabilir. 0008'in üzerine uygulanır.
++
++begin;
++
++-- ============ 1) SUNUCU KAPISI (0008'deki fonksiyonun yerini alır) ============
++create or replace function public.tg_report_request_gate() returns trigger
++language plpgsql security definer set search_path=public as $$
++declare
++  n int;
++  recent int;
++  quota constant int := 3;   /* yönetici olmayan: 24 saatte en fazla bu kadar istek */
++begin
++  if public.is_admin() then
++    /* YÖNETİCİ: 0008 kuralları aynen — mülkiyet/kota şartı yok,
++     * aşağıdaki park geneli onaylı-veri kontrolü yine çalışır. */
++    null;
++  else
++    /* 1) KİMLİK: istek yalnız kendi adına açılır. */
++    if new.requested_by is distinct from auth.uid() then
++      raise exception 'REPORT_NOT_SELF (DGR0NS): yayın isteği yalnız kendi adına açılabilir'
++        using errcode = 'DG0NS';
++    end if;
++
++    /* 2) MÜLKİYET: kullanıcının bu parka bağlı projesi olmalı. */
++    if not exists (
++      select 1 from public.projects p
++      where p.owner = auth.uid()
++        and p.park_id = new.park_id
++    ) then
++      raise exception 'REPORT_NOT_YOUR_PARK (DGR0NP): park #% için projen yok — kullanıcılar yalnız kendi parkını yayınlayabilir', new.park_id
++        using errcode = 'DG0NP';
++    end if;
++
++    /* 3) KENDİ VERİSİ: bu parkta en az bir ONAYLI ölçümü olmalı.
++     *    park_id denormalizedir (0004); eski satırlar proje bağından bulunur. */
++    if not exists (
++      select 1
++      from public.measurements m
++      left join public.projects p2 on p2.id = m.project_id
++      where m.owner = auth.uid()
++        and m.status = 'Onaylı'
++        and m.deleted_at is null
++        and (m.park_id = new.park_id or p2.park_id = new.park_id)
++    ) then
++      raise exception 'REPORT_NO_OWN_DATA (DGR0ND): bu parkta onaylı ölçümün yok — ölçümlerin onaylanınca yayın isteyebilirsin'
++        using errcode = 'DG0ND';
++    end if;
++
++    /* 4) KOTA: 24 saatte en fazla `quota` istek (iptal edilenler de sayılır). */
++    select count(*) into recent
++    from public.report_requests r
++    where r.requested_by = auth.uid()
++      and r.created_at > now() - interval '24 hours';
++    if recent >= quota then
++      raise exception 'REPORT_QUOTA (DGR0QT): 24 saatlik yayın isteği sınırına (%) ulaşıldı — sonra yeniden dene', quota
++        using errcode = 'DG0QT';
++    end if;
++  end if;
++
++  /* 5) HERKES İÇİN (0008'den aynen): parkta onaylı ölçüm yoksa rapor üretilemez. */
++  select count(*) into n
++  from public.measurements m
++  where m.park_id = new.park_id
++    and m.status = 'Onaylı'
++    and m.deleted_at is null;
++
++  if coalesce(n, 0) = 0 then
++    raise exception 'REPORT_NO_DATA (DGR0RD): park #% için onaylı ölçüm yok — rapor üretilemez', new.park_id
++      using errcode = '22023';
++  end if;
++
++  return new;
++end $$;
++
++drop trigger if exists trg_report_request_gate on public.report_requests;
++create trigger trg_report_request_gate
++  before insert or update of park_id on public.report_requests
++  for each row execute function public.tg_report_request_gate();
++
++-- ============ 2) RLS ============
++-- select (herkese) ve delete (yalnız yönetici) 0008'deki gibi KALIR;
++-- burada dokunulmaz. Yalnız insert/update politikaları genişletilir.
++
++drop policy if exists report_requests_insert on public.report_requests;
++create policy report_requests_insert on public.report_requests
++  for insert to authenticated
++  with check (
++    public.is_admin()
++    or (
++      requested_by = auth.uid()
++      and public.is_active()
++      and exists (
++        select 1 from public.projects p
++        where p.owner = auth.uid()
++          and p.park_id = report_requests.park_id
++      )
++    )
++  );
++
++/* İptal: yönetici HER bekleyen isteği, kullanıcı YALNIZ KENDİ bekleyen
++ * isteğini 'Vazgeçildi' yapabilir (with check durumu ve kimliği kilitler). */
++drop policy if exists report_requests_update on public.report_requests;
++create policy report_requests_update on public.report_requests
++  for update to authenticated
++  using ((public.is_admin() or requested_by = auth.uid()) and status = 'Beklemede')
++  with check ((public.is_admin() or requested_by = auth.uid()) and status = 'Vazgeçildi');
++
++commit;
++
++-- ============ 3) DOĞRULAMA (SQL Editor'da elle) ============
++-- Fonksiyon ve tetikleyici yerinde mi:
++--   select proname from pg_proc where proname='tg_report_request_gate';
++--   select tgname from pg_trigger where tgname='trg_report_request_gate';
++--
++-- Normal kullanıcı olarak (kendi parkı, onaylı ölçümü var):
++--   insert into public.report_requests(park_id,requested_by)
++--   values (<kendi_park_id>, auth.uid());                → çalışır
++--
++-- Aynı kullanıcı, başkasının parkı için:
++--   insert into public.report_requests(park_id,requested_by)
++--   values (<yabancı_park_id>, auth.uid());               → DG0NP (REPORT_NOT_YOUR_PARK)
++--
++-- 4. istek (24 saat içinde):                             → DG0QT (REPORT_QUOTA)
++-- Anon anahtarla POST:                                     → 401/RLS reddi
++-- Kullanıcı, başkasının bekleyen isteğini iptale kalkarsa: → RLS 0 satır günceller
++--
++-- İstemci tarafı: 📁 Projeler → parkı bağlı projede 📄 düğmesi
++--   (src/services/report-publish.js, kullanıcı bölümü).
+diff --git a/sw.js b/sw.js
+index 5ebcce3..42590d6 100644
+--- a/sw.js
++++ b/sw.js
+@@ -4,7 +4,7 @@
+ // NOT: Senkronizasyon artık Ana Thread (Supabase JS SDK) tarafından yapılıyor
+ // ============================================================
+ 
+-const CACHE_VERSION = 'dendrogeo-sw-v2-r41';
++const CACHE_VERSION = 'dendrogeo-sw-v2-r42';
+ 
+ /* İKİ AYRI STATİK CACHE — bu ayrım bilinçli ve önemli.
+  *
+diff --git a/test/user-publish.test.mjs b/test/user-publish.test.mjs
+new file mode 100644
+index 0000000..c86bfd6
+--- /dev/null
++++ b/test/user-publish.test.mjs
+@@ -0,0 +1,389 @@
++/* user-publish.test.mjs — KULLANICILAR KENDİ PARKINI YAYINLAR (0009) bekçileri
++ *
++ * KULLANICI İSTEĞİ (2026-09-28): "kullanıcılar kendi park projelerini
++ * paylaşabilecek değil mi?" → doğrudan yayın. Bu dosya üç ayağı kilitler:
++ *
++ *   1) VERİTABANI (0009_user_report_publish.sql): yönetici olmayan kullanıcı
++ *      YALNIZ kendi projesinin parkı için, kendi onaylı ölçümü varsa, 24
++ *      saatte en fazla 3 kez istek açabilir; requested_by = auth.uid();
++ *      kendi bekleyen isteğini iptal edebilir. 0008'in kilitleri (park başına
++ *      tek bekleyen istek, onaylı veri şartı, select anon'a açık, delete
++ *      yalnız yönetici) AYNEN durur.
++ *   2) ARAYÜZ KABLOLAMASI: 📁 Projeler'de parkı bağlı satırda 📄 düğmesi,
++ *      v-projects içinde display:none panel kutusu, sw.js r42, yeni CSS yok.
++ *   3) DAVRANIŞ (vm): panel durumları (yok/beklemede/yabancı beklemede/
++ *      yayınlandı/başarısız), insert gövdesi + oturum anahtarı, kota ve
++ *      mülkiyet hata eşlemeleri, iptal yetkisi, oynanmış günlük dış
++ *      bağlantı sokamaz, yönetici kartının kapısı değişmedi.
++ */
++import { test, describe } from 'node:test';
++import assert from 'node:assert/strict';
++import { readFileSync, existsSync } from 'node:fs';
++import { join, dirname } from 'node:path';
++import { fileURLToPath } from 'node:url';
++import vm from 'node:vm';
++
++const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
++const read = (p) => readFileSync(join(ROOT, p), 'utf8');
++
++const SQL9 = read('supabase/migrations/0009_user_report_publish.sql');
++const UI = read('src/services/report-publish.js');
++const MEAS = read('src/services/measure.js');
++const SHELL = read('partials/shell.html');
++const SW = read('sw.js');
++const DOCS = read('docs/rapor-yayini.md');
++
++/* ============================================================ 1) VERİTABANI */
++describe('0009: kullanıcı yayını yetki modeli (SQL)', () => {
++  test('tetikleyici yönetici dalını KORUR (0008 hakkı değişmez)', () => {
++    assert.match(SQL9, /create or replace function public\.tg_report_request_gate\(\)/);
++    assert.match(SQL9, /if public\.is_admin\(\) then/, 'yönetici dalı');
++    assert.match(SQL9, /create trigger trg_report_request_gate\s+before insert or update of park_id on public\.report_requests/, 'tetikleyici aynı olaylarla yeniden bağlı');
++  });
++
++  test('⭐ kimlik: istek yalnız kendi adına (requested_by = auth.uid())', () => {
++    assert.match(SQL9, /new\.requested_by is distinct from auth\.uid\(\)/);
++    assert.match(SQL9, /REPORT_NOT_SELF \(DGR0NS\)/);
++    assert.match(SQL9, /errcode = 'DG0NS'/);
++  });
++
++  test('⭐ mülkiyet: park, kullanıcının projesine bağlı olmalı', () => {
++    assert.match(SQL9, /from public\.projects p\s+where p\.owner = auth\.uid\(\)\s+and p\.park_id = new\.park_id/);
++    assert.match(SQL9, /REPORT_NOT_YOUR_PARK \(DGR0NP\)/);
++    assert.match(SQL9, /errcode = 'DG0NP'/);
++  });
++
++  test('⭐ kendi verisi: parkta en az bir ONAYLI ölçümü olmalı (silinmiş hariç)', () => {
++    assert.match(SQL9, /m\.owner = auth\.uid\(\)/);
++    assert.match(SQL9, /m\.status = 'Onaylı'/);
++    assert.match(SQL9, /m\.deleted_at is null/);
++    assert.match(SQL9, /\(m\.park_id = new\.park_id or p2\.park_id = new\.park_id\)/, 'denormalize park_id + eski satırlar için proje bağı');
++    assert.match(SQL9, /REPORT_NO_OWN_DATA \(DGR0ND\)/);
++  });
++
++  test('⭐ kota: yönetici olmayan 24 saatte en fazla 3 istek (iptaller de sayılır)', () => {
++    assert.match(SQL9, /quota constant int := 3/);
++    assert.match(SQL9, /r\.created_at > now\(\) - interval '24 hours'/);
++    assert.match(SQL9, /where r\.requested_by = auth\.uid\(\)/, 'kota kullanıcı başına');
++    assert.ok(!/status\s*(<>|!=|not in)[^\n]*Vazgeçildi/.test(SQL9.split('select count(*) into recent')[1] || ''), 'iptal edilenler de kotalanır (aç-kapat döngüsü yoramaz)');
++    assert.match(SQL9, /REPORT_QUOTA \(DGR0QT\)/);
++  });
++
++  test('0008 park-geneli onaylı veri şartı fonksiyonda DURUYOR (replace tüm gövdeyi değişir)', () => {
++    assert.match(SQL9, /REPORT_NO_DATA \(DGR0RD\)/);
++    assert.match(SQL9, /where m\.park_id = new\.park_id\s+and m\.status = 'Onaylı'\s+and m\.deleted_at is null/);
++  });
++
++  test('RLS insert: yönetici VEYA (kendi adına + aktif + parkına projesi olan)', () => {
++    assert.match(SQL9, /create policy report_requests_insert on public\.report_requests\s+for insert to authenticated\s+with check \(\s+public\.is_admin\(\)\s+or \(/);
++    assert.match(SQL9, /requested_by = auth\.uid\(\)\s+and public\.is_active\(\)/, 'kimlik + engelli hesap kilidi (0001 deseni)');
++    assert.match(SQL9, /p\.park_id = report_requests\.park_id/, 'aday satırın parkına bağ (iç sorguda nitelenmiş)');
++  });
++
++  test('RLS update: kullanıcı YALNIZ kendi bekleyen isteğini iptal eder', () => {
++    assert.match(SQL9, /using \(\(public\.is_admin\(\) or requested_by = auth\.uid\(\)\) and status = 'Beklemede'\)/);
++    assert.match(SQL9, /with check \(\(public\.is_admin\(\) or requested_by = auth\.uid\(\)\) and status = 'Vazgeçildi'\)/, 'iptal dışına durum yazılamaz');
++  });
++
++  test('gevşetilmeyenler: select (anon) ve delete (yalnız yönetici) 0009da YOK', () => {
++    assert.ok(!/report_requests_select/.test(SQL9), 'select politikasına dokunulmaz (Actions anon okur)');
++    assert.ok(!/report_requests_delete/.test(SQL9), 'delete politikasına dokunulmaz (yalnız yönetici)');
++    assert.ok(!/report_requests_one_pending_per_park/.test(SQL9), 'kısmi unique index 0008de kalır');
++  });
++
++  test('migration idempotent ve belgeli', () => {
++    assert.match(SQL9, /^begin;/m); assert.match(SQL9, /^commit;/m);
++    assert.ok((SQL9.match(/drop policy if exists/g) || []).length >= 2);
++    assert.match(SQL9, /drop trigger if exists trg_report_request_gate/);
++    assert.match(read('supabase/README.md'), /0009_user_report_publish\.sql/, 'README dosya listesi');
++    assert.match(read('supabase/README.md'), /9\. `0009_user_report_publish\.sql` → Run/, 'README uygulama sırası');
++    assert.match(DOCS, /1b\) Kısa yol \(kullanıcı/, 'işletim rehberi kullanıcı bölümü');
++    assert.match(DOCS, /REPORT_QUOTA/, 'rehberde kota tablosu');
++  });
++});
++
++/* ============================================================ 2) KABLOLAMA */
++describe('arayüz kablolaması: 📄 düğmesi + panel kutusu', () => {
++  test('⭐ panel kutusu v-projects içinde ve başlangıçta görünmez (düzen kaymaz)', () => {
++    const a = SHELL.indexOf('<div class="view" id="v-projects">');
++    const b = SHELL.indexOf('<div class="view" id="v-records">');
++    assert.ok(a > 0 && b > a, 'v-projects/v-records sırası');
++    const seg = SHELL.slice(a, b);
++    const i = seg.indexOf('id="dgUserPubBox"');
++    assert.ok(i > 0, 'kutu projeler sekmesinde');
++    assert.match(seg.slice(i - 60, i + 140), /class="card" style="display:none/, 'boş + display:none → sıfır yer');
++    assert.ok(!SHELL.slice(b).includes('dgUserPubBox'), 'başka sekmeye taşmıyor');
++  });
++
++  test('yönetici kartının başlığı TEKİL kalır (kullanıcı paneli başka ad taşır)', () => {
++    assert.equal((SHELL.match(/Bilimsel Rapor Yayını/g) || []).length, 1, '0008 bekçisi: kart yalnız v-adminde');
++    assert.ok(SHELL.includes('Park Raporu'), 'kullanıcı paneli farklı başlıkta');
++  });
++
++  test('📄 düğmesi yalnız parkı bağlı projede + panel senkronu typeof korumalı', () => {
++    assert.match(MEAS, /const repBtn=p\.park_id/, 'parksız projede düğme yok');
++    assert.match(MEAS, /dgUserPubOpen\(\$\{p\.id\}\)/, 'satır düğmesi paneli açar');
++    assert.match(MEAS, /if\(typeof dgUserPubSync==="function"\)dgUserPubSync\(PROJ_LIST\);/, 'proje silinirse panel kapanır');
++  });
++
++  test('yeni CSS yok: panel mevcut bileşen ailelerini kullanıyor', () => {
++    assert.ok(!/dg-user-pub|user-publish\.css/.test(SHELL), 'yeni sınıf ailesi/dosyası yok');
++    assert.ok(!existsSync(join(ROOT, 'css/user-publish.css')));
++    for (const cls of ['shead', 'badge on', 'badge off', 'badge admin', 'btn sm blue', 'btn sm red', 'btn sm amber', 'alert warn', 'dg-tree-meta', 'dg-parkadmin-note'])
++      assert.ok(UI.includes(cls), 'UI sınıfı mevcut aileden: ' + cls);
++  });
++
++  test('çevrimdışı paket: sw.js r42 ve modül CORE_ASSETS’te kalır', () => {
++    assert.match(SW, /CACHE_VERSION = 'dendrogeo-sw-v2-r42'/, 'içerik değişti → sürüm arttı');
++    assert.match(SW, /'\/src\/services\/report-publish\.js'/);
++  });
++});
++
++/* ---------- vm: modülü GERÇEK davranışıyla ölç ---------- */
++function bootUser(opts) {
++  const o = opts || {};
++  const els = {};
++  const el = (id) => (els[id] = els[id] || { id, innerHTML: '', textContent: '', style: {}, checked: true, classList: { contains: () => true }, scrollIntoView() {} });
++  for (const id of ['dgUserPubBox', 'dgUserPubLulc', 'v-projects', 'dgPubBox', 'dgPubLulc', 'dgPubClock', 'v-admin']) el(id);
++  const toasts = [], calls = [], fetches = [];
++  const RESULTS = {
++    report_requests: { data: o.requests || [], error: o.reqError || null },
++    measurements: { count: o.ownApproved === undefined ? 2 : o.ownApproved },
++  };
++  const chain = (table) => {
++    const t = { then: (res) => res(RESULTS[table] || { data: [], error: null }) };
++    for (const m of ['select', 'eq', 'order', 'limit', 'is', 'update', 'insert'])
++      t[m] = (...a) => { calls.push([table, m, a]); return t; };
++    return t;
++  };
++  let QUEUE = o.queue || { schema: 'dendrogeo-publish-queue/1', entries: [] };
++  let POST = o.post || { status: 201, text: '' };
++  const ctx = {
++    console: { log() {}, warn() {}, error() {} },
++    document: { getElementById: (id) => els[id] || null, hidden: false, querySelector: () => null },
++    navigator: { clipboard: { writeText: async () => {} } },
++    location: { href: 'https://dendrogeo.org/' },
++    window: null,
++    SB_URL: 'https://x.supabase.co', SB_KEY: 'anon-key',
++    PROFILE: o.profile || { id: 'u-2', role: 'user' }, USER: { id: 'u-2' },
++    PROJ_LIST: o.projects || [{ id: 11, park_id: 6, parks: { name: 'Göksu Parkı' }, name: 'Göksu Parkı - deneme' }],
++    toast: (m, t) => toasts.push([m, t]),
++    confirm: () => o.confirm !== false,
++    sb: { from: (table) => chain(table), auth: { getSession: async () => ({ data: { session: { access_token: 'tok-1' } } }) } },
++    fetch: async (u, op) => {
++      const m = (op && op.method) || 'GET';
++      if (m === 'POST') { fetches.push({ url: u, headers: op.headers, body: JSON.parse(op.body) }); return { ok: POST.status < 300, status: POST.status, text: async () => POST.text }; }
++      return { ok: true, status: 200, json: async () => QUEUE, text: async () => '' };
++    },
++    setInterval: () => 1, clearInterval: () => {}, setTimeout: () => 0,
++    URL, URLSearchParams, Math, JSON, Date, Number, Array, Object, String, Boolean, RegExp, Error, Promise, Intl,
++  };
++  ctx.window = ctx; ctx.self = ctx; ctx.globalThis = ctx;
++  vm.createContext(ctx);
++  vm.runInContext(read('src/config/constants.js'), ctx, { filename: 'constants.js' });
++  vm.runInContext(UI, ctx, { filename: 'report-publish.js' });
++  const run = (code) => vm.runInContext(code, ctx);
++  return {
++    ctx, els, toasts, calls, fetches, run,
++    setPost: (p) => { POST = p; },
++    setQueue: (q) => { QUEUE = q; },
++    setRequests: (r) => { RESULTS.report_requests = { data: r, error: null }; },
++    html: () => els.dgUserPubBox.innerHTML,
++    lastToast: () => toasts[toasts.length - 1],
++  };
++}
++const REQ = (id, park, status, by, minAgo) => ({ id, park_id: park, status, requested_by: by, with_lulc: true, created_at: new Date(Date.now() - (minAgo || 0) * 60000).toISOString(), cancelled_at: null });
++
++describe('kullanıcı paneli davranışı (vm)', () => {
++  test('parkı bağlı olmayan proje panel açmaz (rapor park kimliği ister)', async () => {
++    const ui = bootUser({ projects: [{ id: 12, park_id: null }] });
++    await ui.run('dgUserPubOpen(12)');
++    assert.match(ui.lastToast()[0], /parka bağlı değil/);
++    assert.equal(ui.lastToast()[1], 'err');
++    assert.equal(ui.html(), '', 'kutuya dokunulmadı');
++    assert.equal(ui.fetches.length, 0);
++  });
++
++  test('yayın yok: rozet + 📄 Yayınla + 🛰 tercihi + dürüstlük notları', async () => {
++    const ui = bootUser();
++    await ui.run('dgUserPubOpen(11)');
++    const h = ui.html();
++    assert.match(h, /badge off">Yayın yok/);
++    assert.match(h, /dgUserPublish\(6\)/, 'yayınla düğmesi park kimliğiyle');
++    assert.match(h, /📄 Yayınla/);
++    assert.match(h, /id="dgUserPubLulc" checked/, '§4 tercihi varsayılan açık');
++    assert.match(h, /park düzeyindedir/, 'raporun kapsamı kullanıcıya söylenir');
++    assert.match(h, /tüm onaylı ölçümleri/, 'yalnız kendi projesi değil');
++    assert.match(h, /24 saatte en fazla 3 istek/, 'kota şeffaf');
++    assert.match(h, /2 onaylı ölçümün var/, 'kendi onaylı veri sayısı');
++    assert.match(h, /dgUserPubClose\(\)/, 'kapat düğmesi');
++  });
++
++  test('kendi bekleyen isteği: rozet + süre + ✖ Vazgeç; yayın düğmesi yok', async () => {
++    const ui = bootUser({ requests: [REQ('r1', 6, 'Beklemede', 'u-2', 3)] });
++    await ui.run('dgUserPubOpen(11)');
++    const h = ui.html();
++    assert.match(h, /badge admin">Beklemede/);
++    assert.match(h, /3 dk önce kuyruğa alındı/);
++    assert.match(h, /yayın işi 5 dakikada bir çalışır/);
++    assert.match(h, /dgUserCancel\('r1'\)/, 'kendi isteğini iptal edebilir');
++    assert.ok(!/dgUserPublish/.test(h), 'beklerken ikinci istek düğmesi yok');
++    assert.ok(!/dgUserPubLulc/.test(h), 'beklerken tercih de yok');
++  });
++
++  test('⭐ başkasının bekleyen isteği: ✖ Vazgeç YOK, bilgi notu var', async () => {
++    const ui = bootUser({ requests: [REQ('r9', 6, 'Beklemede', 'u-9', 5)] });
++    await ui.run('dgUserPubOpen(11)');
++    const h = ui.html();
++    assert.ok(!/dgUserCancel/.test(h), 'başkasının isteğini iptal düğmesi çizilmez');
++    assert.match(h, /başka bir katkıda bulunan/, 'kimin isteği şeffaf');
++    /* düğme çizilmese bile fonksiyon sunucu/istemci kapısıyla korunur */
++    await ui.run('dgUserCancel("r9")');
++    assert.match(ui.lastToast()[0], /Yalnız kendi bekleyen isteğini/);
++    assert.equal(ui.calls.filter((c) => c[1] === 'update').length, 0, 'update hiç çağrılmadı');
++  });
++
++  test('kendi isteğini iptal: update Vazgeçildi + başarılı toast', async () => {
++    const ui = bootUser({ requests: [REQ('r1', 6, 'Beklemede', 'u-2', 1)] });
++    await ui.run('dgUserPubOpen(11)');
++    await ui.run('dgUserCancel("r1")');
++    const upd = ui.calls.filter((c) => c[0] === 'report_requests' && c[1] === 'update');
++    assert.equal(upd.length, 1, 'update çağrıldı');
++    assert.equal(upd[0][2][0].status, 'Vazgeçildi');
++    assert.ok(upd[0][2][0].cancelled_at, 'iptal zamanı yazılır');
++    assert.match(ui.lastToast()[0], /İstek iptal edildi/);
++  });
++
++  test('yayınlandı: 🔗 Aç + 📤 Paylaş + 📄 Yeni sürüm + kalıcı bağlantı', async () => {
++    const ui = bootUser({
++      requests: [REQ('r0', 6, 'Beklemede', 'u-2', 30)],
++      queue: { schema: 'dendrogeo-publish-queue/1', entries: [{ request_id: 'r0', park_id: 6, status: 'Yayınlandı', report_id: 'DGR-2026-0007', url_path: '/rapor/DGR-2026-0007/', finished_at: '2026-09-28T10:00:00Z', n: 9, carbon_txt: '5 t' }] },
++    });
++    await ui.run('dgUserPubOpen(11)');
++    const h = ui.html();
++    assert.match(h, /badge on">Yayınlandı/);
++    assert.match(h, /dgReportOpen\('DGR-2026-0007'\)/);
++    assert.match(h, /dgReportShare\('DGR-2026-0007'\)/);
++    assert.match(h, /📄 Yeni sürüm/, 'yeni çözümleme yeni kimlik');
++    assert.ok(h.includes('https://dendrogeo.org/rapor/DGR-2026-0007/'), 'bağlantı kimlikten kuruldu');
++    assert.ok(!/dgUserCancel/.test(h), 'sonuçlanmış istekte iptal yok');
++  });
++
++  test('⭐ oynanmış günlük dış bağlantı sokamaz (url_path ve bozuk kimlik)', async () => {
++    const ui = bootUser({
++      requests: [REQ('r0', 6, 'Beklemede', 'u-2', 30)],
++      queue: { schema: 'dendrogeo-publish-queue/1', entries: [{ request_id: 'r0', park_id: 6, status: 'Yayınlandı', report_id: 'DGR-2026-0007', url_path: 'http://evil.example/tuzak' }] },
++    });
++    await ui.run('dgUserPubOpen(11)');
++    assert.ok(!/evil\.example/.test(ui.html()), 'url_path sızmadı');
++    ui.setQueue({ schema: 'dendrogeo-publish-queue/1', entries: [{ request_id: 'r0', park_id: 6, status: 'Yayınlandı', report_id: 'javascript:alert(1)', url_path: 'http://evil.example' }] });
++    await ui.run('dgUserPubRefresh()');
++    const h = ui.html();
++    assert.ok(!/javascript:/.test(h) && !/evil/.test(h), 'kimlik biçimi bozuksa bağlantı hiç kurulmaz');
++    assert.match(h, /badge off">Yayın yok/, 'güvenli tarafa düşer');
++  });
++
++  test('başarısız iş: ⚠ neden + yeniden istek düğmesi', async () => {
++    const ui = bootUser({
++      requests: [REQ('r5', 6, 'Beklemede', 'u-2', 60)],
++      queue: { schema: 'dendrogeo-publish-queue/1', entries: [{ request_id: 'r5', park_id: 6, status: 'Başarısız', message: 'OSM/Overpass erişilemedi' }] },
++    });
++    await ui.run('dgUserPubOpen(11)');
++    const h = ui.html();
++    assert.match(h, /badge off">Başarısız/);
++    assert.match(h, /OSM\/Overpass erişilemedi/, 'günlükteki neden görünür');
++    assert.match(h, /dgUserPublish\(6\)/, 'yeniden istek açılabilir');
++  });
++
++  test('⭐ insert gövdesi: park, LULC, requested_by=USER.id, proje notu, RLS-safe başlıklar', async () => {
++    const ui = bootUser();
++    await ui.run('dgUserPubOpen(11)');
++    await ui.run('dgUserPublish(6)');
++    assert.equal(ui.fetches.length, 1);
++    const f = ui.fetches[0];
++    assert.equal(f.url, 'https://x.supabase.co/rest/v1/report_requests');
++    assert.equal(f.headers['Prefer'], 'return=minimal', 'RETURNING politikaya takılmasın');
++    assert.equal(f.headers['Authorization'], 'Bearer tok-1', 'oturum anahtarı (anon istek açamaz)');
++    assert.deepEqual(f.body, [{ park_id: 6, with_lulc: true, status: 'Beklemede', requested_by: 'u-2', note: 'kullanıcı yayını (proje #11)' }]);
++    assert.match(ui.lastToast()[0], /kuyruğa alındı/);
++    assert.equal(ui.lastToast()[1], 'ok');
++  });
++
++  test('sunucu hataları kullanıcı diline çevrilir (kota/mülkiyet/veri/çift istek)', async () => {
++    const err = (msg, code, status) => ({ status: status || 400, text: JSON.stringify({ message: msg, code }) });
++    const cases = [
++      [err('REPORT_QUOTA (DGR0QT): 24 saatlik yayın isteği sınırına (3) ulaşıldı', 'DG0QT'), /sınırına ulaştın \(24 saatte 3\)/],
++      [err('REPORT_NOT_YOUR_PARK (DGR0NP): park 6 için projen yok', 'DG0NP'), /kendi parkının raporunu/],
++      [err('REPORT_NO_OWN_DATA (DGR0ND): bu parkta onaylı ölçümün yok', 'DG0ND'), /onaylı ölçümün yok/],
++      [err('REPORT_NOT_SELF (DGR0NS): yayın isteği yalnız kendi adına', 'DG0NS'), /kendi adına/],
++      [err('duplicate key value violates unique constraint "report_requests_one_pending_per_park"', '23505'), /bekleyen bir istek zaten var/],
++      [err('no rows affected by row-level security policy', '42501', 403), /Yetki yok/],
++    ];
++    for (const [post, re] of cases) {
++      const ui = bootUser();
++      await ui.run('dgUserPubOpen(11)');
++      ui.setPost(post);
++      await ui.run('dgUserPublish(6)');
++      assert.match(ui.lastToast()[0], re, 'eşleme: ' + post.text.slice(0, 60));
++      assert.equal(ui.lastToast()[1], 'err');
++    }
++  });
++
++  test('0009 uygulanmamışsa panel yapılacak işi söylüyor (sessiz ölüm yok)', async () => {
++    const ui = bootUser({ reqError: { code: '42P01', message: 'relation "report_requests" does not exist' } });
++    await ui.run('dgUserPubOpen(11)');
++    const h = ui.html();
++    assert.match(h, /alert warn/);
++    assert.match(h, /0008_report_publish\.sql/);
++    assert.match(h, /0009_user_report_publish\.sql/);
++  });
++
++  test('onaylı ölçümü görünmeyen kullanıcı uyarılır (karar yine sunucunun)', async () => {
++    const ui = bootUser({ ownApproved: 0 });
++    await ui.run('dgUserPubOpen(11)');
++    const h = ui.html();
++    assert.match(h, /alert warn/, 'uyarı kutusu');
++    assert.match(h, /onaylı ölçümün görünmüyor/);
++    assert.match(h, /dgUserPublish\(6\)/, 'düğme kalır: başka projesindeki onaylı veri de yeter');
++  });
++
++  test('yönetici kartının kapısı değişmedi: kullanıcı dgPublishReport çağıramaz', async () => {
++    const ui = bootUser();
++    await ui.run('dgPublishReport(6)');
++    assert.equal(ui.fetches.length, 0, 'istemci kapısı isteği göndermedi');
++    assert.equal(ui.lastToast()[1], 'err');
++    /* yönetici aynı çekirdekle yazar (ortak dgPubInsertRequest) */
++    const adm = bootUser({ profile: { id: 'u-1', role: 'owner' } });
++    await adm.run('dgPublishReport(6)');
++    assert.equal(adm.fetches.length, 1);
++    assert.equal(adm.fetches[0].body[0].note, 'uygulama içi yayın');
++  });
++
++  test('panel HTML’i yalnız mevcut sınıf ailelerini kullanır (yeni CSS yok)', async () => {
++    const izin = new Set(['shead', 'no', 'rule', 'badge', 'on', 'off', 'admin', 'btn', 'sm', 'ghost', 'blue', 'red', 'amber', 'alert', 'warn', 'err', 'info', 'dg-tree-meta', 'dg-parkadmin-note', 'mono', 'dg-act']);
++    const states = [
++      {},
++      { requests: [REQ('r1', 6, 'Beklemede', 'u-2', 2)] },
++      { requests: [REQ('r9', 6, 'Beklemede', 'u-9', 2)] },
++      { requests: [REQ('r0', 6, 'Beklemede', 'u-2', 2)], queue: { schema: 'dendrogeo-publish-queue/1', entries: [{ request_id: 'r0', park_id: 6, status: 'Yayınlandı', report_id: 'DGR-2026-0007' }] } },
++      { ownApproved: 0 },
++      { reqError: { code: '42P01', message: 'x' } },
++    ];
++    for (const o of states) {
++      const ui = bootUser(o);
++      await ui.run('dgUserPubOpen(11)');
++      for (const m of ui.html().matchAll(/class="([^"]+)"/g))
++        for (const c of m[1].split(/\s+/).filter(Boolean))
++          assert.ok(izin.has(c), 'bilinmeyen sınıf: ' + c);
++    }
++  });
++
++  test('dgUserPubSync: projesi silinen panel kapanır (hayalet durum yok)', async () => {
++    const ui = bootUser();
++    await ui.run('dgUserPubOpen(11)');
++    assert.ok(ui.html().length > 0);
++    ui.run('dgUserPubSync([{id:99,park_id:6}])');
++    assert.equal(ui.els.dgUserPubBox.style.display, 'none', 'kutu gizlendi');
++    assert.equal(ui.els.dgUserPubBox.innerHTML, '', 'içerik temizlendi');
++  });
++});

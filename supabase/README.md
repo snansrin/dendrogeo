@@ -14,7 +14,8 @@ Supabase kontrol panelinde yaşıyordu; artık her değişiklik version control'
 | `migrations/0005_park_name_case.sql` | **Park adı yazım düzeni**: `dg_tr_title()` (Türkçe duyarlı: i→İ, ı→I) + yalnız tamamen küçük harfli adları düzelten tetikleyici + mevcut park/proje adlarının onarımı. Idempotent. |
 | `migrations/0004_parks.sql` | **Park kimliği**: `parks` tablosu (OSM elemanı = canonical anahtar), `projects.park_id/label/park_name`, `measurements.park_id`, `v_park_compare` view'ı, iki trigger (proje adı kurma + ölçüm kapısı). Idempotent. |
 | `migrations/0007_geo_fence.sql` | **Konum çiti**: `parks.geom_json`, `measurements.geo_verified_at/geo_dist_m/geo_acc_m/geo_override_by`, `dg_hav_m()` + `dg_point_in_park()` (ray-casting), `trg_geo_fence` (ölçüm parkın dışında ise INSERT/UPDATE reddi), `trg_project_requires_park`. Idempotent. |
-| `migrations/0008_report_publish.sql` | **Site içinden rapor yayını**: `report_requests` kuyruğu (isteği yalnız `is_admin()` açar, okuma anon'a açık — Actions işi buradan okur), aynı park için tek bekleyen istek (kısmi unique index), `tg_report_request_gate` (yetki + onaylı veri şartı; `REPORT_ADMIN_ONLY`/`REPORT_NO_DATA`). Idempotent. |
+| `migrations/0008_report_publish.sql` | **Site içinden rapor yayını**: `report_requests` kuyruğu (isteği yalnız `is_admin()` açar — 0009'da kendi parkı için kullanıcıya da açıldı; okuma anon'a açık — Actions işi buradan okur), aynı park için tek bekleyen istek (kısmi unique index), `tg_report_request_gate` (yetki + onaylı veri şartı; `REPORT_ADMIN_ONLY`/`REPORT_NO_DATA`). Idempotent. |
+| `migrations/0009_user_report_publish.sql` | **Kullanıcılar kendi parkını yayınlar**: `tg_report_request_gate` genişletildi (yönetici olmayan için mülkiyet `REPORT_NOT_YOUR_PARK`, kendi onaylı verisi `REPORT_NO_OWN_DATA`, 24 saatte 3 istek kotası `REPORT_QUOTA`, `requested_by = auth.uid()` `REPORT_NOT_SELF`) + RLS insert/update: kullanıcı kendi bekleyen isteğini iptal edebilir. Idempotent, 0008'in üzerine. |
 | `dump-schema.sh` | Canlı şemayı `supabase db dump` ile yeniden dökmek için yardımcı |
 | `audit/rls-probe.sh` | Anon key ile 13 saldırı denemesi (yetki yükseltme dahil) |
 | `audit/RLS-DENETIM.md` | Denetim listesi + sonuç tablosu (doldurulacak) |
@@ -31,7 +32,8 @@ Supabase SQL Editor'da sırayla:
 6. `0006_park_admin_only.sql` → Run (park bağını yalnız yönetici değiştirsin)
 7. `0007_geo_fence.sql` → Run (konum çiti: ölçüm park poligonu dışında ise sunucu reddeder)
 8. `0008_report_publish.sql` → Run (site içinden rapor yayını kuyruğu)
-9. (Önerilir) `audit/rls-probe.sh`'i kendi makinenden çalıştır → sonuçları
+9. `0009_user_report_publish.sql` → Run (kullanıcılar kendi parkının raporunu kendisi yayınlar: mülkiyet + kota kilidi)
+10. (Önerilir) `audit/rls-probe.sh`'i kendi makinenden çalıştır → sonuçları
    `audit/RLS-DENETIM.md` tablosuna işle
 
 > ⚠️ **Sıra önemli:** `0004` uygulanmadan site çökmez ama park kimliği devre
@@ -116,6 +118,35 @@ Güvenlik notları:
 
 > 0008 uygulanmazsa site çökmez: kart "0008_report_publish.sql çalıştırılmalı"
 > uyarısını gösterir, diğer sekmeler etkilenmez.
+
+## 0009 — kullanıcılar kendi parkını yayınlar (2026-09-28)
+
+Kullanıcı isteği: **"kullanıcılar kendi park projelerini paylaşabilecek
+değil mi?"** → doğrudan yayın: parkı için projesi olan kullanıcı, yayın
+isteğini `report_requests` kuyruğuna **kendisi** yazar (📁 Projeler → 📄).
+Hat değişmez: aynı kuyruk, aynı Actions işi, aynı DGR kimliği, aynı kalıcı
+bağlantı. Yönetici hakkı aynen durur.
+
+Kötüye kullanıma karşı sunucu kilitleri (RLS + `tg_report_request_gate`, iki
+katman — istemci kapıları yalnız UX'tir):
+
+* **Mülkiyet**: yönetici olmayan yalnız kendi projesinin bağlı olduğu park
+  için istek açabilir (`REPORT_NOT_YOUR_PARK`, `DG0NP`).
+* **Kendi verisi**: isteyenin o parkta en az bir **onaylı** ölçümü olmalı
+  (`REPORT_NO_OWN_DATA`, `DG0ND`) — katkısı olmayan parkı yayınlayamaz.
+* **Kota**: yönetici olmayan 24 saatte en fazla **3** istek (`REPORT_QUOTA`,
+  `DG0QT`; iptal edilenler de sayılır → aç-kapat döngüsü kuyruğu yoramaz).
+* **Kimlik**: `requested_by = auth.uid()` (`REPORT_NOT_SELF`, `DG0NS`) +
+  RLS'te `is_active()` (engelli hesap istek açamaz).
+* **İptal**: kullanıcı yalnız KENDİ bekleyen isteğini `Vazgeçildi` yapabilir;
+  yöneticinin iptal hakkı değişmez. `select` (herkese) ve `delete` (yalnız
+  yönetici) 0008'deki gibi kalır.
+* 0008 kilitleri aynen: park başına TEK bekleyen istek (kısmi unique index),
+  parkta onaylı veri şartı (`REPORT_NO_DATA`), `status` kümesi kapalı.
+
+> 0009 uygulanmazsa kullanıcı 📄 düğmesine basınca sunucu reddeder ve panel
+> "Yetki yok" uyarısı gösterir; yönetici kartı 0008 ile çalışmaya devam eder.
+> Bekçi: `test/user-publish.test.mjs`.
 
 ## 0004 — park kimliği modeli (2026-09-24)
 

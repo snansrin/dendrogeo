@@ -15,8 +15,12 @@
  *      sessizce tazelenir → sayfayı yenilemeye gerek kalmaz.
  *
  * GÜVENLİK / DÜRÜSTLÜK
- *   · İstek yazma YALNIZ yönetici (RLS + tg_report_request_gate); arayüz de
- *     yönetici sekmesinde durur, ayrıca istemcide dgPubAdmin() kapısı var.
+ *   · Yönetici kartı (v-admin): istek yazma dgPubAdmin() kapısıyla korunur.
+ *   · KULLANICI TARAFI (0009_user_report_publish.sql): parkı için projesi olan
+ *     kullanıcı isteği KENDİSİ açar — sunucu kilitleri: mülkiyet (kendi
+ *     projesinin parkı), kendi onaylı ölçümü, 24 saatte 3 istek kotası,
+ *     requested_by = auth.uid(). İstemci kapısı yalnız UX'tir; yetki RLS +
+ *     tg_report_request_gate'te (iki katman, 0006/0008 deseni).
  *   · Günlük dosyası Pages'te herkese açıktır. Bu yüzden bağlantı günlüğün
  *     yazdığı metinden DEĞİL, biçimi doğrulanmış rapor kimliğinden kurulur
  *     (DG_PUB_ID): bozulmuş/oynanmış bir günlük uygulama içine dış bağlantı
@@ -196,41 +200,54 @@ function dgPubRender(){
   'Eski raporlar DEĞİŞMEZ: yeni çözümleme yeni kimlik demektir. 🛰 kutusu işaretliyken §4 arazi örtüsü bağlamı da üretilir (birkaç dakika sürer).</div>';
 }
 
-/* ---------- yazma ---------- */
+/* ---------- yazma (ortak çekirdek: yönetici kartı + kullanıcı paneli) ---------- */
+/* RLS-safe insert (trackVisit ile aynı desen): "Prefer: return=minimal" —
+ * return=representation olsaydı RETURNING satırı politikaya takılıp istek
+ * sessizce ölebilirdi. Oturum anahtarı şart: anon istek açamaz. */
+async function dgPubInsertRequest(parkId,lulc,note){
+ let token=SB_KEY;
+ try{const{data}=await sb.auth.getSession();if(data&&data.session&&data.session.access_token)token=data.session.access_token;}catch(e){}
+ try{
+  const r=await fetch(SB_URL+"/rest/v1/report_requests",{
+   method:"POST",
+   headers:{"apikey":SB_KEY,"Authorization":"Bearer "+token,"Content-Type":"application/json","Prefer":"return=minimal"},
+   body:JSON.stringify([{park_id:Number(parkId),with_lulc:lulc!==false,status:"Beklemede",
+    requested_by:(typeof USER!=="undefined"&&USER&&USER.id)||null,note:note||"uygulama içi yayın"}])
+  });
+  const ok=r.status===201||r.status===200;
+  const txt=ok?"":((await r.text().catch(()=> ""))||"");
+  return{ok:ok,status:r.status,txt:txt};
+ }catch(e){return{ok:false,status:0,txt:"NETWORK "+((e&&e.message)||e)};}
+}
+
+/* Hata metni eşleme: PostgREST, RLS reddini ve tetikleyici hatalarını gövdede
+ * taşır (REPORT_QUOTA / REPORT_NOT_YOUR_PARK / REPORT_NO_OWN_DATA / …). */
+function dgPubInsertError(r){
+ const txt=String(r.txt||"");
+ if(!r.status||/^NETWORK/.test(txt))return"Ağ hatası: "+txt.replace(/^NETWORK\s*/,"").slice(0,160);
+ if(/does not exist|42P01/i.test(txt)||r.status===404)return"0008_report_publish.sql çalıştırılmalı (report_requests tablosu yok).";
+ if(/duplicate key|23505/i.test(txt))return"Bu park için bekleyen bir istek zaten var — kuyruktaki iş bitsin.";
+ if(/REPORT_QUOTA|DG0QT/i.test(txt))return"Günlük yayın isteği sınırına ulaştın (24 saatte 3) — sonra yeniden dene.";
+ if(/REPORT_NOT_YOUR_PARK|DG0NP/i.test(txt))return"Bu park senin projene bağlı değil — yalnız kendi parkının raporunu yayınlayabilirsin.";
+ if(/REPORT_NO_OWN_DATA|DG0ND/i.test(txt))return"Bu parkta onaylı ölçümün yok — ölçümlerin onaylanınca yayın isteyebilirsin.";
+ if(/REPORT_NOT_SELF|DG0NS/i.test(txt))return"Yayın isteği yalnız kendi adına açılabilir.";
+ if(/REPORT_NO_DATA|DGR0RD|22023/i.test(txt))return"Bu parkta onaylı ölçüm yok; rapor üretilemez.";
+ if(/42501|401|403|row-level|permission/i.test(txt))return"Yetki yok: bu park için yayın isteği açamazsın.";
+ return"İstek yazılamadı (HTTP "+r.status+"): "+txt.slice(0,160);
+}
+
 async function dgPublishReport(parkId){
  if(!dgPubAdmin())return toast("Rapor yayını yalnız yönetici içindir.","err","📄");
  const lulc=$("dgPubLulc")?$("dgPubLulc").checked!==false:true;
- /* RLS-safe insert (trackVisit ile aynı desen): "Prefer: return=minimal" —
-  * return=representation olsaydı RETURNING satırı politikaya takılıp istek
-  * sessizce ölebilirdi. Oturum anahtarı şart: anon istek açamaz. */
- let token=SB_KEY;
- try{const{data}=await sb.auth.getSession();if(data&&data.session&&data.session.access_token)token=data.session.access_token;}catch(e){}
- let r=null;
- try{
-  r=await fetch(SB_URL+"/rest/v1/report_requests",{
-   method:"POST",
-   headers:{"apikey":SB_KEY,"Authorization":"Bearer "+token,"Content-Type":"application/json","Prefer":"return=minimal"},
-   body:JSON.stringify([{park_id:Number(parkId),with_lulc:lulc,status:"Beklemede",
-    requested_by:(typeof USER!=="undefined"&&USER&&USER.id)||null,note:"uygulama içi yayın"}])
-  });
- }catch(e){return toast("Ağ hatası: "+esc(e.message),"err","📄");}
- if(r.status===201||r.status===200){
+ const r=await dgPubInsertRequest(parkId,lulc,"uygulama içi yayın");
+ if(r.ok){
   toast("📄 Yayın isteği kuyruğa alındı — rapor birkaç dakika içinde burada bağlanacak.","ok","📄");
   DG_PUB_STATE.pollCount=0;
   await dgLoadPublishQueue();
   dgPubSchedulePoll();
   return;
  }
- const txt=(await r.text().catch(()=>""))||"";
- const msg=(/does not exist|42P01/i.test(txt)||r.status===404)
-  ? "0008_report_publish.sql çalıştırılmalı (report_requests tablosu yok)."
-  : /duplicate key|23505/i.test(txt)
-  ? "Bu park için bekleyen bir istek zaten var — kuyruktaki iş bitsin."
-  : /22023|REPORT_NO_DATA/i.test(txt)
-  ? "Bu parkta onaylı ölçüm yok; rapor üretilemez."
-  : /42501|401|403|row-level|permission/i.test(txt)
-  ? "Yetki yok: yayın isteğini yalnız yönetici açabilir."
-  : ("İstek yazılamadı (HTTP "+r.status+"): "+txt.slice(0,160));
+ const msg=dgPubInsertError(r);
  if(/0008_report_publish/.test(msg))DG_PUB_STATE.error="SCHEMA";
  toast(msg,"err","📄");
  dgPubRender();
@@ -243,6 +260,204 @@ async function dgPublishCancel(id){
  if(error)return toast("İptal edilemedi: "+esc(error.message),"err","📄");
  toast("İstek iptal edildi.","ok","📄");
  await dgLoadPublishQueue();
+}
+
+/* ---------- KULLANICI TARAFI (0009): 📁 Projeler → 📄 Park Raporu ----------
+ * Parkı için projesi olan kullanıcı rapor isteğini KENDİSİ açar; sonuç aynı
+ * kuyruktan döner (rapor-yayin.yml → yayin-kuyrugu.json → kalıcı bağlantı).
+ * Yetki kararı SUNUCUDA (RLS + tg_report_request_gate): mülkiyet, kendi
+ * onaylı ölçümü, 24 saatte 3 istek, requested_by = auth.uid(). İstemci
+ * kapıları yalnız UX'tir — yetki sınırı DEĞİL. Yeni CSS yok: yönetici
+ * kartıyla aynı card/shead/badge/btn/alert/dg-tree-meta/mono aileleri.
+ * Panel durumu yönetici kartından AYRI tutulur (DG_USER_PUB): iki arayüz
+ * birbirinin verisini ezmez. */
+let DG_USER_PUB={projectId:0,parkId:0,parkName:"",requests:[],queue:null,ownApproved:null,error:"",timer:0,polls:0};
+
+/* Saf okuma yardımcıları (günlük dosyası parametrik: yönetici kartı kendi
+ * durumunu, kullanıcı paneli kendi durumunu verir). Kimlik biçimi DOĞRULANMADAN
+ * hiçbir girdi "yayınlandı" sayılmaz — oynanmış günlük dış bağlantı sokamaz. */
+function dgPubEntryIn(queue,reqId){
+ const es=(queue&&queue.entries)||[];
+ for(let i=es.length-1;i>=0;i--)if(String(es[i].request_id)===String(reqId))return es[i];
+ return null;
+}
+function dgPubPublishedInPark(queue,parkId){
+ const es=(queue&&queue.entries)||[];
+ for(let i=es.length-1;i>=0;i--){
+  const e=es[i];
+  if(e.status==="Yayınlandı"&&String(e.park_id)===String(parkId)&&DG_PUB_ID.test(String(e.report_id||"")))return e;
+ }
+ return null;
+}
+
+async function dgUserPubOpen(projectId){
+ const box=$("dgUserPubBox");if(!box)return;
+ if(typeof USER==="undefined"||!USER)return toast("Önce giriş yap.","err","📄");
+ const list=(typeof PROJ_LIST!=="undefined"&&Array.isArray(PROJ_LIST))?PROJ_LIST:[];
+ const p=list.find(x=>Number(x.id)===Number(projectId));
+ if(!p)return toast("Proje bulunamadı — listeden yeniden dene.","err","📄");
+ if(!p.park_id)return toast("Bu proje bir parka bağlı değil — rapor park kimliği ister.","err","🌳");
+ if(DG_USER_PUB.timer){clearInterval(DG_USER_PUB.timer);DG_USER_PUB.timer=0;}
+ DG_USER_PUB.projectId=Number(p.id);
+ DG_USER_PUB.parkId=Number(p.park_id);
+ DG_USER_PUB.parkName=(p.parks&&p.parks.name)||p.park_name||("park #"+p.park_id);
+ DG_USER_PUB.requests=[];DG_USER_PUB.error="";DG_USER_PUB.ownApproved=null;DG_USER_PUB.polls=0;
+ box.style.display="";
+ box.innerHTML='<div class="dg-tree-meta">⏳ Rapor durumu yükleniyor…</div>';
+ if(box.scrollIntoView)box.scrollIntoView({behavior:"smooth",block:"nearest"});
+ await dgUserPubRefresh();
+}
+
+async function dgUserPubRefresh(){
+ const st=DG_USER_PUB;if(!st.parkId)return;
+ try{
+  const{data,error}=await sb.from("report_requests")
+   .select("id,park_id,with_lulc,status,requested_by,created_at,cancelled_at")
+   .eq("park_id",st.parkId).order("created_at",{ascending:false}).limit(10);
+  if(error){
+   st.error=(error.code==="42P01"||/report_requests/i.test(error.message||""))
+    ?"SCHEMA"
+    :("İstekler okunamadı: "+(error.message||error.code||"bilinmeyen hata"));
+   st.requests=[];
+  }else{st.error="";st.requests=data||[];}
+ }catch(e){st.error="İstekler okunamadı: "+((e&&e.message)||e);st.requests=[];}
+ const[q,cnt]=await Promise.all([dgPubFetchQueue(),dgUserOwnApproved()]);
+ if(q)st.queue=q;
+ st.ownApproved=cnt;
+ dgUserPubRender();
+ dgUserPubSchedulePoll();
+}
+
+/* Bu projedeki kendi onaylı ölçüm sayısı (yalnız BİLGİ: yayın kararını
+ * sunucu verir — aynı parktaki başka projenin onaylı verisi de yeter). */
+async function dgUserOwnApproved(){
+ if(typeof USER==="undefined"||!USER||!DG_USER_PUB.projectId)return null;
+ try{
+  const{count}=await sb.from("measurements").select("*",{count:"exact",head:true})
+   .eq("project_id",DG_USER_PUB.projectId).eq("owner",USER.id).eq("status","Onaylı").is("deleted_at",null);
+  return Number(count||0);
+ }catch(e){return null;}
+}
+
+function dgUserPubRender(){
+ const box=$("dgUserPubBox");if(!box)return;
+ const st=DG_USER_PUB;
+ const close='<button class="btn sm ghost" onclick="dgUserPubClose()" title="Paneli kapat">✖ Kapat</button>';
+ if(st.error==="SCHEMA"){
+  box.innerHTML='<div class="shead" style="margin-bottom:10px"><span class="no">📄</span><h2 style="font-size:1.15rem">Park Raporu</h2><span class="rule"></span>'+close+'</div>'+
+   '<div class="alert warn">⚠ <b>Yayın kuyruğu veritabanında kurulu değil.</b> Yönetici Supabase → SQL Editor\'da '+
+   '<span class="mono">0008_report_publish.sql</span> ve <span class="mono">0009_user_report_publish.sql</span> dosyalarını çalıştırmalı.</div>';
+  return;
+ }
+ const mine=(typeof USER!=="undefined"&&USER&&USER.id)||"";
+ const pend=st.requests.find(r=>r.status==="Beklemede"&&!dgPubEntryIn(st.queue,r.id));
+ const pendOwn=!!(pend&&String(pend.requested_by||"")===String(mine));
+ const pub=dgPubPublishedInPark(st.queue,st.parkId);
+ const last=st.requests[0]||null;
+
+ let badge,note="";
+ if(pend){
+  const dk=Math.max(0,Math.round((Date.now()-new Date(pend.created_at||Date.now()).getTime())/60000));
+  badge='<span class="badge admin">Beklemede</span>';
+  note=(dk<1?"az önce":dk+" dk önce")+" kuyruğa alındı · yayın işi 5 dakikada bir çalışır"+(pendOwn?"":" · isteği başka bir katkıda bulunan açtı");
+ }else if(pub){
+  badge='<span class="badge on">Yayınlandı</span>';
+ }else if(last){
+  const e=dgPubEntryIn(st.queue,last.id);
+  if(e&&e.status==="Başarısız"){badge='<span class="badge off">Başarısız</span>';note="⚠ "+String(e.message||"üretim hatası").slice(0,140);}
+  else if(last.status==="Vazgeçildi"){badge='<span class="badge off">Vazgeçildi</span>';}
+  else{badge='<span class="badge off">Yayın yok</span>';}
+ }else{
+  badge='<span class="badge off">Yayın yok</span>';
+ }
+
+ const rid=(pub&&DG_PUB_ID.test(String(pub.report_id||"")))?String(pub.report_id):"";
+ const url=dgPubUrl(rid);
+ const act=[];
+ if(url){
+  act.push('<button class="btn sm blue" onclick="dgReportOpen(\''+rid+'\')" title="Raporu yeni sekmede aç">🔗 Aç</button>');
+  act.push('<button class="btn sm" onclick="dgReportShare(\''+rid+'\')" title="Bağlantıyı paylaş / panoya kopyala">📤 Paylaş</button>');
+ }
+ if(pend&&pendOwn)act.push('<button class="btn sm red" onclick="dgUserCancel(\''+esc(pend.id)+'\')" title="Bekleyen isteği iptal et">✖ Vazgeç</button>');
+ if(!pend)act.push('<button class="btn sm amber" onclick="dgUserPublish('+st.parkId+')" title="'+(url?"Yeni sürüm yayınla: eski rapor değişmez, yeni DGR kimliği alır":"Parkın bilimsel raporunu yayınla")+'">'+(url?"📄 Yeni sürüm":"📄 Yayınla")+"</button>");
+ const lulc=(!pend)?'<label style="font-size:.78rem;color:var(--mut);display:inline-flex;gap:6px;align-items:center"><input type="checkbox" id="dgUserPubLulc" checked> 🛰 Arazi örtüsü bölümü (§4) dahil — önerilir</label>':"";
+
+ const own=st.ownApproved===0
+  ? '<div class="alert warn" style="margin-top:10px">⚠ Bu projede <b>onaylı ölçümün görünmüyor</b>. Yayın isteği, parkta onaylı ölçümün varsa açılır — ölçülerin yönetici onayından geçince 📄 düğmesi çalışır.</div>'
+  : (st.ownApproved>0?'<div class="dg-tree-meta" style="margin-top:8px">✓ Bu projede '+Number(st.ownApproved)+" onaylı ölçümün var.</div>":"");
+
+ box.innerHTML=
+  (st.error?'<div class="alert err">⚠ '+esc(st.error)+"</div>":"")+
+  '<div class="shead" style="margin-bottom:10px"><span class="no">📄</span><h2 style="font-size:1.15rem">Park Raporu — '+esc(st.parkName)+'</h2><span class="rule"></span>'+close+"</div>"+
+  '<div style="display:flex;gap:10px;align-items:baseline;flex-wrap:wrap">'+badge+(note?'<span class="dg-tree-meta">'+esc(note)+"</span>":"")+"</div>"+
+  (url?'<div class="dg-tree-meta" style="margin-top:8px">Kalıcı bağlantı: <span class="mono">'+esc(url)+"</span>"+((pub&&pub.finished_at)?(" · yayın "+String(pub.finished_at).slice(0,10)):"")+"</div>":"")+
+  '<div class="dg-act" style="margin-top:10px;display:flex;gap:8px;align-items:center;flex-wrap:wrap">'+act.join("")+lulc+"</div>"+
+  own+
+  (st.queue===null?'<div class="dg-tree-meta" style="margin-top:8px">ℹ Yayın günlüğü okunamadı (çevrimdışı ya da dosya henüz yayınlanmadı) — istek gönderimi çalışır, durum alanı eksik kalabilir.</div>':"")+
+  '<div class="dg-parkadmin-note" style="margin-top:10px">Rapor <b>park düzeyindedir</b>: yalnız bu projeyi değil, parktaki <b>tüm onaylı ölçümleri</b> kapsar. '+
+  "Yayın kalıcıdır — içerik hash'i ile dondurulur, eski rapor DEĞİŞMEZ; yeni çözümleme yeni DGR kimliği alır. "+
+  "Üretim birkaç dakika sürer (kuyruk işi 5 dakikada bir çalışır); bağlantı bu panelde belirir. Yönetici olmayan kullanıcı 24 saatte en fazla 3 istek açabilir.</div>";
+}
+
+async function dgUserPublish(parkId){
+ if(typeof USER==="undefined"||!USER)return toast("Önce giriş yap.","err","📄");
+ const lulc=$("dgUserPubLulc")?$("dgUserPubLulc").checked!==false:true;
+ const r=await dgPubInsertRequest(parkId,lulc,"kullanıcı yayını (proje #"+(DG_USER_PUB.projectId||0)+")");
+ if(r.ok){
+  toast("📄 Yayın isteği kuyruğa alındı — rapor birkaç dakika içinde burada bağlanacak.","ok","📄");
+  DG_USER_PUB.polls=0;
+  await dgUserPubRefresh();
+  return;
+ }
+ const msg=dgPubInsertError(r);
+ if(/0008_report_publish/.test(msg))DG_USER_PUB.error="SCHEMA";
+ toast(msg,"err","📄");
+ dgUserPubRender();
+}
+
+async function dgUserCancel(id){
+ const mine=(typeof USER!=="undefined"&&USER&&USER.id)||"";
+ const row=DG_USER_PUB.requests.find(r=>String(r.id)===String(id));
+ const own=!!(row&&String(row.requested_by||"")===String(mine));
+ if(!own&&!dgPubAdmin())return toast("Yalnız kendi bekleyen isteğini iptal edebilirsin.","err","📄");
+ if(!confirm("Bekleyen yayın isteği iptal edilsin mi?"))return;
+ const{error}=await sb.from("report_requests").update({status:"Vazgeçildi",cancelled_at:new Date().toISOString()}).eq("id",id);
+ if(error)return toast("İptal edilemedi: "+esc(error.message),"err","📄");
+ toast("İstek iptal edildi.","ok","📄");
+ await dgUserPubRefresh();
+}
+
+/* Kendi bekleyen isteği varken ve panel görünürken 25 sn'de bir sessiz tazeleme
+ * (yönetici kartındaki dgPubSchedulePoll ile aynı desen ve sınırlar). */
+function dgUserPubSchedulePoll(){
+ if(DG_USER_PUB.timer){clearInterval(DG_USER_PUB.timer);DG_USER_PUB.timer=0;}
+ const mine=(typeof USER!=="undefined"&&USER&&USER.id)||"";
+ const waiting=DG_USER_PUB.requests.some(r=>r.status==="Beklemede"&&String(r.requested_by||"")===String(mine)&&!dgPubEntryIn(DG_USER_PUB.queue,r.id));
+ if(!waiting||DG_USER_PUB.polls>=DG_PUB_POLL_MAX)return;
+ DG_USER_PUB.timer=setInterval(async()=>{
+  DG_USER_PUB.polls++;
+  const v=$("v-projects");
+  if(v&&!v.classList.contains("on"))return;      /* sekme kapalı: ağ isteği atma */
+  if(document.hidden)return;                       /* arka plan sekmesi: bekle */
+  const box=$("dgUserPubBox");
+  if(!box||box.style.display==="none")return;      /* panel kapalı: bekle */
+  await dgUserPubRefresh();
+ },DG_PUB_POLL_MS);
+}
+
+function dgUserPubClose(){
+ if(DG_USER_PUB.timer){clearInterval(DG_USER_PUB.timer);DG_USER_PUB.timer=0;}
+ DG_USER_PUB.projectId=0;DG_USER_PUB.parkId=0;
+ const box=$("dgUserPubBox");
+ if(box){box.style.display="none";box.innerHTML="";}
+}
+
+/* loadProjects() her çizimde çağırır: paneli açık proje listeden silindiyse
+ * (proje silindi) panel kapanır — hayalet durum gösterilmez. */
+function dgUserPubSync(list){
+ if(!DG_USER_PUB.projectId)return;
+ const arr=Array.isArray(list)?list:[];
+ if(!arr.some(p=>Number(p.id)===DG_USER_PUB.projectId))dgUserPubClose();
 }
 
 /* ---------- paylaş ---------- */
@@ -305,3 +520,8 @@ window.dgPublishReport=dgPublishReport;
 window.dgPublishCancel=dgPublishCancel;
 window.dgReportShare=dgReportShare;
 window.dgReportOpen=dgReportOpen;
+window.dgUserPubOpen=dgUserPubOpen;
+window.dgUserPubClose=dgUserPubClose;
+window.dgUserPublish=dgUserPublish;
+window.dgUserCancel=dgUserCancel;
+window.dgUserPubSync=dgUserPubSync;

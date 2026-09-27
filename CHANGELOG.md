@@ -9,6 +9,34 @@ Yeni sürüm yayımlama adımları: [`docs/surum-yayini.md`](docs/surum-yayini.m
 
 ## [Yayımlanmadı]
 
+### Eklendi — Kullanıcılar kendi park projelerinin raporunu kendisi yayınlar (0009)
+Kullanıcı: **"kullanıcılar kendi park projelerini paylaşabilecek değil mi?"** →
+doğrudan yayın seçildi. Hat aynı hat (report_requests → rapor-yayin.yml →
+DGR + kalıcı bağlantı); değişen tek şey yetki kapısı.
+- `supabase/migrations/0009_user_report_publish.sql`: yönetici olmayan
+  kullanıcı, parkı için projesi varsa istek açabilir. Sunucu kilitleri (RLS +
+  `tg_report_request_gate`, iki katman): mülkiyet (`REPORT_NOT_YOUR_PARK`),
+  kendi onaylı ölçümü (`REPORT_NO_OWN_DATA`), 24 saatte 3 istek kotası
+  (`REPORT_QUOTA`), `requested_by = auth.uid()` (`REPORT_NOT_SELF`) +
+  `is_active()`. Kullanıcı yalnız kendi bekleyen isteğini iptal edebilir;
+  0008'in kilitleri (park başına tek bekleyen istek, onaylı veri şartı,
+  select anon'a açık, delete yalnız yönetici) aynen durur. Idempotent.
+- `src/services/report-publish.js`: kullanıcı bölümü — 📁 Projeler'de parkı
+  bağlı her satırda **📄** düğmesi, tablonun altında **Park Raporu** paneli
+  (durum rozeti, 🔗 Aç / 📤 Paylaş / 📄 Yayınla / 📄 Yeni sürüm / ✖ Vazgeç,
+  🛰 §4 tercihi, 25 sn'de bir kendiliğinden tazeleme). Yeni CSS yok; panel
+  kullanılmadığında `display:none` → sıfır yer kaplar. Yazma çekirdeği
+  (`dgPubInsertRequest` + hata eşleme) yönetici kartıyla ortak.
+- Dürüstlük: panel her kullanıcıya söyler — rapor **park düzeyindedir**
+  (parktaki tüm onaylı ölçümler), yayın kalıcıdır (hash ile dondurulur),
+  kota 24 saatte 3 istektir.
+- `sw.js`: CACHE_VERSION r42 · `docs/rapor-yayini.md`: kullanıcı kısa yolu +
+  kilit tablosu · `supabase/README.md`: 0009 satırı/bölümü + uygulama sırası.
+- Testler: 650 → 680 (`test/user-publish.test.mjs`: SQL kilitleri, 📄 düğmesi
+  kablolaması, vm'de panel durumları + insert gövdesi + kota/mülkiyet hata
+  eşlemeleri + başkasının isteğinde iptal yok + oynanmış günlük bağlantı
+  sokamaz; 0008 bekçileri değişmeden yeşil).
+
 ### Eklendi — Site içinden rapor yayını: 📄 Yayınla → DGR bağlantısı kartta belirir
 Kullanıcı: **"raporu site üstünden yayınlayacağım"** — GitHub Actions arayüzüne
 gitmeden, uygulama içinden. Rapor motoru (R1+R3) aynı; değişen tek şey tetik:

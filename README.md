@@ -232,10 +232,13 @@ partials)**, CSP↔kod tutarlılığı, birim testler ve (yalnız `main`'e push'
 
 Rapor yayınını iki ayrı iş akışı taşır: **`rapor-yayin.yml`** (5 dakikada bir)
 site içinden gelen yayın isteklerini işler — yönetici GitHub arayüzüne gitmez,
-🔐 Ölçüm Yönetimi → **📄 Bilimsel Rapor Yayını** kartında 📄 Yayınla der; istek
-Supabase'deki `report_requests` kuyruğuna yazılır (0008), rapor
-`rapor/DGR-YYYY-NNNN/` altına commit'lenir ve kalıcı bağlantı aynı kartta
-belirir. İş Supabase'e **yazmaz**: anon anahtarla salt okur, sonucu
+🔐 Ölçüm Yönetimi → **📄 Bilimsel Rapor Yayını** kartında 📄 Yayınla der;
+**kullanıcılar da kendi park projelerinin raporunu kendisi yayınlar**
+(📁 Projeler → 📄; sunucu kilitleri: mülkiyet + kendi onaylı verisi + 24
+saatte 3 istek kotası, 0009). İstek Supabase'deki `report_requests`
+kuyruğuna yazılır (0008+0009), rapor `rapor/DGR-YYYY-NNNN/` altına
+commit'lenir ve kalıcı bağlantı aynı arayüzde belirir. İş Supabase'e
+**yazmaz**: anon anahtarla salt okur, sonucu
 `rapor/yayin-kuyrugu.json` + git taşır (`service_role` anahtarı depoda
 tutulmaz). **`rapor.yml`** (workflow_dispatch) elle tek park yayını için yedek
 yoldur; ikisi de aynı üreticiyi (`publishPark()`) çağırır. Ayrıntı:
