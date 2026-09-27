@@ -1,0 +1,232 @@
+{
+  "schema": "dendrogeo-report/1",
+  "park": {
+    "id": 4,
+    "name": "Ülkü Spor Tesisi",
+    "osm_key": "way/882542160",
+    "city": "Ankara",
+    "country": "Türkiye",
+    "area_m2": 893
+  },
+  "generated_at": "2026-09-27T23:47:49.713Z",
+  "mc": {
+    "N": 1000,
+    "SEED": 20260926,
+    "DBH_SD_CM": 0.5,
+    "H_SD_M": 0.25,
+    "MODEL_CV": 0.22,
+    "CONF": 0.95
+  },
+  "totals": {
+    "n": 5,
+    "carbon_kg": 804.02,
+    "ci": {
+      "mean": 804.02,
+      "lo": 440.31,
+      "hi": 1149.67
+    },
+    "per_ha_kg": 9003.63
+  },
+  "species": [
+    {
+      "species": "SEDİR",
+      "grp": "İBRELİ",
+      "n": 1,
+      "mean_dbh": 72,
+      "mean_h": 9,
+      "carbon_kg": 630.38,
+      "share_pct": 78.4
+    },
+    {
+      "species": "GÖKNAR",
+      "grp": "İBRELİ",
+      "n": 1,
+      "mean_dbh": 27,
+      "mean_h": 6.5,
+      "carbon_kg": 55.32,
+      "share_pct": 6.9
+    },
+    {
+      "species": "LADİN",
+      "grp": "İBRELİ",
+      "n": 1,
+      "mean_dbh": 20,
+      "mean_h": 5,
+      "carbon_kg": 24.37,
+      "share_pct": 3
+    },
+    {
+      "species": "ARDIÇ",
+      "grp": "İBRELİ",
+      "n": 1,
+      "mean_dbh": 25,
+      "mean_h": 6.5,
+      "carbon_kg": 62.16,
+      "share_pct": 7.7
+    },
+    {
+      "species": "KARAÇAM",
+      "grp": "İBRELİ",
+      "n": 1,
+      "mean_dbh": 20,
+      "mean_h": 5,
+      "carbon_kg": 31.79,
+      "share_pct": 4
+    }
+  ],
+  "gps": {
+    "n": 5,
+    "mean_acc_m": 7.6
+  },
+  "period": {
+    "from": "2026-09-06T14:10:21.321357+00:00",
+    "to": "2026-09-11T06:11:33.781569+00:00"
+  },
+  "moderation": {
+    "approved": 5,
+    "reviewed": 0
+  },
+  "geofence": {
+    "policy": "park poligonu içinde ölçüm zorunlu (trg_geo_fence, 0007)",
+    "total": 5,
+    "verified_rows": 0,
+    "outside_rows": 5,
+    "polygon_source": "parks.geom_json"
+  },
+  "lulc": {
+    "source": "ESA WorldCover 10 m · 2021 (v200)",
+    "citation": "ESA WorldCover 10 m 2021 v200, CC BY 4.0",
+    "year": 2021,
+    "cross": "IO LULC 10 m · 2020 (çapraz doğrulama)",
+    "crossError": null,
+    "agreement": {
+      "green": {
+        "primaryHa": 0,
+        "crossHa": 0,
+        "agreementPct": 100
+      },
+      "water": {
+        "primaryHa": 0,
+        "crossHa": 0,
+        "agreementPct": 100
+      },
+      "hard": {
+        "primaryHa": 0.08908140869140625,
+        "crossHa": 0.08908134765625,
+        "agreementPct": 99.99996574191066
+      },
+      "bare": {
+        "primaryHa": 0,
+        "crossHa": 0,
+        "agreementPct": 100
+      },
+      "other": {
+        "primaryHa": 0,
+        "crossHa": 0,
+        "agreementPct": 100
+      }
+    },
+    "areaDeltaPct": 0.2447831003289474,
+    "cells": 23,
+    "masked_ha": 0,
+    "classes": [
+      {
+        "key": "green",
+        "label": "Yeşil alan",
+        "ha": 0,
+        "pct": 0
+      },
+      {
+        "key": "water",
+        "label": "Su",
+        "ha": 0,
+        "pct": 0
+      },
+      {
+        "key": "hard",
+        "label": "Sert zemin",
+        "ha": 0.09,
+        "pct": 100
+      },
+      {
+        "key": "bare",
+        "label": "Çıplak zemin",
+        "ha": 0,
+        "pct": 0
+      },
+      {
+        "key": "other",
+        "label": "Diğer",
+        "ha": 0,
+        "pct": 0
+      }
+    ]
+  },
+  "rows": [
+    {
+      "id": 91,
+      "point_id": 1,
+      "species": "SEDİR",
+      "grp": "İBRELİ",
+      "dbh_cm": 72,
+      "height_m": 9,
+      "carbon_kg": 630.379965577383,
+      "lat": 39.972153,
+      "lon": 32.659008,
+      "acc_m": 5.6929080715052,
+      "date": "2026-09-06"
+    },
+    {
+      "id": 92,
+      "point_id": 1,
+      "species": "GÖKNAR",
+      "grp": "İBRELİ",
+      "dbh_cm": 27,
+      "height_m": 6.5,
+      "carbon_kg": 55.3247400838977,
+      "lat": 39.97328,
+      "lon": 32.654592,
+      "acc_m": 9.8815538415457,
+      "date": "2026-09-08"
+    },
+    {
+      "id": 96,
+      "point_id": 2,
+      "species": "LADİN",
+      "grp": "İBRELİ",
+      "dbh_cm": 20,
+      "height_m": 5,
+      "carbon_kg": 24.3712933421853,
+      "lat": 39.973248,
+      "lon": 32.654959,
+      "acc_m": 11.3726124566148,
+      "date": "2026-09-08"
+    },
+    {
+      "id": 101,
+      "point_id": 3,
+      "species": "ARDIÇ",
+      "grp": "İBRELİ",
+      "dbh_cm": 25,
+      "height_m": 6.5,
+      "carbon_kg": 62.1609215003715,
+      "lat": 39.973988,
+      "lon": 32.655676,
+      "acc_m": 5.46434644364103,
+      "date": "2026-09-11"
+    },
+    {
+      "id": 102,
+      "point_id": 4,
+      "species": "KARAÇAM",
+      "grp": "İBRELİ",
+      "dbh_cm": 20,
+      "height_m": 5,
+      "carbon_kg": 31.7874911587332,
+      "lat": 39.97397,
+      "lon": 32.65475,
+      "acc_m": 5.35081499028081,
+      "date": "2026-09-11"
+    }
+  ]
+}

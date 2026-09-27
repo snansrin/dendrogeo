@@ -1,6 +1,6 @@
 {
   "schema": "dendrogeo-publish-queue/1",
-  "updated_at": "2026-09-27T19:31:23.090Z",
+  "updated_at": "2026-09-27T23:47:49.732Z",
   "entries": [
     {
       "request_id": "manuel-DGR-2026-0001",
@@ -21,6 +21,25 @@
       "requested_at": null,
       "started_at": "2026-09-27T19:31:23.090Z",
       "finished_at": "2026-09-27T19:31:23.090Z"
+    },
+    {
+      "request_id": "4ebe8320-3313-4396-9213-06d017830e5c",
+      "park_id": 4,
+      "with_lulc": true,
+      "requested_at": "2026-09-27T23:39:55.810131+00:00",
+      "started_at": "2026-09-27T23:47:46.846Z",
+      "status": "Yayınlandı",
+      "report_id": "DGR-2026-0002",
+      "version": 1,
+      "url_path": "/rapor/DGR-2026-0002/",
+      "report_hash": "sha256:e099517d8dc2d176a4ae1b0922857922467045753fb3a983ab4fa0aceac4449a",
+      "park_name": "Ülkü Spor Tesisi",
+      "city": "Ankara",
+      "n": 5,
+      "carbon_txt": "0.80 t [%95 GA 0.44–1.15]",
+      "lulc": "dahil (ESA WorldCover 10 m · 2021 (v200))",
+      "citation": "Şirin, N. & Şirin, S. (2026). Ülkü Spor Tesisi ağaç envanteri ve karbon stoku raporu (DGR-2026-0002, sürüm 1). DendroGeo. https://dendrogeo.org/rapor/DGR-2026-0002/",
+      "finished_at": "2026-09-27T23:47:49.731Z"
     }
   ]
 }
