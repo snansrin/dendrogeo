@@ -268,16 +268,21 @@
      projeyi parka bağlar, ölçüm kapısını (park algılanmadan ölçüm yok) kurar.
      Sıra ÖNEMLİ: park-query'den sonra, grid-engine'den önce (grid panelindeki
      proje listesi bu modülden beslenir). -->
-<script src="src/services/park-registry.js?v=d0f84092" defer></script>
+<script src="src/services/park-registry.js?v=5408968f" defer></script>
 <script src="src/services/grid-engine.js?v=c3e27b01" defer></script>
-<script src="src/ui/park-panel.js?v=0617a777" defer></script>
+<script src="src/ui/park-panel.js?v=66573187" defer></script>
 <script src="src/ui/park-export.js?v=47f46346" defer></script>
 <script src="src/services/dash.js?v=07efaa7f" defer></script>
 <link rel="stylesheet" href="css/style.css?v=0155c801">
 <link rel="stylesheet" href="css/landing.css?v=e875e230">
 <link rel="stylesheet" href="css/park-panel.css?v=10b49293">
+<!-- TASARIM SİSTEMİ (2026-09-27, 2. deneme): ui-standard.css geri BAĞLANDI
+     ama ARTIK eleman seviyesi kuralları yalnız .dg-page (alt sayfalar) altında
+     geçerli; kabuk (body.dg-app) yalnız sınıf-bazlı bileşenleri ve sekme
+     başlığı ölçeğini alır → Park Karşılaştırma kartı kıpırdamaz. -->
+<link rel="stylesheet" href="css/ui-standard.css?v=fc1ef63c">
 </head>
-<body>
+<body class="dg-app">
 <div id="toastWrap"></div>
 <div id="landing">
 <div id="topnav"><div class="wrap">

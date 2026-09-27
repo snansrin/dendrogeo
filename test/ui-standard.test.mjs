@@ -54,11 +54,33 @@ describe('ui-standard.css sözleşmesi', () => {
       assert.ok(css.includes(v), v + ' varyantı olmalı');
   });
 
-  test('⭐ ui-standard.css uygulama kabuğuna SIZMAZ (yalnız alt sayfalar)', () => {
-    /* 2026-09-27: eleman seviyesi kurallar (h2/p/td/badge…) Park Karşılaştırma
-     * kartının barlarını ve lead satırını bozdu; dosya alt sayfalara çekildi. */
-    assert.ok(!/ui-standard\.css/.test(head), 'index.html head ui-standard bağlamamalı');
-    assert.ok(!/ui-standard\.css/.test(idx), 'index.html artifaktı da bağlamamalı');
+  test('⭐ ui-standard kabukta YALNIZ sınıf-bazlı: eleman kuralları .dg-page altında', () => {
+    /* Sözleşme v2 (2026-09-27): kullanıcı hem standart tema/başlık istiyor hem
+     * Park Karşılaştırma kartının kıpırdamamasını. ui-standard.css kabuğa
+     * GERİ bağlanır ama çıplak eleman kuralları (h1/p/td/…) YALNIZ .dg-page
+     * (11 alt sayfa) altında geçerlidir; kabuk (body.dg-app) yalnız sınıf
+     * bazlı bileşenleri ve .view>h2 başlık ölçeğini alır. */
+    assert.match(head, /css\/ui-standard\.css/, 'kabuk standardı yüklemeli');
+    assert.match(head, /<body class="dg-app">/, 'kabuk gövdesi işaretli');
+    const bare = css.split('\n').filter((l) =>
+      /^(body|h1|h2|h3|h4|p|li|small|code|a|table|th|td|input|footer)\{/.test(l) &&
+      !/^\.dg-page /.test(l) && !/^body\.dg-page/.test(l));
+    assert.deepEqual(bare, [], 'kapsamsız eleman kuralı kalmamalı: ' + bare.join(' | '));
+    assert.match(css, /\.view>h2,\.view h2\.disp\{/, 'sekme başlıkları standart ölçekte');
+    /* 2026-09-27 KAZA KİLİDİ: style.css'te zaten olan bileşenler ui-standard'da
+     * GLOBAL tanımlanamaz — .lead/.badge/.btn/.card/.alert/.lbl/.val kabukta
+     * başka anlamlar taşıyor (.lead = karşılaştırma lead satırı!) ve global
+     * tanım görünümü kaydırıyordu. Hepsi .dg-page altında olmak zorunda. */
+    for (const sel of ['.lead', '.tag', '.badge', '.btn', '.card', '.alert', '.lbl', '.val']) {
+      const global = css.split('\n').some((l) => l.startsWith(sel + '{') || l.startsWith(sel + ' ') || l.startsWith(sel + ':'));
+      assert.ok(!global, sel + ' global tanımlanamaz (kabukta çakışma)');
+    }
+  });
+
+  test('11 alt sayfa body.dg-page taşır', () => {
+    for (const d of SUBS) {
+      assert.match(read(join(d, 'index.html')), /<body class="dg-page">/, d + ' gövde işareti');
+    }
   });
 
   test("kabuğun ihtiyaç duyduğu .dg-sub style.css’te yaşar", () => {
@@ -87,8 +109,8 @@ describe('11 alt sayfa + kabuk: standart bağlama sözleşmesi', () => {
     /* Kilit: sayfa kendi body fontunu yazsa bile ui-standard SONRA gelir ve
      * aynı özgüllükte son kural kazanır. Sözleşme bozulup link ÖNE alınırsa
      * bu test değil görünüm bozulur → link sırası testi yukarıda kilitli. */
-    assert.match(css, /body\{background:var\(--bg\);color:var\(--ink\);font:15px\/1\.65 var\(--f-ui\)\}/,
-      "body standardı ui-standard.css'te olmalı");
+    assert.match(css, /body\.dg-page\{background:var\(--bg\);color:var\(--ink\);font:15px\/1\.65 var\(--f-ui\)\}/,
+      "body standardı .dg-page kapsaminda olmalı");
   });
 });
 

@@ -586,9 +586,6 @@ function dgRenderScanCard(forceManual){
            :`<br><button class="btn sm amber" onclick="dgRetryRegister()">🔄 Kimliği yeniden yaz</button>`)+
     `</div>`+
 
-    (target
-      ? `<div class="alert info" style="margin:6px 0">📁 <b>${esc(target.name)}</b> projesi park bekliyordu. Bağlayınca ölçüm ekranına döneceksin.</div>`
-      : ``)+
 
     `<div class="grid g2" style="gap:10px">`+
       `<div>`+
@@ -598,22 +595,11 @@ function dgRenderScanCard(forceManual){
         `<div id="scanNamePreview" class="mono" style="font-size:.85rem;padding:6px 0">${esc(dgProjectName((park&&park.name)||"",target?dgLabelFromLegacy(target.name,park&&park.name):""))}</div>`+
       `</div>`+
       `<div style="display:flex;flex-direction:column;gap:8px;justify-content:center">`+
-        (target
-          ? `<button class="btn" onclick="dgScanLinkTarget()">🔗 Bu parka bağla: ${esc(target.name)}</button>`
-          : ``)+
         `<button class="btn blue" onclick="dgScanCreateProject()">📁 Yeni proje oluştur</button>`+
-        (others.length
-          ? `<div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap">`+
-              `<select id="scanBindProject" class="dg-png-select" style="flex:1;min-width:150px">`+
-                others.map(p=>`<option value="${p.id}">${esc(p.name)}</option>`).join("")+
-              `</select>`+
-              `<button class="btn sm ghost" onclick="dgScanBindExisting()">🔗 Bağla</button>`+
-            `</div>`
-          : ``)+
         (admin
           ? ``
-          : `<div class="dg-tree-meta">🔐 Mevcut projeyi parka bağlama yetkisi yöneticide. `+
-            `Burada <b>yeni proje</b> oluşturabilirsin; eski projenin parka bağlanması için yöneticiye haber ver.</div>`)+
+          : `<div class="dg-tree-meta">🔐 Bu ekrandan yalnızca <b>yeni proje</b> açılır. `+
+            `Mevcut projelere park atamasını yönetici <b>Yönetim → Park Kimlikleri</b>'nden yapar.</div>`)+
         (DG_PARK_SCAN&&DG_PARK_RETURN_TO
           ? `<button class="btn sm ghost" onclick="dgCancelScan()">Vazgeç</button>`
           : ``)+
@@ -732,17 +718,7 @@ async function dgScanCreateProject(){
   return data;
 }
 
-async function dgScanLinkTarget(){
-  if(!DG_PARK_TARGET_PROJ)return;
-  await dgLinkProject(DG_PARK_TARGET_PROJ);
-}
 
-async function dgScanBindExisting(){
-  const sel=$("scanBindProject");
-  const pid=sel?+sel.value:0;
-  if(!pid)return toast("Proje seç","err");
-  await dgLinkProject(pid);
-}
 
 async function dgLinkProject(pid){
   /* ⛔ YALNIZ YÖNETİCİ (kullanıcı isteği 2026-09-24): MEVCUT bir projeyi
@@ -889,14 +865,14 @@ function dgParkGate(auto){
     box.innerHTML=dgIsAdmin()
       ? `<b>⛔ Bu projede park algılanmadı — ölçüm girilemez.</b><br>`+
         `<span style="font-size:.82rem">Proje: <b>${esc(p.name)}</b>. `+
-        `Park algılamadan girilen ölçümler karşılaştırmada parka bağlanamıyor; `+
+        `Park kimliği olmadan girilen ölçümler karşılaştırmada park bazında izlenemez; `+
         `bu yüzden önce park kimliği oluşturuluyor.</span>`+
         `<div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap">`+
-          `<button class="btn sm blue" onclick="startParkScan({projectId:${p.id},returnTo:'measure'})">🌳 Parkı Algıla ve Bağla</button>`+
+          `<button class="btn sm blue" onclick="go('admin')">🔐 Yönetim → Park Kimlikleri</button>`+
         `</div>`
       : `<b>⛔ Bu proje parka bağlı değil — ölçüm girilemez.</b><br>`+
         `<span style="font-size:.82rem">Proje: <b>${esc(p.name)}</b>. Mevcut projeyi parka bağlama yetkisi `+
-        `<b>yalnız yöneticide</b> 🔐. İki yol: (1) yönetici bu projeyi bağlasın, `+
+        `<b>yalnız yöneticide</b> 🔐. İki yol: (1) yönetici park atamasını Yönetim → Park Kimlikleri'nden yapsın, `+
         `(2) aşağıdan park algılayıp <b>yeni proje</b> aç ve ölçümlere orada devam et.</span>`+
         `<div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap">`+
           `<button class="btn sm blue" onclick="startParkScan({returnTo:'measure'})">🌳 Park Algıla → Yeni Proje Oluştur</button>`+
@@ -964,7 +940,7 @@ function dgProjectOptionsForPark(parkId,fallbackAll){
  *     OSM'de farklı etiketlenmiş yerler için)
  *   · canlı ilerleme (kaçıncı proje, hangi ad) — 6 proje ~20 sn sürer,
  *     eskiden kutu sabit durunca "çalışmıyor" sanılıyordu
- *   · hiç eşleşmeyen proje için satırda "✍️ Elle park oluştur ve bağla":
+ *   · hiç eşleşmeyen proje için satırda "✍️ Elle park kimliği aç":
  *     ölçüm merkezinde, proje adıyla manuel park kimliği açar. Böylece
  *     OSM'de park olmayan yerler de park bazlı karşılaştırmaya girer. */
 const dgSleep=ms=>new Promise(r=>setTimeout(r,ms));
@@ -1114,7 +1090,7 @@ function dgRenderBackfillPlan(){
       plan.map(x=>{
         const isOk=x.durum==="eşleşti";
         const act=isOk
-          ? `<span class="badge on">✓ bağlanacak</span>`
+          ? `<span class="badge on">✓ eşleşecek</span>`
           : (x.lat!=null
             ? `<span class="badge admin">${esc(x.durum)}</span> <button class="btn sm ghost" onclick="dgBackfillManual(${x.project.id})">✍️ Elle park oluştur ve bağla</button>`
             : `<span class="badge off">${esc(x.durum)}</span>`);
@@ -1145,7 +1121,7 @@ async function dgApplyBackfill(){
   if(!PROFILE||(PROFILE.role!=="admin"&&PROFILE.role!=="owner"))return toast("Yetki yok.","err");
   const plan=(DG_BACKFILL_PLAN||[]).filter(x=>x.durum==="eşleşti");
   if(!plan.length)return toast("Uygulanacak eşleşme yok","warn");
-  if(!confirm(plan.length+" proje parka bağlanacak ve adları yeniden kurulacak. Devam?"))return;
+  if(!confirm(plan.length+" proje parkla eşleşecek ve adları yeniden kurulacak. Devam?"))return;
 
   let ok=0,fail=0;
   for(let i=0;i<plan.length;i++){
@@ -1161,7 +1137,7 @@ async function dgApplyBackfill(){
     if(await dgLinkProjectToPark(x.project,park))ok++;else fail++;
   }
 
-  toast(`✓ ${ok} proje parka bağlandı${fail?` · ${fail} hata`:""}`,fail?"warn":"ok","🌳");
+  toast(`✓ ${ok} proje parkla eşleştirildi${fail?` · ${fail} hata`:""}`,fail?"warn":"ok","🌳");
   DG_BACKFILL_PLAN=null;
   dgCloseBackfill();
   dgAfterBackfillWrites();
@@ -1495,8 +1471,6 @@ window.dgShowProjectStep=dgShowProjectStep;
 window.dgParkIdChip=dgParkIdChip;
 window.dgRetryRegister=dgRetryRegister;
 window.dgScanCreateProject=dgScanCreateProject;
-window.dgScanLinkTarget=dgScanLinkTarget;
-window.dgScanBindExisting=dgScanBindExisting;
 window.dgScanPreviewName=dgScanPreviewName;
 window.dgParkGate=dgParkGate;
 window.dgProjectChanged=dgProjectChanged;

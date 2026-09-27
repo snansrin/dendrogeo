@@ -276,6 +276,11 @@
 <link rel="stylesheet" href="css/style.css?v=790e558b">
 <link rel="stylesheet" href="css/landing.css?v=e875e230">
 <link rel="stylesheet" href="css/park-panel.css?v=00000000">
+<!-- TASARIM SİSTEMİ (2026-09-27, 2. deneme): ui-standard.css geri BAĞLANDI
+     ama ARTIK eleman seviyesi kuralları yalnız .dg-page (alt sayfalar) altında
+     geçerli; kabuk (body.dg-app) yalnız sınıf-bazlı bileşenleri ve sekme
+     başlığı ölçeğini alır → Park Karşılaştırma kartı kıpırdamaz. -->
+<link rel="stylesheet" href="css/ui-standard.css?v=00000000">
 </head>
-<body>
+<body class="dg-app">
 <div id="toastWrap"></div>

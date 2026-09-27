@@ -309,7 +309,9 @@ describe('ölçüm kapısı: park algılanmadan ölçüm yok', () => {
     run('dgParkGate()');
     assert.equal(el('parkGate').className, 'alert err');
     assert.equal(el('saveBtn').disabled, true);
-    assert.ok(el('parkGate').innerHTML.includes('startParkScan({projectId:2'), 'yönlendirme projeyi taşımalı');
+    /* 2026-09-27: tarama kartından bağlama KALDIRILDI (kullanıcı isteği);
+     * yönetici yolusu Yönetim → Park Kimlikleri. */
+    assert.ok(el('parkGate').innerHTML.includes('Park Kimlikleri'), 'yönetici yolu Park Kimlikleri olmalı');
   });
 
   test('proje seçilmemişse park algılama ekranına gönderir', () => {
@@ -559,21 +561,15 @@ describe('park algılama ekranı: yönlendirme → kimlik → proje', () => {
     const card = el('parkScanCard').innerHTML;
     assert.equal((card.match(/dg-scan-step on/g) || []).length, 3, 'üç adım da açık olmalı');
     assert.ok(card.includes('way/123') && card.includes('42.3 ha') && card.includes('DB #7'), card.slice(0, 300));
-    assert.ok(card.includes('dgScanLinkTarget()'), 'hedef projeye bağlama butonu yok');
+    assert.ok(!card.includes('dgScanLinkTarget'), 'bağlama butonu GERİ GELMEMELİ');
+    assert.ok(card.includes('dgScanCreateProject()'), 'tek yol: yeni proje');
     assert.ok(card.includes('value="Eski Proje"'), 'etiket eski adı önermeli (ad kaybolmasın)');
   });
 
-  test('⭐ bağlama: park_id + etiket yazılır, eski ölçümler parklanır', async () => {
-    W.reset();
-    await run('dgScanLinkTarget()');
-    const upd = lastUpdate('projects');
-    assert.ok(upd, 'proje güncellenmedi');
-    assert.equal(upd.patch.park_id, 7);
-    assert.equal(upd.patch.label, 'Eski Proje');
-    assert.ok(LOG.some((l) => l.table === 'measurements' && l.op === 'update' && l.patch.park_id === 7),
-      'eski ölçümlerin park_id’si doldurulmalı');
-    assert.ok(GOES.includes('measure'), 'ölçüm sekmesine dönmeli: ' + JSON.stringify(GOES));
-    assert.equal(run('DG_PARK_SCAN'), false, 'akış kapanmalı');
+  test('⭐ bağla fonksiyonları GERİ GELMEMELİ (kalıcı yasak)', () => {
+    assert.equal(run('typeof dgScanLinkTarget'), 'undefined', 'dgScanLinkTarget silinmeli');
+    assert.equal(run('typeof dgScanBindExisting'), 'undefined', 'dgScanBindExisting silinmeli');
+    const card = el('parkScanCard').innerHTML;
   });
 
   test('etiket boş bırakılırsa eski ad YİNE korunur (ilk bağlamada)', async () => {
@@ -979,8 +975,6 @@ describe('parka bağlama yalnız yönetici — normal kullanıcı kilitli', () =
     await run('loadProjects()');
     const h = el('projTable').innerHTML;
     assert.ok(h.includes('⛔ park yok'), 'durum görünmeli');
-    assert.ok(!h.includes('startParkScan({projectId:2'), 'bağlama düğmesi gizlenmeli');
-    assert.ok(h.includes('🔐 yönetici bağlayacak'), h.slice(0, 200));
   });
 
   test('yönetici aynı yerlerde düğmeleri GÖRÜR (kural tersine dönmez)', async () => {
@@ -994,7 +988,7 @@ describe('parka bağlama yalnız yönetici — normal kullanıcı kilitli', () =
     assert.ok(el('projTable').innerHTML.includes('startParkScan({projectId:2'), 'yönetici bağlayabilmeli');
     el('mProject').value = '2';
     run('dgParkGate()');
-    assert.ok(el('parkGate').innerHTML.includes('Parkı Algıla ve Bağla'), 'yönetici kapıda bağlama görür');
+    assert.ok(el('parkGate').innerHTML.includes('Park Kimlikleri'), 'yönetici kapıda Park Kimlikleri yolunu görür');
     await run('loadParkCompare()');
     assert.ok(el('parkCompare').innerHTML.includes("startParkScan({returnTo:'world'})"), 'yönetici onarım düğmesini görür');
     assert.ok(!el('parkCompare').innerHTML.includes('🔐 yönetici bağlayacak'), 'yöneticiye "yönetici bağlayacak" denmez');

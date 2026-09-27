@@ -9,6 +9,32 @@ Yeni sürüm yayımlama adımları: [`docs/surum-yayini.md`](docs/surum-yayini.m
 
 ## [Yayımlanmadı]
 
+### Düzeltildi — "bağla" UI'ları gerçekten çıktı + standart tema GERİ GELDİ (kabuk bozulmadan)
+Kullanıcı (öfkeli, haklı): "parka bağlayı kaldır dedim duruyor; standart tema
+yapmıştın geri bozmuşsun; sekme başlıkları (Waypoint/Plan) bozulmuş."
+Teşhis: (1) "bağla" temizliği daha önceki bir pakette KAYBOLMUŞTU (commit
+edilmemiş), kodda hâlâ duruyordu; (2) standart tema ile karşılaştırma kartı
+çakışıyordu çünkü ui-standard'ın `.lead` kuralı, karşılaştırmanın
+`dg-cmp-row lead` satırını 70ch'e daraltıyordu — iki istek aynı dosyada
+çakıştığı için önceki turlarda biri düzeltilip diğeri bozuluyordu.
+ÇÖZÜM (ikisi birlikte, kanıtlı):
+- `dgScanLinkTarget`, `dgScanBindExisting`, "🔗 Bu parka bağla", "🔗 Bağla"
+  select'i, "🌳 Parkı Algıla ve Bağla", "Proje oluştur / bağla" TÜMÜ silindi;
+  yönetici yolu tek kapıdan: Yönetim → Park Kimlikleri (metinler "eşleştir"
+  diline çevrildi).
+- `ui-standard.css` kabuğa GERİ bağlandı ama style.css ile çakışan TÜM
+  kurallar (.btn/.card/.alert/.badge/.lbl/.val/.lead/.tag + çıplak elemanlar)
+  `.dg-page` (11 alt sayfa) kapsamına alındı; kabuğa yalnız çakışmasız
+  `.view>h2` başlık ölçeği + yeni sınıflar girer. body'ler işaretli:
+  kabuk `dg-app`, alt sayfalar `dg-page`.
+- KANIT (hesaplanmış stil karşılaştırması): karşılaştırma kartı bugünkü
+  canlıyla birebir (maxWidth none, 15px, mürekkep); sekme başlıkları standart
+  dönemle birebir (23.2px Fraunces, #14532d). Ekran görüntüleri görsel olarak
+  da doğrulandı.
+KİLİTLER: ui-standard "kaza kilidi" (.lead/.badge/.btn/.card/.alert/.lbl/.val
+global tanımlanamaz) + park-flow "bağla fonksiyonları GERİ GELMEMELİ".
+577+ test yeşil · check ✅
+
 ### Düzeltildi — uzaktaki parka proje açılabilir + tüm CTA'lar canlı/tek aile (2026-09-27)
 Kullanıcı: "uzaktaki bir parka proje oluşturamıyorum; proje oluşturabileyim,
 sadece ölçüm giremeyim; GPS parkı algılasın… Hesapla ve Kaydet butonu da canlı

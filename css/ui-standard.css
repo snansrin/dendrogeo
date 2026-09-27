@@ -38,82 +38,82 @@
 }
 
 /* ---- 2) GÖVDE + TİPOGRAFİ ---- */
-body{background:var(--bg);color:var(--ink);font:15px/1.65 var(--f-ui)}
-h1{font-family:var(--f-disp);font-weight:600;font-size:clamp(1.9rem,4vw,2.6rem);
+body.dg-page{background:var(--bg);color:var(--ink);font:15px/1.65 var(--f-ui)}
+.dg-page h1{font-family:var(--f-disp);font-weight:600;font-size:clamp(1.9rem,4vw,2.6rem);
    line-height:1.1;letter-spacing:-.01em;color:var(--green-dk);margin:.2em 0 .3em}
-h2{font-family:var(--f-disp);font-weight:600;font-size:1.45rem;line-height:1.25;
+.dg-page h2{font-family:var(--f-disp);font-weight:600;font-size:1.45rem;line-height:1.25;
    color:var(--green-dk);margin:34px 0 10px}
-h3{font-family:var(--f-ui);font-weight:800;font-size:1.02rem;color:var(--ink);margin:22px 0 8px}
-h4{font-family:var(--f-ui);font-weight:800;font-size:.9rem;color:var(--ink);margin:16px 0 6px}
-p{font-size:.95rem;line-height:1.7;color:var(--ink);max-width:78ch}
-li{font-size:.95rem;line-height:1.7;max-width:78ch}
-small{color:var(--mut);font-size:.78rem}
-code{font-family:var(--f-mono);font-size:.82em;background:var(--tint);
+.dg-page h3{font-family:var(--f-ui);font-weight:800;font-size:1.02rem;color:var(--ink);margin:22px 0 8px}
+.dg-page h4{font-family:var(--f-ui);font-weight:800;font-size:.9rem;color:var(--ink);margin:16px 0 6px}
+.dg-page p{font-size:.95rem;line-height:1.7;color:var(--ink);max-width:78ch}
+.dg-page li{font-size:.95rem;line-height:1.7;max-width:78ch}
+.dg-page small{color:var(--mut);font-size:.78rem}
+.dg-page code{font-family:var(--f-mono);font-size:.82em;background:var(--tint);
      color:var(--green-dk);padding:2px 6px;border-radius:6px}
-a{color:var(--green)}
+.dg-page a{color:var(--green)}
 
 .dg-kicker{font-family:var(--f-mono);font-size:.72rem;font-weight:600;
   letter-spacing:.16em;text-transform:uppercase;color:var(--amber);margin:0 0 6px}
 .dg-sub{color:var(--mut);font-size:.95rem;line-height:1.65;max-width:70ch;margin:0 0 18px}
 .dg-meta{font-family:var(--f-mono);font-size:.74rem;color:var(--mut)}
-.lead{color:var(--mut);font-size:1.02rem;line-height:1.7;max-width:70ch}
-.tag{font-family:var(--f-mono);color:var(--amber);font-weight:600;
+.dg-page .lead{color:var(--mut);font-size:1.02rem;line-height:1.7;max-width:70ch}
+.dg-page .tag{font-family:var(--f-mono);color:var(--amber);font-weight:600;
      text-transform:uppercase;letter-spacing:.16em;font-size:.72rem}
 
 /* uygulama görünümleri: başlık hiyerarşisi sayfaya göre değişmesin */
 .view>h2,.view h2.disp{font-family:var(--f-disp);font-weight:600;font-size:1.45rem;
   color:var(--green-dk);margin:0 0 6px}
-.card>h2,.card h2{font-size:1.12rem;margin:0 0 10px}
-.card>h3,.card h3{font-size:.98rem;margin:18px 0 8px}
+.dg-page .card>h2,.dg-page .card h2{font-size:1.12rem;margin:0 0 10px}
+.dg-page .card>h3,.dg-page .card h3{font-size:.98rem;margin:18px 0 8px}
 
 /* ---- 3) BUTON TEK AİLE ---- */
-.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;
+.dg-page .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;
   background:var(--green);color:#fff;border:0;border-radius:10px;padding:12px 22px;
   font-family:var(--f-ui);font-weight:700;font-size:.88rem;letter-spacing:.02em;
   text-decoration:none;box-shadow:var(--sh);transition:.15s;cursor:pointer}
-.btn:hover{background:var(--green-dk);transform:translateY(-1px)}
-.btn:disabled{opacity:.45;cursor:not-allowed;transform:none;box-shadow:none}
-.btn.ghost{background:transparent;color:var(--green);border:1.5px solid var(--green);box-shadow:none}
-.btn.red{background:var(--red)} .btn.blue{background:var(--blue)} .btn.amber{background:var(--amber)}
-.btn.sm{padding:7px 14px;font-size:.78rem;border-radius:8px}
+.dg-page .btn:hover{background:var(--green-dk);transform:translateY(-1px)}
+.dg-page .btn:disabled{opacity:.45;cursor:not-allowed;transform:none;box-shadow:none}
+.dg-page .btn.ghost{background:transparent;color:var(--green);border:1.5px solid var(--green);box-shadow:none}
+.dg-page .btn.red{background:var(--red)} .btn.blue{background:var(--blue)} .btn.amber{background:var(--amber)}
+.dg-page .btn.sm{padding:7px 14px;font-size:.78rem;border-radius:8px}
 .btn.lg{padding:14px 26px;font-size:.95rem}
 .btn.block{width:100%}
-a.btn{color:#fff}
-a.btn.ghost{color:var(--green)}
+.dg-page a.btn{color:#fff}
+.dg-page a.btn.ghost{color:var(--green)}
 /* alt sayfaların .alt / .btn.alt eşdeğeri → ghost'a eşlenir */
-.btn.alt{background:#fff;color:var(--green);border:1.5px solid var(--line);box-shadow:none}
+.dg-page .btn.alt{background:#fff;color:var(--green);border:1.5px solid var(--line);box-shadow:none}
 
 /* ---- 4) KART / PANEL / DURUM ---- */
-.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);
+.dg-page .card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);
       padding:22px;box-shadow:var(--sh);min-width:0}
 .dg-fieldcard{display:flex;flex-direction:column;gap:12px}
-.lbl{font-size:.68rem;letter-spacing:.14em;text-transform:uppercase;color:var(--mut);font-weight:700}
-.val{font-family:var(--f-mono);font-size:1.5rem;color:var(--green);font-weight:600}
-.alert{border-radius:10px;padding:10px 14px;font-size:.85rem;line-height:1.55}
-.alert.info{background:var(--tint);color:var(--green-dk)}
-.alert.ok{background:var(--tint);color:var(--green-dk)}
-.alert.warn{background:var(--amber-tint);color:#7a4a12}
-.alert.err{background:#fbeae6;color:#8c2f1b}
-.badge{display:inline-block;padding:3px 10px;border-radius:20px;font-size:.66rem;
+.dg-page .lbl{font-size:.68rem;letter-spacing:.14em;text-transform:uppercase;color:var(--mut);font-weight:700}
+.dg-page .val{font-family:var(--f-mono);font-size:1.5rem;color:var(--green);font-weight:600}
+.dg-page .alert{border-radius:10px;padding:10px 14px;font-size:.85rem;line-height:1.55}
+.dg-page .alert.info{background:var(--tint);color:var(--green-dk)}
+.dg-page .alert.ok{background:var(--tint);color:var(--green-dk)}
+.dg-page .alert.warn{background:var(--amber-tint);color:#7a4a12}
+.dg-page .alert.err{background:#fbeae6;color:#8c2f1b}
+.dg-page .badge{display:inline-block;padding:3px 10px;border-radius:20px;font-size:.66rem;
        font-weight:800;text-transform:uppercase;letter-spacing:.06em}
 
 /* ---- 5) TABLO / FORM (bilimsel veri sunumu: mono hücreler, sabit başlık) ---- */
-table{width:100%;border-collapse:collapse;font-size:.82rem;background:var(--surface)}
-th{background:var(--tint);color:var(--green-dk);text-align:left;padding:10px;
+.dg-page table{width:100%;border-collapse:collapse;font-size:.82rem;background:var(--surface)}
+.dg-page th{background:var(--tint);color:var(--green-dk);text-align:left;padding:10px;
    font-family:var(--f-ui);font-size:.68rem;font-weight:700;letter-spacing:.1em;
    text-transform:uppercase;white-space:nowrap}
-td{padding:9px 10px;border-bottom:1px solid var(--line);
+.dg-page td{padding:9px 10px;border-bottom:1px solid var(--line);
    font-family:var(--f-mono);font-size:.78rem;color:var(--ink);white-space:nowrap}
-input,select{width:100%;background:#fff;border:1px solid var(--line);border-radius:10px;
+.dg-page input,select{width:100%;background:#fff;border:1px solid var(--line);border-radius:10px;
   color:var(--ink);padding:11px 12px;font-family:var(--f-ui);font-size:.9rem}
-input:focus,select:focus{outline:2px solid var(--green);border-color:var(--green)}
-input::placeholder{color:#aeb8b1;font-style:italic;opacity:.75}
+.dg-page input:focus,select:focus{outline:2px solid var(--green);border-color:var(--green)}
+.dg-page input::placeholder{color:#aeb8b1;font-style:italic;opacity:.75}
 
 /* ---- 6) ORTAK KABUK: üst bar, alt bilgi, sarmalayıcı ---- */
-.wrap{max-width:1120px;margin:0 auto;padding:0 24px}
-.top{background:var(--surface);border-bottom:1px solid var(--line)}
-.brand{font-family:var(--f-disp);font-weight:700;font-size:1.2rem;color:var(--green-dk);text-decoration:none}
-.links a,.nav a{color:var(--green);text-decoration:none;font-size:.9rem;font-weight:600}
-.links a:hover,.nav a:hover{text-decoration:underline}
-footer{border-top:1px solid var(--line);color:var(--mut);font-size:.85rem}
-footer a{color:var(--green)}
+.dg-page .wrap{max-width:1120px;margin:0 auto;padding:0 24px}
+.dg-page .top{background:var(--surface);border-bottom:1px solid var(--line)}
+.dg-page .brand{font-family:var(--f-disp);font-weight:700;font-size:1.2rem;color:var(--green-dk);text-decoration:none}
+.dg-page .links a,.nav a{color:var(--green);text-decoration:none;font-size:.9rem;font-weight:600}
+.dg-page .links a:hover,.nav a:hover{text-decoration:underline}
+.dg-page footer{border-top:1px solid var(--line);color:var(--mut);font-size:.85rem}
+.dg-page footer a{color:var(--green)}

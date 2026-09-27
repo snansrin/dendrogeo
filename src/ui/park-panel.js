@@ -312,7 +312,7 @@ async function drawPark(park){
           `</div>`+
         `</div>`+
         (parkRow
-          ? `<button class="dg-png-btn ghost sm" onclick="dgShowProjectStep()">📁 Proje oluştur / bağla</button>`
+          ? `<button class="dg-png-btn ghost sm" onclick="dgShowProjectStep()">📁 Proje oluştur</button>`
           : `<button class="dg-png-btn red sm" onclick="dgRetryRegister()">🔄 Yeniden dene</button>`)+
       `</div>`+
     `</div>`+
