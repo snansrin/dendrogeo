@@ -1,0 +1,38 @@
+name: Rapor Yayınla
+
+# Yönetici GitHub UI'ından tetikler: Actions → "Rapor Yayınla" → Run workflow
+# → park_id girer. Job raporu üretir, repo'ya commit'ler ve Pages yayınlar.
+# Raporlar rapor/DGR-YYYY-NNNN/ altında DEĞİŞMEZ statik sayfalardır.
+on:
+  workflow_dispatch:
+    inputs:
+      park_id:
+        description: 'Park ID (parks tablosu)'
+        required: true
+        type: string
+      skip_lulc:
+        description: 'Arazi örtüsü çözümlemesini atla (hızlı prova)'
+        required: false
+        type: boolean
+        default: false
+
+permissions:
+  contents: write
+
+jobs:
+  rapor:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Raporu üret
+        run: |
+          node scripts/make-report.mjs --park "${{ inputs.park_id }}" ${{ inputs.skip_lulc && '--skip-lulc' || '' }}
+      - name: Yayınla (commit + push)
+        run: |
+          git config user.name "DendroGeo Rapor Bot"
+          git config user.email "bot@dendrogeo.local"
+          git add rapor/
+          if git diff --cached --quiet; then echo "yeni rapor yok"; else git commit -m "docs(rapor): park ${{ inputs.park_id }} için DGR yayını"; git push; fi

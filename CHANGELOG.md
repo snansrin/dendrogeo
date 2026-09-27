@@ -9,6 +9,52 @@ Yeni sürüm yayımlama adımları: [`docs/surum-yayini.md`](docs/surum-yayini.m
 
 ## [Yayımlanmadı]
 
+### Düzeltildi — Rapor hattı saha geri bildirimi (Şekil 1/Şekil 2 + başlık dili + doğruluk beyanları)
+- **Şekil 2 (harita.png) park sahasını artık tam gösteriyor:** hücre GeoJSON'u
+  bellek koruması gereği 10.000 hücrede kesildiği için (bu parkta 13.396 hücre)
+  poligonun bir dilimi boyanmıyordu; çizim, motorun KESİNTİSİZ run-length
+  çıktısına geçirildi ve run bantlarının içbükey girintide kurduğu köprüyü
+  kesen bir poligon kırpma geçişi eklendi → park sahası kapalı, beyaz/gri
+  dilim yok; park dışı bağlam dokusu, beyaz halo'lu OSM sınırı, envanter
+  noktaları ve sembol lejantı (sınır/nokta/bağlam) eklendi.
+- **Şekil 1 barları yaprak yeşili:** dolgu `--leaf:#2f9e44`; bej `--line`
+  yatağı yerine soğuk gri yatay yatak (`#e9ece8`) → küçük paylar turuncu/bej
+  görünmüyor.
+- **Başlık ve yöntem Türkçeleştirildi:** "Above-/Below-Ground" →
+  "Toprak Üstü / Toprak Altı"; §2.2 "toprak üstü biyokütle (AGB)" ve
+  "toprak altı biyokütle" olarak tanımlandı.
+- **Şekil 2 açıklamasında çift yıl parantezi** ("(v200) (2021)") giderildi.
+- **Doğruluk beyanı onarımı (hata düzeltmesi):** `geofence.verified_rows`
+  artık varsayım değil, kayıt başına gerçek nokta–poligon testi
+  (`pointInPolygon`); poligon dışı koordinat taşıyan miras kayıtlar §5'te
+  ⚠ beyanı ile raporlanır. Moderasyon satırı da aynı kurala bağlandı:
+  zaman damgası (reviewed_at) eksikse ✅ yerine ⚠ + açıklama.
+- Testler: 609 → 619 (dil denetimi, çiti beyanı, pointInPolygon, Şekil 2
+  tam örtüşüm + kırpma + nokta çizimi).
+
+### Eklendi — Bilimsel Rapor Yayın Hattı (R1+R3): DGR kimlikli, değişmez, tez biçimi raporlar
+Kullanıcı: "projeyi paylaşayım; site açılsın; sadece o park ve analiz raporu,
+tez gibi, bütün veriler estetik; DOI gibi güvenilir referans olsun."
+- `scripts/make-report.mjs`: park ID'den **dondurulmuş snapshot** üretir →
+  `rapor/DGR-YYYY-NNNN/` altında statik sayfa + `data.json` + `olcum.csv` +
+  `park.geojson` + `harita.png`. Sayfa kendi kendinin bütünlüğünü açılışta
+  SHA-256 ile doğrular (crypto.subtle); künye, özet, yöntem (Chave 2014 +
+  Monte Carlo + doğrulama zinciri), sonuçlar, arazi örtüsü, atıf (APA+BibTeX),
+  sınırlılıklar ve yazdır/PDF içerir; og: etiketleri paylaşım önizlemesi verir.
+- Sayıların kaynağı: canlı REST + `scripts/lib/mc.mjs` (MC, merkezli, seed'li)
+  + uygulamanın KENDİ LULC motoru (vm içinde `dgLcAnalyze`) → uydurma değer yok.
+- `.github/workflows/rapor.yml`: Actions → "Rapor Yayınla" (park_id girdisi)
+  → üret → commit → Pages. Yerelde Node gerektirmez.
+- İki gizli kusur bulunup düzeltildi: `canonicalHash` vm-realm nesnelerinde
+  anahtar sıralamayı atlıyordu (instanceof → duck-typing); hash PNG
+  buffer'ını imzalıyordu (ayıklama hash'ten ÖNCE). İkisi de bütünlük zincirini
+  kırardı — testle kilitlendi.
+- Dil: akademik kayıt dili (edilgen, terimler tanımlı); test gündelik kelime
+  yasaklar. Şekil 2'nin temsilî olduğu kapasyonda açıkça yazar.
+Kilitler: test/rapor.test.mjs (12 test). 609 test yeşil · check ✅
+İlk yayın: rapor/DGR-2026-0001/ (Atatürk Çocukları ve Doğal Yaşam Parkı,
+n=2, 24.02 t [%95 GA 13.17–34.22], LULC dahil, sha256 doğrulanmış).
+
 ### Düzeltildi — /en/methods/ 404'leri + kalıcı link bütünlüğü kilidi
 KAZA (canlıda yakalandı): `/en/methods/` iki seviye derin ama göreli linkleri
 tek seviye (`../`) yazılmıştı → `../yontem/` = `/en/yontem/` = **404** (GitHub

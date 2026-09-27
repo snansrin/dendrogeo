@@ -1,0 +1,166 @@
+{
+  "schema": "dendrogeo-report/1",
+  "park": {
+    "id": 5,
+    "name": "Atatürk Çocukları ve Doğal Yaşam Parkı",
+    "osm_key": "way/1402900589",
+    "city": "Ankara",
+    "country": "Türkiye",
+    "area_m2": 851999
+  },
+  "generated_at": "2026-09-27T19:31:23.090Z",
+  "mc": {
+    "N": 1000,
+    "SEED": 20260926,
+    "DBH_SD_CM": 0.5,
+    "H_SD_M": 0.25,
+    "MODEL_CV": 0.22,
+    "CONF": 0.95
+  },
+  "totals": {
+    "n": 2,
+    "carbon_kg": 24023.5,
+    "ci": {
+      "mean": 24023.5,
+      "lo": 13174.59,
+      "hi": 34219.37
+    },
+    "per_ha_kg": 281.97
+  },
+  "species": [
+    {
+      "species": "SERVİ",
+      "grp": "İBRELİ",
+      "n": 1,
+      "mean_dbh": 50,
+      "mean_h": 4,
+      "carbon_kg": 145.29,
+      "share_pct": 0.6
+    },
+    {
+      "species": "ÇINAR",
+      "grp": "YAPRAKLI",
+      "n": 1,
+      "mean_dbh": 320,
+      "mean_h": 15,
+      "carbon_kg": 23878.21,
+      "share_pct": 99.4
+    }
+  ],
+  "gps": {
+    "n": 2,
+    "mean_acc_m": 8.9
+  },
+  "period": {
+    "from": "2026-09-01T15:08:45.089445+00:00",
+    "to": "2026-09-03T09:16:55.850058+00:00"
+  },
+  "moderation": {
+    "approved": 2,
+    "reviewed": 0
+  },
+  "geofence": {
+    "policy": "park poligonu içinde ölçüm zorunlu (trg_geo_fence, 0007)",
+    "total": 2,
+    "verified_rows": 0,
+    "outside_rows": 2,
+    "polygon_source": "OSM"
+  },
+  "lulc": {
+    "source": "ESA WorldCover 10 m · 2021 (v200)",
+    "citation": "ESA WorldCover 10 m 2021 v200, CC BY 4.0",
+    "year": 2021,
+    "cross": "IO LULC 10 m · 2020 (çapraz doğrulama)",
+    "crossError": null,
+    "agreement": {
+      "green": {
+        "primaryHa": 69.75326300048827,
+        "crossHa": 28.049583923339842,
+        "agreementPct": 57.3594426043359
+      },
+      "water": {
+        "primaryHa": 0,
+        "crossHa": 0,
+        "agreementPct": 100
+      },
+      "hard": {
+        "primaryHa": 3.6580487426757813,
+        "crossHa": 56.98222407226562,
+        "agreementPct": 12.064750281843917
+      },
+      "bare": {
+        "primaryHa": 11.620496630859375,
+        "crossHa": 0,
+        "agreementPct": 0
+      },
+      "other": {
+        "primaryHa": 0,
+        "crossHa": 0,
+        "agreementPct": 100
+      }
+    },
+    "areaDeltaPct": 0.19729087237961843,
+    "cells": 13396,
+    "masked_ha": 0,
+    "classes": [
+      {
+        "key": "green",
+        "label": "Yeşil alan",
+        "ha": 69.75,
+        "pct": 82
+      },
+      {
+        "key": "water",
+        "label": "Su",
+        "ha": 0,
+        "pct": 0
+      },
+      {
+        "key": "hard",
+        "label": "Sert zemin",
+        "ha": 3.66,
+        "pct": 4.3
+      },
+      {
+        "key": "bare",
+        "label": "Çıplak zemin",
+        "ha": 11.62,
+        "pct": 13.7
+      },
+      {
+        "key": "other",
+        "label": "Diğer",
+        "ha": 0,
+        "pct": 0
+      }
+    ]
+  },
+  "rows": [
+    {
+      "id": 17,
+      "point_id": 67,
+      "species": "SERVİ",
+      "grp": "İBRELİ",
+      "dbh_cm": 50,
+      "height_m": 4,
+      "carbon_kg": 145.289520137623,
+      "lat": 39.935743,
+      "lon": 32.724784,
+      "acc_m": 13.0841075147775,
+      "date": "2026-09-01"
+    },
+    {
+      "id": 22,
+      "point_id": 75,
+      "species": "ÇINAR",
+      "grp": "YAPRAKLI",
+      "dbh_cm": 320,
+      "height_m": 15,
+      "carbon_kg": 23878.2131450856,
+      "lat": 39.95975,
+      "lon": 32.865297,
+      "acc_m": 4.74865153019178,
+      "date": "2026-09-03"
+    }
+  ]
+}
