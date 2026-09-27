@@ -133,3 +133,25 @@ describe('supabase-js zincir sırası: from() sonrası doğrudan filtre metodu Y
     assert.match(tree, /\.select\(DG_TREE_SEL_FULL,\{count:"exact"\}\)\s*\.order\("created_at",\{ascending:false\}\)\s*\.limit\(1000\)/);
   });
 });
+
+describe('kaldığın yerden devam (sekme + kaydırma) — 2026-09-27', () => {
+  const read = (p) => readFileSync(join(ROOT, p), 'utf8');
+  const shell = read('src/ui/shell.js');
+  test('go() sekme adını kalıcı olarak saklar', () => {
+    assert.match(shell, /dgSaveView\(v\)/, 'go() her sekme değişiminde yazar');
+    assert.match(shell, /localStorage\.setItem\("dg_last_view"/, 'anahtar dg_last_view');
+  });
+  test('startShell yenilemede son sekmeyi geri açar', () => {
+    assert.match(shell, /const lv=dgLastView\(\);/, 'son sekme okunur');
+    assert.match(shell, /if\(lv&&lv!=="dash"&&\$\("v-"\+lv\)\)/, 'geçersiz sekme adında patlamaz');
+  });
+  test('kaydırma konumu sekme bazında saklanır ve geri gelir', () => {
+    assert.match(shell, /localStorage\.setItem\("dg_scroll_"\+DG_CUR_VIEW/, 'kaydırma yazma');
+    assert.match(shell, /localStorage\.getItem\("dg_scroll_"\+v\)/, 'kaydırma okuma');
+    assert.match(shell, /passive:true/, 'scroll dinleyicisi passive olmalı');
+  });
+  test('storage patlarsa (gizli mod) uygulama düşmez', () => {
+    const writes = (shell.match(/try\{\s*(return\s+)?localStorage/g) || []).length;
+    assert.ok(writes >= 4, 'tüm storage erişimleri try/catch içinde, got ' + writes);
+  });
+});

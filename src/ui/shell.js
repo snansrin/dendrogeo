@@ -111,16 +111,33 @@ $("landing").style.display="none";$("shell").style.display="block";
  if(PROFILE){$("whoami").textContent=PROFILE.full_name;
   if(PROFILE.role==="admin"||PROFILE.role==="owner"){$("roleBadge").style.display="inline";$("roleBadge").textContent=PROFILE.role==="owner"?"KURUCU":"ADMIN";$("roleBadge").className=PROFILE.role==="owner"?"badge on":"badge admin";$("adminSec").style.display="block";$("miAdmin").style.display="flex";$("miUsers").style.display="flex";}}
 initMaps();
+ /* kaydırma konumunu sekme bazında hatırla */
+ const mainEl=$("main");
+ if(mainEl&&!window._dgScrollHooked){window._dgScrollHooked=true;
+  mainEl.addEventListener("scroll",()=>{try{localStorage.setItem("dg_scroll_"+DG_CUR_VIEW,String(mainEl.scrollTop));}catch(e){}},{passive:true});}
 await loadProjects();
 await loadWaypoints();
 loadDash();loadRecords();loadWorld();loadMyRequests();loadRequestOptions();
+ /* KALDIĞIN YERDEN DEVAM: yenilemede son açık sekme geri gelir.
+  * OAuth/recovery akışlarında bu satıra gelinmez (yukarıda return var). */
+ const lv=dgLastView();
+ if(lv&&lv!=="dash"&&$("v-"+lv))setTimeout(()=>go(lv),250);
  /* Yöneticiyse yan menüdeki 🔐 Ölçüm Yönetimi rozeti baştan güncel olsun
   * (onay bekleyen sayısı). Sekmeyi açmadan da "iş var" görünsün. */
  if(PROFILE&&(PROFILE.role==="admin"||PROFILE.role==="owner")&&typeof dgRefreshPendingBadge==="function")dgRefreshPendingBadge();
 autoFillPointId();
 }
 
+let DG_CUR_VIEW="dash";
+/* KALDIĞIN YERDEN DEVAM (2026-09-27 · kullanıcı isteği): sayfa yenilenince
+ * son açık sekme ve o sekmedeki kaydırma konumu geri gelir. localStorage
+ * yerine sessionStorage DEĞİL: yenileme dışında tarayıcıyı kapat-aç da
+ * kaldığı yeri bulsun istendi. Yazma/okuma hep try/catch (gizli modda
+ * storage atabilir). */
+function dgSaveView(v){try{localStorage.setItem("dg_last_view",v);}catch(e){}}
+function dgLastView(){try{return localStorage.getItem("dg_last_view")||"";}catch(e){return "";}}
 function go(v){
+ DG_CUR_VIEW=v;dgSaveView(v);
  document.querySelectorAll(".view").forEach(x=>x.classList.remove("on"));
  $("v-"+v).classList.add("on");
  document.querySelectorAll("#side .item").forEach(i=>i.classList.remove("on"));
@@ -145,6 +162,10 @@ if(v==="dash"){loadWaypoints().then(()=>loadDash());}
 if(v==="admin")loadAdmin();
 if(v==="users")loadUsers();
 if(v==="export")loadRequestOptions();
+ /* kaydırma konumunu geri getir (sekme içeriği çizildikten sonra) */
+ setTimeout(()=>{const m=$("main");if(!m)return;
+  const sc=parseInt((()=>{try{return localStorage.getItem("dg_scroll_"+v)||"0";}catch(e){return "0";}})(),10);
+  if(sc>0)m.scrollTop=sc;},180);
 }
 
 boot();

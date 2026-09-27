@@ -99,9 +99,25 @@ describe('modül erişilebilirliği', () => {
   });
 
   test('her css/*.css index.html’de link’li', () => {
+    /* ALT SAYFA İSTİSNASI (2026-09-27): ui-standard.css BİLEREK index.html'de
+     * DEĞİLDİR — eleman seviyesi kuralları uygulama kabuğunda (Park Karşılaştırma
+     * barları, lead satırı) görünüm bozuyordu; dosya yalnız 11 alt sayfada
+     * bağlanır. İstisna listesi kapalıdır: buraya yeni dosya eklemek bilinçli
+     * bir karardır ve sw.js PRECACHE'i ile birlikte güncellenmelidir. */
+    const SUBPAGE_ONLY = ['css/ui-standard.css'];
     const cssFiles = walk(join(ROOT, 'css')).filter((p) => p.endsWith('.css'));
-    const eksik = cssFiles.filter((p) => !assets.some((a) => a.path === p));
+    const eksik = cssFiles.filter((p) => !assets.some((a) => a.path === p) && !SUBPAGE_ONLY.includes(p));
     assert.deepEqual(eksik, [], 'index.html’de link’i olmayan css: ' + eksik.join(', '));
+    /* istisnanın kendisi de kilitli: alt sayfa sayfaları onu GERÇEKTEN bağlamalı */
+    for (const f of SUBPAGE_ONLY) {
+      const base = f.split('/').pop();
+      const subs = readdirSync(ROOT).filter((d) => {
+        try { return existsSync(join(ROOT, d, 'index.html')); } catch (e) { return false; }
+      });
+      assert.ok(subs.length >= 7, 'alt sayfalar bulunmalı');
+      for (const d of subs)
+        assert.ok(readFileSync(join(ROOT, d, 'index.html'), 'utf8').includes(base), d + ' ' + base + ' bağlamalı');
+    }
   });
 });
 

@@ -26,6 +26,7 @@ const css = read('css/ui-standard.css');
 const head = read('partials/head.html');
 const shell = read('partials/shell.html');
 const sw = read('sw.js');
+const idx = read('index.html');
 
 const SUBS = readdirSync(ROOT).filter((d) => {
   if (d.startsWith('.') || d === 'vendor' || d === 'node_modules') return false;
@@ -53,13 +54,18 @@ describe('ui-standard.css sözleşmesi', () => {
       assert.ok(css.includes(v), v + ' varyantı olmalı');
   });
 
-  test('kabukta EN SON yüklenen stil ui-standard.css', () => {
-    const links = [...head.matchAll(/<link rel="stylesheet" href="([^"]+)"/g)].map((m) => m[1]);
-    assert.ok(links.length >= 3, 'stil listesi bulunmalı');
-    assert.match(links[links.length - 1], /ui-standard\.css/, 'son stil ui-standard olmalı');
+  test('⭐ ui-standard.css uygulama kabuğuna SIZMAZ (yalnız alt sayfalar)', () => {
+    /* 2026-09-27: eleman seviyesi kurallar (h2/p/td/badge…) Park Karşılaştırma
+     * kartının barlarını ve lead satırını bozdu; dosya alt sayfalara çekildi. */
+    assert.ok(!/ui-standard\.css/.test(head), 'index.html head ui-standard bağlamamalı');
+    assert.ok(!/ui-standard\.css/.test(idx), 'index.html artifaktı da bağlamamalı');
   });
 
-  test('sw.js PRECACHE çevrimdışı sayfalar için de taşır', () => {
+  test("kabuğun ihtiyaç duyduğu .dg-sub style.css’te yaşar", () => {
+    assert.match(read('css/style.css'), /\.dg-sub\{/, "dg-sub uygulama CSS’inde olmalı");
+  });
+
+  test("sw.js PRECACHE ui-standard’ı taşır (alt sayfalar çevrimdışı da standart)", () => {
     assert.match(sw, /'\/css\/ui-standard\.css'/, 'PRECACHE girdisi olmalı');
   });
 });

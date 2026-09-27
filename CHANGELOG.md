@@ -9,6 +9,22 @@ Yeni sürüm yayımlama adımları: [`docs/surum-yayini.md`](docs/surum-yayini.m
 
 ## [Yayımlanmadı]
 
+### Düzeltildi — Park Karşılaştırma kartı eski görünümünde + "kaldığın yerden devam"
+Kullanıcı: "barları küçültüp en üsttekini kaydırmışsın, eski haline getir;
+sayfayı yenilediğimde kaldığım yerden devam edebileyim."
+- **ui-standard.css uygulama kabuğundan ÇIKARILDI** (yalnız 11 alt sayfada
+  kalır): eleman seviyesi kurallar (h2/p/td/badge…) `.dg-cmp` barlarını ve
+  lead satırını bozuyordu. KANIT: bozulma öncesi build (b6abd30) ile yeni
+  build'in karşılaştırma kartı ekran görüntüleri **piksel özdeş** (md5 eşit).
+- Kabuğun kullandığı tek sınıf (`.dg-sub`) `style.css`'e taşındı.
+- `module-registry` kilidi güncellendi: `SUBPAGE_ONLY` istisnası + istisnanın
+  kendisi kilitli (11 alt sayfa dosyayı GERÇEKTEN bağlıyor).
+- **YENİ:** yenilemede son sekme + sekme içi kaydırma konumu geri gelir
+  (`dg_last_view`, `dg_scroll_<sekme>`; tüm storage erişimleri try/catch,
+  geçersiz sekme adında patlamaz; OAuth/recovery akışlarını etkilemez).
+Kilitler: ui-standard "kabuğa sızmaz" + critical-fixes "kaldığın yerden devam"
+(4 test). 572 test yeşil · check ✅
+
 ### Değişti — 📡 Konumu Etkinleştir artık CANLI buton (🌿 Yüzey Örtüsü Analizi ile birebir)
 Kullanıcı: *"⏳ Analiz yapılıyor… gibi canlı buton yap; burayı incele ve buna
 göre yap; saçma sapan farklı buton/tema/animasyon istemiyorum."*
