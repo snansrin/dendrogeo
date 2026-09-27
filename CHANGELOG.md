@@ -9,6 +9,15 @@ Yeni sürüm yayımlama adımları: [`docs/surum-yayini.md`](docs/surum-yayini.m
 
 ## [Yayımlanmadı]
 
+### Düzeltildi — /en/methods/ 404'leri + kalıcı link bütünlüğü kilidi
+KAZA (canlıda yakalandı): `/en/methods/` iki seviye derin ama göreli linkleri
+tek seviye (`../`) yazılmıştı → `../yontem/` = `/en/yontem/` = **404** (GitHub
+Pages), CSS/ikon da 404'tü. Tüm göreli yollar `../../` yapıldı.
+KİLİT: `test/critical-fixes.test.mjs` → "link bütünlüğü" describe'i: 13 sayfanın
+TÜM href/src'lerini dosya sisteminde çözer (ağ yok); kök-mutlak (`/x/`) ve
+göreli (`../`) dahil; `http/mailto/tel/data/file` hariç. Bir sayfa taşınır ya
+da derinlik değişirse test kırmızıya döner — bu kaza sınıfı kapandı.
+
 ### Değişti — Park Kimlikleri listesi: boş parklar düşmüyor (kullanıcı isteği)
 İstek: "her park sorgulamada buraya yazıyor; projeye kayıt yapıldıktan sonra
 buraya düşsün, boş projeler düşmesin."

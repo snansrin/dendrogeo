@@ -220,3 +220,35 @@ describe('kalite denetimi 2026-09-27 kilidi (P1/P3/P7/P9)', () => {
     assert.match(rd('yontem/index.html'), /hreflang="en"/);
   });
 });
+
+describe("link bütünlüğü: hiçbir sayfa 404’e link vermez (2026-09-27 kazası)", () => {
+  /* KAZA: /en/methods/ iki seviye derin ama linkleri ../ ile yazılmıştı →
+   * ../yontem/ = /en/yontem/ = 404 (GitHub Pages). Bu test TÜM sayfaların
+   * göreli ve kök linklerini dosya sisteminde çözer; ağ gerektirmez. */
+  const pages = [];
+  (function walk(d) {
+    for (const e of readdirSync(join(ROOT, d), { withFileTypes: true })) {
+      if (e.isDirectory()) {
+        if (['.git', 'node_modules', 'vendor', 'out', '.github', 'scripts', 'src', 'css', 'partials', 'test', 'docs', 'supabase'].includes(e.name)) continue;
+        walk(join(d, e.name));
+      } else if (e.name === 'index.html') pages.push(join(d, e.name));
+    }
+  })('');
+  test('en az 13 sayfa taranır', () => assert.ok(pages.length >= 13, pages.join(',')));
+  for (const f of pages) {
+    test(f + ' → tüm göreli/kök linkler dosyada karşılık bulur', () => {
+      const t = readFileSync(join(ROOT, f), 'utf8');
+      const bad = [];
+      for (const m of t.matchAll(/(?:href|src)="([^"#]+)"/g)) {
+        let rel = m[1];
+        if (/^(https?:|mailto:|tel:|data:|file:|#)/.test(rel)) continue;
+        rel = rel.split('?')[0];
+        const target = rel.startsWith('/')
+          ? join(ROOT, rel)
+          : join(dirname(join(ROOT, f)), rel);
+        if (!existsSync(target) && !existsSync(target + '.html') && !existsSync(join(target, 'index.html'))) bad.push(rel);
+      }
+      assert.deepEqual(bad, [], 'kırık link(ler): ' + bad.join(', '));
+    });
+  }
+});
