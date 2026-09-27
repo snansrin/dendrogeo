@@ -1192,3 +1192,33 @@ describe('kayıt formunda KVKK açık rızası zorunlu', () => {
     assert.match(seg, /konum verimin/, 'konum verisi açıkça sayılmalı');
   });
 });
+
+describe('Park Kimlikleri listesi: boş parklar düşmez (2026-09-27)', () => {
+  const PARKS = [
+    { id: 1, name: 'Dolu Park', osm_key: 'way/1', source: 'osm', area_m2: 50000, centroid_lat: 39.9, centroid_lon: 32.7 },
+    { id: 2, name: 'Bos Sorgu Parki', osm_key: 'way/2', source: 'osm', area_m2: 1000, centroid_lat: 39.8, centroid_lon: 32.6 },
+  ];
+  test('varsayılan: yalnız projesi/kaydı olan park listede', async () => {
+    run('PROFILE={id:"u-1",role:"owner",full_name:"K"}; USER={id:"u-1"};');
+    W.route((st) => {
+      if (st.table === 'parks') return { data: PARKS, error: null };
+      if (st.table === 'projects') return { data: [{ id: 9, name: 'Dolu Park - deneme', park_id: 1 }], error: null };
+      if (st.table === 'measurements') return { data: [{ park_id: 1 }], error: null };
+      return { data: [], error: null };
+    });
+    await run('loadParkAdmin()');
+    const html = el('parkAdminBox').innerHTML;
+    assert.ok(html.includes('Dolu Park'), 'dolu park listede');
+    assert.ok(!html.includes('Bos Sorgu Parki'), '⭐ boş park listede OLMAMALI');
+    assert.match(html, /Boş parkları göster \(1\)/, 'sayaçlı toggle görünür');
+    assert.match(html, /1 boş park .* gizlendi/, 'gizleme notu');
+  });
+  test('toggle açınca boş park görünür (veri silinmez)', async () => {
+    await run('dgParkAdminToggleEmpty()');
+    const html = el('parkAdminBox').innerHTML;
+    assert.ok(html.includes('Bos Sorgu Parki'), 'toggle sonrası boş park görünür');
+    assert.match(html, /Boş parkları gizle/, 'toggle tersine döner');
+    await run('dgParkAdminToggleEmpty()');
+    assert.ok(!el('parkAdminBox').innerHTML.includes('Bos Sorgu Parki'), 'kapatınca tekrar gizlenir');
+  });
+});

@@ -1207,6 +1207,8 @@ function dgAfterBackfillWrites(){
  * ("Cumhuriyet Parkı" ×2). Karar yöneticide; araç yalnız ölçüyü gösterir
  * (ad + mesafe + alan) ve tek tıkla taşır. */
 let DG_PARK_ADMIN_ROWS=[];
+let DG_PARK_ADMIN_SHOW_EMPTY=false;   /* 2026-09-27: boş parkları göster/gizle */
+let DG_PARK_ADMIN_LAST=null;          /* son projects/measurements bağlamı */
 
 async function loadParkAdmin(){
   if(!PROFILE||(PROFILE.role!=="admin"&&PROFILE.role!=="owner"))return toast("Yetki yok.","err");
@@ -1234,10 +1236,21 @@ function dgRenderParkAdmin(projects,measurements){
   const projByPark={},measByPark={};
   (projects||[]).forEach(p=>{if(p.park_id)projByPark[p.park_id]=(projByPark[p.park_id]||0)+1;});
   (measurements||[]).forEach(m=>{if(m.park_id)measByPark[m.park_id]=(measByPark[m.park_id]||0)+1;});
+  DG_PARK_ADMIN_LAST={projects:projects||[],measurements:measurements||[]};
+
+  /* BOŞ PARK FİLTRESİ (2026-09-27 · kullanıcı): "her park sorgulamada buraya
+   * yazıyor; projeye kayıt yapıldıktan sonra buraya düşsün, boşlar düşmesin."
+   * Park kimliği algılamada yazılmaya DEVAM eder (kimlik bütünlüğü ve çit
+   * için gerekli) ama yönetim LİSTESİ varsayılan olarak yalnızca projesi
+   * VEYA kaydı olan parkları gösterir; boşlar sayaçlı düğmeyle açılır
+   * (veri silinmez, yalnızca görünüm). */
+  const dgParkIsEmpty=(p)=>!(projByPark[p.id]>0)&&!(measByPark[p.id]>0);
+  const emptyRows=rows.filter(dgParkIsEmpty);
+  const shown=rows.filter(p=>!dgParkIsEmpty(p)||DG_PARK_ADMIN_SHOW_EMPTY);
 
   /* Çift kimlik adayları: aynı (gevşek) adı taşıyan parklar */
   const byName={};
-  rows.forEach(p=>{
+  shown.forEach(p=>{
     const k=dgNormParkLoose(p.name)||("#"+p.id);
     (byName[k]=byName[k]||[]).push(p);
   });
@@ -1261,19 +1274,26 @@ function dgRenderParkAdmin(projects,measurements){
   /* ⚠ /isimsiz/i kullanılmaz: JS'te i bayrağı ASCII katlar, "İsimsiz" (U+0130)
    * eşleşmez — uyarı sessizce hiç çıkmazdı. dgNormParkName ile aksansız/küçük
    * harfe indirip öyle bakılır (aynı tuzak dgNormParkName'in de varlık sebebi). */
-  const unnamed=rows.filter(p=>!p.name||dgNormParkName(p.name).indexOf("isimsiz")===0);
+  const unnamed=shown.filter(p=>!p.name||dgNormParkName(p.name).indexOf("isimsiz")===0);
   const unnamedHTML=unnamed.length
     ? `<div class="alert info" style="margin-bottom:10px">ℹ ${unnamed.length} parkın adı yok (OSM elemanında ad etiketi yoktu): `+
       unnamed.map(p=>`#${p.id}`).join(", ")+` — ✏️ ile ad ver (örn. projenin adı).</div>`
     : ``;
 
   box.innerHTML=dupHTML+unnamedHTML+
+    (emptyRows.length
+      ? `<div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:8px">`+
+          `<button class="btn sm ghost" onclick="dgParkAdminToggleEmpty()">`+
+          (DG_PARK_ADMIN_SHOW_EMPTY?"🙈 Boş parkları gizle":"🫥 Boş parkları göster ("+emptyRows.length+")")+`</button>`+
+          `<span class="dg-tree-meta">Yalnız sorgulanmış, projesi/kaydı olmayan parklar; temizlemek için gösterip 🗑️ kullan.</span>`+
+        `</div>`
+      : "")+
     /* dg-cards: 640px altında tablo kart düzenine döner (css/style.css).
      * data-label değerleri mobilde her satırın başlığı olur. */
     `<div class="tblwrap dg-parkadmin-wrap"><table class="dg-cards">`+
     `<thead><tr><th>ID</th><th>Park Adı</th><th>Kimlik</th><th>Şehir</th><th>Alan</th><th>Proje</th><th>Kayıt</th><th>Kaynak</th><th>İşlem</th></tr></thead><tbody>`+
-    (rows.map(p=>{
-      const others=rows.filter(x=>x.id!==p.id);
+    (shown.map(p=>{
+      const others=shown.filter(x=>x.id!==p.id);
       const isDup=dupGroups.some(g=>g.some(x=>x.id===p.id));
       return `<tr${isDup?' class="dg-dup"':''}>`+
         `<td data-label="ID" class="mono">${p.id}</td>`+
@@ -1296,6 +1316,8 @@ function dgRenderParkAdmin(projects,measurements){
         `</div></td></tr>`;
     }).join("")||`<tr><td colspan=9>Henüz park kimliği yok — Canlı Harita → 🌳 Park Algılama ile oluştur.</td></tr>`)+
     `</tbody></table></div>`+
+    (emptyRows.length&&!DG_PARK_ADMIN_SHOW_EMPTY
+      ? `<div class="dg-tree-meta" style="margin-top:8px">🫥 ${emptyRows.length} boş park (projesi/kaydı yok) gizlendi — yalnız sorgulanmışlar.</div>`:"")+
     `<div class="dg-parkadmin-note">🔀 = bu parkı seçtiğin hedefin içine taşır (projeler + ölçümler + adlar), kaynak kimlik silinir. `+
     `✏️ = adı düzeltir; proje adları otomatik yeniden kurulur ("park - etiket"). 🗑️ = yalnız yanlış kimlikse; bağ kopar, veri silinmez.</div>`;
 }
@@ -1504,6 +1526,12 @@ async function dgBackfillGeom(parkId){
   loadParkAdmin();
 }
 window.dgBackfillGeom=dgBackfillGeom;
+function dgParkAdminToggleEmpty(){
+ DG_PARK_ADMIN_SHOW_EMPTY=!DG_PARK_ADMIN_SHOW_EMPTY;
+ const ctx=DG_PARK_ADMIN_LAST||{projects:[],measurements:[]};
+ dgRenderParkAdmin(ctx.projects,ctx.measurements);
+}
+window.dgParkAdminToggleEmpty=dgParkAdminToggleEmpty;
 window.dgCreateManualPark=dgCreateManualPark;
 window.dgShowManualParkForm=dgShowManualParkForm;
 window.dgToggleParkModeFromScan=dgToggleParkModeFromScan;

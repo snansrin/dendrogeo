@@ -9,6 +9,19 @@ Yeni sürüm yayımlama adımları: [`docs/surum-yayini.md`](docs/surum-yayini.m
 
 ## [Yayımlanmadı]
 
+### Değişti — Park Kimlikleri listesi: boş parklar düşmüyor (kullanıcı isteği)
+İstek: "her park sorgulamada buraya yazıyor; projeye kayıt yapıldıktan sonra
+buraya düşsün, boş projeler düşmesin."
+- Park kimliği algılamada yazılmaya DEVAM eder (kimlik bütünlüğü + konum çiti
+  için gerekli) ama **yönetim listesi varsayılan olarak yalnızca projesi VEYA
+  kaydı olan parkları** gösterir.
+- Boşlar silinmez: sayaçlı `🫥 Boş parkları göster (N)` düğmesiyle açılır,
+  temizlemek isteyen 🗑️ ile siler; altta "N boş park gizlendi" notu.
+- Çift kimlik ve isimsiz park uyarıları da filtrelenmiş küme üzerinde çalışır
+  (gürültü azalır).
+Kilitler: park-flow +2 davranış testi (varsayılan gizli / toggle aç-kapa).
+583 test yeşil · check ✅
+
 ### Düzeltildi/Eklendi — kalite denetimi bulguları (2026-09-27, izinli küme)
 Denetim: 12 sayfa + 10 sekme + landing, masaüstü+mobil; konsol/ağ/taşma/font/
 buton/link/sitemap/WCAG. Fonksiyonel hata çıkmadı; aşağıdakiler denetim
