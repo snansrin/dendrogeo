@@ -16,7 +16,7 @@
  */
 import { test, describe } from 'node:test';
 import assert from 'node:assert/strict';
-import { readFileSync, readdirSync, statSync } from 'node:fs';
+import { readFileSync, readdirSync, statSync, existsSync } from 'node:fs';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -184,5 +184,39 @@ describe('uzaktan proje + canlı kaydet butonu — 2026-09-27', () => {
     assert.match(sh, /id="saveBtn"[^>]*class="dg-png-btn primary"|class="dg-png-btn primary" id="saveBtn"/, 'kaydet butonu ailede');
     assert.match(sh, /class="dg-png-btn primary" style="margin-top:14px" onclick="arriveWp\(\)"/, 'vardım butonu ailede');
     assert.doesNotMatch(sh, /class="btn" style="width:100%/, 'eski dağınık desen kalmamalı');
+  });
+});
+
+describe('kalite denetimi 2026-09-27 kilidi (P1/P3/P7/P9)', () => {
+  const rd = (p) => readFileSync(join(ROOT, p), 'utf8');
+  test('P1 kontrast tokenları AA eşiğinde', () => {
+    const c = rd('css/style.css');
+    assert.match(c, /--mut:#5f6d65/, 'soluk metin tokeni koyulastirilmali');
+    assert.match(c, /--amber-ink:#9a4a08/, 'amber metin tokeni');
+    assert.match(c, /\.badge\.admin\{background:var\(--amber-tint\);color:var\(--amber-ink\)\}/);
+  });
+  test('P3 skip-link + focus halkasi + label.lbl blok (kayma yok)', () => {
+    const h = rd('partials/head.html');
+    assert.match(h, /class="dg-skip" href="#main"/, 'skip link');
+    const c = rd('css/style.css');
+    assert.match(c, /label\.lbl\{display:block\}/, 'label div ile ayni kutu');
+    assert.match(c, /:focus-visible\{outline:2px solid var\(--green\)/, 'odak halkasi');
+    assert.match(c, /\.dg-skip\{position:absolute;left:-9999px/, 'skip link akista yer kaplamaz');
+    const sh = rd('partials/shell.html');
+    assert.ok((sh.match(/<label class="lbl" for="/g) || []).length >= 10, 'label for donusumu');
+  });
+  test('P7 geom backfill: fonksiyon + dugme + CSP origin', () => {
+    const r = rd('src/services/park-registry.js');
+    assert.match(r, /async function dgBackfillGeom/, 'backfill fonksiyonu');
+    assert.match(r, /yetki|role!==\"admin\"/, 'yonetici kapisi');
+    assert.match(r, /api\.openstreetmap\.org\/api\/0\.6/, 'OSM ana API');
+    assert.match(rd('partials/head.html'), /https:\/\/api\.openstreetmap\.org/, 'CSP beyaz listesi');
+  });
+  test('P9 EN methods sayfasi + sitemap + hreflang', () => {
+    assert.ok(existsSync(join(ROOT, 'en/methods/index.html')), 'sayfa var');
+    const en = rd('en/methods/index.html');
+    assert.match(en, /hreflang="tr"/); assert.match(en, /Chave et al\. \(2014\)/);
+    assert.match(rd('sitemap.xml'), /\/en\/methods\//);
+    assert.match(rd('yontem/index.html'), /hreflang="en"/);
   });
 });

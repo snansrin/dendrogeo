@@ -1286,6 +1286,7 @@ function dgRenderParkAdmin(projects,measurements){
         `<td data-label="Kaynak">${esc(p.source||"—")}</td>`+
         `<td data-label="İşlem"><div class="dg-act">`+
           `<button class="btn sm blue" onclick="dgParkRename(${p.id})" title="Yeniden adlandır">✏️</button>`+
+          `<button class="btn sm ghost" onclick="dgBackfillGeom(${p.id})" title="OSM sınırını geom_json'a yaz → konum çiti tam poligonla çalışır">🛰</button>`+
           `<select id="parkMergeSel${p.id}" class="dg-png-select dg-merge-sel">`+
             `<option value="">→ birleştir…</option>`+
             others.map(o=>`<option value="${o.id}">#${o.id} ${esc(o.name)}</option>`).join("")+
@@ -1463,6 +1464,46 @@ function dgSchemaWarnHTML(){
 window.startParkScan=startParkScan;
 window.dgDetectAtMyLocation=dgDetectAtMyLocation;
 window.dgScanSearchByName=dgScanSearchByName;
+
+/* =========================================================
+   🛰 GEOMETRİ BACKFILL (2026-09-27 · denetim P7)
+   7 parkın hiçbirinde geom_json yoktu → 0007 konum çiti daire-yedeğiyle
+   çalışıyordu. Bu araç OSM sınırını çekip parks.geom_json'a yazar; çit
+   bundan sonra TAM POLİGONLA doğrular. Yalnız yönetici düğmesi; yazma
+   RLS'e takılır (parks_update: created_by veya admin).
+========================================================= */
+async function dgFetchOsmRing(osmKey){
+  const m=String(osmKey||"").match(/^(way|relation)\/(\d+)$/);
+  if(!m)return null;
+  const r=await fetch("https://api.openstreetmap.org/api/0.6/"+m[1]+"/"+m[2]+"/full.json",{headers:{"Accept":"application/json"}});
+  if(!r.ok)throw new Error("OSM HTTP "+r.status);
+  const j=await r.json();
+  if(m[1]==="way"){
+    const ring=j.elements.filter(e=>e.type==="node").map(n=>[n.lat,n.lon]);
+    return ring.length>=4?{outer:[ring],inner:[]}:null;
+  }
+  const nodes={};for(const e of j.elements)if(e.type==="node")nodes[e.id]=[e.lat,e.lon];
+  const ways=j.elements.filter(e=>e.type==="way").map(w=>(w.nodes||[]).map(id=>nodes[id]).filter(Boolean));
+  const rings=(typeof joinWaysToRings==="function")?joinWaysToRings(j.elements.filter(e=>e.type==="way")):null;
+  if(rings&&rings.length)return{outer:[rings[0]],inner:rings.slice(1)};
+  const outer=ways.filter(w=>w.length>3&&w[0][0]===w[w.length-1][0]&&w[0][1]===w[w.length-1][1]).sort((a,b)=>b.length-a.length)[0];
+  return outer?{outer:[outer],inner:[]}:null;
+}
+async function dgBackfillGeom(parkId){
+  if(!PROFILE||(PROFILE.role!=="admin"&&PROFILE.role!=="owner"))return toast("Yetki yok.","err");
+  const{data:park}=await sb.from("parks").select("*").eq("id",parkId).maybeSingle();
+  if(!park)return toast("Park bulunamadı","err");
+  toast("🛰 OSM sınırı çekiliyor…","info","🛰");
+  let geom;
+  try{geom=await dgFetchOsmRing(park.osm_key);}catch(e){return toast("OSM hatası: "+esc(e.message),"err","🛰");}
+  if(!geom)return toast("OSM'de kapalı sınır bulunamadı (relation parçalı olabilir).","warn","🛰");
+  const area=typeof polyArea==="function"?polyArea(geom.outer):park.area_m2;
+  const{error}=await sb.from("parks").update({geom_json:geom,area_m2:area>0?Math.round(area):park.area_m2}).eq("id",parkId);
+  if(error)return toast("Yazılamadı (yetki/ağ): "+esc(error.message),"err","🛰");
+  toast("✓ "+esc(park.name)+" geometrisi yazıldı — çit artık tam poligonla.","ok","🛰");
+  loadParkAdmin();
+}
+window.dgBackfillGeom=dgBackfillGeom;
 window.dgCreateManualPark=dgCreateManualPark;
 window.dgShowManualParkForm=dgShowManualParkForm;
 window.dgToggleParkModeFromScan=dgToggleParkModeFromScan;

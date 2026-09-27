@@ -1,4 +1,4 @@
-:root{--bg:#f7f6f2;--surface:#fff;--ink:#182420;--mut:#68766e;--line:#e6e3d9;--green:#1e6f4b;--green-dk:#14532d;--tint:#eaf3ec;--amber:#c77d2e;--amber-tint:#f8efe2;--red:#c2452d;--blue:#2b6cb0;--r:14px;--sh:0 1px 2px rgba(20,30,25,.05),0 10px 28px rgba(20,30,25,.07)}
+:root{--bg:#f7f6f2;--surface:#fff;--ink:#182420;--mut:#5f6d65;                          /* 2026-09-27 WCAG: 4.41→5.03 (bg), 4.77→5.44 (beyaz) */--line:#e6e3d9;--green:#1e6f4b;--green-dk:#14532d;--tint:#eaf3ec;--amber:#c77d2e;--amber-ink:#9a4a08;   /* 2026-09-27: amber METİN tonu (WCAG 5.49); --amber dolgu/çizgi olarak kalır */--amber-tint:#f8efe2;--red:#c2452d;--blue:#2b6cb0;--r:14px;--sh:0 1px 2px rgba(20,30,25,.05),0 10px 28px rgba(20,30,25,.07)}
 *{box-sizing:border-box;margin:0}
 html{scroll-behavior:smooth}
 body{background:var(--bg);color:var(--ink);font:15px/1.65 Manrope,system-ui,sans-serif;overflow-x:hidden}
@@ -27,7 +27,7 @@ table{width:100%;border-collapse:collapse;font-size:.82rem}
 th{background:var(--tint);color:var(--green-dk);text-align:left;padding:10px;font-size:.68rem;letter-spacing:.1em;text-transform:uppercase;white-space:nowrap}
 td{padding:9px 10px;border-bottom:1px solid var(--line);font-family:"IBM Plex Mono",monospace;font-size:.78rem;white-space:nowrap}
 .badge{display:inline-block;padding:3px 10px;border-radius:20px;font-size:.66rem;font-weight:800;text-transform:uppercase}
-.badge.admin{background:var(--amber-tint);color:var(--amber)}
+.badge.admin{background:var(--amber-tint);color:var(--amber-ink)}
 .badge.on{background:var(--tint);color:var(--green)}
 .badge.off{background:#eee;color:#888}
 .brand{display:flex;gap:10px;align-items:center;font-family:Fraunces,serif;font-weight:700;font-size:1.3rem;color:var(--green-dk)}
@@ -41,7 +41,7 @@ td{padding:9px 10px;border-bottom:1px solid var(--line);font-family:"IBM Plex Mo
 .hero h1{font-family:Fraunces,serif;font-size:clamp(2.2rem,5vw,4rem);line-height:1.06;color:var(--green-dk);margin:16px 0;font-weight:600;max-width:20ch}
 .hero .lead{color:var(--mut);max-width:60ch;font-size:1.05rem}
 .shead{display:flex;align-items:baseline;gap:16px;margin-bottom:28px}
-.shead .no{font-family:"IBM Plex Mono",monospace;color:var(--amber);font-size:.85rem}
+.shead .no{font-family:"IBM Plex Mono",monospace;color:var(--amber-ink);font-size:.85rem}
 .shead h2{font-family:Fraunces,serif;font-size:1.8rem;color:var(--green-dk);font-weight:600}
 .shead .rule{flex:1;height:1px;background:var(--line)}
 #map,#navMap,#worldMap,#worldMapLanding{height:420px;border-radius:var(--r);border:1px solid var(--line);isolation:isolate;position:relative;z-index:1}
@@ -357,3 +357,14 @@ td a:has(.dg-thumb){display:inline-flex}
 .dg-consent:hover{border-color:var(--green)}
 .dg-consent:focus-within{outline:2px solid var(--green);outline-offset:1px}
 @media(max-width:640px){.dg-consent{font-size:.74rem;padding:10px}}
+
+/* ---- ERİŞİLEBİLİRLİK (2026-09-27, WCAG 2.2 AA · görsel kayma YOK) ---- */
+/* label.lbl: div.lbl ile BİREBİR aynı kutu (blok) → dönüşüm kayma üretmez. */
+label.lbl{display:block}
+/* Klavye odağı görünür halka (yalnızca odaklanınca görünür). */
+:focus-visible{outline:2px solid var(--green);outline-offset:2px;border-radius:6px}
+/* "İçeriğe atla" linki: gizli, yalnız odaklanınca ortaya çıkar (mutlak konum →
+   normal akışta yer kaplamaz, dolayısıyla sıfır kayma). */
+.dg-skip{position:absolute;left:-9999px;top:0;background:var(--green);color:#fff;
+  padding:10px 16px;border-radius:0 0 10px 0;font-weight:700;font-size:.85rem;z-index:999;text-decoration:none}
+.dg-skip:focus{left:12px;top:12px}

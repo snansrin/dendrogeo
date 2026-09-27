@@ -1,0 +1,42 @@
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>DendroGeo Methods | DendroGeo</title>
+<meta name="description" content="How DendroGeo computes tree biomass, carbon, geodesic area and 10 m land-cover analysis: formulas, sources, uncertainty and limitations.">
+<meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">
+<link rel="canonical" href="https://dendrogeo.org/en/methods/">
+<meta property="og:type" content="article"><meta property="og:site_name" content="DendroGeo">
+<meta property="og:title" content="DendroGeo Methods | DendroGeo"><meta property="og:description" content="DendroGeo'da ağaç biyokütlesi, karbon, geometri ve 10 m arazi örtüsü analizlerinin nasıl hesaplandığını açıklayan yöntem özeti.">
+<meta property="og:url" content="https://dendrogeo.org/en/methods/">
+<link rel="icon" href="../icon.png">
+<link rel="stylesheet" href="../css/style.css?v=98461801">
+<style>:root{--bg:#f7f6f2;--ink:#182420;--mut:#64706a;--green:#14532d;--line:#dfe5df;--card:#fff}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.7 Arial,system-ui,sans-serif}
+.wrap{max-width:1040px;margin:auto;padding:0 22px}.top{padding:18px 0;border-bottom:1px solid var(--line);background:#fff;position:sticky;top:0}
+.nav{display:flex;align-items:center;justify-content:space-between;gap:18px}.brand{font-weight:800;color:var(--green);text-decoration:none;font-size:1.15rem}.links{display:flex;gap:14px;flex-wrap:wrap}.links a{color:var(--green);text-decoration:none;font-size:.92rem}
+main{padding:54px 0 70px}h1{font-size:clamp(2rem,5vw,3.3rem);line-height:1.08;margin:.2em 0 .35em}h2{margin-top:42px;line-height:1.2}h3{margin-top:25px}p,li{max-width:78ch}.lead{font-size:1.08rem;color:#46524c;max-width:75ch}.hero{padding:25px 0 10px}.tag{color:var(--green);font-weight:800;text-transform:uppercase;letter-spacing:.08em;font-size:.78rem}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:18px;margin-top:24px}.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:22px}.card h3{margin-top:0}.btn{display:inline-block;background:var(--green);color:white;text-decoration:none;padding:11px 16px;border-radius:10px;font-weight:700;margin:8px 8px 0 0}.btn.alt{background:white;color:var(--green);border:1px solid var(--line)}code{background:#eef2ee;padding:2px 5px;border-radius:5px}footer{border-top:1px solid var(--line);padding:28px 0;color:var(--mut);font-size:.9rem}table{border-collapse:collapse;width:100%;background:#fff;border:1px solid var(--line);border-radius:12px;overflow:hidden}th,td{padding:11px 12px;border-bottom:1px solid var(--line);text-align:left}th{background:#eef3ef;color:var(--green)}small{color:var(--mut)}</style>
+<link rel="stylesheet" href="../css/ui-standard.css">
+
+<link rel="alternate" hreflang="tr" href="https://dendrogeo.org/yontem/">
+<link rel="alternate" hreflang="en" href="https://dendrogeo.org/en/methods/">
+<link rel="alternate" hreflang="x-default" href="https://dendrogeo.org/yontem/">
+</head>
+<body class="dg-page">
+<header class="top"><div class="wrap nav"><a class="brand" href="../">🌲 DendroGeo</a>
+<nav class="links" aria-label="Main"><a href="../">Home</a><a href="../agac-envanteri/">Inventory</a><a href="../karbon-hesaplama/">Carbon</a><a href="../arazi-ortusu/">Land cover</a><a href="../yontem/">Türkçe</a></nav></div></header>
+<main><div class="wrap"><div class="hero"><div class="tag">SCIENTIFIC METHOD</div><h1>DendroGeo Methods</h1>
+<p class="lead">How tree biomass, carbon stock, geodesic area and 10 m land-cover analysis are computed, with sources, uncertainty and limitations.</p>
+<a class="btn" href="../">Open the DendroGeo app</a></div>
+<h2>Biomass and carbon</h2>
+<p>Above-ground biomass follows the pantropical allometric equation of Chave et al. (2014): AGB = 0.0673·(ρ·D²·H)^0.976, with D = DBH (cm), H = height (m) and ρ = wood density (g/cm³) by species or group default. Root biomass = AGB × 0.26; carbon = 0.47 × total biomass.</p>
+<h2>Location and area</h2>
+<p>Distances use the haversine formula on WGS84. Park areas use geodesic polygon mathematics; land-cover cells are intersected with the park polygon in the native UTM zone and only the true intersection area is counted (no pixel counting).</p>
+<h2>Land cover</h2>
+<p>The park polygon is intersected with 10 m categorical raster cells. Primary source: ESA WorldCover 2021 v200; independent cross-check: IO LULC 2020, reported as per-group agreement. OSM water and road vectors refine artificial pools and hard surfaces. OSM geometry does not change the numeric class result.</p>
+<h2>Uncertainty</h2>
+<p>Field sigmas (DBH ±0.5 cm, height ±0.25 m) and a conservative 22% CV for the allometric model are propagated by Monte Carlo (n=1000, fixed seed); totals treat model error as correlated across records. Totals are reported with 95% confidence intervals where enabled.</p>
+<h2>Geofence and approval</h2>
+<p>Measurements require an approved park identity; the device position must fall inside the park polygon (40 m edge margin) or the server rejects the row (trigger trg_geo_fence). Every record enters the public dataset only after moderator approval.</p>
+<h2>Limitations</h2>
+<ol><li>10 m land-cover accuracy varies by class and site.</li><li>Chave (2014) is pantropical; regional bias for Turkish species is possible.</li><li>Group-level wood density is used when species density is unavailable.</li><li>Satellite-derived boundaries estimate green cover, not administrative borders.</li></ol>
+<p><a class="btn alt" href="https://github.com/snansrin/dendrogeo/blob/main/docs/methods.md">Detailed methods on GitHub</a> <a class="btn alt" href="../yontem/">Türkçe sürüm</a></p></div></main>
+<footer><div class="wrap">DendroGeo · Global Tree Inventory and Carbon Data System · <a href="../">Home</a> · <a href="../yontem/">Yöntem (TR)</a> · <a href="../gizlilik/">Privacy</a> · <a href="../kunye/">Imprint</a></div></footer>
+</body></html>

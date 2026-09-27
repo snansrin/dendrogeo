@@ -9,6 +9,26 @@ Yeni sürüm yayımlama adımları: [`docs/surum-yayini.md`](docs/surum-yayini.m
 
 ## [Yayımlanmadı]
 
+### Düzeltildi/Eklendi — kalite denetimi bulguları (2026-09-27, izinli küme)
+Denetim: 12 sayfa + 10 sekme + landing, masaüstü+mobil; konsol/ağ/taşma/font/
+buton/link/sitemap/WCAG. Fonksiyonel hata çıkmadı; aşağıdakiler denetim
+raporunun İZİNLİ iyileştirme kümesidir (P6 kullanıcı tarafından kapatıldı:
+red zaten geri alınabilir; P5 tembel modül risk nedeniyle BU TURDA YOK).
+- **P1 kontrast (WCAG AA):** `--mut` #68766e→#5f6d65 (4.41→5.03), amber METİN
+  tonu `--amber-ink:#9a4a08` (2.88→5.49); `--amber` dolgu/çizgi olarak kaldı.
+- **P3 erişilebilirlik:** "İçeriğe atla" skip-link (mutlak konum, sıfır kayma),
+  `:focus-visible` halkası, 22 form etiketi `div.lbl`→`label.lbl for=` (aynı
+  kutu: `label.lbl{display:block}` → kayma yok).
+- **P7 çit kesinliği:** Park Kimlikleri'ne 🛰 düğmesi — OSM sınırını çekip
+  `parks.geom_json`'a yazar (çit daire yedeğinden tam poligona geçer); yalnız
+  yönetici, RLS'ye tabi; CSP'ye `api.openstreetmap.org` eklendi (check-csp yakaladı).
+- **P9 uluslararası:** `/en/methods/` sayfası + `hreflang` tr/en çifti + sitemap.
+- **P2 listeden düşürüldü:** denetimdeki `width:100%` bulgusu SAHTE POZİTİFTİ
+  (`max-width:100%` eşleşmesi); butonlarda inline genişlik yok.
+KANIT: 139 öğe geometrisi (x/y/w/h) eski↔yeni karşılaştırıldı → 130 birebir
+aynı, 9 farkın tamamı yeni skip-link'in ekran dışı kutusu (akışa etkisiz).
+Kilitler: critical-fixes +4 test. 581 test yeşil · check ✅
+
 ### Düzeltildi — "bağla" UI'ları gerçekten çıktı + standart tema GERİ GELDİ (kabuk bozulmadan)
 Kullanıcı (öfkeli, haklı): "parka bağlayı kaldır dedim duruyor; standart tema
 yapmıştın geri bozmuşsun; sekme başlıkları (Waypoint/Plan) bozulmuş."
