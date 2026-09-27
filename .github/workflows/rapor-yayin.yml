@@ -1,0 +1,77 @@
+name: Rapor Yayın Kuyruğu
+
+# SİTE İÇİNDEN YAYIN (2026-09-27 · kullanıcı isteği: "raporu site üstünden
+# yayınlayacağım").
+#
+# Yönetici GitHub arayüzüne HİÇ gelmez: uygulama içinde 🔐 Ölçüm Yönetimi →
+# "📄 Bilimsel Rapor Yayını" kartından parkın 📄 Yayınla düğmesine basar.
+# İstek Supabase'deki report_requests kuyruğuna yazılır (0008_report_publish.sql).
+# Bu iş o kuyruğu 5 dakikada bir boşaltır:
+#
+#   report_requests (Beklemede)  →  scripts/publish-queue.mjs
+#                                →  scripts/make-report.mjs (publishPark)
+#                                →  rapor/DGR-YYYY-NNNN/{index.html,data.json,
+#                                    olcum.csv,park.geojson,harita.png}
+#                                →  rapor/yayin-kuyrugu.json (sonuç günlüğü)
+#                                →  commit + push → GitHub Pages
+#
+# Uygulama durumu rapor/yayin-kuyrugu.json'dan okur ve kalıcı bağlantıyı
+# kartta gösterir. Actions'ın Supabase'e YAZMA yetkisi YOKTUR (service_role
+# anahtarı depoda tutulmaz) — istek veritabanında, sonuç git'te durur.
+#
+# NOT: rapor.yml (workflow_dispatch) elle tek park yayını için duruyor; bu iş
+# kuyruğu otomatik boşaltır. İkisi de aynı üreticiyi (publishPark) çağırır,
+# yani çıktı biçimi birebir aynıdır.
+on:
+  schedule:
+    # GitHub minimumu 5 dk; yoğun saatlerde tetikleme 5-15 dk gecikebilir.
+    - cron: '*/5 * * * *'
+  workflow_dispatch: {}   # "hemen çalıştır" (sabırsız anlar için, zorunlu değil)
+
+permissions:
+  contents: write
+
+# Aynı anda TEK koşu: iki koşu aynı isteği iki ayrı DGR'ye dönüştürmesin.
+# cancel-in-progress: false → başlayan iş yarıda kesilmez (rapor yarım kalmaz).
+concurrency:
+  group: rapor-yayin-kuyrugu
+  cancel-in-progress: false
+
+jobs:
+  kuyruk:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # push öncesi rebase için tam geçmiş (repo ~14 MB, maliyet ihmal
+          # edilebilir; shallow clone rebase'de "unrelated histories" verir).
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Bekleyen yayın isteklerini işle
+        run: node scripts/publish-queue.mjs
+
+      - name: Yayınla (commit + push)
+        run: |
+          git config user.name "DendroGeo Rapor Bot"
+          git config user.email "bot@dendrogeo.local"
+          git add rapor/
+          if git diff --cached --quiet; then
+            echo "✅ Yeni yayın yok — commit atlandı."
+            exit 0
+          fi
+          git commit -m "docs(rapor): site içi yayın kuyruğu işlendi"
+          # Kullanıcı bu sırada main'e push etmiş olabilir → rebase + 3 deneme.
+          for i in 1 2 3; do
+            if git pull --rebase origin main && git push; then
+              echo "✅ Yayın push edildi (deneme $i)."
+              exit 0
+            fi
+            echo "⚠ push denemesi $i başarısız — 10 sn sonra yeniden."; sleep 10
+          done
+          echo "🔴 Rapor üretildi ama push edilemedi; sonraki koşu yeniden dener."
+          exit 1

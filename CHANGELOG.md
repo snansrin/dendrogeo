@@ -9,6 +9,41 @@ Yeni sürüm yayımlama adımları: [`docs/surum-yayini.md`](docs/surum-yayini.m
 
 ## [Yayımlanmadı]
 
+### Eklendi — Site içinden rapor yayını: 📄 Yayınla → DGR bağlantısı kartta belirir
+Kullanıcı: **"raporu site üstünden yayınlayacağım"** — GitHub Actions arayüzüne
+gitmeden, uygulama içinden. Rapor motoru (R1+R3) aynı; değişen tek şey tetik:
+elle `workflow_dispatch` yerine uygulama içi kuyruk.
+- `supabase/migrations/0008_report_publish.sql`: `report_requests` kuyruğu.
+  İsteği yalnız `is_admin()` açar (RLS + `tg_report_request_gate`, iki katman),
+  okuma anon'a açık (yayın işi buradan okur), aynı park için aynı anda TEK
+  bekleyen istek (kısmi unique index), onaylı ölçümü olmayan park için istek
+  açılamaz (`REPORT_NO_DATA`). Idempotent.
+- `src/services/report-publish.js` + 🔐 Ölçüm Yönetimi'nde yeni kart
+  **"📄 Bilimsel Rapor Yayını"**: onaylı verisi olan parklar listelenir;
+  📄 Yayınla / 📄 Yeni sürüm, ✖ Vazgeç, 🔗 Aç, 📤 Paylaş (Web Share + pano
+  yedeği), durum rozeti, yayın günlüğü ve 25 sn'de bir kendiliğinden tazeleme
+  (bekleyen istek varken, sekme görünürken). Yeni CSS yok, kart yalnız
+  `v-admin` içinde → başka sekmenin düzeni kaymaz.
+- `.github/workflows/rapor-yayin.yml`: 5 dakikada bir kuyruğu boşaltır
+  (`concurrency` kilidi, rebase + 3 denemeli push, `contents: write`).
+- `scripts/publish-queue.mjs`: bekleyen istekleri anon anahtarla OKUR,
+  `publishPark()` ile üretir, sonucu `rapor/yayin-kuyrugu.json` günlüğüne
+  yazar; işlenmiş `request_id` bir daha üretilmez.
+- `scripts/make-report.mjs`: üretim çekirdeği `publishPark()` olarak dışa
+  açıldı (CLI ve kuyruk aynı yolu kullanır); rapor sayfasına **📤 Paylaş**
+  düğmesi eklendi (kalıcı bağlantıyı paylaşır/kopyalar).
+- **Yetki modeli (bilinçli):** istek veritabanında, sonuç repoda. Actions
+  Supabase'e YAZMAZ — `service_role` anahtarı depoda/tarayıcıda tutulmaz;
+  iş salt-okunur anon anahtarla çalışır, sonucu git'e yazar (commit = denetim
+  izi + yayın kanalı). Uygulama günlüğün yazdığı URL'ye güvenmez: bağlantı
+  biçimi doğrulanmış `DGR-YYYY-NNNN` kimliğinden kurulur.
+- `supabase/README.md`: 0007 + 0008 dosya listesine ve uygulama sırasına
+  eklendi, 0008 için akış/güvenlik bölümü yazıldı · `docs/rapor-yayini.md`:
+  tek sayfalık işletim rehberi.
+- Testler: 619 → 650 (`test/report-publish.test.mjs`: şema/RLS/trigger,
+  workflow kilidi, kuyruk planı + günlük bütünlüğü, vm'de arayüz davranışı —
+  oynanmış günlük dış bağlantı sokamaz, yönetici olmayan istek açamaz).
+
 ### Düzeltildi — Rapor hattı saha geri bildirimi (Şekil 1/Şekil 2 + başlık dili + doğruluk beyanları)
 - **Şekil 2 (harita.png) park sahasını artık tam gösteriyor:** hücre GeoJSON'u
   bellek koruması gereği 10.000 hücrede kesildiği için (bu parkta 13.396 hücre)

@@ -1,0 +1,26 @@
+{
+  "schema": "dendrogeo-publish-queue/1",
+  "updated_at": "2026-09-27T19:31:23.090Z",
+  "entries": [
+    {
+      "request_id": "manuel-DGR-2026-0001",
+      "origin": "elle üretim (bu hat kurulmadan önce: scripts/make-report.mjs + git push)",
+      "park_id": 5,
+      "park_name": "Atatürk Çocukları ve Doğal Yaşam Parkı",
+      "city": "Ankara",
+      "with_lulc": true,
+      "status": "Yayınlandı",
+      "report_id": "DGR-2026-0001",
+      "version": 1,
+      "url_path": "/rapor/DGR-2026-0001/",
+      "report_hash": "sha256:12ff8e8ba1a14cbd720368b960abf7f6952fd0f41927a327256f6855e74ab106",
+      "n": 2,
+      "carbon_txt": "24.02 t [%95 GA 13.17–34.22]",
+      "lulc": "dahil (ESA WorldCover 10 m · 2021 (v200))",
+      "citation": "Şirin, N. & Şirin, S. (2026). Atatürk Çocukları ve Doğal Yaşam Parkı ağaç envanteri ve karbon stoku raporu (DGR-2026-0001, sürüm 1). DendroGeo. https://dendrogeo.org/rapor/DGR-2026-0001/",
+      "requested_at": null,
+      "started_at": "2026-09-27T19:31:23.090Z",
+      "finished_at": "2026-09-27T19:31:23.090Z"
+    }
+  ]
+}

@@ -119,6 +119,7 @@ index.html                  ÜRETİLEN ARTİFAKT — partials'tan build edilir, 
         ├── backup.js       ┘
         ├── admin.js        onay/moderasyon çekirdeği + toplu dışa aktarım
         ├── admin-tree.js   ★ park→proje→kullanıcı ağacı + hata görünürlüğü
+        ├── report-publish.js ★ site içinden bilimsel rapor yayını (0008 kuyruğu)
         ├── export.js       CSV / QGIS / GeoJSON
         ├── allometry.js    Chave 2014 biyokütle/karbon
         └── auth.js         giriş/kayıt + Cloudflare Turnstile
@@ -143,6 +144,10 @@ bir gidiş-dönüş ≈ 300 ms). Yapılanlar:
 | Render'ı bloklayan font CSS | var | **yok** (`media="print"` + `onload`) |
 | `preconnect`/`dns-prefetch` | 1 | **8** |
 | LULC zinciri (8 modül) | her ziyarette | **tembel** (`dgEnsureLulc`) |
+
+> 2026-09-27 notu: site içinden rapor yayını modülü (`src/services/report-publish.js`,
+> 16 KB, `defer`) ile ilk yükleme isteği 42 → **43** oldu. Modül yalnız yönetici
+> sekmesinde çalışır; yükleme anında ağ isteği yapmaz (kart `loadAdmin()` ile açılır).
 
 `defer` belge sırasını koruduğu için modül yükleme sırası (ve `boot()`'un en
 sonda çalışması) değişmez. LULC zinciri `DG_LULC_CHAIN` sırasıyla, `async=false`
@@ -224,6 +229,17 @@ GitHub Actions her push ve PR'da altı adım çalıştırır: sözdizimi (taray�
 semantiğiyle), `?v=` tutarlılığı, **derleme tutarlılığı (index.html ==
 partials)**, CSP↔kod tutarlılığı, birim testler ve (yalnız `main`'e push'ta)
 **canlı site ↔ depo sürüklenme denetimi** (dosya listesi index.html'den türetilir).
+
+Rapor yayınını iki ayrı iş akışı taşır: **`rapor-yayin.yml`** (5 dakikada bir)
+site içinden gelen yayın isteklerini işler — yönetici GitHub arayüzüne gitmez,
+🔐 Ölçüm Yönetimi → **📄 Bilimsel Rapor Yayını** kartında 📄 Yayınla der; istek
+Supabase'deki `report_requests` kuyruğuna yazılır (0008), rapor
+`rapor/DGR-YYYY-NNNN/` altına commit'lenir ve kalıcı bağlantı aynı kartta
+belirir. İş Supabase'e **yazmaz**: anon anahtarla salt okur, sonucu
+`rapor/yayin-kuyrugu.json` + git taşır (`service_role` anahtarı depoda
+tutulmaz). **`rapor.yml`** (workflow_dispatch) elle tek park yayını için yedek
+yoldur; ikisi de aynı üreticiyi (`publishPark()`) çağırır. Ayrıntı:
+[`docs/rapor-yayini.md`](docs/rapor-yayini.md).
 
 ---
 

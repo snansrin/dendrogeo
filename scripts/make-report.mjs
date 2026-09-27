@@ -33,6 +33,8 @@ import { PngCanvas, hex2rgb } from './lib/png.mjs';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const read = (p) => readFileSync(join(ROOT, p), 'utf8');
+/* Yayın kökü: CNAME'den türetilir (elle yazılmış sabit URL sürüklenmesin). */
+const SITE_ORIGIN = (() => { try { const c = read('CNAME').trim(); return c ? 'https://' + c : 'https://dendrogeo.org'; } catch (e) { return 'https://dendrogeo.org'; } })();
 const arg = (a) => { const i = process.argv.indexOf('--' + a); return i >= 0 ? process.argv[i + 1] : null; };
 const has = (a) => process.argv.includes('--' + a);
 
@@ -482,6 +484,7 @@ ${lulcSec}
  <a class="btn g" href="data.json">🧾 Snapshot (JSON)</a>
  ${snap.lulc && !snap.lulc.error ? '<a class="btn g" href="harita.png">🛰 Arazi örtüsü haritası (PNG)</a>' : ''}
  <button class="btn" onclick="window.print()">🖨 Yazdır / PDF</button>
+ <button class="btn" id="dgShareBtn" onclick="dgShareReport()">📤 Paylaş</button>
  <a class="btn g" href="../../">🌐 DendroGeo uygulaması</a>
 </div>
 <p class="sans" style="font-size:.8rem;color:var(--mut)">Ham veriler CC BY-NC 4.0 lisansı ile açıktır; yeniden kullanımda §7 künyesine atıf zorunludur.</p>
@@ -513,6 +516,27 @@ const DG_DATA=${JSON.stringify(snap)};
       :"⚠ UYARI: sayfa verisi yayın hash değeri ile eşleşmiyor; bu kopya değiştirilmiş olabilir.";
   }catch(e){document.getElementById('dgVerify').textContent='⚠ Hash doğrulanamadı: '+e.message;}
 })();
+/* PAYLAŞ (2026-09-27 · kullanıcı isteği: rapor site içinden paylaşılacak):
+ * Web Share API varsa yerel paylaşım sayfası açılır (mobil/masaüstü); yoksa
+ * kalıcı bağlantı panoya kopyalanır. Bağlantı = sayfanın kendi URL'si, yani
+ * DGR kimliği + sürüm + içerik hash'i ile dondurulmuş kopya paylaşılır. */
+async function dgShareReport(){
+  const btn=document.getElementById('dgShareBtn');
+  const url=location.href.split('#')[0];
+  const title=document.title;
+  const sub=document.querySelector('.sub');
+  const text=title+(sub?('. '+sub.textContent):'');
+  const flash=(m)=>{if(!btn)return;const eski=btn.textContent;btn.textContent=m;setTimeout(()=>{btn.textContent=eski;},2400);};
+  try{
+    if(navigator.share){await navigator.share({title:title,text:text,url:url});return;}
+  }catch(e){/* iptal edildi veya API yok → pano yedeği */}
+  try{
+    await navigator.clipboard.writeText(url);
+    flash('✅ Bağlantı kopyalandı');
+  }catch(e){
+    window.prompt('Bağlantıyı kopyalayın (Ctrl+C):',url);
+  }
+}
 </script>
 </body>
 </html>`;
@@ -545,18 +569,23 @@ function renderIndex(list) {
 </div></main><footer><div class="wrap">DendroGeo · CC BY-NC 4.0</div></footer></body></html>`;
 }
 
-/* ---------- CLI ---------- */
-export async function main() {
-  const parkId = arg('park');
-  if (!parkId) { console.error('Kullanım: node scripts/make-report.mjs --park <id> [--skip-lulc]'); process.exit(2); }
-  const { snap, hash, png } = await buildSnapshot(+parkId, { skipLulc: has('skip-lulc') });
+/* ---------- YAYINLAMA ÇEKİRDEĞİ ----------
+ * publishPark() TEK üretim yoludur; iki yerden çağrılır:
+ *   · CLI  (node scripts/make-report.mjs --park N) → rapor.yml, elle yayın
+ *   · KUYRUK (scripts/publish-queue.mjs)           → rapor-yayin.yml, yani
+ *     uygulama içinden basılan "📄 Yayınla" düğmesi (0008_report_publish.sql)
+ * Dönüş değeri yayın kimliğini taşır; kuyruk günlüğü (rapor/yayin-kuyrugu.json)
+ * bu nesneden yazılır ve uygulamadaki "📄 Bilimsel Rapor Yayını" kartı kalıcı
+ * bağlantıyı oradan okur. */
+export async function publishPark(parkId, opts = {}) {
+  const { snap, hash, png } = await buildSnapshot(+parkId, { skipLulc: !!opts.skipLulc });
   const year = new Date().getFullYear();
   const dir = join(ROOT, 'rapor');
   mkdirSync(dir, { recursive: true });
   const existing = readdirSync(dir).filter((d) => d.startsWith('DGR-' + year + '-')).sort();
   const seq = String(existing.length + 1).padStart(4, '0');
   const version = 1;
-  const id = existing.length ? existing[existing.length - 1].replace(/-s\d+$/, '') === `DGR-${year}-${seq}` ? `DGR-${year}-${seq}` : `DGR-${year}-${seq}` : `DGR-${year}-${seq}`;
+  const id = `DGR-${year}-${seq}`;
   const out = join(dir, id);
   mkdirSync(out, { recursive: true });
   if (png) writeFileSync(join(out, 'harita.png'), png);
@@ -572,11 +601,30 @@ export async function main() {
     } catch (e) { return null; }
   }).filter(Boolean);
   writeFileSync(join(dir, 'index.html'), renderIndex(list));
-  console.log(`✅ Rapor yayınlandı: rapor/${id}/`);
-  console.log(`   park   : ${snap.park.name} (${snap.park.city}) · n=${snap.totals.n}`);
-  console.log(`   karbon : ${fmtT(snap.totals.ci.mean)} t [%95 GA ${fmtT(snap.totals.ci.lo)}–${fmtT(snap.totals.ci.hi)}]`);
-  console.log(`   hash   : sha256:${hash}`);
-  console.log(`   LULC   : ${snap.lulc ? (snap.lulc.error ? 'hata: ' + snap.lulc.error : 'dahil (' + snap.lulc.source + ')') : 'atlandı'}`);
-  console.log(`   atıf   : Şirin & Şirin (${snap.generated_at.slice(0, 4)}). ${snap.park.name} … (${id}, sürüm ${version}). https://dendrogeo.org/rapor/${id}/`);
+  const url = SITE_ORIGIN + '/rapor/' + id + '/';
+  return {
+    id, version, url, path: 'rapor/' + id + '/', hash,
+    park_id: snap.park.id, park_name: snap.park.name, city: snap.park.city,
+    n: snap.totals.n, carbon_kg: snap.totals.carbon_kg, per_ha_kg: snap.totals.per_ha_kg,
+    ci: snap.totals.ci,
+    carbon_txt: `${fmtT(snap.totals.ci.mean)} t [%95 GA ${fmtT(snap.totals.ci.lo)}–${fmtT(snap.totals.ci.hi)}]`,
+    lulc: snap.lulc ? (snap.lulc.error ? 'hata: ' + snap.lulc.error : 'dahil (' + snap.lulc.source + ')') : 'atlandı',
+    generated_at: snap.generated_at,
+    citation: `Şirin, N. & Şirin, S. (${snap.generated_at.slice(0, 4)}). ${snap.park.name} ağaç envanteri ve karbon stoku raporu (${id}, sürüm ${version}). DendroGeo. ${url}`,
+  };
+}
+
+/* ---------- CLI ---------- */
+export async function main() {
+  const parkId = arg('park');
+  if (!parkId) { console.error('Kullanım: node scripts/make-report.mjs --park <id> [--skip-lulc]'); process.exit(2); }
+  const r = await publishPark(parkId, { skipLulc: has('skip-lulc') });
+  console.log(`✅ Rapor yayınlandı: ${r.path}`);
+  console.log(`   park   : ${r.park_name} (${r.city}) · n=${r.n}`);
+  console.log(`   karbon : ${r.carbon_txt}`);
+  console.log(`   hash   : sha256:${r.hash}`);
+  console.log(`   LULC   : ${r.lulc}`);
+  console.log(`   bağlantı: ${r.url}`);
+  console.log(`   atıf   : ${r.citation}`);
 }
 if (process.argv[1] === fileURLToPath(import.meta.url)) main().catch((e) => { console.error('❌', e.message); process.exit(1); });

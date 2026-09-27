@@ -13,6 +13,8 @@ Supabase kontrol panelinde yaşıyordu; artık her değişiklik version control'
 | `migrations/0006_park_admin_only.sql` | **Park bağı yalnız yöneticide**: `trg_enforce_park_admin` → mevcut projenin `park_id`'sini yalnız `is_admin()` değiştirebilir (`PARK_ADMIN_ONLY`, `DG0PA`). INSERT serbest (yeni proje açma saha akışı). Idempotent. |
 | `migrations/0005_park_name_case.sql` | **Park adı yazım düzeni**: `dg_tr_title()` (Türkçe duyarlı: i→İ, ı→I) + yalnız tamamen küçük harfli adları düzelten tetikleyici + mevcut park/proje adlarının onarımı. Idempotent. |
 | `migrations/0004_parks.sql` | **Park kimliği**: `parks` tablosu (OSM elemanı = canonical anahtar), `projects.park_id/label/park_name`, `measurements.park_id`, `v_park_compare` view'ı, iki trigger (proje adı kurma + ölçüm kapısı). Idempotent. |
+| `migrations/0007_geo_fence.sql` | **Konum çiti**: `parks.geom_json`, `measurements.geo_verified_at/geo_dist_m/geo_acc_m/geo_override_by`, `dg_hav_m()` + `dg_point_in_park()` (ray-casting), `trg_geo_fence` (ölçüm parkın dışında ise INSERT/UPDATE reddi), `trg_project_requires_park`. Idempotent. |
+| `migrations/0008_report_publish.sql` | **Site içinden rapor yayını**: `report_requests` kuyruğu (isteği yalnız `is_admin()` açar, okuma anon'a açık — Actions işi buradan okur), aynı park için tek bekleyen istek (kısmi unique index), `tg_report_request_gate` (yetki + onaylı veri şartı; `REPORT_ADMIN_ONLY`/`REPORT_NO_DATA`). Idempotent. |
 | `dump-schema.sh` | Canlı şemayı `supabase db dump` ile yeniden dökmek için yardımcı |
 | `audit/rls-probe.sh` | Anon key ile 13 saldırı denemesi (yetki yükseltme dahil) |
 | `audit/RLS-DENETIM.md` | Denetim listesi + sonuç tablosu (doldurulacak) |
@@ -27,7 +29,9 @@ Supabase SQL Editor'da sırayla:
 4. `0004_parks.sql` → Run (park kimliği + ölçüm kapısı + karşılaştırma view'ı)
 5. `0005_park_name_case.sql` → Run (park adı yazım düzeni: "göksu parkı" → "Göksu Parkı")
 6. `0006_park_admin_only.sql` → Run (park bağını yalnız yönetici değiştirsin)
-7. (Önerilir) `audit/rls-probe.sh`'i kendi makinenden çalıştır → sonuçları
+7. `0007_geo_fence.sql` → Run (konum çiti: ölçüm park poligonu dışında ise sunucu reddeder)
+8. `0008_report_publish.sql` → Run (site içinden rapor yayını kuyruğu)
+9. (Önerilir) `audit/rls-probe.sh`'i kendi makinenden çalıştır → sonuçları
    `audit/RLS-DENETIM.md` tablosuna işle
 
 > ⚠️ **Sıra önemli:** `0004` uygulanmadan site çökmez ama park kimliği devre
@@ -77,6 +81,41 @@ tarafında hiçbir şeyi kırmaz.
 * Yeni şema değişikliği = yeni numaralı dosya; mevcut dosya düzenlenmez.
 * Her migration idempotent yazılır (`if not exists` / `drop policy if exists`).
 * Policy değişikliği sonrası `audit/rls-probe.sh` çalıştırılır.
+
+## 0008 — site içinden bilimsel rapor yayını (2026-09-27)
+
+Kullanıcı isteği: **"raporu site üstünden yayınlayacağım"** — GitHub Actions
+arayüzüne gitmeden, uygulama içinden tek düğmeyle DGR kimlikli rapor yayını.
+
+| Katman | Ne yapar |
+|---|---|
+| `report_requests` (bu dosya) | İSTEK: park kimliği, LULC tercihi, durumu (Beklemede/Vazgeçildi), kim-ne zaman |
+| `src/services/report-publish.js` | 🔐 Ölçüm Yönetimi → "📄 Bilimsel Rapor Yayını" kartı: 📄 Yayınla / ✖ Vazgeç / 🔗 Aç / 📤 Paylaş + 25 sn'de bir kendiliğinden tazeleme |
+| `.github/workflows/rapor-yayin.yml` | 5 dakikada bir kuyruğu okur → `scripts/publish-queue.mjs` |
+| `scripts/publish-queue.mjs` → `make-report.mjs` | Raporu üretir, `rapor/DGR-YYYY-NNNN/` + `rapor/index.html` + `rapor/yayin-kuyrugu.json` yazar, commit/push |
+| `rapor/yayin-kuyrugu.json` | SONUÇ: hangi istek → hangi DGR, hash, başarı/hata nedeni (Pages üzerinden herkese açık) |
+
+**İstek veritabanında, sonuç repoda.** Actions'ın Supabase'e YAZMASI
+`service_role` anahtarı gerektirir; o anahtar ne depoda ne tarayıcıda tutulur
+(depoya giren süper anahtar = tüm RLS'in anlamsızlaşması). İş bu yüzden
+salt-okunur **anon** anahtarla çalışır ve sonucu git'e yazar — git commit'i hem
+denetim izi hem yayın kanalıdır. İki tarafı birleştiren anahtar
+`report_requests.id`'dir.
+
+Güvenlik notları:
+* `select using (true)`: Actions anon anahtarla okuyabilmeli. Satırlarda kişisel
+  veri yok (park kimliği + profil UUID'si + zaman damgası).
+* `insert/update/delete` yalnız `is_admin()`; ayrıca `tg_report_request_gate`
+  RLS atlatılsa bile yönetici olmayan isteği ve onaylı ölçümü olmayan parkı
+  reddeder.
+* Kısmi unique index: aynı park için aynı anda TEK bekleyen istek (çift tıklama
+  iki rapor üretmez).
+* Uygulama, günlüğün yazdığı bağlantıyı kullanmaz; bağlantı biçimi
+  doğrulanmış rapor kimliğinden (`DGR-YYYY-NNNN`) kurulur
+  (`test/report-publish.test.mjs` bunu kilitler).
+
+> 0008 uygulanmazsa site çökmez: kart "0008_report_publish.sql çalıştırılmalı"
+> uyarısını gösterir, diğer sekmeler etkilenmez.
 
 ## 0004 — park kimliği modeli (2026-09-24)
 

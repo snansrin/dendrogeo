@@ -286,6 +286,24 @@
     <button class="btn sm blue" style="margin-bottom:10px" onclick="loadParkAdmin()">🔄 Parkları Yükle</button>
     <div id="parkAdminBox"></div>
    </div>
+   <!-- BİLİMSEL RAPOR YAYINI (2026-09-27 · kullanıcı isteği: "raporu site
+        üstünden yayınlayacağım"): GitHub Actions arayüzüne gitmeden yayın.
+        📄 Yayınla → report_requests (0008_report_publish.sql) → rapor-yayin.yml
+        (5 dk'da bir) → scripts/publish-queue.mjs → make-report.mjs →
+        rapor/DGR-…/ + rapor/yayin-kuyrugu.json → kalıcı bağlantı bu kartta.
+        Sonuç günlüğü REPO'dan okunur: Actions'ın Supabase'e yazma yetkisi yok
+        (service_role anahtarı depoda/tarayıcıda tutulmaz).
+        Modül: src/services/report-publish.js · yeni CSS yok, kart yalnız v-admin'de. -->
+   <div class="card" style="margin-bottom:18px;border-left:4px solid var(--green)">
+    <div class="shead" style="margin-bottom:12px"><span class="no">📄</span><h2 style="font-size:1.2rem">Bilimsel Rapor Yayını</h2><span class="rule"></span><span class="mono" style="font-size:.75rem;color:var(--mut)">site içinden · DGR kimlikli · değişmez</span></div>
+    <p style="color:var(--mut);font-size:.8rem;margin-bottom:10px">Park için tez biçiminde rapor <b>site içinden</b> yayınlanır: 📄 Yayınla → istek kuyruğa yazılır → yayın işi birkaç dakika içinde raporu üretir → kalıcı bağlantı, 🔗 Aç ve 📤 Paylaş burada belirir.</p>
+    <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:10px">
+     <button class="btn sm blue" onclick="dgLoadPublishQueue()">🔄 Yenile</button>
+     <label style="font-size:.78rem;color:var(--mut);display:inline-flex;gap:6px;align-items:center"><input type="checkbox" id="dgPubLulc" checked> 🛰 Arazi örtüsü bölümü (§4) dahil — önerilir</label>
+     <span class="dg-tree-meta" id="dgPubClock">—</span>
+    </div>
+    <div id="dgPubBox"><div class="dg-tree-meta">⏳ Kuyruk yükleniyor…</div></div>
+   </div>
    <div class="card" style="margin-bottom:18px;border-left:4px solid var(--amber)">
     <div class="shead" style="margin-bottom:12px"><span class="no">📦</span><h2 style="font-size:1.2rem">Toplu Dışa Aktarım (Tüm Kullanıcılar)</h2></div>
     <p style="color:var(--mut);font-size:.82rem;margin-bottom:10px">Kullanıcı ayrımı yapılmadan sistemdeki <b>tüm veri</b>, seçtiğiniz filtrelere göre dışa aktarılır.</p>

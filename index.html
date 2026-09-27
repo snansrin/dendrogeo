@@ -243,11 +243,15 @@
 <script src="src/services/data-requests.js?v=ca6f827b" defer></script>
 <script src="src/services/user-admin.js?v=f80309ef" defer></script>
 <script src="src/services/backup.js?v=6682edc0" defer></script>
-<script src="src/services/admin.js?v=4b498be2" defer></script>
+<script src="src/services/admin.js?v=c3063b0f" defer></script>
 <!-- YÖNETİM AĞACI (2026-09-24): park → proje → kullanıcı → ölçüm kademeli
      görünümü + sorgu hatası görünürlüğü. admin.js'ten SONRA yüklenir
      (approve/reject/del fonksiyonlarını çağırır). -->
 <script src="src/services/admin-tree.js?v=5ef73c1b" defer></script>
+<!-- BİLİMSEL RAPOR YAYINI (2026-09-27): site içinden yayın kuyruğu —
+     📄 Yayınla → report_requests (0008) → rapor-yayin.yml → rapor/DGR-…/
+     → kalıcı bağlantı + 📤 Paylaş. admin.js loadAdmin() bu modülü çağırır. -->
+<script src="src/services/report-publish.js?v=fc7b0c6a" defer></script>
 <script src="src/services/world.js?v=918cd92f" defer></script>
 <script src="src/services/measure.js?v=1cf8867b" defer></script>
 <script src="src/services/map.js?v=b3b6192d" defer></script>
@@ -896,6 +900,24 @@
     <p style="color:var(--mut);font-size:.8rem;margin-bottom:10px">Aynı park iki kimlikle kayıtlıysa karşılaştırma <b>bölünür</b> — 🔀 ile birleştir. OSM'de adı olmayan park "İsimsiz Park" gelir, ✏️ ile ad ver (proje adları otomatik yeniden kurulur).</p>
     <button class="btn sm blue" style="margin-bottom:10px" onclick="loadParkAdmin()">🔄 Parkları Yükle</button>
     <div id="parkAdminBox"></div>
+   </div>
+   <!-- BİLİMSEL RAPOR YAYINI (2026-09-27 · kullanıcı isteği: "raporu site
+        üstünden yayınlayacağım"): GitHub Actions arayüzüne gitmeden yayın.
+        📄 Yayınla → report_requests (0008_report_publish.sql) → rapor-yayin.yml
+        (5 dk'da bir) → scripts/publish-queue.mjs → make-report.mjs →
+        rapor/DGR-…/ + rapor/yayin-kuyrugu.json → kalıcı bağlantı bu kartta.
+        Sonuç günlüğü REPO'dan okunur: Actions'ın Supabase'e yazma yetkisi yok
+        (service_role anahtarı depoda/tarayıcıda tutulmaz).
+        Modül: src/services/report-publish.js · yeni CSS yok, kart yalnız v-admin'de. -->
+   <div class="card" style="margin-bottom:18px;border-left:4px solid var(--green)">
+    <div class="shead" style="margin-bottom:12px"><span class="no">📄</span><h2 style="font-size:1.2rem">Bilimsel Rapor Yayını</h2><span class="rule"></span><span class="mono" style="font-size:.75rem;color:var(--mut)">site içinden · DGR kimlikli · değişmez</span></div>
+    <p style="color:var(--mut);font-size:.8rem;margin-bottom:10px">Park için tez biçiminde rapor <b>site içinden</b> yayınlanır: 📄 Yayınla → istek kuyruğa yazılır → yayın işi birkaç dakika içinde raporu üretir → kalıcı bağlantı, 🔗 Aç ve 📤 Paylaş burada belirir.</p>
+    <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:10px">
+     <button class="btn sm blue" onclick="dgLoadPublishQueue()">🔄 Yenile</button>
+     <label style="font-size:.78rem;color:var(--mut);display:inline-flex;gap:6px;align-items:center"><input type="checkbox" id="dgPubLulc" checked> 🛰 Arazi örtüsü bölümü (§4) dahil — önerilir</label>
+     <span class="dg-tree-meta" id="dgPubClock">—</span>
+    </div>
+    <div id="dgPubBox"><div class="dg-tree-meta">⏳ Kuyruk yükleniyor…</div></div>
    </div>
    <div class="card" style="margin-bottom:18px;border-left:4px solid var(--amber)">
     <div class="shead" style="margin-bottom:12px"><span class="no">📦</span><h2 style="font-size:1.2rem">Toplu Dışa Aktarım (Tüm Kullanıcılar)</h2></div>

@@ -49,6 +49,10 @@ $("aUsers").textContent=users.length;$("aRec").textContent=cnt.count??meas.lengt
  /* Park kimlikleri (park-registry.js): çift kimlik/adı olmayan park uyarıları
   * burada görünür; birleştir/yeniden adlandır/sil araçları aynı kartta. */
  if(typeof loadParkAdmin==="function")loadParkAdmin();
+ /* Bilimsel rapor yayın kuyruğu (report-publish.js, 0008): yönetici sekmesi
+  * her açıldığında istekler + yayın günlüğü tazelenir; bekleyen istek varken
+  * modül kendi 25 sn'lik yoklamasını kurar. */
+ if(typeof dgLoadPublishQueue==="function")dgLoadPublishQueue();
 }
 
 async function approveMeas(id){
