@@ -29,17 +29,22 @@ const app = loadApp(['src/config/species.js', 'src/services/allometry.js']);
 describe('0011 · loadRho — tür ρ tablosu gerçekten okunuyor', () => {
   test('regex hatası gerilemesi: harita BOŞ değil (eski sürüm 0 tür okuyordu)', () => {
     const { rho } = loadRho();
-    assert.ok(Object.keys(rho).length >= 15, 'rho anahtarı: ' + Object.keys(rho).length);
+    assert.ok(Object.keys(rho).length >= 20, 'rho anahtarı: ' + Object.keys(rho).length);
   });
-  test('sözlük değerleri panel ile aynı (0011b: liste eski halinde)', () => {
+  test('sözlük değerleri panel ile aynı (0011e: 5 tür kaynaklı ρ ile listede)', () => {
     const { rho, grho } = loadRho();
     assert.equal(rho['KARAÇAM'], 470);
     assert.equal(rho['SIĞLA'], 468);
     assert.equal(rho['KIZILÇAM'], 478);
-    // 0011b (kullanıcı isteği): Göksu'nun 5 türü panel listesinden çıkarıldı
-    // → rho haritasında YOKLAR; çözümleyici (resolve) tanımaya devam eder.
-    for (const n of ['SALKIM SÖĞÜT', 'MAVİ LADİN', 'DOĞU ÇINARI', 'ATLAS SEDİRİ', 'CEVİZ'])
-      assert.equal(rho[n], undefined, n + ' panel rho haritasında olmamalı');
+    // 0011e (kullanıcı kararı): Göksu'nun 5 türü panel listesinde ve
+    // ρ'ları 0011'in çalıştırılmış SQL'iyle birebir (Zanne 2009 / Wood DB).
+    assert.equal(rho['SALKIM SÖĞÜT'], 400);
+    assert.equal(rho['MAVİ LADİN'], 450);
+    assert.equal(rho['DOĞU ÇINARI'], 600);
+    assert.equal(rho['ATLAS SEDİRİ'], 490);
+    assert.equal(rho['CEVİZ'], 560);
+    // AĞLAYAN SÖĞÜT panelde yok (kullanıcı isteği) — çözümleyicide var
+    assert.equal(rho['AĞLAYAN SÖĞÜT'], undefined);
     assert.deepEqual({ ...grho }, { 'İBRELİ': 446, 'YAPRAKLI': 541, 'DİĞER': 493 });
   });
   test('rapor motoru panel denklemiyle birebir (KARAÇAM 107 cm / 12 m → 1972,8 kg)', () => {
@@ -76,6 +81,7 @@ describe('0011 · resolveSpeciesName — kanonik tür sözlüğü', () => {
     assert.equal(d.byName['SALKIM SÖĞÜT'].lat, 'Salix babylonica');
     assert.equal(d.byName['CEVİZ'].lat, 'Juglans regia');
     assert.equal(d.byName['MAVİ LADİN'].lat, 'Picea pungens');
+    assert.equal(d.byName['AĞLAYAN SÖĞÜT'].panel, false, 'gizli kayıt panel bayrağı');
   });
 });
 

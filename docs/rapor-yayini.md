@@ -169,6 +169,22 @@ sonuç her zaman günlüktedir.
 > devre dışı bırakır ve e-posta gönderir. Gelirse: Actions → "Rapor Yayın
 > Kuyruğu" → Enable workflow.
 
+## 5b) Yazar, QR ve arşiv boyutu (0012)
+
+- **Yazar**: rapor, yayını İSTEYEN kullanıcının adıyla yayımlanır
+  (`v_report_authors` → `profiles.full_name`). Kurucular (Nagihan Şirin,
+  Sinan Şirin) künyede "Site kurucuları" satırında ve metadata'da
+  `contributors` olarak beyan edilir; `creators` YALNIZ istek sahibidir.
+  Ad çözülemezse (0012 SQL'i çalıştırılmamış / profil boş) yazar
+  "DendroGeo (kurumsal)" olur — isim uydurulmaz. Kurulum: SQL Editor →
+  `0012_report_author.sql` → Run.
+- **QR**: künyedeki QR, raporun kalıcı adresini taşır (`data:` URI ile
+  gömülü SVG → dış istek yok; basılı PDF'te de çalışır).
+- **Arşiv boyutu**: `data.json`/`metadata.json` sıkıştırılmış (minified)
+  yazılır; her yayının bayt büyüklüğü `rapor/yayin-kuyrugu.json` içinde
+  `archive_bytes` alanıyla izlenir. Yayımlanmış raporlar DEĞİŞMEZ
+  (dondurma ilkesi) — sıkıştırma yeni yayınlar için geçerlidir.
+
 ## 6) Envanter kalite kapıları (QA v2.1 · 0011)
 
 Rapor motoru yayından ÖNCE kayıtları da denetler (§7 Çizelge 4):

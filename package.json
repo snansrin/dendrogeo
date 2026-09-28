@@ -17,5 +17,8 @@
     "node": ">=20"
   },
   "license": "CC-BY-NC-4.0",
-  "author": "Nagihan ŞİRİN & Sinan ŞİRİN"
+  "author": "Nagihan ŞİRİN & Sinan ŞİRİN",
+  "devDependencies": {
+    "qrcode": "^1.5.4"
+  }
 }

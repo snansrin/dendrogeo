@@ -20,6 +20,29 @@ birlikte doğrulanır, liste sayfası geri çekilen kimliği GÖSTEREMEZ.
 Not: bot yayınında CI test işi koşmadığı için bu kusurlar canlıda ancak
 şimdi görünür oldu — `npm test` artık canlı main durumuyla da yeşil (774).
 
+### Eklendi — 0012: yazar = kullanıcı, QR, sıkı arşiv, 5 tür listede (2026-09-28)
+Kullanıcı standardı: "yazar adı kullanıcının adı olsun; Şirin'ler site
+kurucusu; DGR kimliği ve DOI'ye bağlanabilir altyapı korunsun; arşiv yer
+kaplamasın."
+- **Tür listesi (0011e)**: SALKIM SÖĞÜT, MAVİ LADİN, DOĞU ÇINARI, ATLAS
+  SEDİRİ, CEVİZ kaynaklı ρ'larıyla (Zanne 2009 / Wood Database) seçim
+  listesine GERİ kondu (kullanıcı onayı); AĞLAYAN SÖĞÜT listede YOK — yalnız
+  eşanlamlı çözümlemede tanınıyor. Formül/katsayılar değişmedi (Chave 2014).
+- **Yazar = yayını isteyen kullanıcı**: `0012_report_author.sql` →
+  `v_report_authors` (full_name+organization; e-posta YOK; anon'a açık).
+  Rapor künyesi, önerilen atıf, BibTeX (`author` + `contributor`), JSON-LD
+  (`author` + `contributor`) ve metadata.json (`creators` + `contributors` +
+  `creatorsNote`) buradan beslenir. Ad çözülemezse kurumsal yazar — İSİM
+  UYDURULMAZ. Kurucular her raporda "Site kurucuları" olarak beyan edilir.
+- **QR (standart md. 15)**: kalıcı rapor adresinin QR'ı künyede — build
+  sırasında `qrcode` (MIT, devDependency) ile SVG üretilir, `data:` URI
+  olarak gömülür → sayfada dış istek YOK, PDF/çevrimdışı çalışır.
+- **Sıkı arşiv**: `data.json` + `metadata.json` artık minified (arşiv ~%40
+  küçük); `publish-queue` her yayının `archive_bytes` değerini günlüğe yazar.
+  Yayımlanmış (donmuş) raporlar DEĞİŞMEZ.
+- Testler: `test/report-author-qr.test.mjs` (yazar/QR/atıf/metadata
+  sözleşmeleri); CANARY 50/28.
+
 ### Değişti — 0011b: panel tür listesi eski halinde (kullanıcı isteği) (2026-09-28)
 - `src/config/species.js`: SPECIES_DATA, 0011 ÖNCESİ 45 kaydın BİREBİR
   aynısına geri döndürüldü (seçim kutusu, ρ ve LATIN haritaları, panel

@@ -109,33 +109,39 @@ describe('rho fallback zinciri — tür → grup → DİĞER', () => {
     assert.ok(Math.abs(r.agb - agb(493, 30, 20)) < 1e-6);
   });
 
-  test('CANARY: 45 tür kaydının 28 kadarında rho yok — veri kalitesi borcu', () => {
+  test('CANARY: 50 tür kaydının 28 kadarında rho yok — veri kalitesi borcu', () => {
     // Bu test bilinçli olarak MEVCUT DURUMU belgeler. rho tablosu
     // dolduruldukça `bos` sayısı düşmeli; o zaman bu test güncellenir.
-    // Bir gerileme değil, ilerleme işaretidir.
-    // 0011b (2026-09-28 · KULLANICI İSTEĞİ): panel seçim listesi cf1b862
-    // öncesindeki 45 kayda GERİ DÖNDÜRÜLDÜ — Göksu'nun 5 türü artık yalnız
-    // çözümleyicide (RESOLVE_ONLY_SPECIES), seçim kutusunda değil.
+    // 0011e (2026-09-28 · kullanıcı kararı): Göksu'nun 5 türü kaynaklı
+    // ρ'larıyla LİSTEDE (SALKIM SÖĞÜT, MAVİ LADİN, DOĞU ÇINARI, ATLAS
+    // SEDİRİ, CEVİZ); AĞLAYAN SÖĞÜT listede YOK (yalnız çözümleyicide).
+    // Orijinal 45 kaydın ρ değerleri (null'lar dahil) birebir korunur →
+    // bos sayısı 28'de kalır: 23 orijinal + 5 yeni türün 5'i de ρ'lu... 
+    // (yeni 5 tür ρ'lu olduğu için bos = 28 - 0 = 28; liste 45+5=50).
     const hepsi = Object.values(app.SPECIES_DATA).flat();
     const bos = hepsi.filter((s) => !s.rho).length;
-    assert.equal(hepsi.length, 45, 'tür kaydı sayısı değişti — kullanıcı isteği: liste sabit');
+    assert.equal(hepsi.length, 50, 'tür kaydı sayısı değişti');
     assert.equal(bos, 28, 'rho eksik tür sayısı ' + bos + ' oldu — tabloyu doldurduysanız bu testi güncelleyin');
   });
 
-  test('0011b: Göksu türleri panel listesinde YOK ama çözümleyicide tanınıyor', () => {
-    // Kullanıcı isteği (2026-09-28): seçim listesi eski halinde kalır.
-    for (const n of ['SALKIM SÖĞÜT', 'MAVİ LADİN', 'DOĞU ÇINARI', 'ATLAS SEDİRİ', 'CEVİZ']) {
-      assert.equal(app.rho[n], undefined, n + ' panel rho haritasına girmemeli');
-      assert.equal(app.LATIN[n], undefined, n + ' panel LATIN haritasına girmemeli');
-    }
-    // ...ama veritabanındaki 34 kayıt bu adları taşıyor → çözümleyici tanır
-    const rs = app.resolveSpeciesName;
-    assert.equal(typeof rs, 'function', 'resolveSpeciesName global olmalı');
-    for (const n of ['SALKIM SÖĞÜT', 'MAVİ LADİN', 'DOĞU ÇINARI', 'ATLAS SEDİRİ', 'CEVİZ'])
-      assert.equal(rs(n), n, n + ' çözülmeli');
-    // Panel hesabı bu türler için ESKİ davranışta: grup varsayılanı (541)
+  test('0011e: Göksu 5 türü kaynaklı ρ ile panel listesinde; AĞLAYAN SÖĞÜT gizli', () => {
+    // Kullanıcı kararı (2026-09-28): 5 gerçek tür listede KALIR, ρ'lar
+    // kaynaklardan (Zanne 2009 [Z09] / Wood Database [WD]); uydurma yok.
+    assert.equal(app.rho['SALKIM SÖĞÜT'], 400);   // Salix babylonica [Z09]
+    assert.equal(app.rho['MAVİ LADİN'], 450);     // Picea pungens [WD]
+    assert.equal(app.rho['DOĞU ÇINARI'], 600);    // Platanus orientalis [Z09]
+    assert.equal(app.rho['ATLAS SEDİRİ'], 490);   // Cedrus atlantica [WD]
+    assert.equal(app.rho['CEVİZ'], 560);          // Juglans regia [Z09]/[WD]
+    assert.equal(app.LATIN['SALKIM SÖĞÜT'], 'Salix babylonica');
+    assert.equal(app.LATIN['CEVİZ'], 'Juglans regia');
+    // Panel hesabı artık tür ρ'sunu kullanır (grup varsayılanı DEĞİL)
     const r = calc(30, 20, 'SALKIM SÖĞÜT', 'YAPRAKLI');
-    assert.ok(Math.abs(r.agb - agb(541, 30, 20)) < 1e-6, 'panel calc grup varsayılanına düşmeli: ' + r.agb);
+    assert.ok(Math.abs(r.agb - agb(400, 30, 20)) < 1e-6, 'calc ρ=400 kullanmalı: ' + r.agb);
+    // AĞLAYAN SÖĞÜT: kullanıcı "listede olmasın" dedi → panelde YOK,
+    // çözümleyicide VAR (SALKIM SÖĞÜT'ün eşanlamlısı)
+    assert.equal(app.rho['AĞLAYAN SÖĞÜT'], undefined);
+    assert.equal(app.LATIN['AĞLAYAN SÖĞÜT'], undefined);
+    assert.equal(app.resolveSpeciesName('Ağlayan söğüt'), 'AĞLAYAN SÖĞÜT');
   });
 
   test('0011: eşanlamlı çözümleyici (resolveSpeciesName) kanonik ada indirger', () => {

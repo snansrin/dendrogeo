@@ -31,6 +31,9 @@ import vm from 'node:vm';
 import { execSync } from 'node:child_process';
 import { mcTotalCI, mcRowCI, canonicalHash, MC_CFG, fmtT, loadRho, loadSpeciesDict, QA_LIMITS, calcRow as _calcRow, carbonKg } from './lib/mc.mjs';
 import { PngCanvas, hex2rgb } from './lib/png.mjs';
+import { createRequire } from 'node:module';
+const require_ = createRequire(import.meta.url);
+const QRlib = require_('qrcode'); /* devDependency: rapor QR'ı (kullanıcı standardı md.15) */
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const read = (p) => readFileSync(join(ROOT, p), 'utf8');
@@ -472,6 +475,17 @@ export async function buildSnapshot(parkId, { skipLulc = false, meta = null } = 
   } : null;
   /* Envanter kalite kapısı: kanonik sözlük + panel denklemiyle yeniden hesap */
   const qaSpecies = inventoryQa(rows, loadSpeciesDict());
+  /* YAZAR (0012 · kullanıcı standardı): rapor, yayını isteyen KULLANICININ
+   * adıyla yayımlanır. İstek sahibi adı v_report_authors görünümünden
+   * çözülür (0012_report_author.sql); görünüm yoksa/ad çözülemezse
+   * DendroGeo kurumsal adı kullanılır — İSİM UYDURULMAZ. Site kurucuları
+   * her raporda "kurucu" olarak beyan edilir (yazarlıkla karışmaz). */
+  let author = { name: null, full_name: null, source: 'unresolved' };
+  try {
+    const ra = await rest('v_report_authors', { park_id: 'eq.' + parkId, order: 'created_at.desc', limit: '1' });
+    if (ra && ra[0] && String(ra[0].full_name || '').trim())
+      author = { name: String(ra[0].full_name).trim(), full_name: String(ra[0].full_name).trim(), source: 'report_request' };
+  } catch (e) { author = { name: null, full_name: null, source: 'unavailable', note: String((e && e.message) || e).slice(0, 120) }; }
   let lulc = null;
   if (!skipLulc) {
     try {
@@ -547,6 +561,7 @@ export async function buildSnapshot(parkId, { skipLulc = false, meta = null } = 
       outside_rows: gfInside == null ? 0 : rows.length - gfInside,
       polygon_source: OG ? (park.geom_json && park.geom_json.outer ? 'parks.geom_json' : 'OSM') : 'yok',
     },
+    author,
     geometry_qa: geometryQA,
     qa: { species: qaSpecies, photos: { n_with: rows.filter((r) => r.photo_url).length, n: rows.length } },
     lulc,
@@ -565,6 +580,21 @@ export async function buildSnapshot(parkId, { skipLulc = false, meta = null } = 
  * DGR — DendroGeo Bilimsel Analiz Raporu (iç/alan kimliği); DOI atanırsa
  * harici kalıcı kimlik olarak §11'e ve metadata.json'a işlenir. */
 const DGR_TITLE_DEF = 'DGR — DendroGeo Bilimsel Analiz Raporu';
+/* Yazar/ad biçimleme (0012): "Ad Soyad" → "Soyad, A." (atıf düzeni).
+ * Tek kelimeli adlar olduğu gibi kalır; virgüllü adlar zaten atıf biçimindedir. */
+export function citeName(full) {
+  const t = String(full || '').trim().replace(/\s+/g, ' ');
+  if (!t) return null;
+  if (t.includes(',')) return t;
+  const ps = t.split(' ');
+  if (ps.length < 2) return t;
+  const soy = ps[ps.length - 1];
+  const ad = ps.slice(0, -1).join(' ');
+  return soy + ', ' + ad.charAt(0) + '.';
+}
+/* Site kurucuları her raporda beyan edilir (kullanıcı standardı 2026-09-28);
+ * yazar DEĞİLDİR — yazar, yayını isteyen kullanıcının kendisidir. */
+export const FOUNDERS_LINE = 'Site kurucuları: Nagihan Şirin, Sinan Şirin';
 const GROUP_TR = { 'İBRELİ': 'ibreli', 'IBRELI': 'ibreli', 'YAPRAKLI': 'yapraklı', 'DİĞER': 'diğer', 'DIGER': 'diğer' };
 /* Şekil 1 bar renkleri (kullanıcı isteği 2026-09-28): ibreli = yeşil,
  * yapraklı = turuncu, diğer = gri. CSS varsayılanı yaprak yeşili kalır. */
@@ -618,6 +648,13 @@ export function renderReport(snap, { id, hash, version = 1, meta = null }) {
   const dataYear = (L && L.year) || 2021;
   const epsg = epsgLabel((L && L.epsg) || M.epsg || null);
   const genTr = fmtDateTr(snap.generated_at);
+  /* QR (kullanıcı standardı md. 15): basılı PDF bile dijital kayda bağlansın
+   * diye kalıcı rapor adresinin QR'ı künyede taşınır. SVG, publishPark
+   * tarafından ÜRETİM ANINDA (async) hazırlanıp meta.qr_uri ile iner →
+   * sayfada dış istek YOK, çevrimdışı/PDF'te çalışır. Üretim başarısızsa
+   * hücre hiç basılmaz (rapor QR'sız da geçerlidir; adres metni kalır). */
+  const REPORT_URL = SITE_ORIGIN + '/rapor/' + id + '/';
+  const qrUri = (M && M.qr_uri) || null;
   const subject = `${P.name} Ağaç Envanteri, Karbon Stoku ve Arazi Örtüsü Analizi`;
   const titleMain = `${esc(P.name)} (${esc(P.city)}): Bireysel Ağaç Envanteri ve Toprak Üstü / Toprak Altı Karbon Stoku`;
 
@@ -697,9 +734,15 @@ export function renderReport(snap, { id, hash, version = 1, meta = null }) {
 
   /* ---- Atıf ---- */
   const citeTitle = `${P.name} ağaç envanteri ve karbon stoku raporu`;
-  const citePlain = `Şirin, N. & Şirin, S. (${snap.generated_at.slice(0, 4)}). ${citeTitle}. DendroGeo Bilimsel Analiz Raporu, ${id} (sürüm ${verTxt}). DendroGeo. ${SITE_ORIGIN}/rapor/${id}/`;
+  /* Yazar bloğu (0012): yayını isteyen kullanıcı YAZARDIR; kurucular ayrıca
+   * beyan edilir (DataCite: creators ≠ contributors). */
+  const AU = snap.author || {};
+  const authorCite = citeName(AU.name);
+  const authorPlain = authorCite || 'DendroGeo';
+  const citePlain = `${authorPlain} (${snap.generated_at.slice(0, 4)}). ${citeTitle}. DendroGeo Bilimsel Analiz Raporu, ${id} (sürüm ${verTxt}). DendroGeo. ${SITE_ORIGIN}/rapor/${id}/`;
   const bib = `@techreport{${id.toLowerCase().replace(/-/g, '')},
-  author    = {Şirin, Nagihan and Şirin, Sinan},
+  author    = {${AU.name ? citeName(AU.name) : 'DendroGeo (kurumsal yazar)'}},
+  contributor = {Şirin, Nagihan and Şirin, Sinan},
   title     = {${citeTitle}},
   year      = {${snap.generated_at.slice(0, 4)}},
   number    = {${id}},
@@ -720,7 +763,10 @@ export function renderReport(snap, { id, hash, version = 1, meta = null }) {
     datePublished: snap.generated_at.slice(0, 10),
     version: verTxt,
     license: 'https://creativecommons.org/licenses/by-nc/4.0/',
-    author: [{ '@type': 'Person', familyName: 'Şirin', givenName: 'Nagihan' }, { '@type': 'Person', familyName: 'Şirin', givenName: 'Sinan' }],
+    author: AU.name
+      ? [{ '@type': 'Person', name: AU.name }]
+      : [{ '@type': 'Organization', name: 'DendroGeo' }],
+    contributor: [{ '@type': 'Person', familyName: 'Şirin', givenName: 'Nagihan' }, { '@type': 'Person', familyName: 'Şirin', givenName: 'Sinan' }],
     publisher: { '@type': 'Organization', name: 'DendroGeo', url: SITE_ORIGIN },
     url: `${SITE_ORIGIN}/rapor/${id}/`,
     spatialCoverage: { '@type': 'Place', name: `${P.city}, ${P.country}` },
@@ -825,7 +871,8 @@ pre{background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:
  <div><b>Park kimliği</b><code>${esc(P.osm_key || '—')} · DB #${P.id}</code></div>
  <div><b>Örneklem</b><code>${t.n} onaylı ölçüm · ${snap.species.length} tür</code></div>
  <div><b>Park alanı</b><code>${trNum(parkHa, 2)} ha (OSM poligonu)</code></div>
- <div><b>Yazarlar</b><code>N. Şirin · S. Şirin</code></div>
+ <div><b>Yazar</b><code>${AU.name ? esc(AU.name) : 'DendroGeo (kurumsal)'}</code><span class="hint">${esc(FOUNDERS_LINE)}${AU.name ? '' : ' — istek sahibi adı çözülemedi'}</span></div>
+ ${qrUri ? `<div><b>Kalıcı bağlantı (QR)</b><img src="${qrUri}" width="104" height="104" alt="${id} kalıcı rapor adresinin QR kodu" style="border:1px solid var(--line);border-radius:6px;background:#fff"><span class="hint">${esc(REPORT_URL)}</span></div>` : `<div><b>Kalıcı bağlantı</b><code>${esc(REPORT_URL)}</code></div>`}
  <div><b>Lisans</b><code>CC BY-NC 4.0</code></div>
  <div><b>İçerik hash'i</b><code>sha256:${hash.slice(0, 20)}…</code></div>
 </div>
@@ -1111,7 +1158,13 @@ export function buildMetadata(snap, { id, hash, version = '1.0', meta = null, hi
     version: String(version),
     language: 'tr',
     license: 'CC-BY-NC-4.0',
-    creators: [{ name: 'Şirin, Nagihan', nameType: 'Personal' }, { name: 'Şirin, Sinan', nameType: 'Personal' }],
+    creators: (snap.author && snap.author.name)
+      ? [{ name: citeName(snap.author.name), nameType: 'Personal' }]
+      : [{ name: 'DendroGeo', nameType: 'Organizational' }],
+    creatorsNote: (snap.author && snap.author.name)
+      ? 'Rapor, yayını isteyen kullanıcının (veri katkısı sahibinin) adıyla yayımlanır.'
+      : 'İstek sahibi adı çözülemedi (v_report_authors boş veya 0012 uygulanmamış) → kurumsal yazar; İSİM UYDURULMAZ.',
+    contributors: [{ name: 'Şirin, Nagihan', contributorType: 'Founder', nameType: 'Personal' }, { name: 'Şirin, Sinan', contributorType: 'Founder', nameType: 'Personal' }],
     subjects: [{ subject: 'tree inventory' }, { subject: 'carbon stock' }, { subject: 'land cover' }, { subject: 'urban forestry' }],
     spatialCoverage: `${P.city}, ${P.country}`,
     temporalCoverage: String((L && L.year) || 2021),
@@ -1133,6 +1186,16 @@ export function buildMetadata(snap, { id, hash, version = '1.0', meta = null, hi
       { id, version: String(version), date: snap.generated_at.slice(0, 10), status: 'Geçerli', note: 'İlk yayımlama' },
     ],
   };
+}
+
+/* QR üretimi (qrcode, MIT — devDependency): kalıcı adresin SVG data-URI'si.
+ * Hata yayını DURDURMAZ: QR kozmetik bir tamamlayıcıdır, rapor kimliği ve
+ * hash doğrulaması ondan bağımsızdır. */
+export async function qrDataUri(url) {
+  try {
+    const svg = await QRlib.toString(String(url), { type: 'svg', errorCorrectionLevel: 'M', margin: 1, width: 104, color: { dark: '#182420', light: '#ffffff' } });
+    return 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg);
+  } catch (e) { return null; }
 }
 
 /* ---------- YAYINLAMA ÇEKİRDEĞİ ----------
@@ -1175,6 +1238,7 @@ export async function publishPark(parkId, opts = {}) {
    * taşısın diye meta olarak buildSnapshot'e iner. */
   const id = nextReportId(dir, year);
   const meta = { id, git_commit: GIT_COMMIT, engine_version: ENGINE_VERSION, app_version: APP_VERSION };
+  meta.qr_uri = await qrDataUri(SITE_ORIGIN + '/rapor/' + id + '/'); /* künye QR'ı (0012) */
   const { snap, hash, png } = await buildSnapshot(+parkId, { skipLulc: !!opts.skipLulc, meta });
   const version = 1;          /* iç sürüm alanı (sayı) — kuyruk günlüğü bunu taşır */
   const verTxt = '1.0';       /* belge sürümü (gösterim/metadata): her DGR 1.0 doğar */
@@ -1184,10 +1248,10 @@ export async function publishPark(parkId, opts = {}) {
   if (png) writeFileSync(join(out, 'harita.png'), png);
   const html = renderReport(snap, { id, hash, version, meta: Object.assign({}, meta, { history }) });
   writeFileSync(join(out, 'index.html'), html);
-  writeFileSync(join(out, 'data.json'), JSON.stringify(snap, null, 2));
+  writeFileSync(join(out, 'data.json'), JSON.stringify(snap)); /* 0012: sıkıştırılmış (arşiv boyutu ~%45 küçük) */
   writeFileSync(join(out, 'olcum.csv'), csvOf(snap));
   writeFileSync(join(out, 'park.geojson'), JSON.stringify(geojsonOf(snap), null, 2));
-  writeFileSync(join(out, 'metadata.json'), JSON.stringify(buildMetadata(snap, { id, hash, version: verTxt, meta, history }), null, 2) + '\n');
+  writeFileSync(join(out, 'metadata.json'), JSON.stringify(buildMetadata(snap, { id, hash, version: verTxt, meta, history })) + '\n'); /* 0012: sıkıştırılmış */
   rebuildIndex();
   const url = SITE_ORIGIN + '/rapor/' + id + '/';
   return {
@@ -1201,7 +1265,7 @@ export async function publishPark(parkId, opts = {}) {
     report_version: verTxt,
     metadata_path: 'rapor/' + id + '/metadata.json',
     supersedes: history.filter((h) => !h.retracted).map((h) => h.id),
-    citation: `Şirin, N. & Şirin, S. (${snap.generated_at.slice(0, 4)}). ${snap.park.name} ağaç envanteri ve karbon stoku raporu (${id}, sürüm ${verTxt}). DendroGeo Bilimsel Analiz Raporu. ${url}`,
+    citation: `${(snap.author && snap.author.name) ? citeName(snap.author.name) : 'DendroGeo'} (${snap.generated_at.slice(0, 4)}). ${snap.park.name} ağaç envanteri ve karbon stoku raporu (${id}, sürüm ${verTxt}). DendroGeo Bilimsel Analiz Raporu. ${url}`,
   };
 }
 

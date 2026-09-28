@@ -4,8 +4,10 @@ const SPECIES_DATA={
   {tr:"GÖKNAR",lat:"Abies spp.",rho:350},
   {tr:"SEDİR",lat:"Cedrus libani",rho:430},
   {tr:"HİMALAYA SEDİRİ",lat:"Cedrus deodara",rho:430},
+  {tr:"ATLAS SEDİRİ",lat:"Cedrus atlantica",rho:490},   /* [WD] .44/.53 → ort. (0011e: kullanıcı onayıyla listede) */
   {tr:"ARDIÇ",lat:"Juniperus spp.",rho:460},
   {tr:"LADİN",lat:"Picea orientalis",rho:358},
+  {tr:"MAVİ LADİN",lat:"Picea pungens",rho:450},        /* [WD] (0011e: kullanıcı onayıyla listede) */
   {tr:"KIZILÇAM",lat:"Pinus brutia",rho:478},
   {tr:"KARAÇAM",lat:"Pinus nigra",rho:470},
   {tr:"SARIÇAM",lat:"Pinus sylvestris",rho:426},
@@ -28,7 +30,9 @@ const SPECIES_DATA={
   {tr:"KAVAK",lat:"Populus spp.",rho:350},
   {tr:"KIZILAĞAÇ",lat:"Alnus glutinosa",rho:407},
   {tr:"ÇINAR",lat:"Platanus orientalis",rho:null},
+  {tr:"DOĞU ÇINARI",lat:"Platanus orientalis",rho:600}, /* [Z09] Platanus .56–.62 (0011e: kullanıcı onayıyla listede) */
   {tr:"SÖĞÜT",lat:"Salix alba",rho:null},
+  {tr:"SALKIM SÖĞÜT",lat:"Salix babylonica",rho:400},   /* [Z09] Salix cinsi ort. (0011e: kullanıcı onayıyla listede) */
   {tr:"AKÇAAĞAÇ",lat:"Acer spp.",rho:null},
   {tr:"IHLAMUR",lat:"Tilia spp.",rho:null},
   {tr:"AT KESTANESİ",lat:"Aesculus hippocastanum",rho:null},
@@ -36,6 +40,7 @@ const SPECIES_DATA={
   {tr:"HUŞ",lat:"Betula pendula",rho:null},
   {tr:"KARAAĞAÇ",lat:"Ulmus minor",rho:null},
   {tr:"DUT",lat:"Morus alba",rho:null},
+  {tr:"CEVİZ",lat:"Juglans regia",rho:560},             /* [Z09]/[WD] (0011e: kullanıcı onayıyla listede) */
   {tr:"YALANCI AKASYA",lat:"Robinia pseudoacacia",rho:null},
   {tr:"MANOLYA",lat:"Magnolia grandiflora",rho:null},
   {tr:"SÜS ELMASI",lat:"Malus spp.",rho:null},
@@ -63,25 +68,14 @@ Object.keys(SPECIES_DATA).forEach(g=>{
 /* Tür rengi (analiz grafiklerinde kullanılır) */
 const GROUP_COLOR={"\u0130BREL\u0130":"#1e6f4b","YAPRAKLI":"#c77d2e","D\u0130\u011eER":"#94a3b8"};
 
-/* ---- GİZLİ ÇÖZÜM KAYITLARI (0011b · 2026-09-28 · kullanıcı isteği) ----
- * Kullanıcı talebi: paneldeki ağaç SEÇİM LİSTESİ eski haliyle kalacak
- * (SPECIES_DATA yukarıda cfb6862 öncesindeki 45 kaydın BİREBİR aynısıdır;
- * seçim kutusu, LATIN künyesi ve panel rho zinciri eskisi gibi davranır).
- * ANCAK veritabanında Göksu envanterinden bu adları taşıyan 34 onaylı kayıt
- * VAR (SALKIM SÖĞÜT, MAVİ LADİN, DOĞU ÇINARI, ATLAS SEDİRİ, CEVİZ) ve
- * carbon_kg değerleri 0011 ile bu ρ'lardan hesaplandı. Rapor QA kapısının
- * ("Tür sözlüğü eşleşmesi") bu kayıtları "sözlük dışı" saymaması ve
- * yeniden hesap denetiminin 0011'deki ρ'larla çalışması için adlar YALNIZ
- * çözümleyicide tanınır — seçim listesine, rho/LATIN haritalarına ve panel
- * hesabına GIRMEZ (calc() davranışı bu türler için eski haline döner:
- * grup varsayılanı). ρ kaynakları: [Z09] Zanne 2009 · [WD] Wood Database. */
+/* ---- GİZLİ ÇÖZÜM KAYITLARI (0011e · 2026-09-28 · kullanıcı kararı) ----
+ * Kullanıcı kararı: Göksu'nun 5 türü (SALKIM SÖĞÜT, MAVİ LADİN, DOĞU ÇINARI,
+ * ATLAS SEDİRİ, CEVİZ) kaynaklı ρ'larıyla seçim listesinde KALIR;
+ * "AĞLAYAN SÖĞÜT" ise listeye KONMAZ (yalnız eşanlamlı çözümlemede tanınır —
+ * SALKIM SÖĞÜT'ün diğer adı). Gizli kayıtlar seçim kutusunda, panel
+ * hesaplarında görünmez; yalnız resolveSpeciesName() ve rapor QA'sı bilir. */
 const RESOLVE_ONLY_SPECIES=[
- {tr:"SALKIM SÖĞÜT",lat:"Salix babylonica",rho:400},   /* [Z09] */
- {tr:"AĞLAYAN SÖĞÜT",lat:"Salix babylonica",rho:400},  /* [Z09] eşanlamlı */
- {tr:"MAVİ LADİN",lat:"Picea pungens",rho:450},        /* [WD] */
- {tr:"DOĞU ÇINARI",lat:"Platanus orientalis",rho:600}, /* [Z09] */
- {tr:"ATLAS SEDİRİ",lat:"Cedrus atlantica",rho:490},   /* [WD] */
- {tr:"CEVİZ",lat:"Juglans regia",rho:560}              /* [Z09]/[WD] */
+ {tr:"AĞLAYAN SÖĞÜT",lat:"Salix babylonica",rho:400}  /* [Z09] eşanlamlı; kullanıcı isteği: seçim listesinde GÖRÜNMEZ, yalnız çözümlemede tanınır */
 ];
 
 /* ---- Eşanlamlı haritası (0011 envanter QA · 2026-09-28) ----

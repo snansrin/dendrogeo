@@ -147,9 +147,19 @@ async function handle(req) {
   };
   try {
     const r = await publishPark(req.park_id, { skipLulc: req.with_lulc === false });
+    /* Arşiv boyutu (0012 · "proje fazla yer kaplamasın"): her yayının bayt
+     * büyüklüğü günlüğe işlenir → depo bütçesi izlenebilir. */
+    let bytes = null;
+    try {
+      const { readdirSync, statSync } = await import('node:fs');
+      const { join } = await import('node:path');
+      const d = join(new URL('..', import.meta.url).pathname, 'rapor', r.id);
+      bytes = readdirSync(d).reduce((a, f) => a + statSync(join(d, f)).size, 0);
+    } catch (e) { /* boyut ölçümü yayın engeli değil */ }
     return {
       ...base,
       status: 'Yayınlandı',
+      archive_bytes: bytes,
       report_id: r.id, version: r.version,
       url_path: '/rapor/' + r.id + '/',
       report_hash: 'sha256:' + r.hash,
@@ -239,7 +249,7 @@ export async function runQueue(opts = {}) {
     if (entry.status === 'Yayınlandı') {
       ok++;
       console.log(`  ✅ ${entry.report_id} · n=${entry.n} · ${entry.carbon_txt}`);
-      console.log(`     ${entry.url_path} · ${entry.report_hash.slice(0, 27)}…`);
+      console.log(`     ${entry.url_path} · ${entry.report_hash.slice(0, 27)}…${entry.archive_bytes ? ' · arşiv ' + (entry.archive_bytes / 1024).toFixed(0) + ' KB' : ''}`);
     } else {
       fail++;
       console.log(`  ❌ üretilemedi: ${entry.message}`);
