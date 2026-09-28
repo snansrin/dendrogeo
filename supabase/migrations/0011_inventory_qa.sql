@@ -168,19 +168,19 @@ update public.parks p
 -- ============ 6) DOĞRULAMA ============
 -- Beklenti: 34 kayıt · toplam ≈ 5,0–5,6 t (düzeltme öncesi 50,51 t idi;
 -- oran ≈ π^1,952 ≈ 9,3x + ρ düzeltmeleri). h/D oranları ~17–51 aralığına oturur.
-select count(*)                                          as kayit,
-       round(sum(carbon_kg) / 1000, 3)                   as toplam_t,
-       round(min(height_m / nullif(dbh_cm / 100, 0)), 1) as "min h/D",
-       round(max(height_m / nullif(dbh_cm / 100, 0)), 1) as "max h/D",
-       count(*) filter (where girth_cm is not null)      as cevre_sakli,
-       count(*) filter (where volume_m3 is not null)     as hacim_dolu,
+select count(*)                                                      as kayit,
+       round((sum(carbon_kg) / 1000)::numeric, 3)                    as toplam_t,
+       round((min(height_m / nullif(dbh_cm / 100, 0)))::numeric, 1)  as "min h/D",
+       round((max(height_m / nullif(dbh_cm / 100, 0)))::numeric, 1)  as "max h/D",
+       count(*) filter (where girth_cm is not null)                  as cevre_sakli,
+       count(*) filter (where volume_m3 is not null)                 as hacim_dolu,
        count(*) filter (where carbon_kg is null or carbon_kg <= 0) as "karbon_bozuk_0_olmali"
 from public.measurements
 where park_id = 25 and status = 'Onaylı' and deleted_at is null;
 
 select species as tur, grp as grup, count(*) as n,
-       round(avg(dbh_cm), 1) as "ort_cap_cm",
-       round(sum(carbon_kg), 1) as "karbon_kg"
+       round(avg(dbh_cm)::numeric, 1) as "ort_cap_cm",
+       round(sum(carbon_kg)::numeric, 1) as "karbon_kg"
 from public.measurements
 where park_id = 25 and status = 'Onaylı' and deleted_at is null
 group by species, grp
