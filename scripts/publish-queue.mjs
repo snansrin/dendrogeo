@@ -19,15 +19,23 @@
  *     aynı istek iki kez rapor üretmez (cron çakışmasına karşı workflow'ta
  *     concurrency kilidi de var).
  *
+ * GERİ ÇEKME (0010 · 2026-09-28): yayımlanmış raporlar yanlışlıkla
+ * yayımlandığında 🗑 ile geri çekilir. report_retractions kuyruğu bu işte
+ * işlenir: rapor dizinindeki VERİ dosyaları kaldırılır, adresinde gerekçeli
+ * bildirim kalır (renderRetractionNotice), liste yenilenir ve günlük
+ * 'Geri çekildi' kaydı alır. Kimlik (DGR) yeniden KULLANILMAZ. İstemcinin
+ * beyan ettiği park_id ↔ report_id eşleşmesi GÜNLÜKLE doğrulanır: eşleşmeyen
+ * satır işlenmez (RLS mülkiyeti park üzerinden verir, rapor eşlemesi burada).
+ *
  * KULLANIM
  *   node scripts/publish-queue.mjs            (bekleyen istekleri işle)
  *   node scripts/publish-queue.mjs --dry      (planı yaz, üretme — prova)
  *   node scripts/publish-queue.mjs --limit 2  (tek koşuda en fazla 2 istek)
  */
-import { readFileSync, writeFileSync, existsSync } from 'node:fs';
+import { readFileSync, writeFileSync, existsSync, unlinkSync } from 'node:fs';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { publishPark } from './make-report.mjs';
+import { publishPark, renderRetractionNotice, rebuildIndex, DGR_ID_RE } from './make-report.mjs';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const read = (p) => readFileSync(join(ROOT, p), 'utf8');
@@ -81,6 +89,21 @@ export async function fetchPending(limit = 50) {
   return Array.isArray(rows) ? rows : [];
 }
 
+/* ---------- geri çekme istekleri (0010; ANON anahtarla salt-okunur) ---------- */
+export async function fetchPendingRetractions(limit = 50) {
+  const u = SB.url + '/rest/v1/report_retractions?' + new URLSearchParams({
+    select: 'id,report_id,park_id,reason,status,requested_by,created_at',
+    status: 'eq.Beklemede',
+    order: 'created_at.asc',
+    limit: String(limit),
+  });
+  const r = await fetch(u, { headers: { apikey: SB.key, Authorization: 'Bearer ' + SB.key } });
+  if (r.status === 404) { const e = new Error('report_retractions tablosu yok — Supabase SQL Editor\'da 0010_report_retraction.sql çalıştırılmalı'); e.code = 'NO_TABLE'; return { rows: [], missing: true, message: e.message }; }
+  if (!r.ok) throw new Error('report_retractions HTTP ' + r.status + ': ' + (await r.text()).slice(0, 200));
+  const rows = await r.json();
+  return { rows: Array.isArray(rows) ? rows : [], missing: false };
+}
+
 /* ---------- PLAN (saf fonksiyon: test burayı kilitler) ----------
  * Günlükte request_id'si zaten olan istekler ATLANIR (iki kez rapor üretmek
  * hem DGR kimliğini şişirir hem değişmezlik ilkesini bozar). */
@@ -88,6 +111,30 @@ export function planQueue(entries, requests, limit = RUN_LIMIT) {
   const done = new Set((entries || []).map((e) => String(e.request_id)));
   const todo = (requests || []).filter((r) => !done.has(String(r.id)));
   return { todo: todo.slice(0, limit), skipped: todo.length > limit ? todo.length - limit : 0, already: (requests || []).length - todo.length };
+}
+
+/* Geri çekme planı (saf):
+ *  · günlükte retraction_id'si olan istek ATLANIR (yeniden işlenmez),
+ *  · report_id günlükte 'Yayınlandı' olarak YOKSA işlenmez (uydurma kimlik),
+ *  · aynı rapor zaten geri çekilmişse işlenmez,
+ *  · istekteki park_id, günlüğün yayın kaydıyla EŞLEŞMİYORSA işlenmez
+ *    (istemci beyanına güvenilmez; RLS park mülkiyetine bakar, eşleme burada). */
+export function planRetractions(entries, retractions, limit = RUN_LIMIT) {
+  const done = new Set((entries || []).filter((e) => e.status === 'Geri çekildi').map((e) => String(e.retraction_id)));
+  const retractedReports = new Set((entries || []).filter((e) => e.status === 'Geri çekildi').map((e) => String(e.report_id)));
+  const pub = new Map();
+  for (const e of entries || [])
+    if (e.status === 'Yayınlandı' && DGR_ID_RE.test(String(e.report_id || ''))) pub.set(String(e.report_id), e);
+  const valid = [], invalid = [];
+  for (const rt of retractions || []) {
+    if (!rt || !DGR_ID_RE.test(String(rt.report_id || ''))) { invalid.push(rt); continue; }
+    if (done.has(String(rt.id))) continue;
+    const p = pub.get(String(rt.report_id));
+    if (!p || retractedReports.has(String(rt.report_id))) continue;
+    if (Number(p.park_id) !== Number(rt.park_id)) { invalid.push(rt); continue; }
+    valid.push(rt);
+  }
+  return { todo: valid.slice(0, limit), skipped: Math.max(0, valid.length - limit), invalid };
 }
 
 /* ---------- tek isteğin işlenmesi ---------- */
@@ -120,6 +167,35 @@ async function handle(req) {
   }
 }
 
+/* Geri çekmenin uygulanması: veri dosyaları silinir, index.html bildirime
+ * döner, liste yenilenir. root parametrik (test geçici dizinde doğrular).
+ * Yol GÜVENLİĞİ: report_id biçimi yeniden doğrulanır ve hedef dizin rapor
+ * kökünün dışına çıkamaz (resolve + prefix kontrolü). */
+export const RETRACT_FILES = ['data.json', 'olcum.csv', 'park.geojson', 'harita.png', 'metadata.json'];
+export function handleRetraction(rt, pubEntry, root = ROOT) {
+  const started = new Date().toISOString();
+  const base = {
+    retraction_id: String(rt.id), report_id: String(rt.report_id), park_id: Number(rt.park_id),
+    park_name: (pubEntry && pubEntry.park_name) || null,
+    reason: rt.reason ? String(rt.reason).slice(0, 400) : null,
+    requested_by: rt.requested_by || null, requested_at: rt.created_at || null, started_at: started,
+  };
+  try {
+    if (!DGR_ID_RE.test(base.report_id)) throw new Error('Geçersiz rapor kimliği: ' + base.report_id);
+    const rapDir = join(root, 'rapor');
+    const dir = join(rapDir, base.report_id);
+    if (!dir.startsWith(rapDir) || !existsSync(dir)) throw new Error('Rapor dizini bulunamadı: ' + base.report_id);
+    for (const f of RETRACT_FILES) { try { unlinkSync(join(dir, f)); } catch (e) { /* dosya zaten yok */ } }
+    writeFileSync(join(dir, 'index.html'), renderRetractionNotice({
+      id: base.report_id, parkName: base.park_name || '', reason: base.reason || '', retractedAt: new Date().toISOString(),
+    }));
+    rebuildIndex(rapDir);
+    return { ...base, status: 'Geri çekildi', finished_at: new Date().toISOString() };
+  } catch (e) {
+    return { ...base, status: 'Geri çekme başarısız', message: String((e && e.message) || e).slice(0, 400), finished_at: new Date().toISOString() };
+  }
+}
+
 /* ---------- ana akış ---------- */
 export async function runQueue(opts = {}) {
   const limit = Number(opts.limit || arg('limit') || RUN_LIMIT);
@@ -136,9 +212,23 @@ export async function runQueue(opts = {}) {
   }
   const plan = planQueue(q.entries, requests, limit);
   console.log(`📄 Yayın kuyruğu: ${requests.length} bekleyen istek · ${plan.already} zaten işlenmiş · ${plan.todo.length} bu koşuda üretilecek${plan.skipped ? ` · ${plan.skipped} sonraki koşuya kaldı` : ''}`);
-  if (!plan.todo.length) { console.log('✅ Üretilecek rapor yok.'); return { ok: true, processed: 0, entries: q.entries }; }
+
+  /* ---- geri çekme kuyruğu (0010): yayın fazından bağımsız okunur ---- */
+  let retractions = [], retMissing = false;
+  try {
+    const rr = await fetchPendingRetractions();
+    retractions = rr.rows; retMissing = rr.missing;
+  } catch (e) {
+    console.log('⚠ Geri çekme kuyruğu okunamadı: ' + e.message);
+  }
+  const rplan = planRetractions(q.entries, retractions, limit);
+  if (!retMissing && (retractions.length || rplan.todo.length))
+    console.log(`🗑 Geri çekme kuyruğu: ${retractions.length} bekleyen · ${rplan.todo.length} bu koşuda işlenecek${rplan.invalid.length ? ` · ${rplan.invalid.length} geçersiz/eşleşmeyen (İŞLENMEDİ)` : ''}`);
+
+  if (!plan.todo.length && !rplan.todo.length) { console.log('✅ Üretilecek rapor yok, işlenecek geri çekme yok.'); return { ok: true, processed: 0, entries: q.entries }; }
   if (dry) {
     for (const r of plan.todo) console.log(`   · (prova) park #${r.park_id} · istek ${r.id} · LULC ${r.with_lulc === false ? 'atlanacak' : 'dahil'}`);
+    for (const r of rplan.todo) console.log(`   · (prova) geri çekme ${r.id} · ${r.report_id}`);
     return { ok: true, processed: 0, dry: true, entries: q.entries };
   }
   let ok = 0, fail = 0;
@@ -158,8 +248,21 @@ export async function runQueue(opts = {}) {
      * ağ) işlenmiş istek yeniden üretilmez. */
     saveQueue(q);
   }
-  console.log(`\n📦 Kuyruk sonucu: ${ok} yayınlandı, ${fail} başarısız → ${QUEUE_PATH}`);
-  return { ok: fail === 0, processed: ok + fail, published: ok, failed: fail, entries: q.entries };
+
+  /* ---- geri çekmeleri uygula: veri dosyaları kalkar, bildirim + günlük kalır ---- */
+  let retOk = 0, retFail = 0;
+  for (const rt of rplan.todo) {
+    console.log(`\n🗑 geri çekme ${rt.id} · ${rt.report_id}`);
+    const pubEntry = q.entries.find((e) => e.status === 'Yayınlandı' && String(e.report_id) === String(rt.report_id)) || null;
+    const entry = handleRetraction(rt, pubEntry);
+    q.entries.push(entry);
+    if (entry.status === 'Geri çekildi') { retOk++; console.log(`  ✅ ${entry.report_id} yayından kaldırıldı (bildirim yerinde, listeden düştü)`); }
+    else { retFail++; console.log(`  ❌ geri çekilemedi: ${entry.message}`); }
+    saveQueue(q);
+  }
+
+  console.log(`\n📦 Kuyruk sonucu: ${ok} yayınlandı, ${fail} başarısız, ${retOk} geri çekildi, ${retFail} geri çekme başarısız → ${QUEUE_PATH}`);
+  return { ok: fail === 0 && retFail === 0, processed: ok + fail + retOk + retFail, published: ok, failed: fail, retracted: retOk, retractFailed: retFail, entries: q.entries };
 }
 
 if (process.argv[1] === fileURLToPath(import.meta.url)) {

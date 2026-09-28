@@ -118,10 +118,18 @@ describe('dil denetimi: başlık ve yöntem Türkçe', () => {
     assert.match(html, /Toprak üstü biyokütle \(AGB\)/, 'yöntem Türkçe');
     assert.match(html, /Toprak altı biyokütle/, 'kök biyokütlesi Türkçe');
   });
-  test('Şekil 1 yaprak yeşili dolgu ile çizilir (turuncu/bej değil)', () => {
-    assert.match(html, /--leaf:#2f9e44/, 'yaprak yeşili token');
-    assert.match(html, /\.brow \.bar i\{display:block;height:100%;background:var\(--leaf\)/, 'bar dolgusu yaprak yeşili');
+  test('Şekil 1 bar renkleri gruba göre: ibreli yeşil, yapraklı turuncu (2026-09-28 standardı)', () => {
+    assert.match(html, /--leaf:#2f9e44/, 'yaprak yeşili token (CSS varsayılanı)');
+    assert.match(html, /\.brow \.bar i\{display:block;height:100%;background:var\(--leaf\)/, 'varsayılan dolgu yaprak yeşili');
     assert.ok(!/\.brow \.bar\{[^}]*background:var\(--line\)/.test(html), 'bar yatağı bej --line olmamalı');
+    const mix = { ...SNAP, species: [
+      { species: 'SEDİR', grp: 'İBRELİ', n: 1, mean_dbh: 190, mean_h: 12, carbon_kg: 14000, share_pct: 58.5 },
+      { species: 'MEŞE', grp: 'YAPRAKLI', n: 1, mean_dbh: 40, mean_h: 9, carbon_kg: 9936.9, share_pct: 41.5 },
+    ] };
+    const h2 = renderReport(mix, { id: 'DGR-2026-0001', hash: canonicalHash(mix), version: 1 });
+    assert.match(h2, /background:#2f9e44/, 'ibreli barı yeşil');
+    assert.match(h2, /background:#e8590c/, 'yapraklı barı turuncu');
+    assert.match(h2, /bar rengi taksonomik grubu gösterir/, 'renk açıklaması');
   });
   test('Şekil 2 açıklamasında yıl yinelenmez', () => {
     assert.ok(!/\(v200\) \(2021\)/.test(html), 'çift yıl parantezi');
@@ -182,6 +190,20 @@ describe('Şekil 2 tuvali: park sahası tam örtüşüm + kırpma', () => {
     const X = W / 2 + (0.005 - 0.01) * 111320 * Math.cos(0.01 * Math.PI / 180) * k;
     const Y = TOP + (MAPH - 2 * PAD) / 2 - (0.005 - 0.01) * 110540 * k;
     assert.ok(same(px(Math.round(X), Math.round(Y)), MAP_TONES.ink), 'nokta merkezi mürekkep');
+  });
+  test('kırpma geçişi: EĞİK kapanış kenarlı poligonda iç bölge tam kaplı (2026-09-28 düzeltmesi)', () => {
+    /* Halka kapanış kenarı (son nokta → ilk nokta) atlanırsa tek-çift parity
+     * bozulur ve poligon içi bağlam tonuna boyanırdı (yatay kapanışlı karede
+     * görünmezdi; gerçek park poligonlarında beyaz bant üretiyordu). */
+    const tri = [[0, 0], [0, 0.02], [0.02, 0.02]];          /* kapanış: eğik hipotenüs */
+    const cv2 = mapCanvas({ outer: tri, wruns: [{ lo0: -0.01, lo1: 0.03, la0: -0.01, la1: 0.03, key: 'green' }], classes, parkName: 'UCGEN', sub: 'K' });
+    const px2 = (x, y) => [cv2.px[(y * cv2.w + x) * 4], cv2.px[(y * cv2.w + x) * 4 + 1], cv2.px[(y * cv2.w + x) * 4 + 2]];
+    const X = (lon) => cv2.w / 2 + (lon - 0.01) * 111320 * Math.cos(0.01 * Math.PI / 180) * (Math.max(0.02, Math.min((cv2.w - 52) / (0.02 * 111320 * Math.cos(0.01 * Math.PI / 180)), 488 / (0.02 * 110540))));
+    const Y = (lat) => 96 + 244 - (lat - 0.01) * 110540 * (Math.max(0.02, Math.min((cv2.w - 52) / (0.02 * 111320 * Math.cos(0.01 * Math.PI / 180)), 488 / (0.02 * 110540))));
+    for (const [la, lo] of [[0.005, 0.015], [0.01, 0.018], [0.004, 0.012], [0.017, 0.019]]) {   /* üçgen içi: lat < lon */
+      const c = px2(Math.round(X(lo)), Math.round(Y(la)));
+      assert.ok(!same(c, MAP_TONES.out), `iç piksel (${la},${lo}) bağlam tonuna dönmemeli: ${c}`);
+    }
   });
   test('lejant: sınır, nokta ve bağlam sembolleri mevcut', () => {
     const buf = cv.encode();

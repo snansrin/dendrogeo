@@ -3,18 +3,19 @@
 Bu belge **site içinden rapor yayınının** nasıl çalıştığını ve bir şey
 takıldığında nereye bakılacağını anlatır. Raporun içeriği/biçimi için
 `scripts/make-report.mjs` başındaki açıklama ve `rapor/DGR-…/index.html`
-§2 (Yöntem) esas kaynaktır.
+§4 (Yöntem) esas kaynaktır. Rapor kimliği: **DGR** = **DendroGeo Bilimsel Analiz Raporu** (iç/alan kimliği); dış kalıcı kimlik (DOI) atandığında §11 ve `metadata.json` üzerinden bağlanır (bkz. §6b).
 
 ## 1) Kısa yol (yönetici)
 
 1. Uygulamada **🔐 Ölçüm Yönetimi** sekmesini aç.
 2. **📄 Bilimsel Rapor Yayını** kartında parkı bul.
-3. 🛰 kutusu işaretli kalsın (önerilir: §4 arazi örtüsü bağlamı da üretilir;
-   üretimi birkaç dakika uzatır).
+3. 🛰 kutusu işaretli kalsın (önerilir: §5–§6 arazi örtüsü sonuçları ve
+   haritası da üretilir; üretimi birkaç dakika uzatır).
 4. **📄 Yayınla**'ya bas → istek kuyruğa yazılır.
 5. Bekle: kart 25 saniyede bir kendini tazeler. Rapor hazır olduğunda satırda
-   **Yayınlandı** rozeti, `DGR-YYYY-NNNN` kimliği, **🔗 Aç** ve **📤 Paylaş**
-   belirir. Sekmeyi/kapatmayı beklemene gerek yok — iş sunucuda sürer.
+   **Yayınlandı** rozeti, `DGR-YYYY-NNNN` kimliği, **🔗 Aç**, **📤 Paylaş** ve
+   **🗑 Geri çek** belirir. Sekmeyi/kapatmayı beklemene gerek yok — iş sunucuda
+   sürer. Yanlışlıkla yayınlanan rapor aynı satırdaki 🗑 ile geri çekilir (§4b).
 
 Bekleme süresi: GitHub zamanlayıcısı 5 dakikada bir çalışır; yoğun saatlerde
 tetikleme 10–15 dakikayı bulabilir. Pages dağıtımı buna 1–2 dakika ekler.
@@ -31,6 +32,8 @@ Kullanıcılar **kendi park projelerinin** raporunu kendisi yayınlar
    yoksa **📄 Yayınla**'ya bas → istek aynı kuyruğa (`report_requests`)
    yazılır, birkaç dakika içinde kalıcı bağlantı panelde belirir.
 4. Bekleyen **kendi** isteğini **✖ Vazgeç** ile iptal edebilirsin.
+5. Yayınlanmış raporu **🗑 Geri çek** ile yayından kaldırabilirsin — yönetici
+   gibi: kendi projesinin bağlı olduğu park için (sunucu kilidi, §4b).
 
 Sunucu kilitleri (RLS + `tg_report_request_gate`, iki katman):
 
@@ -80,13 +83,21 @@ hem denetim izi hem yayın kanalıdır. İki tarafı birleştiren anahtar
 | **Yayınlandı** | Rapor üretildi ve Pages'te | 🔗 Aç / 📤 Paylaş. Yeni çözümleme için **📄 Yeni sürüm** |
 | **Başarısız** | Üretim hatası (günlükte nedeni yazılı) | Nedeni oku; 📄 Yayınla ile **yeni istek** aç (aynı istek yeniden denenmez) |
 | **Vazgeçildi** | Yönetici isteği iptal etti | Gerekirse yeniden 📄 Yayınla |
+| **Geri çekiliyor** | 🗑 isteği kuyrukta (report_retractions) | Bekle; iş birkaç dakikada tamamlar |
+| **Geri çekildi** | Rapor yayından kaldırıldı, adresinde bildirim var | Yeni çözümleme için 📄 Yayınla (yeni DGR alır) |
 
 Başarısızlığın en sık üç nedeni:
 * **OSM/Overpass erişilemedi** → park poligonu çekilemedi. Birkaç dakika sonra
   yeni istek aç (🛰 kutusunu kapatıp denemek de poligon yükünü azaltmaz; poligon
   §5 konum çiti beyanı için de gerekir).
-* **Planetary Computer/STAC yanıt vermedi** → §4 üretilemedi. 🛰 kutusunu
-  kapatıp hızlı yayın al, tam sürümü sonra 📄 Yeni sürüm ile üret.
+* **Planetary Computer/STAC yanıt vermedi** → arazi örtüsü (§5.2/§6)
+  üretilemedi. 🛰 kutusunu kapatıp hızlı yayın al, tam sürümü sonra 📄 Yeni
+  sürüm ile üret.
+* **Raster/park alanı QA eşiği aşıldı** → sınır poligonu ile raster kapsama
+  %0,5'ten fazla ayrışıyor. En sık neden: uygulamada elle çizilen poligonun
+  **kendini kesen segmentler (düğüm)** içermesi — rapor §2/§7/§9'da düğüm
+  sayısını beyan eder. Sınırı uygulamada yeniden çiz (veya OSM poligonuna
+  dön) ve 📄 Yeni sürüm ile yeniden yayımla.
 * **Onaylı ölçüm yok** → istek zaten veritabanında reddedilir
   (`REPORT_NO_DATA`); önce ölçümleri onayla.
 
@@ -98,16 +109,61 @@ Başarısızlığın en sık üç nedeni:
   Bu yüzden kartta yayınlanmış park için düğme "📄 Yeni sürüm" der.
 * Aynı isteğin iki kez işlenmesini iki şey engeller: workflow'taki
   `concurrency` kilidi ve günlükteki `request_id` (işlenmiş istek atlanır).
+* **Geri çekme değişmezliği bozmaz:** rapor içeriği DÜZELTİLMEZ; yanlış
+  yayın tümüyle kaldırılır ve yerine gerekçeli bildirim konur (§4b). Kimlik
+  yeniden kullanılmaz, işlem günlüğe ve git geçmişine yazılır.
+
+## 4b) Geri çekme (🗑 — 0010)
+
+Yanlışlıkla yayımlanan rapor **sessizce silinmez, geri çekilir** (bilimsel
+teamül: retraction). Akış yayınla aynı hattın tersidir:
+
+```
+🗑 Geri çek (yönetici: herhangi bir yayın · kullanıcı: kendi parkının yayını)
+   └─> Supabase: report_retractions (status='Beklemede')        [0010]
+          └─> rapor-yayin.yml (aynı 5 dk'lık iş) → publish-queue.mjs
+                 ├─ rapor/DGR-…/{data.json,olcum.csv,park.geojson,
+                 │               harita.png,metadata.json}  SİLİNİR
+                 ├─ rapor/DGR-…/index.html → gerekçeli GERİ ÇEKME BİLDİRİMİ
+                 │   (noindex; veri dosyalarına bağlantı YOK)
+                 ├─ rapor/index.html → rapor listeden düşer
+                 └─ günlük kaydı: status='Geri çekildi' (+gerekçe/tarih/kimlik)
+```
+
+Sunucu kilitleri (RLS + `tg_report_retraction_gate`, iki katman):
+
+| Kilit | Kural | Hata kodu |
+|---|---|---|
+| Biçim | `report_id` yalnız `DGR-YYYY-NNNN` (yol enjeksiyonu yok) | `RETRACT_BAD_ID` |
+| Kimlik | İstek yalnız kendi adına (`requested_by = auth.uid()`) | `RETRACT_NOT_SELF` |
+| Aktiflik | Engelli hesap istek açamaz | `RETRACT_INACTIVE` |
+| Mülkiyet | Yönetici olmayan yalnız **kendi projesinin parkı** için çekebilir | `RETRACT_NOT_YOUR_PARK` |
+| Kota | Yönetici olmayan 24 saatte en fazla **3** geri çekme | `RETRACT_QUOTA` |
+| Yineleme | Aynı rapor için ikinci bekleyen istek açılamaz (kısmi unique index) | `RETRACT_DUPLICATE` |
+
+Ek dürüstlük katmanı: istemcinin beyan ettiği `park_id ↔ report_id` eşleşmesi
+**repo günlüğüyle** doğrulanır — eşleşmeyen satır Actions tarafından İŞLENMEZ
+(RLS park mülkiyetine bakabilir ama hangi raporun hangi parka ait olduğunu
+yalnız günlük bilir). İstek satırları değiştirilemez (update politikası yok);
+sonuç her zaman günlüktedir.
+
+> Geri çekme, veriyi git **geçmişinden** silemez (geçmiş yeniden yazılmaz).
+> Bildirim sayfası bunu açıkça söyler; kişisel veri (KVKK) bildiriminde
+> depo sahibiyle iletişim yolu sayfada yazılıdır.
 
 ## 5) Kurulum (bir kez)
 
 1. Supabase → SQL Editor → `supabase/migrations/0008_report_publish.sql` → Run.
 2. Supabase → SQL Editor → `supabase/migrations/0009_user_report_publish.sql`
    → Run (kullanıcılar kendi parkını yayınlayabilsin: mülkiyet + kota kilidi).
-3. Depoyu push'la: `rapor-yayin.yml` kendiliğinden etkinleşir.
+3. Supabase → SQL Editor → `supabase/migrations/0010_report_retraction.sql`
+   → Run (🗑 geri çekme kuyruğu: yönetici + kendi parkının sahibi).
+4. Depoyu push'la: `rapor-yayin.yml` kendiliğinden etkinleşir.
    (GitHub → Actions → "Rapor Yayın Kuyruğu" → ilk koşuyu görmek istersen
    "Run workflow" da diyebilirsin; şart değil.)
-4. Uygulamada 🔐 Ölçüm Yönetimi → kart parkları listeliyorsa hat hazır.
+5. Uygulamada 🔐 Ölçüm Yönetimi → kart parkları listeliyorsa hat hazır.
+   (0010 uygulanmazsa site çökmez: 🗑 isteği sunucuda reddedilir ve arayüz
+   "0010_report_retraction.sql çalıştırılmalı" der; yayın akışı etkilenmez.)
 
 > GitHub, 60 gün boyunca **hiç** etkinlik olmayan depolarda zamanlanmış işleri
 > devre dışı bırakır ve e-posta gönderir. Gelirse: Actions → "Rapor Yayın
@@ -126,6 +182,60 @@ Elle yayınlar `rapor/yayin-kuyrugu.json` günlüğünde görünmez (günlük ya
 kuyruktan gelen istekleri ve bu hat kurulmadan önceki ilk yayını taşır);
 `rapor/index.html` dizini ise her iki yolu da listeler.
 
+## 6b) Rapor şablonu v2 (2026-09-28 · kullanıcı standardı)
+
+Bu şablon **bu sürümden sonra üretilen** raporlarda geçerlidir. Yayımlanmış
+`DGR-2026-0001` ve `DGR-2026-0002` dondurulmuştur ve eski şablonda kalır
+(yayımlanmış rapor değiştirilmez; v2 çıktısı bir sonraki yayından, yani
+`DGR-2026-0003`'ten itibaren görünür):
+
+```
+BELGE KÜNYESİ (kimlik · durum · konu · konum · tarih · analiz sürümü ·
+               veri dönemi · çözünürlük · lisans · hash)
+1 Analiz Özeti          8  Değerlendirme (yalnız betimleme)
+2 Analiz Alanı          9  Sınırlılıklar
+3 Veri Kaynakları      10  Tekrar Üretilebilirlik
+4 Yöntem (4.1–4.5)     11  Analiz Parmak İzi (engine · commit · hash · DOI)
+5 Nicel Sonuçlar       12  Rapor Geçmişi (sürüm zinciri)
+  (Çizelge 1–3)        13  Atıf (önerilen atıf + BibTeX + DOI notu)
+6 Harita (Şekil 2)     14  Kaynakça (DOI'lerle)
+7 Kalite Kontrol       Ek A Veri Erişilebilirliği
+  (Çizelge 4: QA/QC + alan dengesi sayıları)
+```
+
+İlkeler: **sonuç ile yorum ayrıdır** (§5 sayı verir, §8 yalnız veriden türeyen
+betimleme yapar; normatif dil kullanılmaz); **QA/QC yıldızdır** (§7 kontrolleri
+ve alan dengesi farkını sayılarıyla belgeler); **sertifika dili yoktur**
+("onaylı rapor", "kesin sonuç", "%100 doğruluk", "resmî belge" gibi iddialar
+yasak — şablon akreditasyon belgesi DEĞİLDİR ve bunu künyede söyler).
+
+* **Şekil 1:** bar renkleri taksonomik grubu taşır — ibreli **yeşil**,
+  yapraklı **turuncu**, diğer gri.
+* **Şekil 2 (harita.png):** alt bilgi şeridi belge kimliğini (DGR-…), veri
+  kaynağını, çözünürlüğü, projeksiyonu (EPSG), analiz tarihini, motor
+  sürümünü ve © DendroGeo telifini taşır → harita tek başına dolaşıma girse
+  bile kaynağı belirlidir. Ölçek çubuğu segmentli, harita alanı çerçevelidir.
+* **metadata.json:** her raporun yanında DataCite Metadata Schema 4.7 alan
+  adlarıyla hizalı makine okur üst veri (identifier/title/publicationYear/
+  resourceType/version/spatialCoverage/temporalCoverage/resolution/
+  methodVersion/sources/relatedIdentifiers/resultHash/gitCommit/doi). Sayfa
+  başında aynı bilgiler JSON-LD (`schema.org/Report`) olarak da gömülüdür.
+* **DOI hazırlığı:** DGR iç kimliktir; Zenodo/DataCite kaydı yapıldığında DOI
+  §11'e, `metadata.json`'a (`doi` + `relatedIdentifiers`'a `IsIdenticalBy`)
+  ve atıf bloğuna işlenir. Rapor kimliği DEĞİŞMEZ.
+* **Sürüm:** her DGR `1.0` doğar. İçerik düzeltmesi = geri çekme + yeni DGR;
+  aynı parkın yeni analizi = yeni DGR ve §12'de `IsNewVersionOf` zinciri.
+* **Geometri QA:** elle çizilen sınır poligonlarında kendini kesen segment
+  (düğüm) taraması yapılır; düğüm varsa §2/§7/§9 sayıyla beyan eder ve arazi
+  örtüsü çözümlemesi yayınlanmaz (QA eşiği zaten bloklayacaktır; rapor
+  NEDENİ de söyler).
+
+Faz haritası (kullanıcı planı): **Faz 1** (rapor standardı) ve **Faz 2**
+(dijital bütünlük: commit/engine/hash/geçmiş) bu sürümle TAMAM; **Faz 3**
+(metadata.json + JSON-LD) TAMAM, QR kod ve gerçek **Faz 4** PID kaydı
+(Zenodo API) bilinçli olarak SONRAYA bırakıldı (QR için satılabilir bir
+kodlayıcı kararı gerekiyor; yanlış QR, hiç QR'dan kötüdür).
+
 ## 7) Bekçiler
 
 `test/report-publish.test.mjs` şu sözleşmeleri kilitler: şema + RLS + trigger
@@ -136,6 +246,22 @@ hash'in yayınlanmış sayfayla eşleşmesi), arayüz bağlantısı (kart yalnı
 vm'de gerçek davranış (bağlantı yalnız geçerli `DGR-YYYY-NNNN` kimliğinden
 kurulur → oynanmış günlük dosyası uygulama içine dış bağlantı sokamaz;
 yönetici olmayan istek açamaz).
+
+`test/retraction.test.mjs` geri çekme hattını (0010) kilitler: SQL kilitleri
+(biçim/kimlik/mülkiyet/kota/yineleme + update politikası YOK), kuyruk planı
+(günlükle park eşleşme doğrulaması, işlenmiş istek atlanır), dosya işleyici
+(geçici dizinde: veri dosyaları silinir, bildirim yazılır, liste düşer, yol
+enjeksiyonu reddedilir) ve vm'de istemci davranışı (🗑 düğmeleri, insert
+gövdesi/oturum anahtarı, hata eşlemeleri, geri çekilen rapor bağlantı
+üretmez).
+
+`test/report-v2.test.mjs` rapor şablonu v2'yi kilitler: künye + 14 bölüm,
+sonuç/yorum ayrımı, QA çizelgesi ve alan dengesi sayıları, grup renkli barlar,
+parmak izi (engine/commit/hash/DOI "atanmadı"), tekrar üretilebilirlik,
+geçmiş zinciri, atıf + kaynakça DOI'leri, metadata.json (DataCite deseni),
+düğüm beyanı, PNG alt bilgi şeridi, sertifika dili yasağı ve yayımlanmış
+dizinin tutarlılığı (kimlik↔park eşleşmesi, v2 sayfa ⇔ metadata.json,
+günlükteki hash'in sayfada görünmesi).
 
 `test/user-publish.test.mjs` kullanıcı yayını hattını (0009) kilitler:
 mülkiyet + kendi onaylı verisi + 24 saatte 3 istek kotası + `requested_by =

@@ -19,6 +19,11 @@ name: Rapor Yayın Kuyruğu
 # kartta gösterir. Actions'ın Supabase'e YAZMA yetkisi YOKTUR (service_role
 # anahtarı depoda tutulmaz) — istek veritabanında, sonuç git'te durur.
 #
+# GERİ ÇEKME (0010 · 2026-09-28): aynı koşu report_retractions kuyruğunu da
+# işler — 🗑 ile istenen geri çekmede raporun VERİ dosyaları kaldırılır,
+# adresinde gerekçeli bildirim kalır, rapor/index.html listesinden düşer ve
+# günlük 'Geri çekildi' kaydı alır. DGR kimliği yeniden kullanılmaz.
+#
 # NOT: rapor.yml (workflow_dispatch) elle tek park yayını için duruyor; bu iş
 # kuyruğu otomatik boşaltır. İkisi de aynı üreticiyi (publishPark) çağırır,
 # yani çıktı biçimi birebir aynıdır.

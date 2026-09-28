@@ -16,6 +16,7 @@ Supabase kontrol panelinde yaşıyordu; artık her değişiklik version control'
 | `migrations/0007_geo_fence.sql` | **Konum çiti**: `parks.geom_json`, `measurements.geo_verified_at/geo_dist_m/geo_acc_m/geo_override_by`, `dg_hav_m()` + `dg_point_in_park()` (ray-casting), `trg_geo_fence` (ölçüm parkın dışında ise INSERT/UPDATE reddi), `trg_project_requires_park`. Idempotent. |
 | `migrations/0008_report_publish.sql` | **Site içinden rapor yayını**: `report_requests` kuyruğu (isteği yalnız `is_admin()` açar — 0009'da kendi parkı için kullanıcıya da açıldı; okuma anon'a açık — Actions işi buradan okur), aynı park için tek bekleyen istek (kısmi unique index), `tg_report_request_gate` (yetki + onaylı veri şartı; `REPORT_ADMIN_ONLY`/`REPORT_NO_DATA`). Idempotent. |
 | `migrations/0009_user_report_publish.sql` | **Kullanıcılar kendi parkını yayınlar**: `tg_report_request_gate` genişletildi (yönetici olmayan için mülkiyet `REPORT_NOT_YOUR_PARK`, kendi onaylı verisi `REPORT_NO_OWN_DATA`, 24 saatte 3 istek kotası `REPORT_QUOTA`, `requested_by = auth.uid()` `REPORT_NOT_SELF`) + RLS insert/update: kullanıcı kendi bekleyen isteğini iptal edebilir. Idempotent, 0008'in üzerine. |
+| `migrations/0010_report_retraction.sql` | **Geri çekme kuyruğu**: `report_retractions` (yönetici herhangi bir yayını, kullanıcı kendi parkının yayınını geri çeker; `report_id` biçim kilidi `RETRACT_BAD_ID`, kimlik `RETRACT_NOT_SELF`, mülkiyet `RETRACT_NOT_YOUR_PARK`, 24 saatte 3 `RETRACT_QUOTA`, yineleme `RETRACT_DUPLICATE`; select anon'a açık, update YOK, delete yalnız yönetici). Sonuç repo günlüğünde: Actions veri dosyalarını siler, adrese gerekçeli bildirim koyar. Idempotent, 0008+0009'un üzerine. |
 | `dump-schema.sh` | Canlı şemayı `supabase db dump` ile yeniden dökmek için yardımcı |
 | `audit/rls-probe.sh` | Anon key ile 13 saldırı denemesi (yetki yükseltme dahil) |
 | `audit/RLS-DENETIM.md` | Denetim listesi + sonuç tablosu (doldurulacak) |
@@ -33,7 +34,8 @@ Supabase SQL Editor'da sırayla:
 7. `0007_geo_fence.sql` → Run (konum çiti: ölçüm park poligonu dışında ise sunucu reddeder)
 8. `0008_report_publish.sql` → Run (site içinden rapor yayını kuyruğu)
 9. `0009_user_report_publish.sql` → Run (kullanıcılar kendi parkının raporunu kendisi yayınlar: mülkiyet + kota kilidi)
-10. (Önerilir) `audit/rls-probe.sh`'i kendi makinenden çalıştır → sonuçları
+10. `0010_report_retraction.sql` → Run (🗑 geri çekme: yanlışlıkla yayınlanan rapor yayından kaldırılabilir)
+11. (Önerilir) `audit/rls-probe.sh`'i kendi makinenden çalıştır → sonuçları
    `audit/RLS-DENETIM.md` tablosuna işle
 
 > ⚠️ **Sıra önemli:** `0004` uygulanmadan site çökmez ama park kimliği devre
@@ -147,6 +149,35 @@ katman — istemci kapıları yalnız UX'tir):
 > 0009 uygulanmazsa kullanıcı 📄 düğmesine basınca sunucu reddeder ve panel
 > "Yetki yok" uyarısı gösterir; yönetici kartı 0008 ile çalışmaya devam eder.
 > Bekçi: `test/user-publish.test.mjs`.
+
+## 0010 — geri çekme: yanlışlıkla yayınlanan rapor yayından kaldırılır (2026-09-28)
+
+Kullanıcı isteği: **"yönetici kısmına yayınları silme yetkisi ver,
+yanlışlıkla yayınlananların silinmesine izin ver; kullanıcıya da aynı
+şekilde."** Bilimsel çizgi: rapor SESSİZCE SİLİNMEZ — **geri çekilir**
+(retraction): veri dosyaları yayından kalkar, adresinde gerekçeli bildirim
+kalır, DGR kimliği yeniden kullanılmaz, işlem günlüğe (`Geri çekildi`) ve git
+geçmişine yazılır.
+
+* **Yönetici**: herhangi bir yayını geri çekebilir.
+* **Kullanıcı**: yalnız kendi projesinin bağlı olduğu parkın yayınını çekebilir
+  (yayınlama yetkisiyle simetrik; `RETRACT_NOT_YOUR_PARK`, `DG0RP`).
+* **Biçim kilidi**: `report_id` yalnız `^DGR-[0-9]{4}-[0-9]{4}$`
+  (`RETRACT_BAD_ID`, `DG0RF`) — Actions dosya yolunu bu kimlikten kurar.
+* **Kimlik**: `requested_by = auth.uid()` (`RETRACT_NOT_SELF`, `DG0RN`) +
+  `is_active()` (`RETRACT_INACTIVE`, `DG0RI`).
+* **Kota**: yönetici olmayan 24 saatte en fazla 3 geri çekme (`RETRACT_QUOTA`,
+  `DG0RQ`); aynı rapor için ikinci bekleyen istek açılamaz
+  (`RETRACT_DUPLICATE`, `DG0RD` + kısmi unique index).
+* **Değişmezlik**: satır güncellenemez (update politikası YOK); delete yalnız
+  yönetici. `select` anon'a açık (Actions işi + arayüz durumu buradan okur).
+* **Eşleme doğrulaması**: park_id ↔ report_id eşleşmesi repo günlüğüyle
+  doğrulanır; eşleşmeyen istek Actions'ta İŞLENMEZ (RLS yalnız park
+  mülkiyetini görebilir).
+
+> 0010 uygulanmazsa site çökmez: 🗑 isteği sunucuda reddedilir, arayüz
+> "0010_report_retraction.sql çalıştırılmalı" der; yayın akışı etkilenmez.
+> Bekçi: `test/retraction.test.mjs`; işletim: `docs/rapor-yayini.md` §4b.
 
 ## 0004 — park kimliği modeli (2026-09-24)
 

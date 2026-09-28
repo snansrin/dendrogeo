@@ -10,7 +10,7 @@
  *      tek bekleyen istek, onaylı veri şartı, select anon'a açık, delete
  *      yalnız yönetici) AYNEN durur.
  *   2) ARAYÜZ KABLOLAMASI: 📁 Projeler'de parkı bağlı satırda 📄 düğmesi,
- *      v-projects içinde display:none panel kutusu, sw.js r42, yeni CSS yok.
+ *      v-projects içinde display:none panel kutusu, sw.js r43, yeni CSS yok.
  *   3) DAVRANIŞ (vm): panel durumları (yok/beklemede/yabancı beklemede/
  *      yayınlandı/başarısız), insert gövdesi + oturum anahtarı, kota ve
  *      mülkiyet hata eşlemeleri, iptal yetkisi, oynanmış günlük dış
@@ -133,8 +133,8 @@ describe('arayüz kablolaması: 📄 düğmesi + panel kutusu', () => {
       assert.ok(UI.includes(cls), 'UI sınıfı mevcut aileden: ' + cls);
   });
 
-  test('çevrimdışı paket: sw.js r42 ve modül CORE_ASSETS’te kalır', () => {
-    assert.match(SW, /CACHE_VERSION = 'dendrogeo-sw-v2-r42'/, 'içerik değişti → sürüm arttı');
+  test('çevrimdışı paket: sw.js r43 ve modül CORE_ASSETS’te kalır', () => {
+    assert.match(SW, /CACHE_VERSION = 'dendrogeo-sw-v2-r43'/, 'içerik değişti → sürüm arttı');
     assert.match(SW, /'\/src\/services\/report-publish\.js'/);
   });
 });
@@ -211,7 +211,7 @@ describe('kullanıcı paneli davranışı (vm)', () => {
     assert.match(h, /badge off">Yayın yok/);
     assert.match(h, /dgUserPublish\(6\)/, 'yayınla düğmesi park kimliğiyle');
     assert.match(h, /📄 Yayınla/);
-    assert.match(h, /id="dgUserPubLulc" checked/, '§4 tercihi varsayılan açık');
+    assert.match(h, /id="dgUserPubLulc" checked/, '§5 tercihi varsayılan açık');
     assert.match(h, /park düzeyindedir/, 'raporun kapsamı kullanıcıya söylenir');
     assert.match(h, /tüm onaylı ölçümleri/, 'yalnız kendi projesi değil');
     assert.match(h, /24 saatte en fazla 3 istek/, 'kota şeffaf');

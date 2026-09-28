@@ -32,6 +32,13 @@
  * ------------------------------------------------------------------------- */
 const DG_LC_STAC="https://planetarycomputer.microsoft.com/api/stac/v1";
 
+/* MOTOR SÜRÜMÜ (2026-09-28 · kullanıcı standardı md. 8/9): bilimsel raporun
+ * "Analiz Parmak İzi" (§11), tekrar üretilebilirlik tablosu (§10), PNG alt
+ * bilgisi ve metadata.json bu sabiti scripts/make-report.mjs üzerinden okur.
+ * Motor davranışı değiştiğinde bu sürüm ARTIRILMALIDIR — raporlar hangi
+ * sürümle üretildiğini beyan eder. */
+const DG_LC_ENGINE_VERSION="4.2.0";
+
 const DG_LC_SOURCES={
   primary:{
     key:"primary",

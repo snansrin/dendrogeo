@@ -35,7 +35,7 @@
  */
 
 /* Modül durumu (üst düzey let: module-registry global ad çakışmasını kilitler). */
-let DG_PUB_STATE={parks:[],requests:[],queue:null,queueAt:0,error:"",loading:false,pollTimer:0,pollCount:0};
+let DG_PUB_STATE={parks:[],requests:[],retractions:[],queue:null,queueAt:0,error:"",loading:false,pollTimer:0,pollCount:0};
 
 const DG_PUB_QUEUE_URL="/rapor/yayin-kuyrugu.json";
 const DG_PUB_ORIGIN="https://dendrogeo.org";
@@ -83,16 +83,51 @@ async function dgPubFetchParks(){
  return data.filter(r=>Number(r.park_id)>0&&!r.park_pending&&Number(r.records)>0);
 }
 
+/* Geri çekme istekleri (0010): tablo yoksa (0010 uygulanmamış) SESSİZCE boş
+ * liste — yayın akışı bundan etkilenmez, 🗑 isteği sunucuda zaten reddedilir. */
+async function dgPubFetchRetractions(){
+ try{
+  const{data,error}=await sb.from("report_retractions")
+   .select("id,report_id,park_id,reason,status,requested_by,created_at")
+   .order("created_at",{ascending:false}).limit(50);
+  if(error)return[];
+  return data||[];
+ }catch(e){return[];}
+}
+
 /* ---------- durum birleştirme: istek (DB) + sonuç (repo günlüğü) ---------- */
 function dgPubEntryFor(reqId){
  const es=(DG_PUB_STATE.queue&&DG_PUB_STATE.queue.entries)||[];
  for(let i=es.length-1;i>=0;i--)if(String(es[i].request_id)===String(reqId))return es[i];
  return null;
 }
+/* GERİ ÇEKME FİLTRESİ (0010): günlükte 'Geri çekildi' kaydı olan rapor artık
+ * "yayınlandı" sayılmaz — bağlantısı kurulmaz, listeden düşer, yerine durum
+ * rozeti geçer. Kimlik biçimi burada da DOĞRULANIR (dgPubUrl tek kapı). */
+function dgPubRetractedIds(queue){
+ const out={};
+ for(const e of ((queue&&queue.entries)||[]))
+  if(e.status==="Geri çekildi"&&DG_PUB_ID.test(String(e.report_id||"")))out[String(e.report_id)]=e;
+ return out;
+}
+function dgPubRetractDone(queue,retId){
+ for(const e of ((queue&&queue.entries)||[]))
+  if(e.status==="Geri çekildi"&&String(e.retraction_id)===String(retId))return e;
+ return null;
+}
+function dgPubRetractedInPark(queue,parkId){
+ const es=(queue&&queue.entries)||[];
+ for(let i=es.length-1;i>=0;i--){
+  const e=es[i];
+  if(e.status==="Geri çekildi"&&String(e.park_id)===String(parkId))return e;
+ }
+ return null;
+}
 function dgPubPublishedByPark(){
+ const ret=dgPubRetractedIds(DG_PUB_STATE.queue);
  const out={};
  for(const e of ((DG_PUB_STATE.queue&&DG_PUB_STATE.queue.entries)||[])){
-  if(e.status==="Yayınlandı"&&DG_PUB_ID.test(String(e.report_id||"")))out[String(e.park_id)]=e;
+  if(e.status==="Yayınlandı"&&DG_PUB_ID.test(String(e.report_id||""))&&!ret[String(e.report_id)])out[String(e.park_id)]=e;
  }
  return out;
 }
@@ -128,14 +163,25 @@ function dgPubRender(){
   const req=st.requests.find(r=>String(r.park_id)===pid&&r.status==="Beklemede"&&!dgPubEntryFor(r.id));
   const last=st.requests.find(r=>String(r.park_id)===pid);
   const pub=pubByPark[pid];
+  const retPend=(st.retractions||[]).find(x=>String(x.park_id)===pid&&x.status==="Beklemede"&&!dgPubRetractDone(st.queue,x.id));
+  const retPark=dgPubRetractedInPark(st.queue,pid);
   let stt="none",rid="",note="";
   if(req){
    stt="pending";
    const s=dgPubStatus(req);
    note=esc(s.note)+" · yayın işi 5 dakikada bir çalışır";
   }else if(pub){
-   stt="published";rid=pub.report_id;
-   note=esc(rid||"—")+(pub.finished_at?(" · yayın "+String(pub.finished_at).slice(0,10)):"");
+   stt=retPend?"retracting":"published";rid=pub.report_id;
+   note=retPend?"🗑 geri çekme isteği kuyrukta — birkaç dakika içinde yayından kalkar"
+    :esc(rid||"—")+(pub.finished_at?(" · yayın "+String(pub.finished_at).slice(0,10)):"");
+  }else if(retPend){
+   stt="retracting";rid=DG_PUB_ID.test(String(retPend.report_id||""))?String(retPend.report_id):"";
+   note="🗑 "+esc(rid||"rapor")+" geri çekme kuyruğunda";
+  }else if(retPark){
+   stt="retracted";
+   note="🗑 "+esc(DG_PUB_ID.test(String(retPark.report_id||""))?String(retPark.report_id):"rapor")+" geri çekildi"+
+    (retPark.finished_at?(" · "+String(retPark.finished_at).slice(0,10)):"")+
+    (retPark.reason?(" · "+esc(String(retPark.reason).slice(0,60))):"");
   }else if(last){
    const s=dgPubStatus(last);
    stt=s.key;rid=s.reportId||"";
@@ -143,22 +189,29 @@ function dgPubRender(){
   }
   const badge=stt==="published"?'<span class="badge on">Yayınlandı</span>'
    :stt==="pending"?'<span class="badge admin">Beklemede</span>'
+   :stt==="retracting"?'<span class="badge admin">Geri çekiliyor</span>'
+   :stt==="retracted"?'<span class="badge off">Geri çekildi</span>'
    :stt==="failed"?'<span class="badge off">Başarısız</span>'
    :stt==="cancelled"?'<span class="badge off">Vazgeçildi</span>'
    :'<span class="badge off">Yayın yok</span>';
   const url=dgPubUrl(rid);
 
   const act=[];
-  if(url){
-   act.push('<button class="btn sm blue" onclick="dgReportOpen(\''+rid+'\')" title="Raporu yeni sekmede aç">🔗 Aç</button>');
-   act.push('<button class="btn sm" onclick="dgReportShare(\''+rid+'\')" title="Bağlantıyı paylaş / panoya kopyala">📤 Paylaş</button>');
-  }
   if(stt==="pending"){
    act.push('<button class="btn sm red" onclick="dgPublishCancel(\''+esc(req.id)+'\')" title="Bekleyen isteği iptal et">✖ Vazgeç</button>');
   }else{
-   act.push('<button class="btn sm amber" onclick="dgPublishReport('+Number(p.park_id)+')" title="'+
-    (stt==="published"?"Yeni sürüm yayınla: eski rapor değişmez, yeni DGR kimliği alır":"Bilimsel raporu yayınla")+'">'+
-    (stt==="published"?"📄 Yeni sürüm":"📄 Yayınla")+"</button>");
+   if(url){
+    act.push('<button class="btn sm blue" onclick="dgReportOpen(\''+rid+'\')" title="Raporu yeni sekmede aç">🔗 Aç</button>');
+    act.push('<button class="btn sm" onclick="dgReportShare(\''+rid+'\')" title="Bağlantıyı paylaş / panoya kopyala">📤 Paylaş</button>');
+   }
+   if(stt==="published"){
+    act.push('<button class="btn sm red" onclick="dgReportRetract(\''+rid+'\','+Number(p.park_id)+')" title="Yayını geri çek: veri dosyaları kaldırılır, adresinde gerekçeli bildirim kalır; kimlik yeniden kullanılmaz">🗑 Geri çek</button>');
+   }
+   if(!retPend){
+    act.push('<button class="btn sm amber" onclick="dgPublishReport('+Number(p.park_id)+')" title="'+
+     (stt==="published"?"Yeni sürüm yayınla: eski rapor değişmez, yeni DGR kimliği alır":"Bilimsel raporu yayınla")+'">'+
+     (stt==="published"?"📄 Yeni sürüm":"📄 Yayınla")+"</button>");
+   }
   }
 
   return "<tr>"+
@@ -172,9 +225,20 @@ function dgPubRender(){
   "</tr>";
  }).join("");
 
+ const retSet=dgPubRetractedIds(st.queue);
  const hist=((st.queue&&st.queue.entries)||[]).slice(-6).reverse().map(e=>{
   const ok=e.status==="Yayınlandı";
-  const u=dgPubUrl(e.report_id);
+  const ret=e.status==="Geri çekildi";
+  if(ret){
+   const ridR=DG_PUB_ID.test(String(e.report_id||""))?e.report_id:"—";
+   return '<div style="padding:5px 0;border-bottom:1px solid var(--line);font-size:.78rem">'+
+    "🗑 <b>"+esc(ridR)+"</b> geri çekildi · "+esc(e.park_name||("park #"+e.park_id))+
+    (e.reason?(" · gerekçe: "+esc(String(e.reason).slice(0,80))):"")+
+    '<div class="dg-tree-meta">istek '+esc(String(e.retraction_id||"").slice(0,8))+" · "+esc(String(e.finished_at||"").slice(0,16).replace("T"," "))+"</div></div>";
+  }
+  /* Geri çekilen raporun eski "Yayınlandı" satırı bağlantı TAŞIMAZ: veri
+   * dosyaları kaldırıldı, ölü bağlantı çizmek dürüstlük ilkesine aykırı. */
+  const u=(ok&&!retSet[String(e.report_id)])?dgPubUrl(e.report_id):"";
   /* Günlük Pages'te herkese açık: biçimi bozuk bir kimlik EKRANA DA yazılmaz
    * (bağlantı zaten kurulmaz) — yerine "—" basılır. */
   const rid=DG_PUB_ID.test(String(e.report_id||""))?e.report_id:"—";
@@ -197,7 +261,8 @@ function dgPubRender(){
   '<div class="lbl" style="margin:14px 0 4px">📜 Yayın günlüğü (son işler)</div>'+
   (hist||'<div class="dg-tree-meta">Henüz işlenmiş istek yok. Günlük: <span class="mono">rapor/yayin-kuyrugu.json</span></div>')+
   '<div class="dg-parkadmin-note" style="margin-top:10px">📄 Yayınla = istek kuyruğa yazılır; rapor tez biçiminde üretilir, içerik hash\'i ile dondurulur ve <span class="mono">/rapor/DGR-…/</span> altında kalıcı bağlantı alır. '+
-  'Eski raporlar DEĞİŞMEZ: yeni çözümleme yeni kimlik demektir. 🛰 kutusu işaretliyken §4 arazi örtüsü bağlamı da üretilir (birkaç dakika sürer).</div>';
+  'Eski raporlar DEĞİŞMEZ: yeni çözümleme yeni kimlik demektir. 🛰 kutusu işaretliyken §5 arazi örtüsü sonuçları da üretilir (birkaç dakika sürer). '+
+  '🗑 Geri çek = yanlışlıkla yayımlanan rapor yayından kaldırılır: veri dosyaları silinir, adresinde gerekçeli bildirim kalır, DGR kimliği yeniden KULLANILMAZ; işlem günlüğe ve git geçmişine yazılır.</div>';
 }
 
 /* ---------- yazma (ortak çekirdek: yönetici kartı + kullanıcı paneli) ---------- */
@@ -262,6 +327,60 @@ async function dgPublishCancel(id){
  await dgLoadPublishQueue();
 }
 
+/* ---------- GERİ ÇEKME (0010): yayımlanmış rapor yayından kaldırılır ----------
+ * Bilimsel teamül: SESSİZ SİLME YOK — istek kuyruğa yazılır, Actions işi
+ * veri dosyalarını kaldırır, adresinde gerekçeli bildirim bırakır, günlük
+ * 'Geri çekildi' kaydı alır. DGR kimliği yeniden kullanılmaz.
+ * YETKİ SUNUCUDA: yönetici herhangi bir raporu; kullanıcı YALNIZ kendi
+ * projesinin parkının raporunu geri çekebilir (RLS + tg_report_retraction_gate).
+ * report_id ↔ park_id eşleşmesini Actions günlükle ayrıca doğrular. */
+async function dgRetractInsert(reportId,parkId,reason){
+ let token=SB_KEY;
+ try{const{data}=await sb.auth.getSession();if(data&&data.session&&data.session.access_token)token=data.session.access_token;}catch(e){}
+ try{
+  const r=await fetch(SB_URL+"/rest/v1/report_retractions",{
+   method:"POST",
+   headers:{"apikey":SB_KEY,"Authorization":"Bearer "+token,"Content-Type":"application/json","Prefer":"return=minimal"},
+   body:JSON.stringify([{report_id:String(reportId),park_id:Number(parkId),reason:reason||null,status:"Beklemede",
+    requested_by:(typeof USER!=="undefined"&&USER&&USER.id)||null}])
+  });
+  const ok=r.status===201||r.status===200;
+  const txt=ok?"":((await r.text().catch(()=> ""))||"");
+  return{ok:ok,status:r.status,txt:txt};
+ }catch(e){return{ok:false,status:0,txt:"NETWORK "+((e&&e.message)||e)};}
+}
+
+function dgRetractError(r){
+ const txt=String(r.txt||"");
+ if(!r.status||/^NETWORK/.test(txt))return "Ağ hatası: "+txt.replace(/^NETWORK\s*/,"").slice(0,160);
+ if(/does not exist|42P01/i.test(txt)||r.status===404)return "Geri çekme kuyruğu kurulu değil: Supabase SQL Editor'da 0010_report_retraction.sql çalıştırılmalı.";
+ if(/RETRACT_BAD_ID|DG0RF/i.test(txt))return "Rapor kimliği geçersiz (DGR-YYYY-NNNN bekleniyor).";
+ if(/RETRACT_DUPLICATE|DG0RD|duplicate key|23505/i.test(txt))return "Bu rapor için bekleyen bir geri çekme isteği zaten var.";
+ if(/RETRACT_QUOTA|DG0RQ/i.test(txt))return "Günlük geri çekme sınırına ulaştın (24 saatte 3) — sonra yeniden dene.";
+ if(/RETRACT_NOT_YOUR_PARK|DG0RP/i.test(txt))return "Bu park senin projene bağlı değil — yalnız kendi parkının yayınını geri çekebilirsin.";
+ if(/RETRACT_NOT_SELF|DG0RN/i.test(txt))return "Geri çekme isteği yalnız kendi adına açılabilir.";
+ if(/RETRACT_INACTIVE|DG0RI/i.test(txt))return "Hesabın etkin değil.";
+ if(/42501|401|403|row-level|permission/i.test(txt))return "Yetki yok: bu rapor için geri çekme isteği açamazsın.";
+ return "İstek yazılamadı (HTTP "+r.status+"): "+txt.slice(0,160);
+}
+
+async function dgReportRetract(reportId,parkId){
+ if(!DG_PUB_ID.test(String(reportId||"")))return toast("Rapor kimliği geçersiz.","err","🗑");
+ if(typeof USER==="undefined"||!USER)return toast("Önce giriş yap.","err","🗑");
+ if(!confirm(reportId+" yayından geri çekilsin mi?\n\nRaporun veri dosyaları kaldırılır; adresinde gerekçeli geri çekme bildirimi kalır. DGR kimliği yeniden kullanılmaz; işlem günlüğe ve git geçmişine yazılır."))return;
+ let reason="";
+ try{reason=window.prompt("Gerekçe (bildirim sayfasında ve günlükte yayımlanır; boş bırakılabilir):","yanlışlıkla yayınlandı")||"";}catch(e){reason="";}
+ const r=await dgRetractInsert(reportId,parkId,String(reason).slice(0,400));
+ if(r.ok){
+  toast("🗑 Geri çekme isteği kuyruğa alındı — rapor birkaç dakika içinde yayından kalkar.","ok","🗑");
+  DG_PUB_STATE.pollCount=0;DG_USER_PUB.polls=0;
+  if($("dgPubBox"))await dgLoadPublishQueue({silent:true});
+  if(DG_USER_PUB.parkId)await dgUserPubRefresh();
+  return;
+ }
+ toast(dgRetractError(r),"err","🗑");
+}
+
 /* ---------- KULLANICI TARAFI (0009): 📁 Projeler → 📄 Park Raporu ----------
  * Parkı için projesi olan kullanıcı rapor isteğini KENDİSİ açar; sonuç aynı
  * kuyruktan döner (rapor-yayin.yml → yayin-kuyrugu.json → kalıcı bağlantı).
@@ -271,7 +390,7 @@ async function dgPublishCancel(id){
  * kartıyla aynı card/shead/badge/btn/alert/dg-tree-meta/mono aileleri.
  * Panel durumu yönetici kartından AYRI tutulur (DG_USER_PUB): iki arayüz
  * birbirinin verisini ezmez. */
-let DG_USER_PUB={projectId:0,parkId:0,parkName:"",requests:[],queue:null,ownApproved:null,error:"",timer:0,polls:0};
+let DG_USER_PUB={projectId:0,parkId:0,parkName:"",requests:[],retracts:[],queue:null,ownApproved:null,error:"",timer:0,polls:0};
 
 /* Saf okuma yardımcıları (günlük dosyası parametrik: yönetici kartı kendi
  * durumunu, kullanıcı paneli kendi durumunu verir). Kimlik biçimi DOĞRULANMADAN
@@ -282,10 +401,11 @@ function dgPubEntryIn(queue,reqId){
  return null;
 }
 function dgPubPublishedInPark(queue,parkId){
+ const ret=dgPubRetractedIds(queue);
  const es=(queue&&queue.entries)||[];
  for(let i=es.length-1;i>=0;i--){
   const e=es[i];
-  if(e.status==="Yayınlandı"&&String(e.park_id)===String(parkId)&&DG_PUB_ID.test(String(e.report_id||"")))return e;
+  if(e.status==="Yayınlandı"&&String(e.park_id)===String(parkId)&&DG_PUB_ID.test(String(e.report_id||""))&&!ret[String(e.report_id)])return e;
  }
  return null;
 }
@@ -301,7 +421,7 @@ async function dgUserPubOpen(projectId){
  DG_USER_PUB.projectId=Number(p.id);
  DG_USER_PUB.parkId=Number(p.park_id);
  DG_USER_PUB.parkName=(p.parks&&p.parks.name)||p.park_name||("park #"+p.park_id);
- DG_USER_PUB.requests=[];DG_USER_PUB.error="";DG_USER_PUB.ownApproved=null;DG_USER_PUB.polls=0;
+ DG_USER_PUB.requests=[];DG_USER_PUB.retracts=[];DG_USER_PUB.error="";DG_USER_PUB.ownApproved=null;DG_USER_PUB.polls=0;
  box.style.display="";
  box.innerHTML='<div class="dg-tree-meta">⏳ Rapor durumu yükleniyor…</div>';
  if(box.scrollIntoView)box.scrollIntoView({behavior:"smooth",block:"nearest"});
@@ -321,9 +441,10 @@ async function dgUserPubRefresh(){
    st.requests=[];
   }else{st.error="";st.requests=data||[];}
  }catch(e){st.error="İstekler okunamadı: "+((e&&e.message)||e);st.requests=[];}
- const[q,cnt]=await Promise.all([dgPubFetchQueue(),dgUserOwnApproved()]);
+ const[q,cnt,rets]=await Promise.all([dgPubFetchQueue(),dgUserOwnApproved(),dgUserFetchRetractions()]);
  if(q)st.queue=q;
  st.ownApproved=cnt;
+ st.retracts=rets||[];
  dgUserPubRender();
  dgUserPubSchedulePoll();
 }
@@ -337,6 +458,19 @@ async function dgUserOwnApproved(){
    .eq("project_id",DG_USER_PUB.projectId).eq("owner",USER.id).eq("status","Onaylı").is("deleted_at",null);
   return Number(count||0);
  }catch(e){return null;}
+}
+
+/* Bu parkın geri çekme istekleri (0010): tablo yoksa sessizce boş — panel
+ * yayın durumunu göstermeye devam eder, 🗑 sunucuda zaten reddedilir. */
+async function dgUserFetchRetractions(){
+ if(!DG_USER_PUB.parkId)return[];
+ try{
+  const{data,error}=await sb.from("report_retractions")
+   .select("id,report_id,park_id,reason,status,requested_by,created_at")
+   .eq("park_id",DG_USER_PUB.parkId).order("created_at",{ascending:false}).limit(10);
+  if(error)return[];
+  return data||[];
+ }catch(e){return[];}
 }
 
 function dgUserPubRender(){
@@ -353,6 +487,8 @@ function dgUserPubRender(){
  const pend=st.requests.find(r=>r.status==="Beklemede"&&!dgPubEntryIn(st.queue,r.id));
  const pendOwn=!!(pend&&String(pend.requested_by||"")===String(mine));
  const pub=dgPubPublishedInPark(st.queue,st.parkId);
+ const retPend=(st.retracts||[]).find(x=>x.status==="Beklemede"&&!dgPubRetractDone(st.queue,x.id));
+ const retPark=dgPubRetractedInPark(st.queue,st.parkId);
  const last=st.requests[0]||null;
 
  let badge,note="";
@@ -360,8 +496,16 @@ function dgUserPubRender(){
   const dk=Math.max(0,Math.round((Date.now()-new Date(pend.created_at||Date.now()).getTime())/60000));
   badge='<span class="badge admin">Beklemede</span>';
   note=(dk<1?"az önce":dk+" dk önce")+" kuyruğa alındı · yayın işi 5 dakikada bir çalışır"+(pendOwn?"":" · isteği başka bir katkıda bulunan açtı");
+ }else if(retPend){
+  badge='<span class="badge admin">Geri çekiliyor</span>';
+  note="🗑 "+esc(DG_PUB_ID.test(String(retPend.report_id||""))?String(retPend.report_id):"rapor")+" geri çekme kuyruğunda — birkaç dakika içinde yayından kalkar";
  }else if(pub){
   badge='<span class="badge on">Yayınlandı</span>';
+ }else if(retPark){
+  badge='<span class="badge off">Geri çekildi</span>';
+  note="🗑 "+esc(DG_PUB_ID.test(String(retPark.report_id||""))?String(retPark.report_id):"rapor")+" geri çekildi"+
+   (retPark.finished_at?(" · "+String(retPark.finished_at).slice(0,10)):"")+
+   (retPark.reason?(" · "+esc(String(retPark.reason).slice(0,60))):"");
  }else if(last){
   const e=dgPubEntryIn(st.queue,last.id);
   if(e&&e.status==="Başarısız"){badge='<span class="badge off">Başarısız</span>';note="⚠ "+String(e.message||"üretim hatası").slice(0,140);}
@@ -378,9 +522,10 @@ function dgUserPubRender(){
   act.push('<button class="btn sm blue" onclick="dgReportOpen(\''+rid+'\')" title="Raporu yeni sekmede aç">🔗 Aç</button>');
   act.push('<button class="btn sm" onclick="dgReportShare(\''+rid+'\')" title="Bağlantıyı paylaş / panoya kopyala">📤 Paylaş</button>');
  }
+ if(pub&&!retPend)act.push('<button class="btn sm red" onclick="dgReportRetract(\''+rid+'\','+st.parkId+')" title="Yayını geri çek: veri dosyaları kaldırılır, adresinde gerekçeli bildirim kalır (kendi parkın olmalı)">🗑 Geri çek</button>');
  if(pend&&pendOwn)act.push('<button class="btn sm red" onclick="dgUserCancel(\''+esc(pend.id)+'\')" title="Bekleyen isteği iptal et">✖ Vazgeç</button>');
- if(!pend)act.push('<button class="btn sm amber" onclick="dgUserPublish('+st.parkId+')" title="'+(url?"Yeni sürüm yayınla: eski rapor değişmez, yeni DGR kimliği alır":"Parkın bilimsel raporunu yayınla")+'">'+(url?"📄 Yeni sürüm":"📄 Yayınla")+"</button>");
- const lulc=(!pend)?'<label style="font-size:.78rem;color:var(--mut);display:inline-flex;gap:6px;align-items:center"><input type="checkbox" id="dgUserPubLulc" checked> 🛰 Arazi örtüsü bölümü (§4) dahil — önerilir</label>':"";
+ if(!pend&&!retPend)act.push('<button class="btn sm amber" onclick="dgUserPublish('+st.parkId+')" title="'+(url?"Yeni sürüm yayınla: eski rapor değişmez, yeni DGR kimliği alır":"Parkın bilimsel raporunu yayınla")+'">'+(url?"📄 Yeni sürüm":"📄 Yayınla")+"</button>");
+ const lulc=(!pend&&!retPend)?'<label style="font-size:.78rem;color:var(--mut);display:inline-flex;gap:6px;align-items:center"><input type="checkbox" id="dgUserPubLulc" checked> 🛰 Arazi örtüsü bölümü (§5) dahil — önerilir</label>':"";
 
  const own=st.ownApproved===0
   ? '<div class="alert warn" style="margin-top:10px">⚠ Bu projede <b>onaylı ölçümün görünmüyor</b>. Yayın isteği, parkta onaylı ölçümün varsa açılır — ölçülerin yönetici onayından geçince 📄 düğmesi çalışır.</div>'
@@ -396,7 +541,8 @@ function dgUserPubRender(){
   (st.queue===null?'<div class="dg-tree-meta" style="margin-top:8px">ℹ Yayın günlüğü okunamadı (çevrimdışı ya da dosya henüz yayınlanmadı) — istek gönderimi çalışır, durum alanı eksik kalabilir.</div>':"")+
   '<div class="dg-parkadmin-note" style="margin-top:10px">Rapor <b>park düzeyindedir</b>: yalnız bu projeyi değil, parktaki <b>tüm onaylı ölçümleri</b> kapsar. '+
   "Yayın kalıcıdır — içerik hash'i ile dondurulur, eski rapor DEĞİŞMEZ; yeni çözümleme yeni DGR kimliği alır. "+
-  "Üretim birkaç dakika sürer (kuyruk işi 5 dakikada bir çalışır); bağlantı bu panelde belirir. Yönetici olmayan kullanıcı 24 saatte en fazla 3 istek açabilir.</div>";
+  "Üretim birkaç dakika sürer (kuyruk işi 5 dakikada bir çalışır); bağlantı bu panelde belirir. Yönetici olmayan kullanıcı 24 saatte en fazla 3 istek açabilir. "+
+  "🗑 Geri çek = yanlışlıkla yayımlanan rapor yayından kaldırılır: adresinde gerekçeli bildirim kalır, kimlik yeniden kullanılmaz, işlem günlüğe yazılır.</div>";
 }
 
 async function dgUserPublish(parkId){
@@ -432,7 +578,8 @@ async function dgUserCancel(id){
 function dgUserPubSchedulePoll(){
  if(DG_USER_PUB.timer){clearInterval(DG_USER_PUB.timer);DG_USER_PUB.timer=0;}
  const mine=(typeof USER!=="undefined"&&USER&&USER.id)||"";
- const waiting=DG_USER_PUB.requests.some(r=>r.status==="Beklemede"&&String(r.requested_by||"")===String(mine)&&!dgPubEntryIn(DG_USER_PUB.queue,r.id));
+ const waiting=DG_USER_PUB.requests.some(r=>r.status==="Beklemede"&&String(r.requested_by||"")===String(mine)&&!dgPubEntryIn(DG_USER_PUB.queue,r.id))
+  ||(DG_USER_PUB.retracts||[]).some(x=>x.status==="Beklemede"&&String(x.requested_by||"")===String(mine)&&!dgPubRetractDone(DG_USER_PUB.queue,x.id));
  if(!waiting||DG_USER_PUB.polls>=DG_PUB_POLL_MAX)return;
  DG_USER_PUB.timer=setInterval(async()=>{
   DG_USER_PUB.polls++;
@@ -488,9 +635,10 @@ async function dgLoadPublishQueue(opts){
  DG_PUB_STATE.loading=true;
  if(!(opts&&opts.silent))$("dgPubBox").innerHTML='<div class="dg-tree-meta">⏳ Kuyruk yükleniyor…</div>';
  try{
-  const [parks,requests,queue]=await Promise.all([dgPubFetchParks(),dgPubFetchRequests(),dgPubFetchQueue()]);
+  const [parks,requests,queue,retracts]=await Promise.all([dgPubFetchParks(),dgPubFetchRequests(),dgPubFetchQueue(),dgPubFetchRetractions()]);
   DG_PUB_STATE.parks=parks;
   DG_PUB_STATE.requests=requests;
+  DG_PUB_STATE.retractions=retracts;
   if(queue)DG_PUB_STATE.queue=queue;
   DG_PUB_STATE.queueAt=Date.now();
  }catch(e){
@@ -504,7 +652,8 @@ async function dgLoadPublishQueue(opts){
  * tazeleme → kullanıcı F5'e basmadan bağlantının belirdiğini görür. */
 function dgPubSchedulePoll(){
  if(DG_PUB_STATE.pollTimer){clearInterval(DG_PUB_STATE.pollTimer);DG_PUB_STATE.pollTimer=0;}
- const waiting=DG_PUB_STATE.requests.some(r=>r.status==="Beklemede"&&!dgPubEntryFor(r.id));
+ const waiting=DG_PUB_STATE.requests.some(r=>r.status==="Beklemede"&&!dgPubEntryFor(r.id))
+  ||(DG_PUB_STATE.retractions||[]).some(x=>x.status==="Beklemede"&&!dgPubRetractDone(DG_PUB_STATE.queue,x.id));
  if(!waiting||DG_PUB_STATE.pollCount>=DG_PUB_POLL_MAX)return;
  DG_PUB_STATE.pollTimer=setInterval(async()=>{
   DG_PUB_STATE.pollCount++;
@@ -525,3 +674,4 @@ window.dgUserPubClose=dgUserPubClose;
 window.dgUserPublish=dgUserPublish;
 window.dgUserCancel=dgUserCancel;
 window.dgUserPubSync=dgUserPubSync;
+window.dgReportRetract=dgReportRetract;

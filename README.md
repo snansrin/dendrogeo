@@ -237,7 +237,17 @@ site içinden gelen yayın isteklerini işler — yönetici GitHub arayüzüne g
 (📁 Projeler → 📄; sunucu kilitleri: mülkiyet + kendi onaylı verisi + 24
 saatte 3 istek kotası, 0009). İstek Supabase'deki `report_requests`
 kuyruğuna yazılır (0008+0009), rapor `rapor/DGR-YYYY-NNNN/` altına
-commit'lenir ve kalıcı bağlantı aynı arayüzde belirir. İş Supabase'e
+commit'lenir ve kalıcı bağlantı aynı arayüzde belirir. **🗑 Geri çekme**
+(0010) aynı hattın tersidir: yanlışlıkla yayımlanan raporun veri dosyaları
+kaldırılır, adresinde gerekçeli bildirim kalır, kimlik yeniden kullanılmaz
+(yönetici herhangi bir yayını, kullanıcı kendi parkının yayınını çekebilir).
+Bu sürümden sonra yayımlanan raporlar belge künyesi, QA/QC çizelgesi + alan
+dengesi, sonuç/yorum ayrımı, analiz parmak izi (engine · git commit · hash),
+tekrar üretilebilirlik, rapor geçmişi, atıf ve kaynakça bölümleriyle ve
+DataCite desenine yakın `metadata.json` + JSON-LD üst verisiyle üretilir
+(DOI kaydı için hazır; DGR iç kimlik olarak kalır). Yayımlanmış
+`DGR-2026-0001` ve `DGR-2026-0002` dondurulmuştur, eski şablonda kalır. İş
+Supabase'e
 **yazmaz**: anon anahtarla salt okur, sonucu
 `rapor/yayin-kuyrugu.json` + git taşır (`service_role` anahtarı depoda
 tutulmaz). **`rapor.yml`** (workflow_dispatch) elle tek park yayını için yedek

@@ -9,6 +9,77 @@ Yeni sürüm yayımlama adımları: [`docs/surum-yayini.md`](docs/surum-yayini.m
 
 ## [Yayımlanmadı]
 
+### Eklendi — Rapor standardı v2 + geri çekme (0010) (2026-09-28)
+Kullanıcı standardı: **DGR — DendroGeo Bilimsel Analiz Raporu** kimliği resmen
+tanımlandı; rapor bilimsel/teknik çizgide baştan yapılandırıldı; yanlışlıkla
+yayımlanan raporlar yönetici VE kendi parkının sahibi tarafından 🗑 ile geri
+çekilebilir.
+- `scripts/make-report.mjs`: şablon v2 — belge künyesi (kimlik · durum
+  "Geçerli" · konu · konum · tarih · analiz sürümü · veri dönemi 2021 ·
+  çözünürlük 10 m) + resmi beyan ("akreditasyon/sertifikasyon belgesi
+  değildir"); 14 bölüm + Ek A: Analiz Özeti, Analiz Alanı, Veri Kaynakları
+  ("OSM verisi raster sınıflandırmanın yerine geçmez" açıkça), Yöntem (4.1–4.5
+  genişletilmiş), Nicel Sonuçlar (Çizelge 1–3: türler + arazi örtüsü + ALAN
+  DENGESİ sayıları), Harita, Kalite Kontrol (Çizelge 4: 10 otomatik kontrol),
+  Değerlendirme (yalnız veriden türeyen betimleme — normatif dil yasak),
+  Sınırlılıklar, Tekrar Üretilebilirlik, Analiz Parmak İzi (engine 4.2.0 ·
+  uygulama 3.0.0 · git commit · EPSG · Result Hash · DOI "atanmadı"), Rapor
+  Geçmişi (sürüm zinciri), Atıf (önerilen atıf + BibTeX + DOI notu), Kaynakça
+  (Zenodo 10.5281/zenodo.7254221 · Chave 10.1111/gcb.12629 · ODbL). Şekil 1
+  barları grup renkli: **ibreli yeşil, yapraklı turuncu**, diğer gri.
+- `metadata.json` (yeni, rapor başına): DataCite Schema 4.7 deseninde makine
+  okur üst veri (identifier/title/publicationYear/resourceType/version/
+  spatialCoverage/temporalCoverage/resolution/methodVersion/sources/
+  relatedIdentifiers/resultHash/gitCommit/doi=null+doiNote); sayfada JSON-LD
+  (schema.org/Report) + `<link rel="alternate" type="application/json">`.
+  DOI atandığında §11 + metadata.json + atıf bloğuna işlenir; DGR kalır.
+- `harita.png` v2: alt bilgi şeridi (DENDROGEO - DGR-… · veri kaynağı ·
+  çözünürlük · projeksiyon EPSG · analiz tarihi · motor sürümü · © DendroGeo),
+  sağ üstte belge kimliği, segmentli ölçek çubuğu, harita çerçevesi; png.mjs
+  glif kümesine © eklendi. Harita tek başına dolaşıma girse bile kaynağı belli.
+- GEOMETRİ QA: elle çizilen park poligonlarında kendini kesen segment (düğüm)
+  taraması (`ringSelfIntersections`, ≤600 nokta); düğüm varsa §2/§7/§9 sayıyla
+  beyan eder ("9 kendini kesen segment çifti") ve arazi örtüsü çözümlemesinin
+  QA eşiğine neden takıldığı açıklanır. Canlı durum: park 5'in uygulamada
+  çizilen sınırında 9 düğüm var → raster/park alanı farkı %1,70 (eşik %0,5),
+  bu yüzden o parkın LULC'li raporu üretilemiyor; sınır yeniden çizilince (ya
+  da `geom_json` silinip OSM sınırına dönülünce) 📄 Yeni sürüm ile haritalı
+  üretilir.
+- GERİ ÇEKME (0010): `supabase/migrations/0010_report_retraction.sql`
+  (`report_retractions` + `tg_report_retraction_gate`: biçim DG0RF, kimlik
+  DG0RN, aktiflik DG0RI, mülkiyet DG0RP, kota DG0RQ, yineleme DG0RD; select
+  anon, update YOK, delete yalnız yönetici; park başına tek bekleyen istek
+  kısmi unique index). `scripts/publish-queue.mjs`: geri çekme fazı —
+  park_id↔report_id eşleşmesi GÜNLÜKLE doğrulanır (eşleşmeyen işlenmez), veri
+  dosyaları silinir, `renderRetractionNotice` bildirimi yazılır (noindex,
+  gerekçe kaçışlanır), `rebuildIndex` listeden düşürür, günlük 'Geri çekildi'
+  kaydı alır. Arayüz: yönetici kartı satırında ve kullanıcı panelinde
+  **🗑 Geri çek** (onay + gerekçe sorar); rozetler 'Geri çekiliyor' /
+  'Geri çekildi'; geri çekilen rapor bağlantı üretmez. Yeni CSS yok.
+- `rapor/index.html`: Durum sütunu (Geçerli) + geri çekme açıklaması;
+  `--reindex` CLI (liste elle yeniden kurulur). Dizin bu sürümde canlı
+  yayınlarla (`DGR-2026-0001` Atatürk Çocukları ve Doğal Yaşam Parkı,
+  `DGR-2026-0002` Ülkü Spor Tesisi) `--reindex` üzerinden yeniden kuruldu;
+  yayımlanmış rapor dosyalarına dokunulmadı.
+- KİMLİK BÜTÜNLÜĞÜ: v2 şablonunun prova çıktısı olarak yerelde üretilen park 5
+  raporu **yayımlanmadı** — `DGR-2026-0002` kimliği canlı hatta Ülkü Spor
+  Tesisi (park 4, kuyruk isteği `4ebe8320…`, 27.09.2026 23:47 UTC) için
+  kullanılmıştı. Yayımlanmış raporlar dondurulmuş hâliyle kalır; prova çıktısı
+  depoya girmez. Yeni bekçi: `test/report-v2.test.mjs` dizindeki her satırın
+  parkını snapshot ve yayın günlüğü ile karşılaştırır (kimlik/park çakışması
+  bir daha sessizce depoya giremez).
+- Sürüm semantiği: her DGR 1.0 doğar (belge + metadata); düzeltme = geri
+  çekme + yeni DGR; aynı parkın yeni analizi = yeni DGR + §12 geçmiş zinciri
+  + metadata `IsNewVersionOf`. DGR-2026-0001 ve DGR-2026-0002 donduruldu
+  (eski şablonda kalır); v2 şablonu bir sonraki yayından (DGR-2026-0003)
+  itibaren üretilen raporlarda görünür.
+- Bilinçli erteleme: QR kod (satılabilir kodlayıcı kararı gerekiyor; yanlış QR
+  hiç QR'dan kötü) ve Zenodo/DataCite DOI kaydı (Faz 4) — metadata bugünden
+  hazır. `docs/rapor-yayini.md` §6b + §4b.
+- Testler: 681 → 740 (`test/report-v2.test.mjs` + `test/retraction.test.mjs`);
+  rapor.test Şekil-1 kilidi yeni standarda güncellendi (grup renkleri).
+  `sw.js` r42→r43.
+
 ### Eklendi — Kullanıcılar kendi park projelerinin raporunu kendisi yayınlar (0009)
 Kullanıcı: **"kullanıcılar kendi park projelerini paylaşabilecek değil mi?"** →
 doğrudan yayın seçildi. Hat aynı hat (report_requests → rapor-yayin.yml →
