@@ -187,6 +187,30 @@ sonuç her zaman günlüktedir.
   `archive_bytes` alanıyla izlenir. Yayımlanmış raporlar DEĞİŞMEZ
   (dondurma ilkesi) — sıkıştırma yeni yayınlar için geçerlidir.
 
+## 5c) Kendi kendini süren kuyruk (0016 · kalp atışı)
+
+GitHub `schedule` pratikte güvenilmez (bu depoda '*/5' cron 20 saatte 4 kez
+tetiklendi). 0016 ile kuyruk KENDİ KENDİNİ sürer:
+
+```
+┌────────────────────────────────────────────────────────────┐
+│  rapor-kalp.yml (nabız, ~5 dk'da bir)                      │
+│    1. HTTP: report_requests/report_retractions 'Beklemede' │
+│       + rapor/yayin-kuyrugu.json (request_id eşleşmesi)    │
+│    2. İş YOK  → hiçbir şey koşmaz (~15-20 sn)              │
+│       İş VAR  → 'Rapor Yayın Kuyruğu' dispatch (kilitli    │
+│                  concurrency → TEK üretici, çift DGR yok)  │
+│    3. Zincir: ardıl nabız 5 dk sonraya KAYDEDİLİR          │
+│       (delayed workflow_dispatch; her koşuda, if: always)  │
+└────────────────────────────────────────────────────────────┘
+   Yedekler: */5 cron · 6 saatlik re-arm cron · CI push tetiği (0013)
+             · rapor-yayin kapanış zinciri · elle Run workflow
+```
+
+Bekleme üst sınırı fiilen ~5-7 dk; zincir koparsa en geç 6 saatte cron
+yeniden armeler, her push anında canlandırır. Panel metni ("5 dakikada bir")
+artık GERÇEKTİR.
+
 ## 6) Envanter kalite kapıları (QA v2.1 · 0011)
 
 Rapor motoru yayından ÖNCE kayıtları da denetler (§7 Çizelge 4):

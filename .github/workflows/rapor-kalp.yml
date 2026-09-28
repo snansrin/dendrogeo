@@ -1,0 +1,112 @@
+name: Rapor Kuyruğu Kalp Atışı
+
+# 0016 (2026-09-28 · kullanıcı: "push etmezsek hiçbir şey çalışmıyor — adam
+# gibi sistem kur"): KENDİ KENDİNİ SÜREN yayın/geri çekme kuyruğu.
+#
+# GitHub schedule pratikte GÜVENİLMEZ (bu depoda gözlem: '*/5' cron 20 saatte
+# 4 kez tetiklendi). Çözüm üç bacalı:
+#
+#   1) ZİNCİR (esas): her koşu — iş yapsın ya da yapmasın — bittiği anda bir
+#      sonrakini repository_dispatch ile kendisi tetikler (~5 dk aralık).
+#      Zincir koşuların kendisinden beslenir; GitHub cron'una bağımlı DEĞİL.
+#   2) YEDEKLER: '*/5' cron + 6 saatte bir yeniden-arme cron + her main
+#      push'unda CI 'kuyruk' işi (0013) + rapor-yayin koşuları zinciri
+#      yeniden tetikler. Zincir herhangi bir nedenle kırılırsa en geç 6 saatte
+#      KENDİLİĞİNDEN dirilir.
+#   3) BOŞTA MALİYET ~15-20 sn: nabız önce YALNIZ HTTP ile kuyruğa bakar
+#      (report_requests + report_retractions, anon okuma — 0008'den beri
+#      anon'a açık). İş yoksa ağır üretim HİÇ koşmaz. İş varsa üretim
+#      'Rapor Yayın Kuyruğu' workflow'una devredilir (onun concurrency
+#      kilidi tek üreticiyi garanti eder → çift DGR imkânsız).
+#
+# Depo PUBLIC → standart runner dakikaları sınırsız; 5 dk'lık nabız maliyet
+# sorunu değildir (aralığı değiştirmek için: zincir adımındaki 300 değeri).
+
+on:
+  repository_dispatch:
+    types: [rapor-kuyruk-nabiz]
+  schedule:
+    - cron: '*/5 * * * *'      # GitHub tetiklerse ek güvence (zinciri de besler)
+    - cron: '17 */6 * * *'     # zincir koptuysa 6 saatte bir yeniden-arme
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+  actions: write               # zincir: kendi ardılını tetikler
+
+concurrency:
+  group: rapor-kalp
+  cancel-in-progress: false
+
+jobs:
+  nabiz:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4   # sığ klon yeter: günlük + supabase.js
+
+      - name: Kuyrukta iş var mı? (yalnız HTTP — boşta koşu hızlı biter)
+        id: kontrol
+        run: |
+          set -e
+          SB_URL=$(sed -n 's/.*SB_URL="\([^"]*\)".*/\1/p' src/config/supabase.js)
+          SB_KEY=$(sed -n 's/.*SB_KEY="\([^"]*\)".*/\1/p' src/config/supabase.js)
+          REQ=$(curl -sf -H "apikey: $SB_KEY" -H "Authorization: Bearer $SB_KEY" \
+            "$SB_URL/rest/v1/report_requests?status=eq.Beklemede&select=id" || echo '[]')
+          RET=$(curl -sf -H "apikey: $SB_KEY" -H "Authorization: Bearer $SB_KEY" \
+            "$SB_URL/rest/v1/report_retractions?status=eq.Beklemede&select=id,report_id" || echo '[]')
+          node -e '
+            const fs = require("fs");
+            const reqS = process.argv[1], retS = process.argv[2];
+            let reqs = [], rets = [], log = { entries: [] };
+            try { reqs = JSON.parse(reqS); } catch (e) {}
+            try { rets = JSON.parse(retS); } catch (e) {}
+            try { log = JSON.parse(fs.readFileSync("rapor/yayin-kuyrugu.json", "utf8")); } catch (e) {}
+            const doneReq = new Set((log.entries || []).map((e) => String(e.request_id)));
+            const doneRet = new Set((log.entries || []).filter((e) => e.status === "Geri çekildi").map((e) => String(e.retraction_id)));
+            const pendReq = reqs.filter((r) => !doneReq.has(String(r.id))).length;
+            const pendRet = rets.filter((r) => !doneRet.has(String(r.id))).length;
+            const work = pendReq + pendRet;
+            fs.appendFileSync(process.env.GITHUB_OUTPUT, "work=" + work + "\npend_req=" + pendReq + "\npend_ret=" + pendRet + "\n");
+            console.log("bekleyen: " + pendReq + " yayın isteği, " + pendRet + " geri çekme → " + (work > 0 ? "ÜRETİM KOŞACAK" : "boşta (üretim atlanır)"));
+          ' "$REQ" "$RET"
+
+      - name: Üretim kilitli mi? (rapor-yayin veya CI kuyruk işi koşuyorsa bekle)
+        if: steps.kontrol.outputs.work != '0'
+        id: kilit
+        run: |
+          set -e
+          H='-H "Authorization: Bearer ${{ github.token }}" -H "Accept: application/vnd.github+json"'
+          A=$(curl -sf -H "Authorization: Bearer ${{ github.token }}" -H "Accept: application/vnd.github+json" \
+            "${{ github.api_url }}/repos/${{ github.repository }}/actions/runs?status=in_progress&exclude_current=true&per_page=100" \
+            | node -e 'let s="";process.stdin.on("data",d=>s+=d).on("end",()=>{try{const j=JSON.parse(s);console.log((j.workflow_runs||[]).filter(r=>r.name==="Rapor Yayın Kuyruğu"||(r.name==="CI"&&(r.display_title||"").includes("kuyruk"))).length)}catch(e){console.log(0)}})')
+          Q=$(curl -sf -H "Authorization: Bearer ${{ github.token }}" -H "Accept: application/vnd.github+json" \
+            "${{ github.api_url }}/repos/${{ github.repository }}/actions/runs?status=queued&exclude_current=true&per_page=100" \
+            | node -e 'let s="";process.stdin.on("data",d=>s+=d).on("end",()=>{try{const j=JSON.parse(s);console.log((j.workflow_runs||[]).filter(r=>r.name==="Rapor Yayın Kuyruğu").length)}catch(e){console.log(0)}})')
+          echo "uretim_yuruyor=$((A + Q))" >> "$GITHUB_OUTPUT"
+          echo "üretimde koşan/kuyruktaki ilgili iş: $((A + Q))"
+
+      - name: Üretimi tetikle (Rapor Yayın Kuyruğu · workflow_dispatch)
+        if: steps.kontrol.outputs.work != '0' && steps.kilit.outputs.uretim_yuruyor == '0'
+        run: |
+          curl -sf -X POST \
+            -H "Authorization: Bearer ${{ github.token }}" \
+            -H "Accept: application/vnd.github+json" \
+            "${{ github.api_url }}/repos/${{ github.repository }}/actions/workflows/rapor-yayin.yml/dispatches" \
+            -d '{"ref":"main"}'
+          echo "✅ üretim tetiklendi: bekleyen ${{ steps.kontrol.outputs.pend_req }} yayın + ${{ steps.kontrol.outputs.pend_ret }} geri çekme"
+
+      - name: Zincir — sonraki nabız ~5 dk (her koşuda, boşta bile)
+        if: always()
+        run: |
+          # Gecikmeli workflow_dispatch: ardıl koşuyu GitHub zamanlayıcısına
+          # 5 dk sonrasına KAYDETİR (runner beklemez, iş ~20 sn'de biter).
+          # Bu istek BAŞARISIZ olursa cron yedekleri (*/5 + 6 saatlik re-arm)
+          # ve CI push tetiği zinciri yeniden kurar.
+          curl -sf -X POST \
+            -H "Authorization: Bearer ${{ github.token }}" \
+            -H "Accept: application/vnd.github+json" \
+            "${{ github.api_url }}/repos/${{ github.repository }}/actions/workflows/rapor-kalp.yml/dispatches" \
+            -d '{"ref":"main","delay_minutes":5}' \
+            && echo "🔗 ardıl nabız 5 dk sonraya kaydedildi" \
+            || echo "⚠ ardıl tetik kaydedilemedi — cron yedeği devralır"

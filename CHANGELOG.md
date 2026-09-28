@@ -33,6 +33,17 @@ kapanmadığı için ikinci yayın kalıcı olarak bloke oluyordu.
   günlükte sonucu olmayan" istekleri sayar; `planQueue` request_id'si
   günlükte olan istekleri atlar. Yeni test: `test/publish-request-fix.test.mjs`.
 
+### Eklendi — 0016: kendi kendini süren yayın kuyruğu (kalp atışı) (2026-09-28)
+Kullanıcı: "biz push etmediğimiz sürece ne geri çekiyor ne yayın yapıyor —
+adam gibi sistem kur." GitHub schedule güvenilmez çıktı ('*/5' cron 20
+saatte 4 koşu) → `rapor-kalp.yml`: her koşu ardılını ~5 dk sonraya KENDİ
+kaydeder (delayed workflow_dispatch, `if: always()`); nabız önce yalnız
+HTTP ile kuyruğa bakar (boşta ~15-20 sn), iş varsa üretimi concurrency
+kilitli `rapor-yayin.yml`'e devreder (tek üretici → çift DGR imkânsız).
+Yedekler: */5 cron + 6 saatlik re-arm + CI push tetiği + rapor-yayin
+kapanış zinciri. Rapor kuyruğu artık push beklemez; paneldeki "5 dakikada
+bir" sözü gerçektir. Testler: `test/heartbeat.test.mjs` (11).
+
 ### Düzeltildi — 0015: yazar = veri sahibi + "tümü geri çekik" CI kazası (2026-09-28)
 - **Yazar önceliği**: DGR-2026-0004'ün künyesinde istek sahibi (Sinan) yazdı;
   oysa 34 kaydın sahibi Nagihan. `0015_report_data_owner.sql` →

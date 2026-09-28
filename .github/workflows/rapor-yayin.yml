@@ -35,6 +35,7 @@ on:
 
 permissions:
   contents: write
+  actions: write   # 0016: kalp atışı zinciri (kendi ardılını tetikler)
 
 # Aynı anda TEK koşu: iki koşu aynı isteği iki ayrı DGR'ye dönüştürmesin.
 # cancel-in-progress: false → başlayan iş yarıda kesilmez (rapor yarım kalmaz).
@@ -83,3 +84,17 @@ jobs:
           done
           echo "🔴 Rapor üretildi ama push edilemedi; sonraki koşu yeniden dener."
           exit 1
+
+      # 0016 · zincir: bu koşu biterken kalp atışını 5 dk sonraya kaydet.
+      # Böylece yayın/geri çekme kuyruğu KENDİ KENDİNİ sürer; push veya
+      # GitHub cron'una bağımlılık kalmaz (cron yedek olarak durur).
+      - name: Kalp atışını zincirle (0016)
+        if: always()
+        run: |
+          curl -sf -X POST \
+            -H "Authorization: Bearer ${{ github.token }}" \
+            -H "Accept: application/vnd.github+json" \
+            "${{ github.api_url }}/repos/${{ github.repository }}/actions/workflows/rapor-kalp.yml/dispatches" \
+            -d '{"ref":"main","delay_minutes":5}' \
+            && echo "🔗 kalp atışı 5 dk sonraya kaydedildi" \
+            || echo "⚠ zincir kaydı başarısız — cron/push yedeği devralır"
