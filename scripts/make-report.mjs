@@ -29,7 +29,7 @@ import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import vm from 'node:vm';
 import { execSync } from 'node:child_process';
-import { mcTotalCI, mcRowCI, canonicalHash, MC_CFG, fmtT, loadRho, carbonKg } from './lib/mc.mjs';
+import { mcTotalCI, mcRowCI, canonicalHash, MC_CFG, fmtT, loadRho, loadSpeciesDict, QA_LIMITS, calcRow as _calcRow, carbonKg } from './lib/mc.mjs';
 import { PngCanvas, hex2rgb } from './lib/png.mjs';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
@@ -89,7 +89,14 @@ function bootLC() {
   return ctx;
 }
 export async function parkOuter(park) {
-  if (park.geom_json && park.geom_json.outer) return { outer: park.geom_json.outer[0], holes: (park.geom_json.inner || []) };
+  /* 0011 (2026-09-28 · Göksu bulgusu): geom_json her zaman gerçek sınır
+   * DEĞİLDİR — park 25'te 5 noktalı dikdörtgen (bbox) taşıyordu; jeodezik
+   * alanı 68,93 ha, künye alanı 50,11 ha. LULC "alan dengesi" QA kapısı bu
+   * yüzden %37,6 farkla haklı olarak bloke etti. Bbox tespit edilirse
+   * geom_json YOK SAYILIR ve OSM poligonuna düşülür; karar geometry_qa
+   * üzerinden §2/§7/§9'da beyan edilir. */
+  if (park.geom_json && park.geom_json.outer && !bboxRing(park.geom_json.outer[0]))
+    return { outer: park.geom_json.outer[0], holes: (park.geom_json.inner || []) };
   const m = String(park.osm_key || '').match(/^(way|relation)\/(\d+)$/);
   if (!m) return null;
   let outer = null, holes = [];
@@ -359,15 +366,75 @@ export function mapCanvas({ outer, holes = [], wruns = [], classes = {}, parkNam
 }
 export function renderMapPNG(opts) { return mapCanvas(opts).encode(); }
 
+/* ---------- envanter QA yardımcıları (0011 · v2.1) ---------- */
+/* Halka yalnız 2 benzersiz enlem + 2 benzersiz boylam taşıyorsa dikdörtgen
+ * (bbox) demektir: gerçek park sınırı değil, arama kutusudur. */
+export function bboxRing(ring) {
+  const r = (ring || []).filter((p) => Array.isArray(p) && Number.isFinite(p[0]) && Number.isFinite(p[1]));
+  if (r.length < 4) return false;
+  return new Set(r.map((p) => p[0])).size === 2 && new Set(r.map((p) => p[1])).size === 2;
+}
+/* Jeodezik alan (m²): yerel enlem ölçekli shoelace; QA beyanları için. */
+export function ringGeodesicAreaM2(ring) {
+  const r = (ring || []).filter((p) => Array.isArray(p) && Number.isFinite(p[0]) && Number.isFinite(p[1]));
+  if (r.length < 3) return 0;
+  const R = 6371008.8, k = Math.PI / 180;
+  const lat0 = r.reduce((a, p) => a + p[0], 0) / r.length, c = Math.cos(lat0 * k);
+  const xy = r.map((p) => [p[1] * k * R * c, p[0] * k * R]);
+  let s = 0;
+  for (let i = 0; i < xy.length - 1; i++) s += xy[i][0] * xy[i + 1][1] - xy[i + 1][0] * xy[i][1];
+  return Math.abs(s / 2);
+}
+/* ENVANTER KALİTE KAPISI (QA v2.1): kayıtları kanonik tür sözlüğü ve panel
+ * denklemiyle (mc.calcRow) yeniden hesaplar; birim kayması (çevre→çap,
+ * mm→cm), ondalık kayması ve sözlük dışı tür adları SAYIYLA yakalanır.
+ * Eşik ihlali raporda beyan edilir; sistemik ihlal (≥ BLOCK_MIN_N kayıt VE
+ * > BLOCK_RATIO oran) yayını bloklar. */
+export function inventoryQa(rows, dict) {
+  const { rho, grho } = loadRho();
+  const out = { n: 0, n_rows: 0, unknown: [], n_unknown: 0, hd_fail: [], hd_block: false, dev_fail: [], dev_block: false, rows: [] };
+  for (const r of rows || []) {
+    out.n++;
+    const d = +r.dbh_cm, h = +r.height_m, c = +r.carbon_kg;
+    const canon = dict.resolve(r.species);
+    if (!canon) out.unknown.push(String(r.species));
+    const hd = (d > 0 && h > 0) ? (100 * h) / d : null; /* birimsiz: h(m) / D(m) */
+    const hdFail = hd != null && (hd < QA_LIMITS.HD_MIN || hd > QA_LIMITS.HD_MAX);
+    if (hdFail) out.hd_fail.push({ point_id: +r.point_id, hd: +hd.toFixed(2) });
+    let dev = null, devFail = false, exp = null;
+    if (d > 0 && h > 0 && Number.isFinite(c) && c > 0) {
+      exp = _calcRow(d, h, canon || r.species, r.grp, { rho, grho }).total_carbon;
+      if (exp > 0) {
+        dev = +(((c - exp) / exp) * 100).toFixed(1);
+        devFail = Math.abs(dev) > QA_LIMITS.CARBON_DEV_PCT;
+        if (devFail) out.dev_fail.push({ point_id: +r.point_id, stored: c, expected: +exp.toFixed(1), dev_pct: dev });
+      }
+    }
+    out.rows.push({ id: r.id, point_id: +r.point_id, species: String(r.species ?? ''), canonical: canon, hd: hd == null ? null : +hd.toFixed(2), hd_fail: !!hdFail, stored_carbon_kg: Number.isFinite(c) ? c : null, expected_carbon_kg: exp == null ? null : +exp.toFixed(1), dev_pct: dev, dev_fail: devFail });
+    out.n_rows++;
+  }
+  out.unknown = [...new Set(out.unknown)].sort((a, b) => a.localeCompare(b, 'tr'));
+  out.n_unknown = out.unknown.length;
+  const N = out.n || 1;
+  out.hd_block = out.hd_fail.length >= QA_LIMITS.BLOCK_MIN_N && out.hd_fail.length / N > QA_LIMITS.BLOCK_RATIO;
+  out.dev_block = out.dev_fail.length >= QA_LIMITS.BLOCK_MIN_N && out.dev_fail.length / N > QA_LIMITS.BLOCK_RATIO;
+  return out;
+}
+
 /* ---------- snapshot ---------- */
 export async function buildSnapshot(parkId, { skipLulc = false, meta = null } = {}) {
   const genAt = new Date().toISOString();
   const park = (await rest('parks', { id: 'eq.' + parkId, limit: 1 }))[0];
   if (!park) throw new Error('Park bulunamadı: ' + parkId);
-  const rows = await rest('measurements', {
-    select: 'id,point_id,measurement_no,species,grp,dbh_cm,height_m,carbon_kg,lat,lon,accuracy_m,created_at,reviewed_at,photo_url',
-    park_id: 'eq.' + parkId, status: 'eq.Onaylı', order: 'point_id.asc',
-  });
+  const SEL_V21 = 'id,point_id,measurement_no,species,grp,dbh_cm,girth_cm,height_m,carbon_kg,volume_m3,lat,lon,accuracy_m,created_at,reviewed_at,photo_url,photo_file';
+  const SEL_V2 = 'id,point_id,measurement_no,species,grp,dbh_cm,height_m,carbon_kg,lat,lon,accuracy_m,created_at,reviewed_at,photo_url';
+  let rows;
+  try {
+    rows = await rest('measurements', { select: SEL_V21, park_id: 'eq.' + parkId, status: 'eq.Onaylı', order: 'point_id.asc' });
+  } catch (e) {
+    /* 0011 henüz uygulanmadı → girth_cm/volume_m3 kolonları yok; eski seçime düş */
+    rows = await rest('measurements', { select: SEL_V2, park_id: 'eq.' + parkId, status: 'eq.Onaylı', order: 'point_id.asc' });
+  }
   if (!rows.length) throw new Error('Bu park için onaylı kayıt yok; rapor yayınlanamaz.');
   const ci = mcTotalCI(rows);
   const bySp = {};
@@ -386,11 +453,18 @@ export async function buildSnapshot(parkId, { skipLulc = false, meta = null } = 
   const gfInside = OG ? rows.filter((r) => pointInPolygon(+r.lat, +r.lon, OG.outer, OG.holes)).length : null;
   const gfStat = OG ? { inside: gfInside, outside: rows.length - gfInside } : null;
   const ringPts = OG ? (OG.outer.length + (OG.holes || []).reduce((a, h) => a + h.length, 0)) : 0;
+  const gjRing = (park.geom_json && Array.isArray(park.geom_json.outer) && park.geom_json.outer[0]) || null;
+  const gjBbox = gjRing ? bboxRing(gjRing) : false;
   const geometryQA = OG ? {
-    source: (park.geom_json && park.geom_json.outer) ? 'parks.geom_json (uygulamada çizilen sınır)' : ('OSM ' + (park.osm_key || '—')),
+    source: (gjRing && !gjBbox) ? 'parks.geom_json (uygulamada çizilen sınır)' : ('OSM ' + (park.osm_key || '—')),
     ring_points: ringPts,
+    ring_area_m2: OG ? Math.round(ringGeodesicAreaM2(OG.outer)) : null,
     self_intersections: ringPts <= 600 ? geometrySelfIntersections(OG.outer, OG.holes) : null,
+    /* geom_json bbox ise analiz OSM poligonundan yürür; rapor bunu beyan eder */
+    geom_json_bbox_ignored: gjBbox ? { ring_points: gjRing.length, ring_area_m2: Math.round(ringGeodesicAreaM2(gjRing)) } : null,
   } : null;
+  /* Envanter kalite kapısı: kanonik sözlük + panel denklemiyle yeniden hesap */
+  const qaSpecies = inventoryQa(rows, loadSpeciesDict());
   let lulc = null;
   if (!skipLulc) {
     try {
@@ -456,7 +530,7 @@ export async function buildSnapshot(parkId, { skipLulc = false, meta = null } = 
     mc: { ...MC_CFG },
     totals: { n: rows.length, carbon_kg: +rows.reduce((a, r) => a + +r.carbon_kg, 0).toFixed(2), ci: { mean: +ci.mean.toFixed(2), lo: +ci.lo.toFixed(2), hi: +ci.hi.toFixed(2) }, per_ha_kg: park.area_m2 > 0 ? +(rows.reduce((a, r) => a + +r.carbon_kg, 0) / (park.area_m2 / 10000)).toFixed(2) : null },
     species: Object.entries(bySp).map(([sp, b]) => ({ species: sp, grp: b.grp, n: b.n, mean_dbh: +(b.dbh / b.n).toFixed(1), mean_h: +(b.h / b.n).toFixed(1), carbon_kg: +b.c.toFixed(2), share_pct: +(100 * b.c / rows.reduce((a, r) => a + +r.carbon_kg, 0)).toFixed(1) })),
-    gps: { n: acc.length, mean_acc_m: acc.length ? +((acc.reduce((a, b) => a + b, 0) / acc.length)).toFixed(1) : null },
+    gps: { n: rows.length, n_with_acc: acc.length, n_null_acc: rows.length - acc.length, mean_acc_m: acc.length ? +((acc.reduce((a, b) => a + b, 0) / acc.length)).toFixed(1) : null },
     period: { from: dates[0], to: dates[dates.length - 1] },
     moderation: { approved: rows.length, reviewed },
     geofence: {
@@ -467,8 +541,9 @@ export async function buildSnapshot(parkId, { skipLulc = false, meta = null } = 
       polygon_source: OG ? (park.geom_json && park.geom_json.outer ? 'parks.geom_json' : 'OSM') : 'yok',
     },
     geometry_qa: geometryQA,
+    qa: { species: qaSpecies, photos: { n_with: rows.filter((r) => r.photo_url).length, n: rows.length } },
     lulc,
-    rows: rows.map((r) => ({ id: r.id, point_id: r.point_id, species: r.species, grp: r.grp, dbh_cm: +r.dbh_cm, height_m: +r.height_m, carbon_kg: +r.carbon_kg, lat: +(+r.lat).toFixed(6), lon: +(+r.lon).toFixed(6), acc_m: r.accuracy_m, date: r.created_at.slice(0, 10) })),
+    rows: rows.map((r) => ({ id: r.id, point_id: r.point_id, species: r.species, grp: r.grp, dbh_cm: +r.dbh_cm, girth_cm: r.girth_cm == null ? null : +r.girth_cm, height_m: +r.height_m, carbon_kg: +r.carbon_kg, volume_m3: r.volume_m3 == null ? null : +r.volume_m3, lat: +(+r.lat).toFixed(6), lon: +(+r.lon).toFixed(6), acc_m: r.accuracy_m, photo: !!r.photo_url, photo_file: r.photo_file || null, date: r.created_at.slice(0, 10) })),
   };
   return { snap, hash: canonicalHash(snap), png, outerL };
 }
@@ -513,6 +588,18 @@ export function renderReport(snap, { id, hash, version = 1, meta = null }) {
   const verTxt = String(version).includes('.') ? String(version) : version + '.0';
   const L = (snap.lulc && !snap.lulc.error) ? snap.lulc : null;
   const GQ = snap.geometry_qa || null;
+  const GJ = (GQ && GQ.geom_json_bbox_ignored) || null;
+  /* §2 saha sınırı kaynağı: GQ.source'a esc() tümüyle uygulanıyordu → <code>
+   * etiketi de kaçıyordu (v2'den beri sessiz kozmetik hata; ekranda
+   * "&lt;code&gt;way/…&lt;/code&gt;" görünüyordu). Etiket dışarıda kurulur,
+   * yalnız DEĞERLER kaçırılır. */
+  const srcTxt = GQ
+    ? (GQ.source.includes('geom_json')
+      ? 'uygulamada çizilen park poligonundan (parks.geom_json)'
+      : 'OpenStreetMap <code>' + esc(P.osm_key || '—') + '</code> geometrisinden')
+    : 'OpenStreetMap <code>' + esc(P.osm_key || '—') + '</code> geometrisinden';
+  const INV = snap.qa && snap.qa.species ? snap.qa.species : null;
+  const G = snap.gps || {};
   const knotN = (GQ && GQ.self_intersections != null) ? GQ.self_intersections : null;
   const knotted = knotN != null && knotN > 0;
   const ciTxt = `${fmtT(t.ci.mean)} t [%95 GA: ${fmtT(t.ci.lo)}–${fmtT(t.ci.hi)}]`;
@@ -536,6 +623,8 @@ export function renderReport(snap, { id, hash, version = 1, meta = null }) {
   const spRows = snap.species.map((s) => `<tr><td class="tr">${esc(s.species)}</td><td>${sw(grpColor(s.grp))} ${esc(s.grp)}</td><td>${s.n}</td><td>${trNum(s.mean_dbh, 1)}</td><td>${trNum(s.mean_h, 1)}</td><td>${trNum(s.carbon_kg, 1)}</td><td>%${trNum(s.share_pct, 1)}</td></tr>`).join('');
 
   /* ---- QA/QC sayıları (gerçek değerler; uydurma yok) ---- */
+  const NR = (snap.rows && snap.rows.length) || t.n; /* kayıt düzeyi QA tabanı */
+  const nPhoto = (snap.qa && snap.qa.photos) ? snap.qa.photos.n_with : (snap.rows || []).filter((r) => r.photo !== false && r.photo != null ? r.photo : true).length;
   const parkHa = (P.area_m2 || 0) / 10000;
   const covHa = (L && L.coverage_m2) ? L.coverage_m2 / 10000 : null;
   const clsHa = (L && L.classified_m2) ? L.classified_m2 / 10000 : null;
@@ -552,6 +641,11 @@ export function renderReport(snap, { id, hash, version = 1, meta = null }) {
     L ? qaRow('Veri kaynağı', !!L.source, `${esc(dataset)} · yıl ${dataYear} · 10 m`) : null,
     L ? qaRow('Sınıflandırma', (L.classes || []).length > 0, `${(L.classes || []).length} sınıf${L.masked_ha > 0 ? ` · maskeli ${trNum(L.masked_ha, 2)} ha (bulut/gölge)` : ' · maskeli alan yok'}`) : null,
     L && L.agreement ? qaRow('Çapraz doğrulama', true, `${esc(L.cross || 'bağımsız kaynak')} uzlaşması: ${Object.entries(L.agreement).map(([k, v]) => `${esc(k)} %${trNum(v.agreementPct, 0)}`).join(', ')}`) : null,
+    INV ? qaRow('Tür sözlüğü eşleşmesi', INV.n_unknown === 0 ? true : `⚠ ${INV.n_unknown} tür dışarıda`, `${INV.n_rows - INV.n_unknown}/${INV.n_rows} kayıt kanonik tür sözlüğüyle eşleşti${INV.unknown.length ? ' · sözlük dışında: ' + esc(INV.unknown.join(', ')) + ' (grup varsayılan ρ ile hesaplandı)' : ''}`) : null,
+    qaRow('Fotoğraf kanıtı', nPhoto === NR ? true : `⚠ ${NR - nPhoto} eksik`, `${nPhoto}/${NR} kayıt sahada çekilmiş fotoğraf bağlantısı taşıyor`),
+    qaRow('GNSS doğruluk kaydı', (G.n_with_acc ?? 0) > 0 ? true : '⚠ Kaydedilmedi', (G.n_with_acc ?? 0) > 0 ? `${G.n_with_acc}/${G.n ?? NR} kayıtta doğruluk değeri · ortalama ±${trNum(G.mean_acc_m, 1)} m` : `0/${G.n ?? NR} kayıtta accuracy_m değeri var — GNSS hassasiyeti bu sürümde SAYIYLA beyan edilemiyor; park üyeliği poligon testiyle doğrulandı`),
+    INV ? qaRow('Envanter tutarlılığı (h/d)', INV.hd_block ? '⛔ Blok' : (INV.hd_fail.length ? '⚠ İnceleme' : true), INV.hd_block ? `Kayıtların ${INV.hd_fail.length}/${INV.n} adedinde boy/çap oranı fiziksel aralık dışında (${QA_LIMITS.HD_MIN}–${QA_LIMITS.HD_MAX}) — SİSTEMİK birim hatası (ölçü birimi çevre olabilir: DBH = çevre/π); yayın düzeltme (0011) uygulanana dek bloklanır` : (INV.hd_fail.length ? `${INV.n - INV.hd_fail.length}/${INV.n} kayıt ${QA_LIMITS.HD_MIN}–${QA_LIMITS.HD_MAX} aralığında · ${INV.hd_fail.length} kayıt sınır dışı (tekil bodur/abartılı birey; noktalar: ${INV.hd_fail.map((x) => 'P' + x.point_id).join(', ')})` : `${INV.n}/${INV.n} kayıt boy/çap oranı ${QA_LIMITS.HD_MIN}–${QA_LIMITS.HD_MAX} aralığında`)) : null,
+    INV ? qaRow('Karbon yeniden hesabı', INV.dev_block ? '⛔ Blok' : (INV.dev_fail.length ? '⚠ İnceleme' : true), INV.dev_block ? `${INV.dev_fail.length}/${INV.n} kayıtta saklı karbon, panel denklemiyle yeniden hesabın ±%${QA_LIMITS.CARBON_DEV_PCT} bandı dışında — SİSTEMİK hesap hatası; yayın düzeltme uygulanana dek bloklanır` : (INV.dev_fail.length ? `${INV.n - INV.dev_fail.length}/${INV.n} kayıt panel denklemiyle ±%${QA_LIMITS.CARBON_DEV_PCT} içinde · ${INV.dev_fail.length} kayıt bant dışında (noktalar: ${INV.dev_fail.map((x) => 'P' + x.point_id + ' %' + trNum(x.dev_pct, 0)).join(', ')})` : `${INV.n}/${INV.n} kayıt panel denklemiyle (Chave 2014 + kanonik ρ) ±%${QA_LIMITS.CARBON_DEV_PCT} içinde yeniden üretildi`)) : null,
     qaRow('Konum çiti', (snap.geofence.outside_rows || 0) === 0 ? true : '⚠ Kısmi', `${snap.geofence.verified_rows}/${snap.geofence.total ?? snap.geofence.verified_rows} kayıt poligon içinde`),
     qaRow('Moderasyon', snap.moderation.approved > 0, `${snap.moderation.approved}/${snap.moderation.approved} kayıt onaylı · zaman damgası ${snap.moderation.reviewed}/${snap.moderation.approved}`),
     qaRow('Rapor üretimi', true, `içerik hash'i <code>sha256:${hash.slice(0, 16)}…</code> (canlı doğrulama §7'de)`),
@@ -581,7 +675,12 @@ export function renderReport(snap, { id, hash, version = 1, meta = null }) {
     knotted ? `Bu sürümde kullanılan park sınırı ${knotN} kendini kesen segment çifti (düğüm) içermektedir; arazi örtüsü çözümlemesi bu nedenle kalite eşiğini geçememiş ve rapor kapsamı dışında bırakılmıştır. Sınırın uygulamada yeniden çizilmesi (veya OSM poligonuna dönülmesi) önerilir.` : null,
     'Chave ve ark. (2014) pantropikal bir modeldir; Türkiye türleri için bölgesel kalibrasyon gerçekleştirilmemiştir.',
     `Örneklem büyüklüğü (n=${t.n}) sınırlıdır; park geneline ekstrapolasyon, güven aralığı ile birlikte dahi ihtiyatla yorumlanmalıdır.`,
-    `GNSS doğruluğu (±${trNum(snap.gps.mean_acc_m ?? 0, 1)} m) bireysel ağaç konumu için değil, park üyeliği doğrulaması için kullanılmıştır.`,
+    (G.n_with_acc ?? 0) > 0
+      ? `GNSS doğruluğu (±${trNum(G.mean_acc_m, 1)} m) bireysel ağaç konumu için değil, park üyeliği doğrulaması için kullanılmıştır.`
+      : 'GNSS alıcı doğruluğu (accuracy_m) bu veri sürümünde kaydedilmemiştir; konumsal doğrulama park poligonu üyelik testiyle sınırlıdır ve bireysel nokta hassasiyeti sayısal olarak beyan edilemez.',
+    (INV && INV.hd_block) ? `Envanter kalite kapısı bu sürümde boy/çap oranı denetiminde blok vermiştir (${INV.hd_fail.length}/${INV.n} kayıt); ölçü birimi hatası (çevre değeri çap kolonuna yazılmış olabilir) düzeltilmeden toplam karbon stoku yayımlanmamalıdır.` : null,
+    (INV && INV.dev_block) ? `Saklı karbon değerleri ${INV.dev_fail.length}/${INV.n} kayıtta panel denklemiyle yeniden hesabın ±%${QA_LIMITS.CARBON_DEV_PCT} bandı dışındadır; düzeltme (0011) uygulanana dek toplam geçicidir.` : null,
+    (INV && INV.n_unknown > 0) ? `${INV.n_unknown} tür adı kanonik sözlük dışında kalmıştır (${INV.unknown.join(', ')}); bu kayıtlarda grup varsayılan odun yoğunluğu kullanılmıştır ve tür düzeyi ρ belirsizliği genişlemiştir.` : null,
     L && L.masked_ha > 0 ? `Analiz alanının ${trNum(L.masked_ha, 2)} ha’lık bölümü bulut/gölge maskesi kapsamındadır; bu alan sınıf dağılımına dahil edilmemiştir.` : null,
   ].filter(Boolean).map((x) => `<li>${x}</li>`).join('');
 
@@ -622,6 +721,19 @@ export function renderReport(snap, { id, hash, version = 1, meta = null }) {
     citation: ['https://doi.org/10.5281/zenodo.7254221', 'https://doi.org/10.1111/gcb.12629'],
   };
 
+  /* §4.1 saha protokolü metni VERİDEN türetilir: hangi alanın nasıl
+   * kaydedildiği veri tablosundan okunur; bilinmeyen hassasiyet ASLA
+   * uydurulmaz (0011 öncesi satır, accuracy_m NULL iken "±0,0 m" basıyordu). */
+  const RWS = snap.rows || [];
+  const nGirth = RWS.filter((r) => r.girth_cm != null && +r.girth_cm > 0).length;
+  const hbRows = RWS.filter((r) => Number.isFinite(+r.height_m) && (+r.height_m * 10) % 1 === 0).length;
+  const dbhcTxt = nGirth > 0
+    ? `Göğüs çapı (DBH), yerden 1,30 m yükseklikte kaydedilen gövde çevresinden türetilmiştir (DBH = çevre ÷ π; ${nGirth}/${NR} kayıtta ham çevre değeri saklıdır).`
+    : 'Göğüs çapı (DBH) yerden 1,30 m yükseklikte ölçülmüş ve doğrudan kaydedilmiştir.';
+  const gnssTxt = (G.n_with_acc ?? 0) > 0
+    ? ` (kaydedilen doğruluk: ${G.n_with_acc}/${G.n ?? NR} kayıt · ortalama ±${trNum(G.mean_acc_m, 1)} m)`
+    : ` — ancak alıcı doğruluk değeri (accuracy_m) bu veri sürümünde kaydedilmediğinden GNSS hassasiyeti sayısal olarak beyan edilememektedir; konumsal doğrulama park poligonu üyelik testiyle sınırlıdır (§7)`;
+  const photoTxt = (nPhoto === NR) ? 'zorunlu tutulmuş ve tüm kayıtlarda sağlanmıştır' : `kısmen sağlanmıştır (${nPhoto}/${NR} kayıt)`;
   const lulcMethod = L ? `<p><b>4.4 Arazi örtüsü sınıflandırması.</b> Arazi örtüsü sınıflandırması, park sınırı içerisinde mekânsal çözünürlüğü 10 m olan raster veri (${esc(dataset)}) ile gerçekleştirilmiştir. Sınıflandırma sonuçları park geometrisi ile kesiştirilerek değerlendirilmiş; sınır hücrelerinde alan ağırlıklı hesaplama uygulanmıştır${epsg ? ` (analiz projeksiyonu: ${esc(epsg)})` : ''}. Bulut/gölge gölgesinde kalan hücreler maskelenmiş ve sınıf toplamına dahil edilmemiştir${L.masked_ha > 0 ? ` (bu sürümde ${trNum(L.masked_ha, 2)} ha)` : ''}. Raster kapsama alanı ile park geometrisi alanı arasındaki bağıl fark %0,5 eşiğini aşarsa sonuç YAYINLANMAZ; bu sürümde fark %${trNum(deltaPct ?? 0, 3)} olarak ölçülmüştür (Çizelge 3).</p>` : '';
 
   return `<!doctype html>
@@ -716,7 +828,7 @@ pre{background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:
 <p>Bu rapor, ${esc(P.name)} sınırları içerisinde gerçekleştirilen ${t.n} bireysel ağaç ölçümüne (göğüs çapı, boy, tür, GNSS konumu ve fotoğraf kanıtı) dayalı toplam karbon stokunu, %95 güven aralığı ve bağımsız doğrulama izleri ile birlikte sunmaktadır. Toplam karbon stoku <b>${ciTxt}</b> olarak hesaplanmış; hektara karşılığı ${t.per_ha_kg == null ? '—' : trNum(t.per_ha_kg / 1000, 3) + ' t/ha'} olarak bulunmuştur. Bütün kayıtlar moderatör onayından geçirilmiştir; park poligonu konum çiti denetiminin kayıt düzeyindeki sonucu §7'de raporlanmıştır.${L ? ` Arazi örtüsü bağlamı ${esc(dataset)} ürünüyle üretilmiş; kalite kontrol sonuçları Çizelge 4'te sunulmuştur.` : ''}</p>
 
 <h2><span class="no">2</span>Analiz Alanı</h2>
-<p>Analiz alanı, ${esc(P.city)} (${esc(P.country)}) sınırları içinde yer alan ${esc(P.name)} park sahasıdır. Saha sınırı, ${GQ ? esc(GQ.source.includes('geom_json') ? 'uygulamada çizilen park poligonundan (parks.geom_json)' : 'OpenStreetMap <code>' + esc(P.osm_key || '—') + '</code> geometrisinden') : 'OpenStreetMap <code>' + esc(P.osm_key || '—') + '</code> geometrisinden'} türetilmiş olup ${trNum(parkHa, 2)} ha alan kaplamaktadır.${knotted ? ` Poligonda <b>${knotN} kendini kesen segment çifti</b> (düğüm) saptanmıştır; bu durum alan hesapları ile raster ayrışımını birbirinden ayırır ve arazi örtüsü çözümlemesinin kalite eşiğine takılmasına yol açar (§7, §9).` : ''} Envanter, ${snap.period.from.slice(0, 10)} – ${snap.period.to.slice(0, 10)} tarihleri arasında ${t.n} ölçüm noktasında gerçekleştirilmiştir${snap.geofence.outside_rows > 0 ? `; kayıtların ${snap.geofence.verified_rows}/${snap.geofence.total} adedi poligon içinde, ${snap.geofence.outside_rows} adedi poligon dışında konumlanmaktadır (ayrıntı §7)` : `; kayıtların tamamı poligon içinde konumlanmaktadır (denetim §7)`}.</p>
+<p>Analiz alanı, ${esc(P.city)} (${esc(P.country)}) sınırları içinde yer alan ${esc(P.name)} park sahasıdır. Saha sınırı, ${srcTxt} türetilmiş olup ${trNum(parkHa, 2)} ha alan kaplamaktadır.${GJ ? ` Uygulamada çizili sınır kaydı bir dikdörtgen (${GJ.ring_points} nokta; ${trNum(GJ.ring_area_m2 / 10000, 2)} ha) olduğundan gerçek park sınırı sayılmamış, analiz OpenStreetMap poligonundan yürütülmüştür (ayrıntı §7).` : ''}${knotted ? ` Poligonda <b>${knotN} kendini kesen segment çifti</b> (düğüm) saptanmıştır; bu durum alan hesapları ile raster ayrışımını birbirinden ayırır ve arazi örtüsü çözümlemesinin kalite eşiğine takılmasına yol açar (§7, §9).` : ''} Envanter, ${snap.period.from.slice(0, 10)} – ${snap.period.to.slice(0, 10)} tarihleri arasında ${t.n} ölçüm noktasında gerçekleştirilmiştir${snap.geofence.outside_rows > 0 ? `; kayıtların ${snap.geofence.verified_rows}/${snap.geofence.total} adedi poligon içinde, ${snap.geofence.outside_rows} adedi poligon dışında konumlanmaktadır (ayrıntı §7)` : `; kayıtların tamamı poligon içinde konumlanmaktadır (denetim §7)`}.</p>
 
 <h2><span class="no">3</span>Veri Kaynakları</h2>
 <p><b>3.1 Birincil veri.</b> ${esc(dataset)}: Sentinel-1 ve Sentinel-2 füzyonundan üretilmiş küresel arazi örtüsü ürünü; mekânsal çözünürlük 10 m; veri dönemi ${dataYear}; lisans CC BY 4.0. Erişim, STAC kataloğu (Planetary Computer) üzerinden park poligonunu kesen karolar için gerçekleştirilmiştir.</p>
@@ -725,10 +837,10 @@ pre{background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:
 ${L && L.cross ? `<p><b>3.4 Çapraz doğrulama verisi.</b> ${esc(L.cross)}: bağımsız ikinci sınıflandırma kaynağı; grup bazlı uzlaşma §7'de raporlanır${L.crossError ? ` (bu sürümde çapraz karşılaştırma tamamlanamadı: ${esc(L.crossError)})` : ''}.</p>` : ''}
 
 <h2><span class="no">4</span>Yöntem</h2>
-<p><b>4.1 Saha protokolü.</b> Göğüs çapı (DBH) yerden 1.30 m yükseklikte şeritmetre ile (±0.5 cm), ağaç boyu lazer hipsometre ile (±0.25 m), konum sivil GNSS alıcısıyla (ortalama ±${trNum(snap.gps.mean_acc_m ?? 0, 1)} m) ölçülmüş; her kayıt için sahada çekilmiş fotoğraf kanıtı zorunlu tutulmuştur.</p>
+<p><b>4.1 Saha protokolü.</b> ${dbhcTxt} Ağaç boyu ${hbRows > 0 ? 'sahada ölçülmüş (kayıt çözünürlüğü 0,1 m)' : '—'}; konum sivil GNSS alıcısıyla kaydedilmiş${gnssTxt}; her kayıt için sahada çekilmiş fotoğraf kanıtı ${photoTxt}.</p>
 <p><b>4.2 Biyokütle ve karbon.</b> Toprak üstü biyokütle (AGB), Chave ve ark. (2014) pantropikal allometrik denklemiyle hesaplanmıştır: AGB = 0.0673·(ρ·D²·H)^0.976; burada ρ odun yoğunluğu (g/cm³), D göğüs çapı (cm), H ağaç boyu (m). Toprak altı biyokütle (kök biyokütlesi) AGB×0.26, karbon stoku ise toplam biyokütlenin 0.47 katsayısı ile çarpımı olarak tanımlanmıştır. Tür yoğunluğu bulunmadığında grup varsayılanı (iğne yapraklı / geniş yapraklı) kullanılmış ve Çizelge 1'de beyan edilmiştir.</p>
 <p><b>4.3 Belirsizlik.</b> Girdi belirsizlikleri (§4.1) ve allometrik model belirsizliği (%22 değişim katsayısı) Monte Carlo yöntemiyle (n=${snap.mc.N}, sabit tohum=${snap.mc.SEED}) yayılmıştır; model hatası kayıtlar arasında korele kabul edilmiştir, zira aynı denklem tüm kayıtlarda ortak yönde sapma üretir. Güven aralığı, örneklem dağılımının 2.5 ve 97.5 yüzdebirlikleri olarak raporlanmıştır.</p>
-${lulcMethod || '<p><b>4.4 Arazi örtüsü sınıflandırması.</b> Bu sürümde arazi örtüsü çözümlemesi yer almamaktadır' + (snap.lulc && snap.lulc.error ? ` (teknik not: ${esc(snap.lulc.error)})` : '') + (knotted ? ` Saptanan neden: sınır poligonundaki ${knotN} kendini kesen segment çifti (düğüm), poligon alanı ile raster kapsama alanını %0,5 eşiğinin üzerinde ayrıştırmaktadır. Sınır düzeltilip yeniden yayımlandığında çözümleme üretilir; bu raporun kimliği değişmez, yeni çözümleme yeni DGR kimliği alır.` : '') + '.</p>'}
+${lulcMethod || '<p><b>4.4 Arazi örtüsü sınıflandırması.</b> Bu sürümde arazi örtüsü çözümlemesi yer almamaktadır' + (snap.lulc && snap.lulc.error ? ` (teknik not: ${esc(snap.lulc.error)})` : '') + (knotted ? ` Saptanan neden: sınır poligonundaki ${knotN} kendini kesen segment çifti (düğüm), poligon alanı ile raster kapsama alanını %0,5 eşiğinin üzerinde ayrıştırmaktadır. Sınır düzeltilip yeniden yayımlandığında çözümleme üretilir; bu raporun kimliği değişmez, yeni çözümleme yeni DGR kimliği alır.` : '') + (GJ ? ` Saptanan neden: uygulamada çizili sınır kaydı bir dikdörtgen (${GJ.ring_points} nokta; jeodezik alanı ${trNum(GJ.ring_area_m2 / 10000, 2)} ha) olup künye alanından (${trNum(parkHa, 2)} ha) belirgin biçimde büyüktür; alan dengesi eşiği bu nedenle aşılmıştır. Sınır kaydı düzeltilip (veya OSM poligonuna dönülüp) yeniden yayımlandığında çözümleme üretilir; bu raporun kimliği değişmez, yeni çözümleme yeni DGR kimliği alır.` : '') + '.</p>'}
 <p><b>4.5 Doğrulama zinciri.</b> (i) Her kayıt moderatör onayı gerektirir (${snap.moderation.approved}/${snap.moderation.approved} kayıt 'Onaylı' durumundadır; zaman damgalı onay kaydı ${snap.moderation.reviewed}/${snap.moderation.approved}); (ii) ölçüm konumunun park poligonu içinde olması veritabanı tetiği ile zorunlu kılınmıştır (trg_geo_fence; zorunluluk, 0007 geçişinden sonraki kayıtlara uygulanır, önceki kayıtlar için kayıt düzeyindeki denetim sonucu §7'de beyan edilir); (iii) arazi örtüsü çözümlemesinde raster/park alan farkı %0,5 eşiğini aşarsa sonuç yayınlanmaz; (iv) yayınlanan sayfanın içerik bütünlüğü SHA-256 hash'i ile açılışta canlı doğrulanır (§7).</p>
 
 <h2><span class="no">5</span>Nicel Sonuçlar</h2>
@@ -751,7 +863,7 @@ ${L ? `<p><b>5.2 Arazi örtüsü.</b> Sınıf alanları Çizelge 2'de sunulmuşt
 ${L ? `<div class="fig"><img src="harita.png" alt="${esc(P.name)} park sahası arazi örtüsü sınıfları haritası; park sınırı ve ölçüm noktaları işaretli" style="width:100%;border-radius:8px"><div class="cap">Şekil 2 — ${esc(L.source)} sınıflandırmasının park poligonu ile tam kesişimi; koyu çizgi park sınırını (OSM), siyah noktalar envanter ölçüm noktalarını gösterir. Çizim, çözümleme motorunun kesintisiz hücre çıktısından birebir ölçekli üretilmiştir; bağlayıcı sayısal değerler Çizelge 2'de ve data.json'dadır. Harita altbilgisi belge kimliğini (${id}), veri kaynağını, çözünürlüğü, projeksiyonu (${esc(epsg || '—')}) ve analiz tarihini taşır: harita tek başına dolaşıma girse bile kaynağı belirlidir.</div></div>` : '<p>Bu sürümde harita üretilmemiştir.</p>'}
 
 <h2><span class="no">7</span>Kalite Kontrol ve Doğrulama</h2>
-<p>Sonuçlar üretilmeden önce hesaplamanın bütünlüğü aşağıdaki kontrollerle doğrulanmıştır (Çizelge 4). Kontroller otomatiktir; eşik ihlalinde yayın durdurulur.</p>
+<p>Sonuçlar üretilmeden önce hesaplamanın bütünlüğü aşağıdaki kontrollerle doğrulanmıştır (Çizelge 4). Kontroller otomatiktir; eşik ihlalinde yayın durdurulur.${(INV && (INV.hd_block || INV.dev_block)) ? ` <b>Bu sürümde envanter kalite kapısı blok durumundadır:</b> ${INV.hd_block ? `boy/çap oranı ${INV.hd_fail.length}/${INV.n} kayıtta fiziksel aralık dışında (sistemik birim hatası; DBH = çevre ÷ π dönüşümü uygulanmamış olabilir)` : ''}${INV.hd_block && INV.dev_block ? '; ' : ''}${INV.dev_block ? `saklı karbon değerleri ${INV.dev_fail.length}/${INV.n} kayıtta panel denklemiyle ±%${QA_LIMITS.CARBON_DEV_PCT} bandı dışında` : ''}. Karbon toplamı bu nedenle GEÇİCİDİR ve düzeltme (0011_inventory_qa.sql) uygulanmadan bilimsel iletişimde KULLANILMAMALIDIR.` : ''}</p>
 <table><thead><tr><th>Kontrol</th><th>Sonuç</th><th>Ayrıntı</th></tr></thead><tbody>${qaRows}</tbody></table>
 <div class="verify">
  <b>Rapor kimliği:</b> <code>${id}</code> · sürüm ${verTxt} · yayın ${snap.generated_at.slice(0, 10)}<br>

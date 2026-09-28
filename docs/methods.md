@@ -66,10 +66,46 @@ varsayılanı kullanılır:
 | YAPRAKLI | 541 | aynı |
 | DİĞER | 493 | aynı |
 
-Tür bazlı değerler tabloda listelenir (örn. Kızılçam 478, Meşe 570).
-**45 tür kaydının 28'inde ρ yoktur** ve grup varsayılanına düşer. ρ, AGB'ye
-doğrusal girdiği için %20 ρ hatası ≈ %20 karbon hatası demektir — bu, veri
-setinin en büyük belirsizlik kaynağıdır.
+Tür bazlı değerler tabloda satır sonu yorumuyla KAYNAKLI listelenir
+(örn. Kızılçam 478 [Z09], Atlas Sediri 490 [WD]):
+
+* **[Z09]** Zanne vd. (2009), *Global wood density database* (Dryad,
+  doi:10.5061/dryad.234) — cins/tür düzeyi temel odun yoğunluğu.
+* **[WD]** The Wood Database (wood-database.com), "Specific Gravity (Basic)".
+* **[T13]** Tolunay (2013) — grup varsayılanları.
+
+Kaynaklandırılamayan tür **bilerek `rho:null` bırakılır** (uydurma değer
+yasağı); hesap grup varsayılanına düşer ve raporda beyan edilir.
+0011 ile sözlük 45 → **50 kayda** çıktı (SALKIM SÖĞÜT, MAVİ LADİN, DOĞU
+ÇINARI, ATLAS SEDİRİ, CEVİZ — Göksu envanterinin sözlük dışı 5 türü);
+**ρ'sız kayıt 28 → 6**'ya indi. ρ, AGB'ye ~0,976 üssüyle girdiği için
+%20 ρ hatası ≈ %19,5 karbon hatası demektir — veri setinin en büyük
+belirsizlik kaynağı olmaya devam eder.
+
+**Eşanlamlı çözümleyici.** Saha kayıtları/cihaz çıktıları kanonik ad dışında
+yazım üretebilir ("Ağlayan Söğüt", "Cınar", "CEVIZ"). `resolveSpeciesName()`
+Türkçe-duyarlı normalizasyon + `SPECIES_SYNONYMS` ile adı kanonik forma
+indirger; DB'ye her zaman kanonik ad yazılır. Rapor QA'sı ("Tür sözlüğü
+eşleşmesi" satırı) eşleşmeyen adları SAYIYLA beyan eder.
+
+### 1.5.1 Çevre → DBH dönüşümü ve birim kapısı (0011)
+
+Cihaz çıktılarında "Çap" kolonu bazen **göğüs çevresi** taşır (Göksu 2026:
+34/34 kayıt; saha fotoğraflarıyla doğrulandı). Kanonik dönüşüm:
+
+```
+DBH [cm] = çevre [cm] / π
+```
+
+Ham çevre değeri `measurements.girth_cm` kolonunda SAKLANIR (silinmez);
+`dbh_cm` türetilmiş değerdir. Birim hatası otomatik yakalanır: birimsiz
+boy/çap oranı `h/D = 100·H[m]/D[cm]` olgun park ağaçlarında ~20–100'dur.
+`QA_LIMITS` (scripts/lib/mc.mjs): `HD_MIN=15`, `HD_MAX=120`; kayıtların
+>%50'si (ve ≥3 kayıt) eşik dışındaysa rapor yayını **bloklanır** (§7'de
+"⛔ Blok" + §9 sınırlılık). Tekil bodur bireyler uyarıdır, blok değildir.
+Aynı kapılar `scripts/import-measurements.mjs` içinde içe aktarımda da
+çalışır; `--birim auto` medyan h/D'ye bakarak kolonun birimini kendisi
+karar verir.
 
 ### 1.6 Geçersiz girdiler
 
@@ -171,7 +207,8 @@ Bunlar hata değil, **belgelenmiş varsayımlardır**. Değiştirmek isteyen
    olabilir. Bölgesel denklem (örn. Türkiye allometrisi) değerlendirmesi açık.
 2. **Belirsizlik yayılımı yoktur.** AGB denkleminin RSE'si ~%19-29'dur;
    raporlar bugün tek nokta değeri verir, güven aralığı vermez.
-3. **ρ tablosu eksik** (28/45 tür). Grup varsayılanı kullanılır.
+3. **ρ tablosu eksik** (6/50 tür: Japon Soforası, Defne + 4 genel satırı).
+   Grup varsayılanı kullanılır; kaynaklandırılamayan türe değer UYDURULMAZ.
 4. **Kök oranı (0,26) ve karbon oranı (0,47) sabittir.**
 5. **Gövde form faktörü (0,5) sabittir.**
 6. **Boy ölçülemeyen ağaç veri setine giremez** (`H` zorunlu). Chave'ın boy
@@ -186,7 +223,8 @@ Bunlar hata değil, **belgelenmiş varsayımlardır**. Değiştirmek isteyen
 
 ## 5. Sürümleme
 
-* Kod sürümü: git etiketleri + `sw.js` içindeki `CACHE_VERSION` (`r34`).
+* Kod sürümü: git etiketleri + `sw.js` içindeki `CACHE_VERSION` (içerik
+  değişince artar; bkz. `test/user-publish.test.mjs` sözleşmesi).
 * Yöntem sürümü: **bugün yok.** ρ tablosu ya da denklemler değiştiğinde eski
   kayıtların hangi yöntemle hesaplandığı izlenemiyor. `allometry_version` /
   `rho_used` sütunları yol haritasındadır; gelene dek bu belge yöntemin

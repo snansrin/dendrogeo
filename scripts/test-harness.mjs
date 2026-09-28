@@ -103,7 +103,7 @@ export function loadApp({ sadece } = {}) {
   const dosyalar = sadece ? SIRALAMA.filter((f) => sadece.includes(f)) : SIRALAMA;
 
   const LEXICAL = ['SPECIES_DATA', 'GROUP_DEFAULT_RHO', 'species', 'rho', 'LATIN',
-                   'GROUP_COLOR', 'QUOTA_MB', 'esc', '$',
+                   'GROUP_COLOR', 'SPECIES_SYNONYMS', 'QUOTA_MB', 'esc', '$',
                    'DG_LC_CODES', 'DG_LC_CLASSES', 'DG_LC_PIXEL_M', 'DG_LC_YEAR',
                    'DG_LC_COLLECTION', 'DG_LC_STAC', 'DG_LC_MAX_TILES',
                    'DG_LC_MAX_READ_PIXELS', 'DG_LC_RENDER_LIMIT',

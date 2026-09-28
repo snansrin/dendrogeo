@@ -169,6 +169,32 @@ sonuç her zaman günlüktedir.
 > devre dışı bırakır ve e-posta gönderir. Gelirse: Actions → "Rapor Yayın
 > Kuyruğu" → Enable workflow.
 
+## 6) Envanter kalite kapıları (QA v2.1 · 0011)
+
+Rapor motoru yayından ÖNCE kayıtları da denetler (§7 Çizelge 4):
+
+| Kapı | Eşik | İhlalde |
+|---|---|---|
+| Tür sözlüğü eşleşmesi | kanonik ad / eşanlamlı | ⚠ beyan (ρ grup varsayılanı) |
+| Fotoğraf kanıtı | her kayıtta `photo_url` | ⚠ beyan |
+| GNSS doğruluk kaydı | `accuracy_m` dolu | ⚠ "kaydedilmedi" beyanı (±0,0 UYDURULMAZ) |
+| Envanter tutarlılığı (h/D) | 15 ≤ 100·H/D ≤ 120 | ≥3 kayıt VE >%50 → **⛔ yayın bloğu** |
+| Karbon yeniden hesabı | panel denklemi ±%20 | ≥3 kayıt VE >%50 → **⛔ yayın bloğu** |
+| Park geometrisi | bbox/düğüm taraması | dikdörtgen `geom_json` yok sayılır → OSM'e düşülür (beyanla) |
+
+Blok durumunda rapor §7 başlığında "GEÇİCİDİR … 0011 uygulanmadan
+KULLANILMAMALIDIR" uyarısı basar. Göksu Parkı (park 25) için düzeltme
+hazır: `supabase/migrations/0011_inventory_qa.sql` (çevre→DBH + ρ yeniden
+hesap + gerçek OSM sınırı; idempotent, yedekli, geri almalı).
+
+Yeni saha/cihaz verisi için elle panel girişi yerine:
+
+```bash
+node scripts/import-measurements.mjs saha.csv --park N --project N --owner UUID
+#  · --birim auto (varsayılan): medyan h/D < 15 ise kolonu ÇEVRE sayar
+#  · --dry-run: yalnız QA raporu  · --json: makine okur  · SQL idempotent
+```
+
 ## 6) Elle yayın (yedek yol)
 
 Kuyruk dışında tek park yayını hâlâ mümkün — aynı üreticiyi çağırır:

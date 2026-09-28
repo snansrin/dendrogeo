@@ -9,6 +9,50 @@ Yeni sürüm yayımlama adımları: [`docs/surum-yayini.md`](docs/surum-yayini.m
 
 ## [Yayımlanmadı]
 
+### Düzeltildi — Envanter kalite paketi (0011 · QA v2.1) (2026-09-28)
+Göksu Parkı (park 25 · 34 kayıt · 28.09.2026) saha denetimi üç sistemik
+hatayı doğruladı; paket üçünü de kalıcı olarak kapatır.
+- **B1 · Birim hatası (9x)**: cihaz çıktısının "Çap" kolonu GÖĞÜS ÇEVRESİ
+  taşıyordu (34/34 kayıtta h/D 5–16; olgun ağaçta 20–100). Saha fotoğrafları
+  ölçekle doğrulandı (P7 gövde ~35 cm ↔ çevre 107; P29 fidan ~13 cm ↔ 40;
+  P32 ~64 cm ↔ 200). `0011_inventory_qa.sql`: ham değer `girth_cm`'e
+  taşınır (SİLİNMEZ), `dbh_cm = round(girth_cm/π, 2)`; karbon+hacim panel
+  denklemiyle yeniden → toplam 50,51 t ≈ **5,0–5,6 t**'a iner.
+- **B2 · ρ okuma hatası (rapor hattı)**: `scripts/lib/mc.mjs loadRho()`
+  species.js'i regex ile tarıyordu ama tablo anahtarları tırnaksız
+  (`{tr:"…"}`) → rapor hattı HİÇBİR tür ρ'sunu okuyamıyor, her tür grup
+  varsayılanına düşüyordu (panel ile rapor sessizce ayrışıyordu). Artık
+  dosya vm'de çalıştırılıp gerçek tablo okunur; `mc.calcRow` panel
+  `calc()` ile birebir (KARAÇAM 107/12 → 1972,8 kg iki tarafta da).
+- **Tür sözlüğü 45 → 50**: SALKIM SÖĞÜT (Salix babylonica 400), MAVİ LADİN
+  (Picea pungens 450), DOĞU ÇINARI (Platanus orientalis 600), ATLAS SEDİRİ
+  (Cedrus atlantica 490), CEVİZ (Juglans regia 560) + kaynaklı ρ dolgusu
+  (ρ'sız kayıt 28 → 6; kaynaklar: Zanne 2009 [Z09], Wood Database [WD]).
+  `SPECIES_SYNONYMS` + `resolveSpeciesName()` (Türkçe-duyarlı normalizasyon)
+  — "Ağlayan Söğüt"/"Cınar"/"CEVIZ" kanonik ada iner.
+- **B3 · Park sınırı**: `parks.geom_json` (park 25) 5 noktalı DİKDÖRTGENdi
+  (68,93 ha ≠ künye 50,11 ha) → LULC "alan dengesi" %37,6 farkla bloke.
+  0011 gerçek OSM poligonunu yazar (way/423602737 · 111 nokta · ~50,00 ha;
+  34/34 kayıt içinde). Rapor hattı ayrıca `bboxRing()` koruması kazandı:
+  dikdörtgen geom_json YOK SAYILIR, OSM'e düşülür (§2/§7'de beyan).
+- **QA v2.1 (rapor §7 Çizelge 4)**: 5 yeni otomatik kontrol — Tür sözlüğü
+  eşleşmesi · Fotoğraf kanıtı · GNSS doğruluk kaydı · Envanter tutarlılığı
+  (h/D) · Karbon yeniden hesabı. Sistemik ihlal (≥3 kayıt VE >%50) yayını
+  BLOKLAR; §7 başlığı "GEÇİCİDİR" uyarısı basar. `accuracy_m` NULL iken
+  rapor artık "±0,0 m" UYDURMUYOR — §4.1/§9 "kaydedilmedi" beyan ediyor.
+- **Yeni araç** `scripts/import-measurements.mjs`: cihaz CSV/TSV çıktısını
+  doğrular (birim auto-tespit, kanonik tür, panel denklemiyle yeniden hesap,
+  mükerrer/çit denetimi) ve idempotent SQL üretir (`client_id` UNIQUE
+  `dgi:<park>:<nokta>:<no>`). QA kapısı blokta SQL üretmez (`--force`
+  damgalı üretir).
+- **Kozmetik**: §2 kaynak cümlesinde `<code>` etiketi esc() içinde
+  kayboluyordu (v2'den beri) → düzeltildi; bbox alanı tr sayı biçiminde.
+- Testler: `test/inventory-qa.test.mjs` (30 test · ρ okuma, sözlük, QA
+  kapıları, bbox, import aracı, render beyanları, SQL senkronu);
+  allometry CANARY 50/6'ya güncellendi; `sw.js` r43 → **r44**.
+- Belgeler: `docs/methods.md` §1.5/§1.5.1 (ρ kaynakları + çevre→DBH +
+  kapılar), `supabase/README.md` (0011 satırı + uygulama sırası).
+
 ### Eklendi — Rapor standardı v2 + geri çekme (0010) (2026-09-28)
 Kullanıcı standardı: **DGR — DendroGeo Bilimsel Analiz Raporu** kimliği resmen
 tanımlandı; rapor bilimsel/teknik çizgide baştan yapılandırıldı; yanlışlıkla

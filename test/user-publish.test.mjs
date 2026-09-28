@@ -133,8 +133,10 @@ describe('arayüz kablolaması: 📄 düğmesi + panel kutusu', () => {
       assert.ok(UI.includes(cls), 'UI sınıfı mevcut aileden: ' + cls);
   });
 
-  test('çevrimdışı paket: sw.js r43 ve modül CORE_ASSETS’te kalır', () => {
-    assert.match(SW, /CACHE_VERSION = 'dendrogeo-sw-v2-r43'/, 'içerik değişti → sürüm arttı');
+  test('çevrimdışı paket: sw.js r44 ve modül CORE_ASSETS’te kalır', () => {
+    // 0011 (2026-09-28): species.js genişledi → önbellek sürümü r43→r44.
+    // Sözleşme: önbeklenen içerik değiştiğinde CACHE_VERSION artmak zorunda.
+    assert.match(SW, /CACHE_VERSION = 'dendrogeo-sw-v2-r44'/, 'içerik değişti → sürüm arttı');
     assert.match(SW, /'\/src\/services\/report-publish\.js'/);
   });
 });

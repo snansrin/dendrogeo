@@ -93,10 +93,10 @@ describe('rho fallback zinciri — tür → grup → DİĞER', () => {
   });
 
   test('rho değeri null olan tür grup varsayılanına düşer', () => {
-    // SERVİ species.js içinde rho:null → İBRELİ varsayılanı 446
-    assert.equal(app.rho['SERVİ'], undefined, 'rho:null olan tür haritaya yazılmamalı');
-    const r = calc(30, 20, 'SERVİ', 'İBRELİ');
-    assert.ok(Math.abs(r.agb - agb(446, 30, 20)) < 1e-6, 'agb=' + r.agb);
+    // JAPON SOFORASI species.js içinde rho:null → YAPRAKLI varsayılanı 541
+    assert.equal(app.rho['JAPON SOFORASI'], undefined, 'rho:null olan tür haritaya yazılmamalı');
+    const r = calc(30, 20, 'JAPON SOFORASI', 'YAPRAKLI');
+    assert.ok(Math.abs(r.agb - agb(541, 30, 20)) < 1e-6, 'agb=' + r.agb);
   });
 
   test('tamamen bilinmeyen tür de grup varsayılanına düşer, çökmüyor', () => {
@@ -109,14 +109,39 @@ describe('rho fallback zinciri — tür → grup → DİĞER', () => {
     assert.ok(Math.abs(r.agb - agb(493, 30, 20)) < 1e-6);
   });
 
-  test('CANARY: 45 tür kaydının 28 kadarında rho yok — veri kalitesi borcu', () => {
+  test('CANARY: 50 tür kaydının 6 kadarında rho yok — veri kalitesi borcu', () => {
     // Bu test bilinçli olarak MEVCUT DURUMU belgeler. rho tablosu
     // dolduruldukça `bos` sayısı düşmeli; o zaman bu test güncellenir.
     // Bir gerileme değil, ilerleme işaretidir.
+    // 0011 (2026-09-28): Göksu envanteri 5 türü sözlük dışında yakaladı →
+    // SALKIM SÖĞÜT, MAVİ LADİN, DOĞU ÇINARI, ATLAS SEDİRİ, CEVİZ kaynaklı
+    // ρ'larıyla eklendi; kalan null'lar kaynaklandırılamayan türler.
     const hepsi = Object.values(app.SPECIES_DATA).flat();
     const bos = hepsi.filter((s) => !s.rho).length;
-    assert.equal(hepsi.length, 45, 'tür kaydı sayısı değişti');
-    assert.equal(bos, 28, 'rho eksik tür sayısı ' + bos + ' oldu — tabloyu doldurduysanız bu testi güncelleyin');
+    assert.equal(hepsi.length, 50, 'tür kaydı sayısı değişti');
+    assert.equal(bos, 6, 'rho eksik tür sayısı ' + bos + ' oldu — tabloyu doldurduysanız bu testi güncelleyin');
+  });
+
+  test('0011: Göksu envanterinin sözlük dışı 5 türü artık kaynaklı ρ taşıyor', () => {
+    assert.equal(app.rho['SALKIM SÖĞÜT'], 400);   // Salix babylonica [Z09]
+    assert.equal(app.rho['MAVİ LADİN'], 450);     // Picea pungens [WD]
+    assert.equal(app.rho['DOĞU ÇINARI'], 600);    // Platanus orientalis [Z09]
+    assert.equal(app.rho['ATLAS SEDİRİ'], 490);   // Cedrus atlantica [WD]
+    assert.equal(app.rho['CEVİZ'], 560);          // Juglans regia [Z09]
+    // Latince künye panelde boş kalmamalı
+    assert.equal(app.LATIN['SALKIM SÖĞÜT'], 'Salix babylonica');
+    assert.equal(app.LATIN['CEVİZ'], 'Juglans regia');
+  });
+
+  test('0011: eşanlamlı çözümleyici (resolveSpeciesName) kanonik ada indirger', () => {
+    const rs = app.resolveSpeciesName;
+    assert.equal(typeof rs, 'function', 'resolveSpeciesName global olmalı');
+    assert.equal(rs('mavi ladin'), 'MAVİ LADİN');
+    assert.equal(rs('  Cınar '), 'ÇINAR');
+    assert.equal(rs('Ağlayan Söğüt'), 'AĞLAYAN SÖĞÜT');
+    assert.equal(rs('MAZI (YALANCI SERVİ)'), 'MAZI (YALANCI SERVİ)');
+    assert.equal(rs('OLMAYAN TÜR'), null);
+    assert.equal(rs(null), null);
   });
 });
 
