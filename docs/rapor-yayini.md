@@ -171,8 +171,10 @@ sonuç her zaman günlüktedir.
 
 ## 5b) Yazar, QR ve arşiv boyutu (0012)
 
-- **Yazar**: rapor, yayını İSTEYEN kullanıcının adıyla yayımlanır
-  (`v_report_authors` → `profiles.full_name`). Kurucular (Nagihan Şirin,
+- **Yazar (0015 ile güncellendi)**: rapor, PARKIN VERİSİNİ ÖLÇEN kullanıcının
+  adıyla yayımlanır. Öncelik zinciri: `dg_park_author(park)` (en çok onaylı
+  katkısı olan kayıt sahibi · 0015) → `v_report_authors` (son yayın isteğini
+  açan · 0012) → kurumsal "DendroGeo" (isim uydurulmaz). Kurucular (Nagihan Şirin,
   Sinan Şirin) künyede "Site kurucuları" satırında ve metadata'da
   `contributors` olarak beyan edilir; `creators` YALNIZ istek sahibidir.
   Ad çözülemezse (0012 SQL'i çalıştırılmamış / profil boş) yazar

@@ -159,9 +159,15 @@ describe('publish-queue.mjs: plan + günlük', () => {
       assert.ok(!existsSync(join(ROOT, 'rapor/DGR-2026-0001/data.json')), 'veri dosyaları kaldırıldı');
       const retractedIds = new Set(q.entries.filter((x) => x.status === 'Geri çekildi').map((x) => String(x.report_id)));
       const pub = q.entries.find((x) => x.status === 'Yayınlandı' && !retractedIds.has(String(x.report_id)));
-      assert.ok(pub, 'günlükte en az bir GEÇERLİ yayın kaldı');
-      const phtml = read('rapor/' + pub.report_id + '/index.html');
-      assert.ok(phtml.includes(String(pub.report_hash).replace('sha256:', '')), pub.report_id + ': hash sayfa ile tutarlı');
+      if (pub) {
+        const phtml = read('rapor/' + pub.report_id + '/index.html');
+        assert.ok(phtml.includes(String(pub.report_hash).replace('sha256:', '')), pub.report_id + ': hash sayfa ile tutarlı');
+      } else {
+        /* 0015: tüm yayınlar geri çekilmiş olabilir (meşru durum) — bu
+         * durumda günlükte en az bir Yayınlandı + bir Geri çekildi izi şart. */
+        assert.ok(retractedIds.size >= 1, 'geçerli yayın yoksa geri çekme kaydı olmalı');
+        assert.ok(q.entries.some((x) => x.status === 'Yayınlandı'), 'günlükte yayın izi korunur');
+      }
     } else {
       assert.equal(e.status, 'Yayınlandı');
       /* günlüğün yazdığı hash, yayınlanmış sayfanın hash’i ile aynı olmalı */

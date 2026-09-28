@@ -33,6 +33,19 @@ kapanmadığı için ikinci yayın kalıcı olarak bloke oluyordu.
   günlükte sonucu olmayan" istekleri sayar; `planQueue` request_id'si
   günlükte olan istekleri atlar. Yeni test: `test/publish-request-fix.test.mjs`.
 
+### Düzeltildi — 0015: yazar = veri sahibi + "tümü geri çekik" CI kazası (2026-09-28)
+- **Yazar önceliği**: DGR-2026-0004'ün künyesinde istek sahibi (Sinan) yazdı;
+  oysa 34 kaydın sahibi Nagihan. `0015_report_data_owner.sql` →
+  `dg_park_author(park)` (SECURITY DEFINER; yalnız full_name/organization):
+  motor artık ÖNCE parkın veri sahibine bakar, sonra istek sahibine (0012),
+  o da yoksa kurumsal yazar. İSİM UYDURULMAZ.
+- **CI kazası**: üç raporun aynı anda geri çekildiği anda (28.09 19:24) iki
+  test "en az bir GEÇERLİ yayın var" varsayımıyla düştü — oysa tümünün geri
+  çekilmiş olması MEŞRU durum. `rapor.test.mjs` + `report-publish.test.mjs`
+  bu durumu tanıyor (geçerli yayın yoksa en az bir geri çekme kaydı şart).
+  Her iki durumda da kanıtlandı: fc265a6 (tümü çekik) ✓ ve güncel main ✓.
+- Testler: report-author-qr'a 0015 sözleşmeleri (+2) · toplam 802.
+
 ### Değişti — 0013: veri sahibinin kararı + kuyruk push tetiği (2026-09-28)
 - **İade SQL'i** (`0013_restore_measurements.sql`): veri sahibi, Göksu
   kayıtlarındaki sayıların göğüs ÇAPI olduğunu beyan etti → 0011'in çevre/π

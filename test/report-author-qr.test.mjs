@@ -107,6 +107,25 @@ describe('0012 · yazar = yayını isteyen kullanıcı', () => {
 const HAS_QR = (() => { try { createRequire(import.meta.url)('qrcode'); return true; } catch (e) { return false; } })();
 const qrSkip = HAS_QR ? false : 'qrcode kurulu değil (npm ci sonrası koşar)';
 
+describe('0015 · yazar = veri sahibi (öncelik zinciri)', () => {
+  test('SQL: SECURITY DEFINER fonksiyon yalnız ad döndürür (e-posta SIZMAZ)', () => {
+    const sql = read('supabase/migrations/0015_report_data_owner.sql');
+    assert.match(sql, /create or replace function public\.dg_park_author/);
+    assert.match(sql, /security definer/);
+    assert.match(sql, /returns table\(full_name text, organization text\)/, 'yalnız iki alan');
+    assert.ok(!/p\.email/.test(sql), 'e-posta sızıntısı yok');
+    assert.match(sql, /count\(\*\) desc/, 'en çok katkı veren sahip');
+    assert.match(sql, /grant execute on function public\.dg_park_author\(bigint\) to anon, authenticated/);
+  });
+  test('motor: önce rpc/dg_park_author, sonra v_report_authors (kod sözleşmesi)', () => {
+    const src = read('scripts/make-report.mjs');
+    const i1 = src.indexOf("rest('rpc/dg_park_author'");
+    const i2 = src.indexOf("rest('v_report_authors'");
+    assert.ok(i1 > 0 && i2 > i1, 'öncelik sırası: data_owner → report_request (i1=' + i1 + ' i2=' + i2 + ')');
+    assert.match(src, /setName\(String\(pa\[0\]\.full_name\)\.trim\(\), 'data_owner'\)/, 'data_owner kaynağı');
+  });
+});
+
 describe('0012 · QR kalıcı bağlantı (standart md. 15)', () => {
   test('qrDataUri geçerli data-URI SVG üretir', { skip: qrSkip }, async () => {
     const uri = await qrDataUri('https://dendrogeo.org/rapor/DGR-2026-9001/');

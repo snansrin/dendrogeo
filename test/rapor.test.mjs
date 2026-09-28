@@ -115,8 +115,14 @@ describe('yayınlanmış rapor dizini tutarlı', () => {
   test('liste sayfası raporları dizinler', () => {
     const idx = readFileSync(join(dir, 'index.html'), 'utf8');
     const ids = readdirSync(dir).filter((d) => d.startsWith('DGR-') && !RETRACTED.has(d));
-    assert.ok(ids.length >= 1, 'en az bir GEÇERLİ yayın var');
-    for (const id of ids) assert.ok(idx.includes(id), 'liste geçerli yayını gösterir: ' + id);
+    /* 0015: "tümü geri çekilmiş" durum MEŞRUDUR (28.09.2026'da yaşandı:
+     * 0001+0002+0003 aynı anda çekikti ve bu test CI'da düştü). Liste o
+     * durumda DGR bağlantısı taşımaz; en az bir GERİ ÇEKME kaydı şarttır. */
+    if (ids.length === 0) {
+      assert.ok(RETRACTED.size >= 1, 'hiç geçerli yayın yoksa en az bir geri çekme kaydı olmalı');
+    } else {
+      for (const id of ids) assert.ok(idx.includes(id), 'liste geçerli yayını gösterir: ' + id);
+    }
     for (const id of RETRACTED) assert.ok(!new RegExp('href="' + id + '/"').test(idx), 'geri çekilen listede olamaz: ' + id);
   });
   test('Actions iş akışı mevcut ve izinli', () => {

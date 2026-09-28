@@ -480,17 +480,25 @@ export async function buildSnapshot(parkId, { skipLulc = false, meta = null } = 
   } : null;
   /* Envanter kalite kapısı: kanonik sözlük + panel denklemiyle yeniden hesap */
   const qaSpecies = inventoryQa(rows, loadSpeciesDict());
-  /* YAZAR (0012 · kullanıcı standardı): rapor, yayını isteyen KULLANICININ
-   * adıyla yayımlanır. İstek sahibi adı v_report_authors görünümünden
-   * çözülür (0012_report_author.sql); görünüm yoksa/ad çözülemezse
-   * DendroGeo kurumsal adı kullanılır — İSİM UYDURULMAZ. Site kurucuları
-   * her raporda "kurucu" olarak beyan edilir (yazarlıkla karışmaz). */
+  /* YAZAR (0012+0015 · kullanıcı standardı): rapor, PARKIN VERİSİNİ ÖLÇEN
+   * kullanıcının adıyla yayımlanır. Öncelik zinciri:
+   *   1) dg_park_author(park)  — en çok onaylı katkısı olan kayıt sahibi (0015)
+   *   2) v_report_authors      — son yayın isteğini açan kullanıcı (0012)
+   *   3) kurumsal "DendroGeo"  — İSİM UYDURULMAZ
+   * (DGR-2026-0004 dersi: istek Sinan'dan gelince künyede Sinan yazdı; oysa
+   * 34 kaydın sahibi Nagihan. Ölçen kişi istek açandan önceliklidir.) */
   let author = { name: null, full_name: null, source: 'unresolved' };
+  const setName = (nm, src) => { author = { name: nm, full_name: nm, source: src }; };
   try {
-    const ra = await rest('v_report_authors', { park_id: 'eq.' + parkId, order: 'created_at.desc', limit: '1' });
-    if (ra && ra[0] && String(ra[0].full_name || '').trim())
-      author = { name: String(ra[0].full_name).trim(), full_name: String(ra[0].full_name).trim(), source: 'report_request' };
-  } catch (e) { author = { name: null, full_name: null, source: 'unavailable', note: String((e && e.message) || e).slice(0, 120) }; }
+    const pa = await rest('rpc/dg_park_author', { park: parkId });
+    if (pa && pa[0] && String(pa[0].full_name || '').trim()) setName(String(pa[0].full_name).trim(), 'data_owner');
+  } catch (e) { /* 0015 henüz uygulanmadı → sıradaki kaynak */ }
+  if (!author.name) {
+    try {
+      const ra = await rest('v_report_authors', { park_id: 'eq.' + parkId, order: 'created_at.desc', limit: '1' });
+      if (ra && ra[0] && String(ra[0].full_name || '').trim()) setName(String(ra[0].full_name).trim(), 'report_request');
+    } catch (e) { author = { name: null, full_name: null, source: 'unavailable', note: String((e && e.message) || e).slice(0, 120) }; }
+  }
   let lulc = null;
   if (!skipLulc) {
     try {
