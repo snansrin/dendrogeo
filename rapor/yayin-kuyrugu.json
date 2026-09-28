@@ -1,6 +1,6 @@
 {
   "schema": "dendrogeo-publish-queue/1",
-  "updated_at": "2026-09-27T23:47:49.732Z",
+  "updated_at": "2026-09-28T17:02:06.642Z",
   "entries": [
     {
       "request_id": "manuel-DGR-2026-0001",
@@ -40,6 +40,49 @@
       "lulc": "dahil (ESA WorldCover 10 m · 2021 (v200))",
       "citation": "Şirin, N. & Şirin, S. (2026). Ülkü Spor Tesisi ağaç envanteri ve karbon stoku raporu (DGR-2026-0002, sürüm 1). DendroGeo. https://dendrogeo.org/rapor/DGR-2026-0002/",
       "finished_at": "2026-09-27T23:47:49.731Z"
+    },
+    {
+      "request_id": "ddf0fa5a-cad6-4f85-b979-b1b6b586accd",
+      "park_id": 25,
+      "with_lulc": true,
+      "requested_at": "2026-09-28T13:54:39.57618+00:00",
+      "started_at": "2026-09-28T17:02:02.506Z",
+      "status": "Yayınlandı",
+      "report_id": "DGR-2026-0003",
+      "version": 1,
+      "url_path": "/rapor/DGR-2026-0003/",
+      "report_hash": "sha256:31d6d84218f6ab75c35141d07236641994a41e819dcfdd20ae2134260e45ec01",
+      "park_name": "Göksu Parkı",
+      "city": "Ankara",
+      "n": 34,
+      "carbon_txt": "5.04 t [%95 GA 2.78–7.14]",
+      "lulc": "dahil (ESA WorldCover 10 m · 2021 (v200))",
+      "citation": "Şirin, N. & Şirin, S. (2026). Göksu Parkı ağaç envanteri ve karbon stoku raporu (DGR-2026-0003, sürüm 1.0). DendroGeo Bilimsel Analiz Raporu. https://dendrogeo.org/rapor/DGR-2026-0003/",
+      "finished_at": "2026-09-28T17:02:06.639Z"
+    },
+    {
+      "retraction_id": "faaa70f9-0c7c-4bef-b463-6e7719685bcf",
+      "report_id": "DGR-2026-0001",
+      "park_id": 5,
+      "park_name": "Atatürk Çocukları ve Doğal Yaşam Parkı",
+      "reason": "TEST YAYINI ",
+      "requested_by": "ebea441f-45e8-4323-80a2-85563d6d8b18",
+      "requested_at": "2026-09-28T12:12:48.920283+00:00",
+      "started_at": "2026-09-28T17:02:06.640Z",
+      "status": "Geri çekildi",
+      "finished_at": "2026-09-28T17:02:06.641Z"
+    },
+    {
+      "retraction_id": "433dc4c3-8dc2-4523-af63-1094acd12fa3",
+      "report_id": "DGR-2026-0002",
+      "park_id": 4,
+      "park_name": "Ülkü Spor Tesisi",
+      "reason": "TEST YAYINI",
+      "requested_by": "ebea441f-45e8-4323-80a2-85563d6d8b18",
+      "requested_at": "2026-09-28T12:12:53.859049+00:00",
+      "started_at": "2026-09-28T17:02:06.641Z",
+      "status": "Geri çekildi",
+      "finished_at": "2026-09-28T17:02:06.642Z"
     }
   ]
 }
