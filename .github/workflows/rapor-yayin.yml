@@ -57,6 +57,9 @@ jobs:
         with:
           node-version: 20
 
+      - name: Bağımlılıklar (npm ci)
+        run: npm ci
+
       - name: Bekleyen yayın isteklerini işle
         run: node scripts/publish-queue.mjs
 

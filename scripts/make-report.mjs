@@ -33,7 +33,12 @@ import { mcTotalCI, mcRowCI, canonicalHash, MC_CFG, fmtT, loadRho, loadSpeciesDi
 import { PngCanvas, hex2rgb } from './lib/png.mjs';
 import { createRequire } from 'node:module';
 const require_ = createRequire(import.meta.url);
-const QRlib = require_('qrcode'); /* devDependency: rapor QR'ı (kullanıcı standardı md.15) */
+/* qrcode (MIT) YALNIZ build bağımlılığıdır. Kurulu değilse (örn. npm install
+ * çalıştırılmamış ortam) rapor üretimi ÇÖKMEZ: QR hücresi atlanır, kalıcı
+ * adres künyede metin olarak kalır. QR kozmetiktir; kimlik/hash ondan
+ * bağımsızdır. */
+let QRlib = null;
+try { QRlib = require_('qrcode'); } catch (e) { QRlib = null; }
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const read = (p) => readFileSync(join(ROOT, p), 'utf8');

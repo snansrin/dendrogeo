@@ -27,6 +27,8 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 20
+      - name: Bağımlılıklar (npm ci)
+        run: npm ci
       - name: Raporu üret
         run: |
           node scripts/make-report.mjs --park "${{ inputs.park_id }}" ${{ inputs.skip_lulc && '--skip-lulc' || '' }}

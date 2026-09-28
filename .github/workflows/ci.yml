@@ -19,6 +19,11 @@ jobs:
       # node --check KULLANILMIYOR: .js dosyalarını CommonJS saydığı için
       # sloppy modda yasal olan yinelenen üst düzey function bildirimlerinde
       # yanlış pozitif üretiyor. vm.Script klasik <script> gibi ayrıştırır.
+      # 0012: qrcode devDependency — kilit dosyasından deterministik kurulum.
+      # (Bu adım olmadan `npm test` make-report'un qrcode import'unda patlıyordu.)
+      - name: Bağımlılıklar (npm ci)
+        run: npm ci
+
       - name: Sözdizimi denetimi (tarayıcı semantiği)
         run: npm run check:syntax
 

@@ -13,6 +13,7 @@
 import { test, describe } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
+import { createRequire } from 'node:module';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { canonicalHash, MC_CFG } from '../scripts/lib/mc.mjs';
@@ -100,15 +101,21 @@ describe('0012 · yazar = yayını isteyen kullanıcı', () => {
   });
 });
 
+/* qrcode kurulu değilse (npm install çalışmamış ortam) QR testleri ATLANIR:
+ * QR kozmetiktir, rapor üretimi onsuz da geçerlidir (zarif fallback).
+ * CI'da `npm ci` adımı kurar → orada bu testler KOŞAR. */
+const HAS_QR = (() => { try { createRequire(import.meta.url)('qrcode'); return true; } catch (e) { return false; } })();
+const qrSkip = HAS_QR ? false : 'qrcode kurulu değil (npm ci sonrası koşar)';
+
 describe('0012 · QR kalıcı bağlantı (standart md. 15)', () => {
-  test('qrDataUri geçerli data-URI SVG üretir', async () => {
+  test('qrDataUri geçerli data-URI SVG üretir', { skip: qrSkip }, async () => {
     const uri = await qrDataUri('https://dendrogeo.org/rapor/DGR-2026-9001/');
     assert.ok(uri && uri.startsWith('data:image/svg+xml;charset=utf-8,'), 'data-URI');
     const svg = decodeURIComponent(uri.slice(uri.indexOf(',') + 1));
     assert.match(svg, /^<svg xmlns="http:\/\/www\.w3\.org\/2000\/svg"/, 'SVG biçimi');
     assert.ok(svg.includes('<path') || svg.includes('<rect'), 'QR modülleri çizili');
   });
-  test('meta.qr_uri künyede basılır; dış istek YOK; uri yoksa adres metni kalır', async () => {
+  test('meta.qr_uri künyede basılır; dış istek YOK; uri yoksa adres metni kalır', { skip: qrSkip }, async () => {
     const snap = { ...base, author: { name: 'Nagihan Şirin', source: 'report_request' } };
     const uri = await qrDataUri('https://dendrogeo.org/rapor/DGR-2026-9001/');
     const html = renderReport(snap, { id: 'DGR-2026-9001', hash: canonicalHash(snap), version: 1, meta: { id: 'DGR-2026-9001', history: [], qr_uri: uri } });
