@@ -391,7 +391,13 @@ export function ringGeodesicAreaM2(ring) {
  * Eşik ihlali raporda beyan edilir; sistemik ihlal (≥ BLOCK_MIN_N kayıt VE
  * > BLOCK_RATIO oran) yayını bloklar. */
 export function inventoryQa(rows, dict) {
-  const { rho, grho } = loadRho();
+  const base = loadRho();
+  /* ρ önceliği: kanonik ad sözlükte (gizli kayıtlar dahil) ρ taşıyorsa o
+   * kullanılır — saklı carbon_kg'yi üreten tabloyla birebir denetim. Panel
+   * hesabı (calc) bundan ETKİLENMEZ; bu yalnız QA/yeniden hesap yoludur. */
+  const rho = Object.assign({}, base.rho);
+  for (const e of Object.values(dict.byName)) if (e.rho) rho[e.tr] = e.rho;
+  const grho = base.grho;
   const out = { n: 0, n_rows: 0, unknown: [], n_unknown: 0, hd_fail: [], hd_block: false, dev_fail: [], dev_block: false, rows: [] };
   for (const r of rows || []) {
     out.n++;
@@ -406,7 +412,8 @@ export function inventoryQa(rows, dict) {
       exp = _calcRow(d, h, canon || r.species, r.grp, { rho, grho }).total_carbon;
       if (exp > 0) {
         dev = +(((c - exp) / exp) * 100).toFixed(1);
-        devFail = Math.abs(dev) > QA_LIMITS.CARBON_DEV_PCT;
+        /* küçük kayıtlarda yuvarlama gürültüsü bayraklanmaz (mutlak taban) */
+        devFail = Math.abs(dev) > QA_LIMITS.CARBON_DEV_PCT && Math.abs(c - exp) >= (QA_LIMITS.CARBON_DEV_MIN_KG ?? 0);
         if (devFail) out.dev_fail.push({ point_id: +r.point_id, stored: c, expected: +exp.toFixed(1), dev_pct: dev });
       }
     }

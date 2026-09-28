@@ -147,13 +147,28 @@ describe('publish-queue.mjs: plan + günlük', () => {
     const q = loadQueue();
     assert.equal(q.schema, QUEUE_SCHEMA);
     assert.ok(existsSync(join(ROOT, QUEUE_PATH)), QUEUE_PATH + ' repo’da');
-    const e = q.entries.find((x) => x.report_id === 'DGR-2026-0001');
-    assert.ok(e, 'ilk yayın günlükte');
-    assert.equal(e.status, 'Yayınlandı');
-    /* günlüğün yazdığı hash, yayınlanmış sayfanın hash’i ile aynı olmalı */
-    const html = read('rapor/DGR-2026-0001/index.html');
-    assert.ok(html.includes(e.report_hash.replace('sha256:', '')), 'hash sayfa ile tutarlı');
-    assert.equal(e.park_id, JSON.parse(read('rapor/DGR-2026-0001/data.json')).park.id);
+    const e = q.entries.find((x) => x.report_id === 'DGR-2026-0001' && x.status === 'Yayınlandı');
+    assert.ok(e, 'ilk yayın günlükte (yayın kaydı geçmiş için korunur)');
+    /* 0010: ilk yayın 28.09.2026'da GERİ ÇEKİLDİ — günlükte AYRI bir
+     * 'Geri çekildi' satırı taşınır; yayın satırı geçmiş olarak kalır.
+     * Sözleşme: veri dosyaları silinir, adresinde gerekçeli bildirim kalır. */
+    const retr = q.entries.find((x) => x.report_id === 'DGR-2026-0001' && x.status === 'Geri çekildi');
+    if (retr) {
+      const html = read('rapor/DGR-2026-0001/index.html');
+      assert.match(html, /[Gg]eri çeki/, 'bildirim sayfası gerekçeli');
+      assert.ok(!existsSync(join(ROOT, 'rapor/DGR-2026-0001/data.json')), 'veri dosyaları kaldırıldı');
+      const retractedIds = new Set(q.entries.filter((x) => x.status === 'Geri çekildi').map((x) => String(x.report_id)));
+      const pub = q.entries.find((x) => x.status === 'Yayınlandı' && !retractedIds.has(String(x.report_id)));
+      assert.ok(pub, 'günlükte en az bir GEÇERLİ yayın kaldı');
+      const phtml = read('rapor/' + pub.report_id + '/index.html');
+      assert.ok(phtml.includes(String(pub.report_hash).replace('sha256:', '')), pub.report_id + ': hash sayfa ile tutarlı');
+    } else {
+      assert.equal(e.status, 'Yayınlandı');
+      /* günlüğün yazdığı hash, yayınlanmış sayfanın hash’i ile aynı olmalı */
+      const html = read('rapor/DGR-2026-0001/index.html');
+      assert.ok(html.includes(e.report_hash.replace('sha256:', '')), 'hash sayfa ile tutarlı');
+      assert.equal(e.park_id, JSON.parse(read('rapor/DGR-2026-0001/data.json')).park.id);
+    }
   });
 
   test('günlükteki her başarılı girdi rapor diziniyle birebir örtüşür', () => {
@@ -182,10 +197,13 @@ describe('make-report.mjs: tek üretici publishPark()', () => {
   });
 
   test('yayınlanan rapor sayfaları paylaş düğmesini taşıyor', () => {
+    /* 0010: geri çekilen yayının sayfası BİLDİRİMdir — paylaş düğmesi taşımaz.
+     * DGR-2026-0001 ayrıca bu hattan önce dondurulmuştu (v1 şablon). */
+    let retracted = new Set();
+    try { retracted = new Set(loadQueue().entries.filter((x) => x.status === 'Geri çekildi').map((x) => String(x.report_id))); } catch (e) { /* günlük yoksa boş */ }
     for (const d of readdirSync(join(ROOT, 'rapor')).filter((x) => x.startsWith('DGR-'))) {
+      if (retracted.has(d)) continue;
       const t = read('rapor/' + d + '/index.html');
-      /* DGR-2026-0001 bu hattan ÖNCE donduruldu: değişmezlik gereği olduğu
-       * gibi kalır (yeniden üretilmez). Yeni yayınlar düğmeyi taşır. */
       if (d === 'DGR-2026-0001') continue;
       assert.match(t, /dgShareReport\(\)/, d + ' paylaş düğmesi');
     }

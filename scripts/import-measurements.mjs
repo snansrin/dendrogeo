@@ -152,7 +152,13 @@ if (!file || has('help')) {
   process.exit(file ? 0 : 2);
 }
 const dict = loadSpeciesDict();
-const { rho, grho } = loadRho();
+/* ρ önceliği (0011b): kanonik ad sözlükte ρ taşıyorsa (gizli çözüm kayıtları
+ * dahil) o kullanılır — 0011'in çalıştırılmış SQL'i ve rapor QA kapısıyla
+ * AYNI tablo. Panel (calc) kendi zincirini kullanmaya devam eder. */
+const _base = loadRho();
+const rho = Object.assign({}, _base.rho);
+for (const e of Object.values(dict.byName)) if (e.rho) rho[e.tr] = e.rho;
+const grho = _base.grho;
 const text = readFileSync(file, 'utf8');
 const { rows, delim } = parseDelimited(text);
 if (rows.length < 2) { console.error('❌ en az başlık + 1 veri satırı gerekli'); process.exit(2); }
@@ -213,7 +219,7 @@ for (const r of live) {
   if (r.hd < QA_LIMITS.HD_MIN || r.hd > QA_LIMITS.HD_MAX) { hdFail.push(r); warn.push(`P${r.point_id}: boy/çap ${r.hd} fiziksel aralık dışında (${QA_LIMITS.HD_MIN}–${QA_LIMITS.HD_MAX}) — tekil bodur ağaçsa sorun değil, sistemikse kapı bloklar`); }
   if (Number.isFinite(r.carbon_stored) && r.carbon_stored > 0) {
     r.dev_pct = +(((r.carbon_stored - r.carbon_calc) / r.carbon_calc) * 100).toFixed(1);
-    if (Math.abs(r.dev_pct) > QA_LIMITS.CARBON_DEV_PCT) { devFail.push(r); warn.push(`P${r.point_id}: saklı karbon ${r.carbon_stored} kg ≠ yeniden hesap ${r.carbon_calc} kg (%${r.dev_pct}) — ondalık kayması/birim hatası olabilir`); }
+    if (Math.abs(r.dev_pct) > QA_LIMITS.CARBON_DEV_PCT && Math.abs(r.carbon_stored - r.carbon_calc) >= (QA_LIMITS.CARBON_DEV_MIN_KG ?? 0)) { devFail.push(r); warn.push(`P${r.point_id}: saklı karbon ${r.carbon_stored} kg ≠ yeniden hesap ${r.carbon_calc} kg (%${r.dev_pct}) — ondalık kayması/birim hatası olabilir`); }
   }
 }
 const seen = new Map();

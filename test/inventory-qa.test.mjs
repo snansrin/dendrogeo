@@ -29,17 +29,17 @@ const app = loadApp(['src/config/species.js', 'src/services/allometry.js']);
 describe('0011 · loadRho — tür ρ tablosu gerçekten okunuyor', () => {
   test('regex hatası gerilemesi: harita BOŞ değil (eski sürüm 0 tür okuyordu)', () => {
     const { rho } = loadRho();
-    assert.ok(Object.keys(rho).length >= 40, 'rho anahtarı: ' + Object.keys(rho).length);
+    assert.ok(Object.keys(rho).length >= 15, 'rho anahtarı: ' + Object.keys(rho).length);
   });
-  test('sözlük değerleri panel ile aynı', () => {
+  test('sözlük değerleri panel ile aynı (0011b: liste eski halinde)', () => {
     const { rho, grho } = loadRho();
     assert.equal(rho['KARAÇAM'], 470);
     assert.equal(rho['SIĞLA'], 468);
-    assert.equal(rho['SALKIM SÖĞÜT'], 400);
-    assert.equal(rho['MAVİ LADİN'], 450);
-    assert.equal(rho['DOĞU ÇINARI'], 600);
-    assert.equal(rho['ATLAS SEDİRİ'], 490);
-    assert.equal(rho['CEVİZ'], 560);
+    assert.equal(rho['KIZILÇAM'], 478);
+    // 0011b (kullanıcı isteği): Göksu'nun 5 türü panel listesinden çıkarıldı
+    // → rho haritasında YOKLAR; çözümleyici (resolve) tanımaya devam eder.
+    for (const n of ['SALKIM SÖĞÜT', 'MAVİ LADİN', 'DOĞU ÇINARI', 'ATLAS SEDİRİ', 'CEVİZ'])
+      assert.equal(rho[n], undefined, n + ' panel rho haritasında olmamalı');
     assert.deepEqual({ ...grho }, { 'İBRELİ': 446, 'YAPRAKLI': 541, 'DİĞER': 493 });
   });
   test('rapor motoru panel denklemiyle birebir (KARAÇAM 107 cm / 12 m → 1972,8 kg)', () => {
@@ -100,12 +100,13 @@ describe('0011 · inventoryQa — envanter kalite kapısı', () => {
     assert.equal(qa.n_unknown, 0, 'türler artık sözlükte');
     assert.equal(qa.hd_fail.length, 6, 'hepsi h/D < ' + QA_LIMITS.HD_MIN);
     assert.equal(qa.hd_block, true, 'sistemik birim hatası → blok');
-    // Karbon kapısı 4/6'da takılır: P1/P43 saklı değerleri panelin ρ=541
-    // varsayılanı + HAM (çevre) çapla ürettiği değerlerdir → kendi içinde
-    // tutarlıdır, sapmayı yalnız ρ düzeltmesi (P29, P32) ve ondalık kayması
-    // (P7) yakalar. Birim hatasının birincil bekçisi h/D kapısıdır.
-    assert.equal(qa.dev_fail.length, 4, 'karbon sapması 4 kayıtta: ' + JSON.stringify(qa.dev_fail));
-    assert.equal(qa.dev_block, true, '4/6 > %50 → blok');
+    // Karbon kapısı 0011b'den beri ÇALIŞTIRILMIŞ ρ tablosuyla denetler
+    // (dict.byName: gizli çözüm kayıtları dahil) → P1/P29/P43 panel-ρ'lu
+    // saklı değerleriyle bandın içinde kalır; kapı ρ düzeltmesi gereken
+    // P3/P32 (SALKIM SÖĞÜT 541→400) ve ondalık kayması P7'de takılır.
+    // Birim hatasının birincil bekçisi h/D kapısıdır (6/6 → blok).
+    assert.equal(qa.dev_fail.length, 3, 'karbon sapması 3 kayıtta: ' + JSON.stringify(qa.dev_fail));
+    assert.equal(qa.dev_block, false, '3/6 = %50 → eşik (>%50) altında, h/D zaten blokluyor');
     // P7 ondalık kayması sayıyla görünür
     const p7 = qa.rows.find((r) => r.point_id === 7);
     assert.ok(Math.abs(p7.dev_pct) > 50, 'P7 sapma %50 üstü: ' + p7.dev_pct);
@@ -136,6 +137,18 @@ describe('0011 · inventoryQa — envanter kalite kapısı', () => {
     const qa = inventoryQa(rows, dict);
     assert.equal(qa.hd_fail.length, 1);
     assert.equal(qa.hd_block, false, '1/4 < eşik → uyarı, blok değil');
+  });
+
+  test('küçük kayıtlarda yuvarlama gürültüsü bayraklanmaz (mutlak taban ≥5 kg)', () => {
+    // Göksu P29 (düzeltilmiş): saklı 10,6 kg; 2 hane DBH ile yeniden hesap
+    // ~13,7 kg → %22 sapma GİBİ görünür ama mutlak fark 3,1 kg < 5 kg → gürültü.
+    const r = [mk(29, 'IHLAMUR', 'YAPRAKLI', 12.73, 4.5, 10.6)];
+    const qa = inventoryQa(r, dict);
+    assert.equal(qa.rows[0].dev_fail, false, 'dev: ' + qa.rows[0].dev_pct + '% ama |fark| < 5 kg → bayraklanmamalı');
+    assert.equal(qa.dev_fail.length, 0);
+    // aynı yüzde büyük kayıtta bayraklanırdı (taban yalnız küçükleri susturur)
+    const big = [mk(30, 'IHLAMUR', 'YAPRAKLI', 40, 12, 1000)];
+    assert.equal(inventoryQa(big, dict).dev_fail.length, 1);
   });
 
   test('sözlük dışı tür unknown listesine düşer (ρ grup varsayılanı beyanı)', () => {
@@ -309,9 +322,27 @@ describe('0011 · SQL migration dosyası', () => {
     assert.match(sql, /dbh_cm\s*=\s*round\(\(m\.dbh_cm \/ pi\(\)\)::numeric, 2\)/);
     assert.ok((sql.match(/girth_cm is null/g) || []).length >= 2, 'yedek + dönüşüm koruması');
   });
-  test('ρ CASE sözlükle senkron (44 tür + grup varsayılanı)', () => {
-    const { rho, grho } = loadRho();
-    for (const [k, v] of Object.entries(rho))
+  test('ρ CASE çalıştırılmış 0011 dosyasıyla birebir (tarihsel kayıt)', () => {
+    // 0011_inventory_qa.sql CANLI veride ÇALIŞTIRILDI (28.09.2026): saklı
+    // carbon_kg değerleri bu ρ tablosundan türedi. Dosya artık TARİHSEL
+    // kayıttır — species.js sonradan değişse bile (0011b: panel listesi
+    // eskiye döndü) dosyanın ρ CASE'i uygulandığı günkü haliyle sabittir.
+    // Bu test o içeriği kilitler: yeniden üretim/senkron BEKLENMEZ.
+    const EXECUTED_RHO_0011 = {
+      'AĞLAYAN SÖĞÜT': 400, 'AKÇAAĞAÇ': 540, 'AMBERAĞACI': 520, 'ARDIÇ': 460,
+      'AT KESTANESİ': 490, 'ATLAS SEDİRİ': 490, 'CEVİZ': 560, 'ÇINAR': 600,
+      'DİŞBUDAK': 562, 'DOĞU ÇINARI': 600, 'DUT': 570, 'FISTIK ÇAMI': 470,
+      'GLEDİÇYA': 600, 'GÖKNAR': 350, 'GÜMÜŞ LADİN': 450, 'GÜRGEN': 630,
+      'HALEP ÇAMI': 480, 'HİMALAYA SEDİRİ': 430, 'HUŞ': 540, 'IHLAMUR': 420,
+      'KARAAĞAÇ': 570, 'KARAÇAM': 470, 'KATALPA': 400, 'KAVAK': 350,
+      'KAYIN': 530, 'KESTANE': 500, 'KIZILAĞAÇ': 407, 'KIZILÇAM': 478,
+      'KRİPTOMERYA': 350, 'LADİN': 358, 'MANOLYA': 500, 'MAVİ LADİN': 450,
+      'MAZI (YALANCI SERVİ)': 450, 'MEŞE': 570, 'PORSUK': 640,
+      'SALKIM SÖĞÜT': 400, 'SARIÇAM': 426, 'SEDİR': 430, 'SERVİ': 510,
+      'SIĞLA': 468, 'SÖĞÜT': 410, 'SÜS ELMASI': 650, 'SÜS ERİĞİ': 630,
+      'YALANCI AKASYA': 660,
+    };
+    for (const [k, v] of Object.entries(EXECUTED_RHO_0011))
       assert.ok(sql.includes(`when '${k}' then ${v}`), 'eksik ρ satırı: ' + k);
     assert.match(sql, /when 'İBRELİ' then 446 when 'YAPRAKLI' then 541 else 493 end/);
   });

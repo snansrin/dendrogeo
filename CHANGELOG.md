@@ -9,6 +9,30 @@ Yeni sürüm yayımlama adımları: [`docs/surum-yayini.md`](docs/surum-yayini.m
 
 ## [Yayımlanmadı]
 
+### Düzeltildi — 0010 geri çekme testleri ilk gerçek geri çekmeyle doğrulandı (2026-09-28)
+DGR-2026-0001/0002'nin yayından kaldırılması (🗑) `rapor.test.mjs`,
+`report-publish.test.mjs` ve `report-v2.test.mjs` içindeki 5 gizli kusuru
+ortaya çıkardı: testler "her DGR dizini tam yayın dosyaları taşır" ve
+"ilk yayın hâlâ Yayınlandı durumunda" varsayıyordu. 0010 sözleşmesine
+uyarlandı: geri çekilen yayında yalnız bildirim sayfası kalır (veri
+dosyaları ve hash beyanı aranmaz), günlükteki yayın+geri çekme satırları
+birlikte doğrulanır, liste sayfası geri çekilen kimliği GÖSTEREMEZ.
+Not: bot yayınında CI test işi koşmadığı için bu kusurlar canlıda ancak
+şimdi görünür oldu — `npm test` artık canlı main durumuyla da yeşil (774).
+
+### Değişti — 0011b: panel tür listesi eski halinde (kullanıcı isteği) (2026-09-28)
+- `src/config/species.js`: SPECIES_DATA, 0011 ÖNCESİ 45 kaydın BİREBİR
+  aynısına geri döndürüldü (seçim kutusu, ρ ve LATIN haritaları, panel
+  `calc()` davranışı değişmedi). Göksu'nun 5 türü + AĞLAYAN SÖĞÜT
+  `RESOLVE_ONLY_SPECIES` olarak YALNIZ çözümleyicide: rapor QA'sı ve import
+  aracı, saklı carbon_kg'yi üreten 0011 ρ'larıyla (400/450/600/490/560)
+  denetlemeye devam eder; `resolveSpeciesName` DB'deki 34 kaydı kanonik
+  eşleştirmeye devam eder (§7 "Tür sözlüğü 34/34" ✓ kalır).
+- QA karbon kapısına mutlak taban: `CARBON_DEV_MIN_KG = 5` — küçük
+  kayıtlarda (örn. 10,6 kg) 0,1 kg saklama + 2 hane DBH yuvarlamasının
+  ürettiği %20+ gürültü artık bayraklanmıyor (büyük kayıtlarda davranış aynı).
+- `sw.js` r44 → **r45**; testler uyarlandı (772/772 + envanter 31/31).
+
 ### Düzeltildi — Envanter kalite paketi (0011 · QA v2.1) (2026-09-28)
 Göksu Parkı (park 25 · 34 kayıt · 28.09.2026) saha denetimi üç sistemik
 hatayı doğruladı; paket üçünü de kalıcı olarak kapatır.

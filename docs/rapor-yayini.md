@@ -179,7 +179,7 @@ Rapor motoru yayından ÖNCE kayıtları da denetler (§7 Çizelge 4):
 | Fotoğraf kanıtı | her kayıtta `photo_url` | ⚠ beyan |
 | GNSS doğruluk kaydı | `accuracy_m` dolu | ⚠ "kaydedilmedi" beyanı (±0,0 UYDURULMAZ) |
 | Envanter tutarlılığı (h/D) | 15 ≤ 100·H/D ≤ 120 | ≥3 kayıt VE >%50 → **⛔ yayın bloğu** |
-| Karbon yeniden hesabı | panel denklemi ±%20 | ≥3 kayıt VE >%50 → **⛔ yayın bloğu** |
+| Karbon yeniden hesabı | panel denklemi ±%20 (ve mutlak fark ≥5 kg — küçük kayıtlarda yuvarlama gürültüsü bayraklanmaz) | ≥3 kayıt VE >%50 → **⛔ yayın bloğu** |
 | Park geometrisi | bbox/düğüm taraması | dikdörtgen `geom_json` yok sayılır → OSM'e düşülür (beyanla) |
 
 Blok durumunda rapor §7 başlığında "GEÇİCİDİR … 0011 uygulanmadan

@@ -76,10 +76,16 @@ Tür bazlı değerler tabloda satır sonu yorumuyla KAYNAKLI listelenir
 
 Kaynaklandırılamayan tür **bilerek `rho:null` bırakılır** (uydurma değer
 yasağı); hesap grup varsayılanına düşer ve raporda beyan edilir.
-0011 ile sözlük 45 → **50 kayda** çıktı (SALKIM SÖĞÜT, MAVİ LADİN, DOĞU
-ÇINARI, ATLAS SEDİRİ, CEVİZ — Göksu envanterinin sözlük dışı 5 türü);
-**ρ'sız kayıt 28 → 6**'ya indi. ρ, AGB'ye ~0,976 üssüyle girdiği için
-%20 ρ hatası ≈ %19,5 karbon hatası demektir — veri setinin en büyük
+**0011b (2026-09-28 · kullanıcı isteği): panel SEÇİM LİSTESİ 45 kayıtta
+sabitlendi** — Göksu envanterinin 5 türü (SALKIM SÖĞÜT, MAVİ LADİN, DOĞU
+ÇINARI, ATLAS SEDİRİ, CEVİZ) `RESOLVE_ONLY_SPECIES` olarak yalnız
+çözümleyicide tanınır; seçim kutusunda, `rho`/`LATIN` haritalarında ve
+panel `calc()` zincirinde YOKTUR (bu türler için panel hesabı grup
+varsayılanına düşer — 0011 öncesi davranış). Rapor QA'sı ve içe aktarma
+aracı ise `loadSpeciesDict().byName` üzerinden gizli kayıtların kaynaklı
+ρ'larını (400/450/600/490/560) kullanır: saklı `carbon_kg` değerlerini
+üreten 0011 CASE'i ile birebir denetim. ρ, AGB'ye ~0,976 üssüyle girdiği
+için %20 ρ hatası ≈ %19,5 karbon hatası demektir — veri setinin en büyük
 belirsizlik kaynağı olmaya devam eder.
 
 **Eşanlamlı çözümleyici.** Saha kayıtları/cihaz çıktıları kanonik ad dışında
@@ -207,8 +213,9 @@ Bunlar hata değil, **belgelenmiş varsayımlardır**. Değiştirmek isteyen
    olabilir. Bölgesel denklem (örn. Türkiye allometrisi) değerlendirmesi açık.
 2. **Belirsizlik yayılımı yoktur.** AGB denkleminin RSE'si ~%19-29'dur;
    raporlar bugün tek nokta değeri verir, güven aralığı vermez.
-3. **ρ tablosu eksik** (6/50 tür: Japon Soforası, Defne + 4 genel satırı).
-   Grup varsayılanı kullanılır; kaynaklandırılamayan türe değer UYDURULMAZ.
+3. **ρ tablosu eksik** (panel listesinde 28/45 tür; 0011b ile liste
+   sabitlendi). Grup varsayılanı kullanılır; kaynaklandırılamayan türe
+   değer UYDURULMAZ.
 4. **Kök oranı (0,26) ve karbon oranı (0,47) sabittir.**
 5. **Gövde form faktörü (0,5) sabittir.**
 6. **Boy ölçülemeyen ağaç veri setine giremez** (`H` zorunlu). Chave'ın boy

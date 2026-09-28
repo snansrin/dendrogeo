@@ -85,12 +85,26 @@ describe('rapor belgesi: biçim ve dil', () => {
 
 describe('yayınlanmış rapor dizini tutarlı', () => {
   const dir = join(ROOT, 'rapor');
+  /* 0010 geri çekme sözleşmesi: geri çekilen yayının VERİ dosyaları silinir,
+   * adresinde gerekçeli bildirim sayfası kalır, listeden düşer. Bu testler
+   * 28.09.2026'daki ilk gerçek geri çekmeye (DGR-2026-0001/0002) dek o
+   * durumu hiç görmedi — artık günlükten okuyarak ayırt ediyor. */
+  const RETRACTED = new Set((() => {
+    try { return (JSON.parse(read('rapor/yayin-kuyrugu.json')).entries || []).filter((e) => e.status === 'Geri çekildi').map((e) => String(e.report_id)); }
+    catch (e) { return []; }
+  })());
   test('rapor dizini ve ilk rapor mevcut', () => {
     assert.ok(existsSync(dir), 'rapor/ dizini');
     const ids = readdirSync(dir).filter((d) => d.startsWith('DGR-'));
     assert.ok(ids.length >= 1, 'en az bir yayın');
     for (const id of ids) {
       const d = join(dir, id);
+      if (RETRACTED.has(id)) {
+        /* geri çekilmiş: yalnız bildirim sayfası kalır (0010 sözleşmesi) */
+        assert.ok(existsSync(join(d, 'index.html')), id + '/index.html (bildirim)');
+        assert.ok(!existsSync(join(d, 'data.json')), id + ': veri dosyaları kaldırılmalı');
+        continue;
+      }
       for (const f of ['index.html', 'data.json', 'olcum.csv', 'park.geojson'])
         assert.ok(existsSync(join(d, f)), id + '/' + f);
       const data = JSON.parse(readFileSync(join(d, 'data.json'), 'utf8'));
@@ -100,7 +114,10 @@ describe('yayınlanmış rapor dizini tutarlı', () => {
   });
   test('liste sayfası raporları dizinler', () => {
     const idx = readFileSync(join(dir, 'index.html'), 'utf8');
-    assert.match(idx, /DGR-2026-0001/, 'liste ilk raporu gösterir');
+    const ids = readdirSync(dir).filter((d) => d.startsWith('DGR-') && !RETRACTED.has(d));
+    assert.ok(ids.length >= 1, 'en az bir GEÇERLİ yayın var');
+    for (const id of ids) assert.ok(idx.includes(id), 'liste geçerli yayını gösterir: ' + id);
+    for (const id of RETRACTED) assert.ok(!new RegExp('href="' + id + '/"').test(idx), 'geri çekilen listede olamaz: ' + id);
   });
   test('Actions iş akışı mevcut ve izinli', () => {
     const y = read('.github/workflows/rapor.yml');

@@ -350,7 +350,15 @@ describe('repo kanıtı: yayımlanmış rapor dizini tutarlı (şablondan bağı
 
   test('günlükteki hash yayımlanmış sayfada görünür (dondurma kanıtı)', () => {
     assert.ok(pub.length > 0, 'günlükte yayın kaydı var');
+    /* 0010: geri çekilen yayının adresinde bildirim sayfası kalır; o sayfa
+     * içerik hash'i TAŞIMAZ (veri dosyalarıyla birlikte hash de kaldırılır).
+     * Dondurma kanıtı yalnız GEÇERLİ yayınlar için anlamlıdır. */
+    const retracted = new Set((() => {
+      try { return (JSON.parse(readFileSync(LOG, 'utf8')).entries || []).filter((x) => x.status === 'Geri çekildi').map((x) => String(x.report_id)); }
+      catch (e) { return []; }
+    })());
     for (const e of pub) {
+      if (retracted.has(String(e.report_id))) continue;
       const p = join(RAP, e.report_id, 'index.html');
       if (!existsSync(p) || !e.report_hash) continue;
       assert.ok(readFileSync(p, 'utf8').includes(e.report_hash.replace('sha256:', '')), e.report_id + ': hash sayfada');

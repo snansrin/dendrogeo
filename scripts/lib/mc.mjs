@@ -50,7 +50,7 @@ export function normPair(rnd) {
 function speciesContext() {
   const ctx = vm.createContext({ Math, JSON, Object, Array, String, Number });
   vm.runInContext(readFileSync(join(ROOT, 'src/config/species.js'), 'utf8'), ctx, { filename: 'species.js' });
-  vm.runInContext('globalThis.__X={SPECIES_DATA,GROUP_DEFAULT_RHO,LATIN,resolveSpeciesName,normSp};', ctx);
+  vm.runInContext('globalThis.__X={SPECIES_DATA,GROUP_DEFAULT_RHO,LATIN,RESOLVE_ONLY_SPECIES,resolveSpeciesName,normSp};', ctx);
   return ctx.__X;
 }
 export function loadRho() {
@@ -68,7 +68,14 @@ export function loadSpeciesDict() {
   const { rho, grho } = loadRho();
   const byName = {};
   for (const [g, list] of Object.entries(X.SPECIES_DATA))
-    for (const s of list) byName[s.tr] = { tr: s.tr, lat: s.lat, rho: rho[s.tr] ?? null, grp: g };
+    for (const s of list) byName[s.tr] = { tr: s.tr, lat: s.lat, rho: rho[s.tr] ?? null, grp: g, panel: true };
+  /* 0011b: panel listesinde GÖRÜNMEYEN ama veritabanında kaydı olan türler
+   * (Göksu'nun 5 türü). ρ'ları 0011'in çalıştırılmış CASE'iyle birebir —
+   * QA yeniden hesabı ve içe aktarma aracı bu değerleri kullanır; panel
+   * (calc) kullanmaz. Böylece "saklı karbon ⇔ yeniden hesap" denetimi
+   * veriyi üreten ρ tablosuna göre yapılır (elma ↔ elma). */
+  for (const s of (X.RESOLVE_ONLY_SPECIES || []))
+    if (!byName[s.tr]) byName[s.tr] = { tr: s.tr, lat: s.lat, rho: s.rho ?? null, grp: null, panel: false };
   return { byName, grho, resolve: (n) => X.resolveSpeciesName(n), norm: (n) => X.normSp(n) };
 }
 /* ---- envanter QA eşikleri (0011 · Göksu bulgularıyla kalibre) ----
@@ -80,7 +87,11 @@ export function loadSpeciesDict() {
  * HD_MAX: oran > 120 ise çap mm girilmiş olabilir (÷10).
  * Kayıtların yarısından fazlası (ve en az BLOCK_MIN_N kayıt) eşik dışındaysa
  * YAYIN KAPISI BLOKLAR; tekil bodur/abartılı bireyler uyarıdır, blok değil. */
-export const QA_LIMITS = { HD_MIN: 15, HD_MAX: 120, CARBON_DEV_PCT: 20, BLOCK_RATIO: 0.5, BLOCK_MIN_N: 3 };
+export const QA_LIMITS = { HD_MIN: 15, HD_MAX: 120, CARBON_DEV_PCT: 20, CARBON_DEV_MIN_KG: 5, BLOCK_RATIO: 0.5, BLOCK_MIN_N: 3 };
+/* CARBON_DEV_MIN_KG: yüzde bandı YALNIZ mutlak fark ≥ 5 kg iken değerlendirilir.
+ * Sebep: 10,6 kg gibi küçük kayıtlarda 0,1 kg'lık saklama yuvarlaması +
+ * dbh_cm'in 2 haneye yuvarlanması %20 bandını tek başına ihlal edebiliyor
+ * (Göksu P29: |10,6 − 13,66| = 3,06 kg → %22,4 — gürültü, hata değil). */
 /* Panel motoruyla (src/services/allometry.js calc) BİREBİR aynı denklem —
  * rapor/içe aktarma hattındaki yeniden hesap bu fonksiyondan türer. */
 export function calcRow(dbh_cm, height_m, speciesName, grp, { rho, grho }) {
