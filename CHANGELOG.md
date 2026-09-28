@@ -33,6 +33,20 @@ kapanmadığı için ikinci yayın kalıcı olarak bloke oluyordu.
   günlükte sonucu olmayan" istekleri sayar; `planQueue` request_id'si
   günlükte olan istekleri atlar. Yeni test: `test/publish-request-fix.test.mjs`.
 
+### Düzeltildi — 0017: kalp zinciri anlık dispatch + bekçi (2026-09-28)
+0016'nın zinciri 'delay_minutes'li ertelenmiş workflow_dispatch'e
+dayanıyordu; GitHub bu depoda o koşuları HİÇ başlatmadı (gözlem: kalp
+workflow kayıtlı, koşu sayısı 0 — ertelenmiş zamanlama da cron kadar
+güvenilmez çıktı). 0017:
+- Zincir artık **anlık repository_dispatch** (saniyeler içinde koştuğu
+  20:17 bot dispatch'iyle aynı depoda kanıtlı) + **bekçi döngüsü**: son
+  4 dk içinde bir kalp koşusu başladıysa tetik atılmaz → cron/push/elle
+  tetikler üst üste binince zincir ÇOĞALMAZ, tekilleşir; döngü (12×4 dk
+  gözlem, timeout 55 dk) zincirin devralındığını doğrular.
+- ci.yml + rapor-yayin.yml kapanışı kalbi ANLIK tetikler (push = kalp
+  hemen canlanır).
+- Testler 0017 sözleşmeleriyle güncellendi (11/11).
+
 ### Eklendi — 0016: kendi kendini süren yayın kuyruğu (kalp atışı) (2026-09-28)
 Kullanıcı: "biz push etmediğimiz sürece ne geri çekiyor ne yayın yapıyor —
 adam gibi sistem kur." GitHub schedule güvenilmez çıktı ('*/5' cron 20

@@ -33,11 +33,19 @@ describe('0016 · rapor-kalp.yml (kendi kendini süren nabız)', () => {
     assert.match(y, /workflows\/rapor-yayin\.yml\/dispatches/, 'tek üretici: rapor-yayin (concurrency orada)');
     assert.match(y, /exclude_current=true/, 'kendi koşusunu saymaz');
   });
-  test('zincir adımı her koşuda (boşta bile) ve gecikmeli dispatch ile', () => {
+  test('zincir: ANLIK repository_dispatch + bekçi döngüsü (0017)', () => {
+    // 0016'nın 'delay_minutes'li ertelenmiş dispatch'i bu depoda HİÇ koşmadı
+    // (gözlem: kalp 0 koşu) → 0017: anlık repository_dispatch (saniyeler
+    // içinde koştuğu 20:17 bot dispatch'iyle kanıtlı) + 4 dk bekçi (zincir
+    // çoğalmaz, tekilleşir) + doğrulama döngüsü (son koşu zinciri devraldı mı).
     assert.match(y, /name: Zincir/);
-    assert.match(y, /if: always/, 'üretim adımı patlasa da zincir sürer');
-    assert.match(y, /workflows\/rapor-kalp\.yml\/dispatches/);
-    assert.match(y, /"delay_minutes":5/, '~5 dk aralık (runner uyumaz)');
+    assert.match(y, /if: always/, 'üretim patlasa da zincir sürer');
+    assert.match(y, /timeout-minutes: 55/, 'bekçi döngüsü işi kilitlemez');
+    assert.match(y, /\$API\/dispatches/, 'anlık repository_dispatch');
+    assert.match(y, /rapor-kuyruk-nabiz/, 'zincir olay adı');
+    assert.match(y, /-ge 4/, 'bekçi: son 4 dk içinde koşu varsa tetik atma');
+    assert.match(y, /seq 1 12/, 'doğrulama döngüsü (12 × 4 dk gözlem)');
+    assert.ok(!/delay_minutes/.test(y), 'ertelenmiş dispatch kaldırıldı (güvenilmez çıktı)');
   });
   test('yetkiler minimal: actions write (zincir) + contents read', () => {
     assert.match(y, /actions: write/);
@@ -46,18 +54,20 @@ describe('0016 · rapor-kalp.yml (kendi kendini süren nabız)', () => {
 });
 
 describe('0016 · zincir halkaları diğer koşucularda da var', () => {
-  test('rapor-yayin.yml: permissions actions write + kapanışta zincir', () => {
+  test('rapor-yayin.yml: actions write + kapanışta ANLIK kalp tetiği', () => {
     const y = read('.github/workflows/rapor-yayin.yml');
     assert.match(y, /actions: write/);
-    assert.match(y, /Kalp atışını zincirle/);
-    assert.match(y, /workflows\/rapor-kalp\.yml\/dispatches/);
-    const i = y.indexOf('Kalp atışını zincirle');
+    assert.match(y, /Kalp atışını başlat/);
+    assert.match(y, /\$\{\{ github\.api_url \}\}\/repos\/\$\{\{ github\.repository \}\}\/dispatches/);
+    assert.match(y, /rapor-kuyruk-nabiz/);
+    const i = y.indexOf('Kalp atışını başlat');
     assert.match(y.slice(i, i + 140), /if: always/, 'üretim patlasa da zincir kırılmasın');
   });
-  test('ci.yml kuyruk işi: actions write + zincir (push da kalbi yeniden kurar)', () => {
+  test('ci.yml kuyruk işi: actions write + anlık kalp tetiği (push kalbi başlatır)', () => {
     const y = read('.github/workflows/ci.yml');
     assert.match(y, /actions: write/);
-    assert.match(y, /Kalp atışını zincirle/);
+    assert.match(y, /Kalp atışını başlat/);
+    assert.match(y, /rapor-kuyruk-nabiz/);
     assert.match(y, /group: rapor-yayin-kuyrugu/, 'üretim kilidi korunuyor');
   });
 });

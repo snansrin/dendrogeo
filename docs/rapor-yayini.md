@@ -200,16 +200,19 @@ tetiklendi). 0016 ile kuyruk KENDİ KENDİNİ sürer:
 │    2. İş YOK  → hiçbir şey koşmaz (~15-20 sn)              │
 │       İş VAR  → 'Rapor Yayın Kuyruğu' dispatch (kilitli    │
 │                  concurrency → TEK üretici, çift DGR yok)  │
-│    3. Zincir: ardıl nabız 5 dk sonraya KAYDEDİLİR          │
-│       (delayed workflow_dispatch; her koşuda, if: always)  │
+│    3. Zincir (0017): ANLIK repository_dispatch + BEKÇİ —   │
+│       son 4 dk'da kalp koştuysa tetik atılmaz (tekilleşir),│
+│       döngü zincirin devraldığını doğrular (if: always)    │
 └────────────────────────────────────────────────────────────┘
    Yedekler: */5 cron · 6 saatlik re-arm cron · CI push tetiği (0013)
              · rapor-yayin kapanış zinciri · elle Run workflow
 ```
 
-Bekleme üst sınırı fiilen ~5-7 dk; zincir koparsa en geç 6 saatte cron
-yeniden armeler, her push anında canlandırır. Panel metni ("5 dakikada bir")
-artık GERÇEKTİR.
+Bekleme üst sınırı fiilen ~4-6 dk; zincir koparsa en geç 6 saatte cron
+yeniden armeler, her push anında canlandırır. 0017 notu: 0016'nın
+'ertelenmiş dispatch' zinciri GitHub tarafında hiç koşmadı (gözlem: kalp
+0 koşu) → anlık repository_dispatch'e geçildi (saniyeler içinde koştuğu
+20:17 bot dispatch'iyle kanıtlı); ertelenmiş zamanlama KULLANILMIYOR.
 
 ## 6) Envanter kalite kapıları (QA v2.1 · 0011)
 
