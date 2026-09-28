@@ -33,6 +33,17 @@ kapanmadığı için ikinci yayın kalıcı olarak bloke oluyordu.
   günlükte sonucu olmayan" istekleri sayar; `planQueue` request_id'si
   günlükte olan istekleri atlar. Yeni test: `test/publish-request-fix.test.mjs`.
 
+### Düzeltildi — 0018: kalp ritmi iş timeoutuna sığdırıldı (2026-09-28)
+0017'nin bekçi DÖNGÜSÜ (sleep 240 × 12 gözlem) kalp işinin 5 dakikalık
+timeout'unda BOĞULDU: ilk kalp koşusu 20:37'de başladı, 20:42'de
+'cancelled' öldü, ardıl tetik hiç gönderilemedi → zincir doğmadan öldü
+(canlı gözlem + run kaydı). Düzeltme:
+- Ritim TEK `sleep 300`; iş timeout'u 12 dk (adım ~5,5 dk'da biter).
+- Yığılma bekçisi: kuyrukta/başlamış ≥2 kalp koşusu varsa tetik atılmaz
+  (cron + push + elle tetikler çakışsa da zincir TEK kalır).
+- Anlık repository_dispatch korunur (0017'nin kanıtlı kısmı).
+- Testler 0018 sözleşmeleriyle güncel (heartbeat 11/11).
+
 ### Düzeltildi — 0017: kalp zinciri anlık dispatch + bekçi (2026-09-28)
 0016'nın zinciri 'delay_minutes'li ertelenmiş workflow_dispatch'e
 dayanıyordu; GitHub bu depoda o koşuları HİÇ başlatmadı (gözlem: kalp

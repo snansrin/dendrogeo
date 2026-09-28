@@ -33,19 +33,21 @@ describe('0016 · rapor-kalp.yml (kendi kendini süren nabız)', () => {
     assert.match(y, /workflows\/rapor-yayin\.yml\/dispatches/, 'tek üretici: rapor-yayin (concurrency orada)');
     assert.match(y, /exclude_current=true/, 'kendi koşusunu saymaz');
   });
-  test('zincir: ANLIK repository_dispatch + bekçi döngüsü (0017)', () => {
-    // 0016'nın 'delay_minutes'li ertelenmiş dispatch'i bu depoda HİÇ koşmadı
-    // (gözlem: kalp 0 koşu) → 0017: anlık repository_dispatch (saniyeler
-    // içinde koştuğu 20:17 bot dispatch'iyle kanıtlı) + 4 dk bekçi (zincir
-    // çoğalmaz, tekilleşir) + doğrulama döngüsü (son koşu zinciri devraldı mı).
+  test('zincir (0018): ritim uykusu iş timeoutunun İÇİNDE + anlık dispatch + yığılma bekçisi', () => {
+    // 0017 dersi: bekçi DÖNGÜSÜ (sleep 240×12) işin 5 dk timeoutunda boğuldu
+    // → kalp 'cancelled' öldü, zincir doğmadı. 0018: TEK sleep 300 + iş
+    // timeout 12 dk + dispatch anlık + yığılma bekçisi (≥2 bekleyen kalp
+    // koşusu varsa tetik atma → cron/push/elle üst üste binse de çoğalmaz).
     assert.match(y, /name: Zincir/);
     assert.match(y, /if: always/, 'üretim patlasa da zincir sürer');
-    assert.match(y, /timeout-minutes: 55/, 'bekçi döngüsü işi kilitlemez');
+    assert.match(y, /timeout-minutes: 12/, 'iş timeoutu ritim uykusunu kapsar (0017 kazasının kökü)');
+    assert.match(y, /sleep 300/, 'ritim: ~5 dk');
     assert.match(y, /\$API\/dispatches/, 'anlık repository_dispatch');
-    assert.match(y, /rapor-kuyruk-nabiz/, 'zincir olay adı');
-    assert.match(y, /-ge 4/, 'bekçi: son 4 dk içinde koşu varsa tetik atma');
-    assert.match(y, /seq 1 12/, 'doğrulama döngüsü (12 × 4 dk gözlem)');
-    assert.ok(!/delay_minutes/.test(y), 'ertelenmiş dispatch kaldırıldı (güvenilmez çıktı)');
+    assert.match(y, /rapor-kuyruk-nabiz/);
+    assert.match(y, /-ge 2/, 'yığılma bekçisi eşiği');
+    assert.match(y, /exclude_current=true/, 'bekçi kendi koşusunu saymaz');
+    assert.ok(!/delay_minutes/.test(y), 'gecikmeli dispatch YOK (güvenilmez)');
+    assert.ok(!/seq 1 12/.test(y), '0017 bekçi döngüsü YOK (timeoutta boğuluyordu)');
   });
   test('yetkiler minimal: actions write (zincir) + contents read', () => {
     assert.match(y, /actions: write/);

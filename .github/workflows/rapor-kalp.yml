@@ -41,7 +41,7 @@ concurrency:
 jobs:
   nabiz:
     runs-on: ubuntu-latest
-    timeout-minutes: 5
+    timeout-minutes: 12   # 0018: zincir adımı 300 sn uyur → iş süresi ~6 dk; 5 dk'lık eski sınır zinciri boğuyordu
     steps:
       - uses: actions/checkout@v4   # sığ klon yeter: günlük + supabase.js
 
@@ -96,36 +96,31 @@ jobs:
             -d '{"ref":"main"}'
           echo "✅ üretim tetiklendi: bekleyen ${{ steps.kontrol.outputs.pend_req }} yayın + ${{ steps.kontrol.outputs.pend_ret }} geri çekme"
 
-      - name: Zincir — sonraki nabız ~4-5 dk (bekçili döngü, her koşuda)
+      - name: Zincir — sonraki nabız ~5 dk (ritim + yığılma bekçisi, her koşuda)
         if: always()
-        timeout-minutes: 55
         run: |
-          # 0017: gecikmeli zamanlanmış gönderim bu depoda HİÇ koşmadı (gözlem: 0)
-          # (gözlem: kalp 0 koşu) → GitHub'ın erteleme kuyruğuna güvenmiyoruz.
-          # Yeni zincir: ANLIK repository_dispatch (saniyeler içinde koşar —
-          # güvenilirliği 20:17'deki bot dispatch'iyle kanıtlı) + BEKÇİ:
-          # son 4 dk içinde bir kalp koşusu başladıysa tetik atılmaz (cron/
-          # push/elle tetikler üst üste binince zincir ÇOĞALMAZ, tekilleşir).
-          # Döngü, sonuncu koşunun zinciri devraldığını doğrulayana dek
-          # 4 dakikada bir yoklar (runner dakikası public depoda ücretsiz).
+          # 0018 · iki dersin toplamı:
+          #  1) Gecikmeli zamanlanmış gönderim GitHub'da HİÇ koşmadı (0016
+          #     gözlemi) → zincir ANLIK repository_dispatch ile kurulur
+          #     (saniyeler içinde koştuğu bu depoda defalarca kanıtlandı).
+          #  2) 0017'de bekçi döngüsü (sleep 240 × 12) işin 5 dk'lık
+          #     timeout'unda BOĞULDU → kalp 'cancelled' öldü, zincir hiç
+          #     doğmadı. Ritim artık TEK sleep 300 ve iş timeout'u 12 dk;
+          #     adım ~5,5 dk'da biter, zincir ölmez.
+          # Yığılma bekçisi: kuyrukta/başlamış ≥2 kalp koşusu varsa bu koşu
+          # tetik ATMAZ (cron+push+elle üst üste binince zincir çoğalmasın).
+          sleep 300 || true
           API="${{ github.api_url }}/repos/${{ github.repository }}"
           AUTH="Authorization: Bearer ${{ github.token }}"
           ACC="Accept: application/vnd.github+json"
-          WF=$(curl -sf -H "$AUTH" -H "$ACC" "$API/actions/workflows" \
-            | node -e 'let s="";process.stdin.on("data",d=>s+=d).on("end",()=>{try{const w=(JSON.parse(s).workflows||[]).find(x=>String(x.path).endsWith("rapor-kalp.yml"));console.log(w?w.id:"")}catch(e){console.log("")}})')
-          if [ -z "$WF" ]; then echo "⚠ kalp workflow kimliği bulunamadı — cron/push yedeği devralır"; exit 0; fi
-          for i in $(seq 1 12); do
-            RECENT=$(curl -sf -H "$AUTH" -H "$ACC" "$API/actions/workflows/$WF/runs?per_page=15" \
-              | node -e 'let s="";process.stdin.on("data",d=>s+=d).on("end",()=>{try{const r=(JSON.parse(s).workflow_runs||[]).filter(x=>x.created_at);if(!r.length){console.log(0);return}r.sort((a,b)=>new Date(b.created_at)-new Date(a.created_at));console.log(Math.floor((Date.now()-new Date(r[0].created_at).getTime())/60000))}catch(e){console.log(99)}})')
-            echo "kontrol $i: son kalp koşusu ${RECENT} dk önce"
-            if [ "$RECENT" -ge 4 ] 2>/dev/null; then
-              curl -sf -X POST -H "$AUTH" -H "$ACC" "$API/dispatches" \
-                -d '{"event_type":"rapor-kuyruk-nabiz","client_payload":{"chain":"${{ github.run_id }}"}}' \
-                && { echo "🔗 ardıl nabız ANLIK tetiklendi (zincir sürüyor)"; exit 0; } \
-                || echo "⚠ tetik gönderilemedi — 4 dk sonra yeniden denenecek"
-            else
-              echo "yakın koşu var — onun zinciri devralır; 4 dk sonra doğrulanacak"
-            fi
-            sleep 240
-          done
-          echo "⚠ döngü bitti, zincir doğrulanamadı — cron (*/5) ve 6 saatlik re-arm yedeği devralır"
+          WF=$(curl -sf -H "$AUTH" -H "$ACC" "$API/actions/workflows" | node -e 'let s="";process.stdin.on("data",d=>s+=d).on("end",()=>{try{const w=(JSON.parse(s).workflows||[]).find(x=>String(x.path).endsWith("rapor-kalp.yml"));console.log(w?w.id:"")}catch(e){console.log("")}})')
+          if [ -z "$WF" ]; then echo "⚠ kalp workflow kimliği yok — cron/push yedeği devralır"; exit 0; fi
+          PENDING=$(curl -sf -H "$AUTH" -H "$ACC" "$API/actions/workflows/$WF/runs?per_page=20&exclude_current=true" | node -e 'let s="";process.stdin.on("data",d=>s+=d).on("end",()=>{try{const j=JSON.parse(s);console.log((j.workflow_runs||[]).filter(r=>r.status==="queued"||r.status==="in_progress").length)}catch(e){console.log(0)}})')
+          if [ "$PENDING" -ge 2 ]; then
+            echo "🫀 kuyrukta/başlamış $PENDING kalp koşusu var — bu koşu tetik atmıyor (yığılma bekçisi)"
+            exit 0
+          fi
+          curl -sf -X POST -H "$AUTH" -H "$ACC" "$API/dispatches" \
+            -d '{"event_type":"rapor-kuyruk-nabiz","client_payload":{"chain":"${{ github.run_id }}"}}' \
+            && echo "🔗 ardıl nabız anlık tetiklendi — zincir sürüyor" \
+            || echo "⚠ tetik gönderilemedi — cron (*/5 + 6 saatlik re-arm) ve push yedeği devralır"
