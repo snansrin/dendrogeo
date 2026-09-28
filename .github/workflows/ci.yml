@@ -6,6 +6,56 @@ on:
   pull_request:
 
 jobs:
+  # 0013 (2026-09-28 · kullanıcı: "GitHub'ın keyfini bekleyemem"): schedule
+  # pratikte düzensiz tetikleniyor (20 saatte 4 koşu gözlendi) → yayın/geri
+  # çekme kuyruğu HER PUSH'TA da boşaltılır. dogrula ile PARALEL koşar (test
+  # sonucunu BEKLEMEZ: kuyruk işi kendi başına buyruktur, rapor-yayin.yml
+  # ile aynı concurrency grubunda sıraya girer → çift koşu çakışmaz).
+  kuyruk:
+    name: Rapor kuyruğu (push tetiği)
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    permissions:
+      contents: write
+    concurrency:
+      group: rapor-yayin-kuyrugu
+      cancel-in-progress: false
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Bağımlılıklar (npm ci)
+        run: npm ci
+
+      - name: Bekleyen yayın/geri çekme isteklerini işle
+        run: node scripts/publish-queue.mjs
+
+      - name: Yayınla (commit + push)
+        run: |
+          git config user.name "DendroGeo Rapor Bot"
+          git config user.email "bot@dendrogeo.local"
+          git add rapor/
+          if git diff --cached --quiet; then
+            echo "✅ Kuyruk boş — commit atlandı."
+            exit 0
+          fi
+          git commit -m "docs(rapor): site içi yayın kuyruğu işlendi"
+          for i in 1 2 3; do
+            if git pull --rebase origin main && git push; then
+              echo "✅ Yayın push edildi (deneme $i)."
+              exit 0
+            fi
+            echo "⚠ push denemesi $i başarısız — 10 sn sonra yeniden."; sleep 10
+          done
+          echo "🔴 Rapor üretildi ama push edilemedi; sonraki koşu yeniden dener."
+          exit 1
+
   dogrula:
     name: Sözdizimi + CSP + testler + dağıtım denetimi
     runs-on: ubuntu-latest

@@ -20,6 +20,25 @@ birlikte doğrulanır, liste sayfası geri çekilen kimliği GÖSTEREMEZ.
 Not: bot yayınında CI test işi koşmadığı için bu kusurlar canlıda ancak
 şimdi görünür oldu — `npm test` artık canlı main durumuyla da yeşil (774).
 
+### Değişti — 0013: veri sahibinin kararı + kuyruk push tetiği (2026-09-28)
+- **İade SQL'i** (`0013_restore_measurements.sql`): veri sahibi, Göksu
+  kayıtlarındaki sayıların göğüs ÇAPI olduğunu beyan etti → 0011'in çevre/π
+  dönüşümü `measurements_bak_0011` yedeğinden birebir geri alınır (34 kayıt,
+  ~50,7 t). Idempotent koruma: yalnız hâlâ `dbh = girth/π` olan satırlar
+  döner; iade sonrası elle düzeltmeleri ezmez. P7 ondalık kayması onarımı
+  (196,2→1972,8) ve geom_json düzeltmesi korunur; `girth_cm` kanıt kolonu
+  silinmez. Rapor QA v2.1 h/D kapısı bu veriyle ⛔ beyan basar (rapor yine
+  üretilir/yayımlanır; "GEÇİCİDİR" uyarısıyla) — sistem bilimsel beyanından
+  ödün vermez, karar veri sahibinindir.
+- **Kuyruk push tetiği** (ci.yml `kuyruk` işi): GitHub schedule'ı ücretsiz
+  depolarda düzensiz tetikleniyor (20 saatte 4 koşu gözlendi; yayın 2 saat
+  bekledi) → yayın/geri çekme kuyruğu artık HER main push'unda da boşaltılır
+  (dogrula ile paralel; `rapor-yayin-kuyrugu` concurrency grubuyla çakışmasız;
+  rapor-yayin.yml ile birebir aynı push kalıbı). Zamanlayıcı yedek olarak kalır.
+- **Panel şeffaflığı**: Ölçüm Yönetimi'nde Çap hücresi, 0011'den `girth_cm`
+  taşıyan kayıtlarda "çevre: X cm" alt satırı gösterir (ham saha değeri
+  görünür; kanıt kaybı yok).
+
 ### Eklendi — 0012: yazar = kullanıcı, QR, sıkı arşiv, 5 tür listede (2026-09-28)
 Kullanıcı standardı: "yazar adı kullanıcının adı olsun; Şirin'ler site
 kurucusu; DGR kimliği ve DOI'ye bağlanabilir altyapı korunsun; arşiv yer

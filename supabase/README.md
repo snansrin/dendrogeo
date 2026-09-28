@@ -19,6 +19,7 @@ Supabase kontrol panelinde yaşıyordu; artık her değişiklik version control'
 | `migrations/0010_report_retraction.sql` | **Geri çekme kuyruğu**: `report_retractions` (yönetici herhangi bir yayını, kullanıcı kendi parkının yayınını geri çeker; `report_id` biçim kilidi `RETRACT_BAD_ID`, kimlik `RETRACT_NOT_SELF`, mülkiyet `RETRACT_NOT_YOUR_PARK`, 24 saatte 3 `RETRACT_QUOTA`, yineleme `RETRACT_DUPLICATE`; select anon'a açık, update YOK, delete yalnız yönetici). Sonuç repo günlüğünde: Actions veri dosyalarını siler, adrese gerekçeli bildirim koyar. Idempotent, 0008+0009'un üzerine. |
 | `migrations/0011_inventory_qa.sql` | **Envanter kalite düzeltmesi (Göksu park 25 · 34 kayıt)**: `measurements.girth_cm` kolonu (ham çevre saklanır) + `measurements_bak_0011` yedeği; **B1** birim hatası: "çap" kolonu aslında çevre idi → `dbh_cm = round(girth_cm/π, 2)`; **B2** ρ düzeltmesi: `carbon_kg`/`volume_m3` panel denklemiyle yeniden (CASE sözlükten üretildi, 44 tür — P7 ondalık kayması 196,2←1962 dahil onarılır); **B3** `parks.geom_json` dikdörtgen (68,93 ha) → gerçek OSM poligonu way/423602737 (111 nokta, ~50 ha; LULC alan dengesi %37,6 → %0,2). Idempotent, tek transaction, geri alma bloğu dosyanın sonunda. |
 | `migrations/0012_report_author.sql` | **Rapor yazarı = kullanıcı**: `v_report_authors` görünümü (report_requests → profiles.full_name/organization; e-posta YOK) + anon select grant. Rapor motoru künye/atıf/BibTeX/JSON-LD/metadata.json yazarını buradan üretir; ad çözülemezse kurumsal yazar (isim uydurulmaz). Kurucular `contributors` olarak beyan edilir. Idempotent. |
+| `migrations/0013_restore_measurements.sql` | **Veri sahibinin kararı — iade**: Göksu (park 25) kayıtlarını 0011 dönüşümü ÖNCESİ elle girilmiş özgün değerlere döndürür (`measurements_bak_0011` yedeğinden; idempotent koruma: yalnız `dbh = girth/π` durumunda olan satırlar döner, sonraki elle düzeltmeleri EZMEZ). P7 ondalık kayması onarımı (196,2→1972,8) dahil; `girth_cm` kanıtı ve geom_json düzeltmesi KORUNUR. Rapor QA kapısı h/D beyanını basmaya devam eder (şeffaflık). |
 | `dump-schema.sh` | Canlı şemayı `supabase db dump` ile yeniden dökmek için yardımcı |
 | `audit/rls-probe.sh` | Anon key ile 13 saldırı denemesi (yetki yükseltme dahil) |
 | `audit/RLS-DENETIM.md` | Denetim listesi + sonuç tablosu (doldurulacak) |
@@ -42,7 +43,10 @@ Supabase SQL Editor'da sırayla:
    ~5,0–5,6 t göstermeli)
 12. `0012_report_author.sql` → Run (✍️ rapor yazarı = yayını isteyen kullanıcı;
    `select * from v_report_authors limit 5;` ile doğrula)
-13. (Önerilir) `audit/rls-probe.sh`'i kendi makinenden çalıştır → sonuçları
+13. `0013_restore_measurements.sql` → Run (↩️ veri sahibinin kararı: Göksu
+   kayıtları elle girilen özgün çaplara döner; doğrulama sorgusu `kayit 34 ·
+   min_cap 40 · max_cap 200 · toplam_t ≈ 50,7` göstermeli)
+14. (Önerilir) `audit/rls-probe.sh`'i kendi makinenden çalıştır → sonuçları
    `audit/RLS-DENETIM.md` tablosuna işle
 
 > ⚠️ **Sıra önemli:** `0004` uygulanmadan site çökmez ama park kimliği devre

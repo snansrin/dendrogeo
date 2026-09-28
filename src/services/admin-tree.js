@@ -41,7 +41,7 @@ let DG_TREE_ERR=null;
  * "profiles(...)" → PGRST201 "more than one relationship" → satır gelmez.
  * (Canlıda 2026-09-24'te tam olarak bu yaşandı; test/critical-fixes kilitler.) */
 const DG_TREE_SEL_FULL=
-  "id,point_id,measurement_no,species,grp,dbh_cm,height_m,carbon_kg,"+
+  "id,point_id,measurement_no,species,grp,dbh_cm,girth_cm,height_m,carbon_kg,"+
   "status,photo_url,created_at,lat,lon,owner,project_id,park_id,"+
   "reviewed_by,reviewed_at,"+
   "profiles!measurements_owner_fkey(full_name),"+
@@ -222,7 +222,7 @@ function dgTreeRowHTML(r){
     `<td data-label="Nokta"><b>P${esc(r.point_id)}</b>${r.measurement_no>1?`<span class="mono dg-sub"> /M${r.measurement_no}</span>`:""}</td>`+
     `<td data-label="Tür">${esc(r.species||"—")}<br><span class="mono dg-sub">${esc((typeof LATIN!=="undefined"&&LATIN[r.species])||"")}</span></td>`+
     `<td data-label="Grup">${esc(r.grp||"—")}</td>`+
-    `<td data-label="Çap">${r.dbh_cm??"—"}</td>`+
+    `<td data-label="Çap">${r.dbh_cm??"—"}${r.girth_cm!=null&&Number(r.girth_cm)>0&&Number(r.girth_cm)!==Number(r.dbh_cm)?`<br><span class="mono dg-sub" title="0011 ile saklanan ham saha değeri (göğüs çevresi)">çevre: ${esc(r.girth_cm)} cm</span>`:""}</td>`+
     `<td data-label="Boy">${r.height_m??"—"}</td>`+
     `<td data-label="Karbon kg"><b>${(Number(r.carbon_kg)||0).toFixed(1)}</b></td>`+
     `<td data-label="Foto">${dgThumb(r.photo_url)}</td>`+
