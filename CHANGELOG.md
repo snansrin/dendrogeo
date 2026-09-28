@@ -20,6 +20,19 @@ birlikte doğrulanır, liste sayfası geri çekilen kimliği GÖSTEREMEZ.
 Not: bot yayınında CI test işi koşmadığı için bu kusurlar canlıda ancak
 şimdi görünür oldu — `npm test` artık canlı main durumuyla da yeşil (774).
 
+### Düzeltildi — 0014: ikinci yayın isteği kalıcı bloke oluyordu (2026-09-28)
+Göksu'da DGR-2026-0003 geri çekildikten sonra 📄 Yayınla "Bu park için
+bekleyen bir istek zaten var" dedi ve yeni istek AÇILAMADI. Kök neden:
+`report_requests_one_pending_per_park` kısmi unique index'i, kuyruk
+tarafından İŞLENMİŞ ama DB'de 'Beklemede' kalan satırları da sayıyordu
+(Actions'ın Supabase'e yazma yetkisi yok — 0008 güvenlik tasarımı; sonuç
+git günlüğünde). Park bir kez yayınlandığında istek satırı asla
+kapanmadığı için ikinci yayın kalıcı olarak bloke oluyordu.
+- `0014_publish_request_fix.sql`: unique index kaldırılır. Çift üretim
+  koruması asıl tek-gerçek-kaynakta kalır: panel yalnız "Beklemede VE
+  günlükte sonucu olmayan" istekleri sayar; `planQueue` request_id'si
+  günlükte olan istekleri atlar. Yeni test: `test/publish-request-fix.test.mjs`.
+
 ### Değişti — 0013: veri sahibinin kararı + kuyruk push tetiği (2026-09-28)
 - **İade SQL'i** (`0013_restore_measurements.sql`): veri sahibi, Göksu
   kayıtlarındaki sayıların göğüs ÇAPI olduğunu beyan etti → 0011'in çevre/π
