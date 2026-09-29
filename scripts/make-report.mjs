@@ -837,7 +837,7 @@ h1{font-size:1.9rem;line-height:1.2;color:var(--gd);margin:10px 0 6px;font-weigh
 h2{font-size:1.15rem;color:var(--gd);margin:30px 0 8px;padding-bottom:6px;border-bottom:1px solid var(--line);font-weight:600;break-after:avoid}
 h2 .no{font-family:ui-monospace,monospace;color:var(--amber);font-size:.8rem;margin-right:8px}
 p{margin:8px 0;text-align:justify}
-table{width:100%;border-collapse:collapse;margin:12px 0;font-family:system-ui,sans-serif;font-size:.8rem}
+.tscroll{margin:12px 0}\ntable{width:100%;border-collapse:collapse;margin:0;font-family:system-ui,sans-serif;font-size:.8rem}
 th{background:var(--tint);color:var(--gd);text-align:left;padding:8px 10px;font-size:.66rem;letter-spacing:.1em;text-transform:uppercase}
 td{padding:8px 10px;border-bottom:1px solid var(--line);font-family:ui-monospace,Consolas,monospace;font-size:.76rem}
 td.tr{font-family:Georgia,serif}
@@ -864,23 +864,23 @@ pre{background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:
 .btn{background:var(--green);color:#fff;border:0;border-radius:8px;padding:9px 16px;font-size:.8rem;font-weight:700;cursor:pointer;text-decoration:none;display:inline-block}
 .btn.g{background:#fff;color:var(--green);border:1.5px solid var(--green)}
 @media (max-width:640px){
- /* 0021 · MOBİL DÜZEN (kullanıcı bildirimi: "§5 Nicel Sonuçlar tablonun
-  * dışına çıkıyor, genel görünüm bozuluyor"): dar ekranlarda tablolar
-  * .wrap'i taşıyordu. Çözüm: yatay taşma kökten kilitlenir, Çizelge 1 gibi
-  * geniş tablolar kendi içinde YATAY KAYDIRILIR (erişilebilirlik: odaklanınca
-  * da kaydırılabilir), hücre punto/boşlukları küçülür, künye tek sütuna iner,
-  * uzun kimlikler her yerde kırılır. Masaüstü ve PDF/print düzeni DEĞİŞMEZ. */
- html,body{max-width:100%;overflow-x:hidden}
+ /* 0024 · MOBİL v2 (0021'in dersi): tabloyu display:block'a çevirmek
+  * thead/tbody'yi AYRI kutulara bölüp kolonları kaydırıyordu; overflow-x:
+  * hidden da başlıkları kırpıyordu. Doğru ve basit yöntem: tablo NORMAL
+  * kalır, .tscroll kabı YATAY KAYAR; metinler overflow-wrap ile kendi
+  * kutusunda kırılır → sayfa gövdesi asla genişlemez, hiçbir şey kaymaz. */
  .wrap{padding:26px 12px 56px;border-left:0;border-right:0}
  h1{font-size:1.42rem}
+ h2{font-size:1.05rem}
  .meta{grid-template-columns:1fr;padding:12px;gap:8px}
- table{display:block;overflow-x:auto;-webkit-overflow-scrolling:touch;white-space:nowrap;font-size:.74rem}
- table thead,table tbody{display:table;width:100%;table-layout:fixed}
- th,td{padding:6px 7px;overflow-wrap:anywhere}
+ .tscroll{overflow-x:auto;-webkit-overflow-scrolling:touch;margin:12px -4px;padding:0 4px}
+ table{font-size:.74rem;min-width:520px}
+ th,td{padding:6px 7px;overflow-wrap:anywhere;word-break:break-word}
+ p,li,.sub,.stmt,.qnote,.fig .cap{overflow-wrap:anywhere}
  pre{font-size:.62rem}
- .fig .cap,.qnote,.hint{font-size:.72rem}
  .btnrow .btn{flex:1 1 100%}
  .kick{font-size:.64rem}
+ .verify{font-size:.76rem}
 }
 @media print{body{background:#fff}.wrap{border:0;padding:0}.btnrow{display:none}}
 </style>
@@ -931,26 +931,26 @@ ${lulcMethod || '<p><b>4.4 Arazi örtüsü sınıflandırması.</b> Bu sürümde
 
 <h2><span class="no">5</span>Nicel Sonuçlar</h2>
 <p><b>5.1 Karbon stoku.</b> Çizelge 1 tür bazlı özet istatistikleri, Şekil 1 ise karbon paylarının dağılımını vermektedir.</p>
-<table><thead><tr><th>Tür</th><th>Grup</th><th>n</th><th>Ort. DBH (cm)</th><th>Ort. boy (m)</th><th>Karbon (kg)</th><th>Pay</th></tr></thead><tbody>${spRows}</tbody></table>
+<div class="tscroll"><table><thead><tr><th>Tür</th><th>Grup</th><th>n</th><th>Ort. DBH (cm)</th><th>Ort. boy (m)</th><th>Karbon (kg)</th><th>Pay</th></tr></thead><tbody>${spRows}</tbody></table></div>
 <div class="fig"><div class="sans" style="font-size:.78rem"><b>Şekil 1 — Tür bazlı karbon stoku payları</b> <span class="qnote">(bar rengi taksonomik grubu gösterir: ${sw('#2f9e44')} ibreli · ${sw('#e8590c')} yapraklı · ${sw('#8a928c')} diğer)</span></div>${bars}</div>
 <div class="ci">📐 Toplam karbon stoku: <b>${ciTxt}</b> · Monte Carlo n=${snap.mc.N}, tohum=${snap.mc.SEED}, model CV=%${snap.mc.MODEL_CV * 100} (korele). ${t.n === 2 ? 'Örneklem büyüklüğü (n=2) nedeniyle güven aralığı geniştir; değer park geneline ekstrapole edilmemelidir.' : t.n < 10 ? 'Örneklem büyüklüğü sınırlı olduğundan güven aralığı geniş yorumlanmalıdır.' : 'Örneklem büyüklüğü aralığı makul düzeye indirmektedir.'}</div>
 ${L ? `<p><b>5.2 Arazi örtüsü.</b> Sınıf alanları Çizelge 2'de sunulmuştur; mekânsal dağılım §6'da (Şekil 2) gösterilmektedir.</p>
-<table><thead><tr><th>Sınıf</th><th>Alan (ha)</th><th>Pay</th></tr></thead><tbody>${L.classes.map((c) => `<tr><td class="tr">${esc(c.label)}</td><td>${trNum(c.ha, 2)}</td><td>%${trNum(c.pct, 1)}</td></tr>`).join('')}</tbody></table>
+<div class="tscroll"><table><thead><tr><th>Sınıf</th><th>Alan (ha)</th><th>Pay</th></tr></thead><tbody>${L.classes.map((c) => `<tr><td class="tr">${esc(c.label)}</td><td>${trNum(c.ha, 2)}</td><td>%${trNum(c.pct, 1)}</td></tr>`).join('')}</tbody></table></div>
 <p><b>5.3 Alan dengesi.</b> Çizelge 3, park geometrisi ile raster kapsama alanının karşılaştırmasını verir; bu karşılaştırma sonuçların üretilmesinden ÖNCE hesaplama bütünlüğünün kontrol edildiğini belgeler.</p>
-<table><thead><tr><th>Büyüklük</th><th>Değer</th></tr></thead><tbody>
+<div class="tscroll"><table><thead><tr><th>Büyüklük</th><th>Değer</th></tr></thead><tbody>
 <tr><td class="tr">Park geometrisi alanı</td><td>${trNum(parkHa, 2)} ha</td></tr>
 <tr><td class="tr">Analiz edilen alan (raster kapsama)</td><td>${covHa != null ? trNum(covHa, 2) + ' ha' : '—'}</td></tr>
 <tr><td class="tr">Sınıflandırılan alan</td><td>${clsHa != null ? trNum(clsHa, 2) + ' ha' : '—'}</td></tr>
 <tr><td class="tr">Alan farkı</td><td>${diffHa != null ? (diffHa >= 0 ? '+' : '') + trNum(diffHa, 2) + ' ha' : '—'}</td></tr>
 <tr><td class="tr">Alan farkı (%)</td><td>${deltaPct != null ? trNum(deltaPct, 3) + ' %' : '—'}</td></tr>
-</tbody></table>` : ''}
+</tbody></table></div>` : ''}
 
 <h2><span class="no">6</span>Harita</h2>
 ${L ? `<div class="fig"><img src="harita.png" alt="${esc(P.name)} park sahası arazi örtüsü sınıfları haritası; park sınırı ve ölçüm noktaları işaretli" style="width:100%;border-radius:8px"><div class="cap">Şekil 2 — ${esc(L.source)} sınıflandırmasının park poligonu ile tam kesişimi; koyu çizgi park sınırını (OSM), siyah noktalar envanter ölçüm noktalarını gösterir. Çizim, çözümleme motorunun kesintisiz hücre çıktısından birebir ölçekli üretilmiştir; bağlayıcı sayısal değerler Çizelge 2'de ve data.json'dadır. Harita altbilgisi belge kimliğini (${id}), veri kaynağını, çözünürlüğü, projeksiyonu (${esc(epsg || '—')}) ve analiz tarihini taşır: harita tek başına dolaşıma girse bile kaynağı belirlidir.</div></div>` : '<p>Bu sürümde harita üretilmemiştir.</p>'}
 
 <h2><span class="no">7</span>Kalite Kontrol ve Doğrulama</h2>
 <p>Sonuçlar üretilmeden önce hesaplamanın bütünlüğü aşağıdaki kontrollerle doğrulanmıştır (Çizelge 4). Kontroller otomatiktir; eşik ihlalinde yayın durdurulur.${(INV && (INV.hd_block || INV.dev_block)) ? ` <b>Bu sürümde envanter kalite kapısı blok durumundadır:</b> ${INV.hd_block ? `boy/çap oranı ${INV.hd_fail.length}/${INV.n} kayıtta fiziksel aralık dışında (sistemik birim hatası; DBH = çevre ÷ π dönüşümü uygulanmamış olabilir)` : ''}${INV.hd_block && INV.dev_block ? '; ' : ''}${INV.dev_block ? `saklı karbon değerleri ${INV.dev_fail.length}/${INV.n} kayıtta panel denklemiyle ±%${QA_LIMITS.CARBON_DEV_PCT} bandı dışında` : ''}. Karbon toplamı bu nedenle GEÇİCİDİR ve düzeltme (0011_inventory_qa.sql) uygulanmadan bilimsel iletişimde KULLANILMAMALIDIR.` : ''}</p>
-<table><thead><tr><th>Kontrol</th><th>Sonuç</th><th>Ayrıntı</th></tr></thead><tbody>${qaRows}</tbody></table>
+<div class="tscroll"><table><thead><tr><th>Kontrol</th><th>Sonuç</th><th>Ayrıntı</th></tr></thead><tbody>${qaRows}</tbody></table></div>
 <div class="verify">
  <b>Rapor kimliği:</b> <code>${id}</code> · sürüm ${verTxt} · yayın ${snap.generated_at.slice(0, 10)}<br>
  <b>İçerik hash'i:</b> <code>sha256:${hash}</code><br>
@@ -973,14 +973,14 @@ ${evalParas}
 </ul>
 
 <h2><span class="no">10</span>Tekrar Üretilebilirlik</h2>
-<table><thead><tr><th>Öğe</th><th>Kayıt</th></tr></thead><tbody>
+<div class="tscroll"><table><thead><tr><th>Öğe</th><th>Kayıt</th></tr></thead><tbody>
 <tr><td class="tr">Analiz sürümü</td><td>${esc(engine)}${engineVer ? ' ' + esc(engineVer) : ' —'}${appVer ? ' · uygulama ' + esc(appVer) : ''}</td></tr>
 <tr><td class="tr">Veri seti</td><td>${esc(dataset)}</td></tr>
 <tr><td class="tr">Çözünürlük</td><td>10 m</td></tr>
 <tr><td class="tr">Park geometrisi</td><td>kayıtlı (<code>${esc(P.osm_key || '—')}</code>; yayın anındaki sınır)</td></tr>
 <tr><td class="tr">Analiz yöntemi</td><td>sürüm kontrollü${git ? ` (git commit <code>${esc(String(git).slice(0, 7))}</code>)` : ' (git commit kaydı bu kopyada yok)'}</td></tr>
 <tr><td class="tr">Üretim komutu</td><td><code>node scripts/make-report.mjs --park ${P.id}</code></td></tr>
-</tbody></table>
+</tbody></table></div>
 <p>Bu raporun yeniden üretilebilmesi için kullanılan yöntem, veri kaynağı ve analiz sürümü rapor üst verisinde (<code>metadata.json</code>) kayıt altına alınmıştır. Raster girdi bulut kataloğundan okunduğu için, kaynak ürünün YENİ bir sürümü yayımlanırsa aynı komut farklı sonuç üretebilir; bu nedenle veri seti sürümü (v200, ${dataYear}) ve üretim anı §11'de sabitlenmiştir.</p>
 
 <h2><span class="no">11</span>Analiz Parmak İzi</h2>
@@ -998,7 +998,7 @@ ${evalParas}
 </div>
 
 <h2><span class="no">12</span>Rapor Geçmişi</h2>
-<table><thead><tr><th>Rapor</th><th>Sürüm</th><th>Tarih</th><th>İşlem</th></tr></thead><tbody>${histRows}</tbody></table>
+<div class="tscroll"><table><thead><tr><th>Rapor</th><th>Sürüm</th><th>Tarih</th><th>İşlem</th></tr></thead><tbody>${histRows}</tbody></table></div>
 <p class="qnote">Yayımlanmış rapor içeriği değiştirilemez. Düzeltme gerekirse rapor geri çekilir (yayın panelinde 🗑) ve aynı park için yeni DGR kimliğiyle yeniden yayımlanır; bu tablo zinciri gösterir. Geri çekme işlemleri rapor/yayin-kuyrugu.json günlüğünde ve git geçmişinde saklanır.</p>
 
 <h2><span class="no">13</span>Atıf</h2>

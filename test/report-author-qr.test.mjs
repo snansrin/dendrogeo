@@ -147,18 +147,24 @@ describe('0012 · QR kalıcı bağlantı (standart md. 15)', () => {
   });
 });
 
-describe('0021 · mobil düzen (dar ekran taşması kilitli)', () => {
-  test('mobil kırılım var: taşma kilidi + kaydırılabilir tablo + tek sütun künye', () => {
+describe('0024 · mobil düzen v2 (kaydırma kabı — 0021 display:block dersi)', () => {
+  test('tablolar .tscroll kabında; tablo display:block DEĞİL (kolon kayması yok)', () => {
     const snap = { ...base, author: { name: 'Nagihan Şirin', source: 'data_owner' } };
     const html = render(snap);
     assert.match(html, /@media \(max-width:640px\)/, 'mobil kırılım');
-    assert.match(html, /overflow-x:hidden/, 'yatay taşma kökten kilitli');
-    assert.match(html, /table\{display:block;overflow-x:auto/, 'geniş tablolar kendi içinde kayar');
-    assert.match(html, /\.meta\{grid-template-columns:1fr/, 'künye dar ekranda tek sütun');
-    assert.match(html, /overflow-wrap:anywhere/, 'uzun kimlikler kırılır');
-    /* masaüstü ve print bozulmadı */
-    assert.match(html, /\.wrap\{max-width:860px/, 'masaüstü düzen yerinde');
-    assert.match(html, /@media print\{/, 'print düzeni yerinde');
+    assert.match(html, /\.tscroll\{overflow-x:auto/, 'dar ekranda tablo kabı yatay kayar');
+    assert.match(html, /table\{font-size:\.74rem;min-width:520px\}/, 'tablo normal düzen + asgari genişlik');
+    assert.ok(!/table\{display:block/.test(html), '0021 hatası geri gelmesin: thead/tbody ayrı kutuya bölünmez');
+    assert.ok(!/overflow-x:hidden/.test(html), '0021 hatası: hidden başlıkları kırpmasın');
+    assert.match(html, /overflow-wrap:anywhere/, 'uzun kimlik/sayılar hücrede kırılır');
+    /* QA + tür tablosu gerçekten kabın içinde */
+    const qa = html.indexOf('<th>Kontrol</th>');
+    assert.ok(html.lastIndexOf('<div class="tscroll">', qa) > qa - 400, 'QA tablosu tscroll içinde');
+    const sp = html.indexOf('<th>Tür</th>');
+    assert.ok(html.lastIndexOf('<div class="tscroll">', sp) > sp - 400, 'tür tablosu tscroll içinde');
+    /* masaüstü + print bozulmadı */
+    assert.match(html, /\.wrap\{max-width:860px/, 'masaüstü düzen');
+    assert.match(html, /@media print\{/, 'print düzeni');
   });
 });
 

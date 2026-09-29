@@ -33,6 +33,21 @@ kapanmadığı için ikinci yayın kalıcı olarak bloke oluyordu.
   günlükte sonucu olmayan" istekleri sayar; `planQueue` request_id'si
   günlükte olan istekleri atlar. Yeni test: `test/publish-request-fix.test.mjs`.
 
+### Düzeltildi — 0024: mobil düzen v2 — kaydırma kabı (2026-09-29)
+0021'in mobil düzeltmesi telefonda YENİ bozulma üretti (kullanıcı bildirimi:
+"§5 tür tablosu birbirine girdi, §7/§10/§12 kayıyor"): `table{display:block}`
+thead ile tbody'yi AYRI tablo kutularına bölüp kolon hizalarını kaydırıyor,
+`overflow-x:hidden` da başlıkları kırpıyordu. Doğru bilinen yöntemle yeniden:
+- Rapor şablonundaki 6 tablo `<div class="tscroll">` kabına alındı; dar
+  ekranda kab YATAY KAYAR (tablo normal düzeninde kalır, `min-width:520px`,
+  kolonlar asla kaymaz). Masaüstünde kab nötr.
+- `overflow-x:hidden` ve `display:block` KALDIRILDI; metinler
+  `overflow-wrap:anywhere` ile kendi kutusunda kırılır → gövde genişlemez,
+  başlıklar kırpılmaz.
+- Kanıt: prova raporda 78/78 div dengesi, üretilen her tablo kabın içinde,
+  `display:block`/`hidden` izi yok; report-author-qr testi 0021 hatasının
+  GERİ GELMESİNİ de kilitliyor. 826+ test yeşil.
+
 ### Düzeltildi — 0023: bayrak adımı sertleştirildi (2026-09-29)
 0022'nin ilk bayrak koşusu (16:45:00) 2 saniyede exit 1 öldü; adım logları
 yetkisiz okunamadığı için kök neden kör noktada kaldı. Kör nokta bırakmama
