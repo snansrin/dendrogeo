@@ -33,6 +33,20 @@ kapanmadığı için ikinci yayın kalıcı olarak bloke oluyordu.
   günlükte sonucu olmayan" istekleri sayar; `planQueue` request_id'si
   günlükte olan istekleri atlar. Yeni test: `test/publish-request-fix.test.mjs`.
 
+### Düzeltildi — 0020: tam denetim paketi (2026-09-29)
+Sıfırdan uçtan uca denetim (depo + canlı site + DB + güvenlik + Actions +
+rapor arşivi; kanıtlar: `docs/DENETIM-2026-09-29.md`). Kritik açık YOK;
+817/817 test, 38/38 canlı varlık hash'i birebir, RLS probları geçti, kalp
+zinciri canlı kanıtla ~5 dk ritimde (15:27'de push olmadan yayın+geri çekme
+işledi). Giderilen kusurlar:
+- Kök dizindeki boş ÇÖP dosyalar `cd`, `copy`, `git` silindi (canlıdaki
+  /cd/ /copy/ /git/ 404'lerinin kaynağı; eski bir cmd kazası artığı).
+- `/en/` giriş sayfası eklendi (dürüst "English · Beta" özeti; methods
+  sayfasına ve TR uygulamaya bağlanır) + sitemap kaydı.
+- `en/methods/index.html` bayat `?v=98461801` hash'i taşıyordu → en/
+  sayfalarında `?v=` kaldırıldı (statik sayfalar, precache dışı).
+- `docs/methods.md` ρ sınırlılık maddesi güncellendi (28/50 · 0011e).
+
 ### Düzeltildi — 0019: çatal ölümü kapatıldı, zincir ilk adıma alındı (2026-09-28)
 Canlı otopsi (kalp koşu kayıtları): 0018 sonrası zincir 18 saat çalıştı
 (gece boyunca 0006/0007/0008 yayın+geri çekmeleri push OLMADAN işlendi) ama

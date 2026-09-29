@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>DendroGeo — Global Tree Inventory & Carbon Data System (English)</title>
+<meta name="description" content="DendroGeo: field-measured individual tree inventory, allometric carbon stock (Chave et al. 2014) and 10 m land-cover analysis for urban parks, with full QA/QC disclosure and reproducible scientific reports (DGR).">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://dendrogeo.org/en/">
+<meta property="og:type" content="website"><meta property="og:site_name" content="DendroGeo">
+<meta property="og:title" content="DendroGeo — Global Tree Inventory & Carbon Data System">
+<meta property="og:description" content="Field-measured tree inventory, allometric carbon stock and 10 m land-cover analysis with full QA/QC disclosure.">
+<meta property="og:url" content="https://dendrogeo.org/en/">
+<link rel="icon" href="../icon.png">
+<link rel="stylesheet" href="../css/style.css">
+<link rel="alternate" hreflang="tr" href="https://dendrogeo.org/">
+<link rel="alternate" hreflang="en" href="https://dendrogeo.org/en/">
+<link rel="alternate" hreflang="x-default" href="https://dendrogeo.org/">
+<style>:root{--bg:#f7f6f2;--ink:#182420;--mut:#64706a;--green:#14532d;--line:#dfe5df;--card:#fff}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.7 Arial,system-ui,sans-serif}
+.wrap{max-width:1040px;margin:auto;padding:0 22px}.top{padding:18px 0;border-bottom:1px solid var(--line);background:#fff}
+.nav{display:flex;align-items:center;justify-content:space-between;gap:18px}.brand{font-weight:800;color:var(--green);text-decoration:none;font-size:1.15rem}.links{display:flex;gap:14px;flex-wrap:wrap}.links a{color:var(--green);text-decoration:none;font-size:.92rem}
+main{padding:54px 0 70px}h1{font-size:clamp(2rem,5vw,3rem);line-height:1.1;margin:.2em 0 .35em}.lead{font-size:1.08rem;color:#46524c;max-width:75ch}
+.tag{color:var(--green);font-weight:800;text-transform:uppercase;letter-spacing:.08em;font-size:.78rem}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:18px;margin-top:28px}.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:22px}.card h3{margin:0 0 8px}
+.btn{display:inline-block;background:var(--green);color:#fff;text-decoration:none;padding:11px 16px;border-radius:10px;font-weight:700;margin:14px 8px 0 0}.btn.alt{background:#fff;color:var(--green);border:1px solid var(--line)}
+footer{border-top:1px solid var(--line);padding:28px 0;color:var(--mut);font-size:.9rem}</style>
+<link rel="stylesheet" href="../css/ui-standard.css">
+</head>
+<body class="dg-page">
+<header class="top"><div class="wrap nav"><a class="brand" href="../">🌲 DendroGeo</a>
+<nav class="links" aria-label="Main"><a href="methods/">Methods</a><a href="../rapor/">Reports (DGR)</a><a href="../">Türkçe</a></nav></div></header>
+<main><div class="wrap">
+<div class="tag">ENGLISH · BETA</div>
+<h1>Global Tree Inventory &amp; Carbon Data System</h1>
+<p class="lead">DendroGeo turns field measurements of individual trees (girth/DBH, height, species, GNSS position, photo evidence) into allometric carbon-stock estimates (Chave et&nbsp;al. 2014) and 10&nbsp;m land-cover context for urban parks — with moderator approval, geofencing, Monte-Carlo uncertainty and fully disclosed QA/QC in reproducible scientific reports (DGR).</p>
+<a class="btn" href="../">Open the app (Turkish)</a>
+<a class="btn alt" href="methods/">Read the methods</a>
+<div class="grid">
+<div class="card"><h3>🌳 Individual-tree inventory</h3><p>Every record carries point ID, species (canonical dictionary with sourced wood density ρ), DBH, height, photo evidence and GNSS position. Raw field values are preserved (e.g. <code>girth_cm</code>) — derived values never overwrite the evidence.</p></div>
+<div class="card"><h3>⚖️ Carbon with disclosed uncertainty</h3><p>AGB = 0.0673·(ρ·D²·H)^0.976; roots = 0.26·AGB; carbon = 0.47·biomass. Monte-Carlo (correlated model error, CV 22%) yields 95% confidence intervals per report.</p></div>
+<div class="card"><h3>🛰️ 10 m land-cover context</h3><p>ESA WorldCover tiles are intersected with the park polygon (area-weighted border cells), with an area-balance QA gate (≤0.5%) before publication.</p></div>
+<div class="card"><h3>📄 DGR scientific reports</h3><p>Each publication is an immutable, hash-verified document: metadata (DataCite 4.7-aligned), analysis fingerprint (engine, git commit, EPSG), QR to the permanent URL, citation &amp; retraction notices. Author = the data contributor.</p></div>
+</div>
+<p style="margin-top:30px;color:var(--mut)"><small>Full English translation is in progress; the application interface is currently in Turkish. Founders: Nagihan Şirin &amp; Sinan Şirin · License: CC BY-NC 4.0 (content) — see repository.</small></p>
+</div></main>
+<footer><div class="wrap">© DendroGeo · <a href="../kunye/">Künye</a> · <a href="../gizlilik/">Privacy (TR)</a> · <a href="https://github.com/snansrin/dendrogeo">GitHub</a></div></footer>
+</body>
+</html>

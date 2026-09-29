@@ -213,9 +213,9 @@ Bunlar hata değil, **belgelenmiş varsayımlardır**. Değiştirmek isteyen
    olabilir. Bölgesel denklem (örn. Türkiye allometrisi) değerlendirmesi açık.
 2. **Belirsizlik yayılımı yoktur.** AGB denkleminin RSE'si ~%19-29'dur;
    raporlar bugün tek nokta değeri verir, güven aralığı vermez.
-3. **ρ tablosu eksik** (panel listesinde 28/45 tür; 0011b ile liste
-   sabitlendi). Grup varsayılanı kullanılır; kaynaklandırılamayan türe
-   değer UYDURULMAZ.
+3. **ρ tablosu eksik** (panel listesinde 28/50 tür ρ'sız — 0011e: 45
+   orijinal + Göksu'nun kaynaklı 5 türü). Grup varsayılanı kullanılır;
+   kaynaklandırılamayan türe değer UYDURULMAZ.
 4. **Kök oranı (0,26) ve karbon oranı (0,47) sabittir.**
 5. **Gövde form faktörü (0,5) sabittir.**
 6. **Boy ölçülemeyen ağaç veri setine giremez** (`H` zorunlu). Chave'ın boy
