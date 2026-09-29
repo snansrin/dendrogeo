@@ -1,6 +1,6 @@
 {
   "schema": "dendrogeo-publish-queue/1",
-  "updated_at": "2026-09-29T15:27:32.984Z",
+  "updated_at": "2026-09-29T15:33:08.714Z",
   "entries": [
     {
       "request_id": "manuel-DGR-2026-0001",
@@ -275,6 +275,38 @@
       "started_at": "2026-09-29T15:27:32.983Z",
       "status": "Geri çekildi",
       "finished_at": "2026-09-29T15:27:32.984Z"
+    },
+    {
+      "request_id": "4cb989a4-1e77-4fa2-a810-5d4f321582de",
+      "park_id": 25,
+      "with_lulc": true,
+      "requested_at": "2026-09-29T15:32:50.604935+00:00",
+      "started_at": "2026-09-29T15:33:04.008Z",
+      "status": "Yayınlandı",
+      "archive_bytes": 115691,
+      "report_id": "DGR-2026-0010",
+      "version": 1,
+      "url_path": "/rapor/DGR-2026-0010/",
+      "report_hash": "sha256:d7ec6982d301f53d3317fe425c67b32bfd94c17c85122de5a2bc5f6b59a8b5eb",
+      "park_name": "Göksu Parkı",
+      "city": "Ankara",
+      "n": 34,
+      "carbon_txt": "52.29 t [%95 GA 28.80–73.91]",
+      "lulc": "dahil (ESA WorldCover 10 m · 2021 (v200))",
+      "citation": "Şirin, N. (2026). Göksu Parkı ağaç envanteri ve karbon stoku raporu (DGR-2026-0010, sürüm 1.0). DendroGeo Bilimsel Analiz Raporu. https://dendrogeo.org/rapor/DGR-2026-0010/",
+      "finished_at": "2026-09-29T15:33:08.712Z"
+    },
+    {
+      "retraction_id": "26b04f87-8a80-49a2-9c83-332efa7fbaec",
+      "report_id": "DGR-2026-0009",
+      "park_id": 5,
+      "park_name": "Atatürk Çocukları ve Doğal Yaşam Parkı",
+      "reason": "Test yayını",
+      "requested_by": "ee148cdd-e06a-462e-a1f3-e3c769aeb7f3",
+      "requested_at": "2026-09-29T15:32:43.966934+00:00",
+      "started_at": "2026-09-29T15:33:08.713Z",
+      "status": "Geri çekildi",
+      "finished_at": "2026-09-29T15:33:08.714Z"
     }
   ]
 }
