@@ -221,6 +221,32 @@ yeniden armeler, her push anında canlandırır. 0017 notu: 0016'nın
 0 koşu) → anlık repository_dispatch'e geçildi (saniyeler içinde koştuğu
 20:17 bot dispatch'iyle kanıtlı); ertelenmiş zamanlama KULLANILMIYOR.
 
+## 5d) Park çalışma arkadaşı (0025)
+
+Aynı parka birden çok kişi ölçü girebilir:
+1. **Davet** — Ölçüm Yönetimi → 👥 *Park Çalışma Arkadaşları*: park seç,
+   arkadaşının e-postasını yaz → `dg_invite_send` (yetki sunucuda: proje
+   sahibi veya yönetici; kendine davet ve mükerrer ortak engelli).
+2. **Kabul** — arkadaşın kendi hesabıyla giriş yapar → Projeler sekmesinde
+   📬 *Park davetlerin* kartı → Kabul (`dg_invite_respond`; e-posta yalnız
+   ADRESTİR, kabul `auth.uid()` ↔ profil e-postası eşleşmesi ister).
+3. **Birlikte ölçüm** — paylaşılan parkın projeleri arkadaşın Ölçüm
+   sekmesindeki listede 🌳 *ortak* rozetiyle görünür; kayıtlar HER ZAMANKİ
+   gibi `owner = arkadaş` ile girer (kimin ölçtüğü bellidir), konum çiti
+   (0007) ve park bağı kilidi (0006) aynen geçerlidir.
+4. **Onay** — park sahibi, ortağın BEKLEYEN kayıtlarını Ölçüm Yönetimi
+   ağacında görür ve onaylar (0025 `meas_select` genişletmesi); raporlar
+   parkın TÜM onaylı kayıtlarını sayar, yazar = veri sahibi önceliği (0015).
+
+**Yayınlama hakkı (0009 ile uyum):** raporu YALNIZ park sahibi (parkta kendi
+projesi + kendi onaylı verisi olan) veya yönetici yayınlayabilir; ortak
+kullanıcı yayın isteği açamaz (REPORT_NOT_YOUR_PARK). Park sahibi yayın
+istediğinde rapor, parkın TÜM onaylı kayıtlarını (ortaklarınki dahil) sayar;
+yazar künyesi veri sahibi önceliğiyle (0015) en çok katkısı olan kişidir.
+
+Güvenlik: davet/ortak tablolarına istemciden YAZMA YOK (grant verilmedi) —
+tüm yazımlar RPC denetiminde; davetler anon'a kapalı (rls-probe.sh 0025 bölümüyle denetlenir).
+
 ## 6) Envanter kalite kapıları (QA v2.1 · 0011)
 
 Rapor motoru yayından ÖNCE kayıtları da denetler (§7 Çizelge 4):

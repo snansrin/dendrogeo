@@ -134,11 +134,32 @@ async function loadProjects(){
   data=fb.data||[];
  }
  PROJ_LIST=data||[];
+ /* 0025 · PAYLAŞILAN PARKLAR: kabul edilmiş park ortağıysan, o parkın
+  * SAHİBİ OLMADIĞIN projeleri de listeye eklenir → aynı projeye birlikte
+  * ölçü girilir. Kayıtlar her zamanki gibi owner=sen (saveMeas) ile gider;
+  * konum çiti (0007) ve park bağı kilidi (0006) değişmez. v_my_parks/RPC
+  * yoksa (0025 SQL uygulanmamış) sessizce eski davranış. */
+ try{
+  if(typeof dgMyParks==="function"){
+   const shared=(await dgMyParks()).filter(x=>x.role==="collaborator");
+   const ownParkIds=new Set((PROJ_LIST||[]).map(x=>Number(x.park_id)).filter(Boolean));
+   const ids=shared.map(x=>Number(x.id)).filter(id=>id&&!ownParkIds.has(id));
+   if(ids.length){
+    const{data:sp,error:es}=await sb.from("projects").select("*,parks(id,name,city,country,area_m2)").in("park_id",ids);
+    for(const q of (es?[]:(sp||[]))){
+     const pk=shared.find(x=>Number(x.id)===Number(q.park_id));
+     q.shared=true;
+     if(pk&&!q.parks)q.parks={id:pk.id,name:pk.name,city:pk.city,country:pk.country,area_m2:pk.area_m2};
+     PROJ_LIST.push(q);
+    }
+   }
+  }
+ }catch(e){/* 0025 yok → eski davranış */}
  const opts=PROJ_LIST.map(p=>`<option value="${p.id}">${esc(dgProjectOptionLabel(p))}</option>`).join("");
  const empty="<option value=''>Önce park algıla → proje oluştur</option>";
  $("mProject").innerHTML=opts||empty;
  $("nProject").innerHTML=opts||empty;
- $("projTable").innerHTML=PROJ_LIST.map(p=>{
+ const ownRows=PROJ_LIST.filter(p=>!p.shared).map(p=>{
   const park=p.parks&&p.parks.name?p.parks.name:(p.park_name||"");
   const parkCell=p.park_id
    ? `🌳 ${esc(park)}${p.parks&&p.parks.area_m2?`<br><span class="mono" style="font-size:.68rem;color:var(--mut)">${dgFmtHa(p.parks.area_m2)}</span>`:""}`
@@ -153,7 +174,14 @@ async function loadProjects(){
    ? `<button class="btn sm" onclick="dgUserPubOpen(${p.id})" title="Park raporu: yayınla / paylaş">📄</button>`
    : "";
   return `<tr><td>${p.id}</td><td>${parkCell}</td><td>${esc(p.name)}</td><td>${esc(p.country||"—")}</td><td>${esc(p.city||"—")}</td><td>${new Date(p.created_at).toLocaleDateString("tr-TR")}</td><td style="display:flex;gap:4px">${repBtn}<button class="btn sm blue" onclick="editProject(${p.id})">✏️</button><button class="btn sm red" onclick="deleteProject(${p.id})">🗑</button></td></tr>`;
- }).join("")||"<tr><td colspan=7>Proje yok — önce park algıla</td></tr>";
+ }).join("");
+ /* 0025 · paylaşılan proje satırları: düzenleme/silme/rapor YOK (proje
+  * sahibinin yetkisi) — ortak yalnız ÖLÇÜM GİRER (ölçüm sekmesi dropdown'ı). */
+ const sharedRows=PROJ_LIST.filter(p=>p.shared).map(p=>{
+  const park=p.parks&&p.parks.name?p.parks.name:(p.park_name||"");
+  return `<tr><td>${p.id}</td><td>🌳 ${esc(park)} <span class="badge on">ortak</span></td><td>${esc(p.name)}</td><td>${esc(p.country||"—")}</td><td>${esc(p.city||"—")}</td><td>${new Date(p.created_at).toLocaleDateString("tr-TR")}</td><td><span class="mono dg-sub">yalnız ölçüm girişi</span></td></tr>`;
+ }).join("");
+ $("projTable").innerHTML=(ownRows+sharedRows)||"<tr><td colspan=7>Proje yok — önce park algıla</td></tr>";
  dgRenderProjectParkBox();
  dgParkGate();
  /* Rapor paneli açıksa ve projesi listeden düştüyse paneli kapat (0009). */

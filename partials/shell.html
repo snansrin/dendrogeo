@@ -156,6 +156,12 @@
 
   <div class="view" id="v-projects">
 <h2 class="disp" style="margin-bottom:16px">Projeler</h2>
+<!-- 0025 · PARK ÇALIŞMA ARKADAŞI: 📬 davetlerin + 🌳 paylaşılan parkların.
+     Modül: src/services/park-invites.js · yeni CSS yok (card/shead/badge/btn
+     aileleri) · kartlar yalnız giriş yapmış kullanıcıda ve ilgili durum varsa
+     görünür (dgInvitesLoadMine, shell go('projects') kancası). -->
+<div id="dgSharedBox" class="alert ok" style="display:none;margin-bottom:12px"></div>
+<div class="card" id="dgInvBox" style="display:none;margin-bottom:16px"></div>
 <div class="card" style="margin-bottom:16px">
     <!-- PROJE = PARK + ETİKET (2026-09-24). Proje adı serbest metin DEĞİL:
          park algılandığında "Göksu Parkı - deneme" biçiminde DB tarafında
@@ -310,6 +316,24 @@
      <span class="dg-tree-meta" id="dgPubClock">—</span>
     </div>
     <div id="dgPubBox"><div class="dg-tree-meta">⏳ Kuyruk yükleniyor…</div></div>
+   </div>
+   <!-- PARK ÇALIŞMA ARKADAŞLARI (0025 · kullanıcı isteği: "beraber aynı
+        projeye veri girilsin"): sahibi/yöneticisi olduğun parklara e-posta
+        ile davet aç; kabul eden arkadaş projeyi kendi Ölçüm sekmesinde görür,
+        ölçümlerini KENDİ adıyla girer (owner=auth.uid()), konum çiti (0007)
+        ve onay akışı aynen geçerlidir; bekleyen kayıtlarını Ölçüm Yönetimi
+        ağacında görürsün (0025 meas_select genişletmesi). Yetki SUNUCUDA:
+        dg_invite_send RPC (proje sahibi/admin değilse INVITE_NOT_YOUR_PARK).
+        Modül: src/services/park-invites.js · yeni CSS yok, kart yalnız v-admin'de. -->
+   <div class="card" style="margin-bottom:18px;border-left:4px solid var(--green)">
+    <div class="shead" style="margin-bottom:12px"><span class="no">👥</span><h2 style="font-size:1.2rem">Park Çalışma Arkadaşları</h2><span class="rule"></span><span class="mono" style="font-size:.75rem;color:var(--mut)">davet · ortak ölçüm · onay sende</span></div>
+    <p style="color:var(--mut);font-size:.8rem;margin-bottom:10px">Parkını bir çalışma arkadaşına aç: e-postasıyla davet et, hesabıyla kabul etsin; aynı parkın projelerine birlikte ölçü girin. Kimin ölçtüğü kayıt sahibinde görünür, onay ve rapor akışı değişmez.</p>
+    <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:10px">
+     <label class="lbl" for="dgInvPark" style="margin:0">Park</label>
+     <select id="dgInvPark" onchange="dgCollabRefresh()" style="min-width:220px"><option value="">⏳ yükleniyor…</option></select>
+     <button class="btn sm blue" onclick="dgCollabLoad()">🔄 Yenile</button>
+    </div>
+    <div id="dgInvList"><div class="dg-tree-meta">Park seçilince davetler ve ortaklar burada listelenir.</div></div>
    </div>
    <div class="card" style="margin-bottom:18px;border-left:4px solid var(--amber)">
     <div class="shead" style="margin-bottom:12px"><span class="no">📦</span><h2 style="font-size:1.2rem">Toplu Dışa Aktarım (Tüm Kullanıcılar)</h2></div>

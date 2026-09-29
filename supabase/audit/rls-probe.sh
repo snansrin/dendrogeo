@@ -92,6 +92,13 @@ else
 fi
 
 echo
+echo "── 0025 park çalışma arkadaşı (yazma YALNIZ RPC olmalı) ──────────"
+deneme "park_invites INSERT (anon)"        RED POST   "park_invites" '{"park_id":25,"email":"probe@example.com","invited_by":"00000000-0000-0000-0000-000000000000"}'
+deneme "park_invites SELECT (anon)"        RED GET    "park_invites?select=id&limit=1"
+deneme "park_collaborators INSERT (anon)"  RED POST   "park_collaborators" '{"park_id":25,"user_id":"00000000-0000-0000-0000-000000000000"}'
+deneme "park_collaborators SELECT (anon)"  RED GET    "park_collaborators?select=park_id&limit=1"
+deneme "dg_invite_send RPC (anon)"         RED POST   "rpc/dg_invite_send" '{"p_park":25,"p_email":"probe@example.com"}'
+
 echo "── service_role sızıntısı ────────────────────────────────────────"
 if grep -rq "service_role" --include='*.js' --include='*.html' . 2>/dev/null; then
   echo "  🔴 AÇIK   'service_role' dizesi kodda geçiyor — hemen kontrol edin"

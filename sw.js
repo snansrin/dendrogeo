@@ -4,7 +4,7 @@
 // NOT: Senkronizasyon artık Ana Thread (Supabase JS SDK) tarafından yapılıyor
 // ============================================================
 
-const CACHE_VERSION = 'dendrogeo-sw-v2-r45';
+const CACHE_VERSION = 'dendrogeo-sw-v2-r46';
 
 /* İKİ AYRI STATİK CACHE — bu ayrım bilinçli ve önemli.
  *
@@ -45,6 +45,8 @@ const CORE_ASSETS = [
     /* SİTE İÇİNDEN RAPOR YAYINI (2026-09-27): report_requests kuyruğu +
      * rapor/yayin-kuyrugu.json günlüğü → 📄 Yayınla / 🔗 Aç / 📤 Paylaş. */
     '/src/services/report-publish.js',
+    /* PARK ÇALIŞMA ARKADAŞI (0025): davet/kabul kartları + ortak proje listesi. */
+    '/src/services/park-invites.js',
     /* LULC ZİNCİRİ (Faz 5): eski landcover.js altı modüle bölündü; facade son sırada
      * (window.DG_LANDCOVER'u o kurar, yükleme anında lc-* global'lerini referanslar). */
     '/src/services/lc-config.js','/src/services/lc-geo.js','/src/services/lc-stac.js','/src/services/lc-engine.js','/src/services/lc-osm.js','/src/services/lc-patches.js','/src/ui/lc-report.js','/src/services/landcover.js',

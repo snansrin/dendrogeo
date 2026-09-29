@@ -33,6 +33,31 @@ kapanmadığı için ikinci yayın kalıcı olarak bloke oluyordu.
   günlükte sonucu olmayan" istekleri sayar; `planQueue` request_id'si
   günlükte olan istekleri atlar. Yeni test: `test/publish-request-fix.test.mjs`.
 
+### Eklendi — 0025: park çalışma arkadaşı (davet + ortak ölçüm) (2026-09-29)
+Kullanıcı isteği: "park çalışma arkadaşı daveti — beraber aynı projeye veri
+girilmesini sağlasın."
+- **SQL** (`0025_park_invites.sql`): `park_invites` + `park_collaborators` +
+  `v_my_parks`; davet/kabul/red/iptal YALNIZ SECURITY DEFINER RPC ile
+  (`dg_invite_send/respond/revoke`; tablolarda insert/update/delete grant'i
+  YOK). Kabul `auth.uid()` ↔ `profiles.email` eşleşmesi ister (e-posta kimlik
+  doğrulamaz). Kendine davet, mükerrer ortak, yetkisiz davet sunucuda reddedilir.
+- **RLS genişletmesi (OR, daralma yok)**: `meas_select`'e ortak-park dalı —
+  park sahibi ve ortaklar, ortak parkın projelerinin BEKLEYEN kayıtlarını
+  görür (onay akışı). `projects_update` owner OR is_owner: ortak, paylaşılan
+  projeyi Ölçüm sekmesinde seçebilir. Ölçüm mülkiyeti değişmez
+  (`meas_insert owner=auth.uid()`): kimin ölçtüğü her zaman belli.
+- **Arayüz**: 👥 kartı (v-admin: park seç → davet gönder, ortak/davet
+  listeleri, geri al/kaldır) + 📬 kartı (v-projects: gelen davetler,
+  Kabul/Red) + 🌳 paylaşılan park kutusu. Yeni CSS YOK (mevcut aileler).
+  `loadProjects` ortak projeleri birleştirir; ortak satırında düzenleme/
+  silme/rapor YOK (yalnız ölçüm girişi). Modül yokken/SQL kurulmamışken
+  her şey sessizce eski davranışta (typeof + 42P01 korumaları).
+- **Değişmeyenler**: konum çiti (0007), park bağı yalnız yönetici (0006),
+  yayın kotası (0009), rapor yazar zinciri (0015 — veri sahibi önceliği;
+  ortak ölçümleri park sahibinin raporuna doğal olarak dahil olur).
+- Testler: `test/park-invites.test.mjs` (15: SQL sözleşmeleri + vm modül +
+  kablolama) · check zinciri yeşil.
+
 ### Düzeltildi — 0024: mobil düzen v2 — kaydırma kabı (2026-09-29)
 0021'in mobil düzeltmesi telefonda YENİ bozulma üretti (kullanıcı bildirimi:
 "§5 tür tablosu birbirine girdi, §7/§10/§12 kayıyor"): `table{display:block}`

@@ -22,6 +22,7 @@ Supabase kontrol panelinde yaşıyordu; artık her değişiklik version control'
 | `migrations/0013_restore_measurements.sql` | **Veri sahibinin kararı — iade**: Göksu (park 25) kayıtlarını 0011 dönüşümü ÖNCESİ elle girilmiş özgün değerlere döndürür (`measurements_bak_0011` yedeğinden; idempotent koruma: yalnız `dbh = girth/π` durumunda olan satırlar döner, sonraki elle düzeltmeleri EZMEZ). P7 ondalık kayması onarımı (196,2→1972,8) dahil; `girth_cm` kanıtı ve geom_json düzeltmesi KORUNUR. Rapor QA kapısı h/D beyanını basmaya devam eder (şeffaflık). |
 | `migrations/0014_publish_request_fix.sql` | **"Bekleyen istek zaten var" kilidini açar**: `report_requests_one_pending_per_park` unique index'i İŞLENMİŞ ama 'Beklemede' kalan satırları da sayıyordu (Actions'ın DB'ye yazma yetkisi yok → satırlar hiç kapanmaz) → park bir kez yayınlanınca yeni istek kalıcı bloke. Index kalkar; çift üretim koruması panel (`dgPubEntryFor`) + kuyruk (`planQueue` request_id ⇔ git günlüğü) katmanındadır. Idempotent. |
 | `migrations/0015_report_data_owner.sql` | **Yazar = veri sahibi**: `dg_park_author(park)` SECURITY DEFINER fonksiyonu — parkın onaylı kayıtlarının en çok katkı veren sahibinin `full_name/organization` değerini döndürür (e-posta SIZMAZ; anon'a yalnız bu iki alan). Rapor motoru öncelik zinciri: **dg_park_author → v_report_authors (0012) → kurumsal**. DGR-2026-0004 dersi: istek Sinan'dan gelince künyede Sinan yazdı; ölçen kişi (Nagihan) öncelikli olmalı. Idempotent. |
+| `migrations/0025_park_invites.sql` | **Park çalışma arkadaşı (0025)**: `park_invites` + `park_collaborators` + `v_my_parks`; davet/kabul/red/iptal YALNIZ SECURITY DEFINER RPC ile (`dg_invite_send/dg_invite_respond/dg_invite_revoke` — tablolarda yazma grant'i YOK). Kabul = `auth.uid()` ↔ `profiles.email` (e-posta kimlik doğrulamaz). `meas_select` OR-ile genişler: park sahibi+ortaklar ortak parkın bekleyen kayıtlarını görür (onay akışı). 0006 park-bağı ve 0007 konum çiti AYNEN geçerli. Idempotent. |
 | `dump-schema.sh` | Canlı şemayı `supabase db dump` ile yeniden dökmek için yardımcı |
 | `audit/rls-probe.sh` | Anon key ile 13 saldırı denemesi (yetki yükseltme dahil) |
 | `audit/RLS-DENETIM.md` | Denetim listesi + sonuç tablosu (doldurulacak) |
@@ -53,7 +54,9 @@ Supabase SQL Editor'da sırayla:
    kalktığını listeler)
 15. `0015_report_data_owner.sql` → Run (✍️ yazar = veri sahibi; doğrulama:
    `select * from dg_park_author(25);` → 'Nagihan Şirin')
-16. (Önerilir) `audit/rls-probe.sh`'i kendi makinenden çalıştır → sonuçları
+16. `0025_park_invites.sql` → Run (👥 park çalışma arkadaşı: davet/kabul +
+   ortak park görünürlüğü; doğrulama: `select * from v_my_parks;`)
+17. (Önerilir) `audit/rls-probe.sh`'i kendi makinenden çalıştır → sonuçları
    `audit/RLS-DENETIM.md` tablosuna işle
 
 > ⚠️ **Sıra önemli:** `0004` uygulanmadan site çökmez ama park kimliği devre

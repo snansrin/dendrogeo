@@ -160,6 +160,10 @@ if(v==="dash"){loadWaypoints().then(()=>loadDash());}
  if(v==="nav")setTimeout(()=>{navMap&&navMap.invalidateSize();loadWaypoints();},150);
  if(v==="world")setTimeout(()=>worldMap&&worldMap.invalidateSize(),150);
 if(v==="admin")loadAdmin();
+ /* 0025 · park çalışma arkadaşı: kartlar kendi modülünde (park-invites.js);
+  * hook'lar typeof korumalı → modül yoksa eski davranış birebir. */
+ if(v==="admin"&&typeof dgCollabLoad==="function")dgCollabLoad();
+ if(v==="projects"&&typeof dgInvitesLoadMine==="function")dgInvitesLoadMine();
 if(v==="users")loadUsers();
 if(v==="export")loadRequestOptions();
  /* kaydırma konumunu geri getir (sekme içeriği çizildikten sonra) */

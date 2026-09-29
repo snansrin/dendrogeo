@@ -46,6 +46,11 @@ girilemez (istemci kapısı `dgParkGate`, sunucu kapısı `trg_enforce_park_link
   açıktır — istemcide düğmeler gizlenir, sunucuda `trg_enforce_park_admin`
   (`PARK_ADMIN_ONLY`) zorlar. Yeni proje açmak için park algılamak herkesin
   hakkıdır (INSERT serbest), yoksa saha akışı kilitlenir.
+
+* **Park çalışma arkadaşı (0025):** park sahibi e-posta ile davet açar; kabul
+  eden kullanıcı aynı parkın projelerine **kendi adıyla** ölçü girer (konum
+  çiti ve onay akışı aynen geçerli). Davet/kabul/iptal yalnız SECURITY
+  DEFINER RPC ile — tablolara istemciden yazma yetkisi yoktur.
 * **Şema yedeği:** `supabase/migrations/0004_parks.sql` uygulanmadıysa uygulama
   çökmez — park kimliği devre dışı kalır, karşılaştırma proje bazlı yedeğe
   düşer, kapı kilitlenmez ve ekranda migration uyarısı görünür.

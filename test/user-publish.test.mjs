@@ -133,10 +133,10 @@ describe('arayüz kablolaması: 📄 düğmesi + panel kutusu', () => {
       assert.ok(UI.includes(cls), 'UI sınıfı mevcut aileden: ' + cls);
   });
 
-  test('çevrimdışı paket: sw.js r45 ve modül CORE_ASSETS’te kalır', () => {
-    // 0011 (2026-09-28): species.js değişti → r43→r44; 0011b geri alımı → r45.
+  test('çevrimdışı paket: sw.js r46 ve modül CORE_ASSETS’te kalır', () => {
+    // 0011: r43→r44; 0011b → r45; 0025 park-invites precache → r46.
     // Sözleşme: önbeklenen içerik değiştiğinde CACHE_VERSION artmak zorunda.
-    assert.match(SW, /CACHE_VERSION = 'dendrogeo-sw-v2-r45'/, 'içerik değişti → sürüm arttı');
+    assert.match(SW, /CACHE_VERSION = 'dendrogeo-sw-v2-r46'/, 'içerik değişti → sürüm arttı');
     assert.match(SW, /'\/src\/services\/report-publish\.js'/);
   });
 });
