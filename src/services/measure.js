@@ -173,13 +173,13 @@ async function loadProjects(){
   const repBtn=p.park_id
    ? `<button class="btn sm" onclick="dgUserPubOpen(${p.id})" title="Park raporu: yayınla / paylaş">📄</button>`
    : "";
-  return `<tr><td>${p.id}</td><td>${parkCell}</td><td>${esc(p.name)}</td><td>${esc(p.country||"—")}</td><td>${esc(p.city||"—")}</td><td>${new Date(p.created_at).toLocaleDateString("tr-TR")}</td><td style="display:flex;gap:4px">${repBtn}<button class="btn sm blue" onclick="editProject(${p.id})">✏️</button><button class="btn sm red" onclick="deleteProject(${p.id})">🗑</button></td></tr>`;
+  return `<tr><td data-label="ID">${p.id}</td><td data-label="Park">${parkCell}</td><td data-label="Proje Adı">${esc(p.name)}</td><td data-label="Ülke">${esc(p.country||"—")}</td><td data-label="Şehir">${esc(p.city||"—")}</td><td data-label="Tarih">${new Date(p.created_at).toLocaleDateString("tr-TR")}</td><td data-label="İşlem" style="display:flex;gap:4px">${repBtn}<button class="btn sm blue" onclick="editProject(${p.id})">✏️</button><button class="btn sm red" onclick="deleteProject(${p.id})">🗑</button></td></tr>`;
  }).join("");
  /* 0025 · paylaşılan proje satırları: düzenleme/silme/rapor YOK (proje
   * sahibinin yetkisi) — ortak yalnız ÖLÇÜM GİRER (ölçüm sekmesi dropdown'ı). */
  const sharedRows=PROJ_LIST.filter(p=>p.shared).map(p=>{
   const park=p.parks&&p.parks.name?p.parks.name:(p.park_name||"");
-  return `<tr><td>${p.id}</td><td>🌳 ${esc(park)} <span class="badge on">ortak</span></td><td>${esc(p.name)}</td><td>${esc(p.country||"—")}</td><td>${esc(p.city||"—")}</td><td>${new Date(p.created_at).toLocaleDateString("tr-TR")}</td><td><span class="mono dg-sub">yalnız ölçüm girişi</span></td></tr>`;
+  return `<tr><td data-label="ID">${p.id}</td><td data-label="Park">🌳 ${esc(park)} <span class="badge on">ortak</span></td><td data-label="Proje Adı">${esc(p.name)}</td><td data-label="Ülke">${esc(p.country||"—")}</td><td data-label="Şehir">${esc(p.city||"—")}</td><td data-label="Tarih">${new Date(p.created_at).toLocaleDateString("tr-TR")}</td><td data-label="İşlem"><span class="mono dg-sub">yalnız ölçüm girişi</span></td></tr>`;
  }).join("");
  $("projTable").innerHTML=(ownRows+sharedRows)||"<tr><td colspan=7>Proje yok — önce park algıla</td></tr>";
  dgRenderProjectParkBox();

@@ -58,6 +58,27 @@ girilmesini sağlasın."
 - Testler: `test/park-invites.test.mjs` (15: SQL sözleşmeleri + vm modül +
   kablolama) · check zinciri yeşil.
 
+### Değişti — 0026: davet kartı Projeler’de + uygulama mobil düzeni (2026-09-29)
+Kullanıcı geri bildirimi: "daveti admin sekmesine koydun — kullanıcı
+kullanacak bunu, proje sayfasına koy; site telefondan saçma görünüyor."
+- **👥 Park Çalışma Arkadaşları kartı v-admin → v-projects'e taşındı**
+  (📬 davetlerin ve 🌳 paylaşılan park kutusunun yanı; projeler tablosunun
+  altı). Admin olmayan park sahipleri de artık davet açabilir (yetki zaten
+  sunucuda: RPC proje sahibi/admin şartı). shell go('projects') iki kartı da
+  yükler; admin kancası kaldırıldı. Kimlikler (dgInvPark/dgInvList) aynı.
+- **Uygulama mobil düzeni** (rapor sayfası 0024'te düzelmişti; kabuk eksikti):
+  · 8 uygulama tablosu `dg-cards` sınıfına alındı → ≤640px'te TABLO→KART
+    düzeni (mevcut sistem): başlık gizlenir, her satır "ETİKET: değer"
+    kutusu olur; proje/kayıt satırlarına `data-label` eklendi.
+  · `.card{overflow-x:auto}` GENEL kuralı kaldırıldı (tüm kartları — form
+    kartları dahil — kaydırma kabına çeviriyordu; dokunmada "saçma" kayma
+    hissinin kaynağı). Artık yalnız `.tblwrap` ve yalnız mobilde kayar.
+  · Üst bar mobilde sakinleşir: yükseklik oto, 📲 Uygulama Kur gizli
+    (telefonda mağaza/menüden), whoami daralır, yan küme sarar; sekme
+    şeridi yapışkan kalır.
+- Testler: park-invites kablolama + mobil sözleşmeleri (dg-cards sayısı,
+  .card overflow yasağı, data-label'lar) · 845/845 yeşil.
+
 ### Düzeltildi — 0024: mobil düzen v2 — kaydırma kabı (2026-09-29)
 0021'in mobil düzeltmesi telefonda YENİ bozulma üretti (kullanıcı bildirimi:
 "§5 tür tablosu birbirine girdi, §7/§10/§12 kayıyor"): `table{display:block}`

@@ -254,7 +254,7 @@
 <script src="src/services/report-publish.js?v=7db34cf4" defer></script>
 <script src="src/services/park-invites.js?v=fdc9c9a5" defer></script>
 <script src="src/services/world.js?v=918cd92f" defer></script>
-<script src="src/services/measure.js?v=31907e54" defer></script>
+<script src="src/services/measure.js?v=e4836dab" defer></script>
 <script src="src/services/map.js?v=b3b6192d" defer></script>
 <!-- LULC ZİNCİRİ ARTIK TEMBEL (2026-09-25 · Faz 8): 8 dosya ilk yüklemede
      indirilmiyor. Yalnız "🌿 Yüzey Örtüsü Analizi"ne basan kullanıcı için
@@ -277,8 +277,8 @@
 <script src="src/services/grid-engine.js?v=c3e27b01" defer></script>
 <script src="src/ui/park-panel.js?v=66573187" defer></script>
 <script src="src/ui/park-export.js?v=47f46346" defer></script>
-<script src="src/services/dash.js?v=07efaa7f" defer></script>
-<link rel="stylesheet" href="css/style.css?v=0664dc16">
+<script src="src/services/dash.js?v=fb9fe821" defer></script>
+<link rel="stylesheet" href="css/style.css?v=82c880cb">
 <link rel="stylesheet" href="css/landing.css?v=e875e230">
 <link rel="stylesheet" href="css/park-panel.css?v=10b49293">
 <!-- TASARIM SİSTEMİ (2026-09-27, 2. deneme): ui-standard.css geri BAĞLANDI
@@ -795,7 +795,7 @@
      <button class="btn sm ghost" id="projCancelBtn" style="display:none" onclick="cancelProjectEdit()">Vazgeç</button>
     </div>
    </div>
-   <div class="card tblwrap"><table><thead><tr><th>ID</th><th>Park</th><th>Proje Adı</th><th>Ülke</th><th>Şehir</th><th>Tarih</th><th>İşlem</th></tr></thead><tbody id="projTable"></tbody></table></div>
+   <div class="card tblwrap dg-cards"><table><thead><tr><th>ID</th><th>Park</th><th>Proje Adı</th><th>Ülke</th><th>Şehir</th><th>Tarih</th><th>İşlem</th></tr></thead><tbody id="projTable"></tbody></table></div>
    <!-- KULLANICI RAPOR PANELİ (0009 · 2026-09-28): kullanıcılar KENDİ park
         projelerinin bilimsel raporunu site içinden yayınlar — aynı kuyruk
         (report_requests), aynı DGR kimliği, aynı kalıcı bağlantı. Sunucu
@@ -803,12 +803,31 @@
         Boş + display:none → kullanılmadığında sıfır yer kaplar (düzen kaymaz);
         yeni CSS yok. Modül: src/services/report-publish.js (kullanıcı bölümü). -->
    <div id="dgUserPubBox" class="card" style="display:none;margin-top:12px"></div>
+   <!-- PARK ÇALIŞMA ARKADAŞLARI (0025/0026 · kullanıcı isteği: "davet
+        PROJE sayfasında olsun — admin sekmesi değil"): sahibi/yöneticisi
+        olduğun parklara e-posta ile davet aç; kabul eden arkadaş projeyi
+        kendi Ölçüm sekmesinde görür, ölçümlerini KENDİ adıyla girer
+        (owner=auth.uid()), konum çiti (0007) ve onay akışı aynen geçerlidir.
+        Yetki SUNUCUDA: dg_invite_send RPC (proje sahibi/admin değilse
+        INVITE_NOT_YOUR_PARK). Modül: src/services/park-invites.js ·
+        yeni CSS yok, kart v-projects'te (her kullanıcının yeri). -->
+   <div class="card" style="margin-bottom:18px;border-left:4px solid var(--green)">
+    <div class="shead" style="margin-bottom:12px"><span class="no">👥</span><h2 style="font-size:1.2rem">Park Çalışma Arkadaşları</h2><span class="rule"></span><span class="mono" style="font-size:.75rem;color:var(--mut)">davet · ortak ölçüm · onay sende</span></div>
+    <p style="color:var(--mut);font-size:.8rem;margin-bottom:10px">Parkını bir çalışma arkadaşına aç: e-postasıyla davet et, hesabıyla kabul etsin; aynı parkın projelerine birlikte ölçü girin. Kimin ölçtüğü kayıt sahibinde görünür, onay ve rapor akışı değişmez.</p>
+    <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:10px">
+     <label class="lbl" for="dgInvPark" style="margin:0">Park</label>
+     <select id="dgInvPark" onchange="dgCollabRefresh()" style="min-width:220px"><option value="">⏳ yükleniyor…</option></select>
+     <button class="btn sm blue" onclick="dgCollabLoad()">🔄 Yenile</button>
+    </div>
+    <div id="dgInvList"><div class="dg-tree-meta">Park seçilince davetler ve ortaklar burada listelenir.</div></div>
+   </div>
+
   </div>
 
   <div class="view" id="v-records">
    <h2 class="disp" style="margin-bottom:16px">Kayıtlarım</h2>
    <div class="alert info">Kayıtlarınız admin onayından sonra dünya verisinde yayınlanır.</div>
-   <div class="card tblwrap"><table><thead><tr><th>Proje</th><th>Nokta</th><th>Tür</th><th>Çap</th><th>Boy</th><th>Karbon</th><th>Foto</th><th>Durum</th><th>İşlem</th></tr></thead><tbody id="recTable"></tbody></table></div>
+   <div class="card tblwrap dg-cards"><table><thead><tr><th>Proje</th><th>Nokta</th><th>Tür</th><th>Çap</th><th>Boy</th><th>Karbon</th><th>Foto</th><th>Durum</th><th>İşlem</th></tr></thead><tbody id="recTable"></tbody></table></div>
   </div>
 
   <div class="view" id="v-export">
@@ -861,8 +880,8 @@
       <div class="card" style="border-left:4px solid var(--green)">
     <div class="shead" style="margin-bottom:12px"><span class="no">🌍</span><h2 style="font-size:1.15rem">Bölgesel Dağılım</h2><span class="rule"></span></div>
     <div class="grid g2">
-     <div class="tblwrap"><table><thead><tr><th>Ülke</th><th>Kayıt</th><th>Karbon(t)</th><th>Ort.Çap</th><th>Ort.Yükseklik(m)</th></tr></thead><tbody id="wCountryT"></tbody></table></div>
-     <div class="tblwrap"><table><thead><tr><th>Şehir</th><th>Kayıt</th><th>Karbon(t)</th></tr></thead><tbody id="wCityT"></tbody></table></div>
+     <div class="tblwrap dg-cards"><table><thead><tr><th>Ülke</th><th>Kayıt</th><th>Karbon(t)</th><th>Ort.Çap</th><th>Ort.Yükseklik(m)</th></tr></thead><tbody id="wCountryT"></tbody></table></div>
+     <div class="tblwrap dg-cards"><table><thead><tr><th>Şehir</th><th>Kayıt</th><th>Karbon(t)</th></tr></thead><tbody id="wCityT"></tbody></table></div>
     </div>
       </div>
    <div class="card" style="margin-top:18px;border-left:4px solid var(--blue)">
@@ -933,24 +952,6 @@
     </div>
     <div id="dgPubBox"><div class="dg-tree-meta">⏳ Kuyruk yükleniyor…</div></div>
    </div>
-   <!-- PARK ÇALIŞMA ARKADAŞLARI (0025 · kullanıcı isteği: "beraber aynı
-        projeye veri girilsin"): sahibi/yöneticisi olduğun parklara e-posta
-        ile davet aç; kabul eden arkadaş projeyi kendi Ölçüm sekmesinde görür,
-        ölçümlerini KENDİ adıyla girer (owner=auth.uid()), konum çiti (0007)
-        ve onay akışı aynen geçerlidir; bekleyen kayıtlarını Ölçüm Yönetimi
-        ağacında görürsün (0025 meas_select genişletmesi). Yetki SUNUCUDA:
-        dg_invite_send RPC (proje sahibi/admin değilse INVITE_NOT_YOUR_PARK).
-        Modül: src/services/park-invites.js · yeni CSS yok, kart yalnız v-admin'de. -->
-   <div class="card" style="margin-bottom:18px;border-left:4px solid var(--green)">
-    <div class="shead" style="margin-bottom:12px"><span class="no">👥</span><h2 style="font-size:1.2rem">Park Çalışma Arkadaşları</h2><span class="rule"></span><span class="mono" style="font-size:.75rem;color:var(--mut)">davet · ortak ölçüm · onay sende</span></div>
-    <p style="color:var(--mut);font-size:.8rem;margin-bottom:10px">Parkını bir çalışma arkadaşına aç: e-postasıyla davet et, hesabıyla kabul etsin; aynı parkın projelerine birlikte ölçü girin. Kimin ölçtüğü kayıt sahibinde görünür, onay ve rapor akışı değişmez.</p>
-    <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:10px">
-     <label class="lbl" for="dgInvPark" style="margin:0">Park</label>
-     <select id="dgInvPark" onchange="dgCollabRefresh()" style="min-width:220px"><option value="">⏳ yükleniyor…</option></select>
-     <button class="btn sm blue" onclick="dgCollabLoad()">🔄 Yenile</button>
-    </div>
-    <div id="dgInvList"><div class="dg-tree-meta">Park seçilince davetler ve ortaklar burada listelenir.</div></div>
-   </div>
    <div class="card" style="margin-bottom:18px;border-left:4px solid var(--amber)">
     <div class="shead" style="margin-bottom:12px"><span class="no">📦</span><h2 style="font-size:1.2rem">Toplu Dışa Aktarım (Tüm Kullanıcılar)</h2></div>
     <p style="color:var(--mut);font-size:.82rem;margin-bottom:10px">Kullanıcı ayrımı yapılmadan sistemdeki <b>tüm veri</b>, seçtiğiniz filtrelere göre dışa aktarılır.</p>
@@ -968,7 +969,7 @@
    </div>
       <div class="card" style="margin-bottom:18px;border-left:4px solid var(--blue)">
     <div class="shead" style="margin-bottom:12px"><span class="no">✉️</span><h2 style="font-size:1.2rem">Aktif Talepler</h2><span class="rule"></span><span class="mono" style="font-size:.78rem;color:var(--amber-ink)">Bekleyen: <b id="aReqPendingMini">0</b></span></div>
-    <div class="tblwrap"><table><thead><tr><th>Kullanıcı</th><th>E‑posta</th><th>Filtre</th><th>Tarih</th><th>Durum</th><th>İşlem</th></tr></thead><tbody id="aReqT"></tbody></table></div>
+    <div class="tblwrap dg-cards"><table><thead><tr><th>Kullanıcı</th><th>E‑posta</th><th>Filtre</th><th>Tarih</th><th>Durum</th><th>İşlem</th></tr></thead><tbody id="aReqT"></tbody></table></div>
    </div>
    <div class="card" id="closedRequestsWrap" style="margin-bottom:18px;border-left:4px solid var(--mut);display:none">
     <div class="shead" style="margin-bottom:12px;cursor:pointer" onclick="document.getElementById('closedReqBody').style.display=document.getElementById('closedReqBody').style.display==='none'?'block':'none'">
@@ -978,7 +979,7 @@
      <span class="mono" style="font-size:.78rem;color:var(--mut)">Arşiv: <b id="aReqClosed">0</b> · Aç/Kapat ▼</span>
     </div>
     <div id="closedReqBody" style="display:none">
-     <div class="tblwrap"><table><thead><tr><th>Kullanıcı</th><th>E‑posta</th><th>Filtre</th><th>Talep</th><th>Kapanış</th><th>Durum</th></tr></thead><tbody id="closedReqT"></tbody></table></div>
+     <div class="tblwrap dg-cards"><table><thead><tr><th>Kullanıcı</th><th>E‑posta</th><th>Filtre</th><th>Talep</th><th>Kapanış</th><th>Durum</th></tr></thead><tbody id="closedReqT"></tbody></table></div>
     </div>
    </div>
    <!-- ÖLÇÜM ONAY & MODERASYON — TEK KART (2026-09-24)
@@ -1003,14 +1004,14 @@
     <details class="dg-flat" style="margin-top:14px">
      <summary>📄 Düz liste (tüm kayıtlar · ilk 300 satır)</summary>
      <input type="text" id="adminMeasSearch" placeholder="🔍 Ara..." oninput="filterAdminMeas()" style="max-width:100%;margin:10px 0">
-     <div class="tblwrap"><table><thead><tr><th>Kullanıcı</th><th>Nokta</th><th>Tür</th><th>Çap</th><th>Boy</th><th>Karbon</th><th>Foto</th><th>Durum</th><th>İşlem</th></tr></thead><tbody id="aMeasT"></tbody></table></div>
+     <div class="tblwrap dg-cards"><table><thead><tr><th>Kullanıcı</th><th>Nokta</th><th>Tür</th><th>Çap</th><th>Boy</th><th>Karbon</th><th>Foto</th><th>Durum</th><th>İşlem</th></tr></thead><tbody id="aMeasT"></tbody></table></div>
     </details>
    </div>
   </div>
 
   <div class="view" id="v-users">
    <h2 class="disp" style="margin-bottom:16px">👥 Kullanıcı Yönetimi</h2>
-   <div class="card tblwrap">
+   <div class="card tblwrap dg-cards">
     <input type="text" id="userSearch" placeholder="🔍 E‑posta veya ad ara..." oninput="filterUsers()" style="max-width:100%;margin-bottom:12px">
     <table><thead><tr><th>E‑posta</th><th>Ad Soyad</th><th>Rol</th><th>Durum</th><th>İşlem</th></tr></thead><tbody id="aUsersT"></tbody></table>
    </div>
@@ -1039,6 +1040,6 @@
 <script src="src/ui/state.js?v=4dc88a5a" defer></script>
 <script src="src/ui/toast.js?v=4e9029ad" defer></script>
 <script src="src/ui/landing.js?v=197cda4b" defer></script>
-<script src="src/ui/shell.js?v=b45d865a" defer></script>
+<script src="src/ui/shell.js?v=90ddc741" defer></script>
 </body>
 </html>

@@ -208,7 +208,10 @@ input,select,textarea{font-size:16px}
    kenarlara yayıp "yayıldı" görüntüsüne yol açmıştı (kullanıcı bildirimi).
    Mobil taşma koruması yalnız table ve kart içi yatay kaydırmada. */
 table{max-width:100%}
-.card{overflow-x:auto}
+/* 0026 · taşma onarımı: ESKİ kural `.card{overflow-x:auto}` TÜM kartları
+   (formlar dahil) kaydırma kabına çeviriyordu → mobilde "saçma" dokunma
+   davranışı. Artık yalnız tablo kapsayıcısı (.tblwrap) ve SADECE mobilde
+   kaydırılır; .dg-cards kart düzenine geçen tablolar zaten kaydırmaz. */
 /* ---- YAZDIRMA: raporlar kağıda temiz çıksın ---- */
 @media print{
 #topnav,#apptop,#side,button,.dg-png-btn,.dg-png-options,.links{display:none!important}
@@ -289,6 +292,13 @@ canvas{max-width:100%}
 
 /* ---------- MOBİL (≤640px) ---------- */
 @media(max-width:640px){
+  /* 0026 · mobil onarımlar: üst bar sakinleşir, yalnız tablo kabı kayar */
+  #apptop{height:auto;min-height:52px;padding:6px 10px;gap:6px}
+  #apptop .right{flex-wrap:wrap;justify-content:flex-end;row-gap:4px}
+  #installBtn{display:none!important} /* PWA kurulumu telefonda mağaza/ menüden */
+  #whoami{max-width:32vw}
+  #side{top:52px}
+  .tblwrap{overflow-x:auto;-webkit-overflow-scrolling:touch}
   /* karşılaştırma: sıra no + ad + ton üstte, bar tam genişlikte altta */
   .dg-cmp-row{flex-wrap:wrap;gap:8px;padding:10px}
   .dg-cmp-rank{width:22px;height:22px;font-size:.7rem}

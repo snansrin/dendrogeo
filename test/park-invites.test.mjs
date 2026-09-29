@@ -191,21 +191,42 @@ describe('0025 · kablolama (index.html + shell + partials)', () => {
     const b = h.indexOf('src/services/park-invites.js');
     assert.ok(a > 0 && b > a, 'yükleme sırası');
   });
-  test('shell go() kancaları typeof korumalı', () => {
+  test('shell go() kancaları typeof korumalı (0026: ikisi de v-projects)', () => {
     const sh = read('src/ui/shell.js');
-    assert.match(sh, /v==="admin"&&typeof dgCollabLoad==="function"/);
-    assert.match(sh, /v==="projects"&&typeof dgInvitesLoadMine==="function"/);
+    const ip = sh.indexOf('if(v==="projects"){');
+    assert.ok(ip > 0, 'projeler sekmesi bloğu var');
+    const blk = sh.slice(ip, ip + 220);
+    assert.match(blk, /dgInvitesLoadMine/, '📬 yüklenir');
+    assert.match(blk, /dgCollabLoad/, '👥 yüklenir');
+    assert.ok(!/v==="admin"&&typeof dgCollabLoad/.test(sh), 'admin kancası kaldırıldı (kart projelerde)');
   });
-  test('kartlar partials’ta: 📬 v-projects, 👥 v-admin (yeni CSS yok)', () => {
+  test('kartlar partials’ta: 📬 ve 👥 İKİSİ DE v-projects (0026 · kullanıcı isteği)', () => {
     const sh = read('partials/shell.html');
     const vp = sh.indexOf('id="v-projects"');
+    const vrec = sh.indexOf('id="v-records"');
     const va = sh.indexOf('id="v-admin"');
     const inv = sh.indexOf('id="dgInvBox"');
     const collab = sh.indexOf('id="dgInvPark"');
-    assert.ok(vp > 0 && inv > vp && inv < va, '📬 kartı v-projects içinde');
-    assert.ok(collab > va, '👥 kartı v-admin içinde');
+    assert.ok(vp > 0 && inv > vp && inv < vrec, '📬 kartı v-projects içinde');
+    assert.ok(collab > vp && collab < vrec, '👥 kartı v-projects içinde (admin değil)');
+    assert.ok(va > 0 && !sh.slice(va).includes('dgInvPark'), '👥 kartı v-admin’de KALMADI');
     assert.ok(sh.indexOf('id="dgSharedBox"') > vp, 'paylaşılan park kutusu');
     assert.ok(!/dg-inv-|park-invites\.css/.test(sh), 'yeni CSS sınıfı ailesi yok');
+  });
+  test('0026 mobil: tablolar dg-cards, .card overflow kalktı, üst bar sakinleşti', () => {
+    const sh = read('partials/shell.html');
+    assert.ok((sh.match(/tblwrap dg-cards/g) || []).length >= 7, 'tüm uygulama tabloları kart düzenine geçer');
+    assert.match(sh, /id="projTable"[\s\S]{0,40}/, 'proje tablosu yerinde');
+    const css = read('css/style.css');
+    /* yorum satırları çıkarılır (belgeleme amaçlı alıntılar kural sayılmasın) */
+    const cssKod = css.split('\n').filter((l) => !l.trim().startsWith('/*') && !l.trim().startsWith('*')).join('\n');
+    assert.ok(!cssKod.includes('.card{overflow-x:auto}'), '0026 öncesi hata: tüm kartlar kaydırma kabıydı');
+    assert.match(css, /\.tblwrap\{overflow-x:auto/, 'yalnız tablo kabı kayar (mobilde)');
+    assert.match(css, /#installBtn\{display:none!important\}/, 'üst bar mobilde sade');
+    const m = read('src/services/measure.js');
+    assert.match(m, /data-label="Proje Adı"/, 'proje satırları etiketli (kart düzeni)');
+    const d = read('src/services/dash.js');
+    assert.match(d, /data-label="Karbon"/, 'kayıt satırları etiketli');
   });
   test('loadProjects paylaşım birleşimi: ortak projeleri dropdown’a ekler', () => {
     const m = read('src/services/measure.js');

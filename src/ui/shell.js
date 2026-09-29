@@ -162,8 +162,12 @@ if(v==="dash"){loadWaypoints().then(()=>loadDash());}
 if(v==="admin")loadAdmin();
  /* 0025 · park çalışma arkadaşı: kartlar kendi modülünde (park-invites.js);
   * hook'lar typeof korumalı → modül yoksa eski davranış birebir. */
- if(v==="admin"&&typeof dgCollabLoad==="function")dgCollabLoad();
- if(v==="projects"&&typeof dgInvitesLoadMine==="function")dgInvitesLoadMine();
+ /* 0026: 👥 davet kartı v-projects'te (kullanıcının yeri) — iki yükleme de
+  * Projeler sekmesinde; admin sekmesi kancası kaldırıldı. */
+ if(v==="projects"){
+  if(typeof dgInvitesLoadMine==="function")dgInvitesLoadMine();
+  if(typeof dgCollabLoad==="function")dgCollabLoad();
+ }
 if(v==="users")loadUsers();
 if(v==="export")loadRequestOptions();
  /* kaydırma konumunu geri getir (sekme içeriği çizildikten sonra) */
