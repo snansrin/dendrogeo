@@ -1,6 +1,6 @@
 {
   "schema": "dendrogeo-publish-queue/1",
-  "updated_at": "2026-09-29T15:33:08.714Z",
+  "updated_at": "2026-09-29T16:44:52.156Z",
   "entries": [
     {
       "request_id": "manuel-DGR-2026-0001",
@@ -307,6 +307,18 @@
       "started_at": "2026-09-29T15:33:08.713Z",
       "status": "Geri çekildi",
       "finished_at": "2026-09-29T15:33:08.714Z"
+    },
+    {
+      "retraction_id": "51d78c9b-fca1-41c2-a096-c348cb1cf87a",
+      "report_id": "DGR-2026-0010",
+      "park_id": 25,
+      "park_name": "Göksu Parkı",
+      "reason": "Test Yayını",
+      "requested_by": "ee148cdd-e06a-462e-a1f3-e3c769aeb7f3",
+      "requested_at": "2026-09-29T16:21:36.639354+00:00",
+      "started_at": "2026-09-29T16:44:52.140Z",
+      "status": "Geri çekildi",
+      "finished_at": "2026-09-29T16:44:52.156Z"
     }
   ]
 }
