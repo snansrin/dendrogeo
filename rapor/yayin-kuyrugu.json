@@ -1,6 +1,6 @@
 {
   "schema": "dendrogeo-publish-queue/1",
-  "updated_at": "2026-09-29T17:01:39.968Z",
+  "updated_at": "2026-09-29T17:07:16.095Z",
   "entries": [
     {
       "request_id": "manuel-DGR-2026-0001",
@@ -339,6 +339,26 @@
       "lulc": "dahil (ESA WorldCover 10 m · 2021 (v200))",
       "citation": "Şirin, N. (2026). Göksu Parkı ağaç envanteri ve karbon stoku raporu (DGR-2026-0011, sürüm 1.0). DendroGeo Bilimsel Analiz Raporu. https://dendrogeo.org/rapor/DGR-2026-0011/",
       "finished_at": "2026-09-29T17:01:39.968Z"
+    },
+    {
+      "request_id": "fc8744a4-ca1e-4bcf-ac70-53797ae4c22b",
+      "park_id": 25,
+      "with_lulc": true,
+      "requested_at": "2026-09-29T17:03:21.266316+00:00",
+      "started_at": "2026-09-29T17:07:12.471Z",
+      "status": "Yayınlandı",
+      "archive_bytes": 117714,
+      "report_id": "DGR-2026-0012",
+      "version": 1,
+      "url_path": "/rapor/DGR-2026-0012/",
+      "report_hash": "sha256:9b764ec568f3655711f88ee3ad2a500a12c729e151d69896234a6e4a83f28d4c",
+      "park_name": "Göksu Parkı",
+      "city": "Ankara",
+      "n": 34,
+      "carbon_txt": "52.29 t [%95 GA 28.80–73.91]",
+      "lulc": "dahil (ESA WorldCover 10 m · 2021 (v200))",
+      "citation": "Şirin, N. (2026). Göksu Parkı ağaç envanteri ve karbon stoku raporu (DGR-2026-0012, sürüm 1.0). DendroGeo Bilimsel Analiz Raporu. https://dendrogeo.org/rapor/DGR-2026-0012/",
+      "finished_at": "2026-09-29T17:07:16.095Z"
     }
   ]
 }
