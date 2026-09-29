@@ -1,6 +1,6 @@
 {
   "schema": "dendrogeo-publish-queue/1",
-  "updated_at": "2026-09-29T15:07:40.842Z",
+  "updated_at": "2026-09-29T15:27:32.984Z",
   "entries": [
     {
       "request_id": "manuel-DGR-2026-0001",
@@ -243,6 +243,38 @@
       "lulc": "dahil (ESA WorldCover 10 m · 2021 (v200))",
       "citation": "Şirin, N. (2026). Göksu Parkı ağaç envanteri ve karbon stoku raporu (DGR-2026-0008, sürüm 1.0). DendroGeo Bilimsel Analiz Raporu. https://dendrogeo.org/rapor/DGR-2026-0008/",
       "finished_at": "2026-09-29T15:07:40.841Z"
+    },
+    {
+      "request_id": "84203b39-2223-4a12-98f6-6740b4522b2e",
+      "park_id": 5,
+      "with_lulc": true,
+      "requested_at": "2026-09-29T15:25:20.937986+00:00",
+      "started_at": "2026-09-29T15:27:28.987Z",
+      "status": "Yayınlandı",
+      "archive_bytes": 40408,
+      "report_id": "DGR-2026-0009",
+      "version": 1,
+      "url_path": "/rapor/DGR-2026-0009/",
+      "report_hash": "sha256:574dfd7d034ed2c3a75323fa31c6e1241b4d24c38f7bb3ee9c0af9f079100d94",
+      "park_name": "Atatürk Çocukları ve Doğal Yaşam Parkı",
+      "city": "Ankara",
+      "n": 2,
+      "carbon_txt": "24.02 t [%95 GA 13.17–34.22]",
+      "lulc": "hata: Raster/park alanı QA başarısız: 1.70% fark. Kısmi alan zorla yeniden dağıtılmadı.",
+      "citation": "Şirin, N. (2026). Atatürk Çocukları ve Doğal Yaşam Parkı ağaç envanteri ve karbon stoku raporu (DGR-2026-0009, sürüm 1.0). DendroGeo Bilimsel Analiz Raporu. https://dendrogeo.org/rapor/DGR-2026-0009/",
+      "finished_at": "2026-09-29T15:27:32.982Z"
+    },
+    {
+      "retraction_id": "0ccc285b-7827-4e1e-948a-fa516667d5b6",
+      "report_id": "DGR-2026-0008",
+      "park_id": 25,
+      "park_name": "Göksu Parkı",
+      "reason": "Test Yayını",
+      "requested_by": "ebea441f-45e8-4323-80a2-85563d6d8b18",
+      "requested_at": "2026-09-29T15:23:48.816+00:00",
+      "started_at": "2026-09-29T15:27:32.983Z",
+      "status": "Geri çekildi",
+      "finished_at": "2026-09-29T15:27:32.984Z"
     }
   ]
 }
