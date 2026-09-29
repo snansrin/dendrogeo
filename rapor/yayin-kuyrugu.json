@@ -1,6 +1,6 @@
 {
   "schema": "dendrogeo-publish-queue/1",
-  "updated_at": "2026-09-29T20:04:35.899Z",
+  "updated_at": "2026-09-29T20:10:12.001Z",
   "entries": [
     {
       "request_id": "manuel-DGR-2026-0001",
@@ -435,6 +435,18 @@
       "started_at": "2026-09-29T20:04:35.888Z",
       "status": "Geri çekildi",
       "finished_at": "2026-09-29T20:04:35.899Z"
+    },
+    {
+      "retraction_id": "c23ea3fc-b4f1-4d8f-a1d0-630ad9edec9a",
+      "report_id": "DGR-2026-0014",
+      "park_id": 4,
+      "park_name": "Ülkü Spor Tesisi",
+      "reason": "TEST YAYINI",
+      "requested_by": "ebea441f-45e8-4323-80a2-85563d6d8b18",
+      "requested_at": "2026-09-29T20:05:34.280364+00:00",
+      "started_at": "2026-09-29T20:10:11.985Z",
+      "status": "Geri çekildi",
+      "finished_at": "2026-09-29T20:10:12.001Z"
     }
   ]
 }
