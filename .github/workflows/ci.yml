@@ -60,15 +60,17 @@ jobs:
       # 0017 · zincir: kalp atışını ANLIK tetikle (delayed dispatch bu depoda
       # hiç koşmadı; repository_dispatch saniyeler içinde koşar — kanıtlı).
       # Kalp, kendi bekçili döngüsüyle zinciri tekilleştirip sürdürür.
-      - name: Kalp atışını başlat (0017)
+      # 0028: repository_dispatch GITHUB_TOKEN'lu koşularda sessizce düşüyor
+      # → bayrak artık workflow_dispatch ile tetiklenir (kanıtlı bacak).
+      - name: Kalp atışını başlat (0017 · 0028: workflow_dispatch)
         if: always()
         run: |
           curl -sf -X POST \
             -H "Authorization: Bearer ${{ github.token }}" \
             -H "Accept: application/vnd.github+json" \
-            "${{ github.api_url }}/repos/${{ github.repository }}/dispatches" \
-            -d '{"event_type":"rapor-kalp-bayrak","client_payload":{"from":"ci-${{ github.run_id }}"}}' \
-            && echo "🔗 kalp atışı tetiklendi" \
+            "${{ github.api_url }}/repos/${{ github.repository }}/actions/workflows/rapor-bayrak.yml/dispatches" \
+            -d '{"ref":"main"}' \
+            && echo "🔗 kalp atışı tetiklendi (bayrak · workflow_dispatch)" \
             || echo "⚠ kalp tetiği gönderilemedi — cron/push yedeği devralır"
 
   dogrula:

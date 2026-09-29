@@ -9,6 +9,25 @@ Yeni sürüm yayımlama adımları: [`docs/surum-yayini.md`](docs/surum-yayini.m
 
 ## [Yayımlanmadı]
 
+### Düzeltildi — 0028 zincir + rapor çıktısı sertleştirmesi (2026-09-29)
+**Zincir (kuyruk bekleme süresi):** `repository_dispatch` olaylarının
+GITHUB_TOKEN'lu koşulardan gönderilince GitHub tarafından SESSİZCE
+düşürüldüğü canlı kanıtlandı (29.09 17:36/19:44 kalp koşuları "başarılı"
+dispatch yapmasına rağmen bayrak koşusu oluşmadı; geri çekme isteği
+cron'a kaldı). Bayrağa giden TÜM tetikler (kalp zincir adımı,
+rapor-yayin kapanışı, CI kuyruk işi) kanıtlı bacak olan
+`workflow_dispatch`'a geçirildi; kalp zincir adımı dispatch sonrası
+2 tur doğrulama + görünmezse yeniden tetikleme yapıyor.
+**Rapor çıktısı (kullanıcı şikâyeti: "telefonda ve print/PDF'te düzgün
+çıkmıyor"):** gerçek tarayıcı doğrulaması (headless Chrome ile mobil
+ekran görüntüsü + A4 PDF) eklendi ve üç kusur düzeltildi — (1) yazdırma
+medyasında harita figürü sayfalara bölünüp yarım boş sayfa bırakıyordu:
+`.fig img` artık 182mm yükseklikle TEK sayfaya sığar; (2) kullanıcı
+"arka plan grafikleri" kapalı bastığında rozetler/çubuklar/zeminler
+kayboluyordu: `print-color-adjust:exact` zorunlu kılındı; (3) mobilde
+tür tablosunun GRUP sütununda renk rozeti metnin üst satırına
+kayuyordu: rozet+ad `span.grp` (inline-flex, nowrap) ile aynı satırda.
+
 ### Düzeltildi — 0010 geri çekme testleri ilk gerçek geri çekmeyle doğrulandı (2026-09-28)
 DGR-2026-0001/0002'nin yayından kaldırılması (🗑) `rapor.test.mjs`,
 `report-publish.test.mjs` ve `report-v2.test.mjs` içindeki 5 gizli kusuru

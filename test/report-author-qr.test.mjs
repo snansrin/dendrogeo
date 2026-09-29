@@ -113,9 +113,13 @@ describe('0027 · rapor PDF/print dostu', () => {
     const html = render(snap);
     assert.match(html, /@page\{margin:14mm\}/, 'sayfa kenar boşluğu');
     assert.match(html, /\.tscroll\{overflow:visible!important/, 'kaplar print’te görünür (kırpma yok)');
+    assert.match(html, /print-color-adjust:exact/, '0028: kullanıcı arka planları kapatsa bile renkler basılır');
+    assert.match(html, /\.fig img\{max-width:100%!important;max-height:182mm/, '0028: harita tek sayfaya sığar (boş sayfa yok)');
+    assert.match(html, /\.grp\{display:inline-flex/, '0028: grup rozeti + ad aynı satırda');
+    assert.match(html, /<span class="grp">/, '0028: tür tablosunda grup hücresi sarılı');
     assert.match(html, /table\{min-width:0!important/, 'tablo kağıt genişliğine iner');
     assert.match(html, /\.btnrow,\.verify button\{display:none!important\}/, 'düğmeler basılmaz');
-    assert.match(html, /\.fig\{break-inside:avoid\}/, 'Şekil 1/2 sayfayı bölmez');
+    assert.match(html, /\.fig\{break-inside:avoid;page-break-inside:avoid\}/, 'Şekil 1/2 sayfayı bölmez');
     assert.match(html, /tr\{break-inside:avoid\}/, 'satırlar bölünmez');
     assert.match(html, /window\.print\(\)/, '🖨 düğmesi yerinde');
   });

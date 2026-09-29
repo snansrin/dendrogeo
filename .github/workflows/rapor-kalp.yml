@@ -49,17 +49,19 @@ jobs:
     steps:
       - uses: actions/checkout@v4   # sığ klon yeter: günlük + supabase.js
 
-      - name: "Zincir İLK iş — ardıl nabız (0022: bayrak üzerinden)"
+      - name: "Zincir İLK iş — ardıl nabız (0028: bayrak workflow_dispatch ile)"
         if: always()
         run: |
-          # 0022 · CANLI KANITLA tasarrım: GitHub, bir workflow'un GITHUB_TOKEN
-          # ile KENDİSİNİ tetiklemesini SESSİZCE düşürüyor (kalp 15:38/15:51/
-          # 16:16'da dispatch'e 202 aldı ama HİÇ koşu oluşmadı). FARKLI
-          # workflow'u tetiklemek ise kanıtlı çalışıyor (kalp→rapor-yayin
-          # 15:27:15 · rapor-yayin→kalp 15:27:38, run kayıtları).
-          # Kural: kalp kendini DEĞİL, 'Rapor Kalp Bayrak'ı tetikler; bayrak
-          # kalbi tetikler → iki bacak da kanıtlı türden. Dispatch sonrası
-          # DOĞRULAMA: bayrak koşusu gerçekten oluştu mu diye 2 tur yoklanır.
+          # 0028 · CANLI KANIT (29.09 gecesi): repository_dispatch, GITHUB_TOKEN'lu
+          # koşulardan gönderilince GitHub tarafından SESSİZCE düşürülüyor —
+          # kalp 17:36/19:44'te "başarılı" dispatch yaptı, bayrak koşusu
+          # OLUŞMADI, zincir öldü, kuyruk geri çekmeyi cron'a bıraktı (14 dk).
+          # workflow_dispatch ise bu depoda KANITLI: bayrak→kalp 17:30/18:58/
+          # 19:39 ✓ · kalp→rapor-yayin ✓. Yeni kural: bayrağa giden TÜM
+          # tetikler workflow_dispatch (rapor-yayin ve ci dahil):
+          #   kalp → (workflow_dispatch) bayrak → (workflow_dispatch) kalp
+          # Dispatch sonrası DOĞRULAMA korunur (202 ≠ koşu dersi): 2 tur
+          # yoklanır, koşu görünmezse bayrak BİR KEZ daha tetiklenir.
           sleep 300 || true
           API="${{ github.api_url }}/repos/${{ github.repository }}"
           AUTH="Authorization: Bearer ${{ github.token }}"
@@ -73,14 +75,24 @@ jobs:
             echo "🫀 son 4 dk'da BENDEN YENİ $NEWER kalp koşusu var — zinciri o kuracak, bu koşu susuyor"
             exit 0
           fi
-          curl -sf -X POST -H "$AUTH" -H "$ACC" "$API/dispatches" \
-            -d '{"event_type":"rapor-kalp-bayrak","client_payload":{"chain":"${{ github.run_id }}"}}' \
-            && echo "🚩 bayrak tetiklendi" \
+          tetik() {
+            curl -sf -X POST -H "$AUTH" -H "$ACC" \
+              "$API/actions/workflows/rapor-bayrak.yml/dispatches" \
+              -d '{"ref":"main"}'
+          }
+          tetik \
+            && echo "🚩 bayrak tetiklendi (workflow_dispatch — kanıtlı bacak)" \
             || { echo "⚠ bayrak tetiklenemedi — cron/push yedeği devralır"; exit 0; }
           # DOĞRULAMA (0016 dersi: 202 ≠ koşu): bayrak koşusu gerçekten oluştu mu?
-          sleep 20
-          CNT=$(curl -sf -H "$AUTH" -H "$ACC" "$API/actions/workflows/$BAYRAK/runs?per_page=3" | node -e 'let s="";process.stdin.on("data",d=>s+=d).on("end",()=>{const t=Date.now();try{console.log((JSON.parse(s).workflow_runs||[]).filter(x=>x.created_at&&(t-new Date(x.created_at).getTime())<180000).length)}catch(e){console.log(0)}})')
-          if [ "$CNT" -ge 1 ] 2>/dev/null; then
+          OK=0
+          for TUR in 1 2; do
+            sleep 20
+            CNT=$(curl -sf -H "$AUTH" -H "$ACC" "$API/actions/workflows/$BAYRAK/runs?per_page=3" | node -e 'let s="";process.stdin.on("data",d=>s+=d).on("end",()=>{const t=Date.now();try{console.log((JSON.parse(s).workflow_runs||[]).filter(x=>x.created_at&&(t-new Date(x.created_at).getTime())<180000).length)}catch(e){console.log(0)}})')
+            if [ "$CNT" -ge 1 ] 2>/dev/null; then OK=1; break; fi
+            echo "⚠ tur $TUR: bayrak koşusu görünmedi — bir kez daha tetikleniyor"
+            tetik || true
+          done
+          if [ "$OK" = 1 ]; then
             echo "🔗 zincir DOĞRULANDI — bayrak koşusu oluştu, kalp ~5 dk sonra yeniden atacak"
           else
             echo "⚠ bayrak koşusu GÖRÜNMEDİ — cron (*/5) ve 6 saatlik re-arm yedeği devralır"

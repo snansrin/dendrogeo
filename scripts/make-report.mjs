@@ -677,7 +677,7 @@ export function renderReport(snap, { id, hash, version = 1, meta = null }) {
   const bars = snap.species.map((s) => `<div class="brow"><span class="bl">${esc(s.species)}</span><div class="bar"><i style="width:${(s.share_pct / maxShare * 100).toFixed(1)}%;background:${grpColor(s.grp)}"></i></div><span class="bv">%${trNum(s.share_pct, 1)}</span></div>`).join('');
 
   /* ---- tür tablosu ---- */
-  const spRows = snap.species.map((s) => `<tr><td class="tr">${esc(s.species)}</td><td>${sw(grpColor(s.grp))} ${esc(s.grp)}</td><td>${s.n}</td><td>${trNum(s.mean_dbh, 1)}</td><td>${trNum(s.mean_h, 1)}</td><td>${trNum(s.carbon_kg, 1)}</td><td>%${trNum(s.share_pct, 1)}</td></tr>`).join('');
+  const spRows = snap.species.map((s) => `<tr><td class="tr">${esc(s.species)}</td><td><span class="grp">${sw(grpColor(s.grp))}${esc(s.grp)}</span></td><td>${s.n}</td><td>${trNum(s.mean_dbh, 1)}</td><td>${trNum(s.mean_h, 1)}</td><td>${trNum(s.carbon_kg, 1)}</td><td>%${trNum(s.share_pct, 1)}</td></tr>`).join('');
 
   /* ---- QA/QC sayıları (gerçek değerler; uydurma yok) ---- */
   const NR = (snap.rows && snap.rows.length) || t.n; /* kayıt düzeyi QA tabanı */
@@ -856,6 +856,7 @@ pre{background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:
 .brow .bar i{display:block;height:100%;background:var(--leaf);border-radius:6px}
 .brow .bv{width:56px;text-align:right;font-family:ui-monospace,monospace}
 .sw{display:inline-block;width:10px;height:10px;border-radius:2px;vertical-align:-1px}
+.grp{display:inline-flex;align-items:center;gap:6px;white-space:nowrap}
 .qnote{font-family:system-ui,sans-serif;font-size:.78rem;color:var(--mut)}
 .lim li{margin:6px 0 6px 18px}
 .refs li{margin:8px 0 8px 18px;font-size:.86rem}
@@ -889,14 +890,19 @@ pre{background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:
   * görünür olur, tablo tam genişlik basılır. */
  @page{margin:14mm}
  body{background:#fff}
+ /* 0028 · kullanıcı "arka plan grafikleri" KAPALI bassa bile renkler gelsin:
+  * rozetler, Şekil 1 çubukları, kart zeminleri otherwise kayboluyordu. */
+ *{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important}
  .wrap{border:0;padding:0;max-width:none}
  .btnrow,.verify button{display:none!important}
  .tscroll{overflow:visible!important;margin:8px 0;padding:0}
  table{min-width:0!important;font-size:9.5pt}
  th,td{padding:4px 6px;white-space:normal}
- .fig{break-inside:avoid}
- .fig img{max-width:100%!important;height:auto!important}
- h2{break-after:avoid}
+ .fig{break-inside:avoid;page-break-inside:avoid}
+ /* 0028 · harita TEK sayfaya sığsın: eskiden figür sayfalara bölünüp yarım
+  * boş sayfa bırakıyordu (canlı PDF kanıtı). 182mm + başlık A4'e sığar. */
+ .fig img{max-width:100%!important;max-height:182mm!important;width:auto!important;height:auto!important;display:block;margin:0 auto}
+ h2,h3{break-after:avoid;page-break-after:avoid}
  tr{break-inside:avoid}
  .meta{background:#fff}
  a{color:inherit;text-decoration:none}
