@@ -33,6 +33,21 @@ kapanmadığı için ikinci yayın kalıcı olarak bloke oluyordu.
   günlükte sonucu olmayan" istekleri sayar; `planQueue` request_id'si
   günlükte olan istekleri atlar. Yeni test: `test/publish-request-fix.test.mjs`.
 
+### Düzeltildi — 0023: bayrak adımı sertleştirildi (2026-09-29)
+0022'nin ilk bayrak koşusu (16:45:00) 2 saniyede exit 1 öldü; adım logları
+yetkisiz okunamadığı için kök neden kör noktada kaldı. Kör nokta bırakmama
+ilkesiyle bayrak baştan yazıldı:
+- TEK adım, `set +euo pipefail`, her yol `exit 0` — betik asla kendiliğinden
+  ölmez; yaş çözülemezse GÜVENLİ TARAF seçilir (bayrak dikilir; mükerrer
+  nabız kalp'in NEWER bekçisinde zaten elenir).
+- Karar düz BASH string karşılaştırması — adım `if:` içinde GitHub ifade
+  değerlendiricisi KULLANILMIYOR (0016'dan beri gizemli ölümlerin ortak
+  şüphelisi).
+- curl çıktısı dosyaya iner (boru zinciri kırılmaz), HTTP kodu loglanır
+  (teşhis her koşuda görünür).
+- Yerel kanıt: betik curl'süz ortamda bile exit 0 (hata yolu simülasyonu).
+- Testler: heartbeat 0023 sözleşmeleriyle (15) · toplam 825+.
+
 ### Düzeltildi — 0022: zincir bayrağı — GitHub'ın sessiz özyineleme yasağı (2026-09-29)
 Kullanıcı 10 dk bekleyince yapılan otopsi (kalp run adım zaman çizelgeleri):
 kalp'in zincir adımı 15:38/15:51/16:16'da dispatch'i **202 OK** ile

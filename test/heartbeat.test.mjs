@@ -106,23 +106,36 @@ describe('0016 · nabız kararı (aynı mantık, birim düzeyinde)', () => {
 });
 
 
-describe('0022 · rapor-bayrak.yml (zincir bayrağı)', () => {
+describe('0022/0023 · rapor-bayrak.yml (zincir bayrağı — sertleştirilmiş)', () => {
   const b = read('.github/workflows/rapor-bayrak.yml');
   test('tetikler: kalp zinciri (repository_dispatch) + cron yedeği + elle', () => {
     assert.match(b, /types: \[rapor-kalp-bayrak\]/);
-    assert.match(b, /cron: '\*\/5 \* \* \* \*'/, 'cron yedeği: bayrak da ateşlenebilir');
+    assert.match(b, /cron: '\*\/5 \* \* \* \*'/, 'cron yedeği');
     assert.match(b, /workflow_dispatch/);
   });
   test('bayrak KALPİ tetikler (farklı-workflow bacağı — kanıtlı yol)', () => {
     assert.match(b, /workflows\/rapor-kalp\.yml\/dispatches/);
     assert.match(b, /actions: write/);
   });
-  test('mükerrer nabız üretmez: kalp son 4 dk içinde koştuysa susar', () => {
-    assert.match(b, /age >= 4|age == '999'/);
-    assert.match(b, /rapor-kalp\.yml\/runs/, 'kalp koşu yaşı sorgulanır');
+  test('0023 sertleştirmesi: set +euo, TEK adım, daima exit 0, ifade(if:) YOK', () => {
+    // 16:45 kazası: adım 2 sn'de exit 1 — GitHub ifade değerlendiricisi/boru
+    // zinciri kırılgan çıktı. Yeni sözleşme: karar düz bash, curl→dosya,
+    // HTTP kodu loglanır, her yol exit 0 (kör nokta bırakılmaz).
+    assert.match(b, /set \+euo pipefail/);
+    assert.match(b, /exit 0/);
+    assert.match(b, /-w '%\{http_code\}'/, 'HTTP kodu görünür');
+    assert.match(b, /mktemp/, 'curl çıktısı dosyaya');
+    assert.ok(!/if: steps\./.test(b), 'adım düzeyinde GitHub ifadesi YOK');
+    const adim = (b.match(/- name:/g) || []).length;
+    assert.equal(adim, 1, 'tek adım: karar + tetik aynı betikte');
+  });
+  test('mükerrer nabız üretmez: kalp 4 dk içinde koştuysa susar (bash karar)', () => {
+    assert.match(b, /AGE.*-ge 4|-ge 4/, '4 dk eşiği');
+    assert.match(b, /bayrak susuyor/, 'susma yolu loglanır');
+    assert.match(b, /AGE=999/, 'yaş çözülemezse GÜVENLİ taraf: dik (zincir kopmasın)');
   });
   test('uçuz iş: checkout YOK, timeout 2 dk', () => {
-    assert.ok(!/actions\/checkout/.test(b), 'bayrak depo indirmaz (yalnız API)');
+    assert.ok(!/actions\/checkout/.test(b), 'bayrak depo indirmez');
     assert.match(b, /timeout-minutes: 2/);
   });
 });

@@ -1,29 +1,30 @@
 name: Rapor Kalp Bayrak
 
-# 0022 · ZİNCİR BAYRAĞI (relay) — GitHub'ın sessiz kuralına karşı tasarım:
+# 0023 · ZİNCİR BAYRAĞI (relay) — sertleştirilmiş sürüm.
 #
-# CANLI KANIT (29.09.2026, kalp koşu kayıtları):
-#   · Bir workflow GITHUB_TOKEN ile KENDİSİNİ tetikleyemiyor: kalp'in
-#     zincir adımı 15:38:23 ve 15:51:35 ve 16:16:33'te dispatch'i "202 OK"
-#     almasına rağmen HİÇBİR koşu oluşmadı ( GitHub aynı-workflow token
-#     özyinelemesini sessizce düşürüyor).
-#   · KENDİSİNDEN FARKLI bir workflow'u tetiklemek ÇALIŞIYOR: kalp(token)
-#     → rapor-yayin 15:27:15'te oluştu; rapor-yayin(token) → kalp 15:27:38'de
-#     oluştu. İkisi de canlı kanıtlı.
+# Neden bayrak? (0022, canlı kanıt): GitHub, bir workflow'un GITHUB_TOKEN ile
+# KENDİSİNİ tetiklemesini SESSİZCE düşürür (kalp dispatch'leri 202 aldı, koşu
+# oluşmadı: 15:38/15:51/16:16). FARKLI workflow'u tetiklemek kanıtlı çalışır
+# (kalp→rapor-yayin 15:27:15 ✓ · rapor-yayin→kalp 15:27:38 ✓). Zincir:
+#   kalp → (repository_dispatch) bayrak → (workflow_dispatch) kalp → …
 #
-# ÇÖZÜM: kalp artık KENDİNİ değil bu bayrak workflow'unu tetikler; bayrak
-# da kalbi tetikler. İki bacak da "farklı workflow" → kanıtlı çalışan yol.
-# Bayrak ~10 sn sürer (checkout bile yok), maliyeti ihmal edilebilir.
+# 0023 sertleştirmesi (16:45'teki tek koşu 2 sn'de exit 1 öldü — adım
+# logları auth'suz okunamadığı için KÖR NOKTA bırakmıyoruz):
+#   · set +euo: betik ASLA kendiliğinden ölmez; her yol exit 0
+#   · GitHub İFADE değerlendiricisi `if:` içinde KULLANILMAZ (0016-0022
+#     boyunca expression kaynaklı gizemli ölümler yaşandı) — karar düz bash
+#     string karşılaştırması
+#   · curl çıktısı DOSYAYA iner (boru zinciri kırılmaz), HTTP kodu loglanır
+#   · age çözümlenemezse GÜVENLİ TARAF: bayrak dikilir (zincir sürer;
+#     mükerrer nabız kalp'in NEWER bekçisinde zaten elenir)
 #
-# Yedekler (bayrak zinciri koparsa): kalp */5 cron + 6 saatlik re-arm cron
-# + bayrak */5 cron (kalp son 4 dk'da koşmadıysa tetikler) + her main
-# push'unda CI kalbi doğrudan tetikler (kanıtlı bacak).
+# Yedekler: kalp */5 + 6h cron · bayrak */5 cron · her main push'unda CI.
 
 on:
   repository_dispatch:
     types: [rapor-kalp-bayrak]
   schedule:
-    - cron: '*/5 * * * *'   # yedek bacak: cron ateşlerse kalbi yoklar
+    - cron: '*/5 * * * *'
   workflow_dispatch: {}
 
 permissions:
@@ -38,23 +39,33 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 2
     steps:
-      - name: Kalp son 4 dk'da koştu mu? (koştuysa zincir zaten canlı)
-        id: kalpvar
+      - name: Kalbi yokla ve gerekirse tetikle (tek adım · set +euo · daima exit 0)
+        shell: bash
         run: |
+          set +euo pipefail
           API="${{ github.api_url }}/repos/${{ github.repository }}"
-          AGE=$(curl -sf -H "Authorization: Bearer ${{ github.token }}" -H "Accept: application/vnd.github+json" \
-            "$API/actions/workflows/rapor-kalp.yml/runs?per_page=5" \
-            | node -e 'let s="";process.stdin.on("data",d=>s+=d).on("end",()=>{try{const r=(JSON.parse(s).workflow_runs||[]).filter(x=>x.created_at).sort((a,b)=>new Date(b.created_at)-new Date(a.created_at));console.log(r.length?Math.floor((Date.now()-new Date(r[0].created_at).getTime())/60000)):999)}catch(e){console.log(999)}})')
+          AUTH="Authorization: Bearer ${{ github.token }}"
+          ACC="Accept: application/vnd.github+json"
+          TMP="$(mktemp)"
+          CODE=$(curl -s -o "$TMP" -w '%{http_code}' -H "$AUTH" -H "$ACC" "$API/actions/workflows/rapor-kalp.yml/runs?per_page=5" || echo 000)
+          echo "kalp koşu listesi HTTP $CODE"
+          AGE=999
+          if [ "$CODE" = "200" ]; then
+            AGE=$(node -e 'const fs=require("fs");try{const j=JSON.parse(fs.readFileSync(process.argv[1],"utf8"));const r=(j.workflow_runs||[]).filter(x=>x.created_at).sort((a,b)=>new Date(b.created_at)-new Date(a.created_at));console.log(r.length?Math.floor((Date.now()-new Date(r[0].created_at).getTime())/60000)):999)}catch(e){console.log(999)}' "$TMP" 2>/dev/null || echo 999)
+          fi
+          rm -f "$TMP"
           echo "kalp son koşu: ${AGE} dk önce"
-          echo "age=$AGE" >> "$GITHUB_OUTPUT"
-
-      - name: Kalbi tetikle (yalnız 4+ dk olduysa — mükerrer nabız üretme)
-        if: steps.kalpvar.outputs.age == '999' || steps.kalpvar.outputs.age >= 4
-        run: |
-          curl -sf -X POST \
-            -H "Authorization: Bearer ${{ github.token }}" \
-            -H "Accept: application/vnd.github+json" \
-            "${{ github.api_url }}/repos/${{ github.repository }}/actions/workflows/rapor-kalp.yml/dispatches" \
-            -d '{"ref":"main"}' \
-            && echo "🚩 kalp tetiklendi" \
-            || echo "⚠ kalp tetiklenemedi — bir sonraki bacak (cron/CI/push) devralır"
+          # Karar DÜZ BASH (GitHub expression yok): age çözülemedi (999) veya
+          # 4+ dk olduysa DİK; kalp taze koştuysa sus (mükerrer nabız üretme).
+          if [ "$AGE" = "999" ] || [ "$AGE" -ge 4 ] 2>/dev/null; then
+            C2=$(curl -s -o /dev/null -w '%{http_code}' -X POST -H "$AUTH" -H "$ACC" \
+              "$API/actions/workflows/rapor-kalp.yml/dispatches" -d '{"ref":"main"}' || echo 000)
+            if [ "$C2" = "204" ] || [ "$C2" = "200" ]; then
+              echo "🚩 kalp tetiklendi (HTTP $C2) — zincir sürüyor"
+            else
+              echo "⚠ kalp tetiklenemedi (HTTP $C2) — cron/CI/push yedeği devralır"
+            fi
+          else
+            echo "🫀 kalp ${AGE} dk önce koşmuş — bayrak susuyor (zincir taze)"
+          fi
+          exit 0
