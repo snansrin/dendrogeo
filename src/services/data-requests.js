@@ -89,12 +89,12 @@ async function loadRequests(){
   const filt=[esc(r.country),esc(r.city),esc(r.project_name)].filter(Boolean).join(" / ")||"Tüm Veri";
   const hasNote=r.note&&r.note.trim().length>0;
   return `<tr>
-   <td>${esc(r.profiles?.full_name)||"—"}</td>
-   <td>${esc(r.email)||"—"}</td>
-   <td><b>${esc(filt)}</b></td>
-   <td>${new Date(r.created_at).toLocaleDateString("tr-TR")}</td>
-   <td><span class="badge admin">${r.status}</span></td>
-   <td style="display:flex;gap:4px;flex-wrap:wrap">
+   <td data-label="Kullanıcı">${esc(r.profiles?.full_name)||"—"}</td>
+   <td data-label="E‑posta">${esc(r.email)||"—"}</td>
+   <td data-label="Filtre"><b>${esc(filt)}</b></td>
+   <td data-label="Tarih">${new Date(r.created_at).toLocaleDateString("tr-TR")}</td>
+   <td data-label="Durum"><span class="badge admin">${r.status}</span></td>
+   <td data-label="İşlem" style="display:flex;gap:4px;flex-wrap:wrap">
     <button class="btn sm blue" onclick="fulfillRequest(${r.id})">📥✉️ İndir ve Yanıtla</button>
     <button class="btn sm red" onclick="rejectRequest(${r.id})">🚫 Reddet</button>
    </td>
@@ -112,12 +112,12 @@ async function loadRequests(){
    const hasNote=r.note&&r.note.trim().length>0;
    const closedDate=r.fulfilled_at?new Date(r.fulfilled_at).toLocaleDateString("tr-TR"):"";
    return `<tr>
-    <td>${esc(r.profiles?.full_name)||"—"}</td>
-    <td>${esc(r.email)||"—"}</td>
-    <td>${esc(filt)}</td>
-    <td>${new Date(r.created_at).toLocaleDateString("tr-TR")}</td>
-    <td>${closedDate}</td>
-    <td><span class="badge ${bc}">${r.status}</span></td>
+    <td data-label="Kullanıcı">${esc(r.profiles?.full_name)||"—"}</td>
+    <td data-label="E‑posta">${esc(r.email)||"—"}</td>
+    <td data-label="Filtre">${esc(filt)}</td>
+    <td data-label="Talep">${new Date(r.created_at).toLocaleDateString("tr-TR")}</td>
+    <td data-label="Kapanış">${closedDate}</td>
+    <td data-label="Durum"><span class="badge ${bc}">${r.status}</span></td>
    </tr>${hasNote?`<tr><td colspan="6" style="background:var(--tint);font-size:.78rem;color:var(--mut);white-space:normal;padding:8px 12px;line-height:1.5"><b style="color:var(--green-dk)">📝 Not:</b> ${esc(r.note)}</td></tr>`:""}`;
   }).join("");
  }else{

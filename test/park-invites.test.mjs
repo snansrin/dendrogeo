@@ -215,8 +215,19 @@ describe('0025 · kablolama (index.html + shell + partials)', () => {
   });
   test('0026 mobil: tablolar dg-cards, .card overflow kalktı, üst bar sakinleşti', () => {
     const sh = read('partials/shell.html');
-    assert.ok((sh.match(/tblwrap dg-cards/g) || []).length >= 7, 'tüm uygulama tabloları kart düzenine geçer');
+    assert.ok((sh.match(/tblwrap dg-cards/g) || []).length >= 9, 'tüm uygulama tabloları kart düzenine geçer (0027: waypoint dahil)');
     assert.match(sh, /id="projTable"[\s\S]{0,40}/, 'proje tablosu yerinde');
+    /* 0027: waypoint tablosu — kullanıcı bildirimi "içeride sağa-sola kayıyor" */
+    const iwp = sh.indexOf('id="wpListTable"');
+    const wcap = sh.lastIndexOf('tblwrap dg-cards', iwp);
+    assert.ok(iwp > 0 && wcap > 0 && iwp - wcap < 300, 'waypoint tablosu dg-cards kabında');
+    const mp = read('src/services/map.js');
+    assert.match(mp, /data-label="Enlem"/, 'waypoint satırları etiketli');
+    assert.match(mp, /data-label="İşlem"/);
+    const ua = read('src/services/user-admin.js');
+    assert.match(ua, /data-label="Ad Soyad"/, 'kullanıcı tablosu etiketli');
+    const dr = read('src/services/data-requests.js');
+    assert.match(dr, /data-label="Kapanış"/, 'talep tabloları etiketli');
     const css = read('css/style.css');
     /* yorum satırları çıkarılır (belgeleme amaçlı alıntılar kural sayılmasın) */
     const cssKod = css.split('\n').filter((l) => !l.trim().startsWith('/*') && !l.trim().startsWith('*')).join('\n');

@@ -118,9 +118,9 @@ async function loadWorld(){
   const g=await sb.from("v_global").select("*").single();
   if(g.data){$("wRec").textContent=g.data.records||0;$("wCountry").textContent=g.data.countries||0;$("wCity").textContent=g.data.cities||0;$("wCarbon").textContent=g.data.carbon_t||0;}
   const c=await sb.from("v_country").select("*");
-  $("wCountryT").innerHTML=(c.data||[]).slice(0,30).map(r=>`<tr><td>${esc(r.country)}</td><td>${r.records}</td><td>${r.carbon_t}</td><td>${r.avg_dbh}</td><td>${r.avg_height||"—"}</td></tr>`).join("")||"<tr><td colspan=5>—</td></tr>";
+  $("wCountryT").innerHTML=(c.data||[]).slice(0,30).map(r=>`<tr><td data-label="Ülke">${esc(r.country)}</td><td data-label="Kayıt">${r.records}</td><td data-label="Karbon(t)">${r.carbon_t}</td><td data-label="Ort.Çap">${r.avg_dbh}</td><td data-label="Ort.Yükseklik(m)">${r.avg_height||"—"}</td></tr>`).join("")||"<tr><td colspan=5>—</td></tr>";
   const t=await sb.from("v_city").select("*");
-  $("wCityT").innerHTML=(t.data||[]).slice(0,30).map(r=>`<tr><td>${esc(r.city)}</td><td>${r.records}</td><td>${r.carbon_t}</td></tr>`).join("")||"<tr><td colspan=3>—</td></tr>";
+  $("wCityT").innerHTML=(t.data||[]).slice(0,30).map(r=>`<tr><td data-label="Şehir">${esc(r.city)}</td><td data-label="Kayıt">${r.records}</td><td data-label="Karbon(t)">${r.carbon_t}</td></tr>`).join("")||"<tr><td colspan=3>—</td></tr>";
   loadApprovedMarkers(worldMap,3000,(n,rows,err)=>{
    if(err)return dgWorldError("İşaretçiler yüklenemedi: "+err);
    dgMarkLiveDirty();   /* dünya tazelendi → canlı harita kümesi de bayat */

@@ -882,7 +882,25 @@ pre{background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:
  .kick{font-size:.64rem}
  .verify{font-size:.76rem}
 }
-@media print{body{background:#fff}.wrap{border:0;padding:0}.btnrow{display:none}}
+@media print{
+ /* 0027 · PDF/print dostu (kullanıcı isteği): 🖨 Yazdır / PDF düğmesi zaten
+  * künyede; bu blok kağıt çıktısını garanti eder — 0024'ün kaydırma kapları
+  * ekranda kolonları kaydırarak çözer ama KAĞITTA KIRPAR; print'te kapak
+  * görünür olur, tablo tam genişlik basılır. */
+ @page{margin:14mm}
+ body{background:#fff}
+ .wrap{border:0;padding:0;max-width:none}
+ .btnrow,.verify button{display:none!important}
+ .tscroll{overflow:visible!important;margin:8px 0;padding:0}
+ table{min-width:0!important;font-size:9.5pt}
+ th,td{padding:4px 6px;white-space:normal}
+ .fig{break-inside:avoid}
+ .fig img{max-width:100%!important;height:auto!important}
+ h2{break-after:avoid}
+ tr{break-inside:avoid}
+ .meta{background:#fff}
+ a{color:inherit;text-decoration:none}
+}
 </style>
 </head>
 <body>

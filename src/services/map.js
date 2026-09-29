@@ -209,7 +209,10 @@ async function loadWaypoints(){
  $("dWp").textContent=WP.length;$("dVisit").textContent=WP.filter(w=>w.visited).length;
  const done=WP.filter(w=>w.visited).length;
  $("navInfo").innerHTML=`📌 <b>${WP.length}</b> waypoint kayıtlı · <b>${done}</b> yapıldı · <b>${WP.length-done}</b> bekliyor. Liste kalıcıdır.`;
- $("wpListTable").innerHTML=WP.length?WP.map(w=>`<tr class="${w.visited?'done':''}"><td><b>P${w.wp_id}</b></td><td>${w.lat.toFixed(6)}</td><td>${w.lon.toFixed(6)}</td><td>${w.visited?'<span class="badge on">✓ Yapıldı</span>':'<span class="badge admin">Bekliyor</span>'}</td><td>${w.visited?'':`<button class="btn sm blue" onclick="selectWaypoint(${w.id})">🎯 Hedef</button>`}</td></tr>`).join(""):"<tr><td colspan=5 style='text-align:center;color:var(--mut)'>Bu projede waypoint yok. CSV yükleyin.</td></tr>";
+ /* 0027 · data-label: ≤640px'te dg-cards kart düzeni "ETİKET: değer" basar
+   (waypoint tablosu eskiden sınıfsızdı → mobilde kapsayıcı içinde sağa-sola
+   kayıyordu; kullanıcı bildirimi). */
+$("wpListTable").innerHTML=WP.length?WP.map(w=>`<tr class="${w.visited?'done':''}"><td data-label="ID"><b>P${w.wp_id}</b></td><td data-label="Enlem">${w.lat.toFixed(6)}</td><td data-label="Boylam">${w.lon.toFixed(6)}</td><td data-label="Durum">${w.visited?'<span class="badge on">✓ Yapıldı</span>':'<span class="badge admin">Bekliyor</span>'}</td><td data-label="İşlem">${w.visited?'':`<button class="btn sm blue" onclick="selectWaypoint(${w.id})">🎯 Hedef</button>`}</td></tr>`).join(""):"<tr><td colspan=5 style='text-align:center;color:var(--mut)'>Bu projede waypoint yok. CSV yükleyin.</td></tr>";
 }
 async function deleteAllWaypoints(){
  const pid=+$("nProject").value;

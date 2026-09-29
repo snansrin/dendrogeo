@@ -16,7 +16,7 @@ async function loadUsers(){
   if(ownerRow)act="<span style='color:var(--mut);font-size:.7rem'>🛡 Korunuyor</span>";
   else if(I_AM_OWNER)act=`<select onchange="updateRole('${x.id}',this.value)" style="padding:4px;border-radius:6px;border:1px solid var(--line)"><option value="user" ${x.role==="user"?"selected":""}>Kullanıcı</option><option value="admin" ${x.role==="admin"?"selected":""}>Denetçi</option></select> <button class="btn sm ${x.active?"red":"blue"}" onclick="toggleU('${x.id}',${!x.active})">${x.active?"Pasifleştir":"Aktifleştir"}</button>`;
   else act="<span style='color:var(--mut);font-size:.7rem'>Salt okunur</span>";
-  return `<tr><td>${esc(x.email)||"—"}</td><td>${esc(x.full_name)||"—"}</td><td>${roleBadge}</td><td><span class="badge ${x.active?"on":"off"}">${x.active?"Aktif":"Pasif"}</span></td><td style="display:flex;gap:6px;align-items:center">${act}</td></tr>`;
+  return `<tr><td data-label="E‑posta">${esc(x.email)||"—"}</td><td data-label="Ad Soyad">${esc(x.full_name)||"—"}</td><td data-label="Rol">${roleBadge}</td><td data-label="Durum"><span class="badge ${x.active?"on":"off"}">${x.active?"Aktif":"Pasif"}</span></td><td data-label="İşlem" style="display:flex;gap:6px;align-items:center">${act}</td></tr>`;
  }).join("");
 }
 

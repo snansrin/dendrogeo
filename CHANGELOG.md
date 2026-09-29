@@ -58,6 +58,27 @@ girilmesini sağlasın."
 - Testler: `test/park-invites.test.mjs` (15: SQL sözleşmeleri + vm modül +
   kablolama) · check zinciri yeşil.
 
+### Düzeltildi — 0027: waypoint tablosu + PDF/print dostu rapor + form cilası (2026-09-29)
+Kullanıcı bildirimi: "waypoint listesi içeride sağa-sola hareket ediyor;
+rapor formu hâlâ telefona uygun değil, PDF print dostu yap."
+- **Waypoint tablosu** 0026'daki dg-cards dönüşümünden TEK eksik kalan
+  tabloydu (inline max-height'li özel kapsayıcı) → kaba alındı + satırlara
+  data-label (ID/Enlem/Boylam/Durum/İşlem). Mobilde artık satırlar kutu-kart;
+  kapsayıcı içi sağa-sola kayma bitti (yalnız dikey liste kayar).
+- Etiket eksiği kalan SON tablolar da kart düzenine bağlandı: dünya verisi
+  (ülke/şehir), admin ölçüm/talep/kullanıcı tabloları (data-label'lar).
+- **Rapor PDF/print katmanı** (make-report şablonu): @page 14mm · 0024'ün
+  .tscroll kapları print'te KIRPIYORDU → overflow:visible + min-width:0 ile
+  tablolar kağıda tam genişlik basılır · düğmeler gizli · şekil/satır/başlık
+  bölünmez (break-inside) · 🖨 Yazdır / PDF düğmesi zaten künyede.
+  Yayımlı raporlar donmuş — katman YENİ yayınlarda etkin.
+- Form/panel mobil cilası: .shead dar ekranda sarar (rule gizli), .dg-act
+  düğmeleri tam genişlik, LULC etiketi kendi satırında, panel dipnotları
+  küçük punto; sekme şeridine overscroll-behavior-x:contain (kaydırma
+  zincirlemez). sw r46→r47.
+- Uyarı: yayın/geri çekme hattına (workflow, publish-queue, make-report
+  ÜRETİM mantığı) DOKUNULMADI — değişiklikler CSS/şablon/satır-şablonu.
+
 ### Değişti — 0026: davet kartı Projeler’de + uygulama mobil düzeni (2026-09-29)
 Kullanıcı geri bildirimi: "daveti admin sekmesine koydun — kullanıcı
 kullanacak bunu, proje sayfasına koy; site telefondan saçma görünüyor."

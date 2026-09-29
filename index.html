@@ -240,10 +240,10 @@
 <script src="src/services/offline.js?v=1db110d2" defer></script>
 <!-- YÖNETİM ZİNCİRİ (Faz 6 — eski admin.js beş modüle bölündü) -->
 <script src="src/services/visit-stats.js?v=a9195dca" defer></script>
-<script src="src/services/data-requests.js?v=ca6f827b" defer></script>
-<script src="src/services/user-admin.js?v=f80309ef" defer></script>
+<script src="src/services/data-requests.js?v=f9ffd837" defer></script>
+<script src="src/services/user-admin.js?v=1830907c" defer></script>
 <script src="src/services/backup.js?v=6682edc0" defer></script>
-<script src="src/services/admin.js?v=c3063b0f" defer></script>
+<script src="src/services/admin.js?v=3914b7e1" defer></script>
 <!-- YÖNETİM AĞACI (2026-09-24): park → proje → kullanıcı → ölçüm kademeli
      görünümü + sorgu hatası görünürlüğü. admin.js'ten SONRA yüklenir
      (approve/reject/del fonksiyonlarını çağırır). -->
@@ -255,7 +255,7 @@
 <script src="src/services/park-invites.js?v=fdc9c9a5" defer></script>
 <script src="src/services/world.js?v=918cd92f" defer></script>
 <script src="src/services/measure.js?v=e4836dab" defer></script>
-<script src="src/services/map.js?v=b3b6192d" defer></script>
+<script src="src/services/map.js?v=c10e001c" defer></script>
 <!-- LULC ZİNCİRİ ARTIK TEMBEL (2026-09-25 · Faz 8): 8 dosya ilk yüklemede
      indirilmiyor. Yalnız "🌿 Yüzey Örtüsü Analizi"ne basan kullanıcı için
      src/utils/lazylibs.js → dgEnsureLulc() sırayla enjekte eder
@@ -277,8 +277,8 @@
 <script src="src/services/grid-engine.js?v=c3e27b01" defer></script>
 <script src="src/ui/park-panel.js?v=66573187" defer></script>
 <script src="src/ui/park-export.js?v=47f46346" defer></script>
-<script src="src/services/dash.js?v=fb9fe821" defer></script>
-<link rel="stylesheet" href="css/style.css?v=82c880cb">
+<script src="src/services/dash.js?v=a409ae65" defer></script>
+<link rel="stylesheet" href="css/style.css?v=c54f485b">
 <link rel="stylesheet" href="css/landing.css?v=e875e230">
 <link rel="stylesheet" href="css/park-panel.css?v=10b49293">
 <!-- TASARIM SİSTEMİ (2026-09-27, 2. deneme): ui-standard.css geri BAĞLANDI
@@ -735,7 +735,7 @@
      <button class="dg-png-btn primary" style="margin-top:14px" onclick="arriveWp()">🎯 Vardım → Ölçüme Geç</button>
      <div style="margin-top:24px;border-top:1px solid var(--line);padding-top:16px">
       <div class="lbl" style="margin-bottom:10px">📍 Waypoint Listesi <span style="text-transform:none;letter-spacing:0">(üstü çizili = yapıldı)</span></div>
-      <div class="tblwrap" style="max-height:300px;overflow-y:auto;border:1px solid var(--line);border-radius:10px">
+      <div class="tblwrap dg-cards" style="max-height:300px;overflow-y:auto;border:1px solid var(--line);border-radius:10px">
        <table><thead><tr><th>ID</th><th>Enlem</th><th>Boylam</th><th>Durum</th><th>İşlem</th></tr></thead><tbody id="wpListTable"></tbody></table>
       </div>
      </div>

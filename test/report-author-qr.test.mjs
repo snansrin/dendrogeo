@@ -107,6 +107,20 @@ describe('0012 · yazar = yayını isteyen kullanıcı', () => {
 const HAS_QR = (() => { try { createRequire(import.meta.url)('qrcode'); return true; } catch (e) { return false; } })();
 const qrSkip = HAS_QR ? false : 'qrcode kurulu değil (npm ci sonrası koşar)';
 
+describe('0027 · rapor PDF/print dostu', () => {
+  test('print bloğu: kaydırma kapları kağıtta kırpılmaz, tam genişlik basılır', () => {
+    const snap = { ...base, author: { name: 'Nagihan Şirin', source: 'data_owner' } };
+    const html = render(snap);
+    assert.match(html, /@page\{margin:14mm\}/, 'sayfa kenar boşluğu');
+    assert.match(html, /\.tscroll\{overflow:visible!important/, 'kaplar print’te görünür (kırpma yok)');
+    assert.match(html, /table\{min-width:0!important/, 'tablo kağıt genişliğine iner');
+    assert.match(html, /\.btnrow,\.verify button\{display:none!important\}/, 'düğmeler basılmaz');
+    assert.match(html, /\.fig\{break-inside:avoid\}/, 'Şekil 1/2 sayfayı bölmez');
+    assert.match(html, /tr\{break-inside:avoid\}/, 'satırlar bölünmez');
+    assert.match(html, /window\.print\(\)/, '🖨 düğmesi yerinde');
+  });
+});
+
 describe('0015 · yazar = veri sahibi (öncelik zinciri)', () => {
   test('SQL: SECURITY DEFINER fonksiyon yalnız ad döndürür (e-posta SIZMAZ)', () => {
     const sql = read('supabase/migrations/0015_report_data_owner.sql');
