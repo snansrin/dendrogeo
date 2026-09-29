@@ -49,35 +49,42 @@ jobs:
     steps:
       - uses: actions/checkout@v4   # sığ klon yeter: günlük + supabase.js
 
-      - name: "Zincir İLK iş — ardıl nabız (0019)"
+      - name: "Zincir İLK iş — ardıl nabız (0022: bayrak üzerinden)"
         if: always()
         run: |
-          # 0019 · dört dersin toplamı (hepsi canlı kanıtlı):
-          #  0016: gecikmeli dispatch HİÇ koşmadı → anlık repository_dispatch.
-          #  0017: bekçi döngüsü iş timeoutunda boğuldu → iş timeout 8 dk,
-          #      adım bütçesi ~5,5 dk (sleep 300 + kısa kontroller).
-          #  0018a: zincir SON adımdaydı → iş adımı patlayınca zincir ölüyordu
-          #      → zincir İLK adımda (if: always) kurulur, iş sonra patlasın.
-          #  0018b: 4 dk'lık İKİ YÖNLÜ bekçi 12:57'de çatal ölümü yaptı (cron
-          #      + CI 26 sn arayla iki koşu; ikisi de 'o devralır' deyip sustu
-          #      → 2 saat kopuk). Kural: susma YALNIZCA kendinden YENİ bir
-          #      kalp koşusu varsa (o, zinciri kesin kuracak — uykusu bizden
-          #      sonra bitiyor); eskiler susturmaz. Ya hep zincir, ya devir.
+          # 0022 · CANLI KANITLA tasarrım: GitHub, bir workflow'un GITHUB_TOKEN
+          # ile KENDİSİNİ tetiklemesini SESSİZCE düşürüyor (kalp 15:38/15:51/
+          # 16:16'da dispatch'e 202 aldı ama HİÇ koşu oluşmadı). FARKLI
+          # workflow'u tetiklemek ise kanıtlı çalışıyor (kalp→rapor-yayin
+          # 15:27:15 · rapor-yayin→kalp 15:27:38, run kayıtları).
+          # Kural: kalp kendini DEĞİL, 'Rapor Kalp Bayrak'ı tetikler; bayrak
+          # kalbi tetikler → iki bacak da kanıtlı türden. Dispatch sonrası
+          # DOĞRULAMA: bayrak koşusu gerçekten oluştu mu diye 2 tur yoklanır.
           sleep 300 || true
           API="${{ github.api_url }}/repos/${{ github.repository }}"
           AUTH="Authorization: Bearer ${{ github.token }}"
           ACC="Accept: application/vnd.github+json"
-          WF=$(curl -sf -H "$AUTH" -H "$ACC" "$API/actions/workflows" | node -e 'let s="";process.stdin.on("data",d=>s+=d).on("end",()=>{try{const w=(JSON.parse(s).workflows||[]).find(x=>String(x.path).endsWith("rapor-kalp.yml"));console.log(w?w.id:"")}catch(e){console.log("")}})')
-          if [ -z "$WF" ]; then echo "⚠ workflow kimliği yok — cron/push yedeği devralır"; exit 0; fi
+          WFS=$(curl -sf -H "$AUTH" -H "$ACC" "$API/actions/workflows")
+          WF=$(echo "$WFS" | node -e 'let s="";process.stdin.on("data",d=>s+=d).on("end",()=>{try{const w=(JSON.parse(s).workflows||[]).find(x=>String(x.path).endsWith("rapor-kalp.yml"));console.log(w?w.id:"")}catch(e){console.log("")}})')
+          BAYRAK=$(echo "$WFS" | node -e 'let s="";process.stdin.on("data",d=>s+=d).on("end",()=>{try{const w=(JSON.parse(s).workflows||[]).find(x=>String(x.path).endsWith("rapor-bayrak.yml"));console.log(w?w.id:"")}catch(e){console.log("")}})')
+          if [ -z "$WF" ] || [ -z "$BAYRAK" ]; then echo "⚠ workflow kimliği yok — cron/push yedeği devralır"; exit 0; fi
           NEWER=$(curl -sf -H "$AUTH" -H "$ACC" "$API/actions/workflows/$WF/runs?per_page=15&exclude_current=true" | node -e 'let s="";process.stdin.on("data",d=>s+=d).on("end",()=>{const t=Date.now();try{const r=(JSON.parse(s).workflow_runs||[]).filter(x=>x.created_at&&(t-new Date(x.created_at).getTime())<240000);console.log(r.length)}catch(e){console.log(0)}})')
           if [ "$NEWER" -ge 1 ] 2>/dev/null; then
-            echo "🫀 son 4 dk'da BENDEN YENİ $NEWER kalp koşusu var — zinciri o kuracak (uykusu sonra bitiyor), bu koşu susuyor"
+            echo "🫀 son 4 dk'da BENDEN YENİ $NEWER kalp koşusu var — zinciri o kuracak, bu koşu susuyor"
             exit 0
           fi
           curl -sf -X POST -H "$AUTH" -H "$ACC" "$API/dispatches" \
-            -d '{"event_type":"rapor-kuyruk-nabiz","client_payload":{"chain":"${{ github.run_id }}"}}' \
-            && echo "🔗 ardıl nabız anlık tetiklendi — zincir sürüyor" \
-            || echo "⚠ tetik gönderilemedi — cron (*/5) ve 6 saatlik re-arm yedeği devralır"
+            -d '{"event_type":"rapor-kalp-bayrak","client_payload":{"chain":"${{ github.run_id }}"}}' \
+            && echo "🚩 bayrak tetiklendi" \
+            || { echo "⚠ bayrak tetiklenemedi — cron/push yedeği devralır"; exit 0; }
+          # DOĞRULAMA (0016 dersi: 202 ≠ koşu): bayrak koşusu gerçekten oluştu mu?
+          sleep 20
+          CNT=$(curl -sf -H "$AUTH" -H "$ACC" "$API/actions/workflows/$BAYRAK/runs?per_page=3" | node -e 'let s="";process.stdin.on("data",d=>s+=d).on("end",()=>{const t=Date.now();try{console.log((JSON.parse(s).workflow_runs||[]).filter(x=>x.created_at&&(t-new Date(x.created_at).getTime())<180000).length)}catch(e){console.log(0)}})')
+          if [ "$CNT" -ge 1 ] 2>/dev/null; then
+            echo "🔗 zincir DOĞRULANDI — bayrak koşusu oluştu, kalp ~5 dk sonra yeniden atacak"
+          else
+            echo "⚠ bayrak koşusu GÖRÜNMEDİ — cron (*/5) ve 6 saatlik re-arm yedeği devralır"
+          fi
 
       - name: Kuyrukta iş var mı? (yalnız HTTP — boşta koşu hızlı biter)
         id: kontrol

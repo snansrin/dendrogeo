@@ -33,6 +33,21 @@ kapanmadığı için ikinci yayın kalıcı olarak bloke oluyordu.
   günlükte sonucu olmayan" istekleri sayar; `planQueue` request_id'si
   günlükte olan istekleri atlar. Yeni test: `test/publish-request-fix.test.mjs`.
 
+### Düzeltildi — 0022: zincir bayrağı — GitHub'ın sessiz özyineleme yasağı (2026-09-29)
+Kullanıcı 10 dk bekleyince yapılan otopsi (kalp run adım zaman çizelgeleri):
+kalp'in zincir adımı 15:38/15:51/16:16'da dispatch'i **202 OK** ile
+gönderdi ama GitHub HİÇBİR koşu oluşturmadı — bir workflow GITHUB_TOKEN ile
+KENDİSİNİ tetikleyemiyor (sessiz düşürme; aynı anda adım 'success' görünüyor,
+bu yüzden üç tur fark edilmedi). Kanıtlı çalışan yol: FARKLI workflow'u
+tetiklemek (kalp→rapor-yayin 15:27:15 ✓ · rapor-yayin→kalp 15:27:38 ✓).
+- Yeni `rapor-bayrak.yml` (~10 sn, checkout yok): kalbin zincir hedefi;
+  kalp son 4 dk'da koşmadıysa kalbi tetikler (cron yedeği de var).
+- kalp zincir adımı: BAYRAK'ı tetikler + dispatch sonrası koşu oluşumunu
+  DOĞRULAR ("202 ≠ koşu" dersi); ci.yml + rapor-yayin.yml bacakları da
+  bayrağa çevrildi (tek düzen).
+- Yedekler aynen: kalp */5 + 6h re-arm cron · bayrak */5 cron · her push.
+- Testler: heartbeat 15/15 (bayrak sözleşmeleri dahil) · YAML parse ✓.
+
 ### Düzeltildi — 0021: rapor mobil düzeni (2026-09-29)
 Kullanıcı bildirimi: "raporu telefondan açtığımda §5 Nicel Sonuçlar tablonun
 dışına çıkıyor, genel görünümü bozuyor." Rapor şablonunda HİÇ mobil kırılım

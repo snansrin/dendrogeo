@@ -67,7 +67,7 @@ jobs:
             -H "Authorization: Bearer ${{ github.token }}" \
             -H "Accept: application/vnd.github+json" \
             "${{ github.api_url }}/repos/${{ github.repository }}/dispatches" \
-            -d '{"event_type":"rapor-kuyruk-nabiz","client_payload":{"from":"ci-${{ github.run_id }}"}}' \
+            -d '{"event_type":"rapor-kalp-bayrak","client_payload":{"from":"ci-${{ github.run_id }}"}}' \
             && echo "🔗 kalp atışı tetiklendi" \
             || echo "⚠ kalp tetiği gönderilemedi — cron/push yedeği devralır"
 

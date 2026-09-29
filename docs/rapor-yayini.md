@@ -192,6 +192,13 @@ sonuç her zaman günlüktedir.
 GitHub `schedule` pratikte güvenilmez (bu depoda '*/5' cron 20 saatte 4 kez
 tetiklendi). 0016 ile kuyruk KENDİ KENDİNİ sürer:
 
+0022 güncellemesi: GitHub, bir workflow'un GITHUB_TOKEN ile KENDİSİNİ
+tetiklemesini sessizce düşürüyor (canlı kanıt: kalp dispatch'leri 202 aldı,
+koşu oluşmadı). Bu yüzden zincir BAYRAK üzerinden döner: kalp → rapor-bayrak
+→ kalp (iki bacak da "farklı workflow" = kanıtlı çalışan yol). Bayrak ~10 sn
+sürer, checkout bile yapmaz; kalp son 4 dk'da koştuysa susar (mükerrer nabız
+yok). Yedek bacaklar: kalp */5 + 6h cron, bayrak */5 cron, CI push tetiği.
+
 ```
 ┌────────────────────────────────────────────────────────────┐
 │  rapor-kalp.yml (nabız, ~5 dk'da bir)                      │

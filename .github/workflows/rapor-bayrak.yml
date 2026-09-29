@@ -1,0 +1,60 @@
+name: Rapor Kalp Bayrak
+
+# 0022 · ZİNCİR BAYRAĞI (relay) — GitHub'ın sessiz kuralına karşı tasarım:
+#
+# CANLI KANIT (29.09.2026, kalp koşu kayıtları):
+#   · Bir workflow GITHUB_TOKEN ile KENDİSİNİ tetikleyemiyor: kalp'in
+#     zincir adımı 15:38:23 ve 15:51:35 ve 16:16:33'te dispatch'i "202 OK"
+#     almasına rağmen HİÇBİR koşu oluşmadı ( GitHub aynı-workflow token
+#     özyinelemesini sessizce düşürüyor).
+#   · KENDİSİNDEN FARKLI bir workflow'u tetiklemek ÇALIŞIYOR: kalp(token)
+#     → rapor-yayin 15:27:15'te oluştu; rapor-yayin(token) → kalp 15:27:38'de
+#     oluştu. İkisi de canlı kanıtlı.
+#
+# ÇÖZÜM: kalp artık KENDİNİ değil bu bayrak workflow'unu tetikler; bayrak
+# da kalbi tetikler. İki bacak da "farklı workflow" → kanıtlı çalışan yol.
+# Bayrak ~10 sn sürer (checkout bile yok), maliyeti ihmal edilebilir.
+#
+# Yedekler (bayrak zinciri koparsa): kalp */5 cron + 6 saatlik re-arm cron
+# + bayrak */5 cron (kalp son 4 dk'da koşmadıysa tetikler) + her main
+# push'unda CI kalbi doğrudan tetikler (kanıtlı bacak).
+
+on:
+  repository_dispatch:
+    types: [rapor-kalp-bayrak]
+  schedule:
+    - cron: '*/5 * * * *'   # yedek bacak: cron ateşlerse kalbi yoklar
+  workflow_dispatch: {}
+
+permissions:
+  actions: write
+
+concurrency:
+  group: rapor-bayrak
+  cancel-in-progress: false
+
+jobs:
+  bayrak:
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    steps:
+      - name: Kalp son 4 dk'da koştu mu? (koştuysa zincir zaten canlı)
+        id: kalpvar
+        run: |
+          API="${{ github.api_url }}/repos/${{ github.repository }}"
+          AGE=$(curl -sf -H "Authorization: Bearer ${{ github.token }}" -H "Accept: application/vnd.github+json" \
+            "$API/actions/workflows/rapor-kalp.yml/runs?per_page=5" \
+            | node -e 'let s="";process.stdin.on("data",d=>s+=d).on("end",()=>{try{const r=(JSON.parse(s).workflow_runs||[]).filter(x=>x.created_at).sort((a,b)=>new Date(b.created_at)-new Date(a.created_at));console.log(r.length?Math.floor((Date.now()-new Date(r[0].created_at).getTime())/60000)):999)}catch(e){console.log(999)}})')
+          echo "kalp son koşu: ${AGE} dk önce"
+          echo "age=$AGE" >> "$GITHUB_OUTPUT"
+
+      - name: Kalbi tetikle (yalnız 4+ dk olduysa — mükerrer nabız üretme)
+        if: steps.kalpvar.outputs.age == '999' || steps.kalpvar.outputs.age >= 4
+        run: |
+          curl -sf -X POST \
+            -H "Authorization: Bearer ${{ github.token }}" \
+            -H "Accept: application/vnd.github+json" \
+            "${{ github.api_url }}/repos/${{ github.repository }}/actions/workflows/rapor-kalp.yml/dispatches" \
+            -d '{"ref":"main"}' \
+            && echo "🚩 kalp tetiklendi" \
+            || echo "⚠ kalp tetiklenemedi — bir sonraki bacak (cron/CI/push) devralır"

@@ -33,25 +33,23 @@ describe('0016 · rapor-kalp.yml (kendi kendini süren nabız)', () => {
     assert.match(y, /workflows\/rapor-yayin\.yml\/dispatches/, 'tek üretici: rapor-yayin (concurrency orada)');
     assert.match(y, /exclude_current=true/, 'kendi koşusunu saymaz');
   });
-  test('zincir (0019): İLK adım + ritim uykusu + TEK YÖNLÜ devir bekçisi', () => {
-    // Dersler (canlı kanıtlı): 0016 gecikmeli dispatch hiç koşmadı;
-    // 0017 bekçi döngüsü timeout'ta boğuldu; 0018a zincir son adımda olduğu
-    // için iş hatasında öldü; 0018b iki yönlü 4 dk bekçi çatal ölümü yaptı
-    // (12:57: cron+CI 26 sn arayla iki koşu, ikisi de sustu, 2 saat kopuk).
-    // 0019: zincir İLK adım (if: always) → sleep 300 → dispatch; susma
-    // YALNIZCA kendinden YENİ bir koşu varsa (o zinciri kesin kurar).
-    assert.match(y, /name: "Zincir İLK iş/, 'zincir adımı');
+  test('zincir (0022): kalp KENDİNİ değil BAYRAKI tetikler (GitHub özyineleme yasağı)', () => {
+    // CANLI KANIT (29.09.2026): kalp'in kendine dispatch'i 202 almasına
+    // rağmen HİÇ koşu oluşturmuyordu (15:38/15:51/16:16 — adımlar success,
+    // ardıl koşu yok). Farklı workflow'u tetiklemek kanıtlı çalışıyor
+    // (kalp→rapor-yayin 15:27:15 · rapor-yayin→kalp 15:27:38).
+    // 0022: kalp → rapor-bayrak → kalp (iki bacak da farklı-workflow).
+    assert.match(y, /name: "Zincir İLK iş/, 'zincir ilk adım');
     const iz = y.indexOf('Zincir İLK iş');
     const ik = y.indexOf('Kuyrukta iş var mı?');
-    assert.ok(iz > 0 && ik > iz, 'zincir, iş kontrolünden ÖNCE koşar');
-    assert.match(y, /sleep 300/, 'ritim uykusu (iş timeout 8 dk içinde)');
-    assert.match(y, /timeout-minutes: 8/, 'uyku + işler timeouta sığar');
-    assert.match(y, /\$API\/dispatches/, 'anlık repository_dispatch');
-    assert.match(y, /rapor-kuyruk-nabiz/);
-    assert.match(y, /240000/, 'devir penceresi 4 dk (yalnız YENİ koşular)');
-    assert.match(y, /exclude_current=true/, 'bekçi kendi koşusunu saymaz');
-    assert.ok(!/delay_minutes/.test(y), 'gecikmeli dispatch YOK (0016 dersi)');
-    assert.ok(!/-lt 90/.test(y), '90 sn iki yönlü bekçi YOK (çatal riski)');
+    assert.ok(iz > 0 && ik > iz, 'zincir, iş kontrolünden ÖNCE');
+    assert.match(y, /sleep 300/, 'ritim uykusu');
+    assert.match(y, /timeout-minutes: 8/, 'uyku iş timeoutuna sığar');
+    assert.match(y, /rapor-kalp-bayrak/, 'hedef: bayrak workflow');
+    assert.ok(!/"event_type":"rapor-kuyruk-nabiz"/.test(y), 'kalp KENDİ olayını tetiklemez (GitHub düşürüyor)');
+    assert.match(y, /zincir DOĞRULANDI/, 'dispatch sonrası koşu oluşumu doğrulanır (202 ≠ koşu dersi)');
+    assert.match(y, /240000/, 'devir penceresi (yalnız YENİ koşular susturur)');
+    assert.ok(!/delay_minutes/.test(y), 'gecikmeli dispatch YOK');
   });
   test('yetkiler minimal: actions write (zincir) + contents read', () => {
     assert.match(y, /actions: write/);
@@ -60,20 +58,19 @@ describe('0016 · rapor-kalp.yml (kendi kendini süren nabız)', () => {
 });
 
 describe('0016 · zincir halkaları diğer koşucularda da var', () => {
-  test('rapor-yayin.yml: actions write + kapanışta ANLIK kalp tetiği', () => {
+  test('rapor-yayin.yml: actions write + kapanışta BAYRAK tetiği', () => {
     const y = read('.github/workflows/rapor-yayin.yml');
     assert.match(y, /actions: write/);
     assert.match(y, /Kalp atışını başlat/);
-    assert.match(y, /\$\{\{ github\.api_url \}\}\/repos\/\$\{\{ github\.repository \}\}\/dispatches/);
-    assert.match(y, /rapor-kuyruk-nabiz/);
+    assert.match(y, /rapor-kalp-bayrak/, 'bacak bayrak üzerinden (farklı-workflow kuralı)');
     const i = y.indexOf('Kalp atışını başlat');
     assert.match(y.slice(i, i + 140), /if: always/, 'üretim patlasa da zincir kırılmasın');
   });
-  test('ci.yml kuyruk işi: actions write + anlık kalp tetiği (push kalbi başlatır)', () => {
+  test('ci.yml kuyruk işi: actions write + BAYRAK tetiği (push zinciri canlandırır)', () => {
     const y = read('.github/workflows/ci.yml');
     assert.match(y, /actions: write/);
     assert.match(y, /Kalp atışını başlat/);
-    assert.match(y, /rapor-kuyruk-nabiz/);
+    assert.match(y, /rapor-kalp-bayrak/);
     assert.match(y, /group: rapor-yayin-kuyrugu/, 'üretim kilidi korunuyor');
   });
 });
@@ -105,5 +102,27 @@ describe('0016 · nabız kararı (aynı mantık, birim düzeyinde)', () => {
   });
   test('bozuk/eksik günlük çökertmez (tüm istekler iş sayılır → güvenli taraf)', () => {
     assert.equal(decide({}, [{ id: 'r9' }], []).work, 1);
+  });
+});
+
+
+describe('0022 · rapor-bayrak.yml (zincir bayrağı)', () => {
+  const b = read('.github/workflows/rapor-bayrak.yml');
+  test('tetikler: kalp zinciri (repository_dispatch) + cron yedeği + elle', () => {
+    assert.match(b, /types: \[rapor-kalp-bayrak\]/);
+    assert.match(b, /cron: '\*\/5 \* \* \* \*'/, 'cron yedeği: bayrak da ateşlenebilir');
+    assert.match(b, /workflow_dispatch/);
+  });
+  test('bayrak KALPİ tetikler (farklı-workflow bacağı — kanıtlı yol)', () => {
+    assert.match(b, /workflows\/rapor-kalp\.yml\/dispatches/);
+    assert.match(b, /actions: write/);
+  });
+  test('mükerrer nabız üretmez: kalp son 4 dk içinde koştuysa susar', () => {
+    assert.match(b, /age >= 4|age == '999'/);
+    assert.match(b, /rapor-kalp\.yml\/runs/, 'kalp koşu yaşı sorgulanır');
+  });
+  test('uçuz iş: checkout YOK, timeout 2 dk', () => {
+    assert.ok(!/actions\/checkout/.test(b), 'bayrak depo indirmaz (yalnız API)');
+    assert.match(b, /timeout-minutes: 2/);
   });
 });
