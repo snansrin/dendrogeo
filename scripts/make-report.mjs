@@ -863,6 +863,25 @@ pre{background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:
 .btnrow{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0;font-family:system-ui,sans-serif}
 .btn{background:var(--green);color:#fff;border:0;border-radius:8px;padding:9px 16px;font-size:.8rem;font-weight:700;cursor:pointer;text-decoration:none;display:inline-block}
 .btn.g{background:#fff;color:var(--green);border:1.5px solid var(--green)}
+@media (max-width:640px){
+ /* 0021 · MOBİL DÜZEN (kullanıcı bildirimi: "§5 Nicel Sonuçlar tablonun
+  * dışına çıkıyor, genel görünüm bozuluyor"): dar ekranlarda tablolar
+  * .wrap'i taşıyordu. Çözüm: yatay taşma kökten kilitlenir, Çizelge 1 gibi
+  * geniş tablolar kendi içinde YATAY KAYDIRILIR (erişilebilirlik: odaklanınca
+  * da kaydırılabilir), hücre punto/boşlukları küçülür, künye tek sütuna iner,
+  * uzun kimlikler her yerde kırılır. Masaüstü ve PDF/print düzeni DEĞİŞMEZ. */
+ html,body{max-width:100%;overflow-x:hidden}
+ .wrap{padding:26px 12px 56px;border-left:0;border-right:0}
+ h1{font-size:1.42rem}
+ .meta{grid-template-columns:1fr;padding:12px;gap:8px}
+ table{display:block;overflow-x:auto;-webkit-overflow-scrolling:touch;white-space:nowrap;font-size:.74rem}
+ table thead,table tbody{display:table;width:100%;table-layout:fixed}
+ th,td{padding:6px 7px;overflow-wrap:anywhere}
+ pre{font-size:.62rem}
+ .fig .cap,.qnote,.hint{font-size:.72rem}
+ .btnrow .btn{flex:1 1 100%}
+ .kick{font-size:.64rem}
+}
 @media print{body{background:#fff}.wrap{border:0;padding:0}.btnrow{display:none}}
 </style>
 </head>

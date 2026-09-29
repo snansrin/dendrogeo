@@ -147,6 +147,21 @@ describe('0012 · QR kalıcı bağlantı (standart md. 15)', () => {
   });
 });
 
+describe('0021 · mobil düzen (dar ekran taşması kilitli)', () => {
+  test('mobil kırılım var: taşma kilidi + kaydırılabilir tablo + tek sütun künye', () => {
+    const snap = { ...base, author: { name: 'Nagihan Şirin', source: 'data_owner' } };
+    const html = render(snap);
+    assert.match(html, /@media \(max-width:640px\)/, 'mobil kırılım');
+    assert.match(html, /overflow-x:hidden/, 'yatay taşma kökten kilitli');
+    assert.match(html, /table\{display:block;overflow-x:auto/, 'geniş tablolar kendi içinde kayar');
+    assert.match(html, /\.meta\{grid-template-columns:1fr/, 'künye dar ekranda tek sütun');
+    assert.match(html, /overflow-wrap:anywhere/, 'uzun kimlikler kırılır');
+    /* masaüstü ve print bozulmadı */
+    assert.match(html, /\.wrap\{max-width:860px/, 'masaüstü düzen yerinde');
+    assert.match(html, /@media print\{/, 'print düzeni yerinde');
+  });
+});
+
 describe('0012 · sıkı arşiv (minified JSON) + archive_bytes', () => {
   test('publishPark data.json/metadata.json sıkıştırılmış yazar', () => {
     const src = read('scripts/make-report.mjs');

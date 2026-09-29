@@ -33,6 +33,18 @@ kapanmadığı için ikinci yayın kalıcı olarak bloke oluyordu.
   günlükte sonucu olmayan" istekleri sayar; `planQueue` request_id'si
   günlükte olan istekleri atlar. Yeni test: `test/publish-request-fix.test.mjs`.
 
+### Düzeltildi — 0021: rapor mobil düzeni (2026-09-29)
+Kullanıcı bildirimi: "raporu telefondan açtığımda §5 Nicel Sonuçlar tablonun
+dışına çıkıyor, genel görünümü bozuyor." Rapor şablonunda HİÇ mobil kırılım
+yoktu; geniş tablolar (Çizelge 1 tür tablosu) `.wrap` gövdesini viewport
+dışına taşıyordu. Eklenen `@media (max-width:640px)` katmanı: yatay taşma
+kökten kilitli (`overflow-x:hidden`), tablolar kendi içinde YATAY
+KAYDIRILABİLİR (`display:block;overflow-x:auto` — içerik asla ezilmez),
+künye tek sütuna iner, hücre punto/boşlukları küçülür, uzun hash/kimlikler
+`overflow-wrap:anywhere` ile kırılır, butonlar tam genişlik. Masaüstü ve
+print/PDF düzeni DEĞİŞMEZ. Yayımlı raporlar donmuş olduğundan düzeltme
+YENİ yayınlarda görünür (0010 sözleşmesi). Test: report-author-qr +1.
+
 ### Düzeltildi — 0020: tam denetim paketi (2026-09-29)
 Sıfırdan uçtan uca denetim (depo + canlı site + DB + güvenlik + Actions +
 rapor arşivi; kanıtlar: `docs/DENETIM-2026-09-29.md`). Kritik açık YOK;
