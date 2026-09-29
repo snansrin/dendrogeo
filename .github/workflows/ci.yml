@@ -62,7 +62,12 @@ jobs:
       # Kalp, kendi bekçili döngüsüyle zinciri tekilleştirip sürdürür.
       # 0028: repository_dispatch GITHUB_TOKEN'lu koşularda sessizce düşüyor
       # → bayrak artık workflow_dispatch ile tetiklenir (kanıtlı bacak).
-      - name: Kalp atışını başlat (0017 · 0028: workflow_dispatch)
+      # 0029 · DERS: tırnaksız YAML skalerinde ": " (iki nokta+boşluk) mapping
+      # hatasıdır → dosya GitHub'da HİÇ çözümlenmez, koşular "startup failure"
+      # olur (0028 bu adımda ci.yml + rapor-yayin.yml'i kırdı; kuyruk 1 saat
+      # bekledi). Ad değeri içinde ":" geçecekse DEĞER TIRNAKLI yazılır ve
+      # test/workflow-yaml.test.mjs bunu her koşuda denetler.
+      - name: "Kalp atışını başlat (0017 · 0028: workflow_dispatch)"
         if: always()
         run: |
           curl -sf -X POST \

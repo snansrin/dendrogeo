@@ -9,6 +9,22 @@ Yeni sürüm yayımlama adımları: [`docs/surum-yayini.md`](docs/surum-yayini.m
 
 ## [Yayımlanmadı]
 
+### Düzeltildi — 0029 workflow YAML kırığı: yayın kuyruğu durdu (2026-09-29)
+**Kök neden (canlı kanıt):** 0028 yamasındaki iki adım adı tırnaksız
+yazılmıştı ve değer ": " (iki nokta+boşluk) içeriyordu —
+`- name: Kalp atışını başlat (0017 · 0028: workflow_dispatch)`. YAML'da
+tırnaksız skaler ": " içeremez → `ci.yml` ve `rapor-yayin.yml` GitHub'da
+HİÇ çözümlenemedi. Belirti zinciri: push koşuları jobsız "startup failure"
+öldü (run adları dosya yoluna düştü), kalp'in rapor-yayin
+`workflow_dispatch`'ı 422 aldı (kalp koşuları 30-33 step 6'da failure),
+kuyruk boşalmadı — Göksu (park 25) yayın isteği 1 saatten fazla
+"Beklemede" kaldı. **Düzeltme:** iki adım adı tırnağa alındı; beş
+workflow'un tamamı js-yaml ile doğrulandı (5/5 parse OK).
+**Bekçi:** `test/workflow-yaml.test.mjs` — aynı hata sınıfını push'tan
+ÖNCE yakalar (name/description/title değerlerinde tırnaksız ": ", TAB
+karakteri, eksik `on:` bloğu + 0028'in bozuk satırının bekçiyi
+düşürdüğünü kanıtlayan regresyon testi). Bağımlılık eklemez.
+
 ### Düzeltildi — 0028 zincir + rapor çıktısı sertleştirmesi (2026-09-29)
 **Zincir (kuyruk bekleme süresi):** `repository_dispatch` olaylarının
 GITHUB_TOKEN'lu koşulardan gönderilince GitHub tarafından SESSİZCE

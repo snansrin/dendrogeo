@@ -86,7 +86,8 @@ jobs:
           exit 1
 
       # 0017 · zincir: kalp atışını ANLIK tetikle (bkz. ci.yml ile aynı gerekçe).
-      - name: Kalp atışını başlat (0017 · 0028: workflow_dispatch)
+      # 0029 · tırnaksız skalerde ": " YAML'ı kırar (bkz. ci.yml aynı ders).
+      - name: "Kalp atışını başlat (0017 · 0028: workflow_dispatch)"
         if: always()
         run: |
           # 0028: repository_dispatch GITHUB_TOKEN'lu koşularda SESSİZCE
