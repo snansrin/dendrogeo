@@ -33,6 +33,22 @@ kapanmadığı için ikinci yayın kalıcı olarak bloke oluyordu.
   günlükte sonucu olmayan" istekleri sayar; `planQueue` request_id'si
   günlükte olan istekleri atlar. Yeni test: `test/publish-request-fix.test.mjs`.
 
+### Düzeltildi — 0019: çatal ölümü kapatıldı, zincir ilk adıma alındı (2026-09-28)
+Canlı otopsi (kalp koşu kayıtları): 0018 sonrası zincir 18 saat çalıştı
+(gece boyunca 0006/0007/0008 yayın+geri çekmeleri push OLMADAN işlendi) ama
+12:57'de cron ile CI tetiği 26 sn arayla İKİ kalp koşusu doğurdu; 4 dakikalık
+İKİ YÖNLÜ bekçi yüzünden ikisi de "yakında koşu var, o devralır" deyip sustu
+→ ÇATAL ÖLÜMÜ, zincir 2 saat koptu (12:57→15:07 boşluğu; kullanıcının
+"50 dk'dır bekliyor" şikâyetinin kökü). Düzeltme:
+- Zincir İLK adıma alındı (`if: always()`): iş adımları patlasa/iptal olsa
+  bile ardıl tetik gönderilir — "ya hep zincir, ya devir".
+- Bekçi TEK YÖNLÜ: susma yalnızca son 4 dk'da BENDEN YENİ bir kalp koşusu
+  varsa (o koşunun uykusu daha sonra biter → zinciri kesin kurar). Akran
+  koşular artık birbirini susturamaz; en kötü senaryoda iki zincir yan yana
+  yürür (zararsız: üretim request_id + concurrency ile zaten tekil).
+- Ritim `sleep 300` zincir adımının içinde; iş timeout 8 dk (bütçe ~5,5 dk).
+- Testler 0019 sözleşmeleriyle güncel (heartbeat 11/11).
+
 ### Düzeltildi — 0018: kalp ritmi iş timeoutuna sığdırıldı (2026-09-28)
 0017'nin bekçi DÖNGÜSÜ (sleep 240 × 12 gözlem) kalp işinin 5 dakikalık
 timeout'unda BOĞULDU: ilk kalp koşusu 20:37'de başladı, 20:42'de

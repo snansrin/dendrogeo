@@ -33,21 +33,25 @@ describe('0016 · rapor-kalp.yml (kendi kendini süren nabız)', () => {
     assert.match(y, /workflows\/rapor-yayin\.yml\/dispatches/, 'tek üretici: rapor-yayin (concurrency orada)');
     assert.match(y, /exclude_current=true/, 'kendi koşusunu saymaz');
   });
-  test('zincir (0018): ritim uykusu iş timeoutunun İÇİNDE + anlık dispatch + yığılma bekçisi', () => {
-    // 0017 dersi: bekçi DÖNGÜSÜ (sleep 240×12) işin 5 dk timeoutunda boğuldu
-    // → kalp 'cancelled' öldü, zincir doğmadı. 0018: TEK sleep 300 + iş
-    // timeout 12 dk + dispatch anlık + yığılma bekçisi (≥2 bekleyen kalp
-    // koşusu varsa tetik atma → cron/push/elle üst üste binse de çoğalmaz).
-    assert.match(y, /name: Zincir/);
-    assert.match(y, /if: always/, 'üretim patlasa da zincir sürer');
-    assert.match(y, /timeout-minutes: 12/, 'iş timeoutu ritim uykusunu kapsar (0017 kazasının kökü)');
-    assert.match(y, /sleep 300/, 'ritim: ~5 dk');
+  test('zincir (0019): İLK adım + ritim uykusu + TEK YÖNLÜ devir bekçisi', () => {
+    // Dersler (canlı kanıtlı): 0016 gecikmeli dispatch hiç koşmadı;
+    // 0017 bekçi döngüsü timeout'ta boğuldu; 0018a zincir son adımda olduğu
+    // için iş hatasında öldü; 0018b iki yönlü 4 dk bekçi çatal ölümü yaptı
+    // (12:57: cron+CI 26 sn arayla iki koşu, ikisi de sustu, 2 saat kopuk).
+    // 0019: zincir İLK adım (if: always) → sleep 300 → dispatch; susma
+    // YALNIZCA kendinden YENİ bir koşu varsa (o zinciri kesin kurar).
+    assert.match(y, /name: "Zincir İLK iş/, 'zincir adımı');
+    const iz = y.indexOf('Zincir İLK iş');
+    const ik = y.indexOf('Kuyrukta iş var mı?');
+    assert.ok(iz > 0 && ik > iz, 'zincir, iş kontrolünden ÖNCE koşar');
+    assert.match(y, /sleep 300/, 'ritim uykusu (iş timeout 8 dk içinde)');
+    assert.match(y, /timeout-minutes: 8/, 'uyku + işler timeouta sığar');
     assert.match(y, /\$API\/dispatches/, 'anlık repository_dispatch');
     assert.match(y, /rapor-kuyruk-nabiz/);
-    assert.match(y, /-ge 2/, 'yığılma bekçisi eşiği');
+    assert.match(y, /240000/, 'devir penceresi 4 dk (yalnız YENİ koşular)');
     assert.match(y, /exclude_current=true/, 'bekçi kendi koşusunu saymaz');
-    assert.ok(!/delay_minutes/.test(y), 'gecikmeli dispatch YOK (güvenilmez)');
-    assert.ok(!/seq 1 12/.test(y), '0017 bekçi döngüsü YOK (timeoutta boğuluyordu)');
+    assert.ok(!/delay_minutes/.test(y), 'gecikmeli dispatch YOK (0016 dersi)');
+    assert.ok(!/-lt 90/.test(y), '90 sn iki yönlü bekçi YOK (çatal riski)');
   });
   test('yetkiler minimal: actions write (zincir) + contents read', () => {
     assert.match(y, /actions: write/);
