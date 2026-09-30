@@ -8,7 +8,7 @@
  *  3) resolveSpeciesName: sözlük dışı Göksu türleri kanonik ada iner
  *  4) inventoryQa: h/D birim kapısı + karbon yeniden hesap kapısı + blok kuralı
  *  5) bboxRing: dikdörtgen geom_json gerçek sınır sayılmaz (park 25 bulgusu)
- *  6) import-measurements.mjs: çevre CSV'sini dönüştürür, cm ısrarını BLOKLAR
+ *  6) import-measurements.mjs: DBH = göğüs çapı (cm); çevre→çap (÷π) dönüşümü YOK
  *  7) renderReport: accuracy_m NULL iken "±0,0 m" UYDURMAZ; QA satırları basılır
  */
 import { test, describe } from 'node:test';
@@ -18,7 +18,7 @@ import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { tmpdir } from 'node:os';
 import { execFileSync } from 'node:child_process';
-import { loadRho, loadSpeciesDict, calcRow, carbonKg, QA_LIMITS, MC_CFG, canonicalHash } from '../scripts/lib/mc.mjs';
+import { loadRho, loadSpeciesDict, calcRow, carbonKg, QA_LIMITS, MC_CFG, canonicalHash, QA_STATE, qaStateOf, DBH_REASON_TR } from '../scripts/lib/mc.mjs';
 import { inventoryQa, bboxRing, ringGeodesicAreaM2, renderReport } from '../scripts/make-report.mjs';
 import { loadApp } from '../scripts/test-harness.mjs';
 
@@ -85,14 +85,18 @@ describe('0011 · resolveSpeciesName — kanonik tür sözlüğü', () => {
   });
 });
 
-describe('0011 · inventoryQa — envanter kalite kapısı', () => {
+describe('0031 · inventoryQa — envanter kalite kapısı (DBH = göğüs çapı, cm)', () => {
   const dict = loadSpeciesDict();
   const mk = (point_id, species, grp, dbh_cm, height_m, carbon_kg, extra = {}) =>
     ({ id: point_id, point_id, species, grp, dbh_cm, height_m, carbon_kg, ...extra });
 
-  test('ham Göksu verisi BLOKLANIR: 34/34 h/D kapısı + sistemik karbon sapması', () => {
-    // Gerçek 28.09.2026 envanterinden temsilci dilim (çevre değerleri "çap"
-    // kolonunda, karbon ~9-10x şişkin): kapı tam da bunu yakalamalı.
+  test('ham Göksu verisi BLOKLANMAZ: DBH göğüs çapı (cm), boy/çap yalnız ⚠ inceleme', () => {
+    /* Gerçek 28.09.2026 envanterinden temsilci dilim. 0031 öncesi kapı bu
+     * veriyi "kolon çevre olabilir" varsayımıyla ⛔ BLOKLU ilan ediyordu;
+     * DBH göğüs çapı (cm) olduğu için bu hüküm geçersizdi. Artık:
+     *   - DBH geçerlilik kontrolü (a) 6/6 GEÇER → blok yok
+     *   - boy/çap oranı (b) yalnız İNCELEME göstergesi → hd_block KALICI false
+     *   - karbon yeniden hesabı (c) DBH biriminden bağımsız ayrı kontrol */
     const raw = [
       mk(1, 'SÜS ERİĞİ', 'YAPRAKLI', 110, 10.2, 2034.7),
       mk(3, 'SALKIM SÖĞÜT', 'YAPRAKLI', 166, 14, 6188.3),
@@ -103,37 +107,58 @@ describe('0011 · inventoryQa — envanter kalite kapısı', () => {
     ];
     const qa = inventoryQa(raw, dict);
     assert.equal(qa.n, 6);
-    assert.equal(qa.n_unknown, 0, 'türler artık sözlükte');
-    assert.equal(qa.hd_fail.length, 6, 'hepsi h/D < ' + QA_LIMITS.HD_MIN);
-    assert.equal(qa.hd_block, true, 'sistemik birim hatası → blok');
-    // Karbon kapısı 0011b'den beri ÇALIŞTIRILMIŞ ρ tablosuyla denetler
-    // (dict.byName: gizli çözüm kayıtları dahil) → P1/P29/P43 panel-ρ'lu
-    // saklı değerleriyle bandın içinde kalır; kapı ρ düzeltmesi gereken
-    // P3/P32 (SALKIM SÖĞÜT 541→400) ve ondalık kayması P7'de takılır.
-    // Birim hatasının birincil bekçisi h/D kapısıdır (6/6 → blok).
+    assert.equal(qa.n_unknown, 0, 'türler sözlükte');
+    /* (a) DBH birim/geçerlilik: hepsi sayısal, pozitif, cm aralığında */
+    assert.equal(qa.dbh_fail.length, 0, 'DBH geçerlilik ihlali olmamalı: ' + JSON.stringify(qa.dbh_fail));
+    assert.equal(qa.dbh_block, false);
+    /* (b) boy/çap: 6/6 gösterge aralığı dışında ama BLOK DEĞİL (0031) */
+    assert.equal(qa.hd_fail.length, 6, 'oran göstergesi 6 kayıtta aralık dışı: ' + JSON.stringify(qa.hd_fail));
+    assert.equal(qa.hd_block, false, 'boy/çap oranı ASLA bloklamaz (0031)');
+    assert.equal(qa.hd_review, true, 'oran inceleme uyarısı üretir');
+    /* (c) karbon yeniden hesabı: DBH biriminden bağımsız; 3/6 = %50 → eşik
+     * (>%50) altında → dev_block false. P7 ondalık kayması sayıyla görünür. */
     assert.equal(qa.dev_fail.length, 3, 'karbon sapması 3 kayıtta: ' + JSON.stringify(qa.dev_fail));
-    assert.equal(qa.dev_block, false, '3/6 = %50 → eşik (>%50) altında, h/D zaten blokluyor');
-    // P7 ondalık kayması sayıyla görünür
+    assert.equal(qa.dev_block, false, '3/6 = %50 → eşik (>%50) altında');
     const p7 = qa.rows.find((r) => r.point_id === 7);
     assert.ok(Math.abs(p7.dev_pct) > 50, 'P7 sapma %50 üstü: ' + p7.dev_pct);
+    /* Üç hâlli durum: blok yok, inceleme var → INCELEME (⛔ BLOKLU değil) */
+    assert.equal(qa.state, 'INCELEME', 'durum: ' + qa.state);
+    /* π ile türetilmiş bir değer YOK: DBH sahada kaydedildiği gibi */
+    assert.equal(qa.rows.find((r) => r.point_id === 7).dbh_cm, 107);
   });
 
-  test('düzeltilmiş veri (DBH = çevre/π) kapıdan GEÇER', () => {
-    const fixed = [
-      mk(1, 'SÜS ERİĞİ', 'YAPRAKLI', +(110 / Math.PI).toFixed(2), 10.2, null, { girth_cm: 110 }),
-      mk(3, 'SALKIM SÖĞÜT', 'YAPRAKLI', +(166 / Math.PI).toFixed(2), 14, null, { girth_cm: 166 }),
-      mk(7, 'KARAÇAM', 'İBRELİ', +(107 / Math.PI).toFixed(2), 12, null, { girth_cm: 107 }),
-      mk(29, 'IHLAMUR', 'YAPRAKLI', +(40 / Math.PI).toFixed(2), 4.5, null, { girth_cm: 40 }),
-      mk(32, 'SALKIM SÖĞÜT', 'YAPRAKLI', +(200 / Math.PI).toFixed(2), 12.5, null, { girth_cm: 200 }),
-      mk(43, 'SIĞLA', 'YAPRAKLI', +(57 / Math.PI).toFixed(2), 7.5, null, { girth_cm: 57 }),
+  test('boy/çap gösterge aralığında olduğunda durum 🟢 GEÇERLİ', () => {
+    const rows = [
+      mk(1, 'SÜS ERİĞİ', 'YAPRAKLI', 35, 10.2, null),
+      mk(3, 'SALKIM SÖĞÜT', 'YAPRAKLI', 53, 14, null),
+      mk(7, 'KARAÇAM', 'İBRELİ', 34, 12, null),
+      mk(29, 'IHLAMUR', 'YAPRAKLI', 13, 4.5, null),
     ];
-    const qa = inventoryQa(fixed, dict);
-    assert.equal(qa.hd_fail.length, 0, 'h/D ihlali kalmamalı: ' + JSON.stringify(qa.hd_fail));
+    const qa = inventoryQa(rows, dict);
+    assert.equal(qa.hd_fail.length, 0, 'oran ihlali yok: ' + JSON.stringify(qa.hd_fail));
     assert.equal(qa.hd_block, false);
+    assert.equal(qa.dbh_fail.length, 0);
     for (const r of qa.rows) assert.ok(r.hd >= QA_LIMITS.HD_MIN && r.hd <= QA_LIMITS.HD_MAX, `P${r.point_id} h/D=${r.hd}`);
+    assert.equal(qa.state, 'GECERLI');
   });
 
-  test('tekil bodur ağaç yayını BLOKLAMAZ (n≥3 + %50 kuralı)', () => {
+  test('DBH geçerlilik zinciri: eksik / sayısal değil / ≤0 / cm aralığı dışı', () => {
+    const rows = [
+      mk(1, 'MEŞE', 'YAPRAKLI', null, 12, null),
+      mk(2, 'MEŞE', 'YAPRAKLI', 'yok', 12, null),
+      mk(3, 'MEŞE', 'YAPRAKLI', 0, 12, null),
+      mk(4, 'MEŞE', 'YAPRAKLI', QA_LIMITS.DBH_MAX_CM + 1, 12, null),
+    ];
+    const qa = inventoryQa(rows, dict);
+    assert.deepEqual(qa.dbh_fail.map((x) => [x.point_id, x.reason]),
+      [[1, 'eksik'], [2, 'sayisal-degil'], [3, 'pozitif-degil'], [4, 'aralik-disi']]);
+    assert.equal(qa.dbh_block, true, '4/4 sistemik → kritik veri hatası bloklar');
+    assert.equal(qa.state, 'BLOKLU');
+    /* Gerekçe metinleri "çevre olabilir" iddiası İÇERMEZ */
+    for (const r of Object.values(DBH_REASON_TR)) assert.ok(!/çevre/.test(r), r);
+  });
+
+  test('tekil bodur ağaç yayını BLOKLAMAZ (boy/çap yalnız inceleme)', () => {
     const rows = [
       mk(1, 'MEŞE', 'YAPRAKLI', 40, 15, null),   // h/D = 37.5 ✓
       mk(2, 'MEŞE', 'YAPRAKLI', 50, 18, null),   // ✓
@@ -142,7 +167,9 @@ describe('0011 · inventoryQa — envanter kalite kapısı', () => {
     ];
     const qa = inventoryQa(rows, dict);
     assert.equal(qa.hd_fail.length, 1);
-    assert.equal(qa.hd_block, false, '1/4 < eşik → uyarı, blok değil');
+    assert.equal(qa.hd_block, false, 'boy/çap oranı hiçbir ölçekte bloklamaz (0031)');
+    assert.equal(qa.hd_review, true);
+    assert.equal(qa.state, 'INCELEME', 'tekil uyarı → 🟡 İNCELEME, 🔴 BLOKLU değil');
   });
 
   test('küçük kayıtlarda yuvarlama gürültüsü bayraklanmaz (mutlak taban ≥5 kg)', () => {
@@ -189,81 +216,114 @@ describe('0011 · bboxRing / ringGeodesicAreaM2 — park 25 sınır bulgusu', ()
   });
 });
 
-describe('0011 · import-measurements.mjs — cihaz çıktısı kapısı', () => {
+describe('0031 · import-measurements.mjs — cihaz çıktısı kapısı (DBH = göğüs çapı, cm)', () => {
   const tmp = mkdtempSync(join(tmpdir(), 'dgi-'));
-  const csv = [
-    'nokta;tur;grup;cevre_cm;boy_m;karbon_kg;foto;enlem;boylam',
+  /* Göksu 28.09.2026 saha dosyası: ÇAP kolonu (cm) — değerler sahada
+   * kaydedildiği gibidir, dönüşüm uygulanmaz. Saklı karbon P3/P7'de bozuk
+   * (0011'in yakaladığı ondalık kayması), boy/çap göstergesi 4/4 aralık dışı. */
+  const csvCap = [
+    'nokta;tur;grup;cap_cm;boy_m;karbon_kg;foto;enlem;boylam',
     '1;SÜS ERİĞİ;YAPRAKLI;110;10,2;2034,7;P001_M1.JPG;39.99025;32.65201',
     '3;SALKIM SÖĞÜT;YAPRAKLI;166;14;6188,3;P003_M1.JPG;39.98989;32.65084',
     '7;KARAÇAM;İBRELİ;107;12;196,2;P007_M1.JPG;39.99111;32.65332',
     '29;IHLAMUR;YAPRAKLI;40;4,5;127,3;P029_M1.JPG;39.99222;32.65443',
   ].join('\n') + '\n';
-  const f = join(tmp, 'cihaz.csv');
-  writeFileSync(f, csv);
-  const run = (args) => {
+  /* 0011 dönemi cihaz dosyası: yalnız ÇEVRE kolonu. 0031: bu dosyadan DBH
+   * TÜRETİLMEZ — içe aktarma durur (sessiz ÷π dönüşümü yok). */
+  const csvCevre = [
+    'nokta;tur;grup;cevre_cm;boy_m;karbon_kg;foto;enlem;boylam',
+    '1;SÜS ERİĞİ;YAPRAKLI;110;10,2;2034,7;P001_M1.JPG;39.99025;32.65201',
+    '7;KARAÇAM;İBRELİ;107;12;196,2;P007_M1.JPG;39.99111;32.65332',
+  ].join('\n') + '\n';
+  /* Saklı karbonu sistemik bozuk dosya: karbon yeniden hesap kapısı (DBH
+   * biriminden BAĞIMSIZ kontrol) bloklamaya devam eder → --force damgası. */
+  const csvBozuk = [
+    'nokta;tur;grup;cap_cm;boy_m;karbon_kg;enlem;boylam',
+    '1;SÜS ERİĞİ;YAPRAKLI;35,01;10,2;203,5;39.99025;32.65201',
+    '3;SALKIM SÖĞÜT;YAPRAKLI;52,82;14;618,8;39.98989;32.65084',
+    '7;KARAÇAM;İBRELİ;34,06;12;19,6;39.99111;32.65332',
+    '29;IHLAMUR;YAPRAKLI;12,73;4,5;127,3;39.99222;32.65443',
+  ].join('\n') + '\n';
+  const fCap = join(tmp, 'cap.csv'), fCevre = join(tmp, 'cevre.csv'), fBozuk = join(tmp, 'bozuk.csv');
+  writeFileSync(fCap, csvCap); writeFileSync(fCevre, csvCevre); writeFileSync(fBozuk, csvBozuk);
+  const run = (f, args) => {
     try {
       const out = execFileSync(process.execPath, [join(ROOT, 'scripts/import-measurements.mjs'), f, ...args], { encoding: 'utf8', timeout: 60000 });
       return { code: 0, out };
     } catch (e) { return { code: e.status ?? 1, out: (e.stdout || '') + (e.stderr || '') }; }
   };
 
-  test('--birim cevre --json: DBH = çevre/π dönüşümü kayıt düzeyinde doğrulanır', () => {
-    const r = run(['--birim', 'cevre', '--dry-run', '--json']);
-    assert.ok(r.out.includes('"unit"'), r.out.slice(0, 200));
+  test('--birim cevre REDDEDİLİR: çevre→çap (÷π) dönüşümü kaldırıldı (0031)', () => {
+    const r = run(fCap, ['--birim', 'cevre', '--dry-run']);
+    assert.equal(r.code, 2, 'çevre birimi reddedilmeli, çıkış: ' + r.code + '\n' + r.out);
+    assert.match(r.out, /KALDIRILDI/);
+    assert.match(r.out, /çevre→çap/);
+    assert.ok(!r.out.includes('35.01'), 'hiçbir π türetmesi yapılmamalı');
+  });
+
+  test('yalnız çevre kolonu olan dosyadan DBH TÜRETİLMEZ → exit 2', () => {
+    const r = run(fCevre, ['--dry-run']);
+    assert.equal(r.code, 2, r.out);
+    assert.match(r.out, /TÜRETİLMEZ|çevre→çap/);
+    assert.ok(!/insert into/i.test(r.out), 'SQL üretilmemeli');
+  });
+
+  test('auto: birim CM, DBH olduğu gibi yazılır, boy/çap yalnız ⚠ İNCELEME', () => {
+    const r = run(fCap, ['--dry-run', '--json']);
+    assert.equal(r.code, 0, 'boy/çap göstergesi içe aktarmayı BLOKLAMAMALI: ' + r.out.slice(0, 400));
     const j = JSON.parse(r.out.slice(r.out.indexOf('{')));
-    assert.equal(j.unit.unit, 'cevre');
+    assert.equal(j.unit.unit, 'cm', 'birim cm: ' + j.unit.why);
+    assert.match(j.unit.why, /göğüs çapı/);
     assert.equal(j.live, 4);
+    /* P7: 107 cm çap OLDUĞU GİBİ (0011'de 34,06'ya bölünüyordu) */
     const p7 = j.records.find((x) => x.point_id === 7);
-    assert.ok(Math.abs(p7.dbh_cm - 34.06) < 0.01, 'P7 dbh: ' + p7.dbh_cm);
-    assert.equal(p7.girth_cm, 107, 'ham çevre saklanmalı');
-    // yeniden hesap ≈ 211 kg (34,06 cm yuvarlak DBH ile; π^1,952 ≈ 9,34 →
-    // saklı 196,2'deki 10x kayma onarılmış olur). Yuvarlama + ρ(470) etkisiyle
-    // sapma +%8 civarında kalır → ±%20 bandının içinde.
-    assert.ok(Math.abs(p7.carbon_calc - 211.2) < 2, 'P7 carbon_calc: ' + p7.carbon_calc);
-    assert.ok(Math.abs(p7.dev_pct) < 20, 'P7 sapma bant içinde kalmalı: ' + p7.dev_pct);
-    const p1 = j.records.find((x) => x.point_id === 1);
-    assert.ok(p1.dev_pct > 500, 'P1 şişkin saklı karbon yakalanmalı: ' + p1.dev_pct);
-    assert.equal(j.gates.hd.fail, 0, 'dönüşüm sonrası h/D ihlali yok');
-  });
-
-  test('birim verilmezse AUTO tespit çevreyi yakalar (medyan h/D < 15)', () => {
-    const r = run(['--dry-run']);
-    assert.match(r.out, /birim: CEVRE — medyan/, r.out.split('\n')[1]);
-  });
-
-  test('cm ısrarı (--birim cm) h/D kapısında BLOKLANIR → exit 1, SQL yok', () => {
-    const r = run(['--birim', 'cm', '--dry-run']);
-    assert.equal(r.code, 1, 'blok beklenirken çıkış ' + r.code);
-    assert.match(r.out, /⛔/);
+    assert.equal(p7.dbh_cm, 107, 'DBH dönüştürülmez: ' + p7.dbh_cm);
+    assert.equal(p7.girth_cm, null, 'çevre kolonu yoksa girth_cm null');
+    assert.ok(!r.out.includes('34.06'), 'π türetmesi izi olmamalı');
+    /* boy/çap 4/4 aralık dışı → uyarı var, blok YOK */
+    assert.equal(j.gates.hd.fail, 4, 'oran göstergesi 4 kayıtta aralık dışı');
+    assert.equal(j.gates.hd.block, false, 'boy/çap ASLA bloklamaz (0031)');
     assert.match(r.out, /boy\/çap/);
+    assert.match(r.out, /İNCELEME/);
+    assert.equal(j.blocked, false);
   });
 
-  test('--force ile SQL üretilir ama uyarı damgası taşır', () => {
+  test('--birim cm beyanı h/D gerekçesiyle BLOKLANMAZ (0031)', () => {
+    const r = run(fCap, ['--birim', 'cm', '--dry-run']);
+    assert.equal(r.code, 0, 'cm ısrarı artık meşru: ' + r.out.slice(0, 300));
+    assert.ok(!/⛔ QA kapısı BLOK/.test(r.out), 'boy/çap oranı blok gerekçesi olamaz');
+    assert.match(r.out, /birim: CM/);
+  });
+
+  test('karbon yeniden hesap kapısı (DBH biriminden bağımsız) bloklar; --force damga basar', () => {
+    const r = run(fBozuk, ['--dry-run']);
+    assert.equal(r.code, 1, 'sistemik saklı-karbon sapması bloklamalı: ' + r.out.slice(0, 300));
+    assert.match(r.out, /⛔/);
+    assert.match(r.out, /karbon 3\/4 ⛔BLOK/);
     const out = join(tmp, 'forced.sql');
-    const r = run(['--birim', 'cm', '--force', '--park', '25', '--project', '26', '--out', out]);
-    assert.equal(r.code, 0, r.out);
+    const r2 = run(fBozuk, ['--force', '--park', '25', '--project', '26', '--out', out]);
+    assert.equal(r2.code, 0, r2.out.slice(0, 400));
     const sql = readFileSync(out, 'utf8');
     assert.match(sql, /--force ile üretildi/);
     assert.match(sql, /on conflict \(client_id\) do nothing/);
     assert.match(sql, /insert into public\.measurements/);
   });
 
-  test('doğru birimle üretilen SQL: girth_cm ham değeri saklar, karbon yeniden hesaptır', () => {
+  test('üretilen SQL: dbh_cm saha değeri (dönüşümsüz), client_id deterministik', () => {
     const out = join(tmp, 'good.sql');
-    const r = run(['--birim', 'cevre', '--park', '25', '--project', '26', '--owner', 'ee148cdd-0000-0000-0000-000000000000', '--out', out]);
-    // karbon kapısı (eski şişkin saklı değerler) bloklar → --force gerekir
-    if (r.code !== 0) {
-      const r2 = run(['--birim', 'cevre', '--force', '--park', '25', '--project', '26', '--owner', 'ee148cdd-0000-0000-0000-000000000000', '--out', out]);
-      assert.equal(r2.code, 0, r2.out);
-    }
+    let r = run(fCap, ['--park', '25', '--project', '26', '--owner', 'ee148cdd-0000-0000-0000-000000000000', '--out', out]);
+    /* karbon kapısı (P3/P7 saklı değerleri) bloklarsa --force gerekir */
+    if (r.code !== 0) r = run(fCap, ['--force', '--park', '25', '--project', '26', '--owner', 'ee148cdd-0000-0000-0000-000000000000', '--out', out]);
+    assert.equal(r.code, 0, r.out.slice(0, 400));
     const sql = readFileSync(out, 'utf8');
-    assert.match(sql, /34\.06, 107/, 'P7: dbh 34.06 (107/π), girth 107 ham');
+    assert.match(sql, /'KARAÇAM', 107, null, 12/, 'P7: dbh 107 cm olduğu gibi, girth null');
     assert.match(sql, /dgi:25:7:1/, 'deterministik client_id');
-    assert.ok(!/196\.2[,)]/.test(sql.split('P007')[0].slice(-600)) || true);
+    assert.match(sql, /birim kararı: cm/, 'SQL başlığı birimi beyan eder');
+    assert.ok(!/34\.06/.test(sql), 'π türetmesi SQL\'e sızmamalı');
   });
 });
 
-describe('0011 · renderReport — GNSS beyanı ve envanter QA satırları', () => {
+describe('0031 · renderReport — GNSS beyanı, DBH tanımı ve envanter QA satırları', () => {
   const base = {
     schema: 'dendrogeo-report/1',
     park: { id: 25, name: 'Göksu Parkı', osm_key: 'way/423602737', city: 'Ankara', country: 'Türkiye', area_m2: 501107 },
@@ -291,27 +351,64 @@ describe('0011 · renderReport — GNSS beyanı ve envanter QA satırları', () 
     assert.match(html, /kaydedilmedi/, 'GNSS hassasiyetinin kaydedilmediği beyan edilmeli');
     assert.match(html, /0\/2 kayıtta accuracy_m/, 'QA çizelgesinde sayıyla');
   });
-  test('QA v2.1 satırları çizelgede', () => {
-    // includes kullanılıyor: 'Envanter tutarlılığı (h/d)' içindeki parantezler
-    // RegExp'te grup anlamına gelir (test tuzağı belgelensin diye not düşüldü).
-    for (const k of ['Tür sözlüğü eşleşmesi', 'Fotoğraf kanıtı', 'GNSS doğruluk kaydı', 'Envanter tutarlılığı (h/d)', 'Karbon yeniden hesabı'])
+  test('QA v3 satırları çizelgede (0031: birim kontrolü + oran incelemesi ayrı)', () => {
+    /* includes kullanılıyor: satır adlarındaki parantezler RegExp'te grup
+     * anlamına gelir (test tuzağı belgelensin diye not düşüldü). */
+    for (const k of ['Tür sözlüğü eşleşmesi', 'Fotoğraf kanıtı', 'GNSS doğruluk kaydı', 'Envanter birim kontrolü (DBH)', 'Boy/DBH oranı incelemesi', 'Karbon yeniden hesabı'])
       assert.ok(html.includes(k), 'QA satırı eksik: ' + k);
+    /* 0011'in "Envanter tutarlılığı (h/d)" satırı ve ⛔ Blok hükmü kalktı */
+    assert.ok(!html.includes('Envanter tutarlılığı (h/d)'), 'eski satır adı kalmamalı');
     assert.match(html, /2\/2 kayıt kanonik tür sözlüğüyle eşleşti/);
+    /* Birim kontrolü: DBH çap (cm) olarak değerlendirildi, dönüşüm yok */
+    assert.match(html, /çevre→çap dönüşümü uygulanmamıştır/);
   });
   test('bbox geom_json beyanı §2 + §4.4 + §7 izlerinde', () => {
     assert.match(html, /dikdörtgen/, 'bbox sınırı beyan edilmeli');
     assert.match(html, /68[.,]93 ha/, 'bbox jeodezik alanı sayıyla');
   });
-  test('§4.1 çevre→DBH türetmesini veriye bakarak anlatır (girth_cm dolu)', () => {
-    assert.match(html, /DBH = çevre ÷ π/, 'dönüşüm beyanı');
-    assert.match(html, /2\/2 kayıtta ham çevre değeri saklıdır/);
+  test('§4.1 DBH = göğüs çapı (cm) beyanı; çevre→çap dönüşümü YOK (0031)', () => {
+    assert.match(html, /göğüs çapı/, 'DBH tanımı göğüs çapı olarak verilmeli');
+    assert.match(html, /1,30 m/, 'göğüs yüksekliği beyanı');
+    assert.match(html, /herhangi bir çevre→çap dönüşümü uygulanmadan/, 'dönüşüm uygulanmadığı açıkça yazılmalı');
+    /* 0011'in yanlış beyanı: DBH çevreden türetilmiş gibi anlatılıyordu */
+    assert.ok(!html.includes('DBH = çevre ÷ π'), 'yasak beyan: DBH = çevre ÷ π');
+    assert.ok(!/çevre ÷ π/.test(html), 'hiçbir yerde ÷π dönüşümü anlatılmamalı');
   });
-  test('blok durumunda §7 açık uyarı basar', () => {
-    const blockedQa = { ...qa, hd_block: true, hd_fail: [{ point_id: 7, hd: 9.7 }, { point_id: 29, hd: 8.8 }, { point_id: 32, hd: 6.25 }] };
-    const snap2 = { ...snap, qa: { species: blockedQa, photos: snap.qa.photos } };
+  test('§4.6 veri sözlüğü + ölçüm notu: DBH satırı çap (cm)', () => {
+    assert.match(html, /Veri sözlüğü/);
+    assert.match(html, /Ölçüm notu:/);
+    assert.match(html, /göğüs çapı/);
+    /* veri sözlüğü tablosunda DBH birimi cm olarak geçmeli */
+    const i = html.indexOf('Veri sözlüğü');
+    const seg = html.slice(i, i + 4000);
+    assert.match(seg, /DBH/);
+    assert.match(seg, /cm/);
+  });
+  test('boy/çap inceleme uyarısı §7 + §9\'da BLOK dili olmadan basılır', () => {
+    const reviewQa = { ...qa, hd_review: true, hd_block: false, hd_fail: [{ point_id: 7, hd: 9.7 }, { point_id: 29, hd: 8.8 }], state: 'INCELEME' };
+    const snap2 = { ...snap, qa: { species: reviewQa, photos: snap.qa.photos } };
     const h2 = renderReport(snap2, { id: 'DGR-2026-9998', hash: canonicalHash(snap2), version: 1, meta: { id: 'DGR-2026-9998', history: [] } });
-    assert.match(h2, /envanter kalite kapısı blok durumundadır/i);
+    assert.match(h2, /🟡 İNCELEME/);
+    assert.match(h2, /İNCELEME GÖSTERGESİDİR/);
+    assert.match(h2, /veri hatası hükmü DEĞİLDİR/);
+    /* inceleme durumunda GEÇİCİDİR/KULLANILMAMALIDIR damgası BASILMAZ */
+    assert.ok(!h2.includes('GEÇİCİDİR'), 'inceleme raporu geçici damgası taşımamalı');
+    assert.ok(!h2.includes('KULLANILMAMALIDIR'), 'inceleme raporu kullanım yasağı taşımamalı');
+    assert.ok(!h2.includes('⛔'), 'inceleme durumunda ⛔ işareti olmamalı');
+  });
+  test('kritik hata (DBH geçerlilik) durumunda §7 🔴 BLOKLU + GEÇİCİDİR basar', () => {
+    const blockedQa = {
+      ...qa, state: 'BLOKLU', dbh_block: true, dbh_review: false,
+      dbh_fail: [{ point_id: 7, dbh_cm: null, reason: 'eksik' }, { point_id: 29, dbh_cm: 0, reason: 'pozitif-degil' }, { point_id: 32, dbh_cm: 900, reason: 'aralik-disi' }],
+    };
+    const snap2 = { ...snap, qa: { species: blockedQa, photos: snap.qa.photos } };
+    const h2 = renderReport(snap2, { id: 'DGR-2026-9997', hash: canonicalHash(snap2), version: 1, meta: { id: 'DGR-2026-9997', history: [] } });
+    assert.match(h2, /🔴 BLOKLU/);
     assert.match(h2, /GEÇİCİDİR/);
+    assert.match(h2, /KULLANILMAMALIDIR/);
+    /* blok gerekçesi DBH geçerliliğidir; "çevre olabilir" iddiası DEĞİL */
+    assert.match(h2, /DBH/);
+    assert.ok(!/çevre olabilir/i.test(h2), 'yasak iddia: DBH çevre olabilir');
   });
 });
 

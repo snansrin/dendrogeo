@@ -94,24 +94,65 @@ Türkçe-duyarlı normalizasyon + `SPECIES_SYNONYMS` ile adı kanonik forma
 indirger; DB'ye her zaman kanonik ad yazılır. Rapor QA'sı ("Tür sözlüğü
 eşleşmesi" satırı) eşleşmeyen adları SAYIYLA beyan eder.
 
-### 1.5.1 Çevre → DBH dönüşümü ve birim kapısı (0011)
+### 1.5.1 DBH tanımı ve envanter kalite kapısı (0031)
 
-Cihaz çıktılarında "Çap" kolonu bazen **göğüs çevresi** taşır (Göksu 2026:
-34/34 kayıt; saha fotoğraflarıyla doğrulandı). Kanonik dönüşüm:
+**DBH = göğüs çapı** (*Diameter at Breast Height*): ağacın yerden **1,30 m**
+yükseklikteki gövde **çapı**, birimi **cm**. Saha ekibi değeri doğrudan çap
+olarak ölçer ve kaydeder; `measurements.dbh_cm` kolonu bu ham ölçümü taşır.
 
-```
-DBH [cm] = çevre [cm] / π
-```
+> **DendroGeo rapor hattında çevre→çap (÷π) dönüşümü YAPILMAZ.**
+> 0011 döneminde "cihazın Çap kolonu aslında çevre taşıyor" varsayımıyla
+> `dbh_cm` değerleri π ile bölünmüş ve rapor metnine DBH'nin gövde
+> çevresinden türetildiği beyanı yazılmıştı. Bu varsayım **yanlıştı**:
+> kayıtlı değerler göğüs çapıdır.
+> 0013 migrationı kayıtları özgün saha değerlerine iade etti; 0031 de
+> rapor metnini, QA hükmünü ve içe aktarma aracını bu tanıma göre düzeltti.
+> Karbon motoru, katsayılar, `dbh_cm` kolonu, CSV biçimi ve veri tabanı
+> şeması bu düzeltmede **değişmedi** — değişen yalnız açıklama ve hükümdür.
 
-Ham çevre değeri `measurements.girth_cm` kolonunda SAKLANIR (silinmez);
-`dbh_cm` türetilmiş değerdir. Birim hatası otomatik yakalanır: birimsiz
-boy/çap oranı `h/D = 100·H[m]/D[cm]` olgun park ağaçlarında ~20–100'dur.
-`QA_LIMITS` (scripts/lib/mc.mjs): `HD_MIN=15`, `HD_MAX=120`; kayıtların
->%50'si (ve ≥3 kayıt) eşik dışındaysa rapor yayını **bloklanır** (§7'de
-"⛔ Blok" + §9 sınırlılık). Tekil bodur bireyler uyarıdır, blok değildir.
-Aynı kapılar `scripts/import-measurements.mjs` içinde içe aktarımda da
-çalışır; `--birim auto` medyan h/D'ye bakarak kolonun birimini kendisi
-karar verir.
+`measurements.girth_cm` kolonu **ham denetim alanı** olarak durur (silinmez);
+hiçbir hesap yolunda DBH türetmek için kullanılmaz. Panelin ölçüm CSV
+dışa aktarımındaki çevre kolonu `π·DBH` ile **türetilmiş bir kolaylık
+alanıdır** — model girdisi değildir ve içe aktarımda çap üretmek için
+okunmaz.
+
+**Envanter kalite kapısı (QA v3 · 0031).** Rapor motoru yayından önce
+kayıtları üç ayrı eksenle denetler (`inventoryQa`, scripts/make-report.mjs):
+
+| # | Kontrol | Soru | İhlalde |
+|---|---|---|---|
+| (a) | **Envanter birim kontrolü (DBH)** | DBH bir çap ölçümü olarak teknik açıdan geçerli mi? var → sayısal → > 0 → `1 ≤ D ≤ 400 cm` | ≥3 kayıt VE >%50 → **⛔ kritik** (🔴 BLOKLU) |
+| (b) | **Boy/DBH oranı incelemesi** | `100·H[m]/D[cm]` gösterge aralığında mı (`15–120`)? | **⚠ İNCELEME — asla blok değil** |
+| (c) | **Karbon yeniden hesabı** | saklı `carbon_kg`, panel denklemiyle ±%20 (ve mutlak fark ≥5 kg) içinde mi? | ≥3 kayıt VE >%50 → **⛔ kritik** (hesap bütünlüğü; DBH birimiyle ilgisi YOK) |
+
+**(b) neden blok değil:** boy/çap oranı tür, yaş, gövde formu ve tepe
+yapısına göre doğal olarak geniş bir aralıkta değişir; tek bir basit oran
+"saha ölçümü yanlıştır" hükmü veremez. Göksu (park 25) envanterinde 32/34
+kayıt bu gösterge aralığının dışındadır ve bu, verinin hatalı olduğu
+anlamına **gelmez**. Eşik dışı oranlar raporda sayıyla beyan edilir
+(⚠ İnceleme) ve yayın **bloklanmaz**. `inventoryQa()` içinde `hd_block`
+kalıcı olarak `false`tur (`test/dbh-qa.test.mjs` bunu kilitler).
+
+**Üç hâlli rapor durumu** (`QA_STATE`, scripts/lib/mc.mjs) Çizelge 4ten
+türetilir ve künyede + §7 girişinde basılır:
+
+* 🔴 **BLOKLU** — kritik veri hatası (a veya c sistemik): karbon sonucu
+  bilimsel iletişimde kullanılmamalıdır.
+* 🟡 **İNCELEME** — veri geçerli; bazı istatistiksel kontroller uyarı veriyor.
+  Veri hatası hükmü DEĞİLDİR, sonucu geçersiz kılmaz.
+* 🟢 **GEÇERLİ** — tüm kritik kontroller geçti.
+
+Eşik sabitleri tek yerdedir: `QA_LIMITS` (scripts/lib/mc.mjs) —
+`DBH_MIN_CM=1`, `DBH_MAX_CM=400`, `HD_MIN=15`, `HD_MAX=120`,
+`CARBON_DEV_PCT=20`, `CARBON_DEV_MIN_KG=5`, `BLOCK_RATIO=0.5`,
+`BLOCK_MIN_N=3`.
+
+Aynı kontroller `scripts/import-measurements.mjs` içinde içe aktarımda da
+çalışır. **`--birim cevre` kaldırıldı (0031):** araç `auto` kipinde birimi
+her zaman **cm** kabul eder, dönüşüm uygulamaz; boy/çap oranı taşmışsa
+yalnız uyarı basar. Dosyada çap kolonu yoksa (yalnız çevre kolonu varsa)
+içe aktarma **durur** — sessiz ÷π türetmesi yapılmaz. `--birim mm` açık
+operatör beyanıdır (mm→cm birim düzeltmesi, π ile ilgisi yoktur).
 
 ### 1.6 Geçersiz girdiler
 

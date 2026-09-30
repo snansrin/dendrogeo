@@ -2,23 +2,30 @@
 /* scripts/import-measurements.mjs — cihaz/saha çıktısını kanonik SQL'e çevirir.
  *
  * Neden var (2026-09-28 · Göksu Parkı envanteri, 0011):
- *   Elle panel girişi üç sistemik hata üretti: (1) cihazın "Çap" kolonu
- *   aslında ÇEVRE idi → DBH 9,05x şişti; (2) 11 kayıt sözlük dışı tür adıyla
- *   girdi → ρ grup varsayılanına düştü; (3) P7'de ondalık kayması (1962 →
- *   196,2). Bu araç aynı hataları İÇE AKTARIMDA yakalar: birim dönüşümü,
- *   kanonik tür çözümü, panel denklemiyle yeniden hesap ve QA kapıları.
+ *   Elle panel girişi sistemik hatalar üretti: sözlük dışı tür adları (ρ grup
+ *   varsayılanına düştü), ondalık kaymaları, mükerrer noktalar. Bu araç aynı
+ *   hataları İÇE AKTARIMDA yakalar: kanonik tür çözümü, panel denklemiyle
+ *   yeniden hesap ve QA kapıları.
+ *
+ * 0031 DÜZELTMESİ (kullanıcı kararı, 2026-09-29): DBH = GÖĞÜS ÇAPI'dır,
+ *   birimi cm'dir, sahada doğrudan çap olarak kaydedilir. Bu araç
+ *   çevre→çap (÷π) dönüşümü YAPMAZ; `--birim cevre` seçeneği kaldırıldı.
+ *   `girth_cm` kolonu yalnız HAM DENETİM alanı olarak saklanır ve DBH
+ *   türetmek için KULLANILMAZ. Boy/çap oranı bir İNCELEME göstergesidir:
+ *   uyarı basar, içe aktarmayı BLOKLAMAZ.
  *
  * Kullanım:
  *   node scripts/import-measurements.mjs saha.csv --park 25 --project 26 [--owner UUID]
- *       [--birim cm|cevre|mm|auto] [--owner-email e@x] [--status Beklemede|Onaylı]
+ *       [--birim cm|mm|auto] [--owner-email e@x] [--status Beklemede|Onaylı]
  *       [--out import.sql] [--json] [--dry-run] [--force]
  *
  * Girdi: CSV veya TSV; başlık satırı zorunlu. Kolon eşanlamlıları:
  *   nokta|point|point_id|no        → point_id       (zorunlu)
  *   tur|tür|species|agac|ağaç      → species        (zorunlu)
  *   grup|group|grp                 → grp            (zorunlu: İBRELİ/YAPRAKLI)
- *   cap|çap|dbh|dbm_cm|dbh_cm      → çap (cm)       (--birim cm|auto)
- *   cevre|çevre|girth|cevre_cm|girth_cm → çevre (cm) (--birim cevre|auto)
+ *   cap|çap|dbh|dbm_cm|dbh_cm      → göğüs çapı (cm) — ZORUNLU (--birim cm|auto)
+ *   cevre|çevre|girth|cevre_cm|girth_cm → ham çevre (cm): yalnız denetim
+ *       alanı olarak saklanır; DBH bu kolondan TÜRETİLMEZ (0031)
  *   boy|h|height|height_m|boy_m    → height_m       (zorunlu)
  *   karbon|carbon|carbon_kg|c_kg   → saklı karbon   (QA karşılaştırması)
  *   hacim|volume|vol|volume_m3     → saklı hacim    (QA karşılaştırması)
@@ -27,10 +34,11 @@
  *   tarih|date|created_at|time|saat
  * Sayılar Türkçe biçimde olabilir (12,5 veya 1.234,56 → 1234.56).
  *
- * QA kapıları (mc.QA_LIMITS): boy/çap oranı, karbon yeniden hesabı, mükerrer
- * nokta, sözlük dışı tür, (park verilirse) konum çiti. Sistemik ihlal
- * (≥3 kayıt VE >%50) çıkışı 1 yapar ve SQL üretmez — --force ile aşılır
- * (üretilen SQL başına uyarı damgası basılır).
+ * QA kapıları (mc.QA_LIMITS): DBH geçerliliği (var/sayısal/pozitif/cm
+ * aralığı), karbon yeniden hesabı, mükerrer nokta, sözlük dışı tür, (park
+ * verilirse) konum çiti. Sistemik ihlal (≥3 kayıt VE >%50) çıkışı 1 yapar ve
+ * SQL üretmez — --force ile aşılır (üretilen SQL başına uyarı damgası
+ * basılır). Boy/çap oranı 0031'den beri YALNIZ uyarıdır, blok değildir.
  */
 import { readFileSync, writeFileSync } from 'node:fs';
 import { loadRho, loadSpeciesDict, calcRow, QA_LIMITS } from './lib/mc.mjs';
@@ -102,16 +110,31 @@ function mapHeader(cells, dict) {
   return idx;
 }
 
-/* ---- birim kararı ---- */
+/* ---- birim kararı (0031: DBH = göğüs çapı, cm) ----
+ * Eski sürüm medyan boy/çap oranına bakarak kolonu "çevre" ilan edip
+ * dbh_cm = çevre/π dönüşümü uyguluyordu. Bu varsayım yanlıştı: saha verisi
+ * göğüs çapıdır ve olduğu gibi kaydedilir. Artık:
+ *   auto → cm (dönüşüm YOK), oran yalnız inceleme uyarısı üretir
+ *   --birim cm|mm → operatörün açık beyanı (mm: ÷10, birim düzeltmesi)
+ *   --birim cevre → REDDEDİLİR (exit 2): DendroGeo çevre→çap dönüşümü yapmaz */
 function decideUnit(records, birim) {
-  if (birim && birim !== 'auto') return { unit: birim, why: '--birim ile verildi' };
+  if (birim === 'cevre' || birim === 'çevre' || birim === 'girth') {
+    console.error('❌ --birim cevre KALDIRILDI (0031): DendroGeo çevre→çap (÷π) dönüşümü YAPMAZ.');
+    console.error('   DBH = göğüs çapı (cm) ve sahada doğrudan çap olarak kaydedilir.');
+    console.error('   Kaynak dosyanızda gerçekten ÇEVRE taşıyan bir kolon varsa, dosyayı');
+    console.error('   göğüs çapı (cm) kolonuyla yeniden düzenleyin; dönüşümü DendroGeo yapmaz.');
+    process.exit(2);
+  }
+  if (birim === 'mm') return { unit: 'mm', why: '--birim mm ile verildi (cm = mm/10; birim düzeltmesi, çevre→çap dönüşümü DEĞİL)' };
+  if (birim && birim !== 'auto') return { unit: 'cm', why: '--birim ile verildi' };
   const hd = records.filter((r) => r.dbh_cm > 0 && r.height_m > 0).map((r) => (100 * r.height_m) / r.dbh_cm);
-  if (!hd.length) return { unit: 'cm', why: 'oran hesabı için veri yok (varsayılan cm)' };
+  if (!hd.length) return { unit: 'cm', why: 'DBH = göğüs çapı (cm) kabul edildi; oran hesabı için veri yok' };
   hd.sort((a, b) => a - b);
   const med = hd[Math.floor(hd.length / 2)];
-  if (med < QA_LIMITS.HD_MIN) return { unit: 'cevre', why: `medyan boy/çap ${med.toFixed(1)} < ${QA_LIMITS.HD_MIN} → kolon ÇEVRE gibi duruyor (DBH = çevre/π)` };
-  if (med > QA_LIMITS.HD_MAX) return { unit: 'mm', why: `medyan boy/çap ${med.toFixed(1)} > ${QA_LIMITS.HD_MAX} → kolon mm gibi duruyor (÷10)` };
-  return { unit: 'cm', why: `medyan boy/çap ${med.toFixed(1)} fiziksel aralıkta → kolon gerçek çap (cm)` };
+  if (med < QA_LIMITS.HD_MIN || med > QA_LIMITS.HD_MAX) {
+    return { unit: 'cm', why: `DBH = göğüs çapı (cm) kabul edildi, dönüşüm uygulanmadı · medyan boy/çap ${med.toFixed(1)} gösterge aralığı (${QA_LIMITS.HD_MIN}–${QA_LIMITS.HD_MAX}) dışında → İNCELEME uyarısı (blok değil)` };
+  }
+  return { unit: 'cm', why: `DBH = göğüs çapı (cm) · medyan boy/çap ${med.toFixed(1)} gösterge aralığında` };
 }
 
 /* ---- konum çiti (opsiyonel; ağ erişimi varsa) ---- */
@@ -140,7 +163,9 @@ async function parkFence(parkId) {
 const file = process.argv[2] && !process.argv[2].startsWith('--') ? process.argv[2] : null;
 if (!file || has('help')) {
   console.log(`Kullanım: node scripts/import-measurements.mjs <saha.csv|saha.tsv> --park N --project N [seçenekler]
-  --birim cm|cevre|mm|auto   çap kolonunun birimi (varsayılan auto: medyan boy/çap oranına bakar)
+  --birim cm|mm|auto         göğüs çapı kolonunun birimi (varsayılan auto = cm)
+                             NOT: 'cevre' KALDIRILDI (0031) — çevre→çap (÷π)
+                             dönüşümü yapılmaz; DBH sahada çap olarak ölçülür
   --owner UUID               measurements.owner (RLS: kayıt sahibi)
   --owner-email e@x          --owner verilmediyse profiles'dan UUID çözülür (anon okuma)
   --status Beklemede|Onaylı  durum (varsayılan Beklemede — moderasyon panelden)
@@ -165,7 +190,15 @@ if (rows.length < 2) { console.error('❌ en az başlık + 1 veri satırı gerek
 const idx = mapHeader(rows[0], dict);
 for (const f of ['point_id', 'species', 'grp', 'height_m'])
   if (idx[f] == null) { console.error(`❌ zorunlu kolon bulunamadı: ${f} (başlık: ${rows[0].join(' | ')})`); process.exit(2); }
-if (idx.dbh_cm == null && idx.girth_cm == null) { console.error('❌ çap veya çevre kolonu yok'); process.exit(2); }
+if (idx.dbh_cm == null && idx.girth_cm == null) { console.error('❌ göğüs çapı (dbh/cap/çap) kolonu yok'); process.exit(2); }
+/* 0031: çevre kolonundan DBH TÜRETİLMEZ. Dosyada yalnız çevre kolonu varsa
+ * içe aktarma durdurulur — sessiz ÷π dönüşümü yapılmaz. */
+if (idx.dbh_cm == null) {
+  console.error('❌ göğüs çapı (cm) kolonu bulunamadı; yalnız çevre kolonu var.');
+  console.error('   0031: çevre→çap (÷π) dönüşümü YAPILMAZ. DBH, sahada ölçülen göğüs');
+  console.error('   çapıdır (cm) ve dosyada cap|çap|dbh|dbh_cm başlıklı bir kolon olmalıdır.');
+  process.exit(2);
+}
 
 const warn = [], errs = [];
 const recs = [];
@@ -184,7 +217,7 @@ for (let li = 1; li < rows.length; li++) {
   recs.push({
     line: li + 1, point_id: Math.round(point), measurement_no: Math.round(parseNum(g('measurement_no')) || 1),
     species_raw: spRaw, species: canon || spRaw, grp: grp || 'DİĞER',
-    dbh_cm: idx.girth_cm != null && idx.dbh_cm == null ? NaN : parseNum(g('dbh_cm')),
+    dbh_cm: parseNum(g('dbh_cm')),
     girth_cm: parseNum(g('girth_cm')),
     height_m: parseNum(g('height_m')),
     carbon_stored: parseNum(g('carbon_kg')), volume_stored: parseNum(g('volume_m3')),
@@ -194,18 +227,19 @@ for (let li = 1; li < rows.length; li++) {
 }
 if (!recs.length) { console.error('❌ ayrıştırılabilir kayıt yok'); errs.forEach((e) => console.error('  ' + e)); process.exit(2); }
 
-/* ---- birim kararı + dönüşüm (ham değer ASLA kaybolmaz: girth_cm saklanır) ---- */
+/* ---- birim kararı (0031: çevre→çap dönüşümü YOK; ham girth_cm yalnız denetim) ---- */
 const birimArg = (arg('birim') || 'auto').toLowerCase();
-const forAuto = recs.map((r) => ({ dbh_cm: Number.isFinite(r.dbh_cm) ? r.dbh_cm : r.girth_cm, height_m: r.height_m }));
-const decided = decideUnit(forAuto, birimArg === 'auto' ? null : birimArg);
+const decided = decideUnit(recs, birimArg === 'auto' ? null : birimArg);
+if (idx.girth_cm != null) warn.push('Dosyada çevre (girth) kolonu var: HAM denetim değeri olarak girth_cm\'e yazılır; DBH bu kolondan TÜRETİLMEZ (0031).');
 for (const r of recs) {
-  const raw = Number.isFinite(r.dbh_cm) ? r.dbh_cm : r.girth_cm;
-  if (!Number.isFinite(raw) || raw <= 0) { errs.push(`P${r.point_id}: çap/çevre yok veya ≤ 0`); r.skip = true; continue; }
+  const raw = r.dbh_cm;
+  if (!Number.isFinite(raw) || raw <= 0) { errs.push(`P${r.point_id}: göğüs çapı (DBH) yok veya ≤ 0`); r.skip = true; continue; }
   if (!Number.isFinite(r.height_m) || r.height_m <= 0) { errs.push(`P${r.point_id}: boy yok veya ≤ 0`); r.skip = true; continue; }
   r.raw_col = raw;
-  if (decided.unit === 'cevre') { r.girth_cm = raw; r.dbh_cm = +(raw / Math.PI).toFixed(2); }
-  else if (decided.unit === 'mm') { r.girth_cm = null; r.dbh_cm = +(raw / 10).toFixed(2); }
-  else { r.girth_cm = Number.isFinite(r.girth_cm) ? r.girth_cm : null; r.dbh_cm = +raw.toFixed(2); }
+  /* mm → cm birim düzeltmesi (operatörün açık beyanı). π ile HİÇBİR yol yok. */
+  if (decided.unit === 'mm') { r.dbh_cm = +(raw / 10).toFixed(2); }
+  else { r.dbh_cm = +raw.toFixed(2); }
+  r.girth_cm = Number.isFinite(r.girth_cm) ? r.girth_cm : null;
 }
 const live = recs.filter((r) => !r.skip);
 
@@ -216,7 +250,7 @@ for (const r of live) {
   r.carbon_calc = +calc.total_carbon.toFixed(2);
   r.volume_calc = +calc.vol.toFixed(3);
   r.hd = +((100 * r.height_m) / r.dbh_cm).toFixed(1);
-  if (r.hd < QA_LIMITS.HD_MIN || r.hd > QA_LIMITS.HD_MAX) { hdFail.push(r); warn.push(`P${r.point_id}: boy/çap ${r.hd} fiziksel aralık dışında (${QA_LIMITS.HD_MIN}–${QA_LIMITS.HD_MAX}) — tekil bodur ağaçsa sorun değil, sistemikse kapı bloklar`); }
+  if (r.hd < QA_LIMITS.HD_MIN || r.hd > QA_LIMITS.HD_MAX) { hdFail.push(r); warn.push(`P${r.point_id}: boy/çap ${r.hd} gösterge aralığı dışında (${QA_LIMITS.HD_MIN}–${QA_LIMITS.HD_MAX}) — İNCELEME uyarısı; tür/yaş/gövde formu farkı olabilir, içe aktarmayı BLOKLAMAZ (0031)`); }
   if (Number.isFinite(r.carbon_stored) && r.carbon_stored > 0) {
     r.dev_pct = +(((r.carbon_stored - r.carbon_calc) / r.carbon_calc) * 100).toFixed(1);
     if (Math.abs(r.dev_pct) > QA_LIMITS.CARBON_DEV_PCT && Math.abs(r.carbon_stored - r.carbon_calc) >= (QA_LIMITS.CARBON_DEV_MIN_KG ?? 0)) { devFail.push(r); warn.push(`P${r.point_id}: saklı karbon ${r.carbon_stored} kg ≠ yeniden hesap ${r.carbon_calc} kg (%${r.dev_pct}) — ondalık kayması/birim hatası olabilir`); }
@@ -234,8 +268,9 @@ for (const [a, b] of dupVals) warn.push(`P${a.point_id} ≡ P${b.point_id}: çap
 
 const N = live.length || 1;
 const gates = {
-  unit: { ok: decided.unit !== 'cm' || !hdFail.length, note: `${decided.unit} (${decided.why})` },
-  hd: { fail: hdFail.length, block: hdFail.length >= QA_LIMITS.BLOCK_MIN_N && hdFail.length / N > QA_LIMITS.BLOCK_RATIO },
+  unit: { ok: true, note: `${decided.unit} (${decided.why})` },
+  /* 0031: boy/çap oranı YALNIZ inceleme göstergesidir → block kalıcı false. */
+  hd: { fail: hdFail.length, block: false, review: hdFail.length > 0 },
   dev: { fail: devFail.length, block: devFail.length >= QA_LIMITS.BLOCK_MIN_N && devFail.length / N > QA_LIMITS.BLOCK_RATIO },
   unknown_species: recs.filter((r) => !r.species || !dict.byName[r.species]).length,
   dup_points: dupPts.length, hard_errors: errs.length,
@@ -319,7 +354,7 @@ else {
   console.log(`📥 ${file}: ${recs.length} satır → ${live.length} geçerli kayıt (${delim === '\t' ? 'TSV' : 'CSV:' + delim})`);
   console.log(`📏 birim: ${decided.unit.toUpperCase()} — ${decided.why}`);
   console.log(`🧮 toplam karbon: saklı ${(totStored / 1000).toFixed(2)} t → yeniden hesap ${(totCalc / 1000).toFixed(2)} t${totStored > 0 ? ` (oran ${(totStored / totCalc).toFixed(2)}x)` : ''}`);
-  console.log(`🚦 kapılar: h/d ${gates.hd.fail}/${live.length}${gates.hd.block ? ' ⛔BLOK' : ''} · karbon ${gates.dev.fail}/${live.length}${gates.dev.block ? ' ⛔BLOK' : ''} · sözlük dışı ${gates.unknown_species} · mükerrer ${gates.dup_points} · hata ${errs.length}${gates.geofence ? ` · çit dışı ${gates.geofence.outside}/${gates.geofence.checked}` : ''}`);
+  console.log(`🚦 kapılar: boy/çap ${gates.hd.fail}/${live.length}${gates.hd.fail ? ' ⚠İNCELEME' : ''} · karbon ${gates.dev.fail}/${live.length}${gates.dev.block ? ' ⛔BLOK' : (gates.dev.fail ? ' ⚠İNCELEME' : '')} · sözlük dışı ${gates.unknown_species} · mükerrer ${gates.dup_points} · hata ${errs.length}${gates.geofence ? ` · çit dışı ${gates.geofence.outside}/${gates.geofence.checked}` : ''}`);
   for (const w of warn.slice(0, 15)) console.log('   ⚠ ' + w);
   if (warn.length > 15) console.log(`   … +${warn.length - 15} uyarı daha`);
   for (const e of errs.slice(0, 10)) console.log('   ❌ ' + e);

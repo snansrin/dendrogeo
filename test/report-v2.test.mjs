@@ -69,7 +69,14 @@ describe('rapor v2: künye ve resmi çerçeve', () => {
   test('belge künyesi alanları tam', () => {
     for (const k of ['Rapor kimliği', 'Rapor durumu', 'Analiz konusu', 'Konum', 'Analiz tarihi', 'Analiz sürümü', 'Veri dönemi', 'Mekânsal çözünürlük'])
       assert.match(html, new RegExp('<b>' + k + '</b>'), k);
-    assert.match(html, /class="st">Geçerli</, 'durum rozeti Geçerli');
+    /* 0031: rapor durumu ÇİZELGE 4'ten türetilen üç hâlli rozettir
+     * (🔴 BLOKLU / 🟡 İNCELEME / 🟢 GEÇERLİ). Eskiden künyede koşulsuz
+     * "Geçerli" yazıyordu — bu, QA sonucu ne olursa olsun basılan yanlış bir
+     * hükümdü. Bu fikstürde accuracy_m kaydı yok → GNSS satırı ⚠ → 🟡 İNCELEME. */
+    assert.match(html, /class="st (st-ok|st-warn|st-bad)">(🟢 GEÇERLİ|🟡 İNCELEME|🔴 BLOKLU)</, 'üç hâlli durum rozeti');
+    assert.match(html, /class="st st-warn">🟡 İNCELEME</, 'GNSS doğruluğu kaydedilmedi → inceleme');
+    assert.ok(!/class="st">Geçerli</.test(html), 'eski sabit "Geçerli" rozeti kalkmalı');
+    assert.match(html, /veri geçerli; bazı istatistiksel kontroller inceleme uyarısı veriyor/, 'rozet açıklaması');
     assert.match(html, /DendroGeo LC Engine v4\.2\.0/, 'analiz sürümü motor adıyla');
     assert.match(html, /2021 \(arazi örtüsü\)/, 'veri dönemi');
   });

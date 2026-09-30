@@ -9,6 +9,60 @@ Yeni sürüm yayımlama adımları: [`docs/surum-yayini.md`](docs/surum-yayini.m
 
 ## [Yayımlanmadı]
 
+### Düzeltildi — 0031 DBH tanımı ve kalite kontrol hükmü (DGR-2026-0016) (2026-09-29)
+**Kök neden (veri sahibi kararı):** rapor hattı DBH'yi "gövde çevresinden
+türetilmiş çap" olarak anlatıyor ve boy/çap oranına bakarak gerçek saha
+verisini ⛔ BLOKLU ilan ediyordu. **DBH = göğüs çapı**dır (yerden 1,30 m),
+birimi **cm**'dir ve sahada doğrudan çap olarak kaydedilir; DendroGeo
+çevre→çap (÷π) dönüşümü **yapmaz**. 0011'in "kolon çevre olabilir"
+varsayımı yanlıştı (kayıtlar 0013 ile zaten özgün değerlerine iade
+edilmişti) ve haksız bir blok + "GEÇİCİDİR / KULLANILMAMALIDIR" hükmü
+üretiyordu. **Karbon motoru, katsayılar, MC yapılandırması, `dbh_cm`
+kolonu, CSV biçimi, veri tabanı şeması, LULC ve park analizi DEĞİŞMEDİ** —
+düzeltilen yalnız açıklama metni ve QA hükmüdür; yeni migration YOKTUR.
+
+* **§4.1/§4.2/§4.6/§5.1/§7/§9 metinleri:** DBH göğüs çapı (cm) olarak
+  tanımlandı; "DBH = çevre ÷ π" beyanı, "sistemik birim hatası" ve
+  "ölçü birimi hatası" hükümleri kaldırıldı. Her rapor **Ölçüm notu**
+  cümlesini ve **§4.6 Veri sözlüğü** çizelgesini (DBH · cm · göğüs çapı;
+  Boy · m; ρ · g/cm³; AGB/BGB/Karbon · kg; h/DBH · birimsiz) basar.
+* **QA v3 (`inventoryQa`):** üç ayrı eksen — (a) **Envanter birim kontrolü
+  (DBH)**: var → sayısal → > 0 → `1 ≤ D ≤ 400 cm` (kritik, sistemik ihlal
+  bloklar); (b) **Boy/DBH oranı incelemesi**: `15–120` gösterge aralığı,
+  **yalnız ⚠ İNCELEME — `hd_block` kalıcı `false`**; (c) **Karbon yeniden
+  hesabı**: panel denklemi ±%20 ve mutlak fark ≥5 kg (kritik; DBH
+  biriminden bağımsız hesap bütünlüğü kontrolü). Eski "Envanter tutarlılığı
+  (h/d)" satırı kalktı.
+* **Üç hâlli rapor durumu:** künyedeki sabit `<span class="st">Geçerli</span>`
+  rozeti kaldırıldı; durum Çizelge 4'ten türetilir — 🔴 BLOKLU / 🟡 İNCELEME
+  / 🟢 GEÇERLİ (`QA_STATE`, `qaStateOf`). Blok dışında GEÇİCİDİR /
+  KULLANILMAMALIDIR damgası BASILMAZ. Göksu (park 25, n=34) aynı veriyle
+  artık **🟡 İNCELEME** üretir (DBH 34/34 geçerli · oran 32/34 gösterge
+  dışı · karbon yeniden hesabı 6/34 bant dışı).
+* **`metadata.json`:** `variables` (veri sözlüğünün makine okur karşılığı),
+  `measurementNote` (ölçüm notu), `qaState` + `qaStateLabel` alanları eklendi.
+* **`scripts/import-measurements.mjs`:** `--birim cevre` ve `auto`'nun
+  π ile bölme yolu **kaldırıldı** — `auto` artık her zaman cm kabul eder,
+  boy/çap taşması yalnız uyarıdır; dosyada göğüs çapı kolonu yoksa (yalnız
+  çevre kolonu varsa) içe aktarma durur. `girth_cm` ham denetim alanı olarak
+  yazılmaya devam eder, DBH türetmek için kullanılmaz.
+* **Doğrulama:** yayımlanan DGR-2026-0016'nın `data.json`'ı yeni kodla
+  yeniden üretildi — tüm sayısal çizelgeler, `.ci` toplamı (52.29 t
+  [%95 GA: 28.80–73.91]), t/ha değeri, 34/34 satır karbonu ve `DG_DATA`
+  (web + print/PDF veri katmanı) **birebir aynı**; değişen yalnız QA
+  hükmü/açıklama metni ve içerik hash'i (QA katmanı hash'e dahildir).
+* **Belgeler:** `docs/methods.md` §1.5.1 yeniden yazıldı (DBH tanımı +
+  QA v3 tablosu), `docs/rapor-yayini.md` §6 üç hâlli duruma güncellendi,
+  `supabase/README.md` 0011 satırına ve `docs/DENETIM-2026-09-29.md`
+  ilgili satırına düzeltme notu düşüldü. Migration dosyaları ve yayımlanmış
+  `rapor/` çıktıları (immutable) DEĞİŞTİRİLMEDİ.
+* **Bekçi:** `test/dbh-qa.test.mjs` (23 test) — motor/katsayı/MC
+  değişmezliği, 0016 sayılarının birebir yeniden üretimi, yasak metinler
+  (÷π, "sistemik birim hatası", GEÇİCİDİR, ⛔), veri sözlüğü + ölçüm notu,
+  üç hâlli rozet, `hd_block` kalıcı false ve kod taraması (src/ + scripts/
+  içinde DBH'nin π ile bölünmediği). `test/inventory-qa.test.mjs` ve
+  `test/report-v2.test.mjs` yeni anlamlara göre güncellendi.
+
 ### Düzeltildi — 0029 workflow YAML kırığı: yayın kuyruğu durdu (2026-09-29)
 **Kök neden (canlı kanıt):** 0028 yamasındaki iki adım adı tırnaksız
 yazılmıştı ve değer ": " (iki nokta+boşluk) içeriyordu —

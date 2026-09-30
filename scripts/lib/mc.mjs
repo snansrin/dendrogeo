@@ -78,16 +78,58 @@ export function loadSpeciesDict() {
     if (!byName[s.tr]) byName[s.tr] = { tr: s.tr, lat: s.lat, rho: s.rho ?? null, grp: null, panel: false };
   return { byName, grho, resolve: (n) => X.resolveSpeciesName(n), norm: (n) => X.normSp(n) };
 }
-/* ---- envanter QA eşikleri (0011 · Göksu bulgularıyla kalibre) ----
- * HD_MIN: boy/çap oranı BİRİMSİZ tanımlıdır: h(m) / (dbh(cm)/100) = 100·h/D.
- *   Olgun park ağaçlarında ~20-100'dur. Oran < 15 ise
- *   "çap" kolonu büyük olasılıkla ÇEVRE'dir (DBH = çevre/π) — Göksu'da
- *   34/34 kayıt 5-16 aralığındaydı; çevre yorumu ile 17-51'e oturdu ve
- *   saha fotoğraflarıyla doğrulandı.
- * HD_MAX: oran > 120 ise çap mm girilmiş olabilir (÷10).
- * Kayıtların yarısından fazlası (ve en az BLOCK_MIN_N kayıt) eşik dışındaysa
- * YAYIN KAPISI BLOKLAR; tekil bodur/abartılı bireyler uyarıdır, blok değil. */
-export const QA_LIMITS = { HD_MIN: 15, HD_MAX: 120, CARBON_DEV_PCT: 20, CARBON_DEV_MIN_KG: 5, BLOCK_RATIO: 0.5, BLOCK_MIN_N: 3 };
+/* ---- envanter QA eşikleri ----
+ * 0031 DÜZELTMESİ (kullanıcı kararı, 2026-09-29): DBH = GÖĞÜS ÇAPI'dır,
+ * birimi cm'dir ve sahada doğrudan çap olarak kaydedilir. DendroGeo
+ * rapor hattında çevre→çap (÷π) dönüşümü UYGULANMAZ; uygulanmamıştır.
+ * 0011 dönemindeki "kolon çevre olabilir" varsayımı yanlıştı ve gerçek
+ * saha verisini haksız yere ⛔ Blok hükmüne taşıdı. Bu nedenle:
+ *
+ * DBH_MIN_CM / DBH_MAX_CM — DBH'nin ÇAP (cm) olarak teknik geçerlilik
+ *   aralığı. Kontrol edilen soru "DBH çevre olabilir mi?" DEĞİL;
+ *   "girilen DBH, çap ölçümü olarak geçerli mi?" sorusudur:
+ *   var mı → sayısal mı → pozitif mi → cm biriminde makul mü.
+ *   Park ağaçlarında 1 cm (fide) – 400 cm (dev birey) fiziksel aralıktır.
+ *   Bu aralık dışı/eksik değerler KRİTİK veri hatasıdır → bloklayabilir.
+ *
+ * HD_MIN / HD_MAX — boy/çap oranı (birimsiz: 100·H[m]/D[cm]) yalnızca
+ *   bir İNCELEME GÖSTERGESİDİR. Tür, yaş ve gövde formu farkları tek bir
+ *   basit oranla "saha ölçümü yanlıştır" hükmü vermeyi geçersiz kılar.
+ *   Bu oran ASLA yayını bloklamaz (0031: hd_block kalıcı olarak false).
+ *   Eşik dışı oranlar raporda ⚠ İnceleme olarak beyan edilir.
+ *
+ * CARBON_DEV_PCT / CARBON_DEV_MIN_KG — saklı karbon ile panel denklemi
+ *   yeniden hesabının karşılaştırılması. DBH tanımından BAĞIMSIZ, ayrı bir
+ *   kalite kontrolüdür; ±%20 bandı dışı kayıtlar ⚠ İnceleme'dir. Yalnız
+ *   SİSTEMİK ölçekte (BLOCK_RATIO/BLOCK_MIN_N) hesap bütünlüğü şüphesi
+ *   doğurursa bloklayabilir — bu bir birim hatası iddiası DEĞİLDİR. */
+export const QA_LIMITS = {
+  DBH_MIN_CM: 1, DBH_MAX_CM: 400,
+  HD_MIN: 15, HD_MAX: 120,
+  CARBON_DEV_PCT: 20, CARBON_DEV_MIN_KG: 5,
+  BLOCK_RATIO: 0.5, BLOCK_MIN_N: 3,
+};
+
+/* ---- rapor QA durumu (0031): üç hâlli, tek yerden ----
+ * 🔴 BLOKLU   → kritik veri hatası var (karbon sonucu kullanılmamalı)
+ * 🟡 İNCELEME → veri geçerli, bazı istatistiksel kontroller uyarı veriyor
+ * 🟢 GEÇERLİ  → tüm kritik kontroller geçti
+ * Boy/DBH oranı ve karbon yeniden hesap bandı YALNIZ 'review' üretir;
+ * 'block' üretmez. Böylece sistem gerçek saha verisini bloke etmez. */
+export const QA_STATE = { BLOCKED: 'BLOKLU', REVIEW: 'INCELEME', VALID: 'GECERLI' };
+export function qaStateOf({ block = false, review = false } = {}) {
+  if (block) return QA_STATE.BLOCKED;
+  if (review) return QA_STATE.REVIEW;
+  return QA_STATE.VALID;
+}
+/* DBH geçerlilik zincirindeki hata halkalarının raporda basılan Türkçe karşılığı.
+ * Hiçbiri "çevre olabilir" iddiası içermez: DBH = göğüs çapı (cm) kabul edilir. */
+export const DBH_REASON_TR = {
+  'eksik': 'DBH kaydı yok',
+  'sayisal-degil': 'DBH sayısal değil',
+  'pozitif-degil': 'DBH ≤ 0',
+  'aralik-disi': 'DBH cm aralığı dışında',
+};
 /* CARBON_DEV_MIN_KG: yüzde bandı YALNIZ mutlak fark ≥ 5 kg iken değerlendirilir.
  * Sebep: 10,6 kg gibi küçük kayıtlarda 0,1 kg'lık saklama yuvarlaması +
  * dbh_cm'in 2 haneye yuvarlanması %20 bandını tek başına ihlal edebiliyor

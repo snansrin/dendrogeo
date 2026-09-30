@@ -247,7 +247,10 @@ yazar künyesi veri sahibi önceliğiyle (0015) en çok katkısı olan kişidir.
 Güvenlik: davet/ortak tablolarına istemciden YAZMA YOK (grant verilmedi) —
 tüm yazımlar RPC denetiminde; davetler anon'a kapalı (rls-probe.sh 0025 bölümüyle denetlenir).
 
-## 6) Envanter kalite kapıları (QA v2.1 · 0011)
+## 6) Envanter kalite kapıları (QA v3 · 0031)
+
+**DBH = göğüs çapı (cm)** ve sahada doğrudan çap olarak kaydedilir; rapor
+hattında çevre→çap dönüşümü YAPILMAZ (ayrıntı: `docs/methods.md` §1.5.1).
 
 Rapor motoru yayından ÖNCE kayıtları da denetler (§7 Çizelge 4):
 
@@ -256,20 +259,35 @@ Rapor motoru yayından ÖNCE kayıtları da denetler (§7 Çizelge 4):
 | Tür sözlüğü eşleşmesi | kanonik ad / eşanlamlı | ⚠ beyan (ρ grup varsayılanı) |
 | Fotoğraf kanıtı | her kayıtta `photo_url` | ⚠ beyan |
 | GNSS doğruluk kaydı | `accuracy_m` dolu | ⚠ "kaydedilmedi" beyanı (±0,0 UYDURULMAZ) |
-| Envanter tutarlılığı (h/D) | 15 ≤ 100·H/D ≤ 120 | ≥3 kayıt VE >%50 → **⛔ yayın bloğu** |
-| Karbon yeniden hesabı | panel denklemi ±%20 (ve mutlak fark ≥5 kg — küçük kayıtlarda yuvarlama gürültüsü bayraklanmaz) | ≥3 kayıt VE >%50 → **⛔ yayın bloğu** |
+| **Envanter birim kontrolü (DBH)** | var → sayısal → > 0 → `1 ≤ D ≤ 400 cm` | ≥3 kayıt VE >%50 → **⛔ kritik** |
+| **Boy/DBH oranı incelemesi** | 15 ≤ 100·H/D ≤ 120 (gösterge) | **⚠ İNCELEME — asla blok değil** |
+| Karbon yeniden hesabı | panel denklemi ±%20 (ve mutlak fark ≥5 kg — küçük kayıtlarda yuvarlama gürültüsü bayraklanmaz) | ≥3 kayıt VE >%50 → **⛔ kritik** (hesap bütünlüğü; DBH birimiyle ilgisi yok) |
 | Park geometrisi | bbox/düğüm taraması | dikdörtgen `geom_json` yok sayılır → OSM'e düşülür (beyanla) |
 
-Blok durumunda rapor §7 başlığında "GEÇİCİDİR … 0011 uygulanmadan
-KULLANILMAMALIDIR" uyarısı basar. Göksu Parkı (park 25) için düzeltme
-hazır: `supabase/migrations/0011_inventory_qa.sql` (çevre→DBH + ρ yeniden
-hesap + gerçek OSM sınırı; idempotent, yedekli, geri almalı).
+Rapor durumu Çizelge 4ten türetilen **üç hâlli** bir rozettir (künye + §7):
+
+* 🔴 **BLOKLU** — kritik veri hatası; §7 "karbon toplamı GEÇİCİDİR ve hata
+  giderilmeden bilimsel iletişimde KULLANILMAMALIDIR" uyarısını basar. Yalnız
+  DBH geçerlilik kontrolü veya karbon yeniden hesabı sistemik ihlal verirse.
+* 🟡 **İNCELEME** — veri geçerli; istatistiksel kontroller uyarı veriyor
+  (boy/çap oranı, GNSS doğruluk kaydı, tekil karbon sapmaları, fotoğraf
+  eksiği). Sonucu geçersiz kılmaz, yayını durdurmaz.
+* 🟢 **GEÇERLİ** — tüm kritik kontroller geçti.
+
+> **0011 notu (tarihsel):** `supabase/migrations/0011_inventory_qa.sql`
+> "Çap kolonu çevre taşıyor" varsayımıyla `dbh_cm` değerlerini π ile bölmüş
+> ve h/D oranına yayın bloğu bağlamıştı. Bu varsayım yanlıştı; kayıtlar
+> `0013_restore_measurements.sql` ile özgün saha değerlerine iade edildi,
+> 0031 de h/D hükmünü incelemeye indirdi. Yeni bir migration GEREKMEZ.
 
 Yeni saha/cihaz verisi için elle panel girişi yerine:
 
 ```bash
 node scripts/import-measurements.mjs saha.csv --park N --project N --owner UUID
-#  · --birim auto (varsayılan): medyan h/D < 15 ise kolonu ÇEVRE sayar
+#  · dosyada göğüs çapı (cap|çap|dbh|dbh_cm, cm) kolonu ZORUNLU
+#  · --birim auto (varsayılan) = cm; çevre→çap dönüşümü YAPILMAZ (0031)
+#  · --birim cevre KALDIRILDI (exit 2); yalnız çevre kolonu olan dosya alınmaz
+#  · boy/çap oranı taşarsa ⚠ uyarı basar, içe aktarmayı BLOKLAMAZ
 #  · --dry-run: yalnız QA raporu  · --json: makine okur  · SQL idempotent
 ```
 
