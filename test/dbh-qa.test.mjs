@@ -105,8 +105,23 @@ const SNAP = {
   rows: ROWS,
 };
 
-/* ---- QA katmanı: 0031 koduyla hesaplanır + üç hâlin elle enjekte edilen hâlleri ---- */
+/* ---- QA katmanı: 0032 (QA v4) koduyla hesaplanır + üç hâlin enjekte hâlleri ----
+ * 0032 · bu fikstürde ağaç DEĞERİ kontrollerinin tümü geçerlidir (2 birey
+ * DBH ≥ 100 cm = anıtsal gövde ölçeği; karbon motor değerlerinden türetildi)
+ * → doğal durum 🟢 GEÇERLİ. 🟡 İNCELEME ve 🔴 BLOKLU görünümleri AYNI
+ * snapshot üzerine enjekte edilen QA nesneleriyle doğrulanır: amaç, QA hükmü
+ * değişirken SAYILARIN (çizelgeler, toplam, GA, t/ha, DG_DATA) değişmediğini
+ * kanıtlamak. Enjekte hd_fail kayıtları 0032 ölçütlerinin gerçek biçimidir:
+ * reason 'fiziksel-alt' (h/D < 3) veya 'stand-aykiri' (modified z > 3,5). */
 const QA = inventoryQa(SNAP.rows, dict);
+const QA_REVIEW = {
+  ...QA, hd_review: true, state: QA_STATE.REVIEW,
+  hd_fail: [
+    { point_id: 1, hd: 9.27, z: 4.1, reason: 'stand-aykiri' },
+    { point_id: 7, hd: 2.1, z: null, reason: 'fiziksel-alt' },
+    { point_id: 29, hd: 11.25, z: 3.9, reason: 'stand-aykiri' },
+  ],
+};
 const QA_VALID = { ...QA, hd_fail: [], hd_review: false, state: QA_STATE.VALID };
 const QA_BLOCKED = {
   ...QA, state: QA_STATE.BLOCKED, dbh_block: true, dbh_review: false,
@@ -118,9 +133,9 @@ const render = (qa, id = 'DGR-2026-9001') => {
   const hash = canonicalHash(s);
   return { html: renderReport(s, { id, hash, version: 1, meta: { ...META, id } }), md: buildMetadata(s, { id, hash, version: '1.0', meta: { ...META, id }, history: META.history }), snap: s, hash };
 };
-const R = render(QA);            /* hesaplanan durum: 🟡 İNCELEME (oran göstergesi) */
+const R = render(QA_REVIEW);     /* 🟡 İNCELEME (enjekte: gövde formu incelemesi) */
 const HTML = R.html, MD = R.md;
-const R_OK = render(QA_VALID);   /* 🟢 GEÇERLİ */
+const R_OK = render(QA_VALID);   /* 🟢 GEÇERLİ (0032de doğal durum da bu) */
 const R_BAD = render(QA_BLOCKED);/* 🔴 BLOKLU */
 
 /* ---- yardımcılar ---- */
@@ -341,15 +356,25 @@ describe('0031 · DBH = göğüs çapı (cm): dönüşüm iddiası YOK', () => {
   });
 });
 
-describe('0031 · boy/DBH oranı yalnız İNCELEME göstergesi (asla blok değil)', () => {
-  test('oran 3/6 kayıtta aralık dışı → 🟡 İNCELEME, blok YOK', () => {
+describe('0031+0032 · boy/DBH oranı: asla blok değil, anıtsal gövdede uyarı bile değil', () => {
+  test('0032 · tipik bant dışı oran SAYIMDIR: anıtsal gövdeli fikstürde durum 🟢 GEÇERLİ', () => {
     assert.equal(QA.n, ROWS.length);
     assert.equal(QA.dbh_fail.length, 0, 'DBH geçerlilik ihlali yok: ' + JSON.stringify(QA.dbh_fail));
-    assert.equal(QA.hd_fail.length, 3, 'oran göstergesi: ' + JSON.stringify(QA.hd_fail));
+    /* P1 (110 cm / 10,2 m → 9,27), P7 (107 / 12 → 11,21), P29 (40 / 4,5 → 11,25)
+     * tipik 15–120 bandının dışında; hiçbiri fiziksel olarak olanaksız değil ve
+     * stand içi dağılıma göre (modified z) aykırı değil → UYARI YOK.
+     * 0031de bu üç kayıt "olağandışı oranda" diye ⚠ üretiyordu. */
+    assert.equal(QA.hd_band_out.length, 3, 'tipik bant dışı SAYIM: ' + JSON.stringify(QA.hd_band_out));
+    assert.equal(QA.hd_fail.length, 0, 'aykırı kayıt yok: ' + JSON.stringify(QA.hd_fail));
     assert.equal(QA.hd_block, false, 'boy/çap ASLA bloklamaz');
-    assert.equal(QA.hd_review, true);
+    assert.equal(QA.hd_review, false, '0032: anıtsal gövde ölçeği inceleme üretmez');
     assert.equal(QA.dev_fail.length, 0, 'saklı karbon motor değerleri → sapma yok');
-    assert.equal(QA.state, QA_STATE.REVIEW, 'durum: ' + QA.state);
+    assert.equal(QA.state, QA_STATE.VALID, 'doğal durum 🟢: ' + QA.state);
+    /* ℹ️ beyan: 2 birey anıtsal gövde ölçeğinde (P1 110 cm, P7 107 cm) */
+    assert.equal(QA.anit.n, 2, JSON.stringify(QA.anit.points));
+    assert.deepEqual(QA.anit.points.map((x) => x.point_id), [1, 7]);
+    assert.equal(QA.anit.max_dbh_cm, 110);
+    assert.deepEqual(QA.info.map((x) => x.key), ['anit'], 'ℹ️ beyan kalemi duruma ETKİ ETMEZ');
   });
 
   test('hd_block kodda kalıcı false: %100 ihlal bile bloklamaz', () => {
@@ -423,8 +448,10 @@ describe('0031 · üç hâlli rapor durumu (Çizelge 4ten türetilir)', () => {
     assert.match(HTML, /🟢 GEÇERLİ/);
     assert.match(HTML, /tüm kritik kontroller geçmiştir/);
     assert.match(HTML, /veri hatası hükmü DEĞİLDİR/);
-    assert.match(HTML, /3\/6 kayıt olağandışı/, 'oran incelemesi sayıyla');
-    assert.match(HTML, /3\/6 kayıt 15–120 gösterge aralığında/, 'kaç kayıt aralıkta, sayıyla');
+    assert.match(HTML, /3\/6 kayıt fiziksel makullük bandı dışında veya stand içi aykırı/, 'inceleme kalemi §7 girişinde sayıyla');
+    assert.match(HTML, /3\/6 kayıt gövde formu açısından makul · 3 kayıt inceleme istiyor/, 'Çizelge 4 ayrıntısı sayıyla');
+    assert.match(HTML, /fiziksel makullük bandı \(3–200\) dışı/, 'ihlalin hangi ölçütten geldiği yazılı');
+    assert.match(HTML, /modified z/, 'robust ölçüt beyan edilir');
     assert.match(HTML, /yayını bloklamaz/, 'oranın bloklamadığı açıkça yazılı');
   });
 

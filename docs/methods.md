@@ -116,22 +116,81 @@ dışa aktarımındaki çevre kolonu `π·DBH` ile **türetilmiş bir kolaylık
 alanıdır** — model girdisi değildir ve içe aktarımda çap üretmek için
 okunmaz.
 
-**Envanter kalite kapısı (QA v3 · 0031).** Rapor motoru yayından önce
-kayıtları üç ayrı eksenle denetler (`inventoryQa`, scripts/make-report.mjs):
+**Envanter kalite kapısı (QA v4 · 0032; v3 = 0031).** Rapor motoru yayından
+önce kayıtları dört eksenle denetler (`inventoryQa`, scripts/make-report.mjs):
 
 | # | Kontrol | Soru | İhlalde |
 |---|---|---|---|
 | (a) | **Envanter birim kontrolü (DBH)** | DBH bir çap ölçümü olarak teknik açıdan geçerli mi? var → sayısal → > 0 → `1 ≤ D ≤ 400 cm` | ≥3 kayıt VE >%50 → **⛔ kritik** (🔴 BLOKLU) |
-| (b) | **Boy/DBH oranı incelemesi** | `100·H[m]/D[cm]` gösterge aralığında mı (`15–120`)? | **⚠ İNCELEME — asla blok değil** |
-| (c) | **Karbon yeniden hesabı** | saklı `carbon_kg`, panel denklemiyle ±%20 (ve mutlak fark ≥5 kg) içinde mi? | ≥3 kayıt VE >%50 → **⛔ kritik** (hesap bütünlüğü; DBH birimiyle ilgisi YOK) |
+| (b) | **Boy/DBH oranı incelemesi** | oran **fiziksel olarak olanaklı** mı (`3 ≤ 100·H/D ≤ 200`) ve **stand içi dağılıma göre aykırı** mı (`modified z > 3,5`)? | **⚠ İNCELEME — asla blok değil** |
+| (c) | **Karbon yeniden hesabı** | saklı `carbon_kg`, panel denklemiyle **iki ρ kaynağından herhangi biriyle** ±%20 (ve mutlak fark ≥5 kg) içinde mi? | ≥3 kayıt VE >%50 → **⛔ kritik** (hesap bütünlüğü; DBH birimiyle ilgisi YOK) |
+| (d) | **Anıtsal gövde beyanı** | kaç bireyin gövde çapı ≥ 100 cm, Ek-4 basamak dağılımı nedir? | **ℹ️ BEYAN — duruma etkisi YOK** |
 
-**(b) neden blok değil:** boy/çap oranı tür, yaş, gövde formu ve tepe
-yapısına göre doğal olarak geniş bir aralıkta değişir; tek bir basit oran
-"saha ölçümü yanlıştır" hükmü veremez. Göksu (park 25) envanterinde 32/34
-kayıt bu gösterge aralığının dışındadır ve bu, verinin hatalı olduğu
-anlamına **gelmez**. Eşik dışı oranlar raporda sayıyla beyan edilir
-(⚠ İnceleme) ve yayın **bloklanmaz**. `inventoryQa()` içinde `hd_block`
-kalıcı olarak `false`tur (`test/dbh-qa.test.mjs` bunu kilitler).
+**(b) 0032de neden değişti.** 0031 sabit `15–120` bandını **inceleme ölçütü**
+olarak kullanıyordu. Bütünüyle anıtsal (veya bütünüyle bodur) formlu bir
+standda sabit bant yanlış bayrak üretir: Göksu (park 25) envanterinde
+`100·H/D` aralığı **5,33–16,32** (medyan 9,65 · MAD 1,575) ve **32/34** kayıt
+bandın dışındaydı; oysa modified z (Iglewicz–Hoaglin, eşik 3,5) aynı veride
+**tek kaydı bile** aykırı bulmaz. QA v4 bu yüzden iki katmanlıdır:
+
+* **fiziksel makullük** — `HD_PHYS_MIN=3`, `HD_PHYS_MAX=200`; ağaç boyu için
+  `H_MIN_M=1.3` (göğüs yüksekliği), `H_MAX_M=100` (dünya rekoru ~100 m).
+  Bu aralık dışı bir oran/boy, ölçüm veya kayıt hatası olasılığına işaret
+  eder → ⚠ (`reason: fiziksel-alt | fiziksel-ust`).
+* **stand içi robust aykırılık** — `M = 0,6745·(x − medyan)/MAD`, `|M| > 3,5`
+  → ⚠ (`reason: stand-aykiri`). Ortalama/standart sapma yerine **medyan/MAD**
+  kullanılmasının nedeni, anıtsal gövdelerin dağılımın kendisini
+  kaydırmasıdır. `n < HD_ROBUST_MIN_N (5)` iken test **koşulmaz**; `MAD = 0`
+  ise ortalama mutlak sapmaya düşülür, o da 0 ise test uygulanmaz (sahte
+  bayrak üretilmez). Stand dağılımı (`hd_stats`: n, medyan, MAD, min, max,
+  z eşiği, `|z|max`) raporda sayıyla beyan edilir.
+
+Tipik `15–120` bandı **yalnız sayım** olarak korunur (`hd_band_out`) ve
+raporda “bu bir UYARI DEĞİL, BİLGİDİR” ibaresiyle basılır. `hd_block` kalıcı
+olarak `false`tur (0031 hükmü korunur; `test/dbh-qa.test.mjs` kilitler).
+
+**(c) 0032de neden iki ρ kaynağı.** Saklı `carbon_kg` değerlerini üreten 0011
+SQL tablosu bazı türlerde **grup varsayılanı** ρ kullanmıştı. QA yalnız **tür
+düzeyi** ρ ile karşılaştırınca bu kayıtlar sahte “bant dışı” çıkıyordu
+(Göksu: 6/34 kayıt, tümü SALKIM SÖĞÜT; tür ρ=400 ile %27–34, grup ρ=541 ile
+%0,0–5,1). QA v4 beklenen değeri **iki kaynakla** hesaplar (`calcRow` tür ρ
+ile ve `{rho:{}, grho}` bağlamıyla grup varsayılanı ile); saklı değer
+herhangi biriyle bant içindeyse satır **geçerlidir** ve eşleşen kaynak
+sayıyla beyan edilir (`dev_rho.tur` / `dev_rho.grup` /
+`dev_rho.grup_farkli`, satır düzeyinde `rho_src`). Gerçek hesap hataları
+(ör. 10× ondalık kayması) her iki kaynakla da bant dışı kaldığı için
+**yakalanmaya devam eder**. Karbon motoru, katsayılar, saklı değerler, CSV
+biçimi ve veri tabanı şeması **değişmez** — değişen yalnız denetimin
+karşılaştırma ölçütüdür.
+
+**(d) Anıtsal gövde beyanı (ℹ️ BEYAN).** Envanterde gövde çapı
+`ANIT_DBH_CM = 100 cm` ve üzerindeki bireyler sayılır; dağılım, İlke Kararı
+Ek-4 gövde çapı basamaklarıyla (`<50`, `50–74`, `75–99`, `100–124`,
+`125–149`, `150–174`, `175–199`, `200–224`, `225–249`, `250–274`, `275–299`,
+`≥300`) birlikte beyan edilir.
+
+* **Dayanak:** *Tabiat Varlığı Olarak Belirlenecek Anıt Ağaçların Tespitine
+  İlişkin İlke Kararı* (Karar No: 110), Tabiat Varlıklarını Koruma Merkez
+  Komisyonu, Resmî Gazete **20.07.2022 / Sayı 31898** (666 sayılı İlke
+  Kararını yürürlükten kaldırır). `ANIT_DBH_CM=100` eşiği keyfî değildir:
+  Ek-4te **I. sınıf** (ortalama boyu 25 mden büyük) türler için gövde çapı
+  puanlamasının başladığı ilk basamak `100–124` cm’dir (3 puan).
+* **Tescil hükmü DEĞİLDİR.** Boyutsal anıt ağaç tespiti, ŞAD (Boy + Gövde
+  Çapı + Tepe Çapı + Yaş + Bulunduğu Yer + Pozitif Özellikler) puanının türe
+  ait AAD (Ek 1–3) ile karşılaştırılmasını zorunlu kılar. Yaş (artım kalemi +
+  halka sayımı) ve tepe çapı DendroGeo envanterinde **kaydedilmez** →
+  puanlama **uygulanmaz** (uydurma puan yoktur). Karar yetkisi ilgili
+  **Tabiat Varlıklarını Koruma Bölge Komisyonu**ndadır. Rapor yalnız
+  ölçülmüş boyutsal veriyi ve basamak dağılımını sayıyla beyan eder.
+* **Birim notu.** Mevzuat gövde çapını “1,30 m yükseklikteki çevre ÷ 3,14”
+  olarak tanımlar. DendroGeo gövde çapını sahada **doğrudan** kaydeder;
+  basamak karşılaştırmasında **hiçbir çevre→çap dönüşümü uygulanmaz**
+  (0031 kararı bu beyanla pekiştirilir).
+* **Duruma etkisi YOKTUR.** ℹ️ satırı `qaStates` dizisine `info` olarak girer;
+  `qaStateOf({block, review})` bu değeri **okumaz** → 🟢/🟡/🔴 değişmez.
+  Sabitler ve yardımcılar `scripts/lib/mc.mjs` içindedir: `ANIT_MEVZUAT`,
+  `ANIT_GOVDE_BASAMAKLARI`, `anitGovdeBasamagi()`, `medianOf()`, `madOf()`,
+  `modifiedZ()`. Bekçisi `test/anit-qa.test.mjs` (45 test).
 
 **Üç hâlli rapor durumu** (`QA_STATE`, scripts/lib/mc.mjs) Çizelge 4ten
 türetilir ve künyede + §7 girişinde basılır:
@@ -139,13 +198,29 @@ türetilir ve künyede + §7 girişinde basılır:
 * 🔴 **BLOKLU** — kritik veri hatası (a veya c sistemik): karbon sonucu
   bilimsel iletişimde kullanılmamalıdır.
 * 🟡 **İNCELEME** — veri geçerli; bazı istatistiksel kontroller uyarı veriyor.
-  Veri hatası hükmü DEĞİLDİR, sonucu geçersiz kılmaz.
+  Veri hatası hükmü DEĞİLDİR, sonucu geçersiz kılmaz. 0032: inceleme
+  kalemlerinin hiçbiri ağaç ölçüm değerleriyle ilgili değilse (ör. yalnız
+  `accuracy_m` kaydedilmemiş) rapor bunu açıkça yazar.
 * 🟢 **GEÇERLİ** — tüm kritik kontroller geçti.
+* ℹ️ **BEYAN** — dördüncü bir **durum değildir**: Çizelge 4 satır işareti.
+  Bilgilendirme kalemidir (anıtsal gövde, ρ kaynağı) ve durumu değiştirmez.
+
+**Çizelge 4 sunumu (0032).** §7 tablosu `table.qa` + `<colgroup>`
+(`%23 / %16 / %61`) ile **sabit kolon düzeninde** basılır: ayrıntı hücresi
+`.qd` (orantılı/sans yazı, `overflow-wrap:break-word` → uzun Türkçe cümle
+**kelime ortasından kırılmaz**), sonuç hücresi `.qst` (renkli, ekranda tek
+satır; mobil ve printte normal sarma → hücre taşmaz), beyan satırı `.qinfo`
+(mavi; ⚠ ile karışmaz). Uzun açıklama kolonu olan diğer çizelgeler (§4.6
+veri sözlüğü, §10 tekrar üretilebilirlik) aynı `.qd` hücresini kullanır.
+Mobilde `.tscroll` kabı yatay kayar (`table.qa{min-width:540px}`), printte
+üç kolon korunur. Önceki hâlde ayrıntı kolonu monospace `.76rem` +
+`overflow-wrap:anywhere` idi; tablo bu yüzden şekilsiz görünüyordu.
 
 Eşik sabitleri tek yerdedir: `QA_LIMITS` (scripts/lib/mc.mjs) —
-`DBH_MIN_CM=1`, `DBH_MAX_CM=400`, `HD_MIN=15`, `HD_MAX=120`,
-`CARBON_DEV_PCT=20`, `CARBON_DEV_MIN_KG=5`, `BLOCK_RATIO=0.5`,
-`BLOCK_MIN_N=3`.
+`DBH_MIN_CM=1`, `DBH_MAX_CM=400`, `HD_MIN=15`, `HD_MAX=120` (tipik bant,
+yalnız sayım), `HD_PHYS_MIN=3`, `HD_PHYS_MAX=200`, `H_MIN_M=1.3`,
+`H_MAX_M=100`, `HD_ROBUST_Z=3.5`, `HD_ROBUST_MIN_N=5`, `CARBON_DEV_PCT=20`,
+`CARBON_DEV_MIN_KG=5`, `BLOCK_RATIO=0.5`, `BLOCK_MIN_N=3`, `ANIT_DBH_CM=100`.
 
 Aynı kontroller `scripts/import-measurements.mjs` içinde içe aktarımda da
 çalışır. **`--birim cevre` kaldırıldı (0031):** araç `auto` kipinde birimi

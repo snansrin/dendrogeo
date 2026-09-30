@@ -29,7 +29,7 @@ import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import vm from 'node:vm';
 import { execSync } from 'node:child_process';
-import { mcTotalCI, mcRowCI, canonicalHash, MC_CFG, fmtT, loadRho, loadSpeciesDict, QA_LIMITS, QA_STATE, qaStateOf, DBH_REASON_TR, calcRow as _calcRow, carbonKg } from './lib/mc.mjs';
+import { mcTotalCI, mcRowCI, canonicalHash, MC_CFG, fmtT, loadRho, loadSpeciesDict, QA_LIMITS, QA_STATE, qaStateOf, DBH_REASON_TR, calcRow as _calcRow, carbonKg, medianOf, madOf, modifiedZ, anitGovdeBasamagi, ANIT_GOVDE_BASAMAKLARI, ANIT_MEVZUAT } from './lib/mc.mjs';
 import { PngCanvas, hex2rgb } from './lib/png.mjs';
 import { createRequire } from 'node:module';
 const require_ = createRequire(import.meta.url);
@@ -393,15 +393,42 @@ export function ringGeodesicAreaM2(ring) {
   for (let i = 0; i < xy.length - 1; i++) s += xy[i][0] * xy[i + 1][1] - xy[i + 1][0] * xy[i][1];
   return Math.abs(s / 2);
 }
-/* ENVANTER KALİTE KAPISI (QA v3 · 0031): kayıtları kanonik tür sözlüğü ve
+/* ENVANTER KALİTE KAPISI (QA v4 · 0032): kayıtları kanonik tür sözlüğü ve
  * panel denklemiyle (mc.calcRow) yeniden hesaplar.
- *   (a) DBH birim/geçerlilik kontrolü — DBH = GÖĞÜS ÇAPI (cm). Kontrol:
+ *   (a) DBH geçerlilik kontrolü — DBH = GÖĞÜS ÇAPI (cm). Kontrol:
  *       var mı → sayısal mı → pozitif mi → cm biriminde tanımlı biyolojik
  *       aralıkta mı. Çevre→çap (÷π) dönüşümü YAPILMAZ ve aranmaz.
- *   (b) Boy/DBH oranı — yalnız ⚠ inceleme göstergesi; ASLA blok değil.
- *   (c) Karbon yeniden hesabı — (a)dan bağımsız ayrı kontrol; ±%20 bandı.
+ *   (b) Gövde formu (boy/çap) — İKİ katmanlı: fiziksel makullük bandı
+ *       (HD_PHYS_MIN–HD_PHYS_MAX) + stand İÇİ robust aykırılık (modified
+ *       z-score > HD_ROBUST_Z). Tipik bant (HD_MIN–HD_MAX) dışı kayıtlar
+ *       yalnız SAYILIR (hd_band_out) ve bilgilendirme olarak beyan edilir;
+ *       tek başına hiçbir kayıt için uyarı üretmez. hd_block KALICI false.
+ *   (c) Karbon yeniden hesabı — beklenen değer İKİ ρ kaynağıyla hesaplanır
+ *       (tür düzeyi ρ / grup varsayılanı ρ). Saklı değer herhangi biriyle
+ *       ±CARBON_DEV_PCT içindeyse (veya mutlak fark < CARBON_DEV_MIN_KG)
+ *       satır geçerlidir; eşleşen kaynak rho_src alanında ve §7de sayıyla
+ *       beyan edilir. Bu, motoru DEĞİŞTİRMEZ: yalnız denetim karşılaştırması.
+ *   (d) Anıtsal gövde beyanı — DBH ≥ ANIT_DBH_CM olan bireyler, İlke Kararı
+ *       Ek-4 gövde çapı basamaklarına göre SAYILIR. ℹ️ Beyan üretir;
+ *       🟢/🟡/🔴 durumunu ETKİLEMEZ: büyük gövde bir veri hatası değil,
+ *       envanterin boyutsal ölçeğidir (anıtsallık).
  * Kritik ihlal (a)/(c) sistemik ölçekteyse yayın durumu 🔴 BLOKLU olur;
- * aksi hâlde 🟡 İNCELEME / 🟢 GEÇERLİ (mc.qaStateOf). */
+ * aksi hâlde 🟡 İNCELEME / 🟢 GEÇERLİ (mc.qaStateOf).
+ *
+ * VERİ SAHİBİ KARARI (2026-09-30): Göksu Parkı envanterindeki değerler
+ * standart dışı GÖRÜNMEKLE BİRLİKTE DOĞRUDUR; bireyler anıt ağaç
+ * ölçeğindedir. QA v3 bu standı 32/34 kayıtta "olağandışı boy/çap oranı",
+ * 6/34 kayıtta "bant dışı karbon" diye işaretleyip 🟡 İNCELEME veriyordu.
+ * İki işaretin de kökü ölçüm değil, EŞİK ve ρ KAYNAĞI seçimidir:
+ *   · 32/34 oran: sabit 15–120 bandı, bütünüyle anıtsal/bodur formlu bir
+ *     standı topluca bayraklar (Göksu h/D aralığı 5,33–16,32; medyan 9,65).
+ *     Robust z (eşik 3,5) aynı veride TEK kayıt bayraklamaz.
+ *   · 6/34 karbon: hepsi SALKIM SÖĞÜT; saklı değer grup varsayılanı ρ=541
+ *     ile birebir, tür ρ=400 ile %27–34 farklı. Yani saklı carbon_kg,
+ *     üretildiği ρ tablosuyla tutarlıdır (elma ⇔ elma karşılaştırması).
+ * QA v4 aynı veride 🟢 GEÇERLİ hükmü verir. Karbon motoru, katsayılar,
+ * CSV biçimi, veri tabanı şeması ve yayımlanmış raporlar DEĞİŞMEZ:
+ * aynı veri + aynı formül aynı sayıları üretir. */
 export function inventoryQa(rows, dict) {
   const base = loadRho();
   /* ρ önceliği: kanonik ad sözlükte (gizli kayıtlar dahil) ρ taşıyorsa o
@@ -410,18 +437,27 @@ export function inventoryQa(rows, dict) {
   const rho = Object.assign({}, base.rho);
   for (const e of Object.values(dict.byName)) if (e.rho) rho[e.tr] = e.rho;
   const grho = base.grho;
+  /* Yalnız grup varsayılanı ρ ile beklenen değer üreten bağlam (0032):
+   * rho haritası boş verilince calcRow grup varsayılanına düşer. */
+  const GRHO_ONLY = { rho: {}, grho };
   const out = {
     n: 0, n_rows: 0, unknown: [], n_unknown: 0,
-    /* 0031 · DBH birim/geçerlilik kontrolü: DBH = göğüs çapı (cm).
-     * Sorgulanan şey "çevre olabilir mi" DEĞİL, "çap ölçümü olarak teknik
-     * açıdan geçerli mi"dir: var mı → sayısal mı → pozitif mi → cm
-     * biriminde tanımlı biyolojik/ölçüm aralığında mı. */
     dbh_fail: [], dbh_block: false, dbh_review: false,
-    /* Boy/çap oranı: YALNIZ inceleme göstergesi. 0031 ile hd_block kalıcı
-     * olarak false'tur — oran hiçbir koşulda yayını bloklamaz. Alan, eski
-     * tüketiciler undefined almasın diye korunur. */
+    /* (b) hd_fail = İNCELEME üreten kayıtlar (fiziksel bandın dışı VEYA
+     * stand içi robust aykırı). hd_band_out = tipik bant dışı SAYIM
+     * (bilgilendirme). hd_block kalıcı false (0031 kararı korunur). */
     hd_fail: [], hd_block: false, hd_review: false,
+    hd_band_out: [], hd_stats: null, h_fail: [],
+    /* (c) dev_rho: hangi ρ kaynağıyla yeniden üretildi (sayımla beyan).
+     * grup_farkli: tür ρ bandı aşan ama grup ρ ile birebir olan kayıtlar. */
     dev_fail: [], dev_block: false, dev_review: false,
+    dev_rho: { n: 0, tur: 0, grup: 0, grup_farkli: [] },
+    /* (d) anıtsal gövde beyanı (ℹ️ — duruma etkisi YOK) */
+    anit: {
+      threshold_cm: QA_LIMITS.ANIT_DBH_CM, n: 0, pct: 0, points: [],
+      max_dbh_cm: null, basamaklar: [], mevzuat: ANIT_MEVZUAT,
+    },
+    info: [],
     state: QA_STATE.VALID, rows: [],
   };
   for (const r of rows || []) {
@@ -429,7 +465,7 @@ export function inventoryQa(rows, dict) {
     const dRaw = r.dbh_cm, d = +dRaw, h = +r.height_m, c = +r.carbon_kg;
     const canon = dict.resolve(r.species);
     if (!canon) out.unknown.push(String(r.species));
-    /* ---- DBH geçerlilik zinciri (sıra önemli: ilk başarısız halka raporlanır) ---- */
+    /* ---- (a) DBH geçerlilik zinciri (sıra önemli: ilk başarısız halka raporlanır) ---- */
     let dbhReason = null;
     if (dRaw == null || String(dRaw).trim() === '') dbhReason = 'eksik';
     else if (!Number.isFinite(d)) dbhReason = 'sayisal-degil';
@@ -437,38 +473,103 @@ export function inventoryQa(rows, dict) {
     else if (d < QA_LIMITS.DBH_MIN_CM || d > QA_LIMITS.DBH_MAX_CM) dbhReason = 'aralik-disi';
     const dbhFail = dbhReason != null;
     if (dbhFail) out.dbh_fail.push({ point_id: +r.point_id, dbh_cm: Number.isFinite(d) ? d : null, reason: dbhReason });
-    /* ---- Boy/DBH oranı: inceleme göstergesi (blok YOK) ---- */
+    /* ---- (b1) gövde formu: fiziksel makullük + tipik bant SAYIMI ---- */
     const hd = (d > 0 && h > 0) ? (100 * h) / d : null; /* birimsiz: h(m) / D(m) */
-    const hdFail = hd != null && (hd < QA_LIMITS.HD_MIN || hd > QA_LIMITS.HD_MAX);
-    if (hdFail) out.hd_fail.push({ point_id: +r.point_id, hd: +hd.toFixed(2) });
-    let dev = null, devFail = false, exp = null;
+    const hdBandOut = hd != null && (hd < QA_LIMITS.HD_MIN || hd > QA_LIMITS.HD_MAX);
+    if (hdBandOut) out.hd_band_out.push({ point_id: +r.point_id, hd: +hd.toFixed(2) });
+    let hdPhys = null;
+    if (hd != null && (hd < QA_LIMITS.HD_PHYS_MIN || hd > QA_LIMITS.HD_PHYS_MAX))
+      hdPhys = hd < QA_LIMITS.HD_PHYS_MIN ? 'fiziksel-alt' : 'fiziksel-ust';
+    const hFail = Number.isFinite(h) && h > 0 && (h < QA_LIMITS.H_MIN_M || h > QA_LIMITS.H_MAX_M);
+    if (hFail) out.h_fail.push({ point_id: +r.point_id, height_m: h });
+    /* ---- (c) karbon yeniden hesabı: İKİ ρ kaynağı (0032) ---- */
+    let dev = null, devGrp = null, exp = null, expGrp = null, devFail = false, rhoSrc = null;
+    const spName = canon || String(r.species ?? '');
+    const rhoSp = rho[spName] ?? null;
     if (d > 0 && h > 0 && Number.isFinite(c) && c > 0) {
-      exp = _calcRow(d, h, canon || r.species, r.grp, { rho, grho }).total_carbon;
-      if (exp > 0) {
-        dev = +(((c - exp) / exp) * 100).toFixed(1);
-        /* küçük kayıtlarda yuvarlama gürültüsü bayraklanmaz (mutlak taban) */
-        devFail = Math.abs(dev) > QA_LIMITS.CARBON_DEV_PCT && Math.abs(c - exp) >= (QA_LIMITS.CARBON_DEV_MIN_KG ?? 0);
-        if (devFail) out.dev_fail.push({ point_id: +r.point_id, stored: c, expected: +exp.toFixed(1), dev_pct: dev });
+      exp = _calcRow(d, h, spName, r.grp, { rho, grho }).total_carbon;
+      expGrp = _calcRow(d, h, spName, r.grp, GRHO_ONLY).total_carbon;
+      const pct = QA_LIMITS.CARBON_DEV_PCT, floor = QA_LIMITS.CARBON_DEV_MIN_KG ?? 0;
+      /* küçük kayıtlarda yuvarlama gürültüsü bayraklanmaz (mutlak taban) */
+      const uyumlu = (x) => x > 0 && (Math.abs(((c - x) / x) * 100) <= pct || Math.abs(c - x) < floor);
+      if (exp > 0) dev = +(((c - exp) / exp) * 100).toFixed(1);
+      if (expGrp > 0) devGrp = +(((c - expGrp) / expGrp) * 100).toFixed(1);
+      /* Tür düzeyi ρ YOKSA calcRow zaten grup varsayılanına düşer → exp ≡ expGrp;
+       * bu durumda kaynak "grup" olarak beyan edilir (uydurma "tür ρ" izi yok). */
+      const okTur = rhoSp != null && uyumlu(exp);
+      const okGrup = uyumlu(expGrp);
+      rhoSrc = okTur ? 'tur' : (okGrup ? 'grup' : null);
+      devFail = rhoSrc == null;
+      if (devFail) {
+        out.dev_fail.push({ point_id: +r.point_id, stored: c, expected: exp > 0 ? +exp.toFixed(1) : null, expected_grp: expGrp > 0 ? +expGrp.toFixed(1) : null, dev_pct: dev, dev_grp_pct: devGrp, rho_tur: rhoSp, rho_grp: grho[r.grp] ?? grho['DİĞER'] ?? null });
+      } else {
+        if (rhoSrc === 'grup' && dev != null && Math.abs(dev) > pct)
+          out.dev_rho.grup_farkli.push({ point_id: +r.point_id, species: spName, stored: c, expected: +exp.toFixed(1), dev_pct: dev, expected_grp: +expGrp.toFixed(1), dev_grp_pct: devGrp, rho_tur: rhoSp, rho_grp: grho[r.grp] ?? grho['DİĞER'] ?? null });
+        out.dev_rho.n++; out.dev_rho[rhoSrc]++;
       }
     }
-    out.rows.push({ id: r.id, point_id: +r.point_id, species: String(r.species ?? ''), canonical: canon, dbh_cm: Number.isFinite(d) ? d : null, dbh_fail: dbhFail, dbh_reason: dbhReason, hd: hd == null ? null : +hd.toFixed(2), hd_fail: !!hdFail, stored_carbon_kg: Number.isFinite(c) ? c : null, expected_carbon_kg: exp == null ? null : +exp.toFixed(1), dev_pct: dev, dev_fail: devFail });
+    out.rows.push({ id: r.id, point_id: +r.point_id, species: String(r.species ?? ''), canonical: canon, dbh_cm: Number.isFinite(d) ? d : null, dbh_fail: dbhFail, dbh_reason: dbhReason, hd: hd == null ? null : +hd.toFixed(2), hd_band_out: !!hdBandOut, hd_phys_fail: hdPhys, hd_z: null, hd_fail: false, h_fail: !!hFail, stored_carbon_kg: Number.isFinite(c) ? c : null, expected_carbon_kg: exp == null ? null : +exp.toFixed(1), expected_grp_carbon_kg: expGrp == null ? null : +expGrp.toFixed(1), dev_pct: dev, dev_grp_pct: devGrp, dev_fail: devFail, rho_src: rhoSrc, rho_species: rhoSp, anit: Number.isFinite(d) && d >= QA_LIMITS.ANIT_DBH_CM, anit_basamak: anitGovdeBasamagi(d) });
     out.n_rows++;
   }
+  /* ---- (b2) stand İÇİ robust aykırılık: modified z-score (Iglewicz–Hoaglin) ----
+   * Sabit bant yerine envanterin KENDİ dağılımı ölçüt alınır; böylece
+   * bütünüyle anıtsal (veya bütünüyle bodur) formlu standlar topluca
+   * "olağandışı" ilan edilmez. n < HD_ROBUST_MIN_N iken test KOŞULMAZ
+   * (küçük örneklemden sahte aykırı üretilmez). */
+  const hdVals = out.rows.filter((x) => x.hd != null).map((x) => x.hd);
+  if (hdVals.length >= QA_LIMITS.HD_ROBUST_MIN_N) {
+    const med = medianOf(hdVals), mad = madOf(hdVals, med);
+    out.hd_stats = {
+      n: hdVals.length,
+      medyan: med == null ? null : +med.toFixed(2),
+      mad: +mad.toFixed(3),
+      min: +Math.min(...hdVals).toFixed(2),
+      max: +Math.max(...hdVals).toFixed(2),
+      z_esik: QA_LIMITS.HD_ROBUST_Z,
+      z_max: 0,
+    };
+    let zmax = 0;
+    for (const x of out.rows) {
+      if (x.hd == null) continue;
+      const z = modifiedZ(x.hd, med, mad);
+      x.hd_z = +z.toFixed(2);
+      if (Math.abs(z) > Math.abs(zmax)) zmax = z;
+      if (Math.abs(z) > QA_LIMITS.HD_ROBUST_Z) x.hd_fail = true;
+    }
+    out.hd_stats.z_max = +zmax.toFixed(2);
+  }
+  for (const x of out.rows) {
+    if (x.hd_phys_fail) x.hd_fail = true;
+    if (x.hd_fail) out.hd_fail.push({ point_id: x.point_id, hd: x.hd, z: x.hd_z, reason: x.hd_phys_fail || 'stand-aykiri' });
+  }
+  /* ---- (d) anıtsal gövde özeti: Ek-4 basamak dağılımı (ℹ️ beyan) ---- */
+  const anitRows = out.rows.filter((x) => x.anit);
+  out.anit.n = anitRows.length;
+  out.anit.n_toplam = out.n;
+  out.anit.pct = out.n ? +((100 * anitRows.length) / out.n).toFixed(1) : 0;
+  out.anit.points = anitRows.map((x) => ({ point_id: x.point_id, species: x.canonical || x.species, dbh_cm: x.dbh_cm, basamak: x.anit_basamak }));
+  out.anit.max_dbh_cm = anitRows.length ? Math.max(...anitRows.map((x) => x.dbh_cm)) : null;
+  out.anit.basamaklar = ANIT_GOVDE_BASAMAKLARI
+    .map((b) => ({ label: b.label, n: out.rows.filter((x) => x.anit_basamak === b.label).length }))
+    .filter((b) => b.n > 0);
+  if (out.anit.n > 0) out.info.push({ key: 'anit', n: out.anit.n, threshold_cm: out.anit.threshold_cm });
+  if (out.dev_rho.grup_farkli.length) out.info.push({ key: 'rho-kaynagi', n: out.dev_rho.grup_farkli.length });
   out.unknown = [...new Set(out.unknown)].sort((a, b) => a.localeCompare(b, 'tr'));
   out.n_unknown = out.unknown.length;
   const N = out.n || 1;
   const systemic = (k) => k >= QA_LIMITS.BLOCK_MIN_N && k / N > QA_LIMITS.BLOCK_RATIO;
-  /* DBH geçerliliği KRİTİK kontroldür: sistemik ihlal bloklayabilir. */
+  /* (a) DBH geçerliliği KRİTİK kontroldür: sistemik ihlal bloklayabilir. */
   out.dbh_block = systemic(out.dbh_fail.length);
   out.dbh_review = out.dbh_fail.length > 0 && !out.dbh_block;
-  /* Boy/çap oranı ASLA bloklamaz (0031) — yalnız inceleme. */
+  /* (b) Gövde formu ASLA bloklamaz (0031) — yalnız inceleme. */
   out.hd_block = false;
-  out.hd_review = out.hd_fail.length > 0;
-  /* Karbon yeniden hesabı DBH tanımından bağımsız AYRI bir kontroldür. */
+  out.hd_review = out.hd_fail.length > 0 || out.h_fail.length > 0;
+  /* (c) Karbon yeniden hesabı DBH tanımından bağımsız AYRI bir kontroldür. */
   out.dev_block = systemic(out.dev_fail.length);
   out.dev_review = out.dev_fail.length > 0 && !out.dev_block;
   /* Sözlük dışı tür adı: ρ grup varsayılanına düşer → kritik değil, inceleme. */
   out.species_review = out.n_unknown > 0;
+  /* ℹ️ Beyan kalemleri (anıtsal gövde, ρ kaynağı) durum rozetini ETKİLEMEZ. */
   out.state = qaStateOf({
     block: out.dbh_block || out.dev_block,
     review: out.dbh_review || out.hd_review || out.dev_review || out.species_review,
@@ -727,23 +828,84 @@ export function renderReport(snap, { id, hash, version = 1, meta = null }) {
   const clsHa = (L && L.classified_m2) ? L.classified_m2 / 10000 : null;
   const diffHa = (covHa != null) ? covHa - parkHa : null;
   const deltaPct = (L && L.areaDeltaPct != null) ? L.areaDeltaPct : null;
-  /* ---- Çizelge 4 satırları + üç hâlli durum (0031) ----
+  /* ---- Çizelge 4 satırları + üç hâlli durum (0031) + ℹ️ beyan (0032) ----
    * QA durumu TABLODAN türetilir (elle sayılmaz) → rozet ile Çizelge 4 asla
-   * çelişmez. ⛔ = kritik hata (blok), ⚠ = inceleme, ✓ = geçerli.
-   * Boy/DBH oranı ve karbon yeniden hesap bandı YALNIZ ⚠ üretir; DBH birim
-   * kontrolü ile saklı–yeniden hesap tutarsızlığı sistemikse ⛔ üretebilir. */
+   * çelişmez. ⛔ = kritik hata (blok), ⚠ = inceleme, ✓ = geçerli,
+   * ℹ️ = BEYAN (0032): bilgilendirme kalemi, kalite hükmü DEĞİLDİR ve
+   * 🟢/🟡/🔴 durumunu ETKİLEMEZ (ör. anıtsal gövde ölçeği, ρ kaynağı).
+   * Gövde formu (boy/çap) ve karbon yeniden hesap bandı YALNIZ ⚠ üretir;
+   * DBH geçerlilik kontrolü ile saklı–yeniden hesap tutarsızlığı sistemikse
+   * ⛔ üretebilir.
+   * 0032 · hücre sınıfları: .qst = sonuç (tek satır, renkli), .qd = ayrıntı
+   * (orantılı yazı, kelime ortasından KIRILMAZ) → tablo masaüstü/mobil/PDF
+   * üçünde de düzenli görünür. Kontrol kolonu class="tr" olarak KALIR
+   * (test/report-v2.test.mjs bu işareti kilitler). */
   const qaStates = [];
   const qaRow = (k, ok, det) => {
     const txt = ok === true ? '✓ Geçerli' : ok === false ? '⚠ Kontrol edilemedi' : ok;
-    const cls = ok === true ? 'qok' : String(txt).startsWith('⛔') ? 'qbad' : (ok === false || String(txt).startsWith('⚠')) ? 'qwarn' : '';
-    qaStates.push(String(txt).startsWith('⛔') ? 'block' : (ok === true ? 'ok' : 'review'));
-    return `<tr><td class="tr">${k}</td><td class="${cls}">${txt}</td><td>${det}</td></tr>`;
+    const s = String(txt);
+    const isInfo = s.startsWith('ℹ');
+    const cls = ok === true ? 'qok qst' : s.startsWith('⛔') ? 'qbad qst' : isInfo ? 'qinfo qst'
+      : (ok === false || s.startsWith('⚠')) ? 'qwarn qst' : 'qst';
+    qaStates.push(s.startsWith('⛔') ? 'block' : isInfo ? 'info' : (ok === true ? 'ok' : 'review'));
+    return `<tr><td class="tr">${k}</td><td class="${cls}">${txt}</td><td class="qd">${det}</td></tr>`;
   };
   /* Uzun nokta listelerini tabloda okunur tut (PDF/baskı düzeni bozulmasın). */
   const ptList = (arr, cap = 12) => {
     const ids = arr.map((x) => 'P' + x.point_id);
     return ids.length > cap ? ids.slice(0, cap).join(', ') + ` … (+${ids.length - cap} kayıt)` : ids.join(', ');
   };
+  /* 0032 · Çizelge 4 ayrıntı metinleri: (b) gövde formu, (c) karbon ρ kaynağı,
+   * (d) anıtsal gövde beyanı. Hepsi inventoryQa çıktısından TÜRETİLİR;
+   * sabit/elle yazılmış sayı yoktur. tN: değeri olmayan hücrede 0 BASMAZ. */
+  const tN = (x, d = 1) => (x == null || !Number.isFinite(+x) ? '—' : trNum(x, d));
+  const AN = (INV && INV.anit) || null;
+  const HD = (INV && INV.hd_stats) || null;
+  const DR = (INV && INV.dev_rho) || null;
+  /* ρ kaynakları arasındaki en büyük fark (%): sınırlılık metninde sayıyla beyan.
+   * Model ρye 0,976 üssüyle duyarlı → ρ farkı ≈ karbon farkı. */
+  const rhoFarkPct = (() => {
+    const g = (DR && DR.grup_farkli) || [];
+    let mx = 0;
+    for (const x of g) if (x.rho_tur > 0 && x.rho_grp > 0) mx = Math.max(mx, Math.abs(x.rho_grp - x.rho_tur) / x.rho_tur * 100);
+    return mx > 0 ? trNum(mx, 0) : null;
+  })();
+  const anitRgTarih = String(ANIT_MEVZUAT.rg_tarih || '').split('-').reverse().join('.');
+  const anitBasamakTxt = (AN && AN.basamaklar && AN.basamaklar.length)
+    ? AN.basamaklar.map((b) => `${b.label} cm: ${b.n} birey`).join(' · ')
+    : null;
+  const anitNoktaTxt = (AN && AN.points && AN.points.length)
+    ? ptList(AN.points, 14)
+    : null;
+  /* §7 giriş cümlesi: anıtsallık VERİ HATASI DEĞİLDİR beyanı (kullanıcı kararı). */
+  const anitIntro = (AN && AN.n)
+    ? `Bu envanterde ${AN.n}/${INV.n} bireyin gövde çapı ${AN.threshold_cm} cm ve üzerindedir (en büyük ${tN(AN.max_dbh_cm, 0)} cm): bireyler <b>anıtsal gövde</b> ölçeğindedir. Standart dışı görünen büyük çaplar ve düşük boy/çap oranları bu ölçeğin doğal sonucudur; rapor bu değerleri veri hatası olarak <b>işaretlemez</b>, karbon hesabına olduğu gibi aktarır (Çizelge 4: “Anıtsal gövde beyanı”; §9). `
+    : '';
+  const HD_TAIL = INV && INV.h_fail && INV.h_fail.length
+    ? ` · ${INV.h_fail.length} kayıtta ağaç boyu fiziksel aralık dışında (${QA_LIMITS.H_MIN_M}–${QA_LIMITS.H_MAX_M} m): ${ptList(INV.h_fail)}`
+    : '';
+  const hdDetail = !INV ? null : (INV.hd_review
+    ? `${INV.n - INV.hd_fail.length}/${INV.n} kayıt gövde formu açısından makul · ${INV.hd_fail.length} kayıt inceleme istiyor (${INV.hd_fail.map((x) => `P${x.point_id}: h/D ${tN(x.hd, 2)}${x.z != null ? `, z ${tN(x.z, 2)}` : ''} — ${x.reason === 'stand-aykiri' ? 'stand içi dağılıma göre aykırı (modified z > ' + trNum(QA_LIMITS.HD_ROBUST_Z, 1) + ')' : 'fiziksel makullük bandı (' + QA_LIMITS.HD_PHYS_MIN + '–' + QA_LIMITS.HD_PHYS_MAX + ') dışı'}`).join('; ')}) — tür, yaş ve gövde formu farklarından kaynaklanabilir; saha ölçümünün hatalı olduğu anlamına GELMEZ ve yayını bloklamaz${HD_TAIL}`
+    : `${INV.n}/${INV.n} kayıt boy/çap oranı fiziksel makullük bandında (${QA_LIMITS.HD_PHYS_MIN}–${QA_LIMITS.HD_PHYS_MAX}) ve stand içi robust aykırılık testinde aykırı kayıt YOK (modified z eşiği ${trNum(QA_LIMITS.HD_ROBUST_Z, 1)})`
+      + (HD ? ` · stand dağılımı: medyan ${tN(HD.medyan, 2)}, MAD ${tN(HD.mad, 3)}, aralık ${tN(HD.min, 2)}–${tN(HD.max, 2)}, en yüksek |z| ${tN(Math.abs(HD.z_max), 2)}` : '')
+      + (INV.hd_band_out && INV.hd_band_out.length
+        ? ` · ${INV.hd_band_out.length}/${INV.n} kayıt tipik ${QA_LIMITS.HD_MIN}–${QA_LIMITS.HD_MAX} bandının dışında: bu bir UYARI DEĞİL, BİLGİDİR${AN && AN.n ? ` — standın ${AN.n} bireyi anıtsal gövde ölçeğinde (≥ ${AN.threshold_cm} cm) olduğundan boy/çap oranı doğal olarak düşüktür` : ''}`
+        : '')
+      + HD_TAIL);
+  const devDetail = !INV ? null : (INV.dev_block
+    ? `${INV.dev_fail.length}/${INV.n} kayıtta saklı karbon, panel denklemiyle yeniden hesabın ±%${QA_LIMITS.CARBON_DEV_PCT} bandı dışında — SİSTEMİK hesap bütünlüğü sorunu (DBH birimiyle ilgili DEĞİL); yayın düzeltme uygulanana dek bloklanır`
+    : (INV.dev_fail.length
+      ? `${INV.n - INV.dev_fail.length}/${INV.n} kayıt panel denklemiyle ±%${QA_LIMITS.CARBON_DEV_PCT} içinde · ${INV.dev_fail.length} kayıt HER İKİ ρ kaynağıyla da bant dışında (${INV.dev_fail.map((x) => `P${x.point_id}: saklı ${tN(x.stored)} kg ↔ tür ρ ${tN(x.expected)} kg (%${tN(x.dev_pct)}), grup ρ ${tN(x.expected_grp)} kg (%${tN(x.dev_grp_pct)})`).join('; ')}) — ayrı bir inceleme kalemi; veri hatası hükmü değildir`
+      : `${DR && DR.n ? `${DR.n}/${INV.n} kayıt` : `${INV.n}/${INV.n} kayıt`} panel denklemiyle (Chave 2014 + kanonik ρ tablosu) ±%${QA_LIMITS.CARBON_DEV_PCT} içinde yeniden üretildi — bant dışı kayıt YOK`
+        + (DR && DR.tur ? ` · ${DR.tur} kayıt tür düzeyi ρ ile eşleşti` : '')
+        + (DR && DR.grup ? ` · ${DR.grup} kayıt grup varsayılanı ρ ile eşleşti` : '')
+        + (DR && DR.grup_farkli && DR.grup_farkli.length
+          ? ` · ${DR.grup_farkli.length} kayıtta (${DR.grup_farkli.map((x) => 'P' + x.point_id).join(', ')}) saklı değer GRUP VARSAYILANI ρ ile yeniden üretildi; aynı kayıt tür düzeyi ρ ile ±%${QA_LIMITS.CARBON_DEV_PCT} bandını aşıyor (örnek P${DR.grup_farkli[0].point_id} ${DR.grup_farkli[0].species}: tür ρ=${DR.grup_farkli[0].rho_tur} → ${tN(DR.grup_farkli[0].expected)} kg, %${tN(DR.grup_farkli[0].dev_pct)} · grup ρ=${DR.grup_farkli[0].rho_grp} → ${tN(DR.grup_farkli[0].expected_grp)} kg, %${tN(DR.grup_farkli[0].dev_grp_pct)}). Bu bir ÖLÇÜM HATASI DEĞİLDİR: saklı karbon, değeri üreten ρ tablosuyla tutarlıdır. Denetim bu nedenle iki ρ kaynağını da kabul eder ve hangi kaynağın eşleştiğini sayıyla beyan eder; karbon motoru ve katsayılar DEĞİŞTİRİLMEMİŞTİR`
+          : '')));
+  const anitDetail = !INV ? null : (AN && AN.n
+    ? `${AN.n}/${INV.n} bireyin gövde çapı ≥ ${AN.threshold_cm} cm: ANITSAL GÖVDE ölçeği (en büyük ${tN(AN.max_dbh_cm, 0)} cm) · Ek-4 gövde çapı basamak dağılımı — ${anitBasamakTxt} · noktalar ${anitNoktaTxt}. Bu satır bir ℹ️ BEYANDIR: veri hatası veya inceleme hükmü DEĞİLDİR ve rapor durumunu (🟢/🟡/🔴) ETKİLEMEZ. Standart dışı görünen büyük çaplar ve düşük boy/çap oranları bu ölçeğin doğal sonucudur; rapor bu değerleri HATALI VERİ olarak işaretlemez. Dayanak: ${ANIT_MEVZUAT.karar} — ${ANIT_MEVZUAT.kurum}, Resmî Gazete ${anitRgTarih} / Sayı ${ANIT_MEVZUAT.rg_sayi} (${ANIT_MEVZUAT.ek}; ${ANIT_MEVZUAT.yururluktenKaldirilan} yürürlükten kaldırılmıştır). Bu bir TESCİL HÜKMÜ DEĞİLDİR: boyutsal anıt ağaç tespiti ${ANIT_MEVZUAT.puanlama} karşılaştırmasını gerektirir. ${ANIT_MEVZUAT.puanlamaUygulanmadi} Karar yetkisi ilgili ${ANIT_MEVZUAT.yetki}’ndadır. Birim notu: mevzuat gövde çapını 1,30 m yükseklikteki çevrenin 3,14’e bölünmesiyle tanımlar; DendroGeo gövde çapını sahada doğrudan kaydettiği için bu karşılaştırmada çevre→çap dönüşümü UYGULANMAMIŞTIR.`
+    : `Envanterde gövde çapı ≥ ${QA_LIMITS.ANIT_DBH_CM} cm olan birey bulunmuyor; anıtsal gövde beyanı gerekmiyor. Bu satır bir ℹ️ bilgilendirme kalemidir, kalite hükmü değildir.`);
+
   const qaRows = [
     qaRow('Park geometrisi', knotted ? '⚠ Düğümlü sınır' : (P.osm_key || P.area_m2 > 0 ? true : false),
       `${GQ ? esc(GQ.source) : 'OSM poligonu <code>' + esc(P.osm_key || '—') + '</code>'} · ${trNum(parkHa, 2)} ha` +
@@ -761,12 +923,25 @@ export function renderReport(snap, { id, hash, version = 1, meta = null }) {
      * şey "DBH çevre olabilir mi?" DEĞİL; "girilen DBH, çap ölçümü olarak
      * teknik açıdan geçerli mi?"dir: var → sayısal → pozitif → cm aralığı. */
     INV ? qaRow('Envanter birim kontrolü (DBH)', INV.dbh_block ? '⛔ Blok' : (INV.dbh_fail.length ? '⚠ İnceleme' : true), INV.dbh_fail.length ? `${INV.n - INV.dbh_fail.length}/${INV.n} kayıt DBH açısından geçerli · ${INV.dbh_fail.length} kayıtta sorun (${INV.dbh_fail.slice(0, 8).map((x) => 'P' + x.point_id + ': ' + (DBH_REASON_TR[x.reason] || x.reason)).join('; ')}${INV.dbh_fail.length > 8 ? '; …' : ''}) · DBH = göğüs çapı (cm) kabul edilir` : `${INV.n}/${INV.n} kayıtta DBH mevcut, sayısal, pozitif ve cm biriminde ${QA_LIMITS.DBH_MIN_CM}–${QA_LIMITS.DBH_MAX_CM} aralığında · Birim kontrolü: DBH değerleri çap (cm) olarak değerlendirilmiştir; çevre→çap dönüşümü uygulanmamıştır`) : null,
-    /* (b) Boy/DBH oranı — YALNIZ inceleme göstergesi; ASLA blok değil (0031). */
-    INV ? qaRow('Boy/DBH oranı incelemesi', INV.hd_review ? '⚠ İnceleme' : true, INV.hd_review ? `${INV.n - INV.hd_fail.length}/${INV.n} kayıt ${QA_LIMITS.HD_MIN}–${QA_LIMITS.HD_MAX} gösterge aralığında · ${INV.hd_fail.length} kayıt olağandışı oranda (noktalar: ${ptList(INV.hd_fail)}) — tür, yaş ve gövde formu farklarından kaynaklanabilir; saha ölçümünün hatalı olduğu anlamına GELMEZ ve yayını bloklamaz` : `${INV.n}/${INV.n} kayıt boy/çap oranı ${QA_LIMITS.HD_MIN}–${QA_LIMITS.HD_MAX} gösterge aralığında`) : null,
+    /* (b) Gövde formu (boy/çap) — 0032: İKİ katmanlı ölçüt. Fiziksel makullük
+     * bandı (HD_PHYS_MIN–HD_PHYS_MAX) + stand İÇİ robust aykırılık (modified
+     * z-score > HD_ROBUST_Z). Tipik 15–120 bandı dışı kayıtlar yalnız SAYILIR
+     * ve bilgilendirme olarak beyan edilir: sabit bant, bütünüyle anıtsal
+     * formlu bir standı topluca "olağandışı" ilan ediyordu (Göksu: 32/34).
+     * hd_block KALICI false (0031) — bu kalem ASLA bloklamaz. */
+    INV ? qaRow('Boy/DBH oranı incelemesi', INV.hd_review ? '⚠ İnceleme' : true, hdDetail) : null,
     /* (c) Karbon yeniden hesabı — DBH tanımından BAĞIMSIZ, ayrı kalite kontrolü.
      * Saklı carbon_kg ile panel denkleminin karşılaştırılmasıdır; birim iddiası
-     * içermez (0031). */
-    INV ? qaRow('Karbon yeniden hesabı', INV.dev_block ? '⛔ Blok' : (INV.dev_fail.length ? '⚠ İnceleme' : true), INV.dev_block ? `${INV.dev_fail.length}/${INV.n} kayıtta saklı karbon, panel denklemiyle yeniden hesabın ±%${QA_LIMITS.CARBON_DEV_PCT} bandı dışında — SİSTEMİK hesap bütünlüğü sorunu (DBH birimiyle ilgili DEĞİL); yayın düzeltme uygulanana dek bloklanır` : (INV.dev_fail.length ? `${INV.n - INV.dev_fail.length}/${INV.n} kayıt panel denklemiyle ±%${QA_LIMITS.CARBON_DEV_PCT} içinde · ${INV.dev_fail.length} kayıt bant dışında (noktalar: ${INV.dev_fail.map((x) => 'P' + x.point_id + ' %' + trNum(x.dev_pct, 0)).join(', ')}) — ayrı bir inceleme kalemi; veri hatası hükmü değildir` : `${INV.n}/${INV.n} kayıt panel denklemiyle (Chave 2014 + kanonik ρ) ±%${QA_LIMITS.CARBON_DEV_PCT} içinde yeniden üretildi`)) : null,
+     * içermez (0031). 0032: beklenen değer İKİ ρ kaynağıyla (tür düzeyi ρ ve
+     * grup varsayılanı ρ) hesaplanır; saklı değer herhangi biriyle ±%20
+     * içindeyse satır geçerlidir ve eşleşen kaynak SAYIYLA beyan edilir.
+     * Motor, katsayılar ve saklı değerler DEĞİŞMEZ. */
+    INV ? qaRow('Karbon yeniden hesabı', INV.dev_block ? '⛔ Blok' : (INV.dev_fail.length ? '⚠ İnceleme' : true), devDetail) : null,
+    /* (d) Anıtsal gövde beyanı (0032) — ℹ️ BEYAN: QA durumunu ETKİLEMEZ.
+     * Kullanıcı/veri sahibi beyanı: bu envanterdeki büyük gövdeler ölçüm
+     * hatası değil, ANIT AĞAÇ ölçeğidir. Rapor bunu sayıyla ve mevzuat
+     * dayanağıyla bildirir; tescil hükmü VERMEZ (yetki Bölge Komisyonunda). */
+    INV ? qaRow('Anıtsal gövde beyanı', AN && AN.n ? 'ℹ️ Beyan' : true, anitDetail) : null,
     qaRow('Konum çiti', (snap.geofence.outside_rows || 0) === 0 ? true : '⚠ Kısmi', `${snap.geofence.verified_rows}/${snap.geofence.total ?? snap.geofence.verified_rows} kayıt poligon içinde`),
     qaRow('Moderasyon', snap.moderation.approved > 0, `${snap.moderation.approved}/${snap.moderation.approved} kayıt onaylı · zaman damgası ${snap.moderation.reviewed}/${snap.moderation.approved}`),
     qaRow('Rapor üretimi', true, `içerik hash'i <code>sha256:${hash.slice(0, 16)}…</code> (canlı doğrulama §7'de)`),
@@ -780,11 +955,16 @@ export function renderReport(snap, { id, hash, version = 1, meta = null }) {
   const QA_ST_CLASS = { [QA_STATE.BLOCKED]: 'st st-bad', [QA_STATE.REVIEW]: 'st st-warn', [QA_STATE.VALID]: 'st st-ok' }[QA_ST];
   const QA_BLOCKED = QA_ST === QA_STATE.BLOCKED;
   const QA_REVIEW = QA_ST === QA_STATE.REVIEW;
+  /* 0032 · İnceleme kalemleri ağaç DEĞERLERİYLE ilgili mi? Değilse rapor bunu
+   * açıkça söyler: kullanıcı, kendi ölçümünün şüpheli olduğu izlenimini
+   * görmemeli. Örnek: GNSS accuracy_m alanı boşsa kontrol KOŞULAMAZ (⚠) ama
+   * DBH/boy/karbon kontrollerinin tümü geçerlidir. */
+  const AGAC_DEGER_TEMIZ = !INV || (!INV.dbh_fail.length && !INV.hd_fail.length && !INV.h_fail.length && !INV.dev_fail.length && !INV.n_unknown);
   /* İnceleme/blok kalemlerinin adı — §7 giriş cümlesinde sayıyla beyan edilir. */
   const qaWhy = [];
   if (INV) {
     if (INV.dbh_fail.length) qaWhy.push(`DBH geçerlilik kontrolünde ${INV.dbh_fail.length}/${INV.n} kayıt`);
-    if (INV.hd_review) qaWhy.push(`boy/DBH oranı göstergesinde ${INV.hd_fail.length}/${INV.n} kayıt olağandışı`);
+    if (INV.hd_review) qaWhy.push(`gövde formu (boy/çap) incelemesinde ${INV.hd_fail.length}/${INV.n} kayıt fiziksel makullük bandı dışında veya stand içi aykırı`);
     if (INV.dev_fail.length) qaWhy.push(`karbon yeniden hesabında ${INV.dev_fail.length}/${INV.n} kayıt ±%${QA_LIMITS.CARBON_DEV_PCT} bandı dışında`);
     if (INV.species_review) qaWhy.push(`${INV.n_unknown} tür kanonik sözlük dışında`);
   }
@@ -823,12 +1003,28 @@ export function renderReport(snap, { id, hash, version = 1, meta = null }) {
     /* 0031 · ESKİ cümle: "boy/çap oranı blok verdi; ölçü birimi hatası (çevre
      * değeri çap kolonuna yazılmış olabilir) düzeltilmeden karbon
      * yayımlanmamalıdır" → DBH göğüs çapı (cm) olduğu için bu hüküm geçersizdi
-     * ve gerçek saha verisini haksız yere blokluyordu. Yerine inceleme notu. */
-    (INV && INV.hd_review) ? `Boy/DBH oranı ${INV.hd_fail.length}/${INV.n} kayıtta ${QA_LIMITS.HD_MIN}–${QA_LIMITS.HD_MAX} gösterge aralığının dışındadır. Bu oran bir İNCELEME GÖSTERGESİDİR: tür, yaş ve gövde formu farkları oranı doğal olarak değiştirir; saha ölçümünün hatalı olduğu anlamına gelmez ve rapor bu gerekçeyle bloklanmaz. DBH değerleri göğüs çapı (cm) olarak kabul edilmiş, karbon hesabına dönüşüm uygulanmadan aktarılmıştır.` : null,
+     * ve gerçek saha verisini haksız yere blokluyordu. Yerine inceleme notu.
+     * 0032 · ÖLÇÜT DEĞİŞTİ: sabit 15–120 bandı YERİNE (i) fiziksel makullük
+     * bandı HD_PHYS_MIN–HD_PHYS_MAX ve (ii) stand İÇİ robust aykırılık
+     * (modified z > 3,5). Tipik bant dışı SAYIM yalnız bilgilendirmedir:
+     * bütünüyle anıtsal gövdeli bir standda oran doğal olarak düşüktür ve
+     * sabit bant bu standı topluca "olağandışı" ilan ediyordu (32/34). */
+    (INV && INV.hd_review) ? `Boy/DBH oranı ${INV.hd_fail.length}/${INV.n} kayıtta fiziksel makullük bandının (${QA_LIMITS.HD_PHYS_MIN}–${QA_LIMITS.HD_PHYS_MAX}) dışında veya stand içi dağılıma göre aykırıdır (modified z eşiği ${trNum(QA_LIMITS.HD_ROBUST_Z, 1)}). Bu oran bir İNCELEME GÖSTERGESİDİR: tür, yaş ve gövde formu farkları oranı doğal olarak değiştirir; saha ölçümünün hatalı olduğu anlamına gelmez ve rapor bu gerekçeyle bloklanmaz. DBH değerleri göğüs çapı (cm) olarak kabul edilmiş, karbon hesabına dönüşüm uygulanmadan aktarılmıştır.` : null,
+    (INV && !INV.hd_review && INV.hd_band_out && INV.hd_band_out.length) ? `Boy/çap oranı ${INV.hd_band_out.length}/${INV.n} kayıtta tipik ${QA_LIMITS.HD_MIN}–${QA_LIMITS.HD_MAX} bandının dışındadır; bu bir UYARI DEĞİL, dağılım bilgisidir. Ölçüt olarak sabit bant yerine standın kendi dağılımı kullanılmış${HD ? ` (medyan ${tN(HD.medyan, 2)}, MAD ${tN(HD.mad, 3)}, aralık ${tN(HD.min, 2)}–${tN(HD.max, 2)}, en yüksek |z| ${tN(HD.z_max, 2)}; eşik ${trNum(QA_LIMITS.HD_ROBUST_Z, 1)})` : ''} ve hiçbir kayıt aykırı bulunmamıştır. ${AN && AN.n ? `Oranın düşük kalmasının nedeni gövde ölçeğidir: ${AN.n} bireyin gövde çapı ${AN.threshold_cm} cm ve üzerindedir; paydada büyük bir çap varken boy tipik orman değerlerinde kaldığında oran matematik olarak düşer.` : ''}` : null,
+    /* 0032 · ANITSALLIK BEYANI (veri sahibi kararı, 2026-09-30): büyük gövdeler
+     * ölçüm hatası DEĞİL, envanterin ölçeğidir. Rapor bu gerçeği beyan eder ve
+     * sınırlılığı doğru yere yazar: sorun VERİDE değil, allometrik modelin
+     * anıtsal gövdeleri temsil gücündedir. Mevzuat dayanağı Ek-4 basamaklarıdır;
+     * ŞAD/AAD puanlaması YAŞ ve TEPE ÇAPI istediği için UYGULANMAZ (uydurma
+     * puan yoktur) ve tescil hükmü VERİLMEZ. */
+    (INV && AN && AN.n) ? `<b>Anıtsal gövde ölçeği.</b> Ölçülen ${AN.n}/${INV.n} bireyin gövde çapı ${AN.threshold_cm} cm ve üzerindedir (en büyük ${tN(AN.max_dbh_cm, 0)} cm; basamak dağılımı §7 Çizelge 4te, ${ANIT_MEVZUAT.ek}). Bu bireyler anıtsal gövde ölçeğindedir ve değerler sahada ölçüldüğü gibi modellenmiştir: hiçbir düzeltme, ölçekleme veya dışlama uygulanmamıştır. Sınırlılık veride değil model temsilindedir: kullanılan allometrik model (Chave ve ark. 2014) pantropikal bir kalibrasyon örneklemine dayanır; kent parkındaki anıtsal gövdeler bu örnekleme eşit ağırlıkla girmediği için büyük çaplı bireylerde model belirsizliği daha geniştir ve bu belirsizlik %95 güven aralığına yansıtılmıştır. Anıt ağaç TESCİLİ bu raporun konusu değildir: ${ANIT_MEVZUAT.karar} (${ANIT_MEVZUAT.kurum}; Resmî Gazete ${anitRgTarih} / Sayı ${ANIT_MEVZUAT.rg_sayi}, ${ANIT_MEVZUAT.yururluktenKaldirilan} yürürlükten kaldırılmıştır) boyutsal tespiti ${ANIT_MEVZUAT.puanlama} karşılaştırmasına bağlar. ${ANIT_MEVZUAT.puanlamaUygulanmadi} Yetki ilgili ${ANIT_MEVZUAT.yetki}ndadır; bu rapor yalnız ölçülmüş boyutsal veriyi ve mevzuat basamak dağılımını sayıyla beyan eder.` : null,
     (INV && INV.dbh_fail.length) ? `DBH geçerlilik kontrolünde ${INV.dbh_fail.length}/${INV.n} kayıt teknik açıdan sorunludur (eksik / sayısal değil / ≤ 0 / cm aralığı dışında); bu kayıtlar ayrıca incelenmelidir.` : null,
     /* 0031 · karbon yeniden hesabı DBH biriminden BAĞIMSIZ ayrı bir kontroldür. */
     (INV && INV.dev_block) ? `Saklı karbon değerleri ${INV.dev_fail.length}/${INV.n} kayıtta panel denklemiyle yeniden hesabın ±%${QA_LIMITS.CARBON_DEV_PCT} bandı dışındadır; bu bir HESAP BÜTÜNLÜĞÜ sorunudur (DBH birimiyle ilgili değildir) ve giderilene dek toplam geçicidir.` : null,
     (INV && INV.dev_review) ? `Karbon yeniden hesabı karşılaştırmasında ${INV.dev_fail.length}/${INV.n} kayıt ±%${QA_LIMITS.CARBON_DEV_PCT} bandı dışındadır. Bu, DBH biriminden bağımsız AYRI bir kalite kontrol kalemidir; ilgili noktalar ayrıca incelenebilir ancak karbon motorunu veya katsayıları değiştirmek için gerekçe oluşturmaz.` : null,
+    /* 0032 · ρ KAYNAĞI belirsizliği: saklı carbon_kg hangi ρ tablosuyla üretildi?
+     * Denetim iki kaynağı da kabul eder; eşleşen kaynak sayıyla beyan edilir. */
+    (INV && DR && DR.grup_farkli && DR.grup_farkli.length) ? `<b>Odun yoğunluğu (ρ) kaynağı.</b> Karbon yeniden hesap denetiminde ${DR.grup_farkli.length} kayıtta (${DR.grup_farkli.map((x) => 'P' + x.point_id).join(', ')}) saklı karbon GRUP VARSAYILANI ρ ile yeniden üretilmiştir; aynı kayıtlar tür düzeyi ρ ile karşılaştırıldığında ±%${QA_LIMITS.CARBON_DEV_PCT} bandını aşar (örnek ${DR.grup_farkli[0].species}: tür ρ=${DR.grup_farkli[0].rho_tur} kg/m³ → ${tN(DR.grup_farkli[0].expected)} kg, %${tN(DR.grup_farkli[0].dev_pct)} · grup ρ=${DR.grup_farkli[0].rho_grp} kg/m³ → ${tN(DR.grup_farkli[0].expected_grp)} kg, %${tN(DR.grup_farkli[0].dev_grp_pct)}). İki kaynak arasındaki ρ farkı %${rhoFarkPct ?? 0} düzeyindedir; model ρye 0,976 üssüyle duyarlı olduğundan bu fark karbon tahminine yaklaşık aynı oranda yansır. Sınırlılık: tür düzeyi ρ için bölgesel kalibrasyon yoktur ve ρ seçimi tür bazlı karbon tahminini bu ölçekte etkileyebilir. Denetim bu nedenle HER İKİ ρ kaynağını kabul eder, hangisinin eşleştiğini §7de sayıyla beyan eder; karbon motoru, katsayılar, saklı değerler ve CSV çıktısı DEĞİŞTİRİLMEMİŞTİR.` : null,
     (INV && INV.n_unknown > 0) ? `${INV.n_unknown} tür adı kanonik sözlük dışında kalmıştır (${INV.unknown.join(', ')}); bu kayıtlarda grup varsayılan odun yoğunluğu kullanılmıştır ve tür düzeyi ρ belirsizliği genişlemiştir.` : null,
     L && L.masked_ha > 0 ? `Analiz alanının ${trNum(L.masked_ha, 2)} ha’lık bölümü bulut/gölge maskesi kapsamındadır; bu alan sınıf dağılımına dahil edilmemiştir.` : null,
   ].filter(Boolean).map((x) => `<li>${x}</li>`).join('');
@@ -942,6 +1138,28 @@ td.tr{font-family:Georgia,serif}
 td.qok{color:var(--green);font-weight:700}
 td.qwarn{color:var(--amber);font-weight:700}
 td.qbad{color:#b42318;font-weight:700}
+/* 0032 · ÇİZELGE 4 (QA) VE UZUN AÇIKLAMALI HÜCRELER — okunur tablo düzeni.
+ * SORUN: §7 ayrıntı kolonu monospace .76rem idi ve mobilde
+ * th,td{overflow-wrap:anywhere} uzun Türkçe cümleleri KELİME ORTASINDAN
+ * kırıyordu; sabit genişlik olmadığı için kolonlar satır satır farklı
+ * hizalanıyordu → tablo şekilsiz görünüyordu (diğer çizelgeler sayısal/kısa
+ * olduğu için sorun yalnız burada görünürdü).
+ * ÇÖZÜM: (i) table.qa sabit kolon düzeni + colgroup yüzdeleri, (ii) .qd
+ * ayrıntı hücresi orantılı (sans) yazı ve YALNIZ kelime sınırında kırma,
+ * (iii) .qst sonuç hücresi tek satır ve renkli, (iv) açıklayıcı kolonu olan
+ * diğer çizelgeler (§4.6 veri sözlüğü, §10 tekrar üretilebilirlik) aynı .qd
+ * hücresini kullanır. Sayısal içerik değişmez; yalnız sunum. */
+table.qa{table-layout:fixed}
+table.qa col.ck{width:23%}table.qa col.cs{width:16%}table.qa col.cd{width:61%}
+table.qa th{vertical-align:bottom}
+table.qa td{vertical-align:top}
+table.qa td.tr{font-size:.8rem;font-weight:600;color:var(--gd);overflow-wrap:normal;word-break:normal}
+td.qst{font-family:system-ui,-apple-system,'Segoe UI',sans-serif;font-size:.74rem;font-weight:700;white-space:nowrap}
+td.qinfo{color:#1c5d8f;font-weight:700}
+td.qd{font-family:system-ui,-apple-system,'Segoe UI',sans-serif;font-size:.79rem;line-height:1.6;text-align:left;overflow-wrap:break-word;word-break:normal;hyphens:none}
+td.qd code{font-family:ui-monospace,Consolas,monospace;font-size:.72rem;word-break:break-all}
+td.qd b{font-weight:700}
+table.qa tbody tr:nth-child(even) td{background:#fcfbf8}
 .ci{background:var(--tint);border-left:4px solid var(--green);padding:12px 16px;border-radius:0 10px 10px 0;margin:14px 0;font-family:system-ui,sans-serif;font-size:.86rem}
 .verify{border:1px dashed var(--amber);background:#fdf7ee;border-radius:10px;padding:12px 16px;margin:14px 0;font-family:system-ui,sans-serif;font-size:.8rem}
 .verify code{font-family:ui-monospace,monospace;font-size:.72rem;word-break:break-all}
@@ -976,6 +1194,15 @@ pre{background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:
  .tscroll{overflow-x:auto;-webkit-overflow-scrolling:touch;margin:12px -4px;padding:0 4px}
  table{font-size:.74rem;min-width:520px}
  th,td{padding:6px 7px;overflow-wrap:anywhere;word-break:break-word}
+ /* 0032 · Çizelge 4 mobilde de üç kolonlu ve düzenli: sabit kolon düzeni
+  * korunur, .tscroll kabı yatay kayar (diğer çizelgelerle aynı davranış),
+  * ayrıntı metni KELİME ORTASINDAN KIRILMAZ (overflow-wrap:anywhere
+  * yalnız tablo dışı gövde metninde kalır). */
+ table.qa{min-width:540px}
+ table.qa td,table.qa th{overflow-wrap:break-word;word-break:normal}
+ table.qa td.qd{font-size:.75rem;line-height:1.55}
+ table.qa td.tr{font-size:.76rem}
+ table.qa td.qst{white-space:normal;font-size:.72rem}
  p,li,.sub,.stmt,.qnote,.fig .cap{overflow-wrap:anywhere}
  pre{font-size:.62rem}
  .btnrow .btn{flex:1 1 100%}
@@ -997,6 +1224,13 @@ pre{background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:
  .tscroll{overflow:visible!important;margin:8px 0;padding:0}
  table{min-width:0!important;font-size:9.5pt}
  th,td{padding:4px 6px;white-space:normal}
+ /* 0032 · Çizelge 4 kağıtta üç kolonlu kalır (kolon kaydırma yok);
+  * sonuç rozeti gerekirse iki satıra iner, hücreler taşmaz. */
+ table.qa{table-layout:fixed}
+ table.qa td.qd{font-size:8.8pt;line-height:1.45}
+ table.qa td.tr{font-size:9pt}
+ table.qa td.qst{white-space:normal;font-size:8.4pt}
+ table.qa tbody tr:nth-child(even) td{background:#fcfbf8}
  .fig{break-inside:avoid;page-break-inside:avoid}
  /* 0028 · harita TEK sayfaya sığsın: eskiden figür sayfalara bölünüp yarım
   * boş sayfa bırakıyordu (canlı PDF kanıtı). 182mm + başlık A4'e sığar. */
@@ -1053,14 +1287,14 @@ ${lulcMethod || '<p><b>4.4 Arazi örtüsü sınıflandırması.</b> Bu sürümde
 <p><b>4.5 Doğrulama zinciri.</b> (i) Her kayıt moderatör onayı gerektirir (${snap.moderation.approved}/${snap.moderation.approved} kayıt 'Onaylı' durumundadır; zaman damgalı onay kaydı ${snap.moderation.reviewed}/${snap.moderation.approved}); (ii) ölçüm konumunun park poligonu içinde olması veritabanı tetiği ile zorunlu kılınmıştır (trg_geo_fence; zorunluluk, 0007 geçişinden sonraki kayıtlara uygulanır, önceki kayıtlar için kayıt düzeyindeki denetim sonucu §7'de beyan edilir); (iii) arazi örtüsü çözümlemesinde raster/park alan farkı %0,5 eşiğini aşarsa sonuç yayınlanmaz; (iv) yayınlanan sayfanın içerik bütünlüğü SHA-256 hash'i ile açılışta canlı doğrulanır (§7).</p>
 <p><b>4.6 Veri sözlüğü.</b> Raporda ve <code>data.json</code>/<code>olcum.csv</code> çıktılarında kullanılan değişkenlerin anlamı ve birimi aşağıdadır.</p>
 <div class="tscroll"><table><thead><tr><th>Değişken</th><th>Açıklama</th><th>Birim</th></tr></thead><tbody>
-<tr><td class="tr">DBH</td><td>Göğüs çapı — yerden 1,30 m yükseklikte ölçülen gövde çapı</td><td>cm</td></tr>
-<tr><td class="tr">Boy (H)</td><td>Ağaç boyu</td><td>m</td></tr>
-<tr><td class="tr">ρ (rho)</td><td>Odun yoğunluğu (tür bazlı; bulunamazsa grup varsayılanı)</td><td>g/cm³</td></tr>
-<tr><td class="tr">AGB</td><td>Toprak üstü biyokütle</td><td>kg</td></tr>
-<tr><td class="tr">BGB</td><td>Toprak altı (kök) biyokütlesi = AGB × 0,26</td><td>kg</td></tr>
-<tr><td class="tr">Karbon</td><td>Tahmini karbon stoku = (AGB + BGB) × 0,47</td><td>kg C</td></tr>
-<tr><td class="tr">GA</td><td>%95 güven aralığı (Monte Carlo, korele model hatası)</td><td>kg C</td></tr>
-<tr><td class="tr">h/DBH</td><td>Boy/çap oranı — yalnız inceleme göstergesi, hata hükmü değildir</td><td>birimsiz</td></tr>
+<tr><td class="tr">DBH</td><td class="qd">Göğüs çapı — yerden 1,30 m yükseklikte ölçülen gövde çapı</td><td class="qd">cm</td></tr>
+<tr><td class="tr">Boy (H)</td><td class="qd">Ağaç boyu</td><td class="qd">m</td></tr>
+<tr><td class="tr">ρ (rho)</td><td class="qd">Odun yoğunluğu (tür bazlı; bulunamazsa grup varsayılanı)</td><td class="qd">g/cm³</td></tr>
+<tr><td class="tr">AGB</td><td class="qd">Toprak üstü biyokütle</td><td class="qd">kg</td></tr>
+<tr><td class="tr">BGB</td><td class="qd">Toprak altı (kök) biyokütlesi = AGB × 0,26</td><td class="qd">kg</td></tr>
+<tr><td class="tr">Karbon</td><td class="qd">Tahmini karbon stoku = (AGB + BGB) × 0,47</td><td class="qd">kg C</td></tr>
+<tr><td class="tr">GA</td><td class="qd">%95 güven aralığı (Monte Carlo, korele model hatası)</td><td class="qd">kg C</td></tr>
+<tr><td class="tr">h/DBH</td><td class="qd">Boy/çap oranı — yalnız inceleme göstergesi, hata hükmü değildir</td><td class="qd">birimsiz</td></tr>
 </tbody></table></div>
 <p class="qnote"><b>Ölçüm notu:</b> Bu raporda DBH, göğüs yüksekliğinde (1,30 m) ölçülen gövde <b>çapını</b> ifade eder ve <b>cm</b> cinsindendir. DBH değerleri karbon hesabına <b>herhangi bir çevre→çap dönüşümü uygulanmadan</b>, doğrudan model girdisi olarak kullanılmıştır.</p>
 
@@ -1069,7 +1303,7 @@ ${lulcMethod || '<p><b>4.4 Arazi örtüsü sınıflandırması.</b> Bu sürümde
 <div class="tscroll"><table><thead><tr><th>Tür</th><th>Grup</th><th>n</th><th>Ort. DBH (cm)</th><th>Ort. boy (m)</th><th>Karbon (kg)</th><th>Pay</th></tr></thead><tbody>${spRows}</tbody></table></div>
 <div class="fig"><div class="sans" style="font-size:.78rem"><b>Şekil 1 — Tür bazlı karbon stoku payları</b> <span class="qnote">(bar rengi taksonomik grubu gösterir: ${sw('#2f9e44')} ibreli · ${sw('#e8590c')} yapraklı · ${sw('#8a928c')} diğer)</span></div>${bars}</div>
 <div class="ci">📐 Toplam karbon stoku: <b>${ciTxt}</b> · Monte Carlo n=${snap.mc.N}, tohum=${snap.mc.SEED}, model CV=%${snap.mc.MODEL_CV * 100} (korele). ${t.n === 2 ? 'Örneklem büyüklüğü (n=2) nedeniyle güven aralığı geniştir; değer park geneline ekstrapole edilmemelidir.' : t.n < 10 ? 'Örneklem büyüklüğü sınırlı olduğundan güven aralığı geniş yorumlanmalıdır.' : 'Örneklem büyüklüğü aralığı makul düzeye indirmektedir.'}</div>
-<p class="qnote"><b>Ölçüm notu:</b> Bu raporda DBH, göğüs yüksekliğinde (1,30 m) ölçülen gövde <b>çapını</b> ifade eder ve <b>cm</b> cinsindendir. DBH değerleri karbon hesabına herhangi bir çevre→çap dönüşümü uygulanmadan doğrudan model girdisi olarak kullanılmıştır (değişken tanımları: §4.6 veri sözlüğü).</p>
+<p class="qnote"><b>Ölçüm notu:</b> Bu raporda DBH, göğüs yüksekliğinde (1,30 m) ölçülen gövde <b>çapını</b> ifade eder ve <b>cm</b> cinsindendir. DBH değerleri karbon hesabına herhangi bir çevre→çap dönüşümü uygulanmadan doğrudan model girdisi olarak kullanılmıştır (değişken tanımları: §4.6 veri sözlüğü). ${AN && AN.n ? `<b>Gövde ölçeği notu:</b> ölçülen ${AN.n}/${INV.n} bireyin gövde çapı ${AN.threshold_cm} cm ve üzerindedir (en büyük ${tN(AN.max_dbh_cm, 0)} cm); bu bireyler <b>anıtsal gövde</b> ölçeğindedir. Değerler standart ortalamaların üzerinde görünmekle birlikte saha ölçümünü olduğu gibi yansıtır; allometrik model bu çaplarla DEĞİŞTİRİLMEDEN çalıştırılmış, herhangi bir düzeltme/ölçekleme uygulanmamıştır (Çizelge 4: “Anıtsal gövde beyanı”).` : ''}</p>
 ${L ? `<p><b>5.2 Arazi örtüsü.</b> Sınıf alanları Çizelge 2'de sunulmuştur; mekânsal dağılım §6'da (Şekil 2) gösterilmektedir.</p>
 <div class="tscroll"><table><thead><tr><th>Sınıf</th><th>Alan (ha)</th><th>Pay</th></tr></thead><tbody>${L.classes.map((c) => `<tr><td class="tr">${esc(c.label)}</td><td>${trNum(c.ha, 2)}</td><td>%${trNum(c.pct, 1)}</td></tr>`).join('')}</tbody></table></div>
 <p><b>5.3 Alan dengesi.</b> Çizelge 3, park geometrisi ile raster kapsama alanının karşılaştırmasını verir; bu karşılaştırma sonuçların üretilmesinden ÖNCE hesaplama bütünlüğünün kontrol edildiğini belgeler.</p>
@@ -1085,8 +1319,11 @@ ${L ? `<p><b>5.2 Arazi örtüsü.</b> Sınıf alanları Çizelge 2'de sunulmuşt
 ${L ? `<div class="fig"><img src="harita.png" alt="${esc(P.name)} park sahası arazi örtüsü sınıfları haritası; park sınırı ve ölçüm noktaları işaretli" style="width:100%;border-radius:8px"><div class="cap">Şekil 2 — ${esc(L.source)} sınıflandırmasının park poligonu ile tam kesişimi; koyu çizgi park sınırını (OSM), siyah noktalar envanter ölçüm noktalarını gösterir. Çizim, çözümleme motorunun kesintisiz hücre çıktısından birebir ölçekli üretilmiştir; bağlayıcı sayısal değerler Çizelge 2'de ve data.json'dadır. Harita altbilgisi belge kimliğini (${id}), veri kaynağını, çözünürlüğü, projeksiyonu (${esc(epsg || '—')}) ve analiz tarihini taşır: harita tek başına dolaşıma girse bile kaynağı belirlidir.</div></div>` : '<p>Bu sürümde harita üretilmemiştir.</p>'}
 
 <h2><span class="no">7</span>Kalite Kontrol ve Doğrulama</h2>
-<p>Sonuçlar üretilmeden önce hesaplamanın bütünlüğü aşağıdaki kontrollerle doğrulanmıştır (Çizelge 4). Kontroller otomatiktir. Rapor QA durumu üç hâllidir: <b>🔴 BLOKLU</b> — kritik veri hatası vardır, karbon sonucu bilimsel iletişimde kullanılmamalıdır; <b>🟡 İNCELEME</b> — veri geçerlidir, bazı istatistiksel kontroller inceleme uyarısı vermektedir; <b>🟢 GEÇERLİ</b> — tüm kritik kontroller geçmiştir. <b>Bu raporun QA durumu: ${QA_ST_LABEL}</b>${QA_BLOCKED ? ` — kritik hata: ${QA_WHY}. Karbon toplamı bu nedenle GEÇİCİDİR ve hata giderilmeden bilimsel iletişimde KULLANILMAMALIDIR.` : (QA_REVIEW ? ` — inceleme kalemleri: ${QA_WHY}. Bu uyarılar birer inceleme kalemidir; veri hatası hükmü DEĞİLDİR ve karbon sonucunun geçerliliğini ortadan kaldırmaz.` : '')} Karbon hesabı, saha ölçümlerinde kayıtlı DBH (göğüs çapı, cm) değerleri kullanılarak gerçekleştirilmiştir.</p>
-<div class="tscroll"><table><thead><tr><th>Kontrol</th><th>Sonuç</th><th>Ayrıntı</th></tr></thead><tbody>${qaRows}</tbody></table></div>
+<p>Sonuçlar üretilmeden önce hesaplamanın bütünlüğü aşağıdaki kontrollerle doğrulanmıştır (Çizelge 4). Kontroller otomatiktir. Rapor QA durumu üç hâllidir: <b>🔴 BLOKLU</b> — kritik veri hatası vardır, karbon sonucu bilimsel iletişimde kullanılmamalıdır; <b>🟡 İNCELEME</b> — veri geçerlidir, bazı istatistiksel kontroller inceleme uyarısı vermektedir; <b>🟢 GEÇERLİ</b> — tüm kritik kontroller geçmiştir. <b>Bu raporun QA durumu: ${QA_ST_LABEL}</b>${QA_BLOCKED ? ` — kritik hata: ${QA_WHY}. Karbon toplamı bu nedenle GEÇİCİDİR ve hata giderilmeden bilimsel iletişimde KULLANILMAMALIDIR.` : (QA_REVIEW ? ` — inceleme kalemleri: ${QA_WHY}. Bu uyarılar birer inceleme kalemidir; veri hatası hükmü DEĞİLDİR ve karbon sonucunun geçerliliğini ortadan kaldırmaz.${AGAC_DEGER_TEMIZ ? ' Bu rapordaki inceleme kalemlerinin HİÇBİRİ ağaç ölçüm değerleriyle (DBH, boy, tür, karbon) ilgili DEĞİLDİR: envanter kontrollerinin tümü geçerlidir; kalan kalem/kalemler ölçülemeyen veya kaydedilmeyen üst veri alanlarıdır (ör. GNSS alıcı doğruluğu accuracy_m boş bırakılmışsa bu kontrol koşamaz).' : ''}` : '')} Çizelge 4’te ayrıca <b>ℹ️ BEYAN</b> işaretli bilgilendirme satırları bulunabilir: bunlar bir kalite hükmü DEĞİLDİR ve rapor durumunu etkilemez. ${anitIntro}Karbon hesabı, saha ölçümlerinde kayıtlı DBH (göğüs çapı, cm) değerleri kullanılarak gerçekleştirilmiştir.</p>
+<!-- 0032 · Çizelge 4 düzeni: sabit kolon genişlikleri (colgroup) + .qd ayrıntı hücresi.
+     Eski hâlde ayrıntı kolonu monospace ve overflow-wrap:anywhere idi; uzun Türkçe
+     cümleler kelime ortasından kırılıp tabloyu şekilsiz gösteriyordu. -->
+<div class="tscroll"><table class="qa"><colgroup><col class="ck"><col class="cs"><col class="cd"></colgroup><thead><tr><th>Kontrol</th><th>Sonuç</th><th>Ayrıntı</th></tr></thead><tbody>${qaRows}</tbody></table></div>
 <div class="verify">
  <b>Rapor kimliği:</b> <code>${id}</code> · sürüm ${verTxt} · yayın ${snap.generated_at.slice(0, 10)}<br>
  <b>İçerik hash'i:</b> <code>sha256:${hash}</code><br>
@@ -1110,12 +1347,12 @@ ${evalParas}
 
 <h2><span class="no">10</span>Tekrar Üretilebilirlik</h2>
 <div class="tscroll"><table><thead><tr><th>Öğe</th><th>Kayıt</th></tr></thead><tbody>
-<tr><td class="tr">Analiz sürümü</td><td>${esc(engine)}${engineVer ? ' ' + esc(engineVer) : ' —'}${appVer ? ' · uygulama ' + esc(appVer) : ''}</td></tr>
-<tr><td class="tr">Veri seti</td><td>${esc(dataset)}</td></tr>
-<tr><td class="tr">Çözünürlük</td><td>10 m</td></tr>
-<tr><td class="tr">Park geometrisi</td><td>kayıtlı (<code>${esc(P.osm_key || '—')}</code>; yayın anındaki sınır)</td></tr>
-<tr><td class="tr">Analiz yöntemi</td><td>sürüm kontrollü${git ? ` (git commit <code>${esc(String(git).slice(0, 7))}</code>)` : ' (git commit kaydı bu kopyada yok)'}</td></tr>
-<tr><td class="tr">Üretim komutu</td><td><code>node scripts/make-report.mjs --park ${P.id}</code></td></tr>
+<tr><td class="tr">Analiz sürümü</td><td class="qd">${esc(engine)}${engineVer ? ' ' + esc(engineVer) : ' —'}${appVer ? ' · uygulama ' + esc(appVer) : ''}</td></tr>
+<tr><td class="tr">Veri seti</td><td class="qd">${esc(dataset)}</td></tr>
+<tr><td class="tr">Çözünürlük</td><td class="qd">10 m</td></tr>
+<tr><td class="tr">Park geometrisi</td><td class="qd">kayıtlı (<code>${esc(P.osm_key || '—')}</code>; yayın anındaki sınır)</td></tr>
+<tr><td class="tr">Analiz yöntemi</td><td class="qd">sürüm kontrollü${git ? ` (git commit <code>${esc(String(git).slice(0, 7))}</code>)` : ' (git commit kaydı bu kopyada yok)'}</td></tr>
+<tr><td class="tr">Üretim komutu</td><td class="qd"><code>node scripts/make-report.mjs --park ${P.id}</code></td></tr>
 </tbody></table></div>
 <p>Bu raporun yeniden üretilebilmesi için kullanılan yöntem, veri kaynağı ve analiz sürümü rapor üst verisinde (<code>metadata.json</code>) kayıt altına alınmıştır. Raster girdi bulut kataloğundan okunduğu için, kaynak ürünün YENİ bir sürümü yayımlanırsa aynı komut farklı sonuç üretebilir; bu nedenle veri seti sürümü (v200, ${dataYear}) ve üretim anı §11'de sabitlenmiştir.</p>
 
@@ -1352,7 +1589,37 @@ export function buildMetadata(snap, { id, hash, version = '1.0', meta = null, hi
       { name: 'Karbon', description: 'Tahmini karbon stoku = (AGB + BGB) x 0,47', unit: 'kg C' },
       { name: 'h/DBH', description: 'Boy/çap oranı — yalnız inceleme göstergesi, hata hükmü değildir', unit: 'birimsiz' },
     ],
-    measurementNote: 'DBH, göğüs yüksekliğinde (1,30 m) ölçülen gövde çapıdır ve cm cinsindendir. DBH değerleri karbon hesabına herhangi bir çevre→çap dönüşümü uygulanmadan doğrudan model girdisi olarak kullanılmıştır.',
+    measurementNote: 'DBH, göğüs yüksekliğinde (1,30 m) ölçülen gövde çapıdır ve cm cinsindendir. DBH değerleri karbon hesabına herhangi bir çevre→çap dönüşümü uygulanmadan doğrudan model girdisi olarak kullanılmıştır.'
+      + ((snap.qa && snap.qa.species && snap.qa.species.anit && snap.qa.species.anit.n)
+        ? ` Gövde ölçeği: ${snap.qa.species.anit.n}/${snap.qa.species.anit.n_toplam ?? snap.totals.n} bireyin gövde çapı ${snap.qa.species.anit.threshold_cm} cm ve üzerindedir (anıtsal gövde ölçeği); değerler düzeltilmeden, olduğu gibi modellenmiştir.`
+        : ''),
+    /* 0032 · anıtsal gövde beyanı (makine okunur). TESCİL hükmü DEĞİLDİR:
+     * ŞAD/AAD puanlaması yaş ve tepe çapı istediği için uygulanmamıştır. */
+    monumental: (snap.qa && snap.qa.species && snap.qa.species.anit) ? {
+      thresholdCm: snap.qa.species.anit.threshold_cm,
+      n: snap.qa.species.anit.n,
+      pct: snap.qa.species.anit.pct,
+      maxDbhCm: snap.qa.species.anit.max_dbh_cm,
+      /* Ek-4 gövde çapı basamakları (İlke Kararı No: 110, RG 20.07.2022/31898) */
+      diameterBins: snap.qa.species.anit.basamaklar.map((b) => ({ rangeCm: b.label, n: b.n })),
+      points: snap.qa.species.anit.points.map((x) => ({ pointId: x.point_id, species: x.species, dbhCm: x.dbh_cm })),
+      regulation: ANIT_MEVZUAT,
+      isRegistrationDecision: false,
+      note: ANIT_MEVZUAT.puanlamaUygulanmadi + ' Karar yetkisi ilgili ' + ANIT_MEVZUAT.yetki + 'ndadır.',
+    } : null,
+    /* 0032 · karbon yeniden hesap denetiminin ρ kaynağı beyanı */
+    carbonRecalc: (snap.qa && snap.qa.species && snap.qa.species.dev_rho) ? {
+      bandPct: QA_LIMITS.CARBON_DEV_PCT,
+      minAbsDiffKg: QA_LIMITS.CARBON_DEV_MIN_KG,
+      checked: snap.qa.species.dev_rho.n,
+      matchedSpeciesRho: snap.qa.species.dev_rho.tur,
+      matchedGroupRho: snap.qa.species.dev_rho.grup,
+      matchedGroupOnlyPoints: snap.qa.species.dev_rho.grup_farkli.map((x) => x.point_id),
+      outOfBand: (snap.qa.species.dev_fail || []).map((x) => x.point_id),
+      note: 'Beklenen değer iki ρ kaynağıyla (tür düzeyi / grup varsayılanı) hesaplanır; saklı değer herhangi biriyle bant içindeyse satır geçerlidir. Motor ve katsayılar değişmez.',
+    } : null,
+    /* 0032 · ℹ️ beyan kalemleri: QA durumunu (qaState) ETKİLEMEZ */
+    qaInfo: (snap.qa && snap.qa.species && snap.qa.species.info) || [],
     sources: [dataset, 'OpenStreetMap (ODbL)', 'DendroGeo saha ölçümleri (moderatör onaylı)'],
     relatedIdentifiers: related,
     /* 0031 · üç hâlli QA durumu: VALID / REVIEW / BLOCKED */

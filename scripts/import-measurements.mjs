@@ -131,10 +131,16 @@ function decideUnit(records, birim) {
   if (!hd.length) return { unit: 'cm', why: 'DBH = göğüs çapı (cm) kabul edildi; oran hesabı için veri yok' };
   hd.sort((a, b) => a - b);
   const med = hd[Math.floor(hd.length / 2)];
-  if (med < QA_LIMITS.HD_MIN || med > QA_LIMITS.HD_MAX) {
-    return { unit: 'cm', why: `DBH = göğüs çapı (cm) kabul edildi, dönüşüm uygulanmadı · medyan boy/çap ${med.toFixed(1)} gösterge aralığı (${QA_LIMITS.HD_MIN}–${QA_LIMITS.HD_MAX}) dışında → İNCELEME uyarısı (blok değil)` };
+  /* 0032 · medyan oran YALNIZ bilgidir: birim kararı DBH = göğüs çapı (cm)
+   * olarak SABİTTİR (0031). Fiziksel makullük bandı dışı medyan → İNCELEME
+   * notu; tipik 15–120 bandı dışı medyan → anıtsal/bodur form olağandır. */
+  if (med < QA_LIMITS.HD_PHYS_MIN || med > QA_LIMITS.HD_PHYS_MAX) {
+    return { unit: 'cm', why: `DBH = göğüs çapı (cm) kabul edildi, dönüşüm uygulanmadı · medyan boy/çap ${med.toFixed(1)} fiziksel makullük bandı (${QA_LIMITS.HD_PHYS_MIN}–${QA_LIMITS.HD_PHYS_MAX}) dışında → İNCELEME uyarısı (blok değil)` };
   }
-  return { unit: 'cm', why: `DBH = göğüs çapı (cm) · medyan boy/çap ${med.toFixed(1)} gösterge aralığında` };
+  if (med < QA_LIMITS.HD_MIN || med > QA_LIMITS.HD_MAX) {
+    return { unit: 'cm', why: `DBH = göğüs çapı (cm) kabul edildi, dönüşüm uygulanmadı · medyan boy/çap ${med.toFixed(1)} tipik ${QA_LIMITS.HD_MIN}–${QA_LIMITS.HD_MAX} bandı dışında → BİLGİ (anıtsal gövde/bodur form olağandır; uyarı değil, blok hiç değil)` };
+  }
+  return { unit: 'cm', why: `DBH = göğüs çapı (cm) · medyan boy/çap ${med.toFixed(1)} tipik gösterge aralığında` };
 }
 
 /* ---- konum çiti (opsiyonel; ağ erişimi varsa) ---- */
@@ -244,18 +250,42 @@ for (const r of recs) {
 const live = recs.filter((r) => !r.skip);
 
 /* ---- QA: yeniden hesap + kapılar ---- */
-const hdFail = [], devFail = [], dupPts = [], dupVals = [], outside = [];
+/* 0032 · QA v4 ile aynı kurallar: (b) gövde formu fiziksel bant + tipik bant
+ * SAYIMI, (c) karbon denetimi İKİ ρ kaynağıyla (tür ρ / grup varsayılanı ρ),
+ * (d) anıtsal gövde sayımı (DBH ≥ ANIT_DBH_CM) — bilgi, hata değil. */
+const hdFail = [], hdBandOut = [], devFail = [], devRhoGrup = [], dupPts = [], dupVals = [], outside = [], anitRows = [];
+const BAND = QA_LIMITS.CARBON_DEV_PCT, TABAN = QA_LIMITS.CARBON_DEV_MIN_KG ?? 0;
+const uygun = (sakli, beklenen) => beklenen > 0 && (Math.abs(((sakli - beklenen) / beklenen) * 100) <= BAND || Math.abs(sakli - beklenen) < TABAN);
 for (const r of live) {
   const calc = calcRow(r.dbh_cm, r.height_m, r.species, r.grp, { rho, grho });
+  const calcGrup = calcRow(r.dbh_cm, r.height_m, r.species, r.grp, { rho: {}, grho });
   r.carbon_calc = +calc.total_carbon.toFixed(2);
   r.volume_calc = +calc.vol.toFixed(3);
   r.hd = +((100 * r.height_m) / r.dbh_cm).toFixed(1);
-  if (r.hd < QA_LIMITS.HD_MIN || r.hd > QA_LIMITS.HD_MAX) { hdFail.push(r); warn.push(`P${r.point_id}: boy/çap ${r.hd} gösterge aralığı dışında (${QA_LIMITS.HD_MIN}–${QA_LIMITS.HD_MAX}) — İNCELEME uyarısı; tür/yaş/gövde formu farkı olabilir, içe aktarmayı BLOKLAMAZ (0031)`); }
+  if (r.dbh_cm >= QA_LIMITS.ANIT_DBH_CM) { r.anit = true; anitRows.push(r); }
+  if (r.hd < QA_LIMITS.HD_PHYS_MIN || r.hd > QA_LIMITS.HD_PHYS_MAX) {
+    hdFail.push(r);
+    warn.push(`P${r.point_id}: boy/çap ${r.hd} fiziksel makullük bandı (${QA_LIMITS.HD_PHYS_MIN}–${QA_LIMITS.HD_PHYS_MAX}) dışında — İNCELEME uyarısı; ölçüm/kayıt hatası olabilir, içe aktarmayı BLOKLAMAZ (0031/0032)`);
+  } else if (r.hd < QA_LIMITS.HD_MIN || r.hd > QA_LIMITS.HD_MAX) {
+    hdBandOut.push(r);
+  }
   if (Number.isFinite(r.carbon_stored) && r.carbon_stored > 0) {
     r.dev_pct = +(((r.carbon_stored - r.carbon_calc) / r.carbon_calc) * 100).toFixed(1);
-    if (Math.abs(r.dev_pct) > QA_LIMITS.CARBON_DEV_PCT && Math.abs(r.carbon_stored - r.carbon_calc) >= (QA_LIMITS.CARBON_DEV_MIN_KG ?? 0)) { devFail.push(r); warn.push(`P${r.point_id}: saklı karbon ${r.carbon_stored} kg ≠ yeniden hesap ${r.carbon_calc} kg (%${r.dev_pct}) — ondalık kayması/birim hatası olabilir`); }
+    r.dev_grp_pct = calcGrup.total_carbon > 0 ? +(((r.carbon_stored - calcGrup.total_carbon) / calcGrup.total_carbon) * 100).toFixed(1) : null;
+    const okTur = uygun(r.carbon_stored, r.carbon_calc);
+    const okGrup = uygun(r.carbon_stored, calcGrup.total_carbon);
+    if (!okTur && !okGrup) {
+      devFail.push(r);
+      warn.push(`P${r.point_id}: saklı karbon ${r.carbon_stored} kg ≠ yeniden hesap ${r.carbon_calc} kg (%${r.dev_pct}; grup ρ ile %${r.dev_grp_pct}) — HER İKİ ρ kaynağıyla bant dışı: ondalık kayması/birim hatası olabilir`);
+    } else if (!okTur && okGrup) {
+      r.rho_src = 'grup';
+      devRhoGrup.push(r);
+      warn.push(`P${r.point_id}: saklı karbon ${r.carbon_stored} kg GRUP VARSAYILANI ρ ile yeniden üretildi (tür ρ ile %${r.dev_pct}) — ρ kaynağı farkı, ÖLÇÜM HATASI DEĞİL (0032)`);
+    } else r.rho_src = 'tur';
   }
 }
+if (hdBandOut.length) warn.push(`BİLGİ: ${hdBandOut.length}/${live.length} kayıtta boy/çap tipik ${QA_LIMITS.HD_MIN}–${QA_LIMITS.HD_MAX} bandının dışında — bu bir UYARI DEĞİLDİR; anıtsal gövde/bodur form oranı doğal olarak düşürür (0032).`);
+if (anitRows.length) warn.push(`BİLGİ: ${anitRows.length}/${live.length} bireyin gövde çapı ≥ ${QA_LIMITS.ANIT_DBH_CM} cm → ANITSAL GÖVDE ölçeği (en büyük ${Math.max(...anitRows.map((r) => r.dbh_cm))} cm). Değerler olduğu gibi aktarılır; düzeltme/dönüşüm uygulanmaz (İlke Kararı No: 110, RG 20.07.2022/31898 Ek-4).`);
 const seen = new Map();
 for (const r of live) {
   const k = r.point_id;
@@ -269,9 +299,12 @@ for (const [a, b] of dupVals) warn.push(`P${a.point_id} ≡ P${b.point_id}: çap
 const N = live.length || 1;
 const gates = {
   unit: { ok: true, note: `${decided.unit} (${decided.why})` },
-  /* 0031: boy/çap oranı YALNIZ inceleme göstergesidir → block kalıcı false. */
-  hd: { fail: hdFail.length, block: false, review: hdFail.length > 0 },
-  dev: { fail: devFail.length, block: devFail.length >= QA_LIMITS.BLOCK_MIN_N && devFail.length / N > QA_LIMITS.BLOCK_RATIO },
+  /* 0031: boy/çap oranı YALNIZ inceleme göstergesidir → block kalıcı false.
+   * 0032: fail = fiziksel olanaksız oran; band_out = tipik bant dışı SAYIM. */
+  hd: { fail: hdFail.length, band_out: hdBandOut.length, block: false, review: hdFail.length > 0 },
+  dev: { fail: devFail.length, rho_grup: devRhoGrup.length, block: devFail.length >= QA_LIMITS.BLOCK_MIN_N && devFail.length / N > QA_LIMITS.BLOCK_RATIO },
+  /* 0032 · anıtsal gövde beyanı (ℹ️): kapı DEĞİL, bilgidir. */
+  anit: { threshold_cm: QA_LIMITS.ANIT_DBH_CM, n: anitRows.length, max_dbh_cm: anitRows.length ? Math.max(...anitRows.map((r) => r.dbh_cm)) : null, points: anitRows.map((r) => r.point_id) },
   unknown_species: recs.filter((r) => !r.species || !dict.byName[r.species]).length,
   dup_points: dupPts.length, hard_errors: errs.length,
 };
@@ -310,7 +343,7 @@ const q = (v) => (v == null ? 'null' : `'${String(v).replace(/'/g, "''")}'`);
 const sqlHead = [
   `-- DendroGeo içe aktarma · ${new Date().toISOString()}`,
   `-- kaynak: ${file} · birim kararı: ${decided.unit} (${decided.why})`,
-  `-- QA: ${live.length} kayıt · h/d ihlal ${gates.hd.fail} · karbon sapma ${gates.dev.fail} · sözlük dışı ${gates.unknown_species} · mükerrer nokta ${gates.dup_points}`,
+  `-- QA: ${live.length} kayıt · h/d fiziksel ihlal ${gates.hd.fail} (tipik bant dışı ${gates.hd.band_out} = bilgi) · karbon sapma ${gates.dev.fail} (grup ρ ile eşleşen ${gates.dev.rho_grup}) · anıtsal gövde ${gates.anit.n} (DBH ≥ ${gates.anit.threshold_cm} cm) · sözlük dışı ${gates.unknown_species} · mükerrer nokta ${gates.dup_points}`,
   force && blocked ? '-- ⚠ --force ile üretildi: QA kapısı BLOK durumundaydı; çalıştırmadan önce nedenleri gözden geçirin!' : null,
   `-- İdempotent: client_id UNIQUE anahtarı 'dgi:<park>:<nokta>:<ölçüno>' → aynı dosya ikinci kez çalıştırılamaz.`,
   'begin;',
@@ -354,7 +387,7 @@ else {
   console.log(`📥 ${file}: ${recs.length} satır → ${live.length} geçerli kayıt (${delim === '\t' ? 'TSV' : 'CSV:' + delim})`);
   console.log(`📏 birim: ${decided.unit.toUpperCase()} — ${decided.why}`);
   console.log(`🧮 toplam karbon: saklı ${(totStored / 1000).toFixed(2)} t → yeniden hesap ${(totCalc / 1000).toFixed(2)} t${totStored > 0 ? ` (oran ${(totStored / totCalc).toFixed(2)}x)` : ''}`);
-  console.log(`🚦 kapılar: boy/çap ${gates.hd.fail}/${live.length}${gates.hd.fail ? ' ⚠İNCELEME' : ''} · karbon ${gates.dev.fail}/${live.length}${gates.dev.block ? ' ⛔BLOK' : (gates.dev.fail ? ' ⚠İNCELEME' : '')} · sözlük dışı ${gates.unknown_species} · mükerrer ${gates.dup_points} · hata ${errs.length}${gates.geofence ? ` · çit dışı ${gates.geofence.outside}/${gates.geofence.checked}` : ''}`);
+  console.log(`🚦 kapılar: boy/çap ${gates.hd.fail}/${live.length}${gates.hd.fail ? ' ⚠İNCELEME' : ''} (tipik bant dışı ${gates.hd.band_out} = ℹ️bilgi) · karbon ${gates.dev.fail}/${live.length}${gates.dev.block ? ' ⛔BLOK' : (gates.dev.fail ? ' ⚠İNCELEME' : '')} (grup ρ ile eşleşen ${gates.dev.rho_grup}) · anıtsal gövde ${gates.anit.n}/${live.length} ℹ️ · sözlük dışı ${gates.unknown_species} · mükerrer ${gates.dup_points} · hata ${errs.length}${gates.geofence ? ` · çit dışı ${gates.geofence.outside}/${gates.geofence.checked}` : ''}`);
   for (const w of warn.slice(0, 15)) console.log('   ⚠ ' + w);
   if (warn.length > 15) console.log(`   … +${warn.length - 15} uyarı daha`);
   for (const e of errs.slice(0, 10)) console.log('   ❌ ' + e);

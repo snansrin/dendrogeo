@@ -85,18 +85,27 @@ describe('0011 · resolveSpeciesName — kanonik tür sözlüğü', () => {
   });
 });
 
-describe('0031 · inventoryQa — envanter kalite kapısı (DBH = göğüs çapı, cm)', () => {
+describe('0031+0032 · inventoryQa — envanter kalite kapısı (QA v4: DBH = göğüs çapı cm, çift ρ kaynağı, anıtsal gövde)', () => {
   const dict = loadSpeciesDict();
   const mk = (point_id, species, grp, dbh_cm, height_m, carbon_kg, extra = {}) =>
     ({ id: point_id, point_id, species, grp, dbh_cm, height_m, carbon_kg, ...extra });
 
-  test('ham Göksu verisi BLOKLANMAZ: DBH göğüs çapı (cm), boy/çap yalnız ⚠ inceleme', () => {
-    /* Gerçek 28.09.2026 envanterinden temsilci dilim. 0031 öncesi kapı bu
-     * veriyi "kolon çevre olabilir" varsayımıyla ⛔ BLOKLU ilan ediyordu;
-     * DBH göğüs çapı (cm) olduğu için bu hüküm geçersizdi. Artık:
-     *   - DBH geçerlilik kontrolü (a) 6/6 GEÇER → blok yok
-     *   - boy/çap oranı (b) yalnız İNCELEME göstergesi → hd_block KALICI false
-     *   - karbon yeniden hesabı (c) DBH biriminden bağımsız ayrı kontrol */
+  test('ham Göksu verisi (anıtsal gövde) BLOKLANMAZ ve ŞÜPHELİ de sayılmaz — QA v4 (0032)', () => {
+    /* Gerçek 28.09.2026 envanterinden temsilci dilim.
+     * 0011 kapısı bu veriyi "kolon çevre olabilir" varsayımıyla ⛔ BLOKLU
+     * ilan ediyordu (yanlış). 0031 bunu 🟡 İNCELEMEye indirdi ama iki kalem
+     * hâlâ veri hatası iması taşıyordu: 6/6 kayıt "olağandışı boy/çap oranı",
+     * 3/6 kayıt "bant dışı karbon". 0032de ikisi de düzeltildi:
+     *   (a) DBH geçerlilik 6/6 GEÇER → blok yok
+     *   (b) gövde formu: sabit bant yerine fiziksel makullük (3–200) + stand
+     *       içi robust aykırılık (modified z > 3,5). Tipik 15–120 bandı dışı
+     *       kayıtlar yalnız SAYILIR (hd_band_out) → uyarı üretmez
+     *   (c) karbon: beklenen değer İKİ ρ kaynağıyla hesaplanır (tür ρ / grup
+     *       varsayılanı ρ); saklı değer herhangi biriyle ±%20 içindeyse geçer.
+     *       Böylece P3/P32 (grup ρ=541 ile birebir) aklanır, P7nin 10x
+     *       ondalık kayması YAKALANMAYA DEVAM EDER.
+     *   (d) anıtsal gövde beyanı: DBH ≥ 100 cm olan 4 birey ℹ️ Beyan üretir,
+     *       QA durumunu ETKİLEMEZ. */
     const raw = [
       mk(1, 'SÜS ERİĞİ', 'YAPRAKLI', 110, 10.2, 2034.7),
       mk(3, 'SALKIM SÖĞÜT', 'YAPRAKLI', 166, 14, 6188.3),
@@ -111,17 +120,29 @@ describe('0031 · inventoryQa — envanter kalite kapısı (DBH = göğüs çap�
     /* (a) DBH birim/geçerlilik: hepsi sayısal, pozitif, cm aralığında */
     assert.equal(qa.dbh_fail.length, 0, 'DBH geçerlilik ihlali olmamalı: ' + JSON.stringify(qa.dbh_fail));
     assert.equal(qa.dbh_block, false);
-    /* (b) boy/çap: 6/6 gösterge aralığı dışında ama BLOK DEĞİL (0031) */
-    assert.equal(qa.hd_fail.length, 6, 'oran göstergesi 6 kayıtta aralık dışı: ' + JSON.stringify(qa.hd_fail));
+    /* (b) gövde formu: tipik bant 6/6 kayıtta aşılır ama bu yalnız SAYIMDIR */
+    assert.equal(qa.hd_band_out.length, 6, 'tipik 15–120 bandı dışı sayım: ' + JSON.stringify(qa.hd_band_out));
+    assert.equal(qa.hd_fail.length, 0, 'fiziksel bant + robust z → aykırı kayıt yok: ' + JSON.stringify(qa.hd_fail));
     assert.equal(qa.hd_block, false, 'boy/çap oranı ASLA bloklamaz (0031)');
-    assert.equal(qa.hd_review, true, 'oran inceleme uyarısı üretir');
-    /* (c) karbon yeniden hesabı: DBH biriminden bağımsız; 3/6 = %50 → eşik
-     * (>%50) altında → dev_block false. P7 ondalık kayması sayıyla görünür. */
-    assert.equal(qa.dev_fail.length, 3, 'karbon sapması 3 kayıtta: ' + JSON.stringify(qa.dev_fail));
-    assert.equal(qa.dev_block, false, '3/6 = %50 → eşik (>%50) altında');
-    const p7 = qa.rows.find((r) => r.point_id === 7);
-    assert.ok(Math.abs(p7.dev_pct) > 50, 'P7 sapma %50 üstü: ' + p7.dev_pct);
-    /* Üç hâlli durum: blok yok, inceleme var → INCELEME (⛔ BLOKLU değil) */
+    assert.equal(qa.hd_review, false, '0032: anıtsal gövdeli stand artık inceleme üretmiyor');
+    assert.ok(qa.hd_stats && qa.hd_stats.n === 6, 'stand dağılımı hesaplandı: ' + JSON.stringify(qa.hd_stats));
+    assert.ok(Math.abs(qa.hd_stats.z_max) <= QA_LIMITS.HD_ROBUST_Z, 'en yüksek |z| eşiğin altında: ' + qa.hd_stats.z_max);
+    /* (c) karbon: yalnız GERÇEK hesap hatası bayraklanır (P7 10x ondalık kayması) */
+    assert.equal(qa.dev_fail.length, 1, 'tek gerçek hata: ' + JSON.stringify(qa.dev_fail));
+    assert.equal(qa.dev_fail[0].point_id, 7);
+    assert.ok(Math.abs(qa.dev_fail[0].dev_pct) > 50, 'P7 sapma %50 üstü: ' + qa.dev_fail[0].dev_pct);
+    assert.equal(qa.dev_block, false, '1/6 → sistemik değil');
+    assert.deepEqual(qa.dev_rho.grup_farkli.map((x) => x.point_id), [3, 32],
+      'grup varsayılanı ρ ile birebir olan ama tür ρ ile bant aşan kayıtlar');
+    assert.equal(qa.dev_rho.n, 5, '5/6 kayıt yeniden üretildi');
+    assert.equal(qa.dev_rho.tur + qa.dev_rho.grup, 5);
+    /* (d) anıtsal gövde beyanı (ℹ️ — duruma etkisi YOK) */
+    assert.equal(qa.anit.n, 4, 'DBH ≥ 100 cm: P1 110, P3 166, P7 107, P32 200');
+    assert.deepEqual(qa.anit.points.map((x) => x.point_id), [1, 3, 7, 32]);
+    assert.equal(qa.anit.max_dbh_cm, 200);
+    assert.equal(qa.anit.threshold_cm, 100);
+    assert.deepEqual(qa.info.map((x) => x.key), ['anit', 'rho-kaynagi']);
+    /* Üç hâlli durum: tek gerçek hata (P7) inceleme üretir; BLOKLU değil */
     assert.equal(qa.state, 'INCELEME', 'durum: ' + qa.state);
     /* π ile türetilmiş bir değer YOK: DBH sahada kaydedildiği gibi */
     assert.equal(qa.rows.find((r) => r.point_id === 7).dbh_cm, 107);
@@ -158,18 +179,79 @@ describe('0031 · inventoryQa — envanter kalite kapısı (DBH = göğüs çap�
     for (const r of Object.values(DBH_REASON_TR)) assert.ok(!/çevre/.test(r), r);
   });
 
-  test('tekil bodur ağaç yayını BLOKLAMAZ (boy/çap yalnız inceleme)', () => {
+  test('tekil bodur ağaç: fiziksel olarak makul → inceleme ÜRETMEZ (0032)', () => {
+    /* 0031de bu fikstür "1 kayıt olağandışı oranda" diye ⚠ üretiyordu: 12 cm
+     * gövde / 1,5 m boy → h/D = 12,5, tipik 15–120 bandının altında. Oysa bu
+     * genç/fide formu için fiziksel olarak olağandır; sabit bant tek başına
+     * hata hükmü veremez. 0032: tipik bant dışı kayıt SAYILIR, uyarı yalnız
+     * fiziksel olanaksızlıkta veya stand içi aykırılıkta üretilir. */
     const rows = [
-      mk(1, 'MEŞE', 'YAPRAKLI', 40, 15, null),   // h/D = 37.5 ✓
-      mk(2, 'MEŞE', 'YAPRAKLI', 50, 18, null),   // ✓
-      mk(3, 'SÜS ERİĞİ', 'YAPRAKLI', 12, 1.5, null), // h/D = 12.5 → tekil ihlal
-      mk(4, 'KARAÇAM', 'İBRELİ', 45, 20, null),  // ✓
+      mk(1, 'MEŞE', 'YAPRAKLI', 40, 15, null),   // h/D = 37,5 → tipik bantta
+      mk(2, 'MEŞE', 'YAPRAKLI', 50, 18, null),   // h/D = 36   → tipik bantta
+      mk(3, 'SÜS ERİĞİ', 'YAPRAKLI', 12, 1.5, null), // h/D = 12,5 → bant dışı SAYIM
+      mk(4, 'KARAÇAM', 'İBRELİ', 45, 20, null),  // h/D = 44,4 → tipik bantta
+    ];
+    const qa = inventoryQa(rows, dict);
+    assert.equal(qa.hd_band_out.length, 1, 'tipik bant dışı sayım (bilgi): ' + JSON.stringify(qa.hd_band_out));
+    assert.equal(qa.hd_fail.length, 0, 'fiziksel olarak makul → aykırı değil');
+    assert.equal(qa.hd_stats, null, 'n < HD_ROBUST_MIN_N → robust z testi KOŞULMAZ (küçük örneklemde sahte aykırı yok)');
+    assert.equal(qa.hd_block, false, 'boy/çap oranı hiçbir ölçekte bloklamaz (0031)');
+    assert.equal(qa.hd_review, false);
+    assert.equal(qa.state, 'GECERLI', 'durum: ' + qa.state);
+  });
+
+  test('fiziksel olarak olanaksız oran ⚠ İNCELEME üretir, ⛔ blok üretmez', () => {
+    const rows = [
+      mk(1, 'MEŞE', 'YAPRAKLI', 40, 15, null),
+      mk(2, 'MEŞE', 'YAPRAKLI', 50, 18, null),
+      mk(3, 'MEŞE', 'YAPRAKLI', 120, 1.5, null), // h/D = 1,25 < HD_PHYS_MIN (3)
+      mk(4, 'KARAÇAM', 'İBRELİ', 45, 20, null),
     ];
     const qa = inventoryQa(rows, dict);
     assert.equal(qa.hd_fail.length, 1);
-    assert.equal(qa.hd_block, false, 'boy/çap oranı hiçbir ölçekte bloklamaz (0031)');
+    assert.equal(qa.hd_fail[0].point_id, 3);
+    assert.equal(qa.hd_fail[0].reason, 'fiziksel-alt');
+    assert.equal(qa.hd_block, false, 'boy/çap oranı ASLA bloklamaz');
     assert.equal(qa.hd_review, true);
-    assert.equal(qa.state, 'INCELEME', 'tekil uyarı → 🟡 İNCELEME, 🔴 BLOKLU değil');
+    assert.equal(qa.state, 'INCELEME', '🟡 İNCELEME, 🔴 BLOKLU değil');
+  });
+
+  test('stand içi robust aykırılık (modified z > 3,5) tek hatalı kaydı yakalar', () => {
+    /* 5 kayıt h/D ≈ 28–32 bandında, 1 kayıt 150: sabit bant (15–120) bunu
+     * yakalardı ama standın tümü bodur/ya da anıtsal formlu olduğunda sabit
+     * bant YANLIŞ kayıtları bayraklar. Robust z her iki durumda da çalışır:
+     * ölçüt standın KENDİ dağılımıdır (medyan 30,5 · MAD 1,5 → z = 53,7). */
+    const rows = [[40, 12], [40, 12.8], [40, 11.2], [40, 12.4], [40, 11.6], [40, 60]]
+      .map((x, i) => mk(i + 1, 'MEŞE', 'YAPRAKLI', x[0], x[1], null));
+    const qa = inventoryQa(rows, dict);
+    assert.equal(qa.hd_stats.n, 6);
+    assert.equal(qa.hd_stats.medyan, 30.5);
+    assert.equal(qa.hd_stats.mad, 1.5);
+    assert.equal(qa.hd_fail.length, 1, 'yalnız aykırı kayıt: ' + JSON.stringify(qa.hd_fail));
+    assert.equal(qa.hd_fail[0].point_id, 6);
+    assert.equal(qa.hd_fail[0].reason, 'stand-aykiri');
+    assert.ok(qa.hd_fail[0].z > QA_LIMITS.HD_ROBUST_Z, 'z: ' + qa.hd_fail[0].z);
+    assert.equal(qa.hd_block, false);
+    assert.equal(qa.state, 'INCELEME');
+    /* diğer 5 kayıt aykırı DEĞİL (satır düzeyinde de işaretli) */
+    assert.deepEqual(qa.rows.filter((r) => r.hd_fail).map((r) => r.point_id), [6]);
+  });
+
+  test('ağaç boyu fiziksel aralık dışında (1,3–100 m) → inceleme', () => {
+    const rows = [
+      mk(1, 'MEŞE', 'YAPRAKLI', 40, 15, null),
+      mk(2, 'MEŞE', 'YAPRAKLI', 50, 18, null),
+      mk(3, 'MEŞE', 'YAPRAKLI', 200, 120, null), // boy 120 m > H_MAX_M; h/D = 60 (fiziksel bantta)
+      mk(4, 'KARAÇAM', 'İBRELİ', 45, 20, null),
+      mk(5, 'KARAÇAM', 'İBRELİ', 47, 21, null),
+    ];
+    const qa = inventoryQa(rows, dict);
+    assert.equal(qa.h_fail.length, 1, 'boy fiziksel aralık dışı: ' + JSON.stringify(qa.h_fail));
+    assert.equal(qa.h_fail[0].point_id, 3);
+    assert.equal(qa.hd_review, true, 'boy kontrolü de inceleme üretir');
+    assert.equal(qa.hd_block, false);
+    assert.equal(qa.state, 'INCELEME');
+    assert.equal(qa.rows.find((r) => r.point_id === 3).h_fail, true);
   });
 
   test('küçük kayıtlarda yuvarlama gürültüsü bayraklanmaz (mutlak taban ≥5 kg)', () => {
@@ -244,8 +326,20 @@ describe('0031 · import-measurements.mjs — cihaz çıktısı kapısı (DBH = 
     '7;KARAÇAM;İBRELİ;34,06;12;19,6;39.99111;32.65332',
     '29;IHLAMUR;YAPRAKLI;12,73;4,5;127,3;39.99222;32.65443',
   ].join('\n') + '\n';
-  const fCap = join(tmp, 'cap.csv'), fCevre = join(tmp, 'cevre.csv'), fBozuk = join(tmp, 'bozuk.csv');
-  writeFileSync(fCap, csvCap); writeFileSync(fCevre, csvCevre); writeFileSync(fBozuk, csvBozuk);
+  /* 0032 · ÇİFT ρ kaynağıyla da SİSTEMİK bozuk dosya: DBH doğru (π ile
+   * bölünmemiş), saklı karbon 10x kaymış → 4/4 kayıt her iki ρ kaynağıyla da
+   * bant dışı. (csvBozukta π ile bölünmüş DBH + 10x kaymış karbon BİRLİKTE
+   * olduğu için iki hata birbirini götürür ve P3 grup ρ ile açıklanabilir
+   * hâle gelir; o dosya artık 2/4 = eşikte kalır, blok üretmez.) */
+  const csvCokBozuk = [
+    'nokta;tur;grup;cap_cm;boy_m;karbon_kg;enlem;boylam',
+    '1;SÜS ERİĞİ;YAPRAKLI;110;10,2;203,5;39.99025;32.65201',
+    '3;SALKIM SÖĞÜT;YAPRAKLI;166;14;618,8;39.98989;32.65084',
+    '7;KARAÇAM;İBRELİ;107;12;196,2;39.99111;32.65332',
+    '29;IHLAMUR;YAPRAKLI;40;4,5;12,7;39.99222;32.65443',
+  ].join('\n') + '\n';
+  const fCap = join(tmp, 'cap.csv'), fCevre = join(tmp, 'cevre.csv'), fBozuk = join(tmp, 'bozuk.csv'), fCokBozuk = join(tmp, 'cokbozuk.csv');
+  writeFileSync(fCap, csvCap); writeFileSync(fCevre, csvCevre); writeFileSync(fBozuk, csvBozuk); writeFileSync(fCokBozuk, csvCokBozuk);
   const run = (f, args) => {
     try {
       const out = execFileSync(process.execPath, [join(ROOT, 'scripts/import-measurements.mjs'), f, ...args], { encoding: 'utf8', timeout: 60000 });
@@ -268,23 +362,51 @@ describe('0031 · import-measurements.mjs — cihaz çıktısı kapısı (DBH = 
     assert.ok(!/insert into/i.test(r.out), 'SQL üretilmemeli');
   });
 
-  test('auto: birim CM, DBH olduğu gibi yazılır, boy/çap yalnız ⚠ İNCELEME', () => {
+  test('auto: birim CM, DBH olduğu gibi yazılır, tipik bant dışı oran yalnız ℹ️ BİLGİ (0032)', () => {
     const r = run(fCap, ['--dry-run', '--json']);
     assert.equal(r.code, 0, 'boy/çap göstergesi içe aktarmayı BLOKLAMAMALI: ' + r.out.slice(0, 400));
     const j = JSON.parse(r.out.slice(r.out.indexOf('{')));
     assert.equal(j.unit.unit, 'cm', 'birim cm: ' + j.unit.why);
     assert.match(j.unit.why, /göğüs çapı/);
+    assert.match(j.unit.why, /tipik 15–120 bandı dışında → BİLGİ/, 'anıtsal gövde için medyan oran uyarı değil: ' + j.unit.why);
     assert.equal(j.live, 4);
-    /* P7: 107 cm çap OLDUĞU GİBİ (0011'de 34,06'ya bölünüyordu) */
+    /* P7: 107 cm çap OLDUĞU GİBİ (0011de 34,06ya bölünüyordu) */
     const p7 = j.records.find((x) => x.point_id === 7);
     assert.equal(p7.dbh_cm, 107, 'DBH dönüştürülmez: ' + p7.dbh_cm);
     assert.equal(p7.girth_cm, null, 'çevre kolonu yoksa girth_cm null');
     assert.ok(!r.out.includes('34.06'), 'π türetmesi izi olmamalı');
-    /* boy/çap 4/4 aralık dışı → uyarı var, blok YOK */
-    assert.equal(j.gates.hd.fail, 4, 'oran göstergesi 4 kayıtta aralık dışı');
+    /* (b) gövde formu: fiziksel ihlal YOK; tipik bant dışı 4/4 = SAYIM */
+    assert.equal(j.gates.hd.fail, 0, 'fiziksel olarak olanaksız oran yok');
+    assert.equal(j.gates.hd.band_out, 4, 'tipik bant dışı sayım: ' + JSON.stringify(j.gates.hd));
     assert.equal(j.gates.hd.block, false, 'boy/çap ASLA bloklamaz (0031)');
+    assert.equal(j.gates.hd.review, false, '0032: anıtsal gövde inceleme üretmez');
+    /* (c) karbon: P3 grup ρ ile açıklanır (ℹ️), P7nin 10x kayması yakalanır */
+    assert.equal(j.gates.dev.fail, 1, 'yalnız gerçek hata: ' + JSON.stringify(j.gates.dev));
+    assert.equal(j.gates.dev.rho_grup, 1, 'grup ρ ile eşleşen kayıt');
+    assert.equal(j.gates.dev.block, false);
+    /* (d) anıtsal gövde sayımı */
+    assert.equal(j.gates.anit.threshold_cm, 100);
+    assert.equal(j.gates.anit.n, 3, 'P1 110 · P3 166 · P7 107');
+    assert.equal(j.gates.anit.max_dbh_cm, 166);
+    assert.deepEqual(j.gates.anit.points, [1, 3, 7]);
     assert.match(r.out, /boy\/çap/);
-    assert.match(r.out, /İNCELEME/);
+    assert.match(r.out, /ANITSAL GÖVDE/);
+    assert.match(r.out, /GRUP VARSAYILANI ρ ile yeniden üretildi/);
+    assert.match(r.out, /ÖLÇÜM HATASI DEĞİL/);
+    assert.equal(j.blocked, false);
+  });
+
+  test('0032 · π ile bölünmüş DBH + 10x kaymış karbon birbirini götürürse P3 grup ρ ile açıklanır', () => {
+    /* Bu dosya 0011 hatasının artifacti: iki hata (÷π DBH ve 10x karbon)
+     * birlikte olduğundan carbon ∝ d^1,952 telafisiyle P3 grup ρ bandına
+     * düşer. Beklenen davranış: P7 ve P29 yakalanır (2/4), eşik (>%50)
+     * aşılmadığı için BLOK yok; P3 için ρ kaynağı beyanı basılır. */
+    const r = run(fBozuk, ['--dry-run', '--json']);
+    assert.equal(r.code, 0, '2/4 = %50 → eşik (>%50) aşılmaz: ' + r.out.slice(0, 300));
+    const j = JSON.parse(r.out.slice(r.out.indexOf('{')));
+    assert.equal(j.gates.dev.fail, 2);
+    assert.deepEqual(j.records.filter((x) => x.dev_pct != null && Math.abs(x.dev_pct) > 500).map((x) => x.point_id), [29]);
+    assert.equal(j.gates.dev.rho_grup, 1);
     assert.equal(j.blocked, false);
   });
 
@@ -296,12 +418,14 @@ describe('0031 · import-measurements.mjs — cihaz çıktısı kapısı (DBH = 
   });
 
   test('karbon yeniden hesap kapısı (DBH biriminden bağımsız) bloklar; --force damga basar', () => {
-    const r = run(fBozuk, ['--dry-run']);
+    /* 0032: blok yolu ÇİFT ρ kaynağıyla da çalışıyor — 4/4 kayıt her iki
+     * kaynakla bant dışı (>%50 VE ≥3 kayıt) → ⛔ BLOK. */
+    const r = run(fCokBozuk, ['--dry-run']);
     assert.equal(r.code, 1, 'sistemik saklı-karbon sapması bloklamalı: ' + r.out.slice(0, 300));
     assert.match(r.out, /⛔/);
-    assert.match(r.out, /karbon 3\/4 ⛔BLOK/);
+    assert.match(r.out, /karbon 4\/4 ⛔BLOK/);
     const out = join(tmp, 'forced.sql');
-    const r2 = run(fBozuk, ['--force', '--park', '25', '--project', '26', '--out', out]);
+    const r2 = run(fCokBozuk, ['--force', '--park', '25', '--project', '26', '--out', out]);
     assert.equal(r2.code, 0, r2.out.slice(0, 400));
     const sql = readFileSync(out, 'utf8');
     assert.match(sql, /--force ile üretildi/);

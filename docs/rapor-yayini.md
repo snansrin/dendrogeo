@@ -247,7 +247,7 @@ yazar künyesi veri sahibi önceliğiyle (0015) en çok katkısı olan kişidir.
 Güvenlik: davet/ortak tablolarına istemciden YAZMA YOK (grant verilmedi) —
 tüm yazımlar RPC denetiminde; davetler anon'a kapalı (rls-probe.sh 0025 bölümüyle denetlenir).
 
-## 6) Envanter kalite kapıları (QA v3 · 0031)
+## 6) Envanter kalite kapıları (QA v4 · 0032)
 
 **DBH = göğüs çapı (cm)** ve sahada doğrudan çap olarak kaydedilir; rapor
 hattında çevre→çap dönüşümü YAPILMAZ (ayrıntı: `docs/methods.md` §1.5.1).
@@ -260,9 +260,30 @@ Rapor motoru yayından ÖNCE kayıtları da denetler (§7 Çizelge 4):
 | Fotoğraf kanıtı | her kayıtta `photo_url` | ⚠ beyan |
 | GNSS doğruluk kaydı | `accuracy_m` dolu | ⚠ "kaydedilmedi" beyanı (±0,0 UYDURULMAZ) |
 | **Envanter birim kontrolü (DBH)** | var → sayısal → > 0 → `1 ≤ D ≤ 400 cm` | ≥3 kayıt VE >%50 → **⛔ kritik** |
-| **Boy/DBH oranı incelemesi** | 15 ≤ 100·H/D ≤ 120 (gösterge) | **⚠ İNCELEME — asla blok değil** |
-| Karbon yeniden hesabı | panel denklemi ±%20 (ve mutlak fark ≥5 kg — küçük kayıtlarda yuvarlama gürültüsü bayraklanmaz) | ≥3 kayıt VE >%50 → **⛔ kritik** (hesap bütünlüğü; DBH birimiyle ilgisi yok) |
+| **Boy/DBH oranı incelemesi** | fiziksel makullük `3 ≤ 100·H/D ≤ 200` + boy `1,3–100 m` + stand içi robust aykırılık (`modified z > 3,5`, yalnız `n ≥ 5`) | **⚠ İNCELEME — asla blok değil** |
+| Karbon yeniden hesabı | panel denklemi ±%20 (ve mutlak fark ≥5 kg — küçük kayıtlarda yuvarlama gürültüsü bayraklanmaz) — **iki ρ kaynağından herhangi biriyle** (tür ρ / grup varsayılanı ρ) | ≥3 kayıt VE >%50 → **⛔ kritik** (hesap bütünlüğü; DBH birimiyle ilgisi yok) |
+| **Anıtsal gövde beyanı** | DBH ≥ `ANIT_DBH_CM` (100 cm) olan bireyler + Ek-4 basamak dağılımı | **ℹ️ BEYAN — durumu değiştirmez** |
 | Park geometrisi | bbox/düğüm taraması | dikdörtgen `geom_json` yok sayılır → OSM'e düşülür (beyanla) |
+
+> **0032 · tipik `15–120` bandı artık YALNIZ SAYIM.** `hd_band_out` olarak
+> beyan edilir, uyarı üretmez. Gerekçe: bütünüyle anıtsal gövdeli bir standda
+> (Göksu park 25: 11/34 birey ≥ 100 cm, `100·H/D` aralığı 5,33–16,32, medyan
+> 9,65) sabit bant 32/34 kaydı yanlış yere “olağandışı” ilan ediyordu;
+> modified z (eşik 3,5) aynı veride hiçbir kaydı aykırı bulmuyor.
+> `hd_block` kalıcı `false` (0031 hükmü korunur).
+
+> **0032 · iki ρ kaynağı.** Saklı `carbon_kg` değerlerinin bir bölümü 0011
+> döneminde **grup varsayılanı** ρ ile üretilmişti. Denetim beklenen değeri hem
+> tür ρ hem grup ρ ile hesaplar; hangisinin eşleştiği §7 Çizelge 4te ve
+> `metadata.json → carbonRecalc` alanında sayıyla beyan edilir. Karbon motoru,
+> katsayılar, saklı değerler, CSV ve şema **değişmez**; 10× ondalık kayması
+> gibi gerçek hesap hataları yakalanmaya devam eder.
+
+> **0032 · anıtsal gövde beyanı bir TESCİL hükmü DEĞİLDİR.** Dayanak: *Tabiat
+> Varlığı Olarak Belirlenecek Anıt Ağaçların Tespitine İlişkin İlke Kararı*
+> (Karar No: 110), Tabiat Varlıklarını Koruma Merkez Komisyonu, Resmî Gazete
+> 20.07.2022 / Sayı 31898, Ek-4. ŞAD/AAD puanlaması yaş (artım kalemi) ve tepe
+> çapı gerektirdiği için **uygulanmaz**; yetki TVK Bölge Komisyonundadır.
 
 Rapor durumu Çizelge 4ten türetilen **üç hâlli** bir rozettir (künye + §7):
 
@@ -270,9 +291,22 @@ Rapor durumu Çizelge 4ten türetilen **üç hâlli** bir rozettir (künye + §7
   giderilmeden bilimsel iletişimde KULLANILMAMALIDIR" uyarısını basar. Yalnız
   DBH geçerlilik kontrolü veya karbon yeniden hesabı sistemik ihlal verirse.
 * 🟡 **İNCELEME** — veri geçerli; istatistiksel kontroller uyarı veriyor
-  (boy/çap oranı, GNSS doğruluk kaydı, tekil karbon sapmaları, fotoğraf
-  eksiği). Sonucu geçersiz kılmaz, yayını durdurmaz.
+  (fiziksel olarak olanaksız boy/çap oranı, stand içi aykırı tekil kayıt, GNSS
+  doğruluk kaydı, tekil karbon sapmaları, fotoğraf eksiği). Sonucu geçersiz
+  kılmaz, yayını durdurmaz. 0032: inceleme kalemlerinin hiçbiri ağaç ölçüm
+  değerleriyle ilgili değilse §7 bunu açıkça yazar (kullanıcının kendi verisi
+  hakkında yanlış şüphe oluşmasın diye).
 * 🟢 **GEÇERLİ** — tüm kritik kontroller geçti.
+* ℹ️ **BEYAN** — dördüncü bir durum **değildir**; Çizelge 4 satır işaretidir
+  (anıtsal gövde, ρ kaynağı). Rozeti değiştirmez, `qaState` alanında görünmez.
+
+**Çizelge 4 sunumu (0032).** §7 tablosu `table.qa` + `<colgroup>`
+(`%23 / %16 / %61`) ile sabit kolon düzeninde basılır; ayrıntı hücresi `.qd`
+(orantılı yazı, kelime ortasından kırma yok), sonuç hücresi `.qst` (renkli,
+ekranda tek satır; mobil/printte normal sarma), beyan satırı `.qinfo`.
+Mobilde `.tscroll` kabı yatay kayar (`table.qa{min-width:540px}`), printte üç
+kolon korunur. Uzun açıklama kolonu olan §4.6 (veri sözlüğü) ve §10 (tekrar
+üretilebilirlik) çizelgeleri de `.qd` kullanır.
 
 > **0011 notu (tarihsel):** `supabase/migrations/0011_inventory_qa.sql`
 > "Çap kolonu çevre taşıyor" varsayımıyla `dbh_cm` değerlerini π ile bölmüş

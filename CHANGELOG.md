@@ -9,6 +9,97 @@ Yeni sürüm yayımlama adımları: [`docs/surum-yayini.md`](docs/surum-yayini.m
 
 ## [Yayımlanmadı]
 
+### Düzeltildi — 0032 anıt ağaç ölçeği + Çizelge 4 okunurluğu (DGR-2026-0017) (2026-09-30)
+**Kök neden (veri sahibi kararı):** "Girdiğim ağaç değerleri gerçek, standart
+dışı olabilir ama **doğru** veriler; **anıt ağaç** onlar. Ona göre raporu
+düzenle. Kontrol | Sonuç | Ayrıntı tablosunu da diğer tablolar gibi göster, bu
+şekilsiz olmuş." İki ayrı kusur vardı: (1) QA v3, anıtsal gövdeli standı
+**veri hatası gibi** işaretliyordu — 32/34 kayıt "olağandışı boy/çap oranı",
+6/34 kayıt "bant dışı karbon"; (2) §7 Çizelge 4ün ayrıntı kolonu monospace +
+`overflow-wrap:anywhere` olduğu için uzun Türkçe cümleler **kelime ortasından**
+kırılıyor, sabit kolon genişliği olmadığından tablo düzensiz görünüyordu.
+**Karbon motoru, katsayılar, MC yapılandırması, `dbh_cm` kolonu, CSV biçimi,
+veri tabanı şeması, yayın kuyruğu/workflowlar, LULC ve park analizi
+DEĞİŞMEDİ**; yayımlanmış `rapor/` çıktılarına dokunulmadı; yeni migration
+YOKTUR. Aynı veri + aynı formül aynı sayıları üretir.
+
+* **QA v4 (`inventoryQa`) · (d) Anıtsal gövde beyanı (ℹ️):** DBH ≥
+  `ANIT_DBH_CM` (100 cm) olan bireyler sayılır ve İlke Kararı **Ek-4** gövde
+  çapı basamaklarıyla (`<50` … `≥300`, 12 basamak) birlikte beyan edilir.
+  Dayanak: *Tabiat Varlığı Olarak Belirlenecek Anıt Ağaçların Tespitine İlişkin
+  İlke Kararı* (Karar No: 110), TVK Merkez Komisyonu, RG **20.07.2022/31898**
+  (666 sayılı kararı yürürlükten kaldırır). **Tescil hükmü DEĞİLDİR:** ŞAD/AAD
+  puanlaması yaş (artım kalemi) ve tepe çapı istediği için **uygulanmaz**
+  (uydurma puan yok), yetki TVK Bölge Komisyonundadır. Mevzuatın "çevre ÷
+  3,14" tanımı ile DendroGeo'nun doğrudan çap kaydı arasındaki fark raporda
+  beyan edilir; **dönüşüm uygulanmaz**. ℹ️ satırı `qaStates`e `info` olarak
+  girer → `qaStateOf` okumaz → 🟢/🟡/🔴 **değişmez**.
+* **QA v4 · (b) gövde formu ölçütü:** sabit `15–120` bandı **yalnız sayıma**
+  indirildi (`hd_band_out`, "bu bir UYARI DEĞİL, BİLGİDİR"). İnceleme ölçütü
+  artık iki katmanlı: **fiziksel makullük** (`3 ≤ 100·H/D ≤ 200`, boy
+  `1,3–100 m`) + **stand içi robust aykırılık** (modified z =
+  `0,6745·(x − medyan)/MAD`, eşik `3,5`, yalnız `n ≥ 5`; `MAD = 0` ise ortalama
+  mutlak sapmaya düşer, o da 0 ise test koşulmaz). Gerekçe sayıyla: Göksu
+  `100·H/D` aralığı **5,33–16,32**, medyan 9,65, MAD 1,575 → `|z|max = 2,86`
+  (eşik 3,5) → **0/34 aykırı**; sabit bant 32/34ü bayraklıyordu. Stand
+  dağılımı (`hd_stats`) raporda basılır. `hd_block` kalıcı `false` (0031).
+* **QA v4 · (c) iki ρ kaynağı:** beklenen karbon hem **tür düzeyi ρ** hem
+  **grup varsayılanı ρ** ile hesaplanır; saklı değer herhangi biriyle ±%20
+  (ve mutlak fark ≥5 kg) içindeyse satır geçerlidir, eşleşen kaynak sayıyla
+  beyan edilir (`dev_rho.tur/grup/grup_farkli`, satırda `rho_src`). Gerekçe:
+  saklı `carbon_kg` değerlerini üreten 0011 SQL tablosu bazı türlerde grup
+  varsayılanını kullanmıştı → Göksu'da 6/34 kayıt (tümü SALKIM SÖĞÜT) sahte
+  "bant dışı" çıkıyordu (tür ρ=400 ile %27–34, grup ρ=541 ile %0,0–5,1).
+  Gerçek hesap hataları (P7'nin 10× ondalık kayması) **yakalanmaya devam eder**.
+* **§7 Çizelge 4 sunumu:** `<table class="qa">` + `<colgroup>` (`%23 / %16 /
+  %61`) → `table-layout:fixed`; ayrıntı hücresi `.qd` (orantılı/sans yazı,
+  `overflow-wrap:break-word` → **kelime ortasından kırılmaz**), sonuç hücresi
+  `.qst` (renkli, ekranda `nowrap`; mobil + printte normal sarma → taşma yok),
+  beyan satırı `.qinfo` (mavi, ⚠ ile karışmaz), satır zeminleri dönüşümlü.
+  Mobilde `.tscroll` yatay kayar (`min-width:540px`), printte üç kolon korunur
+  (`8,8pt`). Uzun açıklama kolonu olan **§4.6 veri sözlüğü** ve **§10 tekrar
+  üretilebilirlik** çizelgeleri de `.qd` kullanır. Kontrol kolonu
+  `class="tr"` olarak kaldı (mevcut bekçiler bu işareti kilitler).
+* **Rapor metni:** §7 girişi ℹ️ BEYANı tanımlar ve anıtsallığı sayıyla
+  bildirir ("4/6 bireyin gövde çapı 100 cm ve üzerindedir … rapor bu değerleri
+  veri hatası olarak **işaretlemez**"); inceleme kalemlerinin hiçbiri ağaç
+  ölçüm değerleriyle ilgili değilse bu ayrıca yazılır. §5.1e **Gövde ölçeği
+  notu** (model DEĞİŞTİRİLMEDEN çalıştırıldı), §9a **Anıtsal gövde ölçeği**
+  (sınırlılık veride değil model temsilindedir) ve **Odun yoğunluğu (ρ)
+  kaynağı** maddeleri eklendi. Suçlayıcı "olağandışı oranda" dili kalktı.
+* **`metadata.json`:** `monumental` (eşik, n, %, en büyük çap, `diameterBins`,
+  `points`, `regulation`, `isRegistrationDecision: false`, `note`),
+  `carbonRecalc` (bant, `matchedSpeciesRho`/`matchedGroupRho`,
+  `matchedGroupOnlyPoints`, `outOfBand`), `qaInfo` alanları eklendi;
+  `measurementNote` gövde ölçeği cümlesiyle genişletildi. `variables`,
+  `qaState`, `qaStateLabel`, `resultHash` desenleri değişmedi.
+* **Doğrulama:** yayımlanan **DGR-2026-0017**nin `data.json`ı yeni kodla
+  yeniden üretildi — `.ci` toplamı (**52,29 t [%95 GA 28,80–73,91]**), tür
+  çizelgesi, arazi örtüsü sınıfları, alan dengesi, t/ha, 34/34 satır karbonu,
+  `DG_DATA` ve `metadata.sampleSize` **birebir aynı**; değişen yalnız QA
+  hükmü/metni ve içerik hash'i. QA: `dbh_fail 0/34` · `hd_fail 0/34`
+  (bant dışı SAYIM 32/34) · `dev_fail 0/34` (13 kayıt tür ρ, 21 kayıt grup ρ
+  ile eşleşti; 6 kayıt grup ρ ile birebir) · **anıtsal gövde 11/34** (en büyük
+  200 cm; basamaklar `<50`:1 · `50–74`:10 · `75–99`:12 · `100–124`:5 ·
+  `125–149`:4 · `150–174`:1 · `200–224`:1). Envanter kalemlerinin tümü ✓;
+  kalan tek ⚠ ağaç değerleriyle ilgisiz olan **GNSS `accuracy_m` kaydı**
+  (0/34) → rozet 🟡 İNCELEME ve §7 bunun ağaç ölçümleriyle ilgili olmadığını
+  açıkça yazar.
+* **Belgeler:** `docs/methods.md` §1.5.1 (QA v4 tablosu, iki ρ kaynağı, robust
+  z, anıtsal gövde/ Ek-4 dayanağı, Çizelge 4 sunumu), `docs/rapor-yayini.md`
+  §6 (kapı tablosu + ℹ️ BEYAN + sunum notu) yeniden yazıldı. Migration,
+  workflow, `sw.js` precache ve yayımlanmış `rapor/` çıktıları DEĞİŞMEDİ.
+* **Bekçi:** `test/anit-qa.test.mjs` (**45 test**, yeni) — eşik sabitleri,
+  Ek-4 basamak sınırları (24 sınır değeri), mevzuat künyesi, robust istatistik
+  çekirdeği, çift ρ kaynağı (aklama + 10× hatanın yakalanması), anıtsal
+  sayım/basamak dağılımı, ℹ️ beyanın durumu değiştirmediği, Çizelge 4
+  markup/CSS (masaüstü + mobil + print), rapor metni beyanları,
+  `metadata.json` alanları ve **dokunulmazlar** (motor/CSV/şema/migration/
+  workflow/yayımlanmış rapor). `test/inventory-qa.test.mjs` ve
+  `test/dbh-qa.test.mjs` yeni ölçüte göre güncellendi (anıtsal gövdeli
+  fikstürde doğal durum 🟢; 🟡/🔴 enjekte QA ile doğrulanır → sayılar üç
+  durumda da aynı). Toplam **932 test yeşil** (`npm run check`).
+
 ### Düzeltildi — 0031 DBH tanımı ve kalite kontrol hükmü (DGR-2026-0016) (2026-09-29)
 **Kök neden (veri sahibi kararı):** rapor hattı DBH'yi "gövde çevresinden
 türetilmiş çap" olarak anlatıyor ve boy/çap oranına bakarak gerçek saha
