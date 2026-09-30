@@ -9,6 +9,76 @@ Yeni sürüm yayımlama adımları: [`docs/surum-yayini.md`](docs/surum-yayini.m
 
 ## [Yayımlanmadı]
 
+### Düzeltildi — 0033 kapsam düzeltmesi: rapor hiçbir yasal statü hükmü üretmez (DGR-2026-0018) (2026-10-01)
+**Kök neden (veri sahibi kararı):** “Anıt ağaç detayı bizim işimiz için risk
+oluşturabilir; anıt ağaç sertifikası bulunmayan ağaçları ölçmüş olabiliriz —
+bunu raporda işleme alma. Ama girdiğimiz veriler **gerçek ve doğru**.
+Standartları buna göre güncelle.” 0032, gövde çapı ≥ 100 cm olan bireyleri
+**eşik tabanlı bir sınıfa** ayırıp raporda “Anıtsal gövde beyanı” (ℹ️) satırı,
+mevzuat künyesi ve `metadata.json → monumental` alanıyla yayımlıyordu.
+DendroGeo bir **ölçüm ve karbon muhasebesi** aracıdır; ağaçların yasal statüsü
+bu aracın konusu değildir ve envanterde **tescilli olmayan** bireyler
+bulunabileceği için rapor bir tespit/tescil iddiası **taşıyamaz**. Bu yüzden
+söz konusu çerçeve **tamamen kaldırıldı**. Verinin kendisi değişmedi: gövde
+çapları sahada ölçüldüğü gibi modellenir; düzeltme, ölçekleme, dışlama veya
+çevre→çap dönüşümü **yoktur**. **Karbon motoru, katsayılar, MC
+yapılandırması, `dbh_cm` kolonu, CSV biçimi, veri tabanı şeması, migrationlar,
+yayın kuyruğu/workflowlar, `index.html`, `sw.js`, LULC ve park analizi
+DEĞİŞMEDİ**; yayımlanmış `rapor/` çıktılarına dokunulmadı. Aynı veri + aynı
+formül aynı sayıları üretir (kanıt: yayındaki DGR-2026-0018 snapshotı 0033
+koduyla yeniden üretildi → **52,29 t**, %95 GA **28,80–73,91 t**, **1043,52
+kg/ha**, n=34, rozet ve envanter QA hükmü aynı).
+
+* **Kaldırıldı (rapor):** §7 Çizelge 4teki “Anıtsal gövde beyanı” (ℹ️) satırı,
+  §7 girişindeki sınıf beyanı cümlesi, §5.1 “Gövde ölçeği notu”, §9 “Anıtsal
+  gövde ölçeği” sınırlılık maddesi ve mevzuat künyesi (karar no, Resmî Gazete
+  sayısı, basamak tablosu, puanlama ve yetki ifadeleri). Çizelge 4 artık **16**
+  kontrol satırı basar; ağaç değerlerine ilişkin üç kontrol (DBH birim,
+  boy/çap, karbon yeniden hesabı) ✓ Geçerli kalır.
+* **Kaldırıldı (kod/metadata):** `QA_LIMITS.ANIT_DBH_CM`, `ANIT_MEVZUAT`,
+  `ANIT_GOVDE_BASAMAKLARI`, `anitGovdeBasamagi()`; `inventoryQa` çıktısındaki
+  `anit` bloğu ile satır düzeyi `anit` / `anit_basamak` alanları;
+  `metadata.json → monumental` (eşik, yüzde, basamak dağılımı ve **birey
+  listesi** içeriyordu); içe aktarma aracındaki `gates.anit` kapısı ve
+  “ANITSAL GÖVDE” bilgi satırı.
+* **Yerine: betimleyici dağılım + tek kaynaklı kapsam beyanı.** `inventoryQa`
+  artık `dbh_stats` (n, min, medyan, max) üretir — **eşik, sınıf, basamak veya
+  puan yoktur**. §5.1 “Gövde çapı notu” ve §9 “Gövde çapı dağılımı ve model
+  temsili” maddeleri bu aralığı sayıyla verir (Göksu: **40–200 cm**, medyan
+  **86 cm**, n=34) ve sınırlılığı doğru yere yazar: sorun veride değil,
+  pantropikal allometrik modelin (Chave ve ark. 2014) geniş gövdeli kent
+  ağaçlarını temsil gücündedir; belirsizlik %95 güven aralığına yansır. Kapsam
+  beyanı **tek kaynaktan** gelir: `scripts/lib/mc.mjs → YASAL_STATU_KAPSAM`
+  (§9 maddesi + `metadata.json → scopeNote`).
+* **QA v5 = QA v4 ölçütleri, statü iddiası olmadan.** (a) DBH geçerlilik
+  zinciri, (b) gövde formu iki katmanlı ölçütü (fiziksel makullük `3 ≤
+  100·H/D ≤ 200` + boy `1,3–100 m`; stand içi robust aykırılık `modified z >
+  3,5`, yalnız `n ≥ 5`) ve (c) **iki ρ kaynaklı** karbon denetimi aynen
+  korunur; tipik `15–120` bandı yalnız **sayım** (`hd_band_out`) olarak durur
+  ve `hd_block` kalıcı `false`tur. Gerçek hesap hataları (10× ondalık kayması)
+  yakalanmaya **devam eder**. ℹ️ işareti `qaRow` içinde yetenek olarak durur
+  (CSS `.qinfo` tanımı korunur) ama 0033 şablonunda ℹ️ satırı basılmaz; §7
+  girişindeki ℹ️ açıklama cümlesi de **yalnız böyle bir satır varsa** üretilir.
+* **Suçlayıcı dil taraması genişletildi.** Raporda “standart dışı”,
+  “olağandışı oranda”, “HATALI VERİ” gibi veri sahibinin kendi ölçümünü
+  şüpheli gösteren ifadeler bulunmaz; inceleme kalemleri ağaç
+  değerleriyle ilgili değilse §7 bunu açıkça yazar (0032 hükmü korunur).
+* **Testler:** `test/anit-qa.test.mjs` → **`test/form-qa.test.mjs`** (47 test):
+  yasaklı ifade taraması (üretilen HTML, `metadata.json`, `scripts/*`,
+  `docs/*`), eşikten bağımsızlık (99 cm ile 200 cm aynı muameleyi görür;
+  `info` boş, durum aynı), `dbh_stats` doğruluğu, kapsam beyanının §9 ve
+  metadatada birebir yer alması, Çizelge 4 düzeni (0032) ve dokunulmazlar.
+  `test/dbh-qa.test.mjs` ve `test/inventory-qa.test.mjs` yeni çıktı alanlarına
+  göre güncellendi (`gates.anit` → `gates.dbh`).
+* **Dokümantasyon:** `docs/methods.md` §1.5.1 (QA v5, (d) maddesinin neden
+  kaldırıldığı) ve `docs/rapor-yayini.md` §6 (kapı tablosu + kapsam beyanı).
+* **Yayın etkisi (operasyon):** 0032 şablonuyla yayımlanmış **DGR-2026-0018**
+  bu ifadeleri içerdiği için yayın panelinden **geri çekilmeli** ve 0033
+  koduyla **yeni bir rapor** yayımlanmalıdır. Yayımlanmış çıktılar
+  **değiştirilmez** (immütability): düzeltme yeni raporla yapılır, DGR
+  kimlikleri yeniden kullanılmaz.
+
+
 ### Düzeltildi — 0032 anıt ağaç ölçeği + Çizelge 4 okunurluğu (DGR-2026-0017) (2026-09-30)
 **Kök neden (veri sahibi kararı):** "Girdiğim ağaç değerleri gerçek, standart
 dışı olabilir ama **doğru** veriler; **anıt ağaç** onlar. Ona göre raporu

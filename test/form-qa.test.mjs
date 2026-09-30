@@ -1,29 +1,33 @@
-/* anit-qa.test.mjs — 0032 BEKÇİSİ: anıt ağaç ölçeği + Çizelge 4 okunurluğu.
+/* form-qa.test.mjs — 0033 BEKÇİSİ: gövde formu ölçütü + KAPSAM (yasal statü
+ * iddiası YOK) + Çizelge 4 okunurluğu.
  *
- * 2026-09-30 tarihli veri sahibi kararını kilitler:
- *  "Girdiğim ağaç değerleri gerçek, standart dışı olabilir ama DOĞRU veriler;
- *   ANIT AĞAÇ onlar. Ona göre raporu düzenle. Kontrol | Sonuç | Ayrıntı
- *   tablosunu da diğer tablolar gibi göster, bu şekilsiz olmuş."
+ * 2026-10-01 tarihli veri sahibi kararını kilitler:
+ *  "Girdiğimiz veriler gerçek ve doğru. Anıt ağaç detayı işimiz için risk
+ *   oluşturabilir; sertifikası bulunmayan ağaçları ölçmüş olabiliriz — bunu
+ *   raporda işleme alma. Standartları buna göre güncelle."
  *
  * Bu dosyanın kilitlediği hükümler:
- *  1) ANITSALLIK: DBH ≥ 100 cm olan bireyler sayılır ve raporda ℹ️ BEYAN
- *     olarak bildirilir. Beyan, QA durumunu (🟢/🟡/🔴) ETKİLEMEZ.
- *  2) GÖVDE FORMU ÖLÇÜTÜ: sabit 15–120 bandı yerine (i) fiziksel makullük
+ *  1) KAPSAM: rapor, metadata, QA ve içe aktarma hattı hiçbir birey için yasal
+ *     statü (tescil, koruma kararı vb.) iddiası ÜRETMEZ. 0032 ile eklenen eşik
+ *     tabanlı gövde sınıfı beyanı, mevzuat künyesi, ℹ️ satırı ve metadata
+ *     alanı KALDIRILDI; bu sözcükler rapor metninde HİÇ geçmez.
+ *  2) VERİ DOĞRUDUR: gövde çapları sahada ölçüldüğü gibi modellenir; düzeltme,
+ *     ölçekleme, dışlama veya çevre→çap dönüşümü YOKTUR. Gövde çapı dağılımı
+ *     (dbh_stats) yalnız BETİMLEYİCİ olarak raporlanır.
+ *  3) GÖVDE FORMU ÖLÇÜTÜ: sabit 15–120 bandı yerine (i) fiziksel makullük
  *     bandı 3–200 ve (ii) stand İÇİ robust aykırılık (modified z > 3,5).
  *     Tipik bant dışı kayıtlar yalnız SAYILIR (hd_band_out) → uyarı yok.
  *     hd_block KALICI false (0031 korunur).
- *  3) ÇİFT ρ KAYNAĞI: beklenen karbon hem tür düzeyi ρ hem grup varsayılanı ρ
+ *  4) ÇİFT ρ KAYNAĞI: beklenen karbon hem tür düzeyi ρ hem grup varsayılanı ρ
  *     ile hesaplanır; saklı değer herhangi biriyle ±%20 içindeyse satır
- *     geçerlidir ve eşleşen kaynak sayıyla beyan edilir. Gerçek hesap
- *     hataları (10x ondalık kayması) YAKALANMAYA DEVAM EDER.
- *  4) ÇİZELGE 4 DÜZENİ: table.qa + colgroup (sabit kolonlar), .qd ayrıntı
- *     hücresi (orantılı yazı, kelime ortasından kırma YOK), .qst sonuç
- *     hücresi (tek satır, renkli). Masaüstü/mobil/print üçünde de tanımlı.
- *  5) MEVZUAT: basamaklar Ek-4 ile birebir; tescil hükmü VERİLMEZ, ŞAD/AAD
- *     puanlaması uygulanmaz (yaş ve tepe çapı envanterde yok).
- *  6) DOKUNULMAZLAR: karbon motoru/katsayılar, CSV biçimi, veri tabanı
- *     şeması, migrationlar, yayın kuyruğu ve YAYIMLANMIŞ rapor/ çıktıları
- *     DEĞİŞMEZ. Aynı veri + aynı formül aynı sayıları üretir.
+ *     geçerlidir ve eşleşen kaynak sayıyla beyan edilir. Gerçek hesap hataları
+ *     (10x ondalık kayması) YAKALANMAYA DEVAM EDER.
+ *  5) ÇİZELGE 4 DÜZENİ (0032den beri): table.qa + colgroup (sabit kolonlar),
+ *     .qd ayrıntı hücresi (orantılı yazı, kelime ortasından kırma YOK), .qst
+ *     sonuç hücresi (tek satır, renkli). Masaüstü/mobil/print üçünde tanımlı.
+ *  6) DOKUNULMAZLAR: karbon motoru/katsayılar, CSV biçimi, veri tabanı şeması,
+ *     migrationlar, yayın kuyruğu ve YAYIMLANMIŞ rapor/ çıktıları DEĞİŞMEZ.
+ *     Aynı veri + aynı formül aynı sayıları üretir.
  *
  * Not: Türkçe metinlerde kesme işareti kullanılmıyor; dosya tek tırnaklı
  * dizeler içerdiği için apostrof sözdizimini bozuyor.
@@ -36,7 +40,7 @@ import { fileURLToPath } from 'node:url';
 import { renderReport, inventoryQa, buildMetadata } from '../scripts/make-report.mjs';
 import {
   canonicalHash, loadSpeciesDict, loadRho, calcRow, QA_LIMITS, QA_STATE,
-  medianOf, madOf, modifiedZ, anitGovdeBasamagi, ANIT_GOVDE_BASAMAKLARI, ANIT_MEVZUAT, MC_CFG,
+  medianOf, madOf, modifiedZ, YASAL_STATU_KAPSAM, MC_CFG,
 } from '../scripts/lib/mc.mjs';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
@@ -50,7 +54,7 @@ const carbonOf = (d, h, sp, gr) => calcRow(d, h, sp, gr, { rho: RHO, grho: GRHO 
 /* Grup varsayılanı ρ ile üretilmiş saklı değer (0011 SQL tablosunun deseni). */
 const carbonGrup = (d, h, sp, gr) => calcRow(d, h, sp, gr, { rho: {}, grho: GRHO }).total_carbon;
 
-/* ---------- Göksu benzeri fikstür: anıtsal gövdeler + çift ρ deseni ---------- */
+/* ---------- Göksu benzeri fikstür: geniş gövdeler + çift ρ deseni ---------- */
 const RAW = [
   { p: 1, sp: 'SÜS ERİĞİ', grp: 'YAPRAKLI', d: 110, h: 10.2, c: 'tur' },
   { p: 3, sp: 'SALKIM SÖĞÜT', grp: 'YAPRAKLI', d: 166, h: 14, c: 'grup' },
@@ -130,7 +134,7 @@ const rowOf = (ad) => QA_TBL.find((r) => r[0] && r[0].txt === ad);
 const badge = (h) => (h.match(/<b>Rapor durumu<\/b><span class="([^"]*)">([^<]*)<\/span>/) || [])[2];
 
 /* ============================ 1) EŞİKLER ============================ */
-describe('0032 · QA eşikleri: 0031 değerleri KORUNDU, anıtsal/form eşikleri eklendi', () => {
+describe('0033 · QA eşikleri: 0031 değerleri KORUNDU, form eşikleri aynı, gövde sınıfı eşiği YOK', () => {
   test('0031 eşikleri birebir aynı (motor ve kritik kontroller değişmedi)', () => {
     assert.equal(QA_LIMITS.DBH_MIN_CM, 1);
     assert.equal(QA_LIMITS.DBH_MAX_CM, 400);
@@ -141,14 +145,15 @@ describe('0032 · QA eşikleri: 0031 değerleri KORUNDU, anıtsal/form eşikleri
     assert.equal(QA_LIMITS.BLOCK_RATIO, 0.5);
     assert.equal(QA_LIMITS.BLOCK_MIN_N, 3);
   });
-  test('0032 yeni eşikler: fiziksel form bandı + robust z + anıtsal gövde', () => {
+  test('0032 eşikleri duruyor; 0033 eşik tabanlı gövde sınıfını KALDIRDI', () => {
     assert.equal(QA_LIMITS.HD_PHYS_MIN, 3);
     assert.equal(QA_LIMITS.HD_PHYS_MAX, 200);
     assert.equal(QA_LIMITS.H_MIN_M, 1.3, 'göğüs yüksekliği = ölçülebilen en küçük boy');
     assert.equal(QA_LIMITS.H_MAX_M, 100, 'dünya ağaç boyu rekoru ~100 m');
     assert.equal(QA_LIMITS.HD_ROBUST_Z, 3.5, 'Iglewicz–Hoaglin modified z eşiği');
     assert.equal(QA_LIMITS.HD_ROBUST_MIN_N, 5, 'küçük örneklemden sahte aykırı üretilmez');
-    assert.equal(QA_LIMITS.ANIT_DBH_CM, 100, 'Ek-4te I. sınıf için çap puanlamasının başladığı basamak');
+    assert.equal(QA_LIMITS.ANIT_DBH_CM, undefined, '0033: eşik tabanlı gövde sınıfı KALDIRILDI');
+    assert.deepEqual(Object.keys(QA_LIMITS).filter((k) => /ANIT/i.test(k)), [], 'QA_LIMITS içinde sınıf eşiği yok');
     /* fiziksel bant tipik bandı KAPSAR (tipik bant daha dar) */
     assert.ok(QA_LIMITS.HD_PHYS_MIN < QA_LIMITS.HD_MIN);
     assert.ok(QA_LIMITS.HD_PHYS_MAX > QA_LIMITS.HD_MAX);
@@ -158,37 +163,63 @@ describe('0032 · QA eşikleri: 0031 değerleri KORUNDU, anıtsal/form eşikleri
   });
 });
 
-/* ====================== 2) MEVZUAT BASAMAKLARI ====================== */
-describe('0032 · Ek-4 gövde çapı basamakları (İlke Kararı No: 110, RG 20.07.2022/31898)', () => {
-  test('12 basamak ve etiketler mevzuatla birebir', () => {
-    assert.equal(ANIT_GOVDE_BASAMAKLARI.length, 12);
-    assert.deepEqual(ANIT_GOVDE_BASAMAKLARI.map((b) => b.label),
-      ['<50', '50–74', '75–99', '100–124', '125–149', '150–174', '175–199', '200–224', '225–249', '250–274', '275–299', '≥300']);
+/* ============ 2) KAPSAM: yasal statü iddiası ve gövde sınıfı YOK ============ */
+describe('0033 · kapsam: yasal statü iddiası, eşik tabanlı gövde sınıfı ve mevzuat atfı YOK', () => {
+  /* Yasaklı ifade deseni. \b sınırları, sha256 özetindeki "aad" gibi harf
+   * dizilerinin yanlış pozitif üretmesini engeller. */
+  const YASAK = /\banıt ağaç|\banıtsal|\bANITSAL|\bmonumental\b|\bEk-4\b|\b31898\b|İlke Kararı|Bölge Komisyonu|\bŞAD\b|\bAAD\b/gi;
+  const bul = (t) => String(t).match(YASAK) || [];
+  const temiz = (dosya) => assert.deepEqual(bul(read(dosya)), [], dosya + ' yasaklı ifade içeriyor');
+
+  test('mc.mjs: sınıf eşiği, mevzuat künyesi ve basamak tablosu kaldırıldı', () => {
+    assert.equal(QA_LIMITS.ANIT_DBH_CM, undefined);
+    temiz('scripts/lib/mc.mjs');
+    const src = read('scripts/lib/mc.mjs');
+    for (const ad of ['ANIT_MEVZUAT', 'ANIT_GOVDE_BASAMAKLARI', 'anitGovdeBasamagi']) {
+      assert.ok(!src.includes('export const ' + ad), ad + ' sabiti yok');
+      assert.ok(!src.includes('export function ' + ad), ad + ' fonksiyonu yok');
+    }
   });
-  test('sınır değerleri doğru basamağa düşer (alt sınır dahil, üst sınır hariç)', () => {
-    const beklenen = [
-      [0.5, '<50'], [49.9, '<50'], [50, '50–74'], [74.9, '50–74'], [75, '75–99'], [99.9, '75–99'],
-      [100, '100–124'], [124.9, '100–124'], [125, '125–149'], [149.9, '125–149'], [150, '150–174'],
-      [174.9, '150–174'], [175, '175–199'], [199.9, '175–199'], [200, '200–224'], [224.9, '200–224'],
-      [225, '225–249'], [249.9, '225–249'], [250, '250–274'], [274.9, '250–274'], [275, '275–299'],
-      [299.9, '275–299'], [300, '≥300'], [400, '≥300'],
-    ];
-    for (const [d, lab] of beklenen) assert.equal(anitGovdeBasamagi(d), lab, d + ' cm');
+
+  test('kapsam beyanı TEK KAYNAKTAN gelir: mc.YASAL_STATU_KAPSAM', () => {
+    assert.match(YASAL_STATU_KAPSAM, /yasal statü değerlendirmesi/);
+    assert.match(YASAL_STATU_KAPSAM, /içermez/);
+    assert.match(YASAL_STATU_KAPSAM, /ilgili idarenin yetkisindedir/);
+    assert.match(YASAL_STATU_KAPSAM, /kapsamı dışındadır/);
+    assert.match(YASAL_STATU_KAPSAM, /ölçüldüğü gibi modellenmiştir/);
+    assert.match(YASAL_STATU_KAPSAM, /düzeltme, ölçekleme veya dışlama uygulanmamıştır/);
+    assert.deepEqual(bul(YASAL_STATU_KAPSAM), [], 'beyan metni de yasaklı sözcük içermez');
+    /* tek kaynak: rapor hem §9da hem metadatada aynı sabiti kullanır */
+    assert.match(read('scripts/make-report.mjs'), /^    YASAL_STATU_KAPSAM,$/m);
+    assert.match(read('scripts/make-report.mjs'), /scopeNote: YASAL_STATU_KAPSAM,/);
   });
-  test('geçersiz girdide basamak UYDURULMAZ (null döner)', () => {
-    for (const x of [null, undefined, '', 'yok', 0, -5, NaN]) assert.equal(anitGovdeBasamagi(x), null, String(x));
+
+  test('üretilen rapor HTMLi ve metadata.json yasaklı ifade İÇERMEZ', () => {
+    assert.deepEqual(bul(HTML), [], 'HTML: ' + JSON.stringify(bul(HTML).slice(0, 5)));
+    assert.deepEqual(bul(JSON.stringify(MD)), [], 'metadata: ' + JSON.stringify(bul(JSON.stringify(MD)).slice(0, 5)));
+    assert.ok(!HTML.includes('Anıtsal gövde beyanı'), 'Çizelge 4te beyan satırı yok');
+    assert.equal(rowOf('Anıtsal gövde beyanı'), undefined);
+    assert.equal(MD.monumental, undefined, 'metadata.monumental kaldırıldı');
+    assert.equal(MD.scopeNote, YASAL_STATU_KAPSAM);
   });
-  test('mevzuat künyesi: karar, kurum, RG, yürürlükten kaldırılan karar, yetki', () => {
-    assert.match(ANIT_MEVZUAT.karar, /Anıt Ağaçların Tespitine İlişkin İlke Kararı/);
-    assert.match(ANIT_MEVZUAT.karar, /110/);
-    assert.equal(ANIT_MEVZUAT.rg_sayi, '31898');
-    assert.equal(ANIT_MEVZUAT.rg_tarih, '2022-07-20');
-    assert.match(ANIT_MEVZUAT.kurum, /Tabiat Varlıklarını Koruma Merkez Komisyonu/);
-    assert.match(ANIT_MEVZUAT.yururluktenKaldirilan, /666/);
-    assert.match(ANIT_MEVZUAT.yetki, /Tabiat Varlıklarını Koruma Bölge Komisyonu/);
-    assert.match(ANIT_MEVZUAT.puanlama, /ŞAD/);
-    assert.match(ANIT_MEVZUAT.puanlama, /AAD/);
-    assert.match(ANIT_MEVZUAT.puanlamaUygulanmadi, /YAPILMAMIŞTIR/);
+
+  test('rapor şablonu, içe aktarma hattı ve dokümanlar da temiz', () => {
+    for (const f of ['scripts/make-report.mjs', 'scripts/import-measurements.mjs', 'docs/methods.md', 'docs/rapor-yayini.md']) temiz(f);
+  });
+
+  test('QA mantığı eşikten BAĞIMSIZ: 99 cm ile 200 cm aynı muameleyi görür', () => {
+    const mk = (i, d) => ({ id: i, point_id: i, species: 'MEŞE', grp: 'YAPRAKLI', dbh_cm: d, height_m: 12, carbon_kg: null });
+    const alt = inventoryQa([1, 2, 3, 4, 5].map((i) => mk(i, 90 + i)), dict);
+    const ust = inventoryQa([1, 2, 3, 4, 5].map((i) => mk(i, 190 + i)), dict);
+    for (const qa of [alt, ust]) {
+      assert.deepEqual(Object.keys(qa).filter((k) => /anit/i.test(k)), [], 'QA çıktısında sınıf alanı yok');
+      assert.deepEqual(qa.info, [], 'ℹ️ beyan kalemi üretilmiyor');
+      assert.equal(qa.dbh_fail.length, 0);
+    }
+    assert.equal(alt.state, ust.state, 'eşik atlaması durum DEĞİŞTİRMEZ');
+    assert.equal(ust.dbh_stats.min, 191);
+    assert.equal(ust.dbh_stats.max, 195);
+    assert.equal(alt.dbh_stats.max, 95);
   });
 });
 
@@ -274,26 +305,18 @@ describe('0032 · karbon yeniden hesabı İKİ ρ kaynağıyla yapılır', () =>
   });
 });
 
-/* =================== 5) GÖVDE FORMU + ANITSALLIK =================== */
-describe('0032 · inventoryQa: anıtsal gövde beyanı + form göstergesi', () => {
-  test('anıtsal gövde sayımı, en büyük çap ve Ek-4 basamak dağılımı', () => {
-    assert.equal(QA.anit.threshold_cm, 100);
-    assert.equal(QA.anit.n, 4, 'P1 110 · P3 166 · P7 107 · P32 200');
-    assert.equal(QA.anit.n_toplam, 6);
-    assert.equal(QA.anit.pct, 66.7);
-    assert.equal(QA.anit.max_dbh_cm, 200);
-    assert.deepEqual(QA.anit.points.map((x) => x.point_id), [1, 3, 7, 32]);
-    assert.deepEqual(QA.anit.basamaklar, [
-      { label: '<50', n: 1 }, { label: '50–74', n: 1 }, { label: '75–99', n: 0 },
-      { label: '100–124', n: 2 }, { label: '125–149', n: 0 }, { label: '150–174', n: 1 },
-      { label: '175–199', n: 0 }, { label: '200–224', n: 1 },
-    ].filter((b) => b.n > 0), 'boş basamak basılmaz (P29 40 cm → <50)');
-    assert.equal(QA.anit.basamaklar.reduce((a, b) => a + b.n, 0), QA.n, 'basamak toplamı = kayıt sayısı');
+/* ================ 5) GÖVDE FORMU + ÇAP DAĞILIMI (0033) ================ */
+describe('0033 · inventoryQa: çap dağılımı betimleyici, form göstergesi iki katmanlı', () => {
+  test('dbh_stats VERİDEN türetilir; eşik, sınıf, basamak alanı YOK', () => {
+    assert.deepEqual(QA.dbh_stats, { n: 6, min: 40, medyan: 108.5, max: 200 });
+    assert.equal(QA.anit, undefined, '0032 alanı kaldırıldı');
+    assert.deepEqual(Object.keys(QA).filter((k) => /anit|basamak|mevzuat|threshold/i.test(k)), []);
+    const p3 = QA.rows.find((r) => r.point_id === 3);
+    assert.deepEqual(Object.keys(p3).filter((k) => /anit|basamak/i.test(k)), [], 'satır düzeyinde sınıf alanı yok');
   });
 
-  test('ℹ️ beyan QA durumunu ETKİLEMEZ: anıtsal gövde var ama durum 🟢 GEÇERLİ', () => {
-    assert.ok(QA.anit.n > 0);
-    assert.deepEqual(QA.info.map((x) => x.key), ['anit', 'rho-kaynagi']);
+  test('ℹ️ beyan kalemi yalnız ρ kaynağıdır ve QA durumunu ETKİLEMEZ', () => {
+    assert.deepEqual(QA.info.map((x) => x.key), ['rho-kaynagi']);
     assert.equal(QA.dbh_fail.length, 0);
     assert.equal(QA.hd_fail.length, 0);
     assert.equal(QA.dev_fail.length, 0);
@@ -312,31 +335,26 @@ describe('0032 · inventoryQa: anıtsal gövde beyanı + form göstergesi', () =
     assert.ok(QA.hd_stats.min >= QA_LIMITS.HD_PHYS_MIN && QA.hd_stats.max <= QA_LIMITS.HD_PHYS_MAX);
   });
 
-  test('satır düzeyi alanlar: hd_band_out / hd_z / rho_src / anit / anit_basamak', () => {
+  test('satır düzeyi alanlar: hd_band_out / hd_z / rho_src (çap olduğu gibi)', () => {
     const p3 = QA.rows.find((r) => r.point_id === 3);
-    assert.equal(p3.anit, true);
-    assert.equal(p3.anit_basamak, '150–174');
     assert.equal(p3.hd_band_out, true);
     assert.equal(p3.hd_fail, false);
     assert.equal(p3.rho_src, 'grup');
     assert.equal(p3.dbh_cm, 166, 'DBH olduğu gibi: dönüşüm YOK');
     assert.equal(p3.dbh_fail, false);
-    const p29 = QA.rows.find((r) => r.point_id === 29);
-    assert.equal(p29.anit, false);
-    assert.equal(p29.anit_basamak, '<50');
+    assert.equal(QA.rows.find((r) => r.point_id === 29).dbh_cm, 40);
   });
 
-  test('anıtsal gövde eşiği altında kalan envanterde beyan satırı ✓ Geçerli', () => {
+  test('küçük çaplı envanterde de beyan satırı ÜRETİLMEZ (Çizelge 4 16 satır)', () => {
     const kucuk = [1, 2, 3, 4, 5].map((i) => ({ id: i, point_id: i, species: 'MEŞE', grp: 'YAPRAKLI', dbh_cm: 30 + i, height_m: 12, carbon_kg: null }));
     const qa = inventoryQa(kucuk, dict);
-    assert.equal(qa.anit.n, 0);
-    assert.equal(qa.anit.max_dbh_cm, null);
     assert.deepEqual(qa.info, [], 'beyan kalemi yok');
+    assert.deepEqual(qa.dbh_stats, { n: 5, min: 31, medyan: 33, max: 35 });
     const h = render(qa, 'DGR-2026-9102').html;
-    const r = qaTable(h).find((x) => x[0].txt === 'Anıtsal gövde beyanı');
-    assert.ok(r, 'satır her envanterde basılır');
-    assert.equal(r[1].txt, '✓ Geçerli');
-    assert.match(r[2].txt, /gövde çapı ≥ 100 cm olan birey bulunmuyor/);
+    assert.ok(!h.includes('Anıtsal gövde beyanı'), 'satır hiçbir envanterde basılmaz');
+    const tbl = qaTable(h);
+    assert.equal(tbl.length, 17, 'başlık + 16 kontrol satırı: ' + tbl.map((r) => r[0] && r[0].txt).join(' | '));
+    assert.ok(!tbl.some((r) => r[0] && /gövde/i.test(r[0].txt)), 'Çizelge 4te gövde sınıfı satırı yok');
   });
 });
 
@@ -357,12 +375,13 @@ describe('0032 · Çizelge 4 diğer çizelgeler gibi düzenli (sabit kolon + oku
       assert.match(r[2].attr, /class="qd"/, 'ayrıntı hücresi orantılı yazı sınıfı taşır');
     }
   });
-  test('sonuç hücreleri renkli durum sınıflarını taşır (qok / qwarn / qbad / qinfo)', () => {
+  test('sonuç hücreleri renkli durum sınıflarını taşır (qok / qwarn / qbad)', () => {
     const sonuclar = QA_TBL.slice(1).map((r) => r[1]);
     assert.ok(sonuclar.filter((c) => /qok/.test(c.attr)).length >= 10, '✓ Geçerli hücreleri: ' + sonuclar.length);
-    const anit = rowOf('Anıtsal gövde beyanı');
-    assert.equal(anit[1].txt, 'ℹ️ Beyan');
-    assert.match(anit[1].attr, /qinfo/, 'beyan rengi ayrı (uyarıyla karışmaz)');
+    /* 0033: ℹ️ beyan satırı üretilmiyor; .qinfo sınıfı CSSde TANIMLI kalır
+     * (ileride bilgilendirme satırı eklenirse düzen hazır). */
+    assert.ok(!QA_TBL.some((r) => r[1] && r[1].txt.startsWith('ℹ')), 'bu raporda ℹ️ satırı yok');
+    assert.match(HTML, /td\.qinfo\{color:#1c5d8f/);
     assert.ok(!HTML.includes('⛔'), 'geçerli raporda ⛔ yok');
   });
   test('CSS: sabit kolon düzeni + ayrıntı hücresi kelime ortasından KIRILMAZ', () => {
@@ -407,88 +426,85 @@ describe('0032 · Çizelge 4 diğer çizelgeler gibi düzenli (sabit kolon + oku
   });
 });
 
-/* =================== 7) RAPOR METNİ BEYANLARI =================== */
-describe('0032 · rapor metni: anıtsallık beyanı, veri hatası iması YOK', () => {
-  test('Çizelge 4 "Anıtsal gövde beyanı" satırı sayıyla ve mevzuatla', () => {
-    const r = rowOf('Anıtsal gövde beyanı');
-    assert.ok(r, 'satır var');
-    assert.equal(r[1].txt, 'ℹ️ Beyan');
-    const d = r[2].txt;
-    assert.match(d, /4\/6 bireyin gövde çapı ≥ 100 cm/);
-    assert.match(d, /en büyük 200 cm/);
-    assert.match(d, /ANITSAL GÖVDE/);
-    assert.match(d, /Ek-4 gövde çapı basamak dağılımı/);
-    assert.match(d, /200–224 cm: 1 birey/);
-    assert.match(d, /P1, P3, P7, P32/);
-    assert.match(d, /ℹ️ BEYANDIR/);
-    assert.match(d, /rapor durumunu \(🟢\/🟡\/🔴\) ETKİLEMEZ/);
-    assert.match(d, /veri hatası veya inceleme hükmü DEĞİLDİR/);
+/* =================== 7) RAPOR METNİ BEYANLARI (0033) =================== */
+describe('0033 · rapor metni: yasal statü iddiası YOK, veri hatası iması YOK', () => {
+  const bol = (bas, son) => {
+    const i = HTML.indexOf(bas);
+    assert.ok(i > 0, bas + ' bulunamadı');
+    return HTML.slice(i, son ? HTML.indexOf(son, i) : i + 2000);
+  };
+  const S9 = stripTags(bol('<span class="no">9</span>', '<span class="no">10</span>'));
+  const S7 = stripTags(bol('<span class="no">7</span>', '<div class="tscroll">'));
+  const S51 = stripTags(bol('5.1 Karbon stoku', '<h2'));
+
+  test('Çizelge 4te gövde sınıfı satırı yok; ağaç değeri kontrolleri ✓ Geçerli', () => {
+    assert.equal(rowOf('Anıtsal gövde beyanı'), undefined);
+    for (const ad of ['Envanter birim kontrolü (DBH)', 'Boy/DBH oranı incelemesi', 'Karbon yeniden hesabı']) {
+      const r = rowOf(ad);
+      assert.ok(r, ad + ' satırı var');
+      assert.equal(r[1].txt, '✓ Geçerli', ad + ' → ' + r[1].txt);
+    }
   });
-  test('mevzuat dayanağı künyesiyle; tescil hükmü VERİLMİYOR', () => {
-    const d = rowOf('Anıtsal gövde beyanı')[2].txt;
-    assert.match(d, /Tabiat Varlığı Olarak Belirlenecek Anıt Ağaçların Tespitine İlişkin İlke Kararı/);
-    assert.match(d, /Tabiat Varlıklarını Koruma Merkez Komisyonu/);
-    assert.match(d, /Resmî Gazete 20\.07\.2022 \/ Sayı 31898/);
-    assert.match(d, /666 sayılı İlke Kararı yürürlükten kaldırılmıştır/);
-    assert.match(d, /TESCİL HÜKMÜ DEĞİLDİR/);
-    assert.match(d, /ŞAD/);
-    assert.match(d, /AAD/);
-    assert.match(d, /ŞAD\/AAD puanlaması YAPILMAMIŞTIR/);
-    assert.match(d, /Tabiat Varlıklarını Koruma Bölge Komisyonu/);
-    /* mevzuatın çevre÷3,14 tanımı ile DendroGeo çap kaydı arasındaki fark beyan edilir */
-    assert.match(d, /çevre→çap dönüşümü UYGULANMAMIŞTIR/);
+
+  test('§9 kapsam beyanı birebir yer alır (tek kaynak sabiti)', () => {
+    assert.ok(S9.includes(YASAL_STATU_KAPSAM), 'kapsam beyanı §9da yok');
+    assert.match(S9, /yasal statü değerlendirmesi/);
+    assert.match(S9, /ilgili idarenin yetkisindedir/);
   });
-  test('kullanıcı beyanı: standart dışı görünen değerler VERİ HATASI sayılmaz', () => {
-    assert.match(HTML, /bireyler <b>anıtsal gövde<\/b> ölçeğindedir/);
-    assert.match(HTML, /rapor bu değerleri veri hatası olarak <b>işaretlemez<\/b>/);
-    assert.match(HTML, /Standart dışı görünen büyük çaplar ve düşük boy\/çap oranları bu ölçeğin doğal sonucudur/);
+
+  test('§9 model temsili: çap aralığı VERİDEN, sınırlılık modelde', () => {
+    assert.match(S9, /Gövde çapı dağılımı ve model temsili/);
+    assert.match(S9, /40–200 cm \(medyan \d+ cm, n=6\)/);
+    assert.match(S9, /Sınırlılık veride değil model temsilindedir/);
+    assert.match(S9, /Chave ve ark\. 2014/);
+    assert.match(S9, /%95 güven aralığına yansıtılmıştır/);
+    assert.match(S9, /hiçbir düzeltme, ölçekleme veya dışlama uygulanmamıştır/);
+  });
+
+  test('§9 ρ kaynağı sınırlılığı ve tipik bant sayımı korunur (0032 hükmü)', () => {
+    assert.match(S9, /Odun yoğunluğu \(ρ\) kaynağı/);
+    assert.match(S9, /P3, P32/);
+    assert.match(S9, /GRUP VARSAYILANI ρ ile yeniden üretilmiştir/);
+    assert.match(S9, /karbon motoru, katsayılar, saklı değerler ve CSV çıktısı DEĞİŞTİRİLMEMİŞTİR/);
+    assert.match(S9, /tipik 15–120 bandının dışındadır; bu bir UYARI DEĞİL, dağılım bilgisidir/);
+    assert.match(S9, /medyan 10,24/, 'stand dağılımı sayıyla');
+    assert.match(S9, /Bu bir form karakteridir, ölçüm hatası değildir/);
+  });
+
+  test('veri hatası iması YOK: suçlayıcı dil kalıcı olarak kaldırıldı', () => {
     assert.ok(!HTML.includes('olağandışı oranda'), '0031in suçlayıcı dili kalktı');
     assert.ok(!HTML.includes('HATALI VERİ olarak işaretler'));
     assert.ok(!HTML.includes('GEÇİCİDİR'), 'geçici damgası yalnız 🔴 BLOKLUda');
     assert.ok(!HTML.includes('KULLANILMAMALIDIR'));
+    assert.ok(!/[Ss]tandart dışı/.test(HTML), 'değerler standart dışı diye damgalanmaz');
   });
-  test('§5.1 gövde ölçeği notu: model DEĞİŞTİRİLMEDEN çalıştırıldı', () => {
-    const i = HTML.indexOf('5.1 Karbon stoku');
-    const seg = HTML.slice(i, HTML.indexOf('<h2', i));
-    assert.match(seg, /Gövde ölçeği notu:/);
-    assert.match(seg, /4\/6 bireyin gövde çapı 100 cm ve üzerindedir/);
-    assert.match(seg, /herhangi bir düzeltme\/ölçekleme uygulanmamıştır|DEĞİŞTİRİLMEDEN çalıştırılmış/);
-    assert.match(seg, /çevre→çap dönüşümü uygulanmadan/);
+
+  test('§5.1 gövde çapı notu: model DEĞİŞTİRİLMEDEN, düzeltme yok', () => {
+    assert.match(S51, /Gövde çapı notu:/);
+    assert.match(S51, /40–200 cm \(medyan \d+ cm, n=6\)/);
+    assert.match(S51, /herhangi bir düzeltme, ölçekleme veya dışlama uygulanmamıştır/);
+    assert.match(S51, /çevre→çap dönüşümü uygulanmadan/);
   });
-  test('§9 sınırlılıklar: anıtsallık + ρ kaynağı + tipik bant sayımı', () => {
-    const i9 = HTML.indexOf('<span class="no">9</span>');
-    const seg = HTML.slice(i9, HTML.indexOf('<span class="no">10</span>'));
-    assert.match(seg, /Anıtsal gövde ölçeği/);
-    assert.match(seg, /Sınırlılık veride değil model temsilindedir/);
-    assert.match(seg, /Chave ve ark\. 2014/);
-    assert.match(seg, /Anıt ağaç TESCİLİ bu raporun konusu değildir/);
-    assert.match(seg, /Odun yoğunluğu \(ρ\) kaynağı/);
-    assert.match(seg, /P3, P32/);
-    assert.match(seg, /GRUP VARSAYILANI ρ ile yeniden üretilmiştir/);
-    assert.match(seg, /karbon motoru, katsayılar, saklı değerler ve CSV çıktısı DEĞİŞTİRİLMEMİŞTİR/);
-    assert.match(seg, /tipik 15–120 bandının dışındadır; bu bir UYARI DEĞİL, dağılım bilgisidir/);
-    assert.match(seg, /medyan 10,24/, 'stand dağılımı sayıyla: ' + (seg.match(/medyan [0-9.,]+/) || [])[0]);
+
+  test('§7 girişi: ℹ️ cümlesi YALNIZ beyan satırı varsa basılır', () => {
+    assert.ok(!S7.includes('ℹ️ BEYAN'), 'bu raporda ℹ️ satırı yok → cümle de basılmaz');
+    assert.match(S7, /Bu raporun QA durumu: 🟢 GEÇERLİ/);
+    assert.match(S7, /Karbon hesabı, saha ölçümlerinde kayıtlı DBH \(göğüs çapı, cm\) değerleri kullanılarak gerçekleştirilmiştir/);
   });
-  test('§7 girişi ℹ️ BEYANı tanımlar ve anıtsallığı sayıyla bildirir', () => {
-    const i7 = HTML.indexOf('<span class="no">7</span>');
-    const seg = HTML.slice(i7, HTML.indexOf('<div class="tscroll">', i7));
-    assert.match(seg, /ℹ️ BEYAN/);
-    assert.match(seg, /bilgilendirme satırları/);
-    assert.match(seg, /kalite hükmü DEĞİLDİR ve rapor durumunu etkilemez/);
-    assert.match(seg, /Bu envanterde 4\/6 bireyin gövde çapı 100 cm ve üzerindedir/);
-    assert.match(seg, /Bu raporun QA durumu: 🟢 GEÇERLİ/);
-  });
-  test('boy/çap satırı yeni ölçütü sayıyla beyan eder (fiziksel bant + robust z)', () => {
+
+  test('boy/çap satırı ölçütü sayıyla beyan eder (fiziksel bant + robust z)', () => {
     const d = rowOf('Boy/DBH oranı incelemesi')[2].txt;
     assert.equal(rowOf('Boy/DBH oranı incelemesi')[1].txt, '✓ Geçerli');
     assert.match(d, /6\/6 kayıt boy\/çap oranı fiziksel makullük bandında \(3–200\)/);
     assert.match(d, /stand içi robust aykırılık testinde aykırı kayıt YOK/);
     assert.match(d, /modified z eşiği 3,5/);
     assert.match(d, /medyan [0-9.,]+, MAD [0-9.,]+, aralık [0-9.,]+–[0-9.,]+, en yüksek \|z\| [0-9.,]+/);
-    assert.match(d, /en yüksek \|z\| 1,91/, 'mutlak değer basılır (imza değil): ' + (d.match(/en yüksek \|z\| [-0-9.,]+/) || [])[0]);
+    assert.match(d, /en yüksek \|z\| 1,91/, 'mutlak değer basılır (imza değil)');
     assert.match(d, /6\/6 kayıt tipik 15–120 bandının dışında: bu bir UYARI DEĞİL, BİLGİDİR/);
-    assert.match(d, /4 bireyi anıtsal gövde ölçeğinde/);
+    assert.match(d, /ölçülen gövde çapı aralığı 40–200 cm/);
+    assert.deepEqual(d.match(/anıt|Anıt/g) || [], [], 'satır metninde iz yok');
   });
+
   test('karbon satırı ρ kaynak sayımını beyan eder', () => {
     const d = rowOf('Karbon yeniden hesabı')[2].txt;
     assert.equal(rowOf('Karbon yeniden hesabı')[1].txt, '✓ Geçerli');
@@ -502,21 +518,14 @@ describe('0032 · rapor metni: anıtsallık beyanı, veri hatası iması YOK', (
 });
 
 /* =================== 8) metadata.json (makine okunur) =================== */
-describe('0032 · metadata.json: monumental + carbonRecalc + qaInfo', () => {
-  test('monumental bloğu sayıları ve mevzuatı taşır; tescil hükmü false', () => {
-    assert.ok(MD.monumental, 'monumental alanı var');
-    assert.equal(MD.monumental.thresholdCm, 100);
-    assert.equal(MD.monumental.n, 4);
-    assert.equal(MD.monumental.maxDbhCm, 200);
-    assert.equal(MD.monumental.isRegistrationDecision, false);
-    assert.deepEqual(MD.monumental.diameterBins, [
-      { rangeCm: '<50', n: 1 }, { rangeCm: '50–74', n: 1 }, { rangeCm: '100–124', n: 2 },
-      { rangeCm: '150–174', n: 1 }, { rangeCm: '200–224', n: 1 },
-    ]);
-    assert.deepEqual(MD.monumental.points.map((x) => x.pointId), [1, 3, 7, 32]);
-    assert.equal(MD.monumental.regulation.rg_sayi, '31898');
-    assert.match(MD.monumental.note, /YAPILMAMIŞTIR/);
-    assert.match(MD.monumental.note, /Bölge Komisyonu/);
+describe('0033 · metadata.json: scopeNote + carbonRecalc + qaInfo', () => {
+  test('eşik tabanlı gövde sınıfı alanı KALDIRILDI; yerine scopeNote', () => {
+    assert.equal(MD.monumental, undefined);
+    assert.equal(MD.scopeNote, YASAL_STATU_KAPSAM);
+    const t = JSON.stringify(MD);
+    for (const iz of ['monumental', 'diameterBins', 'thresholdCm', 'isRegistrationDecision', 'anıtsal', 'Anıtsal', '31898', 'Ek-4', 'İlke Kararı']) {
+      assert.ok(!t.includes(iz), 'metadata içinde iz kalmadı: ' + iz);
+    }
   });
   test('carbonRecalc: ρ kaynağı sayımı + bant + bant dışı noktalar', () => {
     assert.equal(MD.carbonRecalc.bandPct, 20);
@@ -529,14 +538,16 @@ describe('0032 · metadata.json: monumental + carbonRecalc + qaInfo', () => {
     assert.match(MD.carbonRecalc.note, /Motor ve katsayılar değişmez/);
   });
   test('qaInfo + qaState: beyan kalemleri durumu değiştirmez', () => {
-    assert.deepEqual(MD.qaInfo.map((x) => x.key), ['anit', 'rho-kaynagi']);
+    assert.deepEqual(MD.qaInfo.map((x) => x.key), ['rho-kaynagi'], '0033: sınıf beyanı kalemi yok');
     assert.equal(MD.qaState, QA_STATE.VALID);
     assert.equal(MD.qaStateLabel, '🟢 GEÇERLİ');
   });
-  test('measurementNote gövde ölçeğini de söyler; DBH tanımı korunur', () => {
+  test('measurementNote: DBH tanımı + ölçülen çap aralığı (betimleyici)', () => {
     assert.match(MD.measurementNote, /çevre→çap dönüşümü uygulanmadan/);
-    assert.match(MD.measurementNote, /Gövde ölçeği: 4\/6 bireyin gövde çapı 100 cm ve üzerindedir/);
+    assert.match(MD.measurementNote, /Ölçülen gövde çapı aralığı 40–200 cm/);
+    assert.match(MD.measurementNote, /n=6/);
     assert.match(MD.measurementNote, /olduğu gibi modellenmiştir/);
+    assert.ok(!/anıt|Anıt/.test(MD.measurementNote), 'ölçüm notunda iz yok');
     const dbh = MD.variables.find((v) => v.name === 'DBH');
     assert.equal(dbh.unit, 'cm');
     assert.match(dbh.description, /[Gg]öğüs çapı/);
@@ -544,36 +555,45 @@ describe('0032 · metadata.json: monumental + carbonRecalc + qaInfo', () => {
 });
 
 /* =================== 9) DOKUNULMAZLAR =================== */
-describe('0032 · dokunulmazlar: motor, CSV, şema, migration, yayın kuyruğu, yayımlanmış raporlar', () => {
+describe('0033 · dokunulmazlar: motor, CSV, şema, migration, yayın kuyruğu, yayımlanmış raporlar', () => {
   test('CSV başlığı ve veri tabanı şeması değişmedi; yeni migration YOK', () => {
     assert.match(read('scripts/make-report.mjs'),
       /const head = 'NOKTA,TUR,GRUP,DBH_CM,BOY_M,KARBON_KG,KARBON_CI_LO_KG,KARBON_CI_HI_KG,ENLEM,BOYLAM,GPS_DOGRULUK_M,TARIH'/);
     const mig = readdirSync(join(ROOT, 'supabase/migrations')).filter((f) => /\.sql$/.test(f));
-    for (const f of mig) assert.ok(parseInt(f.slice(0, 4), 10) <= 25, '0032 yeni migration EKLEMEMELİ: ' + f);
+    for (const f of mig) assert.ok(parseInt(f.slice(0, 4), 10) <= 25, '0033 yeni migration EKLEMEMELİ: ' + f);
     assert.ok(!mig.some((f) => /^00(3\d)/.test(f)), 'beklenmeyen migration numarası');
     assert.match(read('supabase/migrations/0001_init_v2_1.sql'), /dbh_cm/i);
   });
   test('yayın kuyruğu ve workflow dosyalarına dokunulmadı', () => {
     const wf = readdirSync(join(ROOT, '.github/workflows'));
     assert.ok(wf.length > 0, 'workflow dosyaları yerinde');
-    /* 0032 workflowlara HİÇ dokunmadı: yeni metin/numara izi aranır
-     * ("anıtlı"/"kanıtlı" gibi mevcut Türkçe sözcükler yanlış pozitif verir). */
+    /* 0033 workflowlara HİÇ dokunmadı: yeni metin/numara izi aranır
+     * ("kanıtlı" gibi mevcut Türkçe sözcükler yanlış pozitif verir). */
     for (const f of wf) {
       const w = read('.github/workflows/' + f);
-      assert.ok(!/Anıtsal gövde|anıtsal gövde beyanı|0032/i.test(w), 'workflow içeriği değişmedi: ' + f);
+      assert.ok(!/scopeNote|YASAL_STATU|0033/i.test(w), 'workflow içeriği değişmedi: ' + f);
     }
-    assert.ok(!/Anıtsal gövde/.test(read('scripts/publish-queue.mjs')), 'yayın kuyruğu metni değişmedi');
+    assert.ok(!/YASAL_STATU_KAPSAM/.test(read('scripts/publish-queue.mjs')), 'yayın kuyruğu metni değişmedi');
   });
   test('yayımlanmış rapor çıktıları YENİDEN ÜRETİLMEDİ (immutable)', () => {
-    const live = 'rapor/DGR-2026-0017/index.html';
-    if (existsSync(join(ROOT, live))) {
-      const h = read(live);
-      assert.ok(!h.includes('Anıtsal gövde beyanı'), 'yayımlanmış rapor 0032 şablonuyla değiştirilmemeli');
-      assert.ok(!h.includes('table class="qa"'), 'yayımlanmış rapor markupı olduğu gibi kalmalı');
+    /* 0017 geri çekildi (bildirim sayfası), 0018 0032 şablonuyla yayında.
+     * 0033 yayımlanmış çıktıları DEĞİŞTİRMEZ: düzeltme YENİ raporla yapılır,
+     * eski rapor yayın panelinden geri çekilir. Bu yüzden 0018in içeriğine
+     * dokunulmadığı aşağıda DOĞRULANIR (içerdiği 0032 metni silinmez). */
+    const cekilen = 'rapor/DGR-2026-0017/index.html';
+    if (existsSync(join(ROOT, cekilen))) {
+      assert.match(read(cekilen), /geri çekilmiştir/i);
+      assert.ok(!read(cekilen).includes('table class="qa"'), 'geri çekme bildirimi rapor şablonu değildir');
     }
-    /* site sayfaları (index.html) rapor şablonundan etkilenmez */
-    assert.ok(!read('index.html').includes('Anıtsal gövde beyanı'));
-    assert.ok(!read('sw.js').includes('Anıtsal gövde beyanı'));
+    const yayinda = 'rapor/DGR-2026-0018/index.html';
+    if (existsSync(join(ROOT, yayinda))) {
+      const h = read(yayinda);
+      assert.match(h, /DGR-2026-0018/);
+      assert.ok(!h.includes('scopeNote'), '0018, 0033 şablonuyla yeniden ÜRETİLMEDİ');
+    }
+    /* site sayfaları (index.html, sw.js) rapor şablonundan etkilenmez */
+    assert.ok(!read('index.html').includes('scopeNote'));
+    assert.ok(!read('sw.js').includes('scopeNote'));
   });
   test('rapor sayfası kendi bütünlüğünü doğrular (hash + DG_DATA)', () => {
     assert.match(HTML, /sha256:[0-9a-f]{64}/);

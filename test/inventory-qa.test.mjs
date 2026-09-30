@@ -85,17 +85,18 @@ describe('0011 · resolveSpeciesName — kanonik tür sözlüğü', () => {
   });
 });
 
-describe('0031+0032 · inventoryQa — envanter kalite kapısı (QA v4: DBH = göğüs çapı cm, çift ρ kaynağı, anıtsal gövde)', () => {
+describe('0031+0033 · inventoryQa — envanter kalite kapısı (QA v5: DBH = göğüs çapı cm, çift ρ kaynağı, yasal statü iddiası YOK)', () => {
   const dict = loadSpeciesDict();
   const mk = (point_id, species, grp, dbh_cm, height_m, carbon_kg, extra = {}) =>
     ({ id: point_id, point_id, species, grp, dbh_cm, height_m, carbon_kg, ...extra });
 
-  test('ham Göksu verisi (anıtsal gövde) BLOKLANMAZ ve ŞÜPHELİ de sayılmaz — QA v4 (0032)', () => {
+  test('ham Göksu verisi (geniş gövdeli) BLOKLANMAZ ve ŞÜPHELİ de sayılmaz — QA v5 (0033)', () => {
     /* Gerçek 28.09.2026 envanterinden temsilci dilim.
      * 0011 kapısı bu veriyi "kolon çevre olabilir" varsayımıyla ⛔ BLOKLU
      * ilan ediyordu (yanlış). 0031 bunu 🟡 İNCELEMEye indirdi ama iki kalem
      * hâlâ veri hatası iması taşıyordu: 6/6 kayıt "olağandışı boy/çap oranı",
-     * 3/6 kayıt "bant dışı karbon". 0032de ikisi de düzeltildi:
+     * 3/6 kayıt "bant dışı karbon". 0032de ikisi de düzeltildi, 0033te ise
+     *   eşik tabanlı gövde sınıfı beyanı kaldırıldı (yasal statü iddiası yok):
      *   (a) DBH geçerlilik 6/6 GEÇER → blok yok
      *   (b) gövde formu: sabit bant yerine fiziksel makullük (3–200) + stand
      *       içi robust aykırılık (modified z > 3,5). Tipik 15–120 bandı dışı
@@ -104,8 +105,8 @@ describe('0031+0032 · inventoryQa — envanter kalite kapısı (QA v4: DBH = g�
      *       varsayılanı ρ); saklı değer herhangi biriyle ±%20 içindeyse geçer.
      *       Böylece P3/P32 (grup ρ=541 ile birebir) aklanır, P7nin 10x
      *       ondalık kayması YAKALANMAYA DEVAM EDER.
-     *   (d) anıtsal gövde beyanı: DBH ≥ 100 cm olan 4 birey ℹ️ Beyan üretir,
-     *       QA durumunu ETKİLEMEZ. */
+     *   (d) 0033: gövde çapı dağılımı (dbh_stats) YALNIZ betimleyicidir;
+     *       eşik, sınıf, mevzuat atfı ve ℹ️ beyan satırı YOKTUR. */
     const raw = [
       mk(1, 'SÜS ERİĞİ', 'YAPRAKLI', 110, 10.2, 2034.7),
       mk(3, 'SALKIM SÖĞÜT', 'YAPRAKLI', 166, 14, 6188.3),
@@ -124,7 +125,7 @@ describe('0031+0032 · inventoryQa — envanter kalite kapısı (QA v4: DBH = g�
     assert.equal(qa.hd_band_out.length, 6, 'tipik 15–120 bandı dışı sayım: ' + JSON.stringify(qa.hd_band_out));
     assert.equal(qa.hd_fail.length, 0, 'fiziksel bant + robust z → aykırı kayıt yok: ' + JSON.stringify(qa.hd_fail));
     assert.equal(qa.hd_block, false, 'boy/çap oranı ASLA bloklamaz (0031)');
-    assert.equal(qa.hd_review, false, '0032: anıtsal gövdeli stand artık inceleme üretmiyor');
+    assert.equal(qa.hd_review, false, '0033: geniş gövdeli stand inceleme üretmiyor');
     assert.ok(qa.hd_stats && qa.hd_stats.n === 6, 'stand dağılımı hesaplandı: ' + JSON.stringify(qa.hd_stats));
     assert.ok(Math.abs(qa.hd_stats.z_max) <= QA_LIMITS.HD_ROBUST_Z, 'en yüksek |z| eşiğin altında: ' + qa.hd_stats.z_max);
     /* (c) karbon: yalnız GERÇEK hesap hatası bayraklanır (P7 10x ondalık kayması) */
@@ -136,12 +137,11 @@ describe('0031+0032 · inventoryQa — envanter kalite kapısı (QA v4: DBH = g�
       'grup varsayılanı ρ ile birebir olan ama tür ρ ile bant aşan kayıtlar');
     assert.equal(qa.dev_rho.n, 5, '5/6 kayıt yeniden üretildi');
     assert.equal(qa.dev_rho.tur + qa.dev_rho.grup, 5);
-    /* (d) anıtsal gövde beyanı (ℹ️ — duruma etkisi YOK) */
-    assert.equal(qa.anit.n, 4, 'DBH ≥ 100 cm: P1 110, P3 166, P7 107, P32 200');
-    assert.deepEqual(qa.anit.points.map((x) => x.point_id), [1, 3, 7, 32]);
-    assert.equal(qa.anit.max_dbh_cm, 200);
-    assert.equal(qa.anit.threshold_cm, 100);
-    assert.deepEqual(qa.info.map((x) => x.key), ['anit', 'rho-kaynagi']);
+    /* (d) 0033 · gövde çapı dağılımı BETİMLEYİCİ: eşik/sınıf/mevzuat YOK */
+    assert.equal(qa.anit, undefined, '0032 alanı kaldırıldı');
+    assert.deepEqual(qa.dbh_stats, { n: 6, min: 40, medyan: 108.5, max: 200 });
+    assert.deepEqual(Object.keys(qa).filter((k) => /anit|basamak|mevzuat|threshold/i.test(k)), []);
+    assert.deepEqual(qa.info.map((x) => x.key), ['rho-kaynagi'], 'yalnız ρ kaynağı kalemi');
     /* Üç hâlli durum: tek gerçek hata (P7) inceleme üretir; BLOKLU değil */
     assert.equal(qa.state, 'INCELEME', 'durum: ' + qa.state);
     /* π ile türetilmiş bir değer YOK: DBH sahada kaydedildiği gibi */
@@ -218,7 +218,7 @@ describe('0031+0032 · inventoryQa — envanter kalite kapısı (QA v4: DBH = g�
 
   test('stand içi robust aykırılık (modified z > 3,5) tek hatalı kaydı yakalar', () => {
     /* 5 kayıt h/D ≈ 28–32 bandında, 1 kayıt 150: sabit bant (15–120) bunu
-     * yakalardı ama standın tümü bodur/ya da anıtsal formlu olduğunda sabit
+     * yakalardı ama standın tümü bodur/ya da geniş gövdeli olduğunda sabit
      * bant YANLIŞ kayıtları bayraklar. Robust z her iki durumda da çalışır:
      * ölçüt standın KENDİ dağılımıdır (medyan 30,5 · MAD 1,5 → z = 53,7). */
     const rows = [[40, 12], [40, 12.8], [40, 11.2], [40, 12.4], [40, 11.6], [40, 60]]
@@ -362,13 +362,13 @@ describe('0031 · import-measurements.mjs — cihaz çıktısı kapısı (DBH = 
     assert.ok(!/insert into/i.test(r.out), 'SQL üretilmemeli');
   });
 
-  test('auto: birim CM, DBH olduğu gibi yazılır, tipik bant dışı oran yalnız ℹ️ BİLGİ (0032)', () => {
+  test('auto: birim CM, DBH olduğu gibi yazılır, tipik bant dışı oran yalnız ℹ️ BİLGİ (0033)', () => {
     const r = run(fCap, ['--dry-run', '--json']);
     assert.equal(r.code, 0, 'boy/çap göstergesi içe aktarmayı BLOKLAMAMALI: ' + r.out.slice(0, 400));
     const j = JSON.parse(r.out.slice(r.out.indexOf('{')));
     assert.equal(j.unit.unit, 'cm', 'birim cm: ' + j.unit.why);
     assert.match(j.unit.why, /göğüs çapı/);
-    assert.match(j.unit.why, /tipik 15–120 bandı dışında → BİLGİ/, 'anıtsal gövde için medyan oran uyarı değil: ' + j.unit.why);
+    assert.match(j.unit.why, /tipik 15–120 bandı dışında → BİLGİ/, 'geniş gövde için medyan oran uyarı değil: ' + j.unit.why);
     assert.equal(j.live, 4);
     /* P7: 107 cm çap OLDUĞU GİBİ (0011de 34,06ya bölünüyordu) */
     const p7 = j.records.find((x) => x.point_id === 7);
@@ -379,18 +379,17 @@ describe('0031 · import-measurements.mjs — cihaz çıktısı kapısı (DBH = 
     assert.equal(j.gates.hd.fail, 0, 'fiziksel olarak olanaksız oran yok');
     assert.equal(j.gates.hd.band_out, 4, 'tipik bant dışı sayım: ' + JSON.stringify(j.gates.hd));
     assert.equal(j.gates.hd.block, false, 'boy/çap ASLA bloklamaz (0031)');
-    assert.equal(j.gates.hd.review, false, '0032: anıtsal gövde inceleme üretmez');
+    assert.equal(j.gates.hd.review, false, '0033: geniş gövde inceleme üretmez');
     /* (c) karbon: P3 grup ρ ile açıklanır (ℹ️), P7nin 10x kayması yakalanır */
     assert.equal(j.gates.dev.fail, 1, 'yalnız gerçek hata: ' + JSON.stringify(j.gates.dev));
     assert.equal(j.gates.dev.rho_grup, 1, 'grup ρ ile eşleşen kayıt');
     assert.equal(j.gates.dev.block, false);
-    /* (d) anıtsal gövde sayımı */
-    assert.equal(j.gates.anit.threshold_cm, 100);
-    assert.equal(j.gates.anit.n, 3, 'P1 110 · P3 166 · P7 107');
-    assert.equal(j.gates.anit.max_dbh_cm, 166);
-    assert.deepEqual(j.gates.anit.points, [1, 3, 7]);
+    /* (d) 0033 · gövde çapı dağılımı: betimleyici özet (eşik/sınıf YOK) */
+    assert.equal(j.gates.anit, undefined, '0032 kapısı kaldırıldı');
+    assert.deepEqual(j.gates.dbh, { n: 4, min: 40, medyan: 108.5, max: 166 });
     assert.match(r.out, /boy\/çap/);
-    assert.match(r.out, /ANITSAL GÖVDE/);
+    assert.equal(j.gates.dbh.min + '–' + j.gates.dbh.max + ' cm', '40–166 cm', 'betimleyici aralık');
+    assert.ok(!/ANITSAL|Anıtsal|anıt ağaç|31898|Ek-4/.test(r.out), 'içe aktarma çıktısında statü iddiası yok');
     assert.match(r.out, /GRUP VARSAYILANI ρ ile yeniden üretildi/);
     assert.match(r.out, /ÖLÇÜM HATASI DEĞİL/);
     assert.equal(j.blocked, false);

@@ -116,18 +116,18 @@ dışa aktarımındaki çevre kolonu `π·DBH` ile **türetilmiş bir kolaylık
 alanıdır** — model girdisi değildir ve içe aktarımda çap üretmek için
 okunmaz.
 
-**Envanter kalite kapısı (QA v4 · 0032; v3 = 0031).** Rapor motoru yayından
-önce kayıtları dört eksenle denetler (`inventoryQa`, scripts/make-report.mjs):
+**Envanter kalite kapısı (QA v5 · 0033; v4 = 0032; v3 = 0031).** Rapor motoru
+yayından önce kayıtları **üç** eksenle denetler (`inventoryQa`,
+scripts/make-report.mjs):
 
 | # | Kontrol | Soru | İhlalde |
 |---|---|---|---|
 | (a) | **Envanter birim kontrolü (DBH)** | DBH bir çap ölçümü olarak teknik açıdan geçerli mi? var → sayısal → > 0 → `1 ≤ D ≤ 400 cm` | ≥3 kayıt VE >%50 → **⛔ kritik** (🔴 BLOKLU) |
 | (b) | **Boy/DBH oranı incelemesi** | oran **fiziksel olarak olanaklı** mı (`3 ≤ 100·H/D ≤ 200`) ve **stand içi dağılıma göre aykırı** mı (`modified z > 3,5`)? | **⚠ İNCELEME — asla blok değil** |
 | (c) | **Karbon yeniden hesabı** | saklı `carbon_kg`, panel denklemiyle **iki ρ kaynağından herhangi biriyle** ±%20 (ve mutlak fark ≥5 kg) içinde mi? | ≥3 kayıt VE >%50 → **⛔ kritik** (hesap bütünlüğü; DBH birimiyle ilgisi YOK) |
-| (d) | **Anıtsal gövde beyanı** | kaç bireyin gövde çapı ≥ 100 cm, Ek-4 basamak dağılımı nedir? | **ℹ️ BEYAN — duruma etkisi YOK** |
 
 **(b) 0032de neden değişti.** 0031 sabit `15–120` bandını **inceleme ölçütü**
-olarak kullanıyordu. Bütünüyle anıtsal (veya bütünüyle bodur) formlu bir
+olarak kullanıyordu. Bütünüyle geniş gövdeli (veya bütünüyle bodur) formlu bir
 standda sabit bant yanlış bayrak üretir: Göksu (park 25) envanterinde
 `100·H/D` aralığı **5,33–16,32** (medyan 9,65 · MAD 1,575) ve **32/34** kayıt
 bandın dışındaydı; oysa modified z (Iglewicz–Hoaglin, eşik 3,5) aynı veride
@@ -139,7 +139,7 @@ bandın dışındaydı; oysa modified z (Iglewicz–Hoaglin, eşik 3,5) aynı ve
   eder → ⚠ (`reason: fiziksel-alt | fiziksel-ust`).
 * **stand içi robust aykırılık** — `M = 0,6745·(x − medyan)/MAD`, `|M| > 3,5`
   → ⚠ (`reason: stand-aykiri`). Ortalama/standart sapma yerine **medyan/MAD**
-  kullanılmasının nedeni, anıtsal gövdelerin dağılımın kendisini
+  kullanılmasının nedeni, geniş gövdelerin dağılımın kendisini
   kaydırmasıdır. `n < HD_ROBUST_MIN_N (5)` iken test **koşulmaz**; `MAD = 0`
   ise ortalama mutlak sapmaya düşülür, o da 0 ise test uygulanmaz (sahte
   bayrak üretilmez). Stand dağılımı (`hd_stats`: n, medyan, MAD, min, max,
@@ -163,34 +163,36 @@ sayıyla beyan edilir (`dev_rho.tur` / `dev_rho.grup` /
 biçimi ve veri tabanı şeması **değişmez** — değişen yalnız denetimin
 karşılaştırma ölçütüdür.
 
-**(d) Anıtsal gövde beyanı (ℹ️ BEYAN).** Envanterde gövde çapı
-`ANIT_DBH_CM = 100 cm` ve üzerindeki bireyler sayılır; dağılım, İlke Kararı
-Ek-4 gövde çapı basamaklarıyla (`<50`, `50–74`, `75–99`, `100–124`,
-`125–149`, `150–174`, `175–199`, `200–224`, `225–249`, `250–274`, `275–299`,
-`≥300`) birlikte beyan edilir.
+**(d) 0033te KALDIRILDI: eşik tabanlı gövde sınıfı beyanı.** 0032, gövde çapı
+`100 cm` ve üzerindeki bireyleri sayan ve bir mevzuat künyesiyle birlikte
+“ℹ️ BEYAN” satırı olarak basan dördüncü bir kalem içeriyordu. **0033 bu
+kalemi, ℹ️ satırını, `metadata.json` alanını ve ilgili eşik sabitini
+kaldırdı.** Gerekçe veri sahibinin kararıdır (2026-10-01):
 
-* **Dayanak:** *Tabiat Varlığı Olarak Belirlenecek Anıt Ağaçların Tespitine
-  İlişkin İlke Kararı* (Karar No: 110), Tabiat Varlıklarını Koruma Merkez
-  Komisyonu, Resmî Gazete **20.07.2022 / Sayı 31898** (666 sayılı İlke
-  Kararını yürürlükten kaldırır). `ANIT_DBH_CM=100` eşiği keyfî değildir:
-  Ek-4te **I. sınıf** (ortalama boyu 25 mden büyük) türler için gövde çapı
-  puanlamasının başladığı ilk basamak `100–124` cm’dir (3 puan).
-* **Tescil hükmü DEĞİLDİR.** Boyutsal anıt ağaç tespiti, ŞAD (Boy + Gövde
-  Çapı + Tepe Çapı + Yaş + Bulunduğu Yer + Pozitif Özellikler) puanının türe
-  ait AAD (Ek 1–3) ile karşılaştırılmasını zorunlu kılar. Yaş (artım kalemi +
-  halka sayımı) ve tepe çapı DendroGeo envanterinde **kaydedilmez** →
-  puanlama **uygulanmaz** (uydurma puan yoktur). Karar yetkisi ilgili
-  **Tabiat Varlıklarını Koruma Bölge Komisyonu**ndadır. Rapor yalnız
-  ölçülmüş boyutsal veriyi ve basamak dağılımını sayıyla beyan eder.
-* **Birim notu.** Mevzuat gövde çapını “1,30 m yükseklikteki çevre ÷ 3,14”
-  olarak tanımlar. DendroGeo gövde çapını sahada **doğrudan** kaydeder;
-  basamak karşılaştırmasında **hiçbir çevre→çap dönüşümü uygulanmaz**
-  (0031 kararı bu beyanla pekiştirilir).
-* **Duruma etkisi YOKTUR.** ℹ️ satırı `qaStates` dizisine `info` olarak girer;
-  `qaStateOf({block, review})` bu değeri **okumaz** → 🟢/🟡/🔴 değişmez.
-  Sabitler ve yardımcılar `scripts/lib/mc.mjs` içindedir: `ANIT_MEVZUAT`,
-  `ANIT_GOVDE_BASAMAKLARI`, `anitGovdeBasamagi()`, `medianOf()`, `madOf()`,
-  `modifiedZ()`. Bekçisi `test/anit-qa.test.mjs` (45 test).
+* **Kapsam.** DendroGeo bir ölçüm ve karbon muhasebesi aracıdır; ağaçların
+  **yasal statüsü** (tescil, koruma kararı vb.) bu aracın konusu değildir.
+  Envanterde tescilli olmayan bireyler bulunabilir ve bir ölçüm raporu
+  tespit/tescil hükmü **taşıyamaz**. Bu nedenle rapor, hiçbir birey için
+  statü iddiası, sınıf ataması veya mevzuat değerlendirmesi üretmez.
+* **Veri değişmedi.** Gövde çapları sahada ölçüldüğü gibi modellenir;
+  düzeltme, ölçekleme, dışlama veya çevre→çap dönüşümü **yoktur**.
+* **Yerine geçen.** `inventoryQa` çıktısında `dbh_stats` (n, min, medyan,
+  max) **yalnız betimleyici** bir özet olarak tutulur; §5.1 “Gövde çapı
+  notu” ve §9 “Gövde çapı dağılımı ve model temsili” maddeleri bu aralığı
+  sayıyla verir. Eşik, basamak, sınıf veya puan **yoktur**.
+* **Tek kaynak.** Kapsam beyanı `scripts/lib/mc.mjs` içinde
+  `YASAL_STATU_KAPSAM` sabitidir; rapor §9da ve `metadata.json`
+  `scopeNote` alanında **aynı sabiti** kullanır (metin kopyası yoktur).
+* **Duruma etkisi yoktu, şimdi hiç yok.** ℹ️ işaretinin `qaStateOf`
+  üzerindeki etkisizliği korunur; `qaRow` ℹ️ üretebilme yeteneğini
+  **kod düzeyinde** tutar (CSS `.qinfo` tanımı durur), ancak 0033
+  şablonunda ℹ️ satırı **basılmaz**.
+* **Bekçisi.** `test/form-qa.test.mjs`: yasaklı ifade taraması (rapor HTMLi,
+  `metadata.json`, `scripts/*`, `docs/*`) + eşikten bağımsızlık testi
+  (99 cm ile 200 cm aynı muameleyi görür).
+
+Yardımcılar `scripts/lib/mc.mjs` içindedir: `medianOf()`, `madOf()`,
+`modifiedZ()`, `YASAL_STATU_KAPSAM`.
 
 **Üç hâlli rapor durumu** (`QA_STATE`, scripts/lib/mc.mjs) Çizelge 4ten
 türetilir ve künyede + §7 girişinde basılır:
@@ -203,14 +205,17 @@ türetilir ve künyede + §7 girişinde basılır:
   `accuracy_m` kaydedilmemiş) rapor bunu açıkça yazar.
 * 🟢 **GEÇERLİ** — tüm kritik kontroller geçti.
 * ℹ️ **BEYAN** — dördüncü bir **durum değildir**: Çizelge 4 satır işareti.
-  Bilgilendirme kalemidir (anıtsal gövde, ρ kaynağı) ve durumu değiştirmez.
+  Bilgilendirme kalemidir (ör. ρ kaynağı) ve durumu değiştirmez. 0033
+  şablonunda ℹ️ satırı basılmaz; §7 girişindeki açıklama cümlesi de
+  **yalnız böyle bir satır varsa** üretilir.
 
 **Çizelge 4 sunumu (0032).** §7 tablosu `table.qa` + `<colgroup>`
 (`%23 / %16 / %61`) ile **sabit kolon düzeninde** basılır: ayrıntı hücresi
 `.qd` (orantılı/sans yazı, `overflow-wrap:break-word` → uzun Türkçe cümle
 **kelime ortasından kırılmaz**), sonuç hücresi `.qst` (renkli, ekranda tek
-satır; mobil ve printte normal sarma → hücre taşmaz), beyan satırı `.qinfo`
-(mavi; ⚠ ile karışmaz). Uzun açıklama kolonu olan diğer çizelgeler (§4.6
+satır; mobil ve printte normal sarma → hücre taşmaz). `.qinfo` (mavi; ⚠ ile
+karışmaz) ℹ️ satırları için tanımlıdır; 0033 şablonu böyle bir satır
+basmasa da sınıf CSSde durur. Uzun açıklama kolonu olan diğer çizelgeler (§4.6
 veri sözlüğü, §10 tekrar üretilebilirlik) aynı `.qd` hücresini kullanır.
 Mobilde `.tscroll` kabı yatay kayar (`table.qa{min-width:540px}`), printte
 üç kolon korunur. Önceki hâlde ayrıntı kolonu monospace `.76rem` +
@@ -220,7 +225,8 @@ Eşik sabitleri tek yerdedir: `QA_LIMITS` (scripts/lib/mc.mjs) —
 `DBH_MIN_CM=1`, `DBH_MAX_CM=400`, `HD_MIN=15`, `HD_MAX=120` (tipik bant,
 yalnız sayım), `HD_PHYS_MIN=3`, `HD_PHYS_MAX=200`, `H_MIN_M=1.3`,
 `H_MAX_M=100`, `HD_ROBUST_Z=3.5`, `HD_ROBUST_MIN_N=5`, `CARBON_DEV_PCT=20`,
-`CARBON_DEV_MIN_KG=5`, `BLOCK_RATIO=0.5`, `BLOCK_MIN_N=3`, `ANIT_DBH_CM=100`.
+`CARBON_DEV_MIN_KG=5`, `BLOCK_RATIO=0.5`, `BLOCK_MIN_N=3`. 0033: eşik tabanlı
+gövde sınıfı sabiti **YOKTUR** (bkz. §1.5.1 (d)).
 
 Aynı kontroller `scripts/import-measurements.mjs` içinde içe aktarımda da
 çalışır. **`--birim cevre` kaldırıldı (0031):** araç `auto` kipinde birimi

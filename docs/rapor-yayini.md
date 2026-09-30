@@ -262,13 +262,12 @@ Rapor motoru yayından ÖNCE kayıtları da denetler (§7 Çizelge 4):
 | **Envanter birim kontrolü (DBH)** | var → sayısal → > 0 → `1 ≤ D ≤ 400 cm` | ≥3 kayıt VE >%50 → **⛔ kritik** |
 | **Boy/DBH oranı incelemesi** | fiziksel makullük `3 ≤ 100·H/D ≤ 200` + boy `1,3–100 m` + stand içi robust aykırılık (`modified z > 3,5`, yalnız `n ≥ 5`) | **⚠ İNCELEME — asla blok değil** |
 | Karbon yeniden hesabı | panel denklemi ±%20 (ve mutlak fark ≥5 kg — küçük kayıtlarda yuvarlama gürültüsü bayraklanmaz) — **iki ρ kaynağından herhangi biriyle** (tür ρ / grup varsayılanı ρ) | ≥3 kayıt VE >%50 → **⛔ kritik** (hesap bütünlüğü; DBH birimiyle ilgisi yok) |
-| **Anıtsal gövde beyanı** | DBH ≥ `ANIT_DBH_CM` (100 cm) olan bireyler + Ek-4 basamak dağılımı | **ℹ️ BEYAN — durumu değiştirmez** |
 | Park geometrisi | bbox/düğüm taraması | dikdörtgen `geom_json` yok sayılır → OSM'e düşülür (beyanla) |
 
 > **0032 · tipik `15–120` bandı artık YALNIZ SAYIM.** `hd_band_out` olarak
-> beyan edilir, uyarı üretmez. Gerekçe: bütünüyle anıtsal gövdeli bir standda
-> (Göksu park 25: 11/34 birey ≥ 100 cm, `100·H/D` aralığı 5,33–16,32, medyan
-> 9,65) sabit bant 32/34 kaydı yanlış yere “olağandışı” ilan ediyordu;
+> beyan edilir, uyarı üretmez. Gerekçe: bütünüyle geniş gövdeli bir standda
+> (Göksu park 25: ölçülen gövde çapı 40–200 cm, `100·H/D` aralığı 5,33–16,32,
+> medyan 9,65) sabit bant 32/34 kaydı yanlış yere “olağandışı” ilan ediyordu;
 > modified z (eşik 3,5) aynı veride hiçbir kaydı aykırı bulmuyor.
 > `hd_block` kalıcı `false` (0031 hükmü korunur).
 
@@ -279,11 +278,15 @@ Rapor motoru yayından ÖNCE kayıtları da denetler (§7 Çizelge 4):
 > katsayılar, saklı değerler, CSV ve şema **değişmez**; 10× ondalık kayması
 > gibi gerçek hesap hataları yakalanmaya devam eder.
 
-> **0032 · anıtsal gövde beyanı bir TESCİL hükmü DEĞİLDİR.** Dayanak: *Tabiat
-> Varlığı Olarak Belirlenecek Anıt Ağaçların Tespitine İlişkin İlke Kararı*
-> (Karar No: 110), Tabiat Varlıklarını Koruma Merkez Komisyonu, Resmî Gazete
-> 20.07.2022 / Sayı 31898, Ek-4. ŞAD/AAD puanlaması yaş (artım kalemi) ve tepe
-> çapı gerektirdiği için **uygulanmaz**; yetki TVK Bölge Komisyonundadır.
+> **0033 · rapor hiçbir yasal statü hükmü üretmez.** 0032de eklenen eşik
+> tabanlı gövde sınıfı beyanı (ℹ️ satırı, mevzuat künyesi, `metadata.json`
+> alanı) **kaldırıldı**: envanterde tescilli olmayan bireyler bulunabilir ve
+> bir ölçüm raporu tespit/tescil hükmü taşıyamaz. Ağaçların yasal statüsü
+> ilgili idarenin yetkisindedir; bu çalışmanın kapsamı dışındadır. Yerine
+> gövde çapı dağılımı (`dbh_stats`: n/min/medyan/max) **yalnız betimleyici**
+> olarak §5.1 ve §9da sayıyla verilir. Kapsam beyanı tek kaynaktan gelir:
+> `scripts/lib/mc.mjs → YASAL_STATU_KAPSAM` (rapor §9 + `metadata.json →
+> scopeNote`). Ölçülen değerler düzeltilmez, ölçeklenmez, dışlanmaz.
 
 Rapor durumu Çizelge 4ten türetilen **üç hâlli** bir rozettir (künye + §7):
 
@@ -298,7 +301,9 @@ Rapor durumu Çizelge 4ten türetilen **üç hâlli** bir rozettir (künye + §7
   hakkında yanlış şüphe oluşmasın diye).
 * 🟢 **GEÇERLİ** — tüm kritik kontroller geçti.
 * ℹ️ **BEYAN** — dördüncü bir durum **değildir**; Çizelge 4 satır işaretidir
-  (anıtsal gövde, ρ kaynağı). Rozeti değiştirmez, `qaState` alanında görünmez.
+  (ör. ρ kaynağı). Rozeti değiştirmez, `qaState` alanında görünmez. 0033
+  şablonunda ℹ️ satırı **basılmaz**; §7 girişindeki açıklama cümlesi de yalnız
+  böyle bir satır varsa üretilir (`qaStates.includes('info')`).
 
 **Çizelge 4 sunumu (0032).** §7 tablosu `table.qa` + `<colgroup>`
 (`%23 / %16 / %61`) ile sabit kolon düzeninde basılır; ayrıntı hücresi `.qd`

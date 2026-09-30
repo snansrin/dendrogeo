@@ -105,9 +105,9 @@ const SNAP = {
   rows: ROWS,
 };
 
-/* ---- QA katmanı: 0032 (QA v4) koduyla hesaplanır + üç hâlin enjekte hâlleri ----
- * 0032 · bu fikstürde ağaç DEĞERİ kontrollerinin tümü geçerlidir (2 birey
- * DBH ≥ 100 cm = anıtsal gövde ölçeği; karbon motor değerlerinden türetildi)
+/* ---- QA katmanı: 0033 (QA v5) koduyla hesaplanır + üç hâlin enjekte hâlleri ----
+ * 0033 · bu fikstürde ağaç DEĞERİ kontrollerinin tümü geçerlidir (ölçülen
+ * gövde çapı 40–110 cm; karbon motor değerlerinden türetildi)
  * → doğal durum 🟢 GEÇERLİ. 🟡 İNCELEME ve 🔴 BLOKLU görünümleri AYNI
  * snapshot üzerine enjekte edilen QA nesneleriyle doğrulanır: amaç, QA hükmü
  * değişirken SAYILARIN (çizelgeler, toplam, GA, t/ha, DG_DATA) değişmediğini
@@ -356,8 +356,8 @@ describe('0031 · DBH = göğüs çapı (cm): dönüşüm iddiası YOK', () => {
   });
 });
 
-describe('0031+0032 · boy/DBH oranı: asla blok değil, anıtsal gövdede uyarı bile değil', () => {
-  test('0032 · tipik bant dışı oran SAYIMDIR: anıtsal gövdeli fikstürde durum 🟢 GEÇERLİ', () => {
+describe('0031+0033 · boy/DBH oranı: asla blok değil, geniş gövdede uyarı bile değil', () => {
+  test('0033 · tipik bant dışı oran SAYIMDIR: geniş gövdeli fikstürde durum 🟢 GEÇERLİ', () => {
     assert.equal(QA.n, ROWS.length);
     assert.equal(QA.dbh_fail.length, 0, 'DBH geçerlilik ihlali yok: ' + JSON.stringify(QA.dbh_fail));
     /* P1 (110 cm / 10,2 m → 9,27), P7 (107 / 12 → 11,21), P29 (40 / 4,5 → 11,25)
@@ -367,14 +367,14 @@ describe('0031+0032 · boy/DBH oranı: asla blok değil, anıtsal gövdede uyar�
     assert.equal(QA.hd_band_out.length, 3, 'tipik bant dışı SAYIM: ' + JSON.stringify(QA.hd_band_out));
     assert.equal(QA.hd_fail.length, 0, 'aykırı kayıt yok: ' + JSON.stringify(QA.hd_fail));
     assert.equal(QA.hd_block, false, 'boy/çap ASLA bloklamaz');
-    assert.equal(QA.hd_review, false, '0032: anıtsal gövde ölçeği inceleme üretmez');
+    assert.equal(QA.hd_review, false, '0033: geniş gövde inceleme üretmez');
     assert.equal(QA.dev_fail.length, 0, 'saklı karbon motor değerleri → sapma yok');
     assert.equal(QA.state, QA_STATE.VALID, 'doğal durum 🟢: ' + QA.state);
-    /* ℹ️ beyan: 2 birey anıtsal gövde ölçeğinde (P1 110 cm, P7 107 cm) */
-    assert.equal(QA.anit.n, 2, JSON.stringify(QA.anit.points));
-    assert.deepEqual(QA.anit.points.map((x) => x.point_id), [1, 7]);
-    assert.equal(QA.anit.max_dbh_cm, 110);
-    assert.deepEqual(QA.info.map((x) => x.key), ['anit'], 'ℹ️ beyan kalemi duruma ETKİ ETMEZ');
+    /* 0033 · eşik tabanlı gövde sınıfı beyanı YOK: dağılım yalnız betimleyici
+     * (min 40 · medyan 75 · max 110 cm) ve ℹ️ kalemi üretilmez. */
+    assert.equal(QA.anit, undefined, '0032 alanı kaldırıldı');
+    assert.deepEqual(QA.dbh_stats, { n: 6, min: 40, medyan: 75, max: 110 });
+    assert.deepEqual(QA.info, [], 'ℹ️ beyan kalemi üretilmiyor');
   });
 
   test('hd_block kodda kalıcı false: %100 ihlal bile bloklamaz', () => {

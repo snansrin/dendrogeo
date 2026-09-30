@@ -110,9 +110,13 @@ export function loadSpeciesDict() {
  *   SİSTEMİK ölçekte (BLOCK_RATIO/BLOCK_MIN_N) hesap bütünlüğü şüphesi
  *   doğurursa bloklayabilir — bu bir birim hatası iddiası DEĞİLDİR.
  *
- * 0032 · ANIT AĞAÇ DÜZELTMESİ (veri sahibi kararı): Envanterdeki gövdeler
- * standart dışı görünebilir ama DOĞRUDUR — bireyler anıtsal ölçektedir.
- * Bu yüzden iki eşik ailesi ayrıldı:
+ * 0033 · KAPSAM DÜZELTMESİ (veri sahibi kararı, 2026-10-01): DendroGeo
+ * hiçbir ağacın YASAL STATÜSÜ hakkında hüküm vermez. 0032 ile eklenen eşik
+ * tabanlı gövde sınıfı beyanı (mevzuat atfıyla birlikte) bu yüzden
+ * KALDIRILDI: envanterde tescilli olmayan bireyler bulunabilir ve bir ölçüm
+ * raporu tescil/tespit hükmü taşıyamaz. VERİ DEĞİŞMEDİ: gövde çapları sahada
+ * ölçüldüğü gibi modellenir; düzeltme, ölçekleme veya dışlama uygulanmaz.
+ * Gövde formu kontrolü statü iddiası olmadan iki eşik ailesiyle yürür:
  *   HD_MIN/HD_MAX        — TİPİK gövde oranı bandı (15–120). YALNIZ
  *                          BİLGİLENDİRME amaçlı sayılır (hd_band_out); tek
  *                          başına hiçbir kayıt için uyarı üretmez.
@@ -124,11 +128,12 @@ export function loadSpeciesDict() {
  *   HD_ROBUST_Z          — stand İÇİ aykırılık: modified z-score eşiği 3,5
  *                          (Iglewicz–Hoaglin 1993). Sabit bandın yerine
  *                          envanterin KENDİ dağılımı kullanılır; böylece
- *                          bütünüyle bodur/ya da bütünüyle anıtsal formlu
+ *                          bütünüyle bodur ya da bütünüyle geniş gövdeli
  *                          standlar topluca "olağandışı" ilan edilmez.
  *                          Yalnız n ≥ HD_ROBUST_MIN_N iken uygulanır.
- *   ANIT_DBH_CM          — anıtsal gövde beyan eşiği (100 cm). ℹ️ Beyan
- *                          üretir; QA durumunu (🟢/🟡/🔴) ETKİLEMEZ. */
+ * 0033: eşik tabanlı bir gövde sınıfı YOKTUR. Gövde çapı dağılımı
+ * (dbh_stats: n/min/medyan/max) yalnız BETİMLEYİCİ olarak raporlanır;
+ * hiçbir yasal statü, mevzuat maddesi veya tescil hükmüne bağlanmaz. */
 export const QA_LIMITS = {
   DBH_MIN_CM: 1, DBH_MAX_CM: 400,
   HD_MIN: 15, HD_MAX: 120,
@@ -137,58 +142,24 @@ export const QA_LIMITS = {
   HD_ROBUST_Z: 3.5, HD_ROBUST_MIN_N: 5,
   CARBON_DEV_PCT: 20, CARBON_DEV_MIN_KG: 5,
   BLOCK_RATIO: 0.5, BLOCK_MIN_N: 3,
-  ANIT_DBH_CM: 100,
 };
 
-/* ---- Anıtsal gövde basamakları (0032) ----
- * Dayanak: Tabiat Varlıklarını Koruma Merkez Komisyonu, "Tabiat Varlığı
- * Olarak Belirlenecek Anıt Ağaçların Tespitine İlişkin İlke Kararı"
- * (Karar No: 110), Resmî Gazete 20.07.2022 / Sayı 31898 — 666 sayılı İlke
- * Kararını yürürlükten kaldırır. Aşağıdaki basamaklar, kararın Ek-4
- * "Anıt Ağaç Değerlendirme Tablosu"ndaki GÖVDE ÇAPI (cm) basamaklarıdır.
- *
- * KAPSAM SINIRI (raporda da beyan edilir): Bu dağılım bir TESCİL veya
- * "anıt ağaçtır" KARARI DEĞİLDİR. Boyutsal anıt ağaç tespiti, Şimdiki
- * Anıtsal Değer (ŞAD = boy + gövde çapı + tepe çapı + yaş + bulunduğu yer +
- * pozitif özellikler) puanının tür için tanımlı Asgari Anıtsal Değer (AAD,
- * Ek 1–3) ile karşılaştırılmasını zorunlu kılar. ŞAD'ın yaş bileşeni artım
- * kalemiyle halka sayımı, tepe çapı bileşeni ayrı bir saha ölçümü ister;
- * DendroGeo envanterinde bu iki alan KAYDEDİLMEZ → puanlama YAPILMAZ.
- * Karar yetkisi ilgili Tabiat Varlıklarını Koruma Bölge Komisyonundadır.
- *
- * Birim notu: İlke Kararı B/1.2 gövde çapını "çevre ÷ 3,14" olarak tanımlar.
- * DendroGeo DBH'yi sahada ÇAP (cm) olarak kaydeder; basamak karşılaştırması
- * bu çapla doğrudan yapılır, HİÇBİR çevre→çap dönüşümü uygulanmaz (0031). */
-export const ANIT_MEVZUAT = {
-  karar: 'Tabiat Varlığı Olarak Belirlenecek Anıt Ağaçların Tespitine İlişkin İlke Kararı (Karar No: 110)',
-  kurum: 'Tabiat Varlıklarını Koruma Merkez Komisyonu',
-  rg_tarih: '2022-07-20', rg_sayi: '31898',
-  ek: 'Ek-4 Anıt Ağaç Değerlendirme Tablosu (gövde çapı basamakları)',
-  yururluktenKaldirilan: '666 sayılı İlke Kararı',
-  yetki: 'Tabiat Varlıklarını Koruma Bölge Komisyonu',
-  puanlama: 'ŞAD (Boy + Gövde Çapı + Tepe Çapı + Yaş + Bulunduğu Yer + Pozitif Özellikler) ≥ AAD (Ek 1–3)',
-  puanlamaUygulanmadi: 'Yaş (artım kalemi/halka sayımı) ve tepe çapı envanterde kayıtlı olmadığı için ŞAD/AAD puanlaması YAPILMAMIŞTIR.',
-};
-/* [etiket, alt sınır (dahil), üst sınır (hariç)] — Ek-4 ile birebir. */
-const ANIT_STEPS = [
-  ['<50', 0, 50], ['50–74', 50, 75], ['75–99', 75, 100], ['100–124', 100, 125],
-  ['125–149', 125, 150], ['150–174', 150, 175], ['175–199', 175, 200],
-  ['200–224', 200, 225], ['225–249', 225, 250], ['250–274', 250, 275],
-  ['275–299', 275, 300], ['≥300', 300, Infinity],
-];
-export const ANIT_GOVDE_BASAMAKLARI = ANIT_STEPS.map(([label, lo, hi]) => ({ label, lo, hi }));
-export function anitGovdeBasamagi(dbh_cm) {
-  const d = Number(dbh_cm);
-  if (!Number.isFinite(d) || d <= 0) return null;
-  const s = ANIT_STEPS.find(([, lo, hi]) => d >= lo && d < hi);
-  return s ? s[0] : null;
-}
+/* ---- Kapsam beyanı: yasal statü (0033) ----
+ * DendroGeo bir ÖLÇÜM ve KARBON MUHASEBESİ aracıdır; ağaçların yasal statüsü
+ * (tescil, koruma kararı vb.) bu aracın KONUSU DEĞİLDİR. Gerekçe (veri sahibi
+ * kararı, 2026-10-01): envanterde tescilli olmayan bireyler bulunabilir ve
+ * bir ölçüm raporu tespit/tescil hükmü taşıyamaz. 0032 sürümünde eklenen eşik
+ * tabanlı gövde sınıfı beyanı ile mevzuat künyesi bu nedenle kaldırıldı.
+ * Bu sabit, rapor metninde (§9 sınırlılıklar) ve metadata.json içinde TEK
+ * KAYNAKTAN kullanılır: metin kopyaları arasında çelişki olamaz. */
+export const YASAL_STATU_KAPSAM = 'Bu rapor, ölçülen hiçbir birey için yasal statü değerlendirmesi (tescil, koruma kararı vb.) içermez; ağaçların yasal statüsü ilgili idarenin yetkisindedir ve bu çalışmanın kapsamı dışındadır. Envanter değerleri sahada ölçüldüğü gibi modellenmiştir; hiçbir düzeltme, ölçekleme veya dışlama uygulanmamıştır.';
 
 /* ---- Sağlam (robust) dağılım göstergeleri (0032) ----
  * Modified z-score: M = 0,6745·(x − medyan) / MAD  (Iglewicz & Hoaglin 1993).
- * Ortalama/standart sapma yerine medyan/MAD kullanılmasının nedeni, anıtsal
- * gövdelerin KENDİSİNİN dağılımı kaydırmasıdır: Göksu standında 34 kaydın
- * 11inde gövde çapı ≥ 100 cm olduğu için "ortalama" form zaten anıtsaldır.
+ * Ortalama/standart sapma yerine medyan/MAD kullanılmasının nedeni, geniş
+ * gövdelerin KENDİSİNİN dağılımı kaydırmasıdır: Göksu standında ölçülen gövde
+ * çapı 40–200 cm arasında değiştiği için "ortalama" form zaten tipik orman
+ * ortalamasının dışındadır; medyan/MAD bu kaymadan etkilenmez.
  * MAD = 0 ise (yarıdan fazla kayıt aynı değerde) ortalama mutlak sapmaya
  * düşülür; o da 0 ise aykırılık testi uygulanmaz (sahte bayrak üretilmez). */
 export function medianOf(values) {
