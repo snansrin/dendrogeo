@@ -174,3 +174,255 @@ section.blk{padding:40px 0}
 .info-feature-grid .feature ul{margin-bottom:0}
 .info-feature-grid .feature:hover{transform:translateY(-3px)}
 @media(max-width:900px){.info-feature-grid{grid-template-columns:1fr}}
+
+
+/* ========================================================================
+ * DENDROGEO · PREMIUM MOTION SYSTEM
+ * Amaç: bilimsel arayüzü bozmadan hareketin ritmini, derinliğini ve
+ * algılanan kaliteyi yükseltmek. JS yalnızca gözlemlenebilir UI elemanlarını
+ * sınıflandırır; veri/hesaplama mantığına dokunmaz.
+ * ======================================================================== */
+
+/* 01 · Hero: tek seferlik demo yerine sürekli, sakin bir bilimsel döngü */
+.hero-grid{
+  isolation:isolate;
+}
+.hero-grid::before{
+  content:"";
+  position:absolute;
+  inset:-12% -8% auto 38%;
+  height:72%;
+  pointer-events:none;
+  z-index:-1;
+  background:radial-gradient(circle at 58% 48%,rgba(30,111,75,.075),transparent 58%);
+  filter:blur(2px);
+  animation:heroAtmosphere 9s ease-in-out infinite;
+}
+@keyframes heroAtmosphere{
+  0%,100%{opacity:.55;transform:scale(.98)}
+  50%{opacity:1;transform:scale(1.035)}
+}
+
+.hero-copy > *{
+  opacity:0;
+  transform:translateY(18px);
+  animation:heroEnter .75s cubic-bezier(.22,.8,.25,1) forwards;
+}
+.hero-copy > :nth-child(1){animation-delay:.08s}
+.hero-copy > :nth-child(2){animation-delay:.16s}
+.hero-copy > :nth-child(3){animation-delay:.25s}
+.hero-copy > :nth-child(4){animation-delay:.36s}
+@keyframes heroEnter{
+  to{opacity:1;transform:none}
+}
+
+/* SVG sahnesi: hafif derinlik + nefes alan zemin */
+.hero-art{
+  opacity:0;
+  transform:translateY(12px) scale(.985);
+  transform-origin:center bottom;
+  animation:artEnter 1s cubic-bezier(.2,.75,.25,1) .18s forwards;
+}
+.hero-art svg{
+  filter:drop-shadow(0 18px 26px rgba(24,36,32,.055));
+}
+@keyframes artEnter{
+  to{opacity:1;transform:none}
+}
+
+/* Öğrenciler ve ölçüm hareketi artık sürekli döner */
+.walkerA{animation:visitA 18s ease-in-out infinite both}
+.walkerB{animation:visitB 18s ease-in-out infinite both}
+.legA{animation:stepA 18s linear infinite both}
+.legB{animation:stepB 18s linear infinite both}
+.legC{animation:stepB 18s linear infinite both}
+.legD{animation:stepA 18s linear infinite both}
+.bendA{animation:bend 18s ease-in-out infinite both}
+.penA{animation:write 18s linear infinite both}
+.sightwin{animation:sightWin 18s linear infinite both, dashmove 2.1s linear infinite}
+.tapewin{animation:tapeWin 18s linear infinite both, dashmove 2.1s linear infinite}
+.flash{animation:flash 18s linear infinite both}
+
+/* Ölçüm hattı: veri okunuyormuş hissi */
+.hero-art::after{
+  content:"";
+  position:absolute;
+  left:7%;
+  right:7%;
+  bottom:17%;
+  height:1px;
+  background:linear-gradient(90deg,transparent,rgba(30,111,75,.18),rgba(201,145,53,.24),transparent);
+  transform:scaleX(.2);
+  transform-origin:center;
+  animation:scanLine 5.5s ease-in-out infinite;
+}
+@keyframes scanLine{
+  0%,100%{opacity:0;transform:scaleX(.15)}
+  20%,80%{opacity:1;transform:scaleX(1)}
+}
+
+/* Veri çipleri: yüzdürme + çok hafif ışık geçişi */
+.chip{
+  animation:chipFloatPremium 5.8s cubic-bezier(.37,0,.25,1) infinite;
+  transition:box-shadow .35s ease,border-color .35s ease;
+}
+.chip::after{
+  content:"";
+  position:absolute;
+  inset:0;
+  border-radius:inherit;
+  background:linear-gradient(110deg,transparent 20%,rgba(255,255,255,.72) 48%,transparent 72%);
+  transform:translateX(-130%);
+  animation:chipSheen 6.5s ease-in-out infinite;
+  pointer-events:none;
+}
+.chip.c2{animation-delay:1.8s}
+.chip.c3{animation-delay:3.4s}
+@keyframes chipFloatPremium{
+  0%,100%{transform:translate3d(0,0,0)}
+  50%{transform:translate3d(0,-7px,0)}
+}
+@keyframes chipSheen{
+  0%,55%,100%{transform:translateX(-130%);opacity:0}
+  65%{opacity:1}
+  82%{transform:translateX(130%);opacity:0}
+}
+
+/* 02 · Scroll reveal — içerik ekrana geldiğinde kontrollü açılır */
+.dg-reveal{
+  opacity:0;
+  transform:translate3d(0,28px,0);
+  transition:
+    opacity .72s cubic-bezier(.22,.8,.25,1),
+    transform .72s cubic-bezier(.22,.8,.25,1);
+  will-change:opacity,transform;
+}
+.dg-reveal.dg-visible{
+  opacity:1;
+  transform:none;
+}
+.dg-reveal.dg-delay-1{transition-delay:.06s}
+.dg-reveal.dg-delay-2{transition-delay:.12s}
+.dg-reveal.dg-delay-3{transition-delay:.18s}
+.dg-reveal.dg-delay-4{transition-delay:.24s}
+
+/* Bölüm başlıkları daha doğal bir şekilde sırayla gelir */
+.shead .no,.shead h2,.shead .rule{
+  transition:opacity .65s ease,transform .65s cubic-bezier(.22,.8,.25,1);
+}
+.dg-heading .no{opacity:0;transform:translateX(-12px)}
+.dg-heading h2{opacity:0;transform:translateX(-8px);transition-delay:.08s}
+.dg-heading .rule{opacity:0;transform:scaleX(.25);transform-origin:left;transition-delay:.16s}
+.dg-heading.dg-visible .no,
+.dg-heading.dg-visible h2,
+.dg-heading.dg-visible .rule{opacity:1;transform:none}
+
+/* 03 · Feature kartları: fiziksel ama ölçülü hover */
+.feature{
+  transition:
+    transform .38s cubic-bezier(.2,.75,.25,1),
+    box-shadow .38s ease,
+    border-color .38s ease;
+}
+.feature::before{
+  transform:scaleX(.22);
+  transform-origin:left;
+  transition:transform .5s cubic-bezier(.2,.75,.25,1);
+}
+.feature:hover{
+  transform:translateY(-6px);
+  box-shadow:0 14px 34px rgba(20,30,25,.105);
+  border-color:rgba(30,111,75,.24);
+}
+.feature:hover::before{transform:scaleX(1)}
+.feature .ico{
+  transition:transform .4s cubic-bezier(.2,.75,.25,1),box-shadow .4s ease;
+}
+.feature:hover .ico{
+  transform:translateY(-2px) rotate(-2deg) scale(1.035);
+  box-shadow:0 7px 18px rgba(30,111,75,.09);
+}
+
+/* 04 · Adım hattı: bağlantı çizgisi canlı fakat dikkat dağıtmıyor */
+.steps::before{
+  background:linear-gradient(90deg,
+    transparent 0%,
+    var(--green) 18%,
+    var(--amber) 50%,
+    var(--green) 82%,
+    transparent 100%);
+  background-size:220% 100%;
+  animation:stepFlow 7s linear infinite;
+}
+@keyframes stepFlow{
+  to{background-position:-220% 0}
+}
+.step .num{
+  transition:transform .4s cubic-bezier(.2,.75,.25,1),box-shadow .4s ease;
+}
+.step.dg-step-active .num{
+  transform:translateY(-4px) scale(1.04);
+  box-shadow:0 9px 24px rgba(30,111,75,.13);
+}
+
+/* 05 · İstatistikler: rakamların olduğu alan hafifçe “canlı” kalır */
+.statband,.stat{
+  transition:transform .35s ease,box-shadow .35s ease,border-color .35s ease;
+}
+.statband:hover{
+  box-shadow:0 10px 28px rgba(20,30,25,.08);
+}
+.stat:hover{
+  transform:translateY(-2px);
+}
+
+/* 06 · Navigation mikro-etkileşimi */
+#topnav .links a{
+  position:relative;
+  transition:color .25s ease;
+}
+#topnav .links a::after{
+  content:"";
+  position:absolute;
+  left:0;
+  right:0;
+  bottom:-7px;
+  height:1.5px;
+  background:var(--green);
+  transform:scaleX(0);
+  transform-origin:center;
+  transition:transform .3s cubic-bezier(.2,.75,.25,1);
+}
+#topnav .links a:hover::after,
+#topnav .links a:focus-visible::after{transform:scaleX(1)}
+
+/* 07 · Butonlar: mevcut renk/komponent korunur, sadece hareket iyileşir */
+#landing .btn{
+  transition:transform .28s cubic-bezier(.2,.75,.25,1),box-shadow .28s ease;
+}
+#landing .btn:hover{
+  transform:translateY(-2px);
+}
+#landing .btn:active{
+  transform:translateY(0) scale(.985);
+}
+
+/* 08 · Hareket azaltma: erişilebilirlik ve düşük güçlü cihazlar */
+@media(prefers-reduced-motion:reduce){
+  *,*::before,*::after{
+    animation-duration:.001ms !important;
+    animation-iteration-count:1 !important;
+    scroll-behavior:auto !important;
+    transition-duration:.001ms !important;
+  }
+  .dg-reveal,.hero-copy > *, .hero-art{
+    opacity:1 !important;
+    transform:none !important;
+  }
+}
+
+/* Mobilde sahne zaten gizli; metin hareketi de daha kısa tutulur */
+@media(max-width:960px){
+  .hero-copy > *{animation-duration:.55s}
+  .dg-reveal{transform:translateY(18px)}
+}
