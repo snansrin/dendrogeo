@@ -94,7 +94,6 @@ function dgInitPremiumMotion(){
  /* Scroll reveal: destek yoksa içerik görünür kalır. */
  const revealSelectors=[
   "section.blk > .wrap > .shead",
-  "section.blk > .wrap > > .card",
   "section.blk > .wrap > .cols",
   "section.blk > .wrap > .steps",
   "section.blk > .wrap > .grid",
