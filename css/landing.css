@@ -225,6 +225,9 @@ section.blk{padding:40px 0}
 }
 .hero-art svg{
   filter:drop-shadow(0 18px 26px rgba(24,36,32,.055));
+  transform:translate3d(var(--dg-px,0px),var(--dg-py,0px),0);
+  transition:transform .25s ease-out;
+  will-change:transform;
 }
 @keyframes artEnter{
   to{opacity:1;transform:none}
