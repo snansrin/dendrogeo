@@ -507,7 +507,7 @@ describe('0041 · kaydırma window kök düzeltmesi + 0044 soket kaldırma', () 
     assert.match(mj, /function dgPhotoScan/, 'çok sınıflı tarayıcı (saf fonksiyon)');
     assert.match(mj, /function dgPhotoGate/, 'kalibre kapı');
     assert.ok(!/vegR>=0\.25/.test(mj), 'eski %25 yeşil kapısı geri gelmemeli');
-    assert.match(rd('sw.js'), /dendrogeo-sw-v2-r55/, 'sw r52 (içerik sözleşmesi)');
+    assert.match(rd('sw.js'), /dendrogeo-sw-v2-r56/, 'sw r52 (içerik sözleşmesi)');
   });
   test('⭐ AKASYA kanonik tür (0042): listede + eşanlamlı gölgesi yok', () => {
     const sp = rd('src/config/species.js');

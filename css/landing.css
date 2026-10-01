@@ -109,6 +109,22 @@ section.blk{padding:40px 0}
 @keyframes tapeWin{0%,24%,50%,100%{opacity:0}28%,46%{opacity:1}}
 .flash{animation:flash 12s linear 1 both}
 @keyframes flash{0%,36%,44%,100%{opacity:0}38%,42%{opacity:1}}
+/* 0048 · FOTOĞRAF SENARYOSU (kullanıcı: "kız telefona baksın, telefon önüne
+ * gelsin, ağacı kadrajlasın, sonra eski konumuna gelsin, gitsinler").
+ * Kol omuzdan mindere gibi: 0-22% telefonda DEĞİL (bel hizasında), 27-46%
+ * ÖNDE KALDIRIK (vizör+flaş penceresi), 52%+ tekrar inik → 55-80% yürüyüp gider. */
+.armPhoneB{transform-origin:566px 172px;animation:phoneRaise 12s ease-in-out 1 both}
+@keyframes phoneRaise{0%,22%{transform:rotate(-38deg)}27%,46%{transform:rotate(0deg)}52%,100%{transform:rotate(-38deg)}}
+/* Kafa, telefon kalkınca ekrana bakar (boyuna hafif eğim), sonra doğrulur. */
+.headB{transform-origin:576px 164px;animation:gazeB 12s ease-in-out 1 both}
+@keyframes gazeB{0%,24%{transform:rotate(0deg)}28%,46%{transform:rotate(-7deg)}51%,100%{transform:rotate(0deg)}}
+/* Vizör köşeleri: ağaç kadrajda (sightwin ile aynı pencere). */
+.frameWin{animation:frameWinA 12s linear 1 both}
+@keyframes frameWinA{0%,26%,50%,100%{opacity:0}30%,46%{opacity:1}}
+/* Ayaktayken minik salınım — "çok yapay" hissi kırılır. */
+.bobA,.bobB{animation:bob 2.6s ease-in-out 4 both}
+.bobB{animation-delay:.4s}
+@keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(1.4px)}}
 .tail{transform-box:fill-box;transform-origin:0 0;animation:tailsw 2.4s ease-in-out 3}
 .chip{top:auto;bottom:auto}
 .chip.c1{top:46%;left:72%}

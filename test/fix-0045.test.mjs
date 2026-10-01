@@ -147,6 +147,19 @@ describe('0045 · hero karakterler yarı-gerçekçi (iskelet korunur)', () => {
     assert.ok((landing.match(/fill="#e58f7a"/g) || []).length >= 4, 'allık katmanı ikisinde de');
     assert.ok((landing.match(/stroke-width="\.9"/g) || []).length >= 6, 'ince detay çizgileri (tel/cep/tabán)');
   });
+  test('⭐ 0048 fotoğraf senaryosu: kaldır → bak → kadrajla → indir → git', () => {
+    for (const c of ['class="armPhoneB"', 'class="headB"', 'class="frameWin"', 'class="bobA"', 'class="bobB"'])
+      assert.ok(landing.includes(c), 'eksik sahne grubu: ' + c);
+    const lcss = rd('css/landing.css');
+    assert.match(lcss, /@keyframes phoneRaise/, 'telefon öne kalkar');
+    assert.match(lcss, /transform-origin:566px 172px/, 'omuz minderi');
+    assert.match(lcss, /@keyframes gazeB/, 'kız telefona bakar');
+    assert.match(lcss, /@keyframes frameWinA/, 'ağaç vizörde kadrajlanır');
+    assert.match(lcss, /@keyframes bob/, 'ayakta minik salınım (yapaylık kırılır)');
+    /* senaryo sırası: telefon inik → kalkık pencere (vizör+flaş) → inik → çıkış */
+    assert.match(lcss, /0%,22%\{transform:rotate\(-38deg\)\}27%,46%\{transform:rotate\(0deg\)\}52%,100%\{transform:rotate\(-38deg\)\}/, 'kaldır-indir zamanlaması');
+    assert.match(lcss, /@keyframes visitA/, 'çıkış yürüyüşü korunur (gitsinler)');
+  });
   test('⭐ yarı-gerçekçi katman: gradyanlar + yüz/eli/giysi detayı', () => {
     for (const g of ['id="dgSkinA"', 'id="dgHairA"', 'id="dgVest"', 'id="dgLegA"', 'id="dgSkinB"', 'id="dgHairB"', 'id="dgJack"', 'id="dgLegB"'])
       assert.ok(landing.includes(g), 'eksik gradyan: ' + g);
@@ -159,7 +172,7 @@ describe('0045 · i18n + sürüm sözleşmesi', () => {
     for (const s of ['📡 Canlı Aksiyon Akışı', 'çevrimiçi oldu', 'görüntüledi', 'ölçüm kaydetti', 'park algıladı', 'dışa aktardı', 'rapor yayını istedi', 'oturum', 'gezinti', 'son eylem', 'iz', '⬆ Gizle', '⬇ Göster'])
       assert.ok(i18n.includes(JSON.stringify(s) + ':'), 'eksik EN: ' + s);
   });
-  test('⭐ içerik değişti → sw r55', () => {
-    assert.match(rd('sw.js'), /CACHE_VERSION = 'dendrogeo-sw-v2-r55'/);
+  test('⭐ içerik değişti → sw r56', () => {
+    assert.match(rd('sw.js'), /CACHE_VERSION = 'dendrogeo-sw-v2-r56'/);
   });
 });
