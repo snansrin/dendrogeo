@@ -206,7 +206,9 @@ async function uploadWpCsv(){
  toast(_tmff("✓ {n} waypoint yüklendi ve projeye kalıcı kaydedildi.",{n:n}));
  loadWaypoints();
 }
-async function loadWaypoints(){
+/* 0040: kaydırma koruma sarmalı — yeniden çizimde #main scrollTop korunur. */
+async function loadWaypoints(){const _y=(typeof dgScrollKeep==="function"?dgScrollKeep():null);try{return await loadWaypoints__scroll.apply(this,arguments);}finally{if(typeof dgScrollRestore==="function")dgScrollRestore(_y);}}
+async function loadWaypoints__scroll(){
  const pid=+$("nProject").value;
  if(!pid){$("wpListTable").innerHTML="<tr><td colspan=5 style='text-align:center;color:var(--mut)'>Önce proje seçin.</td></tr>";return;}
  const{data}=await sb.from("waypoints").select("*").eq("project_id",pid).order("wp_id",{ascending:true});

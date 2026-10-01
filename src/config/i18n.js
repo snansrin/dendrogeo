@@ -907,7 +907,7 @@ const DG_I18N_EN={
 "🟢 Şu An Çevrimiçi":"🟢 Online Right Now",
 "Şu An — kim, ne yapıyor":"Right Now — who is doing what",
 "Canlı Konum Haritası":"Live Location Map",
-"Yalnız canlı konum paylaşımını açmış çevrimiçi kullanıcılar görünür; üstüne gel → kimlik + ne yapıyor + son konum yaşı.":"Only online users with live location sharing on are shown; hover → identity + activity + last position age.",
+"Çevrimiçi ve konum izni açık kullanıcılar otomatik görünür (geçici; veritabanına yazılmaz). Üstüne gel → kimlik + ne yapıyor; satıra tıkla → haritada odaklan. Liste 10 sn'de bir kendiliğinden tazelenir.":"Online users with location permission on appear automatically (ephemeral; never written to the database). Hover → identity + activity; click a row → focus on the map. The list refreshes itself every 10 s.",
 "Son Etkinlik — kim ne yaptı":"Recent Activity — who did what",
 "Etkinlik yok":"No activity",
 "Zaman":"Time",
@@ -918,7 +918,7 @@ const DG_I18N_EN={
 "proje oluşturdu":"created a project",
 "veri talebi":"data request",
 "rapor yayını istedi":"requested a report publication",
-"👥 Canlı konumumu paylaş — park ortaklarım ve kurucu canlı haritada görür (geçici; veritabanına yazılmaz)":"👥 Share my live location — park collaborators and the founder see it on the live map (ephemeral; never written to the database)",
+"👥 Canlı konumumu bu parkın çalışma arkadaşlarıyla paylaş (geçici; veritabanına yazılmaz)":"👥 Share my live location with this park's collaborators (ephemeral; never written to the database)",
 
 /* === 0038b: ziyaretçi sekmesi uyarı parçacıkları (<b> ile bölünen düğümler) === */
 "Bu sekme":"This tab is",
@@ -927,6 +927,8 @@ const DG_I18N_EN={
 "geçici":"temporarily",
 "olarak görünür — veritabanına yazılmaz.":"and are never written to the database.",
 
+/* === 0040 === */
+"Haritada odaklan":"Focus on map",
 /* sayfa başlığı */
 "DendroGeo — Küresel Ağaç Envanteri ve Karbon Veri Sistemi":"DendroGeo — Global Tree Inventory & Carbon Data System"
 };

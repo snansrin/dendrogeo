@@ -10,7 +10,9 @@ const _tadf=(t,v)=>(typeof dgTfs==="function"?dgTfs(t,v):String(t).replace(/\{(\
  * listProjects/fillSelect — data-requests de bunları çağırır), yönetici toplu
  * dışa aktarımı ve REQ_ROWS/ADM_ROWS paylaşılan filtre state'i. */
 
-async function loadAdmin(){
+/* 0040: kaydırma koruma sarmalı — yeniden çizimde #main scrollTop korunur. */
+async function loadAdmin(){const _y=(typeof dgScrollKeep==="function"?dgScrollKeep():null);try{return await loadAdmin__scroll.apply(this,arguments);}finally{if(typeof dgScrollRestore==="function")dgScrollRestore(_y);}}
+async function loadAdmin__scroll(){
  if(!PROFILE||(PROFILE.role!=="admin"&&PROFILE.role!=="owner"))return;
  const[uRes,mRes,pRes,gRes]=await Promise.all([
   sb.from("profiles").select("*"),

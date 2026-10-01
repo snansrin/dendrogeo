@@ -432,7 +432,9 @@ async function loadAdminTree(){
 }
 
 /* Filtrelenmiş ağacı çiz (veri zaten DG_TREE_ROWS'ta) */
-function dgTreeDraw(){
+/* 0040: kaydırma koruma sarmalı. */
+function dgTreeDraw(){const _y=(typeof dgScrollKeep==="function"?dgScrollKeep():null);try{return dgTreeDraw__scroll.apply(this,arguments);}finally{if(typeof dgScrollRestore==="function")dgScrollRestore(_y);}}
+function dgTreeDraw__scroll(){
   const rows=dgTreeFilterRows(DG_TREE_ROWS,DG_TREE_STATUS,DG_TREE_QUERY);
   dgTreeRender(dgTreeGroup(rows));
 }

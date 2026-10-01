@@ -4,7 +4,9 @@
 
 let USERS_CACHE=[];
 
-async function loadUsers(){
+/* 0040: kaydırma koruma sarmalı — yeniden çizimde #main scrollTop korunur. */
+async function loadUsers(){const _y=(typeof dgScrollKeep==="function"?dgScrollKeep():null);try{return await loadUsers__scroll.apply(this,arguments);}finally{if(typeof dgScrollRestore==="function")dgScrollRestore(_y);}}
+async function loadUsers__scroll(){
  if(!PROFILE||(PROFILE.role!=="admin"&&PROFILE.role!=="owner"))return;
  const I_AM_OWNER=PROFILE.role==="owner";
  const{data}=await sb.from("profiles").select("*");

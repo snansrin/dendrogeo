@@ -38,7 +38,9 @@ async function sendDataRequest(){
  loadMyRequests();
 }
 
-async function loadMyRequests(){
+/* 0040: kaydırma koruma sarmalı — yeniden çizimde #main scrollTop korunur. */
+async function loadMyRequests(){const _y=(typeof dgScrollKeep==="function"?dgScrollKeep():null);try{return await loadMyRequests__scroll.apply(this,arguments);}finally{if(typeof dgScrollRestore==="function")dgScrollRestore(_y);}}
+async function loadMyRequests__scroll(){
  if(!USER)return;
  const{data}=await sb.from("data_requests").select("*").eq("user_id",USER.id).order("created_at",{ascending:false});
  const el=$("myRequests");if(!el)return;
@@ -74,7 +76,9 @@ function reqCityChanged(){
 }
 
 /* ============ YÖNETİCİ: KULLANICI VERİ TALEPLERİ ============ */
-async function loadRequests(){
+/* 0040: kaydırma koruma sarmalı — yeniden çizimde #main scrollTop korunur. */
+async function loadRequests(){const _y=(typeof dgScrollKeep==="function"?dgScrollKeep():null);try{return await loadRequests__scroll.apply(this,arguments);}finally{if(typeof dgScrollRestore==="function")dgScrollRestore(_y);}}
+async function loadRequests__scroll(){
  const{data}=await sb.from("data_requests").select("*,profiles(full_name)").order("created_at",{ascending:false});
  const reqs=data||[];
  const pending=reqs.filter(r=>r.status!=="Tamamlandı"&&r.status!=="Reddedildi");

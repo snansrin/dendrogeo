@@ -222,23 +222,6 @@ describe('P2 · temizlik kalıcı', () => {
   });
 });
 
-describe('0039 · CSP realtime kilidi', () => {
-  test('⭐ connect-src açıkça tanımlı ve wss://*.supabase.co izinli (Realtime bloklanmasın)', () => {
-    assert.match(head, /connect-src[^"]*wss:\/\/\*\.supabase\.co/, 'CSP wss izni');
-    /* connect-src tanımlandıktan sonra default-src artık bağlantılara DÜŞMEZ:
-     * kodda fetch edilen tüm originler connect-src içinde de olmalı. */
-    for (const o of ['https://*.supabase.co', 'https://nominatim.openstreetmap.org',
-      'https://overpass-api.de', 'https://planetarycomputer.microsoft.com',
-      'https://*.blob.core.windows.net', 'https://*.s3.us-west-2.amazonaws.com',
-      'https://challenges.cloudflare.com', "'self'"]) {
-      const meta = head.match(/Content-Security-Policy"\s+content="([^"]+)"/);
-      assert.ok(meta, 'CSP meta etiketi var');
-      const cs = (meta[1].split(/;\s*connect-src\s/)[1] || '');
-      assert.ok(cs.includes(o), 'connect-src içinde eksik: ' + o);
-    }
-  });
-});
-
 describe('0036 · özellik ve EN bütünlük kilitleri', () => {
   const sh = rd('partials/shell.html');
   test("⭐ grup optionları value taşır (EN çevirisi veriyi bozamaz)", () => {
@@ -306,7 +289,7 @@ describe('0036 · özellik ve EN bütünlük kilitleri', () => {
       'channel önce, auth arka planda');
     assert.match(vs, /WATCHDOG/, '8 sn bekçi köpeği');
     assert.match(vs, /p\.la=GPS\.latitude/, 'konum yalnız DG_LIVE_ON + GPS varsa');
-    assert.match(vs, /DG_LIVE_ON/, 'canlı paylaşım anahtarına bağlı');
+    assert.match(rd('src/services/map.js'), /DG_LIVE_ON/, 'park ORTAK kanalı anahtara bağlı kalır (0040: kurucu görünümü anahtarsız)');
     const mp = rd('src/services/map.js');
     assert.ok(mp.indexOf('sb.channel("dg-park-"') < mp.indexOf('await sb.auth.getSession()'), 'park kanalı da subscribe-önce');
     assert.match(mp, /DG_PARK_CH_WATCH/, 'park kanalı watchdog');
@@ -442,5 +425,58 @@ describe('i18n katmanı sözleşmesi (0035)', () => {
     assert.match(dr, /ŞİRİN, N\. & ŞİRİN, S\./, 'e-posta atfında doğru yazar sırası');
     assert.match(dr, /Version 3\.0\.0/, 'e-posta atfında güncel sürüm');
     assert.ok(!dr.includes('(Version 1.0.0)'), 'eski sürüm atfı kalmamalı');
+  });
+});
+
+describe('0039 · CSP realtime kilidi', () => {
+  test('⭐ connect-src açıkça tanımlı ve wss://*.supabase.co izinli (Realtime bloklanmasın)', () => {
+    assert.match(head, /connect-src[^"]*wss:\/\/\*\.supabase\.co/, 'CSP wss izni');
+    for (const o of ['https://*.supabase.co', 'https://nominatim.openstreetmap.org',
+      'https://overpass-api.de', 'https://planetarycomputer.microsoft.com',
+      'https://*.blob.core.windows.net', 'https://*.s3.us-west-2.amazonaws.com',
+      'https://challenges.cloudflare.com', "'self'"]) {
+      const meta = head.match(/Content-Security-Policy"\s+content="([^"]+)"/);
+      assert.ok(meta, 'CSP meta etiketi var');
+      const cs = (meta[1].split(/;\s*connect-src\s/)[1] || '');
+      assert.ok(cs.includes(o), 'connect-src içinde eksik: ' + o);
+    }
+  });
+});
+
+describe('0040 · kaydırma koruması + ziyaretçi sekmesi zenginleştirme', () => {
+  const rd2 = (p) => readFileSync(join(ROOT, p), 'utf8');
+  test('⭐ dgScrollKeep/dgScrollRestore tanımlı ve yeniden çizen fonksiyonlar sarılı', () => {
+    const c = rd2('src/config/constants.js');
+    assert.match(c, /function dgScrollKeep/);
+    assert.match(c, /function dgScrollRestore/);
+    assert.match(c, /DG_SCROLL_SWITCHING/, 'sekme geçişi istisnası');
+    assert.match(rd2('src/ui/shell.js'), /DG_SCROLL_SWITCHING=true/, 'go() geçiş bayrağı');
+    const wrapped = [['src/services/admin.js', 'loadAdmin'], ['src/services/admin-tree.js', 'dgTreeDraw'],
+      ['src/services/dash.js', 'loadRecords'], ['src/services/dash.js', 'renderAnalysis'],
+      ['src/services/map.js', 'loadWaypoints'], ['src/services/report-publish.js', 'dgPubRender'],
+      ['src/services/park-invites.js', 'dgCollabRender'], ['src/services/user-admin.js', 'loadUsers'],
+      ['src/services/data-requests.js', 'loadRequests'], ['src/services/world.js', 'loadParkCompare'],
+      ['src/services/park-registry.js', 'loadParkAdmin']];
+    for (const [f, fn] of wrapped) {
+      assert.match(rd2(f), new RegExp(fn + '__scroll'), f + ' → ' + fn + ' sarmalanmamış');
+    }
+  });
+  test('⭐ ziyaretçi sekmesi: yenile düğmesi + 10 sn tik + zengin satır + odaklanma', () => {
+    const sh = rd2('partials/shell.html');
+    assert.match(sh, /onclick="dgVisRefresh\(\)"/, 'yenile düğmesi');
+    const vs = rd2('src/services/visit-stats.js');
+    assert.match(vs, /function dgVisRefresh/);
+    assert.match(vs, /function dgVisTickStart/);
+    assert.match(vs, /10000/, '10 sn otomatik tik');
+    assert.match(vs, /function dgVisFocus/, 'satıra tıkla → haritada odaklan');
+    assert.match(vs, /r:\(typeof PROFILE/, 'presence payloadunda rol');
+    assert.match(rd2('src/ui/shell.js'), /dgVisTickStop/, 'sekmeden çıkınca tik durur');
+  });
+  test('⭐ konum paylaşımı: kurucu OTOMATİK (anahtarsız), ortak anahtarı yalnız park kanalı', () => {
+    const vs = rd2('src/services/visit-stats.js');
+    assert.ok(!/DG_LIVE_ON/.test(vs), 'kurucu görünümü anahtara bağlı DEĞİL');
+    const sh = rd2('partials/shell.html');
+    assert.match(sh, /çalışma arkadaşlarıyla paylaş/i, 'anahtar metni yalnız ortakları söyler');
+    assert.ok(!sh.includes('kurucu canlı haritada görür'), 'eski metin kalktı');
   });
 });

@@ -9,34 +9,53 @@ Yeni sürüm yayımlama adımları: [`docs/surum-yayini.md`](docs/surum-yayini.m
 
 ## [Yayımlanmadı]
 
-### Düzeltildi — 0039: CSP, Realtime WebSocket'i blokluyordu (wss:// izni)
-Kullanıcı konsol kanıtı: "Connecting to 'wss://…supabase.co/realtime/v1/
-websocket?…' violates … Content Security Policy … 'connect-src' was not
-explicitly set, so 'default-src' is used as a fallback."
+### Düzeltildi/Eklendi — 0040: kaydırma zıplaması bitti + Ziyaretçi sekmesi zenginleşti + kurucu konumu otomatik (CSP 0039 dahil TEK paket)
+NOT: Bu paket 0039'u (CSP connect-src + wss) İÇERİR — 0039 ayrıca uygulanmaz.
 
-- KÖK NEDEN: meta CSP'de connect-src YOKTU → bağlantılar default-src'e
-  düşüyordu; tarayıcı `https://*.supabase.co` kaynağını `wss://` URL'iyle
-  EŞLEŞTİRMEDİ → presence + canlı konum kanalları daha el sıkışamadan
-  bloklanıyordu. (0038'deki subscribe-önce/watchdog düzeltmesi doğruydu ama
-  WS hiç kurulamadığı için durum hep "connecting"de kalıyordu — sunucu
-  tarafı probu sağlıklıydı, engel kendi CSP'mizdi.)
-- ÇÖZÜM: `connect-src 'self' data: blob: https://*.supabase.co
-  wss://*.supabase.co + bağlantı kurulan tüm originler` (nominatim, overpass
-  uçları, planetarycomputer, blob.core.windows, s3, cloudflare turnstile,
-  arcgis, opentopomap, tile.openstreetmap, api.openstreetmap) AÇIKÇA
-  tanımlandı. connect-src bir kez tanımlanınca default-src bağlantılara
-  düşmeyeceği için liste TAM tutuldu (STAC/COG/ters kodlama/turnstile
-  istekleri kırılmasın).
-- Bekçi: landing-claims.test.mjs → "connect-src açıkça tanımlı + wss izni +
-  kodda fetch edilen her origin connect-src'te de var" (8 origin pinli).
-  check-csp.mjs aynen yeşil (27 origin / 19 izin).
+**1) Kaydırma zıplaması (kullanıcı: "onaylarken ekran yukarı gidiyor"):**
+Onay/red/senkron sonrası tablolar innerHTML ile yeniden çizilince #main
+scrollTop sıfırlanıyordu. Çözüm: `dgScrollKeep/dgScrollRestore`
+(constants.js) + **18 yeniden çizen fonksiyon sarmalandı** (loadAdmin,
+dgTreeDraw, loadRecords, renderAnalysis, loadWaypoints, loadParkCompare
++ denied + legacy, dgPubRender, dgInvitesLoadMine, dgCollabRender/Load,
+loadUsers, loadMyRequests, loadRequests, loadProjects, loadParkAdmin,
+dgRenderScanCard). Sarmal adları aynı kalır (çağıranlar/testler etkilenmez);
+orijinal gövde `…__scroll` olur. SEKME GEÇİŞİ istisna: go(),
+DG_SCROLL_SWITCHING'i 500 ms true yapar → eski sekmenin konumu yeniye
+taşınmaz, kayıtlı konum geri gelir. Kapsam denetimi: bekçi testi 11 kritik
+fonksiyonun sarılı olduğunu kilitler.
 
-Konsoldaki diğer gürültüler zararsız: "OTS parsing error" (Google Fonts
-woff2 ağ aksaklığı, yeniden denemede geçer), "No available adapters /
-powerPreference" (geotiff'in WebGPU probu — WebGL'e düşer), "Kuyruk boş"
-(offline senkron bilgi mesajı).
+**2) 👁 Ziyaretçi & Canlı zenginleştirme (kullanıcı: "anlık takip etmiyor,
+yenileme butonu koy, bilgileri genişlet"):**
+- 🔄 Yenile düğmesi (liste + sayaçlar + etkinlik).
+- **10 sn otomatik tik** — sekme açıkken yaşlar/satırlar kendiliğinden
+  tazelenir; sekmeden çıkınca tik durur (dgVisTickStop, go() kancalı).
+- Zengin satır: ad + **rol rozeti** (KURUCU/DENETÇİ/KULLANICI — presence
+  payload'una r alanı eklendi) + hangi sekmede + **📍 konum göstergesi** +
+  "N s ago"; **satıra tıkla → harita o kullanıcıya odaklanır** (dgVisFocus).
 
-npm run check: 985 test → 983 pass / 0 fail / 2 skip.
+**3) Canlı konum modeli değişti (kullanıcı kararı):**
+- 👥 anahtarı ARTIK YALNIZ PARK ORTAKLARI için (metin: "bu parkın çalışma
+  arkadaşlarıyla paylaş"). Ölçüm ekranındaki eski "kurucu da görür" ibaresi
+  kalktı çünkü:
+- **Kurucu görünümü OTOMATİK**: GPS açıksa konum, dg-presence payload'ına
+  kendiliğinden girer (anahtarsız) → Ziyaretçi sekmesinin canlı haritasında
+  belirir. Hukuki dayanak: konum verisi kayıt sırasında zaten onaylı +
+  yönetici onay akışında saklı konumları görebiliyor; buradaki fark yalnız
+  CANLILIK. Veri GEÇİCİ (presence), veritabanına YAZILMAZ — aynı kırmızı çizgi.
+- Park ortak kanalı (dg-park-<id>) anahtara bağlı KALDI: ortak görmek
+  istemeyen kapatır, kurucu takibi etkilenmez.
+
+**4) 0039 (bu pakete gömülü): CSP connect-src + wss://*.supabase.co** —
+Realtime WebSocket'ini bloklayan kök neden (konsol kanıtıyla); bekçi testiyle.
+
+**Bekçiler (yeni 4 test):** sarmal zinciri (11 fonksiyon pini) · yenile+tik+
+odak+rol payloadı · kurucu-otomatik/ortak-anahtarlı ayrımı · 0038 konum pini
+yeni modele güncellendi.
+
+npm run check: 988 test → 986 pass / 0 fail / 2 skip.
+vm simülasyonu: EN canlı satır "Nagihan Şirin [KURUCU] · Measurement Admin 📍 ·
+5 s ago" + dgScrollKeep 4242 / geçişte null ✓.
 
 
 ### Eklendi/Düzeltildi — 0038: "Ziyaretçi & Canlı" sekmesi (yalnız kurucu) + Realtime "connecting" takılmasının kök çözümü

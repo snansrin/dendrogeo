@@ -142,6 +142,11 @@ function dgSaveView(v){try{localStorage.setItem("dg_last_view",v);}catch(e){}}
 function dgLastView(){try{return localStorage.getItem("dg_last_view")||"";}catch(e){return "";}}
 function go(v){
  DG_CUR_VIEW=v;dgSaveView(v);
+ /* 0040: sekme geçişi sırasında kaydırma koruması devre dışı (eski sekmenin
+  * konumu yeniye taşınmasın); 500 ms sonra normale döner. Ziyaretçi sekmesinin
+  * otomatik tiki yalnız o sekmede çalışır. */
+ DG_SCROLL_SWITCHING=true;setTimeout(()=>{DG_SCROLL_SWITCHING=false;},500);
+ if(v!=="visitors"&&typeof dgVisTickStop==="function"){try{dgVisTickStop();}catch(e){}}
  /* 0036: presence — "ne yapıyor" bilgisi tazelenir (geçici, DB'ye yazılmaz). */
  if(typeof dgPresencePing==="function"){try{dgPresencePing(v);}catch(e){}}
  document.querySelectorAll(".view").forEach(x=>x.classList.remove("on"));

@@ -134,7 +134,9 @@ function liveCalc(){const d=+$("mDbh").value,h=+$("mHeight").value,sp=$("mSpecie
  * (sunucu kapısı: trg_enforce_park_link → PARK_REQUIRED). */
 let EDIT_PROJ_PARK=null;
 
-async function loadProjects(){
+/* 0040: kaydırma koruma sarmalı — yeniden çizimde #main scrollTop korunur. */
+async function loadProjects(){const _y=(typeof dgScrollKeep==="function"?dgScrollKeep():null);try{return await loadProjects__scroll.apply(this,arguments);}finally{if(typeof dgScrollRestore==="function")dgScrollRestore(_y);}}
+async function loadProjects__scroll(){
  if(!USER)return;
  /* parks gömüsü: projenin park kimliği + alanı (kapı kartı ve tablo için).
   * Şema eskiyse (0004 uygulanmamış) PostgREST ilişkiyi bulamaz ve hata döner;

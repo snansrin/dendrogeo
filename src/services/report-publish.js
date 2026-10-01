@@ -143,7 +143,9 @@ function dgPubStatus(req){
 }
 
 /* ---------- çizim ---------- */
-function dgPubRender(){
+/* 0040: kaydırma koruma sarmalı. */
+function dgPubRender(){const _y=(typeof dgScrollKeep==="function"?dgScrollKeep():null);try{return dgPubRender__scroll.apply(this,arguments);}finally{if(typeof dgScrollRestore==="function")dgScrollRestore(_y);}}
+function dgPubRender__scroll(){
  const box=$("dgPubBox");if(!box)return;
  const st=DG_PUB_STATE;
  const pubByPark=dgPubPublishedByPark();

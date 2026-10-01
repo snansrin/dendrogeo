@@ -3,7 +3,9 @@
 Panel, analiz, grafikler, kayıtlar, dünya verisi yükleme */
 
 // 1. Kayıtlarım tablosu
-async function loadRecords(){ 
+/* 0040: kaydırma koruma sarmalı — yeniden çizimde #main scrollTop korunur. */
+async function loadRecords(){const _y=(typeof dgScrollKeep==="function"?dgScrollKeep():null);try{return await loadRecords__scroll.apply(this,arguments);}finally{if(typeof dgScrollRestore==="function")dgScrollRestore(_y);}}
+async function loadRecords__scroll(){ 
  const{data}=await sb.from("measurements").select("*,projects(name)").eq("owner",USER.id).order("created_at",{ascending:false});
  /* 0036 (T1): proje adına göre alfabetik (tr), sonra point_id numerik, sonra ölçüm no. */
  const recRows=(data||[]).slice().sort((a,b)=>{
@@ -43,7 +45,9 @@ async function drawChart(id,type,labels,data){
 }
 // 6. Ağaç çeşitliliği analizi
 /* ============ AKTİF VERİ ANALİZİ (İbreli/Yapraklı yüzde, ort. çap/boy, tür dağılımı) ============ */
-function renderAnalysis(rows,elId){
+/* 0040: kaydırma koruma sarmalı. */
+function renderAnalysis(){const _y=(typeof dgScrollKeep==="function"?dgScrollKeep():null);try{return renderAnalysis__scroll.apply(this,arguments);}finally{if(typeof dgScrollRestore==="function")dgScrollRestore(_y);}}
+function renderAnalysis__scroll(rows,elId){
  const el=$(elId);if(!el)return;
  rows=rows||[];
  if(!rows.length){el.innerHTML="";return;}

@@ -43,3 +43,22 @@ function dgTfs(tpl,vars){
  if(typeof dgTf==="function")return dgTf(tpl,vars);
  let o=String(tpl);for(const k in vars)o=o.split("{"+k+"}").join(String(vars[k]));return o;
 }
+
+/* ═══ 0040 · KAYDIRMA ZIPLAMASI ÖNLEYİCİ ═══
+ * Sorun: onay/red/senkron sonrası tablolar innerHTML ile yeniden çizilince
+ * #main scrollTop sıfırlanıyor, ekran yukarı fırlıyordu (kullanıcı bildirimi:
+ * "onaylamam zaman alıyor"). Çözüm: her yeniden çizim fonksiyonu dgScrollKeep/
+ * dgScrollRestore sarmalıyla kaydırma konumunu AYNI FRAME'de geri koyar.
+ * SEKME GEÇİŞİ istisna: go(), DG_SCROLL_SWITCHING'i kısa süre true yapar →
+ * eski sekmenin kaydırması yeni sekmeye taşınmaz (kayıtlı konum geri gelir). */
+let DG_SCROLL_SWITCHING=false;
+function dgScrollKeep(){
+ if(DG_SCROLL_SWITCHING)return null;
+ const m=document.getElementById("main");
+ return m?m.scrollTop:null;
+}
+function dgScrollRestore(y){
+ if(y==null)return;
+ const m=document.getElementById("main");
+ if(m&&Math.abs(m.scrollTop-y)>1)m.scrollTop=y;
+}

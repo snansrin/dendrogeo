@@ -46,7 +46,9 @@ async function dgMyParks(force){
 }
 
 /* ---------------- 📬 DAVETLERİN (Projeler sekmesi · herkes) ---------------- */
-async function dgInvitesLoadMine(){
+/* 0040: kaydırma koruma sarmalı — yeniden çizimde #main scrollTop korunur. */
+async function dgInvitesLoadMine(){const _y=(typeof dgScrollKeep==="function"?dgScrollKeep():null);try{return await dgInvitesLoadMine__scroll.apply(this,arguments);}finally{if(typeof dgScrollRestore==="function")dgScrollRestore(_y);}}
+async function dgInvitesLoadMine__scroll(){
  const box=$("dgInvBox");
  if(box)box.style.display="none";
  if(typeof USER==="undefined"||!USER){const s=$("dgSharedBox");if(s)s.style.display="none";return;}
@@ -89,7 +91,9 @@ async function dgInviteRespond(id,accept){
 }
 
 /* ---------------- 👥 ÇALIŞMA ARKADAŞLARI (Yönetim sekmesi · sahip/admin) ---------------- */
-async function dgCollabLoad(){
+/* 0040: kaydırma koruma sarmalı — yeniden çizimde #main scrollTop korunur. */
+async function dgCollabLoad(){const _y=(typeof dgScrollKeep==="function"?dgScrollKeep():null);try{return await dgCollabLoad__scroll.apply(this,arguments);}finally{if(typeof dgScrollRestore==="function")dgScrollRestore(_y);}}
+async function dgCollabLoad__scroll(){
  const sel=$("dgInvPark");
  if(!sel)return;
  if(typeof USER==="undefined"||!USER){sel.innerHTML='<option value="">Giriş gerekli</option>';return;}
@@ -114,7 +118,9 @@ async function dgCollabRefresh(){
  dgCollabRender();
 }
 
-function dgCollabRender(){
+/* 0040: kaydırma koruma sarmalı. */
+function dgCollabRender(){const _y=(typeof dgScrollKeep==="function"?dgScrollKeep():null);try{return dgCollabRender__scroll.apply(this,arguments);}finally{if(typeof dgScrollRestore==="function")dgScrollRestore(_y);}}
+function dgCollabRender__scroll(){
  const box=$("dgInvList");if(!box)return;
  const sel=$("dgInvPark");
  if(!sel||!sel.value){box.innerHTML='<div class="alert info">Park seç — davetleri ve ortakları burada görürsün.</div>';return;}

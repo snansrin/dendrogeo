@@ -22,7 +22,9 @@ let PARK_ROWS=[];   /* v_park_compare satırları */
 
 const PARK_RPT_FIELDS="carbon_kg,dbh_cm,height_m,species,grp,point_id,projects(name,city,park_id,park_name)";
 
-async function loadParkCompare(){
+/* 0040: kaydırma koruma sarmalı — yeniden çizimde #main scrollTop korunur. */
+async function loadParkCompare(){const _y=(typeof dgScrollKeep==="function"?dgScrollKeep():null);try{return await loadParkCompare__scroll.apply(this,arguments);}finally{if(typeof dgScrollRestore==="function")dgScrollRestore(_y);}}
+async function loadParkCompare__scroll(){
  const el=$("parkCompare");
  const{data,error}=await sb.from("v_park_compare").select("*").order("carbon_kg",{ascending:false});
 
@@ -124,7 +126,9 @@ function dgFillReportOptions(linked,pending){
 /* YETKİ/AĞ HATASI — şema bayrağına dokunmaz (2026-09-26).
  * dgParkSchemaMissing'in aksine DG_PARK_SCHEMA_OK=false YAPMAZ: ölçüm kapısı
  * ve park_id yazımı açık kalır. Kullanıcıya gerçek sebep söylenir. */
-function dgParkCompareDenied(error){
+/* 0040: kaydırma koruma sarmalı. */
+function dgParkCompareDenied(){const _y=(typeof dgScrollKeep==="function"?dgScrollKeep():null);try{return dgParkCompareDenied__scroll.apply(this,arguments);}finally{if(typeof dgScrollRestore==="function")dgScrollRestore(_y);}}
+function dgParkCompareDenied__scroll(error){
  const code=(error&&(error.code||error.status))||"";
  const msg=(error&&error.message)||String(error||"bilinmeyen hata");
  console.warn("DENDROGEO · park karşılaştırma okunamadı (şema değil, yetki/ağ):",code,msg);
@@ -143,7 +147,9 @@ function dgParkCompareDenied(error){
 
 /* Şema eskiyse (migration 0004 uygulanmamış) karşılaştırma proje bazlı eski
  * davranışa düşer — sayfa boş kalmasın, ama kullanıcı sebebini bilsin. */
-async function loadParkCompareLegacy(el){
+/* 0040: kaydırma koruma sarmalı — yeniden çizimde #main scrollTop korunur. */
+async function loadParkCompareLegacy(){const _y=(typeof dgScrollKeep==="function"?dgScrollKeep():null);try{return await loadParkCompareLegacy__scroll.apply(this,arguments);}finally{if(typeof dgScrollRestore==="function")dgScrollRestore(_y);}}
+async function loadParkCompareLegacy__scroll(el){
  const{data,count}=await sb.from("measurements").select("carbon_kg,dbh_cm,height_m,species,grp,projects(name,city)",{count:"exact"}).eq("status","Onaylı").limit(5000);
  dgWarnIfTruncated(data,5000,"Park karşılaştırma",count);
  PARK_DATA=data||[];

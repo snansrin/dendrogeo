@@ -68,7 +68,7 @@
      <div class="gpsring" id="gpsRing"><div class="val" id="gpsAcc">—</div><div class="lbl">doğruluk (m)</div></div>
      <div id="gpsState" class="alert info">Konum servisi kapalı.</div>
      <button id="gpsBtn" class="dg-png-btn primary" onclick="startGps()">📡 Konumu Etkinleştir</button>
-     <div class="dg-png-sub" style="font-size:.68rem">Doğrulama eşiği ±60 m · park dışı kayıt sunucuda reddedilir (0007).</div><label style="display:flex;gap:8px;align-items:flex-start;font-size:.8rem;color:var(--mut);margin-top:10px;cursor:pointer"><input type="checkbox" class="dg-switch" id="dgLiveShare" checked onchange="dgLiveShareToggle(this.checked)"> <span>👥 Canlı konumumu paylaş — park ortaklarım ve kurucu canlı haritada görür (geçici; veritabanına yazılmaz)</span></label>
+     <div class="dg-png-sub" style="font-size:.68rem">Doğrulama eşiği ±60 m · park dışı kayıt sunucuda reddedilir (0007).</div><label style="display:flex;gap:8px;align-items:flex-start;font-size:.8rem;color:var(--mut);margin-top:10px;cursor:pointer"><input type="checkbox" class="dg-switch" id="dgLiveShare" checked onchange="dgLiveShareToggle(this.checked)"> <span>👥 Canlı konumumu bu parkın çalışma arkadaşlarıyla paylaş (geçici; veritabanına yazılmaz)</span></label>
      <div id="dgMatesNote" class="dg-meta" style="margin-top:6px"></div>
      <div id="iosHint" class="alert info" style="display:none"><b>iPhone kullanıcısı mısınız?</b><br><span style="font-size:.85rem">Ayarlar → Gizlilik ve Güvenlik → Konum Servisleri →Safari Siteleri→ "Uygulamayı Kullanırken" seçin, sayfayı yenileyin.</span></div>
      <div class="grid g2" style="margin-top:14px">
@@ -414,12 +414,12 @@
     <div class="stat"><div class="lbl">🟢 Şu An Çevrimiçi</div><div class="val" id="vzOnline">0</div></div>
    </div>
    <div class="card" style="margin-bottom:18px">
-    <div class="shead" style="margin-bottom:10px"><span class="no">🟢</span><h2 style="font-size:1.15rem">Şu An — kim, ne yapıyor</h2><span class="rule"></span></div>
+    <div class="shead" style="margin-bottom:10px"><span class="no">🟢</span><h2 style="font-size:1.15rem">Şu An — kim, ne yapıyor</h2><span class="rule"></span><button class="btn sm ghost" onclick="dgVisRefresh()">🔄 Yenile</button></div>
     <div id="visLive" style="font-size:.88rem">—</div>
    </div>
    <div class="card" style="margin-bottom:18px">
     <div class="shead" style="margin-bottom:10px"><span class="no">🗺️</span><h2 style="font-size:1.15rem">Canlı Konum Haritası</h2><span class="rule"></span></div>
-    <p style="color:var(--mut);font-size:.8rem;margin-bottom:8px">Yalnız canlı konum paylaşımını açmış çevrimiçi kullanıcılar görünür; üstüne gel → kimlik + ne yapıyor + son konum yaşı.</p>
+    <p style="color:var(--mut);font-size:.8rem;margin-bottom:8px">Çevrimiçi ve konum izni açık kullanıcılar otomatik görünür (geçici; veritabanına yazılmaz). Üstüne gel → kimlik + ne yapıyor; satıra tıkla → haritada odaklan. Liste 10 sn'de bir kendiliğinden tazelenir.</p>
     <div id="visMap" class="notranslate" translate="no"></div>
    </div>
    <div class="card">

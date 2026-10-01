@@ -513,7 +513,9 @@ async function dgFocusScanTarget(){
    5. ALGILAMA KARTI (v-map üstündeki adım adım akış)
 ========================================================= */
 
-function dgRenderScanCard(forceManual){
+/* 0040: kaydırma koruma sarmalı. */
+function dgRenderScanCard(){const _y=(typeof dgScrollKeep==="function"?dgScrollKeep():null);try{return dgRenderScanCard__scroll.apply(this,arguments);}finally{if(typeof dgScrollRestore==="function")dgScrollRestore(_y);}}
+function dgRenderScanCard__scroll(forceManual){
   const el=$("parkScanCard");
   if(!el||!el.style)return;
 
@@ -1216,7 +1218,9 @@ let DG_PARK_ADMIN_ROWS=[];
 let DG_PARK_ADMIN_SHOW_EMPTY=false;   /* 2026-09-27: boş parkları göster/gizle */
 let DG_PARK_ADMIN_LAST=null;          /* son projects/measurements bağlamı */
 
-async function loadParkAdmin(){
+/* 0040: kaydırma koruma sarmalı — yeniden çizimde #main scrollTop korunur. */
+async function loadParkAdmin(){const _y=(typeof dgScrollKeep==="function"?dgScrollKeep():null);try{return await loadParkAdmin__scroll.apply(this,arguments);}finally{if(typeof dgScrollRestore==="function")dgScrollRestore(_y);}}
+async function loadParkAdmin__scroll(){
   if(!PROFILE||(PROFILE.role!=="admin"&&PROFILE.role!=="owner"))return toast("Yetki yok.","err");
   const box=$("parkAdminBox");
   if(box)box.innerHTML='<div class="alert info">⏳ Park kimlikleri yükleniyor…</div>';
