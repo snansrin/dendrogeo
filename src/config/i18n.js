@@ -73,7 +73,6 @@ const DG_I18N_EN={
 "ONAY → HARİTA → EXPORT":"APPROVAL → MAP → EXPORT",
 "📐 Allometrik Formüller":"📐 Allometric Equations",
 "DBH = göğüs çapı (cm) · 1,30 m'den doğrudan ölçülür":"DBH = diameter at breast height (cm) · measured directly at 1.30 m",
-"— çevre→çap dönüşümü UYGULANMAZ; ham saha değeri (girth_cm) kanıt olarak saklanır":"— no girth→diameter conversion is applied; the raw field value (girth_cm) is preserved as evidence",
 "— sistemde kullanılan sabit kök/gövde varsayımı":"— constant root/shoot assumption used by the system",
 "Tür/grup tablosunda 50 seçim kaydı bulunur; 22 kaydın doğrudan ρ değeri vardır, 28 kayıt grup varsayılanına düşer.":"The species/group table holds 50 selectable entries; 22 have a directly sourced ρ value, 28 fall back to the group default.",
 "🔬 Veri Doğruluk Politikası":"🔬 Data Accuracy Policy",
@@ -85,7 +84,7 @@ const DG_I18N_EN={
 "Veri & Harita":"Data & Map",
 "🟢 Onaylı noktalara dokunun → ölçüm bilgisi + varsa fotoğraf.":"🟢 Tap approved points → measurement details + photo if available.",
 "Bölgesel Dağılım":"Regional Distribution",
-"Kayıt":"Records","Karbon(t)":"Carbon(t)","Ort.DBH":"Avg.DBH","Ort.Yükseklik(m)":"Avg.Height(m)","Ort.Çap":"Avg.DBH",
+"Kayıt":"Records","Karbon(t)":"Carbon(t)","Ort.DBH":"Avg.DBH","Ort.Yükseklik(m)":"Avg.Height(m)","Ort.Çap":"Avg.Diam",
 /* === 04 istatistik === */
 "DendroGeo'da şimdiye kadar yayımlanan onaylı ağaç kayıtlarının genel görünümünü burada görebilirsiniz: kaç kayıt, kaç ülke ve şehir ile toplam tahmini karbon stoğu.":"An overview of all approved tree records published on DendroGeo so far: how many records, countries and cities, and the total estimated carbon stock.",
 "Bu sayılar neyi gösteriyor?":"What do these numbers show?",
@@ -120,7 +119,7 @@ const DG_I18N_EN={
 "⏳ Google girişi tamamlanıyor…":"⏳ Completing Google sign-in…",
 "Google ile devam et":"Continue with Google","veya":"or",
 "Giriş":"Log in","Kayıt":"Sign up","Şifre Yenile":"Reset password",
-"E‑posta":"E-mail","Parola":"Password","Giriş Yap":"Log in",
+"E‑posta":"E-mail","Parola":"Password","Giriş Yap":"Sign in",
 "Ad Soyad":"Full name","Kurum":"Institution","Hesap Oluştur":"Create account","Sıfırlama Gönder":"Send reset link",
 /* === footer === */
 "Ağaç envanteri, karbon hesabı, harita ve park ölçeğinde arazi örtüsü analizi.":"Tree inventory, carbon computation, mapping and park-scale land-cover analysis.",
@@ -245,6 +244,44 @@ const DG_I18N_EN={
 "site içinden":"from within the site",
 "yayınlanır: 📄 Yayınla → istek kuyruğa yazılır → yayın işi birkaç dakika içinde raporu üretir → kalıcı bağlantı, 🔗 Aç ve 📤 Paylaş burada belirir.":": 📄 Publish → the request is queued → the publish job produces the report within minutes → the permanent link, 🔗 Open and 📤 Share appear here.",
 "KVKK Aydınlatma Metni":"KVKK Disclosure Text (TR)",
+
+/* === 0035b: Bilimsel Standartlar kartı (Rol/Yetki tablosunun yerine) === */
+"Bilimsel Standartlar — Bir Bakışta":"Scientific Standards — At a Glance",
+"🌡 Chave et al. (2014) allometrisi":"🌡 Chave et al. (2014) allometry",
+"🪵 22/50 türde kaynaklı ρ":"🪵 Sourced ρ for 22/50 species",
+"⚖️ Kök 0,26 · Karbon 0,47 (beyanlı sabit)":"⚖️ Root 0.26 · Carbon 0.47 (declared constants)",
+"🛰 10 m ESA WorldCover 2021 v200":"🛰 10 m ESA WorldCover 2021 v200",
+"📊 Monte Carlo %95 GA (N=1000 · CV=0,22)":"📊 Monte Carlo 95% CI (N=1000 · CV=0.22)",
+"🔐 Admin onayı + RLS (sunucu tarafı)":"🔐 Admin approval + RLS (server-side)",
+"📍 Park konum çiti (sunucu trigger'ı)":"📍 Park geofence (server-side trigger)",
+"📜 CC BY-NC 4.0 · Zenodo DOI":"📜 CC BY-NC 4.0 · Zenodo DOI",
+"Ziyaretçi yalnız onaylı veriyi görür · kullanıcı ölçer · denetçi onaylar · kurucu yönetir.":"Visitors see only approved data · users measure · reviewers approve · the founder governs.",
+/* === 0035b: TÜRLER ve GRUPLAR (kullanıcı isteği: "ağaçların adı da İngilizce
+   olsun"). BÜYÜK HARF veri değerleridir (DB'de kanonik TR ad saklanır — value
+   DEĞİŞMEZ, yalnız GÖRÜNEN metin çevrilir). Büyük harf EN çeviri bilinçli:
+   başlık düzeni "Diğer/Other" ile çakışmasın, TR'ye dönüş birebir olsun. === */
+"İBRELİ":"CONIFER","YAPRAKLI":"BROADLEAF","DİĞER":"OTHER",
+"GÖKNAR":"FIR","SEDİR":"CEDAR OF LEBANON","HİMALAYA SEDİRİ":"HIMALAYAN CEDAR",
+"ATLAS SEDİRİ":"ATLAS CEDAR","ARDIÇ":"JUNIPER","LADİN":"ORIENTAL SPRUCE",
+"MAVİ LADİN":"BLUE SPRUCE","KIZILÇAM":"TURKISH RED PINE","KARAÇAM":"BLACK PINE",
+"SARIÇAM":"SCOTS PINE","FISTIK ÇAMI":"STONE PINE","HALEP ÇAMI":"ALEPPO PINE",
+"GÜMÜŞ LADİN":"SILVER SPRUCE","MAVİ SEDİR":"BLUE ATLAS CEDAR",
+"SERVİ":"MEDITERRANEAN CYPRESS","MAZI (YALANCI SERVİ)":"ORIENTAL ARBORVITAE",
+"PORSUK":"YEW","KRİPTOMERYA":"JAPANESE CEDAR","DİĞER İBRELİ":"OTHER CONIFER",
+"MEŞE":"OAK","GÜRGEN":"HORNBEAM","KAYIN":"ORIENTAL BEECH","DİŞBUDAK":"EUROPEAN ASH",
+"SIĞLA":"ORIENTAL SWEETGUM","KAVAK":"POPLAR","KIZILAĞAÇ":"BLACK ALDER",
+"ÇINAR":"PLANE TREE","DOĞU ÇINARI":"ORIENTAL PLANE","SÖĞÜT":"WHITE WILLOW",
+"SALKIM SÖĞÜT":"WEEPING WILLOW","AKÇAAĞAÇ":"MAPLE","IHLAMUR":"LINDEN",
+"AT KESTANESİ":"HORSE CHESTNUT","KESTANE":"SWEET CHESTNUT","HUŞ":"SILVER BIRCH",
+"KARAAĞAÇ":"ELM","DUT":"WHITE MULBERRY","CEVİZ":"WALNUT",
+"YALANCI AKASYA":"BLACK LOCUST","MANOLYA":"SOUTHERN MAGNOLIA","SÜS ELMASI":"CRABAPPLE",
+"SÜS ERİĞİ":"CHERRY PLUM","KATALPA":"SOUTHERN CATALPA","GLEDİÇYA":"HONEY LOCUST",
+"JAPON SOFORASI":"JAPANESE PAGODA TREE","DEFNE":"BAY LAUREL",
+"AMBERAĞACI":"AMERICAN SWEETGUM","DİĞER YAPRAKLI":"OTHER BROADLEAF",
+"BELİRLENEMEDİ":"UNDETERMINED",
+/* yer adları (veri değerleri) */
+"Karbon":"Carbon","Hacim":"Volume",
+"Kuzey Kıbrıs":"Northern Cyprus","Gazimağusa":"Famagusta",
 
 /* sayfa başlığı */
 "DendroGeo — Küresel Ağaç Envanteri ve Karbon Veri Sistemi":"DendroGeo — Global Tree Inventory & Carbon Data System"

@@ -105,14 +105,16 @@ function fillSpecies(){
  const g=$("mGroup").value,s=$("mSpecies");
  if(!g){s.disabled=true;s.innerHTML="";$("latinName").textContent="";return;}
  s.disabled=false;
- s.innerHTML='<option value="">Seç</option>'+(SPECIES_DATA[g]||[]).map(x=>`<option value="${x.tr}">${x.tr}${x.lat && x.lat!=="—"?" · "+x.lat:""}</option>`).join("");
+ /* 0035b: GÖRÜNEN tür adı dgT() ile çevrilir (EN modu); option VALUE her
+  * zaman kanonik TR adıdır — veritabanına yazılan değer DEĞİŞMEZ. */
+ s.innerHTML='<option value="">Seç</option>'+(SPECIES_DATA[g]||[]).map(x=>`<option value="${x.tr}">${(typeof dgT==="function"?dgT(x.tr):x.tr)}${x.lat && x.lat!=="—"?" · "+x.lat:""}</option>`).join("");
  $("latinName").textContent="";
 }
 function showLatin(){
  const sp=$("mSpecies").value;
  $("latinName").textContent=(LATIN[sp]&&LATIN[sp]!=="—")?("🔬 "+LATIN[sp]):"";
 }
-function liveCalc(){const d=+$("mDbh").value,h=+$("mHeight").value,sp=$("mSpecies").value,grp=$("mGroup").value,box=$("liveCalc");if(!d||!h||!sp){box.style.display="none";return;}const c=calc(d,h,sp,grp);box.style.display="block";box.innerHTML=`Karbon: <b>${c.total_carbon.toFixed(1)} kg</b> · AGB: ${c.agb.toFixed(1)} · BHB: ${c.bhb.toFixed(1)} · Hacim: ${c.vol.toFixed(2)} m³`;}
+function liveCalc(){const d=+$("mDbh").value,h=+$("mHeight").value,sp=$("mSpecies").value,grp=$("mGroup").value,box=$("liveCalc");if(!d||!h||!sp){box.style.display="none";return;}const c=calc(d,h,sp,grp);box.style.display="block";const _t=(s)=>(typeof dgT==="function"?dgT(s):s);box.innerHTML=`${_t("Karbon")}: <b>${c.total_carbon.toFixed(1)} kg</b> · AGB: ${c.agb.toFixed(1)} · BHB: ${c.bhb.toFixed(1)} · ${_t("Hacim")}: ${c.vol.toFixed(2)} m³`;}
 /* --- 5. PROJE CRUD --- */
 /* PROJE = PARK + ETİKET (2026-09-24).
  * Proje adı artık serbest metin değil: park algılanır, kullanıcı bir etiket
@@ -507,3 +509,7 @@ async function removePhoto(url){
   if(p2)await sb.storage.from("dendro-photos").remove([p2]);
  }catch(e){}
 }
+
+/* 0035b: dil değişince tür listesi yeniden doldurulur (görünen adlar çevrilir,
+ * value'lar kanonik TR kalır). */
+window.addEventListener("dg:lang",()=>{try{const g=$("mGroup");if(g&&g.value&&$("mSpecies"))fillSpecies();if(typeof liveCalc==="function")liveCalc();}catch(e){}});

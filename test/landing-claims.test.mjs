@@ -40,9 +40,31 @@ describe('P0 · bilimsel iddialar kaynağıyla birebir', () => {
       const t = rd(f);
       for (const y of yasak) assert.ok(!y.test(t), f + ' içinde dönüşüm beyanı: ' + y);
     }
-    /* Landing DBH'yi DOĞRU tanımlıyor */
+    /* Landing DBH'yi DOĞRU tanımlıyor (0035b: girth notu kullanıcı isteğiyle
+     * kaldırıldı — tanımlayıcı tek satır yeterli, dönüşüm beyanı yasaklığı sürer) */
     assert.match(landing, /DBH = göğüs çapı \(cm\)/, 'DBH tanımı göğüs çapı olmalı');
-    assert.match(landing, /çevre→çap dönüşümü UYGULANMAZ/, 'dönüşüm uygulanmadığı açıkça söylenmeli');
+    assert.ok(!landing.includes('girth_cm'), 'girth_cm notu landing\'de istenmiyor (kullanıcı kararı 0035b)');
+  });
+
+  test('⭐ tür/grup adları EN sözlüğünde tam kapsanıyor (0035b)', () => {
+    const sctx = {};
+    vm.createContext(sctx);
+    vm.runInContext(rd('src/config/species.js') + ';this.S=SPECIES_DATA;', sctx);
+    /* i18n.js açılışta DOM'a dokunur (init + MutationObserver) → test stub'ı */
+    const ictx = {
+      window: { dispatchEvent: () => {} },
+      document: { readyState: 'complete', querySelectorAll: () => [], addEventListener: () => {}, documentElement: {}, title: 'x', getElementById: () => null, body: {} },
+      CustomEvent: function () {},
+    };
+    vm.createContext(ictx);
+    vm.runInContext(rd('src/config/i18n.js') + ';this.E=DG_I18N_EN;this.T=DG_I18N_TR;', ictx);
+    const eksik = [];
+    for (const arr of Object.values(sctx.S)) for (const s of arr) if (!(s.tr in ictx.E)) eksik.push(s.tr);
+    assert.deepEqual(eksik, [], 'EN sözlüğünde eksik tür: ' + eksik.join(', '));
+    /* EN→TR geri dönüş tek anlamlı olmalı (çakışan değer = yanlış restorasyon) */
+    const rev = {}; const cak = [];
+    for (const [k, v] of Object.entries(ictx.E)) { if (rev[v] && rev[v] !== k) cak.push(v); rev[v] = k; }
+    assert.deepEqual(cak, [], 'EN→TR çakışması (değerler benzersiz olmalı): ' + cak.join(', '));
   });
 
   test('⭐ tür tablosu sayıları species.js\'ten yeniden üretiliyor (landing + methods)', () => {
@@ -206,7 +228,8 @@ describe('i18n katmanı sözleşmesi (0035)', () => {
     const n = (i18n.match(/":"/g) || []).length;
     assert.ok(n >= 150, 'EN sözlüğü en az 150 dize içermeli, bulunan: ' + n);
     for (const s of ['"Sistem":"System"', '"Çıkış":"Log out"', '"📊 Panel":"📊 Dashboard"',
-      '"Giriş Yap":"Log in"', '"Hesap Oluştur":"Create account"', '"Kayıtlarım":"My Records"'])
+      '"Giriş Yap":"Sign in"', '"Hesap Oluştur":"Create account"', '"Kayıtlarım":"My Records"',
+      '"KARAÇAM":"BLACK PINE"', '"İBRELİ":"CONIFER"', '"SALKIM SÖĞÜT":"WEEPING WILLOW"'])
       assert.ok(i18n.includes(s), 'eksik çeviri: ' + s);
   });
   test('kalıcılık + html lang + ters harita + MutationObserver var', () => {

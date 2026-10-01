@@ -121,12 +121,20 @@
    </ul>
   </div>
  </div>
- <div style="margin-top:36px" class="card tblwrap"><table><thead><tr><th scope="col">Rol</th><th scope="col">Yetki</th></tr></thead><tbody>
-  <tr><td>Ziyaretçi</td><td>Yalnızca onaylanmış kayıtları, istatistikleri ve haritayı görüntüler</td></tr>
-  <tr><td>Kullanıcı</td><td>Proje ve ölçüm oluşturur; kendi kayıtlarını onay beklerken de görür</td></tr>
-  <tr><td>Denetçi (Admin)</td><td>Kayıtları onaylar/reddeder, moderasyon ve toplu dışa aktarım</td></tr>
-  <tr><td>Kurucu</td><td>Tüm yetkiler + kullanıcı/rol yönetimi (değiştirilemez)</td></tr>
- </tbody></table></div>
+ <div style="margin-top:36px" class="card">
+  <div class="shead" style="margin-bottom:14px"><span class="no">🔬</span><h2 style="font-size:1.15rem">Bilimsel Standartlar — Bir Bakışta</h2><span class="rule"></span></div>
+  <div class="stdchips">
+   <span class="stdchip">🌡 Chave et al. (2014) allometrisi</span>
+   <span class="stdchip">🪵 22/50 türde kaynaklı ρ</span>
+   <span class="stdchip">⚖️ Kök 0,26 · Karbon 0,47 (beyanlı sabit)</span>
+   <span class="stdchip">🛰 10 m ESA WorldCover 2021 v200</span>
+   <span class="stdchip">📊 Monte Carlo %95 GA (N=1000 · CV=0,22)</span>
+   <span class="stdchip">🔐 Admin onayı + RLS (sunucu tarafı)</span>
+   <span class="stdchip">📍 Park konum çiti (sunucu trigger'ı)</span>
+   <span class="stdchip">📜 CC BY-NC 4.0 · Zenodo DOI</span>
+  </div>
+  <p style="color:var(--mut);font-size:.8rem;margin-top:14px">Ziyaretçi yalnız onaylı veriyi görür · kullanıcı ölçer · denetçi onaylar · kurucu yönetir.</p>
+ </div>
 </div></section>
 <section class="blk" id="yontem"><div class="wrap">
  <div class="shead"><span class="no">02</span><h2>Sahadan Haritaya — Üç Adımda</h2><span class="rule"></span></div>
@@ -157,7 +165,6 @@
   <div class="card" style="border-left:4px solid var(--green)">
    <div style="font-family:var(--f-disp);font-size:1.1rem;color:var(--green-dk);font-weight:600;margin-bottom:14px">📐 Allometrik Formüller</div>
    <div class="formula">DBH = göğüs çapı (cm) · 1,30 m'den doğrudan ölçülür</div>
-   <div class="formula" style="border-left-color:var(--amber);font-size:.78rem">— çevre→çap dönüşümü UYGULANMAZ; ham saha değeri (girth_cm) kanıt olarak saklanır</div>
    <div class="formula">AGB = 0.0673·(ρ·DBH²·H)<sup>0.976</sup> <span style="color:var(--mut)">— Chave 2014</span></div>
    <div class="formula">BHB = AGB·0.26 <span style="color:var(--mut)">— sistemde kullanılan sabit kök/gövde varsayımı</span></div>
    <div class="formula">C = (AGB+BHB)·0.47</div>
