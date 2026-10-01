@@ -333,8 +333,16 @@ Bunlar hata değil, **belgelenmiş varsayımlardır**. Değiştirmek isteyen
 1. **Chave 2014 pantropikal bir denklemdir.** Tür listesi ağırlıklı olarak
    ılıman/Türkiye florasıdır; ılıman iğne yapraklılar için sistemli sapma
    olabilir. Bölgesel denklem (örn. Türkiye allometrisi) değerlendirmesi açık.
-2. **Belirsizlik yayılımı yoktur.** AGB denkleminin RSE'si ~%19-29'dur;
-   raporlar bugün tek nokta değeri verir, güven aralığı vermez.
+2. **Uygulama arayüzü tek nokta tahmini verir; yayımlanan DGR raporları
+   Monte Carlo %95 güven aralığı taşır.** AGB denkleminin RSE'si ~%19-29'dur.
+   Rapor hattı (`scripts/lib/mc.mjs`) bu belirsizliği yayımlanan park
+   raporlarında iletir: N=1000 örneklem, sabit seed (20260926 → aynı veri aynı
+   aralığı üretir, hakem tekrarı mümkün); girdi hatası `D ~ N(D; 0,5 cm)`,
+   `H ~ N(H; 0,25 m)`; model hatası çarpan `(1 + z·CV)`, `CV = 0,22` ve
+   kayıtlar arasında **koreledir** (aynı denklem ortak sapma üretir →
+   bağımsızlık varsayımının yapay daralttığı aralıklardan kaçınılır).
+   Panel/harita/dışa aktarım sayıları belirsizlik eki olmadan tek nokta
+   tahmini olarak kalır.
 3. **ρ tablosu eksik** (panel listesinde 28/50 tür ρ'sız — 0011e: 45
    orijinal + Göksu'nun kaynaklı 5 türü). Grup varsayılanı kullanılır;
    kaynaklandırılamayan türe değer UYDURULMAZ.

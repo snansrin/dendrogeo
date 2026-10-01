@@ -9,6 +9,58 @@ Yeni sürüm yayımlama adımları: [`docs/surum-yayini.md`](docs/surum-yayini.m
 
 ## [Yayımlanmadı]
 
+### Düzeltildi — 0034: 2026-10-01 tam denetim paketi (landing dogrulugu · WCAG kaskadi · atif/KVKK)
+Bagimsiz denetim (canli site ↔ depo ↔ canli Supabase verisi; 937 test yesilken
+icerik duzeyinde) asagidakileri buldu ve bu pakette giderildi:
+
+- **K1 birim etiketi:** Panel "kg CO2 esdeger" diyordu ama `dash.js` saf karbon
+  topluyor (Σ `carbon_kg`); kodda ×44/12 donusumu yok → etiket **"kg C (saf
+  karbon)"** oldu (degerler degismedi).
+- **K2 seffaflık notu:** landing §04 istatistik kartina "erken asama veri seti ·
+  kucuk orneklem · kayit duzeyi QA (🟡) park raporlarinin §7'sinde" notu
+  eklendi. Veriye dokunulmadi (0013/0031 veri sahibi karari korunur).
+- **K3 KVKK celiskisi:** footer toast'i "Yalnizca e-posta, ad ve kurum
+  saklanir" diyordu; Aydinlatma Metni konum+fotograf islendigini soyluyor →
+  yaniltici toast kaldirildi, `/aydinlatma/` baglantisi verildi.
+- **K4 atif:** footer "(Version 1.0.0)" + v3.0.0 DOI + ters yazar sirasi
+  tasiyordu → "SIRIN, N. & SIRIN, S. … (Version 3.0.0)"; `release.test.mjs`'e
+  atif kilidi eklendi.
+- **K5 yontem dokumani:** `docs/methods.md` §4.2 "guven araligi vermez"
+  diyordu; DGR raporlari `mc.mjs` ile Monte Carlo %95 GA uretiyor (0019'da
+  yayinda) → MC modeli (N=1000, seed, D±0,5 cm, H±0,25 m, korelasyonlu
+  CV=0,22) belgelendi; karbon-hesaplama sayfasi hizalandi.
+- **O1:** landing tur sayilari bayatti (45/17) → **50/22/28** (0011e'nin 5
+  kaynakli Goksu turu; methods.md duzeltilmisti, landing unutulmustu).
+- **O2 WCAG kaskad regresyonu:** en son yuklenen `ui-standard.css`
+  `:root --mut:#68766e` (4.41:1) ile style.css'in 27.09 duzeltmesini
+  (#5f6d65, 5.03:1) sessizce geri aliyordu → token esitlendi,
+  `critical-fixes.test.mjs`'e **kaskad kilidi** eklendi.
+- **O3:** kucuk amber metinler (`.hero .kick`, `.step .sub`, `.dg-kicker`,
+  `.dg-page .tag` → 3.03:1) `var(--amber-ink)` oldu (5.78:1) + test kilidi.
+- **O4:** TR landing DGR rapor sistemini hic anlatmiyordu (grep: 0 gecis;
+  EN'de var) → Bilgi Merkezi'ne 8. kart "📄 Bilimsel Raporlar (DGR)" →
+  `/rapor/`; 3. direge ve §02 3. adima %95 GA'li DGR cumlesi eklendi.
+- **O5:** index'e `hreflang` (tr/en/x-default) + topnav'a EN baglantisi
+  (DENETIM-2026-09-29 oneri #1).
+- **O6:** admin rapor karti "(§4)" → "(§5)" (rapor v2'de LULC sonuclari §5
+  Nicel Sonuclar'da; kullanici karti zaten §5 diyordu).
+- **O7:** 13 alt sayfa ui-standard fontlarini referansliyor ama Google
+  Fonts'u yuklemiyordu (Georgia/system-ui fallback) → index'le ayni
+  render-blokamayan desen eklendi.
+- **O8:** 7 TR alt sayfada bayat `?v=98461801` kaldirildi (B3 duzeltmesi
+  yalniz en/'e uygulanmisti).
+- **M1:** `html{scroll-padding-top:72px}` — mobilde sticky nav bolum
+  basliklarini yutuyordu.
+- **M2:** mobil landing nav'i `display:none` idi → ikinci satira sarar +
+  yatay kayar (JS'siz).
+- **M3:** footer statik "CEVRIMICI" → "CC BY-NC 4.0" (yanlis durum iddiasi yok).
+- **M4:** "Hemen Basla" → `showAuth('reg')` (ilk ziyaretciye Kayit sekmesi).
+- **M7:** README "506 test" → 937; kunye "sema 0001→0006" → 0001→0025;
+  JSON-LD `dateModified` + sitemap `lastmod` tazelendi.
+- **M9:** hero cipleri DBH 68/H 8,3 (h/D≈12 — K2'deki ayni oran sorusu) →
+  **DBH 45 / H 13 / C 373,7 kg** (h/D=29; ρ=0,446 ile formulden birebir).
+
+
 ### Düzeltildi — 0033 kapsam düzeltmesi: rapor hiçbir yasal statü hükmü üretmez (DGR-2026-0018) (2026-10-01)
 **Kök neden (veri sahibi kararı):** “Anıt ağaç detayı bizim işimiz için risk
 oluşturabilir; anıt ağaç sertifikası bulunmayan ağaçları ölçmüş olabiliriz —

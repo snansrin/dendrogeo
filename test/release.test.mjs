@@ -61,6 +61,15 @@ describe('sürüm numarası yedi yerde de aynı', () => {
     assert.match(kunye, new RegExp('v' + KISA.replace('.', '\\.') + ' \\(arayüz\\)'));
   });
 
+  /* ATIF KİLİDİ (2026-10-01 denetim K4): footer atıf bloğu eskiden
+   * "(Version 1.0.0)" + v3.0.0 DOI'si + ters yazar sırası taşıyordu.
+   * Atıfı kopyalayan herkes yanlış künye üretmesin diye buradan kilitlenir. */
+  test('⭐ footer atıfı: doğru yazar sırası + sürüm + DOI eşleşmesi', () => {
+    assert.match(landing, /ŞİRİN, N\. &amp; ŞİRİN, S\. \(\d{4}\)/, 'CITATION.cff sırası: Nagihan önce');
+    assert.match(landing, new RegExp('\\(Version ' + SURUM.replace(/\./g, '\\.') + '\\) \\[Dataset\\]\\. Zenodo\\. https://doi\\.org/10\\.5281/zenodo\\.'), 'atıf sürümü package.json ile aynı olmalı');
+    assert.ok(!landing.includes('(Version 1.0.0)'), 'eski sürüm atıfta kalmamalı');
+  });
+
   test('SECURITY.md bu sürümü "Current" olarak listeliyor', () => {
     assert.match(security, new RegExp('\\| ' + MAJOR + '\\.0\\.x\\s+\\| ✅ Current'));
   });

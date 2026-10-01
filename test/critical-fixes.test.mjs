@@ -195,6 +195,25 @@ describe('kalite denetimi 2026-09-27 kilidi (P1/P3/P7/P9)', () => {
     assert.match(c, /--amber-ink:#9a4a08/, 'amber metin tokeni');
     assert.match(c, /\.badge\.admin\{background:var\(--amber-tint\);color:var\(--amber-ink\)\}/);
   });
+  /* KASKAD KİLİDİ (2026-10-01 denetim O2/O3): ui-standard.css HER sayfada
+   * en SON yüklenir → :root tokenları style.css'i ezer. Eskiden burada
+   * --mut:#68766e (4.41:1) duruyordu ve 27.09 WCAG düzeltmesini (#5f6d65,
+   * 5.03:1) sessizce geri alıyordu; P1 testi yalnız style.css metnine
+   * baktığı için yakalayamıyordu. Artık iki dosya da kilitli. */
+  test('⭐ ui-standard.css tokenları style.css WCAG değerleriyle aynı (kaskad kilidi)', () => {
+    const u = rd('css/ui-standard.css');
+    assert.match(u, /--mut:#5f6d65/, 'ui-standard --mut, style.css ile ayni olmali (son yuklenen kazanir)');
+    assert.match(u, /--amber-ink:#9a4a08/, 'amber metin tokeni ui-standard :rootunda da tanimli olmali');
+    assert.ok(!/--mut:#68766e/.test(u), 'eski dusuk kontrast token deklarasyonu geri gelmemeli');
+  });
+  test('⭐ küçük amber metinler --amber-ink kullanır (3.03:1 → 5.78:1)', () => {
+    const l = rd('css/landing.css');
+    const u = rd('css/ui-standard.css');
+    assert.match(l, /\.hero \.kick\{[^}]*color:var\(--amber-ink\)/, 'hero kicker');
+    assert.match(l, /\.step \.sub\{[^}]*color:var\(--amber-ink\)/, 'step altligi');
+    assert.match(u, /\.dg-kicker\{[^}]*color:var\(--amber-ink\)/, 'alt sayfa kicker');
+    assert.match(u, /\.dg-page \.tag\{[^}]*color:var\(--amber-ink\)/, 'alt sayfa tag');
+  });
   test('P3 skip-link + focus halkasi + label.lbl blok (kayma yok)', () => {
     const h = rd('partials/head.html');
     assert.match(h, /class="dg-skip" href="#main"/, 'skip link');

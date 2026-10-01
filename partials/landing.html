@@ -1,7 +1,7 @@
 <div id="landing">
 <div id="topnav"><div class="wrap">
 <span class="brand"><img class="brand-logo" src="logo.png" alt="DendroGeo">DendroGeo</span>
- <div class="links"><a href="#sistem">Sistem</a><a href="#yontem">Yöntem</a><a href="#veri">Veri &amp; Harita</a><a href="#istatistik">İstatistik</a><a href="#bilgi-merkezi">Bilgi Merkezi &amp; Kaynaklar</a></div>
+ <div class="links"><a href="#sistem">Sistem</a><a href="#yontem">Yöntem</a><a href="#veri">Veri &amp; Harita</a><a href="#istatistik">İstatistik</a><a href="#bilgi-merkezi">Bilgi Merkezi &amp; Kaynaklar</a><a href="/en/" class="mono">EN</a></div>
  <button class="btn sm" onclick="showAuth()">Giriş / Kayıt</button>
 </div></div>
 
@@ -13,7 +13,7 @@
    <p class="lead">DendroGeo; sahadaki GPS konumunu, ağaç çapı ve boy ölçümünü, tür/grup bilgisini ve isteğe bağlı fotoğraf kalite kontrolünü tek bir veri akışında birleştirir. Ölçümden biyokütle ve karbon tahminine geçilir; onaylanan kayıtlar harita ve istatistik katmanlarında yayımlanır. Park analizinde 10 m arazi örtüsü verisi ayrı bir veri kaynağı olarak işlenir.</p>
    <div style="display:flex;gap:12px;flex-wrap:wrap;margin-top:28px">
     <a href="#sistem" class="btn">🔬 Sistemi Keşfet</a>
-    <button class="btn ghost" onclick="showAuth()">🌲 Hemen Başla</button>
+    <button class="btn ghost" onclick="showAuth('reg')">🌲 Hemen Başla</button>
    </div>
   </div>
     <div class="hero-art" aria-hidden="true">
@@ -75,9 +75,9 @@
      <path d="M573 160 q3 2.5 6 0" stroke="#182420" stroke-width="1.4" stroke-linecap="round"/>
     </g>
    </svg>
-   <div class="chip c1"><span style="color:var(--amber)">●</span> DBH 68 cm</div>
-   <div class="chip c2"><span style="color:var(--green)">●</span> C 539.9 kg</div>
-   <div class="chip c3"><span style="color:var(--blue)">●</span> H 8.3 m</div>
+   <div class="chip c1"><span style="color:var(--amber)">●</span> DBH 45 cm</div>
+   <div class="chip c2"><span style="color:var(--green)">●</span> C 373.7 kg</div>
+   <div class="chip c3"><span style="color:var(--blue)">●</span> H 13 m</div>
   </div>
  </div>
  <div class="statband">
@@ -120,6 +120,7 @@
     <li>Ülke/Şehir/Park karşılaştırma</li>
     <li>CSV, GeoJSON, QGIS export</li>
     <li>İnteraktif karbon haritası</li>
+    <li>DGR rapor yayını · %95 GA (Monte Carlo)</li>
     <li>CC BY‑NC 4.0 açık veri lisansı</li>
    </ul>
   </div>
@@ -151,7 +152,7 @@
   <div class="step">
    <div class="num">3</div>
    <h4>Küresel Yayın</h4>
-   <p>Kayıt admin onayından sonra dünya haritasında görünür. Ülke, şehir ve park agregasyonlarına dahil edilir; QGIS ve CSV olarak dışa aktarılabilir.</p>
+   <p>Kayıt admin onayından sonra dünya haritasında görünür. Ülke, şehir ve park agregasyonlarına dahil edilir; QGIS ve CSV olarak dışa aktarılabilir. Park ölçeğinde, Monte Carlo %95 güven aralıklı DGR bilimsel raporu olarak yayımlanabilir.</p>
    <div class="sub">ONAY → HARİTA → EXPORT</div>
   </div>
  </div>
@@ -163,7 +164,7 @@
    <div class="formula">AGB = 0.0673·(ρ·DBH²·H)<sup>0.976</sup> <span style="color:var(--mut)">— Chave 2014</span></div>
    <div class="formula">BHB = AGB·0.26 <span style="color:var(--mut)">— sistemde kullanılan sabit kök/gövde varsayımı</span></div>
    <div class="formula">C = (AGB+BHB)·0.47</div>
-   <p style="color:var(--mut);font-size:.78rem;margin-top:12px">Tür/grup tablosunda 45 seçim kaydı bulunur; 17 kaydın doğrudan ρ değeri vardır, 28 kayıt grup varsayılanına düşer.</p>
+   <p style="color:var(--mut);font-size:.78rem;margin-top:12px">Tür/grup tablosunda 50 seçim kaydı bulunur; 22 kaydın doğrudan ρ değeri vardır, 28 kayıt grup varsayılanına düşer.</p>
   </div>
   <div class="card" style="border-left:4px solid var(--amber)">
    <div style="font-family:Fraunces,serif;font-size:1.1rem;color:var(--green-dk);font-weight:600;margin-bottom:14px">🔬 Veri Doğruluk Politikası</div>
@@ -201,7 +202,7 @@
  </div>
  <div class="card" style="margin-top:18px;border-left:4px solid var(--blue)">
   <b>Bu sayılar neyi gösteriyor?</b>
-  <p style="color:var(--mut);font-size:.82rem;margin:7px 0 0">Harita ve istatistiklerde yayınlanan, DendroGeo tarafından onaylanmış saha ölçümlerinin mevcut toplamını gösterir. Değerler zaman içinde yeni ölçümler eklendikçe değişebilir.</p>
+  <p style="color:var(--mut);font-size:.82rem;margin:7px 0 0">Harita ve istatistiklerde yayınlanan, DendroGeo tarafından onaylanmış saha ölçümlerinin mevcut toplamını gösterir. Değerler zaman içinde yeni ölçümler eklendikçe değişebilir. Veri seti erken aşamadadır (küçük örneklem); ülke/şehir ortalamaları bu bağlamda yorumlanmalıdır. Kayıt düzeyindeki kalite kontrol değerlendirmeleri (örneğin boy/çap oranı incelemesi 🟡) ilgili park raporlarının §7 bölümünde ayrıca yayımlanır.</p>
  </div>
 </div></section>
 <section class="blk" id="bilgi-merkezi"><div class="wrap">
@@ -237,6 +238,11 @@
    <div class="ico">🗂</div><h3>Veri ve Dışa Aktarım</h3>
    <p>Veri yaşam döngüsü, yayınlama modeli ve araştırma/GIS iş akışlarında kullanılan çıktı formatları.</p>
    <ul><li>CSV</li><li>GeoJSON</li><li>QGIS iş akışı</li></ul>
+  </a>
+  <a class="feature" href="/rapor/" style="text-decoration:none;color:inherit">
+   <div class="ico">📄</div><h3>Bilimsel Raporlar (DGR)</h3>
+   <p>Yayımlanan park raporları: dondurulmuş içerik, SHA-256 hash, QR kalıcı bağlantı, Monte Carlo %95 güven aralığı ve geri çekme politikası.</p>
+   <ul><li>Değişmez, hash'li yayın</li><li>%95 GA · Monte Carlo</li><li>DataCite tarzı künye</li></ul>
   </a>
   <a class="feature" href="/hakkimizda/" style="text-decoration:none;color:inherit">
    <div class="ico">🌿</div><h3>Proje Hakkında</h3>
@@ -280,7 +286,7 @@
  <div class="cols footer-cols">
   <div><h4>DendroGeo</h4><p>Ağaç envanteri, karbon hesabı, harita ve park ölçeğinde arazi örtüsü analizi.</p></div>
   <div><h4>Referanslar</h4><p>Chave et al. 2014 · IPCC 2006<br>As ve ark. 2001 · Tolunay 2013<br>OGM 299 Nolu Tebliğ 2017</p></div>
-  <div><h4>Sistem</h4><p>v3.0 · <span class="mono">ÇEVRİMİÇİ</span></p>
+  <div><h4>Sistem</h4><p>v3.0 · <span class="mono">CC BY-NC 4.0</span></p>
    <p style="margin-top:10px;font-size:.78rem"><a href="/gizlilik/" style="color:#cfe0d4">Gizlilik Politikası</a> · <a href="/aydinlatma/" style="color:#cfe0d4">KVKK Aydınlatma</a> · <a href="/kullanim-kosullari/" style="color:#cfe0d4">Kullanım Koşulları</a> · <a href="/kunye/" style="color:#cfe0d4">Künye &amp; İletişim</a> · <a href="/hakkimizda/" style="color:#cfe0d4">Hakkımızda</a></p>
    <p style="margin-top:8px;font-size:.72rem;color:#a9bcb0">🔒 Bu site izleme çerezi, reklam ve üçüncü taraf analitik kullanmaz. Kod CC BY-NC 4.0 · veri DOI: 10.5281/zenodo.22948643</p></div>
  </div>
@@ -301,7 +307,7 @@
     <h4 style="color:#9fd0ae;font-size:.72rem;letter-spacing:.16em;text-transform:uppercase;margin-bottom:12px">📝 Atıf & Lisans</h4>
     <div class="card" style="background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.15);padding:14px">
      <div class="mono" style="font-size:.72rem;color:#fff;line-height:1.7;background:rgba(0,0,0,.25);padding:10px;border-radius:6px">
-      ŞİRİN, S. &amp; ŞİRİN, N. (2026). <i>DendroGeo: Global Tree Inventory &amp; Carbon Data System</i> (Version 1.0.0) [Dataset]. Zenodo. https://doi.org/10.5281/zenodo.22948643
+      ŞİRİN, N. &amp; ŞİRİN, S. (2026). <i>DendroGeo: Global Tree Inventory &amp; Carbon Data System</i> (Version 3.0.0) [Dataset]. Zenodo. https://doi.org/10.5281/zenodo.22948643
      </div>
      <div style="font-size:.75rem;color:#cfe0d4;margin-top:10px">
       <b style="color:#fff">Veri Lisansı:</b> CC BY-NC 4.0 — Ticari olmayan kullanımda, kaynak gösterilerek serbestçe paylaşılabilir.
@@ -309,7 +315,7 @@
     </div>
     <h4 style="color:#9fd0ae;font-size:.72rem;letter-spacing:.16em;text-transform:uppercase;margin:18px 0 10px">⚖️ Politikalar</h4>
     <div style="font-size:.78rem;color:#cfe0d4;line-height:1.6">
-     <div><a href="#" onclick="toast('KVKK: Yalnızca e-posta, ad ve kurum bilgileriniz saklanır. Hesap istediğinizde tüm verileriniz silinebilir. Çerez kullanılmamaktadır.');return false;" style="color:#9fd0ae;text-decoration:underline">KVKK Aydınlatma Metni</a></div>
+     <div><a href="/aydinlatma/" style="color:#9fd0ae;text-decoration:underline">KVKK Aydınlatma Metni</a></div>
      <div style="margin-top:4px"><a href="#" onclick="toast('Veri Doğruluk: GPS doğruluğu ölçümle kaydedilir. Fotoğraf eklenirse bitki örtüsü ≥%25 ve pozlama 25-245 aralığı kontrol edilir. Tüm kayıtlar admin onayından sonra yayımlanır.');return false;" style="color:#9fd0ae;text-decoration:underline">Veri Doğruluk Politikası</a></div>
     </div>
    </div>

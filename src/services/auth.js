@@ -11,9 +11,9 @@ if(m)m.style.display="flex";
 });
 
 /* --- BLOK 2: Form görünürlüğü + Turnstile --- */
-function showAuth(){
+function showAuth(tab){
 const el=$("erisim");if(!el)return;
-el.scrollIntoView({behavior:"smooth"});authTab("login");
+el.scrollIntoView({behavior:"smooth"});authTab(tab||"login");
 const box=$("authBox");box.classList.remove("auth-glow");void box.offsetWidth;box.classList.add("auth-glow");
 setTimeout(()=>box.classList.remove("auth-glow"),3000);
 }
