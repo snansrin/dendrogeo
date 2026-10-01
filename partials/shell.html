@@ -95,9 +95,9 @@
       <div><label class="lbl" for="mHeight">Boy (m)</label><input id="mHeight" type="number" step="0.1" oninput="liveCalc()" placeholder="örn: 7,2"></div>
      </div>
      <div class="lbl" style="margin-top:12px">📸 Fotoğraf (canlı çekim)</div>
+     <div style="font-size:.74rem;color:var(--mut);margin:-4px 0 6px">denetim: yeşil · kızıl/mor · sonbahar · gövde/dal · kış kadrajı + pozlama</div>
      <span class="dg-file btn sm ghost">📂 <span>Dosya seç</span><input type="file" id="mPhoto" aria-label="Fotoğraf (canlı çekim)" accept="image/*" capture="environment" onchange="checkPhoto(event)" style="position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:pointer"></span><span class="dg-file-name mono" id="mPhotoName"></span>
      <div id="photoCheck" class="alert info" style="display:none;margin-top:8px"></div>
-     <div id="aiSuggest" class="alert info" style="display:none;margin-top:8px"></div>
      <div id="liveCalc" class="alert ok" style="display:none"></div>
      <button class="dg-png-btn primary" id="saveBtn" style="margin-top:14px" onclick="saveMeas()">💾 Hesapla ve Kaydet</button>
     </div>
@@ -316,10 +316,6 @@
         (elle + OSM) ve karşılaştırma bölünüyordu; OSM'de adı olmayan poligonlar
         da "İsimsiz Park" kalıyordu. Otomatik birleştirme BİLEREK yok: iki ayrı
         park aynı adı taşıyabilir, karar yöneticide. -->
-   <div class="card" style="margin-bottom:18px;border-left:4px solid var(--blue)">
-    <div class="shead" style="margin-bottom:6px"><span class="no">🤖</span><h2 style="font-size:1.15rem">AI Ağaç Algılama</h2><span class="rule"></span><span class="mono" style="font-size:.72rem;color:var(--mut)">saha doğrulaması · insan kararı</span></div>
-    <div id="dgAiAdmin"></div>
-   </div>
    <div class="card" style="margin-bottom:18px;border-left:4px solid var(--green)">
     <div class="shead" style="margin-bottom:12px"><span class="no">🌳</span><h2 style="font-size:1.2rem">Park Kimlikleri</h2><span class="rule"></span><span class="mono" style="font-size:.75rem;color:var(--mut)">yeniden adlandır · birleştir · sil</span></div>
     <p style="color:var(--mut);font-size:.8rem;margin-bottom:10px">Aynı park iki kimlikle kayıtlıysa karşılaştırma <b>bölünür</b> — 🔀 ile birleştir. OSM'de adı olmayan park "İsimsiz Park" gelir, ✏️ ile ad ver (proje adları otomatik yeniden kurulur).</p>

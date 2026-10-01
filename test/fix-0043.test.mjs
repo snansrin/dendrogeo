@@ -12,13 +12,10 @@
  *     önbellekte güncellenip ağaç YERİNDE çizilir (ağ turu yok, anlık, sıçrama
  *     yok), tam mutabakat sekmeli (debounced) arka plan tazelemesiyle gelir.
  *
- * (2) AĞAÇ ALGILAMA (kullanıcı: "ağaç algılamayı da düzelt").
- *     KÖK NEDEN: algılama YALNIZ dış uç nokta soketiydi; uç nokta (c.on+c.url)
- *     verilmediyse dgAiOnPhoto HİÇBİR ŞEY yapmıyordu → "🤖 AI Ağaç Algılama"
- *     kartı ölü/bozuk görünüyordu. ÇÖZÜM: uç nokta yoksa TARAYICIDA çalışan
- *     YERLEŞİK çevrimdışı sezgisel algılayıcı (dgAiBuiltin) devreye girer.
- *     Yerleşik sonuç YALNIZ UYARIDIR (advisory) — kaydı ASLA engellemez; sert
- *     kapı (photoOk=false) yalnız gerçek model + admin izniyle tetiklenir.
+ * (2) AĞAÇ ALGILAMA bölümü 0044'te KALDIRILDI: harici model soketi, yerleşik
+ *     sezgisel algılayıcı ve 🤖 yönetim kartı kullanıcı kararıyla kökten
+ *     silindi; bekçileri tersine çevrilmiş hâlde test/fix-0044.test.mjs'te.
+ *     SW sürüm sözleşmesi de orada (r52).
  */
 import { test, describe } from 'node:test';
 import assert from 'node:assert/strict';
@@ -32,9 +29,6 @@ const rd = (p) => readFileSync(join(ROOT, p), 'utf8');
 
 const tree = rd('src/services/admin-tree.js');
 const admin = rd('src/services/admin.js');
-const ai = rd('src/services/species-ai.js');
-const idx = rd('index.html');
-const sh = rd('partials/shell.html');
 
 /* ══════════ (1) KAYDIRMA SIÇRAMASI — STATİK KİLİT ══════════ */
 describe('0043 · onay/red kaydırma sıçraması kök düzeltmesi', () => {
@@ -106,62 +100,5 @@ describe('0043 · onay/red kaydırma sıçraması kök düzeltmesi', () => {
     assert.equal(dgTreeRemoveRow(5), true, 'silme true dönmeli');
     assert.equal(dgTreeRows().length, 0, 'satır önbellekten kaldırılmalı');
     assert.equal(dgTreeRemoveRow(5), false, 'yok olan satırı silme false dönmeli');
-  });
-});
-
-/* ══════════ (2) YERLEŞİK AĞAÇ ALGILAMA — STATİK KİLİT ══════════ */
-describe('0043 · yerleşik çevrimdışı ağaç algılayıcı', () => {
-  test('⭐ dgAiBuiltin var (uç nokta olmadan da algılama ÇALIŞIR)', () => {
-    assert.match(ai, /async function dgAiBuiltin/, 'yerleşik sezgisel algılayıcı');
-    assert.match(ai, /getImageData/, 'piksel düzeyinde sezgi (canvas)');
-    assert.match(ai, /function dgAiTestBuiltin/, 'yönetim kartından denenebilir');
-  });
-
-  test('⭐ dgAiOnPhoto uç nokta YOKSA yerleşik algılayıcıya düşüyor', () => {
-    assert.match(ai, /const ext=dgAiEnabled\(\)/, 'dış uç nokta modu');
-    assert.match(ai, /const builtin=\(c\.builtin!==false\)/, 'yerleşik varsayılan AÇIK');
-    assert.match(ai, /await dgAiBuiltin\(file\)/, 'yerleşik algılayıcı çağrılıyor');
-    /* Uç nokta çökerse (ağ/CSP/CORS) yerleşik yedeğe düşer — saha işi durmaz. */
-    assert.match(ai, /b\.advisory=true/, 'uç nokta yedeği de advisory');
-  });
-
-  test('⭐ yerleşik sonuç YALNIZ UYARI (advisory) — kaydı ASLA engellemez', () => {
-    /* Sert kapı (photoOk=false) yalnız gerçek model + !advisory + admin izniyle. */
-    assert.match(ai, /if\(!advisory&&c\.block\)\{try\{photoOk=false;\}/, 'kapı yalnız gerçek modelde');
-    assert.match(ai, /photoOk=false/, 'AI kapısı korunuyor (0042 kilidi)');
-    /* treeOk advisory iken doğrudan res.tree; eşik/kapı uygulanmaz. */
-    assert.match(ai, /const treeOk=advisory\?\!\!res\.tree:dgAiOk\(res\)/, 'advisory → eşik kapısı yok');
-  });
-
-  test('⭐ yönetim kartı yerleşik algılayıcıyı önde sunuyor (aç/kapa + dene)', () => {
-    assert.match(ai, /id="dgAiBuiltin"/, 'yerleşik aç/kapa kutusu');
-    assert.match(ai, /Yerleşik ağaç algılama/, 'yerleşik etiketi');
-    assert.match(ai, /onclick="dgAiTestBuiltin\(\)"/, 'yerleşik deneme düğmesi');
-    assert.match(ai, /c\.builtin=!\(bi&&!bi\.checked\)/, 'yerleşik ayarı kalıcı (varsayılan açık)');
-    assert.match(sh, /AI Ağaç Algılama/, 'kart başlığı ağaç modunda');
-  });
-
-  test('⭐ AI modülü veritabanına DOKUNMAZ (kırmızı çizgi korunuyor)', () => {
-    assert.ok(!/insert|upsert|\.from\(/.test(ai), 'AI modülünde DB çağrısı olamaz');
-    assert.ok(!/function dgAiUse/.test(ai), 'tür ön-doldurma geri gelmemeli');
-    assert.match(rd('src/services/measure.js'), /dgAiOnPhoto\(f\)/, 'fotoğraf QA kancası duruyor');
-  });
-
-  test('i18n: yeni yerleşik algılama dizeleri EN sözlüğünde (benzersiz)', () => {
-    const i18n = rd('src/config/i18n.js');
-    for (const s of [
-      'Yerleşik ağaç algılama (çevrimdışı · model gerektirmez · yalnız uyarı, kaydı engellemez)',
-      'Ağaç algılanıyor (yerleşik · çevrimdışı)…',
-      'yerleşik algılayıcı',
-      '🌳 Yerleşik algılayıcıyı dene',
-    ]) assert.ok(i18n.includes(JSON.stringify(s) + ':'), 'eksik EN girdisi: ' + s);
-  });
-});
-
-/* ══════════ içerik sözleşmesi: SW r51 (önbeklenen içerik değişti) ══════════ */
-describe('0043 · çevrimdışı paket sürümü', () => {
-  test('sw.js r51 (admin/admin-tree/species-ai değişti → sürüm arttı)', () => {
-    assert.match(rd('sw.js'), /CACHE_VERSION = 'dendrogeo-sw-v2-r51'/);
-    assert.match(idx, /species-ai\.js\?v=[0-9a-f]{8}/, 'index hash tazelenmiş');
   });
 });

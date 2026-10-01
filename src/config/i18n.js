@@ -77,7 +77,7 @@ const DG_I18N_EN={
 "Tür/grup tablosunda 51 seçim kaydı bulunur; 22 kaydın doğrudan ρ değeri vardır, 29 kayıt grup varsayılanına düşer.":"The species/group table holds 51 selectable entries; 22 have a directly sourced ρ value, 29 fall back to the group default.",
 "🔬 Veri Doğruluk Politikası":"🔬 Data Accuracy Policy",
 "GPS doğruluğu ölçümle kaydedilir; sabit ±10 m kayıt eşiği yoktur":"GPS accuracy is recorded per measurement; there is no fixed ±10 m recording threshold",
-"Fotoğraf eklenirse bitki örtüsü ≥ %25 ve pozlama 25–245 aralığı kontrol edilir":"If a photo is added, vegetation ≥ 25% and exposure 25–245 are checked",
+"Fotoğraf eklenirse tarayıcı içi çok sınıflı denetim uygulanır: yeşil · kızıl/mor · sonbahar · gövde/dal · kış kadrajı + pozlama 25–245":"If a photo is added, an in-browser multi-class check runs: green · red/purple · autumn · trunk/branch · winter framing + exposure 25–245",
 "DBH ≤ 400 cm, boy ≤ 100 m":"DBH ≤ 400 cm, height ≤ 100 m",
 "Admin onayı zorunlu":"Admin approval is mandatory",
 /* === 03 veri & harita === */
@@ -853,9 +853,7 @@ const DG_I18N_EN={
 "Çevrimdışı kaydedildi — internet gelince senkronize":"Saved offline — will sync when internet returns",
 "Fotoğraf uygun":"Photo OK",
 "Fotoğraf uygun değil":"Photo not suitable",
-"Bitki örtüsü:":"Vegetation:",
 "Pozlama:":"Exposure:",
-"Ağacı/net bitki örtüsünü gösteren, karanlık olmayan bir çekim yapın.":"Take a well-lit shot clearly showing the tree/vegetation.",
 "⚠ Onaylı kayıtlar yüklenemedi":"⚠ Approved records could not be loaded",
 "— harita bu yüzden boş. Veri silinmedi:":"— the map is empty because of this. No data was deleted:",
 "Önce proje seçin.":"Select a project first.",
@@ -930,40 +928,24 @@ const DG_I18N_EN={
 
 /* === 0040 === */
 "Haritada odaklan":"Focus on map",
-/* === 0041: AI tür tanıma === */
-"AI ağaç doğrulaması yapılıyor…":"AI tree verification running…",
-"Ağaç algılandı":"Tree detected",
-"AI ağaç algılayamadı":"AI could not detect a tree",
-"kadrajı ağacı gösterecek şekilde düzeltin; yine de devam edebilirsiniz (insan kararı).":"reframe the shot to show the tree; you may still continue (human decision).",
-"AI doğrulaması yapılamadı (ağ/CSP/CORS)":"AI verification could not run (network/CSP/CORS)",
-"fotoğraf QA sonucu geçerli, devam edilebilir.":"the photo QA result stands; you may continue.",
-"AI kapısı açık: ağaç doğrulanmadan kayıt engellenir.":"AI gate is on: saving is blocked until a tree is verified.",
-"Etkin — fotoğraf çekilince AI ağaç doğrulaması":"Enabled — AI tree verification on photo capture",
-"Eşik (%) — altındaki güven 'ağaç yok' sayılır":"Threshold (%) — confidence below this counts as 'no tree'",
-"AI kapısı: ağaç doğrulanmazsa fotoğrafı reddet (fotoğraf QA'sına ek)":"AI gate: reject the photo if no tree is verified (on top of photo QA)",
-"🌳 ağaç":"🌳 tree",
-"ağaç yok":"no tree",
-"AI Ağaç Algılama":"AI Tree Detection",
-"AI sonucu yalnız doğrulama amaçlıdır; kararı sahada insan verir — veritabanına otomatik yazılmaz.":"The AI result is for verification only; the decision stays with the human in the field — nothing is written to the database automatically.",
-"Uç nokta (POST · multipart 'photo' · JSON yanıt)":"Endpoint (POST · multipart 'photo' · JSON response)",
-"🧪 Test isteği gönder":"🧪 Send test request",
-"Önce uç nokta URL'si girin.":"Enter the endpoint URL first.",
-"test isteği gönderiliyor…":"sending test request…",
-"yanıt boş ya da çözümlenemedi (CSP/CORS/kontrol edin)":"empty or unparsable response (check CSP/CORS)",
-"CSP connect-src ve CORS kontrol edin":"check CSP connect-src and CORS",
-"Sunucu CORS açmalı (Access-Control-Allow-Origin: https://dendrogeo.org) ve URL, CSP connect-src listesine eklenmeli — adresi iletin, tek satırda eklenir. Model tarayıcıda çalışsın isterseniz ONNX/TF.js modu planlı (çevrimdışı saha).":"The server must enable CORS (Access-Control-Allow-Origin: https://dendrogeo.org) and the URL must be added to the CSP connect-src list — send me the address, it's a one-line change. For in-browser inference, an ONNX/TF.js mode is planned (offline field use).",
-"saha doğrulaması · insan kararı":"field verification · human decision",
-/* === 0043: yerleşik çevrimdışı ağaç algılayıcı === */
-"Ağaç algılanıyor (yerleşik · çevrimdışı)…":"Detecting tree (built-in · offline)…",
-"yerleşik algılayıcı":"built-in detector",
-"yerleşik":"built-in",
-"uç nokta erişilemedi, yerleşik kullanıldı":"endpoint unreachable; built-in used",
-"Yerleşik ağaç algılama (çevrimdışı · model gerektirmez · yalnız uyarı, kaydı engellemez)":"Built-in tree detection (offline · no model needed · advisory only, never blocks saving)",
-"Gelişmiş: gerçek model uç noktası (opsiyonel · yerleşik algılayıcının yerine geçer)":"Advanced: real model endpoint (optional · overrides the built-in detector)",
-"🌳 Yerleşik algılayıcıyı dene":"🌳 Test the built-in detector",
-"yerleşik algılayıcı deneniyor…":"testing the built-in detector…",
-"sonuç yok":"no result",
-"Yerleşik algılayıcı tarayıcıda çalışır (çevrimdışı saha): yeşil örtü + gövde + kadraj sezgisiyle 'ağaç var mı' der; YALNIZ UYARIDIR, kaydı engellemez. Daha kesin sonuç için gerçek model bağlayın: sunucu CORS açmalı (Access-Control-Allow-Origin: https://dendrogeo.org) ve URL, CSP connect-src listesine eklenmeli — adresi iletin, tek satırda eklenir.":"The built-in detector runs in the browser (offline in the field): it uses green-cover + trunk + framing heuristics to say 'is there a tree'; it is ADVISORY ONLY and never blocks saving. For higher accuracy, connect a real model: the server must enable CORS (Access-Control-Allow-Origin: https://dendrogeo.org) and the URL must be added to the CSP connect-src list — send me the address, it's a one-line change.",
+/* === 0044: çok sınıflı fotoğraf denetimi (eski harici model soketinin YERİNİ ALDI) ===
+ * 0041-0043'teki harici model soketi + yerleşik sezgisel algılayıcı ve
+ * yönetim kartı KULLANICI KARARIYLA kökten kaldırıldı (ölü yönetim kartı,
+ * saha sürtünmesi, tür uydurma riski). Fotoğraf denetimi artık measure.js'teki
+ * kalibre piksel sınıflandırıcısı:
+ * yeşil · kızıl/mor · sonbahar · gövde/dal · kış kadrajı + pozlama. */
+"yeşil örtü":"green cover",
+"kızıl/mor yaprak":"red/purple foliage",
+"sonbahar rengi":"autumn colour",
+"gövde/dal":"trunk/branch",
+"kış kadrajı (dal silüeti)":"winter framing (branch silhouette)",
+"bitki/dal kanıtı yeterli":"plant/branch evidence sufficient",
+"Karede ağaç/dal/bitki örtüsü kanıtı bulunamadı.":"No tree, branch or vegetation evidence was found in the frame.",
+"Pozlama uygun değil (çok karanlık veya patlak).":"Exposure is unsuitable (too dark or blown out).",
+"Ağacı, gövdesini veya dallarını kadraja alıp yeniden çekin.":"Reframe to include the tree, its trunk or its branches, then shoot again.",
+"denetim: yeşil · kızıl/mor · sonbahar · gövde/dal · kış kadrajı + pozlama":"check: green · red/purple · autumn · trunk/branch · winter framing + exposure",
+"Fotoğraf denetleniyor…":"Checking photo…",
+"Yalnızca görsel dosyası yükleyin.":"Upload an image file only.",
 
 /* sayfa başlığı */
 "DendroGeo — Küresel Ağaç Envanteri ve Karbon Veri Sistemi":"DendroGeo — Global Tree Inventory & Carbon Data System"

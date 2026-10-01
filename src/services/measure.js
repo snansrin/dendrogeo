@@ -19,30 +19,109 @@ async function reverseGeocode(lat,lon){
   return{city:city||"Bilinmiyor",country:country||"Bilinmiyor"};
  }catch(e){return null;}
 }
-/* --- 2. FOTOĞRAF DENETİMİ --- */
+/* --- 2. FOTOĞRAF DENETİMİ (0044 · ÇOK SINIFLI BİTKİ/DAL SEZGİSİ) ---
+ * KULLANICI (0044): "%25'i kırmızı yapraklı ağaçlar sağlamıyor ve önümüz kış,
+ * fotoğrafta sadece dal olacağı için yeşil çok az — o yüzden fotoğraf
+ * yükleyemez kullanıcılar. Ben bugün 1 fotoğraf için sahada 30 dk harcadım."
+ *
+ * KÖK NEDEN (kanıtla): eski kapı YALNIZ yeşili sayıyordu (2G-R-B>20 && G>50).
+ *   · mor/kırmızı yaprak (Prunus pissardii vb.) → %12 yeşil  → KAYIT ENGELLİ
+ *   · kış çıplak dal                            → %0.4 yeşil → KAYIT ENGELLİ
+ *   · sonbahar sarı/kızıl                       → %4-6 yeşil → KAYIT ENGELLİ
+ *   · gövde+şerit metre (DBH) kadrajı           → %18 yeşil  → KAYIT ENGELLİ
+ *   ÜSTELİK saf gökyüzü %52 "yeşil" sayılıp GEÇİYORDU: ExG indeksinde G>B
+ *   koruması yoktu, mavi-gökkuşağı bandı yeşile düşüyordu.
+ *
+ * ÇÖZÜM: piksel başına ÇOK SINIFLI sınıflandırma + parlaklık-modu sapmasıyla
+ * ince yapı (dal silüeti). Eşiklerin tamamı 22 karelik gerçek fotoğraf
+ * korpusuyla kalibre edildi (test/photo-qa.test.mjs + calib/): yeşil ·
+ * kızıl/mor (antosiyanin) · sonbahar (sarı/turuncu) · gövde/dal kahvesi ·
+ * kış kadrajı (mavi gök fonu + dal silueti). Karar YİNE insanda: bu kapı
+ * yalnızca BARİZ yanlış kareyi (gök/duvar/kapak/patlak) sahada erken
+ * yakalar; ölçüm bilimine (QA_LIMITS, karbon motoru) DOKUNMAZ.
+ *
+ * dgPhotoScan SAF fonksiyondur (canvas verisi alır) → node'da testsiz
+ * tarayıcı olmadan doğrulanabilir. */
 function loadImg(file){return new Promise((res,rej)=>{const u=URL.createObjectURL(file);const i=new Image();i.onload=()=>res({i,u});i.onerror=rej;i.src=u;});}
+function dgPhotoScan(d,S){
+ const n=S*S;
+ let green=0,warm=0,purple=0,woody=0,blue=0,cloud=0,dark=0,lumSum=0;
+ const lum=new Float64Array(n);
+ for(let i=0,p=0;i<n;i++,p+=4){
+  const R=d[p],G=d[p+1],B=d[p+2];
+  const L=(R+G+B)/3;lum[i]=L;lumSum+=L;
+  const mx=R>G?(R>B?R:B):(G>B?G:B),mn=R<G?(R<B?R:B):(G<B?G:B),sat=mx-mn;
+  const isBlue=(B>G+10&&B>R+20);                 /* gök mavisi (koyu mavi dahil) */
+  if(isBlue)blue++;
+  else if(L>185&&sat<30&&B>=R-4)cloud++;          /* bulut / parlak beyaz */
+  else if(2*G-R-B>20&&G>40&&G>=B-2&&G>=R-12)green++; /* yeşil örtü — G>=B-2: mavi gök, G>=R-12: turuncu SIZAMAZ */
+  else if(R>G+8&&G>B+5&&R>70&&L>95&&L<232&&sat>22)warm++;  /* sarı/turuncu sonbahar (kabuk L<=95'te woody'ye düşer) */
+  else if(R>G+12&&R>B+8&&B>G-28&&L>30&&L<215&&sat>18)purple++; /* antosiyanin: mor/kırmızı yaprak */
+  else if(R>G&&G>=B-4&&(R-B)>12&&(R-B)<95&&R>45&&R<205&&sat>8)woody++; /* kabuk / dal kahvesi */
+  if(L<90&&!isBlue)dark++;                        /* koyu silüet (koyu MAVİ gök hariç) */
+ }
+ /* Arka plan parlaklık modu (16 kutulu histogram) → moddan >32 sapan ve
+  * gök/bulut OLMAYAN pikseller = ince yapı: çıplak dal, gövde kenarı, silüet. */
+ const hist=new Array(16).fill(0);
+ for(let i=0;i<n;i++)hist[Math.min(15,(lum[i]/16)|0)]++;
+ let bi=0;for(let k=1;k<16;k++)if(hist[k]>hist[bi])bi=k;
+ const bgL=bi*16+8;
+ let struct=0;
+ for(let i=0,p=0;i<n;i++,p+=4){
+  const L=lum[i];
+  if(Math.abs(L-bgL)>32){
+   const R=d[p],G=d[p+1],B=d[p+2];
+   const mx=R>G?(R>B?R:B):(G>B?G:B),mn=R<G?(R<B?R:B):(G<B?G:B),sat=mx-mn;
+   if(!((B>G+10&&B>R+20)||(L>185&&sat<30&&B>=R-4)))struct++;
+  }
+ }
+ return{lum:lumSum/n,blue:blue/n,cloud:cloud/n,green:green/n,warm:warm/n,
+        purple:purple/n,woody:woody/n,dark:dark/n,struct:struct/n};
+}
+/* KAPI (0044 · kalibre): pozlama teknik eşikleri + en az BİR bitki/dal kanıtı.
+ *   foliage ≥ %5  VEYA  gövde/dal ≥ %5  VEYA  kış kadrajı
+ *   (kış kadrajı = karenin ≥ %25'i gök mavisi İKEN ≥ %2.5 ince yapı veya
+ *    ≥ %3 koyu silüet — çıplak dal fotoğrafının tek güvenilir imzası bu). */
+function dgPhotoGate(m){
+ const exp=m.lum>25&&m.lum<245;
+ const fol=m.green+m.warm+m.purple;
+ const winter=m.blue>=0.25&&(m.struct>=0.025||m.dark>=0.03);
+ return exp&&(fol>=0.05||m.woody>=0.05||winter);
+}
+/* Kullanıcıya NEYİ gördüğümüzü söyler (uyarı anlaşılır olsun, ezbere değil). */
+function dgPhotoLabel(m){
+ const p=(x)=>"%"+Math.round(x*100);
+ const t=[];
+ if(m.green>=0.05)t.push(_tms("yeşil örtü")+" "+p(m.green));
+ if(m.purple>=0.05)t.push(_tms("kızıl/mor yaprak")+" "+p(m.purple));
+ if(m.warm>=0.05)t.push(_tms("sonbahar rengi")+" "+p(m.warm));
+ if(m.woody>=0.05)t.push(_tms("gövde/dal")+" "+p(m.woody));
+ if(m.blue>=0.25&&(m.struct>=0.025||m.dark>=0.03))t.push(_tms("kış kadrajı (dal silüeti)"));
+ return t.join(" · ");
+}
 async function checkPhoto(e){
  const f=e.target.files[0],box=$("photoCheck");
  {const fn=$("mPhotoName");if(fn)fn.textContent=f?f.name:"";}
  if(!f){photoOk=false;box.style.display="none";return;}
- if(!f.type.startsWith("image/")){photoOk=false;box.className="alert err";box.style.display="block";box.innerHTML="⚠ Yalnızca görsel dosyası yükleyin.";return;}
- box.style.display="block";box.className="alert info";box.innerHTML="⏳ Fotoğraf denetleniyor…";
+ if(!f.type.startsWith("image/")){photoOk=false;box.className="alert err";box.style.display="block";box.innerHTML="⚠ "+_tms("Yalnızca görsel dosyası yükleyin.");return;}
+ box.style.display="block";box.className="alert info";box.innerHTML="⏳ "+_tms("Fotoğraf denetleniyor…");
  try{
   const{i,u}=await loadImg(f);
   const S=120,c=document.createElement("canvas");c.width=S;c.height=S;
-  const x=c.getContext("2d");x.drawImage(i,0,0,S,S);URL.revokeObjectURL(u);
-  const d=x.getImageData(0,0,S,S).data;
-  let veg=0,br=0,edge=0;
-  for(let p=0;p<d.length;p+=4){const R=d[p],G=d[p+1],B=d[p+2];if(2*G-R-B>20&&G>50)veg++;br+=(R+G+B)/3;}
-  const n=d.length/4;const vegR=veg/n;br/=n;
-  for(let y=1;y<S-1;y+=2)for(let xx=1;xx<S-1;xx+=2){const a=(y*S+xx)*4,b2=(y*S+xx+1)*4;edge+=Math.abs(d[a]-d[b2]);}
-  const ok=vegR>=0.25&&br>25&&br<245;
+  const x=c.getContext("2d",{willReadFrequently:true});x.drawImage(i,0,0,S,S);URL.revokeObjectURL(u);
+  const m=dgPhotoScan(x.getImageData(0,0,S,S).data,S);
+  const ok=dgPhotoGate(m);
   photoOk=ok;
-  /* 0041: fotoğraf QA'dan geçince AI tür önerisi (arka planda, bloklamaz). */
-  if(ok&&typeof dgAiOnPhoto==="function"){try{dgAiOnPhoto(f);}catch(e){}}
-  if(ok){box.className="alert ok";box.innerHTML=`✓ <b>${_tms("Fotoğraf uygun")}</b> · ${_tms("Bitki örtüsü:")} %${(vegR*100).toFixed(1)} · ${_tms("Pozlama:")} ${br.toFixed(0)}/255`;}
-  else{box.className="alert err";box.innerHTML=`⚠ <b>${_tms("Fotoğraf uygun değil")}</b> · ${_tms("Bitki örtüsü:")} %${(vegR*100).toFixed(1)} (min %25) · ${_tms("Pozlama:")} ${br.toFixed(0)}.<br>${_tms("Ağacı/net bitki örtüsünü gösteren, karanlık olmayan bir çekim yapın.")}`;}
- }catch(err){photoOk=false;box.className="alert err";box.innerHTML="⚠ Fotoğraf okunamadı, tekrar deneyin.";}
+  if(ok){
+   const lbl=dgPhotoLabel(m);
+   box.className="alert ok";box.innerHTML=`✓ <b>${_tms("Fotoğraf uygun")}</b> · ${lbl||_tms("bitki/dal kanıtı yeterli")} · ${_tms("Pozlama:")} ${m.lum.toFixed(0)}/255`;
+  }else{
+   const why=(m.lum>25&&m.lum<245)
+    ?_tms("Karede ağaç/dal/bitki örtüsü kanıtı bulunamadı.")
+    :_tms("Pozlama uygun değil (çok karanlık veya patlak).");
+   box.className="alert err";box.innerHTML=`⚠ <b>${_tms("Fotoğraf uygun değil")}</b> · ${why}<br>${_tms("Ağacı, gövdesini veya dallarını kadraja alıp yeniden çekin.")}`;
+  }
+ }catch(err){photoOk=false;box.className="alert err";box.innerHTML="⚠ "+_tms("Fotoğraf okunamadı, tekrar deneyin.");}
 }
 /* --- 3. GPS --- */
 /* Ekran kilidi: saha ölçümü sırasında ekranın kararmasını engeller.

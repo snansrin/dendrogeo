@@ -9,6 +9,75 @@ Yeni sürüm yayımlama adımları: [`docs/surum-yayini.md`](docs/surum-yayini.m
 
 ## [Yayımlanmadı]
 
+### Düzeltildi/Kaldırıldı — 0044: FOTOĞRAF KAPISI SAHAYI KİLİTLEMİYOR (çok sınıflı denetim) + 🤖 AI alt sistemi KÖKTEN SİLİNDİ
+**Kullanıcı geri bildirimi:** "%25'i kırmızı yapraklı ağaçlar sağlamıyor ve
+önümüz kış, fotoğrafta sadece dal olacağı için yeşil çok az — o yüzden fotoğraf
+yükleyemez kullanıcılar. Ben bugün 1 fotoğraf için sahada 30 dk harcadım, 1
+ağaç için. … 🤖 AI Ağaç Algılama … bunu sil, bu olmaması gereken bir şey.
+… hiçbir yerde izi kalmasın. Fotoğraf kontrolünü yeni ölçüm sekmesinde fotoğraf
+ekle butonuyla yapmak istiyorum, admin panelde istemiyorum. Mevcut sisteme
+ağaç, dal, farklı renkli yaprak algılamayı ekle."
+
+**KANIT — kök neden ölçüldü (canlı üretim kodu, 22 gerçek kare üzerinde):**
+eski kapı YALNIZ yeşil pikseli sayıyordu (`2G-R-B>20 && G>50`, `vegR>=0.25`):
+
+| Vaka | yeşil | eski kapı | yeni kapı |
+|---|---|---|---|
+| Mor/kırmızı yaprak (Prunus pissardii) | %11.9 | ⛔ KAYIT ENGELLİ | ✅ |
+| Kış çıplak dal (3 kare) | %0.4–0.5 | ⛔ KAYIT ENGELLİ | ✅ |
+| Sonbahar sarı/kızıl (2 kare) | %3.6–6.2 | ⛔ KAYIT ENGELLİ | ✅ |
+| Gövde + şerit metre (DBH kadrajı) | %17.6 | ⛔ KAYIT ENGELLİ | ✅ |
+| **Saf gökyüzü** | **%52 "yeşil"** | **✅ SAHTE POZİTİF** | ⛔ |
+| Koyu ibreli / yeşil meşe (kontrol) | %85–89 | ✅ | ✅ |
+| Beton duvar · lens kapağı · patlak | %0 | ⛔ | ⛔ |
+
+Eski kapı 22 karede **%64** doğrulukta (7 gerçek ağaç fotoğrafını engelliyor,
+saf gökyüzünü geçiriyordu). İKİNCİ kök neden: ExG indeksinde `G>B` koruması
+yoktu → mavi-gökkuşağı bandı "yeşil" sayılıyordu (species-ai'deki koruma
+measure.js'te hiç olmamış).
+
+**(a) Çok sınıflı denetim (measure.js · `dgPhotoScan`/`dgPhotoGate`):**
+piksel başına sınıflandırma — gök mavisi · bulut · yeşil örtü (`G>=B-2` gök
+sızmasını, `G>=R-12` turuncu sızmasını keser) · sonbahar sarı/turuncu ·
+antosiyanin kızıl/mor · kabuk/dal kahvesi — + parlaklık-modu sapmasıyla İNCE
+YAPI (dal silüeti). Kapı: pozlama 25–245 VE en az bir kanıt →
+`foliage≥%5` VEYA `gövde/dal≥%5` VEYA KIŞ KADRAJI (`mavi≥%25` iken
+`yapı≥%2.5` veya `koyu≥%3`). Eşiklerin TAMAMI korpusla kalibre edildi;
+sonuç **%100** (16 ağaç + 6 çöp), kış ve kızıl yaprak dahil. Sonuç kutusu
+kullanıcıya NE gördüğünü söyler ("yeşil örtü %86 · gövde/dal %10"). Kapı
+hâlâ teknik olarak var (`if(f&&!photoOk)`) ama artık BARİZ yanlış kareyi
+(gök/duvar/kapak/patlak) yakalıyor, mevsimi/yaprak rengini değil.
+`dgPhotoScan` SAF fonksiyon → tarayıcı olmadan test edilebilir
+(test/photo-qa.test.mjs vm'de sentetik karelerle ölçer).
+
+**(b) 🤖 AI alt sistemi KÖKTEN SİLİNDİ (kullanıcı kararı: "izi kalmasın"):**
+`src/services/species-ai.js` (dosya), index.html tag'i, sw CORE_ASSETS
+girdisi, shell'deki `#aiSuggest` kutusu ve 🤖 yönetim kartı (`#dgAiAdmin`),
+admin.js'teki `dgAiAdminRender` çağrısı, measure.js'teki `dgAiOnPhoto`
+kancası ve i18n'deki tüm AI/yönetim-kartı dizeleri (CORS/CSP talimatı
+dahil) kaldırıldı. Fotoğraf denetimi TEK YERDE: Yeni Ölçüm sekmesi,
+fotoğraf düğmesi (`onchange=checkPhoto`). Bekçiler TERSİNE çevrildi:
+fix-0044 kilidi "hiçbir iz kalmadı"yı assert eder.
+
+**(c) Landing iddiası kodla birebir (vitrin↔kod tutarlılığı):** eski
+"bitki örtüsü ≥ %25 ve pozlama 25–245" satırı YALAN olacağı için güncellendi:
+"Fotoğraf eklenirse tarayıcı içi çok sınıflı denetim uygulanır: yeşil ·
+kızıl/mor · sonbahar · gövde/dal · kış kadrajı + pozlama 25–245" (+ EN).
+
+**KIRMIZI ÇİZGİLER KORUNDU:** karbon motoru/katsayılar, MC_CFG, QA_LIMITS,
+şema/migrations/RLS, yayın kuyrugu, make-report.mjs, yayımlanmış raporlar,
+SPECIES_DATA değişmedi. Kapı istemci tarafı kolaylıktır; esas kalite kapısı
+yönetici onayıdır (onay tablosu fotoğrafı zaten gösterir) — bilimsel doğrulama
+zincirine hiçbir şey eklenmedi/çıkarılmadı.
+
+**Bekçiler:** test/photo-qa.test.mjs (9 davranış + 7 statik kilit) ·
+fix-0043 AI bölümü çıkarıldı (kaydırma kilitleri duruyor) · landing-claims
+0044 kaldırma kilidi · user-publish r52.
+
+**Sürüm:** sw r51→r52 (precache içeriği değişti: measure.js + species-ai
+çıktı). `npm run check`: 1012 test → 1012 pass / 0 fail · CSP 27 origin yeşil.
+
+
 ### Düzeltildi/Eklendi — 0042: AKASYA listede + AI artık AĞAÇ ALGILAMA (tür tanıma değil)
 **Kullanıcı geri bildirimi:** "ben tür tanıma istemedim, sadece ağacı algılasın
 fotoğrafta · geçen gün türleri silmişsin, akasya yok, bugün giriş yapamadım akasyaya."

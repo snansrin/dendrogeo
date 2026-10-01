@@ -481,7 +481,7 @@ describe('0040 · kaydırma koruması + ziyaretçi sekmesi zenginleştirme', () 
   });
 });
 
-describe('0041 · kaydırma window kök düzeltmesi + AI tür tanıma soketi', () => {
+describe('0041 · kaydırma window kök düzeltmesi + 0044 soket kaldırma', () => {
   test('⭐ dgScrollKeep/Restore WINDOW scrollY yakalıyor (0040 eksikliğinin kökü)', () => {
     const c = rd('src/config/constants.js');
     assert.match(c, /window\.scrollY/, 'window kaydırması yakalanmalı');
@@ -490,25 +490,24 @@ describe('0041 · kaydırma window kök düzeltmesi + AI tür tanıma soketi', (
     assert.match(sj, /dg_scrollw_/, 'kaldığın yer belleği window için de');
     assert.match(sj, /window\.scrollTo\(0,scw\)/, 'go() window konumunu geri koyar');
   });
-  test('⭐ AI soketi 0042: AĞAÇ ALGILAMA modu (tür tanıma DEĞİL — kullanıcı kararı)', () => {
-    const ai = rd('src/services/species-ai.js');
-    assert.match(ai, /async function dgAiDetect/);
-    assert.match(ai, /async function dgAiOnPhoto/);
-    assert.match(ai, /function dgAiParse/, 'esnek yanıt ayrıştırıcı');
-    assert.match(ai, /function dgAiAdminRender/);
-    assert.match(ai, /isTreeWord|tree\|a/, 'ağaç etiketi sezimi');
-    assert.match(ai, /photoOk=false/, 'AI kapısı: block açıkken fotoğraf reddi');
-    assert.ok(!/function dgAiUse/.test(ai), 'tür ön-doldurma KALDIRILDI (kullanıcı istemedi)');
-    assert.ok(!/insert|upsert|\.from\(/.test(ai), 'AI modülü veritabanına DOKUNMAZ');
-    assert.match(index, /<script src="src\/services\/species-ai\.js\?v=[0-9a-f]{8}" defer>/, 'index kaydı');
-    assert.match(rd('sw.js'), /'\/src\/services\/species-ai\.js'/, 'CORE_ASSETS kaydı');
-    assert.match(rd('src/services/measure.js'), /dgAiOnPhoto\(f\)/, 'fotoğraf QA sonrası kanca');
-    const sh = rd('partials/shell.html');
-    assert.match(sh, /id="aiSuggest"/, 'sonuç kutusu');
-    assert.match(sh, /id="dgAiAdmin"/, 'yönetim kartı');
-    assert.match(sh, /AI Ağaç Algılama/, 'kart başlığı ağaç modunda');
-    assert.match(rd('src/services/admin.js'), /dgAiAdminRender/, 'loadAdmin kartı çizer');
-    assert.match(rd('sw.js'), /dendrogeo-sw-v2-r51/, 'sw r51 (içerik sözleşmesi)');
+  test('⭐ 0044: harici model soketi + yönetim kartı KÖKTEN SİLİNDİ (kullanıcı kararı: iz kalmasın)', () => {
+    assert.ok(!existsSync(join(ROOT, 'src/services/species-ai.js')), 'modül dosyası silinmeli');
+    assert.ok(!index.includes('species-ai'), 'index.html tag izi kalmamalı');
+    assert.ok(!rd('sw.js').includes('species-ai'), 'CORE_ASSETS izi kalmamalı');
+    assert.ok(!shell.includes('aiSuggest'), 'sonuç kutusu izi kalmamalı');
+    assert.ok(!shell.includes('dgAiAdmin'), 'yönetim kartı kutusu izi kalmamalı');
+    assert.ok(!shell.includes('AI Ağaç Algılama'), 'yönetim kartı başlığı izi kalmamalı');
+    assert.ok(!rd('src/services/admin.js').includes('dgAiAdminRender'), 'loadAdmin çağrısı izi kalmamalı');
+    const mj = rd('src/services/measure.js');
+    assert.ok(!mj.includes('dgAiOnPhoto'), 'fotoğraf kancası izi kalmamalı');
+    assert.ok(!rd('src/config/i18n.js').includes('AI Ağaç Algılama'), 'sözlük izi kalmamalı');
+    /* Fotoğraf denetimi SAHADA ve TEK yerde: Yeni Ölçüm sekmesi, fotoğraf düğmesi. */
+    assert.match(shell, /onchange="checkPhoto\(event\)"/, 'denetim fotoğraf düğmesine bağlı');
+    assert.match(shell, /id="photoCheck"/, 'sonuç kutusu ölçüm formunda');
+    assert.match(mj, /function dgPhotoScan/, 'çok sınıflı tarayıcı (saf fonksiyon)');
+    assert.match(mj, /function dgPhotoGate/, 'kalibre kapı');
+    assert.ok(!/vegR>=0\.25/.test(mj), 'eski %25 yeşil kapısı geri gelmemeli');
+    assert.match(rd('sw.js'), /dendrogeo-sw-v2-r52/, 'sw r52 (içerik sözleşmesi)');
   });
   test('⭐ AKASYA kanonik tür (0042): listede + eşanlamlı gölgesi yok', () => {
     const sp = rd('src/config/species.js');
