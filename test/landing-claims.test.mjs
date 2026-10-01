@@ -508,7 +508,7 @@ describe('0041 · kaydırma window kök düzeltmesi + AI tür tanıma soketi', (
     assert.match(sh, /id="dgAiAdmin"/, 'yönetim kartı');
     assert.match(sh, /AI Ağaç Algılama/, 'kart başlığı ağaç modunda');
     assert.match(rd('src/services/admin.js'), /dgAiAdminRender/, 'loadAdmin kartı çizer');
-    assert.match(rd('sw.js'), /dendrogeo-sw-v2-r50/, 'sw r50 (içerik sözleşmesi)');
+    assert.match(rd('sw.js'), /dendrogeo-sw-v2-r51/, 'sw r51 (içerik sözleşmesi)');
   });
   test('⭐ AKASYA kanonik tür (0042): listede + eşanlamlı gölgesi yok', () => {
     const sp = rd('src/config/species.js');

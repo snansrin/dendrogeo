@@ -10,6 +10,48 @@ const _tadf=(t,v)=>(typeof dgTfs==="function"?dgTfs(t,v):String(t).replace(/\{(\
  * listProjects/fillSelect — data-requests de bunları çağırır), yönetici toplu
  * dışa aktarımı ve REQ_ROWS/ADM_ROWS paylaşılan filtre state'i. */
 
+/* 0043: Düz liste çizimi TEK yerde — hem loadAdmin (taze sunucu verisi) hem
+ * iyimser onay/red (admin-tree.js DG_TREE_ROWS önbelleği) buradan çizer; kod
+ * tekrarlamaz, iki görünüm (ağaç + düz liste) tutarlı kalır. data-mid: satırı
+ * kayıt kimliğiyle bulmayı sağlar (hedefli güncelleme/hata ayıklama). */
+function dgFlatRowHTML(x){
+  const st=x.status||"Beklemede";
+  const bc=st==="Onaylı"?"on":(st==="Red"?"off":"admin");
+  const act=st==="Onaylı"
+   ?`<button class="btn sm red" onclick="rejectMeas(${x.id})">🚫 Reddet</button>`
+   :`<button class="btn sm" onclick="approveMeas(${x.id})">✓ Onayla</button>`;
+  return `<tr data-mid="${esc(x.id)}"><td data-label="Kullanıcı">${esc(x.profiles?.full_name)||"—"}</td><td data-label="Nokta">${x.point_id}</td><td data-label="Tür">${esc(x.species)}<br><span class="mono" style="font-size:.68rem;color:var(--mut);text-transform:none;letter-spacing:0">${esc(LATIN[x.species])||""}</span></td><td data-label="Çap"><b>${x.dbh_cm}</b></td><td data-label="Boy"><b>${x.height_m}</b></td><td data-label="Karbon">${(x.carbon_kg||0).toFixed(1)}</td><td data-label="Foto">${dgThumb(x.photo_url)}</td><td data-label="Durum"><span class="badge ${bc}">${st}</span></td><td data-label="İşlem" style="display:flex;gap:4px">${act}<button class="btn sm ghost" title="Konum çiti istisnası işle (0007 · yalnız yönetici · audit izi kalır)" onclick="dgGeoOverride(${x.id})">🛰</button><button class="btn sm red" onclick="delMeas(${x.id})">🗑️</button></td></tr>`;
+}
+function dgRenderFlatTable(rows){
+  const t=$("aMeasT");if(!t)return;
+  t.innerHTML=(rows||[]).slice()
+    .sort((a,b)=>((+a.project_id||0)-(+b.project_id||0))||((+a.point_id||0)-(+b.point_id||0))||((+a.measurement_no||1)-(+b.measurement_no||1)))
+    .slice(0,300).map(dgFlatRowHTML).join("")||"<tr><td colspan=9>Kayıt yok.</td></tr>";
+}
+
+/* 0043 · SEKMELİ (debounced) ARKA PLAN MUTABAKAT
+ * İyimser onay/red ağacı + düz listeyi + rozetleri ANINDA yerel önbellekten
+ * günceller (ağ turu yok, sıçrama yok, TEK çizim). Sunucuyla tam mutabakat
+ * için her onayda ağır loadAdmin çağırmak YERİNE, son tıktan ~1 sn sonra TEK
+ * bir HAFİF tazeleme yapılır: ağaç SUNUCUDAN YENİDEN ÇEKİLMEZ (ikinci tam
+ * çizim = gereksiz titreme + taze tıkla yarışma); yalnız onayla DEĞİŞEN üst
+ * istatistik (aCarbon: onaylı karbon, v_global) ve dünya karşılaştırması
+ * tazelenir. Dünya sekmesi gizli görünümde çizilir → admin sekmesi
+ * kaydırmasını ETKİLEMEZ. Böylece "bir sürü veri" hızlıca onaylanırken ağaç
+ * anlık ve TEK çizimde kalır, ağ yükü patlamaz, sıçrama/titreme olmaz. */
+let DG_ADMIN_SYNC_T=null;
+function dgAdminSyncSoon(){
+  if(DG_ADMIN_SYNC_T)clearTimeout(DG_ADMIN_SYNC_T);
+  DG_ADMIN_SYNC_T=setTimeout(async()=>{
+    DG_ADMIN_SYNC_T=null;
+    try{
+      const g=await sb.from("v_global").select("*").single();
+      if(g&&g.data&&$("aCarbon"))$("aCarbon").textContent=g.data.carbon_t||0;
+    }catch(e){}
+    try{loadWorld();}catch(e){}
+  },1000);
+}
+
 /* 0040: kaydırma koruma sarmalı — yeniden çizimde #main scrollTop korunur. */
 async function loadAdmin(){const _y=(typeof dgScrollKeep==="function"?dgScrollKeep():null);try{return await loadAdmin__scroll.apply(this,arguments);}finally{if(typeof dgScrollRestore==="function")dgScrollRestore(_y);}}
 async function loadAdmin__scroll(){
@@ -36,15 +78,7 @@ $("aUsers").textContent=users.length;$("aRec").textContent=cnt.count??meas.lengt
   * Artık hatanın kendisi ekrana yazılır (ayrıntı: admin-tree.js dgTreeFetch). */
  if(mRes.error){
   $("aMeasT").innerHTML=`<tr><td colspan=9><div class="alert err"><b>⚠ Ölçümler okunamadı (veri silinmedi, sorgu hata veriyor):</b> <span class="mono" style="font-size:.72rem">${esc(mRes.error.message)}</span><br><span style="font-size:.8rem">Şema değişikliğinden sonra PostgREST önbelleği bayatlamış olabilir → Supabase'de birkaç dakika bekleyip 🔄 Yenile, ya da üstteki "Park → Proje → Kullanıcı" ağacının hata kutusundaki adımları izle.</span></div></td></tr>`;
- }else
- $("aMeasT").innerHTML=meas.slice().sort((a,b)=>((+a.project_id||0)-(+b.project_id||0))||((+a.point_id||0)-(+b.point_id||0))||((+a.measurement_no||1)-(+b.measurement_no||1))).slice(0,300).map(x=>{
-  const st=x.status||"Beklemede";
-  const bc=st==="Onaylı"?"on":(st==="Red"?"off":"admin");
-  const act=st==="Onaylı"
-   ?`<button class="btn sm red" onclick="rejectMeas(${x.id})">🚫 Reddet</button>`
-   :`<button class="btn sm" onclick="approveMeas(${x.id})">✓ Onayla</button>`;
-  return `<tr><td data-label="Kullanıcı">${esc(x.profiles?.full_name)||"—"}</td><td data-label="Nokta">${x.point_id}</td><td data-label="Tür">${esc(x.species)}<br><span class="mono" style="font-size:.68rem;color:var(--mut);text-transform:none;letter-spacing:0">${esc(LATIN[x.species])||""}</span></td><td data-label="Çap"><b>${x.dbh_cm}</b></td><td data-label="Boy"><b>${x.height_m}</b></td><td data-label="Karbon">${(x.carbon_kg||0).toFixed(1)}</td><td data-label="Foto">${dgThumb(x.photo_url)}</td><td data-label="Durum"><span class="badge ${bc}">${st}</span></td><td data-label="İşlem" style="display:flex;gap:4px">${act}<button class="btn sm ghost" title="Konum çiti istisnası işle (0007 · yalnız yönetici · audit izi kalır)" onclick="dgGeoOverride(${x.id})">🛰</button><button class="btn sm red" onclick="delMeas(${x.id})">🗑️</button></td></tr>`;
- }).join("")||"<tr><td colspan=9>Kayıt yok.</td></tr>";
+ }else dgRenderFlatTable(meas);
  loadStorageStats();
  checkBackupReminder();
  loadVisitStats();
@@ -66,11 +100,21 @@ async function approveMeas(id){
  const{error}=await sb.from("measurements").update({status:"Onaylı",shared:true}).eq("id",id);
  if(error)return toast("Hata: "+error.message,"err");
  toast("Kayıt onaylandı","ok","✓");
- /* Canlı haritayı bayat işaretle (2026-09-26): loadWorld() dünya sekmesini
-  * tazeliyordu ama Canlı Harita sekmesi liveLoaded kapısı yüzünden ESKİ
-  * kümede kalıyordu → onaylanan nokta F5'e kadar görünmüyordu. */
+ /* Canlı haritayı bayat işaretle (2026-09-26): onaylanan nokta Canlı Harita
+  * sekmesine gidilince DG_LIVE_DIRTY kapısıyla yeniden çizilir (go("map")). */
  dgMarkLiveDirty();
- loadAdmin();loadWorld();
+ /* 0043 · İYİMSER ONAY (kullanıcı: "3-4 kaydı onaylarken sıçrama yaşıyorum,
+  * bir sürü veri girilecek"). Eski akış her onayda loadAdmin→loadAdminTree ile
+  * TÜM ağacı sunucudan yeniden çekiyor, ağaç "⏳ yükleniyor"a çöküp kaydırma
+  * fırlıyordu. Yeni akış: satırı YEREL önbellekte güncelle + YERİNDE çiz
+  * (anlık, ağ yok, sıçrama yok). Satır önbellekte yoksa (örn. düz listeden,
+  * ağaç yüklenmeden) eski tam yükleme yedeğine düş. Sunucuyla tam mutabakat
+  * sekmeli (debounced) arka plan tazelemesiyle ~1 sn içinde gelir. */
+ if(typeof dgTreeApplyStatus!=="function"||!dgTreeApplyStatus(id,"Onaylı",true)){
+  loadAdmin();loadWorld();
+ }else{
+  dgAdminSyncSoon();
+ }
 }
 
 /* 🛰 KONUM ÇİTİ İSTİSNASI (0007): saha gerçeği poligonla çatışabilir (yeni
@@ -91,7 +135,13 @@ async function rejectMeas(id){
  if(error)return toast("Hata: "+error.message,"err");
  toast("Kayıt reddedildi","warn","🚫");
  dgMarkLiveDirty();   /* red edilen nokta da haritadan düşmeli */
- loadAdmin();
+ /* 0043: iyimser red — yerinde güncelle (ağ yok, sıçrama yok); önbellekte
+  * yoksa tam yüklemeye düş; tam mutabakat sekmeli arka plan tazelemesiyle. */
+ if(typeof dgTreeApplyStatus!=="function"||!dgTreeApplyStatus(id,"Red",false)){
+  loadAdmin();
+ }else{
+  dgAdminSyncSoon();
+ }
 }
 
 async function loadStorageStats(){
@@ -151,7 +201,16 @@ async function delMeas(id){
  if(!confirm(dgCf("Kayıt silinsin mi?")))return;
  const{data}=await sb.from("measurements").select("photo_url").eq("id",id).single();
  if(data)await removePhoto(data.photo_url);
- await sb.from("measurements").delete().eq("id",id);dgMarkLiveDirty();loadAdmin();
+ const{error}=await sb.from("measurements").delete().eq("id",id);
+ if(error)return toast("Hata: "+error.message,"err");
+ dgMarkLiveDirty();
+ /* 0043: iyimser silme — satırı önbellekten düş + yerinde çiz (sıçrama yok);
+  * önbellekte yoksa tam yüklemeye düş; tam mutabakat sekmeli arka planla. */
+ if(typeof dgTreeRemoveRow!=="function"||!dgTreeRemoveRow(id)){
+  loadAdmin();
+ }else{
+  dgAdminSyncSoon();
+ }
 }
 
 function filterAdminMeas(){

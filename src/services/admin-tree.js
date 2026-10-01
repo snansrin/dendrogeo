@@ -220,8 +220,9 @@ function dgTreeRowHTML(r){
     ? `<button class="btn sm red" onclick="rejectMeas(${r.id})">🚫 Reddet</button>`
     : `<button class="btn sm" onclick="approveMeas(${r.id})">✓ Onayla</button>`;
   const d=r.created_at?new Date(r.created_at):null;
-  /* data-label: 640px altında tablo kart düzenine döner (css/style.css .dg-cards) */
-  return `<tr>`+
+  /* data-label: 640px altında tablo kart düzenine döner (css/style.css .dg-cards)
+   * data-mid: 0043 — satırı kayıt kimliğiyle bul (iyimser onay/red güncellemesi). */
+  return `<tr data-mid="${esc(r.id)}">`+
     `<td data-label="Nokta"><b>P${esc(r.point_id)}</b>${r.measurement_no>1?`<span class="mono dg-sub"> /M${r.measurement_no}</span>`:""}</td>`+
     `<td data-label="Tür">${esc(r.species||"—")}<br><span class="mono dg-sub">${esc((typeof LATIN!=="undefined"&&LATIN[r.species])||"")}</span></td>`+
     `<td data-label="Grup">${esc(r.grp||"—")}</td>`+
@@ -398,7 +399,22 @@ function dgTreeRender(tree){
 async function loadAdminTree(){
   if(!PROFILE||(PROFILE.role!=="admin"&&PROFILE.role!=="owner"))return;
   const box=$("adminTree");
-  if(box)box.innerHTML=`<div class="alert info">⏳ Ölçümler yükleniyor…</div>`;
+  /* ═══ 0043 · KAYDIRMA SIÇRAMASININ KÖK NEDENİ BURADAYDI ═══
+   * ESKİ davranış: her yenilemede (onay/red sonrası loadAdmin→loadAdminTree,
+   * sekme açılışı, 🔄 Yenile) ağaç KOŞULSUZ tek satır "⏳ Ölçümler yükleniyor…"
+   * ile eziliyordu. Yüzlerce satırlık ağaç bir anda ~40px'e çökünce toplam
+   * belge yüksekliği aniden küçülüyor, tarayıcı window.scrollY'yi yeni (küçük)
+   * azami değere KIRPIYORDU → ekran yukarı fırlıyordu ("sıçrama"). dgTreeDraw
+   * sonra ağacı yeniden çizse de kaydırma çoktan kaybolmuş oluyordu; 0040/0041
+   * sarmalları bu ÇÖKMEYİ yakalayamadı çünkü konum, yükleme mesajı basılırken
+   * (await'ten ÖNCE, sarmal dışında) sıfırlanıyordu.
+   * ÇÖZÜM: "yükleniyor" mesajı YALNIZ ilk yüklemde (kutu boşken). Yenilemede
+   * mevcut ağaç ekranda KALIR → yükseklik çökmez → kırpma yok → sıçrama yok.
+   * Yeni veri gelince dgTreeDraw onu YERİNDE çizer. Ek güvence: kaydırma
+   * konumu işlemin BAŞINDA yakalanıp SONUNDA (çizimden sonra) geri yazılır. */
+  const hasTree=box&&box.querySelector&&box.querySelector(".dg-tree-park,.dg-tree-sum,.alert.err,.alert.info");
+  if(box&&!hasTree)box.innerHTML=`<div class="alert info">⏳ ${_ta("Ölçümler yükleniyor…")}</div>`;
+  const _y=(typeof dgScrollKeep==="function"?dgScrollKeep():null);
 
   /* ⚠ "YÜKLENIYOR"DA ASILI KALMA KORUMASI (canlıda yaşandı 2026-09-24):
    * sorgu PostgREST hatası DEĞİL de bir JS istisnası fırlatırsa await reddedilir
@@ -411,6 +427,7 @@ async function loadAdminTree(){
     DG_TREE_ROWS=[];
     DG_TREE_ERR=_ta("beklenmedik sorgu hatası: ")+((e&&e.message)||String(e));
     dgTreeDraw();
+    if(typeof dgScrollRestore==="function")dgScrollRestore(_y);
     return;
   }
 
@@ -429,6 +446,10 @@ async function loadAdminTree(){
       `<span class="mono" style="font-size:.72rem">${esc(DG_TREE_ERR)}</span> `+
       `<button class="btn sm blue" onclick="loadAdminTree()">🔄 Yeniden dene</button></div>`;
   }
+  /* 0043: çizim bittikten SONRA kaydırmayı geri koy (ağaç yenilenirken bel
+   * yüksekliği değişmiş olabilir; sarmal tek başına yetmez, çünkü yükleniyor
+   * çökmesi eskiden sarmalın DIŞINDAYDI). */
+  if(typeof dgScrollRestore==="function")dgScrollRestore(_y);
 }
 
 /* Filtrelenmiş ağacı çiz (veri zaten DG_TREE_ROWS'ta) */
@@ -477,6 +498,44 @@ function dgTreeExpand(open){
   dgTreeRender(tree);
 }
 
+/* =========================================================
+   5. 0043 · İYİMSER ONAY/RED/SİL (ağdan YENİDEN ÇEKME YOK)
+   Kullanıcı "3-4 kaydı onaylarken sıçrama yaşıyorum, bir sürü veri
+   girilecek" dedi. Eski akış her onayda loadAdmin→loadAdminTree ile TÜM
+   ağacı sunucudan yeniden çekiyordu; bu hem yavaş (çift ağ turu) hem de
+   ağacı "⏳ yükleniyor"a çökertip kaydırmayı fırlatıyordu.
+   Yeni akış: DB yazımı BAŞARILI olunca ilgili satırın durumu YEREL önbellekte
+   (DG_TREE_ROWS) güncellenir ve ağaç YERİNDE yeniden çizilir. dgTreeDraw
+   zaten kaydırma korumalı + çökertmesiz → tık anında, ekran kımıldamaz,
+   sayaçlar/rozetler (✓N ⏳N 🚫N, 🔴 bekleyen) doğru kalır. Düz liste de aynı
+   önbellekten tazelenir (admin.js:dgRenderFlatTable). Sunucu ile tam mutabakat
+   için admin.js ayrıca SEKMELİ (debounced) bir arka plan loadAdmin çalıştırır.
+========================================================= */
+function dgTreeRows(){return DG_TREE_ROWS;}
+
+/* Satırın durumunu yerel önbellekte güncelle + ağacı ve düz listeyi yerinde
+ * yeniden çiz. Satır önbellekte yoksa false döner (çağıran tam loadAdmin'e
+ * düşer — örn. düz listeden, ağaç henüz yüklenmemişken onay). */
+function dgTreeApplyStatus(id,status,shared){
+  const row=DG_TREE_ROWS.find(r=>Number(r.id)===Number(id));
+  if(!row)return false;
+  row.status=status;
+  if(shared!=null)row.shared=shared;
+  try{dgTreeDraw();}catch(e){}
+  try{if(typeof dgRenderFlatTable==="function")dgRenderFlatTable(DG_TREE_ROWS);}catch(e){}
+  return true;
+}
+
+/* Satırı yerel önbellekten sil (delMeas) + yerinde yeniden çiz. */
+function dgTreeRemoveRow(id){
+  const i=DG_TREE_ROWS.findIndex(r=>Number(r.id)===Number(id));
+  if(i<0)return false;
+  DG_TREE_ROWS.splice(i,1);
+  try{dgTreeDraw();}catch(e){}
+  try{if(typeof dgRenderFlatTable==="function")dgRenderFlatTable(DG_TREE_ROWS);}catch(e){}
+  return true;
+}
+
 window.loadAdminTree=loadAdminTree;
 window.dgRefreshPendingBadge=dgRefreshPendingBadge;
 window.dgTreeOnlyPending=dgTreeOnlyPending;
@@ -486,6 +545,10 @@ window.dgTreeSetQuery=dgTreeSetQuery;
 window.dgTreeToggle=dgTreeToggle;
 window.dgTreeExpand=dgTreeExpand;
 window.dgTreePendingScan=dgTreePendingScan;
+/* 0043: iyimser onay/red/sil — admin.js bunları çağırır (ağaç önbelleğine erişir). */
+window.dgTreeApplyStatus=dgTreeApplyStatus;
+window.dgTreeRemoveRow=dgTreeRemoveRow;
+window.dgTreeRows=dgTreeRows;
 
 /* 0036 (T2) · PROJEYİ TAMAMEN SİL (yönetim ağacından).
  * RLS: projects_delete = owner veya is_owner() → sunucu kararı kesindir;

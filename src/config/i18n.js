@@ -953,6 +953,17 @@ const DG_I18N_EN={
 "CSP connect-src ve CORS kontrol edin":"check CSP connect-src and CORS",
 "Sunucu CORS açmalı (Access-Control-Allow-Origin: https://dendrogeo.org) ve URL, CSP connect-src listesine eklenmeli — adresi iletin, tek satırda eklenir. Model tarayıcıda çalışsın isterseniz ONNX/TF.js modu planlı (çevrimdışı saha).":"The server must enable CORS (Access-Control-Allow-Origin: https://dendrogeo.org) and the URL must be added to the CSP connect-src list — send me the address, it's a one-line change. For in-browser inference, an ONNX/TF.js mode is planned (offline field use).",
 "saha doğrulaması · insan kararı":"field verification · human decision",
+/* === 0043: yerleşik çevrimdışı ağaç algılayıcı === */
+"Ağaç algılanıyor (yerleşik · çevrimdışı)…":"Detecting tree (built-in · offline)…",
+"yerleşik algılayıcı":"built-in detector",
+"yerleşik":"built-in",
+"uç nokta erişilemedi, yerleşik kullanıldı":"endpoint unreachable; built-in used",
+"Yerleşik ağaç algılama (çevrimdışı · model gerektirmez · yalnız uyarı, kaydı engellemez)":"Built-in tree detection (offline · no model needed · advisory only, never blocks saving)",
+"Gelişmiş: gerçek model uç noktası (opsiyonel · yerleşik algılayıcının yerine geçer)":"Advanced: real model endpoint (optional · overrides the built-in detector)",
+"🌳 Yerleşik algılayıcıyı dene":"🌳 Test the built-in detector",
+"yerleşik algılayıcı deneniyor…":"testing the built-in detector…",
+"sonuç yok":"no result",
+"Yerleşik algılayıcı tarayıcıda çalışır (çevrimdışı saha): yeşil örtü + gövde + kadraj sezgisiyle 'ağaç var mı' der; YALNIZ UYARIDIR, kaydı engellemez. Daha kesin sonuç için gerçek model bağlayın: sunucu CORS açmalı (Access-Control-Allow-Origin: https://dendrogeo.org) ve URL, CSP connect-src listesine eklenmeli — adresi iletin, tek satırda eklenir.":"The built-in detector runs in the browser (offline in the field): it uses green-cover + trunk + framing heuristics to say 'is there a tree'; it is ADVISORY ONLY and never blocks saving. For higher accuracy, connect a real model: the server must enable CORS (Access-Control-Allow-Origin: https://dendrogeo.org) and the URL must be added to the CSP connect-src list — send me the address, it's a one-line change.",
 
 /* sayfa başlığı */
 "DendroGeo — Küresel Ağaç Envanteri ve Karbon Veri Sistemi":"DendroGeo — Global Tree Inventory & Carbon Data System"
