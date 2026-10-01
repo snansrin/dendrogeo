@@ -9,6 +9,36 @@ Yeni sürüm yayımlama adımları: [`docs/surum-yayini.md`](docs/surum-yayini.m
 
 ## [Yayımlanmadı]
 
+### Düzeltildi — 0039: CSP, Realtime WebSocket'i blokluyordu (wss:// izni)
+Kullanıcı konsol kanıtı: "Connecting to 'wss://…supabase.co/realtime/v1/
+websocket?…' violates … Content Security Policy … 'connect-src' was not
+explicitly set, so 'default-src' is used as a fallback."
+
+- KÖK NEDEN: meta CSP'de connect-src YOKTU → bağlantılar default-src'e
+  düşüyordu; tarayıcı `https://*.supabase.co` kaynağını `wss://` URL'iyle
+  EŞLEŞTİRMEDİ → presence + canlı konum kanalları daha el sıkışamadan
+  bloklanıyordu. (0038'deki subscribe-önce/watchdog düzeltmesi doğruydu ama
+  WS hiç kurulamadığı için durum hep "connecting"de kalıyordu — sunucu
+  tarafı probu sağlıklıydı, engel kendi CSP'mizdi.)
+- ÇÖZÜM: `connect-src 'self' data: blob: https://*.supabase.co
+  wss://*.supabase.co + bağlantı kurulan tüm originler` (nominatim, overpass
+  uçları, planetarycomputer, blob.core.windows, s3, cloudflare turnstile,
+  arcgis, opentopomap, tile.openstreetmap, api.openstreetmap) AÇIKÇA
+  tanımlandı. connect-src bir kez tanımlanınca default-src bağlantılara
+  düşmeyeceği için liste TAM tutuldu (STAC/COG/ters kodlama/turnstile
+  istekleri kırılmasın).
+- Bekçi: landing-claims.test.mjs → "connect-src açıkça tanımlı + wss izni +
+  kodda fetch edilen her origin connect-src'te de var" (8 origin pinli).
+  check-csp.mjs aynen yeşil (27 origin / 19 izin).
+
+Konsoldaki diğer gürültüler zararsız: "OTS parsing error" (Google Fonts
+woff2 ağ aksaklığı, yeniden denemede geçer), "No available adapters /
+powerPreference" (geotiff'in WebGPU probu — WebGL'e düşer), "Kuyruk boş"
+(offline senkron bilgi mesajı).
+
+npm run check: 985 test → 983 pass / 0 fail / 2 skip.
+
+
 ### Eklendi/Düzeltildi — 0038: "Ziyaretçi & Canlı" sekmesi (yalnız kurucu) + Realtime "connecting" takılmasının kök çözümü
 Kullanici kararlari: (1) yonetim ozet kartlari ACILIR OLMAYACAK (0036'daki
 dgAdminExpand geri alindi), (2) admine "Ziyaretçi" sekmesi — kim girip ne

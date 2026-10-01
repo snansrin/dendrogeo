@@ -4,7 +4,13 @@
 <meta charset="utf-8"> 
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="google-site-verification" content="b8R2BtUI2XYHvOY5jqh18Binkcs_-tILJCLjs9H6LNE" />
-<meta http-equiv="Content-Security-Policy" content="default-src 'self' 'unsafe-inline' data: blob: https://*.tile.openstreetmap.org https://nominatim.openstreetmap.org https://api.openstreetmap.org https://*.supabase.co https://fonts.googleapis.com https://fonts.gstatic.com https://challenges.cloudflare.com https://overpass-api.de https://lz4.overpass-api.de https://z.overpass-api.de https://overpass.kumi.systems https://overpass.osm.ch https://overpass.openstreetmap.fr https://overpass.private.coffee https://server.arcgisonline.com https://*.tile.opentopomap.org https://planetarycomputer.microsoft.com https://*.blob.core.windows.net https://*.s3.us-west-2.amazonaws.com">
+<!-- CSP (0039): connect-src ARTIK AÇIKÇA tanımlı. Sebep: Realtime WebSocket
+     wss://…supabase.co adresine bağlanıyor; connect-src yokken default-src'e
+     düşülüyordu ve tarayıcı https://*.supabase.co kaynağını wss:// ile
+     EŞLEŞTİRMİYOR → presence/canlı konum kanalları konsolda "violates CSP"
+     ile bloklanıyordu (kullanıcı konsol kanıtı 2026-10-01). connect-src,
+     default-src'in bağlantı kurulan tüm originlerini + wss'i içerir. -->
+<meta http-equiv="Content-Security-Policy" content="default-src 'self' 'unsafe-inline' data: blob: https://*.tile.openstreetmap.org https://nominatim.openstreetmap.org https://api.openstreetmap.org https://*.supabase.co https://fonts.googleapis.com https://fonts.gstatic.com https://challenges.cloudflare.com https://overpass-api.de https://lz4.overpass-api.de https://z.overpass-api.de https://overpass.kumi.systems https://overpass.osm.ch https://overpass.openstreetmap.fr https://overpass.private.coffee https://server.arcgisonline.com https://*.tile.opentopomap.org https://planetarycomputer.microsoft.com https://*.blob.core.windows.net https://*.s3.us-west-2.amazonaws.com; connect-src 'self' data: blob: https://*.supabase.co wss://*.supabase.co https://nominatim.openstreetmap.org https://api.openstreetmap.org https://*.tile.openstreetmap.org https://challenges.cloudflare.com https://overpass-api.de https://lz4.overpass-api.de https://z.overpass-api.de https://overpass.kumi.systems https://overpass.osm.ch https://overpass.openstreetmap.fr https://overpass.private.coffee https://server.arcgisonline.com https://*.tile.opentopomap.org https://planetarycomputer.microsoft.com https://*.blob.core.windows.net https://*.s3.us-west-2.amazonaws.com">
 <title>DendroGeo — Küresel Ağaç Envanteri ve Karbon Veri Sistemi</title>
 
 

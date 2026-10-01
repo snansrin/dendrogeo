@@ -222,6 +222,23 @@ describe('P2 · temizlik kalıcı', () => {
   });
 });
 
+describe('0039 · CSP realtime kilidi', () => {
+  test('⭐ connect-src açıkça tanımlı ve wss://*.supabase.co izinli (Realtime bloklanmasın)', () => {
+    assert.match(head, /connect-src[^"]*wss:\/\/\*\.supabase\.co/, 'CSP wss izni');
+    /* connect-src tanımlandıktan sonra default-src artık bağlantılara DÜŞMEZ:
+     * kodda fetch edilen tüm originler connect-src içinde de olmalı. */
+    for (const o of ['https://*.supabase.co', 'https://nominatim.openstreetmap.org',
+      'https://overpass-api.de', 'https://planetarycomputer.microsoft.com',
+      'https://*.blob.core.windows.net', 'https://*.s3.us-west-2.amazonaws.com',
+      'https://challenges.cloudflare.com', "'self'"]) {
+      const meta = head.match(/Content-Security-Policy"\s+content="([^"]+)"/);
+      assert.ok(meta, 'CSP meta etiketi var');
+      const cs = (meta[1].split(/;\s*connect-src\s/)[1] || '');
+      assert.ok(cs.includes(o), 'connect-src içinde eksik: ' + o);
+    }
+  });
+});
+
 describe('0036 · özellik ve EN bütünlük kilitleri', () => {
   const sh = rd('partials/shell.html');
   test("⭐ grup optionları value taşır (EN çevirisi veriyi bozamaz)", () => {
