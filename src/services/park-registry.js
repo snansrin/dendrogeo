@@ -1,4 +1,8 @@
 "use strict";
+/* 0037: i18n güvenlikli yerel yardımcılar. */
+const _tpr=(s)=>(typeof dgCf==="function"?dgCf(s):s);
+const _tprf=(t,v)=>(typeof dgTfs==="function"?dgTfs(t,v):String(t).replace(/\{(\w+)\}/g,(m,k)=>(v&&v[k]!=null?v[k]:m)));
+
 /* DendroGeo · services/park-registry.js — PARK KİMLİĞİ + PROJE BAĞI + ÖLÇÜM KAPISI
  *
  * NEDEN VAR (kullanıcı isteği 2026-09-24):
@@ -331,7 +335,7 @@ async function dgRegisterPark(cand,opt){
     /* Elle oluşturulmuş kayıt OSM kimliğiyle çakıştı: tekilleştirme YÖNETİCİ
      * işidir (sessiz veri taşıma yapılmaz) ama kullanıcı bilmeli. */
     if(!manual&&hit.source==="manual"&&typeof toast==="function"){
-      toast(dgCf("ℹ Bu park daha önce elle oluşturulmuş (#")+hit.id+"); aynı kimlik kullanılıyor. OSM kimliğine geçmek için: Yönetim → 🌳 Park Kimlikleri → 🔀 birleştir.","info","🌳");
+      toast(dgCf("ℹ Bu park daha önce elle oluşturulmuş (#")+hit.id+")"+_tpr("; aynı kimlik kullanılıyor. OSM kimliğine geçmek için: Yönetim → 🌳 Park Kimlikleri → 🔀 birleştir."),"info","🌳");
     }
     return hit;
   }
@@ -405,16 +409,16 @@ async function dgScanSearchByName(name){
   const{data}=await sb.from("parks").select("*").ilike("name_norm",norm+"%").order("name").limit(5);
   if(data&&data.length){
    DG_PARK_CAND=null;DG_PARK=data[0];dgRenderScanCard();
-   return toast("🌳 "+esc(data[0].name)+" seçildi — proje açabilirsin; ölçüm için parkta olman gerekir.","ok","🌳");
+   return toast("🌳 "+esc(data[0].name)+" "+_tpr("seçildi — proje açabilirsin; ölçüm için parkta olman gerekir."),"ok","🌳");
   }
  }catch(e){console.warn("DENDROGEO · uzak park arama (DB):",e.message);}
- toast("🔍 "+q+" OSM'de aranıyor…","info","🌳");
+ toast("🔍 "+q+" "+_tpr("OSM'de aranıyor…"),"info","🌳");
  try{
   const r=await fetch("https://nominatim.openstreetmap.org/search?format=jsonv2&limit=1&q="+encodeURIComponent(q+" park"));
   const j=await r.json();
   if(!j||!j.length)return toast("Bulunamadı: haritada parkın içine tıkla ya da ✍️ elle oluştur.","warn","🔍");
   return await dgDetectAt(+j[0].lat,+j[0].lon);
- }catch(e){return toast(dgCf("Arama hatası: ")+esc(e.message)+" — haritada tıkla veya elle oluştur.","err","🔍");}
+ }catch(e){return toast(dgCf("Arama hatası: ")+esc(e.message)+" "+_tpr("— haritada tıkla veya elle oluştur."),"err","🔍");}
 }
 
 function dgDetectAtMyLocation(){
@@ -1107,7 +1111,7 @@ function dgRenderBackfillPlan(){
       }).join("")+
     `</tbody></table></div>`+
     `<div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap">`+
-      (ok.length?`<button class="btn amber" onclick="dgApplyBackfill()">✓ Planı Uygula (${ok.length} proje)</button>`:``)+
+      (ok.length?`<button class="btn amber" onclick="dgApplyBackfill()">${_tprf("✓ Planı Uygula ({n} proje)",{n:ok.length})}</button>`:``)+
       `<button class="btn sm ghost" onclick="dgCloseBackfill()">Kapat</button>`+
     `</div>`+
     (ok.length?``:`<div class="alert warn" style="margin-top:8px">OSM'de eşleşen park çıkmadı. Satırlardaki <b>✍️ Elle park oluştur ve bağla</b> düğmesi, ölçüm merkezinde o proje adıyla bir park kimliği açar — karşılaştırma yine park bazlı çalışır.</div>`);
@@ -1123,7 +1127,7 @@ async function dgApplyBackfill(){
   if(!PROFILE||(PROFILE.role!=="admin"&&PROFILE.role!=="owner"))return toast("Yetki yok.","err");
   const plan=(DG_BACKFILL_PLAN||[]).filter(x=>x.durum==="eşleşti");
   if(!plan.length)return toast("Uygulanacak eşleşme yok","warn");
-  if(!confirm(plan.length+" proje parkla eşleşecek ve adları yeniden kurulacak. Devam?"))return;
+  if(!confirm(_tprf("{n} proje parkla eşleşecek ve adları yeniden kurulacak. Devam?",{n:plan.length})))return;
 
   let ok=0,fail=0;
   for(let i=0;i<plan.length;i++){
@@ -1139,7 +1143,7 @@ async function dgApplyBackfill(){
     if(await dgLinkProjectToPark(x.project,park))ok++;else fail++;
   }
 
-  toast(`✓ ${ok} proje parkla eşleştirildi${fail?` · ${fail} hata`:""}`,fail?"warn":"ok","🌳");
+  toast(_tprf("✓ {n} proje parkla eşleştirildi{f}",{n:ok,f:fail?_tprf(" · {n} hata",{n:fail}):""}),fail?"warn":"ok","🌳");
   DG_BACKFILL_PLAN=null;
   dgCloseBackfill();
   dgAfterBackfillWrites();
@@ -1170,7 +1174,7 @@ async function dgBackfillManual(projectId){
   const x=(DG_BACKFILL_PLAN||[]).find(k=>k.project.id===projectId);
   if(!x||x.lat==null)return toast("Bu proje için ölçüm merkezi yok.","err");
   const name=String(x.project.name||"").trim()||"İsimsiz Park";
-  if(!confirm(`"${name}" adıyla elle park kimliği oluşturulsun ve proje bağlansın mı?\nKonum: ölçümlerin merkezi (${x.lat.toFixed(5)}, ${x.lon.toFixed(5)})`))return;
+  if(!confirm(_tprf('"{name}" adıyla elle park kimliği oluşturulsun ve proje bağlansın mı?\nKonum: ölçümlerin merkezi ({la}, {lo})',{name:name,la:x.lat.toFixed(5),lo:x.lon.toFixed(5)})))return;
 
   const park=await dgRegisterPark(
     {name,source:"manual",area:null},
@@ -1259,7 +1263,7 @@ function dgRenderParkAdmin(projects,measurements){
   const dupGroups=Object.values(byName).filter(g=>g.length>1);
 
   const dupHTML=dupGroups.length
-    ? `<div class="alert warn" style="margin-bottom:10px"><b>⚠ ${dupGroups.length} çift kimlik adayı var</b> — aynı park iki satırda duruyorsa karşılaştırma bölünür.`+
+    ? `<div class="alert warn" style="margin-bottom:10px"><b>⚠ ${dupGroups.length} ${_tpr("çift kimlik adayı var")}</b> ${_tpr("— aynı park iki satırda duruyorsa karşılaştırma bölünür.")}`+
       dupGroups.map(g=>{
         const mesafe=(g[0].centroid_lat&&g[1].centroid_lat)
           ? Math.round(hav(+g[0].centroid_lat,+g[0].centroid_lon,+g[1].centroid_lat,+g[1].centroid_lon))
@@ -1278,15 +1282,15 @@ function dgRenderParkAdmin(projects,measurements){
    * harfe indirip öyle bakılır (aynı tuzak dgNormParkName'in de varlık sebebi). */
   const unnamed=shown.filter(p=>!p.name||dgNormParkName(p.name).indexOf("isimsiz")===0);
   const unnamedHTML=unnamed.length
-    ? `<div class="alert info" style="margin-bottom:10px">ℹ ${unnamed.length} parkın adı yok (OSM elemanında ad etiketi yoktu): `+
-      unnamed.map(p=>`#${p.id}`).join(", ")+` — ✏️ ile ad ver (örn. projenin adı).</div>`
+    ? `<div class="alert info" style="margin-bottom:10px">ℹ ${unnamed.length} ${_tpr("parkın adı yok (OSM elemanında ad etiketi yoktu):")} `+
+      unnamed.map(p=>`#${p.id}`).join(", ")+` ${_tpr("— ✏️ ile ad ver (örn. projenin adı).")}</div>`
     : ``;
 
   box.innerHTML=dupHTML+unnamedHTML+
     (emptyRows.length
       ? `<div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:8px">`+
           `<button class="btn sm ghost" onclick="dgParkAdminToggleEmpty()">`+
-          (DG_PARK_ADMIN_SHOW_EMPTY?"🙈 Boş parkları gizle":"🫥 Boş parkları göster ("+emptyRows.length+")")+`</button>`+
+          (DG_PARK_ADMIN_SHOW_EMPTY?_tpr("🙈 Boş parkları gizle"):_tprf("🫥 Boş parkları göster ({n})",{n:emptyRows.length}))+`</button>`+
           `<span class="dg-tree-meta">Yalnız sorgulanmış, projesi/kaydı olmayan parklar; temizlemek için gösterip 🗑️ kullan.</span>`+
         `</div>`
       : "")+
@@ -1341,14 +1345,14 @@ async function dgParkRename(id){
   if(!dgIsAdmin())return toast("🔐 Bu işlem yalnız yöneticiye açık.","err");
   const p=DG_PARK_ADMIN_ROWS.find(x=>x.id===id);
   if(!p)return toast("Park bulunamadı","err");
-  const nn=prompt("Park adı (örn. Göksu Parkı):",p.name);
+  const nn=prompt(_tpr("Park adı (örn. Göksu Parkı):"),p.name);
   if(nn===null)return;
   const name=String(nn).trim();
   if(!name)return toast("Ad boş olamaz","err");
   const{error}=await sb.from("parks").update({name,name_norm:dgNormParkName(name)}).eq("id",id);
   if(error)return toast(dgCf("Ad güncellenemedi: ")+esc(error.message),"err");
   await dgResyncProjectNames(id,name);
-  toast(dgCf("✓ Park adı güncellendi: ")+esc(name)+" — proje adları yeniden kuruldu","ok","🌳");
+  toast(dgCf("✓ Park adı güncellendi: ")+esc(name)+" "+_tpr("— proje adları yeniden kuruldu"),"ok","🌳");
   await dgAfterParkAdminChange();
 }
 
@@ -1367,12 +1371,9 @@ async function dgParkMergeInto(srcId,dstId){
   const dst=DG_PARK_ADMIN_ROWS.find(x=>x.id===dstId);
   if(!src||!dst)return toast("Park bulunamadı — 🔄 ile yenile","err");
 
-  if(!confirm(
-    `"${src.name}" (#${srcId}) → "${dst.name}" (#${dstId}) birleştirilsin mi?\n\n`+
-    `· Projeler ve ölçümler hedef parka taşınır\n`+
-    `· Proje adları hedef park adına göre yeniden kurulur\n`+
-    `· Kaynak kimlik (#${srcId}) SİLİNİR — geri alınamaz\n\n`+
-    `Karşılaştırma artık TEK "${dst.name}" satırı gösterir.`))return;
+  if(!confirm(_tprf(
+    '"{src}" (#{sid}) → "{dst}" (#{did}) birleştirilsin mi?\n\n· Projeler ve ölçümler hedef parka taşınır\n· Proje adları hedef park adına göre yeniden kurulur\n· Kaynak kimlik (#{sid}) SİLİNİR — geri alınamaz\n\nKarşılaştırma artık TEK "{dst}" satırı gösterir.',
+    {src:src.name,sid:srcId,dst:dst.name,did:dstId})))return;
 
   const{error:e1}=await sb.from("projects").update({park_id:dstId}).eq("park_id",srcId);
   if(e1)return toast(dgCf("Projeler taşınamadı: ")+esc(e1.message),"err");
@@ -1380,10 +1381,10 @@ async function dgParkMergeInto(srcId,dstId){
   if(e2)toast(dgCf("Ölçümler taşınırken hata: ")+esc(e2.message),"warn");
   await dgResyncProjectNames(dstId);
   const{error:e3}=await sb.from("parks").delete().eq("id",srcId);
-  if(e3)return toast("Kaynak kimlik silinemedi: "+esc(e3.message),"err");
+  if(e3)return toast(_tpr("Kaynak kimlik silinemedi: ")+esc(e3.message),"err");
 
   DG_PARK_SESSION.clear();
-  toast(`✓ #${srcId} → #${dstId} birleştirildi`,"ok","🔀");
+  toast(_tprf("✓ #{a} → #{b} birleştirildi",{a:srcId,b:dstId}),"ok","🔀");
   await dgAfterParkAdminChange();
 }
 

@@ -1,4 +1,7 @@
 "use strict";
+/* 0037: i18n güvenlikli yerel yardımcılar (harness'ler constants yüklemeyebilir). */
+const _tms=(s)=>(typeof dgCf==="function"?dgCf(s):s);
+const _tmsf=(t,v)=>(typeof dgTfs==="function"?dgTfs(t,v):String(t).replace(/\{(\w+)\}/g,(m,k)=>(v&&v[k]!=null?v[k]:m)));
 /* ============ KONUMDAN İL/ÜLKE ALGILAMA ============ */
 /* TÜRKİYE'de il adı "state" alanındadır (admin_level=4); ilçe "city/town"a düşer.
    TR için KESİN çözüm: önce state oku → ilçe asla gelmez. */
@@ -35,8 +38,8 @@ async function checkPhoto(e){
   for(let y=1;y<S-1;y+=2)for(let xx=1;xx<S-1;xx+=2){const a=(y*S+xx)*4,b2=(y*S+xx+1)*4;edge+=Math.abs(d[a]-d[b2]);}
   const ok=vegR>=0.25&&br>25&&br<245;
   photoOk=ok;
-  if(ok){box.className="alert ok";box.innerHTML=`✓ <b>Fotoğraf uygun</b> · Bitki örtüsü: %${(vegR*100).toFixed(1)} · Pozlama: ${br.toFixed(0)}/255`;}
-  else{box.className="alert err";box.innerHTML=`⚠ <b>Fotoğraf uygun değil</b> · Bitki örtüsü: %${(vegR*100).toFixed(1)} (min %25) · Pozlama: ${br.toFixed(0)}.<br>Ağacı/net bitki örtüsünü gösteren, karanlık olmayan bir çekim yapın.`;}
+  if(ok){box.className="alert ok";box.innerHTML=`✓ <b>${_tms("Fotoğraf uygun")}</b> · ${_tms("Bitki örtüsü:")} %${(vegR*100).toFixed(1)} · ${_tms("Pozlama:")} ${br.toFixed(0)}/255`;}
+  else{box.className="alert err";box.innerHTML=`⚠ <b>${_tms("Fotoğraf uygun değil")}</b> · ${_tms("Bitki örtüsü:")} %${(vegR*100).toFixed(1)} (min %25) · ${_tms("Pozlama:")} ${br.toFixed(0)}.<br>${_tms("Ağacı/net bitki örtüsünü gösteren, karanlık olmayan bir çekim yapın.")}`;}
  }catch(err){photoOk=false;box.className="alert err";box.innerHTML="⚠ Fotoğraf okunamadı, tekrar deneyin.";}
 }
 /* --- 3. GPS --- */
@@ -317,12 +320,12 @@ async function queryPointId(){
  if(data&&data.length>0){
   const r=data[0];
   res.style.display="block";res.className="alert info";
-  res.innerHTML=`✓ <b>P${r.point_id}</b> · ${esc(r.species)} · Çap ${r.dbh_cm} cm · Boy ${r.height_m} m · Karbon ${(r.carbon_kg||0).toFixed(1)} kg · Durum: <b>${r.status||"Beklemede"}</b>`+
+  res.innerHTML=`✓ <b>P${r.point_id}</b> · ${esc(_tms(r.species))} · ${_tms("Çap")} ${r.dbh_cm} cm · ${_tms("Boy")} ${r.height_m} m · ${_tms("Karbon")} ${(r.carbon_kg||0).toFixed(1)} kg · ${_tms("Durum")}: <b>${r.status?_tms(r.status):_tms("Beklemede")}</b>`+
    (r.photo_url?`<br><img src="${esc(r.photo_url)}" style="width:140px;border-radius:8px;margin-top:6px">`:"")+
    `<br><button class="btn sm blue" onclick="editRec(${r.id})" style="margin-top:8px">✏️ Düzenle & Güncelle</button> <button class="btn sm red" onclick="delRec(${r.id})" style="margin-top:8px">🗑️ Tamamen Sil</button>`;
  }else{
   res.style.display="block";res.className="alert info";
-  res.innerHTML=`ℹ P${pt} için kayıt yok · Yeni kayıt oluşturulacak.`;
+  res.innerHTML=_tmsf("ℹ P{p} için kayıt yok · Yeni kayıt oluşturulacak.",{p:pt});
  }
 }
 /* --- 7. KAYDET (EN BÜYÜK) --- */
@@ -415,10 +418,10 @@ if (!base.client_id) base.client_id = uuidv4();
       const pk=await sb.from("parks").select("*").eq("id",gateProj.park_id).maybeSingle();
       if(pk.data){
         const dec=await dgVerifyAtPark(pk.data,"measure");
-        if(!dec.ok)return toast("⛔ "+esc(dec.message||("Konum doğrulanamadı ("+dec.reason+")")),"err","🛰");
+        if(!dec.ok)return toast("⛔ "+esc(dec.message||_tmsf("Konum doğrulanamadı ({r})",{r:dec.reason})),"err","🛰");
         dgGeoStamp(base,dec);
         if(dec.verified)toast(dgCf("🛰 Konum doğrulandı: ")+esc(pk.data.name)+
-          (dec.reason==="margin"?" (kenar payı)":"")+" · ±"+Math.round(dec.fix.acc)+" m","ok","🛰");
+          (dec.reason==="margin"?" ("+_tms("kenar payı")+")":"")+" · ±"+Math.round(dec.fix.acc)+" m","ok","🛰");
       }
     }
     

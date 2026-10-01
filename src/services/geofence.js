@@ -1,4 +1,7 @@
 "use strict";
+/* 0037: i18n güvenlikli yerel yardımcılar (harness'ler constants yüklemeyebilir). */
+const _tgf=(s)=>(typeof dgCf==="function"?dgCf(s):s);
+const _tgff=(t,v)=>(typeof dgTfs==="function"?dgTfs(t,v):String(t).replace(/\{(\w+)\}/g,(m,k)=>(v&&v[k]!=null?v[k]:m)));
 /* DendroGeo · services/geofence.js — KONUM DOĞRULAMASI (2026-09-26, kullanıcı isteği)
  *
  * İSTEK: "proje yapılacağı zaman veya projeye fotoğraf ekleneceği zaman
@@ -107,19 +110,19 @@ async function dgVerifyAtPark(park,why){
   if(code==="unavailable"){
    console.warn("DENDROGEO · konum servisi yok → yerinde doğrulama yapılamadı (sunucu çiti aktif)");
    return{ok:true,verified:false,reason:"no-geo",distM:null,acc:null,
-    message:"Cihazda konum servisi yok: yerinde doğrulama yapılamadı; sunucu çiti yine de park dışı girişi reddeder."};
+    message:_tgf("Cihazda konum servisi yok: yerinde doğrulama yapılamadı; sunucu çiti yine de park dışı girişi reddeder.")};
   }
   return{ok:false,verified:false,reason:code,
    message:code==="denied"
-    ?"Konum izni gerekli: bu "+(why==="project"?"proje":"ölçüm")+" yalnızca "+(park.name||"parkı")+" içinden veri kabul eder. Tarayıcı ayarlarından konuma izin ver."
-    :"Konum alınamadı ("+(e&&e.message||code)+"). Açık alanda yeniden dene."};
+    ?_tgff("Konum izni gerekli: bu {w} yalnızca {p} içinden veri kabul eder. Tarayıcı ayarlarından konuma izin ver.",{w:_tgf(why==="project"?"proje":"ölçüm"),p:park.name||_tgf("parkı")})
+    :_tgff("Konum alınamadı ({e}). Açık alanda yeniden dene.",{e:(e&&e.message||code)})};
  }
  const d=dgGeoDecide(fix,park);
  d.fix=fix;
  if(!d.ok&&d.reason==="acc")
-  d.message="GPS hassasiyeti ±"+Math.round(d.acc)+" m (eşik ±"+DG_GEO.ACC_MAX_M+" m). Açık alanda bekleyip yeniden dene.";
+  d.message=_tgff("GPS hassasiyeti ±{a} m (eşik ±{m} m). Açık alanda bekleyip yeniden dene.",{a:Math.round(d.acc),m:DG_GEO.ACC_MAX_M});
  if(!d.ok&&d.reason==="outside")
-  d.message="Konumun "+(park.name||"park")+" DIŞINDA (kenara ~"+(d.edgeM!=null?d.edgeM:d.distM)+" m). Bu proje yalnızca bu parktan veri kabul eder — başka parktan giriş engellendi.";
+  d.message=_tgff("Konumun {p} DIŞINDA (kenara ~{d} m). Bu proje yalnızca bu parktan veri kabul eder — başka parktan giriş engellendi.",{p:(park.name||_tgf("park")),d:(d.edgeM!=null?d.edgeM:d.distM)});
  return d;
 }
 

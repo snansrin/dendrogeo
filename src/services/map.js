@@ -1,4 +1,7 @@
 "use strict";
+/* 0037: i18n güvenlikli yerel yardımcılar (harness'ler constants yüklemeyebilir). */
+const _tmf=(s)=>(typeof dgCf==="function"?dgCf(s):s);
+const _tmff=(t,v)=>(typeof dgTfs==="function"?dgTfs(t,v):String(t).replace(/\{(\w+)\}/g,(m,k)=>(v&&v[k]!=null?v[k]:m)));
 /* ===== DendroGeo v2 · src/services/map.js =====
 Harita init, marker yönetimi, waypoint CRUD, navigasyon çizimi */
 
@@ -200,7 +203,7 @@ async function uploadWpCsv(){
  const f=$("nCsv").files[0];if(!f)return toast("CSV seç");
  const lines=(await f.text()).split(/\r?\n/);let n=0;
  for(let i=1;i<lines.length;i++){const c=lines[i].split(",");if(c.length<3)continue;const id=parseInt((c[2]||"").replace(/"/g,""));const lon=+c[0],lat=+c[1];if(!id||!lat||!lon)continue;await sb.from("waypoints").upsert({owner:USER.id,project_id:pid,wp_id:id,lat,lon},{onConflict:"project_id,wp_id"});n++;}
- toast("✓ "+n+" waypoint yüklendi ve projeye kalıcı kaydedildi.");
+ toast(_tmff("✓ {n} waypoint yüklendi ve projeye kalıcı kaydedildi.",{n:n}));
  loadWaypoints();
 }
 async function loadWaypoints(){
@@ -336,13 +339,13 @@ function switchBaseLayer(type){
  * aynı parkın kanalındaki kullanıcılar görür. Kırmızı çizgiler (şema, RLS,
  * migration) hiç devreye girmez. Her adım typeof/try korumalı: Realtime
  * kapalıysa özellik sessizce devre dışı kalır, ölçüm akışı etkilenmez. */
-let DG_PARK_CH=null,DG_PARK_CH_ID=0,DG_LIVE_ON=true,DG_MATES_LAYER=null,DG_LAST_PING=0;
+let DG_PARK_CH=null,DG_PARK_CH_ID=0,DG_LIVE_ON=true,DG_MATES_LAYER=null,DG_LAST_PING=0,DG_PARK_CH_RETRY=0;
 const DG_MATE_COLORS=["#c2452d","#2b6cb0","#7c3aed","#0f766e","#be185d","#4d7c0f","#b45309","#0e7490"];
 function dgMateColor(id){let h=0;const s=String(id||"?");for(let i=0;i<s.length;i++)h=(h*31+s.charCodeAt(i))>>>0;return DG_MATE_COLORS[h%DG_MATE_COLORS.length];}
 function dgLiveShareToggle(on){
  DG_LIVE_ON=!!on;
  if(!DG_LIVE_ON)dgLiveShareLeave();else dgLiveShareJoinCurrent();
- if(typeof toast==="function")toast(dgCf(on?"Canlı konum paylaşımı açık (bu parkın ortaklarıyla).":"Canlı konum paylaşımı kapalı."),"info","👥");
+ if(typeof toast==="function")toast(_tmf(on?"Canlı konum paylaşımı açık (bu parkın ortaklarıyla).":"Canlı konum paylaşımı kapalı."),"info","👥");
 }
 async function dgLiveShareJoinCurrent(){
  try{
@@ -355,9 +358,22 @@ async function dgLiveShareJoinCurrent(){
   if(DG_PARK_CH_ID===park&&DG_PARK_CH)return;
   dgLiveShareLeave();
   DG_PARK_CH_ID=park;
+  const note0=$("dgMatesNote");if(note0)note0.textContent=_tmf("⏳ gerçek zamanlı katmana bağlanılıyor…");
+  try{
+   const{data}=await sb.auth.getSession();
+   const tok=data&&data.session&&data.session.access_token;
+   if(tok&&sb.realtime&&sb.realtime.setAuth)sb.realtime.setAuth(tok);
+  }catch(e){}
   DG_PARK_CH=sb.channel("dg-park-"+park,{config:{presence:{key:String(USER.id)}}});
   DG_PARK_CH.on("presence",{event:"sync"},()=>dgLiveMatesDraw());
-  DG_PARK_CH.subscribe(st=>{if(st==="SUBSCRIBED"){dgLiveSharePing();dgLiveMatesDraw();}});
+  DG_PARK_CH.subscribe(st=>{
+   if(st==="SUBSCRIBED"){dgLiveSharePing();dgLiveMatesDraw();}
+   else if(st==="CHANNEL_ERROR"||st==="TIMED_OUT"||st==="CLOSED"){
+    const nx=$("dgMatesNote");
+    if(nx)nx.textContent=_tmf("⚠ Gerçek zamanlı katman kapalı — canlı konum gösterilemiyor (Supabase → Dashboard → Realtime).");
+    if(!DG_PARK_CH_RETRY){DG_PARK_CH_RETRY=1;setTimeout(()=>{const id=DG_PARK_CH_ID;DG_PARK_CH=null;DG_PARK_CH_ID=0;if(id)dgLiveShareJoinCurrent();},4000);}
+   }
+  });
  }catch(e){DG_PARK_CH=null;DG_PARK_CH_ID=0;}
 }
 function dgLiveShareLeave(){
@@ -390,9 +406,9 @@ function dgLiveMatesDraw(){
    const age=Math.max(0,Math.round((Date.now()-(p.t||Date.now()))/1000));
    const ageTxt=age<60?age+" "+dgCf("sn"):Math.round(age/60)+" "+dgCf("dk");
    L.marker([p.la,p.lo],{icon:ic,interactive:true,keyboard:false,zIndexOffset:600}).addTo(DG_MATES_LAYER)
-    .bindTooltip("<b>"+esc(p.n||"?")+"</b><br>"+dgCf("son konum")+": "+ageTxt+" "+dgCf("önce"),{direction:"top",offset:[0,-11]});
+    .bindTooltip("<b>"+esc(p.n||"?")+"</b><br>"+_tmf("son konum")+": "+ageTxt+" "+_tmf("önce"),{direction:"top",offset:[0,-11]});
   }}
   const box=$("dgMatesNote");
-  if(box)box.textContent=n?(typeof dgTfs==="function"?dgTfs("👥 {n} ortak bu parkta çevrimiçi — konumlar canlı görünüyor (üstüne gel: kimlik).",{n:n}):""):"";
+  if(box)box.textContent=n?_tmff("👥 {n} ortak bu parkta çevrimiçi — konumlar canlı görünüyor (üstüne gel: kimlik).",{n:n}):"";
  }catch(e){}
 }

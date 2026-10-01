@@ -45,17 +45,35 @@ async function loadVisitStats(){
  * Supabase Realtime presence — GEÇİCİDİR: veritabanına YAZMAZ (KVKK dostu),
  * sekme kapanınca kendiliğinden düşer. Realtime kapalıysa sessizce devre dışı. */
 const DG_VIEW_LABELS={dash:"Panel",measure:"Yeni Ölçüm",nav:"Waypoint",map:"Canlı Harita",projects:"Projeler",records:"Kayıtlarım",export:"Dışa Aktar",world:"Dünya Verisi",admin:"Ölçüm Yönetimi",users:"Kullanıcılar"};
-let DG_PRES=null,DG_PRES_OK=false;
-function dgPresenceStart(){
+let DG_PRES=null,DG_PRES_OK=false,DG_PRES_STATE="idle",DG_PRES_RETRY=0;
+function dgPresenceState(){return DG_PRES_STATE;}
+/* 0037 sertleştirme: (a) Realtime WS, oturum JWT'si ister → setAuth açıkça
+ * yapılır; (b) CHANNEL_ERROR/TIMED_OUT'ta 2 kez yeniden denenir; (c) durum
+ * kartta GÖRÜNÜR ("bağlanıyor / kapalı") — sessiz ölmez. */
+async function dgPresenceStart(){
  try{
   if(DG_PRES||typeof sb==="undefined"||!sb||typeof sb.channel!=="function")return;
   if(typeof USER==="undefined"||!USER)return;
+  DG_PRES_STATE="connecting";
+  try{
+   const{data}=await sb.auth.getSession();
+   const tok=data&&data.session&&data.session.access_token;
+   if(tok&&sb.realtime&&sb.realtime.setAuth)sb.realtime.setAuth(tok);
+  }catch(e){}
   DG_PRES=sb.channel("dg-presence",{config:{presence:{key:String(USER.id)}}});
   DG_PRES.on("presence",{event:"sync"},()=>{try{if(typeof dgRenderActive==="function")dgRenderActive();}catch(e){}});
   DG_PRES.subscribe(st=>{
-   if(st==="SUBSCRIBED"){DG_PRES_OK=true;dgPresencePing(typeof DG_CUR_VIEW!=="undefined"?DG_CUR_VIEW:"dash");}
+   if(st==="SUBSCRIBED"){
+    DG_PRES_OK=true;DG_PRES_STATE="on";
+    dgPresencePing(typeof DG_CUR_VIEW!=="undefined"?DG_CUR_VIEW:"dash");
+    try{if(typeof dgRenderActive==="function")dgRenderActive();}catch(e){}
+   }else if(st==="CHANNEL_ERROR"||st==="TIMED_OUT"||st==="CLOSED"){
+    DG_PRES_OK=false;DG_PRES_STATE="error";
+    try{if(typeof dgRenderActive==="function")dgRenderActive();}catch(e){}
+    if(DG_PRES_RETRY<2){DG_PRES_RETRY++;setTimeout(()=>{try{DG_PRES=null;dgPresenceStart();}catch(e){}},4000);}
+   }
   });
- }catch(e){DG_PRES=null;DG_PRES_OK=false;}
+ }catch(e){DG_PRES=null;DG_PRES_OK=false;DG_PRES_STATE="error";}
 }
 function dgPresencePing(view){
  try{

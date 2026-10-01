@@ -9,6 +9,54 @@ Yeni sürüm yayımlama adımları: [`docs/surum-yayini.md`](docs/surum-yayini.m
 
 ## [Yayımlanmadı]
 
+### Düzeltildi — 0037: EN kapsami TAMAMLANDI (park paneli · davetler · kuyruk · grid · geofence) + Realtime sertlestirme + siralamalar
+Kullanici denetimi (canli EN turu): park algilama paneli, davet/ortak karti,
+yayin kuyrugu tablosu ("Geri cekildi" cevrisi sozluge hic girmemisti!),
+moderasyon butonlari ve waypoint tablosu hala Turkce'ydi; "Aktif
+Kullanicilar" karti bos gorunuyordu; canli konum calismiyordu.
+
+**EN kapsami (sozluk 1027+ anahtar):**
+- "Geri cekildi"→Retracted (0036'de gozu kacmisti) + kuyruk tablosunun
+  TAMAMI: Alan/Yayin durumu/Yayın yok/Geri cekiliyor/Basarisiz/Vazgecildi,
+  🔗 Ac/📤 Paylas/🗑 Geri cek/📄 Yayinla/Yeni surum, gunluk notlari,
+  "son kontrol", "N tur · N katki" meta.
+- PARK ALGILAMA PANELI bastan sona: adimlar, TEK kimlik notu, PROJE
+  ETIKETI/PROJE ADI, Yeni proje olustur, elle park formu, kapi mesajlari
+  (⛔ uc varyant), Park Kimlikleri ekrani (birlestir/yeniden adlandir/
+  bos parklar/cift kimlik uyarilari + confirm sablonlari).
+- DAVET/ORTAK karti: Park davetlerin, Kabul/Reddet/Geri al/Kaldir,
+  Ortaklar(N)/Davetler(N), Kisi/Eklenme/E-posta (duz tire varyanti!),
+  placeholder'lar, uzun aciklama notu.
+- Moderasyon: 🚫 Reddet / ✓ Onayla / 🗑️ Tamamen Sil / ✏️ Duzenle & Guncelle,
+  "Onay Bekliyor", rozet title'lari, duz liste durumu satiri.
+- Waypoint: Bekliyor/✓ Yapildi/🎯 Hedef/Hedef:/popuplar/bos liste.
+- Grid motoru, geofence kapilari (4 mesaj sablonu), LULC sinif adlari ve
+  hata metinleri, GPS sinyali (COK IYI/IYI/ORTA/ZAYIF), foto QA sonucu,
+  offline senkron sablonlari, disa aktarim/backup sablonlari, "En Yaygin
+  6 Tur", alt text'leri (alt= ceviri listesine eklendi).
+- "Kayit"→Sign up felaketi duzeltildi: sekme "Kayit Ol" oldu, tablo "Record".
+
+**Siralamalar (T1 devam):** yonetim duz listesi project_id→point_id→olcum no;
+agacta kullanici satirlari point sirali (Kayitlarim 0036'da duzeltilmisti).
+
+**Realtime sertlestirme (T4/T5 "calismiyor" bildirimi):**
+- setAuth: WS el sikismasina oturum JWT'si ACIKCA veriliyor (anon token
+  yetersiz kalabiliyordu).
+- Durum makinesi: connecting/on/error — kart ve dgMatesNote artik SESSIZ
+  DEGIL: "⏳ baglaniliyor…", hata durumunda "⚠ Gercek zamanli katman etkin
+  degil (Supabase → Dashboard → Realtime)" + 2 otomatik yeniden deneme.
+- SUBSCRIBED aninda kendin dahil hemen cizilir (sync beklemeden).
+- Canli konum anahtari tema uyumlu .dg-switch'e cevrildi.
+
+**Bekciler:** cevrilmemis toast/confirm taramasi 5 yeni module genisletildi
+(geofence/grid-engine/offline/park-query/visit-stats) + tek tirnak varyanti;
+0037 pin testleri (Geri cekildi/Reddet/Park Algilama/Ortaklar/Bekliyor…),
+presence setAuth/retry/durum kilidi, .dg-switch kilidi, siralama kilitleri.
+
+Kirmizi cizgiler korundu (motor/sema/migration/RLS/rapor hatti/SPECIES_DATA).
+npm run check: 983 test → 981 pass / 0 fail / 2 skip.
+
+
 ### Eklendi/Düzeltildi — 0036: EN dinamigi kapatildi + 5 kullanici ozelligi (2026-10-01)
 Kullanici denetimi (canli, EN modu): waypoint tablosu/yayin kuyrugu hala
 Turkce, tur dropdown'i EN'de BOS, "Kayit" basligi "Sign up" olmus,

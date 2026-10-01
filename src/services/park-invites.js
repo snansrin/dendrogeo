@@ -1,4 +1,8 @@
 "use strict";
+/* 0037: i18n güvenlikli yerel yardımcılar. */
+const _tinv=(s)=>(typeof dgCf==="function"?dgCf(s):s);
+const _tinvf=(t,v)=>(typeof dgTfs==="function"?dgTfs(t,v):String(t).replace(/\{(\w+)\}/g,(m,k)=>(v&&v[k]!=null?v[k]:m)));
+
 /* park-invites.js — Park Çalışma Arkadaşı (0025 · 2026-09-29)
  *
  * Kullanıcı isteği: "park çalışma arkadaşı daveti — beraber aynı projeye
@@ -66,7 +70,7 @@ async function dgInvitesLoadMine(){
  if(box){
   box.style.display="";
   box.innerHTML='<div class="shead" style="margin-bottom:8px"><span class="no">📬</span><h2 style="font-size:1.05rem">Park davetlerin</h2><span class="rule"></span></div>'+
-   rows.map(r=>`<div class="alert info" style="margin:6px 0">🌳 <b>${esc(r.parks&&r.parks.name?r.parks.name:("park #"+r.park_id))}</b> parkına çalışma arkadaşı davetin var${r.note?` · not: <i>${esc(r.note)}</i>`:""} <span class="mono" style="font-size:.72rem">(${new Date(r.created_at).toLocaleDateString("tr-TR")})</span>`+
+   rows.map(r=>`<div class="alert info" style="margin:6px 0">🌳 <b>${esc(r.parks&&r.parks.name?r.parks.name:("park #"+r.park_id))}</b> ${_tinv("parkına çalışma arkadaşı davetin var")}${r.note?` · ${_tinv("not")}: <i>${esc(r.note)}</i>`:""} <span class="mono" style="font-size:.72rem">(${new Date(r.created_at).toLocaleDateString("tr-TR")})</span>`+
     ` <span style="display:inline-flex;gap:6px;margin-left:6px"><button class="btn sm" onclick="dgInviteRespond('${r.id}',true)">✓ Kabul</button>`+
     `<button class="btn sm red" onclick="dgInviteRespond('${r.id}',false)">✖ Reddet</button></span></div>`).join("");
  }
@@ -92,7 +96,7 @@ async function dgCollabLoad(){
  const parks=await dgMyParks(true);
  if(!parks.length){sel.innerHTML='<option value="">Paylaşılabilecek parkın yok</option>';dgCollabRender();return;}
  const keep=sel.value;
- sel.innerHTML=parks.map(p=>`<option value="${p.id}">${esc(p.name)}${p.city?" ("+esc(p.city)+")":""}${p.role==="collaborator"?" · ortak":""}</option>`).join("");
+ sel.innerHTML=parks.map(p=>`<option value="${p.id}">${esc(p.name)}${p.city?" ("+esc(p.city)+")":""}${p.role==="collaborator"?" · "+_tinv("ortak"):""}</option>`).join("");
  if(keep&&[...sel.options].some(o=>o.value===keep))sel.value=keep;
  await dgCollabRefresh();
 }
@@ -123,9 +127,9 @@ function dgCollabRender(){
    `<div><label class="lbl" for="dgInvEmail">Arkadaşın e-postası</label><input id="dgInvEmail" type="email" placeholder="ornek@eposta.com"></div>`+
    `<div><label class="lbl" for="dgInvNote">Not (opsiyonel)</label><input id="dgInvNote" placeholder="örn. cumartesi saha ölçümü"></div>`+
    `<div><button class="btn sm blue" onclick="dgInviteSend()">✉️ Davet gönder</button></div></div>`+
-  `<div class="lbl">Ortaklar (${col.length})</div>`+
+  `<div class="lbl">${_tinv("Ortaklar")} (${col.length})</div>`+
   (colRows?`<div class="tblwrap"><table><thead><tr><th scope='col'>Kişi</th><th scope='col'>Eklenme</th><th scope='col'>İşlem</th></tr></thead><tbody>${colRows}</tbody></table></div>`:'<div class="alert info">Henüz ortak yok.</div>')+
-  `<div class="lbl" style="margin-top:10px">Davetler (${inv.length})</div>`+
+  `<div class="lbl" style="margin-top:10px">${_tinv("Davetler")} (${inv.length})</div>`+
   (invRows?`<div class="tblwrap"><table><thead><tr><th scope='col'>E-posta</th><th scope='col'>Durum</th><th scope='col'>Tarih</th><th scope='col'>İşlem</th></tr></thead><tbody>${invRows}</tbody></table></div>`:'<div class="alert info">Davet yok.</div>')+
   `<p class="mono dg-sub" style="margin-top:8px">Davet e-postası kimlik doğrulamaz; kabul yalnız arkadaşın KENDİ hesabıyla olur. Ortak ölçümleri kendi adıyla girer, konum çiti ve onay akışı aynen geçerlidir.</p>`;
 }

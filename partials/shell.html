@@ -67,7 +67,7 @@
      <div class="gpsring" id="gpsRing"><div class="val" id="gpsAcc">—</div><div class="lbl">doğruluk (m)</div></div>
      <div id="gpsState" class="alert info">Konum servisi kapalı.</div>
      <button id="gpsBtn" class="dg-png-btn primary" onclick="startGps()">📡 Konumu Etkinleştir</button>
-     <div class="dg-png-sub" style="font-size:.68rem">Doğrulama eşiği ±60 m · park dışı kayıt sunucuda reddedilir (0007).</div><label style="display:flex;gap:8px;align-items:flex-start;font-size:.8rem;color:var(--mut);margin-top:10px;cursor:pointer"><input type="checkbox" id="dgLiveShare" checked onchange="dgLiveShareToggle(this.checked)" style="width:auto;margin-top:2px"> <span>👥 Canlı konumumu bu parkın çalışma arkadaşlarıyla paylaş (yalnız aynı parkın haritasında, geçici olarak görünür; veritabanına yazılmaz)</span></label>
+     <div class="dg-png-sub" style="font-size:.68rem">Doğrulama eşiği ±60 m · park dışı kayıt sunucuda reddedilir (0007).</div><label style="display:flex;gap:8px;align-items:flex-start;font-size:.8rem;color:var(--mut);margin-top:10px;cursor:pointer"><input type="checkbox" class="dg-switch" id="dgLiveShare" checked onchange="dgLiveShareToggle(this.checked)"> <span>👥 Canlı konumumu bu parkın çalışma arkadaşlarıyla paylaş (yalnız aynı parkın haritasında, geçici olarak görünür; veritabanına yazılmaz)</span></label>
      <div id="dgMatesNote" class="dg-meta" style="margin-top:6px"></div>
      <div id="iosHint" class="alert info" style="display:none"><b>iPhone kullanıcısı mısınız?</b><br><span style="font-size:.85rem">Ayarlar → Gizlilik ve Güvenlik → Konum Servisleri →Safari Siteleri→ "Uygulamayı Kullanırken" seçin, sayfayı yenileyin.</span></div>
      <div class="grid g2" style="margin-top:14px">

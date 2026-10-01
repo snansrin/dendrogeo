@@ -46,7 +46,7 @@ async function fullBackup(){
     a.remove();
     setTimeout(()=>URL.revokeObjectURL(a.href),5000);
     localStorage.setItem("dg_lastBackup", new Date().toISOString());
-    toast("✓ Yedek indirildi: "+name+" ("+meas.length+" ölçüm)","ok","💾");
+    toast((typeof dgTfs==="function"?dgTfs("✓ Yedek indirildi: {f} ({n} ölçüm)",{f:name,n:meas.length}):("✓ Yedek indirildi: "+name+" ("+meas.length+" ölçüm)")),"ok","💾");
   }catch(e){
     toast(dgCf("Yedek hatası: ")+e.message,"err","❌");
   }

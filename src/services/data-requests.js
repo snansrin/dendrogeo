@@ -25,7 +25,7 @@ async function sendDataRequest(){
   if(dup){
    toast("⚠️ Bu veri talebiniz zaten alındı — yönetici onayı bekleniyor","warn","✉️");
    m.style.color="var(--amber)";
-   m.textContent="⚠ Aynı filtreyle bir talebiniz zaten "+(dup.status==="Beklemede"?"beklemede":"işleme alındı")+". Yönetici yanıt verene kadar yeni talep oluşturulamaz.";
+   m.textContent=(typeof dgTfs==="function"?dgTfs("⚠ Aynı filtreyle bir talebiniz zaten {s}. Yönetici yanıt verene kadar yeni talep oluşturulamaz.",{s:(dup.status==="Beklemede"?"beklemede":"işleme alındı")}):("⚠ Aynı filtreyle bir talebiniz zaten "+(dup.status==="Beklemede"?"beklemede":"işleme alındı")+". Yönetici yanıt verene kadar yeni talep oluşturulamaz."));
    return;
   }
  }catch(e){console.log("Dup kontrolü:",e);}

@@ -495,10 +495,10 @@ async function drawPark(park){
   renderRefBadge();
 
   toast(
-    "✓ Park algılandı: "+
+    (typeof dgCf==="function"?dgCf("✓ Park algılandı: "):"✓ Park algılandı: ")+
     ((parkRow&&parkRow.name)||park.name||"")+
     " · "+haTotal+" ha"+
-    (parkRow?" · kimlik #"+parkRow.id:""),
+    (parkRow?" · "+(typeof dgCf==="function"?dgCf("kimlik #"):"kimlik #")+parkRow.id:""),
     "ok",
     "🌳"
   );

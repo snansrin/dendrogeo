@@ -1,4 +1,7 @@
 "use strict";
+/* 0037: i18n güvenlikli yerel yardımcılar (harness'ler constants yüklemeyebilir). */
+const _tof=(s)=>(typeof dgCf==="function"?dgCf(s):s);
+const _toff=(t,v)=>(typeof dgTfs==="function"?dgTfs(t,v):String(t).replace(/\{(\w+)\}/g,(m,k)=>(v&&v[k]!=null?v[k]:m)));
 /* ===== DendroGeo v2 · src/services/offline.js =====
 Çevrimdışı ölçüm kuyruğu (IndexedDB) + senkronizasyon */
 
@@ -139,7 +142,7 @@ break;
 }
 // 📢 Sonuç bildirimi
 if (synced > 0) {
-toast(`✅ ${synced} çevrimdışı ölçüm senkronize edildi!`, 'ok', '🔄');
+toast(_toff("✅ {n} çevrimdışı ölçüm senkronize edildi!",{n:synced}), 'ok', '🔄');
 if ($('v-dash').classList.contains('on')) loadDash();
 if ($('v-records').classList.contains('on')) loadRecords();
 if ($('v-admin').classList.contains('on')) loadAdmin();
@@ -152,12 +155,12 @@ dgMarkLiveDirty();
 if (typeof loadLiveMap === 'function' && $('v-map') && $('v-map').classList.contains('on')) loadLiveMap();
 }
 if (failed > 0) {
-toast(`⚠️ ${failed} ölçüm başarısız. Hata: ${lastError}`, 'err', '❌');
+toast(_toff("⚠️ {n} ölçüm başarısız. Hata: {e}",{n:failed,e:lastError}), 'err', '❌');
 }
 };
 } catch (e) {
 console.error("[Sync] Kritik hata:", e);
-toast('Senkronizasyon hatası: ' + e.message, 'err', '❌');
+toast(_tof('Senkronizasyon hatası: ') + e.message, 'err', '❌');
 }
 }
 
@@ -201,7 +204,7 @@ async function updateSyncBadge(){
     });
     if(n>0){
       b.textContent="⏳ "+n;
-      b.title=n+" ölçüm senkron bekliyor";
+      b.title=_toff("{n} ölçüm senkron bekliyor",{n:n});
       b.style.display="";
     }else{
       b.style.display="none";

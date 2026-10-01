@@ -1,4 +1,8 @@
 "use strict";
+/* 0037: i18n güvenlikli yerel yardımcılar. */
+const _tgr=(s)=>(typeof dgCf==="function"?dgCf(s):s);
+const _tgrf=(t,v)=>(typeof dgTfs==="function"?dgTfs(t,v):String(t).replace(/\{(\w+)\}/g,(m,k)=>(v&&v[k]!=null?v[k]:m)));
+
 /* DendroGeo · services/grid-engine.js — ÖRNEKLEM IZGARASI MOTORU (Faz 4)
  * gridplan.js'ten birebir taşındı: buildGrid (hücre üretimi + engel
  * tamponları), çizim/özet, hücre seçimi, görünürlük anahtarları ve
@@ -31,19 +35,12 @@ async function buildGrid(){
     );
 
   if(est>3000){
-    return toast(
-      "⚠ ~"+
-      est+
-      " hücre çok yoğun.",
-      "err"
-    );
+    return toast(_tgrf("⚠ ~{n} hücre çok yoğun.",{n:est}),"err");
   }
 
   if(
     est>800 &&
-    !confirm(
-      `⚠ ~${est} hücre.\nDevam?`
-    )
+    !confirm(_tgrf("⚠ ~{n} hücre.\nDevam?",{n:est}))
   ){
     return;
   }
@@ -174,13 +171,7 @@ async function buildGrid(){
 
   drawGridLayer();
 
-  toast(
-    "✓ Grid hazır: "+
-    GRID_CELLS.length+
-    " hücre",
-    "ok",
-    "🔲"
-  );
+  toast(_tgrf("✓ Grid hazır: {n} hücre",{n:GRID_CELLS.length}),"ok","🔲");
 }
 
 /* =========================================================
@@ -268,7 +259,7 @@ function drawGridLayer(){
     );
 
     rect.bindTooltip(
-      `Hücre ${cell.id} · ${cell.n} ölçüm`,
+      _tgrf("Hücre {id} · {n} ölçüm",{id:cell.id,n:cell.n}),
       {
         sticky:true
       }
@@ -306,14 +297,14 @@ function updateGridSummary(
     `<b>📊 Grid</b> · `+
     `${$("gridSize")?.value||20}×${$("gridSize")?.value||20} m<br>`+
 
-    `Toplam: <b>${tot}</b> · `+
-    `🟢 Ölçülmüş: ${g} (%${pct(g)}) · `+
-    `🔴 Boş: ${r0} (%${pct(r0)})<br>`+
+    `${_tgr("Toplam:")} <b>${tot}</b> · `+
+    `🟢 ${_tgr("Ölçülmüş:")} ${g} (%${pct(g)}) · `+
+    `🔴 ${_tgr("Boş:")} ${r0} (%${pct(r0)})<br>`+
 
     (
       selCount>0
         ?
-        `<b style="color:#1d4ed8">🔵 Seçili: ${selCount}</b><br>`
+        `<b style="color:#1d4ed8">🔵 ${_tgr("Seçili:")} ${selCount}</b><br>`
         :
         ""
     )+
@@ -323,7 +314,7 @@ function updateGridSummary(
     (
       r0>0
         ?
-        `<button class="btn sm blue" onclick="createWaypointsFromGrid('auto')">📍 Otomatik (${r0})</button>`
+        `<button class="btn sm blue" onclick="createWaypointsFromGrid('auto')">${_tgrf("📍 Otomatik ({n})",{n:r0})}</button>`
         :
         ""
     )+
@@ -331,7 +322,7 @@ function updateGridSummary(
     (
       selCount>0
         ?
-        `<button class="btn sm" style="background:#1d4ed8;color:#fff" onclick="createWaypointsFromGrid('manual')">📍 Seçili (${selCount})</button>`
+        `<button class="btn sm" style="background:#1d4ed8;color:#fff" onclick="createWaypointsFromGrid('manual')">${_tgrf("📍 Seçili ({n})",{n:selCount})}</button>`
         :
         ""
     )+

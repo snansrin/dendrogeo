@@ -168,6 +168,7 @@ function dgTreeGroup(rows){
   const out=[...parks.values()].map(P=>{
     P.projects=[...P.projects.values()].map(J=>{
       J.users=[...J.users.values()].sort((a,b)=>(b.beklemede-a.beklemede)||(b.c-a.c)||(b.n-a.n));
+      for(const U2 of J.users)U2.rows.sort((a,b)=>(+a.point_id||0)-(+b.point_id||0)||(+a.measurement_no||1)-(+b.measurement_no||1));
       return J;
     }).sort((a,b)=>(b.beklemede-a.beklemede)||(b.c-a.c)||(b.n-a.n));
     return P;
@@ -199,7 +200,7 @@ function dgTreeFilterRows(rows,status,query){
 const dgTon=kg=>(Number(kg||0)/1000).toFixed(2)+" t";
 
 /* Onay bekleyen rozeti: 🔴 + sayı. Sıfırsa hiç basılmaz (gürültü olmasın). */
-const dgBekRozet=n=>n>0?`<span class="dg-pend" title="${n} kayıt onay bekliyor">🔴 ${n}</span>`:"";
+const dgBekRozet=n=>{if(!(n>0))return"";const ttl=(typeof dgTfs==="function"?dgTfs("{n} kayıt onay bekliyor",{n}):(n+" kayıt onay bekliyor"));return `<span class="dg-pend" title="${ttl}">🔴 ${n}</span>`;};
 const dgDurumOzet=o=>{
   const p=[];
   if(o.onayli)p.push(`<span class="dg-st-on">✓${o.onayli}</span>`);
@@ -373,8 +374,8 @@ function dgTreeRender(tree){
   }
 
   if(!tree.length){
-    el.innerHTML=`<div class="alert info">Bu filtreye uyan kayıt yok. `+
-      `(Toplam ${DG_TREE_ROWS.length} kayıt çekildi${DG_TREE_STATUS?" · durum: "+esc(DG_TREE_STATUS):""}${DG_TREE_QUERY?" · arama: "+esc(DG_TREE_QUERY):""})</div>`;
+    el.innerHTML=`<div class="alert info">${_ta("Bu filtreye uyan kayıt yok.")} `+
+      `(${_ta("Toplam")} ${DG_TREE_ROWS.length} ${_ta("kayıt çekildi")}${DG_TREE_STATUS?" · "+_ta("durum")+": "+esc(DG_TREE_STATUS):""}${DG_TREE_QUERY?" · "+_ta("arama")+": "+esc(DG_TREE_QUERY):""})</div>`;
     return;
   }
 
@@ -408,7 +409,7 @@ async function loadAdminTree(){
     res=await dgTreeFetch();
   }catch(e){
     DG_TREE_ROWS=[];
-    DG_TREE_ERR="beklenmedik sorgu hatası: "+((e&&e.message)||String(e));
+    DG_TREE_ERR=_ta("beklenmedik sorgu hatası: ")+((e&&e.message)||String(e));
     dgTreeDraw();
     return;
   }
@@ -423,7 +424,7 @@ async function loadAdminTree(){
   try{
     dgTreeDraw();
   }catch(e){
-    DG_TREE_ERR="çizim hatası: "+((e&&e.message)||String(e));
+    DG_TREE_ERR=_ta("çizim hatası: ")+((e&&e.message)||String(e));
     if(box)box.innerHTML=`<div class="alert err"><b>⚠ Ağaç çizilemedi</b> `+
       `<span class="mono" style="font-size:.72rem">${esc(DG_TREE_ERR)}</span> `+
       `<button class="btn sm blue" onclick="loadAdminTree()">🔄 Yeniden dene</button></div>`;

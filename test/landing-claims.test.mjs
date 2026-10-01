@@ -289,6 +289,30 @@ describe('0036 · özellik ve EN bütünlük kilitleri', () => {
     assert.match(rd('src/services/park-registry.js'), /dgLiveShareJoinCurrent/, 'proje değişince kanal taşınır');
     assert.match(rd('src/services/measure.js'), /dgLiveSharePing/, 'GPS güncellemesi ping atar');
   });
+  test('⭐ 0037 pinleri: kuyruk/rozet/panel çekirdek çevirileri sözlükte', () => {
+    const i18nSrc = rd('src/config/i18n.js');
+    for (const s of ['"Geri çekildi":"Retracted"', '"🚫 Reddet":"🚫 Reject"', '"✓ Onayla":"✓ Approve"',
+      '"🌳 Park Algılama":"🌳 Park Detection"', '"Ortaklar":"Collaborators"', '"Bekliyor":"Waiting"',
+      '"En Yaygın 6 Tür":"Top 6 Species"', '"Ölçüm fotoğrafı":"Measurement photo"'])
+      assert.ok(i18nSrc.includes(s), 'eksik pin: ' + s);
+    assert.match(i18nSrc, /"alt"\]/, 'alt özniteliği çevriliyor');
+  });
+  test('⭐ 0037 presence sertleştirme + durum görünürlüğü', () => {
+    const vs = rd('src/services/visit-stats.js');
+    assert.match(vs, /setAuth/, 'realtime JWT açıkça veriliyor');
+    assert.match(vs, /DG_PRES_RETRY<2/, 'hata durumunda yeniden deneme');
+    assert.match(vs, /function dgPresenceState/, 'durum dışa açık');
+    const ad = rd('src/services/admin.js');
+    assert.match(ad, /dgPresenceState\(\)/, 'kart durumu gösteriyor');
+    const mp = rd('src/services/map.js');
+    assert.match(mp, /DG_PARK_CH_RETRY/, 'canlı konum kanalı da yeniden dener');
+    assert.match(rd('css/style.css'), /\.dg-switch/, 'temalı anahtar stili');
+    assert.match(rd('partials/shell.html'), /class="dg-switch"/);
+  });
+  test('⭐ 0037 sıralama: admin düz liste + ağaç satırları point sıralı', () => {
+    assert.match(rd('src/services/admin.js'), /sort\(\(a,b\)=>\(\(\+a\.project_id\|\|0\)-\(\+b\.project_id\|\|0\)\)\|\|\(\(\+a\.point_id\|\|0\)-\(\+b\.point_id\|\|0\)\)/);
+    assert.match(rd('src/services/admin-tree.js'), /U2\.rows\.sort\(\(a,b\)=>\(\+a\.point_id\|\|0\)-\(\+b\.point_id\|\|0\)/);
+  });
   test('yayın kuyruğu dinamik dizeleri dgCf ile çevriliyor', () => {
     const rp = rd('src/services/report-publish.js');
     assert.match(rp, /dgCf\("son kontrol"\)/);
@@ -345,7 +369,10 @@ describe('i18n katmanı sözleşmesi (0035)', () => {
       'src/services/export.js', 'src/services/map.js', 'src/services/measure.js',
       'src/services/park-invites.js', 'src/services/park-registry.js', 'src/services/report-publish.js',
       'src/services/world.js', 'src/services/landcover.js', 'src/ui/park-export.js',
-      'src/ui/park-panel.js', 'src/ui/shell.js', 'src/ui/landing.js'];
+      'src/ui/park-panel.js', 'src/ui/shell.js', 'src/ui/landing.js',
+      /* 0037: tarama genişletildi — geofence/grid/offline/park-query/visit-stats */
+      'src/services/geofence.js', 'src/services/grid-engine.js', 'src/services/offline.js',
+      'src/services/park-query.js', 'src/services/visit-stats.js'];
     const bad = [];
     for (const f of files) {
       const t = rd(f);
@@ -353,6 +380,11 @@ describe('i18n katmanı sözleşmesi (0035)', () => {
       for (const m of t.matchAll(/(?:toast|dgCf)\("((?:[^"\\]|\\.)+)"/g)) {
         const s = m[1].replace(/\\"/g, '"').replace(/\\n/g, '\n');
         if (TR.test(s) && !keys.has(s) && !keys.has(s.trim())) bad.push(f + ' → ' + s.slice(0, 60));
+      }
+      /* tek tırnaklı toast('…') varyantı (offline.js deseni) */
+      for (const m of t.matchAll(/toast\('((?:[^'\\]|\\.)+)'/g)) {
+        const s = m[1].replace(/\\'/g, "'").replace(/\\n/g, '\n');
+        if (TR.test(s) && !keys.has(s) && !keys.has(s.trim()) && !/_to[f]|dgCf/.test(s)) bad.push(f + " ['] → " + s.slice(0, 60));
       }
       /* (2) dgTfs("TR şablon {var}") → şablon anahtarı sözlükte olmalı */
       for (const m of t.matchAll(/dgTfs\("((?:[^"\\]|\\.)+)"/g)) {

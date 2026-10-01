@@ -1,4 +1,7 @@
 "use strict";
+/* 0037: i18n güvenlikli yerel yardımcılar (harness'ler constants yüklemeyebilir). */
+const _tad=(s)=>(typeof dgCf==="function"?dgCf(s):s);
+const _tadf=(t,v)=>(typeof dgTfs==="function"?dgTfs(t,v):String(t).replace(/\{(\w+)\}/g,(m,k)=>(v&&v[k]!=null?v[k]:m)));
 /* DendroGeo · services/admin.js — ÖLÇÜM ONAY & MODERASYON ÇEKİRDEĞİ (Faz 6)
  * Ziyaret sayacı → visit-stats.js, veri talepleri → data-requests.js,
  * kullanıcı yönetimi → user-admin.js, yedek → backup.js'e taşındı.
@@ -33,7 +36,7 @@ $("aUsers").textContent=users.length;$("aRec").textContent=cnt.count??meas.lengt
  if(mRes.error){
   $("aMeasT").innerHTML=`<tr><td colspan=9><div class="alert err"><b>⚠ Ölçümler okunamadı (veri silinmedi, sorgu hata veriyor):</b> <span class="mono" style="font-size:.72rem">${esc(mRes.error.message)}</span><br><span style="font-size:.8rem">Şema değişikliğinden sonra PostgREST önbelleği bayatlamış olabilir → Supabase'de birkaç dakika bekleyip 🔄 Yenile, ya da üstteki "Park → Proje → Kullanıcı" ağacının hata kutusundaki adımları izle.</span></div></td></tr>`;
  }else
- $("aMeasT").innerHTML=meas.slice(0,300).map(x=>{
+ $("aMeasT").innerHTML=meas.slice().sort((a,b)=>((+a.project_id||0)-(+b.project_id||0))||((+a.point_id||0)-(+b.point_id||0))||((+a.measurement_no||1)-(+b.measurement_no||1))).slice(0,300).map(x=>{
   const st=x.status||"Beklemede";
   const bc=st==="Onaylı"?"on":(st==="Red"?"off":"admin");
   const act=st==="Onaylı"
@@ -101,8 +104,8 @@ async function loadStorageStats(){
   const mb=bytes/1048576;
   $("storeBar").style.width=Math.min(100,(mb/QUOTA_MB)*100)+"%";
   $("storeBar").style.background=mb/QUOTA_MB>0.8?"var(--red)":(mb/QUOTA_MB>0.6?"var(--amber)":"var(--green)");
-  $("storeInfo").textContent=count+" fotoğraf · "+mb.toFixed(1)+" MB / "+QUOTA_MB+" MB";
- }catch(e){$("storeInfo").textContent="Depolama bilgisi alınamadı.";}
+  $("storeInfo").textContent=_tadf("{n} fotoğraf · {mb} MB / {q} MB",{n:count,mb:mb.toFixed(1),q:QUOTA_MB});
+ }catch(e){$("storeInfo").textContent=_tad("Depolama bilgisi alınamadı.");}
 }
 
 async function cleanOrphans(){
@@ -139,7 +142,7 @@ async function reGeocodeAll(){
   }
   await new Promise(res=>setTimeout(res,1100));
  }
- toast("✓ "+done+" kaydın şehri güncellendi","ok","🌍");
+ toast(_tadf("✓ {n} kaydın şehri güncellendi",{n:done}),"ok","🌍");
  loadWorld();loadAdmin();
 }
 
@@ -237,21 +240,21 @@ return out;
 
 async function adminExportCSV(){
 const rows=await adminFilteredRows();
-if(!rows.length)return toast("Filtreye uyan kayıt yok","warn");
-dl(fullCSV(rows),"dendrogeo_toplu.csv");toast("✓ "+rows.length+" kayıt dışa aktarıldı","ok","📥");
+if(!rows.length)return toast(_tad("Filtreye uyan kayıt yok"),"warn");
+dl(fullCSV(rows),"dendrogeo_toplu.csv");toast(_tadf("✓ {n} kayıt dışa aktarıldı",{n:rows.length}),"ok","📥");
 }
 
 async function adminExportQgis(){
 const rows=await adminFilteredRows();
 if(!rows.length)return toast("Filtreye uyan kayıt yok","warn");
-dl(fullCSV(rows),"dendrogeo_qgis_detayli.csv");toast("✓ "+rows.length+" kayıt dışa aktarıldı","ok","🧾");
+dl(fullCSV(rows),"dendrogeo_qgis_detayli.csv");toast(_tadf("✓ {n} kayıt dışa aktarıldı",{n:rows.length}),"ok","🧾");
 }
 
 async function adminExportGeo(){
 const rows=await adminFilteredRows();
 if(!rows.length)return toast("Filtreye uyan kayıt yok","warn");
 const gj={type:"FeatureCollection",features:rows.map(r=>({type:"Feature",geometry:{type:"Point",coordinates:[r.lon,r.lat]},properties:{point:r.point_id,species:r.species,latin:LATIN[r.species]||"",dbh:r.dbh_cm,height:r.height_m,carbon:r.carbon_kg,status:r.status,photo:r.photo_url||""}}))};
-dl(JSON.stringify(gj,null,2),"dendrogeo_toplu.geojson");toast("✓ "+rows.length+" kayıt dışa aktarıldı","ok","🗺");
+dl(JSON.stringify(gj,null,2),"dendrogeo_toplu.geojson");toast(_tadf("✓ {n} kayıt dışa aktarıldı",{n:rows.length}),"ok","🗺");
 }
 
 /* ═══════════ 0036 (T4) · AÇILIR ÖZET KARTLAR + AKTİF KULLANICILAR ═══════════
@@ -311,7 +314,10 @@ function dgRenderActive(){
  for(const k in st){for(const p of (st[k]||[])){if(!p||!p.id)continue;rows.push({p:p,age:Math.max(0,Math.round((now-(p.t||now))/1000))});}}
  rows.sort((a,b)=>a.age-b.age);
  if(!rows.length){
-  box.textContent=(typeof dgPresenceReady==="function"&&!dgPresenceReady())?"—":"(şu an başka kimse yok — kanal sessiz)";
+  const stt=(typeof dgPresenceState==="function")?dgPresenceState():"idle";
+  box.textContent=stt==="on"?(typeof dgCf==="function"?dgCf("(şu an başka kimse yok — kanal sessiz)"):"(şu an başka kimse yok — kanal sessiz)")
+   :stt==="connecting"?(typeof dgCf==="function"?dgCf("⏳ gerçek zamanlı katmana bağlanılıyor…"):"⏳")
+   :(typeof dgCf==="function"?dgCf("⚠ Gerçek zamanlı katman etkin değil (Supabase → Dashboard → Realtime). Kart çalışmaya devam eder; canlı liste kapalı."):"—");
   return;
  }
  const T=(s)=>(typeof dgCf==="function"?dgCf(s):s);
