@@ -139,9 +139,10 @@ describe('arayüz kablolaması: 📄 düğmesi + panel kutusu', () => {
     // 0043: onay/red kaydırma sıçraması kök düzeltmesi + yerleşik ağaç algılayıcı → r51;
     // 0044: harici model soketi SİLİNDİ + measure.js çok sınıflı denetim → r52;
     // 0045: saha sürtünmesi paketi (ipucu kaldırma, proje hafızası, açılır etkinlik,
-    //      gelişmiş geçici izleme, yarı-gerçekçi hero) → r53.
+    //      gelişmiş geçici izleme, yarı-gerçekçi hero) → r53;
+    // 0046: hero kızda telefon + karakter güzellik katmanı (index değişti) → r54.
     // Sözleşme: önbeklenen içerik değiştiğinde CACHE_VERSION artmak zorunda.
-    assert.match(SW, /CACHE_VERSION = 'dendrogeo-sw-v2-r53'/, 'içerik değişti → sürüm arttı');
+    assert.match(SW, /CACHE_VERSION = 'dendrogeo-sw-v2-r54'/, 'içerik değişti → sürüm arttı');
     assert.match(SW, /'\/src\/services\/report-publish\.js'/);
     assert.match(SW, /'\/src\/config\/i18n\.js'/);
   });

@@ -189,6 +189,6 @@ describe('0044 · statik kilitler', () => {
   });
 
   test('⭐ çevrimdışı paket sözleşmesi: içerik değişti → sw r52', () => {
-    assert.match(rd('sw.js'), /CACHE_VERSION = 'dendrogeo-sw-v2-r53'/);
+    assert.match(rd('sw.js'), /CACHE_VERSION = 'dendrogeo-sw-v2-r54'/);
   });
 });

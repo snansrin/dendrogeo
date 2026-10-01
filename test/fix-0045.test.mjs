@@ -139,6 +139,10 @@ describe('0045 · hero karakterler yarı-gerçekçi (iskelet korunur)', () => {
     for (const a of ['cx="629" cy="231"', 'cx="575" cy="231"', 'x1="553" y1="186" x2="676" y2="96"', 'cx="671" cy="176"', 'cx="670" cy="230"'])
       assert.ok(landing.includes(a), 'konum çapası kaydı: ' + a);
     assert.ok(!landing.includes('<rect class="legA" x="623"'), 'eski blok bacak geri gelmemeli');
+    assert.match(landing, /class="phoneB"/, 'kızın elinde telefon (kullanıcı isteği)');
+    assert.ok(!landing.includes('width="20" height="14"'), 'eski kamera gövdesi kalktı');
+    assert.ok((landing.match(/fill="#e58f7a" opacity="\.3"/g) || []).length >= 4, 'allık katmanı ikisinde de');
+    assert.ok((landing.match(/stroke-width="\.9"/g) || []).length >= 6, 'ince detay çizgileri (tel/cep/tabán)');
   });
   test('⭐ yarı-gerçekçi katman: gradyanlar + yüz/eli/giysi detayı', () => {
     for (const g of ['id="dgSkinA"', 'id="dgHairA"', 'id="dgVest"', 'id="dgLegA"', 'id="dgSkinB"', 'id="dgHairB"', 'id="dgJack"', 'id="dgLegB"'])
@@ -152,7 +156,7 @@ describe('0045 · i18n + sürüm sözleşmesi', () => {
     for (const s of ['📡 Canlı Aksiyon Akışı', 'çevrimiçi oldu', 'görüntüledi', 'ölçüm kaydetti', 'park algıladı', 'dışa aktardı', 'rapor yayını istedi', 'oturum', 'gezinti', 'son eylem', 'iz', '⬆ Gizle', '⬇ Göster'])
       assert.ok(i18n.includes(JSON.stringify(s) + ':'), 'eksik EN: ' + s);
   });
-  test('⭐ içerik değişti → sw r53', () => {
-    assert.match(rd('sw.js'), /CACHE_VERSION = 'dendrogeo-sw-v2-r53'/);
+  test('⭐ içerik değişti → sw r54', () => {
+    assert.match(rd('sw.js'), /CACHE_VERSION = 'dendrogeo-sw-v2-r54'/);
   });
 });
