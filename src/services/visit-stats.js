@@ -90,6 +90,35 @@ function dgPresenceStart(){
   }catch(e){}})();
  }catch(e){DG_PRES=null;DG_PRES_OK=false;DG_PRES_STATE="error";}
 }
+/* 0045 · GELİŞMİŞ CANLI İZLEME (kullanıcı: "gerçek bir izleme olsun, daha
+ * detaylı olsun"). VERİTABANINA YAZMAZ: tüm alanlar presence payload'ında
+ * taşınır (geçici) — kanal düşince/sekmeler kapanınca buharlaşır. Yeni tablo/
+ * migration/RLS YOK (kırmızı çizgi); gizlilik metnindeki mevcut beyanla birebir
+ * uyumlu (konum yalnız GPS açıksa ve geçici). Yalnız kurucu sekmesi okur. */
+const DG_SID=(()=>{try{let s=sessionStorage.getItem("dg_sid");if(!s){s=Math.random().toString(36).slice(2,10);sessionStorage.setItem("dg_sid",s);}return s;}catch(e){return "x";}})();
+const DG_SESSION_START=Date.now();
+const DG_DEV_TAG=(()=>{try{
+ const ua=navigator.userAgent||"";
+ const br=/Edg\//.test(ua)?"Edge":/OPR\//.test(ua)?"Opera":/Chrome\//.test(ua)?"Chrome":/Firefox\//.test(ua)?"Firefox":/Safari\//.test(ua)?"Safari":"?";
+ const os=/Windows/.test(ua)?"Windows":/Android/.test(ua)?"Android":/iPhone|iPad|iPod/.test(ua)?"iOS":/Mac OS X/.test(ua)?"macOS":/Linux/.test(ua)?"Linux":"?";
+ return (/Mobi|Android|iPhone|iPad|iPod/.test(ua)?"mobil":"masaüstü")+" · "+os+" · "+br;
+}catch(e){return "?";}})();
+let DG_VIEW_HIST=[],DG_LAST_ACT=null,DG_LOC_HIST=[];
+const DG_ACT_LABELS={save:"ölçüm kaydetti",edit:"kayıt güncelledi",park:"park algıladı",export:"dışa aktardı",publish:"rapor yayını istedi"};
+/* Sekme değişince çağrılır (shell go()): gezinme zincirine yazar. */
+function dgPresenceView(v){
+ try{
+  const last=DG_VIEW_HIST[DG_VIEW_HIST.length-1];
+  if(last&&last.v===v)return;
+  DG_VIEW_HIST.push({v:v,t:Date.now()});
+  if(DG_VIEW_HIST.length>8)DG_VIEW_HIST.shift();
+  dgPresencePing(v,true);
+ }catch(e){}
+}
+/* Önemli kullanıcı aksiyonunda çağrılır (kaydet/park/export/yayın). */
+function dgPresenceAct(k,d){
+ try{DG_LAST_ACT={k:k,t:Date.now(),d:String(d||"").slice(0,60)};dgPresencePing(null,true);}catch(e){}
+}
 function dgPresencePing(view,force){
  try{
   if(!DG_PRES||!DG_PRES_OK||typeof DG_PRES.track!=="function")return;
@@ -104,7 +133,15 @@ function dgPresencePing(view,force){
    * paylaşılır (ayrı anahtar yok) — GEÇİCİDİR, veritabanına yazılmaz; kayıt
    * onayında yönetici zaten saklı konumları görebilir. Park ORTAK kanalı
    * ayrıca kullanıcının 👥 anahtarına bağlıdır (map.js canlı paylaşım bayrağı). */
-  if(typeof GPS!=="undefined"&&GPS&&GPS.latitude!=null){p.la=GPS.latitude;p.lo=GPS.longitude;}
+  if(typeof GPS!=="undefined"&&GPS&&GPS.latitude!=null){p.la=GPS.latitude;p.lo=GPS.longitude;
+   const lb=DG_LOC_HIST[DG_LOC_HIST.length-1];
+   if(!lb||Math.abs(lb[0]-p.la)>1e-5||Math.abs(lb[1]-p.lo)>1e-5){DG_LOC_HIST.push([p.la,p.lo,now]);if(DG_LOC_HIST.length>12)DG_LOC_HIST.shift();}
+  }
+  /* 0045: oturum/cihaz/gezinti/aksiyon/iz — hep geçici presence alanı. */
+  p.sid=DG_SID;p.st=DG_SESSION_START;p.dev=DG_DEV_TAG;
+  if(DG_VIEW_HIST.length)p.vh=DG_VIEW_HIST.slice(-8);
+  if(DG_LAST_ACT)p.act=DG_LAST_ACT;
+  if(DG_LOC_HIST.length>1)p.lh=DG_LOC_HIST.slice(-12);
   DG_PRES.track(p);
  }catch(e){}
 }
@@ -112,8 +149,26 @@ function dgPresenceList(){try{return (DG_PRES&&typeof DG_PRES.presenceState==="f
 
 /* ─────────── 👁 ZİYARETÇİ & CANLI (yalnız kurucu) ─────────── */
 let DG_VIS_MAP=null,DG_VIS_LAYER=null;
+/* 0045: "Son Etkinlik" açılır-kapanır (kullanıcı isteği). Durum cihazda
+ * hatırlanır (localStorage) — sekme her açılışta kullanıcının bıraktığı gibi. */
+function dgVisActToggle(){
+ const w=$("visActivityWrap"),b=$("visActToggle");if(!w)return;
+ const T=(x)=>(typeof dgCf==="function"?dgCf(x):x);
+ const open=w.style.display!=="none";
+ w.style.display=open?"none":"";
+ if(b){b.innerHTML=open?T("⬇ Göster"):T("⬆ Gizle");b.setAttribute("aria-expanded",String(!open));}
+ try{localStorage.setItem("dg_vis_act_open",open?"0":"1");}catch(e){}
+}
+function dgVisActRestore(){
+ const w=$("visActivityWrap"),b=$("visActToggle");if(!w)return;
+ const T=(x)=>(typeof dgCf==="function"?dgCf(x):x);
+ let open=true;try{open=localStorage.getItem("dg_vis_act_open")!=="0";}catch(e){}
+ w.style.display=open?"":"none";
+ if(b){b.innerHTML=open?T("⬆ Gizle"):T("⬇ Göster");b.setAttribute("aria-expanded",String(open));}
+}
 async function loadVisitors(){
  if(typeof PROFILE==="undefined"||!PROFILE||PROFILE.role!=="owner")return;
+ dgVisActRestore();
  renderVisitorsLive();
  dgVisCounts();
  dgVisActivity();
@@ -157,18 +212,53 @@ if(!rows.length){
     const hasLoc=(r.p.la!=null&&r.p.lo!=null);
     const role=r.p.r==="owner"?"KURUCU":(r.p.r==="admin"?"DENETÇİ":"KULLANICI");
     const rc=r.p.r==="owner"?"on":(r.p.r==="admin"?"admin":"off");
-    return '<div style="display:flex;gap:8px;align-items:center;padding:6px 0;border-bottom:1px solid var(--line)'+(hasLoc?";cursor:pointer":"")+'"'+
+    const ses=r.p.st?Math.max(0,Math.round((Date.now()-r.p.st)/60000)):null;
+    const chain=(r.p.vh||[]).slice(-3).map(h=>T(DG_VIEW_LABELS[h.v]||h.v)).join(" → ");
+    const actTxt=r.p.act?T(DG_ACT_LABELS[r.p.act.k]||r.p.act.k)+(r.p.act.d?" · "+esc(r.p.act.d):""):"";
+    return '<div style="padding:6px 0;border-bottom:1px solid var(--line)'+(hasLoc?";cursor:pointer":"")+'"'+
      (hasLoc?' onclick="dgVisFocus('+Number(r.p.la)+','+Number(r.p.lo)+')" title="'+T("Haritada odaklan")+'"':'')+'>'+
+     '<div style="display:flex;gap:8px;align-items:center">'+
      '<span style="width:9px;height:9px;border-radius:50%;background:#22c55e;flex:0 0 auto"></span>'+
      '<b>'+esc(r.p.n||"?")+'</b>'+
      '<span class="badge '+rc+'" style="font-size:.6rem">'+role+'</span>'+
      '<span style="color:var(--mut)">· '+T(lbl)+(hasLoc?" 📍":"")+'</span>'+
-     '<span class="dg-meta" style="margin-left:auto;white-space:nowrap">'+ageTxt+" "+T("önce")+'</span></div>';
+     '<span class="dg-meta" style="margin-left:auto;white-space:nowrap">'+ageTxt+" "+T("önce")+'</span></div>'+
+     '<div class="dg-meta" style="margin:3px 0 0 17px">'+
+     (r.p.dev?"🖥 "+esc(r.p.dev)+" · ":"")+
+     (ses!=null?T("oturum")+" "+ses+" "+T("dk")+" · ":"")+
+     (chain?T("gezinti")+": "+chain:"")+
+     (actTxt?" · "+T("son eylem")+": "+actTxt:"")+
+     (r.p.lh&&r.p.lh.length>1?" · 🧭 "+T("iz")+" ("+r.p.lh.length+")":"")+
+     '</div></div>';
    }).join("");
   }
-  
+  dgVisFeed(rows);
  }
  dgVisMapDraw(rows);
+}
+/* 0045: 📡 CANLI AKSİYON AKIŞI — presence'teki oturum/gezinti/aksiyon
+ * olaylarından anlık akış (geçici; DB sorgusu YOK). */
+function dgVisFeed(rows){
+ const box=$("visFeed");if(!box)return;
+ const T=(x)=>(typeof dgCf==="function"?dgCf(x):x);
+ const loc=(typeof DG_LANG!=="undefined"&&DG_LANG==="en")?"en-GB":"tr-TR";
+ const ev=[];
+ for(const r of (rows||[])){
+  const who=r.p.n||"?";
+  if(r.p.st)ev.push({t:r.p.st,who:who,k:T("çevrimiçi oldu"),d:r.p.dev||""});
+  for(const h of (r.p.vh||[]))ev.push({t:h.t,who:who,k:T("görüntüledi"),d:T(DG_VIEW_LABELS[h.v]||h.v)});
+  if(r.p.act)ev.push({t:r.p.act.t,who:who,k:T(DG_ACT_LABELS[r.p.act.k]||r.p.act.k),d:r.p.act.d||""});
+ }
+ ev.sort((a,b)=>b.t-a.t);
+ const top=ev.slice(0,18);
+ if(!top.length){box.textContent=T("—");return;}
+ box.innerHTML=top.map(e=>{
+  const hm=new Date(e.t).toLocaleTimeString(loc,{hour:"2-digit",minute:"2-digit",second:"2-digit"});
+  return '<div style="display:flex;gap:8px;padding:4px 0;border-bottom:1px solid var(--line);font-size:.82rem">'+
+   '<span class="mono" style="color:var(--mut);flex:0 0 auto">'+hm+'</span>'+
+   '<b style="flex:0 0 auto">'+esc(e.who)+'</b>'+
+   '<span>'+esc(e.k)+(e.d?' <span style="color:var(--mut)">· '+esc(e.d)+'</span>':"")+'</span></div>';
+ }).join("");
 }
 function dgVisMapInit(){
  const el=$("visMap");
@@ -194,6 +284,13 @@ function dgVisMapDraw(rows){
   const ic=L.divIcon({className:"",html:'<div style="width:20px;height:20px;border-radius:50%;background:'+col+';border:2px solid #fff;box-shadow:0 1px 4px rgba(0,0,0,.45);display:flex;align-items:center;justify-content:center;color:#fff;font-size:10px;font-weight:800">'+esc(ini)+'</div>',iconSize:[20,20],iconAnchor:[10,10]});
   const lbl=(DG_VIEW_LABELS[r.p.v]||r.p.v||"");
   const ageTxt=r.age<60?r.age+" "+T("sn"):Math.round(r.age/60)+" "+T("dk");
+  /* 0045: geçici konum İZİ (presence lh) — kesikli polizgi, DB'ye yazılmaz. */
+  if(r.p.lh&&r.p.lh.length>1){
+   try{
+    L.polyline(r.p.lh.map(q=>[q[0],q[1]]),{color:col,weight:2,opacity:.55,dashArray:"3 6",interactive:false}).addTo(DG_VIS_LAYER);
+    L.circleMarker([r.p.lh[0][0],r.p.lh[0][1]],{radius:3,color:col,fillColor:"#fff",fillOpacity:.9,weight:2,interactive:false}).addTo(DG_VIS_LAYER);
+   }catch(e){}
+  }
   L.marker([r.p.la,r.p.lo],{icon:ic,interactive:true,keyboard:false,zIndexOffset:700}).addTo(DG_VIS_LAYER)
    .bindTooltip("<b>"+esc(r.p.n||"?")+"</b><br>"+esc(T(lbl))+"<br>"+T("son konum")+": "+ageTxt+" "+T("önce"),{direction:"top",offset:[0,-12]});
  }

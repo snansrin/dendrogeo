@@ -670,6 +670,7 @@ async function dgRetryRegister(){
     DG_PARK=row;
     dgRenderScanCard();
     toast(dgCf("✓ Park kimliği yazıldı: ")+esc(row.name),"ok","🌳");
+    if(typeof dgPresenceAct==="function"){try{dgPresenceAct("park",row.name);}catch(e){}}
   }
 }
 
@@ -904,6 +905,8 @@ function dgParkGate(auto){
 
 /* Proje seçimi değişti (v-measure). shell.html'deki onchange bunu çağırır. */
 function dgProjectChanged(){
+ /* 0045: seçim cihaz belleğine yazılır (yenilemede geri gelir). */
+ if(typeof dgProjectRemember==="function"){try{dgProjectRemember($("mProject").value);}catch(e){}}
  /* 0036 (T5): proje değişince canlı konum kanalı yeni parka taşınır. */
  if(typeof dgLiveShareJoinCurrent==="function"){try{dgLiveShareJoinCurrent();}catch(e){}}
   dgParkGate();

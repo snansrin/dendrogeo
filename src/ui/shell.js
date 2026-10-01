@@ -148,6 +148,7 @@ function dgSaveView(v){try{localStorage.setItem("dg_last_view",v);}catch(e){}}
 function dgLastView(){try{return localStorage.getItem("dg_last_view")||"";}catch(e){return "";}}
 function go(v){
  DG_CUR_VIEW=v;dgSaveView(v);
+ if(typeof dgPresenceView==="function"){try{dgPresenceView(v);}catch(e){}}
  /* 0040: sekme geçişi sırasında kaydırma koruması devre dışı (eski sekmenin
   * konumu yeniye taşınmasın); 500 ms sonra normale döner. Ziyaretçi sekmesinin
   * otomatik tiki yalnız o sekmede çalışır. */

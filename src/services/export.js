@@ -25,9 +25,12 @@ from+=step;
 }
 return out;
 }
-async function exportCSV(){const d=await getMine();dl(fullCSV(d),"dendrogeo.csv");}
-async function exportQgis(){const d=await getMine();dl(fullCSV(d),"dendrogeo_qgis.csv");}
+async function exportCSV(){
+ if(typeof dgPresenceAct==="function"){try{dgPresenceAct("export","CSV");}catch(e){}}const d=await getMine();dl(fullCSV(d),"dendrogeo.csv");}
+async function exportQgis(){
+ if(typeof dgPresenceAct==="function"){try{dgPresenceAct("export","QGIS");}catch(e){}}const d=await getMine();dl(fullCSV(d),"dendrogeo_qgis.csv");}
 async function exportGeo(){
+ if(typeof dgPresenceAct==="function"){try{dgPresenceAct("export","GeoJSON");}catch(e){}}
  const d=await getMine();
  const gj={type:"FeatureCollection",features:d.map(r=>({type:"Feature",geometry:{type:"Point",coordinates:[r.lon,r.lat]},properties:{point:r.point_id,species:r.species,latin:LATIN[r.species]||"",dbh:r.dbh_cm,height:r.height_m,carbon:r.carbon_kg,photo:r.photo_url||""}}))};
  dl(JSON.stringify(gj,null,2),"dendrogeo.geojson");

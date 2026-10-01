@@ -216,6 +216,19 @@ function liveCalc(){const d=+$("mDbh").value,h=+$("mHeight").value,sp=$("mSpecie
 let EDIT_PROJ_PARK=null;
 
 /* 0040: kaydırma koruma sarmalı — yeniden çizimde #main scrollTop korunur. */
+/* 0045: SON KULLANILAN PARK/PROJE hatırlanır (kullanıcı: "sayfa yenilendiğinde
+ * park-proje değişmesin, en son hangisinde çalışılıyorsa onda kalsın").
+ * Bellek CİHAZDA (localStorage): sunucuda yeni alan/şema/RLS yok (kırmızı çizgi).
+ * Geri yükleme KOŞULLU: id hâlâ PROJ_LIST'te varsa seçilir — silinmiş/paylaşımdan
+ * çıkmış proje hortlamaz; düzenleme modu (EDIT_ID) değeri zaten kendisi yazar. */
+const DG_LAST_PROJ_KEY="dg_last_proj";
+function dgProjectRemember(id){try{if(id)localStorage.setItem(DG_LAST_PROJ_KEY,String(id));}catch(e){}}
+function dgProjectRestore(){
+ let last=null;try{last=localStorage.getItem(DG_LAST_PROJ_KEY);}catch(e){}
+ if(!last)return;
+ if(!(PROJ_LIST||[]).some(p=>String(p.id)===last))return;
+ for(const id of ["mProject","nProject"]){const s=$(id);if(s)s.value=last;}
+}
 async function loadProjects(){const _y=(typeof dgScrollKeep==="function"?dgScrollKeep():null);try{return await loadProjects__scroll.apply(this,arguments);}finally{if(typeof dgScrollRestore==="function")dgScrollRestore(_y);}}
 async function loadProjects__scroll(){
  if(!USER)return;
@@ -254,6 +267,7 @@ async function loadProjects__scroll(){
  const empty="<option value=''>Önce park algıla → proje oluştur</option>";
  $("mProject").innerHTML=opts||empty;
  $("nProject").innerHTML=opts||empty;
+ dgProjectRestore();
  const ownRows=PROJ_LIST.filter(p=>!p.shared).map(p=>{
   const park=p.parks&&p.parks.name?p.parks.name:(p.park_name||"");
   const parkCell=p.park_id
@@ -444,6 +458,7 @@ async function dgSaveMeasInner(){
     
     const f=$("mPhoto").files[0];
     if(f&&!photoOk)return toast("Fotoğraf denetimi başarısız — uygun bir çekim yapın","err");
+    dgProjectRemember(pid);
     
     const wasEdit=!!EDIT_ID;
     const c=calc(d,h,sp,grp);
@@ -517,6 +532,7 @@ if(EDIT_ID) base._editId = EDIT_ID; // ✅ çevrimdışı düzenleme işareti
         
         await saveOfflineMeasurement(base);
         toast('Çevrimdışı kaydedildi — internet gelince senkronize','info','📴');
+        if(typeof dgPresenceAct==="function"){try{dgPresenceAct(wasEdit?"edit":"save","P"+String(pt).padStart(3,"0"));}catch(e){}}
         
         // ✅ Background Sync register KALDIRILDI (artık ana thread yönetiyor)
         
@@ -557,6 +573,7 @@ if(EDIT_ID) base._editId = EDIT_ID; // ✅ çevrimdışı düzenleme işareti
         if(error){delete base.altitude_m;delete base.photo_file;({error}=await sb.from("measurements").insert(base));}
         if(error)return toast("Hata: "+error.message,"err");
         toast("Kaydedildi — "+c.total_carbon.toFixed(1)+" kg karbon","ok","🌱");
+      if(typeof dgPresenceAct==="function"){try{dgPresenceAct(wasEdit?"edit":"save","P"+String(pt).padStart(3,"0"));}catch(e){}}
     }
     
     $("mPoint").value='';

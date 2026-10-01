@@ -304,6 +304,7 @@ function dgPubInsertError(r){
 }
 
 async function dgPublishReport(parkId){
+ if(typeof dgPresenceAct==="function"){try{dgPresenceAct("publish","park #"+parkId);}catch(e){}}
  if(!dgPubAdmin())return toast("Rapor yayını yalnız yönetici içindir.","err","📄");
  const lulc=$("dgPubLulc")?$("dgPubLulc").checked!==false:true;
  const r=await dgPubInsertRequest(parkId,lulc,"uygulama içi yayın");
