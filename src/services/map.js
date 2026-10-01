@@ -339,7 +339,15 @@ function switchBaseLayer(type){
  * aynı parkın kanalındaki kullanıcılar görür. Kırmızı çizgiler (şema, RLS,
  * migration) hiç devreye girmez. Her adım typeof/try korumalı: Realtime
  * kapalıysa özellik sessizce devre dışı kalır, ölçüm akışı etkilenmez. */
-let DG_PARK_CH=null,DG_PARK_CH_ID=0,DG_LIVE_ON=true,DG_MATES_LAYER=null,DG_LAST_PING=0,DG_PARK_CH_RETRY=0;
+let DG_PARK_CH=null,DG_PARK_CH_ID=0,DG_LIVE_ON=true,DG_MATES_LAYER=null,DG_LAST_PING=0,DG_PARK_CH_RETRY=0,DG_PARK_CH_WATCH=null,DG_PARK_CH_LIVE=false;
+function dgParkShareFail(){
+ DG_PARK_CH_LIVE=false;
+ const nx=$("dgMatesNote");
+ if(nx)nx.textContent=_tmf("⚠ Gerçek zamanlı katman kapalı — canlı konum gösterilemiyor (Supabase → Dashboard → Realtime).");
+ if(DG_PARK_CH_RETRY<2){DG_PARK_CH_RETRY++;
+  setTimeout(()=>{try{if(DG_PARK_CH&&sb&&sb.removeChannel)sb.removeChannel(DG_PARK_CH);}catch(e){}
+   DG_PARK_CH=null;DG_PARK_CH_ID=0;if(DG_LIVE_ON)dgLiveShareJoinCurrent();},3000);}
+}
 const DG_MATE_COLORS=["#c2452d","#2b6cb0","#7c3aed","#0f766e","#be185d","#4d7c0f","#b45309","#0e7490"];
 function dgMateColor(id){let h=0;const s=String(id||"?");for(let i=0;i<s.length;i++)h=(h*31+s.charCodeAt(i))>>>0;return DG_MATE_COLORS[h%DG_MATE_COLORS.length];}
 function dgLiveShareToggle(on){
@@ -359,21 +367,24 @@ async function dgLiveShareJoinCurrent(){
   dgLiveShareLeave();
   DG_PARK_CH_ID=park;
   const note0=$("dgMatesNote");if(note0)note0.textContent=_tmf("⏳ gerçek zamanlı katmana bağlanılıyor…");
-  try{
-   const{data}=await sb.auth.getSession();
-   const tok=data&&data.session&&data.session.access_token;
-   if(tok&&sb.realtime&&sb.realtime.setAuth)sb.realtime.setAuth(tok);
-  }catch(e){}
+  /* 0038: SUBSCRIBE ÖNCE (presence anon apikey ile çalışır — canlı WS
+   * probuyla doğrulandı), JWT arka planda; 8 sn watchdog takılı düşürür. */
   DG_PARK_CH=sb.channel("dg-park-"+park,{config:{presence:{key:String(USER.id)}}});
   DG_PARK_CH.on("presence",{event:"sync"},()=>dgLiveMatesDraw());
   DG_PARK_CH.subscribe(st=>{
-   if(st==="SUBSCRIBED"){dgLiveSharePing();dgLiveMatesDraw();}
-   else if(st==="CHANNEL_ERROR"||st==="TIMED_OUT"||st==="CLOSED"){
-    const nx=$("dgMatesNote");
-    if(nx)nx.textContent=_tmf("⚠ Gerçek zamanlı katman kapalı — canlı konum gösterilemiyor (Supabase → Dashboard → Realtime).");
-    if(!DG_PARK_CH_RETRY){DG_PARK_CH_RETRY=1;setTimeout(()=>{const id=DG_PARK_CH_ID;DG_PARK_CH=null;DG_PARK_CH_ID=0;if(id)dgLiveShareJoinCurrent();},4000);}
+   if(st==="SUBSCRIBED"){
+    if(DG_PARK_CH_WATCH){clearTimeout(DG_PARK_CH_WATCH);DG_PARK_CH_WATCH=null;}
+    DG_PARK_CH_LIVE=true;DG_LAST_PING=0;dgLiveSharePing();dgLiveMatesDraw();
    }
+   else if(st==="CHANNEL_ERROR"||st==="TIMED_OUT"||st==="CLOSED"){dgParkShareFail();}
   });
+  if(DG_PARK_CH_WATCH)clearTimeout(DG_PARK_CH_WATCH);
+  DG_PARK_CH_WATCH=setTimeout(()=>{dgParkShareFail();},8000);
+  (async()=>{try{
+   const{data}=await sb.auth.getSession();
+   const tok=data&&data.session&&data.session.access_token;
+   if(tok&&sb.realtime&&sb.realtime.setAuth)sb.realtime.setAuth(tok);
+  }catch(e){}})();
  }catch(e){DG_PARK_CH=null;DG_PARK_CH_ID=0;}
 }
 function dgLiveShareLeave(){
@@ -385,7 +396,7 @@ function dgLiveShareLeave(){
 }
 function dgLiveSharePing(){
  try{
-  if(!DG_PARK_CH||typeof DG_PARK_CH.track!=="function"||!DG_LIVE_ON)return;
+  if(!DG_PARK_CH||!DG_PARK_CH_LIVE||typeof DG_PARK_CH.track!=="function"||!DG_LIVE_ON)return;
   if(typeof GPS==="undefined"||!GPS||GPS.latitude==null)return;
   const now=Date.now();if(now-DG_LAST_PING<10000)return;DG_LAST_PING=now;
   DG_PARK_CH.track({id:String(USER.id),n:(typeof PROFILE!=="undefined"&&PROFILE&&PROFILE.full_name)||"?",la:GPS.latitude,lo:GPS.longitude,t:now});

@@ -65,9 +65,10 @@ describe('ID ve sekme denetimi', () => {
   test('yan menü öğe sayısı go() indeks haritasıyla uyumlu (10)', () => {
     const html = src['index.html'];
     const items = (html.match(/class="item/g) || []).length;
-    assert.equal(items, 10);
+    assert.equal(items, 11);
     // go() indeks haritası Faz 1'den beri src/ui/shell.js'te → tüm kaynaklarda ara
     assert.match(all, /users:9/);
+    assert.match(all, /visitors:10/); /* 0038: kurucuya özel Ziyaretçi & Canlı */
   });
 });
 

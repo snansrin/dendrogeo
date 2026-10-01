@@ -233,7 +233,7 @@
 <!-- DİL KATMANI (0035): TR markup varsayılan; EN sözlüğü çalışma zamanında
      uygulanır (dgToggleLang). defer sırası önemli değil — DOMContentLoaded'da
      ya da hemen (hazırsa) çalışır. module-registry + CORE_ASSETS kaydı şart. -->
-<script src="src/config/i18n.js?v=43cc1036" defer></script>
+<script src="src/config/i18n.js?v=6cb24fc7" defer></script>
 <script src="src/utils/geo.js?v=3e796768" defer></script>
 <script src="src/utils/truncation.js?v=f43c76b3" defer></script>
 <!-- Faz 7: geotiff (317 KB) ve chart.js (208 KB) artık SENKRON yüklenmiyor;
@@ -244,11 +244,11 @@
 <script src="src/services/export.js?v=f15f365d" defer></script>
 <script src="src/services/offline.js?v=1765b5a6" defer></script>
 <!-- YÖNETİM ZİNCİRİ (Faz 6 — eski admin.js beş modüle bölündü) -->
-<script src="src/services/visit-stats.js?v=9942799d" defer></script>
+<script src="src/services/visit-stats.js?v=cbd09616" defer></script>
 <script src="src/services/data-requests.js?v=38e6299d" defer></script>
 <script src="src/services/user-admin.js?v=1830907c" defer></script>
 <script src="src/services/backup.js?v=86db8192" defer></script>
-<script src="src/services/admin.js?v=bbf669d8" defer></script>
+<script src="src/services/admin.js?v=d14e39b7" defer></script>
 <!-- YÖNETİM AĞACI (2026-09-24): park → proje → kullanıcı → ölçüm kademeli
      görünümü + sorgu hatası görünürlüğü. admin.js'ten SONRA yüklenir
      (approve/reject/del fonksiyonlarını çağırır). -->
@@ -259,8 +259,8 @@
 <script src="src/services/report-publish.js?v=a70a36ab" defer></script>
 <script src="src/services/park-invites.js?v=37f6bcad" defer></script>
 <script src="src/services/world.js?v=ea4867e8" defer></script>
-<script src="src/services/measure.js?v=64be19ab" defer></script>
-<script src="src/services/map.js?v=3acb383d" defer></script>
+<script src="src/services/measure.js?v=49452993" defer></script>
+<script src="src/services/map.js?v=27263ef3" defer></script>
 <!-- LULC ZİNCİRİ ARTIK TEMBEL (2026-09-25 · Faz 8): 8 dosya ilk yüklemede
      indirilmiyor. Yalnız "🌿 Yüzey Örtüsü Analizi"ne basan kullanıcı için
      src/utils/lazylibs.js → dgEnsureLulc() sırayla enjekte eder
@@ -283,7 +283,7 @@
 <script src="src/ui/park-panel.js?v=d519efc8" defer></script>
 <script src="src/ui/park-export.js?v=3e078dc3" defer></script>
 <script src="src/services/dash.js?v=57ca0f35" defer></script>
-<link rel="stylesheet" href="css/style.css?v=b2cf4d4c">
+<link rel="stylesheet" href="css/style.css?v=77a93734">
 <link rel="stylesheet" href="css/landing.css?v=91528a91">
 <link rel="stylesheet" href="css/park-panel.css?v=10b49293">
 <!-- TASARIM SİSTEMİ (2026-09-27, 2. deneme): ui-standard.css geri BAĞLANDI
@@ -643,6 +643,7 @@
   <div class="sec" id="adminSec" style="display:none">Yönetim</div>
   <div class="item" id="miAdmin" style="display:none" role="button" tabindex="0" onkeydown="dgKeyActivate(event,this)" onclick="go('admin')">🔐 Ölçüm Yönetimi<span id="adminPendingBadge" class="dg-menu-badge" style="display:none"></span></div>
   <div class="item" id="miUsers" style="display:none" role="button" tabindex="0" onkeydown="dgKeyActivate(event,this)" onclick="go('users')">👥 Kullanıcılar</div>
+  <div class="item" id="miVisitors" style="display:none" role="button" tabindex="0" onkeydown="dgKeyActivate(event,this)" onclick="go('visitors')">👁 Ziyaretçi &amp; Canlı</div>
  </div>
  <div id="main">
 
@@ -684,7 +685,7 @@
      <div class="gpsring" id="gpsRing"><div class="val" id="gpsAcc">—</div><div class="lbl">doğruluk (m)</div></div>
      <div id="gpsState" class="alert info">Konum servisi kapalı.</div>
      <button id="gpsBtn" class="dg-png-btn primary" onclick="startGps()">📡 Konumu Etkinleştir</button>
-     <div class="dg-png-sub" style="font-size:.68rem">Doğrulama eşiği ±60 m · park dışı kayıt sunucuda reddedilir (0007).</div><label style="display:flex;gap:8px;align-items:flex-start;font-size:.8rem;color:var(--mut);margin-top:10px;cursor:pointer"><input type="checkbox" class="dg-switch" id="dgLiveShare" checked onchange="dgLiveShareToggle(this.checked)"> <span>👥 Canlı konumumu bu parkın çalışma arkadaşlarıyla paylaş (yalnız aynı parkın haritasında, geçici olarak görünür; veritabanına yazılmaz)</span></label>
+     <div class="dg-png-sub" style="font-size:.68rem">Doğrulama eşiği ±60 m · park dışı kayıt sunucuda reddedilir (0007).</div><label style="display:flex;gap:8px;align-items:flex-start;font-size:.8rem;color:var(--mut);margin-top:10px;cursor:pointer"><input type="checkbox" class="dg-switch" id="dgLiveShare" checked onchange="dgLiveShareToggle(this.checked)"> <span>👥 Canlı konumumu paylaş — park ortaklarım ve kurucu canlı haritada görür (geçici; veritabanına yazılmaz)</span></label>
      <div id="dgMatesNote" class="dg-meta" style="margin-top:6px"></div>
      <div id="iosHint" class="alert info" style="display:none"><b>iPhone kullanıcısı mısınız?</b><br><span style="font-size:.85rem">Ayarlar → Gizlilik ve Güvenlik → Konum Servisleri →Safari Siteleri→ "Uygulamayı Kullanırken" seçin, sayfayı yenileyin.</span></div>
      <div class="grid g2" style="margin-top:14px">
@@ -903,14 +904,12 @@
 
   <div class="view" id="v-admin">
    <h2 class="disp" style="margin-bottom:16px">🔐 Ölçüm Yönetimi & Onay</h2>
-   <div class="grid g4" style="margin-bottom:10px">
-    <div class="stat dg-clickable" onclick="dgAdminExpand('users')" role="button" tabindex="0" onkeydown="dgKeyActivate(event,this)" title="Listeyi aç/kapat"><div class="lbl">Kullanıcı</div><div class="val" id="aUsers">0</div><div style="font-size:.68rem;color:var(--mut);margin-top:4px">▾ liste</div></div>
-    <div class="stat dg-clickable" onclick="dgAdminExpand('records')" role="button" tabindex="0" onkeydown="dgKeyActivate(event,this)" title="Listeyi aç/kapat"><div class="lbl">Kayıt</div><div class="val" id="aRec">0</div><div style="font-size:.68rem;color:var(--mut);margin-top:4px">▾ liste</div></div>
-    <div class="stat dg-clickable" onclick="dgAdminExpand('carbon')" role="button" tabindex="0" onkeydown="dgKeyActivate(event,this)" title="Listeyi aç/kapat"><div class="lbl">Karbon (t)</div><div class="val" id="aCarbon">0</div><div style="font-size:.68rem;color:var(--mut);margin-top:4px">▾ ülke kırılımı</div></div>
-    <div class="stat dg-clickable" onclick="dgAdminExpand('projects')" role="button" tabindex="0" onkeydown="dgKeyActivate(event,this)" title="Listeyi aç/kapat"><div class="lbl">Proje</div><div class="val" id="aProj">0</div><div style="font-size:.68rem;color:var(--mut);margin-top:4px">▾ liste</div></div>
+   <div class="grid g4" style="margin-bottom:18px">
+    <div class="stat"><div class="lbl">Kullanıcı</div><div class="val" id="aUsers">0</div></div>
+    <div class="stat"><div class="lbl">Kayıt</div><div class="val" id="aRec">0</div></div>
+    <div class="stat"><div class="lbl">Karbon (t)</div><div class="val" id="aCarbon">0</div></div>
+    <div class="stat"><div class="lbl">Proje</div><div class="val" id="aProj">0</div></div>
    </div>
-   <div id="admExpand" class="card tblwrap" style="display:none;margin:0 0 18px"></div>
-   <div class="card" style="margin-bottom:18px"><div class="lbl">🟢 Aktif Kullanıcılar — şu an kim, ne yapıyor</div><div id="aLive" style="margin-top:8px;font-size:.85rem;color:var(--mut)">—</div></div>
    <div class="grid g4" style="margin-bottom:18px">
     <div class="stat"><div class="lbl">👁 Toplam Ziyaretçi</div><div class="val" id="aVisitTotal">0</div></div>
     <div class="stat"><div class="lbl">👁 Bugün</div><div class="val" id="aVisitToday">0</div></div>
@@ -1022,6 +1021,30 @@
    </div>
   </div>
 
+  <div class="view" id="v-visitors">
+   <h2 class="disp" style="margin-bottom:16px">👁 Ziyaretçi &amp; Canlı İzleme</h2>
+   <div class="alert info" style="font-size:.82rem">Bu sekme <b>yalnız kurucuya</b> açıktır. Ziyaretçi sayacı kimlik tutmaz (gizlilik); oturum açmış kullanıcıların veri işlemleri aşağıdadır. Konumlar, yalnız kullanıcı "canlı konum paylaşımı"nı açtıysa <b>geçici</b> olarak görünür — veritabanına yazılmaz.</div>
+   <div class="grid g4" style="margin-bottom:18px">
+    <div class="stat"><div class="lbl">👁 Toplam Ziyaret</div><div class="val" id="vzTotal">0</div></div>
+    <div class="stat"><div class="lbl">👁 Bugün</div><div class="val" id="vzToday">0</div></div>
+    <div class="stat"><div class="lbl">👁 Son 7 Gün</div><div class="val" id="vz7">0</div></div>
+    <div class="stat"><div class="lbl">🟢 Şu An Çevrimiçi</div><div class="val" id="vzOnline">0</div></div>
+   </div>
+   <div class="card" style="margin-bottom:18px">
+    <div class="shead" style="margin-bottom:10px"><span class="no">🟢</span><h2 style="font-size:1.15rem">Şu An — kim, ne yapıyor</h2><span class="rule"></span></div>
+    <div id="visLive" style="font-size:.88rem">—</div>
+   </div>
+   <div class="card" style="margin-bottom:18px">
+    <div class="shead" style="margin-bottom:10px"><span class="no">🗺️</span><h2 style="font-size:1.15rem">Canlı Konum Haritası</h2><span class="rule"></span></div>
+    <p style="color:var(--mut);font-size:.8rem;margin-bottom:8px">Yalnız canlı konum paylaşımını açmış çevrimiçi kullanıcılar görünür; üstüne gel → kimlik + ne yapıyor + son konum yaşı.</p>
+    <div id="visMap" class="notranslate" translate="no"></div>
+   </div>
+   <div class="card">
+    <div class="shead" style="margin-bottom:10px"><span class="no">📜</span><h2 style="font-size:1.15rem">Son Etkinlik — kim ne yaptı</h2><span class="rule"></span></div>
+    <div id="visActivity" class="tblwrap">⏳</div>
+   </div>
+  </div>
+
  </div>
 </div>
 </div>
@@ -1045,6 +1068,6 @@
 <script src="src/ui/state.js?v=5feada9b" defer></script>
 <script src="src/ui/toast.js?v=1a84b2f4" defer></script>
 <script src="src/ui/landing.js?v=f7ad4ccd" defer></script>
-<script src="src/ui/shell.js?v=b454178d" defer></script>
+<script src="src/ui/shell.js?v=79da8970" defer></script>
 </body>
 </html>

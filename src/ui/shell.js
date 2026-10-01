@@ -109,7 +109,9 @@ return;
 async function startShell(){
 $("landing").style.display="none";$("shell").style.display="block";
  if(PROFILE){$("whoami").textContent=PROFILE.full_name;
-  if(PROFILE.role==="admin"||PROFILE.role==="owner"){$("roleBadge").style.display="inline";$("roleBadge").textContent=PROFILE.role==="owner"?"KURUCU":"ADMIN";$("roleBadge").className=PROFILE.role==="owner"?"badge on":"badge admin";$("adminSec").style.display="block";$("miAdmin").style.display="flex";$("miUsers").style.display="flex";}}
+  if(PROFILE.role==="admin"||PROFILE.role==="owner"){$("roleBadge").style.display="inline";$("roleBadge").textContent=PROFILE.role==="owner"?"KURUCU":"ADMIN";$("roleBadge").className=PROFILE.role==="owner"?"badge on":"badge admin";$("adminSec").style.display="block";$("miAdmin").style.display="flex";$("miUsers").style.display="flex";
+   /* 0038: Ziyaretçi & Canlı sekmesi YALNIZ KURUCUYA açıktır (kullanıcı isteği). */
+   if(PROFILE.role==="owner"&&$("miVisitors"))$("miVisitors").style.display="flex";}}
 initMaps();
  /* 0036 (T4): canlı varlık kanalını aç (Realtime yoksa sessiz). */
  if(typeof dgPresenceStart==="function"){try{dgPresenceStart();}catch(e){}}
@@ -146,7 +148,7 @@ function go(v){
  $("v-"+v).classList.add("on");
  document.querySelectorAll("#side .item").forEach(i=>i.classList.remove("on"));
  const items=document.querySelectorAll("#side .item");
- const idx={dash:0,measure:1,nav:2,map:3,projects:4,records:5,export:6,world:7,admin:8,users:9};
+ const idx={dash:0,measure:1,nav:2,map:3,projects:4,records:5,export:6,world:7,admin:8,users:9,visitors:10};
 if(items[idx[v]])items[idx[v]].classList.add("on");
 if(v==="dash"){loadWaypoints().then(()=>loadDash());}
  /* Ölçüm sekmesi her açıldığında park kapısı tazelenir: seçili projenin parkı
@@ -174,6 +176,8 @@ if(v==="admin")loadAdmin();
   if(typeof dgCollabLoad==="function")dgCollabLoad();
  }
 if(v==="users")loadUsers();
+ /* 0038: kurucu sekmesi — canlı liste + harita + etkinlik akışı */
+ if(v==="visitors"){setTimeout(()=>{try{if(typeof loadVisitors==="function")loadVisitors();}catch(e){}},120);}
 if(v==="export")loadRequestOptions();
  /* kaydırma konumunu geri getir (sekme içeriği çizildikten sonra) */
  setTimeout(()=>{const m=$("main");if(!m)return;

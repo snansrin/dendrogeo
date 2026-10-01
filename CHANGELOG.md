@@ -9,6 +9,53 @@ Yeni sürüm yayımlama adımları: [`docs/surum-yayini.md`](docs/surum-yayini.m
 
 ## [Yayımlanmadı]
 
+### Eklendi/Düzeltildi — 0038: "Ziyaretçi & Canlı" sekmesi (yalnız kurucu) + Realtime "connecting" takılmasının kök çözümü
+Kullanici kararlari: (1) yonetim ozet kartlari ACILIR OLMAYACAK (0036'daki
+dgAdminExpand geri alindi), (2) admine "Ziyaretçi" sekmesi — kim girip ne
+yapti + CANLI HARITADA kim nerede — YALNIZ KURUCUYA ozel, (3) "connecting"-de
+takilan presence/canli konum duzeltilecek.
+
+**KOK NEDEN (canlı prob ile kanıtlandı):** Supabase Realtime sunucusu
+SAGLIKLI (wss el sıkışması 101 + phx_join "ok" + presence "ok" — anon apikey
+yeterli). Takılma istemcideydi: `sb.channel()` çağrısından ÖNCE
+`await sb.auth.getSession()` bekleniyordu; getSession kilit/önbellek
+nedeniyle çözülmezse kanal HİÇ kurulmuyor, durum sonsuza dek "connecting"
+kalıyordu. Düzeltme: **subscribe önce, JWT arka planda** + **8 sn watchdog**
+(sessizlik = takılma → kanalı düşür, 2 kez yeniden dene, sonra ⚠ durumu
+GÖSTER). Aynı düzeltme park canlı-konum kanalında da (DG_PARK_CH_WATCH +
+track yalnız SUBSCRIBED sonrası).
+
+**👁 Ziyaretçi & Canlı sekmesi (v-visitors, yalnız role=owner):**
+- 🟢 Şu An: çevrimiçi kullanıcılar — ad, hangi sekmede ("ne yapıyor"),
+  kaç sn önce; çevrimiçi sayacı.
+- 🗺️ Canlı Konum Haritası: paylaşımı AÇIK kullanıcılar renkli işaretçi
+  (baş harf), hover → kimlik + sekme + son konum yaşı; tek kişide zoom,
+  çok kişide fitBounds.
+- 📜 Son Etkinlik: measurements/projects/data_requests/report_requests
+  birleşik akış (kim · ne yaptı · ayrıntı · zaman, son 60 satır).
+- 👁 ziyaret sayaçları (toplam/bugün/7 gün) — sayaç KİMLİK TUTMAZ (gizlilik
+  beyanı kartta).
+- Konum alanı presence payload'ına YALNIZ kullanıcı anahtarı açıksa + GPS
+  varsa girer; GEÇİCİDİR, DB'ye yazılmaz. Anahtar metni dürüstleştirildi:
+  "park ortaklarım VE KURUCU canlı haritada görür".
+- Kapılar: menü öğesi yalnız owner'a görünür + loadVisitors() rol kontrolü
+  (RLS'ten bağımsız istemci kapısı; veriler zaten admin/owner RLS'inde).
+
+**Geri alınan:** 0036 açılır özet kartları (dgAdminExpand/admExpand/aLive
+kartı/.dg-clickable) — kullanıcı "açılır pencere yapma" dedi; kartlar sade
+stat hâline döndü. Bekçi testleri yeni duruma göre yeniden yazıldı
+(açılır kablolama GERİ GELİRSE test kırılır).
+
+**Bekçiler:** miVisitors owner kapısı · v-visitors/visLive/visMap/visActivity
+kablolaması · subscribe-önce sıralaması (indexOf kanal < lastIndexOf
+getSession) · watchdog · DG_PARK_CH_LIVE · konum alanı DG_LIVE_ON şartı ·
+ui-audit menü sayısı 11 + visitors:10.
+
+npm run check: 984 test → 982 pass / 0 fail / 2 skip. Sozluk 1053 anahtar,
+EN→TR cakisma yok. Ziyaretci modulu vm simulasyonuyla dogrulandi (rol kapisi,
+canli liste EN "30 s ago · New Measurement 📍", vzOnline).
+
+
 ### Düzeltildi — 0037: EN kapsami TAMAMLANDI (park paneli · davetler · kuyruk · grid · geofence) + Realtime sertlestirme + siralamalar
 Kullanici denetimi (canli EN turu): park algilama paneli, davet/ortak karti,
 yayin kuyrugu tablosu ("Geri cekildi" cevrisi sozluge hic girmemisti!),

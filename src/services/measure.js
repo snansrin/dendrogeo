@@ -82,7 +82,7 @@ async function startGps(){
  gpsMsg("Konum alınıyor…",0);
  dgGpsBtnBusy(true);
  const opts={enableHighAccuracy:true,timeout:15000,maximumAge:0};
- const onOk=p=>{dgGpsBtnBusy(false);GPS=p.coords;updGps();if(typeof dgLiveSharePing==="function")dgLiveSharePing();acquireWakeLock();navigator.geolocation.watchPosition(p2=>{GPS=p2.coords;updGps();if(typeof dgLiveSharePing==="function")dgLiveSharePing();},()=>{},{...opts,maximumAge:1000});};
+ const onOk=p=>{dgGpsBtnBusy(false);GPS=p.coords;updGps();if(typeof dgLiveSharePing==="function")dgLiveSharePing();if(typeof dgPresencePing==="function")dgPresencePing();acquireWakeLock();navigator.geolocation.watchPosition(p2=>{GPS=p2.coords;updGps();if(typeof dgLiveSharePing==="function")dgLiveSharePing();if(typeof dgPresencePing==="function")dgPresencePing();},()=>{},{...opts,maximumAge:1000});};
  const onErr=e=>{
   if(e.code===1)return gpsMsg("İzin reddedildi. iPhone: Ayarlar→Safari→Konum→Kullanırken İzin Ver.",1);
   if(e.code===3){try{navigator.geolocation.getCurrentPosition(onOk,()=>gpsMsg("GPS başarısız: dışarıda tekrar deneyin.",1),opts);}catch(err){gpsMsg("GPS hatası.",1);}return;}

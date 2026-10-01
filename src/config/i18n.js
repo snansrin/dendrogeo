@@ -898,6 +898,35 @@ const DG_I18N_EN={
 
 "Listeyi aç/kapat":"Toggle list",
 "📁 Yeni proje oluştur":"📁 Create new project",
+/* === 0038: ziyaretçi sekmesi + canlı konum beyanı === */
+"👁 Ziyaretçi & Canlı":"👁 Visitors & Live",
+"Ziyaretçi & Canlı":"Visitors & Live",
+"👁 Ziyaretçi & Canlı İzleme":"👁 Visitors & Live Monitoring",
+"Bu sekme yalnız kurucuya açıktır. Ziyaretçi sayacı kimlik tutmaz (gizlilik); oturum açmış kullanıcıların veri işlemleri aşağıdadır. Konumlar, yalnız kullanıcı \"canlı konum paylaşımı\"nı açtıysa geçici olarak görünür — veritabanına yazılmaz.":"This tab is open to the founder only. The visit counter stores no identity (privacy); data actions of signed-in users are listed below. Locations appear only while a user has live location sharing turned on — ephemeral, never written to the database.",
+"👁 Toplam Ziyaret":"👁 Total Visits",
+"🟢 Şu An Çevrimiçi":"🟢 Online Right Now",
+"Şu An — kim, ne yapıyor":"Right Now — who is doing what",
+"Canlı Konum Haritası":"Live Location Map",
+"Yalnız canlı konum paylaşımını açmış çevrimiçi kullanıcılar görünür; üstüne gel → kimlik + ne yapıyor + son konum yaşı.":"Only online users with live location sharing on are shown; hover → identity + activity + last position age.",
+"Son Etkinlik — kim ne yaptı":"Recent Activity — who did what",
+"Etkinlik yok":"No activity",
+"Zaman":"Time",
+"Kim":"Who",
+"Ne yaptı":"What they did",
+"Ayrıntı":"Detail",
+"ölçüm kaydı":"measurement record",
+"proje oluşturdu":"created a project",
+"veri talebi":"data request",
+"rapor yayını istedi":"requested a report publication",
+"👥 Canlı konumumu paylaş — park ortaklarım ve kurucu canlı haritada görür (geçici; veritabanına yazılmaz)":"👥 Share my live location — park collaborators and the founder see it on the live map (ephemeral; never written to the database)",
+
+/* === 0038b: ziyaretçi sekmesi uyarı parçacıkları (<b> ile bölünen düğümler) === */
+"Bu sekme":"This tab is",
+"yalnız kurucuya":"open to the founder only",
+"açıktır. Ziyaretçi sayacı kimlik tutmaz (gizlilik); oturum açmış kullanıcıların veri işlemleri aşağıdadır. Konumlar, yalnız kullanıcı \"canlı konum paylaşımı\"nı açtıysa":". The visit counter stores no identity (privacy); data actions of signed-in users are listed below. Locations appear only while a user has turned on \"live location sharing\" —",
+"geçici":"temporarily",
+"olarak görünür — veritabanına yazılmaz.":"and are never written to the database.",
+
 /* sayfa başlığı */
 "DendroGeo — Küresel Ağaç Envanteri ve Karbon Veri Sistemi":"DendroGeo — Global Tree Inventory & Carbon Data System"
 };

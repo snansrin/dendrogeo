@@ -260,19 +260,40 @@ describe('0036 · özellik ve EN bütünlük kilitleri', () => {
     assert.match(b, /zenodo\.22948643/, 'yedek künyesinde güncel DOI');
     assert.match(sh, /dgRestorePick/, 'kabukta giriş noktası');
   });
-  test('T4 açılır kartlar + presence: kabuk kablolaması ve fonksiyonlar', () => {
-    assert.match(sh, /dgAdminExpand\('users'\)/);
-    assert.match(sh, /id="admExpand"/);
-    assert.match(sh, /id="aLive"/);
-    const ad = rd('src/services/admin.js');
-    assert.match(ad, /async function dgAdminExpand/);
-    assert.match(ad, /function dgRenderActive/);
+  test('T4/0038 kurucuya özel Ziyaretçi & Canlı sekmesi (açılır kartlar KALDIRILDI)', () => {
+    /* kullanıcı kararı: özet kartlar açılır OLMAYACAK; canlı izleme ayrı sekme */
+    assert.ok(!sh.includes('dgAdminExpand'), 'açılır kart kablolaması kalktı');
+    assert.ok(!sh.includes('admExpand'), 'admExpand kabuğu kalktı');
+    assert.ok(!rd('src/services/admin.js').includes('dgAdminExpand'), 'admin.js temiz');
+    assert.match(sh, /id="miVisitors"[^>]*style="display:none"/, 'sekme varsayılan gizli');
+    assert.match(sh, /id="v-visitors"/);
+    assert.match(sh, /id="visLive"/); assert.match(sh, /id="visMap"/); assert.match(sh, /id="visActivity"/);
+    const sj = rd('src/ui/shell.js');
+    assert.match(sj, /PROFILE\.role==="owner"&&\$\("miVisitors"\)/, 'YALNIZ KURUCU görür');
+    assert.match(sj, /visitors:10/, 'go() indeks haritası');
+    assert.match(sj, /loadVisitors/, 'go() yükleyici');
     const vs = rd('src/services/visit-stats.js');
+    assert.match(vs, /async function loadVisitors/);
+    assert.match(vs, /PROFILE\.role!=="owner"/, 'yükleyicide rol kapısı');
+    assert.match(vs, /function renderVisitorsLive/);
+    assert.match(vs, /function dgVisMapDraw/);
     assert.match(vs, /function dgPresenceStart/);
-    assert.match(vs, /function dgPresencePing/);
     assert.match(vs, /dg-presence/, 'presence kanalı');
     assert.match(rd('src/ui/shell.js'), /dgPresenceStart\(\)/, 'startShell kancası');
     assert.match(rd('src/ui/shell.js'), /dgPresencePing\(v\)/, 'go() kancası');
+  });
+  test('⭐ 0038 presence subscribe-önce + watchdog + konum alanı (connecting takılması kökten bitti)', () => {
+    const vs = rd('src/services/visit-stats.js');
+    /* kanal, getSession await'inden ÖNCE kurulmalı (takılma kök nedeni buydu) */
+    assert.ok(vs.indexOf('sb.channel("dg-presence"') < vs.lastIndexOf('await sb.auth.getSession()'),
+      'channel önce, auth arka planda');
+    assert.match(vs, /WATCHDOG/, '8 sn bekçi köpeği');
+    assert.match(vs, /p\.la=GPS\.latitude/, 'konum yalnız DG_LIVE_ON + GPS varsa');
+    assert.match(vs, /DG_LIVE_ON/, 'canlı paylaşım anahtarına bağlı');
+    const mp = rd('src/services/map.js');
+    assert.ok(mp.indexOf('sb.channel("dg-park-"') < mp.indexOf('await sb.auth.getSession()'), 'park kanalı da subscribe-önce');
+    assert.match(mp, /DG_PARK_CH_WATCH/, 'park kanalı watchdog');
+    assert.match(mp, /DG_PARK_CH_LIVE/, 'track yalnız SUBSCRIBED sonrası');
   });
   test("T5 canlı konum: kanal park başına, DB ye yazmaz, UI kablolaması tamam", () => {
     const mp = rd('src/services/map.js');
@@ -302,8 +323,8 @@ describe('0036 · özellik ve EN bütünlük kilitleri', () => {
     assert.match(vs, /setAuth/, 'realtime JWT açıkça veriliyor');
     assert.match(vs, /DG_PRES_RETRY<2/, 'hata durumunda yeniden deneme');
     assert.match(vs, /function dgPresenceState/, 'durum dışa açık');
-    const ad = rd('src/services/admin.js');
-    assert.match(ad, /dgPresenceState\(\)/, 'kart durumu gösteriyor');
+    const vs2 = rd('src/services/visit-stats.js');
+    assert.match(vs2, /dgPresenceState\(\)/, 'canlı kart durumu gösteriyor');
     const mp = rd('src/services/map.js');
     assert.match(mp, /DG_PARK_CH_RETRY/, 'canlı konum kanalı da yeniden dener');
     assert.match(rd('css/style.css'), /\.dg-switch/, 'temalı anahtar stili');

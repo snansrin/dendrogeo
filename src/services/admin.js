@@ -25,9 +25,7 @@ async function loadAdmin(){
   sb.from("v_global").select("*").single()
  ]);
  const users=uRes.data||[],meas=mRes.data||[],projs=pRes.data||[],global=gRes.data||{};
- /* 0036 (T4): açılır özet kartlar bu önbellekten çizilir. */
- try{DG_ADM={users,meas,projs,global};}catch(e){}
- if(typeof dgRenderActive==="function"){try{dgRenderActive();}catch(e){}}
+
 const cnt=await sb.from("measurements").select("*",{count:"exact",head:true});
 $("aUsers").textContent=users.length;$("aRec").textContent=cnt.count??meas.length;$("aProj").textContent=projs.length;$("aCarbon").textContent=global.carbon_t||0;
  /* ⚠ SESSİZ "KAYIT YOK" TUZAĞI KAPANDI (2026-09-24): sorgu hata verirse
@@ -256,81 +254,3 @@ if(!rows.length)return toast("Filtreye uyan kayıt yok","warn");
 const gj={type:"FeatureCollection",features:rows.map(r=>({type:"Feature",geometry:{type:"Point",coordinates:[r.lon,r.lat]},properties:{point:r.point_id,species:r.species,latin:LATIN[r.species]||"",dbh:r.dbh_cm,height:r.height_m,carbon:r.carbon_kg,status:r.status,photo:r.photo_url||""}}))};
 dl(JSON.stringify(gj,null,2),"dendrogeo_toplu.geojson");toast(_tadf("✓ {n} kayıt dışa aktarıldı",{n:rows.length}),"ok","🗺");
 }
-
-/* ═══════════ 0036 (T4) · AÇILIR ÖZET KARTLAR + AKTİF KULLANICILAR ═══════════
- * Kullanıcı isteği: "buradakiler açılabilir tablo olsun, aktif kullanıcı
- * eklensin ve ne yapıyor yazsın." Kartlara tıkla → altta liste açılır/kapanır.
- * Metinler TR literal basılır; EN modunda MutationObserver çevirir (0035d
- * mimarisi) — ikinci sözlük gerekmez. */
-let DG_ADM=null,DG_ADM_KIND="";
-async function dgAdminExpand(kind){
- const box=$("admExpand");if(!box)return;
- if(DG_ADM_KIND===kind){box.style.display="none";DG_ADM_KIND="";return;}
- DG_ADM_KIND=kind;box.style.display="";
- const d=DG_ADM||{users:[],meas:[],projs:[]};
- const scroll='style="max-height:340px;overflow:auto"';
- if(kind==="users"){
-  const cnt={};(d.meas||[]).forEach(m=>{if(m.owner)cnt[m.owner]=(cnt[m.owner]||0)+1;});
-  box.innerHTML='<div class="lbl" style="margin-bottom:10px">Kullanıcılar (tümü) — karta tekrar tıklayınca kapanır</div>'+
-   '<div '+scroll+'><table><thead><tr><th scope="col">E‑posta</th><th scope="col">Ad Soyad</th><th scope="col">Rol</th><th scope="col">Durum</th><th scope="col">Kayıt</th></tr></thead><tbody>'+
-   (d.users||[]).map(u=>'<tr><td data-label="E‑posta">'+esc(u.email||"—")+'</td><td data-label="Ad Soyad">'+esc(u.full_name||"—")+'</td><td data-label="Rol">'+(u.role==="owner"?"KURUCU":(u.role==="admin"?"DENETÇİ":"KULLANICI"))+'</td><td data-label="Durum"><span class="badge '+(u.active?"on":"off")+'">'+(u.active?"Aktif":"Pasif")+'</span></td><td data-label="Kayıt" class="mono">'+(cnt[u.id]||0)+'</td></tr>').join("")+
-   '</tbody></table></div>';
-  return;
- }
- if(kind==="records"){
-  const rows=(d.meas||[]).slice(0,100);
-  box.innerHTML='<div class="lbl" style="margin-bottom:10px">Son 100 ölçüm — karta tekrar tıklayınca kapanır</div>'+
-   '<div '+scroll+'><table><thead><tr><th scope="col">Kullanıcı</th><th scope="col">Nokta</th><th scope="col">Tür</th><th scope="col">Çap</th><th scope="col">Boy</th><th scope="col">Karbon</th><th scope="col">Durum</th><th scope="col">Tarih</th></tr></thead><tbody>'+
-   rows.map(m=>'<tr><td data-label="Kullanıcı">'+esc((m.profiles&&m.profiles.full_name)||"—")+'</td><td data-label="Nokta" class="mono">P'+esc(m.point_id)+'</td><td data-label="Tür">'+esc(m.species||"—")+'</td><td data-label="Çap" class="mono">'+(m.dbh_cm||"—")+'</td><td data-label="Boy" class="mono">'+(m.height_m||"—")+'</td><td data-label="Karbon" class="mono">'+((m.carbon_kg||0)/1).toFixed(1)+' kg</td><td data-label="Durum"><span class="badge '+(m.status==="Onaylı"?"on":(m.status==="Red"?"off":"admin"))+'">'+esc(m.status||"—")+'</td><td data-label="Tarih" class="mono">'+String(m.created_at||"").slice(0,10)+'</td></tr>').join("")+
-   '</tbody></table></div>';
-  return;
- }
- if(kind==="projects"){
-  const byId={};(d.users||[]).forEach(u=>byId[u.id]=u);
-  box.innerHTML='<div class="lbl" style="margin-bottom:10px">Projeler (tümü) — karta tekrar tıklayınca kapanır</div>'+
-   '<div '+scroll+'><table><thead><tr><th scope="col">Proje Adı</th><th scope="col">Ülke</th><th scope="col">Şehir</th><th scope="col">Sahip</th><th scope="col">Tarih</th></tr></thead><tbody>'+
-   (d.projs||[]).map(p=>'<tr><td data-label="Proje Adı">'+esc(p.name||"—")+'</td><td data-label="Ülke">'+esc(p.country||"—")+'</td><td data-label="Şehir">'+esc(p.city||"—")+'</td><td data-label="Sahip">'+esc((byId[p.owner]&&(byId[p.owner].full_name||byId[p.owner].email))||"—")+'</td><td data-label="Tarih" class="mono">'+String(p.created_at||"").slice(0,10)+'</td></tr>').join("")+
-   '</tbody></table></div>';
-  return;
- }
- if(kind==="carbon"){
-  box.innerHTML='<div class="lbl" style="margin-bottom:10px">⏳</div>';
-  try{
-   const[cRes,tRes]=await Promise.all([sb.from("v_country").select("*"),sb.from("v_city").select("*")]);
-   box.innerHTML='<div class="lbl" style="margin-bottom:10px">Karbon — ülke kırılımı (onaylı kayıtlar)</div>'+
-    '<div class="grid g2"><div '+scroll+'><table><thead><tr><th scope="col">Ülke</th><th scope="col">Kayıt</th><th scope="col">Karbon(t)</th><th scope="col">Ort.DBH</th></tr></thead><tbody>'+
-    (cRes.data||[]).map(r=>'<tr><td data-label="Ülke">'+esc(r.country)+'</td><td data-label="Kayıt" class="mono">'+r.records+'</td><td data-label="Karbon(t)" class="mono">'+r.carbon_t+'</td><td data-label="Ort.DBH" class="mono">'+(r.avg_dbh||"—")+'</td></tr>').join("")+
-    '</tbody></table></div><div '+scroll+'><table><thead><tr><th scope="col">Şehir</th><th scope="col">Kayıt</th><th scope="col">Karbon(t)</th></tr></thead><tbody>'+
-    (tRes.data||[]).map(r=>'<tr><td data-label="Şehir">'+esc(r.city)+'</td><td data-label="Kayıt" class="mono">'+r.records+'</td><td data-label="Karbon(t)" class="mono">'+r.carbon_t+'</td></tr>').join("")+
-    '</tbody></table></div></div>';
-  }catch(e){box.innerHTML='<div class="alert err">⚠ '+esc(e&&e.message||e)+'</div>';}
- }
-}
-function dgRenderActive(){
- const box=$("aLive");if(!box)return;
- let st={};
- try{st=(typeof dgPresenceList==="function")?dgPresenceList():{};}catch(e){}
- const now=Date.now();const rows=[];
- for(const k in st){for(const p of (st[k]||[])){if(!p||!p.id)continue;rows.push({p:p,age:Math.max(0,Math.round((now-(p.t||now))/1000))});}}
- rows.sort((a,b)=>a.age-b.age);
- if(!rows.length){
-  const stt=(typeof dgPresenceState==="function")?dgPresenceState():"idle";
-  box.textContent=stt==="on"?(typeof dgCf==="function"?dgCf("(şu an başka kimse yok — kanal sessiz)"):"(şu an başka kimse yok — kanal sessiz)")
-   :stt==="connecting"?(typeof dgCf==="function"?dgCf("⏳ gerçek zamanlı katmana bağlanılıyor…"):"⏳")
-   :(typeof dgCf==="function"?dgCf("⚠ Gerçek zamanlı katman etkin değil (Supabase → Dashboard → Realtime). Kart çalışmaya devam eder; canlı liste kapalı."):"—");
-  return;
- }
- const T=(s)=>(typeof dgCf==="function"?dgCf(s):s);
- box.innerHTML=rows.map(r=>{
-  const lbl=(typeof DG_VIEW_LABELS!=="undefined"&&DG_VIEW_LABELS[r.p.v])||r.p.v||"?";
-  const ageTxt=r.age<60?r.age+" "+T("sn"):Math.round(r.age/60)+" "+T("dk");
-  return '<div style="display:flex;gap:8px;align-items:center;padding:5px 0;border-bottom:1px solid var(--line)">'+
-   '<span style="width:9px;height:9px;border-radius:50%;background:#22c55e;flex:0 0 auto"></span>'+
-   '<b>'+esc(r.p.n||"?")+'</b><span style="color:var(--mut)">· '+T(lbl)+'</span>'+
-   '<span class="dg-meta" style="margin-left:auto">'+ageTxt+" "+T("önce")+'</span></div>';
- }).join("");
-}
-window.addEventListener("dg:lang",()=>{try{
- const b=$("admExpand");if(b&&DG_ADM_KIND){b.style.display="none";DG_ADM_KIND="";}
- if(typeof dgRenderActive==="function")dgRenderActive();
-}catch(e){}});
