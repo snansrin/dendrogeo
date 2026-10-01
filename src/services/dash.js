@@ -5,11 +5,17 @@ Panel, analiz, grafikler, kayıtlar, dünya verisi yükleme */
 // 1. Kayıtlarım tablosu
 async function loadRecords(){ 
  const{data}=await sb.from("measurements").select("*,projects(name)").eq("owner",USER.id).order("created_at",{ascending:false});
- $("recTable").innerHTML=(data||[]).map(r=>{
+ /* 0036 (T1): proje adına göre alfabetik (tr), sonra point_id numerik, sonra ölçüm no. */
+ const recRows=(data||[]).slice().sort((a,b)=>{
+  const pa=(a.projects&&a.projects.name)||"",pb=(b.projects&&b.projects.name)||"";
+  const c=String(pa).localeCompare(String(pb),"tr");
+  return c!==0?c:((+a.point_id||0)-(+b.point_id||0))||((+a.measurement_no||1)-(+b.measurement_no||1));
+ });
+ $("recTable").innerHTML=recRows.map(r=>{
   const st=r.status||"Beklemede";
   const bc=st==="Onaylı"?"on":(st==="Red"?"off":"admin");
   return `<tr><td data-label="Proje">${esc(r.projects?.name)||"—"}</td><td data-label="Nokta">${r.point_id}</td><td data-label="Tür">${esc(r.species)}</td><td data-label="Çap">${r.dbh_cm}</td><td data-label="Boy">${r.height_m}</td><td data-label="Karbon">${(r.carbon_kg||0).toFixed(1)}</td><td data-label="Foto">${dgThumb(r.photo_url)}</td><td data-label="Durum"><span class="badge ${bc}">${st==="Beklemede"?"Onay Bekliyor":st}</span></td><td data-label="İşlem" style="display:flex;gap:4px"><button class="btn sm blue" onclick="editRec(${r.id})">✏️</button><button class="btn sm red" onclick="delRec(${r.id})">Sil</button></td></tr>`;
- }).join("")||"<tr><td colspan=9>Kayıt yok</td></tr>";
+ }).join("")||"<tr><td colspan=9>"+(typeof dgCf==="function"?dgCf("Kayıt yok"):"Kayıt yok")+"</td></tr>";
 }
 // 2. Kayıt sil
 async function delRec(id){

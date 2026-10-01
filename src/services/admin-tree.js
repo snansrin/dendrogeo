@@ -239,7 +239,7 @@ function dgTreeUserHTML(U){
   return `<details class="dg-tree-user"${open} ontoggle="dgTreeToggle('${U.key}',this.open)">`+
     `<summary>👤 <b>${esc(U.name)}</b>`+
       dgBekRozet(U.beklemede)+
-      `<span class="dg-tree-meta">${U.n} kayıt · ${dgTon(U.c)} · ${dgDurumOzet(U)}</span>`+
+      `<span class="dg-tree-meta">${U.n} ${_ta("kayıt")} · ${dgTon(U.c)} · ${dgDurumOzet(U)}</span>`+
     `</summary>`+
     `<div class="dg-tree-body tblwrap"><table class="dg-cards">`+
       `<thead><tr><th scope='col'>Nokta</th><th scope='col'>Tür</th><th scope='col'>Grup</th><th scope='col'>Çap</th><th scope='col'>Boy</th><th scope='col'>Karbon kg</th><th scope='col'>Foto</th><th scope='col'>Durum</th><th scope='col'>Tarih</th><th scope='col'>İşlem</th></tr></thead>`+
@@ -254,6 +254,10 @@ function dgTreeProjectHTML(P,J){
     `<summary>📁 <b>${esc(J.name)}</b>`+
       dgBekRozet(J.beklemede)+
       `<span class="dg-tree-meta">${J.users.length} ${_ta("kullanıcı")} · ${J.n} ${_ta("kayıt")} · ${dgTon(J.c)}</span>`+
+      /* 0036 (T2): proje silme — yalnız yönetici/kurucu görür; RLS sunucuda
+       * ayrıca zorlar (owner veya is_owner). Cascade: measurements+waypoints. */
+      ((typeof PROFILE!=="undefined"&&PROFILE&&(PROFILE.role==="owner"||PROFILE.role==="admin")&&J.project_id)
+        ?`<button class="btn sm red dg-tree-act" onclick="dgTreeDeleteProject(event,${J.project_id})" title="${_ta("Projeyi kalıcı olarak sil (ölçümler + waypoint'ler dahil)")}">🗑</button>`:"")+
     `</summary>`+
     `<div class="dg-tree-body">${J.users.map(U=>dgTreeUserHTML(U)).join("")}</div>`+
   `</details>`;
@@ -479,3 +483,22 @@ window.dgTreeSetQuery=dgTreeSetQuery;
 window.dgTreeToggle=dgTreeToggle;
 window.dgTreeExpand=dgTreeExpand;
 window.dgTreePendingScan=dgTreePendingScan;
+
+/* 0036 (T2) · PROJEYİ TAMAMEN SİL (yönetim ağacından).
+ * RLS: projects_delete = owner veya is_owner() → sunucu kararı kesindir;
+ * istemci düğmeyi admin/owner'a gösterir, yetki yoksa hata toast'ı düşer.
+ * FK'ler on delete cascade → projenin ölçümleri ve waypoint'leri birlikte gider.
+ * Park kimliği (parks) SİLİNMEZ — karşılaştırma bütünlüğü korunur. */
+async function dgTreeDeleteProject(ev,pid){
+ if(ev){ev.preventDefault();ev.stopPropagation();}
+ const msg=_ta("Proje TÜM ölçüm ve waypoint'leriyle kalıcı olarak silinsin mi? Bu işlem geri alınamaz (park kimliği kalır).");
+ if(!confirm(msg))return;
+ try{
+  const{error}=await sb.from("projects").delete().eq("id",pid);
+  if(error){toast(_ta("Proje silinemedi: ")+error.message,"err","🗑");return;}
+  try{DG_LIVE_DIRTY=true;}catch(e){}
+  toast(_ta("✓ Proje silindi (ölçümler + waypoint'ler cascade ile kaldırıldı)"),"ok","🗑");
+  if(typeof dgTreeDraw==="function")dgTreeDraw();
+  if(typeof loadAdmin==="function")loadAdmin();
+ }catch(e){toast(_ta("Proje silinemedi: ")+(e&&e.message||e),"err","🗑");}
+}

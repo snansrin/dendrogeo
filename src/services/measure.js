@@ -79,7 +79,7 @@ async function startGps(){
  gpsMsg("Konum alınıyor…",0);
  dgGpsBtnBusy(true);
  const opts={enableHighAccuracy:true,timeout:15000,maximumAge:0};
- const onOk=p=>{dgGpsBtnBusy(false);GPS=p.coords;updGps();acquireWakeLock();navigator.geolocation.watchPosition(p2=>{GPS=p2.coords;updGps();},()=>{},{...opts,maximumAge:1000});};
+ const onOk=p=>{dgGpsBtnBusy(false);GPS=p.coords;updGps();if(typeof dgLiveSharePing==="function")dgLiveSharePing();acquireWakeLock();navigator.geolocation.watchPosition(p2=>{GPS=p2.coords;updGps();if(typeof dgLiveSharePing==="function")dgLiveSharePing();},()=>{},{...opts,maximumAge:1000});};
  const onErr=e=>{
   if(e.code===1)return gpsMsg("İzin reddedildi. iPhone: Ayarlar→Safari→Konum→Kullanırken İzin Ver.",1);
   if(e.code===3){try{navigator.geolocation.getCurrentPosition(onOk,()=>gpsMsg("GPS başarısız: dışarıda tekrar deneyin.",1),opts);}catch(err){gpsMsg("GPS hatası.",1);}return;}
@@ -103,12 +103,18 @@ function updGps(){
 }
 /* --- 4. FORM YARDIMCILARI --- */
 function fillSpecies(){
- const g=$("mGroup").value,s=$("mSpecies");
- if(!g){s.disabled=true;s.innerHTML="";$("latinName").textContent="";return;}
+ const gv=$("mGroup").value,s=$("mSpecies");
+ /* 0036: EN modunda option GÖRÜNÜMÜ çevrilir; value kanonik TR kalmalıdır
+  * (shell'de value="İBRELİ" açık yazıldı). Bayat DOM/önbellek için ters
+  * sözlükten çöz → "CONIFER" gelirse "İBRELİ"ye dön. */
+ const g=(typeof SPECIES_DATA!=="undefined"&&SPECIES_DATA[gv])?gv
+        :((typeof DG_I18N_TR!=="undefined"&&DG_I18N_TR[gv])||gv);
+ if(!g||!(typeof SPECIES_DATA!=="undefined"&&SPECIES_DATA[g])){s.disabled=true;s.innerHTML="";$("latinName").textContent="";return;}
  s.disabled=false;
  /* 0035b: GÖRÜNEN tür adı dgT() ile çevrilir (EN modu); option VALUE her
   * zaman kanonik TR adıdır — veritabanına yazılan değer DEĞİŞMEZ. */
- s.innerHTML='<option value="">Seç</option>'+(SPECIES_DATA[g]||[]).map(x=>`<option value="${x.tr}">${(typeof dgT==="function"?dgT(x.tr):x.tr)}${x.lat && x.lat!=="—"?" · "+x.lat:""}</option>`).join("");
+ /* 0036 (T1): tür listesi ALFABETİK (tr yereli) — SPECIES_DATA sırasına dokunulmaz. */
+ s.innerHTML='<option value="">Seç</option>'+(SPECIES_DATA[g]||[]).slice().sort((a,b)=>String(a.tr).localeCompare(String(b.tr),"tr")).map(x=>`<option value="${x.tr}">${(typeof dgT==="function"?dgT(x.tr):x.tr)}${x.lat && x.lat!=="—"?" · "+x.lat:""}</option>`).join("");
  $("latinName").textContent="";
 }
 function showLatin(){

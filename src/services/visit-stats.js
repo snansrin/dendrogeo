@@ -39,3 +39,29 @@ async function loadVisitStats(){
   $("aVisit7").textContent=w.count??0;
  }catch(e){$("aVisitTotal").textContent="—";}
 }
+
+/* ═══════════ 0036 (T4) · CANLI VARLIK (presence) ═══════════
+ * "Aktif kullanıcı eklensin ve ne yapıyor yazsın."
+ * Supabase Realtime presence — GEÇİCİDİR: veritabanına YAZMAZ (KVKK dostu),
+ * sekme kapanınca kendiliğinden düşer. Realtime kapalıysa sessizce devre dışı. */
+const DG_VIEW_LABELS={dash:"Panel",measure:"Yeni Ölçüm",nav:"Waypoint",map:"Canlı Harita",projects:"Projeler",records:"Kayıtlarım",export:"Dışa Aktar",world:"Dünya Verisi",admin:"Ölçüm Yönetimi",users:"Kullanıcılar"};
+let DG_PRES=null,DG_PRES_OK=false;
+function dgPresenceStart(){
+ try{
+  if(DG_PRES||typeof sb==="undefined"||!sb||typeof sb.channel!=="function")return;
+  if(typeof USER==="undefined"||!USER)return;
+  DG_PRES=sb.channel("dg-presence",{config:{presence:{key:String(USER.id)}}});
+  DG_PRES.on("presence",{event:"sync"},()=>{try{if(typeof dgRenderActive==="function")dgRenderActive();}catch(e){}});
+  DG_PRES.subscribe(st=>{
+   if(st==="SUBSCRIBED"){DG_PRES_OK=true;dgPresencePing(typeof DG_CUR_VIEW!=="undefined"?DG_CUR_VIEW:"dash");}
+  });
+ }catch(e){DG_PRES=null;DG_PRES_OK=false;}
+}
+function dgPresencePing(view){
+ try{
+  if(!DG_PRES||!DG_PRES_OK||typeof DG_PRES.track!=="function")return;
+  DG_PRES.track({id:String(USER.id),n:(typeof PROFILE!=="undefined"&&PROFILE&&(PROFILE.full_name||PROFILE.email))||"?",v:view||"dash",t:Date.now()});
+ }catch(e){}
+}
+function dgPresenceList(){try{return (DG_PRES&&typeof DG_PRES.presenceState==="function")?DG_PRES.presenceState():{};}catch(e){return{};}}
+function dgPresenceReady(){return !!DG_PRES_OK;}

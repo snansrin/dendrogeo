@@ -222,6 +222,81 @@ describe('P2 · temizlik kalıcı', () => {
   });
 });
 
+describe('0036 · özellik ve EN bütünlük kilitleri', () => {
+  const sh = rd('partials/shell.html');
+  test("⭐ grup optionları value taşır (EN çevirisi veriyi bozamaz)", () => {
+    assert.match(sh, /<option value="İBRELİ">İBRELİ<\/option>/);
+    assert.match(sh, /<option value="YAPRAKLI">YAPRAKLI<\/option>/);
+    assert.match(sh, /<option value="DİĞER">DİĞER<\/option>/);
+  });
+  test('fillSpecies: ters sözlük savunması + alfabetik sıralama (T1)', () => {
+    const m = rd('src/services/measure.js');
+    assert.match(m, /DG_I18N_TR/, 'EN grup değeri TR kanoniğe çözülüyor');
+    assert.match(m, /localeCompare\(String\(b\.tr\),"tr"\)/, 'tür listesi alfabetik (tr yereli)');
+  });
+  test('Kayıtlarım point sırası: proje alfabetik + point numerik (T1)', () => {
+    assert.match(rd('src/services/dash.js'), /localeCompare\(String\(pb\),"tr"\)/);
+    assert.match(rd('src/services/dash.js'), /point_id/, );
+  });
+  test('"Kayıt" çakışması giderildi: sekme "Kayıt Ol", tablo "Record"', () => {
+    const i18nSrc = rd('src/config/i18n.js');
+    assert.match(i18nSrc, /"Kayıt Ol":"Sign up"/);
+    assert.ok(!/"Kayıt":"Sign up"/.test(i18nSrc), 'tablo başlığı Sign up olamaz');
+    assert.match(rd('partials/landing.html'), />Kayıt Ol</);
+  });
+  test('T2 proje silme: ağaçta düğme + dgTreeDeleteProject + confirm + cascade bilgisi', () => {
+    const a = rd('src/services/admin-tree.js');
+    assert.match(a, /async function dgTreeDeleteProject/);
+    assert.match(a, /dgTreeDeleteProject\(event,\$\{J\.project_id\}\)/);
+    assert.match(a, /PROFILE\.role==="owner"\|\|PROFILE\.role==="admin"/, 'istemci kapısı');
+    assert.match(a, /confirm\(/, 'onay isteniyor');
+  });
+  test('T3 yedekten yükle: dgRestorePick + SQL üretici + OVERRIDING SYSTEM VALUE', () => {
+    const b = rd('src/services/backup.js');
+    assert.match(b, /function dgRestorePick/);
+    assert.match(b, /function dgRestoreSQL/);
+    assert.match(b, /OVERRIDING SYSTEM VALUE/, 'identity kolonlarına özgün id yazımı');
+    assert.match(b, /ON CONFLICT DO NOTHING/, 'idempotent');
+    assert.match(b, /zenodo\.22948643/, 'yedek künyesinde güncel DOI');
+    assert.match(sh, /dgRestorePick/, 'kabukta giriş noktası');
+  });
+  test('T4 açılır kartlar + presence: kabuk kablolaması ve fonksiyonlar', () => {
+    assert.match(sh, /dgAdminExpand\('users'\)/);
+    assert.match(sh, /id="admExpand"/);
+    assert.match(sh, /id="aLive"/);
+    const ad = rd('src/services/admin.js');
+    assert.match(ad, /async function dgAdminExpand/);
+    assert.match(ad, /function dgRenderActive/);
+    const vs = rd('src/services/visit-stats.js');
+    assert.match(vs, /function dgPresenceStart/);
+    assert.match(vs, /function dgPresencePing/);
+    assert.match(vs, /dg-presence/, 'presence kanalı');
+    assert.match(rd('src/ui/shell.js'), /dgPresenceStart\(\)/, 'startShell kancası');
+    assert.match(rd('src/ui/shell.js'), /dgPresencePing\(v\)/, 'go() kancası');
+  });
+  test("T5 canlı konum: kanal park başına, DB ye yazmaz, UI kablolaması tamam", () => {
+    const mp = rd('src/services/map.js');
+    assert.match(mp, /function dgLiveShareJoinCurrent/);
+    assert.match(mp, /function dgLiveSharePing/);
+    assert.match(mp, /function dgLiveMatesDraw/);
+    assert.match(mp, /dg-park-/, 'park başına kanal');
+    assert.match(mp, /DG_MATE_COLORS/, 'ortak başına renk');
+    assert.match(mp, /bindTooltip/, 'üstüne gelince kimlik');
+    assert.ok(!/\.insert\(|\.upsert\(/.test(mp.slice(mp.indexOf('0036 (T5)'))), 'canlı konum DB\'ye YAZMAZ');
+    assert.match(sh, /dgLiveShareToggle/, 'kabukta anahtar');
+    assert.match(sh, /id="dgLiveShare"/);
+    assert.match(sh, /id="dgMatesNote"/);
+    assert.match(rd('src/services/park-registry.js'), /dgLiveShareJoinCurrent/, 'proje değişince kanal taşınır');
+    assert.match(rd('src/services/measure.js'), /dgLiveSharePing/, 'GPS güncellemesi ping atar');
+  });
+  test('yayın kuyruğu dinamik dizeleri dgCf ile çevriliyor', () => {
+    const rp = rd('src/services/report-publish.js');
+    assert.match(rp, /dgCf\("son kontrol"\)/);
+    assert.match(rp, /dgCf\("yayın işi 5 dakikada bir çalışır"\)/);
+    assert.match(rp, /dgCf\("geri çekildi"\)/);
+  });
+});
+
 describe('i18n katmanı sözleşmesi (0035)', () => {
   const i18n = rd('src/config/i18n.js');
   test('sözlük kapsamlı ve çekirdek dizeler çevrili', () => {

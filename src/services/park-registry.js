@@ -898,6 +898,8 @@ function dgParkGate(auto){
 
 /* Proje seçimi değişti (v-measure). shell.html'deki onchange bunu çağırır. */
 function dgProjectChanged(){
+ /* 0036 (T5): proje değişince canlı konum kanalı yeni parka taşınır. */
+ if(typeof dgLiveShareJoinCurrent==="function"){try{dgLiveShareJoinCurrent();}catch(e){}}
   dgParkGate();
   if(typeof manualPoint!=="undefined"&&!manualPoint&&typeof autoFillPointId==="function"){
     autoFillPointId();

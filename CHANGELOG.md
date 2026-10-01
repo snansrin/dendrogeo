@@ -9,6 +9,70 @@ Yeni sürüm yayımlama adımları: [`docs/surum-yayini.md`](docs/surum-yayini.m
 
 ## [Yayımlanmadı]
 
+### Eklendi/Düzeltildi — 0036: EN dinamigi kapatildi + 5 kullanici ozelligi (2026-10-01)
+Kullanici denetimi (canli, EN modu): waypoint tablosu/yayin kuyrugu hala
+Turkce, tur dropdown'i EN'de BOS, "Kayit" basligi "Sign up" olmus,
+"Dosya secilmedi" gorunuyor + 5 yeni gorev.
+
+**EN duzeltmeleri:**
+- KRITIK: grup <option>'larinda value YOKTU → EN modunda gorunum cevrilince
+  value de degisiyor, fillSpecies("CONIFER") bos liste donduruyordu.
+  value="IBRELI|YAPRAKLI|DIGER" acik yazildi + fillSpecies'e ters sozluk
+  savunmasi (bayat DOM icin). Tur verisi her zaman kanonik TR yazilir.
+- "Kayit" cakismasi: auth sekmesi "Kayit Ol" oldu (Sign up), tablo basligi
+  "Kayit" → Record. Sozluk 777+ anahtar.
+- Waypoint tablosu (Bekliyor/✓ Yapildi/🎯 Hedef), navTarget, popup;
+  yayin kuyrugu (Alan/Yayin durumu/Yayinlandi/Geri cekildi/Yayin yok,
+  🔗 Ac/📤 Paylas/🗑 Geri cek/📄 Yayinla/Yeni surum, gunluk notlari,
+  "son kontrol", tur/katki meta) dgCf/dgTf ile sarildi.
+- File input: inline gizleme (bayat CSS'te bile "Dosya secilmedi" gorunmez)
+  + secilen dosya adi.
+- i18n.js: typeof window guard (vm sertlesmesi).
+
+**T1 siralama:** tur listesi alfabetik (tr lokali, SPECIES_DATA'ya dokunmadan
+gorunumde); Kayitlarim = proje adi (alfabetik tr) → point_id (numerik) →
+olcum no. Karisik dizilim bitti.
+
+**T2 proje silme (yonetim agaci):** 📁 dugumunde 🗑 (yalniz admin/owner gorur;
+RLS projects_delete sunucuda kesin karar: owner veya is_owner). Cascade ile
+olcumler+waypointler gider; PARK KIMLIGI KALIR (karsilastirma butunlugu).
+confirm + DG_LIVE_DIRTY + agac/ozet tazelenir.
+
+**T3 yedekten yukle:** 💾 Tam Yedek'in yanina 📥 Yedekten Yukle. RLS gercegi:
+istemci baskasinin satirini yazamaz ve id'ler GENERATED ALWAYS → geri yukleme
+TEK kanaldan tam sadakatle: arac JSON'u dogrular, ozetler ve OVERRIDING
+SYSTEM VALUE + ON CONFLICT DO NOTHING ile idempotent .sql uretir (Supabase
+SQL Editor — migration'larin uygulandigi kanal). Sema/RLS/migration DEGISMEDI.
+Ayrica yedek kunyesindeki bayat DOI (22646300→22948643) duzeltildi.
+
+**T4 acilir ozet kartlari + aktif kullanicilar:** Kullanici/Kayit/Karbon/Proje
+kartlari tiklanabilir → altta tablo acilir (kullanicilar + olcum sayilari;
+son 100 olcum; projeler + sahip; ulke/sehir karbon kirilimi). Yeni
+"🟢 Aktif Kullanilicilar — kim, ne yapiyor" karti: Supabase Realtime
+PRESENCE (dg-presence kanali) — GECICI, DB'ye yazmaz (KVKK dostu), sekme
+kapaninca duser; Realtime kapaliysa sessiz fallback.
+
+**T5 ortak canli konum haritasi:** olcum gorunumunde "👥 Canli konumumu bu
+parkin calisma arkadaslariyla paylas" anahtari (varsayilan acik, kullanicinin
+kontrolunde). Park basina presence kanali (dg-park-<id>): ortaklar #map
+uzerinde KISIYE OZEL RENKTE nokta (isim bas harfi), ustune gelince kimlik +
+"son konum X sn once". 10 sn throttle; yalniz ayni parkin kanali; HICBIR
+VERI DB'YE YAZILMAZ. Ortak sayaci dgMatesNote'ta.
+
+**Bekciler (9 yeni test):** option value kilidi · fillSpecies savumasi +
+alfabetik · Kayitlarim siralamasi · Kayit/Kayit Ol ayrimi · T2 dugme+confirm
++rol kapisi · T3 OVERRIDING/ON CONFLICT/DOI · T4 kablolama (admExpand/aLive/
+presence/startShell+go kancalari) · T5 kanal+renk+tooltip+DB'ye yazmaz+
+kablolama · kuyruk dgCf sarmalari.
+
+Kirmizi cizgiler korundu: motor/katsayilar, MC_CFG, sema, migrations, RLS,
+publish kuyrugu/workflow'lar, make-report.mjs, yayimlanmis raporlar,
+SPECIES_DATA icerigi/sirasi (yalniz gorunum siralandi).
+
+npm run check: 980 test → 978 pass / 0 fail / 2 skip.
+SQL uretici vm simulasyonuyla dogrulandi (escape/OVERRIDING/idempotent).
+
+
 ### Düzeltildi — 0035d: EN modunda Türkçe KALMADI (dinamik katman) + kart silindi
 Kullanici denetimi (canli test): EN modunda waypoint satiri, Kayitlarim
 tablosu, toast'lar, confirm diyaloglari ve "Dosya secilmedi" hala Turkce'ydi.

@@ -233,7 +233,7 @@
 <!-- DİL KATMANI (0035): TR markup varsayılan; EN sözlüğü çalışma zamanında
      uygulanır (dgToggleLang). defer sırası önemli değil — DOMContentLoaded'da
      ya da hemen (hazırsa) çalışır. module-registry + CORE_ASSETS kaydı şart. -->
-<script src="src/config/i18n.js?v=a12d9743" defer></script>
+<script src="src/config/i18n.js?v=13f52c88" defer></script>
 <script src="src/utils/geo.js?v=3e796768" defer></script>
 <script src="src/utils/truncation.js?v=f43c76b3" defer></script>
 <!-- Faz 7: geotiff (317 KB) ve chart.js (208 KB) artık SENKRON yüklenmiyor;
@@ -244,23 +244,23 @@
 <script src="src/services/export.js?v=f15f365d" defer></script>
 <script src="src/services/offline.js?v=1db110d2" defer></script>
 <!-- YÖNETİM ZİNCİRİ (Faz 6 — eski admin.js beş modüle bölündü) -->
-<script src="src/services/visit-stats.js?v=a9195dca" defer></script>
+<script src="src/services/visit-stats.js?v=e8f79b71" defer></script>
 <script src="src/services/data-requests.js?v=25e31a9d" defer></script>
 <script src="src/services/user-admin.js?v=1830907c" defer></script>
-<script src="src/services/backup.js?v=dbc9bfa5" defer></script>
-<script src="src/services/admin.js?v=c2ec496e" defer></script>
+<script src="src/services/backup.js?v=c84d1a98" defer></script>
+<script src="src/services/admin.js?v=f5dc81d2" defer></script>
 <!-- YÖNETİM AĞACI (2026-09-24): park → proje → kullanıcı → ölçüm kademeli
      görünümü + sorgu hatası görünürlüğü. admin.js'ten SONRA yüklenir
      (approve/reject/del fonksiyonlarını çağırır). -->
-<script src="src/services/admin-tree.js?v=5af4ea66" defer></script>
+<script src="src/services/admin-tree.js?v=eaa7a958" defer></script>
 <!-- BİLİMSEL RAPOR YAYINI (2026-09-27): site içinden yayın kuyruğu —
      📄 Yayınla → report_requests (0008) → rapor-yayin.yml → rapor/DGR-…/
      → kalıcı bağlantı + 📤 Paylaş. admin.js loadAdmin() bu modülü çağırır. -->
-<script src="src/services/report-publish.js?v=dbf5dd98" defer></script>
+<script src="src/services/report-publish.js?v=a70a36ab" defer></script>
 <script src="src/services/park-invites.js?v=a2c13094" defer></script>
 <script src="src/services/world.js?v=ea4867e8" defer></script>
-<script src="src/services/measure.js?v=c35260d7" defer></script>
-<script src="src/services/map.js?v=9ff786da" defer></script>
+<script src="src/services/measure.js?v=8b7b6edf" defer></script>
+<script src="src/services/map.js?v=e7ad63ae" defer></script>
 <!-- LULC ZİNCİRİ ARTIK TEMBEL (2026-09-25 · Faz 8): 8 dosya ilk yüklemede
      indirilmiyor. Yalnız "🌿 Yüzey Örtüsü Analizi"ne basan kullanıcı için
      src/utils/lazylibs.js → dgEnsureLulc() sırayla enjekte eder
@@ -278,12 +278,12 @@
      projeyi parka bağlar, ölçüm kapısını (park algılanmadan ölçüm yok) kurar.
      Sıra ÖNEMLİ: park-query'den sonra, grid-engine'den önce (grid panelindeki
      proje listesi bu modülden beslenir). -->
-<script src="src/services/park-registry.js?v=0352da55" defer></script>
+<script src="src/services/park-registry.js?v=8649345c" defer></script>
 <script src="src/services/grid-engine.js?v=c3e27b01" defer></script>
 <script src="src/ui/park-panel.js?v=66573187" defer></script>
 <script src="src/ui/park-export.js?v=3e078dc3" defer></script>
-<script src="src/services/dash.js?v=b0fd90a3" defer></script>
-<link rel="stylesheet" href="css/style.css?v=3d51e8a4">
+<script src="src/services/dash.js?v=57ca0f35" defer></script>
+<link rel="stylesheet" href="css/style.css?v=ba0a4dea">
 <link rel="stylesheet" href="css/landing.css?v=91528a91">
 <link rel="stylesheet" href="css/park-panel.css?v=10b49293">
 <!-- TASARIM SİSTEMİ (2026-09-27, 2. deneme): ui-standard.css geri BAĞLANDI
@@ -553,7 +553,7 @@
   <div class="dg-oauth-sep"><span>veya</span></div>
   <div style="display:flex;gap:8px;margin-bottom:16px">
    <button class="btn sm" onclick="authTab('login')">Giriş</button>
-   <button class="btn sm ghost" onclick="authTab('reg')">Kayıt</button>
+   <button class="btn sm ghost" onclick="authTab('reg')">Kayıt Ol</button>
    <button class="btn sm ghost" onclick="authTab('reset')">Şifre Yenile</button>
   </div>
 <form id="fLogin" onsubmit="return false;"><label class="lbl" for="liEmail">E‑posta</label><input id="liEmail" type="email" required><label class="lbl" for="liPass" style="margin-top:12px">Parola</label><input id="liPass" type="password" required><div id="tsLogin" style="margin-top:14px;min-height:65px"></div><button type="button" class="btn" style="width:100%;margin-top:16px" onclick="doLogin()">Giriş Yap</button></form>
@@ -684,7 +684,8 @@
      <div class="gpsring" id="gpsRing"><div class="val" id="gpsAcc">—</div><div class="lbl">doğruluk (m)</div></div>
      <div id="gpsState" class="alert info">Konum servisi kapalı.</div>
      <button id="gpsBtn" class="dg-png-btn primary" onclick="startGps()">📡 Konumu Etkinleştir</button>
-     <div class="dg-png-sub" style="font-size:.68rem">Doğrulama eşiği ±60 m · park dışı kayıt sunucuda reddedilir (0007).</div>
+     <div class="dg-png-sub" style="font-size:.68rem">Doğrulama eşiği ±60 m · park dışı kayıt sunucuda reddedilir (0007).</div><label style="display:flex;gap:8px;align-items:flex-start;font-size:.8rem;color:var(--mut);margin-top:10px;cursor:pointer"><input type="checkbox" id="dgLiveShare" checked onchange="dgLiveShareToggle(this.checked)" style="width:auto;margin-top:2px"> <span>👥 Canlı konumumu bu parkın çalışma arkadaşlarıyla paylaş (yalnız aynı parkın haritasında, geçici olarak görünür; veritabanına yazılmaz)</span></label>
+     <div id="dgMatesNote" class="dg-meta" style="margin-top:6px"></div>
      <div id="iosHint" class="alert info" style="display:none"><b>iPhone kullanıcısı mısınız?</b><br><span style="font-size:.85rem">Ayarlar → Gizlilik ve Güvenlik → Konum Servisleri →Safari Siteleri→ "Uygulamayı Kullanırken" seçin, sayfayı yenileyin.</span></div>
      <div class="grid g2" style="margin-top:14px">
       <div><div class="lbl">Enlem</div><div class="mono" id="gLat">—</div></div>
@@ -701,7 +702,7 @@
      </div>
      <div id="pointQueryResult" class="alert info" style="display:none;margin-top:10px"></div>
      <div class="grid g2" style="margin-top:10px">
-      <div><label class="lbl" for="mGroup">Grup</label><select id="mGroup" onchange="fillSpecies()"><option value="">Seç</option><option>İBRELİ</option><option>YAPRAKLI</option><option>DİĞER</option></select></div>
+      <div><label class="lbl" for="mGroup">Grup</label><select id="mGroup" onchange="fillSpecies()"><option value="">Seç</option><option value="İBRELİ">İBRELİ</option><option value="YAPRAKLI">YAPRAKLI</option><option value="DİĞER">DİĞER</option></select></div>
       <div><label class="lbl" for="mSpecies">Tür (Latince)</label><select id="mSpecies" disabled onchange="showLatin()"></select></div>
      </div>
      <div id="latinName" class="mono" style="font-size:.76rem;color:var(--mut);font-style:italic;margin-top:4px"></div>
@@ -902,12 +903,14 @@
 
   <div class="view" id="v-admin">
    <h2 class="disp" style="margin-bottom:16px">🔐 Ölçüm Yönetimi & Onay</h2>
-   <div class="grid g4" style="margin-bottom:18px">
-    <div class="stat"><div class="lbl">Kullanıcı</div><div class="val" id="aUsers">0</div></div>
-    <div class="stat"><div class="lbl">Kayıt</div><div class="val" id="aRec">0</div></div>
-    <div class="stat"><div class="lbl">Karbon (t)</div><div class="val" id="aCarbon">0</div></div>
-    <div class="stat"><div class="lbl">Proje</div><div class="val" id="aProj">0</div></div>
+   <div class="grid g4" style="margin-bottom:10px">
+    <div class="stat dg-clickable" onclick="dgAdminExpand('users')" role="button" tabindex="0" onkeydown="dgKeyActivate(event,this)" title="Listeyi aç/kapat"><div class="lbl">Kullanıcı</div><div class="val" id="aUsers">0</div><div style="font-size:.68rem;color:var(--mut);margin-top:4px">▾ liste</div></div>
+    <div class="stat dg-clickable" onclick="dgAdminExpand('records')" role="button" tabindex="0" onkeydown="dgKeyActivate(event,this)" title="Listeyi aç/kapat"><div class="lbl">Kayıt</div><div class="val" id="aRec">0</div><div style="font-size:.68rem;color:var(--mut);margin-top:4px">▾ liste</div></div>
+    <div class="stat dg-clickable" onclick="dgAdminExpand('carbon')" role="button" tabindex="0" onkeydown="dgKeyActivate(event,this)" title="Listeyi aç/kapat"><div class="lbl">Karbon (t)</div><div class="val" id="aCarbon">0</div><div style="font-size:.68rem;color:var(--mut);margin-top:4px">▾ ülke kırılımı</div></div>
+    <div class="stat dg-clickable" onclick="dgAdminExpand('projects')" role="button" tabindex="0" onkeydown="dgKeyActivate(event,this)" title="Listeyi aç/kapat"><div class="lbl">Proje</div><div class="val" id="aProj">0</div><div style="font-size:.68rem;color:var(--mut);margin-top:4px">▾ liste</div></div>
    </div>
+   <div id="admExpand" class="card tblwrap" style="display:none;margin:0 0 18px"></div>
+   <div class="card" style="margin-bottom:18px"><div class="lbl">🟢 Aktif Kullanıcılar — şu an kim, ne yapıyor</div><div id="aLive" style="margin-top:8px;font-size:.85rem;color:var(--mut)">—</div></div>
    <div class="grid g4" style="margin-bottom:18px">
     <div class="stat"><div class="lbl">👁 Toplam Ziyaretçi</div><div class="val" id="aVisitTotal">0</div></div>
     <div class="stat"><div class="lbl">👁 Bugün</div><div class="val" id="aVisitToday">0</div></div>
@@ -921,7 +924,7 @@
     <button class="btn sm amber" style="margin-top:10px" onclick="cleanOrphans()">🧹 Yetim Dosyaları Temizle</button>
     <button class="btn sm blue" style="margin-top:10px;margin-left:8px" onclick="reGeocodeAll()">🌍 Şehirleri Yeniden Algıla</button>
     <button class="btn sm blue" style="margin-top:10px;margin-left:8px" onclick="backfillParks()">🌳 Parkları Geri Doldur</button>
-    <button class="btn sm" style="margin-top:10px;margin-left:8px" onclick="fullBackup()">💾 Tam Yedek İndir (JSON)</button>
+    <button class="btn sm" style="margin-top:10px;margin-left:8px" onclick="fullBackup()">💾 Tam Yedek İndir (JSON)</button><button class="btn sm ghost" style="margin-top:10px;margin-left:8px" onclick="document.getElementById('dgRestoreFile').click()">📥 Yedekten Yükle</button><input type="file" id="dgRestoreFile" accept=".json,application/json" style="display:none" onchange="dgRestorePick(event)">
     <!-- Park bağı olmayan ESKİ projeleri ölçüm merkezinden OSM parkıyla eşleştirir.
          İki fazlı: önce plan/önizleme (yazmaz), onaydan sonra dgApplyBackfill(). -->
     <div id="backfillBox" style="display:none;margin-top:12px"></div>
@@ -1042,6 +1045,6 @@
 <script src="src/ui/state.js?v=5feada9b" defer></script>
 <script src="src/ui/toast.js?v=1a84b2f4" defer></script>
 <script src="src/ui/landing.js?v=f7ad4ccd" defer></script>
-<script src="src/ui/shell.js?v=43834455" defer></script>
+<script src="src/ui/shell.js?v=b454178d" defer></script>
 </body>
 </html>

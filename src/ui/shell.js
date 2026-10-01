@@ -111,6 +111,8 @@ $("landing").style.display="none";$("shell").style.display="block";
  if(PROFILE){$("whoami").textContent=PROFILE.full_name;
   if(PROFILE.role==="admin"||PROFILE.role==="owner"){$("roleBadge").style.display="inline";$("roleBadge").textContent=PROFILE.role==="owner"?"KURUCU":"ADMIN";$("roleBadge").className=PROFILE.role==="owner"?"badge on":"badge admin";$("adminSec").style.display="block";$("miAdmin").style.display="flex";$("miUsers").style.display="flex";}}
 initMaps();
+ /* 0036 (T4): canlı varlık kanalını aç (Realtime yoksa sessiz). */
+ if(typeof dgPresenceStart==="function"){try{dgPresenceStart();}catch(e){}}
  /* kaydırma konumunu sekme bazında hatırla */
  const mainEl=$("main");
  if(mainEl&&!window._dgScrollHooked){window._dgScrollHooked=true;
@@ -138,6 +140,8 @@ function dgSaveView(v){try{localStorage.setItem("dg_last_view",v);}catch(e){}}
 function dgLastView(){try{return localStorage.getItem("dg_last_view")||"";}catch(e){return "";}}
 function go(v){
  DG_CUR_VIEW=v;dgSaveView(v);
+ /* 0036: presence — "ne yapıyor" bilgisi tazelenir (geçici, DB'ye yazılmaz). */
+ if(typeof dgPresencePing==="function"){try{dgPresencePing(v);}catch(e){}}
  document.querySelectorAll(".view").forEach(x=>x.classList.remove("on"));
  $("v-"+v).classList.add("on");
  document.querySelectorAll("#side .item").forEach(i=>i.classList.remove("on"));
@@ -149,6 +153,7 @@ if(v==="dash"){loadWaypoints().then(()=>loadDash());}
   * yoksa form kilitli gelir ve kullanıcı park algılama ekranına yönlendirilir.
   * (2026-09-24 · park-registry.js dgParkGate) */
  if(v==="measure"&&typeof dgParkGate==="function")dgParkGate(true);
+ if(v==="measure"&&typeof dgLiveShareJoinCurrent==="function")setTimeout(()=>{try{dgLiveShareJoinCurrent();}catch(e){}},400);
  /* CANLI HARİTA TAZELEME KAPISI (2026-09-26 · kullanıcı bildirimi):
   * ESKİ: if(!liveLoaded){liveLoaded=true;loadLiveMap();}
   *      → sekme bir oturumda YALNIZ BİR KEZ yükleniyordu. Yönetici ölçümü

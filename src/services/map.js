@@ -282,7 +282,7 @@ function drawNav(){
    iconSize:[28,28],iconAnchor:[14,24]
   });
   const m=L.marker([w.lat,w.lon],{icon}).addTo(navMap);m._wp=1;
-  m.bindPopup(done?"<s>P"+w.wp_id+"</s> ✓ Yapıldı":"P"+w.wp_id+" · Hedef yapmak için tıkla");
+  const _tm=(s)=>(typeof dgCf==="function"?dgCf(s):s);m.bindPopup(done?"<s>P"+w.wp_id+"</s> "+_tm("✓ Yapıldı"):"P"+w.wp_id+" · "+_tm("Hedef yapmak için tıkla"));
   m.on("click",()=>{selectWaypoint(w.id);});
  });
  if(GPS){
@@ -297,10 +297,10 @@ function drawNav(){
   }).addTo(navMap);me._wp=1;
   if(!navTarget){const ts=WP.filter(w=>!w.visited);if(ts.length)navTarget=ts.sort((a,b)=>hav(GPS.latitude,GPS.longitude,a.lat,a.lon)-hav(GPS.latitude,GPS.longitude,b.lat,b.lon))[0];}
   if(navTarget&&!navTarget.visited){const d=hav(GPS.latitude,GPS.longitude,navTarget.lat,navTarget.lon),bearing=brg(GPS.latitude,GPS.longitude,navTarget.lat,navTarget.lon);
-   $("navDist").textContent=Math.round(d)+" m";$("navTarget").textContent="Hedef: P"+navTarget.wp_id+" · "+Math.round(bearing)+"°";
+   $("navDist").textContent=Math.round(d)+" m";$("navTarget").textContent=(typeof dgCf==="function"?dgCf("Hedef:"):"Hedef:")+" P"+navTarget.wp_id+" · "+Math.round(bearing)+"°";
    $("navArrow").style.transform="rotate("+bearing+"deg)";
    const ln=L.polyline([[GPS.latitude,GPS.longitude],[navTarget.lat,navTarget.lon]],{color:"#c2452d",dashArray:"5,8",weight:2}).addTo(navMap);ln._wp=1;
-  }else{$("navDist").textContent="—";$("navTarget").textContent="Hedef seç / tamamlandı";$("navArrow").style.transform="rotate(0)";}
+  }else{$("navDist").textContent="—";$("navTarget").textContent=(typeof dgCf==="function"?dgCf("Hedef seç / tamamlandı"):"Hedef seç / tamamlandı");$("navArrow").style.transform="rotate(0)";}
  }
 }
 /* =========================================================
@@ -326,4 +326,73 @@ function switchBaseLayer(type){
  
  L.tileLayer(urls[type],{attribution:attr[type]}).addTo(map);
  toast("✓ Harita: "+(type==="osm"?"Sokak":(type==="sat"?"Uydu":"Topoğrafik")),"ok","🗺️");
+}
+
+/* ═══════════ 0036 (T5) · PARK ORTAK CANLI KONUM ═══════════
+ * İstek: "ortak proje yapılırken ortaklar haritada birbirlerinin konumunu
+ * görsün, her ortak farklı renkte, üstüne gelince kimlik."
+ * Tasarım: Supabase Realtime PRESENCE — park başına kanal (dg-park-<id>).
+ * GEÇİCİDİR: konum VERİTABANINA YAZILMAZ, kanal kapanınca silinir; yalnız
+ * aynı parkın kanalındaki kullanıcılar görür. Kırmızı çizgiler (şema, RLS,
+ * migration) hiç devreye girmez. Her adım typeof/try korumalı: Realtime
+ * kapalıysa özellik sessizce devre dışı kalır, ölçüm akışı etkilenmez. */
+let DG_PARK_CH=null,DG_PARK_CH_ID=0,DG_LIVE_ON=true,DG_MATES_LAYER=null,DG_LAST_PING=0;
+const DG_MATE_COLORS=["#c2452d","#2b6cb0","#7c3aed","#0f766e","#be185d","#4d7c0f","#b45309","#0e7490"];
+function dgMateColor(id){let h=0;const s=String(id||"?");for(let i=0;i<s.length;i++)h=(h*31+s.charCodeAt(i))>>>0;return DG_MATE_COLORS[h%DG_MATE_COLORS.length];}
+function dgLiveShareToggle(on){
+ DG_LIVE_ON=!!on;
+ if(!DG_LIVE_ON)dgLiveShareLeave();else dgLiveShareJoinCurrent();
+ if(typeof toast==="function")toast(dgCf(on?"Canlı konum paylaşımı açık (bu parkın ortaklarıyla).":"Canlı konum paylaşımı kapalı."),"info","👥");
+}
+async function dgLiveShareJoinCurrent(){
+ try{
+  if(!DG_LIVE_ON||typeof USER==="undefined"||!USER||typeof sb==="undefined")return;
+  const sel=$("mProject");const pid=sel&&sel.value?+sel.value:0;
+  if(!pid){dgLiveShareLeave();return;}
+  const{data}=await sb.from("projects").select("park_id").eq("id",pid).maybeSingle();
+  const park=(data&&data.park_id)||0;
+  if(!park){dgLiveShareLeave();return;}
+  if(DG_PARK_CH_ID===park&&DG_PARK_CH)return;
+  dgLiveShareLeave();
+  DG_PARK_CH_ID=park;
+  DG_PARK_CH=sb.channel("dg-park-"+park,{config:{presence:{key:String(USER.id)}}});
+  DG_PARK_CH.on("presence",{event:"sync"},()=>dgLiveMatesDraw());
+  DG_PARK_CH.subscribe(st=>{if(st==="SUBSCRIBED"){dgLiveSharePing();dgLiveMatesDraw();}});
+ }catch(e){DG_PARK_CH=null;DG_PARK_CH_ID=0;}
+}
+function dgLiveShareLeave(){
+ try{if(DG_PARK_CH&&sb&&sb.removeChannel)sb.removeChannel(DG_PARK_CH);}catch(e){}
+ DG_PARK_CH=null;DG_PARK_CH_ID=0;
+ if(DG_MATES_LAYER&&typeof map!=="undefined"&&map){try{map.removeLayer(DG_MATES_LAYER);}catch(e){}}
+ DG_MATES_LAYER=null;
+ const note=$("dgMatesNote");if(note)note.textContent="";
+}
+function dgLiveSharePing(){
+ try{
+  if(!DG_PARK_CH||typeof DG_PARK_CH.track!=="function"||!DG_LIVE_ON)return;
+  if(typeof GPS==="undefined"||!GPS||GPS.latitude==null)return;
+  const now=Date.now();if(now-DG_LAST_PING<10000)return;DG_LAST_PING=now;
+  DG_PARK_CH.track({id:String(USER.id),n:(typeof PROFILE!=="undefined"&&PROFILE&&PROFILE.full_name)||"?",la:GPS.latitude,lo:GPS.longitude,t:now});
+ }catch(e){}
+}
+function dgLiveMatesDraw(){
+ try{
+  if(typeof map==="undefined"||!map||!DG_PARK_CH||typeof L==="undefined")return;
+  if(!DG_MATES_LAYER){DG_MATES_LAYER=L.layerGroup().addTo(map);}
+  DG_MATES_LAYER.clearLayers();
+  const st=DG_PARK_CH.presenceState();let n=0;
+  for(const k in st){const arr=st[k]||[];for(const p of arr){
+   if(!p||String(p.id)===String(USER.id)||p.la==null||p.lo==null)continue;
+   n++;
+   const col=dgMateColor(p.id);
+   const ini=String(p.n||"?").trim().slice(0,1).toLocaleUpperCase("tr-TR");
+   const ic=L.divIcon({className:"",html:'<div style="width:18px;height:18px;border-radius:50%;background:'+col+';border:2px solid #fff;box-shadow:0 1px 4px rgba(0,0,0,.45);display:flex;align-items:center;justify-content:center;color:#fff;font-size:10px;font-weight:800">'+esc(ini)+'</div>',iconSize:[18,18],iconAnchor:[9,9]});
+   const age=Math.max(0,Math.round((Date.now()-(p.t||Date.now()))/1000));
+   const ageTxt=age<60?age+" "+dgCf("sn"):Math.round(age/60)+" "+dgCf("dk");
+   L.marker([p.la,p.lo],{icon:ic,interactive:true,keyboard:false,zIndexOffset:600}).addTo(DG_MATES_LAYER)
+    .bindTooltip("<b>"+esc(p.n||"?")+"</b><br>"+dgCf("son konum")+": "+ageTxt+" "+dgCf("önce"),{direction:"top",offset:[0,-11]});
+  }}
+  const box=$("dgMatesNote");
+  if(box)box.textContent=n?(typeof dgTfs==="function"?dgTfs("👥 {n} ortak bu parkta çevrimiçi — konumlar canlı görünüyor (üstüne gel: kimlik).",{n:n}):""):"";
+ }catch(e){}
 }

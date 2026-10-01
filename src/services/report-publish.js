@@ -148,7 +148,7 @@ function dgPubRender(){
  const st=DG_PUB_STATE;
  const pubByPark=dgPubPublishedByPark();
  const clock=$("dgPubClock");
- if(clock)clock.textContent=st.queueAt?("son kontrol "+new Date(st.queueAt).toLocaleTimeString("tr-TR")):"—";
+ if(clock)clock.textContent=st.queueAt?(dgCf("son kontrol")+" "+new Date(st.queueAt).toLocaleTimeString("tr-TR")):"—";
 
  if(st.error==="SCHEMA"){
   box.innerHTML='<div class="alert warn">⚠ <b>Yayın kuyruğu veritabanında kurulu değil.</b> '+
@@ -172,14 +172,14 @@ function dgPubRender(){
    note=esc(s.note)+" · yayın işi 5 dakikada bir çalışır";
   }else if(pub){
    stt=retPend?"retracting":"published";rid=pub.report_id;
-   note=retPend?"🗑 geri çekme isteği kuyrukta — birkaç dakika içinde yayından kalkar"
-    :esc(rid||"—")+(pub.finished_at?(" · yayın "+String(pub.finished_at).slice(0,10)):"");
+   note=retPend?dgCf("🗑 geri çekme isteği kuyrukta — birkaç dakika içinde yayından kalkar")
+    :esc(rid||"—")+(pub.finished_at?(" · "+dgCf("yayın")+" "+String(pub.finished_at).slice(0,10)):"");
   }else if(retPend){
    stt="retracting";rid=DG_PUB_ID.test(String(retPend.report_id||""))?String(retPend.report_id):"";
-   note="🗑 "+esc(rid||"rapor")+" geri çekme kuyruğunda";
+   note="🗑 "+esc(rid||dgCf("rapor"))+" "+dgCf("geri çekme kuyruğunda");
   }else if(retPark){
    stt="retracted";
-   note="🗑 "+esc(DG_PUB_ID.test(String(retPark.report_id||""))?String(retPark.report_id):"rapor")+" geri çekildi"+
+   note="🗑 "+esc(DG_PUB_ID.test(String(retPark.report_id||""))?String(retPark.report_id):dgCf("rapor"))+" "+dgCf("geri çekildi")+
     (retPark.finished_at?(" · "+String(retPark.finished_at).slice(0,10)):"")+
     (retPark.reason?(" · "+esc(String(retPark.reason).slice(0,60))):"");
   }else if(last){
@@ -216,7 +216,7 @@ function dgPubRender(){
 
   return "<tr>"+
    '<td data-label="Park"><b>'+esc(p.park_name)+"</b>"+
-    '<div class="dg-tree-meta">'+esc(p.city||"—")+" · "+Number(p.species_n||0)+" tür · "+Number(p.contributors||0)+" katkı</div></td>"+
+    '<div class="dg-tree-meta">'+esc(p.city||"—")+" · "+Number(p.species_n||0)+" "+dgCf("tür")+" · "+Number(p.contributors||0)+" "+dgCf("katkı")+"</div></td>"+
    '<td data-label="Kayıt" class="mono">'+Number(p.records||0)+"</td>"+
    '<td data-label="Karbon">'+(Number(p.carbon_kg||0)/1000).toFixed(2)+" t</td>"+
    '<td data-label="Alan">'+(typeof dgFmtHa==="function"?dgFmtHa(p.area_m2):"—")+"</td>"+
@@ -232,7 +232,7 @@ function dgPubRender(){
   if(ret){
    const ridR=DG_PUB_ID.test(String(e.report_id||""))?e.report_id:"—";
    return '<div style="padding:5px 0;border-bottom:1px solid var(--line);font-size:.78rem">'+
-    "🗑 <b>"+esc(ridR)+"</b> geri çekildi · "+esc(e.park_name||("park #"+e.park_id))+
+    "🗑 <b>"+esc(ridR)+"</b> "+dgCf("geri çekildi")+" · "+esc(e.park_name||("park #"+e.park_id))+
     (e.reason?(" · gerekçe: "+esc(String(e.reason).slice(0,80))):"")+
     '<div class="dg-tree-meta">istek '+esc(String(e.retraction_id||"").slice(0,8))+" · "+esc(String(e.finished_at||"").slice(0,16).replace("T"," "))+"</div></div>";
   }
@@ -253,7 +253,7 @@ function dgPubRender(){
  box.innerHTML=
   (st.error?'<div class="alert err">⚠ '+esc(st.error)+"</div>":"")+
   (st.queue===null?'<div class="alert info">ℹ Yayın günlüğü okunamadı (çevrimdışı ya da dosya henüz yayınlanmadı). İstek gönderimi çalışır; durum alanı boş kalır.</div>':"")+
-  (pending>0?'<div class="alert info">⏳ <b>'+pending+" istek kuyrukta.</b> Yayın işi 5 dakikada bir çalışır (GitHub yoğunluğunda 15 dakikayı bulabilir); bu kart kendini 25 saniyede bir tazeler, bağlantı burada görünür. Sekmeyi kapatmanız işi durdurmaz.</div>":"")+
+  (pending>0?'<div class="alert info">⏳ <b>'+pending+" "+dgCf("istek kuyrukta.")+"</b> "+dgCf("Yayın işi 5 dakikada bir çalışır (GitHub yoğunluğunda 15 dakikayı bulabilir); bu kart kendini 25 saniyede bir tazeler, bağlantı burada görünür. Sekmeyi kapatmanız işi durdurmaz.")+"</div>":"")+
   '<div class="tblwrap"><table class="dg-cards">'+
   "<thead><tr><th scope='col'>Park</th><th scope='col'>Kayıt</th><th scope='col'>Karbon</th><th scope='col'>Alan</th><th scope='col'>Yayın durumu</th><th scope='col'>İşlem</th></tr></thead><tbody>"+
   (rows||'<tr><td colspan=6>Onaylı ölçümü olan park yok — önce ölçüm onaylayın.</td></tr>')+
@@ -291,7 +291,7 @@ function dgPubInsertError(r){
  const txt=String(r.txt||"");
  if(!r.status||/^NETWORK/.test(txt))return"Ağ hatası: "+txt.replace(/^NETWORK\s*/,"").slice(0,160);
  if(/does not exist|42P01/i.test(txt)||r.status===404)return"0008_report_publish.sql çalıştırılmalı (report_requests tablosu yok).";
- if(/duplicate key|23505/i.test(txt))return"Bu park için bekleyen bir istek zaten var — kuyruktaki iş bitsin.";
+ if(/duplicate key|23505/i.test(txt))return dgCf("Bu park için bekleyen bir istek zaten var — kuyruktaki iş bitsin.");
  if(/REPORT_QUOTA|DG0QT/i.test(txt))return"Günlük yayın isteği sınırına ulaştın (24 saatte 3) — sonra yeniden dene.";
  if(/REPORT_NOT_YOUR_PARK|DG0NP/i.test(txt))return"Bu park senin projene bağlı değil — yalnız kendi parkının raporunu yayınlayabilirsin.";
  if(/REPORT_NO_OWN_DATA|DG0ND/i.test(txt))return"Bu parkta onaylı ölçümün yok — ölçümlerin onaylanınca yayın isteyebilirsin.";
@@ -495,7 +495,7 @@ function dgUserPubRender(){
  if(pend){
   const dk=Math.max(0,Math.round((Date.now()-new Date(pend.created_at||Date.now()).getTime())/60000));
   badge='<span class="badge admin">Beklemede</span>';
-  note=(dk<1?"az önce":dk+" dk önce")+" kuyruğa alındı · yayın işi 5 dakikada bir çalışır"+(pendOwn?"":" · isteği başka bir katkıda bulunan açtı");
+  note=(dk<1?dgCf("az önce"):dk+" "+dgCf("dk önce"))+" "+dgCf("kuyruğa alındı")+" · "+dgCf("yayın işi 5 dakikada bir çalışır")+(pendOwn?"":" · "+dgCf("isteği başka bir katkıda bulunan açtı"));
  }else if(retPend){
   badge='<span class="badge admin">Geri çekiliyor</span>';
   note="🗑 "+esc(DG_PUB_ID.test(String(retPend.report_id||""))?String(retPend.report_id):"rapor")+" geri çekme kuyruğunda — birkaç dakika içinde yayından kalkar";
@@ -503,7 +503,7 @@ function dgUserPubRender(){
   badge='<span class="badge on">Yayınlandı</span>';
  }else if(retPark){
   badge='<span class="badge off">Geri çekildi</span>';
-  note="🗑 "+esc(DG_PUB_ID.test(String(retPark.report_id||""))?String(retPark.report_id):"rapor")+" geri çekildi"+
+  note="🗑 "+esc(DG_PUB_ID.test(String(retPark.report_id||""))?String(retPark.report_id):dgCf("rapor"))+" "+dgCf("geri çekildi")+
    (retPark.finished_at?(" · "+String(retPark.finished_at).slice(0,10)):"")+
    (retPark.reason?(" · "+esc(String(retPark.reason).slice(0,60))):"");
  }else if(last){

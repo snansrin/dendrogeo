@@ -67,7 +67,8 @@
      <div class="gpsring" id="gpsRing"><div class="val" id="gpsAcc">—</div><div class="lbl">doğruluk (m)</div></div>
      <div id="gpsState" class="alert info">Konum servisi kapalı.</div>
      <button id="gpsBtn" class="dg-png-btn primary" onclick="startGps()">📡 Konumu Etkinleştir</button>
-     <div class="dg-png-sub" style="font-size:.68rem">Doğrulama eşiği ±60 m · park dışı kayıt sunucuda reddedilir (0007).</div>
+     <div class="dg-png-sub" style="font-size:.68rem">Doğrulama eşiği ±60 m · park dışı kayıt sunucuda reddedilir (0007).</div><label style="display:flex;gap:8px;align-items:flex-start;font-size:.8rem;color:var(--mut);margin-top:10px;cursor:pointer"><input type="checkbox" id="dgLiveShare" checked onchange="dgLiveShareToggle(this.checked)" style="width:auto;margin-top:2px"> <span>👥 Canlı konumumu bu parkın çalışma arkadaşlarıyla paylaş (yalnız aynı parkın haritasında, geçici olarak görünür; veritabanına yazılmaz)</span></label>
+     <div id="dgMatesNote" class="dg-meta" style="margin-top:6px"></div>
      <div id="iosHint" class="alert info" style="display:none"><b>iPhone kullanıcısı mısınız?</b><br><span style="font-size:.85rem">Ayarlar → Gizlilik ve Güvenlik → Konum Servisleri →Safari Siteleri→ "Uygulamayı Kullanırken" seçin, sayfayı yenileyin.</span></div>
      <div class="grid g2" style="margin-top:14px">
       <div><div class="lbl">Enlem</div><div class="mono" id="gLat">—</div></div>
@@ -84,7 +85,7 @@
      </div>
      <div id="pointQueryResult" class="alert info" style="display:none;margin-top:10px"></div>
      <div class="grid g2" style="margin-top:10px">
-      <div><label class="lbl" for="mGroup">Grup</label><select id="mGroup" onchange="fillSpecies()"><option value="">Seç</option><option>İBRELİ</option><option>YAPRAKLI</option><option>DİĞER</option></select></div>
+      <div><label class="lbl" for="mGroup">Grup</label><select id="mGroup" onchange="fillSpecies()"><option value="">Seç</option><option value="İBRELİ">İBRELİ</option><option value="YAPRAKLI">YAPRAKLI</option><option value="DİĞER">DİĞER</option></select></div>
       <div><label class="lbl" for="mSpecies">Tür (Latince)</label><select id="mSpecies" disabled onchange="showLatin()"></select></div>
      </div>
      <div id="latinName" class="mono" style="font-size:.76rem;color:var(--mut);font-style:italic;margin-top:4px"></div>
@@ -285,12 +286,14 @@
 
   <div class="view" id="v-admin">
    <h2 class="disp" style="margin-bottom:16px">🔐 Ölçüm Yönetimi & Onay</h2>
-   <div class="grid g4" style="margin-bottom:18px">
-    <div class="stat"><div class="lbl">Kullanıcı</div><div class="val" id="aUsers">0</div></div>
-    <div class="stat"><div class="lbl">Kayıt</div><div class="val" id="aRec">0</div></div>
-    <div class="stat"><div class="lbl">Karbon (t)</div><div class="val" id="aCarbon">0</div></div>
-    <div class="stat"><div class="lbl">Proje</div><div class="val" id="aProj">0</div></div>
+   <div class="grid g4" style="margin-bottom:10px">
+    <div class="stat dg-clickable" onclick="dgAdminExpand('users')" role="button" tabindex="0" onkeydown="dgKeyActivate(event,this)" title="Listeyi aç/kapat"><div class="lbl">Kullanıcı</div><div class="val" id="aUsers">0</div><div style="font-size:.68rem;color:var(--mut);margin-top:4px">▾ liste</div></div>
+    <div class="stat dg-clickable" onclick="dgAdminExpand('records')" role="button" tabindex="0" onkeydown="dgKeyActivate(event,this)" title="Listeyi aç/kapat"><div class="lbl">Kayıt</div><div class="val" id="aRec">0</div><div style="font-size:.68rem;color:var(--mut);margin-top:4px">▾ liste</div></div>
+    <div class="stat dg-clickable" onclick="dgAdminExpand('carbon')" role="button" tabindex="0" onkeydown="dgKeyActivate(event,this)" title="Listeyi aç/kapat"><div class="lbl">Karbon (t)</div><div class="val" id="aCarbon">0</div><div style="font-size:.68rem;color:var(--mut);margin-top:4px">▾ ülke kırılımı</div></div>
+    <div class="stat dg-clickable" onclick="dgAdminExpand('projects')" role="button" tabindex="0" onkeydown="dgKeyActivate(event,this)" title="Listeyi aç/kapat"><div class="lbl">Proje</div><div class="val" id="aProj">0</div><div style="font-size:.68rem;color:var(--mut);margin-top:4px">▾ liste</div></div>
    </div>
+   <div id="admExpand" class="card tblwrap" style="display:none;margin:0 0 18px"></div>
+   <div class="card" style="margin-bottom:18px"><div class="lbl">🟢 Aktif Kullanıcılar — şu an kim, ne yapıyor</div><div id="aLive" style="margin-top:8px;font-size:.85rem;color:var(--mut)">—</div></div>
    <div class="grid g4" style="margin-bottom:18px">
     <div class="stat"><div class="lbl">👁 Toplam Ziyaretçi</div><div class="val" id="aVisitTotal">0</div></div>
     <div class="stat"><div class="lbl">👁 Bugün</div><div class="val" id="aVisitToday">0</div></div>
@@ -304,7 +307,7 @@
     <button class="btn sm amber" style="margin-top:10px" onclick="cleanOrphans()">🧹 Yetim Dosyaları Temizle</button>
     <button class="btn sm blue" style="margin-top:10px;margin-left:8px" onclick="reGeocodeAll()">🌍 Şehirleri Yeniden Algıla</button>
     <button class="btn sm blue" style="margin-top:10px;margin-left:8px" onclick="backfillParks()">🌳 Parkları Geri Doldur</button>
-    <button class="btn sm" style="margin-top:10px;margin-left:8px" onclick="fullBackup()">💾 Tam Yedek İndir (JSON)</button>
+    <button class="btn sm" style="margin-top:10px;margin-left:8px" onclick="fullBackup()">💾 Tam Yedek İndir (JSON)</button><button class="btn sm ghost" style="margin-top:10px;margin-left:8px" onclick="document.getElementById('dgRestoreFile').click()">📥 Yedekten Yükle</button><input type="file" id="dgRestoreFile" accept=".json,application/json" style="display:none" onchange="dgRestorePick(event)">
     <!-- Park bağı olmayan ESKİ projeleri ölçüm merkezinden OSM parkıyla eşleştirir.
          İki fazlı: önce plan/önizleme (yazmaz), onaydan sonra dgApplyBackfill(). -->
     <div id="backfillBox" style="display:none;margin-top:12px"></div>
