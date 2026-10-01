@@ -126,7 +126,7 @@ async function loadRequests(){
 }
 
 async function rejectRequest(id){
- if(!confirm("Bu talebi reddetmek istediğinizden emin misiniz? Kullanıcıya yanıt gönderilmez, talep arşive kaldırılır."))return;
+ if(!confirm(dgCf("Bu talebi reddetmek istediğinizden emin misiniz? Kullanıcıya yanıt gönderilmez, talep arşive kaldırılır.")))return;
  const{error}=await sb.from("data_requests").update({status:"Reddedildi",fulfilled_at:new Date().toISOString()}).eq("id",id);
  if(error){toast("Hata: "+error.message,"err");return;}
  toast("✓ Talep reddedildi","warn","🚫");
@@ -156,7 +156,7 @@ async function fulfillRequest(id){
     const cities    = new Set(rows.map(r=>r.city).filter(Boolean));
     
     if(n === 0){
-        if(!confirm("Bu filtreye uyan onaylı kayıt bulunamadı. Yine de kullanıcıya bilgilendirme maili göndermek ister misiniz?")) return;
+        if(!confirm(dgCf("Bu filtreye uyan onaylı kayıt bulunamadı. Yine de kullanıcıya bilgilendirme maili göndermek ister misiniz?"))) return;
     } else {
         dl(fullCSV(rows), "dendrogeo_talep_" + id + ".csv");
     }
@@ -202,7 +202,7 @@ async function fulfillRequest(id){
         "Bu veri CC BY-NC 4.0 lisansı altındadır. Ticari olmayan amaçlarla, kaynak gösterilerek serbestçe kullanılabilir.",
         "",
         "Atıf önerisi:",
-"ŞİRİN, S. & ŞİRİN, N. (2026). DendroGeo: Global Tree Inventory & Carbon Data System (Version 1.0.0) [Dataset]. Zenodo. https://doi.org/10.5281/zenodo.22646300",
+"ŞİRİN, N. & ŞİRİN, S. (2026). DendroGeo: Küresel Ağaç Envanteri ve Karbon Veri Sistemi (Version 3.0.0) [Software] [Dataset]. Zenodo. https://doi.org/10.5281/zenodo.22646300",
 "",
         "Herhangi bir sorunuz olursa bu e-postayı yanıtlayarak bize ulaşabilirsiniz.",
         "",

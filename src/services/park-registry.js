@@ -331,7 +331,7 @@ async function dgRegisterPark(cand,opt){
     /* Elle oluşturulmuş kayıt OSM kimliğiyle çakıştı: tekilleştirme YÖNETİCİ
      * işidir (sessiz veri taşıma yapılmaz) ama kullanıcı bilmeli. */
     if(!manual&&hit.source==="manual"&&typeof toast==="function"){
-      toast("ℹ Bu park daha önce elle oluşturulmuş (#"+hit.id+"); aynı kimlik kullanılıyor. OSM kimliğine geçmek için: Yönetim → 🌳 Park Kimlikleri → 🔀 birleştir.","info","🌳");
+      toast(dgCf("ℹ Bu park daha önce elle oluşturulmuş (#")+hit.id+"); aynı kimlik kullanılıyor. OSM kimliğine geçmek için: Yönetim → 🌳 Park Kimlikleri → 🔀 birleştir.","info","🌳");
     }
     return hit;
   }
@@ -349,7 +349,7 @@ async function dgRegisterPark(cand,opt){
       if(again){DG_PARK_SESSION.set(again.osm_key,again);return again;}
     }
     console.warn("DENDROGEO · park kimliği yazılamadı:",error.message);
-    toast("Park kimliği sunucuya yazılamadı: "+esc(error.message),"err","🌳");
+    toast(dgCf("Park kimliği sunucuya yazılamadı: ")+esc(error.message),"err","🌳");
     return null;
   }
 
@@ -414,7 +414,7 @@ async function dgScanSearchByName(name){
   const j=await r.json();
   if(!j||!j.length)return toast("Bulunamadı: haritada parkın içine tıkla ya da ✍️ elle oluştur.","warn","🔍");
   return await dgDetectAt(+j[0].lat,+j[0].lon);
- }catch(e){return toast("Arama hatası: "+esc(e.message)+" — haritada tıkla veya elle oluştur.","err","🔍");}
+ }catch(e){return toast(dgCf("Arama hatası: ")+esc(e.message)+" — haritada tıkla veya elle oluştur.","err","🔍");}
 }
 
 function dgDetectAtMyLocation(){
@@ -455,7 +455,7 @@ async function dgCreateManualPark(){
   DG_PARK=row;
   DG_MANUAL_PENDING=null;
   dgRenderScanCard();
-  toast("✓ Park oluşturuldu: "+esc(row.name),"ok","🌳");
+  toast(dgCf("✓ Park oluşturuldu: ")+esc(row.name),"ok","🌳");
   return row;
 }
 
@@ -663,7 +663,7 @@ async function dgRetryRegister(){
   if(row){
     DG_PARK=row;
     dgRenderScanCard();
-    toast("✓ Park kimliği yazıldı: "+esc(row.name),"ok","🌳");
+    toast(dgCf("✓ Park kimliği yazıldı: ")+esc(row.name),"ok","🌳");
   }
 }
 
@@ -707,13 +707,13 @@ async function dgScanCreateProject(){
     country:park.country||""
   }).select().single();
 
-  if(error)return toast("Proje oluşturulamadı: "+esc(error.message),"err");
+  if(error)return toast(dgCf("Proje oluşturulamadı: ")+esc(error.message),"err");
 
   /* 0007: taramadaki halkayı sunucuya yaz → trg_geo_fence bundan sonra bu
    * park için daire yedeği değil TAM POLİGON ile doğrular. */
   if(typeof dgPersistParkGeom==="function")await dgPersistParkGeom(park);
 
-  toast("✓ Proje hazır: "+esc(data.name),"ok","📁");
+  toast(dgCf("✓ Proje hazır: ")+esc(data.name),"ok","📁");
   await dgAfterProjectLinked(data);
   return data;
 }
@@ -756,7 +756,7 @@ async function dgLinkProject(pid){
     label
   }).eq("id",pid).select().single();
 
-  if(error)return toast("Bağlanamadı: "+esc(error.message),"err");
+  if(error)return toast(dgCf("Bağlanamadı: ")+esc(error.message),"err");
 
   /* Ölçümlerin denormalize park_id'sini de doldur (view zaten yedekli okur,
    * ama sorgu hızı ve dışa aktarım alanı için tutarlılık iyi). */
@@ -1023,7 +1023,7 @@ async function backfillParks(){
   const{data:projs,error}=await sb.from("projects").select("id,name,owner,park_id,park_name,label,city,country");
   if(error){
     if(box){box.style.display="block";box.innerHTML=`<div class="alert err">⚠ Projeler okunamadı: <span class="mono">${esc(error.message)}</span></div>`;}
-    return toast("Projeler okunamadı: "+esc(error.message),"err");
+    return toast(dgCf("Projeler okunamadı: ")+esc(error.message),"err");
   }
   const targets=(projs||[]).filter(p=>!p.park_id);
 
@@ -1149,7 +1149,7 @@ async function dgLinkProjectToPark(proj,park){
   const{error}=await sb.from("projects").update({park_id:park.id,label}).eq("id",proj.id);
   if(error){
     console.warn("DENDROGEO · backfill proje hatası:",error.message);
-    toast("Bağlanamadı ("+esc(proj.name)+"): "+esc(error.message),"err");
+    toast(dgCf("Bağlanamadı (")+esc(proj.name)+"): "+esc(error.message),"err");
     return false;
   }
   /* Ölçümlerin denormalize park_id'sini doldur (view zaten yedekli okur,
@@ -1344,9 +1344,9 @@ async function dgParkRename(id){
   const name=String(nn).trim();
   if(!name)return toast("Ad boş olamaz","err");
   const{error}=await sb.from("parks").update({name,name_norm:dgNormParkName(name)}).eq("id",id);
-  if(error)return toast("Ad güncellenemedi: "+esc(error.message),"err");
+  if(error)return toast(dgCf("Ad güncellenemedi: ")+esc(error.message),"err");
   await dgResyncProjectNames(id,name);
-  toast("✓ Park adı güncellendi: "+esc(name)+" — proje adları yeniden kuruldu","ok","🌳");
+  toast(dgCf("✓ Park adı güncellendi: ")+esc(name)+" — proje adları yeniden kuruldu","ok","🌳");
   await dgAfterParkAdminChange();
 }
 
@@ -1373,9 +1373,9 @@ async function dgParkMergeInto(srcId,dstId){
     `Karşılaştırma artık TEK "${dst.name}" satırı gösterir.`))return;
 
   const{error:e1}=await sb.from("projects").update({park_id:dstId}).eq("park_id",srcId);
-  if(e1)return toast("Projeler taşınamadı: "+esc(e1.message),"err");
+  if(e1)return toast(dgCf("Projeler taşınamadı: ")+esc(e1.message),"err");
   const{error:e2}=await sb.from("measurements").update({park_id:dstId}).eq("park_id",srcId);
-  if(e2)toast("Ölçümler taşınırken hata: "+esc(e2.message),"warn");
+  if(e2)toast(dgCf("Ölçümler taşınırken hata: ")+esc(e2.message),"warn");
   await dgResyncProjectNames(dstId);
   const{error:e3}=await sb.from("parks").delete().eq("id",srcId);
   if(e3)return toast("Kaynak kimlik silinemedi: "+esc(e3.message),"err");
@@ -1517,11 +1517,11 @@ async function dgBackfillGeom(parkId){
   if(!park)return toast("Park bulunamadı","err");
   toast("🛰 OSM sınırı çekiliyor…","info","🛰");
   let geom;
-  try{geom=await dgFetchOsmRing(park.osm_key);}catch(e){return toast("OSM hatası: "+esc(e.message),"err","🛰");}
+  try{geom=await dgFetchOsmRing(park.osm_key);}catch(e){return toast(dgCf("OSM hatası: ")+esc(e.message),"err","🛰");}
   if(!geom)return toast("OSM'de kapalı sınır bulunamadı (relation parçalı olabilir).","warn","🛰");
   const area=typeof polyArea==="function"?polyArea(geom.outer):park.area_m2;
   const{error}=await sb.from("parks").update({geom_json:geom,area_m2:area>0?Math.round(area):park.area_m2}).eq("id",parkId);
-  if(error)return toast("Yazılamadı (yetki/ağ): "+esc(error.message),"err","🛰");
+  if(error)return toast(dgCf("Yazılamadı (yetki/ağ): ")+esc(error.message),"err","🛰");
   toast("✓ "+esc(park.name)+" geometrisi yazıldı — çit artık tam poligonla.","ok","🛰");
   loadParkAdmin();
 }

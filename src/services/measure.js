@@ -269,14 +269,14 @@ async function createProject(){
    city:$("pCity").value||park.city||""
   });
   if(error)return toast("Hata: "+error.message,"err");
-  toast("✓ Proje oluşturuldu: "+dgProjectName(park.name,label),"ok","📁");
+  toast(dgCf("✓ Proje oluşturuldu: ")+dgProjectName(park.name,label),"ok","📁");
   $("pLabel").value="";
  }
  loadProjects();
 }
 async function deleteProject(id){
  const{count}=await sb.from("measurements").select("*",{count:"exact",head:true}).eq("project_id",id);
- if(!confirm("Proje silinsin mi? Bağlı "+(count||0)+" ölçüm ve waypoint'ler de silinebilir.\n(Park kimliği silinmez — aynı parktaki diğer projelerin karşılaştırması devam eder.)"))return;
+ if(!confirm(dgTfs("Proje silinsin mi? Bağlı {n} ölçüm ve waypoint'ler de silinebilir.\n(Park kimliği silinmez — aynı parktaki diğer projelerin karşılaştırması devam eder.)",{n:(count||0)})))return;
  await sb.from("waypoints").delete().eq("project_id",id);
  await sb.from("projects").delete().eq("id",id);
  loadProjects();
@@ -395,7 +395,7 @@ if (!base.client_id) base.client_id = uuidv4();
         const geo=await reverseGeocode(GPS.latitude,GPS.longitude);
         base.country=geo?geo.country:"Bilinmiyor";
         base.city=geo?geo.city:"Bilinmiyor";
-        if(geo)toast("📍 Konum algılandı: "+esc(geo.city)+" / "+esc(geo.country),"info","🗺️");
+        if(geo)toast(dgCf("📍 Konum algılandı: ")+esc(geo.city)+" / "+esc(geo.country),"info","🗺️");
     }
 
     /* 🛰 KONUM DOĞRULAMASI (0007 · kullanıcı isteği 2026-09-26): yeni ölçüm ve
@@ -411,7 +411,7 @@ if (!base.client_id) base.client_id = uuidv4();
         const dec=await dgVerifyAtPark(pk.data,"measure");
         if(!dec.ok)return toast("⛔ "+esc(dec.message||("Konum doğrulanamadı ("+dec.reason+")")),"err","🛰");
         dgGeoStamp(base,dec);
-        if(dec.verified)toast("🛰 Konum doğrulandı: "+esc(pk.data.name)+
+        if(dec.verified)toast(dgCf("🛰 Konum doğrulandı: ")+esc(pk.data.name)+
           (dec.reason==="margin"?" (kenar payı)":"")+" · ±"+Math.round(dec.fix.acc)+" m","ok","🛰");
       }
     }

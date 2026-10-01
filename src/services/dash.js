@@ -13,7 +13,7 @@ async function loadRecords(){
 }
 // 2. Kayıt sil
 async function delRec(id){
- if(!confirm("Kayıt tamamen silinsin mi?"))return;
+ if(!confirm(dgCf("Kayıt tamamen silinsin mi?")))return;
  const{data}=await sb.from("measurements").select("photo_url").eq("id",id).single();
  if(data)await removePhoto(data.photo_url);
  await sb.from("measurements").delete().eq("id",id);loadRecords();loadDash();

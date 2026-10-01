@@ -72,7 +72,7 @@ async function approveMeas(id){
  * Yetki sunucuda da denetlenir: tg_geo_fence → is_admin() yoksa 42501. */
 async function dgGeoOverride(id){
  if(!PROFILE||(PROFILE.role!=="admin"&&PROFILE.role!=="owner"))return toast("Yetki yok.","err");
- if(!confirm("Bu kayıt için KONUM ÇİTİ İSTİSNASI işlensin mi?\nSorumluluk işleyende; satıra audit izi (geo_override_by) yazılır."))return;
+ if(!confirm(dgCf("Bu kayıt için KONUM ÇİTİ İSTİSNASI işlensin mi?\nSorumluluk işleyende; satıra audit izi (geo_override_by) yazılır.")))return;
  const{error}=await sb.from("measurements").update({geo_override_by:USER.id}).eq("id",id);
  if(error)return toast("Hata: "+error.message,"err");
  toast("🛰 Konum istisnası işlendi (audit izi satırda)","ok","🛰");
@@ -104,7 +104,7 @@ async function loadStorageStats(){
 
 async function cleanOrphans(){
  if(!PROFILE||(PROFILE.role!=="admin"&&PROFILE.role!=="owner"))return toast("Yetki yok.");
- if(!confirm("Hiçbir kayda bağlı olmayan depolama dosyaları silinsin mi?"))return;
+ if(!confirm(dgCf("Hiçbir kayda bağlı olmayan depolama dosyaları silinsin mi?")))return;
  const root=await sb.storage.from("dendro-photos").list("",{limit:100});
  const{data:meas}=await sb.from("measurements").select("photo_url");
  const urls=new Set((meas||[]).map(m=>m.photo_url).filter(Boolean));
@@ -124,7 +124,7 @@ async function cleanOrphans(){
 
 async function reGeocodeAll(){
  if(!PROFILE||(PROFILE.role!=="admin"&&PROFILE.role!=="owner"))return toast("Yetki yok.");
- if(!confirm("Tüm kayıtların şehir/ülke bilgisi GPS koordinatından yeniden algılansın mı? (Nominatim limiti ~1 istek/sn)"))return;
+ if(!confirm(dgCf("Tüm kayıtların şehir/ülke bilgisi GPS koordinatından yeniden algılansın mı? (Nominatim limiti ~1 istek/sn)")))return;
  const{data}=await sb.from("measurements").select("id,lat,lon,city,country");
  let done=0;
  for(const r of (data||[])){
@@ -141,7 +141,7 @@ async function reGeocodeAll(){
 }
 
 async function delMeas(id){
- if(!confirm("Kayıt silinsin mi?"))return;
+ if(!confirm(dgCf("Kayıt silinsin mi?")))return;
  const{data}=await sb.from("measurements").select("photo_url").eq("id",id).single();
  if(data)await removePhoto(data.photo_url);
  await sb.from("measurements").delete().eq("id",id);dgMarkLiveDirty();loadAdmin();

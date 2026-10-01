@@ -138,7 +138,7 @@ function dgParkCompareDenied(error){
     ? "Oturumu yenileyip (F5) tekrar deneyin. Hata sürerse Supabase → SQL Editor'da <span class='mono'>select * from v_park_compare limit 1;</span> sorgusunu kendi rolünüzle çalıştırın."
     : "Sayfayı yenileyin; sürerse yöneticiyle paylaşın."}</span> `+
   `<button class="btn sm" style="margin-left:6px" onclick="loadParkCompare()">↻ Yeniden dene</button></div>`;
- toast("Park karşılaştırması yüklenemedi: "+(code||msg),"warn","🌳");
+ toast(dgCf("Park karşılaştırması yüklenemedi: ")+(code||msg),"warn","🌳");
 }
 
 /* Şema eskiyse (migration 0004 uygulanmamış) karşılaştırma proje bazlı eski
@@ -193,7 +193,7 @@ async function parkReport(){
  if(error){
   /* Şema eski: park_id sütunu yok → ada göre dene */
   const fb=await sb.from("measurements").select("carbon_kg,dbh_cm,height_m,species,grp,point_id,projects(name,city)").eq("status","Onaylı").eq("projects.name",name).limit(5000);
-  if(fb.error)return toast("Rapor alınamadı: "+esc(fb.error.message),"err");
+  if(fb.error)return toast(dgCf("Rapor alınamadı: ")+esc(fb.error.message),"err");
   return dgRenderParkReport(name,fb.data||[],fb.count,null);
  }
  dgWarnIfTruncated(data,5000,name+" (park raporu)",count);
@@ -262,7 +262,7 @@ function fitRows(m,rows,label,icon){
 /* dgValidCoord (map.js): +null===0 tuzağı yüzünden NULL koordinatlı satır
  * (0,0)a "geçerli" diye geçip fitBounds'u Gine Körfezi'ne savuruyordu. */
 const pts=(rows||[]).filter(r=>dgValidCoord(r.lat,r.lon));
-if(!pts.length)return toast(label+" için onaylı nokta yok","warn",icon);
+if(!pts.length)return toast(label+" "+dgCf("için onaylı nokta yok"),"warn",icon);
 const b=L.latLngBounds(pts.map(r=>[+r.lat,+r.lon]));
 m.fitBounds(b.pad(0.25),{maxZoom:12});
 toast(label+" haritada","info",icon);

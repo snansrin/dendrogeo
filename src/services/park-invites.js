@@ -75,7 +75,7 @@ async function dgInvitesLoadMine(){
 async function dgInviteRespond(id,accept){
  if(typeof USER==="undefined"||!USER)return toast("Önce giriş yap.","err","📬");
  const{error}=await sb.rpc("dg_invite_respond",{p_invite:id,p_accept:!!accept});
- if(error){toast("İşlenemedi: "+(error.message||"").slice(0,90),"err","📬");return;}
+ if(error){toast(dgCf("İşlenemedi: ")+(error.message||"").slice(0,90),"err","📬");return;}
  toast(accept?"Davet kabul edildi — proje listene bak 🌳":"Davet reddedildi","ok","📬");
  if(accept){
   DG_INV.mine=null;                       // ortak park listesi tazelensin
@@ -136,7 +136,7 @@ async function dgInviteSend(){
  const email=(em&&em.value||"").trim();
  if(!email)return toast("E-posta gir.","err","👥");
  const{data,error}=await sb.rpc("dg_invite_send",{p_park:Number(sel.value),p_email:email,p_note:(nt&&nt.value)||null});
- if(error){toast("Davet gönderilemedi: "+(error.message||"").slice(0,110),"err","👥");return;}
+ if(error){toast(dgCf("Davet gönderilemedi: ")+(error.message||"").slice(0,110),"err","👥");return;}
  if(em)em.value="";if(nt)nt.value="";
  toast("Davet açıldı — arkadaşın giriş yaptığında 📬 kartını görecek ✉️","ok","👥");
  dgCollabRefresh();
@@ -146,7 +146,7 @@ async function dgInviteRevoke(target,kind){
  const sel=$("dgInvPark");
  if(!sel||!sel.value)return;
  const{error}=await sb.rpc("dg_invite_revoke",{p_park:Number(sel.value),p_target:target,p_kind:kind});
- if(error){toast("İşlenemedi: "+(error.message||"").slice(0,90),"err","👥");return;}
+ if(error){toast(dgCf("İşlenemedi: ")+(error.message||"").slice(0,90),"err","👥");return;}
  toast(kind==="collab"?"Ortak kaldırıldı":"Davet geri alındı","ok","👥");
  DG_INV.mine=null;
  dgCollabRefresh();

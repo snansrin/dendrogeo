@@ -35,3 +35,11 @@ const DG_ATTR_TEXT={
   sat:"Tiles \u00a9 Esri \u2014 Source: Esri, Maxar, GeoEye, Earthstar Geographics, and the GIS User Community",
   topo:"\u00a9 OpenTopoMap (CC-BY-SA) \u00b7 \u00a9 OpenStreetMap contributors (ODbL)"
 };
+/* i18n GÜVENLİ YARDIMCILAR (0035d): test vm'leri modülleri i18n.js OLMADAN
+ * yükleyebiliyor → typeof koruması şart. dgCf: dizeyi çevirir; dgTfs: {var}
+ * şablonunu çevirir (dgTf varsa onu kullanır, yoksa TR interpolasyon). */
+function dgCf(m){return typeof dgT==="function"?dgT(m):m;}
+function dgTfs(tpl,vars){
+ if(typeof dgTf==="function")return dgTf(tpl,vars);
+ let o=String(tpl);for(const k in vars)o=o.split("{"+k+"}").join(String(vars[k]));return o;
+}

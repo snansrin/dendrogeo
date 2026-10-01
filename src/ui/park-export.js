@@ -161,7 +161,7 @@ async function runLandCoverAnalysis(){
     try{
       await dgEnsureLulc();
     }catch(err){
-      return toast("Arazi örtüsü modülü yüklenemedi: "+((err&&err.message)||err),"err","🛰️");
+      return toast(dgCf("Arazi örtüsü modülü yüklenemedi: ")+((err&&err.message)||err),"err","🛰️");
     }
   }
 
@@ -223,7 +223,7 @@ async function runLandCoverAnalysis(){
         "<div style='font-size:.74rem;color:var(--red);margin-top:7px'>"+esc(err?.message||String(err))+"</div>"+
         "<div style='font-size:.68rem;color:var(--mut);margin-top:7px'>Geçersiz veya eksik sonuç rapora yazılmadı.</div>";
     }
-    toast("Arazi örtüsü analizi hatası: "+(err?.message||String(err)),"err","🗺️");
+    toast(dgCf("Arazi örtüsü analizi hatası: ")+(err?.message||String(err)),"err","🗺️");
   }).finally(()=>{
     window._dgLandCoverBusy=false;
     if(btn){
@@ -490,7 +490,7 @@ function downloadParkImage(){
     },"image/png");
   }catch(err){
     console.error("DENDROGEO · PNG:",err);
-    toast("PNG hatası: "+(err&&err.message||err),"err","🖼️");
+    toast(dgCf("PNG hatası: ")+(err&&err.message||err),"err","🖼️");
   }
 }
 

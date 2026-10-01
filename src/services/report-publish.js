@@ -320,9 +320,9 @@ async function dgPublishReport(parkId){
 
 async function dgPublishCancel(id){
  if(!dgPubAdmin())return toast("Yalnız yönetici iptal edebilir.","err","📄");
- if(!confirm("Bekleyen yayın isteği iptal edilsin mi?"))return;
+ if(!confirm(dgCf("Bekleyen yayın isteği iptal edilsin mi?")))return;
  const{error}=await sb.from("report_requests").update({status:"Vazgeçildi",cancelled_at:new Date().toISOString()}).eq("id",id);
- if(error)return toast("İptal edilemedi: "+esc(error.message),"err","📄");
+ if(error)return toast(dgCf("İptal edilemedi: ")+esc(error.message),"err","📄");
  toast("İstek iptal edildi.","ok","📄");
  await dgLoadPublishQueue();
 }
@@ -566,9 +566,9 @@ async function dgUserCancel(id){
  const row=DG_USER_PUB.requests.find(r=>String(r.id)===String(id));
  const own=!!(row&&String(row.requested_by||"")===String(mine));
  if(!own&&!dgPubAdmin())return toast("Yalnız kendi bekleyen isteğini iptal edebilirsin.","err","📄");
- if(!confirm("Bekleyen yayın isteği iptal edilsin mi?"))return;
+ if(!confirm(dgCf("Bekleyen yayın isteği iptal edilsin mi?")))return;
  const{error}=await sb.from("report_requests").update({status:"Vazgeçildi",cancelled_at:new Date().toISOString()}).eq("id",id);
- if(error)return toast("İptal edilemedi: "+esc(error.message),"err","📄");
+ if(error)return toast(dgCf("İptal edilemedi: ")+esc(error.message),"err","📄");
  toast("İstek iptal edildi.","ok","📄");
  await dgUserPubRefresh();
 }
@@ -618,7 +618,7 @@ async function dgReportShare(reportId,parkName){
  }catch(e){/* kullanıcı vazgeçti ya da API yok → pano yedeği */}
  try{
   await navigator.clipboard.writeText(url);
-  toast("🔗 Bağlantı kopyalandı: "+url,"ok","📄");
+  toast(dgCf("🔗 Bağlantı kopyalandı: ")+url,"ok","📄");
  }catch(e){window.prompt("Bağlantıyı kopyalayın (Ctrl+C):",url);}
 }
 

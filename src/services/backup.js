@@ -48,12 +48,12 @@ async function fullBackup(){
     localStorage.setItem("dg_lastBackup", new Date().toISOString());
     toast("✓ Yedek indirildi: "+name+" ("+meas.length+" ölçüm)","ok","💾");
   }catch(e){
-    toast("Yedek hatası: "+e.message,"err","❌");
+    toast(dgCf("Yedek hatası: ")+e.message,"err","❌");
   }
 }
 
 function checkBackupReminder(){
   const last=localStorage.getItem("dg_lastBackup");
   const days=last?(Date.now()-new Date(last).getTime())/86400000:999;
-  if(days>7) toast("⚠ Son tam yedeğin üzerinden "+Math.floor(days)+" gün geçti — bugünkü yedeği alın","warn","💾");
+  if(days>7) toast(dgTfs("⚠ Son tam yedeğin üzerinden {n} gün geçti — bugünkü yedeği alın",{n:Math.floor(days)}),"warn","💾");
 }

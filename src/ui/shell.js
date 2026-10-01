@@ -65,7 +65,7 @@ async function boot(){
         if(oauthErr){
             dgShowOAuthWait("⚠ Google girişi iptal edildi veya başarısız: "+oauthErr);
             initLanding();
-            setTimeout(()=>{toast("Google girişi tamamlanamadı: "+oauthErr,"err","🔵");},400);
+            setTimeout(()=>{toast(dgCf("Google girişi tamamlanamadı: ")+oauthErr,"err","🔵");},400);
             return;
         }
         dgShowOAuthWait();
@@ -177,3 +177,15 @@ if(v==="export")loadRequestOptions();
 }
 
 boot();
+
+/* 0035d: DİL DEĞİŞİNCE aktif görünümü YENİDEN ÇİZ — dil düğmesine basıldığında
+ * daha önce render edilmiş dinamik içerik (tablolar, waypoint satırı, park
+ * kartları) eski dilde kalıyordu. go() kendi yükleyicilerini çalıştırır;
+ * records/world go() içinde yeniden yüklenmediği için ayrıca çağrılır. */
+window.addEventListener("dg:lang",()=>{try{
+ if(typeof DG_CUR_VIEW==="undefined"||!DG_CUR_VIEW)return;
+ const sh=$("shell");if(!sh||sh.style.display==="none")return;
+ if(DG_CUR_VIEW==="records"&&typeof loadRecords==="function"){loadRecords();return;}
+ if(DG_CUR_VIEW==="world"&&typeof loadWorld==="function"){loadWorld();return;}
+ go(DG_CUR_VIEW);
+}catch(e){}});

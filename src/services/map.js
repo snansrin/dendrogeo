@@ -221,7 +221,7 @@ $("wpListTable").innerHTML=WP.length?WP.map(w=>`<tr class="${w.visited?'done':''
 async function deleteAllWaypoints(){
  const pid=+$("nProject").value;
  if(!pid)return toast("Proje seç");
- if(!confirm("⚠ Bu projedeki TÜM waypoint'ler kalıcı olarak silinsin mi? Yanlış liste ise sonra yeniden yükleyebilirsiniz."))return;
+ if(!confirm(dgCf("⚠ Bu projedeki TÜM waypoint'ler kalıcı olarak silinsin mi? Yanlış liste ise sonra yeniden yükleyebilirsiniz.")))return;
  const{error}=await sb.from("waypoints").delete().eq("project_id",pid);
  if(error)return toast("Hata: "+error.message,"err");
  navTarget=null;WP=[];
@@ -253,7 +253,7 @@ async function arriveWp(){
   if(!w)return toast("Aktif waypoint yok","warn","🎯");
   if(GPS){
     const d=hav(GPS.latitude,GPS.longitude,w.lat,w.lon);
-    if(d>50&&!confirm("Hedeften "+d.toFixed(0)+" m uzaktasın.\nYine de 'vardım' işaretlensin mi?"))return;
+    if(d>50&&!confirm(dgTfs("Hedeften {d} m uzaktasın.\nYine de 'vardım' işaretlensin mi?",{d:d.toFixed(0)})))return;
   }
   const{error}=await sb.from("waypoints").update({visited:true}).eq("id",w.id);
   if(error)return toast("Hata: "+error.message,"err","🎯");
@@ -266,7 +266,7 @@ async function arriveWp(){
    * kapısı (dgParkGate) doğru projeyi değerlendirsin. go("measure") kapıyı
    * zaten tazeliyor. (2026-09-24) */
   if(w.project_id&&$("mProject"))$("mProject").value=String(w.project_id);
-  toast("✓ Vardın: P"+w.wp_id+" → ölçüme geç","ok","🎯");
+  toast(dgTfs("✓ Vardın: P{id} → ölçüme geç",{id:w.wp_id}),"ok","🎯");
   go("measure");
 }
 window.arriveWp=arriveWp;

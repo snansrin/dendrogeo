@@ -9,6 +9,40 @@ Yeni sürüm yayımlama adımları: [`docs/surum-yayini.md`](docs/surum-yayini.m
 
 ## [Yayımlanmadı]
 
+### Düzeltildi — 0035d: EN modunda Türkçe KALMADI (dinamik katman) + kart silindi
+Kullanici denetimi (canli test): EN modunda waypoint satiri, Kayitlarim
+tablosu, toast'lar, confirm diyaloglari ve "Dosya secilmedi" hala Turkce'ydi.
+
+- **Kullanici karari:** "Bilimsel Standartlar — Bir Bakista" karti (0035b'de
+  Rol/Yetki tablosu yerine gelmisti) KOMPLE silindi — Bolum 01 yalniz uc direk.
+- **dgTf/dgTfs sablon cevirisi:** sayi gomulu dinamik dizeler tam eslesmeyle
+  cevrilemiyordu → {var} yer tutuculu sablonlar (canli harita durum satiri,
+  waypoint navInfo, adminTree ozetleri, park karsilastirma satirlari,
+  confirm'ler). Sozluk **698 EN anahtari**.
+- **confirm() diyaloglari (12 yer):** dgCf/dgTfs ile sarildi — native diyalog
+  DOM'dan gecmedigi icin observer ceviremiyordu. `confirm(` deseni korundu
+  (park-identity kilidi sag).
+- **Dil degisince yeniden cizim:** shell.js `dg:lang` kancasi aktif gorunumu
+  tazeler (records/world ayrica; digerleri go() ile) — dil degistirmeden once
+  cizilmis icerik eski dilde kalmiyordu.
+- **data-label ozniteligi** ceviriliyor (mobil tablolarin kolon adlari).
+- **"Dosya secilmedi":** tarayicinin kendi metni (sayfa diliyle degismez) →
+  file input'lar .dg-file sarmalinda gorunmez (inline style ile CSS'e
+  bagimlilasmadan), temali "Dosya sec" dugmesi + secilen dosya adi.
+- **E-posta atif hayaleti:** data-requests.js mail sablonu hala
+  "S. & N. (Version 1.0.0)" tasiyordu → DataCite ile birebir duzeltildi.
+- **Bekci (yeni):** test/landing-claims.test.mjs → "uygulamada cevrilmemis
+  Turkce toast/confirm KALMADI" (18 modulu tarar; ham/trim'li sozluk kontrolu;
+  dgTfs sablonlari; confirm sarmasi) + dg:lang kanca kilidi + mail atfi kilidi.
+  Bugun 0 kalan; gelecekte eklenen her Turkce dize CI kirmiziya dusurur.
+
+Bilerek TR: KVKK riza metni, kaynakca/atif/tez, DB veri degerleri (tur/park/
+yer adlari value olarak TR kalir — yalniz GORUNUM cevrilir), yonetici mail
+govdesi (yonetici yazismasi), disa aktarim CSV basliklari (bilimsel format).
+
+npm run check: 971 test → 969 pass / 0 fail / 2 skip.
+
+
 ### Düzeltildi — 0035c: kullanici geri bildirimi (standart karti silindi · EN modunda Turkce kalmadi)
 Kullanici denetimi: (1) "Bilimsel Standartlar" karti istenmiyor → SILINDI;
 (2) EN modunda hala Turkce gorunen ekranlar listelendi → tamami kapatildi.

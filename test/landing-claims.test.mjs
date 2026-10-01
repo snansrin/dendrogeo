@@ -260,4 +260,42 @@ describe('i18n katmanı sözleşmesi (0035)', () => {
   test('KVKK rıza metni bilinçli olarak çevrilmiyor (hukuki metin TR kalır)', () => {
     assert.ok(!i18n.includes('onaylıyorum. Rızamı dilediğim zaman'), 'rıza metni sözlüğe EKLENMEMELİ');
   });
+  test('⭐ uygulamada çevrilmemiş Türkçe toast/confirm KALMADI (0035d)', () => {
+    const dictSrc = rd('src/config/i18n.js');
+    const keys = new Set([...dictSrc.matchAll(/"((?:[^"\\]|\\.)+)":/g)]
+      .map((m) => m[1].replace(/\\"/g, '"').replace(/\\n/g, '\n')));
+    const TR = /[çğıöşüÇĞİÖŞÜ]/;
+    const files = ['src/services/admin.js', 'src/services/admin-tree.js', 'src/services/auth.js',
+      'src/services/backup.js', 'src/services/dash.js', 'src/services/data-requests.js',
+      'src/services/export.js', 'src/services/map.js', 'src/services/measure.js',
+      'src/services/park-invites.js', 'src/services/park-registry.js', 'src/services/report-publish.js',
+      'src/services/world.js', 'src/services/landcover.js', 'src/ui/park-export.js',
+      'src/ui/park-panel.js', 'src/ui/shell.js', 'src/ui/landing.js'];
+    const bad = [];
+    for (const f of files) {
+      const t = rd(f);
+      /* (1) düz toast("TR…") ve dgCf("TR…") → sözlükte olmalı (ham veya trim'li) */
+      for (const m of t.matchAll(/(?:toast|dgCf)\("((?:[^"\\]|\\.)+)"/g)) {
+        const s = m[1].replace(/\\"/g, '"').replace(/\\n/g, '\n');
+        if (TR.test(s) && !keys.has(s) && !keys.has(s.trim())) bad.push(f + ' → ' + s.slice(0, 60));
+      }
+      /* (2) dgTfs("TR şablon {var}") → şablon anahtarı sözlükte olmalı */
+      for (const m of t.matchAll(/dgTfs\("((?:[^"\\]|\\.)+)"/g)) {
+        const s = m[1].replace(/\\"/g, '"').replace(/\\n/g, '\n');
+        if (TR.test(s) && !keys.has(s)) bad.push(f + ' [şablon] → ' + s.slice(0, 60));
+      }
+      /* (3) confirm("TR…") YASAK — confirm(dgCf(…)) olmalı */
+      for (const m of t.matchAll(/confirm\("((?:[^"\\]|\\.)+)"/g)) {
+        if (TR.test(m[1])) bad.push(f + ' [confirm sarmalanmamış] → ' + m[1].slice(0, 60));
+      }
+    }
+    assert.deepEqual(bad, [], 'çevrilmemiş kullanıcı dizeleri:\n' + bad.join('\n'));
+  });
+  test('⭐ dil değişince aktif görünüm yeniden çiziliyor + e-posta atfı güncel', () => {
+    assert.match(rd('src/ui/shell.js'), /addEventListener\("dg:lang"/, 're-render kancası');
+    const dr = rd('src/services/data-requests.js');
+    assert.match(dr, /ŞİRİN, N\. & ŞİRİN, S\./, 'e-posta atfında doğru yazar sırası');
+    assert.match(dr, /Version 3\.0\.0/, 'e-posta atfında güncel sürüm');
+    assert.ok(!dr.includes('(Version 1.0.0)'), 'eski sürüm atfı kalmamalı');
+  });
 });

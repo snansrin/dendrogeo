@@ -413,7 +413,7 @@ async function loadAdminTree(){
   DG_TREE_ERR=(res.error&&DG_TREE_ROWS.length)?null:res.error;
 
   if(res.mode!=="embed"&&res.error&&DG_TREE_ROWS.length){
-    toast("⚠ Gömülü sorgu başarısız, yedek birleştirme kullanıldı: "+esc(res.error),"warn","🌳");
+    toast(dgCf("⚠ Gömülü sorgu başarısız, yedek birleştirme kullanıldı: ")+esc(res.error),"warn","🌳");
   }
 
   try{

@@ -228,12 +228,12 @@
 <script src="vendor/leaflet.markercluster-1.5.3.js" defer></script>
 <script src="vendor/supabase-js-2.116.0.js" defer></script>
 <script src="src/config/supabase.js?v=6b91ef6f" defer></script>
-<script src="src/config/constants.js?v=8811f86e" defer></script>
+<script src="src/config/constants.js?v=b1b56c74" defer></script>
 <script src="src/config/species.js?v=d5d302ab" defer></script>
 <!-- DİL KATMANI (0035): TR markup varsayılan; EN sözlüğü çalışma zamanında
      uygulanır (dgToggleLang). defer sırası önemli değil — DOMContentLoaded'da
      ya da hemen (hazırsa) çalışır. module-registry + CORE_ASSETS kaydı şart. -->
-<script src="src/config/i18n.js?v=95ce0bc0" defer></script>
+<script src="src/config/i18n.js?v=a12d9743" defer></script>
 <script src="src/utils/geo.js?v=3e796768" defer></script>
 <script src="src/utils/truncation.js?v=f43c76b3" defer></script>
 <!-- Faz 7: geotiff (317 KB) ve chart.js (208 KB) artık SENKRON yüklenmiyor;
@@ -245,22 +245,22 @@
 <script src="src/services/offline.js?v=1db110d2" defer></script>
 <!-- YÖNETİM ZİNCİRİ (Faz 6 — eski admin.js beş modüle bölündü) -->
 <script src="src/services/visit-stats.js?v=a9195dca" defer></script>
-<script src="src/services/data-requests.js?v=f9ffd837" defer></script>
+<script src="src/services/data-requests.js?v=25e31a9d" defer></script>
 <script src="src/services/user-admin.js?v=1830907c" defer></script>
-<script src="src/services/backup.js?v=6682edc0" defer></script>
-<script src="src/services/admin.js?v=3914b7e1" defer></script>
+<script src="src/services/backup.js?v=dbc9bfa5" defer></script>
+<script src="src/services/admin.js?v=c2ec496e" defer></script>
 <!-- YÖNETİM AĞACI (2026-09-24): park → proje → kullanıcı → ölçüm kademeli
      görünümü + sorgu hatası görünürlüğü. admin.js'ten SONRA yüklenir
      (approve/reject/del fonksiyonlarını çağırır). -->
-<script src="src/services/admin-tree.js?v=473cb30b" defer></script>
+<script src="src/services/admin-tree.js?v=5af4ea66" defer></script>
 <!-- BİLİMSEL RAPOR YAYINI (2026-09-27): site içinden yayın kuyruğu —
      📄 Yayınla → report_requests (0008) → rapor-yayin.yml → rapor/DGR-…/
      → kalıcı bağlantı + 📤 Paylaş. admin.js loadAdmin() bu modülü çağırır. -->
-<script src="src/services/report-publish.js?v=85a20f0e" defer></script>
-<script src="src/services/park-invites.js?v=d2974e7a" defer></script>
-<script src="src/services/world.js?v=93bfb924" defer></script>
-<script src="src/services/measure.js?v=819b1417" defer></script>
-<script src="src/services/map.js?v=de8f9e54" defer></script>
+<script src="src/services/report-publish.js?v=dbf5dd98" defer></script>
+<script src="src/services/park-invites.js?v=a2c13094" defer></script>
+<script src="src/services/world.js?v=ea4867e8" defer></script>
+<script src="src/services/measure.js?v=c35260d7" defer></script>
+<script src="src/services/map.js?v=9ff786da" defer></script>
 <!-- LULC ZİNCİRİ ARTIK TEMBEL (2026-09-25 · Faz 8): 8 dosya ilk yüklemede
      indirilmiyor. Yalnız "🌿 Yüzey Örtüsü Analizi"ne basan kullanıcı için
      src/utils/lazylibs.js → dgEnsureLulc() sırayla enjekte eder
@@ -278,11 +278,11 @@
      projeyi parka bağlar, ölçüm kapısını (park algılanmadan ölçüm yok) kurar.
      Sıra ÖNEMLİ: park-query'den sonra, grid-engine'den önce (grid panelindeki
      proje listesi bu modülden beslenir). -->
-<script src="src/services/park-registry.js?v=1b70a559" defer></script>
+<script src="src/services/park-registry.js?v=0352da55" defer></script>
 <script src="src/services/grid-engine.js?v=c3e27b01" defer></script>
 <script src="src/ui/park-panel.js?v=66573187" defer></script>
-<script src="src/ui/park-export.js?v=47f46346" defer></script>
-<script src="src/services/dash.js?v=e5c948aa" defer></script>
+<script src="src/ui/park-export.js?v=3e078dc3" defer></script>
+<script src="src/services/dash.js?v=b0fd90a3" defer></script>
 <link rel="stylesheet" href="css/style.css?v=3d51e8a4">
 <link rel="stylesheet" href="css/landing.css?v=91528a91">
 <link rel="stylesheet" href="css/park-panel.css?v=10b49293">
@@ -710,7 +710,7 @@
       <div><label class="lbl" for="mHeight">Boy (m)</label><input id="mHeight" type="number" step="0.1" oninput="liveCalc()" placeholder="örn: 7,2"></div>
      </div>
      <div class="lbl" style="margin-top:12px">📸 Fotoğraf (canlı çekim)</div>
-     <span class="dg-file btn sm ghost">📂 <span>Dosya seç</span><input type="file" id="mPhoto" aria-label="Fotoğraf (canlı çekim)" accept="image/*" capture="environment" onchange="checkPhoto(event)"></span><span class="dg-file-name mono" id="mPhotoName"></span>
+     <span class="dg-file btn sm ghost">📂 <span>Dosya seç</span><input type="file" id="mPhoto" aria-label="Fotoğraf (canlı çekim)" accept="image/*" capture="environment" onchange="checkPhoto(event)" style="position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:pointer"></span><span class="dg-file-name mono" id="mPhotoName"></span>
      <div id="photoCheck" class="alert info" style="display:none;margin-top:8px"></div>
      <div id="liveCalc" class="alert ok" style="display:none"></div>
      <button class="dg-png-btn primary" id="saveBtn" style="margin-top:14px" onclick="saveMeas()">💾 Hesapla ve Kaydet</button>
@@ -724,7 +724,7 @@
     <div class="card">
      <label class="lbl" for="nProject">Proje</label><select id="nProject" onchange="loadWaypoints()"></select>
      <div class="lbl" style="margin:12px 0 6px">Waypoints.csv Yükle (X,Y,id)</div>
-     <span class="dg-file btn sm ghost">📂 <span>Dosya seç</span><input type="file" id="nCsv" aria-label="Waypoints.csv dosyası seç (X,Y,id)" accept=".csv" onchange="dgFileName(event,'nCsvName')"></span><span class="dg-file-name mono" id="nCsvName"></span>
+     <span class="dg-file btn sm ghost">📂 <span>Dosya seç</span><input type="file" id="nCsv" aria-label="Waypoints.csv dosyası seç (X,Y,id)" accept=".csv" onchange="dgFileName(event,'nCsvName')" style="position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:pointer"></span><span class="dg-file-name mono" id="nCsvName"></span>
      <div style="display:flex;gap:8px;flex-wrap:wrap">
       <button class="btn blue sm" style="margin-top:8px" onclick="uploadWpCsv()">⬆ Waypoint Yükle</button>
       <button class="btn red sm" style="margin-top:8px" onclick="deleteAllWaypoints()">🗑 Listeyi Tamamen Sil</button>
@@ -1042,6 +1042,6 @@
 <script src="src/ui/state.js?v=5feada9b" defer></script>
 <script src="src/ui/toast.js?v=1a84b2f4" defer></script>
 <script src="src/ui/landing.js?v=f7ad4ccd" defer></script>
-<script src="src/ui/shell.js?v=90ddc741" defer></script>
+<script src="src/ui/shell.js?v=43834455" defer></script>
 </body>
 </html>
