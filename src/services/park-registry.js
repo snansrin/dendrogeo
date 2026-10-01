@@ -1317,7 +1317,7 @@ function dgRenderParkAdmin(projects,measurements){
     }).join("")||`<tr><td colspan=9>Henüz park kimliği yok — Canlı Harita → 🌳 Park Algılama ile oluştur.</td></tr>`)+
     `</tbody></table></div>`+
     (emptyRows.length&&!DG_PARK_ADMIN_SHOW_EMPTY
-      ? `<div class="dg-tree-meta" style="margin-top:8px">🫥 ${emptyRows.length} boş park (projesi/kaydı yok) gizlendi — yalnız sorgulanmışlar.</div>`:"")+
+      ? `<div class="dg-tree-meta" style="margin-top:8px">🫥 ${emptyRows.length} `+(typeof dgT==="function"?dgT("boş park (projesi/kaydı yok) gizlendi — yalnız sorgulanmışlar."):"boş park (projesi/kaydı yok) gizlendi — yalnız sorgulanmışlar.")+`</div>`:"")+
     `<div class="dg-parkadmin-note">🔀 = bu parkı seçtiğin hedefin içine taşır (projeler + ölçümler + adlar), kaynak kimlik silinir. `+
     `✏️ = adı düzeltir; proje adları otomatik yeniden kurulur ("park - etiket"). 🗑️ = yalnız yanlış kimlikse; bağ kopar, veri silinmez.</div>`;
 }

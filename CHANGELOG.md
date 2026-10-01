@@ -9,6 +9,42 @@ Yeni sürüm yayımlama adımları: [`docs/surum-yayini.md`](docs/surum-yayini.m
 
 ## [Yayımlanmadı]
 
+### Düzeltildi — 0035c: kullanici geri bildirimi (standart karti silindi · EN modunda Turkce kalmadi)
+Kullanici denetimi: (1) "Bilimsel Standartlar" karti istenmiyor → SILINDI;
+(2) EN modunda hala Turkce gorunen ekranlar listelendi → tamami kapatildi.
+
+- **Kart kaldirildi:** 0035b'de Rol/Yetki tablosu yerine gelen "🔬 Bilimsel
+  Standartlar — Bir Bakista" karti + .stdchip CSS'i + sozluk girdileri
+  kullanici karariyla komple silindi (Bolum 01 yalniz uc direk kartlari).
+- **dgTf sablon cevirisi (i18n.js):** sayi/degisken gomulu dinamik dizeler
+  tam eslesmeyle cevrilemiyordu → "{var}" yer tutuculu sablon fonksiyonu
+  eklendi; sozluk 457 EN anahtarina cikti.
+- **Kod sarmalari:** map.js (canli harita durum satiri + waypoint navInfo),
+  world.js (park karsilastirma satirlari, park rapor onizleme alerti,
+  Ibreli/Yaprakli yuzde satiri, pvTitle), admin-tree.js (4 ozet/meta satiri),
+  park-registry.js (bos park notu) → dgT/dgTf; yardimcilar dosya-bazinda
+  benzersiz (_tw/_ta — vm paylasimli baglaminda _t cakismasi yasandi, bekci
+  testi eklendi).
+- **Dosya inputlari:** "Dosya secilmedi" metni TARAYICI diline bagli, sayfa
+  diliyle degismiyordu → .dg-file sarmali (temali .btn ailesi, input gorunmez,
+  "Dosya sec" + secilen dosya adi); mPhoto ve nCsv donusturuldu
+  (checkPhoto/dgFileName adlari gosterir; id'ler ve akis AYNI).
+- **Sozluk genisletme (kullanicinin yapistirdigi ekranlarin TAMAMI):** park
+  kapisi (⛔ Park algilanmadi...), park degistir, paylasilan parklar notu,
+  ortak/yalniz olcum girisi rozetleri, Taleplerim/Tamamlandi/Isleme Alindi/
+  Reddedildi, 🏆 En Iyi, Tumunu ac/kapat, Latince/Adet/Karbon (kg)/Ort. Cap/
+  Ort. Boy, park kimlikleri yardim metni (🔀/✏️/🗑️), iPhone konum ipucu,
+  QGIS rehberi parcalari, tum placeholder/title'lar (orn: 52, orn: 7,2,
+  🔍 Ara..., park proje kullanici tur nokta...), Senkron bekleyen olcumler.
+- **Bilerek TR kalanlar (belgelendi):** KVKK acik riza metni (hukuki),
+  kaynakca/atif/tez kunyeleri (akademik teamul), tur adlarinin DB degerleri
+  (value kanonik TR — yalniz GORUNEN metin cevrilir), park/yer adlari (veri).
+- **Bekci:** landing-claims.test.mjs += dgTf sozlesmesi + sahipsiz _t(
+  regresyon kilidi + yeni cekirdek ceviri kilitleri.
+
+npm run check: 968 test → 966 pass / 0 fail / 2 skip.
+
+
 ### Eklendi/Düzeltildi — 0035: dis denetim paketi + tam EN/TR dil katmani (2026-10-01)
 Dis denetim raporu (b82cb7e tabanli) + kullanici kararlari (P0+P1+P2+bekciler
 HEPSI · DBH siniri 400 · hero bandi kalkar §04 kalir · premium-landing-motion

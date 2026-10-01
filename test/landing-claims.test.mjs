@@ -243,6 +243,20 @@ describe('i18n katmanı sözleşmesi (0035)', () => {
     assert.match(index, /<script src="src\/config\/i18n\.js\?v=[0-9a-f]{8}" defer>/);
     assert.match(rd('sw.js'), /'\/src\/config\/i18n\.js'/);
   });
+  test('⭐ dinamik şablonlar dgTf/dgT ile çevriliyor (0035c — EN modunda Türkçe kalmaz)', () => {
+    assert.match(i18n, /function dgTf\(/, 'dgTf şablon çevirici tanımlı');
+    for (const s of ['"✓ {n} onaylı kayıt yüklendi', '"📌 <b>{a}</b> waypoint kayıtlı',
+      '"🌲 İbreli":"🌲 Conifer"', '"🍃 Yapraklı":"🍃 Broadleaf"', '"Dosya seç":"Choose file"',
+      '"🏆 En İyi":"🏆 Best"', '"Taleplerim":"My Requests"'])
+      assert.ok(i18n.includes(s), 'eksik şablon/çeviri: ' + s);
+    /* Regresyon: 0035c'de yeniden adlandırma bir `_t(` kullanımını kaçırmıştı
+     * → vm'de ReferenceError. Yardımcı adları dosyaya özgü ve TAM olmalı. */
+    const w = rd('src/services/world.js'), a = rd('src/services/admin-tree.js');
+    assert.match(w, /const _tw=/, 'world.js kendi yardımcısını tanımlar');
+    assert.ok(!w.includes('${_t(') && !w.includes('(_t(') && !w.includes('+_t('), 'world.js içinde sahipsiz _t( kalmamalı');
+    assert.match(a, /const _ta=/, 'admin-tree.js kendi yardımcısını tanımlar');
+    assert.ok(!a.includes('${_t(') && !a.includes('(_t(') && !a.includes('+_t('), 'admin-tree.js içinde sahipsiz _t( kalmamalı');
+  });
   test('KVKK rıza metni bilinçli olarak çevrilmiyor (hukuki metin TR kalır)', () => {
     assert.ok(!i18n.includes('onaylıyorum. Rızamı dilediğim zaman'), 'rıza metni sözlüğe EKLENMEMELİ');
   });

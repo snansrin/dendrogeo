@@ -20,6 +20,7 @@ async function reverseGeocode(lat,lon){
 function loadImg(file){return new Promise((res,rej)=>{const u=URL.createObjectURL(file);const i=new Image();i.onload=()=>res({i,u});i.onerror=rej;i.src=u;});}
 async function checkPhoto(e){
  const f=e.target.files[0],box=$("photoCheck");
+ {const fn=$("mPhotoName");if(fn)fn.textContent=f?f.name:"";}
  if(!f){photoOk=false;box.style.display="none";return;}
  if(!f.type.startsWith("image/")){photoOk=false;box.className="alert err";box.style.display="block";box.innerHTML="⚠ Yalnızca görsel dosyası yükleyin.";return;}
  box.style.display="block";box.className="alert info";box.innerHTML="⏳ Fotoğraf denetleniyor…";

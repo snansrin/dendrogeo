@@ -1,4 +1,6 @@
 "use strict";
+/* 0035c: EN modu için kısa çeviri yardımcısı (i18n yoksa TR döner). */
+const _tw=(s)=>(typeof dgT==="function"?dgT(s):s);
 /* ============ PARK KARŞILAŞTIRMA + RAPOR ============
  * 2026-09-24 DEĞİŞİKLİK (kullanıcı isteği): bu liste artık PROJELERE VERİLEN
  * ADLARI değil, ALGILANAN PARKLARI gösterir. 3 kişi Göksu Parkı'nda çalıştıysa
@@ -76,7 +78,7 @@ function dgParkRowHTML(p,i,max){
    <div class="dg-cmp-rank">${i+1}</div>
    <div class="dg-cmp-main">
     <div class="dg-cmp-name">🌳 ${esc(p.park_name)} ${i===0?'<span class="badge on">🏆 En İyi</span>':""}</div>
-    <div class="dg-cmp-meta">${esc(p.city||"—")} · 👥 ${p.contributors||0} kişi · 📁 ${p.projects||0} proje · ${n} kayıt${p.species_n?` · ${p.species_n} tür`:""} · ort. çap ${(Number(p.avg_dbh)||0).toFixed(1)} cm · ort. boy ${(Number(p.avg_height)||0).toFixed(1)} m${area>0?` · ${dgFmtHa(area)}`:""}</div>
+    <div class="dg-cmp-meta">${esc(p.city||"—")} · 👥 ${p.contributors||0} ${_tw("kişi")} · 📁 ${p.projects||0} ${_tw("proje")} · ${n} ${_tw("kayıt")}${p.species_n?` · ${p.species_n} ${_tw("tür")}`:""} · ${_tw("ort. çap")} ${(Number(p.avg_dbh)||0).toFixed(1)} cm · ${_tw("ort. boy")} ${(Number(p.avg_height)||0).toFixed(1)} m${area>0?` · ${dgFmtHa(area)}`:""}</div>
    </div>
    <div class="dg-cmp-ton">${(kg/1000).toFixed(2)} t${perHa!==null?`<span class="dg-cmp-ha">${perHa.toFixed(2)} t/ha</span>`:""}</div>
    <div class="dg-cmp-bar"><div style="width:${max>0?(kg/max*100).toFixed(0):0}%"></div></div>
@@ -162,7 +164,7 @@ async function loadParkCompareLegacy(el){
    <div class="mono" style="width:26px;height:26px;border-radius:50%;background:${i===0?"var(--green)":"var(--line)"};color:${i===0?"#fff":"var(--mut)"};display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.75rem;flex:0 0 auto">${i+1}</div>
    <div style="flex:1;min-width:0">
     <div style="font-size:.85rem;font-weight:700">${esc(p.name)} ${i===0?'<span class="badge on">🏆 En İyi</span>':""}</div>
-    <div style="font-size:.7rem;color:var(--mut)">${esc(p.city)} · ${p.n} kayıt · ort. çap ${(p.dbh/p.n).toFixed(1)} cm · ort. boy ${(p.h/p.n).toFixed(1)} m</div>
+    <div style="font-size:.7rem;color:var(--mut)">${esc(p.city)} · ${p.n} ${_tw("kayıt")} · ${_tw("ort. çap")} ${(p.dbh/p.n).toFixed(1)} cm · ${_tw("ort. boy")} ${(p.h/p.n).toFixed(1)} m</div>
    </div>
    <div style="width:120px;background:var(--line);border-radius:4px;height:8px;overflow:hidden;flex:0 0 auto"><div style="height:100%;width:${(p.c/max*100).toFixed(0)}%;background:var(--green)"></div></div>
    <div class="mono" style="width:70px;text-align:right;font-weight:600;flex:0 0 auto">${(p.c/1000).toFixed(2)} t</div>
@@ -214,14 +216,14 @@ function dgRenderParkReport(name,rows,count,row){
  const area=row&&Number(row.area_m2)>0?Number(row.area_m2):null;
  const perHa=area?(c/1000)/(area/10000):null;
  const html=`
-  <div class="alert info" style="margin-bottom:12px">🌳 <b>${esc(name)}</b> · 👥 ${row&&row.contributors?row.contributors+" kişi":projNames.length+" proje"} · 📁 ${projNames.length} proje · ${count!=null?count+" onaylı kayıt (raporda "+n+")":n+" kayıt"}</div>
+  <div class="alert info" style="margin-bottom:12px">🌳 <b>${esc(name)}</b> · 👥 ${row&&row.contributors?row.contributors+" "+_tw("kişi"):projNames.length+" "+_tw("proje")} · 📁 ${projNames.length} ${_tw("proje")} · ${count!=null?count+" "+_tw("onaylı kayıt")+" ("+_tw("raporda")+" "+n+")":n+" "+_tw("kayıt")}</div>
   <div class="grid g4" style="margin-bottom:14px">
    <div class="stat" style="padding:12px"><div class="lbl">Kayıt</div><div class="val" style="font-size:1.1rem">${n}</div></div>
    <div class="stat" style="padding:12px"><div class="lbl">Karbon</div><div class="val" style="font-size:1.1rem">${(c/1000).toFixed(2)} t</div></div>
    <div class="stat" style="padding:12px"><div class="lbl">Ort. Çap</div><div class="val" style="font-size:1.1rem">${dbh} cm</div></div>
    <div class="stat" style="padding:12px"><div class="lbl">Ort. Boy</div><div class="val" style="font-size:1.1rem">${h} m</div></div>
   </div>
-  <div style="font-size:.78rem;color:var(--mut);margin-bottom:12px">🌲 İbreli %${pct(ib)} · 🍃 Yapraklı %${pct(ya)} · Diğer %${pct(n-ib-ya)}${area?` · alan ${dgFmtHa(area)}${perHa!==null?` · <b>${perHa.toFixed(2)} t/ha</b>`:""}`:""} · ${new Date().toLocaleDateString("tr-TR")}</div>
+  <div style="font-size:.78rem;color:var(--mut);margin-bottom:12px">${_tw("🌲 İbreli")} %${pct(ib)} · ${_tw("🍃 Yapraklı")} %${pct(ya)} · ${_tw("Diğer")} %${pct(n-ib-ya)}${area?` · ${_tw("alan")} ${dgFmtHa(area)}${perHa!==null?` · <b>${perHa.toFixed(2)} t/ha</b>`:""}`:""} · ${new Date().toLocaleDateString("tr-TR")}</div>
   ${projNames.length>1?`<div style="font-size:.74rem;color:var(--mut);margin-bottom:10px">Bu parkta birleşen projeler: ${projNames.map(esc).join(" · ")}</div>`:""}
   <table><thead><tr><th scope='col'>Tür</th><th scope='col'>Latince</th><th scope='col'>Grup</th><th scope='col'>Adet</th><th scope='col'>Karbon (kg)</th><th scope='col'>Ort. Çap</th><th scope='col'>Ort. Boy</th></tr></thead><tbody>
   ${spRows.map(([sp,v])=>`<tr><td>${sp}</td><td style="font-style:italic">${LATIN[sp]&&LATIN[sp]!=="—"?LATIN[sp]:"—"}</td><td>${v.grp}</td><td>${v.n}</td><td>${v.c.toFixed(1)}</td><td>${(v.dbh/v.n).toFixed(1)}</td><td>${(v.h/v.n).toFixed(1)}</td></tr>`).join("")}
@@ -238,7 +240,7 @@ function dgRenderParkReport(name,rows,count,row){
   "ORT_CAP_CM,"+dbh,"ORT_BOY_M,"+h,"IBRELI_%,"+pct(ib),"YAPRAKLI_%,"+pct(ya),
   "TUR,LATIN,GRUP,ADET,KARBON_KG,ORT_CAP_CM,ORT_BOY_M"]
   .concat(spRows.map(([sp,v])=>[sp,LATIN[sp]||"—",v.grp,v.n,v.c.toFixed(1),(v.dbh/v.n).toFixed(1),(v.h/v.n).toFixed(1)].join(","))).join("\n")+"\n";
- $("pvTitle").textContent="📄 "+name+" — Park Raporu";
+ $("pvTitle").textContent="📄 "+name+" — "+_tw("Park Raporu");
  $("pvBody").innerHTML=html;
  $("pvDownload").onclick=()=>dl(csv,name.replace(/\s+/g,"_")+"_rapor.csv");
  $("previewModal").classList.add("on");

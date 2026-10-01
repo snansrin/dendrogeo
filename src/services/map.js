@@ -171,8 +171,9 @@ async function loadLiveMap(){
    * olmasın): noktalar tek tek çizilir, balon yerine nokta görür. */
   const deg=map&&map._clusterDegraded;
   el.className=deg?"alert warn":"alert ok";
-  el.textContent=(deg?"⚠ ":"✓ ")+`${n} onaylı kayıt yüklendi · ${new Date().toLocaleTimeString("tr-TR")} · `+
-   (deg?"kümeleme eklentisi yüklenemedi, noktalar tek tek çizildi. ":"noktaya dokun → bilgi + fotoğraf.");
+  /* 0035c: durum satırı dgTf şablonuyla çevrilir (EN modunda Türkçe kalmaz). */
+  const _tf=(typeof dgTf==="function"?dgTf:(_t,v)=>_t.replace(/\{(\w+)\}/g,(m,k)=>v[k]));
+  el.textContent=_tf(deg?"⚠ {n} onaylı kayıt yüklendi · {t} · kümeleme eklentisi yüklenemedi, noktalar tek tek çizildi.":"✓ {n} onaylı kayıt yüklendi · {t} · noktaya dokun → bilgi + fotoğraf.",{n:n,t:new Date().toLocaleTimeString("tr-TR")});
   setTimeout(()=>el.style.display="none",6000);
   renderAnalysis(rows,"liveAnalysis");
  });
@@ -211,7 +212,7 @@ async function loadWaypoints(){
  drawNav();
  $("dWp").textContent=WP.length;$("dVisit").textContent=WP.filter(w=>w.visited).length;
  const done=WP.filter(w=>w.visited).length;
- $("navInfo").innerHTML=`📌 <b>${WP.length}</b> waypoint kayıtlı · <b>${done}</b> yapıldı · <b>${WP.length-done}</b> bekliyor. Liste kalıcıdır.`;
+ $("navInfo").innerHTML=(typeof dgTf==="function"?dgTf:(_t,v)=>_t.replace(/\{(\w+)\}/g,(m,k)=>v[k]))("📌 <b>{a}</b> waypoint kayıtlı · <b>{b}</b> yapıldı · <b>{c}</b> bekliyor. Liste kalıcıdır.",{a:WP.length,b:done,c:WP.length-done});
  /* 0027 · data-label: ≤640px'te dg-cards kart düzeni "ETİKET: değer" basar
    (waypoint tablosu eskiden sınıfsızdı → mobilde kapsayıcı içinde sağa-sola
    kayıyordu; kullanıcı bildirimi). */

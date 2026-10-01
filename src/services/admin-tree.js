@@ -1,4 +1,6 @@
 "use strict";
+/* 0035c: EN modu çeviri yardımcısı. */
+const _ta=(s)=>(typeof dgT==="function"?dgT(s):s);
 /* DendroGeo · services/admin-tree.js — PARK → PROJE → KULLANICI → ÖLÇÜM AĞACI
  *
  * NEDEN VAR (kullanıcı isteği 2026-09-24):
@@ -251,7 +253,7 @@ function dgTreeProjectHTML(P,J){
   return `<details class="dg-tree-proj"${open} ontoggle="dgTreeToggle('${J.key}',this.open)">`+
     `<summary>📁 <b>${esc(J.name)}</b>`+
       dgBekRozet(J.beklemede)+
-      `<span class="dg-tree-meta">${J.users.length} kullanıcı · ${J.n} kayıt · ${dgTon(J.c)}</span>`+
+      `<span class="dg-tree-meta">${J.users.length} ${_ta("kullanıcı")} · ${J.n} ${_ta("kayıt")} · ${dgTon(J.c)}</span>`+
     `</summary>`+
     `<div class="dg-tree-body">${J.users.map(U=>dgTreeUserHTML(U)).join("")}</div>`+
   `</details>`;
@@ -266,7 +268,7 @@ function dgTreeParkHTML(P){
   return `<details class="dg-tree-park${P.pending?" pending":""}"${open} ontoggle="dgTreeToggle('${P.key}',this.open)">`+
     `<summary>${P.pending?"⚠":"🌳"} <b>${esc(P.name)}</b>`+
       dgBekRozet(P.beklemede)+
-      `<span class="dg-tree-meta">${esc(P.city||"")}${ha} · ${projN} proje · ${userN} kullanıcı · ${P.n} kayıt · ${dgTon(P.c)}${perHa}</span>`+
+      `<span class="dg-tree-meta">${esc(P.city||"")}${ha} · ${projN} ${_ta("proje")} · ${userN} ${_ta("kullanıcı")} · ${P.n} ${_ta("kayıt")} · ${dgTon(P.c)}${perHa}</span>`+
       (P.pending?`<button class="btn sm ghost dg-tree-act" onclick="dgTreePendingScan(event)">🌳 Park Algıla</button>`:"")+
     `</summary>`+
     `<div class="dg-tree-body">${P.projects.map(J=>dgTreeProjectHTML(P,J)).join("")}</div>`+
@@ -297,7 +299,7 @@ function dgRenderPendingSummary(){
   box.style.display="block";
   box.className="alert warn";
   box.innerHTML=
-    `<b>⏳ ${wait} kayıt onay bekliyor</b> · 🌳 ${parkN} park · 📁 ${projN} proje · 👤 ${userN} kullanıcı`+
+    `<b>⏳ ${wait} ${_ta("kayıt onay bekliyor")}</b> · 🌳 ${parkN} ${_ta("park")} · 📁 ${projN} ${_ta("proje")} · 👤 ${userN} ${_ta("kullanıcı")}`+
     `<div style="margin-top:8px;display:flex;gap:8px;flex-wrap:wrap">`+
       `<button class="btn sm amber" onclick="dgTreeOnlyPending()">🔴 Sadece bekleyenler</button>`+
       `<button class="btn sm ghost" onclick="dgTreeOpenPending()">Bekleyen düğümleri aç</button>`+
@@ -378,7 +380,7 @@ function dgTreeRender(tree){
   const carb=tree.reduce((a,P)=>a+P.c,0);
 
   el.innerHTML=
-    `<div class="dg-tree-sum mono">🌳 ${parkN} park · 📁 ${projN} proje · 📋 ${recN} kayıt · ⚖ ${dgTon(carb)}`+
+    `<div class="dg-tree-sum mono">🌳 ${parkN} ${_ta("park")} · 📁 ${projN} ${_ta("proje")} · 📋 ${recN} ${_ta("kayıt")} · ⚖ ${dgTon(carb)}`+
     ` <button class="btn sm ghost dg-tree-act" onclick="dgTreeExpand(true)">Tümünü aç</button>`+
     ` <button class="btn sm ghost dg-tree-act" onclick="dgTreeExpand(false)">Tümünü kapat</button></div>`+
     tree.map(dgTreeParkHTML).join("");

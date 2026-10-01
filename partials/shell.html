@@ -93,7 +93,7 @@
       <div><label class="lbl" for="mHeight">Boy (m)</label><input id="mHeight" type="number" step="0.1" oninput="liveCalc()" placeholder="örn: 7,2"></div>
      </div>
      <div class="lbl" style="margin-top:12px">📸 Fotoğraf (canlı çekim)</div>
-     <input type="file" id="mPhoto" aria-label="Fotoğraf (canlı çekim)" accept="image/*" capture="environment" onchange="checkPhoto(event)">
+     <span class="dg-file btn sm ghost">📂 <span>Dosya seç</span><input type="file" id="mPhoto" aria-label="Fotoğraf (canlı çekim)" accept="image/*" capture="environment" onchange="checkPhoto(event)"></span><span class="dg-file-name mono" id="mPhotoName"></span>
      <div id="photoCheck" class="alert info" style="display:none;margin-top:8px"></div>
      <div id="liveCalc" class="alert ok" style="display:none"></div>
      <button class="dg-png-btn primary" id="saveBtn" style="margin-top:14px" onclick="saveMeas()">💾 Hesapla ve Kaydet</button>
@@ -107,7 +107,7 @@
     <div class="card">
      <label class="lbl" for="nProject">Proje</label><select id="nProject" onchange="loadWaypoints()"></select>
      <div class="lbl" style="margin:12px 0 6px">Waypoints.csv Yükle (X,Y,id)</div>
-     <input type="file" id="nCsv" aria-label="Waypoints.csv dosyası seç (X,Y,id)" accept=".csv">
+     <span class="dg-file btn sm ghost">📂 <span>Dosya seç</span><input type="file" id="nCsv" aria-label="Waypoints.csv dosyası seç (X,Y,id)" accept=".csv" onchange="dgFileName(event,'nCsvName')"></span><span class="dg-file-name mono" id="nCsvName"></span>
      <div style="display:flex;gap:8px;flex-wrap:wrap">
       <button class="btn blue sm" style="margin-top:8px" onclick="uploadWpCsv()">⬆ Waypoint Yükle</button>
       <button class="btn red sm" style="margin-top:8px" onclick="deleteAllWaypoints()">🗑 Listeyi Tamamen Sil</button>

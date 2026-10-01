@@ -22,3 +22,9 @@ let DG_LIVE_DIRTY=false;
 function dgKeyActivate(ev,el){
  if(ev.key==="Enter"||ev.key===" "||ev.key==="Spacebar"){ev.preventDefault();if(el&&el.click)el.click();}
 }
+
+/* DOSYA ADI GÖSTERİMİ (0035c): .dg-file sarmalındaki seçili dosya adı.
+ * Native "Dosya seçilmedi" metni tarayıcı dilinde kaldığı için gerekliydi. */
+function dgFileName(ev,id){
+ const s=$(id); if(s)s.textContent=(ev.target.files&&ev.target.files[0])?ev.target.files[0].name:"";
+}

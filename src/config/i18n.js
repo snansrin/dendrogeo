@@ -245,17 +245,6 @@ const DG_I18N_EN={
 "yayınlanır: 📄 Yayınla → istek kuyruğa yazılır → yayın işi birkaç dakika içinde raporu üretir → kalıcı bağlantı, 🔗 Aç ve 📤 Paylaş burada belirir.":": 📄 Publish → the request is queued → the publish job produces the report within minutes → the permanent link, 🔗 Open and 📤 Share appear here.",
 "KVKK Aydınlatma Metni":"KVKK Disclosure Text (TR)",
 
-/* === 0035b: Bilimsel Standartlar kartı (Rol/Yetki tablosunun yerine) === */
-"Bilimsel Standartlar — Bir Bakışta":"Scientific Standards — At a Glance",
-"🌡 Chave et al. (2014) allometrisi":"🌡 Chave et al. (2014) allometry",
-"🪵 22/50 türde kaynaklı ρ":"🪵 Sourced ρ for 22/50 species",
-"⚖️ Kök 0,26 · Karbon 0,47 (beyanlı sabit)":"⚖️ Root 0.26 · Carbon 0.47 (declared constants)",
-"🛰 10 m ESA WorldCover 2021 v200":"🛰 10 m ESA WorldCover 2021 v200",
-"📊 Monte Carlo %95 GA (N=1000 · CV=0,22)":"📊 Monte Carlo 95% CI (N=1000 · CV=0.22)",
-"🔐 Admin onayı + RLS (sunucu tarafı)":"🔐 Admin approval + RLS (server-side)",
-"📍 Park konum çiti (sunucu trigger'ı)":"📍 Park geofence (server-side trigger)",
-"📜 CC BY-NC 4.0 · Zenodo DOI":"📜 CC BY-NC 4.0 · Zenodo DOI",
-"Ziyaretçi yalnız onaylı veriyi görür · kullanıcı ölçer · denetçi onaylar · kurucu yönetir.":"Visitors see only approved data · users measure · reviewers approve · the founder governs.",
 /* === 0035b: TÜRLER ve GRUPLAR (kullanıcı isteği: "ağaçların adı da İngilizce
    olsun"). BÜYÜK HARF veri değerleridir (DB'de kanonik TR ad saklanır — value
    DEĞİŞMEZ, yalnız GÖRÜNEN metin çevrilir). Büyük harf EN çeviri bilinçli:
@@ -283,6 +272,47 @@ const DG_I18N_EN={
 "Karbon":"Carbon","Hacim":"Volume",
 "Kuzey Kıbrıs":"Northern Cyprus","Gazimağusa":"Famagusta",
 
+/* === 0035c: uygulama içi DİNAMİK ekranlar — kullanıcı denetimi: "EN modunda
+   hiçbir Türkçe kalmayacak". Sayı gömülü şablonlar dgTf ile, tek parça metin
+   düğümleri tam eşleşmeyle çevrilir. === */
+"✓ {n} onaylı kayıt yüklendi · {t} · noktaya dokun → bilgi + fotoğraf.":"✓ {n} approved records loaded · {t} · tap a point → info + photo.",
+"⚠ {n} onaylı kayıt yüklendi · {t} · kümeleme eklentisi yüklenemedi, noktalar tek tek çizildi.":"⚠ {n} approved records loaded · {t} · clustering plugin failed to load, points drawn individually.",
+"📌 <b>{a}</b> waypoint kayıtlı · <b>{b}</b> yapıldı · <b>{c}</b> bekliyor. Liste kalıcıdır.":"📌 <b>{a}</b> waypoints saved · <b>{b}</b> done · <b>{c}</b> pending. The list is persistent.",
+"boş park (projesi/kaydı yok) gizlendi — yalnız sorgulanmışlar.":"empty park(s) (no projects/records) hidden — only queried ones shown.",
+"kişi":"contributor(s)","proje":"project(s)","kayıt":"record(s)","tür":"species","kullanıcı":"user(s)","park":"park(s)",
+"ort. çap":"avg. DBH","ort. boy":"avg. height","alan":"area","raporda":"in report",
+"onaylı kayıt":"approved records","kayıt onay bekliyor":"record(s) awaiting approval",
+"🏆 En İyi":"🏆 Best","🌲 İbreli":"🌲 Conifer","🍃 Yapraklı":"🍃 Broadleaf","Latince":"Latin","Adet":"Count","Karbon (kg)":"Carbon (kg)",
+"Ort. Çap":"Avg. DBH","Ort. Boy":"Avg. Height",
+"· proje:":"· project:","Parkı değiştir":"Change park",
+"Bu parktaki tüm kullanıcıların verileri karşılaştırmada tek satırda toplanır.":"Data from all users working in this park is aggregated into a single comparison row.",
+"⛔ Park algılanmadı — proje oluşturulamaz.":"⛔ Park not detected — a project cannot be created.",
+"Önce Canlı Harita → Park Algılama ekranında parkın içine tıkla. OSM'de park yoksa \"elle oluştur\" ile kimlik açabilirsin.":"First click inside the park on the Live Map → Park Detection screen. If the park is not in OSM, create an identity via \"create manually\".",
+"🌳 Park Algılama Ekranına Git":"🌳 Go to Park Detection Screen",
+"ortak":"shared","yalnız ölçüm girişi":"measurement entry only",
+"🌳 Paylaşılan parkların:":"🌳 Parks shared with you:",
+"— ölçüm sekmesindeki proje listesinde görünüyorlar; kayıtların":"— they appear in the project list on the measurement tab; your records are entered",
+"kendi adınla":"under your own name,",
+"girer, park sahibi onaylar.":"and the park owner approves.",
+"Taleplerim":"My Requests","Tamamlandı":"Completed","İşleme Alındı":"Processing","Reddedildi":"Declined",
+"Tümünü aç":"Expand all","Tümünü kapat":"Collapse all",
+"🔀 = bu parkı seçtiğin hedefin içine taşır (projeler + ölçümler + adlar), kaynak kimlik silinir. ✏️ = adı düzeltir; proje adları otomatik yeniden kurulur (\"park - etiket\"). 🗑️ = yalnız yanlış kimlikse; bağ kopar, veri silinmez.":"🔀 = moves this park into the target you picked (projects + measurements + names); the source identity is deleted. ✏️ = fixes the name; project names are recomposed automatically (\"park - label\"). 🗑️ = only for wrong identities; the link is removed, data is not deleted.",
+"📄 Rapor Oluştur":"📄 Generate Report",
+/* placeholder / title öznitelikleri */
+"örn: 52":"e.g. 52","örn: 7,2":"e.g. 7.2","örn. deneme":"e.g. trial",
+"🔍 Ara...":"🔍 Search...","park, proje, kullanıcı, tür, nokta…":"park, project, user, species, point…",
+"İsteğe dair kısa not":"Short note about the request",
+"🔍 E‑posta veya ad ara...":"🔍 Search e-mail or name...",
+"Senkron bekleyen ölçümler":"Measurements awaiting sync",
+"Onaylı kayıtları sunucudan yeniden çek":"Re-fetch approved records from the server",
+/* dosya seç (yerel .dg-file sarmalı — tarayıcının 'Dosya seçilmedi' metni görünmez) */
+"Dosya seç":"Choose file",
+
+/* 0035c ikinci tur: gözden kaçan statik dizeler */
+"Ayarlar → Gizlilik ve Güvenlik → Konum Servisleri →Safari Siteleri→ \"Uygulamayı Kullanırken\" seçin, sayfayı yenileyin.":"Settings → Privacy & Security → Location Services → Safari Websites → choose \"While Using the App\", then refresh the page.",
+"CSV'yi içe aktar:":"Import the CSV:",
+"— 🔀 ile birleştir. OSM'de adı olmayan park \"İsimsiz Park\" gelir, ✏️ ile ad ver (proje adları otomatik yeniden kurulur).":"— merge with 🔀. Parks without a name in OSM appear as \"Unnamed Park\"; name them with ✏️ (project names are recomposed automatically).",
+
 /* sayfa başlığı */
 "DendroGeo — Küresel Ağaç Envanteri ve Karbon Veri Sistemi":"DendroGeo — Global Tree Inventory & Carbon Data System"
 };
@@ -298,6 +328,17 @@ const DG_I18N_SKIP="script,style,svg,textarea,.notranslate,[translate=\"no\"]";
 
 function dgT(s){ const t=String(s==null?"":s).trim(); if(!t)return s;
  return DG_LANG==="en"?(DG_I18N_EN[t]??s):(DG_I18N_TR[t]??s); }
+
+/* ŞABLON ÇEVİRİ (0035c): sayı/değişken gömülü dinamik dizeler tam eşleşmez.
+ * dgTf("✓ {n} onaylı kayıt yüklendi", {n:44}) → TR'de aynı, EN'de sözlükteki
+ * EN şablonuna aynı {var} yer tutucularıyla çevrilir. Çağıran taraf şablonu
+ * BİREBİR yazmalı (sözlük anahtarı = TR şablonun kendisi). */
+function dgTf(tpl,vars){
+ let out=dgT(tpl);
+ out=String(out);
+ for(const k in vars) out=out.split("{"+k+"}").join(String(vars[k]));
+ return out;
+}
 
 /* Bir alt ağacı çevir: metin düğümleri + placeholder/title/aria-label. */
 function dgApplyI18n(root){
