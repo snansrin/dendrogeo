@@ -133,11 +133,11 @@ describe('arayüz kablolaması: 📄 düğmesi + panel kutusu', () => {
       assert.ok(UI.includes(cls), 'UI sınıfı mevcut aileden: ' + cls);
   });
 
-  test('çevrimdışı paket: sw.js r48 ve modül CORE_ASSETS’te kalır', () => {
+  test('çevrimdışı paket: sw.js r49 ve modül CORE_ASSETS’te kalır', () => {
     // 0011: r43→r44; 0011b → r45; 0025 → r46; 0027 mobil/print → r47;
-    // 0035: +i18n.js +apple-touch-icon.png → r48.
+    // 0035: +i18n.js +apple-touch-icon.png → r48; 0041: +species-ai.js → r49.
     // Sözleşme: önbeklenen içerik değiştiğinde CACHE_VERSION artmak zorunda.
-    assert.match(SW, /CACHE_VERSION = 'dendrogeo-sw-v2-r48'/, 'içerik değişti → sürüm arttı');
+    assert.match(SW, /CACHE_VERSION = 'dendrogeo-sw-v2-r49'/, 'içerik değişti → sürüm arttı');
     assert.match(SW, /'\/src\/services\/report-publish\.js'/);
     assert.match(SW, /'\/src\/config\/i18n\.js'/);
   });

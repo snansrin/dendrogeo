@@ -929,6 +929,26 @@ const DG_I18N_EN={
 
 /* === 0040 === */
 "Haritada odaklan":"Focus on map",
+/* === 0041: AI tür tanıma === */
+"AI türü tanıyor…":"AI is identifying the species…",
+"AI önerisi":"AI suggestion",
+"Kullan":"Use",
+"Yoksay":"Dismiss",
+"listede yok, elle seçin":"not in the list, select manually",
+"Öneri formu ön doldurur; kararı sahada insan verir — veritabanına otomatik yazılmaz.":"The suggestion pre-fills the form; the decision stays with the human in the field — nothing is written to the database automatically.",
+"Tür seçildi":"Species selected",
+"AI önerisi alınamadı":"Could not get an AI suggestion",
+"Etkin — ölçüm formunda fotoğraf çekilince otomatik öneri":"Enabled — automatic suggestion when a photo is taken in the measurement form",
+"Uç nokta (POST · multipart 'photo' · JSON yanıt)":"Endpoint (POST · multipart 'photo' · JSON response)",
+"🧪 Test isteği gönder":"🧪 Send test request",
+"Önce uç nokta URL'si girin.":"Enter the endpoint URL first.",
+"test isteği gönderiliyor…":"sending test request…",
+"yanıt boş ya da çözümlenemedi (CSP/CORS/kontrol edin)":"empty or unparsable response (check CSP/CORS)",
+"CSP connect-src ve CORS kontrol edin":"check CSP connect-src and CORS",
+"Sunucu CORS açmalı (Access-Control-Allow-Origin: https://dendrogeo.org) ve URL, CSP connect-src listesine eklenmeli — adresi iletin, tek satırda eklenir. Model tarayıcıda çalışsın isterseniz ONNX/TF.js modu planlı (çevrimdışı saha).":"The server must enable CORS (Access-Control-Allow-Origin: https://dendrogeo.org) and the URL must be added to the CSP connect-src list — send me the address, it's a one-line change. For in-browser inference, an ONNX/TF.js mode is planned (offline field use).",
+"AI Tür Tanıma":"AI Species Identification",
+"saha destekli öneri · insan onaylı":"field-assisted suggestion · human-approved",
+
 /* sayfa başlığı */
 "DendroGeo — Küresel Ağaç Envanteri ve Karbon Veri Sistemi":"DendroGeo — Global Tree Inventory & Carbon Data System"
 };

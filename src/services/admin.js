@@ -29,6 +29,7 @@ async function loadAdmin__scroll(){
  const users=uRes.data||[],meas=mRes.data||[],projs=pRes.data||[],global=gRes.data||{};
 
 const cnt=await sb.from("measurements").select("*",{count:"exact",head:true});
+if(typeof dgAiAdminRender==="function"){try{dgAiAdminRender();}catch(e){}}
 $("aUsers").textContent=users.length;$("aRec").textContent=cnt.count??meas.length;$("aProj").textContent=projs.length;$("aCarbon").textContent=global.carbon_t||0;
  /* ⚠ SESSİZ "KAYIT YOK" TUZAĞI KAPANDI (2026-09-24): sorgu hata verirse
   * tablo "Kayıt yok." diyordu ve kullanıcı verisinin silindiğini sanıyordu.

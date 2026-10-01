@@ -9,6 +9,40 @@ Yeni sürüm yayımlama adımları: [`docs/surum-yayini.md`](docs/surum-yayini.m
 
 ## [Yayımlanmadı]
 
+### Düzeltildi/Eklendi — 0041: kaydırma zıplaması KÖKTEN bitti (window) + 🤖 AI tür tanıma soketi
+**1) Zıplama (0040 neden yetmedi):** #layout `min-height`'lı → içerik uzayınca
+ASIL KAYAN KONTEYNER #main değil **WINDOW** (mobilde #layout display:block).
+0040 koruması #main.scrollTop okuyordu (hep 0) → restore hiç çalışmadı.
+Şimdi dgScrollKeep/Restore **window.scrollY + #main.scrollTop birlikte**
+yakalayıp geri koyuyor. Bonus: "kaldığın yerden devam" belleği de yalnız
+#main'e bağlıydı (hiç kaydetmiyordu) → window scroll dinleyicisi eklendi
+(dg_scrollw_*, 120 ms throttle), go() ikisini birden geri yüklüyor.
+
+**2) 🤖 AI Tür Tanıma (kullanıcının eğittiği model için hazır soket):**
+- Yeni modül `src/services/species-ai.js` (index tag + CORE_ASSETS + sw r49).
+- Ölçüm formunda fotoğraf QA'dan geçince OTOMATİK öneri: "🤖 AI önerisi:
+  KARAÇAM %87 [Kullan][Yoksay]" → Kullan: grup+tür seçilir, Latince ad ve
+  canlı hesap tazelenir. **Bilimsel ilke: öneri ASLA otomatik kaydedilmez,
+  kararı sahada insan verir** (AI modülü veritabanına hiç dokunmaz — testle
+  kilitli).
+- AI etiketi `resolveSpeciesName` ile KANONİK sözlüğe çözülür (eşanlamlı +
+  Türkçe normalizasyon hazır); listede yoksa "elle seçin" denir, uydurulmaz.
+- Yönetim → 🤖 AI Tür Tanıma kartı: etkinleştir + uç nokta URL + 🧪 test
+  düğmesi (8×8 jpeg ile hat doğrulama, ms + sonuç). Ayar localStorage'da
+  (cihaza özel; şema/migration yok).
+- API sözleşmesi (esnek): POST multipart "photo" → JSON {species|label|name|
+  prediction, confidence|score|prob} (0-1 veya 0-100).
+- Gereksinimler: sunucuda CORS (Allow-Origin: https://dendrogeo.org) +
+  URL'nin CSP connect-src'e eklenmesi (tek satır — adres gelince eklenecek).
+- Mod B planlı: ONNX/TF.js ile TARAYICI İÇİ çıkarım (çevrimdışı saha) —
+  lazylibs deseni hazır.
+
+**Bekçiler:** window scroll pini (scrollY/scrollTo/dg_scrollw_) · AI soketi
+(modül+index+CORE_ASSETS+kanca+kart+r49+DB'ye dokunmaz).
+
+npm run check: 990 test → 988 pass / 0 fail / 2 skip · CSP 27 origin yeşil.
+
+
 ### Düzeltildi/Eklendi — 0040: kaydırma zıplaması bitti + Ziyaretçi sekmesi zenginleşti + kurucu konumu otomatik (CSP 0039 dahil TEK paket)
 NOT: Bu paket 0039'u (CSP connect-src + wss) İÇERİR — 0039 ayrıca uygulanmaz.
 

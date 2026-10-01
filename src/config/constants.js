@@ -52,13 +52,18 @@ function dgTfs(tpl,vars){
  * SEKME GEÇİŞİ istisna: go(), DG_SCROLL_SWITCHING'i kısa süre true yapar →
  * eski sekmenin kaydırması yeni sekmeye taşınmaz (kayıtlı konum geri gelir). */
 let DG_SCROLL_SWITCHING=false;
+/* 0041 KÖK DÜZELTME: #layout min-height'lı (sabit yükseklik değil) → içerik
+ * uzayınca ASIL KAYAN kap #main değil WINDOW'dur (mobilde #layout display:block).
+ * 0040'taki koruma yalnız #main.scrollTop okuyordu (hep 0) → zıplama sürdü.
+ * Artık İKİSİ birlikte yakalanır/geri konur. */
 function dgScrollKeep(){
  if(DG_SCROLL_SWITCHING)return null;
  const m=document.getElementById("main");
- return m?m.scrollTop:null;
+ return {w:(typeof window!=="undefined"&&window.scrollY)||0,m:(m?m.scrollTop:0)};
 }
 function dgScrollRestore(y){
- if(y==null)return;
+ if(!y)return;
  const m=document.getElementById("main");
- if(m&&Math.abs(m.scrollTop-y)>1)m.scrollTop=y;
+ if(m&&y.m&&Math.abs(m.scrollTop-y.m)>1)m.scrollTop=y.m;
+ if(y.w&&typeof window!=="undefined"&&Math.abs((window.scrollY||0)-y.w)>1)window.scrollTo(0,y.w);
 }

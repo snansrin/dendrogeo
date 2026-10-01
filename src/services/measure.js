@@ -38,6 +38,8 @@ async function checkPhoto(e){
   for(let y=1;y<S-1;y+=2)for(let xx=1;xx<S-1;xx+=2){const a=(y*S+xx)*4,b2=(y*S+xx+1)*4;edge+=Math.abs(d[a]-d[b2]);}
   const ok=vegR>=0.25&&br>25&&br<245;
   photoOk=ok;
+  /* 0041: fotoğraf QA'dan geçince AI tür önerisi (arka planda, bloklamaz). */
+  if(ok&&typeof dgAiOnPhoto==="function"){try{dgAiOnPhoto(f);}catch(e){}}
   if(ok){box.className="alert ok";box.innerHTML=`✓ <b>${_tms("Fotoğraf uygun")}</b> · ${_tms("Bitki örtüsü:")} %${(vegR*100).toFixed(1)} · ${_tms("Pozlama:")} ${br.toFixed(0)}/255`;}
   else{box.className="alert err";box.innerHTML=`⚠ <b>${_tms("Fotoğraf uygun değil")}</b> · ${_tms("Bitki örtüsü:")} %${(vegR*100).toFixed(1)} (min %25) · ${_tms("Pozlama:")} ${br.toFixed(0)}.<br>${_tms("Ağacı/net bitki örtüsünü gösteren, karanlık olmayan bir çekim yapın.")}`;}
  }catch(err){photoOk=false;box.className="alert err";box.innerHTML="⚠ Fotoğraf okunamadı, tekrar deneyin.";}

@@ -119,6 +119,12 @@ initMaps();
  const mainEl=$("main");
  if(mainEl&&!window._dgScrollHooked){window._dgScrollHooked=true;
   mainEl.addEventListener("scroll",()=>{try{localStorage.setItem("dg_scroll_"+DG_CUR_VIEW,String(mainEl.scrollTop));}catch(e){}},{passive:true});}
+ /* 0041: asıl kayan konteyner WINDOW (bkz. constants.js dgScrollKeep notu) —
+  * "kaldığın yerden devam" belleği window.scrollY'yi de kaydeder (120 ms throttle). */
+ if(!window._dgScrollWinHooked){window._dgScrollWinHooked=true;
+  let _swt=null;
+  window.addEventListener("scroll",()=>{if(_swt)return;_swt=setTimeout(()=>{_swt=null;
+   try{localStorage.setItem("dg_scrollw_"+DG_CUR_VIEW,String(window.scrollY||0));}catch(e){}},120);},{passive:true});}
 await loadProjects();
 await loadWaypoints();
 loadDash();loadRecords();loadWorld();loadMyRequests();loadRequestOptions();
@@ -187,7 +193,9 @@ if(v==="export")loadRequestOptions();
  /* kaydırma konumunu geri getir (sekme içeriği çizildikten sonra) */
  setTimeout(()=>{const m=$("main");if(!m)return;
   const sc=parseInt((()=>{try{return localStorage.getItem("dg_scroll_"+v)||"0";}catch(e){return "0";}})(),10);
-  if(sc>0)m.scrollTop=sc;},180);
+  if(sc>0)m.scrollTop=sc;
+  const scw=parseInt((()=>{try{return localStorage.getItem("dg_scrollw_"+v)||"0";}catch(e){return "0";}})(),10);
+  if(scw>0)window.scrollTo(0,scw);},180);
 }
 
 boot();

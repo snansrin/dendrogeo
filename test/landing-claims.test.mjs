@@ -480,3 +480,31 @@ describe('0040 · kaydırma koruması + ziyaretçi sekmesi zenginleştirme', () 
     assert.ok(!sh.includes('kurucu canlı haritada görür'), 'eski metin kalktı');
   });
 });
+
+describe('0041 · kaydırma window kök düzeltmesi + AI tür tanıma soketi', () => {
+  test('⭐ dgScrollKeep/Restore WINDOW scrollY yakalıyor (0040 eksikliğinin kökü)', () => {
+    const c = rd('src/config/constants.js');
+    assert.match(c, /window\.scrollY/, 'window kaydırması yakalanmalı');
+    assert.match(c, /window\.scrollTo\(0,y\.w\)/, 'window geri konmalı');
+    const sj = rd('src/ui/shell.js');
+    assert.match(sj, /dg_scrollw_/, 'kaldığın yer belleği window için de');
+    assert.match(sj, /window\.scrollTo\(0,scw\)/, 'go() window konumunu geri koyar');
+  });
+  test('⭐ AI soketi: modül + kayıt zinciri + form kancası + yönetim kartı', () => {
+    const ai = rd('src/services/species-ai.js');
+    assert.match(ai, /async function dgAiDetect/);
+    assert.match(ai, /async function dgAiOnPhoto/);
+    assert.match(ai, /function dgAiUse/);
+    assert.match(ai, /function dgAiAdminRender/);
+    assert.match(ai, /resolveSpeciesName/, 'AI etiketi kanonik sözlüğe çözülür');
+    assert.ok(!/insert|upsert|\.from\(/.test(ai), 'AI modülü veritabanına DOKUNMAZ (öneri insan onaylı)');
+    assert.match(index, /<script src="src\/services\/species-ai\.js\?v=[0-9a-f]{8}" defer>/, 'index kaydı');
+    assert.match(rd('sw.js'), /'\/src\/services\/species-ai\.js'/, 'CORE_ASSETS kaydı');
+    assert.match(rd('src/services/measure.js'), /dgAiOnPhoto\(f\)/, 'fotoğraf QA sonrası kanca');
+    const sh = rd('partials/shell.html');
+    assert.match(sh, /id="aiSuggest"/, 'öneri kutusu');
+    assert.match(sh, /id="dgAiAdmin"/, 'yönetim kartı');
+    assert.match(rd('src/services/admin.js'), /dgAiAdminRender/, 'loadAdmin kartı çizer');
+    assert.match(rd('sw.js'), /dendrogeo-sw-v2-r49/, 'sw sürümü r49 (yeni modül)');
+  });
+});
