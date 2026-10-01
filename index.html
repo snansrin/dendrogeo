@@ -235,11 +235,11 @@
 <script src="vendor/supabase-js-2.116.0.js" defer></script>
 <script src="src/config/supabase.js?v=6b91ef6f" defer></script>
 <script src="src/config/constants.js?v=f65498e4" defer></script>
-<script src="src/config/species.js?v=d5d302ab" defer></script>
+<script src="src/config/species.js?v=c7a16ce8" defer></script>
 <!-- DİL KATMANI (0035): TR markup varsayılan; EN sözlüğü çalışma zamanında
      uygulanır (dgToggleLang). defer sırası önemli değil — DOMContentLoaded'da
      ya da hemen (hazırsa) çalışır. module-registry + CORE_ASSETS kaydı şart. -->
-<script src="src/config/i18n.js?v=cb2207e8" defer></script>
+<script src="src/config/i18n.js?v=8a833a84" defer></script>
 <script src="src/utils/geo.js?v=3e796768" defer></script>
 <script src="src/utils/truncation.js?v=f43c76b3" defer></script>
 <!-- Faz 7: geotiff (317 KB) ve chart.js (208 KB) artık SENKRON yüklenmiyor;
@@ -268,7 +268,7 @@
 <script src="src/services/measure.js?v=28358524" defer></script>
 <!-- AI TÜR TANIMA (0041): kullanıcının eğittiği modelin soketi — ölçüm
      formunda fotoğraf çekilince öneri üretir; karar insanda kalır. -->
-<script src="src/services/species-ai.js?v=a1e2ac31" defer></script>
+<script src="src/services/species-ai.js?v=3f0e7c35" defer></script>
 <script src="src/services/map.js?v=3be191fd" defer></script>
 <!-- LULC ZİNCİRİ ARTIK TEMBEL (2026-09-25 · Faz 8): 8 dosya ilk yüklemede
      indirilmiyor. Yalnız "🌿 Yüzey Örtüsü Analizi"ne basan kullanıcı için
@@ -460,7 +460,7 @@
    <div class="formula">AGB = 0.0673·(ρ·DBH²·H)<sup>0.976</sup> <span style="color:var(--mut)">— Chave 2014</span></div>
    <div class="formula">BHB = AGB·0.26 <span style="color:var(--mut)">— sistemde kullanılan sabit kök/gövde varsayımı</span></div>
    <div class="formula">C = (AGB+BHB)·0.47</div>
-   <p style="color:var(--mut);font-size:.78rem;margin-top:12px">Tür/grup tablosunda 50 seçim kaydı bulunur; 22 kaydın doğrudan ρ değeri vardır, 28 kayıt grup varsayılanına düşer.</p>
+   <p style="color:var(--mut);font-size:.78rem;margin-top:12px">Tür/grup tablosunda 51 seçim kaydı bulunur; 22 kaydın doğrudan ρ değeri vardır, 29 kayıt grup varsayılanına düşer.</p>
   </div>
   <div class="card" style="border-left:4px solid var(--amber)">
    <div style="font-family:var(--f-disp);font-size:1.1rem;color:var(--green-dk);font-weight:600;margin-bottom:14px">🔬 Veri Doğruluk Politikası</div>
@@ -943,7 +943,7 @@
         da "İsimsiz Park" kalıyordu. Otomatik birleştirme BİLEREK yok: iki ayrı
         park aynı adı taşıyabilir, karar yöneticide. -->
    <div class="card" style="margin-bottom:18px;border-left:4px solid var(--blue)">
-    <div class="shead" style="margin-bottom:6px"><span class="no">🤖</span><h2 style="font-size:1.15rem">AI Tür Tanıma</h2><span class="rule"></span><span class="mono" style="font-size:.72rem;color:var(--mut)">saha destekli öneri · insan onaylı</span></div>
+    <div class="shead" style="margin-bottom:6px"><span class="no">🤖</span><h2 style="font-size:1.15rem">AI Ağaç Algılama</h2><span class="rule"></span><span class="mono" style="font-size:.72rem;color:var(--mut)">saha doğrulaması · insan kararı</span></div>
     <div id="dgAiAdmin"></div>
    </div>
    <div class="card" style="margin-bottom:18px;border-left:4px solid var(--green)">

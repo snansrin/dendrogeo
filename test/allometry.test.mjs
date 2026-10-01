@@ -109,7 +109,7 @@ describe('rho fallback zinciri — tür → grup → DİĞER', () => {
     assert.ok(Math.abs(r.agb - agb(493, 30, 20)) < 1e-6);
   });
 
-  test('CANARY: 50 tür kaydının 28 kadarında rho yok — veri kalitesi borcu', () => {
+  test('CANARY: 51 tür kaydının 29 kadarında rho yok — veri kalitesi borcu (0042: +AKASYA)', () => {
     // Bu test bilinçli olarak MEVCUT DURUMU belgeler. rho tablosu
     // dolduruldukça `bos` sayısı düşmeli; o zaman bu test güncellenir.
     // 0011e (2026-09-28 · kullanıcı kararı): Göksu'nun 5 türü kaynaklı
@@ -118,10 +118,12 @@ describe('rho fallback zinciri — tür → grup → DİĞER', () => {
     // Orijinal 45 kaydın ρ değerleri (null'lar dahil) birebir korunur →
     // bos sayısı 28'de kalır: 23 orijinal + 5 yeni türün 5'i de ρ'lu... 
     // (yeni 5 tür ρ'lu olduğu için bos = 28 - 0 = 28; liste 45+5=50).
+    // 0042 (kullanıcı isteği): AKASYA (Acacia spp.) eklendi — ρ kaynak
+    // bekliyor (UYDURULMAZ) → liste 51, bos 29.
     const hepsi = Object.values(app.SPECIES_DATA).flat();
     const bos = hepsi.filter((s) => !s.rho).length;
-    assert.equal(hepsi.length, 50, 'tür kaydı sayısı değişti');
-    assert.equal(bos, 28, 'rho eksik tür sayısı ' + bos + ' oldu — tabloyu doldurduysanız bu testi güncelleyin');
+    assert.equal(hepsi.length, 51, 'tür kaydı sayısı değişti (0042: 50+AKASYA)');
+    assert.equal(bos, 29, 'rho eksik tür sayısı ' + bos + ' oldu — 0042: AKASYA rho-suz eklendi; tabloyu doldurduysanız bu testi güncelleyin');
   });
 
   test('0011e: Göksu 5 türü kaynaklı ρ ile panel listesinde; AĞLAYAN SÖĞÜT gizli', () => {

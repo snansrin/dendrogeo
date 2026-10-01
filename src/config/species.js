@@ -41,6 +41,7 @@ const SPECIES_DATA={
   {tr:"KARAAĞAÇ",lat:"Ulmus minor",rho:null},
   {tr:"DUT",lat:"Morus alba",rho:null},
   {tr:"CEVİZ",lat:"Juglans regia",rho:560},             /* [Z09]/[WD] (0011e: kullanıcı onayıyla listede) */
+  {tr:"AKASYA",lat:"Acacia spp.",rho:null},            /* 0042 (kullanıcı isteği): kent peyzajında gerçek Akasya da dikilir; ρ kaynak bekliyor → grup varsayılanı. Eski "AKASYA"→YALANCI AKASYA eşanlamlısı KALDIRILDI (artık kanonik ad; Robinia için YALANCI AKASYA seçilir). */
   {tr:"YALANCI AKASYA",lat:"Robinia pseudoacacia",rho:null},
   {tr:"MANOLYA",lat:"Magnolia grandiflora",rho:null},
   {tr:"SÜS ELMASI",lat:"Malus spp.",rho:null},
@@ -99,7 +100,6 @@ const SPECIES_SYNONYMS={
  "CEVIZ AGACI":"CEVİZ",
  "ADI CEVIZ":"CEVİZ",
  "INGILIZ CEVIZI":"CEVİZ",
- "AKASYA":"YALANCI AKASYA"
 };
 /* Türkçe-duyarlı normalleştirme: büyük harf (İ/ı doğru), aksan katlama,
  * parantez-içi ve fazla boşluk temizliği. Anahtarlar bu biçimde saklanır. */

@@ -343,8 +343,7 @@ Bunlar hata değil, **belgelenmiş varsayımlardır**. Değiştirmek isteyen
    bağımsızlık varsayımının yapay daralttığı aralıklardan kaçınılır).
    Panel/harita/dışa aktarım sayıları belirsizlik eki olmadan tek nokta
    tahmini olarak kalır.
-3. **ρ tablosu eksik** (panel listesinde 28/50 tür ρ'sız — 0011e: 45
-   orijinal + Göksu'nun kaynaklı 5 türü). Grup varsayılanı kullanılır;
+3. **ρ tablosu eksik** (panel listesinde 29/51 tür ρ'sız — 0011e: 45 orijinal + Göksu'nun kaynaklı 5 türü; 0042: + AKASYA (Acacia spp.), ρ kaynak bekliyor). Grup varsayılanı kullanılır;
    kaynaklandırılamayan türe değer UYDURULMAZ.
 4. **Kök oranı (0,26) ve karbon oranı (0,47) sabittir.**
 5. **Gövde form faktörü (0,5) sabittir.**

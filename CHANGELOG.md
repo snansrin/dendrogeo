@@ -9,6 +9,33 @@ Yeni sürüm yayımlama adımları: [`docs/surum-yayini.md`](docs/surum-yayini.m
 
 ## [Yayımlanmadı]
 
+### Düzeltildi/Eklendi — 0042: AKASYA listede + AI artık AĞAÇ ALGILAMA (tür tanıma değil)
+**Kullanıcı geri bildirimi:** "ben tür tanıma istemedim, sadece ağacı algılasın
+fotoğrafta · geçen gün türleri silmişsin, akasya yok, bugün giriş yapamadım akasyaya."
+
+**Kanıt — tür silinmedi:** `git log -- src/config/species.js` → bot'un tek teması
+0035 (yalnız GROUP_COLOR_INK sabiti). `git log --all -S '"AKASYA",'` → sonuç YOK:
+"AKASYA" dropdown'da hiçbir sürümde bağımsız kayıt olmadı; olan YALANCI AKASYA
+(Robinia) + 0011'in okuma-taraflı eşanlamlısıydı. Algı doğru, kayıt eksikti.
+
+**(a) AKASYA artık seçilebilir (51. tür):** `{tr:"AKASYA",lat:"Acacia spp.",rho:null}`
+→ YAPRAKLI; ρ KAYNAK BEKLİYOR (§4.3: kaynaklandırılamayan ρ uydurulmaz → grup
+varsayılanı 541). Eski `"AKASYA":"YALANCI AKASYA"` eşanlamlısı KALDIRILDI (kanonik
+adı gölgelerdi); Robinia "YALANCI AKASYA" olarak duruyor. DB'de "AKASYA" metinli
+kayıt yok → geçmiş etkilenmez. Sayımlar: landing + methods + EN 51/22/29;
+allometry CANARY'si bilinçli güncellendi (50/28 → 51/29). EN: "AKASYA":"ACACIA".
+
+**(b) AI modu döndü: tür ÖNERİSİ kaldırıldı → AĞAÇ ALGILAMA doğrulaması.**
+`dgAiUse`/ön-doldurma/DG_AI_LAST silindi (bekçi kilitler). Fotoğraf çekilince:
+"🌳 Ağaç algılandı ✓ %93" ya da "⚠ AI ağaç algılayamadı — kadrajı düzeltin; yine
+de devam edebilirsiniz (insan kararı)". ESNEK ayrıştırıcı (14/14 olgu): tree/is_tree/
+detected/label/detections/results/bool/score · 0-1 ve 0-100 güven · "no_tree/
+background/person" olumsuzları false · çözümlenemeyen yanıt null. Yönetim kartı:
+etkinleştir + uç nokta + **eşik %** + **AI kapısı** (açıksa ağaç doğrulanmadan
+KAYDET bloklanır — photoOk=false; yeniden çekim onarır) + test. AI HATA verirse
+kapı kapatmaz (sahada ağ sorunu ölçümü engellemez). İlke: modül DB'ye dokunmaz,
+karar insanda. sw r50.
+
 ### Düzeltildi/Eklendi — 0041: kaydırma zıplaması KÖKTEN bitti (window) + 🤖 AI tür tanıma soketi
 **1) Zıplama (0040 neden yetmedi):** #layout `min-height`'lı → içerik uzayınca
 ASIL KAYAN KONTEYNER #main değil **WINDOW** (mobilde #layout display:block).

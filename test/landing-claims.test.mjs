@@ -76,7 +76,7 @@ describe('P0 · bilimsel iddialar kaynağıyla birebir', () => {
     const def = total - rho;
     const re = new RegExp(`tablosunda ${total} seçim kaydı bulunur; ${rho} kaydın doğrudan ρ değeri vardır, ${def} kayıt grup varsayılanına düşer`);
     assert.match(landing, re, `landing güncel olmalı: ${total}/${rho}/${def}`);
-    assert.match(rd('docs/methods.md'), new RegExp(`28/${total}`), 'methods.md aynı sayıyı söylemeli');
+    assert.match(rd('docs/methods.md'), new RegExp(`${def}/${total}`), 'methods.md ρ\'sız/toplam sayısını söylemeli');
   });
 
   test('⭐ hero çipleri motorla birebir üretiliyor + QA h/D bandında', () => {
@@ -490,21 +490,30 @@ describe('0041 · kaydırma window kök düzeltmesi + AI tür tanıma soketi', (
     assert.match(sj, /dg_scrollw_/, 'kaldığın yer belleği window için de');
     assert.match(sj, /window\.scrollTo\(0,scw\)/, 'go() window konumunu geri koyar');
   });
-  test('⭐ AI soketi: modül + kayıt zinciri + form kancası + yönetim kartı', () => {
+  test('⭐ AI soketi 0042: AĞAÇ ALGILAMA modu (tür tanıma DEĞİL — kullanıcı kararı)', () => {
     const ai = rd('src/services/species-ai.js');
     assert.match(ai, /async function dgAiDetect/);
     assert.match(ai, /async function dgAiOnPhoto/);
-    assert.match(ai, /function dgAiUse/);
+    assert.match(ai, /function dgAiParse/, 'esnek yanıt ayrıştırıcı');
     assert.match(ai, /function dgAiAdminRender/);
-    assert.match(ai, /resolveSpeciesName/, 'AI etiketi kanonik sözlüğe çözülür');
-    assert.ok(!/insert|upsert|\.from\(/.test(ai), 'AI modülü veritabanına DOKUNMAZ (öneri insan onaylı)');
+    assert.match(ai, /isTreeWord|tree\|a/, 'ağaç etiketi sezimi');
+    assert.match(ai, /photoOk=false/, 'AI kapısı: block açıkken fotoğraf reddi');
+    assert.ok(!/function dgAiUse/.test(ai), 'tür ön-doldurma KALDIRILDI (kullanıcı istemedi)');
+    assert.ok(!/insert|upsert|\.from\(/.test(ai), 'AI modülü veritabanına DOKUNMAZ');
     assert.match(index, /<script src="src\/services\/species-ai\.js\?v=[0-9a-f]{8}" defer>/, 'index kaydı');
     assert.match(rd('sw.js'), /'\/src\/services\/species-ai\.js'/, 'CORE_ASSETS kaydı');
     assert.match(rd('src/services/measure.js'), /dgAiOnPhoto\(f\)/, 'fotoğraf QA sonrası kanca');
     const sh = rd('partials/shell.html');
-    assert.match(sh, /id="aiSuggest"/, 'öneri kutusu');
+    assert.match(sh, /id="aiSuggest"/, 'sonuç kutusu');
     assert.match(sh, /id="dgAiAdmin"/, 'yönetim kartı');
+    assert.match(sh, /AI Ağaç Algılama/, 'kart başlığı ağaç modunda');
     assert.match(rd('src/services/admin.js'), /dgAiAdminRender/, 'loadAdmin kartı çizer');
-    assert.match(rd('sw.js'), /dendrogeo-sw-v2-r49/, 'sw sürümü r49 (yeni modül)');
+    assert.match(rd('sw.js'), /dendrogeo-sw-v2-r50/, 'sw r50 (içerik sözleşmesi)');
+  });
+  test('⭐ AKASYA kanonik tür (0042): listede + eşanlamlı gölgesi yok', () => {
+    const sp = rd('src/config/species.js');
+    assert.match(sp, /\{tr:"AKASYA",lat:"Acacia spp\.",rho:null\}/, 'AKASYA seçilebilir kayıt (ρ kaynak bekliyor → grup varsayılanı)');
+    assert.ok(!/"AKASYA":"YALANCI AKASYA"/.test(sp), 'eski eşanlamlı gölgesi kaldırılmalı (kanonik adı ezerdi)');
+    assert.match(sp, /YALANCI AKASYA/, 'Robinia ayrı tür olarak duruyor');
   });
 });
