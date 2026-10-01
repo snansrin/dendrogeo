@@ -500,7 +500,7 @@ describe('kabuk: park algılama ekranı + ölçüm kapısı id’leri', () => {
   });
 
   test('park tablosu "Park" sütunu içeriyor', () => {
-    assert.match(idx, /<th>ID<\/th><th>Park<\/th><th>Proje Adı<\/th>/);
+    assert.match(idx, /<th scope="col">ID<\/th><th scope="col">Park<\/th><th scope="col">Proje Adı<\/th>/);
   });
 
   test('⭐ park-registry.js yükleme sırası: park-query → registry → grid-engine', () => {

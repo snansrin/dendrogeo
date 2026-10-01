@@ -195,16 +195,20 @@ describe('kalite denetimi 2026-09-27 kilidi (P1/P3/P7/P9)', () => {
     assert.match(c, /--amber-ink:#9a4a08/, 'amber metin tokeni');
     assert.match(c, /\.badge\.admin\{background:var\(--amber-tint\);color:var\(--amber-ink\)\}/);
   });
-  /* KASKAD KİLİDİ (2026-10-01 denetim O2/O3): ui-standard.css HER sayfada
-   * en SON yüklenir → :root tokenları style.css'i ezer. Eskiden burada
-   * --mut:#68766e (4.41:1) duruyordu ve 27.09 WCAG düzeltmesini (#5f6d65,
-   * 5.03:1) sessizce geri alıyordu; P1 testi yalnız style.css metnine
-   * baktığı için yakalayamıyordu. Artık iki dosya da kilitli. */
-  test('⭐ ui-standard.css tokenları style.css WCAG değerleriyle aynı (kaskad kilidi)', () => {
+  /* KASKAD KİLİDİ (0034→0035): --mut TEK kaynakta (style.css) tanımlanır;
+   * ui-standard.css en son yüklendiği için :root duplikasyonu WCAG
+   * düzeltmesini sessizce geri alıyordu (4.41:1). Artık :root tanımlaması
+   * yasak ve tüm css/ taranır: --mut tam BİR kez, #5f6d65 olarak tanımlı. */
+  test('⭐ --mut tek kaynak ve WCAG değerinde (kaskad kilidi)', () => {
     const u = rd('css/ui-standard.css');
-    assert.match(u, /--mut:#5f6d65/, 'ui-standard --mut, style.css ile ayni olmali (son yuklenen kazanir)');
-    assert.match(u, /--amber-ink:#9a4a08/, 'amber metin tokeni ui-standard :rootunda da tanimli olmali');
-    assert.ok(!/--mut:#68766e/.test(u), 'eski dusuk kontrast token deklarasyonu geri gelmemeli');
+    const c = rd('css/style.css');
+    assert.match(c, /--mut:#5f6d65/, 'tek kaynak style.css');
+    assert.ok(!/:root\s*\{/.test(u), 'ui-standard.css :root ile token TANIMLAMAZ');
+    const allCss = ['style.css', 'landing.css', 'ui-standard.css', 'park-panel.css']
+      .map((f) => rd('css/' + f)).join('\n');
+    const defs = allCss.match(/--mut:#[0-9a-f]{6}/g) || [];
+    assert.deepEqual(defs, ['--mut:#5f6d65'], '--mut css/ genelinde tam bir kez tanımlı');
+    assert.ok(!/68766e/.test(allCss), 'eski dusuk kontrast deger css/te kalmamali');
   });
   test('⭐ küçük amber metinler --amber-ink kullanır (3.03:1 → 5.78:1)', () => {
     const l = rd('css/landing.css');
@@ -213,6 +217,11 @@ describe('kalite denetimi 2026-09-27 kilidi (P1/P3/P7/P9)', () => {
     assert.match(l, /\.step \.sub\{[^}]*color:var\(--amber-ink\)/, 'step altligi');
     assert.match(u, /\.dg-kicker\{[^}]*color:var\(--amber-ink\)/, 'alt sayfa kicker');
     assert.match(u, /\.dg-page \.tag\{[^}]*color:var\(--amber-ink\)/, 'alt sayfa tag');
+    /* GROUP_COLOR dolgu içindir; METİN tonları GROUP_COLOR_INK (0035 · P1-7b) */
+    const sp = rd('src/config/species.js');
+    const dj = rd('src/services/dash.js');
+    assert.match(sp, /GROUP_COLOR_INK=/, 'metin tonu tablosu var');
+    assert.ok(!/color:\$\{GROUP_COLOR\[/.test(dj), 'dash.js metinde dolgu rengi kullanmiyor');
   });
   test('P3 skip-link + focus halkasi + label.lbl blok (kayma yok)', () => {
     const h = rd('partials/head.html');

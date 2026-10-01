@@ -9,9 +9,9 @@
 <meta property="og:url" content="https://dendrogeo.org/yontem/">
 <link rel="icon" href="../icon.png">
 <!-- FONT (2026-10-01 denetim O7): tasarım sistemi Manrope/Fraunces/IBM Plex Mono referanslar; index.html'dekiyle AYNI render-blokamayan desen. -->
-<link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Manrope:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Manrope:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap" media="print" onload="this.media='all'">
-<noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Manrope:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap"></noscript>
+<link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=Manrope:wght@400;600;700;800&family=IBM+Plex+Mono:wght@400;600;700&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=Manrope:wght@400;600;700;800&family=IBM+Plex+Mono:wght@400;600;700&display=swap" media="print" onload="this.media='all'">
+<noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=Manrope:wght@400;600;700;800&family=IBM+Plex+Mono:wght@400;600;700&display=swap"></noscript>
 <link rel="stylesheet" href="../css/style.css">
 <style>:root{--bg:#f7f6f2;--ink:#182420;--mut:#64706a;--green:#14532d;--line:#dfe5df;--card:#fff}
 *{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.7 Arial,system-ui,sans-serif}
@@ -24,7 +24,7 @@ main{padding:54px 0 70px}h1{font-size:clamp(2rem,5vw,3.3rem);line-height:1.08;ma
 <link rel="alternate" hreflang="en" href="https://dendrogeo.org/en/methods/">
 </head><body class="dg-page">
 <header class="top"><div class="wrap nav"><a class="brand" href="../">🌲 DendroGeo</a>
-<nav class="links" aria-label="Ana navigasyon"><a href="../">Ana Sayfa</a><a href="../agac-envanteri/">Ağaç Envanteri</a><a href="../karbon-hesaplama/">Karbon</a><a href="../arazi-ortusu/">Arazi Örtüsü</a><a href="../yontem/">Yöntem</a></nav></div></header>
+<nav class="links" aria-label="Ana navigasyon"><a href="../">Ana Sayfa</a><a href="../agac-envanteri/">Ağaç Envanteri</a><a href="../karbon-hesaplama/">Karbon</a><a href="../arazi-ortusu/">Arazi Örtüsü</a><a href="../yontem/">Yöntem</a><a href="../en/" hreflang="en">EN</a></nav></div></header>
 <main><div class="wrap"><div class="hero"><div class="tag">BİLİMSEL YÖNTEM</div><h1>DendroGeo Yöntemi</h1><p class="lead">DendroGeo'da ağaç biyokütlesi, karbon, jeodezik alan ve Sentinel-2 arazi örtüsü analizlerinin nasıl hesaplandığını açıklayan yöntem özeti.</p><a class="btn" href="../">DendroGeo uygulamasını aç</a></div><h2>Biyokütle ve karbon</h2><p>Üstü gövde biyokütlesi Chave et al. (2014) allometrik denklemiyle, kök biyokütlesi AGB × 0,26 ve karbon toplam biyokütlenin 0,47'si kabul edilerek hesaplanır.</p>
 <h2>Konum ve alan</h2><p>Mesafe hesabında haversine, ArcGIS uydu servisleri için Web Mercator dönüşümleri ve LULC hücre alanlarında uygun metre tabanlı geometri hesapları kullanılır. Proje, jeodezik alan ile projeksiyonlu hücre kesişimi arasındaki farkları kalite kontrolünde izler.</p>
 <h2>Arazi örtüsü</h2><p>Park polygonu 10 m kategorik raster hücreleriyle kesiştirilir; her hücrenin yalnızca park içinde kalan gerçek alanı sınıfına yazılır. Birincil kaynak ESA WorldCover 2021 v200'dür. IO LULC 2020 bağımsız çapraz doğrulama olarak kullanılır. OSM geometrileri sayısal sınıf sonucunu değiştirmez.</p>

@@ -1,3 +1,12 @@
+/* toastWrap canlı bölge ilan edilir (0035 · P1-5): build çapası
+ * '<div id="toastWrap"></div>' index.html bölme ANCHORS'ında kilitli olduğu
+ * için nitelikler STATİK yazılamaz → çalışma zamanında atanır. Ekran okuyucu
+ * toast'ları artık duyurur. */
+(function dgToastA11y(){
+ const set=()=>{const w=document.getElementById("toastWrap");
+  if(w){w.setAttribute("role","status");w.setAttribute("aria-live","polite");}};
+ if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",set);else set();
+})();
 "use strict";
 /* DendroGeo · ui/toast.js — ortak bildirim baloncukları.
  * index.html inline script'inden birebir taşındı (Faz 1, modülerleştirme).

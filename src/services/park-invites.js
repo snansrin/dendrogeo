@@ -124,9 +124,9 @@ function dgCollabRender(){
    `<div><label class="lbl" for="dgInvNote">Not (opsiyonel)</label><input id="dgInvNote" placeholder="örn. cumartesi saha ölçümü"></div>`+
    `<div><button class="btn sm blue" onclick="dgInviteSend()">✉️ Davet gönder</button></div></div>`+
   `<div class="lbl">Ortaklar (${col.length})</div>`+
-  (colRows?`<div class="tblwrap"><table><thead><tr><th>Kişi</th><th>Eklenme</th><th>İşlem</th></tr></thead><tbody>${colRows}</tbody></table></div>`:'<div class="alert info">Henüz ortak yok.</div>')+
+  (colRows?`<div class="tblwrap"><table><thead><tr><th scope='col'>Kişi</th><th scope='col'>Eklenme</th><th scope='col'>İşlem</th></tr></thead><tbody>${colRows}</tbody></table></div>`:'<div class="alert info">Henüz ortak yok.</div>')+
   `<div class="lbl" style="margin-top:10px">Davetler (${inv.length})</div>`+
-  (invRows?`<div class="tblwrap"><table><thead><tr><th>E-posta</th><th>Durum</th><th>Tarih</th><th>İşlem</th></tr></thead><tbody>${invRows}</tbody></table></div>`:'<div class="alert info">Davet yok.</div>')+
+  (invRows?`<div class="tblwrap"><table><thead><tr><th scope='col'>E-posta</th><th scope='col'>Durum</th><th scope='col'>Tarih</th><th scope='col'>İşlem</th></tr></thead><tbody>${invRows}</tbody></table></div>`:'<div class="alert info">Davet yok.</div>')+
   `<p class="mono dg-sub" style="margin-top:8px">Davet e-postası kimlik doğrulamaz; kabul yalnız arkadaşın KENDİ hesabıyla olur. Ortak ölçümleri kendi adıyla girer, konum çiti ve onay akışı aynen geçerlidir.</p>`;
 }
 

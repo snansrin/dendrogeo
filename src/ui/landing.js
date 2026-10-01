@@ -55,18 +55,34 @@ function dgLandingMapWhenVisible(){
  setTimeout(()=>{if(!worldMapL)dgLandingMapInit();},6000);
 }
 
+/* MOBİL MENÜ (0035 · P1-6): erişilebilir disclosure — aria-expanded/controls,
+ * Esc ile kapanır, bölüm linkine basınca kapanır. Desktop'ta düğme display:none. */
+function dgNavToggle(force){
+ const l=$("navLinks"),b=$("navToggle");
+ if(!l||!b)return;
+ const open=(force===undefined)?!l.classList.contains("open"):!!force;
+ l.classList.toggle("open",open);
+ b.setAttribute("aria-expanded",open?"true":"false");
+}
+document.addEventListener("keydown",e=>{
+ if(e.key==="Escape"){const l=$("navLinks");if(l&&l.classList.contains("open"))dgNavToggle(false);}
+});
+document.addEventListener("click",e=>{
+ const l=$("navLinks");
+ if(l&&l.classList.contains("open")&&e.target.closest&&e.target.closest("#navLinks a"))dgNavToggle(false);
+});
+
 function initLanding(){
  $("landing").style.display="block";$("shell").style.display="none";
  dgLandingMapWhenVisible();
  (async()=>{
   try{
    const g=await sb.from("v_global").select("*").single();
-   if(g.data){$("stRec").textContent=g.data.records||0;$("stCountry").textContent=g.data.countries||0;$("stCity").textContent=g.data.cities||0;$("stCarbon").textContent=g.data.carbon_t||0;
-       $("statRec").textContent=g.data.records||0;$("statCountry").textContent=g.data.countries||0;$("statCity").textContent=g.data.cities||0;$("statCarbon").textContent=g.data.carbon_t||0;}
+   if(g.data){$("statRec").textContent=g.data.records||0;$("statCountry").textContent=g.data.countries||0;$("statCity").textContent=g.data.cities||0;$("statCarbon").textContent=g.data.carbon_t||0;}
    const c=await sb.from("v_country").select("*");
-   $("tblCountry").querySelector("tbody").innerHTML=(c.data||[]).slice(0,20).map(r=>`<tr class="clickable-row" onclick="zoomToCountry('${esc(r.country)}')"><td>${esc(r.country)}</td><td>${r.records}</td><td>${r.carbon_t}</td><td>${r.avg_dbh}</td><td>${r.avg_height||"—"}</td></tr>`).join("")||"<tr><td colspan=5>Henüz veri yok</td></tr>";
+   $("tblCountry").querySelector("tbody").innerHTML=(c.data||[]).slice(0,20).map(r=>`<tr class="clickable-row" tabindex="0" role="link" onkeydown="dgKeyActivate(event,this)" onclick="zoomToCountry('${esc(r.country)}')"><td>${esc(r.country)}</td><td>${r.records}</td><td>${r.carbon_t}</td><td>${r.avg_dbh}</td><td>${r.avg_height||"—"}</td></tr>`).join("")||"<tr><td colspan=5>Henüz veri yok</td></tr>";
    const t=await sb.from("v_city").select("*");
-    $("tblCity").querySelector("tbody").innerHTML=(t.data||[]).slice(0,20).map(r=>`<tr class="clickable-row" onclick="zoomToCity('${esc(r.city)}')"><td>${esc(r.city)}</td><td>${r.records}</td><td>${r.carbon_t}</td></tr>`).join("")||"<tr><td colspan=3>Henüz veri yok</td></tr>";
+    $("tblCity").querySelector("tbody").innerHTML=(t.data||[]).slice(0,20).map(r=>`<tr class="clickable-row" tabindex="0" role="link" onkeydown="dgKeyActivate(event,this)" onclick="zoomToCity('${esc(r.city)}')"><td>${esc(r.city)}</td><td>${r.records}</td><td>${r.carbon_t}</td></tr>`).join("")||"<tr><td colspan=3>Henüz veri yok</td></tr>";
    /* Harita henüz kurulmadıysa bayrak bırak: dgLandingMapInit kurulunca
     * işaretçileri kendisi yükler (yarış durumu olmasın). */
    if(worldMapL)dgLandingMarkers();

@@ -4,7 +4,7 @@
 // NOT: Senkronizasyon artık Ana Thread (Supabase JS SDK) tarafından yapılıyor
 // ============================================================
 
-const CACHE_VERSION = 'dendrogeo-sw-v2-r47';
+const CACHE_VERSION = 'dendrogeo-sw-v2-r48';
 
 /* İKİ AYRI STATİK CACHE — bu ayrım bilinçli ve önemli.
  *
@@ -34,9 +34,9 @@ const MAX_API_CACHE = 150;   // Nominatim vb. API yanıtları
 const MAX_RUNTIME = 400;     // ?v=NNN sürümlü script/style kopyaları
 
 const CORE_ASSETS = [
-    '/', '/index.html', '/manifest.json', '/icon.png', '/social-preview.jpg', '/css/style.css',
+    '/', '/index.html', '/manifest.json', '/icon.png', '/apple-touch-icon.png', '/social-preview.jpg', '/css/style.css',
     '/css/landing.css',
-    '/src/config/supabase.js', '/src/config/constants.js', '/src/config/species.js', 
+    '/src/config/supabase.js', '/src/config/constants.js', '/src/config/species.js', '/src/config/i18n.js', 
     '/src/utils/geo.js', '/src/utils/truncation.js', '/src/utils/lazylibs.js', '/src/services/allometry.js', '/src/services/auth.js','/src/services/export.js', '/src/services/offline.js',
     /* YÖNETİM ZİNCİRİ (Faz 6): ziyaret sayacı, veri talepleri, kullanıcı yönetimi,
      * yedek ve moderasyon çekirdeği ayrı modüller. */

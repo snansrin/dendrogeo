@@ -65,8 +65,13 @@ Object.keys(SPECIES_DATA).forEach(g=>{
  species[g]=SPECIES_DATA[g].map(s=>s.tr);
  SPECIES_DATA[g].forEach(s=>{ if(s.rho) rho[s.tr]=s.rho; LATIN[s.tr]=s.lat; });
 });
-/* Tür rengi (analiz grafiklerinde kullanılır) */
+/* Tür rengi (analiz grafiklerinde DOLGU/çizgi rengi olarak kullanılır) */
 const GROUP_COLOR={"\u0130BREL\u0130":"#1e6f4b","YAPRAKLI":"#c77d2e","D\u0130\u011eER":"#94a3b8"};
+/* METİN tonları (0035 · WCAG): GROUP_COLOR dolgu içindir; küçük metinde
+ * #c77d2e 3.03:1, #94a3b8 2.37:1 → AA FAIL. Metinde bu koyu tonlar kullanılır
+ * (İBRELİ 5.66 · YAPRAKLI 5.78 · DİĞER 5.04, bg üzerinde). Kilit:
+ * test/landing-claims.test.mjs. */
+const GROUP_COLOR_INK={"\u0130BREL\u0130":"#1e6f4b","YAPRAKLI":"#9a4a08","D\u0130\u011eER":"#5b6b7f"};
 
 /* ---- GİZLİ ÇÖZÜM KAYITLARI (0011e · 2026-09-28 · kullanıcı kararı) ----
  * Kullanıcı kararı: Göksu'nun 5 türü (SALKIM SÖĞÜT, MAVİ LADİN, DOĞU ÇINARI,

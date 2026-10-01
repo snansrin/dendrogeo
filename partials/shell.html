@@ -7,24 +7,25 @@
   <button class="btn sm ghost" id="installBtn" style="display:none" onclick="dgInstallApp()">📲 Uygulayı Kur</button>
   <span class="mono" id="whoami" style="font-size:.8rem;color:var(--mut)"></span>
   <span class="badge admin" id="roleBadge" style="display:none">ADMIN</span>
+  <button type="button" class="btn sm ghost dg-lang-toggle" onclick="dgToggleLang()" aria-label="Switch to English">EN</button>
   <button class="btn sm red" onclick="logout()">Çıkış</button>
  </div>
 </div>
 <div id="layout">
  <div id="side">
   <div class="sec">Saha</div>
-  <div class="item on" onclick="go('dash')">📊 Panel</div>
-  <div class="item" onclick="go('measure')">📏 Yeni Ölçüm</div>
-  <div class="item" onclick="go('nav')">🧭 Waypoint</div>
-  <div class="item" onclick="go('map')">🗺️ Canlı Harita</div>
+  <div class="item on" role="button" tabindex="0" onkeydown="dgKeyActivate(event,this)" onclick="go('dash')">📊 Panel</div>
+  <div class="item" role="button" tabindex="0" onkeydown="dgKeyActivate(event,this)" onclick="go('measure')">📏 Yeni Ölçüm</div>
+  <div class="item" role="button" tabindex="0" onkeydown="dgKeyActivate(event,this)" onclick="go('nav')">🧭 Waypoint</div>
+  <div class="item" role="button" tabindex="0" onkeydown="dgKeyActivate(event,this)" onclick="go('map')">🗺️ Canlı Harita</div>
   <div class="sec">Veri</div>
-  <div class="item" onclick="go('projects')">📁 Projeler</div>
-  <div class="item" onclick="go('records')">📋 Kayıtlarım</div>
-  <div class="item" onclick="go('export')">💾 Dışa Aktar</div>
-  <div class="item" onclick="go('world')">🌍 Dünya Verisi</div>
+  <div class="item" role="button" tabindex="0" onkeydown="dgKeyActivate(event,this)" onclick="go('projects')">📁 Projeler</div>
+  <div class="item" role="button" tabindex="0" onkeydown="dgKeyActivate(event,this)" onclick="go('records')">📋 Kayıtlarım</div>
+  <div class="item" role="button" tabindex="0" onkeydown="dgKeyActivate(event,this)" onclick="go('export')">💾 Dışa Aktar</div>
+  <div class="item" role="button" tabindex="0" onkeydown="dgKeyActivate(event,this)" onclick="go('world')">🌍 Dünya Verisi</div>
   <div class="sec" id="adminSec" style="display:none">Yönetim</div>
-  <div class="item" id="miAdmin" style="display:none" onclick="go('admin')">🔐 Ölçüm Yönetimi<span id="adminPendingBadge" class="dg-menu-badge" style="display:none"></span></div>
-  <div class="item" id="miUsers" style="display:none" onclick="go('users')">👥 Kullanıcılar</div>
+  <div class="item" id="miAdmin" style="display:none" role="button" tabindex="0" onkeydown="dgKeyActivate(event,this)" onclick="go('admin')">🔐 Ölçüm Yönetimi<span id="adminPendingBadge" class="dg-menu-badge" style="display:none"></span></div>
+  <div class="item" id="miUsers" style="display:none" role="button" tabindex="0" onkeydown="dgKeyActivate(event,this)" onclick="go('users')">👥 Kullanıcılar</div>
  </div>
  <div id="main">
 
@@ -78,7 +79,7 @@
     <div class="card">
      <label class="lbl" for="mProject">Proje <span style="text-transform:none;letter-spacing:0;font-size:.72rem;color:var(--mut)">(park adı - etiket)</span></label><select id="mProject" onchange="dgProjectChanged()"></select>
      <div class="grid g2" style="margin-top:10px">
-      <div><div class="lbl">POINT ID</div><div style="display:flex;gap:6px"><input id="mPoint" type="number" oninput="manualPoint=true"><button class="btn sm blue" style="white-space:nowrap" onclick="queryPointId()">🔍 Sorgula</button></div></div>
+      <div><label class="lbl" for="mPoint">POINT ID</label><div style="display:flex;gap:6px"><input id="mPoint" type="number" oninput="manualPoint=true"><button class="btn sm blue" style="white-space:nowrap" onclick="queryPointId()">🔍 Sorgula</button></div></div>
       <div><label class="lbl" for="mNo">Ölçüm No</label><input id="mNo" type="number" value="1"></div>
      </div>
      <div id="pointQueryResult" class="alert info" style="display:none;margin-top:10px"></div>
@@ -92,7 +93,7 @@
       <div><label class="lbl" for="mHeight">Boy (m)</label><input id="mHeight" type="number" step="0.1" oninput="liveCalc()" placeholder="örn: 7,2"></div>
      </div>
      <div class="lbl" style="margin-top:12px">📸 Fotoğraf (canlı çekim)</div>
-     <input type="file" id="mPhoto" accept="image/*" capture="environment" onchange="checkPhoto(event)">
+     <input type="file" id="mPhoto" aria-label="Fotoğraf (canlı çekim)" accept="image/*" capture="environment" onchange="checkPhoto(event)">
      <div id="photoCheck" class="alert info" style="display:none;margin-top:8px"></div>
      <div id="liveCalc" class="alert ok" style="display:none"></div>
      <button class="dg-png-btn primary" id="saveBtn" style="margin-top:14px" onclick="saveMeas()">💾 Hesapla ve Kaydet</button>
@@ -106,7 +107,7 @@
     <div class="card">
      <label class="lbl" for="nProject">Proje</label><select id="nProject" onchange="loadWaypoints()"></select>
      <div class="lbl" style="margin:12px 0 6px">Waypoints.csv Yükle (X,Y,id)</div>
-     <input type="file" id="nCsv" accept=".csv">
+     <input type="file" id="nCsv" aria-label="Waypoints.csv dosyası seç (X,Y,id)" accept=".csv">
      <div style="display:flex;gap:8px;flex-wrap:wrap">
       <button class="btn blue sm" style="margin-top:8px" onclick="uploadWpCsv()">⬆ Waypoint Yükle</button>
       <button class="btn red sm" style="margin-top:8px" onclick="deleteAllWaypoints()">🗑 Listeyi Tamamen Sil</button>
@@ -120,7 +121,7 @@
      <div style="margin-top:24px;border-top:1px solid var(--line);padding-top:16px">
       <div class="lbl" style="margin-bottom:10px">📍 Waypoint Listesi <span style="text-transform:none;letter-spacing:0">(üstü çizili = yapıldı)</span></div>
       <div class="tblwrap dg-cards" style="max-height:300px;overflow-y:auto;border:1px solid var(--line);border-radius:10px">
-       <table><thead><tr><th>ID</th><th>Enlem</th><th>Boylam</th><th>Durum</th><th>İşlem</th></tr></thead><tbody id="wpListTable"></tbody></table>
+       <table><thead><tr><th scope="col">ID</th><th scope="col">Enlem</th><th scope="col">Boylam</th><th scope="col">Durum</th><th scope="col">İşlem</th></tr></thead><tbody id="wpListTable"></tbody></table>
       </div>
      </div>
     </div>
@@ -179,7 +180,7 @@
      <button class="btn sm ghost" id="projCancelBtn" style="display:none" onclick="cancelProjectEdit()">Vazgeç</button>
     </div>
    </div>
-   <div class="card tblwrap dg-cards"><table><thead><tr><th>ID</th><th>Park</th><th>Proje Adı</th><th>Ülke</th><th>Şehir</th><th>Tarih</th><th>İşlem</th></tr></thead><tbody id="projTable"></tbody></table></div>
+   <div class="card tblwrap dg-cards"><table><thead><tr><th scope="col">ID</th><th scope="col">Park</th><th scope="col">Proje Adı</th><th scope="col">Ülke</th><th scope="col">Şehir</th><th scope="col">Tarih</th><th scope="col">İşlem</th></tr></thead><tbody id="projTable"></tbody></table></div>
    <!-- KULLANICI RAPOR PANELİ (0009 · 2026-09-28): kullanıcılar KENDİ park
         projelerinin bilimsel raporunu site içinden yayınlar — aynı kuyruk
         (report_requests), aynı DGR kimliği, aynı kalıcı bağlantı. Sunucu
@@ -211,7 +212,7 @@
   <div class="view" id="v-records">
    <h2 class="disp" style="margin-bottom:16px">Kayıtlarım</h2>
    <div class="alert info">Kayıtlarınız admin onayından sonra dünya verisinde yayınlanır.</div>
-   <div class="card tblwrap dg-cards"><table><thead><tr><th>Proje</th><th>Nokta</th><th>Tür</th><th>Çap</th><th>Boy</th><th>Karbon</th><th>Foto</th><th>Durum</th><th>İşlem</th></tr></thead><tbody id="recTable"></tbody></table></div>
+   <div class="card tblwrap dg-cards"><table><thead><tr><th scope="col">Proje</th><th scope="col">Nokta</th><th scope="col">Tür</th><th scope="col">Çap</th><th scope="col">Boy</th><th scope="col">Karbon</th><th scope="col">Foto</th><th scope="col">Durum</th><th scope="col">İşlem</th></tr></thead><tbody id="recTable"></tbody></table></div>
   </div>
 
   <div class="view" id="v-export">
@@ -239,7 +240,7 @@
     <ol class="guide">
      <li><b>CSV'yi içe aktar:</b> QGIS → <code>Layer → Add Layer → Add Delimited Text Layer</code>. <code>X = LONGITUDE</code>, <code>Y = LATITUDE</code>, CRS = <code>EPSG:4326</code>.</li>
      <li><b>Tüm veriler katman olur:</b> AGB, BHB, biyokütle, karbon sütunları öznitelik tablosuna işlenir. <code>Identify (i)</code> ile bilgi balonu açılır.</li>
-     <li><b>Yöntem A — İnternetten (önerilen):</b> Katman Özellikleri → <code>Display</code> → HTML Map Tip:<br><code>&lt;img src='[% "PHOTO_URL" %]' width='220'&gt;</code><br>İnternet bağlantısı varken fotoğraflar otomatik yüklenir, yerel klasöre gerek yok.</li><li><b>Yöntem B — Yerel klasör:</b> Fotoğrafları tek klasöre koy (örn. <code>C:/dendro_foto/</code>). Dosya adları <code>PHOTO_FILE</code> ile aynı olmalı. Map Tip:<br><code>&lt;img src="file:///C:/dendro_foto/[% "PHOTO_FILE" %]" width="220"&gt;</code></li>
+     <li><b>Yöntem A — İnternetten (önerilen):</b> Katman Özellikleri → <code>Display</code> → HTML Map Tip:<br><code>&lt;img src='[% "PHOTO_URL" %]' width='220'&gt;</code><br>İnternet bağlantısı varken fotoğraflar otomatik yüklenir, yerel klasöre gerek yok.</li><li><b>Yöntem B — Yerel klasör:</b> Fotoğrafları tek klasöre koy (örn. <code>D:/DendroFoto/</code>). Dosya adları <code>PHOTO_FILE</code> ile aynı olmalı. Map Tip:<br><code>&lt;img src="file:///D:/DendroFoto/[% "PHOTO_FILE" %]" width="220"&gt;</code></li>
      <li><b>Etkinleştir:</b> <code>View → Show Map Tips</code>.</li>
      <li><b>Etiket:</b> Labels → <code>POINT_ID</code>.</li>
     </ol>
@@ -264,8 +265,8 @@
       <div class="card" style="border-left:4px solid var(--green)">
     <div class="shead" style="margin-bottom:12px"><span class="no">🌍</span><h2 style="font-size:1.15rem">Bölgesel Dağılım</h2><span class="rule"></span></div>
     <div class="grid g2">
-     <div class="tblwrap dg-cards"><table><thead><tr><th>Ülke</th><th>Kayıt</th><th>Karbon(t)</th><th>Ort.Çap</th><th>Ort.Yükseklik(m)</th></tr></thead><tbody id="wCountryT"></tbody></table></div>
-     <div class="tblwrap dg-cards"><table><thead><tr><th>Şehir</th><th>Kayıt</th><th>Karbon(t)</th></tr></thead><tbody id="wCityT"></tbody></table></div>
+     <div class="tblwrap dg-cards"><table><thead><tr><th scope="col">Ülke</th><th scope="col">Kayıt</th><th scope="col">Karbon(t)</th><th scope="col">Ort.Çap</th><th scope="col">Ort.Yükseklik(m)</th></tr></thead><tbody id="wCountryT"></tbody></table></div>
+     <div class="tblwrap dg-cards"><table><thead><tr><th scope="col">Şehir</th><th scope="col">Kayıt</th><th scope="col">Karbon(t)</th></tr></thead><tbody id="wCityT"></tbody></table></div>
     </div>
       </div>
    <div class="card" style="margin-top:18px;border-left:4px solid var(--blue)">
@@ -353,7 +354,7 @@
    </div>
       <div class="card" style="margin-bottom:18px;border-left:4px solid var(--blue)">
     <div class="shead" style="margin-bottom:12px"><span class="no">✉️</span><h2 style="font-size:1.2rem">Aktif Talepler</h2><span class="rule"></span><span class="mono" style="font-size:.78rem;color:var(--amber-ink)">Bekleyen: <b id="aReqPendingMini">0</b></span></div>
-    <div class="tblwrap dg-cards"><table><thead><tr><th>Kullanıcı</th><th>E‑posta</th><th>Filtre</th><th>Tarih</th><th>Durum</th><th>İşlem</th></tr></thead><tbody id="aReqT"></tbody></table></div>
+    <div class="tblwrap dg-cards"><table><thead><tr><th scope="col">Kullanıcı</th><th scope="col">E‑posta</th><th scope="col">Filtre</th><th scope="col">Tarih</th><th scope="col">Durum</th><th scope="col">İşlem</th></tr></thead><tbody id="aReqT"></tbody></table></div>
    </div>
    <div class="card" id="closedRequestsWrap" style="margin-bottom:18px;border-left:4px solid var(--mut);display:none">
     <div class="shead" style="margin-bottom:12px;cursor:pointer" onclick="document.getElementById('closedReqBody').style.display=document.getElementById('closedReqBody').style.display==='none'?'block':'none'">
@@ -363,7 +364,7 @@
      <span class="mono" style="font-size:.78rem;color:var(--mut)">Arşiv: <b id="aReqClosed">0</b> · Aç/Kapat ▼</span>
     </div>
     <div id="closedReqBody" style="display:none">
-     <div class="tblwrap dg-cards"><table><thead><tr><th>Kullanıcı</th><th>E‑posta</th><th>Filtre</th><th>Talep</th><th>Kapanış</th><th>Durum</th></tr></thead><tbody id="closedReqT"></tbody></table></div>
+     <div class="tblwrap dg-cards"><table><thead><tr><th scope="col">Kullanıcı</th><th scope="col">E‑posta</th><th scope="col">Filtre</th><th scope="col">Talep</th><th scope="col">Kapanış</th><th scope="col">Durum</th></tr></thead><tbody id="closedReqT"></tbody></table></div>
     </div>
    </div>
    <!-- ÖLÇÜM ONAY & MODERASYON — TEK KART (2026-09-24)
@@ -387,8 +388,8 @@
     <div id="adminTree"></div>
     <details class="dg-flat" style="margin-top:14px">
      <summary>📄 Düz liste (tüm kayıtlar · ilk 300 satır)</summary>
-     <input type="text" id="adminMeasSearch" placeholder="🔍 Ara..." oninput="filterAdminMeas()" style="max-width:100%;margin:10px 0">
-     <div class="tblwrap dg-cards"><table><thead><tr><th>Kullanıcı</th><th>Nokta</th><th>Tür</th><th>Çap</th><th>Boy</th><th>Karbon</th><th>Foto</th><th>Durum</th><th>İşlem</th></tr></thead><tbody id="aMeasT"></tbody></table></div>
+     <input type="text" id="adminMeasSearch" aria-label="Kayıtlarda ara" placeholder="🔍 Ara..." oninput="filterAdminMeas()" style="max-width:100%;margin:10px 0">
+     <div class="tblwrap dg-cards"><table><thead><tr><th scope="col">Kullanıcı</th><th scope="col">Nokta</th><th scope="col">Tür</th><th scope="col">Çap</th><th scope="col">Boy</th><th scope="col">Karbon</th><th scope="col">Foto</th><th scope="col">Durum</th><th scope="col">İşlem</th></tr></thead><tbody id="aMeasT"></tbody></table></div>
     </details>
    </div>
   </div>
@@ -396,8 +397,8 @@
   <div class="view" id="v-users">
    <h2 class="disp" style="margin-bottom:16px">👥 Kullanıcı Yönetimi</h2>
    <div class="card tblwrap dg-cards">
-    <input type="text" id="userSearch" placeholder="🔍 E‑posta veya ad ara..." oninput="filterUsers()" style="max-width:100%;margin-bottom:12px">
-    <table><thead><tr><th>E‑posta</th><th>Ad Soyad</th><th>Rol</th><th>Durum</th><th>İşlem</th></tr></thead><tbody id="aUsersT"></tbody></table>
+    <input type="text" id="userSearch" aria-label="E-posta veya ad ara" placeholder="🔍 E‑posta veya ad ara..." oninput="filterUsers()" style="max-width:100%;margin-bottom:12px">
+    <table><thead><tr><th scope="col">E‑posta</th><th scope="col">Ad Soyad</th><th scope="col">Rol</th><th scope="col">Durum</th><th scope="col">İşlem</th></tr></thead><tbody id="aUsersT"></tbody></table>
    </div>
   </div>
 
@@ -409,7 +410,7 @@
 <h3 class="disp" style="margin-bottom:8px">🔑 Yeni Parola Belirle</h3>
 <p style="color:var(--mut);font-size:.85rem;margin-bottom:14px">Şifre sıfırlama bağlantısı doğrulandı. Yeni parolanızı belirleyin.</p>
 <label class="lbl" for="rcPass">Yeni Parola</label><input id="rcPass" type="password" minlength="6">
-<div class="lbl" style="margin-top:10px">Yeni Parola (tekrar)</div><input id="rcPass2" type="password" minlength="6">
+<label class="lbl" for="rcPass2" style="margin-top:10px">Yeni Parola (tekrar)</label><input id="rcPass2" type="password" minlength="6">
 <div id="rcMsg" style="margin-top:10px;font-size:.85rem;min-height:1.2em"></div>
 <button class="dg-png-btn primary" style="margin-top:14px" onclick="saveNewPassword()">💾 Parolayı Güncelle</button>
 <button class="dg-png-btn ghost" style="margin-top:8px" onclick="cancelRecovery()">Şimdi Değil</button>

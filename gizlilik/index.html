@@ -9,9 +9,9 @@
 <meta property="og:url" content="https://dendrogeo.org/gizlilik/">
 <link rel="icon" href="../icon.png">
 <!-- FONT (2026-10-01 denetim O7): tasarım sistemi Manrope/Fraunces/IBM Plex Mono referanslar; index.html'dekiyle AYNI render-blokamayan desen. -->
-<link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Manrope:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Manrope:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap" media="print" onload="this.media='all'">
-<noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Manrope:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap"></noscript>
+<link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=Manrope:wght@400;600;700;800&family=IBM+Plex+Mono:wght@400;600;700&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=Manrope:wght@400;600;700;800&family=IBM+Plex+Mono:wght@400;600;700&display=swap" media="print" onload="this.media='all'">
+<noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=Manrope:wght@400;600;700;800&family=IBM+Plex+Mono:wght@400;600;700&display=swap"></noscript>
 <link rel="stylesheet" href="../css/style.css">
 <style>:root{--bg:#f7f6f2;--ink:#182420;--mut:#64706a;--green:#14532d;--line:#dfe5df;--card:#fff}
 *{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.7 Arial,system-ui,sans-serif}
@@ -51,7 +51,7 @@ main{padding:54px 0 70px}h1{font-size:clamp(2rem,5vw,3.3rem);line-height:1.08;ma
 </div>
 
 <h2>3. İşleme amaçları ve hukuki sebepler</h2>
-<table><thead><tr><th>Amaç</th><th>Veri</th><th>Hukuki sebep (KVKK m.5)</th></tr></thead><tbody>
+<table><thead><tr><th scope="col">Amaç</th><th scope="col">Veri</th><th scope="col">Hukuki sebep (KVKK m.5)</th></tr></thead><tbody>
 <tr><td>Hesap oluşturma ve oturum yönetimi</td><td>E-posta, ad soyad, kurum</td><td>Açık rıza + sözleşmenin kurulması/ifası</td></tr>
 <tr><td>Bilimsel ağaç envanteri ve karbon hesabı</td><td>GPS, tür, çap, boy, foto</td><td>Sözleşmenin ifası + veri sorumlusunun meşru menfaati (kamuya açık bilimsel veri seti)</td></tr>
 <tr><td>Veri kalite kontrolü ve moderasyon</td><td>Ölçüm kayıtları, denetim izi</td><td>Meşru menfaat (bilimsel doğruluk)</td></tr>
@@ -61,7 +61,7 @@ main{padding:54px 0 70px}h1{font-size:clamp(2rem,5vw,3.3rem);line-height:1.08;ma
 
 <h2>4. Verilerin kimlerle paylaşıldığı</h2>
 <p>Verileriniz <b>satılmaz</b>. Yalnızca hizmetin çalışması için gerekli alt yüklenicilerle ve aşağıdaki amaçlarla paylaşılır:</p>
-<table><thead><tr><th>Sağlayıcı</th><th>Amaç</th><th>Paylaşılan veri</th></tr></thead><tbody>
+<table><thead><tr><th scope="col">Sağlayıcı</th><th scope="col">Amaç</th><th scope="col">Paylaşılan veri</th></tr></thead><tbody>
 <tr><td>Supabase (veritabanı, kimlik doğrulama, dosya depolama)</td><td>Uygulamanın barındırılması</td><td>Hesap, ölçüm ve fotoğraf verileri</td></tr>
 <tr><td>Google (OAuth)</td><td>"Google ile devam et" girişi</td><td>Yalnız giriş anında ad + e-posta</td></tr>
 <tr><td>Cloudflare Turnstile</td><td>Parola formunda bot koruması</td><td>Doğrulama jetonu (kişisel veri değil)</td></tr>
@@ -93,7 +93,7 @@ main{padding:54px 0 70px}h1{font-size:clamp(2rem,5vw,3.3rem);line-height:1.08;ma
 
 <h2>8. Çerezler ve yerel depolama</h2>
 <p>DendroGeo <b>izleme çerezi kullanmaz</b>. Kullanılan yerel depolama:</p>
-<table><thead><tr><th>Teknoloji</th><th>Ne tutar</th><th>Neden</th></tr></thead><tbody>
+<table><thead><tr><th scope="col">Teknoloji</th><th scope="col">Ne tutar</th><th scope="col">Neden</th></tr></thead><tbody>
 <tr><td>localStorage</td><td>Oturum belirteci (Supabase Auth)</td><td>Yenilemede oturumun korunması</td></tr>
 <tr><td>IndexedDB</td><td>Çevrimdışı ölçüm kuyruğu (fotoğraf dahil)</td><td>Sahada internet yokken veri kaybını önleme</td></tr>
 <tr><td>Service Worker Cache</td><td>Kod, stil ve harita karoları</td><td>Çevrimdışı çalışma ve hız</td></tr>

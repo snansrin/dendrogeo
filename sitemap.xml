@@ -14,4 +14,6 @@
   <url><loc>https://dendrogeo.org/kunye/</loc><lastmod>2026-10-01</lastmod></url>
   <url><loc>https://dendrogeo.org/en/</loc><changefreq>monthly</changefreq></url>
   <url><loc>https://dendrogeo.org/en/methods/</loc><changefreq>yearly</changefreq></url>
+  <url><loc>https://dendrogeo.org/rapor/</loc><lastmod>2026-10-01</lastmod><changefreq>weekly</changefreq></url>
+  <url><loc>https://dendrogeo.org/rapor/DGR-2026-0019/</loc><lastmod>2026-09-30</lastmod><changefreq>yearly</changefreq></url>
 </urlset>

@@ -255,7 +255,7 @@ function dgPubRender(){
   (st.queue===null?'<div class="alert info">ℹ Yayın günlüğü okunamadı (çevrimdışı ya da dosya henüz yayınlanmadı). İstek gönderimi çalışır; durum alanı boş kalır.</div>':"")+
   (pending>0?'<div class="alert info">⏳ <b>'+pending+" istek kuyrukta.</b> Yayın işi 5 dakikada bir çalışır (GitHub yoğunluğunda 15 dakikayı bulabilir); bu kart kendini 25 saniyede bir tazeler, bağlantı burada görünür. Sekmeyi kapatmanız işi durdurmaz.</div>":"")+
   '<div class="tblwrap"><table class="dg-cards">'+
-  "<thead><tr><th>Park</th><th>Kayıt</th><th>Karbon</th><th>Alan</th><th>Yayın durumu</th><th>İşlem</th></tr></thead><tbody>"+
+  "<thead><tr><th scope='col'>Park</th><th scope='col'>Kayıt</th><th scope='col'>Karbon</th><th scope='col'>Alan</th><th scope='col'>Yayın durumu</th><th scope='col'>İşlem</th></tr></thead><tbody>"+
   (rows||'<tr><td colspan=6>Onaylı ölçümü olan park yok — önce ölçüm onaylayın.</td></tr>')+
   "</tbody></table></div>"+
   '<div class="lbl" style="margin:14px 0 4px">📜 Yayın günlüğü (son işler)</div>'+

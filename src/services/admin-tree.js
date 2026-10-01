@@ -240,7 +240,7 @@ function dgTreeUserHTML(U){
       `<span class="dg-tree-meta">${U.n} kayıt · ${dgTon(U.c)} · ${dgDurumOzet(U)}</span>`+
     `</summary>`+
     `<div class="dg-tree-body tblwrap"><table class="dg-cards">`+
-      `<thead><tr><th>Nokta</th><th>Tür</th><th>Grup</th><th>Çap</th><th>Boy</th><th>Karbon kg</th><th>Foto</th><th>Durum</th><th>Tarih</th><th>İşlem</th></tr></thead>`+
+      `<thead><tr><th scope='col'>Nokta</th><th scope='col'>Tür</th><th scope='col'>Grup</th><th scope='col'>Çap</th><th scope='col'>Boy</th><th scope='col'>Karbon kg</th><th scope='col'>Foto</th><th scope='col'>Durum</th><th scope='col'>Tarih</th><th scope='col'>İşlem</th></tr></thead>`+
       `<tbody>${U.rows.map(dgTreeRowHTML).join("")}</tbody>`+
     `</table></div>`+
   `</details>`;

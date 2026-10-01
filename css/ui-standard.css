@@ -26,20 +26,12 @@
    RENKLER yalnız :root token'larından gelir (elle hex yazılmaz).
    ============================================================ */
 
-/* ---- 1) TOKEN ANAYASASI: sayfa yerel :root override'larını nötrler ----
-   NOT (2026-10-01 denetim): --mut DEĞERİ style.css'teki WCAG düzeltmesiyle
-   (#5f6d65 · 5.03:1) AYNI olmalı. Bu dosya her sayfada EN SON yüklendiği
-   için buradaki eski açık --mut tonu (4.41:1) düzeltmeyi sessizce geri alıyordu.
-   Kilit: test/critical-fixes.test.mjs. */
-:root{
-  --bg:#f7f6f2; --surface:#fff; --ink:#182420; --mut:#5f6d65; --line:#e6e3d9;
-  --green:#1e6f4b; --green-dk:#14532d; --tint:#eaf3ec;
-  --amber:#c77d2e; --amber-ink:#9a4a08; --amber-tint:#f8efe2; --red:#c2452d; --blue:#2b6cb0;
-  --r:14px; --sh:0 1px 2px rgba(20,30,25,.05),0 10px 28px rgba(20,30,25,.07);
-  --f-disp:Fraunces,Georgia,serif;
-  --f-ui:Manrope,system-ui,sans-serif;
-  --f-mono:"IBM Plex Mono",Consolas,monospace;
-}
+/* ---- 1) TOKEN KAYNAĞI (0035): tüm tasarım tokenları TEK YERDE — style.css
+   :root. Bu dosya eskiden aynı tokenları yeniden tanımlıyordu; en SON yüklendiği
+   için style.css'teki WCAG düzeltmelerini sessizce eziyordu (--mut 4.41:1'e
+   geri düşmüştü). Artık burada :root YOK; kurallar var(--token) kullanır.
+   Kilit: test/landing-claims.test.mjs + test/critical-fixes.test.mjs. */
+
 
 /* ---- 2) GÖVDE + TİPOGRAFİ ---- */
 body.dg-page{background:var(--bg);color:var(--ink);font:15px/1.65 var(--f-ui)}

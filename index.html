@@ -10,7 +10,6 @@
 
 <!-- === SEO META === -->                  
 <meta name="description" content="DendroGeo: saha GPS ölçümü, ağaç biyokütlesi ve karbon hesabı, onaylı veri haritası ve 10 m arazi örtüsü analizi için web GIS platformu.">
-<meta name="keywords" content="ağaç envanteri, karbon hesaplama, biyokütle, allometrik denklem, DBH, çap ölçümü, ağaç boyu, kent parkları karbon, orman karbon stoğu, Chave 2014, IPCC 2006, QGIS ağaç haritası, ağaç veri tabanı, tree inventory, carbon sequestration, biomass equation, forest carbon, urban tree carbon, DendroGeo">
 <meta name="author" content="Sinan ŞİRİN, Nagihan ŞİRİN">
 <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">
 <meta name="googlebot" content="index, follow">
@@ -59,21 +58,20 @@
       "applicationSubCategory": "Environmental Science",
       "operatingSystem": "Web, PWA, iOS, Android",
       "browserRequirements": "Requires JavaScript, HTML5, Geolocation API",
-      "softwareVersion": "3.0",
+      "softwareVersion": "3.0.0",
       "datePublished": "2026-08-30",
       "dateModified": "2026-10-01",
       "inLanguage": ["tr-TR", "en-US"],
       "isAccessibleForFree": true,
       "license": "https://creativecommons.org/licenses/by-nc/4.0/",
-      "copyrightHolder": {
-        "@type": "Person",
-        "name": "Nagihan ŞİRİN & Sinan ŞİRİN"
-      },
+      "copyrightHolder": [
+        { "@type": "Person", "name": "Nagihan ŞİRİN" },
+        { "@type": "Person", "name": "Sinan ŞİRİN" }
+      ],
       "sameAs": [
         "https://github.com/snansrin/dendrogeo",
         "https://doi.org/10.5281/zenodo.22948643",
-        "https://zenodo.org/records/22948643",
-        "https://doi.org/10.5281/zenodo.22646300"
+        "https://zenodo.org/records/22948643"
       ],
       "termsOfService": "https://dendrogeo.org/kullanim-kosullari/",
       "privacyPolicy": "https://dendrogeo.org/gizlilik/",
@@ -220,9 +218,9 @@
 <link rel="dns-prefetch" href="https://overpass-api.de">
 <!-- FONT RENDER'I BLOKLAMASIN: stylesheet media="print" ile gelir, onload'da
      all'a döner → ilk çizim font CSS'ini beklemez; preload öncelikli indirir. -->
-<link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Manrope:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Manrope:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap" media="print" onload="this.media='all'">
-<noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Manrope:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap"></noscript>
+<link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=Manrope:wght@400;600;700;800&family=IBM+Plex+Mono:wght@400;600;700&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=Manrope:wght@400;600;700;800&family=IBM+Plex+Mono:wght@400;600;700&display=swap" media="print" onload="this.media='all'">
+<noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=Manrope:wght@400;600;700;800&family=IBM+Plex+Mono:wght@400;600;700&display=swap"></noscript>
 <link rel="stylesheet" href="vendor/leaflet-1.9.4.css">
 <script src="vendor/leaflet-1.9.4.js" defer></script>
 <link rel="stylesheet" href="vendor/MarkerCluster-1.5.3.css">
@@ -231,7 +229,11 @@
 <script src="vendor/supabase-js-2.116.0.js" defer></script>
 <script src="src/config/supabase.js?v=6b91ef6f" defer></script>
 <script src="src/config/constants.js?v=8811f86e" defer></script>
-<script src="src/config/species.js?v=5b94c549" defer></script>
+<script src="src/config/species.js?v=d5d302ab" defer></script>
+<!-- DİL KATMANI (0035): TR markup varsayılan; EN sözlüğü çalışma zamanında
+     uygulanır (dgToggleLang). defer sırası önemli değil — DOMContentLoaded'da
+     ya da hemen (hazırsa) çalışır. module-registry + CORE_ASSETS kaydı şart. -->
+<script src="src/config/i18n.js?v=77b688eb" defer></script>
 <script src="src/utils/geo.js?v=3e796768" defer></script>
 <script src="src/utils/truncation.js?v=f43c76b3" defer></script>
 <!-- Faz 7: geotiff (317 KB) ve chart.js (208 KB) artık SENKRON yüklenmiyor;
@@ -239,7 +241,7 @@
 <script src="src/utils/lazylibs.js?v=b3a9a6ec" defer></script>
 <script src="src/services/allometry.js?v=23ec2992" defer></script>
 <script src="src/services/auth.js?v=83b12d2c" defer></script>
-<script src="src/services/export.js?v=cf96e318" defer></script>
+<script src="src/services/export.js?v=f15f365d" defer></script>
 <script src="src/services/offline.js?v=1db110d2" defer></script>
 <!-- YÖNETİM ZİNCİRİ (Faz 6 — eski admin.js beş modüle bölündü) -->
 <script src="src/services/visit-stats.js?v=a9195dca" defer></script>
@@ -250,15 +252,15 @@
 <!-- YÖNETİM AĞACI (2026-09-24): park → proje → kullanıcı → ölçüm kademeli
      görünümü + sorgu hatası görünürlüğü. admin.js'ten SONRA yüklenir
      (approve/reject/del fonksiyonlarını çağırır). -->
-<script src="src/services/admin-tree.js?v=c3c195e8" defer></script>
+<script src="src/services/admin-tree.js?v=ccdafe28" defer></script>
 <!-- BİLİMSEL RAPOR YAYINI (2026-09-27): site içinden yayın kuyruğu —
      📄 Yayınla → report_requests (0008) → rapor-yayin.yml → rapor/DGR-…/
      → kalıcı bağlantı + 📤 Paylaş. admin.js loadAdmin() bu modülü çağırır. -->
-<script src="src/services/report-publish.js?v=7db34cf4" defer></script>
-<script src="src/services/park-invites.js?v=fdc9c9a5" defer></script>
-<script src="src/services/world.js?v=918cd92f" defer></script>
-<script src="src/services/measure.js?v=e4836dab" defer></script>
-<script src="src/services/map.js?v=c10e001c" defer></script>
+<script src="src/services/report-publish.js?v=85a20f0e" defer></script>
+<script src="src/services/park-invites.js?v=d2974e7a" defer></script>
+<script src="src/services/world.js?v=4ebc047a" defer></script>
+<script src="src/services/measure.js?v=d078205a" defer></script>
+<script src="src/services/map.js?v=8e36a225" defer></script>
 <!-- LULC ZİNCİRİ ARTIK TEMBEL (2026-09-25 · Faz 8): 8 dosya ilk yüklemede
      indirilmiyor. Yalnız "🌿 Yüzey Örtüsü Analizi"ne basan kullanıcı için
      src/utils/lazylibs.js → dgEnsureLulc() sırayla enjekte eder
@@ -276,19 +278,19 @@
      projeyi parka bağlar, ölçüm kapısını (park algılanmadan ölçüm yok) kurar.
      Sıra ÖNEMLİ: park-query'den sonra, grid-engine'den önce (grid panelindeki
      proje listesi bu modülden beslenir). -->
-<script src="src/services/park-registry.js?v=6fc6d4be" defer></script>
+<script src="src/services/park-registry.js?v=2df3b59d" defer></script>
 <script src="src/services/grid-engine.js?v=c3e27b01" defer></script>
 <script src="src/ui/park-panel.js?v=66573187" defer></script>
 <script src="src/ui/park-export.js?v=47f46346" defer></script>
-<script src="src/services/dash.js?v=a409ae65" defer></script>
-<link rel="stylesheet" href="css/style.css?v=487febbf">
-<link rel="stylesheet" href="css/landing.css?v=4ca9a886">
+<script src="src/services/dash.js?v=e5c948aa" defer></script>
+<link rel="stylesheet" href="css/style.css?v=0e01b736">
+<link rel="stylesheet" href="css/landing.css?v=91528a91">
 <link rel="stylesheet" href="css/park-panel.css?v=10b49293">
 <!-- TASARIM SİSTEMİ (2026-09-27, 2. deneme): ui-standard.css geri BAĞLANDI
      ama ARTIK eleman seviyesi kuralları yalnız .dg-page (alt sayfalar) altında
      geçerli; kabuk (body.dg-app) yalnız sınıf-bazlı bileşenleri ve sekme
      başlığı ölçeğini alır → Park Karşılaştırma kartı kıpırdamaz. -->
-<link rel="stylesheet" href="css/ui-standard.css?v=154e6f6b">
+<link rel="stylesheet" href="css/ui-standard.css?v=8206bd65">
 </head>
 <body class="dg-app">
 <a class="dg-skip" href="#main">İçeriğe atla</a>
@@ -296,7 +298,9 @@
 <div id="landing">
 <div id="topnav"><div class="wrap">
 <span class="brand"><img class="brand-logo" src="logo.png" alt="DendroGeo">DendroGeo</span>
- <div class="links"><a href="#sistem">Sistem</a><a href="#yontem">Yöntem</a><a href="#veri">Veri &amp; Harita</a><a href="#istatistik">İstatistik</a><a href="#bilgi-merkezi">Bilgi Merkezi &amp; Kaynaklar</a><a href="/en/" class="mono">EN</a></div>
+ <button type="button" class="navtoggle" id="navToggle" aria-expanded="false" aria-controls="navLinks" aria-label="Bölüm menüsü" onclick="dgNavToggle()">☰</button>
+ <div class="links" id="navLinks"><a href="#sistem">Sistem</a><a href="#yontem">Yöntem</a><a href="#veri">Veri &amp; Harita</a><a href="#istatistik">İstatistik</a><a href="#bilgi-merkezi">Bilgi Merkezi &amp; Kaynaklar</a></div>
+ <button type="button" class="btn sm ghost dg-lang-toggle" onclick="dgToggleLang()" aria-label="Switch to English">EN</button>
  <button class="btn sm" onclick="showAuth()">Giriş / Kayıt</button>
 </div></div>
 
@@ -375,12 +379,6 @@
    <div class="chip c3"><span style="color:var(--blue)">●</span> H 13 m</div>
   </div>
  </div>
- <div class="statband">
- <div><div class="val" id="stRec">—</div><div class="lbl">Toplam Kayıt</div></div>
-  <div><div class="val" id="stCountry">—</div><div class="lbl">Ülke</div></div>
-  <div><div class="val" id="stCity">—</div><div class="lbl">Şehir</div></div>
-  <div><div class="val" id="stCarbon">—</div><div class="lbl">Karbon (t)</div></div>
- </div>
 </div></div>
 <section class="blk" id="sistem"><div class="wrap">
  <div class="shead"><span class="no">01</span><h2>Sistemin Üç Temel Direği</h2><span class="rule"></span></div>
@@ -420,7 +418,7 @@
    </ul>
   </div>
  </div>
- <div style="margin-top:36px" class="card tblwrap"><table><thead><tr><th>Rol</th><th>Yetki</th></tr></thead><tbody>
+ <div style="margin-top:36px" class="card tblwrap"><table><thead><tr><th scope="col">Rol</th><th scope="col">Yetki</th></tr></thead><tbody>
   <tr><td>Ziyaretçi</td><td>Yalnızca onaylanmış kayıtları, istatistikleri ve haritayı görüntüler</td></tr>
   <tr><td>Kullanıcı</td><td>Proje ve ölçüm oluşturur; kendi kayıtlarını onay beklerken de görür</td></tr>
   <tr><td>Denetçi (Admin)</td><td>Kayıtları onaylar/reddeder, moderasyon ve toplu dışa aktarım</td></tr>
@@ -454,19 +452,20 @@
 
  <div style="margin-top:56px;display:grid;grid-template-columns:1fr 1fr;gap:24px" class="method-grid">
   <div class="card" style="border-left:4px solid var(--green)">
-   <div style="font-family:Fraunces,serif;font-size:1.1rem;color:var(--green-dk);font-weight:600;margin-bottom:14px">📐 Allometrik Formüller</div>
-   <div class="formula">DBH = Çevre ÷ π</div>
+   <div style="font-family:var(--f-disp);font-size:1.1rem;color:var(--green-dk);font-weight:600;margin-bottom:14px">📐 Allometrik Formüller</div>
+   <div class="formula">DBH = göğüs çapı (cm) · 1,30 m'den doğrudan ölçülür</div>
+   <div class="formula" style="border-left-color:var(--amber);font-size:.78rem">— çevre→çap dönüşümü UYGULANMAZ; ham saha değeri (girth_cm) kanıt olarak saklanır</div>
    <div class="formula">AGB = 0.0673·(ρ·DBH²·H)<sup>0.976</sup> <span style="color:var(--mut)">— Chave 2014</span></div>
    <div class="formula">BHB = AGB·0.26 <span style="color:var(--mut)">— sistemde kullanılan sabit kök/gövde varsayımı</span></div>
    <div class="formula">C = (AGB+BHB)·0.47</div>
    <p style="color:var(--mut);font-size:.78rem;margin-top:12px">Tür/grup tablosunda 50 seçim kaydı bulunur; 22 kaydın doğrudan ρ değeri vardır, 28 kayıt grup varsayılanına düşer.</p>
   </div>
   <div class="card" style="border-left:4px solid var(--amber)">
-   <div style="font-family:Fraunces,serif;font-size:1.1rem;color:var(--green-dk);font-weight:600;margin-bottom:14px">🔬 Veri Doğruluk Politikası</div>
+   <div style="font-family:var(--f-disp);font-size:1.1rem;color:var(--green-dk);font-weight:600;margin-bottom:14px">🔬 Veri Doğruluk Politikası</div>
    <ul style="list-style:none;padding:0;margin:0">
     <li style="padding:8px 0 8px 24px;position:relative;color:var(--ink);font-size:.88rem"><span style="position:absolute;left:0;color:var(--ink);font-weight:700">✓</span>GPS doğruluğu ölçümle kaydedilir; sabit ±10 m kayıt eşiği yoktur</li>
     <li style="padding:8px 0 8px 24px;position:relative;color:var(--ink);font-size:.88rem"><span style="position:absolute;left:0;color:var(--ink);font-weight:700">✓</span>Fotoğraf eklenirse bitki örtüsü ≥ %25 ve pozlama 25–245 aralığı kontrol edilir</li>
-    <li style="padding:8px 0 8px 24px;position:relative;color:var(--ink);font-size:.88rem"><span style="position:absolute;left:0;color:var(--green);font-weight:700">✓</span>DBH ≤ 500 cm, boy ≤ 100 m</li>
+    <li style="padding:8px 0 8px 24px;position:relative;color:var(--ink);font-size:.88rem"><span style="position:absolute;left:0;color:var(--green);font-weight:700">✓</span>DBH ≤ 400 cm, boy ≤ 100 m</li>
     <li style="padding:8px 0 8px 24px;position:relative;color:var(--ink);font-size:.88rem"><span style="position:absolute;left:0;color:var(--green);font-weight:700">✓</span>Admin onayı zorunlu</li>
    </ul>
   </div>
@@ -481,8 +480,8 @@
   <div class="card" style="margin-top:20px;border-left:4px solid var(--green)">
   <div class="shead" style="margin-bottom:12px"><span class="no">🌍</span><h2 style="font-size:1.15rem">Bölgesel Dağılım</h2><span class="rule"></span></div>
   <div class="grid g2">
-   <div class="tblwrap"><table id="tblCountry"><thead><tr><th>Ülke</th><th>Kayıt</th><th>Karbon(t)</th><th>Ort.DBH</th><th>Ort.Yükseklik(m)</th></tr></thead><tbody></tbody></table></div>
-   <div class="tblwrap"><table id="tblCity"><thead><tr><th>Şehir</th><th>Kayıt</th><th>Karbon(t)</th></tr></thead><tbody></tbody></table></div>
+   <div class="tblwrap"><table id="tblCountry"><thead><tr><th scope="col">Ülke</th><th scope="col">Kayıt</th><th scope="col">Karbon(t)</th><th scope="col">Ort.DBH</th><th scope="col">Ort.Yükseklik(m)</th></tr></thead><tbody></tbody></table></div>
+   <div class="tblwrap"><table id="tblCity"><thead><tr><th scope="col">Şehir</th><th scope="col">Kayıt</th><th scope="col">Karbon(t)</th></tr></thead><tbody></tbody></table></div>
   </div>
  </div>
 </div></section>
@@ -564,8 +563,8 @@
    <button class="btn sm ghost" onclick="authTab('reg')">Kayıt</button>
    <button class="btn sm ghost" onclick="authTab('reset')">Şifre Yenile</button>
   </div>
-<form id="fLogin" onsubmit="return false;"><div class="lbl">E‑posta</div><input id="liEmail" type="email" required><div class="lbl" style="margin-top:12px">Parola</div><input id="liPass" type="password" required><div id="tsLogin" style="margin-top:14px;min-height:65px"></div><button type="button" class="btn" style="width:100%;margin-top:16px" onclick="doLogin()">Giriş Yap</button></form>
-<form id="fReg" style="display:none" onsubmit="return false;"><div class="lbl">Ad Soyad</div><input id="rgName" required><div class="lbl" style="margin-top:10px">Kurum</div><input id="rgOrg"><div class="lbl" style="margin-top:10px">E‑posta</div><input id="rgEmail" type="email" required><div class="lbl" style="margin-top:10px">Parola</div><input id="rgPass" type="password" minlength="6" required><div id="tsReg" style="margin-top:14px;min-height:65px"></div>
+<form id="fLogin" onsubmit="return false;"><label class="lbl" for="liEmail">E‑posta</label><input id="liEmail" type="email" required><label class="lbl" for="liPass" style="margin-top:12px">Parola</label><input id="liPass" type="password" required><div id="tsLogin" style="margin-top:14px;min-height:65px"></div><button type="button" class="btn" style="width:100%;margin-top:16px" onclick="doLogin()">Giriş Yap</button></form>
+<form id="fReg" style="display:none" onsubmit="return false;"><label class="lbl" for="rgName">Ad Soyad</label><input id="rgName" required><label class="lbl" for="rgOrg" style="margin-top:10px">Kurum</label><input id="rgOrg"><label class="lbl" for="rgEmail" style="margin-top:10px">E‑posta</label><input id="rgEmail" type="email" required><label class="lbl" for="rgPass" style="margin-top:10px">Parola</label><input id="rgPass" type="password" minlength="6" required><div id="tsReg" style="margin-top:14px;min-height:65px"></div>
  <!-- KVKK m.5/2-a AÇIK RIZA (2026-09-24): ad, e-posta, kurum + sonradan GPS ve
       fotoğraf işleniyor; yurt dışı altyapı (Supabase/Google/Cloudflare) kullanılıyor.
       Rıza olmadan kayıt engellenir; rıza zaman damgası auth metadata'sına yazılır
@@ -573,7 +572,7 @@
  <label class="dg-consent" for="rgConsent"><input type="checkbox" id="rgConsent">
   <span><a href="/aydinlatma/" target="_blank" rel="noopener">KVKK Aydınlatma Metni</a>&#39;ni ve <a href="/gizlilik/" target="_blank" rel="noopener">Gizlilik Politikası</a>&#39;nı okudum. Ad, e-posta, kurum bilgilerimin; saha ölçümlerimde <b>konum verimin</b> ve yüklersem <b>fotoğrafımın</b> bu belgelerde belirtilen amaçlarla işlenmesini, onaylanan ölçümlerin CC BY-NC 4.0 ile kamuya açık veri setinde yayımlanmasını ve hizmet sağlayıcılarının (Supabase, Google, Cloudflare) <b>yurt dışı altyapısında barındırılmasını</b> onaylıyorum. Rızamı dilediğim zaman geri çekebilirim.</span></label>
  <button type="button" class="btn" style="width:100%;margin-top:16px" onclick="doRegister()">Hesap Oluştur</button></form>
-<form id="fReset" style="display:none" onsubmit="return false;"><div class="lbl">E‑posta</div><input id="rsEmail" type="email" required><div id="tsReset" style="margin-top:14px;min-height:65px"></div><button type="button" class="btn" style="width:100%;margin-top:16px" onclick="sendResetEmail()">Sıfırlama Gönder</button></form>
+<form id="fReset" style="display:none" onsubmit="return false;"><label class="lbl" for="rsEmail">E‑posta</label><input id="rsEmail" type="email" required><div id="tsReset" style="margin-top:14px;min-height:65px"></div><button type="button" class="btn" style="width:100%;margin-top:16px" onclick="sendResetEmail()">Sıfırlama Gönder</button></form>
   <div id="authMsg" style="margin-top:12px;font-size:.85rem;min-height:1.2em"></div>
  </div>
 </div></section>
@@ -602,7 +601,7 @@
     <h4 style="color:#9fd0ae;font-size:.72rem;letter-spacing:.16em;text-transform:uppercase;margin-bottom:12px">📝 Atıf & Lisans</h4>
     <div class="card" style="background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.15);padding:14px">
      <div class="mono" style="font-size:.72rem;color:#fff;line-height:1.7;background:rgba(0,0,0,.25);padding:10px;border-radius:6px">
-      ŞİRİN, N. &amp; ŞİRİN, S. (2026). <i>DendroGeo: Global Tree Inventory &amp; Carbon Data System</i> (Version 3.0.0) [Dataset]. Zenodo. https://doi.org/10.5281/zenodo.22948643
+      ŞİRİN, N. &amp; ŞİRİN, S. (2026). <i>DendroGeo: Küresel Ağaç Envanteri ve Karbon Veri Sistemi</i> (Version 3.0.0) [Software]. Zenodo. https://doi.org/10.5281/zenodo.22948643
      </div>
      <div style="font-size:.75rem;color:#cfe0d4;margin-top:10px">
       <b style="color:#fff">Veri Lisansı:</b> CC BY-NC 4.0 — Ticari olmayan kullanımda, kaynak gösterilerek serbestçe paylaşılabilir.
@@ -611,7 +610,7 @@
     <h4 style="color:#9fd0ae;font-size:.72rem;letter-spacing:.16em;text-transform:uppercase;margin:18px 0 10px">⚖️ Politikalar</h4>
     <div style="font-size:.78rem;color:#cfe0d4;line-height:1.6">
      <div><a href="/aydinlatma/" style="color:#9fd0ae;text-decoration:underline">KVKK Aydınlatma Metni</a></div>
-     <div style="margin-top:4px"><a href="#" onclick="toast('Veri Doğruluk: GPS doğruluğu ölçümle kaydedilir. Fotoğraf eklenirse bitki örtüsü ≥%25 ve pozlama 25-245 aralığı kontrol edilir. Tüm kayıtlar admin onayından sonra yayımlanır.');return false;" style="color:#9fd0ae;text-decoration:underline">Veri Doğruluk Politikası</a></div>
+     <div style="margin-top:4px"><a href="/yontem/" style="color:#9fd0ae;text-decoration:underline">Veri Doğruluk Politikası</a></div>
     </div>
    </div>
   </div>
@@ -632,24 +631,25 @@
   <button class="btn sm ghost" id="installBtn" style="display:none" onclick="dgInstallApp()">📲 Uygulayı Kur</button>
   <span class="mono" id="whoami" style="font-size:.8rem;color:var(--mut)"></span>
   <span class="badge admin" id="roleBadge" style="display:none">ADMIN</span>
+  <button type="button" class="btn sm ghost dg-lang-toggle" onclick="dgToggleLang()" aria-label="Switch to English">EN</button>
   <button class="btn sm red" onclick="logout()">Çıkış</button>
  </div>
 </div>
 <div id="layout">
  <div id="side">
   <div class="sec">Saha</div>
-  <div class="item on" onclick="go('dash')">📊 Panel</div>
-  <div class="item" onclick="go('measure')">📏 Yeni Ölçüm</div>
-  <div class="item" onclick="go('nav')">🧭 Waypoint</div>
-  <div class="item" onclick="go('map')">🗺️ Canlı Harita</div>
+  <div class="item on" role="button" tabindex="0" onkeydown="dgKeyActivate(event,this)" onclick="go('dash')">📊 Panel</div>
+  <div class="item" role="button" tabindex="0" onkeydown="dgKeyActivate(event,this)" onclick="go('measure')">📏 Yeni Ölçüm</div>
+  <div class="item" role="button" tabindex="0" onkeydown="dgKeyActivate(event,this)" onclick="go('nav')">🧭 Waypoint</div>
+  <div class="item" role="button" tabindex="0" onkeydown="dgKeyActivate(event,this)" onclick="go('map')">🗺️ Canlı Harita</div>
   <div class="sec">Veri</div>
-  <div class="item" onclick="go('projects')">📁 Projeler</div>
-  <div class="item" onclick="go('records')">📋 Kayıtlarım</div>
-  <div class="item" onclick="go('export')">💾 Dışa Aktar</div>
-  <div class="item" onclick="go('world')">🌍 Dünya Verisi</div>
+  <div class="item" role="button" tabindex="0" onkeydown="dgKeyActivate(event,this)" onclick="go('projects')">📁 Projeler</div>
+  <div class="item" role="button" tabindex="0" onkeydown="dgKeyActivate(event,this)" onclick="go('records')">📋 Kayıtlarım</div>
+  <div class="item" role="button" tabindex="0" onkeydown="dgKeyActivate(event,this)" onclick="go('export')">💾 Dışa Aktar</div>
+  <div class="item" role="button" tabindex="0" onkeydown="dgKeyActivate(event,this)" onclick="go('world')">🌍 Dünya Verisi</div>
   <div class="sec" id="adminSec" style="display:none">Yönetim</div>
-  <div class="item" id="miAdmin" style="display:none" onclick="go('admin')">🔐 Ölçüm Yönetimi<span id="adminPendingBadge" class="dg-menu-badge" style="display:none"></span></div>
-  <div class="item" id="miUsers" style="display:none" onclick="go('users')">👥 Kullanıcılar</div>
+  <div class="item" id="miAdmin" style="display:none" role="button" tabindex="0" onkeydown="dgKeyActivate(event,this)" onclick="go('admin')">🔐 Ölçüm Yönetimi<span id="adminPendingBadge" class="dg-menu-badge" style="display:none"></span></div>
+  <div class="item" id="miUsers" style="display:none" role="button" tabindex="0" onkeydown="dgKeyActivate(event,this)" onclick="go('users')">👥 Kullanıcılar</div>
  </div>
  <div id="main">
 
@@ -703,7 +703,7 @@
     <div class="card">
      <label class="lbl" for="mProject">Proje <span style="text-transform:none;letter-spacing:0;font-size:.72rem;color:var(--mut)">(park adı - etiket)</span></label><select id="mProject" onchange="dgProjectChanged()"></select>
      <div class="grid g2" style="margin-top:10px">
-      <div><div class="lbl">POINT ID</div><div style="display:flex;gap:6px"><input id="mPoint" type="number" oninput="manualPoint=true"><button class="btn sm blue" style="white-space:nowrap" onclick="queryPointId()">🔍 Sorgula</button></div></div>
+      <div><label class="lbl" for="mPoint">POINT ID</label><div style="display:flex;gap:6px"><input id="mPoint" type="number" oninput="manualPoint=true"><button class="btn sm blue" style="white-space:nowrap" onclick="queryPointId()">🔍 Sorgula</button></div></div>
       <div><label class="lbl" for="mNo">Ölçüm No</label><input id="mNo" type="number" value="1"></div>
      </div>
      <div id="pointQueryResult" class="alert info" style="display:none;margin-top:10px"></div>
@@ -717,7 +717,7 @@
       <div><label class="lbl" for="mHeight">Boy (m)</label><input id="mHeight" type="number" step="0.1" oninput="liveCalc()" placeholder="örn: 7,2"></div>
      </div>
      <div class="lbl" style="margin-top:12px">📸 Fotoğraf (canlı çekim)</div>
-     <input type="file" id="mPhoto" accept="image/*" capture="environment" onchange="checkPhoto(event)">
+     <input type="file" id="mPhoto" aria-label="Fotoğraf (canlı çekim)" accept="image/*" capture="environment" onchange="checkPhoto(event)">
      <div id="photoCheck" class="alert info" style="display:none;margin-top:8px"></div>
      <div id="liveCalc" class="alert ok" style="display:none"></div>
      <button class="dg-png-btn primary" id="saveBtn" style="margin-top:14px" onclick="saveMeas()">💾 Hesapla ve Kaydet</button>
@@ -731,7 +731,7 @@
     <div class="card">
      <label class="lbl" for="nProject">Proje</label><select id="nProject" onchange="loadWaypoints()"></select>
      <div class="lbl" style="margin:12px 0 6px">Waypoints.csv Yükle (X,Y,id)</div>
-     <input type="file" id="nCsv" accept=".csv">
+     <input type="file" id="nCsv" aria-label="Waypoints.csv dosyası seç (X,Y,id)" accept=".csv">
      <div style="display:flex;gap:8px;flex-wrap:wrap">
       <button class="btn blue sm" style="margin-top:8px" onclick="uploadWpCsv()">⬆ Waypoint Yükle</button>
       <button class="btn red sm" style="margin-top:8px" onclick="deleteAllWaypoints()">🗑 Listeyi Tamamen Sil</button>
@@ -745,7 +745,7 @@
      <div style="margin-top:24px;border-top:1px solid var(--line);padding-top:16px">
       <div class="lbl" style="margin-bottom:10px">📍 Waypoint Listesi <span style="text-transform:none;letter-spacing:0">(üstü çizili = yapıldı)</span></div>
       <div class="tblwrap dg-cards" style="max-height:300px;overflow-y:auto;border:1px solid var(--line);border-radius:10px">
-       <table><thead><tr><th>ID</th><th>Enlem</th><th>Boylam</th><th>Durum</th><th>İşlem</th></tr></thead><tbody id="wpListTable"></tbody></table>
+       <table><thead><tr><th scope="col">ID</th><th scope="col">Enlem</th><th scope="col">Boylam</th><th scope="col">Durum</th><th scope="col">İşlem</th></tr></thead><tbody id="wpListTable"></tbody></table>
       </div>
      </div>
     </div>
@@ -804,7 +804,7 @@
      <button class="btn sm ghost" id="projCancelBtn" style="display:none" onclick="cancelProjectEdit()">Vazgeç</button>
     </div>
    </div>
-   <div class="card tblwrap dg-cards"><table><thead><tr><th>ID</th><th>Park</th><th>Proje Adı</th><th>Ülke</th><th>Şehir</th><th>Tarih</th><th>İşlem</th></tr></thead><tbody id="projTable"></tbody></table></div>
+   <div class="card tblwrap dg-cards"><table><thead><tr><th scope="col">ID</th><th scope="col">Park</th><th scope="col">Proje Adı</th><th scope="col">Ülke</th><th scope="col">Şehir</th><th scope="col">Tarih</th><th scope="col">İşlem</th></tr></thead><tbody id="projTable"></tbody></table></div>
    <!-- KULLANICI RAPOR PANELİ (0009 · 2026-09-28): kullanıcılar KENDİ park
         projelerinin bilimsel raporunu site içinden yayınlar — aynı kuyruk
         (report_requests), aynı DGR kimliği, aynı kalıcı bağlantı. Sunucu
@@ -836,7 +836,7 @@
   <div class="view" id="v-records">
    <h2 class="disp" style="margin-bottom:16px">Kayıtlarım</h2>
    <div class="alert info">Kayıtlarınız admin onayından sonra dünya verisinde yayınlanır.</div>
-   <div class="card tblwrap dg-cards"><table><thead><tr><th>Proje</th><th>Nokta</th><th>Tür</th><th>Çap</th><th>Boy</th><th>Karbon</th><th>Foto</th><th>Durum</th><th>İşlem</th></tr></thead><tbody id="recTable"></tbody></table></div>
+   <div class="card tblwrap dg-cards"><table><thead><tr><th scope="col">Proje</th><th scope="col">Nokta</th><th scope="col">Tür</th><th scope="col">Çap</th><th scope="col">Boy</th><th scope="col">Karbon</th><th scope="col">Foto</th><th scope="col">Durum</th><th scope="col">İşlem</th></tr></thead><tbody id="recTable"></tbody></table></div>
   </div>
 
   <div class="view" id="v-export">
@@ -864,7 +864,7 @@
     <ol class="guide">
      <li><b>CSV'yi içe aktar:</b> QGIS → <code>Layer → Add Layer → Add Delimited Text Layer</code>. <code>X = LONGITUDE</code>, <code>Y = LATITUDE</code>, CRS = <code>EPSG:4326</code>.</li>
      <li><b>Tüm veriler katman olur:</b> AGB, BHB, biyokütle, karbon sütunları öznitelik tablosuna işlenir. <code>Identify (i)</code> ile bilgi balonu açılır.</li>
-     <li><b>Yöntem A — İnternetten (önerilen):</b> Katman Özellikleri → <code>Display</code> → HTML Map Tip:<br><code>&lt;img src='[% "PHOTO_URL" %]' width='220'&gt;</code><br>İnternet bağlantısı varken fotoğraflar otomatik yüklenir, yerel klasöre gerek yok.</li><li><b>Yöntem B — Yerel klasör:</b> Fotoğrafları tek klasöre koy (örn. <code>C:/dendro_foto/</code>). Dosya adları <code>PHOTO_FILE</code> ile aynı olmalı. Map Tip:<br><code>&lt;img src="file:///C:/dendro_foto/[% "PHOTO_FILE" %]" width="220"&gt;</code></li>
+     <li><b>Yöntem A — İnternetten (önerilen):</b> Katman Özellikleri → <code>Display</code> → HTML Map Tip:<br><code>&lt;img src='[% "PHOTO_URL" %]' width='220'&gt;</code><br>İnternet bağlantısı varken fotoğraflar otomatik yüklenir, yerel klasöre gerek yok.</li><li><b>Yöntem B — Yerel klasör:</b> Fotoğrafları tek klasöre koy (örn. <code>D:/DendroFoto/</code>). Dosya adları <code>PHOTO_FILE</code> ile aynı olmalı. Map Tip:<br><code>&lt;img src="file:///D:/DendroFoto/[% "PHOTO_FILE" %]" width="220"&gt;</code></li>
      <li><b>Etkinleştir:</b> <code>View → Show Map Tips</code>.</li>
      <li><b>Etiket:</b> Labels → <code>POINT_ID</code>.</li>
     </ol>
@@ -889,8 +889,8 @@
       <div class="card" style="border-left:4px solid var(--green)">
     <div class="shead" style="margin-bottom:12px"><span class="no">🌍</span><h2 style="font-size:1.15rem">Bölgesel Dağılım</h2><span class="rule"></span></div>
     <div class="grid g2">
-     <div class="tblwrap dg-cards"><table><thead><tr><th>Ülke</th><th>Kayıt</th><th>Karbon(t)</th><th>Ort.Çap</th><th>Ort.Yükseklik(m)</th></tr></thead><tbody id="wCountryT"></tbody></table></div>
-     <div class="tblwrap dg-cards"><table><thead><tr><th>Şehir</th><th>Kayıt</th><th>Karbon(t)</th></tr></thead><tbody id="wCityT"></tbody></table></div>
+     <div class="tblwrap dg-cards"><table><thead><tr><th scope="col">Ülke</th><th scope="col">Kayıt</th><th scope="col">Karbon(t)</th><th scope="col">Ort.Çap</th><th scope="col">Ort.Yükseklik(m)</th></tr></thead><tbody id="wCountryT"></tbody></table></div>
+     <div class="tblwrap dg-cards"><table><thead><tr><th scope="col">Şehir</th><th scope="col">Kayıt</th><th scope="col">Karbon(t)</th></tr></thead><tbody id="wCityT"></tbody></table></div>
     </div>
       </div>
    <div class="card" style="margin-top:18px;border-left:4px solid var(--blue)">
@@ -978,7 +978,7 @@
    </div>
       <div class="card" style="margin-bottom:18px;border-left:4px solid var(--blue)">
     <div class="shead" style="margin-bottom:12px"><span class="no">✉️</span><h2 style="font-size:1.2rem">Aktif Talepler</h2><span class="rule"></span><span class="mono" style="font-size:.78rem;color:var(--amber-ink)">Bekleyen: <b id="aReqPendingMini">0</b></span></div>
-    <div class="tblwrap dg-cards"><table><thead><tr><th>Kullanıcı</th><th>E‑posta</th><th>Filtre</th><th>Tarih</th><th>Durum</th><th>İşlem</th></tr></thead><tbody id="aReqT"></tbody></table></div>
+    <div class="tblwrap dg-cards"><table><thead><tr><th scope="col">Kullanıcı</th><th scope="col">E‑posta</th><th scope="col">Filtre</th><th scope="col">Tarih</th><th scope="col">Durum</th><th scope="col">İşlem</th></tr></thead><tbody id="aReqT"></tbody></table></div>
    </div>
    <div class="card" id="closedRequestsWrap" style="margin-bottom:18px;border-left:4px solid var(--mut);display:none">
     <div class="shead" style="margin-bottom:12px;cursor:pointer" onclick="document.getElementById('closedReqBody').style.display=document.getElementById('closedReqBody').style.display==='none'?'block':'none'">
@@ -988,7 +988,7 @@
      <span class="mono" style="font-size:.78rem;color:var(--mut)">Arşiv: <b id="aReqClosed">0</b> · Aç/Kapat ▼</span>
     </div>
     <div id="closedReqBody" style="display:none">
-     <div class="tblwrap dg-cards"><table><thead><tr><th>Kullanıcı</th><th>E‑posta</th><th>Filtre</th><th>Talep</th><th>Kapanış</th><th>Durum</th></tr></thead><tbody id="closedReqT"></tbody></table></div>
+     <div class="tblwrap dg-cards"><table><thead><tr><th scope="col">Kullanıcı</th><th scope="col">E‑posta</th><th scope="col">Filtre</th><th scope="col">Talep</th><th scope="col">Kapanış</th><th scope="col">Durum</th></tr></thead><tbody id="closedReqT"></tbody></table></div>
     </div>
    </div>
    <!-- ÖLÇÜM ONAY & MODERASYON — TEK KART (2026-09-24)
@@ -1012,8 +1012,8 @@
     <div id="adminTree"></div>
     <details class="dg-flat" style="margin-top:14px">
      <summary>📄 Düz liste (tüm kayıtlar · ilk 300 satır)</summary>
-     <input type="text" id="adminMeasSearch" placeholder="🔍 Ara..." oninput="filterAdminMeas()" style="max-width:100%;margin:10px 0">
-     <div class="tblwrap dg-cards"><table><thead><tr><th>Kullanıcı</th><th>Nokta</th><th>Tür</th><th>Çap</th><th>Boy</th><th>Karbon</th><th>Foto</th><th>Durum</th><th>İşlem</th></tr></thead><tbody id="aMeasT"></tbody></table></div>
+     <input type="text" id="adminMeasSearch" aria-label="Kayıtlarda ara" placeholder="🔍 Ara..." oninput="filterAdminMeas()" style="max-width:100%;margin:10px 0">
+     <div class="tblwrap dg-cards"><table><thead><tr><th scope="col">Kullanıcı</th><th scope="col">Nokta</th><th scope="col">Tür</th><th scope="col">Çap</th><th scope="col">Boy</th><th scope="col">Karbon</th><th scope="col">Foto</th><th scope="col">Durum</th><th scope="col">İşlem</th></tr></thead><tbody id="aMeasT"></tbody></table></div>
     </details>
    </div>
   </div>
@@ -1021,8 +1021,8 @@
   <div class="view" id="v-users">
    <h2 class="disp" style="margin-bottom:16px">👥 Kullanıcı Yönetimi</h2>
    <div class="card tblwrap dg-cards">
-    <input type="text" id="userSearch" placeholder="🔍 E‑posta veya ad ara..." oninput="filterUsers()" style="max-width:100%;margin-bottom:12px">
-    <table><thead><tr><th>E‑posta</th><th>Ad Soyad</th><th>Rol</th><th>Durum</th><th>İşlem</th></tr></thead><tbody id="aUsersT"></tbody></table>
+    <input type="text" id="userSearch" aria-label="E-posta veya ad ara" placeholder="🔍 E‑posta veya ad ara..." oninput="filterUsers()" style="max-width:100%;margin-bottom:12px">
+    <table><thead><tr><th scope="col">E‑posta</th><th scope="col">Ad Soyad</th><th scope="col">Rol</th><th scope="col">Durum</th><th scope="col">İşlem</th></tr></thead><tbody id="aUsersT"></tbody></table>
    </div>
   </div>
 
@@ -1034,7 +1034,7 @@
 <h3 class="disp" style="margin-bottom:8px">🔑 Yeni Parola Belirle</h3>
 <p style="color:var(--mut);font-size:.85rem;margin-bottom:14px">Şifre sıfırlama bağlantısı doğrulandı. Yeni parolanızı belirleyin.</p>
 <label class="lbl" for="rcPass">Yeni Parola</label><input id="rcPass" type="password" minlength="6">
-<div class="lbl" style="margin-top:10px">Yeni Parola (tekrar)</div><input id="rcPass2" type="password" minlength="6">
+<label class="lbl" for="rcPass2" style="margin-top:10px">Yeni Parola (tekrar)</label><input id="rcPass2" type="password" minlength="6">
 <div id="rcMsg" style="margin-top:10px;font-size:.85rem;min-height:1.2em"></div>
 <button class="dg-png-btn primary" style="margin-top:14px" onclick="saveNewPassword()">💾 Parolayı Güncelle</button>
 <button class="dg-png-btn ghost" style="margin-top:8px" onclick="cancelRecovery()">Şimdi Değil</button>
@@ -1046,9 +1046,9 @@
  <button class="btn" style="margin-top:12px" id="pvDownload">📥 İndir</button>
 </div></div>
 
-<script src="src/ui/state.js?v=4dc88a5a" defer></script>
-<script src="src/ui/toast.js?v=4e9029ad" defer></script>
-<script src="src/ui/landing.js?v=197cda4b" defer></script>
+<script src="src/ui/state.js?v=d21d88a9" defer></script>
+<script src="src/ui/toast.js?v=1a84b2f4" defer></script>
+<script src="src/ui/landing.js?v=f7ad4ccd" defer></script>
 <script src="src/ui/shell.js?v=90ddc741" defer></script>
 </body>
 </html>

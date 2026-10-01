@@ -231,7 +231,11 @@ describe('JSON-LD: Dataset, atıf ve yasal belge bağlantıları', () => {
     assert.ok(app.sameAs.some((x) => x.includes('10.5281/zenodo')));
     assert.equal(app.privacyPolicy, 'https://dendrogeo.org/gizlilik/');
     assert.equal(app.termsOfService, 'https://dendrogeo.org/kullanim-kosullari/');
-    assert.match(app.copyrightHolder.name, /Nagihan ŞİRİN & Sinan ŞİRİN/);
+    /* 0035 (P2-5): copyrightHolder tek "Nagihan ŞİRİN & Sinan ŞİRİN" Person'ı
+     * değildi → iki ayrı Person düğümü (DataCite creators sırasıyla). */
+    assert.ok(Array.isArray(app.copyrightHolder) && app.copyrightHolder.length === 2, 'iki ayrı Person');
+    assert.equal(app.copyrightHolder[0].name, 'Nagihan ŞİRİN');
+    assert.equal(app.copyrightHolder[1].name, 'Sinan ŞİRİN');
   });
 });
 

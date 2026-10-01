@@ -1,7 +1,9 @@
 <div id="landing">
 <div id="topnav"><div class="wrap">
 <span class="brand"><img class="brand-logo" src="logo.png" alt="DendroGeo">DendroGeo</span>
- <div class="links"><a href="#sistem">Sistem</a><a href="#yontem">Yöntem</a><a href="#veri">Veri &amp; Harita</a><a href="#istatistik">İstatistik</a><a href="#bilgi-merkezi">Bilgi Merkezi &amp; Kaynaklar</a><a href="/en/" class="mono">EN</a></div>
+ <button type="button" class="navtoggle" id="navToggle" aria-expanded="false" aria-controls="navLinks" aria-label="Bölüm menüsü" onclick="dgNavToggle()">☰</button>
+ <div class="links" id="navLinks"><a href="#sistem">Sistem</a><a href="#yontem">Yöntem</a><a href="#veri">Veri &amp; Harita</a><a href="#istatistik">İstatistik</a><a href="#bilgi-merkezi">Bilgi Merkezi &amp; Kaynaklar</a></div>
+ <button type="button" class="btn sm ghost dg-lang-toggle" onclick="dgToggleLang()" aria-label="Switch to English">EN</button>
  <button class="btn sm" onclick="showAuth()">Giriş / Kayıt</button>
 </div></div>
 
@@ -80,12 +82,6 @@
    <div class="chip c3"><span style="color:var(--blue)">●</span> H 13 m</div>
   </div>
  </div>
- <div class="statband">
- <div><div class="val" id="stRec">—</div><div class="lbl">Toplam Kayıt</div></div>
-  <div><div class="val" id="stCountry">—</div><div class="lbl">Ülke</div></div>
-  <div><div class="val" id="stCity">—</div><div class="lbl">Şehir</div></div>
-  <div><div class="val" id="stCarbon">—</div><div class="lbl">Karbon (t)</div></div>
- </div>
 </div></div>
 <section class="blk" id="sistem"><div class="wrap">
  <div class="shead"><span class="no">01</span><h2>Sistemin Üç Temel Direği</h2><span class="rule"></span></div>
@@ -125,7 +121,7 @@
    </ul>
   </div>
  </div>
- <div style="margin-top:36px" class="card tblwrap"><table><thead><tr><th>Rol</th><th>Yetki</th></tr></thead><tbody>
+ <div style="margin-top:36px" class="card tblwrap"><table><thead><tr><th scope="col">Rol</th><th scope="col">Yetki</th></tr></thead><tbody>
   <tr><td>Ziyaretçi</td><td>Yalnızca onaylanmış kayıtları, istatistikleri ve haritayı görüntüler</td></tr>
   <tr><td>Kullanıcı</td><td>Proje ve ölçüm oluşturur; kendi kayıtlarını onay beklerken de görür</td></tr>
   <tr><td>Denetçi (Admin)</td><td>Kayıtları onaylar/reddeder, moderasyon ve toplu dışa aktarım</td></tr>
@@ -159,19 +155,20 @@
 
  <div style="margin-top:56px;display:grid;grid-template-columns:1fr 1fr;gap:24px" class="method-grid">
   <div class="card" style="border-left:4px solid var(--green)">
-   <div style="font-family:Fraunces,serif;font-size:1.1rem;color:var(--green-dk);font-weight:600;margin-bottom:14px">📐 Allometrik Formüller</div>
-   <div class="formula">DBH = Çevre ÷ π</div>
+   <div style="font-family:var(--f-disp);font-size:1.1rem;color:var(--green-dk);font-weight:600;margin-bottom:14px">📐 Allometrik Formüller</div>
+   <div class="formula">DBH = göğüs çapı (cm) · 1,30 m'den doğrudan ölçülür</div>
+   <div class="formula" style="border-left-color:var(--amber);font-size:.78rem">— çevre→çap dönüşümü UYGULANMAZ; ham saha değeri (girth_cm) kanıt olarak saklanır</div>
    <div class="formula">AGB = 0.0673·(ρ·DBH²·H)<sup>0.976</sup> <span style="color:var(--mut)">— Chave 2014</span></div>
    <div class="formula">BHB = AGB·0.26 <span style="color:var(--mut)">— sistemde kullanılan sabit kök/gövde varsayımı</span></div>
    <div class="formula">C = (AGB+BHB)·0.47</div>
    <p style="color:var(--mut);font-size:.78rem;margin-top:12px">Tür/grup tablosunda 50 seçim kaydı bulunur; 22 kaydın doğrudan ρ değeri vardır, 28 kayıt grup varsayılanına düşer.</p>
   </div>
   <div class="card" style="border-left:4px solid var(--amber)">
-   <div style="font-family:Fraunces,serif;font-size:1.1rem;color:var(--green-dk);font-weight:600;margin-bottom:14px">🔬 Veri Doğruluk Politikası</div>
+   <div style="font-family:var(--f-disp);font-size:1.1rem;color:var(--green-dk);font-weight:600;margin-bottom:14px">🔬 Veri Doğruluk Politikası</div>
    <ul style="list-style:none;padding:0;margin:0">
     <li style="padding:8px 0 8px 24px;position:relative;color:var(--ink);font-size:.88rem"><span style="position:absolute;left:0;color:var(--ink);font-weight:700">✓</span>GPS doğruluğu ölçümle kaydedilir; sabit ±10 m kayıt eşiği yoktur</li>
     <li style="padding:8px 0 8px 24px;position:relative;color:var(--ink);font-size:.88rem"><span style="position:absolute;left:0;color:var(--ink);font-weight:700">✓</span>Fotoğraf eklenirse bitki örtüsü ≥ %25 ve pozlama 25–245 aralığı kontrol edilir</li>
-    <li style="padding:8px 0 8px 24px;position:relative;color:var(--ink);font-size:.88rem"><span style="position:absolute;left:0;color:var(--green);font-weight:700">✓</span>DBH ≤ 500 cm, boy ≤ 100 m</li>
+    <li style="padding:8px 0 8px 24px;position:relative;color:var(--ink);font-size:.88rem"><span style="position:absolute;left:0;color:var(--green);font-weight:700">✓</span>DBH ≤ 400 cm, boy ≤ 100 m</li>
     <li style="padding:8px 0 8px 24px;position:relative;color:var(--ink);font-size:.88rem"><span style="position:absolute;left:0;color:var(--green);font-weight:700">✓</span>Admin onayı zorunlu</li>
    </ul>
   </div>
@@ -186,8 +183,8 @@
   <div class="card" style="margin-top:20px;border-left:4px solid var(--green)">
   <div class="shead" style="margin-bottom:12px"><span class="no">🌍</span><h2 style="font-size:1.15rem">Bölgesel Dağılım</h2><span class="rule"></span></div>
   <div class="grid g2">
-   <div class="tblwrap"><table id="tblCountry"><thead><tr><th>Ülke</th><th>Kayıt</th><th>Karbon(t)</th><th>Ort.DBH</th><th>Ort.Yükseklik(m)</th></tr></thead><tbody></tbody></table></div>
-   <div class="tblwrap"><table id="tblCity"><thead><tr><th>Şehir</th><th>Kayıt</th><th>Karbon(t)</th></tr></thead><tbody></tbody></table></div>
+   <div class="tblwrap"><table id="tblCountry"><thead><tr><th scope="col">Ülke</th><th scope="col">Kayıt</th><th scope="col">Karbon(t)</th><th scope="col">Ort.DBH</th><th scope="col">Ort.Yükseklik(m)</th></tr></thead><tbody></tbody></table></div>
+   <div class="tblwrap"><table id="tblCity"><thead><tr><th scope="col">Şehir</th><th scope="col">Kayıt</th><th scope="col">Karbon(t)</th></tr></thead><tbody></tbody></table></div>
   </div>
  </div>
 </div></section>
@@ -269,8 +266,8 @@
    <button class="btn sm ghost" onclick="authTab('reg')">Kayıt</button>
    <button class="btn sm ghost" onclick="authTab('reset')">Şifre Yenile</button>
   </div>
-<form id="fLogin" onsubmit="return false;"><div class="lbl">E‑posta</div><input id="liEmail" type="email" required><div class="lbl" style="margin-top:12px">Parola</div><input id="liPass" type="password" required><div id="tsLogin" style="margin-top:14px;min-height:65px"></div><button type="button" class="btn" style="width:100%;margin-top:16px" onclick="doLogin()">Giriş Yap</button></form>
-<form id="fReg" style="display:none" onsubmit="return false;"><div class="lbl">Ad Soyad</div><input id="rgName" required><div class="lbl" style="margin-top:10px">Kurum</div><input id="rgOrg"><div class="lbl" style="margin-top:10px">E‑posta</div><input id="rgEmail" type="email" required><div class="lbl" style="margin-top:10px">Parola</div><input id="rgPass" type="password" minlength="6" required><div id="tsReg" style="margin-top:14px;min-height:65px"></div>
+<form id="fLogin" onsubmit="return false;"><label class="lbl" for="liEmail">E‑posta</label><input id="liEmail" type="email" required><label class="lbl" for="liPass" style="margin-top:12px">Parola</label><input id="liPass" type="password" required><div id="tsLogin" style="margin-top:14px;min-height:65px"></div><button type="button" class="btn" style="width:100%;margin-top:16px" onclick="doLogin()">Giriş Yap</button></form>
+<form id="fReg" style="display:none" onsubmit="return false;"><label class="lbl" for="rgName">Ad Soyad</label><input id="rgName" required><label class="lbl" for="rgOrg" style="margin-top:10px">Kurum</label><input id="rgOrg"><label class="lbl" for="rgEmail" style="margin-top:10px">E‑posta</label><input id="rgEmail" type="email" required><label class="lbl" for="rgPass" style="margin-top:10px">Parola</label><input id="rgPass" type="password" minlength="6" required><div id="tsReg" style="margin-top:14px;min-height:65px"></div>
  <!-- KVKK m.5/2-a AÇIK RIZA (2026-09-24): ad, e-posta, kurum + sonradan GPS ve
       fotoğraf işleniyor; yurt dışı altyapı (Supabase/Google/Cloudflare) kullanılıyor.
       Rıza olmadan kayıt engellenir; rıza zaman damgası auth metadata'sına yazılır
@@ -278,7 +275,7 @@
  <label class="dg-consent" for="rgConsent"><input type="checkbox" id="rgConsent">
   <span><a href="/aydinlatma/" target="_blank" rel="noopener">KVKK Aydınlatma Metni</a>&#39;ni ve <a href="/gizlilik/" target="_blank" rel="noopener">Gizlilik Politikası</a>&#39;nı okudum. Ad, e-posta, kurum bilgilerimin; saha ölçümlerimde <b>konum verimin</b> ve yüklersem <b>fotoğrafımın</b> bu belgelerde belirtilen amaçlarla işlenmesini, onaylanan ölçümlerin CC BY-NC 4.0 ile kamuya açık veri setinde yayımlanmasını ve hizmet sağlayıcılarının (Supabase, Google, Cloudflare) <b>yurt dışı altyapısında barındırılmasını</b> onaylıyorum. Rızamı dilediğim zaman geri çekebilirim.</span></label>
  <button type="button" class="btn" style="width:100%;margin-top:16px" onclick="doRegister()">Hesap Oluştur</button></form>
-<form id="fReset" style="display:none" onsubmit="return false;"><div class="lbl">E‑posta</div><input id="rsEmail" type="email" required><div id="tsReset" style="margin-top:14px;min-height:65px"></div><button type="button" class="btn" style="width:100%;margin-top:16px" onclick="sendResetEmail()">Sıfırlama Gönder</button></form>
+<form id="fReset" style="display:none" onsubmit="return false;"><label class="lbl" for="rsEmail">E‑posta</label><input id="rsEmail" type="email" required><div id="tsReset" style="margin-top:14px;min-height:65px"></div><button type="button" class="btn" style="width:100%;margin-top:16px" onclick="sendResetEmail()">Sıfırlama Gönder</button></form>
   <div id="authMsg" style="margin-top:12px;font-size:.85rem;min-height:1.2em"></div>
  </div>
 </div></section>
@@ -307,7 +304,7 @@
     <h4 style="color:#9fd0ae;font-size:.72rem;letter-spacing:.16em;text-transform:uppercase;margin-bottom:12px">📝 Atıf & Lisans</h4>
     <div class="card" style="background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.15);padding:14px">
      <div class="mono" style="font-size:.72rem;color:#fff;line-height:1.7;background:rgba(0,0,0,.25);padding:10px;border-radius:6px">
-      ŞİRİN, N. &amp; ŞİRİN, S. (2026). <i>DendroGeo: Global Tree Inventory &amp; Carbon Data System</i> (Version 3.0.0) [Dataset]. Zenodo. https://doi.org/10.5281/zenodo.22948643
+      ŞİRİN, N. &amp; ŞİRİN, S. (2026). <i>DendroGeo: Küresel Ağaç Envanteri ve Karbon Veri Sistemi</i> (Version 3.0.0) [Software]. Zenodo. https://doi.org/10.5281/zenodo.22948643
      </div>
      <div style="font-size:.75rem;color:#cfe0d4;margin-top:10px">
       <b style="color:#fff">Veri Lisansı:</b> CC BY-NC 4.0 — Ticari olmayan kullanımda, kaynak gösterilerek serbestçe paylaşılabilir.
@@ -316,7 +313,7 @@
     <h4 style="color:#9fd0ae;font-size:.72rem;letter-spacing:.16em;text-transform:uppercase;margin:18px 0 10px">⚖️ Politikalar</h4>
     <div style="font-size:.78rem;color:#cfe0d4;line-height:1.6">
      <div><a href="/aydinlatma/" style="color:#9fd0ae;text-decoration:underline">KVKK Aydınlatma Metni</a></div>
-     <div style="margin-top:4px"><a href="#" onclick="toast('Veri Doğruluk: GPS doğruluğu ölçümle kaydedilir. Fotoğraf eklenirse bitki örtüsü ≥%25 ve pozlama 25-245 aralığı kontrol edilir. Tüm kayıtlar admin onayından sonra yayımlanır.');return false;" style="color:#9fd0ae;text-decoration:underline">Veri Doğruluk Politikası</a></div>
+     <div style="margin-top:4px"><a href="/yontem/" style="color:#9fd0ae;text-decoration:underline">Veri Doğruluk Politikası</a></div>
     </div>
    </div>
   </div>

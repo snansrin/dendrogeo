@@ -10,7 +10,6 @@
 
 <!-- === SEO META === -->                  
 <meta name="description" content="DendroGeo: saha GPS ölçümü, ağaç biyokütlesi ve karbon hesabı, onaylı veri haritası ve 10 m arazi örtüsü analizi için web GIS platformu.">
-<meta name="keywords" content="ağaç envanteri, karbon hesaplama, biyokütle, allometrik denklem, DBH, çap ölçümü, ağaç boyu, kent parkları karbon, orman karbon stoğu, Chave 2014, IPCC 2006, QGIS ağaç haritası, ağaç veri tabanı, tree inventory, carbon sequestration, biomass equation, forest carbon, urban tree carbon, DendroGeo">
 <meta name="author" content="Sinan ŞİRİN, Nagihan ŞİRİN">
 <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">
 <meta name="googlebot" content="index, follow">
@@ -59,21 +58,20 @@
       "applicationSubCategory": "Environmental Science",
       "operatingSystem": "Web, PWA, iOS, Android",
       "browserRequirements": "Requires JavaScript, HTML5, Geolocation API",
-      "softwareVersion": "3.0",
+      "softwareVersion": "3.0.0",
       "datePublished": "2026-08-30",
       "dateModified": "2026-10-01",
       "inLanguage": ["tr-TR", "en-US"],
       "isAccessibleForFree": true,
       "license": "https://creativecommons.org/licenses/by-nc/4.0/",
-      "copyrightHolder": {
-        "@type": "Person",
-        "name": "Nagihan ŞİRİN & Sinan ŞİRİN"
-      },
+      "copyrightHolder": [
+        { "@type": "Person", "name": "Nagihan ŞİRİN" },
+        { "@type": "Person", "name": "Sinan ŞİRİN" }
+      ],
       "sameAs": [
         "https://github.com/snansrin/dendrogeo",
         "https://doi.org/10.5281/zenodo.22948643",
-        "https://zenodo.org/records/22948643",
-        "https://doi.org/10.5281/zenodo.22646300"
+        "https://zenodo.org/records/22948643"
       ],
       "termsOfService": "https://dendrogeo.org/kullanim-kosullari/",
       "privacyPolicy": "https://dendrogeo.org/gizlilik/",
@@ -220,9 +218,9 @@
 <link rel="dns-prefetch" href="https://overpass-api.de">
 <!-- FONT RENDER'I BLOKLAMASIN: stylesheet media="print" ile gelir, onload'da
      all'a döner → ilk çizim font CSS'ini beklemez; preload öncelikli indirir. -->
-<link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Manrope:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Manrope:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap" media="print" onload="this.media='all'">
-<noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Manrope:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap"></noscript>
+<link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=Manrope:wght@400;600;700;800&family=IBM+Plex+Mono:wght@400;600;700&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=Manrope:wght@400;600;700;800&family=IBM+Plex+Mono:wght@400;600;700&display=swap" media="print" onload="this.media='all'">
+<noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=Manrope:wght@400;600;700;800&family=IBM+Plex+Mono:wght@400;600;700&display=swap"></noscript>
 <link rel="stylesheet" href="vendor/leaflet-1.9.4.css">
 <script src="vendor/leaflet-1.9.4.js" defer></script>
 <link rel="stylesheet" href="vendor/MarkerCluster-1.5.3.css">
@@ -232,6 +230,10 @@
 <script src="src/config/supabase.js?v=6b91ef6f" defer></script>
 <script src="src/config/constants.js?v=9f758cd5" defer></script>
 <script src="src/config/species.js?v=597bfd9f" defer></script>
+<!-- DİL KATMANI (0035): TR markup varsayılan; EN sözlüğü çalışma zamanında
+     uygulanır (dgToggleLang). defer sırası önemli değil — DOMContentLoaded'da
+     ya da hemen (hazırsa) çalışır. module-registry + CORE_ASSETS kaydı şart. -->
+<script src="src/config/i18n.js?v=00000000" defer></script>
 <script src="src/utils/geo.js?v=3e796768" defer></script>
 <script src="src/utils/truncation.js?v=f43c76b3" defer></script>
 <!-- Faz 7: geotiff (317 KB) ve chart.js (208 KB) artık SENKRON yüklenmiyor;

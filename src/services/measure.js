@@ -345,7 +345,7 @@ async function dgSaveMeasInner(){
         return;
     }
     if(!EDIT_ID&&!GPS)return toast("Önce 📡 Konumu Etkinleştir butonuna basın","err");
-    if(d>500||h>100)return toast("Çap ≤500 cm, boy ≤100 m olmalı","err");
+    if(d>400||h>100)return toast("Çap ≤400 cm, boy ≤100 m olmalı","err");
     
     const f=$("mPhoto").files[0];
     if(f&&!photoOk)return toast("Fotoğraf denetimi başarısız — uygun bir çekim yapın","err");

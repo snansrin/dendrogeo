@@ -1086,7 +1086,7 @@ function dgRenderBackfillPlan(){
     `<b>${noPark.length}</b> projede OSM parkı yok (satırdaki ✍️ ile elle oluştur) · `+
     `<b>${noMeas.length}</b> projede ölçüm yok.</div>`+
     `<div class="tblwrap" style="max-height:340px;overflow:auto"><table>`+
-      `<thead><tr><th>Proje (eski ad)</th><th>Park</th><th>Yeni ad</th><th>Alan</th><th>Nasıl bulundu</th><th>Durum / İşlem</th></tr></thead><tbody>`+
+      `<thead><tr><th scope='col'>Proje (eski ad)</th><th scope='col'>Park</th><th scope='col'>Yeni ad</th><th scope='col'>Alan</th><th scope='col'>Nasıl bulundu</th><th scope='col'>Durum / İşlem</th></tr></thead><tbody>`+
       plan.map(x=>{
         const isOk=x.durum==="eşleşti";
         const act=isOk
@@ -1291,7 +1291,7 @@ function dgRenderParkAdmin(projects,measurements){
     /* dg-cards: 640px altında tablo kart düzenine döner (css/style.css).
      * data-label değerleri mobilde her satırın başlığı olur. */
     `<div class="tblwrap dg-parkadmin-wrap"><table class="dg-cards">`+
-    `<thead><tr><th>ID</th><th>Park Adı</th><th>Kimlik</th><th>Şehir</th><th>Alan</th><th>Proje</th><th>Kayıt</th><th>Kaynak</th><th>İşlem</th></tr></thead><tbody>`+
+    `<thead><tr><th scope='col'>ID</th><th scope='col'>Park Adı</th><th scope='col'>Kimlik</th><th scope='col'>Şehir</th><th scope='col'>Alan</th><th scope='col'>Proje</th><th scope='col'>Kayıt</th><th scope='col'>Kaynak</th><th scope='col'>İşlem</th></tr></thead><tbody>`+
     (shown.map(p=>{
       const others=shown.filter(x=>x.id!==p.id);
       const isDup=dupGroups.some(g=>g.some(x=>x.id===p.id));

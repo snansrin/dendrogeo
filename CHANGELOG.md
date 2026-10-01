@@ -9,6 +9,85 @@ Yeni sürüm yayımlama adımları: [`docs/surum-yayini.md`](docs/surum-yayini.m
 
 ## [Yayımlanmadı]
 
+### Eklendi/Düzeltildi — 0035: dis denetim paketi + tam EN/TR dil katmani (2026-10-01)
+Dis denetim raporu (b82cb7e tabanli) + kullanici kararlari (P0+P1+P2+bekciler
+HEPSI · DBH siniri 400 · hero bandi kalkar §04 kalir · premium-landing-motion
+dali silinecek). 0034'un uzerine insa eder.
+
+**A · i18n (kullanici istegi #1):**
+- `src/config/i18n.js`: sozluk tabanli calisma-zamani cevirmen (~200 dize EN).
+  Markup TR kalir (SEO/JSON-LD/testler korunur); metin dugumu + placeholder/
+  title/aria-label cevirisi; MutationObserver dinamik gorunumleri yakalar;
+  localStorage `dg_lang`; `<html lang>`; `dg:lang` olayi.
+- Dil dugmesi landing topnav + uygulama ust bari: **EN'e bas → site+app
+  Ingilizce, dugme TR olur** (dgToggleLang). KVKK riza metni BILEREK TR kalir
+  (hukuki metin); tur adlari veri anahtari, cevrilmez.
+- Kayit zinciri: head.html defer tag + sw.js CORE_ASSETS + r47→r48.
+
+**B · P0 bilimsel dogruluk:**
+- "DBH = Cevre ÷ π" landing'den SILINDI (0031 kirmizi cizgisi; rapor
+  bekçileri landing'i taramiyordu) → "DBH = gogus capi (cm) · 1,30 m'den
+  dogrudan" + "cevre→cap donusumu UYGULANMAZ; ham deger (girth_cm) kanit
+  olarak saklanir" notu. Bekci: landing-claims.test.mjs (tum yayin sayfalari).
+- DBH ust siniri TEK standart: **400 cm** (measure.js d>500→d>400 + landing
+  QA karti + rapor QA_LIMITS zaten 400) — ucunun esitligi testle kilitli.
+- Atif DataCite kaydiyla birebir: Turkce baslik + **[Software]** + v3.0.0
+  (release.test kilidi guncellendi). JSON-LD: softwareVersion 3.0.0,
+  sameAs'ten v1.0.0 DOI (cc-by-4.0 celiskisi) cikti, copyrightHolder 2 Person.
+- Hero cipleri bekci altinda: C degeri motorla yeniden uretiliyor + h/D
+  QA bandinda (15-120) zorunlu.
+
+**C · P1 standart/erisilebilirlik:**
+- Token TEK kaynak: --f-disp/--f-ui/--f-mono style.css'e tasindi;
+  ui-standard.css :root duplikasyonu KALDIRILDI (0034 kaskad dersinin kalici
+  cozumu); 26 elle font stack → var(--f-*); Google Fonts'tan kullanilmayan
+  500 agirliklari dustu, mono 700 eklendi (.step .num kullaniyor).
+- GROUP_COLOR_INK (metin tonlari): dash.js etiketleri 3.03/2.37:1 → ≥5.0:1.
+  #68766e kalintilari (dash.js chart ticks, map.js popup) → #5f6d65.
+- Klavye: sol menu 10 div → role="button" tabindex="0" + dgKeyActivate
+  (Enter/Space); landing ulke/sehir satirlari tabindex+keydown.
+- 14 form alanina label for / aria-label; 65 <th> → scope="col"
+  (partials + alt sayfalar + src sablonlari; make-report.mjs DOKUNULMADI —
+  rapor HTML kilitleri ve dondurulmus ciktilar korunur).
+- #toastWrap → role="status" aria-live="polite" (build ancasi statik yazima
+  kapali oldugu icin toast.js calisma zamaninda atar).
+- Mobil hamburger (erisilebilir disclosure): aria-expanded/controls, Esc,
+  link basinca kapanma (0034'teki kaydirma seridi yerine).
+- hreflang simetrisi korunuyor; 7 TR alt sayfa nav'ina EN linki;
+  sitemap += /rapor/ + DGR-2026-0019; tek :focus-visible kurali.
+
+**D · P2 temizlik:**
+- Hero statband kaldirildi (kullanici karari: §04 Iststatistik kalir) —
+  landing.js stRec* atamalari ve .statband CSS'i de gitti.
+- 26 olu animasyon sinifi + 13 olu keyframes landing.css'ten silindi (~56 satir).
+- Footer "Veri Dogruluk Politikasi" toast'i → /yontem/ gercek link
+  (KVKK 0034'te link olmustu); meta keywords kaldirildi.
+- sw.js CORE_ASSETS += /apple-touch-icon.png, +/src/config/i18n.js; r48.
+- 404.html eklendi (markali, dg-page standardinda, TR+EN).
+- QGIS rehberindeki kisisel C:/dendro_foto → notr D:/DendroFoto.
+
+**E · Bekciler — test/landing-claims.test.mjs (yeni):**
+cevre÷π yasagi (tum yayin sayfalari) · tur sayilari species.js'ten · hero
+cipi motorla birebir + QA bandi · DBH 400 uc yerde · sameAs DOI · 2 Person ·
+keywords yok · amber metin yasagi · #68766e yasagi · tek focus-visible ·
+menu klavye · 14 label · th scope · aria-live · hamburger · hreflang ·
+sitemap rapor · statband yok · olu sinif yok · gercek politika linkleri ·
+404 + CORE_ASSETS · i18n sozluk/kayit/tespit kilidi.
+
+**Guncellenen mevcut kilitler:** release.test (softwareVersion SURUM, atif
+[Software]+Turkce baslik) · critical-fixes (--mut TEK kaynak kaskad kilidi,
+GROUP_COLOR_INK) · ui-standard.test (token anayasasi style.css'e tasindi,
+ui-standard :root TANIMLAYAMAZ) · park-identity (th scope desenleri).
+
+**Kirmizi cizgiler korundu:** karbon motoru/katsayilar, MC_CFG, dbh_cm semasi,
+CSV bicimi, migrations, publish kuyrugu/workflow'lar, make-report.mjs, LULC/park
+analizi, yayimlanmis rapor ciktilari, .dg-google Arial.
+
+**Kullanicida kalan:** `git push origin --delete feat/premium-landing-motion`
+(P2-9 dali silme karari) · Zenodo v1.0.0 kaydinin lisansini arayuzden
+duzeltme (P0-5, yalniz kayit sahibi yapabilir).
+
+
 ### Düzeltildi — 0034: 2026-10-01 tam denetim paketi (landing dogrulugu · WCAG kaskadi · atif/KVKK)
 Bagimsiz denetim (canli site ↔ depo ↔ canli Supabase verisi; 937 test yesilken
 icerik duzeyinde) asagidakileri buldu ve bu pakette giderildi:

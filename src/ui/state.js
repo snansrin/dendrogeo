@@ -17,3 +17,8 @@ let USER=null,PROFILE=null,GPS=null,WP=[],navTarget=null,charts={},map=null,navM
  * sekme bir oturumda BİR KEZ yüklendiği için yeni onaylanan nokta F5'e kadar
  * haritada görünmüyordu. */
 let DG_LIVE_DIRTY=false;
+/* KLAVYE ETKİNLEŞTİRME (0035 · P1-2): role="button" taşıyan div/tr öğeleri
+ * Enter/Space ile de tıklanabilir. ui-audit handler'ı tanımlı sayar. */
+function dgKeyActivate(ev,el){
+ if(ev.key==="Enter"||ev.key===" "||ev.key==="Spacebar"){ev.preventDefault();if(el&&el.click)el.click();}
+}

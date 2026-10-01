@@ -38,7 +38,7 @@ function openPreview(title,content,isCSV,fname){
  $("pvTitle").textContent=title;
  if(isCSV){
   const lines=content.replace(/^\uFEFF/,"").split("\n").filter(Boolean).slice(0,100);
-  let html="<table><thead><tr>"+lines[0].split(",").map(h=>`<th>${h}</th>`).join("")+"</tr></thead><tbody>";
+  let html="<table><thead><tr>"+lines[0].split(",").map(h=>`<th scope='col'>${h}</th>`).join("")+"</tr></thead><tbody>";
   for(let i=1;i<lines.length;i++)html+="<tr>"+lines[i].split(",").map(c=>`<td>${esc(c)}</td>`).join("")+"</tr>";
   $("pvBody").innerHTML=html+"</tbody></table>";
  }else{$("pvBody").innerHTML=`<pre style="font-size:.75rem;white-space:pre-wrap">${esc(content.slice(0,20000))}</pre>`;}

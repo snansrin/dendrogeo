@@ -223,7 +223,7 @@ function dgRenderParkReport(name,rows,count,row){
   </div>
   <div style="font-size:.78rem;color:var(--mut);margin-bottom:12px">🌲 İbreli %${pct(ib)} · 🍃 Yapraklı %${pct(ya)} · Diğer %${pct(n-ib-ya)}${area?` · alan ${dgFmtHa(area)}${perHa!==null?` · <b>${perHa.toFixed(2)} t/ha</b>`:""}`:""} · ${new Date().toLocaleDateString("tr-TR")}</div>
   ${projNames.length>1?`<div style="font-size:.74rem;color:var(--mut);margin-bottom:10px">Bu parkta birleşen projeler: ${projNames.map(esc).join(" · ")}</div>`:""}
-  <table><thead><tr><th>Tür</th><th>Latince</th><th>Grup</th><th>Adet</th><th>Karbon (kg)</th><th>Ort. Çap</th><th>Ort. Boy</th></tr></thead><tbody>
+  <table><thead><tr><th scope='col'>Tür</th><th scope='col'>Latince</th><th scope='col'>Grup</th><th scope='col'>Adet</th><th scope='col'>Karbon (kg)</th><th scope='col'>Ort. Çap</th><th scope='col'>Ort. Boy</th></tr></thead><tbody>
   ${spRows.map(([sp,v])=>`<tr><td>${sp}</td><td style="font-style:italic">${LATIN[sp]&&LATIN[sp]!=="—"?LATIN[sp]:"—"}</td><td>${v.grp}</td><td>${v.n}</td><td>${v.c.toFixed(1)}</td><td>${(v.dbh/v.n).toFixed(1)}</td><td>${(v.h/v.n).toFixed(1)}</td></tr>`).join("")}
   </tbody></table>`;
  const csv="\uFEFF"+["PARK,\""+name.replace(/"/g,'""')+"\"",

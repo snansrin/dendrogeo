@@ -33,7 +33,7 @@ async function drawChart(id,type,labels,data){
  if(window.dgEnsureChart)await window.dgEnsureChart();
  if(charts[id])charts[id].destroy();
  const pal=["#14532d","#1e6f4b","#2e8b57","#3aa76d","#6aa84f","#8fbc6d","#c77d2e","#d97706","#92400e","#4c9a52"];
- charts[id]=new Chart($(id),{type,data:{labels,datasets:[{data,backgroundColor:(c)=>pal[c.dataIndex%pal.length],borderRadius:8,borderSkipped:false,barPercentage:.6}]},options:{plugins:{legend:{display:false}},scales:type==="bar"?{y:{grid:{color:"rgba(20,30,25,.06)"},ticks:{color:"#68766e"}},x:{grid:{display:false},ticks:{color:"#68766e"}}}:undefined}});
+ charts[id]=new Chart($(id),{type,data:{labels,datasets:[{data,backgroundColor:(c)=>pal[c.dataIndex%pal.length],borderRadius:8,borderSkipped:false,barPercentage:.6}]},options:{plugins:{legend:{display:false}},scales:type==="bar"?{y:{grid:{color:"rgba(20,30,25,.06)"},ticks:{color:"#5f6d65"}},x:{grid:{display:false},ticks:{color:"#5f6d65"}}}:undefined}});
 }
 // 6. Ağaç çeşitliliği analizi
 /* ============ AKTİF VERİ ANALİZİ (İbreli/Yapraklı yüzde, ort. çap/boy, tür dağılımı) ============ */
@@ -81,8 +81,8 @@ function renderAnalysis(rows,elId){
    <div class="grid g4" style="margin-bottom:18px">
     <div class="stat" style="padding:14px"><div class="lbl">Ort. Çap</div><div class="val" style="font-size:1.15rem">${avgDbh} <span style="font-size:.7rem;font-weight:400">cm</span></div></div>
     <div class="stat" style="padding:14px"><div class="lbl">Ort. Boy</div><div class="val" style="font-size:1.15rem">${avgH} <span style="font-size:.7rem;font-weight:400">m</span></div></div>
-    <div class="stat" style="padding:14px"><div class="lbl" style="color:${GROUP_COLOR["İBRELİ"]}">İbreli Ort.Boy</div><div class="val" style="font-size:1.15rem">${groups["İBRELİ"].n?(groups["İBRELİ"].h/groups["İBRELİ"].n).toFixed(1):"—"} <span style="font-size:.7rem;font-weight:400">m</span></div></div>
-    <div class="stat" style="padding:14px"><div class="lbl" style="color:${GROUP_COLOR["YAPRAKLI"]}">Yapraklı Ort.Boy</div><div class="val" style="font-size:1.15rem">${groups["YAPRAKLI"].n?(groups["YAPRAKLI"].h/groups["YAPRAKLI"].n).toFixed(1):"—"} <span style="font-size:.7rem;font-weight:400">m</span></div></div>
+    <div class="stat" style="padding:14px"><div class="lbl" style="color:${GROUP_COLOR_INK["İBRELİ"]}">İbreli Ort.Boy</div><div class="val" style="font-size:1.15rem">${groups["İBRELİ"].n?(groups["İBRELİ"].h/groups["İBRELİ"].n).toFixed(1):"—"} <span style="font-size:.7rem;font-weight:400">m</span></div></div>
+    <div class="stat" style="padding:14px"><div class="lbl" style="color:${GROUP_COLOR_INK["YAPRAKLI"]}">Yapraklı Ort.Boy</div><div class="val" style="font-size:1.15rem">${groups["YAPRAKLI"].n?(groups["YAPRAKLI"].h/groups["YAPRAKLI"].n).toFixed(1):"—"} <span style="font-size:.7rem;font-weight:400">m</span></div></div>
    </div>
    
    <!-- Top 6 tür -->

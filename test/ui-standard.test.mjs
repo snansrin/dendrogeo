@@ -34,11 +34,15 @@ const SUBS = readdirSync(ROOT).filter((d) => {
 });
 
 describe('ui-standard.css sözleşmesi', () => {
-  test('dosya var ve token anayasasını tanımlıyor', () => {
-    assert.match(css, /--green:#1e6f4b/, 'kanonik yeşil token');
-    assert.match(css, /--f-disp:Fraunces/, 'başlık ailesi Fraunces');
-    assert.match(css, /--f-ui:Manrope/, 'gövde ailesi Manrope');
-    assert.match(css, /--f-mono:"IBM Plex Mono"/, 'veri ailesi IBM Plex Mono');
+  test('token anayasası TEK KAYNAKTA: style.css :root (0035 · P1-8)', () => {
+    const style = read('css/style.css');
+    assert.match(style, /--green:#1e6f4b/, 'kanonik yeşil token style.css\'te');
+    assert.match(style, /--f-disp:Fraunces/, 'başlık ailesi Fraunces');
+    assert.match(style, /--f-ui:Manrope/, 'gövde ailesi Manrope');
+    assert.match(style, /--f-mono:"IBM Plex Mono"/, 'veri ailesi IBM Plex Mono');
+    /* 0034 dersi: ui-standard.css EN SON yüklendiği için :root duplikasyonu
+     * style.css'teki WCAG düzeltmelerini sessizce eziyordu. Artık yasak. */
+    assert.ok(!/:root\s*\{/.test(css), 'ui-standard.css token YENİDEN TANIMLAMAZ (tek kaynak style.css)');
   });
 
   test('tipografi ölçeği bilimsel hiyerarşide (kicker/h1/h2/h3/sub/meta)', () => {
