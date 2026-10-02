@@ -290,7 +290,7 @@
 <script src="src/ui/park-export.js?v=3e078dc3" defer></script>
 <script src="src/services/dash.js?v=4556cd69" defer></script>
 <link rel="stylesheet" href="css/style.css?v=77a93734">
-<link rel="stylesheet" href="css/landing.css?v=2a41ef92">
+<link rel="stylesheet" href="css/landing.css?v=85504b78">
 <link rel="stylesheet" href="css/park-panel.css?v=10b49293">
 <!-- TASARIM SİSTEMİ (2026-09-27, 2. deneme): ui-standard.css geri BAĞLANDI
      ama ARTIK eleman seviyesi kuralları yalnız .dg-page (alt sayfalar) altında
@@ -323,16 +323,6 @@
   </div>
     <div class="hero-art" aria-hidden="true">
    <svg viewBox="0 0 800 300" fill="none">
-    <defs>
-     <linearGradient id="dgSkinA" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f6cba6"/><stop offset="1" stop-color="#e0a87f"/></linearGradient>
-     <linearGradient id="dgHairA" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#5a3a24"/><stop offset="1" stop-color="#4a2f1d"/></linearGradient>
-     <linearGradient id="dgVest" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#d18a37"/><stop offset="1" stop-color="#c77d2e"/></linearGradient>
-     <linearGradient id="dgLegA" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#44668a"/><stop offset="1" stop-color="#3b5a7a"/></linearGradient>
-     <linearGradient id="dgSkinB" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#eec296"/><stop offset="1" stop-color="#d6a172"/></linearGradient>
-     <linearGradient id="dgHairB" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#7d5033"/><stop offset="1" stop-color="#6d452c"/></linearGradient>
-     <linearGradient id="dgJack" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#25855a"/><stop offset="1" stop-color="#1e6f4b"/></linearGradient>
-     <linearGradient id="dgLegB" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#1a6338"/><stop offset="1" stop-color="#14532d"/></linearGradient>
-    </defs>
     <path d="M0 228 Q200 222 400 226 T800 226" stroke="#9cc39c" stroke-width="3" stroke-linecap="round"/>
     <path d="M20 236 C200 232 400 238 780 234" stroke="#e6e3d9" stroke-width="4" stroke-linecap="round" stroke-dasharray=".5 11"/>
     <ellipse cx="670" cy="230" rx="42" ry="6" fill="#182420" opacity=".08"/>
@@ -355,112 +345,66 @@
     <g class="walkerA">
      <ellipse cx="629" cy="231" rx="15" ry="3.5" fill="#182420" opacity=".08"/>
      <g class="bobA">
-     <path d="M626 226 q0-3 3-3 h7 q3 0 3 3 v3.5 h-13 z" fill="#fff" stroke="#e6e3d9"/>
-     <path d="M636 226 q0-3 3-3 h6 q3 0 3 3 v3.5 h-12 z" fill="#fff" stroke="#e6e3d9"/>
-     <path d="M627 224.5 h10" stroke="#c9d4e0" stroke-width="1.6"/>
-     <path d="M637 224.5 h9" stroke="#c9d4e0" stroke-width="1.6"/>
-     <path class="legA" d="M626 198 q4 0 4.6 3 l.6 11 q.2 4-.4 8 l-.6 6 h-6 l.4-6 q.6-4 .2-8 l-.4-12 q0-3 2.2-3 z" fill="url(#dgLegA)"/>
-     <path class="legB" d="M636 198 q4 0 4.4 3 l.4 12 q.2 4-.4 8 l-.4 5 h-6 l.4-6 q.4-4 .2-8 l-.4-11 q0-3 2.2-3 z" fill="url(#dgLegA)"/>
+     <path d="M621.5 226 q0-2.6 2.6-2.6 h5.2 q2.6 0 2.6 2.6 v3.4 h-10.4 z" fill="#fff" stroke="#e6e3d9"/>
+     <path d="M632.5 226 q0-2.6 2.6-2.6 h5.2 q2.6 0 2.6 2.6 v3.4 h-10.4 z" fill="#fff" stroke="#e6e3d9"/>
+     <path d="M622.5 224.5 h8" stroke="#c9d4e0" stroke-width="1.4"/>
+     <path d="M633.5 224.5 h8" stroke="#c9d4e0" stroke-width="1.4"/>
+     <path class="legA" d="M625 199 q3.6 0 4 3 l.5 10 q.3 4-.5 8 l-.5 5.5 h-5.5 l.5-6 q.5-4 .2-8 l-.4-10 q0-2.5 2.2-2.5 z" fill="#3b5a7a"/>
+     <path class="legB" d="M634.5 199 q3.6 0 4 3 l.4 10 q.2 4-.4 8 l-.5 5.5 h-5.5 l.5-6 q.4-4 .2-8 l-.4-10 q0-2.5 2.2-2.5 z" fill="#3b5a7a"/>
      <g class="bendA">
-      <path d="M624 170 q7-4 13 0 l2 8 q1.5 12-.5 24 q-7 3-13.5 0 q-2.5-12-1.5-24 z" fill="url(#dgVest)"/>
-      <path d="M635 170 q2 15 .5 31" stroke="#a9661f" stroke-width="1.2" opacity=".75"/>
-      <path d="M625.5 178 q7 3 13 0" stroke="#a9661f" stroke-width="1" fill="none" opacity=".5"/>
-      <path d="M626 194 h6 l-.5 4 h-5 z" stroke="#a9661f" stroke-width=".9" fill="none" opacity=".6"/>
-      <path d="M621 172 q-3.5 3-3.5 8 l.5 9 q.5 3 3.5 4 l3 1" fill="none" stroke="url(#dgVest)" stroke-width="5.5" stroke-linecap="round"/>
-      <circle cx="625" cy="195" r="2.8" fill="url(#dgSkinA)"/>
-      <g transform="rotate(-8 645 186)">
-       <rect x="638" y="176" width="14" height="19" rx="2" fill="#fff" stroke="#c77d2e"/>
-       <rect x="642.5" y="174" width="6" height="3.5" rx="1.4" fill="#8a5a3b"/>
-       <path d="M641 181 h8 M641 184.5 h6.5 M641 188 h8 M641 191.5 h5" stroke="#9cc39c" stroke-width="1.1"/>
-      </g>
-      <path d="M636 173 q6 2 8 6 l2 5" fill="none" stroke="url(#dgVest)" stroke-width="5.5" stroke-linecap="round"/>
-      <circle cx="647" cy="185" r="2.9" fill="url(#dgSkinA)"/>
-      <g class="penA"><path d="M646 183.5 L651.5 189" stroke="#c77d2e" stroke-width="2" stroke-linecap="round"/></g>
-      <g class="headA">
-       <rect x="628" y="161.5" width="5.5" height="6.5" rx="2" fill="url(#dgSkinA)"/>
-       <path d="M628.2 162.2 q2.6 1.6 5.2 0" stroke="#d69a6e" stroke-width=".8" fill="none" opacity=".7"/>
-       <path d="M621.5 152.5 q0-9.5 8.5-9.5 q8 0 9 8 l.5 3.5 q1.8 1 1.6 2.2 q-.2 1.2-1.8 1.4 l-.4 2.6 q-.4 2.6-3 3.6 q-3.4 1.4-7 .6 q-3.8-.8-5.8-4 q-1.9-3.2-1.6-8.4 z" fill="url(#dgSkinA)"/>
-       <path d="M624.6 156.5 q-1.6 .6-1.4 2.2 q.2 1.6 1.8 1.8" fill="url(#dgSkinA)" stroke="#e0a87f" stroke-width=".6"/>
-       <path d="M621.5 151 q.8-8.5 9-8.5 q8 0 9.2 8 q-3.5-3.2-9.2-3.2 q-5.5 0-9 3.7 z" fill="url(#dgHairA)"/>
-       <path d="M624 149.5 q2.5-2.6 5.5-2.8 M631 147.6 q3 .4 4.6 2.4" stroke="#3a2416" stroke-width=".9" fill="none" opacity=".55"/>
-       <path d="M630.5 146.8 q-1.8-1.2-1-2.8 q1 1.2 2.6 1" stroke="#4a2f1d" stroke-width="1.1" fill="none" stroke-linecap="round"/>
-       <path d="M629.5 151.2 q2.6-1 4.8-.2" stroke="#7a5236" stroke-width=".8" stroke-linecap="round" fill="none"/>
-       <ellipse cx="633.5" cy="155" rx="1.9" ry="2.2" fill="#fff"/>
-       <circle cx="634.2" cy="154.6" r="1.3" fill="#6b4423"/>
-       <circle cx="634.4" cy="154.7" r=".55" fill="#182420"/>
-       <circle cx="633.6" cy="153.9" r=".5" fill="#fff"/>
-       <path d="M631.6 153 q2.2-1.3 4.2-.1" stroke="#3a2416" stroke-width=".9" fill="none"/>
-       <g class="blinkA">
-        <ellipse cx="633.5" cy="155" rx="2" ry="2.3" fill="url(#dgSkinA)"/>
-        <path d="M631.6 155.2 q2 1.5 3.9 0" stroke="#3a2416" stroke-width="1" fill="none" stroke-linecap="round"/>
-       </g>
-       <circle cx="629" cy="158.6" r=".45" fill="#c98d68" opacity=".5"/>
-       <circle cx="627.6" cy="157.6" r=".45" fill="#c98d68" opacity=".5"/>
-       <circle cx="628.4" cy="159.6" r="1.7" fill="#e58f7a" opacity=".32"/>
-       <path d="M636.5 161.5 q1.8 1.1 3.4 .1" stroke="#b0574a" stroke-width="1.3" stroke-linecap="round" fill="none"/>
-      </g>
+      <path d="M616 172 q-3.5 2.5-4 7 l.5 9 q.5 3 3.5 4 l3.5 1" fill="none" stroke="#1e6f4b" stroke-width="5.5" stroke-linecap="round"/>
+      <circle cx="621" cy="195" r="2.8" fill="#f2c19a"/>
+      <rect x="617" y="168" width="21" height="34" rx="9" fill="#c77d2e"/>
+      <rect x="619" y="174" width="17" height="22" rx="2" fill="#fff" stroke="#c77d2e"/>
+      <path d="M622 178 h11 M622 181 h9" stroke="#9cc39c" stroke-width="1.2"/>
+      <g class="penA"><path d="M625 190 L631 196" stroke="#c77d2e" stroke-width="2" stroke-linecap="round"/></g>
+      <path d="M637 176 q5 0 8 1.5 l5 1.5" fill="none" stroke="#f2c19a" stroke-width="5" stroke-linecap="round"/>
+      <circle cx="651" cy="177" r="3" fill="#f2c19a"/>
+      <circle cx="628" cy="158" r="9" fill="#f2c19a"/>
+      <path d="M619 156 a9 9 0 0 1 18 0 z" fill="#4a2f1d"/>
+      <circle cx="624" cy="158" r="1.2" fill="#182420"/><circle cx="632" cy="158" r="1.2" fill="#182420"/>
+      <path d="M625 162 q3 2.5 6 0" stroke="#182420" stroke-width="1.4" stroke-linecap="round"/>
      </g>
      </g>
     </g>
     <g class="walkerB">
      <ellipse cx="575" cy="231" rx="15" ry="3.5" fill="#182420" opacity=".08"/>
      <g class="bobB">
-     <path d="M570 226 q0-3 3-3 h7 q3 0 3 3 v3.5 h-13 z" fill="#fff" stroke="#e6e3d9"/>
-     <path d="M580 226 q0-3 3-3 h6 q3 0 3 3 v3.5 h-12 z" fill="#fff" stroke="#e6e3d9"/>
-     <path d="M571 224.5 h10" stroke="#c9d4e0" stroke-width="1.6"/>
-     <path d="M581 224.5 h9" stroke="#c9d4e0" stroke-width="1.6"/>
-     <path class="legC" d="M570 202 q3.6 0 4 3 l.6 9 q.2 4-.6 7 l-.6 5 h-5 l.6-5 q.6-3 .4-7 l-.6-10 q0-3 2.2-3 z" fill="url(#dgLegB)"/>
-     <path class="legD" d="M580 202 q3.4 0 3.4 3 l0 10 q0 4-.4 7 l-.6 4 h-5 l.6-5 q.4-3 .4-7 l.6-9 q0-3 2-3 z" fill="url(#dgLegB)"/>
-     <path d="M568 168 q8-4 15 0 l2 9 q1.5 14-1 27 q-8.5 3-16 0 q-2.5-13-1-27 z" fill="url(#dgJack)"/>
-     <path d="M581 169 q2 16 .5 33" stroke="#9fd0ae" stroke-width="1.8" opacity=".85"/>
-     <path d="M570 177 q8 3 14 0" stroke="#175c3e" stroke-width="1" fill="none" opacity=".6"/>
-     <path d="M572 196 h6 l-.5 4 h-5 z" stroke="#175c3e" stroke-width=".9" fill="none" opacity=".6"/>
-     <path d="M569 170 q-3 3.5-3 8.5 l.5 9 q.4 3 3 4 l2.5 1" fill="none" stroke="url(#dgJack)" stroke-width="5.5" stroke-linecap="round"/>
-     <circle cx="573" cy="194" r="2.7" fill="url(#dgSkinB)"/>
-     <g class="armPhoneB">
-      <path d="M578 172 q4.5 3.5 6 9.5 q3-5.5 10.5-8.5" fill="none" stroke="url(#dgJack)" stroke-width="5.5" stroke-linecap="round"/>
-      <circle cx="596" cy="163" r="2.9" fill="url(#dgSkinB)"/>
-      <g class="phoneB">
-      <rect x="594" y="148" width="10.5" height="20" rx="2.6" fill="#182420"/>
-      <rect x="595.2" y="149.2" width="8.1" height="17.6" rx="1.8" fill="#22332b"/>
-      <rect x="595.9" y="150" width="6.7" height="13.4" rx="1.2" fill="#eaf3ec" opacity=".9"/>
-      <circle cx="599.2" cy="155.6" r="2.2" fill="#2e8b57" opacity=".85"/>
-      <path d="M599.2 157.8 v2.6" stroke="#8a5a3b" stroke-width="1.1"/>
-      <rect x="596.4" y="164.4" width="5.6" height="1.1" rx=".55" fill="#9cc39c" opacity=".8"/>
-      <rect x="595.6" y="149.6" width="3.4" height="3.4" rx="1" fill="#0d1512"/>
-      <circle cx="596.8" cy="150.8" r=".7" fill="#2b3a33"/><circle cx="598.2" cy="150.8" r=".7" fill="#2b3a33"/>
-      <circle class="flash" cx="599" cy="150" r="3.4" fill="#fff"/>
-      </g>
-     </g>
+     <path d="M566.5 226 q0-2.6 2.6-2.6 h5.2 q2.6 0 2.6 2.6 v3.4 h-10.4 z" fill="#fff" stroke="#e6e3d9"/>
+     <path d="M577.5 226 q0-2.6 2.6-2.6 h5.2 q2.6 0 2.6 2.6 v3.4 h-10.4 z" fill="#fff" stroke="#e6e3d9"/>
+     <path d="M567.5 224.5 h8" stroke="#c9d4e0" stroke-width="1.4"/>
+     <path d="M578.5 224.5 h8" stroke="#c9d4e0" stroke-width="1.4"/>
+     <path class="legC" d="M570 201 q3.4 0 3.8 3 l.5 9 q.2 4-.6 7 l-.5 5 h-5.2 l.6-5.5 q.6-3 .4-7 l-.5-9 q0-2.5 2-2.5 z" fill="#14532d"/>
+     <path class="legD" d="M579.5 201 q3.2 0 3.2 3 l0 9 q0 4-.4 7 l-.5 5 h-5.2 l.6-5.5 q.4-3 .4-7 l.5-9 q0-2.5 2-2.5 z" fill="#14532d"/>
+     <path d="M566 172 q-4 2-4.5 6.5 l-.5 8 q.3 3 3 4 l2.5 1" fill="none" stroke="#e8b98a" stroke-width="5" stroke-linecap="round"/>
+     <circle cx="567.5" cy="194" r="2.7" fill="#e8b98a"/>
+     <rect x="564" y="166" width="24" height="40" rx="10" fill="#1e6f4b"/>
+     <path d="M576 168 v36" stroke="#9fd0ae" stroke-width="2" opacity=".8"/>
      <g class="headB">
-      <rect x="573.5" y="160.5" width="5.5" height="6.5" rx="2" fill="url(#dgSkinB)"/>
-      <path d="M573.7 161.2 q2.6 1.6 5.2 0" stroke="#d6a172" stroke-width=".8" fill="none" opacity=".7"/>
-      <path d="M567 152.5 q0-9.5 8.5-9.5 q8 0 9 8 l.5 3.5 q1.8 1 1.6 2.2 q-.2 1.2-1.8 1.4 l-.4 2.6 q-.4 2.6-3 3.6 q-3.4 1.4-7 .6 q-3.8-.8-5.8-4 q-1.9-3.2-1.6-8.4 z" fill="url(#dgSkinB)"/>
-      <path d="M570.1 156.5 q-1.6 .6-1.4 2.2 q.2 1.6 1.8 1.8" fill="url(#dgSkinB)" stroke="#d6a172" stroke-width=".6"/>
-      <path d="M567 151 q.8-8.5 9-8.5 q8 0 9.2 8 q-2.4-3-5.4-3.2 q1 2.2 .4 4.2 q-1.6-3.2-4.8-3.6 q-5-.6-8.4 3.1 z" fill="url(#dgHairB)"/>
-      <path d="M569.5 149.5 q3-2.2 6-2 M577.5 147.8 q3 .5 4.6 2.6" stroke="#573621" stroke-width=".9" fill="none" opacity=".55"/>
-      <path d="M583 150 q1.4 2.6 1 5.4" stroke="url(#dgHairB)" stroke-width="2" fill="none" stroke-linecap="round"/>
-      <g class="tail"><path d="M567.5 146 q-10 6-11.5 16 q-1.2 9.5 4.5 15 q3 2.8 6.5 3 q-4.2-6.5-3.6-13.5 q.6-8 6.6-14.5 z" fill="url(#dgHairB)"/><path d="M563 152 q-4.5 6-4.6 12.5 q-.1 6 2.6 10" stroke="#573621" stroke-width=".9" fill="none" opacity=".55"/></g>
-      <circle cx="568.5" cy="148.5" r="3" fill="#c2452d"/>
-      <circle cx="567.6" cy="147.6" r=".9" fill="#e06a52" opacity=".8"/>
-      <path d="M578.5 151.2 q2.6-1 4.8-.2" stroke="#8a6248" stroke-width=".8" stroke-linecap="round" fill="none"/>
-      <ellipse cx="581.5" cy="155" rx="1.9" ry="2.2" fill="#fff"/>
-      <circle cx="582.2" cy="154.6" r="1.3" fill="#4e6e58"/>
-      <circle cx="582.4" cy="154.7" r=".55" fill="#182420"/>
-      <circle cx="581.6" cy="153.9" r=".5" fill="#fff"/>
-      <path d="M579.6 153 q2.2-1.3 4.2-.1" stroke="#3a2416" stroke-width=".9" fill="none"/>
-      <g class="blinkB">
-       <ellipse cx="581.5" cy="155" rx="2" ry="2.3" fill="url(#dgSkinB)"/>
-       <path d="M579.6 155.2 q2 1.5 3.9 0" stroke="#3a2416" stroke-width="1" fill="none" stroke-linecap="round"/>
+     <circle cx="576" cy="156" r="9" fill="#e8b98a"/>
+     <path d="M567 154 a9 9 0 0 1 18 0 z" fill="#6d452c"/>
+     <g class="tail"><circle cx="585" cy="151" r="5" fill="#6d452c"/><path d="M587 154 q8 6 5 18" stroke="#6d452c" stroke-width="4" stroke-linecap="round"/></g>
+     <circle cx="585" cy="146" r="3" fill="#c2452d"/>
+     <circle cx="573" cy="156" r="1.2" fill="#182420"/><circle cx="579" cy="156" r="1.2" fill="#182420"/>
+     <path d="M573 160 q3 2.5 6 0" stroke="#182420" stroke-width="1.4" stroke-linecap="round"/>
+     </g>     <g class="armPhoneB">
+      <path d="M584 170 q4.5 3 6 8 q2.5-5 8-7" fill="none" stroke="#e8b98a" stroke-width="5" stroke-linecap="round"/>
+      <circle cx="597" cy="164" r="2.8" fill="#e8b98a"/>
+      <g class="phoneB">
+       <rect x="594" y="148" width="10.5" height="20" rx="2.6" fill="#182420"/>
+       <rect x="595.2" y="149.2" width="8.1" height="17.6" rx="1.8" fill="#22332b"/>
+       <rect x="595.9" y="150" width="6.7" height="13.4" rx="1.2" fill="#eaf3ec" opacity=".9"/>
+       <circle cx="599.2" cy="155.6" r="2.2" fill="#2e8b57" opacity=".85"/>
+       <path d="M599.2 157.8 v2.6" stroke="#8a5a3b" stroke-width="1.1"/>
+       <rect x="595.6" y="149.6" width="3.4" height="3.4" rx="1" fill="#0d1512"/>
+       <circle cx="596.8" cy="150.8" r=".7" fill="#2b3a33"/><circle cx="598.2" cy="150.8" r=".7" fill="#2b3a33"/>
+       <circle class="flash" cx="599" cy="150" r="3.4" fill="#fff"/>
       </g>
-      <circle cx="576.6" cy="158.6" r=".45" fill="#c98d68" opacity=".5"/>
-      <circle cx="575.2" cy="157.6" r=".45" fill="#c98d68" opacity=".5"/>
-      <circle cx="576" cy="159.6" r="1.7" fill="#e58f7a" opacity=".32"/>
-      <path d="M584.5 161.5 q1.8 1.1 3.4 .1" stroke="#b0574a" stroke-width="1.3" stroke-linecap="round" fill="none"/>
      </g>
+
      </g>
     </g>
-   </svg>   </svg>   </svg>
+   </svg>   </svg>   </svg>   </svg>
    <div class="chip c1"><span style="color:var(--amber)">●</span> DBH 45 cm</div>
    <div class="chip c2"><span style="color:var(--green)">●</span> C 373.7 kg</div>
    <div class="chip c3"><span style="color:var(--blue)">●</span> H 13 m</div>

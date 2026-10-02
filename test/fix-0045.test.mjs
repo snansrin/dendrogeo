@@ -132,57 +132,36 @@ describe('0045 · gelişmiş canlı izleme — GEÇİCİ (DB yok)', () => {
   });
 });
 
-describe('0045 · hero karakterler yarı-gerçekçi (iskelet korunur)', () => {
-  test('⭐ animasyon sınıfları ve çapalar BİREBİR yerinde', () => {
-    for (const c of ['class="walkerA"', 'class="walkerB"', 'class="legA"', 'class="legB"', 'class="legC"', 'class="legD"', 'class="bendA"', 'class="penA"', 'class="tail"', 'class="flash"', 'class="canopy"', 'class="tapewin"', 'class="sightwin"'])
-      assert.ok(landing.includes(c), 'eksik sınıf: ' + c);
-    for (const a of ['cx="629" cy="231"', 'cx="575" cy="231"', 'x1="599" y1="152" x2="676" y2="60"', 'cx="671" cy="176"', 'cx="670" cy="230"'])
-      assert.ok(landing.includes(a), 'konum çapası kaydı: ' + a);
-    assert.ok(!landing.includes('<rect class="legA" x="623"'), 'eski blok bacak geri gelmemeli');
-    assert.match(landing, /class="phoneB"/, 'kızın elinde telefon (kullanıcı isteği)');
-    assert.match(landing, /width="10.5" height="20"/, 'telefon DİKEY (kamera değil)');
-    assert.match(landing, /fill="#eaf3ec" opacity="\.9"/, 'ekran + mini ağaç önizleme');
-    assert.ok(!landing.includes('M567.5 151.4'), 'kaş üstü boya lekesi stroke u geri gelmemeli');
-    assert.ok(!landing.includes('width="20" height="14"'), 'eski kamera gövdesi kalktı');
-    assert.ok((landing.match(/fill="#e58f7a"/g) || []).length >= 2, 'allık (profil: görünen tek yanak)');
-    assert.ok((landing.match(/stroke-width="\.9"/g) || []).length >= 6, 'ince detay çizgileri (tel/cep/tabán)');
+describe('0052 · hero: ÖZGÜN YÜZLER + istenen kol/bacak (kullanıcı: "yüz aynı kalsın, kol-bacak istediğim gibi")', () => {
+  test('⭐ YÜZLER kullanıcının ilk çizimiyle BİREBİR', () => {
+    for (const k of ['<circle cx="628" cy="158" r="9" fill="#f2c19a"/>',
+                     '<circle cx="576" cy="156" r="9" fill="#e8b98a"/>',
+                     '<path d="M619 156 a9 9 0 0 1 18 0 z" fill="#4a2f1d"/>',
+                     '<path d="M567 154 a9 9 0 0 1 18 0 z" fill="#6d452c"/>',
+                     '<circle cx="585" cy="151" r="5" fill="#6d452c"/>',
+                     '<circle cx="585" cy="146" r="3" fill="#c2452d"/>',
+                     '<circle cx="624" cy="158" r="1.2" fill="#182420"/>',
+                     '<path d="M573 160 q3 2.5 6 0"'])
+      assert.ok(landing.includes(k), 'özgün yüz öğesi eksik: ' + k);
   });
-  test('⭐ 0048 fotoğraf senaryosu: kaldır → bak → kadrajla → indir → git', () => {
-    for (const c of ['class="armPhoneB"', 'class="headB"', 'class="frameWin"', 'class="bobA"', 'class="bobB"'])
-      assert.ok(landing.includes(c), 'eksik sahne grubu: ' + c);
+  test('⭐ kol/bacak YENİ (eklemli, doğal) + telefon senaryosu duruyor', () => {
+    for (const c of ['class="legA"', 'class="legB"', 'class="legC"', 'class="legD"', 'class="armPhoneB"', 'class="phoneB"', 'class="headB"', 'class="bobA"', 'class="frameWin"'])
+      assert.ok(landing.includes(c), 'eksik: ' + c);
+    assert.ok(!landing.includes('<rect class="legA" x="623"'), 'bacaklar artık blok dikdörtmen değil');
+    assert.ok(!landing.includes('<rect x="636" y="174" width="14" height="6"'), 'kollar artık blok dikdörtmen değil');
     const lcss = rd('css/landing.css');
-    assert.match(lcss, /@keyframes phoneRaise/, 'telefon öne kalkar');
-    assert.match(lcss, /transform-origin:578px 172px/, 'omuz minderi (profil omuz)');
-    assert.match(lcss, /@keyframes gazeB/, 'kız telefona bakar');
-    assert.match(lcss, /@keyframes frameWinA/, 'ağaç vizörde kadrajlanır');
-    assert.match(lcss, /@keyframes bob/, 'ayakta minik salınım (yapaylık kırılır)');
-    /* senaryo sırası: telefon inik → kalkık pencere (vizör+flaş) → inik → çıkış */
-    assert.match(lcss, /0%,22%\{transform:rotate\(38deg\)\}26%\{transform:rotate\(-5deg\)\}29%,46%\{transform:rotate\(0deg\)\}52%,100%\{transform:rotate\(38deg\)\}/, 'kaldır-indir zamanlaması (anticipation overshoot dahil)');
-    assert.match(lcss, /@keyframes visitA/, 'çıkış yürüyüşü korunur (gitsinler)');
-    /* 0050: profil sahne kilitleri */
-    assert.match(lcss, /rotate\(6deg\)/, 'yürürken öne eğik gövde');
-    assert.match(lcss, /@keyframes headAk/, 'oğlan panoya/şeride bakar');
-    assert.match(lcss, /28%,46%\{transform:rotate\(11deg\)\}/, 'eğilme ağaca doğru');
-    assert.match(lcss, /0%,22%\{transform:rotate\(38deg\)\}/, 'telefon başta inik');
-    assert.match(landing, /class="headA"/, 'oğlan kafa grubu');
+    for (const k of ['@keyframes phoneRaise', '@keyframes gazeB', '@keyframes frameWinA', '@keyframes bob'])
+      assert.match(lcss, new RegExp(k.replace(/[()]/g, (x) => '\\' + x)), 'senaryo katmanı: ' + k);
+    assert.match(lcss, /@keyframes visitA\{0%\{transform:translateX\(-600px\);opacity:0\}/, 'özgün yürüyüş korunur');
+    assert.match(lcss, /@keyframes bend\{0%,22%,52%,100%\{transform:rotate\(0\)\}28%,46%\{transform:rotate\(8deg\)\}/, 'eğilme AĞACA doğru (ölçüm duruşu)');
+    assert.ok(landing.includes('x1="599" y1="152" x2="676" y2="60"'), 'görüş çizgisi telefon lensinden ağaç tepesine');
   });
-  test('⭐ 0049 tatlı yüz + göz kırpma (kullanıcı: "keko gibi olmasın, tatlı olsun")', () => {
-    for (const c of ['class="blinkA"', 'class="blinkB"']) assert.ok(landing.includes(c), 'kapak grubu: ' + c);
+  test('⭐ reddedilen deneme katmanları GERİ GELMEZ (0046-0050 çöplüğü)', () => {
+    for (const k of ['blinkA', 'blinkB', 'headA', 'dgSkinA', 'dgVest', 'dgJack', 'rx="1.9" ry="2.2"'])
+      assert.ok(!landing.includes(k), 'kalıntı: ' + k);
     const lcss = rd('css/landing.css');
-    assert.match(lcss, /@keyframes blinkA/, 'oğlan kırpma');
-    assert.match(lcss, /@keyframes blinkB/, 'kız kırpma (faz farklı)');
-    assert.ok((landing.match(/stroke-width="\.8"/g) || []).length >= 4, 'kaşlar İNCE ve yumuşak');
-    assert.ok((landing.match(/rx="1\.9" ry="2\.2"/g) || []).length >= 2, 'profil badem gözler ikisinde de');
-    assert.ok((landing.match(/fill="#e58f7a"/g) || []).length >= 2, 'yumuşak allık (profil tek yanak)');
-    assert.match(landing, /stroke="#7a5236" stroke-width="\.8"/, 'oğlan kaşı ince');
-    assert.match(landing, /stroke="#8a6248" stroke-width="\.8"/, 'kız kaşı ince');
-    assert.ok(!/stroke="#7a5236" stroke-width="1[.\d]*"/.test(landing), 'kalın keko kaş geri gelmemeli (oğlan)');
-    assert.ok(!/stroke="#8a6248" stroke-width="1[.\d]*"/.test(landing), 'kalın keko kaş geri gelmemeli (kız)');
-  });
-  test('⭐ yarı-gerçekçi katman: gradyanlar + yüz/eli/giysi detayı', () => {
-    for (const g of ['id="dgSkinA"', 'id="dgHairA"', 'id="dgVest"', 'id="dgLegA"', 'id="dgSkinB"', 'id="dgHairB"', 'id="dgJack"', 'id="dgLegB"'])
-      assert.ok(landing.includes(g), 'eksik gradyan: ' + g);
-    assert.ok((landing.match(/stop-color="#(c77d2e|1e6f4b|3b5a7a|14532d|f2c19a|e8b98a|4a2f1d|6d452c)/g) || []).length >= 6, 'palet aynı aileden');
+    for (const k of ['blinkA', 'headAk', 'translateX(-600px) rotate(', 'rotate(-38deg)'])
+      assert.ok(!lcss.includes(k), 'css kalıntısı: ' + k);
   });
 });
 
@@ -191,7 +170,7 @@ describe('0045 · i18n + sürüm sözleşmesi', () => {
     for (const s of ['📡 Canlı Aksiyon Akışı', 'çevrimiçi oldu', 'görüntüledi', 'ölçüm kaydetti', 'park algıladı', 'dışa aktardı', 'rapor yayını istedi', 'oturum', 'gezinti', 'son eylem', 'iz', '⬆ Gizle', '⬇ Göster'])
       assert.ok(i18n.includes(JSON.stringify(s) + ':'), 'eksik EN: ' + s);
   });
-  test('⭐ içerik değişti → sw r58', () => {
-    assert.match(rd('sw.js'), /CACHE_VERSION = 'dendrogeo-sw-v2-r58'/);
+  test('⭐ içerik değişti → sw r60', () => {
+    assert.match(rd('sw.js'), /CACHE_VERSION = 'dendrogeo-sw-v2-r60'/);
   });
 });
