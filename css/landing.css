@@ -121,6 +121,11 @@ section.blk{padding:40px 0}
 /* Vizör köşeleri: ağaç kadrajda (sightwin ile aynı pencere). */
 .frameWin{animation:frameWinA 12s linear 1 both}
 @keyframes frameWinA{0%,26%,50%,100%{opacity:0}30%,46%{opacity:1}}
+/* 0049 · GÖZ KIRPMA: kapak grubu kısa aralıklarla belirir (ölü bakış biter). */
+.blinkA,.blinkB{opacity:0;animation:blinkA 12s linear 1 both}
+.blinkB{animation-name:blinkB}
+@keyframes blinkA{0%,30%,34%,62%,66%,100%{opacity:0}31.5%,64%{opacity:1}}
+@keyframes blinkB{0%,40%,44%,72%,76%,100%{opacity:0}42%,74%{opacity:1}}
 /* Ayaktayken minik salınım — "çok yapay" hissi kırılır. */
 .bobA,.bobB{animation:bob 2.6s ease-in-out 4 both}
 .bobB{animation-delay:.4s}

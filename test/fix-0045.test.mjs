@@ -160,6 +160,16 @@ describe('0045 · hero karakterler yarı-gerçekçi (iskelet korunur)', () => {
     assert.match(lcss, /0%,22%\{transform:rotate\(-38deg\)\}27%,46%\{transform:rotate\(0deg\)\}52%,100%\{transform:rotate\(-38deg\)\}/, 'kaldır-indir zamanlaması');
     assert.match(lcss, /@keyframes visitA/, 'çıkış yürüyüşü korunur (gitsinler)');
   });
+  test('⭐ 0049 tatlı yüz + göz kırpma (kullanıcı: "keko gibi olmasın, tatlı olsun")', () => {
+    for (const c of ['class="blinkA"', 'class="blinkB"']) assert.ok(landing.includes(c), 'kapak grubu: ' + c);
+    const lcss = rd('css/landing.css');
+    assert.match(lcss, /@keyframes blinkA/, 'oğlan kırpma');
+    assert.match(lcss, /@keyframes blinkB/, 'kız kırpma (faz farklı)');
+    assert.ok((landing.match(/stroke-width="\.8"/g) || []).length >= 4, 'kaşlar İNCE ve yumuşak');
+    assert.ok((landing.match(/rx="2\.6" ry="2\.4"/g) || []).length >= 4, 'büyük tatlı gözler');
+    assert.ok((landing.match(/fill="#e58f7a"/g) || []).length >= 4, 'yumuşak allık');
+    assert.ok(!/stroke-width="1\.3"/.test(landing.slice(landing.indexOf('walkerA'))), 'kalın keko kaş geri gelmemeli');
+  });
   test('⭐ yarı-gerçekçi katman: gradyanlar + yüz/eli/giysi detayı', () => {
     for (const g of ['id="dgSkinA"', 'id="dgHairA"', 'id="dgVest"', 'id="dgLegA"', 'id="dgSkinB"', 'id="dgHairB"', 'id="dgJack"', 'id="dgLegB"'])
       assert.ok(landing.includes(g), 'eksik gradyan: ' + g);
@@ -172,7 +182,7 @@ describe('0045 · i18n + sürüm sözleşmesi', () => {
     for (const s of ['📡 Canlı Aksiyon Akışı', 'çevrimiçi oldu', 'görüntüledi', 'ölçüm kaydetti', 'park algıladı', 'dışa aktardı', 'rapor yayını istedi', 'oturum', 'gezinti', 'son eylem', 'iz', '⬆ Gizle', '⬇ Göster'])
       assert.ok(i18n.includes(JSON.stringify(s) + ':'), 'eksik EN: ' + s);
   });
-  test('⭐ içerik değişti → sw r56', () => {
-    assert.match(rd('sw.js'), /CACHE_VERSION = 'dendrogeo-sw-v2-r56'/);
+  test('⭐ içerik değişti → sw r57', () => {
+    assert.match(rd('sw.js'), /CACHE_VERSION = 'dendrogeo-sw-v2-r57'/);
   });
 });
