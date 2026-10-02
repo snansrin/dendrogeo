@@ -132,17 +132,19 @@ describe('0045 · gelişmiş canlı izleme — GEÇİCİ (DB yok)', () => {
   });
 });
 
-describe('0052 · hero: ÖZGÜN YÜZLER + istenen kol/bacak (kullanıcı: "yüz aynı kalsın, kol-bacak istediğim gibi")', () => {
-  test('⭐ YÜZLER kullanıcının ilk çizimiyle BİREBİR', () => {
-    for (const k of ['<circle cx="628" cy="158" r="9" fill="#f2c19a"/>',
-                     '<circle cx="576" cy="156" r="9" fill="#e8b98a"/>',
-                     '<path d="M619 156 a9 9 0 0 1 18 0 z" fill="#4a2f1d"/>',
-                     '<path d="M567 154 a9 9 0 0 1 18 0 z" fill="#6d452c"/>',
-                     '<circle cx="585" cy="151" r="5" fill="#6d452c"/>',
-                     '<circle cx="585" cy="146" r="3" fill="#c2452d"/>',
-                     '<circle cx="624" cy="158" r="1.2" fill="#182420"/>',
-                     '<path d="M573 160 q3 2.5 6 0"'])
-      assert.ok(landing.includes(k), 'özgün yüz öğesi eksik: ' + k);
+describe('Hero öğrenciler: 2026-10-02 kullanıcı isteğiyle yenilenen yüzler, korunan sahne', () => {
+  test('öğrenci çizimleri aynı SVG içinde; dış görsel veya yeni yükleyici yok', () => {
+    const scene = landing.slice(landing.indexOf('<div class="hero-art"'), landing.indexOf('<div class="chip c1"'));
+    assert.match(scene, /viewBox="0 0 800 300"/);
+    assert.equal((scene.match(/class="walkerA"/g) || []).length, 1);
+    assert.equal((scene.match(/class="walkerB"/g) || []).length, 1);
+    assert.doesNotMatch(scene, /<image\b|<foreignObject\b|<script\b/);
+    const ids = new Set([...scene.matchAll(/id="([^"]+)"/g)].map(m => m[1]));
+    for (const m of scene.matchAll(/url\(#([^)]+)\)/g))
+      assert.ok(ids.has(m[1]), 'eksik SVG boya tanımı: ' + m[1]);
+    const css = rd('css/landing.css');
+    assert.match(css, /\.hero-art\{position:absolute;left:0;top:-80px;width:100%;z-index:0;pointer-events:none;overflow:visible\}/);
+    assert.match(css, /@media\(max-width:960px\)\{\s*\.hero-art\{display:none\}/);
   });
   test('⭐ kol/bacak YENİ (eklemli, doğal) + telefon senaryosu duruyor', () => {
     for (const c of ['class="legA"', 'class="legB"', 'class="legC"', 'class="legD"', 'class="armPhoneB"', 'class="phoneB"', 'class="headB"', 'class="bobA"', 'class="frameWin"'])
@@ -170,7 +172,7 @@ describe('0045 · i18n + sürüm sözleşmesi', () => {
     for (const s of ['📡 Canlı Aksiyon Akışı', 'çevrimiçi oldu', 'görüntüledi', 'ölçüm kaydetti', 'park algıladı', 'dışa aktardı', 'rapor yayını istedi', 'oturum', 'gezinti', 'son eylem', 'iz', '⬆ Gizle', '⬇ Göster'])
       assert.ok(i18n.includes(JSON.stringify(s) + ':'), 'eksik EN: ' + s);
   });
-  test('⭐ içerik değişti → sw r60', () => {
-    assert.match(rd('sw.js'), /CACHE_VERSION = 'dendrogeo-sw-v2-r60'/);
+  test('⭐ içerik değişti → sw r61', () => {
+    assert.match(rd('sw.js'), /CACHE_VERSION = 'dendrogeo-sw-v2-r61'/);
   });
 });

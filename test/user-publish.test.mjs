@@ -148,7 +148,7 @@ describe('arayüz kablolaması: 📄 düğmesi + panel kutusu', () => {
     // 0051: hero özgün tasarıma geri alındı → r59;
     // 0052: özgün YÜZLER + yeni kol/bacak + telefon senaryosu (index+css) → r60.
     // Sözleşme: önbeklenen içerik değiştiğinde CACHE_VERSION artmak zorunda.
-    assert.match(SW, /CACHE_VERSION = 'dendrogeo-sw-v2-r60'/, 'içerik değişti → sürüm arttı');
+    assert.match(SW, /CACHE_VERSION = 'dendrogeo-sw-v2-r61'/, 'içerik değişti → sürüm arttı');
     assert.match(SW, /'\/src\/services\/report-publish\.js'/);
     assert.match(SW, /'\/src\/config\/i18n\.js'/);
   });

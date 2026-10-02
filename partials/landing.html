@@ -39,66 +39,123 @@
     <g class="frameWin" stroke="#c77d2e" stroke-width="2.5" stroke-linecap="round" fill="none">
      <path d="M622 62 v-12 h12"/><path d="M710 50 h12 v12"/><path d="M722 126 v12 h-12"/><path d="M634 138 h-12 v-12"/>
     </g>
+    <!-- Field students: same scene coordinates and existing animation hooks. -->
     <g class="walkerA">
+     <defs>
+      <linearGradient id="student-skin" x1="0" y1="0" x2="1" y2=".5"><stop stop-color="#f4cfac"/><stop offset=".55" stop-color="#ddb08b"/><stop offset="1" stop-color="#ba8062"/></linearGradient>
+      <linearGradient id="student-ochre" x1="0" y1="0" x2="1" y2=".2"><stop stop-color="#ddbc83"/><stop offset=".45" stop-color="#bc9256"/><stop offset="1" stop-color="#80613b"/></linearGradient>
+      <linearGradient id="student-green" x1="0" y1="0" x2="1" y2=".3"><stop stop-color="#67917d"/><stop offset=".5" stop-color="#3c6e59"/><stop offset="1" stop-color="#254a3e"/></linearGradient>
+      <linearGradient id="student-denim" x1="0" y1="0" x2="1" y2="0"><stop stop-color="#486073"/><stop offset=".5" stop-color="#344b5d"/><stop offset="1" stop-color="#213343"/></linearGradient>
+      <linearGradient id="student-hair" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#75523c"/><stop offset=".45" stop-color="#49372d"/><stop offset="1" stop-color="#2b2623"/></linearGradient>
+     </defs>
      <ellipse cx="629" cy="231" rx="15" ry="3.5" fill="#182420" opacity=".08"/>
      <g class="bobA">
-     <path d="M621.5 226 q0-2.6 2.6-2.6 h5.2 q2.6 0 2.6 2.6 v3.4 h-10.4 z" fill="#fff" stroke="#e6e3d9"/>
-     <path d="M632.5 226 q0-2.6 2.6-2.6 h5.2 q2.6 0 2.6 2.6 v3.4 h-10.4 z" fill="#fff" stroke="#e6e3d9"/>
-     <path d="M622.5 224.5 h8" stroke="#c9d4e0" stroke-width="1.4"/>
-     <path d="M633.5 224.5 h8" stroke="#c9d4e0" stroke-width="1.4"/>
-     <path class="legA" d="M625 199 q3.6 0 4 3 l.5 10 q.3 4-.5 8 l-.5 5.5 h-5.5 l.5-6 q.5-4 .2-8 l-.4-10 q0-2.5 2.2-2.5 z" fill="#3b5a7a"/>
-     <path class="legB" d="M634.5 199 q3.6 0 4 3 l.4 10 q.2 4-.4 8 l-.5 5.5 h-5.5 l.5-6 q.4-4 .2-8 l-.4-10 q0-2.5 2.2-2.5 z" fill="#3b5a7a"/>
-     <g class="bendA">
-      <path d="M616 172 q-3.5 2.5-4 7 l.5 9 q.5 3 3.5 4 l3.5 1" fill="none" stroke="#1e6f4b" stroke-width="5.5" stroke-linecap="round"/>
-      <circle cx="621" cy="195" r="2.8" fill="#f2c19a"/>
-      <rect x="617" y="168" width="21" height="34" rx="9" fill="#c77d2e"/>
-      <rect x="619" y="174" width="17" height="22" rx="2" fill="#fff" stroke="#c77d2e"/>
-      <path d="M622 178 h11 M622 181 h9" stroke="#9cc39c" stroke-width="1.2"/>
-      <g class="penA"><path d="M625 190 L631 196" stroke="#c77d2e" stroke-width="2" stroke-linecap="round"/></g>
-      <path d="M637 176 q5 0 8 1.5 l5 1.5" fill="none" stroke="#f2c19a" stroke-width="5" stroke-linecap="round"/>
-      <circle cx="651" cy="177" r="3" fill="#f2c19a"/>
-      <circle cx="628" cy="158" r="9" fill="#f2c19a"/>
-      <path d="M619 156 a9 9 0 0 1 18 0 z" fill="#4a2f1d"/>
-      <circle cx="624" cy="158" r="1.2" fill="#182420"/><circle cx="632" cy="158" r="1.2" fill="#182420"/>
-      <path d="M625 162 q3 2.5 6 0" stroke="#182420" stroke-width="1.4" stroke-linecap="round"/>
-     </g>
+      <g class="legA">
+       <path d="M619 191 Q623 189 628 193 L629 207 626.5 224 621 224 621.5 208Z" fill="url(#student-denim)"/>
+       <path d="M622 197 624 208 623 220 M623 209 626 210" stroke="#738594" stroke-width=".6" opacity=".65"/>
+       <path d="M620.8 222.5 626.8 222.5 628 225 632 227 Q633 228 631.5 230 H620 Q619 228 620.8 222.5Z" fill="#574a3b"/>
+       <path d="M620 229 H632 M624 225 628 226" stroke="#d4c5a6" stroke-width=".8"/>
+      </g>
+      <g class="legB">
+       <path d="M628 192 636 191 635.5 208 639 223 633 225 629.5 209Z" fill="url(#student-denim)"/>
+       <path d="M632 196 632 207 635 220 M631 209 634 209" stroke="#84929b" stroke-width=".6" opacity=".6"/>
+       <path d="M632.5 222.5 638 221.8 640 225 643 227 Q644 229 642 230 H632 Q631 227 632.5 222.5Z" fill="#675442"/>
+       <path d="M632 229 H643 M636 225 640 226" stroke="#d4c5a6" stroke-width=".8"/>
+      </g>
+      <g class="bendA">
+       <path d="M619 167 Q613 168 613 174 L613 184 Q614 188 618 188 L622 172Z" fill="#364c42"/>
+       <path d="M614.5 173 614.5 183" stroke="#819585" stroke-width="1"/>
+       <path d="M621 164 625 162 632 163 636 167 638 178 635 194 Q627 197 618 193 L619 180 616 172Z" fill="url(#student-ochre)"/>
+       <path d="M625 165 628 171 631 165 630 191 624 191Z" fill="#e6e4d8"/>
+       <path d="M624 164 620 167 624 174 627 169 M632 164 635 167 632 172 629 168" fill="#a38151" stroke="#e2c697" stroke-width=".5"/>
+       <path d="M619.5 175 624 175 624 180 620 180Z M632 175 636 175 636 180 632 180Z" fill="#a58351" stroke="#d9bb84" stroke-width=".5"/>
+       <path d="M620 184 622 190 M635 183 633 190 M619 193 Q627 194 635 193" stroke="#715a3e" stroke-width=".65" opacity=".7"/>
+       <path d="M619 167 Q616 178 619 187" stroke="#34493e" stroke-width="2"/>
+       <path d="M625 157 625 165 Q628 168 631 164 L630 158Z" fill="url(#student-skin)"/>
+       <!-- Three-quarter face, looking at the trunk. -->
+       <path d="M622 151 Q622 147 627 147 Q632 147 633.5 152 L633.5 155 635 158 633.5 159 Q634 163 630 164 L625 162 623 157Z" fill="url(#student-skin)"/>
+       <path d="M622.5 157 Q619 153 621 150 Q620 146 625 146 Q629 143 633 148 L634 151 630 150 626 151 625 155 624 156 623 160Z" fill="url(#student-hair)"/>
+       <path d="M622 149 Q627 146 631 148 M623 151 626 149" stroke="#98765a" stroke-width=".6" stroke-linecap="round"/>
+       <ellipse cx="624.3" cy="156.7" rx="1.25" ry="1.8" fill="#d29c78"/>
+       <path d="M624 156 625 157 M629.5 154.3 632 154.5" stroke="#725141" stroke-width=".6" stroke-linecap="round"/>
+       <path d="M630 155.7 632.5 155.8" stroke="#f5eadd" stroke-width=".9"/>
+       <circle cx="631.8" cy="155.7" r=".65" fill="#30302b"/>
+       <path d="M633 158.2 631.9 158.7 M630.5 161 632.6 160.8" stroke="#8c5947" stroke-width=".65" stroke-linecap="round"/>
+       <!-- Field notebook held close to the body; free hand takes the reading. -->
+       <path d="M617 170 Q614 171 615 178 L618 185 622 184 620 176Z" fill="url(#student-ochre)"/>
+       <path d="M617 180 620 186 627 185" stroke="url(#student-skin)" stroke-width="3.2" stroke-linecap="round"/>
+       <g transform="rotate(-9 626 185)">
+        <rect x="621" y="178" width="11" height="15" rx=".8" fill="#4c594d"/>
+        <rect x="622" y="179" width="9" height="13" rx=".3" fill="#f0eddd"/>
+        <path d="M624 182 H629 M624 185 H629 M624 188 H628" stroke="#9ba698" stroke-width=".5"/>
+        <path d="M625 178 H628" stroke="#b3bbb0" stroke-width="1.5"/>
+       </g>
+       <path d="M624 185 Q627 183 629 185 L628 187 625 188" fill="url(#student-skin)"/>
+       <g class="penA"><path d="M628 185 631 181" stroke="#314d45" stroke-width=".8" stroke-linecap="round"/></g>
+       <path d="M633 168 Q637 167 639 172 L642 176 638 179 634 174Z" fill="url(#student-ochre)"/>
+       <path d="M638.5 176.5 643 180 650 178" stroke="url(#student-skin)" stroke-width="3.5" stroke-linecap="round"/>
+       <path d="M648.5 177 Q651 175 653 177 L654 179 650 180Z" fill="url(#student-skin)"/>
+       <path d="M651 176.8 652 179 M652 177 653 179" stroke="#a97759" stroke-width=".45"/>
+      </g>
      </g>
     </g>
     <g class="walkerB">
      <ellipse cx="575" cy="231" rx="15" ry="3.5" fill="#182420" opacity=".08"/>
      <g class="bobB">
-     <path d="M566.5 226 q0-2.6 2.6-2.6 h5.2 q2.6 0 2.6 2.6 v3.4 h-10.4 z" fill="#fff" stroke="#e6e3d9"/>
-     <path d="M577.5 226 q0-2.6 2.6-2.6 h5.2 q2.6 0 2.6 2.6 v3.4 h-10.4 z" fill="#fff" stroke="#e6e3d9"/>
-     <path d="M567.5 224.5 h8" stroke="#c9d4e0" stroke-width="1.4"/>
-     <path d="M578.5 224.5 h8" stroke="#c9d4e0" stroke-width="1.4"/>
-     <path class="legC" d="M570 201 q3.4 0 3.8 3 l.5 9 q.2 4-.6 7 l-.5 5 h-5.2 l.6-5.5 q.6-3 .4-7 l-.5-9 q0-2.5 2-2.5 z" fill="#14532d"/>
-     <path class="legD" d="M579.5 201 q3.2 0 3.2 3 l0 9 q0 4-.4 7 l-.5 5 h-5.2 l.6-5.5 q.4-3 .4-7 l.5-9 q0-2.5 2-2.5 z" fill="#14532d"/>
-     <path d="M566 172 q-4 2-4.5 6.5 l-.5 8 q.3 3 3 4 l2.5 1" fill="none" stroke="#e8b98a" stroke-width="5" stroke-linecap="round"/>
-     <circle cx="567.5" cy="194" r="2.7" fill="#e8b98a"/>
-     <rect x="564" y="166" width="24" height="40" rx="10" fill="#1e6f4b"/>
-     <path d="M576 168 v36" stroke="#9fd0ae" stroke-width="2" opacity=".8"/>
-     <g class="headB">
-     <circle cx="576" cy="156" r="9" fill="#e8b98a"/>
-     <path d="M567 154 a9 9 0 0 1 18 0 z" fill="#6d452c"/>
-     <g class="tail"><circle cx="585" cy="151" r="5" fill="#6d452c"/><path d="M587 154 q8 6 5 18" stroke="#6d452c" stroke-width="4" stroke-linecap="round"/></g>
-     <circle cx="585" cy="146" r="3" fill="#c2452d"/>
-     <circle cx="573" cy="156" r="1.2" fill="#182420"/><circle cx="579" cy="156" r="1.2" fill="#182420"/>
-     <path d="M573 160 q3 2.5 6 0" stroke="#182420" stroke-width="1.4" stroke-linecap="round"/>
-     </g>     <g class="armPhoneB">
-      <path d="M584 170 q4.5 3 6 8 q2.5-5 8-7" fill="none" stroke="#e8b98a" stroke-width="5" stroke-linecap="round"/>
-      <circle cx="597" cy="164" r="2.8" fill="#e8b98a"/>
-      <g class="phoneB">
-       <rect x="594" y="148" width="10.5" height="20" rx="2.6" fill="#182420"/>
-       <rect x="595.2" y="149.2" width="8.1" height="17.6" rx="1.8" fill="#22332b"/>
-       <rect x="595.9" y="150" width="6.7" height="13.4" rx="1.2" fill="#eaf3ec" opacity=".9"/>
-       <circle cx="599.2" cy="155.6" r="2.2" fill="#2e8b57" opacity=".85"/>
-       <path d="M599.2 157.8 v2.6" stroke="#8a5a3b" stroke-width="1.1"/>
-       <rect x="595.6" y="149.6" width="3.4" height="3.4" rx="1" fill="#0d1512"/>
-       <circle cx="596.8" cy="150.8" r=".7" fill="#2b3a33"/><circle cx="598.2" cy="150.8" r=".7" fill="#2b3a33"/>
-       <circle class="flash" cx="599" cy="150" r="3.4" fill="#fff"/>
+      <g class="legC">
+       <path d="M566 190 574 192 573.5 207 572 224 566.5 224 567.5 207Z" fill="#374d46"/>
+       <path d="M569 196 570 207 568.5 220 M568 208 572 209" stroke="#789082" stroke-width=".6"/>
+       <path d="M566 222.5 572 223 573 225.5 577 227 Q578 229 576 230 H565 Q564 227 566 222.5Z" fill="#655446"/>
+       <path d="M565 229 H577 M569 225 573 226" stroke="#d1c2a6" stroke-width=".8"/>
       </g>
-     </g>
-
+      <g class="legD">
+       <path d="M574 191 582 191 581.5 207 584 224 578.5 224 575 208Z" fill="#465f53"/>
+       <path d="M578 196 578 207 581 220 M577 209 581 209" stroke="#829689" stroke-width=".6"/>
+       <path d="M578 223 584 223 585 226 588 227 Q589 229 587 230 H577 Q576 227 578 223Z" fill="#74604a"/>
+       <path d="M577 229 H588 M581 225 585 226" stroke="#ded2b9" stroke-width=".8"/>
+      </g>
+      <path d="M566 167 Q560 165 560 173 L560 184 Q561 187 565 185 L570 169Z" fill="#ad8453"/>
+      <path d="M562 171 562 181 M561 175 H565" stroke="#d1ae7b" stroke-width=".7"/>
+      <path d="M568 163 575 162 581 164 Q586 166 586 171 L581 182 582 193 Q574 196 565 192 L567 182 564 172 Q563 167 568 163Z" fill="url(#student-green)"/>
+      <path d="M572 165 575 170 578 165 577 189 573 190Z" fill="#e3e4d7"/>
+      <path d="M570 164 567 168 572 173 575 169 M579 164 582 168 578 173 575 169" fill="#789788"/>
+      <path d="M568 175 H572 V180 H568Z M579 175 H582 V180 H579Z" fill="#345d4b" stroke="#91aa95" stroke-width=".45"/>
+      <path d="M567 184 570 190 M580 184 578 191 M566 192 Q574 194 581 192" stroke="#264b3c" stroke-width=".65"/>
+      <path d="M568 165 Q565 174 567 183" stroke="#5c4d38" stroke-width="1.8"/>
+      <path d="M565 169 Q562 171 563 176 L565 184 568 183 568 174" fill="url(#student-green)"/>
+      <path d="M565.5 182 568 189 572 190" stroke="url(#student-skin)" stroke-width="3.2" stroke-linecap="round"/>
+      <path d="M571 188 574 189 575 192 572 193 570 191Z" fill="url(#student-skin)"/>
+      <g class="headB">
+       <path d="M572 157 572 164 575 167 578 164 577 157Z" fill="url(#student-skin)"/>
+       <g class="tail"><path d="M567 151 Q560 148 562 157 Q564 163 561 170 Q568 168 566 160 L570 153Z" fill="url(#student-hair)"/><path d="M564 153 Q564 161 563 165" stroke="#967358" stroke-width=".65"/></g>
+       <path d="M570 148 Q574 145 578 148 Q581 150 580.5 154 L582 157 580.5 158 Q581 161 577 163 L572 161 570 156Z" fill="url(#student-skin)"/>
+       <path d="M570 158 Q566 154 568 150 Q568 145 573 145 Q579 144 581 150 L577 150 574 148 Q575 153 571 155Z" fill="url(#student-hair)"/>
+       <path d="M569 150 Q571 146 576 147 M569 153 571 150" stroke="#a38263" stroke-width=".6" stroke-linecap="round"/>
+       <path d="M567 151 566 153" stroke="#b57956" stroke-width="1.4"/>
+       <ellipse cx="571.3" cy="156.4" rx="1.1" ry="1.7" fill="#d3a080"/>
+       <circle cx="571.7" cy="158" r=".55" fill="#ddca96"/>
+       <path d="M576.5 153.5 579 154" stroke="#674c39" stroke-width=".65" stroke-linecap="round"/>
+       <path d="M576.8 155.3 579.6 155.6" stroke="#f8eee0" stroke-width="1"/>
+       <circle cx="579" cy="155.5" r=".65" fill="#353c31"/>
+       <path d="M580.1 157.8 579 158.4 M577.5 160.5 580 160" stroke="#996450" stroke-width=".6" stroke-linecap="round"/>
+      </g>
+      <g class="armPhoneB">
+       <path d="M582 166 Q586 166 587.5 171 L590 176 586 178 582 172Z" fill="url(#student-green)"/>
+       <path d="M587.5 175.5 591 179 597 167" stroke="url(#student-skin)" stroke-width="3.7" stroke-linecap="round" stroke-linejoin="round"/>
+       <path d="M589 175.5 587 177.5" stroke="#c8b393" stroke-width="1.1"/>
+       <g class="phoneB">
+        <rect x="594" y="148" width="10.5" height="20" rx="2.6" fill="#293b36" stroke="#8b9b90" stroke-width=".5"/>
+        <rect x="595.2" y="149.2" width="8.1" height="17.6" rx="1.8" fill="#172b25"/>
+        <rect x="595.9" y="150" width="6.7" height="13.4" rx="1.2" fill="#d3e7d8"/>
+        <path d="M599.2 160 V155" stroke="#8a6848" stroke-width=".8"/>
+        <path d="M596.8 156 599.2 151.8 601.6 156Z" fill="#3a7958"/>
+        <path d="M596.8 152.6 V151.4 H598 M601.7 158.8 V160 H600.5" stroke="#fff" stroke-width=".5"/>
+        <path d="M598 165 H601" stroke="#9aafa2" stroke-width=".6" stroke-linecap="round"/>
+        <circle class="flash" cx="599" cy="150" r="3.4" fill="#fff"/>
+       </g>
+       <path d="M596 167 Q594 165 594.5 163 L595.6 161.5 596.5 164 599 164 Q600 165 598 167Z" fill="url(#student-skin)"/>
+       <path d="M595.8 164.5 598 165 M596.5 166 598 166" stroke="#aa7a5e" stroke-width=".4"/>
+      </g>
      </g>
     </g>
    </svg>   </svg>   </svg>   </svg>
