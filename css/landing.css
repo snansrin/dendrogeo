@@ -88,10 +88,11 @@ section.blk{padding:40px 0}
 .hero-art{position:absolute;left:0;top:-80px;width:100%;z-index:0;pointer-events:none;overflow:visible}
 .hero-art svg{width:100%;height:auto;display:block;overflow:visible}
 .walkerA,.walkerB{will-change:transform}
-.walkerA{animation:visitA 12s ease-in-out 1 both}
-.walkerB{animation:visitB 12s ease-in-out 1 both}
-@keyframes visitA{0%{transform:translateX(-600px);opacity:0}6%{opacity:1}20%{transform:translateX(20px)}55%{transform:translateX(20px)}80%{transform:translateX(420px);opacity:1}100%{transform:translateX(480px);opacity:0}}
-@keyframes visitB{0%{transform:translateX(-600px);opacity:0}6%{opacity:1}20%{transform:translateX(0px)}55%{transform:translateX(0px)}80%{transform:translateX(400px);opacity:1}100%{transform:translateX(460px);opacity:0}}
+.walkerA{transform-origin:629px 230px;animation:visitA 12s ease-in-out 1 both}
+.walkerB{transform-origin:575px 230px;animation:visitB 12s ease-in-out 1 both}
+/* 0050: yürüyen profil gövde ONE EĞİK (arc + lean), durunca dik, çıkışta yine eğik */
+@keyframes visitA{0%{transform:translateX(-600px) rotate(6deg);opacity:0}6%{opacity:1}20%{transform:translateX(20px) rotate(0deg)}55%{transform:translateX(20px) rotate(0deg)}80%{transform:translateX(420px) rotate(6deg);opacity:1}100%{transform:translateX(480px) rotate(6deg);opacity:0}}
+@keyframes visitB{0%{transform:translateX(-600px) rotate(6deg);opacity:0}6%{opacity:1}20%{transform:translateX(0px) rotate(0deg)}55%{transform:translateX(0px) rotate(0deg)}80%{transform:translateX(400px) rotate(6deg);opacity:1}100%{transform:translateX(460px) rotate(6deg);opacity:0}}
 .legA,.legB,.legC,.legD{transform-box:fill-box;transform-origin:50% 0}
 .legA{animation:stepA 12s linear 1 both}
 .legB{animation:stepB 12s linear 1 both}
@@ -100,7 +101,11 @@ section.blk{padding:40px 0}
 @keyframes stepA{0%,20%,55%,80%,100%{transform:rotate(0)}4%{transform:rotate(22deg)}8%{transform:rotate(-20deg)}12%{transform:rotate(22deg)}16%{transform:rotate(-16deg)}59%{transform:rotate(22deg)}63%{transform:rotate(-20deg)}67%{transform:rotate(22deg)}71%{transform:rotate(-16deg)}77%{transform:rotate(10deg)}}
 @keyframes stepB{0%,20%,55%,80%,100%{transform:rotate(0)}4%{transform:rotate(-22deg)}8%{transform:rotate(20deg)}12%{transform:rotate(-22deg)}16%{transform:rotate(16deg)}59%{transform:rotate(-22deg)}63%{transform:rotate(20deg)}67%{transform:rotate(-22deg)}71%{transform:rotate(16deg)}77%{transform:rotate(-10deg)}}
 .bendA{transform-box:fill-box;transform-origin:50% 100%;animation:bend 12s ease-in-out 1 both}
-@keyframes bend{0%,22%,52%,100%{transform:rotate(0)}28%,46%{transform:rotate(-18deg)}}
+/* 0050: eğilme AĞACA DOĞRU (+) — wikiHow duruşu; gövde trunk'a yaslanır */
+@keyframes bend{0%,22%,52%,100%{transform:rotate(0)}28%,46%{transform:rotate(11deg)}}
+/* 0050: oğlanın kafası: ölçümde panoya/şeride bakar (+9), kalkınca tacı süzer (-6) */
+.headA{transform-origin:630px 162px;animation:headAk 12s ease-in-out 1 both}
+@keyframes headAk{0%,22%{transform:rotate(0deg)}26%,48%{transform:rotate(9deg)}54%,60%{transform:rotate(-6deg)}66%,100%{transform:rotate(0deg)}}
 .penA{transform-box:fill-box;transform-origin:0 0;animation:write 12s linear 1 both}
 @keyframes write{0%,26%,50%,100%{transform:rotate(0)}30%{transform:rotate(12deg)}34%{transform:rotate(-8deg)}38%{transform:rotate(10deg)}42%{transform:rotate(-6deg)}46%{transform:rotate(4deg)}}
 .sightwin{animation:sightWin 12s linear 1 both, dashmove 2s linear 4}
@@ -113,11 +118,11 @@ section.blk{padding:40px 0}
  * gelsin, ağacı kadrajlasın, sonra eski konumuna gelsin, gitsinler").
  * Kol omuzdan mindere gibi: 0-22% telefonda DEĞİL (bel hizasında), 27-46%
  * ÖNDE KALDIRIK (vizör+flaş penceresi), 52%+ tekrar inik → 55-80% yürüyüp gider. */
-.armPhoneB{transform-origin:566px 172px;animation:phoneRaise 12s ease-in-out 1 both}
-@keyframes phoneRaise{0%,22%{transform:rotate(-38deg)}27%,46%{transform:rotate(0deg)}52%,100%{transform:rotate(-38deg)}}
+.armPhoneB{transform-origin:578px 172px;animation:phoneRaise 12s ease-in-out 1 both}
+@keyframes phoneRaise{0%,22%{transform:rotate(38deg)}26%{transform:rotate(-5deg)}29%,46%{transform:rotate(0deg)}52%,100%{transform:rotate(38deg)}}
 /* Kafa, telefon kalkınca ekrana bakar (boyuna hafif eğim), sonra doğrulur. */
-.headB{transform-origin:576px 164px;animation:gazeB 12s ease-in-out 1 both}
-@keyframes gazeB{0%,24%{transform:rotate(0deg)}28%,46%{transform:rotate(-7deg)}51%,100%{transform:rotate(0deg)}}
+.headB{transform-origin:576px 160px;animation:gazeB 12s ease-in-out 1 both}
+@keyframes gazeB{0%,24%{transform:rotate(0deg)}28%,46%{transform:rotate(-9deg)}51%,100%{transform:rotate(0deg)}}
 /* Vizör köşeleri: ağaç kadrajda (sightwin ile aynı pencere). */
 .frameWin{animation:frameWinA 12s linear 1 both}
 @keyframes frameWinA{0%,26%,50%,100%{opacity:0}30%,46%{opacity:1}}

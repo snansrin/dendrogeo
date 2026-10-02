@@ -143,9 +143,10 @@ describe('arayüz kablolaması: 📄 düğmesi + panel kutusu', () => {
     // 0046: hero kızda telefon + karakter güzellik katmanı (index değişti) → r54;
     // 0047: yüz rötuşu + dikey telefon netleştirme (index değişti) → r55;
     // 0048: fotoğraf senaryosu (kaldır-bak-kadrajla-in-git) + bob (index+css) → r56;
-    // 0049: tatlı yüz yeniden çizimi + göz kırpma (index+css) → r57.
+    // 0049: tatlı yüz yeniden çizimi + göz kırpma (index+css) → r57;
+    // 0050: profil karakterler + wikiHow ölçüm duruşu/senaryosu (index+css) → r58.
     // Sözleşme: önbeklenen içerik değiştiğinde CACHE_VERSION artmak zorunda.
-    assert.match(SW, /CACHE_VERSION = 'dendrogeo-sw-v2-r57'/, 'içerik değişti → sürüm arttı');
+    assert.match(SW, /CACHE_VERSION = 'dendrogeo-sw-v2-r58'/, 'içerik değişti → sürüm arttı');
     assert.match(SW, /'\/src\/services\/report-publish\.js'/);
     assert.match(SW, /'\/src\/config\/i18n\.js'/);
   });
