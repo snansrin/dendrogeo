@@ -11,19 +11,7 @@
  * dgEnsureGeoTIFF() / dgEnsureChart() <script> enjekte eder ve yüklemeyi
  * Promise olarak döner (aynı anda çok çağıran olursa tek enjeksiyon — promise
  * paylaşılır; hata olursa promise sıfırlanır, sonraki çağrı yeniden dener).
- *
- * ÇAĞRI NOKTALARI:
- *   · landcover.js (facade) dgLcAnalyze → await dgEnsureGeoTIFF()
- *   · dash.js drawChart                 → await dgEnsureChart()
- *
- * ÇEVRİMDIŞI: sw.js bu iki vendor dosyasını PRECACHE'te tutmaya DEVAM eder
- * (CORE_ASSETS); aynı-köken script isteği network-first→PRECACHE rotasından
- * servis edilir, yani çevrimdışı LULC/panel davranışı değişmez.
- *
- * QA NOTU: scripts/lulc-qa.mjs vm bağlamında GeoTIFF'i önceden yükler ve
- * dgEnsureGeoTIFF tanımlı değildir; facade'taki çağrı `window.dgEnsureGeoTIFF`
- * VARSA yapılır — QA bu sayede etkilenmez. */
-
+ */
 let DG_GEO_PROMISE=null;
 let DG_CHART_PROMISE=null;
 
@@ -65,19 +53,6 @@ function dgLcLoadWithRetry(src,globalName){
 /* =========================================================
    LULC ZİNCİRİ — TEMBEL MODÜL YÜKLEME (2026-09-25 · Faz 8)
 ========================================================= */
-/* NEDEN: 8 dosya (lc-config, lc-geo, lc-stac, lc-engine, lc-osm, lc-patches,
- * ui/lc-report, landcover facade) her ziyaretçide senkron iniyordu; oysa
- * yalnız "🌿 Yüzey Örtüsü Analizi"ne basan kullanıcı gerekiyor. İlk yüklemede
- * 8 istek ve ~20 KB (gzip) azaldı.
- *
- * SIRA ŞART: zincir birbirinin global'lerini çağrı anında çözer ama facade
- * (landcover.js) YÜKLEME ANINDA lc-* global'lerine dokunur → sıralı yüklenmeli.
- * Dinamik eklenen script'lerde async=false yürütme sırasını belge sırasına
- * sabitler (indirmeler paralel, yürütme sıralı).
- *
- * ?v= KULLANILMIYOR: sw.js network-first + PRECACHE zaten tazelik sağlıyor
- * (depodaki sürüm politikası notu: "?v= artık ZORUNLU DEĞİL"). CORE_ASSETS
- * sorgusuz yolları tuttuğu için çevrimdışı davranış değişmez. */
 const DG_LULC_CHAIN=[
   "src/services/lc-config.js",
   "src/services/lc-geo.js",
@@ -87,10 +62,7 @@ const DG_LULC_CHAIN=[
   "src/services/lc-patches.js",
   /* UYDU HASSASİYET (0054 · 2026-10-03): lc-validate eşik/metrics çekirdeği
    * + lc-s2 Sentinel-2 spektral kanıt + ui/lc-sens basit kaydırıcı paneli
-   * (0053'teki üç adımlı workbench kullanıcı isteğiyle kaldırıldı: "çok
-   * karışık — daha basit, daha işlevsel"). Sıra: validate s2'den ÖNCE
-   * (DG_S2_MIN_OBS_GUARD ondan okunur); lc-sens validate+s2+lc-report
-   * SONRASI; facade (landcover) daima EN SON. */
+   * (0053'teki üç adımlı workbench kullanıcı isteğiyle kaldırıldı). */
   "src/services/lc-validate.js",
   "src/services/lc-s2.js",
   "src/ui/lc-report.js",
@@ -106,7 +78,7 @@ function dgLoadScriptOrdered(src){
   return new Promise((resolve,reject)=>{
     const s=document.createElement("script");
     s.src=src;
-    s.async=false;           /* yürütme sırası belge sırası olsun */
+    s.async=false;
     s.onload=()=>resolve();
     s.onerror=()=>reject(new Error(src+" yüklenemedi"));
     document.head.appendChild(s);
@@ -129,3 +101,20 @@ function dgEnsureLulc(){
 window.dgEnsureGeoTIFF=dgEnsureGeoTIFF;
 window.dgEnsureChart=dgEnsureChart;
 window.dgEnsureLulc=dgEnsureLulc;
+
+/* 2026-10-03 · saha ölçeği düzeltmeleri ayrı dosyada tutulur. Dosya DOM ve
+ * ana servisler hazır olduktan sonra bir kez yüklenir; LULC'nin kendisi hâlâ
+ * tembel yüklenir. Böylece 77/300 waypoint UX'i ve GPS yardımı ilk anda hazır,
+ * yüzey patch'i ise dgEnsureLulc tamamlanınca devreye girer. */
+let DG_FIELD_UX_PROMISE=null;
+function dgEnsureFieldUx(){
+  if(window.DG_FIELD_UX)return Promise.resolve();
+  if(!DG_FIELD_UX_PROMISE){
+    DG_FIELD_UX_PROMISE=dgLoadVendorScript("src/services/field-ux.js")
+      .catch(err=>{DG_FIELD_UX_PROMISE=null;throw err;});
+  }
+  return DG_FIELD_UX_PROMISE;
+}
+window.dgEnsureFieldUx=dgEnsureFieldUx;
+const dgBootFieldUx=()=>dgEnsureFieldUx().catch(err=>console.warn("DENDROGEO · saha UX yüklenemedi:",err));
+if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",dgBootFieldUx,{once:true});else dgBootFieldUx();

@@ -41,7 +41,7 @@ const CORE_ASSETS = [
     /* YÖNETİM ZİNCİRİ (Faz 6): ziyaret sayacı, veri talepleri, kullanıcı yönetimi,
      * yedek ve moderasyon çekirdeği ayrı modüller. */
     '/src/services/visit-stats.js','/src/services/data-requests.js','/src/services/user-admin.js','/src/services/backup.js',
-    '/src/services/admin.js','/src/services/admin-tree.js','/src/services/world.js', '/src/services/measure.js','/src/services/map.js',
+    '/src/services/admin.js','/src/services/admin-tree.js','/src/services/world.js', '/src/services/measure.js','/src/services/map.js','/src/services/field-ux.js',
     /* SİTE İÇİNDEN RAPOR YAYINI (2026-09-27): report_requests kuyruğu +
      * rapor/yayin-kuyrugu.json günlüğü → 📄 Yayınla / 🔗 Aç / 📤 Paylaş. */
     '/src/services/report-publish.js',
@@ -342,4 +342,4 @@ self.addEventListener('notificationclick', event => {
     );
 });
 
-console.log('[SW] 🌲 DendroGeo Service Worker v2.10 r32 — network-first app assets');
+console.log('[SW] 🌲 DendroGeo Service Worker v2.10 r68 — network-first app assets');

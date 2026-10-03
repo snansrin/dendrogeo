@@ -126,7 +126,17 @@ describe('publish-queue: geri çekme planı (günlükle doğrulama)', () => {
   });
   test('kaynak kilitleri: anon okuma + bildirim + liste yenileme', () => {
     assert.match(PQ, /rest\/v1\/report_retractions/, 'anon REST okuması');
-    assert.match(PQ, /import \{ publishPark, renderRetractionNotice, rebuildIndex, DGR_ID_RE \}/);
+    /* 0059 (fix/surface-report-field-ux): kilit AMACINI korur, biçimini
+     * gevşetir — çekirdek dört ad make-report.mjs'ten import edilmeli
+     * (satır içi yeniden yazım yasak) ama yayın hattı yeni adlar
+     * ekleyebilir (surface-snapshot entegrasyonu renderReport/buildMetadata/
+     * qrDataUri/parkHistory getirdi). Birebir satır eşleşmesi yerine
+     * ad-bazlı denetim: amaç aynı, genişleme serbest. */
+    const imp = PQ.match(/import \{([^}]*)\} from '\.\/make-report\.mjs';/);
+    assert.ok(imp, 'publish-queue make-report.mjs import satırı bulunamadı');
+    for (const n of ['publishPark', 'renderRetractionNotice', 'rebuildIndex', 'DGR_ID_RE']) {
+      assert.ok(imp[1].split(',').map(x => x.trim()).includes(n), 'çekirdek import eksik: ' + n);
+    }
     assert.match(PQ, /service_role/, 'yasak anahtar yalnız yorumda geçer');
     assert.ok(!/process\.env\.SUPABASE_SERVICE/.test(PQ));
     assert.deepEqual(RETRACT_FILES, ['data.json', 'olcum.csv', 'park.geojson', 'harita.png', 'metadata.json']);
