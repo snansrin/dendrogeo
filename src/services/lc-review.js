@@ -2,7 +2,7 @@
 /* Surface review geometry and persistence. Baseline raster remains immutable.
  * Polygon clipping operates in the raster analysis UTM CRS, including park
  * holes. User-drawn boundaries have explicit visual-review provenance. */
-const DG_SURFACE_TYPES={green:{group:"green",label:"Yeşil alan"},hard:{group:"hard",label:"Sert / yapılı alan"},building:{group:"hard",label:"Bina"},water:{group:"water",label:"Su"},pool:{group:"water",label:"Havuz / süs havuzu"},bare:{group:"bare",label:"Çıplak zemin"},other:{group:"other",label:"Diğer"}};
+const DG_SURFACE_TYPES={green:{group:"green",label:"Yeşil alan"},hard:{group:"hard",label:"Sert zemin"},building:{group:"building",label:"Bina"},water:{group:"water",label:"Su"},pool:{group:"pool",label:"Havuz / süs havuzu"},bare:{group:"bare",label:"Çıplak zemin"},other:{group:"other",label:"Diğer"}};
 function dgSurfaceProject(ring,epsg){return ring.map(p=>{const q=dgLcUtmForward(p[1],p[0],epsg);return[q.x,q.y];});}
 function dgSurfaceUnproject(geom,epsg){return geom.map(poly=>poly.map(ring=>ring.map(p=>{const q=dgLcUtmInverse(p[0],p[1],epsg);return[q.lon,q.lat];})));}
 function dgSurfaceArea(geom){let total=0;for(const poly of geom||[])for(let i=0;i<poly.length;i++){const r=poly[i];let area=0;for(let j=0;j<r.length;j++){const p=r[j],q=r[(j+1)%r.length];area+=p[0]*q[1]-q[0]*p[1];}total+=(i? -1:1)*Math.abs(area)/2;}return Math.max(0,total);}
