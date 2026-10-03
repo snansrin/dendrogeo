@@ -4,7 +4,7 @@
 // NOT: Senkronizasyon artık Ana Thread (Supabase JS SDK) tarafından yapılıyor
 // ============================================================
 
-const CACHE_VERSION = 'dendrogeo-sw-v2-r68';
+const CACHE_VERSION = 'dendrogeo-sw-v2-r67';
 
 /* İKİ AYRI STATİK CACHE — bu ayrım bilinçli ve önemli.
  *
@@ -38,10 +38,6 @@ const CORE_ASSETS = [
     '/css/landing.css',
     '/src/config/supabase.js', '/src/config/constants.js', '/src/config/species.js', '/src/config/i18n.js', 
     '/src/utils/geo.js', '/src/utils/truncation.js', '/src/utils/lazylibs.js', '/src/services/allometry.js', '/src/services/auth.js','/src/services/export.js', '/src/services/offline.js',
-    /* SAHA UX (2026-10-03): 77–300 waypoint sayfalama, iOS konum toastı,
-     * aktif park kimliği ve yüzey inceleme hizalama/nesne kanıt katmanı.
-     * lazylibs tarafından dinamik yüklenir; çevrimdışı saha için precache şart. */
-    '/src/services/field-ux.js',
     /* YÖNETİM ZİNCİRİ (Faz 6): ziyaret sayacı, veri talepleri, kullanıcı yönetimi,
      * yedek ve moderasyon çekirdeği ayrı modüller. */
     '/src/services/visit-stats.js','/src/services/data-requests.js','/src/services/user-admin.js','/src/services/backup.js',
@@ -182,82 +178,168 @@ self.addEventListener('fetch', event => {
             fetch(request)
                 .then(response => {
                     const responseClone = response.clone();
-                    caches.open(PRECACHE).then(cache => cache.put('/', responseClone)).catch(() => {});
+                    caches.open(RUNTIME).then(cache => cache.put(request, responseClone));
                     return response;
                 })
-                .catch(() => caches.open(PRECACHE).then(cache => cache.match(OFFLINE_URL)))
+                // Çevrimdışı gezinme: PRECACHE'ten oku. caches.match()
+                // (cache adı verilmeyen) TÜM cache'leri arar; activate'te eski
+                // sürüm silinemediyse bayat bir kopya dönebilirdi.
+                .catch(() => caches.open(PRECACHE).then(c =>
+                    c.match(OFFLINE_URL).then(res => res || c.match('/index.html'))
+                ))
         );
         return;
     }
 
-    event.respondWith(fetch(request));
+    event.respondWith(staleWhileRevalidate(request, RUNTIME));
 });
 
-async function trimCache(cacheName, maxItems) {
-    const cache = await caches.open(cacheName);
-    const keys = await cache.keys();
-    if (keys.length <= maxItems) return;
-    await cache.delete(keys[0]);
-    return trimCache(cacheName, maxItems);
+// 📨 Sadece SKIP_WAITING için message dinle (sync YOK)
+self.addEventListener('message', event => {
+    if (event.data && event.data.type === 'SKIP_WAITING') {
+        self.skipWaiting();
+    }
+});
+
+async function cacheFirstWithLimit(request, cacheName, limit) {
+    const cached = await caches.match(request);
+    if (cached) return cached;
+    try {
+        const response = await fetch(request);
+        if (response.ok) {
+            const cache = await caches.open(cacheName);
+            await cache.put(request, response.clone());
+            await trimCache(cacheName, limit);
+        }
+        return response;
+    } catch (err) {
+        return new Response('Offline Content', { status: 503, statusText: 'Offline' });
+    }
 }
 
-async function cacheFirstWithLimit(request, cacheName, maxItems) {
-    const cache = await caches.open(cacheName);
-    const cached = await cache.match(request);
-    if (cached) return cached;
-    const response = await fetch(request);
-    if (response && response.ok) {
-        cache.put(request, response.clone()).catch(() => {});
-        trimCache(cacheName, maxItems).catch(() => {});
+/* Ağ öncelikli + sınırlı çalışma zamanı cache'i + PRECACHE yedeği.
+ *
+ * fallbackCache verilirse, çevrimdışıyken önce RUNTIME'da tam URL aranır,
+ * bulunamazsa PRECACHE'te sorgusuz yol (origin + pathname) aranır. Böylece
+ * "?v=139" ile istenen gridplan.js, install sırasında PRECACHE'e yazılmış
+ * sorgusuz kopyasından yüklenebilir.
+ *
+ * ÖNEMLİ: yedek ayrı cache'ten okunur. Eskiden tek cache kullanılıyordu ve
+ * trimCache FIFO ile precache girdilerini sildiği için bu yedek sessizce
+ * yok oluyordu (bkz. dosya başındaki PRECACHE/RUNTIME açıklaması). */
+async function networkFirstWithLimit(request, cacheName, limit, fallbackCache) {
+    try {
+        const response = await fetch(request);
+        if (response.ok) {
+            const cache = await caches.open(cacheName);
+            await cache.put(request, response.clone());
+            await trimCache(cacheName, limit);
+        }
+        return response;
+    } catch (err) {
+        const cache = await caches.open(cacheName);
+        const cached = await cache.match(request);
+        if (cached) return cached;
+
+        // Offline + versioned asset: fall back to the unversioned precache.
+        const url = new URL(request.url);
+        const unversioned = url.origin + url.pathname;
+        const fallbackSource = fallbackCache ? await caches.open(fallbackCache) : cache;
+        const fallback = await fallbackSource.match(new Request(unversioned));
+        if (fallback) return fallback;
+
+        return new Response(JSON.stringify({ error: 'Offline' }), {
+            status: 503, headers: { 'Content-Type': 'application/json' }
+        });
     }
-    return response;
 }
 
 async function networkFirst(request, cacheName) {
-    const cache = await caches.open(cacheName);
     try {
         const response = await fetch(request);
-        if (response && response.ok) cache.put(request, response.clone()).catch(() => {});
-        return response;
-    } catch (e) {
-        const cached = await cache.match(request);
-        if (cached) return cached;
-        throw e;
-    }
-}
-
-async function networkFirstWithLimit(request, runtimeName, maxItems, fallbackName) {
-    const runtime = await caches.open(runtimeName);
-    try {
-        const response = await fetch(request);
-        if (response && response.ok) {
-            runtime.put(request, response.clone()).catch(() => {});
-            trimCache(runtimeName, maxItems).catch(() => {});
+        if (response.ok) {
+            const cache = await caches.open(cacheName);
+            if (request.url.startsWith("http")) cache.put(request, response.clone());
         }
         return response;
-    } catch (e) {
-        const direct = await runtime.match(request);
-        if (direct) return direct;
-        // Sürüm sorgusu (?v=NNN) precache'te yoktur; pathname'in sorgusuz
-        // kopyası install sırasında yazılmıştır. Aynı-köken varsayımı yukarıda
-        // garanti edildi, bu yüzden yalnız path ile güvenli fallback yapılır.
-        const fallback = await caches.open(fallbackName);
-        const plain = await fallback.match(new URL(request.url).pathname);
-        if (plain) return plain;
-        throw e;
+    } catch (err) {
+        const cached = await caches.match(request);
+        return cached || new Response('Offline', { status: 503 });
     }
 }
 
 async function staleWhileRevalidate(request, cacheName) {
     const cache = await caches.open(cacheName);
     const cached = await cache.match(request);
-    const network = fetch(request).then(response => {
-        if (response && response.ok) cache.put(request, response.clone()).catch(() => {});
-        return response;
-    }).catch(() => null);
-    return cached || network || fetch(request);
+    const fetchPromise = fetch(request)
+        .then(response => {
+            if (response.ok) cache.put(request, response.clone()).catch(() => {});
+            return response;
+        })
+        .catch(async () => {
+            if (cached) return cached;
+            // Ağ yok ve RUNTIME'da kopya yok → PRECACHE'teki sorgusuz kopya.
+            // Sabit sürümlü CDN dosyaları (leaflet@1.9.4, geotiff@2.1.3)
+            // CORE_ASSETS'te tam URL'leriyle durduğu için bu yedek çalışır.
+            const url = new URL(request.url);
+            const pre = await caches.open(PRECACHE);
+            return pre.match(request) || pre.match(new Request(url.origin + url.pathname));
+        });
+    return cached || fetchPromise;
 }
 
 async function networkOnly(request) {
-    return fetch(request);
+    try {
+        return await fetch(request);
+    } catch (err) {
+        return new Response(JSON.stringify({ error: 'Offline' }), {
+            status: 503, headers: { 'Content-Type': 'application/json' }
+        });
+    }
 }
+
+/* Cache'i limite indirir.
+ *
+ * İki düzeltme:
+ *  1) while döngüsü — eski hali `if` ile TEK girdi siliyordu; limit bir
+ *     seferde birden fazla aşılırsa (ör. toplu yükleme) yetişemiyordu.
+ *  2) keys.shift() FIFO'yu açıkça belgeler. Bu fonksiyon ARTIK PRECACHE
+ *     ÜZERİNDE ÇAĞRILMAMALI — precache çevrimdışı yedeğidir ve sınırsız
+ *     ömürlüdür. Yalnızca RUNTIME/TILE/API/IMG üzerinde çağrılır. */
+async function trimCache(cacheName, limit) {
+    const cache = await caches.open(cacheName);
+    const keys = await cache.keys();
+    let fazla = keys.length - limit;
+    while (fazla-- > 0) {
+        const enEski = keys.shift();
+        if (!enEski) break;
+        await cache.delete(enEski);
+    }
+}
+
+// 🔔 Push bildirimleri (gelecek kullanım)
+self.addEventListener('push', event => {
+    if (!event.data) return;
+    const data = event.data.json();
+    const title = data.title || 'DendroGeo Bildirim';
+    const options = {
+        body: data.body || 'Yeni bir güncelleme var.',
+        icon: '/icon.png', badge: '/icon.png',
+        data: data.url || '/', vibrate: [100, 50, 100]
+    };
+    event.waitUntil(self.registration.showNotification(title, options));
+});
+
+self.addEventListener('notificationclick', event => {
+    event.notification.close();
+    event.waitUntil(
+        clients.matchAll({ type: 'window' }).then(clientList => {
+            for (const client of clientList) {
+                if (client.url === event.notification.data && 'focus' in client) return client.focus();
+            }
+            if (clients.openWindow) return clients.openWindow(event.notification.data);
+        })
+    );
+});
+
+console.log('[SW] 🌲 DendroGeo Service Worker v2.10 r32 — network-first app assets');

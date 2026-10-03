@@ -34,7 +34,7 @@ assert.match(field,/DG_PARK!=="undefined"&&DG_PARK&&DG_PARK\.id/,'aktif park DG_
 assert.match(field,/matchMedia\("\(max-width: 760px\)"\)\.matches\?12:24/,'waypoint mobil sayfası 12 olmalı');
 assert.match(field,/map\.invalidateSize/,'Leaflet yerleşim değişiminde yeniden hizalanmalı');
 assert.match(field,/8500/,'iOS konum yardımı uzun toast olmalı');
-assert.match(field,/way\["building"\]/,'OSM bina nesneleri otomatik kanıt katmanına alınmalı');
+assert.match(field,/t\?\.building/,'OSM bina nesneleri otomatik kanıt katmanına alınmalı');
 
 const migration=readFileSync(new URL('../supabase/migrations/20261003203000_report_accepted_surface_snapshot.sql',import.meta.url),'utf8');
 assert.match(migration,/surface_snapshot jsonb/);
