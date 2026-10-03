@@ -29,23 +29,24 @@ jobs:
           python - <<'PY'
           from pathlib import Path
 
-          patches = {
-            'test/dbh-qa.test.mjs': (
-              "    for (const f of mig) assert.ok((parseInt(f.slice(0, 4), 10) <= 25 || f === \"20261003165331_surface_reviews.sql\"), '0031 yeni migration EKLEMEMELİ: ' + f);",
-              "    const migAt0031 = mig.filter((f) => !/^\\d{14}_/.test(f) || f <= '20261003165331_surface_reviews.sql');\n    for (const f of migAt0031) assert.ok((parseInt(f.slice(0, 4), 10) <= 25 || f === \"20261003165331_surface_reviews.sql\"), '0031 döneminde beklenmeyen migration: ' + f);"
-            ),
-            'test/form-qa.test.mjs': (
-              "    for (const f of mig) assert.ok((parseInt(f.slice(0, 4), 10) <= 25 || f === \"20261003165331_surface_reviews.sql\"), '0033 yeni migration EKLEMEMELİ: ' + f);",
-              "    const migAt0033 = mig.filter((f) => !/^\\d{14}_/.test(f) || f <= '20261003165331_surface_reviews.sql');\n    for (const f of migAt0033) assert.ok((parseInt(f.slice(0, 4), 10) <= 25 || f === \"20261003165331_surface_reviews.sql\"), '0033 döneminde beklenmeyen migration: ' + f);"
-            ),
-          }
-          for name, (old, new) in patches.items():
+          cutoff = '20261003165331_surface_reviews.sql'
+          for name in ['test/dbh-qa.test.mjs', 'test/form-qa.test.mjs']:
             p = Path(name)
-            text = p.read_text(encoding='utf-8')
-            if old in text:
-              p.write_text(text.replace(old, new, 1), encoding='utf-8')
-            elif new not in text:
-              raise SystemExit(f'Beklenen QA kilidi bulunamadı: {name}')
+            lines = p.read_text(encoding='utf-8').splitlines()
+            if any('migAtCutoff' in line for line in lines):
+              continue
+            for i, line in enumerate(lines):
+              if 'for (const f of mig) assert.ok((parseInt(f.slice(0, 4), 10) <= 25' in line:
+                indent = line[:len(line) - len(line.lstrip())]
+                guard = line.replace('for (const f of mig)', 'for (const f of migAtCutoff)', 1)
+                lines[i:i+1] = [
+                  indent + "const migAtCutoff = mig.filter((f) => !/^\\d{14}_/.test(f) || f <= '" + cutoff + "');",
+                  guard,
+                ]
+                p.write_text('\n'.join(lines) + '\n', encoding='utf-8')
+                break
+            else:
+              raise SystemExit(f'Beklenen tarihsel migration kilidi bulunamadı: {name}')
           PY
       - name: Varlık hashlerini içerikle eşitle
         run: node scripts/version-sync.mjs --write
