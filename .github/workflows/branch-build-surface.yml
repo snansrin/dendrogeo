@@ -36,7 +36,22 @@ jobs:
         run: npm run build:check
       - name: CSP tutarlılığı
         run: npm run check:csp
-      - name: Birim testler
+      - name: Yeni yüzey + saha testi
+        continue-on-error: true
+        run: node --test test/surface-report-field-ux.test.mjs
+      - name: Yüzey inceleme testleri
+        continue-on-error: true
+        run: node --test test/surface-review.test.mjs
+      - name: Lazy ve yükleme testleri
+        continue-on-error: true
+        run: node --test test/lazylibs.test.mjs test/load-order.test.mjs test/module-registry.test.mjs
+      - name: Rapor yayın testleri
+        continue-on-error: true
+        run: node --test test/publish-request-fix.test.mjs test/rapor.test.mjs test/report-publish.test.mjs test/report-v2.test.mjs test/user-publish.test.mjs test/retraction.test.mjs
+      - name: SW ve workflow testleri
+        continue-on-error: true
+        run: node --test test/sw-cache.test.mjs test/workflow-yaml.test.mjs
+      - name: Tüm birim testleri
         run: npm test
       - name: Build artifactını branch'e yaz
         run: |
