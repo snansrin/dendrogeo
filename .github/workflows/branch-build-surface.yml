@@ -1,0 +1,41 @@
+name: Surface field branch build
+
+on:
+  push:
+    branches: [fix/surface-report-field-ux]
+
+permissions:
+  contents: write
+
+concurrency:
+  group: surface-field-branch-build
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: fix/surface-report-field-ux
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - run: npm ci
+      - name: Üretilen index/hash dosyasını güncelle
+        run: npm run build
+      - name: Tam denetim
+        run: npm run check
+      - name: Build artifactını branch'e yaz
+        run: |
+          git config user.name "DendroGeo Branch Build"
+          git config user.email "bot@dendrogeo.local"
+          git add index.html
+          if git diff --cached --quiet; then
+            echo "✅ index.html zaten güncel"
+            exit 0
+          fi
+          git commit -m "build: refresh generated index hashes"
+          git push origin HEAD:fix/surface-report-field-ux
