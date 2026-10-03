@@ -19,6 +19,12 @@
  *     aynı istek iki kez rapor üretmez (cron çakışmasına karşı workflow'ta
  *     concurrency kilidi de var).
  *
+ * 2026-10-03: report_requests.surface_snapshot doluysa yayın anında yeniden
+ * LULC çalıştırılmaz. Sunucu-süzülmüş son kabul edilmiş alanlar data.json ve
+ * rapor tablosuna dondurulur. Ayrıntılı kullanıcı çizim geometrisi kuyruğa
+ * taşınmaz; dolayısıyla farklı bir raster haritası kabul edilmiş sayılarla
+ * karıştırılmaz.
+ *
  * GERİ ÇEKME (0010 · 2026-09-28): yayımlanmış raporlar yanlışlıkla
  * yayımlandığında 🗑 ile geri çekilir. report_retractions kuyruğu bu işte
  * işlenir: rapor dizinindeki VERİ dosyaları kaldırılır, adresinde gerekçeli
@@ -35,7 +41,9 @@
 import { readFileSync, writeFileSync, existsSync, unlinkSync } from 'node:fs';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { publishPark, renderRetractionNotice, rebuildIndex, DGR_ID_RE } from './make-report.mjs';
+import { publishPark, renderRetractionNotice, rebuildIndex, DGR_ID_RE, renderReport, buildMetadata, qrDataUri, parkHistory } from './make-report.mjs';
+import { canonicalHash } from './lib/mc.mjs';
+import { acceptedSurfaceToLulc, stripUnavailableSurfaceMap, isAcceptedSurfaceSnapshot } from './lib/surface-snapshot.mjs';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const read = (p) => readFileSync(join(ROOT, p), 'utf8');
@@ -44,8 +52,8 @@ const has = (a) => process.argv.includes('--' + a);
 
 export const QUEUE_PATH = 'rapor/yayin-kuyrugu.json';
 export const QUEUE_SCHEMA = 'dendrogeo-publish-queue/1';
-export const QUEUE_CAP = 200;          /* günlük sınırsız büyümesin */
-export const RUN_LIMIT = 3;            /* tek koşuda en fazla bu kadar rapor */
+export const QUEUE_CAP = 200;
+export const RUN_LIMIT = 3;
 
 const SB = (() => {
   const s = read('src/config/supabase.js');
@@ -53,8 +61,6 @@ const SB = (() => {
 })();
 
 /* ---------- günlük (repo tarafı, Pages ile yayınlanır) ---------- */
-/* rel: depo göreli yol (varsayılan QUEUE_PATH) veya mutlak yol — testler
- * geçici dizine yazabilsin diye. */
 const qpath = (rel) => (String(rel).startsWith('/') ? String(rel) : join(ROOT, rel));
 export function emptyQueue() {
   return { schema: QUEUE_SCHEMA, updated_at: null, entries: [] };
@@ -75,14 +81,21 @@ export function saveQueue(q, rel = QUEUE_PATH) {
 }
 
 /* ---------- istekler (Supabase, ANON anahtarla salt-okunur) ---------- */
-export async function fetchPending(limit = 50) {
+async function fetchRequestRows(select, limit) {
   const u = SB.url + '/rest/v1/report_requests?' + new URLSearchParams({
-    select: 'id,park_id,with_lulc,status,note,created_at',
+    select,
     status: 'eq.Beklemede',
     order: 'created_at.asc',
     limit: String(limit),
   });
-  const r = await fetch(u, { headers: { apikey: SB.key, Authorization: 'Bearer ' + SB.key } });
+  return fetch(u, { headers: { apikey: SB.key, Authorization: 'Bearer ' + SB.key } });
+}
+export async function fetchPending(limit = 50) {
+  /* Yeni kolon henüz canlı DB'ye uygulanmamışsa kuyruk tümden durmasın:
+   * eski seçime düşer. Migration uygulandığı anda kabul snapshot'ı otomatik
+   * kullanılmaya başlanır. */
+  let r = await fetchRequestRows('id,park_id,with_lulc,status,note,created_at,surface_snapshot', limit);
+  if (r.status === 400) r = await fetchRequestRows('id,park_id,with_lulc,status,note,created_at', limit);
   if (r.status === 404) { const e = new Error('report_requests tablosu yok — Supabase SQL Editor\'da 0008_report_publish.sql çalıştırılmalı'); e.code = 'NO_TABLE'; throw e; }
   if (!r.ok) throw new Error('report_requests HTTP ' + r.status + ': ' + (await r.text()).slice(0, 200));
   const rows = await r.json();
@@ -104,21 +117,13 @@ export async function fetchPendingRetractions(limit = 50) {
   return { rows: Array.isArray(rows) ? rows : [], missing: false };
 }
 
-/* ---------- PLAN (saf fonksiyon: test burayı kilitler) ----------
- * Günlükte request_id'si zaten olan istekler ATLANIR (iki kez rapor üretmek
- * hem DGR kimliğini şişirir hem değişmezlik ilkesini bozar). */
+/* ---------- PLAN (saf fonksiyon: test burayı kilitler) ---------- */
 export function planQueue(entries, requests, limit = RUN_LIMIT) {
   const done = new Set((entries || []).map((e) => String(e.request_id)));
   const todo = (requests || []).filter((r) => !done.has(String(r.id)));
   return { todo: todo.slice(0, limit), skipped: todo.length > limit ? todo.length - limit : 0, already: (requests || []).length - todo.length };
 }
 
-/* Geri çekme planı (saf):
- *  · günlükte retraction_id'si olan istek ATLANIR (yeniden işlenmez),
- *  · report_id günlükte 'Yayınlandı' olarak YOKSA işlenmez (uydurma kimlik),
- *  · aynı rapor zaten geri çekilmişse işlenmez,
- *  · istekteki park_id, günlüğün yayın kaydıyla EŞLEŞMİYORSA işlenmez
- *    (istemci beyanına güvenilmez; RLS park mülkiyetine bakar, eşleme burada). */
 export function planRetractions(entries, retractions, limit = RUN_LIMIT) {
   const done = new Set((entries || []).filter((e) => e.status === 'Geri çekildi').map((e) => String(e.retraction_id)));
   const retractedReports = new Set((entries || []).filter((e) => e.status === 'Geri çekildi').map((e) => String(e.report_id)));
@@ -137,22 +142,76 @@ export function planRetractions(entries, retractions, limit = RUN_LIMIT) {
   return { todo: valid.slice(0, limit), skipped: Math.max(0, valid.length - limit), invalid };
 }
 
+/* Kabul edilmiş yüzey sonucu, publishPark'in ürettiği normal snapshot üzerine
+ * rapor kimliği değişmeden yeniden dondurulur. Bu aşama geometri açığa çıkarmaz. */
+export async function applyAcceptedSurfaceSnapshot(pub, surfaceSnapshot, root = ROOT) {
+  if (!isAcceptedSurfaceSnapshot(surfaceSnapshot)) return pub;
+  const dir = join(root, 'rapor', String(pub.id));
+  const dataPath = join(dir, 'data.json');
+  if (!existsSync(dataPath)) throw new Error('Yayın snapshot dosyası bulunamadı: ' + pub.id);
+  const snap = JSON.parse(readFileSync(dataPath, 'utf8'));
+  const lulc = acceptedSurfaceToLulc(surfaceSnapshot, snap.park && snap.park.area_m2);
+  if (!lulc) throw new Error('Kabul edilmiş yüzey snapshot alanları geçersiz veya boş.');
+
+  snap.lulc = lulc;
+  snap.provenance = {
+    ...(snap.provenance || {}),
+    dataset: lulc.source,
+    epsg: null,
+    surface_review: {
+      schema: surfaceSnapshot.schema,
+      revision: lulc.revision,
+      accepted_at: lulc.accepted_at,
+      source_fingerprint: lulc.source_fingerprint,
+      object_fingerprint: lulc.object_fingerprint,
+      geometry_published: false,
+    },
+  };
+  const hash = canonicalHash(snap);
+  const rapDir = join(root, 'rapor');
+  const history = parkHistory(rapDir, snap.park.id, pub.id);
+  const meta = {
+    id: pub.id,
+    git_commit: snap.provenance.git_commit || null,
+    engine_version: snap.provenance.engine_version || null,
+    app_version: snap.provenance.app_version || null,
+    qr_uri: await qrDataUri(pub.url),
+  };
+  let html = renderReport(snap, { id: pub.id, hash, version: pub.version || 1, meta: { ...meta, history } });
+  html = stripUnavailableSurfaceMap(html);
+  writeFileSync(join(dir, 'index.html'), html);
+  writeFileSync(dataPath, JSON.stringify(snap));
+  writeFileSync(join(dir, 'metadata.json'), JSON.stringify(buildMetadata(snap, { id: pub.id, hash, version: '1.0', meta, history })) + '\n');
+  try { unlinkSync(join(dir, 'harita.png')); } catch (e) { /* kabul snapshot'ında geometri yayımlanmaz */ }
+  rebuildIndex(rapDir);
+  return {
+    ...pub,
+    hash,
+    lulc: `dahil (son kabul edilmiş yüzey kaydı · r${lulc.revision || '—'})`,
+    surface_snapshot: true,
+    surface_revision: lulc.revision,
+    surface_accepted_at: lulc.accepted_at,
+  };
+}
+
 /* ---------- tek isteğin işlenmesi ---------- */
 async function handle(req) {
   const started = new Date().toISOString();
+  const accepted = isAcceptedSurfaceSnapshot(req.surface_snapshot);
   const base = {
     request_id: String(req.id), park_id: Number(req.park_id),
     with_lulc: req.with_lulc !== false,
+    surface_snapshot: accepted,
     requested_at: req.created_at || null, started_at: started,
   };
   try {
-    const r = await publishPark(req.park_id, { skipLulc: req.with_lulc === false });
-    /* Arşiv boyutu (0012 · "proje fazla yer kaplamasın"): her yayının bayt
-     * büyüklüğü günlüğe işlenir → depo bütçesi izlenebilir. */
+    /* Kabul edilmiş snapshot varsa yeniden LULC çalıştırma: önce hızlı temel
+     * rapor iskeleti üretilir, sonra kabul edilmiş alanlar aynı DGR'ye bağlanır. */
+    let r = await publishPark(req.park_id, { skipLulc: accepted || req.with_lulc === false });
+    if (accepted) r = await applyAcceptedSurfaceSnapshot(r, req.surface_snapshot);
     let bytes = null;
     try {
       const { readdirSync, statSync } = await import('node:fs');
-      const { join } = await import('node:path');
       const d = join(fileURLToPath(new URL('..', import.meta.url)), 'rapor', r.id);
       bytes = readdirSync(d).reduce((a, f) => a + statSync(join(d, f)).size, 0);
     } catch (e) { /* boyut ölçümü yayın engeli değil */ }
@@ -165,6 +224,8 @@ async function handle(req) {
       report_hash: 'sha256:' + r.hash,
       park_name: r.park_name, city: r.city, n: r.n,
       carbon_txt: r.carbon_txt, lulc: r.lulc, citation: r.citation,
+      surface_revision: r.surface_revision || null,
+      surface_accepted_at: r.surface_accepted_at || null,
       finished_at: new Date().toISOString(),
     };
   } catch (e) {
@@ -178,9 +239,7 @@ async function handle(req) {
 }
 
 /* Geri çekmenin uygulanması: veri dosyaları silinir, index.html bildirime
- * döner, liste yenilenir. root parametrik (test geçici dizinde doğrular).
- * Yol GÜVENLİĞİ: report_id biçimi yeniden doğrulanır ve hedef dizin rapor
- * kökünün dışına çıkamaz (resolve + prefix kontrolü). */
+ * döner, liste yenilenir. root parametrik (test geçici dizinde doğrular). */
 export const RETRACT_FILES = ['data.json', 'olcum.csv', 'park.geojson', 'harita.png', 'metadata.json'];
 export function handleRetraction(rt, pubEntry, root = ROOT) {
   const started = new Date().toISOString();
@@ -215,15 +274,12 @@ export async function runQueue(opts = {}) {
   try {
     requests = await fetchPending();
   } catch (e) {
-    /* Tablo yoksa (0008 uygulanmamış) ya da ağ hatası: iş DURUR ama koşu
-     * başarısız sayılmaz — cron her 5 dakikada bir yeniden dener. */
     console.log('⚠ Kuyruk okunamadı: ' + e.message);
     return { ok: false, processed: 0, entries: q.entries, reason: e.code || 'FETCH' };
   }
   const plan = planQueue(q.entries, requests, limit);
   console.log(`📄 Yayın kuyruğu: ${requests.length} bekleyen istek · ${plan.already} zaten işlenmiş · ${plan.todo.length} bu koşuda üretilecek${plan.skipped ? ` · ${plan.skipped} sonraki koşuya kaldı` : ''}`);
 
-  /* ---- geri çekme kuyruğu (0010): yayın fazından bağımsız okunur ---- */
   let retractions = [], retMissing = false;
   try {
     const rr = await fetchPendingRetractions();
@@ -237,13 +293,17 @@ export async function runQueue(opts = {}) {
 
   if (!plan.todo.length && !rplan.todo.length) { console.log('✅ Üretilecek rapor yok, işlenecek geri çekme yok.'); return { ok: true, processed: 0, entries: q.entries }; }
   if (dry) {
-    for (const r of plan.todo) console.log(`   · (prova) park #${r.park_id} · istek ${r.id} · LULC ${r.with_lulc === false ? 'atlanacak' : 'dahil'}`);
+    for (const r of plan.todo) {
+      const mode=isAcceptedSurfaceSnapshot(r.surface_snapshot)?'son kabul edilmiş yüzey snapshotı':(r.with_lulc===false?'LULC atlanacak':'LULC dahil');
+      console.log(`   · (prova) park #${r.park_id} · istek ${r.id} · ${mode}`);
+    }
     for (const r of rplan.todo) console.log(`   · (prova) geri çekme ${r.id} · ${r.report_id}`);
     return { ok: true, processed: 0, dry: true, entries: q.entries };
   }
   let ok = 0, fail = 0;
   for (const r of plan.todo) {
-    console.log(`\n▶ park #${r.park_id} (istek ${r.id}) · LULC ${r.with_lulc === false ? 'atlandı' : 'dahil'}`);
+    const mode=isAcceptedSurfaceSnapshot(r.surface_snapshot)?'kabul edilmiş yüzey snapshotı':(r.with_lulc===false?'LULC atlandı':'LULC dahil');
+    console.log(`\n▶ park #${r.park_id} (istek ${r.id}) · ${mode}`);
     const entry = await handle(r);
     q.entries.push(entry);
     if (entry.status === 'Yayınlandı') {
@@ -254,12 +314,9 @@ export async function runQueue(opts = {}) {
       fail++;
       console.log(`  ❌ üretilemedi: ${entry.message}`);
     }
-    /* Günlük her istekten SONRA yazılır: koşu ortasında ölürse (zaman aşımı,
-     * ağ) işlenmiş istek yeniden üretilmez. */
     saveQueue(q);
   }
 
-  /* ---- geri çekmeleri uygula: veri dosyaları kalkar, bildirim + günlük kalır ---- */
   let retOk = 0, retFail = 0;
   for (const rt of rplan.todo) {
     console.log(`\n🗑 geri çekme ${rt.id} · ${rt.report_id}`);
