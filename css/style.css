@@ -424,8 +424,7 @@ label.lbl{display:block}
 #v-measure .gpsring.bad{border-color:var(--red)}
 #v-measure #gpsState{flex:1;margin:0;background:transparent;padding:0}
 #v-measure #gpsBtn{width:auto;flex:0 0 auto}
-#v-measure .dg-png-btn.primary{background:var(--green);min-height:48px;font-size:.9rem}
-#v-measure .dg-png-btn.primary:hover{background:var(--green-dk)}
+#v-measure .dg-png-btn.primary{min-height:48px;font-size:.9rem}
 #v-measure button:disabled{opacity:.6;cursor:not-allowed;transform:none}
 .measure-details{border-top:1px solid var(--line);margin-top:16px}
 .measure-details summary{cursor:pointer;padding:12px 0;font-size:.8rem;color:var(--green);min-height:44px;font-weight:700}
