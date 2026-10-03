@@ -85,7 +85,15 @@ const DG_LULC_CHAIN=[
   "src/services/lc-engine.js",
   "src/services/lc-osm.js",
   "src/services/lc-patches.js",
+  /* DOĞRULAMA ÇALIŞMA SAHASI (v5 · 2026-10-03): lc-validate Olofsson
+   * metrik çekirdeği + lc-s2 Sentinel-2 spektral kanıt + ui/lc-workbench
+   * üç adım arayüzü. Sıra: validate (kural seti sabitleri) s2'den ÖNCE
+   * (DG_S2_MIN_OBS_GUARD ondan okunur); workbench, validate+s2+lc-report
+   * SONRASI; facade (landcover) daima EN SON. */
+  "src/services/lc-validate.js",
+  "src/services/lc-s2.js",
   "src/ui/lc-report.js",
+  "src/ui/lc-workbench.js",
   "src/services/landcover.js"
 ];
 

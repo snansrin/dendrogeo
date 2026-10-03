@@ -9,6 +9,66 @@ Yeni sürüm yayımlama adımları: [`docs/surum-yayini.md`](docs/surum-yayini.m
 
 ## [Yayımlanmadı]
 
+### Eklendi — 0053: 🛰 DOĞRULAMA ÇALIŞMA SAHASI v5 (LULC accuracy assessment · Olofsson 2014 · Sentinel-2 çok zamanlı kanıt)
+**Kullanıcı isteği:** "canlı haritanın analiz tarafını en gelişmiş seviyeye
+çıkar; uydu görüntüsü ile sistemin işaretlediği su, sert zemin, yeşil alan
+birebir uyuşana kadar geliştir; sahada telefonla çalıştığımızı unutma;
+çalışan çekirdeğe zarar verme."
+
+**MİMARİ — üç bağımsız kanıt hattı (sayısal sonuçları ÖLÇER, DEĞİŞTİRMEZ):**
+* **A · Spektral (yeni `src/services/lc-s2.js`):** Planetary Computer
+  Sentinel-2 L2A → bulutsuz medyan kompozit (yaz: 6 sahne ☁≤%20) +
+  MEVSİMSEL KALICILIK taraması (ilkbahar 3 + sonbahar 2 sahne, yıllık MAX
+  MNDWI/NDVI) → hücre bazında NDVI/MNDWI/NDBI/IBI → otomatik uzlaşma +
+  uyuşmazlık kuyruğu (kırmızı kontur). SCL bulut maskesi {2,4,5,6,7};
+  EPSG disipline: her bant KENDİ UTM bölgesinde indekslenir (bölge sınırı
+  parklarında kayma olmaz).
+* **B · Görsel/insan (yeni `src/services/lc-validate.js` +
+  `src/ui/lc-workbench.js`):** Olofsson vd. (2014) tabakalı rastgele
+  örnekleme (tohumlu PRNG → tekrar üretilebilir), Esri ~0.5 m altlıkta
+  sıralı etiketleme turu (bottom sheet, ≥44px hedefler, tek el kullanımı,
+  spektral ipucu çipleri), hata matrisi → OA±CI95, UA±CI95, PA, alan
+  düzeltmeli ha±CI95, ağırlıklı kappa; kapı hükmü 🟢/🟡/🔴 (eşikler
+  DG_VAL_GATE, testle kilitli). Kampanya IndexedDB + otomatik kayıt +
+  CSV/JSON (şema dendrogeo-lc-validation/1, parmak izli).
+* **C · Vektör/çapraz:** v4'teki OSM rafinasyonu + IO LULC uzlaşması
+  karneyle birleşir (dokunulmadı).
+
+**CANLI KALİBRASYON KANITI (yeni `scripts/val-qa.mjs`, iki parkta koşuldu):**
+* Göksu (park 25): 7804/7864 hücre profillendi · yeşil uzlaşma %90.2 · su
+  %67.1 — uyuşmayan 605 su hücresinin YILLIK max MNDWI p50=0.13: 2021'in
+  hiçbir sahnesinde açık su değil → mevsimsel çekilen göl kıyısı (WorldCover
+  80 = "yılın çoğunda su"); hücreler insan kuyruğuna düşer, sınıf
+  UYDURULMAZ. Sert %38.2 (ağaç gölgeli yol karışık pikseli — beklenen fizik).
+* Doğal Yaşam (park 5, 85 ha step): bahar yeşillenmesi kanıtı yeşil
+  uzlaşmayı %22.5→%55 çıkardı (+2686 hücre). Kural seti bu iki koşuyla
+  düzeltildi: (1) su = medyan VEYA yıllık-max kanıtı; (2) yeşil = yaz
+  VEYA bahar kalıcılığı; (3) sert/çıplak = IBI (Xu 2008) + yıl-boyu
+  vejetasyon yokluğu (asfalt yeşermez, toprak yeşerir). Eşikler literatür
+  çapalıdır; HARİTAYA uydurulmaz (döngüsel doğrulama yasağı belgelendi).
+
+**KIRMIZI ÇİZGİLER KORUNDU:** dgLcAnalyze/motor/katsayılar, MC_CFG,
+QA_LIMITS, şema+migrations (yeni tablo YOK — kalıcılık IndexedDB),
+publish kuyruğu, make-report.mjs, yayımlanmış raporlar, .dg-google.
+Doğrulama katmanı DG_LC_LAST'i yalnız OKUR (test kilidi: workbench
+groupAreas/DG_LC_LAST'e yazamaz).
+
+**ENTEGRASYON:** park panelinde yeni kart "3 · ÇALIŞMA SAHASI" (PNG→4,
+KATMANLAR→5); bayat "10 m LULC · 2020" rozeti motor gerçeğiyle düzeltildi
+("10 m WorldCover 2021 · IO LULC çapraz" — 0044 vitrin↔kod ilkesi); köprü
+park-export.js'te (dgValOpen, runLandCoverAnalysis deseni); zincir
+lc-patches→lc-validate→lc-s2→lc-report→lc-workbench→facade; sw r61→r62
+(precache += 3 modül, içerik sözleşmesi kilitleri güncellendi); i18n += ~90
+anahtar (EN modu tam); css/park-panel.css += .dg-valw-* (animasyon YOK,
+token'lar tek kaynak).
+
+**Bekçiler:** test/lc-validate.test.mjs (70 test) — Olofsson metrikleri ELLE
+hesaplanmış referanslarla (OA 0.80, SE 0.09187, κ 0.60239, PA/UA, alan
+±SE birebir), örnekleme determinizmi, spektral kurallar (Göksu/park-5 canlı
+ölçümleri vaka olarak kilitli), kapı eşikleri, kırmızı çizgi bekçisi, mobil
+sözleşme (bottom sheet/44px/role=dialog), ölü CSS sınıfı taraması.
+npm run check: 1083 test → TÜMÜ YEŞİL.
+
 ### Düzeltildi/Kaldırıldı — 0044: FOTOĞRAF KAPISI SAHAYI KİLİTLEMİYOR (çok sınıflı denetim) + 🤖 AI alt sistemi KÖKTEN SİLİNDİ
 **Kullanıcı geri bildirimi:** "%25'i kırmızı yapraklı ağaçlar sağlamıyor ve
 önümüz kış, fotoğrafta sadece dal olacağı için yeşil çok az — o yüzden fotoğraf

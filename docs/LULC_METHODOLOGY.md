@@ -164,3 +164,96 @@ merkez (≥0,05 ha). Göksu Parkı'nda su kütlesi tek nesne olarak 12.47 ha
   Saha bilgisiyle (su ~12,5 ha, sert ~15 ha) uyumlu.
 * `test/landcover-v4.test.mjs`: yıl filtresi regresyon kilidi, 4326 hücre
   alanı, dışbükey kesişim ↔ rect denkliği, nesne/uzlaşma matematiği.
+
+## Güncelleme v5 (2026-10-03): Doğrulama Çalışma Sahası (accuracy assessment)
+
+Sürüm 4'e kadar sistem sınıf alanlarını ÜRETİYOR ama bağımsız olarak
+ÖLÇMÜYORDU (çapraz uzlaşma tek belirsizlik göstergesiydi). v5, park
+paneline üç adımlı bir doğrulama katmanı ekler. Bu katman sayısal alan
+sonuçlarını DEĞİŞTİRMEZ; ölçer, işaretler, beyan eder (motor ve yayın
+hattı dokunulmadan kalır).
+
+### 1. Üç bağımsız kanıt hattı
+
+| Hat | Kaynak | Tür |
+|---|---|---|
+| A · Spektral | Sentinel-2 L2A (Planetary Computer), bulutsuz medyan kompozit + mevsimsel kalıcılık taraması | otomatik |
+| B · Görsel | Esri World Imagery (~0.5 m) üzerinde tabakalı örnek noktaların İNSAN etiketi | altın standart |
+| C · Vektör/çapraz | OSM su-yol rafinasyonu + IO LULC uzlaşması (v4'ten beri mevcut) | otomatik |
+
+### 2. Örnekleme tasarımı (B hattı)
+
+Olofsson vd. (2014) tabakalı rastgele örnekleme: tabaka = haritalanmış sınıf;
+tabaka başına eşit sayıda nokta (nadir sınıfın UA güven aralığı dar kalsın
+diye); tohumlu PRNG (mulberry32) → aynı tohum aynı noktalar (tekrar
+üretilebilirlik, kampanya JSON'unda parmak izi). Kenar hücreleri (alanı
+%60'ın altında park içinde) örneklenmez: 10 m piksel park sınırını
+kesiyorsa referans belirsizleşir.
+
+### 3. Metrikler (C karne)
+
+Ağırlıklar Wᵢ TAM SAYIM raster alanlarından (örneklem oranından değil).
+OA±CI95, sınıf bazında UA±CI95 ve PA, alan düzeltmeli hektar ±CI95,
+ağırlıklı Cohen kappa — formüller Olofsson vd. (2014), RSE 144:48-57
+(kod içi yorumlarda denklem denk türetme; test/lc-validate.test.mjs
+elle hesaplanmış referans değerlerle kilitler). Kararsız (❓) etiketler
+paydada kalır, paya girmez → muhafazakâr doğruluk.
+
+### 4. Spektral kurallar (A hattı) — literatür çapalı eşikler
+
+* Su: (a) MNDWI ≥ 0.20 ve MNDWI ≥ NDVI (Xu 2006 + görelilik) VEYA
+  (b) yıllık MAX MNDWI ≥ 0.45 ve taç baskın değil (ndvi/ndviYear < 0.50)
+* Yeşil: NDVI ≥ 0.35 VEYA yıllık MAX NDVI ≥ 0.50 (bahar yeşillenmesi)
+* Sert: kuru + IBI > 0 (Xu 2008) + [NDVI ≥ 0.20 VEYA (IBI > 0.10 ve
+  yıl boyu vejetasyonsuz: ndviYear < 0.25)]
+* Çıplak: kuru + NDVI < 0.20 + (IBI ≤ 0.10 VEYA mevsimsel yeşillenme
+  ndviYear ≥ 0.25 — toprak baharda yeşerir, asfalt yeşermez)
+* Kalan: belirsiz (sınıfa zorlama YOK; insan kuyruğuna gider)
+
+Çok zamanlı kanıt (ilkbahar şub-may + sonbahar eki-ara pencereleri, ayrı
+S2 taraması) WorldCover sınıf SEMANTİĞİYLE hizalamadır: sınıf 80 "yılın
+çoğunda su", sınıf 10/30 "vejetasyon varlığı" demek; yaz medyanı tek
+başına mevsimsel göl kıyısını ve kuru step çayırını yanlış görür.
+
+### 5. İki parkta canlı kalibrasyon kanıtı (2026-10-03, scripts/val-qa.mjs)
+
+**Göksu Parkı (park 25, 50 ha, göllü):** 6 yaz sahnesi (☁ %0.8-1.3) +
+5 kalıcılık sahnesi; 7804/7864 hücre profillendi. Yeşil uzlaşma %90.2;
+su %67.1 — uyuşmayan 605 su hücresinin yıllık MAX MNDWI medyanı 0.13:
+2021 boyunca (şub-ara) hiçbir sahnede açık su DEĞİL → mevsimsel çekilen
+göl kıyısı/çamur; WorldCover 80 bu kıyıyı ıslak yıla dayanarak içeriyor.
+Bu hücreler kırmızı konturla insan incelemesine kuyruklanır (uydurma
+sınıf düzeltmesi YAPILMAZ). Sert %38.2: ağaç gölgeli yollar yaz
+medyanında karışık piksel — beklenen fizik.
+
+**Atatürk Çocukları ve Doğal Yaşam Parkı (park 5, 85 ha, yarı kurak
+step):** yeşil uzlaşma bahar yeşillenmesi kanıtıyla %22.5 → %55'e çıktı
+(+2686 hücre); kalan uyumsuzluk yarı kurak step sürekliliğidir (seyrek
+çayır ↔ çıplak ↔ sert ayrımı 10 m spektralinde zayıftır — literatürde
+belgeli) ve B hattına (insan) devredilir.
+
+### 6. Kapı eşikleri (doğrulama rozeti)
+
+🟢 DOĞRULANDI: OA ≥ %80 VE κ ≥ 0.60 VE su UA ≥ %90 VE spektral uzlaşma
+≥ %70 VE n ≥ 30 · 🔴 KRİTİK: OA < %65 VEYA su UA < %75 · 🟡 aradaki her
+durum/örneklem yetersiz. Dayanak: WorldCover 2021 v200 küresel OA
+%76.7±0.5 (PUM V2.0); park ölçeği küresel karışımdan homojendir → %80
+hedefi makul. Eşikler testle kilitli (DG_VAL_GATE).
+
+### 7. Kalıcılık ve dışa aktarım
+
+Kampanya IndexedDB'de (park başına, otomatik kayıt 5 etikette bir);
+CSV (nokta listesi + matris + metrikler) ve JSON (şema
+`dendrogeo-lc-validation/1`: tohum, sahne id'leri, motor sürümü,
+metrikler, hüküm) — ileride DGR raporlarına doğrulama bölümü olarak
+bağlanmaya hazır (make-report KIRMIZI ÇİZGİ: bu sürümde dokunulmadı).
+
+### 8. Sınırlılıklar (dürüst beyan)
+
+* Esri altlığının görüntü tarihi parktan parka değişir (2021 haritası ↔
+  güncel görüntü): mevsimsel/değişim kaynaklı ayrışma meşrudur, karne
+  dönemi beyan eder.
+* A hattı eşikleri Göksu + park 5 canlı koşularıyla kalibre edildi;
+  farklı biyomlarda (ör. tropik) yeniden değerlendirme gerekir.
+* Otomatik uzlaşma DOĞRULUK DEĞİLDİR; doğruluk yalnız B hattı (insan
+  referansı) ile üretilir. A hattının işi şüpheli hücreyi kuyruklamaktır.

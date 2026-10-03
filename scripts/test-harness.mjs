@@ -79,6 +79,14 @@ export function loadApp({ sadece } = {}) {
     'src/services/lc-engine.js',
     'src/services/lc-osm.js',
     'src/services/lc-patches.js',
+    /* DOĞRULAMA ÇALIŞMA SAHASI (v5 · 2026-10-03): validate çekirdeği saf
+     * matematiktir (Olofsson metrikleri, örnekleme, spektral kurallar) —
+     * birim testleri buradan yüklenir. lc-s2 ağ/GeoTIFF katmanıdır; sabitleri
+     * ve saf yardımcıları (dgS2Median, dgS2SeasonRange) test edilir.
+     * ui/lc-workbench BİLEREK yok (DOM'a yapışır; park-panel gibi statik
+     * denetimden geçer). */
+    'src/services/lc-validate.js',
+    'src/services/lc-s2.js',
     'src/ui/lc-report.js',
     'src/services/landcover.js',
     /* PARK ZİNCİRİ (Faz 4): eski gridplan.js'in mantık modülleri, index.html'deki
@@ -108,6 +116,11 @@ export function loadApp({ sadece } = {}) {
                    'DG_LC_COLLECTION', 'DG_LC_STAC', 'DG_LC_MAX_TILES',
                    'DG_LC_MAX_READ_PIXELS', 'DG_LC_RENDER_LIMIT',
                    'DG_LC_SOURCES', 'DG_ESA_GROUP', 'DG_ESA_CODES', 'DG_LC_SAS', 'DG_OSM_WATER_MIRRORS', 'DG_LC_LAYER', 'DG_LC_LAST',
+                   /* Çalışma Sahası v5 (2026-10-03) */
+                   'DG_VAL_VERSION', 'DG_VAL_CLASSES', 'DG_VAL_LABELS', 'DG_VAL_DEFAULTS',
+                   'DG_VAL_SPECTRAL', 'DG_VAL_GATE',
+                   'DG_S2_COLLECTION', 'DG_S2_MAX_SCENES', 'DG_S2_MAX_CLOUD', 'DG_S2_SEARCH_LIMIT',
+                   'DG_S2_BANDS', 'DG_S2_SCL_VALID', 'DG_S2_SCALE', 'DG_S2_MIN_OBS_GUARD',
                    'DG_TRUNCATION_WARNED',
                    'DG_PARK_SEP', 'DG_PARK_MATCH_M', 'DG_TR_FOLD', 'DG_TR_UP'];
   const epilog = LEXICAL

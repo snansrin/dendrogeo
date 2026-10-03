@@ -97,8 +97,9 @@ index.html                  ÜRETİLEN ARTİFAKT — partials'tan build edilir, 
     │   ├── landing.js      ★ initLanding() — landing modülünün beyni
     │   ├── shell.js        boot()/startShell()/go() — kabuk önyüklemesi
     │   ├── park-panel.js   park modu + sonuç paneli (drawPark)
-    │   ├── park-export.js  GeoJSON/CSV/PNG indirmeleri + LULC köprüsü
-    │   └── lc-report.js    LULC vektör çizimi + tek blok HTML rapor
+    │   ├── park-export.js  GeoJSON/CSV/PNG indirmeleri + LULC + doğrulama köprüleri
+    │   ├── lc-report.js    LULC vektör çizimi + tek blok HTML rapor
+    │   └── lc-workbench.js ★ Doğrulama Çalışma Sahası UI (v5 · 2026-10-03)
     └── services/
         ├── measure.js      saha formu, GPS, fotoğraf
         ├── offline.js      IndexedDB kuyruk + UUID dedup + senkron
@@ -114,7 +115,9 @@ index.html                  ÜRETİLEN ARTİFAKT — partials'tan build edilir, 
         ├── lc-stac.js      │ LULC ZİNCİRİ (eski landcover.js; sıra önemli)
         ├── lc-engine.js    │
         ├── lc-osm.js       │
-        ├── lc-patches.js   ┘
+        ├── lc-patches.js   │
+        ├── lc-validate.js  │ ★ Olofsson doğruluk metrikleri + spektral kurallar (v5)
+        ├── lc-s2.js        ┘ ★ Sentinel-2 çok zamanlı spektral kanıt (v5)
         ├── landcover.js    LULC facade — window.DG_LANDCOVER sözleşmesi
         ├── world.js        park karşılaştırma (v_park_compare), ülke/şehir yakınlaşma
         ├── dash.js         kayıtlar, grafikler, analiz

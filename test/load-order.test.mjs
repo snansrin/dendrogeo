@@ -67,7 +67,11 @@ function scriptSirasi() {
 const LULC_ZINCIRI = [
   'src/services/lc-config.js', 'src/services/lc-geo.js', 'src/services/lc-stac.js',
   'src/services/lc-engine.js', 'src/services/lc-osm.js', 'src/services/lc-patches.js',
-  'src/ui/lc-report.js', 'src/services/landcover.js',
+  /* Çalışma Sahası v5 (2026-10-03): validate çekirdeği s2'den önce
+   * (DG_S2_MIN_OBS_GUARD sabiti ondan okunur); workbench, lc-report'tan
+   * sonra; facade daima en son. */
+  'src/services/lc-validate.js', 'src/services/lc-s2.js',
+  'src/ui/lc-report.js', 'src/ui/lc-workbench.js', 'src/services/landcover.js',
 ];
 
 /* const/let üst düzey bildirimleri ctx NESNESİNDE görünmez (global lexical
