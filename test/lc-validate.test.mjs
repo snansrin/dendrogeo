@@ -658,3 +658,29 @@ describe('entegrasyon zinciri kilitleri (0054 · lc-sens)', () => {
     assert.match(sens, /rec\.profile=profile/);
   });
 });
+
+describe("0058 · Doğrulanmış Harita PNG (kullanıcının refactor'ü üstüne ek)", () => {
+  const sens = rd('src/ui/lc-sens.js');
+  test('düğme + üretici mevcut ve onların kancalarını kullanır', () => {
+    assert.match(sens, /onclick="dgSensExportPng\(\)"/);
+    assert.match(sens, /function dgSensExportPng\(\)\{/);
+    /* onların kabul hattı: dgSensAreas (polygon-clipping summarize) + dgSensEffective */
+    assert.match(sens, /const areas=dgSensAreas\(\)\|\|dgSensGroupAreas\(\);/);
+    assert.match(sens, /COL\[dgSensEffective\(c\)\]/);
+    assert.match(sens, /rec\.features\|\|\[\]/);
+  });
+  test("künye dürüst: parmak izi + dönem + ÖNİZLEME/KABUL damgası canvas'ta", () => {
+    assert.match(sens, /parmak izi/);
+    assert.match(sens, /DG_SENS\.editing\?"ÖNİZLEME":"KABUL EDİLMİŞ v"/);
+    assert.match(sens, /DOĞRULANMIŞ PARK HARİTASI/);
+  });
+  test('kırmızı çizgi: PNG yalnız okur (DG_LC_LAST/groupAreas ataması yok)', () => {
+    assert.ok(!/DG_LC_LAST\s*=[^=]/.test(sens));
+    assert.ok(!/groupAreas\s*=/.test(sens));
+  });
+  test('i18n anahtarları sözlükte', () => {
+    const i18n = rd('src/config/i18n.js');
+    for (const k of ['Doğrulanmış Harita', '✓ Doğrulanmış harita PNG indirildi.', 'PNG üretilemedi.'])
+      assert.ok(i18n.includes(JSON.stringify(k) + ':'), 'eksik: ' + k);
+  });
+});

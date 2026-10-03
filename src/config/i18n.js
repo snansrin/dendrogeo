@@ -1116,7 +1116,14 @@ const DG_I18N_EN={
 "Analiz moduna dön":"Return to analysis mode",
 "Park seçmek için algılamayı aç":"Enable detection to pick a park",
 "Analiz":"Analysis",
-"Park seç":"Pick park"
+"Park seç":"Pick park",
+
+/* === 0058 · Doğrulanmış Harita PNG çıktısı === */
+"Doğrulanmış Harita":"Validated Map",
+"Önce en az bir hücre kararı ver — doğrulanmış harita kararlarını gösterir.":"Make at least one cell decision first — the validated map shows your decisions.",
+"✓ Doğrulanmış harita PNG indirildi.":"✓ Validated map PNG downloaded.",
+"Önce arazi örtüsü analizini çalıştırın.":"Run the land cover analysis first.",
+"PNG üretilemedi.":"Could not produce the PNG.",
 };
 
 /* EN→TR ters haritası (TR'ye dönüşte kullanılır) */

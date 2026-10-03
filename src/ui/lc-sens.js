@@ -96,7 +96,7 @@ function dgSensRender(){
  for(const k of DG_SENS_CLASSES){const m=dgSensMeta(k);h+=`<div class="dg-sens-row"><button type="button" class="dg-sens-label" onclick="dgSensFocus('${k}')" aria-pressed="${DG_SENS.focus===k}">${m.emoji} ${esc(_tvs(m.tr))}</button><input id="dgSensRange-${k}" type="range" class="dg-sens-slider" min="0" max="100" step="1" value="${rec.sens[k]}" oninput="dgSensSlide('${k}',this.value)" aria-label="${esc(_tvs(m.tr))} ${esc(_tvs("hassasiyet"))}" ${!scanned||disabled?"disabled":""}><output class="dg-sens-count" id="dgSensCnt-${k}"></output></div>`;}
  h+=`<div class="dg-sens-actions"><button type="button" class="dg-png-btn ghost sm" onclick="dgSensFocus(null)">${esc(_tvs("Tüm sınıflar"))}</button><button type="button" class="dg-png-btn ghost sm" onclick="dgSensToggleCand(!DG_SENS.showCand)">${esc(_tvs(DG_SENS.showCand?"Görüntüyü göster":"Renkleri göster"))}</button><button type="button" class="dg-png-btn primary" id="dgSensAcceptBtn" onclick="dgSensAccept()" ${disabled?"disabled":""}>💾 ${esc(_tvs("Kabul et ve kaydet"))}</button></div><div id="dgSensSummary" class="dg-sens-adj"></div><p id="dgSensStatus" class="dg-sens-hint" role="status"></p>`;
  h+=`<details class="dg-sens-details"><summary>${esc(_tvs("Bina / havuz sınırını düzelt"))}</summary><p class="dg-sens-hint">${esc(_tvs("Sınıfı seç, haritada sınır köşelerine dokun, çizimi tamamla. Çizilen alan park sınırına kırpılır."))}</p><select id="dgSensDrawType" aria-label="${esc(_tvs("Yüzey türü"))}">${["building","pool","hard","water","green","bare"].map(k=>`<option value="${k}">${esc(_tvs(window.DG_SURFACE_REVIEW.types[k].label))}</option>`).join("")}</select><div class="dg-sens-actions"><button type="button" class="dg-png-btn blue sm" onclick="dgSensDrawStart()">✏ ${esc(_tvs("Sınır çiz"))}</button><button type="button" class="dg-png-btn primary sm" onclick="dgSensDrawFinish()">✓ ${esc(_tvs("Çizimi tamamla"))}</button><button type="button" class="dg-png-btn ghost sm" onclick="dgSensDrawBack()">↩ ${esc(_tvs("Son köşeyi sil"))}</button><button type="button" class="dg-png-btn ghost sm" onclick="dgSensDrawCancel()">${esc(_tvs("İptal"))}</button></div><div id="dgSensFeatures">${(rec.features||[]).map((f,i)=>`<div class="dg-sens-feature"><span>${esc(_tvs(window.DG_SURFACE_REVIEW.types[f.type]?.label||f.type))}</span><button type="button" class="dg-png-btn ghost sm" onclick="dgSensRemoveFeature(${i})">↩ ${esc(_tvs("Geri al"))}</button></div>`).join("")}</div></details>`;
- h+=`<details class="dg-sens-details"><summary>${esc(_tvs("Veri ve ayarlar"))}</summary><p class="dg-sens-hint">${esc(_tvs("Kaydırıcı eşikleri değiştirir; çözünürlüğü veya doğruluk garantisini artırmaz. Kabul, görsel inceleme kararınızı kaydeder."))}</p><label class="dg-png-label" for="dgSensPeriod">${esc(_tvs("DÖNEM"))}</label><select id="dgSensPeriod" onchange="dgSensPeriod(this.value)"><option value="latest" ${rec.period==="latest"?"selected":""}>${esc(_tvs("Son 120 gün"))}</option><option value="ref" ${rec.period==="ref"?"selected":""}>2021</option></select><div class="dg-sens-actions"><button type="button" class="dg-png-btn ghost sm" onclick="dgSensModePark()">🌳 ${esc(_tvs("Park seç"))}</button><button type="button" class="dg-png-btn ghost sm" onclick="dgSensModeAnalysis()">🛰 ${esc(_tvs("Analiz"))}</button><button type="button" class="dg-png-btn ghost sm" onclick="dgSensExportGeoJson()">📥 GeoJSON</button><button type="button" class="dg-png-btn ghost sm" onclick="dgSensExportCsv()">📥 CSV</button><button type="button" class="dg-png-btn red sm" onclick="dgSensReset()">${esc(_tvs("Kararları sıfırla"))}</button></div></details>`;
+ h+=`<details class="dg-sens-details"><summary>${esc(_tvs("Veri ve ayarlar"))}</summary><p class="dg-sens-hint">${esc(_tvs("Kaydırıcı eşikleri değiştirir; çözünürlüğü veya doğruluk garantisini artırmaz. Kabul, görsel inceleme kararınızı kaydeder."))}</p><label class="dg-png-label" for="dgSensPeriod">${esc(_tvs("DÖNEM"))}</label><select id="dgSensPeriod" onchange="dgSensPeriod(this.value)"><option value="latest" ${rec.period==="latest"?"selected":""}>${esc(_tvs("Son 120 gün"))}</option><option value="ref" ${rec.period==="ref"?"selected":""}>2021</option></select><div class="dg-sens-actions"><button type="button" class="dg-png-btn ghost sm" onclick="dgSensModePark()">🌳 ${esc(_tvs("Park seç"))}</button><button type="button" class="dg-png-btn ghost sm" onclick="dgSensModeAnalysis()">🛰 ${esc(_tvs("Analiz"))}</button><button type="button" class="dg-png-btn primary sm" onclick="dgSensExportPng()">🖼️ ${esc(_tvs("Doğrulanmış Harita"))}</button><button type="button" class="dg-png-btn ghost sm" onclick="dgSensExportGeoJson()">📥 GeoJSON</button><button type="button" class="dg-png-btn ghost sm" onclick="dgSensExportCsv()">📥 CSV</button><button type="button" class="dg-png-btn red sm" onclick="dgSensReset()">${esc(_tvs("Kararları sıfırla"))}</button></div></details>`;
  host.innerHTML=h;dgSensUpdateSummary();dgSensUpdateStatus();
 }
 function dgSensUpdateSummary(){
@@ -197,6 +197,104 @@ function dgSensExportGeoJson(){
  const features=parts.map(p=>({type:"Feature",properties:{row:p.cell.row,column:p.cell.col,original_class:p.cell.classKey,review_class:p.type,group:p.group,area_m2:p.areaM2,method:p.method,source_fingerprint:rec.fingerprint,accepted_at:rec.acceptedAt||null,view:DG_SENS.editing?"preview":"accepted"},geometry:{type:"MultiPolygon",coordinates:dgSurfaceUnproject(p.geom,DG_SENS.epsg)}}));
  downloadBlob("dendrogeo_surface_"+rec.parkId+".geojson","application/geo+json",JSON.stringify({type:"FeatureCollection",features}));
 }
+/* ── 0058: DOĞRULANMIŞ HARİTA PNG (infografik çıktı) ────────────────
+ * Kullanıcı isteği: "iyileştirmeden sonra böyle bir çıktı alalım" (X
+ * lansman infografiği). Kabul/düzeltme kararlarından SONRA tek tıkla
+ * marka çerçeveli infografik PNG: hücreler dgSensEffective rengiyle
+ * (kabul edilmiş anlık görüntü), çizilen bina/havuz maskeleri üstte,
+ * sağ sütunda dgSensAreas()'nin ALT-HÜCRE doğrulanmış alanları (polygon
+ * clipping dahil), alt bantta parmak izi + dönem + lisans künyesi.
+ * Raster salt okunur kalır (kırmızı çizgi): tüm sayılar record/areas'tan. */
+function dgSensExportPng(){
+  const rec=DG_SENS.record,cells=dgSensCells();
+  if(!rec||!cells||!cells.length){toast(_tvs("Önce arazi örtüsü analizini çalıştırın."),"warn","🖼️");return;}
+  const nDec=Object.keys(rec.corrections||{}).length+(rec.features||[]).length;
+  if(!nDec){toast(_tvs("Önce en az bir hücre kararı ver — doğrulanmış harita kararlarını gösterir."),"warn","🖼️");return;}
+  const areas=dgSensAreas()||dgSensGroupAreas();
+  const epsg=DG_SENS.epsg||dgLcUtmEpsgForLatLon(cells[0].center.lat,cells[0].center.lon);
+  /* UTM zarfı */
+  let mnX=Infinity,mnY=Infinity,mxX=-Infinity,mxY=-Infinity;
+  const PR=(lat,lon)=>{const z=dgLcUtmForward(lat,lon,epsg);mnX=Math.min(mnX,z.x);mxX=Math.max(mxX,z.x);mnY=Math.min(mnY,z.y);mxY=Math.max(mxY,z.y);return z;};
+  for(const c of cells)for(const q of (c.quadWgs||[]))PR(q[1],q[0]);
+  if(typeof PARK_POLY!=="undefined"&&PARK_POLY)for(const r of PARK_POLY)for(const q of r)PR(q[0],q[1]);
+  const CW=1240,CH=1560,cv=document.createElement("canvas");
+  cv.width=CW;cv.height=CH;
+  const g=cv.getContext("2d");
+  const GREEN="#14532d",MUT="#5c6a63",INK="#182420",BGc="#f7f6f2";
+  const COL=Object.assign({green:"#4ade80",water:"#3b82f6",hard:"#64748b",bare:"#8b5a2b",other:"#94a3b8"},DG_SENS_COLORS);
+  g.fillStyle=BGc;g.fillRect(0,0,CW,CH);
+  g.fillStyle=GREEN;g.fillRect(0,0,CW,120);
+  g.fillStyle="#fff";g.font="bold 44px Arial";g.fillText("DENDROGEO",40,72);
+  g.font="22px Arial";g.fillStyle="#cfe3d3";g.fillText("Küresel Ağaç Envanteri ve Karbon Veri Sistemi",40,102);
+  g.fillStyle="#eaf5ec";g.font="bold 30px Arial";g.textAlign="right";g.fillText("dendrogeo.org",CW-40,70);g.textAlign="left";
+  g.fillStyle=GREEN;g.font="bold 32px Arial";g.fillText("DOĞRULANMIŞ PARK HARİTASI",40,172);
+  const pk=dgSensParkId();
+  g.fillStyle=MUT;g.font="22px Arial";
+  g.fillText((pk.name||"Park")+" · "+new Date().toISOString().slice(0,10)+" · "+nDec+" karar · "+(DG_SENS.editing?"ÖNİZLEME":"KABUL EDİLMİŞ v"+(rec.serverRevision||1)),40,206);
+  const MX=40,MY=240,MW=760,MH=1180;
+  g.fillStyle="#fff";g.fillRect(MX,MY,MW,MH);
+  g.strokeStyle="#dfe5df";g.lineWidth=2;g.strokeRect(MX,MY,MW,MH);
+  const sc=Math.min((MW-40)/((mxX-mnX)||1),(MH-40)/((mxY-mnY)||1));
+  const ox=MX+(MW-(mxX-mnX)*sc)/2,oy=MY+(MH-(mxY-mnY)*sc)/2;
+  const px=z=>[ox+(z.x-mnX)*sc,oy+(mxY-z.y)*sc];
+  for(const c of cells){
+    if(!c.quadWgs||c.quadWgs.length!==4)continue;
+    g.beginPath();
+    c.quadWgs.forEach((q,i)=>{const p=px(PR(q[1],q[0]));i?g.lineTo(p[0],p[1]):g.moveTo(p[0],p[1]);});
+    g.closePath();
+    g.fillStyle=COL[dgSensEffective(c)]||COL.other;
+    g.fill();
+    const dec=(rec.corrections||{})[c.row+":"+c.col];
+    if(dec&&dec.to&&dec.to!==dec.from){g.strokeStyle="#14532d";g.lineWidth=1.2;g.stroke();}
+  }
+  /* çizilen bina/havuz maskeleri üstte */
+  for(const f of (rec.features||[])){
+    if(!f.ring||f.ring.length<3)continue;
+    g.beginPath();
+    f.ring.forEach((q,i)=>{const p=px(PR(q[1],q[0]));i?g.lineTo(p[0],p[1]):g.moveTo(p[0],p[1]);});
+    g.closePath();
+    g.fillStyle=COL[f.type]||COL.other;g.globalAlpha=.75;g.fill();g.globalAlpha=1;
+    g.strokeStyle="#111827";g.lineWidth=1.5;g.stroke();
+  }
+  if(typeof PARK_POLY!=="undefined"&&PARK_POLY&&PARK_POLY.length){
+    g.beginPath();let first=true;
+    for(const r of PARK_POLY){for(const q of r){const p=px(PR(q[0],q[1]));first?g.moveTo(p[0],p[1]):g.lineTo(p[0],p[1]);first=false;}g.closePath();}
+    g.strokeStyle="#111827";g.lineWidth=2.5;g.stroke();
+  }
+  /* sağ sütun */
+  const X0=840;
+  g.fillStyle=MUT;g.font="bold 20px Arial";g.fillText("PARK SAHASI",X0,300);
+  g.fillStyle=INK;g.font="bold 54px Arial";g.fillText((typeof parkAreaHa==="function"?parkAreaHa().toFixed(1):"—")+" ha",X0,352);
+  g.fillStyle=MUT;g.font="bold 20px Arial";g.fillText("İNSAN KARARI",X0,420);
+  g.fillStyle=INK;g.font="bold 54px Arial";g.fillText(String(nDec),X0,472);
+  g.fillStyle=MUT;g.font="bold 20px Arial";g.fillText("DOĞRULANMIŞ ALANLAR",X0,540);
+  let y=580;
+  for(const k of ["green","water","hard","bare","building","pool"]){
+    const v=Number(areas[k]||0);
+    if(v<=0&&k!=="green"&&k!=="water")continue;
+    const lbl=(window.DG_SURFACE_REVIEW&&window.DG_SURFACE_REVIEW.types[k]?window.DG_SURFACE_REVIEW.types[k].label:k);
+    g.fillStyle=COL[k]||COL.other;g.fillRect(X0,y,34,34);
+    g.fillStyle=INK;g.font="bold 24px Arial";g.fillText(lbl,X0+48,y+18);
+    g.fillStyle=MUT;g.font="22px Arial";g.fillText(dgSensHa(v)+" ha",X0+48,y+44);
+    y+=76;
+  }
+  g.strokeStyle="#dfe5df";g.lineWidth=2;g.beginPath();g.moveTo(X0,y+6);g.lineTo(CW-40,y+6);g.stroke();
+  g.fillStyle="#1d6b3c";g.font="bold 22px Arial";
+  g.fillText("Bu harita raster + insan kararlarının",X0,y+44);
+  g.fillText("birleşimidir; ham raster sonucu",X0,y+74);
+  g.fillText("raporlarda değişmeden korunur.",X0,y+104);
+  g.fillStyle=GREEN;g.fillRect(0,CH-70,CW,70);
+  g.fillStyle="#cfe3d3";g.font="19px Arial";
+  g.fillText("Raster: ESA WorldCover 2021 v200 (CC BY 4.0) · Uydu: Sentinel-2 "+String((rec.profile&&rec.profile.scenes&&rec.profile.scenes[0]&&rec.profile.scenes[0].datetime)||"—").slice(0,10)+" · parmak izi "+String(rec.fingerprint||"").slice(0,8)+" · CC BY-NC 4.0",40,CH-26);
+  cv.toBlob(b=>{
+    if(!b){toast(_tvs("PNG üretilemedi."),"err","🖼️");return;}
+    const u=URL.createObjectURL(b),a=document.createElement("a");
+    a.href=u;a.download="dendrogeo_dogrulanmis_harita_"+(pk.id||"park")+".png";
+    a.click();setTimeout(()=>URL.revokeObjectURL(u),1500);
+    toast(_tvs("✓ Doğrulanmış harita PNG indirildi."),"ok","🖼️");
+  },"image/png");
+}
+
 function dgSensExportCsv(){const a=dgSensAreas();if(!a)return;const rec=DG_SENS.record;downloadBlob("dendrogeo_surface_"+rec.parkId+".csv","text/csv;charset=utf-8","\uFEFFclass,area_m2,area_ha,view,source_fingerprint\n"+Object.keys(a).map(k=>[k,a[k],a[k]/10000,DG_SENS.editing?"preview":"accepted",rec.fingerprint].join(",")).join("\n"));}
 function dgSensCleanup(){
  ++DG_SENS.epoch;clearTimeout(DG_SENS.debounce);

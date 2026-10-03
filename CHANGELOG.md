@@ -9,6 +9,30 @@ Yeni sürüm yayımlama adımları: [`docs/surum-yayini.md`](docs/surum-yayini.m
 
 ## [Yayımlanmadı]
 
+### Eklendi — 0058: 🖼️ DOĞRULANMIŞ HARİTA PNG — kabul/düzeltme SONRASI infografik çıktı
+**Kullanıcı isteği (birebir):** "iyileştirmeden sonra böyle bir çıktıyı
+alalım yine harika duruyor" (X lansman infografiğini göstererek).
+
+**NE:** 1409597'nin kabul hattının (surface_reviews + polygon-clipping +
+revizyon kilidi) ÜSTÜNE tek düğme: "🖼️ Doğrulanmış Harita" (Veri ve ayarlar
+→ GeoJSON/CSV yanı). En az bir karar (hücre düzeltmesi VEYA çizilen bina/
+havuz maskesi) varsa tarayıcı içi canvas infografik PNG üretir:
+· hücreler `dgSensEffective` rengiyle (kabul edilmiş anlık görüntü),
+  düzeltilen hücreler koyu yeşil konturlu
+· çizilen maskeler yarı saydam üstte, park sınırı siyah
+· sağ sütun: park sahası, karar sayısı, `dgSensAreas()`'nin ALT HÜCRE
+  doğrulanmış alanları (bina/havuz ayrımı dahil)
+· durum damgası: ÖNİZLEME / KABUL EDİLMİŞ v<revizyon>
+· alt bant künye: WorldCover + Sentinel-2 tarihi + kaynak parmak izi
+  (ilk 8 hane) + CC BY-NC 4.0
+
+**KIRMIZI ÇİZGİ:** raster salt okunur; tüm sayılar record/areas'tan gelir;
+yayın hattı ve make-report bu modülü tanımaz.
+
+**Bekçiler:** test/lc-validate.test.mjs +4 (düğme/üretici/künye/kırmızı
+çizgi/i18n). sw r67→r68. i18n +5.
+
+
 ### Düzeltildi — 0056: MOD AYRIMI — analiz etkinken park algılama TAMAMEN duraklatılır + tarama sonrası otomatik uydu altlığı
 **Kullanıcı bildirimi (birebir):** "AYNI HALA PARK ALGILAMA YAPIYOR BEN
 KABUL EDEMİYORUM Kİ GRİDLERİ ... GÜNCEL HARİTA DEDİM GELİŞMİŞ ALGILAMA
