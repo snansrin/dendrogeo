@@ -9,6 +9,59 @@ Yeni sürüm yayımlama adımları: [`docs/surum-yayini.md`](docs/surum-yayini.m
 
 ## [Yayımlanmadı]
 
+### Değiştirildi/Sadeleştirildi — 0054: 🛰 UYDU HASSASİYET PANELİ (workbench UI kaldırıldı · kaydırıcı + gözle onay + kalıcı kayıt)
+**Kullanıcı geri bildirimi (birebir):** "yaptıkların çok teferruatlı, benim
+istediğim daha basit: yüzey analizi butonuna basınca barlar çıkıyor ya —
+bunlar gibi yatay bar koy; kaydırdığımda mesela sert zemin hassasiyeti
+artsın ve harita üzerinde sert zeminleri işaretlesin, gözümle görüp takip
+edeyim; doğru noktaları kabul ettiğimde kaydedip öylece kalsın. Daha
+gelişmiş algılama, daha hassas ve GÜNCEL uydu verisi kullanarak. Az önce
+yaptığını sil bence çok karışık olmuş — daha basit daha işlevsel olsun."
+
+**KALDIRILDI:** 0053'ün üç adımlı Çalışma Sahası arayüzü
+(ui/lc-workbench.js: A/B/C sekmeleri, örneklem turu, hata matrisi karnesi,
+bottom-sheet etiketleme). Bilim çekirdeği (lc-validate.js metrik/örnekleme
+fonksiyonları + lc-s2.js spektral motor) KORUNDU — testler duruyor,
+kütüphane olarak hazır; yalnız KARMAŞIK UI gitti.
+
+**EKLENDİ — ui/lc-sens.js (tek panel, sekmesiz):**
+* Yüzey Örtüsü Analizi biter bitmez rapor barlarının HEMEN ALTINDA belirir
+  (#lcSens kabı, park-export köprüsü otomatik mount — ayrı kart/düğme yok).
+* 🔍 Tara: GÜNCEL sezon Sentinel-2 L2A (varsayılan 'latest' — kullanıcı
+  isteği "en güncel uydu verisi") + aynı yılın ilkbahar/sonbahar kalıcılık
+  pencereleri; profil IndexedDB'ye kaydedilir → sonraki açılışta TARAMASIZ,
+  sahada çevrimdışı bile çalışır. Dönem seçici: Güncel / WorldCover 2021.
+* Sınıf başına YATAY KAYDIRICI (0-100, varsayılan 50 = Göksu+park5 canlı
+  kalibrasyonlu literatür tabanı, testle kilitli): eşikler taban etrafında
+  doğrusal kayar (dgValThr; eğimler DG_VAL_SENS_K). Kaydırıcı yalnız
+  ÖNBELLEKTEKİ profili yeniden sınıflar — ağ isteği YOK, anlık.
+* Aday hücre (spektral ≠ raster, karar verilmemiş) haritada sınıf rengiyle
+  kesikli kontur; onaylı hücre dolu renk; teyitli ince yeşil. Hücreye
+  dokun → ✅ Kabul / ❌ Harita doğru / ↩ Geri al. Sınıf başına toplu
+  "✓ Hepsini kabul" (confirm'li).
+* Kararlar park başına KALICI (IndexedDB 'sens-<parkId>') + otomatik kayıt;
+  "Onaylarınla" satırı düzeltilmiş ha + Δ'yı anlık gösterir
+  (applyCorrections saf — raster groupAreas'e dokunmaz).
+* 📥 GeoJSON (denetim izli onaylı hücreler) + 📥 CSV (kararlar + alanlar).
+
+**BİLİMSEL DÜRÜSTLÜK (kırmızı çizgi aynen):** raster sonucu/rapor barları/
+yayın hattı DEĞİŞMEZ; onaylar AYRI düzeltme katmanıdır (Olofsson harita+
+saha-düzeltmesi ayrılığı). Varsayılan 50 kaydırıcısı 0053'teki kalibre
+davranışı BİREBİR üretir (8 piksellik eşdeğerlik testi kilitler).
+
+**DİĞER:** lc-s2 'latest' modda kalıcılık pencereleri de güncel yılı
+kullanır; Windows yol düzeltmesi (check-csp.mjs + publish-queue.mjs:
+URL.pathname → fileURLToPath — 'C:\C:\...' ENOENT kazası kökten bitti);
+park paneli kart numaraları geri alındı (3·RAPOR PNG, 4·KATMANLAR);
+css .dg-valw-* bloğu silindi, .dg-sens-* eklendi (animasyon YOK);
+i18n += 33 anahtar; sw r63→r64 (precache: workbench çıktı, lc-sens girdi).
+
+**Bekçiler:** test/lc-validate.test.mjs 70→79: hassasiyet eşdeğerlik +
+kaydırıcı yön testleri (yeşil/su/sert/çıplak ↑↓), agreement sens geçişi,
+lc-sens entegrasyon kilitleri (zincir/precache/lcSens kabı/mount köprüsü/
+cleanup/ölü .dg-valw yasağı/i18n/kalıcılık sözleşmesi), kırmızı çizgi
+bekçisi lc-sens'i de kapsar. npm run check: 1138 test → TÜMÜ YEŞİL.
+
 ### Eklendi — 0053: 🛰 DOĞRULAMA ÇALIŞMA SAHASI v5 (LULC accuracy assessment · Olofsson 2014 · Sentinel-2 çok zamanlı kanıt)
 **Kullanıcı isteği:** "canlı haritanın analiz tarafını en gelişmiş seviyeye
 çıkar; uydu görüntüsü ile sistemin işaretlediği su, sert zemin, yeşil alan

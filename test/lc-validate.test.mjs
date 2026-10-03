@@ -463,85 +463,169 @@ describe('lc-s2 · Sentinel-2 sabitleri ve saf yardımcılar', () => {
   });
 });
 
-describe('entegrasyon zinciri kilitleri (modül kaydı + kırmızı çizgiler)', () => {
+describe('lc-validate · hassasiyet kaydırıcıları (0054 · kullanıcı isteği)', () => {
+  const n = (o) => Object.assign({ obs: 5 }, o);
+  const S50 = { green: 50, water: 50, hard: 50, bare: 50 };
+
+  test('⭐ varsayılan (sens yok) === 50/50/50/50 — literatür kalibrasyonu DEĞİŞMEZ', () => {
+    const pikseller = [
+      n({ ndvi: 0.8, mndwi: -0.2, ndbi: -0.3 }),
+      n({ ndvi: -0.233, mndwi: 0.416, ndbi: 0.256 }),
+      n({ ndvi: 0.276, mndwi: -0.272, ndbi: -0.052 }),
+      n({ ndvi: 0.16, mndwi: -0.195, ndbi: -0.012 }),
+      n({ ndvi: 0.12, mndwi: -0.30, ndbi: 0.05, ndviMaxYear: 0.12 }),
+      n({ ndvi: 0.30, mndwi: -0.20, ndbi: -0.10 }),
+      n({ ndvi: 0.05, mndwi: 0.6, ndbi: -0.5 }),
+      n({ ndvi: 0.30, mndwi: 0.05, ndbi: 0.02 }),
+    ];
+    for (const px of pikseller) {
+      assert.equal(dgValSpectralPredict(px, S50), dgValSpectralPredict(px),
+        '50 kaydırıcısı taban davranışı değiştirdi: ' + JSON.stringify(px));
+    }
+  });
+
+  test('yeşil hassasiyeti ↑ (100): kuruya yakın çim adaya döner (NDVI eşiği 0.35→0.20)', () => {
+    const px = n({ ndvi: 0.30, mndwi: -0.20, ndbi: -0.10, ndviMaxYear: 0.42 });
+    assert.equal(dgValSpectralPredict(px), 'ambiguous');
+    assert.equal(dgValSpectralPredict(px, { green: 100 }), 'green');
+    assert.equal(dgValSpectralPredict(px, { green: 0 }), 'ambiguous');
+  });
+
+  test('⭐ su hassasiyeti ↑ (100): sığ/bulanık su adaya döner (MNDWI eşiği 0.20→0.05)', () => {
+    const px = n({ ndvi: -0.10, mndwi: 0.10, ndbi: 0.20 });
+    assert.equal(dgValSpectralPredict(px), 'hard');
+    assert.equal(dgValSpectralPredict(px, { water: 100 }), 'water');
+  });
+
+  test('su hassasiyeti ↓ (0): yalnız en net su kalır (MNDWI eşiği 0.20→0.35)', () => {
+    const px = n({ ndvi: -0.20, mndwi: 0.25, ndbi: 0.10 });
+    assert.equal(dgValSpectralPredict(px), 'water');
+    /* eşik 0.35'e çıkınca 0.25'lik piksel su sayılmaz; kuru da değil
+     * (MNDWI ≥ 0.20) → belirsiz: insan kararına gider (zorlama yok). */
+    assert.equal(dgValSpectralPredict(px, { water: 0 }), 'ambiguous');
+  });
+
+  test('sert hassasiyeti ↑ (100): IBI eşiği 0→−0.25, zayıf kanıtlı piksel adaya döner', () => {
+    const px = n({ ndvi: 0.22, mndwi: -0.15, ndbi: -0.08 });
+    assert.equal(dgValSpectralPredict(px), 'ambiguous');
+    assert.equal(dgValSpectralPredict(px, { hard: 100 }), 'hard');
+  });
+
+  test('çıplak hassasiyeti ↑ (100): NDVI bandı 0.20→0.275 genişler', () => {
+    const px = n({ ndvi: 0.24, mndwi: -0.30, ndbi: -0.35 });
+    assert.equal(dgValSpectralPredict(px), 'ambiguous');
+    assert.equal(dgValSpectralPredict(px, { bare: 100 }), 'bare');
+  });
+
+  test('eşik eğimleri taban etrafında simetrik ve sınırlı (0..100 clamp)', () => {
+    const t0 = app.dgValThr({ green: -50, water: 999, hard: 'x', bare: null });
+    assert.ok(t0.ndviGreenMin >= 0.20 - 1e-9 && t0.ndviGreenMin <= 0.50 + 1e-9);
+    const t1 = app.dgValThr();
+    assert.ok(Math.abs(t1.ndviGreenMin - 0.35) < 1e-9);
+    assert.ok(Math.abs(t1.mndwiWaterMin - 0.20) < 1e-9);
+    assert.ok(Math.abs(t1.ibiHardMin - 0.0) < 1e-9);
+    assert.ok(Math.abs(t1.ndviBareMax - 0.20) < 1e-9);
+  });
+
+  test("agreement sens parametresini predict'e geçirir (aday kümesi kaydırıcıyla değişir)", () => {
+    const cells = [
+      { row: 1, col: 1, classKey: 'water', areaM2: 100, center: { lat: 40, lon: 32 } },
+    ];
+    const spectral = { '1:1': { obs: 5, ndvi: -0.10, mndwi: 0.10, ndbi: 0.20 } };
+    const a50 = dgValAgreement(cells, spectral, {});
+    const a100 = dgValAgreement(cells, spectral, { sens: { water: 100 } });
+    assert.equal(a50.perClass.water.agree, 0);   /* 50'de hard'a düşer → uyuşmaz */
+    assert.equal(a100.perClass.water.agree, 1);  /* 100'de water → uzlaşma */
+  });
+});
+
+describe('entegrasyon zinciri kilitleri (0054 · lc-sens)', () => {
   const lazy = rd('src/utils/lazylibs.js');
   const sw = rd('sw.js');
   const panel = rd('src/ui/park-panel.js');
   const exportJs = rd('src/ui/park-export.js');
   const i18n = rd('src/config/i18n.js');
+  const sens = rd('src/ui/lc-sens.js');
+  const css = rd('css/park-panel.css');
 
-  test('⭐ zincir sırası: validate → s2 → lc-report → workbench → facade', () => {
+  test('⭐ zincir sırası: validate → s2 → lc-report → lc-sens → facade', () => {
     const idx = ['src/services/lc-validate.js', 'src/services/lc-s2.js',
-      'src/ui/lc-report.js', 'src/ui/lc-workbench.js', 'src/services/landcover.js']
+      'src/ui/lc-report.js', 'src/ui/lc-sens.js', 'src/services/landcover.js']
       .map(f => lazy.indexOf('"' + f + '"'));
     for (const i of idx) assert.ok(i > -1, 'zincirde eksik');
     assert.deepEqual(idx, [...idx].sort((a, b) => a - b), 'sıra bozuk');
+    assert.ok(!lazy.includes('lc-workbench'), 'workbench zincirden silinmeliydi (0054)');
   });
-  test('üç yeni modül sw.js CORE_ASSETS’te (çevrimdışı precache)', () => {
-    for (const f of ['/src/services/lc-validate.js', '/src/services/lc-s2.js', '/src/ui/lc-workbench.js']) {
-      assert.ok(sw.includes("'" + f + "'"), 'CORE_ASSETS eksik: ' + f);
-    }
+
+  test('lc-sens sw.js CORE_ASSETS’te; workbench precache’ten düştü', () => {
+    assert.ok(sw.includes("'/src/ui/lc-sens.js'"));
+    assert.ok(sw.includes("'/src/services/lc-validate.js'"));
+    assert.ok(sw.includes("'/src/services/lc-s2.js'"));
+    assert.ok(!sw.includes('lc-workbench'), 'workbench precache’te kalmamalı');
   });
-  test('kart: dg-png ailesi + valOpenBtn + valWorkbench + dgValOpen köprüsü', () => {
-    assert.match(panel, /3 · ÇALIŞMA SAHASI/);
-    assert.match(panel, /id="valOpenBtn"[^>]*onclick="dgValOpen\(\)"/);
-    assert.match(panel, /id="valWorkbench"/);
-    assert.match(panel, /dg-png-badge blue">Olofsson 2014 · Sentinel-2/);
-    /* komşu kartlar yeniden numaralandı, iskelet aynı aile */
-    assert.match(panel, /4 · RAPOR PNG/);
-    assert.match(panel, /5 · KATMANLAR/);
+
+  test('panel: lcSens kabı rapor barlarının altında + kart numaraları geri alındı', () => {
+    assert.match(panel, /id="lcSens"/);
+    assert.ok(panel.indexOf('id="landCoverReport"') < panel.indexOf('id="lcSens"'),
+      'lcSens, landCoverReport’tan SONRA gelmeli (barların altı)');
+    assert.ok(!panel.includes('valWorkbench'), 'workbench kartı silinmeliydi');
+    assert.ok(!panel.includes('dgValOpen'), 'workbench köprüsü silinmeliydi');
+    assert.match(panel, /3 · RAPOR PNG/);
+    assert.match(panel, /4 · KATMANLAR/);
   });
-  test('köprü eager dosyada: dgValOpen → await dgEnsureLulc → DG_LC_WORKBENCH.open', () => {
-    assert.match(exportJs, /async function dgValOpen\(/);
-    assert.match(exportJs, /await dgEnsureLulc\(\)/);
-    assert.match(exportJs, /window\.DG_LC_WORKBENCH\.open\(\)/);
-    assert.match(exportJs, /window\.dgValOpen=dgValOpen;/);
-    /* köprü de LULC köprüsü gibi önce analiz ister */
-    assert.match(exportJs, /DG_LANDCOVER\.getLast\(\)/);
+
+  test('köprü: analiz bitince DG_LC_SENS.mount otomatik (typeof+try korumalı)', () => {
+    assert.match(exportJs, /window\.DG_LC_SENS&&typeof window\.DG_LC_SENS\.mount==="function"/);
+    assert.match(exportJs, /window\.DG_LC_SENS\.mount\("lcSens"\)/);
+    assert.ok(!/function dgValOpen/.test(exportJs), 'eski köprü kalmamalı');
   });
-  test('clearPark → workbench cleanup kancası (park değişince tur/kampanya belleği düşer)', () => {
-    assert.match(panel, /DG_LC_WORKBENCH&&typeof window\.DG_LC_WORKBENCH\.cleanup==="function"/);
+
+  test('clearPark → lc-sens cleanup kancası (park değişince katman/kayıt düşer)', () => {
+    assert.match(panel, /DG_LC_SENS&&typeof window\.DG_LC_SENS\.cleanup==="function"/);
   });
-  test('i18n: köprü + workbench anahtar dizeleri sözlükte', () => {
-    for (const s of [
-      '🛰 Doğrulama modülü yükleniyor…',
-      'Doğrulama çalışma sahası modülü yüklenmedi.',
-      "Önce 🌿 Yüzey Örtüsü Analizi'ni çalıştırın.",
-      'Etiketleme Turunu Başlat',
-      'HATA MATRİSİ (satır: harita · sütun: referans)',
-      'Kampanyayı Kaydet',
-      '🛰 Doğrulama Çalışma Sahası',
-    ]) assert.ok(i18n.includes(JSON.stringify(s) + ':'), 'eksik EN anahtarı: ' + s);
-  });
-  test('⭐ KIRMIZI ÇİZGİ: doğrulama katmanı sayısal hatta DOKUNMAZ', () => {
-    /* landcover facade ve engine'de validate/s2 çağrısı YOK: dgLcAnalyze
-     * çıktısı doğrulama modüllerinden bağımsız üretilmeye devam eder. */
+
+  test('⭐ KIRMIZI ÇİZGİ: hassasiyet paneli sayısal hatta DOKUNMAZ', () => {
     const facade = rd('src/services/landcover.js');
     const engine = rd('src/services/lc-engine.js');
     for (const src of [facade, engine]) {
-      assert.ok(!/dgVal|DG_LC_VALIDATE|DG_LC_S2|dgS2/.test(src), 'sayısal hat doğrulama modülüne bağlanmış');
+      assert.ok(!/dgVal|DG_LC_VALIDATE|DG_LC_S2|dgS2|DG_LC_SENS|dgSens/.test(src), 'sayısal hat doğrulama modülüne bağlanmış');
     }
-    /* workbench de DG_LC_LAST'i yalnız OKUR (atama yok) */
-    const wb = rd('src/ui/lc-workbench.js');
-    assert.ok(!/DG_LC_LAST\s*=/.test(wb), 'workbench DG_LC_LAST’e yazamaz');
-    assert.ok(!/groupAreas\s*=|groupCounts\s*=/.test(wb), 'workbench alan sonuçlarını değiştiremez');
+    /* lc-sens DG_LC_LAST'i yalnız OKUR; groupAreas'a YAZAMAZ */
+    assert.ok(!/DG_LC_LAST\s*=/.test(sens), 'lc-sens DG_LC_LAST’e yazamaz');
+    assert.ok(!/groupAreas\s*[=.]/.test(sens.replace(/groupAreas\)/g, '')), 'lc-sens alan sonuçlarını değiştiremez');
+    /* kararlar corrections kaydında — hücre sınıfına yerinde müdahale yok */
+    assert.ok(!/classKey\s*=/.test(sens), 'lc-sens hücre classKey’ini değiştiremez');
   });
-  test('workbench mobil sözleşmesi: bottom sheet + ≥44px hedefler + role=dialog', () => {
-    const wb = rd('src/ui/lc-workbench.js');
-    const css = rd('css/park-panel.css');
-    assert.match(wb, /dg-valw-sheet/);
-    assert.match(wb, /setAttribute\("role","dialog"\)/);
-    assert.match(css, /\.dg-valw-classbtn\{[^}]*min-height:64px/);
-    assert.match(css, /\.dg-valw-tab\{[^}]*min-height:44px/);
-    assert.match(css, /env\(safe-area-inset-bottom/);
-    /* yeni animasyon YOK (ui-standard kilidiyle uyum) */
-    assert.ok(!/dg-valw[^{]*\{[^}]*animation/.test(css), 'workbench CSS animasyon ekleyemez');
+
+  test('mobil sözleşme: kaydırıcı ≥44px + dg-png ailesi + animasyon YOK', () => {
+    assert.match(css, /\.dg-sens-slider\{[^}]*min-height:44px/);
+    assert.match(sens, /dg-png-btn/);
+    assert.match(sens, /type="range"/);
+    assert.ok(!/dg-sens[^{]*\{[^}]*animation/.test(css), 'sens CSS animasyon ekleyemez');
+    assert.ok(!/\.dg-valw-[\w-]+\s*\{/.test(css), 'ölü .dg-valw-* kuralları css’te kalmamalı (0054)');
   });
-  test('CSS ölü sınıf yok: workbench şablonlarındaki her dg-valw-* sınıfı css’te tanımlı', () => {
-    const wb = rd('src/ui/lc-workbench.js');
-    const css = rd('css/park-panel.css');
-    const used = new Set([...wb.matchAll(/dg-valw-[\w-]+/g)].map(m => m[0]));
+
+  test('CSS ölü sınıf yok: lc-sens şablonlarındaki her dg-sens-* sınıfı css’te tanımlı', () => {
+    const used = new Set([...sens.matchAll(/dg-sens-[\w-]+/g)].map(m => m[0]));
     const missing = [...used].filter(c => !css.includes('.' + c));
     assert.deepEqual(missing, [], 'css’te tanımsız sınıf: ' + missing.join(', '));
+  });
+
+  test('i18n: panel anahtar dizeleri sözlükte', () => {
+    for (const s of [
+      'UYDU HASSASİYET',
+      'Hücreye dokun: ✅ Kabul (uydu gördüğün sınıf) · ❌ Harita doğru · ↩ Geri al. Kararlar bu park için kalıcıdır; raster sonucu değişmez, düzeltme katmanı ayrıca tutulur.',
+      'Harita doğru',
+      'Hepsini kabul',
+      'Güncel sezon (en yeni görüntü)',
+      'Kararları sıfırla',
+    ]) assert.ok(i18n.includes(JSON.stringify(s) + ':'), 'eksik EN anahtarı: ' + s);
+  });
+
+  test('kalıcılık sözleşmesi: park başına tek kayıt (id "sens-<parkId>") + profil önbelleği', () => {
+    assert.match(sens, /id:"sens-"\+\(pk\.id\|\|"x"\)/);
+    assert.match(sens, /dgSensSave\(\)/);
+    assert.match(sens, /loadCampaigns/);
+    assert.match(sens, /rec\.profile=\{/);
   });
 });

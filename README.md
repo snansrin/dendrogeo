@@ -99,7 +99,7 @@ index.html                  ÜRETİLEN ARTİFAKT — partials'tan build edilir, 
     │   ├── park-panel.js   park modu + sonuç paneli (drawPark)
     │   ├── park-export.js  GeoJSON/CSV/PNG indirmeleri + LULC + doğrulama köprüleri
     │   ├── lc-report.js    LULC vektör çizimi + tek blok HTML rapor
-    │   └── lc-workbench.js ★ Doğrulama Çalışma Sahası UI (v5 · 2026-10-03)
+    │   └── lc-sens.js      ★ Uydu hassasiyet paneli (0054 · kaydırıcı + onay)
     └── services/
         ├── measure.js      saha formu, GPS, fotoğraf
         ├── offline.js      IndexedDB kuyruk + UUID dedup + senkron

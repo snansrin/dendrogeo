@@ -10,8 +10,12 @@
  */
 import { readFileSync, readdirSync, statSync } from 'node:fs';
 import { join } from 'node:path';
+import { fileURLToPath } from 'node:url';
 
-const ROOT = new URL('..', import.meta.url).pathname;
+/* 0054 (Windows dersi): URL.pathname Windows'ta '/C:/...' döner → join
+ * 'C:\C:\...' üretir ve check:csp ENOENT ile patlar (kullanıcı makinesi,
+ * 2026-10-03). fileURLToPath platform-bağımsız gerçek yol verir. */
+const ROOT = fileURLToPath(new URL('..', import.meta.url));
 
 /* Sadece bağlantı/kaynak olarak yüklenen origin'ler denetlenir.
  * Aşağıdakiler yalnızca <a href>, canonical, og:url veya XML ad alanı olarak geçer;

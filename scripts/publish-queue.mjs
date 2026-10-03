@@ -153,7 +153,7 @@ async function handle(req) {
     try {
       const { readdirSync, statSync } = await import('node:fs');
       const { join } = await import('node:path');
-      const d = join(new URL('..', import.meta.url).pathname, 'rapor', r.id);
+      const d = join(fileURLToPath(new URL('..', import.meta.url)), 'rapor', r.id);
       bytes = readdirSync(d).reduce((a, f) => a + statSync(join(d, f)).size, 0);
     } catch (e) { /* boyut ölçümü yayın engeli değil */ }
     return {

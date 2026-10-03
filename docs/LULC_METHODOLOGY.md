@@ -257,3 +257,29 @@ bağlanmaya hazır (make-report KIRMIZI ÇİZGİ: bu sürümde dokunulmadı).
   farklı biyomlarda (ör. tropik) yeniden değerlendirme gerekir.
 * Otomatik uzlaşma DOĞRULUK DEĞİLDİR; doğruluk yalnız B hattı (insan
   referansı) ile üretilir. A hattının işi şüpheli hücreyi kuyruklamaktır.
+
+### 9. v5.1 sadeleştirmesi (0054 · 2026-10-03): Hassasiyet Paneli
+
+Kullanıcı geri bildirimiyle üç adımlı çalışma sahası arayüzü (A/B/C
+sekmeleri, örneklem turu, karne) KALDIRILDI; yerine rapor barlarının
+altında tek panel geldi:
+
+* **Kaydırıcı = eşik:** her sınıf için 0-100; 50 = §4'teki literatür
+  kalibrasyonu (değişmez, testle kilitli). Eşikler taban etrafında doğrusal
+  kayar (`dgValThr`): yeşil NDVI 0.35±, su MNDWI 0.20±, sert IBI 0.00±,
+  çıplak NDVI bandı 0.20±. Kaydırıcı önbellekteki spektral profili yeniden
+  sınıflar (ağ isteği yok).
+* **Aday = spektral ≠ raster:** aday hücreler haritada sınıf rengiyle
+  kesikli işaretlenir; kullanıcı uydu altlığında GÖZÜYLE doğrular ve
+  ✅ Kabul / ❌ Harita doğru der. Kararlar park başına kalıcıdır
+  (IndexedDB) ve denetim izlidir (hücre, eski→yeni sınıf, zaman damgası,
+  spektral kanıt değerleri).
+* **Güncel veri:** varsayılan tarama GÜNCEL sezon Sentinel-2'sidir
+  (WorldCover 2021 değil) — adaylar hem sınıflandırma hatasını hem 2021'den
+  bu yana GERÇEK DEĞİŞİMİ yakalar; ayırım insan kararına bırakılır.
+* **Doğrulanmış alan:** onaylar `applyCorrections` ile raster alanlarına
+  uygulanır (saf fonksiyon; ham sonuç DEĞİŞMEZ) → "Onaylarınla" satırı
+  düzeltilmiş ha ± Δ gösterir; GeoJSON/CSV dışa aktarılır.
+* §2-§8'deki örnekleme/metric bilimi KÜTÜPHANE olarak durur
+  (`lc-validate.js`, 79 testle kilitli); ileride rapor hattına resmî
+  doğruluk bölümü bağlanmak istenirse hazırdır.

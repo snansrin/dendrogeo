@@ -209,6 +209,16 @@ async function runLandCoverAnalysis(){
     if(window.DG_LANDCOVER_RENDER_REPORT){
       window.DG_LANDCOVER_RENDER_REPORT(rep,result,parkArea);
     }
+    /* 0054 · 🛰 UYDU HASSASİYET PANELİ: rapor barlarının hemen altında
+     * belirir (kullanıcı isteği: "barlar gibi yatay bar — kaydırınca
+     * hassasiyet artsın, uydu üstünde işaretlensin, kabul edince
+     * kaydedilip öylece kalsın"). LULC zinciri zaten yüklü (bu köprünün
+     * başında dgEnsureLulc koşuldu); mount başarısızsa analiz SONUCU
+     * etkilenmez — typeof + try koruması. */
+    if(window.DG_LC_SENS&&typeof window.DG_LC_SENS.mount==="function"){
+      try{window.DG_LC_SENS.mount("lcSens");}
+      catch(e){console.warn("DENDROGEO · hassasiyet paneli monte edilemedi:",e);}
+    }
     toast(
       "✓ 10 m arazi örtüsü analizi tamamlandı (ESA WorldCover 2021 + çapraz IO LULC 2020).",
       "ok",
@@ -501,62 +511,10 @@ const DG_LC_CLASSES_SAF=(typeof DG_LC_CLASSES!=="undefined")?DG_LC_CLASSES:
 
 window.runLandCoverAnalysis=runLandCoverAnalysis;
 
-/* ═══════════ DOĞRULAMA ÇALIŞMA SAHASI KÖPRÜSÜ (v5 · 2026-10-03) ═══════════
- * runLandCoverAnalysis ile AYNI desen: eager dosyada ince köprü, ağır iş
- * lazy zincirde (ui/lc-workbench.js). Köprü burada çünkü park-panel kartındaki
- * onclick="dgValOpen()" hedefinin ui-audit FILES kümesinde (index.html'deki
- * eager script'ler) TANIMLI görünmesi gerekiyor — workbench lazy olduğundan
- * denetim onu göremez; köprü hem ölü-buton bekçisini doyurur hem zinciri
- * ilk kullanımda yükler. */
-async function dgValOpen(){
-  if(window._dgValBusy)return;
-
-  if(!window.DG_LC_WORKBENCH&&typeof dgEnsureLulc==="function"){
-    toast("🛰 Doğrulama modülü yükleniyor…","info");
-    try{
-      await dgEnsureLulc();
-    }catch(err){
-      return toast(dgCf("Doğrulama modülü yüklenemedi: ")+((err&&err.message)||err),"err","🛰️");
-    }
-  }
-
-  if(!window.DG_LC_WORKBENCH||typeof window.DG_LC_WORKBENCH.open!=="function"){
-    return toast("Doğrulama çalışma sahası modülü yüklenmedi.","err","🛰️");
-  }
-
-  if(!PARK_POLY||!PARK_POLY.length){
-    return toast("Önce park seç","warn","🌳");
-  }
-
-  /* Doğrulama, arazi örtüsü analizinin hücreleri üzerinde çalışır. */
-  if(!window.DG_LANDCOVER||typeof window.DG_LANDCOVER.getLast!=="function"||!window.DG_LANDCOVER.getLast()){
-    return toast("Önce 🌿 Yüzey Örtüsü Analizi'ni çalıştırın.","warn","🛰️");
-  }
-
-  window._dgValBusy=true;
-  const btn=$("valOpenBtn");
-  if(btn){
-    btn.disabled=true;
-    btn.dataset.oldText=btn.innerHTML;
-    btn.innerHTML="⏳ Açılıyor…";
-    btn.style.opacity=".65";
-    btn.style.cursor="wait";
-  }
-  try{
-    await window.DG_LC_WORKBENCH.open();
-  }catch(err){
-    toast(dgCf("Çalışma sahası açılamadı: ")+((err&&err.message)||err),"err","🛰️");
-  }finally{
-    window._dgValBusy=false;
-    if(btn&&btn.dataset.oldText){
-      btn.innerHTML=btn.dataset.oldText;
-      btn.disabled=false;
-      btn.style.opacity="";
-      btn.style.cursor="";
-    }
-  }
-}
-window.dgValOpen=dgValOpen;
+/* 0054: eski dgValOpen köprüsü (üç adımlı workbench) KALDIRILDI —
+ * kullanıcı geri bildirimi: "çok karışık, daha basit ve işlevsel olsun."
+ * Uydu hassasiyet paneli (ui/lc-sens.js) analiz bitiminde OTOMATİK monte
+ * edilir (yukarıdaki .then bloğu); ayrı kart/düğme yoktur. */
 
 window.downloadLandCoverClassCSV=downloadLandCoverClassCSV;
 

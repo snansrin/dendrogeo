@@ -63,7 +63,7 @@
  *   WorldCover'ın KENDİ sınıf tanımıyla (kalıcılık) hizalamadır.
  *
  * YÜKLEME SIRASI: lc-config → lc-geo → lc-stac → lc-engine → lc-osm →
- * lc-patches → BU DOSYA → lc-s2 → ui/lc-report → ui/lc-workbench → landcover.
+ * lc-patches → BU DOSYA → lc-s2 → ui/lc-report → ui/lc-sens → landcover.
  * DOM/ağ bağımlılığı YOKTUR (IndexedDB hariç, o da typeof korumalı) →
  * test/lc-validate.test.mjs doğrudan vm ile birim test eder. */
 
@@ -336,6 +336,56 @@ function dgValMetrics(conf,W,assignedAreaM2){
   };
 }
 
+/* ---------- HASSASİYET AYARLI EŞİKLER (0054 · kullanıcı isteği) ----------
+ * Kullanıcı geri bildirimi: "sert zemin barını kaydırınca hassasiyet artsın,
+ * harita üzerinde işaretlensin, gözümle görüp kabul edeyim."
+ * Her sınıf için 0-100 kaydırıcı; 50 = literatür kalibrasyonu (Göksu +
+ * park 5 canlı koşularıyla doğrulanmış taban eşikler — DEĞİŞMEZ, test
+ * kilidi). Eşikler taban değerin etrafında DOĞRUSAL kayar:
+ *   eşik(s) = taban + (s − 50) · eğim
+ * Hassasiyet arttıkça eşik gevşer → DAHA ÇOK hücre o sınıfın adayı olur.
+ * Aday = spektral tahmin ≠ raster sınıfı. Karar İNSANINDIR: adaylar
+ * görüntü üzerinde onaya sunulur, onaylananlar corrections'a işlenir.
+ * Bu fonksiyon hiçbir sayısal raster sonucunu değiştirmez. */
+const DG_VAL_SENS_K={
+  greenNdvi:-0.0030,   /* 0→0.50 · 50→0.35 · 100→0.20 */
+  greenYear:-0.0030,   /* 0→0.65 · 50→0.50 · 100→0.35 */
+  waterMndwi:-0.0030,  /* 0→0.35 · 50→0.20 · 100→0.05 */
+  waterYear:-0.0030,   /* 0→0.60 · 50→0.45 · 100→0.30 */
+  hardIbi:-0.0050,     /* 0→+0.25 · 50→0.00 · 100→−0.25 */
+  hardNdvi:-0.0010,    /* karışım bandı alt sınırı: 50→0.20 */
+  hardStrongIbi:-0.0030,/* asfalt dalı IBI eşiği: 50→0.10 */
+  bareNdvi:+0.0015     /* 0→0.125 · 50→0.20 · 100→0.275 */
+};
+
+function dgValThr(sens){
+  /* Savunmacı sayısallaştırma: null/''/bozuk değer → 50 (taban),
+   * sayısal değer 0..100'e kırpılır. (Number(null)=0 tuzağına düşmez.) */
+  const s100=(v)=>{
+    if(v==null||v==="")return 50;
+    const x=Number(v);
+    return Number.isFinite(x)?Math.max(0,Math.min(100,x)):50;
+  };
+  const g=s100(sens&&sens.green);
+  const w=s100(sens&&sens.water);
+  const h=s100(sens&&sens.hard);
+  const b=s100(sens&&sens.bare);
+  const K=DG_VAL_SENS_K;
+  return{
+    ndviGreenMin:DG_VAL_SPECTRAL.NDVI_GREEN_MIN+(g-50)*K.greenNdvi,
+    ndviYearGreenMin:DG_VAL_SPECTRAL.NDVI_MAX_GREEN+(g-50)*K.greenYear,
+    mndwiWaterMin:DG_VAL_SPECTRAL.MNDWI_WATER_MIN+(w-50)*K.waterMndwi,
+    mndwiYearWaterMin:DG_VAL_SPECTRAL.MNDWI_MAX_WATER+(w-50)*K.waterYear,
+    ibiHardMin:DG_VAL_SPECTRAL.IBI_HARD_MIN+(h-50)*K.hardIbi,
+    ndviHardMin:DG_VAL_SPECTRAL.NDVI_HARD_MIN+(h-50)*K.hardNdvi,
+    ibiStrongMin:DG_VAL_SPECTRAL.IBI_BARE_MAX+(h-50)*K.hardStrongIbi,
+    ndviBareMax:DG_VAL_SPECTRAL.NDVI_BARE_MAX+(b-50)*K.bareNdvi,
+    canopyMax:DG_VAL_SPECTRAL.NDVI_WATERCANOPY_MAX,
+    dryMax:DG_VAL_SPECTRAL.MNDWI_DRY_MAX,
+    yearBareMin:DG_VAL_SPECTRAL.NDVI_YEAR_BARE_MIN
+  };
+}
+
 /* ---------- SPEKTRAL KURAL SETİ (A hattı) ----------
  * Sıra bilimsel olarak önemlidir:
  *   1) SU önce — MNDWI mutlak taban + NDVI'ya GÖRELİ baskınlık. Sığ/bulanık
@@ -347,12 +397,25 @@ function dgValMetrics(conf,W,assignedAreaM2){
  *   3) SERT — IBI > 0 (Xu 2008) + NDVI ≥ 0.20 + kuru (MNDWI < 0.20).
  *   4) ÇIPLAK — düşük NDVI + kuru.
  *   5) Kalan her şey AMBIGUOUS — sınıfa zorlama yok; insan etiketine gider. */
-function dgValSpectralPredict(m){
+function dgValSpectralPredict(m,sens){
   if(!m)return"nodata";
   const obs=Number(m.obs)||0;
   if(obs<DG_VAL_SPECTRAL.MIN_OBS)return"nodata";
   const ndvi=Number(m.ndvi),mndwi=Number(m.mndwi),ndbi=Number(m.ndbi);
   if(!Number.isFinite(ndvi)||!Number.isFinite(mndwi)||!Number.isFinite(ndbi))return"nodata";
+  const T=sens?dgValThr(sens):{
+    ndviGreenMin:DG_VAL_SPECTRAL.NDVI_GREEN_MIN,
+    ndviYearGreenMin:DG_VAL_SPECTRAL.NDVI_MAX_GREEN,
+    mndwiWaterMin:DG_VAL_SPECTRAL.MNDWI_WATER_MIN,
+    mndwiYearWaterMin:DG_VAL_SPECTRAL.MNDWI_MAX_WATER,
+    ibiHardMin:DG_VAL_SPECTRAL.IBI_HARD_MIN,
+    ndviHardMin:DG_VAL_SPECTRAL.NDVI_HARD_MIN,
+    ibiStrongMin:DG_VAL_SPECTRAL.IBI_BARE_MAX,
+    ndviBareMax:DG_VAL_SPECTRAL.NDVI_BARE_MAX,
+    canopyMax:DG_VAL_SPECTRAL.NDVI_WATERCANOPY_MAX,
+    dryMax:DG_VAL_SPECTRAL.MNDWI_DRY_MAX,
+    yearBareMin:DG_VAL_SPECTRAL.NDVI_YEAR_BARE_MIN
+  };
   /* Geriye uyum zincirleri:
    * mndwiYear = yıllık max (ilkbahar/sonbahar taraması) → yaz max → medyan
    * ndviYear  = yıllık max → yaz max → medyan
@@ -366,33 +429,31 @@ function dgValSpectralPredict(m){
    *           değil (ndvi ve ndviYear < 0.50): mevsimsel çekilen göl kıyısı
    *           ilkbaharda açıksa WorldCover 80 tanımıyla ("yılın çoğunda su")
    *           uyumlu biçimde SU sayılır. Sazlık ndviYear 0.5+ verir → yeşil. */
-  if((mndwi>=DG_VAL_SPECTRAL.MNDWI_WATER_MIN&&mndwi>=ndvi)||
-     (mndwiYear>=DG_VAL_SPECTRAL.MNDWI_MAX_WATER&&
-      ndvi<DG_VAL_SPECTRAL.NDVI_WATERCANOPY_MAX&&
-      ndviYear<DG_VAL_SPECTRAL.NDVI_WATERCANOPY_MAX))return"water";
+  if((mndwi>=T.mndwiWaterMin&&mndwi>=ndvi)||
+     (mndwiYear>=T.mndwiYearWaterMin&&
+      ndvi<T.canopyMax&&
+      ndviYear<T.canopyMax))return"water";
   /* 2) Yeşil: ya yaz medyanı güçlü ya YILLIK yeşillenme kanıtı (bahar
    *    yeşermesi — kuru step çayırı ve yaz sonu kuruyan çim buradan döner) */
-  if(ndvi>=DG_VAL_SPECTRAL.NDVI_GREEN_MIN||ndviYear>=DG_VAL_SPECTRAL.NDVI_MAX_GREEN)return"green";
+  if(ndvi>=T.ndviGreenMin||ndviYear>=T.ndviYearGreenMin)return"green";
   const ibi=dgValIbi(ndvi,mndwi,ndbi);
-  const dry=mndwi<DG_VAL_SPECTRAL.MNDWI_DRY_MAX;
+  const dry=mndwi<T.dryMax;
   if(dry&&ibi!==null){
-    /* 3) NDVI 0.20-0.35 karışım bandı: IBI pozitifse sert (ağaç gölgeli
-     *    asfalt IBI≈+0.05 kalır ama pozitiftir); IBI ≤ 0 ise belirsiz
-     *    (kuru çim olabilir — insan etiketine gider). */
-    if(ndvi>=DG_VAL_SPECTRAL.NDVI_HARD_MIN){
-      if(ibi>DG_VAL_SPECTRAL.IBI_HARD_MIN)return"hard";
-      return"ambiguous";
-    }
-    /* 4) NDVI < 0.20: parlak yüzeyler. Güçlü IBI + yıl boyu vejetasyonsuz
-     *    → asfalt/beton; mevsimsel yeşillenme varsa → toprak. */
-    if(ibi>DG_VAL_SPECTRAL.IBI_HARD_MIN){
-      if(ibi>DG_VAL_SPECTRAL.IBI_BARE_MAX&&ndviYear<DG_VAL_SPECTRAL.NDVI_YEAR_BARE_MIN)return"hard";
+    /* 3) Karışım bandı (NDVI ≥ sert eşiği): IBI pozitifse sert (ağaç
+     *    gölgeli asfalt IBI≈+0.05 kalır ama pozitiftir); IBI ≤ 0 ise
+     *    belirsiz (kuru çim olabilir — insan kararına gider). */
+    if(ndvi>=T.ndviHardMin&&ibi>T.ibiHardMin)return"hard";
+    /* 4) Düşük vejetasyon bandı (NDVI < çıplak eşiği — hassasiyet
+     *    kaydırıcısı bu bandı genişletir/daraltır): güçlü IBI + yıl boyu
+     *    vejetasyonsuz → asfalt/beton; değilse toprak/çamur. */
+    if(ndvi<T.ndviBareMax){
+      if(ibi>T.ibiStrongMin&&ndviYear<T.yearBareMin)return"hard";
       return"bare";
     }
-    /* IBI ≤ 0 + düşük NDVI → koyu toprak/çamur */
-    return"bare";
+    /* 5) Ara bant (bareMax ≤ NDVI, IBI ≤ hardMin) → belirsiz: sınıfa
+     *    zorlama yok, insan kararına gider. */
+    return"ambiguous";
   }
-  /* 5) Kalan her şey belirsiz — sınıfa zorlama yok. */
   return"ambiguous";
 }
 
@@ -402,6 +463,7 @@ function dgValSpectralPredict(m){
  * GÖZDEN GEÇİRME için işaretlenir (kırmızı kontur) — insan etiketi esastır. */
 function dgValAgreement(cells,spectralByCell,opts){
   const o=Object.assign({},DG_VAL_DEFAULTS,opts||{});
+  const sens=o.sens||null;
   const per={};
   for(const c of DG_VAL_CLASSES)per[c]={agree:0,disagree:0,ambiguous:0,nodata:0,edge:0,pct:null};
   let agree=0,candidate=0;
@@ -411,7 +473,7 @@ function dgValAgreement(cells,spectralByCell,opts){
     if(!per[cls])continue;
     if(Number(c.areaM2||0)<o.edgeAreaM2){per[cls].edge++;continue;}
     const sp=spectralByCell&&spectralByCell[c.row+":"+c.col];
-    const pred=sp?dgValSpectralPredict(sp):"nodata";
+    const pred=sp?dgValSpectralPredict(sp,sens):"nodata";
     if(pred==="nodata"){per[cls].nodata++;continue;}
     if(pred==="ambiguous"){per[cls].ambiguous++;continue;}
     candidate++;
@@ -503,6 +565,29 @@ function dgValCsv(campaign){
     rows.push([q(campaign.gate.state),q(campaign.gate.label)]);
     for(const r of (campaign.gate.reasons||[]))rows.push(["REASON",q(r)]);
   }
+  const corr=campaign.corrections||{};
+  const corrKeys=Object.keys(corr);
+  if(corrKeys.length){
+    rows.push([]);
+    rows.push(["# HÜCRE KARARLARI (uyuşmazlık kuyruğu — insan kararı, denetim izli)"]);
+    rows.push(["ROW","COL","FROM_CLASS","TO_CLASS","STATUS","ADJUDICATED_AT"]);
+    for(const k of corrKeys){
+      const rc=corr[k]||{};
+      const parts=String(k).split(":");
+      const same=!rc.to||rc.to===rc.from;
+      rows.push([parts[0]||"",parts[1]||"",q(rc.from||""),q(rc.to||""),q(same?"confirmed":"corrected"),q(rc.ts||"")]);
+    }
+    if(campaign.correctedAreas){
+      rows.push([]);
+      rows.push(["# DOĞRULANMIŞ ALANLAR (ha) — karar verilen hücreler işlendi, kalanlar raster değerinde"]);
+      rows.push(["CLASS","RASTER_HA","ADJUDICATED_HA","DELTA_HA"]);
+      for(const c of DG_VAL_CLASSES){
+        const rh=(campaign.rasterAreas&&campaign.rasterAreas[c])||0;
+        const ah=campaign.correctedAreas[c]||0;
+        rows.push([q(c),(rh/10000).toFixed(4),(ah/10000).toFixed(4),((ah-rh)/10000).toFixed(4)]);
+      }
+    }
+  }
   return"\uFEFF"+rows.map(r=>r.join(",")).join("\n")+"\n";
 }
 
@@ -563,7 +648,74 @@ async function dgValDeleteCampaign(id){
   });
 }
 
-/* ---------- DIŞ SÖZLEŞME (ui/lc-workbench.js buradan kullanır) ---------- */
+/* ---------- HÜCRE KARARI (adjudication) — DOĞRULANMIŞ ALAN KATMANI ----------
+ * Uyuşmazlık kuyruğunda İNSAN, hücre hücre karar verir: raster sınıfı mı
+ * doğru, görüntüde görünen sınıf mı? Kararlar campaign.corrections'ta
+ * {from,to,ts} olarak birikir. Bu fonksiyon raster grup alanlarını
+ * DEĞİŞTİRMEZ (saf): karar verilen hücrelerin kesişim alanı eski sınıftan
+ * düşülüp yeni sınıfa eklenir → "doğrulanmış alan" kısmi bir düzeltmedir
+ * ve ancak karar verilen hücreleri kapsar (kalanlar raster değerinde kalır;
+ * karne bunu dürüstçe beyan eder). Olofsson'un "harita + saha düzeltmesi"
+ * ayrılığı: HAM raster kanıtı korunur, düzeltilmiş katman ayrıca raporlanır. */
+function dgValApplyCorrections(groupAreas,cells,corrections){
+  const out={};
+  for(const k of Object.keys(groupAreas||{}))out[k]=Number(groupAreas[k])||0;
+  const lookup={};
+  for(const c of (cells||[]))lookup[c.row+":"+c.col]=c;
+  let nCorrected=0,nConfirmed=0,nOrphan=0,movedAreaM2=0;
+  for(const key of Object.keys(corrections||{})){
+    const rec=corrections[key];
+    const cell=lookup[key];
+    if(!cell||!rec||!rec.from){nOrphan++;continue;}
+    const a=Number(cell.areaM2)||0;
+    if(rec.to&&rec.to!==rec.from&&out[rec.from]!==undefined&&out[rec.to]!==undefined){
+      out[rec.from]=Math.max(0,out[rec.from]-a);
+      out[rec.to]=out[rec.to]+a;
+      movedAreaM2+=a;
+      nCorrected++;
+    }else{
+      nConfirmed++; /* "raster doğru" kararı — alan değişmez, hücre doğrulanmış sayılır */
+    }
+  }
+  return{correctedAreas:out,nCorrected,nConfirmed,nOrphan,movedAreaM2:+movedAreaM2.toFixed(3)};
+}
+
+/* Karar verilen + bekleyen uyuşmazlık hücrelerinin GeoJSON'ı (denetim izi:
+ * hangi hücre, hangi sınıftan hangi sınıfa, ne zaman, spektral kanıt neydi). */
+function dgValCorrectedGeoJson(cells,corrections,spectralCells){
+  const feats=[];
+  for(const c of (cells||[])){
+    const key=c.row+":"+c.col;
+    const rec=(corrections||{})[key];
+    const sp=(spectralCells||{})[key];
+    if(!rec&&!sp)continue;
+    const pred=sp?dgValSpectralPredict(sp):null;
+    const flagged=pred&&pred!==c.classKey&&pred!=="ambiguous"&&pred!=="nodata"&&Number(c.areaM2||0)>=DG_VAL_DEFAULTS.edgeAreaM2;
+    if(!rec&&!flagged)continue;
+    const status=rec?(rec.to&&rec.to!==rec.from?"corrected":"confirmed"):"pending";
+    const ring=c.quadWgs&&c.quadWgs.length===4?[...c.quadWgs,c.quadWgs[0]]:[[c.center.lon,c.center.lat]];
+    feats.push({
+      type:"Feature",
+      properties:{
+        row:c.row,column:c.col,
+        original_class:c.classKey,
+        adjudicated_class:rec&&rec.to&&rec.to!==rec.from?rec.to:null,
+        status,
+        spectral_predict:pred||"",
+        area_m2:+Number(c.areaM2||0).toFixed(3),
+        ndvi:sp&&sp.ndvi!==undefined?sp.ndvi:null,
+        mndwi:sp&&sp.mndwi!==undefined?sp.mndwi:null,
+        mndwi_year_max:sp&&(sp.mndwiMaxYear!==undefined?sp.mndwiMaxYear:sp.mndwiMax)||null,
+        ndvi_season_max:sp&&(sp.ndviMaxYear!==undefined?sp.ndviMaxYear:sp.ndviMax)||null,
+        adjudicated_at:rec?rec.ts||"":null
+      },
+      geometry:{type:"Polygon",coordinates:[ring]}
+    });
+  }
+  return{type:"FeatureCollection",name:"dendrogeo_adjudicated_cells",features:feats};
+}
+
+/* ---------- DIŞ SÖZLEŞME (ui/lc-sens.js buradan kullanır) ---------- */
 window.DG_LC_VALIDATE={
   version:DG_VAL_VERSION,
   classes:DG_VAL_CLASSES,
@@ -573,12 +725,15 @@ window.DG_LC_VALIDATE={
   gate:DG_VAL_GATE,
   rng:dgValRng,
   ibi:dgValIbi,
+  thresholds:dgValThr,
   stratifiedSample:dgValStratifiedSample,
   confusion:dgValConfusion,
   weights:dgValWeights,
   metrics:dgValMetrics,
   spectralPredict:dgValSpectralPredict,
   agreement:dgValAgreement,
+  applyCorrections:dgValApplyCorrections,
+  correctedGeoJson:dgValCorrectedGeoJson,
   gateOf:dgValGate,
   csv:dgValCsv,
   json:dgValCampaignJson,

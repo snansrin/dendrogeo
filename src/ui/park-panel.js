@@ -388,38 +388,10 @@ async function drawPark(park){
         `</div>`+
       `</div>`+
 
-      /* ═══ 3 · DOĞRULAMA ÇALIŞMA SAHASI (v5 · 2026-10-03) ═══
-       * LULC sonucunu uydu görüntüsüyle doğrulama katmanı: Sentinel-2
-       * spektral tarama (otomatik) + Esri World Imagery üzerinde Olofsson
-       * tabakalı örnek nokta etiketleme (insan, altın standart) + doğruluk
-       * karnesi (OA±CI, kappa, UA/PA, alan düzeltmeli ha ± CI).
-       * Köprü park-export.js'te (dgValOpen — eager), beyin lazy zincirde
-       * (ui/lc-workbench.js); runLandCoverAnalysis ile AYNI desendir. */
       `<div class="dg-png-card">`+
         `<div class="dg-png-head">`+
           `<div>`+
-            `<div class="dg-png-kicker">3 · ÇALIŞMA SAHASI</div>`+
-            `<div class="dg-png-title">🛰 Uydu doğrulama</div>`+
-            `<div class="dg-png-sub">Spektral tarama · örnek noktalar · doğruluk karnesi</div>`+
-          `</div>`+
-          `<span class="dg-png-badge blue">Olofsson 2014 · Sentinel-2</span>`+
-        `</div>`+
-
-        `<button id="valOpenBtn" class="dg-png-btn primary" onclick="dgValOpen()">`+
-          `🛰 Doğrulama Çalışma Sahası`+
-        `</button>`+
-
-        `<div class="dg-png-sub" style="font-size:.68rem">`+
-          `Su · yeşil · sert zemin sınıflandırmasını ~0.5 m uydu görüntüsü ve bağımsız Sentinel-2 spektral indekleriyle doğrular; hata matrisi ve güven aralıklı karne üretir. Sayısal alan sonuçlarını DEĞİŞTİRMEZ — ölçer ve beyan eder.`+
-        `</div>`+
-
-        `<div id="valWorkbench" class="dg-png-result" style="display:none"></div>`+
-      `</div>`+
-
-      `<div class="dg-png-card">`+
-        `<div class="dg-png-head">`+
-          `<div>`+
-            `<div class="dg-png-kicker">4 · RAPOR PNG</div>`+
+            `<div class="dg-png-kicker">3 · RAPOR PNG</div>`+
             `<div class="dg-png-title">🖼️ Harita çıktısı</div>`+
             `<div class="dg-png-sub">Park şeklinde yüksek çözünürlük</div>`+
           `</div>`+
@@ -480,7 +452,7 @@ async function drawPark(park){
       `<div class="dg-png-card">`+
         `<div class="dg-png-head">`+
           `<div>`+
-            `<div class="dg-png-kicker">5 · KATMANLAR</div>`+
+            `<div class="dg-png-kicker">4 · KATMANLAR</div>`+
             `<div class="dg-png-title">🗺️ Görünürlük</div>`+
             `<div class="dg-png-sub">Harita üzerindeki katmanlar</div>`+
           `</div>`+
@@ -518,6 +490,11 @@ async function drawPark(park){
     `</div>`+
 
     `<div id="landCoverReport" class="dg-png-result" style="display:none"></div>`+
+    /* 0054 · 🛰 UYDU HASSASİYET PANELİ: yüzey analizi bitince köprü
+     * (park-export.js) buraya lc-sens'i monte eder — rapor barlarının
+     * hemen altında sınıf başına hassasiyet kaydırıcıları + uydu görüntüsü
+     * üzerinde aday işaretleme + tek dokunuşla kalıcı onay. */
+    `<div id="lcSens" class="dg-png-result" style="display:none"></div>`+
     `<div id="gridSummary" class="dg-png-result" style="display:none"></div>`;
 
   renderRefBadge();
@@ -578,11 +555,11 @@ PARK_POLY=null;
    * kapısı PROJ_LIST üzerinden okur). */
   if(typeof dgResetParkIdentity==="function")dgResetParkIdentity();
 
-  /* DOĞRULAMA ÇALIŞMA SAHASI (v5): park değişince tur/işaretleyici/kampanya
-   * belleği temizlenir. Lazy zincir hiç yüklenmediyse sessiz no-op —
-   * typeof koruması 0037 deseni. Kayıtlı kampanyalar IndexedDB'de kalır. */
-  if(window.DG_LC_WORKBENCH&&typeof window.DG_LC_WORKBENCH.cleanup==="function"){
-    try{window.DG_LC_WORKBENCH.cleanup();}catch(e){}
+  /* UYDU HASSASİYET PANELİ (0054): park değişince katman/kayıt belleği
+   * temizlenir. Lazy zincir hiç yüklenmediyse sessiz no-op — typeof
+   * koruması 0037 deseni. Kararlar IndexedDB'de park başına kalıcıdır. */
+  if(window.DG_LC_SENS&&typeof window.DG_LC_SENS.cleanup==="function"){
+    try{window.DG_LC_SENS.cleanup();}catch(e){}
   }
 
   WATER_RINGS=[];

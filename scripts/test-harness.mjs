@@ -79,11 +79,11 @@ export function loadApp({ sadece } = {}) {
     'src/services/lc-engine.js',
     'src/services/lc-osm.js',
     'src/services/lc-patches.js',
-    /* DOĞRULAMA ÇALIŞMA SAHASI (v5 · 2026-10-03): validate çekirdeği saf
-     * matematiktir (Olofsson metrikleri, örnekleme, spektral kurallar) —
-     * birim testleri buradan yüklenir. lc-s2 ağ/GeoTIFF katmanıdır; sabitleri
-     * ve saf yardımcıları (dgS2Median, dgS2SeasonRange) test edilir.
-     * ui/lc-workbench BİLEREK yok (DOM'a yapışır; park-panel gibi statik
+    /* UYDU HASSASİYET (0054): validate çekirdeği saf matematiktir (eşikler,
+     * hassasiyet, Olofsson metrikleri, düzeltme katmanı) — birim testleri
+     * buradan yüklenir. lc-s2 ağ/GeoTIFF katmanıdır; sabitleri ve saf
+     * yardımcıları (dgS2Median, dgS2SeasonRange) test edilir.
+     * ui/lc-sens BİLEREK yok (DOM'a yapışır; park-panel gibi statik
      * denetimden geçer). */
     'src/services/lc-validate.js',
     'src/services/lc-s2.js',

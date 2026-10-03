@@ -87,8 +87,11 @@ async function dgS2FindScenes(bbox,year,mode){
  * dersi 2026-10-03: su hücrelerinde p25 MNDWI = 0.006, ✗612). Bu yüzden su
  * kanıtı için yüksek su dönemi (ilkbahar) + sonbahar pencereleri ayrıca
  * taranır; MAX MNDWI "referans yılında açık su görüldü mü" sorusuna döner. */
-function dgS2WaterWindows(year){
-  const y=Number(year)||2021;
+function dgS2WaterWindows(year,mode){
+  /* 'latest' modda kalıcılık pencereleri de GÜNCEL yılı kullanır (0054):
+   * hassasiyet paneli "en yeni uydu verisi" ile çalışır — su/yeşil kanıtı
+   * 2021'de değil içinde bulunulan yılda aranır. */
+  const y=(mode==="latest")?new Date().getUTCFullYear():(Number(year)||2021);
   return[
     {start:y+"-02-01T00:00:00Z",end:y+"-05-31T23:59:59Z",max:3,label:y+" ilkbahar (yüksek su)"},
     {start:y+"-10-01T00:00:00Z",end:y+"-12-15T23:59:59Z",max:2,label:y+" sonbahar"}
@@ -278,7 +281,7 @@ async function dgS2Profile(cells,outer,opts){
   const vegMax={};
   const waterScenes=[];
   if(o.waterYear!==false){
-    for(const w of dgS2WaterWindows(o.year||2021)){
+    for(const w of dgS2WaterWindows(o.year||2021,o.mode)){
       let wScenes=[];
       try{wScenes=await dgS2FindScenesRange(bbox,w.start,w.end,w.max);}catch(err){wScenes=[];}
       for(const sc of wScenes){
