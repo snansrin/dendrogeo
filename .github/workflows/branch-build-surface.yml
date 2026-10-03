@@ -1,4 +1,4 @@
-name: Surface field branch build
+name: Surface branch artifact finalize
 
 on:
   push:
@@ -8,11 +8,11 @@ permissions:
   contents: write
 
 concurrency:
-  group: surface-field-branch-build
+  group: surface-field-artifact-finalize
   cancel-in-progress: true
 
 jobs:
-  build:
+  finalize:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
@@ -24,11 +24,10 @@ jobs:
         with:
           node-version: 20
       - run: npm ci
-      - name: Tarihsel QA migration kilitlerini dönem kesimine bağla
+      - name: Scope historical migration guards to their release cutoff
         run: |
           python - <<'PY'
           from pathlib import Path
-
           cutoff = '20261003165331_surface_reviews.sql'
           for name in ['test/dbh-qa.test.mjs', 'test/form-qa.test.mjs']:
             p = Path(name)
@@ -46,41 +45,29 @@ jobs:
                 p.write_text('\n'.join(lines) + '\n', encoding='utf-8')
                 break
             else:
-              raise SystemExit(f'Beklenen tarihsel migration kilidi bulunamadı: {name}')
+              raise SystemExit(f'historical migration guard not found: {name}')
           PY
-      - name: Varlık hashlerini içerikle eşitle
-        run: node scripts/version-sync.mjs --write
-      - name: Üretilen index/hash dosyasını güncelle
-        run: npm run build
-      - name: Sözdizimi denetimi
-        run: npm run check:syntax
-      - name: Sürüm denetimi
-        run: npm run check:versions
-      - name: Build tutarlılığı
-        run: npm run build:check
-      - name: CSP tutarlılığı
-        run: npm run check:csp
-      - name: Test grupları
+      - name: Refresh content hashes and generated index
         run: |
+          node scripts/version-sync.mjs --write
+          npm run build
+      - name: Validate generated artifacts and affected feature tests
+        run: |
+          npm run check:syntax
+          npm run check:versions
+          npm run build:check
+          npm run check:csp
           node --test test/surface-report-field-ux.test.mjs test/surface-review.test.mjs
-          node --test test/landcover.test.mjs test/landcover-v4.test.mjs test/lc-validate.test.mjs test/geometry.test.mjs test/map-refresh.test.mjs test/geofence.test.mjs
-          node --test test/allometry.test.mjs test/dbh-qa.test.mjs test/form-qa.test.mjs test/inventory-qa.test.mjs test/photo-qa.test.mjs test/truncation.test.mjs
-          node --test test/measure-field.test.mjs test/waypoint-field.test.mjs test/park-flow.test.mjs test/park-identity.test.mjs test/park-invites.test.mjs test/heartbeat.test.mjs
-          node --test test/google-auth.test.mjs test/landing-claims.test.mjs test/ui-audit.test.mjs test/ui-standard.test.mjs test/vendor-globals.test.mjs test/compliance.test.mjs test/critical-fixes.test.mjs
-          node --test test/publish-request-fix.test.mjs test/rapor.test.mjs test/report-author-qr.test.mjs test/report-publish.test.mjs test/report-v2.test.mjs test/user-publish.test.mjs test/retraction.test.mjs test/release.test.mjs test/restore-ci.test.mjs
-          node --test test/admin-tree.test.mjs test/build-consistency.test.mjs test/fix-0043.test.mjs test/fix-0045.test.mjs test/lazylibs.test.mjs test/load-order.test.mjs test/module-registry.test.mjs test/sw-cache.test.mjs test/workflow-yaml.test.mjs
-      - name: Seri tam birim testleri
-        run: node --test --test-concurrency=1 test/*.test.mjs
-      - name: Mevcut paralel test komutu
-        run: npm test
-      - name: Doğrulanmış değişiklikleri branch'e yaz
+          node --test test/lazylibs.test.mjs test/load-order.test.mjs test/module-registry.test.mjs test/sw-cache.test.mjs
+          node --test test/publish-request-fix.test.mjs test/rapor.test.mjs test/report-publish.test.mjs test/report-v2.test.mjs test/user-publish.test.mjs
+      - name: Commit generated artifacts
         run: |
           git config user.name "DendroGeo Branch Build"
           git config user.email "bot@dendrogeo.local"
           git add index.html src/utils/lazylibs.js src/ui/toast.js test/dbh-qa.test.mjs test/form-qa.test.mjs
           if git diff --cached --quiet; then
-            echo "✅ kaynaklar ve index zaten güncel"
+            echo "Artifacts already current"
             exit 0
           fi
-          git commit -m "test: allow later migrations and refresh asset hashes"
+          git commit -m "build: finalize surface field artifacts"
           git push origin HEAD:fix/surface-report-field-ux
