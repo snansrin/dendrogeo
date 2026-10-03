@@ -24,6 +24,8 @@ jobs:
         with:
           node-version: 20
       - run: npm ci
+      - name: Varlık hashlerini içerikle eşitle
+        run: node scripts/version-sync.mjs --write
       - name: Üretilen index/hash dosyasını güncelle
         run: npm run build
       - name: Tam denetim
