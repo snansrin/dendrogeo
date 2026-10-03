@@ -220,7 +220,7 @@ describe('0025 · kablolama (index.html + shell + partials)', () => {
     /* 0027: waypoint tablosu — kullanıcı bildirimi "içeride sağa-sola kayıyor" */
     const iwp = sh.indexOf('id="wpListTable"');
     const wcap = sh.lastIndexOf('tblwrap dg-cards', iwp);
-    assert.ok(iwp > 0 && wcap > 0 && iwp - wcap < 300, 'waypoint tablosu dg-cards kabında');
+    assert.ok(iwp > 0 && wcap > 0 && iwp - wcap < 600, 'waypoint tablosu dg-cards kabında');
     const mp = read('src/services/map.js');
     assert.match(mp, /data-label="Enlem"/, 'waypoint satırları etiketli');
     assert.match(mp, /data-label="İşlem"/);

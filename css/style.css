@@ -466,3 +466,13 @@ label.lbl{display:block}
  #v-measure #saveBtn{width:100%;min-width:0}
 }
 @media(prefers-reduced-motion:reduce){#v-measure *{scroll-behavior:auto;transition:none}}
+
+/* Waypoint field layout; shared button and color rules are retained. */
+.waypoint-filters{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px}
+.waypoint-files{margin-top:18px;border-top:1px solid var(--line);padding-top:12px}
+.waypoint-files summary{cursor:pointer;padding:10px 0;font-weight:600}
+#v-nav .tblwrap{max-height:380px!important}
+#v-nav tr[aria-current="true"]{outline:2px solid var(--line);outline-offset:-2px}
+@media(max-width:640px){#v-nav #navMap{height:360px}.waypoint-filters{grid-template-columns:1fr 1fr}#v-nav .arrow{flex-shrink:0}}
+
+#v-nav .waypoint-list{grid-column:1 / -1}

@@ -239,7 +239,7 @@
 <!-- DİL KATMANI (0035): TR markup varsayılan; EN sözlüğü çalışma zamanında
      uygulanır (dgToggleLang). defer sırası önemli değil — DOMContentLoaded'da
      ya da hemen (hazırsa) çalışır. module-registry + CORE_ASSETS kaydı şart. -->
-<script src="src/config/i18n.js?v=3c77bc5b" defer></script>
+<script src="src/config/i18n.js?v=d6de63b6" defer></script>
 <script src="src/utils/geo.js?v=3e796768" defer></script>
 <script src="src/utils/truncation.js?v=f43c76b3" defer></script>
 <!-- Faz 7: geotiff (317 KB) ve chart.js (208 KB) artık SENKRON yüklenmiyor;
@@ -266,7 +266,7 @@
 <script src="src/services/park-invites.js?v=1023c17d" defer></script>
 <script src="src/services/world.js?v=c72d9019" defer></script>
 <script src="src/services/measure.js?v=452c298c" defer></script>
-<script src="src/services/map.js?v=3be191fd" defer></script>
+<script src="src/services/map.js?v=3d3b9b47" defer></script>
 <!-- LULC ZİNCİRİ ARTIK TEMBEL (2026-09-25 · Faz 8): 8 dosya ilk yüklemede
      indirilmiyor. Yalnız "🌿 Yüzey Örtüsü Analizi"ne basan kullanıcı için
      src/utils/lazylibs.js → dgEnsureLulc() sırayla enjekte eder
@@ -289,7 +289,7 @@
 <script src="src/ui/park-panel.js?v=d519efc8" defer></script>
 <script src="src/ui/park-export.js?v=3e078dc3" defer></script>
 <script src="src/services/dash.js?v=4556cd69" defer></script>
-<link rel="stylesheet" href="css/style.css?v=e2df7aaf">
+<link rel="stylesheet" href="css/style.css?v=cc9a06c7">
 <link rel="stylesheet" href="css/landing.css?v=85504b78">
 <link rel="stylesheet" href="css/park-panel.css?v=10b49293">
 <!-- TASARIM SİSTEMİ (2026-09-27, 2. deneme): ui-standard.css geri BAĞLANDI
@@ -782,26 +782,32 @@
    <div class="grid g2">
     <div class="card">
      <label class="lbl" for="nProject">Proje</label><select id="nProject" onchange="loadWaypoints()"></select>
-     <div class="lbl" style="margin:12px 0 6px">Waypoints.csv Yükle (X,Y,id)</div>
-     <span class="dg-file btn sm ghost">📂 <span>Dosya seç</span><input type="file" id="nCsv" aria-label="Waypoints.csv dosyası seç (X,Y,id)" accept=".csv" onchange="dgFileName(event,'nCsvName')" style="position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:pointer"></span><span class="dg-file-name mono" id="nCsvName"></span>
-     <div style="display:flex;gap:8px;flex-wrap:wrap">
-      <button class="btn blue sm" style="margin-top:8px" onclick="uploadWpCsv()">⬆ Waypoint Yükle</button>
-      <button class="btn red sm" style="margin-top:8px" onclick="deleteAllWaypoints()">🗑 Listeyi Tamamen Sil</button>
-     </div>
      <div id="navInfo" class="alert info" style="margin-top:12px">Liste projeye kalıcı kaydedilir; tekrar yüklemeye gerek yok.</div>
      <div style="display:flex;gap:20px;align-items:center;margin-top:14px">
       <svg class="arrow" id="navArrow" viewBox="0 0 100 100"><path d="M50 5 L70 70 L50 55 L30 70 Z" fill="var(--green)"/></svg>
       <div><div class="val" id="navDist">—</div><div class="lbl">hedefe mesafe</div><div class="mono" id="navTarget" style="color:var(--amber-ink);margin-top:6px">—</div></div>
      </div>
      <button class="dg-png-btn primary" style="margin-top:14px" onclick="arriveWp()">🎯 Vardım → Ölçüme Geç</button>
-     <div style="margin-top:24px;border-top:1px solid var(--line);padding-top:16px">
-      <div class="lbl" style="margin-bottom:10px">📍 Waypoint Listesi <span style="text-transform:none;letter-spacing:0">(üstü çizili = yapıldı)</span></div>
-      <div class="tblwrap dg-cards" style="max-height:300px;overflow-y:auto;border:1px solid var(--line);border-radius:10px">
-       <table><thead><tr><th scope="col">ID</th><th scope="col">Enlem</th><th scope="col">Boylam</th><th scope="col">Durum</th><th scope="col">İşlem</th></tr></thead><tbody id="wpListTable"></tbody></table>
-      </div>
-     </div>
+     <p id="navGps" class="measure-help" role="status">GPS konumu bekleniyor.</p>
     </div>
     <div class="card"><div id="navMap" class="notranslate" translate="no"></div><div class="lbl" style="margin-top:8px">🔴 waypoint (numaralı, tıkla=hedef) · 🟢 yapıldı · 🔵 konumun</div></div>
+    <div class="card waypoint-list">
+     <div style="margin-top:24px;border-top:1px solid var(--line);padding-top:16px">
+      <div class="lbl" style="margin-bottom:10px">📍 Waypoint Listesi <span style="text-transform:none;letter-spacing:0">(üstü çizili = yapıldı)</span></div>
+      <div class="waypoint-filters"><div><label class="lbl" for="wpSearch">Nokta ara</label><input id="wpSearch" type="search" placeholder="P12 veya 12" oninput="renderWaypointList()"></div><div><label class="lbl" for="wpFilter">Durum</label><select id="wpFilter" onchange="renderWaypointList()"><option value="all">Tümü</option><option value="pending">Bekleyen</option><option value="done">Tamamlanan</option></select></div></div>
+      <div class="tblwrap dg-cards" style="max-height:300px;overflow-y:auto;border:1px solid var(--line);border-radius:10px">
+       <table><thead><tr><th scope="col">ID</th><th scope="col">Enlem</th><th scope="col">Boylam</th><th scope="col">Mesafe</th><th scope="col">Durum</th><th scope="col">İşlem</th></tr></thead><tbody id="wpListTable"></tbody></table>
+      </div>
+     </div>
+     <details class="waypoint-files"><summary>📂 CSV ve liste yönetimi</summary>
+     <div class="lbl" style="margin:12px 0 6px">Waypoints.csv Yükle (X,Y,id)</div>
+     <span class="dg-file btn sm ghost">📂 <span>Dosya seç</span><input type="file" id="nCsv" aria-label="Waypoints.csv dosyası seç (X,Y,id)" accept=".csv" onchange="dgFileName(event,'nCsvName')" style="position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:pointer"></span><span class="dg-file-name mono" id="nCsvName"></span>
+     <div style="display:flex;gap:8px;flex-wrap:wrap">
+      <button class="btn blue sm" style="margin-top:8px" onclick="uploadWpCsv()">⬆ Waypoint Yükle</button>
+      <button class="btn red sm" style="margin-top:8px" onclick="deleteAllWaypoints()">🗑 Listeyi Tamamen Sil</button>
+     </div>
+     </details>
+    </div>
    </div>
   </div>
 

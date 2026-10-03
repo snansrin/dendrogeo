@@ -24,6 +24,18 @@
 
 /* ---- EN sözlüğü: anahtar = TR dizenin trim'lenmiş hâli ---- */
 const DG_I18N_EN={
+"Waypoint yükleme hatası:":"Waypoint upload failed:",
+"Waypoint listesi alınamadı:":"Could not load waypoints:",
+"Nokta ara":"Find a point",
+"Durum":"Status",
+"Tümü":"All",
+"Bekleyen":"Pending points",
+"Tamamlanan":"Completed points",
+"Mesafe":"Distance",
+"📂 CSV ve liste yönetimi":"📂 CSV and list management",
+"GPS konumu bekleniyor; hedef seçebilirsiniz.":"Waiting for GPS; you can select a target.",
+"Listeden veya haritadan hedef seçin.":"Select a target from the list or map.",
+"Aramaya uygun nokta yok.":"No matching points.",
 /* Field measurement */
 "SAHA KAYDI":"FIELD RECORD",
 "Konumu aç, ağacı ölç, kaydet.":"Enable location, measure the tree, save.",

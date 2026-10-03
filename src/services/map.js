@@ -201,28 +201,48 @@ function initMaps(){
 async function uploadWpCsv(){
  const pid=+$("nProject").value;if(!pid)return toast("Proje seç");
  const f=$("nCsv").files[0];if(!f)return toast("CSV seç");
- const lines=(await f.text()).split(/\r?\n/);let n=0;
- for(let i=1;i<lines.length;i++){const c=lines[i].split(",");if(c.length<3)continue;const id=parseInt((c[2]||"").replace(/"/g,""));const lon=+c[0],lat=+c[1];if(!id||!lat||!lon)continue;await sb.from("waypoints").upsert({owner:USER.id,project_id:pid,wp_id:id,lat,lon},{onConflict:"project_id,wp_id"});n++;}
- toast(_tmff("✓ {n} waypoint yüklendi ve projeye kalıcı kaydedildi.",{n:n}));
- loadWaypoints();
+ let n=0,invalid=0;
+ try{
+  const lines=(await f.text()).replace(/^\uFEFF/,"").split(/\r?\n/);
+  for(let i=1;i<lines.length;i++){
+   if(!lines[i].trim())continue;
+   const c=lines[i].split(",").map(v=>v.trim().replace(/^"|"$/g,""));
+   const lon=Number(c[0]),lat=Number(c[1]),id=Number(c[2]);
+   if(c.length<3||!c[0]||!c[1]||!Number.isInteger(id)||id<=0||!Number.isFinite(lat)||!Number.isFinite(lon)||Math.abs(lat)>90||Math.abs(lon)>180){invalid++;continue;}
+   const{error}=await sb.from("waypoints").upsert({owner:USER.id,project_id:pid,wp_id:id,lat,lon},{onConflict:"project_id,wp_id"});
+   if(error)throw error;
+   n++;
+  }
+  toast("✓ "+n+" waypoint kaydedildi."+(invalid?" "+invalid+" geçersiz satır atlandı.":""),invalid?"warn":"ok");
+ }catch(e){toast(dgCf("Waypoint yükleme hatası:")+" "+e.message+" · "+n+" satır kaydedildi.","err");}
+ await loadWaypoints();
 }
 /* 0040: kaydırma koruma sarmalı — yeniden çizimde #main scrollTop korunur. */
 async function loadWaypoints(){const _y=(typeof dgScrollKeep==="function"?dgScrollKeep():null);try{return await loadWaypoints__scroll.apply(this,arguments);}finally{if(typeof dgScrollRestore==="function")dgScrollRestore(_y);}}
 async function loadWaypoints__scroll(){
  const pid=+$("nProject").value;
- if(!pid){$("wpListTable").innerHTML="<tr><td colspan=5 style='text-align:center;color:var(--mut)'>Önce proje seçin.</td></tr>";return;}
- const{data}=await sb.from("waypoints").select("*").eq("project_id",pid).order("wp_id",{ascending:true});
- WP=data||[];
- if(navTarget&&navTarget.project_id!==pid)navTarget=null;
- drawNav();
- $("dWp").textContent=WP.length;$("dVisit").textContent=WP.filter(w=>w.visited).length;
- const done=WP.filter(w=>w.visited).length;
- $("navInfo").innerHTML=(typeof dgTf==="function"?dgTf:(_t,v)=>_t.replace(/\{(\w+)\}/g,(m,k)=>v[k]))("📌 <b>{a}</b> waypoint kayıtlı · <b>{b}</b> yapıldı · <b>{c}</b> bekliyor. Liste kalıcıdır.",{a:WP.length,b:done,c:WP.length-done});
- /* 0027 · data-label: ≤640px'te dg-cards kart düzeni "ETİKET: değer" basar
-   (waypoint tablosu eskiden sınıfsızdı → mobilde kapsayıcı içinde sağa-sola
-   kayıyordu; kullanıcı bildirimi). */
-$("wpListTable").innerHTML=WP.length?WP.map(w=>`<tr class="${w.visited?'done':''}"><td data-label="ID"><b>P${w.wp_id}</b></td><td data-label="Enlem">${w.lat.toFixed(6)}</td><td data-label="Boylam">${w.lon.toFixed(6)}</td><td data-label="Durum">${w.visited?'<span class="badge on">✓ Yapıldı</span>':'<span class="badge admin">Bekliyor</span>'}</td><td data-label="İşlem">${w.visited?'':`<button class="btn sm blue" onclick="selectWaypoint(${w.id})">🎯 Hedef</button>`}</td></tr>`).join(""):"<tr><td colspan=5 style='text-align:center;color:var(--mut)'>Bu projede waypoint yok. CSV yükleyin.</td></tr>";
+ const previousTarget=navTarget;
+ WP=[];navTarget=null;drawNav();
+ if(!pid){renderWaypointList();return;}
+ try{
+  const{data,error}=await sb.from("waypoints").select("*").eq("project_id",pid).order("wp_id",{ascending:true});
+  if(+$("nProject").value!==pid)return;
+  if(error)throw error;
+  WP=data||[];
+  navTarget=WP.find(w=>w.id===previousTarget?.id&&!w.visited)||null;
+  drawNav();
+ }catch(e){toast(dgCf("Waypoint listesi alınamadı:")+" "+e.message,"err");}
 }
+function renderWaypointList(){
+ const done=WP.filter(w=>w.visited).length;
+ $("dWp").textContent=WP.length;$("dVisit").textContent=done;
+ $("navInfo").textContent=WP.length+" nokta · "+(WP.length-done)+" bekleyen · "+done+" tamamlanan. Liste projeye kalıcı kaydedilir.";
+ const query=($("wpSearch")?.value||"").trim().toLowerCase().replace(/^p/,"");
+ const filter=$("wpFilter")?.value||"all";
+ const rows=WP.filter(w=>String(w.wp_id).includes(query)&&(filter==="all"||(filter==="done"?w.visited:!w.visited)));
+ $("wpListTable").innerHTML=rows.length?rows.map(w=>`<tr class="${w.visited?'done':''}"${navTarget?.id===w.id?' aria-current="true"':''}><td data-label="ID"><b>P${Number(w.wp_id)}</b></td><td data-label="Enlem">${Number(w.lat).toFixed(6)}</td><td data-label="Boylam">${Number(w.lon).toFixed(6)}</td><td data-label="Mesafe">${GPS?Math.round(hav(GPS.latitude,GPS.longitude,w.lat,w.lon))+" m":"—"}</td><td data-label="Durum">${w.visited?'<span class="badge on">✓ Yapıldı</span>':'<span class="badge admin">Bekliyor</span>'}</td><td data-label="İşlem">${w.visited?'':`<button class="btn sm blue" onclick="selectWaypoint(${Number(w.id)})">🎯 Hedef</button>`}</td></tr>`).join(""):"<tr><td colspan=6>"+(WP.length?"Aramaya uygun nokta yok.":(+$("nProject").value?"Bu projede waypoint yok. CSV yükleyin.":"Önce proje seçin."))+"</td></tr>";
+}
+
 async function deleteAllWaypoints(){
  const pid=+$("nProject").value;
  if(!pid)return toast("Proje seç");
@@ -277,6 +297,13 @@ async function arriveWp(){
 window.arriveWp=arriveWp;
 
 function drawNav(){
+ if(!GPS){
+  $("navDist").textContent="—";
+  $("navTarget").textContent=navTarget?"Hedef: P"+navTarget.wp_id:"Listeden veya haritadan hedef seçin.";
+  $("navArrow").style.transform="rotate(0)";
+ }
+ if($("navGps"))$("navGps").textContent=GPS?"GPS doğruluğu: "+(Number.isFinite(GPS.accuracy)?"±"+Math.round(GPS.accuracy)+" m":"bilinmiyor"):"GPS konumu bekleniyor; hedef seçebilirsiniz.";
+ renderWaypointList();
  if(!navMap)return;
  navMap.eachLayer(l=>{if(l._wp)navMap.removeLayer(l);});
  WP.forEach(w=>{
@@ -307,6 +334,7 @@ function drawNav(){
    const ln=L.polyline([[GPS.latitude,GPS.longitude],[navTarget.lat,navTarget.lon]],{color:"#c2452d",dashArray:"5,8",weight:2}).addTo(navMap);ln._wp=1;
   }else{$("navDist").textContent="—";$("navTarget").textContent=(typeof dgCf==="function"?dgCf("Hedef seç / tamamlandı"):"Hedef seç / tamamlandı");$("navArrow").style.transform="rotate(0)";}
  }
+ renderWaypointList();
 }
 /* =========================================================
  * MODÜL 2: HARİTA KATMANI SEÇİMİ
