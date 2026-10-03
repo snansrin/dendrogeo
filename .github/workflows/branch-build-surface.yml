@@ -28,8 +28,16 @@ jobs:
         run: node scripts/version-sync.mjs --write
       - name: Üretilen index/hash dosyasını güncelle
         run: npm run build
-      - name: Tam denetim
-        run: npm run check
+      - name: Sözdizimi denetimi
+        run: npm run check:syntax
+      - name: Sürüm denetimi
+        run: npm run check:versions
+      - name: Build tutarlılığı
+        run: npm run build:check
+      - name: CSP tutarlılığı
+        run: npm run check:csp
+      - name: Birim testler
+        run: npm test
       - name: Build artifactını branch'e yaz
         run: |
           git config user.name "DendroGeo Branch Build"
