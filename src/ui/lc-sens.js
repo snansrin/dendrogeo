@@ -344,7 +344,19 @@ function dgSensRefreshLayer(){
     style.interactive=true;
     style.renderer=renderer||undefined;
     const poly=L.polygon(latlngs,style);
-    poly.on("click",()=>dgSensPopup(key));
+    /* 0055 REGRESYON (kullanıcı bildirimi: "yeşil gridleri seçerken sistem
+     * tekrardan park algılama moduna geçiyor"): Leaflet'te interaktif
+     * katmana tıklama DOM'da haritaya KABARIR → PARK_MODE açıksa
+     * bindParkClick aynı tıklamayla yeniden park algılar, drawPark
+     * paneli sökerdi. Katman olayındaki özgün DOM olayının kabarması
+     * burada durdurulur — popup açılır, harita tıklaması YANMAZ. */
+    poly.on("click",ev=>{
+      try{
+        const oe=ev&&(ev.originalEvent||ev);
+        if(oe&&window.L&&L.DomEvent&&L.DomEvent.stopPropagation)L.DomEvent.stopPropagation(oe);
+      }catch(e){}
+      dgSensPopup(key);
+    });
     poly.addTo(DG_SENS.layer);
   }
 }

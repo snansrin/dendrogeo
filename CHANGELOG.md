@@ -9,6 +9,27 @@ Yeni sürüm yayımlama adımları: [`docs/surum-yayini.md`](docs/surum-yayini.m
 
 ## [Yayımlanmadı]
 
+### Düzeltildi — 0055: HÜCRE TIKLAMASI PARK ALGILAMAYI TETİKLİYORDU (olay kabarması)
+**Kullanıcı bildirimi (birebir):** "yeşil gridleri seçerken sistem tekrardan
+park algılama moduna geçiyor."
+
+**KÖK NEDEN:** Leaflet'te interaktif vektör katmanına tıklama, DOM'da harita
+kabına KABARIR (bubble). Park Analizi Modu açıksa (PARK_MODE — park
+seçildikten sonra bilerek açık kalır ki başka parka tıklanabilsin)
+bindParkClick aynı tıklamayı yakalayıp dgDetectAt → drawPark çalıştırıyordu:
+panel sökülüyor (clearPark → DG_LC_SENS.cleanup), Overpass sorgusu atılıyor,
+kullanıcının onay akışı yarıda kesiliyordu. 0053'teki workbench
+poligonlarında da latent olan bu sınıf, 0054'te hücreler tıklanabilir
+onay yüzeyine dönüşünce ortaya çıktı.
+
+**ÇÖZÜM:** lc-sens polygon click handler'ı, katman olayının taşıdığı özgün
+DOM olayında `L.DomEvent.stopPropagation` çağırır — popup açılır, harita
+tıklaması YANMAZ. Leaflet'in kanonik katman/harita olay ayrımı deseni.
+
+**Bekçi:** test/lc-validate.test.mjs — "0055 regresyon: hücre tıklaması
+haritaya KABARMAZ" (handler desenini statik kilitler). sw r64→r65
+(precache içeriği: lc-sens.js).
+
 ### Değiştirildi/Sadeleştirildi — 0054: 🛰 UYDU HASSASİYET PANELİ (workbench UI kaldırıldı · kaydırıcı + gözle onay + kalıcı kayıt)
 **Kullanıcı geri bildirimi (birebir):** "yaptıkların çok teferruatlı, benim
 istediğim daha basit: yüzey analizi butonuna basınca barlar çıkıyor ya —

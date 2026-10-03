@@ -622,6 +622,16 @@ describe('entegrasyon zinciri kilitleri (0054 · lc-sens)', () => {
     ]) assert.ok(i18n.includes(JSON.stringify(s) + ':'), 'eksik EN anahtarı: ' + s);
   });
 
+  test('⭐ 0055 regresyon: hücre tıklaması haritaya KABARMAZ (park algılama sızıntısı kapalı)', () => {
+    /* Kullanıcı bildirimi: "yeşil gridleri seçerken sistem tekrardan park
+     * algılama moduna geçiyor" — interaktif polygon tıklaması DOM'da map
+     * click'e kabarınca PARK_MODE açıkken dgDetectAt tetikleniyordu.
+     * Bekçi: click handler özgün DOM olayında stopPropagation çağırmalı. */
+    assert.match(sens, /poly\.on\("click",ev=>\{/);
+    assert.match(sens, /L\.DomEvent\.stopPropagation\(oe\)/);
+    assert.match(sens, /ev\.originalEvent\|\|ev/);
+  });
+
   test('kalıcılık sözleşmesi: park başına tek kayıt (id "sens-<parkId>") + profil önbelleği', () => {
     assert.match(sens, /id:"sens-"\+\(pk\.id\|\|"x"\)/);
     assert.match(sens, /dgSensSave\(\)/);
