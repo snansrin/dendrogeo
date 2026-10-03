@@ -1065,7 +1065,17 @@ const DG_I18N_EN={
 "Tüm kararlar silinsin mi? (Tarama profili kalır)":"Delete all decisions? (The scan profile is kept)",
 "Önce en az bir karar ver.":"Make at least one decision first.",
 "✓ Onaylı hücre GeoJSON'u indirildi (denetim izli).":"✓ Approved cell GeoJSON downloaded (audit-trailed).",
-"✓ Onay CSV'si indirildi.":"✓ Approvals CSV downloaded."
+"✓ Onay CSV'si indirildi.":"✓ Approvals CSV downloaded.",
+
+/* === 0056 · MOD AYRIMI (analiz ↔ park algılama) === */
+"🛰 Analiz modu: park algılama duraklatıldı — hücrelere güvenle dokunabilirsin.":"🛰 Analysis mode: park detection paused — tap cells safely.",
+"🌳 Park seçim modu: haritadan bir parka tıklayabilirsin. Analize dönmek için 🛰 düğmesine bas.":"🌳 Park selection mode: click a park on the map. Press 🛰 to return to analysis.",
+"Analiz modu · park algılama duraklatıldı":"Analysis mode · park detection paused",
+"Park seçim modu açık":"Park selection mode on",
+"Analiz moduna dön":"Return to analysis mode",
+"Park seçmek için algılamayı aç":"Enable detection to pick a park",
+"Analiz":"Analysis",
+"Park seç":"Pick park"
 };
 
 /* EN→TR ters haritası (TR'ye dönüşte kullanılır) */

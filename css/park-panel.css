@@ -395,3 +395,22 @@
   min-height:40px;
   font-size:.78rem;
 }
+/* 0056 · mod çipi: analiz modu (guard) / park seçim modu */
+.dg-sens-chip{
+  display:inline-flex;
+  align-items:center;
+  gap:4px;
+  border:1px solid var(--line);
+  border-radius:999px;
+  padding:3px 10px;
+  font-size:.66rem;
+  font-weight:700;
+  color:var(--mut);
+  background:var(--bg);
+  white-space:nowrap;
+}
+.dg-sens-chip.on{
+  border-color:var(--green);
+  color:var(--green);
+  background:rgba(20,83,45,.07);
+}

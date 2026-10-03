@@ -603,6 +603,7 @@ describe('entegrasyon zinciri kilitleri (0054 · lc-sens)', () => {
     assert.match(sens, /type="range"/);
     assert.ok(!/dg-sens[^{]*\{[^}]*animation/.test(css), 'sens CSS animasyon ekleyemez');
     assert.ok(!/\.dg-valw-[\w-]+\s*\{/.test(css), 'ölü .dg-valw-* kuralları css’te kalmamalı (0054)');
+    assert.match(css, /\.dg-sens-chip\{/, '0056 mod çipi stili tanımlı olmalı');
   });
 
   test('CSS ölü sınıf yok: lc-sens şablonlarındaki her dg-sens-* sınıfı css’te tanımlı', () => {
@@ -620,6 +621,24 @@ describe('entegrasyon zinciri kilitleri (0054 · lc-sens)', () => {
       'Güncel sezon (en yeni görüntü)',
       'Kararları sıfırla',
     ]) assert.ok(i18n.includes(JSON.stringify(s) + ':'), 'eksik EN anahtarı: ' + s);
+  });
+
+  test('⭐ 0056 MOD AYRIMI: panel etkinken park algılama tıklamaları guard ile kapalı', () => {
+    /* Kullanıcı kuralı: "park algılama ile analizi ayıramıyosun."
+     * (a) bindParkClick guard'a bakar (LULC poligonları interactive:false —
+     *     üstlerine tıklama doğrudan haritaya düşer; tek kesin çözüm guard),
+     * (b) lc-sens mount'ta guard'ı AÇAR, cleanup'ta KAPATIR,
+     * (c) 🌳 Park seç düğmesi guard'ı kullanıcı iradesiyle düşürür. */
+    assert.match(panel, /if\(window\._dgSensGuard\)return;/);
+    assert.match(sens, /dgSensGuard\(true\); \/\* 0056: analiz başladı/);
+    assert.match(sens, /dgSensGuard\(false\); \/\* 0056: park kapandı/);
+    assert.match(sens, /function dgSensModePark\(\)\{\s*dgSensGuard\(false\);/);
+    assert.match(sens, /window\._dgSensGuard=!!on;/);
+  });
+
+  test('⭐ 0056: tarama bitince altlık OTOMATİK uyduya geçer (gözle doğrulama)', () => {
+    assert.match(sens, /if\(DG_SENS\.base!=="sat"&&typeof switchBaseLayer==="function"\)\{/);
+    assert.match(sens, /switchBaseLayer\("sat"\);DG_SENS\.base="sat";/);
   });
 
   test('⭐ 0055 regresyon: hücre tıklaması haritaya KABARMAZ (park algılama sızıntısı kapalı)', () => {

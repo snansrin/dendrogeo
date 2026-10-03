@@ -48,8 +48,34 @@ const DG_SENS={
   busy:false,
   showCand:true,
   base:"sat",
+  guard:true,      /* 0056: panel etkinken park algılama tıklamaları kapalı */
   debounce:null
 };
+
+/* 0056 MOD AYRIMI: panel monte olduğu anda guard AÇILIR — bindParkClick
+ * (park-panel.js) window._dgSensGuard'a bakıp park algılamayı atlar.
+ * Böylece aday-olmayan LULC gridlerine (interactive:false) veya boş
+ * haritaya tıklama analiz akışını BOZAMAZ. Park seçmek için 🌳 düğmesi
+ * guard'ı kapatır + Park Analizi Modu'nu açar. */
+function dgSensGuard(on){
+  DG_SENS.guard=!!on;
+  try{window._dgSensGuard=!!on;}catch(e){}
+}
+
+function dgSensModeAnalysis(){
+  dgSensGuard(true);
+  dgSensRender();
+  toast(_tvs("🛰 Analiz modu: park algılama duraklatıldı — hücrelere güvenle dokunabilirsin."),"info","🛰️");
+}
+
+function dgSensModePark(){
+  dgSensGuard(false);
+  if(typeof PARK_MODE!=="undefined"&&!PARK_MODE&&typeof toggleParkMode==="function"){
+    try{toggleParkMode();}catch(e){}
+  }
+  dgSensRender();
+  toast(_tvs("🌳 Park seçim modu: haritadan bir parka tıklayabilirsin. Analize dönmek için 🛰 düğmesine bas."),"info","🌳");
+}
 
 const DG_SENS_COLORS={green:"#22c55e",water:"#3b82f6",hard:"#64748b",bare:"#8b5a2b"};
 const DG_SENS_CLASSES=["green","water","hard","bare"];
@@ -150,6 +176,7 @@ async function dgSensMount(hostId){
   if(!dgSensCells()){host.style.display="none";return;}
   DG_SENS.record=await dgSensLoadRecord();
   host.style.display="block";
+  dgSensGuard(true); /* 0056: analiz başladı — park algılama duraklatıldı */
   dgSensRender();
   dgSensRefreshLayer();
 }
@@ -170,7 +197,10 @@ function dgSensRender(){
             : esc(_tvs("Güncel sezon Sentinel-2 görüntüsünden aday hücreleri bulur; kaydırıcıyla hassasiyeti ayarla, uydu altında gözünle doğrula, tek dokunuşla kabul et.")))+
         `</div>`+
       `</div>`+
-      `<div style="display:flex;gap:6px;flex-wrap:wrap">`+
+      `<div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center">`+
+        `<span class="dg-sens-chip ${DG_SENS.guard?"on":""}" id="dgSensModeChip">${DG_SENS.guard?"🛡 "+esc(_tvs("Analiz modu · park algılama duraklatıldı")):"🌳 "+esc(_tvs("Park seçim modu açık"))}</span>`+
+        `<button type="button" class="dg-png-btn ghost sm" onclick="dgSensModeAnalysis()" ${DG_SENS.guard?"disabled":""} title="${esc(_tvs("Analiz moduna dön"))}">🛰 ${esc(_tvs("Analiz"))}</button>`+
+        `<button type="button" class="dg-png-btn ghost sm" onclick="dgSensModePark()" ${DG_SENS.guard?"":"disabled"} title="${esc(_tvs("Park seçmek için algılamayı aç"))}">🌳 ${esc(_tvs("Park seç"))}</button>`+
         `<button type="button" id="dgSensScanBtn" class="dg-png-btn ${scanned?"ghost":"primary"}" onclick="dgSensScan()">${scanned?"🔁 "+esc(_tvs("Yeniden Tara")):"🔍 "+esc(_tvs("Tara"))}</button>`+
         `<button type="button" class="dg-png-btn ghost" onclick="dgSensBase()" title="${esc(_tvs("Uydu/sokak altlığı"))}">${DG_SENS.base==="sat"?"🗺 "+esc(_tvs("Sokak")):"🛰 "+esc(_tvs("Uydu"))}</button>`+
       `</div>`+
@@ -266,6 +296,11 @@ async function dgSensScan(){
     };
     rec.scannedAt=new Date().toISOString();
     dgSensSave();
+    /* 0056: gözle doğrulama GÖRÜNTÜDE yapılır — tarama bitince altlık
+     * otomatik uyduya geçer (kullanıcı: "gözümle görüp takip edeyim"). */
+    if(DG_SENS.base!=="sat"&&typeof switchBaseLayer==="function"){
+      try{switchBaseLayer("sat");DG_SENS.base="sat";}catch(e){}
+    }
     dgSensRender();
     dgSensRefreshLayer();
     toast(_tvst("✓ Tarama bitti: {n} hücre · kaydırıcıları oynat, adaylar haritada.",{n:profile.stats.nProfiled}),"ok","🛰️");
@@ -481,6 +516,7 @@ function dgSensCleanup(){
   if(DG_SENS.layer&&typeof map!=="undefined"&&map){try{map.removeLayer(DG_SENS.layer);}catch(e){}}
   DG_SENS.layer=null;
   DG_SENS.record=null;
+  dgSensGuard(false); /* 0056: park kapandı — algılama serbest */
   const host=document.getElementById("lcSens");
   if(host){host.style.display="none";host.innerHTML="";}
 }
@@ -488,5 +524,6 @@ function dgSensCleanup(){
 window.DG_LC_SENS={
   mount:dgSensMount,
   cleanup:dgSensCleanup,
+  guard:dgSensGuard,
   state:DG_SENS
 };

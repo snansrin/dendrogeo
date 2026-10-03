@@ -9,6 +9,38 @@ Yeni sürüm yayımlama adımları: [`docs/surum-yayini.md`](docs/surum-yayini.m
 
 ## [Yayımlanmadı]
 
+### Düzeltildi — 0056: MOD AYRIMI — analiz etkinken park algılama TAMAMEN duraklatılır + tarama sonrası otomatik uydu altlığı
+**Kullanıcı bildirimi (birebir):** "AYNI HALA PARK ALGILAMA YAPIYOR BEN
+KABUL EDEMİYORUM Kİ GRİDLERİ ... GÜNCEL HARİTA DEDİM GELİŞMİŞ ALGILAMA
+DEDİM ... DAHA PARK ALGILAMA İLE ANALİZİ AYIRAMIYOSUN"
+
+**KÖK NEDEN (0055 neden yetmedi):** stopPropagation yalnız ADAY
+poligonlarının tıklamasını koruyordu; oysa kullanıcının bastığı yeşil
+gridler LULC rapor poligonlarıydı (dgLcRenderObjects, interactive:false) —
+üstlerine tıklama DOĞRUDAN haritaya düşer, PARK_MODE açıksa dgDetectAt
+çalışır, drawPark paneli söker. Olay yamasıyla çözülemez: modların
+AYRIŞMASI gerekir.
+
+**ÇÖZÜM — bekçi bayrağı (yapısal):**
+* Panel mount olduğu anda `window._dgSensGuard=true`; bindParkClick ilk
+  satırda guard'a bakıp ÇIKAR → panel etkinken haritanın NERESİNE
+  tıklanırsa tıklansın park algılama çalışmaz (LULC gridi, boş alan, aday).
+* Başlıkta mod çipi + iki düğme: 🛰 Analiz (guard açık, varsayılan) ·
+  🌳 Park seç (guard'ı kullanıcı iradesiyle düşürür + PARK_MODE kapalıysa
+  açar). cleanup/park değişimi guard'ı otomatik kapatır.
+* TARAMA BİTİNCE altlık OTOMATİK uyduya geçer ("gözümle görüp takip
+  edeyim" + "güncel harita dedim"): switchBaseLayer('sat'), durum
+  DG_SENS.base'de izlenir, 🗺 Sokak düğmesiyle geri dönülür.
+
+**Kırmızı çizgiler:** bindParkClick'in dgDetectAt yolu DEĞİŞMEDİ (yalnız
+guard erken-çıkışı eklendi); "konumumdan algıla" ve geri doldurma aracı
+guard'dan etkilenmez (onlar map click'i kullanmıyor). Park kimliği akışı,
+motor, şema aynen.
+
+**Bekçiler:** test/lc-validate.test.mjs +3 (guard zinciri: panel↔sens↔
+cleanup, otomatik uydu altlığı, chip CSS). sw r65→r66. npm run check:
+1141 test → 1141 pass / 0 fail.
+
 ### Düzeltildi — 0055: HÜCRE TIKLAMASI PARK ALGILAMAYI TETİKLİYORDU (olay kabarması)
 **Kullanıcı bildirimi (birebir):** "yeşil gridleri seçerken sistem tekrardan
 park algılama moduna geçiyor."

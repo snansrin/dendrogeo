@@ -119,6 +119,20 @@ function bindParkClick(){
     async e=>{
       if(!PARK_MODE)return;
 
+      /* 0056 MOD AYRIMI (kullanıcı kuralı: "park algılama ile analizi
+       * ayıramıyosun" — haklıydı): Hassasiyet paneli etkinken harita
+       * tıklamaları park algılamaya HİÇ gitmez. Sızıntının iki yolu vardı:
+       *   (a) 0055: interaktif aday poligonuna tıklama DOM'da kabarıyordu
+       *       (stopPropagation ile kapatıldı),
+       *   (b) 0056: LULC rapor poligonları interactive:false — üstlerine
+       *       tıklama DOĞRUDAN haritaya düşer; aday olmayan yeşil/su
+       *       gridlerine basınca dgDetectAt çalışıp paneli söküyordu.
+       * Bekçi (b)'yi kökten kapatır: guard panel mount'unda açılır,
+       * cleanup'ta kapanır. Park değiştirmek için: 🌳 Park Analizi Modu
+       * düğmesini kapat-aç (clearPark guard'ı düşürür) veya paneldeki
+       * "🌳 Park seç" düğmesi. */
+      if(window._dgSensGuard)return;
+
       /* 2026-09-24: tıklama artık dgDetectAt'e gider (park-registry.js).
        * Tek yol olmasının sebebi: aynı fonksiyon "konumumdan algıla" ve
        * geri doldurma aracı tarafından da kullanılıyor; park bulunamazsa
