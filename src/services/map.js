@@ -240,6 +240,8 @@ function renderWaypointList(){
  const query=($("wpSearch")?.value||"").trim().toLowerCase().replace(/^p/,"");
  const filter=$("wpFilter")?.value||"all";
  const rows=WP.filter(w=>String(w.wp_id).includes(query)&&(filter==="all"||(filter==="done"?w.visited:!w.visited)));
+ if($("wpSort")?.value==="distance"&&GPS)rows.sort((a,b)=>hav(GPS.latitude,GPS.longitude,a.lat,a.lon)-hav(GPS.latitude,GPS.longitude,b.lat,b.lon)||a.wp_id-b.wp_id);
+ else rows.sort((a,b)=>a.wp_id-b.wp_id);
  $("wpListTable").innerHTML=rows.length?rows.map(w=>`<tr class="${w.visited?'done':''}"${navTarget?.id===w.id?' aria-current="true"':''}><td data-label="ID"><b>P${Number(w.wp_id)}</b></td><td data-label="Enlem">${Number(w.lat).toFixed(6)}</td><td data-label="Boylam">${Number(w.lon).toFixed(6)}</td><td data-label="Mesafe">${GPS?Math.round(hav(GPS.latitude,GPS.longitude,w.lat,w.lon))+" m":"—"}</td><td data-label="Durum">${w.visited?'<span class="badge on">✓ Yapıldı</span>':'<span class="badge admin">Bekliyor</span>'}</td><td data-label="İşlem">${w.visited?'':`<button class="btn sm blue" onclick="selectWaypoint(${Number(w.id)})">🎯 Hedef</button>`}</td></tr>`).join(""):"<tr><td colspan=6>"+(WP.length?"Aramaya uygun nokta yok.":(+$("nProject").value?"Bu projede waypoint yok. CSV yükleyin.":"Önce proje seçin."))+"</td></tr>";
 }
 
@@ -258,6 +260,40 @@ async function selectWaypoint(id){
  navTarget=w;
  if(!manualPoint)$("mPoint").value=w.wp_id;
  drawNav();
+ dgFocusWaypoint();
+}
+// Navigation actions select targets only; arrival retains the existing visit/save flow.
+function dgNearestWaypoint(){
+ if(!GPS){toast(dgCf("En yakın noktayı seçmek için önce konumu etkinleştirin."),"warn");go("measure");return;}
+ const pending=WP.filter(w=>!w.visited);
+ if(!pending.length)return toast(dgCf("Bekleyen waypoint kalmadı."),"info");
+ const nearest=pending.reduce((a,b)=>hav(GPS.latitude,GPS.longitude,a.lat,a.lon)<=hav(GPS.latitude,GPS.longitude,b.lat,b.lon)?a:b);
+ selectWaypoint(nearest.id);
+}
+function dgNextWaypoint(){
+ const pending=WP.filter(w=>!w.visited).sort((a,b)=>a.wp_id-b.wp_id);
+ if(!pending.length)return toast(dgCf("Bekleyen waypoint kalmadı."),"info");
+ const next=pending.find(w=>w.wp_id>(navTarget?.wp_id??-Infinity))||pending[0];
+ selectWaypoint(next.id);
+}
+function dgFocusWaypoint(){
+ if(!navTarget||!navMap)return;
+ const target=[navTarget.lat,navTarget.lon];
+ if(GPS)navMap.fitBounds([[GPS.latitude,GPS.longitude],target],{padding:[36,36],maxZoom:18});
+ else navMap.setView(target,18);
+}
+function dgFitWaypoints(){
+ if(!navMap||!WP.length)return;
+ const points=WP.map(w=>[w.lat,w.lon]);
+ if(GPS)points.push([GPS.latitude,GPS.longitude]);
+ navMap.fitBounds(points,{padding:[36,36],maxZoom:18});
+}
+function dgWaypointGuidance(){
+ const el=$("navGuidance");if(!el)return;
+ if(!navTarget||navTarget.visited){el.textContent=dgCf("Hedef seçerek navigasyona başlayın.");return;}
+ if(!GPS){el.textContent=dgCf("Hedef seçildi. Mesafe ve yön için konumu etkinleştirin.");return;}
+ const distance=hav(GPS.latitude,GPS.longitude,navTarget.lat,navTarget.lon);
+ el.textContent=distance<=GPS.accuracy?dgCf("Hedef GPS belirsizlik alanında. Noktayı sahada doğrulayın."):distance<=50?dgCf("Hedefe yaklaştınız. Noktayı doğrulayıp Vardım düğmesine basın."):dgCf("Kesikli çizgi hedefe kuş uçuşu yönü gösterir; yürüyüş rotası değildir.");
 }
 // 7. Navigasyon çizimi
 /* "🎯 Vardım → Ölçüme Geç" butonu (index.html:563) daha önce TANIMSIZ bir
@@ -304,6 +340,7 @@ function drawNav(){
  }
  if($("navGps"))$("navGps").textContent=GPS?"GPS doğruluğu: "+(Number.isFinite(GPS.accuracy)?"±"+Math.round(GPS.accuracy)+" m":"bilinmiyor"):"GPS konumu bekleniyor; hedef seçebilirsiniz.";
  renderWaypointList();
+ dgWaypointGuidance();
  if(!navMap)return;
  navMap.eachLayer(l=>{if(l._wp)navMap.removeLayer(l);});
  WP.forEach(w=>{
@@ -335,6 +372,7 @@ function drawNav(){
   }else{$("navDist").textContent="—";$("navTarget").textContent=(typeof dgCf==="function"?dgCf("Hedef seç / tamamlandı"):"Hedef seç / tamamlandı");$("navArrow").style.transform="rotate(0)";}
  }
  renderWaypointList();
+ dgWaypointGuidance();
 }
 /* =========================================================
  * MODÜL 2: HARİTA KATMANI SEÇİMİ

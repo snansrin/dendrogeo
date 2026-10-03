@@ -475,3 +475,7 @@ label.lbl{display:block}
 @media(max-width:640px){#v-nav #navMap{height:360px}.waypoint-filters{grid-template-columns:1fr 1fr}#v-nav .arrow{flex-shrink:0}}
 
 #v-nav .waypoint-list{grid-column:1 / -1}
+
+.waypoint-actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:16px}
+.waypoint-actions .btn{min-height:44px}
+.waypoint-sort{max-width:280px;margin-bottom:12px}

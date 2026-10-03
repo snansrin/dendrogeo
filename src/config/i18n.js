@@ -24,6 +24,21 @@
 
 /* ---- EN sözlüğü: anahtar = TR dizenin trim'lenmiş hâli ---- */
 const DG_I18N_EN={
+"📍 En yakın bekleyen":"\ud83d\udccd Nearest pending point",
+"→ Sıradaki nokta":"\u2192 Next point",
+"🎯 Hedefi göster":"\ud83c\udfaf Show target",
+"🗺 Tüm noktalar":"\ud83d\uddfa All points",
+"Sıralama":"Sort points",
+"Nokta numarası":"Point number",
+"Yakından uzağa (GPS)":"Nearest first (GPS)",
+"En yakın noktayı seçmek için önce konumu etkinleştirin.":"Enable location to select the nearest point.",
+"Bekleyen waypoint kalmadı.":"No pending waypoints remain.",
+"Hedef seçerek navigasyona başlayın.":"Select a target to start navigation.",
+"Hedef seçildi. Mesafe ve yön için konumu etkinleştirin.":"Target selected. Enable location for distance and direction.",
+"Hedef GPS belirsizlik alanında. Noktayı sahada doğrulayın.":"Target is within GPS uncertainty. Verify the point in the field.",
+"Hedefe yaklaştınız. Noktayı doğrulayıp Vardım düğmesine basın.":"You are near the target. Verify the point and press Arrived.",
+"Kesikli çizgi hedefe kuş uçuşu yönü gösterir; yürüyüş rotası değildir.":"The dashed line shows the straight-line direction; it is not a walking route.",
+
 "Waypoint yükleme hatası:":"Waypoint upload failed:",
 "Waypoint listesi alınamadı:":"Could not load waypoints:",
 "Nokta ara":"Find a point",
