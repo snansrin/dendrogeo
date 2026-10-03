@@ -167,7 +167,7 @@ function dgGpsBtnBusy(on){
 async function startGps(){
  const gpsMsg=(t,e)=>{const g=$("gpsState");g.textContent=t;g.className="alert "+(e?"err":"info");if(e)dgGpsBtnBusy(false);};
  if(!navigator.geolocation)return gpsMsg("Tarayıcı konum desteklemiyor.",1);
- if(/iPhone|iPad|iPod/.test(navigator.userAgent))$("iosHint").style.display="block";
+ if(/iPhone|iPad|iPod/.test(navigator.userAgent)||(navigator.platform==="MacIntel"&&navigator.maxTouchPoints>1))toast("<b>"+_tms("iPhone kullanıcısı mısınız?")+"</b><br>"+_tms("Ayarlar → Gizlilik ve Güvenlik → Konum Servisleri → Safari Siteleri → Uygulamayı Kullanırken."),"info","📍",12000);
  try{if(navigator.permissions&&navigator.permissions.query){const p=await navigator.permissions.query({name:"geolocation"});if(p.state==="denied")return gpsMsg("Konum izni reddedildi. Ayarlar→Safari→Konum.",1);}}catch(e){}
  gpsMsg("Konum alınıyor…",0);
  dgGpsBtnBusy(true);

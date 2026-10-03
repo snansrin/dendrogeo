@@ -233,6 +233,9 @@ async function loadWaypoints__scroll(){
   drawNav();
  }catch(e){toast(dgCf("Waypoint listesi alınamadı:")+" "+e.message,"err");}
 }
+let DG_WP_PAGE=0,DG_WP_QUERY="";
+const DG_WP_PAGE_SIZE=8;
+function dgWaypointPage(delta){DG_WP_PAGE+=delta;renderWaypointList();}
 function renderWaypointList(){
  const done=WP.filter(w=>w.visited).length;
  $("dWp").textContent=WP.length;$("dVisit").textContent=done;
@@ -242,8 +245,12 @@ function renderWaypointList(){
  const rows=WP.filter(w=>String(w.wp_id).includes(query)&&(filter==="all"||(filter==="done"?w.visited:!w.visited)));
  if($("wpSort")?.value==="distance"&&GPS)rows.sort((a,b)=>hav(GPS.latitude,GPS.longitude,a.lat,a.lon)-hav(GPS.latitude,GPS.longitude,b.lat,b.lon)||a.wp_id-b.wp_id);
  else rows.sort((a,b)=>a.wp_id-b.wp_id);
+ const signature=String($("nProject").value)+":"+query+":"+filter+":"+($("wpSort")?.value||"id");if(signature!==DG_WP_QUERY){DG_WP_PAGE=0;DG_WP_QUERY=signature;}
+ const pages=Math.max(1,Math.ceil(rows.length/DG_WP_PAGE_SIZE));DG_WP_PAGE=Math.max(0,Math.min(pages-1,DG_WP_PAGE));
+ const visible=rows.slice(DG_WP_PAGE*DG_WP_PAGE_SIZE,(DG_WP_PAGE+1)*DG_WP_PAGE_SIZE);
+ const pager=$("wpPager");if(pager)pager.innerHTML=`<button class="btn sm ghost" onclick="dgWaypointPage(-1)" ${DG_WP_PAGE===0?"disabled":""}>←</button><span>${rows.length?DG_WP_PAGE*DG_WP_PAGE_SIZE+1:0}–${Math.min(rows.length,(DG_WP_PAGE+1)*DG_WP_PAGE_SIZE)} / ${rows.length}</span><button class="btn sm ghost" onclick="dgWaypointPage(1)" ${DG_WP_PAGE===pages-1?"disabled":""}>→</button>`;
  const openCoordinates=new Set(Array.from($("wpListTable").querySelectorAll?.("details[open]")||[],el=>el.getAttribute("data-wp-id")));
- $("wpListTable").innerHTML=rows.length?rows.map(w=>`<li class="waypoint-point ${w.visited?'done':''}"${navTarget?.id===w.id?' aria-current="true"':''}><div class="waypoint-point-head"><b>P${Number(w.wp_id)}</b><span class="mono waypoint-distance">${GPS?Math.round(hav(GPS.latitude,GPS.longitude,w.lat,w.lon))+" m":"—"}</span></div><div class="waypoint-point-actions"><span>${w.visited?'<span class="badge on">✓ Yapıldı</span>':'<span class="badge admin">Bekliyor</span>'}</span><div data-label="İşlem">${w.visited?'':`<button class="btn sm blue" onclick="selectWaypoint(${Number(w.id)})">🎯 Hedef</button>`}</div></div><details class="waypoint-coordinates" data-wp-id="${Number(w.id)}"${openCoordinates.has(String(w.id))?" open":""}><summary>Koordinatlar</summary><div><span data-label="Enlem">${dgCf("Enlem")}: ${Number(w.lat).toFixed(6)}</span><span data-label="Boylam">${dgCf("Boylam")}: ${Number(w.lon).toFixed(6)}</span></div></details></li>`).join(""):'<li class="waypoint-empty">'+(WP.length?"Aramaya uygun nokta yok.":(+$("nProject").value?"Bu projede waypoint yok. CSV yükleyin.":"Önce proje seçin."))+"</li>";
+ $("wpListTable").innerHTML=rows.length?visible.map(w=>`<li class="waypoint-point ${w.visited?'done':''}"${navTarget?.id===w.id?' aria-current="true"':''}><details class="waypoint-coordinates" data-wp-id="${Number(w.id)}"${openCoordinates.has(String(w.id))?" open":""}><summary aria-label="P${Number(w.wp_id)} ${dgCf("Koordinatlar")}"><b>P${Number(w.wp_id)}</b><span class="mono waypoint-distance">${GPS?Math.round(hav(GPS.latitude,GPS.longitude,w.lat,w.lon))+" m":"—"}</span><span aria-hidden="true">⌄</span></summary><div><span data-label="Enlem">${dgCf("Enlem")}: ${Number(w.lat).toFixed(6)}</span><span data-label="Boylam">${dgCf("Boylam")}: ${Number(w.lon).toFixed(6)}</span></div></details><div class="waypoint-point-actions"><span>${w.visited?'<span class="badge on">✓ Yapıldı</span>':'<span class="badge admin">Bekliyor</span>'}</span><div data-label="İşlem">${w.visited?'':`<button class="btn sm blue" onclick="selectWaypoint(${Number(w.id)})">🎯 Hedef</button>`}</div></div></li>`).join(""):'<li class="waypoint-empty">'+(WP.length?"Aramaya uygun nokta yok.":(+$("nProject").value?"Bu projede waypoint yok. CSV yükleyin.":"Önce proje seçin."))+"</li>";
 }
 
 async function deleteAllWaypoints(){
@@ -277,7 +284,8 @@ function dgNextWaypoint(){
  const next=pending.find(w=>w.wp_id>(navTarget?.wp_id??-Infinity))||pending[0];
  selectWaypoint(next.id);
 }
-function dgFocusWaypoint(){
+function dgFocusWaypoint(showMap=false){
+ if(showMap){const p=$("wpMapPanel");if(p)p.open=true;if(navMap?.invalidateSize)navMap.invalidateSize();}
  if(!navTarget||!navMap)return;
  const target=[navTarget.lat,navTarget.lon];
  if(GPS)navMap.fitBounds([[GPS.latitude,GPS.longitude],target],{padding:[36,36],maxZoom:18});
@@ -381,7 +389,8 @@ function drawNav(){
 
 function switchBaseLayer(type){
  if(!map)return;
- 
+ if(!["osm","sat","topo"].includes(type))return;
+ let current=null;map.eachLayer(l=>{if(l._dgBase===type)current=l;});if(current)return;
  // Mevcut tile layer'ı bul ve kaldır
  map.eachLayer(l=>{
   if(l._url)map.removeLayer(l);
@@ -396,7 +405,8 @@ function switchBaseLayer(type){
   * tam biçim orada tutuluyor, burada kopya tutulmaz. */
  const attr=DG_ATTR;
  
- L.tileLayer(urls[type],{attribution:attr[type]}).addTo(map);
+ const layer=L.tileLayer(urls[type],{attribution:attr[type],maxZoom:22,maxNativeZoom:type==="topo"?17:type==="sat"?19:19,keepBuffer:1,updateWhenIdle:true,updateWhenZooming:false});
+ layer._dgBase=type;layer.addTo(map);
  toast("✓ Harita: "+(type==="osm"?"Sokak":(type==="sat"?"Uydu":"Topoğrafik")),"ok","🗺️");
 }
 

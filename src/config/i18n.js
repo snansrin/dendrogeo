@@ -24,6 +24,13 @@
 
 /* ---- EN sözlüğü: anahtar = TR dizenin trim'lenmiş hâli ---- */
 const DG_I18N_EN={
+"Ayarlar → Gizlilik ve Güvenlik → Konum Servisleri → Safari Siteleri → Uygulamayı Kullanırken.":"Settings → Privacy & Security → Location Services → Safari Websites → While Using the App.",
+"Kayıtlı analiz sonucu":"Saved analysis result",
+"Yayın isteğinde bu kayıt rapora aktarılır. Kaydedilmemiş önizleme rapora girmez.":"This saved result is attached to your publication request. Unsaved previews are excluded.",
+"Bina ve havuz alanları ayrı hesaplanır.":"Buildings and pools are calculated separately.",
+"nesne sınırı":"object boundaries",
+"OSM bina, su ve sert zemin sınırlarını kullan":"Use OSM building, water and paved boundaries",
+
 "Yüzey düzenleme açılamadı: ":"Surface review could not be opened: ",
 "Cihaz önbelleği yazılamadı.":"Device cache could not be written.",
 "Yüzey düzenleme":"Surface review",

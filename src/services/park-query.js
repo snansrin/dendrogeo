@@ -106,6 +106,7 @@ async function queryDetailedCoverage(){
     return false;
   }
 
+  window.DG_SURFACE_OSM=null;
   IMP_RINGS=[];
   IMP_LINES=[];
   GRID_BLOCK_LINES=[];
@@ -150,6 +151,8 @@ async function queryDetailedCoverage(){
     `relation["landuse"~"reservoir|basin"](${bbox});`+
     `way["leisure"="swimming_pool"](${bbox});`+
     `relation["leisure"="swimming_pool"](${bbox});`+
+    `way["amenity"="fountain"](${bbox});`+
+    `relation["amenity"="fountain"](${bbox});`+
     `way["waterway"="riverbank"](${bbox});`+
     `relation["waterway"="riverbank"](${bbox});`+
 
@@ -182,6 +185,7 @@ async function queryDetailedCoverage(){
     return false;
   }
 
+  window.DG_SURFACE_OSM={elements:json.elements||[],boundary:JSON.stringify(PARK_POLY),fetchedAt:new Date().toISOString()};
   const seenWater=new Set();
   const seenImp=new Set();
 

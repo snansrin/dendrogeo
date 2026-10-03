@@ -3,8 +3,9 @@
  * Polygon clipping operates in the raster analysis UTM CRS, including park
  * holes. User-drawn boundaries have explicit visual-review provenance. */
 const DG_SURFACE_TYPES={green:{group:"green",label:"Yeşil alan"},hard:{group:"hard",label:"Sert zemin"},building:{group:"building",label:"Bina"},water:{group:"water",label:"Su"},pool:{group:"pool",label:"Havuz / süs havuzu"},bare:{group:"bare",label:"Çıplak zemin"},other:{group:"other",label:"Diğer"}};
-function dgSurfaceProject(ring,epsg){return ring.map(p=>{const q=dgLcUtmForward(p[1],p[0],epsg);return[q.x,q.y];});}
-function dgSurfaceUnproject(geom,epsg){return geom.map(poly=>poly.map(ring=>ring.map(p=>{const q=dgLcUtmInverse(p[0],p[1],epsg);return[q.lon,q.lat];})));}
+// Millimetre snapping removes UTM round-trip noise at shared raster edges.
+function dgSurfaceProject(ring,epsg){return ring.map(p=>{const q=dgLcUtmForward(p[1],p[0],epsg);return[Math.round(q.x*1000)/1000,Math.round(q.y*1000)/1000];});}
+function dgSurfaceUnproject(geom,epsg){const old=DG_SURFACE_WGS_CACHE.get(geom);if(old?.epsg===epsg)return old.wgs;const wgs=geom.map(poly=>poly.map(ring=>ring.map(p=>{const q=dgLcUtmInverse(p[0],p[1],epsg);return[q.lon,q.lat];})));DG_SURFACE_WGS_CACHE.set(geom,{epsg,wgs});return wgs;}
 function dgSurfaceArea(geom){let total=0;for(const poly of geom||[])for(let i=0;i<poly.length;i++){const r=poly[i];let area=0;for(let j=0;j<r.length;j++){const p=r[j],q=r[(j+1)%r.length];area+=p[0]*q[1]-q[0]*p[1];}total+=(i? -1:1)*Math.abs(area)/2;}return Math.max(0,total);}
 function dgSurfacePark(outer,holes,epsg){
  const pc=window.polygonClipping;
@@ -22,20 +23,23 @@ async function dgSurfaceFingerprint(cells,outer,holes,meta){
  const digest=await crypto.subtle.digest("SHA-256",new TextEncoder().encode(input));
  return Array.from(new Uint8Array(digest),b=>b.toString(16).padStart(2,"0")).join("");
 }
+const DG_SURFACE_MASK_CACHE=new WeakMap();
 function dgSurfaceResolved(cells,classFor,geometries,features,epsg,park){
+ const cached=DG_SURFACE_PART_CACHE.get(geometries);
+ if(cached&&cached.park===park&&cached.epsg===epsg&&cached.cellCount===cells.length&&cached.cellFirst===cells[0]&&cached.features.length===(features||[]).length&&cached.features.every((f,i)=>f===features[i]))return cached.parts.map(p=>{if(p.method!=="review-cell")return p;const type=classFor(p.cell)||"other";return{...p,type,group:DG_SURFACE_TYPES[type]?.group||"other"};});
  const pc=window.polygonClipping,parts=[];
- const masks=(features||[]).filter(f=>DG_SURFACE_TYPES[f.type]&&dgSurfaceValidRing(f.ring)).map(f=>({...f,geom:pc.intersection([dgSurfaceProject(f.ring,epsg)],park)}));
+ const masks=(features||[]).filter(f=>DG_SURFACE_TYPES[f.type]).map(f=>{const old=DG_SURFACE_MASK_CACHE.get(f);if(old?.park===park&&old.epsg===epsg)return old.mask;const geom=pc.intersection(dgSurfaceFeatureGeometry(f,epsg),park),mask={...f,geom,bbox:dgSurfaceBounds(geom)};DG_SURFACE_MASK_CACHE.set(f,{park,epsg,mask});return mask;});
  for(const c of cells){
   const key=c.row+":"+c.col,geom=geometries[key],full=dgSurfaceArea(geom),a=Number(c.areaM2)||0;
   if(!full||!a)continue;
-  let remaining=geom;
+  let remaining=geom;const bbox=dgSurfaceBounds(geom);
   for(let i=masks.length-1;i>=0&&remaining.length;i--){
-   const mask=masks[i],part=pc.intersection(remaining,mask.geom),partArea=dgSurfaceArea(part);
-   if(partArea>0){parts.push({key,cell:c,type:mask.type,group:DG_SURFACE_TYPES[mask.type].group,geom:part,areaM2:a*partArea/full,method:"visual-boundary",ts:mask.ts});remaining=pc.difference(remaining,mask.geom);}
+   const mask=masks[i];if(!dgSurfaceOverlap(bbox,mask.bbox))continue;const part=pc.intersection(remaining,mask.geom),partArea=dgSurfaceArea(part);
+   if(partArea>0){parts.push({key,cell:c,type:mask.type,group:DG_SURFACE_TYPES[mask.type].group,geom:part,areaM2:a*partArea/full,method:mask.method||"visual-boundary",ts:mask.ts});remaining=pc.difference(remaining,mask.geom);}
   }
   if(remaining.length){const type=classFor(c)||c.classKey||"other";parts.push({key,cell:c,type,group:DG_SURFACE_TYPES[type]?.group||"other",geom:remaining,areaM2:a*dgSurfaceArea(remaining)/full,method:"review-cell"});}
  }
- return parts;
+ dgSurfaceSeed(geometries,features||[],epsg,park,parts,cells);return parts;
 }
 function dgSurfaceSummarize(base,cells,classFor,geometries,features,epsg,park){
  const areas={green:0,hard:0,building:0,water:0,pool:0,bare:0,other:0,...base};
@@ -71,3 +75,73 @@ async function dgSurfaceSaveRemote(record,revision){
  return data.revision;
 }
 window.DG_SURFACE_REVIEW={types:DG_SURFACE_TYPES,park:dgSurfacePark,cell:dgSurfaceCell,area:dgSurfaceArea,fingerprint:dgSurfaceFingerprint,summarize:dgSurfaceSummarize,resolved:dgSurfaceResolved,validRing:dgSurfaceValidRing,load:dgSurfaceLoadRemote,save:dgSurfaceSaveRemote};
+
+function dgSurfaceBounds(geom){const pts=geom.flat(2);return pts.reduce((b,p)=>[Math.min(b[0],p[0]),Math.min(b[1],p[1]),Math.max(b[2],p[0]),Math.max(b[3],p[1])],[Infinity,Infinity,-Infinity,-Infinity]);}
+function dgSurfaceOverlap(a,b){return a[0]<b[2]&&a[2]>b[0]&&a[1]<b[3]&&a[3]>b[1];}
+function dgSurfaceFeatureGeometry(f,epsg){
+ if(f.geometry?.type==="MultiPolygon")return f.geometry.coordinates.map(poly=>poly.map(r=>dgSurfaceProject(r,epsg)));
+ return dgSurfaceValidRing(f.ring)?[ [dgSurfaceProject(f.ring,epsg)] ]:[];
+}
+function dgSurfaceObjects(elements,epsg){
+ const out=[];const paved=/^(asphalt|paved|concrete|paving_stones|sett|cobblestone|bricks|concrete:plates|concrete:lanes)$/;
+ for(const el of elements||[]){
+  const t=el.tags||{};let type=null;
+  if((t.building&&t.building!=="no")||(t["building:part"]&&t["building:part"]!=="no"))type="building";
+  else if(t.leisure==="swimming_pool"||t.amenity==="fountain"||t.water==="reflecting_pool")type="pool";
+  else if(t.natural==="water"||t.water||t.landuse==="reservoir"||t.waterway==="riverbank")type="water";
+  else if(paved.test(t.surface||"")||t.amenity==="parking")type="hard";
+  if(!type)continue;
+  let geom=[];
+  if(el.type==="relation"&&typeof extractRings==="function"){
+   const rs=extractRings(el);if(rs){const outer=Array.isArray(rs)?rs:rs.outer,holes=Array.isArray(rs)?[]:rs.inner||[];if(outer?.length)geom=dgSurfacePark(outer,holes,epsg);}
+  }else if(el.geometry?.length>=4){
+   const pts=el.geometry.map(p=>[p.lon,p.lat]),a=pts[0],b=pts.at(-1);
+   if(a[0]===b[0]&&a[1]===b[1])geom=[[dgSurfaceProject(pts,epsg)]];
+   else if(type==="hard"&&paved.test(t.surface||"")){
+    const width=Number(t.width);if(Number.isFinite(width)&&width>0&&width<=40){
+     const xy=dgSurfaceProject(pts,epsg),segments=[];
+     for(let i=1;i<xy.length;i++){const a=xy[i-1],b=xy[i],dx=b[0]-a[0],dy=b[1]-a[1],len=Math.hypot(dx,dy);if(!len)continue;const ox=-dy/len*width/2,oy=dx/len*width/2;segments.push([[[a[0]+ox,a[1]+oy],[b[0]+ox,b[1]+oy],[b[0]-ox,b[1]-oy],[a[0]-ox,a[1]-oy],[a[0]+ox,a[1]+oy]]]);}
+     if(segments.length)geom=window.polygonClipping.union(...segments);
+    }
+   }
+  }
+  if(geom.length)out.push({type,method:"osm-boundary",osmId:el.type+"/"+el.id,geometry:{type:"MultiPolygon",coordinates:dgSurfaceUnproject(geom,epsg)}});
+ }
+ const priority={hard:0,water:1,pool:2,building:3};return out.sort((a,b)=>priority[a.type]-priority[b.type]);
+}
+window.DG_SURFACE_REVIEW.objects=dgSurfaceObjects;
+
+const DG_SURFACE_PART_CACHE=new WeakMap();
+const DG_SURFACE_WGS_CACHE=new WeakMap();
+function dgSurfaceSeed(geometries,features,epsg,park,parts,cells){
+ DG_SURFACE_PART_CACHE.set(geometries,{features:features.slice(),epsg,park,parts,cellCount:cells?.length,cellFirst:cells?.[0]});
+ for(const p of parts)if(p.wgs)DG_SURFACE_WGS_CACHE.set(p.geom,{epsg,wgs:p.wgs});
+}
+const DG_SURFACE_JOBS=new Set();
+function dgSurfaceCancelJobs(){for(const cancel of [...DG_SURFACE_JOBS])cancel();}
+function dgSurfaceWorkerJob(data){
+ return new Promise((resolve,reject)=>{
+  if(typeof Worker==='undefined'){resolve(null);return;}
+  let worker;try{worker=new Worker('/src/workers/surface-worker.js');}catch(e){resolve(null);return;}
+  const finish=()=>{clearTimeout(timer);worker.terminate();DG_SURFACE_JOBS.delete(cancel);};
+  const cancel=()=>{finish();reject(Error('Analiz kapatıldı.'));};
+  const timer=setTimeout(()=>{finish();reject(Error('Sınır hesabı zaman aşımına uğradı.'));},90000);
+  DG_SURFACE_JOBS.add(cancel);
+  worker.onmessage=e=>{finish();if(e.data.error)reject(Error(e.data.error));else resolve(e.data);};
+  worker.onerror=()=>{finish();resolve(null);};
+  try{worker.postMessage(data);}catch(e){finish();reject(e);}
+ });
+}
+async function dgSurfacePrepare(data){
+ const result=await dgSurfaceWorkerJob(data);if(result)return result;
+ // Older browsers / worker load failures: yield between bounded geometry batches.
+ const park=dgSurfacePark(data.outer,data.holes,data.epsg),geometries={},parts=[];
+ const objects=data.objects||dgSurfaceObjects(data.elements||[],data.epsg);
+ const features=[...(data.useObjects!==false?objects:[]),...data.features];
+ for(let i=0;i<data.cells.length;i+=128){const batch=data.cells.slice(i,i+128);for(const c of batch)geometries[c.row+':'+c.col]=dgSurfaceCell(c,park,data.epsg);parts.push(...dgSurfaceResolved(batch,c=>c.classKey,geometries,features,data.epsg,park));await new Promise(r=>setTimeout(r,0));}
+ return{park,geometries,objects,parts};
+}
+function dgSurfaceMergeSync(parts,epsg){
+ const groups={};for(const p of parts){const g=groups[p.type]||(groups[p.type]={geoms:[],area:0,methods:new Set()});g.geoms.push(p.geom);g.area+=p.areaM2;g.methods.add(p.method);}
+ return Object.entries(groups).map(([k,g])=>({type:'Feature',properties:{class:k,area_m2:g.area,method:[...g.methods].sort().join('+')},geometry:{type:'MultiPolygon',coordinates:dgSurfaceUnproject(window.polygonClipping.union(...g.geoms),epsg)}}));
+}

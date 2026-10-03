@@ -492,3 +492,27 @@ label.lbl{display:block}
 .waypoint-coordinates div{display:grid;gap:5px;overflow-wrap:anywhere}
 .waypoint-empty{padding:16px;color:var(--mut)}
 @media(max-width:640px){.waypoint-points{grid-template-columns:minmax(0,1fr)}#v-nav .waypoint-list{padding:12px}.waypoint-point{padding:10px 12px}}
+
+/* Field queue: eight compact rows, independent of total project size. */
+#v-nav .waypoint-points{display:block}
+#v-nav .waypoint-point{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:0 8px;padding:6px 8px;border-radius:6px;margin-bottom:4px}
+#v-nav .waypoint-point-head{margin:0;gap:8px;font-size:.9rem}
+#v-nav .waypoint-point-actions{gap:8px}
+#v-nav .waypoint-point-actions .btn{min-width:70px;padding:8px}
+#v-nav .waypoint-point-actions .badge{font-size:.58rem;padding:3px 5px}
+#v-nav .waypoint-coordinates{grid-column:1/-1;margin:0}
+#v-nav .waypoint-coordinates summary{min-height:24px;font-size:.66rem}
+#v-nav .waypoint-distance{font-size:.75rem}
+.waypoint-pager{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:8px;font-size:.8rem}
+.waypoint-pager .btn{min-height:44px;min-width:52px}
+#v-nav .waypoint-list>div:first-child{margin-top:0!important;padding-top:0!important;border-top:0!important}
+
+#v-nav .waypoint-coordinates{grid-column:auto;min-width:0;color:var(--ink)}
+#v-nav .waypoint-coordinates summary{width:100%;min-height:44px;display:flex;gap:8px;font-size:.9rem;list-style:none}
+#v-nav .waypoint-coordinates summary::-webkit-details-marker{display:none}
+#v-nav .waypoint-coordinates summary .waypoint-distance{margin-left:auto}
+#v-nav .waypoint-point-actions{align-self:start;min-height:44px}
+#v-nav .waypoint-map{padding:8px 12px}
+#v-nav .waypoint-map>summary{min-height:44px;display:flex;align-items:center;cursor:pointer;font-weight:600}
+#v-nav .waypoint-pager{position:sticky;bottom:0;background:var(--surface);padding:6px 0}
+@media(max-width:640px){#v-nav .waypoint-map #navMap{height:240px}#v-nav .waypoint-point{padding:2px 6px}#v-nav .waypoint-coordinates div{padding:4px 0 8px}}

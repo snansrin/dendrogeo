@@ -212,6 +212,7 @@ function dgLcProcessTile(item,href,geometryWgs,source){
             epsg:analysisEpsg,
             classCode:Math.round(Number(raw)),
             classKey,
+            rasterClassKey:classKey,
             areaM2:area,
             center,
             quadWgs:[[c0.lon,c0.lat],[c1.lon,c1.lat],[c2.lon,c2.lat],[c3.lon,c3.lat]],

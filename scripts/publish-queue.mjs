@@ -198,16 +198,18 @@ export async function applyAcceptedSurfaceSnapshot(pub, surfaceSnapshot, root = 
 async function handle(req) {
   const started = new Date().toISOString();
   const accepted = isAcceptedSurfaceSnapshot(req.surface_snapshot);
+  const geometrySnapshot = req.surface_snapshot?.schema === "dendrogeo-surface/2";
   const base = {
     request_id: String(req.id), park_id: Number(req.park_id),
     with_lulc: req.with_lulc !== false,
-    surface_snapshot: accepted,
+    surface_snapshot: accepted || geometrySnapshot,
     requested_at: req.created_at || null, started_at: started,
   };
   try {
     /* Kabul edilmiş snapshot varsa yeniden LULC çalıştırma: önce hızlı temel
      * rapor iskeleti üretilir, sonra kabul edilmiş alanlar aynı DGR'ye bağlanır. */
-    let r = await publishPark(req.park_id, { skipLulc: accepted || req.with_lulc === false });
+    if(req.surface_snapshot && !accepted && !geometrySnapshot)throw new Error("Bilinmeyen kayıtlı analiz şeması");
+    let r = await publishPark(req.park_id, { skipLulc: accepted || (!geometrySnapshot && req.with_lulc === false), surfaceSnapshot: geometrySnapshot ? req.surface_snapshot : null });
     if (accepted) r = await applyAcceptedSurfaceSnapshot(r, req.surface_snapshot);
     let bytes = null;
     try {
@@ -240,7 +242,7 @@ async function handle(req) {
 
 /* Geri çekmenin uygulanması: veri dosyaları silinir, index.html bildirime
  * döner, liste yenilenir. root parametrik (test geçici dizinde doğrular). */
-export const RETRACT_FILES = ['data.json', 'olcum.csv', 'park.geojson', 'harita.png', 'metadata.json'];
+export const RETRACT_FILES = ['data.json', 'olcum.csv', 'park.geojson', 'surface.geojson', 'harita.png', 'metadata.json'];
 export function handleRetraction(rt, pubEntry, root = ROOT) {
   const started = new Date().toISOString();
   const base = {

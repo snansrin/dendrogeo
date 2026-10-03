@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+import { reviewedSurface } from './surface-report.mjs';
 /* make-report.mjs — DendroGeo Bilimsel Rapor Yayın Hattı (R1+R3, 2026-09-27)
  *
  * AMAÇ: bir park/proje için PAYLAŞILABİLİR, DEĞİŞMEZ (immutable), tez biçiminde
@@ -72,7 +73,7 @@ const esc = (s) => String(s ?? '').replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<
 const trNum = (x, d = 2) => Number(x).toLocaleString('tr-TR', { minimumFractionDigits: d, maximumFractionDigits: d });
 
 /* ---------- LULC (uygulamanın kendi motoru, vm içinde) ---------- */
-function bootLC() {
+export function bootLC() {
   const MODS = ['src/utils/geo.js', 'src/services/park-state.js', 'src/services/park-geometry.js',
     'src/services/lc-config.js', 'src/services/lc-geo.js', 'src/services/lc-stac.js',
     'src/services/lc-engine.js', 'src/services/lc-osm.js', 'src/services/lc-patches.js',
@@ -244,10 +245,10 @@ function disc(cv, x, y, r, col) {
   for (let dy = -r; dy <= r; dy++) for (let dx = -r; dx <= r; dx++)
     if (dx * dx + dy * dy <= r * r) cv.set(x + dx, y + dy, col);
 }
-export function mapCanvas({ outer, holes = [], wruns = [], classes = {}, parkName = '', sub = '', sub2 = '', maskHa = 0, points = [], pointStat = null, meta = null }) {
+export function mapCanvas({ outer, outers = null, surfaceFeatures = [], holes = [], wruns = [], classes = {}, parkName = '', sub = '', sub2 = '', maskHa = 0, points = [], pointStat = null, meta = null }) {
   const PAD = 26, TOP = 96, MAPH = 540, FOOT = 70;
   let minLa = 90, maxLa = -90, minLo = 180, maxLo = -180;
-  for (const [la, lo] of outer) { minLa = Math.min(minLa, la); maxLa = Math.max(maxLa, la); minLo = Math.min(minLo, lo); maxLo = Math.max(maxLo, lo); }
+  for (const [la, lo] of (outers||[outer]).flat()) { minLa = Math.min(minLa, la); maxLa = Math.max(maxLa, la); minLo = Math.min(minLo, lo); maxLo = Math.max(maxLo, lo); }
   const dxM = Math.max(1, (maxLo - minLo) * 111320 * Math.cos(((minLa + maxLa) / 2) * Math.PI / 180));
   const dyM = Math.max(1, (maxLa - minLa) * 110540);
   const W = Math.max(420, Math.min(1000, Math.round((MAPH - 2 * PAD) * dxM / dyM) + 2 * PAD));
@@ -255,7 +256,7 @@ export function mapCanvas({ outer, holes = [], wruns = [], classes = {}, parkNam
   const cx = (minLo + maxLo) / 2, cy = (minLa + maxLa) / 2;
   const X = (lon) => W / 2 + (lon - cx) * 111320 * Math.cos(cy * Math.PI / 180) * k;
   const Y = (lat) => TOP + (MAPH - 2 * PAD) / 2 - (lat - cy) * 110540 * k;
-  const legRows = ['green', 'hard', 'water', 'bare', 'other'].filter((key) => classes[key])
+  const legRows = ['green', 'hard', 'building', 'water', 'pool', 'bare', 'other'].filter((key) => classes[key])
     .concat(maskHa > 0 ? ['masked'] : [], ['border', 'point', 'outside']);
   const H = TOP + MAPH + 16 + legRows.length * 28 + 18 + FOOT;
   const cv = new PngCanvas(W, H, MAP_TONES.out);
@@ -264,12 +265,16 @@ export function mapCanvas({ outer, holes = [], wruns = [], classes = {}, parkNam
   for (const h of holes) fillRing(cv, h.map(([la, lo]) => [X(lo), Y(la)]), MAP_TONES.out);
   for (const r of wruns)                                      /* kesintisiz hücre örtüsü */
     cv.rect(X(r.lo0), Y(r.la1), X(r.lo1), Y(r.la0), hex2rgb((classes[r.key] && classes[r.key].color) || '#94a3b8'));
+  for(const f of surfaceFeatures)for(const poly of f.geometry.coordinates){
+    const rings=poly.map(r=>r.map(([lo,la])=>[X(lo),Y(la)]));
+    fillSurfacePolygon(cv,rings,hex2rgb(classes[f.properties.class]?.color||'#94a3b8'));
+  }
   /* KRIPMA GEÇİŞİ: run-length bantları satır içindeki poligon dışı boşlukları
    * köprüleyebildiği için (içbükey girinti) harita alanı taranır ve poligon
    * (delikler dâhil, tek-çift kuralı) dışındaki pikseller bağlam dokusuna
    * geri boyanır. Böylece hem beyaz/gri dilim kalmaz hem de park sahasının
    * dışına sınıf rengi taşmaz. */
-  const allRings = [ring, ...holes.map((h) => h.map(([la, lo]) => [X(lo), Y(la)]))];
+  const allRings = [...(outers||[outer]).map(r=>r.map(([la,lo])=>[X(lo),Y(la)])), ...holes.map((h) => h.map(([la, lo]) => [X(lo), Y(la)]))];
   const yMap1 = Math.min(cv.h - 1, TOP + MAPH);
   for (let y = 0; y <= yMap1; y++) {
     const xs = [];
@@ -363,7 +368,7 @@ export function mapCanvas({ outer, holes = [], wruns = [], classes = {}, parkNam
   T(PAD, fy, idLine, MAP_TONES.ink, 2);
   const cr = '© DENDROGEO';
   if (W - PAD - 12 * cr.length > PAD + 12 * idLine.length + 8) T(W - PAD - 12 * cr.length, fy, cr, MAP_TONES.mut, 2);
-  Tfit(PAD, fy + 20, 'VERI: ' + ((meta && meta.source) || DATASET_ASCII) + ' / COZUNURLUK: 10 M' + (meta && meta.epsg ? ' / PROJEKSIYON: EPSG:' + meta.epsg : ''), MAP_TONES.mut);
+  Tfit(PAD, fy + 20, 'VERI: ' + ((meta && meta.source) || DATASET_ASCII) + ' / COZUNURLUK: '+(meta?.resolution||'10 M') + (meta && meta.epsg ? ' / PROJEKSIYON: EPSG:' + meta.epsg : ''), MAP_TONES.mut);
   if (meta && (meta.dateStr || meta.engine)) {
     const l3 = (meta.dateStr ? 'ANALIZ TARIHI: ' + meta.dateStr : '') +
       (meta.dateStr && meta.engine ? ' / ' : '') +
@@ -573,7 +578,7 @@ export function inventoryQa(rows, dict) {
 }
 
 /* ---------- snapshot ---------- */
-export async function buildSnapshot(parkId, { skipLulc = false, meta = null } = {}) {
+export async function buildSnapshot(parkId, { skipLulc = false, meta = null, surfaceSnapshot = null } = {}) {
   const genAt = new Date().toISOString();
   const park = (await rest('parks', { id: 'eq.' + parkId, limit: 1 }))[0];
   if (!park) throw new Error('Park bulunamadı: ' + parkId);
@@ -600,19 +605,20 @@ export async function buildSnapshot(parkId, { skipLulc = false, meta = null } = 
   /* Konum çiti denetimi SAYILARLA: her kayıt için gerçek nokta–poligon testi.
    * Daha önce verified_rows = rows.length varsayılıyordu; poligon dışında
    * koordinat taşıyan kayıt varsa rapor bunu beyan etmek zorundadır. */
-  const OG = await parkOuter(park).catch(() => null);
-  const gfInside = OG ? rows.filter((r) => pointInPolygon(+r.lat, +r.lon, OG.outer, OG.holes)).length : null;
+  const savedSurface = !skipLulc && surfaceSnapshot ? reviewedSurface(surfaceSnapshot,parkId) : null;
+  const OG = savedSurface ? {outer:surfaceSnapshot.outer[0],holes:surfaceSnapshot.holes||[]} : await parkOuter(park).catch(() => null);
+  const gfInside = OG ? rows.filter((r) => (savedSurface ? surfaceSnapshot.outer : [OG.outer]).some(outer=>pointInPolygon(+r.lat, +r.lon, outer, OG.holes))).length : null;
   const gfStat = OG ? { inside: gfInside, outside: rows.length - gfInside } : null;
   const ringPts = OG ? (OG.outer.length + (OG.holes || []).reduce((a, h) => a + h.length, 0)) : 0;
   const gjRing = (park.geom_json && Array.isArray(park.geom_json.outer) && park.geom_json.outer[0]) || null;
   const gjBbox = gjRing ? bboxRing(gjRing) : false;
   const geometryQA = OG ? {
-    source: (gjRing && !gjBbox) ? 'parks.geom_json (uygulamada çizilen sınır)' : ('OSM ' + (park.osm_key || '—')),
+    source: savedSurface ? 'Kayıtlı analiz sınırı' : (gjRing && !gjBbox) ? 'parks.geom_json (uygulamada çizilen sınır)' : ('OSM ' + (park.osm_key || '—')),
     ring_points: ringPts,
     ring_area_m2: OG ? Math.round(ringGeodesicAreaM2(OG.outer)) : null,
     self_intersections: ringPts <= 600 ? geometrySelfIntersections(OG.outer, OG.holes) : null,
     /* geom_json bbox ise analiz OSM poligonundan yürür; rapor bunu beyan eder */
-    geom_json_bbox_ignored: gjBbox ? { ring_points: gjRing.length, ring_area_m2: Math.round(ringGeodesicAreaM2(gjRing)) } : null,
+    geom_json_bbox_ignored: !savedSurface && gjBbox ? { ring_points: gjRing.length, ring_area_m2: Math.round(ringGeodesicAreaM2(gjRing)) } : null,
   } : null;
   /* Envanter kalite kapısı: kanonik sözlük + panel denklemiyle yeniden hesap */
   const qaSpecies = inventoryQa(rows, loadSpeciesDict());
@@ -636,7 +642,12 @@ export async function buildSnapshot(parkId, { skipLulc = false, meta = null } = 
     } catch (e) { author = { name: null, full_name: null, source: 'unavailable', note: String((e && e.message) || e).slice(0, 120) }; }
   }
   let lulc = null;
-  if (!skipLulc) {
+  if (!skipLulc && surfaceSnapshot) {
+    lulc=savedSurface;
+    lulc._outer=surfaceSnapshot.outer[0];
+    lulc._png=renderMapPNG({outer:surfaceSnapshot.outer[0],outers:surfaceSnapshot.outer,holes:surfaceSnapshot.holes||[],surfaceFeatures:surfaceSnapshot.features,classes:lulc.mapClasses,parkName:park.name,sub:'KAYITLI ANALIZ - '+fmtDateDot(surfaceSnapshot.acceptedAt),points:rows.map(r=>({lat:+r.lat,lon:+r.lon})),pointStat:gfStat,meta:{id:meta?.id,epsg:lulc.epsg,dateStr:fmtDateDot(surfaceSnapshot.acceptedAt),source:'UYDU / OSM / KULLANICI KARARI',resolution:'UYDU 10/20 M; VEKTOR SINIR'}});
+    delete lulc.mapClasses;
+  } else if (!skipLulc) {
     try {
       const L = await runLULC(park, OG);
       if (L) {
@@ -694,7 +705,8 @@ export async function buildSnapshot(parkId, { skipLulc = false, meta = null } = 
       git_commit: (meta && meta.git_commit) || GIT_COMMIT || null,
       report_id: (meta && meta.id) || null,
       epsg: (lulc && lulc.epsg) || null,
-      resolution_m: 10,
+      resolution_m: savedSurface ? null : 10,
+      resolution_note: savedSurface ? "Uydu 10/20 m; OSM ve çizim vektör sınırları" : "10 m",
       dataset: (lulc && lulc.source) || DATASET_DEFAULT,
     },
     mc: { ...MC_CFG },
@@ -708,7 +720,7 @@ export async function buildSnapshot(parkId, { skipLulc = false, meta = null } = 
       total: rows.length,
       verified_rows: gfInside == null ? rows.length : gfInside,
       outside_rows: gfInside == null ? 0 : rows.length - gfInside,
-      polygon_source: OG ? (park.geom_json && park.geom_json.outer ? 'parks.geom_json' : 'OSM') : 'yok',
+      polygon_source: savedSurface ? 'Kayıtlı analiz sınırı' : OG ? (park.geom_json && park.geom_json.outer ? 'parks.geom_json' : 'OSM') : 'yok',
     },
     author,
     geometry_qa: geometryQA,
@@ -793,6 +805,7 @@ export function renderReport(snap, { id, hash, version = 1, meta = null }) {
   const engineVer = M.engine_version || null;
   const appVer = M.app_version || null;
   const git = M.git_commit || null;
+  const resolutionLabel = L?.review ? "Uydu 10/20 m + vektör sınır" : L?.accepted ? "Kayıtlı alan toplamları" : "10 m";
   const dataset = (L && L.source) || 'ESA WorldCover 10 m · 2021 (v200)';
   const dataYear = (L && L.year) || 2021;
   const epsg = epsgLabel((L && L.epsg) || M.epsg || null);
@@ -896,7 +909,7 @@ export function renderReport(snap, { id, hash, version = 1, meta = null }) {
     L ? qaRow('Raster kapsama', (L.cells || 0) > 0 && covHa > 0, `${L.cells || 0} kaynak hücre · kapsama ${covHa != null ? trNum(covHa, 2) + ' ha' : '—'}`) : null,
     L ? qaRow('Alan dengesi', deltaPct != null && deltaPct <= 0.5, deltaPct != null ? `raster/park alan farkı %${trNum(deltaPct, 3)} (eşik %0,500)` : '—') : null,
     L ? qaRow('Hücre–kesit hesabı', true, 'tam poligon–hücre kesişimi; sınır hücrelerinde alan ağırlıklı hesap') : null,
-    L ? qaRow('Veri kaynağı', !!L.source, `${esc(dataset)} · yıl ${dataYear} · 10 m`) : null,
+    L ? qaRow('Veri kaynağı', !!L.source, `${esc(dataset)} · yıl ${dataYear} · ${esc(resolutionLabel)}`) : null,
     L ? qaRow('Sınıflandırma', (L.classes || []).length > 0, `${(L.classes || []).length} sınıf${L.masked_ha > 0 ? ` · maskeli ${trNum(L.masked_ha, 2)} ha (bulut/gölge)` : ' · maskeli alan yok'}`) : null,
     L && L.agreement ? qaRow('Çapraz doğrulama', true, `${esc(L.cross || 'bağımsız kaynak')} uzlaşması: ${Object.entries(L.agreement).map(([k, v]) => `${esc(k)} %${trNum(v.agreementPct, 0)}`).join(', ')}`) : null,
     INV ? qaRow('Tür sözlüğü eşleşmesi', INV.n_unknown === 0 ? true : `⚠ ${INV.n_unknown} tür dışarıda`, `${INV.n_rows - INV.n_unknown}/${INV.n_rows} kayıt kanonik tür sözlüğüyle eşleşti${INV.unknown.length ? ' · sözlük dışında: ' + esc(INV.unknown.join(', ')) + ' (grup varsayılan ρ ile hesaplandı)' : ''}`) : null,
@@ -958,7 +971,7 @@ export function renderReport(snap, { id, hash, version = 1, meta = null }) {
   /* ---- Değerlendirme: yalnız veriden türeyen betimleme ---- */
   const clsPct = (k) => { const c = ((L && L.classes) || []).find((x) => x.key === k); return c ? c.pct : null; };
   const distParts = [];
-  for (const [k, label] of [['green', 'yeşil alan'], ['hard', 'sert yüzey'], ['water', 'su'], ['bare', 'açık/çıplak alan'], ['other', 'diğer']]) {
+  for (const [k, label] of [['green', 'yeşil alan'], ['hard', 'sert yüzey'], ['building','bina'], ['water', 'su'], ['pool','havuz / süs havuzu'], ['bare', 'açık/çıplak alan'], ['other', 'diğer']]) {
     const v = clsPct(k); if (v != null && v > 0) distParts.push(`${label} %${trNum(v, 1)}`);
   }
   const dominant = (((L && L.classes) || []).slice().sort((a, b) => b.pct - a.pct))[0] || null;
@@ -975,7 +988,7 @@ export function renderReport(snap, { id, hash, version = 1, meta = null }) {
   /* ---- Sınırlılıklar ---- */
   const limItems = [
     'Arazi örtüsü sonuçları, kullanılan veri kaynağının mekânsal çözünürlüğü, veri edinim tarihi ve sınıflandırma doğruluğu ile sınırlıdır. 10 m çözünürlükteki veri, küçük ve dar yüzeylerin bağımsız olarak temsil edilmesini her durumda mümkün kılmayabilir.',
-    'OSM verileri yardımcı geometrik doğrulama amacıyla kullanılmış olup, eksik veya güncel olmayan OSM geometrileri analiz sonucunun tek başına belirleyicisi değildir.',
+    L?.review ? 'Kayıtlı analizde OSM nesne sınırları ve kullanıcı çizimleri sınıf alanlarını değiştirebilir; kaynak tarihi ve sınır doğruluğu saha doğrulaması gerektirir.' : 'OSM verileri yardımcı geometrik doğrulama amacıyla kullanılmış olup, eksik veya güncel olmayan OSM geometrileri analiz sonucunun tek başına belirleyicisi değildir.',
     knotted ? `Bu sürümde kullanılan park sınırı ${knotN} kendini kesen segment çifti (düğüm) içermektedir; arazi örtüsü çözümlemesi bu nedenle kalite eşiğini geçememiş ve rapor kapsamı dışında bırakılmıştır. Sınırın uygulamada yeniden çizilmesi (veya OSM poligonuna dönülmesi) önerilir.` : null,
     'Chave ve ark. (2014) pantropikal bir modeldir; Türkiye türleri için bölgesel kalibrasyon gerçekleştirilmemiştir.',
     `Örneklem büyüklüğü (n=${t.n}) sınırlıdır; park geneline ekstrapolasyon, güven aralığı ile birlikte dahi ihtiyatla yorumlanmalıdır.`,
@@ -1076,7 +1089,7 @@ export function renderReport(snap, { id, hash, version = 1, meta = null }) {
     ? ` (kaydedilen doğruluk: ${G.n_with_acc}/${G.n ?? NR} kayıt · ortalama ±${trNum(G.mean_acc_m, 1)} m)`
     : ` — ancak alıcı doğruluk değeri (accuracy_m) bu veri sürümünde kaydedilmediğinden GNSS hassasiyeti sayısal olarak beyan edilememektedir; konumsal doğrulama park poligonu üyelik testiyle sınırlıdır (§7)`;
   const photoTxt = (nPhoto === NR) ? 'zorunlu tutulmuş ve tüm kayıtlarda sağlanmıştır' : `kısmen sağlanmıştır (${nPhoto}/${NR} kayıt)`;
-  const lulcMethod = L ? `<p><b>4.4 Arazi örtüsü sınıflandırması.</b> Arazi örtüsü sınıflandırması, park sınırı içerisinde mekânsal çözünürlüğü 10 m olan raster veri (${esc(dataset)}) ile gerçekleştirilmiştir. Sınıflandırma sonuçları park geometrisi ile kesiştirilerek değerlendirilmiş; sınır hücrelerinde alan ağırlıklı hesaplama uygulanmıştır${epsg ? ` (analiz projeksiyonu: ${esc(epsg)})` : ''}. Bulut/gölge gölgesinde kalan hücreler maskelenmiş ve sınıf toplamına dahil edilmemiştir${L.masked_ha > 0 ? ` (bu sürümde ${trNum(L.masked_ha, 2)} ha)` : ''}. Raster kapsama alanı ile park geometrisi alanı arasındaki bağıl fark %0,5 eşiğini aşarsa sonuç YAYINLANMAZ; bu sürümde fark %${trNum(deltaPct ?? 0, 3)} olarak ölçülmüştür (Çizelge 3).</p>` : '';
+  const lulcMethod = L?.accepted ? `<p><b>4.4 Kayıtlı analiz sonucu.</b> ${esc(fmtDateTr(L.accepted_at))} tarihinde kabul edilmiş sınıf alanları yayın isteğinden alınmıştır. Eski kayıt ayrıntılı geometri taşımadığından yeni harita üretilmemiştir. Bu yayın için uydu analizi yeniden çalıştırılmamıştır.</p>` : L?.review ? `<p><b>4.4 Kayıtlı analiz sonucu.</b> ${esc(fmtDateTr(L.review.acceptedAt))} tarihinde kabul edilen analiz, yayın isteğine sabitlenerek aktarılmıştır. Bina ve havuzlar ayrı sınıftır; OSM nesne sınırları ve kullanıcı çizimleri park sınırına kırpılmıştır. Sayısal değerler ve harita aynı kayıtlı geometriden gelir. Uydu verisinin 10/20 m çözünürlük sınırı ile harita geometrilerinin tarih ve doğruluk sınırlamaları geçerlidir; bu kayıt bağımsız saha doğrulaması sayılmaz.</p>` : L ? `<p><b>4.4 Arazi örtüsü sınıflandırması.</b> Arazi örtüsü sınıflandırması, park sınırı içerisinde mekânsal çözünürlüğü 10 m olan raster veri (${esc(dataset)}) ile gerçekleştirilmiştir. Sınıflandırma sonuçları park geometrisi ile kesiştirilerek değerlendirilmiş; sınır hücrelerinde alan ağırlıklı hesaplama uygulanmıştır${epsg ? ` (analiz projeksiyonu: ${esc(epsg)})` : ''}. Bulut/gölge gölgesinde kalan hücreler maskelenmiş ve sınıf toplamına dahil edilmemiştir${L.masked_ha > 0 ? ` (bu sürümde ${trNum(L.masked_ha, 2)} ha)` : ''}. Raster kapsama alanı ile park geometrisi alanı arasındaki bağıl fark %0,5 eşiğini aşarsa sonuç YAYINLANMAZ; bu sürümde fark %${trNum(deltaPct ?? 0, 3)} olarak ölçülmüştür (Çizelge 3).</p>` : '';
 
   return `<!doctype html>
 <html lang="tr">
@@ -1231,7 +1244,7 @@ pre{background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:
 <div class="wrap">
 <div class="kick">DendroGeo Bilimsel Analiz Raporu · ${id} · sürüm ${verTxt}</div>
 <h1>${titleMain}</h1>
-<div class="sub">Saha ölçümünden allometrik hesaplama ve 10 m arazi örtüsü sınıflandırmasına uzanan, uçtan uca doğrulanmış park ölçekli analiz</div>
+<div class="sub">Saha ölçümleri, allometrik hesaplama ve ${L?.review ? "kayıtlı yüzey sonucu" : "arazi örtüsü sınıflandırması"} ile park ölçekli analiz</div>
 
 <div class="meta">
  <div><b>Rapor kimliği</b><code>${id}</code><span class="hint">${DGR_TITLE_DEF}</span></div>
@@ -1241,7 +1254,7 @@ pre{background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:
  <div><b>Analiz tarihi</b><code>${genTr}</code></div>
  <div><b>Analiz sürümü</b><code>${esc(engine)}${engineVer ? ' v' + esc(engineVer) : ''}${appVer ? ' · DendroGeo v' + esc(appVer) : ''}</code></div>
  <div><b>Veri dönemi</b><code>${dataYear} (arazi örtüsü)</code><span class="hint">saha ölçümleri: ${snap.period.from.slice(0, 10)} → ${snap.period.to.slice(0, 10)}</span></div>
- <div><b>Mekânsal çözünürlük</b><code>10 m</code></div>
+ <div><b>Mekânsal çözünürlük</b><code>${esc(resolutionLabel)}</code></div>
  <div><b>Park kimliği</b><code>${esc(P.osm_key || '—')} · DB #${P.id}</code></div>
  <div><b>Örneklem</b><code>${t.n} onaylı ölçüm · ${snap.species.length} tür</code></div>
  <div><b>Park alanı</b><code>${trNum(parkHa, 2)} ha (OSM poligonu)</code></div>
@@ -1259,8 +1272,8 @@ pre{background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:
 <p>Analiz alanı, ${esc(P.city)} (${esc(P.country)}) sınırları içinde yer alan ${esc(P.name)} park sahasıdır. Saha sınırı, ${srcTxt} türetilmiş olup ${trNum(parkHa, 2)} ha alan kaplamaktadır.${GJ ? ` Uygulamada çizili sınır kaydı bir dikdörtgen (${GJ.ring_points} nokta; ${trNum(GJ.ring_area_m2 / 10000, 2)} ha) olduğundan gerçek park sınırı sayılmamış, analiz OpenStreetMap poligonundan yürütülmüştür (ayrıntı §7).` : ''}${knotted ? ` Poligonda <b>${knotN} kendini kesen segment çifti</b> (düğüm) saptanmıştır; bu durum alan hesapları ile raster ayrışımını birbirinden ayırır ve arazi örtüsü çözümlemesinin kalite eşiğine takılmasına yol açar (§7, §9).` : ''} Envanter, ${snap.period.from.slice(0, 10)} – ${snap.period.to.slice(0, 10)} tarihleri arasında ${t.n} ölçüm noktasında gerçekleştirilmiştir${snap.geofence.outside_rows > 0 ? `; kayıtların ${snap.geofence.verified_rows}/${snap.geofence.total} adedi poligon içinde, ${snap.geofence.outside_rows} adedi poligon dışında konumlanmaktadır (ayrıntı §7)` : `; kayıtların tamamı poligon içinde konumlanmaktadır (denetim §7)`}.</p>
 
 <h2><span class="no">3</span>Veri Kaynakları</h2>
-<p><b>3.1 Birincil veri.</b> ${esc(dataset)}: Sentinel-1 ve Sentinel-2 füzyonundan üretilmiş küresel arazi örtüsü ürünü; mekânsal çözünürlük 10 m; veri dönemi ${dataYear}; lisans CC BY 4.0. Erişim, STAC kataloğu (Planetary Computer) üzerinden park poligonunu kesen karolar için gerçekleştirilmiştir.</p>
-<p><b>3.2 Bütünleyici veri.</b> OpenStreetMap (ODbL): park sınırı geometrisi ile su ve açıkça tanımlanmış sert yüzeylerin geometrik doğrulaması/iyileştirmesi amacıyla kullanılmıştır. <b>OSM verisi raster sınıflandırmanın yerine geçmez:</b> sınıf alanları birincil raster üründen hesaplanır; OSM yalnız sınır geometrisi ve bağımsız kontrol için kullanılır.</p>
+${L?.accepted ? `<p><b>3.1 Birincil veri.</b> ${esc(fmtDateTr(L.accepted_at))} tarihli kabul edilmiş yüzey alanları, kayıt sürümü ${esc(L.revision||"—")}.</p>` : L?.review ? `<p><b>3.1 Birincil veri.</b> Yayın isteğindeki kayıtlı analiz; kabul tarihi ${esc(fmtDateTr(L.review.acceptedAt))}. Kullanılan sahneler: ${esc((L.review.scenes||[]).filter(s=>s.usedCells>0).map(s=>s.datetime).join(", ")||"uydu taraması yok")}. Nesne sınırları: © OpenStreetMap contributors (ODbL) ve kullanıcı çizimleri. Kayıt geometrileri <a href="surface.geojson">GeoJSON</a> olarak indirilebilir.</p>` : `<p><b>3.1 Birincil veri.</b> ${esc(dataset)}: Sentinel-1 ve Sentinel-2 füzyonundan üretilmiş küresel arazi örtüsü ürünü; mekânsal çözünürlük 10 m; veri dönemi ${dataYear}; lisans CC BY 4.0. Erişim, STAC kataloğu (Planetary Computer) üzerinden park poligonunu kesen karolar için gerçekleştirilmiştir.</p>`}
+${L?.accepted ? `<p><b>3.2 Bütünleyici veri.</b> Bu eski kayıt sınıf alanlarını taşır; nesne geometrileri ve uydu sahne ayrıntıları kayıtlı değildir.</p>` : L?.review ? `<p><b>3.2 Bütünleyici veri.</b> OpenStreetMap bina, su, havuz ve açıkça tanımlanmış sert zemin sınırları ile kullanıcı çizimleri, kayıtlı analizde raster hücrelerini keserek ayrı yüzey alanları oluşturur. Çakışan çizimlerde son kullanıcı düzeltmesi önceliklidir. Harita tarihi, eksik nesneler ve konumsal doğruluk sonucu sınırlayabilir.</p>` : `<p><b>3.2 Bütünleyici veri.</b> OpenStreetMap (ODbL): park sınırı geometrisi ile su ve açıkça tanımlanmış sert yüzeylerin geometrik doğrulaması/iyileştirmesi amacıyla kullanılmıştır. <b>OSM verisi raster sınıflandırmanın yerine geçmez:</b> sınıf alanları birincil raster üründen hesaplanır; OSM yalnız sınır geometrisi ve bağımsız kontrol için kullanılır.</p>`}
 <p><b>3.3 Saha verisi.</b> ${t.n} adet DendroGeo saha ölçümü (DBH, boy, tür, GNSS konumu, fotoğraf kanıtı); tümü moderatör onaylıdır. Ölçüm kuralları <i>DendroGeo Saha Protokolü v1</i>'de tanımlıdır.</p>
 ${L && L.cross ? `<p><b>3.4 Çapraz doğrulama verisi.</b> ${esc(L.cross)}: bağımsız ikinci sınıflandırma kaynağı; grup bazlı uzlaşma §7'de raporlanır${L.crossError ? ` (bu sürümde çapraz karşılaştırma tamamlanamadı: ${esc(L.crossError)})` : ''}.</p>` : ''}
 
@@ -1301,7 +1314,7 @@ ${L ? `<p><b>5.2 Arazi örtüsü.</b> Sınıf alanları Çizelge 2'de sunulmuşt
 </tbody></table></div>` : ''}
 
 <h2><span class="no">6</span>Harita</h2>
-${L ? `<div class="fig"><img src="harita.png" alt="${esc(P.name)} park sahası arazi örtüsü sınıfları haritası; park sınırı ve ölçüm noktaları işaretli" style="width:100%;border-radius:8px"><div class="cap">Şekil 2 — ${esc(L.source)} sınıflandırmasının park poligonu ile tam kesişimi; koyu çizgi park sınırını (OSM), siyah noktalar envanter ölçüm noktalarını gösterir. Çizim, çözümleme motorunun kesintisiz hücre çıktısından birebir ölçekli üretilmiştir; bağlayıcı sayısal değerler Çizelge 2'de ve data.json'dadır. Harita altbilgisi belge kimliğini (${id}), veri kaynağını, çözünürlüğü, projeksiyonu (${esc(epsg || '—')}) ve analiz tarihini taşır: harita tek başına dolaşıma girse bile kaynağı belirlidir.</div></div>` : '<p>Bu sürümde harita üretilmemiştir.</p>'}
+${L ? `<div class="fig"><img src="harita.png" alt="${esc(P.name)} park sahası arazi örtüsü sınıfları haritası; park sınırı ve ölçüm noktaları işaretli" style="width:100%;border-radius:8px"><div class="cap">Şekil 2 — ${esc(L.source)} sınıflandırmasının park poligonu ile tam kesişimi; koyu çizgi park sınırını (OSM), siyah noktalar envanter ölçüm noktalarını gösterir. ${L.review?"Çizim, kabul edilmiş kayıt geometrilerinden üretilmiştir;":"Çizim, çözümleme motorunun kesintisiz hücre çıktısından birebir ölçekli üretilmiştir;"} bağlayıcı sayısal değerler Çizelge 2'de ve data.json'dadır. Harita altbilgisi belge kimliğini (${id}), veri kaynağını, çözünürlüğü, projeksiyonu (${esc(epsg || '—')}) ve analiz tarihini taşır: harita tek başına dolaşıma girse bile kaynağı belirlidir.</div></div>` : '<p>Bu sürümde harita üretilmemiştir.</p>'}
 
 <h2><span class="no">7</span>Kalite Kontrol ve Doğrulama</h2>
 <p>Sonuçlar üretilmeden önce hesaplamanın bütünlüğü aşağıdaki kontrollerle doğrulanmıştır (Çizelge 4). Kontroller otomatiktir. Rapor QA durumu üç hâllidir: <b>🔴 BLOKLU</b> — kritik veri hatası vardır, karbon sonucu bilimsel iletişimde kullanılmamalıdır; <b>🟡 İNCELEME</b> — veri geçerlidir, bazı istatistiksel kontroller inceleme uyarısı vermektedir; <b>🟢 GEÇERLİ</b> — tüm kritik kontroller geçmiştir. <b>Bu raporun QA durumu: ${QA_ST_LABEL}</b>${QA_BLOCKED ? ` — kritik hata: ${QA_WHY}. Karbon toplamı bu nedenle GEÇİCİDİR ve hata giderilmeden bilimsel iletişimde KULLANILMAMALIDIR.` : (QA_REVIEW ? ` — inceleme kalemleri: ${QA_WHY}. Bu uyarılar birer inceleme kalemidir; veri hatası hükmü DEĞİLDİR ve karbon sonucunun geçerliliğini ortadan kaldırmaz.${AGAC_DEGER_TEMIZ ? ' Bu rapordaki inceleme kalemlerinin HİÇBİRİ ağaç ölçüm değerleriyle (DBH, boy, tür, karbon) ilgili DEĞİLDİR: envanter kontrollerinin tümü geçerlidir; kalan kalem/kalemler ölçülemeyen veya kaydedilmeyen üst veri alanlarıdır (ör. GNSS alıcı doğruluğu accuracy_m boş bırakılmışsa bu kontrol koşamaz).' : ''}` : '')}${qaStates.includes('info') ? ' Çizelge 4’te ayrıca <b>ℹ️ BEYAN</b> işaretli bilgilendirme satırları bulunabilir: bunlar bir kalite hükmü DEĞİLDİR ve rapor durumunu etkilemez.' : ''} Karbon hesabı, saha ölçümlerinde kayıtlı DBH (göğüs çapı, cm) değerleri kullanılarak gerçekleştirilmiştir.</p>
@@ -1334,10 +1347,10 @@ ${evalParas}
 <div class="tscroll"><table><thead><tr><th>Öğe</th><th>Kayıt</th></tr></thead><tbody>
 <tr><td class="tr">Analiz sürümü</td><td class="qd">${esc(engine)}${engineVer ? ' ' + esc(engineVer) : ' —'}${appVer ? ' · uygulama ' + esc(appVer) : ''}</td></tr>
 <tr><td class="tr">Veri seti</td><td class="qd">${esc(dataset)}</td></tr>
-<tr><td class="tr">Çözünürlük</td><td class="qd">10 m</td></tr>
+<tr><td class="tr">Çözünürlük</td><td class="qd">${esc(resolutionLabel)}</td></tr>
 <tr><td class="tr">Park geometrisi</td><td class="qd">kayıtlı (<code>${esc(P.osm_key || '—')}</code>; yayın anındaki sınır)</td></tr>
 <tr><td class="tr">Analiz yöntemi</td><td class="qd">sürüm kontrollü${git ? ` (git commit <code>${esc(String(git).slice(0, 7))}</code>)` : ' (git commit kaydı bu kopyada yok)'}</td></tr>
-<tr><td class="tr">Üretim komutu</td><td class="qd"><code>node scripts/make-report.mjs --park ${P.id}</code></td></tr>
+<tr><td class="tr">Üretim komutu</td><td class="qd">${L?.review ? "Yayın isteğine sabitlenen analiz: data.json ve surface.geojson" : `<code>node scripts/make-report.mjs --park ${P.id}</code>`}</td></tr>
 </tbody></table></div>
 <p>Bu raporun yeniden üretilebilmesi için kullanılan yöntem, veri kaynağı ve analiz sürümü rapor üst verisinde (<code>metadata.json</code>) kayıt altına alınmıştır. Raster girdi bulut kataloğundan okunduğu için, kaynak ürünün YENİ bir sürümü yayımlanırsa aynı komut farklı sonuç üretebilir; bu nedenle veri seti sürümü (v200, ${dataYear}) ve üretim anı §11'de sabitlenmiştir.</p>
 
@@ -1347,7 +1360,7 @@ ${evalParas}
  <div><b>Engine</b><code>${esc(engine)}</code></div>
  <div><b>Engine version</b><code>${engineVer ? esc(engineVer) : '—'}</code></div>
  <div><b>Source dataset</b><code>${esc(dataset)}</code></div>
- <div><b>Resolution</b><code>10 m</code></div>
+ <div><b>Resolution</b><code>${esc(resolutionLabel)}</code></div>
  <div><b>Projection</b><code>${esc(epsg || '—')}</code></div>
  <div><b>Git commit</b><code>${git ? esc(String(git).slice(0, 7)) : '—'}</code></div>
  <div><b>Generated</b><code>${esc(snap.generated_at)}</code></div>
@@ -1526,6 +1539,7 @@ export function buildMetadata(snap, { id, hash, version = '1.0', meta = null, hi
   const M = Object.assign({}, snap.provenance || {}, meta || {});
   const L = (snap.lulc && !snap.lulc.error) ? snap.lulc : null;
   const P = snap.park, t = snap.totals;
+  const resolutionLabel = L?.review ? "Uydu 10/20 m + vektör sınır" : L?.accepted ? "Kayıtlı alan toplamları" : "10 m";
   const dataset = (L && L.source) || DATASET_DEFAULT;
   const related = [
     { relationType: 'IsDerivedFrom', relatedIdentifier: '10.5281/zenodo.7254221', relatedIdentifierType: 'DOI', resourceType: 'Dataset', label: dataset },
@@ -1559,7 +1573,7 @@ export function buildMetadata(snap, { id, hash, version = '1.0', meta = null, hi
     spatialCoverage: `${P.city}, ${P.country}`,
     temporalCoverage: String((L && L.year) || 2021),
     measurementPeriod: `${snap.period.from.slice(0, 10)}/${snap.period.to.slice(0, 10)}`,
-    resolution: '10 m',
+    resolution: L?.review ? 'Uydu 10/20 m + vektör sınır' : '10 m',
     methodVersion: `${M.engine || 'DendroGeo LC Engine'}${M.engine_version ? ' ' + M.engine_version : ''}`.trim(),
     projection: epsgLabel((L && L.epsg) || M.epsg || null),
     sampleSize: t.n,
@@ -1664,13 +1678,14 @@ export async function publishPark(parkId, opts = {}) {
   const id = nextReportId(dir, year);
   const meta = { id, git_commit: GIT_COMMIT, engine_version: ENGINE_VERSION, app_version: APP_VERSION };
   meta.qr_uri = await qrDataUri(SITE_ORIGIN + '/rapor/' + id + '/'); /* künye QR'ı (0012) */
-  const { snap, hash, png } = await buildSnapshot(+parkId, { skipLulc: !!opts.skipLulc, meta });
+  const { snap, hash, png } = await buildSnapshot(+parkId, { skipLulc: !!opts.skipLulc, meta, surfaceSnapshot: opts.surfaceSnapshot || null });
   const version = 1;          /* iç sürüm alanı (sayı) — kuyruk günlüğü bunu taşır */
   const verTxt = '1.0';       /* belge sürümü (gösterim/metadata): her DGR 1.0 doğar */
   const history = parkHistory(dir, snap.park.id, id);
   const out = join(dir, id);
   mkdirSync(out, { recursive: true });
   if (png) writeFileSync(join(out, 'harita.png'), png);
+  if(snap.lulc?.review)writeFileSync(join(out,'surface.geojson'),JSON.stringify({type:'FeatureCollection',features:snap.lulc.review.features}));
   const html = renderReport(snap, { id, hash, version, meta: Object.assign({}, meta, { history }) });
   writeFileSync(join(out, 'index.html'), html);
   writeFileSync(join(out, 'data.json'), JSON.stringify(snap)); /* 0012: sıkıştırılmış (arşiv boyutu ~%45 küçük) */
@@ -1715,3 +1730,8 @@ export async function main() {
   console.log(`   atıf   : ${r.citation}`);
 }
 if (process.argv[1] === fileURLToPath(import.meta.url)) main().catch((e) => { console.error('❌', e.message); process.exit(1); });
+
+function fillSurfacePolygon(cv,rings,col){
+ const pts=rings.flat();let y0=Math.max(0,Math.floor(Math.min(...pts.map(p=>p[1])))),y1=Math.min(cv.h-1,Math.ceil(Math.max(...pts.map(p=>p[1]))));
+ for(let y=y0;y<=y1;y++){const xs=[];for(const ring of rings)for(let i=0,j=ring.length-1;i<ring.length;j=i++){const a=ring[j],b=ring[i];if((a[1]>y+.5)!==(b[1]>y+.5))xs.push(a[0]+(y+.5-a[1])/(b[1]-a[1])*(b[0]-a[0]));}xs.sort((a,b)=>a-b);for(let i=0;i+1<xs.length;i+=2)cv.rect(xs[i],y,xs[i+1],y,col);}
+}

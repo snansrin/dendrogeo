@@ -239,7 +239,7 @@
 <!-- DİL KATMANI (0035): TR markup varsayılan; EN sözlüğü çalışma zamanında
      uygulanır (dgToggleLang). defer sırası önemli değil — DOMContentLoaded'da
      ya da hemen (hazırsa) çalışır. module-registry + CORE_ASSETS kaydı şart. -->
-<script src="src/config/i18n.js?v=094273b4" defer></script>
+<script src="src/config/i18n.js?v=e43e6cef" defer></script>
 <script src="src/utils/geo.js?v=3e796768" defer></script>
 <script src="src/utils/truncation.js?v=f43c76b3" defer></script>
 <!-- Faz 7: geotiff (317 KB) ve chart.js (208 KB) artık SENKRON yüklenmiyor;
@@ -265,8 +265,8 @@
 <script src="src/services/report-publish.js?v=46ecdba2" defer></script>
 <script src="src/services/park-invites.js?v=1023c17d" defer></script>
 <script src="src/services/world.js?v=c72d9019" defer></script>
-<script src="src/services/measure.js?v=452c298c" defer></script>
-<script src="src/services/map.js?v=0ed6573c" defer></script>
+<script src="src/services/measure.js?v=444d6096" defer></script>
+<script src="src/services/map.js?v=317c80b3" defer></script>
 <!-- LULC ZİNCİRİ ARTIK TEMBEL (2026-09-25 · Faz 8): 8 dosya ilk yüklemede
      indirilmiyor. Yalnız "🌿 Yüzey Örtüsü Analizi"ne basan kullanıcı için
      src/utils/lazylibs.js → dgEnsureLulc() sırayla enjekte eder
@@ -279,7 +279,7 @@
 <script src="src/services/osm-client.js?v=16aaa145" defer></script>
 <script src="src/services/park-geometry.js?v=ff23581a" defer></script>
 <script src="src/services/geofence.js?v=f1d93562" defer></script>
-<script src="src/services/park-query.js?v=fb33a0b7" defer></script>
+<script src="src/services/park-query.js?v=dc55e905" defer></script>
 <!-- PARK KİMLİĞİ (2026-09-24): queryPark'ın bulduğu parkı public.parks'a yazar,
      projeyi parka bağlar, ölçüm kapısını (park algılanmadan ölçüm yok) kurar.
      Sıra ÖNEMLİ: park-query'den sonra, grid-engine'den önce (grid panelindeki
@@ -289,7 +289,7 @@
 <script src="src/ui/park-panel.js?v=3eead8ad" defer></script>
 <script src="src/ui/park-export.js?v=4d2f0de5" defer></script>
 <script src="src/services/dash.js?v=4556cd69" defer></script>
-<link rel="stylesheet" href="css/style.css?v=010b3357">
+<link rel="stylesheet" href="css/style.css?v=a621830b">
 <link rel="stylesheet" href="css/landing.css?v=85504b78">
 <link rel="stylesheet" href="css/park-panel.css?v=b95dd215">
 <!-- TASARIM SİSTEMİ (2026-09-27, 2. deneme): ui-standard.css geri BAĞLANDI
@@ -763,7 +763,6 @@
     <details class="measure-details"><summary>Konum ayrıntıları ve paylaşım</summary><p class="measure-help">Kayıt için GPS doğruluğu en fazla ±60 m olmalıdır.</p><div class="measure-coordinates"><div><span class="lbl">Enlem</span><div class="mono" id="gLat">—</div></div><div><span class="lbl">Boylam</span><div class="mono" id="gLon">—</div></div><div><span class="lbl">Rakım</span><div class="mono" id="gAlt">—</div></div><div><span class="lbl">Sinyal</span><div class="mono" id="gQ">—</div></div></div>
      <label class="measure-share"><input type="checkbox" class="dg-switch" id="dgLiveShare" checked onchange="dgLiveShareToggle(this.checked)"><span>Canlı konumumu park ekibiyle paylaş<small>Geçicidir; veritabanına yazılmaz.</small></span></label><div id="dgMatesNote" class="dg-meta"></div>
     </details>
-    <div id="iosHint" class="alert info" style="display:none"><b>iPhone kullanıcısı mısınız?</b><br><span>Ayarlar → Gizlilik ve Güvenlik → Konum Servisleri → Safari Siteleri → Uygulamayı Kullanırken.</span></div>
    </section>
    <section class="card measure-tree" aria-labelledby="measureTreeTitle">
     <div class="dg-png-kicker">2 · AĞAÇ</div><h3 id="measureTreeTitle">Ağaç bilgileri</h3>
@@ -787,18 +786,19 @@
       <svg class="arrow" id="navArrow" viewBox="0 0 100 100"><path d="M50 5 L70 70 L50 55 L30 70 Z" fill="var(--green)"/></svg>
       <div><div class="val" id="navDist">—</div><div class="lbl">hedefe mesafe</div><div class="mono" id="navTarget" style="color:var(--amber-ink);margin-top:6px">—</div></div>
      </div>
-     <div class="waypoint-actions"><button class="btn blue sm" onclick="dgNearestWaypoint()">📍 En yakın bekleyen</button><button class="btn sm ghost" onclick="dgNextWaypoint()">→ Sıradaki nokta</button><button class="btn sm ghost" onclick="dgFocusWaypoint()">🎯 Hedefi göster</button><button class="btn sm ghost" onclick="dgFitWaypoints()">🗺 Tüm noktalar</button></div>
+     <div class="waypoint-actions"><button class="btn blue sm" onclick="dgNearestWaypoint()">📍 En yakın bekleyen</button><button class="btn sm ghost" onclick="dgNextWaypoint()">→ Sıradaki nokta</button><button class="btn sm ghost" onclick="dgFocusWaypoint(true)">🎯 Hedefi göster</button><button class="btn sm ghost" onclick="dgFitWaypoints()">🗺 Tüm noktalar</button></div>
      <p id="navGuidance" class="measure-help" role="status">Hedef seçerek navigasyona başlayın.</p>
      <button class="dg-png-btn primary" style="margin-top:14px" onclick="arriveWp()">🎯 Vardım → Ölçüme Geç</button>
      <p id="navGps" class="measure-help" role="status">GPS konumu bekleniyor.</p>
     </div>
-    <div class="card"><div id="navMap" class="notranslate" translate="no"></div><div class="lbl" style="margin-top:8px">🔴 waypoint (numaralı, tıkla=hedef) · 🟢 yapıldı · 🔵 konumun</div></div>
+    <details id="wpMapPanel" class="card waypoint-map" ontoggle="if(this.open&amp;&amp;navMap){navMap.invalidateSize();dgFocusWaypoint();}"><summary>🗺 Harita</summary><div id="navMap" class="notranslate" translate="no"></div><div class="lbl" style="margin-top:8px">🔴 waypoint (numaralı, tıkla=hedef) · 🟢 yapıldı · 🔵 konumun</div></details>
     <div class="card waypoint-list">
      <div style="margin-top:24px;border-top:1px solid var(--line);padding-top:16px">
       <div class="lbl" style="margin-bottom:10px">📍 Waypoint Listesi</div>
       <div class="waypoint-filters"><div><label class="lbl" for="wpSearch">Nokta ara</label><input id="wpSearch" type="search" placeholder="P12 veya 12" oninput="renderWaypointList()"></div><div><label class="lbl" for="wpFilter">Durum</label><select id="wpFilter" onchange="renderWaypointList()"><option value="all">Tümü</option><option value="pending">Bekleyen</option><option value="done">Tamamlanan</option></select></div></div>
       <div class="waypoint-sort"><label class="lbl" for="wpSort">Sıralama</label><select id="wpSort" onchange="renderWaypointList()"><option value="id">Nokta numarası</option><option value="distance">Yakından uzağa (GPS)</option></select></div>
       <ul id="wpListTable" class="waypoint-points" aria-label="Waypoint noktaları"></ul>
+      <div id="wpPager" class="waypoint-pager"></div>
      </div>
      <details class="waypoint-files"><summary>📂 CSV ve liste yönetimi</summary>
      <div class="lbl" style="margin:12px 0 6px">Waypoints.csv Yükle (X,Y,id)</div>

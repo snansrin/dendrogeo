@@ -666,7 +666,8 @@ describe("0058 · Doğrulanmış Harita PNG (kullanıcının refactor'ü üstün
     assert.match(sens, /function dgSensExportPng\(\)\{/);
     /* onların kabul hattı: dgSensAreas (polygon-clipping summarize) + dgSensEffective */
     assert.match(sens, /const areas=dgSensAreas\(\)\|\|dgSensGroupAreas\(\);/);
-    assert.match(sens, /COL\[dgSensEffective\(c\)\]/);
+    assert.match(sens, /COL\[part.type\]/);
+    assert.match(sens, /g.fill\("evenodd"\)/);
     assert.match(sens, /rec\.features\|\|\[\]/);
   });
   test("künye dürüst: parmak izi + dönem + ÖNİZLEME/KABUL damgası canvas'ta", () => {

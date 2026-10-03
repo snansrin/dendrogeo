@@ -58,7 +58,6 @@
     <details class="measure-details"><summary>Konum ayrıntıları ve paylaşım</summary><p class="measure-help">Kayıt için GPS doğruluğu en fazla ±60 m olmalıdır.</p><div class="measure-coordinates"><div><span class="lbl">Enlem</span><div class="mono" id="gLat">—</div></div><div><span class="lbl">Boylam</span><div class="mono" id="gLon">—</div></div><div><span class="lbl">Rakım</span><div class="mono" id="gAlt">—</div></div><div><span class="lbl">Sinyal</span><div class="mono" id="gQ">—</div></div></div>
      <label class="measure-share"><input type="checkbox" class="dg-switch" id="dgLiveShare" checked onchange="dgLiveShareToggle(this.checked)"><span>Canlı konumumu park ekibiyle paylaş<small>Geçicidir; veritabanına yazılmaz.</small></span></label><div id="dgMatesNote" class="dg-meta"></div>
     </details>
-    <div id="iosHint" class="alert info" style="display:none"><b>iPhone kullanıcısı mısınız?</b><br><span>Ayarlar → Gizlilik ve Güvenlik → Konum Servisleri → Safari Siteleri → Uygulamayı Kullanırken.</span></div>
    </section>
    <section class="card measure-tree" aria-labelledby="measureTreeTitle">
     <div class="dg-png-kicker">2 · AĞAÇ</div><h3 id="measureTreeTitle">Ağaç bilgileri</h3>
@@ -82,18 +81,19 @@
       <svg class="arrow" id="navArrow" viewBox="0 0 100 100"><path d="M50 5 L70 70 L50 55 L30 70 Z" fill="var(--green)"/></svg>
       <div><div class="val" id="navDist">—</div><div class="lbl">hedefe mesafe</div><div class="mono" id="navTarget" style="color:var(--amber-ink);margin-top:6px">—</div></div>
      </div>
-     <div class="waypoint-actions"><button class="btn blue sm" onclick="dgNearestWaypoint()">📍 En yakın bekleyen</button><button class="btn sm ghost" onclick="dgNextWaypoint()">→ Sıradaki nokta</button><button class="btn sm ghost" onclick="dgFocusWaypoint()">🎯 Hedefi göster</button><button class="btn sm ghost" onclick="dgFitWaypoints()">🗺 Tüm noktalar</button></div>
+     <div class="waypoint-actions"><button class="btn blue sm" onclick="dgNearestWaypoint()">📍 En yakın bekleyen</button><button class="btn sm ghost" onclick="dgNextWaypoint()">→ Sıradaki nokta</button><button class="btn sm ghost" onclick="dgFocusWaypoint(true)">🎯 Hedefi göster</button><button class="btn sm ghost" onclick="dgFitWaypoints()">🗺 Tüm noktalar</button></div>
      <p id="navGuidance" class="measure-help" role="status">Hedef seçerek navigasyona başlayın.</p>
      <button class="dg-png-btn primary" style="margin-top:14px" onclick="arriveWp()">🎯 Vardım → Ölçüme Geç</button>
      <p id="navGps" class="measure-help" role="status">GPS konumu bekleniyor.</p>
     </div>
-    <div class="card"><div id="navMap" class="notranslate" translate="no"></div><div class="lbl" style="margin-top:8px">🔴 waypoint (numaralı, tıkla=hedef) · 🟢 yapıldı · 🔵 konumun</div></div>
+    <details id="wpMapPanel" class="card waypoint-map" ontoggle="if(this.open&amp;&amp;navMap){navMap.invalidateSize();dgFocusWaypoint();}"><summary>🗺 Harita</summary><div id="navMap" class="notranslate" translate="no"></div><div class="lbl" style="margin-top:8px">🔴 waypoint (numaralı, tıkla=hedef) · 🟢 yapıldı · 🔵 konumun</div></details>
     <div class="card waypoint-list">
      <div style="margin-top:24px;border-top:1px solid var(--line);padding-top:16px">
       <div class="lbl" style="margin-bottom:10px">📍 Waypoint Listesi</div>
       <div class="waypoint-filters"><div><label class="lbl" for="wpSearch">Nokta ara</label><input id="wpSearch" type="search" placeholder="P12 veya 12" oninput="renderWaypointList()"></div><div><label class="lbl" for="wpFilter">Durum</label><select id="wpFilter" onchange="renderWaypointList()"><option value="all">Tümü</option><option value="pending">Bekleyen</option><option value="done">Tamamlanan</option></select></div></div>
       <div class="waypoint-sort"><label class="lbl" for="wpSort">Sıralama</label><select id="wpSort" onchange="renderWaypointList()"><option value="id">Nokta numarası</option><option value="distance">Yakından uzağa (GPS)</option></select></div>
       <ul id="wpListTable" class="waypoint-points" aria-label="Waypoint noktaları"></ul>
+      <div id="wpPager" class="waypoint-pager"></div>
      </div>
      <details class="waypoint-files"><summary>📂 CSV ve liste yönetimi</summary>
      <div class="lbl" style="margin:12px 0 6px">Waypoints.csv Yükle (X,Y,id)</div>

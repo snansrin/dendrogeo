@@ -30,11 +30,15 @@ assert.match(review,/pool:\{group:"pool",label:"Havuz \/ süs havuzu"\}/);
 assert.match(review,/hard:\{group:"hard",label:"Sert zemin"\}/);
 
 const field=readFileSync(new URL('../src/services/field-ux.js',import.meta.url),'utf8');
-assert.match(field,/DG_PARK!=="undefined"&&DG_PARK&&DG_PARK\.id/,'aktif park DG_PARK üzerinden çözülmeli');
-assert.match(field,/matchMedia\("\(max-width: 760px\)"\)\.matches\?12:24/,'waypoint mobil sayfası 12 olmalı');
-assert.match(field,/map\.invalidateSize/,'Leaflet yerleşim değişiminde yeniden hizalanmalı');
-assert.match(field,/8500/,'iOS konum yardımı uzun toast olmalı');
-assert.match(field,/t\?\.building/,'OSM bina nesneleri otomatik kanıt katmanına alınmalı');
+assert.doesNotMatch(field,/window\.(startGps|renderWaypointList|dgSensRefreshLayer)\s*=/,'compatibility loader must not replace native field behavior');
+const sens=readFileSync(new URL('../src/ui/lc-sens.js',import.meta.url),'utf8');
+assert.match(sens,/typeof DG_PARK!=="undefined"/);
+assert.match(sens,/map\.invalidateSize/);
+const map=readFileSync(new URL('../src/services/map.js',import.meta.url),'utf8');
+assert.match(map,/DG_WP_PAGE_SIZE=8/);
+const measure=readFileSync(new URL('../src/services/measure.js',import.meta.url),'utf8');
+assert.match(measure,/12000/);
+assert.match(review,/t\.building/);
 
 const migration=readFileSync(new URL('../supabase/migrations/20261003203000_report_accepted_surface_snapshot.sql',import.meta.url),'utf8');
 assert.match(migration,/surface_snapshot jsonb/);
@@ -46,6 +50,6 @@ assert.match(migration,/new\.with_lulc := false/,'kabul snapshotı varken yenide
 const queue=readFileSync(new URL('../scripts/publish-queue.mjs',import.meta.url),'utf8');
 assert.match(queue,/surface_snapshot/);
 assert.match(queue,/applyAcceptedSurfaceSnapshot/);
-assert.match(queue,/skipLulc: accepted \|\| req\.with_lulc === false/);
+assert.match(queue,/skipLulc: accepted \|\| \(!geometrySnapshot && req\.with_lulc === false\)/);
 
 console.log('✅ surface-report-field-ux: accepted snapshot + building/pool + 300-WP saha kilitleri geçti');
