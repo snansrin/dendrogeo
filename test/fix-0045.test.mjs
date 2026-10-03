@@ -172,7 +172,7 @@ describe('0045 · i18n + sürüm sözleşmesi', () => {
     for (const s of ['📡 Canlı Aksiyon Akışı', 'çevrimiçi oldu', 'görüntüledi', 'ölçüm kaydetti', 'park algıladı', 'dışa aktardı', 'rapor yayını istedi', 'oturum', 'gezinti', 'son eylem', 'iz', '⬆ Gizle', '⬇ Göster'])
       assert.ok(i18n.includes(JSON.stringify(s) + ':'), 'eksik EN: ' + s);
   });
-  test('⭐ içerik değişti → sw r61', () => {
-    assert.match(rd('sw.js'), /CACHE_VERSION = 'dendrogeo-sw-v2-r61'/);
+  test('⭐ içerik değişti → sw r62 veya sonrası', () => {
+    assert.match(rd('sw.js'), /CACHE_VERSION = 'dendrogeo-sw-v2-r(?:6[2-9]|[7-9]\d|\d{3,})'/);
   });
 });

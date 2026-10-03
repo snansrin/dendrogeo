@@ -5,7 +5,7 @@
   "description": "DendroGeo — Küresel Ağaç Envanteri ve Karbon Veri Sistemi",
   "type": "module",
   "scripts": {
-    "test": "node --test test/",
+    "test": "node scripts/run-tests.mjs",
     "build": "node scripts/build-index.mjs --write",
     "build:check": "node scripts/build-index.mjs --check",
     "check:csp": "node scripts/check-csp.mjs",

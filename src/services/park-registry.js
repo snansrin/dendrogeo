@@ -895,10 +895,9 @@ function dgParkGate(auto){
   box.style.display="block";
   box.className="alert ok";
   box.innerHTML=
-    `<b>🌳 ${esc(parkName)}</b> · proje: <b>${esc(p.name)}</b>`+
+    `<div class="measure-park-summary"><span><b>🌳 ${esc(parkName)}</b>`+
     (p.parks&&p.parks.area_m2?` · ${dgFmtHa(p.parks.area_m2)}`:``)+
-    `<br><span style="font-size:.78rem">Bu parktaki tüm kullanıcıların verileri karşılaştırmada tek satırda toplanır.</span>`+
-    ` <button class="btn sm ghost" style="margin-left:8px" onclick="startParkScan({projectId:${p.id},returnTo:'measure'})">Parkı değiştir</button>`;
+    `</span><button class="btn sm ghost" onclick="startParkScan({projectId:${p.id},returnTo:'measure'})">Parkı değiştir</button></div>`;
   if(save)save.disabled=false;
   return true;
 }
@@ -910,7 +909,9 @@ function dgProjectChanged(){
  /* 0036 (T5): proje değişince canlı konum kanalı yeni parka taşınır. */
  if(typeof dgLiveShareJoinCurrent==="function"){try{dgLiveShareJoinCurrent();}catch(e){}}
   dgParkGate();
-  if(typeof manualPoint!=="undefined"&&!manualPoint&&typeof autoFillPointId==="function"){
+  if(typeof manualPoint!=="undefined"&&!manualPoint&&!EDIT_ID&&typeof autoFillPointId==="function"){
+    $("mPoint").value="";
+    $("pointQueryResult").style.display="none";
     autoFillPointId();
   }
 }

@@ -42,7 +42,7 @@ async function reverseGeocode(lat,lon){
  *
  * dgPhotoScan SAF fonksiyondur (canvas verisi alır) → node'da testsiz
  * tarayıcı olmadan doğrulanabilir. */
-function loadImg(file){return new Promise((res,rej)=>{const u=URL.createObjectURL(file);const i=new Image();i.onload=()=>res({i,u});i.onerror=rej;i.src=u;});}
+function loadImg(file){return new Promise((res,rej)=>{const u=URL.createObjectURL(file);const i=new Image();i.onload=()=>res({i,u});i.onerror=()=>{URL.revokeObjectURL(u);rej(new Error("image"));};i.src=u;});}
 function dgPhotoScan(d,S){
  const n=S*S;
  let green=0,warm=0,purple=0,woody=0,blue=0,cloud=0,dark=0,lumSum=0;
@@ -99,14 +99,23 @@ function dgPhotoLabel(m){
  if(m.blue>=0.25&&(m.struct>=0.025||m.dark>=0.03))t.push(_tms("kış kadrajı (dal silüeti)"));
  return t.join(" · ");
 }
+let dgPhotoCheckVersion=0;
+function dgClearMeasurePhoto(){
+ dgPhotoCheckVersion++;photoOk=false;
+ $("mPhoto").value="";$("mPhotoName").textContent="";$("photoCheck").style.display="none";
+ const remove=$("mPhotoRemove");if(remove)remove.style.display="none";
+}
 async function checkPhoto(e){
+ const version=++dgPhotoCheckVersion;photoOk=false;
  const f=e.target.files[0],box=$("photoCheck");
  {const fn=$("mPhotoName");if(fn)fn.textContent=f?f.name:"";}
+ const remove=$("mPhotoRemove");if(remove)remove.style.display=f?"inline-flex":"none";
  if(!f){photoOk=false;box.style.display="none";return;}
  if(!f.type.startsWith("image/")){photoOk=false;box.className="alert err";box.style.display="block";box.innerHTML="⚠ "+_tms("Yalnızca görsel dosyası yükleyin.");return;}
  box.style.display="block";box.className="alert info";box.innerHTML="⏳ "+_tms("Fotoğraf denetleniyor…");
  try{
   const{i,u}=await loadImg(f);
+  if(version!==dgPhotoCheckVersion){URL.revokeObjectURL(u);return;}
   const S=120,c=document.createElement("canvas");c.width=S;c.height=S;
   const x=c.getContext("2d",{willReadFrequently:true});x.drawImage(i,0,0,S,S);URL.revokeObjectURL(u);
   const m=dgPhotoScan(x.getImageData(0,0,S,S).data,S);
@@ -121,7 +130,7 @@ async function checkPhoto(e){
     :_tms("Pozlama uygun değil (çok karanlık veya patlak).");
    box.className="alert err";box.innerHTML=`⚠ <b>${_tms("Fotoğraf uygun değil")}</b> · ${why}<br>${_tms("Ağacı, gövdesini veya dallarını kadraja alıp yeniden çekin.")}`;
   }
- }catch(err){photoOk=false;box.className="alert err";box.innerHTML="⚠ "+_tms("Fotoğraf okunamadı, tekrar deneyin.");}
+ }catch(err){if(version!==dgPhotoCheckVersion)return;photoOk=false;box.className="alert err";box.innerHTML="⚠ "+_tms("Fotoğraf okunamadı, tekrar deneyin.");}
 }
 /* --- 3. GPS --- */
 /* Ekran kilidi: saha ölçümü sırasında ekranın kararmasını engeller.
@@ -174,7 +183,7 @@ async function startGps(){
 function updGps(){
  const a=GPS.accuracy;
  $("gpsAcc").textContent=a.toFixed(0);$("gLat").textContent=GPS.latitude.toFixed(6);$("gLon").textContent=GPS.longitude.toFixed(6);
- $("gAlt").textContent=(GPS.altitude||0).toFixed(0)+" m";
+ $("gAlt").textContent=Number.isFinite(GPS.altitude)?GPS.altitude.toFixed(0)+" m":"—";
  const q=a<10?"ÇOK İYİ":a<20?"İYİ":a<40?"ORTA":"ZAYIF";
  $("gQ").textContent=q;
  $("gpsRing").className="gpsring "+(a<10?"good":a<30?"mid":"bad");
@@ -188,12 +197,13 @@ function updGps(){
 /* --- 4. FORM YARDIMCILARI --- */
 function fillSpecies(){
  const gv=$("mGroup").value,s=$("mSpecies");
+ $("latinName").textContent="";
  /* 0036: EN modunda option GÖRÜNÜMÜ çevrilir; value kanonik TR kalmalıdır
   * (shell'de value="İBRELİ" açık yazıldı). Bayat DOM/önbellek için ters
   * sözlükten çöz → "CONIFER" gelirse "İBRELİ"ye dön. */
  const g=(typeof SPECIES_DATA!=="undefined"&&SPECIES_DATA[gv])?gv
         :((typeof DG_I18N_TR!=="undefined"&&DG_I18N_TR[gv])||gv);
- if(!g||!(typeof SPECIES_DATA!=="undefined"&&SPECIES_DATA[g])){s.disabled=true;s.innerHTML="";$("latinName").textContent="";return;}
+ if(!g||!(typeof SPECIES_DATA!=="undefined"&&SPECIES_DATA[g])){s.disabled=true;s.innerHTML=`<option value="">${_tms("Önce grup seçin")}</option>`;$("latinName").textContent="";return;}
  s.disabled=false;
  /* 0035b: GÖRÜNEN tür adı dgT() ile çevrilir (EN modu); option VALUE her
   * zaman kanonik TR adıdır — veritabanına yazılan değer DEĞİŞMEZ. */
@@ -205,7 +215,25 @@ function showLatin(){
  const sp=$("mSpecies").value;
  $("latinName").textContent=(LATIN[sp]&&LATIN[sp]!=="—")?("🔬 "+LATIN[sp]):"";
 }
-function liveCalc(){const d=+$("mDbh").value,h=+$("mHeight").value,sp=$("mSpecies").value,grp=$("mGroup").value,box=$("liveCalc");if(!d||!h||!sp){box.style.display="none";return;}const c=calc(d,h,sp,grp);box.style.display="block";const _t=(s)=>(typeof dgT==="function"?dgT(s):s);box.innerHTML=`${_t("Karbon")}: <b>${c.total_carbon.toFixed(1)} kg</b> · AGB: ${c.agb.toFixed(1)} · BHB: ${c.bhb.toFixed(1)} · ${_t("Hacim")}: ${c.vol.toFixed(2)} m³`;}
+function liveCalc(){
+ const d=+$("mDbh").value,h=+$("mHeight").value,s=$("mSpecies").value,g=$("mGroup").value;
+ const valid=Number.isFinite(d)&&Number.isFinite(h)&&d>0&&d<=400&&h>0&&h<=100&&s&&g;
+ $("liveCalc").style.display=valid?"block":"none";
+ const hint=$("measureSaveHint");if(hint)hint.style.display=valid?"none":"block";
+ if(!valid)return;
+ const r=calc(d,h,s,g);
+ $("liveCalc").innerHTML=`<b>${_tms("Tahmini karbon")} · ${r.total_carbon.toFixed(1)} kg</b><br><small>AGB ${r.agb.toFixed(1)} · BHB ${r.bhb.toFixed(1)} kg · ${_tms("Hacim")} ${r.vol.toFixed(3)} m³</small>`;
+}
+function dgMeasureInvalid(id,message){
+ const el=$(id);if(el){el.setAttribute("aria-invalid","true");el.focus();}
+ toast(message,"err");
+}
+function dgResetMeasureFields(){
+ for(const id of ["mPoint","mDbh","mHeight"])$(id).value="";
+ dgClearMeasurePhoto();$("pointQueryResult").style.display="none";
+ manualPoint=false;liveCalc();
+}
+
 /* --- 5. PROJE CRUD --- */
 /* PROJE = PARK + ETİKET (2026-09-24).
  * Proje adı artık serbest metin değil: park algılanır, kullanıcı bir etiket
@@ -389,7 +417,9 @@ async function deleteProject(id){
 }
 /* --- 6. NOKTA YÖNETİMİ --- */
 let manualPoint=false;
+let dgPointRequest=0;
 async function autoFillPointId(){
+const request=++dgPointRequest;
 if(manualPoint||EDIT_ID)return;
 const pid=+$("mProject").value;
 if(!pid)return;
@@ -400,13 +430,13 @@ if(GPS){
 const{data}=await sb.from("waypoints").select("*").eq("project_id",pid).eq("visited",false);
 if(data&&data.length){
 const nearest=data.sort((a,b)=>hav(GPS.latitude,GPS.longitude,a.lat,a.lon)-hav(GPS.latitude,GPS.longitude,b.lat,b.lon))[0];
-$("mPoint").value=nearest.wp_id;
+if(request===dgPointRequest&&!manualPoint&&!EDIT_ID&&+$("mProject").value===pid&&!$("mPoint").value)$("mPoint").value=nearest.wp_id;
 return;
 }
 }
 // 2) Waypoint yoksa → projedeki son point_id + 1 (proje boşsa 1)
 const{data}=await sb.from("measurements").select("point_id").eq("project_id",pid).order("point_id",{ascending:false}).limit(1);
-$("mPoint").value=(data&&data.length)?((data[0].point_id||0)+1):1;
+if(request===dgPointRequest&&!manualPoint&&!EDIT_ID&&+$("mProject").value===pid&&!$("mPoint").value)$("mPoint").value=(data&&data.length)?((data[0].point_id||0)+1):1;
 }catch(e){}
 }
 
@@ -414,6 +444,7 @@ async function queryPointId(){
  const pid=+$("mProject").value,pt=+$("mPoint").value,res=$("pointQueryResult");
  if(!pid||!pt){res.style.display="none";return;}
  const{data}=await sb.from("measurements").select("*").eq("project_id",pid).eq("point_id",pt).order("created_at",{ascending:false}).limit(1);
+ if(+$("mProject").value!==pid||+$("mPoint").value!==pt)return;
  if(data&&data.length>0){
   const r=data[0];
   res.style.display="block";res.className="alert info";
@@ -432,17 +463,28 @@ async function queryPointId(){
  * ile geri gelir. Yeni tema yok — aynı aile, aynı mekanizma. */
 function dgSaveBusy(on){
  const b=$("saveBtn");if(!b)return;
- if(on){b.dataset.oldText=b.innerHTML;b.innerHTML="⏳ Hesaplanıyor ve kaydediliyor…";b.disabled=true;b.style.opacity=".65";b.style.cursor="wait";}
- else{b.disabled=false;b.innerHTML=b.dataset.oldText||"💾 Hesapla ve Kaydet";b.style.opacity="";b.style.cursor="";}
+ if(on){dgMeasureSaving=true;b.dataset.oldText=b.innerHTML;b.innerHTML="⏳ Hesaplanıyor ve kaydediliyor…";b.disabled=true;b.style.opacity=".65";b.style.cursor="wait";}
+ else{dgMeasureSaving=false;b.disabled=false;b.textContent=EDIT_ID?"💾 Kaydı Güncelle":"💾 Hesapla ve Kaydet";b.style.opacity="";b.style.cursor="";if(typeof dgParkGate==="function")dgParkGate();}
 }
+let dgMeasureSaving=false;
 async function saveMeas(){
+ if(dgMeasureSaving)return;
  dgSaveBusy(true);
  try{return await dgSaveMeasInner();}
+ catch(err){toast(_tms("Kayıt tamamlanamadı. Bilgileriniz formda duruyor; yeniden deneyin."),"err");}
  finally{dgSaveBusy(false);}
 }
 async function dgSaveMeasInner(){
     const pid=+$("mProject").value,pt=+$("mPoint").value,sp=$("mSpecies").value,d=+$("mDbh").value,h=+$("mHeight").value,grp=$("mGroup").value;
-    if(!pid||!pt||!sp||!d||!h)return toast("Tüm alanları doldur","err");
+    for(const id of ["mProject","mPoint","mNo","mGroup","mSpecies","mDbh","mHeight"])$(id).setAttribute("aria-invalid","false");
+    if(!pid)return dgMeasureInvalid("mProject",_tms("Bir çalışma projesi seçin."));
+    if(!Number.isSafeInteger(pt)||pt<=0)return dgMeasureInvalid("mPoint",_tms("Nokta ID pozitif bir tam sayı olmalı."));
+    const measurementNo=+$("mNo").value;
+    if(!Number.isSafeInteger(measurementNo)||measurementNo<=0)return dgMeasureInvalid("mNo",_tms("Ölçüm No pozitif bir tam sayı olmalı."));
+    if(!grp)return dgMeasureInvalid("mGroup",_tms("Ağaç grubunu seçin."));
+    if(!sp)return dgMeasureInvalid("mSpecies",_tms("Ağaç türünü seçin."));
+    if(!Number.isFinite(d)||d<=0||d>400)return dgMeasureInvalid("mDbh",_tms("Çap 0’dan büyük, en fazla 400 cm olmalı."));
+    if(!Number.isFinite(h)||h<=0||h>100)return dgMeasureInvalid("mHeight",_tms("Boy 0’dan büyük, en fazla 100 m olmalı."));
 
     /* ⛔ PARK KAPISI: park algılanmamış projeye ölçüm girilemez. Düzenleme
      * (EDIT_ID) mevcut kaydı günceller, yeni ölçüm değildir → kapı uygulanmaz.
@@ -454,7 +496,7 @@ async function dgSaveMeasInner(){
         return;
     }
     if(!EDIT_ID&&!GPS)return toast("Önce 📡 Konumu Etkinleştir butonuna basın","err");
-    if(d>400||h>100)return toast("Çap ≤400 cm, boy ≤100 m olmalı","err");
+
     
     const f=$("mPhoto").files[0];
     if(f&&!photoOk)return toast("Fotoğraf denetimi başarısız — uygun bir çekim yapın","err");
@@ -468,7 +510,7 @@ async function dgSaveMeasInner(){
     let photoFile = null;
     if(f){
         photoBlob = await compress(f);
-        photoFile = "P"+String(pt).padStart(3,"0")+"_M"+(+$("mNo").value||1)+".JPG";
+        photoFile = "P"+String(pt).padStart(3,"0")+"_M"+measurementNo+".JPG";
     }
     
     // 2. base objesini oluştur
@@ -479,7 +521,7 @@ async function dgSaveMeasInner(){
          * okur; dışa aktarımda park alanı/kimliği satır düzeyinde taşınır.
          * Şema eskiyse sütun hiç gönderilmez (yoksa insert 42703 ile patlar). */
         point_id:pt,
-        measurement_no:+$("mNo").value||1,
+        measurement_no:measurementNo,
         grp,species:sp,
         dbh_cm:d,
         height_m:h,
@@ -536,13 +578,9 @@ if(EDIT_ID) base._editId = EDIT_ID; // ✅ çevrimdışı düzenleme işareti
         
         // ✅ Background Sync register KALDIRILDI (artık ana thread yönetiyor)
         
-        $('mPoint').value='';
-        $('mDbh').value='';
-        $('mHeight').value='';
-        $('mPhoto').value='';
-        $('photoCheck').style.display='none';
-        photoOk=false;
-        manualPoint=false;
+        if(wasEdit)cancelEdit();
+        dgResetMeasureFields();
+        if(!wasEdit)autoFillPointId();
         loadDash();
         loadRecords();
         return;
@@ -553,6 +591,7 @@ if(EDIT_ID) base._editId = EDIT_ID; // ✅ çevrimdışı düzenleme işareti
     if(photoBlob){
         const path = USER.id+"/"+Date.now()+".jpg";
         const {error} = await sb.storage.from("dendro-photos").upload(path, photoBlob, {contentType:"image/jpeg"});
+        if(error)throw error;
         if(!error){
             photoUrl = sb.storage.from("dendro-photos").getPublicUrl(path).data.publicUrl;
         }
@@ -576,14 +615,7 @@ if(EDIT_ID) base._editId = EDIT_ID; // ✅ çevrimdışı düzenleme işareti
       if(typeof dgPresenceAct==="function"){try{dgPresenceAct(wasEdit?"edit":"save","P"+String(pt).padStart(3,"0"));}catch(e){}}
     }
     
-    $("mPoint").value='';
-    $("mDbh").value='';
-    $("mHeight").value='';
-    $("mPhoto").value='';
-    $("photoCheck").style.display="none";
-    $("pointQueryResult").style.display="none";
-    photoOk=false;
-    manualPoint=false;
+    dgResetMeasureFields();
     loadDash();
     loadRecords();
     loadWaypoints();
@@ -595,6 +627,7 @@ function cancelEdit(){EDIT_ID=null;manualPoint=false;$("editBanner").style.displ
 async function editRec(id){
  const{data}=await sb.from("measurements").select("*").eq("id",id).single();
  if(!data)return;
+ dgClearMeasurePhoto();
  EDIT_ID=id;
  $("mProject").value=data.project_id;
  $("mPoint").value=data.point_id;$("mNo").value=data.measurement_no||1;
@@ -604,10 +637,14 @@ async function editRec(id){
  liveCalc();go("measure");dgProjectChanged();
 }
 /* --- 9. FOTOĞRAF İŞLEME --- */
-function compress(f){
-return new Promise(res=>{
-const i=new Image(),u=URL.createObjectURL(f);
-i.onload=()=>{const m=1024,sc=Math.min(1,m/Math.max(i.width,i.height)),c=document.createElement("canvas");c.width=i.width*sc;c.height=i.height*sc;c.getContext("2d").drawImage(i,0,0,c.width,c.height);c.toBlob(b=>{URL.revokeObjectURL(u);res(b);},"image/jpeg",.7);};i.src=u;});}
+async function compress(f){
+ const{i,u}=await loadImg(f);
+ try{
+  const m=1024,sc=Math.min(1,m/Math.max(i.width,i.height)),c=document.createElement("canvas");
+  c.width=i.width*sc;c.height=i.height*sc;c.getContext("2d").drawImage(i,0,0,c.width,c.height);
+  return await new Promise((resolve,reject)=>c.toBlob(b=>b?resolve(b):reject(new Error("image compression")),"image/jpeg",.7));
+ }finally{URL.revokeObjectURL(u);}
+}
 async function removePhoto(url){
  if(!url)return;
  try{
@@ -622,4 +659,4 @@ async function removePhoto(url){
 
 /* 0035b: dil değişince tür listesi yeniden doldurulur (görünen adlar çevrilir,
  * value'lar kanonik TR kalır). */
-window.addEventListener("dg:lang",()=>{try{const g=$("mGroup");if(g&&g.value&&$("mSpecies"))fillSpecies();if(typeof liveCalc==="function")liveCalc();}catch(e){}});
+window.addEventListener("dg:lang",()=>{try{const g=$("mGroup");if(g&&g.value&&$("mSpecies")){const sp=$("mSpecies").value;fillSpecies();$("mSpecies").value=sp;showLatin();}if(typeof liveCalc==="function")liveCalc();}catch(e){}});

@@ -239,7 +239,7 @@
 <!-- DİL KATMANI (0035): TR markup varsayılan; EN sözlüğü çalışma zamanında
      uygulanır (dgToggleLang). defer sırası önemli değil — DOMContentLoaded'da
      ya da hemen (hazırsa) çalışır. module-registry + CORE_ASSETS kaydı şart. -->
-<script src="src/config/i18n.js?v=33360bf7" defer></script>
+<script src="src/config/i18n.js?v=3c77bc5b" defer></script>
 <script src="src/utils/geo.js?v=3e796768" defer></script>
 <script src="src/utils/truncation.js?v=f43c76b3" defer></script>
 <!-- Faz 7: geotiff (317 KB) ve chart.js (208 KB) artık SENKRON yüklenmiyor;
@@ -265,7 +265,7 @@
 <script src="src/services/report-publish.js?v=46ecdba2" defer></script>
 <script src="src/services/park-invites.js?v=1023c17d" defer></script>
 <script src="src/services/world.js?v=c72d9019" defer></script>
-<script src="src/services/measure.js?v=78b7cc1b" defer></script>
+<script src="src/services/measure.js?v=452c298c" defer></script>
 <script src="src/services/map.js?v=3be191fd" defer></script>
 <!-- LULC ZİNCİRİ ARTIK TEMBEL (2026-09-25 · Faz 8): 8 dosya ilk yüklemede
      indirilmiyor. Yalnız "🌿 Yüzey Örtüsü Analizi"ne basan kullanıcı için
@@ -284,12 +284,12 @@
      projeyi parka bağlar, ölçüm kapısını (park algılanmadan ölçüm yok) kurar.
      Sıra ÖNEMLİ: park-query'den sonra, grid-engine'den önce (grid panelindeki
      proje listesi bu modülden beslenir). -->
-<script src="src/services/park-registry.js?v=e549e136" defer></script>
+<script src="src/services/park-registry.js?v=084c1f5f" defer></script>
 <script src="src/services/grid-engine.js?v=2a73614e" defer></script>
 <script src="src/ui/park-panel.js?v=d519efc8" defer></script>
 <script src="src/ui/park-export.js?v=3e078dc3" defer></script>
 <script src="src/services/dash.js?v=4556cd69" defer></script>
-<link rel="stylesheet" href="css/style.css?v=77a93734">
+<link rel="stylesheet" href="css/style.css?v=e2df7aaf">
 <link rel="stylesheet" href="css/landing.css?v=85504b78">
 <link rel="stylesheet" href="css/park-panel.css?v=10b49293">
 <!-- TASARIM SİSTEMİ (2026-09-27, 2. deneme): ui-standard.css geri BAĞLANDI
@@ -754,58 +754,27 @@
   </div>
 
   <div class="view" id="v-measure">
-   <h2 class="disp" style="margin-bottom:16px">Yeni Ölçüm</h2>
-   <div id="editBanner" class="alert info" style="display:none">✏️ <b>Düzenleme modu:</b> mevcut kaydı güncelliyorsunuz. <button class="btn sm ghost" style="margin-left:10px" onclick="cancelEdit()">Vazgeç</button></div>
-   <!-- PARK KAPISI (2026-09-24): seçili projenin parkı yoksa ölçüm kilitlenir ve
-        kullanıcı park algılama ekranına yönlendirilir. İstemci kapısı burası +
-        saveMeas(); sunucu kapısı 0004_parks.sql → trg_enforce_park_link. -->
-   <div id="parkGate" class="alert info" style="display:none"></div>
-   <div class="grid g2">
-    <div class="dg-png-card">
-     <div class="dg-png-head">
-      <div>
-       <div class="dg-png-kicker">1 · SAHA KONUMU</div>
-       <div class="dg-png-title">🛰 GPS / Uydu</div>
-       <div class="dg-png-sub">Biyokütle ve jeodezik alan için koordinat</div>
-      </div>
-      <span class="dg-png-badge" id="gpsBadge">konum kapalı</span>
-     </div>
-     <div class="gpsring" id="gpsRing"><div class="val" id="gpsAcc">—</div><div class="lbl">doğruluk (m)</div></div>
-     <div id="gpsState" class="alert info">Konum servisi kapalı.</div>
-     <button id="gpsBtn" class="dg-png-btn primary" onclick="startGps()">📡 Konumu Etkinleştir</button>
-     <div class="dg-png-sub" style="font-size:.68rem">Doğrulama eşiği ±60 m · park dışı kayıt sunucuda reddedilir (0007).</div><label style="display:flex;gap:8px;align-items:flex-start;font-size:.8rem;color:var(--mut);margin-top:10px;cursor:pointer"><input type="checkbox" class="dg-switch" id="dgLiveShare" checked onchange="dgLiveShareToggle(this.checked)"> <span>👥 Canlı konumumu bu parkın çalışma arkadaşlarıyla paylaş (geçici; veritabanına yazılmaz)</span></label>
-     <div id="dgMatesNote" class="dg-meta" style="margin-top:6px"></div>
-     <div id="iosHint" class="alert info" style="display:none"><b>iPhone kullanıcısı mısınız?</b><br><span style="font-size:.85rem">Ayarlar → Gizlilik ve Güvenlik → Konum Servisleri →Safari Siteleri→ "Uygulamayı Kullanırken" seçin, sayfayı yenileyin.</span></div>
-     <div class="grid g2" style="margin-top:14px">
-      <div><div class="lbl">Enlem</div><div class="mono" id="gLat">—</div></div>
-      <div><div class="lbl">Boylam</div><div class="mono" id="gLon">—</div></div>
-      <div><div class="lbl">Rakım</div><div class="mono" id="gAlt">—</div></div>
-      <div><div class="lbl">Sinyal</div><div class="mono" id="gQ">—</div></div>
-     </div>
-    </div>
-    <div class="card">
-     <label class="lbl" for="mProject">Proje <span style="text-transform:none;letter-spacing:0;font-size:.72rem;color:var(--mut)">(park adı - etiket)</span></label><select id="mProject" onchange="dgProjectChanged()"></select>
-     <div class="grid g2" style="margin-top:10px">
-      <div><label class="lbl" for="mPoint">POINT ID</label><div style="display:flex;gap:6px"><input id="mPoint" type="number" oninput="manualPoint=true"><button class="btn sm blue" style="white-space:nowrap" onclick="queryPointId()">🔍 Sorgula</button></div></div>
-      <div><label class="lbl" for="mNo">Ölçüm No</label><input id="mNo" type="number" value="1"></div>
-     </div>
-     <div id="pointQueryResult" class="alert info" style="display:none;margin-top:10px"></div>
-     <div class="grid g2" style="margin-top:10px">
-      <div><label class="lbl" for="mGroup">Grup</label><select id="mGroup" onchange="fillSpecies()"><option value="">Seç</option><option value="İBRELİ">İBRELİ</option><option value="YAPRAKLI">YAPRAKLI</option><option value="DİĞER">DİĞER</option></select></div>
-      <div><label class="lbl" for="mSpecies">Tür (Latince)</label><select id="mSpecies" disabled onchange="showLatin()"></select></div>
-     </div>
-     <div id="latinName" class="mono" style="font-size:.76rem;color:var(--mut);font-style:italic;margin-top:4px"></div>
-     <div class="grid g2" style="margin-top:10px">
-      <div><label class="lbl" for="mDbh">Çap (cm)</label><input id="mDbh" type="number" step="0.1" oninput="liveCalc()" placeholder="örn: 52"></div>
-      <div><label class="lbl" for="mHeight">Boy (m)</label><input id="mHeight" type="number" step="0.1" oninput="liveCalc()" placeholder="örn: 7,2"></div>
-     </div>
-     <div class="lbl" style="margin-top:12px">📸 Fotoğraf (canlı çekim)</div>
-     <span class="dg-file btn sm ghost">📂 <span>Dosya seç</span><input type="file" id="mPhoto" aria-label="Fotoğraf (canlı çekim)" accept="image/*" capture="environment" onchange="checkPhoto(event)" style="position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:pointer"></span><span class="dg-file-name mono" id="mPhotoName"></span>
-     <div id="photoCheck" class="alert info" style="display:none;margin-top:8px"></div>
-     <div id="liveCalc" class="alert ok" style="display:none"></div>
-     <button class="dg-png-btn primary" id="saveBtn" style="margin-top:14px" onclick="saveMeas()">💾 Hesapla ve Kaydet</button>
-    </div>
-   </div>
+   <div class="measure-heading"><div><div class="dg-kicker">SAHA KAYDI</div><h2 class="disp">Yeni Ölçüm</h2><p class="measure-help">Konumu aç, ağacı ölç, kaydet.</p></div><span class="measure-tag">Bir ağaç · bir kayıt</span></div>
+   <div id="editBanner" class="alert info" style="display:none">✏️ <b>Düzenleme modu:</b> mevcut kaydı güncelliyorsunuz. <button class="btn sm ghost" onclick="cancelEdit()">Vazgeç</button></div>
+   <div class="card measure-project"><label class="lbl" for="mProject">Çalışma projesi</label><select id="mProject" onchange="dgProjectChanged()"></select><div id="parkGate" class="alert info" style="display:none"></div></div>
+   <section class="dg-png-card measure-location" aria-labelledby="measureLocationTitle">
+    <div class="dg-png-head"><div><div class="dg-png-kicker">1 · KONUM</div><h3 class="dg-png-title" id="measureLocationTitle">Saha konumu</h3><p class="dg-png-sub">Kaydederken park içinde olduğunuz doğrulanır.</p></div><span class="dg-png-badge" id="gpsBadge">konum kapalı</span></div>
+    <div class="measure-gps-row"><div class="gpsring" id="gpsRing"><div class="val" id="gpsAcc">—</div><div class="lbl">doğruluk (m)</div></div><div id="gpsState" class="alert info" role="status">Konum servisi kapalı.</div><button id="gpsBtn" class="dg-png-btn primary" onclick="startGps()">📡 Konumu Etkinleştir</button></div>
+    <details class="measure-details"><summary>Konum ayrıntıları ve paylaşım</summary><p class="measure-help">Kayıt için GPS doğruluğu en fazla ±60 m olmalıdır.</p><div class="measure-coordinates"><div><span class="lbl">Enlem</span><div class="mono" id="gLat">—</div></div><div><span class="lbl">Boylam</span><div class="mono" id="gLon">—</div></div><div><span class="lbl">Rakım</span><div class="mono" id="gAlt">—</div></div><div><span class="lbl">Sinyal</span><div class="mono" id="gQ">—</div></div></div>
+     <label class="measure-share"><input type="checkbox" class="dg-switch" id="dgLiveShare" checked onchange="dgLiveShareToggle(this.checked)"><span>Canlı konumumu park ekibiyle paylaş<small>Geçicidir; veritabanına yazılmaz.</small></span></label><div id="dgMatesNote" class="dg-meta"></div>
+    </details>
+    <div id="iosHint" class="alert info" style="display:none"><b>iPhone kullanıcısı mısınız?</b><br><span>Ayarlar → Gizlilik ve Güvenlik → Konum Servisleri → Safari Siteleri → Uygulamayı Kullanırken.</span></div>
+   </section>
+   <section class="card measure-tree" aria-labelledby="measureTreeTitle">
+    <div class="dg-png-kicker">2 · AĞAÇ</div><h3 id="measureTreeTitle">Ağaç bilgileri</h3>
+    <div class="measure-fields measure-identity"><div><label class="lbl" for="mPoint">Nokta ID</label><div class="measure-query"><input id="mPoint" type="number" min="1" step="1" inputmode="numeric" oninput="manualPoint=true" aria-describedby="pointHelp"><button class="btn sm ghost" onclick="queryPointId()">🔍 Sorgula</button></div><p class="measure-help" id="pointHelp">Otomatik önerilir; gerekirse değiştirin.</p></div><div><label class="lbl" for="mNo">Ölçüm No</label><input id="mNo" type="number" min="1" step="1" inputmode="numeric" value="1"><p class="measure-help">Aynı noktadaki ölçüm sırası.</p></div></div>
+    <div id="pointQueryResult" class="alert info" style="display:none"></div>
+    <div class="measure-fields"><div><label class="lbl" for="mGroup">Ağaç grubu</label><select id="mGroup" onchange="fillSpecies();liveCalc()"><option value="">Grup seçin</option><option value="İBRELİ">İBRELİ</option><option value="YAPRAKLI">YAPRAKLI</option><option value="DİĞER">DİĞER</option></select></div><div><label class="lbl" for="mSpecies">Ağaç türü</label><select id="mSpecies" disabled onchange="showLatin();liveCalc()"><option value="">Önce grup seçin</option></select><div id="latinName" class="mono measure-help"></div></div></div>
+    <div class="measure-fields measure-dimensions"><div><label class="lbl" for="mDbh">Gövde çapı <span>(cm)</span></label><input id="mDbh" type="number" min="0.1" max="400" step="0.1" inputmode="decimal" oninput="liveCalc()" placeholder="Örn. 52" aria-describedby="dbhHelp"><p class="measure-help" id="dbhHelp">Yerden 1,30 m yüksekte ölçün.</p></div><div><label class="lbl" for="mHeight">Ağaç boyu <span>(m)</span></label><input id="mHeight" type="number" min="0.1" max="100" step="0.1" inputmode="decimal" oninput="liveCalc()" placeholder="Örn. 7,2"><p class="measure-help">Ağacın toplam yüksekliği.</p></div></div>
+    <div class="measure-photo"><div><h4>Fotoğraf <span class="measure-optional">İsteğe bağlı</span></h4><p class="measure-help">Ağacı ve gövdesini kadraja alın.</p></div><span class="dg-file btn ghost">📸 <span>Fotoğraf ekle</span><input type="file" id="mPhoto" aria-label="Fotoğraf (canlı çekim)" accept="image/*" capture="environment" onchange="checkPhoto(event)"></span><span class="dg-file-name mono" id="mPhotoName"></span><button type="button" class="btn sm ghost" id="mPhotoRemove" style="display:none" onclick="dgClearMeasurePhoto()">Fotoğrafı kaldır</button></div>
+    <div id="photoCheck" class="alert info" role="status" style="display:none"></div>
+   </section>
+   <div class="measure-save"><div class="measure-save-copy"><div id="liveCalc" class="alert ok" style="display:none" role="status"></div><p class="measure-help" id="measureSaveHint">Çap, boy ve türü girin; karbon tahmini burada görünür.</p></div><button class="dg-png-btn primary" id="saveBtn" onclick="saveMeas()">💾 Hesapla ve Kaydet</button></div>
   </div>
 
   <div class="view" id="v-nav">

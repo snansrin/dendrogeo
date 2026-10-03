@@ -300,7 +300,7 @@ describe('ölçüm kapısı: park algılanmadan ölçüm yok', () => {
     run('dgParkGate()');
     assert.equal(el('parkGate').className, 'alert ok');
     assert.equal(el('saveBtn').disabled, false);
-    assert.ok(el('parkGate').innerHTML.includes('Göksu Parkı - deneme'));
+    assert.ok(el('parkGate').innerHTML.includes('Göksu Parkı'));
     assert.ok(el('parkGate').innerHTML.includes('42.3 ha'));
   });
 

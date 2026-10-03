@@ -402,3 +402,67 @@ label.lbl{display:block}
 .dg-switch::after{content:"";position:absolute;top:2px;left:2px;width:16px;height:16px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.35);transition:.15s}
 .dg-switch:checked{background:var(--green);border-color:var(--green)}
 .dg-switch:checked::after{left:18px}
+
+/* Field measurement: theme tokens, generous touch targets, one reading order. */
+#v-measure{max-width:960px;margin-inline:auto;padding-bottom:20px}
+.measure-heading{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:20px}
+.measure-heading .disp{font-size:2rem;margin:0}
+.measure-help{font-size:.8rem;line-height:1.5;color:var(--mut);margin-top:6px}
+.measure-tag,.measure-optional{font-size:.74rem;color:var(--green);background:var(--tint);padding:5px 10px;border-radius:20px;font-weight:600}
+.measure-project,.measure-location,.measure-tree{margin-bottom:16px}
+.measure-project{display:grid;grid-template-columns:auto minmax(0,1fr);align-items:center;gap:10px 18px}
+#v-measure #parkGate{grid-column:1/-1;margin:0}
+#v-measure #parkGate.alert.ok{background:transparent;border:0;border-top:1px solid var(--line);border-radius:0;padding:10px 0 0}
+.measure-park-summary{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px}
+#v-measure .measure-location{background:var(--surface);border:1px solid var(--line);padding:20px 22px;border-radius:var(--r);box-shadow:var(--sh)}
+#v-measure .dg-png-title,.measure-tree h3{font-family:var(--f-disp);font-size:1.25rem;color:var(--green-dk);font-weight:600}
+#v-measure .dg-png-kicker{color:var(--amber-ink)}
+.measure-gps-row{display:flex;align-items:center;gap:16px;margin-top:14px}
+#v-measure .gpsring{width:auto;height:auto;border:0;border-left:3px solid var(--line);border-radius:0;padding:4px 14px;margin:0;flex:0 0 auto;display:block;text-align:left}
+#v-measure .gpsring.good{border-color:var(--green)}
+#v-measure .gpsring.mid{border-color:var(--amber)}
+#v-measure .gpsring.bad{border-color:var(--red)}
+#v-measure #gpsState{flex:1;margin:0;background:transparent;padding:0}
+#v-measure #gpsBtn{width:auto;flex:0 0 auto}
+#v-measure .dg-png-btn.primary{background:var(--green);min-height:48px;font-size:.9rem}
+#v-measure .dg-png-btn.primary:hover{background:var(--green-dk)}
+#v-measure button:disabled{opacity:.6;cursor:not-allowed;transform:none}
+.measure-details{border-top:1px solid var(--line);margin-top:16px}
+.measure-details summary{cursor:pointer;padding:12px 0;font-size:.8rem;color:var(--green);min-height:44px;font-weight:700}
+.measure-coordinates{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin:12px 0;font-size:.85rem}
+.measure-share{display:flex;gap:12px;align-items:center;min-height:48px;font-size:.83rem;cursor:pointer}
+.measure-share small{display:block;color:var(--mut)}
+.measure-fields{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-top:20px}
+.measure-fields>div{min-width:0}
+#v-measure .lbl{display:block;font-size:.75rem;letter-spacing:.05em;margin-bottom:6px}
+#v-measure input:not([type=checkbox]):not([type=file]),#v-measure select{min-height:48px;font-size:16px}
+#v-measure input::placeholder{color:var(--mut);opacity:1;font-style:normal}
+.measure-query{display:flex;gap:8px}.measure-query input{min-width:0}.measure-query button{flex:0 0 auto}
+#v-measure .measure-dimensions input{font-family:var(--f-mono);font-size:1.65rem;font-weight:600;padding:14px;min-height:64px;background:var(--bg)}
+.measure-dimensions .lbl span{color:var(--green)}
+.measure-photo{display:flex;gap:12px;align-items:center;flex-wrap:wrap;border-top:1px solid var(--line);margin-top:24px;padding-top:20px}
+.measure-photo>div{flex:1 1 220px}.measure-photo h4{font-size:.9rem}.measure-optional{margin-left:8px;font-size:.68rem}
+#v-measure .dg-file{min-height:48px;display:inline-flex;align-items:center;gap:8px;position:relative}
+#v-measure .dg-file input{position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:pointer}
+#v-measure .dg-file:focus-within{outline:2px solid var(--green);outline-offset:3px}
+#v-measure #mPhotoName{overflow-wrap:anywhere;white-space:normal;max-width:100%;font-size:.75rem}
+#v-measure .btn.sm{min-height:44px}
+.measure-save{position:sticky;bottom:12px;z-index:20;display:flex;align-items:center;gap:20px;padding:16px 20px;background:var(--surface);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--sh)}
+.measure-save-copy{flex:1;min-width:0}.measure-save .measure-help{margin:0}
+#v-measure #liveCalc{margin:0;padding:0;background:transparent;line-height:1.5}
+#v-measure #saveBtn{width:auto;min-width:245px;flex:0 0 auto}
+#v-measure [aria-invalid=true]{border-color:var(--red);outline-color:var(--red)}
+@media(max-width:640px){
+ .measure-heading{margin-bottom:14px}.measure-tag{display:none}
+ #v-measure .card,#v-measure .measure-location{padding:16px}
+ .measure-project{grid-template-columns:1fr;gap:4px}
+ .measure-gps-row{flex-wrap:wrap;gap:12px}#v-measure #gpsBtn{width:100%}
+ .measure-coordinates{grid-template-columns:1fr 1fr}
+ .measure-fields{gap:12px}.measure-fields:not(.measure-dimensions):not(.measure-identity){grid-template-columns:1fr}
+ .measure-identity{grid-template-columns:minmax(0,1.5fr) minmax(0,1fr)}
+ .measure-query{flex-wrap:wrap}.measure-query input{flex:1 1 70px}
+ .measure-photo{gap:10px}.measure-photo>div{flex-basis:100%}
+ .measure-save{bottom:0;gap:10px;flex-direction:column;align-items:stretch;padding:12px 14px;padding-bottom:max(12px,env(safe-area-inset-bottom))}
+ #v-measure #saveBtn{width:100%;min-width:0}
+}
+@media(prefers-reduced-motion:reduce){#v-measure *{scroll-behavior:auto;transition:none}}

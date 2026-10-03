@@ -95,10 +95,10 @@ describe('eski format koruması (kullanıcı tercihi 2026-09-20)', () => {
     assert.ok(!/\nh3\{/.test(css), 'global h3 kuralı geri gelmemeli');
   });
 
-  test('bölüm başlıklarının eski inline boyutları duruyor', () => {
+  test('panel başlıkları korunur, ölçüm başlığı ortak tema sınıfını kullanır', () => {
     assert.match(html, /<h2 style="font-size:1\.6rem">Genel Bakış/);
     assert.match(html, /<h2 style="font-size:1\.15rem">Kişisel Ağaç Analizi/);
-    assert.match(html, /<h2 class="disp" style="margin-bottom:16px">Yeni Ölçüm/);
+    assert.match(html, /<h2 class="disp">Yeni Ölçüm/);
   });
 
   test('panel başlıkları eski stilinde (gri kicker, sans title)', () => {

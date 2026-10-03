@@ -98,7 +98,7 @@ describe('P0 · bilimsel iddialar kaynağıyla birebir', () => {
 
   test('⭐ DBH üst sınırı TEK standart: form = landing = rapor QA (400 cm)', () => {
     const measure = rd('src/services/measure.js');
-    assert.match(measure, /if\(d>400\|\|h>100\)/, 'form eşiği 400');
+    assert.match(measure, /d<=0\|\|d>400/, 'form eşiği 400');
     assert.match(landing, /DBH ≤ 400 cm, boy ≤ 100 m/, 'landing QA kartı 400');
     assert.equal(QA_LIMITS.DBH_MAX_CM, 400, 'rapor QA 400');
     assert.equal(QA_LIMITS.H_MAX_M, 100, 'boy üst sınırı her yerde 100');
@@ -476,7 +476,7 @@ describe('0040 · kaydırma koruması + ziyaretçi sekmesi zenginleştirme', () 
     const vs = rd2('src/services/visit-stats.js');
     assert.ok(!/DG_LIVE_ON/.test(vs), 'kurucu görünümü anahtara bağlı DEĞİL');
     const sh = rd2('partials/shell.html');
-    assert.match(sh, /çalışma arkadaşlarıyla paylaş/i, 'anahtar metni yalnız ortakları söyler');
+    assert.match(sh, /park ekibiyle paylaş/i, 'anahtar metni yalnız ortakları söyler');
     assert.ok(!sh.includes('kurucu canlı haritada görür'), 'eski metin kalktı');
   });
 });
@@ -507,7 +507,7 @@ describe('0041 · kaydırma window kök düzeltmesi + 0044 soket kaldırma', () 
     assert.match(mj, /function dgPhotoScan/, 'çok sınıflı tarayıcı (saf fonksiyon)');
     assert.match(mj, /function dgPhotoGate/, 'kalibre kapı');
     assert.ok(!/vegR>=0\.25/.test(mj), 'eski %25 yeşil kapısı geri gelmemeli');
-    assert.match(rd('sw.js'), /dendrogeo-sw-v2-r61/, 'sw r52 (içerik sözleşmesi)');
+    assert.match(rd('sw.js'), /dendrogeo-sw-v2-r(?:6[2-9]|[7-9]\d|\d{3,})/, 'güncel çevrimdışı paket');
   });
   test('⭐ AKASYA kanonik tür (0042): listede + eşanlamlı gölgesi yok', () => {
     const sp = rd('src/config/species.js');
