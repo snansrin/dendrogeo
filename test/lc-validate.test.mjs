@@ -651,10 +651,10 @@ describe('entegrasyon zinciri kilitleri (0054 · lc-sens)', () => {
     assert.match(sens, /ev\.originalEvent\|\|ev/);
   });
 
-  test('kalıcılık sözleşmesi: park başına tek kayıt (id "sens-<parkId>") + profil önbelleği', () => {
-    assert.match(sens, /id:"sens-"\+\(pk\.id\|\|"x"\)/);
+  test('kalıcılık sözleşmesi: hesap ve park başına kayıt + profil önbelleği', () => {
+    assert.match(sens, /id:"surface-"\+\(owner\|\|"guest"\)\+"-"\+\(pk\.id\|\|"x"\)/);
     assert.match(sens, /dgSensSave\(\)/);
     assert.match(sens, /loadCampaigns/);
-    assert.match(sens, /rec\.profile=\{/);
+    assert.match(sens, /rec\.profile=profile/);
   });
 });

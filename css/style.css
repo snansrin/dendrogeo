@@ -470,8 +470,6 @@ label.lbl{display:block}
 .waypoint-filters{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px}
 .waypoint-files{margin-top:18px;border-top:1px solid var(--line);padding-top:12px}
 .waypoint-files summary{cursor:pointer;padding:10px 0;font-weight:600}
-#v-nav .tblwrap{max-height:380px!important}
-#v-nav tr[aria-current="true"]{outline:2px solid var(--line);outline-offset:-2px}
 @media(max-width:640px){#v-nav #navMap{height:360px}.waypoint-filters{grid-template-columns:1fr 1fr}#v-nav .arrow{flex-shrink:0}}
 
 #v-nav .waypoint-list{grid-column:1 / -1}
@@ -479,3 +477,18 @@ label.lbl{display:block}
 .waypoint-actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:16px}
 .waypoint-actions .btn{min-height:44px}
 .waypoint-sort{max-width:280px;margin-bottom:12px}
+
+/* Compact field list: coordinates are available on demand. */
+.waypoint-points{list-style:none;padding:0;margin:0;display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,260px),1fr));gap:10px}
+.waypoint-point{min-width:0;padding:12px;border:1px solid var(--line);border-radius:10px;background:var(--surface)}
+.waypoint-point[aria-current="true"]{border-color:var(--blue);box-shadow:inset 3px 0 0 var(--blue)}
+.waypoint-point-head,.waypoint-point-actions{display:flex;justify-content:space-between;align-items:center;gap:12px}
+.waypoint-point-head{font-size:1.08rem;margin-bottom:8px}
+.waypoint-distance{font-size:.9rem;white-space:nowrap}
+.waypoint-point-actions .btn{min-height:44px;min-width:100px}
+.waypoint-coordinates{margin-top:6px;font-size:.78rem;color:var(--mut)}
+.waypoint-coordinates summary{cursor:pointer;min-height:44px;display:flex;align-items:center;width:fit-content}
+.waypoint-coordinates[open] summary{margin-bottom:4px}
+.waypoint-coordinates div{display:grid;gap:5px;overflow-wrap:anywhere}
+.waypoint-empty{padding:16px;color:var(--mut)}
+@media(max-width:640px){.waypoint-points{grid-template-columns:minmax(0,1fr)}#v-nav .waypoint-list{padding:12px}.waypoint-point{padding:10px 12px}}

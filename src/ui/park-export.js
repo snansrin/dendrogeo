@@ -205,7 +205,7 @@ async function runLandCoverAnalysis(){
     outer:PARK_POLY,
     holes:PARK_HOLES||[],
     parkAreaM2:parkArea
-  }).then(result=>{
+  }).then(async result=>{
     if(window.DG_LANDCOVER_RENDER_REPORT){
       window.DG_LANDCOVER_RENDER_REPORT(rep,result,parkArea);
     }
@@ -216,8 +216,8 @@ async function runLandCoverAnalysis(){
      * başında dgEnsureLulc koşuldu); mount başarısızsa analiz SONUCU
      * etkilenmez — typeof + try koruması. */
     if(window.DG_LC_SENS&&typeof window.DG_LC_SENS.mount==="function"){
-      try{window.DG_LC_SENS.mount("lcSens");}
-      catch(e){console.warn("DENDROGEO · hassasiyet paneli monte edilemedi:",e);}
+      try{await window.DG_LC_SENS.mount("lcSens");}
+      catch(e){console.warn("DENDROGEO · hassasiyet paneli monte edilemedi:",e);toast(dgCf("Yüzey düzenleme açılamadı: ")+String(e.message||e),"err");}
     }
     toast(
       "✓ 10 m arazi örtüsü analizi tamamlandı (ESA WorldCover 2021 + çapraz IO LULC 2020).",

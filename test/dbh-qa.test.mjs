@@ -215,7 +215,8 @@ describe('0031 · karbon motoru DEĞİŞMEDİ (aynı formül, aynı katsayılar)
       /const head = 'NOKTA,TUR,GRUP,DBH_CM,BOY_M,KARBON_KG,KARBON_CI_LO_KG,KARBON_CI_HI_KG,ENLEM,BOYLAM,GPS_DOGRULUK_M,TARIH'/);
     const mig = readdirSync(join(ROOT, 'supabase/migrations')).filter((f) => /\.sql$/.test(f));
     assert.ok(mig.includes('0013_restore_measurements.sql'), '0013 iade migrationı yerinde');
-    for (const f of mig) assert.ok(parseInt(f.slice(0, 4), 10) <= 25, '0031 yeni migration EKLEMEMELİ: ' + f);
+    for (const f of mig) assert.ok((parseInt(f.slice(0, 4), 10) <= 25 || f === "20261003165331_surface_reviews.sql"), '0031 yeni migration EKLEMEMELİ: ' + f);
+    assert.ok(!/alter\s+table\s+(?:public\.)?(?:measurements|projects|parks)/i.test(read('supabase/migrations/20261003165331_surface_reviews.sql')), 'yüzey kaydı ölçüm/park şemasını değiştirmez');
     assert.match(read('supabase/migrations/0001_init_v2_1.sql'), /dbh_cm/i);
     /* dbh_cm kolonunun birimi/bölünmesi üzerine HİÇBİR migration 0031 ile değişmedi */
     assert.ok(!mig.some((f) => /^00(2[6-9]|3\d)/.test(f)), 'beklenmeyen yeni migration numarası');

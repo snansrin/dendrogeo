@@ -215,12 +215,10 @@ describe('0025 · kablolama (index.html + shell + partials)', () => {
   });
   test('0026 mobil: tablolar dg-cards, .card overflow kalktı, üst bar sakinleşti', () => {
     const sh = read('partials/shell.html');
-    assert.ok((sh.match(/tblwrap dg-cards/g) || []).length >= 9, 'tüm uygulama tabloları kart düzenine geçer (0027: waypoint dahil)');
+    assert.ok((sh.match(/tblwrap dg-cards/g) || []).length >= 8, 'uygulama tabloları kart düzeninde; waypoint yerel nokta kartlarını kullanır');
     assert.match(sh, /id="projTable"[\s\S]{0,40}/, 'proje tablosu yerinde');
     /* 0027: waypoint tablosu — kullanıcı bildirimi "içeride sağa-sola kayıyor" */
-    const iwp = sh.indexOf('id="wpListTable"');
-    const wcap = sh.lastIndexOf('tblwrap dg-cards', iwp);
-    assert.ok(iwp > 0 && wcap > 0 && iwp - wcap < 600, 'waypoint tablosu dg-cards kabında');
+    assert.match(sh, /<ul id="wpListTable" class="waypoint-points"/, 'waypoint listesi kompakt nokta kartları kullanır');
     const mp = read('src/services/map.js');
     assert.match(mp, /data-label="Enlem"/, 'waypoint satırları etiketli');
     assert.match(mp, /data-label="İşlem"/);

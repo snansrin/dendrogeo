@@ -94,6 +94,8 @@ const DG_LULC_CHAIN=[
   "src/services/lc-validate.js",
   "src/services/lc-s2.js",
   "src/ui/lc-report.js",
+  "vendor/polygon-clipping-0.15.7.js",
+  "src/services/lc-review.js",
   "src/ui/lc-sens.js",
   "src/services/landcover.js"
 ];

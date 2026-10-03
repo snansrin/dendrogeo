@@ -414,3 +414,19 @@
   color:var(--green);
   background:rgba(20,83,45,.07);
 }
+/* Surface editor sits beside a sticky map so the phone shows both. */
+#v-map #map.surface-review-map{position:sticky!important;top:0;height:clamp(260px,40vh,420px)!important;z-index:3!important}
+#lcSens{margin:12px 0;background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:14px}
+#lcSens .dg-sens-head{align-items:flex-start}
+#lcSens .dg-sens-head>.dg-png-btn{width:auto;min-width:100px}
+#lcSens .dg-sens-row{display:grid;grid-template-columns:minmax(90px,1fr) minmax(70px,2fr) minmax(85px,1fr);gap:8px}
+#lcSens .dg-sens-label{background:none;border:0;text-align:left;cursor:pointer;color:inherit;font:inherit;font-weight:600;padding:0;min-height:44px}
+#lcSens .dg-sens-count{white-space:normal;text-align:right;line-height:1.4}
+.dg-sens-details{border-top:1px solid var(--line);margin-top:12px}
+.dg-sens-details>summary{cursor:pointer;min-height:44px;display:flex;align-items:center;font-size:.84rem;font-weight:600}
+.dg-sens-feature{display:flex;justify-content:space-between;gap:10px;align-items:center}
+.dg-sens-feature .dg-png-btn{width:auto}
+#lcSens .dg-sens-actions .dg-png-btn{width:auto;min-height:44px;flex:1 1 auto}
+.dg-sens-popup{font-size:.8rem;line-height:1.5}
+@media(max-width:640px){#lcSens{padding:10px}#lcSens .dg-sens-row{grid-template-columns:90px minmax(60px,1fr) 84px;gap:6px}#lcSens .dg-sens-label{font-size:.76rem}#lcSens .dg-sens-count{font-size:.7rem}#v-map #map.surface-review-map{height:36vh!important;min-height:230px}.dg-sens-adj{font-size:.73rem}}
+@media(max-height:500px){#v-map #map.surface-review-map{height:35vh!important;min-height:150px}}

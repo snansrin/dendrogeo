@@ -90,12 +90,10 @@
     <div class="card"><div id="navMap" class="notranslate" translate="no"></div><div class="lbl" style="margin-top:8px">🔴 waypoint (numaralı, tıkla=hedef) · 🟢 yapıldı · 🔵 konumun</div></div>
     <div class="card waypoint-list">
      <div style="margin-top:24px;border-top:1px solid var(--line);padding-top:16px">
-      <div class="lbl" style="margin-bottom:10px">📍 Waypoint Listesi <span style="text-transform:none;letter-spacing:0">(üstü çizili = yapıldı)</span></div>
+      <div class="lbl" style="margin-bottom:10px">📍 Waypoint Listesi</div>
       <div class="waypoint-filters"><div><label class="lbl" for="wpSearch">Nokta ara</label><input id="wpSearch" type="search" placeholder="P12 veya 12" oninput="renderWaypointList()"></div><div><label class="lbl" for="wpFilter">Durum</label><select id="wpFilter" onchange="renderWaypointList()"><option value="all">Tümü</option><option value="pending">Bekleyen</option><option value="done">Tamamlanan</option></select></div></div>
       <div class="waypoint-sort"><label class="lbl" for="wpSort">Sıralama</label><select id="wpSort" onchange="renderWaypointList()"><option value="id">Nokta numarası</option><option value="distance">Yakından uzağa (GPS)</option></select></div>
-      <div class="tblwrap dg-cards" style="max-height:300px;overflow-y:auto;border:1px solid var(--line);border-radius:10px">
-       <table><thead><tr><th scope="col">ID</th><th scope="col">Enlem</th><th scope="col">Boylam</th><th scope="col">Mesafe</th><th scope="col">Durum</th><th scope="col">İşlem</th></tr></thead><tbody id="wpListTable"></tbody></table>
-      </div>
+      <ul id="wpListTable" class="waypoint-points" aria-label="Waypoint noktaları"></ul>
      </div>
      <details class="waypoint-files"><summary>📂 CSV ve liste yönetimi</summary>
      <div class="lbl" style="margin:12px 0 6px">Waypoints.csv Yükle (X,Y,id)</div>

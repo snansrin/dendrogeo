@@ -42,27 +42,32 @@ const DG_S2_SCALE=10000;       /* L2A yansıma ölçeği */
 /* Referans dönemi seçenekleri (karne beyanı bunları kaynak gösterir) */
 function dgS2SeasonRange(year,mode){
   const y=Number(year)||2021;
-  return mode==="latest"
-    ?{start:(new Date().getUTCFullYear())+"-05-01T00:00:00Z",end:(new Date().getUTCFullYear())+"-10-01T00:00:00Z",label:"güncel sezon (değişim notu)"}
-    :{start:y+"-06-01T00:00:00Z",end:y+"-09-30T23:59:59Z",label:y+" vejetasyon sezonu (1 Haz – 30 Eyl)"};
+  if(mode==="latest"){
+    const now=new Date(),end=now.toISOString(),start=new Date(now.getTime()-120*86400000).toISOString();
+    return{start,end,label:start.slice(0,10)+" – "+end.slice(0,10)+" (güncel, son 120 gün)"};
+  }
+  return{start:y+"-06-01T00:00:00Z",end:y+"-09-30T23:59:59Z",label:y+" vejetasyon sezonu (1 Haz – 30 Eyl)"};
 }
 
-/* STAC sahne araması: GET (CORS dersi) → buluta göre sırala → en temiz N */
+/* STAC sahne araması: GET (CORS dersi) → bulutsuz sahneler → en güncel farklı tarihleri seç */
 async function dgS2FindScenesRange(bbox,start,end,maxN){
   const qs=new URLSearchParams({
     collections:DG_S2_COLLECTION,
     bbox:[bbox.minLon,bbox.minLat,bbox.maxLon,bbox.maxLat].join(","),
     datetime:start+"/"+end,
-    limit:String(DG_S2_SEARCH_LIMIT)
+    limit:String(DG_S2_SEARCH_LIMIT),
+    sortby:"-datetime"
   });
   const data=await dgLcFetchJson(DG_LC_STAC+"/search?"+qs.toString(),{
     headers:{Accept:"application/geo+json"}
   });
   const items=Array.isArray(data&&data.features)?data.features:[];
+  const unique=new Set();
   const ranked=items
     .map(it=>({it,cloud:Number((it.properties&&it.properties["eo:cloud_cover"])??101)}))
-    .filter(x=>x.cloud<=DG_S2_MAX_CLOUD)
-    .sort((a,b)=>a.cloud-b.cloud)
+    .filter(x=>x.cloud<=DG_S2_MAX_CLOUD&&Object.keys(DG_S2_BANDS).every(b=>x.it.assets?.[b]?.href))
+    .sort((a,b)=>String(b.it.properties.datetime).localeCompare(String(a.it.properties.datetime))||a.cloud-b.cloud)
+    .filter(x=>{const p=x.it.properties||{},key=String(p["s2:mgrs_tile"]||p["grid:code"]||"")+":"+String(p.datetime).slice(0,10);if(unique.has(key))return false;unique.add(key);return true;})
     .slice(0,maxN||DG_S2_MAX_SCENES);
   return ranked.map(x=>({
     id:x.it.id,
@@ -146,6 +151,17 @@ function dgS2Median(arr){
   return s.length%2?s[m]:(s[m-1]+s[m])/2;
 }
 
+/* Planetary Computer baseline-change notebook + ESA PB04 radiometry.
+ * DN=0 remains NoData. Asset scale/offset metadata takes precedence. */
+function dgS2Reflectance(raw,item,band){
+ const v=Number(raw);if(!Number.isFinite(v)||v<=0||v>=65535)return null;
+ const asset=item?.assets?.[band],meta=asset?.["raster:bands"]?.[0];
+ const baseline=Number(item?.properties?.["s2:processing_baseline"]);
+ const date=String(item?.properties?.datetime||"");
+ const offset=Number.isFinite(meta?.offset)?meta.offset:((Number.isFinite(baseline)?baseline>=4:date>="2022-01-25")?-1000:0);
+ const r=Number.isFinite(meta?.scale)?v*meta.scale+(Number.isFinite(meta?.offset)?meta.offset:0):(v+offset)/DG_S2_SCALE;
+ return Number.isFinite(r)&&r>=-0.1&&r<=1.6?Math.max(0,r):null;
+}
 /* ANA GİRİŞ: hücre listesi (dgLcAnalyze → result.cells) için spektral profil.
  * Dönüş: {cells:{"row:col":{b03,b04,b08,b11,ndvi,mndwi,ndbi,obs}},
  *         scenes:[{id,cloud,datetime}], epsg, range, skipped}
@@ -167,6 +183,7 @@ async function dgS2Profile(cells,outer,opts){
 
   const epsg=o.epsg||dgLcUtmEpsgForLatLon(lats[0],lons[0]);
   const found=await dgS2FindScenes(bbox,o.year||2021,o.mode);
+  if(found.scenes.length<DG_S2_MIN_OBS_GUARD)throw Error("En az 3 farklı tarihte bulutsuz sahne gerekiyor; yeterli güncel veri bulunamadı.");
   const token=await dgLcGetSas(DG_S2_COLLECTION);
   const bboxDeg=bbox;
 
@@ -213,9 +230,9 @@ async function dgS2Profile(cells,outer,opts){
         for(const b of ["B03","B04","B08","B11"]){
           const bi=idxB[b][ci];
           if(bi===null){ok=false;break;}
-          const v=Number(reads[b].values[bi]);
-          if(!Number.isFinite(v)||v<=0||v>DG_S2_SCALE){ok=false;break;} /* nodata/doygun */
-          vals[b]=v/DG_S2_SCALE;
+          const v=dgS2Reflectance(reads[b].values[bi],sc.item,b);
+          if(v===null){ok=false;break;}
+          vals[b]=v;
         }
         if(!ok)continue;
         const key=cells[ci].row+":"+cells[ci].col;
@@ -251,6 +268,7 @@ async function dgS2Profile(cells,outer,opts){
     const obs=Math.min(a.b03.length,a.b04.length,a.b08.length,a.b11.length);
     const g=dgS2Median(a.b03),r=dgS2Median(a.b04),nir=dgS2Median(a.b08),sw=dgS2Median(a.b11);
     if(obs<DG_S2_MIN_OBS_GUARD||g===null||r===null||nir===null||sw===null){out[key]={obs,predict:"nodata"};nLow++;continue;}
+    if(nir+r<=0||g+sw<=0||sw+nir<=0){out[key]={obs,predict:"nodata"};nLow++;continue;}
     const ndvi=(nir-r)/(nir+r);
     const mndwi=(g-sw)/(g+sw);
     const ndbi=(sw-nir)/(sw+nir);
@@ -280,7 +298,7 @@ async function dgS2Profile(cells,outer,opts){
   const waterMax={};
   const vegMax={};
   const waterScenes=[];
-  if(o.waterYear!==false){
+  if(o.waterYear!==false&&o.mode!=="latest"){
     for(const w of dgS2WaterWindows(o.year||2021,o.mode)){
       let wScenes=[];
       try{wScenes=await dgS2FindScenesRange(bbox,w.start,w.end,w.max);}catch(err){wScenes=[];}
@@ -311,10 +329,10 @@ async function dgS2Profile(cells,outer,opts){
           for(let ci=0;ci<cells.length;ci++){
             if(iS[ci]===null||i3[ci]===null||i4[ci]===null||i8[ci]===null||i1[ci]===null)continue;
             if(!DG_S2_SCL_VALID.includes(Math.round(Number(rSCL.values[iS[ci]]))))continue;
-            const gW=Number(rB03.values[i3[ci]]),rW=Number(rB04.values[i4[ci]]);
-            const nW=Number(rB08.values[i8[ci]]),sW=Number(rB11.values[i1[ci]]);
-            const okB=v=>Number.isFinite(v)&&v>0&&v<=DG_S2_SCALE;
-            if(!okB(gW)||!okB(rW)||!okB(nW)||!okB(sW))continue;
+            const gW=dgS2Reflectance(rB03.values[i3[ci]],sc.item,"B03"),rW=dgS2Reflectance(rB04.values[i4[ci]],sc.item,"B04");
+            const nW=dgS2Reflectance(rB08.values[i8[ci]],sc.item,"B08"),sW=dgS2Reflectance(rB11.values[i1[ci]],sc.item,"B11");
+            const okB=v=>v!==null&&Number.isFinite(v);
+            if(!okB(gW)||!okB(rW)||!okB(nW)||!okB(sW)||gW+sW<=0||nW+rW<=0)continue;
             const kW=cells[ci].row+":"+cells[ci].col;
             const mW=(gW-sW)/(gW+sW);
             if(waterMax[kW]===undefined||mW>waterMax[kW])waterMax[kW]=mW;
@@ -346,6 +364,7 @@ async function dgS2Profile(cells,outer,opts){
     scenes:found.scenes.map(s=>({id:s.id,cloud:s.cloud,datetime:s.datetime,usedCells:s.usedCells||0})),
     waterScenes,
     range:found.range,
+    radiometryVersion:"pb04-offset-v1",
     epsg,
     skipped,
     stats:{nCells:cells.length,nProfiled:nOk,nInsufficient:nLow}

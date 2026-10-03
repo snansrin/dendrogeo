@@ -19,3 +19,6 @@ npm-debug.log*
 # Geçici çıktılar
 /tmp/
 *.local
+
+# Supabase CLI temporary metadata
+supabase/.temp/
