@@ -39,7 +39,3 @@ ZORUNLU ATIF BİÇİMİ
 Harita karoları ve arazi örtüsü raster'ları üçüncü taraf lisanslarına tabidir;
 DendroGeo arayüzünde kaynak atıfları bu yüzden görünür tutulur
 (Leaflet attribution + PNG çıktısındaki telif satırı).
-
-Clipper 6.4.2 (JavaScript port): Angus Johnson and Timo.
-vendor/clipper-6.4.2.js retains its Boost Software License 1.0 and copyright notice.
-Used for cartographic display only; analytic geometries retain their existing engine.

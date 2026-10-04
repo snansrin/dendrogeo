@@ -10,33 +10,39 @@
  * OSM'de bu havuzlar natural=water / leisure=swimming_pool olarak çizilidir.
  * Park bbox'ı için OSM su poligonları çekilir ve hücre merkezleri içinde
  * kalanlar SU sınıfına geçirilir. Böylece yapay havuzlar su alanına katılır. */
-const DG_LC_OSM_CACHE=new Map();
-function dgLcIsWaterElement(el){const t=el.tags||{};return t.natural==="water"||t.waterway==="riverbank"||t.leisure==="swimming_pool"||t.landuse==="basin";}
-function dgLcCachedOsm(bbox){
- const cached=window.DG_SURFACE_OSM,b=cached?.bbox;
- if(!b||!Array.isArray(cached.elements)||Date.now()-Date.parse(cached.fetchedAt)>600000||!Number.isFinite(Date.parse(cached.fetchedAt)))return null;
- return b.minLat<=bbox.minLat&&b.minLon<=bbox.minLon&&b.maxLat>=bbox.maxLat&&b.maxLon>=bbox.maxLon?cached:null;
-}
-async function dgLcOsmData(bbox){
- const coverage=dgLcCachedOsm(bbox);if(coverage)return coverage;
- const b=[bbox.minLat,bbox.minLon,bbox.maxLat,bbox.maxLon].join(","),old=DG_LC_OSM_CACHE.get(b);
- if(old&&Date.now()-old.time<600000)return old.promise;
- const query='[out:json][timeout:25];(nwr["natural"="water"]('+b+');nwr["waterway"="riverbank"]('+b+');nwr["leisure"="swimming_pool"]('+b+');nwr["landuse"="basin"]('+b+');way["highway"]('+b+');way["area:highway"]('+b+'););out geom;';
- const promise=(async()=>{
-  if(typeof overpassRequest==="function")return overpassRequest(query,"su+yol");
-  // Standalone CLI/QA contexts may load the land-cover modules without the
-  // app shell. Keep the same bounded request and do not accept partial data.
-  const r=await fetch("https://lz4.overpass-api.de/api/interpreter",{method:"POST",headers:{"Content-Type":"application/x-www-form-urlencoded",Accept:"application/json"},body:"data="+encodeURIComponent(query),signal:AbortSignal.timeout(18000)});
-  if(!r.ok)return null;const data=await r.json();return Array.isArray(data?.elements)&&!data.remark?data:null;
- })().catch(()=>null).then(data=>{if(!data)DG_LC_OSM_CACHE.delete(b);return data;});
- DG_LC_OSM_CACHE.set(b,{time:Date.now(),promise});return promise;
-}
+const DG_OSM_WATER_MIRRORS=[
+  "https://overpass.openstreetmap.fr/api/interpreter",
+  "https://overpass.private.coffee/api/interpreter",
+  "https://overpass.kumi.systems/api/interpreter",
+  "https://overpass-api.de/api/interpreter",
+  "https://lz4.overpass-api.de/api/interpreter"
+];
 
 async function dgLcFetchWaterPolygons(bbox){
-  const data=await dgLcOsmData(bbox);
+  const b=[bbox.minLat,bbox.minLon,bbox.maxLat,bbox.maxLon].join(",");
+  const sel="(nwr[\"natural\"=\"water\"]("+b+");nwr[\"waterway\"=\"riverbank\"]("+b+");"+
+             "nwr[\"leisure\"=\"swimming_pool\"]("+b+");nwr[\"landuse\"=\"basin\"]("+b+"););";
+  const q="[out:json][timeout:60];"+sel+"out geom;";
+  let data=null;
+  for(const url of DG_OSM_WATER_MIRRORS){
+    try{
+      const r=await fetch(url,{
+        method:"POST",
+        headers:{
+          "Content-Type":"application/x-www-form-urlencoded",
+          "User-Agent":"dendrogeo-lulc-qa/1.0 (scientific QA tool)",
+          "Accept":"application/json"
+        },
+        body:"data="+encodeURIComponent(q),
+        signal:AbortSignal.timeout(45000)
+      });
+      if(!r.ok)continue;
+      data=await r.json();
+      break;
+    }catch(err){/* sonraki ayna */}
+  }
   const rings=[];
   for(const el of (data&&data.elements)||[]){
-    if(!dgLcIsWaterElement(el))continue;
     if(el.type==="way"&&el.geometry&&el.geometry.length>=3){
       rings.push(el.geometry.map(g=>[g.lat,g.lon]));
     }else if(el.type==="relation"&&el.members){
@@ -182,7 +188,35 @@ function dgLcRoadShouldRefine(tags){
 }
 
 async function dgLcFetchRoadFeatures(bbox){
-  const data=await dgLcOsmData(bbox);
+  const b=[bbox.minLat,bbox.minLon,bbox.maxLat,bbox.maxLon].join(",");
+  const q=
+    "[out:json][timeout:60];("+
+    "way[\"highway\"]("+b+");"+
+    "way[\"area:highway\"]("+b+");"+
+    ");out tags geom;";
+
+  let data=null;
+  for(const url of DG_OSM_WATER_MIRRORS){
+    try{
+      const r=await fetch(url,{
+        method:"POST",
+        headers:{
+          "Content-Type":"application/x-www-form-urlencoded",
+          "User-Agent":"dendrogeo-lulc-qa/1.0 (scientific QA tool)",
+          "Accept":"application/json"
+        },
+        body:"data="+encodeURIComponent(q),
+        signal:AbortSignal.timeout(45000)
+      });
+      if(!r.ok)continue;
+      const j=await r.json();
+      if(j&&Array.isArray(j.elements)){
+        data=j;
+        break;
+      }
+    }catch(err){/* sonraki ayna */}
+  }
+
   const features=[];
   for(const el of (data&&data.elements)||[]){
     if(el?.type!=="way"||!Array.isArray(el.geometry)||el.geometry.length<2)continue;

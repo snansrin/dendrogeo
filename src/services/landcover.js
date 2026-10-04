@@ -28,7 +28,6 @@ async function dgLcAnalyze(params){
   /* BİRİNCİL ve çapraz kaynak bağımsız ağ istekleri: aynı anda başlatılır.
    * Birincil kaynak QA'dan geçmeden sonuç yayınlanmaz; çapraz kaynak yalnız
    * bağımsız uzlaşma göstergesi üretir. */
-  const osmPromise=Promise.allSettled([dgLcFetchWaterPolygons(bbox),dgLcFetchRoadFeatures(bbox)]);
   const primPromise=dgLcAnalyzeSource(DG_LC_SOURCES.primary,bbox,geom);
   const crossPromise=dgLcAnalyzeSource(DG_LC_SOURCES.cross,bbox,geom)
     .catch(err=>{
@@ -62,11 +61,9 @@ async function dgLcAnalyze(params){
    * ayrıca belirtilir. OSM verisi yoksa veya alınamazsa raster sonucu aynen
    * korunur. */
 
-  const osm=await osmPromise;
   let waterRefined=0;
   try{
-    if(osm[0].status!=="fulfilled")throw osm[0].reason;
-    const waterRings=osm[0].value;
+    const waterRings=await dgLcFetchWaterPolygons(bbox);
     waterRefined=dgLcRefineWater(result,waterRings);
     if(waterRefined>0){
       console.info("DENDROGEO · OSM su rafinasyonu:",waterRefined,"10 m hücre SU olarak işaretlendi.");
@@ -81,8 +78,7 @@ async function dgLcAnalyze(params){
    * hücre sert olarak işaretlenir. Sabit alan katsayısı uygulanmaz. */
   let roadRefined=0;
   try{
-    if(osm[1].status!=="fulfilled")throw osm[1].reason;
-    const roadFeatures=osm[1].value;
+    const roadFeatures=await dgLcFetchRoadFeatures(bbox);
     const roadEpsg=dgLcUtmEpsgForLatLon(
       Number(outer?.[0]?.[0]?.[0]??40),
       Number(outer?.[0]?.[0]?.[1]??32)
