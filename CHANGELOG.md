@@ -9,6 +9,9 @@ Yeni sürüm yayımlama adımları: [`docs/surum-yayini.md`](docs/surum-yayini.m
 
 ## [Yayımlanmadı]
 
+### Düzeltildi — Yüzey incelemesinde kapalı yol çizgilerinin alan sayılması
+Kapalı bir OSM `highway` çizgisi, yalnızca ilk ve son koordinatı eşleşiyor diye artık dolu poligon kabul edilmiyor. Yolun alansal yüzey olarak değerlendirilmesi için `area=yes` veya `area:highway` gerekir; açık genişliği bulunan doğrusal yollar çizgi olarak tamponlanır. Eski türetilmiş OSM sınırları yeni kuralla yeniden oluşturulur; manuel düzeltmeler ve kabul edilmiş rapor anlık görüntüleri korunur.
+
 ### Eklendi — 0058: 🖼️ DOĞRULANMIŞ HARİTA PNG — kabul/düzeltme SONRASI infografik çıktı
 **Kullanıcı isteği (birebir):** "iyileştirmeden sonra böyle bir çıktıyı
 alalım yine harika duruyor" (X lansman infografiğini göstererek).

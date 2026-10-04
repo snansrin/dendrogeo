@@ -29,6 +29,7 @@ function dgSensEditSummary(rec=DG_SENS.record,cells=dgSensCells()||[]){
 function dgSensMeta(k){return window.DG_LC_VALIDATE?.labels?.[k]||{tr:window.DG_SURFACE_REVIEW?.types?.[k]?.label||k,emoji:""};}
 function dgSensHa(a){return(Number(a||0)/10000).toFixed(3);}
 function dgSensNewRecord(){const pk=dgSensParkId(),owner=typeof USER!=="undefined"?USER?.id:null;return{id:"surface-"+(owner||"guest")+"-"+(pk.id||"x"),owner,parkId:pk.id,parkName:pk.name,sens:{green:50,water:50,hard:50,bare:50},corrections:{},features:[],useObjects:false,spectralEnabled:false,analysisEngine:"esa-raster-manual-v1",profile:null,period:"latest",createdAt:new Date().toISOString()};}
+function dgSensMigrateOsmObjects(rec){if(!rec)return false;const stale=(!!rec.objectVersion&&rec.objectVersion!=="footprints-v3-area-semantics")||((rec.objectFeatures||[]).length>0&&rec.objectVersion!=="footprints-v3-area-semantics");if(!stale)return false;rec.objectFeatures=null;rec.objectVersion=null;rec.draftDirty=true;return true;}
 async function dgSensLoadRecord(){
  const fresh=dgSensNewRecord();let local=null,remote=null;
  try{const rows=await window.DG_LC_VALIDATE.loadCampaigns(fresh.parkId);local=rows.find(r=>r.id===fresh.id&&r.owner===fresh.owner);if(!local&&fresh.parkId){const drafts=await window.DG_LC_VALIDATE.loadCampaigns(null);const fp=await window.DG_SURFACE_REVIEW.fingerprint(dgSensCells(),PARK_POLY,PARK_HOLES||[],{year:DG_LC_LAST.report?.year,engine:DG_LC_ENGINE_VERSION});const old=drafts.find(r=>r.id==="surface-"+fresh.owner+"-x"&&r.owner===fresh.owner&&r.fingerprint===fp);if(old)local={...old,id:fresh.id,parkId:fresh.parkId,parkName:fresh.parkName};}}catch(e){}
@@ -77,10 +78,11 @@ async function dgSensMount(hostId){
  if(rec.fingerprint&&rec.fingerprint!==fingerprint){Object.assign(rec,{corrections:{},features:[],objectFeatures:null,profile:null,acceptedAt:null,acceptedAreas:null,acceptedResult:null});DG_SENS.status=_tvs("Park sınırı veya veri değişti; eski kararlar yeni veriye uygulanmadı.");}
  rec.fingerprint=fingerprint;
  if(rec.profile?.radiometryVersion!=="pb04-offset-v1")rec.profile=null;
+ const rebuildOsmObjects=dgSensMigrateOsmObjects(rec);
+ if(rebuildOsmObjects)DG_SENS.status=_tvs("OSM yüzey geometrileri yeni alan kurallarıyla yeniden hesaplanıyor; önceki kabul edilmiş rapor korunuyor.");
  DG_SENS.record=rec;DG_SENS.opacity=rec.displayOpacity??45;DG_SENS.revision=rec.serverRevision||0;DG_SENS.editing=!!rec.draftDirty||!rec.acceptedAt||!rec.acceptedResult;
  if(rec.acceptedAt&&!rec.acceptedResult)DG_SENS.status=_tvs("Önceki kabul alanları hesabınızda korunuyor. Bu yeni harita önizlemesini kontrol edip kaydedin.");DG_SENS.focus=null;DG_SENS.showCand=true;
  DG_SENS.epsg=cells[0].epsg;
- if(!rec.acceptedAt&&rec.objectVersion!=="footprints-v2")rec.objectFeatures=null;
  DG_SENS.hostParent=host.parentNode;DG_SENS.hostNext=host.nextSibling;
  const mapEl=document.getElementById("map");
  if(mapEl){mapEl.after(host);mapEl.classList.add("surface-review-map");}
@@ -218,7 +220,7 @@ async function dgSensRepartition(){
  try{
   const data=await dgSurfacePrepare({cells:dgSensCells(),outer:PARK_POLY,holes:PARK_HOLES||[],epsg:DG_SENS.epsg,objects:rec.objectFeatures||null,elements:window.DG_SURFACE_OSM?.boundary===JSON.stringify(PARK_POLY)?window.DG_SURFACE_OSM.elements:[],features:DG_SENS.rawView?[]:rec.features||[],useObjects:!DG_SENS.rawView&&rec.useObjects});
   if(epoch!==DG_SENS.epoch)return;
-  if(!rec.objectFeatures){rec.objectFeatures=data.objects;rec.objectVersion="footprints-v2";}
+  if(!rec.objectFeatures){rec.objectFeatures=data.objects;rec.objectVersion="footprints-v3-area-semantics";}
   DG_SENS.partitionVersion=(DG_SENS.partitionVersion||0)+1;DG_SENS.parkGeometry=data.park;DG_SENS.geometry=data.geometries;
   // Structured cloning preserves geometry references; rebind cells to the UI's canonical array.
   const cells=new Map(dgSensCells().map(c=>[dgSensCellKey(c),c]));for(const p of data.parts)p.cell=cells.get(p.key);
