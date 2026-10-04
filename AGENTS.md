@@ -8,3 +8,4 @@
 - DBH santimetre cinsinden çaptır; karbon formüllerini ve ölçüm kayıtlarını arayüz değişiklikleriyle değiştirmeyin.
 - Canlı kullanıcı konumu mevcut GPS izni ve paylaşım koşullarıyla, geçici olarak gösterilir. Kurucu ekranı mevcut yetkileri korumalı; filtreler yeni veri erişimi açmamalı.
 - Yayından önce ilgili regresyon testleri, `npm run check`, telefon görünümü, CI ve canlı dosya sürümleri doğrulansın.
+- Yüzey analiz motoru ve canlı harita DendroGeo ana çekirdeğidir; kapsam/izolasyon/test şartları için [`docs/CORE-KIRMIZI-CIZGILER.md`](docs/CORE-KIRMIZI-CIZGILER.md) kurallarını uygulayın.

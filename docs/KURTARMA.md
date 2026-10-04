@@ -1,5 +1,7 @@
 # DendroGeo saha çekirdeği — 4 Ekim 2026
 
+> **Güncel ana çekirdek:** Kullanıcının 4 Ekim 2026 tarihli kararıyla `recovery/core-2026-10-04` dalı `61d4163a0a6d9d62d6b5f4f623894a6c9b57e29a` commit'ine fast-forward edilmiştir. Önceki `e7d94399aa6a058538068b6e4cc0263ed68ffa34` kurtarma noktası `recovery/previous-core-e7d9439` dalında ayrıca korunur. Aşağıdaki doğrulama manifesti önceki e7d9439 anlık görüntüsünü denetler; güncel çekirdek davranışı ve kırmızı çizgiler için [CORE-KIRMIZI-CIZGILER.md](CORE-KIRMIZI-CIZGILER.md) ve [ANALIZ-TEK-MOTOR-2026-10-04.md](ANALIZ-TEK-MOTOR-2026-10-04.md) belgelerini kullanın.
+
 Kullanıcının sahada çalışmayı sürdürmek için kabul ettiği sürüm GitHub'da ayrı bir kurtarma dalına sabitlenmiştir.
 
 | Referans | Değer |
