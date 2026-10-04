@@ -142,9 +142,25 @@ async function dgSurfacePrepare(data){
  return{park,geometries,objects,parts};
 }
 function dgSurfaceMergeSync(parts,epsg){
- // Keep surveyed/OSM outlines distinct from raster-derived boundaries for display.
- const groups={};for(const p of parts){const exact=p.method!=="review-cell",key=p.type+":"+(exact?"exact":"raster");const g=groups[key]||(groups[key]={type:p.type,exact,geoms:[],area:0,methods:new Set()});g.geoms.push(p.geom);g.area+=p.areaM2;g.methods.add(p.method);}
- return Object.values(groups).map(g=>({type:'Feature',properties:{class:g.type,area_m2:g.area,display_boundary:g.exact?'exact':'raster',method:[...g.methods].sort().join('+')},geometry:{type:'MultiPolygon',coordinates:dgSurfaceUnproject(window.polygonClipping.union(...g.geoms),epsg)}}));
+ const groups={};for(const p of parts){const g=groups[p.type]||(groups[p.type]={geoms:[],area:0,methods:new Set()});g.geoms.push(p.geom);g.area+=p.areaM2;g.methods.add(p.method);}
+ return Object.entries(groups).map(([k,g])=>({type:'Feature',properties:{class:k,area_m2:g.area,method:[...g.methods].sort().join('+')},geometry:{type:'MultiPolygon',coordinates:dgSurfaceUnproject(window.polygonClipping.union(...g.geoms),epsg)}}));
+}
+
+function dgSurfaceDisplaySync(parts,epsg,park,prepared=null){
+ const exact=prepared||dgSurfaceMergeSync(parts,epsg),pc=window.polygonClipping;
+ if(!globalThis.DG_SURFACE_DISPLAY)return exact;
+ const vector=parts.filter(p=>p.method!=="review-cell"||p.type==="building"||p.type==="pool");
+ const objects=dgSurfaceMergeSync(vector,epsg).map(f=>dgSurfaceFeatureGeometry(f,epsg));
+ const edges=[];for(const geom of [...objects,park||[]])for(const poly of geom)for(const r of poly)for(let i=1;i<r.length;i++)edges.push([r[i-1],r[i]]);
+ const raw=exact.map(f=>dgSurfaceFeatureGeometry(f,epsg));
+ try{
+  const visual=DG_SURFACE_DISPLAY.topology(raw,edges,6);
+  const union=pc.union(...visual),originalArea=dgSurfaceArea(pc.union(...raw));
+  // Topology and total coverage checks are display guards, not replacements for analytic QA.
+  if(Math.abs(dgSurfaceArea(union)-originalArea)>Math.max(.1,originalArea*.000001))return exact;
+  for(let i=0;i<visual.length;i++)for(let j=i+1;j<visual.length;j++)if(dgSurfaceArea(pc.intersection(visual[i],visual[j]))>.01)return exact;
+  return exact.map((f,i)=>({...f,geometry:{type:'MultiPolygon',coordinates:dgSurfaceUnproject(visual[i],epsg)}}));
+ }catch(e){return exact;}
 }
 
 /* Sampling geometry is derived from the displayed review, never from patch centroids.

@@ -183,6 +183,7 @@ function bootUser(opts) {
     PROFILE: o.profile || { id: 'u-2', role: 'user' }, USER: { id: 'u-2' },
     PROJ_LIST: o.projects || [{ id: 11, park_id: 6, parks: { name: 'Göksu Parkı' }, name: 'Göksu Parkı - deneme' }],
     toast: (m, t) => toasts.push([m, t]),
+    dgReportCollectRequest:async(park,lulc)=>ctx.dgPubInsertRequest(park,lulc,JSON.stringify({schema:'dendrogeo-report-context/1',study:{project_name:'Göksu projesi'},publication_consent:true})),
     confirm: () => o.confirm !== false,
     sb: { from: (table) => chain(table), auth: { getSession: async () => ({ data: { session: { access_token: 'tok-1' } } }) } },
     fetch: async (u, op) => {
@@ -197,7 +198,6 @@ function bootUser(opts) {
   vm.createContext(ctx);
   vm.runInContext(read('src/config/constants.js'), ctx, { filename: 'constants.js' });
   vm.runInContext(UI, ctx, { filename: 'report-publish.js' });
-  vm.runInContext('dgPublicationForm=async()=>({schema:"dendrogeo-publication/1",project:"Göksu çalışması"})', ctx);
   const run = (code) => vm.runInContext(code, ctx);
   return {
     ctx, els, toasts, calls, fetches, run,
@@ -320,7 +320,7 @@ describe('kullanıcı paneli davranışı (vm)', () => {
     assert.equal(f.url, 'https://x.supabase.co/rest/v1/report_requests');
     assert.equal(f.headers['Prefer'], 'return=minimal', 'RETURNING politikaya takılmasın');
     assert.equal(f.headers['Authorization'], 'Bearer tok-1', 'oturum anahtarı (anon istek açamaz)');
-    assert.deepEqual(f.body, [{ park_id: 6, with_lulc: true, status: 'Beklemede', requested_by: 'u-2', note: JSON.stringify({schema:'dendrogeo-publication/1',project:'Göksu çalışması'}) }]);
+    assert.deepEqual(f.body, [{ park_id: 6, with_lulc: true, status: 'Beklemede', requested_by: 'u-2', note: JSON.stringify({schema:'dendrogeo-report-context/1',study:{project_name:'Göksu projesi'},publication_consent:true}) }]);
     assert.match(ui.lastToast()[0], /kuyruğa alındı/);
     assert.equal(ui.lastToast()[1], 'ok');
   });
@@ -372,11 +372,11 @@ describe('kullanıcı paneli davranışı (vm)', () => {
     const adm = bootUser({ profile: { id: 'u-1', role: 'owner' } });
     await adm.run('dgPublishReport(6)');
     assert.equal(adm.fetches.length, 1);
-    assert.equal(JSON.parse(adm.fetches[0].body[0].note).schema, 'dendrogeo-publication/1');
+    assert.equal(JSON.parse(adm.fetches[0].body[0].note).schema,'dendrogeo-report-context/1');
   });
 
   test('panel HTML’i yalnız mevcut sınıf ailelerini kullanır (yeni CSS yok)', async () => {
-    const izin = new Set(['shead', 'no', 'rule', 'badge', 'on', 'off', 'admin', 'btn', 'sm', 'ghost', 'blue', 'red', 'amber', 'alert', 'warn', 'err', 'info', 'dg-tree-meta', 'dg-parkadmin-note', 'mono', 'dg-act']);
+    const izin = new Set(['dg-switch','shead', 'no', 'rule', 'badge', 'on', 'off', 'admin', 'btn', 'sm', 'ghost', 'blue', 'red', 'amber', 'alert', 'warn', 'err', 'info', 'dg-tree-meta', 'dg-parkadmin-note', 'mono', 'dg-act']);
     const states = [
       {},
       { requests: [REQ('r1', 6, 'Beklemede', 'u-2', 2)] },

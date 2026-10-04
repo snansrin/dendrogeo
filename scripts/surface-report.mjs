@@ -7,6 +7,7 @@ export function reviewedSurface(snapshot,parkId){
  const sums={};let count=0;
  const validRing=r=>Array.isArray(r)&&r.length>=4&&r.every(p=>Array.isArray(p)&&p.length===2&&p.every(Number.isFinite)&&Math.abs(p[0])<=180&&Math.abs(p[1])<=90)&&r[0][0]===r.at(-1)[0]&&r[0][1]===r.at(-1)[1];
  for(const f of features){const k=f.properties?.class,a=f.properties?.area_m2;if(!SURFACE_CLASSES[k]||!Number.isFinite(a)||a<0||f.geometry?.type!=='MultiPolygon'||!f.geometry.coordinates?.length||!f.geometry.coordinates.every(p=>p.length&&p.every(validRing)))throw Error('Kayıtlı analiz sınıfı veya koordinatları geçersiz.');sums[k]=(sums[k]||0)+a;count++;}
+ if(snapshot.displayFeatures!=null){if(!Array.isArray(snapshot.displayFeatures)||snapshot.displayFeatures.length!==features.length)throw Error('Görsel yüzey geometrisi eksik.');for(const f of snapshot.displayFeatures)if(!SURFACE_CLASSES[f.properties?.class]||!f.geometry?.coordinates?.every(p=>p.length&&p.every(validRing)))throw Error('Görsel yüzey geometrisi geçersiz.');}
  let total=0;for(const [k,a] of Object.entries(areas)){if(!SURFACE_CLASSES[k]||!Number.isFinite(a)||a<0||Math.abs(a-(sums[k]||0))>Math.max(.1,a*.00001))throw Error('Kayıtlı analiz alanı harita ile uyuşmuyor: '+k);total+=a;}
  for(const k of Object.keys(sums))if(!(k in areas))throw Error('Kayıtlı analizde sınıf alanı eksik: '+k);
  if(!(total>0))throw Error('Kayıtlı analiz alanı boş.');

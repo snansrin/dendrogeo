@@ -11,7 +11,7 @@ on:
         required: true
         type: string
       publication_json:
-        description: 'Çalışma künyesi (dendrogeo-publication/1 JSON)'
+        description: 'Yayın formundaki çalışma künyesi JSON'
         required: true
         type: string
       skip_lulc:
@@ -44,6 +44,8 @@ jobs:
         run: |
           printf '%s' "$PUBLICATION_JSON" > /tmp/dendrogeo-publication.json
           node scripts/make-report.mjs --publication-file /tmp/dendrogeo-publication.json --park "$PARK_ID" ${{ inputs.skip_lulc && '--skip-lulc' || '' }}
+      - name: PDF ve DOI dosya paketlerini üret
+        run: node scripts/render-report-pdf.mjs
       - name: Yayınla (commit + push)
         run: |
           git config user.name "DendroGeo Rapor Bot"

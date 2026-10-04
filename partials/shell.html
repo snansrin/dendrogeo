@@ -32,14 +32,7 @@
 
    <div class="view on" id="v-dash">
    <div class="shead" style="margin-bottom:18px"><span class="no">📊</span><h2 style="font-size:1.6rem">Genel Bakış</h2><span class="rule"></span><span class="mono" style="font-size:.78rem;color:var(--mut)">Kişisel Analiz Paneli</span></div>
-   <section class="card dg-profile-card" aria-labelledby="dgProfileName">
-    <div class="dg-profile-heading"><span class="dg-profile-avatar" id="dgProfileInitials" aria-hidden="true">DG</span><div><div class="lbl">Araştırmacı profili</div><h2 id="dgProfileName">Profilim</h2><p class="dg-meta" id="dgProfileAffiliation"></p></div></div>
-    <p class="dg-meta">Çalışmalarınızı, saha kayıtlarınızı ve yayınlarınızı bu panelden yönetin.</p>
-    <div class="dg-sens-actions"><button class="btn green" onclick="go('measure')">Yeni ölçüm</button><button class="btn blue" onclick="go('projects')">Projelerim ve raporlarım</button></div>
-    <details class="measure-details"><summary>Profil ve akademik bilgiler</summary><form id="dgAcademicProfile" onsubmit="dgSaveAcademicProfile(event)"><div class="dg-profile-fields">
-     <label class="lbl">Üniversite / kurum<input name="institution" maxlength="200"></label><label class="lbl">Fakülte / bölüm / program<input name="department" maxlength="200"></label><label class="lbl">Danışman (unvan, ad soyad)<input name="supervisor" maxlength="160"></label><label class="lbl">Çalışmanın / projenin adı<input name="project" maxlength="240"></label><label class="lbl">Araştırma alanı<input name="research_area" maxlength="200"></label><label class="lbl">ORCID<input name="orcid" placeholder="0000-0000-0000-0000" pattern="[0-9]{4}-[0-9]{4}-[0-9]{4}-[0-9]{3}[0-9X]" maxlength="19"></label>
-    </div><p class="dg-meta">Profil bilgileri hesabınızda saklanır. Rapor künyesini yayın öncesinde ayrıca onaylarsınız.</p><button type="submit" class="btn green">Profili kaydet</button><p id="dgProfileStatus" class="dg-meta" role="status"></p></form></details>
-   </section>
+   <section id="dgAcademicProfile" class="card" style="margin-bottom:18px" aria-label="Araştırmacı profili"></section>
    <div class="grid g4" style="margin-bottom:22px">
     <div class="stat" style="border-left:3px solid var(--green);padding-left:18px"><div class="lbl">📋 Kayıtlarım</div><div class="val" id="dMy">0</div></div>
     <div class="stat" style="border-left:3px solid var(--amber);padding-left:18px"><div class="lbl">🌱 Karbonum</div><div class="val" id="dCarbon">0</div><div style="font-size:.72rem;color:var(--mut);margin-top:4px">kg C (saf karbon)</div></div>

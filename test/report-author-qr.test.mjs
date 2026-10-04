@@ -85,7 +85,7 @@ describe('0012 · yazar = yayını isteyen kullanıcı', () => {
   test('metadata.json: creators istek sahibi, contributors kurucular (DataCite 4.7)', () => {
     const snap = { ...base, author: { name: 'Nagihan Şirin', source: 'report_request' } };
     const md = buildMetadata(snap, { id: 'DGR-2026-9001', hash: canonicalHash(snap), version: '1.0', meta: {}, history: [] });
-    assert.deepEqual(md.creators, [{ name: 'Şirin, N.', nameType: 'Personal' }]);
+    assert.deepEqual(md.creators, [{ name: 'Nagihan Şirin', nameType: 'Personal' }]);
     assert.equal(md.contributors.length, 2);
     assert.equal(md.contributors[0].contributorType, 'Founder');
     assert.match(md.creatorsNote, /yayını isteyen kullanıcının/);
@@ -111,7 +111,7 @@ describe('0027 · rapor PDF/print dostu', () => {
   test('print bloğu: kaydırma kapları kağıtta kırpılmaz, tam genişlik basılır', () => {
     const snap = { ...base, author: { name: 'Nagihan Şirin', source: 'data_owner' } };
     const html = render(snap);
-    assert.match(html, /@page\{margin:14mm\}/, 'sayfa kenar boşluğu');
+    assert.match(html, /@page\{size:A4;margin:14mm 14mm 18mm/, 'sayfa kenar boşluğu');
     assert.match(html, /\.tscroll\{overflow:visible!important/, 'kaplar print’te görünür (kırpma yok)');
     assert.match(html, /print-color-adjust:exact/, '0028: kullanıcı arka planları kapatsa bile renkler basılır');
     assert.match(html, /\.fig img\{max-width:100%!important;max-height:182mm/, '0028: harita tek sayfaya sığar (boş sayfa yok)');

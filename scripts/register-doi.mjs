@@ -5,12 +5,15 @@ import {join} from 'node:path';
 import {tmpdir} from 'node:os';
 import {execFileSync} from 'node:child_process';
 import {fileURLToPath} from 'node:url';
-import {zenodoMetadata} from './lib/publication.mjs';
+import {prepareReportDoi} from './prepare-report-doi.mjs';
+import {buildMetadata} from './make-report.mjs';
+import {canonicalHash} from './lib/mc.mjs';
+import {renderReportPdf} from './render-report-pdf.mjs';
 const root=fileURLToPath(new URL('..',import.meta.url));
 const id=process.argv[2];
 if(!/^DGR-\d{4}-\d{4}$/.test(id||''))throw Error('Kullanım: node scripts/register-doi.mjs DGR-YYYY-NNNN [--publish]');
 const dir=join(root,'rapor',id),statePath=join(dir,'zenodo-deposit.json'),doiPath=join(dir,'doi.json');
-if(existsSync(doiPath)){console.log('DOI kaydı zaten mevcut; ikinci kayıt oluşturulmadı.');process.exit(0);}
+if(existsSync(doiPath)){const d=JSON.parse(readFileSync(doiPath,'utf8'));if(d.report_id!==id||!/^10\.5281\/zenodo\.\d+$/.test(d.doi||''))throw Error('Kayıtlı DOI geçersiz.');const snap=JSON.parse(readFileSync(join(dir,'data.json'),'utf8')),md=JSON.parse(readFileSync(join(dir,'metadata.json'),'utf8'));writeFileSync(join(dir,'metadata.json'),JSON.stringify(buildMetadata(snap,{id,hash:canonicalHash(snap),version:md.version,meta:{...snap.provenance,doi:d.doi},history:(md.history||[]).filter(h=>h.id!==id).map(h=>({...h,retracted:h.status==='Geri çekildi'}))}))+'\n');await renderReportPdf(id,{force:true});console.log('Mevcut DOI belgeye işlendi; ikinci kayıt oluşturulmadı.');process.exit(0);}
 const token=process.env.ZENODO_TOKEN;if(!token)throw Error('ZENODO_TOKEN gerekli. Token yalnız yerel ortamda veya GitHub Actions secret olarak kullanılmalıdır.');
 const api='https://zenodo.org/api/deposit/depositions';
 async function call(url,method='GET',body){
@@ -20,7 +23,7 @@ async function call(url,method='GET',body){
  if(!res.ok)throw Error('Zenodo '+method+' HTTP '+res.status);return res.json();
 }
 const snap=JSON.parse(readFileSync(join(dir,'data.json'),'utf8'));
-const metadata=zenodoMetadata(snap,id);
+const {metadata}=prepareReportDoi(dir);delete metadata.prereserve_doi;
 let deposit=existsSync(statePath)?await call(api+'/'+JSON.parse(readFileSync(statePath,'utf8')).id):await call(api,'POST',{});
 writeFileSync(statePath,JSON.stringify({id:deposit.id,report_id:id},null,2)+'\n');
 if(deposit.submitted){
@@ -39,4 +42,6 @@ if(deposit.submitted){
 }
 if(!/^10\.5281\/zenodo\.\d+$/.test(deposit.doi||''))throw Error('Zenodo tarafından verilmiş DOI doğrulanamadı.');
 writeFileSync(doiPath,JSON.stringify({schema:'dendrogeo-doi/1',report_id:id,doi:deposit.doi,url:'https://doi.org/'+deposit.doi,record_url:'https://zenodo.org/records/'+deposit.id,registered_at:new Date().toISOString()},null,2)+'\n');
+const previous=JSON.parse(readFileSync(join(dir,'metadata.json'),'utf8'));writeFileSync(join(dir,'metadata.json'),JSON.stringify(buildMetadata(snap,{id,hash:canonicalHash(snap),version:previous.version,meta:{...snap.provenance,doi:deposit.doi},history:(previous.history||[]).filter(h=>h.id!==id).map(h=>({...h,retracted:h.status==='Geri çekildi'}))}))+'\n');
+await renderReportPdf(id,{force:true});
 console.log('DOI kaydedildi: https://doi.org/'+deposit.doi);

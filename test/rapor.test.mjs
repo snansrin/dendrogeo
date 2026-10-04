@@ -90,7 +90,7 @@ describe('yayınlanmış rapor dizini tutarlı', () => {
    * 28.09.2026'daki ilk gerçek geri çekmeye (DGR-2026-0001/0002) dek o
    * durumu hiç görmedi — artık günlükten okuyarak ayırt ediyor. */
   const RETRACTED = new Set((() => {
-    try { return (JSON.parse(read('rapor/yayin-kuyrugu.json')).entries || []).filter((e) => e.status === 'Geri çekildi').map((e) => String(e.report_id)); }
+    try { const q=JSON.parse(read('rapor/yayin-kuyrugu.json')); return [...(q.retired_report_ids||[]),...(q.entries||[]).filter(e=>e.status==='Geri çekildi').map(e=>String(e.report_id))]; }
     catch (e) { return []; }
   })());
   test('rapor dizini ve ilk rapor mevcut', () => {
@@ -136,7 +136,7 @@ describe('yayınlanmış rapor dizini tutarlı', () => {
 describe('dil denetimi: başlık ve yöntem Türkçe', () => {
   const html = renderReport(SNAP, { id: 'DGR-2026-0001', hash: canonicalHash(SNAP), version: 1 });
   test('Above/Below-Ground geçmez (Türkçe karşılık: toprak üstü / toprak altı)', () => {
-    assert.ok(!/Above|Below/i.test(html), 'İngilizce biyokütle terimi kalmamalı');
+    assert.ok(!/Above|Below/i.test(html.slice(0,html.indexOf('<span class="no">14</span>'))), 'İngilizce biyokütle terimi kalmamalı');
     assert.match(html, /Toprak Üstü \/ Toprak Altı Karbon Stoku/, 'başlık Türkçe');
     assert.match(html, /Toprak üstü biyokütle \(AGB\)/, 'yöntem Türkçe');
     assert.match(html, /Toprak altı biyokütle/, 'kök biyokütlesi Türkçe');

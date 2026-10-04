@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+import {decodeReportContext} from './lib/report-context.mjs';
 /* publish-queue.mjs — SİTE İÇİNDEN GELEN RAPOR YAYIN İSTEKLERİNİ İŞLER
  *
  * NEDEN VAR (2026-09-27 · kullanıcı isteği: "raporu site üstünden
@@ -42,7 +43,6 @@ import { readFileSync, writeFileSync, existsSync, unlinkSync } from 'node:fs';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { publishPark, renderRetractionNotice, rebuildIndex, DGR_ID_RE, renderReport, buildMetadata, qrDataUri, parkHistory } from './make-report.mjs';
-import { parsePublication } from './lib/publication.mjs';
 import { canonicalHash } from './lib/mc.mjs';
 import { acceptedSurfaceToLulc, stripUnavailableSurfaceMap, isAcceptedSurfaceSnapshot } from './lib/surface-snapshot.mjs';
 
@@ -76,51 +76,50 @@ export function loadQueue(rel = QUEUE_PATH) {
   } catch (e) { return emptyQueue(); }
 }
 export function saveQueue(q, rel = QUEUE_PATH) {
-  const out = { schema: QUEUE_SCHEMA, updated_at: new Date().toISOString(), entries: (q.entries || []).slice(-QUEUE_CAP) };
+  const out = { ...q, ...(q.production_started_at ? {processed_request_ids:[...new Set([...(q.processed_request_ids||[]),...(q.entries||[]).filter(e=>e.request_id).map(e=>String(e.request_id))])],processed_retraction_ids:[...new Set([...(q.processed_retraction_ids||[]),...(q.entries||[]).filter(e=>e.retraction_id).map(e=>String(e.retraction_id))])]} : {}), schema: QUEUE_SCHEMA, updated_at: new Date().toISOString(), entries: (q.entries || []).slice(-QUEUE_CAP) };
   writeFileSync(qpath(rel), JSON.stringify(out, null, 2) + '\n');
   return out;
 }
 
 /* ---------- istekler (Supabase, ANON anahtarla salt-okunur) ---------- */
-async function fetchRequestRows(select, limit) {
+async function fetchRequestRows(select, limit, offset=0, cutoff=null) {
   const u = SB.url + '/rest/v1/report_requests?' + new URLSearchParams({
     select,
     status: 'eq.Beklemede',
     order: 'created_at.asc',
-    limit: String(limit),
+    limit: String(limit),offset:String(offset),...(cutoff ? {created_at:"gte."+new Date(cutoff).toISOString()} : {}),
   });
   return fetch(u, { headers: { apikey: SB.key, Authorization: 'Bearer ' + SB.key } });
 }
-export async function fetchPending(limit = 50) {
-  /* Yeni kolon henüz canlı DB'ye uygulanmamışsa kuyruk tümden durmasın:
-   * eski seçime düşer. Migration uygulandığı anda kabul snapshot'ı otomatik
-   * kullanılmaya başlanır. */
-  let r = await fetchRequestRows('id,park_id,with_lulc,status,note,created_at,surface_snapshot', limit);
-  if (r.status === 400) r = await fetchRequestRows('id,park_id,with_lulc,status,note,created_at', limit);
-  if (r.status === 404) { const e = new Error('report_requests tablosu yok — Supabase SQL Editor\'da 0008_report_publish.sql çalıştırılmalı'); e.code = 'NO_TABLE'; throw e; }
-  if (!r.ok) throw new Error('report_requests HTTP ' + r.status + ': ' + (await r.text()).slice(0, 200));
-  const rows = await r.json();
-  return Array.isArray(rows) ? rows : [];
+export async function fetchPending(limit = 50, processedIds=[],cutoff=null) {
+  const done=new Set(processedIds.map(String)),out=[];let offset=0,select='id,park_id,with_lulc,status,note,created_at,surface_snapshot';
+  while(out.length<limit){
+    let r=await fetchRequestRows(select,50,offset,cutoff);
+    if(r.status===400){select='id,park_id,with_lulc,status,note,created_at';r=await fetchRequestRows(select,50,offset,cutoff);}
+    if(r.status===404){const e=new Error('report_requests tablosu yok — Supabase SQL Editor\'da 0008_report_publish.sql çalıştırılmalı');e.code='NO_TABLE';throw e;}
+    if(!r.ok)throw Error('report_requests HTTP '+r.status+': '+(await r.text()).slice(0,200));
+    const rows=await r.json();if(!Array.isArray(rows))return out;
+    out.push(...rows.filter(r=>!done.has(String(r.id))));if(rows.length<50)break;offset+=rows.length;
+  }
+  return out.slice(0,limit);
 }
 
 /* ---------- geri çekme istekleri (0010; ANON anahtarla salt-okunur) ---------- */
-export async function fetchPendingRetractions(limit = 50) {
-  const u = SB.url + '/rest/v1/report_retractions?' + new URLSearchParams({
-    select: 'id,report_id,park_id,reason,status,requested_by,created_at',
-    status: 'eq.Beklemede',
-    order: 'created_at.asc',
-    limit: String(limit),
-  });
-  const r = await fetch(u, { headers: { apikey: SB.key, Authorization: 'Bearer ' + SB.key } });
-  if (r.status === 404) { const e = new Error('report_retractions tablosu yok — Supabase SQL Editor\'da 0010_report_retraction.sql çalıştırılmalı'); e.code = 'NO_TABLE'; return { rows: [], missing: true, message: e.message }; }
-  if (!r.ok) throw new Error('report_retractions HTTP ' + r.status + ': ' + (await r.text()).slice(0, 200));
-  const rows = await r.json();
-  return { rows: Array.isArray(rows) ? rows : [], missing: false };
+export async function fetchPendingRetractions(limit = 50,processedIds=[],cutoff=null) {
+ const out=[],done=new Set(processedIds.map(String));let offset=0;
+ while(out.length<limit){
+  const u=SB.url+'/rest/v1/report_retractions?'+new URLSearchParams({select:'id,report_id,park_id,reason,status,requested_by,created_at',status:'eq.Beklemede',order:'created_at.asc',limit:'50',offset:String(offset),...(cutoff?{created_at:'gte.'+new Date(cutoff).toISOString()}:{})});
+  const r=await fetch(u,{headers:{apikey:SB.key,Authorization:'Bearer '+SB.key}});
+  if(r.status===404)return{rows:[],missing:true,message:'report_retractions tablosu yok — 0010_report_retraction.sql çalıştırılmalı'};
+  if(!r.ok)throw Error('report_retractions HTTP '+r.status+': '+(await r.text()).slice(0,200));
+  const rows=await r.json();if(!Array.isArray(rows))break;out.push(...rows.filter(r=>!done.has(String(r.id))));if(rows.length<50)break;offset+=rows.length;
+ }
+ return{rows:out.slice(0,limit),missing:false};
 }
 
 /* ---------- PLAN (saf fonksiyon: test burayı kilitler) ---------- */
-export function planQueue(entries, requests, limit = RUN_LIMIT) {
-  const done = new Set((entries || []).map((e) => String(e.request_id)));
+export function planQueue(entries, requests, limit = RUN_LIMIT, processedIds = []) {
+  const done = new Set([...(entries || []).map((e) => String(e.request_id)),...processedIds.map(String)]);
   const todo = (requests || []).filter((r) => !done.has(String(r.id)));
   return { todo: todo.slice(0, limit), skipped: todo.length > limit ? todo.length - limit : 0, already: (requests || []).length - todo.length };
 }
@@ -210,8 +209,8 @@ async function handle(req) {
     /* Kabul edilmiş snapshot varsa yeniden LULC çalıştırma: önce hızlı temel
      * rapor iskeleti üretilir, sonra kabul edilmiş alanlar aynı DGR'ye bağlanır. */
     if(req.surface_snapshot && !accepted && !geometrySnapshot)throw new Error("Bilinmeyen kayıtlı analiz şeması");
-    const publication=parsePublication(req.note);
-    let r = await publishPark(req.park_id, { publication, skipLulc: accepted || (!geometrySnapshot && req.with_lulc === false), surfaceSnapshot: geometrySnapshot ? req.surface_snapshot : null });
+    const study=decodeReportContext(req.note);
+    let r = await publishPark(req.park_id, { ...(study ? {study} : {}), skipLulc: accepted || (!geometrySnapshot && req.with_lulc === false), surfaceSnapshot: geometrySnapshot ? req.surface_snapshot : null });
     if (accepted) r = await applyAcceptedSurfaceSnapshot(r, req.surface_snapshot);
     let bytes = null;
     try {
@@ -244,7 +243,7 @@ async function handle(req) {
 
 /* Geri çekmenin uygulanması: veri dosyaları silinir, index.html bildirime
  * döner, liste yenilenir. root parametrik (test geçici dizinde doğrular). */
-export const RETRACT_FILES = ['data.json', 'olcum.csv', 'park.geojson', 'surface.geojson', 'harita.png', 'metadata.json'];
+export const RETRACT_FILES = ['rapor.pdf','doi-yayin-paketi.zip','manifest.json','zenodo-metadata.json','data.json', 'olcum.csv', 'park.geojson', 'surface.geojson', 'harita.png', 'metadata.json'];
 export function handleRetraction(rt, pubEntry, root = ROOT) {
   const started = new Date().toISOString();
   const base = {
@@ -276,22 +275,22 @@ export async function runQueue(opts = {}) {
   const q = loadQueue();
   let requests = [];
   try {
-    requests = await fetchPending();
+    requests = await fetchPending(50,q.processed_request_ids||[],q.production_started_at||null);
   } catch (e) {
     console.log('⚠ Kuyruk okunamadı: ' + e.message);
     return { ok: false, processed: 0, entries: q.entries, reason: e.code || 'FETCH' };
   }
-  const plan = planQueue(q.entries, requests, limit);
+  const plan = planQueue(q.entries, requests, limit, q.processed_request_ids || []);
   console.log(`📄 Yayın kuyruğu: ${requests.length} bekleyen istek · ${plan.already} zaten işlenmiş · ${plan.todo.length} bu koşuda üretilecek${plan.skipped ? ` · ${plan.skipped} sonraki koşuya kaldı` : ''}`);
 
   let retractions = [], retMissing = false;
   try {
-    const rr = await fetchPendingRetractions();
+    const rr = await fetchPendingRetractions(50,q.processed_retraction_ids||[],q.production_started_at||null);
     retractions = rr.rows; retMissing = rr.missing;
   } catch (e) {
     console.log('⚠ Geri çekme kuyruğu okunamadı: ' + e.message);
   }
-  const rplan = planRetractions(q.entries, retractions, limit);
+  const rplan = planRetractions(q.entries, retractions.filter(r=>!(q.processed_retraction_ids||[]).includes(String(r.id))), limit);
   if (!retMissing && (retractions.length || rplan.todo.length))
     console.log(`🗑 Geri çekme kuyruğu: ${retractions.length} bekleyen · ${rplan.todo.length} bu koşuda işlenecek${rplan.invalid.length ? ` · ${rplan.invalid.length} geçersiz/eşleşmeyen (İŞLENMEDİ)` : ''}`);
 

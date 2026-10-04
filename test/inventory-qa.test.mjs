@@ -513,7 +513,7 @@ describe('0031 · renderReport — GNSS beyanı, DBH tanımı ve envanter QA sat
     const h2 = renderReport(snap2, { id: 'DGR-2026-9998', hash: canonicalHash(snap2), version: 1, meta: { id: 'DGR-2026-9998', history: [] } });
     assert.match(h2, /🟡 İNCELEME/);
     assert.match(h2, /İNCELEME GÖSTERGESİDİR/);
-    assert.match(h2, /tek başına veri hatası hükmü oluşturmaz/);
+    assert.match(h2, /veri hatası hükmü DEĞİLDİR/);
     /* inceleme durumunda GEÇİCİDİR/KULLANILMAMALIDIR damgası BASILMAZ */
     assert.ok(!h2.includes('GEÇİCİDİR'), 'inceleme raporu geçici damgası taşımamalı');
     assert.ok(!h2.includes('KULLANILMAMALIDIR'), 'inceleme raporu kullanım yasağı taşımamalı');

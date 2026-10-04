@@ -448,7 +448,7 @@ describe('0031 · üç hâlli rapor durumu (Çizelge 4ten türetilir)', () => {
     assert.match(HTML, /kritik veri hatası vardır, karbon sonucu bilimsel iletişimde kullanılmamalıdır/);
     assert.match(HTML, /🟢 GEÇERLİ/);
     assert.match(HTML, /tüm kritik kontroller geçmiştir/);
-    assert.match(HTML, /tek başına veri hatası hükmü oluşturmaz/);
+    assert.match(HTML, /veri hatası hükmü DEĞİLDİR/);
     assert.match(HTML, /3\/6 kayıt fiziksel makullük bandı dışında veya stand içi aykırı/, 'inceleme kalemi §7 girişinde sayıyla');
     assert.match(HTML, /3\/6 kayıt gövde formu açısından makul · 3 kayıt inceleme istiyor/, 'Çizelge 4 ayrıntısı sayıyla');
     assert.match(HTML, /fiziksel makullük bandı \(3–200\) dışı/, 'ihlalin hangi ölçütten geldiği yazılı');

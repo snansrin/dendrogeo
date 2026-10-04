@@ -20,15 +20,15 @@ test('metadata rejects missing required fields, impossible dates and thesis with
 test('test publication IDs cannot enter new report history',()=>{
  const dir=mkdtempSync(join(tmpdir(),'dg-publication-history-'));
  writeFileSync(join(dir,'test-publications.json'),JSON.stringify({report_ids:['DGR-2026-0001']}));
- writeFileSync(join(dir,'yayin-kuyrugu.json'),JSON.stringify({entries:[{report_id:'DGR-2026-0001',park_id:1,status:'Yayınlandı'},{report_id:'DGR-2026-0021',park_id:1,status:'Yayınlandı'}]}));
+ writeFileSync(join(dir,'yayin-kuyrugu.json'),JSON.stringify({retired_report_ids:['DGR-2026-0001'],entries:[{report_id:'DGR-2026-0001',park_id:1,status:'Yayınlandı'},{report_id:'DGR-2026-0021',park_id:1,status:'Yayınlandı'}]}));
  assert.deepEqual(parkHistory(dir,1,'DGR-2026-0022').map(h=>h.id),['DGR-2026-0021']);
 });
 test('cancelled publication form writes no request; confirmed form preserves RLS-safe metadata payload',async()=>{
  let sent=0;const ctx=vm.createContext({$:()=>null,USER:{id:'u'},PROFILE:{role:'admin'},DG_USER_PUB:{},document:{getElementById:()=>null},toast:()=>{},setInterval:()=>0,clearInterval:()=>{},JSON,Date,Number,String,window:{},sb:{auth:{getSession:async()=>({data:{session:{access_token:'session'}}})}},SB_URL:'https://example.invalid',SB_KEY:'anon',fetch:async()=>{sent++;return{status:201}},confirm:()=>true});
  vm.runInContext(readFileSync(new URL('../src/services/report-publish.js',import.meta.url),'utf8'),ctx);
- vm.runInContext('dgPublicationForm=async()=>null;dgPubAdmin=()=>true;dgLoadPublishQueue=async()=>{};dgPubSchedulePoll=()=>{}',ctx);
+ vm.runInContext('dgReportCollectRequest=async()=>null;dgPubAdmin=()=>true;dgLoadPublishQueue=async()=>{};dgPubSchedulePoll=()=>{}',ctx);
  await vm.runInContext('dgPublishReport(1)',ctx);assert.equal(sent,0);
- ctx.study=study;vm.runInContext('dgPublicationForm=async()=>study',ctx);await vm.runInContext('dgPublishReport(1)',ctx);assert.equal(sent,1);
+ ctx.study=study;vm.runInContext('dgReportCollectRequest=async()=>{const r=await dgPubInsertRequest(1,true,JSON.stringify(study));return r;}',ctx);await vm.runInContext('dgPublishReport(1)',ctx);assert.equal(sent,1);
 });
 test('Zenodo export carries study title and affiliation without an invented DOI',()=>{
  const m=zenodoMetadata({publication:study,author:{name:'Araştırmacı'}},'DGR-2026-0021');assert.equal(m.title,study.title);assert.equal(m.creators[0].affiliation,study.institution);assert.equal(m.doi,undefined);

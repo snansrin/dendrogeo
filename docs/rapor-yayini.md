@@ -445,7 +445,7 @@ Künye mevcut `report_requests.note` metin alanına
 gerekmez. Kuyruk işleyicisi zorunlu alanları ve tarih aralığını yeniden
 doğrular. Künye eksik eski istekler rapor üretmez; kullanıcı yeni formdan
 istek açmalıdır. Künye `data.json` içinde içerik hash'ine dahil edilir ve
-`metadata.json` dosyasında `publication` alanıyla yayımlanır. Nicel kapsam,
+`metadata.json` dosyasında `study` alanıyla yayımlanır. Nicel kapsam,
 parkın tüm onaylı ölçümleridir. Beyan edilen saha tarihleri veri filtresi
 olarak kullanılmaz; kayıt tarih aralığı ayrıca raporda gösterilir.
 
@@ -496,3 +496,5 @@ uygulanır. Raster çözünürlüğü değişmez; bu çizim yeni veya daha hassa
 uzaktan algılama sonucu değildir. Analiz alanları, kabul snapshot'ı ve
 GeoJSON dışa aktarımı özgün geometriden üretilir. Veri/ayarlar ve sınır
 düzeltme bölümleri açılır kapanır; yeniden çizimde açık durumları korunur.
+
+Güncel site formu `dendrogeo-report-context/1` şemasını kullanır. Önceki `dendrogeo-publication/1` künyeleri kuyruk ve CLI girişinde dönüştürülerek desteklenir. Profil bilgileri `dendrogeo_profile` hesap üst verisinde tutulur; önceki `academic_profile` değerleri yeni forma aktarılır. Yayın formunda verilen onay yalnız raporda gösterilen künye alanları içindir.

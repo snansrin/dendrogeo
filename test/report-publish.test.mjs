@@ -143,38 +143,23 @@ describe('publish-queue.mjs: plan + günlük', () => {
     assert.deepEqual(loadQueue(rel), emptyQueue(), 'bozuk günlük → boş');
   });
 
-  test('depodaki günlük geçerli ve ilk yayını (DGR-2026-0001) taşıyor', () => {
+  test('üretim günlüğü test yayınlarını yeniden yayımlamaz', () => {
     const q = loadQueue();
     assert.equal(q.schema, QUEUE_SCHEMA);
-    assert.ok(existsSync(join(ROOT, QUEUE_PATH)), QUEUE_PATH + ' repo’da');
-    const e = q.entries.find((x) => x.report_id === 'DGR-2026-0001' && x.status === 'Yayınlandı');
-    assert.ok(e, 'ilk yayın günlükte (yayın kaydı geçmiş için korunur)');
-    /* 0010: ilk yayın 28.09.2026'da GERİ ÇEKİLDİ — günlükte AYRI bir
-     * 'Geri çekildi' satırı taşınır; yayın satırı geçmiş olarak kalır.
-     * Sözleşme: veri dosyaları silinir, adresinde gerekçeli bildirim kalır. */
-    const retr = q.entries.find((x) => x.report_id === 'DGR-2026-0001' && x.status === 'Geri çekildi');
-    if (retr) {
-      const html = read('rapor/DGR-2026-0001/index.html');
-      assert.match(html, /[Gg]eri çeki/, 'bildirim sayfası gerekçeli');
-      assert.ok(!existsSync(join(ROOT, 'rapor/DGR-2026-0001/data.json')), 'veri dosyaları kaldırıldı');
-      const retractedIds = new Set(q.entries.filter((x) => x.status === 'Geri çekildi').map((x) => String(x.report_id)));
-      const pub = q.entries.find((x) => x.status === 'Yayınlandı' && !retractedIds.has(String(x.report_id)));
-      if (pub) {
-        const phtml = read('rapor/' + pub.report_id + '/index.html');
-        assert.ok(phtml.includes(String(pub.report_hash).replace('sha256:', '')), pub.report_id + ': hash sayfa ile tutarlı');
-      } else {
-        /* 0015: tüm yayınlar geri çekilmiş olabilir (meşru durum) — bu
-         * durumda günlükte en az bir Yayınlandı + bir Geri çekildi izi şart. */
-        assert.ok(retractedIds.size >= 1, 'geçerli yayın yoksa geri çekme kaydı olmalı');
-        assert.ok(q.entries.some((x) => x.status === 'Yayınlandı'), 'günlükte yayın izi korunur');
-      }
-    } else {
-      assert.equal(e.status, 'Yayınlandı');
-      /* günlüğün yazdığı hash, yayınlanmış sayfanın hash’i ile aynı olmalı */
-      const html = read('rapor/DGR-2026-0001/index.html');
-      assert.ok(html.includes(e.report_hash.replace('sha256:', '')), 'hash sayfa ile tutarlı');
-      assert.equal(e.park_id, JSON.parse(read('rapor/DGR-2026-0001/data.json')).park.id);
+    assert.ok(q.production_started_at);
+    assert.match(q.test_archive_ref, /archive\/test-publications-/);
+    assert.ok(q.retired_report_ids.includes('DGR-2026-0001'));
+    assert.ok(q.retired_report_ids.includes('DGR-2026-0020'));
+    assert.ok(q.processed_request_ids.length >= 21);
+    assert.ok(q.processed_retraction_ids.length >= 19);
+    assert.ok(!q.entries.some(e => q.retired_report_ids.includes(e.report_id)));
+    for(const e of q.entries.filter(e=>e.status==='Yayınlandı')) {
+      const h=read('rapor/'+e.report_id+'/index.html');
+      assert.ok(h.includes(e.report_hash.replace('sha256:', '')));
+      assert.equal(e.park_id,JSON.parse(read('rapor/'+e.report_id+'/data.json')).park.id);
     }
+    assert.match(read('rapor/DGR-2026-0020/index.html'), /noindex,nofollow/);
+    assert.ok(!existsSync(join(ROOT,'rapor/DGR-2026-0020/data.json')));
   });
 
   test('günlükteki her başarılı girdi rapor diziniyle birebir örtüşür', () => {
@@ -190,7 +175,7 @@ describe('publish-queue.mjs: plan + günlük', () => {
 describe('make-report.mjs: tek üretici publishPark()', () => {
   test('publishPark dışa açık ve CLI onu kullanıyor (iki yol, tek çıktı)', () => {
     assert.match(MR, /export async function publishPark\(/);
-    assert.match(MR, /const r = await publishPark\(parkId, \{ skipLulc: has\('skip-lulc'\), publication: parsePublication\(readFileSync\(publicationFile,'utf8'\)\) \}\)/, 'main → publishPark');
+    assert.match(MR, /const r = await publishPark\(parkId, \{ skipLulc: has\('skip-lulc'\), study \}\)/, 'main → publishPark');
     assert.match(MR, /SITE_ORIGIN/, 'bağlantı CNAME’den türetilir');
   });
 
@@ -208,7 +193,7 @@ describe('make-report.mjs: tek üretici publishPark()', () => {
     let retracted = new Set();
     try { retracted = new Set(loadQueue().entries.filter((x) => x.status === 'Geri çekildi').map((x) => String(x.report_id))); } catch (e) { /* günlük yoksa boş */ }
     for (const d of readdirSync(join(ROOT, 'rapor')).filter((x) => x.startsWith('DGR-'))) {
-      if (retracted.has(d)) continue;
+      if (retracted.has(d) || !existsSync(join(ROOT,'rapor',d,'data.json'))) continue;
       const t = read('rapor/' + d + '/index.html');
       if (d === 'DGR-2026-0001') continue;
       assert.match(t, /dgShareReport\(\)/, d + ' paylaş düğmesi');

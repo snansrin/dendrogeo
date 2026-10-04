@@ -64,6 +64,9 @@ jobs:
       - name: Bekleyen yayın isteklerini işle
         run: node scripts/publish-queue.mjs
 
+      - name: PDF ve DOI dosya paketlerini üret
+        run: node scripts/render-report-pdf.mjs
+
       - name: Yayınla (commit + push)
         run: |
           git config user.name "DendroGeo Rapor Bot"

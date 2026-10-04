@@ -1,0 +1,33 @@
+{
+  "metadata": {
+    "upload_type": "publication",
+    "publication_type": "report",
+    "publication_date": "2026-10-04",
+    "title": "Göksu Parkı (Ankara): Bireysel Ağaç Envanteri ve Toprak Üstü / Toprak Altı Karbon Stoku Analizi",
+    "creators": [
+      {
+        "name": "Nagihan Şirin"
+      }
+    ],
+    "description": "<p>Göksu Parkı, Ankara: 36 moderatör onaylı ağaç ölçümünün envanteri ve model tabanlı karbon stoku analizi. Raporda yöntem, birimler, model belirsizlikleri, yüzey örtüsü alanları, kalite kontrolleri ve sınırlılıklar açıklanmıştır.</p><p>Rapor kimliği: DGR-2026-0021; sürüm: 1.0; sonuç özeti SHA-256: ac4eadda1f477f8e289cdcf1f1f6c71b08ce9c49a7cc161492adfd06a4940d72. Envanter kapsamı ölçülen bireylerle sınırlıdır; parkın tüm ağaçlarına genellenmez.</p>",
+    "access_right": "open",
+    "license": "cc-by-nc-4.0",
+    "language": "tur",
+    "version": "1.0",
+    "keywords": [
+      "urban forestry",
+      "tree inventory",
+      "carbon stock",
+      "land cover",
+      "Göksu Parkı"
+    ],
+    "related_identifiers": [
+      {
+        "identifier": "https://dendrogeo.org/rapor/DGR-2026-0021/",
+        "relation": "isIdenticalTo",
+        "scheme": "url"
+      }
+    ],
+    "prereserve_doi": true
+  }
+}

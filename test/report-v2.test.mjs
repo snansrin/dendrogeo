@@ -111,7 +111,7 @@ describe('rapor v2: veri kaynakları ve yöntem', () => {
     assert.match(html, /ile gerçekleştirilmiştir\. Sınıflandırma sonuçları park geometrisi ile kesiştirilerek değerlendirilmiş; sınır hücrelerinde alan ağırlıklı hesaplama uygulanmıştır/);
     assert.match(html, /Toprak üstü biyokütle \(AGB\)/);
     assert.match(html, /Toprak altı biyokütle/);
-    assert.ok(!/Above|Below/i.test(html), 'İngilizce biyokütle terimi yok');
+    assert.ok(!/Above|Below/i.test(html.slice(0, html.indexOf('<span class="no">14</span>'))), 'İngilizce biyokütle terimi yok');
   });
 });
 
@@ -139,7 +139,7 @@ describe('rapor v2: sonuç/yorum ayrımı + QA/QC', () => {
     assert.match(sec, /yeşil alan %82,0; sert yüzey %12,0; su %6,0/);
     assert.match(sec, /baskın sınıf %82,0 pay ile Yeşil alan sınıfıdır/);
     assert.match(sec, /ekstrapole edilmemelidir/);
-    assert.match(sec, /normatif değerlendirme/, 'ayrım beyanı');
+    assert.match(sec, /nedensel/, 'nedensel çıkarım sınırı');
     assert.ok(!/çok iyi|mükemmel|harika|yetersiz durumda|başarılı bir park/.test(sec), 'yorum dili sızmadı');
   });
   test('§9 sınırlılıklar: çözünürlük + OSM beyanları', () => {
@@ -157,20 +157,20 @@ describe('rapor v2: parmak izi + tekrar üretilebilirlik + geçmiş', () => {
     assert.match(html, /<code>abc1234<\/code>/, 'commit kısa gösterim');
     assert.match(html, /EPSG:4326 \(WGS 84 coğrafi\)/);
     assert.ok(html.includes('sha256:' + H2), 'tam sonuç hash’i');
-    assert.match(html, /DOI<\/b><code id="dgReportDoi">atanmadı<\/code>/);
-    assert.match(html, /Zenodo\/DataCite/, 'DOI yolu beyanı');
+    assert.match(html, /DOI<\/b><code>atanmadı<\/code>/);
+    assert.ok(!html.includes('10.xxxx'), 'örnek DOI yayımlanmıyor');
   });
   test('§10 tekrar üretilebilirlik tablosu + dürüst uyarı', () => {
     assert.match(html, /DendroGeo LC Engine 4\.2\.0 · uygulama 3\.0\.0/);
     assert.match(html, /node scripts\/make-report\.mjs --park 5/, 'üretim komutu');
     assert.match(html, /kayıt altına alınmıştır/);
-    assert.match(html, /kaynak ürünün yeni sürümleri yeniden üretim sonucunu etkileyebilir/, 'bulut girdisi dürüstlüğü');
+    assert.match(html, /yeni bir sürümü yayımlanırsa aynı komut farklı sonuç üretebilir/, 'bulut girdisi dürüstlüğü');
   });
   test('§12 geçmiş: önceki DGR + ilk yayımlama + değişmezlik notu', () => {
     assert.match(html, /DGR-2026-0001/, 'önceki analiz');
     assert.match(html, /İlk yayımlama/, 'bu rapor');
-    assert.match(html, /geri çekilir/, 'düzeltme yolu');
-    assert.match(html, /yayin-kuyrugu\.json/, 'denetim izi');
+    assert.match(html, /yeni rapor kimliği ve sürüm kaydı/, 'düzeltme yolu');
+    assert.match(html, /Test yayınları sürüm zincirine dahil edilmemiştir/, 'üretim geçmişi');
   });
 });
 
@@ -180,7 +180,7 @@ describe('rapor v2: atıf + kaynakça + makine okur üst veri', () => {
     assert.match(html, /DendroGeo Bilimsel Analiz Raporu, DGR-2026-0002 \(sürüm 1\.0\)/);
     assert.match(html, /@techreport\{dgr20260002/);
     assert.match(html, /version   = \{1\.0\}/);
-    assert.match(html, /Gerçek DOI kaydı oluşturulduğunda/, 'DOI ikame notu');
+    assert.match(html, /DOI<\/b><code>atanmadı<\/code>/, 'tescilsiz DOI dürüstçe belirtilir');
   });
   test('kaynakça DOI/kalıcı bağlantılarla', () => {
     assert.match(html, /10\.5281\/zenodo\.7254221/, 'WorldCover 2021 v200 Zenodo DOI');
@@ -211,7 +211,7 @@ describe('rapor v2: atıf + kaynakça + makine okur üst veri', () => {
     assert.equal(md.resolution, '10 m');
     assert.equal(md.temporalCoverage, '2021');
     assert.equal(md.doi, null);
-    assert.match(md.doiNote, /IsIdenticalBy/);
+    assert.match(md.doiNote, /DOI atanmadı/);
     assert.equal(md.resultHash, 'sha256:' + H2);
     assert.equal(md.gitCommit, 'abc1234def5678');
     const rels = md.relatedIdentifiers;

@@ -139,7 +139,7 @@ describe('publish-queue: geri çekme planı (günlükle doğrulama)', () => {
     }
     assert.match(PQ, /service_role/, 'yasak anahtar yalnız yorumda geçer');
     assert.ok(!/process\.env\.SUPABASE_SERVICE/.test(PQ));
-    assert.deepEqual(RETRACT_FILES, ['data.json', 'olcum.csv', 'park.geojson', 'surface.geojson', 'harita.png', 'metadata.json']);
+    assert.deepEqual(RETRACT_FILES, ['rapor.pdf','doi-yayin-paketi.zip','manifest.json','zenodo-metadata.json','data.json', 'olcum.csv', 'park.geojson', 'surface.geojson', 'harita.png', 'metadata.json']);
   });
 });
 

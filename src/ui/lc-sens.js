@@ -148,11 +148,12 @@ async function dgSensRefreshLayer(){
   if(DG_SENS.mergeBusy)return;
   const epoch=DG_SENS.epoch;DG_SENS.mergeBusy=true;
   try{const parts=window.DG_SURFACE_REVIEW.resolved(dgSensCells(),dgSensEffective,DG_SENS.geometry,dgSensFeatures(),DG_SENS.epsg,DG_SENS.parkGeometry);
-   const job=await dgSurfaceWorkerJob({job:"merge",parts:parts.map(p=>({type:p.type,geom:p.geom,areaM2:p.areaM2,method:p.method})),epsg:DG_SENS.epsg});
+   const job=await dgSurfaceWorkerJob({job:"merge",parts:parts.map(p=>({type:p.type,geom:p.geom,areaM2:p.areaM2,method:p.method})),epsg:DG_SENS.epsg,display:true,park:DG_SENS.parkGeometry});
    if(epoch!==DG_SENS.epoch)return;
    DG_SENS.mergedFeatures=job?.features||dgSurfaceMergeSync(parts,DG_SENS.epsg);DG_SENS.mergedKey=key;DG_SENS.layer.clearLayers();DG_SENS.displayPaths=[];
-   for(const f of DG_SENS.mergedFeatures){const cls=f.properties.class;
-    const rings=f.geometry.coordinates.map(poly=>poly.map(r=>dgSensSoftRing(r,DG_SENS.epsg,f.properties.display_boundary==="exact"||/boundary/.test(f.properties.method||""))));
+   DG_SENS.displayFeatures=job?.displayFeatures||dgSurfaceDisplaySync(parts,DG_SENS.epsg,DG_SENS.parkGeometry);
+   for(const f of DG_SENS.displayFeatures){const cls=f.properties.class;
+    const rings=f.geometry.coordinates.map(poly=>poly.map(r=>r.map(p=>[p[1],p[0]])));
     const poly=L.polygon(rings,{renderer:DG_SENS.renderer,stroke:false,weight:0,smoothFactor:1,bubblingMouseEvents:false,fillColor:DG_SENS_COLORS[cls]||DG_SENS_COLORS.other});
     poly.on("click",ev=>{const oe=ev.originalEvent||ev;if(oe&&L.DomEvent?.stopPropagation)L.DomEvent.stopPropagation(oe);if(DG_SENS.draw){dgSensDrawPoint(ev);return;}const q=dgLcUtmForward(ev.latlng.lat,ev.latlng.lng,DG_SENS.epsg);const part=window.DG_SURFACE_REVIEW.resolved(dgSensCells(),dgSensEffective,DG_SENS.geometry,dgSensFeatures(),DG_SENS.epsg,DG_SENS.parkGeometry).find(p=>dgGridPointDistance([q.x,q.y],p.geom)>=0);if(part)dgSensPopup(part.key);});
     DG_SENS.displayPaths.push({poly,cls});
@@ -164,19 +165,8 @@ async function dgSensRefreshLayer(){
  if(!DG_SENS.showCand){DG_SENS.layer?.clearLayers();return;}
  for(const p of DG_SENS.displayPaths||[]){p.poly.setStyle({fillOpacity:DG_SENS.opacity/100});if(!DG_SENS.focus||p.cls===DG_SENS.focus){if(!DG_SENS.layer.hasLayer(p.poly))p.poly.addTo(DG_SENS.layer);}else DG_SENS.layer.removeLayer(p.poly);}
 }
-/* Cartographic rounding only. Exact object outlines, calculation geometry and exports remain intact. */
-function dgSensSoftRing(ring,epsg,exact=false){
- if(exact)return ring.map(p=>[p[1],p[0]]);
- const closed=ring.length>1&&ring[0][0]===ring.at(-1)[0]&&ring[0][1]===ring.at(-1)[1];
- const pts=(closed?ring.slice(0,-1):ring).map(p=>dgLcUtmForward(p[1],p[0],epsg)),out=[];
- for(let i=0;i<pts.length;i++){
-  const p=pts[i],prev=pts[(i+pts.length-1)%pts.length],next=pts[(i+1)%pts.length];
-  const inset=q=>{const d=Math.hypot(q.x-p.x,q.y-p.y),t=d?Math.min(.4,4/d):0;return{x:p.x+(q.x-p.x)*t,y:p.y+(q.y-p.y)*t};};
-  const a=inset(prev),b=inset(next);
-  for(let step=0;step<=4;step++){const t=step/4,u=1-t,z=dgLcUtmInverse(u*u*a.x+2*u*t*p.x+t*t*b.x,u*u*a.y+2*u*t*p.y+t*t*b.y,epsg);out.push([z.lat,z.lon]);}
- }
- if(out.length)out.push(out[0]);return out;
-}
+/* Display-only corner rounding, at most 1.5m. Areas and exports retain exact geometry. */
+function dgSensSoftRing(ring,epsg){const pts=ring.slice(0,-1).map(p=>dgLcUtmForward(p[1],p[0],epsg)),out=[];for(let i=0;i<pts.length;i++){const p=pts[i],prev=pts[(i+pts.length-1)%pts.length],next=pts[(i+1)%pts.length];for(const q of [prev,next]){const d=Math.hypot(q.x-p.x,q.y-p.y),t=d?Math.min(.2,1.5/d):0,z=dgLcUtmInverse(p.x+(q.x-p.x)*t,p.y+(q.y-p.y)*t,epsg);out.push([z.lat,z.lon]);}}if(out.length)out.push(out[0]);return out;}
 
 async function dgSensRepartition(){
  const rec=DG_SENS.record;if(!rec)return;const epoch=DG_SENS.epoch;
@@ -268,7 +258,9 @@ async function dgSensExportPng(){
   const epoch=DG_SENS.epoch;DG_SENS.exporting=true;dgSensRender();
   try{
   const parts=window.DG_SURFACE_REVIEW.resolved(cells,dgSensEffective,DG_SENS.geometry,dgSensFeatures(),epsg,DG_SENS.parkGeometry);
-  const merged=(await dgSurfaceWorkerJob({job:"merge",parts:parts.map(p=>({type:p.type,geom:p.geom,areaM2:p.areaM2,method:p.method})),epsg}))?.features||dgSurfaceMergeSync(parts,epsg);
+  const merged=!DG_SENS.editing&&rec.acceptedResult?rec.acceptedResult.features:(await dgSurfaceWorkerJob({job:"merge",parts:parts.map(p=>({type:p.type,geom:p.geom,areaM2:p.areaM2,method:p.method})),epsg}))?.features||dgSurfaceMergeSync(parts,epsg);
+  const displayJob=await dgSurfaceWorkerJob({job:"merge",parts:parts.map(p=>({type:p.type,geom:p.geom,areaM2:p.areaM2,method:p.method})),epsg,display:true,park:DG_SENS.parkGeometry});
+  const displayFeatures=displayJob?.displayFeatures||dgSurfaceDisplaySync(parts,epsg,DG_SENS.parkGeometry);
   if(epoch!==DG_SENS.epoch)return;
   /* UTM zarfı */
   let mnX=Infinity,mnY=Infinity,mxX=-Infinity,mxY=-Infinity;
@@ -295,9 +287,9 @@ async function dgSensExportPng(){
   const sc=Math.min((MW-40)/((mxX-mnX)||1),(MH-40)/((mxY-mnY)||1));
   const ox=MX+(MW-(mxX-mnX)*sc)/2,oy=MY+(MH-(mxY-mnY)*sc)/2;
   const px=z=>[ox+(z.x-mnX)*sc,oy+(mxY-z.y)*sc];
-  for(const feature of merged){
+  for(const feature of displayFeatures){
     g.beginPath();
-    for(const poly of feature.geometry.coordinates)for(const ring of poly){const display=dgSensSoftRing(ring,epsg,feature.properties.display_boundary==="exact"||/boundary/.test(feature.properties.method||""));display.forEach((q,i)=>{const p=px(PR(q[0],q[1]));i?g.lineTo(p[0],p[1]):g.moveTo(p[0],p[1]);});g.closePath();}
+    for(const poly of feature.geometry.coordinates)for(const ring of poly){ring.forEach((q,i)=>{const p=px(PR(q[1],q[0]));i?g.lineTo(p[0],p[1]):g.moveTo(p[0],p[1]);});g.closePath();}
     g.fillStyle=COL[feature.properties.class]||COL.other;g.fill("evenodd");
   }
   if(typeof PARK_POLY!=="undefined"&&PARK_POLY&&PARK_POLY.length){
@@ -329,7 +321,7 @@ async function dgSensExportPng(){
   g.fillText("kaynak veride değişmeden korunur.",X0,y+104,CW-X0-40);
   g.fillStyle=GREEN;g.fillRect(0,CH-70,CW,70);
   g.fillStyle="#cfe3d3";g.font="19px Arial";
-  g.fillText("Görsel sınırlar yumuşatılmıştır; alanlar özgün geometriden hesaplanır.",40,CH-52,CW-80);
+  g.fillText("Görsel genelleştirme; alanlar kabul edilmiş kesin geometriden hesaplanır.",40,CH-54,CW-80);
   g.fillText("Raster: ESA WorldCover 2021 v200 (CC BY 4.0) · Uydu: Sentinel-2 "+String((rec.profile&&rec.profile.scenes&&rec.profile.scenes[0]&&rec.profile.scenes[0].datetime)||"—").slice(0,10)+" · parmak izi "+String(rec.fingerprint||"").slice(0,8)+" · CC BY-NC 4.0",40,CH-26,CW-80);
   cv.toBlob(b=>{
     if(!b){toast(_tvs("PNG üretilemedi."),"err","🖼️");return;}
@@ -361,9 +353,10 @@ async function dgSensResultSnapshot(rec){
  const parts=window.DG_SURFACE_REVIEW.resolved(cells,dgSensEffective,DG_SENS.geometry,dgSensFeatures(rec),epsg,DG_SENS.parkGeometry);
  const totals={};for(const p of parts)totals[p.type]=(totals[p.type]||0)+p.areaM2;
  for(const [k,a] of Object.entries(rec.acceptedAreas))if(Math.abs(a-(totals[k]||0))>Math.max(.1,a*.00001))throw Error(_tvs("Analiz tüm parkı kapsamıyor. Parkı yeniden analiz edip tekrar kaydedin."));
- const job=await dgSurfaceWorkerJob({job:"merge",parts:parts.map(p=>({type:p.type,geom:p.geom,areaM2:p.areaM2,method:p.method})),epsg});
+ const job=await dgSurfaceWorkerJob({job:"merge",parts:parts.map(p=>({type:p.type,geom:p.geom,areaM2:p.areaM2,method:p.method})),epsg,display:true,park:DG_SENS.parkGeometry});
  const features=job?job.features:dgSurfaceMergeSync(parts,epsg);
- return{schema:"dendrogeo-surface/2",parkId:rec.parkId,acceptedAt:rec.acceptedAt,fingerprint:rec.fingerprint,epsg,cellCount:cells.length,areas:rec.acceptedAreas,outer,holes,scenes:rec.profile?.scenes||[],features};
+ const displayFeatures=job?.displayFeatures||dgSurfaceDisplaySync(parts,epsg,DG_SENS.parkGeometry,features);
+ return{schema:"dendrogeo-surface/2",parkId:rec.parkId,acceptedAt:rec.acceptedAt,fingerprint:rec.fingerprint,epsg,cellCount:cells.length,areas:rec.acceptedAreas,outer,holes,scenes:rec.profile?.scenes||[],features,displayFeatures,displayMethod:{name:"shared-contour",version:1,tolerance_m:6},displayNote:"Görsel genelleştirme; alanlar kesin kabul geometrisinden hesaplanır."};
 }
 
 function dgSensRenderCurrentReport(areas){
