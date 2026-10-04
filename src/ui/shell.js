@@ -16,8 +16,8 @@ async function boot(){
             // previous LULC bundle after a successful deployment.
             if(navigator.serviceWorker.controller){
                 navigator.serviceWorker.addEventListener('controllerchange',()=>{
-                    if(sessionStorage.getItem('dg_sw_runtime_reload')==='1')return;
-                    sessionStorage.setItem('dg_sw_runtime_reload','1');
+                    if(sessionStorage.getItem('dg_sw_runtime_reload:'+dgRuntimeBuild())==='1')return;
+                    sessionStorage.setItem('dg_sw_runtime_reload:'+dgRuntimeBuild(),'1');
                     location.reload();
                 },{once:true});
             }

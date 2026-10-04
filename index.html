@@ -10,7 +10,7 @@
      EŞLEŞTİRMİYOR → presence/canlı konum kanalları konsolda "violates CSP"
      ile bloklanıyordu (kullanıcı konsol kanıtı 2026-10-01). connect-src,
      default-src'in bağlantı kurulan tüm originlerini + wss'i içerir. -->
-<meta http-equiv="Content-Security-Policy" content="default-src 'self' 'unsafe-inline' data: blob: https://*.tile.openstreetmap.org https://nominatim.openstreetmap.org https://api.openstreetmap.org https://*.supabase.co https://fonts.googleapis.com https://fonts.gstatic.com https://challenges.cloudflare.com https://overpass-api.de https://lz4.overpass-api.de https://z.overpass-api.de https://overpass.kumi.systems https://overpass.osm.ch https://overpass.openstreetmap.fr https://overpass.private.coffee https://server.arcgisonline.com https://*.tile.opentopomap.org https://planetarycomputer.microsoft.com https://*.blob.core.windows.net https://*.s3.us-west-2.amazonaws.com; connect-src 'self' data: blob: https://*.supabase.co wss://*.supabase.co https://nominatim.openstreetmap.org https://api.openstreetmap.org https://*.tile.openstreetmap.org https://challenges.cloudflare.com https://overpass-api.de https://lz4.overpass-api.de https://z.overpass-api.de https://overpass.kumi.systems https://overpass.osm.ch https://overpass.openstreetmap.fr https://overpass.private.coffee https://server.arcgisonline.com https://*.tile.opentopomap.org https://planetarycomputer.microsoft.com https://*.blob.core.windows.net https://*.s3.us-west-2.amazonaws.com">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self' https://orcid.org 'unsafe-inline' data: blob: https://*.tile.openstreetmap.org https://nominatim.openstreetmap.org https://api.openstreetmap.org https://*.supabase.co https://fonts.googleapis.com https://fonts.gstatic.com https://challenges.cloudflare.com https://overpass-api.de https://lz4.overpass-api.de https://z.overpass-api.de https://overpass.kumi.systems https://overpass.osm.ch https://overpass.openstreetmap.fr https://overpass.private.coffee https://server.arcgisonline.com https://*.tile.opentopomap.org https://planetarycomputer.microsoft.com https://*.blob.core.windows.net https://*.s3.us-west-2.amazonaws.com; connect-src 'self' data: blob: https://*.supabase.co wss://*.supabase.co https://nominatim.openstreetmap.org https://api.openstreetmap.org https://*.tile.openstreetmap.org https://challenges.cloudflare.com https://overpass-api.de https://lz4.overpass-api.de https://z.overpass-api.de https://overpass.kumi.systems https://overpass.osm.ch https://overpass.openstreetmap.fr https://overpass.private.coffee https://server.arcgisonline.com https://*.tile.opentopomap.org https://planetarycomputer.microsoft.com https://*.blob.core.windows.net https://*.s3.us-west-2.amazonaws.com">
 <title>DendroGeo — Küresel Ağaç Envanteri ve Karbon Veri Sistemi</title>
 
 
@@ -244,7 +244,8 @@
 <script src="src/utils/truncation.js?v=f43c76b3" defer></script>
 <!-- Faz 7: geotiff (317 KB) ve chart.js (208 KB) artık SENKRON yüklenmiyor;
      src/utils/lazylibs.js ihtiyaç anında enjekte eder (LULC analizi / panel grafiği). -->
-<script src="src/utils/lazylibs.js?v=cf20a8eb" defer></script>
+<script id="dgRuntimeBuild" type="application/json">"37a1bd2474af3285"</script>
+<script src="src/utils/lazylibs.js?v=497125f3" defer></script>
 <script src="src/services/allometry.js?v=23ec2992" defer></script>
 <script src="src/services/auth.js?v=83b12d2c" defer></script>
 <script src="src/services/export.js?v=cf5c039b" defer></script>
@@ -263,8 +264,8 @@
      📄 Yayınla → report_requests (0008) → rapor-yayin.yml → rapor/DGR-…/
      → kalıcı bağlantı + 📤 Paylaş. admin.js loadAdmin() bu modülü çağırır. -->
 <script src="src/core/surface-display.js?v=b6596228" defer></script>
-<script src="src/core/report-context.js?v=eb119a2e" defer></script>
-<script src="src/services/academic-profile.js?v=7a125d26" defer></script>
+<script src="src/core/report-context.js?v=20d570c7" defer></script>
+<script src="src/services/academic-profile.js?v=ab18cc96" defer></script>
 <script src="src/services/report-publish.js?v=0836b57c" defer></script>
 <script src="src/services/park-invites.js?v=1023c17d" defer></script>
 <script src="src/services/world.js?v=c72d9019" defer></script>
@@ -300,7 +301,7 @@
      geçerli; kabuk (body.dg-app) yalnız sınıf-bazlı bileşenleri ve sekme
      başlığı ölçeğini alır → Park Karşılaştırma kartı kıpırdamaz. -->
 <link rel="stylesheet" href="css/ui-standard.css?v=cf5fc000">
-<link rel="stylesheet" href="css/academic-profile.css?v=d28fe4c3">
+<link rel="stylesheet" href="css/academic-profile.css?v=619420ce">
 </head>
 <body class="dg-app">
 <a class="dg-skip" href="#main">İçeriğe atla</a>
@@ -1144,6 +1145,6 @@
 <script src="src/ui/state.js?v=5feada9b" defer></script>
 <script src="src/ui/toast.js?v=50dab987" defer></script>
 <script src="src/ui/landing.js?v=f7ad4ccd" defer></script>
-<script src="src/ui/shell.js?v=29be33b5" defer></script>
+<script src="src/ui/shell.js?v=49cc6b12" defer></script>
 </body>
 </html>

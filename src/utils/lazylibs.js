@@ -12,13 +12,15 @@
  * Promise olarak döner (aynı anda çok çağıran olursa tek enjeksiyon — promise
  * paylaşılır; hata olursa promise sıfırlanır, sonraki çağrı yeniden dener).
  */
+function dgRuntimeBuild(){try{return JSON.parse(document.getElementById("dgRuntimeBuild")?.textContent||'"current"');}catch(e){return "current";}}
+function dgRuntimeScriptUrl(src){return src+(src.includes("?")?"&":"?")+"v="+encodeURIComponent(dgRuntimeBuild());}
 let DG_GEO_PROMISE=null;
 let DG_CHART_PROMISE=null;
 
 function dgLoadVendorScript(src){
   return new Promise((resolve,reject)=>{
     const s=document.createElement("script");
-    s.src=src;
+    s.src=dgRuntimeScriptUrl(src);
     s.async=true;
     s.onload=()=>resolve();
     s.onerror=()=>reject(new Error(src+" yüklenemedi"));
@@ -67,6 +69,8 @@ const DG_LULC_CHAIN=[
   "src/services/lc-s2.js",
   "src/ui/lc-report.js",
   "vendor/polygon-clipping-0.15.7.js",
+  "vendor/clipper-6.4.2.js",
+  "src/core/display-clip.js",
   "src/services/lc-review.js",
   "src/ui/lc-sens.js",
   "src/services/landcover.js"
@@ -77,7 +81,7 @@ let DG_LULC_PROMISE=null;
 function dgLoadScriptOrdered(src){
   return new Promise((resolve,reject)=>{
     const s=document.createElement("script");
-    s.src=src;
+    s.src=dgRuntimeScriptUrl(src);
     s.async=false;
     s.onload=()=>resolve();
     s.onerror=()=>reject(new Error(src+" yüklenemedi"));

@@ -32,7 +32,7 @@
  *            src modülü → npm run build → commit.
  *            Elle index.html düzenlersen: node scripts/build-index.mjs --split
  */
-import { readFileSync, writeFileSync, existsSync } from 'node:fs';
+import { readFileSync, writeFileSync, existsSync, readdirSync } from 'node:fs';
 import { createHash } from 'node:crypto';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -59,6 +59,12 @@ function refreshHashes(text) {
     });
 }
 
+function runtimeBuild(){
+ const hash=createHash('sha256');
+ function visit(dir){for(const item of readdirSync(join(ROOT,dir),{withFileTypes:true}).sort((a,b)=>a.name.localeCompare(b.name))){const path=dir+'/'+item.name;if(item.isDirectory())visit(path);else if(path.endsWith('.js'))hash.update(path).update(readFileSync(join(ROOT,path)));}}
+ visit('src');visit('vendor');return hash.digest('hex').slice(0,16);
+}
+
 function assemble() {
   let out = '';
   for (const f of PARTIALS) {
@@ -69,7 +75,7 @@ function assemble() {
     }
     out += readFileSync(p, 'utf8');
   }
-  return refreshHashes(out);
+  return refreshHashes(out).replaceAll("__DG_RUNTIME_BUILD__",runtimeBuild());
 }
 
 /* index.html'i kararlı çapa noktalarından dörde böler */
