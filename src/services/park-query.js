@@ -106,6 +106,7 @@ async function queryDetailedCoverage(){
     return false;
   }
 
+  const boundary=JSON.stringify(PARK_POLY);
   window.DG_SURFACE_OSM=null;
   IMP_RINGS=[];
   IMP_LINES=[];
@@ -176,6 +177,7 @@ async function queryDetailedCoverage(){
     `);out geom;`;
 
   const json=await overpassRequest(q,"yüzey+su");
+  if(boundary!==JSON.stringify(PARK_POLY))return false;
 
   if(!json){
     console.warn(
@@ -185,7 +187,7 @@ async function queryDetailedCoverage(){
     return false;
   }
 
-  window.DG_SURFACE_OSM={elements:json.elements||[],boundary:JSON.stringify(PARK_POLY),fetchedAt:new Date().toISOString()};
+  window.DG_SURFACE_OSM={bbox:{minLat:minLat-pad,minLon:minLon-pad,maxLat:maxLat+pad,maxLon:maxLon+pad},elements:json.elements||[],boundary,fetchedAt:new Date().toISOString()};
   const seenWater=new Set();
   const seenImp=new Set();
 
