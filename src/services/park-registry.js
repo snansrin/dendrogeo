@@ -368,6 +368,7 @@ async function dgRegisterPark(cand,opt){
 /* Belirli bir noktada park ara → bulunduysa çiz, bulunamadıysa elle oluştur
  * teklif et. bindParkClick (harita tıklaması), "konumumdan algıla" ve
  * geri doldurma aracı AYNI yolu kullanır. */
+let DG_PARK_DETECT_SEQ=0;
 async function dgDetectAt(lat,lon,opt){
   opt=opt||{};
   if(!Number.isFinite(+lat)||!Number.isFinite(+lon)){
@@ -379,12 +380,16 @@ async function dgDetectAt(lat,lon,opt){
   if(!opt.silent)toast("🌳 Park sorgulanıyor…","info");
   DG_PARK_ANCHOR={lat:+lat,lon:+lon};
 
+  const request=++DG_PARK_DETECT_SEQ;
   let parks=null;
   try{
     parks=await queryPark(+lat,+lon,opt.radius||1200);
   }catch(e){
     console.warn("DENDROGEO · park sorgusu hatası:",e);
+    if(request===DG_PARK_DETECT_SEQ&&!opt.silent)toast(_tpr("OSM bağlantısı başarısız; parkın olmadığı doğrulanamadı. Yeniden algılamayı deneyin."),"err","🌳");
+    return null;
   }
+  if(request!==DG_PARK_DETECT_SEQ)return null;
 
   if(!parks||!parks.length){
     if(opt.silent)return null;

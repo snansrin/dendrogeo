@@ -24,17 +24,12 @@ async function queryPark(
 
   const parkData=await overpassRequest(q1,"park");
 
-  if(
-    !parkData||
-    !parkData.elements||
-    !parkData.elements.length
-  ){
-    console.warn(
-      "Park sorgusu başarısız.",
-      LAST_OVERPASS_ERROR||"OSM veri döndürmedi."
-    );
-    return null;
+  if(!parkData||!Array.isArray(parkData.elements)||parkData.remark){
+    const fallback=await dgParkBoundaryFallback(lat,lon,radius);
+    if(fallback.length)return fallback;
+    throw new Error("OSM park sınırı alınamadı. Bağlantı hatası parkın bulunmadığı anlamına gelmez; yeniden deneyin.");
   }
+  if(!parkData.elements.length)return [];
 
   const cands=[];
 
@@ -64,7 +59,7 @@ async function queryPark(
     });
   }
 
-  if(!cands.length)return null;
+  if(!cands.length)throw new Error("OSM park geometrisi eksik; yeniden deneyin.");
 
   const validCands=cands.filter(c=>{
     if(Array.isArray(c.rings)){
@@ -77,7 +72,7 @@ async function queryPark(
     );
   });
 
-  if(!validCands.length)return null;
+  if(!validCands.length)throw new Error("OSM park geometrisi geçersiz; yeniden deneyin.");
 
   const inside=validCands.filter(c=>
     pointInPark(
@@ -94,6 +89,50 @@ async function queryPark(
   return sorted;
 }
 
+/* A geocoding result is only a candidate: never substitute its bounding box
+ * for a park boundary. Use the actual OSM polygon, including all holes. */
+const DG_PARK_BOUNDARY_CACHE=new Map();
+let DG_PARK_NOMINATIM_QUEUE=Promise.resolve(),DG_PARK_NOMINATIM_TIME=0;
+function dgParkNominatim(params){
+ const task=DG_PARK_NOMINATIM_QUEUE.catch(()=>{}).then(async()=>{
+  const wait=Math.max(0,1000-(Date.now()-DG_PARK_NOMINATIM_TIME));
+  if(wait)await new Promise(r=>setTimeout(r,wait));
+  DG_PARK_NOMINATIM_TIME=Date.now();
+  const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),15000);
+  try{const res=await fetch("https://nominatim.openstreetmap.org/"+params.path+"?"+new URLSearchParams(params.query),{headers:{Accept:"application/json"},signal:controller.signal});
+   if(!res.ok)throw new Error("OSM sınır servisi HTTP "+res.status);
+   const data=await res.json();if(!Array.isArray(data))throw new Error("OSM sınır yanıtı geçersiz");return data;
+  }finally{clearTimeout(timer);}
+ });DG_PARK_NOMINATIM_QUEUE=task;return task;
+}
+function dgParkGeojsonCandidate(item){
+ if(!['way','relation'].includes(item.osm_type)||!Number.isSafeInteger(Number(item.osm_id))||Number(item.osm_id)<=0)return null;
+ const g=item.geojson,polys=g?.type==='Polygon'?[g.coordinates]:g?.type==='MultiPolygon'?g.coordinates:null;
+ if(!Array.isArray(polys)||!polys.length)return null;
+ const rings={outer:[],inner:[]};
+ for(const poly of polys){if(!Array.isArray(poly)||!poly.length)return null;for(let i=0;i<poly.length;i++){
+  const ring=poly[i];if(!Array.isArray(ring)||ring.length<4||ring.some(p=>!Array.isArray(p)||p.length<2||!Number.isFinite(p[0])||!Number.isFinite(p[1])||Math.abs(p[0])>180||Math.abs(p[1])>90))return null;
+  if(ring[0][0]!==ring.at(-1)[0]||ring[0][1]!==ring.at(-1)[1])return null;
+  rings[i?'inner':'outer'].push(ring.map(p=>[p[1],p[0]]));
+ }}
+ const area=polyArea(rings);if(!(area>0))return null;
+ return {name:item.name||item.display_name?.split(',')[0]||null,type:item.osm_type,id:Number(item.osm_id),rings,area,boundaryProvider:'nominatim'};
+}
+async function dgParkBoundaryFallback(lat,lon,radius){
+ const cached=[...DG_PARK_BOUNDARY_CACHE.values()].filter(x=>Date.now()-x.time<600000&&pointInPark(lat,lon,x.park.rings)).map(x=>x.park);
+ if(cached.length)return cached.sort((a,b)=>a.area-b.area);
+ const dLat=radius/111320,dLon=radius/(111320*Math.max(.1,Math.cos(lat*Math.PI/180)));
+ const results=await dgParkNominatim({path:'search',query:{q:'[park]',format:'jsonv2',bounded:'1',limit:'40',viewbox:[lon-dLon,lat+dLat,lon+dLon,lat-dLat].join(',')}});
+ // Search can return points or omit polygon output. Look up only OSM parks
+ // whose advertised extent contains the selected point, then verify polygon containment.
+ const candidates=results.filter(x=>(x.category||x.class)==='leisure'&&x.type==='park'&&['way','relation'].includes(x.osm_type)&&/^\d+$/.test(String(x.osm_id))&&Array.isArray(x.boundingbox)&&x.boundingbox.length===4&&lat>=Number(x.boundingbox[0])&&lat<=Number(x.boundingbox[1])&&lon>=Number(x.boundingbox[2])&&lon<=Number(x.boundingbox[3])).slice(0,10);
+ if(!candidates.length)return [];
+ const data=await dgParkNominatim({path:'lookup',query:{osm_ids:candidates.map(x=>(x.osm_type==='way'?'W':'R')+x.osm_id).join(','),format:'jsonv2',polygon_geojson:'1'}});
+ const allowed=new Set(candidates.map(x=>x.osm_type+'/'+x.osm_id)),parks=[];
+ for(const item of data){if(!allowed.has(item.osm_type+'/'+item.osm_id))continue;const park=dgParkGeojsonCandidate(item);if(park&&pointInPark(lat,lon,park.rings)){DG_PARK_BOUNDARY_CACHE.set(park.type+'/'+park.id,{park,time:Date.now()});parks.push(park);}}
+ return parks.sort((a,b)=>a.area-b.area);
+}
+
 /* =========================================================
    DETAILED COVERAGE QUERY
 ========================================================= */
@@ -106,6 +145,7 @@ async function queryDetailedCoverage(){
     return false;
   }
 
+  const boundary=JSON.stringify(PARK_POLY);
   window.DG_SURFACE_OSM=null;
   IMP_RINGS=[];
   IMP_LINES=[];
@@ -176,6 +216,7 @@ async function queryDetailedCoverage(){
     `);out geom;`;
 
   const json=await overpassRequest(q,"yüzey+su");
+  if(boundary!==JSON.stringify(PARK_POLY))return false;
 
   if(!json){
     console.warn(

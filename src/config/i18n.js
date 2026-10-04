@@ -24,6 +24,7 @@
 
 /* ---- EN sözlüğü: anahtar = TR dizenin trim'lenmiş hâli ---- */
 const DG_I18N_EN={
+"OSM bağlantısı başarısız; parkın olmadığı doğrulanamadı. Yeniden algılamayı deneyin.":"The OSM connection failed; the absence of a park could not be confirmed. Try detecting again.",
 "Renk yoğunluğu":"Color opacity",
 "Uydu tarama dönemi":"Satellite scan period",
 "Güncel görüntüler · son 120 gün":"Recent imagery · last 120 days",

@@ -239,12 +239,12 @@
 <!-- DİL KATMANI (0035): TR markup varsayılan; EN sözlüğü çalışma zamanında
      uygulanır (dgToggleLang). defer sırası önemli değil — DOMContentLoaded'da
      ya da hemen (hazırsa) çalışır. module-registry + CORE_ASSETS kaydı şart. -->
-<script src="src/config/i18n.js?v=1aa92fe7" defer></script>
+<script src="src/config/i18n.js?v=8d4ca20c" defer></script>
 <script src="src/utils/geo.js?v=3e796768" defer></script>
 <script src="src/utils/truncation.js?v=f43c76b3" defer></script>
 <!-- Faz 7: geotiff (317 KB) ve chart.js (208 KB) artık SENKRON yüklenmiyor;
      src/utils/lazylibs.js ihtiyaç anında enjekte eder (LULC analizi / panel grafiği). -->
-<script id="dgRuntimeBuild" type="application/json">"d09257c1a30d767d"</script>
+<script id="dgRuntimeBuild" type="application/json">"4fec4914104e7fe3"</script>
 <script src="src/utils/lazylibs.js?v=2714da4b" defer></script>
 <script src="src/services/allometry.js?v=23ec2992" defer></script>
 <script src="src/services/auth.js?v=1e92b5cd" defer></script>
@@ -280,15 +280,15 @@
 <!-- PARK ZİNCİRİ (Faz 4 — eski gridplan.js yedi modüle bölündü; sıralama ÖNEMLİ:
      state → istemci → geometri → sorgu → motor → panel → export) -->
 <script src="src/services/park-state.js?v=78c0b4e3" defer></script>
-<script src="src/services/osm-client.js?v=16aaa145" defer></script>
+<script src="src/services/osm-client.js?v=70efc6cb" defer></script>
 <script src="src/services/park-geometry.js?v=ff23581a" defer></script>
 <script src="src/services/geofence.js?v=f1d93562" defer></script>
-<script src="src/services/park-query.js?v=dc55e905" defer></script>
+<script src="src/services/park-query.js?v=8b6f9b18" defer></script>
 <!-- PARK KİMLİĞİ (2026-09-24): queryPark'ın bulduğu parkı public.parks'a yazar,
      projeyi parka bağlar, ölçüm kapısını (park algılanmadan ölçüm yok) kurar.
      Sıra ÖNEMLİ: park-query'den sonra, grid-engine'den önce (grid panelindeki
      proje listesi bu modülden beslenir). -->
-<script src="src/services/park-registry.js?v=9d92eabe" defer></script>
+<script src="src/services/park-registry.js?v=85cf9bd9" defer></script>
 <script src="src/services/grid-engine.js?v=55f5f5f9" defer></script>
 <script src="src/ui/park-panel.js?v=9d44698a" defer></script>
 <script src="src/ui/park-export.js?v=c724cd32" defer></script>
