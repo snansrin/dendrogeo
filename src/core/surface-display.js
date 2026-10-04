@@ -17,6 +17,12 @@
  }
  function smoothOpen(path,tol){const simple=simplify(path,tol);if(simple.length<3)return simple;const out=[simple[0]];for(let i=1;i<simple.length-1;i++){const p=simple[i],a=simple[i-1],b=simple[i+1],l1=Math.hypot(p[0]-a[0],p[1]-a[1]),l2=Math.hypot(p[0]-b[0],p[1]-b[1]),c=Math.min(2.5,l1*.2,l2*.2);if(!c){out.push(p);continue;}const x=[p[0]+(a[0]-p[0])*c/l1,p[1]+(a[1]-p[1])*c/l1],y=[p[0]+(b[0]-p[0])*c/l2,p[1]+(b[1]-p[1])*c/l2];out.push(x);for(const t of [.25,.5,.75,1])out.push([(1-t)**2*x[0]+2*(1-t)*t*p[0]+t*t*y[0],(1-t)**2*x[1]+2*(1-t)*t*p[1]+t*t*y[1]]);}out.push(simple.at(-1));return out;}
  function topology(geoms,protectedEdges=[],tol=6){
+  // Node collinear boundaries before building shared arcs. Polygon unions may
+  // remove an intermediate vertex on one side of an otherwise shared edge.
+  const bins=new Map(),size=20,seen=new Map();
+  for(const geom of geoms)for(const poly of geom)for(const r of poly)for(const p of r){const k=p.map(v=>Math.round(v*1000)).join(',');if(seen.has(k))continue;seen.set(k,p);const b=Math.floor(p[0]/size)+','+Math.floor(p[1]/size);if(!bins.has(b))bins.set(b,[]);bins.get(b).push(p);}
+  geoms=geoms.map(geom=>geom.map(poly=>poly.map(r=>{const out=[];for(let i=1;i<r.length;i++){const a=r[i-1],b=r[i],dx=b[0]-a[0],dy=b[1]-a[1],len=dx*dx+dy*dy,cuts=[];out.push(a);if(!len)continue;for(let x=Math.floor(Math.min(a[0],b[0])/size);x<=Math.floor(Math.max(a[0],b[0])/size);x++)for(let y=Math.floor(Math.min(a[1],b[1])/size);y<=Math.floor(Math.max(a[1],b[1])/size);y++)for(const p of bins.get(x+','+y)||[]){const t=((p[0]-a[0])*dx+(p[1]-a[1])*dy)/len;if(t>1e-7&&t<1-1e-7&&distance(p,a,b)<.001)cuts.push({p,t});}cuts.sort((a,b)=>a.t-b.t);out.push(...cuts.map(c=>c.p));}out.push(out[0]);return out;})));
+
   const key=p=>p.map(v=>Math.round(v*1000)).join(','),nodes=new Map(),edges=new Map(),paths=new Map();
   for(let gi=0;gi<geoms.length;gi++)for(const poly of geoms[gi])for(const r of poly)for(let i=1;i<r.length;i++){const a=key(r[i-1]),b=key(r[i]);if(a===b)continue;nodes.set(a,r[i-1]);nodes.set(b,r[i]);const id=[a,b].sort().join('|');if(!edges.has(id))edges.set(id,{a,b,labels:new Set()});edges.get(id).labels.add(gi);}
   const groups=new Map();for(const[id,e]of edges){const group=[...e.labels].sort((a,b)=>a-b).join(',');if(!groups.has(group))groups.set(group,new Map());groups.get(group).set(id,e);}

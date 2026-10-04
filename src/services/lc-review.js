@@ -148,16 +148,28 @@ function dgSurfaceMergeSync(parts,epsg){
 
 function dgSurfaceDisplaySync(parts,epsg,park,prepared=null){
  const exact=prepared||dgSurfaceMergeSync(parts,epsg),pc=window.polygonClipping;
- if(!globalThis.DG_SURFACE_DISPLAY)return exact;
- const vector=parts.filter(p=>p.method!=="review-cell"||p.type==="building"||p.type==="pool");
- const objects=dgSurfaceMergeSync(vector,epsg).map(f=>dgSurfaceFeatureGeometry(f,epsg));
- const edges=[];for(const geom of [...objects,park||[]])for(const poly of geom)for(const r of poly)for(let i=1;i<r.length;i++)edges.push([r[i-1],r[i]]);
+ if(!globalThis.DG_SURFACE_DISPLAY||!exact.length)return exact;
  const raw=exact.map(f=>dgSurfaceFeatureGeometry(f,epsg));
+ const vectors=parts.filter(p=>p.method!=="review-cell");
+ const fixed=exact.map(f=>{const g=vectors.filter(p=>p.type===f.properties.class).map(p=>p.geom);return g.length?pc.union(...g):[];});
+ const edges=[];for(const geom of [...fixed,park||[]])for(const poly of geom)for(const r of poly)for(let i=1;i<r.length;i++)edges.push([r[i-1],r[i]]);
  try{
-  const visual=DG_SURFACE_DISPLAY.topology(raw,edges,6);
-  const union=pc.union(...visual),originalArea=dgSurfaceArea(pc.union(...raw));
-  // Topology and total coverage checks are display guards, not replacements for analytic QA.
-  if(Math.abs(dgSurfaceArea(union)-originalArea)>Math.max(.1,originalArea*.000001))return exact;
+  const domain=pc.union(...raw),objects=pc.union(...fixed),visual=raw.map(()=>[]);
+  // Build one display partition, rather than independently painting rounded
+  // classes. Exact vector footprints are reserved before raster generalisation.
+  let claimed=objects;
+  const order=exact.map((f,i)=>i).sort((a,b)=>(exact[a].properties.class==="green")-(exact[b].properties.class==="green"));
+  for(let n=0;n<order.length;n++){
+   const i=order[n],remaining=pc.difference(domain,claimed);let fill=remaining;
+   if(n<order.length-1){
+    const raster=pc.difference(raw[i],objects);
+    const rounded=raster.map(poly=>poly.map(r=>DG_SURFACE_DISPLAY.ring(r,edges,8)));
+    try{fill=pc.intersection(remaining,rounded);}catch(e){fill=pc.intersection(remaining,raster);}
+   }
+   visual[i]=pc.union(fill,fixed[i]);claimed=pc.union(claimed,fill);
+  }
+  const originalArea=dgSurfaceArea(domain);
+  if(Math.abs(dgSurfaceArea(pc.union(...visual))-originalArea)>Math.max(.1,originalArea*.000001))return exact;
   for(let i=0;i<visual.length;i++)for(let j=i+1;j<visual.length;j++)if(dgSurfaceArea(pc.intersection(visual[i],visual[j]))>.01)return exact;
   return exact.map((f,i)=>({...f,geometry:{type:'MultiPolygon',coordinates:dgSurfaceUnproject(visual[i],epsg)}}));
  }catch(e){return exact;}
