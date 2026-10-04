@@ -14,164 +14,41 @@ const _tgrf=(t,v)=>(typeof dgTfs==="function"?dgTfs(t,v):String(t).replace(/\{(\
    GRID
 ========================================================= */
 
+let DG_GRID_BUSY=false,DG_GRID_EPOCH=0,DG_GRID_RENDERER=null,DG_GRID_SOURCE=null,DG_GRID_META="";
+function dgGridReviewSignature(){const s=window.DG_LC_SENS?.state;return s?.record?JSON.stringify([s.epoch,s.partitionVersion,s.record.scannedAt,s.editing,s.record.sens,s.record.corrections,s.record.features,s.record.useObjects]):null;}
 async function buildGrid(){
-  if(
-    !PARK_POLY||
-    !PARK_POLY.length
-  ){
-    return toast(
-      "Önce park seç"
-    );
+ if(DG_GRID_BUSY)return;
+ if(!PARK_POLY?.length)return toast("Önce park seç","warn");
+ const size=Number($("gridSize")?.value)||20,clearance=Math.max(1,Math.min(20,Number($("gridClearance")?.value)||3));
+ const park=PARK_POLY,epoch=++DG_GRID_EPOCH,btn=$("gridBuildBtn");DG_GRID_BUSY=true;
+ if(btn){btn.disabled=true;btn.textContent="⏳ Grid hazırlanıyor…";}
+ try{
+  if(typeof dgEnsureLulc==="function")await dgEnsureLulc();
+  if(epoch!==DG_GRID_EPOCH||park!==PARK_POLY)return;
+  if(DG_GREEN_ONLY&&!(typeof DG_LC_LAST!=="undefined"&&DG_LC_LAST?.result?.cells?.length))throw Error("Önce yüzey analizi yapın; grid güncel yeşil alanı kullanır.");
+  const review=window.DG_LC_SENS?.state;if(review?.busy||review?.saving)throw Error("Yüzey işleminin tamamlanmasını bekleyin.");
+  const signature=dgGridReviewSignature(),epsg=dgLcUtmEpsgForLatLon(park[0][0][0],park[0][0][1]);
+  let parts=[];
+  if(review?.record&&review.geometry)parts=window.DG_SURFACE_REVIEW.resolved(dgSensCells(),dgSensEffective,review.geometry,dgSensFeatures(),review.epsg,review.parkGeometry);
+  else if(typeof DG_LC_LAST!=="undefined"&&DG_LC_LAST?.result?.cells?.length){
+   const cells=DG_LC_LAST.result.cells,prepared=await dgSurfacePrepare({cells,outer:park,holes:PARK_HOLES||[],epsg,objects:null,elements:window.DG_SURFACE_OSM?.boundary===JSON.stringify(park)?window.DG_SURFACE_OSM.elements:[],features:[]});
+   parts=prepared.parts;
   }
-
-  const size=
-    +$("gridSize").value||
-    20;
-
-  const est=
-    Math.round(
-      parkAreaM2()/
-      (size*size)
-    );
-
-  if(est>3000){
-    return toast(_tgrf("⚠ ~{n} hücre çok yoğun.",{n:est}),"err");
-  }
-
-  if(
-    est>800 &&
-    !confirm(_tgrf("⚠ ~{n} hücre.\nDevam?",{n:est}))
-  ){
-    return;
-  }
-
-  clearGrid();
-
-  let minLat=90;
-  let maxLat=-90;
-  let minLon=180;
-  let maxLon=-180;
-
-  PARK_POLY.forEach(r=>
-    r.forEach(p=>{
-      if(p[0]<minLat)minLat=p[0];
-      if(p[0]>maxLat)maxLat=p[0];
-
-      if(p[1]<minLon)minLon=p[1];
-      if(p[1]>maxLon)maxLon=p[1];
-    })
-  );
-
-  const lat0=
-    (
-      (minLat+maxLat)/2
-    )*
-    Math.PI/180;
-
-  const dLat=
-    size/110540;
-
-  const dLon=
-    size/
-    (
-      111320*
-      Math.max(
-        .1,
-        Math.cos(lat0)
-      )
-    );
-
-  const cellMap={};
-
-  GRID_CELLS.length=0;
-
-  for(let rI=0;;rI++){
-    const s0=
-      minLat+
-      rI*dLat;
-
-    const s1=
-      s0+dLat;
-
-    if(s0>=maxLat)break;
-
-    for(let cI=0;;cI++){
-      const w0=
-        minLon+
-        cI*dLon;
-
-      const w1=
-        w0+dLon;
-
-      if(w0>=maxLon)break;
-
-      if(
-        !isCellValid(
-          s0,
-          s1,
-          w0,
-          w1
-        )
-      ){
-        continue;
-      }
-
-      const cell={
-        lat:(s0+s1)/2,
-        lon:(w0+w1)/2,
-        s0,
-        s1,
-        w0,
-        w1,
-        n:0,
-        id:rI+"_"+cI
-      };
-
-      cellMap[cell.id]=cell;
-
-      GRID_CELLS.push(cell);
-    }
-  }
-
-  const{data,count}=await sb
-    .from("measurements")
-    .select("lat,lon",{count:"exact"})
-    .eq("status","Onaylı")
-    .gte("lat",minLat)
-    .lte("lat",maxLat)
-    .gte("lon",minLon)
-    .lte("lon",maxLon)
-    .limit(5000);
-
-  /* Bu sorgu zaten bbox ile sınırlı (doğru yaklaşım) ama 5000 üst sınırı var.
-   * Yoğun bir bölgede eşik aşılırsa hücre başına düşen ölçüm sayısı eksik
-   * kalır ve ızgara yoğunluk hesabı sessizce bozulur. */
+  const request={job:"grid",size,clearance,epsg,outer:park,holes:PARK_HOLES||[],greenOnly:DG_GREEN_ONLY,parts:parts.map(p=>({type:p.type,geom:p.geom})),blockRings:parts.length?[]:[...(WATER_RINGS||[]),...(IMP_RINGS||[])],blockLines:[...(WATER_LINES||[]).map(pts=>({pts,w:1})),...(IMP_LINES||[]),...(GRID_BLOCK_LINES||[])]};
+  const result=await dgSurfaceWorkerJob(request)||await dgSurfaceGrid(request);
+  if(epoch!==DG_GRID_EPOCH||park!==PARK_POLY)return;
+  if(signature!==dgGridReviewSignature())throw Error("Yüzey değişti. Güncel yüzeyle gridi tekrar oluşturun.");
+  const all=park.flat(),minLat=Math.min(...all.map(p=>p[0])),maxLat=Math.max(...all.map(p=>p[0])),minLon=Math.min(...all.map(p=>p[1])),maxLon=Math.max(...all.map(p=>p[1]));
+  const {data,count,error}=await sb.from("measurements").select("lat,lon",{count:"exact"}).eq("status","Onaylı").gte("lat",minLat).lte("lat",maxLat).gte("lon",minLon).lte("lon",maxLon).limit(5000);
+  if(error)throw error;if(epoch!==DG_GRID_EPOCH||park!==PARK_POLY)return;
   dgWarnIfTruncated(data,5000,"Izgara ölçüm yoğunluğu",count);
-
-  (data||[]).forEach(m=>{
-    const cell=
-      cellMap[
-        Math.floor(
-          (m.lat-minLat)/
-          dLat
-        )+
-        "_" +
-        Math.floor(
-          (m.lon-minLon)/
-          dLon
-        )
-      ];
-
-    if(cell){
-      cell.n++;
-    }
-  });
-
-  SELECTED_CELLS.clear();
-
-  drawGridLayer();
-
-  toast(_tgrf("✓ Grid hazır: {n} hücre",{n:GRID_CELLS.length}),"ok","🔲");
+  const byId=new Map();for(const c of result.cells){const a=byId.get(c.baseId)||[];a.push(c);byId.set(c.baseId,a);}
+  for(const m of data||[]){const q=dgLcUtmForward(+m.lat,+m.lon,epsg),c=(byId.get(Math.floor((q.y-result.y0)/size)+"_"+Math.floor((q.x-result.x0)/size))||[]).find(c=>dgGridPointDistance([q.x,q.y],dgSurfaceFeatureGeometry({geometry:c.geometry},epsg))>=0);if(c)c.n++;}
+  if(signature!==dgGridReviewSignature())throw Error("Yüzey değişti. Güncel yüzeyle gridi tekrar oluşturun.");
+  clearGrid();DG_GRID_SOURCE=signature;DG_GRID_META=`<p class="measure-help">${_tgr("Su ve sert zeminden uzaklık")}: ${clearance} m · ${_tgr(review?.editing?"Yüzey önizlemesi":"Kayıtlı yüzey")} · ${(result.areaM2/10000).toFixed(3)} ha ${_tgr("uygun alan")}</p>`;GRID_CELLS.push(...result.cells);drawGridLayer();
+  toast(_tgrf("✓ Grid hazır: {n} hücre",{n:GRID_CELLS.length}),GRID_CELLS.length?"ok":"warn","🔲");
+ }catch(e){toast(String(e.message||e),"err","🔲");}
+ finally{DG_GRID_BUSY=false;if(btn?.isConnected){btn.disabled=false;btn.textContent="🔲 Grid Oluştur";}}
 }
 
 /* =========================================================
@@ -188,8 +65,8 @@ function drawGridLayer(){
     );
   }
 
-  GRID_LAYER=
-    L.layerGroup().addTo(map);
+  if(DG_GRID_RENDERER&&map)map.removeLayer(DG_GRID_RENDERER);
+  GRID_LAYER=L.layerGroup().addTo(map);DG_GRID_RENDERER=L.canvas({padding:.1});
 
   let g=0;
   let r0=0;
@@ -208,13 +85,10 @@ function drawGridLayer(){
         cell.id
       );
 
-    const rect=
-      L.rectangle(
-        [
-          [cell.s0,cell.w0],
-          [cell.s1,cell.w1]
-        ],
+    const shape=cell.geometry?cell.geometry.coordinates.map(poly=>poly.map(r=>r.map(p=>[p[1],p[0]]))):[[cell.s0,cell.w0],[cell.s0,cell.w1],[cell.s1,cell.w1],[cell.s1,cell.w0]];
+    const rect=L.polygon(shape,
         {
+          renderer:DG_GRID_RENDERER,
           color:
             isSel
               ?"#1d4ed8"
@@ -339,7 +213,7 @@ function updateGridSummary(
 
     `<button class="btn sm ghost" onclick="downloadWaypointsCSV()">📥 WP CSV</button>`+
 
-    `</div>`;
+    `</div>`+DG_GRID_META;
 }
 
 /* =========================================================
@@ -452,6 +326,9 @@ function clearCellSelection(){
 }
 
 function clearGrid(){
+  DG_GRID_META="";DG_GRID_SOURCE=null;
+  ++DG_GRID_EPOCH;
+  if(DG_GRID_RENDERER&&map)map.removeLayer(DG_GRID_RENDERER);DG_GRID_RENDERER=null;
   if(
     GRID_LAYER &&
     map
@@ -526,11 +403,14 @@ function toggleWpVis(){
 ========================================================= */
 
 async function createWaypointsFromGrid(mode){
+  const source=DG_GRID_SOURCE,park=PARK_POLY;
   if(!GRID_CELLS.length){
     return toast(
       "Önce grid oluştur"
     );
   }
+
+  if(DG_GRID_SOURCE!==dgGridReviewSignature())return toast(_tgr("Yüzey değişti. Waypoint üretmeden önce gridi yeniden oluşturun."),"warn");
 
   const pid=
     +$("gridProject").value||
@@ -590,6 +470,8 @@ async function createWaypointsFromGrid(mode){
     )
     .limit(1);
 
+  if(source!==dgGridReviewSignature()||source!==DG_GRID_SOURCE||park!==PARK_POLY||pid!==+$("gridProject").value)return toast(_tgr("Yüzey değişti. Waypoint üretmeden önce gridi yeniden oluşturun."),"warn");
+
   let next=
     (
       mx&&
@@ -605,11 +487,9 @@ async function createWaypointsFromGrid(mode){
       owner:USER.id,
       project_id:pid,
       wp_id:next++,
-      /* ⚠ WAYPOINT HATASI BURADAYDI: GRID_CELLS elemanlarında lat/lon
-       * alanı YOK (yalnız s0,s1,w0,w1,n,id) → c.lat.toFixed TypeError
-       * fırlatıyor, insert hiç çalışmıyordu. Merkez açıkça hesaplanır. */
-      lat:+(((c.s0+c.s1)/2).toFixed(6)),
-      lon:+(((c.w0+c.w1)/2).toFixed(6)),
+      /* Yeni gridin güvenli iç noktası; eski kayıtlar için merkez yedeği. */
+      lat:+((Number.isFinite(c.lat)?c.lat:(c.s0+c.s1)/2).toFixed(6)),
+      lon:+((Number.isFinite(c.lon)?c.lon:(c.w0+c.w1)/2).toFixed(6)),
       visited:false
     }));
 

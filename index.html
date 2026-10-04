@@ -239,7 +239,7 @@
 <!-- DİL KATMANI (0035): TR markup varsayılan; EN sözlüğü çalışma zamanında
      uygulanır (dgToggleLang). defer sırası önemli değil — DOMContentLoaded'da
      ya da hemen (hazırsa) çalışır. module-registry + CORE_ASSETS kaydı şart. -->
-<script src="src/config/i18n.js?v=e43e6cef" defer></script>
+<script src="src/config/i18n.js?v=e33f1c2e" defer></script>
 <script src="src/utils/geo.js?v=3e796768" defer></script>
 <script src="src/utils/truncation.js?v=f43c76b3" defer></script>
 <!-- Faz 7: geotiff (317 KB) ve chart.js (208 KB) artık SENKRON yüklenmiyor;
@@ -266,7 +266,7 @@
 <script src="src/services/park-invites.js?v=1023c17d" defer></script>
 <script src="src/services/world.js?v=c72d9019" defer></script>
 <script src="src/services/measure.js?v=444d6096" defer></script>
-<script src="src/services/map.js?v=317c80b3" defer></script>
+<script src="src/services/map.js?v=9f6c9825" defer></script>
 <!-- LULC ZİNCİRİ ARTIK TEMBEL (2026-09-25 · Faz 8): 8 dosya ilk yüklemede
      indirilmiyor. Yalnız "🌿 Yüzey Örtüsü Analizi"ne basan kullanıcı için
      src/utils/lazylibs.js → dgEnsureLulc() sırayla enjekte eder
@@ -284,14 +284,14 @@
      projeyi parka bağlar, ölçüm kapısını (park algılanmadan ölçüm yok) kurar.
      Sıra ÖNEMLİ: park-query'den sonra, grid-engine'den önce (grid panelindeki
      proje listesi bu modülden beslenir). -->
-<script src="src/services/park-registry.js?v=084c1f5f" defer></script>
-<script src="src/services/grid-engine.js?v=2a73614e" defer></script>
-<script src="src/ui/park-panel.js?v=3eead8ad" defer></script>
-<script src="src/ui/park-export.js?v=4d2f0de5" defer></script>
+<script src="src/services/park-registry.js?v=9d92eabe" defer></script>
+<script src="src/services/grid-engine.js?v=55f5f5f9" defer></script>
+<script src="src/ui/park-panel.js?v=9d44698a" defer></script>
+<script src="src/ui/park-export.js?v=c724cd32" defer></script>
 <script src="src/services/dash.js?v=4556cd69" defer></script>
 <link rel="stylesheet" href="css/style.css?v=a621830b">
 <link rel="stylesheet" href="css/landing.css?v=85504b78">
-<link rel="stylesheet" href="css/park-panel.css?v=b95dd215">
+<link rel="stylesheet" href="css/park-panel.css?v=987ed4d6">
 <!-- TASARIM SİSTEMİ (2026-09-27, 2. deneme): ui-standard.css geri BAĞLANDI
      ama ARTIK eleman seviyesi kuralları yalnız .dg-page (alt sayfalar) altında
      geçerli; kabuk (body.dg-app) yalnız sınıf-bazlı bileşenleri ve sekme
@@ -813,7 +813,7 @@
   </div>
 
 <div class="view" id="v-map"><h2 class="disp" style="margin-bottom:16px">Canlı Harita</h2>
-<div style="display:flex;gap:10px;align-items:center;margin-bottom:10px;flex-wrap:wrap">
+<div class="live-map-tools" style="display:flex;gap:10px;align-items:center;margin-bottom:10px;flex-wrap:wrap">
  <button class="btn sm blue" id="parkModeBtn" onclick="window.dgToggleParkMode()">🌳 Park Analizi Modu: KAPALI</button>
  <label style="font-size:.82rem;margin-left:8px">Harita:</label>
  <select id="baseLayerSelect" onchange="switchBaseLayer(this.value)" style="font-size:.82rem;padding:4px 8px;border-radius:6px;border:1px solid var(--line)">
@@ -835,6 +835,7 @@
  <button class="btn sm ghost" onclick="loadLiveMap()" title="Onaylı kayıtları sunucudan yeniden çek">↻ İşaretçileri tazele</button>
  <span style="color:var(--mut);font-size:.76rem">Onayladığın kayıt hemen görünmüyorsa bu düğmeye bas.</span>
 </div>
+<div id="surfacePendingTools" class="dg-sens-map-tools" style="display:none"><label for="dgPendingBaseSelect">Harita</label><select id="dgPendingBaseSelect" onchange="switchBaseLayer(this.value)"><option value="osm">Sokak</option><option value="sat">Uydu</option><option value="topo">Topoğrafik</option></select><button class="dg-png-btn ghost sm" disabled>📍 Yeni konum</button><span class="measure-help" role="status">⏳ Yüzey analizi hazırlanıyor…</span></div>
 <div id="map" class="notranslate" translate="no"></div>
 <div id="parkInfo" class="card" style="display:none;margin-top:12px;border-left:4px solid var(--blue)"></div><p style="color:var(--mut);font-size:.8rem;margin-top:8px">🟢 Noktalara dokunun → onaylı ölçüm bilgisi + varsa fotoğraf.</p><div id="liveAnalysis" style="margin-top:18px"></div></div>
 

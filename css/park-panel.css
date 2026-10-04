@@ -430,3 +430,9 @@
 .dg-sens-popup{font-size:.8rem;line-height:1.5}
 @media(max-width:640px){#lcSens{padding:10px}#lcSens .dg-sens-row{grid-template-columns:90px minmax(60px,1fr) 84px;gap:6px}#lcSens .dg-sens-label{font-size:.76rem}#lcSens .dg-sens-count{font-size:.7rem}#v-map #map.surface-review-map{height:36vh!important;min-height:230px}.dg-sens-adj{font-size:.73rem}}
 @media(max-height:500px){#v-map #map.surface-review-map{height:35vh!important;min-height:150px}}
+
+#v-map.surface-review-active #parkScanCard{display:none!important}
+.dg-sens-map-tools{display:flex;align-items:center;gap:8px;margin:10px 0;flex-wrap:wrap}
+.dg-sens-map-tools select{flex:1;min-width:110px;max-width:220px;min-height:44px}
+
+#v-map.surface-review-active .live-map-tools,#v-map.surface-review-active #parkSurfaceAction,#v-map.surface-review-active #parkRasterExport{display:none}

@@ -518,6 +518,7 @@ function dgRenderScanCard(){const _y=(typeof dgScrollKeep==="function"?dgScrollK
 function dgRenderScanCard__scroll(forceManual){
   const el=$("parkScanCard");
   if(!el||!el.style)return;
+  if(document.getElementById("v-map")?.classList.contains("surface-review-active")){el.style.display="none";return;}
 
   const park=DG_PARK;
   const cand=DG_PARK_CAND;

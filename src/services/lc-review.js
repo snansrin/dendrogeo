@@ -85,19 +85,19 @@ function dgSurfaceFeatureGeometry(f,epsg){
 function dgSurfaceObjects(elements,epsg){
  const out=[];const paved=/^(asphalt|paved|concrete|paving_stones|sett|cobblestone|bricks|concrete:plates|concrete:lanes)$/;
  for(const el of elements||[]){
-  const t=el.tags||{};let type=null;
+  const t=el.tags||{};let type=null;const deck=/^(pier|bridge)$/.test(t.man_made||"")||t.bridge==="yes";
   if((t.building&&t.building!=="no")||(t["building:part"]&&t["building:part"]!=="no"))type="building";
   else if(t.leisure==="swimming_pool"||t.amenity==="fountain"||t.water==="reflecting_pool")type="pool";
   else if(t.natural==="water"||t.water||t.landuse==="reservoir"||t.waterway==="riverbank")type="water";
-  else if(paved.test(t.surface||"")||t.amenity==="parking")type="hard";
+  else if(deck||paved.test(t.surface||"")||t.amenity==="parking")type="hard";
   if(!type)continue;
   let geom=[];
   if(el.type==="relation"&&typeof extractRings==="function"){
    const rs=extractRings(el);if(rs){const outer=Array.isArray(rs)?rs:rs.outer,holes=Array.isArray(rs)?[]:rs.inner||[];if(outer?.length)geom=dgSurfacePark(outer,holes,epsg);}
-  }else if(el.geometry?.length>=4){
+  }else if(el.geometry?.length>=2){
    const pts=el.geometry.map(p=>[p.lon,p.lat]),a=pts[0],b=pts.at(-1);
-   if(a[0]===b[0]&&a[1]===b[1])geom=[[dgSurfaceProject(pts,epsg)]];
-   else if(type==="hard"&&paved.test(t.surface||"")){
+   if(pts.length>=4&&a[0]===b[0]&&a[1]===b[1])geom=[[dgSurfaceProject(pts,epsg)]];
+   else if(type==="hard"&&(deck||paved.test(t.surface||""))){
     const width=Number(t.width);if(Number.isFinite(width)&&width>0&&width<=40){
      const xy=dgSurfaceProject(pts,epsg),segments=[];
      for(let i=1;i<xy.length;i++){const a=xy[i-1],b=xy[i],dx=b[0]-a[0],dy=b[1]-a[1],len=Math.hypot(dx,dy);if(!len)continue;const ox=-dy/len*width/2,oy=dx/len*width/2;segments.push([[[a[0]+ox,a[1]+oy],[b[0]+ox,b[1]+oy],[b[0]-ox,b[1]-oy],[a[0]-ox,a[1]-oy],[a[0]+ox,a[1]+oy]]]);}
@@ -105,9 +105,9 @@ function dgSurfaceObjects(elements,epsg){
     }
    }
   }
-  if(geom.length)out.push({type,method:"osm-boundary",osmId:el.type+"/"+el.id,geometry:{type:"MultiPolygon",coordinates:dgSurfaceUnproject(geom,epsg)}});
+  if(geom.length)out.push({type,method:"osm-boundary",osmId:el.type+"/"+el.id,priority:deck?4:null,geometry:{type:"MultiPolygon",coordinates:dgSurfaceUnproject(geom,epsg)}});
  }
- const priority={hard:0,water:1,pool:2,building:3};return out.sort((a,b)=>priority[a.type]-priority[b.type]);
+ const priority={hard:0,water:1,pool:2,building:3};return out.sort((a,b)=>(a.priority??priority[a.type])-(b.priority??priority[b.type]));
 }
 window.DG_SURFACE_REVIEW.objects=dgSurfaceObjects;
 
@@ -144,4 +144,74 @@ async function dgSurfacePrepare(data){
 function dgSurfaceMergeSync(parts,epsg){
  const groups={};for(const p of parts){const g=groups[p.type]||(groups[p.type]={geoms:[],area:0,methods:new Set()});g.geoms.push(p.geom);g.area+=p.areaM2;g.methods.add(p.method);}
  return Object.entries(groups).map(([k,g])=>({type:'Feature',properties:{class:k,area_m2:g.area,method:[...g.methods].sort().join('+')},geometry:{type:'MultiPolygon',coordinates:dgSurfaceUnproject(window.polygonClipping.union(...g.geoms),epsg)}}));
+}
+
+/* Sampling geometry is derived from the displayed review, never from patch centroids.
+ * Erode the usable domain, clip metric cells, then choose an interior point.
+ * The final point has an exact boundary-distance check after coordinate rounding. */
+function dgGridPointDistance(p,geom){
+ let inside=false,min=Infinity;
+ for(const poly of geom){let inPoly=false;for(let i=0;i<poly.length;i++){const ring=poly[i];let hit=false;for(let j=0,k=ring.length-1;j<ring.length;k=j++){
+  const a=ring[k],b=ring[j];if((a[1]>p[1])!==(b[1]>p[1])&&p[0]<(b[0]-a[0])*(p[1]-a[1])/(b[1]-a[1])+a[0])hit=!hit;
+  const dx=b[0]-a[0],dy=b[1]-a[1],t=Math.max(0,Math.min(1,((p[0]-a[0])*dx+(p[1]-a[1])*dy)/(dx*dx+dy*dy||1)));
+  min=Math.min(min,Math.hypot(p[0]-a[0]-t*dx,p[1]-a[1]-t*dy));
+ }if(i===0)inPoly=hit;else if(hit)inPoly=false;}if(inPoly)inside=true;}
+ return inside?min:-min;
+}
+function dgGridInterior(poly){
+ const b=dgSurfaceBounds([poly]);let best=null;
+ const make=(x,y,h)=>{const d=dgGridPointDistance([x,y],[poly]);return{x,y,h,d,max:d+h*Math.SQRT2};};
+ const queue=[make((b[0]+b[2])/2,(b[1]+b[3])/2,Math.max(b[2]-b[0],b[3]-b[1])/2)];
+ // Bounded best-first subdivision. Cell dimensions are at most 50 m.
+ for(let n=0;queue.length&&n<2048;n++){
+  queue.sort((a,b)=>b.max-a.max);const c=queue.shift();if(!best||c.d>best.d)best=c;
+  if(c.max-best.d<=.15||c.h<=.075)continue;
+  const h=c.h/2;for(const dx of [-h,h])for(const dy of [-h,h])queue.push(make(c.x+dx,c.y+dy,h));
+ }
+ return best?.d>0?[best.x,best.y]:null;
+}
+function dgGridLineMask(line,epsg){
+ const pts=dgSurfaceProject(line.pts.map(p=>[p[1],p[0]]),epsg),width=Math.max(.1,Number(line.w)||1),out=[];
+ for(let i=1;i<pts.length;i++){const a=pts[i-1],b=pts[i],dx=b[0]-a[0],dy=b[1]-a[1],len=Math.hypot(dx,dy);if(!len)continue;const ox=-dy/len*width,oy=dx/len*width;out.push([[[a[0]+ox,a[1]+oy],[b[0]+ox,b[1]+oy],[b[0]-ox,b[1]-oy],[a[0]-ox,a[1]-oy],[a[0]+ox,a[1]+oy]]]);}
+ for(const p of pts)out.push([Array.from({length:17},(_,i)=>[p[0]+Math.cos(i*Math.PI/8)*width,p[1]+Math.sin(i*Math.PI/8)*width])]);
+ return out;
+}
+async function dgSurfaceGrid(data){
+ const pc=window.polygonClipping,size=Number(data.size),clearance=Number(data.clearance),epsg=data.epsg;
+ if(![10,20,50].includes(size)||!Number.isFinite(clearance)||clearance<1||clearance>20)throw Error('Grid boyutu veya güvenlik mesafesi geçersiz.');
+ const park=dgSurfacePark(data.outer,data.holes||[],epsg);
+ const greens=(data.parts||[]).filter(p=>p.type==='green'&&p.geom?.length).map(p=>p.geom);
+ if(data.greenOnly&&!greens.length)throw Error('Yeşil alan bulunamadı. Yüzey analizini kontrol edin.');
+ let domain=data.greenOnly?pc.union(...greens):park;
+ const obstacles=(data.blockRings||[]).filter(r=>r.length>=3).map(r=>[dgSurfaceProject(r.map(p=>[p[1],p[0]]),epsg)]);
+ if(!data.greenOnly)for(const p of data.parts||[])if(p.type!=='green')obstacles.push(p.geom);
+ for(const line of data.blockLines||[])if(line.pts?.length>=2)obstacles.push(...dgGridLineMask(line,epsg));
+ if(obstacles.length)domain=pc.difference(domain,...obstacles);
+ domain=pc.intersection(domain,park);
+ if(!domain.length)return{cells:[],epsg,size,clearance,areaM2:0};
+ let safe=domain;
+ const radius=(clearance+.15)/Math.cos(Math.PI/16);
+ for(let i=0;i<16&&safe.length;i++){const dx=Math.cos(i*Math.PI/8)*radius,dy=Math.sin(i*Math.PI/8)*radius;safe=pc.intersection(safe,domain.map(poly=>poly.map(ring=>ring.map(p=>[Math.round((p[0]+dx)*1000)/1000,Math.round((p[1]+dy)*1000)/1000]))));if(i%4===3)await new Promise(r=>setTimeout(r,0));}
+ if(!safe.length)return{cells:[],epsg,size,clearance,areaM2:0};
+ const bounds=dgSurfaceBounds(park),x0=Math.floor(bounds[0]/size)*size,y0=Math.floor(bounds[1]/size)*size,nx=Math.ceil((bounds[2]-x0)/size),ny=Math.ceil((bounds[3]-y0)/size);
+ if(nx*ny>30000)throw Error('Park zarfı çok geniş. Daha büyük grid boyutu seçin.');
+ const islands=safe.map(poly=>({poly,bbox:dgSurfaceBounds([poly])})),cells=[];
+ for(let row=0;row<ny;row++)for(let col=0;col<nx;col++){
+  const x=x0+col*size,y=y0+row*size,bb=[x,y,x+size,y+size],near=islands.filter(p=>dgSurfaceOverlap(bb,p.bbox));if(!near.length)continue;
+  const quad=[[x,y],[x+size,y],[x+size,y+size],[x,y+size],[x,y]],geom=pc.intersection(near.map(p=>p.poly),[quad]);
+  const components=geom.filter(poly=>dgSurfaceArea([poly])>=1);
+  for(let component=0;component<components.length;component++){
+  const piece=[components[component]];
+  let point=[x+size/2,y+size/2];
+  if(dgGridPointDistance(point,piece)<=0)point=dgGridInterior(components[component]);
+  if(!point)continue;
+  const ll=dgLcUtmInverse(point[0],point[1],epsg),lat=+ll.lat.toFixed(6),lon=+ll.lon.toFixed(6),rounded=dgSurfaceProject([[lon,lat]],epsg)[0];
+  const distance=dgGridPointDistance(rounded,domain);if(distance<clearance||dgGridPointDistance(rounded,piece)<0)continue;
+  const wgs=dgSurfaceUnproject(piece,epsg),corners=quad.map(p=>dgLcUtmInverse(p[0],p[1],epsg)),baseId=row+'_'+col;
+  cells.push({id:baseId+(components.length>1?'_'+component:''),baseId,row,col,lat,lon,n:0,s0:Math.min(...corners.map(p=>p.lat)),s1:Math.max(...corners.map(p=>p.lat)),w0:Math.min(...corners.map(p=>p.lon)),w1:Math.max(...corners.map(p=>p.lon)),geometry:{type:'MultiPolygon',coordinates:wgs},areaM2:dgSurfaceArea(piece),clearanceM:distance});
+  }
+  if(cells.length>10000)throw Error('Grid çok yoğun. Daha büyük grid boyutu seçin.');
+  if(cells.length%64===0)await new Promise(r=>setTimeout(r,0));
+ }
+ return{cells,epsg,size,clearance,x0,y0,areaM2:dgSurfaceArea(safe)};
 }

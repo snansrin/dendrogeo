@@ -390,6 +390,8 @@ function drawNav(){
 function switchBaseLayer(type){
  if(!map)return;
  if(!["osm","sat","topo"].includes(type))return;
+ for(const id of ["baseLayerSelect","dgSensBaseSelect","dgPendingBaseSelect"]){const el=document.getElementById(id);if(el)el.value=type;}
+ if(window.DG_LC_SENS?.state)window.DG_LC_SENS.state.base=type;
  let current=null;map.eachLayer(l=>{if(l._dgBase===type)current=l;});if(current)return;
  // Mevcut tile layer'ı bul ve kaldır
  map.eachLayer(l=>{

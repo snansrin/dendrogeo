@@ -636,9 +636,10 @@ describe('entegrasyon zinciri kilitleri (0054 · lc-sens)', () => {
     assert.match(sens, /window\._dgSensGuard=!!on;/);
   });
 
-  test('⭐ 0056: tarama bitince altlık OTOMATİK uyduya geçer (gözle doğrulama)', () => {
-    assert.match(sens, /if\(DG_SENS\.base!=="sat"&&typeof switchBaseLayer==="function"\)\{/);
-    assert.match(sens, /switchBaseLayer\("sat"\);DG_SENS\.base="sat";/);
+  test('harita kullanıcının seçimine bağlıdır; tarama uyduya zorla geçmez', () => {
+    assert.match(sens, /onchange="dgSensBase\(this.value\)"/);
+    assert.match(sens, /switchBaseLayer\(DG_SENS.base\)/);
+    assert.ok(!sens.includes('switchBaseLayer("sat");DG_SENS.base="sat";'));
   });
 
   test('⭐ 0055 regresyon: hücre tıklaması haritaya KABARMAZ (park algılama sızıntısı kapalı)', () => {
@@ -666,7 +667,7 @@ describe("0058 · Doğrulanmış Harita PNG (kullanıcının refactor'ü üstün
     assert.match(sens, /function dgSensExportPng\(\)\{/);
     /* onların kabul hattı: dgSensAreas (polygon-clipping summarize) + dgSensEffective */
     assert.match(sens, /const areas=dgSensAreas\(\)\|\|dgSensGroupAreas\(\);/);
-    assert.match(sens, /COL\[part.type\]/);
+    assert.match(sens, /COL\[feature.properties.class\]/);
     assert.match(sens, /g.fill\("evenodd"\)/);
     assert.match(sens, /rec\.features\|\|\[\]/);
   });

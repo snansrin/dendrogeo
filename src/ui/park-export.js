@@ -60,13 +60,16 @@ function downloadGridGeoJSON(){
         properties:{
           id:c.id,
           olcum:c.n,
+          alan_m2:c.areaM2||null,
+          guvenlik_m:c.clearanceM||null,
+          waypoint_lat:c.lat??null,waypoint_lon:c.lon??null,
           durum:
             c.n===0
               ?"bos"
               :"olculmus"
         },
 
-        geometry:{
+        geometry:c.geometry||{
           type:"Polygon",
 
           coordinates:[
@@ -174,6 +177,9 @@ async function runLandCoverAnalysis(){
   }
 
   window._dgLandCoverBusy=true;
+  document.getElementById("v-map")?.classList.add("surface-review-active");
+  const pending=document.getElementById("surfacePendingTools");if(pending)pending.style.display="flex";
+  const pendingBase=document.getElementById("dgPendingBaseSelect");if(pendingBase)pendingBase.value=document.getElementById("baseLayerSelect")?.value||"osm";
   const btn=$("landCoverBtn");
   if(btn){
     btn.disabled=true;
@@ -201,7 +207,7 @@ async function runLandCoverAnalysis(){
 
   const parkArea=parkAreaM2();
 
-  window.DG_LANDCOVER.analyze({
+  return window.DG_LANDCOVER.analyze({
     outer:PARK_POLY,
     holes:PARK_HOLES||[],
     parkAreaM2:parkArea
@@ -236,6 +242,8 @@ async function runLandCoverAnalysis(){
     toast(dgCf("Arazi örtüsü analizi hatası: ")+(err?.message||String(err)),"err","🗺️");
   }).finally(()=>{
     window._dgLandCoverBusy=false;
+    if(pending)pending.style.display="none";
+    if(!window.DG_LC_SENS?.state?.record)document.getElementById("v-map")?.classList.remove("surface-review-active");
     if(btn){
       btn.disabled=false;
       btn.innerHTML=btn.dataset.oldText||"🌿 Yüzey Örtüsü Analizi";

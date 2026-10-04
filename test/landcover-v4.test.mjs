@@ -621,8 +621,8 @@ describe('v9: sapma düzeltmesi + yapay havuz rafinasyonu + PNG park kıpı', ()
     assert.match(srcLc, /leisure\\?"=\\?"swimming_pool|leisure/);
   });
 
-  test('⭐ waypoint: hücre merkezi hesaplanıyor (c.lat çökmesi geri gelemez)', () => {
-    assert.match(srcGp, /lat:\+\(\(\(c\.s0\+c\.s1\)\/2\)\.toFixed\(6\)\)/);
+  test('⭐ waypoint: güvenli iç nokta kullanılır; eski hücrelerde merkez yedeği var', () => {
+    assert.match(srcGp, /Number\.isFinite\(c\.lat\)\?c\.lat:\(c\.s0\+c\.s1\)\/2/);
     assert.ok(!srcGp.includes('lat:+c.lat.toFixed(6),'), 'eski çöken satır geri gelmemeli');
   });
 

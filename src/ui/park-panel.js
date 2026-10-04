@@ -311,25 +311,7 @@ async function drawPark(park){
       alt+
     `</div>`+
 
-    /* 0 · PARK KİMLİĞİ + PROJE: karşılaştırmanın park bazında toplanabilmesi
-     * için ölçümler parka bağlı bir projede olmalı. Kart, algılama akışının
-     * 3. adımına (proje oluştur/bağla) köprüdür. */
-    `<div class="dg-png-card" style="margin-bottom:12px">`+
-      `<div class="dg-png-head">`+
-        `<div>`+
-          `<div class="dg-png-kicker">0 · PARK KİMLİĞİ</div>`+
-          `<div class="dg-png-title">🌳 ${esc((parkRow&&parkRow.name)||park.name||"İsimsiz Park")}</div>`+
-          `<div class="dg-png-sub">`+
-            (parkRow
-              ? `kimlik #${parkRow.id} · ${esc(parkRow.osm_key||"")} · ${parkProjects.length} proje bağlı`
-              : `kimlik sunucuya yazılamadı — ölçüm girmeden önce 🔄 gerekir`)+
-          `</div>`+
-        `</div>`+
-        (parkRow
-          ? `<button class="dg-png-btn ghost sm" onclick="dgShowProjectStep()">📁 Proje oluştur</button>`
-          : `<button class="dg-png-btn red sm" onclick="dgRetryRegister()">🔄 Yeniden dene</button>`)+
-      `</div>`+
-    `</div>`+
+    (!parkRow?`<div class="dg-png-card"><button class="dg-png-btn red sm" onclick="dgRetryRegister()">🔄 Yeniden dene</button></div>`:"")+
 
     `<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px">`+
 
@@ -378,12 +360,12 @@ async function drawPark(park){
           `<span class="dg-png-switch"></span>`+
         `</label>`+
 
-        `<button class="dg-png-btn primary" onclick="buildGrid()">`+
+        `<div class="dg-png-field"><label class="dg-png-label" for="gridClearance">SU / SERT ZEMİN MESAFESİ (M)</label><input id="gridClearance" class="dg-png-input" type="number" min="1" max="20" step="1" value="3"></div><button id="gridBuildBtn" class="dg-png-btn primary" onclick="buildGrid()">`+
           `🔲 Grid Oluştur`+
         `</button>`+
       `</div>`+
 
-      `<div class="dg-png-card">`+
+      `<div id="parkSurfaceAction" class="dg-png-card">`+
         `<div class="dg-png-head">`+
           `<div>`+
             `<div class="dg-png-kicker">2 · YÜZEY ANALİZİ</div>`+
@@ -402,7 +384,7 @@ async function drawPark(park){
         `</div>`+
       `</div>`+
 
-      `<div class="dg-png-card">`+
+      `<div id="parkRasterExport" class="dg-png-card">`+
         `<div class="dg-png-head">`+
           `<div>`+
             `<div class="dg-png-kicker">3 · RAPOR PNG</div>`+
@@ -600,3 +582,15 @@ window.dgToggleParkMode=toggleParkMode;
 window.bindParkClick=bindParkClick;
 
 window.clearPark=clearPark;
+
+async function dgChooseNewPark(){
+ if(window._dgLandCoverBusy||window.DG_LC_SENS?.state?.saving||window.DG_LC_SENS?.state?.exporting)return;
+ if(window.DG_LC_SENS?.state?.record&&typeof dgSensSave==="function")await dgSensSave();
+ clearPark();clearGrid();if(window.DG_LANDCOVER?.clear)window.DG_LANDCOVER.clear();
+ const info=$("parkInfo");if(info){info.style.display="none";info.innerHTML="";}
+ if(!PARK_MODE)toggleParkMode();else bindParkClick();
+ map?.invalidateSize({pan:false});document.getElementById("map")?.scrollIntoView({block:"nearest"});
+ toast(_tgrSafeNewPark(),"info","📍");
+}
+function _tgrSafeNewPark(){return typeof dgCf==="function"?dgCf("Haritada yeni parkın içine dokunun."):"Haritada yeni parkın içine dokunun.";}
+window.dgChooseNewPark=dgChooseNewPark;

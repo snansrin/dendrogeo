@@ -24,6 +24,13 @@
 
 /* ---- EN sözlüğü: anahtar = TR dizenin trim'lenmiş hâli ---- */
 const DG_I18N_EN={
+"Yüzey değişti. Waypoint üretmeden önce gridi yeniden oluşturun.":"The surface changed. Rebuild the grid before creating waypoints.",
+"Haritada yeni parkın içine dokunun.":"Tap inside the new park on the map.",
+"Yeni konum":"New location",
+"Su ve sert zeminden uzaklık":"Distance from water and hard surfaces",
+"Yüzey önizlemesi":"Surface preview",
+"Kayıtlı yüzey":"Saved surface",
+"uygun alan":"usable area",
 "Ayarlar → Gizlilik ve Güvenlik → Konum Servisleri → Safari Siteleri → Uygulamayı Kullanırken.":"Settings → Privacy & Security → Location Services → Safari Websites → While Using the App.",
 "Kayıtlı analiz sonucu":"Saved analysis result",
 "Yayın isteğinde bu kayıt rapora aktarılır. Kaydedilmemiş önizleme rapora girmez.":"This saved result is attached to your publication request. Unsaved previews are excluded.",
