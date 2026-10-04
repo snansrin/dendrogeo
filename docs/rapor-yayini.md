@@ -430,3 +430,69 @@ auth.uid()` (SQL), 📁 Projeler'deki 📄 düğmesi ve panelin kablolaması
 (arayüz), vm'de gerçek davranış (panel durumları, insert gövdesi/oturum
 anahtarı, kota–mülkiyet hata eşlemeleri, başkasının isteğinde ✖ Vazgeç yok,
 oynanmış günlük bağlantı sokamaz).
+
+## Üretim yayınına geçiş (4 Ekim 2026)
+
+Yayın düğmesi artık çalışma künyesi formunu açar. Başlık, proje adı,
+sorumlu araştırmacı, kurum, amaç, örnekleme tasarımı, saha yöntemi/cihazları
+ve saha tarihleri zorunludur. Tez/bitirme projesinde danışman da zorunludur.
+Bölüm/program ve destek bilgisi isteğe bağlıdır. Kullanıcı, bu bilgilerin
+açık yayımlanmasını onaylar. Profildeki kurum ve danışman bilgileri formu
+önceden doldurur; profil alanları yetkilendirme kararlarında kullanılmaz.
+
+Künye mevcut `report_requests.note` metin alanına
+`dendrogeo-publication/1` JSON olarak yazılır; yeni veritabanı migration'ı
+gerekmez. Kuyruk işleyicisi zorunlu alanları ve tarih aralığını yeniden
+doğrular. Künye eksik eski istekler rapor üretmez; kullanıcı yeni formdan
+istek açmalıdır. Künye `data.json` içinde içerik hash'ine dahil edilir ve
+`metadata.json` dosyasında `publication` alanıyla yayımlanır. Nicel kapsam,
+parkın tüm onaylı ölçümleridir. Beyan edilen saha tarihleri veri filtresi
+olarak kullanılmaz; kayıt tarih aralığı ayrıca raporda gösterilir.
+
+Önceki 20 rapor test yayınıdır. `test-publications.json` kimlik listesini
+sabitler; yeni rapor geçmişi bu listeyi dışlar. Eski rapor adreslerinde test
+bildirimi bulunur. Kimlikler yeniden kullanılmaz ve git geçmişi korunur.
+Bu geçişi yapan `reset-test-publications.mjs` idempotenttir; manifest varsa
+yeni yayınlara dokunmaz. Ölçüm, park, proje ve kullanıcı kayıtları silinmez.
+
+### Gerçek DOI kaydı
+
+Yeni raporlar Zenodo için `zenodo.json` üretir. DOI kaydı için Zenodo
+hesabından bir erişim token'ı alınır ve GitHub Actions secrets alanına
+`ZENODO_TOKEN` olarak eklenir. Token tarayıcıya veya depoya yazılmaz.
+Actions → **Rapor DOI kaydı** → `report_id` ile kayıt başlatılır.
+İşlem rapor dosyalarını ZIP olarak Zenodo'ya yükler ve yayımlar. Gerçek DOI
+Zenodo yanıtından alınır; biçimi doğrulanır ve `doi.json` dosyasına yazılır.
+Rapor sayfası bu dosyadan DOI bağlantısını ve atıf ekini gösterir. Özgün
+ölçüm snapshot'ı ve içerik hash'i değiştirilmez. DOI, Zenodo'daki arşivin
+kimliğidir; DGR kurum içi rapor kimliği olarak korunur.
+
+Yerel kullanım:
+
+```bash
+# Önce yalnız taslak oluşturur; token ortam değişkeninde bulunmalıdır.
+node scripts/register-doi.mjs DGR-2026-0021
+# Gerçek DOI kaydı ve açık Zenodo yayını:
+node scripts/register-doi.mjs DGR-2026-0021 --publish
+```
+
+`zenodo-deposit.json` taslak kimliğini saklar; yeniden deneme aynı kaydı
+kullanır. `doi.json` varsa ikinci bir DOI üretilmez. Token bulunmazsa DOI
+üretilmez ve işlem açık hata verir. Formdaki danışman bilgisi kurumsal onay
+veya danışmanın yazarlık beyanı yerine geçmez.
+
+Elle rapor üretiminde de künye zorunludur:
+
+```bash
+node scripts/make-report.mjs --park 25 --publication-file calisma-kunyesi.json
+```
+
+### Harita ve profil
+
+Canlı harita ve PNG çıktısı aynı görsel sınır yordamını kullanır. OSM ve
+kullanıcı çizimi kaynaklı sınırlar aynen korunur; raster kaynaklı sınıf
+alanları birleştirilir ve yalnız gösterimde en fazla 4 m köşe yumuşatması
+uygulanır. Raster çözünürlüğü değişmez; bu çizim yeni veya daha hassas bir
+uzaktan algılama sonucu değildir. Analiz alanları, kabul snapshot'ı ve
+GeoJSON dışa aktarımı özgün geometriden üretilir. Veri/ayarlar ve sınır
+düzeltme bölümleri açılır kapanır; yeniden çizimde açık durumları korunur.

@@ -197,6 +197,7 @@ function bootUser(opts) {
   vm.createContext(ctx);
   vm.runInContext(read('src/config/constants.js'), ctx, { filename: 'constants.js' });
   vm.runInContext(UI, ctx, { filename: 'report-publish.js' });
+  vm.runInContext('dgPublicationForm=async()=>({schema:"dendrogeo-publication/1",project:"Göksu çalışması"})', ctx);
   const run = (code) => vm.runInContext(code, ctx);
   return {
     ctx, els, toasts, calls, fetches, run,
@@ -319,7 +320,7 @@ describe('kullanıcı paneli davranışı (vm)', () => {
     assert.equal(f.url, 'https://x.supabase.co/rest/v1/report_requests');
     assert.equal(f.headers['Prefer'], 'return=minimal', 'RETURNING politikaya takılmasın');
     assert.equal(f.headers['Authorization'], 'Bearer tok-1', 'oturum anahtarı (anon istek açamaz)');
-    assert.deepEqual(f.body, [{ park_id: 6, with_lulc: true, status: 'Beklemede', requested_by: 'u-2', note: 'kullanıcı yayını (proje #11)' }]);
+    assert.deepEqual(f.body, [{ park_id: 6, with_lulc: true, status: 'Beklemede', requested_by: 'u-2', note: JSON.stringify({schema:'dendrogeo-publication/1',project:'Göksu çalışması'}) }]);
     assert.match(ui.lastToast()[0], /kuyruğa alındı/);
     assert.equal(ui.lastToast()[1], 'ok');
   });
@@ -371,7 +372,7 @@ describe('kullanıcı paneli davranışı (vm)', () => {
     const adm = bootUser({ profile: { id: 'u-1', role: 'owner' } });
     await adm.run('dgPublishReport(6)');
     assert.equal(adm.fetches.length, 1);
-    assert.equal(adm.fetches[0].body[0].note, 'uygulama içi yayın');
+    assert.equal(JSON.parse(adm.fetches[0].body[0].note).schema, 'dendrogeo-publication/1');
   });
 
   test('panel HTML’i yalnız mevcut sınıf ailelerini kullanır (yeni CSS yok)', async () => {
