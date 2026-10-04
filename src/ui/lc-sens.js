@@ -1,16 +1,17 @@
 "use strict";
-/* Mobile surface review: scan → live preview → explicit acceptance.
+/* Mobile surface review: one raster baseline → manual review → explicit acceptance.
  * Raster baseline stays read-only. Geometry clipping and cloud persistence
  * are isolated in lc-review.js. Accepted snapshots are bound to source/grid. */
 const _tvs=s=>typeof dgCf==="function"?dgCf(s):s;
 const _tvst=(s,v)=>typeof dgTfs==="function"?dgTfs(s,v):s.replace(/\{(\w+)\}/g,(m,k)=>v[k]??m);
-const DG_SENS={record:null,layer:null,busy:false,saving:false,showCand:true,base:"sat",guard:true,debounce:null,epoch:0,focus:null,editing:true,revision:0,geometry:null,parkGeometry:null,epsg:null,hostParent:null,hostNext:null,status:"",draw:null,drawLayer:null,localQueue:Promise.resolve(),opacity:45,visualVersion:0,baselineShown:false};
+const DG_SENS={record:null,layer:null,busy:false,saving:false,showCand:true,base:"sat",guard:true,debounce:null,epoch:0,focus:null,editing:true,revision:0,geometry:null,parkGeometry:null,epsg:null,hostParent:null,hostNext:null,status:"",draw:null,drawLayer:null,localQueue:Promise.resolve(),opacity:45,visualVersion:0,baselineShown:false,rawView:false,brush:null,brushType:"hard",brushDiameter:10};
 const DG_SENS_COLORS={green:"#22c55e",water:"#3b82f6",hard:"#64748b",bare:"#8b5a2b",building:"#475569",pool:"#0ea5e9",other:"#94a3b8"};
 const DG_SENS_CLASSES=["green","water","hard","bare"];
 function dgSensGuard(on){DG_SENS.guard=!!on;window._dgSensGuard=!!on;}
 function dgSensModeAnalysis(){dgSensGuard(true);dgSensRender();}
 function dgSensModePark(){
   dgSensGuard(false);
+  dgSensBrushStop();
   if(DG_SENS.draw)dgSensDrawCancel();
   if(typeof PARK_MODE!=="undefined"&&!PARK_MODE&&typeof toggleParkMode==="function")toggleParkMode();
   dgSensRender();
@@ -19,7 +20,7 @@ function dgSensParkId(){try{if(typeof DG_PARK!=="undefined"&&DG_PARK?.id)return{
 function dgSensCells(){return typeof DG_LC_LAST!=="undefined"&&Array.isArray(DG_LC_LAST?.result?.cells)?DG_LC_LAST.result.cells:null;}
 function dgSensGroupAreas(){return typeof DG_LC_LAST!=="undefined"?DG_LC_LAST?.result?.groupAreas||{}:{};}
 function dgSensEditSummary(rec=DG_SENS.record,cells=dgSensCells()||[]){
- if(!rec)return{total:0,manualCells:0,sensitivityCells:0,boundaries:0,thresholds:0,appearance:0};
+ if(DG_SENS.rawView||!rec)return{total:0,manualCells:0,sensitivityCells:0,boundaries:0,thresholds:0,appearance:0};
  const manualCells=Object.values(rec.corrections||{}).filter(d=>d.method==="visual-cell").length;
  const sensitivityCells=cells.filter(c=>{const d=rec.corrections?.[dgSensCellKey(c)];if(d?.method==="visual-cell")return false;const type=rec===DG_SENS.record?dgSensEffective(c):(d?.to||c.rasterClassKey||c.classKey);return type!==(c.rasterClassKey||c.classKey);}).length;
  const boundaries=(rec.features||[]).length,thresholds=DG_SENS_CLASSES.filter(k=>Number(rec.sens?.[k]??50)!==50).length,appearance=Number(rec.displayOpacity??45)!==45?1:0;
@@ -27,7 +28,7 @@ function dgSensEditSummary(rec=DG_SENS.record,cells=dgSensCells()||[]){
 }
 function dgSensMeta(k){return window.DG_LC_VALIDATE?.labels?.[k]||{tr:window.DG_SURFACE_REVIEW?.types?.[k]?.label||k,emoji:""};}
 function dgSensHa(a){return(Number(a||0)/10000).toFixed(3);}
-function dgSensNewRecord(){const pk=dgSensParkId(),owner=typeof USER!=="undefined"?USER?.id:null;return{id:"surface-"+(owner||"guest")+"-"+(pk.id||"x"),owner,parkId:pk.id,parkName:pk.name,sens:{green:50,water:50,hard:50,bare:50},corrections:{},features:[],profile:null,period:"latest",createdAt:new Date().toISOString()};}
+function dgSensNewRecord(){const pk=dgSensParkId(),owner=typeof USER!=="undefined"?USER?.id:null;return{id:"surface-"+(owner||"guest")+"-"+(pk.id||"x"),owner,parkId:pk.id,parkName:pk.name,sens:{green:50,water:50,hard:50,bare:50},corrections:{},features:[],useObjects:false,analysisEngine:"esa-raster-manual-v1",profile:null,period:"latest",createdAt:new Date().toISOString()};}
 async function dgSensLoadRecord(){
  const fresh=dgSensNewRecord();let local=null,remote=null;
  try{const rows=await window.DG_LC_VALIDATE.loadCampaigns(fresh.parkId);local=rows.find(r=>r.id===fresh.id&&r.owner===fresh.owner);if(!local&&fresh.parkId){const drafts=await window.DG_LC_VALIDATE.loadCampaigns(null);const fp=await window.DG_SURFACE_REVIEW.fingerprint(dgSensCells(),PARK_POLY,PARK_HOLES||[],{year:DG_LC_LAST.report?.year,engine:DG_LC_ENGINE_VERSION});const old=drafts.find(r=>r.id==="surface-"+fresh.owner+"-x"&&r.owner===fresh.owner&&r.fingerprint===fp);if(old)local={...old,id:fresh.id,parkId:fresh.parkId,parkName:fresh.parkName};}}catch(e){}
@@ -39,7 +40,7 @@ async function dgSensLoadRecord(){
  const chosen=local&&(!remote||String(local.modifiedAt||"")>String(remote.modifiedAt||""))?local:remote||local||fresh;
  const safe=chosen.owner===fresh.owner&&String(chosen.parkId)===String(fresh.parkId)?chosen:fresh;
  const sens={...fresh.sens};for(const k of DG_SENS_CLASSES){const n=Number(safe.sens?.[k]);sens[k]=Number.isFinite(n)?Math.max(0,Math.min(100,n)):50;}
- return{...fresh,...safe,serverRevision:revision,sens,corrections:safe.corrections&&typeof safe.corrections==="object"&&!Array.isArray(safe.corrections)?safe.corrections:{},features:Array.isArray(safe.features)?safe.features.filter(f=>window.DG_SURFACE_REVIEW.types[f.type]&&window.DG_SURFACE_REVIEW.validRing(f.ring)):[]};
+ return{...fresh,...safe,serverRevision:revision,sens,corrections:safe.corrections&&typeof safe.corrections==="object"&&!Array.isArray(safe.corrections)?safe.corrections:{},features:Array.isArray(safe.features)?safe.features.filter(f=>window.DG_SURFACE_REVIEW.validFeature(f)):[]};
 }
 function dgSensSave(){
  if(!DG_SENS.record)return Promise.resolve(false);
@@ -53,18 +54,17 @@ function dgSensDirty(){DG_SENS.visualVersion++;DG_SENS.editing=true;if(DG_SENS.r
 function dgSensPredict(sp){return window.DG_LC_VALIDATE.spectralPredict(sp,DG_SENS.record?.sens);}
 function dgSensCellKey(c){return c.row+":"+c.col;}
 function dgSensEffective(c){
- const rec=DG_SENS.record,key=dgSensCellKey(c),dec=rec?.corrections?.[key];
  const original=c.rasterClassKey||c.classKey;
- if(dec&&(dec.method!=="sensitivity"||!DG_SENS.editing))return window.DG_SURFACE_REVIEW.types[dec.to]?dec.to:original;
- if(!DG_SENS.editing)return original;
- if(Number(c.areaM2)<window.DG_LC_VALIDATE.defaults.edgeAreaM2)return original;
- const pred=dgSensPredict(rec?.profile?.cells?.[key]);
- return DG_SENS_CLASSES.includes(pred)?pred:original;
+ if(DG_SENS.rawView)return original;
+ const dec=DG_SENS.record?.corrections?.[dgSensCellKey(c)];
+ // Preserve previously accepted decisions; new edits use only explicit manual evidence.
+ if(dec&&(dec.method==="visual-cell"||!DG_SENS.editing))return window.DG_SURFACE_REVIEW.types[dec.to]?dec.to:original;
+ return original;
 }
 function dgSensCandidates(cls){return(dgSensCells()||[]).filter(c=>dgSensEffective(c)===cls&&c.classKey!==cls).map(cell=>({cell,pred:cls,sp:DG_SENS.record?.profile?.cells?.[dgSensCellKey(cell)]}));}
 async function dgSensMount(hostId){
  const host=document.getElementById(hostId||"lcSens"),cells=dgSensCells();if(!host||!cells?.length)return;
- const epoch=++DG_SENS.epoch;DG_SENS.status="";dgSensGuard(true);
+ dgSensBrushStop();DG_SENS.rawView=false;const epoch=++DG_SENS.epoch;DG_SENS.status="";dgSensGuard(true);
  const rec=await dgSensLoadRecord();if(epoch!==DG_SENS.epoch)return;
  const R=window.DG_SURFACE_REVIEW;
  const fingerprint=await R.fingerprint(cells,PARK_POLY,PARK_HOLES||[],{year:DG_LC_LAST.report?.year,engine:DG_LC_ENGINE_VERSION});if(epoch!==DG_SENS.epoch)return;
@@ -114,7 +114,7 @@ async function dgSensVisualResult(parts=dgSensParts()){
  const epsg=DG_SENS.epsg,park=DG_SENS.parkGeometry,memo={key,geometry:DG_SENS.geometry};
  DG_SENS.visualMemo=memo;
  const accepted=DG_SENS.record?.acceptedResult;
- if(!DG_SENS.editing&&!DG_SENS.record?.draftDirty&&accepted?.displayMethod?.version===4&&accepted.features?.length&&accepted.displayFeatures?.length===accepted.features.length){
+ if(!DG_SENS.rawView&&!DG_SENS.editing&&!DG_SENS.record?.draftDirty&&accepted?.displayMethod?.version===4&&accepted.features?.length&&accepted.displayFeatures?.length===accepted.features.length){
   memo.promise=Promise.resolve({features:accepted.features,displayFeatures:accepted.displayFeatures});return memo.promise;
  }
  memo.promise=(async()=>{
@@ -128,19 +128,16 @@ function dgSensAdjusted(){const a=dgSensAreas();if(!a)return null;const rec=DG_S
 function dgSensRememberSection(el){DG_SENS.sections=DG_SENS.sections||{};DG_SENS.sections[el.id]=el.open;}
 function dgSensRender(){
  const host=document.getElementById("lcSens"),rec=DG_SENS.record;if(!host||!rec)return;
- const scanned=!!rec.profile?.cells,disabled=DG_SENS.busy||DG_SENS.saving||DG_SENS.exporting;
- let h=`<div class="dg-sens-head"><div><div class="dg-png-kicker">🛰 ${esc(_tvs("Yüzey düzenleme"))}</div><p class="dg-sens-hint">${esc(_tvs("Tara, haritada ayarla, doğru gördüğün sonucu kaydet."))}</p></div><button id="dgSensScanBtn" type="button" class="dg-png-btn ${scanned?"ghost":"primary"} sm" onclick="dgSensScan()" ${disabled?"disabled":""}>${DG_SENS.busy?"⏳":scanned?"🔁":"🔍"} ${esc(_tvs(scanned?"Yeniden Tara":"Tara"))}</button></div>`;
- if(scanned){
-  const dates=(rec.profile.scenes||[]).filter(s=>s.usedCells>0).map(s=>s.datetime).sort();
-  h+=`<p class="dg-sens-hint">Sentinel‑2 L2A · ${esc(dates[0]||"—")} – ${esc(dates.at(-1)||"—")} · ${rec.profile.stats?.nProfiled||0}/${dgSensCells().length} ${esc(_tvs("hücre"))} · 10 / 20 m</p>`;
- }
- h+=`<p class="dg-sens-hint">${esc(_tvs("Uydu altlığının tarihi bu tarihlerden farklı olabilir. Küçük bina ve havuzlar için sınır düzeltmesini kullanın."))}</p>`;
+ const disabled=DG_SENS.busy||DG_SENS.saving||DG_SENS.exporting;
+ let h=`<div class="dg-sens-head"><div><div class="dg-png-kicker">🛰 ${esc(_tvs("Yüzey düzenleme"))}</div><p class="dg-sens-hint">${esc(_tvs("ESA WorldCover 2021 · Ham analizi inceleyin, gerekiyorsa fırça veya sınır çizimiyle düzeltin."))}</p></div></div>`;
  h+=`<div class="dg-sens-map-tools"><label for="dgSensBaseSelect">${esc(_tvs("Harita"))}</label><select id="dgSensBaseSelect" onchange="dgSensBase(this.value)">${[["osm","Sokak"],["sat","Uydu"],["topo","Topoğrafik"]].map(([v,t])=>`<option value="${v}" ${DG_SENS.base===v?"selected":""}>${esc(_tvs(t))}</option>`).join("")}</select><button type="button" class="dg-png-btn ghost sm" onclick="dgChooseNewPark()">📍 ${esc(_tvs("Yeni konum"))}</button></div>`;
- for(const k of DG_SENS_CLASSES){const m=dgSensMeta(k);h+=`<div class="dg-sens-row"><button type="button" class="dg-sens-label" onclick="dgSensFocus('${k}')" aria-pressed="${DG_SENS.focus===k}">${m.emoji} ${esc(_tvs(m.tr))}</button><input id="dgSensRange-${k}" type="range" class="dg-sens-slider" min="0" max="100" step="1" value="${rec.sens[k]}" oninput="dgSensSlide('${k}',this.value)" aria-label="${esc(_tvs(m.tr))} ${esc(_tvs("hassasiyet"))}" ${!scanned||disabled?"disabled":""}><output class="dg-sens-count" id="dgSensCnt-${k}"></output></div>`;}
+ h+=`<div class="dg-sens-actions"><button type="button" class="dg-png-btn ghost sm" onclick="dgSensRawView(!DG_SENS.rawView)" aria-pressed="${DG_SENS.rawView}" ${disabled?"disabled":""}>${esc(_tvs(DG_SENS.rawView?"Düzenlemeye dön":"Ham analizi göster"))}</button></div>`;
+ h+=`<p class="dg-sens-hint">${esc(_tvs(DG_SENS.rawView?"Ham kaynak görüntüleniyor; kayıtlı düzeltmeler korunur. Düzenlemek veya kaydetmek için düzenlemeye dönün.":"Ek tarama gerekmez. Ham sınıflar, kullanıcı düzeltmesi olmadan değiştirilmez."))}</p>`;
+ h+=`<div class="dg-sens-map-tools"><label for="dgSensBrushType">${esc(_tvs("Fırça sınıfı"))}</label><select id="dgSensBrushType" onchange="dgSensBrushConfig()">${["hard","green","water","building","pool","bare"].map(k=>`<option value="${k}" ${(DG_SENS.brush?.type||DG_SENS.brushType)===k?"selected":""}>${esc(_tvs(window.DG_SURFACE_REVIEW.types[k].label))}</option>`).join("")}</select><label for="dgSensBrushSize">${esc(_tvs("Fırça çapı"))}</label><select id="dgSensBrushSize" onchange="dgSensBrushConfig()">${[5,10,20,40].map(n=>`<option value="${n}" ${n===(DG_SENS.brush?.diameter||DG_SENS.brushDiameter)?"selected":""}>${n} m</option>`).join("")}</select></div><div class="dg-sens-actions"><button id="dgSensBrushBtn" type="button" class="dg-png-btn blue sm" onclick="dgSensBrushToggle()" aria-pressed="${!!DG_SENS.brush}" ${disabled||DG_SENS.rawView?"disabled":""}>🖌 ${esc(_tvs(DG_SENS.brush?"Fırçayı kapat":"Fırçayı aç"))}</button><button type="button" class="dg-png-btn ghost sm" onclick="dgSensBrushUndo()" ${disabled||DG_SENS.rawView?"disabled":""}>↩ ${esc(_tvs("Son fırça izini geri al"))}</button></div><p class="dg-sens-hint">${esc(_tvs("Fırça açıkken haritada basılı tutup sürükleyin. Bıraktığınızda alan seçilen sınıfa dönüştürülür; ham raster korunur."))}</p>`;
  h+=`<div class="dg-sens-row"><label class="dg-sens-label" for="dgSensOpacity">${esc(_tvs("Renk yoğunluğu"))}</label><input id="dgSensOpacity" type="range" class="dg-sens-slider" min="0" max="100" value="${DG_SENS.opacity}" oninput="dgSensOpacity(this.value)"><output class="dg-sens-count" id="dgSensOpacityValue">%${DG_SENS.opacity}</output></div>`;
- h+=`<p class="dg-sens-hint">${esc(_tvs("Bina ve havuz alanları ayrı hesaplanır."))} · OSM: ${(rec.objectFeatures||[]).length} ${esc(_tvs("nesne sınırı"))}</p><div class="dg-sens-actions"><button type="button" class="dg-png-btn ghost sm" onclick="dgSensFocus(null)">${esc(_tvs("Tüm sınıflar"))}</button><button type="button" class="dg-png-btn ghost sm" onclick="dgSensToggleCand(!DG_SENS.showCand)">${esc(_tvs(DG_SENS.showCand?"Görüntüyü göster":"Renkleri göster"))}</button><button type="button" class="dg-png-btn primary" id="dgSensAcceptBtn" onclick="dgSensAccept()" ${disabled?"disabled":""}>💾 ${esc(_tvs("Kabul et ve kaydet"))}</button></div><div id="dgSensSummary" class="dg-sens-adj"></div><p id="dgSensStatus" class="dg-sens-hint" role="status"></p>`;
+ h+=`<p class="dg-sens-hint">${esc(_tvs("Bina ve havuz alanları ayrı hesaplanır."))} · OSM: ${(rec.objectFeatures||[]).length} ${esc(_tvs("nesne sınırı"))}</p><div class="dg-sens-actions"><button type="button" class="dg-png-btn ghost sm" onclick="dgSensFocus(null)">${esc(_tvs("Tüm sınıflar"))}</button><button type="button" class="dg-png-btn ghost sm" onclick="dgSensToggleCand(!DG_SENS.showCand)">${esc(_tvs(DG_SENS.showCand?"Görüntüyü göster":"Renkleri göster"))}</button><button type="button" class="dg-png-btn primary" id="dgSensAcceptBtn" onclick="dgSensAccept()" ${disabled||DG_SENS.rawView||DG_SENS.brush?"disabled":""}>💾 ${esc(_tvs("Kabul et ve kaydet"))}</button></div><div id="dgSensSummary" class="dg-sens-adj"></div><p id="dgSensStatus" class="dg-sens-hint" role="status"></p>`;
  h+=`<details id="dgSensBoundaryDetails" ${DG_SENS.sections?.dgSensBoundaryDetails?"open":""} class="dg-sens-details" ontoggle="dgSensRememberSection(this)"><summary>${esc(_tvs("Sınır düzeltme"))}</summary><p class="dg-sens-hint">${esc(_tvs("Sınıfı seç, haritada sınır köşelerine dokun, çizimi tamamla. Çizilen alan park sınırına kırpılır."))}</p><select id="dgSensDrawType" aria-label="${esc(_tvs("Yüzey türü"))}">${["building","pool","hard","water","green","bare"].map(k=>`<option value="${k}">${esc(_tvs(window.DG_SURFACE_REVIEW.types[k].label))}</option>`).join("")}</select><div class="dg-sens-actions"><button type="button" class="dg-png-btn blue sm" onclick="dgSensDrawStart()">✏ ${esc(_tvs("Sınır çiz"))}</button><button type="button" class="dg-png-btn primary sm" onclick="dgSensDrawFinish()">✓ ${esc(_tvs("Çizimi tamamla"))}</button><button type="button" class="dg-png-btn ghost sm" onclick="dgSensDrawBack()">↩ ${esc(_tvs("Son köşeyi sil"))}</button><button type="button" class="dg-png-btn ghost sm" onclick="dgSensDrawCancel()">${esc(_tvs("İptal"))}</button></div><div id="dgSensFeatures">${(rec.features||[]).map((f,i)=>`<div class="dg-sens-feature"><span>${esc(_tvs(window.DG_SURFACE_REVIEW.types[f.type]?.label||f.type))}</span><button type="button" class="dg-png-btn ghost sm" onclick="dgSensRemoveFeature(${i})">↩ ${esc(_tvs("Geri al"))}</button></div>`).join("")}</div></details>`;
- h+=`<details id="dgSensDataDetails" ${DG_SENS.sections?.dgSensDataDetails?"open":""} class="dg-sens-details" ontoggle="dgSensRememberSection(this)"><summary>${esc(_tvs("Veri ve ayarlar"))}</summary><label class="measure-share"><input class="dg-switch" type="checkbox" ${rec.useObjects!==false?"checked":""} onchange="dgSensObjects(this.checked)"> ${esc(_tvs("OSM bina, su ve sert zemin sınırlarını kullan"))}</label><p class="dg-sens-hint">${esc(_tvs("Kaydırıcı eşikleri değiştirir; çözünürlüğü veya doğruluk garantisini artırmaz. Kabul, görsel inceleme kararınızı kaydeder."))}</p><label class="dg-png-label" for="dgSensPeriod">${esc(_tvs("Uydu tarama dönemi"))}</label><select id="dgSensPeriod" onchange="dgSensPeriod(this.value)"><option value="latest" ${rec.period==="latest"?"selected":""}>${esc(_tvs("Güncel görüntüler · son 120 gün"))}</option><option value="ref" ${rec.period==="ref"?"selected":""}>2021</option></select><p class="dg-sens-hint">${esc(_tvs("Tarama, bugün ile 120 gün öncesi arasındaki uygun Sentinel-2 görüntülerini arar. Bulut nedeniyle kullanılan tarihler daha eski olabilir. Altlık haritasının tarihi ve 2021 raster verisi ayrıdır."))}</p><div class="dg-sens-actions"><button type="button" class="dg-png-btn ghost sm" onclick="dgSensModePark()">🌳 ${esc(_tvs("Park seç"))}</button><button type="button" class="dg-png-btn ghost sm" onclick="dgSensModeAnalysis()">🛰 ${esc(_tvs("Analiz"))}</button><button type="button" class="dg-png-btn primary sm" onclick="dgSensExportPng()">🖼️ ${esc(_tvs("Doğrulanmış Harita"))}</button><button type="button" class="dg-png-btn ghost sm" onclick="dgSensExportGeoJson()">📥 GeoJSON</button><button type="button" class="dg-png-btn ghost sm" onclick="dgSensExportCsv()">📥 CSV</button><button type="button" class="dg-png-btn red sm" onclick="dgSensReset()">${esc(_tvs("Kararları sıfırla"))}</button></div></details>`;
+ h+=`<details id="dgSensDataDetails" ${DG_SENS.sections?.dgSensDataDetails?"open":""} class="dg-sens-details" ontoggle="dgSensRememberSection(this)"><summary>${esc(_tvs("Veri ve ayarlar"))}</summary><label class="measure-share"><input class="dg-switch" type="checkbox" ${rec.useObjects!==false?"checked":""} onchange="dgSensObjects(this.checked)"> ${esc(_tvs("OSM bina, su ve sert zemin sınırlarını kullan"))}</label><p class="dg-sens-hint">${esc(_tvs("OSM sınırları isteğe bağlı vektör katmanıdır. Raster sınıflandırması sabit kalır; düzeltmeler kabul edildiğinde ayrıca kaydedilir."))}</p><div class="dg-sens-actions"><button type="button" class="dg-png-btn ghost sm" onclick="dgSensModePark()">🌳 ${esc(_tvs("Park seç"))}</button><button type="button" class="dg-png-btn ghost sm" onclick="dgSensModeAnalysis()">🛰 ${esc(_tvs("Analiz"))}</button><button type="button" class="dg-png-btn primary sm" onclick="dgSensExportPng()">🖼️ ${esc(_tvs("Doğrulanmış Harita"))}</button><button type="button" class="dg-png-btn ghost sm" onclick="dgSensExportGeoJson()">📥 GeoJSON</button><button type="button" class="dg-png-btn ghost sm" onclick="dgSensExportCsv()">📥 CSV</button><button type="button" class="dg-png-btn red sm" onclick="dgSensReset()">${esc(_tvs("Kararları sıfırla"))}</button></div></details>`;
  host.innerHTML=h;dgSensUpdateSummary();dgSensUpdateStatus();
 }
 function dgSensOpacity(value){DG_SENS.opacity=Math.max(0,Math.min(100,Number(value)||0));if(DG_SENS.record){DG_SENS.record.displayOpacity=DG_SENS.opacity;clearTimeout(DG_SENS.saveTimer);DG_SENS.saveTimer=setTimeout(()=>dgSensSave(),900);}const out=document.getElementById("dgSensOpacityValue");if(out)out.textContent="%"+DG_SENS.opacity;for(const p of DG_SENS.displayPaths||[])p.poly.setStyle({fillOpacity:DG_SENS.opacity/100});}
@@ -151,20 +148,6 @@ function dgSensUpdateSummary(){
  const el=document.getElementById("dgSensSummary");if(el)el.textContent=_tvs(DG_SENS.editing?"Önizleme":"Kayıtlı sonuç")+" · "+Object.keys(a).filter(k=>a[k]>0).map(k=>_tvs(window.DG_SURFACE_REVIEW.types[k]?.label||k)+": "+dgSensHa(a[k])+" ha").join(" · ");
 }
 function dgSensUpdateStatus(){const el=document.getElementById("dgSensStatus");if(el)el.textContent=DG_SENS.status||(DG_SENS.mergeBusy?_tvs("Çizim güncelleniyor…"):_tvs(DG_SENS.record?.acceptedAt&&!DG_SENS.editing?"Kayıtlı sonuç korunuyor. Kaydırıcıyı değiştirerek yeni önizleme yapabilirsiniz.":"Önizleme henüz hesap kaydına yazılmadı."));}
-async function dgSensScan(){
- if(DG_SENS.busy||DG_SENS.saving||!DG_SENS.record)return;
- const rec=DG_SENS.record,epoch=DG_SENS.epoch;DG_SENS.busy=true;dgSensRender();
- try{
-  const profile=await window.DG_LC_S2.profile(dgSensCells(),PARK_POLY,{year:DG_LC_LAST.report?.year||2021,mode:rec.period});
-  if(epoch!==DG_SENS.epoch||DG_SENS.record!==rec)return;
-  rec.profile=profile;rec.scannedAt=new Date().toISOString();dgSensDirty();DG_SENS.status=_tvs("Tarama tamamlandı. Renkleri haritada kontrol edin.");
-  rec.objectFeatures=null;rec.objectVersion="footprints-v2";
-  await dgSensRepartition();
-  await dgSensSave();
- }catch(e){if(epoch===DG_SENS.epoch){DG_SENS.status=_tvs("Tarama başarısız: ")+String(e.message||e);toast(DG_SENS.status,"err");}}
- finally{if(epoch===DG_SENS.epoch){DG_SENS.busy=false;dgSensRender();dgSensRefreshLayer();}}
-}
-function dgSensPeriod(v){if(DG_SENS.busy||DG_SENS.saving)return;DG_SENS.record.period=v==="ref"?"ref":"latest";dgSensScan();}
 function dgSensSlide(cls,val){
  const rec=DG_SENS.record;if(!rec||DG_SENS.busy||DG_SENS.saving||!DG_SENS_CLASSES.includes(cls))return;
  const n=Number(val);rec.sens[cls]=Number.isFinite(n)?Math.max(0,Math.min(100,n)):50;
@@ -191,7 +174,7 @@ async function dgSensRefreshLayer(){
    for(const f of DG_SENS.displayFeatures){const cls=f.properties.class;
     const rings=f.geometry.coordinates.map(poly=>poly.map(r=>r.map(p=>[p[1],p[0]])));
     const poly=L.polygon(rings,{renderer:DG_SENS.renderer,stroke:false,weight:0,smoothFactor:1,bubblingMouseEvents:false,fillColor:DG_SENS_COLORS[cls]||DG_SENS_COLORS.other});
-    poly.on("click",ev=>{const oe=ev.originalEvent||ev;if(oe&&L.DomEvent?.stopPropagation)L.DomEvent.stopPropagation(oe);if(DG_SENS.draw){dgSensDrawPoint(ev);return;}const q=dgLcUtmForward(ev.latlng.lat,ev.latlng.lng,DG_SENS.epsg);const part=dgSensParts().find(p=>{const b=p.displayBounds||(p.displayBounds=dgSurfaceBounds(p.geom));return q.x>=b[0]&&q.x<=b[2]&&q.y>=b[1]&&q.y<=b[3]&&dgGridPointDistance([q.x,q.y],p.geom)>=0;});if(part)dgSensPopup(part.key);});
+    poly.on("click",ev=>{const oe=ev.originalEvent||ev;if(oe&&L.DomEvent?.stopPropagation)L.DomEvent.stopPropagation(oe);if(DG_SENS.brush)return;if(DG_SENS.draw){dgSensDrawPoint(ev);return;}const q=dgLcUtmForward(ev.latlng.lat,ev.latlng.lng,DG_SENS.epsg);const part=dgSensParts().find(p=>{const b=p.displayBounds||(p.displayBounds=dgSurfaceBounds(p.geom));return q.x>=b[0]&&q.x<=b[2]&&q.y>=b[1]&&q.y<=b[3]&&dgGridPointDistance([q.x,q.y],p.geom)>=0;});if(part)dgSensPopup(part.key);});
     DG_SENS.displayPaths.push({poly,cls});
    }
   }catch(e){if(epoch===DG_SENS.epoch){DG_SENS.status=String(e.message||e);dgSensUpdateStatus();}}
@@ -208,7 +191,7 @@ async function dgSensRepartition(){
  const rec=DG_SENS.record;if(!rec)return;const epoch=DG_SENS.epoch;
  DG_SENS.busy=true;DG_SENS.geometry=null;dgSensRender();
  try{
-  const data=await dgSurfacePrepare({cells:dgSensCells(),outer:PARK_POLY,holes:PARK_HOLES||[],epsg:DG_SENS.epsg,objects:rec.objectFeatures||null,elements:window.DG_SURFACE_OSM?.boundary===JSON.stringify(PARK_POLY)?window.DG_SURFACE_OSM.elements:[],features:rec.features||[],useObjects:rec.useObjects});
+  const data=await dgSurfacePrepare({cells:dgSensCells(),outer:PARK_POLY,holes:PARK_HOLES||[],epsg:DG_SENS.epsg,objects:rec.objectFeatures||null,elements:window.DG_SURFACE_OSM?.boundary===JSON.stringify(PARK_POLY)?window.DG_SURFACE_OSM.elements:[],features:DG_SENS.rawView?[]:rec.features||[],useObjects:!DG_SENS.rawView&&rec.useObjects});
   if(epoch!==DG_SENS.epoch)return;
   if(!rec.objectFeatures){rec.objectFeatures=data.objects;rec.objectVersion="footprints-v2";}
   DG_SENS.partitionVersion=(DG_SENS.partitionVersion||0)+1;DG_SENS.parkGeometry=data.park;DG_SENS.geometry=data.geometries;
@@ -229,14 +212,13 @@ function dgSensPopup(key){
  html+="</div></div>";L.popup({maxWidth:280}).setLatLng([c.center.lat,c.center.lon]).setContent(html).openOn(map);
 }
 function dgSensDecide(key,toCls){
- const c=dgSensCells()?.find(c=>dgSensCellKey(c)===key);if(!c||!window.DG_SURFACE_REVIEW.types[toCls]||DG_SENS.busy||DG_SENS.saving)return;
+ const c=dgSensCells()?.find(c=>dgSensCellKey(c)===key);if(DG_SENS.rawView||!c||!window.DG_SURFACE_REVIEW.types[toCls]||DG_SENS.busy||DG_SENS.saving)return;
  DG_SENS.record.corrections[key]={from:c.classKey,to:toCls,method:"visual-cell",ts:new Date().toISOString()};dgSensDirty();map.closePopup();dgSensRefreshLayer();dgSensUpdateSummary();dgSensUpdateStatus();dgSensSave();
 }
-function dgSensUndo(key){if(!DG_SENS.record||DG_SENS.busy||DG_SENS.saving)return;delete DG_SENS.record.corrections[key];dgSensDirty();map.closePopup();dgSensRefreshLayer();dgSensUpdateSummary();dgSensSave();}
+function dgSensUndo(key){if(DG_SENS.rawView||!DG_SENS.record||DG_SENS.busy||DG_SENS.saving)return;delete DG_SENS.record.corrections[key];dgSensDirty();map.closePopup();dgSensRefreshLayer();dgSensUpdateSummary();dgSensSave();}
 function dgSensBulk(cls){for(const x of dgSensCandidates(cls))dgSensDecide(dgSensCellKey(x.cell),cls);}
 async function dgSensAccept(){
- const rec=DG_SENS.record;if(!rec||DG_SENS.saving||DG_SENS.busy||!DG_SENS.geometry||DG_SENS.draw)return;
- if(!rec.profile&&!dgSensFeatures().length&&!Object.keys(rec.corrections).length){toast(_tvs("Önce tarama veya sınır düzeltmesi yapın."),"warn");return;}
+ const rec=DG_SENS.record;if(!rec||DG_SENS.rawView||DG_SENS.brush||DG_SENS.saving||DG_SENS.busy||!DG_SENS.geometry||DG_SENS.draw)return;
  const epoch=DG_SENS.epoch,snapshot=JSON.parse(JSON.stringify(rec));
  // Keep immutable geometry identities so acceptance cannot invalidate the partition cache.
  snapshot.features=rec.features;snapshot.objectFeatures=rec.objectFeatures;
@@ -255,8 +237,8 @@ async function dgSensAccept(){
  }catch(e){if(epoch===DG_SENS.epoch){const local=await dgSensSave();DG_SENS.status=_tvs("Hesaba kaydedilemedi: ")+String(e.message||e)+(local?" · "+_tvs("Taslak bu cihazda saklandı."):"");toast(DG_SENS.status,"err");}}
  finally{if(epoch===DG_SENS.epoch){DG_SENS.saving=false;dgSensRender();dgSensRefreshLayer();}}
 }
-function dgSensReset(){if(DG_SENS.busy||DG_SENS.saving||!confirm(_tvs("Tüm kararlar silinsin mi? (Tarama profili kalır)")))return;DG_SENS.record.corrections={};DG_SENS.record.features=[];dgSensDirty();dgSensRepartition().then(dgSensSave);}
-function dgSensDrawStart(){if(DG_SENS.busy||DG_SENS.saving)return;map.invalidateSize({pan:false});dgSensDrawCancel();DG_SENS.draw={type:document.getElementById("dgSensDrawType").value,ring:[]};DG_SENS.status=_tvs("Haritada sınır köşelerine dokunun; ardından çizimi tamamlayın.");dgSensUpdateStatus();dgSensGuard(true);map.on("click",dgSensDrawPoint);}
+function dgSensReset(){if(DG_SENS.rawView||DG_SENS.busy||DG_SENS.saving||!confirm(_tvs("Tüm kullanıcı düzeltmeleri silinsin mi? Ham raster korunur.")))return;DG_SENS.record.corrections={};DG_SENS.record.features=[];dgSensDirty();dgSensRepartition().then(dgSensSave);}
+function dgSensDrawStart(){if(DG_SENS.rawView||DG_SENS.busy||DG_SENS.saving)return;dgSensBrushStop();map.invalidateSize({pan:false});dgSensDrawCancel();DG_SENS.draw={type:document.getElementById("dgSensDrawType").value,ring:[]};DG_SENS.status=_tvs("Haritada sınır köşelerine dokunun; ardından çizimi tamamlayın.");dgSensUpdateStatus();dgSensGuard(true);map.on("click",dgSensDrawPoint);}
 function dgSensDrawPoint(ev){if(!DG_SENS.draw||!ev.latlng)return;const p=[ev.latlng.lng,ev.latlng.lat];if(DG_SENS.draw.ring.length>=300)return;DG_SENS.draw.ring.push(p);dgSensDrawRender();}
 function dgSensDrawRender(){if(DG_SENS.drawLayer)map.removeLayer(DG_SENS.drawLayer);DG_SENS.drawLayer=L.layerGroup().addTo(map);const pts=DG_SENS.draw.ring.map(p=>[p[1],p[0]]);if(pts.length>1)L.polyline(pts,{color:DG_SENS_COLORS[DG_SENS.draw.type],dashArray:"4,4",interactive:false}).addTo(DG_SENS.drawLayer);for(const p of pts)L.circleMarker(p,{radius:5,color:DG_SENS_COLORS[DG_SENS.draw.type],interactive:false}).addTo(DG_SENS.drawLayer);}
 function dgSensDrawBack(){if(DG_SENS.draw){DG_SENS.draw.ring.pop();dgSensDrawRender();}}
@@ -268,11 +250,11 @@ function dgSensDrawFinish(){
  if(dgSurfaceArea(geom)<.1){toast(_tvs("Çizim park sınırının dışında veya çok küçük."),"warn");return;}
  DG_SENS.record.features.push({...d,method:"visual-boundary",ts:new Date().toISOString()});dgSensDirty();dgSensDrawCancel();dgSensRepartition().then(dgSensSave);
 }
-function dgSensRemoveFeature(i){if(DG_SENS.busy||DG_SENS.saving)return;DG_SENS.record.features.splice(i,1);dgSensDirty();dgSensRepartition().then(dgSensSave);}
+function dgSensRemoveFeature(i){if(DG_SENS.rawView||DG_SENS.busy||DG_SENS.saving)return;DG_SENS.record.features.splice(i,1);dgSensDirty();dgSensRepartition().then(dgSensSave);}
 function dgSensExportGeoJson(){
  const rec=DG_SENS.record;if(!rec||!DG_SENS.geometry||DG_SENS.busy)return;
  const parts=window.DG_SURFACE_REVIEW.resolved(dgSensCells(),dgSensEffective,DG_SENS.geometry,dgSensFeatures(rec),DG_SENS.epsg,DG_SENS.parkGeometry);
- const features=parts.map(p=>({type:"Feature",properties:{row:p.cell.row,column:p.cell.col,original_class:p.cell.classKey,review_class:p.type,group:p.group,area_m2:p.areaM2,method:p.method,source_fingerprint:rec.fingerprint,accepted_at:rec.acceptedAt||null,view:DG_SENS.editing?"preview":"accepted"},geometry:{type:"MultiPolygon",coordinates:dgSurfaceUnproject(p.geom,DG_SENS.epsg)}}));
+ const features=parts.map(p=>({type:"Feature",properties:{row:p.cell.row,column:p.cell.col,original_class:p.cell.classKey,review_class:p.type,group:p.group,area_m2:p.areaM2,method:p.method,source_fingerprint:rec.fingerprint,accepted_at:rec.acceptedAt||null,view:DG_SENS.rawView?"raw":DG_SENS.editing?"preview":"accepted"},geometry:{type:"MultiPolygon",coordinates:dgSurfaceUnproject(p.geom,DG_SENS.epsg)}}));
  downloadBlob("dendrogeo_surface_"+rec.parkId+".geojson","application/geo+json",JSON.stringify({type:"FeatureCollection",features}));
 }
 /* ── 0058: DOĞRULANMIŞ HARİTA PNG (infografik çıktı) ────────────────
@@ -376,8 +358,8 @@ async function dgSensRenderPng(layers={park:true,surface:true},waypoints=[]){
   g.fillText("kaynak veride değişmeden korunur.",X0,y+104,CW-X0-40);
   g.fillStyle=GREEN;g.fillRect(0,CH-70,CW,70);
   g.fillStyle="#cfe3d3";g.font="19px Arial";
-  g.fillText("Görsel genelleştirme; alanlar kabul edilmiş kesin geometriden hesaplanır.",40,CH-54,CW-80);
-  g.fillText("Raster: ESA WorldCover 2021 v200 (CC BY 4.0) · Uydu: Sentinel-2 "+String((rec.profile&&rec.profile.scenes&&rec.profile.scenes[0]&&rec.profile.scenes[0].datetime)||"—").slice(0,10)+" · parmak izi "+String(rec.fingerprint||"").slice(0,8)+" · CC BY-NC 4.0",40,CH-26,CW-80);
+  g.fillText("Kesin hücre geometrisi; kullanıcı düzeltmeleri ayrıca kaydedilir.",40,CH-54,CW-80);
+  g.fillText("Raster: ESA WorldCover 2021 v200 (CC BY 4.0) · parmak izi "+String(rec.fingerprint||"").slice(0,8)+" · CC BY-NC 4.0",40,CH-26,CW-80);
   cv.toBlob(b=>{
     if(!b){toast(_tvs("PNG üretilemedi."),"err","🖼️");return;}
     const u=URL.createObjectURL(b),a=document.createElement("a");
@@ -389,9 +371,9 @@ async function dgSensRenderPng(layers={park:true,surface:true},waypoints=[]){
   finally{if(epoch===DG_SENS.epoch){DG_SENS.exporting=false;dgSensRender();}}
 }
 
-function dgSensExportCsv(){const a=dgSensAreas();if(!a)return;const rec=DG_SENS.record;downloadBlob("dendrogeo_surface_"+rec.parkId+".csv","text/csv;charset=utf-8","\uFEFFclass,area_m2,area_ha,view,source_fingerprint\n"+Object.keys(a).map(k=>[k,a[k],a[k]/10000,DG_SENS.editing?"preview":"accepted",rec.fingerprint].join(",")).join("\n"));}
+function dgSensExportCsv(){const a=dgSensAreas();if(!a)return;const rec=DG_SENS.record;downloadBlob("dendrogeo_surface_"+rec.parkId+".csv","text/csv;charset=utf-8","\uFEFFclass,area_m2,area_ha,view,source_fingerprint\n"+Object.keys(a).map(k=>[k,a[k],a[k]/10000,DG_SENS.rawView?"raw":DG_SENS.editing?"preview":"accepted",rec.fingerprint].join(",")).join("\n"));}
 function dgSensCleanup(){
- ++DG_SENS.epoch;dgSurfaceCancelJobs();clearTimeout(DG_SENS.debounce);clearTimeout(DG_SENS.saveTimer);DG_SENS.debounce=null;DG_SENS.resizeObserver?.disconnect();DG_SENS.resizeObserver=null;
+ dgSensBrushStop();DG_SENS.rawView=false;++DG_SENS.epoch;dgSurfaceCancelJobs();clearTimeout(DG_SENS.debounce);clearTimeout(DG_SENS.saveTimer);DG_SENS.debounce=null;DG_SENS.resizeObserver?.disconnect();DG_SENS.resizeObserver=null;
  if(typeof map!=="undefined"&&map){if(DG_SENS.layer)map.removeLayer(DG_SENS.layer);if(DG_SENS.renderer)map.removeLayer(DG_SENS.renderer);DG_SENS.renderer=null;DG_SENS.pathCache=null;dgSensDrawCancel();map.off("moveend",dgSensRefreshLayer);}
  const host=document.getElementById("lcSens");if(host){host.style.display="none";host.innerHTML="";if(DG_SENS.hostParent?.isConnected)DG_SENS.hostParent.insertBefore(host,DG_SENS.hostNext?.parentNode===DG_SENS.hostParent?DG_SENS.hostNext:null);else host.remove();}
  document.getElementById("map")?.classList.remove("surface-review-map");
@@ -422,12 +404,77 @@ function dgSensAreaBars(areas){
 function dgSensRenderCurrentReport(areas){
  const host=document.getElementById("landCoverReport");if(!host)return;
  if(!DG_SENS.baselineReport)DG_SENS.baselineReport=host.innerHTML;
- host.innerHTML='<b>'+esc(_tvs(DG_SENS.editing?"Güncel yüzey önizlemesi":"Kayıtlı analiz sonucu"))+'</b>'+dgSensAreaBars(areas)+'<p class="dg-sens-hint">'+esc(_tvs(DG_SENS.editing?"Kaydırıcılar ve sınır düzeltmeleri bu özete yansır. Yayın için kabul edip kaydedin.":"Yayın isteğinde bu kayıt rapora aktarılır. Kaydedilmemiş önizleme rapora girmez."))+'</p><details class="dg-sens-details"><summary>'+esc(_tvs("Ham 2021 raster sonucu"))+'</summary>'+DG_SENS.baselineReport+'</details>';
+ host.innerHTML='<b>'+esc(_tvs(DG_SENS.rawView?"Ham 2021 raster sonucu":DG_SENS.editing?"Güncel yüzey önizlemesi":"Kayıtlı analiz sonucu"))+'</b>'+dgSensAreaBars(areas)+'<p class="dg-sens-hint">'+esc(_tvs(DG_SENS.editing?"Fırça ve sınır düzeltmeleri bu özete yansır. Yayın için kabul edip kaydedin.":"Yayın isteğinde bu kayıt rapora aktarılır. Kaydedilmemiş önizleme rapora girmez."))+'</p><details class="dg-sens-details"><summary>'+esc(_tvs("Ham 2021 raster sonucu"))+'</summary>'+DG_SENS.baselineReport+'</details>';
 }
 function dgSensRenderAccepted(){
  const r=DG_SENS.record?.acceptedResult,host=document.getElementById("landCoverReport");if(!r||!host)return;
  host.innerHTML='<b>'+esc(_tvs("Kayıtlı analiz sonucu"))+'</b><p class="dg-meta">'+esc(new Date(r.acceptedAt).toLocaleString())+'</p>'+dgSensAreaBars(r.areas)+'<p class="dg-sens-hint">'+esc(_tvs("Yayın isteğinde bu kayıt rapora aktarılır. Kaydedilmemiş önizleme rapora girmez."))+'</p>';
 }
 
-function dgSensFeatures(rec=DG_SENS.record){return[...(rec?.useObjects!==false?rec?.objectFeatures||[]:[]),...(rec?.features||[])];}
-function dgSensObjects(on){if(!DG_SENS.record||DG_SENS.busy||DG_SENS.saving)return;DG_SENS.record.useObjects=on;dgSensDirty();dgSensRepartition().then(dgSensSave);}
+function dgSensFeatures(rec=DG_SENS.record){if(DG_SENS.rawView)return [];return[...(rec?.useObjects!==false?rec?.objectFeatures||[]:[]),...(rec?.features||[])];}
+function dgSensObjects(on){if(DG_SENS.rawView||!DG_SENS.record||DG_SENS.busy||DG_SENS.saving)return;DG_SENS.record.useObjects=on;dgSensDirty();dgSensRepartition().then(dgSensSave);}
+
+async function dgSensRawView(on){
+ if(!DG_SENS.record||DG_SENS.busy||DG_SENS.saving||DG_SENS.exporting)return;
+ dgSensBrushStop();dgSensDrawCancel();DG_SENS.rawView=!!on;
+ DG_SENS.visualVersion++;DG_SENS.focus=null;DG_SENS.showCand=true;
+ await dgSensRepartition();dgSensUpdateSummary();
+}
+function dgSensBrushStop(){
+ const b=DG_SENS.brush;if(!b)return;DG_SENS.brush=null;
+ for(const [event,fn] of b.handlers)b.container.removeEventListener(event,fn,true);
+ try{if(b.stroke)b.container.releasePointerCapture(b.stroke.pointerId);}catch(e){}
+ if(b.preview)map.removeLayer(b.preview);
+ b.container.style.touchAction=b.touchAction;b.container.style.cursor=b.cursor;
+ if(b.dragging)map.dragging.enable();
+ if(b.zoom)map.doubleClickZoom.enable();
+}
+function dgSensBrushToggle(){
+ if(DG_SENS.brush){dgSensBrushStop();dgSensRender();return;}
+ if(!DG_SENS.record||DG_SENS.rawView||DG_SENS.busy||DG_SENS.saving||DG_SENS.exporting)return;
+ dgSensDrawCancel();map.closePopup();
+ const container=map.getContainer(),type=document.getElementById('dgSensBrushType').value;
+ const diameter=Number(document.getElementById('dgSensBrushSize').value);
+ if(!window.DG_SURFACE_REVIEW.types[type]||![5,10,20,40].includes(diameter))return;
+ DG_SENS.brushType=type;DG_SENS.brushDiameter=diameter;
+ const b=DG_SENS.brush={container,type,diameter,epoch:DG_SENS.epoch,record:DG_SENS.record,dragging:map.dragging.enabled(),zoom:map.doubleClickZoom.enabled(),touchAction:container.style.touchAction,cursor:container.style.cursor,handlers:[]};
+ map.dragging.disable();map.doubleClickZoom.disable();container.style.touchAction='none';container.style.cursor='crosshair';
+ const point=e=>{const p=map.mouseEventToLatLng(e);return[p.lat,p.lng];};
+ const stop=e=>{e.preventDefault();e.stopImmediatePropagation();};
+ const add=e=>{
+  const p=point(e),last=b.stroke.points.at(-1),q=dgLcUtmForward(p[0],p[1],DG_SENS.epsg);
+  if(last){const prev=dgLcUtmForward(last[0],last[1],DG_SENS.epsg);if(Math.hypot(q.x-prev.x,q.y-prev.y)<b.diameter/6)return;}
+  if(b.stroke.points.length<300)b.stroke.points.push(p);
+  if(b.preview)map.removeLayer(b.preview);b.preview=L.layerGroup().addTo(map);
+  if(b.stroke.points.length>1)L.polyline(b.stroke.points,{color:DG_SENS_COLORS[b.type],weight:4,interactive:false}).addTo(b.preview);
+  L.circle(p,{radius:b.diameter/2,color:DG_SENS_COLORS[b.type],fillOpacity:.2,interactive:false}).addTo(b.preview);
+ };
+ const down=e=>{if(e.target?.closest?.('.leaflet-control')||e.button!==0||!e.isPrimary||DG_SENS.busy||DG_SENS.saving||b.stroke)return;stop(e);b.stroke={pointerId:e.pointerId,points:[]};container.setPointerCapture(e.pointerId);add(e);};
+ const move=e=>{if(b.stroke?.pointerId!==e.pointerId)return;stop(e);add(e);};
+ const finish=e=>{if(b.stroke?.pointerId!==e.pointerId)return;stop(e);if(e.type==='pointerup')add(e);const points=b.stroke.points;b.stroke=null;if(b.preview)map.removeLayer(b.preview);b.preview=null;try{container.releasePointerCapture(e.pointerId);}catch(err){}
+  if(e.type==='pointerup'&&b.epoch===DG_SENS.epoch&&b.record===DG_SENS.record)dgSensBrushCommit(points,b.type,b.diameter).catch(err=>{DG_SENS.status=String(err.message||err);dgSensUpdateStatus();});
+ };
+ for(const [event,fn] of [['pointerdown',down],['pointermove',move],['pointerup',finish],['pointercancel',finish],['lostpointercapture',finish]]){container.addEventListener(event,fn,true);b.handlers.push([event,fn]);}
+ dgSensRender();
+}
+async function dgSensBrushCommit(points,type,diameter){
+ if(!points.length||points.length>300||!points.every(p=>Array.isArray(p)&&p.length===2&&p.every(Number.isFinite)&&Math.abs(p[0])<=90&&Math.abs(p[1])<=180)||!window.DG_SURFACE_REVIEW.types[type]||![5,10,20,40].includes(diameter)||!DG_SENS.record||DG_SENS.rawView||DG_SENS.busy||DG_SENS.saving)return;
+ const rec=DG_SENS.record;
+ // A continuous metric stroke includes the space between pointer events.
+ const masks=dgGridLineMask({pts:points,w:diameter/2},DG_SENS.epsg);
+ const geom=window.polygonClipping.intersection(window.polygonClipping.union(...masks),DG_SENS.parkGeometry);
+ if(!geom.length)return;
+ rec.features.push({type,method:'visual-brush',diameter_m:diameter,geometry:{type:'MultiPolygon',coordinates:dgSurfaceUnproject(geom,DG_SENS.epsg)},ts:new Date().toISOString()});
+ dgSensDirty();await dgSensRepartition();if(DG_SENS.record===rec)await dgSensSave();
+}
+function dgSensBrushUndo(){
+ if(!DG_SENS.record||DG_SENS.rawView||DG_SENS.busy||DG_SENS.saving)return;
+ const i=DG_SENS.record.features.findLastIndex(f=>f.method==='visual-brush');if(i>=0)dgSensRemoveFeature(i);
+}
+
+function dgSensBrushConfig(){
+ const type=document.getElementById('dgSensBrushType')?.value,size=Number(document.getElementById('dgSensBrushSize')?.value);
+ if(window.DG_SURFACE_REVIEW.types[type])DG_SENS.brushType=type;
+ if([5,10,20,40].includes(size))DG_SENS.brushDiameter=size;
+ dgSensBrushStop();dgSensRender();
+}
