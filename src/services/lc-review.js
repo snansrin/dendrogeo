@@ -239,3 +239,21 @@ async function dgSurfaceGrid(data){
  }
  return{cells,epsg,size,clearance,x0:x0+origin[0],y0:y0+origin[1],areaM2:dgSurfaceArea(safe)};
 }
+
+// Reviewed brush footprints survive account/draft reloads, with bounded numeric geometry.
+function dgSurfaceValidFeature(f){
+ if(!DG_SURFACE_TYPES[f?.type])return false;
+ if(f.ring)return dgSurfaceValidRing(f.ring);
+ const g=f.geometry;if(g?.type!=="MultiPolygon"||!Array.isArray(g.coordinates)||!g.coordinates.length||g.coordinates.length>1000)return false;
+ let points=0;
+ for(const poly of g.coordinates){
+  if(!Array.isArray(poly)||!poly.length)return false;
+  for(const ring of poly){
+   if(!Array.isArray(ring)||ring.length<4||(points+=ring.length)>20000)return false;
+   if(ring.some(p=>!Array.isArray(p)||p.length!==2||!p.every(Number.isFinite)||Math.abs(p[0])>180||Math.abs(p[1])>90))return false;
+   if(ring[0][0]!==ring.at(-1)[0]||ring[0][1]!==ring.at(-1)[1])return false;
+  }
+ }
+ return true;
+}
+window.DG_SURFACE_REVIEW.validFeature=dgSurfaceValidFeature;

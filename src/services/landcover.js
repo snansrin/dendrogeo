@@ -25,18 +25,8 @@ async function dgLcAnalyze(params){
   const bbox=dgLcBboxFromGeometry(outer,holes);
   const geom={outer,holes};
 
-  /* BİRİNCİL ve çapraz kaynak bağımsız ağ istekleri: aynı anda başlatılır.
-   * Birincil kaynak QA'dan geçmeden sonuç yayınlanmaz; çapraz kaynak yalnız
-   * bağımsız uzlaşma göstergesi üretir. */
-  const osmPromise=Promise.allSettled([dgLcFetchWaterPolygons(bbox),dgLcFetchRoadFeatures(bbox)]);
+  // A single immutable ESA WorldCover baseline. Other sources never relabel it.
   const primPromise=dgLcAnalyzeSource(DG_LC_SOURCES.primary,bbox,geom);
-  const crossPromise=dgLcAnalyzeSource(DG_LC_SOURCES.cross,bbox,geom)
-    .catch(err=>{
-      const msg=String(err&&err.message||err);
-      console.warn("DENDROGEO · çapraz doğrulama kaynağı atlandı:",msg);
-      return null;
-    });
-
   const prim=await primPromise;
   const result=prim.result;
   if(!(result.assignedAreaM2>0))throw new Error("Park polygonu ile 10 m raster hücreleri kesişmiyor.");
@@ -46,55 +36,7 @@ async function dgLcAnalyze(params){
     "Kısmi alan zorla yeniden dağıtılmadı."
   );
 
-  /* ÇAPRAZ kaynak: IO LULC. Bu bağımsız kontrol birincil analizle aynı
-   * anda yürütülür; böylece iki raster kaynağının toplam ağ gecikmesi
-   * kullanıcıya seri şekilde yansımaz. Çapraz kaynak başarısız olursa
-   * birincil gerçek sonuç korunur. */
-  const cross=await crossPromise;
-  const crossErr=cross?null:"Çapraz kaynak alınamadı.";
-
-  /* YAPAY SU RAFİNASYONU:
-   * ESA WorldCover 10 m rasterı küçük/yapay havuzları bazen yeşil veya
-   * yapılı sınıfa atayabilir. OSM'deki açıkça water/pool/basin olarak
-   * etiketlenmiş su geometrileri bağımsız vektör kanıtı olarak kullanılır.
-   * Yalnızca hücre merkezi su geometrisinin içindeyse sınıf SU'ya çevrilir.
-   * Rasterın ham kodu/rawCounts değiştirilmez; raporda rafine hücre sayısı
-   * ayrıca belirtilir. OSM verisi yoksa veya alınamazsa raster sonucu aynen
-   * korunur. */
-
-  const osm=await osmPromise;
-  let waterRefined=0;
-  try{
-    if(osm[0].status!=="fulfilled")throw osm[0].reason;
-    const waterRings=osm[0].value;
-    waterRefined=dgLcRefineWater(result,waterRings);
-    if(waterRefined>0){
-      console.info("DENDROGEO · OSM su rafinasyonu:",waterRefined,"10 m hücre SU olarak işaretlendi.");
-    }
-  }catch(err){
-    console.warn("DENDROGEO · OSM su rafinasyonu atlandı:",String(err&&err.message||err));
-  }
-
-  /* ASFALT/SERT YOL RAFİNASYONU:
-   * Raster 10 m sınıfı dar asfalt yolları çevredeki yeşil/çıplak sınıfla
-   * karıştırabilir. OSM'deki gerçek highway geometrisi hücreyle kesişiyorsa
-   * hücre sert olarak işaretlenir. Sabit alan katsayısı uygulanmaz. */
-  let roadRefined=0;
-  try{
-    if(osm[1].status!=="fulfilled")throw osm[1].reason;
-    const roadFeatures=osm[1].value;
-    const roadEpsg=dgLcUtmEpsgForLatLon(
-      Number(outer?.[0]?.[0]?.[0]??40),
-      Number(outer?.[0]?.[0]?.[1]??32)
-    );
-    roadRefined=dgLcRefineHardByOsm(result,roadFeatures,roadEpsg);
-    if(roadRefined>0){
-      console.info("DENDROGEO · OSM yol rafinasyonu:",roadRefined,"10 m hücre SERT olarak işaretlendi.");
-    }
-  }catch(err){
-    console.warn("DENDROGEO · OSM yol rafinasyonu atlandı:",String(err&&err.message||err));
-  }
-
+  const cross=null,crossErr=null,waterRefined=0,roadRefined=0;
   const patches=dgLcDetectPatches(result.cells);
   const agreement=cross?dgLcGroupAgreement(result,cross.result):null;
 
@@ -103,9 +45,9 @@ async function dgLcAnalyze(params){
     crossYear:DG_LC_SOURCES.cross.year,
     resolutionM:DG_LC_PIXEL_M,
     primaryLabel:DG_LC_SOURCES.primary.label,
-    crossLabel:DG_LC_SOURCES.cross.label,
+    crossLabel:null,
     primaryCitation:DG_LC_SOURCES.primary.citation,
-    crossCitation:DG_LC_SOURCES.cross.citation,
+    crossCitation:null,
     parkAreaM2,
     rasterCoverageAreaM2:result.assignedAreaM2,
     classifiedAreaM2:result.classifiedAreaM2,

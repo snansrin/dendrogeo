@@ -656,7 +656,8 @@ describe('entegrasyon zinciri kilitleri (0054 · lc-sens)', () => {
     assert.match(sens, /id:"surface-"\+\(owner\|\|"guest"\)\+"-"\+\(pk\.id\|\|"x"\)/);
     assert.match(sens, /dgSensSave\(\)/);
     assert.match(sens, /loadCampaigns/);
-    assert.match(sens, /rec\.profile=profile/);
+    assert.doesNotMatch(sens, /rec\.profile=profile/);
+    assert.match(sens, /analysisEngine:"esa-raster-manual-v1"/);
   });
 });
 

@@ -24,6 +24,21 @@
 
 /* ---- EN sözlüğü: anahtar = TR dizenin trim'lenmiş hâli ---- */
 const DG_I18N_EN={
+ "Ham analizi göster":"Show raw analysis",
+ "Düzenlemeye dön":"Return to review",
+ "Fırça sınıfı":"Brush class",
+ "Fırça çapı":"Brush diameter",
+ "Fırçayı kapat":"Disable brush",
+ "Fırçayı aç":"Enable brush",
+ "Son fırça izini geri al":"Undo last brush stroke",
+ "ESA WorldCover 2021 · Ham analizi inceleyin, gerekiyorsa fırça veya sınır çizimiyle düzeltin.":"ESA WorldCover 2021 · Inspect the raw analysis and use the brush or boundary tool if corrections are needed.",
+ "Ek tarama gerekmez. Ham sınıflar, kullanıcı düzeltmesi olmadan değiştirilmez.":"No additional scan is required. Raw classes stay unchanged unless you apply corrections.",
+ "Ham kaynak görüntüleniyor; kayıtlı düzeltmeler korunur. Düzenlemek veya kaydetmek için düzenlemeye dönün.":"Showing the raw source; saved corrections are preserved. Return to review to edit or save.",
+ "Fırça açıkken haritada basılı tutup sürükleyin. Bıraktığınızda alan seçilen sınıfa dönüştürülür; ham raster korunur.":"With the brush enabled, press and drag on the map. Release to apply the selected class; the raw raster is preserved.",
+ "OSM sınırları isteğe bağlı vektör katmanıdır. Raster sınıflandırması sabit kalır; düzeltmeler kabul edildiğinde ayrıca kaydedilir.":"OSM boundaries are an optional vector layer. Raster classification stays fixed; accepted corrections are stored separately.",
+ "Tüm kullanıcı düzeltmeleri silinsin mi? Ham raster korunur.":"Delete all user corrections? The raw raster is preserved.",
+ "Fırça ve sınır düzeltmeleri bu özete yansır. Yayın için kabul edip kaydedin.":"Brush and boundary corrections are reflected in this summary. Accept and save for publication.",
+
 "Kayıt silinemedi:":"Could not delete the record:",
 "Sunucu silmeyi doğrulamadı.":"The server did not confirm deletion.",
 "OSM bağlantısı başarısız; parkın olmadığı doğrulanamadı. Yeniden algılamayı deneyin.":"The OSM connection failed; the absence of a park could not be confirmed. Try detecting again.",

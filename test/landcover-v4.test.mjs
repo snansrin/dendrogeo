@@ -637,15 +637,16 @@ describe('v9: sapma düzeltmesi + yapay havuz rafinasyonu + PNG park kıpı', ()
 });
 
 
-test('LULC: yapay su rafinasyonu açıkça bağlı ve ham raster kodları korunuyor', () => {
+test('LULC: tek ESA motoru ham kodları korur, ikincil motor ve OSM sınıflandırması çalışmaz', () => {
   const src = readFileSync(new URL('../src/services/landcover.js', import.meta.url), 'utf8');
   const start = src.indexOf('async function dgLcAnalyze(params)');
   const end = src.indexOf('function downloadLandCoverClassCSV', start);
   assert.ok(start >= 0 && end > start, 'dgLcAnalyze sınırları bulunamadı');
   const body = src.slice(start, end);
   assert.match(body, /const primPromise=dgLcAnalyzeSource\(DG_LC_SOURCES\.primary/);
-  assert.match(body, /dgLcFetchWaterPolygons\(bbox\)/);
-  assert.match(body, /waterRefined=dgLcRefineWater\(result,waterRings\)/);
+  assert.doesNotMatch(body, /dgLcFetchWaterPolygons\(bbox\)/);
+  assert.doesNotMatch(body, /dgLcRefineWater\(result/);
+  assert.doesNotMatch(body, /dgLcAnalyzeSource\(DG_LC_SOURCES\.cross/);
   assert.match(body, /waterRefinedCells:waterRefined/);
   /* Faz 5: ham raster sayaçları dgLcProcessTile içinde → lc-engine.js */
   const engine = readFileSync(new URL('../src/services/lc-engine.js', import.meta.url), 'utf8');

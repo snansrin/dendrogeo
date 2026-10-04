@@ -221,7 +221,7 @@ function dgLcProcessTile(item,href,geometryWgs,source,signal){
         }
       }
       if(runStart>=0){
-        dgLcRunPush(runs,globalRow,runStart,colStart+localW,runCls,meta,analysisEpsg);
+        dgLcRunPush(runs,globalRow,runStart,colStart+localW,runCls,meta,runEpsg);
         runStart=-1;runCls=null;
       }
     }
