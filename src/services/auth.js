@@ -181,7 +181,7 @@ amsg("Beklenmeyen hata: "+(e&&e.message?e.message:String(e)),1);
 try{turnstile.reset(TS.tsReset);}catch(e2){}
 }
 }
-async function logout(){await sb.auth.signOut();location.reload();}
+async function logout(){if(typeof dgPresenceStop==="function")dgPresenceStop();await sb.auth.signOut();location.reload();}
 
 /* --- BLOK 4: Recovery modal --- */
 function cancelRecovery(){

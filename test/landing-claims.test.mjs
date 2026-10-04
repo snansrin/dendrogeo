@@ -321,7 +321,8 @@ describe('0036 · özellik ve EN bütünlük kilitleri', () => {
   test('⭐ 0037 presence sertleştirme + durum görünürlüğü', () => {
     const vs = rd('src/services/visit-stats.js');
     assert.match(vs, /setAuth/, 'realtime JWT açıkça veriliyor');
-    assert.match(vs, /DG_PRES_RETRY<2/, 'hata durumunda yeniden deneme');
+    assert.match(vs, /Math\.min\(30000/, 'yeniden deneme aralığı sınırlı');
+    assert.match(vs, /DG_PRES_GENERATION/, 'eski kanal olayları yeni bağlantıyı etkileyemez');
     assert.match(vs, /function dgPresenceState/, 'durum dışa açık');
     const vs2 = rd('src/services/visit-stats.js');
     assert.match(vs2, /dgPresenceState\(\)/, 'canlı kart durumu gösteriyor');
