@@ -4,7 +4,7 @@
 
 🌐 **[dendrogeo.org](https://dendrogeo.org)** · 📖 [Yöntem](docs/methods.md) · 🛰️ [Arazi örtüsü](arazi-ortusu/) · 🔵 [Google ile giriş](docs/google-giris.md) · 🔐 [Güvenlik](SECURITY.md) · 🗄️ [Veri erişimi](#veri-erişimi-ve-lisans)
 
-🛟 **Saha kurtarma çekirdeği:** [geri dönüş ve doğrulama](docs/KURTARMA.md) · [denetim](docs/DENETIM-2026-10-04.md)
+🧭 **Ana çekirdek ve kırmızı çizgiler:** [yüzey motoru ve canlı harita kuralları](docs/CORE-KIRMIZI-CIZGILER.md) · 🛟 **Saha kurtarma çekirdeği:** [geri dönüş ve doğrulama](docs/KURTARMA.md) · [denetim](docs/DENETIM-2026-10-04.md)
 
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.22948643.svg)](https://doi.org/10.5281/zenodo.22948643)
 [![License: CC BY-NC 4.0](https://img.shields.io/badge/License-CC%20BY--NC%204.0-lightgrey.svg)](https://creativecommons.org/licenses/by-nc/4.0/)
