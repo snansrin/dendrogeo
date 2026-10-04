@@ -9,6 +9,9 @@ Yeni sürüm yayımlama adımları: [`docs/surum-yayini.md`](docs/surum-yayini.m
 
 ## [Yayımlanmadı]
 
+### Düzeltildi — Tarama başlangıcı ve hücre fırçası
+Park analizi her açıldığında ve her yeni Sentinel‑2 taramasında önceki spektral profil temizlenir, dört hassasiyet eşiği tarafsız %50 değerine döner. Yeni profil geldikten sonra eşikler kullanıcının ayarlamasına açılır; ham WorldCover sınıfları kendiliğinden değişmez. Fırça izi artık sürekli yüzey maskesi yazmaz: metrik fırça iziyle kesişen raster hücrelerine haritadaki sınıf seçimiyle aynı hücre kararı uygulanır. Son fırça izi önceki hücre kararlarını koruyarak geri alınabilir; eski sürekli fırça maskeleri hücre kararlarına çevrilir.
+
 ### Düzeltildi — Yüzey incelemesinde kapalı yol çizgilerinin alan sayılması
 Kapalı bir OSM `highway` çizgisi, yalnızca ilk ve son koordinatı eşleşiyor diye artık dolu poligon kabul edilmiyor. Yolun alansal yüzey olarak değerlendirilmesi için `area=yes` veya `area:highway` gerekir; açık genişliği bulunan doğrusal yollar çizgi olarak tamponlanır. Eski türetilmiş OSM sınırları yeni kuralla yeniden oluşturulur; manuel düzeltmeler ve kabul edilmiş rapor anlık görüntüleri korunur.
 
