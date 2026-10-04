@@ -23,7 +23,7 @@ abstract: >-
   çapı, boy) allometrik biyokütle ve karbon hesaplarıyla (Chave vd. 2014),
   park kimliği bazlı toplulaştırmalarla ve 10 m çözünürlüklü arazi örtüsü
   analizleriyle (ESA WorldCover 2021 v200 birincil, IO LULC 2020 çapraz
-  doğrulama) birleştiren, çevrimdışı çalışabilen açık kaynaklı bir web GIS
+  doğrulama) birleştiren, çevrimdışı çalışabilen, kaynak kodu GitHub'da yayımlanan bir web GIS
   uygulamasıdır. Ölçümler yönetici onayından geçerek CC BY-NC 4.0 lisanslı,
   DOI ile sürümlenmiş kamuya açık bir veri setine dönüşür. Park sınırları
   OpenStreetMap geometrisinden türetilir ve her park tek bir kimlikte

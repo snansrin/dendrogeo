@@ -1,344 +1,95 @@
 # 🌲 DendroGeo
 
-**Küresel Ağaç Envanteri ve Karbon Veri Sistemi** — GPS konumlu saha ölçümlerini biyokütle/karbon hesapları, onaylı harita ve park ölçeğinde analizlerle birleştiren web GIS uygulaması.
+**Küresel Ağaç Envanteri ve Karbon Veri Sistemi.** DendroGeo; saha ağaç ölçümlerini, biyokütle ve karbon tahminlerini, park kimliğini, canlı haritayı ve park ölçeğinde arazi örtüsü analizini bir web GIS/PWA içinde birleştirir.
 
-🌐 **[dendrogeo.org](https://dendrogeo.org)** · 📖 [Yöntem](docs/methods.md) · 🛰️ [Arazi örtüsü](arazi-ortusu/) · 🔵 [Google ile giriş](docs/google-giris.md) · 🔐 [Güvenlik](SECURITY.md) · 🗄️ [Veri erişimi](#veri-erişimi-ve-lisans)
-
-🧭 **Ana çekirdek ve kırmızı çizgiler:** [yüzey motoru ve canlı harita kuralları](docs/CORE-KIRMIZI-CIZGILER.md) · 🛟 **Saha kurtarma çekirdeği:** [geri dönüş ve doğrulama](docs/KURTARMA.md) · [denetim](docs/DENETIM-2026-10-04.md)
+🌐 [DendroGeo sitesi](https://dendrogeo.org/) · [Ağaç envanteri](https://dendrogeo.org/agac-envanteri/) · [Karbon hesabı](https://dendrogeo.org/karbon-hesaplama/) · [Arazi örtüsü](https://dendrogeo.org/arazi-ortusu/) · [Kent parkları](https://dendrogeo.org/kent-parklari/) · [Yöntem](https://dendrogeo.org/yontem/) · [Rapor arşivi](https://dendrogeo.org/rapor/)
 
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.22948643.svg)](https://doi.org/10.5281/zenodo.22948643)
 [![License: CC BY-NC 4.0](https://img.shields.io/badge/License-CC%20BY--NC%204.0-lightgrey.svg)](https://creativecommons.org/licenses/by-nc/4.0/)
 [![CI](https://github.com/snansrin/dendrogeo/actions/workflows/ci.yml/badge.svg)](https://github.com/snansrin/dendrogeo/actions/workflows/ci.yml)
 
+## Sitede neler var?
 
----
+- **Saha envanteri:** GPS konumu, göğüs yüksekliğinde ağaç çapı (DBH), boy, tür/grup ve isteğe bağlı fotoğraf. Fotoğraf eklendiğinde tarayıcı içi QA/QC uygulanır. Ölçümler çevrimdışı kuyruğa alınabilir ve bağlantı gelince eşitlenir.
+- **Waypoint ve navigasyon:** proje noktalarını yükleme, sıralama ve sahada hedefe yönelme.
+- **Canlı harita:** yönetici onaylı ölçümleri görüntüleme; katmanları, park sınırını, gridleri ve waypointleri inceleme; harita çıktısı alma.
+- **Park yüzey analizi:** 10 m arazi örtüsü rasterını park sınırıyla kesiştirerek sınıf alanlarını hesaplama. Sentinel-2 taraması isteğe bağlıdır; yeni tarama nötr eşiklerden başlar ve kendi başına ham sınıfları yeniden etiketlemez. Hücre fırçası, elle hücre seçimi ve sınır çizimi kullanıcı kararlarını kaydeder.
+- **Projeler ve parklar:** aynı fiziksel parkta çalışan projeler park kimliği altında karşılaştırılabilir. Park çalışma arkadaşı akışı ortak saha ölçümünü destekler.
+- **Dünya verisi ve yönetim:** onaylı kayıtların harita/istatistik görünümü; moderasyon, kullanıcı ve ziyaretçi görünümü yönetim yetkileriyle sunulur.
+- **Dışa aktarım ve raporlar:** CSV, GeoJSON, QGIS biçimleri ve doğrulanmış harita çıktıları; park raporları DGR kimliği ve içerik parmak iziyle arşivlenir.
 
-## Ne yapıyor
+## Veri ve yöntem
 
-DendroGeo üç adımda çalışır:
+### Ağaç biyokütlesi ve karbon
 
-1. **Sahada ölç** — çevrimdışı bile çalışan PWA: GPS konumu, çap (DBH), boy ve tür/grup; fotoğraf eklenirse tarayıcı içi QA/QC uygulanır. Ölçümler cihazda IndexedDB'de kuyruklanır, bağlantı gelince Supabase'e senkron olur.
-2. **Yönetici onaylasın** — yayınlanan her kayıt bir moderasyon akışından geçer; onaysız veri dünya haritasına çıkmaz.
-3. **Küresel harita ve istatistik** — onaylı kayıtlar Leaflet haritasında, ülke/şehir kırılımında ve park karşılaştırma raporlarında görünür. Park arazi örtüsü analizi ESA WorldCover 2021 v200 birincil kaynağı ve IO LULC 2020 çapraz kaynağıyla 10 m kategorik raster hücre kesişimlerinden hesaplanır.
+Üstü gövde biyokütlesi Chave vd. (2014) allometrik modeliyle hesaplanır:
 
-**Giriş:** e-posta/parola (Cloudflare Turnstile korumalı) veya **🔵 Google ile
-devam et** (Supabase OAuth, PKCE). OAuth dönüşünde `boot()` kod takasının
-bitmesini bekler — aksi hâlde kullanıcı giriş olduğu hâlde landing'i görürdü.
-Panel ayarları ve tuzaklar: [`docs/google-giris.md`](docs/google-giris.md).
+`AGB = 0.0673 · (ρ · D² · H)^0.976`
 
-### Park kimliği: ölçüm → park → karşılaştırma
+Burada `D` DBH (cm), `H` ağaç boyu (m), `ρ` odun yoğunluğudur. Kök biyokütlesi `AGB × 0,26`; karbon stoğu toplam biyokütlenin `0,47`'si olarak tahmin edilir. Tür yoğunluğu bulunmadığında belgelenmiş grup varsayımı uygulanabilir. Bunlar ölçülmüş karbon miktarı değil, model tabanlı tahminlerdir. Uygulama ve rapor belirsizlikleri ile sınırlılıkları açıklar.
 
-Karşılaştırma **proje adlarına** değil, **algılanan parka** dayanır. Ölçüme
-geçmeden önce park algılama ekranı açılır; park bulunur, kimliği `public.parks`
-tablosuna yazılır ve proje adı `park adı - etiket` olarak kurulur
-(`Göksu Parkı - deneme`). Aynı parkı üç kişi ayrı projelerde çalışsa da
-karbon/kayıt/katılımcı sayıları tek satırda birleşir; park algılanmadan ölçüm
-girilemez (istemci kapısı `dgParkGate`, sunucu kapısı `trg_enforce_park_link`).
+### Park arazi örtüsü
 
-* **Kimlik anahtarı:** OSM elemanı (`way/123456`). OSM'de park yoksa elle
-  oluşturulur (`manual/<ad>/<~100 m hücresi>`). Ad + konum çakışırsa farklı OSM
-  kimlikleri de TEK parkta birleşir (yarıçap park alanıyla büyür).
-* **Sıralama kaynağı:** `v_park_compare` view'ı (sunucu tarafı `group by park`)
-  → istemcide `.limit(5000)` kesilmesi yok; katkıda bulunan kişi sayısı, proje
-  sayısı, tür sayısı ve **t/ha** karbon yoğunluğu buradan gelir.
-* **Eski veriler:** park bağı olmayan projeler kaybolmaz, "park algılanmamış"
-  bölümünde ayrıca listelenir; Yönetim → **🌳 Parkları Geri Doldur** aracı
-  bunları ölçüm merkezinden OSM parkıyla eşleştirir (önce önizleme, sonra onay).
-* **Yetki:** mevcut bir projeyi parka bağlamak (onarım) **yalnız yöneticiye**
-  açıktır — istemcide düğmeler gizlenir, sunucuda `trg_enforce_park_admin`
-  (`PARK_ADMIN_ONLY`) zorlar. Yeni proje açmak için park algılamak herkesin
-  hakkıdır (INSERT serbest), yoksa saha akışı kilitlenir.
+- Birincil kaynak: **ESA WorldCover 2021 v200, 10 m**.
+- Bağımsız çapraz kontrol: **Impact Observatory LULC 2020**.
+- Alan hesabı, raster hücrelerinin park geometrisiyle gerçek kesişim alanlarını kullanır.
+- OSM park/yapı/geometri bilgileri yardımcı katmandır; ham raster sınıfının yerine geçmez. Bilinmeyen veya kapsam dışı alanlar hedef yüzdelere dağıtılmaz.
+- Sınıf sonuçları kaynak, yıl, geometri QA ve yöntem sınırlılıklarıyla yorumlanmalıdır. Ayrıntı: [yöntem belgesi](docs/methods.md) ve [arazi örtüsü yöntemi](docs/LULC_METHODOLOGY.md).
 
-* **Park çalışma arkadaşı (0025):** park sahibi e-posta ile davet açar; kabul
-  eden kullanıcı aynı parkın projelerine **kendi adıyla** ölçü girer (konum
-  çiti ve onay akışı aynen geçerli). Davet/kabul/iptal yalnız SECURITY
-  DEFINER RPC ile — tablolara istemciden yazma yetkisi yoktur.
-* **Şema yedeği:** `supabase/migrations/0004_parks.sql` uygulanmadıysa uygulama
-  çökmez — park kimliği devre dışı kalır, karşılaştırma proje bazlı yedeğe
-  düşer, kapı kilitlenmez ve ekranda migration uyarısı görünür.
+## Rapor kimliği ve DOI
 
-### Bilimsel yöntem (özet)
+DGR, DendroGeo park raporunun kalıcı iç kimliğidir. Yayımlanan rapor sessizce değiştirilmez; düzeltme ve geri çekmeler kayıtlı yayın süreciyle yürütülür. [Rapor arşivinde](https://dendrogeo.org/rapor/) yayımlanan raporlar ve durumları görülebilir.
 
-* **Biyokütle:** Chave vd. (2014) allometrik denklemi — `AGB = 0.0673 · (ρ·D²·H)^0.976`
-* **Kök biyokütlesi:** AGB × 0,26 sistem varsayımı · **Karbon oranı:** 0,47 sistem varsayımı
-* **Odun yoğunluğu (ρ):** tür bazlı; bilinmeyen türler grup varsayılanına düşer (İbreli 446, Yapraklı 541, Diğer 493 kg/m³ — Tolunay 2013, NIR Turkey 2017)
-* **Hacim:** silindir × 0,5 gövde form faktörü
-* **Arazi örtüsü:** Birincil kaynak ESA WorldCover 2021 v200 (10 m, Sentinel-1 + Sentinel-2); IO LULC 2020 bağımsız çapraz doğrulama olarak kullanılır. Alanlar raster hücresi ile park polygonunun gerçek kesişimlerinden hesaplanır.
-
-Ayrıntı ve bilinen sınırlılıklar: [`docs/methods.md`](docs/methods.md)
-
----
-
-## Mimari
-
-Dağıtılan site **statik** (GitHub Pages) + PWA + Supabase. Tek "build" adımı
-`index.html`'in `partials/` altındaki dört modülden **üretilmesidir**
-(`npm run build`) — derleyici/transpiler yok, klasik `<script>` etiketleri.
-
-```
-index.html                  ÜRETİLEN ARTİFAKT — partials'tan build edilir, elle düzenlenmez
-├── partials/
-│   ├── head.html           doctype…</head> + <body> + #toastWrap (meta/SEO/JSON-LD/asset tag'leri)
-│   ├── landing.html        ★ LANDING MODÜLÜ: #topnav → hero → bölümler → footer
-│   ├── shell.html          uygulama kabuğu: #apptop, #side, v-* view'ları, modaller
-│   └── boot.html           src/ui/* tag'leri + </body></html>
-├── css/
-│   ├── style.css           ortak design-token'lar + bileşenler + uygulama stilleri
-│   ├── landing.css         ★ yalnız landing'e özgü stiller (alt sayfalar yüklemez)
-│   └── park-panel.css      park paneli + PNG seçenekleri (eski CSS-in-JS yerine)
-├── sw.js                   Service Worker — PRECACHE/RUNTIME ayrımı, offline
-├── manifest.json           PWA
-├── vendor/                 Leaflet, MarkerCluster, Supabase JS, Chart.js*, GeoTIFF*
-│                           (* = Faz 7'den beri TEMBEL yüklenir: src/utils/lazylibs.js)
-└── src/
-    ├── config/             supabase istemcisi, sabitler, tür + ρ tablosu
-    ├── utils/              geo (haversine, WebMercator), truncation, lazylibs
-    ├── ui/                 DOM yapıştırıcısı katmanı
-    │   ├── state.js        global uygulama state'i (USER, map, WP, …) — TEK sahip
-    │   ├── toast.js        bildirim baloncukları
-    │   ├── landing.js      ★ initLanding() — landing modülünün beyni
-    │   ├── shell.js        boot()/startShell()/go() — kabuk önyüklemesi
-    │   ├── park-panel.js   park modu + sonuç paneli (drawPark)
-    │   ├── park-export.js  GeoJSON/CSV/PNG indirmeleri + LULC + doğrulama köprüleri
-    │   ├── lc-report.js    LULC vektör çizimi + tek blok HTML rapor
-    │   └── lc-sens.js      ★ Uydu hassasiyet paneli (0054 · kaydırıcı + onay)
-    └── services/
-        ├── measure.js      saha formu, GPS, fotoğraf
-        ├── offline.js      IndexedDB kuyruk + UUID dedup + senkron
-        ├── map.js          canlı harita, waypoint navigasyonu
-        ├── park-state.js   ┐
-        ├── osm-client.js   │ PARK ZİNCİRİ (eski gridplan.js; sıra önemli)
-        ├── park-geometry.js│
-        ├── park-query.js   │
-        ├── park-registry.js│ ★ park kimliği + ölçüm kapısı (2026-09-24)
-        ├── grid-engine.js  ┘
-        ├── lc-config.js    ┐
-        ├── lc-geo.js       │
-        ├── lc-stac.js      │ LULC ZİNCİRİ (eski landcover.js; sıra önemli)
-        ├── lc-engine.js    │
-        ├── lc-osm.js       │
-        ├── lc-patches.js   │
-        ├── lc-validate.js  │ ★ Olofsson doğruluk metrikleri + spektral kurallar (v5)
-        ├── lc-s2.js        ┘ ★ Sentinel-2 çok zamanlı spektral kanıt (v5)
-        ├── landcover.js    LULC facade — window.DG_LANDCOVER sözleşmesi
-        ├── world.js        park karşılaştırma (v_park_compare), ülke/şehir yakınlaşma
-        ├── dash.js         kayıtlar, grafikler, analiz
-        ├── visit-stats.js  ┐
-        ├── data-requests.js│ YÖNETİM ZİNCİRİ (eski admin.js; sıra önemli)
-        ├── user-admin.js   │
-        ├── backup.js       ┘
-        ├── admin.js        onay/moderasyon çekirdeği + toplu dışa aktarım
-        ├── admin-tree.js   ★ park→proje→kullanıcı ağacı + hata görünürlüğü
-        ├── report-publish.js ★ site içinden bilimsel rapor yayını (0008 kuyruğu)
-        ├── export.js       CSV / QGIS / GeoJSON
-        ├── allometry.js    Chave 2014 biyokütle/karbon
-        └── auth.js         giriş/kayıt + Cloudflare Turnstile
+README başlığındaki Zenodo DOI, **DendroGeo v3.0.0 yazılım sürüm kaydına** aittir. Bir park raporunun DOI'si ancak o rapor için ayrıca atanmış ve yayımlanmışsa kullanılır; yazılım DOI'si DGR rapor DOI'si olarak gösterilmez.
+```bibtex
+@software{dendrogeo,
+  title   = {DendroGeo: Global Tree Inventory and Carbon Data System},
+  author  = {\c{S}irin, Nagihan and \c{S}irin, Sinan},
+  year    = {2026},
+  version = {3.0.0},
+  doi     = {10.5281/zenodo.22948643},
+  license = {CC-BY-NC-4.0}
+}
 ```
 
-**Tembel yükleme (Faz 7):** `vendor/geotiff-2.1.3.js` (317 KB) ve
-`vendor/chart.js-4.5.1.js` (208 KB) head'de senkron DEĞİL; `lazylibs.js`
-bunları LULC analizi / panel grafiği ilk kullanıldığında enjekte eder.
-Landing ziyaretçisinin ilk açılışı ~525 KB daha hafiftir. sw.js ikisini de
-PRECACHE'te tutar → çevrimdışı davranış aynıdır.
+## Site sayfaları
 
-**İlk yükleme performansı (Faz 8, 2026-09-25):** ölçülen sorun bayt değil
-**istek sayısı + bloklamaydı** — 43 script'in tamamı `head`'de senkrondu, yani
-tarayıcı hepsini indirip çalıştırmadan gövdeyi çizemiyordu (1 KB'lık dosya bile
-bir gidiş-dönüş ≈ 300 ms). Yapılanlar:
+| Sayfa | İçerik |
+|---|---|
+| [Ağaç Envanteri](https://dendrogeo.org/agac-envanteri/) | Saha ölçümü ve veri yaşam döngüsü |
+| [Karbon Hesaplama](https://dendrogeo.org/karbon-hesaplama/) | Model, varsayımlar ve belirsizlik |
+| [Arazi Örtüsü](https://dendrogeo.org/arazi-ortusu/) | Raster kaynakları, hücre alanı ve sınırlılıklar |
+| [Kent Parkları](https://dendrogeo.org/kent-parklari/) | Park ölçeğinde veri kaynaklarının ayrımı |
+| [Veri ve Dışa Aktarım](https://dendrogeo.org/veri/) | Kayıtların yönetimi, formatlar ve lisanslar |
+| [Yöntem](https://dendrogeo.org/yontem/) · [English site](https://dendrogeo.org/en/) · [English methods](https://dendrogeo.org/en/methods/) | Bilimsel hesap zinciri |
+| [Hakkımızda](https://dendrogeo.org/hakkimizda/) · [Künye](https://dendrogeo.org/kunye/) | Proje, sorumlular ve iletişim |
+| [Gizlilik](https://dendrogeo.org/gizlilik/) · [KVKK Aydınlatma](https://dendrogeo.org/aydinlatma/) · [Kullanım Koşulları](https://dendrogeo.org/kullanim-kosullari/) | Yasal ve veri işleme bilgileri |
 
-| | Önce | Sonra |
-|---|---|---|
-| İlk yükleme isteği | 50 | **42** |
-| Wire (gzip) | 277 KB | **250 KB** |
-| **Blokluyan script** | **43** | **0** (`defer`) |
-| Render'ı bloklayan font CSS | var | **yok** (`media="print"` + `onload`) |
-| `preconnect`/`dns-prefetch` | 1 | **8** |
-| LULC zinciri (8 modül) | her ziyarette | **tembel** (`dgEnsureLulc`) |
+## Geliştirme
 
-> 2026-09-27 notu: site içinden rapor yayını modülü (`src/services/report-publish.js`,
-> 16 KB, `defer`) ile ilk yükleme isteği 42 → **43** oldu. Modül yalnız yönetici
-> sekmesinde çalışır; yükleme anında ağ isteği yapmaz (kart `loadAdmin()` ile açılır).
-
-`defer` belge sırasını koruduğu için modül yükleme sırası (ve `boot()`'un en
-sonda çalışması) değişmez. LULC zinciri `DG_LULC_CHAIN` sırasıyla, `async=false`
-ile enjekte edilir (indirmeler paralel, yürütme sıralı — facade `lc-*`
-global'lerine yükleme anında dokunduğu için sıra şart). `sw.js` bu dosyaları
-PRECACHE'te tutmaya devam eder → çevrimdışı LULC davranışı aynıdır.
-Landing haritası da eleman görünür alana yaklaşınca kuruluyor
-(`IntersectionObserver`, 6 sn yedek) → karolar ilk yüklemede yarışmıyor.
-Kilitler: `test/load-order.test.mjs` (tüm etiketler `defer` mi, LULC
-index.html'de YOK mu, zincir sırası doğru mu, analiz köprüsü `await
-dgEnsureLulc()` yapıyor mu).
-
-**Modül değişikliği iş akışı:**
-
-```bash
-# landing'e bir şey ekleyeceksin → yalnız şunlara dokun:
-#   partials/landing.html · css/landing.css · src/ui/landing.js
-npm run build        # index.html'i yeniden üretir (?v= hash'leri tazelenir)
-npm run check        # sözdizimi + sürüm + build tutarlılığı + CSP + testler
-git add -A && git commit   # index.html DAHİL commit'le
-
-# index.html'i yanlışlıkla elle (örn. GitHub web) düzenlediysen:
-node scripts/build-index.mjs --split   # değişiklik partials'a geri emilir
-```
-
-Böylece bir landing değişikliği uygulama kabuğuna **fiziksel olarak** dokunamaz;
-kabuk değişikliği de landing'e dokunamaz. `test/build-consistency.test.mjs`
-bu izolasyonu CI'da kilitler.
-
-Veri modeli (Supabase/Postgres): `measurements`, `waypoints`, `projects`,
-`parks`, `data_requests`, `profiles`, `site_visits` +
-`v_global/v_country/v_city/v_world_agg/v_park_compare` view'ları,
-Storage bucket `dendro-photos`. `projects.park_id` projeyi fiziksel parka
-bağlar; proje adını `trg_compose_project_name` ("park - etiket"), ölçüm kapısını
-`trg_enforce_park_link` (`PARK_REQUIRED`) kurar. Erişimin tamamı **Row Level
-Security** ile sunucu tarafında zorunlu kılınır; `service_role` anahtarı hiçbir
-zaman repoda yoktur. Şema ayrıntısı: [`supabase/README.md`](supabase/README.md).
-
----
-
-## Yerelde çalıştırma
+Site, GitHub Pages üzerinde yayımlanan statik bir web uygulaması/PWA'dır; kullanıcı ve proje verileri Supabase'e RLS politikalarıyla erişir. `index.html`, `partials/` içeriğinden üretilir. Geliştirme ortamı Node.js 20 veya üzerini gerektirir.
 
 ```bash
 git clone https://github.com/snansrin/dendrogeo.git
 cd dendrogeo
-python3 -m http.server 8080        # herhangi bir statik sunucu olur
-# → http://localhost:8080
+npm ci
+npm run check
+npm run build
+python3 -m http.server 8080
 ```
 
-> Not: `src/config/supabase.js` içindeki **anon key** repoda açıktır ve bu
-> tasarımı gereğidir: tüm erişim kontrolü sunucu tarafında RLS ile yapılır.
-> Ayrıntı: [README güvenlik notu](#-güvenlik-notu) ve [`SECURITY.md`](SECURITY.md).
+`npm run check` sözdizimi, sürüm işaretleri, üretilen HTML, CSP ve testleri denetler. Test sayısı zamanla değişebildiğinden burada sabit sayı verilmez. Üretim öncesi kontrol ve dağıtım CI üzerinden yapılır.
 
-### Test ve denetimler
+## Lisans ve atıf
 
-```bash
-npm run check          # sözdizimi + ?v= + build + CSP + 1.234 test
-npm test               # yalnız testler (node:test, bağımlılık gerektirmez)
-npm run build          # index.html'i partials'tan üret (değişiklik sonrası)
-```
+DendroGeo kaynak kodu, belgeleri ve DendroGeo tarafından yayımlanan veri CC BY-NC 4.0 koşullarına tabidir. Ticari kullanım için hak sahiplerinden yazılı izin gerekir. **Harita, raster ve diğer üçüncü taraf kaynaklar bu lisansla yeniden lisanslanmaz**; kendi lisansları ve atıf koşulları geçerlidir. Ayrıntılar: [LICENSE](LICENSE) ve [NOTICE](NOTICE).
 
-1.234 test şunları kilitler: karbon hesabı (Chave 2014, ρ fallback,
-NaN yayılmaması), jeodezik alan ve geometri, **UTM projeksiyonu** (bilinen
-referans değerlerine karşı), Sutherland-Hodgman kırpma + alan korunumu,
-Service Worker'ın çevrimdışı yedeği, vendor kütüphanelerin global kurulumu,
-ölü buton/eksik ID denetimi, **modül kayıt bekçisi** (index↔disk↔CORE_ASSETS
-↔?v= zinciri + global ad çakışması), **partial→index derleme tutarlılığı ve
-landing↔shell izolasyonu**, kritik canlı düzeltmelerin canary'leri (STAC GET,
-RLS-safe sayaç), tembel yükleme kilitleri ve **park kimliği** (ad
-normalizasyonu + "park - etiket" adı + şema/trigger/view kilitleri;
-`park-flow.test.mjs` aynı akışı sahte Supabase üzerinde uçtan uca çalıştırır),
-**hukuki uyum** (`compliance.test.mjs`: harita atıfları ODbL/Esri/CC-BY-SA, KVKK
-açık rıza kapısı, lisans tutarlılığı, depoda kişisel e-posta kalmadığı — hiçbiri
-bozulduğunda sayfa çökmediği için testle kilitlenir) ve **sürüm tutarlılığı**
-(`release.test.mjs`: sürüm numarasının yedi yerde aynı kalması + Zenodo'nun
-okuduğu `CITATION.cff` künyesi).
+Başlıca veri atıfları: OpenStreetMap (ODbL), ESA WorldCover 2021 v200 (CC BY 4.0) ve Impact Observatory LULC 2020 (CC BY 4.0). Kullanılan altlık haritasına özgü atıflar harita üzerinde ve dışa aktarımlarda gösterilir.
 
-GitHub Actions her push ve PR'da altı adım çalıştırır: sözdizimi (tarayıcı
-semantiğiyle), `?v=` tutarlılığı, **derleme tutarlılığı (index.html ==
-partials)**, CSP↔kod tutarlılığı, birim testler ve (yalnız `main`'e push'ta)
-**canlı site ↔ depo sürüklenme denetimi** (dosya listesi index.html'den türetilir).
+Yazılım sürümüne atıf için DOI: [10.5281/zenodo.22948643](https://doi.org/10.5281/zenodo.22948643). Sürüm ve atıf bilgisi [CITATION.cff](CITATION.cff) dosyasındadır.
 
-Rapor yayınını iki ayrı iş akışı taşır: **`rapor-yayin.yml`** (5 dakikada bir)
-site içinden gelen yayın isteklerini işler — yönetici GitHub arayüzüne gitmez,
-🔐 Ölçüm Yönetimi → **📄 Bilimsel Rapor Yayını** kartında 📄 Yayınla der;
-**kullanıcılar da kendi park projelerinin raporunu kendisi yayınlar**
-(📁 Projeler → 📄; sunucu kilitleri: mülkiyet + kendi onaylı verisi + 24
-saatte 3 istek kotası, 0009). İstek Supabase'deki `report_requests`
-kuyruğuna yazılır (0008+0009), rapor `rapor/DGR-YYYY-NNNN/` altına
-commit'lenir ve kalıcı bağlantı aynı arayüzde belirir. **🗑 Geri çekme**
-(0010) aynı hattın tersidir: yanlışlıkla yayımlanan raporun veri dosyaları
-kaldırılır, adresinde gerekçeli bildirim kalır, kimlik yeniden kullanılmaz
-(yönetici herhangi bir yayını, kullanıcı kendi parkının yayınını çekebilir).
-Bu sürümden sonra yayımlanan raporlar belge künyesi, QA/QC çizelgesi + alan
-dengesi, sonuç/yorum ayrımı, analiz parmak izi (engine · git commit · hash),
-tekrar üretilebilirlik, rapor geçmişi, atıf ve kaynakça bölümleriyle ve
-DataCite desenine yakın `metadata.json` + JSON-LD üst verisiyle üretilir
-(DOI kaydı için hazır; DGR iç kimlik olarak kalır). Yayımlanmış
-`DGR-2026-0001` ve `DGR-2026-0002` dondurulmuştur, eski şablonda kalır. İş
-Supabase'e
-**yazmaz**: anon anahtarla salt okur, sonucu
-`rapor/yayin-kuyrugu.json` + git taşır (`service_role` anahtarı depoda
-tutulmaz). **`rapor.yml`** (workflow_dispatch) elle tek park yayını için yedek
-yoldur; ikisi de aynı üreticiyi (`publishPark()`) çağırır. Ayrıntı:
-[`docs/rapor-yayini.md`](docs/rapor-yayini.md).
+## Güvenlik ve katkı
 
----
+Güvenlik açığını herkese açık issue yerine [SECURITY.md](SECURITY.md) adresindeki özel bildirim yoluyla iletin. Hata ve geliştirme önerileri için [GitHub Issues](https://github.com/snansrin/dendrogeo/issues) kullanın.
 
-## Veri erişimi ve lisans
-
-* **Uygulama içinde:** giriş yapmış kullanıcı kendi kayıtlarını CSV / QGIS CSV / GeoJSON olarak dışa aktarabilir.
-* **Lisans:** [CC BY-NC 4.0](https://creativecommons.org/licenses/by-nc/4.0/) — **kod, belgeler ve veri seti birlikte**; ticari kullanım yazılı izne tabidir (`sinan@dendrogeo.org`).
-  Telif: **Nagihan ŞİRİN & Sinan ŞİRİN**. Ayrıntı: [`LICENSE`](LICENSE) (tam lisans metni) + [`NOTICE`](NOTICE) (atıf biçimi ve üçüncü taraf bileşenlerin kendi lisansları).
-  > ⚠ `LICENSE` eskiden **MIT** idi ve README rozeti/DOI ile çelişiyordu (2026-09-24'te CC BY-NC 4.0 ile değiştirildi). MIT'ten kalan türev çalışmalarınız varsa lisans durumunu netleştirin.
-* **Atıf:** Zenodo DOI [10.5281/zenodo.22948643](https://doi.org/10.5281/zenodo.22948643) (v3.0.0) · önceki sürüm: [10.5281/zenodo.22646300](https://doi.org/10.5281/zenodo.22646300) (v1.0.0)
-* **Üçüncü taraf veri atıfları:** harita karoları ve park geometrileri **© OpenStreetMap contributors (ODbL)**; OpenTopoMap **CC-BY-SA**; Esri World Imagery kendi kaynak zinciriyle; arazi örtüsü **ESA WorldCover 2021 v200 (CC BY 4.0)** ve **IO LULC 2020**. Bu atıflar arayüzde Leaflet attribution kontrolünde ve PNG çıktısının telif satırında görünür tutulur (`src/config/constants.js → DG_ATTR`).
-
-```bibtex
-@software{dendrogeo,
-  title    = {DendroGeo: Global Tree Inventory \& Carbon Data System},
-  author   = {\c{S}irin, Nagihan and \c{S}irin, Sinan},
-  year     = {2026},
-  version  = {3.0.0},
-  doi      = {10.5281/zenodo.22948643},
-  url      = {https://dendrogeo.org},
-  license  = {CC-BY-NC-4.0}
-}
-```
-
-### Yasal belgeler
-
-| Sayfa | İçerik |
-|---|---|
-| [`/gizlilik/`](https://dendrogeo.org/gizlilik/) | Gizlilik Politikası (12 bölüm: toplanan veriler, amaçlar, alt yükleniciler, KVKK m.11 hakları, çerez/yerel depolama, konum verisi) |
-| [`/aydinlatma/`](https://dendrogeo.org/aydinlatma/) | KVKK m.10 Aydınlatma Metni (veri sorumlusu kimliği, veri kategorileri, hukuki sebepler, yurt dışı aktarım, başvuru yolu) |
-| [`/kullanim-kosullari/`](https://dendrogeo.org/kullanim-kosullari/) | Kullanım Koşulları (hesap, kabul edilebilir kullanım, lisans/atıf, bilimsel sınırlılıklar) |
-| [`/kunye/`](https://dendrogeo.org/kunye/) | Künye & İletişim + **içerik kaldırma/düzeltme** başvuru süreci + erişilebilirlik beyanı |
-| [`SECURITY.md`](SECURITY.md) | Güvenlik açığı bildirimi |
-
----
-
-## 🔒 Güvenlik notu
-
-Bu depo Supabase `anon` anahtarını içerir; bu **bilinçli bir tasarımdır**.
-Tüm veri erişimi sunucu tarafında Row Level Security politikaları ve veritabanı
-trigger'ları ile zorunlu kılınır; `service_role` anahtarı repoda yoktur.
-Sorumlu güvenlik bildirimi için: **security@dendrogeo.org** — ayrıntılar
-[`SECURITY.md`](SECURITY.md).
-
----
-
-## Yol haritası
-
-Kısa vadede planlananlar (ayrıntılı analiz ve önceliklendirme depo dışı
-raporlarda tutuluyor):
-
-- [x] **Park kimliği** (2026-09-24): `parks` tablosu, park bazlı karşılaştırma (`v_park_compare`), ölçüm kapısı, `park adı - etiket` proje adı → `0004_parks.sql` + `src/services/park-registry.js`
-- [x] **Park adı yazım düzeni** (2026-09-24): OSM'den küçük harfle gelen adlar Türkçe duyarlı başlık düzenine çevrilir (`0005_park_name_case.sql`) — `initcap` Türkçeyi bozduğu için elle eşleme
-- [ ] Park polygon geometrisinin `parks`'a yazılması → Overpass/OSM çevrimdışıyken de park sınırını çizebilme
-- [x] **Yinelenen park kimlikleri aracı** (2026-09-24): Yönetim → 🌳 Park Kimlikleri — çift kimlikleri ad+mesafe ile bulur, ✏️ yeniden adlandırır, 🔀 birleştirir (projeler+ölçümler taşınır, adlar yeniden kurulur), 🗑️ siler. Canlıda aynı Göksu Parkı iki kimlikle kayıtlıydı
-- [ ] İstatistikleri veritabanı tarafına taşıyan `v_world_agg` view'ı + haritada bbox sayfalama (istemci tarafı `.limit()` eşiğinin tamamen kalkması)
-- [ ] `allometry_version` / `rho_used` sütunları — yöntem sürümlemesi
-- [ ] ρ tablosunun literatür kaynaklarıyla doldurulması (28 türde eksik)
-- [ ] Denetim izi: `reviewed_by`, `reviewed_at`, `reject_reason`, `deleted_at`
-- [ ] Erişilebilirlik: `<label for>` geçişi, semantik HTML, `prefers-reduced-motion`
-- [ ] TR/EN i18n
-
----
-
-## Katkı
-
-Hata bildirimi ve öneriler için [issue](https://github.com/snansrin/dendrogeo/issues) açın.
-Güvenlik açıkları için **issue açmayın**, security@dendrogeo.org adresine yazın.
-
-Kod katkısı:
-
-1. Fork edip dal açın (`fix/...` veya `feat/...`)
-2. `npm run check` yeşil olmalı — CI da çalıştıracaktır
-3. Bilimsel hesapları değiştiren her değişiklik **test güncellemesi gerektirir**
-   (`test/allometry.test.mjs`, `test/geometry.test.mjs`, `test/landcover.test.mjs`)
-4. Yeni bir dış servis ekliyorsanız **CSP'ye de yazın** — `scripts/check-csp.mjs`
-   bunu denetler ve unutulursa CI kırılır
-
-İletişim: sinan@dendrogeo.org
+Yüzey analiz motoru ve canlı harita DendroGeo'nun ana çekirdeğidir. Bu akışlarda değişiklikler [çekirdek kırmızı çizgilerine](docs/CORE-KIRMIZI-CIZGILER.md) göre izole edilmeli; bilimsel veya harita regresyonları ilgili testler, çoklu park kontrolleri, mobil görünüm ve CI ile doğrulanmalıdır.
