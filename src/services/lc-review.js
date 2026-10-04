@@ -88,17 +88,20 @@ function dgSurfaceObjects(elements,epsg){
  const out=[];const paved=/^(asphalt|paved|concrete|paving_stones|sett|cobblestone|bricks|concrete:plates|concrete:lanes)$/;
  for(const el of elements||[]){
   const t=el.tags||{};let type=null;const deck=/^(pier|bridge)$/.test(t.man_made||"")||t.bridge==="yes";
+  // OSM ways are lines by default, even when their first and last nodes match.
+  // Filling a closed footpath loop turns the lawn inside it into hard surface.
+  const isArea=t.area==="yes"||(!!t["area:highway"]&&t["area:highway"]!=="no"),isLinearHighway=!!t.highway&&t.highway!=="no";
   if((t.building&&t.building!=="no")||(t["building:part"]&&t["building:part"]!=="no"))type="building";
   else if(t.leisure==="swimming_pool"||t.amenity==="fountain"||t.water==="reflecting_pool")type="pool";
   else if(t.natural==="water"||t.water||t.landuse==="reservoir"||t.waterway==="riverbank")type="water";
   else if(deck||paved.test(t.surface||"")||t.amenity==="parking")type="hard";
   if(!type)continue;
   let geom=[];
-  if(el.type==="relation"&&typeof extractRings==="function"){
+  if(el.type==="relation"&&/^(multipolygon|boundary)$/.test(t.type||"")&&typeof extractRings==="function"){
    const rs=extractRings(el);if(rs){const outer=Array.isArray(rs)?rs:rs.outer,holes=Array.isArray(rs)?[]:rs.inner||[];if(outer?.length)geom=dgSurfacePark(outer,holes,epsg);}
   }else if(el.geometry?.length>=2){
    const pts=el.geometry.map(p=>[p.lon,p.lat]),a=pts[0],b=pts.at(-1);
-   if(pts.length>=4&&a[0]===b[0]&&a[1]===b[1])geom=[[dgSurfaceProject(pts,epsg)]];
+   if(pts.length>=4&&a[0]===b[0]&&a[1]===b[1]&&(!isLinearHighway||(isArea&&t.area!=="no")))geom=[[dgSurfaceProject(pts,epsg)]];
    else if(type==="hard"&&(deck||paved.test(t.surface||""))){
     const width=Number(t.width);if(Number.isFinite(width)&&width>0&&width<=40){
      const xy=dgSurfaceProject(pts,epsg),segments=[];
