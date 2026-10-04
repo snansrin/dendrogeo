@@ -95,7 +95,7 @@ function dgRestoreSQL(bk){
   if(!confirm(msg))return;
   const tabs=[["projects",bk.projects],["measurements",bk.measurements],["waypoints",bk.waypoints],["data_requests",bk.data_requests]];
   let sql="-- DendroGeo tam geri yukleme (0036 · Yedekten Yukle araci uretti)\n"+
-          "-- Yedek tarihi: "+String(bk.exported_at||"?")+" · disa aktaran: "+String(bk.exported_by||"?")+"\n"+
+          "-- Yedek tarihi: "+String(bk.exported_at||"?").replace(/[\r\n]/g," ")+" · disa aktaran: "+String(bk.exported_by||"?").replace(/[\r\n]/g," ")+"\n"+
           "-- Kullanim: Supabase → SQL Editor'a yapistir → Run. Idempotenttir:\n"+
           "-- kimlikler (id/owner) korunur, mevcut satirlar ON CONFLICT DO NOTHING ile atlanir.\nBEGIN;\n";
   let n=0;
@@ -107,7 +107,7 @@ function dgRestoreSQL(bk){
     if(!r||typeof r!=="object")continue;
     const cols=Object.keys(r);
     if(!cols.length)continue;
-    sql+="INSERT INTO public."+tab+" ("+cols.join(", ")+") OVERRIDING SYSTEM VALUE VALUES ("+cols.map(x=>dgSqlVal(r[x])).join(", ")+") ON CONFLICT DO NOTHING;\n";
+    sql+="INSERT INTO public."+tab+" ("+cols.map(x=>'"'+String(x).replace(/"/g,'""')+'"').join(", ")+") OVERRIDING SYSTEM VALUE VALUES ("+cols.map(x=>dgSqlVal(r[x])).join(", ")+") ON CONFLICT DO NOTHING;\n";
     n++;
    }
   }

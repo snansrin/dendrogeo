@@ -4,6 +4,8 @@
 
 🌐 **[dendrogeo.org](https://dendrogeo.org)** · 📖 [Yöntem](docs/methods.md) · 🛰️ [Arazi örtüsü](arazi-ortusu/) · 🔵 [Google ile giriş](docs/google-giris.md) · 🔐 [Güvenlik](SECURITY.md) · 🗄️ [Veri erişimi](#veri-erişimi-ve-lisans)
 
+🛟 **Saha kurtarma çekirdeği:** [geri dönüş ve doğrulama](docs/KURTARMA.md) · [denetim](docs/DENETIM-2026-10-04.md)
+
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.22948643.svg)](https://doi.org/10.5281/zenodo.22948643)
 [![License: CC BY-NC 4.0](https://img.shields.io/badge/License-CC%20BY--NC%204.0-lightgrey.svg)](https://creativecommons.org/licenses/by-nc/4.0/)
 [![CI](https://github.com/snansrin/dendrogeo/actions/workflows/ci.yml/badge.svg)](https://github.com/snansrin/dendrogeo/actions/workflows/ci.yml)
@@ -212,12 +214,12 @@ python3 -m http.server 8080        # herhangi bir statik sunucu olur
 ### Test ve denetimler
 
 ```bash
-npm run check          # sözdizimi + ?v= + build + CSP + 937 test
+npm run check          # sözdizimi + ?v= + build + CSP + 1.234 test
 npm test               # yalnız testler (node:test, bağımlılık gerektirmez)
 npm run build          # index.html'i partials'tan üret (değişiklik sonrası)
 ```
 
-937 test şunları kilitler: karbon hesabı (Chave 2014, ρ fallback,
+1.234 test şunları kilitler: karbon hesabı (Chave 2014, ρ fallback,
 NaN yayılmaması), jeodezik alan ve geometri, **UTM projeksiyonu** (bilinen
 referans değerlerine karşı), Sutherland-Hodgman kırpma + alan korunumu,
 Service Worker'ın çevrimdışı yedeği, vendor kütüphanelerin global kurulumu,
