@@ -157,14 +157,14 @@ describe('rapor v2: parmak izi + tekrar üretilebilirlik + geçmiş', () => {
     assert.match(html, /<code>abc1234<\/code>/, 'commit kısa gösterim');
     assert.match(html, /EPSG:4326 \(WGS 84 coğrafi\)/);
     assert.ok(html.includes('sha256:' + H2), 'tam sonuç hash’i');
-    assert.match(html, /DOI<\/b><code>atanmadı<\/code>/);
+    assert.match(html, /DOI<\/b><code id="dgReportDoi">atanmadı<\/code>/);
     assert.match(html, /Zenodo\/DataCite/, 'DOI yolu beyanı');
   });
   test('§10 tekrar üretilebilirlik tablosu + dürüst uyarı', () => {
     assert.match(html, /DendroGeo LC Engine 4\.2\.0 · uygulama 3\.0\.0/);
     assert.match(html, /node scripts\/make-report\.mjs --park 5/, 'üretim komutu');
     assert.match(html, /kayıt altına alınmıştır/);
-    assert.match(html, /YENİ bir sürümü yayımlanırsa aynı komut farklı sonuç üretebilir/, 'bulut girdisi dürüstlüğü');
+    assert.match(html, /kaynak ürünün yeni sürümleri yeniden üretim sonucunu etkileyebilir/, 'bulut girdisi dürüstlüğü');
   });
   test('§12 geçmiş: önceki DGR + ilk yayımlama + değişmezlik notu', () => {
     assert.match(html, /DGR-2026-0001/, 'önceki analiz');

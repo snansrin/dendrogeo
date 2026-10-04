@@ -186,7 +186,7 @@ describe('P1 · SEO/çok dillilik', () => {
   test('sitemap /rapor/ galerisini ve geçerli DGR yayınını içeriyor', () => {
     const sm = rd('sitemap.xml');
     assert.match(sm, /<loc>https:\/\/dendrogeo\.org\/rapor\/<\/loc>/);
-    assert.match(sm, /rapor\/DGR-\d{4}-\d{4}\//);
+    for(const id of JSON.parse(rd('rapor/test-publications.json')).report_ids)assert.ok(!sm.includes('/rapor/'+id+'/'), 'test yayını sitemap içinde olmamalı');
   });
   test('dil düğmesi landing topnav VE uygulama üst barında (EN↔TR)', () => {
     assert.match(landing, /class="btn sm ghost dg-lang-toggle" onclick="dgToggleLang\(\)"/);

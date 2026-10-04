@@ -142,8 +142,9 @@ async function dgSurfacePrepare(data){
  return{park,geometries,objects,parts};
 }
 function dgSurfaceMergeSync(parts,epsg){
- const groups={};for(const p of parts){const g=groups[p.type]||(groups[p.type]={geoms:[],area:0,methods:new Set()});g.geoms.push(p.geom);g.area+=p.areaM2;g.methods.add(p.method);}
- return Object.entries(groups).map(([k,g])=>({type:'Feature',properties:{class:k,area_m2:g.area,method:[...g.methods].sort().join('+')},geometry:{type:'MultiPolygon',coordinates:dgSurfaceUnproject(window.polygonClipping.union(...g.geoms),epsg)}}));
+ // Keep surveyed/OSM outlines distinct from raster-derived boundaries for display.
+ const groups={};for(const p of parts){const exact=p.method!=="review-cell",key=p.type+":"+(exact?"exact":"raster");const g=groups[key]||(groups[key]={type:p.type,exact,geoms:[],area:0,methods:new Set()});g.geoms.push(p.geom);g.area+=p.areaM2;g.methods.add(p.method);}
+ return Object.values(groups).map(g=>({type:'Feature',properties:{class:g.type,area_m2:g.area,display_boundary:g.exact?'exact':'raster',method:[...g.methods].sort().join('+')},geometry:{type:'MultiPolygon',coordinates:dgSurfaceUnproject(window.polygonClipping.union(...g.geoms),epsg)}}));
 }
 
 /* Sampling geometry is derived from the displayed review, never from patch centroids.

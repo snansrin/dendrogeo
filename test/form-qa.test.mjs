@@ -464,11 +464,11 @@ describe('0033 · rapor metni: yasal statü iddiası YOK, veri hatası iması YO
   test('§9 ρ kaynağı sınırlılığı ve tipik bant sayımı korunur (0032 hükmü)', () => {
     assert.match(S9, /Odun yoğunluğu \(ρ\) kaynağı/);
     assert.match(S9, /P3, P32/);
-    assert.match(S9, /GRUP VARSAYILANI ρ ile yeniden üretilmiştir/);
-    assert.match(S9, /karbon motoru, katsayılar, saklı değerler ve CSV çıktısı DEĞİŞTİRİLMEMİŞTİR/);
-    assert.match(S9, /tipik 15–120 bandının dışındadır; bu bir UYARI DEĞİL, dağılım bilgisidir/);
+    assert.match(S9, /grup varsayılanı ρ ile yeniden üretilmiştir/);
+    assert.match(S9, /karbon motoru, katsayılar, kayıtlı değerler ve CSV çıktısı korunmuştur/);
+    assert.match(S9, /tipik 15–120 bandının dışındadır; bu değer betimleyici dağılım göstergesidir/);
     assert.match(S9, /medyan 10,24/, 'stand dağılımı sayıyla');
-    assert.match(S9, /Bu bir form karakteridir, ölçüm hatası değildir/);
+    assert.match(S9, /Bu oran tek başına ölçüm hatası kanıtı oluşturmaz/);
   });
 
   test('veri hatası iması YOK: suçlayıcı dil kalıcı olarak kaldırıldı', () => {
@@ -500,7 +500,7 @@ describe('0033 · rapor metni: yasal statü iddiası YOK, veri hatası iması YO
     assert.match(d, /modified z eşiği 3,5/);
     assert.match(d, /medyan [0-9.,]+, MAD [0-9.,]+, aralık [0-9.,]+–[0-9.,]+, en yüksek \|z\| [0-9.,]+/);
     assert.match(d, /en yüksek \|z\| 1,91/, 'mutlak değer basılır (imza değil)');
-    assert.match(d, /6\/6 kayıt tipik 15–120 bandının dışında: bu bir UYARI DEĞİL, BİLGİDİR/);
+    assert.match(d, /6\/6 kayıt tipik 15–120 bandının dışında: bu değer betimleyici bir göstergedir/);
     assert.match(d, /ölçülen gövde çapı aralığı 40–200 cm/);
     assert.deepEqual(d.match(/anıt|Anıt/g) || [], [], 'satır metninde iz yok');
   });
@@ -512,8 +512,8 @@ describe('0033 · rapor metni: yasal statü iddiası YOK, veri hatası iması YO
     assert.match(d, /bant dışı kayıt YOK/);
     assert.match(d, /kayıt tür düzeyi ρ ile eşleşti/);
     assert.match(d, /kayıt grup varsayılanı ρ ile eşleşti/);
-    assert.match(d, /GRUP VARSAYILANI ρ ile yeniden üretildi/);
-    assert.match(d, /ÖLÇÜM HATASI DEĞİLDİR/);
+    assert.match(d, /grup varsayılanı ρ ile yeniden üretildi/);
+    assert.match(d, /Bu fark yoğunluk parametresinin seçimiyle ilişkilidir/);
   });
 });
 

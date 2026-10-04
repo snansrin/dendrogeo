@@ -190,7 +190,7 @@ describe('publish-queue.mjs: plan + günlük', () => {
 describe('make-report.mjs: tek üretici publishPark()', () => {
   test('publishPark dışa açık ve CLI onu kullanıyor (iki yol, tek çıktı)', () => {
     assert.match(MR, /export async function publishPark\(/);
-    assert.match(MR, /const r = await publishPark\(parkId, \{ skipLulc: has\('skip-lulc'\) \}\)/, 'main → publishPark');
+    assert.match(MR, /const r = await publishPark\(parkId, \{ skipLulc: has\('skip-lulc'\), publication: parsePublication\(readFileSync\(publicationFile,'utf8'\)\) \}\)/, 'main → publishPark');
     assert.match(MR, /SITE_ORIGIN/, 'bağlantı CNAME’den türetilir');
   });
 
