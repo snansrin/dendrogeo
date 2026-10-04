@@ -4,7 +4,7 @@
 
 Önceki akış üç farklı işlemi birleştiriyordu: ESA WorldCover sınıfları, OSM ile hücrelerin su/yol olarak yeniden etiketlenmesi ve Sentinel-2 spektral eşikleri. Son işlem, görüntü tarihi ve eşiklere bağlı olarak büyük yeşil alanları sert zemin olarak değiştirebiliyordu. Ayrıca OSM ile değiştirilmiş sonuç “ham raster” başlığı altında gösteriliyor; tarama veya düzeltme olmadan kabul engelleniyordu.
 
-Yeni otomatik analiz yalnız ESA WorldCover 2021 v200 kullanır. IO çapraz rasterı, Sentinel-2 yeniden sınıflandırması ve OSM hücre yeniden etiketlemesi bu akışta çalışmaz. Park/hücre kesişim hesabı, alan QA kontrolü ve ham kaynak kodları korunur. OSM nesne sınırları yalnız kullanıcının açtığı ayrı bir vektör düzeltme katmanıdır; yeni taslaklarda kapalıdır. Önceden kabul edilmiş hesap kayıtları ve yayımlanmış raporlar kendiliğinden değiştirilmez.
+Temel otomatik analiz yalnız ESA WorldCover 2021 v200 kullanır. IO çapraz rasterı ve OSM hücre yeniden etiketlemesi bu temel sonucu değiştirmez. Tara/Yeniden Tara, mevcut dönem seçimi ve dört hassasiyet barı korunur. İsteğe bağlı Sentinel-2 taraması inceleme profili sağlar; tarama tek başına hücreleri yeniden sınıflandırmaz. Kullanıcı bir barı değiştirdiğinde ilgili sınıfların önizlemesi değişebilir; nötr 50 değerleri ham sınıfları korur. Manuel hücre ve fırça/sınır kararları spektral önizlemeye göre önceliklidir. Park/hücre kesişim hesabı, alan QA kontrolü ve ham kaynak kodları korunur. OSM nesne sınırları yalnız kullanıcının açtığı ayrı bir vektör düzeltme katmanıdır; yeni taslaklarda kapalıdır. Önceden kabul edilmiş hesap kayıtları ve yayımlanmış raporlar kendiliğinden değiştirilmez.
 
 ## Kullanım
 
@@ -33,3 +33,7 @@ Telefon kontrolleri: 360/390/430 px yatay taşma yok; gerçek 7.864 hücreli har
 Kurtarma çekirdeği `recovery/core-2026-10-04` bu değişikliklerden bağımsız olarak korunur. Önceki güvenlik denetimindeki canlı kanal yetkilendirmesi ve diğer açık işler bu düzeltmenin parçası değildir.
 
 Doğrulama: `npm run check` başarılı; 1.240/1.240 test geçti. Üç parkın gerçek hücreleriyle telefon üzerinde pointer ve dokunmatik fırça, iptal, ham karşılaştırma ve geri alma doğrulandı. Yeni fırça geometrisinin cihaz/hesap kaydı yeniden yüklenirken korunması için regresyon testi eklendi.
+
+Arayüz düzeltmesi: Tara/Yeniden Tara, yeşil/su/sert/çıplak hassasiyet barları ve dönem seçimi yeniden etkinleştirildi. Bunların kaldırılması talebin kapsamını aşmıştı. Fırça ve ham karşılaştırma özellikleri korunur.
+
+Geri getirilen kontrollerin doğrulaması: 1.245 test geçti. Gerçek Göksu rasterı üzerinde 360/390/430 px görünüm, bar uçlarına gerçek pointer tıklaması, fırça/touch/iptal/geri alma test edildi. Tara ve bar entegrasyonu kontrollü spektral profil ile doğrulandı; bu kontrolde yeni bir canlı Sentinel-2 indirme koşusu yapılmadı.
