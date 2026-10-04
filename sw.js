@@ -4,7 +4,7 @@
 // NOT: Senkronizasyon artık Ana Thread (Supabase JS SDK) tarafından yapılıyor
 // ============================================================
 
-const CACHE_VERSION = 'dendrogeo-sw-v2-r76';
+const CACHE_VERSION = 'dendrogeo-sw-v2-r77';
 
 /* İKİ AYRI STATİK CACHE — bu ayrım bilinçli ve önemli.
  *
@@ -53,7 +53,7 @@ const CORE_ASSETS = [
     '/src/services/park-invites.js',
     /* LULC ZİNCİRİ (Faz 5): eski landcover.js altı modüle bölündü; facade son sırada
      * (window.DG_LANDCOVER'u o kurar, yükleme anında lc-* global'lerini referanslar). */
-    '/src/services/lc-config.js','/src/services/lc-geo.js','/src/services/lc-stac.js','/src/services/lc-engine.js','/src/services/lc-osm.js','/src/services/lc-patches.js','/src/services/lc-validate.js','/src/services/lc-s2.js','/src/ui/lc-report.js','/vendor/polygon-clipping-0.15.7.js','/vendor/clipper-6.4.2.js','/src/core/display-clip.js','/src/workers/surface-worker.js','/src/services/lc-review.js','/src/ui/lc-sens.js','/src/services/landcover.js',
+    '/src/services/lc-config.js','/src/services/lc-geo.js','/src/services/lc-stac.js','/src/services/lc-engine.js','/src/services/lc-osm.js','/src/services/lc-patches.js','/src/services/lc-validate.js','/src/services/lc-s2.js','/src/ui/lc-report.js','/vendor/polygon-clipping-0.15.7.js','/src/workers/surface-worker.js','/src/services/lc-review.js','/src/ui/lc-sens.js','/src/services/landcover.js',
     /* PARK ZİNCİRİ (Faz 4): eski gridplan.js yedi modüle bölündü — yükleme
      * sırası index.html ile aynı olmalı (state → client → geometry → query →
      * engine → panel → export). */

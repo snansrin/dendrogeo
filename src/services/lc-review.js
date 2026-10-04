@@ -42,10 +42,8 @@ function dgSurfaceResolved(cells,classFor,geometries,features,epsg,park){
  dgSurfaceSeed(geometries,features||[],epsg,park,parts,cells);return parts;
 }
 function dgSurfaceSummarize(base,cells,classFor,geometries,features,epsg,park){
- return dgSurfaceSummarizeParts(base,dgSurfaceResolved(cells,classFor,geometries,features,epsg,park));
-}
-function dgSurfaceSummarizeParts(base,parts){
- const areas={green:0,hard:0,building:0,water:0,pool:0,bare:0,other:0,...base},seen=new Set();
+ const areas={green:0,hard:0,building:0,water:0,pool:0,bare:0,other:0,...base};
+ const parts=dgSurfaceResolved(cells,classFor,geometries,features,epsg,park),seen=new Set();
  for(const p of parts){
   if(!seen.has(p.key)){const old=p.cell.classKey||"other";areas[old]=(areas[old]||0)-Number(p.cell.areaM2||0);seen.add(p.key);}
   areas[p.type]=(areas[p.type]||0)+p.areaM2;
@@ -124,7 +122,7 @@ function dgSurfaceCancelJobs(){for(const cancel of [...DG_SURFACE_JOBS])cancel()
 function dgSurfaceWorkerJob(data){
  return new Promise((resolve,reject)=>{
   if(typeof Worker==='undefined'){resolve(null);return;}
-  let worker;try{worker=new Worker('/src/workers/surface-worker.js?v='+(typeof dgRuntimeBuild==='function'?encodeURIComponent(dgRuntimeBuild()):'current'));}catch(e){resolve(null);return;}
+  let worker;try{worker=new Worker('/src/workers/surface-worker.js');}catch(e){resolve(null);return;}
   const finish=()=>{clearTimeout(timer);worker.terminate();DG_SURFACE_JOBS.delete(cancel);};
   const cancel=()=>{finish();reject(Error('Analiz kapatıldı.'));};
   const timer=setTimeout(()=>{finish();reject(Error('Sınır hesabı zaman aşımına uğradı.'));},90000);
@@ -149,40 +147,32 @@ function dgSurfaceMergeSync(parts,epsg){
 }
 
 function dgSurfaceDisplaySync(parts,epsg,park,prepared=null){
- const exact=prepared||dgSurfaceMergeSync(parts,epsg),pc=globalThis.DG_DISPLAY_CLIP||window.polygonClipping;
+ const exact=prepared||dgSurfaceMergeSync(parts,epsg),pc=window.polygonClipping;
  if(!globalThis.DG_SURFACE_DISPLAY||!exact.length)return exact;
- const source=exact.map(f=>dgSurfaceFeatureGeometry(f,epsg));
- const origin=source.flat(3)[0];if(!origin)return exact;
- // Local metre coordinates avoid cancellation and clipping noise at UTM
- // eastings/northings. Neither accepted features nor analytic areas are edited.
- const shift=(g,sign)=>g.map(poly=>poly.map(r=>r.map(p=>[sign<0?Math.round((p[0]-origin[0])*1000)/1000:p[0]+origin[0],sign<0?Math.round((p[1]-origin[1])*1000)/1000:p[1]+origin[1]])));
- const raw=source.map(g=>shift(g,-1)),vectors=parts.filter(p=>p.method!=="review-cell");
+ const raw=exact.map(f=>dgSurfaceFeatureGeometry(f,epsg));
+ const vectors=parts.filter(p=>p.method!=="review-cell");
+ const fixed=exact.map(f=>{const g=vectors.filter(p=>p.type===f.properties.class).map(p=>p.geom);return g.length?pc.union(...g):[];});
+ const edges=[];for(const geom of [...fixed,park||[]])for(const poly of geom)for(const r of poly)for(let i=1;i<r.length;i++)edges.push([r[i-1],r[i]]);
  try{
-  const domain=pc.union(...raw),fixed=[];let reserved=[];
-  for(let i=0;i<exact.length;i++){
-   const g=vectors.filter(p=>p.type===exact[i].properties.class).map(p=>shift(p.geom,-1));
-   const mask=g.length?pc.difference(pc.intersection(pc.union(...g),raw[i],domain),reserved):[];
-   fixed.push(mask);reserved=pc.union(reserved,mask);
-  }
-  const edges=[];for(const geom of [...fixed,shift(park||[],-1)])for(const poly of geom)for(const r of poly)for(let i=1;i<r.length;i++)edges.push([r[i-1],r[i]]);
-  const objects=reserved,visual=raw.map(()=>[]);let claimed=objects;
+  const domain=pc.union(...raw),objects=pc.union(...fixed),visual=raw.map(()=>[]);
+  // Build one display partition, rather than independently painting rounded
+  // classes. Exact vector footprints are reserved before raster generalisation.
+  let claimed=objects;
   const order=exact.map((f,i)=>i).sort((a,b)=>(exact[a].properties.class==="green")-(exact[b].properties.class==="green"));
   for(let n=0;n<order.length;n++){
    const i=order[n],remaining=pc.difference(domain,claimed);let fill=remaining;
    if(n<order.length-1){
-    const raster=pc.difference(raw[i],objects),rounded=raster.map(poly=>poly.map(r=>DG_SURFACE_DISPLAY.ring(r,edges,8)));
-    // Repair each component independently so one narrow contour cannot force
-    // every class back to the raw raster outline.
-    const pieces=[];for(let k=0;k<rounded.length;k++){try{pieces.push(pc.intersection(remaining,[rounded[k]]));}catch(e){pieces.push(pc.intersection(remaining,[raster[k]]));}}
-    fill=pieces.length?pc.union(...pieces):[];
+    const raster=pc.difference(raw[i],objects);
+    const rounded=raster.map(poly=>poly.map(r=>DG_SURFACE_DISPLAY.ring(r,edges,8)));
+    try{fill=pc.intersection(remaining,rounded);}catch(e){fill=pc.intersection(remaining,raster);}
    }
-   visual[i]=pc.union(fill,fixed[i]);claimed=pc.union(claimed,visual[i]);
+   visual[i]=pc.union(fill,fixed[i]);claimed=pc.union(claimed,fill);
   }
   const originalArea=dgSurfaceArea(domain);
-  if(Math.abs(dgSurfaceArea(pc.union(...visual))-originalArea)>Math.max(.1,originalArea*.000001))throw Error("Görsel park kapsamı doğrulanamadı.");
-  for(let i=0;i<visual.length;i++)for(let j=i+1;j<visual.length;j++){const overlap=dgSurfaceArea(pc.intersection(visual[i],visual[j]));if(overlap>Math.max(1,originalArea*.000002))throw Error("Görsel sınıf sınırları örtüşüyor: "+i+","+j+" "+overlap);}
-  return exact.map((f,i)=>({...f,geometry:{type:'MultiPolygon',coordinates:dgSurfaceUnproject(shift(visual[i],1),epsg)}}));
- }catch(e){throw Error("Yumuşak yüzey çizimi üretilemedi: "+String(e.message||e));}
+  if(Math.abs(dgSurfaceArea(pc.union(...visual))-originalArea)>Math.max(.1,originalArea*.000001))return exact;
+  for(let i=0;i<visual.length;i++)for(let j=i+1;j<visual.length;j++)if(dgSurfaceArea(pc.intersection(visual[i],visual[j]))>.01)return exact;
+  return exact.map((f,i)=>({...f,geometry:{type:'MultiPolygon',coordinates:dgSurfaceUnproject(visual[i],epsg)}}));
+ }catch(e){return exact;}
 }
 
 /* Sampling geometry is derived from the displayed review, never from patch centroids.

@@ -69,8 +69,6 @@ const DG_LULC_CHAIN=[
   "src/services/lc-s2.js",
   "src/ui/lc-report.js",
   "vendor/polygon-clipping-0.15.7.js",
-  "vendor/clipper-6.4.2.js",
-  "src/core/display-clip.js",
   "src/services/lc-review.js",
   "src/ui/lc-sens.js",
   "src/services/landcover.js"
