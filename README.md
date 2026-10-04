@@ -51,7 +51,7 @@ README başlığındaki Zenodo DOI, **DendroGeo v3.0.0 yazılım sürüm kaydın
 | [Arazi Örtüsü](https://dendrogeo.org/arazi-ortusu/) | Raster kaynakları, hücre alanı ve sınırlılıklar |
 | [Kent Parkları](https://dendrogeo.org/kent-parklari/) | Park ölçeğinde veri kaynaklarının ayrımı |
 | [Veri ve Dışa Aktarım](https://dendrogeo.org/veri/) | Kayıtların yönetimi, formatlar ve lisanslar |
-| [Yöntem](https://dendrogeo.org/yontem/) · [English methods](https://dendrogeo.org/en/methods/) | Bilimsel hesap zinciri |
+| [Yöntem](https://dendrogeo.org/yontem/) · [English site](https://dendrogeo.org/en/) · [English methods](https://dendrogeo.org/en/methods/) | Bilimsel hesap zinciri |
 | [Hakkımızda](https://dendrogeo.org/hakkimizda/) · [Künye](https://dendrogeo.org/kunye/) | Proje, sorumlular ve iletişim |
 | [Gizlilik](https://dendrogeo.org/gizlilik/) · [KVKK Aydınlatma](https://dendrogeo.org/aydinlatma/) · [Kullanım Koşulları](https://dendrogeo.org/kullanim-kosullari/) | Yasal ve veri işleme bilgileri |
 
