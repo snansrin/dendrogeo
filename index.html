@@ -239,7 +239,7 @@
 <!-- DİL KATMANI (0035): TR markup varsayılan; EN sözlüğü çalışma zamanında
      uygulanır (dgToggleLang). defer sırası önemli değil — DOMContentLoaded'da
      ya da hemen (hazırsa) çalışır. module-registry + CORE_ASSETS kaydı şart. -->
-<script src="src/config/i18n.js?v=e33f1c2e" defer></script>
+<script src="src/config/i18n.js?v=e5667299" defer></script>
 <script src="src/utils/geo.js?v=3e796768" defer></script>
 <script src="src/utils/truncation.js?v=f43c76b3" defer></script>
 <!-- Faz 7: geotiff (317 KB) ve chart.js (208 KB) artık SENKRON yüklenmiyor;
@@ -250,7 +250,7 @@
 <script src="src/services/export.js?v=cf5c039b" defer></script>
 <script src="src/services/offline.js?v=1765b5a6" defer></script>
 <!-- YÖNETİM ZİNCİRİ (Faz 6 — eski admin.js beş modüle bölündü) -->
-<script src="src/services/visit-stats.js?v=f72a0c5d" defer></script>
+<script src="src/services/visit-stats.js?v=ebd4e614" defer></script>
 <script src="src/services/data-requests.js?v=59fe4b11" defer></script>
 <script src="src/services/user-admin.js?v=354a2701" defer></script>
 <script src="src/services/backup.js?v=86db8192" defer></script>
@@ -289,9 +289,9 @@
 <script src="src/ui/park-panel.js?v=9d44698a" defer></script>
 <script src="src/ui/park-export.js?v=c724cd32" defer></script>
 <script src="src/services/dash.js?v=4556cd69" defer></script>
-<link rel="stylesheet" href="css/style.css?v=a621830b">
+<link rel="stylesheet" href="css/style.css?v=10e16d1e">
 <link rel="stylesheet" href="css/landing.css?v=85504b78">
-<link rel="stylesheet" href="css/park-panel.css?v=987ed4d6">
+<link rel="stylesheet" href="css/park-panel.css?v=c5a02f62">
 <!-- TASARIM SİSTEMİ (2026-09-27, 2. deneme): ui-standard.css geri BAĞLANDI
      ama ARTIK eleman seviyesi kuralları yalnız .dg-page (alt sayfalar) altında
      geçerli; kabuk (body.dg-app) yalnız sınıf-bazlı bileşenleri ve sekme
@@ -1089,6 +1089,7 @@
   <div class="view" id="v-visitors">
    <h2 class="disp" style="margin-bottom:16px">👁 Ziyaretçi &amp; Canlı İzleme</h2>
    <div class="alert info" style="font-size:.82rem">Bu sekme <b>yalnız kurucuya</b> açıktır. Ziyaretçi sayacı kimlik tutmaz (gizlilik); oturum açmış kullanıcıların veri işlemleri aşağıdadır. Konumlar, yalnız kullanıcı "canlı konum paylaşımı"nı açtıysa <b>geçici</b> olarak görünür — veritabanına yazılmaz.</div>
+   <div class="dg-vis-tools card"><label class="lbl" for="visSearch">Kullanıcı ara</label><input id="visSearch" type="search" placeholder="İsim veya cihaz" oninput="renderVisitorsLive()"><label class="lbl" for="visViewFilter">Ekran</label><select id="visViewFilter" onchange="renderVisitorsLive()"><option value="">Tüm ekranlar</option value="measure">Yeni Ölçüm</option><option value="nav">Waypoint</option><option value="map">Canlı Harita</option><option value="projects">Projeler</option></select><label class="measure-share"><input class="dg-switch" id="visLocated" type="checkbox" onchange="renderVisitorsLive()"><span>Yalnız konum paylaşanlar</span></label><label class="measure-share"><input class="dg-switch" type="checkbox" onchange="dgVisPause(this.checked)"><span>Görünümü duraklat</span></label><p id="visStatus" class="dg-meta" role="status">Bağlanıyor…</p><p class="dg-meta">Konum paylaşan: <b id="vzLocated">0</b> · Çevrimiçi sayısı son 2 dakikada sinyal gönderen benzersiz kullanıcıları gösterir.</p></div>
    <div class="grid g4" style="margin-bottom:18px">
     <div class="stat"><div class="lbl">👁 Toplam Ziyaret</div><div class="val" id="vzTotal">0</div></div>
     <div class="stat"><div class="lbl">👁 Bugün</div><div class="val" id="vzToday">0</div></div>
@@ -1105,7 +1106,8 @@
    </div>
    <div class="card" style="margin-bottom:18px">
     <div class="shead" style="margin-bottom:10px"><span class="no">🗺️</span><h2 style="font-size:1.15rem">Canlı Konum Haritası</h2><span class="rule"></span></div>
-    <p style="color:var(--mut);font-size:.8rem;margin-bottom:8px">Çevrimiçi ve konum izni açık kullanıcılar otomatik görünür (geçici; veritabanına yazılmaz). Üstüne gel → kimlik + ne yapıyor; satıra tıkla → haritada odaklan. Liste 10 sn'de bir kendiliğinden tazelenir.</p>
+    <p style="color:var(--mut);font-size:.8rem;margin-bottom:8px">Konum izni açık ve GPS etkin kullanıcılar görünür (geçici; veritabanına yazılmaz). Üstüne gel → kimlik + ne yapıyor; satıra tıkla → haritada odaklan. Liste 10 sn'de bir kendiliğinden tazelenir.</p>
+    <div class="dg-vis-map-tools"><button class="btn sm ghost" onclick="dgVisFit()">🗺️ Tümünü göster</button><label class="measure-share"><input class="dg-switch" type="checkbox" id="visFollow" onchange="dgVisMapDraw(dgVisFilter(dgVisRows()))"><span>Haritayı takip et</span></label><label class="measure-share"><input class="dg-switch" type="checkbox" id="visTrails" onchange="dgVisMapDraw(dgVisFilter(dgVisRows()))"><span>Geçici izleri göster</span></label></div>
     <div id="visMap" class="notranslate" translate="no"></div>
    </div>
    <div class="card">

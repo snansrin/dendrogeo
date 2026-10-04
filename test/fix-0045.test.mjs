@@ -119,7 +119,7 @@ describe('0045 · gelişmiş canlı izleme — GEÇİCİ (DB yok)', () => {
     assert.match(shell, /id="visFeed"/, 'aksiyon akışı kutusu');
     assert.match(shell, /Canlı Aksiyon Akışı/, 'kart başlığı');
     assert.match(vs, /function dgVisFeed/, 'akış çizici');
-    assert.match(vs, /L\.polyline\(r\.p\.lh\.map/, 'haritada geçici iz');
+    assert.match(vs, /L\.polyline\(r\.p\.lh\.filter/, 'haritada geçici iz');
     assert.match(vs, /r\.p\.dev/, 'satırda cihaz');
     assert.match(vs, /DG_ACT_LABELS/, 'aksiyon etiketleri');
   });

@@ -516,3 +516,9 @@ label.lbl{display:block}
 #v-nav .waypoint-map>summary{min-height:44px;display:flex;align-items:center;cursor:pointer;font-weight:600}
 #v-nav .waypoint-pager{position:sticky;bottom:0;background:var(--surface);padding:6px 0}
 @media(max-width:640px){#v-nav .waypoint-map #navMap{height:240px}#v-nav .waypoint-point{padding:2px 6px}#v-nav .waypoint-coordinates div{padding:4px 0 8px}}
+.dg-vis-tools{margin-bottom:18px;display:grid;gap:10px;grid-template-columns:1fr 1fr}
+.dg-vis-tools .dg-meta{grid-column:1/-1}
+.dg-vis-map-tools{display:flex;gap:12px;flex-wrap:wrap;align-items:center;margin-bottom:12px}
+.dg-vis-person>div{flex-wrap:wrap;overflow-wrap:anywhere}
+#visFeed>div{flex-wrap:wrap;overflow-wrap:anywhere}
+@media(max-width:640px){.dg-vis-tools{grid-template-columns:1fr}#v-visitors .grid.g4{grid-template-columns:repeat(2,minmax(0,1fr))}}

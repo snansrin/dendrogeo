@@ -24,6 +24,22 @@
 
 /* ---- EN sözlüğü: anahtar = TR dizenin trim'lenmiş hâli ---- */
 const DG_I18N_EN={
+"Renk yoğunluğu":"Color opacity",
+"Uydu tarama dönemi":"Satellite scan period",
+"Güncel görüntüler · son 120 gün":"Recent imagery · last 120 days",
+"Tarama, bugün ile 120 gün öncesi arasındaki uygun Sentinel-2 görüntülerini arar. Bulut nedeniyle kullanılan tarihler daha eski olabilir. Altlık haritasının tarihi ve 2021 raster verisi ayrıdır.":"The scan searches suitable Sentinel-2 imagery from the last 120 days. Clouds may mean older dates within this period are used. Basemap dates and the 2021 raster are separate.",
+"Güncel yüzey önizlemesi":"Current surface preview",
+"Kaydırıcılar ve sınır düzeltmeleri bu özete yansır. Yayın için kabul edip kaydedin.":"Sliders and boundary edits update this summary. Accept and save it for publication.",
+"Ham 2021 raster sonucu":"Original 2021 raster result",
+"Kullanıcı ara":"Find users",
+"İsim veya cihaz":"Name or device",
+"Tüm ekranlar":"All screens",
+"Yalnız konum paylaşanlar":"Only users sharing location",
+"Görünümü duraklat":"Pause display",
+"Haritayı takip et":"Follow map",
+"Geçici izleri göster":"Show temporary trails",
+"🗺️ Tümünü göster":"🗺️ Show all",
+
 "Yüzey değişti. Waypoint üretmeden önce gridi yeniden oluşturun.":"The surface changed. Rebuild the grid before creating waypoints.",
 "Haritada yeni parkın içine dokunun.":"Tap inside the new park on the map.",
 "Yeni konum":"New location",

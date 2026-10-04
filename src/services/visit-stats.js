@@ -53,12 +53,12 @@ async function loadVisitStats(){
  * Konum alanı (la/lo) yalnız kullanıcı "canlı konum paylaşımı"nı AÇTIYSA
  * ve GPS varsa payload'a girer; GEÇİCİDİR — veritabanına yazılmaz. */
 const DG_VIEW_LABELS={dash:"Panel",measure:"Yeni Ölçüm",nav:"Waypoint",map:"Canlı Harita",projects:"Projeler",records:"Kayıtlarım",export:"Dışa Aktar",world:"Dünya Verisi",admin:"Ölçüm Yönetimi",users:"Kullanıcılar",visitors:"Ziyaretçi & Canlı"};
-let DG_PRES=null,DG_PRES_OK=false,DG_PRES_STATE="idle",DG_PRES_RETRY=0,DG_PRES_LAST=0,DG_PRES_WATCH=null;
+let DG_PRES=null,DG_PRES_OK=false,DG_PRES_STATE="idle",DG_PRES_RETRY=0,DG_PRES_LAST=0,DG_PRES_WATCH=null,DG_PRES_HEARTBEAT=null;
 function dgPresenceState(){return DG_PRES_STATE;}
 function dgPresenceReady(){return !!DG_PRES_OK;}
 function dgPresenceEmit(){try{if(typeof renderVisitorsLive==="function")renderVisitorsLive();}catch(e){}}
 function dgPresenceFail(why){
- DG_PRES_OK=false;DG_PRES_STATE="error";dgPresenceEmit();
+ clearInterval(DG_PRES_HEARTBEAT);DG_PRES_HEARTBEAT=null;DG_PRES_OK=false;DG_PRES_STATE="error";dgPresenceEmit();
  if(DG_PRES_RETRY<2){DG_PRES_RETRY++;
   setTimeout(()=>{try{if(DG_PRES&&sb&&sb.removeChannel)sb.removeChannel(DG_PRES);}catch(e){}
    DG_PRES=null;DG_PRES_STATE="idle";dgPresenceStart();},3000);}
@@ -74,6 +74,7 @@ function dgPresenceStart(){
    if(st==="SUBSCRIBED"){
     DG_PRES_OK=true;DG_PRES_STATE="on";
     if(DG_PRES_WATCH){clearTimeout(DG_PRES_WATCH);DG_PRES_WATCH=null;}
+    clearInterval(DG_PRES_HEARTBEAT);DG_PRES_HEARTBEAT=setInterval(()=>{if(!document.hidden)dgPresencePing(null,true);},30000);
     DG_PRES_LAST=0;
     dgPresencePing(typeof DG_CUR_VIEW!=="undefined"?DG_CUR_VIEW:"dash",true);
     dgPresenceEmit();
@@ -141,14 +142,14 @@ function dgPresencePing(view,force){
   p.sid=DG_SID;p.st=DG_SESSION_START;p.dev=DG_DEV_TAG;
   if(DG_VIEW_HIST.length)p.vh=DG_VIEW_HIST.slice(-8);
   if(DG_LAST_ACT)p.act=DG_LAST_ACT;
-  if(DG_LOC_HIST.length>1)p.lh=DG_LOC_HIST.slice(-12);
+  if(p.la!=null&&DG_LOC_HIST.length>1)p.lh=DG_LOC_HIST.slice(-12);
   DG_PRES.track(p);
  }catch(e){}
 }
 function dgPresenceList(){try{return (DG_PRES&&typeof DG_PRES.presenceState==="function")?DG_PRES.presenceState():{};}catch(e){return{};}}
 
 /* ─────────── 👁 ZİYARETÇİ & CANLI (yalnız kurucu) ─────────── */
-let DG_VIS_MAP=null,DG_VIS_LAYER=null;
+let DG_VIS_MAP=null,DG_VIS_LAYER=null,DG_VIS_PAUSED=false,DG_VIS_FIT=false,DG_VIS_REFRESHING=false;
 /* 0045: "Son Etkinlik" açılır-kapanır (kullanıcı isteği). Durum cihazda
  * hatırlanır (localStorage) — sekme her açılışta kullanıcının bıraktığı gibi. */
 function dgVisActToggle(){
@@ -175,6 +176,7 @@ async function loadVisitors(){
  dgVisTickStart();
 }
 async function dgVisCounts(){
+ if(!dgVisAllowed())return;
  try{
   const today=new Date();today.setHours(0,0,0,0);
   const d7=new Date(Date.now()-7*86400000);
@@ -187,17 +189,24 @@ async function dgVisCounts(){
   if($("vz7"))$("vz7").textContent=tw.count??0;
  }catch(e){}
 }
+function dgVisAllowed(){return typeof PROFILE!=="undefined"&&PROFILE?.role==="owner";}
+function dgVisHasLocation(p){return p?.la!=null&&p?.lo!=null&&Number.isFinite(Number(p.la))&&Number.isFinite(Number(p.lo))&&Math.abs(Number(p.la))<=90&&Math.abs(Number(p.lo))<=180&&!(Number(p.la)===0&&Number(p.lo)===0);}
 function dgVisRows(){
  let st={};try{st=dgPresenceList();}catch(e){}
- const now=Date.now();const rows=[];
- for(const k in st)for(const p of (st[k]||[]))if(p&&p.id)rows.push({p:p,age:Math.max(0,Math.round((now-(p.t||now))/1000))});
- rows.sort((a,b)=>a.age-b.age);
- return rows;
+ const now=Date.now(),users=new Map();
+ for(const k in st)for(const p of (st[k]||[])){if(!p?.id)continue;const t=Number(p.t);if(!Number.isFinite(t))continue;const age=Math.max(0,Math.round((now-t)/1000));if(age>120)continue;const old=users.get(String(p.id));if(!old||age<old.age)users.set(String(p.id),{p,age});}
+ return [...users.values()].sort((a,b)=>a.age-b.age);
 }
+function dgVisFilter(rows){const query=String($("visSearch")?.value||"").trim().toLocaleLowerCase("tr-TR"),view=$("visViewFilter")?.value||"",located=!!$("visLocated")?.checked;return rows.filter(r=>(!query||String((r.p.n||"")+" "+(r.p.dev||"")).toLocaleLowerCase("tr-TR").includes(query))&&(!view||r.p.v===view)&&(!located||dgVisHasLocation(r.p)));}
+function dgVisPause(on){DG_VIS_PAUSED=!!on;if(!on)renderVisitorsLive();else if($("visStatus"))$("visStatus").textContent="Görünüm duraklatıldı";}
+function dgVisFit(){DG_VIS_FIT=false;dgVisMapDraw(dgVisFilter(dgVisRows()));}
 function renderVisitorsLive(){
+ if(!dgVisAllowed()||DG_VIS_PAUSED||document.hidden)return;
  const box=$("visLive");
- const rows=dgVisRows();
- if($("vzOnline"))$("vzOnline").textContent=rows.length;
+ const all=dgVisRows(),rows=dgVisFilter(all);
+ if($("vzOnline"))$("vzOnline").textContent=all.length;
+ if($("vzLocated"))$("vzLocated").textContent=all.filter(r=>dgVisHasLocation(r.p)).length;
+ if($("visStatus"))$("visStatus").textContent=(dgPresenceState()==="on"?"Bağlı":"Bağlantı: "+dgPresenceState())+" · "+rows.length+" / "+all.length+" kullanıcı · "+new Date().toLocaleTimeString();
  if(box){
   const T=(s)=>(typeof dgCf==="function"?dgCf(s):s);
 if(!rows.length){
@@ -209,19 +218,19 @@ if(!rows.length){
    box.innerHTML=rows.map(r=>{
     const lbl=(DG_VIEW_LABELS[r.p.v]||r.p.v||"?");
     const ageTxt=r.age<60?r.age+" "+T("sn"):Math.round(r.age/60)+" "+T("dk");
-    const hasLoc=(r.p.la!=null&&r.p.lo!=null);
+    const hasLoc=dgVisHasLocation(r.p);
     const role=r.p.r==="owner"?"KURUCU":(r.p.r==="admin"?"DENETÇİ":"KULLANICI");
     const rc=r.p.r==="owner"?"on":(r.p.r==="admin"?"admin":"off");
     const ses=r.p.st?Math.max(0,Math.round((Date.now()-r.p.st)/60000)):null;
-    const chain=(r.p.vh||[]).slice(-3).map(h=>T(DG_VIEW_LABELS[h.v]||h.v)).join(" → ");
+    const chain=(Array.isArray(r.p.vh)?r.p.vh:[]).slice(-3).map(h=>esc(T(DG_VIEW_LABELS[h.v]||h.v))).join(" → ");
     const actTxt=r.p.act?T(DG_ACT_LABELS[r.p.act.k]||r.p.act.k)+(r.p.act.d?" · "+esc(r.p.act.d):""):"";
-    return '<div style="padding:6px 0;border-bottom:1px solid var(--line)'+(hasLoc?";cursor:pointer":"")+'"'+
+    return '<div class="dg-vis-person" style="padding:6px 0;border-bottom:1px solid var(--line)'+(hasLoc?";cursor:pointer":"")+'"'+
      (hasLoc?' onclick="dgVisFocus('+Number(r.p.la)+','+Number(r.p.lo)+')" title="'+T("Haritada odaklan")+'"':'')+'>'+
      '<div style="display:flex;gap:8px;align-items:center">'+
      '<span style="width:9px;height:9px;border-radius:50%;background:#22c55e;flex:0 0 auto"></span>'+
      '<b>'+esc(r.p.n||"?")+'</b>'+
      '<span class="badge '+rc+'" style="font-size:.6rem">'+role+'</span>'+
-     '<span style="color:var(--mut)">· '+T(lbl)+(hasLoc?" 📍":"")+'</span>'+
+     '<span style="color:var(--mut)">· '+esc(T(lbl))+(hasLoc?" 📍":"")+'</span>'+
      '<span class="dg-meta" style="margin-left:auto;white-space:nowrap">'+ageTxt+" "+T("önce")+'</span></div>'+
      '<div class="dg-meta" style="margin:3px 0 0 17px">'+
      (r.p.dev?"🖥 "+esc(r.p.dev)+" · ":"")+
@@ -277,7 +286,7 @@ function dgVisMapDraw(rows){
  const T=(s)=>(typeof dgCf==="function"?dgCf(s):s);
  const pts=[];
  for(const r of (rows||[])){
-  if(r.p.la==null||r.p.lo==null)continue;
+  if(!dgVisHasLocation(r.p))continue;
   pts.push(r);
   const col=(typeof dgMateColor==="function")?dgMateColor(r.p.id):"#2b6cb0";
   const ini=String(r.p.n||"?").trim().slice(0,1).toLocaleUpperCase("tr-TR");
@@ -285,9 +294,9 @@ function dgVisMapDraw(rows){
   const lbl=(DG_VIEW_LABELS[r.p.v]||r.p.v||"");
   const ageTxt=r.age<60?r.age+" "+T("sn"):Math.round(r.age/60)+" "+T("dk");
   /* 0045: geçici konum İZİ (presence lh) — kesikli polizgi, DB'ye yazılmaz. */
-  if(r.p.lh&&r.p.lh.length>1){
+  if($("visTrails")?.checked&&Array.isArray(r.p.lh)&&r.p.lh.length>1){
    try{
-    L.polyline(r.p.lh.map(q=>[q[0],q[1]]),{color:col,weight:2,opacity:.55,dashArray:"3 6",interactive:false}).addTo(DG_VIS_LAYER);
+    L.polyline(r.p.lh.filter(q=>Array.isArray(q)&&dgVisHasLocation({la:q[0],lo:q[1]})).slice(-30).map(q=>[q[0],q[1]]),{color:col,weight:2,opacity:.55,dashArray:"3 6",interactive:false}).addTo(DG_VIS_LAYER);
     L.circleMarker([r.p.lh[0][0],r.p.lh[0][1]],{radius:3,color:col,fillColor:"#fff",fillOpacity:.9,weight:2,interactive:false}).addTo(DG_VIS_LAYER);
    }catch(e){}
   }
@@ -295,11 +304,13 @@ function dgVisMapDraw(rows){
    .bindTooltip("<b>"+esc(r.p.n||"?")+"</b><br>"+esc(T(lbl))+"<br>"+T("son konum")+": "+ageTxt+" "+T("önce"),{direction:"top",offset:[0,-12]});
  }
  try{
-  if(pts.length===1)DG_VIS_MAP.setView([pts[0].p.la,pts[0].p.lo],13);
-  else if(pts.length>1)DG_VIS_MAP.fitBounds(L.latLngBounds(pts.map(r=>[r.p.la,r.p.lo])).pad(0.35),{maxZoom:14});
+  if((!DG_VIS_FIT||$("visFollow")?.checked)&&pts.length===1)DG_VIS_MAP.setView([pts[0].p.la,pts[0].p.lo],13);
+  else if((!DG_VIS_FIT||$("visFollow")?.checked)&&pts.length>1)DG_VIS_MAP.fitBounds(L.latLngBounds(pts.map(r=>[r.p.la,r.p.lo])).pad(0.35),{maxZoom:14});
+ if(pts.length)DG_VIS_FIT=true;
  }catch(e){}
 }
 async function dgVisActivity(){
+ if(!dgVisAllowed())return;
  const box=$("visActivity");if(!box)return;
  const T=(s)=>(typeof dgCf==="function"?dgCf(s):s);
  const loc=(typeof DG_LANG!=="undefined"&&DG_LANG==="en")?"en-GB":"tr-TR";
@@ -331,8 +342,8 @@ async function dgVisActivity(){
 }
 
 /* 0040: elle yenileme + 10 sn otomatik tik (yalnız sekme açıkken) + odaklanma */
-function dgVisRefresh(){try{renderVisitorsLive();dgVisCounts();dgVisActivity();}catch(e){}}
+async function dgVisRefresh(){if(!dgVisAllowed()||DG_VIS_REFRESHING)return;DG_VIS_REFRESHING=true;try{renderVisitorsLive();await Promise.all([dgVisCounts(),dgVisActivity()]);}finally{DG_VIS_REFRESHING=false;}}
 let DG_VIS_TIMER=null;
 function dgVisTickStart(){dgVisTickStop();DG_VIS_TIMER=setInterval(()=>{try{if(typeof DG_CUR_VIEW!=="undefined"&&DG_CUR_VIEW==="visitors")renderVisitorsLive();}catch(e){}},10000);}
 function dgVisTickStop(){if(DG_VIS_TIMER){clearInterval(DG_VIS_TIMER);DG_VIS_TIMER=null;}}
-function dgVisFocus(la,lo){try{if(DG_VIS_MAP)DG_VIS_MAP.setView([la,lo],16);}catch(e){}}
+function dgVisFocus(la,lo){try{if(!dgVisAllowed()||!dgVisHasLocation({la,lo}))return;const follow=$("visFollow");if(follow)follow.checked=false;if(DG_VIS_MAP)DG_VIS_MAP.setView([la,lo],16);}catch(e){}}

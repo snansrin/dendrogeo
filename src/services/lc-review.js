@@ -176,16 +176,32 @@ function dgGridLineMask(line,epsg){
  for(const p of pts)out.push([Array.from({length:17},(_,i)=>[p[0]+Math.cos(i*Math.PI/8)*width,p[1]+Math.sin(i*Math.PI/8)*width])]);
  return out;
 }
+/* Local millimetre precision prevents UTM floating-point slivers accumulating
+ * across repeated offset intersections. Never widen geometry after a failure. */
+function dgSurfaceClean(geom){
+ if(typeof geom?.[0]?.[0]?.[0]==="number")geom=[geom];
+ const clean=[];
+ for(const poly of geom||[]){const rings=[];for(let i=0;i<poly.length;i++){
+  const out=[];for(const p of poly[i]){const q=[Math.round(p[0]*1000)/1000,Math.round(p[1]*1000)/1000];if(!out.length||q[0]!==out.at(-1)[0]||q[1]!==out.at(-1)[1])out.push(q);}
+  if(out.length&&(out[0][0]!==out.at(-1)[0]||out[0][1]!==out.at(-1)[1]))out.push([...out[0]]);
+  if(out.length<4){if(i===0)break;continue;}rings.push(out);
+ }if(rings.length&&dgSurfaceArea([rings])>.000001)clean.push(rings);}
+ return clean;
+}
+function dgGridPrecisionClip(op,...geoms){return dgSurfaceClean(window.polygonClipping[op](...geoms.map(dgSurfaceClean)));}
 async function dgSurfaceGrid(data){
- const pc=window.polygonClipping,size=Number(data.size),clearance=Number(data.clearance),epsg=data.epsg;
+ const pc={union:(...g)=>dgGridPrecisionClip("union",...g),difference:(...g)=>dgGridPrecisionClip("difference",...g),intersection:(...g)=>dgGridPrecisionClip("intersection",...g)},size=Number(data.size),clearance=Number(data.clearance),epsg=data.epsg;
  if(![10,20,50].includes(size)||!Number.isFinite(clearance)||clearance<1||clearance>20)throw Error('Grid boyutu veya güvenlik mesafesi geçersiz.');
- const park=dgSurfacePark(data.outer,data.holes||[],epsg);
- const greens=(data.parts||[]).filter(p=>p.type==='green'&&p.geom?.length).map(p=>p.geom);
+ const globalPark=dgSurfacePark(data.outer,data.holes||[],epsg),origin=dgSurfaceBounds(globalPark).slice(0,2).map(v=>Math.floor(v));
+ const local=g=>dgSurfaceClean(g.map(poly=>poly.map(r=>r.map(p=>[p[0]-origin[0],p[1]-origin[1]]))));
+ const global=g=>g.map(poly=>poly.map(r=>r.map(p=>[p[0]+origin[0],p[1]+origin[1]])));
+ const park=local(globalPark);
+ const greens=(data.parts||[]).filter(p=>p.type==='green'&&p.geom?.length).map(p=>local(p.geom));
  if(data.greenOnly&&!greens.length)throw Error('Yeşil alan bulunamadı. Yüzey analizini kontrol edin.');
  let domain=data.greenOnly?pc.union(...greens):park;
- const obstacles=(data.blockRings||[]).filter(r=>r.length>=3).map(r=>[dgSurfaceProject(r.map(p=>[p[1],p[0]]),epsg)]);
- if(!data.greenOnly)for(const p of data.parts||[])if(p.type!=='green')obstacles.push(p.geom);
- for(const line of data.blockLines||[])if(line.pts?.length>=2)obstacles.push(...dgGridLineMask(line,epsg));
+ const obstacles=(data.blockRings||[]).filter(r=>r.length>=3).map(r=>local([[dgSurfaceProject(r.map(p=>[p[1],p[0]]),epsg)]]));
+ if(!data.greenOnly)for(const p of data.parts||[])if(p.type!=='green')obstacles.push(local(p.geom));
+ for(const line of data.blockLines||[])if(line.pts?.length>=2)obstacles.push(local(dgGridLineMask(line,epsg)));
  if(obstacles.length)domain=pc.difference(domain,...obstacles);
  domain=pc.intersection(domain,park);
  if(!domain.length)return{cells:[],epsg,size,clearance,areaM2:0};
@@ -193,7 +209,7 @@ async function dgSurfaceGrid(data){
  const radius=(clearance+.15)/Math.cos(Math.PI/16);
  for(let i=0;i<16&&safe.length;i++){const dx=Math.cos(i*Math.PI/8)*radius,dy=Math.sin(i*Math.PI/8)*radius;safe=pc.intersection(safe,domain.map(poly=>poly.map(ring=>ring.map(p=>[Math.round((p[0]+dx)*1000)/1000,Math.round((p[1]+dy)*1000)/1000]))));if(i%4===3)await new Promise(r=>setTimeout(r,0));}
  if(!safe.length)return{cells:[],epsg,size,clearance,areaM2:0};
- const bounds=dgSurfaceBounds(park),x0=Math.floor(bounds[0]/size)*size,y0=Math.floor(bounds[1]/size)*size,nx=Math.ceil((bounds[2]-x0)/size),ny=Math.ceil((bounds[3]-y0)/size);
+ const bounds=dgSurfaceBounds(park),x0=Math.floor((bounds[0]+origin[0])/size)*size-origin[0],y0=Math.floor((bounds[1]+origin[1])/size)*size-origin[1],nx=Math.ceil((bounds[2]-x0)/size),ny=Math.ceil((bounds[3]-y0)/size);
  if(nx*ny>30000)throw Error('Park zarfı çok geniş. Daha büyük grid boyutu seçin.');
  const islands=safe.map(poly=>({poly,bbox:dgSurfaceBounds([poly])})),cells=[];
  for(let row=0;row<ny;row++)for(let col=0;col<nx;col++){
@@ -205,13 +221,13 @@ async function dgSurfaceGrid(data){
   let point=[x+size/2,y+size/2];
   if(dgGridPointDistance(point,piece)<=0)point=dgGridInterior(components[component]);
   if(!point)continue;
-  const ll=dgLcUtmInverse(point[0],point[1],epsg),lat=+ll.lat.toFixed(6),lon=+ll.lon.toFixed(6),rounded=dgSurfaceProject([[lon,lat]],epsg)[0];
+  const ll=dgLcUtmInverse(point[0]+origin[0],point[1]+origin[1],epsg),lat=+ll.lat.toFixed(6),lon=+ll.lon.toFixed(6),rounded=dgSurfaceProject([[lon,lat]],epsg)[0].map((v,i)=>v-origin[i]);
   const distance=dgGridPointDistance(rounded,domain);if(distance<clearance||dgGridPointDistance(rounded,piece)<0)continue;
-  const wgs=dgSurfaceUnproject(piece,epsg),corners=quad.map(p=>dgLcUtmInverse(p[0],p[1],epsg)),baseId=row+'_'+col;
+  const wgs=dgSurfaceUnproject(global(piece),epsg),corners=quad.map(p=>dgLcUtmInverse(p[0]+origin[0],p[1]+origin[1],epsg)),baseId=row+'_'+col;
   cells.push({id:baseId+(components.length>1?'_'+component:''),baseId,row,col,lat,lon,n:0,s0:Math.min(...corners.map(p=>p.lat)),s1:Math.max(...corners.map(p=>p.lat)),w0:Math.min(...corners.map(p=>p.lon)),w1:Math.max(...corners.map(p=>p.lon)),geometry:{type:'MultiPolygon',coordinates:wgs},areaM2:dgSurfaceArea(piece),clearanceM:distance});
   }
   if(cells.length>10000)throw Error('Grid çok yoğun. Daha büyük grid boyutu seçin.');
   if(cells.length%64===0)await new Promise(r=>setTimeout(r,0));
  }
- return{cells,epsg,size,clearance,x0,y0,areaM2:dgSurfaceArea(safe)};
+ return{cells,epsg,size,clearance,x0:x0+origin[0],y0:y0+origin[1],areaM2:dgSurfaceArea(safe)};
 }

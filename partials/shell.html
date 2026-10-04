@@ -384,6 +384,7 @@
   <div class="view" id="v-visitors">
    <h2 class="disp" style="margin-bottom:16px">👁 Ziyaretçi &amp; Canlı İzleme</h2>
    <div class="alert info" style="font-size:.82rem">Bu sekme <b>yalnız kurucuya</b> açıktır. Ziyaretçi sayacı kimlik tutmaz (gizlilik); oturum açmış kullanıcıların veri işlemleri aşağıdadır. Konumlar, yalnız kullanıcı "canlı konum paylaşımı"nı açtıysa <b>geçici</b> olarak görünür — veritabanına yazılmaz.</div>
+   <div class="dg-vis-tools card"><label class="lbl" for="visSearch">Kullanıcı ara</label><input id="visSearch" type="search" placeholder="İsim veya cihaz" oninput="renderVisitorsLive()"><label class="lbl" for="visViewFilter">Ekran</label><select id="visViewFilter" onchange="renderVisitorsLive()"><option value="">Tüm ekranlar</option value="measure">Yeni Ölçüm</option><option value="nav">Waypoint</option><option value="map">Canlı Harita</option><option value="projects">Projeler</option></select><label class="measure-share"><input class="dg-switch" id="visLocated" type="checkbox" onchange="renderVisitorsLive()"><span>Yalnız konum paylaşanlar</span></label><label class="measure-share"><input class="dg-switch" type="checkbox" onchange="dgVisPause(this.checked)"><span>Görünümü duraklat</span></label><p id="visStatus" class="dg-meta" role="status">Bağlanıyor…</p><p class="dg-meta">Konum paylaşan: <b id="vzLocated">0</b> · Çevrimiçi sayısı son 2 dakikada sinyal gönderen benzersiz kullanıcıları gösterir.</p></div>
    <div class="grid g4" style="margin-bottom:18px">
     <div class="stat"><div class="lbl">👁 Toplam Ziyaret</div><div class="val" id="vzTotal">0</div></div>
     <div class="stat"><div class="lbl">👁 Bugün</div><div class="val" id="vzToday">0</div></div>
@@ -400,7 +401,8 @@
    </div>
    <div class="card" style="margin-bottom:18px">
     <div class="shead" style="margin-bottom:10px"><span class="no">🗺️</span><h2 style="font-size:1.15rem">Canlı Konum Haritası</h2><span class="rule"></span></div>
-    <p style="color:var(--mut);font-size:.8rem;margin-bottom:8px">Çevrimiçi ve konum izni açık kullanıcılar otomatik görünür (geçici; veritabanına yazılmaz). Üstüne gel → kimlik + ne yapıyor; satıra tıkla → haritada odaklan. Liste 10 sn'de bir kendiliğinden tazelenir.</p>
+    <p style="color:var(--mut);font-size:.8rem;margin-bottom:8px">Konum izni açık ve GPS etkin kullanıcılar görünür (geçici; veritabanına yazılmaz). Üstüne gel → kimlik + ne yapıyor; satıra tıkla → haritada odaklan. Liste 10 sn'de bir kendiliğinden tazelenir.</p>
+    <div class="dg-vis-map-tools"><button class="btn sm ghost" onclick="dgVisFit()">🗺️ Tümünü göster</button><label class="measure-share"><input class="dg-switch" type="checkbox" id="visFollow" onchange="dgVisMapDraw(dgVisFilter(dgVisRows()))"><span>Haritayı takip et</span></label><label class="measure-share"><input class="dg-switch" type="checkbox" id="visTrails" onchange="dgVisMapDraw(dgVisFilter(dgVisRows()))"><span>Geçici izleri göster</span></label></div>
     <div id="visMap" class="notranslate" translate="no"></div>
    </div>
    <div class="card">
