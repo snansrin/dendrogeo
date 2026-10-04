@@ -64,9 +64,9 @@ function dgLcIsMasked(code,source){
  *
  * Çıktılar grup anahtarlıdır (green/water/hard/bare/other) + ham kod kırılımı.
  */
-function dgLcProcessTile(item,href,geometryWgs,source){
+function dgLcProcessTile(item,href,geometryWgs,source,signal){
   const src=source||DG_LC_SOURCES.cross;
-  return GeoTIFF.fromUrl(href).then(async tiff=>{
+  return dgLcOpenRaster(href,signal).then(async tiff=>{
     const image=await tiff.getImage();
     const keys=typeof image.getGeoKeys==="function"?image.getGeoKeys():null;
     const keyEpsg=Math.round(Number(keys&&keys.ProjectedCSTypeGeoKey||0));
@@ -118,7 +118,7 @@ function dgLcProcessTile(item,href,geometryWgs,source){
     const values=await image.readRasters({
       window:win,
       samples:[0],
-      interleave:true
+      interleave:true,signal
     });
 
     const groupCounts={},groupAreas={},rawCounts={},rawAreas={};
@@ -366,11 +366,13 @@ function dgLcGroupAgreement(a,b){
 
 /* Tek kaynak için tam analiz zinciri */
 async function dgLcAnalyzeSource(src,bbox,geom){
+ const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),90000);
+ try{
   /* STAC karo listesi ile SAS tokenı birbirinden bağımsızdır: aynı anda
    * istenmesi mobil bağlantıda gereksiz beklemeyi azaltır. */
   const [items,token]=await Promise.all([
-    dgLcFindTiles(bbox,src),
-    dgLcGetSas(src.collection)
+    dgLcFindTiles(bbox,src,controller.signal),
+    dgLcGetSas(src.collection,controller.signal)
   ]);
 
   if(items.length>DG_LC_MAX_TILES){
@@ -386,10 +388,12 @@ async function dgLcAnalyzeSource(src,bbox,geom){
     const asset=dgLcGetDataAsset(item,src);
     if(!asset?.href)throw new Error(src.year+" veri karosunun COG asset'i bulunamadı: "+item.id);
     const href=dgLcSignedHref(asset.href,token);
-    jobs.push(dgLcProcessTile(item,href,geom,src));
+    jobs.push(dgLcProcessTile(item,href,geom,src,controller.signal));
   }
   /* Kesişen karolar bağımsızdır; seri GeoTIFF okuması yerine paralel
    * işlenir. Sonuçların birleştirilmesi deterministiktir. */
   parts.push(...await Promise.all(jobs));
   return{result:dgLcMergeTileResults(parts),items:items.map(i=>i.id)};
+ }catch(e){if(controller.signal.aborted)throw new Error(src.label+" veri okuması zaman aşımına uğradı; yeniden deneyin.");throw e;}
+ finally{clearTimeout(timer);}
 }

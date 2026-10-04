@@ -45,8 +45,7 @@ async function overpassRun(query,label="OSM"){
 
   let release=()=>{};
   // Park selection must not wait behind a slow detailed-surface request.
-  const previous=label==="park"?Promise.resolve():OVERPASS_BUSY;
-  if(label!=="park")OVERPASS_BUSY=new Promise(resolve=>{release=resolve;});
+  const previous=Promise.resolve();
   await previous;
 
   try{
@@ -66,11 +65,11 @@ async function overpassRun(query,label="OSM"){
       ? ordered
       : OVERPASS_URLS.map((url,index)=>({url,index,badUntil:0,lastOk:0}));
 
-    const deadline=label==="park"?Date.now()+15000:Infinity;
+    const deadline=Date.now()+(label==="park"?15000:20000);
     for(const item of pool){
-      if(Date.now()>=deadline){LAST_OVERPASS_ERROR="Park servisi bağlantı süresi aşıldı";break;}
+      if(Date.now()>=deadline){LAST_OVERPASS_ERROR=label+" bağlantı süresi aşıldı";break;}
       const controller=new AbortController();
-      const timeoutMs=label==="park" ? Math.min(7500,deadline-Date.now()) : 18000;
+      const timeoutMs=Math.min(label==="park"?7500:10000,deadline-Date.now());
       const timer=setTimeout(()=>controller.abort(),timeoutMs);
 
       try{

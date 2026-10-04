@@ -137,7 +137,16 @@ async function dgParkBoundaryFallback(lat,lon,radius){
    DETAILED COVERAGE QUERY
 ========================================================= */
 
-async function queryDetailedCoverage(){
+function queryDetailedCoverage(){
+ const boundary=JSON.stringify(PARK_POLY);
+ if(window.DG_SURFACE_OSM_PENDING?.boundary===boundary)return window.DG_SURFACE_OSM_PENDING.promise;
+ const promise=dgQueryDetailedCoverage();
+ window.DG_SURFACE_OSM_PENDING={boundary,promise};
+ promise.finally(()=>{if(window.DG_SURFACE_OSM_PENDING?.promise===promise)window.DG_SURFACE_OSM_PENDING=null;}).catch(()=>{});
+ return promise;
+}
+
+async function dgQueryDetailedCoverage(){
   if(
     !PARK_POLY||
     !PARK_POLY.length
@@ -226,7 +235,7 @@ async function queryDetailedCoverage(){
     return false;
   }
 
-  window.DG_SURFACE_OSM={elements:json.elements||[],boundary:JSON.stringify(PARK_POLY),fetchedAt:new Date().toISOString()};
+  window.DG_SURFACE_OSM={elements:json.elements||[],bbox:{minLat:minLat-pad,minLon:minLon-pad,maxLat:maxLat+pad,maxLon:maxLon+pad},boundary,fetchedAt:new Date().toISOString()};
   const seenWater=new Set();
   const seenImp=new Set();
 

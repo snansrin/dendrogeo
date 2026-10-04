@@ -42,8 +42,10 @@ function dgSurfaceResolved(cells,classFor,geometries,features,epsg,park){
  dgSurfaceSeed(geometries,features||[],epsg,park,parts,cells);return parts;
 }
 function dgSurfaceSummarize(base,cells,classFor,geometries,features,epsg,park){
- const areas={green:0,hard:0,building:0,water:0,pool:0,bare:0,other:0,...base};
- const parts=dgSurfaceResolved(cells,classFor,geometries,features,epsg,park),seen=new Set();
+ return dgSurfaceSummarizeParts(base,dgSurfaceResolved(cells,classFor,geometries,features,epsg,park));
+}
+function dgSurfaceSummarizeParts(base,parts){
+ const areas={green:0,hard:0,building:0,water:0,pool:0,bare:0,other:0,...base},seen=new Set();
  for(const p of parts){
   if(!seen.has(p.key)){const old=p.cell.classKey||"other";areas[old]=(areas[old]||0)-Number(p.cell.areaM2||0);seen.add(p.key);}
   areas[p.type]=(areas[p.type]||0)+p.areaM2;
@@ -122,7 +124,7 @@ function dgSurfaceCancelJobs(){for(const cancel of [...DG_SURFACE_JOBS])cancel()
 function dgSurfaceWorkerJob(data){
  return new Promise((resolve,reject)=>{
   if(typeof Worker==='undefined'){resolve(null);return;}
-  let worker;try{worker=new Worker('/src/workers/surface-worker.js');}catch(e){resolve(null);return;}
+  let worker;try{worker=new Worker(typeof dgRuntimeScriptUrl==='function'?dgRuntimeScriptUrl('/src/workers/surface-worker.js'):'/src/workers/surface-worker.js');}catch(e){resolve(null);return;}
   const finish=()=>{clearTimeout(timer);worker.terminate();DG_SURFACE_JOBS.delete(cancel);};
   const cancel=()=>{finish();reject(Error('Analiz kapatıldı.'));};
   const timer=setTimeout(()=>{finish();reject(Error('Sınır hesabı zaman aşımına uğradı.'));},90000);
@@ -147,20 +149,9 @@ function dgSurfaceMergeSync(parts,epsg){
 }
 
 function dgSurfaceDisplaySync(parts,epsg,park,prepared=null){
- const exact=prepared||dgSurfaceMergeSync(parts,epsg),pc=window.polygonClipping;
- if(!globalThis.DG_SURFACE_DISPLAY)return exact;
- const vector=parts.filter(p=>p.method!=="review-cell"||p.type==="building"||p.type==="pool");
- const objects=dgSurfaceMergeSync(vector,epsg).map(f=>dgSurfaceFeatureGeometry(f,epsg));
- const edges=[];for(const geom of [...objects,park||[]])for(const poly of geom)for(const r of poly)for(let i=1;i<r.length;i++)edges.push([r[i-1],r[i]]);
- const raw=exact.map(f=>dgSurfaceFeatureGeometry(f,epsg));
- try{
-  const visual=DG_SURFACE_DISPLAY.topology(raw,edges,6);
-  const union=pc.union(...visual),originalArea=dgSurfaceArea(pc.union(...raw));
-  // Topology and total coverage checks are display guards, not replacements for analytic QA.
-  if(Math.abs(dgSurfaceArea(union)-originalArea)>Math.max(.1,originalArea*.000001))return exact;
-  for(let i=0;i<visual.length;i++)for(let j=i+1;j<visual.length;j++)if(dgSurfaceArea(pc.intersection(visual[i],visual[j]))>.01)return exact;
-  return exact.map((f,i)=>({...f,geometry:{type:'MultiPolygon',coordinates:dgSurfaceUnproject(visual[i],epsg)}}));
- }catch(e){return exact;}
+ // The user requested the original exact map, without display smoothing.
+ // Reuse the already merged analytical features; no second topology pass.
+ return prepared||dgSurfaceMergeSync(parts,epsg);
 }
 
 /* Sampling geometry is derived from the displayed review, never from patch centroids.
