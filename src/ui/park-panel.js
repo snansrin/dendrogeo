@@ -362,7 +362,7 @@ async function drawPark(park){
 
         `<div class="dg-png-field"><label class="dg-png-label" for="gridClearance">SU / SERT ZEMİN MESAFESİ (M)</label><input id="gridClearance" class="dg-png-input" type="number" min="1" max="20" step="1" value="3"></div><button id="gridBuildBtn" class="dg-png-btn primary" onclick="buildGrid()">`+
           `🔲 Grid Oluştur`+
-        `</button><div id="gridSummary" class="dg-png-result" style="display:none"></div>`+
+        `</button>`+
       `</div>`+
 
       `<div id="parkSurfaceAction" class="dg-png-card">`+
@@ -490,7 +490,8 @@ async function drawPark(park){
      * (park-export.js) buraya lc-sens'i monte eder — rapor barlarının
      * hemen altında sınıf başına hassasiyet kaydırıcıları + uydu görüntüsü
      * üzerinde aday işaretleme + tek dokunuşla kalıcı onay. */
-    `<div id="lcSens" class="dg-png-result" style="display:none"></div>`;
+    `<div id="lcSens" class="dg-png-result" style="display:none"></div>`+
+    `<div id="gridSummary" class="dg-png-result" style="display:none"></div>`;
 
   renderRefBadge();
 

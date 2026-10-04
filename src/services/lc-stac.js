@@ -5,22 +5,17 @@
  * test/critical-fixes.test.mjs), yıl filtresi, asset seçimi, image meta
  * ve okuma penceresi hesabı. */
 
-async function dgLcFetchJson(url,options){
- const opts=Object.assign({cache:"no-store",headers:{Accept:"application/json"}},options||{});
- // Independent browser sessions may hit the provider's request quota together.
- // Retry only transient responses; authentication and validation errors remain visible.
- for(let attempt=0;attempt<3;attempt++){
-  const res=await fetch(url,opts);
-  if(res.ok)return res.json();
-  if([429,502,503,504].includes(res.status)&&attempt<2){
-   const header=res.headers?.get("Retry-After"),seconds=Number(header);
-   const delay=header?(Number.isFinite(seconds)?seconds*1000:Date.parse(header)-Date.now()):750*2**attempt;
-   await res.body?.cancel?.();
-   await new Promise((resolve,reject)=>{const signal=opts.signal;if(signal?.aborted){reject(signal.reason||new Error("İstek iptal edildi."));return;}const abort=()=>{clearTimeout(timer);reject(signal.reason||new Error("İstek iptal edildi."));};const timer=setTimeout(()=>{signal?.removeEventListener("abort",abort);resolve();},Math.max(0,Math.min(5000,delay||750)));signal?.addEventListener("abort",abort,{once:true});});
-   continue;
-  }
-  const txt=await res.text().catch(()=>"");throw new Error("HTTP "+res.status+" · "+txt.slice(0,180));
- }
+function dgLcFetchJson(url,options){
+  return fetch(url,Object.assign({
+    cache:"no-store",
+    headers:{Accept:"application/json"}
+  },options||{})).then(async res=>{
+    if(!res.ok){
+      const txt=await res.text().catch(()=> "");
+      throw new Error("HTTP "+res.status+" · "+txt.slice(0,180));
+    }
+    return res.json();
+  });
 }
 
 function dgLcSignedHref(href,token){
