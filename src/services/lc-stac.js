@@ -5,17 +5,37 @@
  * test/critical-fixes.test.mjs), yıl filtresi, asset seçimi, image meta
  * ve okuma penceresi hesabı. */
 
-function dgLcFetchJson(url,options){
-  return fetch(url,Object.assign({
-    cache:"no-store",
-    headers:{Accept:"application/json"}
-  },options||{})).then(async res=>{
-    if(!res.ok){
-      const txt=await res.text().catch(()=> "");
-      throw new Error("HTTP "+res.status+" · "+txt.slice(0,180));
-    }
-    return res.json();
-  });
+async function dgLcFetchJson(url,options){
+ const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),30000);
+ const parent=options?.signal,abort=()=>controller.abort();
+ if(parent?.aborted)controller.abort();else parent?.addEventListener('abort',abort,{once:true});
+ try{const res=await fetch(url,{cache:"no-store",headers:{Accept:"application/json"},...options,signal:controller.signal});
+  if(!res.ok){const txt=await res.text().catch(()=>"");throw new Error("HTTP "+res.status+" · "+txt.slice(0,180));}
+  return await res.json();
+ }finally{clearTimeout(timer);parent?.removeEventListener('abort',abort);}
+}
+
+/* Bound every HTTP range, including image-directory reads which GeoTIFF 2.1
+ * does not pass a readRasters signal to. Keep Range headers and COG semantics. */
+function dgLcOpenRaster(href,sourceSignal){
+ if(!GeoTIFF.fromCustomClient||!GeoTIFF.BaseClient||!GeoTIFF.BaseResponse)return GeoTIFF.fromUrl(href,{},sourceSignal);
+ class RangeResponse extends GeoTIFF.BaseResponse{
+  constructor(response,done){super();this.response=response;this.done=done;}
+  get ok(){return this.response.ok;}get status(){return this.response.status;}
+  getHeader(name){return this.response.headers.get(name);}
+  async getData(){try{return await this.response.arrayBuffer();}finally{this.done();}}
+ }
+ class RangeClient extends GeoTIFF.BaseClient{
+  async request({headers,signal}={}){
+   const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),30000);
+   const signals=[signal,sourceSignal].filter(Boolean);
+   const abort=()=>controller.abort(),done=()=>{clearTimeout(timer);for(const s of signals)s.removeEventListener('abort',abort);};
+   for(const s of signals){if(s.aborted)controller.abort();else s.addEventListener('abort',abort,{once:true});}
+   try{const response=await fetch(this.url,{headers,signal:controller.signal});if(!response.ok){try{await response.body?.cancel();}finally{done();}throw new Error("Raster HTTP "+response.status); }return new RangeResponse(response,done);}
+   catch(e){done();throw e;}
+  }
+ }
+ return GeoTIFF.fromCustomClient(new RangeClient(href));
 }
 
 function dgLcSignedHref(href,token){
@@ -45,7 +65,7 @@ function dgLcItemMatchesYear(item,year){
   return false;
 }
 
-async function dgLcFindTiles(bbox,source){
+async function dgLcFindTiles(bbox,source,signal){
   const src=source||DG_LC_SOURCES.cross;
   /* ⚠️ CORS: POST + application/json tarayıcıda preflight (OPTIONS) tetikler ve
    * Planetary Computer /search OPTIONS isteğine 405 döner → analiz daha ilk
@@ -59,7 +79,7 @@ async function dgLcFindTiles(bbox,source){
     limit:String(DG_LC_MAX_TILES)
   });
   const data=await dgLcFetchJson(DG_LC_STAC+"/search?"+qs.toString(),{
-    headers:{Accept:"application/geo+json"}
+    headers:{Accept:"application/geo+json"},signal
   });
   const ham=Array.isArray(data?.features)?data.features:[];
   const items=ham.filter(it=>dgLcItemMatchesYear(it,src.year));
@@ -70,10 +90,10 @@ async function dgLcFindTiles(bbox,source){
   return items;
 }
 
-async function dgLcGetSas(collection){
+async function dgLcGetSas(collection,signal){
   const coll=collection||DG_LC_SOURCES.cross.collection;
   try{
-    const data=await dgLcFetchJson(DG_LC_SAS+coll,{headers:{Accept:"application/json"}});
+    const data=await dgLcFetchJson(DG_LC_SAS+coll,{headers:{Accept:"application/json"},signal});
     return data?.token||"";
   }catch(err){
     console.warn("DENDROGEO · Veri imzalama tokenı alınamadı; doğrudan açık asset deneniyor.",err);
