@@ -16,10 +16,11 @@ const dir=join(root,'rapor',id),statePath=join(dir,'zenodo-deposit.json'),doiPat
 if(existsSync(doiPath)){const d=JSON.parse(readFileSync(doiPath,'utf8'));if(d.report_id!==id||!/^10\.5281\/zenodo\.\d+$/.test(d.doi||''))throw Error('Kayıtlı DOI geçersiz.');const snap=JSON.parse(readFileSync(join(dir,'data.json'),'utf8')),md=JSON.parse(readFileSync(join(dir,'metadata.json'),'utf8'));writeFileSync(join(dir,'metadata.json'),JSON.stringify(buildMetadata(snap,{id,hash:canonicalHash(snap),version:md.version,meta:{...snap.provenance,doi:d.doi},history:(md.history||[]).filter(h=>h.id!==id).map(h=>({...h,retracted:h.status==='Geri çekildi'}))}))+'\n');await renderReportPdf(id,{force:true});console.log('Mevcut DOI belgeye işlendi; ikinci kayıt oluşturulmadı.');process.exit(0);}
 const token=process.env.ZENODO_TOKEN;if(!token)throw Error('ZENODO_TOKEN gerekli. Token yalnız yerel ortamda veya GitHub Actions secret olarak kullanılmalıdır.');
 const api='https://zenodo.org/api/deposit/depositions';
+const apiHeaders={Authorization:'Bearer '+token,Accept:'application/json','User-Agent':'DendroGeo/3.0 (https://dendrogeo.org)'};
 async function call(url,method='GET',body){
  // Only the known Zenodo API may receive the token.
  const u=new URL(url);if(u.origin!=='https://zenodo.org'||!u.pathname.startsWith('/api/'))throw Error('Geçersiz Zenodo API adresi.');
- const res=await fetch(u,{method,redirect:'error',headers:{Authorization:'Bearer '+token,...(body?{'Content-Type':'application/json'}:{})},body:body?JSON.stringify(body):undefined});
+ const res=await fetch(u,{method,redirect:'error',headers:{...apiHeaders,...(body?{'Content-Type':'application/json'}:{})},body:body?JSON.stringify(body):undefined});
  if(!res.ok)throw Error('Zenodo '+method+' HTTP '+res.status);return res.json();
 }
 const snap=JSON.parse(readFileSync(join(dir,'data.json'),'utf8'));
@@ -33,7 +34,7 @@ if(deposit.submitted){
  const temp=mkdtempSync(join(tmpdir(),'dendrogeo-doi-'));
  try{
   const zip=join(temp,id+'.zip');execFileSync('python3',['-c','import pathlib,zipfile,sys; p=pathlib.Path(sys.argv[1]); z=zipfile.ZipFile(sys.argv[2],"w",zipfile.ZIP_DEFLATED); [z.write(f,f.name) for f in sorted(p.iterdir()) if f.is_file() and f.name not in ("zenodo-deposit.json","doi.json")]; z.close()',dir,zip]);
-  const res=await fetch(bucket.href+'/'+id+'.zip',{method:'PUT',redirect:'error',headers:{Authorization:'Bearer '+token,'Content-Type':'application/octet-stream'},body:readFileSync(zip)});
+  const res=await fetch(bucket.href+'/'+id+'.zip',{method:'PUT',redirect:'error',headers:{...apiHeaders,'Content-Type':'application/octet-stream'},body:readFileSync(zip)});
   if(!res.ok)throw Error('Zenodo dosya yükleme HTTP '+res.status);
  }finally{rmSync(temp,{recursive:true,force:true});}
  deposit=await call(api+'/'+deposit.id,'PUT',{metadata});

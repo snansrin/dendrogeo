@@ -53,44 +53,51 @@ async function loadVisitStats(){
  * Konum alanı (la/lo) yalnız kullanıcı "canlı konum paylaşımı"nı AÇTIYSA
  * ve GPS varsa payload'a girer; GEÇİCİDİR — veritabanına yazılmaz. */
 const DG_VIEW_LABELS={dash:"Panel",measure:"Yeni Ölçüm",nav:"Waypoint",map:"Canlı Harita",projects:"Projeler",records:"Kayıtlarım",export:"Dışa Aktar",world:"Dünya Verisi",admin:"Ölçüm Yönetimi",users:"Kullanıcılar",visitors:"Ziyaretçi & Canlı"};
-let DG_PRES=null,DG_PRES_OK=false,DG_PRES_STATE="idle",DG_PRES_RETRY=0,DG_PRES_LAST=0,DG_PRES_WATCH=null,DG_PRES_HEARTBEAT=null;
+let DG_PRES=null,DG_PRES_OK=false,DG_PRES_STATE="idle",DG_PRES_RETRY=0,DG_PRES_LAST=0,DG_PRES_WATCH=null,DG_PRES_HEARTBEAT=null,DG_PRES_TIMER=null,DG_PRES_USER=null,DG_PRES_GENERATION=0;
 function dgPresenceState(){return DG_PRES_STATE;}
 function dgPresenceReady(){return !!DG_PRES_OK;}
-function dgPresenceEmit(){try{if(typeof renderVisitorsLive==="function")renderVisitorsLive();}catch(e){}}
+function dgPresenceEmit(){try{if(typeof DG_CUR_VIEW!=="undefined"&&DG_CUR_VIEW!=="visitors")return;if(typeof renderVisitorsLive==="function")renderVisitorsLive();}catch(e){}}
+function dgPresenceStop(){
+ ++DG_PRES_GENERATION;clearTimeout(DG_PRES_TIMER);clearTimeout(DG_PRES_WATCH);clearInterval(DG_PRES_HEARTBEAT);
+ DG_PRES_TIMER=DG_PRES_WATCH=DG_PRES_HEARTBEAT=null;const old=DG_PRES;DG_PRES=null;DG_PRES_USER=null;DG_PRES_OK=false;DG_PRES_STATE="idle";
+ if(old&&typeof sb!=="undefined")Promise.resolve(sb.removeChannel(old)).catch(()=>{});
+}
 function dgPresenceFail(why){
- clearInterval(DG_PRES_HEARTBEAT);DG_PRES_HEARTBEAT=null;DG_PRES_OK=false;DG_PRES_STATE="error";dgPresenceEmit();
- if(DG_PRES_RETRY<2){DG_PRES_RETRY++;
-  setTimeout(()=>{try{if(DG_PRES&&sb&&sb.removeChannel)sb.removeChannel(DG_PRES);}catch(e){}
-   DG_PRES=null;DG_PRES_STATE="idle";dgPresenceStart();},3000);}
+ if(!DG_PRES||DG_PRES_TIMER)return;
+ clearTimeout(DG_PRES_WATCH);clearInterval(DG_PRES_HEARTBEAT);DG_PRES_WATCH=DG_PRES_HEARTBEAT=null;
+ DG_PRES_OK=false;DG_PRES_STATE="error";dgPresenceEmit();
+ const delay=Math.min(30000,1500*2**Math.min(DG_PRES_RETRY++,4));
+ DG_PRES_TIMER=setTimeout(()=>{DG_PRES_TIMER=null;dgPresenceStop();dgPresenceStart();},delay);
 }
 function dgPresenceStart(){
  try{
-  if(DG_PRES||typeof sb==="undefined"||!sb||typeof sb.channel!=="function")return;
-  if(typeof USER==="undefined"||!USER)return;
-  DG_PRES_STATE="connecting";
-  DG_PRES=sb.channel("dg-presence",{config:{presence:{key:String(USER.id)}}});
-  DG_PRES.on("presence",{event:"sync"},()=>{dgPresenceEmit();});
-  DG_PRES.subscribe(st=>{
+  if(typeof USER==="undefined"||!USER||typeof sb==="undefined"||!sb||typeof sb.channel!=="function")return;
+  if(DG_PRES&&DG_PRES_USER===String(USER.id))return;
+  if(DG_PRES)dgPresenceStop();
+  const generation=++DG_PRES_GENERATION;DG_PRES_USER=String(USER.id);DG_PRES_STATE="connecting";dgPresenceEmit();
+  const channel=DG_PRES=sb.channel("dg-presence",{config:{presence:{key:String(USER.id)+":"+DG_SID}}});
+  channel.on("presence",{event:"sync"},()=>{if(generation===DG_PRES_GENERATION)dgPresenceEmit();});
+  channel.subscribe(st=>{
+   if(generation!==DG_PRES_GENERATION)return;
    if(st==="SUBSCRIBED"){
-    DG_PRES_OK=true;DG_PRES_STATE="on";
-    if(DG_PRES_WATCH){clearTimeout(DG_PRES_WATCH);DG_PRES_WATCH=null;}
-    clearInterval(DG_PRES_HEARTBEAT);DG_PRES_HEARTBEAT=setInterval(()=>{if(!document.hidden)dgPresencePing(null,true);},30000);
-    DG_PRES_LAST=0;
-    dgPresencePing(typeof DG_CUR_VIEW!=="undefined"?DG_CUR_VIEW:"dash",true);
-    dgPresenceEmit();
-   }else if(st==="CHANNEL_ERROR"||st==="TIMED_OUT"||st==="CLOSED"){dgPresenceFail(st);}
+    DG_PRES_OK=true;DG_PRES_STATE="on";DG_PRES_RETRY=0;
+    clearTimeout(DG_PRES_WATCH);DG_PRES_WATCH=null;
+    clearInterval(DG_PRES_HEARTBEAT);DG_PRES_HEARTBEAT=setInterval(()=>dgPresencePing(null,true),30000);
+    DG_PRES_LAST=0;dgPresencePing(typeof DG_CUR_VIEW!=="undefined"?DG_CUR_VIEW:"dash",true);dgPresenceEmit();
+   }else if(st==="CHANNEL_ERROR"||st==="TIMED_OUT"||st==="CLOSED")dgPresenceFail(st);
   });
-  /* WATCHDOG: 8 sn sessizlik = takılı bağlantı → düşür, yeniden dene. */
-  if(DG_PRES_WATCH)clearTimeout(DG_PRES_WATCH);
-  DG_PRES_WATCH=setTimeout(()=>{if(DG_PRES_STATE==="connecting")dgPresenceFail("WATCHDOG");},8000);
-  /* JWT'yi ARKA PLANDA yükselt (subscribe'ı bloklamaz). */
-  (async()=>{try{
-   const{data}=await sb.auth.getSession();
-   const tok=data&&data.session&&data.session.access_token;
-   if(tok&&sb.realtime&&sb.realtime.setAuth)sb.realtime.setAuth(tok);
+  DG_PRES_WATCH=setTimeout(()=>{if(generation===DG_PRES_GENERATION&&DG_PRES_STATE==="connecting")dgPresenceFail("WATCHDOG");},20000);
+  (async()=>{try{const{data}=await sb.auth.getSession();const tok=data?.session?.access_token;
+   if(generation===DG_PRES_GENERATION&&tok&&sb.realtime?.setAuth)await sb.realtime.setAuth(tok);
   }catch(e){}})();
- }catch(e){DG_PRES=null;DG_PRES_OK=false;DG_PRES_STATE="error";}
+ }catch(e){DG_PRES_OK=false;DG_PRES_STATE="error";dgPresenceEmit();if(DG_PRES)dgPresenceFail("START");}
 }
+function dgPresenceResume(){
+ if(typeof USER==="undefined"||!USER)return;
+ if(!DG_PRES_OK){dgPresenceStop();dgPresenceStart();}else dgPresencePing(null,true);
+}
+if(typeof window.addEventListener==="function")window.addEventListener("online",dgPresenceResume);
+if(typeof document.addEventListener==="function")document.addEventListener("visibilitychange",()=>{if(!document.hidden)dgPresenceResume();});
 /* 0045 · GELİŞMİŞ CANLI İZLEME (kullanıcı: "gerçek bir izleme olsun, daha
  * detaylı olsun"). VERİTABANINA YAZMAZ: tüm alanlar presence payload'ında
  * taşınır (geçici) — kanal düşince/sekmeler kapanınca buharlaşır. Yeni tablo/
@@ -143,7 +150,9 @@ function dgPresencePing(view,force){
   if(DG_VIEW_HIST.length)p.vh=DG_VIEW_HIST.slice(-8);
   if(DG_LAST_ACT)p.act=DG_LAST_ACT;
   if(p.la!=null&&DG_LOC_HIST.length>1)p.lh=DG_LOC_HIST.slice(-12);
-  DG_PRES.track(p);
+  p.hidden=!!document.hidden;
+  const channel=DG_PRES,generation=DG_PRES_GENERATION;
+  Promise.resolve(channel.track(p)).then(status=>{if(generation===DG_PRES_GENERATION&&status!=="ok")dgPresenceFail("TRACK");}).catch(()=>{if(generation===DG_PRES_GENERATION)dgPresenceFail("TRACK");});
  }catch(e){}
 }
 function dgPresenceList(){try{return (DG_PRES&&typeof DG_PRES.presenceState==="function")?DG_PRES.presenceState():{};}catch(e){return{};}}
@@ -194,14 +203,15 @@ function dgVisHasLocation(p){return p?.la!=null&&p?.lo!=null&&Number.isFinite(Nu
 function dgVisRows(){
  let st={};try{st=dgPresenceList();}catch(e){}
  const now=Date.now(),users=new Map();
- for(const k in st)for(const p of (st[k]||[])){if(!p?.id)continue;const t=Number(p.t);if(!Number.isFinite(t))continue;const age=Math.max(0,Math.round((now-t)/1000));if(age>120)continue;const old=users.get(String(p.id));if(!old||age<old.age)users.set(String(p.id),{p,age});}
+ for(const k in st)for(const p of (st[k]||[])){if(!p?.id)continue;const t=Number(p.t);if(!Number.isFinite(t))continue;const age=Math.max(0,Math.round((now-t)/1000));if(age>120&&!dgPresenceReady())continue;const old=users.get(String(p.id));if(!old||age<old.age)users.set(String(p.id),{p,age});}
  return [...users.values()].sort((a,b)=>a.age-b.age);
 }
 function dgVisFilter(rows){const query=String($("visSearch")?.value||"").trim().toLocaleLowerCase("tr-TR"),view=$("visViewFilter")?.value||"",located=!!$("visLocated")?.checked;return rows.filter(r=>(!query||String((r.p.n||"")+" "+(r.p.dev||"")).toLocaleLowerCase("tr-TR").includes(query))&&(!view||r.p.v===view)&&(!located||dgVisHasLocation(r.p)));}
+function dgVisResetFilters(){for(const id of ["visSearch","visViewFilter"]){const el=$(id);if(el)el.value="";}const located=$("visLocated");if(located)located.checked=false;renderVisitorsLive();}
 function dgVisPause(on){DG_VIS_PAUSED=!!on;if(!on)renderVisitorsLive();else if($("visStatus"))$("visStatus").textContent="Görünüm duraklatıldı";}
 function dgVisFit(){DG_VIS_FIT=false;dgVisMapDraw(dgVisFilter(dgVisRows()));}
 function renderVisitorsLive(){
- if(!dgVisAllowed()||DG_VIS_PAUSED||document.hidden)return;
+ if(!dgVisAllowed()||DG_VIS_PAUSED||document.hidden||(typeof DG_CUR_VIEW!=="undefined"&&DG_CUR_VIEW!=="visitors"))return;
  const box=$("visLive");
  const all=dgVisRows(),rows=dgVisFilter(all);
  if($("vzOnline"))$("vzOnline").textContent=all.length;
@@ -211,9 +221,9 @@ function renderVisitorsLive(){
   const T=(s)=>(typeof dgCf==="function"?dgCf(s):s);
 if(!rows.length){
    const stt=dgPresenceState();
-   box.textContent=stt==="on"?T("(şu an başka kimse yok — kanal sessiz)")
+   box.textContent=stt==="on"?T(all.length?"Seçili filtrelere uyan kullanıcı yok. Filtreleri temizleyebilirsiniz.":"Şu an bağlı kullanıcı yok.")
     :stt==="connecting"?T("⏳ gerçek zamanlı katmana bağlanılıyor…")
-    :T("⚠ Gerçek zamanlı katman etkin değil (Supabase → Dashboard → Realtime). Kart çalışmaya devam eder; canlı liste kapalı.");
+    :T("Canlı bağlantı yeniden kuruluyor. Yenile düğmesiyle tekrar bağlanabilirsiniz.");
   }else{
    box.innerHTML=rows.map(r=>{
     const lbl=(DG_VIEW_LABELS[r.p.v]||r.p.v||"?");
@@ -227,8 +237,8 @@ if(!rows.length){
     return '<div class="dg-vis-person" style="padding:6px 0;border-bottom:1px solid var(--line)'+(hasLoc?";cursor:pointer":"")+'"'+
      (hasLoc?' onclick="dgVisFocus('+Number(r.p.la)+','+Number(r.p.lo)+')" title="'+T("Haritada odaklan")+'"':'')+'>'+
      '<div style="display:flex;gap:8px;align-items:center">'+
-     '<span style="width:9px;height:9px;border-radius:50%;background:#22c55e;flex:0 0 auto"></span>'+
-     '<b>'+esc(r.p.n||"?")+'</b>'+
+     '<span style="width:9px;height:9px;border-radius:50%;background:var(--green);flex:0 0 auto"></span>'+
+     '<b>'+esc(r.p.n||"?")+'</b>'+(r.p.hidden||r.age>120?'<span class="badge off">ARKA PLAN</span>':'')+
      '<span class="badge '+rc+'" style="font-size:.6rem">'+role+'</span>'+
      '<span style="color:var(--mut)">· '+esc(T(lbl))+(hasLoc?" 📍":"")+'</span>'+
      '<span class="dg-meta" style="margin-left:auto;white-space:nowrap">'+ageTxt+" "+T("önce")+'</span></div>'+
@@ -342,7 +352,7 @@ async function dgVisActivity(){
 }
 
 /* 0040: elle yenileme + 10 sn otomatik tik (yalnız sekme açıkken) + odaklanma */
-async function dgVisRefresh(){if(!dgVisAllowed()||DG_VIS_REFRESHING)return;DG_VIS_REFRESHING=true;try{renderVisitorsLive();await Promise.all([dgVisCounts(),dgVisActivity()]);}finally{DG_VIS_REFRESHING=false;}}
+async function dgVisRefresh(){if(!dgVisAllowed()||DG_VIS_REFRESHING)return;dgPresenceResume();DG_VIS_REFRESHING=true;try{renderVisitorsLive();await Promise.all([dgVisCounts(),dgVisActivity()]);}finally{DG_VIS_REFRESHING=false;}}
 let DG_VIS_TIMER=null;
 function dgVisTickStart(){dgVisTickStop();DG_VIS_TIMER=setInterval(()=>{try{if(typeof DG_CUR_VIEW!=="undefined"&&DG_CUR_VIEW==="visitors")renderVisitorsLive();}catch(e){}},10000);}
 function dgVisTickStop(){if(DG_VIS_TIMER){clearInterval(DG_VIS_TIMER);DG_VIS_TIMER=null;}}

@@ -1,16 +1,16 @@
 {
   "report_id": "DGR-2026-0021",
   "result_hash": "sha256:ac4eadda1f477f8e289cdcf1f1f6c71b08ce9c49a7cc161492adfd06a4940d72",
-  "doi": null,
-  "registration_status": "not_registered",
+  "doi": "10.5281/zenodo.23137788",
+  "registration_status": "registered",
   "files": [
     {
       "name": "rapor.pdf",
-      "sha256": "ca42ef02f6de00c0fa46c13b2049a47d9a3b974393119793464d1a5c14a0d24f"
+      "sha256": "acaa09ee250e558e21a6e24293c232826e803c890a200e7f947b41e0a0876d25"
     },
     {
       "name": "index.html",
-      "sha256": "10ad0204dca1a3221460dafc40dc7088623536c231d64cea233058a0cd935fbf"
+      "sha256": "69af58d38ce5b6a9c0ea5c00e3a16a796949ebc13263e0b1e52d776e6e0291f3"
     },
     {
       "name": "data.json",
@@ -18,7 +18,7 @@
     },
     {
       "name": "metadata.json",
-      "sha256": "4e1bdbcd05706fc0100b2bf2356d412340695f148996a74f7be375d655fd745c"
+      "sha256": "8282d047d232bef0799cd1acd15d64a8954a819d649999147ef45bf93e67784a"
     },
     {
       "name": "olcum.csv",

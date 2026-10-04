@@ -42,8 +42,10 @@ function dgSurfaceResolved(cells,classFor,geometries,features,epsg,park){
  dgSurfaceSeed(geometries,features||[],epsg,park,parts,cells);return parts;
 }
 function dgSurfaceSummarize(base,cells,classFor,geometries,features,epsg,park){
- const areas={green:0,hard:0,building:0,water:0,pool:0,bare:0,other:0,...base};
- const parts=dgSurfaceResolved(cells,classFor,geometries,features,epsg,park),seen=new Set();
+ return dgSurfaceSummarizeParts(base,dgSurfaceResolved(cells,classFor,geometries,features,epsg,park));
+}
+function dgSurfaceSummarizeParts(base,parts){
+ const areas={green:0,hard:0,building:0,water:0,pool:0,bare:0,other:0,...base},seen=new Set();
  for(const p of parts){
   if(!seen.has(p.key)){const old=p.cell.classKey||"other";areas[old]=(areas[old]||0)-Number(p.cell.areaM2||0);seen.add(p.key);}
   areas[p.type]=(areas[p.type]||0)+p.areaM2;

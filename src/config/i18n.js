@@ -1157,6 +1157,15 @@ const DG_I18N_EN={
 };
 
 /* EN→TR ters haritası (TR'ye dönüşte kullanılır) */
+Object.assign(DG_I18N_EN,{
+ "Çizim güncelleniyor…":"Updating surface drawing…",
+ "Filtreleri temizle":"Clear filters",
+ "Şu an bağlı kullanıcı yok.":"No users are connected right now.",
+ "Seçili filtrelere uyan kullanıcı yok. Filtreleri temizleyebilirsiniz.":"No users match these filters. You can clear the filters.",
+ "Canlı bağlantı yeniden kuruluyor. Yenile düğmesiyle tekrar bağlanabilirsiniz.":"Reconnecting live activity. Use Refresh to connect again.",
+ "ARKA PLAN":"BACKGROUND",
+ "Çevrimiçi sayısı bağlı benzersiz kullanıcıları gösterir. Arka planda kalan oturumlar ayrıca işaretlenir.":"The online count shows unique connected users. Background sessions are marked separately."
+});
 const DG_I18N_TR={};
 for(const k in DG_I18N_EN){ if(!(DG_I18N_EN[k] in DG_I18N_TR)) DG_I18N_TR[DG_I18N_EN[k]]=k; }
 
