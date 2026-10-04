@@ -1,7 +1,8 @@
 /* Geometry work stays off the interaction thread. No credentials or network reads. */
 (function(){
  self.window=self;
- importScripts('../core/surface-display.js','../../vendor/polygon-clipping-0.15.7.js','../services/park-geometry.js','../services/lc-geo.js','../services/lc-review.js');
+ const version=new URL(self.location.href).searchParams.get('v')||'current';
+ importScripts(...['../core/surface-display.js','../../vendor/polygon-clipping-0.15.7.js','../../vendor/clipper-6.4.2.js','../core/display-clip.js','../services/park-geometry.js','../services/lc-geo.js','../services/lc-review.js'].map(p=>p+'?v='+encodeURIComponent(version)));
  self.onmessage=async event=>{
   try{const d=event.data;
    if(d.job==='grid'){self.postMessage(await dgSurfaceGrid(d));return;}
