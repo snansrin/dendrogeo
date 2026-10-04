@@ -19,6 +19,7 @@ const OVERPASS_CACHE=new Map();
 const OVERPASS_HEALTH=new Map();
 
 let OVERPASS_BUSY=Promise.resolve();
+const OVERPASS_PENDING=new Map();
 
 let LAST_OVERPASS_ERROR=null;
 
@@ -26,7 +27,14 @@ function overpassCacheKey(query){
   return query.replace(/\s+/g," ").trim();
 }
 
-async function overpassRequest(query,label="OSM"){
+function overpassRequest(query,label="OSM"){
+  const key=overpassCacheKey(query);
+  if(OVERPASS_PENDING.has(key))return OVERPASS_PENDING.get(key);
+  const job=overpassRun(query,label).finally(()=>OVERPASS_PENDING.delete(key));
+  OVERPASS_PENDING.set(key,job);return job;
+}
+
+async function overpassRun(query,label="OSM"){
   const key=overpassCacheKey(query);
   const cached=OVERPASS_CACHE.get(key);
 
@@ -35,9 +43,10 @@ async function overpassRequest(query,label="OSM"){
     return cached.data;
   }
 
-  let release;
-  const previous=OVERPASS_BUSY;
-  OVERPASS_BUSY=new Promise(resolve=>{release=resolve;});
+  let release=()=>{};
+  // Park selection must not wait behind a slow detailed-surface request.
+  const previous=label==="park"?Promise.resolve():OVERPASS_BUSY;
+  if(label!=="park")OVERPASS_BUSY=new Promise(resolve=>{release=resolve;});
   await previous;
 
   try{
@@ -57,9 +66,11 @@ async function overpassRequest(query,label="OSM"){
       ? ordered
       : OVERPASS_URLS.map((url,index)=>({url,index,badUntil:0,lastOk:0}));
 
+    const deadline=label==="park"?Date.now()+15000:Infinity;
     for(const item of pool){
+      if(Date.now()>=deadline){LAST_OVERPASS_ERROR="Park servisi bağlantı süresi aşıldı";break;}
       const controller=new AbortController();
-      const timeoutMs=label==="park" ? 6500 : 18000;
+      const timeoutMs=label==="park" ? Math.min(7500,deadline-Date.now()) : 18000;
       const timer=setTimeout(()=>controller.abort(),timeoutMs);
 
       try{
@@ -76,11 +87,9 @@ async function overpassRequest(query,label="OSM"){
           cache:"no-store"
         });
 
-        clearTimeout(timer);
-
         if(res.ok){
           const data=await res.json();
-          if(data && Array.isArray(data.elements)){
+          if(data && Array.isArray(data.elements)&&!data.remark){
             OVERPASS_CACHE.set(key,{time:Date.now(),data});
             OVERPASS_HEALTH.set(item.url,{lastOk:Date.now(),badUntil:0});
             LAST_OVERPASS_ERROR=null;
@@ -90,6 +99,7 @@ async function overpassRequest(query,label="OSM"){
         }
 
         const status=res.status;
+        LAST_OVERPASS_ERROR=label+" HTTP "+status+(res.ok?" · Eksik OSM yanıtı":"");
         if(status===429){
           OVERPASS_HEALTH.set(item.url,{lastOk:item.lastOk,badUntil:Date.now()+30000});
           console.warn("Overpass 429:",item.url,"→ 30 sn karantina");
@@ -112,7 +122,7 @@ async function overpassRequest(query,label="OSM"){
         LAST_OVERPASS_ERROR=label+" "+msg;
         OVERPASS_HEALTH.set(item.url,{lastOk:item.lastOk,badUntil:Date.now()+60000});
         console.warn("Overpass bağlantı:",item.url,msg,"→ 60 sn karantina");
-      }
+      }finally{clearTimeout(timer);}
     }
   }finally{
     release();
