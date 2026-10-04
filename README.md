@@ -41,6 +41,16 @@ Burada `D` DBH (cm), `H` ağaç boyu (m), `ρ` odun yoğunluğudur. Kök biyokü
 DGR, DendroGeo park raporunun kalıcı iç kimliğidir. Yayımlanan rapor sessizce değiştirilmez; düzeltme ve geri çekmeler kayıtlı yayın süreciyle yürütülür. [Rapor arşivinde](https://dendrogeo.org/rapor/) yayımlanan raporlar ve durumları görülebilir.
 
 README başlığındaki Zenodo DOI, **DendroGeo v3.0.0 yazılım sürüm kaydına** aittir. Bir park raporunun DOI'si ancak o rapor için ayrıca atanmış ve yayımlanmışsa kullanılır; yazılım DOI'si DGR rapor DOI'si olarak gösterilmez.
+```bibtex
+@software{dendrogeo,
+  title   = {DendroGeo: Global Tree Inventory and Carbon Data System},
+  author  = {\c{S}irin, Nagihan and \c{S}irin, Sinan},
+  year    = {2026},
+  version = {3.0.0},
+  doi     = {10.5281/zenodo.22948643},
+  license = {CC-BY-NC-4.0}
+}
+```
 
 ## Site sayfaları
 
