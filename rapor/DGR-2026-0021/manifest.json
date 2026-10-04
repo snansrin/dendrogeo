@@ -6,11 +6,11 @@
   "files": [
     {
       "name": "rapor.pdf",
-      "sha256": "acaa09ee250e558e21a6e24293c232826e803c890a200e7f947b41e0a0876d25"
+      "sha256": "2391be75c953e5adf8451fc749655257a2b4f8f2e007d442571c5f6dc84e4548"
     },
     {
       "name": "index.html",
-      "sha256": "69af58d38ce5b6a9c0ea5c00e3a16a796949ebc13263e0b1e52d776e6e0291f3"
+      "sha256": "d90522ab4e538bccd34599b8df407cef17d3700ec9c5db02a5fb984357aeb50f"
     },
     {
       "name": "data.json",
