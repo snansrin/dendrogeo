@@ -75,6 +75,7 @@ const DG_LULC_CHAIN=[
 ];
 
 let DG_LULC_PROMISE=null;
+let DG_LULC_LOADED=0; // Resume after a failed download; classic const/let modules cannot execute twice.
 
 function dgLoadScriptOrdered(src){
   return new Promise((resolve,reject)=>{
@@ -90,8 +91,8 @@ function dgLoadScriptOrdered(src){
 function dgEnsureLulc(){
   if(window.DG_LANDCOVER)return Promise.resolve();
   if(!DG_LULC_PROMISE){
-    DG_LULC_PROMISE=DG_LULC_CHAIN
-      .reduce((z,src)=>z.then(()=>dgLoadScriptOrdered(src)),Promise.resolve())
+    DG_LULC_PROMISE=DG_LULC_CHAIN.slice(DG_LULC_LOADED)
+      .reduce((z,src)=>z.then(()=>dgLoadScriptOrdered(src)).then(()=>{DG_LULC_LOADED++;}),Promise.resolve())
       .then(()=>{
         if(!window.DG_LANDCOVER)throw new Error("LULC zinciri yüklendi ama DG_LANDCOVER facade oluşmadı");
       })

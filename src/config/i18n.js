@@ -24,6 +24,8 @@
 
 /* ---- EN sözlüğü: anahtar = TR dizenin trim'lenmiş hâli ---- */
 const DG_I18N_EN={
+"Kayıt silinemedi:":"Could not delete the record:",
+"Sunucu silmeyi doğrulamadı.":"The server did not confirm deletion.",
 "OSM bağlantısı başarısız; parkın olmadığı doğrulanamadı. Yeniden algılamayı deneyin.":"The OSM connection failed; the absence of a park could not be confirmed. Try detecting again.",
 "Renk yoğunluğu":"Color opacity",
 "Uydu tarama dönemi":"Satellite scan period",

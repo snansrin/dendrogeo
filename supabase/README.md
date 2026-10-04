@@ -23,6 +23,7 @@ Supabase kontrol panelinde yaşıyordu; artık her değişiklik version control'
 | `migrations/0014_publish_request_fix.sql` | **"Bekleyen istek zaten var" kilidini açar**: `report_requests_one_pending_per_park` unique index'i İŞLENMİŞ ama 'Beklemede' kalan satırları da sayıyordu (Actions'ın DB'ye yazma yetkisi yok → satırlar hiç kapanmaz) → park bir kez yayınlanınca yeni istek kalıcı bloke. Index kalkar; çift üretim koruması panel (`dgPubEntryFor`) + kuyruk (`planQueue` request_id ⇔ git günlüğü) katmanındadır. Idempotent. |
 | `migrations/0015_report_data_owner.sql` | **Yazar = veri sahibi**: `dg_park_author(park)` SECURITY DEFINER fonksiyonu — parkın onaylı kayıtlarının en çok katkı veren sahibinin `full_name/organization` değerini döndürür (e-posta SIZMAZ; anon'a yalnız bu iki alan). Rapor motoru öncelik zinciri: **dg_park_author → v_report_authors (0012) → kurumsal**. DGR-2026-0004 dersi: istek Sinan'dan gelince künyede Sinan yazdı; ölçen kişi (Nagihan) öncelikli olmalı. Idempotent. |
 | `migrations/0025_park_invites.sql` | **Park çalışma arkadaşı (0025)**: `park_invites` + `park_collaborators` + `v_my_parks`; davet/kabul/red/iptal YALNIZ SECURITY DEFINER RPC ile (`dg_invite_send/dg_invite_respond/dg_invite_revoke` — tablolarda yazma grant'i YOK). Kabul = `auth.uid()` ↔ `profiles.email` (e-posta kimlik doğrulamaz). `meas_select` OR-ile genişler: park sahibi+ortaklar ortak parkın bekleyen kayıtlarını görür (onay akışı). 0006 park-bağı ve 0007 konum çiti AYNEN geçerli. Idempotent. |
+| `migrations/20261004165219_profile_privilege_guard.sql` | Profil kimliği değişmez; normal kullanıcı kendi rolünü/aktifliğini değiştiremez. Kurucu rol/aktiflik yönetimine ve kullanıcı ad/okul düzenlemesine devam eder. SECURITY INVOKER tetikleyici; mevcut kayıtlar ve RLS kapsamı değişmez. |
 | `dump-schema.sh` | Canlı şemayı `supabase db dump` ile yeniden dökmek için yardımcı |
 | `audit/rls-probe.sh` | Anon key ile 13 saldırı denemesi (yetki yükseltme dahil) |
 | `audit/RLS-DENETIM.md` | Denetim listesi + sonuç tablosu (doldurulacak) |
@@ -236,3 +237,7 @@ tazelendiğinde `trg_compose_project_name` proje adını da otomatik düzeltir
 **İstemci tarafı:** `src/services/park-registry.js` (kimlik yazma, algılama
 akışı, ölçüm kapısı, geri doldurma aracı) + `test/park-identity.test.mjs`
 (kural kilidi) + `test/park-flow.test.mjs` (sahte Supabase ile uçtan uca akış).
+
+## 4 Ekim 2026 saha güvenliği
+
+`20261004165219_profile_privilege_guard.sql`, önceki migration'ların ardından uygulanır. SQL testleri geçici tabloda, normal kullanıcı ve kurucu rolleriyle çalıştırılıp rollback edilmiştir. Profil verileri değiştirilmez. Kod kurtarması bu güvenlik düzeltmesini geri almamalıdır.

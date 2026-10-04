@@ -22,9 +22,13 @@ async function loadRecords__scroll(){
 // 2. Kayıt sil
 async function delRec(id){
  if(!confirm(dgCf("Kayıt tamamen silinsin mi?")))return;
- const{data}=await sb.from("measurements").select("photo_url").eq("id",id).single();
- if(data)await removePhoto(data.photo_url);
- await sb.from("measurements").delete().eq("id",id);loadRecords();loadDash();
+ // Delete the row first. A rejected/zero-row delete must retain its photo.
+ const{data,error}=await sb.from("measurements").delete().eq("id",id).select("photo_url");
+ if(error||!data?.length)return toast(dgCf("Kayıt silinemedi: ")+(error?.message||dgCf("Sunucu silmeyi doğrulamadı.")),"err");
+ for(const row of data)if(row.photo_url)await removePhoto(row.photo_url);
+ loadRecords();loadDash();
+ dgMarkLiveDirty();
+ if(typeof loadLiveMap==="function"&&$("v-map")?.classList.contains("on"))loadLiveMap();
 }
 // 3. Panel istatistikleri + grafik
 async function loadDash(){
