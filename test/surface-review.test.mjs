@@ -51,3 +51,32 @@ test('each successful scan starts at neutral sensitivity and replaces the previo
 test('user changes a sensitivity slider after scanning; returning to neutral restores raster',()=>{const a=app();fixture(a);a.run('DG_SENS.record.profile={cells:{"0:0":{obs:5,ndvi:.25,mndwi:-.15,ndbi:-.1}}};dgSensSlide("hard",100);clearTimeout(DG_SENS.debounce);clearTimeout(DG_SENS.saveTimer)');assert.equal(a.run('dgSensEffective(cells[0])'),'hard');assert.equal(a.run('DG_LC_LAST.result.groupAreas.green'),200);a.run('dgSensSlide("hard",50);clearTimeout(DG_SENS.debounce);clearTimeout(DG_SENS.saveTimer)');assert.equal(a.run('dgSensEffective(cells[0])'),'green');});
 test('sensitivity sliders cannot replace visual cell corrections or brush boundaries',async()=>{const a=app();fixture(a);a.run('DG_SENS.record.profile={cells:{"0:0":{obs:5,ndvi:.25,mndwi:-.15,ndbi:-.1}}};DG_SENS.record.corrections={"0:0":{to:"water",method:"visual-cell"}};dgSensSlide("hard",100);clearTimeout(DG_SENS.debounce);clearTimeout(DG_SENS.saveTimer)');assert.equal(a.run('dgSensEffective(cells[0])'),'water');a.run('dgSensRepartition=async()=>{};dgSensSave=async()=>true');a.ctx.stroke=a.run('cells.map(c=>[c.center.lat,c.center.lon])');await a.run('dgSensBrushCommit(stroke,"building",10)');assert.ok(a.run('dgSensAreas().building')>0);assert.equal(a.run('DG_LC_LAST.result.groupAreas.green'),200);});
 test('failed scan clears its old profile and starts neutral; a late scan cannot replace the next park',async()=>{const a=app();fixture(a);a.run('DG_SENS.record.sens={green:0,water:0,hard:100,bare:0};DG_SENS.record.spectralEnabled=true;DG_SENS.record.profile={cells:{old:{obs:4}}};dgSensRender=()=>{};dgSensRefreshLayer=()=>{};dgSensSave=async()=>true');a.ctx.window.DG_LC_S2.profile=async()=>{throw Error('network failure');};await a.run('dgSensScan()');assert.equal(a.run('DG_SENS.record.profile'),null);assert.deepEqual(JSON.parse(JSON.stringify(a.run('DG_SENS.record.sens'))),{green:50,water:50,hard:50,bare:50});assert.equal(a.run('DG_SENS.record.spectralEnabled'),false);assert.match(a.run('DG_SENS.status'),/Tarama başarısız/);a.ctx.window.DG_LC_S2.profile=async()=>{a.run('DG_SENS.epoch++');return{cells:{}};};await a.run('dgSensScan()');assert.equal(a.run('DG_SENS.record.profile'),null);});
+
+test('raw view menu keeps return enabled while editing tools remain disabled',()=>{
+ const a=app();fixture(a);a.run('DG_SENS.rawView=true;dgSensRenderPaintTools()');
+ const html=a.el('surfaceBrushTools').innerHTML;
+ const toggle=html.match(/<button[^>]*onclick="dgSensRawView\(!DG_SENS.rawView\)"[^>]*>/)?.[0];
+ assert.ok(toggle);assert.doesNotMatch(toggle,/disabled/);
+ assert.match(html,/<select id="dgSensBrushType"[^>]*disabled/);
+ a.run('DG_SENS.busy=true;dgSensRenderPaintTools()');
+ assert.match(a.el('surfaceBrushTools').innerHTML,/<button[^>]*onclick="dgSensRawView\(!DG_SENS.rawView\)"[^>]*disabled/);
+});
+test('raw-to-edit round trip reuses prepared editing geometry and preserves corrections',async()=>{
+ const a=app();fixture(a);a.run('DG_SENS.record.corrections={"0:0":{to:"water",method:"visual-cell"}}');
+ const original=a.run('DG_SENS.geometry'),before=a.run('JSON.stringify(DG_SENS.record)');
+ let partitions=0;a.ctx.dgSensRepartition=async()=>{partitions++;a.run('DG_SENS.geometry={raw:true};DG_SENS.partitionVersion=123');};
+ a.run('dgSensDrawCancel=()=>{};dgSensRender=()=>{};dgSensRefreshLayer=async()=>{};dgSensUpdateSummary=()=>{}');
+ await a.run('dgSensRawView(true)');assert.equal(a.run('DG_SENS.rawView'),true);
+ await a.run('dgSensRawView(false)');assert.equal(a.run('DG_SENS.rawView'),false);
+ assert.equal(a.run('DG_SENS.geometry'),original);assert.equal(partitions,1);
+ assert.equal(a.run('dgSensAreas().water'),100);assert.equal(a.run('JSON.stringify(DG_SENS.record)'),before);
+ assert.equal(a.run('DG_SENS.busy'),false);assert.equal(a.run('DG_SENS.editView'),null);
+ await a.run('dgSensRawView(false)');assert.equal(partitions,1);
+});
+test('real raw preparation excludes boundaries, then restores manual and accepted data',async()=>{
+ const a=app(),f=fixture(a);a.ctx.boundary={type:'building',ring:f.ring(0,0,10,10)};
+ a.run('DG_SENS.record.objectFeatures=[];DG_SENS.record.features=[boundary];DG_SENS.record.corrections={"0:1":{to:"water",method:"visual-cell"}};DG_SENS.record.acceptedResult={areas:{building:100,water:100}};dgSensDrawCancel=()=>{};dgSensRender=()=>{};dgSensRefreshLayer=async()=>{};dgSensUpdateSummary=()=>{}');
+ const before=a.run('JSON.stringify(DG_SENS.record)'),editing=a.run('JSON.stringify(dgSensAreas())');
+ await a.run('dgSensRawView(true)');assert.equal(a.run('dgSensAreas().green'),200);assert.equal(a.run('dgSensAreas().building'),0);
+ await a.run('dgSensRawView(false)');assert.equal(a.run('JSON.stringify(dgSensAreas())'),editing);assert.equal(a.run('JSON.stringify(DG_SENS.record)'),before);
+});
