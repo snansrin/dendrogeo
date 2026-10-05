@@ -22,12 +22,7 @@ describe('calc() — Chave vd. (2014) AGB formülü', () => {
   test('Kızılçam D=30 cm H=20 m → 465.889 kg AGB', () => {
     const r = calc(30, 20, 'KIZILÇAM', 'İBRELİ');
     assert.ok(Math.abs(r.agb - agb(478, 30, 20)) < 1e-6, 'agb=' + r.agb);
-    // Beklenen değer elle yazılmış sabitle DEĞİL, formülün bağımsız yeniden
-    // yazımıyla karşılaştırılıyor (agb yardımcısı). Sebep: uygulama rho/1000
-    // bölmesi yapıyor; 0.478 sabitini elle yazınca son basamakta ~2.4e-6 mutlak
-    // (~5e-9 bağıl) kayan nokta farkı kalıyor ve sıkı tolerans yanlış alarm verir.
     assert.equal(r.agb, agb(478, 30, 20));
-    // Büyüklük denetimi: formül katsayısı veya birimler bozulursa bu patlar.
     assert.ok(Math.abs(r.agb - 465.88921674) / 465.88921674 < 1e-6, 'agb=' + r.agb);
   });
 
@@ -42,7 +37,6 @@ describe('calc() — Chave vd. (2014) AGB formülü', () => {
     assert.ok(Math.abs(r.c_agb - r.agb * 0.47) < 1e-9);
     assert.ok(Math.abs(r.c_bhb - r.bhb * 0.47) < 1e-9);
     assert.ok(Math.abs(r.total_carbon - r.bio * 0.47) < 1e-9);
-    // iç tutarlılık: parçaların toplamı bütüne eşit olmalı
     assert.ok(Math.abs(r.c_agb + r.c_bhb - r.total_carbon) < 1e-9);
   });
 
@@ -70,10 +64,6 @@ describe('calc() — sınır ve geçersiz girdiler', () => {
   for (const [ad, dbh, h] of durumlar) {
     test(ad + ' → tüm alanlar sıfır, NaN yayılmıyor', () => {
       const r = calc(dbh, h, 'MEŞE', 'YAPRAKLI');
-      // assert.deepEqual KULLANILMIYOR: dönen nesne node:vm bağlamının
-      // realm'inden geliyor ve Object.prototype'ı farklı. Node bu durumda
-      // "Values have same structure but are not reference-equal" hatası verir.
-      // Anahtar kümesini ve değerleri ayrı ayrı karşılaştırıyoruz.
       assert.deepEqual(Object.keys(r).sort(), Object.keys(SIFIR).sort());
       for (const [k, v] of Object.entries(SIFIR)) {
         assert.equal(r[k], v, k + ' = ' + r[k] + ' olmalıydı');
@@ -85,7 +75,7 @@ describe('calc() — sınır ve geçersiz girdiler', () => {
   }
 });
 
-describe('rho fallback zinciri — tür → grup → DİĞER', () => {
+describe('rho fallback zinciri — kanonik tür → grup → DİĞER', () => {
   test('rho değeri bilinen tür kendi değerini kullanır', () => {
     assert.equal(app.rho['KIZILÇAM'], 478);
     const r = calc(30, 20, 'KIZILÇAM', 'İBRELİ');
@@ -93,7 +83,6 @@ describe('rho fallback zinciri — tür → grup → DİĞER', () => {
   });
 
   test('rho değeri null olan tür grup varsayılanına düşer', () => {
-    // JAPON SOFORASI species.js içinde rho:null → YAPRAKLI varsayılanı 541
     assert.equal(app.rho['JAPON SOFORASI'], undefined, 'rho:null olan tür haritaya yazılmamalı');
     const r = calc(30, 20, 'JAPON SOFORASI', 'YAPRAKLI');
     assert.ok(Math.abs(r.agb - agb(541, 30, 20)) < 1e-6, 'agb=' + r.agb);
@@ -109,52 +98,48 @@ describe('rho fallback zinciri — tür → grup → DİĞER', () => {
     assert.ok(Math.abs(r.agb - agb(493, 30, 20)) < 1e-6);
   });
 
-  test('CANARY: 51 tür kaydının 29 kadarında rho yok — veri kalitesi borcu (0042: +AKASYA)', () => {
-    // Bu test bilinçli olarak MEVCUT DURUMU belgeler. rho tablosu
-    // dolduruldukça `bos` sayısı düşmeli; o zaman bu test güncellenir.
-    // 0011e (2026-09-28 · kullanıcı kararı): Göksu'nun 5 türü kaynaklı
-    // ρ'larıyla LİSTEDE (SALKIM SÖĞÜT, MAVİ LADİN, DOĞU ÇINARI, ATLAS
-    // SEDİRİ, CEVİZ); AĞLAYAN SÖĞÜT listede YOK (yalnız çözümleyicide).
-    // Orijinal 45 kaydın ρ değerleri (null'lar dahil) birebir korunur →
-    // bos sayısı 28'de kalır: 23 orijinal + 5 yeni türün 5'i de ρ'lu... 
-    // (yeni 5 tür ρ'lu olduğu için bos = 28 - 0 = 28; liste 45+5=50).
-    // 0042 (kullanıcı isteği): AKASYA (Acacia spp.) eklendi — ρ kaynak
-    // bekliyor (UYDURULMAZ) → liste 51, bos 29.
+  test('CANARY: 51 tür kaydının yalnız kanonik tabloda bulunan 17 türünde özel rho vardır', () => {
     const hepsi = Object.values(app.SPECIES_DATA).flat();
     const bos = hepsi.filter((s) => !s.rho).length;
-    assert.equal(hepsi.length, 51, 'tür kaydı sayısı değişti (0042: 50+AKASYA)');
-    assert.equal(bos, 29, 'rho eksik tür sayısı ' + bos + ' oldu — 0042: AKASYA rho-suz eklendi; tabloyu doldurduysanız bu testi güncelleyin');
+    assert.equal(hepsi.length, 51, 'tür kaydı sayısı değişti');
+    assert.equal(bos, 34, 'kanonik tablo dışında özel rho eklenmiş veya kilitli rho silinmiş olabilir');
   });
 
-  test('0011e: Göksu 5 türü kaynaklı ρ ile panel listesinde; AĞLAYAN SÖĞÜT gizli', () => {
-    // Kullanıcı kararı (2026-09-28): 5 gerçek tür listede KALIR, ρ'lar
-    // kaynaklardan (Zanne 2009 [Z09] / Wood Database [WD]); uydurma yok.
-    assert.equal(app.rho['SALKIM SÖĞÜT'], 400);   // Salix babylonica [Z09]
-    assert.equal(app.rho['MAVİ LADİN'], 450);     // Picea pungens [WD]
-    assert.equal(app.rho['DOĞU ÇINARI'], 600);    // Platanus orientalis [Z09]
-    assert.equal(app.rho['ATLAS SEDİRİ'], 490);   // Cedrus atlantica [WD]
-    assert.equal(app.rho['CEVİZ'], 560);          // Juglans regia [Z09]/[WD]
-    assert.equal(app.LATIN['SALKIM SÖĞÜT'], 'Salix babylonica');
-    assert.equal(app.LATIN['CEVİZ'], 'Juglans regia');
-    // Panel hesabı artık tür ρ'sunu kullanır (grup varsayılanı DEĞİL)
-    const r = calc(30, 20, 'SALKIM SÖĞÜT', 'YAPRAKLI');
-    assert.ok(Math.abs(r.agb - agb(400, 30, 20)) < 1e-6, 'calc ρ=400 kullanmalı: ' + r.agb);
-    // AĞLAYAN SÖĞÜT: kullanıcı "listede olmasın" dedi → panelde YOK,
-    // çözümleyicide VAR (SALKIM SÖĞÜT'ün eşanlamlısı)
+  test('2026-10-06 kilidi: tablo dışı beş tür özel rho taşımaz, grup geneline düşer', () => {
+    for (const name of ['SALKIM SÖĞÜT', 'MAVİ LADİN', 'DOĞU ÇINARI', 'ATLAS SEDİRİ', 'CEVİZ']) {
+      assert.equal(app.rho[name], undefined, name + ' özel rho taşımamalı');
+    }
+    const yaprakli = calc(30, 20, 'SALKIM SÖĞÜT', 'YAPRAKLI');
+    assert.ok(Math.abs(yaprakli.agb - agb(541, 30, 20)) < 1e-6, 'SALKIM SÖĞÜT grup 541 kullanmalı');
+    const ibreli = calc(30, 20, 'MAVİ LADİN', 'İBRELİ');
+    assert.ok(Math.abs(ibreli.agb - agb(446, 30, 20)) < 1e-6, 'MAVİ LADİN grup 446 kullanmalı');
     assert.equal(app.rho['AĞLAYAN SÖĞÜT'], undefined);
     assert.equal(app.LATIN['AĞLAYAN SÖĞÜT'], undefined);
     assert.equal(app.resolveSpeciesName('Ağlayan söğüt'), 'AĞLAYAN SÖĞÜT');
   });
 
-  test('0011: eşanlamlı çözümleyici (resolveSpeciesName) kanonik ada indirger', () => {
+  test('eşanlamlı ve Latince çözümleyici kanonik ada indirger', () => {
     const rs = app.resolveSpeciesName;
     assert.equal(rs('mavi ladin'), 'MAVİ LADİN');
     assert.equal(rs('  Cınar '), 'ÇINAR');
     assert.equal(rs('Ağlayan Söğüt'), 'AĞLAYAN SÖĞÜT');
     assert.equal(rs('CEVIZ'), 'CEVİZ');
     assert.equal(rs('MAZI (YALANCI SERVİ)'), 'MAZI (YALANCI SERVİ)');
+    assert.equal(rs('Sığla'), 'SIĞLA');
+    assert.equal(rs('SIGLA'), 'SIĞLA');
+    assert.equal(rs('Liquidambar orientalis'), 'SIĞLA');
     assert.equal(rs('OLMAYAN TÜR'), null);
     assert.equal(rs(null), null);
+  });
+});
+
+describe('calc() — SIĞLA regresyonu', () => {
+  test('Türkçe ve Latince ad aynı 468 kg/m3 yoğunlukla aynı sonucu verir', () => {
+    const beklenen = agb(468, 30, 20);
+    for (const sp of ['SIĞLA', 'Sığla', 'SIGLA', 'Liquidambar orientalis']) {
+      const r = calc(30, 20, sp, 'YAPRAKLI');
+      assert.ok(Math.abs(r.agb - beklenen) < 1e-9, sp + ' için AGB=' + r.agb);
+    }
   });
 });
 
@@ -178,8 +163,8 @@ describe('calc() — monotonluk (fiziksel tutarlılık)', () => {
   });
 
   test('yoğunluk arttıkça biyokütle rho^0.976 ile ölçeklenir', () => {
-    const hafif = calc(30, 20, 'GÖKNAR', 'İBRELİ').agb;   // rho=350
-    const agir = calc(30, 20, 'KIZILÇAM', 'İBRELİ').agb;  // rho=478
+    const hafif = calc(30, 20, 'GÖKNAR', 'İBRELİ').agb;
+    const agir = calc(30, 20, 'KIZILÇAM', 'İBRELİ').agb;
     assert.ok(agir > hafif);
     const beklenenOran = Math.pow(478 / 350, 0.976);
     assert.ok(Math.abs(agir / hafif - beklenenOran) < 1e-6);
