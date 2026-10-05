@@ -99,9 +99,8 @@ function initLanding(){
   if(errors.length){
    /* Üç bağımsız panelden biri aksasa bile diğer ikisi görünür kalır. */
    console.error("DENDROGEO · landing verisi kısmen yüklenemedi:",errors);
-   toast("⚠ Bazı istatistikler yüklenemedi. Harita ve diğer veriler kullanılabilir.","warn","🌍");
+   toast("⚠ Genel istatistikler yüklenemedi (ağ/oturum). Sayfayı yenileyin.","warn","🌍");
   }
  })();
  trackVisit();
 }
-
