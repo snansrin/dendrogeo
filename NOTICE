@@ -1,41 +1,48 @@
 DendroGeo — Küresel Ağaç Envanteri ve Karbon Veri Sistemi
 Copyright (c) 2026 Nagihan ŞİRİN & Sinan ŞİRİN
 
-Bu çalışma (kaynak kodu, arayüz, belgeler ve yayımlanan veri seti) Creative
-Commons Attribution-NonCommercial 4.0 International (CC BY-NC 4.0) lisansı
-altındadır. Lisans metni: LICENSE dosyası ve
-https://creativecommons.org/licenses/by-nc/4.0/deed.tr
+## DendroGeo içeriği
 
-Bu lisans KISACA şunu söyler:
-  ✅ Paylaşabilirsin — kopyala, dağıt (uygun atıfla)
-  ✅ Uyarlayabilirsin — türev çalışmalar (uygun atıfla)
-  ⛔ Ticari amaçla kullanamazsın (ticari kullanım için yazılı izin gerekir:
-     sinan@dendrogeo.org)
-  ⛔ Ek kısıtlama getiremezsin (teknolojik önlem / hukuki şart ekleyemezsin)
+DendroGeo hak sahiplerinin yayımlama yetkisine sahip olduğu özgün kaynak kodu,
+arayüz, belge ve yazılım sürüm kaydı Creative Commons
+Attribution-NonCommercial 4.0 International (CC BY-NC 4.0) lisansı
+altındadır. Lisansın tam metni LICENSE dosyasında ve şu adreste bulunur:
+https://creativecommons.org/licenses/by-nc/4.0/
 
-ZORUNLU ATIF BİÇİMİ
-  Kod/arayüz için:
-    "DendroGeo: Küresel Ağaç Envanteri ve Karbon Veri Sistemi.
-     N. Şirin & S. Şirin (2026). https://github.com/snansrin/dendrogeo
-     Lisans: CC BY-NC 4.0"
+Bu bildirim üçüncü taraf yazılımı, harita/raster verisini, hizmet içeriğini,
+saha kullanıcısının yüklediği kayıtları veya kişisel verileri DendroGeo
+lisansı altına almaz. Her içerik kaynağının lisansı, atfı ve yayımlama izni
+ayrı değerlendirilir. Ayrıntılı ve sürüm bazlı kayıt:
+docs/THIRD_PARTY_LICENSES.md
 
-  Veri seti için (DOI ile, sürüm belirtilebilir):
-    "DendroGeo: Global Tree Inventory and Carbon Data System [Data set].
-     Zenodo. https://doi.org/10.5281/zenodo.22948643
-     Lisans: CC BY-NC 4.0"
+Önerilen yazılım atfı:
+"DendroGeo: Küresel Ağaç Envanteri ve Karbon Veri Sistemi.
+N. Şirin & S. Şirin (2026). https://github.com/snansrin/dendrogeo
+Lisans: CC BY-NC 4.0"
 
-ÜÇÜNCÜ TARAF BİLEŞENLER (kendi lisanslarıyla kullanılır, CC BY-NC kapsamaz)
-  Leaflet 1.9.4                 BSD-2-Clause
-  Leaflet.markercluster 1.5.3   MIT
-  Supabase JS 2.116.0           MIT
-  Chart.js 4.5.1                MIT
-  GeoTIFF.js 2.1.3              MIT
-  OpenStreetMap verisi          ODbL 1.0 — atıf: "© OpenStreetMap contributors"
-  OpenTopoMap karoları          CC-BY-SA 3.0
-  Esri World Imagery            Esri kullanım koşulları (kaynak zinciri atfı)
-  ESA WorldCover 2021 v200      CC BY 4.0 (ESA)
-  IO LULC 2020                  CC BY 4.0
+Zenodo DOI 10.5281/zenodo.22948643 DendroGeo yazılım sürüm kaydına aittir.
+Bu DOI bir park raporuna veya kullanıcı kaynaklı veri setine aitmiş gibi
+gösterilmemelidir. Her rapor/veri yayını kendi DOI'sine ve veri lisansına
+sahipse bunları ayrıca belirtmelidir.
 
-Harita karoları ve arazi örtüsü raster'ları üçüncü taraf lisanslarına tabidir;
-DendroGeo arayüzünde kaynak atıfları bu yüzden görünür tutulur
-(Leaflet attribution + PNG çıktısındaki telif satırı).
+## Başlıca üçüncü taraf bileşen ve kaynaklar
+
+- Leaflet 1.9.4 — BSD-2-Clause
+- Leaflet.markercluster 1.5.3 — MIT
+- Supabase JavaScript client 2.116.0 — MIT
+- Chart.js 4.5.1 — MIT
+- GeoTIFF.js 2.1.3 — MIT
+- polygon-clipping 0.15.7 — MIT; dağıtılan bundle içindeki diğer lisans
+  bildirimleri ayrıca geçerlidir
+- OpenStreetMap verisi — ODbL 1.0
+- OpenTopoMap harita karoları — CC BY-SA 3.0
+- Esri World Imagery — Esri ArcGIS hizmet koşulları ve katmana özgü atıf
+- ESA WorldCover 2021 v200 — CC BY 4.0
+- Impact Observatory Maps for Good Annual LULC 2020 — CC BY 4.0
+- Copernicus Sentinel-2 verisi — Copernicus'un serbest, tam ve açık veri
+  politikası; ilgili kaynak bildirimi kullanılmalıdır
+- Fraunces, Manrope ve IBM Plex Mono fontları — SIL Open Font License 1.1
+
+Bu kısa liste tam envanter değildir. Bağımlılık sürümleri, atıf biçimleri,
+servis şartları ve kaynak lisansları için
+docs/THIRD_PARTY_LICENSES.md dosyasına bakın.
