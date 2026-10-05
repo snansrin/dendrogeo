@@ -46,7 +46,7 @@ const DG_LC_SOURCES={
     year:2021,
     assetKeys:["map","data"],
     label:"ESA WorldCover 10 m · 2021 (v200)",
-    citation:"ESA WorldCover 10 m 2021 v200, CC BY 4.0",
+    citation:"© ESA WorldCover project 2021 / Contains modified Copernicus Sentinel data (2021) processed by ESA WorldCover consortium. ESA WorldCover 10 m 2021 v200, CC BY 4.0",
   },
   cross:{
     key:"cross",
@@ -54,7 +54,7 @@ const DG_LC_SOURCES={
     year:2020,
     assetKeys:["data","lulc"],
     label:"IO LULC 10 m · 2020 (çapraz doğrulama)",
-    citation:"Impact Observatory 10m Annual LULC v02, CC BY 4.0",
+    citation:"Impact Observatory Maps for Good Annual LULC 2020 (v02), CC BY 4.0",
   },
 };
 
