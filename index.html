@@ -234,43 +234,43 @@
 <script src="vendor/leaflet.markercluster-1.5.3.js" defer></script>
 <script src="vendor/supabase-js-2.116.0.js" defer></script>
 <script src="src/config/supabase.js?v=6b91ef6f" defer></script>
-<script src="src/config/constants.js?v=f65498e4" defer></script>
-<script src="src/config/species.js?v=c7a16ce8" defer></script>
+<script src="src/config/constants.js?v=9f758cd5" defer></script>
+<script src="src/config/species.js?v=597bfd9f" defer></script>
 <!-- DİL KATMANI (0035): TR markup varsayılan; EN sözlüğü çalışma zamanında
      uygulanır (dgToggleLang). defer sırası önemli değil — DOMContentLoaded'da
      ya da hemen (hazırsa) çalışır. module-registry + CORE_ASSETS kaydı şart. -->
-<script src="src/config/i18n.js?v=ff42ae94" defer></script>
+<script src="src/config/i18n.js?v=00000000" defer></script>
 <script src="src/utils/geo.js?v=3e796768" defer></script>
 <script src="src/utils/truncation.js?v=f43c76b3" defer></script>
 <!-- Faz 7: geotiff (317 KB) ve chart.js (208 KB) artık SENKRON yüklenmiyor;
      src/utils/lazylibs.js ihtiyaç anında enjekte eder (LULC analizi / panel grafiği). -->
-<script id="dgRuntimeBuild" type="application/json">"a23cac25722ee3e6"</script>
-<script src="src/utils/lazylibs.js?v=19763039" defer></script>
+<script id="dgRuntimeBuild" type="application/json">"__DG_RUNTIME_BUILD__"</script>
+<script src="src/utils/lazylibs.js?v=00000000" defer></script>
 <script src="src/services/allometry.js?v=23ec2992" defer></script>
-<script src="src/services/auth.js?v=1e92b5cd" defer></script>
-<script src="src/services/export.js?v=cf5c039b" defer></script>
-<script src="src/services/offline.js?v=3152b55e" defer></script>
+<script src="src/services/auth.js?v=7c805a8c" defer></script>
+<script src="src/services/export.js?v=cf96e318" defer></script>
+<script src="src/services/offline.js?v=8017c712" defer></script>
 <!-- YÖNETİM ZİNCİRİ (Faz 6 — eski admin.js beş modüle bölündü) -->
-<script src="src/services/visit-stats.js?v=c10aa02f" defer></script>
-<script src="src/services/data-requests.js?v=59fe4b11" defer></script>
-<script src="src/services/user-admin.js?v=354a2701" defer></script>
-<script src="src/services/backup.js?v=b56fd4f9" defer></script>
-<script src="src/services/admin.js?v=7786640a" defer></script>
+<script src="src/services/visit-stats.js?v=00000000" defer></script>
+<script src="src/services/data-requests.js?v=00000000" defer></script>
+<script src="src/services/user-admin.js?v=00000000" defer></script>
+<script src="src/services/backup.js?v=00000000" defer></script>
+<script src="src/services/admin.js?v=00000000" defer></script>
 <!-- YÖNETİM AĞACI (2026-09-24): park → proje → kullanıcı → ölçüm kademeli
      görünümü + sorgu hatası görünürlüğü. admin.js'ten SONRA yüklenir
      (approve/reject/del fonksiyonlarını çağırır). -->
-<script src="src/services/admin-tree.js?v=8deb232d" defer></script>
+<script src="src/services/admin-tree.js?v=00000000" defer></script>
 <!-- BİLİMSEL RAPOR YAYINI (2026-09-27): site içinden yayın kuyruğu —
      📄 Yayınla → report_requests (0008) → rapor-yayin.yml → rapor/DGR-…/
      → kalıcı bağlantı + 📤 Paylaş. admin.js loadAdmin() bu modülü çağırır. -->
-<script src="src/core/surface-display.js?v=0bed5180" defer></script>
-<script src="src/core/report-context.js?v=20d570c7" defer></script>
-<script src="src/services/academic-profile.js?v=ab18cc96" defer></script>
-<script src="src/services/report-publish.js?v=0836b57c" defer></script>
-<script src="src/services/park-invites.js?v=1023c17d" defer></script>
-<script src="src/services/world.js?v=c72d9019" defer></script>
-<script src="src/services/measure.js?v=444d6096" defer></script>
-<script src="src/services/map.js?v=9f6c9825" defer></script>
+<script src="src/core/surface-display.js?v=00000000" defer></script>
+<script src="src/core/report-context.js?v=00000000" defer></script>
+<script src="src/services/academic-profile.js?v=00000000" defer></script>
+<script src="src/services/report-publish.js?v=00000000" defer></script>
+<script src="src/services/park-invites.js?v=00000000" defer></script>
+<script src="src/services/world.js?v=9623fcee" defer></script>
+<script src="src/services/measure.js?v=9a57298b" defer></script>
+<script src="src/services/map.js?v=ec711385" defer></script>
 <!-- LULC ZİNCİRİ ARTIK TEMBEL (2026-09-25 · Faz 8): 8 dosya ilk yüklemede
      indirilmiyor. Yalnız "🌿 Yüzey Örtüsü Analizi"ne basan kullanıcı için
      src/utils/lazylibs.js → dgEnsureLulc() sırayla enjekte eder
@@ -279,29 +279,29 @@
      yani çevrimdışı davranış değişmez. Kazanç: ilk yüklemede 8 istek azalır. -->
 <!-- PARK ZİNCİRİ (Faz 4 — eski gridplan.js yedi modüle bölündü; sıralama ÖNEMLİ:
      state → istemci → geometri → sorgu → motor → panel → export) -->
-<script src="src/services/park-state.js?v=78c0b4e3" defer></script>
-<script src="src/services/osm-client.js?v=651b4da2" defer></script>
-<script src="src/services/park-geometry.js?v=ff23581a" defer></script>
-<script src="src/services/geofence.js?v=f1d93562" defer></script>
-<script src="src/services/park-query.js?v=400e3b3f" defer></script>
+<script src="src/services/park-state.js?v=00000000" defer></script>
+<script src="src/services/osm-client.js?v=00000000" defer></script>
+<script src="src/services/park-geometry.js?v=00000000" defer></script>
+<script src="src/services/geofence.js?v=00000000" defer></script>
+<script src="src/services/park-query.js?v=00000000" defer></script>
 <!-- PARK KİMLİĞİ (2026-09-24): queryPark'ın bulduğu parkı public.parks'a yazar,
      projeyi parka bağlar, ölçüm kapısını (park algılanmadan ölçüm yok) kurar.
      Sıra ÖNEMLİ: park-query'den sonra, grid-engine'den önce (grid panelindeki
      proje listesi bu modülden beslenir). -->
-<script src="src/services/park-registry.js?v=85cf9bd9" defer></script>
-<script src="src/services/grid-engine.js?v=55f5f5f9" defer></script>
-<script src="src/ui/park-panel.js?v=9d44698a" defer></script>
-<script src="src/ui/park-export.js?v=c724cd32" defer></script>
-<script src="src/services/dash.js?v=91cf55ce" defer></script>
-<link rel="stylesheet" href="css/style.css?v=5833685d">
-<link rel="stylesheet" href="css/landing.css?v=85504b78">
-<link rel="stylesheet" href="css/park-panel.css?v=6e88719b">
+<script src="src/services/park-registry.js?v=00000000" defer></script>
+<script src="src/services/grid-engine.js?v=00000000" defer></script>
+<script src="src/ui/park-panel.js?v=00000000" defer></script>
+<script src="src/ui/park-export.js?v=00000000" defer></script>
+<script src="src/services/dash.js?v=f5e14053" defer></script>
+<link rel="stylesheet" href="css/style.css?v=790e558b">
+<link rel="stylesheet" href="css/landing.css?v=e875e230">
+<link rel="stylesheet" href="css/park-panel.css?v=00000000">
 <!-- TASARIM SİSTEMİ (2026-09-27, 2. deneme): ui-standard.css geri BAĞLANDI
      ama ARTIK eleman seviyesi kuralları yalnız .dg-page (alt sayfalar) altında
      geçerli; kabuk (body.dg-app) yalnız sınıf-bazlı bileşenleri ve sekme
      başlığı ölçeğini alır → Park Karşılaştırma kartı kıpırdamaz. -->
-<link rel="stylesheet" href="css/ui-standard.css?v=cf5fc000">
-<link rel="stylesheet" href="css/academic-profile.css?v=619420ce">
+<link rel="stylesheet" href="css/ui-standard.css?v=00000000">
+<link rel="stylesheet" href="css/academic-profile.css?v=00000000">
 </head>
 <body class="dg-app">
 <a class="dg-skip" href="#main">İçeriğe atla</a>
@@ -1142,9 +1142,9 @@
  <button class="btn" style="margin-top:12px" id="pvDownload">📥 İndir</button>
 </div></div>
 
-<script src="src/ui/state.js?v=5feada9b" defer></script>
-<script src="src/ui/toast.js?v=50dab987" defer></script>
+<script src="src/ui/state.js?v=bfca986d" defer></script>
+<script src="src/ui/toast.js?v=e4a61075" defer></script>
 <script src="src/ui/landing.js?v=f00a7bb6" defer></script>
-<script src="src/ui/shell.js?v=49cc6b12" defer></script>
+<script src="src/ui/shell.js?v=ad297cd5" defer></script>
 </body>
 </html>
