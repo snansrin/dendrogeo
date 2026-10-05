@@ -35,8 +35,8 @@ Aşağıdaki paketler `package-lock.json` içinde kilitlidir ve sitede istemci b
 
 | SPDX lisansı | Kilitli paketler |
 |---|---|
-| MIT | `ansi-regex@5.0.1`, `ansi-styles@4.3.0`, `camelcase@5.3.1`, `color-convert@2.0.1`, `color-name@1.1.4`, `decamelize@5.3.1`, `dijkstrajs@1.0.3`, `emoji-regex@8.0.0`, `find-up@4.1.0`, `is-fullwidth-code-point@3.0.0`, `locate-path@5.0.0`, `p-limit@2.3.0`, `p-locate@4.1.0`, `p-try@2.2.0`, `path-exists@4.0.0`, `pngjs@5.0.0`, `polygon-clipping@0.15.7`, `qrcode@1.5.4`, `require-directory@2.1.1`, `splaytree@3.2.3`, `string-width@4.2.3`, `strip-ansi@6.0.1`, `wrap-ansi@6.2.0`, `yargs@15.4.1` |
-| ISC | `cliui@6.0.0`, `get-caller-file@2.0.0`, `require-main-filename@2.0.0`, `set-blocking@2.0.0`, `which-module@2.0.1`, `y18n@4.0.3`, `yargs-parser@18.1.3` |
+| MIT | `ansi-regex@5.0.1`, `ansi-styles@4.3.0`, `camelcase@5.3.1`, `color-convert@2.0.1`, `color-name@1.1.4`, `decamelize@1.2.0`, `dijkstrajs@1.0.3`, `emoji-regex@8.0.0`, `find-up@4.1.0`, `is-fullwidth-code-point@3.0.0`, `locate-path@5.0.0`, `p-limit@2.3.0`, `p-locate@4.1.0`, `p-try@2.2.0`, `path-exists@4.0.0`, `pngjs@5.0.0`, `polygon-clipping@0.15.7`, `qrcode@1.5.4`, `require-directory@2.1.1`, `splaytree@3.2.3`, `string-width@4.2.3`, `strip-ansi@6.0.1`, `wrap-ansi@6.2.0`, `yargs@15.4.1` |
+| ISC | `cliui@6.0.0`, `get-caller-file@2.0.5`, `require-main-filename@2.0.0`, `set-blocking@2.0.0`, `which-module@2.0.1`, `y18n@4.0.3`, `yargs-parser@18.1.3` |
 | Apache-2.0 | `playwright-core@1.62.1` |
 | Unlicense | `robust-predicates@3.0.3` |
 
