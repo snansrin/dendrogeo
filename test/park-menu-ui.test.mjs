@@ -16,7 +16,7 @@ test('park menus move the original grid and layer nodes, retaining values and ha
  nodes.parkGridTools.value='selected-project';const handler=()=>{};nodes.parkLayerTools.onchange=handler;
  const ctx=vm.createContext({document:{getElementById:id=>nodes[id],createElement:()=>new Element()}});
  const start=source.indexOf('function dgParkMountMenus(){');const end=source.indexOf('\nif(typeof document.addEventListener',start);
- vm.runInContext(source.slice(start,end)+';dgParkMountMenus()',ctx);
+ vm.runInContext("function dgEditorClearMenus(){} function dgEditorArrangeMenus(){}"+source.slice(start,end)+';dgParkMountMenus()',ctx);
  const nav=nodes.surfaceParkTools.children[0];assert.equal(nav.children.length,2);
  assert.equal(nav.children[0].children[1].children[0],nodes.parkGridTools);
  assert.equal(nav.children[1].children[1].children[0],nodes.parkLayerTools);
@@ -29,4 +29,14 @@ test('menus mount after park and waypoint markup is created, not on reference-ar
  const ref=source.slice(source.indexOf('function setRefHa'),source.indexOf('function renderRefBadge'));
  assert.doesNotMatch(ref,/dgParkMountMenus/);
  assert.match(source,/id="gridSummary"[\s\S]*?dgParkMountMenus\(\);[\s\S]*?renderRefBadge\(\);/);
+});
+
+test('shared bar sorts file first and moves controls without recreating them',()=>{
+ const menus=[70,30,10,60,20,40,50].map(menuOrder=>({dataset:{menuOrder}}));
+ const bar={children:[],append(node){this.children=this.children.filter(x=>x!==node);this.children.push(node);}};
+ const nodes={surfaceMenuBar:bar,surfaceParkTools:{querySelectorAll:()=>menus.filter(x=>[30,40].includes(x.dataset.menuOrder))},surfaceBrushTools:{querySelectorAll:()=>menus.filter(x=>![30,40].includes(x.dataset.menuOrder))}};
+ const ctx=vm.createContext({document:{getElementById:id=>nodes[id]}});
+ vm.runInContext(source.slice(source.indexOf('function dgEditorArrangeMenus()'))+';dgEditorArrangeMenus()',ctx);
+ assert.deepEqual(bar.children.map(x=>x.dataset.menuOrder),[10,20,30,40,50,60,70]);
+ assert.equal(bar.children[0],menus[2]);
 });

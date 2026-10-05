@@ -512,6 +512,7 @@ async function drawPark(park){
 
 function clearPark(){
   const menus=document.getElementById("surfaceParkTools");if(menus)menus.replaceChildren();
+  dgEditorClearMenus("park");
   if(
     PARK_LAYER &&
     map
@@ -600,19 +601,33 @@ window.dgChooseNewPark=dgChooseNewPark;
 /* Relocate the existing controls, keeping their IDs, values and event handlers. */
 function dgParkMountMenus(){
  const host=document.getElementById("surfaceParkTools");if(!host)return;
+ dgEditorClearMenus("park");
  host.replaceChildren();
  const nav=document.createElement("nav");nav.className="dg-editor-menubar";nav.setAttribute("aria-label",typeof dgCf==="function"?dgCf("Harita menüsü"):"Harita menüsü");
  for(const [id,label] of [["parkGridTools","🔲 Grid & Waypoint"],["parkLayerTools","🗺️ Katmanlar"]]){
   const controls=document.getElementById(id);if(!controls)continue;
-  const menu=document.createElement("details");menu.className="dg-editor-menu";
+  const menu=document.createElement("details");menu.className="dg-editor-menu";menu.setAttribute("data-menu-owner","park");menu.setAttribute("data-menu-order",id==="parkGridTools"?"30":"40");
   const summary=document.createElement("summary");summary.textContent=(typeof dgCf==="function"?dgCf(label):label)+" ⌄";
   const body=document.createElement("div");body.className="dg-editor-menu-body";body.append(controls);
   if(id==="parkGridTools"){const summary=document.getElementById("gridSummary");if(summary)body.append(summary);}
-  menu.append(summary,body);menu.addEventListener("toggle",()=>{if(menu.open)nav.querySelectorAll("details[open]").forEach(other=>{if(other!==menu)other.open=false;});});nav.append(menu);
+  menu.append(summary,body);menu.addEventListener("toggle",()=>{if(menu.open)(document.getElementById("surfaceMenuBar")||nav).querySelectorAll("details[open]").forEach(other=>{if(other!==menu)other.open=false;});});nav.append(menu);
  }
- host.append(nav);
+ host.append(nav);dgEditorArrangeMenus();
 }
 if(typeof document.addEventListener==="function"){
- document.addEventListener("pointerdown",e=>{if(!e.target.closest?.("#surfaceParkTools"))document.querySelectorAll("#surfaceParkTools details[open]").forEach(menu=>{menu.open=false;});});
- document.addEventListener("keydown",e=>{if(e.key!=="Escape")return;document.querySelectorAll("#surfaceParkTools details[open]").forEach(menu=>{menu.open=false;menu.querySelector("summary")?.focus();});});
+ document.addEventListener("pointerdown",e=>{if(!e.target.closest?.("#surfaceEditorMenu"))document.querySelectorAll("#surfaceEditorMenu details[open]").forEach(menu=>{menu.open=false;});});
+ document.addEventListener("keydown",e=>{if(e.key!=="Escape")return;document.querySelectorAll("#surfaceEditorMenu details[open]").forEach(menu=>{menu.open=false;menu.querySelector("summary")?.focus();});});
+}
+
+/* Presentation only: move menu nodes without cloning their controls. */
+function dgEditorClearMenus(owner){
+ const bar=document.getElementById("surfaceMenuBar");if(!bar?.append)return;
+ bar.querySelectorAll('[data-menu-owner="'+owner+'"]').forEach(menu=>menu.remove());
+}
+function dgEditorArrangeMenus(){
+ const bar=document.getElementById("surfaceMenuBar");if(!bar?.append)return;
+ for(const id of ["surfaceParkTools","surfaceBrushTools"]){
+  document.getElementById(id)?.querySelectorAll(".dg-editor-menu").forEach(menu=>bar.append(menu));
+ }
+ [...bar.children].sort((a,b)=>Number(a.dataset.menuOrder)-Number(b.dataset.menuOrder)).forEach(menu=>bar.append(menu));
 }

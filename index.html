@@ -244,7 +244,7 @@
 <script src="src/utils/truncation.js?v=f43c76b3" defer></script>
 <!-- Faz 7: geotiff (317 KB) ve chart.js (208 KB) artık SENKRON yüklenmiyor;
      src/utils/lazylibs.js ihtiyaç anında enjekte eder (LULC analizi / panel grafiği). -->
-<script id="dgRuntimeBuild" type="application/json">"95d129395f838712"</script>
+<script id="dgRuntimeBuild" type="application/json">"cc58cd4e755632ee"</script>
 <script src="src/utils/lazylibs.js?v=19763039" defer></script>
 <script src="src/services/allometry.js?v=23ec2992" defer></script>
 <script src="src/services/auth.js?v=1e92b5cd" defer></script>
@@ -290,12 +290,12 @@
      proje listesi bu modülden beslenir). -->
 <script src="src/services/park-registry.js?v=85cf9bd9" defer></script>
 <script src="src/services/grid-engine.js?v=55f5f5f9" defer></script>
-<script src="src/ui/park-panel.js?v=b5b09977" defer></script>
+<script src="src/ui/park-panel.js?v=618e3acc" defer></script>
 <script src="src/ui/park-export.js?v=c724cd32" defer></script>
 <script src="src/services/dash.js?v=91cf55ce" defer></script>
 <link rel="stylesheet" href="css/style.css?v=5833685d">
 <link rel="stylesheet" href="css/landing.css?v=85504b78">
-<link rel="stylesheet" href="css/park-panel.css?v=77bf2267">
+<link rel="stylesheet" href="css/park-panel.css?v=b5a685fb">
 <!-- TASARIM SİSTEMİ (2026-09-27, 2. deneme): ui-standard.css geri BAĞLANDI
      ama ARTIK eleman seviyesi kuralları yalnız .dg-page (alt sayfalar) altında
      geçerli; kabuk (body.dg-app) yalnız sınıf-bazlı bileşenleri ve sekme
@@ -842,6 +842,7 @@
  <span style="color:var(--mut);font-size:.76rem">Onayladığın kayıt hemen görünmüyorsa bu düğmeye bas.</span>
 </div>
 <div id="surfaceEditorMenu" class="dg-editor-menu-shell">
+<nav id="surfaceMenuBar" class="dg-editor-menubar" aria-label="Harita menüsü"></nav>
 <div id="surfaceParkTools"></div>
 <div id="surfaceBrushTools" aria-live="polite"></div>
 </div>
