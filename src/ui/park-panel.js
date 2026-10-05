@@ -22,6 +22,7 @@ window.setGreenOnly=setGreenOnly;
 function setRefHa(v){
   const n=parseFloat(v);
   PARK_REF_HA=Number.isFinite(n)&&n>0?n:null;
+  dgParkMountMenus();
   renderRefBadge();
 }
 
@@ -315,7 +316,7 @@ async function drawPark(park){
 
     `<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px">`+
 
-      `<div class="dg-png-card">`+
+      `<div id="parkGridTools" class="dg-png-card">`+
         `<div class="dg-png-head">`+
           `<div>`+
             `<div class="dg-png-kicker">1 · GRID & WAYPOINT</div>`+
@@ -445,7 +446,7 @@ async function drawPark(park){
         `</button>`+
       `</div>`+
 
-      `<div class="dg-png-card">`+
+      `<div id="parkLayerTools" class="dg-png-card">`+
         `<div class="dg-png-head">`+
           `<div>`+
             `<div class="dg-png-kicker">4 · KATMANLAR</div>`+
@@ -510,6 +511,7 @@ async function drawPark(park){
 ========================================================= */
 
 function clearPark(){
+  const menus=document.getElementById("surfaceParkTools");if(menus)menus.replaceChildren();
   if(
     PARK_LAYER &&
     map
@@ -594,3 +596,22 @@ async function dgChooseNewPark(){
 }
 function _tgrSafeNewPark(){return typeof dgCf==="function"?dgCf("Haritada yeni parkın içine dokunun."):"Haritada yeni parkın içine dokunun.";}
 window.dgChooseNewPark=dgChooseNewPark;
+
+/* Relocate the existing controls, keeping their IDs, values and event handlers. */
+function dgParkMountMenus(){
+ const host=document.getElementById("surfaceParkTools");if(!host)return;
+ host.replaceChildren();
+ const nav=document.createElement("nav");nav.className="dg-editor-menubar";nav.setAttribute("aria-label",typeof dgCf==="function"?dgCf("Harita menüsü"):"Harita menüsü");
+ for(const [id,label] of [["parkGridTools","🔲 Grid & Waypoint"],["parkLayerTools","🗺️ Katmanlar"]]){
+  const controls=document.getElementById(id);if(!controls)continue;
+  const menu=document.createElement("details");menu.className="dg-editor-menu";
+  const summary=document.createElement("summary");summary.textContent=(typeof dgCf==="function"?dgCf(label):label)+" ⌄";
+  const body=document.createElement("div");body.className="dg-editor-menu-body";body.append(controls);
+  menu.append(summary,body);menu.addEventListener("toggle",()=>{if(menu.open)nav.querySelectorAll("details[open]").forEach(other=>{if(other!==menu)other.open=false;});});nav.append(menu);
+ }
+ host.append(nav);
+}
+if(typeof document.addEventListener==="function"){
+ document.addEventListener("pointerdown",e=>{if(!e.target.closest?.("#surfaceParkTools"))document.querySelectorAll("#surfaceParkTools details[open]").forEach(menu=>{menu.open=false;});});
+ document.addEventListener("keydown",e=>{if(e.key!=="Escape")return;document.querySelectorAll("#surfaceParkTools details[open]").forEach(menu=>{menu.open=false;menu.querySelector("summary")?.focus();});});
+}

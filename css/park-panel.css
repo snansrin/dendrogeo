@@ -510,3 +510,10 @@
 .dg-editor-tool:disabled{opacity:.45;cursor:default}
 .dg-editor-tool:focus-visible,.dg-editor-menu>summary:focus-visible{outline:2px solid var(--green);outline-offset:2px}
 @media(max-width:640px){.dg-editor-menu>summary{min-height:42px;padding:5px 7px;font-size:.7rem;gap:4px}.dg-editor-menu-body{padding:10px}.dg-editor-status{font-size:.65rem}#surfaceMapTools{left:8px}.dg-editor-rail{padding:3px;gap:3px}}
+
+#surfaceParkTools:empty{display:none}
+#surfaceParkTools{position:relative;z-index:1102;margin:8px 0 0;border:1px solid var(--line);border-radius:8px;background:var(--surface);font-family:var(--f-ui)}
+#surfaceParkTools .dg-png-card{margin:0;padding:0;border:0;box-shadow:none;background:transparent;min-width:0}
+#surfaceParkTools .dg-png-fields{grid-template-columns:1fr}
+#surfaceParkTools .dg-png-kicker{display:none}
+#surfaceParkTools .dg-editor-menu-body{width:min(430px,100%)}
