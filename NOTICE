@@ -12,7 +12,8 @@ https://creativecommons.org/licenses/by-nc/4.0/
 Bu bildirim üçüncü taraf yazılımı, harita/raster verisini, hizmet içeriğini,
 saha kullanıcısının yüklediği kayıtları veya kişisel verileri DendroGeo
 lisansı altına almaz. Her içerik kaynağının lisansı, atfı ve yayımlama izni
-ayrı değerlendirilir. Ayrıntılı ve sürüm bazlı kayıt:
+ayrı değerlendirilir. Ticari kullanım izni için hak sahiplerine
+sinan@dendrogeo.org adresinden ulaşılabilir. Ayrıntılı ve sürüm bazlı kayıt:
 docs/THIRD_PARTY_LICENSES.md
 
 Önerilen yazılım atfı:
@@ -34,7 +35,7 @@ sahipse bunları ayrıca belirtmelidir.
 - GeoTIFF.js 2.1.3 — MIT
 - polygon-clipping 0.15.7 — MIT; dağıtılan bundle içindeki diğer lisans
   bildirimleri ayrıca geçerlidir
-- OpenStreetMap verisi — ODbL 1.0
+- OpenStreetMap verisi — ODbL 1.0 — atıf: "© OpenStreetMap contributors"
 - OpenTopoMap harita karoları — CC BY-SA 3.0
 - Esri World Imagery — Esri ArcGIS hizmet koşulları ve katmana özgü atıf
 - ESA WorldCover 2021 v200 — CC BY 4.0
