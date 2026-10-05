@@ -18,11 +18,25 @@ jobs:
         with:
           node-version: 20
 
+      - name: Diagnose checkout test set
+        run: |
+          echo "checkout:"; ls test/change-summary.test.mjs 2>/dev/null || true
+
       - name: Install dependencies
         run: npm ci
 
+      - name: Diagnose after npm ci
+        run: |
+          echo "after npm ci:"; ls -l test/change-summary.test.mjs 2>/dev/null || true
+          if [ -f test/change-summary.test.mjs ]; then sed -n '1,220p' test/change-summary.test.mjs; fi
+
       - name: Generate deterministic index artifact
         run: npm run build
+
+      - name: Diagnose after build
+        run: |
+          echo "after build:"; ls -l test/change-summary.test.mjs 2>/dev/null || true
+          if [ -f test/change-summary.test.mjs ]; then sed -n '1,220p' test/change-summary.test.mjs; fi
 
       - name: Run complete repository guards
         run: npm run check
