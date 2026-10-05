@@ -75,25 +75,33 @@ document.addEventListener("click",e=>{
 function initLanding(){
  $("landing").style.display="block";$("shell").style.display="none";
  dgLandingMapWhenVisible();
+ /* Harita noktalarını istatistik sorgularından bağımsız başlat: bir yavaş
+  * özet sorgusu, onaylı noktaların haritaya gelmesini bekletmemeli. */
+ if(worldMapL)dgLandingMarkers();
+ else DG_LANDING_MARKERS_PENDING=true;
  (async()=>{
-  try{
-   const g=await sb.from("v_global").select("*").single();
-   if(g.data){$("statRec").textContent=g.data.records||0;$("statCountry").textContent=g.data.countries||0;$("statCity").textContent=g.data.cities||0;$("statCarbon").textContent=g.data.carbon_t||0;}
-   const c=await sb.from("v_country").select("*");
-   $("tblCountry").querySelector("tbody").innerHTML=(c.data||[]).slice(0,20).map(r=>`<tr class="clickable-row" tabindex="0" role="link" onkeydown="dgKeyActivate(event,this)" onclick="zoomToCountry('${esc(r.country)}')"><td>${esc(r.country)}</td><td>${r.records}</td><td>${r.carbon_t}</td><td>${r.avg_dbh}</td><td>${r.avg_height||"—"}</td></tr>`).join("")||"<tr><td colspan=5>Henüz veri yok</td></tr>";
-   const t=await sb.from("v_city").select("*");
+  const jobs=[
+   sb.from("v_global").select("*").single().then(g=>{
+    if(g.error)throw g.error;
+    if(g.data){$("statRec").textContent=g.data.records||0;$("statCountry").textContent=g.data.countries||0;$("statCity").textContent=g.data.cities||0;$("statCarbon").textContent=g.data.carbon_t||0;}
+   }),
+   sb.from("v_country").select("*").then(c=>{
+    if(c.error)throw c.error;
+    $("tblCountry").querySelector("tbody").innerHTML=(c.data||[]).slice(0,20).map(r=>`<tr class="clickable-row" tabindex="0" role="link" onkeydown="dgKeyActivate(event,this)" onclick="zoomToCountry('${esc(r.country)}')"><td>${esc(r.country)}</td><td>${r.records}</td><td>${r.carbon_t}</td><td>${r.avg_dbh}</td><td>${r.avg_height||"—"}</td></tr>`).join("")||"<tr><td colspan=5>Henüz veri yok</td></tr>";
+   }),
+   sb.from("v_city").select("*").then(t=>{
+    if(t.error)throw t.error;
     $("tblCity").querySelector("tbody").innerHTML=(t.data||[]).slice(0,20).map(r=>`<tr class="clickable-row" tabindex="0" role="link" onkeydown="dgKeyActivate(event,this)" onclick="zoomToCity('${esc(r.city)}')"><td>${esc(r.city)}</td><td>${r.records}</td><td>${r.carbon_t}</td></tr>`).join("")||"<tr><td colspan=3>Henüz veri yok</td></tr>";
-   /* Harita henüz kurulmadıysa bayrak bırak: dgLandingMapInit kurulunca
-    * işaretçileri kendisi yükler (yarış durumu olmasın). */
-   if(worldMapL)dgLandingMarkers();
-   else DG_LANDING_MARKERS_PENDING=true;
-  }catch(e){
-   /* SESSİZ HATA YUTMA KALDIRILDI (2026-09-26): landing istatistikleri
-    * (v_global/v_country/v_city) patladığında sayılar 0 kalıyor ve ziyaretçi
-    * "site boş/bozuk" izlenimi alıyordu. Sebep artık görünür. */
-   console.error("DENDROGEO · landing verisi yüklenemedi:",e);
-   toast("⚠ Genel istatistikler yüklenemedi (ağ/oturum). Sayfayı yenileyin.","warn","🌍");
+   })
+  ];
+  const results=await Promise.allSettled(jobs);
+  const errors=results.filter(r=>r.status==="rejected").map(r=>r.reason);
+  if(errors.length){
+   /* Üç bağımsız panelden biri aksasa bile diğer ikisi görünür kalır. */
+   console.error("DENDROGEO · landing verisi kısmen yüklenemedi:",errors);
+   toast("⚠ Bazı istatistikler yüklenemedi. Harita ve diğer veriler kullanılabilir.","warn","🌍");
   }
  })();
  trackVisit();
 }
+

@@ -34,13 +34,14 @@ main{padding:54px 0 70px}h1{font-size:clamp(2rem,5vw,3.3rem);line-height:1.08;ma
 <h2>Location and area</h2>
 <p>Distances use the haversine formula on WGS84. Park areas use geodesic polygon mathematics; land-cover cells are intersected with the park polygon in the native UTM zone and only the true intersection area is counted (no pixel counting).</p>
 <h2>Land cover</h2>
-<p>The park polygon is intersected with 10 m categorical raster cells. Primary source: ESA WorldCover 2021 v200; independent cross-check: IO LULC 2020, reported as per-group agreement. OSM water and road vectors refine artificial pools and hard surfaces. OSM geometry does not change the numeric class result.</p>
+<p>The raw annual raster result uses ESA WorldCover 2021 v200 (10 m) and true raster-cell/park-polygon intersection areas. IO LULC 2020 is used as an independent cross-check only when a source comparison is run. Current analyses may also use Sentinel-2 L2A imagery (10 m or 20 m bands); the scene dates are recorded in the accepted analysis and report. Raw raster classes remain separate from the final user-accepted surface result. When enabled and accepted, OSM building, water and hard-surface geometries and user-drawn features contribute to that final result without rewriting the raw raster. Reports identify the source, period, resolution and accepted corrections.</p>
 <h2>Uncertainty</h2>
 <p>Field sigmas (DBH ±0.5 cm, height ±0.25 m) and a conservative 22% CV for the allometric model are propagated by Monte Carlo (n=1000, fixed seed); totals treat model error as correlated across records. Totals are reported with 95% confidence intervals where enabled.</p>
 <h2>Geofence and approval</h2>
 <p>Measurements require an approved park identity; the device position must fall inside the park polygon (40 m edge margin) or the server rejects the row (trigger trg_geo_fence). Every record enters the public dataset only after moderator approval.</p>
 <h2>Limitations</h2>
-<ol><li>10 m land-cover accuracy varies by class and site.</li><li>Chave (2014) is pantropical; regional bias for Turkish species is possible.</li><li>Group-level wood density is used when species density is unavailable.</li><li>Satellite-derived boundaries estimate green cover, not administrative borders.</li></ol>
+<ol><li>WorldCover is 10 m; Sentinel-2 bands are 10 m or 20 m. Mixed or smaller features may not be separable at these resolutions.</li><li>OSM completeness varies by place; manually accepted geometry depends on visual review.</li><li>Chave (2014) is pantropical; regional bias for Turkish species is possible.</li><li>Group-level wood density is used when species density is unavailable.</li></ol>
 <p><a class="btn alt" href="https://github.com/snansrin/dendrogeo/blob/main/docs/methods.md">Detailed methods on GitHub</a> <a class="btn alt" href="../../yontem/">Türkçe sürüm</a></p></div></main>
 <footer><div class="wrap">DendroGeo · Global Tree Inventory and Carbon Data System · <a href="../../">Home</a> · <a href="../../yontem/">Yöntem (TR)</a> · <a href="../../gizlilik/">Privacy</a> · <a href="../../kunye/">Imprint</a></div></footer>
 </body></html>
+

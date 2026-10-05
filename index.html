@@ -1,3 +1,6 @@
+Warning: truncated output (original token count: 25012)
+Total output lines: 1152
+
 <!doctype html>
 <html lang="tr">
 <head> 
@@ -10,7 +13,7 @@
      EŞLEŞTİRMİYOR → presence/canlı konum kanalları konsolda "violates CSP"
      ile bloklanıyordu (kullanıcı konsol kanıtı 2026-10-01). connect-src,
      default-src'in bağlantı kurulan tüm originlerini + wss'i içerir. -->
-<meta http-equiv="Content-Security-Policy" content="default-src 'self' https://orcid.org 'unsafe-inline' data: blob: https://*.tile.openstreetmap.org https://nominatim.openstreetmap.org https://api.openstreetmap.org https://*.supabase.co https://fonts.googleapis.com https://fonts.gstatic.com https://challenges.cloudflare.com https://overpass-api.de https://lz4.overpass-api.de https://z.overpass-api.de https://overpass.kumi.systems https://overpass.osm.ch https://overpass.openstreetmap.fr https://overpass.private.coffee https://server.arcgisonline.com https://*.tile.opentopomap.org https://planetarycomputer.microsoft.com https://*.blob.core.windows.net https://*.s3.us-west-2.amazonaws.com; connect-src 'self' data: blob: https://*.supabase.co wss://*.supabase.co https://nominatim.openstreetmap.org https://api.openstreetmap.org https://*.tile.openstreetmap.org https://challenges.cloudflare.com https://overpass-api.de https://lz4.overpass-api.de https://z.overpass-api.de https://overpass.kumi.systems https://overpass.osm.ch https://overpass.openstreetmap.fr https://overpass.private.coffee https://server.arcgisonline.com https://*.tile.opentopomap.org https://planetarycomputer.microsoft.com https://*.blob.core.windows.net https://*.s3.us-west-2.amazonaws.com">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self' 'unsafe-inline' data: blob: https://*.tile.openstreetmap.org https://nominatim.openstreetmap.org https://api.openstreetmap.org https://*.supabase.co https://fonts.googleapis.com https://fonts.gstatic.com https://challenges.cloudflare.com https://overpass-api.de https://lz4.overpass-api.de https://z.overpass-api.de https://overpass.kumi.systems https://overpass.osm.ch https://overpass.openstreetmap.fr https://overpass.private.coffee https://server.arcgisonline.com https://*.tile.opentopomap.org https://planetarycomputer.microsoft.com https://*.blob.core.windows.net https://*.s3.us-west-2.amazonaws.com; connect-src 'self' data: blob: https://*.supabase.co wss://*.supabase.co https://nominatim.openstreetmap.org https://api.openstreetmap.org https://*.tile.openstreetmap.org https://challenges.cloudflare.com https://overpass-api.de https://lz4.overpass-api.de https://z.overpass-api.de https://overpass.kumi.systems https://overpass.osm.ch https://overpass.openstreetmap.fr https://overpass.private.coffee https://server.arcgisonline.com https://*.tile.opentopomap.org https://planetarycomputer.microsoft.com https://*.blob.core.windows.net https://*.s3.us-west-2.amazonaws.com">
 <title>DendroGeo — Küresel Ağaç Envanteri ve Karbon Veri Sistemi</title>
 
 
@@ -239,22 +242,21 @@
 <!-- DİL KATMANI (0035): TR markup varsayılan; EN sözlüğü çalışma zamanında
      uygulanır (dgToggleLang). defer sırası önemli değil — DOMContentLoaded'da
      ya da hemen (hazırsa) çalışır. module-registry + CORE_ASSETS kaydı şart. -->
-<script src="src/config/i18n.js?v=ff42ae94" defer></script>
+<script src="src/config/i18n.js?v=ddde401f" defer></script>
 <script src="src/utils/geo.js?v=3e796768" defer></script>
 <script src="src/utils/truncation.js?v=f43c76b3" defer></script>
 <!-- Faz 7: geotiff (317 KB) ve chart.js (208 KB) artık SENKRON yüklenmiyor;
      src/utils/lazylibs.js ihtiyaç anında enjekte eder (LULC analizi / panel grafiği). -->
-<script id="dgRuntimeBuild" type="application/json">"a23cac25722ee3e6"</script>
-<script src="src/utils/lazylibs.js?v=19763039" defer></script>
+<script src="src/utils/lazylibs.js?v=cf20a8eb" defer></script>
 <script src="src/services/allometry.js?v=23ec2992" defer></script>
-<script src="src/services/auth.js?v=1e92b5cd" defer></script>
+<script src="src/services/auth.js?v=83b12d2c" defer></script>
 <script src="src/services/export.js?v=cf5c039b" defer></script>
-<script src="src/services/offline.js?v=3152b55e" defer></script>
+<script src="src/services/offline.js?v=1765b5a6" defer></script>
 <!-- YÖNETİM ZİNCİRİ (Faz 6 — eski admin.js beş modüle bölündü) -->
-<script src="src/services/visit-stats.js?v=c10aa02f" defer></script>
+<script src="src/services/visit-stats.js?v=ebd4e614" defer></script>
 <script src="src/services/data-requests.js?v=59fe4b11" defer></script>
 <script src="src/services/user-admin.js?v=354a2701" defer></script>
-<script src="src/services/backup.js?v=b56fd4f9" defer></script>
+<script src="src/services/backup.js?v=86db8192" defer></script>
 <script src="src/services/admin.js?v=7786640a" defer></script>
 <!-- YÖNETİM AĞACI (2026-09-24): park → proje → kullanıcı → ölçüm kademeli
      görünümü + sorgu hatası görünürlüğü. admin.js'ten SONRA yüklenir
@@ -263,10 +265,7 @@
 <!-- BİLİMSEL RAPOR YAYINI (2026-09-27): site içinden yayın kuyruğu —
      📄 Yayınla → report_requests (0008) → rapor-yayin.yml → rapor/DGR-…/
      → kalıcı bağlantı + 📤 Paylaş. admin.js loadAdmin() bu modülü çağırır. -->
-<script src="src/core/surface-display.js?v=0bed5180" defer></script>
-<script src="src/core/report-context.js?v=20d570c7" defer></script>
-<script src="src/services/academic-profile.js?v=ab18cc96" defer></script>
-<script src="src/services/report-publish.js?v=0836b57c" defer></script>
+<script src="src/services/report-publish.js?v=bfddc240" defer></script>
 <script src="src/services/park-invites.js?v=1023c17d" defer></script>
 <script src="src/services/world.js?v=c72d9019" defer></script>
 <script src="src/services/measure.js?v=444d6096" defer></script>
@@ -280,28 +279,27 @@
 <!-- PARK ZİNCİRİ (Faz 4 — eski gridplan.js yedi modüle bölündü; sıralama ÖNEMLİ:
      state → istemci → geometri → sorgu → motor → panel → export) -->
 <script src="src/services/park-state.js?v=78c0b4e3" defer></script>
-<script src="src/services/osm-client.js?v=651b4da2" defer></script>
+<script src="src/services/osm-client.js?v=16aaa145" defer></script>
 <script src="src/services/park-geometry.js?v=ff23581a" defer></script>
 <script src="src/services/geofence.js?v=f1d93562" defer></script>
-<script src="src/services/park-query.js?v=400e3b3f" defer></script>
+<script src="src/services/park-query.js?v=dc55e905" defer></script>
 <!-- PARK KİMLİĞİ (2026-09-24): queryPark'ın bulduğu parkı public.parks'a yazar,
      projeyi parka bağlar, ölçüm kapısını (park algılanmadan ölçüm yok) kurar.
      Sıra ÖNEMLİ: park-query'den sonra, grid-engine'den önce (grid panelindeki
      proje listesi bu modülden beslenir). -->
-<script src="src/services/park-registry.js?v=85cf9bd9" defer></script>
+<script src="src/services/park-registry.js?v=9d92eabe" defer></script>
 <script src="src/services/grid-engine.js?v=55f5f5f9" defer></script>
 <script src="src/ui/park-panel.js?v=9d44698a" defer></script>
 <script src="src/ui/park-export.js?v=c724cd32" defer></script>
-<script src="src/services/dash.js?v=91cf55ce" defer></script>
-<link rel="stylesheet" href="css/style.css?v=5833685d">
+<script src="src/services/dash.js?v=8653841d" defer></script>
+<link rel="stylesheet" href="css/style.css?v=10e16d1e">
 <link rel="stylesheet" href="css/landing.css?v=85504b78">
-<link rel="stylesheet" href="css/park-panel.css?v=6e88719b">
+<link rel="stylesheet" href="css/park-panel.css?v=c5a02f62">
 <!-- TASARIM SİSTEMİ (2026-09-27, 2. deneme): ui-standard.css geri BAĞLANDI
      ama ARTIK eleman seviyesi kuralları yalnız .dg-page (alt sayfalar) altında
      geçerli; kabuk (body.dg-app) yalnız sınıf-bazlı bileşenleri ve sekme
      başlığı ölçeğini alır → Park Karşılaştırma kartı kıpırdamaz. -->
 <link rel="stylesheet" href="css/ui-standard.css?v=cf5fc000">
-<link rel="stylesheet" href="css/academic-profile.css?v=619420ce">
 </head>
 <body class="dg-app">
 <a class="dg-skip" href="#main">İçeriğe atla</a>
@@ -366,550 +364,7 @@
       </g>
       <g class="legB">
        <path d="M628 192 636 191 635.5 208 639 223 633 225 629.5 209Z" fill="url(#student-denim)"/>
-       <path d="M632 196 632 207 635 220 M631 209 634 209" stroke="#84929b" stroke-width=".6" opacity=".6"/>
-       <path d="M632.5 222.5 638 221.8 640 225 643 227 Q644 229 642 230 H632 Q631 227 632.5 222.5Z" fill="#675442"/>
-       <path d="M632 229 H643 M636 225 640 226" stroke="#d4c5a6" stroke-width=".8"/>
-      </g>
-      <g class="bendA">
-       <path d="M619 167 Q613 168 613 174 L613 184 Q614 188 618 188 L622 172Z" fill="#364c42"/>
-       <path d="M614.5 173 614.5 183" stroke="#819585" stroke-width="1"/>
-       <path d="M621 164 625 162 632 163 636 167 638 178 635 194 Q627 197 618 193 L619 180 616 172Z" fill="url(#student-ochre)"/>
-       <path d="M625 165 628 171 631 165 630 191 624 191Z" fill="#e6e4d8"/>
-       <path d="M624 164 620 167 624 174 627 169 M632 164 635 167 632 172 629 168" fill="#a38151" stroke="#e2c697" stroke-width=".5"/>
-       <path d="M619.5 175 624 175 624 180 620 180Z M632 175 636 175 636 180 632 180Z" fill="#a58351" stroke="#d9bb84" stroke-width=".5"/>
-       <path d="M620 184 622 190 M635 183 633 190 M619 193 Q627 194 635 193" stroke="#715a3e" stroke-width=".65" opacity=".7"/>
-       <path d="M619 167 Q616 178 619 187" stroke="#34493e" stroke-width="2"/>
-       <path d="M625 157 625 165 Q628 168 631 164 L630 158Z" fill="url(#student-skin)"/>
-       <!-- Three-quarter face, looking at the trunk. -->
-       <path d="M622 151 Q622 147 627 147 Q632 147 633.5 152 L633.5 155 635 158 633.5 159 Q634 163 630 164 L625 162 623 157Z" fill="url(#student-skin)"/>
-       <path d="M622.5 157 Q619 153 621 150 Q620 146 625 146 Q629 143 633 148 L634 151 630 150 626 151 625 155 624 156 623 160Z" fill="url(#student-hair)"/>
-       <path d="M622 149 Q627 146 631 148 M623 151 626 149" stroke="#98765a" stroke-width=".6" stroke-linecap="round"/>
-       <ellipse cx="624.3" cy="156.7" rx="1.25" ry="1.8" fill="#d29c78"/>
-       <path d="M624 156 625 157 M629.5 154.3 632 154.5" stroke="#725141" stroke-width=".6" stroke-linecap="round"/>
-       <path d="M630 155.7 632.5 155.8" stroke="#f5eadd" stroke-width=".9"/>
-       <circle cx="631.8" cy="155.7" r=".65" fill="#30302b"/>
-       <path d="M633 158.2 631.9 158.7 M630.5 161 632.6 160.8" stroke="#8c5947" stroke-width=".65" stroke-linecap="round"/>
-       <!-- Field notebook held close to the body; free hand takes the reading. -->
-       <path d="M617 170 Q614 171 615 178 L618 185 622 184 620 176Z" fill="url(#student-ochre)"/>
-       <path d="M617 180 620 186 627 185" stroke="url(#student-skin)" stroke-width="3.2" stroke-linecap="round"/>
-       <g transform="rotate(-9 626 185)">
-        <rect x="621" y="178" width="11" height="15" rx=".8" fill="#4c594d"/>
-        <rect x="622" y="179" width="9" height="13" rx=".3" fill="#f0eddd"/>
-        <path d="M624 182 H629 M624 185 H629 M624 188 H628" stroke="#9ba698" stroke-width=".5"/>
-        <path d="M625 178 H628" stroke="#b3bbb0" stroke-width="1.5"/>
-       </g>
-       <path d="M624 185 Q627 183 629 185 L628 187 625 188" fill="url(#student-skin)"/>
-       <g class="penA"><path d="M628 185 631 181" stroke="#314d45" stroke-width=".8" stroke-linecap="round"/></g>
-       <path d="M633 168 Q637 167 639 172 L642 176 638 179 634 174Z" fill="url(#student-ochre)"/>
-       <path d="M638.5 176.5 643 180 650 178" stroke="url(#student-skin)" stroke-width="3.5" stroke-linecap="round"/>
-       <path d="M648.5 177 Q651 175 653 177 L654 179 650 180Z" fill="url(#student-skin)"/>
-       <path d="M651 176.8 652 179 M652 177 653 179" stroke="#a97759" stroke-width=".45"/>
-      </g>
-     </g>
-    </g>
-    <g class="walkerB">
-     <ellipse cx="575" cy="231" rx="15" ry="3.5" fill="#182420" opacity=".08"/>
-     <g class="bobB">
-      <g class="legC">
-       <path d="M566 190 574 192 573.5 207 572 224 566.5 224 567.5 207Z" fill="#374d46"/>
-       <path d="M569 196 570 207 568.5 220 M568 208 572 209" stroke="#789082" stroke-width=".6"/>
-       <path d="M566 222.5 572 223 573 225.5 577 227 Q578 229 576 230 H565 Q564 227 566 222.5Z" fill="#655446"/>
-       <path d="M565 229 H577 M569 225 573 226" stroke="#d1c2a6" stroke-width=".8"/>
-      </g>
-      <g class="legD">
-       <path d="M574 191 582 191 581.5 207 584 224 578.5 224 575 208Z" fill="#465f53"/>
-       <path d="M578 196 578 207 581 220 M577 209 581 209" stroke="#829689" stroke-width=".6"/>
-       <path d="M578 223 584 223 585 226 588 227 Q589 229 587 230 H577 Q576 227 578 223Z" fill="#74604a"/>
-       <path d="M577 229 H588 M581 225 585 226" stroke="#ded2b9" stroke-width=".8"/>
-      </g>
-      <path d="M566 167 Q560 165 560 173 L560 184 Q561 187 565 185 L570 169Z" fill="#ad8453"/>
-      <path d="M562 171 562 181 M561 175 H565" stroke="#d1ae7b" stroke-width=".7"/>
-      <path d="M568 163 575 162 581 164 Q586 166 586 171 L581 182 582 193 Q574 196 565 192 L567 182 564 172 Q563 167 568 163Z" fill="url(#student-green)"/>
-      <path d="M572 165 575 170 578 165 577 189 573 190Z" fill="#e3e4d7"/>
-      <path d="M570 164 567 168 572 173 575 169 M579 164 582 168 578 173 575 169" fill="#789788"/>
-      <path d="M568 175 H572 V180 H568Z M579 175 H582 V180 H579Z" fill="#345d4b" stroke="#91aa95" stroke-width=".45"/>
-      <path d="M567 184 570 190 M580 184 578 191 M566 192 Q574 194 581 192" stroke="#264b3c" stroke-width=".65"/>
-      <path d="M568 165 Q565 174 567 183" stroke="#5c4d38" stroke-width="1.8"/>
-      <path d="M565 169 Q562 171 563 176 L565 184 568 183 568 174" fill="url(#student-green)"/>
-      <path d="M565.5 182 568 189 572 190" stroke="url(#student-skin)" stroke-width="3.2" stroke-linecap="round"/>
-      <path d="M571 188 574 189 575 192 572 193 570 191Z" fill="url(#student-skin)"/>
-      <g class="headB">
-       <path d="M572 157 572 164 575 167 578 164 577 157Z" fill="url(#student-skin)"/>
-       <g class="tail"><path d="M567 151 Q560 148 562 157 Q564 163 561 170 Q568 168 566 160 L570 153Z" fill="url(#student-hair)"/><path d="M564 153 Q564 161 563 165" stroke="#967358" stroke-width=".65"/></g>
-       <path d="M570 148 Q574 145 578 148 Q581 150 580.5 154 L582 157 580.5 158 Q581 161 577 163 L572 161 570 156Z" fill="url(#student-skin)"/>
-       <path d="M570 158 Q566 154 568 150 Q568 145 573 145 Q579 144 581 150 L577 150 574 148 Q575 153 571 155Z" fill="url(#student-hair)"/>
-       <path d="M569 150 Q571 146 576 147 M569 153 571 150" stroke="#a38263" stroke-width=".6" stroke-linecap="round"/>
-       <path d="M567 151 566 153" stroke="#b57956" stroke-width="1.4"/>
-       <ellipse cx="571.3" cy="156.4" rx="1.1" ry="1.7" fill="#d3a080"/>
-       <circle cx="571.7" cy="158" r=".55" fill="#ddca96"/>
-       <path d="M576.5 153.5 579 154" stroke="#674c39" stroke-width=".65" stroke-linecap="round"/>
-       <path d="M576.8 155.3 579.6 155.6" stroke="#f8eee0" stroke-width="1"/>
-       <circle cx="579" cy="155.5" r=".65" fill="#353c31"/>
-       <path d="M580.1 157.8 579 158.4 M577.5 160.5 580 160" stroke="#996450" stroke-width=".6" stroke-linecap="round"/>
-      </g>
-      <g class="armPhoneB">
-       <path d="M582 166 Q586 166 587.5 171 L590 176 586 178 582 172Z" fill="url(#student-green)"/>
-       <path d="M587.5 175.5 591 179 597 167" stroke="url(#student-skin)" stroke-width="3.7" stroke-linecap="round" stroke-linejoin="round"/>
-       <path d="M589 175.5 587 177.5" stroke="#c8b393" stroke-width="1.1"/>
-       <g class="phoneB">
-        <rect x="594" y="148" width="10.5" height="20" rx="2.6" fill="#293b36" stroke="#8b9b90" stroke-width=".5"/>
-        <rect x="595.2" y="149.2" width="8.1" height="17.6" rx="1.8" fill="#172b25"/>
-        <rect x="595.9" y="150" width="6.7" height="13.4" rx="1.2" fill="#d3e7d8"/>
-        <path d="M599.2 160 V155" stroke="#8a6848" stroke-width=".8"/>
-        <path d="M596.8 156 599.2 151.8 601.6 156Z" fill="#3a7958"/>
-        <path d="M596.8 152.6 V151.4 H598 M601.7 158.8 V160 H600.5" stroke="#fff" stroke-width=".5"/>
-        <path d="M598 165 H601" stroke="#9aafa2" stroke-width=".6" stroke-linecap="round"/>
-        <circle class="flash" cx="599" cy="150" r="3.4" fill="#fff"/>
-       </g>
-       <path d="M596 167 Q594 165 594.5 163 L595.6 161.5 596.5 164 599 164 Q600 165 598 167Z" fill="url(#student-skin)"/>
-       <path d="M595.8 164.5 598 165 M596.5 166 598 166" stroke="#aa7a5e" stroke-width=".4"/>
-      </g>
-     </g>
-    </g>
-   </svg>   </svg>   </svg>   </svg>
-   <div class="chip c1"><span style="color:var(--amber)">●</span> DBH 45 cm</div>
-   <div class="chip c2"><span style="color:var(--green)">●</span> C 373.7 kg</div>
-   <div class="chip c3"><span style="color:var(--blue)">●</span> H 13 m</div>
-  </div>
- </div>
-</div></div>
-<section class="blk" id="sistem"><div class="wrap">
- <div class="shead"><span class="no">01</span><h2>Sistemin Üç Temel Direği</h2><span class="rule"></span></div>
-<div class="cols cols-3">
-  <div class="feature">
-   <div class="ico">🛰</div>
-   <h3>Sahadan Veri</h3>
-   <p>GPS konumu ve cihazın bildirdiği doğruluk değeriyle saha ölçümünü konumlandırır; fotoğraf eklenirse tarayıcı içi kalite kontrolü uygulanır.</p>
-   <ul>
-    <li>GPS doğruluğu ölçümle kaydedilir</li>
-    <li>Waypoint pusula navigasyonu</li>
-    <li>Çevrimdışı ölçüm + senkronizasyon</li>
-    <li>Fotoğraf için tarayıcı içi QA/QC</li>
-   </ul>
-  </div>
-  <div class="feature">
-   <div class="ico">🧮</div>
-   <h3>Bilimsel Hesap</h3>
-   <p>Belirlenen ölçüm değişkenleriyle AGB, BHB, toplam biyokütle ve karbon tahmini üretir.</p>
-   <ul>
-    <li>Chave et al. 2014 (DBH + boy + ρ)</li>
-    <li>AGB × 0,26 kök/gövde varsayımı</li>
-    <li>Tür ρ değeri yoksa grup varsayılanı</li>
-    <li>Hacim hesabı</li>
-   </ul>
-  </div>
-  <div class="feature">
-   <div class="ico">🌍</div>
-   <h3>Küresel Analiz</h3>
-   <p>Admin onaylı merkezi veritabanı; şehir, ülke ve park bazlı agregasyonlar, QGIS uyumlu dışa aktarım.</p>
-   <ul>
-    <li>Ülke/Şehir/Park karşılaştırma</li>
-    <li>CSV, GeoJSON, QGIS export</li>
-    <li>İnteraktif karbon haritası</li>
-    <li>DGR rapor yayını · %95 GA (Monte Carlo)</li>
-    <li>CC BY‑NC 4.0 paylaşım lisansı</li>
-   </ul>
-  </div>
- </div>
-</div></section>
-<section class="blk" id="yontem"><div class="wrap">
- <div class="shead"><span class="no">02</span><h2>Sahadan Haritaya — Üç Adımda</h2><span class="rule"></span></div>
- <p style="color:var(--mut);max-width:70ch;font-size:1.02rem">Her ölçüm, saha verisinden hesaplamaya ve denetimli yayına uzanan kontrollü bir akıştan geçer. Yayınlanan küresel veri ve istatistik katmanlarına yalnızca onaylı kayıtlar dahil edilir.</p>
- 
- <div class="steps">
-  <div class="step">
-   <div class="num">1</div>
-   <h4>Sahada Ölç</h4>
-   <p>GPS konumunu alın, waypoint pusulasıyla ağaca yönelin; DBH, boy ve grup/tür bilgilerini girin.</p>
-   <div class="sub">GPS · DBH · BOY · FOTOĞRAF</div>
-  </div>
-  <div class="step">
-   <div class="num">2</div>
-   <h4>Otomatik Hesap</h4>
-   <p>Fotoğraf eklenirse tarayıcı içi QA/QC uygulanır. Ardından Chave et al. (2014) modeliyle AGB hesaplanır; kök biyokütlesi ve karbon, sistemde tanımlı sabit varsayımlarla türetilir.</p>
-   <div class="sub">AGB · BHB · C · m³</div>
-  </div>
-  <div class="step">
-   <div class="num">3</div>
-   <h4>Küresel Yayın</h4>
-   <p>Kayıt admin onayından sonra dünya haritasında görünür. Ülke, şehir ve park agregasyonlarına dahil edilir; QGIS ve CSV olarak dışa aktarılabilir. Park ölçeğinde, Monte Carlo %95 güven aralıklı DGR bilimsel raporu olarak yayımlanabilir.</p>
-   <div class="sub">ONAY → HARİTA → EXPORT</div>
-  </div>
- </div>
-
- <div style="margin-top:56px;display:grid;grid-template-columns:1fr 1fr;gap:24px" class="method-grid">
-  <div class="card" style="border-left:4px solid var(--green)">
-   <div style="font-family:var(--f-disp);font-size:1.1rem;color:var(--green-dk);font-weight:600;margin-bottom:14px">📐 Allometrik Formüller</div>
-   <div class="formula">DBH = göğüs çapı (cm) · 1,30 m'den doğrudan ölçülür</div>
-   <div class="formula">AGB = 0.0673·(ρ·DBH²·H)<sup>0.976</sup> <span style="color:var(--mut)">— Chave 2014</span></div>
-   <div class="formula">BHB = AGB·0.26 <span style="color:var(--mut)">— sistemde kullanılan sabit kök/gövde varsayımı</span></div>
-   <div class="formula">C = (AGB+BHB)·0.47</div>
-   <p style="color:var(--mut);font-size:.78rem;margin-top:12px">Tür/grup tablosunda 51 seçim kaydı bulunur; 22 kaydın doğrudan ρ değeri vardır, 29 kayıt grup varsayılanına düşer.</p>
-  </div>
-  <div class="card" style="border-left:4px solid var(--amber)">
-   <div style="font-family:var(--f-disp);font-size:1.1rem;color:var(--green-dk);font-weight:600;margin-bottom:14px">🔬 Veri Doğruluk Politikası</div>
-   <ul style="list-style:none;padding:0;margin:0">
-    <li style="padding:8px 0 8px 24px;position:relative;color:var(--ink);font-size:.88rem"><span style="position:absolute;left:0;color:var(--ink);font-weight:700">✓</span>GPS doğruluğu ölçümle kaydedilir; sabit ±10 m kayıt eşiği yoktur</li>
-    <li style="padding:8px 0 8px 24px;position:relative;color:var(--ink);font-size:.88rem"><span style="position:absolute;left:0;color:var(--green);font-weight:700">✓</span>Fotoğraf eklenirse tarayıcı içi çok sınıflı denetim uygulanır: yeşil · kızıl/mor · sonbahar · gövde/dal · kış kadrajı + pozlama 25–245</li>
-    <li style="padding:8px 0 8px 24px;position:relative;color:var(--ink);font-size:.88rem"><span style="position:absolute;left:0;color:var(--green);font-weight:700">✓</span>DBH ≤ 400 cm, boy ≤ 100 m</li>
-    <li style="padding:8px 0 8px 24px;position:relative;color:var(--ink);font-size:.88rem"><span style="position:absolute;left:0;color:var(--green);font-weight:700">✓</span>Admin onayı zorunlu</li>
-   </ul>
-  </div>
- </div>
-</div></section>
-<section class="blk" id="veri"><div class="wrap">
- <div class="shead"><span class="no">03</span><h2>Veri & Harita</h2><span class="rule"></span></div>
- <div id="worldMapLanding" class="notranslate" translate="no" style="height:380px;border-radius:var(--r);border:1px solid var(--line)"></div>
- <div id="landingMapNote" class="alert warn" style="display:none;margin-top:8px;font-size:.82rem"></div>
- <p style="color:var(--mut);font-size:.8rem;margin-top:8px">🟢 Onaylı noktalara dokunun → ölçüm bilgisi + varsa fotoğraf.</p>
- <div id="landingAnalysis" style="margin-top:20px"></div>
-  <div class="card" style="margin-top:20px;border-left:4px solid var(--green)">
-  <div class="shead" style="margin-bottom:12px"><span class="no">🌍</span><h2 style="font-size:1.15rem">Bölgesel Dağılım</h2><span class="rule"></span></div>
-  <div class="grid g2">
-   <div class="tblwrap"><table id="tblCountry"><thead><tr><th scope="col">Ülke</th><th scope="col">Kayıt</th><th scope="col">Karbon(t)</th><th scope="col">Ort.DBH</th><th scope="col">Ort.Yükseklik(m)</th></tr></thead><tbody></tbody></table></div>
-   <div class="tblwrap"><table id="tblCity"><thead><tr><th scope="col">Şehir</th><th scope="col">Kayıt</th><th scope="col">Karbon(t)</th></tr></thead><tbody></tbody></table></div>
-  </div>
- </div>
-</div></section>
-<section class="blk" id="istatistik"><div class="wrap">
- <div class="shead"><span class="no">04</span><h2>İstatistik</h2><span class="rule"></span></div>
- <p style="color:var(--mut);max-width:72ch">DendroGeo'da şimdiye kadar yayımlanan onaylı ağaç kayıtlarının genel görünümünü burada görebilirsiniz: kaç kayıt, kaç ülke ve şehir ile toplam tahmini karbon stoğu.</p>
- <div class="grid g4" style="margin-top:20px">
-  <div class="stat"><div class="lbl">Onaylı Kayıt</div><div class="val" id="statRec">—</div></div>
-  <div class="stat"><div class="lbl">Ülke</div><div class="val" id="statCountry">—</div></div>
-  <div class="stat"><div class="lbl">Şehir</div><div class="val" id="statCity">—</div></div>
-  <div class="stat"><div class="lbl">Karbon Stoğu <span class="mono">t</span></div><div class="val" id="statCarbon">—</div></div>
- </div>
- <div class="card" style="margin-top:18px;border-left:4px solid var(--blue)">
-  <b>Bu sayılar neyi gösteriyor?</b>
-  <p style="color:var(--mut);font-size:.82rem;margin:7px 0 0">Harita ve istatistiklerde yayınlanan, DendroGeo tarafından onaylanmış saha ölçümlerinin mevcut toplamını gösterir. Değerler zaman içinde yeni ölçümler eklendikçe değişebilir. Veri seti erken aşamadadır (küçük örneklem); ülke/şehir ortalamaları bu bağlamda yorumlanmalıdır. Kayıt düzeyindeki kalite kontrol değerlendirmeleri (örneğin boy/çap oranı incelemesi 🟡) ilgili park raporlarının §7 bölümünde ayrıca yayımlanır.</p>
- </div>
-</div></section>
-<section class="blk" id="bilgi-merkezi"><div class="wrap">
- <div class="shead"><span class="no">05</span><h2>Bilgi Merkezi & Kaynaklar</h2><span class="rule"></span></div>
- <p style="color:var(--mut);max-width:75ch">DendroGeo'yu kullanırken ihtiyaç duyacağınız ölçüm, karbon hesabı, arazi örtüsü, park analizi ve veri paylaşımı bilgilerini tek yerde bulabilirsiniz.</p>
- <div class="cols cols-3 info-feature-grid" style="margin-top:22px">
-  <a class="feature" href="/agac-envanteri/" style="text-decoration:none;color:inherit">
-   <div class="ico">🌳</div><h3>Ağaç Envanteri</h3>
-   <p>Saha ölçümleri, GPS, DBH, boy, tür/grup bilgisi ve veri yaşam döngüsü.</p>
-   <ul><li>GPS konumu</li><li>DBH · boy · tür</li><li>Çevrimdışı senkronizasyon</li></ul>
-  </a>
-  <a class="feature" href="/karbon-hesaplama/" style="text-decoration:none;color:inherit">
-   <div class="ico">🧮</div><h3>Karbon Hesaplama</h3>
-   <p>Allometrik biyokütle ve karbon hesabının kullanılan denklemi, varsayımları ve sınırlılıkları.</p>
-   <ul><li>Chave et al. 2014</li><li>ρ odun yoğunluğu</li><li>Varsayım şeffaflığı</li></ul>
-  </a>
-  <a class="feature" href="/arazi-ortusu/" style="text-decoration:none;color:inherit">
-   <div class="ico">🛰</div><h3>10 m Arazi Örtüsü</h3>
-   <p>Park polygonu üzerinde 10 m kategorik raster hücreleriyle yapılan alan analizinin veri ve QA yapısı.</p>
-   <ul><li>WorldCover 2021 v200</li><li>IO LULC 2020 çapraz kontrolü</li><li>Gerçek hücre kesişimi</li></ul>
-  </a>
-  <a class="feature" href="/kent-parklari/" style="text-decoration:none;color:inherit">
-   <div class="ico">🏞</div><h3>Kent Parkı Analizi</h3>
-   <p>Ağaç envanteri, karbon ve arazi örtüsünü aynı park bağlamında birbirinden ayrı veri kaynaklarıyla inceleyin.</p>
-   <ul><li>Park polygonu</li><li>Saha + raster ayrımı</li><li>GIS görünümü</li></ul>
-  </a>
-  <a class="feature" href="/yontem/" style="text-decoration:none;color:inherit">
-   <div class="ico">📐</div><h3>Bilimsel Yöntem</h3>
-   <p>Alan, geometri, biyokütle, karbon ve arazi örtüsü hesaplama zincirinin dayandığı yöntem özeti.</p>
-   <ul><li>Formüller</li><li>Projeksiyon ve alan</li><li>QA/QC</li></ul>
-  </a>
-  <a class="feature" href="/veri/" style="text-decoration:none;color:inherit">
-   <div class="ico">🗂</div><h3>Veri ve Dışa Aktarım</h3>
-   <p>Veri yaşam döngüsü, yayınlama modeli ve araştırma/GIS iş akışlarında kullanılan çıktı formatları.</p>
-   <ul><li>CSV</li><li>GeoJSON</li><li>QGIS iş akışı</li></ul>
-  </a>
-  <a class="feature" href="/rapor/" style="text-decoration:none;color:inherit">
-   <div class="ico">📄</div><h3>Bilimsel Raporlar (DGR)</h3>
-   <p>Yayımlanan park raporları: dondurulmuş içerik, SHA-256 hash, QR kalıcı bağlantı, Monte Carlo %95 güven aralığı ve geri çekme politikası.</p>
-   <ul><li>Değişmez, hash'li yayın</li><li>%95 GA · Monte Carlo</li><li>DataCite tarzı künye</li></ul>
-  </a>
-  <a class="feature" href="/hakkimizda/" style="text-decoration:none;color:inherit">
-   <div class="ico">🌿</div><h3>Proje Hakkında</h3>
-   <p>Projenin amacı, kaynak kodunun yayımlanma biçimi, mimarisi ve bilimsel veri yaklaşımının genel çerçevesi.</p>
-   <ul><li>Kaynak kodu GitHub'da</li><li>Web GIS + PWA</li><li>Yöntem ve test belgeleri</li></ul>
-  </a>
- </div>
- </div></section>
-
-<section class="blk" id="erisim" style="border-top:0"><div class="wrap">
- <div class="shead"><span class="no">06</span><h2>Giriş / Kayıt</h2><span class="rule"></span></div>
- <div class="card auth" id="authBox">
-  <!-- GOOGLE İLE GİRİŞ (2026-09-24). OAuth akışı: supabase-js → Supabase
-       /auth/v1/authorize → Google → ?code=… ile geri dönüş → takas (boot()).
-       G logosu satır içi SVG: dış kaynak yok (CSP + çevrimdışı + PWA güvenli). -->
-  <div id="oauthWait" class="dg-oauth-wait" style="display:none">⏳ Google girişi tamamlanıyor…</div>
-  <button type="button" id="googleBtn" class="dg-google" onclick="dgGoogleSignIn()">
-   <svg width="18" height="18" viewBox="0 0 48 48" aria-hidden="true" focusable="false"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>
-   <span>Google ile devam et</span>
-  </button>
-  <div class="dg-oauth-sep"><span>veya</span></div>
-  <div style="display:flex;gap:8px;margin-bottom:16px">
-   <button class="btn sm" onclick="authTab('login')">Giriş</button>
-   <button class="btn sm ghost" onclick="authTab('reg')">Kayıt Ol</button>
-   <button class="btn sm ghost" onclick="authTab('reset')">Şifre Yenile</button>
-  </div>
-<form id="fLogin" onsubmit="return false;"><label class="lbl" for="liEmail">E‑posta</label><input id="liEmail" type="email" required><label class="lbl" for="liPass" style="margin-top:12px">Parola</label><input id="liPass" type="password" required><div id="tsLogin" style="margin-top:14px;min-height:65px"></div><button type="button" class="btn" style="width:100%;margin-top:16px" onclick="doLogin()">Giriş Yap</button></form>
-<form id="fReg" style="display:none" onsubmit="return false;"><label class="lbl" for="rgName">Ad Soyad</label><input id="rgName" required><label class="lbl" for="rgOrg" style="margin-top:10px">Kurum</label><input id="rgOrg"><label class="lbl" for="rgEmail" style="margin-top:10px">E‑posta</label><input id="rgEmail" type="email" required><label class="lbl" for="rgPass" style="margin-top:10px">Parola</label><input id="rgPass" type="password" minlength="6" required><div id="tsReg" style="margin-top:14px;min-height:65px"></div>
- <!-- KVKK m.5/2-a AÇIK RIZA (2026-09-24): ad, e-posta, kurum + sonradan GPS ve
-      fotoğraf işleniyor; yurt dışı altyapı (Supabase/Google/Cloudflare) kullanılıyor.
-      Rıza olmadan kayıt engellenir; rıza zaman damgası auth metadata'sına yazılır
-      (doRegister → kvkk_consent_at) yani SONRADAN İNKÂR EDİLEMEZ KAYIT oluşur. -->
- <label class="dg-consent" for="rgConsent"><input type="checkbox" id="rgConsent">
-  <span><a href="/aydinlatma/" target="_blank" rel="noopener">KVKK Aydınlatma Metni</a>&#39;ni ve <a href="/gizlilik/" target="_blank" rel="noopener">Gizlilik Politikası</a>&#39;nı okudum. Ad, e-posta, kurum bilgilerimin; saha ölçümlerimde <b>konum verimin</b> ve yüklersem <b>fotoğrafımın</b> bu belgelerde belirtilen amaçlarla işlenmesini, onaylanan ölçümlerin CC BY-NC 4.0 ile kamuya açık veri setinde yayımlanmasını ve hizmet sağlayıcılarının (Supabase, Google, Cloudflare) <b>yurt dışı altyapısında barındırılmasını</b> onaylıyorum. Rızamı dilediğim zaman geri çekebilirim.</span></label>
- <button type="button" class="btn" style="width:100%;margin-top:16px" onclick="doRegister()">Hesap Oluştur</button></form>
-<form id="fReset" style="display:none" onsubmit="return false;"><label class="lbl" for="rsEmail">E‑posta</label><input id="rsEmail" type="email" required><div id="tsReset" style="margin-top:14px;min-height:65px"></div><button type="button" class="btn" style="width:100%;margin-top:16px" onclick="sendResetEmail()">Sıfırlama Gönder</button></form>
-  <div id="authMsg" style="margin-top:12px;font-size:.85rem;min-height:1.2em"></div>
- </div>
-</div></section>
-<footer><div class="wrap">
- <div class="cols footer-cols">
-  <div><h4>DendroGeo</h4><p>Ağaç envanteri, karbon hesabı, harita ve park ölçeğinde arazi örtüsü analizi.</p></div>
-  <div><h4>Referanslar</h4><p>Chave et al. 2014 · IPCC 2006<br>As ve ark. 2001 · Tolunay 2013<br>OGM 299 Nolu Tebliğ 2017</p></div>
-  <div><h4>Sistem</h4><p>v3.0 · <span class="mono">CC BY-NC 4.0</span></p>
-   <p style="margin-top:10px;font-size:.78rem"><a href="/gizlilik/" style="color:#cfe0d4">Gizlilik Politikası</a> · <a href="/aydinlatma/" style="color:#cfe0d4">KVKK Aydınlatma</a> · <a href="/kullanim-kosullari/" style="color:#cfe0d4">Kullanım Koşulları</a> · <a href="/kunye/" style="color:#cfe0d4">Künye &amp; İletişim</a> · <a href="/hakkimizda/" style="color:#cfe0d4">Hakkımızda</a></p>
-   <p style="margin-top:8px;font-size:.72rem;color:#a9bcb0">🔒 Bu site izleme çerezi, reklam ve üçüncü taraf analitik kullanmaz. Kaynak kodu CC BY-NC 4.0 · Zenodo v3.0.0 sürüm DOI: 10.5281/zenodo.22948643</p></div>
- </div>
- <div style="margin-top:34px;padding-top:30px;border-top:1px solid rgba(255,255,255,.18)">
-  <div class="grid g2" style="gap:24px">
-   <div>
-    <h4 style="color:#9fd0ae;font-size:.72rem;letter-spacing:.16em;text-transform:uppercase;margin-bottom:12px">📚 Kaynakça</h4>
-    <div style="font-size:.78rem;line-height:1.7;color:#cfe0d4">
-     <div>• Chave J, Réjou-Méchain M, et al. (2014). <i>Pantropical biomass allometries</i>. Global Ecology and Biogeography, 23(1), 132-146.</div>
-     <div>• IPCC (2006). <i>Guidelines for National Greenhouse Gas Inventories</i>. Vol. 4, Chapter 4: Forest Land.</div>
-     <div>• As N, Asan A, Okur OD (2001). <i>Türkiye Orman Ağaçlarının Odun Özellikleri</i>. Orman Bakanlığı Yayınları.</div>
-     <div>• Tolunay D (2013). <i>Türkiye'deki Ağaç Türlerinin Odun Yoğunluk Değerleri</i>. İstanbul Üniversitesi Orman Fakültesi.</div>
-     <div>• OGM (2017). <i>299 Nolu Tebliğ — Orman Ürünlerinin Özellikleri</i>. Orman Genel Müdürlüğü.</div>
-     <div>• Bozkurt Y, Erdin N (2000). <i>Önemli Ağaçların Teknik Özellikleri</i>. İÜ Orman Fakültesi.</div>
-    </div>
-   </div>
-   <div>
-    <h4 style="color:#9fd0ae;font-size:.72rem;letter-spacing:.16em;text-transform:uppercase;margin-bottom:12px">📝 Atıf & Lisans</h4>
-    <div class="card" style="background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.15);padding:14px">
-     <div class="mono" style="font-size:.72rem;color:#fff;line-height:1.7;background:rgba(0,0,0,.25);padding:10px;border-radius:6px">
-      ŞİRİN, N. &amp; ŞİRİN, S. (2026). <i>DendroGeo: Küresel Ağaç Envanteri ve Karbon Veri Sistemi</i> (Version 3.0.0) [Software]. Zenodo. https://doi.org/10.5281/zenodo.22948643
-     </div>
-     <div style="font-size:.75rem;color:#cfe0d4;margin-top:10px">
-      <b style="color:#fff">Veri Lisansı:</b> CC BY-NC 4.0 — Ticari olmayan kullanımda, kaynak gösterilerek serbestçe paylaşılabilir.
-     </div>
-    </div>
-    <h4 style="color:#9fd0ae;font-size:.72rem;letter-spacing:.16em;text-transform:uppercase;margin:18px 0 10px">⚖️ Politikalar</h4>
-    <div style="font-size:.78rem;color:#cfe0d4;line-height:1.6">
-     <div><a href="/aydinlatma/" style="color:#9fd0ae;text-decoration:underline">KVKK Aydınlatma Metni</a></div>
-     <div style="margin-top:4px"><a href="/yontem/" style="color:#9fd0ae;text-decoration:underline">Veri Doğruluk Politikası</a></div>
-    </div>
-   </div>
-  </div>
- </div>
- <div class="credit">
-  <div class="thesis">🎓 Bu proje; <b>Nagihan ŞİRİN</b>'in <i>"Kent Parklarının Karbon Depolama Performansının Saptanması"</i> adlı doktora çalışması kapsamında gerçekleştirilmiştir.</div>
-  <div class="prod">Üretici · Sinan ŞİRİN</div>
- </div>
-</div></footer>
-</div>
-
-<div id="shell">
-<div id="apptop">
-<span class="logo"><img class="brand-logo" src="logo.png" alt="">DendroGeo</span>
- <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:var(--green);box-shadow:0 0 0 3px rgba(30,111,75,.25)"></span>
- <div class="right">
-  <span class="badge admin" id="syncBadge" style="display:none" title="Senkron bekleyen ölçümler">⏳ 0</span>
-  <button class="btn sm ghost" id="installBtn" style="display:none" onclick="dgInstallApp()">📲 Uygulayı Kur</button>
-  <span class="mono" id="whoami" style="font-size:.8rem;color:var(--mut)"></span>
-  <span class="badge admin" id="roleBadge" style="display:none">ADMIN</span>
-  <button type="button" class="btn sm ghost dg-lang-toggle" onclick="dgToggleLang()" aria-label="Switch to English">EN</button>
-  <button class="btn sm red" onclick="logout()">Çıkış</button>
- </div>
-</div>
-<div id="layout">
- <div id="side">
-  <div class="sec">Saha</div>
-  <div class="item on" role="button" tabindex="0" onkeydown="dgKeyActivate(event,this)" onclick="go('dash')">📊 Panel</div>
-  <div class="item" role="button" tabindex="0" onkeydown="dgKeyActivate(event,this)" onclick="go('measure')">📏 Yeni Ölçüm</div>
-  <div class="item" role="button" tabindex="0" onkeydown="dgKeyActivate(event,this)" onclick="go('nav')">🧭 Waypoint</div>
-  <div class="item" role="button" tabindex="0" onkeydown="dgKeyActivate(event,this)" onclick="go('map')">🗺️ Canlı Harita</div>
-  <div class="sec">Veri</div>
-  <div class="item" role="button" tabindex="0" onkeydown="dgKeyActivate(event,this)" onclick="go('projects')">📁 Projeler</div>
-  <div class="item" role="button" tabindex="0" onkeydown="dgKeyActivate(event,this)" onclick="go('records')">📋 Kayıtlarım</div>
-  <div class="item" role="button" tabindex="0" onkeydown="dgKeyActivate(event,this)" onclick="go('export')">💾 Dışa Aktar</div>
-  <div class="item" role="button" tabindex="0" onkeydown="dgKeyActivate(event,this)" onclick="go('world')">🌍 Dünya Verisi</div>
-  <div class="sec" id="adminSec" style="display:none">Yönetim</div>
-  <div class="item" id="miAdmin" style="display:none" role="button" tabindex="0" onkeydown="dgKeyActivate(event,this)" onclick="go('admin')">🔐 Ölçüm Yönetimi<span id="adminPendingBadge" class="dg-menu-badge" style="display:none"></span></div>
-  <div class="item" id="miUsers" style="display:none" role="button" tabindex="0" onkeydown="dgKeyActivate(event,this)" onclick="go('users')">👥 Kullanıcılar</div>
-  <div class="item" id="miVisitors" style="display:none" role="button" tabindex="0" onkeydown="dgKeyActivate(event,this)" onclick="go('visitors')">👁 Ziyaretçi &amp; Canlı</div>
- </div>
- <div id="main">
-
-   <div class="view on" id="v-dash">
-   <div class="shead" style="margin-bottom:18px"><span class="no">📊</span><h2 style="font-size:1.6rem">Genel Bakış</h2><span class="rule"></span><span class="mono" style="font-size:.78rem;color:var(--mut)">Kişisel Analiz Paneli</span></div>
-   <section id="dgAcademicProfile" class="card" style="margin-bottom:18px" aria-label="Araştırmacı profili"></section>
-   <div class="grid g4" style="margin-bottom:22px">
-    <div class="stat" style="border-left:3px solid var(--green);padding-left:18px"><div class="lbl">📋 Kayıtlarım</div><div class="val" id="dMy">0</div></div>
-    <div class="stat" style="border-left:3px solid var(--amber);padding-left:18px"><div class="lbl">🌱 Karbonum</div><div class="val" id="dCarbon">0</div><div style="font-size:.72rem;color:var(--mut);margin-top:4px">kg C (saf karbon)</div></div>
-    <div class="stat" style="border-left:3px solid var(--blue);padding-left:18px"><div class="lbl">📍 Waypoint</div><div class="val" id="dWp">0</div></div>
-    <div class="stat" style="border-left:3px solid var(--red);padding-left:18px"><div class="lbl">✅ Tamamlanan</div><div class="val" id="dVisit">0</div></div>
-   </div>
-   <div class="card" style="margin-bottom:18px;border-left:4px solid var(--green)">
-    <div class="shead" style="margin-bottom:14px"><span class="no">🌳</span><h2 style="font-size:1.15rem">Kişisel Ağaç Analizi</h2><span class="rule"></span></div>
-    <div id="myAnalysis"></div>
-   </div>
-     <div class="card" style="margin-top:18px;border-left:4px solid var(--blue)">
-    <div class="shead" style="margin-bottom:12px"><span class="no">📈</span><h2 style="font-size:1.15rem">Karbon Trendi</h2><span class="rule"></span><span class="mono" style="font-size:.72rem;color:var(--mut)">son 10 kayıt · kg</span></div>
-    <canvas id="chCarbon" height="110"></canvas>
-   </div>
-  </div>
-
-  <div class="view" id="v-measure">
-   <div class="measure-heading"><div><div class="dg-kicker">SAHA KAYDI</div><h2 class="disp">Yeni Ölçüm</h2><p class="measure-help">Konumu aç, ağacı ölç, kaydet.</p></div><span class="measure-tag">Bir ağaç · bir kayıt</span></div>
-   <div id="editBanner" class="alert info" style="display:none">✏️ <b>Düzenleme modu:</b> mevcut kaydı güncelliyorsunuz. <button class="btn sm ghost" onclick="cancelEdit()">Vazgeç</button></div>
-   <div class="card measure-project"><label class="lbl" for="mProject">Çalışma projesi</label><select id="mProject" onchange="dgProjectChanged()"></select><div id="parkGate" class="alert info" style="display:none"></div></div>
-   <section class="dg-png-card measure-location" aria-labelledby="measureLocationTitle">
-    <div class="dg-png-head"><div><div class="dg-png-kicker">1 · KONUM</div><h3 class="dg-png-title" id="measureLocationTitle">Saha konumu</h3><p class="dg-png-sub">Kaydederken park içinde olduğunuz doğrulanır.</p></div><span class="dg-png-badge" id="gpsBadge">konum kapalı</span></div>
-    <div class="measure-gps-row"><div class="gpsring" id="gpsRing"><div class="val" id="gpsAcc">—</div><div class="lbl">doğruluk (m)</div></div><div id="gpsState" class="alert info" role="status">Konum servisi kapalı.</div><button id="gpsBtn" class="dg-png-btn primary" onclick="startGps()">📡 Konumu Etkinleştir</button></div>
-    <details class="measure-details"><summary>Konum ayrıntıları ve paylaşım</summary><p class="measure-help">Kayıt için GPS doğruluğu en fazla ±60 m olmalıdır.</p><div class="measure-coordinates"><div><span class="lbl">Enlem</span><div class="mono" id="gLat">—</div></div><div><span class="lbl">Boylam</span><div class="mono" id="gLon">—</div></div><div><span class="lbl">Rakım</span><div class="mono" id="gAlt">—</div></div><div><span class="lbl">Sinyal</span><div class="mono" id="gQ">—</div></div></div>
-     <label class="measure-share"><input type="checkbox" class="dg-switch" id="dgLiveShare" checked onchange="dgLiveShareToggle(this.checked)"><span>Canlı konumumu park ekibiyle paylaş<small>Geçicidir; veritabanına yazılmaz.</small></span></label><div id="dgMatesNote" class="dg-meta"></div>
-    </details>
-   </section>
-   <section class="card measure-tree" aria-labelledby="measureTreeTitle">
-    <div class="dg-png-kicker">2 · AĞAÇ</div><h3 id="measureTreeTitle">Ağaç bilgileri</h3>
-    <div class="measure-fields measure-identity"><div><label class="lbl" for="mPoint">Nokta ID</label><div class="measure-query"><input id="mPoint" type="number" min="1" step="1" inputmode="numeric" oninput="manualPoint=true" aria-describedby="pointHelp"><button class="btn sm ghost" onclick="queryPointId()">🔍 Sorgula</button></div><p class="measure-help" id="pointHelp">Otomatik önerilir; gerekirse değiştirin.</p></div><div><label class="lbl" for="mNo">Ölçüm No</label><input id="mNo" type="number" min="1" step="1" inputmode="numeric" value="1"><p class="measure-help">Aynı noktadaki ölçüm sırası.</p></div></div>
-    <div id="pointQueryResult" class="alert info" style="display:none"></div>
-    <div class="measure-fields"><div><label class="lbl" for="mGroup">Ağaç grubu</label><select id="mGroup" onchange="fillSpecies();liveCalc()"><option value="">Grup seçin</option><option value="İBRELİ">İBRELİ</option><option value="YAPRAKLI">YAPRAKLI</option><option value="DİĞER">DİĞER</option></select></div><div><label class="lbl" for="mSpecies">Ağaç türü</label><select id="mSpecies" disabled onchange="showLatin();liveCalc()"><option value="">Önce grup seçin</option></select><div id="latinName" class="mono measure-help"></div></div></div>
-    <div class="measure-fields measure-dimensions"><div><label class="lbl" for="mDbh">Gövde çapı <span>(cm)</span></label><input id="mDbh" type="number" min="0.1" max="400" step="0.1" inputmode="decimal" oninput="liveCalc()" placeholder="Örn. 52" aria-describedby="dbhHelp"><p class="measure-help" id="dbhHelp">Yerden 1,30 m yüksekte ölçün.</p></div><div><label class="lbl" for="mHeight">Ağaç boyu <span>(m)</span></label><input id="mHeight" type="number" min="0.1" max="100" step="0.1" inputmode="decimal" oninput="liveCalc()" placeholder="Örn. 7,2"><p class="measure-help">Ağacın toplam yüksekliği.</p></div></div>
-    <div class="measure-photo"><div><h4>Fotoğraf <span class="measure-optional">İsteğe bağlı</span></h4><p class="measure-help">Ağacı ve gövdesini kadraja alın.</p></div><span class="dg-file btn ghost">📸 <span>Fotoğraf ekle</span><input type="file" id="mPhoto" aria-label="Fotoğraf (canlı çekim)" accept="image/*" capture="environment" onchange="checkPhoto(event)"></span><span class="dg-file-name mono" id="mPhotoName"></span><button type="button" class="btn sm ghost" id="mPhotoRemove" style="display:none" onclick="dgClearMeasurePhoto()">Fotoğrafı kaldır</button></div>
-    <div id="photoCheck" class="alert info" role="status" style="display:none"></div>
-   </section>
-   <div class="measure-save"><div class="measure-save-copy"><div id="liveCalc" class="alert ok" style="display:none" role="status"></div><p class="measure-help" id="measureSaveHint">Çap, boy ve türü girin; karbon tahmini burada görünür.</p></div><button class="dg-png-btn primary" id="saveBtn" onclick="saveMeas()">💾 Hesapla ve Kaydet</button></div>
-  </div>
-
-  <div class="view" id="v-nav">
-   <h2 class="disp" style="margin-bottom:16px">Waypoint Navigasyon</h2>
-   <div class="grid g2">
-    <div class="card">
-     <label class="lbl" for="nProject">Proje</label><select id="nProject" onchange="loadWaypoints()"></select>
-     <div id="navInfo" class="alert info" style="margin-top:12px">Liste projeye kalıcı kaydedilir; tekrar yüklemeye gerek yok.</div>
-     <div style="display:flex;gap:20px;align-items:center;margin-top:14px">
-      <svg class="arrow" id="navArrow" viewBox="0 0 100 100"><path d="M50 5 L70 70 L50 55 L30 70 Z" fill="var(--green)"/></svg>
-      <div><div class="val" id="navDist">—</div><div class="lbl">hedefe mesafe</div><div class="mono" id="navTarget" style="color:var(--amber-ink);margin-top:6px">—</div></div>
-     </div>
-     <div class="waypoint-actions"><button class="btn blue sm" onclick="dgNearestWaypoint()">📍 En yakın bekleyen</button><button class="btn sm ghost" onclick="dgNextWaypoint()">→ Sıradaki nokta</button><button class="btn sm ghost" onclick="dgFocusWaypoint(true)">🎯 Hedefi göster</button><button class="btn sm ghost" onclick="dgFitWaypoints()">🗺 Tüm noktalar</button></div>
-     <p id="navGuidance" class="measure-help" role="status">Hedef seçerek navigasyona başlayın.</p>
-     <button class="dg-png-btn primary" style="margin-top:14px" onclick="arriveWp()">🎯 Vardım → Ölçüme Geç</button>
-     <p id="navGps" class="measure-help" role="status">GPS konumu bekleniyor.</p>
-    </div>
-    <details id="wpMapPanel" class="card waypoint-map" ontoggle="if(this.open&amp;&amp;navMap){navMap.invalidateSize();dgFocusWaypoint();}"><summary>🗺 Harita</summary><div id="navMap" class="notranslate" translate="no"></div><div class="lbl" style="margin-top:8px">🔴 waypoint (numaralı, tıkla=hedef) · 🟢 yapıldı · 🔵 konumun</div></details>
-    <div class="card waypoint-list">
-     <div style="margin-top:24px;border-top:1px solid var(--line);padding-top:16px">
-      <div class="lbl" style="margin-bottom:10px">📍 Waypoint Listesi</div>
-      <div class="waypoint-filters"><div><label class="lbl" for="wpSearch">Nokta ara</label><input id="wpSearch" type="search" placeholder="P12 veya 12" oninput="renderWaypointList()"></div><div><label class="lbl" for="wpFilter">Durum</label><select id="wpFilter" onchange="renderWaypointList()"><option value="all">Tümü</option><option value="pending">Bekleyen</option><option value="done">Tamamlanan</option></select></div></div>
-      <div class="waypoint-sort"><label class="lbl" for="wpSort">Sıralama</label><select id="wpSort" onchange="renderWaypointList()"><option value="id">Nokta numarası</option><option value="distance">Yakından uzağa (GPS)</option></select></div>
-      <ul id="wpListTable" class="waypoint-points" aria-label="Waypoint noktaları"></ul>
-      <div id="wpPager" class="waypoint-pager"></div>
-     </div>
-     <details class="waypoint-files"><summary>📂 CSV ve liste yönetimi</summary>
-     <div class="lbl" style="margin:12px 0 6px">Waypoints.csv Yükle (X,Y,id)</div>
-     <span class="dg-file btn sm ghost">📂 <span>Dosya seç</span><input type="file" id="nCsv" aria-label="Waypoints.csv dosyası seç (X,Y,id)" accept=".csv" onchange="dgFileName(event,'nCsvName')" style="position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:pointer"></span><span class="dg-file-name mono" id="nCsvName"></span>
-     <div style="display:flex;gap:8px;flex-wrap:wrap">
-      <button class="btn blue sm" style="margin-top:8px" onclick="uploadWpCsv()">⬆ Waypoint Yükle</button>
-      <button class="btn red sm" style="margin-top:8px" onclick="deleteAllWaypoints()">🗑 Listeyi Tamamen Sil</button>
-     </div>
-     </details>
-    </div>
-   </div>
-  </div>
-
-<div class="view" id="v-map"><h2 class="disp" style="margin-bottom:16px">Canlı Harita</h2>
-<div class="live-map-tools" style="display:flex;gap:10px;align-items:center;margin-bottom:10px;flex-wrap:wrap">
- <button class="btn sm blue" id="parkModeBtn" onclick="window.dgToggleParkMode()">🌳 Park Analizi Modu: KAPALI</button>
- <label style="font-size:.82rem;margin-left:8px">Harita:</label>
- <select id="baseLayerSelect" onchange="switchBaseLayer(this.value)" style="font-size:.82rem;padding:4px 8px;border-radius:6px;border:1px solid var(--line)">
-  <option value="osm">🗺️ Sokak</option>
-  <option value="sat">🛰️ Uydu</option>
-  <option value="topo">🏔️ Topoğrafik</option>
- </select>
- <span id="parkModeHint" style="font-size:.78rem;color:var(--mut)">Açınca haritada bir parkın içine tıkla → sınırı otomatik algılanır.</span>
-</div>
-<!-- PARK ALGILAMA EKRANI: ölçüm kapısı buraya yönlendirir (startParkScan).
-     Adım adım akış + park kimliği + proje oluşturma/bağlama park-registry.js'te. -->
-<div id="parkScanCard" class="card" style="display:none;margin-bottom:12px;border-left:4px solid var(--green)"></div>
-<div id="mapLoad" class="alert info">⏳ Onaylı kayıtlar yükleniyor…</div>
-<!-- ↻ ELLE TAZELEME (2026-09-26): canlı harita sekmesi eskiden bir oturumda
-     YALNIZ BİR KEZ yükleniyordu (liveLoaded kapısı). Onaydan sonra sekmeye
-     dönen yönetici eski kümeyi görüyordu. Kapı artık DG_LIVE_DIRTY ile
-     tazeleniyor; başka bir kullanıcının girdiği veri için de bu düğme var. -->
-<div style="display:flex;gap:8px;align-items:center;margin-bottom:8px">
- <button class="btn sm ghost" onclick="loadLiveMap()" title="Onaylı kayıtları sunucudan yeniden çek">↻ İşaretçileri tazele</button>
- <span style="color:var(--mut);font-size:.76rem">Onayladığın kayıt hemen görünmüyorsa bu düğmeye bas.</span>
-</div>
-<div id="surfacePendingTools" class="dg-sens-map-tools" style="display:none"><label for="dgPendingBaseSelect">Harita</label><select id="dgPendingBaseSelect" onchange="switchBaseLayer(this.value)"><option value="osm">Sokak</option><option value="sat">Uydu</option><option value="topo">Topoğrafik</option></select><button class="dg-png-btn ghost sm" disabled>📍 Yeni konum</button><span class="measure-help" role="status">⏳ Yüzey analizi hazırlanıyor…</span></div>
-<div id="map" class="notranslate" translate="no"></div>
-<div id="parkInfo" class="card" style="display:none;margin-top:12px;border-left:4px solid var(--blue)"></div><p style="color:var(--mut);font-size:.8rem;margin-top:8px">🟢 Noktalara dokunun → onaylı ölçüm bilgisi + varsa fotoğraf.</p><div id="liveAnalysis" style="margin-top:18px"></div></div>
-
-  <div class="view" id="v-projects">
-<h2 class="disp" style="margin-bottom:16px">Projeler</h2>
-<!-- 0025 · PARK ÇALIŞMA ARKADAŞI: 📬 davetlerin + 🌳 paylaşılan parkların.
-     Modül: src/services/park-invites.js · yeni CSS yok (card/shead/badge/btn
-     aileleri) · kartlar yalnız giriş yapmış kullanıcıda ve ilgili durum varsa
-     görünür (dgInvitesLoadMine, shell go('projects') kancası). -->
-<div id="dgSharedBox" class="alert ok" style="display:none;margin-bottom:12px"></div>
-<div class="card" id="dgInvBox" style="display:none;margin-bottom:16px"></div>
-<div class="card" style="margin-bottom:16px">
-    <!-- PROJE = PARK + ETİKET (2026-09-24). Proje adı serbest metin DEĞİL:
-         park algılandığında "Göksu Parkı - deneme" biçiminde DB tarafında
-         kurulur (trg_compose_project_name). Park algılanmadan proje açılamaz. -->
-    <div id="projParkBox" class="alert info" style="margin-bottom:12px"></div>
-<div class="grid g3">
-<div><label class="lbl" for="pLabel">Proje Etiketi</label><input id="pLabel" placeholder="örn. deneme" oninput="dgProjectNamePreview()"></div>
-<div><label class="lbl" for="pCountry">Ülke</label><input id="pCountry" value="Türkiye"></div>
-<div><label class="lbl" for="pCity">Şehir</label><input id="pCity" value="Ankara"></div>
-</div>
-    <div class="lbl" style="margin-top:12px">Proje Adı (otomatik)</div>
-    <div id="pNamePreview" class="mono" style="font-size:.95rem;padding:4px 0 2px;color:var(--mut)">—</div>
-    <div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap">
-     <button class="btn sm" id="projSaveBtn" onclick="createProject()">+ Proje Oluştur</button>
-     <button class="btn sm ghost" id="projCancelBtn" style="display:none" onclick="cancelProjectEdit()">Vazgeç</button>
-    </div>
-   </div>
-   <div class="card tblwrap dg-cards"><table><thead><tr><th scope="col">ID</th><th scope="col">Park</th><th scope="col">Proje Adı</th><th scope="col">Ülke</th><th scope="col">Şehir</th><th scope="col">Tarih</th><th scope="col">İşlem</th></tr></thead><tbody id="projTable"></tbody></table></div>
-   <!-- KULLANICI RAPOR PANELİ (0009 · 2026-09-28): kullanıcılar KENDİ park
-        projelerinin bilimsel raporunu site içinden yayınlar — aynı kuyruk
-        (report_requests), aynı DGR kimliği, aynı kalıcı bağlantı. Sunucu
-        kilitleri: mülkiyet + kendi onaylı verisi + 24 saatte 3 istek kotası.
-        Boş + display:none → kullanılmadığında sıfır yer kaplar (düzen kaymaz);
-        yeni CSS yok. Modül: src/services/report-publish.js (kullanıcı bölümü). -->
-   <div id="dgUserPubBox" class="card" style="display:none;margin-top:12px"></div>
-   <!-- PARK ÇALIŞMA ARKADAŞLARI (0025/0026 · kullanıcı isteği: "davet
-        PROJE sayfasında olsun — admin sekmesi değil"): sahibi/yöneticisi
-        olduğun parklara e-posta ile davet aç; kabul eden arkadaş projeyi
-        kendi Ölçüm sekmesinde görür, ölçümlerini KENDİ adıyla girer
-        (owner=auth.uid()), konum çiti (0007) ve onay akışı aynen geçerlidir.
-        Yetki SUNUCUDA: dg_invite_send RPC (proje sahibi/admin değilse
-        INVITE_NOT_YOUR_PARK). Modül: src/services/park-invites.js ·
-        yeni CSS yok, kart v-projects'te (her kullanıcının yeri). -->
-   <div class="card" style="margin-bottom:18px;border-left:4px solid var(--green)">
-    <div class="shead" style="margin-bottom:12px"><span class="no">👥</span><h2 style="font-size:1.2rem">Park Çalışma Arkadaşları</h2><span class="rule"></span><span class="mono" style="font-size:.75rem;color:var(--mut)">davet · ortak ölçüm · onay sende</span></div>
-    <p style="color:var(--mut);font-size:.8rem;margin-bottom:10px">Parkını bir çalışma arkadaşına aç: e-postasıyla davet et, hesabıyla kabul etsin; aynı parkın projelerine birlikte ölçü girin. Kimin ölçtüğü kayıt sahibinde görünür, onay ve rapor akışı değişmez.</p>
-    <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:10px">
-     <label class="lbl" for="dgInvPark" style="margin:0">Park</label>
-     <select id="dgInvPark" onchange="dgCollabRefresh()" style="min-width:220px"><option value="">⏳ yükleniyor…</option></select>
-     <button class="btn sm blue" onclick="dgCollabLoad()">🔄 Yenile</button>
-    </div>
-    <div id="dgInvList"><div class="dg-tree-meta">Park seçilince davetler ve ortaklar burada listelenir.</div></div>
-   </div>
-
-  </div>
-
-  <div class="view" id="v-records">
-   <h2 class="disp" style="margin-bottom:16px">Kayıtlarım</h2>
-   <div class="alert info">Kayıtlarınız admin onayından sonra dünya verisinde yayınlanır.</div>
-   <div class="card tblwrap dg-cards"><table><thead><tr><th scope="col">Proje</th><th scope="col">Nokta</th><th scope="col">Tür</th><th scope="col">Çap</th><th scope="col">Boy</th><th scope="col">Karbon</th><th scope="col">Foto</th><th scope="col">Durum</th><th scope="col">İşlem</th></tr></thead><tbody id="recTable"></tbody></table></div>
-  </div>
-
-  <div class="view" id="v-export">
-   <h2 class="disp" style="margin-bottom:16px">Dışa Aktar</h2>
-   <div class="grid g3">
-    <div class="card"><b>📥 Standart CSV</b><p style="color:var(--mut);font-size:.8rem;margin:6px 0 12px">Tam bilimsel format (AGB/BHB/Karbon)</p><div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn sm" onclick="exportCSV()">İndir</button><button class="btn sm ghost" onclick="previewCSV()">Görüntüle</button></div></div>
-    <div class="card"><b>🗺 GeoJSON</b><p style="color:var(--mut);font-size:.8rem;margin:6px 0 12px">QGIS / web harita katmanı</p><div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn sm blue" onclick="exportGeo()">İndir</button><button class="btn sm ghost" onclick="previewGeo()">Görüntüle</button></div></div>
+       <path d="M632 196 632 207 635 220 M631 209 …13012 tokens truncated…rap:wrap"><button class="btn sm blue" onclick="exportGeo()">İndir</button><button class="btn sm ghost" onclick="previewGeo()">Görüntüle</button></div></div>
     <div class="card"><b>🧾 QGIS CSV</b><p style="color:var(--mut);font-size:.8rem;margin:6px 0 12px">Fotoğraf eşleştirmeli saha formatı</p><div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn sm amber" onclick="exportQgis()">İndir</button><button class="btn sm ghost" onclick="previewCSV()">Görüntüle</button></div></div>
    </div>
    <div class="card" style="margin-top:20px;border-left:4px solid var(--blue)">
@@ -1095,7 +550,7 @@
   <div class="view" id="v-visitors">
    <h2 class="disp" style="margin-bottom:16px">👁 Ziyaretçi &amp; Canlı İzleme</h2>
    <div class="alert info" style="font-size:.82rem">Bu sekme <b>yalnız kurucuya</b> açıktır. Ziyaretçi sayacı kimlik tutmaz (gizlilik); oturum açmış kullanıcıların veri işlemleri aşağıdadır. Konumlar, yalnız kullanıcı "canlı konum paylaşımı"nı açtıysa <b>geçici</b> olarak görünür — veritabanına yazılmaz.</div>
-   <div class="dg-vis-tools card"><label class="lbl" for="visSearch">Kullanıcı ara</label><input id="visSearch" type="search" placeholder="İsim veya cihaz" oninput="renderVisitorsLive()"><label class="lbl" for="visViewFilter">Ekran</label><select id="visViewFilter" onchange="renderVisitorsLive()"><option value="">Tüm ekranlar</option value="measure">Yeni Ölçüm</option><option value="nav">Waypoint</option><option value="map">Canlı Harita</option><option value="projects">Projeler</option></select><label class="measure-share"><input class="dg-switch" id="visLocated" type="checkbox" onchange="renderVisitorsLive()"><span>Yalnız konum paylaşanlar</span></label><label class="measure-share"><input class="dg-switch" type="checkbox" onchange="dgVisPause(this.checked)"><span>Görünümü duraklat</span></label><button type="button" class="btn sm ghost" onclick="dgVisResetFilters()">Filtreleri temizle</button><p id="visStatus" class="dg-meta" role="status">Bağlanıyor…</p><p class="dg-meta">Konum paylaşan: <b id="vzLocated">0</b> · Çevrimiçi sayısı bağlı benzersiz kullanıcıları gösterir. Arka planda kalan oturumlar ayrıca işaretlenir.</p></div>
+   <div class="dg-vis-tools card"><label class="lbl" for="visSearch">Kullanıcı ara</label><input id="visSearch" type="search" placeholder="İsim veya cihaz" oninput="renderVisitorsLive()"><label class="lbl" for="visViewFilter">Ekran</label><select id="visViewFilter" onchange="renderVisitorsLive()"><option value="">Tüm ekranlar</option value="measure">Yeni Ölçüm</option><option value="nav">Waypoint</option><option value="map">Canlı Harita</option><option value="projects">Projeler</option></select><label class="measure-share"><input class="dg-switch" id="visLocated" type="checkbox" onchange="renderVisitorsLive()"><span>Yalnız konum paylaşanlar</span></label><label class="measure-share"><input class="dg-switch" type="checkbox" onchange="dgVisPause(this.checked)"><span>Görünümü duraklat</span></label><p id="visStatus" class="dg-meta" role="status">Bağlanıyor…</p><p class="dg-meta">Konum paylaşan: <b id="vzLocated">0</b> · Çevrimiçi sayısı son 2 dakikada sinyal gönderen benzersiz kullanıcıları gösterir.</p></div>
    <div class="grid g4" style="margin-bottom:18px">
     <div class="stat"><div class="lbl">👁 Toplam Ziyaret</div><div class="val" id="vzTotal">0</div></div>
     <div class="stat"><div class="lbl">👁 Bugün</div><div class="val" id="vzToday">0</div></div>
@@ -1144,7 +599,8 @@
 
 <script src="src/ui/state.js?v=5feada9b" defer></script>
 <script src="src/ui/toast.js?v=50dab987" defer></script>
-<script src="src/ui/landing.js?v=f7ad4ccd" defer></script>
-<script src="src/ui/shell.js?v=49cc6b12" defer></script>
+<script src="src/ui/landing.js?v=d9cc69fb" defer></script>
+<script src="src/ui/shell.js?v=29be33b5" defer></script>
 </body>
 </html>
+

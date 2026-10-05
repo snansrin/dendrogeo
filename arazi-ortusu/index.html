@@ -1,11 +1,11 @@
 <!doctype html>
 <html lang="tr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>10 m Arazi Örtüsü Analizi | DendroGeo</title>
-<meta name="description" content="DendroGeo, seçilen park polygonu içinde 10 m sınıflandırılmış arazi örtüsü verisini gerçek hücre-polygon kesişimleriyle analiz eder; sonuçları yeşil, su, sert ve çıplak zemin gruplarında sunar.">
+<title>Park Yüzey ve Arazi Örtüsü Analizi | DendroGeo</title>
+<meta name="description" content="DendroGeo park yüzey analizinde ESA WorldCover rasterını, Sentinel-2 görüntülerini ve kabul edilmiş OSM/kullanıcı düzeltmelerini kaynak ve dönem bilgileriyle sunar.">
 <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">
 <link rel="canonical" href="https://dendrogeo.org/arazi-ortusu/">
 <meta property="og:type" content="article"><meta property="og:site_name" content="DendroGeo">
-<meta property="og:title" content="10 m Arazi Örtüsü Analizi | DendroGeo"><meta property="og:description" content="DendroGeo, seçilen park polygonu içinde 10 m kategorik arazi örtüsü verisini hücre-polygon kesişimleriyle analiz eder; sonuçları yeşil, su, sert ve çıplak zemin gruplarında sunar.">
+<meta property="og:title" content="Park Yüzey ve Arazi Örtüsü Analizi | DendroGeo"><meta property="og:description" content="DendroGeo park yüzey analizinde ESA WorldCover rasterını, Sentinel-2 görüntülerini ve kabul edilmiş OSM/kullanıcı düzeltmelerini kaynak ve dönem bilgileriyle sunar.">
 <meta property="og:url" content="https://dendrogeo.org/arazi-ortusu/">
 <link rel="icon" href="../icon.png">
 <!-- FONT (2026-10-01 denetim O7): tasarım sistemi Manrope/Fraunces/IBM Plex Mono referanslar; index.html'dekiyle AYNI render-blokamayan desen. -->
@@ -23,18 +23,22 @@ main{padding:54px 0 70px}h1{font-size:clamp(2rem,5vw,3.3rem);line-height:1.08;ma
 </head><body class="dg-page">
 <header class="top"><div class="wrap nav"><a class="brand" href="../">🌲 DendroGeo</a>
 <nav class="links" aria-label="Ana navigasyon"><a href="../">Ana Sayfa</a><a href="../agac-envanteri/">Ağaç Envanteri</a><a href="../karbon-hesaplama/">Karbon</a><a href="../arazi-ortusu/">Arazi Örtüsü</a><a href="../yontem/">Yöntem</a><a href="../en/" hreflang="en">EN</a></nav></div></header>
-<main><div class="wrap"><div class="hero"><div class="tag">ARAZİ ÖRTÜSÜ</div><h1>10 m Arazi Örtüsü Analizi</h1><p class="lead">DendroGeo seçilen park polygonu içinde 10 m çözünürlüklü kategorik arazi örtüsü verisini hücre-polygon kesişimleri üzerinden işler ve yeşil alan, su, sert zemin ve çıplak zemin dağılımını raporlar.</p><a class="btn" href="../">DendroGeo uygulamasını aç</a></div><h2>Hangi sınıflar raporlanır?</h2>
+<main><div class="wrap"><div class="hero"><div class="tag">ARAZİ ÖRTÜSÜ</div><h1>Park Yüzey ve Arazi Örtüsü Analizi</h1><p class="lead">Park analizi, yıllık kategorik raster verisini, güncel uydu görüntülerini ve kullanıcı tarafından kabul edilmiş vektör düzeltmelerini ayrı kaynaklar olarak değerlendirir. Ham raster sonucu ile son yüzey özeti ayrı gösterilir.</p><a class="btn" href="../">DendroGeo uygulamasını aç</a></div><h2>Yayımlanan yüzey sınıfları</h2>
 <table><thead><tr><th scope="col">Rapor sınıfı</th><th scope="col">Kaynak sınıflar</th></tr></thead><tbody>
-<tr><td>🌿 Yeşil alan</td><td>Ağaç, taşkın vejetasyon, tarım, rangeland</td></tr>
-<tr><td>💧 Su</td><td>Water</td></tr>
-<tr><td>🧱 Sert zemin</td><td>Built Area</td></tr>
-<tr><td>🟫 Çıplak zemin</td><td>Bare Ground</td></tr>
+<tr><td>🌿 Yeşil alan</td><td>Ağaç, çalı, çayır ve diğer vejetasyon sınıfları</td></tr>
+<tr><td>🧱 Sert zemin</td><td>Yol, kaldırım, otopark ve benzeri geçirimsiz yüzeyler</td></tr>
+<tr><td>🏢 Bina</td><td>Yapı ayak izleri</td></tr>
+<tr><td>💧 Su</td><td>Göl, gölet ve diğer su yüzeyleri</td></tr>
+<tr><td>🟦 Havuz / süs havuzu</td><td>Haritada ayrı tanımlanan yapay su öğeleri</td></tr>
+<tr><td>🟫 Çıplak zemin</td><td>Vejetasyonsuz doğal veya açık zemin</td></tr>
+<tr><td>⬜ Diğer</td><td>Yukarıdaki gruplara atanmayan alanlar</td></tr>
 </tbody></table>
-<h2>Alan hesabı</h2>
-<p>Analiz motoru 10 m kaynak-grid hücrelerini park polygonuyla kesiştirir. Hücrenin park dışında kalan kısmı hesaba dahil edilmez; sınıf alanı hücrenin park içindeki gerçek kesişim alanlarının toplamından üretilir. Birincil kaynak ESA WorldCover 2021 v200, bağımsız çapraz kaynak ise IO LULC 2020'dir.</p>
-<h2>Kaynak düzeni</h2>
-<p>Birincil sayısal sonuç ESA WorldCover 2021 v200 (10 m) ürününden hesaplanır. IO LULC 2020 bağımsız çapraz doğrulama amacıyla çalıştırılır ve iki kaynağın grup alanları arasındaki fark belirsizlik göstergesi olarak raporlanır.</p>
-<h2>Önemli sınırlılık</h2>
-<p>10 m çözünürlüklü kategorik bir raster küçük nesneleri saha ölçümü ayrıntısında ayıramayabilir. OSM park sınırı bulma ve yardımcı görselleştirme için kullanılabilir; sayısal arazi örtüsü sınıfı OSM geometrileriyle değiştirilmez.</p></div></main>
+<h2>Ham raster sonucu</h2>
+<p>ESA WorldCover 2021 v200, 10 m çözünürlüklü yıllık referans rasterıdır. Sınıf alanları raster hücrelerinin park poligonu içinde kalan gerçek kesişim alanlarından hesaplanır; park dışındaki hücre alanı toplama girmez. IO LULC 2020 bağımsız kaynak karşılaştırması olarak kullanılabilir. Bu ham sonuç kullanıcı düzeltmelerinden ve güncel uydu taramasından ayrı saklanır.</p>
+<h2>Güncel görüntüler ve kabul edilmiş yüzey sonucu</h2>
+<p>Sentinel‑2 L2A görüntüleri güncel spektral kanıt sağlar; bant çözünürlüğü 10 m veya 20 m'dir. Bulut, mevsim ve görüntü tarihi sınıflandırmayı etkileyebilir. Uygulamada OSM bina/su/sert zemin geometrileri ve kullanıcı çizimleri seçilebilir; kabul edildiğinde son yüzey özetine dahil edilir. Bu geometri düzeltmeleri ham ESA raster sonucunu değiştirmez. Yayımlanan rapor, kullanılan uydu sahnelerini, OSM geometrilerini ve kullanıcı kararlarını ayrı ayrı belirtir.</p>
+<h2>Önemli sınırlılıklar</h2>
+<p>Raster çözünürlüğünden küçük öğeler ve birden fazla sınıf içeren hücreler tek başına kesin ayrıştırılamaz. OSM verisinin kapsamı parka göre değişir; elle yapılan düzeltmelerin doğruluğu kullanıcı incelemesiyle sınırlıdır. Harita rengi görselleştirmedir; sayısal alanlar kabul edilmiş geometri ve raporda belirtilen yöntemden üretilir.</p></div></main>
 <footer><div class="wrap">DendroGeo · Küresel Ağaç Envanteri ve Karbon Veri Sistemi · <a href="../">Ana sayfa</a> · <a href="../yontem/">Yöntem</a> · <a href="../gizlilik/">Gizlilik</a> · <a href="../aydinlatma/">KVKK Aydınlatma</a> · <a href="../kullanim-kosullari/">Kullanım Koşulları</a> · <a href="../kunye/">Künye</a></div></footer>
 </body></html>
+
