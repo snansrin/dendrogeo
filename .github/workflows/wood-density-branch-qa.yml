@@ -1,0 +1,40 @@
+name: Wood density branch QA
+
+on:
+  push:
+    branches: [fix/wood-density-lock-sigla]
+
+permissions:
+  contents: write
+
+jobs:
+  build-and-check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Generate deterministic index artifact
+        run: npm run build
+
+      - name: Run complete repository guards
+        run: npm run check
+
+      - name: Commit generated index if needed
+        run: |
+          git config user.name "DendroGeo QA Bot"
+          git config user.email "qa-bot@dendrogeo.local"
+          git add index.html
+          if git diff --cached --quiet; then
+            echo "Generated index is already current."
+            exit 0
+          fi
+          git commit -m "build: refresh content hashes for density lock"
+          git push origin HEAD:fix/wood-density-lock-sigla
