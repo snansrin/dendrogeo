@@ -16,3 +16,11 @@ export function zenodoMetadata(snap,id) {
  const p=parsePublication(snap.publication);
  return {upload_type:'publication',publication_type:'report',title:p.title,description:p.purpose+'\n\nÖrnekleme: '+p.sampling+'\n\nSaha yöntemi: '+p.instruments,creators:[{name:snap.author?.name||p.researcher,affiliation:p.institution}],keywords:['urban forestry','tree inventory','carbon stock','DendroGeo'],license:'cc-by-nc-4.0',related_identifiers:[{identifier:'https://dendrogeo.org/rapor/'+id+'/',relation:'isIdenticalTo',scheme:'url'}],notes:'Proje: '+p.project+'; saha dönemi: '+p.start_date+' – '+p.end_date+(p.supervisor?'; danışman: '+p.supervisor:'')};
 }
+export function parseZenodoDepositState(state, reportId) {
+ let value;
+ try { value = typeof state === 'string' ? JSON.parse(state) : state; }
+ catch { throw Error('Zenodo taslak durumu okunamadı; güvenli biçimde yeniden deneyin.'); }
+ if (!value || value.report_id !== reportId || !Number.isSafeInteger(value.id) || value.id < 1)
+  throw Error('Zenodo taslak durumu rapor kimliğiyle eşleşmiyor.');
+ return { id: value.id, report_id: value.report_id };
+}

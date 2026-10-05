@@ -6,6 +6,7 @@ import {tmpdir} from 'node:os';
 import {execFileSync} from 'node:child_process';
 import {fileURLToPath} from 'node:url';
 import {prepareReportDoi} from './prepare-report-doi.mjs';
+import {parseZenodoDepositState} from './lib/publication.mjs';
 import {buildMetadata} from './make-report.mjs';
 import {canonicalHash} from './lib/mc.mjs';
 import {renderReportPdf} from './render-report-pdf.mjs';
@@ -25,7 +26,10 @@ async function call(url,method='GET',body){
 }
 const snap=JSON.parse(readFileSync(join(dir,'data.json'),'utf8'));
 const {metadata}=prepareReportDoi(dir);delete metadata.prereserve_doi;
-let deposit=existsSync(statePath)?await call(api+'/'+JSON.parse(readFileSync(statePath,'utf8')).id):await call(api,'POST',{});
+const priorState=existsSync(statePath)?parseZenodoDepositState(readFileSync(statePath,'utf8'),id):null;
+let deposit=priorState?await call(api+'/'+priorState.id):await call(api,'POST',{});
+if(!Number.isSafeInteger(deposit.id)||deposit.id<1)throw Error('Zenodo taslak kimliği geçersiz.');
+if(priorState&&deposit.id!==priorState.id)throw Error('Zenodo taslak kimliği beklenen kayıtla eşleşmiyor.');
 writeFileSync(statePath,JSON.stringify({id:deposit.id,report_id:id},null,2)+'\n');
 if(deposit.submitted){
  if(!deposit.doi)throw Error('Zenodo DOI yanıtı eksik.');
@@ -40,6 +44,7 @@ if(deposit.submitted){
  deposit=await call(api+'/'+deposit.id,'PUT',{metadata});
  if(!process.argv.includes('--publish')){console.log('Zenodo taslağı hazır: https://zenodo.org/deposit/'+deposit.id);process.exit(0);}
  deposit=await call(api+'/'+deposit.id+'/actions/publish','POST');
+ if(!deposit.submitted||!deposit.doi)throw Error('Zenodo yayını yanıtında yayımlanmış kayıt bilgisi eksik.');
 }
 if(!/^10\.5281\/zenodo\.\d+$/.test(deposit.doi||''))throw Error('Zenodo tarafından verilmiş DOI doğrulanamadı.');
 writeFileSync(doiPath,JSON.stringify({schema:'dendrogeo-doi/1',report_id:id,doi:deposit.doi,url:'https://doi.org/'+deposit.doi,record_url:'https://zenodo.org/records/'+deposit.id,registered_at:new Date().toISOString()},null,2)+'\n');
