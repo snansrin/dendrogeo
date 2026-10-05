@@ -12,7 +12,7 @@ class Element {
  querySelectorAll(){return this.children.filter(x=>x.open);}
 }
 test('park menus move the original grid and layer nodes, retaining values and handlers',()=>{
- const nodes=Object.fromEntries(['surfaceParkTools','parkGridTools','parkLayerTools'].map(id=>[id,new Element()]));
+ const nodes=Object.fromEntries(['surfaceParkTools','parkGridTools','parkLayerTools','gridSummary'].map(id=>[id,new Element()]));
  nodes.parkGridTools.value='selected-project';const handler=()=>{};nodes.parkLayerTools.onchange=handler;
  const ctx=vm.createContext({document:{getElementById:id=>nodes[id],createElement:()=>new Element()}});
  const start=source.indexOf('function dgParkMountMenus(){');const end=source.indexOf('\nif(typeof document.addEventListener',start);
@@ -20,6 +20,13 @@ test('park menus move the original grid and layer nodes, retaining values and ha
  const nav=nodes.surfaceParkTools.children[0];assert.equal(nav.children.length,2);
  assert.equal(nav.children[0].children[1].children[0],nodes.parkGridTools);
  assert.equal(nav.children[1].children[1].children[0],nodes.parkLayerTools);
+ assert.equal(nav.children[0].children[1].children[1],nodes.gridSummary);
  assert.equal(nodes.parkGridTools.value,'selected-project');assert.equal(nodes.parkLayerTools.onchange,handler);
  nav.children[1].open=true;nav.children[0].open=true;nav.children[0].listeners.toggle();assert.equal(nav.children[1].open,false);
+});
+
+test('menus mount after park and waypoint markup is created, not on reference-area edits',()=>{
+ const ref=source.slice(source.indexOf('function setRefHa'),source.indexOf('function renderRefBadge'));
+ assert.doesNotMatch(ref,/dgParkMountMenus/);
+ assert.match(source,/id="gridSummary"[\s\S]*?dgParkMountMenus\(\);[\s\S]*?renderRefBadge\(\);/);
 });

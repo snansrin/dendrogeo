@@ -22,7 +22,6 @@ window.setGreenOnly=setGreenOnly;
 function setRefHa(v){
   const n=parseFloat(v);
   PARK_REF_HA=Number.isFinite(n)&&n>0?n:null;
-  dgParkMountMenus();
   renderRefBadge();
 }
 
@@ -494,6 +493,7 @@ async function drawPark(park){
     `<div id="lcSens" class="dg-png-result" style="display:none"></div>`+
     `<div id="gridSummary" class="dg-png-result" style="display:none"></div>`;
 
+  dgParkMountMenus();
   renderRefBadge();
 
   toast(
@@ -607,6 +607,7 @@ function dgParkMountMenus(){
   const menu=document.createElement("details");menu.className="dg-editor-menu";
   const summary=document.createElement("summary");summary.textContent=(typeof dgCf==="function"?dgCf(label):label)+" ⌄";
   const body=document.createElement("div");body.className="dg-editor-menu-body";body.append(controls);
+  if(id==="parkGridTools"){const summary=document.getElementById("gridSummary");if(summary)body.append(summary);}
   menu.append(summary,body);menu.addEventListener("toggle",()=>{if(menu.open)nav.querySelectorAll("details[open]").forEach(other=>{if(other!==menu)other.open=false;});});nav.append(menu);
  }
  host.append(nav);

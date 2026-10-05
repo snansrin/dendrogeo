@@ -517,3 +517,12 @@
 #surfaceParkTools .dg-png-fields{grid-template-columns:1fr}
 #surfaceParkTools .dg-png-kicker{display:none}
 #surfaceParkTools .dg-editor-menu-body{width:min(430px,100%)}
+
+/* One shared menu bar for park, grid, waypoint and surface tools. */
+.dg-editor-menu-shell{position:relative;z-index:1100;display:flex;flex-wrap:wrap;align-items:flex-start;margin:8px 0;border:1px solid var(--line);border-radius:8px;background:var(--surface);font-family:var(--f-ui)}
+.dg-editor-menu-shell:not(:has(nav)){display:none}
+.dg-editor-menu-shell #surfaceParkTools,.dg-editor-menu-shell #surfaceBrushTools,.dg-editor-menu-shell .dg-editor{display:contents}
+.dg-editor-menu-shell .dg-editor-menubar{position:static}
+.dg-editor-menu-shell .dg-editor-status{flex-basis:100%;box-sizing:border-box;width:100%}
+.dg-editor-menu-shell .dg-editor-menu-body{width:min(430px,100%);left:0;top:100%;z-index:1103}
+.dg-editor-menu-shell #gridSummary{margin-top:12px;overflow-wrap:anywhere}
