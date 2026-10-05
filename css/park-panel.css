@@ -544,3 +544,5 @@
 .dg-editor-menu-shell .dg-editor-status{display:flex;align-items:center;min-height:30px;padding:5px 12px;background:var(--bg);border-radius:0 0 8px 8px;line-height:1.5}
 @media(max-width:640px){#surfaceMenuBar{gap:3px;padding:5px}#surfaceMenuBar>.dg-editor-menu>summary{padding:7px 9px;font-size:.7rem;min-height:44px}#surfaceMenuBar>.dg-editor-menu[data-menu-order]{border-left:0;padding-left:0}#surfaceMenuBar .dg-editor-menu-body{padding:12px;max-height:55vh}}
 @media(prefers-reduced-motion:reduce){#surfaceMenuBar>.dg-editor-menu>summary{transition:none}}
+.dg-sens-object-preview{margin:10px 0;padding:10px;border:1px solid var(--line);border-left:3px solid var(--green);border-radius:6px;background:var(--bg)}
+.dg-sens-object-preview .dg-sens-actions{margin-bottom:0}

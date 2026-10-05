@@ -80,3 +80,20 @@ test('real raw preparation excludes boundaries, then restores manual and accepte
  await a.run('dgSensRawView(true)');assert.equal(a.run('dgSensAreas().green'),200);assert.equal(a.run('dgSensAreas().building'),0);
  await a.run('dgSensRawView(false)');assert.equal(a.run('JSON.stringify(dgSensAreas())'),editing);assert.equal(a.run('JSON.stringify(DG_SENS.record)'),before);
 });
+
+test('OSM object picker returns an exact pier footprint and rejects distant taps',()=>{
+ const a=app(),f=fixture(a);const ring=f.ring(2,2,8,8),geometry=[...ring,ring[0]].map(p=>({lat:p[1],lon:p[0]}));
+ a.ctx.elements=[{type:'way',id:77,tags:{man_made:'pier',area:'yes'},geometry}];
+ const center=a.run('dgLcUtmInverse(500005,1005,32631)');a.ctx.latlng={lat:center.lat,lng:center.lon};
+ const picked=a.run('dgSensFindObjectAt(latlng,elements)');a.ctx.picked=picked;assert.equal(picked.type,'hard');assert.equal(picked.osmId,'way/77');assert.ok(Math.abs(a.run('dgSurfaceArea(dgSurfaceFeatureGeometry(picked,32631))')-36)<.01);
+ const far=a.run('dgLcUtmInverse(500019,1009,32631)');a.ctx.latlng={lat:far.lat,lng:far.lon};assert.equal(a.run('dgSensFindObjectAt(latlng,elements)'),null);
+});
+test('OSM selected boundary asks for a class and persists only after explicit apply',()=>{
+ const a=app(),f=fixture(a);a.run('dgSensRepartition=async()=>{};dgSensSave=async()=>true');
+ const boundary=f.ring(2,2,8,8);boundary.push([...boundary[0]]);a.ctx.selection={type:'hard',osmId:'way/77',geometry:{type:'MultiPolygon',coordinates:[[boundary]]}};
+ a.run('DG_SENS.drawType="hard";DG_SENS.objectPreview=selection;DG_SENS.record.corrections={"0:0":{to:"water",method:"visual-cell"}}');
+ assert.equal(a.run('DG_SENS.record.features.length'),0);
+ a.run('dgSensObjectApply()');assert.equal(a.run('DG_SENS.record.features.length'),1);
+ assert.equal(a.run('DG_SENS.record.features[0].source'),'osm-selected');assert.equal(a.run('DG_SENS.record.features[0].type'),'hard');
+ assert.equal(a.run('DG_SENS.record.corrections["0:0"].to'),'water');assert.equal(a.run('DG_SENS.objectPreview'),null);
+});
