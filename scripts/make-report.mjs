@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+import { parsePublication, zenodoMetadata } from './lib/publication.mjs';
 import { reviewedSurface } from './surface-report.mjs';
 /* make-report.mjs — DendroGeo Bilimsel Rapor Yayın Hattı (R1+R3, 2026-09-27)
  *
@@ -654,7 +655,7 @@ export async function buildSnapshot(parkId, { skipLulc = false, meta = null, sur
         const g = L.report.groupAreasM2 || {};
         lulc = {
           source: L.report.primaryLabel, citation: L.report.primaryCitation, year: L.report.year,
-          cross: L.report.crossLabel, crossError: L.report.crossError || null,
+          cross: L.report.crossLabel, crossYear: L.report.crossYear, crossCitation: L.report.crossCitation || null, crossError: L.report.crossError || null,
           agreement: L.report.agreement, areaDeltaPct: L.report.areaDeltaPct, cells: L.report.sourceCells,
           coverage_m2: Math.round(L.report.rasterCoverageAreaM2 || 0),
           classified_m2: Math.round(L.report.classifiedAreaM2 || 0),
@@ -728,6 +729,7 @@ export async function buildSnapshot(parkId, { skipLulc = false, meta = null, sur
     lulc,
     rows: rows.map((r) => ({ id: r.id, point_id: r.point_id, species: r.species, grp: r.grp, dbh_cm: +r.dbh_cm, girth_cm: r.girth_cm == null ? null : +r.girth_cm, height_m: +r.height_m, carbon_kg: +r.carbon_kg, volume_m3: r.volume_m3 == null ? null : +r.volume_m3, lat: +(+r.lat).toFixed(6), lon: +(+r.lon).toFixed(6), acc_m: r.accuracy_m, photo: !!r.photo_url, photo_file: r.photo_file || null, date: r.created_at.slice(0, 10) })),
   };
+  if(meta?.publication)snap.publication=parsePublication(meta.publication);
   return { snap, hash: canonicalHash(snap), png, outerL };
 }
 
@@ -818,7 +820,8 @@ export function renderReport(snap, { id, hash, version = 1, meta = null }) {
   const REPORT_URL = SITE_ORIGIN + '/rapor/' + id + '/';
   const qrUri = (M && M.qr_uri) || null;
   const subject = `${P.name} Ağaç Envanteri, Karbon Stoku ve Arazi Örtüsü Analizi`;
-  const titleMain = `${esc(P.name)} (${esc(P.city)}): Bireysel Ağaç Envanteri ve Toprak Üstü / Toprak Altı Karbon Stoku`;
+  const canonicalTitle = reportTitle(snap);
+  const titleMain = esc(canonicalTitle);
 
   /* ---- Şekil 1: grup renkli barlar ---- */
   const maxShare = Math.max(...snap.species.map((s) => s.share_pct), 1);
@@ -888,18 +891,18 @@ export function renderReport(snap, { id, hash, version = 1, meta = null }) {
     : `${INV.n}/${INV.n} kayıt boy/çap oranı fiziksel makullük bandında (${QA_LIMITS.HD_PHYS_MIN}–${QA_LIMITS.HD_PHYS_MAX}) ve stand içi robust aykırılık testinde aykırı kayıt YOK (modified z eşiği ${trNum(QA_LIMITS.HD_ROBUST_Z, 1)})`
       + (HD ? ` · stand dağılımı: medyan ${tN(HD.medyan, 2)}, MAD ${tN(HD.mad, 3)}, aralık ${tN(HD.min, 2)}–${tN(HD.max, 2)}, en yüksek |z| ${tN(Math.abs(HD.z_max), 2)}` : '')
       + (INV.hd_band_out && INV.hd_band_out.length
-        ? ` · ${INV.hd_band_out.length}/${INV.n} kayıt tipik ${QA_LIMITS.HD_MIN}–${QA_LIMITS.HD_MAX} bandının dışında: bu bir UYARI DEĞİL, BİLGİDİR — bu envanterin boy/çap dağılımı${HD ? ` (medyan ${tN(HD.medyan, 2)})` : ''} tipik orman bandının altında kalıyor; sabit bant karşılaştırması dağılım bilgisidir, kayıt bazlı hata hükmü değildir${govdeAralikTxt ? ` · ölçülen gövde çapı aralığı ${govdeAralikTxt}` : ''}`
+        ? ` · ${INV.hd_band_out.length}/${INV.n} kayıt tipik ${QA_LIMITS.HD_MIN}–${QA_LIMITS.HD_MAX} bandının dışında: bu değer betimleyici bir göstergedir — bu envanterin boy/çap dağılımı${HD ? ` (medyan ${tN(HD.medyan, 2)})` : ''} tipik orman bandının altında kalmaktadır; sabit bant karşılaştırması dağılım bilgisidir, kayıt bazlı hata hükmü değildir${govdeAralikTxt ? ` · ölçülen gövde çapı aralığı ${govdeAralikTxt}` : ''}`
         : '')
       + HD_TAIL);
   const devDetail = !INV ? null : (INV.dev_block
     ? `${INV.dev_fail.length}/${INV.n} kayıtta saklı karbon, panel denklemiyle yeniden hesabın ±%${QA_LIMITS.CARBON_DEV_PCT} bandı dışında — SİSTEMİK hesap bütünlüğü sorunu (DBH birimiyle ilgili DEĞİL); yayın düzeltme uygulanana dek bloklanır`
     : (INV.dev_fail.length
-      ? `${INV.n - INV.dev_fail.length}/${INV.n} kayıt panel denklemiyle ±%${QA_LIMITS.CARBON_DEV_PCT} içinde · ${INV.dev_fail.length} kayıt HER İKİ ρ kaynağıyla da bant dışında (${INV.dev_fail.map((x) => `P${x.point_id}: saklı ${tN(x.stored)} kg ↔ tür ρ ${tN(x.expected)} kg (%${tN(x.dev_pct)}), grup ρ ${tN(x.expected_grp)} kg (%${tN(x.dev_grp_pct)})`).join('; ')}) — ayrı bir inceleme kalemi; veri hatası hükmü değildir`
+      ? `${INV.n - INV.dev_fail.length}/${INV.n} kayıt panel denklemiyle ±%${QA_LIMITS.CARBON_DEV_PCT} içinde · ${INV.dev_fail.length} kayıt her iki ρ kaynağıyla da bant dışında (${INV.dev_fail.map((x) => `P${x.point_id}: saklı ${tN(x.stored)} kg ↔ tür ρ ${tN(x.expected)} kg (%${tN(x.dev_pct)}), grup ρ ${tN(x.expected_grp)} kg (%${tN(x.dev_grp_pct)})`).join('; ')}) — ayrı bir inceleme kalemi; veri hatası hükmü değildir`
       : `${DR && DR.n ? `${DR.n}/${INV.n} kayıt` : `${INV.n}/${INV.n} kayıt`} panel denklemiyle (Chave 2014 + kanonik ρ tablosu) ±%${QA_LIMITS.CARBON_DEV_PCT} içinde yeniden üretildi — bant dışı kayıt YOK`
         + (DR && DR.tur ? ` · ${DR.tur} kayıt tür düzeyi ρ ile eşleşti` : '')
         + (DR && DR.grup ? ` · ${DR.grup} kayıt grup varsayılanı ρ ile eşleşti` : '')
         + (DR && DR.grup_farkli && DR.grup_farkli.length
-          ? ` · ${DR.grup_farkli.length} kayıtta (${DR.grup_farkli.map((x) => 'P' + x.point_id).join(', ')}) saklı değer GRUP VARSAYILANI ρ ile yeniden üretildi; aynı kayıt tür düzeyi ρ ile ±%${QA_LIMITS.CARBON_DEV_PCT} bandını aşıyor (örnek P${DR.grup_farkli[0].point_id} ${DR.grup_farkli[0].species}: tür ρ=${DR.grup_farkli[0].rho_tur} → ${tN(DR.grup_farkli[0].expected)} kg, %${tN(DR.grup_farkli[0].dev_pct)} · grup ρ=${DR.grup_farkli[0].rho_grp} → ${tN(DR.grup_farkli[0].expected_grp)} kg, %${tN(DR.grup_farkli[0].dev_grp_pct)}). Bu bir ÖLÇÜM HATASI DEĞİLDİR: saklı karbon, değeri üreten ρ tablosuyla tutarlıdır. Denetim bu nedenle iki ρ kaynağını da kabul eder ve hangi kaynağın eşleştiğini sayıyla beyan eder; karbon motoru ve katsayılar DEĞİŞTİRİLMEMİŞTİR`
+          ? ` · ${DR.grup_farkli.length} kayıtta (${DR.grup_farkli.map((x) => 'P' + x.point_id).join(', ')}) saklı değer grup varsayılanı ρ ile yeniden üretildi; aynı kayıt tür düzeyi ρ ile ±%${QA_LIMITS.CARBON_DEV_PCT} bandını aşıyor (örnek P${DR.grup_farkli[0].point_id} ${DR.grup_farkli[0].species}: tür ρ=${DR.grup_farkli[0].rho_tur} → ${tN(DR.grup_farkli[0].expected)} kg, %${tN(DR.grup_farkli[0].dev_pct)} · grup ρ=${DR.grup_farkli[0].rho_grp} → ${tN(DR.grup_farkli[0].expected_grp)} kg, %${tN(DR.grup_farkli[0].dev_grp_pct)}). Bu fark yoğunluk parametresinin seçimiyle ilişkilidir: saklı karbon, değeri üreten ρ tablosuyla tutarlıdır. Denetim bu nedenle iki ρ kaynağını da kabul eder ve hangi kaynağın eşleştiğini sayıyla beyan eder; karbon motoru ve katsayılar DEĞİŞTİRİLMEMİŞTİR`
           : '')));
 
   const qaRows = [
@@ -980,8 +983,8 @@ export function renderReport(snap, { id, hash, version = 1, meta = null }) {
   const grpShares = Object.entries(grpTot).map(([g, c]) => `${grpTr(g)} türlerde %${trNum(100 * c / (t.carbon_kg || 1), 1)}`).join(', ');
   const evalParas = [
     distParts.length ? `<p>Arazi örtüsü sınıflandırmasına göre analiz alanının ${distParts.join('; ')} şeklinde dağıldığı belirlenmiştir${dominant ? `; baskın sınıf %${trNum(dominant.pct, 1)} pay ile ${esc(dominant.label)} sınıfıdır` : ''}.</p>` : '',
-    `<p>Ölçülen ${t.n} bireyin toplam karbon stoku ${ciTxt} olarak hesaplanmış; stokun ${grpShares || 'tek grupta'} biriktiği görülmüştür. Hektar başına karşılık ${t.per_ha_kg == null ? '—' : trNum(t.per_ha_kg / 1000, 3) + ' t/ha'} düzeyindedir.</p>`,
-    `<p>Örneklem ${t.n} bireysel ölçüme dayanmaktadır; sonuçlar ölçülen bireylerin toplamını verir ve parkın ölçülmeyen bölümlerine ekstrapole edilmemelidir.</p>`,
+    `<p>Ölçülen ${t.n} ağacın toplam karbon stoku ${ciTxt} olarak hesaplanmış; stokun ${grpShares || 'tek grupta'} biriktiği görülmüştür. Hektar başına karşılık ${t.per_ha_kg == null ? '—' : trNum(t.per_ha_kg / 1000, 3) + ' t/ha'} düzeyindedir.</p>`,
+    `<p>Envanter ${t.n} ağaç ölçüm kaydına dayanmaktadır. Sonuçlar yalnızca ölçülen ağaçları kapsar; parkın ölçülmeyen ağaçlarına genellenmemelidir.</p>`,
     `<p class="qnote">Bu bölüm yalnızca ölçüm ve sınıflandırma sonuçlarından türetilen betimleyici ifadeleri içerir; normatif değerlendirme (ör. “iyi durumda”, “yetersiz”) yapılmamıştır.</p>`,
   ].join('');
 
@@ -993,8 +996,8 @@ export function renderReport(snap, { id, hash, version = 1, meta = null }) {
     'Chave ve ark. (2014) pantropikal bir modeldir; Türkiye türleri için bölgesel kalibrasyon gerçekleştirilmemiştir.',
     `Örneklem büyüklüğü (n=${t.n}) sınırlıdır; park geneline ekstrapolasyon, güven aralığı ile birlikte dahi ihtiyatla yorumlanmalıdır.`,
     (G.n_with_acc ?? 0) > 0
-      ? `GNSS doğruluğu (±${trNum(G.mean_acc_m, 1)} m) bireysel ağaç konumu için değil, park üyeliği doğrulaması için kullanılmıştır.`
-      : 'GNSS alıcı doğruluğu (accuracy_m) bu veri sürümünde kaydedilmemiştir; konumsal doğrulama park poligonu üyelik testiyle sınırlıdır ve bireysel nokta hassasiyeti sayısal olarak beyan edilemez.',
+      ? `GNSS doğruluğu (±${trNum(G.mean_acc_m, 1)} m) tek tek ağaçların konum hassasiyetini belirlemek için değil, kayıtların park sınırı içindeki konumunu doğrulamak için kullanılmıştır.`
+      : 'GNSS alıcı doğruluğu (accuracy_m) bu veri sürümünde kaydedilmemiştir; konumsal doğrulama park poligonu üyelik testiyle sınırlıdır ve tek tek ağaç kayıtlarının konum hassasiyeti sayısal olarak beyan edilemez.',
     /* 0031 · ESKİ cümle: "boy/çap oranı blok verdi; ölçü birimi hatası (çevre
      * değeri çap kolonuna yazılmış olabilir) düzeltilmeden karbon
      * yayımlanmamalıdır" → DBH göğüs çapı (cm) olduğu için bu hüküm geçersizdi
@@ -1005,7 +1008,7 @@ export function renderReport(snap, { id, hash, version = 1, meta = null }) {
      * bütünüyle geniş gövdeli bir standda oran doğal olarak düşüktür ve
      * sabit bant bu standı topluca "olağandışı" ilan ediyordu (32/34). */
     (INV && INV.hd_review) ? `Boy/DBH oranı ${INV.hd_fail.length}/${INV.n} kayıtta fiziksel makullük bandının (${QA_LIMITS.HD_PHYS_MIN}–${QA_LIMITS.HD_PHYS_MAX}) dışında veya stand içi dağılıma göre aykırıdır (modified z eşiği ${trNum(QA_LIMITS.HD_ROBUST_Z, 1)}). Bu oran bir İNCELEME GÖSTERGESİDİR: tür, yaş ve gövde formu farkları oranı doğal olarak değiştirir; saha ölçümünün hatalı olduğu anlamına gelmez ve rapor bu gerekçeyle bloklanmaz. DBH değerleri göğüs çapı (cm) olarak kabul edilmiş, karbon hesabına dönüşüm uygulanmadan aktarılmıştır.` : null,
-    (INV && !INV.hd_review && INV.hd_band_out && INV.hd_band_out.length) ? `Boy/çap oranı ${INV.hd_band_out.length}/${INV.n} kayıtta tipik ${QA_LIMITS.HD_MIN}–${QA_LIMITS.HD_MAX} bandının dışındadır; bu bir UYARI DEĞİL, dağılım bilgisidir. Ölçüt olarak sabit bant yerine standın kendi dağılımı kullanılmış${HD ? ` (medyan ${tN(HD.medyan, 2)}, MAD ${tN(HD.mad, 3)}, aralık ${tN(HD.min, 2)}–${tN(HD.max, 2)}, en yüksek |z| ${tN(HD.z_max, 2)}; eşik ${trNum(QA_LIMITS.HD_ROBUST_Z, 1)})` : ''} ve hiçbir kayıt aykırı bulunmamıştır. ${DB ? `Oranın düşük kalması ölçülen gövde çaplarıyla ilgilidir — aralık ${govdeAralikTxt}: paydada büyük bir çap varken boy tipik orman değerlerinde kaldığında oran matematiksel olarak düşer. Bu bir form karakteridir, ölçüm hatası değildir.` : ''}` : null,
+    (INV && !INV.hd_review && INV.hd_band_out && INV.hd_band_out.length) ? `Boy/çap oranı ${INV.hd_band_out.length}/${INV.n} kayıtta tipik ${QA_LIMITS.HD_MIN}–${QA_LIMITS.HD_MAX} bandının dışındadır; bu değer betimleyici dağılım göstergesidir. Ölçüt olarak sabit bant yerine standın kendi dağılımı kullanılmış${HD ? ` (medyan ${tN(HD.medyan, 2)}, MAD ${tN(HD.mad, 3)}, aralık ${tN(HD.min, 2)}–${tN(HD.max, 2)}, en yüksek |z| ${tN(HD.z_max, 2)}; eşik ${trNum(QA_LIMITS.HD_ROBUST_Z, 1)})` : ''} ve hiçbir kayıt aykırı bulunmamıştır. ${DB ? `Oranın düşük kalması ölçülen gövde çaplarıyla ilgilidir — aralık ${govdeAralikTxt}: paydada büyük bir çap varken boy tipik orman değerlerinde kaldığında oran matematiksel olarak düşer. Bu oran tek başına ölçüm hatası kanıtı oluşturmaz.` : ''}` : null,
     /* 0033 · KAPSAM BEYANI (tek kaynak: mc.YASAL_STATU_KAPSAM). Rapor hiçbir
      * birey için yasal statü değerlendirmesi YAPMAZ. 0032deki eşik tabanlı
      * gövde sınıfı beyanı bu yüzden kaldırıldı: envanterde tescilli olmayan
@@ -1015,14 +1018,14 @@ export function renderReport(snap, { id, hash, version = 1, meta = null }) {
     /* 0033 · model temsili sınırlılığı: geniş gövdeli bireyler allometrik
      * kalibrasyon örnekleminde düşük ağırlık taşır → belirsizlik geniştir.
      * Sınırlılık VERİDE değil, modelin temsil gücündedir. */
-    (INV && DB) ? `<b>Gövde çapı dağılımı ve model temsili.</b> Bu envanterde ölçülen gövde çapı aralığı ${govdeAralikTxt}. Değerler sahada ölçüldüğü gibi modellenmiştir; hiçbir düzeltme, ölçekleme veya dışlama uygulanmamıştır. Sınırlılık veride değil model temsilindedir: kullanılan allometrik model (Chave ve ark. 2014) pantropikal bir kalibrasyon örneklemine dayanır; geniş gövdeli kent ağaçları bu örnekleme eşit ağırlıkla girmediği için büyük çaplı bireylerde model belirsizliği daha geniştir ve bu belirsizlik %95 güven aralığına yansıtılmıştır.` : null,
+    (INV && DB) ? `<b>Gövde çapı dağılımı ve model temsili.</b> Bu envanterde ölçülen gövde çapı aralığı ${govdeAralikTxt}. Değerler sahada ölçüldüğü gibi modellenmiştir; hiçbir düzeltme, ölçekleme veya dışlama uygulanmamıştır. Sınırlılık veride değil model temsilindedir: kullanılan allometrik model (Chave ve ark. 2014) pantropikal bir kalibrasyon örneklemine dayanır; geniş gövdeli kent ağaçları bu örnekleme eşit ağırlıkla girmediği için büyük gövdeli ağaçlara ilişkin model belirsizliği daha geniştir ve bu belirsizlik %95 güven aralığına yansıtılmıştır.` : null,
     (INV && INV.dbh_fail.length) ? `DBH geçerlilik kontrolünde ${INV.dbh_fail.length}/${INV.n} kayıt teknik açıdan sorunludur (eksik / sayısal değil / ≤ 0 / cm aralığı dışında); bu kayıtlar ayrıca incelenmelidir.` : null,
     /* 0031 · karbon yeniden hesabı DBH biriminden BAĞIMSIZ ayrı bir kontroldür. */
     (INV && INV.dev_block) ? `Saklı karbon değerleri ${INV.dev_fail.length}/${INV.n} kayıtta panel denklemiyle yeniden hesabın ±%${QA_LIMITS.CARBON_DEV_PCT} bandı dışındadır; bu bir HESAP BÜTÜNLÜĞÜ sorunudur (DBH birimiyle ilgili değildir) ve giderilene dek toplam geçicidir.` : null,
     (INV && INV.dev_review) ? `Karbon yeniden hesabı karşılaştırmasında ${INV.dev_fail.length}/${INV.n} kayıt ±%${QA_LIMITS.CARBON_DEV_PCT} bandı dışındadır. Bu, DBH biriminden bağımsız AYRI bir kalite kontrol kalemidir; ilgili noktalar ayrıca incelenebilir ancak karbon motorunu veya katsayıları değiştirmek için gerekçe oluşturmaz.` : null,
     /* 0032 · ρ KAYNAĞI belirsizliği: saklı carbon_kg hangi ρ tablosuyla üretildi?
      * Denetim iki kaynağı da kabul eder; eşleşen kaynak sayıyla beyan edilir. */
-    (INV && DR && DR.grup_farkli && DR.grup_farkli.length) ? `<b>Odun yoğunluğu (ρ) kaynağı.</b> Karbon yeniden hesap denetiminde ${DR.grup_farkli.length} kayıtta (${DR.grup_farkli.map((x) => 'P' + x.point_id).join(', ')}) saklı karbon GRUP VARSAYILANI ρ ile yeniden üretilmiştir; aynı kayıtlar tür düzeyi ρ ile karşılaştırıldığında ±%${QA_LIMITS.CARBON_DEV_PCT} bandını aşar (örnek ${DR.grup_farkli[0].species}: tür ρ=${DR.grup_farkli[0].rho_tur} kg/m³ → ${tN(DR.grup_farkli[0].expected)} kg, %${tN(DR.grup_farkli[0].dev_pct)} · grup ρ=${DR.grup_farkli[0].rho_grp} kg/m³ → ${tN(DR.grup_farkli[0].expected_grp)} kg, %${tN(DR.grup_farkli[0].dev_grp_pct)}). İki kaynak arasındaki ρ farkı %${rhoFarkPct ?? 0} düzeyindedir; model ρye 0,976 üssüyle duyarlı olduğundan bu fark karbon tahminine yaklaşık aynı oranda yansır. Sınırlılık: tür düzeyi ρ için bölgesel kalibrasyon yoktur ve ρ seçimi tür bazlı karbon tahminini bu ölçekte etkileyebilir. Denetim bu nedenle HER İKİ ρ kaynağını kabul eder, hangisinin eşleştiğini §7de sayıyla beyan eder; karbon motoru, katsayılar, saklı değerler ve CSV çıktısı DEĞİŞTİRİLMEMİŞTİR.` : null,
+    (INV && DR && DR.grup_farkli && DR.grup_farkli.length) ? `<b>Odun yoğunluğu (ρ) kaynağı.</b> Karbon yeniden hesap denetiminde ${DR.grup_farkli.length} kayıtta (${DR.grup_farkli.map((x) => 'P' + x.point_id).join(', ')}) saklı karbon grup varsayılanı ρ ile yeniden üretilmiştir; aynı kayıtlar tür düzeyi ρ ile karşılaştırıldığında ±%${QA_LIMITS.CARBON_DEV_PCT} bandını aşar (örnek ${DR.grup_farkli[0].species}: tür ρ=${DR.grup_farkli[0].rho_tur} kg/m³ → ${tN(DR.grup_farkli[0].expected)} kg, %${tN(DR.grup_farkli[0].dev_pct)} · grup ρ=${DR.grup_farkli[0].rho_grp} kg/m³ → ${tN(DR.grup_farkli[0].expected_grp)} kg, %${tN(DR.grup_farkli[0].dev_grp_pct)}). İki kaynak arasındaki ρ farkı %${rhoFarkPct ?? 0} düzeyindedir; model ρye 0,976 üssüyle duyarlı olduğundan bu fark karbon tahminine yaklaşık aynı oranda yansır. Sınırlılık: tür düzeyi ρ için bölgesel kalibrasyon yoktur ve ρ seçimi tür bazlı karbon tahminini bu ölçekte etkileyebilir. Denetim bu nedenle her iki ρ kaynağını kabul eder, hangisinin eşleştiğini §7de sayıyla beyan eder; karbon motoru, katsayılar, kayıtlı değerler ve CSV çıktısı korunmuştur.` : null,
     (INV && INV.n_unknown > 0) ? `${INV.n_unknown} tür adı kanonik sözlük dışında kalmıştır (${INV.unknown.join(', ')}); bu kayıtlarda grup varsayılan odun yoğunluğu kullanılmıştır ve tür düzeyi ρ belirsizliği genişlemiştir.` : null,
     L && L.masked_ha > 0 ? `Analiz alanının ${trNum(L.masked_ha, 2)} ha’lık bölümü bulut/gölge maskesi kapsamındadır; bu alan sınıf dağılımına dahil edilmemiştir.` : null,
   ].filter(Boolean).map((x) => `<li>${x}</li>`).join('');
@@ -1032,7 +1035,7 @@ export function renderReport(snap, { id, hash, version = 1, meta = null }) {
   const histRows = hist.map((h) => `<tr${h.cur ? ' style="font-weight:700"' : ''}><td><code>${esc(h.id)}</code></td><td>1.0</td><td>${esc(h.date || '—')}</td><td class="tr">${esc(h.note || '')}${h.cur ? ' (bu rapor · geçerli sürüm)' : ''}</td></tr>`).join('');
 
   /* ---- Atıf ---- */
-  const citeTitle = `${P.name} ağaç envanteri ve karbon stoku raporu`;
+  const citeTitle = canonicalTitle;
   /* Yazar bloğu (0012): yayını isteyen kullanıcı YAZARDIR; kurucular ayrıca
    * beyan edilir (DataCite: creators ≠ contributors). */
   const AU = snap.author || {};
@@ -1052,25 +1055,39 @@ export function renderReport(snap, { id, hash, version = 1, meta = null }) {
 }`;
 
   /* ---- Makine okur üst veri (DataCite Schema 4.7 desenine yakın; §11 + metadata.json) ---- */
+  const reportMetadata = buildMetadata(snap, { id, hash, version: verTxt, meta: M, history: M.history });
+  const reportAuthor = AU.name
+    ? { '@type': 'Person', name: AU.name, ...(snap.publication?.orcid ? { identifier: 'https://orcid.org/' + snap.publication.orcid } : {}) }
+    : { '@type': 'Organization', name: 'DendroGeo' };
   const jsonld = {
     '@context': 'https://schema.org',
     '@type': 'Report',
-    name: `${P.name}: Bireysel Ağaç Envanteri ve Toprak Üstü / Toprak Altı Karbon Stoku`,
+    name: canonicalTitle,
     alternateName: id,
     reportNumber: id,
+    identifier: [
+      { '@type': 'PropertyValue', propertyID: 'DGR', value: id },
+      { '@type': 'PropertyValue', propertyID: 'SHA-256', value: hash },
+    ],
     inLanguage: 'tr',
     datePublished: snap.generated_at.slice(0, 10),
     version: verTxt,
+    softwareVersion: reportMetadata.applicationVersion,
+    measurementTechnique: reportMetadata.methodVersion,
     license: 'https://creativecommons.org/licenses/by-nc/4.0/',
-    author: AU.name
-      ? [{ '@type': 'Person', name: AU.name }]
-      : [{ '@type': 'Organization', name: 'DendroGeo' }],
+    author: [reportAuthor],
     contributor: [{ '@type': 'Person', familyName: 'Şirin', givenName: 'Nagihan' }, { '@type': 'Person', familyName: 'Şirin', givenName: 'Sinan' }],
     publisher: { '@type': 'Organization', name: 'DendroGeo', url: SITE_ORIGIN },
     url: `${SITE_ORIGIN}/rapor/${id}/`,
     spatialCoverage: { '@type': 'Place', name: `${P.city}, ${P.country}` },
     temporalCoverage: String(dataYear),
-    citation: ['https://doi.org/10.5281/zenodo.7254221', 'https://doi.org/10.1111/gcb.12629'],
+    citation: [citePlain, 'https://doi.org/10.5281/zenodo.7254221', 'https://doi.org/10.1111/gcb.12629'],
+    isBasedOn: reportMetadata.sources,
+    additionalProperty: [
+      { '@type': 'PropertyValue', name: 'Motor sürümü', value: reportMetadata.engineVersion },
+      { '@type': 'PropertyValue', name: 'Kaynak kökeni', value: reportMetadata.sourceProvenance },
+      { '@type': 'PropertyValue', name: 'Sonuç özeti SHA-256', value: reportMetadata.resultHash },
+    ],
   };
 
   /* §4.1 saha protokolü metni VERİDEN türetilir: hangi alanın nasıl
@@ -1097,7 +1114,7 @@ export function renderReport(snap, { id, hash, version = 1, meta = null }) {
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>${id} · ${esc(P.name)} — Ağaç Envanteri ve Karbon Stoku Raporu</title>
-<meta name="description" content="${esc(P.name)} (${esc(P.city)}) bireysel ağaç envanteri: ${t.n} onaylı ölçüm, toplam karbon ${fmtT(t.ci.mean)} t (%95 GA ${fmtT(t.ci.lo)}–${fmtT(t.ci.hi)}). Yöntem: Chave ve ark. 2014; Monte Carlo belirsizlik; konum çiti doğrulaması; ${esc(dataset)} arazi örtüsü bağlamı.">
+<meta name="description" content="${esc(P.name)} (${esc(P.city)}) ağaç envanteri: ${t.n} onaylı ağaç ölçüm kaydı, toplam karbon ${fmtT(t.ci.mean)} t (%95 GA ${fmtT(t.ci.lo)}–${fmtT(t.ci.hi)}). Yöntem: Chave ve ark. 2014; Monte Carlo belirsizlik; park sınırı doğrulaması; ${esc(dataset)} arazi örtüsü bağlamı.">
 <link rel="canonical" href="${SITE_ORIGIN}/rapor/${id}/">
 <meta property="og:type" content="article">
 <meta property="og:site_name" content="DendroGeo">
@@ -1108,7 +1125,7 @@ ${L ? '<meta property="og:image" content="' + SITE_ORIGIN + '/rapor/' + id + '/h
 <meta name="twitter:card" content="${L ? 'summary_large_image' : 'summary'}">
 <link rel="alternate" hreflang="tr" href="${SITE_ORIGIN}/rapor/${id}/">
 <link rel="alternate" type="application/json" href="metadata.json" title="Rapor üst verisi (DataCite deseni)">
-<script type="application/ld+json">${JSON.stringify(jsonld)}</script>
+<script type="application/ld+json">${JSON.stringify(jsonld).replace(/</g,"\\u003c")}</script>
 <style>
 :root{--ink:#182420;--mut:#5f6d65;--line:#e6e3d9;--green:#1e6f4b;--leaf:#2f9e44;--gd:#14532d;--tint:#eaf3ec;--amber:#9a4a08;--bg:#f7f6f2;--broad:#e8590c}
 *{box-sizing:border-box;margin:0}body{background:var(--bg);color:var(--ink);font:15px/1.7 Georgia,'Times New Roman',serif}
@@ -1245,6 +1262,8 @@ pre{background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:
 <div class="kick">DendroGeo Bilimsel Analiz Raporu · ${id} · sürüm ${verTxt}</div>
 <h1>${titleMain}</h1>
 <div class="sub">Saha ölçümleri, allometrik hesaplama ve ${L?.review ? "kayıtlı yüzey sonucu" : "arazi örtüsü sınıflandırması"} ile park ölçekli analiz</div>
+${snap.publication ? `<section class="study"><h2>Çalışma Künyesi</h2><div class="meta">${[['project','Proje'],['researcher','Sorumlu araştırmacı'],['institution','Üniversite / kurum'],['department','Bölüm / program'],['supervisor','Danışman'],['funding','Destek / proje numarası']].filter(([k])=>snap.publication[k]).map(([k,label])=>`<div><b>${label}</b><span>${esc(snap.publication[k])}</span></div>`).join('')}${snap.publication.orcid?`<div><b>ORCID iD</b><span><a href="https://orcid.org/${esc(snap.publication.orcid)}">${esc(snap.publication.orcid)}</a></span></div>`:''}<div><b>Beyan edilen saha dönemi</b><span>${esc(snap.publication.start_date)} – ${esc(snap.publication.end_date)}</span></div></div><p><b>Amaç.</b> ${esc(snap.publication.purpose)}</p><p><b>Örnekleme tasarımı.</b> ${esc(snap.publication.sampling)}</p><p><b>Saha yöntemi ve cihazlar.</b> ${esc(snap.publication.instruments)}</p><p class="qnote">Çalışma künyesi yayın isteğinde beyan edilmiştir. Danışman ve kurum bilgileri kurumsal onay belgesi değildir. Nicel sonuçlar parktaki onaylı ölçümlerin tamamını kapsar; ölçüm kayıtlarının tarih aralığı belge künyesinde ayrıca verilmiştir.</p></section>` : ''}
+
 
 <div class="meta">
  <div><b>Rapor kimliği</b><code>${id}</code><span class="hint">${DGR_TITLE_DEF}</span></div>
@@ -1266,7 +1285,7 @@ pre{background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:
 <p class="stmt">Bu rapor, DendroGeo analiz sistemi tarafından belirlenen yöntem, veri kaynakları ve kalite kontrol prosedürleri doğrultusunda oluşturulmuştur. Rapor bir akreditasyon veya sertifikasyon belgesi değildir; bulgular, beyan edilen veri kaynakları ve çözümleme sürümü kapsamında geçerlidir.</p>
 
 <h2><span class="no">1</span>Analiz Özeti</h2>
-<p>Bu rapor, ${esc(P.name)} sınırları içerisinde gerçekleştirilen ${t.n} bireysel ağaç ölçümüne (göğüs çapı, boy, tür, GNSS konumu ve fotoğraf kanıtı) dayalı toplam karbon stokunu, %95 güven aralığı ve bağımsız doğrulama izleri ile birlikte sunmaktadır. Toplam karbon stoku <b>${ciTxt}</b> olarak hesaplanmış; hektara karşılığı ${t.per_ha_kg == null ? '—' : trNum(t.per_ha_kg / 1000, 3) + ' t/ha'} olarak bulunmuştur. Bütün kayıtlar moderatör onayından geçirilmiştir; park poligonu konum çiti denetiminin kayıt düzeyindeki sonucu §7'de raporlanmıştır.${L ? ` Arazi örtüsü bağlamı ${esc(dataset)} ürünüyle üretilmiş; kalite kontrol sonuçları Çizelge 4'te sunulmuştur.` : ''}</p>
+<p>Bu rapor, ${esc(P.name)} sınırları içinde gerçekleştirilen ${t.n} ağaç ölçüm kaydına (göğüs çapı, boy, tür, GNSS konumu ve fotoğraf kanıtı) dayalı toplam karbon stokunu, %95 güven aralığı ve bağımsız doğrulama izleri ile birlikte sunmaktadır. Toplam karbon stoku <b>${ciTxt}</b> olarak hesaplanmış; hektara karşılığı ${t.per_ha_kg == null ? '—' : trNum(t.per_ha_kg / 1000, 3) + ' t/ha'} olarak bulunmuştur. Bütün kayıtlar moderatör onayından geçirilmiştir; park poligonu konum denetiminin kayıt düzeyindeki sonucu §7'de raporlanmıştır.${L ? ` Arazi örtüsü bağlamı ${esc(dataset)} ürünüyle üretilmiş; kalite kontrol sonuçları Çizelge 4'te sunulmuştur.` : ''}</p>
 
 <h2><span class="no">2</span>Analiz Alanı</h2>
 <p>Analiz alanı, ${esc(P.city)} (${esc(P.country)}) sınırları içinde yer alan ${esc(P.name)} park sahasıdır. Saha sınırı, ${srcTxt} türetilmiş olup ${trNum(parkHa, 2)} ha alan kaplamaktadır.${GJ ? ` Uygulamada çizili sınır kaydı bir dikdörtgen (${GJ.ring_points} nokta; ${trNum(GJ.ring_area_m2 / 10000, 2)} ha) olduğundan gerçek park sınırı sayılmamış, analiz OpenStreetMap poligonundan yürütülmüştür (ayrıntı §7).` : ''}${knotted ? ` Poligonda <b>${knotN} kendini kesen segment çifti</b> (düğüm) saptanmıştır; bu durum alan hesapları ile raster ayrışımını birbirinden ayırır ve arazi örtüsü çözümlemesinin kalite eşiğine takılmasına yol açar (§7, §9).` : ''} Envanter, ${snap.period.from.slice(0, 10)} – ${snap.period.to.slice(0, 10)} tarihleri arasında ${t.n} ölçüm noktasında gerçekleştirilmiştir${snap.geofence.outside_rows > 0 ? `; kayıtların ${snap.geofence.verified_rows}/${snap.geofence.total} adedi poligon içinde, ${snap.geofence.outside_rows} adedi poligon dışında konumlanmaktadır (ayrıntı §7)` : `; kayıtların tamamı poligon içinde konumlanmaktadır (denetim §7)`}.</p>
@@ -1317,7 +1336,7 @@ ${L ? `<p><b>5.2 Arazi örtüsü.</b> Sınıf alanları Çizelge 2'de sunulmuşt
 ${L ? `<div class="fig"><img src="harita.png" alt="${esc(P.name)} park sahası arazi örtüsü sınıfları haritası; park sınırı ve ölçüm noktaları işaretli" style="width:100%;border-radius:8px"><div class="cap">Şekil 2 — ${esc(L.source)} sınıflandırmasının park poligonu ile tam kesişimi; koyu çizgi park sınırını (OSM), siyah noktalar envanter ölçüm noktalarını gösterir. ${L.review?"Çizim, kabul edilmiş kayıt geometrilerinden üretilmiştir;":"Çizim, çözümleme motorunun kesintisiz hücre çıktısından birebir ölçekli üretilmiştir;"} bağlayıcı sayısal değerler Çizelge 2'de ve data.json'dadır. Harita altbilgisi belge kimliğini (${id}), veri kaynağını, çözünürlüğü, projeksiyonu (${esc(epsg || '—')}) ve analiz tarihini taşır: harita tek başına dolaşıma girse bile kaynağı belirlidir.</div></div>` : '<p>Bu sürümde harita üretilmemiştir.</p>'}
 
 <h2><span class="no">7</span>Kalite Kontrol ve Doğrulama</h2>
-<p>Sonuçlar üretilmeden önce hesaplamanın bütünlüğü aşağıdaki kontrollerle doğrulanmıştır (Çizelge 4). Kontroller otomatiktir. Rapor QA durumu üç hâllidir: <b>🔴 BLOKLU</b> — kritik veri hatası vardır, karbon sonucu bilimsel iletişimde kullanılmamalıdır; <b>🟡 İNCELEME</b> — veri geçerlidir, bazı istatistiksel kontroller inceleme uyarısı vermektedir; <b>🟢 GEÇERLİ</b> — tüm kritik kontroller geçmiştir. <b>Bu raporun QA durumu: ${QA_ST_LABEL}</b>${QA_BLOCKED ? ` — kritik hata: ${QA_WHY}. Karbon toplamı bu nedenle GEÇİCİDİR ve hata giderilmeden bilimsel iletişimde KULLANILMAMALIDIR.` : (QA_REVIEW ? ` — inceleme kalemleri: ${QA_WHY}. Bu uyarılar birer inceleme kalemidir; veri hatası hükmü DEĞİLDİR ve karbon sonucunun geçerliliğini ortadan kaldırmaz.${AGAC_DEGER_TEMIZ ? ' Bu rapordaki inceleme kalemlerinin HİÇBİRİ ağaç ölçüm değerleriyle (DBH, boy, tür, karbon) ilgili DEĞİLDİR: envanter kontrollerinin tümü geçerlidir; kalan kalem/kalemler ölçülemeyen veya kaydedilmeyen üst veri alanlarıdır (ör. GNSS alıcı doğruluğu accuracy_m boş bırakılmışsa bu kontrol koşamaz).' : ''}` : '')}${qaStates.includes('info') ? ' Çizelge 4’te ayrıca <b>ℹ️ BEYAN</b> işaretli bilgilendirme satırları bulunabilir: bunlar bir kalite hükmü DEĞİLDİR ve rapor durumunu etkilemez.' : ''} Karbon hesabı, saha ölçümlerinde kayıtlı DBH (göğüs çapı, cm) değerleri kullanılarak gerçekleştirilmiştir.</p>
+<p>Sonuçlar üretilmeden önce hesaplamanın bütünlüğü aşağıdaki kontrollerle doğrulanmıştır (Çizelge 4). Kontroller otomatiktir. Rapor QA durumu üç hâllidir: <b>🔴 BLOKLU</b> — kritik veri hatası vardır, karbon sonucu bilimsel iletişimde kullanılmamalıdır; <b>🟡 İNCELEME</b> — veri geçerlidir, bazı istatistiksel kontroller inceleme uyarısı vermektedir; <b>🟢 GEÇERLİ</b> — tüm kritik kontroller geçmiştir. <b>Bu raporun QA durumu: ${QA_ST_LABEL}</b>${QA_BLOCKED ? ` — kritik hata: ${QA_WHY}. Karbon toplamı bu nedenle GEÇİCİDİR ve hata giderilmeden bilimsel iletişimde KULLANILMAMALIDIR.` : (QA_REVIEW ? ` — inceleme kalemleri: ${QA_WHY}. Bu uyarılar birer inceleme kalemidir; tek başına veri hatası hükmü oluşturmaz ve karbon sonucunun geçerliliğini ortadan kaldırmaz.${AGAC_DEGER_TEMIZ ? ' Bu rapordaki inceleme kalemlerinin HİÇBİRİ ağaç ölçüm değerleriyle (DBH, boy, tür, karbon) ilgili DEĞİLDİR: envanter kontrollerinin tümü geçerlidir; kalan kalem/kalemler ölçülemeyen veya kaydedilmeyen üst veri alanlarıdır (ör. GNSS alıcı doğruluğu accuracy_m boş bırakılmışsa bu kontrol gerçekleştirilemez).' : ''}` : '')}${qaStates.includes('info') ? ' Çizelge 4’te ayrıca <b>ℹ️ BEYAN</b> işaretli bilgilendirme satırları bulunabilir: bunlar bir kalite hükmü DEĞİLDİR ve rapor durumunu etkilemez.' : ''} Karbon hesabı, saha ölçümlerinde kayıtlı DBH (göğüs çapı, cm) değerleri kullanılarak gerçekleştirilmiştir.</p>
 <!-- 0032 · Çizelge 4 düzeni: sabit kolon genişlikleri (colgroup) + .qd ayrıntı hücresi.
      Eski hâlde ayrıntı kolonu monospace ve overflow-wrap:anywhere idi; uzun Türkçe
      cümleler kelime ortasından kırılıp tabloyu şekilsiz gösteriyordu. -->
@@ -1352,7 +1371,7 @@ ${evalParas}
 <tr><td class="tr">Analiz yöntemi</td><td class="qd">sürüm kontrollü${git ? ` (git commit <code>${esc(String(git).slice(0, 7))}</code>)` : ' (git commit kaydı bu kopyada yok)'}</td></tr>
 <tr><td class="tr">Üretim komutu</td><td class="qd">${L?.review ? "Yayın isteğine sabitlenen analiz: data.json ve surface.geojson" : `<code>node scripts/make-report.mjs --park ${P.id}</code>`}</td></tr>
 </tbody></table></div>
-<p>Bu raporun yeniden üretilebilmesi için kullanılan yöntem, veri kaynağı ve analiz sürümü rapor üst verisinde (<code>metadata.json</code>) kayıt altına alınmıştır. Raster girdi bulut kataloğundan okunduğu için, kaynak ürünün YENİ bir sürümü yayımlanırsa aynı komut farklı sonuç üretebilir; bu nedenle veri seti sürümü (v200, ${dataYear}) ve üretim anı §11'de sabitlenmiştir.</p>
+<p>Bu raporun yeniden üretilebilmesi için kullanılan yöntem, veri kaynağı ve analiz sürümü rapor üst verisinde (<code>metadata.json</code>) kayıt altına alınmıştır. Raster girdi bulut kataloğundan alındığından, kaynak ürünün yeni sürümleri yeniden üretim sonucunu etkileyebilir; bu nedenle veri seti sürümü (v200, ${dataYear}) ve üretim anı §11'de sabitlenmiştir.</p>
 
 <h2><span class="no">11</span>Analiz Parmak İzi</h2>
 <div class="meta">
@@ -1365,7 +1384,7 @@ ${evalParas}
  <div><b>Git commit</b><code>${git ? esc(String(git).slice(0, 7)) : '—'}</code></div>
  <div><b>Generated</b><code>${esc(snap.generated_at)}</code></div>
  <div><b>Result hash</b><code>sha256:${esc(hash)}</code></div>
- <div><b>DOI</b><code>${M.doi ? esc(M.doi) : 'atanmadı'}</code><span class="hint">DOI kaydı (Zenodo/DataCite) yapıldığında 10.xxxx/… değeri buraya ve metadata.json relatedIdentifiers alanına işlenir; DGR iç kimlik olarak kalır.</span></div>
+ <div><b>DOI</b><code id="dgReportDoi">${M.doi ? esc(M.doi) : 'atanmadı'}</code><span class="hint">DOI kaydı (Zenodo/DataCite) yapıldığında 10.xxxx/… değeri buraya ve metadata.json relatedIdentifiers alanına işlenir; DGR iç kimlik olarak kalır.</span></div>
 </div>
 
 <h2><span class="no">12</span>Rapor Geçmişi</h2>
@@ -1373,7 +1392,7 @@ ${evalParas}
 <p class="qnote">Yayımlanmış rapor içeriği değiştirilemez. Düzeltme gerekirse rapor geri çekilir (yayın panelinde 🗑) ve aynı park için yeni DGR kimliğiyle yeniden yayımlanır; bu tablo zinciri gösterir. Geri çekme işlemleri rapor/yayin-kuyrugu.json günlüğünde ve git geçmişinde saklanır.</p>
 
 <h2><span class="no">13</span>Atıf</h2>
-<div class="cite"><b>Önerilen atıf</b><br>${esc(citePlain)}
+<div class="cite"><b>Önerilen atıf</b><br><span id="dgReportCitation">${esc(citePlain)}</span>
 <div class="sans" style="margin-top:8px;color:var(--mut)">Gerçek DOI kaydı oluşturulduğunda atıfın sonuna <code>https://doi.org/…</code> eklenir; DGR kimliği ve sürüm bilgisi değişmez. Yöntem atıfları: Chave ve ark. (2014) <code>10.1111/gcb.12629</code>${L ? ` · ${esc(L.citation)}` : ''} · OpenStreetMap katkıcıları (ODbL).</div></div>
 <pre>${esc(bib)}</pre>
 
@@ -1403,7 +1422,12 @@ ${evalParas}
 </div>
 <script>
 const DG_HASH=${JSON.stringify(hash)};
-const DG_DATA=${JSON.stringify(snap)};
+fetch('doi.json',{cache:'no-store'}).then(r=>r.ok?r.json():null).then(d=>{
+ if(!d||d.report_id!==${JSON.stringify(id)}||!new RegExp('^10[.]5281/zenodo[.][0-9]+$').test(d.doi||''))return;
+ const a=document.createElement('a');a.href='https://doi.org/'+d.doi;a.textContent=d.doi;document.getElementById('dgReportDoi').replaceChildren(a);
+ document.getElementById('dgReportCitation').append(' https://doi.org/'+d.doi);
+}).catch(()=>{});
+const DG_DATA=${JSON.stringify(snap).replace(/</g,"\\u003c")};
 (async()=>{
   try{
     const buf=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(JSON.stringify(DG_DATA,(k,v)=>(v&&typeof v==='object'&&!Array.isArray(v))?Object.keys(v).sort().reduce((o,key)=>(o[key]=v[key],o),{}):v)));
@@ -1535,12 +1559,31 @@ a{color:var(--green)}
  * kaydı (Faz 4) bu nesneden türetilir. DOI atanmadığı sürece doi=null ve
  * doiNote alanı doldurulur; atandığında relatedIdentifiers'a IsIdenticalBy
  * ilişkisi eklenir. DGR iç/alan kimliği olarak KALIR. */
+function reportTitle(snap) {
+  return snap.publication?.title
+    || `${snap.park.name} (${snap.park.city}): Ağaç Envanteri ve Toprak Üstü / Toprak Altı Karbon Stoku Analizi`;
+}
+
 export function buildMetadata(snap, { id, hash, version = '1.0', meta = null, history = null }) {
   const M = Object.assign({}, snap.provenance || {}, meta || {});
   const L = (snap.lulc && !snap.lulc.error) ? snap.lulc : null;
   const P = snap.park, t = snap.totals;
   const resolutionLabel = L?.review ? "Uydu 10/20 m + vektör sınır" : L?.accepted ? "Kayıtlı alan toplamları" : "10 m";
   const dataset = (L && L.source) || DATASET_DEFAULT;
+  const sourceProvenance = {
+    primary: { name: dataset, version: L?.year || null, citation: L?.citation || null },
+    crossValidation: L?.cross ? {
+      name: L.cross, version: L.crossYear || null, citation: L.crossCitation || null,
+      status: L.crossError ? 'incomplete' : 'completed',
+    } : null,
+    acceptedSurface: L?.review ? {
+      schema: L.review.schema || null,
+      revision: L.review.revision ?? null,
+      acceptedAt: L.review.acceptedAt || null,
+      sourceFingerprint: L.review.sourceFingerprint || null,
+      objectFingerprint: L.review.objectFingerprint || null,
+    } : null,
+  };
   const related = [
     { relationType: 'IsDerivedFrom', relatedIdentifier: '10.5281/zenodo.7254221', relatedIdentifierType: 'DOI', resourceType: 'Dataset', label: dataset },
     { relationType: 'IsDerivedFrom', relatedIdentifier: 'https://www.openstreetmap.org/copyright', relatedIdentifierType: 'URL', resourceType: 'Dataset', label: 'OpenStreetMap (park sınırı geometrisi + bütünleyici doğrulama)' },
@@ -1548,23 +1591,28 @@ export function buildMetadata(snap, { id, hash, version = '1.0', meta = null, hi
   ];
   if (M.git_commit) related.push({ relationType: 'IsSupplementedBy', relatedIdentifier: 'https://github.com/snansrin/dendrogeo/commit/' + M.git_commit, relatedIdentifierType: 'URL', resourceType: 'Software', label: 'Üretim kodu (git commit)' });
   for (const h of history || []) related.push({ relationType: 'IsNewVersionOf', relatedIdentifier: h.id, relatedIdentifierType: 'Other', resourceType: 'Report', label: h.note || 'Aynı parkın önceki analizi' });
+  const creator = (snap.author && snap.author.name)
+    ? { name: citeName(snap.author.name), nameType: 'Personal' }
+    : { name: 'DendroGeo', nameType: 'Organizational' };
+  if (snap.author?.name && snap.publication?.orcid) creator.nameIdentifiers = [{ nameIdentifier: snap.publication.orcid, nameIdentifierScheme: 'ORCID', schemeUri: 'https://orcid.org' }];
   return {
     schema: 'dendrogeo-report-metadata/1',
     dataciteCompatibility: 'DataCite Metadata Schema 4.7 alan adlarıyla hizalıdır; DOI kaydı bu nesneden türetilir.',
     identifier: id,
     identifierType: 'DGR',
     identifierDescription: DGR_TITLE_DEF + ' (iç/alan kimliği)',
-    title: `${P.name} (${P.city}): Bireysel Ağaç Envanteri ve Toprak Üstü / Toprak Altı Karbon Stoku Analizi`,
+    title: reportTitle(snap),
     publicationYear: Number(snap.generated_at.slice(0, 4)),
     resourceType: 'Scientific Analysis Report',
     resourceTypeGeneral: 'Report',
     publisher: 'DendroGeo',
     version: String(version),
+    engineVersion: M.engine_version || null,
+    applicationVersion: M.app_version || null,
     language: 'tr',
     license: 'CC-BY-NC-4.0',
-    creators: (snap.author && snap.author.name)
-      ? [{ name: citeName(snap.author.name), nameType: 'Personal' }]
-      : [{ name: 'DendroGeo', nameType: 'Organizational' }],
+    publication: snap.publication || null,
+    creators: [creator],
     creatorsNote: (snap.author && snap.author.name)
       ? 'Rapor, yayını isteyen kullanıcının (veri katkısı sahibinin) adıyla yayımlanır.'
       : 'İstek sahibi adı çözülemedi (v_report_authors boş veya 0012 uygulanmamış) → kurumsal yazar; İSİM UYDURULMAZ.',
@@ -1575,6 +1623,7 @@ export function buildMetadata(snap, { id, hash, version = '1.0', meta = null, hi
     measurementPeriod: `${snap.period.from.slice(0, 10)}/${snap.period.to.slice(0, 10)}`,
     resolution: L?.review ? 'Uydu 10/20 m + vektör sınır' : '10 m',
     methodVersion: `${M.engine || 'DendroGeo LC Engine'}${M.engine_version ? ' ' + M.engine_version : ''}`.trim(),
+    sourceProvenance,
     projection: epsgLabel((L && L.epsg) || M.epsg || null),
     sampleSize: t.n,
     /* 0031 · Veri sözlüğü (makine okunur): DBH = göğüs çapı, cm.
@@ -1609,7 +1658,7 @@ export function buildMetadata(snap, { id, hash, version = '1.0', meta = null, hi
     } : null,
     /* 0032 · ℹ️ beyan kalemleri: QA durumunu (qaState) ETKİLEMEZ */
     qaInfo: (snap.qa && snap.qa.species && snap.qa.species.info) || [],
-    sources: [dataset, 'OpenStreetMap (ODbL)', 'DendroGeo saha ölçümleri (moderatör onaylı)'],
+    sources: [dataset, ...(L?.cross ? [L.cross + (L.crossCitation ? ' — ' + L.crossCitation : '')] : []), 'OpenStreetMap (ODbL)', 'DendroGeo saha ölçümleri (moderatör onaylı)'],
     relatedIdentifiers: related,
     /* 0031 · üç hâlli QA durumu: VALID / REVIEW / BLOCKED */
     qaState: (snap.qa && snap.qa.species && snap.qa.species.state) || QA_STATE.VALID,
@@ -1619,6 +1668,7 @@ export function buildMetadata(snap, { id, hash, version = '1.0', meta = null, hi
     generated: snap.generated_at,
     url: SITE_ORIGIN + '/rapor/' + id + '/',
     doi: (M.doi && /^10\.\d{4,9}\//.test(String(M.doi))) ? String(M.doi) : null,
+    doiRegistration: 'doi.json',
     doiNote: 'DOI atanmadı. Zenodo/DataCite kaydında bu alan 10.xxxx/… değeriyle doldurulur ve DGR kimliği relatedIdentifiers listesine IsIdenticalBy ilişkisiyle bağlanır.',
     history: [
       ...(history || []).map((h) => ({ id: h.id, version: '1.0', date: h.date || null, status: h.retracted ? 'Geri çekildi' : 'Yerine bu rapor yayımlandı', note: h.note || '' })),
@@ -1658,8 +1708,9 @@ export function parkHistory(dir, parkId, selfId) {
   try {
     const q = JSON.parse(readFileSync(join(dir, 'yayin-kuyrugu.json'), 'utf8'));
     const es = Array.isArray(q.entries) ? q.entries : [];
+    const tests = existsSync(join(dir,'test-publications.json')) ? new Set(JSON.parse(readFileSync(join(dir,'test-publications.json'),'utf8')).report_ids) : new Set();
     const retracted = new Set(es.filter((e) => e.status === 'Geri çekildi').map((e) => String(e.report_id)));
-    return es.filter((e) => e.status === 'Yayınlandı' && Number(e.park_id) === Number(parkId) && String(e.report_id) !== String(selfId))
+    return es.filter((e) => !tests.has(String(e.report_id)) && e.status === 'Yayınlandı' && Number(e.park_id) === Number(parkId) && String(e.report_id) !== String(selfId))
       .map((e) => ({
         id: String(e.report_id),
         date: String(e.finished_at || '').slice(0, 10),
@@ -1670,13 +1721,14 @@ export function parkHistory(dir, parkId, selfId) {
 }
 
 export async function publishPark(parkId, opts = {}) {
+  const publication=parsePublication(opts.publication);
   const year = new Date().getFullYear();
   const dir = join(ROOT, 'rapor');
   mkdirSync(dir, { recursive: true });
   /* Kimlik ÖNCE atanır: snapshot, PNG altbilgisi ve parmak izi aynı DGR'yi
    * taşısın diye meta olarak buildSnapshot'e iner. */
   const id = nextReportId(dir, year);
-  const meta = { id, git_commit: GIT_COMMIT, engine_version: ENGINE_VERSION, app_version: APP_VERSION };
+  const meta = { id, git_commit: GIT_COMMIT, engine_version: ENGINE_VERSION, app_version: APP_VERSION, publication };
   meta.qr_uri = await qrDataUri(SITE_ORIGIN + '/rapor/' + id + '/'); /* künye QR'ı (0012) */
   const { snap, hash, png } = await buildSnapshot(+parkId, { skipLulc: !!opts.skipLulc, meta, surfaceSnapshot: opts.surfaceSnapshot || null });
   const version = 1;          /* iç sürüm alanı (sayı) — kuyruk günlüğü bunu taşır */
@@ -1692,6 +1744,7 @@ export async function publishPark(parkId, opts = {}) {
   writeFileSync(join(out, 'olcum.csv'), csvOf(snap));
   writeFileSync(join(out, 'park.geojson'), JSON.stringify(geojsonOf(snap), null, 2));
   writeFileSync(join(out, 'metadata.json'), JSON.stringify(buildMetadata(snap, { id, hash, version: verTxt, meta, history })) + '\n'); /* 0012: sıkıştırılmış */
+  if(snap.publication)writeFileSync(join(out,'zenodo.json'),JSON.stringify({metadata:zenodoMetadata(snap,id)},null,2)+'\n');
   rebuildIndex();
   const url = SITE_ORIGIN + '/rapor/' + id + '/';
   return {
@@ -1718,7 +1771,9 @@ export async function main() {
   }
   const parkId = arg('park');
   if (!parkId) { console.error('Kullanım: node scripts/make-report.mjs --park <id> [--skip-lulc] | --reindex'); process.exit(2); }
-  const r = await publishPark(parkId, { skipLulc: has('skip-lulc') });
+  const publicationFile=arg('publication-file');
+  if(!publicationFile)throw Error('Çalışma künyesi gerekli: --publication-file künye.json');
+  const r = await publishPark(parkId, { skipLulc: has('skip-lulc'), publication: parsePublication(readFileSync(publicationFile,'utf8')) });
   console.log(`✅ Rapor yayınlandı: ${r.path}`);
   console.log(`   park   : ${r.park_name} (${r.city}) · n=${r.n}`);
   console.log(`   karbon : ${r.carbon_txt}`);

@@ -28,6 +28,7 @@ async function delRec(id){
 }
 // 3. Panel istatistikleri + grafik
 async function loadDash(){
+ dgRenderAcademicProfile();
  const{data}=await sb.from("measurements").select("*").eq("owner",USER.id);
  $("dMy").textContent=(data||[]).length;
  $("dCarbon").textContent=((data||[]).reduce((a,r)=>a+(r.carbon_kg||0),0)).toFixed(0);
@@ -152,4 +153,21 @@ function dgWorldError(msg){
  box.innerHTML=`<b>⚠ Dünya verisi yüklenemedi</b> — sayılar/harita bu yüzden boş olabilir. Kayıt silinmedi: `+
   `<span class="mono" style="font-size:.74rem">${esc(msg)}</span> `+
   `<button class="btn sm" style="margin-left:6px" onclick="loadWorld()">↻ Yeniden dene</button>`;
+}
+
+function dgRenderAcademicProfile(){
+ const host=$("dgProfileName"),f=$("dgAcademicProfile");if(!host||!f||!f.elements)return;
+ const name=PROFILE?.full_name||USER?.user_metadata?.full_name||"Araştırmacı";
+ const p=USER?.user_metadata?.academic_profile||{};host.textContent=name;
+ $("dgProfileInitials").textContent=name.split(/\s+/).filter(Boolean).slice(0,2).map(x=>x[0]).join("").toLocaleUpperCase("tr");
+ $("dgProfileAffiliation").textContent=[p.institution,p.department,p.research_area].filter(Boolean).join(" · ")||"Akademik bilgilerinizi ekleyerek profilinizi tamamlayın.";
+ if(!f.contains(document.activeElement))for(const k of ["institution","department","supervisor","project","research_area","orcid"])f.elements[k].value=p[k]||"";
+}
+async function dgSaveAcademicProfile(ev){
+ ev.preventDefault();const f=ev.target,button=f.querySelector('button[type="submit"]'),status=$("dgProfileStatus");if(button.disabled)return;
+ if(!f.reportValidity())return;if(f.elements.orcid.value&&typeof dgValidOrcid==="function"&&!dgValidOrcid(f.elements.orcid.value)){status.textContent="ORCID iD kontrol basamağı geçersiz.";return;}button.disabled=true;status.textContent="Kaydediliyor…";
+ try{const academic_profile=Object.fromEntries(new FormData(f));for(const k in academic_profile)academic_profile[k]=academic_profile[k].trim();
+  const {data,error}=await sb.auth.updateUser({data:{academic_profile}});if(error)throw error;
+  USER=data.user;dgRenderAcademicProfile();status.textContent="Profiliniz kaydedildi.";
+ }catch(e){status.textContent="Profil kaydedilemedi: "+String(e.message||e);}finally{button.disabled=false;}
 }

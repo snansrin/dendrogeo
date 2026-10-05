@@ -42,6 +42,7 @@ import { readFileSync, writeFileSync, existsSync, unlinkSync } from 'node:fs';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { publishPark, renderRetractionNotice, rebuildIndex, DGR_ID_RE, renderReport, buildMetadata, qrDataUri, parkHistory } from './make-report.mjs';
+import { parsePublication } from './lib/publication.mjs';
 import { canonicalHash } from './lib/mc.mjs';
 import { acceptedSurfaceToLulc, stripUnavailableSurfaceMap, isAcceptedSurfaceSnapshot } from './lib/surface-snapshot.mjs';
 
@@ -209,7 +210,8 @@ async function handle(req) {
     /* Kabul edilmiş snapshot varsa yeniden LULC çalıştırma: önce hızlı temel
      * rapor iskeleti üretilir, sonra kabul edilmiş alanlar aynı DGR'ye bağlanır. */
     if(req.surface_snapshot && !accepted && !geometrySnapshot)throw new Error("Bilinmeyen kayıtlı analiz şeması");
-    let r = await publishPark(req.park_id, { skipLulc: accepted || (!geometrySnapshot && req.with_lulc === false), surfaceSnapshot: geometrySnapshot ? req.surface_snapshot : null });
+    const publication=parsePublication(req.note);
+    let r = await publishPark(req.park_id, { publication, skipLulc: accepted || (!geometrySnapshot && req.with_lulc === false), surfaceSnapshot: geometrySnapshot ? req.surface_snapshot : null });
     if (accepted) r = await applyAcceptedSurfaceSnapshot(r, req.surface_snapshot);
     let bytes = null;
     try {

@@ -152,7 +152,7 @@ export const QA_LIMITS = {
  * tabanlı gövde sınıfı beyanı ile mevzuat künyesi bu nedenle kaldırıldı.
  * Bu sabit, rapor metninde (§9 sınırlılıklar) ve metadata.json içinde TEK
  * KAYNAKTAN kullanılır: metin kopyaları arasında çelişki olamaz. */
-export const YASAL_STATU_KAPSAM = 'Bu rapor, ölçülen hiçbir birey için yasal statü değerlendirmesi (tescil, koruma kararı vb.) içermez; ağaçların yasal statüsü ilgili idarenin yetkisindedir ve bu çalışmanın kapsamı dışındadır. Envanter değerleri sahada ölçüldüğü gibi modellenmiştir; hiçbir düzeltme, ölçekleme veya dışlama uygulanmamıştır.';
+export const YASAL_STATU_KAPSAM = 'Bu rapor, ölçülen hiçbir ağaç için yasal statü değerlendirmesi (tescil, koruma kararı vb.) içermez; ağaçların yasal durumu ilgili idarenin yetkisindedir ve bu çalışmanın kapsamı dışındadır. Envanter değerleri sahada ölçüldüğü gibi modellenmiştir; hiçbir düzeltme, ölçekleme veya dışlama uygulanmamıştır.';
 
 /* ---- Sağlam (robust) dağılım göstergeleri (0032) ----
  * Modified z-score: M = 0,6745·(x − medyan) / MAD  (Iglewicz & Hoaglin 1993).

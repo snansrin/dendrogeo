@@ -64,7 +64,7 @@ describe('0012 · yazar = yayını isteyen kullanıcı', () => {
     const html = render(snap);
     assert.match(html, /<b>Yazar<\/b><code>Nagihan Şirin<\/code>/, 'künye yazarı');
     assert.ok(html.includes(FOUNDERS_LINE), 'kurucular beyanı künyede');
-    assert.match(html, /Şirin, N\. \(\d{4}\)\. Göksu Parkı ağaç envanteri/, 'önerilen atıf yazarla');
+    assert.match(html, /Şirin, N\. \(\d{4}\)\. Göksu Parkı \(Ankara\): Ağaç Envanteri/, 'önerilen atıf yazarla ve tek başlıkla');
     assert.match(html, /author\s*=\s*\{Şirin, N\.\}/, 'BibTeX author');
     assert.match(html, /contributor = \{Şirin, Nagihan and Şirin, Sinan\}/, 'BibTeX contributor kurucular');
     const ld = JSON.parse(html.match(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/)[1]);

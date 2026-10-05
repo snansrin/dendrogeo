@@ -48,7 +48,7 @@ const SNAP2 = {
   provenance: { engine: 'DendroGeo LC Engine', engine_version: '4.2.0', app_version: '3.0.0', git_commit: 'abc1234def5678', report_id: 'DGR-2026-0002', epsg: 4326, resolution_m: 10, dataset: 'ESA WorldCover 10 m · 2021 (v200)' },
   lulc: {
     source: 'ESA WorldCover 10 m · 2021 (v200)', citation: 'ESA WorldCover 10 m 2021 v200, CC BY 4.0', year: 2021,
-    cross: 'IO LULC', crossError: null, agreement: { green: { agreementPct: 91 }, hard: { agreementPct: 84 } },
+    cross: 'IO LULC 10 m · 2020 (çapraz doğrulama)', crossYear: 2020, crossCitation: 'Impact Observatory Annual LULC v02, CC BY 4.0', crossError: null, agreement: { green: { agreementPct: 91 }, hard: { agreementPct: 84 } },
     areaDeltaPct: 0.059, cells: 8530, coverage_m2: 852500, classified_m2: 852500, epsg: 4326, masked_ha: 0,
     classes: [
       { key: 'green', label: 'Yeşil alan', ha: 69.9, pct: 82 },
@@ -85,6 +85,11 @@ describe('rapor v2: künye ve resmi çerçeve', () => {
     assert.match(html, /akreditasyon veya sertifikasyon belgesi değildir/);
     for (const w of ['Onaylı Bilimsel Rapor', 'Kesin sonuç', '%100 doğruluk', 'Resmî belge', 'Sertifikalı analiz'])
       assert.ok(!html.includes(w), 'yasak iddia: ' + w);
+  });
+  test('rapor kapsamını ölçülen ağaç kayıtlarıyla açıkça sınırlar', () => {
+    assert.match(html, /Ölçülen 3 ağacın/);
+    assert.match(html, /yalnızca ölçülen ağaçları kapsar/);
+    assert.doesNotMatch(html, /birey(?:sel)?/i);
   });
   test('14 bölüm + Ek A doğru sırayla', () => {
     const sira = ['Analiz Özeti', 'Analiz Alanı', 'Veri Kaynakları', 'Yöntem', 'Nicel Sonuçlar', 'Harita', 'Kalite Kontrol ve Doğrulama', 'Değerlendirme', 'Sınırlılıklar', 'Tekrar Üretilebilirlik', 'Analiz Parmak İzi', 'Rapor Geçmişi', 'Atıf', 'Kaynakça'];
@@ -138,7 +143,7 @@ describe('rapor v2: sonuç/yorum ayrımı + QA/QC', () => {
     const sec = html.slice(i8, i9);
     assert.match(sec, /yeşil alan %82,0; sert yüzey %12,0; su %6,0/);
     assert.match(sec, /baskın sınıf %82,0 pay ile Yeşil alan sınıfıdır/);
-    assert.match(sec, /ekstrapole edilmemelidir/);
+    assert.match(sec, /parkın ölçülmeyen ağaçlarına genellenmemelidir/);
     assert.match(sec, /normatif değerlendirme/, 'ayrım beyanı');
     assert.ok(!/çok iyi|mükemmel|harika|yetersiz durumda|başarılı bir park/.test(sec), 'yorum dili sızmadı');
   });
@@ -157,14 +162,14 @@ describe('rapor v2: parmak izi + tekrar üretilebilirlik + geçmiş', () => {
     assert.match(html, /<code>abc1234<\/code>/, 'commit kısa gösterim');
     assert.match(html, /EPSG:4326 \(WGS 84 coğrafi\)/);
     assert.ok(html.includes('sha256:' + H2), 'tam sonuç hash’i');
-    assert.match(html, /DOI<\/b><code>atanmadı<\/code>/);
+    assert.match(html, /DOI<\/b><code id="dgReportDoi">atanmadı<\/code>/);
     assert.match(html, /Zenodo\/DataCite/, 'DOI yolu beyanı');
   });
   test('§10 tekrar üretilebilirlik tablosu + dürüst uyarı', () => {
     assert.match(html, /DendroGeo LC Engine 4\.2\.0 · uygulama 3\.0\.0/);
     assert.match(html, /node scripts\/make-report\.mjs --park 5/, 'üretim komutu');
     assert.match(html, /kayıt altına alınmıştır/);
-    assert.match(html, /YENİ bir sürümü yayımlanırsa aynı komut farklı sonuç üretebilir/, 'bulut girdisi dürüstlüğü');
+    assert.match(html, /kaynak ürünün yeni sürümleri yeniden üretim sonucunu etkileyebilir/, 'bulut girdisi dürüstlüğü');
   });
   test('§12 geçmiş: önceki DGR + ilk yayımlama + değişmezlik notu', () => {
     assert.match(html, /DGR-2026-0001/, 'önceki analiz');
@@ -192,9 +197,18 @@ describe('rapor v2: atıf + kaynakça + makine okur üst veri', () => {
     const m = html.match(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/);
     assert.ok(m, 'ld+json bloğu');
     const j = JSON.parse(m[1]);
+    const md = buildMetadata(SNAP2, { id: 'DGR-2026-0002', hash: H2, version: '1.0', meta: META2, history: META2.history });
     assert.equal(j['@type'], 'Report');
     assert.equal(j.reportNumber, 'DGR-2026-0002');
     assert.equal(j.version, '1.0');
+    assert.equal(j.name, md.title, 'sayfa, atıf ve metadata aynı rapor başlığını kullanır');
+    assert.equal(j.softwareVersion, md.applicationVersion);
+    assert.equal(j.measurementTechnique, md.methodVersion);
+    assert.deepEqual(j.isBasedOn, md.sources, 'JSON-LD kaynak listesi metadata ile eşleşir');
+    assert.deepEqual(j.additionalProperty[1].value, md.sourceProvenance, 'kaynak kökeni JSON-LD ile metadata arasında eşleşir');
+    assert.equal(j.additionalProperty[2].value, md.resultHash);
+    assert.ok(j.identifier.some((x) => x.propertyID === 'SHA-256' && x.value === H2));
+    assert.match(j.citation[0], /DendroGeo Bilimsel Analiz Raporu, DGR-2026-0002/);
     assert.equal(j.temporalCoverage, '2021');
     assert.match(html, /href="metadata\.json"/, 'metadata bağlantısı');
   });
@@ -207,6 +221,8 @@ describe('rapor v2: atıf + kaynakça + makine okur üst veri', () => {
     assert.equal(md.resourceType, 'Scientific Analysis Report');
     assert.equal(md.resourceTypeGeneral, 'Report');
     assert.equal(md.version, '1.0');
+    assert.equal(md.engineVersion, '4.2.0');
+    assert.equal(md.applicationVersion, '3.0.0');
     assert.equal(md.language, 'tr');
     assert.equal(md.resolution, '10 m');
     assert.equal(md.temporalCoverage, '2021');
@@ -214,11 +230,32 @@ describe('rapor v2: atıf + kaynakça + makine okur üst veri', () => {
     assert.match(md.doiNote, /IsIdenticalBy/);
     assert.equal(md.resultHash, 'sha256:' + H2);
     assert.equal(md.gitCommit, 'abc1234def5678');
+    assert.deepEqual(md.sourceProvenance.primary, { name: 'ESA WorldCover 10 m · 2021 (v200)', version: 2021, citation: 'ESA WorldCover 10 m 2021 v200, CC BY 4.0' });
+    assert.deepEqual(md.sourceProvenance.crossValidation, { name: 'IO LULC 10 m · 2020 (çapraz doğrulama)', version: 2020, citation: 'Impact Observatory Annual LULC v02, CC BY 4.0', status: 'completed' });
+    assert.ok(md.sources.includes('IO LULC 10 m · 2020 (çapraz doğrulama) — Impact Observatory Annual LULC v02, CC BY 4.0'));
     const rels = md.relatedIdentifiers;
     assert.ok(rels.some((r) => r.relatedIdentifier === '10.5281/zenodo.7254221' && r.relationType === 'IsDerivedFrom'));
     assert.ok(rels.some((r) => r.relationType === 'IsSupplementedBy' && /github\.com\/snansrin\/dendrogeo\/commit\/abc1234/.test(r.relatedIdentifier)));
     assert.ok(rels.some((r) => r.relationType === 'IsNewVersionOf' && r.relatedIdentifier === 'DGR-2026-0001'));
     assert.equal(md.history[md.history.length - 1].status, 'Geçerli');
+  });
+  test('kabul edilmiş yüzey analizinin revizyonu ve girdi parmak izleri metadata’da korunur', () => {
+    const snap = structuredClone(SNAP2);
+    snap.lulc.review = { schema: 'dendrogeo-surface/2', revision: 7, acceptedAt: '2026-10-04T12:00:00.000Z', sourceFingerprint: 'source-abc', objectFingerprint: 'objects-def' };
+    const md = buildMetadata(snap, { id: 'DGR-2026-0002', hash: canonicalHash(snap), version: '1.0', meta: META2, history: META2.history });
+    assert.deepEqual(md.sourceProvenance.acceptedSurface, { schema: 'dendrogeo-surface/2', revision: 7, acceptedAt: '2026-10-04T12:00:00.000Z', sourceFingerprint: 'source-abc', objectFingerprint: 'objects-def' });
+  });
+  test('yayın formundaki ORCID rapor ve makine okur yaratıcı bilgisine aktarılır', () => {
+    const snap = structuredClone(SNAP2);
+    snap.author = { name: 'Örnek Araştırmacı' };
+    snap.publication = { schema: 'dendrogeo-publication/1', title: 'Kent parkı envanteri', project: 'Park araştırması', researcher: 'Örnek Araştırmacı', institution: 'Örnek Üniversite', department: '', supervisor: '', orcid: '0000-0002-1825-0097', purpose: 'Karbon stokunun belirlenmesi.', sampling: 'Onaylı ağaç ölçüm kayıtları.', instruments: 'Çap ve boy ölçer.', funding: '', study_type: 'research', start_date: '2026-09-01', end_date: '2026-09-28' };
+    const hash = canonicalHash(snap);
+    const html = renderReport(snap, { id: 'DGR-2026-0002', hash, version: 1, meta: META2 });
+    const md = buildMetadata(snap, { id: 'DGR-2026-0002', hash, version: '1.0', meta: META2, history: META2.history });
+    const jsonld = JSON.parse(html.match(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/)[1]);
+    assert.deepEqual(md.creators[0].nameIdentifiers, [{ nameIdentifier: '0000-0002-1825-0097', nameIdentifierScheme: 'ORCID', schemeUri: 'https://orcid.org' }]);
+    assert.equal(jsonld.author[0].identifier, 'https://orcid.org/0000-0002-1825-0097');
+    assert.match(html, /href="https:\/\/orcid\.org\/0000-0002-1825-0097"/);
   });
 });
 
@@ -332,7 +369,7 @@ describe('repo kanıtı: yayımlanmış rapor dizini tutarlı (şablondan bağı
     }
   });
 
-  test('v2 sayfa ⇔ metadata.json; hash, DOI ve harita tutarlı', () => {
+  test('v2 sayfa ⇔ metadata.json; hash ve harita tutarlı', () => {
     for (const d of dirs) {
       const p = join(RAP, d, 'index.html');
       if (!existsSync(p)) continue; /* geri çekilmiş: yalnız bildirim kalır */
@@ -349,7 +386,6 @@ describe('repo kanıtı: yayımlanmış rapor dizini tutarlı (şablondan bağı
       assert.equal(md.identifier, d);
       assert.equal(md.version, '1.0');
       assert.equal(md.resultHash, 'sha256:' + canonicalHash(data), d + ': üst veri hash’i snapshot’la aynı');
-      assert.ok(md.doi === null || /^10\.\d{4,9}\/\S+$/.test(md.doi), 'DOI ya atanmadı ya geçerli biçimde');
       if (data.geometry_qa && data.geometry_qa.self_intersections > 0)
         assert.match(h, /⚠ Düğümlü sınır/, d + ': düğümlü sınır beyanı sayfada');
     }

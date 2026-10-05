@@ -10,6 +10,10 @@ on:
         description: 'Park ID (parks tablosu)'
         required: true
         type: string
+      publication_json:
+        description: 'Çalışma künyesi (dendrogeo-publication/1 JSON)'
+        required: true
+        type: string
       skip_lulc:
         description: 'Arazi örtüsü çözümlemesini atla (hızlı prova)'
         required: false
@@ -18,6 +22,10 @@ on:
 
 permissions:
   contents: write
+
+concurrency:
+  group: rapor-yayin-kuyrugu
+  cancel-in-progress: false
 
 jobs:
   rapor:
@@ -30,8 +38,12 @@ jobs:
       - name: Bağımlılıklar (npm ci)
         run: npm ci
       - name: Raporu üret
+        env:
+          PARK_ID: ${{ inputs.park_id }}
+          PUBLICATION_JSON: ${{ inputs.publication_json }}
         run: |
-          node scripts/make-report.mjs --park "${{ inputs.park_id }}" ${{ inputs.skip_lulc && '--skip-lulc' || '' }}
+          printf '%s' "$PUBLICATION_JSON" > /tmp/dendrogeo-publication.json
+          node scripts/make-report.mjs --publication-file /tmp/dendrogeo-publication.json --park "$PARK_ID" ${{ inputs.skip_lulc && '--skip-lulc' || '' }}
       - name: Yayınla (commit + push)
         run: |
           git config user.name "DendroGeo Rapor Bot"

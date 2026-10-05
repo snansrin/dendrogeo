@@ -303,11 +303,50 @@ function dgPubInsertError(r){
  return"İstek yazılamadı (HTTP "+r.status+"): "+txt.slice(0,160);
 }
 
+
+/* Publication metadata is public, supplied separately from private profile settings. */
+const DG_PUBLICATION_FIELDS=[
+ ["title","Rapor başlığı",true,240],["project","Çalışmanın / projenin adı",true,240],
+ ["researcher","Sorumlu araştırmacı (ad soyad)",true,160],["institution","Üniversite / kurum",true,200],
+ ["orcid","Yayımlayan araştırmacının ORCID iD’si (isteğe bağlı)",false,40],
+ ["department","Fakülte / bölüm / program",false,200],["supervisor","Danışman (unvan, ad soyad)",false,160],
+ ["purpose","Araştırmanın amacı",true,1600],["sampling","Örnekleme tasarımı ve kapsamı",true,1600],
+ ["instruments","Ölçüm cihazları ve saha yöntemi",true,1000],["funding","Destek / proje numarası",false,300]
+];
+function dgValidOrcid(value){
+ const raw=String(value||"").trim();if(!raw)return true;
+ const s=raw.replace(/^https?:\/\/orcid\.org\//i,"").replace(/[\s-]/g,"").toUpperCase();
+ if(!/^\d{15}[\dX]$/.test(s))return false;
+ let n=0;for(const d of s.slice(0,15))n=(n+Number(d))*2;
+ const c=(12-(n%11))%11;return s[15]===(c===10?"X":String(c));
+}
+function dgPublicationForm(parkId){
+ return new Promise(resolve=>{
+  if(document.getElementById("dgPublicationDialog")){resolve(null);return;}
+  const before=document.activeElement,profile=USER?.user_metadata?.academic_profile||{};
+  const project=PROJ_LIST.find(p=>Number(p.id)===Number(DG_USER_PUB.projectId));
+  const defaults={...profile,researcher:PROFILE?.full_name||"",project:project?.name||profile.project||""};
+  const dialog=document.createElement("dialog");dialog.id="dgPublicationDialog";dialog.className="dg-publication-dialog card";
+  dialog.innerHTML='<form id="dgPublicationForm"><h2 id="dgPublicationTitle">Bilimsel rapor künyesi</h2><p class="dg-meta">Bu bilgiler raporda açık olarak yayımlanır. Çalışma bilgilerini ve veri kapsamını doğrulayın. Danışman adı kurum onayı anlamına gelmez.</p><div class="dg-profile-fields">'+
+   DG_PUBLICATION_FIELDS.map(([k,label,required,max])=>'<label class="lbl">'+esc(label)+(required?' *':'')+(max>500?'<textarea rows="3"':'<input type="text"')+' name="'+k+'" maxlength="'+max+'" '+(required?'required':'')+'>'+(max>500?esc(defaults[k]||"")+'</textarea>':'')+'</label>').join('')+
+   '<label class="lbl">Çalışma türü<select name="study_type"><option value="research">Araştırma projesi</option><option value="thesis">Tez / bitirme projesi</option><option value="inventory">Envanter çalışması</option></select></label><label class="lbl">Saha başlangıç tarihi *<input type="date" name="start_date" required></label><label class="lbl">Saha bitiş tarihi *<input type="date" name="end_date" required></label></div><label class="measure-share"><input type="checkbox" class="dg-switch" name="consent" required><span>Çalışma künyesinin yayımlanmasını onaylıyorum; bilgiler ve saha tarihleri doğrudur. Raporun kapsamı parktaki onaylı kayıtları içerir.</span></label><p class="dg-meta" id="dgPublicationError" role="alert"></p><div class="dg-sens-actions"><button type="submit" class="btn green">Künyeyi onayla ve yayımla</button><button type="button" class="btn ghost" id="dgPublicationCancel">Vazgeç</button></div></form>';
+  document.body.appendChild(dialog);dialog.setAttribute("aria-labelledby","dgPublicationTitle");
+  const f=dialog.querySelector("form");for(const [k] of DG_PUBLICATION_FIELDS)if(f.elements[k].tagName==='INPUT')f.elements[k].value=defaults[k]||"";
+  const close=value=>{dialog.close();dialog.remove();before?.focus();resolve(value);};
+  dialog.addEventListener("cancel",ev=>{ev.preventDefault();close(null);});dialog.querySelector("#dgPublicationCancel").onclick=()=>close(null);
+  f.onsubmit=ev=>{ev.preventDefault();const data=Object.fromEntries(new FormData(f));for(const [k] of DG_PUBLICATION_FIELDS)data[k]=String(data[k]||"").trim();
+   const err=DG_PUBLICATION_FIELDS.some(([k,,required])=>required&&!data[k])?"Zorunlu alanları doldurun.":!dgValidOrcid(data.orcid)?"ORCID iD biçimi veya kontrol basamağı geçersiz.":data.end_date<data.start_date?"Bitiş tarihi başlangıç tarihinden önce olamaz.":data.end_date>new Date().toISOString().slice(0,10)?"Saha bitiş tarihi gelecekte olamaz.":data.study_type==='thesis'&&!data.supervisor?"Tez / bitirme projesi için danışman bilgisini girin.":"";
+   if(err){dialog.querySelector("#dgPublicationError").textContent=err;return;}
+   delete data.consent;close({schema:"dendrogeo-publication/1",...data});};dialog.showModal();
+ });
+}
+
 async function dgPublishReport(parkId){
  if(typeof dgPresenceAct==="function"){try{dgPresenceAct("publish","park #"+parkId);}catch(e){}}
  if(!dgPubAdmin())return toast("Rapor yayını yalnız yönetici içindir.","err","📄");
  const lulc=$("dgPubLulc")?$("dgPubLulc").checked!==false:true;
- const r=await dgPubInsertRequest(parkId,lulc,"uygulama içi yayın");
+ const metadata=await dgPublicationForm(parkId);if(!metadata)return;
+ const r=await dgPubInsertRequest(parkId,lulc,JSON.stringify(metadata));
  if(r.ok){
   toast("📄 Yayın isteği kuyruğa alındı — rapor birkaç dakika içinde burada bağlanacak.","ok","📄");
   DG_PUB_STATE.pollCount=0;
@@ -551,7 +590,8 @@ function dgUserPubRender(){
 async function dgUserPublish(parkId){
  if(typeof USER==="undefined"||!USER)return toast("Önce giriş yap.","err","📄");
  const lulc=$("dgUserPubLulc")?$("dgUserPubLulc").checked!==false:true;
- const r=await dgPubInsertRequest(parkId,lulc,"kullanıcı yayını (proje #"+(DG_USER_PUB.projectId||0)+")");
+ const metadata=await dgPublicationForm(parkId);if(!metadata)return;
+ const r=await dgPubInsertRequest(parkId,lulc,JSON.stringify(metadata));
  if(r.ok){
   toast("📄 Yayın isteği kuyruğa alındı — rapor birkaç dakika içinde burada bağlanacak.","ok","📄");
   DG_USER_PUB.polls=0;

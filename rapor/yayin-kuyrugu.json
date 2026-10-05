@@ -1,6 +1,6 @@
 {
   "schema": "dendrogeo-publish-queue/1",
-  "updated_at": "2026-10-01T20:29:30.669Z",
+  "updated_at": "2026-10-04T09:06:36.629Z",
   "entries": [
     {
       "request_id": "manuel-DGR-2026-0001",
@@ -627,6 +627,166 @@
       "lulc": "dahil (ESA WorldCover 10 m · 2021 (v200))",
       "citation": "Şirin, N. (2026). Göksu Parkı ağaç envanteri ve karbon stoku raporu (DGR-2026-0020, sürüm 1.0). DendroGeo Bilimsel Analiz Raporu. https://dendrogeo.org/rapor/DGR-2026-0020/",
       "finished_at": "2026-10-01T20:29:30.669Z"
+    },
+    {
+      "report_id": "DGR-2026-0001",
+      "park_id": 5,
+      "status": "Geri çekildi",
+      "test_publication": true,
+      "reason": "Test yayını — üretim geçişi",
+      "finished_at": "2026-10-04T09:06:36.629Z"
+    },
+    {
+      "report_id": "DGR-2026-0002",
+      "park_id": 4,
+      "status": "Geri çekildi",
+      "test_publication": true,
+      "reason": "Test yayını — üretim geçişi",
+      "finished_at": "2026-10-04T09:06:36.629Z"
+    },
+    {
+      "report_id": "DGR-2026-0003",
+      "park_id": 25,
+      "status": "Geri çekildi",
+      "test_publication": true,
+      "reason": "Test yayını — üretim geçişi",
+      "finished_at": "2026-10-04T09:06:36.629Z"
+    },
+    {
+      "report_id": "DGR-2026-0004",
+      "park_id": 25,
+      "status": "Geri çekildi",
+      "test_publication": true,
+      "reason": "Test yayını — üretim geçişi",
+      "finished_at": "2026-10-04T09:06:36.629Z"
+    },
+    {
+      "report_id": "DGR-2026-0005",
+      "park_id": 25,
+      "status": "Geri çekildi",
+      "test_publication": true,
+      "reason": "Test yayını — üretim geçişi",
+      "finished_at": "2026-10-04T09:06:36.629Z"
+    },
+    {
+      "report_id": "DGR-2026-0006",
+      "park_id": 25,
+      "status": "Geri çekildi",
+      "test_publication": true,
+      "reason": "Test yayını — üretim geçişi",
+      "finished_at": "2026-10-04T09:06:36.629Z"
+    },
+    {
+      "report_id": "DGR-2026-0007",
+      "park_id": 25,
+      "status": "Geri çekildi",
+      "test_publication": true,
+      "reason": "Test yayını — üretim geçişi",
+      "finished_at": "2026-10-04T09:06:36.629Z"
+    },
+    {
+      "report_id": "DGR-2026-0008",
+      "park_id": 25,
+      "status": "Geri çekildi",
+      "test_publication": true,
+      "reason": "Test yayını — üretim geçişi",
+      "finished_at": "2026-10-04T09:06:36.629Z"
+    },
+    {
+      "report_id": "DGR-2026-0009",
+      "park_id": 5,
+      "status": "Geri çekildi",
+      "test_publication": true,
+      "reason": "Test yayını — üretim geçişi",
+      "finished_at": "2026-10-04T09:06:36.629Z"
+    },
+    {
+      "report_id": "DGR-2026-0010",
+      "park_id": 25,
+      "status": "Geri çekildi",
+      "test_publication": true,
+      "reason": "Test yayını — üretim geçişi",
+      "finished_at": "2026-10-04T09:06:36.629Z"
+    },
+    {
+      "report_id": "DGR-2026-0011",
+      "park_id": 25,
+      "status": "Geri çekildi",
+      "test_publication": true,
+      "reason": "Test yayını — üretim geçişi",
+      "finished_at": "2026-10-04T09:06:36.629Z"
+    },
+    {
+      "report_id": "DGR-2026-0012",
+      "park_id": 25,
+      "status": "Geri çekildi",
+      "test_publication": true,
+      "reason": "Test yayını — üretim geçişi",
+      "finished_at": "2026-10-04T09:06:36.629Z"
+    },
+    {
+      "report_id": "DGR-2026-0013",
+      "park_id": 25,
+      "status": "Geri çekildi",
+      "test_publication": true,
+      "reason": "Test yayını — üretim geçişi",
+      "finished_at": "2026-10-04T09:06:36.629Z"
+    },
+    {
+      "report_id": "DGR-2026-0014",
+      "park_id": 4,
+      "status": "Geri çekildi",
+      "test_publication": true,
+      "reason": "Test yayını — üretim geçişi",
+      "finished_at": "2026-10-04T09:06:36.629Z"
+    },
+    {
+      "report_id": "DGR-2026-0015",
+      "park_id": 25,
+      "status": "Geri çekildi",
+      "test_publication": true,
+      "reason": "Test yayını — üretim geçişi",
+      "finished_at": "2026-10-04T09:06:36.629Z"
+    },
+    {
+      "report_id": "DGR-2026-0016",
+      "park_id": 25,
+      "status": "Geri çekildi",
+      "test_publication": true,
+      "reason": "Test yayını — üretim geçişi",
+      "finished_at": "2026-10-04T09:06:36.629Z"
+    },
+    {
+      "report_id": "DGR-2026-0017",
+      "park_id": 25,
+      "status": "Geri çekildi",
+      "test_publication": true,
+      "reason": "Test yayını — üretim geçişi",
+      "finished_at": "2026-10-04T09:06:36.629Z"
+    },
+    {
+      "report_id": "DGR-2026-0018",
+      "park_id": 25,
+      "status": "Geri çekildi",
+      "test_publication": true,
+      "reason": "Test yayını — üretim geçişi",
+      "finished_at": "2026-10-04T09:06:36.629Z"
+    },
+    {
+      "report_id": "DGR-2026-0019",
+      "park_id": 25,
+      "status": "Geri çekildi",
+      "test_publication": true,
+      "reason": "Test yayını — üretim geçişi",
+      "finished_at": "2026-10-04T09:06:36.629Z"
+    },
+    {
+      "report_id": "DGR-2026-0020",
+      "park_id": 25,
+      "status": "Geri çekildi",
+      "test_publication": true,
+      "reason": "Test yayını — üretim geçişi",
+      "finished_at": "2026-10-04T09:06:36.629Z"
     }
   ]
 }

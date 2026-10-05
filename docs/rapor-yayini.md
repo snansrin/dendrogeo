@@ -379,8 +379,14 @@ yasak — şablon akreditasyon belgesi DEĞİLDİR ve bunu künyede söyler).
 * **metadata.json:** her raporun yanında DataCite Metadata Schema 4.7 alan
   adlarıyla hizalı makine okur üst veri (identifier/title/publicationYear/
   resourceType/version/spatialCoverage/temporalCoverage/resolution/
-  methodVersion/sources/relatedIdentifiers/resultHash/gitCommit/doi). Sayfa
-  başında aynı bilgiler JSON-LD (`schema.org/Report`) olarak da gömülüdür.
+  methodVersion/engineVersion/applicationVersion/sourceProvenance/sources/
+  relatedIdentifiers/resultHash/gitCommit/doi). Kaynak sürümleri, çapraz
+  doğrulama kaynağı ve kabul edilmiş yüzey analizinin revizyon/parmak izleri
+  `sourceProvenance` altında snapshot ile aynı kaynaktan üretilir. Sayfa
+  başında JSON-LD (`schema.org/Report`) olarak da gömülüdür. Sayfa başlığı,
+  önerilen atıf ve metadata tek bir rapor başlığı kullanır; JSON-LD ayrıca aynı
+  kaynak listesini, yöntem ve yazılım sürümünü, kaynak kökenini ve sonuç özeti
+  SHA-256 değerini taşır.
 * **DOI hazırlığı:** DGR iç kimliktir; Zenodo/DataCite kaydı yapıldığında DOI
   §11'e, `metadata.json`'a (`doi` + `relatedIdentifiers`'a `IsIdenticalBy`)
   ve atıf bloğuna işlenir. Rapor kimliği DEĞİŞMEZ.
@@ -391,11 +397,12 @@ yasak — şablon akreditasyon belgesi DEĞİLDİR ve bunu künyede söyler).
   örtüsü çözümlemesi yayınlanmaz (QA eşiği zaten bloklayacaktır; rapor
   NEDENİ de söyler).
 
-Faz haritası (kullanıcı planı): **Faz 1** (rapor standardı) ve **Faz 2**
-(dijital bütünlük: commit/engine/hash/geçmiş) bu sürümle TAMAM; **Faz 3**
-(metadata.json + JSON-LD) TAMAM, QR kod ve gerçek **Faz 4** PID kaydı
-(Zenodo API) bilinçli olarak SONRAYA bırakıldı (QR için satılabilir bir
-kodlayıcı kararı gerekiyor; yanlış QR, hiç QR'dan kötüdür).
+Faz haritası: **Faz 1** (akademik rapor standardı), **Faz 2** (dijital
+bütünlük), **Faz 3** (metadata.json + JSON-LD tutarlılığı), **Faz 4**
+(Zenodo API yayın akışı ve güvenli kayıt durumu) ve **Faz 5** (bilimsel kayıt
+bütünlüğü, ORCID aktarımı ve regresyon bekçileri) tamamlandı. Mevcut rapor ve
+yazılım DOI değerleri bu çalışma kapsamında incelenmedi veya değiştirilmedi;
+mevcut DOI kaydı gerekiyorsa rapor arayüzünde gösterilir.
 
 ## 7) Bekçiler
 
@@ -430,3 +437,72 @@ auth.uid()` (SQL), 📁 Projeler'deki 📄 düğmesi ve panelin kablolaması
 (arayüz), vm'de gerçek davranış (panel durumları, insert gövdesi/oturum
 anahtarı, kota–mülkiyet hata eşlemeleri, başkasının isteğinde ✖ Vazgeç yok,
 oynanmış günlük bağlantı sokamaz).
+
+## Üretim yayınına geçiş (4 Ekim 2026)
+
+Yayın düğmesi artık çalışma künyesi formunu açar. Başlık, proje adı,
+sorumlu araştırmacı, kurum, amaç, örnekleme tasarımı, saha yöntemi/cihazları
+ve saha tarihleri zorunludur. Tez/bitirme projesinde danışman da zorunludur.
+Bölüm/program ve destek bilgisi isteğe bağlıdır. Kullanıcı, bu bilgilerin
+açık yayımlanmasını onaylar. Profildeki kurum ve danışman bilgileri formu
+önceden doldurur; profil alanları yetkilendirme kararlarında kullanılmaz.
+Profildeki ORCID iD de forma taşınır; kullanıcı isterse değiştirir. Biçimi ve
+kontrol basamağı doğrulanan ORCID, rapor künyesine, JSON-LD'ye, DataCite
+desenindeki yaratıcı kimliğine ve Zenodo yaratıcı metadata'sına aktarılır.
+
+Künye mevcut `report_requests.note` metin alanına
+`dendrogeo-publication/1` JSON olarak yazılır; yeni veritabanı migration'ı
+gerekmez. Kuyruk işleyicisi zorunlu alanları ve tarih aralığını yeniden
+doğrular. Künye eksik eski istekler rapor üretmez; kullanıcı yeni formdan
+istek açmalıdır. Künye `data.json` içinde içerik hash'ine dahil edilir ve
+`metadata.json` dosyasında `publication` alanıyla yayımlanır. Nicel kapsam,
+parkın tüm onaylı ölçümleridir. Beyan edilen saha tarihleri veri filtresi
+olarak kullanılmaz; kayıt tarih aralığı ayrıca raporda gösterilir.
+
+Önceki 20 rapor test yayınıdır. `test-publications.json` kimlik listesini
+sabitler; yeni rapor geçmişi bu listeyi dışlar. Eski rapor adreslerinde test
+bildirimi bulunur. Kimlikler yeniden kullanılmaz ve git geçmişi korunur.
+Bu geçişi yapan `reset-test-publications.mjs` idempotenttir; manifest varsa
+yeni yayınlara dokunmaz. Ölçüm, park, proje ve kullanıcı kayıtları silinmez.
+
+### Gerçek DOI kaydı
+
+Yeni raporlar Zenodo için `zenodo.json` üretir. DOI kaydı için Zenodo
+hesabından bir erişim token'ı alınır ve GitHub Actions secrets alanına
+`ZENODO_TOKEN` olarak eklenir. Token tarayıcıya veya depoya yazılmaz.
+Actions → **Rapor DOI kaydı** → `report_id` ile kayıt başlatılır.
+İşlem rapor dosyalarını ZIP olarak Zenodo'ya yükler ve yayımlar. Gerçek DOI
+Zenodo yanıtından alınır; biçimi doğrulanır ve `doi.json` dosyasına yazılır.
+Rapor sayfası bu dosyadan DOI bağlantısını ve atıf ekini gösterir. Özgün
+ölçüm snapshot'ı ve içerik hash'i değiştirilmez. DOI, Zenodo'daki arşivin
+kimliğidir; DGR kurum içi rapor kimliği olarak korunur.
+
+Yerel kullanım:
+
+```bash
+# Önce yalnız taslak oluşturur; token ortam değişkeninde bulunmalıdır.
+node scripts/register-doi.mjs DGR-2026-0021
+# Gerçek DOI kaydı ve açık Zenodo yayını:
+node scripts/register-doi.mjs DGR-2026-0021 --publish
+```
+
+`zenodo-deposit.json` taslak kimliğini saklar; yeniden deneme aynı kaydı
+kullanır ve durum dosyasındaki rapor kimliği ile Zenodo kayıt numarası yeniden
+doğrulanır. Actions yalnızca seçilen raporun taslak/DOI durum dosyalarını
+commitleyip yayımlar. `doi.json` varsa ikinci bir DOI üretilmez. Token bulunmazsa DOI
+üretilmez ve işlem açık hata verir. Formdaki danışman bilgisi kurumsal onay
+veya danışmanın yazarlık beyanı yerine geçmez.
+
+Elle rapor üretiminde de künye zorunludur:
+
+```bash
+node scripts/make-report.mjs --park 25 --publication-file calisma-kunyesi.json
+```
+
+### Harita çıktısı ve çekirdek sınırı
+
+Rapor PNG'si yayımlanan snapshot ve sınıflandırma geometrilerinden üretilir;
+bu yayın hattı canlı yüzey analizi motorunu veya kullanıcının haritadaki
+düzenlemelerini değiştirmez. Rapor haritası analiz girdisi değildir. Yüzey
+analizinin geometrisi ve alanları `data.json` ile `surface.geojson` içinde
+ayrı ayrı korunur.
