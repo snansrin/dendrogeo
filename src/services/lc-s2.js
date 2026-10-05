@@ -2,8 +2,10 @@
 /* DendroGeo · services/lc-s2.js — SENTINEL-2 SPEKTRAL ÇAPRAZ KANIT (Çalışma Sahası v5)
  *
  * AMAÇ: LULC sınıflandırmasından BAĞIMSIZ ikinci bir otomatik kanıt hattı.
- * Planetary Computer'daki Sentinel-2 L2A sahnelerinden (10 m, atmosferik
- * düzeltmeli, CC BY 4.0) parkın referans dönemi için bulutsuz medyan
+ * Microsoft Planetary Computer üzerinden erişilen Copernicus Sentinel-2 L2A
+ * sahnelerinden (10 m, atmosferik düzeltmeli). Veri kullanımı Copernicus'un
+ * serbest, tam ve açık veri politikası ile kaynak bildirimine tabidir; bu veri
+ * CC BY 4.0 lisanslı olarak tanımlanmamalıdır. Parkın referans dönemi için bulutsuz medyan
  * kompozit üretir; her 10 m WorldCover hücresinde NDVI/MNDWI/NDBI hesaplar.
  *
  * NEDEN MEDYAN KOMPOZİT: tek sahne bulut/gölge/kalıcı iz taşır; medyan

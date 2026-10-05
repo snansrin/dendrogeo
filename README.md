@@ -82,11 +82,13 @@ python3 -m http.server 8080
 
 ## Lisans ve atıf
 
-DendroGeo kaynak kodu, belgeleri ve DendroGeo tarafından yayımlanan veri CC BY-NC 4.0 koşullarına tabidir. Ticari kullanım için hak sahiplerinden yazılı izin gerekir. **Harita, raster ve diğer üçüncü taraf kaynaklar bu lisansla yeniden lisanslanmaz**; kendi lisansları ve atıf koşulları geçerlidir. Ayrıntılar: [LICENSE](LICENSE) ve [NOTICE](NOTICE).
+DendroGeo'nun hak sahiplerinin yayımlama yetkisine sahip olduğu özgün kaynak kodu, arayüzü, belgeleri ve yazılım sürüm kayıtları [CC BY-NC 4.0](LICENSE) koşullarına tabidir. Ticari kullanım için hak sahiplerinden yazılı izin gerekir. Harita, raster, font, kütüphane ve diğer üçüncü taraf kaynaklar bu lisansla yeniden lisanslanmaz; kendi lisansları ve hizmet koşulları geçerlidir.
 
-Başlıca veri atıfları: OpenStreetMap (ODbL), ESA WorldCover 2021 v200 (CC BY 4.0) ve Impact Observatory LULC 2020 (CC BY 4.0). Kullanılan altlık haritasına özgü atıflar harita üzerinde ve dışa aktarımlarda gösterilir.
+Saha kullanıcılarının eklediği ölçüm, fotoğraf, konum ve kişisel veriler bu lisans bildirimiyle kendiliğinden yayımlanmış veya açık lisanslı hâle gelmez. Bu verilerin yayımlanması için hak, izin, rıza ve gizlilik koşulları ayrıca değerlendirilir. Üçüncü taraf yazılım, veri ve hizmetlerin sürüm/kaynak/lisans dökümü: [Üçüncü Taraf Lisans Envanteri](docs/THIRD_PARTY_LICENSES.md). Temel repo notları: [LICENSE](LICENSE) ve [NOTICE](NOTICE).
 
-Yazılım sürümüne atıf için DOI: [10.5281/zenodo.22948643](https://doi.org/10.5281/zenodo.22948643). Sürüm ve atıf bilgisi [CITATION.cff](CITATION.cff) dosyasındadır.
+Başlıca veri atıfları OpenStreetMap (ODbL), ESA WorldCover 2021 v200 (CC BY 4.0), Impact Observatory Maps for Good Annual LULC 2020 (CC BY 4.0) ve kullanımına bağlı Copernicus Sentinel-2 verisidir. OpenTopoMap ve Esri World Imagery için katmana özgü sağlayıcı atıfları gerekir; harita ve dışa aktarımlarda kullanılacak tam metinler envanterde açıklanmıştır.
+
+README başlığındaki Zenodo DOI, **DendroGeo v3.0.0 yazılım sürüm kaydına** aittir. Bir park raporunun DOI'si ancak o rapor için ayrıca atanmış ve yayımlanmışsa kullanılır; yazılım DOI'si rapor veya saha verisi DOI'si değildir. Sürüm ve yazılım atıf bilgisi [CITATION.cff](CITATION.cff) dosyasındadır.
 
 ## Güvenlik ve katkı
 
