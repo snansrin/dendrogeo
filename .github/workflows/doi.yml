@@ -28,12 +28,21 @@ jobs:
         run: node scripts/register-doi.mjs "$REPORT_ID" --publish
       - name: Kayıt durumunu sakla
         if: always()
+        env:
+          REPORT_ID: ${{ inputs.report_id }}
         run: |
+          if [[ ! "$REPORT_ID" =~ ^DGR-[0-9]{4}-[0-9]{4}$ ]]; then
+            echo "Geçersiz rapor kimliği; kayıt dosyaları işlenmedi."
+            exit 2
+          fi
           git config user.name "DendroGeo Rapor Bot"
           git config user.email "bot@dendrogeo.local"
-          git add rapor/
+          state="rapor/$REPORT_ID/zenodo-deposit.json"
+          record="rapor/$REPORT_ID/doi.json"
+          [[ -f "$state" ]] && git add "$state"
+          [[ -f "$record" ]] && git add "$record"
           if ! git diff --cached --quiet; then
-            git commit -m "Rapor DOI kayıt durumu"
+            git commit -m "Rapor yayın kayıt durumunu sakla"
             git pull --rebase origin main
             git push origin HEAD:main
           fi
