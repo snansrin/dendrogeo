@@ -8,7 +8,7 @@ okuyucunun repoyu açmadan sonuçları yeniden üretebilmesi.
 
 ## 1. Biyokütle ve karbon
 
-### 1.1 Üstü gövde biyokütlesi (AGB)
+### 1.1 Toprak üstü biyokütle (AGB)
 
 Chave vd. (2014), pantropikal ağaçlar için yayınlanan allometrik denklem
 (Eq. 4 biçimi):
@@ -291,12 +291,21 @@ E 488.012,4 / N 4.420.374,7 (±2 m). İleri→ters gidiş-dönüş < 1e-5°.
 > **Otorite belge:** [`LULC_METHODOLOGY.md`](LULC_METHODOLOGY.md)
 > Bu bölüm yalnızca özetler; çelişki olursa LULC_METHODOLOGY.md geçerlidir.
 
-**v4 (2026-09-20) itibaren çift kaynak:** birincil **ESA WorldCover 2021 v200**
-(10 m, 11 sınıf, EPSG:4326), çapraz doğrulama **IO LULC 2020** (10 m, UTM).
-Grup başına uzlaşma yüzdesi belirsizlik göstergesi olarak raporlanır.
+**Ham yıllık raster sonucu:** birincil **ESA WorldCover 2021 v200**
+(10 m, 11 sınıf, EPSG:4326). **IO LULC 2020** (10 m, UTM), yalnızca
+karşılaştırma çalıştırıldığında bağımsız çapraz kontrol sağlar; her raporda
+çalıştırıldığı varsayılmaz. Güncel yüzey incelemesinde **Sentinel‑2 L2A**
+görüntülerinin 10 m ve 20 m bantlarından spektral kanıt alınabilir. Kullanılan
+sahnelerin tarihleri kabul edilmiş analiz kaydında bulunur.
 
-Özet yöntem: park poligonu analiz UTM'sine projekte edilir; rasterin **gerçek
-kaynak hücreleriyle** kesişimi alınır. UTM karolarda hücre dikdörtgen,
+Ham raster sonucu ile **kullanıcının kabul ettiği son yüzey sonucu** ayrı
+çıktılardır. OSM bina, su ve sert zemin geometrileri ile kullanıcı çizimleri
+etkinleştirilip kabul edildiğinde son yüzey sınıflarına katılır; ham raster
+sınıflarını değiştirmez. Her rapor, ilgili analizde kullanılan kaynakları,
+dönemi, çözünürlüğü ve kabul edilmiş geometrileri beyan etmelidir.
+
+Ham raster alanı için park poligonu analiz UTM'sine projekte edilir; rasterin
+**gerçek kaynak hücreleriyle** kesişimi alınır. UTM karolarda hücre dikdörtgen,
 EPSG:4326 karolarda hücrenin derece köşeleri UTM'ye projekte edilip **tam
 dışbükey kesişim** hesaplanır (anizotropik ~7,1×9,3 m hücre şekli korunur).
 Alanlar hücre sayımıyla değil gerçek kesişim geometrisiyle üretilir; hücre
@@ -304,7 +313,11 @@ toplamı park alanına %0,5 QA eşiği içinde eşittir. Ayrıca 4-yön bağlant
 bileşen analiziyle **nesneler** (su kütlesi, yeşil blok, yapılı parça)
 tanımlanır: nesne başına alan + alan-ağırlıklı merkez.
 
-Doğrulama örneği (canlı veri, `scripts/lulc-qa.mjs`): Göksu Parkı 50.05 ha →
+Vektör düzeltmeleri kabul edilmişse ilgili geometriler park sınırı içinde
+kırpılır ve örtüşme önceliği kayıtlı düzenleme kuralına göre çözülür; bu
+sonuç ham raster alanından ayrı raporlanır.
+
+Tarihsel doğrulama örneği (2026-09-20, `scripts/lulc-qa.mjs`): Göksu Parkı 50.05 ha →
 su 12.50 ha, sert 14.71 ha, yeşil 22.26 ha; QA farkı %0.000; saha bilgisiyle
 (su ~12,5 ha, sert ~15 ha) uyumlu.
 
@@ -365,3 +378,4 @@ Bunlar hata değil, **belgelenmiş varsayımlardır**. Değiştirmek isteyen
   kayıtların hangi yöntemle hesaplandığı izlenemiyor. `allometry_version` /
   `rho_used` sütunları yol haritasındadır; gelene dek bu belge yöntemin
   *mevcut* halini tanımlar.
+
