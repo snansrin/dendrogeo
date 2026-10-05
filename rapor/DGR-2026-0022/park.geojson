@@ -1,0 +1,689 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          32.652171,
+          39.990257
+        ]
+      },
+      "properties": {
+        "nokta": 1,
+        "tur": "SÜS ERİĞİ",
+        "grup": "YAPRAKLI",
+        "dbh_cm": 110,
+        "boy_m": 7,
+        "karbon_kg": 1411.55630590422,
+        "tarih": "2026-10-01"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          32.651361,
+          39.989899
+        ]
+      },
+      "properties": {
+        "nokta": 2,
+        "tur": "SÜS ERİĞİ",
+        "grup": "YAPRAKLI",
+        "dbh_cm": 92,
+        "boy_m": 7.8,
+        "karbon_kg": 1106.83317881434,
+        "tarih": "2026-10-01"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          32.650762,
+          39.989757
+        ]
+      },
+      "properties": {
+        "nokta": 3,
+        "tur": "SALKIM SÖĞÜT",
+        "grup": "YAPRAKLI",
+        "dbh_cm": 166,
+        "boy_m": 10.7,
+        "karbon_kg": 3551.5961267378,
+        "tarih": "2026-10-01"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          32.650509,
+          39.98973
+        ]
+      },
+      "properties": {
+        "nokta": 4,
+        "tur": "HALEP ÇAMI",
+        "grup": "İBRELİ",
+        "dbh_cm": 57,
+        "boy_m": 8,
+        "karbon_kg": 396.513940349742,
+        "tarih": "2026-10-01"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          32.650203,
+          39.989694
+        ]
+      },
+      "properties": {
+        "nokta": 5,
+        "tur": "AKASYA",
+        "grup": "YAPRAKLI",
+        "dbh_cm": 90,
+        "boy_m": 7,
+        "karbon_kg": 954.071809076481,
+        "tarih": "2026-10-01"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          32.649799,
+          39.989571
+        ]
+      },
+      "properties": {
+        "nokta": 6,
+        "tur": "KARAÇAM",
+        "grup": "İBRELİ",
+        "dbh_cm": 82,
+        "boy_m": 9,
+        "karbon_kg": 886.250117332571,
+        "tarih": "2026-10-01"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          32.649391,
+          39.989116
+        ]
+      },
+      "properties": {
+        "nokta": 7,
+        "tur": "KARAÇAM",
+        "grup": "İBRELİ",
+        "dbh_cm": 107,
+        "boy_m": 10.8,
+        "karbon_kg": 1780.03973109912,
+        "tarih": "2026-10-01"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          32.648536,
+          39.98922
+        ]
+      },
+      "properties": {
+        "nokta": 8,
+        "tur": "SALKIM SÖĞÜT",
+        "grup": "YAPRAKLI",
+        "dbh_cm": 112,
+        "boy_m": 10.3,
+        "karbon_kg": 1587.43784709261,
+        "tarih": "2026-10-01"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          32.64848,
+          39.988587
+        ]
+      },
+      "properties": {
+        "nokta": 9,
+        "tur": "DOĞU ÇINARI",
+        "grup": "YAPRAKLI",
+        "dbh_cm": 84,
+        "boy_m": 6.9,
+        "karbon_kg": 909.63877906559,
+        "tarih": "2026-10-01"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          32.648074,
+          39.988751
+        ]
+      },
+      "properties": {
+        "nokta": 10,
+        "tur": "MAVİ LADİN",
+        "grup": "İBRELİ",
+        "dbh_cm": 88,
+        "boy_m": 6.7,
+        "karbon_kg": 730.967493679405,
+        "tarih": "2026-10-01"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          32.647281,
+          39.988569
+        ]
+      },
+      "properties": {
+        "nokta": 11,
+        "tur": "AT KESTANESİ",
+        "grup": "YAPRAKLI",
+        "dbh_cm": 102,
+        "boy_m": 8,
+        "karbon_kg": 1387.67371034878,
+        "tarih": "2026-10-01"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          32.646497,
+          39.988656
+        ]
+      },
+      "properties": {
+        "nokta": 12,
+        "tur": "KARAAĞAÇ",
+        "grup": "YAPRAKLI",
+        "dbh_cm": 70,
+        "boy_m": 5.3,
+        "karbon_kg": 445.2548111289,
+        "tarih": "2026-10-01"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          32.645965,
+          39.989153
+        ]
+      },
+      "properties": {
+        "nokta": 13,
+        "tur": "AT KESTANESİ",
+        "grup": "YAPRAKLI",
+        "dbh_cm": 88,
+        "boy_m": 10.7,
+        "karbon_kg": 1381.63313796719,
+        "tarih": "2026-10-01"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          32.64554,
+          39.989575
+        ]
+      },
+      "properties": {
+        "nokta": 14,
+        "tur": "MAVİ LADİN",
+        "grup": "İBRELİ",
+        "dbh_cm": 142,
+        "boy_m": 11.2,
+        "karbon_kg": 3071.30197541684,
+        "tarih": "2026-10-01"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          32.645354,
+          39.989999
+        ]
+      },
+      "properties": {
+        "nokta": 15,
+        "tur": "SALKIM SÖĞÜT",
+        "grup": "YAPRAKLI",
+        "dbh_cm": 140,
+        "boy_m": 11.9,
+        "karbon_kg": 2825.33388928177,
+        "tarih": "2026-10-01"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          32.645158,
+          39.99063
+        ]
+      },
+      "properties": {
+        "nokta": 16,
+        "tur": "AT KESTANESİ",
+        "grup": "YAPRAKLI",
+        "dbh_cm": 58,
+        "boy_m": 5.2,
+        "karbon_kg": 302.771299498776,
+        "tarih": "2026-10-01"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          32.644972,
+          39.990994
+        ]
+      },
+      "properties": {
+        "nokta": 17,
+        "tur": "GÖKNAR",
+        "grup": "İBRELİ",
+        "dbh_cm": 57,
+        "boy_m": 5.6,
+        "karbon_kg": 205.680496120075,
+        "tarih": "2026-10-01"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          32.645614,
+          39.991792
+        ]
+      },
+      "properties": {
+        "nokta": 18,
+        "tur": "AT KESTANESİ",
+        "grup": "YAPRAKLI",
+        "dbh_cm": 80,
+        "boy_m": 9.5,
+        "karbon_kg": 1021.34834944639,
+        "tarih": "2026-10-01"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          32.646158,
+          39.992143
+        ]
+      },
+      "properties": {
+        "nokta": 19,
+        "tur": "SÜS ERİĞİ",
+        "grup": "YAPRAKLI",
+        "dbh_cm": 92,
+        "boy_m": 8.2,
+        "karbon_kg": 1162.19808881939,
+        "tarih": "2026-10-01"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          32.646334,
+          39.992404
+        ]
+      },
+      "properties": {
+        "nokta": 20,
+        "tur": "ATLAS SEDİRİ",
+        "grup": "İBRELİ",
+        "dbh_cm": 122,
+        "boy_m": 10.3,
+        "karbon_kg": 2286.74828566595,
+        "tarih": "2026-10-01"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          32.646658,
+          39.992562
+        ]
+      },
+      "properties": {
+        "nokta": 21,
+        "tur": "MAVİ LADİN",
+        "grup": "İBRELİ",
+        "dbh_cm": 92,
+        "boy_m": 10.8,
+        "karbon_kg": 1270.44042688423,
+        "tarih": "2026-10-01"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          32.647088,
+          39.992668
+        ]
+      },
+      "properties": {
+        "nokta": 22,
+        "tur": "SÖĞÜT",
+        "grup": "YAPRAKLI",
+        "dbh_cm": 87,
+        "boy_m": 4,
+        "karbon_kg": 517.173341815045,
+        "tarih": "2026-10-01"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          32.647694,
+          39.992926
+        ]
+      },
+      "properties": {
+        "nokta": 23,
+        "tur": "SÜS ERİĞİ",
+        "grup": "YAPRAKLI",
+        "dbh_cm": 30,
+        "boy_m": 3.5,
+        "karbon_kg": 56.8113485665862,
+        "tarih": "2026-10-01"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          32.64731,
+          39.99212
+        ]
+      },
+      "properties": {
+        "nokta": 25,
+        "tur": "DİŞBUDAK",
+        "grup": "YAPRAKLI",
+        "dbh_cm": 137,
+        "boy_m": 7.3,
+        "karbon_kg": 2342.65,
+        "tarih": "2026-09-28"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          32.64763,
+          39.99128
+        ]
+      },
+      "properties": {
+        "nokta": 26,
+        "tur": "DUT",
+        "grup": "YAPRAKLI",
+        "dbh_cm": 72,
+        "boy_m": 5.8,
+        "karbon_kg": 513.69,
+        "tarih": "2026-09-28"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          32.64866,
+          39.99216
+        ]
+      },
+      "properties": {
+        "nokta": 27,
+        "tur": "DUT",
+        "grup": "YAPRAKLI",
+        "dbh_cm": 63,
+        "boy_m": 4,
+        "karbon_kg": 275.43,
+        "tarih": "2026-09-28"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          32.64912,
+          39.99167
+        ]
+      },
+      "properties": {
+        "nokta": 28,
+        "tur": "SALKIM SÖĞÜT",
+        "grup": "YAPRAKLI",
+        "dbh_cm": 100,
+        "boy_m": 6.8,
+        "karbon_kg": 1139.23,
+        "tarih": "2026-09-28"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          32.64972,
+          39.99166
+        ]
+      },
+      "properties": {
+        "nokta": 29,
+        "tur": "IHLAMUR",
+        "grup": "YAPRAKLI",
+        "dbh_cm": 40,
+        "boy_m": 4.5,
+        "karbon_kg": 127.3,
+        "tarih": "2026-09-28"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          32.65002,
+          39.99152
+        ]
+      },
+      "properties": {
+        "nokta": 30,
+        "tur": "AKÇAAĞAÇ",
+        "grup": "YAPRAKLI",
+        "dbh_cm": 58,
+        "boy_m": 8.8,
+        "karbon_kg": 505.95,
+        "tarih": "2026-09-28"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          32.6509,
+          39.99151
+        ]
+      },
+      "properties": {
+        "nokta": 31,
+        "tur": "KATALPA",
+        "grup": "YAPRAKLI",
+        "dbh_cm": 63,
+        "boy_m": 7.8,
+        "karbon_kg": 528.54,
+        "tarih": "2026-09-28"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          32.65141,
+          39.99143
+        ]
+      },
+      "properties": {
+        "nokta": 32,
+        "tur": "SALKIM SÖĞÜT",
+        "grup": "YAPRAKLI",
+        "dbh_cm": 200,
+        "boy_m": 12.5,
+        "karbon_kg": 7985.07,
+        "tarih": "2026-09-28"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          32.65192,
+          39.99094
+        ]
+      },
+      "properties": {
+        "nokta": 33,
+        "tur": "AKÇAAĞAÇ",
+        "grup": "YAPRAKLI",
+        "dbh_cm": 86,
+        "boy_m": 8.3,
+        "karbon_kg": 1030.97,
+        "tarih": "2026-09-28"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          32.65246,
+          39.99073
+        ]
+      },
+      "properties": {
+        "nokta": 34,
+        "tur": "DİŞBUDAK",
+        "grup": "YAPRAKLI",
+        "dbh_cm": 75,
+        "boy_m": 6.5,
+        "karbon_kg": 645.28,
+        "tarih": "2026-09-28"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          32.65189,
+          39.99093
+        ]
+      },
+      "properties": {
+        "nokta": 35,
+        "tur": "AKÇAAĞAÇ",
+        "grup": "YAPRAKLI",
+        "dbh_cm": 86,
+        "boy_m": 8.3,
+        "karbon_kg": 1030.97,
+        "tarih": "2026-09-28"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          32.65189,
+          39.99131
+        ]
+      },
+      "properties": {
+        "nokta": 37,
+        "tur": "LADİN",
+        "grup": "İBRELİ",
+        "dbh_cm": 78,
+        "boy_m": 10,
+        "karbon_kg": 683.03,
+        "tarih": "2026-09-28"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          32.64803,
+          39.99299
+        ]
+      },
+      "properties": {
+        "nokta": 43,
+        "tur": "SIĞLA",
+        "grup": "YAPRAKLI",
+        "dbh_cm": 57,
+        "boy_m": 7.5,
+        "karbon_kg": 418.42,
+        "tarih": "2026-09-28"
+      }
+    }
+  ]
+}

@@ -1,6 +1,6 @@
 {
   "schema": "dendrogeo-publish-queue/1",
-  "updated_at": "2026-10-05T17:38:05.771Z",
+  "updated_at": "2026-10-05T18:00:28.088Z",
   "production_started_at": "2026-10-04T08:26:48.034Z",
   "test_archive_ref": "archive/test-publications-2026-10-04",
   "retired_report_ids": [
@@ -48,7 +48,8 @@
     "6ebc9036-c996-489e-858c-3ec6a9ee786b",
     "b28a32d1-3baa-4304-8e75-ecb9c268450c",
     "7fea46c0-ecfa-41d6-8bee-bd065de9b5f2",
-    "production-DGR-2026-0021"
+    "production-DGR-2026-0021",
+    "7b620060-187f-4a27-bf87-dc14af183f19"
   ],
   "processed_retraction_ids": [
     "faaa70f9-0c7c-4bef-b463-6e7719685bcf",
@@ -103,6 +104,29 @@
       "started_at": "2026-10-05T17:38:05.758Z",
       "status": "Geri çekildi",
       "finished_at": "2026-10-05T17:38:05.770Z"
+    },
+    {
+      "request_id": "7b620060-187f-4a27-bf87-dc14af183f19",
+      "park_id": 25,
+      "with_lulc": true,
+      "surface_snapshot": true,
+      "requested_at": "2026-10-05T17:59:42.045291+00:00",
+      "started_at": "2026-10-05T18:00:26.812Z",
+      "status": "Yayınlandı",
+      "archive_bytes": 864944,
+      "report_id": "DGR-2026-0022",
+      "version": 1,
+      "url_path": "/rapor/DGR-2026-0022/",
+      "report_hash": "sha256:873284e3f773fb29fb303a2e753ecc2c98ef29c9051506c752b9d1b0f5eb826f",
+      "park_name": "Göksu Parkı",
+      "city": "Ankara",
+      "n": 36,
+      "carbon_txt": "46,48 t [%95 GA 25,52–65,74]",
+      "lulc": "dahil (Kullanıcının kabul ettiği son analiz · uydu / OSM / çizim)",
+      "citation": "Şirin, N. (2026). Göksu Parkı ağaç envanteri ve karbon stoku raporu (DGR-2026-0022, sürüm 1.0). DendroGeo Bilimsel Analiz Raporu. https://dendrogeo.org/rapor/DGR-2026-0022/",
+      "surface_revision": null,
+      "surface_accepted_at": null,
+      "finished_at": "2026-10-05T18:00:28.088Z"
     }
   ],
   "archived_request_ids": [
