@@ -1,6 +1,6 @@
 {
   "schema": "dendrogeo-publish-queue/1",
-  "updated_at": "2026-10-04T08:28:33.330Z",
+  "updated_at": "2026-10-05T17:38:05.771Z",
   "production_started_at": "2026-10-04T08:26:48.034Z",
   "test_archive_ref": "archive/test-publications-2026-10-04",
   "retired_report_ids": [
@@ -47,7 +47,8 @@
     "32ca5ac2-2b6b-402a-bcb2-87bd1605bb63",
     "6ebc9036-c996-489e-858c-3ec6a9ee786b",
     "b28a32d1-3baa-4304-8e75-ecb9c268450c",
-    "7fea46c0-ecfa-41d6-8bee-bd065de9b5f2"
+    "7fea46c0-ecfa-41d6-8bee-bd065de9b5f2",
+    "production-DGR-2026-0021"
   ],
   "processed_retraction_ids": [
     "faaa70f9-0c7c-4bef-b463-6e7719685bcf",
@@ -68,7 +69,8 @@
     "85d3b3e8-00e4-42b3-b667-c39962405a12",
     "1cd4402f-37bb-4eaa-9b7e-c650102af415",
     "ccb7e3cb-d076-40d0-85aa-6c3605733c5d",
-    "deab2f29-8c15-4b29-a88d-2503a69a2657"
+    "deab2f29-8c15-4b29-a88d-2503a69a2657",
+    "ba985d20-96cc-417b-9ceb-7bb952cc5d26"
   ],
   "entries": [
     {
@@ -89,6 +91,18 @@
       "citation": "Şirin, N. (2026). Göksu Parkı ağaç envanteri ve karbon stoku raporu (DGR-2026-0021, sürüm 1.0). DendroGeo Bilimsel Analiz Raporu. https://dendrogeo.org/rapor/DGR-2026-0021/",
       "finished_at": "2026-10-04T08:28:21.521Z",
       "surface_revision": 4
+    },
+    {
+      "retraction_id": "ba985d20-96cc-417b-9ceb-7bb952cc5d26",
+      "report_id": "DGR-2026-0021",
+      "park_id": 25,
+      "park_name": "Göksu Parkı",
+      "reason": "Test yayını ",
+      "requested_by": "ee148cdd-e06a-462e-a1f3-e3c769aeb7f3",
+      "requested_at": "2026-10-05T17:35:55.691877+00:00",
+      "started_at": "2026-10-05T17:38:05.758Z",
+      "status": "Geri çekildi",
+      "finished_at": "2026-10-05T17:38:05.770Z"
     }
   ],
   "archived_request_ids": [
