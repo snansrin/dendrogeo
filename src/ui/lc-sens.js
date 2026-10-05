@@ -4,7 +4,7 @@
  * are isolated in lc-review.js. Accepted snapshots are bound to source/grid. */
 const _tvs=s=>typeof dgCf==="function"?dgCf(s):s;
 const _tvst=(s,v)=>typeof dgTfs==="function"?dgTfs(s,v):s.replace(/\{(\w+)\}/g,(m,k)=>v[k]??m);
-const DG_SENS={record:null,layer:null,busy:false,saving:false,showCand:true,base:"sat",guard:true,debounce:null,epoch:0,focus:null,editing:true,revision:0,geometry:null,parkGeometry:null,epsg:null,hostParent:null,hostNext:null,status:"",draw:null,drawLayer:null,localQueue:Promise.resolve(),opacity:45,visualVersion:0,baselineShown:false,rawView:false,brush:null,brushType:"hard",brushDiameter:10,strokeSeq:0};
+const DG_SENS={record:null,layer:null,busy:false,saving:false,showCand:true,base:"sat",guard:true,debounce:null,epoch:0,focus:null,editing:true,revision:0,geometry:null,parkGeometry:null,epsg:null,hostParent:null,hostNext:null,status:"",draw:null,drawLayer:null,localQueue:Promise.resolve(),opacity:45,visualVersion:0,baselineShown:false,rawView:false,brush:null,rightPan:null,brushType:"hard",brushDiameter:10,strokeSeq:0};
 const DG_SENS_COLORS={green:"#22c55e",water:"#3b82f6",hard:"#64748b",bare:"#8b5a2b",building:"#475569",pool:"#0ea5e9",other:"#94a3b8"};
 const DG_SENS_CLASSES=["green","water","hard","bare"];
 function dgSensGuard(on){DG_SENS.guard=!!on;window._dgSensGuard=!!on;}
@@ -152,11 +152,43 @@ function dgSensRender(){
  h+=`<p class="dg-sens-hint">${esc(_tvs("Bina ve havuz alanları ayrı hesaplanır."))} · OSM: ${(rec.objectFeatures||[]).length} ${esc(_tvs("nesne sınırı"))}</p><div class="dg-sens-actions"><button type="button" class="dg-png-btn ghost sm" onclick="dgSensFocus(null)">${esc(_tvs("Tüm sınıflar"))}</button><button type="button" class="dg-png-btn ghost sm" onclick="dgSensToggleCand(!DG_SENS.showCand)">${esc(_tvs(DG_SENS.showCand?"Görüntüyü göster":"Renkleri göster"))}</button><button type="button" class="dg-png-btn primary" id="dgSensAcceptBtn" onclick="dgSensAccept()" ${disabled||DG_SENS.rawView||DG_SENS.brush?"disabled":""}>💾 ${esc(_tvs("Kabul et ve kaydet"))}</button></div><div id="dgSensSummary" class="dg-sens-adj"></div><p id="dgSensStatus" class="dg-sens-hint" role="status"></p>`;
  h+=`<div class="dg-sens-actions"><button type="button" class="dg-png-btn ghost sm" onclick="dgSensRawView(!DG_SENS.rawView)" aria-pressed="${DG_SENS.rawView}" ${disabled?"disabled":""}>${esc(_tvs(DG_SENS.rawView?"Düzenlemeye dön":"Ham analizi göster"))}</button></div>`;
  h+=`<p class="dg-sens-hint">${esc(_tvs(DG_SENS.rawView?"Ham kaynak görüntüleniyor; kayıtlı düzeltmeler korunur. Düzenlemek veya kaydetmek için düzenlemeye dönün.":"Tarama isteğe bağlıdır. Ham analizi doğrudan inceleyebilir veya tarayıp hassasiyet barlarıyla ayarlayabilirsiniz."))}</p>`;
- h+=`<div class="dg-sens-map-tools"><label for="dgSensBrushType">${esc(_tvs("Fırça sınıfı"))}</label><select id="dgSensBrushType" onchange="dgSensBrushConfig()">${["hard","green","water","building","pool","bare"].map(k=>`<option value="${k}" ${(DG_SENS.brush?.type||DG_SENS.brushType)===k?"selected":""}>${esc(_tvs(window.DG_SURFACE_REVIEW.types[k].label))}</option>`).join("")}</select><label for="dgSensBrushSize">${esc(_tvs("Fırça çapı"))}</label><select id="dgSensBrushSize" onchange="dgSensBrushConfig()">${[5,10,20,40].map(n=>`<option value="${n}" ${n===(DG_SENS.brush?.diameter||DG_SENS.brushDiameter)?"selected":""}>${n} m</option>`).join("")}</select></div><div class="dg-sens-actions"><button id="dgSensBrushBtn" type="button" class="dg-png-btn blue sm" onclick="dgSensBrushToggle()" aria-pressed="${!!DG_SENS.brush}" ${disabled||DG_SENS.rawView?"disabled":""}>🖌 ${esc(_tvs(DG_SENS.brush?"Fırçayı kapat":"Fırçayı aç"))}</button><button type="button" class="dg-png-btn ghost sm" onclick="dgSensBrushUndo()" ${disabled||DG_SENS.rawView?"disabled":""}>↩ ${esc(_tvs("Son fırça izini geri al"))}</button></div><p class="dg-sens-hint">${esc(_tvs("Fırçayla geçtiğiniz raster hücreleri seçilen sınıfa boyanır; her hücre, haritadaki sınıf seçimiyle aynı şekilde kaydedilir. Ham raster korunur."))}</p>`;
+
  h+=`<details id="dgSensBoundaryDetails" ${DG_SENS.sections?.dgSensBoundaryDetails?"open":""} class="dg-sens-details" ontoggle="dgSensRememberSection(this)"><summary>${esc(_tvs("Sınır düzeltme"))}</summary><p class="dg-sens-hint">${esc(_tvs("Sınıfı seç, haritada sınır köşelerine dokun, çizimi tamamla. Çizilen alan park sınırına kırpılır."))}</p><select id="dgSensDrawType" aria-label="${esc(_tvs("Yüzey türü"))}">${["building","pool","hard","water","green","bare"].map(k=>`<option value="${k}">${esc(_tvs(window.DG_SURFACE_REVIEW.types[k].label))}</option>`).join("")}</select><div class="dg-sens-actions"><button type="button" class="dg-png-btn blue sm" onclick="dgSensDrawStart()">✏ ${esc(_tvs("Sınır çiz"))}</button><button type="button" class="dg-png-btn primary sm" onclick="dgSensDrawFinish()">✓ ${esc(_tvs("Çizimi tamamla"))}</button><button type="button" class="dg-png-btn ghost sm" onclick="dgSensDrawBack()">↩ ${esc(_tvs("Son köşeyi sil"))}</button><button type="button" class="dg-png-btn ghost sm" onclick="dgSensDrawCancel()">${esc(_tvs("İptal"))}</button></div><div id="dgSensFeatures">${(rec.features||[]).map((f,i)=>`<div class="dg-sens-feature"><span>${esc(_tvs(window.DG_SURFACE_REVIEW.types[f.type]?.label||f.type))}</span><button type="button" class="dg-png-btn ghost sm" onclick="dgSensRemoveFeature(${i})">↩ ${esc(_tvs("Geri al"))}</button></div>`).join("")}</div></details>`;
  h+=`<details id="dgSensDataDetails" ${DG_SENS.sections?.dgSensDataDetails?"open":""} class="dg-sens-details" ontoggle="dgSensRememberSection(this)"><summary>${esc(_tvs("Veri ve ayarlar"))}</summary><label class="measure-share"><input class="dg-switch" type="checkbox" ${rec.useObjects!==false?"checked":""} onchange="dgSensObjects(this.checked)"> ${esc(_tvs("OSM bina, su ve sert zemin sınırlarını kullan"))}</label><p class="dg-sens-hint">${esc(_tvs("OSM sınırları isteğe bağlı vektör katmanıdır. Raster sınıflandırması sabit kalır; düzeltmeler kabul edildiğinde ayrıca kaydedilir."))}</p><label class="dg-png-label" for="dgSensPeriod">${esc(_tvs("Uydu tarama dönemi"))}</label><select id="dgSensPeriod" ${disabled||DG_SENS.rawView||DG_SENS.brush?"disabled":""} onchange="dgSensPeriod(this.value)"><option value="latest" ${rec.period==="latest"?"selected":""}>${esc(_tvs("Güncel görüntüler · son 120 gün"))}</option><option value="ref" ${rec.period==="ref"?"selected":""}>2021</option></select><p class="dg-sens-hint">${esc(_tvs("Tarama, bugün ile 120 gün öncesi arasındaki uygun Sentinel-2 görüntülerini arar. Bulut nedeniyle kullanılan tarihler daha eski olabilir. Altlık haritasının tarihi ve 2021 raster verisi ayrıdır."))}</p><div class="dg-sens-actions"><button type="button" class="dg-png-btn ghost sm" onclick="dgSensModePark()">🌳 ${esc(_tvs("Park seç"))}</button><button type="button" class="dg-png-btn ghost sm" onclick="dgSensModeAnalysis()">🛰 ${esc(_tvs("Analiz"))}</button><button type="button" class="dg-png-btn primary sm" onclick="dgSensExportPng()">🖼️ ${esc(_tvs("Doğrulanmış Harita"))}</button><button type="button" class="dg-png-btn ghost sm" onclick="dgSensExportGeoJson()">📥 GeoJSON</button><button type="button" class="dg-png-btn ghost sm" onclick="dgSensExportCsv()">📥 CSV</button><button type="button" class="dg-png-btn red sm" onclick="dgSensReset()">${esc(_tvs("Kararları sıfırla"))}</button></div></details>`;
- host.innerHTML=h;dgSensUpdateSummary();dgSensUpdateStatus();
+ host.innerHTML=h;
+ dgSensRenderPaintTools();dgSensBindRightPan();dgSensUpdateSummary();dgSensUpdateStatus();
 }
+function dgSensRenderPaintTools(){
+ const host=document.getElementById("surfaceBrushTools");if(!host)return;
+ if(!DG_SENS.record){host.innerHTML="";return;}
+ const disabled=DG_SENS.busy||DG_SENS.saving||DG_SENS.exporting||DG_SENS.rawView;
+ const colors={hard:"#64748b",green:"#22c55e",water:"#3b82f6",building:"#475569",pool:"#0ea5e9",bare:"#8b5a2b"};
+ const types=["hard","green","water","building","pool","bare"];
+ host.innerHTML=`<section class="dg-paint-tools" aria-label="${esc(_tvs("Fırça araçları"))}">
+  <div class="dg-paint-head"><span class="dg-paint-icon" aria-hidden="true">🖌</span><div><strong>${esc(_tvs("Yüzey fırçası"))}</strong><small>${esc(_tvs("Haritada hücreleri seçilen sınıfa boya"))}</small></div><span class="dg-paint-mode ${DG_SENS.brush?"is-active":""}" role="status">${esc(_tvs(DG_SENS.brush?"Fırça etkin":"El ile kaydırma"))}</span></div>
+  <div class="dg-paint-row"><div class="dg-paint-palette" role="group" aria-label="${esc(_tvs("Fırça sınıfı"))}">${types.map(k=>`<button type="button" class="dg-paint-swatch ${((DG_SENS.brush?.type||DG_SENS.brushType)===k)?"is-selected":""}" style="--paint-color:${colors[k]}" title="${esc(_tvs(window.DG_SURFACE_REVIEW.types[k].label))}" aria-label="${esc(_tvs(window.DG_SURFACE_REVIEW.types[k].label))}" aria-pressed="${((DG_SENS.brush?.type||DG_SENS.brushType)===k)}" onclick="dgSensBrushChoose('${k}')" ${disabled?"disabled":""}><i></i><span>${esc(_tvs(window.DG_SURFACE_REVIEW.types[k].label))}</span></button>`).join("")}</div>
+  <label class="dg-paint-size"><span>${esc(_tvs("Fırça çapı"))}</span><select id="dgSensBrushSize" aria-label="${esc(_tvs("Fırça çapı"))}" onchange="dgSensBrushConfig()" ${disabled?"disabled":""}>${[5,10,20,40].map(n=>`<option value="${n}" ${n===(DG_SENS.brush?.diameter||DG_SENS.brushDiameter)?"selected":""}>${n} m</option>`).join("")}</select></label></div>
+  <div class="dg-paint-actions"><button id="dgSensBrushBtn" type="button" class="dg-png-btn ${DG_SENS.brush?"primary":"ghost"} sm" onclick="dgSensBrushToggle()" aria-pressed="${!!DG_SENS.brush}" ${disabled?"disabled":""}>${DG_SENS.brush?"🖌 "+esc(_tvs("Fırçayı kapat")):"🖌 "+esc(_tvs("Fırçayı aç"))}</button><button type="button" class="dg-png-btn ghost sm" onclick="dgSensHandMode()" ${disabled?"disabled":""}>✋ ${esc(_tvs("Haritayı kaydır"))}</button><button type="button" class="dg-png-btn ghost sm" onclick="dgSensBrushUndo()" ${disabled?"disabled":""}>↶ ${esc(_tvs("Son fırça izini geri al"))}</button></div>
+  <p class="dg-paint-hint">${esc(_tvs("Sol tuşla fırçala; sağ tuşla haritayı kaydır. Fırça kapalıyken haritayı normal şekilde taşıyabilirsiniz. Ham raster korunur."))}</p>
+ </section>`;
+}
+function dgSensBrushChoose(type){
+ if(!window.DG_SURFACE_REVIEW.types[type]||DG_SENS.rawView||DG_SENS.busy||DG_SENS.saving)return;
+ DG_SENS.brushType=type;if(DG_SENS.brush){dgSensBrushStop();dgSensBrushToggle();}else dgSensRenderPaintTools();
+}
+function dgSensHandMode(){dgSensBrushStop();dgSensRender();}
+function dgSensBindRightPan(){
+ if(typeof map==="undefined"||!map||typeof map.getContainer!=="function")return;
+ const container=map.getContainer();if(!container?.addEventListener||DG_SENS.rightPan?.container===container)return;
+ dgSensUnbindRightPan();
+ const state=DG_SENS.rightPan={container,stroke:null,handlers:[]};
+ const down=e=>{if(e.button!==2||!e.isPrimary)return;e.preventDefault();e.stopImmediatePropagation();state.stroke={id:e.pointerId,x:e.clientX,y:e.clientY};try{container.setPointerCapture(e.pointerId);}catch(err){};container.style.cursor="grabbing";};
+ const move=e=>{const s=state.stroke;if(!s||s.id!==e.pointerId)return;e.preventDefault();e.stopImmediatePropagation();const dx=e.clientX-s.x,dy=e.clientY-s.y;s.x=e.clientX;s.y=e.clientY;if(dx||dy)map.panBy([-dx,-dy],{animate:false});};
+ const finish=e=>{const s=state.stroke;if(!s||s.id!==e.pointerId)return;e.preventDefault();e.stopImmediatePropagation();state.stroke=null;container.style.cursor=DG_SENS.brush?"crosshair":"";try{container.releasePointerCapture(e.pointerId);}catch(err){}};
+ const menu=e=>{e.preventDefault();e.stopImmediatePropagation();};
+ for(const [name,fn] of [["pointerdown",down],["pointermove",move],["pointerup",finish],["pointercancel",finish],["contextmenu",menu]]){container.addEventListener(name,fn,true);state.handlers.push([name,fn]);}
+}
+function dgSensUnbindRightPan(){const p=DG_SENS.rightPan;if(!p)return;for(const [name,fn] of p.handlers)p.container.removeEventListener(name,fn,true);p.container.style.cursor=DG_SENS.brush?"crosshair":"";DG_SENS.rightPan=null;}
 function dgSensOpacity(value){DG_SENS.opacity=Math.max(0,Math.min(100,Number(value)||0));if(DG_SENS.record){DG_SENS.record.displayOpacity=DG_SENS.opacity;clearTimeout(DG_SENS.saveTimer);DG_SENS.saveTimer=setTimeout(()=>dgSensSave(),900);}const out=document.getElementById("dgSensOpacityValue");if(out)out.textContent="%"+DG_SENS.opacity;for(const p of DG_SENS.displayPaths||[])p.poly.setStyle({fillOpacity:DG_SENS.opacity/100});}
 function dgSensUpdateSummary(){
  const a=dgSensAreas(),rec=DG_SENS.record;if(!a||!rec)return;
@@ -403,12 +435,13 @@ async function dgSensRenderPng(layers={park:true,surface:true},waypoints=[]){
 
 function dgSensExportCsv(){const a=dgSensAreas();if(!a)return;const rec=DG_SENS.record;downloadBlob("dendrogeo_surface_"+rec.parkId+".csv","text/csv;charset=utf-8","\uFEFFclass,area_m2,area_ha,view,source_fingerprint\n"+Object.keys(a).map(k=>[k,a[k],a[k]/10000,DG_SENS.rawView?"raw":DG_SENS.editing?"preview":"accepted",rec.fingerprint].join(",")).join("\n"));}
 function dgSensCleanup(){
- dgSensBrushStop();DG_SENS.rawView=false;++DG_SENS.epoch;dgSurfaceCancelJobs();clearTimeout(DG_SENS.debounce);clearTimeout(DG_SENS.saveTimer);DG_SENS.debounce=null;DG_SENS.resizeObserver?.disconnect();DG_SENS.resizeObserver=null;
+ dgSensBrushStop();dgSensUnbindRightPan();DG_SENS.rawView=false;++DG_SENS.epoch;dgSurfaceCancelJobs();clearTimeout(DG_SENS.debounce);clearTimeout(DG_SENS.saveTimer);DG_SENS.debounce=null;DG_SENS.resizeObserver?.disconnect();DG_SENS.resizeObserver=null;
  if(typeof map!=="undefined"&&map){if(DG_SENS.layer)map.removeLayer(DG_SENS.layer);if(DG_SENS.renderer)map.removeLayer(DG_SENS.renderer);DG_SENS.renderer=null;DG_SENS.pathCache=null;dgSensDrawCancel();map.off("moveend",dgSensRefreshLayer);}
  const host=document.getElementById("lcSens");if(host){host.style.display="none";host.innerHTML="";if(DG_SENS.hostParent?.isConnected)DG_SENS.hostParent.insertBefore(host,DG_SENS.hostNext?.parentNode===DG_SENS.hostParent?DG_SENS.hostNext:null);else host.remove();}
  document.getElementById("map")?.classList.remove("surface-review-map");
  document.getElementById("v-map")?.classList.remove("surface-review-active");
  const pending=document.getElementById("surfacePendingTools");if(pending)pending.style.display="none";
+ const paint=document.getElementById("surfaceBrushTools");if(paint)paint.innerHTML="";
  if(typeof map!=="undefined"&&map?.invalidateSize)map.invalidateSize({pan:false});
  Object.assign(DG_SENS,{record:null,layer:null,geometry:null,parkGeometry:null,busy:false,saving:false,exporting:false,baselineShown:false,baselineReport:null,mergedKey:null,mergedFeatures:null,displayPaths:null,hostParent:null,hostNext:null});
  DG_SENS.partsMemo=null;DG_SENS.visualMemo=null;
@@ -455,7 +488,7 @@ function dgSensBrushStop(){
  for(const [event,fn] of b.handlers)b.container.removeEventListener(event,fn,true);
  try{if(b.stroke)b.container.releasePointerCapture(b.stroke.pointerId);}catch(e){}
  if(b.preview)map.removeLayer(b.preview);
- b.container.style.touchAction=b.touchAction;b.container.style.cursor=b.cursor;
+ b.container.classList.remove('dg-paint-brush-active');b.container.style.touchAction=b.touchAction;b.container.style.cursor=b.cursor;
  if(b.dragging)map.dragging.enable();
  if(b.zoom)map.doubleClickZoom.enable();
 }
@@ -495,10 +528,10 @@ function dgSensBrushToggle(){
  if(DG_SENS.brush){dgSensBrushStop();dgSensRender();return;}
  if(!DG_SENS.record||DG_SENS.rawView||DG_SENS.busy||DG_SENS.saving||DG_SENS.exporting)return;
  dgSensDrawCancel();map.closePopup();
- const container=map.getContainer(),type=document.getElementById('dgSensBrushType').value;
- const diameter=Number(document.getElementById('dgSensBrushSize').value);
+ const container=map.getContainer(),type=document.getElementById('dgSensBrushType')?.value||DG_SENS.brushType;
+ const diameter=Number(document.getElementById('dgSensBrushSize')?.value||DG_SENS.brushDiameter);
  if(!window.DG_SURFACE_REVIEW.types[type]||![5,10,20,40].includes(diameter))return;
- DG_SENS.brushType=type;DG_SENS.brushDiameter=diameter;
+ DG_SENS.brushType=type;DG_SENS.brushDiameter=diameter;container.classList.add('dg-paint-brush-active');
  const b=DG_SENS.brush={container,type,diameter,epoch:DG_SENS.epoch,record:DG_SENS.record,dragging:map.dragging.enabled(),zoom:map.doubleClickZoom.enabled(),touchAction:container.style.touchAction,cursor:container.style.cursor,handlers:[]};
  map.dragging.disable();map.doubleClickZoom.disable();container.style.touchAction='none';container.style.cursor='crosshair';
  const point=e=>{const p=map.mouseEventToLatLng(e);return[p.lat,p.lng];};
@@ -536,7 +569,7 @@ function dgSensBrushUndo(){
 }
 
 function dgSensBrushConfig(){
- const type=document.getElementById('dgSensBrushType')?.value,size=Number(document.getElementById('dgSensBrushSize')?.value);
+ const type=document.getElementById('dgSensBrushType')?.value||DG_SENS.brushType,size=Number(document.getElementById('dgSensBrushSize')?.value||DG_SENS.brushDiameter);
  if(window.DG_SURFACE_REVIEW.types[type])DG_SENS.brushType=type;
  if([5,10,20,40].includes(size))DG_SENS.brushDiameter=size;
  dgSensBrushStop();dgSensRender();

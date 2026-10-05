@@ -48,7 +48,7 @@ class FakeCacheStorage {
 
 /* ---------- sw.js'ten seçilen fonksiyonları izole çalıştır ---------- */
 function yukle({ agCalisiyor = false } = {}) {
-  const adlar = ['networkFirstWithLimit', 'staleWhileRevalidate', 'trimCache', 'cacheFirstWithLimit'];
+  const adlar = ['networkFirstWithLimit', 'staleWhileRevalidate', 'trimCache', 'cacheFirstWithLimit', 'clearCachedWebFonts'];
   const govde = adlar
     .map((n) => {
       const m = swKaynak.match(new RegExp(`async function ${n}\\([\\s\\S]*?\\n\\}`));
@@ -69,7 +69,7 @@ function yukle({ agCalisiyor = false } = {}) {
       : async () => { throw new TypeError('Failed to fetch'); },
   };
   vm.createContext(ctx);
-  vm.runInContext(sabitler + '\n\n' + govde + '\n\nthis.__api = { networkFirstWithLimit, staleWhileRevalidate, trimCache, cacheFirstWithLimit, PRECACHE, RUNTIME, MAX_RUNTIME };', ctx, { filename: 'sw.js[izole]' });
+  vm.runInContext(sabitler + '\n\n' + govde + '\n\nthis.__api = { networkFirstWithLimit, staleWhileRevalidate, trimCache, cacheFirstWithLimit, clearCachedWebFonts, PRECACHE, RUNTIME, MAX_RUNTIME };', ctx, { filename: 'sw.js[izole]' });
   ctx.__api.__storage = ctx.caches;   // testlerin sahte CacheStorage'a erişimi
   return ctx.__api;
 }
@@ -94,6 +94,25 @@ describe('PRECACHE / RUNTIME ayrımı', () => {
   test('⚠️ REGRESYON KİLİDİ: trimCache PRECACHE üzerinde çağrılmıyor', () => {
     assert.doesNotMatch(swKaynak, /trimCache\(\s*PRECACHE/);
     assert.doesNotMatch(swKaynak, /networkFirstWithLimit\([^)]*PRECACHE\s*,\s*MAX/);
+  });
+});
+
+describe('Google Fonts WOFF cache cleanup', () => {
+  test('activation cleanup removes cached binary fonts but leaves scripts and CSS intact', async () => {
+    const api = yukle();
+    const cache = await openCache(api, api.RUNTIME);
+    await cache.put('https://fonts.gstatic.com/s/manrope/v1/font.woff2', { body: 'bad-font' });
+    await cache.put('https://fonts.googleapis.com/css?family=Manrope', { body: 'font-css' });
+    await cache.put(ORIGIN + '/src/ui/shell.js?v=1', { body: 'app-script' });
+    await api.clearCachedWebFonts();
+    const left = (await cache.keys()).map(r => r.url);
+    assert.equal(left.some(url => url.includes('fonts.gstatic.com')), false);
+    assert.equal(left.some(url => url.includes('fonts.googleapis.com')), true);
+    assert.equal(left.some(url => url.includes('/src/ui/shell.js')), true);
+  });
+
+  test('font binaries bypass service-worker stale cache', () => {
+    assert.match(swKaynak, /url\.hostname\.includes\('fonts\.gstatic\.com'\)[\s\S]{0,120}event\.respondWith\(networkOnly\(request\)\)/);
   });
 });
 

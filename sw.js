@@ -111,7 +111,7 @@ self.addEventListener('activate', event => {
                         return caches.delete(key);
                     })
             )
-        ).then(() => self.clients.claim())
+        ).then(async () => { await clearCachedWebFonts(); return self.clients.claim(); })
     );
 });
 
@@ -142,9 +142,15 @@ self.addEventListener('fetch', event => {
      * isteği kalmadı, yani dallar ölü koddu ve kaldırıldı. Bir gün yeniden
      * bir CDN kullanılırsa buraya geri eklenmeli ve CSP'ye de yazılmalı —
      * scripts/check-csp.mjs bu tutarlılığı denetliyor. */
+    // Binary font files are served from the browser HTTP cache/network. Avoid
+    // persisting a truncated WOFF response in CacheStorage and replaying it.
+    if (url.hostname.includes('fonts.gstatic.com')) {
+        event.respondWith(networkOnly(request));
+        return;
+    }
+
     if (
         url.hostname.includes('fonts.googleapis.com') ||
-        url.hostname.includes('fonts.gstatic.com') ||
         url.hostname.includes('challenges.cloudflare.com')
     ) {
         event.respondWith(staleWhileRevalidate(request, RUNTIME));
@@ -300,6 +306,16 @@ async function networkOnly(request) {
             status: 503, headers: { 'Content-Type': 'application/json' }
         });
     }
+}
+
+async function clearCachedWebFonts() {
+    const cache = await caches.open(RUNTIME);
+    const requests = await cache.keys();
+    const fonts = requests.filter(request => {
+        try { return new URL(request.url).hostname.includes('fonts.gstatic.com'); }
+        catch (_) { return false; }
+    });
+    await Promise.all(fonts.map(request => cache.delete(request)));
 }
 
 /* Cache'i limite indirir.

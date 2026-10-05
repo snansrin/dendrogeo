@@ -239,12 +239,12 @@
 <!-- DİL KATMANI (0035): TR markup varsayılan; EN sözlüğü çalışma zamanında
      uygulanır (dgToggleLang). defer sırası önemli değil — DOMContentLoaded'da
      ya da hemen (hazırsa) çalışır. module-registry + CORE_ASSETS kaydı şart. -->
-<script src="src/config/i18n.js?v=ff42ae94" defer></script>
+<script src="src/config/i18n.js?v=ffdbab04" defer></script>
 <script src="src/utils/geo.js?v=3e796768" defer></script>
 <script src="src/utils/truncation.js?v=f43c76b3" defer></script>
 <!-- Faz 7: geotiff (317 KB) ve chart.js (208 KB) artık SENKRON yüklenmiyor;
      src/utils/lazylibs.js ihtiyaç anında enjekte eder (LULC analizi / panel grafiği). -->
-<script id="dgRuntimeBuild" type="application/json">"ee7ac330d046456d"</script>
+<script id="dgRuntimeBuild" type="application/json">"82347f783b19dbb9"</script>
 <script src="src/utils/lazylibs.js?v=19763039" defer></script>
 <script src="src/services/allometry.js?v=23ec2992" defer></script>
 <script src="src/services/auth.js?v=1e92b5cd" defer></script>
@@ -295,7 +295,7 @@
 <script src="src/services/dash.js?v=91cf55ce" defer></script>
 <link rel="stylesheet" href="css/style.css?v=5833685d">
 <link rel="stylesheet" href="css/landing.css?v=85504b78">
-<link rel="stylesheet" href="css/park-panel.css?v=6e88719b">
+<link rel="stylesheet" href="css/park-panel.css?v=c935b6c1">
 <!-- TASARIM SİSTEMİ (2026-09-27, 2. deneme): ui-standard.css geri BAĞLANDI
      ama ARTIK eleman seviyesi kuralları yalnız .dg-page (alt sayfalar) altında
      geçerli; kabuk (body.dg-app) yalnız sınıf-bazlı bileşenleri ve sekme
@@ -841,6 +841,7 @@
  <button class="btn sm ghost" onclick="loadLiveMap()" title="Onaylı kayıtları sunucudan yeniden çek">↻ İşaretçileri tazele</button>
  <span style="color:var(--mut);font-size:.76rem">Onayladığın kayıt hemen görünmüyorsa bu düğmeye bas.</span>
 </div>
+<div id="surfaceBrushTools" aria-live="polite"></div>
 <div id="surfacePendingTools" class="dg-sens-map-tools" style="display:none"><label for="dgPendingBaseSelect">Harita</label><select id="dgPendingBaseSelect" onchange="switchBaseLayer(this.value)"><option value="osm">Sokak</option><option value="sat">Uydu</option><option value="topo">Topoğrafik</option></select><button class="dg-png-btn ghost sm" disabled>📍 Yeni konum</button><span class="measure-help" role="status">⏳ Yüzey analizi hazırlanıyor…</span></div>
 <div id="map" class="notranslate" translate="no"></div>
 <div id="parkInfo" class="card" style="display:none;margin-top:12px;border-left:4px solid var(--blue)"></div><p style="color:var(--mut);font-size:.8rem;margin-top:8px">🟢 Noktalara dokunun → onaylı ölçüm bilgisi + varsa fotoğraf.</p><div id="liveAnalysis" style="margin-top:18px"></div></div>
@@ -1141,7 +1142,6 @@
  <div id="pvBody" class="tblwrap" style="overflow:auto;flex:1"></div>
  <button class="btn" style="margin-top:12px" id="pvDownload">📥 İndir</button>
 </div></div>
-
 <script src="src/ui/state.js?v=5feada9b" defer></script>
 <script src="src/ui/toast.js?v=50dab987" defer></script>
 <script src="src/ui/landing.js?v=f2f7c13e" defer></script>
