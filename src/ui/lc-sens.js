@@ -104,14 +104,17 @@ async function dgSensMount(hostId){
  host.scrollIntoView({block:"nearest"});
 }
 function dgSensParts(){
+ const cells=dgSensCells(),geometry=DG_SENS.geometry,park=DG_SENS.parkGeometry,rec=DG_SENS.record;
+ if(!rec||!geometry||!park||!Array.isArray(cells)||!cells.length){DG_SENS.partsMemo=null;return [];}
  const key=[DG_SENS.epoch,DG_SENS.partitionVersion,DG_SENS.visualVersion,DG_SENS.editing].join(":");
- const rec=DG_SENS.record,features=dgSensFeatures(),memo=DG_SENS.partsMemo,sens=JSON.stringify(rec?.sens);
- if(memo?.key!==key||memo.geometry!==DG_SENS.geometry||memo.record!==rec||memo.sens!==sens||memo.corrections!==rec.corrections||memo.profile!==rec.profile||memo.features.length!==features.length||!memo.features.every((f,i)=>f===features[i])){
-  const parts=window.DG_SURFACE_REVIEW.resolved(dgSensCells(),dgSensEffective,DG_SENS.geometry,dgSensFeatures(),DG_SENS.epsg,DG_SENS.parkGeometry);
-  DG_SENS.partsMemo={key,geometry:DG_SENS.geometry,parts,record:rec,sens,corrections:rec.corrections,profile:rec.profile,features};
+ const features=dgSensFeatures(),memo=DG_SENS.partsMemo,sens=JSON.stringify(rec.sens);
+ if(memo?.key!==key||memo.geometry!==geometry||memo.record!==rec||memo.sens!==sens||memo.corrections!==rec.corrections||memo.profile!==rec.profile||memo.features.length!==features.length||!memo.features.every((f,i)=>f===features[i])){
+  const parts=window.DG_SURFACE_REVIEW.resolved(cells,dgSensEffective,geometry,features,DG_SENS.epsg,park);
+  DG_SENS.partsMemo={key,geometry,parts,record:rec,sens,corrections:rec.corrections,profile:rec.profile,features};
  }
  return DG_SENS.partsMemo.parts;
 }
+function dgSensLayerClickIsCurrent(epoch,geometry){return !!DG_SENS.record&&!DG_SENS.busy&&!!geometry&&DG_SENS.epoch===epoch&&DG_SENS.geometry===geometry;}
 function dgSensAreas(){
  if(!DG_SENS.record||!DG_SENS.geometry)return null;
  const parts=dgSensParts(),memo=DG_SENS.partsMemo;
@@ -258,10 +261,11 @@ async function dgSensRefreshLayer(){
    if(epoch!==DG_SENS.epoch||key!==[DG_SENS.epoch,DG_SENS.partitionVersion,DG_SENS.visualVersion,DG_SENS.editing].join(":"))return;
    DG_SENS.mergedFeatures=job?.features||dgSurfaceMergeSync(parts,DG_SENS.epsg);DG_SENS.mergedKey=key;DG_SENS.layer.clearLayers();DG_SENS.displayPaths=[];
    DG_SENS.displayFeatures=job?.displayFeatures||dgSurfaceDisplaySync(parts,DG_SENS.epsg,DG_SENS.parkGeometry);
+   const layerEpoch=DG_SENS.epoch,layerGeometry=DG_SENS.geometry;
    for(const f of DG_SENS.displayFeatures){const cls=f.properties.class;
     const rings=f.geometry.coordinates.map(poly=>poly.map(r=>r.map(p=>[p[1],p[0]])));
     const poly=L.polygon(rings,{renderer:DG_SENS.renderer,stroke:false,weight:0,smoothFactor:1,bubblingMouseEvents:false,fillColor:DG_SENS_COLORS[cls]||DG_SENS_COLORS.other});
-    poly.on("click",ev=>{const oe=ev.originalEvent||ev;if(oe&&L.DomEvent?.stopPropagation)L.DomEvent.stopPropagation(oe);if(DG_SENS.objectPick){dgSensObjectPickAt(ev);return;}if(DG_SENS.brush)return;if(DG_SENS.draw){dgSensDrawPoint(ev);return;}const q=dgLcUtmForward(ev.latlng.lat,ev.latlng.lng,DG_SENS.epsg);const part=dgSensParts().find(p=>{const b=p.displayBounds||(p.displayBounds=dgSurfaceBounds(p.geom));return q.x>=b[0]&&q.x<=b[2]&&q.y>=b[1]&&q.y<=b[3]&&dgGridPointDistance([q.x,q.y],p.geom)>=0;});if(part)dgSensPopup(part.key);});
+    poly.on("click",ev=>{const oe=ev.originalEvent||ev;if(oe&&L.DomEvent?.stopPropagation)L.DomEvent.stopPropagation(oe);if(!dgSensLayerClickIsCurrent(layerEpoch,layerGeometry))return;if(DG_SENS.objectPick){dgSensObjectPickAt(ev);return;}if(DG_SENS.brush)return;if(DG_SENS.draw){dgSensDrawPoint(ev);return;}const q=dgLcUtmForward(ev.latlng.lat,ev.latlng.lng,DG_SENS.epsg);const part=dgSensParts().find(p=>{const b=p.displayBounds||(p.displayBounds=dgSurfaceBounds(p.geom));return q.x>=b[0]&&q.x<=b[2]&&q.y>=b[1]&&q.y<=b[3]&&dgGridPointDistance([q.x,q.y],p.geom)>=0;});if(part)dgSensPopup(part.key);});
     DG_SENS.displayPaths.push({poly,cls});
    }
   }catch(e){if(epoch===DG_SENS.epoch){DG_SENS.status=String(e.message||e);dgSensUpdateStatus();}}
@@ -339,7 +343,7 @@ function dgSensFindObjectAt(latlng,elements=window.DG_SURFACE_OSM?.elements||[])
   }
  }
  if(!best)return null;
- const clipped=window.polygonClipping.intersection(best.geometry,DG_SENS.parkGeometry);
+ const clipped=dgSurfaceClip("intersection",best.geometry,DG_SENS.parkGeometry);
  if(!clipped.length||dgSurfaceArea(clipped)<.1)return null;
  const geometry={type:"MultiPolygon",coordinates:dgSurfaceUnproject(clipped,DG_SENS.epsg)};
  if(!window.DG_SURFACE_REVIEW.validFeature({type:best.feature.type,geometry}))return null;
@@ -353,7 +357,7 @@ function dgSensObjectPickStart(){
 }
 function dgSensObjectPickAt(ev){
  if(!DG_SENS.objectPick||!ev?.latlng)return;
- const result=dgSensFindObjectAt(ev.latlng);if(!result){toast(_tvs("Bu noktada kapalı bir OSM nesne sınırı bulunamadı. Sınırı elle çizebilirsiniz."),"info");return;}
+ let result=null;try{result=dgSensFindObjectAt(ev.latlng);}catch(e){toast(_tvs("OSM nesne sınırı geçersiz olduğu için seçilemedi. Sınırı elle çizebilirsiniz."),"warn");return;}if(!result){toast(_tvs("Bu noktada kapalı bir OSM nesne sınırı bulunamadı. Sınırı elle çizebilirsiniz."),"info");return;}
  map.off("click",dgSensObjectPickAt);DG_SENS.objectPick=false;DG_SENS.objectPreview=result;DG_SENS.drawType=result.type;
  DG_SENS.objectPreviewLayer=L.geoJSON({type:"Feature",properties:{},geometry:result.geometry},{style:{color:DG_SENS_COLORS[result.type]||"#2d8150",weight:3,dashArray:"7 5",fillOpacity:.16,interactive:false}}).addTo(map);
  dgSensRenderPaintTools();dgSensOpenMenu("dgSensBoundaryDetails");dgSensUpdateStatus();
@@ -379,7 +383,7 @@ function dgSensDrawCancel(){if(DG_SENS.drawLayer)map.removeLayer(DG_SENS.drawLay
 function dgSensDrawFinish(){
  const d=DG_SENS.draw;if(!d)return;
  if(!window.DG_SURFACE_REVIEW.validRing(d.ring)){toast(_tvs("En az üç köşe seçin; sınır kendi üzerine kesişmemeli."),"warn");return;}
- const geom=window.polygonClipping.intersection([dgSurfaceProject(d.ring,DG_SENS.epsg)],DG_SENS.parkGeometry);
+ let geom;try{geom=dgSurfaceClip("intersection",[dgSurfaceProject(d.ring,DG_SENS.epsg)],DG_SENS.parkGeometry);}catch(e){toast(esc(String(e.message||e)),"warn");return;}
  if(dgSurfaceArea(geom)<.1){toast(_tvs("Çizim park sınırının dışında veya çok küçük."),"warn");return;}
  DG_SENS.record.features.push({...d,method:"visual-boundary",ts:new Date().toISOString()});dgSensDirty();dgSensDrawCancel();dgSensRepartition().then(dgSensSave);
 }

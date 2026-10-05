@@ -7,17 +7,23 @@ const DG_SURFACE_TYPES={green:{group:"green",label:"Yeşil alan"},hard:{group:"h
 function dgSurfaceProject(ring,epsg){return ring.map(p=>{const q=dgLcUtmForward(p[1],p[0],epsg);return[Math.round(q.x*1000)/1000,Math.round(q.y*1000)/1000];});}
 function dgSurfaceUnproject(geom,epsg){const old=DG_SURFACE_WGS_CACHE.get(geom);if(old?.epsg===epsg)return old.wgs;const wgs=geom.map(poly=>poly.map(ring=>ring.map(p=>{const q=dgLcUtmInverse(p[0],p[1],epsg);return[q.lon,q.lat];})));DG_SURFACE_WGS_CACHE.set(geom,{epsg,wgs});return wgs;}
 function dgSurfaceArea(geom){let total=0;for(const poly of geom||[])for(let i=0;i<poly.length;i++){const r=poly[i];let area=0;for(let j=0;j<r.length;j++){const p=r[j],q=r[(j+1)%r.length];area+=p[0]*q[1]-q[0]*p[1];}total+=(i? -1:1)*Math.abs(area)/2;}return Math.max(0,total);}
+function dgSurfaceClip(op,...geoms){
+ const pc=window.polygonClipping;if(!pc||typeof pc[op]!=="function")throw Error("Sınır hesaplama modülü yüklenmedi.");
+ const input=geoms.map(dgSurfaceClean);
+ try{return dgSurfaceClean(pc[op](...input));}
+ catch(e){if(!/Unable to find segment|SweepLine tree/i.test(String(e?.message||e)))throw e;throw Error("OSM sınırında çakışan veya bozuk köşe bulundu. Geçersiz nesne atlandı.");}
+}
 function dgSurfacePark(outer,holes,epsg){
  const pc=window.polygonClipping;
  if(!pc)throw Error("Sınır hesaplama modülü yüklenmedi.");
  const rings=(outer||[]).filter(r=>r.length>=3).map(r=>dgSurfaceProject(r.map(p=>[p[1],p[0]]),epsg));
  if(!rings.length)throw Error("Park sınırı bulunamadı.");
- let geom=pc.union(...rings.map(r=>[r]));
+ let geom=dgSurfaceClip("union",...rings.map(r=>[r]));
  const h=(holes||[]).filter(r=>r.length>=3).map(r=>[dgSurfaceProject(r.map(p=>[p[1],p[0]]),epsg)]);
- if(h.length)geom=pc.difference(geom,...h);
+ if(h.length)geom=dgSurfaceClip("difference",geom,...h);
  return geom;
 }
-function dgSurfaceCell(c,park,epsg){return window.polygonClipping.intersection([dgSurfaceProject(c.quadWgs,epsg)],park);}
+function dgSurfaceCell(c,park,epsg){return dgSurfaceClip("intersection",[dgSurfaceProject(c.quadWgs,epsg)],park);}
 async function dgSurfaceFingerprint(cells,outer,holes,meta){
  const input=JSON.stringify({outer,holes,source:meta,grid:cells.map(c=>[c.row,c.col,c.epsg,c.classKey,c.areaM2,c.quadWgs])});
  const digest=await crypto.subtle.digest("SHA-256",new TextEncoder().encode(input));
@@ -25,17 +31,18 @@ async function dgSurfaceFingerprint(cells,outer,holes,meta){
 }
 const DG_SURFACE_MASK_CACHE=new WeakMap();
 function dgSurfaceResolved(cells,classFor,geometries,features,epsg,park){
+ if(!Array.isArray(cells)||!cells.length||!geometries||typeof geometries!=="object"||!Array.isArray(park)||!park.length)return [];
  const cached=DG_SURFACE_PART_CACHE.get(geometries);
  if(cached&&cached.park===park&&cached.epsg===epsg&&cached.cellCount===cells.length&&cached.cellFirst===cells[0]&&cached.features.length===(features||[]).length&&cached.features.every((f,i)=>f===features[i]))return cached.parts.map(p=>{if(p.method!=="review-cell")return p;const type=classFor(p.cell)||"other";return{...p,type,group:DG_SURFACE_TYPES[type]?.group||"other"};});
- const pc=window.polygonClipping,parts=[];
- const masks=(features||[]).filter(f=>DG_SURFACE_TYPES[f.type]).map(f=>{const old=DG_SURFACE_MASK_CACHE.get(f);if(old?.park===park&&old.epsg===epsg)return old.mask;const geom=pc.intersection(dgSurfaceFeatureGeometry(f,epsg),park),mask={...f,geom,bbox:dgSurfaceBounds(geom)};DG_SURFACE_MASK_CACHE.set(f,{park,epsg,mask});return mask;});
+ const parts=[];
+ const masks=(features||[]).filter(f=>DG_SURFACE_TYPES[f.type]).map(f=>{const old=DG_SURFACE_MASK_CACHE.get(f);if(old?.park===park&&old.epsg===epsg)return old.mask;const geom=dgSurfaceClip("intersection",dgSurfaceFeatureGeometry(f,epsg),park),mask={...f,geom,bbox:dgSurfaceBounds(geom)};DG_SURFACE_MASK_CACHE.set(f,{park,epsg,mask});return mask;});
  for(const c of cells){
   const key=c.row+":"+c.col,geom=geometries[key],full=dgSurfaceArea(geom),a=Number(c.areaM2)||0;
   if(!full||!a)continue;
   let remaining=geom;const bbox=dgSurfaceBounds(geom);
   for(let i=masks.length-1;i>=0&&remaining.length;i--){
-   const mask=masks[i];if(!dgSurfaceOverlap(bbox,mask.bbox))continue;const part=pc.intersection(remaining,mask.geom),partArea=dgSurfaceArea(part);
-   if(partArea>0){parts.push({key,cell:c,type:mask.type,group:DG_SURFACE_TYPES[mask.type].group,geom:part,areaM2:a*partArea/full,method:mask.method||"visual-boundary",ts:mask.ts});remaining=pc.difference(remaining,mask.geom);}
+   const mask=masks[i];if(!dgSurfaceOverlap(bbox,mask.bbox))continue;const part=dgSurfaceClip("intersection",remaining,mask.geom),partArea=dgSurfaceArea(part);
+   if(partArea>0){parts.push({key,cell:c,type:mask.type,group:DG_SURFACE_TYPES[mask.type].group,geom:part,areaM2:a*partArea/full,method:mask.method||"visual-boundary",ts:mask.ts});remaining=dgSurfaceClip("difference",remaining,mask.geom);}
   }
   if(remaining.length){const type=classFor(c)||c.classKey||"other";parts.push({key,cell:c,type,group:DG_SURFACE_TYPES[type]?.group||"other",geom:remaining,areaM2:a*dgSurfaceArea(remaining)/full,method:"review-cell"});}
  }
@@ -106,7 +113,7 @@ function dgSurfaceObjects(elements,epsg){
     const width=Number(t.width);if(Number.isFinite(width)&&width>0&&width<=40){
      const xy=dgSurfaceProject(pts,epsg),segments=[];
      for(let i=1;i<xy.length;i++){const a=xy[i-1],b=xy[i],dx=b[0]-a[0],dy=b[1]-a[1],len=Math.hypot(dx,dy);if(!len)continue;const ox=-dy/len*width/2,oy=dx/len*width/2;segments.push([[[a[0]+ox,a[1]+oy],[b[0]+ox,b[1]+oy],[b[0]-ox,b[1]-oy],[a[0]-ox,a[1]-oy],[a[0]+ox,a[1]+oy]]]);}
-     if(segments.length)geom=window.polygonClipping.union(...segments);
+     if(segments.length)geom=dgSurfaceClip("union",...segments);
     }
    }
   }
@@ -148,7 +155,7 @@ async function dgSurfacePrepare(data){
 }
 function dgSurfaceMergeSync(parts,epsg){
  const groups={};for(const p of parts){const g=groups[p.type]||(groups[p.type]={geoms:[],area:0,methods:new Set()});g.geoms.push(p.geom);g.area+=p.areaM2;g.methods.add(p.method);}
- return Object.entries(groups).map(([k,g])=>({type:'Feature',properties:{class:k,area_m2:g.area,method:[...g.methods].sort().join('+')},geometry:{type:'MultiPolygon',coordinates:dgSurfaceUnproject(window.polygonClipping.union(...g.geoms),epsg)}}));
+ return Object.entries(groups).map(([k,g])=>({type:'Feature',properties:{class:k,area_m2:g.area,method:[...g.methods].sort().join('+')},geometry:{type:'MultiPolygon',coordinates:dgSurfaceUnproject(dgSurfaceClip("union",...g.geoms),epsg)}}));
 }
 
 function dgSurfaceDisplaySync(parts,epsg,park,prepared=null){
