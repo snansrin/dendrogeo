@@ -32,6 +32,9 @@ test('brush toolbar is placed below marker refresh and exposes the established c
   assert.match(source, /dgSensBrushCommit\(points,b\.type,b\.diameter\)/);
   assert.match(source, /Sol tuşla fırçala; sağ tuşla haritayı kaydır/);
   assert.match(css, /\.dg-paint-swatch\.is-selected/);
+  assert.match(source, /dgSensSetDrawType\(type\)/);
+  assert.match(source, /dg-boundary-palette/);
+  assert.match(source, /dgSensDataDetails[\s\S]*?dg-paint-section/);
 });
 
 test('right-button drag pans map without replacing the existing left-button brush handlers', () => {

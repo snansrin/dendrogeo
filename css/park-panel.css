@@ -475,3 +475,14 @@
 .dg-paint-hint{margin:8px 0 0;color:var(--mut);font-size:.69rem;line-height:1.45}
 #map.dg-paint-brush-active,#map.dg-paint-brush-active .leaflet-interactive{cursor:crosshair!important}
 @media(max-width:640px){.dg-paint-tools{padding:10px}.dg-paint-palette{grid-template-columns:repeat(2,minmax(0,1fr));min-width:0}.dg-paint-size{width:82px;flex-basis:82px}.dg-paint-actions .dg-png-btn{flex:1 1 auto}}
+
+#lcSens .dg-paint-section{overflow:hidden;border:1px solid var(--line);border-radius:10px;background:var(--surface);margin-top:10px}
+#lcSens .dg-paint-section>summary{justify-content:space-between;padding:0 12px;background:color-mix(in srgb,var(--bg) 75%,var(--surface));font-weight:700}
+#lcSens .dg-paint-section>summary::-webkit-details-marker{display:none}
+.dg-paint-chevron{color:var(--mut);font-size:1.1rem;transition:transform .15s ease}
+#lcSens .dg-paint-section[open]>summary .dg-paint-chevron{transform:rotate(180deg)}
+#lcSens .dg-paint-section-body{padding:10px 12px 12px}
+.dg-paint-native-select{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+.dg-boundary-palette{grid-template-columns:repeat(3,minmax(0,1fr));margin:6px 0 10px}
+.dg-boundary-swatch{width:100%}
+@media(max-width:640px){.dg-boundary-palette{grid-template-columns:repeat(2,minmax(0,1fr))}}
