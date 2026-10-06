@@ -617,6 +617,10 @@ export async function buildSnapshot(parkId, { skipLulc = false, meta = null, sur
   } : null;
   /* Envanter kalite kapısı: kanonik sözlük + panel denklemiyle yeniden hesap */
   const qaSpecies = inventoryQa(rows, loadSpeciesDict());
+  /* Yayın provenance'i ölçüm protokolü kilidini aynı kanonik ρ kaynağından okur.
+   * Bu değer buildSnapshot kapsamındadır; inventoryQa içindeki yerel değişkene
+   * güvenilmez (2026-10-06: "base is not defined" yayın hatası). */
+  const rhoBase = loadRho();
   /* YAZAR (0012+0015 · kullanıcı standardı): rapor, PARKIN VERİSİNİ ÖLÇEN
    * kullanıcının adıyla yayımlanır. Öncelik zinciri:
    *   1) dg_park_author(park)  — en çok onaylı katkısı olan kayıt sahibi (0015)
@@ -703,8 +707,8 @@ export async function buildSnapshot(parkId, { skipLulc = false, meta = null, sur
       report_id: (meta && meta.id) || null,
       report_standard: 'DendroGeo Academic Report 3.0',
       publication_stage: 'production',
-      measurement_protocol: base.measurementLockId,
-      measurement_protocol_fingerprint: base.measurementLockFingerprint,
+      measurement_protocol: rhoBase.measurementLockId,
+      measurement_protocol_fingerprint: rhoBase.measurementLockFingerprint,
       epsg: (lulc && lulc.epsg) || null,
       resolution_m: savedSurface ? null : 10,
       resolution_note: savedSurface ? "Uydu 10/20 m; OSM ve çizim vektör sınırları" : "10 m",
