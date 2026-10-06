@@ -19,3 +19,11 @@ test('otomatik DOI yalnız aktif ve geri çekilmemiş üretim raporlarını seç
  ]};
  assert.deepEqual(activePublishedReports(q).map(([id])=>id),['DGR-2026-0022']);
 });
+
+
+test('otomatik DOI no-op çalışması yayın günlüğüne gereksiz timestamp yazmaz',()=>{
+ const src=readFileSync(new URL('../scripts/register-pending-dois.mjs',import.meta.url),'utf8');
+ assert.match(src,/const before=JSON\.stringify\(q\)/);
+ assert.match(src,/if\(JSON\.stringify\(q\)!==before\)/);
+ assert.match(src,/DOI bekleyen aktif üretim raporu yok; dosya değişmedi/);
+});
