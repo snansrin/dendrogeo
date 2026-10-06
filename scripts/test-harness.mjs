@@ -67,6 +67,7 @@ export function loadApp({ sadece } = {}) {
 
   const SIRALAMA = [
     'src/config/constants.js',
+    'src/config/wood-density-lock.js',
     'src/config/species.js',
     'src/utils/geo.js',
     'src/utils/truncation.js',
@@ -110,8 +111,35 @@ export function loadApp({ sadece } = {}) {
   ];
   const dosyalar = sadece ? SIRALAMA.filter((f) => sadece.includes(f)) : SIRALAMA;
 
-  const LEXICAL = ['SPECIES_DATA', 'GROUP_DEFAULT_RHO', 'species', 'rho', 'LATIN',
-                   'GROUP_COLOR', 'SPECIES_SYNONYMS', 'QUOTA_MB', 'esc', '$',
+  const LEXICAL = ['WOOD_DENSITY_LOCK_ID','WOOD_DENSITY_LOCK_FINGERPRINT','WOOD_DENSITY_CANONICAL',
+                   'MEASUREMENT_GROUPS','SPECIES_DATA','GROUP_DEFAULT_RHO','SPECIES_GROUP',
+                   'species','rho','LATIN','GROUP_COLOR','SPECIES_SYNONYMS','QUOTA_MB','esc','
+                   'DG_LC_CODES', 'DG_LC_CLASSES', 'DG_LC_PIXEL_M', 'DG_LC_YEAR',
+                   'DG_LC_COLLECTION', 'DG_LC_STAC', 'DG_LC_MAX_TILES',
+                   'DG_LC_MAX_READ_PIXELS', 'DG_LC_RENDER_LIMIT',
+                   'DG_LC_SOURCES', 'DG_ESA_GROUP', 'DG_ESA_CODES', 'DG_LC_SAS', 'DG_OSM_WATER_MIRRORS', 'DG_LC_LAYER', 'DG_LC_LAST',
+                   /* Çalışma Sahası v5 (2026-10-03) */
+                   'DG_VAL_VERSION', 'DG_VAL_CLASSES', 'DG_VAL_LABELS', 'DG_VAL_DEFAULTS',
+                   'DG_VAL_SPECTRAL', 'DG_VAL_GATE',
+                   'DG_S2_COLLECTION', 'DG_S2_MAX_SCENES', 'DG_S2_MAX_CLOUD', 'DG_S2_SEARCH_LIMIT',
+                   'DG_S2_BANDS', 'DG_S2_SCL_VALID', 'DG_S2_SCALE', 'DG_S2_MIN_OBS_GUARD',
+                   'DG_TRUNCATION_WARNED',
+                   'DG_PARK_SEP', 'DG_PARK_MATCH_M', 'DG_TR_FOLD', 'DG_TR_UP'];
+  const epilog = LEXICAL
+    .map((n) => `if(typeof ${n}!=="undefined")__exports.${n}=${n};`)
+    .join('');
+
+  ctx.__exports = {};
+  for (const f of dosyalar) {
+    vm.runInContext(readFileSync(join(ROOT, f), 'utf8'), ctx, { filename: f });
+    vm.runInContext(epilog, ctx, { filename: f + ' [exports]' });
+  }
+  Object.assign(ctx, ctx.__exports);
+  return ctx;
+}
+
+export { ROOT };
+,
                    'DG_LC_CODES', 'DG_LC_CLASSES', 'DG_LC_PIXEL_M', 'DG_LC_YEAR',
                    'DG_LC_COLLECTION', 'DG_LC_STAC', 'DG_LC_MAX_TILES',
                    'DG_LC_MAX_READ_PIXELS', 'DG_LC_RENDER_LIMIT',
