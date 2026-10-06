@@ -432,10 +432,7 @@ export function ringGeodesicAreaM2(ring) {
  *   · 32/34 oran: sabit 15–120 bandı, bütünüyle geniş gövdeli/bodur formlu bir
  *     standı topluca bayraklar (Göksu h/D aralığı 5,33–16,32; medyan 9,65).
  *     Robust z (eşik 3,5) aynı veride TEK kayıt bayraklamaz.
- *   · 6/34 karbon: hepsi SALKIM SÖĞÜT; saklı değer grup varsayılanı ρ=541
- *     ile birebir, tür ρ=400 ile %27–34 farklı. Yani saklı carbon_kg,
- *     üretildiği ρ tablosuyla tutarlıdır (elma ⇔ elma karşılaştırması).
- * QA v5 (0033) aynı veride 🟢 GEÇERLİ hükmü verir ve hiçbir yasal statü
+ *   · Karbon QA artık yalnız FINAL kilitli yoğunluk yoluyla yeniden hesaplanır.\n * QA v5 (0033) aynı veride 🟢 GEÇERLİ hükmü verir ve hiçbir yasal statü
  * iddiası üretmez. Karbon motoru, katsayılar,
  * CSV biçimi, veri tabanı şeması ve yayımlanmış raporlar DEĞİŞMEZ:
  * aynı veri + aynı formül aynı sayıları üretir. */
@@ -451,8 +448,8 @@ export function inventoryQa(rows, dict) {
      * (bilgilendirme). hd_block kalıcı false (0031 kararı korunur). */
     hd_fail: [], hd_block: false, hd_review: false,
     hd_band_out: [], hd_stats: null, h_fail: [],
-    /* (c) dev_rho: hangi ρ kaynağıyla yeniden üretildi (sayımla beyan).
-     * grup_farkli: tür ρ bandı aşan ama grup ρ ile birebir olan kayıtlar. */
+    /* (c) dev_rho yalnız FINAL kilit içindeki yetkili kaynağın tür-özel mi
+     * yoksa grup-geneli mi olduğunu sayar; alternatif kabul yolu değildir. */
     dev_fail: [], dev_block: false, dev_review: false,
     dev_rho: { n: 0, tur: 0, grup: 0, grup_farkli: [] },
     /* 0033 · gövde çapı dağılımı: BETİMLEYİCİ özet (eşik/sınıf/mevzuat YOK) */
@@ -872,14 +869,6 @@ export function renderReport(snap, { id, hash, version = 1, meta = null }) {
   const DB = (INV && INV.dbh_stats) || null;
   const HD = (INV && INV.hd_stats) || null;
   const DR = (INV && INV.dev_rho) || null;
-  /* ρ kaynakları arasındaki en büyük fark (%): sınırlılık metninde sayıyla beyan.
-   * Model ρye 0,976 üssüyle duyarlı → ρ farkı ≈ karbon farkı. */
-  const rhoFarkPct = (() => {
-    const g = (DR && DR.grup_farkli) || [];
-    let mx = 0;
-    for (const x of g) if (x.rho_tur > 0 && x.rho_grp > 0) mx = Math.max(mx, Math.abs(x.rho_grp - x.rho_tur) / x.rho_tur * 100);
-    return mx > 0 ? trNum(mx, 0) : null;
-  })();
   /* 0033 · gövde çapı aralığı metni: envanterden TÜRETİLİR, eşik/statü yok. */
   const govdeAralikTxt = DB ? `${tN(DB.min, 0)}–${tN(DB.max, 0)} cm (medyan ${tN(DB.medyan, 0)} cm, n=${DB.n})` : null;
   const HD_TAIL = INV && INV.h_fail && INV.h_fail.length
@@ -894,15 +883,12 @@ export function renderReport(snap, { id, hash, version = 1, meta = null }) {
         : '')
       + HD_TAIL);
   const devDetail = !INV ? null : (INV.dev_block
-    ? `${INV.dev_fail.length}/${INV.n} kayıtta saklı karbon, panel denklemiyle yeniden hesabın ±%${QA_LIMITS.CARBON_DEV_PCT} bandı dışında — SİSTEMİK hesap bütünlüğü sorunu (DBH birimiyle ilgili DEĞİL); yayın düzeltme uygulanana dek bloklanır`
+    ? `${INV.dev_fail.length}/${INV.n} kayıtta saklı karbon, FINAL kilitli ρ tablosuyla yeniden hesabın ±%${QA_LIMITS.CARBON_DEV_PCT} bandı dışında — SİSTEMİK hesap bütünlüğü sorunu; yayın düzeltme uygulanana dek bloklanır`
     : (INV.dev_fail.length
-      ? `${INV.n - INV.dev_fail.length}/${INV.n} kayıt panel denklemiyle ±%${QA_LIMITS.CARBON_DEV_PCT} içinde · ${INV.dev_fail.length} kayıt HER İKİ ρ kaynağıyla da bant dışında (${INV.dev_fail.map((x) => `P${x.point_id}: saklı ${tN(x.stored)} kg ↔ tür ρ ${tN(x.expected)} kg (%${tN(x.dev_pct)}), grup ρ ${tN(x.expected_grp)} kg (%${tN(x.dev_grp_pct)})`).join('; ')}) — ayrı bir inceleme kalemi; veri hatası hükmü değildir`
-      : `${DR && DR.n ? `${DR.n}/${INV.n} kayıt` : `${INV.n}/${INV.n} kayıt`} panel denklemiyle (Chave 2014 + kanonik ρ tablosu) ±%${QA_LIMITS.CARBON_DEV_PCT} içinde yeniden üretildi — bant dışı kayıt YOK`
-        + (DR && DR.tur ? ` · ${DR.tur} kayıt tür düzeyi ρ ile eşleşti` : '')
-        + (DR && DR.grup ? ` · ${DR.grup} kayıt grup varsayılanı ρ ile eşleşti` : '')
-        + (DR && DR.grup_farkli && DR.grup_farkli.length
-          ? ` · ${DR.grup_farkli.length} kayıtta (${DR.grup_farkli.map((x) => 'P' + x.point_id).join(', ')}) saklı değer GRUP VARSAYILANI ρ ile yeniden üretildi; aynı kayıt tür düzeyi ρ ile ±%${QA_LIMITS.CARBON_DEV_PCT} bandını aşıyor (örnek P${DR.grup_farkli[0].point_id} ${DR.grup_farkli[0].species}: tür ρ=${DR.grup_farkli[0].rho_tur} → ${tN(DR.grup_farkli[0].expected)} kg, %${tN(DR.grup_farkli[0].dev_pct)} · grup ρ=${DR.grup_farkli[0].rho_grp} → ${tN(DR.grup_farkli[0].expected_grp)} kg, %${tN(DR.grup_farkli[0].dev_grp_pct)}). Bu bir ÖLÇÜM HATASI DEĞİLDİR: saklı karbon, değeri üreten ρ tablosuyla tutarlıdır. Denetim bu nedenle iki ρ kaynağını da kabul eder ve hangi kaynağın eşleştiğini sayıyla beyan eder; karbon motoru ve katsayılar DEĞİŞTİRİLMEMİŞTİR`
-          : '')));
+      ? `${INV.n - INV.dev_fail.length}/${INV.n} kayıt FINAL kilitli ρ tablosuyla ±%${QA_LIMITS.CARBON_DEV_PCT} içinde · ${INV.dev_fail.length} kayıt bant dışında (${INV.dev_fail.map((x) => `P${x.point_id}: saklı ${tN(x.stored)} kg ↔ beklenen ${tN(x.expected)} kg (%${tN(x.dev_pct)})`).join('; ')}) — tek yetkili hesap yolu budur`
+      : `${DR && DR.n ? `${DR.n}/${INV.n} kayıt` : `${INV.n}/${INV.n} kayıt`} panel denklemiyle (Chave 2014 + FINAL kilitli ρ tablosu) ±%${QA_LIMITS.CARBON_DEV_PCT} içinde yeniden üretildi — bant dışı kayıt YOK`
+        + (DR && DR.tur ? ` · ${DR.tur} kayıt kilitli tür ρ satırı kullandı` : '')
+        + (DR && DR.grup ? ` · ${DR.grup} kayıt yalnız kendi grup genelini kullandı` : '')));
 
   const qaRows = [
     qaRow('Park geometrisi', knotted ? '⚠ Düğümlü sınır' : (P.osm_key || P.area_m2 > 0 ? true : false),
@@ -914,7 +900,7 @@ export function renderReport(snap, { id, hash, version = 1, meta = null }) {
     L ? qaRow('Veri kaynağı', !!L.source, `${esc(dataset)} · yıl ${dataYear} · ${esc(resolutionLabel)}`) : null,
     L ? qaRow('Sınıflandırma', (L.classes || []).length > 0, `${(L.classes || []).length} sınıf${L.masked_ha > 0 ? ` · maskeli ${trNum(L.masked_ha, 2)} ha (bulut/gölge)` : ' · maskeli alan yok'}`) : null,
     L && L.agreement ? qaRow('Çapraz doğrulama', true, `${esc(L.cross || 'bağımsız kaynak')} uzlaşması: ${Object.entries(L.agreement).map(([k, v]) => `${esc(k)} %${trNum(v.agreementPct, 0)}`).join(', ')}`) : null,
-    INV ? qaRow('Tür sözlüğü eşleşmesi', INV.n_unknown === 0 ? true : `⚠ ${INV.n_unknown} tür dışarıda`, `${INV.n_rows - INV.n_unknown}/${INV.n_rows} kayıt kanonik tür sözlüğüyle eşleşti${INV.unknown.length ? ' · sözlük dışında: ' + esc(INV.unknown.join(', ')) + ' (grup varsayılan ρ ile hesaplandı)' : ''}`) : null,
+    INV ? qaRow('Tür/grup kilidi', (INV.n_unknown === 0 && !(INV.group_fail||[]).length) ? true : `⚠ ${INV.n_unknown + (INV.group_fail||[]).length} kayıt uyuşmuyor`, `${INV.n_rows - INV.n_unknown - (INV.group_fail||[]).length}/${INV.n_rows} kayıt FINAL tür/grup sözleşmesiyle eşleşti${INV.unknown.length ? ' · sözlük dışında: ' + esc(INV.unknown.join(', ')) : ''}${(INV.group_fail||[]).length ? ' · yanlış grup: ' + esc((INV.group_fail||[]).map(x=>'P'+x.point_id).join(', ')) : ''}`) : null,
     qaRow('Fotoğraf kanıtı', nPhoto === NR ? true : `⚠ ${NR - nPhoto} eksik`, `${nPhoto}/${NR} kayıt sahada çekilmiş fotoğraf bağlantısı taşıyor`),
     qaRow('GNSS doğruluk kaydı', (G.n_with_acc ?? 0) > 0 ? true : '⚠ Kaydedilmedi', (G.n_with_acc ?? 0) > 0 ? `${G.n_with_acc}/${G.n ?? NR} kayıtta doğruluk değeri · ortalama ±${trNum(G.mean_acc_m, 1)} m` : `0/${G.n ?? NR} kayıtta accuracy_m değeri var — GNSS hassasiyeti bu sürümde SAYIYLA beyan edilemiyor; park üyeliği poligon testiyle doğrulandı`),
     /* (a) DBH birim/geçerlilik kontrolü — KRİTİK kontrol (0031). Sorgulanan
@@ -1022,10 +1008,8 @@ export function renderReport(snap, { id, hash, version = 1, meta = null }) {
     /* 0031 · karbon yeniden hesabı DBH biriminden BAĞIMSIZ ayrı bir kontroldür. */
     (INV && INV.dev_block) ? `Saklı karbon değerleri ${INV.dev_fail.length}/${INV.n} kayıtta panel denklemiyle yeniden hesabın ±%${QA_LIMITS.CARBON_DEV_PCT} bandı dışındadır; bu bir HESAP BÜTÜNLÜĞÜ sorunudur (DBH birimiyle ilgili değildir) ve giderilene dek toplam geçicidir.` : null,
     (INV && INV.dev_review) ? `Karbon yeniden hesabı karşılaştırmasında ${INV.dev_fail.length}/${INV.n} kayıt ±%${QA_LIMITS.CARBON_DEV_PCT} bandı dışındadır. Bu, DBH biriminden bağımsız AYRI bir kalite kontrol kalemidir; ilgili noktalar ayrıca incelenebilir ancak karbon motorunu veya katsayıları değiştirmek için gerekçe oluşturmaz.` : null,
-    /* 0032 · ρ KAYNAĞI belirsizliği: saklı carbon_kg hangi ρ tablosuyla üretildi?
-     * Denetim iki kaynağı da kabul eder; eşleşen kaynak sayıyla beyan edilir. */
-    (INV && DR && DR.grup_farkli && DR.grup_farkli.length) ? `<b>Odun yoğunluğu (ρ) kaynağı.</b> Karbon yeniden hesap denetiminde ${DR.grup_farkli.length} kayıtta (${DR.grup_farkli.map((x) => 'P' + x.point_id).join(', ')}) saklı karbon GRUP VARSAYILANI ρ ile yeniden üretilmiştir; aynı kayıtlar tür düzeyi ρ ile karşılaştırıldığında ±%${QA_LIMITS.CARBON_DEV_PCT} bandını aşar (örnek ${DR.grup_farkli[0].species}: tür ρ=${DR.grup_farkli[0].rho_tur} kg/m³ → ${tN(DR.grup_farkli[0].expected)} kg, %${tN(DR.grup_farkli[0].dev_pct)} · grup ρ=${DR.grup_farkli[0].rho_grp} kg/m³ → ${tN(DR.grup_farkli[0].expected_grp)} kg, %${tN(DR.grup_farkli[0].dev_grp_pct)}). İki kaynak arasındaki ρ farkı %${rhoFarkPct ?? 0} düzeyindedir; model ρye 0,976 üssüyle duyarlı olduğundan bu fark karbon tahminine yaklaşık aynı oranda yansır. Sınırlılık: tür düzeyi ρ için bölgesel kalibrasyon yoktur ve ρ seçimi tür bazlı karbon tahminini bu ölçekte etkileyebilir. Denetim bu nedenle HER İKİ ρ kaynağını kabul eder, hangisinin eşleştiğini §7de sayıyla beyan eder; karbon motoru, katsayılar, saklı değerler ve CSV çıktısı DEĞİŞTİRİLMEMİŞTİR.` : null,
-    (INV && INV.n_unknown > 0) ? `${INV.n_unknown} tür adı kanonik sözlük dışında kalmıştır (${INV.unknown.join(', ')}); bu kayıtlarda grup varsayılan odun yoğunluğu kullanılmıştır ve tür düzeyi ρ belirsizliği genişlemiştir.` : null,
+    (INV && INV.n_unknown > 0) ? `${INV.n_unknown} tür adı kanonik sözlük dışında kalmıştır (${INV.unknown.join(', ')}); FINAL kilit bu kayıtlar için karbon hesabına izin vermez.` : null,
+    (INV && INV.group_fail && INV.group_fail.length) ? `${INV.group_fail.length} kayıtta tür ile seçilen grup uyuşmamaktadır; FINAL kilit bu kayıtlar için karbon hesabına izin vermez.` : null,
     L && L.masked_ha > 0 ? `Analiz alanının ${trNum(L.masked_ha, 2)} ha’lık bölümü bulut/gölge maskesi kapsamındadır; bu alan sınıf dağılımına dahil edilmemiştir.` : null,
   ].filter(Boolean).map((x) => `<li>${x}</li>`).join('');
 
@@ -1623,9 +1607,10 @@ export function buildMetadata(snap, { id, hash, version = '1.0', meta = null, hi
       checked: snap.qa.species.dev_rho.n,
       matchedSpeciesRho: snap.qa.species.dev_rho.tur,
       matchedGroupRho: snap.qa.species.dev_rho.grup,
-      matchedGroupOnlyPoints: snap.qa.species.dev_rho.grup_farkli.map((x) => x.point_id),
+      matchedGroupOnlyPoints: [],
       outOfBand: (snap.qa.species.dev_fail || []).map((x) => x.point_id),
-      note: 'Beklenen değer iki ρ kaynağıyla (tür düzeyi / grup varsayılanı) hesaplanır; saklı değer herhangi biriyle bant içindeyse satır geçerlidir. Motor ve katsayılar değişmez.',
+      densityLockId: 'DG-WD-LOCK-2026-10-06-FINAL',
+      note: 'Beklenen değer yalnız FINAL kilitli ρ tablosuyla hesaplanır: kilitli tür satırı varsa o, yoksa türün kendi İBRELİ/YAPRAKLI grup geneli kullanılır. Alternatif veya tarihsel ρ kabul edilmez.',
     } : null,
     /* 0032 · ℹ️ beyan kalemleri: QA durumunu (qaState) ETKİLEMEZ */
     qaInfo: (snap.qa && snap.qa.species && snap.qa.species.info) || [],
