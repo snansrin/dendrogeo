@@ -440,18 +440,11 @@ export function ringGeodesicAreaM2(ring) {
  * CSV biçimi, veri tabanı şeması ve yayımlanmış raporlar DEĞİŞMEZ:
  * aynı veri + aynı formül aynı sayıları üretir. */
 export function inventoryQa(rows, dict) {
+  /* TEK KAYNAK: loadRho() yalnız kilitli tabloyu ve iki grup genelini taşır.
+   * Tarihsel/alternatif ρ ile ikinci bir "kabul" hesabı YOKTUR. */
   const base = loadRho();
-  /* ρ önceliği: kanonik ad sözlükte (gizli kayıtlar dahil) ρ taşıyorsa o
-   * kullanılır — saklı carbon_kg'yi üreten tabloyla birebir denetim. Panel
-   * hesabı (calc) bundan ETKİLENMEZ; bu yalnız QA/yeniden hesap yoludur. */
-  const rho = Object.assign({}, base.rho);
-  for (const e of Object.values(dict.byName)) if (e.rho) rho[e.tr] = e.rho;
-  const grho = base.grho;
-  /* Yalnız grup varsayılanı ρ ile beklenen değer üreten bağlam (0032):
-   * rho haritası boş verilince calcRow grup varsayılanına düşer. */
-  const GRHO_ONLY = { rho: {}, grho };
   const out = {
-    n: 0, n_rows: 0, unknown: [], n_unknown: 0,
+    n: 0, n_rows: 0, unknown: [], n_unknown: 0, group_fail: [],
     dbh_fail: [], dbh_block: false, dbh_review: false,
     /* (b) hd_fail = İNCELEME üreten kayıtlar (fiziksel bandın dışı VEYA
      * stand içi robust aykırı). hd_band_out = tipik bant dışı SAYIM
@@ -489,33 +482,34 @@ export function inventoryQa(rows, dict) {
       hdPhys = hd < QA_LIMITS.HD_PHYS_MIN ? 'fiziksel-alt' : 'fiziksel-ust';
     const hFail = Number.isFinite(h) && h > 0 && (h < QA_LIMITS.H_MIN_M || h > QA_LIMITS.H_MAX_M);
     if (hFail) out.h_fail.push({ point_id: +r.point_id, height_m: h });
-    /* ---- (c) karbon yeniden hesabı: İKİ ρ kaynağı (0032) ---- */
-    let dev = null, devGrp = null, exp = null, expGrp = null, devFail = false, rhoSrc = null;
+    /* ---- (c) karbon yeniden hesabı: TEK kilitli ρ kaynağı ---- */
+    let dev = null, exp = null, devFail = false, rhoSrc = null;
     const spName = canon || String(r.species ?? '');
-    const rhoSp = rho[spName] ?? null;
+    const expectedGroup = canon ? base.groupBySpecies[canon] : null;
+    if (canon && expectedGroup && expectedGroup !== r.grp)
+      out.group_fail.push({ point_id:+r.point_id, species:spName, stored_group:r.grp, expected_group:expectedGroup });
+    const rhoSp = canon ? (base.rho[canon] ?? null) : null;
     if (d > 0 && h > 0 && Number.isFinite(c) && c > 0) {
-      exp = _calcRow(d, h, spName, r.grp, { rho, grho }).total_carbon;
-      expGrp = _calcRow(d, h, spName, r.grp, GRHO_ONLY).total_carbon;
+      const calc = _calcRow(d, h, spName, r.grp, base);
+      exp = calc.total_carbon;
       const pct = QA_LIMITS.CARBON_DEV_PCT, floor = QA_LIMITS.CARBON_DEV_MIN_KG ?? 0;
-      /* küçük kayıtlarda yuvarlama gürültüsü bayraklanmaz (mutlak taban) */
       const uyumlu = (x) => x > 0 && (Math.abs(((c - x) / x) * 100) <= pct || Math.abs(c - x) < floor);
       if (exp > 0) dev = +(((c - exp) / exp) * 100).toFixed(1);
-      if (expGrp > 0) devGrp = +(((c - expGrp) / expGrp) * 100).toFixed(1);
-      /* Tür düzeyi ρ YOKSA calcRow zaten grup varsayılanına düşer → exp ≡ expGrp;
-       * bu durumda kaynak "grup" olarak beyan edilir (uydurma "tür ρ" izi yok). */
-      const okTur = rhoSp != null && uyumlu(exp);
-      const okGrup = uyumlu(expGrp);
-      rhoSrc = okTur ? 'tur' : (okGrup ? 'grup' : null);
-      devFail = rhoSrc == null;
+      rhoSrc = calc.valid ? (rhoSp != null ? 'tur' : 'grup') : null;
+      devFail = !calc.valid || !uyumlu(exp);
       if (devFail) {
-        out.dev_fail.push({ point_id: +r.point_id, stored: c, expected: exp > 0 ? +exp.toFixed(1) : null, expected_grp: expGrp > 0 ? +expGrp.toFixed(1) : null, dev_pct: dev, dev_grp_pct: devGrp, rho_tur: rhoSp, rho_grp: grho[r.grp] ?? grho['DİĞER'] ?? null });
+        out.dev_fail.push({
+          point_id:+r.point_id, stored:c,
+          expected:exp > 0 ? +exp.toFixed(1) : null,
+          expected_grp:null, dev_pct:dev, dev_grp_pct:null,
+          rho_tur:rhoSp, rho_grp:base.grho[r.grp] ?? null,
+          reason:calc.valid ? 'karbon-sapmasi' : 'tur-grup-politikasi'
+        });
       } else {
-        if (rhoSrc === 'grup' && dev != null && Math.abs(dev) > pct)
-          out.dev_rho.grup_farkli.push({ point_id: +r.point_id, species: spName, stored: c, expected: +exp.toFixed(1), dev_pct: dev, expected_grp: +expGrp.toFixed(1), dev_grp_pct: devGrp, rho_tur: rhoSp, rho_grp: grho[r.grp] ?? grho['DİĞER'] ?? null });
         out.dev_rho.n++; out.dev_rho[rhoSrc]++;
       }
     }
-    out.rows.push({ id: r.id, point_id: +r.point_id, species: String(r.species ?? ''), canonical: canon, dbh_cm: Number.isFinite(d) ? d : null, dbh_fail: dbhFail, dbh_reason: dbhReason, hd: hd == null ? null : +hd.toFixed(2), hd_band_out: !!hdBandOut, hd_phys_fail: hdPhys, hd_z: null, hd_fail: false, h_fail: !!hFail, stored_carbon_kg: Number.isFinite(c) ? c : null, expected_carbon_kg: exp == null ? null : +exp.toFixed(1), expected_grp_carbon_kg: expGrp == null ? null : +expGrp.toFixed(1), dev_pct: dev, dev_grp_pct: devGrp, dev_fail: devFail, rho_src: rhoSrc, rho_species: rhoSp });
+    out.rows.push({ id: r.id, point_id: +r.point_id, species: String(r.species ?? ''), canonical: canon, dbh_cm: Number.isFinite(d) ? d : null, dbh_fail: dbhFail, dbh_reason: dbhReason, hd: hd == null ? null : +hd.toFixed(2), hd_band_out: !!hdBandOut, hd_phys_fail: hdPhys, hd_z: null, hd_fail: false, h_fail: !!hFail, stored_carbon_kg: Number.isFinite(c) ? c : null, expected_carbon_kg: exp == null ? null : +exp.toFixed(1), expected_grp_carbon_kg: null, dev_pct: dev, dev_grp_pct: null, dev_fail: devFail, rho_src: rhoSrc, rho_species: rhoSp });
     out.n_rows++;
   }
   /* ---- (b2) stand İÇİ robust aykırılık: modified z-score (Iglewicz–Hoaglin) ----
@@ -556,7 +550,6 @@ export function inventoryQa(rows, dict) {
   out.dbh_stats = dbhVals.length
     ? { n: dbhVals.length, min: Math.min(...dbhVals), medyan: medianOf(dbhVals), max: Math.max(...dbhVals) }
     : null;
-  if (out.dev_rho.grup_farkli.length) out.info.push({ key: 'rho-kaynagi', n: out.dev_rho.grup_farkli.length });
   out.unknown = [...new Set(out.unknown)].sort((a, b) => a.localeCompare(b, 'tr'));
   out.n_unknown = out.unknown.length;
   const N = out.n || 1;
@@ -570,9 +563,9 @@ export function inventoryQa(rows, dict) {
   /* (c) Karbon yeniden hesabı DBH tanımından bağımsız AYRI bir kontroldür. */
   out.dev_block = systemic(out.dev_fail.length);
   out.dev_review = out.dev_fail.length > 0 && !out.dev_block;
-  /* Sözlük dışı tür adı: ρ grup varsayılanına düşer → kritik değil, inceleme. */
-  out.species_review = out.n_unknown > 0;
-  /* ℹ️ Beyan kalemleri (ρ kaynağı) durum rozetini ETKİLEMEZ. */
+  /* Sözlük dışı tür veya katalogla uyuşmayan grup ölçüm politikası ihlalidir. */
+  out.species_review = out.n_unknown > 0 || out.group_fail.length > 0;
+  /* ρ kaynağı için alternatif kabul/beyan yoktur. */
   out.state = qaStateOf({
     block: out.dbh_block || out.dev_block,
     review: out.dbh_review || out.hd_review || out.dev_review || out.species_review,
