@@ -25,7 +25,7 @@ const read = (p) => readFileSync(join(ROOT, p), 'utf8');
 function boot(o = {}) {
   const els = {};
   const el = (id) => (els[id] ||= { id, innerHTML: '', style: {}, value: '', options: [], textContent: '' });
-  for (const id of ['dgInvBox', 'dgSharedBox', 'dgInvPark', 'dgInvList', 'dgInvEmail', 'dgInvNote', 'projTable']) el(id);
+  for (const id of ['dgInvBox', 'dgSharedBox', 'dgInvPark', 'dgInvList', 'dgInvEmail', 'dgInvNote', 'dgOwnerCollabCard', 'projOwnCount', 'projSharedCount', 'projInviteCount', 'projTable']) el(id);
   /* Gerçek <select> innerHTML'e option yazılınca value'yu doldurur; stub'da
    * bu davranışı taklit et (modül sel.value'ya güveniyor). */
   {
@@ -143,14 +143,15 @@ describe('0025 · park-invites modülü (vm)', () => {
     assert.ok(calls.toast.some((t) => /Kabul/i.test(t)));
   });
 
-  test('👥 kartı: parklar v_my_parks’tan, davet+ortak listeleri render', async () => {
+  test('👥 sahibi ekranı: yalnız owner parkları seçicide, davet+ortak listeleri render', async () => {
     const { ctx, els } = boot({
       myParks: [{ id: 25, name: 'Göksu Parkı', city: 'Ankara', role: 'owner' }],
       invites: [{ id: 'i1', park_id: 25, email: 'ark@ornek.com', status: 'Beklemede', created_at: '2026-09-29T10:00:00Z' }],
       collabs: [{ user_id: 'u2', added_at: '2026-09-29T09:00:00Z', profiles: { full_name: 'Ayşe Y.', email: 'ayse@ornek.com' } }],
     });
     await run(ctx, 'await dgCollabLoad();');
-    assert.equal(String(els.dgInvPark.innerHTML), '<option value="25">Göksu Parkı (Ankara)</option>');
+    assert.equal(String(els.dgInvPark.innerHTML), '<option value="25">Göksu Parkı · Ankara</option>');
+    assert.equal(els.dgOwnerCollabCard.style.display, '', 'proje sahibinde ekip yönetimi görünür');
     const h = els.dgInvList.innerHTML;
     assert.ok(h.includes('ark@ornek.com'), 'davet satırı');
     assert.ok(h.includes('Ayşe Y.'), 'ortak satırı');
@@ -173,6 +174,32 @@ describe('0025 · park-invites modülü (vm)', () => {
     assert.equal(sent.args.p_email, 'Arkadas@Ornek.com');
     assert.equal(sent.args.p_note, 'cumartesi');
     assert.equal(els.dgInvEmail.value, '', 'gönderim sonrası alan temiz');
+  });
+
+  test('ortak kullanıcı davet yönetimi ekranını GÖRMEZ ve RPC çağıramaz', async () => {
+    const { ctx, els, calls } = boot({
+      myParks: [{ id: 25, name: 'Göksu Parkı', city: 'Ankara', role: 'collaborator' }],
+    });
+    await run(ctx, 'await dgCollabLoad();');
+    assert.equal(els.dgOwnerCollabCard.style.display, 'none', 'ortakta sahip yönetim kartı gizli');
+    assert.ok(String(els.dgInvPark.innerHTML).includes('Sahibi olduğun proje yok'));
+    els.dgInvPark.value = '25'; // DOM kurcalansa bile istemci kapısı çalışmalı
+    els.dgInvEmail.value = 'x@ornek.com';
+    await run(ctx, 'await dgInviteSend();');
+    assert.equal(calls.rpc.filter((r) => r.fn === 'dg_invite_send').length, 0, 'ortak davet RPC çağramaz');
+    assert.ok(calls.toast.some((t) => /yalnız proje sahibinde/i.test(t)));
+  });
+
+  test('karma rolde owner ve collaborator parkları AYRI tutulur', async () => {
+    const { ctx, els } = boot({
+      myParks: [
+        { id: 25, name: 'Sahibi Olduğum', city: 'Ankara', role: 'owner' },
+        { id: 31, name: 'Paylaşılan', city: 'Ankara', role: 'collaborator' },
+      ],
+    });
+    await run(ctx, 'await dgCollabLoad();');
+    assert.ok(String(els.dgInvPark.innerHTML).includes('Sahibi Olduğum'));
+    assert.ok(!String(els.dgInvPark.innerHTML).includes('Paylaşılan'), 'ortak park ekip yönetimi seçicisine giremez');
   });
 
   test('0025 SQL uygulanmamışsa (tablo/view yok) SESSİZCE eski akış', async () => {
@@ -211,12 +238,18 @@ describe('0025 · kablolama (index.html + shell + partials)', () => {
     assert.ok(collab > vp && collab < vrec, '👥 kartı v-projects içinde (admin değil)');
     assert.ok(va > 0 && !sh.slice(va).includes('dgInvPark'), '👥 kartı v-admin’de KALMADI');
     assert.ok(sh.indexOf('id="dgSharedBox"') > vp, 'paylaşılan park kutusu');
-    assert.ok(!/dg-inv-|park-invites\.css/.test(sh), 'yeni CSS sınıfı ailesi yok');
+    assert.ok(sh.indexOf('id="projOwnList"') > vp, 'sahip projeleri ayrı liste');
+    assert.ok(sh.indexOf('id="projSharedList"') > vp, 'ortak projeleri ayrı liste');
+    assert.ok(sh.indexOf('id="dgOwnerCollabCard"') > vp, 'ekip yönetimi ayrı sahip kartı');
+    assert.match(sh, /PROJE SAHİBİ/, 'sahip rolü görsel olarak açık');
+    assert.match(sh, /ORTAK/, 'ortak rolü görsel olarak açık');
   });
   test('0026 mobil: tablolar dg-cards, .card overflow kalktı, üst bar sakinleşti', () => {
     const sh = read('partials/shell.html');
     assert.ok((sh.match(/tblwrap dg-cards/g) || []).length >= 8, 'uygulama tabloları kart düzeninde; waypoint yerel nokta kartlarını kullanır');
-    assert.match(sh, /id="projTable"[\s\S]{0,40}/, 'proje tablosu yerinde');
+    assert.match(sh, /id="projTable" hidden/, 'eski entegrasyon hedefi görünmez uyumluluk için korunur');
+    assert.match(sh, /id="projOwnList"/, 'proje sahipliği kart listesinde');
+    assert.match(sh, /id="projSharedList"/, 'paylaşılan projeler ayrı kart listesinde');
     /* 0027: waypoint tablosu — kullanıcı bildirimi "içeride sağa-sola kayıyor" */
     assert.match(sh, /<ul id="wpListTable" class="waypoint-points"/, 'waypoint listesi kompakt nokta kartları kullanır');
     const mp = read('src/services/map.js');
@@ -233,7 +266,9 @@ describe('0025 · kablolama (index.html + shell + partials)', () => {
     assert.match(css, /\.tblwrap\{overflow-x:auto/, 'yalnız tablo kabı kayar (mobilde)');
     assert.match(css, /#installBtn\{display:none!important\}/, 'üst bar mobilde sade');
     const m = read('src/services/measure.js');
-    assert.match(m, /data-label="Proje Adı"/, 'proje satırları etiketli (kart düzeni)');
+    assert.match(m, /function dgProjectCard\(/, 'proje kart render yardımcısı');
+    assert.match(m, /PROJE SAHİBİ/, 'sahip projesi rol rozeti');
+    assert.match(m, /ORTAK/, 'paylaşılan proje rol rozeti');
     const d = read('src/services/dash.js');
     assert.match(d, /data-label="Karbon"/, 'kayıt satırları etiketli');
   });
@@ -242,7 +277,8 @@ describe('0025 · kablolama (index.html + shell + partials)', () => {
     assert.match(m, /dgMyParks/, 'v_my_parks okunur');
     assert.match(m, /role==="collaborator"|role === "collaborator"/);
     assert.match(m, /q\.shared=true/, 'paylaşılan proje işaretlenir');
-    assert.match(m, /yalnız ölçüm girişi/, 'ortak satırında düzenleme/silme YOK');
+    assert.match(m, /Düzenleme ve ekip yönetimi proje sahibinde/, 'ortak kartında sahiplik sınırı açık');
+    assert.match(m, /const own=PROJ_LIST\.filter\(p=>!p\.shared\), shared=PROJ_LIST\.filter\(p=>p\.shared\)/, 'sahip/paylaşılan projeler ayrı render edilir');
     assert.match(m, /owner:USER\.id/, 'ölçüm sahipliği değişmedi (kim ölçtü belli)');
   });
 });
