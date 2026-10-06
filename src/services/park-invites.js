@@ -167,8 +167,8 @@ function dgCollabRender__scroll(){
 }
 async function dgInviteSend(){
  const sel=$("dgInvPark"),em=$("dgInvEmail"),nt=$("dgInvNote");
- if(!sel||!sel.value)return toast("Önce sahibi olduğun projeyi seç.","err","👥");
- if(!dgCanManagePark(Number(sel.value)))return toast("Davet yetkisi yalnız proje sahibinde.","err","👥");
+ if(!sel||!sel.value)return toast(_tinv("Önce sahibi olduğun projeyi seç."),"err","👥");
+ if(!dgCanManagePark(Number(sel.value)))return toast(_tinv("Davet yetkisi yalnız proje sahibinde."),"err","👥");
  const email=(em&&em.value||"").trim();
  if(!email)return toast("E-posta gir.","err","👥");
  const{data,error}=await sb.rpc("dg_invite_send",{p_park:Number(sel.value),p_email:email,p_note:(nt&&nt.value)||null});
@@ -181,7 +181,7 @@ async function dgInviteSend(){
 async function dgInviteRevoke(target,kind){
  const sel=$("dgInvPark");
  if(!sel||!sel.value)return;
- if(!dgCanManagePark(Number(sel.value)))return toast("Ekip yönetimi yalnız proje sahibinde.","err","👥");
+ if(!dgCanManagePark(Number(sel.value)))return toast(_tinv("Ekip yönetimi yalnız proje sahibinde."),"err","👥");
  const{error}=await sb.rpc("dg_invite_revoke",{p_park:Number(sel.value),p_target:target,p_kind:kind});
  if(error){toast(dgCf("İşlenemedi: ")+(error.message||"").slice(0,90),"err","👥");return;}
  toast(kind==="collab"?"Ortak kaldırıldı":"Davet geri alındı","ok","👥");
