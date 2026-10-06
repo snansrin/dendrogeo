@@ -71,6 +71,7 @@ describe('Dışa Aktar tema standardı',()=>{
   const sh=rd('partials/shell.html');
   for(const fn of ['exportCSV()','previewCSV()','exportGeo()','previewGeo()','exportQgis()','sendDataRequest()']) assert.ok(sh.includes(fn),fn+' korunmalı');
   assert.match(sh,/DBH çevre\/π ile türetilir/);
-  assert.match(sh,/DBH 0,1 cm/);
+  assert.match(sh,/0,1 cm hassasiyetle/);
+  assert.ok(!sh.includes('C → DBH = C/π · DBH 0,1 cm'),'kullanıcının kaldırdığı yöntem rozeti geri gelmemeli');
  });
 });
