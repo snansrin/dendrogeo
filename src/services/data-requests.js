@@ -42,13 +42,25 @@ async function sendDataRequest(){
 async function loadMyRequests(){const _y=(typeof dgScrollKeep==="function"?dgScrollKeep():null);try{return await loadMyRequests__scroll.apply(this,arguments);}finally{if(typeof dgScrollRestore==="function")dgScrollRestore(_y);}}
 async function loadMyRequests__scroll(){
  if(!USER)return;
- const{data}=await sb.from("data_requests").select("*").eq("user_id",USER.id).order("created_at",{ascending:false});
+ const{data,error}=await sb.from("data_requests").select("*").eq("user_id",USER.id).order("created_at",{ascending:false});
  const el=$("myRequests");if(!el)return;
- el.innerHTML=(data&&data.length)?"<div class='lbl' style='margin:10px 0 6px'>Taleplerim</div>"+data.map(r=>{
+ if(error){el.innerHTML='<div class="alert err">Talepler yüklenemedi.</div>';return;}
+ if(!data||!data.length){el.innerHTML="";return;}
+ const rows=data.map(r=>{
   const filt=[esc(r.country),esc(r.city),esc(r.project_name)].filter(Boolean).join(" / ")||"Tüm Veri";
   const bc=r.status==="Tamamlandı"?"on":(r.status==="İşleme Alındı"?"admin":"off");
-  return `<div style="display:flex;justify-content:space-between;gap:8px;padding:6px 0;border-bottom:1px solid var(--line);font-size:.82rem"><span>${esc(filt)}</span><span class="badge ${bc}">${r.status}</span></div>`;
- }).join(""):"";
+  const dt=r.created_at?new Date(r.created_at).toLocaleDateString("tr-TR"):"";
+  return `<div class="export-request-item"><div class="export-request-item-main"><b>${filt}</b><small>${dt}${r.note?" · "+esc(r.note):""}</small></div><span class="badge ${bc}">${esc(r.status||"Beklemede")}</span><button class="btn sm red export-request-delete" type="button" onclick="deleteMyRequest(${Number(r.id)})" aria-label="${esc(filt)} talebini sil">🗑 Sil</button></div>`;
+ }).join("");
+ el.innerHTML=`<details class="export-my-requests"><summary><span>📨 Taleplerim</span><span class="badge">${data.length}</span></summary><div class="export-request-list">${rows}</div></details>`;
+}
+async function deleteMyRequest(id){
+ if(!USER||!Number.isFinite(+id))return;
+ if(!confirm("Bu veri talebi silinsin mi?"))return;
+ const{data,error}=await sb.from("data_requests").delete().eq("id",+id).eq("user_id",USER.id).select("id");
+ if(error||!data?.length){toast("Talep silinemedi: "+(error?.message||"Yetki veya kayıt bulunamadı."),"err","🗑");return;}
+ toast("Talep silindi.","ok","🗑");
+ loadMyRequests();
 }
 
 /* --- Kullanıcı talep formu --- */
