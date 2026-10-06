@@ -923,3 +923,70 @@ label.lbl{display:block}
  #v-nav .waypoint-state{text-align:center}
  #v-nav .waypoint-target-btn{width:100%}
 }
+
+
+/* 2026-10-06 · Kullanıcı yönetimi v2 — kompakt yönetim çalışma alanı */
+#v-users{max-width:1040px;margin-inline:auto;padding-bottom:28px}
+#v-users .admin-users-heading{align-items:center;margin-bottom:10px}
+#v-users .admin-users-heading .disp{font-size:1.8rem;margin:1px 0 0}
+#v-users .admin-users-help{margin-top:2px;font-size:.76rem}
+#v-users .admin-users-refresh-top{min-height:38px}
+#v-users .admin-users-summary{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:10px}
+#v-users .admin-users-summary-item{display:inline-flex;align-items:center;gap:8px;min-height:34px;padding:6px 10px;border:1px solid var(--line);border-radius:999px;background:var(--surface);font-size:.7rem;color:var(--mut)}
+#v-users .admin-users-summary-item strong{font:700 .92rem/1 var(--f-disp);color:var(--ink)}
+#v-users .admin-users-summary-item.is-active strong{color:var(--green)}
+#v-users .admin-users-summary-item.is-admin strong{color:var(--blue)}
+#v-users .admin-users-summary-item.is-passive strong{color:var(--red)}
+#v-users .admin-users-card{padding:14px 16px}
+#v-users .admin-users-toolbar{grid-template-columns:minmax(220px,1fr) 140px 140px;gap:8px;margin-bottom:10px}
+#v-users .admin-users-toolbar input,#v-users .admin-users-toolbar select{min-height:38px;padding:7px 9px}
+#v-users .admin-users-list-head{align-items:center;padding:7px 2px 8px;margin:0}
+#v-users .admin-users-list-head h3{font-size:.92rem;margin:0}
+#v-users .admin-users-list-head .mono{font-size:.68rem;color:var(--mut)}
+#v-users .admin-users-table table{table-layout:fixed}
+#v-users .admin-users-table th{padding:7px 10px;font-size:.66rem}
+#v-users .admin-users-table th:nth-child(1){width:42%}
+#v-users .admin-users-table th:nth-child(2){width:13%}
+#v-users .admin-users-table th:nth-child(3){width:12%}
+#v-users .admin-users-table th:nth-child(4){width:33%}
+#v-users .admin-users-table td{padding:7px 10px;vertical-align:middle}
+#v-users .admin-user-person{display:flex;align-items:center;gap:9px;min-width:0}
+#v-users .admin-user-avatar{width:30px;height:30px;flex:0 0 30px;display:grid;place-items:center;border-radius:50%;background:var(--tint);border:1px solid var(--line);color:var(--green-dk);font:700 .68rem/1 var(--f-disp)}
+#v-users .admin-user-identity{display:flex;flex-direction:column;min-width:0;line-height:1.25}
+#v-users .admin-user-identity strong{font-size:.78rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#v-users .admin-user-identity small{margin-top:2px;color:var(--mut);font-size:.66rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#v-users .admin-user-role{font-size:.58rem;padding:3px 6px}
+#v-users .admin-user-role.owner{background:var(--green-dk);color:#fff}
+#v-users .admin-user-actions{flex-wrap:nowrap;justify-content:flex-end;gap:6px}
+#v-users .admin-user-actions select{min-height:34px;max-width:112px;padding:5px 7px;font-size:.7rem}
+#v-users .admin-user-actions .btn{min-height:34px;padding:6px 9px;font-size:.68rem}
+#v-users .admin-user-lock{white-space:nowrap}
+@media(max-width:760px){
+ #v-users .admin-users-heading{align-items:flex-end}
+ #v-users .admin-users-toolbar{grid-template-columns:minmax(0,1fr) minmax(105px,.35fr) minmax(105px,.35fr)}
+ #v-users .admin-users-table table{table-layout:auto}
+}
+@media(max-width:640px){
+ #v-users{padding-bottom:18px}
+ #v-users .admin-users-heading .disp{font-size:1.55rem}
+ #v-users .admin-users-help{display:none}
+ #v-users .admin-users-refresh-top{min-width:44px;padding-inline:10px}
+ #v-users .admin-users-summary{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:5px}
+ #v-users .admin-users-summary-item{justify-content:center;gap:4px;min-width:0;padding:5px 4px;border-radius:8px;font-size:.58rem}
+ #v-users .admin-users-summary-item strong{font-size:.8rem}
+ #v-users .admin-users-card{padding:10px}
+ #v-users .admin-users-toolbar{grid-template-columns:1fr 1fr;gap:6px}
+ #v-users .admin-users-search{grid-column:1/-1}
+ #v-users .admin-users-toolbar input,#v-users .admin-users-toolbar select{min-height:44px;font-size:16px}
+ #v-users .admin-users-list-head{padding:6px 1px}
+ #v-users .admin-users-table tbody tr{padding:8px;margin-bottom:6px}
+ #v-users .admin-users-table tbody td{padding:4px 0}
+ #v-users .admin-users-table tbody td:first-child{display:block;text-align:left;padding-bottom:7px;border-bottom:1px solid var(--line)}
+ #v-users .admin-users-table tbody td:first-child:before{display:none}
+ #v-users .admin-user-avatar{width:34px;height:34px;flex-basis:34px}
+ #v-users .admin-user-identity strong{font-size:.82rem}
+ #v-users .admin-user-identity small{font-size:.68rem}
+ #v-users .admin-user-actions{width:100%;justify-content:flex-end}
+ #v-users .admin-user-actions select{min-height:40px;max-width:128px}
+ #v-users .admin-user-actions .btn{min-height:40px}
+}
