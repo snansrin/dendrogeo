@@ -1,0 +1,44 @@
+name: Sigla Branch QA
+
+on:
+  push:
+    branches:
+      - fix/sigla-group-density-ci-green
+
+permissions:
+  contents: write
+
+jobs:
+  qa:
+    name: Full guard chain
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Rebuild deterministic index
+        run: npm run build
+
+      - name: Commit generated index when needed
+        run: |
+          git config user.name "DendroGeo QA Bot"
+          git config user.email "qa@dendrogeo.local"
+          git add index.html
+          if git diff --cached --quiet; then
+            echo "index.html already current"
+          else
+            git commit -m "build: refresh deterministic index after carbon fix"
+            git push origin HEAD:fix/sigla-group-density-ci-green
+          fi
+
+      - name: Run full guards
+        run: npm run check
