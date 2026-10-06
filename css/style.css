@@ -833,6 +833,9 @@ label.lbl{display:block}
 #v-nav .waypoint-point-main .waypoint-distance{color:var(--mut);font-size:.78rem}
 #v-nav .waypoint-point-actions{display:flex;align-items:center;justify-content:flex-end;gap:8px;min-height:38px}
 #v-nav .waypoint-point-actions .btn{min-height:38px;min-width:78px;padding:6px 10px}
+#v-nav .waypoint-state{display:inline-flex;align-items:center;justify-content:center;min-height:28px;padding:4px 9px;border:1px solid var(--line);border-radius:999px;font-size:.7rem;font-weight:800;white-space:nowrap}
+#v-nav .waypoint-state.done{border-color:color-mix(in srgb,var(--green) 35%,var(--line));background:color-mix(in srgb,var(--green) 10%,var(--surface));color:var(--green-dk)}
+#v-nav .waypoint-state.pending{background:var(--bg);color:var(--mut)}
 #v-nav .waypoint-pager{position:static;margin-top:10px;padding:0;background:transparent}
 #v-nav .waypoint-files{display:block;margin:0;padding:14px 18px;border:1px solid var(--line);border-left:4px solid var(--amber);border-radius:var(--r);background:var(--surface)}
 #v-nav .waypoint-files .project-section-head{margin-bottom:10px}
@@ -855,14 +858,40 @@ label.lbl{display:block}
  #v-nav .waypoint-field-status{grid-template-columns:1fr}
  #v-nav .waypoint-arrival{display:grid;grid-template-columns:.8fr 1.2fr}
  #v-nav .waypoint-arrival .btn,#v-nav .waypoint-arrival .dg-png-btn{width:100%;min-width:0}
- #v-nav .waypoint-map #navMap{height:300px}
- #v-nav .waypoint-toolbar{grid-template-columns:1fr 1fr}
+ #v-nav .waypoint-map #navMap{height:min(52vh,360px)}
+ #v-nav .waypoint-toolbar{grid-template-columns:1fr 1fr;gap:8px}
  #v-nav .waypoint-toolbar>div:first-child{grid-column:1/-1}
+ #v-nav .waypoint-toolbar input,#v-nav .waypoint-toolbar select{min-height:44px;font-size:16px}
  #v-nav .waypoint-list{padding:12px}
- #v-nav .waypoint-point{padding:7px 5px}
- #v-nav .waypoint-point-actions .badge{display:none}
+ #v-nav .waypoint-point{min-height:62px;padding:8px 4px;gap:8px}
+ #v-nav .waypoint-point-main{gap:8px}
+ #v-nav .waypoint-point-main b{min-width:42px;font-size:1rem}
+ #v-nav .waypoint-point-main .waypoint-distance{font-size:.82rem}
+ #v-nav .waypoint-point-actions{gap:6px}
+ #v-nav .waypoint-state{min-height:30px;padding:5px 8px;font-size:.68rem}
+ #v-nav .waypoint-target-btn{min-width:76px!important;min-height:44px!important}
+ #v-nav .waypoint-point.done{opacity:1;background:color-mix(in srgb,var(--green) 5%,transparent)}
+ #v-nav .waypoint-point.done .waypoint-point-main b{color:var(--green-dk)}
+ #v-nav .waypoint-pager .btn{min-width:44px;min-height:44px}
  #v-nav .waypoint-files{padding:12px}
  #v-nav .waypoint-file-row{display:grid;grid-template-columns:1fr 1fr}
  #v-nav .waypoint-file-row #nCsvName{grid-column:1/-1}
  #v-nav .waypoint-delete-all{margin-left:0}
+}
+
+@media(max-width:430px){
+ #v-nav .waypoint-nav-card{padding:11px}
+ #v-nav .waypoint-target{grid-template-columns:58px minmax(0,1fr);gap:9px}
+ #v-nav .waypoint-compass{width:56px;height:56px}
+ #v-nav .waypoint-compass .arrow{width:42px;height:42px}
+ #v-nav .waypoint-target-name{font-size:.84rem}
+ #v-nav .waypoint-distance-main strong{font-size:1.55rem}
+ #v-nav .waypoint-actions-primary{grid-template-columns:1fr 1fr}
+ #v-nav .waypoint-actions-primary .btn{min-height:44px;padding-inline:7px}
+ #v-nav .waypoint-arrival{grid-template-columns:1fr}
+ #v-nav .waypoint-arrival .btn,#v-nav .waypoint-arrival .dg-png-btn{min-height:46px}
+ #v-nav .waypoint-point{grid-template-columns:minmax(0,1fr) auto}
+ #v-nav .waypoint-point-actions{flex-direction:column;align-items:stretch}
+ #v-nav .waypoint-state{text-align:center}
+ #v-nav .waypoint-target-btn{width:100%}
 }
