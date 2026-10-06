@@ -31,7 +31,7 @@ test('Waypoint ana tema standardında saha odaklıdır; yalnız harita disclosur
  assert.match(nav,/<h2 class="disp">Waypoint<\/h2>/);
  assert.ok(!nav.includes('Saha Modu'));
  assert.match(nav,/id="wpMapPanel" class="card waypoint-map"/);
- assert.equal((nav.match(/<details\\b/g)||[]).length,1,'yalnız harita açılır/kapanır');
+ assert.equal((nav.match(/<details\b/g)||[]).length,1,'yalnız harita açılır/kapanır');
  assert.match(nav,/class="card waypoint-files"/);
  assert.match(nav,/id="wpSearch"/);
  assert.match(nav,/id="wpFilter"/);
