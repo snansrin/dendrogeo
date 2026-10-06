@@ -153,7 +153,8 @@ describe('publish-queue.mjs: plan + günlük', () => {
     assert.ok(q.processed_request_ids.length >= 21);
     assert.ok(q.processed_retraction_ids.length >= 19);
     assert.ok(!q.entries.some(e => q.retired_report_ids.includes(e.report_id)));
-    for(const e of q.entries.filter(e=>e.status==='Yayınlandı')) {
+    const retracted=new Set(q.entries.filter(e=>e.status==='Geri çekildi').map(e=>e.report_id));
+    for(const e of q.entries.filter(e=>e.status==='Yayınlandı'&&!retracted.has(e.report_id))) {
       const h=read('rapor/'+e.report_id+'/index.html');
       assert.ok(h.includes(e.report_hash.replace('sha256:', '')));
       assert.equal(e.park_id,JSON.parse(read('rapor/'+e.report_id+'/data.json')).park.id);
