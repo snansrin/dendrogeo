@@ -37,14 +37,14 @@ function field() {
     dgCf:s=>s,dgT:s=>s,map:null,drawNav() {}, console
   });
   function $(id) { return el(id); }
-  for (const path of ['src/config/wood-density-lock.js','src/config/species.js','src/services/allometry.js','src/services/measure.js']) {
+  for (const path of ['src/config/measurement-protocol-lock.js','src/config/wood-density-lock.js','src/config/species.js','src/services/allometry.js','src/services/measure.js']) {
     vm.runInContext(readFileSync(new URL('../'+path,import.meta.url),'utf8'),ctx,{filename:path});
   }
   for (const [id,value] of Object.entries({mProject:'1',mPoint:'5',mNo:'1',mGroup:'YAPRAKLI',mSpecies:'IHLAMUR',mDbh:'52',mHeight:'7.2'})) el(id).value=value;
   return {ctx,el,writes,messages,events,run:code=>vm.runInContext(code,ctx)};
 }
 
-for (const [id,value] of [['mDbh','-1'],['mDbh','0'],['mDbh','Infinity'],['mDbh','401'],['mHeight','-2'],['mHeight','NaN'],['mHeight','101'],['mPoint','1.2'],['mPoint','-1'],['mNo','0']]) {
+for (const [id,value] of [['mDbh','-1'],['mDbh','0'],['mDbh','Infinity'],['mDbh','1257'],['mHeight','-2'],['mHeight','NaN'],['mHeight','101'],['mPoint','1.2'],['mPoint','-1'],['mNo','0']]) {
   test(`invalid ${id}=${value} focuses the field and never writes`,async()=>{
     const f=field();f.el(id).value=value;
     await f.run('saveMeas()');
@@ -55,8 +55,8 @@ for (const [id,value] of [['mDbh','-1'],['mDbh','0'],['mDbh','Infinity'],['mDbh'
   });
 }
 
-test('live carbon and biomass use the unchanged calculation engine; invalid input hides stale totals',()=>{
-  const f=field(), result=f.run('calc(52,7.2,"IHLAMUR","YAPRAKLI")');
+test('live carbon derives DBH from measured circumference; invalid input hides stale totals',()=>{
+  const f=field(), result=f.run('calcFromCircumference(52,7.2,"IHLAMUR","YAPRAKLI")');
   f.run('liveCalc()');
   assert.match(f.el('liveCalc').innerHTML,new RegExp(result.total_carbon.toFixed(1)));
   assert.ok(f.el('liveCalc').innerHTML.includes(result.bhb.toFixed(1)));
@@ -69,7 +69,9 @@ test('live carbon and biomass use the unchanged calculation engine; invalid inpu
 test('successful save clears per-tree values, photo metadata and preview; keeps species and project',async()=>{
   const f=field();f.el('mPhotoName').textContent='previous.jpg';f.run('liveCalc()');
   await f.run('saveMeas()');
-  assert.equal(f.writes.length,1);assert.equal(f.writes[0].row.dbh_cm,52);
+  assert.equal(f.writes.length,1);
+  assert.equal(f.writes[0].row.girth_cm,52);
+  assert.ok(Math.abs(f.writes[0].row.dbh_cm-52/Math.PI)<1e-12);
   assert.equal(f.el('mDbh').value,'');assert.equal(f.el('mHeight').value,'');
   assert.equal(f.el('mPhotoName').textContent,'');assert.equal(f.el('liveCalc').style.display,'none');
   assert.equal(f.el('mSpecies').value,'IHLAMUR');assert.equal(f.el('mProject').value,'1');
