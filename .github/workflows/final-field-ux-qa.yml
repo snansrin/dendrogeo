@@ -1,4 +1,5 @@
 name: Final Field UX QA
+# rerun: optional-metadata-gps
 on:
   push:
     branches:
