@@ -1,5 +1,6 @@
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
+import {readFileSync} from 'node:fs';
 import {parseZenodoDepositState} from '../scripts/lib/publication.mjs';
 import {activePublishedReports} from '../scripts/register-pending-dois.mjs';
 
@@ -18,4 +19,12 @@ test('otomatik DOI yalnız aktif ve geri çekilmemiş üretim raporlarını seç
   {status:'Yayınlandı',report_id:'javascript:bad'}
  ]};
  assert.deepEqual(activePublishedReports(q).map(([id])=>id),['DGR-2026-0022']);
+});
+
+
+test('otomatik DOI no-op çalışması yayın günlüğüne gereksiz timestamp yazmaz',()=>{
+ const src=readFileSync(new URL('../scripts/register-pending-dois.mjs',import.meta.url),'utf8');
+ assert.match(src,/const before=JSON\.stringify\(q\)/);
+ assert.match(src,/if\(JSON\.stringify\(q\)!==before\)/);
+ assert.match(src,/DOI bekleyen aktif üretim raporu yok; dosya değişmedi/);
 });
