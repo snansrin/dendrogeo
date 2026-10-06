@@ -1,6 +1,6 @@
 {
   "schema": "dendrogeo-publish-queue/1",
-  "updated_at": "2026-10-05T21:31:53.289Z",
+  "updated_at": "2026-10-06T17:51:32.940Z",
   "production_started_at": "2026-10-04T08:26:48.034Z",
   "test_archive_ref": "archive/test-publications-2026-10-04",
   "retired_report_ids": [
@@ -49,7 +49,8 @@
     "b28a32d1-3baa-4304-8e75-ecb9c268450c",
     "7fea46c0-ecfa-41d6-8bee-bd065de9b5f2",
     "production-DGR-2026-0021",
-    "7b620060-187f-4a27-bf87-dc14af183f19"
+    "7b620060-187f-4a27-bf87-dc14af183f19",
+    "7954028e-22dd-4299-905b-4a54a0481abf"
   ],
   "processed_retraction_ids": [
     "faaa70f9-0c7c-4bef-b463-6e7719685bcf",
@@ -140,6 +141,17 @@
       "started_at": "2026-10-05T21:31:53.264Z",
       "status": "Geri çekildi",
       "finished_at": "2026-10-05T21:31:53.288Z"
+    },
+    {
+      "request_id": "7954028e-22dd-4299-905b-4a54a0481abf",
+      "park_id": 25,
+      "with_lulc": true,
+      "surface_snapshot": true,
+      "requested_at": "2026-10-06T17:49:30.30244+00:00",
+      "started_at": "2026-10-06T17:50:06.988Z",
+      "status": "Başarısız",
+      "message": "base is not defined",
+      "finished_at": "2026-10-06T17:51:32.939Z"
     }
   ],
   "archived_request_ids": [
