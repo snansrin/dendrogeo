@@ -56,3 +56,21 @@ describe('Kayıtlarım kademeli görünüm',()=>{
 test('çevrimdışı senkronizasyon ham çevreyi kaybetmez',()=>{
  assert.match(rd('src/services/offline.js'),/"girth_cm","dbh_cm"/);
 });
+
+
+describe('Dışa Aktar tema standardı',()=>{
+ test('dosya, veri talebi ve QGIS rehberi açılır/kapanır ana tema panelleridir',()=>{
+  const sh=rd('partials/shell.html'),css=rd('css/style.css');
+  assert.match(sh,/class="export-heading"/);
+  assert.equal((sh.match(/<details class="export-panel"/g)||[]).length,3);
+  assert.match(sh,/Standart CSV/); assert.match(sh,/GeoJSON/); assert.match(sh,/QGIS CSV/);
+  assert.match(sh,/Yöneticiden veri talep et/); assert.match(sh,/QGIS fotoğraf aktarım rehberi/);
+  assert.match(css,/\.export-panel>summary/); assert.match(css,/\.export-format-grid/);
+ });
+ test('mevcut dışa aktarım işlevleri korunur ve yöntem notu C\/π standardını açıklar',()=>{
+  const sh=rd('partials/shell.html');
+  for(const fn of ['exportCSV()','previewCSV()','exportGeo()','previewGeo()','exportQgis()','sendDataRequest()']) assert.ok(sh.includes(fn),fn+' korunmalı');
+  assert.match(sh,/DBH çevre\/π ile türetilir/);
+  assert.match(sh,/DBH 0,1 cm/);
+ });
+});

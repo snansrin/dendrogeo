@@ -444,7 +444,7 @@ describe('0033 · rapor metni: yasal statü iddiası YOK, veri hatası iması YO
 
   test('§9 model temsili: çap aralığı VERİDEN, sınırlılık modelde', () => {
     assert.match(S9, /Gövde çapı dağılımı ve model temsili/);
-    assert.match(S9, /40–200 cm \(medyan \d+ cm, n=6\)/);
+    assert.match(S9, /40,0–200,0 cm \(medyan 108,5 cm, n=6\)/);
     assert.match(S9, /Modelin aktarılabilirliği şu sınırlamalara tabidir/);
     assert.match(S9, /Chave ve ark\. 2014/);
     assert.match(S9, /model sapmasını ayrıca nicelleştirmez/);
@@ -489,7 +489,7 @@ describe('0033 · rapor metni: yasal statü iddiası YOK, veri hatası iması YO
     assert.match(d, /medyan [0-9.,]+, MAD [0-9.,]+, aralık [0-9.,]+–[0-9.,]+, en yüksek \|z\| [0-9.,]+/);
     assert.match(d, /en yüksek \|z\| 1,91/, 'mutlak değer basılır (imza değil)');
     assert.match(d, /6\/6 kayıt tipik 15–120 bandının dışında: bu bir UYARI DEĞİL, BİLGİDİR/);
-    assert.match(d, /türetilmiş DBH aralığı 40–200 cm/);
+    assert.match(d, /türetilmiş DBH aralığı 40,0–200,0 cm/);
     assert.deepEqual(d.match(/anıt|Anıt/g) || [], [], 'satır metninde iz yok');
   });
 

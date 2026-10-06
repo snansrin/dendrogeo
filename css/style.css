@@ -700,3 +700,45 @@ label.lbl{display:block}
  .record-item{padding:12px;gap:10px}.record-metrics{grid-template-columns:1fr 1fr}.record-side{flex-wrap:wrap}
  .record-actions{width:100%}.record-actions .btn{flex:1}
 }
+
+
+/* Dışa Aktar: Kayıtlarım / Projeler ile aynı tema ve kademeli bilgi mimarisi. */
+#v-export{max-width:1120px;margin-inline:auto;padding-bottom:24px}
+.export-heading{display:flex;align-items:flex-start;justify-content:space-between;gap:18px;margin-bottom:16px}
+.export-heading .disp{font-size:2rem;margin:2px 0 4px}
+.export-help{color:var(--mut);font-size:.84rem;line-height:1.5;max-width:650px}
+.export-tag{flex:0 0 auto;border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:8px 12px;color:var(--green);font-size:.72rem;font-weight:800}
+.export-method-note{margin-bottom:14px}
+.export-panel{border:1px solid var(--line);border-radius:var(--r);background:var(--surface);overflow:hidden;margin-bottom:10px}
+.export-panel>summary{list-style:none;cursor:pointer;display:flex;align-items:center;justify-content:space-between;gap:14px;min-height:64px;padding:12px 16px}
+.export-panel>summary::-webkit-details-marker{display:none}
+.export-panel>summary::after{content:"＋";order:3;color:var(--green);font-weight:800;font-size:1rem}
+.export-panel[open]>summary::after{content:"−"}
+.export-panel[open]>summary{border-bottom:1px solid var(--line)}
+.export-summary{display:flex;align-items:center;gap:10px;min-width:0;flex:1}
+.export-summary>span:nth-child(2){display:grid;gap:3px;min-width:0}
+.export-summary b{font:600 .95rem/1.25 var(--f-disp)}
+.export-summary small{color:var(--mut);font-size:.68rem}
+.export-icon{width:36px;height:36px;border-radius:9px;background:var(--tint);display:grid;place-items:center;flex:0 0 auto}
+.export-summary-note{font:700 .64rem/1 var(--f-mono);color:var(--mut);white-space:nowrap}
+.export-panel-body{padding:16px}
+.export-format-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.export-format-card{display:flex;flex-direction:column;min-height:210px;padding:15px;border:1px solid var(--line);border-radius:12px;background:var(--bg)}
+.export-format-top{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:12px}
+.export-format-icon{font-size:1.35rem}
+.export-format-card h3{font:600 1rem/1.25 var(--f-disp);margin:0 0 6px}
+.export-format-card p,.export-copy{color:var(--mut);font-size:.76rem;line-height:1.55}
+.export-format-card p{margin:0 0 14px;flex:1}
+.export-actions{display:flex;gap:7px;flex-wrap:wrap}.export-actions .btn{min-height:36px}
+.export-request-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-top:12px}
+.export-note-field{margin-top:10px}
+.export-request-actions{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:12px}
+.export-request-msg{font-size:.78rem;min-height:20px}
+.export-requests{margin-top:14px}
+.export-guide{margin:0;padding-left:22px}.export-guide li{margin-bottom:10px;line-height:1.55}
+@media(max-width:860px){.export-format-grid{grid-template-columns:1fr}.export-format-card{min-height:0}.export-request-grid{grid-template-columns:1fr}}
+@media(max-width:640px){
+ #v-export{padding-bottom:12px}.export-heading{margin-bottom:10px}.export-heading .disp{font-size:1.65rem}.export-tag{display:none}
+ .export-panel>summary{padding:10px 12px;min-height:58px}.export-summary-note{display:none}.export-panel-body{padding:12px}
+ .export-actions{width:100%}.export-actions .btn{flex:1}.export-request-actions .btn{width:100%}
+}
