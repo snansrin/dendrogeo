@@ -272,16 +272,24 @@ for (const r of live) {
   if (Number.isFinite(r.carbon_stored) && r.carbon_stored > 0) {
     r.dev_pct = +(((r.carbon_stored - r.carbon_calc) / r.carbon_calc) * 100).toFixed(1);
     r.dev_grp_pct = calcGrup.total_carbon > 0 ? +(((r.carbon_stored - calcGrup.total_carbon) / calcGrup.total_carbon) * 100).toFixed(1) : null;
-    const okTur = uygun(r.carbon_stored, r.carbon_calc);
+    const rhoSp = rho[r.species] ?? null;
+    /* Özel tür ρ'su yoksa calcRow zaten grup varsayılanına düşer. Böyle bir
+     * kaydı "tür ρ" diye etiketlemek yanlıştır; tek meşru kaynak gruptur. */
+    const okTur = rhoSp != null && uygun(r.carbon_stored, r.carbon_calc);
     const okGrup = uygun(r.carbon_stored, calcGrup.total_carbon);
     if (!okTur && !okGrup) {
       devFail.push(r);
-      warn.push(`P${r.point_id}: saklı karbon ${r.carbon_stored} kg ≠ yeniden hesap ${r.carbon_calc} kg (%${r.dev_pct}; grup ρ ile %${r.dev_grp_pct}) — HER İKİ ρ kaynağıyla bant dışı: ondalık kayması/birim hatası olabilir`);
-    } else if (!okTur && okGrup) {
+      warn.push(`P${r.point_id}: saklı karbon ${r.carbon_stored} kg ≠ yeniden hesap ${r.carbon_calc} kg (%${r.dev_pct}; grup ρ ile %${r.dev_grp_pct}) — geçerli ρ kaynağıyla bant dışı: ondalık kayması/birim hatası olabilir`);
+    } else if (okTur) {
+      r.rho_src = 'tur';
+    } else {
       r.rho_src = 'grup';
       devRhoGrup.push(r);
-      warn.push(`P${r.point_id}: saklı karbon ${r.carbon_stored} kg GRUP VARSAYILANI ρ ile yeniden üretildi (tür ρ ile %${r.dev_pct}) — ρ kaynağı farkı, ÖLÇÜM HATASI DEĞİL (0032)`);
-    } else r.rho_src = 'tur';
+      /* Yalnız gerçekten iki farklı ρ adayı varsa kaynak farkını uyarı olarak
+       * açıkla. rhoSp=null türlerde grup varsayılanı normal hesap yoludur. */
+      if (rhoSp != null && Math.abs(r.dev_pct) > BAND)
+        warn.push(`P${r.point_id}: saklı karbon ${r.carbon_stored} kg GRUP VARSAYILANI ρ ile yeniden üretildi (tür ρ ile %${r.dev_pct}) — ρ kaynağı farkı, ÖLÇÜM HATASI DEĞİL (0032)`);
+    }
   }
 }
 if (hdBandOut.length) warn.push(`BİLGİ: ${hdBandOut.length}/${live.length} kayıtta boy/çap tipik ${QA_LIMITS.HD_MIN}–${QA_LIMITS.HD_MAX} bandının dışında — bu bir UYARI DEĞİLDİR; geniş gövdeli/bodur form oranı doğal olarak düşürür (0033).`);
@@ -381,7 +389,7 @@ const summary = {
   file, delim, rows: recs.length, live: live.length, skipped: recs.length - live.length,
   unit: decided, gates, blocked: !!blocked, forced: !!force,
   totals: { stored_t: +(totStored / 1000).toFixed(3), calc_t: +(totCalc / 1000).toFixed(3), ratio: totStored > 0 ? +(totStored / totCalc).toFixed(2) : null },
-  records: live.map((r) => ({ point_id: r.point_id, species: r.species, grp: r.grp, girth_cm: Number.isFinite(r.girth_cm) ? r.girth_cm : null, dbh_cm: r.dbh_cm, height_m: r.height_m, hd: r.hd, carbon_stored: Number.isFinite(r.carbon_stored) ? r.carbon_stored : null, carbon_calc: r.carbon_calc, dev_pct: Number.isFinite(r.dev_pct) ? r.dev_pct : null, lat: Number.isFinite(r.lat) ? r.lat : null, lon: Number.isFinite(r.lon) ? r.lon : null })),
+  records: live.map((r) => ({ point_id: r.point_id, species: r.species, grp: r.grp, girth_cm: Number.isFinite(r.girth_cm) ? r.girth_cm : null, dbh_cm: r.dbh_cm, height_m: r.height_m, hd: r.hd, carbon_stored: Number.isFinite(r.carbon_stored) ? r.carbon_stored : null, carbon_calc: r.carbon_calc, dev_pct: Number.isFinite(r.dev_pct) ? r.dev_pct : null, rho_src: r.rho_src ?? null, lat: Number.isFinite(r.lat) ? r.lat : null, lon: Number.isFinite(r.lon) ? r.lon : null })),
   warn: warn.slice(0, 40), errors: errs,
   out: has('dry-run') ? null : outPath,
 };

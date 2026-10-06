@@ -57,36 +57,47 @@ göre değişir; 0,5 yaygın bir ortalama varsayımdır.
 
 ### 1.5 ρ (odun yoğunluğu) kaynak zinciri
 
-`src/config/species.js` içindeki tür tablosu aranır; tür yoksa grubun
-varsayılanı kullanılır:
+Güncel hesapta tek otorite `src/config/species.js` içindeki
+`DG-WD-LOCK-2026-10-06-v2` yoğunluk kilididir. Uygulama içinde birim
+**kg/m³** tutulur; kaynak tablodaki ton/m³ değerleri ×1000 çevrilir.
 
-| Grup | ρ (kg/m³) | Kaynak |
-|---|---|---|
-| İBRELİ | 446 | Tolunay 2013; NIR Turkey 2017; 299 Nolu Tebliğ 2017 |
-| YAPRAKLI | 541 | aynı |
-| DİĞER | 493 | aynı |
+| Grup / tür | ρ (ton/m³) | ρ (kg/m³) | Kaynak |
+|---|---:|---:|---|
+| İbreliler (Genel) | 0,446 | 446 | Tolunay, 2013; NIR Turkey, 2017; 299 Nolu Tebliğ, 2017 |
+| Abies sp. (Göknar) | 0,350 | 350 | As ve ark., 2001 |
+| Cedrus deodora (Himalaya Sediri) | 0,430 | 430 | Bozkurt ve Erdin (2000), Demetçi (1986) |
+| Cedrus libani (Toros Sediri) | 0,430 | 430 | As ve ark., 2001 |
+| Juniperus sp. (Ardıç) | 0,460 | 460 | As ve ark., 2001 |
+| Picea orientalis (Doğu Ladini) | 0,358 | 358 | As ve ark., 2001 |
+| Pinus brutia (Kızılçam) | 0,478 | 478 | As ve ark., 2001 |
+| Pinus halepensis (Halep Çamı) | 0,480 | 480 | Erten ve Sözen, 1997b |
+| Pinus nigra (Karaçam) | 0,470 | 470 | As ve ark., 2001 |
+| Pinus pinea (Fıstık Çamı) | 0,470 | 470 | Erten ve Sözen, 1997a |
+| Pinus sylvestris (Sarıçam) | 0,426 | 426 | As ve ark., 2001 |
+| Yapraklılar (Genel) | 0,541 | 541 | Tolunay, 2013; NIR Turkey, 2017; 299 Nolu Tebliğ, 2017 |
+| Alnus sp. (Kızılağaç) | 0,407 | 407 | As ve ark., 2001 |
+| Carpinus sp. (Gürgen) | 0,630 | 630 | IPCC, 2003 |
+| Fagus orientalis (Doğu Kayını) | 0,530 | 530 | As ve ark., 2001 |
+| Fraxinus excelsior (Dişbudak) | 0,562 | 562 | Gürsu, 1971 |
+| Populus sp. (Kavak) | 0,350 | 350 | IPCC, 2003 |
+| Quercus sp. (Meşe) | 0,570 | 570 | As ve ark., 2001 |
 
-Tür bazlı değerler tabloda satır sonu yorumuyla KAYNAKLI listelenir
-(örn. Kızılçam 478 [Z09], Atlas Sediri 490 [WD]):
+**Sığla kuralı.** `SIĞLA`, `Sığla`, `SIGLA` ve
+`Liquidambar orientalis` aynı kanonik türe çözülür; ancak **özel ρ değeri
+taşımaz**. Sığla bir yapraklı tür olarak **YAPRAKLI genel 0,541 ton/m³
+(541 kg/m³)** değerini kullanır. DBH 57 cm ve H 7,5 m için mevcut denklem
+yaklaşık **418,42 kg C** üretir. Bu saha örneği regresyon testiyle kilitlidir.
 
-* **[Z09]** Zanne vd. (2009), *Global wood density database* (Dryad,
-  doi:10.5061/dryad.234) — cins/tür düzeyi temel odun yoğunluğu.
-* **[WD]** The Wood Database (wood-database.com), "Specific Gravity (Basic)".
-* **[T13]** Tolunay (2013) — grup varsayılanları.
+Aktif seçim tablosunda **51** kayıt vardır; **16** kaydın özel tür ρ değeri
+vardır, **35/51** kayıt grup varsayılanına düşer. Tabloda olmayan veya özel
+değeri kaldırılmış türlere ρ **uydurulmaz**: `rho:null` bırakılır. Atlas
+sediri, mavi ladin, doğu çınarı, salkım söğüt, ceviz ve Sığla gibi özel
+satırı olmayan türler bu nedenle kendi grubunun genel değerini kullanır.
 
-Kaynaklandırılamayan tür **bilerek `rho:null` bırakılır** (uydurma değer
-yasağı); hesap grup varsayılanına düşer ve raporda beyan edilir.
-**0011b (2026-09-28 · kullanıcı isteği): panel SEÇİM LİSTESİ 45 kayıtta
-sabitlendi** — Göksu envanterinin 5 türü (SALKIM SÖĞÜT, MAVİ LADİN, DOĞU
-ÇINARI, ATLAS SEDİRİ, CEVİZ) `RESOLVE_ONLY_SPECIES` olarak yalnız
-çözümleyicide tanınır; seçim kutusunda, `rho`/`LATIN` haritalarında ve
-panel `calc()` zincirinde YOKTUR (bu türler için panel hesabı grup
-varsayılanına düşer — 0011 öncesi davranış). Rapor QA'sı ve içe aktarma
-aracı ise `loadSpeciesDict().byName` üzerinden gizli kayıtların kaynaklı
-ρ'larını (400/450/600/490/560) kullanır: saklı `carbon_kg` değerlerini
-üreten 0011 CASE'i ile birebir denetim. ρ, AGB'ye ~0,976 üssüyle girdiği
-için %20 ρ hatası ≈ %19,5 karbon hatası demektir — veri setinin en büyük
-belirsizlik kaynağı olmaya devam eder.
+Eski migration dosyaları ve geri çekilmiş raporlar, geçmişte kullanılmış
+yoğunlukları tarihsel kanıt olarak içerebilir. Bu değerler **güncel hesap
+otoritesi değildir** ve `rho` haritasına geri taşınmaz. Panel, rapor QA ve
+CSV içe aktarma hattı aynı güncel tür/grup politikasına bağlıdır.
 
 **Eşanlamlı çözümleyici.** Saha kayıtları/cihaz çıktıları kanonik ad dışında
 yazım üretebilir ("Ağlayan Söğüt", "Cınar", "CEVIZ"). `resolveSpeciesName()`
@@ -149,19 +160,15 @@ Tipik `15–120` bandı **yalnız sayım** olarak korunur (`hd_band_out`) ve
 raporda “bu bir UYARI DEĞİL, BİLGİDİR” ibaresiyle basılır. `hd_block` kalıcı
 olarak `false`tur (0031 hükmü korunur; `test/dbh-qa.test.mjs` kilitler).
 
-**(c) 0032de neden iki ρ kaynağı.** Saklı `carbon_kg` değerlerini üreten 0011
-SQL tablosu bazı türlerde **grup varsayılanı** ρ kullanmıştı. QA yalnız **tür
-düzeyi** ρ ile karşılaştırınca bu kayıtlar sahte “bant dışı” çıkıyordu
-(Göksu: 6/34 kayıt, tümü SALKIM SÖĞÜT; tür ρ=400 ile %27–34, grup ρ=541 ile
-%0,0–5,1). QA v4 beklenen değeri **iki kaynakla** hesaplar (`calcRow` tür ρ
-ile ve `{rho:{}, grho}` bağlamıyla grup varsayılanı ile); saklı değer
-herhangi biriyle bant içindeyse satır **geçerlidir** ve eşleşen kaynak
-sayıyla beyan edilir (`dev_rho.tur` / `dev_rho.grup` /
-`dev_rho.grup_farkli`, satır düzeyinde `rho_src`). Gerçek hesap hataları
-(ör. 10× ondalık kayması) her iki kaynakla da bant dışı kaldığı için
-**yakalanmaya devam eder**. Karbon motoru, katsayılar, saklı değerler, CSV
-biçimi ve veri tabanı şeması **değişmez** — değişen yalnız denetimin
-karşılaştırma ölçütüdür.
+**(c) 0032de neden iki ρ kaynağı.** Eski saklı `carbon_kg` kayıtları,
+tarihsel sürümlerde tür ρ veya grup varsayılanı ρ ile üretilmiş olabilir.
+QA bu nedenle geriye dönük denetimde iki meşru adayı ayrı hesaplar. Güncel
+politika ise tektir: özel ρ yalnız kilitli tabloda varsa kullanılır; yoksa
+grup varsayılanına düşülür. Özel ρ bulunmayan bir tür hiçbir zaman “tür ρ”
+olarak etiketlenmez. Gerçek hesap hataları (ör. 10× ondalık kayması) geçerli
+kaynakların tamamında bant dışı kaldığı için **yakalanmaya devam eder**.
+Karbon motoru ve katsayılar değişmez; çift kaynak denetimi yalnız tarihsel
+saklı değerlerin açıklanabilirliğini sınayan bir QA katmanıdır.
 
 **(d) 0033te KALDIRILDI: eşik tabanlı gövde sınıfı beyanı.** 0032, gövde çapı
 `100 cm` ve üzerindeki bireyleri sayan ve bir mevzuat künyesiyle birlikte
@@ -356,8 +363,7 @@ Bunlar hata değil, **belgelenmiş varsayımlardır**. Değiştirmek isteyen
    bağımsızlık varsayımının yapay daralttığı aralıklardan kaçınılır).
    Panel/harita/dışa aktarım sayıları belirsizlik eki olmadan tek nokta
    tahmini olarak kalır.
-3. **ρ tablosu eksik** (panel listesinde 29/51 tür ρ'sız — 0011e: 45 orijinal + Göksu'nun kaynaklı 5 türü; 0042: + AKASYA (Acacia spp.), ρ kaynak bekliyor). Grup varsayılanı kullanılır;
-   kaynaklandırılamayan türe değer UYDURULMAZ.
+3. **ρ tablosu seçici olarak tür özeldir:** 51 seçim kaydının 35/51'i özel tür ρ'su taşımaz ve grup varsayılanını kullanır. Kaynaklandırılmamış türe değer UYDURULMAZ; Sığla da kullanıcı kararıyla YAPRAKLI genel 541 kg/m³ kullanır.
 4. **Kök oranı (0,26) ve karbon oranı (0,47) sabittir.**
 5. **Gövde form faktörü (0,5) sabittir.**
 6. **Boy ölçülemeyen ağaç veri setine giremez** (`H` zorunlu). Chave'ın boy

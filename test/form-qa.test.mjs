@@ -57,10 +57,10 @@ const carbonGrup = (d, h, sp, gr) => calcRow(d, h, sp, gr, { rho: {}, grho: GRHO
 /* ---------- Göksu benzeri fikstür: geniş gövdeler + çift ρ deseni ---------- */
 const RAW = [
   { p: 1, sp: 'SÜS ERİĞİ', grp: 'YAPRAKLI', d: 110, h: 10.2, c: 'tur' },
-  { p: 3, sp: 'SALKIM SÖĞÜT', grp: 'YAPRAKLI', d: 166, h: 14, c: 'grup' },
+  { p: 3, sp: 'KIZILAĞAÇ', grp: 'YAPRAKLI', d: 166, h: 14, c: 'grup' },
   { p: 7, sp: 'KARAÇAM', grp: 'İBRELİ', d: 107, h: 12, c: 'tur' },
   { p: 29, sp: 'IHLAMUR', grp: 'YAPRAKLI', d: 40, h: 4.5, c: 'tur' },
-  { p: 32, sp: 'SALKIM SÖĞÜT', grp: 'YAPRAKLI', d: 200, h: 12.5, c: 'grup' },
+  { p: 32, sp: 'KIZILAĞAÇ', grp: 'YAPRAKLI', d: 200, h: 12.5, c: 'grup' },
   { p: 43, sp: 'SIĞLA', grp: 'YAPRAKLI', d: 57, h: 7.5, c: 'tur' },
 ];
 const ROWS = RAW.map((r, i) => ({
@@ -248,19 +248,19 @@ describe('0032 · karbon yeniden hesabı İKİ ρ kaynağıyla yapılır', () =>
   const mk = (p, sp, grp, d, h, c) => ({ id: p, point_id: p, species: sp, grp: grp, dbh_cm: d, height_m: h, carbon_kg: c });
 
   test('grup varsayılanı ρ ile üretilmiş saklı değer GEÇERLİ sayılır (Göksu deseni)', () => {
-    /* SALKIM SÖĞÜT: tür ρ=400, grup (YAPRAKLI) ρ=541 → karbon ~%34 farklı.
-     * Saklı değer 541 ile üretildiği için 400 ile karşılaştırmak sahte
-     * "bant dışı" üretiyordu (0031de 6/34 kayıt). */
+    /* KIZILAĞAÇ: kanonik tür ρ=407, grup (YAPRAKLI) ρ=541.
+     * Saklı değer grup varsayılanıyla üretildiyse çift-kaynak QA bunu geçerli
+     * saymalı; bu test özel ρ ile grup fallback yolunu birbirinden ayırır. */
     const d = 166, h = 14;
-    const sakliGrup = +carbonGrup(d, h, 'SALKIM SÖĞÜT', 'YAPRAKLI').toFixed(6);
-    const qa = inventoryQa([mk(3, 'SALKIM SÖĞÜT', 'YAPRAKLI', d, h, sakliGrup)], dict);
+    const sakliGrup = +carbonGrup(d, h, 'KIZILAĞAÇ', 'YAPRAKLI').toFixed(6);
+    const qa = inventoryQa([mk(3, 'KIZILAĞAÇ', 'YAPRAKLI', d, h, sakliGrup)], dict);
     assert.equal(qa.dev_fail.length, 0, 'grup ρ ile birebir → geçerli');
     const row = qa.rows[0];
     assert.equal(row.rho_src, 'grup');
     assert.ok(Math.abs(row.dev_pct) > QA_LIMITS.CARBON_DEV_PCT, 'tür ρ ile bant aşılır: ' + row.dev_pct);
     assert.ok(Math.abs(row.dev_grp_pct) <= QA_LIMITS.CARBON_DEV_PCT, 'grup ρ ile bant içinde: ' + row.dev_grp_pct);
     assert.equal(qa.dev_rho.grup_farkli.length, 1, 'beyan listesi');
-    assert.equal(qa.dev_rho.grup_farkli[0].rho_tur, 400);
+    assert.equal(qa.dev_rho.grup_farkli[0].rho_tur, 407);
     assert.equal(qa.dev_rho.grup_farkli[0].rho_grp, 541);
     assert.equal(qa.state, QA_STATE.VALID);
   });
@@ -286,7 +286,7 @@ describe('0032 · karbon yeniden hesabı İKİ ρ kaynağıyla yapılır', () =>
   test('ρ kaynağı sayımı raporda beyan edilir (tür / grup)', () => {
     assert.equal(QA.dev_rho.n, 6, '6/6 kayıt yeniden üretildi');
     assert.equal(QA.dev_rho.tur + QA.dev_rho.grup, 6);
-    assert.ok(QA.dev_rho.grup >= 2, 'en az SALKIM SÖĞÜT kayıtları grup ρ ile: ' + QA.dev_rho.grup);
+    assert.ok(QA.dev_rho.grup >= 2, 'KIZILAĞAÇ grup ρ ile üretilen kayıtlar: ' + QA.dev_rho.grup);
     assert.deepEqual(QA.dev_rho.grup_farkli.map((x) => x.point_id), [3, 32]);
     assert.equal(QA.dev_fail.length, 0);
     assert.equal(QA.dev_block, false);

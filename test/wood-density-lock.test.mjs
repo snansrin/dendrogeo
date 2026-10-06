@@ -26,14 +26,13 @@ const EXPECTED = [
  ['GÜRGEN', 630, 'IPCC, 2003'],
  ['KAYIN', 530, 'As ve ark., 2001'],
  ['DİŞBUDAK', 562, 'Gürsu, 1971'],
- ['SIĞLA', 468, 'Tolunay (2013)'],
  ['KAVAK', 350, 'IPCC, 2003'],
  ['MEŞE', 570, 'As ve ark., 2001'],
 ];
 
-describe('DG-WD-LOCK-2026-10-06-v1', () => {
+describe('DG-WD-LOCK-2026-10-06-v2', () => {
   test('kilit kimliği ve satır sayısı değişmez', () => {
-    assert.equal(lock.id, 'DG-WD-LOCK-2026-10-06-v1');
+    assert.equal(lock.id, 'DG-WD-LOCK-2026-10-06-v2');
     assert.equal(lock.unit, 'kg/m3');
     assert.equal(lock.rows.length, EXPECTED.length);
     assert.equal(Object.isFrozen(lock), true);
@@ -41,7 +40,7 @@ describe('DG-WD-LOCK-2026-10-06-v1', () => {
     assert.ok(Array.from(lock.rows).every((r) => Object.isFrozen(r)));
   });
 
-  test('19 kanonik satırın yoğunluk ve kaynakları birebir korunur', () => {
+  test('18 kanonik satırın yoğunluk ve kaynakları birebir korunur', () => {
     assert.equal(Array.from(lock.rows, (r) => r.key).join('|'), EXPECTED.map((r) => r[0]).join('|'));
     for (const [key, rho, source] of EXPECTED) {
       assert.ok(byKey[key], key + ' eksik');
@@ -52,21 +51,26 @@ describe('DG-WD-LOCK-2026-10-06-v1', () => {
   });
 
   test('tablo dışı sonradan eklenen türler özel rho alamaz', () => {
-    for (const name of ['ATLAS SEDİRİ', 'MAVİ LADİN', 'DOĞU ÇINARI', 'SALKIM SÖĞÜT', 'CEVİZ']) {
+    for (const name of ['ATLAS SEDİRİ', 'MAVİ LADİN', 'DOĞU ÇINARI', 'SALKIM SÖĞÜT', 'CEVİZ', 'SIĞLA']) {
       assert.equal(app.rho[name], undefined, name + ' kanonik tabloda yok; özel rho verilmemeli');
     }
   });
 
-  test('SIĞLA her yazım yolunda 468 kg/m3 kullanır', () => {
-    assert.equal(app.rho['SIĞLA'], 468);
+  test('SIĞLA özel rho taşımaz; her yazım yolunda YAPRAKLI genel 541 kg/m3 kullanır', () => {
+    assert.equal(app.rho['SIĞLA'], undefined);
     assert.equal(app.resolveSpeciesName('Sığla'), 'SIĞLA');
     assert.equal(app.resolveSpeciesName('SIGLA'), 'SIĞLA');
     assert.equal(app.resolveSpeciesName('Liquidambar orientalis'), 'SIĞLA');
 
-    const agb = (D, H) => 0.0673 * Math.pow(0.468 * D * D * H, 0.976);
-    for (const sp of ['SIĞLA', 'Sığla', 'Liquidambar orientalis']) {
-      const r = app.calc(30, 20, sp, 'YAPRAKLI');
-      assert.ok(Math.abs(r.agb - agb(30, 20)) < 1e-9, sp + ' yanlış rho kullandı');
+    const carbon = (rhoKg, D, H) => {
+      const agb = 0.0673 * Math.pow((rhoKg / 1000) * D * D * H, 0.976);
+      return (agb + agb * 0.26) * 0.47;
+    };
+    const beklenen = carbon(541, 57, 7.5);
+    assert.ok(Math.abs(beklenen - 418.41910806687343) < 1e-9);
+    for (const sp of ['SIĞLA', 'Sığla', 'SIGLA', 'Liquidambar orientalis']) {
+      const r = app.calc(57, 7.5, sp, 'YAPRAKLI');
+      assert.ok(Math.abs(r.total_carbon - beklenen) < 1e-9, sp + ' YAPRAKLI genel rho kullanmadı');
     }
   });
 
