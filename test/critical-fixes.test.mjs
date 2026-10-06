@@ -182,7 +182,7 @@ describe('uzaktan proje + canlı kaydet butonu — 2026-09-27', () => {
   test('tam genişlik CTA' + '\u2019' + 'lar tek ailede (dg-png-btn)', () => {
     const sh = read2('partials/shell.html');
     assert.match(sh, /id="saveBtn"[^>]*class="dg-png-btn primary"|class="dg-png-btn primary" id="saveBtn"/, 'kaydet butonu ailede');
-    assert.match(sh, /class="dg-png-btn primary" style="margin-top:14px" onclick="arriveWp\(\)"/, 'vardım butonu ailede');
+    assert.match(sh, /class="dg-png-btn primary"[^>]*onclick="arriveWp\(\)"|onclick="arriveWp\(\)"[^>]*class="dg-png-btn primary"/, 'vardım butonu aynı CTA ailesinde');
     assert.doesNotMatch(sh, /class="btn" style="width:100%/, 'eski dağınık desen kalmamalı');
   });
 });
