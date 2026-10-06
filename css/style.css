@@ -654,3 +654,49 @@ label.lbl{display:block}
  .project-person{align-items:flex-start;flex-wrap:wrap}.project-person .btn{margin-left:44px}
  .project-invite-row{align-items:flex-start;flex-direction:column}.project-invite-row>div:last-child{justify-content:flex-start}
 }
+
+
+/* Kayıtlarım: ana tema ile proje bazında kademeli açılır envanter. */
+#v-records{max-width:1120px;margin-inline:auto;padding-bottom:24px}
+.records-heading{display:flex;align-items:flex-start;justify-content:space-between;gap:18px;margin-bottom:16px}
+.records-heading .disp{font-size:2rem;margin:2px 0 4px}
+.records-help{color:var(--mut);font-size:.84rem;line-height:1.5;max-width:650px}
+.records-tag{flex:0 0 auto;border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:8px 12px;color:var(--green);font-size:.72rem;font-weight:800}
+.records-groups{display:grid;gap:10px;margin-top:14px}
+.record-project{border:1px solid var(--line);border-radius:var(--r);background:var(--surface);overflow:hidden}
+.record-project>summary{list-style:none;cursor:pointer;display:flex;align-items:center;justify-content:space-between;gap:14px;min-height:62px;padding:12px 16px}
+.record-project>summary::-webkit-details-marker{display:none}
+.record-project>summary::after{content:"＋";order:3;color:var(--green);font-weight:800;font-size:1rem}
+.record-project[open]>summary::after{content:"−"}
+.record-project[open]>summary{border-bottom:1px solid var(--line)}
+.record-project-title{display:flex;align-items:center;gap:10px;min-width:0;flex:1}
+.record-project-title>span:last-child{display:grid;gap:3px;min-width:0}
+.record-project-title b{font:600 .95rem/1.25 var(--f-disp);overflow-wrap:anywhere}
+.record-project-title small{color:var(--mut);font-size:.68rem}
+.record-project-icon{width:34px;height:34px;border-radius:9px;background:var(--tint);display:grid;place-items:center;flex:0 0 auto}
+.record-project-total{display:grid;text-align:right;line-height:1.05}
+.record-project-total b{font:700 .95rem/1 var(--f-mono);color:var(--green-dk)}
+.record-project-total span{font-size:.6rem;color:var(--mut);margin-top:4px}
+.record-project-body{display:grid}
+.record-item{display:grid;grid-template-columns:minmax(180px,.8fr) minmax(380px,1.5fr) minmax(190px,.65fr);gap:16px;align-items:center;padding:13px 16px;border-bottom:1px solid var(--line)}
+.record-item:last-child{border-bottom:0}
+.record-main{display:flex;align-items:center;gap:10px;min-width:0}
+.record-point{font:800 .68rem/1 var(--f-mono);color:var(--green);background:var(--tint);border-radius:8px;padding:8px;min-width:44px;text-align:center}
+.record-tree{display:grid;gap:3px;min-width:0}.record-tree b{font-size:.82rem;overflow-wrap:anywhere}.record-tree span{font-size:.63rem;color:var(--mut)}
+.record-metrics{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:7px}
+.record-metrics>div{display:grid;gap:3px;padding:8px 9px;border-radius:8px;background:var(--bg)}
+.record-metrics span{font-size:.58rem;text-transform:uppercase;letter-spacing:.05em;color:var(--mut);font-weight:800}
+.record-metrics b{font:700 .72rem/1.2 var(--f-mono);white-space:nowrap}
+.record-side{display:flex;align-items:center;justify-content:flex-end;gap:8px;min-width:0}
+.record-photo img{width:36px!important;height:36px!important;object-fit:cover;border-radius:8px!important;margin:0!important}
+.record-actions{display:flex;gap:6px}.record-actions .btn{min-height:36px}
+.records-empty{padding:24px;text-align:center;color:var(--mut)}
+@media(max-width:900px){
+ .record-item{grid-template-columns:1fr}.record-side{justify-content:flex-start}.record-metrics{grid-template-columns:repeat(4,minmax(0,1fr))}
+}
+@media(max-width:640px){
+ #v-records{padding-bottom:12px}.records-heading{margin-bottom:10px}.records-heading .disp{font-size:1.65rem}.records-tag{display:none}
+ .record-project>summary{padding:10px 12px;min-height:58px}.record-project-total{display:none}
+ .record-item{padding:12px;gap:10px}.record-metrics{grid-template-columns:1fr 1fr}.record-side{flex-wrap:wrap}
+ .record-actions{width:100%}.record-actions .btn{flex:1}
+}
