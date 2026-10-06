@@ -42,9 +42,11 @@ test('waypoint UI keeps only the map collapsible and all field controls visible'
  const shell=readFileSync(new URL('../partials/shell.html',import.meta.url),'utf8');
  const a=shell.indexOf('<div class="view" id="v-nav">'),b=shell.indexOf('<div class="view" id="v-map">',a),nav=shell.slice(a,b);
  assert.match(nav,/<details id="wpMapPanel"/);
- assert.equal((nav.match(/<details\b/g)||[]).length,1);
+ assert.equal((nav.match(/<details\b/g)||[]).length,1,'Waypoint sekmesinde yalnız harita açılır/kapanır olmalı');
  assert.match(nav,/class="card waypoint-nav-card"/);
- assert.match(nav,/id="wpSearch"/);assert.match(nav,/id="wpFilter"/);assert.match(nav,/id="wpSort"/);
+ assert.match(nav,/id="wpSearch"/);
+ assert.match(nav,/id="wpFilter"/);
+ assert.match(nav,/id="wpSort"/);
  assert.match(nav,/class="card waypoint-files"/);
  assert.doesNotMatch(nav,/waypoint-coordinates/);
 });
