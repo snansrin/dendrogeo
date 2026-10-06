@@ -204,11 +204,12 @@ export const DBH_REASON_TR = {
  * (Göksu P29: |10,6 − 13,66| = 3,06 kg → %22,4 — gürültü, hata değil). */
 /* Panel motoruyla (src/services/allometry.js calc) BİREBİR aynı denklem —
  * rapor/içe aktarma hattındaki yeniden hesap bu fonksiyondan türer. */
-export function calcRow(dbh_cm, height_m, speciesName, grp, policy) {
+export function calcRow(dbh_cm, height_m, speciesName, grp) {
   const d = parseFloat(dbh_cm), h = parseFloat(height_m);
   const zero = { valid:false, density_kg_m3:null, agb:0, bhb:0, bio:0, c_agb:0, c_bhb:0, total_carbon:0, vol:0 };
   if (!(d > 0) || !(h > 0)) return zero;
-  const P = policy || loadRho();
+  /* Yoğunluk politikası dışarıdan enjekte EDİLEMEZ: her çağrı final kilidi okur. */
+  const P = loadRho();
   const canonical = typeof P.resolve === 'function' ? P.resolve(speciesName) : speciesName;
   if (!canonical || !P.groupBySpecies || P.groupBySpecies[canonical] !== grp) return zero;
   const densityKg = P.rho[canonical] ?? P.grho[grp] ?? null;
@@ -219,8 +220,8 @@ export function calcRow(dbh_cm, height_m, speciesName, grp, policy) {
   return { valid:true, density_kg_m3:densityKg, agb, bhb, bio:agb+bhb, c_agb:agb*0.47, c_bhb:bhb*0.47, total_carbon:(agb+bhb)*0.47, vol:Math.PI*Math.pow(d/200,2)*h*0.5 };
 }
 
-export function carbonKg(row, policy) {
-  return calcRow(row.dbh_cm, row.height_m, row.species, row.grp, policy || loadRho()).total_carbon;
+export function carbonKg(row) {
+  return calcRow(row.dbh_cm, row.height_m, row.species, row.grp).total_carbon;
 }
 export function percentile(sorted, p) {
   const i = (sorted.length - 1) * p, lo = Math.floor(i), hi = Math.ceil(i);
@@ -238,14 +239,14 @@ export function mcRowCI(row, cfg = {}) {
   const c = { ...MC_CFG, ...cfg };
   const policy = loadRho();
   const rnd = mulberry32((c.SEED | 0) ^ ((row.id || row.point_id || 7) * 2654435761));
-  const base = carbonKg(row, policy);
+  const base = carbonKg(row);
   const point = Number.isFinite(+row.carbon_kg) && +row.carbon_kg > 0 ? +row.carbon_kg : base;
   const out = new Array(c.N);
   for (let i = 0; i < c.N; i++) {
     const [z1, z2] = normPair(rnd), zm = normPair(rnd)[0];
     const d = Math.max(0.5, parseFloat(row.dbh_cm) + z1 * c.DBH_SD_CM);
     const h = Math.max(0.5, parseFloat(row.height_m) + z2 * c.H_SD_M);
-    const pert = carbonKg({ ...row, dbh_cm: d, height_m: h }, policy);
+    const pert = carbonKg({ ...row, dbh_cm: d, height_m: h });
     out[i] = point * (base > 0 ? pert / base : 1) * (1 + zm * c.MODEL_CV);
   }
   const m = out.reduce((a, x) => a + x, 0) / out.length;
@@ -257,9 +258,9 @@ export function mcTotalCI(rows, cfg = {}) {
   const list = (rows || []).filter((r) => Number.isFinite(+r.dbh_cm) && Number.isFinite(+r.height_m));
   if (!list.length) return { mean: 0, lo: 0, hi: 0, sd: 0, n: 0 };
   const policy = loadRho();
-  const stored = list.reduce((a, r) => a + (Number.isFinite(+r.carbon_kg) && +r.carbon_kg > 0 ? +r.carbon_kg : carbonKg(r, policy)), 0);
+  const stored = list.reduce((a, r) => a + (Number.isFinite(+r.carbon_kg) && +r.carbon_kg > 0 ? +r.carbon_kg : carbonKg(r)), 0);
   const rndM = mulberry32((c.SEED | 0) ^ 0x9E3779B9);
-  const per = list.map((r) => ({ r, base: carbonKg(r, policy), point: Number.isFinite(+r.carbon_kg) && +r.carbon_kg > 0 ? +r.carbon_kg : carbonKg(r, policy), rnd: mulberry32((c.SEED | 0) ^ ((r.id || r.point_id || 7) * 2654435761)) }));
+  const per = list.map((r) => ({ r, base: carbonKg(r), point: Number.isFinite(+r.carbon_kg) && +r.carbon_kg > 0 ? +r.carbon_kg : carbonKg(r), rnd: mulberry32((c.SEED | 0) ^ ((r.id || r.point_id || 7) * 2654435761)) }));
   const sums = new Array(c.N);
   for (let i = 0; i < c.N; i++) {
     const f = 1 + normPair(rndM)[0] * c.MODEL_CV;      // KORELE model çarpanı
@@ -268,7 +269,7 @@ export function mcTotalCI(rows, cfg = {}) {
       const [z1, z2] = normPair(p.rnd);                 // bağımsız ölçüm hatası
       const d = Math.max(0.5, parseFloat(p.r.dbh_cm) + z1 * c.DBH_SD_CM);
       const h = Math.max(0.5, parseFloat(p.r.height_m) + z2 * c.H_SD_M);
-      const pert = carbonKg({ ...p.r, dbh_cm: d, height_m: h }, policy);
+      const pert = carbonKg({ ...p.r, dbh_cm: d, height_m: h });
       t += p.point * (p.base > 0 ? pert / p.base : 1) * f;
     }
     sums[i] = t;
