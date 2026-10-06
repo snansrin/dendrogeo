@@ -393,7 +393,7 @@ describe('0031 · üç hâlli rapor durumu (Çizelge 4ten türetilir)', () => {
     assert.match(ratio.description, /inceleme göstergesi/);
     /* sözlükteki birimler karbon zinciriyle tutarlı */
     const units = Object.fromEntries(MD.variables.map((v) => [v.name, v.unit]));
-    assert.deepEqual(units, { DBH: 'cm', 'Boy (H)': 'm', rho: 'g/cm3', AGB: 'kg', BGB: 'kg', Karbon: 'kg C', 'h/DBH': 'birimsiz' });
+    assert.deepEqual(units, { 'Göğüs çevresi (C)': 'cm', 'DBH (D)': 'cm', 'Boy (H)': 'm', rho: 'g/cm3', AGB: 'kg', BGB: 'kg', Karbon: 'kg C', 'h/DBH': 'birimsiz' });
   });
 });
 
