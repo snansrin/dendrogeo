@@ -235,7 +235,8 @@
 <script src="vendor/supabase-js-2.116.0.js" defer></script>
 <script src="src/config/supabase.js?v=6b91ef6f" defer></script>
 <script src="src/config/constants.js?v=f65498e4" defer></script>
-<script src="src/config/species.js?v=b9752ca5" defer></script>
+<script src="src/config/wood-density-lock.js?v=dd2e5fe5" defer></script>
+<script src="src/config/species.js?v=5cd417c7" defer></script>
 <!-- DİL KATMANI (0035): TR markup varsayılan; EN sözlüğü çalışma zamanında
      uygulanır (dgToggleLang). defer sırası önemli değil — DOMContentLoaded'da
      ya da hemen (hazırsa) çalışır. module-registry + CORE_ASSETS kaydı şart. -->
@@ -244,9 +245,9 @@
 <script src="src/utils/truncation.js?v=f43c76b3" defer></script>
 <!-- Faz 7: geotiff (317 KB) ve chart.js (208 KB) artık SENKRON yüklenmiyor;
      src/utils/lazylibs.js ihtiyaç anında enjekte eder (LULC analizi / panel grafiği). -->
-<script id="dgRuntimeBuild" type="application/json">"5e9d73f1878645b1"</script>
+<script id="dgRuntimeBuild" type="application/json">"ffe47a10abb94765"</script>
 <script src="src/utils/lazylibs.js?v=19763039" defer></script>
-<script src="src/services/allometry.js?v=5dd3f98d" defer></script>
+<script src="src/services/allometry.js?v=be661f10" defer></script>
 <script src="src/services/auth.js?v=1e92b5cd" defer></script>
 <script src="src/services/export.js?v=cf5c039b" defer></script>
 <script src="src/services/offline.js?v=3152b55e" defer></script>
@@ -269,7 +270,7 @@
 <script src="src/services/report-publish.js?v=0836b57c" defer></script>
 <script src="src/services/park-invites.js?v=1023c17d" defer></script>
 <script src="src/services/world.js?v=c72d9019" defer></script>
-<script src="src/services/measure.js?v=444d6096" defer></script>
+<script src="src/services/measure.js?v=9b8ca67b" defer></script>
 <script src="src/services/map.js?v=9f6c9825" defer></script>
 <!-- LULC ZİNCİRİ ARTIK TEMBEL (2026-09-25 · Faz 8): 8 dosya ilk yüklemede
      indirilmiyor. Yalnız "🌿 Yüzey Örtüsü Analizi"ne basan kullanıcı için
@@ -494,7 +495,7 @@
    <ul>
     <li>Chave et al. 2014 (DBH + boy + ρ)</li>
     <li>AGB × 0,26 kök/gövde varsayımı</li>
-    <li>Tür ρ değeri yoksa grup varsayılanı</li>
+    <li>Özel tür ρ değeri yoksa yalnız kendi grup geneli</li>
     <li>Hacim hesabı</li>
    </ul>
   </div>
@@ -544,7 +545,7 @@
    <div class="formula">AGB = 0.0673·(ρ·DBH²·H)<sup>0.976</sup> <span style="color:var(--mut)">— Chave 2014</span></div>
    <div class="formula">BHB = AGB·0.26 <span style="color:var(--mut)">— sistemde kullanılan sabit kök/gövde varsayımı</span></div>
    <div class="formula">C = (AGB+BHB)·0.47</div>
-   <p style="color:var(--mut);font-size:.78rem;margin-top:12px">Tür/grup tablosunda 51 seçim kaydı bulunur; 16 kaydın doğrudan ρ değeri vardır, 35 kayıt grup varsayılanına düşer.</p>
+   <p style="color:var(--mut);font-size:.78rem;margin-top:12px">Ölçüm kataloğunda 49 tür bulunur; 16 tür kilitli özel ρ kullanır, 33 tür yalnız kendi grup genelini kullanır. Ölçüm grubu yalnız İBRELİ veya YAPRAKLI olabilir.</p>
   </div>
   <div class="card" style="border-left:4px solid var(--amber)">
    <div style="font-family:var(--f-disp);font-size:1.1rem;color:var(--green-dk);font-weight:600;margin-bottom:14px">🔬 Veri Doğruluk Politikası</div>
@@ -774,7 +775,7 @@
     <div class="dg-png-kicker">2 · AĞAÇ</div><h3 id="measureTreeTitle">Ağaç bilgileri</h3>
     <div class="measure-fields measure-identity"><div><label class="lbl" for="mPoint">Nokta ID</label><div class="measure-query"><input id="mPoint" type="number" min="1" step="1" inputmode="numeric" oninput="manualPoint=true" aria-describedby="pointHelp"><button class="btn sm ghost" onclick="queryPointId()">🔍 Sorgula</button></div><p class="measure-help" id="pointHelp">Otomatik önerilir; gerekirse değiştirin.</p></div><div><label class="lbl" for="mNo">Ölçüm No</label><input id="mNo" type="number" min="1" step="1" inputmode="numeric" value="1"><p class="measure-help">Aynı noktadaki ölçüm sırası.</p></div></div>
     <div id="pointQueryResult" class="alert info" style="display:none"></div>
-    <div class="measure-fields"><div><label class="lbl" for="mGroup">Ağaç grubu</label><select id="mGroup" onchange="fillSpecies();liveCalc()"><option value="">Grup seçin</option><option value="İBRELİ">İBRELİ</option><option value="YAPRAKLI">YAPRAKLI</option><option value="DİĞER">DİĞER</option></select></div><div><label class="lbl" for="mSpecies">Ağaç türü</label><select id="mSpecies" disabled onchange="showLatin();liveCalc()"><option value="">Önce grup seçin</option></select><div id="latinName" class="mono measure-help"></div></div></div>
+    <div class="measure-fields"><div><label class="lbl" for="mGroup">Ağaç grubu</label><select id="mGroup" onchange="fillSpecies();liveCalc()"><option value="">Grup seçin</option><option value="İBRELİ">İBRELİ</option><option value="YAPRAKLI">YAPRAKLI</option></select></div><div><label class="lbl" for="mSpecies">Ağaç türü</label><select id="mSpecies" disabled onchange="showLatin();liveCalc()"><option value="">Önce grup seçin</option></select><div id="latinName" class="mono measure-help"></div></div></div>
     <div class="measure-fields measure-dimensions"><div><label class="lbl" for="mDbh">Gövde çapı <span>(cm)</span></label><input id="mDbh" type="number" min="0.1" max="400" step="0.1" inputmode="decimal" oninput="liveCalc()" placeholder="Örn. 52" aria-describedby="dbhHelp"><p class="measure-help" id="dbhHelp">Yerden 1,30 m yüksekte ölçün.</p></div><div><label class="lbl" for="mHeight">Ağaç boyu <span>(m)</span></label><input id="mHeight" type="number" min="0.1" max="100" step="0.1" inputmode="decimal" oninput="liveCalc()" placeholder="Örn. 7,2"><p class="measure-help">Ağacın toplam yüksekliği.</p></div></div>
     <div class="measure-photo"><div><h4>Fotoğraf <span class="measure-optional">İsteğe bağlı</span></h4><p class="measure-help">Ağacı ve gövdesini kadraja alın.</p></div><span class="dg-file btn ghost">📸 <span>Fotoğraf ekle</span><input type="file" id="mPhoto" aria-label="Fotoğraf (canlı çekim)" accept="image/*" capture="environment" onchange="checkPhoto(event)"></span><span class="dg-file-name mono" id="mPhotoName"></span><button type="button" class="btn sm ghost" id="mPhotoRemove" style="display:none" onclick="dgClearMeasurePhoto()">Fotoğrafı kaldır</button></div>
     <div id="photoCheck" class="alert info" role="status" style="display:none"></div>
