@@ -69,11 +69,9 @@ export function loadSpeciesDict() {
   const byName = {};
   for (const [g, list] of Object.entries(X.SPECIES_DATA))
     for (const s of list) byName[s.tr] = { tr: s.tr, lat: s.lat, rho: rho[s.tr] ?? null, grp: g, panel: true };
-  /* 0011b: panel listesinde GÖRÜNMEYEN ama veritabanında kaydı olan türler
-   * (Göksu'nun 5 türü). ρ'ları 0011'in çalıştırılmış CASE'iyle birebir —
-   * QA yeniden hesabı ve içe aktarma aracı bu değerleri kullanır; panel
-   * (calc) kullanmaz. Böylece "saklı karbon ⇔ yeniden hesap" denetimi
-   * veriyi üreten ρ tablosuna göre yapılır (elma ↔ elma). */
+  /* Seçim listesinde görünmeyen tarihsel/eşanlamlı kayıtlar yalnız ad
+   * çözümleme içindir. Özel ρ uydurulmaz; rho:null ise hesap kendi grup
+   * varsayılanına düşer. Panel, rapor QA ve içe aktarma aynı politikayı kullanır. */
   for (const s of (X.RESOLVE_ONLY_SPECIES || []))
     if (!byName[s.tr]) byName[s.tr] = { tr: s.tr, lat: s.lat, rho: s.rho ?? null, grp: null, panel: false };
   return { byName, grho, resolve: (n) => X.resolveSpeciesName(n), norm: (n) => X.normSp(n) };
@@ -104,10 +102,10 @@ export function loadSpeciesDict() {
  *   (tür düzeyi ρ ve grup varsayılanı ρ); saklı değer HERHANGİ BİRİYLE
  *   ±%20 (ve mutlak fark ≥ CARBON_DEV_MIN_KG) içindeyse satır geçerlidir ve
  *   eşleşen kaynak raporda SAYIYLA beyan edilir. Gerekçe: saklı carbon_kg
- *   değerlerini üreten 0011 SQL tablosu bazı türlerde grup varsayılanını
- *   kullanmıştı; QA yalnız tür ρ ile karşılaştırınca bu kayıtlar haksız yere
- *   "bant dışı" çıkıyordu (Göksu: 6/34 kayıt, hepsi SALKIM SÖĞÜT). Yalnız
- *   SİSTEMİK ölçekte (BLOCK_RATIO/BLOCK_MIN_N) hesap bütünlüğü şüphesi
+ *   değerlerini üreten eski kayıtlar tür veya grup varsayılanı ρ kullanmış
+ *   olabilir. QA bu iki meşru kaynağı ayrı ayrı sınar; özel ρ bulunmayan
+ *   türlerde tek meşru kaynak grup varsayılanıdır. Yalnız SİSTEMİK ölçekte
+ *   (BLOCK_RATIO/BLOCK_MIN_N) hesap bütünlüğü şüphesi
  *   doğurursa bloklayabilir — bu bir birim hatası iddiası DEĞİLDİR.
  *
  * 0033 · KAPSAM DÜZELTMESİ (veri sahibi kararı, 2026-10-01): DendroGeo
