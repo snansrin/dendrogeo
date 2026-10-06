@@ -259,7 +259,16 @@ export function mapCanvas({ outer, outers = null, surfaceFeatures = [], holes = 
   const cx = (minLo + maxLo) / 2, cy = (minLa + maxLa) / 2;
   const X = (lon) => W / 2 + (lon - cx) * 111320 * Math.cos(cy * Math.PI / 180) * k;
   const Y = (lat) => TOP + (MAPH - 2 * PAD) / 2 - (lat - cy) * 110540 * k;
-  const legRows = ['green', 'hard', 'building', 'water', 'pool', 'bare', 'other'].filter((key) => classes[key])
+  /* PNG sunumu: havuz / süs havuzu ayrı bir kartografik sınıf değildir.
+   * Bilimsel snapshot ve rapor tablosundaki "pool" alanı DEĞİŞMEZ; yalnız PNG'de
+   * su ile aynı renkte ve aynı lejant satırında gösterilir. */
+  const pngClassKey = (key) => key === 'pool' ? 'water' : key;
+  const pngClass = (key) => {
+    const dk = pngClassKey(key);
+    return classes[dk] || classes[key] || null;
+  };
+  const legRows = ['green', 'hard', 'building', 'water', 'bare', 'other']
+    .filter((key) => key === 'water' ? (classes.water || classes.pool) : classes[key])
     .concat(maskHa > 0 ? ['masked'] : [], ['border', 'point', 'outside']);
   const H = TOP + MAPH + 16 + legRows.length * 28 + 18 + FOOT;
   const cv = new PngCanvas(W, H, MAP_TONES.out);
@@ -267,10 +276,10 @@ export function mapCanvas({ outer, outers = null, surfaceFeatures = [], holes = 
   fillRing(cv, ring, MAP_TONES.nodata);                       /* taban: veri yok tonu */
   for (const h of holes) fillRing(cv, h.map(([la, lo]) => [X(lo), Y(la)]), MAP_TONES.out);
   for (const r of wruns)                                      /* kesintisiz hücre örtüsü */
-    cv.rect(X(r.lo0), Y(r.la1), X(r.lo1), Y(r.la0), hex2rgb((classes[r.key] && classes[r.key].color) || '#94a3b8'));
+    cv.rect(X(r.lo0), Y(r.la1), X(r.lo1), Y(r.la0), hex2rgb((pngClass(r.key) && pngClass(r.key).color) || '#94a3b8'));
   for(const f of surfaceFeatures)for(const poly of f.geometry.coordinates){
     const rings=poly.map(r=>r.map(([lo,la])=>[X(lo),Y(la)]));
-    fillSurfacePolygon(cv,rings,hex2rgb(classes[f.properties.class]?.color||'#94a3b8'));
+    fillSurfacePolygon(cv,rings,hex2rgb(pngClass(f.properties.class)?.color||'#94a3b8'));
   }
   /* KRIPMA GEÇİŞİ: run-length bantları satır içindeki poligon dışı boşlukları
    * köprüleyebildiği için (içbükey girinti) harita alanı taranır ve poligon
@@ -337,9 +346,13 @@ export function mapCanvas({ outer, outers = null, surfaceFeatures = [], holes = 
       cv.rect(PAD + 1, ly + 1, PAD + 21, ly + 21, MAP_TONES.nodata);
       T(PAD + 32, ly + 4, `MASKELI (BULUT/GOLGE) ${maskHa.toFixed(2)} ha`, MAP_TONES.mut, 2);
     } else {
-      const c = classes[key];
+      const c = pngClass(key);
+      const areaM2 = key === 'water'
+        ? Number(classes.water?.areaM2 || 0) + Number(classes.pool?.areaM2 || 0)
+        : Number(c?.areaM2 || 0);
+      const label = key === 'water' ? (classes.water?.label || 'Su') : c.label;
       cv.rect(PAD + 1, ly + 1, PAD + 21, ly + 21, hex2rgb(c.color));
-      T(PAD + 32, ly + 4, `${c.label} ${((c.areaM2 || 0) / 10000).toFixed(2)} ha`, MAP_TONES.ink, 2);
+      T(PAD + 32, ly + 4, `${label} ${(areaM2 / 10000).toFixed(2)} ha`, MAP_TONES.ink, 2);
     }
     ly += 28;
   }
@@ -369,8 +382,8 @@ export function mapCanvas({ outer, outers = null, surfaceFeatures = [], holes = 
   const Tfit = (x, y, txt, c) => T(x, y, txt, c, (12 * txt.length <= W - 2 * PAD) ? 2 : 1);
   const idLine = meta && meta.id ? ('DENDROGEO - ' + meta.id) : 'DENDROGEO - BILIMSEL ANALIZ HARITASI';
   T(PAD, fy, idLine, MAP_TONES.ink, 2);
-  const cr = '© DENDROGEO';
-  if (W - PAD - 12 * cr.length > PAD + 12 * idLine.length + 8) T(W - PAD - 12 * cr.length, fy, cr, MAP_TONES.mut, 2);
+  const brandMark = 'DENDROGEO 2026';
+  if (W - PAD - 12 * brandMark.length > PAD + 12 * idLine.length + 8) T(W - PAD - 12 * brandMark.length, fy, brandMark, MAP_TONES.mut, 2);
   Tfit(PAD, fy + 20, 'VERI: ' + ((meta && meta.source) || DATASET_ASCII) + ' / COZUNURLUK: '+(meta?.resolution||'10 M') + (meta && meta.epsg ? ' / PROJEKSIYON: EPSG:' + meta.epsg : ''), MAP_TONES.mut);
   if (meta && (meta.dateStr || meta.engine)) {
     const l3 = (meta.dateStr ? 'ANALIZ TARIHI: ' + meta.dateStr : '') +
@@ -1105,8 +1118,10 @@ ${L ? '<meta property="og:image" content="' + SITE_ORIGIN + '/rapor/' + id + '/h
 h1{font-size:1.9rem;line-height:1.2;color:var(--gd);margin:10px 0 6px;font-weight:600}
 .sub{color:var(--mut);font-size:.95rem;font-style:italic}
 .meta{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px;margin:22px 0;padding:14px;border:1px solid var(--line);border-radius:10px;background:var(--bg);font-family:system-ui,sans-serif;font-size:.78rem}
+.meta>div{min-width:0}
 .meta b{display:block;color:var(--mut);font-size:.66rem;letter-spacing:.12em;text-transform:uppercase}
-.meta code{font-family:ui-monospace,Consolas,monospace;font-size:.72rem;word-break:break-all}
+.meta code{display:block;max-width:100%;font-family:ui-monospace,Consolas,monospace;font-size:.72rem;white-space:normal;overflow-wrap:anywhere;word-break:normal}
+.meta .meta-wide{grid-column:1/-1}
 .meta .hint{display:block;color:var(--mut);font-size:.64rem;margin-top:2px}
 .st{display:inline-block;font-family:system-ui,sans-serif;font-size:.72rem;font-weight:700;padding:2px 10px;border-radius:999px;background:var(--tint);color:var(--green);border:1px solid var(--green)}
 .st-ok{background:var(--tint);color:var(--green);border-color:var(--green)}
@@ -1254,7 +1269,7 @@ pre{background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:
  <div><b>Lisans</b><code>CC BY-NC 4.0</code></div>
  <div><b>İçerik hash'i</b><code>sha256:${hash.slice(0, 20)}…</code></div>
 </div>
-${snap.study ? `<div class="meta" aria-label="Akademik çalışma künyesi">${Object.entries({project_name:'Proje',study_type:'Çalışma türü',institution:'Üniversite / kurum',department:'Fakülte / bölüm',program:'Program / çalışma alanı',advisor:'Danışman',orcid:'ORCID',funding:'Destek / proje numarası',start_date:'Beyan edilen saha başlangıcı',end_date:'Beyan edilen saha bitişi'}).filter(([k])=>snap.study[k]).map(([k,l])=>`<div><b>${esc(l)}</b><code>${esc(snap.study[k])}</code></div>`).join('')}${snap.study.independent ? '<div><b>Kurumsal bağ</b><code>Bağımsız çalışma</code></div>' : ''}</div><p><b>Çalışmanın amacı ve kapsamı.</b> ${esc(snap.study.purpose)}</p>${snap.study.sampling ? '<p><b>Örnekleme tasarımı.</b> '+esc(snap.study.sampling)+'</p>' : ''}${snap.study.instruments ? '<p><b>Saha yöntemi ve ölçüm cihazları.</b> '+esc(snap.study.instruments)+'</p>' : ''}` : ''}
+${snap.study ? `<div class="meta" aria-label="Akademik çalışma künyesi">${Object.entries({project_name:'Proje',study_type:'Çalışma türü',institution:'Üniversite / kurum',department:'Fakülte / bölüm',program:'Program / çalışma alanı',advisor:'Danışman',orcid:'ORCID',funding:'Destek / proje numarası',start_date:'Beyan edilen saha başlangıcı',end_date:'Beyan edilen saha bitişi'}).filter(([k])=>snap.study[k]).map(([k,l])=>`<div${k==='project_name'?' class="meta-wide"':''}><b>${esc(l)}</b><code>${esc(snap.study[k])}</code></div>`).join('')}${snap.study.independent ? '<div><b>Kurumsal bağ</b><code>Bağımsız çalışma</code></div>' : ''}</div><p><b>Çalışmanın amacı ve kapsamı.</b> ${esc(snap.study.purpose)}</p>${snap.study.sampling ? '<p><b>Örnekleme tasarımı.</b> '+esc(snap.study.sampling)+'</p>' : ''}${snap.study.instruments ? '<p><b>Saha yöntemi ve ölçüm cihazları.</b> '+esc(snap.study.instruments)+'</p>' : ''}` : ''}
 <p class="stmt">Bu rapor, DendroGeo analiz sistemi tarafından belirlenen yöntem, veri kaynakları ve kalite kontrol prosedürleri doğrultusunda oluşturulmuştur. Rapor bir akreditasyon veya sertifikasyon belgesi değildir; bulgular, beyan edilen veri kaynakları ve çözümleme sürümü kapsamında geçerlidir.</p>
 
 <h2><span class="no">1</span>Analiz Özeti</h2>
