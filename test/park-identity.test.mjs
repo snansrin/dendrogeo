@@ -499,8 +499,12 @@ describe('kabuk: park algılama ekranı + ölçüm kapısı id’leri', () => {
     assert.match(idx, /id="mProject" onchange="dgProjectChanged\(\)"/);
   });
 
-  test('park tablosu "Park" sütunu içeriyor', () => {
-    assert.match(idx, /<th scope="col">ID<\/th><th scope="col">Park<\/th><th scope="col">Proje Adı<\/th>/);
+  test('proje kartları park bağını ve rol ayrımını görünür tutuyor', () => {
+    assert.match(idx, /id="projOwnList"/);
+    assert.match(idx, /id="projSharedList"/);
+    assert.match(idx, /PROJE SAHİBİ/);
+    assert.match(idx, /ORTAK/);
+    assert.match(measure, /project-card-park/);
   });
 
   test('⭐ park-registry.js yükleme sırası: park-query → registry → grid-engine', () => {

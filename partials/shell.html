@@ -141,57 +141,82 @@
 <div id="parkInfo" class="card" style="display:none;margin-top:12px;border-left:4px solid var(--blue)"></div><p style="color:var(--mut);font-size:.8rem;margin-top:8px">🟢 Noktalara dokunun → onaylı ölçüm bilgisi + varsa fotoğraf.</p><div id="liveAnalysis" style="margin-top:18px"></div></div>
 
   <div class="view" id="v-projects">
-<h2 class="disp" style="margin-bottom:16px">Projeler</h2>
-<!-- 0025 · PARK ÇALIŞMA ARKADAŞI: 📬 davetlerin + 🌳 paylaşılan parkların.
-     Modül: src/services/park-invites.js · yeni CSS yok (card/shead/badge/btn
-     aileleri) · kartlar yalnız giriş yapmış kullanıcıda ve ilgili durum varsa
-     görünür (dgInvitesLoadMine, shell go('projects') kancası). -->
-<div id="dgSharedBox" class="alert ok" style="display:none;margin-bottom:12px"></div>
-<div class="card" id="dgInvBox" style="display:none;margin-bottom:16px"></div>
-<div class="card" style="margin-bottom:16px">
-    <!-- PROJE = PARK + ETİKET (2026-09-24). Proje adı serbest metin DEĞİL:
-         park algılandığında "Göksu Parkı - deneme" biçiminde DB tarafında
-         kurulur (trg_compose_project_name). Park algılanmadan proje açılamaz. -->
-    <div id="projParkBox" class="alert info" style="margin-bottom:12px"></div>
-<div class="grid g3">
-<div><label class="lbl" for="pLabel">Proje Etiketi</label><input id="pLabel" placeholder="örn. deneme" oninput="dgProjectNamePreview()"></div>
-<div><label class="lbl" for="pCountry">Ülke</label><input id="pCountry" value="Türkiye"></div>
-<div><label class="lbl" for="pCity">Şehir</label><input id="pCity" value="Ankara"></div>
-</div>
-    <div class="lbl" style="margin-top:12px">Proje Adı (otomatik)</div>
-    <div id="pNamePreview" class="mono" style="font-size:.95rem;padding:4px 0 2px;color:var(--mut)">—</div>
-    <div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap">
-     <button class="btn sm" id="projSaveBtn" onclick="createProject()">+ Proje Oluştur</button>
-     <button class="btn sm ghost" id="projCancelBtn" style="display:none" onclick="cancelProjectEdit()">Vazgeç</button>
+   <div class="project-hero">
+    <div>
+     <div class="dg-kicker">ÇALIŞMA ALANI</div>
+     <h2 class="disp">Projeler</h2>
+     <p class="project-lead">Park bazlı çalışmalarını, ekip erişimini ve saha akışını tek yerden yönet.</p>
     </div>
-   </div>
-   <div class="card tblwrap dg-cards"><table><thead><tr><th scope="col">ID</th><th scope="col">Park</th><th scope="col">Proje Adı</th><th scope="col">Ülke</th><th scope="col">Şehir</th><th scope="col">Tarih</th><th scope="col">İşlem</th></tr></thead><tbody id="projTable"></tbody></table></div>
-   <!-- KULLANICI RAPOR PANELİ (0009 · 2026-09-28): kullanıcılar KENDİ park
-        projelerinin bilimsel raporunu site içinden yayınlar — aynı kuyruk
-        (report_requests), aynı DGR kimliği, aynı kalıcı bağlantı. Sunucu
-        kilitleri: mülkiyet + kendi onaylı verisi + 24 saatte 3 istek kotası.
-        Boş + display:none → kullanılmadığında sıfır yer kaplar (düzen kaymaz);
-        yeni CSS yok. Modül: src/services/report-publish.js (kullanıcı bölümü). -->
-   <div id="dgUserPubBox" class="card" style="display:none;margin-top:12px"></div>
-   <!-- PARK ÇALIŞMA ARKADAŞLARI (0025/0026 · kullanıcı isteği: "davet
-        PROJE sayfasında olsun — admin sekmesi değil"): sahibi/yöneticisi
-        olduğun parklara e-posta ile davet aç; kabul eden arkadaş projeyi
-        kendi Ölçüm sekmesinde görür, ölçümlerini KENDİ adıyla girer
-        (owner=auth.uid()), konum çiti (0007) ve onay akışı aynen geçerlidir.
-        Yetki SUNUCUDA: dg_invite_send RPC (proje sahibi/admin değilse
-        INVITE_NOT_YOUR_PARK). Modül: src/services/park-invites.js ·
-        yeni CSS yok, kart v-projects'te (her kullanıcının yeri). -->
-   <div class="card" style="margin-bottom:18px;border-left:4px solid var(--green)">
-    <div class="shead" style="margin-bottom:12px"><span class="no">👥</span><h2 style="font-size:1.2rem">Park Çalışma Arkadaşları</h2><span class="rule"></span><span class="mono" style="font-size:.75rem;color:var(--mut)">davet · ortak ölçüm · onay sende</span></div>
-    <p style="color:var(--mut);font-size:.8rem;margin-bottom:10px">Parkını bir çalışma arkadaşına aç: e-postasıyla davet et, hesabıyla kabul etsin; aynı parkın projelerine birlikte ölçü girin. Kimin ölçtüğü kayıt sahibinde görünür, onay ve rapor akışı değişmez.</p>
-    <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:10px">
-     <label class="lbl" for="dgInvPark" style="margin:0">Park</label>
-     <select id="dgInvPark" onchange="dgCollabRefresh()" style="min-width:220px"><option value="">⏳ yükleniyor…</option></select>
-     <button class="btn sm blue" onclick="dgCollabLoad()">🔄 Yenile</button>
-    </div>
-    <div id="dgInvList"><div class="dg-tree-meta">Park seçilince davetler ve ortaklar burada listelenir.</div></div>
+    <span class="project-hero-chip">🌳 Park · proje · ekip</span>
    </div>
 
+   <div class="project-stats" aria-label="Proje özeti">
+    <div class="project-stat"><span>Sahibi olduğum</span><strong id="projOwnCount">0</strong><small>tam yönetim</small></div>
+    <div class="project-stat"><span>Benimle paylaşılan</span><strong id="projSharedCount">0</strong><small>ortak çalışma</small></div>
+    <div class="project-stat"><span>Gelen davet</span><strong id="projInviteCount">0</strong><small>yanıt bekleyen</small></div>
+   </div>
+
+   <!-- DAVET EDİLEN ROLÜ: yalnız kullanıcının kendisine gelen davetler. -->
+   <section id="dgInvBox" class="card project-inbox" style="display:none" aria-label="Gelen çalışma davetleri"></section>
+   <div id="dgSharedBox" class="project-member-banner" style="display:none"></div>
+
+   <div class="project-layout">
+    <details class="card project-create" id="projCreateDetails" open>
+     <summary>
+      <span><span class="project-step">01</span><b>Proje oluştur / düzenle</b></span>
+      <small>Park kimliğine bağlı çalışma</small>
+     </summary>
+     <div class="project-create-body">
+      <!-- PROJE = PARK + ETİKET. Park algılanmadan proje açılamaz. -->
+      <div id="projParkBox" class="alert info"></div>
+      <div class="project-form-grid">
+       <div><label class="lbl" for="pLabel">Proje etiketi</label><input id="pLabel" placeholder="örn. envanter 2026" oninput="dgProjectNamePreview()"></div>
+       <div><label class="lbl" for="pCountry">Ülke</label><input id="pCountry" value="Türkiye"></div>
+       <div><label class="lbl" for="pCity">Şehir</label><input id="pCity" value="Ankara"></div>
+      </div>
+      <div class="project-name-preview"><span>Proje Adı (otomatik)</span><strong id="pNamePreview" class="mono">—</strong></div>
+      <div class="project-actions">
+       <button class="btn sm" id="projSaveBtn" onclick="createProject()">+ Proje Oluştur</button>
+       <button class="btn sm ghost" id="projCancelBtn" style="display:none" onclick="cancelProjectEdit()">Vazgeç</button>
+      </div>
+     </div>
+    </details>
+
+    <section class="card project-owned" aria-labelledby="projectOwnedTitle">
+     <div class="project-section-head">
+      <div><span class="project-step">02</span><div><h3 id="projectOwnedTitle">Projelerim</h3><p>Proje sahibi olarak düzenleme, rapor ve ekip yönetimi sende.</p></div></div>
+      <span class="badge on">PROJE SAHİBİ</span>
+     </div>
+     <div id="projOwnList" class="project-card-list"></div>
+    </section>
+   </div>
+
+   <section class="card project-shared" id="projSharedSection" style="display:none" aria-labelledby="projectSharedTitle">
+    <div class="project-section-head">
+     <div><span class="project-step">03</span><div><h3 id="projectSharedTitle">Benimle paylaşılan projeler</h3><p>Bu projelerde ortak olarak ölçüm girebilirsin; proje ve ekip yönetimi sahibinde kalır.</p></div></div>
+     <span class="badge admin">ORTAK</span>
+    </div>
+    <div id="projSharedList" class="project-card-list"></div>
+   </section>
+
+   <!-- Eski entegrasyonlar için görünmez uyumluluk hedefi; kullanıcı arayüzünde tablo yok. -->
+   <div id="projTable" hidden aria-hidden="true"></div>
+
+   <!-- Kullanıcının kendi projesi için bilimsel rapor paneli. -->
+   <div id="dgUserPubBox" class="card" style="display:none;margin-top:14px"></div>
+
+   <!-- DAVET EDEN ROLÜ: yalnız sahibi olunan park/projelerde görünür. -->
+   <section class="card project-team" id="dgOwnerCollabCard" style="display:none" aria-labelledby="projectTeamTitle">
+    <div class="project-section-head">
+     <div><span class="project-step">04</span><div><h3 id="projectTeamTitle">Ekip yönetimi</h3><p>Çalışma arkadaşlarını yalnız sahibi olduğun projelere davet et ve erişimlerini yönet.</p></div></div>
+     <span class="badge on">PROJE SAHİBİ</span>
+    </div>
+    <div class="project-team-toolbar">
+     <div><label class="lbl" for="dgInvPark">Proje parkı</label><select id="dgInvPark" onchange="dgCollabRefresh()"><option value="">⏳ yükleniyor…</option></select></div>
+     <button class="btn sm ghost" onclick="dgCollabLoad()">↻ Yenile</button>
+    </div>
+    <div id="dgInvList"><div class="dg-tree-meta">Sahibi olduğun proje seçilince ekip ve davetler burada görünür.</div></div>
+   </section>
   </div>
 
   <div class="view" id="v-records">

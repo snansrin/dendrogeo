@@ -260,6 +260,32 @@ function dgProjectRestore(){
  if(!(PROJ_LIST||[]).some(p=>String(p.id)===last))return;
  for(const id of ["mProject","nProject"]){const s=$(id);if(s)s.value=last;}
 }
+function dgProjectOpenMeasure(id){
+ const p=(PROJ_LIST||[]).find(x=>Number(x.id)===Number(id));if(!p)return;
+ dgProjectRemember(id);
+ go("measure");
+ setTimeout(()=>{
+  const sel=$("mProject");if(sel)sel.value=String(id);
+  if(typeof dgProjectChanged==="function")dgProjectChanged();
+  if(typeof dgParkGate==="function")dgParkGate();
+ },80);
+}
+function dgProjectCard(p,isShared){
+ const park=p.parks&&p.parks.name?p.parks.name:(p.park_name||"Park bağlantısı yok");
+ const area=p.parks&&p.parks.area_m2?dgFmtHa(p.parks.area_m2):"";
+ const loc=[p.city,p.country].filter(Boolean).map(esc).join(" · ")||"Konum belirtilmedi";
+ const date=p.created_at?new Date(p.created_at).toLocaleDateString("tr-TR"):"—";
+ const role=isShared?'<span class="badge admin">ORTAK</span>':'<span class="badge on">PROJE SAHİBİ</span>';
+ const parkState=p.park_id
+  ? `<span>🌳 ${esc(park)}${area?" · "+area:""}</span>`
+  : `<span class="project-warning">⛔ park yok</span><small>${dgIsAdmin()?"Yönetici olarak bu eski projeyi parka bağlayabilirsin.":"🔐 yönetici bağlayacak"}</small>`;
+ const repBtn=p.park_id?`<button class="btn sm ghost" onclick="dgUserPubOpen(${p.id})">📄 Rapor</button>`:"";
+ const linkBtn=!isShared&&!p.park_id&&dgIsAdmin()?`<button class="btn sm ghost" onclick="startParkScan({projectId:${p.id},returnTo:'projects'})">🌳 Parka bağla</button>`:"";
+ const actions=isShared
+  ? `<button class="btn sm" onclick="dgProjectOpenMeasure(${p.id})">📏 Ölçüme geç</button><span class="project-access-note">Düzenleme ve ekip yönetimi proje sahibinde</span>`
+  : `<button class="btn sm" onclick="dgProjectOpenMeasure(${p.id})">📏 Ölçüm</button>${repBtn}${linkBtn}<button class="btn sm ghost" onclick="editProject(${p.id})">✏️ Düzenle</button><button class="btn sm ghost project-danger" onclick="deleteProject(${p.id})">🗑 Sil</button>`;
+ return `<article class="project-card ${isShared?"is-shared":"is-owned"}"><div class="project-card-top"><div><div class="project-card-park">${parkState}</div><h4>${esc(p.name||("Proje #"+p.id))}</h4></div>${role}</div><div class="project-card-meta"><span>📍 ${loc}</span><span>📅 ${date}</span><span class="mono">#${p.id}</span></div><div class="project-card-actions">${actions}</div></article>`;
+}
 async function loadProjects(){const _y=(typeof dgScrollKeep==="function"?dgScrollKeep():null);try{return await loadProjects__scroll.apply(this,arguments);}finally{if(typeof dgScrollRestore==="function")dgScrollRestore(_y);}}
 async function loadProjects__scroll(){
  if(!USER)return;
@@ -299,29 +325,17 @@ async function loadProjects__scroll(){
  $("mProject").innerHTML=opts||empty;
  $("nProject").innerHTML=opts||empty;
  dgProjectRestore();
- const ownRows=PROJ_LIST.filter(p=>!p.shared).map(p=>{
-  const park=p.parks&&p.parks.name?p.parks.name:(p.park_name||"");
-  const parkCell=p.park_id
-   ? `🌳 ${esc(park)}${p.parks&&p.parks.area_m2?`<br><span class="mono" style="font-size:.68rem;color:var(--mut)">${dgFmtHa(p.parks.area_m2)}</span>`:""}`
-   : `<span class="badge off">⛔ park yok</span><br>`+
-     (dgIsAdmin()
-       ? `<button class="btn sm blue" style="margin-top:4px" onclick="startParkScan({projectId:${p.id},returnTo:'projects'})">🌳 Bağla</button>`
-       : `<span style="font-size:.66rem;color:var(--mut)">🔐 yönetici bağlayacak</span>`);
-  /* 📄 (0009): parkı bağlı projede rapor paneli — kullanıcı kendi parkının
-   * bilimsel raporunu site içinden yayınlar/paylaşır. Parksız projede düğme
-   * yok (rapor park kimliği ister). Yetki kararı sunucuda (RLS + tetikleyici). */
-  const repBtn=p.park_id
-   ? `<button class="btn sm" onclick="dgUserPubOpen(${p.id})" title="Park raporu: yayınla / paylaş">📄</button>`
-   : "";
-  return `<tr><td data-label="ID">${p.id}</td><td data-label="Park">${parkCell}</td><td data-label="Proje Adı">${esc(p.name)}</td><td data-label="Ülke">${esc(p.country||"—")}</td><td data-label="Şehir">${esc(p.city||"—")}</td><td data-label="Tarih">${new Date(p.created_at).toLocaleDateString("tr-TR")}</td><td data-label="İşlem" style="display:flex;gap:4px">${repBtn}<button class="btn sm blue" onclick="editProject(${p.id})">✏️</button><button class="btn sm red" onclick="deleteProject(${p.id})">🗑</button></td></tr>`;
- }).join("");
- /* 0025 · paylaşılan proje satırları: düzenleme/silme/rapor YOK (proje
-  * sahibinin yetkisi) — ortak yalnız ÖLÇÜM GİRER (ölçüm sekmesi dropdown'ı). */
- const sharedRows=PROJ_LIST.filter(p=>p.shared).map(p=>{
-  const park=p.parks&&p.parks.name?p.parks.name:(p.park_name||"");
-  return `<tr><td data-label="ID">${p.id}</td><td data-label="Park">🌳 ${esc(park)} <span class="badge on">ortak</span></td><td data-label="Proje Adı">${esc(p.name)}</td><td data-label="Ülke">${esc(p.country||"—")}</td><td data-label="Şehir">${esc(p.city||"—")}</td><td data-label="Tarih">${new Date(p.created_at).toLocaleDateString("tr-TR")}</td><td data-label="İşlem"><span class="mono dg-sub">yalnız ölçüm girişi</span></td></tr>`;
- }).join("");
- $("projTable").innerHTML=(ownRows+sharedRows)||"<tr><td colspan=7>Proje yok — önce park algıla</td></tr>";
+
+ const own=PROJ_LIST.filter(p=>!p.shared), shared=PROJ_LIST.filter(p=>p.shared);
+ const ownCount=$("projOwnCount"), sharedCount=$("projSharedCount");
+ if(ownCount)ownCount.textContent=String(own.length);
+ if(sharedCount)sharedCount.textContent=String(shared.length);
+ const ownList=$("projOwnList"), sharedList=$("projSharedList"), sharedSection=$("projSharedSection");
+ if(ownList)ownList.innerHTML=own.length?own.map(p=>dgProjectCard(p,false)).join(""):'<div class="project-empty"><b>Henüz kendi projen yok.</b><span>Canlı Harita’dan bir park algılayıp ilk çalışma alanını oluştur.</span></div>';
+ if(sharedList)sharedList.innerHTML=shared.map(p=>dgProjectCard(p,true)).join("");
+ if(sharedSection)sharedSection.style.display=shared.length?"":"none";
+ const compat=$("projTable");if(compat)compat.innerHTML=own.map(p=>dgProjectCard(p,false)).join("")+shared.map(p=>dgProjectCard(p,true)).join("");
+ const create=$("projCreateDetails");if(create&&!EDIT_PROJ)create.open=own.length===0;
  dgRenderProjectParkBox();
  dgParkGate();
  /* Rapor paneli açıksa ve projesi listeden düştüyse paneli kapat (0009). */
@@ -361,7 +375,8 @@ function dgProjectNamePreview(){
 }
 
 function editProject(id){
- const p=PROJ_LIST.find(x=>x.id===id);if(!p)return;
+ const p=PROJ_LIST.find(x=>x.id===id&&!x.shared);if(!p)return;
+ const panel=$("projCreateDetails");if(panel)panel.open=true;
  EDIT_PROJ=id;
  EDIT_PROJ_PARK=p.park_id
   ? {id:p.park_id,name:(p.parks&&p.parks.name)||p.park_name||"",area_m2:(p.parks&&p.parks.area_m2)||null}
@@ -374,6 +389,7 @@ function editProject(id){
 function cancelProjectEdit(){
  EDIT_PROJ=null;EDIT_PROJ_PARK=null;
  $("pLabel").value="";$("projSaveBtn").textContent="+ Proje Oluştur";$("projCancelBtn").style.display="none";
+ const panel=$("projCreateDetails");if(panel&&(PROJ_LIST||[]).some(p=>!p.shared))panel.open=false;
  dgRenderProjectParkBox();
 }
 async function createProject(){
