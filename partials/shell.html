@@ -437,24 +437,24 @@
 
   <div class="view" id="v-users">
    <div class="admin-users-heading">
-    <div><div class="dg-kicker">YÖNETİM</div><h2 class="disp">Kullanıcılar</h2><p class="admin-users-help">Hesapları ara, rol ve durum bilgilerini tek ekranda yönet.</p></div>
+    <div><div class="dg-kicker">YÖNETİM</div><h2 class="disp">Kullanıcılar</h2><p class="admin-users-help">Hesap, rol ve erişim durumunu hızlıca yönetin.</p></div>
+    <button class="btn sm ghost admin-users-refresh-top" onclick="loadUsers()" title="Kullanıcı listesini yenile">↻ Yenile</button>
    </div>
-   <div class="admin-users-stats" aria-label="Kullanıcı özeti">
-    <div class="stat"><div class="lbl">Toplam</div><div class="val" id="aUsersTotal">0</div></div>
-    <div class="stat"><div class="lbl">Aktif</div><div class="val" id="aUsersActive">0</div></div>
-    <div class="stat"><div class="lbl">Yönetici</div><div class="val" id="aUsersAdmin">0</div></div>
-    <div class="stat"><div class="lbl">Pasif</div><div class="val" id="aUsersPassive">0</div></div>
+   <div class="admin-users-summary" aria-label="Kullanıcı özeti">
+    <div class="admin-users-summary-item"><span>Toplam</span><strong id="aUsersTotal">0</strong></div>
+    <div class="admin-users-summary-item is-active"><span>Aktif</span><strong id="aUsersActive">0</strong></div>
+    <div class="admin-users-summary-item is-admin"><span>Yönetici</span><strong id="aUsersAdmin">0</strong></div>
+    <div class="admin-users-summary-item is-passive"><span>Pasif</span><strong id="aUsersPassive">0</strong></div>
    </div>
    <section class="card admin-users-card" aria-labelledby="adminUsersListTitle">
     <div class="admin-users-toolbar">
-     <div class="admin-users-search"><label class="lbl" for="userSearch">Kullanıcı ara</label><input type="search" id="userSearch" placeholder="E-posta veya ad soyad" oninput="filterUsers()"></div>
+     <div class="admin-users-search"><label class="lbl" for="userSearch">Kullanıcı ara</label><input type="search" id="userSearch" placeholder="Ad veya e-posta" oninput="filterUsers()"></div>
      <div><label class="lbl" for="userRoleFilter">Rol</label><select id="userRoleFilter" onchange="filterUsers()"><option value="">Tümü</option><option value="owner">Kurucu</option><option value="admin">Denetçi</option><option value="user">Kullanıcı</option></select></div>
      <div><label class="lbl" for="userStatusFilter">Durum</label><select id="userStatusFilter" onchange="filterUsers()"><option value="">Tümü</option><option value="active">Aktif</option><option value="passive">Pasif</option></select></div>
-     <button class="btn sm ghost admin-users-refresh" onclick="loadUsers()">↻ Yenile</button>
     </div>
-    <div class="admin-users-list-head"><div><h3 id="adminUsersListTitle">Hesap listesi</h3><p>Rol değişikliği ve hesap durumu yalnız yetkili kullanıcı tarafından düzenlenir.</p></div><span class="mono" id="aUsersVisible">0 kullanıcı</span></div>
-    <div class="tblwrap dg-cards">
-     <table><thead><tr><th scope="col">E-posta</th><th scope="col">Ad Soyad</th><th scope="col">Rol</th><th scope="col">Durum</th><th scope="col">İşlem</th></tr></thead><tbody id="aUsersT"></tbody></table>
+    <div class="admin-users-list-head"><h3 id="adminUsersListTitle">Hesap listesi</h3><span class="mono" id="aUsersVisible">0 kullanıcı</span></div>
+    <div class="tblwrap dg-cards admin-users-table">
+     <table><thead><tr><th scope="col">Kullanıcı</th><th scope="col">Rol</th><th scope="col">Durum</th><th scope="col">İşlem</th></tr></thead><tbody id="aUsersT"></tbody></table>
     </div>
    </section>
   </div>
