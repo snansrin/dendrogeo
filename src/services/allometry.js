@@ -8,8 +8,10 @@ if(!dbh||!h||dbh<=0||h<=0)return{agb:0,bhb:0,bio:0,c_agb:0,c_bhb:0,total_carbon:
  * 3) kilitli grup geneli,
  * 4) yalnız geriye dönük belirsiz kayıtlar için DİĞER fallback.
  *
- * Böylece "Sığla", "SIĞLA" ve "Liquidambar orientalis" aynı 468 kg/m³
- * değerini kullanır; tür eklemek kanonik yoğunluk tablosunu ezemez.
+ * Sığla özel tür yoğunluğu taşımaz: "Sığla", "SIĞLA", "SIGLA" ve
+ * "Liquidambar orientalis" kanonik SIĞLA adına çözülür, rho haritasında özel
+ * değer bulunmadığı için YAPRAKLI genel 541 kg/m³ değerine düşer.
+ * Tür eklemek kilitli yoğunluk politikasını ezemez.
  */
 const canonical=(typeof resolveSpeciesName==="function"&&resolveSpeciesName(sp))||sp;
 const densityKg=(rho[canonical]??GROUP_DEFAULT_RHO[grp]??GROUP_DEFAULT_RHO["DİĞER"]);
