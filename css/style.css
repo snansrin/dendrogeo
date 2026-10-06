@@ -785,6 +785,45 @@ label.lbl{display:block}
 }
 
 
+/* 2026-10-06 · admin bilimsel yayın merkezi — sık kullanılan durumlar önde,
+   günlük ve açıklama ayrıntıları isteğe bağlı açılır. */
+.admin-publish-card{margin-bottom:18px!important;border-left:4px solid var(--green);padding:0!important;overflow:hidden}
+.admin-publish-heading{display:flex;align-items:flex-start;justify-content:space-between;gap:18px;padding:18px;border-bottom:1px solid var(--line);background:linear-gradient(180deg,var(--surface),var(--bg))}
+.admin-publish-title{display:flex;align-items:flex-start;gap:12px;min-width:0}
+.admin-publish-icon{display:grid;place-items:center;width:42px;height:42px;flex:0 0 auto;border-radius:11px;background:var(--tint);font-size:1.2rem}
+.admin-publish-title h2{font:600 1.25rem/1.2 var(--f-disp);color:var(--green-dk);margin:2px 0 4px}
+.admin-publish-title p{font-size:.78rem;line-height:1.5;color:var(--mut);max-width:680px}
+.admin-publish-lock{flex:0 0 auto;border:1px solid var(--line);border-radius:999px;padding:6px 10px;font:700 .64rem/1 var(--f-mono);color:var(--green);background:var(--surface)}
+.admin-publish-toolbar{display:grid;grid-template-columns:auto minmax(260px,1fr) auto;gap:12px;align-items:center;padding:12px 18px;border-bottom:1px solid var(--line);background:var(--surface)}
+.admin-publish-lulc{display:flex;align-items:center;gap:10px;min-height:42px;cursor:pointer;font-size:.76rem;color:var(--ink)}
+.admin-publish-lulc>span{display:grid;gap:2px}.admin-publish-lulc small{color:var(--mut);font-size:.65rem;font-weight:400}
+.admin-publish-clock{font:600 .67rem/1.2 var(--f-mono);color:var(--mut);white-space:nowrap}
+.admin-publish-body{padding:16px 18px 18px}
+.admin-publish-summary{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:9px;margin-bottom:12px}
+.admin-publish-metric{display:grid;gap:4px;padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:var(--bg)}
+.admin-publish-metric span{font-size:.64rem;text-transform:uppercase;letter-spacing:.05em;color:var(--mut);font-weight:800}
+.admin-publish-metric strong{font:700 1.25rem/1 var(--f-disp);color:var(--green-dk)}
+.admin-publish-error small{display:block;margin-top:4px;color:inherit;opacity:.8}
+.admin-publish-table{margin-top:12px}
+.admin-publish-table .dg-act{justify-content:flex-start}
+.admin-publish-log,.admin-publish-help{margin-top:12px;border:1px solid var(--line);border-radius:10px;background:var(--bg);overflow:hidden}
+.admin-publish-log>summary,.admin-publish-help>summary{list-style:none;cursor:pointer;display:flex;align-items:center;justify-content:space-between;gap:10px;min-height:46px;padding:10px 12px;font-size:.76rem;font-weight:800}
+.admin-publish-log>summary::-webkit-details-marker,.admin-publish-help>summary::-webkit-details-marker{display:none}
+.admin-publish-log>summary::after,.admin-publish-help>summary::after{content:"＋";color:var(--green);font-weight:800}
+.admin-publish-log[open]>summary::after,.admin-publish-help[open]>summary::after{content:"−"}
+.admin-publish-log>summary small{font-size:.64rem;color:var(--mut);font-weight:500;margin-left:auto}
+.admin-publish-log-list,.admin-publish-help-body{border-top:1px solid var(--line);padding:10px 12px}
+.admin-publish-log-item{padding:7px 0;border-bottom:1px solid var(--line);font-size:.76rem;line-height:1.45}
+.admin-publish-log-item:last-child{border-bottom:0}
+.admin-publish-help-body{font-size:.75rem;line-height:1.55;color:var(--mut)}
+@media(max-width:760px){
+ .admin-publish-heading{padding:14px}.admin-publish-lock{display:none}
+ .admin-publish-toolbar{grid-template-columns:1fr;padding:10px 14px}.admin-publish-toolbar>.btn{width:100%}
+ .admin-publish-clock{text-align:right}.admin-publish-body{padding:12px 14px 14px}
+ .admin-publish-summary{grid-template-columns:1fr 1fr}.admin-publish-title p{font-size:.72rem}
+}
+@media(max-width:480px){.admin-publish-summary{grid-template-columns:1fr 1fr}.admin-publish-icon{width:36px;height:36px}.admin-publish-title h2{font-size:1.1rem}}
+
 /* 2026-10-06 · admin kullanıcı yönetimi — ana tema, sade ve işlevsel */
 .admin-users-heading{display:flex;align-items:flex-end;justify-content:space-between;gap:18px;margin-bottom:16px}
 .admin-users-help{color:var(--mut);font-size:.84rem;margin-top:5px;max-width:680px}
