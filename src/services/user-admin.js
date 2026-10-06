@@ -11,20 +11,34 @@ async function loadUsers__scroll(){
  const I_AM_OWNER=PROFILE.role==="owner";
  const{data}=await sb.from("profiles").select("*");
  USERS_CACHE=data||[];
+ const total=USERS_CACHE.length,active=USERS_CACHE.filter(x=>x.active).length;
+ if($("aUsersTotal"))$("aUsersTotal").textContent=total;
+ if($("aUsersActive"))$("aUsersActive").textContent=active;
+ if($("aUsersAdmin"))$("aUsersAdmin").textContent=USERS_CACHE.filter(x=>x.role==="admin"||x.role==="owner").length;
+ if($("aUsersPassive"))$("aUsersPassive").textContent=total-active;
  $("aUsersT").innerHTML=USERS_CACHE.map(x=>{
   const ownerRow=x.role==="owner";
   const roleBadge=ownerRow?'<span class="badge" style="background:var(--green-dk);color:#fff">KURUCU</span>':(x.role==="admin"?'<span class="badge admin">DENETÇİ</span>':'<span class="badge on">KULLANICI</span>');
   let act="";
-  if(ownerRow)act="<span style='color:var(--mut);font-size:.7rem'>🛡 Korunuyor</span>";
-  else if(I_AM_OWNER)act=`<select onchange="updateRole('${x.id}',this.value)" style="padding:4px;border-radius:6px;border:1px solid var(--line)"><option value="user" ${x.role==="user"?"selected":""}>Kullanıcı</option><option value="admin" ${x.role==="admin"?"selected":""}>Denetçi</option></select> <button class="btn sm ${x.active?"red":"blue"}" onclick="toggleU('${x.id}',${!x.active})">${x.active?"Pasifleştir":"Aktifleştir"}</button>`;
-  else act="<span style='color:var(--mut);font-size:.7rem'>Salt okunur</span>";
-  return `<tr><td data-label="E‑posta">${esc(x.email)||"—"}</td><td data-label="Ad Soyad">${esc(x.full_name)||"—"}</td><td data-label="Rol">${roleBadge}</td><td data-label="Durum"><span class="badge ${x.active?"on":"off"}">${x.active?"Aktif":"Pasif"}</span></td><td data-label="İşlem" style="display:flex;gap:6px;align-items:center">${act}</td></tr>`;
+  if(ownerRow)act="<span class='admin-user-lock'>🛡 Korunuyor</span>";
+  else if(I_AM_OWNER)act=`<div class="admin-user-actions"><select aria-label="Kullanıcı rolü" onchange="updateRole('${x.id}',this.value)"><option value="user" ${x.role==="user"?"selected":""}>Kullanıcı</option><option value="admin" ${x.role==="admin"?"selected":""}>Denetçi</option></select><button class="btn sm ${x.active?"red":"blue"}" onclick="toggleU('${x.id}',${!x.active})">${x.active?"Pasifleştir":"Aktifleştir"}</button></div>`;
+  else act="<span class='admin-user-lock'>Salt okunur</span>";
+  return `<tr data-role="${esc(x.role||"user")}" data-status="${x.active?"active":"passive"}"><td data-label="E-posta"><strong>${esc(x.email)||"—"}</strong></td><td data-label="Ad Soyad">${esc(x.full_name)||"—"}</td><td data-label="Rol">${roleBadge}</td><td data-label="Durum"><span class="badge ${x.active?"on":"off"}">${x.active?"Aktif":"Pasif"}</span></td><td data-label="İşlem">${act}</td></tr>`;
  }).join("");
+ filterUsers();
 }
 
 function filterUsers(){
- const q=$("userSearch").value.toLowerCase();
- $("aUsersT").querySelectorAll("tr").forEach(r=>{r.style.display=r.textContent.toLowerCase().includes(q)?"":"none";});
+ const q=($("userSearch")?.value||"").trim().toLocaleLowerCase("tr-TR");
+ const role=$("userRoleFilter")?.value||"";
+ const status=$("userStatusFilter")?.value||"";
+ let visible=0;
+ $("aUsersT").querySelectorAll("tr").forEach(r=>{
+  const text=(r.textContent||"").toLocaleLowerCase("tr-TR");
+  const show=(!q||text.includes(q))&&(!role||r.dataset.role===role)&&(!status||r.dataset.status===status);
+  r.style.display=show?"":"none"; if(show)visible++;
+ });
+ if($("aUsersVisible"))$("aUsersVisible").textContent=visible+" kullanıcı";
 }
 
 async function updateRole(id,role){
