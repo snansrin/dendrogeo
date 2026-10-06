@@ -247,7 +247,7 @@
 <script src="src/utils/truncation.js?v=f43c76b3" defer></script>
 <!-- Faz 7: geotiff (317 KB) ve chart.js (208 KB) artık SENKRON yüklenmiyor;
      src/utils/lazylibs.js ihtiyaç anında enjekte eder (LULC analizi / panel grafiği). -->
-<script id="dgRuntimeBuild" type="application/json">"2d2afc0ad8b3d98e"</script>
+<script id="dgRuntimeBuild" type="application/json">"a1b0427bfa5525ad"</script>
 <script src="src/utils/lazylibs.js?v=19763039" defer></script>
 <script src="src/services/allometry.js?v=46ea5b87" defer></script>
 <script src="src/services/auth.js?v=1e92b5cd" defer></script>
@@ -273,7 +273,7 @@
 <script src="src/services/park-invites.js?v=f31e6518" defer></script>
 <script src="src/services/world.js?v=c72d9019" defer></script>
 <script src="src/services/measure.js?v=2bcadf7e" defer></script>
-<script src="src/services/map.js?v=bc3b57b1" defer></script>
+<script src="src/services/map.js?v=6f0fa745" defer></script>
 <!-- LULC ZİNCİRİ ARTIK TEMBEL (2026-09-25 · Faz 8): 8 dosya ilk yüklemede
      indirilmiyor. Yalnız "🌿 Yüzey Örtüsü Analizi"ne basan kullanıcı için
      src/utils/lazylibs.js → dgEnsureLulc() sırayla enjekte eder
@@ -296,7 +296,7 @@
 <script src="src/ui/park-panel.js?v=618e3acc" defer></script>
 <script src="src/ui/park-export.js?v=c724cd32" defer></script>
 <script src="src/services/dash.js?v=7e8bde11" defer></script>
-<link rel="stylesheet" href="css/style.css?v=08447845">
+<link rel="stylesheet" href="css/style.css?v=87144e68">
 <link rel="stylesheet" href="css/landing.css?v=e354190f">
 <link rel="stylesheet" href="css/park-panel.css?v=649541ba">
 <!-- TASARIM SİSTEMİ (2026-09-27, 2. deneme): ui-standard.css geri BAĞLANDI
@@ -786,39 +786,39 @@
   </div>
 
   <div class="view" id="v-nav">
-   <h2 class="disp" style="margin-bottom:16px">Waypoint Navigasyon</h2>
-   <div class="grid g2">
-    <div class="card">
-     <label class="lbl" for="nProject">Proje</label><select id="nProject" onchange="loadWaypoints()"></select>
-     <div id="navInfo" class="alert info" style="margin-top:12px">Liste projeye kalıcı kaydedilir; tekrar yüklemeye gerek yok.</div>
-     <div style="display:flex;gap:20px;align-items:center;margin-top:14px">
-      <svg class="arrow" id="navArrow" viewBox="0 0 100 100"><path d="M50 5 L70 70 L50 55 L30 70 Z" fill="var(--green)"/></svg>
-      <div><div class="val" id="navDist">—</div><div class="lbl">hedefe mesafe</div><div class="mono" id="navTarget" style="color:var(--amber-ink);margin-top:6px">—</div></div>
-     </div>
-     <div class="waypoint-actions"><button class="btn blue sm" onclick="dgNearestWaypoint()">📍 En yakın bekleyen</button><button class="btn sm ghost" onclick="dgNextWaypoint()">→ Sıradaki nokta</button><button class="btn sm ghost" onclick="dgFocusWaypoint(true)">🎯 Hedefi göster</button><button class="btn sm ghost" onclick="dgFitWaypoints()">🗺 Tüm noktalar</button></div>
-     <p id="navGuidance" class="measure-help" role="status">Hedef seçerek navigasyona başlayın.</p>
-     <button class="dg-png-btn primary" style="margin-top:14px" onclick="arriveWp()">🎯 Vardım → Ölçüme Geç</button>
-     <p id="navGps" class="measure-help" role="status">GPS konumu bekleniyor.</p>
+   <div class="waypoint-heading"><div><div class="dg-kicker">SAHA NAVİGASYONU</div><h2 class="disp">Waypoint</h2></div></div>
+   <section class="card waypoint-project" aria-label="Waypoint projesi">
+    <div class="waypoint-project-select"><label class="lbl" for="nProject">Proje</label><select id="nProject" onchange="loadWaypoints()"></select></div>
+    <div id="navInfo" class="waypoint-project-status" role="status">Proje seçin.</div>
+   </section>
+   <section class="card waypoint-nav-card" aria-label="Aktif hedef">
+    <div class="waypoint-target">
+     <div class="waypoint-compass" aria-hidden="true"><svg class="arrow" id="navArrow" viewBox="0 0 100 100"><path d="M50 5 L70 70 L50 55 L30 70 Z" fill="var(--green)"/></svg></div>
+     <div class="waypoint-target-copy"><span class="lbl">Aktif hedef</span><div class="mono waypoint-target-name" id="navTarget">Listeden hedef seçin.</div><div class="waypoint-distance-main"><strong id="navDist">—</strong><span>mesafe</span></div></div>
     </div>
-    <details id="wpMapPanel" class="card waypoint-map" ontoggle="if(this.open&amp;&amp;navMap){navMap.invalidateSize();dgFocusWaypoint();}"><summary>🗺 Harita</summary><div id="navMap" class="notranslate" translate="no"></div><div class="lbl" style="margin-top:8px">🔴 waypoint (numaralı, tıkla=hedef) · 🟢 yapıldı · 🔵 konumun</div></details>
-    <div class="card waypoint-list">
-     <div style="margin-top:24px;border-top:1px solid var(--line);padding-top:16px">
-      <div class="lbl" style="margin-bottom:10px">📍 Waypoint Listesi</div>
-      <div class="waypoint-filters"><div><label class="lbl" for="wpSearch">Nokta ara</label><input id="wpSearch" type="search" placeholder="P12 veya 12" oninput="renderWaypointList()"></div><div><label class="lbl" for="wpFilter">Durum</label><select id="wpFilter" onchange="renderWaypointList()"><option value="all">Tümü</option><option value="pending">Bekleyen</option><option value="done">Tamamlanan</option></select></div></div>
-      <div class="waypoint-sort"><label class="lbl" for="wpSort">Sıralama</label><select id="wpSort" onchange="renderWaypointList()"><option value="id">Nokta numarası</option><option value="distance">Yakından uzağa (GPS)</option></select></div>
-      <ul id="wpListTable" class="waypoint-points" aria-label="Waypoint noktaları"></ul>
-      <div id="wpPager" class="waypoint-pager"></div>
-     </div>
-     <details class="waypoint-files"><summary>📂 CSV ve liste yönetimi</summary>
-     <div class="lbl" style="margin:12px 0 6px">Waypoints.csv Yükle (X,Y,id)</div>
-     <span class="dg-file btn sm ghost">📂 <span>Dosya seç</span><input type="file" id="nCsv" aria-label="Waypoints.csv dosyası seç (X,Y,id)" accept=".csv" onchange="dgFileName(event,'nCsvName')" style="position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:pointer"></span><span class="dg-file-name mono" id="nCsvName"></span>
-     <div style="display:flex;gap:8px;flex-wrap:wrap">
-      <button class="btn blue sm" style="margin-top:8px" onclick="uploadWpCsv()">⬆ Waypoint Yükle</button>
-      <button class="btn red sm" style="margin-top:8px" onclick="deleteAllWaypoints()">🗑 Listeyi Tamamen Sil</button>
-     </div>
-     </details>
+    <div class="waypoint-actions waypoint-actions-primary">
+     <button class="btn blue sm" onclick="dgNearestWaypoint()">📍 En yakın</button><button class="btn sm ghost" onclick="dgNextWaypoint()">→ Sıradaki</button><button class="btn sm ghost" onclick="dgFocusWaypoint(true)">🎯 Haritada göster</button><button class="btn sm ghost" onclick="dgFitWaypoints(true)">🗺 Tüm noktalar</button>
     </div>
-   </div>
+    <div class="waypoint-field-status"><p id="navGuidance" class="measure-help" role="status">Hedef seçerek navigasyona başlayın.</p><p id="navGps" class="measure-help" role="status">GPS konumu bekleniyor.</p></div>
+    <div class="waypoint-arrival"><button class="btn sm ghost waypoint-gps-btn" onclick="startGps()">📡 Konumu Aç</button><button class="dg-png-btn primary" onclick="arriveWp()">🎯 Vardım → Ölçüme Geç</button></div>
+   </section>
+   <details id="wpMapPanel" class="card waypoint-map" ontoggle="if(this.open&amp;&amp;navMap){navMap.invalidateSize();dgFocusWaypoint();}">
+    <summary><span>🗺 Harita</span><small>hedef · konum · tamamlananlar</small></summary><div id="navMap" class="notranslate" translate="no"></div>
+    <div class="waypoint-map-legend"><span><i class="wp-legend-dot pending"></i>Waypoint</span><span><i class="wp-legend-dot done"></i>Tamamlandı</span><span><i class="wp-legend-dot me"></i>Konumun</span></div>
+   </details>
+   <section class="card waypoint-list" aria-labelledby="waypointListTitle">
+    <div class="project-section-head"><div><div class="dg-kicker">SAHA SIRASI</div><h3 id="waypointListTitle">Waypoint listesi</h3></div></div>
+    <div class="waypoint-toolbar">
+     <div><label class="lbl" for="wpSearch">Nokta ara</label><input id="wpSearch" type="search" placeholder="P12" oninput="renderWaypointList()"></div>
+     <div><label class="lbl" for="wpFilter">Durum</label><select id="wpFilter" onchange="renderWaypointList()"><option value="all">Tümü</option><option value="pending">Bekleyen</option><option value="done">Tamamlanan</option></select></div>
+     <div><label class="lbl" for="wpSort">Sıralama</label><select id="wpSort" onchange="renderWaypointList()"><option value="id">Nokta numarası</option><option value="distance">En yakından</option></select></div>
+    </div>
+    <ul id="wpListTable" class="waypoint-points" aria-label="Waypoint noktaları"></ul><div id="wpPager" class="waypoint-pager"></div>
+   </section>
+   <section class="card waypoint-files" aria-labelledby="waypointFileTitle">
+    <div class="project-section-head"><div><div class="dg-kicker">LİSTE YÖNETİMİ</div><h3 id="waypointFileTitle">Waypoint dosyası</h3></div></div>
+    <div class="waypoint-file-row"><span class="dg-file btn sm ghost">📂 <span>CSV seç</span><input type="file" id="nCsv" aria-label="Waypoints.csv dosyası seç (X,Y,id)" accept=".csv" onchange="dgFileName(event,'nCsvName')" style="position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:pointer"></span><span class="dg-file-name mono" id="nCsvName"></span><button class="btn blue sm" onclick="uploadWpCsv()">⬆ Yükle</button><button class="btn red sm waypoint-delete-all" onclick="deleteAllWaypoints()">🗑 Tümünü Sil</button></div>
+   </section>
   </div>
 
 <div class="view" id="v-map"><h2 class="disp" style="margin-bottom:16px">Canlı Harita</h2>
