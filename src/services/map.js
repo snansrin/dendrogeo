@@ -239,7 +239,7 @@ function dgWaypointPage(delta){DG_WP_PAGE+=delta;renderWaypointList();}
 function renderWaypointList(){
  const done=WP.filter(w=>w.visited).length;
  $("dWp").textContent=WP.length;$("dVisit").textContent=done;
- $("navInfo").textContent=WP.length+" nokta · "+(WP.length-done)+" bekleyen · "+done+" tamamlanan. Liste projeye kalıcı kaydedilir.";
+ $("navInfo").textContent=WP.length+" nokta · "+(WP.length-done)+" bekleyen · "+done+" tamamlanan";
  const query=($("wpSearch")?.value||"").trim().toLowerCase().replace(/^p/,"");
  const filter=$("wpFilter")?.value||"all";
  const rows=WP.filter(w=>String(w.wp_id).includes(query)&&(filter==="all"||(filter==="done"?w.visited:!w.visited)));
@@ -249,8 +249,7 @@ function renderWaypointList(){
  const pages=Math.max(1,Math.ceil(rows.length/DG_WP_PAGE_SIZE));DG_WP_PAGE=Math.max(0,Math.min(pages-1,DG_WP_PAGE));
  const visible=rows.slice(DG_WP_PAGE*DG_WP_PAGE_SIZE,(DG_WP_PAGE+1)*DG_WP_PAGE_SIZE);
  const pager=$("wpPager");if(pager)pager.innerHTML=`<button class="btn sm ghost" onclick="dgWaypointPage(-1)" ${DG_WP_PAGE===0?"disabled":""}>←</button><span>${rows.length?DG_WP_PAGE*DG_WP_PAGE_SIZE+1:0}–${Math.min(rows.length,(DG_WP_PAGE+1)*DG_WP_PAGE_SIZE)} / ${rows.length}</span><button class="btn sm ghost" onclick="dgWaypointPage(1)" ${DG_WP_PAGE===pages-1?"disabled":""}>→</button>`;
- const openCoordinates=new Set(Array.from($("wpListTable").querySelectorAll?.("details[open]")||[],el=>el.getAttribute("data-wp-id")));
- $("wpListTable").innerHTML=rows.length?visible.map(w=>`<li class="waypoint-point ${w.visited?'done':''}"${navTarget?.id===w.id?' aria-current="true"':''}><details class="waypoint-coordinates" data-wp-id="${Number(w.id)}"${openCoordinates.has(String(w.id))?" open":""}><summary aria-label="P${Number(w.wp_id)} ${dgCf("Koordinatlar")}"><b>P${Number(w.wp_id)}</b><span class="mono waypoint-distance">${GPS?Math.round(hav(GPS.latitude,GPS.longitude,w.lat,w.lon))+" m":"—"}</span><span aria-hidden="true">⌄</span></summary><div><span data-label="Enlem">${dgCf("Enlem")}: ${Number(w.lat).toFixed(6)}</span><span data-label="Boylam">${dgCf("Boylam")}: ${Number(w.lon).toFixed(6)}</span></div></details><div class="waypoint-point-actions"><span>${w.visited?'<span class="badge on">✓ Yapıldı</span>':'<span class="badge admin">Bekliyor</span>'}</span><div data-label="İşlem">${w.visited?'':`<button class="btn sm blue" onclick="selectWaypoint(${Number(w.id)})">🎯 Hedef</button>`}</div></div></li>`).join(""):'<li class="waypoint-empty">'+(WP.length?"Aramaya uygun nokta yok.":(+$("nProject").value?"Bu projede waypoint yok. CSV yükleyin.":"Önce proje seçin."))+"</li>";
+ $("wpListTable").innerHTML=rows.length?visible.map(w=>`<li class="waypoint-point ${w.visited?'done':''}"${navTarget?.id===w.id?' aria-current="true"':''}><div class="waypoint-point-main"><b>P${Number(w.wp_id)}</b><span class="mono waypoint-distance">${GPS?Math.round(hav(GPS.latitude,GPS.longitude,w.lat,w.lon))+" m":"—"}</span></div><div class="waypoint-point-actions"><span>${w.visited?'<span class="badge on">✓ Yapıldı</span>':'<span class="badge admin">Bekliyor</span>'}</span>${w.visited?'':`<button class="btn sm blue" onclick="selectWaypoint(${Number(w.id)})">🎯 Hedef</button>`}</div></li>`).join(""):'<li class="waypoint-empty">'+(WP.length?"Aramaya uygun nokta yok.":(+$("nProject").value?"Bu projede waypoint yok. CSV yükleyin.":"Önce proje seçin."))+"</li>";
 }
 
 async function deleteAllWaypoints(){
@@ -272,7 +271,7 @@ async function selectWaypoint(id){
 }
 // Navigation actions select targets only; arrival retains the existing visit/save flow.
 function dgNearestWaypoint(){
- if(!GPS){toast(dgCf("En yakın noktayı seçmek için önce konumu etkinleştirin."),"warn");go("measure");return;}
+ if(!GPS){toast(dgCf("En yakın noktayı seçmek için önce konumu etkinleştirin."),"warn","📡");try{if(typeof startGps==="function")startGps();}catch(e){}return;}
  const pending=WP.filter(w=>!w.visited);
  if(!pending.length)return toast(dgCf("Bekleyen waypoint kalmadı."),"info");
  const nearest=pending.reduce((a,b)=>hav(GPS.latitude,GPS.longitude,a.lat,a.lon)<=hav(GPS.latitude,GPS.longitude,b.lat,b.lon)?a:b);
@@ -291,7 +290,8 @@ function dgFocusWaypoint(showMap=false){
  if(GPS)navMap.fitBounds([[GPS.latitude,GPS.longitude],target],{padding:[36,36],maxZoom:18});
  else navMap.setView(target,18);
 }
-function dgFitWaypoints(){
+function dgFitWaypoints(showMap=false){
+ if(showMap){const p=$("wpMapPanel");if(p)p.open=true;if(navMap?.invalidateSize)navMap.invalidateSize();}
  if(!navMap||!WP.length)return;
  const points=WP.map(w=>[w.lat,w.lon]);
  if(GPS)points.push([GPS.latitude,GPS.longitude]);

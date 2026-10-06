@@ -22,16 +22,20 @@ test('Kayıtlarım proje bazında kapalı disclosure olarak gruplanır',()=>{
  assert.match(rd('partials/shell.html'),/id="recGroups" class="records-groups"/);
 });
 
-test('Waypoint kullanıcı tercihiyle sade eski düzendedir',()=>{
+test('Waypoint ana tema standardında saha odaklıdır; yalnız harita disclosure kalır',()=>{
  const shell=rd('partials/shell.html');
  const a=shell.indexOf('<div class="view" id="v-nav">');
  const b=shell.indexOf('<div class="view"',a+30);
  const nav=shell.slice(a,b);
- assert.match(nav,/<h2 class="disp"[^>]*>Waypoint Navigasyon<\/h2>/);
+ assert.match(nav,/class="waypoint-heading"/);
+ assert.match(nav,/<h2 class="disp">Waypoint<\/h2>/);
  assert.ok(!nav.includes('Saha Modu'));
- assert.ok(!nav.includes('waypoint-heading'));
  assert.match(nav,/id="wpMapPanel" class="card waypoint-map"/);
- assert.match(nav,/<details class="waypoint-files"><summary>📂 CSV ve liste yönetimi<\/summary>/);
+ assert.equal((nav.match(/<details\b/g)||[]).length,1,'yalnız harita açılır/kapanır');
+ assert.match(nav,/class="card waypoint-files"/);
+ assert.match(nav,/id="wpSearch"/);
+ assert.match(nav,/id="wpFilter"/);
+ assert.match(nav,/id="wpSort"/);
 });
 
 test('Taleplerim kapalı disclosure olur ve kullanıcı kendi talebini silebilir',()=>{

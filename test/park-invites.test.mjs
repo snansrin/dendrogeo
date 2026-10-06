@@ -251,11 +251,11 @@ describe('0025 · kablolama (index.html + shell + partials)', () => {
     assert.match(sh, /id="projTable" hidden/, 'eski entegrasyon hedefi görünmez uyumluluk için korunur');
     assert.match(sh, /id="projOwnList"/, 'proje sahipliği kart listesinde');
     assert.match(sh, /id="projSharedList"/, 'paylaşılan projeler ayrı kart listesinde');
-    /* 0027: waypoint tablosu — kullanıcı bildirimi "içeride sağa-sola kayıyor" */
-    assert.match(sh, /<ul id="wpListTable" class="waypoint-points"/, 'waypoint listesi kompakt nokta kartları kullanır');
+    /* Waypoint saha listesi yatay tablo/koordinat disclosure kullanmaz. */
+    assert.match(sh, /<ul id="wpListTable" class="waypoint-points"/, 'waypoint listesi kompakt saha sırası kullanır');
     const mp = read('src/services/map.js');
-    assert.match(mp, /data-label="Enlem"/, 'waypoint satırları etiketli');
-    assert.match(mp, /data-label="İşlem"/);
+    assert.match(mp, /class="waypoint-point-main"/, 'nokta + mesafe tek satırda');
+    assert.ok(!mp.includes('waypoint-coordinates'), 'gereksiz koordinat disclosure kaldırılmış olmalı');
     const ua = read('src/services/user-admin.js');
     assert.match(ua, /data-label="Ad Soyad"/, 'kullanıcı tablosu etiketli');
     const dr = read('src/services/data-requests.js');
