@@ -247,10 +247,9 @@ yazar künyesi veri sahibi önceliğiyle (0015) en çok katkısı olan kişidir.
 Güvenlik: davet/ortak tablolarına istemciden YAZMA YOK (grant verilmedi) —
 tüm yazımlar RPC denetiminde; davetler anon'a kapalı (rls-probe.sh 0025 bölümüyle denetlenir).
 
-## 6) Envanter kalite kapıları (QA v4 · 0032)
+## 6) Envanter kalite kapıları (FINAL ölçüm protokolü)
 
-**DBH = göğüs çapı (cm)** ve sahada doğrudan çap olarak kaydedilir; rapor
-hattında çevre→çap dönüşümü YAPILMAZ (ayrıntı: `docs/methods.md` §1.5.1).
+**Sahada ham değişken göğüs çevresi C'dir (cm).** Mezura 1,30 m yükseklikte gövde çevresine sarılır; ham değer `girth_cm` olarak korunur. DBH çapı **D = C / π** ile türetilip `dbh_cm` alanına yazılır. Rapor görünümünde DBH 1 ondalık basamakla gösterilir; karbon/QA hesabında yuvarlanmamış D kullanılır (ayrıntı: `docs/methods.md` §1.5.1).
 
 Rapor motoru yayından ÖNCE kayıtları da denetler (§7 Çizelge 4):
 
@@ -259,9 +258,9 @@ Rapor motoru yayından ÖNCE kayıtları da denetler (§7 Çizelge 4):
 | Tür sözlüğü eşleşmesi | kanonik ad / eşanlamlı | ⚠ beyan (ρ grup varsayılanı) |
 | Fotoğraf kanıtı | her kayıtta `photo_url` | ⚠ beyan |
 | GNSS doğruluk kaydı | `accuracy_m` dolu | ⚠ "kaydedilmedi" beyanı (±0,0 UYDURULMAZ) |
-| **Envanter birim kontrolü (DBH)** | var → sayısal → > 0 → `1 ≤ D ≤ 400 cm` | ≥3 kayıt VE >%50 → **⛔ kritik** |
+| **Ölçüm protokolü (çevre → DBH)** | ham C var → sayısal → >0; `D=C/π`; `1 ≤ D ≤ 400 cm` | ≥3 kayıt VE >%50 → **⛔ kritik** |
 | **Boy/DBH oranı incelemesi** | fiziksel makullük `3 ≤ 100·H/D ≤ 200` + boy `1,3–100 m` + stand içi robust aykırılık (`modified z > 3,5`, yalnız `n ≥ 5`) | **⚠ İNCELEME — asla blok değil** |
-| Karbon yeniden hesabı | panel denklemi ±%20 (ve mutlak fark ≥5 kg — küçük kayıtlarda yuvarlama gürültüsü bayraklanmaz) — **iki ρ kaynağından herhangi biriyle** (tür ρ / grup varsayılanı ρ) | ≥3 kayıt VE >%50 → **⛔ kritik** (hesap bütünlüğü; DBH birimiyle ilgisi yok) |
+| Karbon yeniden hesabı | türetilmiş tam hassasiyetli D + FINAL kilitli ρ ile panel denklemi ±%20 (ve mutlak fark ≥5 kg) | ≥3 kayıt VE >%50 → **⛔ kritik** |
 | Park geometrisi | bbox/düğüm taraması | dikdörtgen `geom_json` yok sayılır → OSM'e düşülür (beyanla) |
 
 > **0032 · tipik `15–120` bandı artık YALNIZ SAYIM.** `hd_band_out` olarak
@@ -271,12 +270,7 @@ Rapor motoru yayından ÖNCE kayıtları da denetler (§7 Çizelge 4):
 > modified z (eşik 3,5) aynı veride hiçbir kaydı aykırı bulmuyor.
 > `hd_block` kalıcı `false` (0031 hükmü korunur).
 
-> **0032 · iki ρ kaynağı.** Saklı `carbon_kg` değerlerinin bir bölümü 0011
-> döneminde **grup varsayılanı** ρ ile üretilmişti. Denetim beklenen değeri hem
-> tür ρ hem grup ρ ile hesaplar; hangisinin eşleştiği §7 Çizelge 4te ve
-> `metadata.json → carbonRecalc` alanında sayıyla beyan edilir. Karbon motoru,
-> katsayılar, saklı değerler, CSV ve şema **değişmez**; 10× ondalık kayması
-> gibi gerçek hesap hataları yakalanmaya devam eder.
+> **FINAL ρ kaynağı.** Karbon yeniden hesabı yalnız kilitli tür yoğunluğunu; tür için özel yoğunluk yoksa kendi İBRELİ/YAPRAKLI grup genelini kullanır. Tarihsel/alternatif yoğunluklar güncel hesap için kabul edilmez.
 
 > **0033 · rapor hiçbir yasal statü hükmü üretmez.** 0032de eklenen eşik
 > tabanlı gövde sınıfı beyanı (ℹ️ satırı, mevzuat künyesi, `metadata.json`
@@ -313,19 +307,15 @@ Mobilde `.tscroll` kabı yatay kayar (`table.qa{min-width:540px}`), printte üç
 kolon korunur. Uzun açıklama kolonu olan §4.6 (veri sözlüğü) ve §10 (tekrar
 üretilebilirlik) çizelgeleri de `.qd` kullanır.
 
-> **0011 notu (tarihsel):** `supabase/migrations/0011_inventory_qa.sql`
-> "Çap kolonu çevre taşıyor" varsayımıyla `dbh_cm` değerlerini π ile bölmüş
-> ve h/D oranına yayın bloğu bağlamıştı. Bu varsayım yanlıştı; kayıtlar
-> `0013_restore_measurements.sql` ile özgün saha değerlerine iade edildi,
-> 0031 de h/D hükmünü incelemeye indirdi. Yeni bir migration GEREKMEZ.
+> **Tarihsel not:** 0011/0013 geçişleri önceki protokol kararlarını belgelendirir. **2026-10-06 FINAL kararında saha ham değişkeni göğüs çevresidir**; canlı ölçümler ham `girth_cm` korunarak `dbh_cm = girth_cm/π` biçiminde türetilmiştir. Tarihsel migration metinleri güncel yöntem otoritesi değildir.
 
 Yeni saha/cihaz verisi için elle panel girişi yerine:
 
 ```bash
 node scripts/import-measurements.mjs saha.csv --park N --project N --owner UUID
-#  · dosyada göğüs çapı (cap|çap|dbh|dbh_cm, cm) kolonu ZORUNLU
-#  · --birim auto (varsayılan) = cm; çevre→çap dönüşümü YAPILMAZ (0031)
-#  · --birim cevre KALDIRILDI (exit 2); yalnız çevre kolonu olan dosya alınmaz
+#  · dosyada ham göğüs çevresi (cevre|çevre|girth|girth_cm, cm) ZORUNLU
+#  · --birim auto (varsayılan) = cm; DBH = çevre/π ile türetilir
+#  · ayrıca DBH kolonu varsa yalnız çevre/π sonucunu çapraz doğrular
 #  · boy/çap oranı taşarsa ⚠ uyarı basar, içe aktarmayı BLOKLAMAZ
 #  · --dry-run: yalnız QA raporu  · --json: makine okur  · SQL idempotent
 ```
