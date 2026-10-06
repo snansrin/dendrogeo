@@ -221,6 +221,7 @@ describe('arayüz bağlantısı: kart, modül kaydı, çevrimdışı paket', () 
     assert.ok(!SHELL.slice(0, a).includes('Bilimsel Rapor Yayını'), 'başka sekmede yok');
     for (const id of ['dgPubBox', 'dgPubLulc', 'dgPubClock'])
       assert.match(seg, new RegExp('id="' + id + '"'), id + ' kartta');
+    assert.match(seg,/class="dg-switch" id="dgPubLulc"/,'§5 seçimi yerel checkbox yerine tema switch kullanır');
     assert.ok(!SHELL.slice(b).includes('dgPubBox'), 'kart v-users’a taşmıyor');
   });
 
