@@ -1,0 +1,29 @@
+name: Live UI Verify
+on:
+  push:
+    branches:
+      - ui/admin-users-compact-final
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - name: Compare deployed UI files
+        run: |
+          python3 - <<'PY'
+          import hashlib, urllib.request, time
+          files=['index.html','css/style.css','src/config/i18n.js','src/services/user-admin.js']
+          h=lambda b: hashlib.sha256(b).hexdigest()[:16]
+          bad=[]
+          for f in files:
+              local=h(open(f,'rb').read())
+              req=urllib.request.Request('https://dendrogeo.org/'+f+'?_='+str(int(time.time())),headers={'User-Agent':'dendrogeo-final-live-verify'})
+              live=h(urllib.request.urlopen(req,timeout=30).read())
+              print(('OK' if local==live else 'DRIFT'),f,'repo='+local,'live='+live)
+              if local!=live: bad.append(f)
+          if bad: raise SystemExit('Live drift: '+', '.join(bad))
+          print('LIVE_MATCH')
+          PY
