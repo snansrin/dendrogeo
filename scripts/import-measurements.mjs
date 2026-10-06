@@ -389,7 +389,7 @@ const summary = {
   file, delim, rows: recs.length, live: live.length, skipped: recs.length - live.length,
   unit: decided, gates, blocked: !!blocked, forced: !!force,
   totals: { stored_t: +(totStored / 1000).toFixed(3), calc_t: +(totCalc / 1000).toFixed(3), ratio: totStored > 0 ? +(totStored / totCalc).toFixed(2) : null },
-  records: live.map((r) => ({ point_id: r.point_id, species: r.species, grp: r.grp, girth_cm: Number.isFinite(r.girth_cm) ? r.girth_cm : null, dbh_cm: r.dbh_cm, height_m: r.height_m, hd: r.hd, carbon_stored: Number.isFinite(r.carbon_stored) ? r.carbon_stored : null, carbon_calc: r.carbon_calc, dev_pct: Number.isFinite(r.dev_pct) ? r.dev_pct : null, lat: Number.isFinite(r.lat) ? r.lat : null, lon: Number.isFinite(r.lon) ? r.lon : null })),
+  records: live.map((r) => ({ point_id: r.point_id, species: r.species, grp: r.grp, girth_cm: Number.isFinite(r.girth_cm) ? r.girth_cm : null, dbh_cm: r.dbh_cm, height_m: r.height_m, hd: r.hd, carbon_stored: Number.isFinite(r.carbon_stored) ? r.carbon_stored : null, carbon_calc: r.carbon_calc, dev_pct: Number.isFinite(r.dev_pct) ? r.dev_pct : null, rho_src: r.rho_src ?? null, lat: Number.isFinite(r.lat) ? r.lat : null, lon: Number.isFinite(r.lon) ? r.lon : null })),
   warn: warn.slice(0, 40), errors: errs,
   out: has('dry-run') ? null : outPath,
 };
