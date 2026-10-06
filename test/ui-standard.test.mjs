@@ -128,11 +128,11 @@ describe('GPS butonu canlı UI dilinde (🌿 Yüzey Örtüsü Analizi kartıyla 
     assert.doesNotMatch(m[0], /btn blue/, 'ayrı tema yok');
   });
 
-  test('kart LULC kartıyla aynı iskelet: dg-png-card/head/kicker/title/sub/badge', () => {
-    const i = shell.indexOf('id="gpsState"');
-    const blok = shell.slice(i - 700, i + 700);
-    for (const c of ['dg-png-card', 'dg-png-head', 'dg-png-kicker', 'dg-png-title', 'dg-png-sub', 'dg-png-badge'])
-      assert.ok(blok.includes(c), c + ' GPS kartında olmalı');
+  test('kart LULC kartıyla aynı iskelet: dg-png-card/head/kicker/title/sub', () => {
+    const i = shell.indexOf('id="gpsBtn"');
+    const blok = shell.slice(i - 900, i + 500);
+    for (const c of ['dg-png-card', 'dg-png-head', 'dg-png-kicker', 'dg-png-title', 'dg-png-sub']) assert.ok(blok.includes(c), c + ' GPS kartında olmalı');
+    assert.ok(!blok.includes('id="gpsBadge"'),'ayrı GPS rozeti kullanıcı isteğiyle kaldırıldı');
   });
 
   test('canlı durum: konum alınırken bekler, başarıdan sonra sade GPS aktif durumuna geçer', () => {
@@ -142,7 +142,7 @@ describe('GPS butonu canlı UI dilinde (🌿 Yüzey Örtüsü Analizi kartıyla 
     assert.match(m, /b\.style\.opacity="\.65"/, 'aynı solukluk');
     assert.match(m, /b\.style\.cursor="wait"/, 'aynı imleç');
     assert.match(m, /const onOk=p=>\{dgGpsBtnBusy\(false\);/, 'başarı akışı');
-    assert.match(m, /b\.innerHTML=GPS\?"🛰 GPS aktif":"📡 Konumu Etkinleştir"/, 'GPS sonrası sade durum');
+    assert.match(m, /btn\.innerHTML="🛰 GPS aktif"/, 'GPS sonrası sade durum');
     assert.match(m, /if\(e\)dgGpsBtnBusy\(false\);/, 'hatada buton geri gelir');
   });
 
@@ -153,10 +153,10 @@ describe('GPS butonu canlı UI dilinde (🌿 Yüzey Örtüsü Analizi kartıyla 
     assert.doesNotMatch(css, /\.dg-png-btn\{/, 'ui-standard mevcut bileşeni EZMEMELİ');
   });
 
-  test('durum satırı ve rozet standart ailelerden', () => {
-    assert.match(shell, /id="gpsState" class="alert info"/, 'gpsState alert ailesinde');
-    assert.match(shell, /id="gpsBadge"/, 'canlı rozet');
-    const m = read('src/services/measure.js');
-    assert.match(m, /bd\.className="dg-png-badge"/, 'rozet standart badge ailesinde kalır');
+  test('GPS durumu yalnız ana butonda gösterilir; ayrı durum/rozet yok', () => {
+    assert.ok(!shell.includes('id="gpsState"'));
+    assert.ok(!shell.includes('id="gpsBadge"'));
+    const m=read('src/services/measure.js');
+    assert.match(m,/btn\.innerHTML="🛰 GPS aktif"/);
   });
 });
