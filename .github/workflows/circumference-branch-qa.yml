@@ -1,4 +1,5 @@
 name: Circumference Protocol Branch QA
+# rerun-current-head: bc1eaa4
 on:
   push:
     branches:
