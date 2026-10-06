@@ -16,8 +16,10 @@ jobs:
         with:
           node-version: 20
       - run: npm ci
-      - name: Build generated index and version hashes
-        run: npm run build
+      - name: Refresh version hashes and generated index
+        run: |
+          node scripts/version-sync.mjs --write
+          npm run build
       - name: Commit generated index
         run: |
           git config user.name "DendroGeo QA Bot"
