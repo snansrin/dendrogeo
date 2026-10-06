@@ -247,22 +247,22 @@
 <script src="src/utils/truncation.js?v=f43c76b3" defer></script>
 <!-- Faz 7: geotiff (317 KB) ve chart.js (208 KB) artık SENKRON yüklenmiyor;
      src/utils/lazylibs.js ihtiyaç anında enjekte eder (LULC analizi / panel grafiği). -->
-<script id="dgRuntimeBuild" type="application/json">"5b166382a8b98228"</script>
+<script id="dgRuntimeBuild" type="application/json">"83012d1ff3fa58ac"</script>
 <script src="src/utils/lazylibs.js?v=19763039" defer></script>
 <script src="src/services/allometry.js?v=46ea5b87" defer></script>
 <script src="src/services/auth.js?v=1e92b5cd" defer></script>
 <script src="src/services/export.js?v=93b46559" defer></script>
-<script src="src/services/offline.js?v=3152b55e" defer></script>
+<script src="src/services/offline.js?v=35698f8c" defer></script>
 <!-- YÖNETİM ZİNCİRİ (Faz 6 — eski admin.js beş modüle bölündü) -->
 <script src="src/services/visit-stats.js?v=c10aa02f" defer></script>
 <script src="src/services/data-requests.js?v=59fe4b11" defer></script>
 <script src="src/services/user-admin.js?v=354a2701" defer></script>
 <script src="src/services/backup.js?v=b56fd4f9" defer></script>
-<script src="src/services/admin.js?v=7786640a" defer></script>
+<script src="src/services/admin.js?v=13fc6ab4" defer></script>
 <!-- YÖNETİM AĞACI (2026-09-24): park → proje → kullanıcı → ölçüm kademeli
      görünümü + sorgu hatası görünürlüğü. admin.js'ten SONRA yüklenir
      (approve/reject/del fonksiyonlarını çağırır). -->
-<script src="src/services/admin-tree.js?v=8deb232d" defer></script>
+<script src="src/services/admin-tree.js?v=a358c33d" defer></script>
 <!-- BİLİMSEL RAPOR YAYINI (2026-09-27): site içinden yayın kuyruğu —
      📄 Yayınla → report_requests (0008) → rapor-yayin.yml → rapor/DGR-…/
      → kalıcı bağlantı + 📤 Paylaş. admin.js loadAdmin() bu modülü çağırır. -->
@@ -273,7 +273,7 @@
 <script src="src/services/park-invites.js?v=f31e6518" defer></script>
 <script src="src/services/world.js?v=c72d9019" defer></script>
 <script src="src/services/measure.js?v=2bcadf7e" defer></script>
-<script src="src/services/map.js?v=9f6c9825" defer></script>
+<script src="src/services/map.js?v=bc3b57b1" defer></script>
 <!-- LULC ZİNCİRİ ARTIK TEMBEL (2026-09-25 · Faz 8): 8 dosya ilk yüklemede
      indirilmiyor. Yalnız "🌿 Yüzey Örtüsü Analizi"ne basan kullanıcı için
      src/utils/lazylibs.js → dgEnsureLulc() sırayla enjekte eder
@@ -295,8 +295,8 @@
 <script src="src/services/grid-engine.js?v=55f5f5f9" defer></script>
 <script src="src/ui/park-panel.js?v=618e3acc" defer></script>
 <script src="src/ui/park-export.js?v=c724cd32" defer></script>
-<script src="src/services/dash.js?v=eee8ec58" defer></script>
-<link rel="stylesheet" href="css/style.css?v=b906c6bd">
+<script src="src/services/dash.js?v=5291639c" defer></script>
+<link rel="stylesheet" href="css/style.css?v=64081a43">
 <link rel="stylesheet" href="css/landing.css?v=85504b78">
 <link rel="stylesheet" href="css/park-panel.css?v=649541ba">
 <!-- TASARIM SİSTEMİ (2026-09-27, 2. deneme): ui-standard.css geri BAĞLANDI
@@ -933,9 +933,9 @@
   </div>
 
   <div class="view" id="v-records">
-   <h2 class="disp" style="margin-bottom:16px">Kayıtlarım</h2>
-   <div class="alert info">Kayıtlarınız admin onayından sonra dünya verisinde yayınlanır.</div>
-   <div class="card tblwrap dg-cards"><table><thead><tr><th scope="col">Proje</th><th scope="col">Nokta</th><th scope="col">Tür</th><th scope="col">Çap</th><th scope="col">Boy</th><th scope="col">Karbon</th><th scope="col">Foto</th><th scope="col">Durum</th><th scope="col">İşlem</th></tr></thead><tbody id="recTable"></tbody></table></div>
+   <div class="records-heading"><div><div class="dg-kicker">ENVANTER</div><h2 class="disp">Kayıtlarım</h2><p class="records-help">Ölçümler proje bazında gruplanır. Bir projeyi açarak kayıtlarını inceleyebilir veya düzenleyebilirsin.</p></div><span class="records-tag">Çevre → DBH = C/π</span></div>
+   <div class="alert info">Kayıtlarınız admin onayından sonra dünya verisinde yayınlanır. DBH ekranda 1 ondalık basamakla gösterilir; hesaplamada yuvarlanmamış çevre/π değeri kullanılır.</div>
+   <div id="recGroups" class="records-groups" aria-live="polite"></div>
   </div>
 
   <div class="view" id="v-export">
@@ -988,7 +988,7 @@
       <div class="card" style="border-left:4px solid var(--green)">
     <div class="shead" style="margin-bottom:12px"><span class="no">🌍</span><h2 style="font-size:1.15rem">Bölgesel Dağılım</h2><span class="rule"></span></div>
     <div class="grid g2">
-     <div class="tblwrap dg-cards"><table><thead><tr><th scope="col">Ülke</th><th scope="col">Kayıt</th><th scope="col">Karbon(t)</th><th scope="col">Ort.Çap</th><th scope="col">Ort.Yükseklik(m)</th></tr></thead><tbody id="wCountryT"></tbody></table></div>
+     <div class="tblwrap dg-cards"><table><thead><tr><th scope="col">Ülke</th><th scope="col">Kayıt</th><th scope="col">Karbon(t)</th><th scope="col">Ort.DBH</th><th scope="col">Ort.Yükseklik(m)</th></tr></thead><tbody id="wCountryT"></tbody></table></div>
      <div class="tblwrap dg-cards"><table><thead><tr><th scope="col">Şehir</th><th scope="col">Kayıt</th><th scope="col">Karbon(t)</th></tr></thead><tbody id="wCityT"></tbody></table></div>
     </div>
       </div>
@@ -1112,7 +1112,7 @@
     <details class="dg-flat" style="margin-top:14px">
      <summary>📄 Düz liste (tüm kayıtlar · ilk 300 satır)</summary>
      <input type="text" id="adminMeasSearch" aria-label="Kayıtlarda ara" placeholder="🔍 Ara..." oninput="filterAdminMeas()" style="max-width:100%;margin:10px 0">
-     <div class="tblwrap dg-cards"><table><thead><tr><th scope="col">Kullanıcı</th><th scope="col">Nokta</th><th scope="col">Tür</th><th scope="col">Çap</th><th scope="col">Boy</th><th scope="col">Karbon</th><th scope="col">Foto</th><th scope="col">Durum</th><th scope="col">İşlem</th></tr></thead><tbody id="aMeasT"></tbody></table></div>
+     <div class="tblwrap dg-cards"><table><thead><tr><th scope="col">Kullanıcı</th><th scope="col">Nokta</th><th scope="col">Tür</th><th scope="col">DBH</th><th scope="col">Boy</th><th scope="col">Karbon</th><th scope="col">Foto</th><th scope="col">Durum</th><th scope="col">İşlem</th></tr></thead><tbody id="aMeasT"></tbody></table></div>
     </details>
    </div>
   </div>
