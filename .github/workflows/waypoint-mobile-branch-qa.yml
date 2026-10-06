@@ -1,0 +1,22 @@
+name: Waypoint Mobile Branch QA
+on:
+  push:
+    branches:
+      - fix/circumference-to-dbh-protocol
+permissions:
+  contents: read
+jobs:
+  qa:
+    name: Full build and guard chain
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - run: npm ci
+      - run: npm run build
+      - run: npm run check
