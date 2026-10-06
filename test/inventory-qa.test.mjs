@@ -29,22 +29,15 @@ const app = loadApp(['src/config/species.js', 'src/services/allometry.js']);
 describe('0011 · loadRho — tür ρ tablosu gerçekten okunuyor', () => {
   test('regex hatası gerilemesi: harita BOŞ değil (eski sürüm 0 tür okuyordu)', () => {
     const { rho } = loadRho();
-    assert.ok(Object.keys(rho).length >= 20, 'rho anahtarı: ' + Object.keys(rho).length);
+    assert.equal(Object.keys(rho).length, 16, 'kanonik özel rho anahtarı: ' + Object.keys(rho).length);
   });
-  test('sözlük değerleri panel ile aynı (0011e: 5 tür kaynaklı ρ ile listede)', () => {
+  test('sözlük yalnız kanonik özel ρ değerlerini taşır; diğer türler gruba düşer', () => {
     const { rho, grho } = loadRho();
     assert.equal(rho['KARAÇAM'], 470);
-    assert.equal(rho['SIĞLA'], 468);
+    assert.equal(rho['KIZILAĞAÇ'], 407);
     assert.equal(rho['KIZILÇAM'], 478);
-    // 0011e (kullanıcı kararı): Göksu'nun 5 türü panel listesinde ve
-    // ρ'ları 0011'in çalıştırılmış SQL'iyle birebir (Zanne 2009 / Wood DB).
-    assert.equal(rho['SALKIM SÖĞÜT'], 400);
-    assert.equal(rho['MAVİ LADİN'], 450);
-    assert.equal(rho['DOĞU ÇINARI'], 600);
-    assert.equal(rho['ATLAS SEDİRİ'], 490);
-    assert.equal(rho['CEVİZ'], 560);
-    // AĞLAYAN SÖĞÜT panelde yok (kullanıcı isteği) — çözümleyicide var
-    assert.equal(rho['AĞLAYAN SÖĞÜT'], undefined);
+    for (const name of ['SIĞLA','SALKIM SÖĞÜT','MAVİ LADİN','DOĞU ÇINARI','ATLAS SEDİRİ','CEVİZ','AĞLAYAN SÖĞÜT'])
+      assert.equal(rho[name], undefined, name + ' özel rho taşımamalı');
     assert.deepEqual({ ...grho }, { 'İBRELİ': 446, 'YAPRAKLI': 541, 'DİĞER': 493 });
   });
   test('rapor motoru panel denklemiyle birebir (KARAÇAM 107 cm / 12 m → 1972,8 kg)', () => {
@@ -133,15 +126,16 @@ describe('0031+0033 · inventoryQa — envanter kalite kapısı (QA v5: DBH = g�
     assert.equal(qa.dev_fail[0].point_id, 7);
     assert.ok(Math.abs(qa.dev_fail[0].dev_pct) > 50, 'P7 sapma %50 üstü: ' + qa.dev_fail[0].dev_pct);
     assert.equal(qa.dev_block, false, '1/6 → sistemik değil');
-    assert.deepEqual(qa.dev_rho.grup_farkli.map((x) => x.point_id), [3, 32],
-      'grup varsayılanı ρ ile birebir olan ama tür ρ ile bant aşan kayıtlar');
+    assert.deepEqual(qa.dev_rho.grup_farkli, [],
+      'özel rho olmayan türlerde sahte tür/grup ayrımı üretilmez');
     assert.equal(qa.dev_rho.n, 5, '5/6 kayıt yeniden üretildi');
-    assert.equal(qa.dev_rho.tur + qa.dev_rho.grup, 5);
+    assert.equal(qa.dev_rho.tur, 0, 'P7 hatalı; diğer eşleşen kayıtların özel rho kaynağı yok');
+    assert.equal(qa.dev_rho.grup, 5, 'özel rho taşımayan kayıtlar grup varsayılanıyla eşleşir');
     /* (d) 0033 · gövde çapı dağılımı BETİMLEYİCİ: eşik/sınıf/mevzuat YOK */
     assert.equal(qa.anit, undefined, '0032 alanı kaldırıldı');
     assert.deepEqual(qa.dbh_stats, { n: 6, min: 40, medyan: 108.5, max: 200 });
     assert.deepEqual(Object.keys(qa).filter((k) => /anit|basamak|mevzuat|threshold/i.test(k)), []);
-    assert.deepEqual(qa.info.map((x) => x.key), ['rho-kaynagi'], 'yalnız ρ kaynağı kalemi');
+    assert.deepEqual(qa.info, [], 'özel tür/grup çelişkisi yoksa bilgi kalemi üretilmez');
     /* Üç hâlli durum: tek gerçek hata (P7) inceleme üretir; BLOKLU değil */
     assert.equal(qa.state, 'INCELEME', 'durum: ' + qa.state);
     /* π ile türetilmiş bir değer YOK: DBH sahada kaydedildiği gibi */
@@ -382,7 +376,7 @@ describe('0031 · import-measurements.mjs — cihaz çıktısı kapısı (DBH = 
     assert.equal(j.gates.hd.review, false, '0033: geniş gövde inceleme üretmez');
     /* (c) karbon: P3 grup ρ ile açıklanır (ℹ️), P7nin 10x kayması yakalanır */
     assert.equal(j.gates.dev.fail, 1, 'yalnız gerçek hata: ' + JSON.stringify(j.gates.dev));
-    assert.equal(j.gates.dev.rho_grup, 1, 'grup ρ ile eşleşen kayıt');
+    assert.equal(j.gates.dev.rho_grup, 3, 'özel rho taşımayan üç kayıt grup ρ ile eşleşir');
     assert.equal(j.gates.dev.block, false);
     /* (d) 0033 · gövde çapı dağılımı: betimleyici özet (eşik/sınıf YOK) */
     assert.equal(j.gates.anit, undefined, '0032 kapısı kaldırıldı');
@@ -390,8 +384,9 @@ describe('0031 · import-measurements.mjs — cihaz çıktısı kapısı (DBH = 
     assert.match(r.out, /boy\/çap/);
     assert.equal(j.gates.dbh.min + '–' + j.gates.dbh.max + ' cm', '40–166 cm', 'betimleyici aralık');
     assert.ok(!/ANITSAL|Anıtsal|anıt ağaç|31898|Ek-4/.test(r.out), 'içe aktarma çıktısında statü iddiası yok');
-    assert.match(r.out, /GRUP VARSAYILANI ρ ile yeniden üretildi/);
-    assert.match(r.out, /ÖLÇÜM HATASI DEĞİL/);
+    assert.equal(j.records.find((x) => x.point_id === 1).rho_src, 'grup');
+    assert.equal(j.records.find((x) => x.point_id === 3).rho_src, 'grup');
+    assert.equal(j.records.find((x) => x.point_id === 29).rho_src, 'grup');
     assert.equal(j.blocked, false);
   });
 
@@ -405,7 +400,7 @@ describe('0031 · import-measurements.mjs — cihaz çıktısı kapısı (DBH = 
     const j = JSON.parse(r.out.slice(r.out.indexOf('{')));
     assert.equal(j.gates.dev.fail, 2);
     assert.deepEqual(j.records.filter((x) => x.dev_pct != null && Math.abs(x.dev_pct) > 500).map((x) => x.point_id), [29]);
-    assert.equal(j.gates.dev.rho_grup, 1);
+    assert.equal(j.gates.dev.rho_grup, 2, 'P1 ve P3 grup varsayılanıyla açıklanır');
     assert.equal(j.blocked, false);
   });
 
