@@ -1,6 +1,6 @@
 {
   "schema": "dendrogeo-publish-queue/1",
-  "updated_at": "2026-10-06T20:08:10.102Z",
+  "updated_at": "2026-10-06T20:10:38.381Z",
   "production_started_at": "2026-10-04T08:26:48.034Z",
   "test_archive_ref": "archive/test-publications-2026-10-04",
   "retired_report_ids": [
