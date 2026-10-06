@@ -75,3 +75,26 @@ describe('Dışa Aktar tema standardı',()=>{
   assert.ok(!sh.includes('export-method-note'));
  });
 });
+
+describe('Mobil saha yardımı ve rapor künye UX',()=>{
+ test('mobil ölçüm kimliği görünür; GPS doğruluk gürültüsü ana satırdan kaldırılmıştır',()=>{
+  const sh=rd('partials/shell.html'),css=rd('css/style.css'),m=rd('src/services/measure.js');
+  assert.match(sh,/measure-tag">Bir ağaç · bir kayıt/);
+  assert.match(css,/#v-measure \.measure-tag\{display:inline-flex!important/);
+  assert.match(sh,/id="gpsState" class="measure-gps-state" role="status" style="display:none"/);
+  assert.ok(!sh.includes('doğruluk (m)'));
+  assert.match(m,/b\.innerHTML=GPS\?"🛰 GPS aktif":"📡 Konumu Etkinleştir"/);
+ });
+ test('çevre ve boy açıklamaları yalnız soru işareti yardımında bulunur',()=>{
+  const sh=rd('partials/shell.html');
+  assert.match(sh,/Göğüs çevresi[\s\S]{0,300}dg-inline-help[\s\S]{0,500}Mezurayı gövdenin etrafına/);
+  assert.match(sh,/Ağaç boyu[\s\S]{0,300}dg-inline-help[\s\S]{0,500}yer seviyesinden tepe noktasına/);
+ });
+ test('rapor formu isteğe bağlı akademik alanları zorunlu yapmaz ve ? örnekleri verir',()=>{
+  const a=rd('src/services/academic-profile.js');
+  assert.match(a,/Danışman \(unvan, ad ve soyad\)/);
+  assert.match(a,/Prof\. Dr\. Ad Soyad/);
+  assert.match(a,/Diğer alanları çalışmanıza uygunsa doldurun; \? simgesinde örnek görebilirsiniz/);
+  assert.match(a,/DG_ACADEMIC_FIELDS\.filter\(\(\[k\]\)=>k!=='project_name'\)\.map\(\(\[k,l\]\)=>dgAcademicInput\(k,l,values\[k\]\)\)/);
+ });
+});
