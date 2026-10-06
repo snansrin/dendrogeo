@@ -1,5 +1,5 @@
 name: Circumference Protocol Branch QA
-# rerun-current-head: 36ad1c8
+# rerun-current-head: e0e2f49
 on:
   push:
     branches:
