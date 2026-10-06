@@ -38,12 +38,18 @@ function syncDoi(entry,id){
 export async function registerPendingDois(){
  if(!existsSync(QUEUE)){console.log('ℹ Yayın günlüğü yok; DOI işi atlandı.');return{processed:0,failed:0};}
  const q=JSON.parse(readFileSync(QUEUE,'utf8'));
+ const before=JSON.stringify(q);
  const active=activePublishedReports(q);
  const candidates=active.filter(([id,e])=>existsSync(join(ROOT,'rapor',id,'data.json'))&&!syncDoi(e,id));
  if(!candidates.length){
-  q.updated_at=new Date().toISOString();
-  writeFileSync(QUEUE,JSON.stringify(q,null,2)+'\n');
-  console.log('✅ DOI bekleyen aktif üretim raporu yok.');
+  /* Tam idempotent no-op: DOI dosyalarından kuyruğa gerçekten yeni bilgi
+   * senkronlandıysa yaz; hiçbir değişiklik yoksa dosyaya dokunma. Aksi halde
+   * her main pushunda updated_at değişir → yeni commit → yeni CI → sonsuz zincir. */
+  if(JSON.stringify(q)!==before){
+   q.updated_at=new Date().toISOString();
+   writeFileSync(QUEUE,JSON.stringify(q,null,2)+'\n');
+   console.log('✅ Mevcut DOI durumu yayın günlüğüne senkronlandı.');
+  }else console.log('✅ DOI bekleyen aktif üretim raporu yok; dosya değişmedi.');
   return{processed:0,failed:0};
  }
  if(!process.env.ZENODO_TOKEN)throw Error('ZENODO_TOKEN secret tanımlı değil; otomatik DOI kaydı yapılamaz.');
