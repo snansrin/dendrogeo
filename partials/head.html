@@ -132,7 +132,8 @@
       "keywords": "tree inventory, carbon sequestration, biomass, DBH, urban forest, forest carbon, urban park, land cover, park identity, OpenStreetMap park geometry",
       "measurementTechnique": "Field GPS + tape-measured trunk circumference at 1.30 m; DBH derived as circumference/pi before Chave 2014 allometry; park geometry from OpenStreetMap via Overpass; 10 m land cover from ESA WorldCover 2021 v200 (cross-checked with IO LULC 2020)",
       "variableMeasured": [
-        { "@type": "PropertyValue", "name": "DBH (cm)" },
+        { "@type": "PropertyValue", "name": "Trunk circumference at 1.30 m (cm)" },
+        { "@type": "PropertyValue", "name": "Derived DBH = circumference/pi (cm)" },
         { "@type": "PropertyValue", "name": "Tree Height (m)" },
         { "@type": "PropertyValue", "name": "Above-ground biomass (kg)" },
         { "@type": "PropertyValue", "name": "Carbon stock (kg)" },
@@ -168,7 +169,7 @@
           "name": "Bir ağacın karbon stoğu nasıl hesaplanır?",
           "acceptedAnswer": {
             "@type": "Answer",
-            "text": "DendroGeo'da DBH, boy ve odun yoğunluğu (ρ) ile Chave et al. (2014) denklemiyle AGB hesaplanır. Kök biyokütlesi sistemde kullanılan AGB × 0,26 oranıyla, karbon ise toplam biyokütlenin 0,47'si varsayımıyla hesaplanır."
+            "text": "DendroGeo'da sahada 1,30 m yükseklikte göğüs çevresi mezurayla ölçülür. DBH çapı çevre/π ile türetilir; bu türetilmiş DBH, boy ve odun yoğunluğu (ρ) Chave et al. (2014) denklemine uygulanır. Kök biyokütlesi AGB × 0,26, karbon ise toplam biyokütlenin 0,47'si olarak hesaplanır."
           }
         },
         {
