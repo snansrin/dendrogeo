@@ -254,10 +254,11 @@ describe('0025 · kablolama (index.html + shell + partials)', () => {
     /* 0027: waypoint tablosu — kullanıcı bildirimi "içeride sağa-sola kayıyor" */
     assert.match(sh, /<ul id="wpListTable" class="waypoint-points"/, 'waypoint listesi kompakt nokta kartları kullanır');
     const mp = read('src/services/map.js');
-    assert.match(mp, /data-label="Enlem"/, 'waypoint satırları etiketli');
-    assert.match(mp, /data-label="İşlem"/);
+    assert.match(mp, /class="waypoint-point /, 'waypoint satırları mobil nokta kartı');
+    assert.match(mp, /waypoint-state /, 'waypoint durum rozeti görünür');
+    assert.match(mp, /✓ Yapıldı/, 'tamamlanan waypoint açıkça işaretli');
     const ua = read('src/services/user-admin.js');
-    assert.match(ua, /data-label="Ad Soyad"/, 'kullanıcı tablosu etiketli');
+    assert.match(ua, /data-label="Kullanıcı"/, 'kullanıcı kimliği kompakt tek hücrede etiketli');
     const dr = read('src/services/data-requests.js');
     assert.match(dr, /data-label="Kapanış"/, 'talep tabloları etiketli');
     const css = read('css/style.css');
