@@ -469,7 +469,7 @@ label.lbl{display:block}
 /* Waypoint field layout; shared button and color rules are retained. */
 .waypoint-filters{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px}
 .waypoint-files{margin-top:18px;border-top:1px solid var(--line);padding-top:12px}
-.waypoint-files summary{cursor:pointer;padding:10px 0;font-weight:600}
+.waypoint-files-title{padding:10px 0 0;font-weight:700;color:var(--green-dk)}
 @media(max-width:640px){#v-nav #navMap{height:360px}.waypoint-filters{grid-template-columns:1fr 1fr}#v-nav .arrow{flex-shrink:0}}
 
 #v-nav .waypoint-list{grid-column:1 / -1}
@@ -767,7 +767,7 @@ label.lbl{display:block}
 #v-nav .waypoint-list{border-left:4px solid var(--green)}
 #v-nav .waypoint-list .project-section-head{margin-bottom:12px}
 #v-nav .waypoint-files{border:1px solid var(--line);border-radius:10px;padding:0 12px;margin-top:14px;background:var(--bg)}
-#v-nav .waypoint-files[open]{padding-bottom:12px}
+#v-nav .waypoint-files{padding-bottom:12px}
 .export-my-requests{margin-top:14px;border:1px solid var(--line);border-radius:10px;background:var(--bg);overflow:hidden}
 .export-my-requests>summary{list-style:none;cursor:pointer;display:flex;align-items:center;justify-content:space-between;gap:10px;padding:11px 12px;font-weight:700;font-size:.82rem}
 .export-my-requests>summary::-webkit-details-marker{display:none}
