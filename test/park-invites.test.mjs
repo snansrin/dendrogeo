@@ -251,13 +251,14 @@ describe('0025 · kablolama (index.html + shell + partials)', () => {
     assert.match(sh, /id="projTable" hidden/, 'eski entegrasyon hedefi görünmez uyumluluk için korunur');
     assert.match(sh, /id="projOwnList"/, 'proje sahipliği kart listesinde');
     assert.match(sh, /id="projSharedList"/, 'paylaşılan projeler ayrı kart listesinde');
-    /* Waypoint saha listesi yatay tablo/koordinat disclosure kullanmaz. */
-    assert.match(sh, /<ul id="wpListTable" class="waypoint-points"/, 'waypoint listesi kompakt saha sırası kullanır');
+    /* 0027: waypoint tablosu — kullanıcı bildirimi "içeride sağa-sola kayıyor" */
+    assert.match(sh, /<ul id="wpListTable" class="waypoint-points"/, 'waypoint listesi kompakt nokta kartları kullanır');
     const mp = read('src/services/map.js');
-    assert.match(mp, /class="waypoint-point-main"/, 'nokta + mesafe tek satırda');
-    assert.ok(!mp.includes('waypoint-coordinates'), 'gereksiz koordinat disclosure kaldırılmış olmalı');
+    assert.match(mp, /class="waypoint-point /, 'waypoint satırları mobil nokta kartı');
+    assert.match(mp, /waypoint-state /, 'waypoint durum rozeti görünür');
+    assert.match(mp, /✓ Yapıldı/, 'tamamlanan waypoint açıkça işaretli');
     const ua = read('src/services/user-admin.js');
-    assert.match(ua, /data-label="Ad Soyad"/, 'kullanıcı tablosu etiketli');
+    assert.match(ua, /data-label="Kullanıcı"/, 'kullanıcı kimliği kompakt tek hücrede etiketli');
     const dr = read('src/services/data-requests.js');
     assert.match(dr, /data-label="Kapanış"/, 'talep tabloları etiketli');
     const css = read('css/style.css');
