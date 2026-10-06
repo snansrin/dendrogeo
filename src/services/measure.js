@@ -165,7 +165,7 @@ function dgGpsBtnBusy(on){
  else{b.disabled=false;b.innerHTML=b.dataset.oldText||"📡 Konumu Etkinleştir";b.style.opacity="";b.style.cursor="";}
 }
 async function startGps(){
- const gpsMsg=(t,e)=>{const g=$("gpsState");if(g){g.textContent=t;g.className="alert "+(e?"err":"info");}if(e){dgGpsBtnBusy(false);const b=$("gpsBtn");if(b){b.textContent="📡 Konumu Tekrar Dene";b.dataset.oldText=b.textContent;}if(typeof toast==="function")toast(t,"err","📍");}};
+ const gpsMsg=(t,e)=>{const g=$("gpsState");if(g){g.textContent=t;g.className="alert "+(e?"err":"info");}if(e)dgGpsBtnBusy(false);if(e){const b=$("gpsBtn");if(b){b.classList.remove("is-active");b.textContent="📡 Konumu Tekrar Dene";b.dataset.oldText=b.textContent;}const bd=$("gpsBadge");if(bd){bd.textContent="konum kapalı";bd.className="dg-png-badge ";}if(typeof toast==="function")toast(t,"err","📍");}};
  if(!navigator.geolocation)return gpsMsg("Tarayıcı konum desteklemiyor.",1);
  if(/iPhone|iPad|iPod/.test(navigator.userAgent)||(navigator.platform==="MacIntel"&&navigator.maxTouchPoints>1))toast("<b>"+_tms("iPhone kullanıcısı mısınız?")+"</b><br>"+_tms("Ayarlar → Gizlilik ve Güvenlik → Konum Servisleri → Safari Siteleri → Uygulamayı Kullanırken."),"info","📍",12000);
  try{if(navigator.permissions&&navigator.permissions.query){const p=await navigator.permissions.query({name:"geolocation"});if(p.state==="denied")return gpsMsg("Konum izni reddedildi. Ayarlar→Safari→Konum.",1);}}catch(e){}
@@ -193,9 +193,9 @@ function updGps(){
  /* Ana ekranda doğruluk sayısı/kalite cümlesi gösterilmez; ayrıntılar açılır
   * panelde kalır. Konum alınınca tek bakışta buton durum değiştirir. */
  if(state){state.textContent="GPS aktif";state.className="alert ok";}
- if(btn){btn.textContent="✓ GPS aktif";btn.dataset.oldText="✓ GPS aktif";btn.classList.add("is-active");}
+ if(btn){btn.textContent="GPS aktif";btn.dataset.oldText="GPS aktif";btn.classList.add("is-active");}
  const bd=$("gpsBadge");
- if(bd){bd.textContent="GPS aktif";bd.className="dg-png-badge";}
+ if(bd){bd.textContent="GPS aktif";bd.className="dg-png-badge blue";}
  if(map&&GPS){if(window._me)map.removeLayer(window._me);window._me=L.circleMarker([GPS.latitude,GPS.longitude],{radius:7,color:"#2b6cb0",weight:3,fillOpacity:.9}).addTo(map).bindPopup("Konumun");}
  drawNav();autoFillPointId();
 }
