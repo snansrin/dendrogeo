@@ -57,8 +57,9 @@ göre değişir; 0,5 yaygın bir ortalama varsayımdır.
 
 ### 1.5 ρ (odun yoğunluğu) kaynak zinciri
 
-Güncel hesapta tek otorite `src/config/species.js` içindeki
-`DG-WD-LOCK-2026-10-06-v2` yoğunluk kilididir. Uygulama içinde birim
+Güncel hesapta tek ve değiştirilemez otorite `src/config/wood-density-lock.js` içindeki
+`DG-WD-LOCK-2026-10-06-FINAL` yoğunluk kilididir. Kilitli yükün SHA-256 parmak izi
+`1312379570ccf39d4ca6a3dbd7eb3fef0ba894dd12d34cfe87ee39cb0ab480cc` değeridir. Uygulama içinde birim
 **kg/m³** tutulur; kaynak tablodaki ton/m³ değerleri ×1000 çevrilir.
 
 | Grup / tür | ρ (ton/m³) | ρ (kg/m³) | Kaynak |
@@ -88,16 +89,18 @@ taşımaz**. Sığla bir yapraklı tür olarak **YAPRAKLI genel 0,541 ton/m³
 (541 kg/m³)** değerini kullanır. DBH 57 cm ve H 7,5 m için mevcut denklem
 yaklaşık **418,42 kg C** üretir. Bu saha örneği regresyon testiyle kilitlidir.
 
-Aktif seçim tablosunda **51** kayıt vardır; **16** kaydın özel tür ρ değeri
-vardır, **35/51** kayıt grup varsayılanına düşer. Tabloda olmayan veya özel
-değeri kaldırılmış türlere ρ **uydurulmaz**: `rho:null` bırakılır. Atlas
-sediri, mavi ladin, doğu çınarı, salkım söğüt, ceviz ve Sığla gibi özel
-satırı olmayan türler bu nedenle kendi grubunun genel değerini kullanır.
+Aktif ölçüm kataloğunda **49** tür vardır; **16** tür kilitli özel ρ taşır,
+**33/49** tür özel ρ taşımadığı için yalnız kendi grup genelini kullanır.
+Ölçüm grubu yalnız **İBRELİ** veya **YAPRAKLI** olabilir. `DİĞER`,
+bilinmeyen tür veya katalogla uyuşmayan grup için karbon hesabı üretilmez.
 
-Eski migration dosyaları ve geri çekilmiş raporlar, geçmişte kullanılmış
-yoğunlukları tarihsel kanıt olarak içerebilir. Bu değerler **güncel hesap
-otoritesi değildir** ve `rho` haritasına geri taşınmaz. Panel, rapor QA ve
-CSV içe aktarma hattı aynı güncel tür/grup politikasına bağlıdır.
+Yeni tür yalnız `src/config/species.js` içine İBRELİ veya YAPRAKLI grubunda
+`rho:null` olarak eklenebilir. Yeni türe özel ρ eklemek, mevcut yoğunluğu
+değiştirmek, üçüncü bir grup/fallback tanımlamak veya tarihsel ρ'yı yeniden
+hesap yoluna sokmak CI kilidini bozar. Eski migration ve geri çekilmiş rapor
+dosyalarındaki tarihsel değerler yalnız arşiv kanıtıdır; güncel hesap kaynağı
+değildir. Panel, rapor QA, Monte Carlo ve CSV içe aktarma aynı tek politikayı
+kullanır.
 
 **Eşanlamlı çözümleyici.** Saha kayıtları/cihaz çıktıları kanonik ad dışında
 yazım üretebilir ("Ağlayan Söğüt", "Cınar", "CEVIZ"). `resolveSpeciesName()`
@@ -135,7 +138,7 @@ scripts/make-report.mjs):
 |---|---|---|---|
 | (a) | **Envanter birim kontrolü (DBH)** | DBH bir çap ölçümü olarak teknik açıdan geçerli mi? var → sayısal → > 0 → `1 ≤ D ≤ 400 cm` | ≥3 kayıt VE >%50 → **⛔ kritik** (🔴 BLOKLU) |
 | (b) | **Boy/DBH oranı incelemesi** | oran **fiziksel olarak olanaklı** mı (`3 ≤ 100·H/D ≤ 200`) ve **stand içi dağılıma göre aykırı** mı (`modified z > 3,5`)? | **⚠ İNCELEME — asla blok değil** |
-| (c) | **Karbon yeniden hesabı** | saklı `carbon_kg`, panel denklemiyle **iki ρ kaynağından herhangi biriyle** ±%20 (ve mutlak fark ≥5 kg) içinde mi? | ≥3 kayıt VE >%50 → **⛔ kritik** (hesap bütünlüğü; DBH birimiyle ilgisi YOK) |
+| (c) | **Karbon yeniden hesabı** | saklı `carbon_kg`, **tek kilitli ρ yolu** ile yeniden hesaplanan değerle ±%20 (ve mutlak fark ≥5 kg) içinde mi? | ≥3 kayıt VE >%50 → **⛔ kritik** (hesap bütünlüğü; DBH birimiyle ilgisi YOK) |
 
 **(b) 0032de neden değişti.** 0031 sabit `15–120` bandını **inceleme ölçütü**
 olarak kullanıyordu. Bütünüyle geniş gövdeli (veya bütünüyle bodur) formlu bir
@@ -160,15 +163,12 @@ Tipik `15–120` bandı **yalnız sayım** olarak korunur (`hd_band_out`) ve
 raporda “bu bir UYARI DEĞİL, BİLGİDİR” ibaresiyle basılır. `hd_block` kalıcı
 olarak `false`tur (0031 hükmü korunur; `test/dbh-qa.test.mjs` kilitler).
 
-**(c) 0032de neden iki ρ kaynağı.** Eski saklı `carbon_kg` kayıtları,
-tarihsel sürümlerde tür ρ veya grup varsayılanı ρ ile üretilmiş olabilir.
-QA bu nedenle geriye dönük denetimde iki meşru adayı ayrı hesaplar. Güncel
-politika ise tektir: özel ρ yalnız kilitli tabloda varsa kullanılır; yoksa
-grup varsayılanına düşülür. Özel ρ bulunmayan bir tür hiçbir zaman “tür ρ”
-olarak etiketlenmez. Gerçek hesap hataları (ör. 10× ondalık kayması) geçerli
-kaynakların tamamında bant dışı kaldığı için **yakalanmaya devam eder**.
-Karbon motoru ve katsayılar değişmez; çift kaynak denetimi yalnız tarihsel
-saklı değerlerin açıklanabilirliğini sınayan bir QA katmanıdır.
+**(c) Nihai tek-ρ denetimi.** Karbon yeniden hesabında alternatif veya
+tarihsel yoğunluk yolu yoktur. Tür kilitli tabloda özel satıra sahipse yalnız
+o değer; sahip değilse yalnız katalog grubunun genel değeri kullanılır.
+Bilinmeyen tür, yanlış grup ve DİĞER grup hesaplanamaz. Saklı `carbon_kg`
+bu tek beklenen değerle denetlenir; eski bir yoğunlukla uyuşması artık
+geçerlilik sağlamaz.
 
 **(d) 0033te KALDIRILDI: eşik tabanlı gövde sınıfı beyanı.** 0032, gövde çapı
 `100 cm` ve üzerindeki bireyleri sayan ve bir mevzuat künyesiyle birlikte
@@ -363,7 +363,7 @@ Bunlar hata değil, **belgelenmiş varsayımlardır**. Değiştirmek isteyen
    bağımsızlık varsayımının yapay daralttığı aralıklardan kaçınılır).
    Panel/harita/dışa aktarım sayıları belirsizlik eki olmadan tek nokta
    tahmini olarak kalır.
-3. **ρ tablosu seçici olarak tür özeldir:** 51 seçim kaydının 35/51'i özel tür ρ'su taşımaz ve grup varsayılanını kullanır. Kaynaklandırılmamış türe değer UYDURULMAZ; Sığla da kullanıcı kararıyla YAPRAKLI genel 541 kg/m³ kullanır.
+3. **ρ tablosu nihai ve kilitlidir:** 49 ölçüm türünün 33/49'u özel tür ρ'su taşımaz ve yalnız kendi grup genelini kullanır. Yeni tür yalnız İBRELİ/YAPRAKLI olarak eklenebilir; DİĞER yoğunluk/fallback yoktur. Sığla YAPRAKLI genel 541 kg/m³ kullanır.
 4. **Kök oranı (0,26) ve karbon oranı (0,47) sabittir.**
 5. **Gövde form faktörü (0,5) sabittir.**
 6. **Boy ölçülemeyen ağaç veri setine giremez** (`H` zorunlu). Chave'ın boy
