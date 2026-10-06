@@ -1005,3 +1005,30 @@ label.lbl{display:block}
  #v-measure #gpsBtn{width:100%}
  .dg-help-pop{font-size:.72rem}
 }
+
+/* 2026-10-06 · field/visitor mobile polish */
+#v-measure .measure-gps-state{margin:0}
+#v-measure .dg-png-badge.on{border-color:color-mix(in srgb,var(--green) 38%,var(--line));background:color-mix(in srgb,var(--green) 10%,var(--surface));color:var(--green-dk)}
+#v-visitors{max-width:1120px;margin-inline:auto;padding-bottom:28px}
+#v-visitors .visitor-heading{display:flex;align-items:flex-end;justify-content:space-between;gap:14px;margin-bottom:12px}
+#v-visitors .visitor-heading .disp{margin:1px 0 2px;font-size:1.8rem}
+#v-visitors .visitor-privacy{margin-bottom:14px}
+#v-visitors .dg-vis-tools{display:grid;grid-template-columns:minmax(190px,1fr) 170px auto auto auto;gap:10px;align-items:end;margin-bottom:16px}
+#v-visitors .dg-vis-tools>p{grid-column:1/-1;margin:0}
+#v-visitors #visMap{min-height:360px;border-radius:10px;overflow:hidden}
+@media(max-width:760px){
+ #v-visitors .dg-vis-tools{grid-template-columns:1fr 1fr}
+ #v-visitors .dg-vis-tools>label:first-child,#v-visitors .dg-vis-tools>input:first-of-type{grid-column:1/-1}
+}
+@media(max-width:640px){
+ #v-measure .measure-heading{display:flex!important}
+ #v-measure .measure-heading>div{min-width:0}
+ #v-measure .measure-tag{display:inline-flex!important;visibility:visible!important;opacity:1!important;flex:0 0 auto}
+ #v-measure #gpsState[style*="display: none"],#v-measure #gpsState[style*="display:none"]{display:none!important}
+ #v-visitors .visitor-heading{align-items:flex-start}
+ #v-visitors .visitor-heading .disp{font-size:1.5rem}
+ #v-visitors .visitor-heading .dg-meta{font-size:.7rem}
+ #v-visitors .dg-vis-tools{grid-template-columns:1fr}
+ #v-visitors .dg-vis-tools>*{grid-column:1!important}
+ #v-visitors #visMap{min-height:300px}
+}
