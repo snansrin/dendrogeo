@@ -38,15 +38,15 @@ describe('0011 · loadRho — tür ρ tablosu gerçekten okunuyor', () => {
     assert.equal(rho['KIZILÇAM'], 478);
     for (const name of ['SIĞLA','SALKIM SÖĞÜT','MAVİ LADİN','DOĞU ÇINARI','ATLAS SEDİRİ','CEVİZ','AĞLAYAN SÖĞÜT'])
       assert.equal(rho[name], undefined, name + ' özel rho taşımamalı');
-    assert.deepEqual({ ...grho }, { 'İBRELİ': 446, 'YAPRAKLI': 541, 'DİĞER': 493 });
+    assert.deepEqual({ ...grho }, { 'İBRELİ': 446, 'YAPRAKLI': 541 });
   });
   test('rapor motoru panel denklemiyle birebir (KARAÇAM 107 cm / 12 m → 1972,8 kg)', () => {
     const { rho, grho } = loadRho();
     const row = { species: 'KARAÇAM', grp: 'İBRELİ', dbh_cm: 107, height_m: 12 };
     const panel = app.calc(107, 12, 'KARAÇAM', 'İBRELİ').total_carbon;
     assert.ok(Math.abs(panel - 1972.8) < 0.15, 'panel: ' + panel);
-    assert.ok(Math.abs(carbonKg(row, { rho, grho }) - panel) < 1e-9, 'rapor ≠ panel');
-    assert.ok(Math.abs(calcRow(107, 12, 'KARAÇAM', 'İBRELİ', { rho, grho }).total_carbon - panel) < 1e-9);
+    assert.ok(Math.abs(carbonKg(row, { rho:{KARAÇAM:9999}, grho:{İBRELİ:9999} }) - panel) < 1e-9, 'dış politika FINAL kilidi değiştirememeli');
+    assert.ok(Math.abs(calcRow(107, 12, 'KARAÇAM', 'İBRELİ', { rho:{KARAÇAM:9999}, grho:{İBRELİ:9999} }).total_carbon - panel) < 1e-9);
     // Göksu P7'nin saklı değeri 196,2 idi → 10,05x ondalık kayması burada yakalanır
     assert.ok(panel / 196.2 > 9.5 && panel / 196.2 < 10.5, 'P7 oranı ~10x olmalı');
   });
@@ -59,7 +59,7 @@ describe('0011 · resolveSpeciesName — kanonik tür sözlüğü', () => {
       assert.equal(d.resolve(n), n, n);
   });
   test('eşanlamlılar ve yazım varyasyonları kanonik ada iner', () => {
-    assert.equal(d.resolve('Ağlayan söğüt'), 'AĞLAYAN SÖĞÜT');
+    assert.equal(d.resolve('Ağlayan söğüt'), 'SALKIM SÖĞÜT');
     assert.equal(d.resolve('mavi ladin'), 'MAVİ LADİN');
     assert.equal(d.resolve('  Cınar '), 'ÇINAR');
     assert.equal(d.resolve('akça ağaç'), 'AKÇAAĞAÇ');
@@ -74,11 +74,11 @@ describe('0011 · resolveSpeciesName — kanonik tür sözlüğü', () => {
     assert.equal(d.byName['SALKIM SÖĞÜT'].lat, 'Salix babylonica');
     assert.equal(d.byName['CEVİZ'].lat, 'Juglans regia');
     assert.equal(d.byName['MAVİ LADİN'].lat, 'Picea pungens');
-    assert.equal(d.byName['AĞLAYAN SÖĞÜT'].panel, false, 'gizli kayıt panel bayrağı');
+    assert.equal(d.byName['AĞLAYAN SÖĞÜT'], undefined, 'gizli tür kaydı yok; eşanlamlı kanonik Salkım Söğüt’e iner');
   });
 });
 
-describe('0031+0033 · inventoryQa — envanter kalite kapısı (QA v5: DBH = göğüs çapı cm, çift ρ kaynağı, yasal statü iddiası YOK)', () => {
+describe('0031+0033 · inventoryQa — envanter kalite kapısı (DBH = göğüs çapı cm, FINAL ρ kilidi, yasal statü iddiası YOK)', () => {
   const dict = loadSpeciesDict();
   const mk = (point_id, species, grp, dbh_cm, height_m, carbon_kg, extra = {}) =>
     ({ id: point_id, point_id, species, grp, dbh_cm, height_m, carbon_kg, ...extra });
@@ -400,7 +400,7 @@ describe('0031 · import-measurements.mjs — cihaz çıktısı kapısı (DBH = 
     const j = JSON.parse(r.out.slice(r.out.indexOf('{')));
     assert.equal(j.gates.dev.fail, 2);
     assert.deepEqual(j.records.filter((x) => x.dev_pct != null && Math.abs(x.dev_pct) > 500).map((x) => x.point_id), [29]);
-    assert.equal(j.gates.dev.rho_grup, 2, 'P1 ve P3 grup varsayılanıyla açıklanır');
+    assert.equal(j.gates.dev.rho_grup, 3, 'özel ρ taşımayan kayıtlar yalnız kendi grup genelini kullanır');
     assert.equal(j.blocked, false);
   });
 
@@ -472,11 +472,11 @@ describe('0031 · renderReport — GNSS beyanı, DBH tanımı ve envanter QA sat
   test('QA v3 satırları çizelgede (0031: birim kontrolü + oran incelemesi ayrı)', () => {
     /* includes kullanılıyor: satır adlarındaki parantezler RegExp'te grup
      * anlamına gelir (test tuzağı belgelensin diye not düşüldü). */
-    for (const k of ['Tür sözlüğü eşleşmesi', 'Fotoğraf kanıtı', 'GNSS doğruluk kaydı', 'Envanter birim kontrolü (DBH)', 'Boy/DBH oranı incelemesi', 'Karbon yeniden hesabı'])
+    for (const k of ['Tür/grup kilidi', 'Fotoğraf kanıtı', 'GNSS doğruluk kaydı', 'Envanter birim kontrolü (DBH)', 'Boy/DBH oranı incelemesi', 'Karbon yeniden hesabı'])
       assert.ok(html.includes(k), 'QA satırı eksik: ' + k);
     /* 0011'in "Envanter tutarlılığı (h/d)" satırı ve ⛔ Blok hükmü kalktı */
     assert.ok(!html.includes('Envanter tutarlılığı (h/d)'), 'eski satır adı kalmamalı');
-    assert.match(html, /2\/2 kayıt kanonik tür sözlüğüyle eşleşti/);
+    assert.match(html, /2\/2 kayıt FINAL tür\/grup sözleşmesiyle eşleşti/);
     /* Birim kontrolü: DBH çap (cm) olarak değerlendirildi, dönüşüm yok */
     assert.match(html, /çevre→çap dönüşümü uygulanmamıştır/);
   });
