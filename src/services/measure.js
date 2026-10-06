@@ -163,6 +163,7 @@ function dgGpsBtnBusy(on){
  const b=$("gpsBtn");if(!b)return;
  if(on){b.innerHTML="⏳ Konum alınıyor…";b.disabled=true;b.style.opacity=".65";b.style.cursor="wait";}
  else{b.disabled=false;b.innerHTML=GPS?"🛰 GPS aktif":"📡 Konumu Etkinleştir";b.style.opacity="";b.style.cursor="";}
+ const state=$("gpsState");if(state)state.style.display=GPS?"none":state.style.display;
 }
 async function startGps(){
  const gpsMsg=(t,e)=>{const g=$("gpsState");g.textContent=t;g.className="alert "+(e?"err":"info");if(e)dgGpsBtnBusy(false);};
@@ -182,6 +183,8 @@ async function startGps(){
 }
 function updGps(){
  const a=GPS.accuracy;
+ const state=$("gpsState");if(state){state.textContent="";state.style.display="none";}
+ const badge=$("gpsBadge");if(badge){badge.textContent="GPS aktif";badge.className="dg-png-badge on";}
  $("gLat").textContent=GPS.latitude.toFixed(6);$("gLon").textContent=GPS.longitude.toFixed(6);
  $("gAlt").textContent=Number.isFinite(GPS.altitude)?GPS.altitude.toFixed(0)+" m":"—";
  const q=a<10?"ÇOK İYİ":a<20?"İYİ":a<40?"ORTA":"ZAYIF";
