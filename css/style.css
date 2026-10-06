@@ -796,6 +796,7 @@ label.lbl{display:block}
 .admin-publish-lock{flex:0 0 auto;border:1px solid var(--line);border-radius:999px;padding:6px 10px;font:700 .64rem/1 var(--f-mono);color:var(--green);background:var(--surface)}
 .admin-publish-toolbar{display:grid;grid-template-columns:auto minmax(260px,1fr) auto;gap:12px;align-items:center;padding:12px 18px;border-bottom:1px solid var(--line);background:var(--surface)}
 .admin-publish-lulc{display:flex;align-items:center;gap:10px;min-height:42px;cursor:pointer;font-size:.76rem;color:var(--ink)}
+.admin-publish-lulc .dg-switch{margin:0;align-self:center}
 .admin-publish-lulc>span{display:grid;gap:2px}.admin-publish-lulc small{color:var(--mut);font-size:.65rem;font-weight:400}
 .admin-publish-clock{font:600 .67rem/1.2 var(--f-mono);color:var(--mut);white-space:nowrap}
 .admin-publish-body{padding:16px 18px 18px}
