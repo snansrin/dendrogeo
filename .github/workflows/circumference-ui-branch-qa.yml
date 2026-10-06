@@ -24,8 +24,7 @@ jobs:
         run: |
           git config user.name "DendroGeo QA Bot"
           git config user.email "qa@dendrogeo.local"
-          git add index.html partials/ *.html en/**/*.html 2>/dev/null || true
-git add index.html partials/
+          git add index.html partials/
           if git diff --cached --quiet; then
             echo "index current"
           else
