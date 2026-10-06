@@ -1,0 +1,37 @@
+name: Live UI Verify
+on:
+  push:
+    branches:
+      - fix/ui-simplify-final
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Compare deployed files and UI claims
+        run: |
+          python - <<'PY'
+          import hashlib, pathlib, urllib.request, time
+          files=['index.html','css/style.css','src/services/user-admin.js','partials/shell.html']
+          bad=[]
+          live_index=None
+          for p in files:
+              local=pathlib.Path(p).read_bytes()
+              req=urllib.request.Request('https://dendrogeo.org/'+p+'?_='+str(int(time.time())),headers={'User-Agent':'dendrogeo-live-ui-verify'})
+              live=urllib.request.urlopen(req,timeout=25).read()
+              lh=hashlib.sha256(local).hexdigest()
+              rh=hashlib.sha256(live).hexdigest()
+              print(p,lh[:16],rh[:16])
+              if lh!=rh: bad.append(p)
+              if p=='index.html': live_index=live.decode('utf-8','replace')
+          forbidden=['DendroGeo Panel','Saha Modu','Park · proje · ekip','Proje bazlı envanter','Ölçüm protokolü korunur:','C → DBH = C/π · DBH 0,1 cm','ÇEVRE 45 cm → DBH 14.3 cm']
+          required=['Waypoint Navigasyon','DBH 14.3 cm','id="userRoleFilter"','id="userStatusFilter"','Taleplerim']
+          for x in forbidden:
+              if x in live_index: bad.append('forbidden:'+x)
+          for x in required:
+              if x not in live_index: bad.append('missing:'+x)
+          if bad:
+              raise SystemExit('LIVE_MISMATCH: '+', '.join(bad))
+          print('LIVE_OK: deployed files byte-identical and requested UI claims verified')
+          PY
