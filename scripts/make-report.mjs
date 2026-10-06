@@ -401,11 +401,12 @@ export function ringGeodesicAreaM2(ring) {
   for (let i = 0; i < xy.length - 1; i++) s += xy[i][0] * xy[i + 1][1] - xy[i + 1][0] * xy[i][1];
   return Math.abs(s / 2);
 }
-/* ENVANTER KALİTE KAPISI (QA v4 · 0032): kayıtları kanonik tür sözlüğü ve
+/* ENVANTER KALİTE KAPISI: kayıtları kanonik tür sözlüğü ve
  * panel denklemiyle (mc.calcRow) yeniden hesaplar.
- *   (a) DBH geçerlilik kontrolü — DBH = GÖĞÜS ÇAPI (cm). Kontrol:
- *       var mı → sayısal mı → pozitif mi → cm biriminde tanımlı biyolojik
- *       aralıkta mı. Çevre→çap (÷π) dönüşümü YAPILMAZ ve aranmaz.
+ *   (a) Ölçüm protokolü — sahada 1,30 m yükseklikte göğüs çevresi (cm)
+ *       ölçülür; ham değer girth_cm'de korunur. DBH çapı = girth_cm / π
+ *       olarak türetilir ve dbh_cm alanında tutulur. QA, allometri ve hacim
+ *       yalnız bu türetilmiş DBH çapını kullanır.
  *   (b) Gövde formu (boy/çap) — İKİ katmanlı: fiziksel makullük bandı
  *       (HD_PHYS_MIN–HD_PHYS_MAX) + stand İÇİ robust aykırılık (modified
  *       z-score > HD_ROBUST_Z). Tipik bant (HD_MIN–HD_MAX) dışı kayıtlar
@@ -702,6 +703,8 @@ export async function buildSnapshot(parkId, { skipLulc = false, meta = null, sur
       report_id: (meta && meta.id) || null,
       report_standard: 'DendroGeo Academic Report 3.0',
       publication_stage: 'production',
+      measurement_protocol: base.measurementLockId,
+      measurement_protocol_fingerprint: base.measurementLockFingerprint,
       epsg: (lulc && lulc.epsg) || null,
       resolution_m: savedSurface ? null : 10,
       resolution_note: savedSurface ? "Uydu 10/20 m; OSM ve çizim vektör sınırları" : "10 m",
@@ -903,10 +906,8 @@ export function renderReport(snap, { id, hash, version = 1, meta = null }) {
     INV ? qaRow('Tür/grup kilidi', (INV.n_unknown === 0 && !(INV.group_fail||[]).length) ? true : `⚠ ${INV.n_unknown + (INV.group_fail||[]).length} kayıt uyuşmuyor`, `${INV.n_rows - INV.n_unknown - (INV.group_fail||[]).length}/${INV.n_rows} kayıt FINAL tür/grup sözleşmesiyle eşleşti${INV.unknown.length ? ' · sözlük dışında: ' + esc(INV.unknown.join(', ')) : ''}${(INV.group_fail||[]).length ? ' · yanlış grup: ' + esc((INV.group_fail||[]).map(x=>'P'+x.point_id).join(', ')) : ''}`) : null,
     qaRow('Fotoğraf kanıtı', nPhoto === NR ? true : `⚠ ${NR - nPhoto} eksik`, `${nPhoto}/${NR} kayıt sahada çekilmiş fotoğraf bağlantısı taşıyor`),
     qaRow('GNSS doğruluk kaydı', (G.n_with_acc ?? 0) > 0 ? true : '⚠ Kaydedilmedi', (G.n_with_acc ?? 0) > 0 ? `${G.n_with_acc}/${G.n ?? NR} kayıtta doğruluk değeri · ortalama ±${trNum(G.mean_acc_m, 1)} m` : `0/${G.n ?? NR} kayıtta accuracy_m değeri var — GNSS hassasiyeti bu sürümde SAYIYLA beyan edilemiyor; park üyeliği poligon testiyle doğrulandı`),
-    /* (a) DBH birim/geçerlilik kontrolü — KRİTİK kontrol (0031). Sorgulanan
-     * şey "DBH çevre olabilir mi?" DEĞİL; "girilen DBH, çap ölçümü olarak
-     * teknik açıdan geçerli mi?"dir: var → sayısal → pozitif → cm aralığı. */
-    INV ? qaRow('Envanter birim kontrolü (DBH)', INV.dbh_block ? '⛔ Blok' : (INV.dbh_fail.length ? '⚠ İnceleme' : true), INV.dbh_fail.length ? `${INV.n - INV.dbh_fail.length}/${INV.n} kayıt DBH açısından geçerli · ${INV.dbh_fail.length} kayıtta sorun (${INV.dbh_fail.slice(0, 8).map((x) => 'P' + x.point_id + ': ' + (DBH_REASON_TR[x.reason] || x.reason)).join('; ')}${INV.dbh_fail.length > 8 ? '; …' : ''}) · DBH = göğüs çapı (cm) kabul edilir` : `${INV.n}/${INV.n} kayıtta DBH mevcut, sayısal, pozitif ve cm biriminde ${QA_LIMITS.DBH_MIN_CM}–${QA_LIMITS.DBH_MAX_CM} aralığında · Birim kontrolü: DBH değerleri çap (cm) olarak değerlendirilmiştir; çevre→çap dönüşümü uygulanmamıştır`) : null,
+    /* (a) Ölçüm protokolü/geçerlilik kontrolü — ham çevre + türetilmiş DBH. */
+    INV ? qaRow('Ölçüm protokolü (çevre → DBH)', INV.dbh_block ? '⛔ Blok' : (INV.dbh_fail.length ? '⚠ İnceleme' : true), INV.dbh_fail.length ? `${INV.n - INV.dbh_fail.length}/${INV.n} kayıtta türetilmiş DBH geçerli · ${INV.dbh_fail.length} kayıtta sorun (${INV.dbh_fail.slice(0, 8).map((x) => 'P' + x.point_id + ': ' + (DBH_REASON_TR[x.reason] || x.reason)).join('; ')}${INV.dbh_fail.length > 8 ? '; …' : ''})` : `${INV.n}/${INV.n} kayıtta ham göğüs çevresi korunmuş ve DBH = çevre / π olarak türetilmiştir; türetilmiş DBH ${QA_LIMITS.DBH_MIN_CM}–${QA_LIMITS.DBH_MAX_CM} cm aralığındadır`) : null,
     /* (b) Gövde formu (boy/çap) — 0032: İKİ katmanlı ölçüt. Fiziksel makullük
      * bandı (HD_PHYS_MIN–HD_PHYS_MAX) + stand İÇİ robust aykırılık (modified
      * z-score > HD_ROBUST_Z). Tipik 15–120 bandı dışı kayıtlar yalnız SAYILIR
@@ -1064,13 +1065,8 @@ export function renderReport(snap, { id, hash, version = 1, meta = null }) {
    * kaydedildiği veri tablosundan okunur; bilinmeyen hassasiyet ASLA
    * uydurulmaz (0011 öncesi satır, accuracy_m NULL iken "±0,0 m" basıyordu). */
   const RWS = snap.rows || [];
-  /* 0031 · DBH TANIMI (kullanıcı kararı): DBH = göğüs çapı, birim cm.
-   * Saha verisi doğrudan çap olarak girilir; DendroGeo rapor hattında
-   * çevre→çap (÷π) dönüşümü YAPILMAZ. Eski satır, DBH'nin gövde çevresinden
-   * türetildiğini iddia ediyordu — bu, ölçümün nasıl yapıldığını yanlış
-   * anlatan bir açıklamaydı ve haksız bir ⛔ Blok hükmüne yol açtı.
-   * Karbon motoru, katsayılar ve DBH_CM kolonu DEĞİŞMEDİ: yalnız metin. */
-  const dbhcTxt = 'Göğüs çapı (DBH; <i>Diameter at Breast Height</i>), ağacın yerden 1,30 m yükseklikteki gövde çapıdır ve sahada santimetre (cm) cinsinden ölçülerek doğrudan kaydedilmiştir. Kaydedilen DBH değerleri, herhangi bir çevre→çap dönüşümü uygulanmadan, olduğu gibi allometrik modelin girdisi olarak kullanılmıştır (DBH = göğüs çapı, cm).';
+  /* FINAL ölçüm protokolü: mezura ile çevre ölçülür; DBH çevre/π ile türetilir. */
+  const dbhcTxt = 'Sahada mezura ile ağacın yerden 1,30 m yüksekliğindeki <b>göğüs çevresi</b> santimetre (cm) cinsinden ölçülmüştür. Ham çevre <code>girth_cm</code> alanında korunmuş; gerçek göğüs çapı (DBH; <i>Diameter at Breast Height</i>) her kayıt için <b>DBH = çevre / π</b> bağıntısıyla türetilerek <code>dbh_cm</code> alanına yazılmıştır. Allometrik modele ham çevre değil, bu türetilmiş DBH çapı uygulanmıştır.';
   const hbRows = RWS.filter((r) => Number.isFinite(+r.height_m) && (+r.height_m * 10) % 1 === 0).length;
   const gnssTxt = (G.n_with_acc ?? 0) > 0
     ? ` (kaydedilen doğruluk: ${G.n_with_acc}/${G.n ?? NR} kayıt · ortalama ±${trNum(G.mean_acc_m, 1)} m)`
@@ -1271,13 +1267,14 @@ ${L && L.cross ? `<p><b>3.4 Çapraz doğrulama verisi.</b> ${esc(L.cross)}: bağ
 
 <h2><span class="no">4</span>Yöntem</h2>
 <p><b>4.1 Saha protokolü.</b> ${dbhcTxt} Ağaç boyu ${hbRows > 0 ? 'sahada ölçülmüş (kayıt çözünürlüğü 0,1 m)' : '—'}; konum sivil GNSS alıcısıyla kaydedilmiş${gnssTxt}; her kayıt için sahada çekilmiş fotoğraf kanıtı ${photoTxt}.</p>
-<p><b>4.2 Biyokütle ve karbon.</b> Karbon stoku; sahada ölçülen DBH (göğüs çapı, cm), ağaç boyu (m) ve tür/odun yoğunluğu parametreleri kullanılarak uygulanan allometrik model üzerinden hesaplanmıştır. Hesaplama zinciri: <b>DBH (cm) → boy (m) → odun yoğunluğu (ρ) → AGB → BGB → karbon → belirsizlik.</b> Toprak üstü biyokütle (AGB), Chave ve ark. (2014) pantropikal allometrik denklemiyle hesaplanmıştır: AGB = 0.0673·(ρ·D²·H)^0.976; burada <b>D = sahada ölçülen göğüs çapı (DBH), cm</b> — modele olduğu gibi girer, herhangi bir çevre→çap dönüşümü uygulanmaz; ρ odun yoğunluğu (g/cm³), H ağaç boyu (m). Toprak altı biyokütle (kök biyokütlesi) AGB×0.26, karbon stoku ise toplam biyokütlenin 0.47 katsayısı ile çarpımı olarak tanımlanmıştır. Tür yoğunluğu bulunmadığında grup varsayılanı (iğne yapraklı / geniş yapraklı) kullanılmış ve Çizelge 1'de beyan edilmiştir.</p>
+<p><b>4.2 Biyokütle ve karbon.</b> Hesaplama zinciri: <b>göğüs çevresi C (cm) → DBH çapı D=C/π (cm) → boy H (m) → odun yoğunluğu (ρ) → AGB → BGB → karbon → belirsizlik.</b> Toprak üstü biyokütle (AGB), Chave ve ark. (2014) pantropikal allometrik denklemiyle hesaplanmıştır: AGB = 0.0673·(ρ·D²·H)^0.976. Burada <b>D, mezurayla ölçülen çevrenin π'ye bölünmesiyle türetilmiş DBH çapıdır</b>; ham çevre hiçbir aşamada doğrudan D olarak kullanılmaz. Toprak altı biyokütle AGB×0.26, karbon stoku ise toplam biyokütlenin 0.47 katsayısı ile çarpımıdır. Odun yoğunluğu yalnız kilitli DendroGeo yoğunluk tablosundan çözülür.</p>
 <p><b>4.3 Belirsizlik.</b> Girdi belirsizlikleri (§4.1) ve allometrik model belirsizliği (%22 değişim katsayısı) Monte Carlo yöntemiyle (n=${snap.mc.N}, sabit tohum=${snap.mc.SEED}) yayılmıştır; model hatası kayıtlar arasında korele kabul edilmiştir, zira aynı denklem tüm kayıtlarda ortak yönde sapma üretir. Aralık sınırları Monte Carlo dağılımının 2,5 ve 97,5 yüzdelikleridir. Bu aralık model ve girdi belirsizlikleri koşulunda hesaplanmıştır; olasılıklı örnekleme tasarımına dayalı park geneli güven aralığı değildir.</p>
 ${lulcMethod || '<p><b>4.4 Arazi örtüsü sınıflandırması.</b> Bu sürümde arazi örtüsü çözümlemesi yer almamaktadır' + (snap.lulc && snap.lulc.error ? ` (teknik not: ${esc(snap.lulc.error)})` : '') + (knotted ? ` Saptanan neden: sınır poligonundaki ${knotN} kendini kesen segment çifti (düğüm), poligon alanı ile raster kapsama alanını %0,5 eşiğinin üzerinde ayrıştırmaktadır. Sınır düzeltilip yeniden yayımlandığında çözümleme üretilir; bu raporun kimliği değişmez, yeni çözümleme yeni DGR kimliği alır.` : '') + (GJ ? ` Saptanan neden: uygulamada çizili sınır kaydı bir dikdörtgen (${GJ.ring_points} nokta; jeodezik alanı ${trNum(GJ.ring_area_m2 / 10000, 2)} ha) olup künye alanından (${trNum(parkHa, 2)} ha) belirgin biçimde büyüktür; alan dengesi eşiği bu nedenle aşılmıştır. Sınır kaydı düzeltilip (veya OSM poligonuna dönülüp) yeniden yayımlandığında çözümleme üretilir; bu raporun kimliği değişmez, yeni çözümleme yeni DGR kimliği alır.` : '') + '.</p>'}
 <p><b>4.5 Doğrulama zinciri.</b> (i) Her kayıt moderatör onayı gerektirir (${snap.moderation.approved}/${snap.moderation.approved} kayıt 'Onaylı' durumundadır; zaman damgalı onay kaydı ${snap.moderation.reviewed}/${snap.moderation.approved}); (ii) ölçüm konumunun park poligonu içinde olması veritabanı tetiği ile zorunlu kılınmıştır (trg_geo_fence; zorunluluk, 0007 geçişinden sonraki kayıtlara uygulanır, önceki kayıtlar için kayıt düzeyindeki denetim sonucu §7'de beyan edilir); (iii) arazi örtüsü çözümlemesinde raster/park alan farkı %0,5 eşiğini aşarsa sonuç yayınlanmaz; (iv) yayınlanan sayfanın içerik bütünlüğü SHA-256 hash'i ile açılışta canlı doğrulanır (§7).</p>
 <p><b>4.6 Veri sözlüğü.</b> Raporda ve <code>data.json</code>/<code>olcum.csv</code> çıktılarında kullanılan değişkenlerin anlamı ve birimi aşağıdadır.</p>
 <div class="tscroll"><table><thead><tr><th>Değişken</th><th>Açıklama</th><th>Birim</th></tr></thead><tbody>
-<tr><td class="tr">DBH</td><td class="qd">Göğüs çapı — yerden 1,30 m yükseklikte ölçülen gövde çapı</td><td class="qd">cm</td></tr>
+<tr><td class="tr">Göğüs çevresi (C)</td><td class="qd">Mezura ile yerden 1,30 m yükseklikte ölçülen ham gövde çevresi (<code>girth_cm</code>)</td><td class="qd">cm</td></tr>
+<tr><td class="tr">DBH (D)</td><td class="qd">Türetilmiş göğüs çapı: <b>D = C / π</b> (<code>dbh_cm</code>)</td><td class="qd">cm</td></tr>
 <tr><td class="tr">Boy (H)</td><td class="qd">Ağaç boyu</td><td class="qd">m</td></tr>
 <tr><td class="tr">ρ (rho)</td><td class="qd">Odun yoğunluğu (tür bazlı; bulunamazsa grup varsayılanı)</td><td class="qd">g/cm³</td></tr>
 <tr><td class="tr">AGB</td><td class="qd">Toprak üstü biyokütle</td><td class="qd">kg</td></tr>
@@ -1286,14 +1283,14 @@ ${lulcMethod || '<p><b>4.4 Arazi örtüsü sınıflandırması.</b> Bu sürümde
 <tr><td class="tr">GA</td><td class="qd">%95 model belirsizlik aralığı (Monte Carlo, korele model hatası)</td><td class="qd">kg C</td></tr>
 <tr><td class="tr">h/DBH</td><td class="qd">Boy/çap oranı — yalnız inceleme göstergesi, hata hükmü değildir</td><td class="qd">birimsiz</td></tr>
 </tbody></table></div>
-<p class="qnote"><b>Ölçüm notu:</b> Bu raporda DBH, göğüs yüksekliğinde (1,30 m) ölçülen gövde <b>çapını</b> ifade eder ve <b>cm</b> cinsindendir. DBH değerleri karbon hesabına <b>herhangi bir çevre→çap dönüşümü uygulanmadan</b>, doğrudan model girdisi olarak kullanılmıştır.</p>
+<p class="qnote"><b>Ölçüm notu:</b> Sahada doğrudan çap ölçülmemiştir. Mezura ile 1,30 m yükseklikte göğüs çevresi ölçülmüş; DBH çapı her kayıt için <b>çevre / π</b> ile türetilmiştir. Allometrik modele yalnız türetilmiş DBH uygulanır; ham çevre ayrıca saklanır.</p>
 
 <h2><span class="no">5</span>Nicel Sonuçlar</h2>
 <p><b>5.1 Karbon stoku.</b> Çizelge 1 tür bazlı özet istatistikleri, Şekil 1 ise karbon paylarının dağılımını vermektedir.</p>
 <div class="tscroll"><table><caption>Çizelge 1. Türlere göre ağaç envanteri ve karbon stoku.</caption><thead><tr><th>Tür</th><th>Grup</th><th>n</th><th>Ort. DBH (cm)</th><th>Ort. boy (m)</th><th>Karbon (kg)</th><th>Pay</th></tr></thead><tbody>${spRows}</tbody></table></div>
 <div class="fig"><div class="sans" style="font-size:.78rem"><b>Şekil 1 — Tür bazlı karbon stoku payları</b> <span class="qnote">(bar rengi taksonomik grubu gösterir: ${sw('#2f9e44')} ibreli · ${sw('#e8590c')} yapraklı · ${sw('#8a928c')} diğer)</span></div>${bars}</div>
 <div class="ci">📐 Toplam karbon stoku: <b>${ciTxt}</b> · Monte Carlo n=${snap.mc.N}, tohum=${snap.mc.SEED}, model CV=%${snap.mc.MODEL_CV * 100} (korele). ${'Aralık, belirtilen model ve girdi belirsizliklerini kapsar; parkın ölçülmeyen ağaçlarından kaynaklanan örnekleme belirsizliğini kapsamaz.'}</div>
-<p class="qnote"><b>Ölçüm notu:</b> Bu raporda DBH, göğüs yüksekliğinde (1,30 m) ölçülen gövde <b>çapını</b> ifade eder ve <b>cm</b> cinsindendir. DBH değerleri karbon hesabına herhangi bir çevre→çap dönüşümü uygulanmadan doğrudan model girdisi olarak kullanılmıştır (değişken tanımları: §4.6 veri sözlüğü). ${govdeAralikTxt ? ` <b>Gövde çapı notu:</b> bu envanterde ölçülen gövde çapı aralığı ${govdeAralikTxt}. Değerler sahada ölçüldüğü gibi modellenmiştir; herhangi bir düzeltme, ölçekleme veya dışlama uygulanmamıştır (§9 sınırlılıklar).` : ''}</p>
+<p class="qnote"><b>Ölçüm notu:</b> Ham saha değişkeni göğüs çevresidir; DBH = çevre / π ile türetilmiştir (değişken tanımları: §4.6 veri sözlüğü). ${govdeAralikTxt ? ` <b>Türetilmiş DBH aralığı:</b> ${govdeAralikTxt}. Ham çevre değerleri korunmuş, yalnız matematiksel çevre→çap dönüşümü uygulanmıştır (§9 sınırlılıklar).` : ''}</p>
 ${L ? `<p><b>5.2 Arazi örtüsü.</b> Sınıf alanları Çizelge 2'de sunulmuştur; mekânsal dağılım §6'da (Şekil 2) gösterilmektedir.</p>
 <div class="tscroll"><table class="summary"><caption>Çizelge 2. Park sınırı içindeki yüzey sınıflarının alanları.</caption><thead><tr><th>Sınıf</th><th>Alan (ha)</th><th>Pay</th></tr></thead><tbody>${L.classes.map((c) => `<tr><td class="tr">${esc(c.label)}</td><td>${trNum(c.ha, 2)}</td><td>%${trNum(c.pct, 1)}</td></tr>`).join('')}</tbody></table></div>
 <p><b>5.3 Alan dengesi.</b> Çizelge 3, park geometrisi ile raster kapsama alanının karşılaştırmasını verir; bu karşılaştırma sonuçların üretilmesinden önce hesaplama bütünlüğünün kontrol edildiğini belgeler.</p>
@@ -1440,16 +1437,16 @@ async function dgShareReport(){
 
 /* ---------- CSV / GeoJSON / liste ---------- */
 function csvOf(snap) {
-  const head = 'NOKTA,TUR,GRUP,DBH_CM,BOY_M,KARBON_KG,KARBON_CI_LO_KG,KARBON_CI_HI_KG,ENLEM,BOYLAM,GPS_DOGRULUK_M,TARIH';
+  const head = 'NOKTA,TUR,GRUP,GOGUS_CEVRESI_CM,DBH_CM,BOY_M,KARBON_KG,KARBON_CI_LO_KG,KARBON_CI_HI_KG,ENLEM,BOYLAM,GPS_DOGRULUK_M,TARIH';
   const { rho, grho } = loadRho();
   const lines = snap.rows.map((r) => {
     const ci = mcRowCI(r);
-    return [r.point_id, `"${r.species}"`, r.grp, r.dbh_cm, r.height_m, r.carbon_kg, ci.lo.toFixed(1), ci.hi.toFixed(1), r.lat, r.lon, r.acc_m ?? '', r.date].join(',');
+    return [r.point_id, `"${r.species}"`, r.grp, r.girth_cm ?? '', r.dbh_cm, r.height_m, r.carbon_kg, ci.lo.toFixed(1), ci.hi.toFixed(1), r.lat, r.lon, r.acc_m ?? '', r.date].join(',');
   });
   return '\uFEFF' + head + '\n' + lines.join('\n') + '\n';
 }
 function geojsonOf(snap) {
-  return { type: 'FeatureCollection', features: snap.rows.map((r) => ({ type: 'Feature', geometry: { type: 'Point', coordinates: [r.lon, r.lat] }, properties: { nokta: r.point_id, tur: r.species, grup: r.grp, dbh_cm: r.dbh_cm, boy_m: r.height_m, karbon_kg: r.carbon_kg, tarih: r.date } })) };
+  return { type: 'FeatureCollection', features: snap.rows.map((r) => ({ type: 'Feature', geometry: { type: 'Point', coordinates: [r.lon, r.lat] }, properties: { nokta: r.point_id, tur: r.species, grup: r.grp, gogus_cevresi_cm: r.girth_cm, dbh_cm: r.dbh_cm, boy_m: r.height_m, karbon_kg: r.carbon_kg, tarih: r.date } })) };
 }
 function renderIndex(list) {
   const rows = list.map((r) => `<tr><td><a href="${r.id}/">${r.id}</a></td><td class="tr">${esc(r.park)}</td><td>${r.n}</td><td>${r.carbon}</td><td>${r.date}</td><td><span class="badge on">Geçerli</span></td></tr>`).join('');
@@ -1581,10 +1578,10 @@ export function buildMetadata(snap, { id, hash, version = '1.0', meta = null, hi
     methodVersion: `${M.engine || 'DendroGeo LC Engine'}${M.engine_version ? ' ' + M.engine_version : ''}`.trim(),
     projection: epsgLabel((L && L.epsg) || M.epsg || null),
     sampleSize: t.n,
-    /* 0031 · Veri sözlüğü (makine okunur): DBH = göğüs çapı, cm.
-     * Rapordaki §4.6 çizelgesinin birebir karşılığı; çevre→çap dönüşümü YOK. */
+    /* Makine-okur saha protokolü: ham çevre + türetilmiş DBH. */
     variables: [
-      { name: 'DBH', description: 'Göğüs çapı — yerden 1,30 m yükseklikte ölçülen gövde çapı', unit: 'cm' },
+      { name: 'Göğüs çevresi (C)', description: 'Mezura ile 1,30 m yükseklikte ölçülen ham gövde çevresi (girth_cm)', unit: 'cm' },
+      { name: 'DBH (D)', description: 'Türetilmiş göğüs çapı: D = C / pi (dbh_cm)', unit: 'cm' },
       { name: 'Boy (H)', description: 'Ağaç boyu', unit: 'm' },
       { name: 'rho', description: 'Odun yoğunluğu (tür bazlı; bulunamazsa grup varsayılanı)', unit: 'g/cm3' },
       { name: 'AGB', description: 'Toprak üstü biyokütle', unit: 'kg' },
@@ -1592,9 +1589,9 @@ export function buildMetadata(snap, { id, hash, version = '1.0', meta = null, hi
       { name: 'Karbon', description: 'Tahmini karbon stoku = (AGB + BGB) x 0,47', unit: 'kg C' },
       { name: 'h/DBH', description: 'Boy/çap oranı — yalnız inceleme göstergesi, hata hükmü değildir', unit: 'birimsiz' },
     ],
-    measurementNote: 'DBH, göğüs yüksekliğinde (1,30 m) ölçülen gövde çapıdır ve cm cinsindendir. DBH değerleri karbon hesabına herhangi bir çevre→çap dönüşümü uygulanmadan doğrudan model girdisi olarak kullanılmıştır.'
+    measurementNote: 'Sahada 1,30 m yükseklikte göğüs çevresi (cm) mezura ile ölçülür ve girth_cm alanında korunur. DBH çapı D = C / pi ile türetilip dbh_cm alanına yazılır; karbon ve hacim hesabında yalnız türetilmiş DBH kullanılır.'
       + ((snap.qa && snap.qa.species && snap.qa.species.dbh_stats)
-        ? ` Ölçülen gövde çapı aralığı ${trNum(snap.qa.species.dbh_stats.min, 0)}–${trNum(snap.qa.species.dbh_stats.max, 0)} cm (medyan ${trNum(snap.qa.species.dbh_stats.medyan, 0)} cm, n=${snap.qa.species.dbh_stats.n}); değerler doğrudan model girdisi olarak kullanılmıştır.`
+        ? ` Türetilmiş DBH aralığı ${trNum(snap.qa.species.dbh_stats.min, 1)}–${trNum(snap.qa.species.dbh_stats.max, 1)} cm (medyan ${trNum(snap.qa.species.dbh_stats.medyan, 1)} cm, n=${snap.qa.species.dbh_stats.n}); ham çevre değerleri ayrıca korunmuştur.`
         : ''),
     /* 0033 · kapsam beyanı (makine okunur): bu rapor hiçbir birey için yasal
      * statü değerlendirmesi içermez. 0032deki eşik tabanlı gövde sınıfı alanı
