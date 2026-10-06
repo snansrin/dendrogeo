@@ -33,18 +33,19 @@ const SUBS = readdirSync(ROOT).filter((d) =>
   existsSync(join(ROOT, d, 'index.html')));
 
 describe('P0 · bilimsel iddialar kaynağıyla birebir', () => {
-  test('⭐ çevre→çap dönüşümü beyanı hiçbir yayın sayfasında YOK (0031 kırmızı çizgisi)', () => {
-    const yasak = [/Çevre\s*÷\s*π/i, /çevre\s*\/\s*π/i, /girth\s*\/\s*π/i];
-    const sayfalar = ['partials/landing.html', 'partials/shell.html', 'index.html',
-      ...SUBS.map((d) => d + '/index.html')];
-    for (const f of sayfalar) {
-      const t = rd(f);
-      for (const y of yasak) assert.ok(!y.test(t), f + ' içinde dönüşüm beyanı: ' + y);
-    }
-    /* Landing DBH'yi DOĞRU tanımlıyor (0035b: girth notu kullanıcı isteğiyle
-     * kaldırıldı — tanımlayıcı tek satır yeterli, dönüşüm beyanı yasaklığı sürer) */
-    assert.match(landing, /DBH = göğüs çapı \(cm\)/, 'DBH tanımı göğüs çapı olmalı');
-    assert.ok(!landing.includes('girth_cm'), 'girth_cm notu landing\'de istenmiyor (kullanıcı kararı 0035b)');
+  test('⭐ FINAL ölçüm protokolü: çevre ölçülür, DBH = çevre/π türetilir', () => {
+    const lock = rd('src/config/measurement-protocol-lock.js');
+    assert.match(lock, /DG-MEASURE-LOCK-2026-10-06-FINAL/);
+    assert.match(lock, /diameter_cm=circumference_cm\/pi/);
+    assert.match(lock, /raw_field:"measurements\.girth_cm"/);
+    assert.match(lock, /derived_field:"measurements\.dbh_cm"/);
+    assert.match(landing, /DBH = göğüs çevresi ÷ π/);
+    assert.match(shell, /Göğüs çevresi/);
+    assert.match(rd('docs/methods.md'), /D = C \/ π/);
+    const aktif=['partials/landing.html','partials/shell.html','src/services/measure.js',
+      'scripts/make-report.mjs','scripts/import-measurements.mjs','docs/methods.md'];
+    const yasak=[/çevre→çap[^\n]{0,80}(?:YAPILMAZ|uygulanmaz)/i,/sahada doğrudan çap/i,/doğrudan çap olarak ölç/i];
+    for(const file of aktif)for(const re of yasak)assert.ok(!re.test(rd(file)),file+' eski yanlış ölçüm iddiası: '+re);
   });
 
   test('⭐ tür/grup adları EN sözlüğünde tam kapsanıyor (0035b)', () => {
@@ -80,29 +81,33 @@ describe('P0 · bilimsel iddialar kaynağıyla birebir', () => {
     assert.match(rd('docs/methods.md'), new RegExp(`${def}/${total}`), 'methods.md ρ\'sız/toplam sayısını söylemeli');
   });
 
-  test('⭐ hero çipleri motorla birebir üretiliyor + QA h/D bandında', () => {
-    const D = +landing.match(/DBH (\d+(?:[.,]\d+)?) cm/)[1].replace(',', '.');
+  test('⭐ hero çipleri çevre→DBH→karbon zinciriyle birebir', () => {
+    const circumference = +landing.match(/ÇEVRE (\d+(?:[.,]\d+)?) cm/)[1].replace(',', '.');
+    const shownD = +landing.match(/→ DBH (\d+(?:[.,]\d+)?) cm/)[1].replace(',', '.');
     const H = +landing.match(/H (\d+(?:[.,]\d+)?) m/)[1].replace(',', '.');
     const C = +landing.match(/C (\d+(?:[.,]\d+)?) kg/)[1].replace(',', '.');
-    /* allometry.js calc() ile aynı denklem; ρ = İBRELİ grup varsayılanı (446) */
+    const D=circumference/Math.PI;
+    assert.ok(Math.abs(shownD-D)<0.01,`gösterilen DBH ${shownD}, çevre/π ${D}`);
     const rhoCtx = {};
     vm.createContext(rhoCtx);
     vm.runInContext(speciesRuntime() + ';this.G=GROUP_DEFAULT_RHO;', rhoCtx);
     const r = rhoCtx.G['\u0130BREL\u0130'] / 1000;
     const agb = 0.0673 * Math.pow(r * D * D * H, 0.976);
     const beklenen = agb * 1.26 * 0.47;
-    assert.ok(Math.abs(beklenen - C) < 0.06, `çip C=${C} kg ama motor ${beklenen.toFixed(1)} kg üretiyor`);
+    assert.ok(Math.abs(beklenen - C) < 0.06, `çip C=${C} kg ama çevre→DBH motoru ${beklenen.toFixed(1)} kg üretiyor`);
     const hd = 100 * H / D;
     assert.ok(hd >= QA_LIMITS.HD_MIN && hd <= QA_LIMITS.HD_MAX,
-      `vitrin örneği QA tipik bandında olmalı (h/D=${hd.toFixed(1)}, bant ${QA_LIMITS.HD_MIN}-${QA_LIMITS.HD_MAX})`);
+      `vitrin örneği QA tipik bandında olmalı (h/D=${hd.toFixed(1)})`);
   });
 
-  test('⭐ DBH üst sınırı TEK standart: form = landing = rapor QA (400 cm)', () => {
-    const measure = rd('src/services/measure.js');
-    assert.match(measure, /d<=0\|\|d>400/, 'form eşiği 400');
-    assert.match(landing, /DBH ≤ 400 cm, boy ≤ 100 m/, 'landing QA kartı 400');
-    assert.equal(QA_LIMITS.DBH_MAX_CM, 400, 'rapor QA 400');
-    assert.equal(QA_LIMITS.H_MAX_M, 100, 'boy üst sınırı her yerde 100');
+  test('⭐ çap üst sınırı türetilmiş DBH üzerinde tek standart: 400 cm', () => {
+    const protocol=rd('src/config/measurement-protocol-lock.js');
+    assert.match(protocol,/max_diameter_cm:400/);
+    assert.match(protocol,/max_circumference_cm:1256\.6370614359173/);
+    assert.match(shell,/id="mDbh"[^>]*max="1256\.6"/);
+    assert.match(landing,/Türetilmiş DBH ≤ 400 cm, boy ≤ 100 m/);
+    assert.equal(QA_LIMITS.DBH_MAX_CM,400);
+    assert.equal(QA_LIMITS.H_MAX_M,100);
   });
 });
 
