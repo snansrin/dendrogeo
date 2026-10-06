@@ -142,29 +142,3 @@ export function loadApp({ sadece } = {}) {
 }
 
 export { ROOT };
-,
-                   'DG_LC_CODES', 'DG_LC_CLASSES', 'DG_LC_PIXEL_M', 'DG_LC_YEAR',
-                   'DG_LC_COLLECTION', 'DG_LC_STAC', 'DG_LC_MAX_TILES',
-                   'DG_LC_MAX_READ_PIXELS', 'DG_LC_RENDER_LIMIT',
-                   'DG_LC_SOURCES', 'DG_ESA_GROUP', 'DG_ESA_CODES', 'DG_LC_SAS', 'DG_OSM_WATER_MIRRORS', 'DG_LC_LAYER', 'DG_LC_LAST',
-                   /* Çalışma Sahası v5 (2026-10-03) */
-                   'DG_VAL_VERSION', 'DG_VAL_CLASSES', 'DG_VAL_LABELS', 'DG_VAL_DEFAULTS',
-                   'DG_VAL_SPECTRAL', 'DG_VAL_GATE',
-                   'DG_S2_COLLECTION', 'DG_S2_MAX_SCENES', 'DG_S2_MAX_CLOUD', 'DG_S2_SEARCH_LIMIT',
-                   'DG_S2_BANDS', 'DG_S2_SCL_VALID', 'DG_S2_SCALE', 'DG_S2_MIN_OBS_GUARD',
-                   'DG_TRUNCATION_WARNED',
-                   'DG_PARK_SEP', 'DG_PARK_MATCH_M', 'DG_TR_FOLD', 'DG_TR_UP'];
-  const epilog = LEXICAL
-    .map((n) => `if(typeof ${n}!=="undefined")__exports.${n}=${n};`)
-    .join('');
-
-  ctx.__exports = {};
-  for (const f of dosyalar) {
-    vm.runInContext(readFileSync(join(ROOT, f), 'utf8'), ctx, { filename: f });
-    vm.runInContext(epilog, ctx, { filename: f + ' [exports]' });
-  }
-  Object.assign(ctx, ctx.__exports);
-  return ctx;
-}
-
-export { ROOT };
