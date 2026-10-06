@@ -990,3 +990,73 @@ label.lbl{display:block}
  #v-users .admin-user-actions select{min-height:40px;max-width:128px}
  #v-users .admin-user-actions .btn{min-height:40px}
 }
+
+
+/* 2026-10-06 · field help + live monitoring polish. Same DendroGeo tokens. */
+.measure-label-help,.dg-field-label{display:flex!important;align-items:center;gap:7px}
+.measure-label-help>span:first-child,.dg-field-label>.lbl{min-width:0}
+.dg-field-help{appearance:none;border:1px solid var(--line);background:var(--tint);color:var(--green-dk);width:20px;height:20px;min-width:20px;padding:0;border-radius:50%;display:inline-grid;place-items:center;font:800 .68rem/1 var(--f-mono);cursor:help;position:relative;vertical-align:middle}
+.dg-field-help::after{content:attr(data-tip);position:absolute;left:50%;bottom:calc(100% + 9px);transform:translateX(-50%) translateY(3px);width:min(290px,78vw);padding:9px 11px;border:1px solid var(--line);border-radius:9px;background:var(--surface);color:var(--ink);box-shadow:var(--sh);font:500 .75rem/1.45 var(--f-body);letter-spacing:0;text-transform:none;text-align:left;white-space:normal;opacity:0;visibility:hidden;pointer-events:none;z-index:90;transition:.12s}
+.dg-field-help::before{content:"";position:absolute;left:50%;bottom:calc(100% + 4px);width:8px;height:8px;background:var(--surface);border-right:1px solid var(--line);border-bottom:1px solid var(--line);transform:translateX(-50%) rotate(45deg);opacity:0;visibility:hidden;z-index:91}
+.dg-field-help:hover::after,.dg-field-help:focus-visible::after,.dg-field-help:focus::after,.dg-field-help:hover::before,.dg-field-help:focus-visible::before,.dg-field-help:focus::before{opacity:1;visibility:visible}
+.dg-field-help:focus-visible{outline:2px solid var(--green);outline-offset:2px}
+#v-measure .measure-gps-row{justify-content:flex-end}
+#v-measure #gpsBtn.is-active{background:var(--tint);color:var(--green-dk);border-color:var(--green)}
+#v-measure [hidden]{display:none!important}
+@media(max-width:640px){
+ #v-measure .measure-heading{align-items:flex-start}
+ #v-measure .measure-tag{display:inline-flex;white-space:nowrap;font-size:.65rem;padding:4px 8px;margin-top:2px}
+ #v-measure .measure-heading .disp{font-size:1.55rem}
+ #v-measure .measure-heading .measure-help{display:none}
+ #v-measure .measure-gps-row{display:block;margin-top:10px}
+ #v-measure #gpsBtn{width:100%}
+ .dg-field-help::after{left:auto;right:-6px;transform:none;width:min(270px,78vw)}
+ .dg-field-help::before{left:auto;right:1px;transform:rotate(45deg)}
+}
+
+/* Visitor & live workspace: compact control surface, no new data collection. */
+#v-visitors{max-width:1120px;margin-inline:auto;padding-bottom:24px}
+.visitor-heading{display:flex;justify-content:space-between;align-items:flex-start;gap:18px;margin-bottom:12px}
+.visitor-heading .disp{font-size:2rem;margin:2px 0 4px}
+.visitor-lead{font-size:.82rem;color:var(--mut);line-height:1.45}
+.visitor-connection{display:flex;align-items:center;gap:7px;min-height:38px;padding:5px 7px 5px 10px;border:1px solid var(--line);border-radius:999px;background:var(--surface);font-size:.7rem;color:var(--mut);white-space:nowrap}
+.visitor-live-dot{width:8px;height:8px;border-radius:50%;background:var(--amber);box-shadow:0 0 0 3px color-mix(in srgb,var(--amber) 16%,transparent)}
+.visitor-connection[data-state="on"] .visitor-live-dot{background:var(--green);box-shadow:0 0 0 3px color-mix(in srgb,var(--green) 16%,transparent)}
+.visitor-connection[data-state="error"] .visitor-live-dot{background:var(--red);box-shadow:0 0 0 3px color-mix(in srgb,var(--red) 16%,transparent)}
+.visitor-privacy{display:flex;gap:9px;align-items:center;padding:9px 12px;border:1px solid var(--line);border-radius:10px;background:var(--bg);margin-bottom:12px;color:var(--mut);font-size:.72rem}
+.visitor-privacy p{margin:0}
+.visitor-stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:9px;margin-bottom:12px}
+.visitor-stat{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:var(--surface)}
+.visitor-stat span{font-size:.66rem;color:var(--mut);font-weight:700;text-transform:uppercase;letter-spacing:.04em}
+.visitor-stat strong{font:700 1.25rem/1 var(--f-disp);color:var(--green-dk)}
+.visitor-stat.is-live{box-shadow:inset 3px 0 0 var(--green)}
+.visitor-control{padding:14px;margin-bottom:12px}
+.visitor-quick{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:10px}
+#v-visitors .dg-vis-tools{margin:0;grid-template-columns:minmax(220px,1fr) minmax(160px,.55fr) auto auto;align-items:end;gap:8px}
+#v-visitors .dg-vis-tools .measure-share{min-height:40px;font-size:.72rem}
+#v-visitors .visitor-control-note{grid-column:1/-1;margin:0}
+.visitor-layout{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:12px;margin-bottom:12px}
+.visitor-live-card,.visitor-feed-card,.visitor-map-card,.visitor-activity-card{padding:14px}
+.visitor-map-card,.visitor-activity-card{margin-bottom:12px}
+.visitor-card-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:10px}
+.visitor-card-head h3{font:600 1.05rem/1.25 var(--f-disp);color:var(--green-dk);margin:1px 0 0}
+.visitor-card-hint{font-size:.62rem;color:var(--mut);border:1px solid var(--line);border-radius:999px;padding:3px 7px;white-space:nowrap}
+#v-visitors #visLive,#v-visitors #visFeed{max-height:310px;overflow:auto;padding-right:3px}
+#v-visitors #visMap{height:360px;border-radius:10px;border:1px solid var(--line)}
+@media(max-width:760px){
+ .visitor-heading{display:grid;gap:8px}
+ .visitor-connection{width:100%;justify-content:flex-start;border-radius:10px}
+ .visitor-connection .btn{margin-left:auto}
+ .visitor-stats{grid-template-columns:repeat(2,minmax(0,1fr))}
+ #v-visitors .dg-vis-tools{grid-template-columns:1fr 1fr}
+ .visitor-layout{grid-template-columns:1fr}
+}
+@media(max-width:520px){
+ .visitor-heading .disp{font-size:1.55rem}
+ .visitor-lead{display:none}
+ .visitor-quick{display:grid;grid-template-columns:1fr 1fr}
+ .visitor-quick .btn{min-height:42px}
+ #v-visitors .dg-vis-tools{grid-template-columns:1fr}
+ #v-visitors .dg-vis-tools .measure-share{min-height:44px}
+ #v-visitors #visMap{height:300px}
+}
