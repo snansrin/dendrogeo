@@ -61,6 +61,7 @@
 
 .dg-png-badge.amber{background:rgba(245,158,11,.14);color:#b45309;}
 .dg-png-badge.blue{background:rgba(59,130,246,.14);color:#1d4ed8;}
+.dg-png-badge.red{background:color-mix(in srgb,var(--red) 12%,transparent);color:var(--red);}
 
 .dg-png-label{
   display:block;
