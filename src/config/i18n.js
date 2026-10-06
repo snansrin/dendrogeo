@@ -24,6 +24,7 @@
 
 /* ---- EN sözlüğü: anahtar = TR dizenin trim'lenmiş hâli ---- */
 const DG_I18N_EN={
+"Başarısız üretimler en fazla 3 kez otomatik yeniden denenir. Başarılı rapor üretildikten sonra Zenodo DOI kaydı otomatik başlatılır.":"Failed publication attempts are retried automatically up to 3 times. Zenodo DOI registration starts automatically after a successful report is produced.",
 "Tarama isteğe bağlıdır. Ham analizi doğrudan inceleyebilir veya tarayıp hassasiyet barlarıyla ayarlayabilirsiniz.":"Scanning is optional. Inspect the raw analysis directly, or scan and adjust the sensitivity sliders.",
 "Tarama tamamlandı. Ham sınıflar korundu; hassasiyet barlarıyla önizlemeyi ayarlayabilirsiniz.":"Scan completed. Raw classes are preserved; adjust the preview using the sensitivity sliders.",
 "Hassasiyet barları, fırça ve sınır düzeltmeleri bu özete yansır. Yayın için kabul edip kaydedin.":"Sensitivity sliders, brush strokes and boundary corrections update this summary. Accept and save for publication.",

@@ -35,10 +35,11 @@ describe('0014 · migration: unique index kalkar, koruma katmanları kalır', ()
 });
 
 describe('0014 · çift üretim koruması kodda duruyor (regresyon kilidi)', () => {
-  test('panel: yalnız günlükte sonucu OLMAYAN Beklemede istekleri sayar', () => {
+  test('panel: sonuçsuz veya başarısız Beklemede istekleri gösterir; başarılı sonucu tekrar kuyruğa sokmaz', () => {
     const ui = read('src/services/report-publish.js');
-    assert.match(ui, /status===\"Beklemede\"&&!dgPubEntryFor\(r\.id\)/, 'park kartı durum seçicisi');
-    assert.match(ui, /filter\(r=>r\.status===\"Beklemede\"&&!dgPubEntryFor\(r\.id\)\)/, 'bekleyen sayacı');
+    assert.match(ui, /return !prev\|\|prev\.status==="Başarısız"/, 'park kartı başarısız isteği yeniden deneme olarak gösterir');
+    assert.match(ui, /return !e\|\|e\.status==="Başarısız"/, 'bekleyen sayacı başarısız isteği kuyrukta tutar');
+    assert.match(ui, /e\.status==="Yayınlandı"/, 'başarılı günlük kaydı yayın durumuna geçer');
   });
   test('planQueue: request_id günlükte olan istek atlanır (already)', () => {
     const q = read('scripts/publish-queue.mjs');

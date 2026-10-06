@@ -242,12 +242,12 @@
 <!-- DİL KATMANI (0035): TR markup varsayılan; EN sözlüğü çalışma zamanında
      uygulanır (dgToggleLang). defer sırası önemli değil — DOMContentLoaded'da
      ya da hemen (hazırsa) çalışır. module-registry + CORE_ASSETS kaydı şart. -->
-<script src="src/config/i18n.js?v=450a0e9a" defer></script>
+<script src="src/config/i18n.js?v=9e11a38b" defer></script>
 <script src="src/utils/geo.js?v=3e796768" defer></script>
 <script src="src/utils/truncation.js?v=f43c76b3" defer></script>
 <!-- Faz 7: geotiff (317 KB) ve chart.js (208 KB) artık SENKRON yüklenmiyor;
      src/utils/lazylibs.js ihtiyaç anında enjekte eder (LULC analizi / panel grafiği). -->
-<script id="dgRuntimeBuild" type="application/json">"0e52240e560dec8c"</script>
+<script id="dgRuntimeBuild" type="application/json">"6febab2a2c8966a7"</script>
 <script src="src/utils/lazylibs.js?v=19763039" defer></script>
 <script src="src/services/allometry.js?v=46ea5b87" defer></script>
 <script src="src/services/auth.js?v=1e92b5cd" defer></script>
@@ -269,10 +269,10 @@
 <script src="src/core/surface-display.js?v=0bed5180" defer></script>
 <script src="src/core/report-context.js?v=d786eae1" defer></script>
 <script src="src/services/academic-profile.js?v=34c44885" defer></script>
-<script src="src/services/report-publish.js?v=0836b57c" defer></script>
+<script src="src/services/report-publish.js?v=76a95185" defer></script>
 <script src="src/services/park-invites.js?v=f31e6518" defer></script>
 <script src="src/services/world.js?v=c72d9019" defer></script>
-<script src="src/services/measure.js?v=02b8d87f" defer></script>
+<script src="src/services/measure.js?v=a52a3105" defer></script>
 <script src="src/services/map.js?v=9b66120a" defer></script>
 <!-- LULC ZİNCİRİ ARTIK TEMBEL (2026-09-25 · Faz 8): 8 dosya ilk yüklemede
      indirilmiyor. Yalnız "🌿 Yüzey Örtüsü Analizi"ne basan kullanıcı için
@@ -296,9 +296,9 @@
 <script src="src/ui/park-panel.js?v=618e3acc" defer></script>
 <script src="src/ui/park-export.js?v=c724cd32" defer></script>
 <script src="src/services/dash.js?v=7e8bde11" defer></script>
-<link rel="stylesheet" href="css/style.css?v=35eb992f">
+<link rel="stylesheet" href="css/style.css?v=e944bb43">
 <link rel="stylesheet" href="css/landing.css?v=e354190f">
-<link rel="stylesheet" href="css/park-panel.css?v=649541ba">
+<link rel="stylesheet" href="css/park-panel.css?v=dd4dd964">
 <!-- TASARIM SİSTEMİ (2026-09-27, 2. deneme): ui-standard.css geri BAĞLANDI
      ama ARTIK eleman seviyesi kuralları yalnız .dg-page (alt sayfalar) altında
      geçerli; kabuk (body.dg-app) yalnız sınıf-bazlı bileşenleri ve sekme
@@ -961,7 +961,7 @@
    <div class="export-heading">
     <div><div class="dg-kicker">VERİ ÇIKTISI</div><h2 class="disp">Dışa Aktar</h2><p class="export-help">Kendi ölçümlerini araştırma, GIS ve arşiv iş akışlarına uygun biçimlerde dışa aktar.</p></div>
    </div>
-   <details class="export-panel" open>
+   <details class="export-panel">
     <summary><div class="export-summary"><span class="export-icon">💾</span><span><b>Dosya çıktıları</b><small>CSV · GeoJSON · QGIS</small></span></div><span class="export-summary-note">3 biçim</span></summary>
     <div class="export-panel-body">
      <div class="export-format-grid">
@@ -1081,16 +1081,18 @@
         Sonuç günlüğü REPO'dan okunur: Actions'ın Supabase'e yazma yetkisi yok
         (service_role anahtarı depoda/tarayıcıda tutulmaz).
         Modül: src/services/report-publish.js · yeni CSS yok, kart yalnız v-admin'de. -->
-   <div class="card" style="margin-bottom:18px;border-left:4px solid var(--green)">
-    <div class="shead" style="margin-bottom:12px"><span class="no">📄</span><h2 style="font-size:1.2rem">Bilimsel Rapor Yayını</h2><span class="rule"></span><span class="mono" style="font-size:.75rem;color:var(--mut)">site içinden · DGR kimlikli · değişmez</span></div>
-    <p style="color:var(--mut);font-size:.8rem;margin-bottom:10px">Park için tez biçiminde rapor <b>site içinden</b> yayınlanır: 📄 Yayınla → istek kuyruğa yazılır → yayın işi birkaç dakika içinde raporu üretir → kalıcı bağlantı, 🔗 Aç ve 📤 Paylaş burada belirir.</p>
-    <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:10px">
-     <button class="btn sm blue" onclick="dgLoadPublishQueue()">🔄 Yenile</button>
-     <label style="font-size:.78rem;color:var(--mut);display:inline-flex;gap:6px;align-items:center"><input type="checkbox" id="dgPubLulc" checked> 🛰 Arazi örtüsü bölümü (§5) dahil — önerilir</label>
-     <span class="dg-tree-meta" id="dgPubClock">—</span>
+   <section class="card admin-publish-card" aria-labelledby="adminPublishTitle">
+    <div class="admin-publish-heading">
+     <div class="admin-publish-title"><span class="admin-publish-icon" aria-hidden="true">📄</span><div><div class="dg-kicker">YAYIN MERKEZİ</div><h2 id="adminPublishTitle">Bilimsel Rapor Yayını</h2><p>Park raporlarını DGR kimliği, değişmez içerik özeti ve otomatik DOI kaydıyla yönetin.</p></div></div>
+     <span class="admin-publish-lock">DGR · DEĞİŞMEZ</span>
     </div>
-    <div id="dgPubBox"><div class="dg-tree-meta">⏳ Kuyruk yükleniyor…</div></div>
-   </div>
+    <div class="admin-publish-toolbar">
+     <button class="btn sm blue" onclick="dgLoadPublishQueue()">↻ Yenile</button>
+     <label class="admin-publish-lulc"><input type="checkbox" id="dgPubLulc" checked><span>🛰 §5 arazi örtüsünü dahil et<small>Son kabul edilmiş yüzey analizi rapora dondurulur.</small></span></label>
+     <span class="admin-publish-clock" id="dgPubClock">—</span>
+    </div>
+    <div id="dgPubBox" class="admin-publish-body"><div class="dg-tree-meta">⏳ Yayın kuyruğu yükleniyor…</div></div>
+   </section>
    <div class="card" style="margin-bottom:18px;border-left:4px solid var(--amber)">
     <div class="shead" style="margin-bottom:12px"><span class="no">📦</span><h2 style="font-size:1.2rem">Toplu Dışa Aktarım (Tüm Kullanıcılar)</h2></div>
     <p style="color:var(--mut);font-size:.82rem;margin-bottom:10px">Kullanıcı ayrımı yapılmadan sistemdeki <b>tüm veri</b>, seçtiğiniz filtrelere göre dışa aktarılır.</p>

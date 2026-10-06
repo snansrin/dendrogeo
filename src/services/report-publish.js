@@ -29,9 +29,9 @@
  *     Rapordaki tüm değerler make-report.mjs'in canlı veri snapshot'ından gelir
  *     (park karşılaştırma satırındaki karbon yalnız seçim yardımıdır).
  *
- * GÖRÜNÜM: yeni CSS YOK — mevcut kart/tablo/buton aileleri (card, shead,
- * tblwrap, dg-cards, dg-act, btn sm …, badge, alert, dg-tree-meta). Kart
- * yalnız v-admin içindedir; başka sekmenin düzenine dokunmaz.
+ * GÖRÜNÜM: yönetici yayın merkezi ortak tema tokenları ve mevcut buton/rozet
+ * aileleriyle düzenlenir. Özet, kuyruk, DOI ve son hata önde; ayrıntılı günlük
+ * ile değişmezlik kuralları isteğe bağlı açılır. Kart yalnız v-admin içindedir.
  */
 
 /* Modül durumu (üst düzey let: module-registry global ad çakışmasını kilitler). */
@@ -41,6 +41,7 @@ const DG_PUB_QUEUE_URL="/rapor/yayin-kuyrugu.json";
 const DG_PUB_ORIGIN="https://dendrogeo.org";
 /* DGR-YYYY-NNNN: yayın kimliğinin TEK kabul edilen biçimi. */
 const DG_PUB_ID=/^DGR-\d{4}-\d{4}$/;
+const DG_PUB_DOI=/^10\.5281\/zenodo\.\d+$/;
 const DG_PUB_POLL_MS=25000;      /* bekleyen istek varken tazeleme aralığı */
 const DG_PUB_POLL_MAX=80;        /* ~33 dk; sonra elle 🔄 Yenile */
 
@@ -164,8 +165,14 @@ function dgPubRender__scroll(){
 
  const rows=st.parks.map(p=>{
   const pid=String(p.park_id);
-  /* Bekleyen istek = DB'de 'Beklemede' VE günlükte sonucu henüz yok. */
-  const req=st.requests.find(r=>String(r.park_id)===pid&&r.status==="Beklemede"&&!dgPubEntryFor(r.id));
+  /* Başarısız üretim artık geçici kabul edilir: aynı DB isteği en fazla üç kez
+   * yeniden denenir. Günlükte yalnız başarısız sonuç varsa satır "Beklemede"
+   * kalır; kullanıcıdan yeni istek açması istenmez. */
+  const req=st.requests.find(r=>{
+   if(String(r.park_id)!==pid||r.status!=="Beklemede")return false;
+   const prev=dgPubEntryFor(r.id);
+   return !prev||prev.status==="Başarısız";
+  });
   const last=st.requests.find(r=>String(r.park_id)===pid&&!(st.queue?.archived_request_ids||[]).includes(String(r.id)));
   const pub=pubByPark[pid];
   const retPend=(st.retractions||[]).find(x=>String(x.park_id)===pid&&x.status==="Beklemede"&&!dgPubRetractDone(st.queue,x.id));
@@ -173,12 +180,18 @@ function dgPubRender__scroll(){
   let stt="none",rid="",note="";
   if(req){
    stt="pending";
-   const s=dgPubStatus(req);
-   note=esc(s.note)+" · yayın işi 5 dakikada bir çalışır";
+   const prev=dgPubEntryFor(req.id);
+   if(prev&&prev.status==="Başarısız")note="⚠ Önceki deneme başarısız · otomatik yeniden denenecek (en fazla 3 deneme)";
+   else{
+    const s=dgPubStatus(req);
+    note=esc(s.note)+" · yayın işi 5 dakikada bir çalışır";
+   }
   }else if(pub){
    stt=retPend?"retracting":"published";rid=pub.report_id;
+   const doiNote=DG_PUB_DOI.test(String(pub.doi||""))?(" · DOI "+esc(pub.doi))
+    :(pub.doi_status==="Başarısız"?" · DOI tekrar denenecek":" · DOI sırada");
    note=retPend?dgCf("🗑 geri çekme isteği kuyrukta — birkaç dakika içinde yayından kalkar")
-    :esc(rid||"—")+(pub.finished_at?(" · "+dgCf("yayın")+" "+String(pub.finished_at).slice(0,10)):"");
+    :esc(rid||"—")+(pub.finished_at?(" · "+dgCf("yayın")+" "+String(pub.finished_at).slice(0,10)):"")+doiNote;
   }else if(retPend){
    stt="retracting";rid=DG_PUB_ID.test(String(retPend.report_id||""))?String(retPend.report_id):"";
    note="🗑 "+esc(rid||dgCf("rapor"))+" "+dgCf("geri çekme kuyruğunda");
@@ -208,6 +221,7 @@ function dgPubRender__scroll(){
    if(url){
     act.push('<button class="btn sm blue" onclick="dgReportOpen(\''+rid+'\')" title="Raporu yeni sekmede aç">🔗 Aç</button>');
     act.push('<button class="btn sm" onclick="dgReportShare(\''+rid+'\')" title="Bağlantıyı paylaş / panoya kopyala">📤 Paylaş</button>');
+    if(pub&&DG_PUB_DOI.test(String(pub.doi||"")))act.push('<a class="btn sm ghost" href="https://doi.org/'+esc(pub.doi)+'" target="_blank" rel="noopener" title="Zenodo DOI kaydını aç">DOI</a>');
    }
    if(stt==="published"){
     act.push('<button class="btn sm red" onclick="dgReportRetract(\''+rid+'\','+Number(p.park_id)+')" title="Yayını geri çek: veri dosyaları kaldırılır, adresinde gerekçeli bildirim kalır; kimlik yeniden kullanılmaz">🗑 Geri çek</button>');
@@ -236,7 +250,7 @@ function dgPubRender__scroll(){
   const ret=e.status==="Geri çekildi";
   if(ret){
    const ridR=DG_PUB_ID.test(String(e.report_id||""))?e.report_id:"—";
-   return '<div style="padding:5px 0;border-bottom:1px solid var(--line);font-size:.78rem">'+
+   return '<div class="admin-publish-log-item">'+
     "🗑 <b>"+esc(ridR)+"</b> "+dgCf("geri çekildi")+" · "+esc(e.park_name||("park #"+e.park_id))+
     (e.reason?(" · gerekçe: "+esc(String(e.reason).slice(0,80))):"")+
     '<div class="dg-tree-meta">istek '+esc(String(e.retraction_id||"").slice(0,8))+" · "+esc(String(e.finished_at||"").slice(0,16).replace("T"," "))+"</div></div>";
@@ -247,27 +261,46 @@ function dgPubRender__scroll(){
   /* Günlük Pages'te herkese açık: biçimi bozuk bir kimlik EKRANA DA yazılmaz
    * (bağlantı zaten kurulmaz) — yerine "—" basılır. */
   const rid=DG_PUB_ID.test(String(e.report_id||""))?e.report_id:"—";
-  return '<div style="padding:5px 0;border-bottom:1px solid var(--line);font-size:.78rem">'+
+  return '<div class="admin-publish-log-item">'+
    (ok?"✅ ":"❌ ")+"<b>"+esc(rid)+"</b> · "+esc(e.park_name||("park #"+e.park_id))+
    (ok?(" · n="+Number(e.n||0)+" · "+esc(e.carbon_txt||"")):(" · "+esc(String(e.message||"").slice(0,120))))+
    (u?(' · <a href="'+esc(u)+'" target="_blank" rel="noopener">bağlantı</a>'):"")+
    '<div class="dg-tree-meta">istek '+esc(String(e.request_id||"").slice(0,8))+" · "+esc(String(e.finished_at||"").slice(0,16).replace("T"," "))+"</div></div>";
  }).join("");
 
- const pending=st.requests.filter(r=>r.status==="Beklemede"&&!dgPubEntryFor(r.id)).length;
+ const queueEntries=(st.queue&&st.queue.entries)||[];
+ const pending=st.requests.filter(r=>{
+  if(r.status!=="Beklemede")return false;
+  const e=dgPubEntryFor(r.id);
+  return !e||e.status==="Başarısız";
+ }).length;
+ const activePublished=Object.values(pubByPark);
+ const doiCount=activePublished.filter(e=>DG_PUB_DOI.test(String(e.doi||""))).length;
+ const latestByRequest=new Map();
+ for(const e of queueEntries)if(e.request_id)latestByRequest.set(String(e.request_id),e);
+ const unresolvedFails=[...latestByRequest.values()].filter(e=>e.status==="Başarısız");
+ const failedCount=unresolvedFails.length;
+ const latestFail=unresolvedFails.at(-1);
+ const failBanner=latestFail?'<div class="alert err admin-publish-error"><b>Son yayın denemesi başarısız.</b> '+esc(latestFail.park_name||("park #"+latestFail.park_id))+' · '+esc(String(latestFail.message||"üretim hatası").slice(0,180))+'<small>istek '+esc(String(latestFail.request_id||"").slice(0,8))+' · sistem otomatik yeniden dener</small></div>':"";
  box.innerHTML=
+  '<div class="admin-publish-summary">'+
+   '<div class="admin-publish-metric"><span>Aktif yayın</span><strong>'+activePublished.length+'</strong></div>'+
+   '<div class="admin-publish-metric"><span>Kuyrukta</span><strong>'+pending+'</strong></div>'+
+   '<div class="admin-publish-metric"><span>DOI kayıtlı</span><strong>'+doiCount+'</strong></div>'+
+   '<div class="admin-publish-metric"><span>Hata günlüğü</span><strong>'+failedCount+'</strong></div>'+
+  '</div>'+
   (st.error?'<div class="alert err">⚠ '+esc(st.error)+"</div>":"")+
   (st.queue===null?'<div class="alert info">ℹ Yayın günlüğü okunamadı (çevrimdışı ya da dosya henüz yayınlanmadı). İstek gönderimi çalışır; durum alanı boş kalır.</div>':"")+
-  (pending>0?'<div class="alert info">⏳ <b>'+pending+" "+dgCf("istek kuyrukta.")+"</b> "+dgCf("Yayın işi 5 dakikada bir çalışır (GitHub yoğunluğunda 15 dakikayı bulabilir); bu kart kendini 25 saniyede bir tazeler, bağlantı burada görünür. Sekmeyi kapatmanız işi durdurmaz.")+"</div>":"")+
-  '<div class="tblwrap"><table class="dg-cards">'+
+  failBanner+
+  (pending>0?'<div class="alert info">⏳ <b>'+pending+" "+dgCf("istek kuyrukta.")+"</b> "+dgCf("Başarısız üretimler en fazla 3 kez otomatik yeniden denenir. Başarılı rapor üretildikten sonra Zenodo DOI kaydı otomatik başlatılır.")+"</div>":"")+
+  '<div class="tblwrap admin-publish-table"><table class="dg-cards">'+
   "<thead><tr><th scope='col'>Park</th><th scope='col'>Kayıt</th><th scope='col'>Karbon</th><th scope='col'>Alan</th><th scope='col'>Yayın durumu</th><th scope='col'>İşlem</th></tr></thead><tbody>"+
   (rows||'<tr><td colspan=6>Onaylı ölçümü olan park yok — önce ölçüm onaylayın.</td></tr>')+
   "</tbody></table></div>"+
-  '<div class="lbl" style="margin:14px 0 4px">📜 Yayın günlüğü (son işler)</div>'+
+  '<details class="admin-publish-log"><summary><span>📜 Yayın günlüğü</span><small>son 6 işlem</small></summary><div class="admin-publish-log-list">'+
   (hist||'<div class="dg-tree-meta">Henüz işlenmiş istek yok. Günlük: <span class="mono">rapor/yayin-kuyrugu.json</span></div>')+
-  '<div class="dg-parkadmin-note" style="margin-top:10px">📄 Yayınla = istek kuyruğa yazılır; rapor tez biçiminde üretilir, içerik hash\'i ile dondurulur ve <span class="mono">/rapor/DGR-…/</span> altında kalıcı bağlantı alır. '+
-  'Eski raporlar DEĞİŞMEZ: yeni çözümleme yeni kimlik demektir. 🛰 kutusu işaretliyken §5 arazi örtüsü sonuçları da üretilir (birkaç dakika sürer). '+
-  '🗑 Geri çek = yanlışlıkla yayımlanan rapor yayından kaldırılır: veri dosyaları silinir, adresinde gerekçeli bildirim kalır, DGR kimliği yeniden KULLANILMAZ; işlem günlüğe ve git geçmişine yazılır.</div>';
+  '</div></details>'+
+  '<details class="admin-publish-help"><summary>Yayın akışı ve değişmezlik kuralları</summary><div class="admin-publish-help-body">📄 Yayınla isteği kuyruğa yazar; rapor üretildiğinde DGR kimliği ve içerik hash\'i dondurulur. Aktif üretim raporu için Zenodo DOI kaydı otomatik yürür. Eski rapor değiştirilmez; yeni çözümleme yeni DGR kimliği alır. 🗑 Geri çekme veri dosyalarını kaldırır ve kimliği yeniden kullandırmaz.</div></details>';
 }
 
 /* ---------- yazma (ortak çekirdek: yönetici kartı + kullanıcı paneli) ---------- */

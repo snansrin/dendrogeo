@@ -157,6 +157,6 @@ describe('GPS butonu canlı UI dilinde (🌿 Yüzey Örtüsü Analizi kartıyla 
     assert.match(shell, /id="gpsState" class="alert info"/, 'gpsState alert ailesinde');
     assert.match(shell, /id="gpsBadge"/, 'canlı rozet');
     const m = read('src/services/measure.js');
-    assert.match(m, /bd\.className="dg-png-badge "/, 'rozet LULC badge diliyle güncellenir');
+    assert.match(m, /bd\.className="dg-png-badge"\+\(a<20\?"":a<40\?" amber":" red"\)/, 'rozet kaliteye göre ortak badge ailesini kullanır');
   });
 });

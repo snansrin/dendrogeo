@@ -55,6 +55,7 @@ export const QUEUE_PATH = 'rapor/yayin-kuyrugu.json';
 export const QUEUE_SCHEMA = 'dendrogeo-publish-queue/1';
 export const QUEUE_CAP = 200;
 export const RUN_LIMIT = 3;
+export const REQUEST_RETRY_MAX = 3;
 
 const SB = (() => {
   const s = read('src/config/supabase.js');
@@ -118,8 +119,27 @@ export async function fetchPendingRetractions(limit = 50,processedIds=[],cutoff=
 }
 
 /* ---------- PLAN (saf fonksiyon: test burayı kilitler) ---------- */
+export function requestAttemptState(entries,id){
+  const key=String(id),xs=(entries||[]).filter(e=>String(e.request_id||"")===key);
+  return {published:xs.some(e=>e.status==="Yayınlandı"),failures:xs.filter(e=>e.status==="Başarısız").length};
+}
+export function effectiveProcessedRequestIds(entries,processedIds=[],maxAttempts=REQUEST_RETRY_MAX){
+  const out=new Set((processedIds||[]).map(String));
+  for(const e of entries||[]){
+    const id=String(e.request_id||"");if(!id)continue;
+    const st=requestAttemptState(entries,id);
+    if(!st.published&&st.failures>0&&st.failures<maxAttempts)out.delete(id);
+  }
+  return [...out];
+}
 export function planQueue(entries, requests, limit = RUN_LIMIT, processedIds = []) {
-  const done = new Set([...(entries || []).map((e) => String(e.request_id)),...processedIds.map(String)]);
+  const done = new Set(effectiveProcessedRequestIds(entries,processedIds));
+  for(const e of entries||[]){
+    const id=String(e.request_id||"");if(!id)continue;
+    const st=requestAttemptState(entries,id);
+    if(st.published||st.failures>=REQUEST_RETRY_MAX)done.add(id);
+    else if(st.failures>0)done.delete(id);
+  }
   const todo = (requests || []).filter((r) => !done.has(String(r.id)));
   return { todo: todo.slice(0, limit), skipped: todo.length > limit ? todo.length - limit : 0, already: (requests || []).length - todo.length };
 }
@@ -275,7 +295,8 @@ export async function runQueue(opts = {}) {
   const q = loadQueue();
   let requests = [];
   try {
-    requests = await fetchPending(50,q.processed_request_ids||[],q.production_started_at||null);
+    const effectiveProcessed=effectiveProcessedRequestIds(q.entries,q.processed_request_ids||[]);
+    requests = await fetchPending(50,effectiveProcessed,q.production_started_at||null);
   } catch (e) {
     console.log('⚠ Kuyruk okunamadı: ' + e.message);
     return { ok: false, processed: 0, entries: q.entries, reason: e.code || 'FETCH' };

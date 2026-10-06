@@ -67,7 +67,13 @@ jobs:
       - name: PDF ve DOI dosya paketlerini üret
         run: node scripts/render-report-pdf.mjs
 
+      - name: Otomatik Zenodo DOI kaydı
+        env:
+          ZENODO_TOKEN: ${{ secrets.ZENODO_TOKEN }}
+        run: node scripts/register-pending-dois.mjs
+
       - name: Yayınla (commit + push)
+        if: always()
         run: |
           git config user.name "DendroGeo Rapor Bot"
           git config user.email "bot@dendrogeo.local"

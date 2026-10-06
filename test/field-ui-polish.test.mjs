@@ -19,7 +19,8 @@ describe('Saha ekranı · mobil sadeleştirme sözleşmesi',()=>{
   assert.match(seg,/id="gpsRing" hidden/);
   assert.match(seg,/id="gpsState"[^>]*hidden/);
   assert.match(measure,/btn\.textContent="GPS aktif"/);
-  assert.match(measure,/bd\.textContent="GPS aktif"/);
+  assert.match(measure,/bd\.textContent="GPS aktif · ±"\+Math\.round\(a\)\+" m · "\+q/);
+  assert.match(measure,/a<20\?"":a<40\?" amber":" red"/);
  });
  test('çevre ve boy uzun açıklama yerine erişilebilir soru işareti yardımı kullanır',()=>{
   assert.match(shell,/aria-label="Göğüs çevresi nasıl ölçülür\?"/);

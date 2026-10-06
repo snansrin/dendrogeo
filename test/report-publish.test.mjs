@@ -20,7 +20,7 @@ import { tmpdir } from 'node:os';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import vm from 'node:vm';
-import { planQueue, loadQueue, saveQueue, emptyQueue, QUEUE_SCHEMA, QUEUE_CAP, QUEUE_PATH } from '../scripts/publish-queue.mjs';
+import { planQueue, effectiveProcessedRequestIds, REQUEST_RETRY_MAX, loadQueue, saveQueue, emptyQueue, QUEUE_SCHEMA, QUEUE_CAP, QUEUE_PATH } from '../scripts/publish-queue.mjs';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const read = (p) => readFileSync(join(ROOT, p), 'utf8');
@@ -93,12 +93,10 @@ describe('rapor-yayin.yml: kuyruk 5 dakikada bir boşalır', () => {
     assert.match(WF, /fetch-depth: 0/, 'rebase için tam geçmiş');
   });
 
-  test('⭐ yayın işi ANON anahtarla çalışır: hiçbir secret istemiyor', () => {
-    /* Service_role anahtarı bu hatta YOKTUR: depoda/tarayıcıda duran bir süper
-     * anahtar tüm RLS’i anlamsızlaştırır. Kanıt: workflow hiç secret okumaz ve
-     * betiğin kullandığı anahtarın JWT rol iddiası "anon"dur. */
-    assert.ok(!/secrets\./.test(WF), 'workflow secret okumuyor');
-    assert.ok(!/SUPABASE_SERVICE_ROLE|service_role_key/.test(WF), 'süper anahtar adı geçmiyor');
+  test('⭐ yayın kuyruğu Supabase için anon kalır; tek secret yalnız Zenodo DOI içindir', () => {
+    assert.ok(!/SUPABASE_SERVICE_ROLE|service_role_key/.test(WF), 'Supabase süper anahtarı workflowa girmez');
+    assert.match(WF, /ZENODO_TOKEN: \$\{\{ secrets\.ZENODO_TOKEN \}\}/, 'DOI tokeni yalnız Actions secret üzerinden');
+    assert.match(WF, /node scripts\/register-pending-dois\.mjs/, 'başarılı rapordan sonra otomatik DOI işi');
     assert.ok(!/method:\s*['"](POST|PATCH|PUT|DELETE)['"]/.test(PQ), 'PostgREST’e yazma çağrısı yok (salt-okunur)');
     const key = read('src/config/supabase.js').match(/SB_KEY="([^"]+)"/)[1];
     const payload = JSON.parse(Buffer.from(key.split('.')[1], 'base64url').toString('utf8'));
@@ -119,9 +117,12 @@ describe('publish-queue.mjs: plan + günlük', () => {
     assert.equal(p.already, 1);
   });
 
-  test('başarısız istek de işlenmiş sayılır (yeniden istek = yeni satır)', () => {
-    const entries = [{ request_id: 'r1', status: 'Başarısız', message: 'x' }];
-    assert.equal(planQueue(entries, [REQ('r1', 5)], 5).todo.length, 0);
+  test('başarısız istek otomatik yeniden denenir; üç hatadan sonra durur', () => {
+    const once = [{ request_id: 'r1', status: 'Başarısız', message: 'x' }];
+    assert.deepEqual(planQueue(once, [REQ('r1', 5)], 5, ['r1']).todo.map(r=>r.id), ['r1']);
+    assert.ok(!effectiveProcessedRequestIds(once,['r1']).includes('r1'),'tek hata processed kilidini kaldırır');
+    const thrice=Array.from({length:REQUEST_RETRY_MAX},(_,i)=>({request_id:'r1',status:'Başarısız',message:'x'+i}));
+    assert.equal(planQueue(thrice,[REQ('r1',5)],5,['r1']).todo.length,0,'retry sınırı sonsuz döngüyü keser');
   });
 
   test('limit sonraki koşuya bırakır (tek koşuda sınırsız üretim yok)', () => {
@@ -180,6 +181,13 @@ describe('make-report.mjs: tek üretici publishPark()', () => {
     assert.match(MR, /SITE_ORIGIN/, 'bağlantı CNAME’den türetilir');
   });
 
+  test('ölçüm protokolü provenance kaynağı buildSnapshot kapsamında tanımlıdır', () => {
+    assert.match(MR,/const rhoBase = loadRho\(\)/);
+    assert.match(MR,/measurement_protocol: rhoBase\.measurementLockId/);
+    assert.match(MR,/measurement_protocol_fingerprint: rhoBase\.measurementLockFingerprint/);
+    assert.doesNotMatch(MR,/measurement_protocol: base\.measurementLockId/);
+  });
+
   test('⭐ üretilen sayfada paylaş düğmesi var (Web Share + pano yedeği)', () => {
     assert.match(MR, /id="dgShareBtn" onclick="dgShareReport\(\)">📤 Paylaş</);
     assert.match(MR, /async function dgShareReport\(\)/);
@@ -226,16 +234,15 @@ describe('arayüz bağlantısı: kart, modül kaydı, çevrimdışı paket', () 
     assert.match(read('src/services/admin.js'), /if\(typeof dgLoadPublishQueue==="function"\)dgLoadPublishQueue\(\);/);
   });
 
-  test('⭐ yeni CSS yok: kart mevcut bileşen ailelerini kullanıyor', () => {
-    /* Kullanıcı kuralı: görünüm kaymasın. Kart yalnız var olan sınıfları
-     * kullanır; css/ dosyalarına bu hat için kural EKLENMEZ. */
-    const seg = SHELL.slice(SHELL.indexOf('Bilimsel Rapor Yayını') - 400, SHELL.indexOf('dgPubBox'));
-    for (const cls of ['class="card"', 'class="shead"', 'class="btn sm blue"'])
-      assert.ok(seg.includes(cls), cls);
-    assert.ok(!/dg-pub-|report-publish\.css/.test(SHELL), 'yeni sınıf dosyası/ailesi yok');
-    assert.ok(!existsSync(join(ROOT, 'css/report-publish.css')));
-    assert.match(UI, /class="tblwrap"><table class="dg-cards"/, 'tablo mevcut ailede');
-    assert.match(UI, /class="badge (on|off|admin)"/, 'rozetler mevcut ailede');
+  test('⭐ yayın merkezi ana temaya uyumlu, günlük ve kurallar katlanabilir', () => {
+    const seg = SHELL.slice(SHELL.indexOf('Bilimsel Rapor Yayını') - 500, SHELL.indexOf('dgPubBox') + 200);
+    assert.match(seg,/admin-publish-card/);
+    assert.match(seg,/admin-publish-toolbar/);
+    assert.match(read('css/style.css'),/\.admin-publish-summary\{/);
+    assert.match(UI,/admin-publish-table/);
+    assert.match(UI,/admin-publish-log/);
+    assert.match(UI,/admin-publish-help/);
+    assert.match(UI, /class="badge (on|off|admin)"/, 'durum rozetleri ortak ailede');
   });
 
   test('istemci insert RLS-safe desenle (return=minimal, oturum anahtarı)', () => {

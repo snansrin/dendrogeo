@@ -17,7 +17,7 @@ export function prepareReportDoi(dir){
  if(md.resultHash!=='sha256:'+canonicalHash(snap))throw Error('Rapor verisinin SHA-256 doğrulaması başarısız.');
  if(!existsSync(join(dir,'rapor.pdf')))throw Error('Doğrulanmış PDF çıktısı gerekli.');
  const metadata={upload_type:'publication',publication_type:'report',publication_date:md.generated.slice(0,10),title:md.title,creators:(snap.author?.name?[{name:snap.author.name,...(snap.study?.institution?{affiliation:snap.study.institution}:{}),...(snap.study?.orcid?{orcid:snap.study.orcid}:{})}]:[{name:'DendroGeo'}]),description:reportDoiDescription(md,snap),access_right:'open',license:'cc-by-nc-4.0',language:'tur',version:md.version,keywords:['urban forestry','tree inventory','carbon stock','land cover',snap.park.name],related_identifiers:[{identifier:md.url,relation:'isIdenticalTo',scheme:'url'}],...(md.doi?{doi:md.doi}:{prereserve_doi:true})};
- const files=['rapor.pdf','index.html','data.json','metadata.json','olcum.csv','park.geojson','harita.png',...(existsSync(join(dir,'surface.geojson'))?['surface.geojson']:[])];
+ const files=['rapor.pdf','index.html','data.json','metadata.json','olcum.csv','park.geojson',...(existsSync(join(dir,'harita.png'))?['harita.png']:[]),...(existsSync(join(dir,'surface.geojson'))?['surface.geojson']:[])];
  const manifest={report_id:md.identifier,result_hash:md.resultHash,doi:md.doi,registration_status:md.doi?'registered':'not_registered',files:files.map(name=>({name,sha256:createHash('sha256').update(readFileSync(join(dir,name))).digest('hex')}))};
  writeFileSync(join(dir,'zenodo-metadata.json'),JSON.stringify({metadata},null,2)+'\n');
  writeFileSync(join(dir,'manifest.json'),JSON.stringify(manifest,null,2)+'\n');
