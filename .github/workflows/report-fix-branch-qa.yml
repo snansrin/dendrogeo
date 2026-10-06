@@ -1,0 +1,32 @@
+name: Report Fix Branch QA
+on:
+  push:
+    branches:
+      - fix/report-publish-doi-admin-ui-20261006
+permissions:
+  contents: write
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - run: npm ci
+      - run: npm run build
+      - name: Commit generated index
+        run: |
+          git config user.name "DendroGeo QA Bot"
+          git config user.email "qa@dendrogeo.local"
+          git add index.html
+          if git diff --cached --quiet; then
+            echo "index current"
+          else
+            git commit -m "build: refresh index for report DOI and admin UI"
+            git push origin HEAD:fix/report-publish-doi-admin-ui-20261006
+          fi
+      - run: npm run check
