@@ -873,7 +873,7 @@ export function renderReport(snap, { id, hash, version = 1, meta = null }) {
   const HD = (INV && INV.hd_stats) || null;
   const DR = (INV && INV.dev_rho) || null;
   /* 0033 · gövde çapı aralığı metni: envanterden TÜRETİLİR, eşik/statü yok. */
-  const govdeAralikTxt = DB ? `${tN(DB.min, 0)}–${tN(DB.max, 0)} cm (medyan ${tN(DB.medyan, 0)} cm, n=${DB.n})` : null;
+  const govdeAralikTxt = DB ? `${tN(DB.min, 1)}–${tN(DB.max, 1)} cm (medyan ${tN(DB.medyan, 1)} cm, n=${DB.n})` : null;
   const HD_TAIL = INV && INV.h_fail && INV.h_fail.length
     ? ` · ${INV.h_fail.length} kayıtta ağaç boyu fiziksel aralık dışında (${QA_LIMITS.H_MIN_M}–${QA_LIMITS.H_MAX_M} m): ${ptList(INV.h_fail)}`
     : '';
