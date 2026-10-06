@@ -58,8 +58,9 @@ describe('0013 · panel çevre ipucu (şeffaflık)', () => {
   test('girth_cm select listesinde', () => {
     assert.match(ui, /DG_TREE_SEL_FULL=\s*\n\s*"id,point_id,measurement_no,species,grp,dbh_cm,girth_cm,height_m,carbon_kg,"/);
   });
-  test('Çap hücresi ham çevreyi alt satırda gösterir (farklıysa)', () => {
-    assert.match(ui, /çevre: \$\{esc\(r\.girth_cm\)\} cm/);
-    assert.match(ui, /Number\(r\.girth_cm\)!==Number\(r\.dbh_cm\)/, 'yalnız dönüşüm izi varsa');
+  test('DBH hücresi 1 ondalık gösterir ve ham çevreyi ayrı korur', () => {
+    assert.match(ui, /\(\+r\.dbh_cm\)\.toFixed\(1\)/, 'türetilmiş DBH görünümü 1 ondalık');
+    assert.match(ui, /çevre: \$\{\(\+r\.girth_cm\)\.toFixed\(1\)\} cm/, 'ham çevre ayrı ve 1 ondalık görünür');
+    assert.match(ui, /Sahada ölçülen ham göğüs çevresi/, 'alan semantiği açık');
   });
 });
