@@ -183,16 +183,11 @@ async function startGps(){
 }
 function updGps(){
  const a=GPS.accuracy;
- const state=$("gpsState");if(state){state.textContent="";state.style.display="none";}
- const badge=$("gpsBadge");if(badge){badge.textContent="GPS aktif";badge.className="dg-png-badge on";}
  $("gLat").textContent=GPS.latitude.toFixed(6);$("gLon").textContent=GPS.longitude.toFixed(6);
  $("gAlt").textContent=Number.isFinite(GPS.altitude)?GPS.altitude.toFixed(0)+" m":"—";
  const q=a<10?"ÇOK İYİ":a<20?"İYİ":a<40?"ORTA":"ZAYIF";
  $("gQ").textContent=q;
- $("gpsState").textContent="🛰 GPS aktif";$("gpsState").className="alert ok";
- const btn=$("gpsBtn");if(btn){btn.innerHTML="🛰 GPS aktif";btn.disabled=true;btn.style.opacity="1";btn.style.cursor="default";}
- const bd=$("gpsBadge");
- if(bd){bd.textContent="GPS aktif";bd.className="dg-png-badge";}
+ const btn=$("gpsBtn");if(btn){btn.innerHTML="🛰 GPS aktif";btn.disabled=true;btn.style.opacity="1";btn.style.cursor="default";btn.setAttribute("aria-label","GPS aktif");}
  if(map&&GPS){if(window._me)map.removeLayer(window._me);window._me=L.circleMarker([GPS.latitude,GPS.longitude],{radius:7,color:"#2b6cb0",weight:3,fillOpacity:.9}).addTo(map).bindPopup("Konumun");}
  drawNav();autoFillPointId();
 }
