@@ -29,9 +29,9 @@
  *     Rapordaki tüm değerler make-report.mjs'in canlı veri snapshot'ından gelir
  *     (park karşılaştırma satırındaki karbon yalnız seçim yardımıdır).
  *
- * GÖRÜNÜM: yeni CSS YOK — mevcut kart/tablo/buton aileleri (card, shead,
- * tblwrap, dg-cards, dg-act, btn sm …, badge, alert, dg-tree-meta). Kart
- * yalnız v-admin içindedir; başka sekmenin düzenine dokunmaz.
+ * GÖRÜNÜM: yönetici yayın merkezi ortak tema tokenları ve mevcut buton/rozet
+ * aileleriyle düzenlenir. Özet, kuyruk, DOI ve son hata önde; ayrıntılı günlük
+ * ile değişmezlik kuralları isteğe bağlı açılır. Kart yalnız v-admin içindedir.
  */
 
 /* Modül durumu (üst düzey let: module-registry global ad çakışmasını kilitler). */
@@ -188,8 +188,10 @@ function dgPubRender__scroll(){
    }
   }else if(pub){
    stt=retPend?"retracting":"published";rid=pub.report_id;
+   const doiNote=DG_PUB_DOI.test(String(pub.doi||""))?(" · DOI "+esc(pub.doi))
+    :(pub.doi_status==="Başarısız"?" · DOI tekrar denenecek":" · DOI sırada");
    note=retPend?dgCf("🗑 geri çekme isteği kuyrukta — birkaç dakika içinde yayından kalkar")
-    :esc(rid||"—")+(pub.finished_at?(" · "+dgCf("yayın")+" "+String(pub.finished_at).slice(0,10)):"");
+    :esc(rid||"—")+(pub.finished_at?(" · "+dgCf("yayın")+" "+String(pub.finished_at).slice(0,10)):"")+doiNote;
   }else if(retPend){
    stt="retracting";rid=DG_PUB_ID.test(String(retPend.report_id||""))?String(retPend.report_id):"";
    note="🗑 "+esc(rid||dgCf("rapor"))+" "+dgCf("geri çekme kuyruğunda");
@@ -274,8 +276,11 @@ function dgPubRender__scroll(){
  }).length;
  const activePublished=Object.values(pubByPark);
  const doiCount=activePublished.filter(e=>DG_PUB_DOI.test(String(e.doi||""))).length;
- const failedCount=queueEntries.filter(e=>e.status==="Başarısız").length;
- const latestFail=[...queueEntries].reverse().find(e=>e.status==="Başarısız");
+ const latestByRequest=new Map();
+ for(const e of queueEntries)if(e.request_id)latestByRequest.set(String(e.request_id),e);
+ const unresolvedFails=[...latestByRequest.values()].filter(e=>e.status==="Başarısız");
+ const failedCount=unresolvedFails.length;
+ const latestFail=unresolvedFails.at(-1);
  const failBanner=latestFail?'<div class="alert err admin-publish-error"><b>Son yayın denemesi başarısız.</b> '+esc(latestFail.park_name||("park #"+latestFail.park_id))+' · '+esc(String(latestFail.message||"üretim hatası").slice(0,180))+'<small>istek '+esc(String(latestFail.request_id||"").slice(0,8))+' · sistem otomatik yeniden dener</small></div>':"";
  box.innerHTML=
   '<div class="admin-publish-summary">'+
