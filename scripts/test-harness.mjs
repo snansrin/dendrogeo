@@ -67,6 +67,7 @@ export function loadApp({ sadece } = {}) {
 
   const SIRALAMA = [
     'src/config/constants.js',
+    'src/config/measurement-protocol-lock.js',
     'src/config/wood-density-lock.js',
     'src/config/species.js',
     'src/utils/geo.js',
@@ -110,11 +111,14 @@ export function loadApp({ sadece } = {}) {
     'src/services/admin-tree.js',
   ];
   const secim = sadece ? new Set(sadece) : null;
-  if (secim && (secim.has('src/config/species.js') || secim.has('src/services/allometry.js')))
+  if (secim && (secim.has('src/config/species.js') || secim.has('src/services/allometry.js'))) {
+    secim.add('src/config/measurement-protocol-lock.js');
     secim.add('src/config/wood-density-lock.js');
+  }
   const dosyalar = secim ? SIRALAMA.filter((f) => secim.has(f)) : SIRALAMA;
 
-  const LEXICAL = ['WOOD_DENSITY_LOCK_ID','WOOD_DENSITY_LOCK_FINGERPRINT','WOOD_DENSITY_CANONICAL',
+  const LEXICAL = ['DG_MEASUREMENT_PROTOCOL_PAYLOAD','DG_MEASUREMENT_PROTOCOL_LOCK',
+                   'WOOD_DENSITY_LOCK_ID','WOOD_DENSITY_LOCK_FINGERPRINT','WOOD_DENSITY_CANONICAL',
                    'MEASUREMENT_GROUPS','SPECIES_DATA','GROUP_DEFAULT_RHO','SPECIES_GROUP',
                    'species','rho','LATIN','GROUP_COLOR','SPECIES_SYNONYMS','QUOTA_MB','esc','$',
                    'DG_LC_CODES', 'DG_LC_CLASSES', 'DG_LC_PIXEL_M', 'DG_LC_YEAR',
