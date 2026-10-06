@@ -208,6 +208,13 @@ function dgVisRows(){
 }
 function dgVisFilter(rows){const query=String($("visSearch")?.value||"").trim().toLocaleLowerCase("tr-TR"),view=$("visViewFilter")?.value||"",located=!!$("visLocated")?.checked;return rows.filter(r=>(!query||String((r.p.n||"")+" "+(r.p.dev||"")).toLocaleLowerCase("tr-TR").includes(query))&&(!view||r.p.v===view)&&(!located||dgVisHasLocation(r.p)));}
 function dgVisResetFilters(){for(const id of ["visSearch","visViewFilter"]){const el=$(id);if(el)el.value="";}const located=$("visLocated");if(located)located.checked=false;renderVisitorsLive();}
+function dgVisQuick(view,located){
+ const search=$("visSearch"),filter=$("visViewFilter"),loc=$("visLocated");
+ if(search)search.value="";
+ if(filter)filter.value=view||"";
+ if(loc)loc.checked=!!located;
+ renderVisitorsLive();
+}
 function dgVisPause(on){DG_VIS_PAUSED=!!on;if(!on)renderVisitorsLive();else if($("visStatus"))$("visStatus").textContent="Görünüm duraklatıldı";}
 function dgVisFit(){DG_VIS_FIT=false;dgVisMapDraw(dgVisFilter(dgVisRows()));}
 function renderVisitorsLive(){
@@ -216,7 +223,7 @@ function renderVisitorsLive(){
  const all=dgVisRows(),rows=dgVisFilter(all);
  if($("vzOnline"))$("vzOnline").textContent=all.length;
  if($("vzLocated"))$("vzLocated").textContent=all.filter(r=>dgVisHasLocation(r.p)).length;
- if($("visStatus"))$("visStatus").textContent=(dgPresenceState()==="on"?"Bağlı":"Bağlantı: "+dgPresenceState())+" · "+rows.length+" / "+all.length+" kullanıcı · "+new Date().toLocaleTimeString();
+ if($("visStatus")){const st=dgPresenceState();$("visStatus").textContent=(st==="on"?"Canlı bağlantı":"Bağlantı: "+st)+" · "+rows.length+" / "+all.length+" kullanıcı · "+new Date().toLocaleTimeString("tr-TR",{hour:"2-digit",minute:"2-digit"});const wrap=$("visStatus").closest(".visitor-connection");if(wrap)wrap.dataset.state=st;}
  if(box){
   const T=(s)=>(typeof dgCf==="function"?dgCf(s):s);
 if(!rows.length){
