@@ -932,7 +932,7 @@ export function renderReport(snap, { id, hash, version = 1, meta = null }) {
   ].filter(Boolean).join('');
 
   /* Üç hâlli rapor QA durumu: Çizelge 4'ün kendisinden türetilir.
-   * 0031: "DBH çevre olabilir" yorumu kaldırıldığı için Göksu benzeri gerçek
+   * FINAL: saha çevresi korunur ve DBH=C/π ile türetilir; Göksu benzeri gerçek
    * saha verisi artık ⛔ BLOKLU değil 🟡 İNCELEME / 🟢 GEÇERLİ olur. */
   const QA_ST = qaStateOf({ block: qaStates.includes('block'), review: qaStates.includes('review') });
   const QA_ST_LABEL = { [QA_STATE.BLOCKED]: '🔴 BLOKLU', [QA_STATE.REVIEW]: '🟡 İNCELEME', [QA_STATE.VALID]: '🟢 GEÇERLİ' }[QA_ST];
@@ -1374,7 +1374,7 @@ ${L?.review ? `<p>Yeniden üretim girdileri <code>data.json</code> dosyasında s
  <li>Chave, J., Réjou-Méchain, M., Búrquez, A. ve ark. (2014). Improved allometric models to estimate the aboveground biomass of tropical trees. <i>Global Change Biology</i>, 20(10), 3177–3190. <code>10.1111/gcb.12629</code> — §4.2'de kullanılan allometrik denklem.</li>
  <li>OpenStreetMap katkıcıları. <i>OpenStreetMap verisi</i> [park sınırı geometrisi ve bütünleyici doğrulama]. Open Database License (ODbL). https://www.openstreetmap.org/copyright</li>
  ${L && L.cross ? `<li>${esc(L.cross)} [çapraz doğrulama veri seti] — grup bazlı uzlaşma §7'de raporlanmıştır.</li>` : ''}
- <li>Şirin, N. &amp; Şirin, S. (2026). <i>DendroGeo Saha Protokolü v1</i> (DBH, boy, GNSS ve fotoğraf kanıtı kuralları) ve <i>DendroGeo yöntem dokümantasyonu</i>. ${SITE_ORIGIN}/yontem/</li>
+ <li>Şirin, N. &amp; Şirin, S. (2026). <i>DendroGeo Saha Protokolü v1</i> (göğüs çevresi, DBH = çevre/π, boy, GNSS ve fotoğraf kanıtı kuralları) ve <i>DendroGeo yöntem dokümantasyonu</i>. ${SITE_ORIGIN}/yontem/</li>
 </ol>
 
 <h2><span class="no">Ek</span>A — Veri Erişilebilirliği</h2>

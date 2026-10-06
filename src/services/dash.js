@@ -2,22 +2,44 @@
 /* ===== DendroGeo v2 · src/services/dash.js =====
 Panel, analiz, grafikler, kayıtlar, dünya verisi yükleme */
 
-// 1. Kayıtlarım tablosu
+// 1. Kayıtlarım — ana tema ile proje bazında açılır/kapanır envanter
 /* 0040: kaydırma koruma sarmalı — yeniden çizimde #main scrollTop korunur. */
 async function loadRecords(){const _y=(typeof dgScrollKeep==="function"?dgScrollKeep():null);try{return await loadRecords__scroll.apply(this,arguments);}finally{if(typeof dgScrollRestore==="function")dgScrollRestore(_y);}}
-async function loadRecords__scroll(){ 
+function dgRecordStatusMeta(status){
+ const st=status||"Beklemede";
+ return {label:st==="Beklemede"?"Onay Bekliyor":st,cls:st==="Onaylı"?"on":(st==="Red"?"off":"admin")};
+}
+function dgRecordProjectGroup(name,rows,index){
+ const carbon=rows.reduce((a,r)=>a+(Number(r.carbon_kg)||0),0);
+ const approved=rows.filter(r=>r.status==="Onaylı").length;
+ const pending=rows.filter(r=>!r.status||r.status==="Beklemede").length;
+ const body=rows.map(r=>{
+  const st=dgRecordStatusMeta(r.status);
+  const dbh=Number.isFinite(+r.dbh_cm)?(+r.dbh_cm).toFixed(1):"—";
+  const girth=Number.isFinite(+r.girth_cm)&&+r.girth_cm>0?(+r.girth_cm).toFixed(1):"—";
+  const height=Number.isFinite(+r.height_m)?(+r.height_m).toFixed(1):"—";
+  return `<article class="record-item">
+   <div class="record-main"><div class="record-point">P${esc(r.point_id)}</div><div class="record-tree"><b>${esc(r.species)||"—"}</b><span>${esc(r.grp)||"—"}</span></div></div>
+   <div class="record-metrics"><div><span>Çevre</span><b>${girth} cm</b></div><div><span>DBH</span><b>${dbh} cm</b></div><div><span>Boy</span><b>${height} m</b></div><div><span>Karbon</span><b>${(Number(r.carbon_kg)||0).toFixed(1)} kg C</b></div></div>
+   <div class="record-side"><span class="badge ${st.cls}">${esc(st.label)}</span><div class="record-photo">${dgThumb(r.photo_url)}</div><div class="record-actions"><button class="btn sm blue" onclick="editRec(${r.id})" aria-label="P${esc(r.point_id)} kaydını düzenle">✏️ Düzenle</button><button class="btn sm red" onclick="delRec(${r.id})" aria-label="P${esc(r.point_id)} kaydını sil">Sil</button></div></div>
+  </article>`;
+ }).join("");
+ return `<details class="record-project" ${index===0?"open":""}>
+  <summary><div class="record-project-title"><span class="record-project-icon">📁</span><span><b>${esc(name)||"Projesiz kayıtlar"}</b><small>${rows.length} kayıt · ${approved} onaylı${pending?" · "+pending+" bekliyor":""}</small></span></div><div class="record-project-total"><b>${carbon.toFixed(1)}</b><span>kg C</span></div></summary>
+  <div class="record-project-body">${body}</div>
+ </details>`;
+}
+async function loadRecords__scroll(){
  const{data}=await sb.from("measurements").select("*,projects(name)").eq("owner",USER.id).order("created_at",{ascending:false});
- /* 0036 (T1): proje adına göre alfabetik (tr), sonra point_id numerik, sonra ölçüm no. */
  const recRows=(data||[]).slice().sort((a,b)=>{
   const pa=(a.projects&&a.projects.name)||"",pb=(b.projects&&b.projects.name)||"";
   const c=String(pa).localeCompare(String(pb),"tr");
   return c!==0?c:((+a.point_id||0)-(+b.point_id||0))||((+a.measurement_no||1)-(+b.measurement_no||1));
  });
- $("recTable").innerHTML=recRows.map(r=>{
-  const st=r.status||"Beklemede";
-  const bc=st==="Onaylı"?"on":(st==="Red"?"off":"admin");
-  return `<tr><td data-label="Proje">${esc(r.projects?.name)||"—"}</td><td data-label="Nokta">${r.point_id}</td><td data-label="Tür">${esc(r.species)}</td><td data-label="Çap">${Number.isFinite(+r.dbh_cm)?(+r.dbh_cm).toFixed(1):"—"}</td><td data-label="Boy">${r.height_m}</td><td data-label="Karbon">${(r.carbon_kg||0).toFixed(1)}</td><td data-label="Foto">${dgThumb(r.photo_url)}</td><td data-label="Durum"><span class="badge ${bc}">${st==="Beklemede"?"Onay Bekliyor":st}</span></td><td data-label="İşlem" style="display:flex;gap:4px"><button class="btn sm blue" onclick="editRec(${r.id})">✏️</button><button class="btn sm red" onclick="delRec(${r.id})">Sil</button></td></tr>`;
- }).join("")||"<tr><td colspan=9>"+(typeof dgCf==="function"?dgCf("Kayıt yok"):"Kayıt yok")+"</td></tr>";
+ const groups=new Map();
+ for(const r of recRows){const name=(r.projects&&r.projects.name)||"Projesiz kayıtlar";if(!groups.has(name))groups.set(name,[]);groups.get(name).push(r);}
+ const el=$("recGroups");if(!el)return;
+ el.innerHTML=groups.size?[...groups.entries()].map(([name,rows],i)=>dgRecordProjectGroup(name,rows,i)).join(""):`<div class="card records-empty">${typeof dgCf==="function"?dgCf("Kayıt yok"):"Kayıt yok"}</div>`;
 }
 // 2. Kayıt sil
 async function delRec(id){
@@ -133,7 +155,7 @@ async function loadWorld(){
   const g=await sb.from("v_global").select("*").single();
   if(g.data){$("wRec").textContent=g.data.records||0;$("wCountry").textContent=g.data.countries||0;$("wCity").textContent=g.data.cities||0;$("wCarbon").textContent=g.data.carbon_t||0;}
   const c=await sb.from("v_country").select("*");
-  $("wCountryT").innerHTML=(c.data||[]).slice(0,30).map(r=>`<tr><td data-label="Ülke">${esc(r.country)}</td><td data-label="Kayıt">${r.records}</td><td data-label="Karbon(t)">${r.carbon_t}</td><td data-label="Ort.Çap">${r.avg_dbh}</td><td data-label="Ort.Yükseklik(m)">${r.avg_height||"—"}</td></tr>`).join("")||"<tr><td colspan=5>—</td></tr>";
+  $("wCountryT").innerHTML=(c.data||[]).slice(0,30).map(r=>`<tr><td data-label="Ülke">${esc(r.country)}</td><td data-label="Kayıt">${r.records}</td><td data-label="Karbon(t)">${r.carbon_t}</td><td data-label="Ort.Çap">${Number.isFinite(+r.avg_dbh)?(+r.avg_dbh).toFixed(1):"—"}</td><td data-label="Ort.Yükseklik(m)">${r.avg_height||"—"}</td></tr>`).join("")||"<tr><td colspan=5>—</td></tr>";
   const t=await sb.from("v_city").select("*");
   $("wCityT").innerHTML=(t.data||[]).slice(0,30).map(r=>`<tr><td data-label="Şehir">${esc(r.city)}</td><td data-label="Kayıt">${r.records}</td><td data-label="Karbon(t)">${r.carbon_t}</td></tr>`).join("")||"<tr><td colspan=3>—</td></tr>";
   loadApprovedMarkers(worldMap,3000,(n,rows,err)=>{

@@ -246,7 +246,8 @@ describe('0025 · kablolama (index.html + shell + partials)', () => {
   });
   test('0026 mobil: tablolar dg-cards, .card overflow kalktı, üst bar sakinleşti', () => {
     const sh = read('partials/shell.html');
-    assert.ok((sh.match(/tblwrap dg-cards/g) || []).length >= 7, 'tablo kalan ekranlarda mobil kart düzeni korunur; projeler artık özel proje kartları kullanır');
+    assert.ok((sh.match(/tblwrap dg-cards/g) || []).length >= 6, 'tablo kalan ekranlarda mobil kart düzeni korunur; projeler ve Kayıtlarım artık özel kart/disclosure bileşenleri kullanır');
+    assert.match(sh, /id="recGroups" class="records-groups"/, 'Kayıtlarım düz tablo yerine proje bazlı disclosure kullanır');
     assert.match(sh, /id="projTable" hidden/, 'eski entegrasyon hedefi görünmez uyumluluk için korunur');
     assert.match(sh, /id="projOwnList"/, 'proje sahipliği kart listesinde');
     assert.match(sh, /id="projSharedList"/, 'paylaşılan projeler ayrı kart listesinde');
@@ -270,7 +271,8 @@ describe('0025 · kablolama (index.html + shell + partials)', () => {
     assert.match(m, /PROJE SAHİBİ/, 'sahip projesi rol rozeti');
     assert.match(m, /ORTAK/, 'paylaşılan proje rol rozeti');
     const d = read('src/services/dash.js');
-    assert.match(d, /data-label="Karbon"/, 'kayıt satırları etiketli');
+    assert.match(d, /class="record-metrics"/, 'kayıt kartı metrik grubu var');
+    assert.match(d, />Karbon<\/span>/, 'kayıt kartında karbon metriği etiketli');
   });
   test('loadProjects paylaşım birleşimi: ortak projeleri dropdown’a ekler', () => {
     const m = read('src/services/measure.js');

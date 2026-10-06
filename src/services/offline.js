@@ -78,7 +78,7 @@ tx.onabort=()=>reject(tx.error||new Error("Yerel kuyruk işlemi iptal edildi."))
 }
 function dgOfflineSameMeasurement(local,remote){
 if(!remote||String(remote.owner)!==String(local.owner)||remote.client_id!==local.client_id)return false;
-const fields=["project_id","point_id","measurement_no","grp","species","dbh_cm","height_m","volume_m3","carbon_kg","lat","lon"];
+const fields=["project_id","point_id","measurement_no","grp","species","girth_cm","dbh_cm","height_m","volume_m3","carbon_kg","lat","lon"];
 return fields.every(k=>String(local[k]??"")===String(remote[k]??""))&&(!local.photoBlob||!!remote.photo_url);
 }
 async function dgOfflineFindSaved(data){

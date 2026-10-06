@@ -29,7 +29,7 @@ function popupHtml(r){
  /* 0035b: balon etiketleri dgT() ile çevrilir (EN modu). Tür adı da sözlükte
   * (tam eşleşme) — balon her açılışta yeniden kurulduğu için dil anında yansır. */
  const _t=(s)=>(typeof dgT==="function"?dgT(s):s);
- return `<div style="min-width:140px"><b>P${r.point_id}</b> · ${esc(_t(r.species))}<br><span style="font-size:.75rem;color:#5f6d65">${_t("Çap")}: ${r.dbh_cm||"—"} cm · ${_t("Boy")}: ${r.height_m||"—"} m<br>${_t("Karbon")}: ${(r.carbon_kg||0).toFixed(1)} kg</span>`+(r.photo_url?`<br><img src="${esc(r.photo_url)}" style="width:160px;border-radius:8px;margin-top:6px">`:"")+`</div>`;
+ return `<div style="min-width:140px"><b>P${r.point_id}</b> · ${esc(_t(r.species))}<br><span style="font-size:.75rem;color:#5f6d65">DBH: ${Number.isFinite(+r.dbh_cm)?(+r.dbh_cm).toFixed(1):"—"} cm · ${_t("Boy")}: ${r.height_m||"—"} m<br>${_t("Karbon")}: ${(r.carbon_kg||0).toFixed(1)} kg</span>`+(r.photo_url?`<br><img src="${esc(r.photo_url)}" style="width:160px;border-radius:8px;margin-top:6px">`:"")+`</div>`;
 }
 // 2. Marker yükleme (chunked)
 /* İDEMPOTENT (2026-09-26 · canlı tarayıcıda ölçüldü): küme zaten varsa ÖNCE
