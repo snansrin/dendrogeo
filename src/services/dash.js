@@ -9,7 +9,7 @@ function dgRecordStatusMeta(status){
  const st=status||"Beklemede";
  return {label:st==="Beklemede"?"Onay Bekliyor":st,cls:st==="Onaylı"?"on":(st==="Red"?"off":"admin")};
 }
-function dgRecordProjectGroup(name,rows,index){
+function dgRecordProjectGroup(name,rows){
  const carbon=rows.reduce((a,r)=>a+(Number(r.carbon_kg)||0),0);
  const approved=rows.filter(r=>r.status==="Onaylı").length;
  const pending=rows.filter(r=>!r.status||r.status==="Beklemede").length;
@@ -24,7 +24,7 @@ function dgRecordProjectGroup(name,rows,index){
    <div class="record-side"><span class="badge ${st.cls}">${esc(st.label)}</span><div class="record-photo">${dgThumb(r.photo_url)}</div><div class="record-actions"><button class="btn sm blue" onclick="editRec(${r.id})" aria-label="P${esc(r.point_id)} kaydını düzenle">✏️ Düzenle</button><button class="btn sm red" onclick="delRec(${r.id})" aria-label="P${esc(r.point_id)} kaydını sil">Sil</button></div></div>
   </article>`;
  }).join("");
- return `<details class="record-project" ${index===0?"open":""}>
+ return `<details class="record-project">
   <summary><div class="record-project-title"><span class="record-project-icon">📁</span><span><b>${esc(name)||"Projesiz kayıtlar"}</b><small>${rows.length} kayıt · ${approved} onaylı${pending?" · "+pending+" bekliyor":""}</small></span></div><div class="record-project-total"><b>${carbon.toFixed(1)}</b><span>kg C</span></div></summary>
   <div class="record-project-body">${body}</div>
  </details>`;
@@ -39,7 +39,7 @@ async function loadRecords__scroll(){
  const groups=new Map();
  for(const r of recRows){const name=(r.projects&&r.projects.name)||"Projesiz kayıtlar";if(!groups.has(name))groups.set(name,[]);groups.get(name).push(r);}
  const el=$("recGroups");if(!el)return;
- el.innerHTML=groups.size?[...groups.entries()].map(([name,rows],i)=>dgRecordProjectGroup(name,rows,i)).join(""):`<div class="card records-empty">${typeof dgCf==="function"?dgCf("Kayıt yok"):"Kayıt yok"}</div>`;
+ el.innerHTML=groups.size?[...groups.entries()].map(([name,rows])=>dgRecordProjectGroup(name,rows)).join(""):`<div class="card records-empty">${typeof dgCf==="function"?dgCf("Kayıt yok"):"Kayıt yok"}</div>`;
 }
 // 2. Kayıt sil
 async function delRec(id){
