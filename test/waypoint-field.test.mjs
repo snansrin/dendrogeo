@@ -25,6 +25,19 @@ test('all-points extent includes completed points and current location',()=>{con
 test('guidance distinguishes GPS uncertainty from approaching the target',()=>{const f=field();f.ctx.navTarget=f.ctx.WP[0];f.ctx.GPS={latitude:40,longitude:32,accuracy:30};f.run('dgWaypointGuidance()');assert.match(f.$('navGuidance').textContent,/belirsizlik/);f.ctx.GPS.accuracy=5;f.run('dgWaypointGuidance()');assert.match(f.$('navGuidance').textContent,/yaklaştınız/);assert.equal(f.writes.length,0);});
 test('300 waypoints render only eight rows; search finds a far point directly',()=>{const f=field();f.ctx.WP=Array.from({length:300},(_,i)=>({id:i+1,wp_id:i+1,lat:40,lon:32,visited:false}));f.run('renderWaypointList()');assert.equal((f.$('wpListTable').innerHTML.match(/<li /g)||[]).length,8);assert.match(f.$('wpPager').innerHTML,/1–8 \/ 300/);f.run('dgWaypointPage(1)');assert.match(f.$('wpPager').innerHTML,/9–16 \/ 300/);f.$('wpSearch').value='P300';f.run('renderWaypointList()');assert.match(f.$('wpListTable').innerHTML,/P300/);assert.equal((f.$('wpListTable').innerHTML.match(/<li /g)||[]).length,1);});
 
+test('completed waypoint remains explicitly marked Yapıldı on phone-sized UI',()=>{
+ const f=field();f.run('renderWaypointList()');const html=f.$('wpListTable').innerHTML;
+ assert.match(html,/P20/);assert.match(html,/waypoint-state done/);assert.match(html,/✓ Yapıldı/);
+ const css=readFileSync(new URL('../css/style.css',import.meta.url),'utf8');
+ assert.doesNotMatch(css,/waypoint-point-actions \.badge\{display:none\}/);
+ assert.match(css,/@media\(max-width:430px\)/);
+ assert.match(css,/\.waypoint-target-btn\{min-width:76px!important;min-height:44px!important\}/);
+});
+test('completed filter shows only completed points with visible status',()=>{
+ const f=field();f.$('wpFilter').value='done';f.run('renderWaypointList()');const html=f.$('wpListTable').innerHTML;
+ assert.match(html,/P20/);assert.match(html,/✓ Yapıldı/);assert.doesNotMatch(html,/P12/);
+});
+
 test('waypoint UI keeps only the map collapsible and all field controls visible',()=>{
  const shell=readFileSync(new URL('../partials/shell.html',import.meta.url),'utf8');
  const a=shell.indexOf('<div class="view" id="v-nav">'),b=shell.indexOf('<div class="view" id="v-map">',a),nav=shell.slice(a,b);
