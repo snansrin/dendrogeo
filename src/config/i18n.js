@@ -833,6 +833,8 @@ const DG_I18N_EN={
 "Dünya Verisi":"World Data",
 "Ölçüm Yönetimi":"Measurement Admin",
 "Kullanıcılar":"Users",
+"Kullanıcı listesi alınamadı:":"Could not load the user list:",
+"Hata:":"Error:",
 "sn":"s",
 "dk":"min",
 "önce":"ago",

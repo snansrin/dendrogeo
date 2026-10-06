@@ -242,12 +242,12 @@
 <!-- DİL KATMANI (0035): TR markup varsayılan; EN sözlüğü çalışma zamanında
      uygulanır (dgToggleLang). defer sırası önemli değil — DOMContentLoaded'da
      ya da hemen (hazırsa) çalışır. module-registry + CORE_ASSETS kaydı şart. -->
-<script src="src/config/i18n.js?v=7a0dcca3" defer></script>
+<script src="src/config/i18n.js?v=450a0e9a" defer></script>
 <script src="src/utils/geo.js?v=3e796768" defer></script>
 <script src="src/utils/truncation.js?v=f43c76b3" defer></script>
 <!-- Faz 7: geotiff (317 KB) ve chart.js (208 KB) artık SENKRON yüklenmiyor;
      src/utils/lazylibs.js ihtiyaç anında enjekte eder (LULC analizi / panel grafiği). -->
-<script id="dgRuntimeBuild" type="application/json">"defd3a2c52f95f09"</script>
+<script id="dgRuntimeBuild" type="application/json">"fd23e607937a8555"</script>
 <script src="src/utils/lazylibs.js?v=19763039" defer></script>
 <script src="src/services/allometry.js?v=46ea5b87" defer></script>
 <script src="src/services/auth.js?v=1e92b5cd" defer></script>
@@ -256,7 +256,7 @@
 <!-- YÖNETİM ZİNCİRİ (Faz 6 — eski admin.js beş modüle bölündü) -->
 <script src="src/services/visit-stats.js?v=c10aa02f" defer></script>
 <script src="src/services/data-requests.js?v=80827902" defer></script>
-<script src="src/services/user-admin.js?v=f4a2fcbb" defer></script>
+<script src="src/services/user-admin.js?v=dc6b6aa8" defer></script>
 <script src="src/services/backup.js?v=b56fd4f9" defer></script>
 <script src="src/services/admin.js?v=13fc6ab4" defer></script>
 <!-- YÖNETİM AĞACI (2026-09-24): park → proje → kullanıcı → ölçüm kademeli
@@ -296,7 +296,7 @@
 <script src="src/ui/park-panel.js?v=618e3acc" defer></script>
 <script src="src/ui/park-export.js?v=c724cd32" defer></script>
 <script src="src/services/dash.js?v=7e8bde11" defer></script>
-<link rel="stylesheet" href="css/style.css?v=da8bca75">
+<link rel="stylesheet" href="css/style.css?v=4c638afd">
 <link rel="stylesheet" href="css/landing.css?v=e354190f">
 <link rel="stylesheet" href="css/park-panel.css?v=649541ba">
 <!-- TASARIM SİSTEMİ (2026-09-27, 2. deneme): ui-standard.css geri BAĞLANDI
@@ -786,26 +786,39 @@
   </div>
 
   <div class="view" id="v-nav">
-   <div class="waypoint-heading"><div><div class="dg-kicker">SAHA NAVİGASYONU</div><h2 class="disp">Waypoint</h2></div></div>
+   <div class="waypoint-heading">
+    <div><div class="dg-kicker">SAHA NAVİGASYONU</div><h2 class="disp">Waypoint</h2></div>
+   </div>
+
    <section class="card waypoint-project" aria-label="Waypoint projesi">
     <div class="waypoint-project-select"><label class="lbl" for="nProject">Proje</label><select id="nProject" onchange="loadWaypoints()"></select></div>
     <div id="navInfo" class="waypoint-project-status" role="status">Proje seçin.</div>
    </section>
+
    <section class="card waypoint-nav-card" aria-label="Aktif hedef">
     <div class="waypoint-target">
      <div class="waypoint-compass" aria-hidden="true"><svg class="arrow" id="navArrow" viewBox="0 0 100 100"><path d="M50 5 L70 70 L50 55 L30 70 Z" fill="var(--green)"/></svg></div>
      <div class="waypoint-target-copy"><span class="lbl">Aktif hedef</span><div class="mono waypoint-target-name" id="navTarget">Listeden hedef seçin.</div><div class="waypoint-distance-main"><strong id="navDist">—</strong><span>mesafe</span></div></div>
     </div>
     <div class="waypoint-actions waypoint-actions-primary">
-     <button class="btn blue sm" onclick="dgNearestWaypoint()">📍 En yakın</button><button class="btn sm ghost" onclick="dgNextWaypoint()">→ Sıradaki</button><button class="btn sm ghost" onclick="dgFocusWaypoint(true)">🎯 Haritada göster</button><button class="btn sm ghost" onclick="dgFitWaypoints(true)">🗺 Tüm noktalar</button>
+     <button class="btn blue sm" onclick="dgNearestWaypoint()">📍 En yakın</button>
+     <button class="btn sm ghost" onclick="dgNextWaypoint()">→ Sıradaki</button>
+     <button class="btn sm ghost" onclick="dgFocusWaypoint(true)">🎯 Haritada göster</button>
+     <button class="btn sm ghost" onclick="dgFitWaypoints(true)">🗺 Tüm noktalar</button>
     </div>
     <div class="waypoint-field-status"><p id="navGuidance" class="measure-help" role="status">Hedef seçerek navigasyona başlayın.</p><p id="navGps" class="measure-help" role="status">GPS konumu bekleniyor.</p></div>
-    <div class="waypoint-arrival"><button class="btn sm ghost waypoint-gps-btn" onclick="startGps()">📡 Konumu Aç</button><button class="dg-png-btn primary" style="margin-top:14px" onclick="arriveWp()">🎯 Vardım → Ölçüme Geç</button></div>
+    <div class="waypoint-arrival">
+     <button class="btn sm ghost waypoint-gps-btn" onclick="startGps()">📡 Konumu Aç</button>
+     <button class="dg-png-btn primary" onclick="arriveWp()">🎯 Vardım → Ölçüme Geç</button>
+    </div>
    </section>
+
    <details id="wpMapPanel" class="card waypoint-map" ontoggle="if(this.open&amp;&amp;navMap){navMap.invalidateSize();dgFocusWaypoint();}">
-    <summary><span>🗺 Harita</span><small>hedef · konum · tamamlananlar</small></summary><div id="navMap" class="notranslate" translate="no"></div>
+    <summary><span>🗺 Harita</span><small>hedef · konum · tamamlananlar</small></summary>
+    <div id="navMap" class="notranslate" translate="no"></div>
     <div class="waypoint-map-legend"><span><i class="wp-legend-dot pending"></i>Waypoint</span><span><i class="wp-legend-dot done"></i>Tamamlandı</span><span><i class="wp-legend-dot me"></i>Konumun</span></div>
    </details>
+
    <section class="card waypoint-list" aria-labelledby="waypointListTitle">
     <div class="project-section-head"><div><div class="dg-kicker">SAHA SIRASI</div><h3 id="waypointListTitle">Waypoint listesi</h3></div></div>
     <div class="waypoint-toolbar">
@@ -813,11 +826,18 @@
      <div><label class="lbl" for="wpFilter">Durum</label><select id="wpFilter" onchange="renderWaypointList()"><option value="all">Tümü</option><option value="pending">Bekleyen</option><option value="done">Tamamlanan</option></select></div>
      <div><label class="lbl" for="wpSort">Sıralama</label><select id="wpSort" onchange="renderWaypointList()"><option value="id">Nokta numarası</option><option value="distance">En yakından</option></select></div>
     </div>
-    <ul id="wpListTable" class="waypoint-points" aria-label="Waypoint noktaları"></ul><div id="wpPager" class="waypoint-pager"></div>
+    <ul id="wpListTable" class="waypoint-points" aria-label="Waypoint noktaları"></ul>
+    <div id="wpPager" class="waypoint-pager"></div>
    </section>
+
    <section class="card waypoint-files" aria-labelledby="waypointFileTitle">
     <div class="project-section-head"><div><div class="dg-kicker">LİSTE YÖNETİMİ</div><h3 id="waypointFileTitle">Waypoint dosyası</h3></div></div>
-    <div class="waypoint-file-row"><span class="dg-file btn sm ghost">📂 <span>CSV seç</span><input type="file" id="nCsv" aria-label="Waypoints.csv dosyası seç (X,Y,id)" accept=".csv" onchange="dgFileName(event,'nCsvName')" style="position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:pointer"></span><span class="dg-file-name mono" id="nCsvName"></span><button class="btn blue sm" onclick="uploadWpCsv()">⬆ Yükle</button><button class="btn red sm waypoint-delete-all" onclick="deleteAllWaypoints()">🗑 Tümünü Sil</button></div>
+    <div class="waypoint-file-row">
+     <span class="dg-file btn sm ghost">📂 <span>CSV seç</span><input type="file" id="nCsv" aria-label="Waypoints.csv dosyası seç (X,Y,id)" accept=".csv" onchange="dgFileName(event,'nCsvName')" style="position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:pointer"></span>
+     <span class="dg-file-name mono" id="nCsvName"></span>
+     <button class="btn blue sm" onclick="uploadWpCsv()">⬆ Yükle</button>
+     <button class="btn red sm waypoint-delete-all" onclick="deleteAllWaypoints()">🗑 Tümünü Sil</button>
+    </div>
    </section>
   </div>
 
@@ -1130,24 +1150,24 @@
 
   <div class="view" id="v-users">
    <div class="admin-users-heading">
-    <div><div class="dg-kicker">YÖNETİM</div><h2 class="disp">Kullanıcılar</h2><p class="admin-users-help">Hesapları ara, rol ve durum bilgilerini tek ekranda yönet.</p></div>
+    <div><div class="dg-kicker">YÖNETİM</div><h2 class="disp">Kullanıcılar</h2><p class="admin-users-help">Hesap, rol ve erişim durumunu hızlıca yönetin.</p></div>
+    <button class="btn sm ghost admin-users-refresh-top" onclick="loadUsers()" title="Kullanıcı listesini yenile">↻ Yenile</button>
    </div>
-   <div class="admin-users-stats" aria-label="Kullanıcı özeti">
-    <div class="stat"><div class="lbl">Toplam</div><div class="val" id="aUsersTotal">0</div></div>
-    <div class="stat"><div class="lbl">Aktif</div><div class="val" id="aUsersActive">0</div></div>
-    <div class="stat"><div class="lbl">Yönetici</div><div class="val" id="aUsersAdmin">0</div></div>
-    <div class="stat"><div class="lbl">Pasif</div><div class="val" id="aUsersPassive">0</div></div>
+   <div class="admin-users-summary" aria-label="Kullanıcı özeti">
+    <div class="admin-users-summary-item"><span>Toplam</span><strong id="aUsersTotal">0</strong></div>
+    <div class="admin-users-summary-item is-active"><span>Aktif</span><strong id="aUsersActive">0</strong></div>
+    <div class="admin-users-summary-item is-admin"><span>Yönetici</span><strong id="aUsersAdmin">0</strong></div>
+    <div class="admin-users-summary-item is-passive"><span>Pasif</span><strong id="aUsersPassive">0</strong></div>
    </div>
    <section class="card admin-users-card" aria-labelledby="adminUsersListTitle">
     <div class="admin-users-toolbar">
-     <div class="admin-users-search"><label class="lbl" for="userSearch">Kullanıcı ara</label><input type="search" id="userSearch" placeholder="E-posta veya ad soyad" oninput="filterUsers()"></div>
+     <div class="admin-users-search"><label class="lbl" for="userSearch">Kullanıcı ara</label><input type="search" id="userSearch" placeholder="Ad veya e-posta" oninput="filterUsers()"></div>
      <div><label class="lbl" for="userRoleFilter">Rol</label><select id="userRoleFilter" onchange="filterUsers()"><option value="">Tümü</option><option value="owner">Kurucu</option><option value="admin">Denetçi</option><option value="user">Kullanıcı</option></select></div>
      <div><label class="lbl" for="userStatusFilter">Durum</label><select id="userStatusFilter" onchange="filterUsers()"><option value="">Tümü</option><option value="active">Aktif</option><option value="passive">Pasif</option></select></div>
-     <button class="btn sm ghost admin-users-refresh" onclick="loadUsers()">↻ Yenile</button>
     </div>
-    <div class="admin-users-list-head"><div><h3 id="adminUsersListTitle">Hesap listesi</h3><p>Rol değişikliği ve hesap durumu yalnız yetkili kullanıcı tarafından düzenlenir.</p></div><span class="mono" id="aUsersVisible">0 kullanıcı</span></div>
-    <div class="tblwrap dg-cards">
-     <table><thead><tr><th scope="col">E-posta</th><th scope="col">Ad Soyad</th><th scope="col">Rol</th><th scope="col">Durum</th><th scope="col">İşlem</th></tr></thead><tbody id="aUsersT"></tbody></table>
+    <div class="admin-users-list-head"><h3 id="adminUsersListTitle">Hesap listesi</h3><span class="mono" id="aUsersVisible">0 kullanıcı</span></div>
+    <div class="tblwrap dg-cards admin-users-table">
+     <table><thead><tr><th scope="col">Kullanıcı</th><th scope="col">Rol</th><th scope="col">Durum</th><th scope="col">İşlem</th></tr></thead><tbody id="aUsersT"></tbody></table>
     </div>
    </section>
   </div>

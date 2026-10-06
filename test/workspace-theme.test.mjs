@@ -22,20 +22,18 @@ test('Kayıtlarım proje bazında kapalı disclosure olarak gruplanır',()=>{
  assert.match(rd('partials/shell.html'),/id="recGroups" class="records-groups"/);
 });
 
-test('Waypoint ana tema standardında saha odaklıdır; yalnız harita disclosure kalır',()=>{
- const shell=rd('partials/shell.html');
+test('Waypoint saha odaklı ana tema ve telefon düzenini kullanır',()=>{
+ const shell=rd('partials/shell.html'),map=rd('src/services/map.js'),css=rd('css/style.css');
  const a=shell.indexOf('<div class="view" id="v-nav">');
  const b=shell.indexOf('<div class="view"',a+30);
  const nav=shell.slice(a,b);
  assert.match(nav,/class="waypoint-heading"/);
- assert.match(nav,/<h2 class="disp">Waypoint<\/h2>/);
- assert.ok(!nav.includes('Saha Modu'));
  assert.match(nav,/id="wpMapPanel" class="card waypoint-map"/);
- assert.equal((nav.match(/<details\b/g)||[]).length,1,'yalnız harita açılır/kapanır');
+ assert.equal((nav.match(/<details\b/g)||[]).length,1,'yalnız harita katlanır olmalı');
  assert.match(nav,/class="card waypoint-files"/);
- assert.match(nav,/id="wpSearch"/);
- assert.match(nav,/id="wpFilter"/);
- assert.match(nav,/id="wpSort"/);
+ assert.match(map,/✓ Yapıldı/);
+ assert.match(map,/waypoint-state/);
+ assert.match(css,/@media\(max-width:430px\)/);
 });
 
 test('Taleplerim kapalı disclosure olur ve kullanıcı kendi talebini silebilir',()=>{
@@ -80,9 +78,11 @@ test('panel sade, kullanıcı yönetimi ana tema standardında',()=>{
  assert.ok(!shell.includes('Park · proje · ekip'));
  assert.ok(!shell.includes('Proje bazlı envanter'));
  assert.match(shell,/id="dgAcademicProfile"/);
- assert.match(shell,/class="admin-users-stats"/);
+ assert.match(shell,/class="admin-users-summary"/);
  assert.match(shell,/id="userRoleFilter"/);
  assert.match(shell,/id="userStatusFilter"/);
  assert.match(ua,/aUsersVisible/);
+ assert.match(ua,/class="admin-user-person"/);
+ assert.match(ua,/data-label="Kullanıcı"/);
  assert.match(ua,/dataset\.role/);
 });
