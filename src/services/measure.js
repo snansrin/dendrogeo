@@ -224,7 +224,7 @@ function liveCalc(){
  $("liveCalc").style.display=valid?"block":"none";
  const hint=$("measureSaveHint");if(hint)hint.style.display=valid?"none":"block";
  if(!valid)return;
- const r=calc(c,h,s,g);
+ const r=calcFromCircumference(c,h,s,g);
  if(!r.valid)return;
  $("liveCalc").innerHTML=`<b>${_tms("Tahmini karbon")} · ${r.total_carbon.toFixed(1)} kg</b><br><small>${_tms("Göğüs çevresi")} ${c.toFixed(1)} cm → DBH ${r.dbh_cm.toFixed(2)} cm · AGB ${r.agb.toFixed(1)} · BHB ${r.bhb.toFixed(1)} kg · ${_tms("Hacim")} ${r.vol.toFixed(3)} m³ · ρ ${r.density_kg_m3} kg/m³</small>`;
 }
@@ -468,8 +468,8 @@ async function queryPointId(){
  if(data&&data.length>0){
   const r=data[0];
   res.style.display="block";res.className="alert info";
-  const derivedDbh=(typeof diameterCmFromCircumference==="function")?diameterCmFromCircumference(r.dbh_cm):null;
-  res.innerHTML=`✓ <b>P${r.point_id}</b> · ${esc(_tms(r.species))} · ${_tms("Göğüs çevresi")} ${r.dbh_cm} cm${derivedDbh?` · DBH ${derivedDbh.toFixed(2)} cm`:""} · ${_tms("Boy")} ${r.height_m} m · ${_tms("Karbon")} ${(r.carbon_kg||0).toFixed(1)} kg · ${_tms("Durum")}: <b>${r.status?_tms(r.status):_tms("Beklemede")}</b>`+
+  const rawCirc=Number.isFinite(+r.girth_cm)&&+r.girth_cm>0?+r.girth_cm:((typeof circumferenceCmFromDiameter==="function")?circumferenceCmFromDiameter(+r.dbh_cm):null);
+  res.innerHTML=`✓ <b>P${r.point_id}</b> · ${esc(_tms(r.species))} · ${_tms("Göğüs çevresi")} ${rawCirc?rawCirc.toFixed(1):"—"} cm · DBH ${(+r.dbh_cm).toFixed(2)} cm · ${_tms("Boy")} ${r.height_m} m · ${_tms("Karbon")} ${(r.carbon_kg||0).toFixed(1)} kg · ${_tms("Durum")}: <b>${r.status?_tms(r.status):_tms("Beklemede")}</b>`+
    (r.photo_url?`<br><img src="${esc(r.photo_url)}" style="width:140px;border-radius:8px;margin-top:6px">`:"")+
    `<br><button class="btn sm blue" onclick="editRec(${r.id})" style="margin-top:8px">✏️ Düzenle & Güncelle</button> <button class="btn sm red" onclick="delRec(${r.id})" style="margin-top:8px">🗑️ Tamamen Sil</button>`;
  }else{
@@ -529,7 +529,7 @@ async function dgSaveMeasInner(){
     dgProjectRemember(pid);
     
     const wasEdit=!!EDIT_ID;
-    const c=calc(circumference,h,sp,grp);
+    const c=calcFromCircumference(circumference,h,sp,grp);
     if(!c.valid)return dgMeasureInvalid("mSpecies",_tms("Kilitli yoğunluk tablosu bu ölçüm için karbon hesabına izin vermiyor."));
     
     // 1. Fotoğrafı sıkıştır (henüz upload etme, sadece Blob olarak hazırla)
@@ -550,8 +550,8 @@ async function dgSaveMeasInner(){
         point_id:pt,
         measurement_no:measurementNo,
         grp,species:sp,
-        /* Tarihsel kolon adı korunur: dbh_cm artık kilitli protokole göre SAHA ÇEVRESİDİR. */
-        dbh_cm:circumference,
+        girth_cm:circumference,
+        dbh_cm:c.dbh_cm,
         height_m:h,
         volume_m3:c.vol,
         carbon_kg:c.total_carbon,
@@ -660,7 +660,7 @@ async function editRec(id){
  $("mProject").value=data.project_id;
  $("mPoint").value=data.point_id;$("mNo").value=data.measurement_no||1;
  $("mGroup").value=data.grp||"";fillSpecies();$("mSpecies").value=data.species;showLatin();
- $("mDbh").value=data.dbh_cm;$("mHeight").value=data.height_m;
+ $("mDbh").value=(data.girth_cm!=null?data.girth_cm:((typeof circumferenceCmFromDiameter==="function")?circumferenceCmFromDiameter(data.dbh_cm):data.dbh_cm));$("mHeight").value=data.height_m;
  $("editBanner").style.display="block";$("saveBtn").textContent="💾 Kaydı Güncelle";
  liveCalc();go("measure");dgProjectChanged();
 }
