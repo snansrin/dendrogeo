@@ -129,20 +129,20 @@ describe('GPS butonu canlı UI dilinde (🌿 Yüzey Örtüsü Analizi kartıyla 
   });
 
   test('kart LULC kartıyla aynı iskelet: dg-png-card/head/kicker/title/sub/badge', () => {
-    const i = shell.indexOf('id="gpsRing"');
+    const i = shell.indexOf('id="gpsState"');
     const blok = shell.slice(i - 700, i + 700);
     for (const c of ['dg-png-card', 'dg-png-head', 'dg-png-kicker', 'dg-png-title', 'dg-png-sub', 'dg-png-badge'])
       assert.ok(blok.includes(c), c + ' GPS kartında olmalı');
   });
 
-  test('canlı durum LULC deseniyle birebir: disabled + ⏳ + oldText + opacity', () => {
+  test('canlı durum: konum alınırken bekler, başarıdan sonra sade GPS aktif durumuna geçer', () => {
     const m = read('src/services/measure.js');
     assert.match(m, /function dgGpsBtnBusy\(on\)/, 'canlı buton yardımcısı');
     assert.match(m, /"⏳ Konum alınıyor…"/, 'LULC ile aynı ⏳ kalıbı');
-    assert.match(m, /b\.dataset\.oldText=b\.innerHTML/, 'eski metni sakla');
     assert.match(m, /b\.style\.opacity="\.65"/, 'aynı solukluk');
     assert.match(m, /b\.style\.cursor="wait"/, 'aynı imleç');
-    assert.match(m, /const onOk=p=>\{dgGpsBtnBusy\(false\);/, 'başarıda buton geri gelir');
+    assert.match(m, /const onOk=p=>\{dgGpsBtnBusy\(false\);/, 'başarı akışı');
+    assert.match(m, /b\.innerHTML=GPS\?"🛰 GPS aktif":"📡 Konumu Etkinleştir"/, 'GPS sonrası sade durum');
     assert.match(m, /if\(e\)dgGpsBtnBusy\(false\);/, 'hatada buton geri gelir');
   });
 
@@ -157,6 +157,6 @@ describe('GPS butonu canlı UI dilinde (🌿 Yüzey Örtüsü Analizi kartıyla 
     assert.match(shell, /id="gpsState" class="alert info"/, 'gpsState alert ailesinde');
     assert.match(shell, /id="gpsBadge"/, 'canlı rozet');
     const m = read('src/services/measure.js');
-    assert.match(m, /bd\.className="dg-png-badge "/, 'rozet LULC badge diliyle güncellenir');
+    assert.match(m, /bd\.className="dg-png-badge"/, 'rozet standart badge ailesinde kalır');
   });
 });
