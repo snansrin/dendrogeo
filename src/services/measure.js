@@ -195,7 +195,10 @@ function updGps(){
  if(state){state.textContent="GPS aktif";state.className="alert ok";}
  if(btn){btn.textContent="GPS aktif";btn.dataset.oldText="GPS aktif";btn.classList.add("is-active");}
  const bd=$("gpsBadge");
- if(bd){bd.textContent="GPS aktif";bd.className="dg-png-badge blue";}
+ if(bd){
+  bd.textContent="GPS aktif · ±"+Math.round(a)+" m · "+q;
+  bd.className="dg-png-badge"+(a<20?"":a<40?" amber":" red");
+ }
  if(map&&GPS){if(window._me)map.removeLayer(window._me);window._me=L.circleMarker([GPS.latitude,GPS.longitude],{radius:7,color:"#2b6cb0",weight:3,fillOpacity:.9}).addTo(map).bindPopup("Konumun");}
  drawNav();autoFillPointId();
 }
