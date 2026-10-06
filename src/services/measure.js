@@ -161,8 +161,8 @@ if(!window._wakeLockHooked){
  * YOK — aynı sınıf (.dg-png-btn primary) ve aynı mekanizma. */
 function dgGpsBtnBusy(on){
  const b=$("gpsBtn");if(!b)return;
- if(on){b.dataset.oldText=b.innerHTML;b.innerHTML="⏳ Konum alınıyor…";b.disabled=true;b.style.opacity=".65";b.style.cursor="wait";}
- else{b.disabled=false;b.innerHTML=b.dataset.oldText||"📡 Konumu Etkinleştir";b.style.opacity="";b.style.cursor="";}
+ if(on){b.innerHTML="⏳ Konum alınıyor…";b.disabled=true;b.style.opacity=".65";b.style.cursor="wait";}
+ else{b.disabled=false;b.innerHTML=GPS?"🛰 GPS aktif":"📡 Konumu Etkinleştir";b.style.opacity="";b.style.cursor="";}
 }
 async function startGps(){
  const gpsMsg=(t,e)=>{const g=$("gpsState");g.textContent=t;g.className="alert "+(e?"err":"info");if(e)dgGpsBtnBusy(false);};
@@ -182,15 +182,14 @@ async function startGps(){
 }
 function updGps(){
  const a=GPS.accuracy;
- $("gpsAcc").textContent=a.toFixed(0);$("gLat").textContent=GPS.latitude.toFixed(6);$("gLon").textContent=GPS.longitude.toFixed(6);
+ $("gLat").textContent=GPS.latitude.toFixed(6);$("gLon").textContent=GPS.longitude.toFixed(6);
  $("gAlt").textContent=Number.isFinite(GPS.altitude)?GPS.altitude.toFixed(0)+" m":"—";
  const q=a<10?"ÇOK İYİ":a<20?"İYİ":a<40?"ORTA":"ZAYIF";
  $("gQ").textContent=q;
- $("gpsRing").className="gpsring "+(a<10?"good":a<30?"mid":"bad");
- $("gpsState").textContent="🛰 GPS aktif · ±"+a.toFixed(1)+" m · "+q;$("gpsState").className="alert ok";
- /* rozet de LULC kartlarındaki dg-png-badge diliyle canlı güncellenir */
+ $("gpsState").textContent="🛰 GPS aktif";$("gpsState").className="alert ok";
+ const btn=$("gpsBtn");if(btn){btn.innerHTML="🛰 GPS aktif";btn.disabled=true;btn.style.opacity="1";btn.style.cursor="default";}
  const bd=$("gpsBadge");
- if(bd){bd.textContent="±"+a.toFixed(0)+" m · "+q;bd.className="dg-png-badge "+(a<10?"":(a<30?"blue":"amber"));}
+ if(bd){bd.textContent="GPS aktif";bd.className="dg-png-badge";}
  if(map&&GPS){if(window._me)map.removeLayer(window._me);window._me=L.circleMarker([GPS.latitude,GPS.longitude],{radius:7,color:"#2b6cb0",weight:3,fillOpacity:.9}).addTo(map).bindPopup("Konumun");}
  drawNav();autoFillPointId();
 }
