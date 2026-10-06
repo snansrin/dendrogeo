@@ -7,12 +7,10 @@
  *   hataları İÇE AKTARIMDA yakalar: kanonik tür çözümü, panel denklemiyle
  *   yeniden hesap ve QA kapıları.
  *
- * 0031 DÜZELTMESİ (kullanıcı kararı, 2026-09-29): DBH = GÖĞÜS ÇAPI'dır,
- *   birimi cm'dir, sahada doğrudan çap olarak kaydedilir. Bu araç
- *   çevre→çap (÷π) dönüşümü YAPMAZ; `--birim cevre` seçeneği kaldırıldı.
- *   `girth_cm` kolonu yalnız HAM DENETİM alanı olarak saklanır ve DBH
- *   türetmek için KULLANILMAZ. Boy/çap oranı bir İNCELEME göstergesidir:
- *   uyarı basar, içe aktarmayı BLOKLAMAZ.
+ * FINAL ÖLÇÜM PROTOKOLÜ (2026-10-06): sahada mezura ile 1,30 m
+ *   yükseklikte GÖĞÜS ÇEVRESİ ölçülür. Ham çevre `girth_cm` alanında
+ *   korunur; gerçek DBH çapı `dbh_cm = girth_cm / π` olarak türetilir.
+ *   Allometri, hacim ve QA yalnız türetilmiş DBH'yi kullanır.
  *
  * Kullanım:
  *   node scripts/import-measurements.mjs saha.csv --park 25 --project 26 [--owner UUID]
@@ -23,9 +21,9 @@
  *   nokta|point|point_id|no        → point_id       (zorunlu)
  *   tur|tür|species|agac|ağaç      → species        (zorunlu)
  *   grup|group|grp                 → grp            (zorunlu: İBRELİ/YAPRAKLI)
- *   cap|çap|dbh|dbm_cm|dbh_cm      → göğüs çapı (cm) — ZORUNLU (--birim cm|auto)
- *   cevre|çevre|girth|cevre_cm|girth_cm → ham çevre (cm): yalnız denetim
- *       alanı olarak saklanır; DBH bu kolondan TÜRETİLMEZ (0031)
+ *   cevre|çevre|girth|cevre_cm|girth_cm → göğüs çevresi (cm) — ZORUNLU
+ *   cap|çap|dbh|dbm_cm|dbh_cm      → türetilmiş DBH (opsiyonel doğrulama);
+ *       verilirse çevre/π ile uyumlu olması gerekir
  *   boy|h|height|height_m|boy_m    → height_m       (zorunlu)
  *   karbon|carbon|carbon_kg|c_kg   → saklı karbon   (QA karşılaştırması)
  *   hacim|volume|vol|volume_m3     → saklı hacim    (QA karşılaştırması)
@@ -110,37 +108,15 @@ function mapHeader(cells, dict) {
   return idx;
 }
 
-/* ---- birim kararı (0031: DBH = göğüs çapı, cm) ----
- * Eski sürüm medyan boy/çap oranına bakarak kolonu "çevre" ilan edip
- * dbh_cm = çevre/π dönüşümü uyguluyordu. Bu varsayım yanlıştı: saha verisi
- * göğüs çapıdır ve olduğu gibi kaydedilir. Artık:
- *   auto → cm (dönüşüm YOK), oran yalnız inceleme uyarısı üretir
- *   --birim cm|mm → operatörün açık beyanı (mm: ÷10, birim düzeltmesi)
- *   --birim cevre → REDDEDİLİR (exit 2): DendroGeo çevre→çap dönüşümü yapmaz */
-function decideUnit(records, birim) {
-  if (birim === 'cevre' || birim === 'çevre' || birim === 'girth') {
-    console.error('❌ --birim cevre KALDIRILDI (0031): DendroGeo çevre→çap (÷π) dönüşümü YAPMAZ.');
-    console.error('   DBH = göğüs çapı (cm) ve sahada doğrudan çap olarak kaydedilir.');
-    console.error('   Kaynak dosyanızda gerçekten ÇEVRE taşıyan bir kolon varsa, dosyayı');
-    console.error('   göğüs çapı (cm) kolonuyla yeniden düzenleyin; dönüşümü DendroGeo yapmaz.');
-    process.exit(2);
-  }
-  if (birim === 'mm') return { unit: 'mm', why: '--birim mm ile verildi (cm = mm/10; birim düzeltmesi, çevre→çap dönüşümü DEĞİL)' };
-  if (birim && birim !== 'auto') return { unit: 'cm', why: '--birim ile verildi' };
-  const hd = records.filter((r) => r.dbh_cm > 0 && r.height_m > 0).map((r) => (100 * r.height_m) / r.dbh_cm);
-  if (!hd.length) return { unit: 'cm', why: 'DBH = göğüs çapı (cm) kabul edildi; oran hesabı için veri yok' };
-  hd.sort((a, b) => a - b);
-  const med = hd[Math.floor(hd.length / 2)];
-  /* 0032 · medyan oran YALNIZ bilgidir: birim kararı DBH = göğüs çapı (cm)
-   * olarak SABİTTİR (0031). Fiziksel makullük bandı dışı medyan → İNCELEME
-   * notu; tipik 15–120 bandı dışı medyan → geniş gövdeli/bodur form olağandır. */
-  if (med < QA_LIMITS.HD_PHYS_MIN || med > QA_LIMITS.HD_PHYS_MAX) {
-    return { unit: 'cm', why: `DBH = göğüs çapı (cm) kabul edildi, dönüşüm uygulanmadı · medyan boy/çap ${med.toFixed(1)} fiziksel makullük bandı (${QA_LIMITS.HD_PHYS_MIN}–${QA_LIMITS.HD_PHYS_MAX}) dışında → İNCELEME uyarısı (blok değil)` };
-  }
-  if (med < QA_LIMITS.HD_MIN || med > QA_LIMITS.HD_MAX) {
-    return { unit: 'cm', why: `DBH = göğüs çapı (cm) kabul edildi, dönüşüm uygulanmadı · medyan boy/çap ${med.toFixed(1)} tipik ${QA_LIMITS.HD_MIN}–${QA_LIMITS.HD_MAX} bandı dışında → BİLGİ (geniş gövdeli/bodur form olağandır; uyarı değil, blok hiç değil)` };
-  }
-  return { unit: 'cm', why: `DBH = göğüs çapı (cm) · medyan boy/çap ${med.toFixed(1)} tipik gösterge aralığında` };
+/* ---- çevre birim kararı ----
+ * Standart saha girişi göğüs çevresidir. auto/cm → cm, mm → cm/10.
+ * DBH her durumda çevre/π ile türetilir. */
+function decideUnit(_records, birim) {
+  if (birim === 'mm') return { unit: 'mm', why: 'göğüs çevresi mm verildi; cm = mm/10, ardından DBH = çevre/π' };
+  if (!birim || birim === 'auto' || birim === 'cm' || birim === 'cevre' || birim === 'çevre' || birim === 'girth')
+    return { unit: 'cm', why: 'göğüs çevresi cm; DBH = çevre/π' };
+  console.error('❌ --birim yalnız cm|mm|auto olabilir (ölçülen değişken göğüs çevresidir).');
+  process.exit(2);
 }
 
 /* ---- konum çiti (opsiyonel; ağ erişimi varsa) ---- */
@@ -169,9 +145,8 @@ async function parkFence(parkId) {
 const file = process.argv[2] && !process.argv[2].startsWith('--') ? process.argv[2] : null;
 if (!file || has('help')) {
   console.log(`Kullanım: node scripts/import-measurements.mjs <saha.csv|saha.tsv> --park N --project N [seçenekler]
-  --birim cm|mm|auto         göğüs çapı kolonunun birimi (varsayılan auto = cm)
-                             NOT: 'cevre' KALDIRILDI (0031) — çevre→çap (÷π)
-                             dönüşümü yapılmaz; DBH sahada çap olarak ölçülür
+  --birim cm|mm|auto         göğüs çevresi kolonunun birimi (varsayılan auto = cm)
+                             DBH sistem tarafından çevre/π ile türetilir
   --owner UUID               measurements.owner (RLS: kayıt sahibi)
   --owner-email e@x          --owner verilmediyse profiles'dan UUID çözülür (anon okuma)
   --status Beklemede|Onaylı  durum (varsayılan Beklemede — moderasyon panelden)
@@ -190,17 +165,9 @@ const text = readFileSync(file, 'utf8');
 const { rows, delim } = parseDelimited(text);
 if (rows.length < 2) { console.error('❌ en az başlık + 1 veri satırı gerekli'); process.exit(2); }
 const idx = mapHeader(rows[0], dict);
-for (const f of ['point_id', 'species', 'grp', 'height_m'])
+for (const f of ['point_id', 'species', 'grp', 'height_m', 'girth_cm'])
   if (idx[f] == null) { console.error(`❌ zorunlu kolon bulunamadı: ${f} (başlık: ${rows[0].join(' | ')})`); process.exit(2); }
-if (idx.dbh_cm == null && idx.girth_cm == null) { console.error('❌ göğüs çapı (dbh/cap/çap) kolonu yok'); process.exit(2); }
-/* 0031: çevre kolonundan DBH TÜRETİLMEZ. Dosyada yalnız çevre kolonu varsa
- * içe aktarma durdurulur — sessiz ÷π dönüşümü yapılmaz. */
-if (idx.dbh_cm == null) {
-  console.error('❌ göğüs çapı (cm) kolonu bulunamadı; yalnız çevre kolonu var.');
-  console.error('   0031: çevre→çap (÷π) dönüşümü YAPILMAZ. DBH, sahada ölçülen göğüs');
-  console.error('   çapıdır (cm) ve dosyada cap|çap|dbh|dbh_cm başlıklı bir kolon olmalıdır.');
-  process.exit(2);
-}
+/* FINAL protokol: ham göğüs çevresi zorunludur; DBH varsa yalnız çapraz kontroldür. */
 
 const warn = [], errs = [];
 const recs = [];
@@ -230,19 +197,28 @@ for (let li = 1; li < rows.length; li++) {
 }
 if (!recs.length) { console.error('❌ ayrıştırılabilir kayıt yok'); errs.forEach((e) => console.error('  ' + e)); process.exit(2); }
 
-/* ---- birim kararı (0031: çevre→çap dönüşümü YOK; ham girth_cm yalnız denetim) ---- */
+/* ---- ham çevre → türetilmiş DBH ---- */
 const birimArg = (arg('birim') || 'auto').toLowerCase();
 const decided = decideUnit(recs, birimArg === 'auto' ? null : birimArg);
-if (idx.girth_cm != null) warn.push('Dosyada çevre (girth) kolonu var: HAM denetim değeri olarak girth_cm\'e yazılır; DBH bu kolondan TÜRETİLMEZ (0031).');
 for (const r of recs) {
-  const raw = r.dbh_cm;
-  if (!Number.isFinite(raw) || raw <= 0) { errs.push(`P${r.point_id}: göğüs çapı (DBH) yok veya ≤ 0`); r.skip = true; continue; }
+  const raw = r.girth_cm;
+  if (!Number.isFinite(raw) || raw <= 0) { errs.push(`P${r.point_id}: göğüs çevresi yok veya ≤ 0`); r.skip = true; continue; }
   if (!Number.isFinite(r.height_m) || r.height_m <= 0) { errs.push(`P${r.point_id}: boy yok veya ≤ 0`); r.skip = true; continue; }
   r.raw_col = raw;
-  /* mm → cm birim düzeltmesi (operatörün açık beyanı). π ile HİÇBİR yol yok. */
-  if (decided.unit === 'mm') { r.dbh_cm = +(raw / 10).toFixed(2); }
-  else { r.dbh_cm = +raw.toFixed(2); }
-  r.girth_cm = Number.isFinite(r.girth_cm) ? r.girth_cm : null;
+  r.girth_cm = decided.unit === 'mm' ? raw / 10 : raw;
+  r.dbh_input = Number.isFinite(r.dbh_cm) ? r.dbh_cm : null;
+  r.dbh_cm = policy.diameterFromCircumference(r.girth_cm);
+  if (!(r.dbh_cm > 0) || r.dbh_cm > QA_LIMITS.DBH_MAX_CM) {
+    errs.push(`P${r.point_id}: çevre/π ile türetilen DBH geçersiz (${r.dbh_cm})`); r.skip = true; continue;
+  }
+  /* Dosya ayrıca DBH taşıyorsa sessiz çelişki kabul edilmez. */
+  if (r.dbh_input != null) {
+    const inputD = decided.unit === 'mm' ? r.dbh_input / 10 : r.dbh_input;
+    if (Math.abs(inputD - r.dbh_cm) > 0.15) {
+      errs.push(`P${r.point_id}: dosyadaki DBH ${inputD} cm, çevre/π sonucu ${r.dbh_cm.toFixed(2)} cm ile uyuşmuyor`);
+      r.skip = true;
+    }
+  }
 }
 const live = recs.filter((r) => !r.skip);
 
@@ -288,7 +264,7 @@ for (const r of live) {
   const v = live.filter((q) => q !== r && Math.abs(q.dbh_cm - r.dbh_cm) < 1e-9 && Math.abs(q.height_m - r.height_m) < 1e-9 && Math.abs(q.carbon_calc - r.carbon_calc) < 1e-6 && Math.abs(q.lat - r.lat) < 1e-6 && Math.abs(q.lon - r.lon) < 1e-6);
   if (v.length && r.point_id < v[0].point_id) dupVals.push([r, v[0]]);
 }
-for (const [a, b] of dupVals) warn.push(`P${a.point_id} ≡ P${b.point_id}: çap+boy+konum birebir aynı — mükerrer ölçüm şüphesi, sahada doğrulayın`);
+for (const [a, b] of dupVals) warn.push(`P${a.point_id} ≡ P${b.point_id}: çevre+DBH+boy+konum birebir aynı — mükerrer ölçüm şüphesi, sahada doğrulayın`);
 
 const N = live.length || 1;
 const gates = {
@@ -340,7 +316,7 @@ const outPath = arg('out') || `import-${parkId || 'x'}-${ts}.sql`;
 const q = (v) => (v == null ? 'null' : `'${String(v).replace(/'/g, "''")}'`);
 const sqlHead = [
   `-- DendroGeo içe aktarma · ${new Date().toISOString()}`,
-  `-- kaynak: ${file} · birim kararı: ${decided.unit} (${decided.why})`,
+  `-- kaynak: ${file} · saha protokolü: göğüs çevresi ${decided.unit}; DBH=çevre/π · ${policy.measurementLockId}`,
   `-- QA: ${live.length} kayıt · h/d fiziksel ihlal ${gates.hd.fail} (tipik bant dışı ${gates.hd.band_out} = bilgi) · karbon sapma ${gates.dev.fail} (grup genelini kullanan ${gates.dev.rho_grup}) · gövde çapı ${gates.dbh ? gates.dbh.min + '–' + gates.dbh.max + ' cm (medyan ' + gates.dbh.medyan + ')' : '—'} · sözlük dışı ${gates.unknown_species} · mükerrer nokta ${gates.dup_points}`,
   force && blocked ? '-- ⚠ --force ile üretildi: QA kapısı BLOK durumundaydı; çalıştırmadan önce nedenleri gözden geçirin!' : null,
   `-- İdempotent: client_id UNIQUE anahtarı 'dgi:<park>:<nokta>:<ölçüno>' → aynı dosya ikinci kez çalıştırılamaz.`,
@@ -383,7 +359,7 @@ const summary = {
 if (has('json')) console.log(JSON.stringify(summary, null, 1));
 else {
   console.log(`📥 ${file}: ${recs.length} satır → ${live.length} geçerli kayıt (${delim === '\t' ? 'TSV' : 'CSV:' + delim})`);
-  console.log(`📏 birim: ${decided.unit.toUpperCase()} — ${decided.why}`);
+  console.log(`📏 saha ölçümü: göğüs çevresi ${decided.unit.toUpperCase()} — ${decided.why}`);
   console.log(`🧮 toplam karbon: saklı ${(totStored / 1000).toFixed(2)} t → yeniden hesap ${(totCalc / 1000).toFixed(2)} t${totStored > 0 ? ` (oran ${(totStored / totCalc).toFixed(2)}x)` : ''}`);
   console.log(`🚦 kapılar: boy/çap ${gates.hd.fail}/${live.length}${gates.hd.fail ? ' ⚠İNCELEME' : ''} (tipik bant dışı ${gates.hd.band_out} = ℹ️bilgi) · karbon ${gates.dev.fail}/${live.length}${gates.dev.block ? ' ⛔BLOK' : (gates.dev.fail ? ' ⚠İNCELEME' : '')} (grup ρ ile eşleşen ${gates.dev.rho_grup}) · gövde çapı ${gates.dbh ? gates.dbh.min + '–' + gates.dbh.max + ' cm' : '—'} ℹ️ · sözlük dışı ${gates.unknown_species} · mükerrer ${gates.dup_points} · hata ${errs.length}${gates.geofence ? ` · çit dışı ${gates.geofence.outside}/${gates.geofence.checked}` : ''}`);
   for (const w of warn.slice(0, 15)) console.log('   ⚠ ' + w);
