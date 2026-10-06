@@ -217,12 +217,15 @@ function showLatin(){
 }
 function liveCalc(){
  const d=+$("mDbh").value,h=+$("mHeight").value,s=$("mSpecies").value,g=$("mGroup").value;
- const valid=Number.isFinite(d)&&Number.isFinite(h)&&d>0&&d<=400&&h>0&&h<=100&&s&&g;
+ const groupOk=(typeof MEASUREMENT_GROUPS!=="undefined"&&MEASUREMENT_GROUPS.includes(g));
+ const densityOk=(typeof densityKgFor==="function"&&densityKgFor(s,g)>0);
+ const valid=Number.isFinite(d)&&Number.isFinite(h)&&d>0&&d<=400&&h>0&&h<=100&&s&&groupOk&&densityOk;
  $("liveCalc").style.display=valid?"block":"none";
  const hint=$("measureSaveHint");if(hint)hint.style.display=valid?"none":"block";
  if(!valid)return;
  const r=calc(d,h,s,g);
- $("liveCalc").innerHTML=`<b>${_tms("Tahmini karbon")} · ${r.total_carbon.toFixed(1)} kg</b><br><small>AGB ${r.agb.toFixed(1)} · BHB ${r.bhb.toFixed(1)} kg · ${_tms("Hacim")} ${r.vol.toFixed(3)} m³</small>`;
+ if(!r.valid)return;
+ $("liveCalc").innerHTML=`<b>${_tms("Tahmini karbon")} · ${r.total_carbon.toFixed(1)} kg</b><br><small>AGB ${r.agb.toFixed(1)} · BHB ${r.bhb.toFixed(1)} kg · ${_tms("Hacim")} ${r.vol.toFixed(3)} m³ · ρ ${r.density_kg_m3} kg/m³</small>`;
 }
 function dgMeasureInvalid(id,message){
  const el=$(id);if(el){el.setAttribute("aria-invalid","true");el.focus();}
@@ -482,7 +485,11 @@ async function dgSaveMeasInner(){
     const measurementNo=+$("mNo").value;
     if(!Number.isSafeInteger(measurementNo)||measurementNo<=0)return dgMeasureInvalid("mNo",_tms("Ölçüm No pozitif bir tam sayı olmalı."));
     if(!grp)return dgMeasureInvalid("mGroup",_tms("Ağaç grubunu seçin."));
+    if(typeof MEASUREMENT_GROUPS==="undefined"||!MEASUREMENT_GROUPS.includes(grp))
+      return dgMeasureInvalid("mGroup",_tms("Ölçüm yalnız İBRELİ veya YAPRAKLI grubunda yapılabilir."));
     if(!sp)return dgMeasureInvalid("mSpecies",_tms("Ağaç türünü seçin."));
+    if(typeof densityKgFor!=="function"||!(densityKgFor(sp,grp)>0))
+      return dgMeasureInvalid("mSpecies",_tms("Tür/grup eşleşmesi kilitli yoğunluk tablosuna uygun değil."));
     if(!Number.isFinite(d)||d<=0||d>400)return dgMeasureInvalid("mDbh",_tms("Çap 0’dan büyük, en fazla 400 cm olmalı."));
     if(!Number.isFinite(h)||h<=0||h>100)return dgMeasureInvalid("mHeight",_tms("Boy 0’dan büyük, en fazla 100 m olmalı."));
 
@@ -504,6 +511,7 @@ async function dgSaveMeasInner(){
     
     const wasEdit=!!EDIT_ID;
     const c=calc(d,h,sp,grp);
+    if(!c.valid)return dgMeasureInvalid("mSpecies",_tms("Kilitli yoğunluk tablosu bu ölçüm için karbon hesabına izin vermiyor."));
     
     // 1. Fotoğrafı sıkıştır (henüz upload etme, sadece Blob olarak hazırla)
     let photoBlob = null;
