@@ -159,8 +159,8 @@
      </g>
     </g>
    </svg>   </svg>   </svg>   </svg>
-   <div class="chip c1"><span style="color:var(--amber)">●</span> DBH 45 cm</div>
-   <div class="chip c2"><span style="color:var(--green)">●</span> C 373.7 kg</div>
+   <div class="chip c1"><span style="color:var(--amber)">●</span> ÇEVRE 45 cm → DBH 14.32 cm</div>
+   <div class="chip c2"><span style="color:var(--green)">●</span> C 40.0 kg</div>
    <div class="chip c3"><span style="color:var(--blue)">●</span> H 13 m</div>
   </div>
  </div>
@@ -184,7 +184,7 @@
    <h3>Bilimsel Hesap</h3>
    <p>Belirlenen ölçüm değişkenleriyle AGB, BHB, toplam biyokütle ve karbon tahmini üretir.</p>
    <ul>
-    <li>Chave et al. 2014 (DBH + boy + ρ)</li>
+    <li>Chave et al. 2014 (çevre ÷ π → DBH + boy + ρ)</li>
     <li>AGB × 0,26 kök/gövde varsayımı</li>
     <li>Özel tür ρ değeri yoksa yalnız kendi grup geneli</li>
     <li>Hacim hesabı</li>
@@ -212,13 +212,13 @@
   <div class="step">
    <div class="num">1</div>
    <h4>Sahada Ölç</h4>
-   <p>GPS konumunu alın, waypoint pusulasıyla ağaca yönelin; DBH, boy ve grup/tür bilgilerini girin.</p>
-   <div class="sub">GPS · DBH · BOY · FOTOĞRAF</div>
+   <p>GPS konumunu alın, waypoint pusulasıyla ağaca yönelin; 1,30 m yükseklikte göğüs çevresini mezurayla ölçün, boy ve grup/tür bilgilerini girin.</p>
+   <div class="sub">GPS · ÇEVRE · BOY · FOTOĞRAF</div>
   </div>
   <div class="step">
    <div class="num">2</div>
    <h4>Otomatik Hesap</h4>
-   <p>Fotoğraf eklenirse tarayıcı içi QA/QC uygulanır. Ardından Chave et al. (2014) modeliyle AGB hesaplanır; kök biyokütlesi ve karbon, sistemde tanımlı sabit varsayımlarla türetilir.</p>
+   <p>Fotoğraf eklenirse tarayıcı içi QA/QC uygulanır. Ölçülen göğüs çevresi önce π’ye bölünerek gerçek DBH çapına dönüştürülür; ardından Chave et al. (2014) modeliyle AGB, kök biyokütlesi ve karbon hesaplanır.</p>
    <div class="sub">AGB · BHB · C · m³</div>
   </div>
   <div class="step">
@@ -232,7 +232,7 @@
  <div style="margin-top:56px;display:grid;grid-template-columns:1fr 1fr;gap:24px" class="method-grid">
   <div class="card" style="border-left:4px solid var(--green)">
    <div style="font-family:var(--f-disp);font-size:1.1rem;color:var(--green-dk);font-weight:600;margin-bottom:14px">📐 Allometrik Formüller</div>
-   <div class="formula">DBH = göğüs çapı (cm) · 1,30 m'den doğrudan ölçülür</div>
+   <div class="formula">DBH = göğüs çevresi ÷ π · C/π (cm)</div>
    <div class="formula">AGB = 0.0673·(ρ·DBH²·H)<sup>0.976</sup> <span style="color:var(--mut)">— Chave 2014</span></div>
    <div class="formula">BHB = AGB·0.26 <span style="color:var(--mut)">— sistemde kullanılan sabit kök/gövde varsayımı</span></div>
    <div class="formula">C = (AGB+BHB)·0.47</div>
@@ -243,7 +243,7 @@
    <ul style="list-style:none;padding:0;margin:0">
     <li style="padding:8px 0 8px 24px;position:relative;color:var(--ink);font-size:.88rem"><span style="position:absolute;left:0;color:var(--ink);font-weight:700">✓</span>GPS doğruluğu ölçümle kaydedilir; sabit ±10 m kayıt eşiği yoktur</li>
     <li style="padding:8px 0 8px 24px;position:relative;color:var(--ink);font-size:.88rem"><span style="position:absolute;left:0;color:var(--green);font-weight:700">✓</span>Fotoğraf eklenirse tarayıcı içi çok sınıflı denetim uygulanır: yeşil · kızıl/mor · sonbahar · gövde/dal · kış kadrajı + pozlama 25–245</li>
-    <li style="padding:8px 0 8px 24px;position:relative;color:var(--ink);font-size:.88rem"><span style="position:absolute;left:0;color:var(--green);font-weight:700">✓</span>DBH ≤ 400 cm, boy ≤ 100 m</li>
+    <li style="padding:8px 0 8px 24px;position:relative;color:var(--ink);font-size:.88rem"><span style="position:absolute;left:0;color:var(--green);font-weight:700">✓</span>Türetilmiş DBH ≤ 400 cm, boy ≤ 100 m</li>
     <li style="padding:8px 0 8px 24px;position:relative;color:var(--ink);font-size:.88rem"><span style="position:absolute;left:0;color:var(--green);font-weight:700">✓</span>Admin onayı zorunlu</li>
    </ul>
   </div>

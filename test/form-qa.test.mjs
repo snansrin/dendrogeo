@@ -183,8 +183,8 @@ describe('0033 · kapsam: yasal statü iddiası, eşik tabanlı gövde sınıfı
     assert.match(YASAL_STATU_KAPSAM, /içermez/);
     assert.match(YASAL_STATU_KAPSAM, /ilgili idarenin yetkisindedir/);
     assert.match(YASAL_STATU_KAPSAM, /kapsamı dışındadır/);
-    assert.match(YASAL_STATU_KAPSAM, /ölçüldüğü gibi modellenmiştir/);
-    assert.match(YASAL_STATU_KAPSAM, /düzeltme, ölçekleme veya dışlama uygulanmamıştır/);
+    assert.match(YASAL_STATU_KAPSAM, /gövde çevresi ölçülmüş/);
+    assert.match(YASAL_STATU_KAPSAM, /DBH çapı çevre\/π ile türetilmiş/);
     assert.deepEqual(bul(YASAL_STATU_KAPSAM), [], 'beyan metni de yasaklı sözcük içermez');
     /* tek kaynak: rapor hem §9da hem metadatada aynı sabiti kullanır */
     assert.match(read('scripts/make-report.mjs'), /^    YASAL_STATU_KAPSAM,$/m);
@@ -429,7 +429,7 @@ describe('0033 · rapor metni: yasal statü iddiası YOK, veri hatası iması YO
 
   test('Çizelge 4te gövde sınıfı satırı yok; ağaç değeri kontrolleri ✓ Geçerli', () => {
     assert.equal(rowOf('Anıtsal gövde beyanı'), undefined);
-    for (const ad of ['Envanter birim kontrolü (DBH)', 'Boy/DBH oranı incelemesi', 'Karbon yeniden hesabı']) {
+    for (const ad of ['Ölçüm protokolü (çevre → DBH)', 'Boy/DBH oranı incelemesi', 'Karbon yeniden hesabı']) {
       const r = rowOf(ad);
       assert.ok(r, ad + ' satırı var');
       assert.equal(r[1].txt, '✓ Geçerli', ad + ' → ' + r[1].txt);
@@ -466,11 +466,11 @@ describe('0033 · rapor metni: yasal statü iddiası YOK, veri hatası iması YO
     assert.ok(!/[Ss]tandart dışı/.test(HTML), 'değerler standart dışı diye damgalanmaz');
   });
 
-  test('§5.1 gövde çapı notu: model DEĞİŞTİRİLMEDEN, düzeltme yok', () => {
-    assert.match(S51, /Gövde çapı notu:/);
-    assert.match(S51, /40–200 cm \(medyan \d+ cm, n=6\)/);
-    assert.match(S51, /herhangi bir düzeltme, ölçekleme veya dışlama uygulanmamıştır/);
-    assert.match(S51, /çevre→çap dönüşümü uygulanmadan/);
+  test('§5.1 ölçüm notu: ham çevre ve türetilmiş DBH ayrımı açık', () => {
+    assert.match(S51, /Ölçüm notu:/);
+    assert.match(S51, /Ham saha değişkeni göğüs çevresidir/);
+    assert.match(S51, /DBH = çevre \/ π/);
+    assert.match(S51, /Türetilmiş DBH aralığı:/);
   });
 
   test('§7 girişi: ℹ️ cümlesi YALNIZ beyan satırı varsa basılır', () => {
@@ -528,15 +528,14 @@ describe('0033 · metadata.json: scopeNote + carbonRecalc + qaInfo', () => {
     assert.equal(MD.qaState, QA_STATE.VALID);
     assert.equal(MD.qaStateLabel, '🟢 GEÇERLİ');
   });
-  test('measurementNote: DBH tanımı + ölçülen çap aralığı (betimleyici)', () => {
-    assert.match(MD.measurementNote, /çevre→çap dönüşümü uygulanmadan/);
-    assert.match(MD.measurementNote, /Ölçülen gövde çapı aralığı 40–200 cm/);
-    assert.match(MD.measurementNote, /n=6/);
-    assert.match(MD.measurementNote, /doğrudan model girdisi olarak kullanılmıştır/);
+  test('measurementNote: ham çevre + türetilmiş DBH protokolü', () => {
+    assert.match(MD.measurementNote, /göğüs çevresi/);
+    assert.match(MD.measurementNote, /DBH çapı D = C \/ pi/);
     assert.ok(!/anıt|Anıt/.test(MD.measurementNote), 'ölçüm notunda iz yok');
-    const dbh = MD.variables.find((v) => v.name === 'DBH');
-    assert.equal(dbh.unit, 'cm');
-    assert.match(dbh.description, /[Gg]öğüs çapı/);
+    const girth=MD.variables.find((v)=>v.name==='Göğüs çevresi (C)');
+    const dbh=MD.variables.find((v)=>v.name==='DBH (D)');
+    assert.equal(girth.unit,'cm'); assert.equal(dbh.unit,'cm');
+    assert.match(dbh.description,/D = C \/ pi/);
   });
 });
 
@@ -544,7 +543,7 @@ describe('0033 · metadata.json: scopeNote + carbonRecalc + qaInfo', () => {
 describe('0033 · dokunulmazlar: motor, CSV, şema, migration, yayın kuyruğu, yayımlanmış raporlar', () => {
   test('CSV başlığı ve veri tabanı şeması değişmedi; yeni migration YOK', () => {
     assert.match(read('scripts/make-report.mjs'),
-      /const head = 'NOKTA,TUR,GRUP,DBH_CM,BOY_M,KARBON_KG,KARBON_CI_LO_KG,KARBON_CI_HI_KG,ENLEM,BOYLAM,GPS_DOGRULUK_M,TARIH'/);
+      /const head = 'NOKTA,TUR,GRUP,GOGUS_CEVRESI_CM,DBH_CM,BOY_M,KARBON_KG,KARBON_CI_LO_KG,KARBON_CI_HI_KG,ENLEM,BOYLAM,GPS_DOGRULUK_M,TARIH'/);
     const mig = readdirSync(join(ROOT, 'supabase/migrations')).filter((f) => /\.sql$/.test(f));
     for (const f of mig) assert.ok((parseInt(f.slice(0, 4), 10) <= 25 || ["20261003165331_surface_reviews.sql","20261003180749_surface_report_snapshot.sql","20261003203000_report_accepted_surface_snapshot.sql","20261003220749_surface_geometry_compat.sql","20261004165219_profile_privilege_guard.sql"].includes(f)), '0033 yeni migration EKLEMEMELİ: ' + f);
     assert.ok(!mig.some((f) => /^00(3\d)/.test(f)), 'beklenmeyen migration numarası');

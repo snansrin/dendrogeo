@@ -66,7 +66,7 @@
       "browserRequirements": "Requires JavaScript, HTML5, Geolocation API",
       "softwareVersion": "3.0.0",
       "datePublished": "2026-08-30",
-      "dateModified": "2026-10-01",
+      "dateModified": "2026-10-06",
       "inLanguage": ["tr-TR", "en-US"],
       "isAccessibleForFree": true,
       "license": "https://creativecommons.org/licenses/by-nc/4.0/",
@@ -105,7 +105,7 @@
       "@type": "Dataset",
       "@id": "https://dendrogeo.org/#dataset",
       "name": "DendroGeo Global Tree Inventory Dataset",
-      "description": "Admin onaylı ağaç ölçüm verileri: GPS konumu, DBH, boy, tür, AGB, BHB, karbon stoğu, fotoğraf. CSV ve GeoJSON formatında dışa aktarılabilir.",
+      "description": "Admin onaylı ağaç ölçüm verileri: GPS konumu, 1,30 m göğüs çevresi, çevre/π ile türetilmiş DBH, boy, tür, AGB, BHB, karbon stoğu ve fotoğraf. CSV ve GeoJSON formatında dışa aktarılabilir.",
       "url": "https://dendrogeo.org/",
       "identifier": "https://doi.org/10.5281/zenodo.22948643",
       "version": "3.0.0",
@@ -130,9 +130,10 @@
         { "@type": "CreativeWork", "name": "ESA WorldCover 2021 v200 (10 m)", "license": "https://creativecommons.org/licenses/by/4.0/" }
       ],
       "keywords": "tree inventory, carbon sequestration, biomass, DBH, urban forest, forest carbon, urban park, land cover, park identity, OpenStreetMap park geometry",
-      "measurementTechnique": "Field GPS measurement + allometric equations (Chave 2014); park geometry from OpenStreetMap via Overpass; 10 m land cover from ESA WorldCover 2021 v200 (cross-checked with IO LULC 2020)",
+      "measurementTechnique": "Field GPS + tape-measured trunk circumference at 1.30 m; DBH derived as circumference/pi before Chave 2014 allometry; park geometry from OpenStreetMap via Overpass; 10 m land cover from ESA WorldCover 2021 v200 (cross-checked with IO LULC 2020)",
       "variableMeasured": [
-        { "@type": "PropertyValue", "name": "DBH (cm)" },
+        { "@type": "PropertyValue", "name": "Trunk circumference at 1.30 m (cm)" },
+        { "@type": "PropertyValue", "name": "Derived DBH = circumference/pi (cm)" },
         { "@type": "PropertyValue", "name": "Tree Height (m)" },
         { "@type": "PropertyValue", "name": "Above-ground biomass (kg)" },
         { "@type": "PropertyValue", "name": "Carbon stock (kg)" },
@@ -168,7 +169,7 @@
           "name": "Bir ağacın karbon stoğu nasıl hesaplanır?",
           "acceptedAnswer": {
             "@type": "Answer",
-            "text": "DendroGeo'da DBH, boy ve odun yoğunluğu (ρ) ile Chave et al. (2014) denklemiyle AGB hesaplanır. Kök biyokütlesi sistemde kullanılan AGB × 0,26 oranıyla, karbon ise toplam biyokütlenin 0,47'si varsayımıyla hesaplanır."
+            "text": "DendroGeo'da sahada 1,30 m yükseklikte göğüs çevresi mezurayla ölçülür. DBH çapı çevre/π ile türetilir; bu türetilmiş DBH, boy ve odun yoğunluğu (ρ) Chave et al. (2014) denklemine uygulanır. Kök biyokütlesi AGB × 0,26, karbon ise toplam biyokütlenin 0,47'si olarak hesaplanır."
           }
         },
         {
@@ -235,6 +236,7 @@
 <script src="vendor/supabase-js-2.116.0.js" defer></script>
 <script src="src/config/supabase.js?v=6b91ef6f" defer></script>
 <script src="src/config/constants.js?v=9f758cd5" defer></script>
+<script src="src/config/measurement-protocol-lock.js?v=00000000" defer></script>
 <script src="src/config/wood-density-lock.js?v=00000000" defer></script>
 <script src="src/config/species.js?v=597bfd9f" defer></script>
 <!-- DİL KATMANI (0035): TR markup varsayılan; EN sözlüğü çalışma zamanında

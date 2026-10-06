@@ -108,139 +108,89 @@ Türkçe-duyarlı normalizasyon + `SPECIES_SYNONYMS` ile adı kanonik forma
 indirger; DB'ye her zaman kanonik ad yazılır. Rapor QA'sı ("Tür sözlüğü
 eşleşmesi" satırı) eşleşmeyen adları SAYIYLA beyan eder.
 
-### 1.5.1 DBH tanımı ve envanter kalite kapısı (0031)
+### 1.5.1 Saha çevresi, türetilmiş DBH ve envanter kalite kapısı
 
-**DBH = göğüs çapı** (*Diameter at Breast Height*): ağacın yerden **1,30 m**
-yükseklikteki gövde **çapı**, birimi **cm**. Saha ekibi değeri doğrudan çap
-olarak ölçer ve kaydeder; `measurements.dbh_cm` kolonu bu ham ölçümü taşır.
+**FINAL saha ölçüm protokolü (DG-MEASURE-LOCK-2026-10-06-FINAL).**
+DendroGeo sahasında doğrudan çap ölçülmez. Esnek mezura, ağacın yerden
+**1,30 m** yüksekliğinde gövdenin etrafına sarılır ve **göğüs çevresi C**
+santimetre (cm) cinsinden ölçülür.
 
-> **DendroGeo rapor hattında çevre→çap (÷π) dönüşümü YAPILMAZ.**
-> 0011 döneminde "cihazın Çap kolonu aslında çevre taşıyor" varsayımıyla
-> `dbh_cm` değerleri π ile bölünmüş ve rapor metnine DBH'nin gövde
-> çevresinden türetildiği beyanı yazılmıştı. Bu varsayım **yanlıştı**:
-> kayıtlı değerler göğüs çapıdır.
-> 0013 migrationı kayıtları özgün saha değerlerine iade etti; 0031 de
-> rapor metnini, QA hükmünü ve içe aktarma aracını bu tanıma göre düzeltti.
-> Karbon motoru, katsayılar, `dbh_cm` kolonu, CSV biçimi ve veri tabanı
-> şeması bu düzeltmede **değişmedi** — değişen yalnız açıklama ve hükümdür.
+Veri modeli iki değeri ayrı tutar:
 
-`measurements.girth_cm` kolonu **ham denetim alanı** olarak durur (silinmez);
-hiçbir hesap yolunda DBH türetmek için kullanılmaz. Panelin ölçüm CSV
-dışa aktarımındaki çevre kolonu `π·DBH` ile **türetilmiş bir kolaylık
-alanıdır** — model girdisi değildir ve içe aktarımda çap üretmek için
-okunmaz.
+- **measurements.girth_cm** — sahada gözlenen ham göğüs çevresi C (cm).
+- **measurements.dbh_cm** — matematiksel olarak türetilmiş DBH çapı D (cm).
 
-**Envanter kalite kapısı (QA v5 · 0033; v4 = 0032; v3 = 0031).** Rapor motoru
-yayından önce kayıtları **üç** eksenle denetler (`inventoryQa`,
-scripts/make-report.mjs):
+Türeyiş tek ve değiştirilemezdir:
+
+**D = C / π**
+
+Allometri, hacim, boy/DBH oranı, QA ve raporlar yalnız **D** değerini kullanır.
+Ham çevrenin doğrudan çap gibi modele verilmesi yasaktır. Saha çevresi hiçbir
+zaman kaybedilmez; girth_cm alanında korunur ve rapor/CSV çıktısında
+dbh_cm ile birlikte yayımlanır.
+
+Ölçüm protokolü src/config/measurement-protocol-lock.js içinde salt-okunur
+kilit olarak tanımlıdır. Kilit kimliği
+**DG-MEASURE-LOCK-2026-10-06-FINAL**, parmak izi
+**4e48cf360622b5633e664618a8626756b3207cec8dd63a3158714e957eae3212**'dir.
+CI; alan semantiğini, dönüşümü, kilit kimliğini, parmak izini ve örnek
+hesapları doğrular.
+
+**2026-10-06 düzeltmesi.** Önceki DendroGeo sürümü, sahada mezurayla ölçülen
+çevre değerlerini yanlışlıkla DBH çapı olarak modele vermişti. Bu nedenle
+biyokütle, karbon ve hacim değerleri sistematik olarak yüksek hesaplanmıştı.
+Düzeltmede ham saha sayıları değiştirilmemiştir: eski değer
+**girth_cm = eski dbh_cm** olarak korunmuş, gerçek DBH
+**dbh_cm = girth_cm / π** şeklinde yeniden türetilmiş; karbon ve hacim bu
+türetilmiş çapla yeniden hesaplanmıştır. Bu yöntem değişikliği raporlarda
+açıkça beyan edilir; eski yayımlanmış sonuçlar yeni yöntem sonucu gibi
+sessizce yeniden etiketlenmez.
+
+**Allometrik zincir:**
+
+1. Göğüs çevresi: C [cm]
+2. Türetilmiş DBH: D=C/π [cm]
+3. AGB: 0.0673(ρD²H)^0.976
+4. BGB: 0.26·AGB
+5. Karbon: 0.47·(AGB+BGB)
+6. Gövde hacmi göstergesi: π(D/200)²H·0.5
+
+Burada ρ, yalnız kilitli odun yoğunluğu tablosundan; H, metre
+cinsinden ağaç boyundan gelir.
+
+**Örnek regresyon — Sığla.** Sahada **57 cm çevre**, **7,5 m boy** ölçülen
+Sığla için Yapraklı genel yoğunluğu **541 kg/m³** kullanılır:
+
+- ham çevre C = 57 cm,
+- türetilmiş DBH D = 57/π = 18,1437 cm,
+- tahmini karbon ≈ **44,79 kg C**.
+
+Bu örnek CI regresyon testinde kilitlidir; 57 cm'nin doğrudan çap sayılmasıyla
+elde edilen eski ≈418 kg C sonucu artık saha ölçüm yolu için geçerli değildir.
+
+**Envanter kalite kapısı.** Rapor motoru yayın öncesinde üç temel ekseni
+denetler:
 
 | # | Kontrol | Soru | İhlalde |
 |---|---|---|---|
-| (a) | **Envanter birim kontrolü (DBH)** | DBH bir çap ölçümü olarak teknik açıdan geçerli mi? var → sayısal → > 0 → `1 ≤ D ≤ 400 cm` | ≥3 kayıt VE >%50 → **⛔ kritik** (🔴 BLOKLU) |
-| (b) | **Boy/DBH oranı incelemesi** | oran **fiziksel olarak olanaklı** mı (`3 ≤ 100·H/D ≤ 200`) ve **stand içi dağılıma göre aykırı** mı (`modified z > 3,5`)? | **⚠ İNCELEME — asla blok değil** |
-| (c) | **Karbon yeniden hesabı** | saklı `carbon_kg`, **tek kilitli ρ yolu** ile yeniden hesaplanan değerle ±%20 (ve mutlak fark ≥5 kg) içinde mi? | ≥3 kayıt VE >%50 → **⛔ kritik** (hesap bütünlüğü; DBH birimiyle ilgisi YOK) |
+| (a) | **Ölçüm protokolü** | Ham çevre var mı ve türetilmiş DBH D=C/π ile uyumlu mu; 1 ≤ D ≤ 400 cm mi? | Sistemik ihlal → **⛔ kritik** |
+| (b) | **Boy/DBH oranı** | 100·H/D fiziksel makullük ve stand-içi robust aykırılık açısından uygun mu? | **⚠ İnceleme**, tek başına blok değil |
+| (c) | **Karbon yeniden hesabı** | Saklı carbon_kg, türetilmiş DBH + kilitli ρ ile yeniden hesaplanan sonuçla uyumlu mu? | Sistemik ihlal → **⛔ kritik** |
 
-**(b) 0032de neden değişti.** 0031 sabit `15–120` bandını **inceleme ölçütü**
-olarak kullanıyordu. Bütünüyle geniş gövdeli (veya bütünüyle bodur) formlu bir
-standda sabit bant yanlış bayrak üretir: Göksu (park 25) envanterinde
-`100·H/D` aralığı **5,33–16,32** (medyan 9,65 · MAD 1,575) ve **32/34** kayıt
-bandın dışındaydı; oysa modified z (Iglewicz–Hoaglin, eşik 3,5) aynı veride
-**tek kaydı bile** aykırı bulmaz. QA v4 bu yüzden iki katmanlıdır:
+Boy/DBH için HD_MIN=15, HD_MAX=120 yalnız betimleyici tipik banttır.
+Fiziksel inceleme HD_PHYS_MIN=3, HD_PHYS_MAX=200; stand içi robust
+kontrol |modified z| > 3,5 ve en az beş kayıt koşuluyla uygulanır.
+DBH teknik sınırı 1–400 cm, boy sınırı 1,3–100 m'dir.
 
-* **fiziksel makullük** — `HD_PHYS_MIN=3`, `HD_PHYS_MAX=200`; ağaç boyu için
-  `H_MIN_M=1.3` (göğüs yüksekliği), `H_MAX_M=100` (dünya rekoru ~100 m).
-  Bu aralık dışı bir oran/boy, ölçüm veya kayıt hatası olasılığına işaret
-  eder → ⚠ (`reason: fiziksel-alt | fiziksel-ust`).
-* **stand içi robust aykırılık** — `M = 0,6745·(x − medyan)/MAD`, `|M| > 3,5`
-  → ⚠ (`reason: stand-aykiri`). Ortalama/standart sapma yerine **medyan/MAD**
-  kullanılmasının nedeni, geniş gövdelerin dağılımın kendisini
-  kaydırmasıdır. `n < HD_ROBUST_MIN_N (5)` iken test **koşulmaz**; `MAD = 0`
-  ise ortalama mutlak sapmaya düşülür, o da 0 ise test uygulanmaz (sahte
-  bayrak üretilmez). Stand dağılımı (`hd_stats`: n, medyan, MAD, min, max,
-  z eşiği, `|z|max`) raporda sayıyla beyan edilir.
+DendroGeo hiçbir bireyin yasal statüsü (tescil, koruma kararı vb.) hakkında
+hüküm üretmez. Gövde ölçüleri yalnız saha ölçümü, matematiksel dönüşüm ve
+karbon muhasebesi bağlamında kullanılır.
 
-Tipik `15–120` bandı **yalnız sayım** olarak korunur (`hd_band_out`) ve
-raporda “bu bir UYARI DEĞİL, BİLGİDİR” ibaresiyle basılır. `hd_block` kalıcı
-olarak `false`tur (0031 hükmü korunur; `test/dbh-qa.test.mjs` kilitler).
+Aynı protokol scripts/import-measurements.mjs için de zorunludur.
+İçe aktarmada ham girth_cm / çevre kolonu gerekir; DBH verilmişse
+çevre/π sonucu ile çapraz doğrulanır. --birim mm yalnız çevreyi
+mm'den cm'ye dönüştürür; ardından yine DBH = çevre/π uygulanır.
 
-**(c) Nihai tek-ρ denetimi.** Karbon yeniden hesabında alternatif veya
-tarihsel yoğunluk yolu yoktur. Tür kilitli tabloda özel satıra sahipse yalnız
-o değer; sahip değilse yalnız katalog grubunun genel değeri kullanılır.
-Bilinmeyen tür, yanlış grup ve DİĞER grup hesaplanamaz. Saklı `carbon_kg`
-bu tek beklenen değerle denetlenir; eski bir yoğunlukla uyuşması artık
-geçerlilik sağlamaz.
-
-**(d) 0033te KALDIRILDI: eşik tabanlı gövde sınıfı beyanı.** 0032, gövde çapı
-`100 cm` ve üzerindeki bireyleri sayan ve bir mevzuat künyesiyle birlikte
-“ℹ️ BEYAN” satırı olarak basan dördüncü bir kalem içeriyordu. **0033 bu
-kalemi, ℹ️ satırını, `metadata.json` alanını ve ilgili eşik sabitini
-kaldırdı.** Gerekçe veri sahibinin kararıdır (2026-10-01):
-
-* **Kapsam.** DendroGeo bir ölçüm ve karbon muhasebesi aracıdır; ağaçların
-  **yasal statüsü** (tescil, koruma kararı vb.) bu aracın konusu değildir.
-  Envanterde tescilli olmayan bireyler bulunabilir ve bir ölçüm raporu
-  tespit/tescil hükmü **taşıyamaz**. Bu nedenle rapor, hiçbir birey için
-  statü iddiası, sınıf ataması veya mevzuat değerlendirmesi üretmez.
-* **Veri değişmedi.** Gövde çapları sahada ölçüldüğü gibi modellenir;
-  düzeltme, ölçekleme, dışlama veya çevre→çap dönüşümü **yoktur**.
-* **Yerine geçen.** `inventoryQa` çıktısında `dbh_stats` (n, min, medyan,
-  max) **yalnız betimleyici** bir özet olarak tutulur; §5.1 “Gövde çapı
-  notu” ve §9 “Gövde çapı dağılımı ve model temsili” maddeleri bu aralığı
-  sayıyla verir. Eşik, basamak, sınıf veya puan **yoktur**.
-* **Tek kaynak.** Kapsam beyanı `scripts/lib/mc.mjs` içinde
-  `YASAL_STATU_KAPSAM` sabitidir; rapor §9da ve `metadata.json`
-  `scopeNote` alanında **aynı sabiti** kullanır (metin kopyası yoktur).
-* **Duruma etkisi yoktu, şimdi hiç yok.** ℹ️ işaretinin `qaStateOf`
-  üzerindeki etkisizliği korunur; `qaRow` ℹ️ üretebilme yeteneğini
-  **kod düzeyinde** tutar (CSS `.qinfo` tanımı durur), ancak 0033
-  şablonunda ℹ️ satırı **basılmaz**.
-* **Bekçisi.** `test/form-qa.test.mjs`: yasaklı ifade taraması (rapor HTMLi,
-  `metadata.json`, `scripts/*`, `docs/*`) + eşikten bağımsızlık testi
-  (99 cm ile 200 cm aynı muameleyi görür).
-
-Yardımcılar `scripts/lib/mc.mjs` içindedir: `medianOf()`, `madOf()`,
-`modifiedZ()`, `YASAL_STATU_KAPSAM`.
-
-**Üç hâlli rapor durumu** (`QA_STATE`, scripts/lib/mc.mjs) Çizelge 4ten
-türetilir ve künyede + §7 girişinde basılır:
-
-* 🔴 **BLOKLU** — kritik veri hatası (a veya c sistemik): karbon sonucu
-  bilimsel iletişimde kullanılmamalıdır.
-* 🟡 **İNCELEME** — veri geçerli; bazı istatistiksel kontroller uyarı veriyor.
-  Veri hatası hükmü DEĞİLDİR, sonucu geçersiz kılmaz. 0032: inceleme
-  kalemlerinin hiçbiri ağaç ölçüm değerleriyle ilgili değilse (ör. yalnız
-  `accuracy_m` kaydedilmemiş) rapor bunu açıkça yazar.
-* 🟢 **GEÇERLİ** — tüm kritik kontroller geçti.
-* ℹ️ **BEYAN** — dördüncü bir **durum değildir**: Çizelge 4 satır işareti.
-  Bilgilendirme kalemidir (ör. ρ kaynağı) ve durumu değiştirmez. 0033
-  şablonunda ℹ️ satırı basılmaz; §7 girişindeki açıklama cümlesi de
-  **yalnız böyle bir satır varsa** üretilir.
-
-**Çizelge 4 sunumu (0032).** §7 tablosu `table.qa` + `<colgroup>`
-(`%23 / %16 / %61`) ile **sabit kolon düzeninde** basılır: ayrıntı hücresi
-`.qd` (orantılı/sans yazı, `overflow-wrap:break-word` → uzun Türkçe cümle
-**kelime ortasından kırılmaz**), sonuç hücresi `.qst` (renkli, ekranda tek
-satır; mobil ve printte normal sarma → hücre taşmaz). `.qinfo` (mavi; ⚠ ile
-karışmaz) ℹ️ satırları için tanımlıdır; 0033 şablonu böyle bir satır
-basmasa da sınıf CSSde durur. Uzun açıklama kolonu olan diğer çizelgeler (§4.6
-veri sözlüğü, §10 tekrar üretilebilirlik) aynı `.qd` hücresini kullanır.
-Mobilde `.tscroll` kabı yatay kayar (`table.qa{min-width:540px}`), printte
-üç kolon korunur. Önceki hâlde ayrıntı kolonu monospace `.76rem` +
-`overflow-wrap:anywhere` idi; tablo bu yüzden şekilsiz görünüyordu.
-
-Eşik sabitleri tek yerdedir: `QA_LIMITS` (scripts/lib/mc.mjs) —
-`DBH_MIN_CM=1`, `DBH_MAX_CM=400`, `HD_MIN=15`, `HD_MAX=120` (tipik bant,
-yalnız sayım), `HD_PHYS_MIN=3`, `HD_PHYS_MAX=200`, `H_MIN_M=1.3`,
-`H_MAX_M=100`, `HD_ROBUST_Z=3.5`, `HD_ROBUST_MIN_N=5`, `CARBON_DEV_PCT=20`,
-`CARBON_DEV_MIN_KG=5`, `BLOCK_RATIO=0.5`, `BLOCK_MIN_N=3`. 0033: eşik tabanlı
-gövde sınıfı sabiti **YOKTUR** (bkz. §1.5.1 (d)).
-
-Aynı kontroller `scripts/import-measurements.mjs` içinde içe aktarımda da
-çalışır. **`--birim cevre` kaldırıldı (0031):** araç `auto` kipinde birimi
-her zaman **cm** kabul eder, dönüşüm uygulamaz; boy/çap oranı taşmışsa
-yalnız uyarı basar. Dosyada çap kolonu yoksa (yalnız çevre kolonu varsa)
-içe aktarma **durur** — sessiz ÷π türetmesi yapılmaz. `--birim mm` açık
-operatör beyanıdır (mm→cm birim düzeltmesi, π ile ilgisi yoktur).
 
 ### 1.6 Geçersiz girdiler
 

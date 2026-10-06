@@ -5,9 +5,10 @@
  * rapordaki sayılar ile testteki beklentiler aynı kaynaktan türer.
  *
  * MODEL (belgelenmiş, tek yerden değişir):
+ *   Saha: çevre C ölçülür; D = C / π
  *   AGB  = 0.0673 · (ρ · D² · H)^0.976          [Chave et al. 2014]
  *   BGB  = 0.26 · AGB ;  C = 0.47 · (AGB+BGB)
- *   girdi hatası: D ~ N(D, 0.5 cm), H ~ N(H, 0.25 m)
+ *   girdi hatası: çevre C ~ N(C, 0.5 cm), H ~ N(H, 0.25 m)
  *   model hatası: çarpan (1 + z·CV), CV=0.22 ; TOPLAMDA çarpan kayıtlar arası
  *                 KORELEDİR (aynı denklem ortak sapma üretir) → bağımsız
  *                 varsayımının yapay daralttığı aralıklardan kaçınılır.
@@ -21,7 +22,7 @@ import { fileURLToPath } from 'node:url';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..', '..');
 
-export const MC_CFG = { N: 1000, SEED: 20260926, DBH_SD_CM: 0.5, H_SD_M: 0.25, MODEL_CV: 0.22, CONF: 0.95 };
+export const MC_CFG = { N: 1000, SEED: 20260926, GIRTH_SD_CM: 0.5, H_SD_M: 0.25, MODEL_CV: 0.22, CONF: 0.95 };
 
 export function mulberry32(a) {
   return function () {
@@ -49,9 +50,10 @@ export function normPair(rnd) {
  * nesneleri okumak. Regex ile şema ayrıştırma YASAK. */
 function speciesContext() {
   const ctx = vm.createContext({ Math, JSON, Object, Array, String, Number });
+  vm.runInContext(readFileSync(join(ROOT, 'src/config/measurement-protocol-lock.js'), 'utf8'), ctx, { filename: 'measurement-protocol-lock.js' });
   vm.runInContext(readFileSync(join(ROOT, 'src/config/wood-density-lock.js'), 'utf8'), ctx, { filename: 'wood-density-lock.js' });
   vm.runInContext(readFileSync(join(ROOT, 'src/config/species.js'), 'utf8'), ctx, { filename: 'species.js' });
-  vm.runInContext('globalThis.__X={SPECIES_DATA,GROUP_DEFAULT_RHO,LATIN,SPECIES_GROUP,rho,resolveSpeciesName,normSp,densityKgFor,DG_WOOD_DENSITY_LOCK};', ctx);
+  vm.runInContext('globalThis.__X={SPECIES_DATA,GROUP_DEFAULT_RHO,LATIN,SPECIES_GROUP,rho,resolveSpeciesName,normSp,densityKgFor,DG_WOOD_DENSITY_LOCK,DG_MEASUREMENT_PROTOCOL_LOCK,diameterCmFromCircumference,circumferenceCmFromDiameter};', ctx);
   return ctx.__X;
 }
 export function loadRho() {
@@ -63,6 +65,10 @@ export function loadRho() {
     resolve: (n) => X.resolveSpeciesName(n),
     lockId: X.DG_WOOD_DENSITY_LOCK.id,
     lockFingerprint: X.DG_WOOD_DENSITY_LOCK.fingerprint,
+    measurementLockId: X.DG_MEASUREMENT_PROTOCOL_LOCK.id,
+    measurementLockFingerprint: X.DG_MEASUREMENT_PROTOCOL_LOCK.fingerprint,
+    diameterFromCircumference: (c) => X.diameterCmFromCircumference(c),
+    circumferenceFromDiameter: (d) => X.circumferenceCmFromDiameter(d),
   };
 }
 /* Kanonik tür sözlüğü: ad → {lat, rho, grp}; eşanlamlı çözümleyici ile.
@@ -76,61 +82,15 @@ export function loadSpeciesDict() {
   return { byName, grho, resolve: (n) => X.resolveSpeciesName(n), norm: (n) => X.normSp(n) };
 }
 /* ---- envanter QA eşikleri ----
- * 0031 DÜZELTMESİ (kullanıcı kararı, 2026-09-29): DBH = GÖĞÜS ÇAPI'dır,
- * birimi cm'dir ve sahada doğrudan çap olarak kaydedilir. DendroGeo
- * rapor hattında çevre→çap (÷π) dönüşümü UYGULANMAZ; uygulanmamıştır.
- * 0011 dönemindeki "kolon çevre olabilir" varsayımı yanlıştı ve gerçek
- * saha verisini haksız yere ⛔ Blok hükmüne taşıdı. Bu nedenle:
+ * FINAL ÖLÇÜM PROTOKOLÜ (2026-10-06):
+ * sahada mezura ile 1,30 m yükseklikte GÖĞÜS ÇEVRESİ ölçülür.
+ * measurements.girth_cm ham çevreyi, measurements.dbh_cm ise
+ * çevre/π ile türetilmiş gerçek DBH çapını taşır. Allometri ve QA yalnız
+ * türetilmiş DBH çapını kullanır. Ham çevre hiçbir zaman doğrudan D değildir.
  *
- * DBH_MIN_CM / DBH_MAX_CM — DBH'nin ÇAP (cm) olarak teknik geçerlilik
- *   aralığı. Kontrol edilen soru "DBH çevre olabilir mi?" DEĞİL;
- *   "girilen DBH, çap ölçümü olarak geçerli mi?" sorusudur:
- *   var mı → sayısal mı → pozitif mi → cm biriminde makul mü.
- *   Park ağaçlarında 1 cm (fide) – 400 cm (dev birey) fiziksel aralıktır.
- *   Bu aralık dışı/eksik değerler KRİTİK veri hatasıdır → bloklayabilir.
- *
- * HD_MIN / HD_MAX — boy/çap oranı (birimsiz: 100·H[m]/D[cm]) yalnızca
- *   bir İNCELEME GÖSTERGESİDİR. Tür, yaş ve gövde formu farkları tek bir
- *   basit oranla "saha ölçümü yanlıştır" hükmü vermeyi geçersiz kılar.
- *   Bu oran ASLA yayını bloklamaz (0031: hd_block kalıcı olarak false).
- *   Eşik dışı oranlar raporda ⚠ İnceleme olarak beyan edilir.
- *
- * CARBON_DEV_PCT / CARBON_DEV_MIN_KG — saklı karbon ile panel denklemi
- *   yeniden hesabının karşılaştırılması. DBH tanımından BAĞIMSIZ, ayrı bir
- *   kalite kontrolüdür. 0032: beklenen değer İKİ ρ kaynağıyla hesaplanır
- *   (tür düzeyi ρ ve grup varsayılanı ρ); saklı değer HERHANGİ BİRİYLE
- *   ±%20 (ve mutlak fark ≥ CARBON_DEV_MIN_KG) içindeyse satır geçerlidir ve
- *   eşleşen kaynak raporda SAYIYLA beyan edilir. Gerekçe: saklı carbon_kg
- *   değerlerini üreten eski kayıtlar tür veya grup varsayılanı ρ kullanmış
- *   olabilir. QA bu iki meşru kaynağı ayrı ayrı sınar; özel ρ bulunmayan
- *   türlerde tek meşru kaynak grup varsayılanıdır. Yalnız SİSTEMİK ölçekte
- *   (BLOCK_RATIO/BLOCK_MIN_N) hesap bütünlüğü şüphesi
- *   doğurursa bloklayabilir — bu bir birim hatası iddiası DEĞİLDİR.
- *
- * 0033 · KAPSAM DÜZELTMESİ (veri sahibi kararı, 2026-10-01): DendroGeo
- * hiçbir ağacın YASAL STATÜSÜ hakkında hüküm vermez. 0032 ile eklenen eşik
- * tabanlı gövde sınıfı beyanı (mevzuat atfıyla birlikte) bu yüzden
- * KALDIRILDI: envanterde tescilli olmayan bireyler bulunabilir ve bir ölçüm
- * raporu tescil/tespit hükmü taşıyamaz. VERİ DEĞİŞMEDİ: gövde çapları sahada
- * ölçüldüğü gibi modellenir; düzeltme, ölçekleme veya dışlama uygulanmaz.
- * Gövde formu kontrolü statü iddiası olmadan iki eşik ailesiyle yürür:
- *   HD_MIN/HD_MAX        — TİPİK gövde oranı bandı (15–120). YALNIZ
- *                          BİLGİLENDİRME amaçlı sayılır (hd_band_out); tek
- *                          başına hiçbir kayıt için uyarı üretmez.
- *   HD_PHYS_MIN/MAX      — fiziksel makullük bandı (3–200). Bu aralık dışı
- *                          bir oran ölçüm/kayıt hatası olasılığına işaret
- *                          eder → ⚠ İnceleme (asla blok değil).
- *   H_MIN_M/H_MAX_M      — ağaç boyu için fiziksel aralık (1,3 m göğüs
- *                          yüksekliğinden 100 m dünya rekoruna).
- *   HD_ROBUST_Z          — stand İÇİ aykırılık: modified z-score eşiği 3,5
- *                          (Iglewicz–Hoaglin 1993). Sabit bandın yerine
- *                          envanterin KENDİ dağılımı kullanılır; böylece
- *                          bütünüyle bodur ya da bütünüyle geniş gövdeli
- *                          standlar topluca "olağandışı" ilan edilmez.
- *                          Yalnız n ≥ HD_ROBUST_MIN_N iken uygulanır.
- * 0033: eşik tabanlı bir gövde sınıfı YOKTUR. Gövde çapı dağılımı
- * (dbh_stats: n/min/medyan/max) yalnız BETİMLEYİCİ olarak raporlanır;
- * hiçbir yasal statü, mevzuat maddesi veya tescil hükmüne bağlanmaz. */
+ * DBH_MIN_CM / DBH_MAX_CM türetilmiş çapın teknik geçerlilik aralığıdır.
+ * HD oranı da türetilmiş çap üzerinden hesaplanır.
+ */
 export const QA_LIMITS = {
   DBH_MIN_CM: 1, DBH_MAX_CM: 400,
   HD_MIN: 15, HD_MAX: 120,
@@ -149,7 +109,7 @@ export const QA_LIMITS = {
  * tabanlı gövde sınıfı beyanı ile mevzuat künyesi bu nedenle kaldırıldı.
  * Bu sabit, rapor metninde (§9 sınırlılıklar) ve metadata.json içinde TEK
  * KAYNAKTAN kullanılır: metin kopyaları arasında çelişki olamaz. */
-export const YASAL_STATU_KAPSAM = 'Bu rapor, ölçülen hiçbir birey için yasal statü değerlendirmesi (tescil, koruma kararı vb.) içermez; ağaçların yasal statüsü ilgili idarenin yetkisindedir ve bu çalışmanın kapsamı dışındadır. Envanter değerleri sahada ölçüldüğü gibi modellenmiştir; hiçbir düzeltme, ölçekleme veya dışlama uygulanmamıştır.';
+export const YASAL_STATU_KAPSAM = 'Bu rapor, ölçülen hiçbir birey için yasal statü değerlendirmesi (tescil, koruma kararı vb.) içermez; ağaçların yasal statüsü ilgili idarenin yetkisindedir ve bu çalışmanın kapsamı dışındadır. Sahada 1,30 m yükseklikte gövde çevresi ölçülmüş, DBH çapı çevre/π ile türetilmiş ve allometrik modele bu türetilmiş çap uygulanmıştır.';
 
 /* ---- Sağlam (robust) dağılım göstergeleri (0032) ----
  * Modified z-score: M = 0,6745·(x − medyan) / MAD  (Iglewicz & Hoaglin 1993).
@@ -190,8 +150,7 @@ export function qaStateOf({ block = false, review = false } = {}) {
   if (review) return QA_STATE.REVIEW;
   return QA_STATE.VALID;
 }
-/* DBH geçerlilik zincirindeki hata halkalarının raporda basılan Türkçe karşılığı.
- * Hiçbiri "çevre olabilir" iddiası içermez: DBH = göğüs çapı (cm) kabul edilir. */
+/* DBH geçerlilik zinciri türetilmiş çapı denetler; ham çevre girth_cm'dedir. */
 export const DBH_REASON_TR = {
   'eksik': 'DBH kaydı yok',
   'sayisal-degil': 'DBH sayısal değil',
@@ -244,9 +203,11 @@ export function mcRowCI(row, cfg = {}) {
   const out = new Array(c.N);
   for (let i = 0; i < c.N; i++) {
     const [z1, z2] = normPair(rnd), zm = normPair(rnd)[0];
-    const d = Math.max(0.5, parseFloat(row.dbh_cm) + z1 * c.DBH_SD_CM);
+    const c0 = Number.isFinite(+row.girth_cm) && +row.girth_cm > 0 ? +row.girth_cm : policy.circumferenceFromDiameter(+row.dbh_cm);
+    const girth = Math.max(0.5, c0 + z1 * c.GIRTH_SD_CM);
+    const d = policy.diameterFromCircumference(girth);
     const h = Math.max(0.5, parseFloat(row.height_m) + z2 * c.H_SD_M);
-    const pert = carbonKg({ ...row, dbh_cm: d, height_m: h });
+    const pert = carbonKg({ ...row, girth_cm:girth, dbh_cm:d, height_m:h });
     out[i] = point * (base > 0 ? pert / base : 1) * (1 + zm * c.MODEL_CV);
   }
   const m = out.reduce((a, x) => a + x, 0) / out.length;
@@ -267,9 +228,11 @@ export function mcTotalCI(rows, cfg = {}) {
     let t = 0;
     for (const p of per) {
       const [z1, z2] = normPair(p.rnd);                 // bağımsız ölçüm hatası
-      const d = Math.max(0.5, parseFloat(p.r.dbh_cm) + z1 * c.DBH_SD_CM);
+      const c0 = Number.isFinite(+p.r.girth_cm) && +p.r.girth_cm > 0 ? +p.r.girth_cm : policy.circumferenceFromDiameter(+p.r.dbh_cm);
+      const girth = Math.max(0.5, c0 + z1 * c.GIRTH_SD_CM);
+      const d = policy.diameterFromCircumference(girth);
       const h = Math.max(0.5, parseFloat(p.r.height_m) + z2 * c.H_SD_M);
-      const pert = carbonKg({ ...p.r, dbh_cm: d, height_m: h });
+      const pert = carbonKg({ ...p.r, girth_cm:girth, dbh_cm:d, height_m:h });
       t += p.point * (p.base > 0 ? pert / p.base : 1) * f;
     }
     sums[i] = t;

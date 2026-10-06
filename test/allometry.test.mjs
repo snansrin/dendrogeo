@@ -91,8 +91,8 @@ describe('ρ tek-kaynak zinciri',()=>{
  });
 });
 
-describe('SIĞLA saha regresyonu',()=>{
- test('57 cm × 7,5 m → YAPRAKLI 541 → 418,419108 kg C',()=>{
+describe('SIĞLA çap-temelli çekirdek regresyonu',()=>{
+ test('çekirdeğe gerçek DBH=57 cm verilirse 418,419108 kg C',()=>{
   for(const sp of ['SIĞLA','Sığla','SIGLA','Liquidambar orientalis']){
    const r=calc(57,7.5,sp,'YAPRAKLI');
    assert.equal(r.valid,true,sp);assert.equal(r.density_kg_m3,541,sp);
