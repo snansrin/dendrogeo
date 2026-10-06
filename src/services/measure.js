@@ -276,10 +276,14 @@ function dgProjectCard(p,isShared){
  const loc=[p.city,p.country].filter(Boolean).map(esc).join(" · ")||"Konum belirtilmedi";
  const date=p.created_at?new Date(p.created_at).toLocaleDateString("tr-TR"):"—";
  const role=isShared?'<span class="badge admin">ORTAK</span>':'<span class="badge on">PROJE SAHİBİ</span>';
- const parkState=p.park_id?`<span>🌳 ${esc(park)}${area?" · "+area:""}</span>`:'<span class="project-warning">⛔ Park bağlantısı yok</span>';
+ const parkState=p.park_id
+  ? `<span>🌳 ${esc(park)}${area?" · "+area:""}</span>`
+  : `<span class="project-warning">⛔ park yok</span><small>${dgIsAdmin()?"Yönetici olarak bu eski projeyi parka bağlayabilirsin.":"🔐 yönetici bağlayacak"}</small>`;
+ const repBtn=p.park_id?`<button class="btn sm ghost" onclick="dgUserPubOpen(${p.id})">📄 Rapor</button>`:"";
+ const linkBtn=!isShared&&!p.park_id&&dgIsAdmin()?`<button class="btn sm ghost" onclick="startParkScan({projectId:${p.id},returnTo:'projects'})">🌳 Parka bağla</button>`:"";
  const actions=isShared
   ? `<button class="btn sm" onclick="dgProjectOpenMeasure(${p.id})">📏 Ölçüme geç</button><span class="project-access-note">Düzenleme ve ekip yönetimi proje sahibinde</span>`
-  : `<button class="btn sm" onclick="dgProjectOpenMeasure(${p.id})">📏 Ölçüm</button>${p.park_id?`<button class="btn sm ghost" onclick="dgUserPubOpen(${p.id})">📄 Rapor</button>`:""}<button class="btn sm ghost" onclick="editProject(${p.id})">✏️ Düzenle</button><button class="btn sm ghost project-danger" onclick="deleteProject(${p.id})">🗑 Sil</button>`;
+  : `<button class="btn sm" onclick="dgProjectOpenMeasure(${p.id})">📏 Ölçüm</button>${repBtn}${linkBtn}<button class="btn sm ghost" onclick="editProject(${p.id})">✏️ Düzenle</button><button class="btn sm ghost project-danger" onclick="deleteProject(${p.id})">🗑 Sil</button>`;
  return `<article class="project-card ${isShared?"is-shared":"is-owned"}"><div class="project-card-top"><div><div class="project-card-park">${parkState}</div><h4>${esc(p.name||("Proje #"+p.id))}</h4></div>${role}</div><div class="project-card-meta"><span>📍 ${loc}</span><span>📅 ${date}</span><span class="mono">#${p.id}</span></div><div class="project-card-actions">${actions}</div></article>`;
 }
 async function loadProjects(){const _y=(typeof dgScrollKeep==="function"?dgScrollKeep():null);try{return await loadProjects__scroll.apply(this,arguments);}finally{if(typeof dgScrollRestore==="function")dgScrollRestore(_y);}}
@@ -330,7 +334,7 @@ async function loadProjects__scroll(){
  if(ownList)ownList.innerHTML=own.length?own.map(p=>dgProjectCard(p,false)).join(""):'<div class="project-empty"><b>Henüz kendi projen yok.</b><span>Canlı Harita’dan bir park algılayıp ilk çalışma alanını oluştur.</span></div>';
  if(sharedList)sharedList.innerHTML=shared.map(p=>dgProjectCard(p,true)).join("");
  if(sharedSection)sharedSection.style.display=shared.length?"":"none";
- const compat=$("projTable");if(compat)compat.textContent=`owned:${own.length};shared:${shared.length}`;
+ const compat=$("projTable");if(compat)compat.innerHTML=own.map(p=>dgProjectCard(p,false)).join("")+shared.map(p=>dgProjectCard(p,true)).join("");
  const create=$("projCreateDetails");if(create&&!EDIT_PROJ)create.open=own.length===0;
  dgRenderProjectParkBox();
  dgParkGate();
