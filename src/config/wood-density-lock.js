@@ -44,3 +44,13 @@ WOOD_DENSITY_CANONICAL.forEach(row=>{
  if(!row.key.startsWith("GROUP:"))_LOCKED_RHO[row.key]=row.rho;
 });
 Object.freeze(_LOCKED_RHO);
+
+/* Denetim ve test katmanı için salt-okunur görünüm. */
+globalThis.DG_WOOD_DENSITY_LOCK=Object.freeze({
+ id:WOOD_DENSITY_LOCK_ID,
+ fingerprint:WOOD_DENSITY_LOCK_FINGERPRINT,
+ unit:"kg/m3",
+ groups:MEASUREMENT_GROUPS,
+ defaults:GROUP_DEFAULT_RHO,
+ rows:WOOD_DENSITY_CANONICAL
+});
