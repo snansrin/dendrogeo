@@ -9,7 +9,6 @@ export function parsePublication(note) {
  if(!['research','thesis','inventory'].includes(p.study_type))throw Error('Geçersiz çalışma türü.');out.study_type=p.study_type;
  for(const k of ['start_date','end_date']){const d=p[k];if(!/^\d{4}-\d{2}-\d{2}$/.test(d||'')||!Number.isFinite(Date.parse(d))||new Date(d).toISOString().slice(0,10)!==d)throw Error('Geçersiz saha tarihi.');out[k]=d;}
  if(out.end_date<out.start_date||out.end_date>new Date().toISOString().slice(0,10))throw Error('Saha tarih aralığı geçersiz.');
- if(out.study_type==='thesis'&&!out.supervisor)throw Error('Tez / bitirme projesi için danışman gerekli.');
  return out;
 }
 export function zenodoMetadata(snap,id) {
