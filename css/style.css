@@ -812,3 +812,85 @@ label.lbl{display:block}
  .admin-users-search{grid-column:auto}
  .admin-users-list-head{align-items:flex-start;flex-direction:column}
 }
+
+
+/* 2026-10-06 · Waypoint saha çalışma alanı
+   Yalnız harita açılır/kapanır; hedef, sıra ve dosya yönetimi sürekli erişilebilir. */
+#v-nav{max-width:980px;margin-inline:auto;padding-bottom:28px}
+#v-nav .waypoint-heading{margin-bottom:12px}
+#v-nav .waypoint-heading .disp{margin:2px 0 0;font-size:2rem}
+#v-nav .waypoint-project{display:grid;grid-template-columns:minmax(240px,.72fr) minmax(0,1fr);gap:14px;align-items:end;padding:14px 16px;margin-bottom:12px}
+#v-nav .waypoint-project-select{display:grid;gap:5px}
+#v-nav .waypoint-project-status{min-height:42px;display:flex;align-items:center;padding:9px 12px;border:1px solid var(--line);border-radius:9px;background:var(--bg);color:var(--mut);font-size:.78rem}
+#v-nav .waypoint-nav-card{padding:16px 18px;margin-bottom:12px;border-left:4px solid var(--green)}
+#v-nav .waypoint-target{display:grid;grid-template-columns:84px minmax(0,1fr);gap:18px;align-items:center}
+#v-nav .waypoint-compass{width:78px;height:78px;display:grid;place-items:center;border:1px solid var(--line);border-radius:50%;background:var(--bg)}
+#v-nav .waypoint-compass .arrow{width:58px;height:58px;transition:transform .18s ease}
+#v-nav .waypoint-target-copy{min-width:0}
+#v-nav .waypoint-target-name{margin-top:3px;color:var(--amber-ink);font-size:.9rem;overflow-wrap:anywhere}
+#v-nav .waypoint-distance-main{display:flex;align-items:baseline;gap:8px;margin-top:7px}
+#v-nav .waypoint-distance-main strong{font:700 2rem/1 var(--f-disp);color:var(--green-dk)}
+#v-nav .waypoint-distance-main span{font-size:.7rem;color:var(--mut);text-transform:uppercase;letter-spacing:.05em}
+#v-nav .waypoint-actions-primary{margin-top:14px;padding-top:12px;border-top:1px solid var(--line)}
+#v-nav .waypoint-actions-primary .btn{flex:1 1 150px}
+#v-nav .waypoint-field-status{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}
+#v-nav .waypoint-field-status .measure-help{margin:0;padding:8px 10px;border-radius:8px;background:var(--bg)}
+#v-nav .waypoint-arrival{display:flex;gap:8px;justify-content:flex-end;align-items:center;margin-top:12px}
+#v-nav .waypoint-arrival .dg-png-btn{min-width:230px}
+#v-nav .waypoint-map{margin:0 0 12px;padding:0;overflow:hidden;border-left:4px solid var(--blue)}
+#v-nav .waypoint-map>summary{padding:11px 14px;min-height:48px}
+#v-nav .waypoint-map>summary small{margin-left:auto;color:var(--mut);font-size:.67rem;font-weight:500}
+#v-nav .waypoint-map[open]>summary{border-bottom:1px solid var(--line)}
+#v-nav .waypoint-map #navMap{height:380px;margin:0}
+#v-nav .waypoint-map-legend{display:flex;gap:16px;flex-wrap:wrap;padding:9px 14px;color:var(--mut);font-size:.7rem}
+#v-nav .waypoint-map-legend span{display:flex;align-items:center;gap:6px}
+#v-nav .wp-legend-dot{width:8px;height:8px;border-radius:50%;display:inline-block;background:var(--red)}
+#v-nav .wp-legend-dot.done{background:var(--green)}
+#v-nav .wp-legend-dot.me{background:var(--blue)}
+#v-nav .waypoint-list{padding:16px 18px;margin-bottom:12px;border-left:4px solid var(--green);grid-column:auto}
+#v-nav .waypoint-list .project-section-head{margin-bottom:12px}
+#v-nav .waypoint-toolbar{display:grid;grid-template-columns:minmax(180px,1.2fr) minmax(140px,.7fr) minmax(150px,.8fr);gap:10px;align-items:end;margin-bottom:12px}
+#v-nav .waypoint-toolbar>div{display:grid;gap:5px}
+#v-nav .waypoint-points{display:block;margin:0}
+#v-nav .waypoint-point{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px;align-items:center;min-height:52px;padding:7px 10px;margin:0;border:0;border-bottom:1px solid var(--line);border-radius:0;background:transparent}
+#v-nav .waypoint-point:first-child{border-top:1px solid var(--line)}
+#v-nav .waypoint-point[aria-current="true"]{background:var(--tint);box-shadow:inset 3px 0 0 var(--blue)}
+#v-nav .waypoint-point.done{opacity:.78}
+#v-nav .waypoint-point-main{display:flex;align-items:center;gap:12px;min-width:0}
+#v-nav .waypoint-point-main b{font-size:.95rem;min-width:48px}
+#v-nav .waypoint-point-main .waypoint-distance{color:var(--mut);font-size:.78rem}
+#v-nav .waypoint-point-actions{display:flex;align-items:center;justify-content:flex-end;gap:8px;min-height:38px}
+#v-nav .waypoint-point-actions .btn{min-height:38px;min-width:78px;padding:6px 10px}
+#v-nav .waypoint-pager{position:static;margin-top:10px;padding:0;background:transparent}
+#v-nav .waypoint-files{display:block;margin:0;padding:14px 18px;border:1px solid var(--line);border-left:4px solid var(--amber);border-radius:var(--r);background:var(--surface)}
+#v-nav .waypoint-files .project-section-head{margin-bottom:10px}
+#v-nav .waypoint-file-row{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+#v-nav .waypoint-file-row .dg-file{position:relative}
+#v-nav .waypoint-file-row #nCsvName{flex:1 1 180px;min-width:0;overflow-wrap:anywhere}
+#v-nav .waypoint-delete-all{margin-left:auto}
+@media(max-width:700px){
+ #v-nav{padding-bottom:16px}
+ #v-nav .waypoint-heading .disp{font-size:1.65rem}
+ #v-nav .waypoint-project{grid-template-columns:1fr;padding:12px}
+ #v-nav .waypoint-project-status{min-height:38px}
+ #v-nav .waypoint-nav-card{padding:13px}
+ #v-nav .waypoint-target{grid-template-columns:68px minmax(0,1fr);gap:12px}
+ #v-nav .waypoint-compass{width:64px;height:64px}
+ #v-nav .waypoint-compass .arrow{width:48px;height:48px}
+ #v-nav .waypoint-distance-main strong{font-size:1.65rem}
+ #v-nav .waypoint-actions-primary{display:grid;grid-template-columns:1fr 1fr;gap:7px}
+ #v-nav .waypoint-actions-primary .btn{width:100%;min-width:0}
+ #v-nav .waypoint-field-status{grid-template-columns:1fr}
+ #v-nav .waypoint-arrival{display:grid;grid-template-columns:.8fr 1.2fr}
+ #v-nav .waypoint-arrival .btn,#v-nav .waypoint-arrival .dg-png-btn{width:100%;min-width:0}
+ #v-nav .waypoint-map #navMap{height:300px}
+ #v-nav .waypoint-toolbar{grid-template-columns:1fr 1fr}
+ #v-nav .waypoint-toolbar>div:first-child{grid-column:1/-1}
+ #v-nav .waypoint-list{padding:12px}
+ #v-nav .waypoint-point{padding:7px 5px}
+ #v-nav .waypoint-point-actions .badge{display:none}
+ #v-nav .waypoint-files{padding:12px}
+ #v-nav .waypoint-file-row{display:grid;grid-template-columns:1fr 1fr}
+ #v-nav .waypoint-file-row #nCsvName{grid-column:1/-1}
+ #v-nav .waypoint-delete-all{margin-left:0}
+}
