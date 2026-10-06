@@ -271,7 +271,7 @@ async function selectWaypoint(id){
 }
 // Navigation actions select targets only; arrival retains the existing visit/save flow.
 function dgNearestWaypoint(){
- if(!GPS){toast(dgCf("En yakın noktayı seçmek için konumu açın."),"warn","📡");try{if(typeof startGps==="function")startGps();}catch(e){}return;}
+ if(!GPS){toast(dgCf("En yakın noktayı seçmek için önce konumu etkinleştirin."),"warn","📡");try{if(typeof startGps==="function")startGps();}catch(e){}return;}
  const pending=WP.filter(w=>!w.visited);
  if(!pending.length)return toast(dgCf("Bekleyen waypoint kalmadı."),"info");
  const nearest=pending.reduce((a,b)=>hav(GPS.latitude,GPS.longitude,a.lat,a.lon)<=hav(GPS.latitude,GPS.longitude,b.lat,b.lon)?a:b);
