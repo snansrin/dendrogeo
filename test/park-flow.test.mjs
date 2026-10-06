@@ -173,7 +173,7 @@ scripts.push('src/services/lc-config.js', 'src/services/lc-geo.js', 'src/service
   vm.runInContext('USER={id:"u-1"}; PROFILE={id:"u-1",role:"owner",full_name:"Test"};', ctx);
   vm.runInContext('map={setView(){},fitBounds(){},invalidateSize(){},on(){}};', ctx);
   vm.runInContext('reverseGeocode=async()=>({city:"Ankara",country:"Türkiye"});', ctx);
-  vm.runInContext('calc=(d,h,sp,gr)=>({total_carbon:123.4,agb:200,bhb:52,vol:1.1});', ctx);
+  vm.runInContext('calc=(d,h,sp,gr)=>({valid:true,density_kg_m3:541,total_carbon:123.4,agb:200,bhb:52,vol:1.1});', ctx);
 
   return {
     ctx, LOG, TOASTS, GOES, AUTH,
