@@ -207,7 +207,7 @@ describe('0025 · park-invites modülü (vm)', () => {
     await run(ctx, 'await dgInvitesLoadMine();');
     assert.equal(els.dgInvBox.style.display, 'none');
     await run(ctx, 'await dgCollabLoad();');
-    assert.ok(els.dgInvPark.innerHTML.includes('Paylaşılabilecek parkın yok'), 'yönetim kartı zarif düşer');
+    assert.ok(els.dgInvPark.innerHTML.includes('Sahibi olduğun proje yok'), 'sahip yönetimi zarif düşer');
   });
 });
 
@@ -246,7 +246,7 @@ describe('0025 · kablolama (index.html + shell + partials)', () => {
   });
   test('0026 mobil: tablolar dg-cards, .card overflow kalktı, üst bar sakinleşti', () => {
     const sh = read('partials/shell.html');
-    assert.ok((sh.match(/tblwrap dg-cards/g) || []).length >= 8, 'uygulama tabloları kart düzeninde; waypoint yerel nokta kartlarını kullanır');
+    assert.ok((sh.match(/tblwrap dg-cards/g) || []).length >= 7, 'tablo kalan ekranlarda mobil kart düzeni korunur; projeler artık özel proje kartları kullanır');
     assert.match(sh, /id="projTable" hidden/, 'eski entegrasyon hedefi görünmez uyumluluk için korunur');
     assert.match(sh, /id="projOwnList"/, 'proje sahipliği kart listesinde');
     assert.match(sh, /id="projSharedList"/, 'paylaşılan projeler ayrı kart listesinde');
