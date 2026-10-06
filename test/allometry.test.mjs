@@ -98,15 +98,15 @@ describe('rho fallback zinciri — kanonik tür → grup → DİĞER', () => {
     assert.ok(Math.abs(r.agb - agb(493, 30, 20)) < 1e-6);
   });
 
-  test('CANARY: 51 tür kaydının yalnız kanonik tabloda bulunan 17 türünde özel rho vardır', () => {
+  test('CANARY: 51 tür kaydının yalnız kanonik tabloda bulunan 16 türünde özel rho vardır', () => {
     const hepsi = Object.values(app.SPECIES_DATA).flat();
     const bos = hepsi.filter((s) => !s.rho).length;
     assert.equal(hepsi.length, 51, 'tür kaydı sayısı değişti');
-    assert.equal(bos, 34, 'kanonik tablo dışında özel rho eklenmiş veya kilitli rho silinmiş olabilir');
+    assert.equal(bos, 35, 'kanonik tablo dışında özel rho eklenmiş veya kilitli rho silinmiş olabilir');
   });
 
   test('2026-10-06 kilidi: tablo dışı beş tür özel rho taşımaz, grup geneline düşer', () => {
-    for (const name of ['SALKIM SÖĞÜT', 'MAVİ LADİN', 'DOĞU ÇINARI', 'ATLAS SEDİRİ', 'CEVİZ']) {
+    for (const name of ['SALKIM SÖĞÜT', 'MAVİ LADİN', 'DOĞU ÇINARI', 'ATLAS SEDİRİ', 'CEVİZ', 'SIĞLA']) {
       assert.equal(app.rho[name], undefined, name + ' özel rho taşımamalı');
     }
     const yaprakli = calc(30, 20, 'SALKIM SÖĞÜT', 'YAPRAKLI');
@@ -134,11 +134,15 @@ describe('rho fallback zinciri — kanonik tür → grup → DİĞER', () => {
 });
 
 describe('calc() — SIĞLA regresyonu', () => {
-  test('Türkçe ve Latince ad aynı 468 kg/m3 yoğunlukla aynı sonucu verir', () => {
-    const beklenen = agb(468, 30, 20);
+  test('Sığla özel rho taşımaz; YAPRAKLI genel 541 kg/m3 kullanır', () => {
+    assert.equal(app.rho['SIĞLA'], undefined);
+    const beklenenAgb = agb(541, 57, 7.5);
+    const beklenenCarbon = (beklenenAgb + beklenenAgb * 0.26) * 0.47;
+    assert.ok(Math.abs(beklenenCarbon - 418.41910806687343) < 1e-9);
     for (const sp of ['SIĞLA', 'Sığla', 'SIGLA', 'Liquidambar orientalis']) {
-      const r = calc(30, 20, sp, 'YAPRAKLI');
-      assert.ok(Math.abs(r.agb - beklenen) < 1e-9, sp + ' için AGB=' + r.agb);
+      const r = calc(57, 7.5, sp, 'YAPRAKLI');
+      assert.ok(Math.abs(r.agb - beklenenAgb) < 1e-9, sp + ' için AGB=' + r.agb);
+      assert.ok(Math.abs(r.total_carbon - beklenenCarbon) < 1e-9, sp + ' için C=' + r.total_carbon);
     }
   });
 });
