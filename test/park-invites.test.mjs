@@ -271,7 +271,8 @@ describe('0025 · kablolama (index.html + shell + partials)', () => {
     assert.match(m, /PROJE SAHİBİ/, 'sahip projesi rol rozeti');
     assert.match(m, /ORTAK/, 'paylaşılan proje rol rozeti');
     const d = read('src/services/dash.js');
-    assert.match(d, /data-label="Karbon"/, 'kayıt satırları etiketli');
+    assert.match(d, /class="record-metrics"/, 'kayıt kartı metrik grubu var');
+    assert.match(d, />Karbon<\/span>/, 'kayıt kartında karbon metriği etiketli');
   });
   test('loadProjects paylaşım birleşimi: ortak projeleri dropdown’a ekler', () => {
     const m = read('src/services/measure.js');
