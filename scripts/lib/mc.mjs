@@ -217,7 +217,7 @@ export function calcRow(dbh_cm, height_m, speciesName, grp) {
   const r = densityKg / 1000;
   const agb = 0.0673 * Math.pow(r * d * d * h, 0.976);
   const bhb = agb * 0.26;
-  return { valid:true, density_kg_m3:densityKg, agb, bhb, bio:agb+bhb, c_agb:agb*0.47, c_bhb:bhb*0.47, total_carbon:(agb+bhb)*0.47, vol:Math.PI*Math.pow(d/200,2)*h*0.5 };
+  return { valid:true, density_kg_m3:densityKg, agb, bhb, bio:agb+bhb, c_agb:agb*0.47, c_bhb:bhb*0.47, total_carbon:(agb+bhb)*0.47, vol: Math.PI * Math.pow(d / 200, 2) * h * 0.5 };
 }
 
 export function carbonKg(row) {
