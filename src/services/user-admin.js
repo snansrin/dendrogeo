@@ -9,7 +9,8 @@ async function loadUsers(){const _y=(typeof dgScrollKeep==="function"?dgScrollKe
 async function loadUsers__scroll(){
  if(!PROFILE||(PROFILE.role!=="admin"&&PROFILE.role!=="owner"))return;
  const I_AM_OWNER=PROFILE.role==="owner";
- const{data}=await sb.from("profiles").select("*");
+ const{data,error}=await sb.from("profiles").select("*");
+ if(error){toast("Kullanıcı listesi alınamadı: "+error.message,"err");return;}
  USERS_CACHE=data||[];
  const total=USERS_CACHE.length,active=USERS_CACHE.filter(x=>x.active).length;
  if($("aUsersTotal"))$("aUsersTotal").textContent=total;
@@ -18,12 +19,14 @@ async function loadUsers__scroll(){
  if($("aUsersPassive"))$("aUsersPassive").textContent=total-active;
  $("aUsersT").innerHTML=USERS_CACHE.map(x=>{
   const ownerRow=x.role==="owner";
-  const roleBadge=ownerRow?'<span class="badge" style="background:var(--green-dk);color:#fff">KURUCU</span>':(x.role==="admin"?'<span class="badge admin">DENETÇİ</span>':'<span class="badge on">KULLANICI</span>');
+  const roleBadge=ownerRow?'<span class="badge admin-user-role owner">KURUCU</span>':(x.role==="admin"?'<span class="badge admin admin-user-role">DENETÇİ</span>':'<span class="badge on admin-user-role">KULLANICI</span>');
+  const label=(x.full_name||x.email||"?").trim(),initials=label.split(/\s+/).slice(0,2).map(v=>v[0]||"").join("").toLocaleUpperCase("tr-TR")||"?";
+  const person=`<div class="admin-user-person"><span class="admin-user-avatar" aria-hidden="true">${esc(initials)}</span><span class="admin-user-identity"><strong>${esc(x.full_name)||"İsimsiz kullanıcı"}</strong><small>${esc(x.email)||"—"}</small></span></div>`;
   let act="";
   if(ownerRow)act="<span class='admin-user-lock'>🛡 Korunuyor</span>";
-  else if(I_AM_OWNER)act=`<div class="admin-user-actions"><select aria-label="Kullanıcı rolü" onchange="updateRole('${x.id}',this.value)"><option value="user" ${x.role==="user"?"selected":""}>Kullanıcı</option><option value="admin" ${x.role==="admin"?"selected":""}>Denetçi</option></select><button class="btn sm ${x.active?"red":"blue"}" onclick="toggleU('${x.id}',${!x.active})">${x.active?"Pasifleştir":"Aktifleştir"}</button></div>`;
+  else if(I_AM_OWNER)act=`<div class="admin-user-actions"><select class="admin-user-role-select" aria-label="Kullanıcı rolü" onchange="updateRole('${x.id}',this.value)"><option value="user" ${x.role==="user"?"selected":""}>Kullanıcı</option><option value="admin" ${x.role==="admin"?"selected":""}>Denetçi</option></select><button class="btn sm ${x.active?"red":"blue"}" onclick="toggleU('${x.id}',${!x.active})">${x.active?"Pasifleştir":"Aktifleştir"}</button></div>`;
   else act="<span class='admin-user-lock'>Salt okunur</span>";
-  return `<tr data-role="${esc(x.role||"user")}" data-status="${x.active?"active":"passive"}"><td data-label="E-posta"><strong>${esc(x.email)||"—"}</strong></td><td data-label="Ad Soyad">${esc(x.full_name)||"—"}</td><td data-label="Rol">${roleBadge}</td><td data-label="Durum"><span class="badge ${x.active?"on":"off"}">${x.active?"Aktif":"Pasif"}</span></td><td data-label="İşlem">${act}</td></tr>`;
+  return `<tr data-role="${esc(x.role||"user")}" data-status="${x.active?"active":"passive"}"><td data-label="Kullanıcı">${person}</td><td data-label="Rol">${roleBadge}</td><td data-label="Durum"><span class="badge ${x.active?"on":"off"}">${x.active?"Aktif":"Pasif"}</span></td><td data-label="İşlem">${act}</td></tr>`;
  }).join("");
  filterUsers();
 }
@@ -49,5 +52,7 @@ if(error){toast("Hata: "+error.message,"err");return;}loadUsers();
 
 async function toggleU(id,act){
  if(PROFILE.role!=="owner")return toast("🛡 Bu yetki yalnızca kurucuya aittir.");
- await sb.from("profiles").update({active:act}).eq("id",id);loadUsers();
+ const{error}=await sb.from("profiles").update({active:act}).eq("id",id);
+ if(error){toast("Hata: "+error.message,"err");return;}
+ loadUsers();
 }
