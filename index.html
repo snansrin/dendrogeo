@@ -247,7 +247,7 @@
 <script src="src/utils/truncation.js?v=f43c76b3" defer></script>
 <!-- Faz 7: geotiff (317 KB) ve chart.js (208 KB) artık SENKRON yüklenmiyor;
      src/utils/lazylibs.js ihtiyaç anında enjekte eder (LULC analizi / panel grafiği). -->
-<script id="dgRuntimeBuild" type="application/json">"fd23e607937a8555"</script>
+<script id="dgRuntimeBuild" type="application/json">"bd075709ce7f6bef"</script>
 <script src="src/utils/lazylibs.js?v=19763039" defer></script>
 <script src="src/services/allometry.js?v=46ea5b87" defer></script>
 <script src="src/services/auth.js?v=1e92b5cd" defer></script>
@@ -267,12 +267,12 @@
      📄 Yayınla → report_requests (0008) → rapor-yayin.yml → rapor/DGR-…/
      → kalıcı bağlantı + 📤 Paylaş. admin.js loadAdmin() bu modülü çağırır. -->
 <script src="src/core/surface-display.js?v=0bed5180" defer></script>
-<script src="src/core/report-context.js?v=20d570c7" defer></script>
-<script src="src/services/academic-profile.js?v=785c7635" defer></script>
+<script src="src/core/report-context.js?v=e88cb924" defer></script>
+<script src="src/services/academic-profile.js?v=b85506f3" defer></script>
 <script src="src/services/report-publish.js?v=0836b57c" defer></script>
 <script src="src/services/park-invites.js?v=f31e6518" defer></script>
 <script src="src/services/world.js?v=c72d9019" defer></script>
-<script src="src/services/measure.js?v=2bcadf7e" defer></script>
+<script src="src/services/measure.js?v=ca89772c" defer></script>
 <script src="src/services/map.js?v=9b66120a" defer></script>
 <!-- LULC ZİNCİRİ ARTIK TEMBEL (2026-09-25 · Faz 8): 8 dosya ilk yüklemede
      indirilmiyor. Yalnız "🌿 Yüzey Örtüsü Analizi"ne basan kullanıcı için
@@ -296,7 +296,7 @@
 <script src="src/ui/park-panel.js?v=618e3acc" defer></script>
 <script src="src/ui/park-export.js?v=c724cd32" defer></script>
 <script src="src/services/dash.js?v=7e8bde11" defer></script>
-<link rel="stylesheet" href="css/style.css?v=4c638afd">
+<link rel="stylesheet" href="css/style.css?v=87273a39">
 <link rel="stylesheet" href="css/landing.css?v=e354190f">
 <link rel="stylesheet" href="css/park-panel.css?v=649541ba">
 <!-- TASARIM SİSTEMİ (2026-09-27, 2. deneme): ui-standard.css geri BAĞLANDI
@@ -768,7 +768,7 @@
    <div class="card measure-project"><label class="lbl" for="mProject">Çalışma projesi</label><select id="mProject" onchange="dgProjectChanged()"></select><div id="parkGate" class="alert info" style="display:none"></div></div>
    <section class="dg-png-card measure-location" aria-labelledby="measureLocationTitle">
     <div class="dg-png-head"><div><div class="dg-png-kicker">1 · KONUM</div><h3 class="dg-png-title" id="measureLocationTitle">Saha konumu</h3><p class="dg-png-sub">Kaydederken park içinde olduğunuz doğrulanır.</p></div><span class="dg-png-badge" id="gpsBadge">konum kapalı</span></div>
-    <div class="measure-gps-row"><div class="gpsring" id="gpsRing"><div class="val" id="gpsAcc">—</div><div class="lbl">doğruluk (m)</div></div><div id="gpsState" class="alert info" role="status">Konum servisi kapalı.</div><button id="gpsBtn" class="dg-png-btn primary" onclick="startGps()">📡 Konumu Etkinleştir</button></div>
+    <div class="measure-gps-row"><div id="gpsState" class="alert info" role="status">Konum servisi kapalı.</div><button id="gpsBtn" class="dg-png-btn primary" onclick="startGps()">📡 Konumu Etkinleştir</button></div>
     <details class="measure-details"><summary>Konum ayrıntıları ve paylaşım</summary><p class="measure-help">Kayıt için GPS doğruluğu en fazla ±60 m olmalıdır.</p><div class="measure-coordinates"><div><span class="lbl">Enlem</span><div class="mono" id="gLat">—</div></div><div><span class="lbl">Boylam</span><div class="mono" id="gLon">—</div></div><div><span class="lbl">Rakım</span><div class="mono" id="gAlt">—</div></div><div><span class="lbl">Sinyal</span><div class="mono" id="gQ">—</div></div></div>
      <label class="measure-share"><input type="checkbox" class="dg-switch" id="dgLiveShare" checked onchange="dgLiveShareToggle(this.checked)"><span>Canlı konumumu park ekibiyle paylaş<small>Geçicidir; veritabanına yazılmaz.</small></span></label><div id="dgMatesNote" class="dg-meta"></div>
     </details>
@@ -778,7 +778,7 @@
     <div class="measure-fields measure-identity"><div><label class="lbl" for="mPoint">Nokta ID</label><div class="measure-query"><input id="mPoint" type="number" min="1" step="1" inputmode="numeric" oninput="manualPoint=true" aria-describedby="pointHelp"><button class="btn sm ghost" onclick="queryPointId()">🔍 Sorgula</button></div><p class="measure-help" id="pointHelp">Otomatik önerilir; gerekirse değiştirin.</p></div><div><label class="lbl" for="mNo">Ölçüm No</label><input id="mNo" type="number" min="1" step="1" inputmode="numeric" value="1"><p class="measure-help">Aynı noktadaki ölçüm sırası.</p></div></div>
     <div id="pointQueryResult" class="alert info" style="display:none"></div>
     <div class="measure-fields"><div><label class="lbl" for="mGroup">Ağaç grubu</label><select id="mGroup" onchange="fillSpecies();liveCalc()"><option value="">Grup seçin</option><option value="İBRELİ">İBRELİ</option><option value="YAPRAKLI">YAPRAKLI</option></select></div><div><label class="lbl" for="mSpecies">Ağaç türü</label><select id="mSpecies" disabled onchange="showLatin();liveCalc()"><option value="">Önce grup seçin</option></select><div id="latinName" class="mono measure-help"></div></div></div>
-    <div class="measure-fields measure-dimensions"><div><label class="lbl" for="mDbh">Göğüs çevresi <span>(cm)</span></label><input id="mDbh" type="number" min="0.1" max="1256.6" step="0.1" inputmode="decimal" oninput="liveCalc()" placeholder="Örn. 110" aria-describedby="dbhHelp"><p class="measure-help" id="dbhHelp">Mezurayı gövdenin etrafına, yerden 1,30 m yüksekte sarın. Sistem DBH çapını otomatik olarak çevre ÷ π ile hesaplar.</p></div><div><label class="lbl" for="mHeight">Ağaç boyu <span>(m)</span></label><input id="mHeight" type="number" min="0.1" max="100" step="0.1" inputmode="decimal" oninput="liveCalc()" placeholder="Örn. 7,2"><p class="measure-help">Ağacın toplam yüksekliği.</p></div></div>
+    <div class="measure-fields measure-dimensions"><div><label class="lbl" for="mDbh">Göğüs çevresi <span>(cm)</span> <button type="button" class="dg-inline-help" aria-label="Göğüs çevresi ölçüm yardımı" aria-describedby="dbhHelp">?</button></label><input id="mDbh" type="number" min="0.1" max="1256.6" step="0.1" inputmode="decimal" oninput="liveCalc()" placeholder="Örn. 110"><span class="dg-help-pop" id="dbhHelp" role="tooltip">Mezurayı gövdenin etrafına, yerden 1,30 m yüksekte sarın. Sistem DBH çapını otomatik olarak çevre ÷ π ile hesaplar.</span></div><div><label class="lbl" for="mHeight">Ağaç boyu <span>(m)</span> <button type="button" class="dg-inline-help" aria-label="Ağaç boyu ölçüm yardımı" aria-describedby="heightHelp">?</button></label><input id="mHeight" type="number" min="0.1" max="100" step="0.1" inputmode="decimal" oninput="liveCalc()" placeholder="Örn. 7,2"><span class="dg-help-pop" id="heightHelp" role="tooltip">Ağacın yer seviyesinden tepe noktasına kadar olan toplam yüksekliğini metre cinsinden girin.</span></div></div>
     <div class="measure-photo"><div><h4>Fotoğraf <span class="measure-optional">İsteğe bağlı</span></h4><p class="measure-help">Ağacı ve gövdesini kadraja alın.</p></div><span class="dg-file btn ghost">📸 <span>Fotoğraf ekle</span><input type="file" id="mPhoto" aria-label="Fotoğraf (canlı çekim)" accept="image/*" capture="environment" onchange="checkPhoto(event)"></span><span class="dg-file-name mono" id="mPhotoName"></span><button type="button" class="btn sm ghost" id="mPhotoRemove" style="display:none" onclick="dgClearMeasurePhoto()">Fotoğrafı kaldır</button></div>
     <div id="photoCheck" class="alert info" role="status" style="display:none"></div>
    </section>
