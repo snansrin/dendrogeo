@@ -25,6 +25,7 @@ const landing = rd('partials/landing.html');
 const shell = rd('partials/shell.html');
 const head = rd('partials/head.html');
 const index = rd('index.html');
+const speciesRuntime = () => rd('src/config/wood-density-lock.js') + '\n' + rd('src/config/species.js');
 
 /* Alt sayfalar (rapor/ hariç — yayımlanmış çıktılar dondurulmuştur) */
 const SUBS = readdirSync(ROOT).filter((d) =>
@@ -49,7 +50,7 @@ describe('P0 · bilimsel iddialar kaynağıyla birebir', () => {
   test('⭐ tür/grup adları EN sözlüğünde tam kapsanıyor (0035b)', () => {
     const sctx = {};
     vm.createContext(sctx);
-    vm.runInContext(rd('src/config/species.js') + ';this.S=SPECIES_DATA;', sctx);
+    vm.runInContext(speciesRuntime() + ';this.S=SPECIES_DATA;', sctx);
     /* i18n.js açılışta DOM'a dokunur (init + MutationObserver) → test stub'ı */
     const ictx = {
       window: { dispatchEvent: () => {} },
@@ -70,11 +71,11 @@ describe('P0 · bilimsel iddialar kaynağıyla birebir', () => {
   test('⭐ tür tablosu sayıları species.js\'ten yeniden üretiliyor (landing + methods)', () => {
     const ctx = {};
     vm.createContext(ctx);
-    vm.runInContext(rd('src/config/species.js') + ';this.S=SPECIES_DATA;', ctx);
+    vm.runInContext(speciesRuntime() + ';this.S=SPECIES_DATA;', ctx);
     let total = 0, rho = 0;
     for (const arr of Object.values(ctx.S)) { total += arr.length; rho += arr.filter((s) => s.rho != null).length; }
     const def = total - rho;
-    const re = new RegExp(`tablosunda ${total} seçim kaydı bulunur; ${rho} kaydın doğrudan ρ değeri vardır, ${def} kayıt grup varsayılanına düşer`);
+    const re = new RegExp(`Ölçüm kataloğunda ${total} tür bulunur; ${rho} tür kilitli özel ρ kullanır, ${def} tür yalnız kendi grup genelini kullanır`);
     assert.match(landing, re, `landing güncel olmalı: ${total}/${rho}/${def}`);
     assert.match(rd('docs/methods.md'), new RegExp(`${def}/${total}`), 'methods.md ρ\'sız/toplam sayısını söylemeli');
   });
@@ -86,7 +87,7 @@ describe('P0 · bilimsel iddialar kaynağıyla birebir', () => {
     /* allometry.js calc() ile aynı denklem; ρ = İBRELİ grup varsayılanı (446) */
     const rhoCtx = {};
     vm.createContext(rhoCtx);
-    vm.runInContext(rd('src/config/species.js') + ';this.G=GROUP_DEFAULT_RHO;', rhoCtx);
+    vm.runInContext(speciesRuntime() + ';this.G=GROUP_DEFAULT_RHO;', rhoCtx);
     const r = rhoCtx.G['\u0130BREL\u0130'] / 1000;
     const agb = 0.0673 * Math.pow(r * D * D * H, 0.976);
     const beklenen = agb * 1.26 * 0.47;
@@ -227,7 +228,7 @@ describe('0036 · özellik ve EN bütünlük kilitleri', () => {
   test("⭐ grup optionları value taşır (EN çevirisi veriyi bozamaz)", () => {
     assert.match(sh, /<option value="İBRELİ">İBRELİ<\/option>/);
     assert.match(sh, /<option value="YAPRAKLI">YAPRAKLI<\/option>/);
-    assert.match(sh, /<option value="DİĞER">DİĞER<\/option>/);
+    assert.ok(!/<option value="DİĞER">/.test(sh), 'DİĞER yeni ölçüm grubu olamaz');
   });
   test('fillSpecies: ters sözlük savunması + alfabetik sıralama (T1)', () => {
     const m = rd('src/services/measure.js');

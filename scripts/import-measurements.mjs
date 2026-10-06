@@ -183,13 +183,9 @@ if (!file || has('help')) {
   process.exit(file ? 0 : 2);
 }
 const dict = loadSpeciesDict();
-/* ρ önceliği (0011b): kanonik ad sözlükte ρ taşıyorsa (gizli çözüm kayıtları
- * dahil) o kullanılır — 0011'in çalıştırılmış SQL'i ve rapor QA kapısıyla
- * AYNI tablo. Panel (calc) kendi zincirini kullanmaya devam eder. */
-const _base = loadRho();
-const rho = Object.assign({}, _base.rho);
-for (const e of Object.values(dict.byName)) if (e.rho) rho[e.tr] = e.rho;
-const grho = _base.grho;
+/* TEK yoğunluk politikası: kilitli tür ρ'su veya iki grup geneli.
+ * Alternatif/tarihsel ρ ve DİĞER fallback yoktur. */
+const policy = loadRho();
 const text = readFileSync(file, 'utf8');
 const { rows, delim } = parseDelimited(text);
 if (rows.length < 2) { console.error('❌ en az başlık + 1 veri satırı gerekli'); process.exit(2); }
@@ -216,13 +212,14 @@ for (let li = 1; li < rows.length; li++) {
   const grpRaw = String(g('grp') || '').trim();
   if (!Number.isFinite(point)) { errs.push(`satır ${li + 1}: nokta no ayrıştırılamadı (${g('point_id')})`); continue; }
   const GRP = dict.norm(grpRaw).replace(/[^A-Z]/g, '');
-  const grp = GRP.startsWith('IBRE') || GRP.startsWith('İBRE') ? 'İBRELİ' : GRP.startsWith('YAPRAK') ? 'YAPRAKLI' : (grpRaw || null);
-  if (!['İBRELİ', 'YAPRAKLI', 'DİĞER'].includes(grp)) warn.push(`P${point}: grup tanınmadı (${grpRaw}) → DİĞER varsayılanı`);
+  const grp = GRP.startsWith('IBRE') || GRP.startsWith('İBRE') ? 'İBRELİ' : GRP.startsWith('YAPRAK') ? 'YAPRAKLI' : null;
+  if (!grp) { errs.push(`P${point}: grup yalnız İBRELİ veya YAPRAKLI olabilir (${grpRaw})`); continue; }
   const canon = dict.resolve(spRaw);
-  if (!canon) warn.push(`P${point}: tür sözlük dışında (${spRaw}) → ρ grup varsayılanı`);
+  if (!canon || !dict.byName[canon]) { errs.push(`P${point}: tür katalogda yok (${spRaw}); önce tür kataloğuna İBRELİ/YAPRAKLI olarak ekleyin`); continue; }
+  if (dict.byName[canon].grp !== grp) { errs.push(`P${point}: tür/grup uyuşmuyor (${canon} → ${dict.byName[canon].grp}, dosyada ${grp})`); continue; }
   recs.push({
     line: li + 1, point_id: Math.round(point), measurement_no: Math.round(parseNum(g('measurement_no')) || 1),
-    species_raw: spRaw, species: canon || spRaw, grp: grp || 'DİĞER',
+    species_raw: spRaw, species: canon, grp,
     dbh_cm: parseNum(g('dbh_cm')),
     girth_cm: parseNum(g('girth_cm')),
     height_m: parseNum(g('height_m')),
@@ -250,45 +247,35 @@ for (const r of recs) {
 const live = recs.filter((r) => !r.skip);
 
 /* ---- QA: yeniden hesap + kapılar ---- */
-/* 0033 · QA v5 ile aynı kurallar: (b) gövde formu fiziksel bant + tipik bant
- * SAYIMI, (c) karbon denetimi İKİ ρ kaynağıyla (tür ρ / grup varsayılanı ρ).
- * 0032deki eşik tabanlı gövde sınıfı sayımı KALDIRILDI: içe aktarma hiçbir
- * yasal statü iddiası üretmez, yalnız ölçülen çap dağılımını özetler. */
+/* QA: gövde formu + TEK kilitli karbon yeniden hesabı.
+ * Alternatif ρ ile "geçerli sayma" yolu yoktur. */
 const hdFail = [], hdBandOut = [], devFail = [], devRhoGrup = [], dupPts = [], dupVals = [], outside = [];
 const BAND = QA_LIMITS.CARBON_DEV_PCT, TABAN = QA_LIMITS.CARBON_DEV_MIN_KG ?? 0;
 const uygun = (sakli, beklenen) => beklenen > 0 && (Math.abs(((sakli - beklenen) / beklenen) * 100) <= BAND || Math.abs(sakli - beklenen) < TABAN);
 for (const r of live) {
-  const calc = calcRow(r.dbh_cm, r.height_m, r.species, r.grp, { rho, grho });
-  const calcGrup = calcRow(r.dbh_cm, r.height_m, r.species, r.grp, { rho: {}, grho });
+  const calc = calcRow(r.dbh_cm, r.height_m, r.species, r.grp, policy);
+  if (!calc.valid) {
+    errs.push(`P${r.point_id}: tür/grup kilitli yoğunluk politikasıyla hesaplanamıyor`);
+    r.skip = true;
+    continue;
+  }
   r.carbon_calc = +calc.total_carbon.toFixed(2);
   r.volume_calc = +calc.vol.toFixed(3);
+  r.rho_src = policy.rho[r.species] != null ? 'tur' : 'grup';
+  if (r.rho_src === 'grup') devRhoGrup.push(r);
   r.hd = +((100 * r.height_m) / r.dbh_cm).toFixed(1);
   if (r.hd < QA_LIMITS.HD_PHYS_MIN || r.hd > QA_LIMITS.HD_PHYS_MAX) {
     hdFail.push(r);
-    warn.push(`P${r.point_id}: boy/çap ${r.hd} fiziksel makullük bandı (${QA_LIMITS.HD_PHYS_MIN}–${QA_LIMITS.HD_PHYS_MAX}) dışında — İNCELEME uyarısı; ölçüm/kayıt hatası olabilir, içe aktarmayı BLOKLAMAZ (0031/0032)`);
+    warn.push(`P${r.point_id}: boy/çap ${r.hd} fiziksel makullük bandı (${QA_LIMITS.HD_PHYS_MIN}–${QA_LIMITS.HD_PHYS_MAX}) dışında — İNCELEME uyarısı; ölçüm/kayıt hatası olabilir, içe aktarmayı BLOKLAMAZ`);
   } else if (r.hd < QA_LIMITS.HD_MIN || r.hd > QA_LIMITS.HD_MAX) {
     hdBandOut.push(r);
   }
   if (Number.isFinite(r.carbon_stored) && r.carbon_stored > 0) {
     r.dev_pct = +(((r.carbon_stored - r.carbon_calc) / r.carbon_calc) * 100).toFixed(1);
-    r.dev_grp_pct = calcGrup.total_carbon > 0 ? +(((r.carbon_stored - calcGrup.total_carbon) / calcGrup.total_carbon) * 100).toFixed(1) : null;
-    const rhoSp = rho[r.species] ?? null;
-    /* Özel tür ρ'su yoksa calcRow zaten grup varsayılanına düşer. Böyle bir
-     * kaydı "tür ρ" diye etiketlemek yanlıştır; tek meşru kaynak gruptur. */
-    const okTur = rhoSp != null && uygun(r.carbon_stored, r.carbon_calc);
-    const okGrup = uygun(r.carbon_stored, calcGrup.total_carbon);
-    if (!okTur && !okGrup) {
+    r.dev_grp_pct = null;
+    if (!uygun(r.carbon_stored, r.carbon_calc)) {
       devFail.push(r);
-      warn.push(`P${r.point_id}: saklı karbon ${r.carbon_stored} kg ≠ yeniden hesap ${r.carbon_calc} kg (%${r.dev_pct}; grup ρ ile %${r.dev_grp_pct}) — geçerli ρ kaynağıyla bant dışı: ondalık kayması/birim hatası olabilir`);
-    } else if (okTur) {
-      r.rho_src = 'tur';
-    } else {
-      r.rho_src = 'grup';
-      devRhoGrup.push(r);
-      /* Yalnız gerçekten iki farklı ρ adayı varsa kaynak farkını uyarı olarak
-       * açıkla. rhoSp=null türlerde grup varsayılanı normal hesap yoludur. */
-      if (rhoSp != null && Math.abs(r.dev_pct) > BAND)
-        warn.push(`P${r.point_id}: saklı karbon ${r.carbon_stored} kg GRUP VARSAYILANI ρ ile yeniden üretildi (tür ρ ile %${r.dev_pct}) — ρ kaynağı farkı, ÖLÇÜM HATASI DEĞİL (0032)`);
+      warn.push(`P${r.point_id}: saklı karbon ${r.carbon_stored} kg ≠ kilitli tablo hesabı ${r.carbon_calc} kg (%${r.dev_pct})`);
     }
   }
 }
@@ -354,7 +341,7 @@ const q = (v) => (v == null ? 'null' : `'${String(v).replace(/'/g, "''")}'`);
 const sqlHead = [
   `-- DendroGeo içe aktarma · ${new Date().toISOString()}`,
   `-- kaynak: ${file} · birim kararı: ${decided.unit} (${decided.why})`,
-  `-- QA: ${live.length} kayıt · h/d fiziksel ihlal ${gates.hd.fail} (tipik bant dışı ${gates.hd.band_out} = bilgi) · karbon sapma ${gates.dev.fail} (grup ρ ile eşleşen ${gates.dev.rho_grup}) · gövde çapı ${gates.dbh ? gates.dbh.min + '–' + gates.dbh.max + ' cm (medyan ' + gates.dbh.medyan + ')' : '—'} · sözlük dışı ${gates.unknown_species} · mükerrer nokta ${gates.dup_points}`,
+  `-- QA: ${live.length} kayıt · h/d fiziksel ihlal ${gates.hd.fail} (tipik bant dışı ${gates.hd.band_out} = bilgi) · karbon sapma ${gates.dev.fail} (grup genelini kullanan ${gates.dev.rho_grup}) · gövde çapı ${gates.dbh ? gates.dbh.min + '–' + gates.dbh.max + ' cm (medyan ' + gates.dbh.medyan + ')' : '—'} · sözlük dışı ${gates.unknown_species} · mükerrer nokta ${gates.dup_points}`,
   force && blocked ? '-- ⚠ --force ile üretildi: QA kapısı BLOK durumundaydı; çalıştırmadan önce nedenleri gözden geçirin!' : null,
   `-- İdempotent: client_id UNIQUE anahtarı 'dgi:<park>:<nokta>:<ölçüno>' → aynı dosya ikinci kez çalıştırılamaz.`,
   'begin;',

@@ -1,45 +1,10 @@
 "use strict";
-/*
- * DendroGeo kanonik odun yoğunluğu tablosu
- * Kilit: DG-WD-LOCK-2026-10-06-v2
- *
- * KURAL:
- * - Bu tablo kullanıcı tarafından 2026-10-06 tarihinde kanonik kaynak olarak onaylandı.
- * - Tür eklemek bu tablodaki hiçbir yoğunluğu değiştiremez.
- * - Tabloda özel tür yoğunluğu bulunmayan türler kendi grubunun genel yoğunluğuna düşer:
- *   İbreliler 0,446 ton/m³; Yapraklılar 0,541 ton/m³.
- * - SIĞLA (Liquidambar orientalis) için özel rho UYGULANMAZ; YAPRAKLI genel 0,541 kullanılır.
- * - Birimler uygulama içinde kg/m³ tutulur (0,541 ton/m³ = 541 kg/m³).
+/* Tür kataloğu. Odun yoğunluğu bu dosyada TANIMLANMAZ.
+ * Tek kaynak: src/config/wood-density-lock.js
+ * Yeni tür kuralı: yalnız İBRELİ/YAPRAKLI grubuna rho:null ile eklenebilir.
  */
-const WOOD_DENSITY_LOCK_ID="DG-WD-LOCK-2026-10-06-v2";
-const WOOD_DENSITY_CANONICAL=[
- {key:"GROUP:İBRELİ",tr:"İbreliler (Genel)",taxon:null,rho_t_m3:0.446,rho:446,source:"Tolunay, 2013; NIR Turkey, 2017; 299 Nolu Tebliğ, 2017"},
- {key:"GÖKNAR",tr:"GÖKNAR",taxon:"Abies sp.",rho_t_m3:0.350,rho:350,source:"As ve ark., 2001"},
- {key:"HİMALAYA SEDİRİ",tr:"HİMALAYA SEDİRİ",taxon:"Cedrus deodora",rho_t_m3:0.430,rho:430,source:"Bozkurt ve Erdin (2000), Demetçi (1986)"},
- {key:"SEDİR",tr:"SEDİR",taxon:"Cedrus libani",rho_t_m3:0.430,rho:430,source:"As ve ark., 2001"},
- {key:"ARDIÇ",tr:"ARDIÇ",taxon:"Juniperus sp.",rho_t_m3:0.460,rho:460,source:"As ve ark., 2001"},
- {key:"LADİN",tr:"LADİN",taxon:"Picea orientalis",rho_t_m3:0.358,rho:358,source:"As ve ark., 2001"},
- {key:"KIZILÇAM",tr:"KIZILÇAM",taxon:"Pinus brutia",rho_t_m3:0.478,rho:478,source:"As ve ark., 2001"},
- {key:"HALEP ÇAMI",tr:"HALEP ÇAMI",taxon:"Pinus halepensis",rho_t_m3:0.480,rho:480,source:"Erten ve Sözen, 1997b"},
- {key:"KARAÇAM",tr:"KARAÇAM",taxon:"Pinus nigra",rho_t_m3:0.470,rho:470,source:"As ve ark., 2001"},
- {key:"FISTIK ÇAMI",tr:"FISTIK ÇAMI",taxon:"Pinus pinea",rho_t_m3:0.470,rho:470,source:"Erten ve Sözen, 1997a"},
- {key:"SARIÇAM",tr:"SARIÇAM",taxon:"Pinus sylvestris",rho_t_m3:0.426,rho:426,source:"As ve ark., 2001"},
- {key:"GROUP:YAPRAKLI",tr:"Yapraklılar (Genel)",taxon:null,rho_t_m3:0.541,rho:541,source:"Tolunay, 2013; NIR Turkey, 2017; 299 Nolu Tebliğ, 2017"},
- {key:"KIZILAĞAÇ",tr:"KIZILAĞAÇ",taxon:"Alnus sp.",rho_t_m3:0.407,rho:407,source:"As ve ark., 2001"},
- {key:"GÜRGEN",tr:"GÜRGEN",taxon:"Carpinus sp.",rho_t_m3:0.630,rho:630,source:"IPCC, 2003"},
- {key:"KAYIN",tr:"KAYIN",taxon:"Fagus orientalis",rho_t_m3:0.530,rho:530,source:"As ve ark., 2001"},
- {key:"DİŞBUDAK",tr:"DİŞBUDAK",taxon:"Fraxinus excelsior",rho_t_m3:0.562,rho:562,source:"Gürsu, 1971"},
- {key:"KAVAK",tr:"KAVAK",taxon:"Populus sp.",rho_t_m3:0.350,rho:350,source:"IPCC, 2003"},
- {key:"MEŞE",tr:"MEŞE",taxon:"Quercus sp.",rho_t_m3:0.570,rho:570,source:"As ve ark., 2001"}
-];
-WOOD_DENSITY_CANONICAL.forEach(Object.freeze);
-Object.freeze(WOOD_DENSITY_CANONICAL);
-const _LOCKED_RHO={};
-WOOD_DENSITY_CANONICAL.forEach(row=>{
- if(!row.key.startsWith("GROUP:"))_LOCKED_RHO[row.key]=row.rho;
-});
-Object.freeze(_LOCKED_RHO);
-
+if(typeof WOOD_DENSITY_LOCK_ID==="undefined"||typeof _LOCKED_RHO==="undefined"||typeof GROUP_DEFAULT_RHO==="undefined")
+ throw new Error("WOOD_DENSITY_LOCK_REQUIRED");
 const SPECIES_DATA={
  "İBRELİ":[
   {tr:"GÖKNAR",lat:"Abies spp.",rho:_LOCKED_RHO["GÖKNAR"]},
@@ -93,24 +58,23 @@ const SPECIES_DATA={
   {tr:"DEFNE",lat:"Laurus nobilis",rho:null},
   {tr:"AMBERAĞACI",lat:"Liquidambar styraciflua",rho:null},
   {tr:"DİĞER YAPRAKLI",lat:"Angiosperm spp.",rho:null}
- ],
- "DİĞER":[
-  {tr:"BELİRLENEMEDİ",lat:"—",rho:null},
-  {tr:"DİĞER",lat:"—",rho:null}
  ]
 };
-/* Kilitli genel satırlar: İbreliler 0,446 · Yapraklılar 0,541.
- * DİĞER=493 yalnız eski/belirsiz kayıtların geriye dönük uyumluluk fallback'idir;
- * kanonik yoğunluk tablosunun parçası değildir ve bilinen tür/grupları ezemez. */
-const GROUP_DEFAULT_RHO=Object.freeze({"İBRELİ":446,"YAPRAKLI":541,"DİĞER":493});
-
 /* Geriye dönük uyumluluk + hızlı erişim haritaları */
-const species={}; const rho={}; const LATIN={};
+const species={}; const rho={}; const LATIN={}; const SPECIES_GROUP={};
 Object.keys(SPECIES_DATA).forEach(g=>{
  species[g]=SPECIES_DATA[g].map(s=>s.tr);
- SPECIES_DATA[g].forEach(s=>{ if(s.rho!=null) rho[s.tr]=s.rho; LATIN[s.tr]=s.lat; });
+ SPECIES_DATA[g].forEach(s=>{
+  if(s.rho!=null)rho[s.tr]=s.rho;
+  LATIN[s.tr]=s.lat;
+  SPECIES_GROUP[s.tr]=g;
+ });
+ Object.freeze(species[g]);
 });
+Object.freeze(species);
 Object.freeze(rho);
+Object.freeze(LATIN);
+Object.freeze(SPECIES_GROUP);
 /* Yoğunluk taşıyan tür satırları da çalışma anında değiştirilemesin. */
 Object.keys(SPECIES_DATA).forEach(g=>{
  SPECIES_DATA[g].forEach(Object.freeze);
@@ -126,15 +90,10 @@ const GROUP_COLOR={"İBRELİ":"#1e6f4b","YAPRAKLI":"#c77d2e","DİĞER":"#94a3b8"
  * test/landing-claims.test.mjs. */
 const GROUP_COLOR_INK={"İBRELİ":"#1e6f4b","YAPRAKLI":"#9a4a08","DİĞER":"#5b6b7f"};
 
-/* Gizli eşanlamlı kayıt: seçim listesine girmez, yalnız çözümlemede tanınır.
- * Özel yoğunluk VERİLMEZ; tablodaki Yapraklılar (Genel) değerine düşer. */
-const RESOLVE_ONLY_SPECIES=[
- {tr:"AĞLAYAN SÖĞÜT",lat:"Salix babylonica",rho:null}
-];
-
 /* Saha kayıtları ve cihaz çıktıları kanonik ad dışında yazımlar üretebilir.
  * Eşanlamlılar yalnız OKUMA yolunda çözülür; veritabanına kanonik ad yazılır. */
 const SPECIES_SYNONYMS={
+ "AGLAYAN SOGUT":"SALKIM SÖĞÜT",
  "MAVI SEDIR":"ATLAS SEDİRİ",
  "AKCA AGAC":"AKÇAAĞAÇ",
  "CINAR":"ÇINAR",
@@ -171,10 +130,6 @@ Object.keys(SPECIES_DATA).forEach(g=>SPECIES_DATA[g].forEach(s=>{
  const ln=normSp(s.lat);
  if(ln&&s.lat!=="—"&&!_SP_NORM[ln])_SP_NORM[ln]=s.tr;
 }));
-RESOLVE_ONLY_SPECIES.forEach(s=>{
- _SP_NORM[normSp(s.tr)]=s.tr;
- const ln=normSp(s.lat); if(ln&&!_SP_NORM[ln])_SP_NORM[ln]=s.tr;
-});
 Object.keys(SPECIES_SYNONYMS).forEach(k=>{
  const v=SPECIES_SYNONYMS[k];
  if(_SP_NORM[normSp(v)]===v)_SP_NORM[k]=v;
@@ -184,12 +139,16 @@ function resolveSpeciesName(name){
  if(!n)return null;
  return _SP_NORM[n]||null;
 }
+/* TEK ρ çözüm yolu:
+ * 1) tür katalogda bulunmalı,
+ * 2) kayıt grubu katalog grubuyla aynı olmalı,
+ * 3) kilitli özel ρ varsa onu, yoksa yalnız İBRELİ/YAPRAKLI genelini kullan.
+ * DİĞER, bilinmeyen tür veya grup uyuşmazlığı karbon üretemez. */
+function densityKgFor(name,grp){
+ const canonical=resolveSpeciesName(name);
+ if(!canonical)return null;
+ const expectedGroup=SPECIES_GROUP[canonical];
+ if(!expectedGroup||expectedGroup!==grp||!MEASUREMENT_GROUPS.includes(grp))return null;
+ return rho[canonical]??GROUP_DEFAULT_RHO[grp]??null;
+}
 
-/* Test/denetim katmanının kanonik tabloyu okuyabilmesi için salt-okunur dışa aktarım.
- * globalThis hem tarayıcıda (window) hem Node/vm araçlarında vardır; doğrudan
- * `window` kullanmak CLI/CI rapor zincirini ReferenceError ile kırıyordu. */
-globalThis.DG_WOOD_DENSITY_LOCK=Object.freeze({
- id:WOOD_DENSITY_LOCK_ID,
- unit:"kg/m3",
- rows:WOOD_DENSITY_CANONICAL
-});

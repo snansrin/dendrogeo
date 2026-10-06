@@ -67,6 +67,7 @@ export function loadApp({ sadece } = {}) {
 
   const SIRALAMA = [
     'src/config/constants.js',
+    'src/config/wood-density-lock.js',
     'src/config/species.js',
     'src/utils/geo.js',
     'src/utils/truncation.js',
@@ -108,10 +109,14 @@ export function loadApp({ sadece } = {}) {
      * fonksiyonları burada test edilir (DOM'a dokunan çizim kısmı değil). */
     'src/services/admin-tree.js',
   ];
-  const dosyalar = sadece ? SIRALAMA.filter((f) => sadece.includes(f)) : SIRALAMA;
+  const secim = sadece ? new Set(sadece) : null;
+  if (secim && (secim.has('src/config/species.js') || secim.has('src/services/allometry.js')))
+    secim.add('src/config/wood-density-lock.js');
+  const dosyalar = secim ? SIRALAMA.filter((f) => secim.has(f)) : SIRALAMA;
 
-  const LEXICAL = ['SPECIES_DATA', 'GROUP_DEFAULT_RHO', 'species', 'rho', 'LATIN',
-                   'GROUP_COLOR', 'SPECIES_SYNONYMS', 'QUOTA_MB', 'esc', '$',
+  const LEXICAL = ['WOOD_DENSITY_LOCK_ID','WOOD_DENSITY_LOCK_FINGERPRINT','WOOD_DENSITY_CANONICAL',
+                   'MEASUREMENT_GROUPS','SPECIES_DATA','GROUP_DEFAULT_RHO','SPECIES_GROUP',
+                   'species','rho','LATIN','GROUP_COLOR','SPECIES_SYNONYMS','QUOTA_MB','esc','$',
                    'DG_LC_CODES', 'DG_LC_CLASSES', 'DG_LC_PIXEL_M', 'DG_LC_YEAR',
                    'DG_LC_COLLECTION', 'DG_LC_STAC', 'DG_LC_MAX_TILES',
                    'DG_LC_MAX_READ_PIXELS', 'DG_LC_RENDER_LIMIT',

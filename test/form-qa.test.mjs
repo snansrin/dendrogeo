@@ -48,13 +48,10 @@ const read = (p) => readFileSync(join(ROOT, p), 'utf8');
 const dict = loadSpeciesDict();
 const _base = loadRho();
 const RHO = Object.assign({}, _base.rho);
-for (const e of Object.values(dict.byName)) if (e.rho) RHO[e.tr] = e.rho;
 const GRHO = _base.grho;
-const carbonOf = (d, h, sp, gr) => calcRow(d, h, sp, gr, { rho: RHO, grho: GRHO }).total_carbon;
-/* Grup varsayılanı ρ ile üretilmiş saklı değer (0011 SQL tablosunun deseni). */
-const carbonGrup = (d, h, sp, gr) => calcRow(d, h, sp, gr, { rho: {}, grho: GRHO }).total_carbon;
+const carbonOf = (d, h, sp, gr) => calcRow(d, h, sp, gr).total_carbon;
 
-/* ---------- Göksu benzeri fikstür: geniş gövdeler + çift ρ deseni ---------- */
+/* ---------- Göksu benzeri fikstür: geniş gövdeler + FINAL ρ kilidi ---------- */
 const RAW = [
   { p: 1, sp: 'SÜS ERİĞİ', grp: 'YAPRAKLI', d: 110, h: 10.2, c: 'tur' },
   { p: 3, sp: 'KIZILAĞAÇ', grp: 'YAPRAKLI', d: 166, h: 14, c: 'grup' },
@@ -66,8 +63,8 @@ const RAW = [
 const ROWS = RAW.map((r, i) => ({
   id: 200 + i, point_id: r.p, species: r.sp, grp: r.grp,
   dbh_cm: r.d, girth_cm: null, height_m: r.h,
-  carbon_kg: +(r.c === 'grup' ? carbonGrup(r.d, r.h, r.sp, r.grp) : carbonOf(r.d, r.h, r.sp, r.grp)).toFixed(6),
-  volume_m3: +calcRow(r.d, r.h, r.sp, r.grp, { rho: RHO, grho: GRHO }).vol.toFixed(3),
+  carbon_kg: +carbonOf(r.d, r.h, r.sp, r.grp).toFixed(6),
+  volume_m3: +calcRow(r.d, r.h, r.sp, r.grp).vol.toFixed(3),
   lat: 39.99025 + i * 0.0002, lon: 32.65201 + i * 0.0002, acc_m: 4.2, photo: true,
   photo_file: `P${String(r.p).padStart(3, '0')}_M1.JPG`, date: '2026-09-28',
 }));
@@ -243,64 +240,57 @@ describe('0032 · medianOf / madOf / modifiedZ (sağlam aykırılık göstergesi
   });
 });
 
-/* ================== 4) ÇİFT ρ KAYNAĞI (karbon denetimi) ================== */
-describe('0032 · karbon yeniden hesabı İKİ ρ kaynağıyla yapılır', () => {
-  const mk = (p, sp, grp, d, h, c) => ({ id: p, point_id: p, species: sp, grp: grp, dbh_cm: d, height_m: h, carbon_kg: c });
+/* ================== 4) FINAL ρ KİLİDİ (karbon denetimi) ================== */
+describe('karbon yeniden hesabı yalnız FINAL kilitli ρ ile yapılır', () => {
+  const mk = (p, sp, grp, d, h, c) => ({ id:p, point_id:p, species:sp, grp, dbh_cm:d, height_m:h, carbon_kg:c });
 
-  test('grup varsayılanı ρ ile üretilmiş saklı değer GEÇERLİ sayılır (Göksu deseni)', () => {
-    /* KIZILAĞAÇ: kanonik tür ρ=407, grup (YAPRAKLI) ρ=541.
-     * Saklı değer grup varsayılanıyla üretildiyse çift-kaynak QA bunu geçerli
-     * saymalı; bu test özel ρ ile grup fallback yolunu birbirinden ayırır. */
-    const d = 166, h = 14;
-    const sakliGrup = +carbonGrup(d, h, 'KIZILAĞAÇ', 'YAPRAKLI').toFixed(6);
-    const qa = inventoryQa([mk(3, 'KIZILAĞAÇ', 'YAPRAKLI', d, h, sakliGrup)], dict);
-    assert.equal(qa.dev_fail.length, 0, 'grup ρ ile birebir → geçerli');
-    const row = qa.rows[0];
-    assert.equal(row.rho_src, 'grup');
-    assert.ok(Math.abs(row.dev_pct) > QA_LIMITS.CARBON_DEV_PCT, 'tür ρ ile bant aşılır: ' + row.dev_pct);
-    assert.ok(Math.abs(row.dev_grp_pct) <= QA_LIMITS.CARBON_DEV_PCT, 'grup ρ ile bant içinde: ' + row.dev_grp_pct);
-    assert.equal(qa.dev_rho.grup_farkli.length, 1, 'beyan listesi');
-    assert.equal(qa.dev_rho.grup_farkli[0].rho_tur, 407);
-    assert.equal(qa.dev_rho.grup_farkli[0].rho_grp, 541);
-    assert.equal(qa.state, QA_STATE.VALID);
+  test('özel tür ρ dışarıdan grup geneliyle override edilemez', () => {
+    const d=166,h=14;
+    const finalC=carbonOf(d,h,'KIZILAĞAÇ','YAPRAKLI');
+    const injected=calcRow(d,h,'KIZILAĞAÇ','YAPRAKLI',{rho:{},grho:{YAPRAKLI:541}}).total_carbon;
+    assert.equal(injected,finalC,'dış politika FINAL kilidi değiştirememeli');
+    const qa=inventoryQa([mk(3,'KIZILAĞAÇ','YAPRAKLI',d,h,+finalC.toFixed(6))],dict);
+    assert.equal(qa.dev_fail.length,0);
+    assert.equal(qa.rows[0].rho_src,'tur');
+    assert.equal(qa.rows[0].rho_species,407);
+    assert.deepEqual(qa.dev_rho.grup_farkli,[]);
+    assert.equal(qa.state,QA_STATE.VALID);
   });
 
-  test('gerçek hesap hatası (10x ondalık kayması) YAKALANMAYA DEVAM EDER', () => {
-    const d = 107, h = 12;
-    const dogru = carbonOf(d, h, 'KARAÇAM', 'İBRELİ');
-    const qa = inventoryQa([mk(7, 'KARAÇAM', 'İBRELİ', d, h, +(dogru / 10).toFixed(1))], dict);
-    assert.equal(qa.dev_fail.length, 1, 'her iki ρ kaynağıyla da bant dışı');
-    assert.equal(qa.dev_fail[0].point_id, 7);
-    assert.ok(Math.abs(qa.dev_fail[0].dev_pct) > 80, 'sapma: ' + qa.dev_fail[0].dev_pct);
-    assert.ok(qa.dev_fail[0].expected_grp > 0, 'grup ρ beklenen değeri de beyan edilir');
-    assert.equal(qa.rows[0].rho_src, null, 'eşleşen kaynak yok');
+  test('gerçek hesap hatası (10x ondalık kayması) yakalanır; alternatif ρ aranmaz', () => {
+    const d=107,h=12,dogru=carbonOf(d,h,'KARAÇAM','İBRELİ');
+    const qa=inventoryQa([mk(7,'KARAÇAM','İBRELİ',d,h,+(dogru/10).toFixed(1))],dict);
+    assert.equal(qa.dev_fail.length,1);
+    assert.equal(qa.dev_fail[0].point_id,7);
+    assert.ok(Math.abs(qa.dev_fail[0].dev_pct)>80);
+    assert.equal(qa.dev_fail[0].expected_grp,null);
+    assert.equal(qa.rows[0].rho_src,'tur');
   });
 
   test('küçük kayıtlarda mutlak taban (≥5 kg) korunur', () => {
-    const r = [mk(29, 'IHLAMUR', 'YAPRAKLI', 12.73, 4.5, 10.6)];
-    const qa = inventoryQa(r, dict);
-    assert.equal(qa.rows[0].dev_fail, false, 'dev ' + qa.rows[0].dev_pct + '% ama |fark| < 5 kg');
-    assert.equal(qa.dev_fail.length, 0);
+    const r=[mk(29,'IHLAMUR','YAPRAKLI',12.73,4.5,10.6)];
+    const qa=inventoryQa(r,dict);
+    assert.equal(qa.rows[0].dev_fail,false);
+    assert.equal(qa.dev_fail.length,0);
   });
 
-  test('ρ kaynağı sayımı raporda beyan edilir (tür / grup)', () => {
-    assert.equal(QA.dev_rho.n, 6, '6/6 kayıt yeniden üretildi');
-    assert.equal(QA.dev_rho.tur + QA.dev_rho.grup, 6);
-    assert.ok(QA.dev_rho.grup >= 2, 'KIZILAĞAÇ grup ρ ile üretilen kayıtlar: ' + QA.dev_rho.grup);
-    assert.deepEqual(QA.dev_rho.grup_farkli.map((x) => x.point_id), [3, 32]);
-    assert.equal(QA.dev_fail.length, 0);
-    assert.equal(QA.dev_block, false);
+  test('yetkili kaynak sayımı tür-özel / grup-geneli olarak beyan edilir', () => {
+    assert.equal(QA.dev_rho.n,6);
+    assert.equal(QA.dev_rho.tur,3);
+    assert.equal(QA.dev_rho.grup,3);
+    assert.deepEqual(QA.dev_rho.grup_farkli,[]);
+    assert.equal(QA.dev_fail.length,0);
+    assert.equal(QA.dev_block,false);
   });
 
-  test('karbon MOTORU değişmedi: aynı girdi aynı altın değer', () => {
-    const altin = calcRow(107, 12, 'KARAÇAM', 'İBRELİ', { rho: RHO, grho: GRHO });
-    assert.ok(Math.abs(altin.total_carbon - 1972.827017) < 1e-4, 'altın değer: ' + altin.total_carbon);
-    assert.ok(Math.abs(altin.bhb - altin.agb * 0.26) < 1e-9);
-    assert.ok(Math.abs(altin.total_carbon - (altin.agb + altin.bhb) * 0.47) < 1e-9);
-    /* katsayılar kaynak dosyalarda birebir */
-    for (const k of ['0.0673', '0.976', '0.26', '0.47']) {
-      assert.ok(read('scripts/lib/mc.mjs').includes(k), 'mc.mjs: ' + k);
-      assert.ok(read('src/services/allometry.js').includes(k), 'allometry.js: ' + k);
+  test('karbon motoru aynı Chave/BGB/C katsayılarını korur', () => {
+    const altin=calcRow(107,12,'KARAÇAM','İBRELİ');
+    assert.ok(Math.abs(altin.total_carbon-1972.827017)<1e-4,'altın değer: '+altin.total_carbon);
+    assert.ok(Math.abs(altin.bhb-altin.agb*0.26)<1e-9);
+    assert.ok(Math.abs(altin.total_carbon-(altin.agb+altin.bhb)*0.47)<1e-9);
+    for(const k of ['0.0673','0.976','0.26','0.47']){
+      assert.ok(read('scripts/lib/mc.mjs').includes(k),'mc.mjs: '+k);
+      assert.ok(read('src/services/allometry.js').includes(k),'allometry.js: '+k);
     }
   });
 });
@@ -315,8 +305,8 @@ describe('0033 · inventoryQa: çap dağılımı betimleyici, form göstergesi i
     assert.deepEqual(Object.keys(p3).filter((k) => /anit|basamak/i.test(k)), [], 'satır düzeyinde sınıf alanı yok');
   });
 
-  test('ℹ️ beyan kalemi yalnız ρ kaynağıdır ve QA durumunu ETKİLEMEZ', () => {
-    assert.deepEqual(QA.info.map((x) => x.key), ['rho-kaynagi']);
+  test('alternatif ρ beyan kalemi yoktur; QA durumu geçerlidir', () => {
+    assert.deepEqual(QA.info, []);
     assert.equal(QA.dbh_fail.length, 0);
     assert.equal(QA.hd_fail.length, 0);
     assert.equal(QA.dev_fail.length, 0);
@@ -339,7 +329,7 @@ describe('0033 · inventoryQa: çap dağılımı betimleyici, form göstergesi i
     const p3 = QA.rows.find((r) => r.point_id === 3);
     assert.equal(p3.hd_band_out, true);
     assert.equal(p3.hd_fail, false);
-    assert.equal(p3.rho_src, 'grup');
+    assert.equal(p3.rho_src, 'tur');
     assert.equal(p3.dbh_cm, 166, 'DBH olduğu gibi: dönüşüm YOK');
     assert.equal(p3.dbh_fail, false);
     assert.equal(QA.rows.find((r) => r.point_id === 29).dbh_cm, 40);
@@ -461,11 +451,8 @@ describe('0033 · rapor metni: yasal statü iddiası YOK, veri hatası iması YO
     assert.match(S9, /hiçbir düzeltme, ölçekleme veya dışlama uygulanmamıştır/);
   });
 
-  test('§9 ρ kaynağı sınırlılığı ve tipik bant sayımı korunur (0032 hükmü)', () => {
-    assert.match(S9, /Odun yoğunluğu \(ρ\) kaynağı/);
-    assert.match(S9, /P3, P32/);
-    assert.match(S9, /GRUP VARSAYILANI ρ ile yeniden üretilmiştir/);
-    assert.match(S9, /karbon motoru, katsayılar, saklı değerler ve CSV çıktısı DEĞİŞTİRİLMEMİŞTİR/);
+  test('§9 tipik bant sayımı korunur; alternatif ρ sınırlılığı yoktur', () => {
+    assert.ok(!/HER İKİ ρ|iki ρ kaynağı|GRUP VARSAYILANI ρ ile yeniden üretilmiştir/.test(S9));
     assert.match(S9, /tipik 15–120 bandının dışındadır; bu bir UYARI DEĞİL, dağılım bilgisidir/);
     assert.match(S9, /medyan 10,24/, 'stand dağılımı sayıyla');
     assert.match(S9, /tek başına ölçüm hatası kanıtı oluşturmaz/);
@@ -505,15 +492,14 @@ describe('0033 · rapor metni: yasal statü iddiası YOK, veri hatası iması YO
     assert.deepEqual(d.match(/anıt|Anıt/g) || [], [], 'satır metninde iz yok');
   });
 
-  test('karbon satırı ρ kaynak sayımını beyan eder', () => {
-    const d = rowOf('Karbon yeniden hesabı')[2].txt;
-    assert.equal(rowOf('Karbon yeniden hesabı')[1].txt, '✓ Geçerli');
-    assert.match(d, /6\/6 kayıt panel denklemiyle \(Chave 2014 \+ kanonik ρ tablosu\) ±%20 içinde yeniden üretildi/);
-    assert.match(d, /bant dışı kayıt YOK/);
-    assert.match(d, /kayıt tür düzeyi ρ ile eşleşti/);
-    assert.match(d, /kayıt grup varsayılanı ρ ile eşleşti/);
-    assert.match(d, /GRUP VARSAYILANI ρ ile yeniden üretildi/);
-    assert.match(d, /ÖLÇÜM HATASI DEĞİLDİR/);
+  test('karbon satırı FINAL kilit ve yetkili kaynak sayımını beyan eder', () => {
+    const d=rowOf('Karbon yeniden hesabı')[2].txt;
+    assert.equal(rowOf('Karbon yeniden hesabı')[1].txt,'✓ Geçerli');
+    assert.match(d,/6\/6 kayıt panel denklemiyle \(Chave 2014 \+ FINAL kilitli ρ tablosu\) ±%20 içinde yeniden üretildi/);
+    assert.match(d,/bant dışı kayıt YOK/);
+    assert.match(d,/3 kayıt kilitli tür ρ satırı kullandı/);
+    assert.match(d,/3 kayıt yalnız kendi grup genelini kullandı/);
+    assert.ok(!/HER İKİ ρ|iki ρ kaynağı/.test(d));
   });
 });
 
@@ -532,13 +518,13 @@ describe('0033 · metadata.json: scopeNote + carbonRecalc + qaInfo', () => {
     assert.equal(MD.carbonRecalc.minAbsDiffKg, 5);
     assert.equal(MD.carbonRecalc.checked, 6);
     assert.equal(MD.carbonRecalc.matchedSpeciesRho + MD.carbonRecalc.matchedGroupRho, 6);
-    assert.deepEqual(MD.carbonRecalc.matchedGroupOnlyPoints, [3, 32]);
+    assert.deepEqual(MD.carbonRecalc.matchedGroupOnlyPoints, []);
     assert.deepEqual(MD.carbonRecalc.outOfBand, []);
-    assert.match(MD.carbonRecalc.note, /iki ρ kaynağıyla/);
-    assert.match(MD.carbonRecalc.note, /Motor ve katsayılar değişmez/);
+    assert.match(MD.carbonRecalc.note, /yalnız FINAL kilitli ρ tablosuyla/);
+    assert.equal(MD.carbonRecalc.densityLockId, 'DG-WD-LOCK-2026-10-06-FINAL');
   });
   test('qaInfo + qaState: beyan kalemleri durumu değiştirmez', () => {
-    assert.deepEqual(MD.qaInfo.map((x) => x.key), ['rho-kaynagi'], '0033: sınıf beyanı kalemi yok');
+    assert.deepEqual(MD.qaInfo, [], 'alternatif ρ bilgi kalemi yok');
     assert.equal(MD.qaState, QA_STATE.VALID);
     assert.equal(MD.qaStateLabel, '🟢 GEÇERLİ');
   });
