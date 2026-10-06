@@ -990,3 +990,18 @@ label.lbl{display:block}
  #v-users .admin-user-actions select{min-height:40px;max-width:128px}
  #v-users .admin-user-actions .btn{min-height:40px}
 }
+
+/* 2026-10-06 · compact field help + mobile measurement identity */
+.dg-inline-help{display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;min-width:20px;padding:0;margin-left:5px;border:1px solid var(--line);border-radius:50%;background:var(--surface);color:var(--green);font:800 .72rem/1 var(--f-mono);vertical-align:middle;cursor:help}
+.dg-inline-help:focus{outline:2px solid var(--green);outline-offset:2px}
+.measure-dimensions>div{position:relative}
+.dg-help-pop{display:none;position:absolute;left:0;right:0;top:100%;z-index:45;margin-top:7px;padding:10px 12px;border:1px solid var(--line);border-radius:9px;background:var(--surface);box-shadow:var(--sh);font-size:.76rem;line-height:1.45;color:var(--ink)}
+.dg-inline-help:hover~.dg-help-pop,.dg-inline-help:focus~.dg-help-pop,.measure-dimensions>div:focus-within .dg-inline-help:focus~.dg-help-pop{display:block}
+@media(max-width:640px){
+ .measure-heading{align-items:flex-start}
+ .measure-tag{display:inline-flex!important;white-space:nowrap;font-size:.67rem;padding:4px 8px}
+ #v-measure .measure-gps-row{display:grid;grid-template-columns:1fr;gap:8px}
+ #v-measure #gpsState{min-height:44px;display:flex;align-items:center}
+ #v-measure #gpsBtn{width:100%}
+ .dg-help-pop{font-size:.72rem}
+}
