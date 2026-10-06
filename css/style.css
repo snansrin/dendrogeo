@@ -452,7 +452,7 @@ label.lbl{display:block}
 #v-measure #saveBtn{width:auto;min-width:245px;flex:0 0 auto}
 #v-measure [aria-invalid=true]{border-color:var(--red);outline-color:var(--red)}
 @media(max-width:640px){
- .measure-heading{margin-bottom:14px}.measure-tag{display:none}
+ .measure-heading{margin-bottom:14px}.measure-tag{display:inline-flex!important}
  #v-measure .card,#v-measure .measure-location{padding:16px}
  .measure-project{grid-template-columns:1fr;gap:4px}
  .measure-gps-row{flex-wrap:wrap;gap:12px}#v-measure #gpsBtn{width:100%}
@@ -1001,7 +1001,6 @@ label.lbl{display:block}
  .measure-heading{align-items:flex-start}
  .measure-tag{display:inline-flex!important;white-space:nowrap;font-size:.67rem;padding:4px 8px}
  #v-measure .measure-gps-row{display:grid;grid-template-columns:1fr;gap:8px}
- #v-measure #gpsState{min-height:44px;display:flex;align-items:center}
  #v-measure #gpsBtn{width:100%}
  .dg-help-pop{font-size:.72rem}
 }
@@ -1032,3 +1031,16 @@ label.lbl{display:block}
  #v-visitors .dg-vis-tools>*{grid-column:1!important}
  #v-visitors #visMap{min-height:300px}
 }
+
+/* 2026-10-06 · final mobile field ergonomics */
+@media(max-width:640px){
+ #v-measure .measure-heading{align-items:center;gap:8px}
+ #v-measure .measure-heading .disp{font-size:1.55rem}
+ #v-measure .measure-heading .measure-help{display:none}
+ #v-measure .measure-tag{display:inline-flex!important;max-width:44%;text-align:center;justify-content:center}
+ #v-measure .measure-gps-row{display:block}
+ #v-measure #gpsBtn{width:100%;min-height:48px}
+ #v-measure .dg-help-pop{left:-4px;right:-4px;z-index:80}
+}
+#v-visitors .dg-vis-person{padding:9px 10px!important;border:1px solid var(--line)!important;border-radius:9px;margin-bottom:7px;background:var(--bg)}
+#v-visitors #visFeed>div{padding:7px 4px!important}
