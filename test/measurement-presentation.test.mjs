@@ -67,11 +67,11 @@ describe('Dışa Aktar tema standardı',()=>{
   assert.match(sh,/Yöneticiden veri talep et/); assert.match(sh,/QGIS fotoğraf aktarım rehberi/);
   assert.match(css,/\.export-panel>summary/); assert.match(css,/\.export-format-grid/);
  });
- test('mevcut dışa aktarım işlevleri korunur ve yöntem notu C\/π standardını açıklar',()=>{
+ test('mevcut dışa aktarım işlevleri korunur; tekrar eden yöntem metni arayüzde gösterilmez',()=>{
   const sh=rd('partials/shell.html');
   for(const fn of ['exportCSV()','previewCSV()','exportGeo()','previewGeo()','exportQgis()','sendDataRequest()']) assert.ok(sh.includes(fn),fn+' korunmalı');
-  assert.match(sh,/DBH çevre\/π ile türetilir/);
-  assert.match(sh,/çıktıda 1 ondalık basamakla sunulur/);
-  assert.ok(!sh.includes('C → DBH = C/π · DBH 0,1 cm'),'kullanıcının kaldırdığı yöntem rozeti geri gelmemeli');
+  assert.ok(!sh.includes('C → DBH = C/π · DBH 0,1 cm'));
+  assert.ok(!sh.includes('Ölçüm protokolü korunur:'));
+  assert.ok(!sh.includes('export-method-note'));
  });
 });

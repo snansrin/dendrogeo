@@ -95,11 +95,12 @@ describe('eski format koruması (kullanıcı tercihi 2026-09-20)', () => {
     assert.ok(!/\nh3\{/.test(css), 'global h3 kuralı geri gelmemeli');
   });
 
-  test('panel ana tema standardında kişisel çalışma alanıdır; ölçüm başlığı korunur', () => {
-    assert.match(html, /class="dashboard-heading"/);
-    assert.match(html, /KİŞİSEL ÇALIŞMA ALANI/);
-    assert.match(html, /<h2 class="disp">Genel Bakış/);
-    assert.match(html, /<h3>Kişisel Ağaç Analizi<\/h3>/);
+  test('panel kullanıcı tercihiyle sade ana tema yapısındadır; ölçüm başlığı korunur', () => {
+    assert.match(html, /<h2 style="font-size:1\.6rem">Genel Bakış<\/h2>/);
+    assert.match(html, /id="dgAcademicProfile"/);
+    assert.match(html, /Kişisel Ağaç Analizi/);
+    assert.match(html, /Karbon Trendi/);
+    assert.ok(!html.includes('DendroGeo Panel'));
     assert.match(html, /<h2 class="disp">Yeni Ölçüm/);
   });
 

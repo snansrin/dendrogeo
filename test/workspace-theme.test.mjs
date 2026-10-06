@@ -6,9 +6,11 @@ import {fileURLToPath} from 'node:url';
 const ROOT=join(dirname(fileURLToPath(import.meta.url)),'..');
 const rd=p=>readFileSync(join(ROOT,p),'utf8');
 
-test('Dışa Aktar başlığında yöntem rozeti yok; paneller ortak details temasında',()=>{
+test('Dışa Aktar sade başlık kullanır; yöntem bannerı yok, işlevsel paneller korunur',()=>{
  const shell=rd('partials/shell.html');
  assert.ok(!shell.includes('C → DBH = C/π · DBH 0,1 cm'));
+ assert.ok(!shell.includes('Ölçüm protokolü korunur:'));
+ assert.ok(!shell.includes('export-method-note'));
  assert.match(shell,/class="export-panel"/);
  assert.match(shell,/class="export-format-grid"/);
 });
@@ -20,15 +22,16 @@ test('Kayıtlarım proje bazında kapalı disclosure olarak gruplanır',()=>{
  assert.match(rd('partials/shell.html'),/id="recGroups" class="records-groups"/);
 });
 
-test('Waypoint görünümünde yalnız harita açılır-kapanır; diğer saha araçları açık kalır',()=>{
+test('Waypoint kullanıcı tercihiyle sade eski düzendedir',()=>{
  const shell=rd('partials/shell.html');
  const a=shell.indexOf('<div class="view" id="v-nav">');
  const b=shell.indexOf('<div class="view"',a+30);
  const nav=shell.slice(a,b);
- assert.equal((nav.match(/<details\b/g)||[]).length,1);
+ assert.match(nav,/<h2 class="disp"[^>]*>Waypoint Navigasyon<\/h2>/);
+ assert.ok(!nav.includes('Saha Modu'));
+ assert.ok(!nav.includes('waypoint-heading'));
  assert.match(nav,/id="wpMapPanel" class="card waypoint-map"/);
- assert.match(nav,/class="waypoint-files"/);
- assert.ok(!/class="waypoint-files"[^>]*><summary/.test(nav));
+ assert.match(nav,/<details class="waypoint-files"><summary>📂 CSV ve liste yönetimi<\/summary>/);
 });
 
 test('Taleplerim kapalı disclosure olur ve kullanıcı kendi talebini silebilir',()=>{
@@ -64,4 +67,18 @@ test('bilimsel yöntem her ana belgede çevre bölü pi ve DBH 0,1 cm gösterimi
   assert.match(t,/C\s*\/\s*π|D\s*=\s*C\s*\/\s*π|çevre\s*÷\s*π/i,p);
   assert.match(t,/1 ondalık|0,1 cm/i,p);
  }
+});
+
+
+test('panel sade, kullanıcı yönetimi ana tema standardında',()=>{
+ const shell=rd('partials/shell.html'),ua=rd('src/services/user-admin.js');
+ assert.ok(!shell.includes('DendroGeo Panel'));
+ assert.ok(!shell.includes('Park · proje · ekip'));
+ assert.ok(!shell.includes('Proje bazlı envanter'));
+ assert.match(shell,/id="dgAcademicProfile"/);
+ assert.match(shell,/class="admin-users-stats"/);
+ assert.match(shell,/id="userRoleFilter"/);
+ assert.match(shell,/id="userStatusFilter"/);
+ assert.match(ua,/aUsersVisible/);
+ assert.match(ua,/dataset\.role/);
 });
