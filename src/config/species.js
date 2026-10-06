@@ -1,16 +1,17 @@
 "use strict";
 /*
  * DendroGeo kanonik odun yoğunluğu tablosu
- * Kilit: DG-WD-LOCK-2026-10-06-v1
+ * Kilit: DG-WD-LOCK-2026-10-06-v2
  *
  * KURAL:
  * - Bu tablo kullanıcı tarafından 2026-10-06 tarihinde kanonik kaynak olarak onaylandı.
  * - Tür eklemek bu tablodaki hiçbir yoğunluğu değiştiremez.
- * - Tabloda olmayan türler kendi grubunun genel yoğunluğuna düşer:
+ * - Tabloda özel tür yoğunluğu bulunmayan türler kendi grubunun genel yoğunluğuna düşer:
  *   İbreliler 0,446 ton/m³; Yapraklılar 0,541 ton/m³.
- * - Birimler uygulama içinde kg/m³ tutulur (0,468 ton/m³ = 468 kg/m³).
+ * - SIĞLA (Liquidambar orientalis) için özel rho UYGULANMAZ; YAPRAKLI genel 0,541 kullanılır.
+ * - Birimler uygulama içinde kg/m³ tutulur (0,541 ton/m³ = 541 kg/m³).
  */
-const WOOD_DENSITY_LOCK_ID="DG-WD-LOCK-2026-10-06-v1";
+const WOOD_DENSITY_LOCK_ID="DG-WD-LOCK-2026-10-06-v2";
 const WOOD_DENSITY_CANONICAL=[
  {key:"GROUP:İBRELİ",tr:"İbreliler (Genel)",taxon:null,rho_t_m3:0.446,rho:446,source:"Tolunay, 2013; NIR Turkey, 2017; 299 Nolu Tebliğ, 2017"},
  {key:"GÖKNAR",tr:"GÖKNAR",taxon:"Abies sp.",rho_t_m3:0.350,rho:350,source:"As ve ark., 2001"},
@@ -28,7 +29,6 @@ const WOOD_DENSITY_CANONICAL=[
  {key:"GÜRGEN",tr:"GÜRGEN",taxon:"Carpinus sp.",rho_t_m3:0.630,rho:630,source:"IPCC, 2003"},
  {key:"KAYIN",tr:"KAYIN",taxon:"Fagus orientalis",rho_t_m3:0.530,rho:530,source:"As ve ark., 2001"},
  {key:"DİŞBUDAK",tr:"DİŞBUDAK",taxon:"Fraxinus excelsior",rho_t_m3:0.562,rho:562,source:"Gürsu, 1971"},
- {key:"SIĞLA",tr:"SIĞLA",taxon:"Liquidambar orientalis",rho_t_m3:0.468,rho:468,source:"Tolunay (2013)"},
  {key:"KAVAK",tr:"KAVAK",taxon:"Populus sp.",rho_t_m3:0.350,rho:350,source:"IPCC, 2003"},
  {key:"MEŞE",tr:"MEŞE",taxon:"Quercus sp.",rho_t_m3:0.570,rho:570,source:"As ve ark., 2001"}
 ];
@@ -67,7 +67,7 @@ const SPECIES_DATA={
   {tr:"GÜRGEN",lat:"Carpinus betulus",rho:_LOCKED_RHO["GÜRGEN"]},
   {tr:"KAYIN",lat:"Fagus orientalis",rho:_LOCKED_RHO["KAYIN"]},
   {tr:"DİŞBUDAK",lat:"Fraxinus excelsior",rho:_LOCKED_RHO["DİŞBUDAK"]},
-  {tr:"SIĞLA",lat:"Liquidambar orientalis",rho:_LOCKED_RHO["SIĞLA"]},
+  {tr:"SIĞLA",lat:"Liquidambar orientalis",rho:null},
   {tr:"KAVAK",lat:"Populus spp.",rho:_LOCKED_RHO["KAVAK"]},
   {tr:"KIZILAĞAÇ",lat:"Alnus glutinosa",rho:_LOCKED_RHO["KIZILAĞAÇ"]},
   {tr:"ÇINAR",lat:"Platanus orientalis",rho:null},
@@ -185,8 +185,10 @@ function resolveSpeciesName(name){
  return _SP_NORM[n]||null;
 }
 
-/* Test/denetim katmanının kanonik tabloyu okuyabilmesi için salt-okunur dışa aktarım. */
-window.DG_WOOD_DENSITY_LOCK=Object.freeze({
+/* Test/denetim katmanının kanonik tabloyu okuyabilmesi için salt-okunur dışa aktarım.
+ * globalThis hem tarayıcıda (window) hem Node/vm araçlarında vardır; doğrudan
+ * `window` kullanmak CLI/CI rapor zincirini ReferenceError ile kırıyordu. */
+globalThis.DG_WOOD_DENSITY_LOCK=Object.freeze({
  id:WOOD_DENSITY_LOCK_ID,
  unit:"kg/m3",
  rows:WOOD_DENSITY_CANONICAL
