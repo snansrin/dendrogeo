@@ -444,7 +444,7 @@ describe('0033 · rapor metni: yasal statü iddiası YOK, veri hatası iması YO
 
   test('§9 model temsili: çap aralığı VERİDEN, sınırlılık modelde', () => {
     assert.match(S9, /Gövde çapı dağılımı ve model temsili/);
-    assert.match(S9, /40,0–200,0 cm \\(medyan 108,5 cm, n=6\\)/);
+    assert.match(S9, /40,0–200,0 cm \(medyan 108,5 cm, n=6\)/);
     assert.match(S9, /Modelin aktarılabilirliği şu sınırlamalara tabidir/);
     assert.match(S9, /Chave ve ark\. 2014/);
     assert.match(S9, /model sapmasını ayrıca nicelleştirmez/);
