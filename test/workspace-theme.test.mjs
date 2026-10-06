@@ -50,8 +50,8 @@ test('landing hero yalnız yuvarlanmış DBHyi gösterir; yöntem kaynağı gizl
  const landing=rd('partials/landing.html'),css=rd('css/landing.css');
  assert.match(landing,/class="chip c1" data-circumference="45"[^>]*>[\s\S]*?DBH 14\.3 cm/);
  assert.ok(!landing.includes('ÇEVRE 45 cm → DBH 14.3 cm'));
- assert.match(css,/\.chip\.c1\{top:38%/);
- assert.match(css,/\.chip\.c3\{top:42%/);
+ assert.match(css,/\.chip\.c1\{top:31%/);
+ assert.match(css,/\.chip\.c3\{top:35%/);
 });
 
 test('yayın öncesi form gerekli alanlarda örnek yardım balonları taşır',()=>{
