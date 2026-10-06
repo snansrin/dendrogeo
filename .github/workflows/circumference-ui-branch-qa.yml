@@ -18,16 +18,18 @@ jobs:
         with:
           node-version: 20
       - run: npm ci
+      - run: node scripts/version-sync.mjs --write
       - run: npm run build
-      - name: Commit generated index
+      - name: Commit generated assets
         run: |
           git config user.name "DendroGeo QA Bot"
           git config user.email "qa@dendrogeo.local"
-          git add index.html
+          git add index.html partials/ *.html en/**/*.html 2>/dev/null || true
+git add index.html partials/
           if git diff --cached --quiet; then
             echo "index current"
           else
-            git commit -m "build: refresh index after workspace polish"
+            git commit -m "build: refresh versions and index after workspace polish"
             git push origin HEAD:fix/circumference-to-dbh-protocol
           fi
       - run: npm run check
