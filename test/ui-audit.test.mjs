@@ -95,9 +95,11 @@ describe('eski format koruması (kullanıcı tercihi 2026-09-20)', () => {
     assert.ok(!/\nh3\{/.test(css), 'global h3 kuralı geri gelmemeli');
   });
 
-  test('panel başlıkları korunur, ölçüm başlığı ortak tema sınıfını kullanır', () => {
-    assert.match(html, /<h2 style="font-size:1\.6rem">Genel Bakış/);
-    assert.match(html, /<h2 style="font-size:1\.15rem">Kişisel Ağaç Analizi/);
+  test('panel ana tema standardında kişisel çalışma alanıdır; ölçüm başlığı korunur', () => {
+    assert.match(html, /class="dashboard-heading"/);
+    assert.match(html, /KİŞİSEL ÇALIŞMA ALANI/);
+    assert.match(html, /<h2 class="disp">Genel Bakış/);
+    assert.match(html, /<h3>Kişisel Ağaç Analizi<\/h3>/);
     assert.match(html, /<h2 class="disp">Yeni Ölçüm/);
   });
 
