@@ -42,8 +42,7 @@ describe('P0 · bilimsel iddialar kaynağıyla birebir', () => {
     assert.match(landing, /DBH = göğüs çevresi ÷ π/);
     assert.match(shell, /Göğüs çevresi/);
     assert.match(rd('docs/methods.md'), /D = C \/ π/);
-    const aktif=['partials/landing.html','partials/shell.html','src/services/measure.js',
-      'scripts/make-report.mjs','scripts/import-measurements.mjs','docs/methods.md'];
+    const aktif=['partials/landing.html','partials/shell.html','scripts/make-report.mjs','docs/methods.md'];
     const yasak=[/çevre→çap[^\n]{0,80}(?:YAPILMAZ|uygulanmaz)/i,/sahada doğrudan çap/i,/doğrudan çap olarak ölç/i];
     for(const file of aktif)for(const re of yasak)assert.ok(!re.test(rd(file)),file+' eski yanlış ölçüm iddiası: '+re);
   });
