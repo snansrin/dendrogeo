@@ -1,0 +1,122 @@
+name: Full System Audit
+on:
+  push:
+    branches:
+      - audit/full-scan-20261006
+permissions:
+  contents: read
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Install
+        run: npm ci
+      - name: Full regression suite
+        run: npm run check
+      - name: Dependency security audit
+        run: npm audit --audit-level=high
+      - name: Public client key sanity
+        shell: bash
+        run: |
+          node <<'NODE'
+          const fs=require('fs');
+          const s=fs.readFileSync('src/config/supabase.js','utf8');
+          const m=s.match(/SB_KEY="([^"]+)"/);
+          if(!m) throw new Error('SB_KEY missing');
+          const payload=JSON.parse(Buffer.from(m[1].split('.')[1],'base64url').toString());
+          console.log('Supabase public key role:', payload.role);
+          if(payload.role!=='anon') throw new Error('Frontend key is not anon');
+          if(/service[_-]?role/i.test(m[1])) throw new Error('service role marker in public key');
+          NODE
+      - name: Static dangerous construct scan
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import re, sys
+          roots=[Path('src'),Path('scripts')]
+          pats={
+            'eval':re.compile(r'\beval\s*\('),
+            'new Function':re.compile(r'\bnew\s+Function\b'),
+            'document.write':re.compile(r'\bdocument\.write\s*\('),
+            'javascript URL':re.compile(r'javascript\s*:',re.I),
+          }
+          bad=[]
+          inner=[]
+          todos=[]
+          for root in roots:
+            for p in root.rglob('*'):
+              if p.suffix not in {'.js','.mjs'}: continue
+              txt=p.read_text('utf-8',errors='replace')
+              for n,line in enumerate(txt.splitlines(),1):
+                for label,rx in pats.items():
+                  if rx.search(line): bad.append((str(p),n,label,line.strip()[:180]))
+                if '.innerHTML' in line or 'insertAdjacentHTML' in line:
+                  inner.append((str(p),n,line.strip()[:180]))
+                if re.search(r'\b(TODO|FIXME|HACK)\b',line,re.I):
+                  todos.append((str(p),n,line.strip()[:180]))
+          print('dangerous=',len(bad),'html_sinks=',len(inner),'todo_fixme_hack=',len(todos))
+          for x in bad: print('DANGEROUS',*x,sep=' | ')
+          for x in inner[:100]: print('HTML_SINK',*x,sep=' | ')
+          for x in todos[:100]: print('NOTE',*x,sep=' | ')
+          if bad: sys.exit(1)
+          PY
+      - name: Live deployment hash parity
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          import hashlib, urllib.request, time, re, sys
+          html=open('index.html',encoding='utf-8').read()
+          files=['index.html','sw.js','manifest.json']
+          for m in re.finditer(r'(?:src|href)="((?:src|css|vendor)/[^"?]+)',html):
+              if m.group(1) not in files: files.append(m.group(1))
+          h=lambda b:hashlib.sha256(b).hexdigest()
+          bad=[]
+          for f in files:
+              req=urllib.request.Request('https://dendrogeo.org/'+f+'?_audit='+str(int(time.time())),headers={'User-Agent':'DendroGeo-Full-Audit'})
+              try: remote=urllib.request.urlopen(req,timeout=30).read()
+              except Exception as e:
+                  print('FETCH_FAIL',f,repr(e)); bad.append(f); continue
+              local=open(f,'rb').read()
+              ok=h(local)==h(remote)
+              print(('OK' if ok else 'MISMATCH'),f)
+              if not ok: bad.append(f)
+          if bad:
+              print('HASH_MISMATCH_OR_FETCH_FAIL',','.join(bad))
+              sys.exit(1)
+          print('LIVE_HASH_PARITY_OK',len(files),'files')
+          PY
+      - name: Live URL smoke test
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          import urllib.request, xml.etree.ElementTree as ET, sys
+          ua={'User-Agent':'DendroGeo-Full-Audit'}
+          urls=['https://dendrogeo.org/','https://dendrogeo.org/rapor/','https://dendrogeo.org/rapor/DGR-2026-0023/','https://dendrogeo.org/yontem/']
+          try:
+              raw=urllib.request.urlopen(urllib.request.Request('https://dendrogeo.org/sitemap.xml',headers=ua),timeout=30).read()
+              root=ET.fromstring(raw)
+              ns={'s':'http://www.sitemaps.org/schemas/sitemap/0.9'}
+              urls += [x.text for x in root.findall('.//s:loc',ns) if x.text]
+          except Exception as e:
+              print('SITEMAP_FETCH_FAIL',repr(e)); sys.exit(1)
+          seen=[]; bad=[]
+          for u in urls:
+              if u in seen: continue
+              seen.append(u)
+              try:
+                  r=urllib.request.urlopen(urllib.request.Request(u,headers=ua),timeout=30)
+                  code=getattr(r,'status',200)
+                  body=r.read(256)
+                  print(code,u)
+                  if code<200 or code>=400 or not body: bad.append((u,code))
+              except Exception as e:
+                  print('URL_FAIL',u,repr(e)); bad.append((u,str(e)))
+          print('SMOKE_URLS',len(seen),'FAIL',len(bad))
+          if bad: sys.exit(1)
+          PY
