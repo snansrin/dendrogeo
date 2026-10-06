@@ -226,7 +226,7 @@ function dgTreeRowHTML(r){
     `<td data-label="Nokta"><b>P${esc(r.point_id)}</b>${r.measurement_no>1?`<span class="mono dg-sub"> /M${r.measurement_no}</span>`:""}</td>`+
     `<td data-label="Tür">${esc(r.species||"—")}<br><span class="mono dg-sub">${esc((typeof LATIN!=="undefined"&&LATIN[r.species])||"")}</span></td>`+
     `<td data-label="Grup">${esc(r.grp||"—")}</td>`+
-    `<td data-label="Çap">${r.dbh_cm??"—"}${r.girth_cm!=null&&Number(r.girth_cm)>0&&Number(r.girth_cm)!==Number(r.dbh_cm)?`<br><span class="mono dg-sub" title="0011 ile saklanan ham saha değeri (göğüs çevresi)">çevre: ${esc(r.girth_cm)} cm</span>`:""}</td>`+
+    `<td data-label="DBH">${Number.isFinite(+r.dbh_cm)?(+r.dbh_cm).toFixed(1):"—"}${r.girth_cm!=null&&Number(r.girth_cm)>0?`<br><span class="mono dg-sub" title="Sahada ölçülen ham göğüs çevresi">çevre: ${(+r.girth_cm).toFixed(1)} cm</span>`:""}</td>`+
     `<td data-label="Boy">${r.height_m??"—"}</td>`+
     `<td data-label="Karbon kg"><b>${(Number(r.carbon_kg)||0).toFixed(1)}</b></td>`+
     `<td data-label="Foto">${dgThumb(r.photo_url)}</td>`+
