@@ -109,7 +109,10 @@ export function loadApp({ sadece } = {}) {
      * fonksiyonları burada test edilir (DOM'a dokunan çizim kısmı değil). */
     'src/services/admin-tree.js',
   ];
-  const dosyalar = sadece ? SIRALAMA.filter((f) => sadece.includes(f)) : SIRALAMA;
+  const secim = sadece ? new Set(sadece) : null;
+  if (secim && (secim.has('src/config/species.js') || secim.has('src/services/allometry.js')))
+    secim.add('src/config/wood-density-lock.js');
+  const dosyalar = secim ? SIRALAMA.filter((f) => secim.has(f)) : SIRALAMA;
 
   const LEXICAL = ['WOOD_DENSITY_LOCK_ID','WOOD_DENSITY_LOCK_FINGERPRINT','WOOD_DENSITY_CANONICAL',
                    'MEASUREMENT_GROUPS','SPECIES_DATA','GROUP_DEFAULT_RHO','SPECIES_GROUP',
