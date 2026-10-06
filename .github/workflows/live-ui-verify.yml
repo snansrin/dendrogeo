@@ -13,9 +13,10 @@ jobs:
         run: |
           python - <<'PY'
           import hashlib, pathlib, urllib.request, time
-          files=['index.html','css/style.css','src/services/user-admin.js','partials/shell.html']
+          files=['index.html','css/style.css','src/services/user-admin.js','src/services/data-requests.js','partials/shell.html']
           bad=[]
           live_index=None
+          live_requests=None
           for p in files:
               local=pathlib.Path(p).read_bytes()
               req=urllib.request.Request('https://dendrogeo.org/'+p+'?_='+str(int(time.time())),headers={'User-Agent':'dendrogeo-live-ui-verify'})
@@ -25,12 +26,15 @@ jobs:
               print(p,lh[:16],rh[:16])
               if lh!=rh: bad.append(p)
               if p=='index.html': live_index=live.decode('utf-8','replace')
+              if p=='src/services/data-requests.js': live_requests=live.decode('utf-8','replace')
           forbidden=['DendroGeo Panel','Saha Modu','Park · proje · ekip','Proje bazlı envanter','Ölçüm protokolü korunur:','C → DBH = C/π · DBH 0,1 cm','ÇEVRE 45 cm → DBH 14.3 cm']
-          required=['Waypoint Navigasyon','DBH 14.3 cm','id="userRoleFilter"','id="userStatusFilter"','Taleplerim']
+          required=['Waypoint Navigasyon','DBH 14.3 cm','id="userRoleFilter"','id="userStatusFilter"']
           for x in forbidden:
               if x in live_index: bad.append('forbidden:'+x)
           for x in required:
               if x not in live_index: bad.append('missing:'+x)
+          for x in ['Taleplerim','deleteMyRequest','export-my-requests']:
+              if x not in live_requests: bad.append('missing-request-ui:'+x)
           if bad:
               raise SystemExit('LIVE_MISMATCH: '+', '.join(bad))
           print('LIVE_OK: deployed files byte-identical and requested UI claims verified')
