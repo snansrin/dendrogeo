@@ -161,7 +161,7 @@ cinsinden ağaç boyundan gelir.
 Sığla için Yapraklı genel yoğunluğu **541 kg/m³** kullanılır:
 
 - ham çevre C = 57 cm,
-- türetilmiş DBH D = 57/π = 18,1437 cm,
+- türetilmiş DBH ekranda **18,1 cm** gösterilir (hesap motorunda D = 57/π tam hassasiyetle korunur),
 - tahmini karbon ≈ **44,79 kg C**.
 
 Bu örnek CI regresyon testinde kilitlidir; 57 cm'nin doğrudan çap sayılmasıyla
