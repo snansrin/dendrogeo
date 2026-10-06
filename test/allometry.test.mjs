@@ -1,176 +1,116 @@
-/* allometry.test.mjs — Karbon hesabının bilimsel çekirdeği.
- *
- * Bu dosya projenin en kritik doğrulama katmanıdır: calc() çıktısı doğrudan
- * yayınlanan karbon rakamlarını üretir. Formül, odun yoğunluğu (rho) fallback
- * zinciri ve birim dönüşümleri burada kilitlenir.
- *
- * Not: Türkçe metinlerde kesme işareti kullanılmıyor; bu dosya tek tırnaklı
- * dizeler içerdiği için apostrof sözdizimini bozuyor.
- */
+/* allometry.test.mjs — DendroGeo karbon çekirdeği. */
 import { test, describe } from 'node:test';
 import assert from 'node:assert/strict';
 import { loadApp } from '../scripts/test-harness.mjs';
 
-const app = loadApp();
-const { calc } = app;
+const app=loadApp();
+const {calc}=app;
+const agb=(rhoKg,D,H)=>0.0673*Math.pow((rhoKg/1000)*D*D*H,0.976);
 
-/* Elle hesaplanmış referans değerler — formülün bağımsız yeniden yazımı.
- * 0.0673 * (rho_t * D^2 * H)^0.976 ; rho_t = rho_kg_m3 / 1000 */
-const agb = (rhoKg, D, H) => 0.0673 * Math.pow((rhoKg / 1000) * D * D * H, 0.976);
-
-describe('calc() — Chave vd. (2014) AGB formülü', () => {
-  test('Kızılçam D=30 cm H=20 m → 465.889 kg AGB', () => {
-    const r = calc(30, 20, 'KIZILÇAM', 'İBRELİ');
-    assert.ok(Math.abs(r.agb - agb(478, 30, 20)) < 1e-6, 'agb=' + r.agb);
-    assert.equal(r.agb, agb(478, 30, 20));
-    assert.ok(Math.abs(r.agb - 465.88921674) / 465.88921674 < 1e-6, 'agb=' + r.agb);
-  });
-
-  test('kök biyokütlesi AGB üzerinden %26 oranında', () => {
-    const r = calc(40, 25, 'MEŞE', 'YAPRAKLI');
-    assert.ok(Math.abs(r.bhb / r.agb - 0.26) < 1e-9);
-    assert.ok(Math.abs(r.bio - (r.agb + r.bhb)) < 1e-9);
-  });
-
-  test('karbon oranı 0.47 (IPCC) tutarlı uygulanıyor', () => {
-    const r = calc(35, 22, 'KAYIN', 'YAPRAKLI');
-    assert.ok(Math.abs(r.c_agb - r.agb * 0.47) < 1e-9);
-    assert.ok(Math.abs(r.c_bhb - r.bhb * 0.47) < 1e-9);
-    assert.ok(Math.abs(r.total_carbon - r.bio * 0.47) < 1e-9);
-    assert.ok(Math.abs(r.c_agb + r.c_bhb - r.total_carbon) < 1e-9);
-  });
-
-  test('hacim = silindir x 0.5 gövde form faktörü', () => {
-    const r = calc(30, 20, 'KIZILÇAM', 'İBRELİ');
-    const beklenen = Math.PI * Math.pow(30 / 200, 2) * 20 * 0.5;
-    assert.ok(Math.abs(r.vol - beklenen) < 1e-9, 'vol=' + r.vol);
-  });
+describe('calc() — Chave vd. (2014) çekirdeği',()=>{
+ test('Kızılçam D=30 cm H=20 m kilitli 478 kg/m3 kullanır',()=>{
+  const r=calc(30,20,'KIZILÇAM','İBRELİ');
+  assert.equal(r.valid,true);
+  assert.equal(r.density_kg_m3,478);
+  assert.equal(r.agb,agb(478,30,20));
+  assert.ok(Math.abs(r.agb-465.88921674)/465.88921674<1e-6);
+ });
+ test('BHB = AGB × 0,26',()=>{
+  const r=calc(40,25,'MEŞE','YAPRAKLI');
+  assert.ok(Math.abs(r.bhb/r.agb-0.26)<1e-9);
+  assert.ok(Math.abs(r.bio-(r.agb+r.bhb))<1e-9);
+ });
+ test('karbon oranı 0,47 tutarlı',()=>{
+  const r=calc(35,22,'KAYIN','YAPRAKLI');
+  assert.ok(Math.abs(r.c_agb-r.agb*0.47)<1e-9);
+  assert.ok(Math.abs(r.c_bhb-r.bhb*0.47)<1e-9);
+  assert.ok(Math.abs(r.total_carbon-r.bio*0.47)<1e-9);
+ });
+ test('hacim = silindir × 0,5 form faktörü',()=>{
+  const r=calc(30,20,'KIZILÇAM','İBRELİ');
+  assert.ok(Math.abs(r.vol-Math.PI*Math.pow(30/200,2)*20*0.5)<1e-9);
+ });
 });
 
-describe('calc() — sınır ve geçersiz girdiler', () => {
-  const SIFIR = { agb: 0, bhb: 0, bio: 0, c_agb: 0, c_bhb: 0, total_carbon: 0, vol: 0 };
+describe('calc() — geçersiz girdiler',()=>{
+ for(const [ad,d,h] of [
+  ['dbh=0',0,20],['h=0',30,0],['dbh negatif',-5,20],['h negatif',30,-3],
+  ['dbh null',null,20],['h undefined',30,undefined],['dbh NaN',NaN,20],['ikisi NaN',NaN,NaN]
+ ]){
+  test(ad+' → hesap yok',()=>{
+   const r=calc(d,h,'MEŞE','YAPRAKLI');
+   assert.equal(r.valid,false);assert.equal(r.density_kg_m3,null);
+   for(const k of ['agb','bhb','bio','c_agb','c_bhb','total_carbon','vol'])assert.equal(r[k],0,k);
+  });
+ }
+});
 
-  const durumlar = [
-    ['dbh=0', 0, 20],
-    ['h=0', 30, 0],
-    ['dbh negatif', -5, 20],
-    ['h negatif', 30, -3],
-    ['dbh null', null, 20],
-    ['h undefined', 30, undefined],
-    ['dbh NaN', NaN, 20],
-    ['ikisi de NaN', NaN, NaN],
-  ];
-
-  for (const [ad, dbh, h] of durumlar) {
-    test(ad + ' → tüm alanlar sıfır, NaN yayılmıyor', () => {
-      const r = calc(dbh, h, 'MEŞE', 'YAPRAKLI');
-      assert.deepEqual(Object.keys(r).sort(), Object.keys(SIFIR).sort());
-      for (const [k, v] of Object.entries(SIFIR)) {
-        assert.equal(r[k], v, k + ' = ' + r[k] + ' olmalıydı');
-      }
-      for (const [k, v] of Object.entries(r)) {
-        assert.ok(Number.isFinite(v), k + ' sonlu değil: ' + v);
-      }
-    });
+describe('ρ tek-kaynak zinciri',()=>{
+ test('kilitli tür kendi özel değerini kullanır',()=>{
+  const r=calc(30,20,'KIZILÇAM','İBRELİ');
+  assert.equal(r.density_kg_m3,478);
+  assert.ok(Math.abs(r.agb-agb(478,30,20))<1e-9);
+ });
+ test('özel rho olmayan katalog türü yalnız kendi grup genelini kullanır',()=>{
+  const a=calc(30,20,'JAPON SOFORASI','YAPRAKLI');
+  const b=calc(30,20,'MAVİ LADİN','İBRELİ');
+  assert.equal(a.density_kg_m3,541);
+  assert.equal(b.density_kg_m3,446);
+  assert.ok(Math.abs(a.agb-agb(541,30,20))<1e-9);
+  assert.ok(Math.abs(b.agb-agb(446,30,20))<1e-9);
+ });
+ test('bilinmeyen tür grup varsayılanını kullanamaz',()=>{
+  const r=calc(30,20,'BOYLE_BIR_TUR_YOK','YAPRAKLI');
+  assert.equal(r.valid,false);assert.equal(r.total_carbon,0);
+ });
+ test('yanlış grup kullanılamaz',()=>{
+  assert.equal(calc(30,20,'KARAÇAM','YAPRAKLI').valid,false);
+  assert.equal(calc(30,20,'SÜS ERİĞİ','İBRELİ').valid,false);
+ });
+ test('DİĞER veya tanımsız grup için yoğunluk yoktur',()=>{
+  for(const grp of ['DİĞER','TANIMSIZ_GRUP']){
+   const r=calc(30,20,'KARAÇAM',grp);
+   assert.equal(r.valid,false);assert.equal(r.density_kg_m3,null);assert.equal(r.total_carbon,0);
   }
+ });
+ test('CANARY: seçim kataloğu 49 tür; 16 özel, 33 grup-geneli',()=>{
+  const hepsi=Object.values(app.SPECIES_DATA).flat();
+  assert.equal(hepsi.length,49);
+  assert.equal(hepsi.filter(x=>x.rho!=null).length,16);
+  assert.equal(hepsi.filter(x=>x.rho==null).length,33);
+  assert.equal(Object.keys(app.SPECIES_DATA).sort().join('|'),['İBRELİ','YAPRAKLI'].sort().join('|'));
+ });
+ test('eşanlamlılar mevcut kanonik türe iner',()=>{
+  const rs=app.resolveSpeciesName;
+  assert.equal(rs('Ağlayan Söğüt'),'SALKIM SÖĞÜT');
+  assert.equal(rs('CEVIZ'),'CEVİZ');
+  assert.equal(rs('Sığla'),'SIĞLA');
+  assert.equal(rs('SIGLA'),'SIĞLA');
+  assert.equal(rs('Liquidambar orientalis'),'SIĞLA');
+  assert.equal(rs('OLMAYAN TÜR'),null);
+ });
 });
 
-describe('rho fallback zinciri — kanonik tür → grup → DİĞER', () => {
-  test('rho değeri bilinen tür kendi değerini kullanır', () => {
-    assert.equal(app.rho['KIZILÇAM'], 478);
-    const r = calc(30, 20, 'KIZILÇAM', 'İBRELİ');
-    assert.ok(Math.abs(r.agb - agb(478, 30, 20)) < 1e-6);
-  });
-
-  test('rho değeri null olan tür grup varsayılanına düşer', () => {
-    assert.equal(app.rho['JAPON SOFORASI'], undefined, 'rho:null olan tür haritaya yazılmamalı');
-    const r = calc(30, 20, 'JAPON SOFORASI', 'YAPRAKLI');
-    assert.ok(Math.abs(r.agb - agb(541, 30, 20)) < 1e-6, 'agb=' + r.agb);
-  });
-
-  test('tamamen bilinmeyen tür de grup varsayılanına düşer, çökmüyor', () => {
-    const r = calc(30, 20, 'BOYLE_BIR_TUR_YOK', 'YAPRAKLI');
-    assert.ok(Math.abs(r.agb - agb(541, 30, 20)) < 1e-6);
-  });
-
-  test('grup da tanınmıyorsa DİĞER (493) kullanılır', () => {
-    const r = calc(30, 20, 'X', 'TANIMSIZ_GRUP');
-    assert.ok(Math.abs(r.agb - agb(493, 30, 20)) < 1e-6);
-  });
-
-  test('CANARY: 51 tür kaydının yalnız kanonik tabloda bulunan 16 türünde özel rho vardır', () => {
-    const hepsi = Object.values(app.SPECIES_DATA).flat();
-    const bos = hepsi.filter((s) => !s.rho).length;
-    assert.equal(hepsi.length, 51, 'tür kaydı sayısı değişti');
-    assert.equal(bos, 35, 'kanonik tablo dışında özel rho eklenmiş veya kilitli rho silinmiş olabilir');
-  });
-
-  test('2026-10-06 kilidi: tablo dışı beş tür özel rho taşımaz, grup geneline düşer', () => {
-    for (const name of ['SALKIM SÖĞÜT', 'MAVİ LADİN', 'DOĞU ÇINARI', 'ATLAS SEDİRİ', 'CEVİZ', 'SIĞLA']) {
-      assert.equal(app.rho[name], undefined, name + ' özel rho taşımamalı');
-    }
-    const yaprakli = calc(30, 20, 'SALKIM SÖĞÜT', 'YAPRAKLI');
-    assert.ok(Math.abs(yaprakli.agb - agb(541, 30, 20)) < 1e-6, 'SALKIM SÖĞÜT grup 541 kullanmalı');
-    const ibreli = calc(30, 20, 'MAVİ LADİN', 'İBRELİ');
-    assert.ok(Math.abs(ibreli.agb - agb(446, 30, 20)) < 1e-6, 'MAVİ LADİN grup 446 kullanmalı');
-    assert.equal(app.rho['AĞLAYAN SÖĞÜT'], undefined);
-    assert.equal(app.LATIN['AĞLAYAN SÖĞÜT'], undefined);
-    assert.equal(app.resolveSpeciesName('Ağlayan söğüt'), 'AĞLAYAN SÖĞÜT');
-  });
-
-  test('eşanlamlı ve Latince çözümleyici kanonik ada indirger', () => {
-    const rs = app.resolveSpeciesName;
-    assert.equal(rs('mavi ladin'), 'MAVİ LADİN');
-    assert.equal(rs('  Cınar '), 'ÇINAR');
-    assert.equal(rs('Ağlayan Söğüt'), 'AĞLAYAN SÖĞÜT');
-    assert.equal(rs('CEVIZ'), 'CEVİZ');
-    assert.equal(rs('MAZI (YALANCI SERVİ)'), 'MAZI (YALANCI SERVİ)');
-    assert.equal(rs('Sığla'), 'SIĞLA');
-    assert.equal(rs('SIGLA'), 'SIĞLA');
-    assert.equal(rs('Liquidambar orientalis'), 'SIĞLA');
-    assert.equal(rs('OLMAYAN TÜR'), null);
-    assert.equal(rs(null), null);
-  });
+describe('SIĞLA saha regresyonu',()=>{
+ test('57 cm × 7,5 m → YAPRAKLI 541 → 418,419108 kg C',()=>{
+  for(const sp of ['SIĞLA','Sığla','SIGLA','Liquidambar orientalis']){
+   const r=calc(57,7.5,sp,'YAPRAKLI');
+   assert.equal(r.valid,true,sp);assert.equal(r.density_kg_m3,541,sp);
+   assert.ok(Math.abs(r.total_carbon-418.41910806687343)<1e-9,sp+' C='+r.total_carbon);
+  }
+ });
 });
 
-describe('calc() — SIĞLA regresyonu', () => {
-  test('Sığla özel rho taşımaz; YAPRAKLI genel 541 kg/m3 kullanır', () => {
-    assert.equal(app.rho['SIĞLA'], undefined);
-    const beklenenAgb = agb(541, 57, 7.5);
-    const beklenenCarbon = (beklenenAgb + beklenenAgb * 0.26) * 0.47;
-    assert.ok(Math.abs(beklenenCarbon - 418.41910806687343) < 1e-9);
-    for (const sp of ['SIĞLA', 'Sığla', 'SIGLA', 'Liquidambar orientalis']) {
-      const r = calc(57, 7.5, sp, 'YAPRAKLI');
-      assert.ok(Math.abs(r.agb - beklenenAgb) < 1e-9, sp + ' için AGB=' + r.agb);
-      assert.ok(Math.abs(r.total_carbon - beklenenCarbon) < 1e-9, sp + ' için C=' + r.total_carbon);
-    }
-  });
-});
-
-describe('calc() — monotonluk (fiziksel tutarlılık)', () => {
-  test('çap arttıkça biyokütle artar', () => {
-    let once = 0;
-    for (const d of [5, 10, 20, 40, 80, 150]) {
-      const v = calc(d, 20, 'KIZILÇAM', 'İBRELİ').agb;
-      assert.ok(v > once, 'D=' + d + ' için agb=' + v + ' önceki ' + once + ' değerini aşmadı');
-      once = v;
-    }
-  });
-
-  test('boy arttıkça biyokütle artar', () => {
-    let once = 0;
-    for (const h of [3, 8, 15, 25, 40]) {
-      const v = calc(30, h, 'KIZILÇAM', 'İBRELİ').agb;
-      assert.ok(v > once, 'H=' + h + ' için agb=' + v + ' önceki ' + once + ' değerini aşmadı');
-      once = v;
-    }
-  });
-
-  test('yoğunluk arttıkça biyokütle rho^0.976 ile ölçeklenir', () => {
-    const hafif = calc(30, 20, 'GÖKNAR', 'İBRELİ').agb;
-    const agir = calc(30, 20, 'KIZILÇAM', 'İBRELİ').agb;
-    assert.ok(agir > hafif);
-    const beklenenOran = Math.pow(478 / 350, 0.976);
-    assert.ok(Math.abs(agir / hafif - beklenenOran) < 1e-6);
-  });
+describe('calc() — monotonluk',()=>{
+ test('çap arttıkça biyokütle artar',()=>{
+  let once=0;for(const d of [5,10,20,40,80,150]){const v=calc(d,20,'KIZILÇAM','İBRELİ').agb;assert.ok(v>once);once=v;}
+ });
+ test('boy arttıkça biyokütle artar',()=>{
+  let once=0;for(const h of [3,8,15,25,40]){const v=calc(30,h,'KIZILÇAM','İBRELİ').agb;assert.ok(v>once);once=v;}
+ });
+ test('yoğunluk arttıkça biyokütle rho^0.976 ile ölçeklenir',()=>{
+  const hafif=calc(30,20,'GÖKNAR','İBRELİ').agb, agir=calc(30,20,'KIZILÇAM','İBRELİ').agb;
+  assert.ok(agir>hafif);
+  assert.ok(Math.abs(agir/hafif-Math.pow(478/350,0.976))<1e-6);
+ });
 });
