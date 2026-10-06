@@ -81,8 +81,8 @@ describe('P0 · bilimsel iddialar kaynağıyla birebir', () => {
   });
 
   test('⭐ hero çipleri çevre→DBH→karbon zinciriyle birebir', () => {
-    const circumference = +landing.match(/ÇEVRE (\d+(?:[.,]\d+)?) cm/)[1].replace(',', '.');
-    const shownD = +landing.match(/→ DBH (\d+(?:[.,]\d+)?) cm/)[1].replace(',', '.');
+    const circumference = +landing.match(/class="chip c1" data-circumference="(\d+(?:[.,]\d+)?)"/)[1].replace(',', '.');
+    const shownD = +landing.match(/class="chip c1"[^>]*>[\s\S]*?DBH (\d+(?:[.,]\d+)?) cm/)[1].replace(',', '.');
     const H = +landing.match(/H (\d+(?:[.,]\d+)?) m/)[1].replace(',', '.');
     const C = +landing.match(/C (\d+(?:[.,]\d+)?) kg/)[1].replace(',', '.');
     const D=circumference/Math.PI;
