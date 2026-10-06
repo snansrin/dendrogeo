@@ -18,7 +18,7 @@ describe('Saha ekranı · mobil sadeleştirme sözleşmesi',()=>{
   assert.doesNotMatch(seg,/doğruluk \(m\)/);
   assert.match(seg,/id="gpsRing" hidden/);
   assert.match(seg,/id="gpsState"[^>]*hidden/);
-  assert.match(measure,/btn\.textContent="✓ GPS aktif"/);
+  assert.match(measure,/btn\.textContent="GPS aktif"/);
   assert.match(measure,/bd\.textContent="GPS aktif"/);
  });
  test('çevre ve boy uzun açıklama yerine erişilebilir soru işareti yardımı kullanır',()=>{
