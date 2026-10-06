@@ -1,0 +1,33 @@
+name: Circumference UI Branch QA
+on:
+  push:
+    branches:
+      - fix/circumference-to-dbh-protocol
+permissions:
+  contents: write
+jobs:
+  qa:
+    name: Build and full guards
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - run: npm ci
+      - run: npm run build
+      - name: Commit generated index
+        run: |
+          git config user.name "DendroGeo QA Bot"
+          git config user.email "qa@dendrogeo.local"
+          git add index.html
+          if git diff --cached --quiet; then
+            echo "index current"
+          else
+            git commit -m "build: refresh index after data workspace UI"
+            git push origin HEAD:fix/circumference-to-dbh-protocol
+          fi
+      - run: npm run check
