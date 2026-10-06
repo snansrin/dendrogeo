@@ -122,9 +122,9 @@ section.blk{padding:40px 0}
 .bobB{animation-delay:.4s}
 @keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(1.4px)}}
 .chip{top:auto;bottom:auto}
-.chip.c1{top:38%;left:72%}
+.chip.c1{top:31%;left:72%}
 .chip.c2{top:22%;left:84%}
-.chip.c3{top:42%;left:85%}
+.chip.c3{top:35%;left:85%}
 @media(max-width:960px){
 .hero-art{display:none}
 }
