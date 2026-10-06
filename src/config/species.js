@@ -93,7 +93,7 @@ const GROUP_COLOR_INK={"İBRELİ":"#1e6f4b","YAPRAKLI":"#9a4a08","DİĞER":"#5b6
 /* Saha kayıtları ve cihaz çıktıları kanonik ad dışında yazımlar üretebilir.
  * Eşanlamlılar yalnız OKUMA yolunda çözülür; veritabanına kanonik ad yazılır. */
 const SPECIES_SYNONYMS={
- "AĞLAYAN SÖĞÜT":"SALKIM SÖĞÜT",
+ "AGLAYAN SOGUT":"SALKIM SÖĞÜT",
  "MAVI SEDIR":"ATLAS SEDİRİ",
  "AKCA AGAC":"AKÇAAĞAÇ",
  "CINAR":"ÇINAR",
