@@ -11,7 +11,8 @@ function fullRow(r){
  const d=new Date(r.created_at);
  const pf=r.photo_file||(r.photo_url?("P"+String(r.point_id).padStart(3,"0")+"_M"+(r.measurement_no||1)+".JPG"):"");
  const q=v=>`"${(v||"").toString().replace(/"/g,'""')}"`;
- return [r.point_id,r.measurement_no||1,d.toLocaleDateString("tr-TR"),d.toLocaleTimeString("tr-TR"),r.lat,r.lon,(r.altitude_m??""),(r.altitude_m??""),(r.satellites??""),(r.hdop??""),(r.accuracy_m??""),slope,q(r.grp),q(r.species),q(LATIN[r.species]||""),(Math.PI*(r.dbh_cm||0)).toFixed(2),r.dbh_cm,r.height_m,area.toFixed(4),hArea.toFixed(4),vol.toFixed(4),agb.toFixed(1),bhb.toFixed(1),bio.toFixed(1),(r.carbon_kg||bio*0.47).toFixed(2),(agb*0.47).toFixed(1),(bhb*0.47).toFixed(1),pf,q(r.photo_url||""),d.toISOString().slice(0,10)].join(",");
+ const girth=Number.isFinite(+r.girth_cm)&&+r.girth_cm>0?+r.girth_cm:Math.PI*(r.dbh_cm||0); const dbh=Number.isFinite(+r.dbh_cm)?(+r.dbh_cm).toFixed(1):"";
+ return [r.point_id,r.measurement_no||1,d.toLocaleDateString("tr-TR"),d.toLocaleTimeString("tr-TR"),r.lat,r.lon,(r.altitude_m??""),(r.altitude_m??""),(r.satellites??""),(r.hdop??""),(r.accuracy_m??""),slope,q(r.grp),q(r.species),q(LATIN[r.species]||""),girth,dbh,r.height_m,area.toFixed(4),hArea.toFixed(4),vol.toFixed(4),agb.toFixed(1),bhb.toFixed(1),bio.toFixed(1),(r.carbon_kg||bio*0.47).toFixed(2),(agb*0.47).toFixed(1),(bhb*0.47).toFixed(1),pf,q(r.photo_url||""),d.toISOString().slice(0,10)].join(",");
 }
 function fullCSV(rows){return "\uFEFF"+FULL_HEAD+"\n"+rows.map(fullRow).join("\n")+"\n";}
 /* === BÖLGE B  === */
@@ -32,7 +33,7 @@ async function exportQgis(){
 async function exportGeo(){
  if(typeof dgPresenceAct==="function"){try{dgPresenceAct("export","GeoJSON");}catch(e){}}
  const d=await getMine();
- const gj={type:"FeatureCollection",features:d.map(r=>({type:"Feature",geometry:{type:"Point",coordinates:[r.lon,r.lat]},properties:{point:r.point_id,species:r.species,latin:LATIN[r.species]||"",dbh:r.dbh_cm,height:r.height_m,carbon:r.carbon_kg,photo:r.photo_url||""}}))};
+ const gj={type:"FeatureCollection",features:d.map(r=>({type:"Feature",geometry:{type:"Point",coordinates:[r.lon,r.lat]},properties:{point:r.point_id,species:r.species,latin:LATIN[r.species]||"",circumference_cm:(Number.isFinite(+r.girth_cm)?+r.girth_cm:null),dbh:(Number.isFinite(+r.dbh_cm)?+(+r.dbh_cm).toFixed(1):null),height:r.height_m,carbon:r.carbon_kg,photo:r.photo_url||""}}))};
  dl(JSON.stringify(gj,null,2),"dendrogeo.geojson");
 }
 function dl(content,name){const a=document.createElement("a");a.href=URL.createObjectURL(new Blob([content],{type:"text/csv;charset=utf-8;"}));a.download=name;a.click();}

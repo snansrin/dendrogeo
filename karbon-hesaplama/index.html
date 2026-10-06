@@ -26,7 +26,7 @@ main{padding:54px 0 70px}h1{font-size:clamp(2rem,5vw,3.3rem);line-height:1.08;ma
 <main><div class="wrap"><div class="hero"><div class="tag">BİLİMSEL HESAP</div><h1>Ağaç Karbon Hesaplama</h1><p class="lead">DendroGeo, ağaç çapı, boyu ve odun yoğunluğunu kullanarak biyokütle ve karbon stoğu için belgelenmiş allometrik hesaplamalar uygular.</p><a class="btn" href="../">DendroGeo uygulamasını aç</a></div><h2>Temel hesaplama</h2>
 <p>DendroGeo'nun mevcut yöntem dokümanında üstü gövde biyokütlesi için Chave ve ark. (2014) denklemi kullanılır:</p>
 <p><code>AGB = 0.0673 · (ρ · D² · H)^0.976</code></p>
-<p>Burada <code>ρ</code> odun yoğunluğu, <code>D</code> DBH ve <code>H</code> ağaç boyudur. Sistem ayrıca kök biyokütlesini AGB × 0,26 ve toplam karbonu toplam biyokütle × 0,47 varsayımıyla hesaplar.</p>
+<p>Burada <code>ρ</code> odun yoğunluğu, <code>C</code> sahada 1,30 m yükseklikte ölçülen göğüs çevresi, <code>D = C / π</code> ile türetilen DBH çapı ve <code>H</code> ağaç boyudur. Allometriye ham çevre değil, yuvarlanmamış türetilmiş <code>D</code> girer; DBH kullanıcıya 1 ondalık basamakla gösterilir. Sistem ayrıca kök biyokütlesini AGB × 0,26 ve toplam karbonu toplam biyokütle × 0,47 varsayımıyla hesaplar.</p>
 <h2>Odun yoğunluğu</h2>
 <p>Tür bazında değer mevcutsa türün odun yoğunluğu kullanılır. Tür için değer bulunamadığında yapılandırılmış grup varsayılanı devreye girer. Bu nedenle sonuçların yorumlanmasında kullanılan yoğunluk değerinin hangi kaynaktan geldiği önemlidir.</p>
 <h2>Belirsizlikler</h2>

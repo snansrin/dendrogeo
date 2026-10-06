@@ -16,7 +16,7 @@ async function loadRecords__scroll(){
  $("recTable").innerHTML=recRows.map(r=>{
   const st=r.status||"Beklemede";
   const bc=st==="Onaylı"?"on":(st==="Red"?"off":"admin");
-  return `<tr><td data-label="Proje">${esc(r.projects?.name)||"—"}</td><td data-label="Nokta">${r.point_id}</td><td data-label="Tür">${esc(r.species)}</td><td data-label="Çap">${r.dbh_cm}</td><td data-label="Boy">${r.height_m}</td><td data-label="Karbon">${(r.carbon_kg||0).toFixed(1)}</td><td data-label="Foto">${dgThumb(r.photo_url)}</td><td data-label="Durum"><span class="badge ${bc}">${st==="Beklemede"?"Onay Bekliyor":st}</span></td><td data-label="İşlem" style="display:flex;gap:4px"><button class="btn sm blue" onclick="editRec(${r.id})">✏️</button><button class="btn sm red" onclick="delRec(${r.id})">Sil</button></td></tr>`;
+  return `<tr><td data-label="Proje">${esc(r.projects?.name)||"—"}</td><td data-label="Nokta">${r.point_id}</td><td data-label="Tür">${esc(r.species)}</td><td data-label="Çap">${Number.isFinite(+r.dbh_cm)?(+r.dbh_cm).toFixed(1):"—"}</td><td data-label="Boy">${r.height_m}</td><td data-label="Karbon">${(r.carbon_kg||0).toFixed(1)}</td><td data-label="Foto">${dgThumb(r.photo_url)}</td><td data-label="Durum"><span class="badge ${bc}">${st==="Beklemede"?"Onay Bekliyor":st}</span></td><td data-label="İşlem" style="display:flex;gap:4px"><button class="btn sm blue" onclick="editRec(${r.id})">✏️</button><button class="btn sm red" onclick="delRec(${r.id})">Sil</button></td></tr>`;
  }).join("")||"<tr><td colspan=9>"+(typeof dgCf==="function"?dgCf("Kayıt yok"):"Kayıt yok")+"</td></tr>";
 }
 // 2. Kayıt sil

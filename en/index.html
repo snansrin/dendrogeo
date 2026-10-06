@@ -35,11 +35,11 @@ footer{border-top:1px solid var(--line);padding:28px 0;color:var(--mut);font-siz
 <main><div class="wrap">
 <div class="tag">ENGLISH · BETA</div>
 <h1>Global Tree Inventory &amp; Carbon Data System</h1>
-<p class="lead">DendroGeo turns field measurements of individual trees (girth/DBH, height, species, GNSS position, photo evidence) into allometric carbon-stock estimates (Chave et&nbsp;al. 2014) and 10&nbsp;m land-cover context for urban parks — with moderator approval, geofencing, Monte-Carlo uncertainty and fully disclosed QA/QC in reproducible scientific reports (DGR).</p>
+<p class="lead">DendroGeo turns field measurements of individual trees (circumference at 1.30 m, derived DBH = circumference/π, height, species, GNSS position, photo evidence) into allometric carbon-stock estimates (Chave et&nbsp;al. 2014) and 10&nbsp;m land-cover context for urban parks — with moderator approval, geofencing, Monte-Carlo uncertainty and fully disclosed QA/QC in reproducible scientific reports (DGR).</p>
 <a class="btn" href="../">Open the app (Turkish)</a>
 <a class="btn alt" href="methods/">Read the methods</a>
 <div class="grid">
-<div class="card"><h3>🌳 Individual-tree inventory</h3><p>Every record carries point ID, species (canonical dictionary with sourced wood density ρ), DBH, height, photo evidence and GNSS position. Raw field values are preserved (e.g. <code>girth_cm</code>) — derived values never overwrite the evidence.</p></div>
+<div class="card"><h3>🌳 Individual-tree inventory</h3><p>Every record carries point ID, species (canonical dictionary with sourced wood density ρ), raw circumference at 1.30 m, derived DBH, height, photo evidence and GNSS position. Raw <code>girth_cm</code> is preserved; <code>dbh_cm = girth_cm / π</code>. Allometry uses the unrounded derived DBH, while user-facing DBH is displayed to one decimal place.</p></div>
 <div class="card"><h3>⚖️ Carbon with disclosed uncertainty</h3><p>AGB = 0.0673·(ρ·D²·H)^0.976; roots = 0.26·AGB; carbon = 0.47·biomass. Monte-Carlo (correlated model error, CV 22%) yields 95% confidence intervals per report.</p></div>
 <div class="card"><h3>🛰️ 10 m land-cover context</h3><p>ESA WorldCover tiles are intersected with the park polygon (area-weighted border cells), with an area-balance QA gate (≤0.5%) before publication.</p></div>
 <div class="card"><h3>📄 DGR scientific reports</h3><p>Each publication is an immutable, hash-verified document: metadata (DataCite 4.7-aligned), analysis fingerprint (engine, git commit, EPSG), QR to the permanent URL, citation &amp; retraction notices. Author = the data contributor.</p></div>

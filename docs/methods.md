@@ -86,8 +86,7 @@ Güncel hesapta tek ve değiştirilemez otorite `src/config/wood-density-lock.js
 **Sığla kuralı.** `SIĞLA`, `Sığla`, `SIGLA` ve
 `Liquidambar orientalis` aynı kanonik türe çözülür; ancak **özel ρ değeri
 taşımaz**. Sığla bir yapraklı tür olarak **YAPRAKLI genel 0,541 ton/m³
-(541 kg/m³)** değerini kullanır. DBH 57 cm ve H 7,5 m için mevcut denklem
-yaklaşık **418,42 kg C** üretir. Bu saha örneği regresyon testiyle kilitlidir.
+(541 kg/m³)** değerini kullanır. Türetilmiş DBH 57 cm ve H 7,5 m olan matematiksel bir model girdisi yaklaşık **418,42 kg C** üretir. Bu değer doğrudan saha çevresi örneği değildir; saha protokolünde önce **D=C/π** uygulanır.
 
 Aktif ölçüm kataloğunda **49** tür vardır; **16** tür kilitli özel ρ taşır,
 **33/49** tür özel ρ taşımadığı için yalnız kendi grup genelini kullanır.
@@ -127,7 +126,7 @@ Türeyiş tek ve değiştirilemezdir:
 Allometri, hacim, boy/DBH oranı, QA ve raporlar yalnız **D** değerini kullanır.
 Ham çevrenin doğrudan çap gibi modele verilmesi yasaktır. Saha çevresi hiçbir
 zaman kaybedilmez; girth_cm alanında korunur ve rapor/CSV çıktısında
-dbh_cm ile birlikte yayımlanır.
+dbh_cm ile birlikte yayımlanır. Kullanıcı arayüzü, rapor tabloları ve okunabilir dışa aktarımlar DBH'yi **1 ondalık basamakla** gösterir (örn. 28,647889… → 28,6 cm); karbon, hacim ve QA hesapları ise yuvarlanmamış türetilmiş D ile yürütülür.
 
 Ölçüm protokolü src/config/measurement-protocol-lock.js içinde salt-okunur
 kilit olarak tanımlıdır. Kilit kimliği

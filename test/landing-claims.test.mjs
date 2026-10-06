@@ -86,7 +86,7 @@ describe('P0 · bilimsel iddialar kaynağıyla birebir', () => {
     const H = +landing.match(/H (\d+(?:[.,]\d+)?) m/)[1].replace(',', '.');
     const C = +landing.match(/C (\d+(?:[.,]\d+)?) kg/)[1].replace(',', '.');
     const D=circumference/Math.PI;
-    assert.ok(Math.abs(shownD-D)<0.01,`gösterilen DBH ${shownD}, çevre/π ${D}`);
+    assert.equal(shownD,+D.toFixed(1),`gösterilen DBH ${shownD}, çevre/π bir ondalık ${D.toFixed(1)}`);
     const rhoCtx = {};
     vm.createContext(rhoCtx);
     vm.runInContext(speciesRuntime() + ';this.G=GROUP_DEFAULT_RHO;', rhoCtx);

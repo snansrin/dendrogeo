@@ -88,7 +88,7 @@ function initLanding(){
    sb.from("v_country").select("*").then(c=>{
     if(c.error)throw c.error;
     const table=$("tblCountry"),body=table&&table.querySelector&&table.querySelector("tbody");
-    if(body)body.innerHTML=(c.data||[]).slice(0,20).map(r=>`<tr class="clickable-row" tabindex="0" role="link" onkeydown="dgKeyActivate(event,this)" onclick="zoomToCountry('${esc(r.country)}')"><td>${esc(r.country)}</td><td>${r.records}</td><td>${r.carbon_t}</td><td>${r.avg_dbh}</td><td>${r.avg_height||"—"}</td></tr>`).join("")||"<tr><td colspan=5>Henüz veri yok</td></tr>";
+    if(body)body.innerHTML=(c.data||[]).slice(0,20).map(r=>`<tr class="clickable-row" tabindex="0" role="link" onkeydown="dgKeyActivate(event,this)" onclick="zoomToCountry('${esc(r.country)}')"><td>${esc(r.country)}</td><td>${r.records}</td><td>${r.carbon_t}</td><td>${Number.isFinite(+r.avg_dbh)?(+r.avg_dbh).toFixed(1):"—"}</td><td>${r.avg_height||"—"}</td></tr>`).join("")||"<tr><td colspan=5>Henüz veri yok</td></tr>";
    }),
    sb.from("v_city").select("*").then(t=>{
     if(t.error)throw t.error;

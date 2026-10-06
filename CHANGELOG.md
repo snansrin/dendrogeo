@@ -9,6 +9,10 @@ Yeni sürüm yayımlama adımları: [`docs/surum-yayini.md`](docs/surum-yayini.m
 
 ## [Yayımlanmadı]
 
+### Düzeltildi — FINAL saha ölçüm protokolü ve DBH gösterimi
+Saha ham değişkeni yerden 1,30 m yükseklikte mezurayla ölçülen **göğüs çevresi C (cm)** olarak kilitlendi. Ham değer `girth_cm` alanında korunur; DBH çapı yalnız **D = C / π** ile türetilip `dbh_cm` alanına yazılır. Allometri, hacim, QA ve Monte Carlo yuvarlanmamış türetilmiş D ile çalışır. Arayüz, rapor tabloları ve okunabilir dışa aktarımlar DBH'yi **1 ondalık basamakla** gösterir (örn. 28,647889… → 28,6 cm). README, yöntem, rapor yayını, envanter/karbon sayfaları ve İngilizce yöntem metni aynı protokole hizalandı. Aşağıdaki 0031/0013 kayıtları tarihsel karar günlüğüdür; güncel yöntem otoritesi değildir.
+
+
 ### Düzeltildi — Tarama başlangıcı ve hücre fırçası
 Park analizi her açıldığında ve her yeni Sentinel‑2 taramasında önceki spektral profil temizlenir, dört hassasiyet eşiği tarafsız %50 değerine döner. Yeni profil geldikten sonra eşikler kullanıcının ayarlamasına açılır; ham WorldCover sınıfları kendiliğinden değişmez. Fırça izi artık sürekli yüzey maskesi yazmaz: metrik fırça iziyle kesişen raster hücrelerine haritadaki sınıf seçimiyle aynı hücre kararı uygulanır. Son fırça izi önceki hücre kararlarını koruyarak geri alınabilir; eski sürekli fırça maskeleri hücre kararlarına çevrilir.
 
