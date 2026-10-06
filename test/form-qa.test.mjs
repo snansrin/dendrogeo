@@ -448,7 +448,7 @@ describe('0033 · rapor metni: yasal statü iddiası YOK, veri hatası iması YO
     assert.match(S9, /Modelin aktarılabilirliği şu sınırlamalara tabidir/);
     assert.match(S9, /Chave ve ark\. 2014/);
     assert.match(S9, /model sapmasını ayrıca nicelleştirmez/);
-    assert.match(S9, /hiçbir düzeltme, ölçekleme veya dışlama uygulanmamıştır/);
+    assert.match(S9, /Ham çevre değiştirilmemiş; allometriye yalnız yuvarlanmamış türetilmiş D uygulanmıştır/);
   });
 
   test('§9 tipik bant sayımı korunur; alternatif ρ sınırlılığı yoktur', () => {
@@ -476,7 +476,8 @@ describe('0033 · rapor metni: yasal statü iddiası YOK, veri hatası iması YO
   test('§7 girişi: ℹ️ cümlesi YALNIZ beyan satırı varsa basılır', () => {
     assert.ok(!S7.includes('ℹ️ BEYAN'), 'bu raporda ℹ️ satırı yok → cümle de basılmaz');
     assert.match(S7, /Bu raporun QA durumu: 🟢 GEÇERLİ/);
-    assert.match(S7, /Karbon hesabı, saha ölçümlerinde kayıtlı DBH \(göğüs çapı, cm\) değerleri kullanılarak gerçekleştirilmiştir/);
+    assert.match(S7, /sahada ölçülen göğüs çevresinden D=C\/π ile türetilen yuvarlanmamış DBH/);
+    assert.match(S7, /DBH 1 ondalık basamakla gösterilir/);
   });
 
   test('boy/çap satırı ölçütü sayıyla beyan eder (fiziksel bant + robust z)', () => {
@@ -488,7 +489,7 @@ describe('0033 · rapor metni: yasal statü iddiası YOK, veri hatası iması YO
     assert.match(d, /medyan [0-9.,]+, MAD [0-9.,]+, aralık [0-9.,]+–[0-9.,]+, en yüksek \|z\| [0-9.,]+/);
     assert.match(d, /en yüksek \|z\| 1,91/, 'mutlak değer basılır (imza değil)');
     assert.match(d, /6\/6 kayıt tipik 15–120 bandının dışında: bu bir UYARI DEĞİL, BİLGİDİR/);
-    assert.match(d, /ölçülen gövde çapı aralığı 40–200 cm/);
+    assert.match(d, /türetilmiş DBH aralığı 40–200 cm/);
     assert.deepEqual(d.match(/anıt|Anıt/g) || [], [], 'satır metninde iz yok');
   });
 
