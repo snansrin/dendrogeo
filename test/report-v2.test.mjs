@@ -283,6 +283,23 @@ describe('rapor v2: harita PNG üst bilgisi', () => {
     const buf = cv.encode();
     assert.ok(buf.length > 1000 && buf[1] === 0x50);
   });
+  test('havuz PNG sunumunda ayrı lejant değildir; su sınıfına birleşir', () => {
+    const cls={
+      water:{label:'Su',color:'#2563eb',areaM2:12000},
+      pool:{label:'Havuz / süs havuzu',color:'#06b6d4',areaM2:3000}
+    };
+    const feature={properties:{class:'pool'},geometry:{coordinates:[[[[0.004,0.004],[0.008,0.004],[0.008,0.008],[0.004,0.008],[0.004,0.004]]]]}};
+    const c2=mapCanvas({outer,surfaceFeatures:[feature],classes:cls,parkName:'TEST',points:[]});
+    const expectedRows=4; /* su + border + point + outside; pool ayrı satır değildir */
+    assert.equal(c2.h,96+540+16+expectedRows*28+18+70);
+    const centerX=Math.round(c2.w/2-(0.006-0.01)*111320*Math.cos(0.01*Math.PI/180)*Math.max(0.02,Math.min((c2.w-52)/(0.02*111320*Math.cos(0.01*Math.PI/180)),(540-52)/(0.02*110540))));
+    assert.ok(c2.encode().length>1000,'havuz geometrisi PNG üretimini bozmaz');
+  });
+  test('PNG altbilgisinde bozuk telif glifi yerine ASCII-safe DendroGeo imzası vardır', () => {
+    const src=readFileSync(new URL('../scripts/make-report.mjs',import.meta.url),'utf8');
+    assert.match(src,/const brandMark = 'DENDROGEO 2026'/);
+    assert.doesNotMatch(src,/const cr = '© DENDROGEO'/);
+  });
 });
 
 describe('rapor v2: liste yeniden kurulumu', () => {
