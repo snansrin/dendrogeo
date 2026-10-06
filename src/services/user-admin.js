@@ -9,7 +9,8 @@ async function loadUsers(){const _y=(typeof dgScrollKeep==="function"?dgScrollKe
 async function loadUsers__scroll(){
  if(!PROFILE||(PROFILE.role!=="admin"&&PROFILE.role!=="owner"))return;
  const I_AM_OWNER=PROFILE.role==="owner";
- const{data}=await sb.from("profiles").select("*");
+ const{data,error}=await sb.from("profiles").select("*");
+ if(error){toast("Kullanıcı listesi alınamadı: "+error.message,"err");return;}
  USERS_CACHE=data||[];
  const total=USERS_CACHE.length,active=USERS_CACHE.filter(x=>x.active).length;
  if($("aUsersTotal"))$("aUsersTotal").textContent=total;
@@ -51,5 +52,7 @@ if(error){toast("Hata: "+error.message,"err");return;}loadUsers();
 
 async function toggleU(id,act){
  if(PROFILE.role!=="owner")return toast("🛡 Bu yetki yalnızca kurucuya aittir.");
- await sb.from("profiles").update({active:act}).eq("id",id);loadUsers();
+ const{error}=await sb.from("profiles").update({active:act}).eq("id",id);
+ if(error){toast("Hata: "+error.message,"err");return;}
+ loadUsers();
 }
