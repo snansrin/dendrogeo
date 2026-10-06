@@ -10,7 +10,7 @@
 
 ## Sitede neler var?
 
-- **Saha envanteri:** GPS konumu, göğüs yüksekliğinde ağaç çapı (DBH), boy, tür/grup ve isteğe bağlı fotoğraf. Fotoğraf eklendiğinde tarayıcı içi QA/QC uygulanır. Ölçümler çevrimdışı kuyruğa alınabilir ve bağlantı gelince eşitlenir.
+- **Saha envanteri:** GPS konumu, yerden 1,30 m yükseklikte mezurayla ölçülen göğüs çevresi, boy, tür/grup ve isteğe bağlı fotoğraf. Sistem DBH çapını `D = C / π` ile türetir. Fotoğraf eklendiğinde tarayıcı içi QA/QC uygulanır. Ölçümler çevrimdışı kuyruğa alınabilir ve bağlantı gelince eşitlenir.
 - **Waypoint ve navigasyon:** proje noktalarını yükleme, sıralama ve sahada hedefe yönelme.
 - **Canlı harita:** yönetici onaylı ölçümleri görüntüleme; katmanları, park sınırını, gridleri ve waypointleri inceleme; harita çıktısı alma.
 - **Park yüzey analizi:** 10 m arazi örtüsü rasterını park sınırıyla kesiştirerek sınıf alanlarını hesaplama. Sentinel-2 taraması isteğe bağlıdır; yeni tarama nötr eşiklerden başlar ve kendi başına ham sınıfları yeniden etiketlemez. Hücre fırçası, elle hücre seçimi ve sınır çizimi kullanıcı kararlarını kaydeder.
@@ -26,7 +26,7 @@
 
 `AGB = 0.0673 · (ρ · D² · H)^0.976`
 
-Burada `D` DBH (cm), `H` ağaç boyu (m), `ρ` odun yoğunluğudur. Kök biyokütlesi `AGB × 0,26`; karbon stoğu toplam biyokütlenin `0,47`'si olarak tahmin edilir. Tür yoğunluğu bulunmadığında belgelenmiş grup varsayımı uygulanabilir. Bunlar ölçülmüş karbon miktarı değil, model tabanlı tahminlerdir. Uygulama ve rapor belirsizlikleri ile sınırlılıkları açıklar.
+Burada saha değişkeni `C` göğüs çevresidir (cm); `D = C / π` ile türetilen DBH çapı (cm), `H` ağaç boyu (m), `ρ` odun yoğunluğudur. Ham çevre korunur; allometriye çevre değil türetilmiş `D` girer. Kullanıcı arayüzü ve rapor tabloları DBH'yi **1 ondalık basamakla** gösterir; hesap motoru tam hassasiyetli türetilmiş değeri kullanır. Kök biyokütlesi `AGB × 0,26`; karbon stoğu toplam biyokütlenin `0,47`'si olarak tahmin edilir. Tür yoğunluğu bulunmadığında belgelenmiş grup varsayımı uygulanabilir. Bunlar ölçülmüş karbon miktarı değil, model tabanlı tahminlerdir. Uygulama ve rapor belirsizlikleri ile sınırlılıkları açıklar.
 
 ### Park arazi örtüsü
 
