@@ -55,7 +55,7 @@
    <div class="card measure-project"><label class="lbl" for="mProject">Çalışma projesi</label><select id="mProject" onchange="dgProjectChanged()"></select><div id="parkGate" class="alert info" style="display:none"></div></div>
    <section class="dg-png-card measure-location" aria-labelledby="measureLocationTitle">
     <div class="dg-png-head"><div><div class="dg-png-kicker">1 · KONUM</div><h3 class="dg-png-title" id="measureLocationTitle">Saha konumu</h3><p class="dg-png-sub">Kaydederken park içinde olduğunuz doğrulanır.</p></div><span class="dg-png-badge" id="gpsBadge">konum kapalı</span></div>
-    <div class="measure-gps-row"><div class="gpsring" id="gpsRing"><div class="val" id="gpsAcc">—</div><div class="lbl">doğruluk (m)</div></div><div id="gpsState" class="alert info" role="status">Konum servisi kapalı.</div><button id="gpsBtn" class="dg-png-btn primary" onclick="startGps()">📡 Konumu Etkinleştir</button></div>
+    <div class="measure-gps-row"><div class="gpsring" id="gpsRing" hidden aria-hidden="true"><div class="val" id="gpsAcc">—</div></div><div id="gpsState" class="alert info" role="status" hidden>Konum servisi kapalı.</div><button id="gpsBtn" class="dg-png-btn primary" onclick="startGps()">📡 Konumu Etkinleştir</button></div>
     <details class="measure-details"><summary>Konum ayrıntıları ve paylaşım</summary><p class="measure-help">Kayıt için GPS doğruluğu en fazla ±60 m olmalıdır.</p><div class="measure-coordinates"><div><span class="lbl">Enlem</span><div class="mono" id="gLat">—</div></div><div><span class="lbl">Boylam</span><div class="mono" id="gLon">—</div></div><div><span class="lbl">Rakım</span><div class="mono" id="gAlt">—</div></div><div><span class="lbl">Sinyal</span><div class="mono" id="gQ">—</div></div></div>
      <label class="measure-share"><input type="checkbox" class="dg-switch" id="dgLiveShare" checked onchange="dgLiveShareToggle(this.checked)"><span>Canlı konumumu park ekibiyle paylaş<small>Geçicidir; veritabanına yazılmaz.</small></span></label><div id="dgMatesNote" class="dg-meta"></div>
     </details>
@@ -65,7 +65,7 @@
     <div class="measure-fields measure-identity"><div><label class="lbl" for="mPoint">Nokta ID</label><div class="measure-query"><input id="mPoint" type="number" min="1" step="1" inputmode="numeric" oninput="manualPoint=true" aria-describedby="pointHelp"><button class="btn sm ghost" onclick="queryPointId()">🔍 Sorgula</button></div><p class="measure-help" id="pointHelp">Otomatik önerilir; gerekirse değiştirin.</p></div><div><label class="lbl" for="mNo">Ölçüm No</label><input id="mNo" type="number" min="1" step="1" inputmode="numeric" value="1"><p class="measure-help">Aynı noktadaki ölçüm sırası.</p></div></div>
     <div id="pointQueryResult" class="alert info" style="display:none"></div>
     <div class="measure-fields"><div><label class="lbl" for="mGroup">Ağaç grubu</label><select id="mGroup" onchange="fillSpecies();liveCalc()"><option value="">Grup seçin</option><option value="İBRELİ">İBRELİ</option><option value="YAPRAKLI">YAPRAKLI</option></select></div><div><label class="lbl" for="mSpecies">Ağaç türü</label><select id="mSpecies" disabled onchange="showLatin();liveCalc()"><option value="">Önce grup seçin</option></select><div id="latinName" class="mono measure-help"></div></div></div>
-    <div class="measure-fields measure-dimensions"><div><label class="lbl" for="mDbh">Göğüs çevresi <span>(cm)</span></label><input id="mDbh" type="number" min="0.1" max="1256.6" step="0.1" inputmode="decimal" oninput="liveCalc()" placeholder="Örn. 110" aria-describedby="dbhHelp"><p class="measure-help" id="dbhHelp">Mezurayı gövdenin etrafına, yerden 1,30 m yüksekte sarın. Sistem DBH çapını otomatik olarak çevre ÷ π ile hesaplar.</p></div><div><label class="lbl" for="mHeight">Ağaç boyu <span>(m)</span></label><input id="mHeight" type="number" min="0.1" max="100" step="0.1" inputmode="decimal" oninput="liveCalc()" placeholder="Örn. 7,2"><p class="measure-help">Ağacın toplam yüksekliği.</p></div></div>
+    <div class="measure-fields measure-dimensions"><div><label class="lbl measure-label-help" for="mDbh"><span>Göğüs çevresi <span>(cm)</span></span><button type="button" class="dg-field-help" aria-label="Göğüs çevresi nasıl ölçülür?" data-tip="Mezurayı gövdenin etrafına, yerden 1,30 m yüksekte sarın. Sistem DBH çapını otomatik olarak çevre ÷ π ile hesaplar.">?</button></label><input id="mDbh" type="number" min="0.1" max="1256.6" step="0.1" inputmode="decimal" oninput="liveCalc()" placeholder="Örn. 110"></div><div><label class="lbl measure-label-help" for="mHeight"><span>Ağaç boyu <span>(m)</span></span><button type="button" class="dg-field-help" aria-label="Ağaç boyu nasıl girilir?" data-tip="Ağacın zeminden tepe noktasına kadar olan toplam yüksekliğini metre cinsinden girin.">?</button></label><input id="mHeight" type="number" min="0.1" max="100" step="0.1" inputmode="decimal" oninput="liveCalc()" placeholder="Örn. 7,2"></div></div>
     <div class="measure-photo"><div><h4>Fotoğraf <span class="measure-optional">İsteğe bağlı</span></h4><p class="measure-help">Ağacı ve gövdesini kadraja alın.</p></div><span class="dg-file btn ghost">📸 <span>Fotoğraf ekle</span><input type="file" id="mPhoto" aria-label="Fotoğraf (canlı çekim)" accept="image/*" capture="environment" onchange="checkPhoto(event)"></span><span class="dg-file-name mono" id="mPhotoName"></span><button type="button" class="btn sm ghost" id="mPhotoRemove" style="display:none" onclick="dgClearMeasurePhoto()">Fotoğrafı kaldır</button></div>
     <div id="photoCheck" class="alert info" role="status" style="display:none"></div>
    </section>
@@ -460,34 +460,46 @@
   </div>
 
   <div class="view" id="v-visitors">
-   <h2 class="disp" style="margin-bottom:16px">👁 Ziyaretçi &amp; Canlı İzleme</h2>
-   <div class="alert info" style="font-size:.82rem">Bu sekme <b>yalnız kurucuya</b> açıktır. Ziyaretçi sayacı kimlik tutmaz (gizlilik); oturum açmış kullanıcıların veri işlemleri aşağıdadır. Konumlar, yalnız kullanıcı "canlı konum paylaşımı"nı açtıysa <b>geçici</b> olarak görünür — veritabanına yazılmaz.</div>
-   <div class="dg-vis-tools card"><label class="lbl" for="visSearch">Kullanıcı ara</label><input id="visSearch" type="search" placeholder="İsim veya cihaz" oninput="renderVisitorsLive()"><label class="lbl" for="visViewFilter">Ekran</label><select id="visViewFilter" onchange="renderVisitorsLive()"><option value="">Tüm ekranlar</option value="measure">Yeni Ölçüm</option><option value="nav">Waypoint</option><option value="map">Canlı Harita</option><option value="projects">Projeler</option></select><label class="measure-share"><input class="dg-switch" id="visLocated" type="checkbox" onchange="renderVisitorsLive()"><span>Yalnız konum paylaşanlar</span></label><label class="measure-share"><input class="dg-switch" type="checkbox" onchange="dgVisPause(this.checked)"><span>Görünümü duraklat</span></label><button type="button" class="btn sm ghost" onclick="dgVisResetFilters()">Filtreleri temizle</button><p id="visStatus" class="dg-meta" role="status">Bağlanıyor…</p><p class="dg-meta">Konum paylaşan: <b id="vzLocated">0</b> · Çevrimiçi sayısı bağlı benzersiz kullanıcıları gösterir. Arka planda kalan oturumlar ayrıca işaretlenir.</p></div>
-   <div class="grid g4" style="margin-bottom:18px">
-    <div class="stat"><div class="lbl">👁 Toplam Ziyaret</div><div class="val" id="vzTotal">0</div></div>
-    <div class="stat"><div class="lbl">👁 Bugün</div><div class="val" id="vzToday">0</div></div>
-    <div class="stat"><div class="lbl">👁 Son 7 Gün</div><div class="val" id="vz7">0</div></div>
-    <div class="stat"><div class="lbl">🟢 Şu An Çevrimiçi</div><div class="val" id="vzOnline">0</div></div>
+   <div class="visitor-heading">
+    <div><div class="dg-kicker">CANLI DURUM</div><h2 class="disp">Ziyaretçi &amp; Canlı İzleme</h2><p class="visitor-lead">Oturumları, saha hareketini ve geçici canlı konumları tek ekranda izle.</p></div>
+    <div class="visitor-connection"><span class="visitor-live-dot" aria-hidden="true"></span><span id="visStatus" role="status">Bağlanıyor…</span><button type="button" class="btn sm ghost" onclick="dgVisRefresh()">↻ Yenile</button></div>
    </div>
-   <div class="card" style="margin-bottom:18px">
-    <div class="shead" style="margin-bottom:10px"><span class="no">🟢</span><h2 style="font-size:1.15rem">Şu An — kim, ne yapıyor</h2><span class="rule"></span><button class="btn sm ghost" onclick="dgVisRefresh()">🔄 Yenile</button></div>
-    <div id="visLive" style="font-size:.88rem">—</div>
+   <div class="visitor-privacy"><span>🔒</span><p>Yalnız kurucu görür. Canlı konum ve oturum ayrıntıları geçicidir; veritabanına yazılmaz.</p></div>
+   <div class="visitor-stats">
+    <div class="visitor-stat"><span>Toplam ziyaret</span><strong id="vzTotal">0</strong></div>
+    <div class="visitor-stat"><span>Bugün</span><strong id="vzToday">0</strong></div>
+    <div class="visitor-stat"><span>Son 7 gün</span><strong id="vz7">0</strong></div>
+    <div class="visitor-stat is-live"><span>Çevrimiçi</span><strong id="vzOnline">0</strong></div>
    </div>
-   <div class="card" style="margin-bottom:18px">
-    <div class="shead" style="margin-bottom:10px"><span class="no">📡</span><h2 style="font-size:1.15rem">Canlı Aksiyon Akışı</h2><span class="rule"></span><span class="mono" style="font-size:.7rem;color:var(--mut)">geçici · yazılmaz</span></div>
-    <div id="visFeed" style="font-size:.85rem">—</div>
+   <section class="card visitor-control" aria-label="Canlı izleme filtreleri">
+    <div class="visitor-quick">
+     <button type="button" class="btn sm ghost" onclick="dgVisQuick('measure',false)">📏 Ölçümdekiler</button>
+     <button type="button" class="btn sm ghost" onclick="dgVisQuick('nav',false)">📍 Waypointtekiler</button>
+     <button type="button" class="btn sm ghost" onclick="dgVisQuick('',true)">🛰 Konum paylaşanlar</button>
+     <button type="button" class="btn sm ghost" onclick="dgVisResetFilters()">Tümünü göster</button>
+    </div>
+    <div class="dg-vis-tools">
+     <div><label class="lbl" for="visSearch">Kullanıcı ara</label><input id="visSearch" type="search" placeholder="İsim veya cihaz" oninput="renderVisitorsLive()"></div>
+     <div><label class="lbl" for="visViewFilter">Ekran</label><select id="visViewFilter" onchange="renderVisitorsLive()"><option value="">Tüm ekranlar</option><option value="measure">Yeni Ölçüm</option><option value="nav">Waypoint</option><option value="map">Canlı Harita</option><option value="projects">Projeler</option></select></div>
+     <label class="measure-share"><input class="dg-switch" id="visLocated" type="checkbox" onchange="renderVisitorsLive()"><span>Yalnız konum paylaşanlar</span></label>
+     <label class="measure-share"><input class="dg-switch" type="checkbox" onchange="dgVisPause(this.checked)"><span>Görünümü duraklat</span></label>
+     <p class="dg-meta visitor-control-note">Konum paylaşan: <b id="vzLocated">0</b> · Arka planda kalan oturumlar ayrıca işaretlenir.</p>
+    </div>
+   </section>
+   <div class="visitor-layout">
+    <section class="card visitor-live-card"><div class="visitor-card-head"><div><div class="dg-kicker">ŞU AN</div><h3>Kim, ne yapıyor?</h3></div><span class="visitor-card-hint">canlı</span></div><div id="visLive">—</div></section>
+    <section class="card visitor-feed-card"><div class="visitor-card-head"><div><div class="dg-kicker">AKIŞ</div><h3>Canlı aksiyonlar</h3></div><span class="visitor-card-hint">geçici</span></div><div id="visFeed">—</div></section>
    </div>
-   <div class="card" style="margin-bottom:18px">
-    <div class="shead" style="margin-bottom:10px"><span class="no">🗺️</span><h2 style="font-size:1.15rem">Canlı Konum Haritası</h2><span class="rule"></span></div>
-    <p style="color:var(--mut);font-size:.8rem;margin-bottom:8px">Konum izni açık ve GPS etkin kullanıcılar görünür (geçici; veritabanına yazılmaz). Üstüne gel → kimlik + ne yapıyor; satıra tıkla → haritada odaklan. Liste 10 sn'de bir kendiliğinden tazelenir.</p>
-    <div class="dg-vis-map-tools"><button class="btn sm ghost" onclick="dgVisFit()">🗺️ Tümünü göster</button><label class="measure-share"><input class="dg-switch" type="checkbox" id="visFollow" onchange="dgVisMapDraw(dgVisFilter(dgVisRows()))"><span>Haritayı takip et</span></label><label class="measure-share"><input class="dg-switch" type="checkbox" id="visTrails" onchange="dgVisMapDraw(dgVisFilter(dgVisRows()))"><span>Geçici izleri göster</span></label></div>
+   <section class="card visitor-map-card">
+    <div class="visitor-card-head"><div><div class="dg-kicker">KONUM</div><h3>Canlı konum haritası</h3></div><span class="visitor-card-hint">yalnız izinli GPS</span></div>
+    <div class="dg-vis-map-tools"><button class="btn sm ghost" onclick="dgVisFit()">🗺 Tümünü göster</button><label class="measure-share"><input class="dg-switch" type="checkbox" id="visFollow" onchange="dgVisMapDraw(dgVisFilter(dgVisRows()))"><span>Haritayı takip et</span></label><label class="measure-share"><input class="dg-switch" type="checkbox" id="visTrails" onchange="dgVisMapDraw(dgVisFilter(dgVisRows()))"><span>Geçici izleri göster</span></label></div>
     <div id="visMap" class="notranslate" translate="no"></div>
-   </div>
-   <div class="card">
-    <div class="shead" style="margin-bottom:10px"><span class="no">📜</span><h2 style="font-size:1.15rem">Son Etkinlik — kim ne yaptı</h2><span class="rule"></span><button class="btn sm ghost" id="visActToggle" aria-expanded="true" aria-controls="visActivityWrap" onclick="dgVisActToggle()">⬆ Gizle</button></div>
+   </section>
+   <section class="card visitor-activity-card">
+    <div class="visitor-card-head"><div><div class="dg-kicker">GEÇMİŞ</div><h3>Son etkinlik</h3></div><button class="btn sm ghost" id="visActToggle" aria-expanded="true" aria-controls="visActivityWrap" onclick="dgVisActToggle()">⬆ Gizle</button></div>
     <div id="visActivityWrap"><div id="visActivity" class="tblwrap">⏳</div></div>
-   </div>
-  </div>
+   </section>
+  </div>>
 
  </div>
 </div>
