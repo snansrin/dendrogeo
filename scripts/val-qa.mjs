@@ -17,6 +17,16 @@ import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import vm from 'node:vm';
 
+// Bound CLI lookups too; Node needs --use-env-proxy in proxied environments.
+const nativeFetch=globalThis.fetch;
+async function fetch(url,options={}){
+ const signal=options.signal?AbortSignal.any([options.signal,AbortSignal.timeout(30000)]):AbortSignal.timeout(30000);
+ const started=Date.now();
+ try{const response=await nativeFetch(url,{...options,signal});
+  if(process.argv.includes('--verbose'))console.log('HTTP',response.status,new URL(url).hostname,Date.now()-started+' ms');
+  return response;
+ }catch(e){if(process.argv.includes('--verbose'))console.error('HTTP failed',new URL(url).hostname,e.name);throw e;}
+}
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const arg = (ad) => { const i = process.argv.indexOf('--' + ad); return i >= 0 ? process.argv[i + 1] : null; };
 const PARK_ID = Number(arg('park-id') || 0);
@@ -37,10 +47,15 @@ async function parkFromDb(id) {
   return { outer, meta: { name: p.name, city: p.city, osm: 'supabase.parks#' + p.id } };
 }
 async function parkFromOverpass(ad) {
-  const nr = await fetch('https://nominatim.openstreetmap.org/search?format=jsonv2&limit=1&q=' +
-    encodeURIComponent(ad + ', Türkiye'), { headers: { 'User-Agent': 'dendrogeo-val-qa/1.0' } });
+  const nr = await fetch('https://nominatim.openstreetmap.org/search?format=jsonv2&polygon_geojson=1&limit=1&q=' +
+    encodeURIComponent(ad + ', '+(arg('city')||'Türkiye')), { headers: { 'User-Agent': 'dendrogeo-val-qa/1.0' } });
   const nj = await nr.json();
   if (!nj.length) throw new Error('Nominatim bulamadı: ' + ad);
+  const named=nj[0],geometry=named.geojson;
+  if(named.category==='leisure'&&named.type==='park'&&['Polygon','MultiPolygon'].includes(geometry?.type)){
+    const polygons=geometry.type==='Polygon'?[geometry.coordinates]:geometry.coordinates;
+    return {outer:polygons.map(p=>p[0].map(([lon,lat])=>[lat,lon])),holes:polygons.flatMap(p=>p.slice(1).map(r=>r.map(([lon,lat])=>[lat,lon]))),meta:{name:ad,city:arg('city')||'',osm:'nominatim:'+named.osm_type+'/'+named.osm_id}};
+  }
   const lat = Number(nj[0].lat), lon = Number(nj[0].lon);
   const q = `[out:json][timeout:60];nwr["leisure"="park"]["name"~"${ad}",i](around:4000,${lat},${lon});out geom;`;
   const AYNALAR = ['https://overpass.private.coffee/api/interpreter', 'https://overpass.kumi.systems/api/interpreter',
@@ -102,15 +117,17 @@ for (const f of ['src/config/constants.js',
 
 const script = `(async () => {
   const outer = ${JSON.stringify(src.outer)};
-  const holes = [];
+  const holes = ${JSON.stringify(src.holes||[])};
   const geom = dgLcProjectGeometry(outer, holes, dgLcUtmEpsgForLatLon(outer[0][0][0], outer[0][0][1]));
   const parkAreaM2 = dgLcProjectedArea(geom);
   const t0 = Date.now();
+  console.log('WorldCover analizi başladı.');
   const report = await dgLcAnalyze({ outer, holes, parkAreaM2 });
   const cells = DG_LC_LAST.result.cells;
   const tA = Date.now() - t0;
 
   const t1 = Date.now();
+  console.log('WorldCover tamamlandı; Sentinel-2 taraması başladı.');
   const profile = await dgS2Profile(cells, outer, { year: 2021, mode: 'ref' });
   dgS2PredictAll(profile);
   const tB = Date.now() - t1;
@@ -219,7 +236,7 @@ const script = `(async () => {
 })()`;
 const out = await vm.runInContext(script, ctx, { filename: 'val-qa', timeout: 600000 });
 
-console.log('\n══ A) WorldCover 2021 (+IO LULC çapraz +OSM rafinasyon) ══');
+console.log('\n══ A) WorldCover 2021 — değişmez ham raster ══');
 console.log(`park: ${out.parkAreaHa.toFixed(2)} ha · hücre: ${out.cellCount} · süre: ${(out.tA_ms / 1000).toFixed(1)} sn · su rafine: ${out.waterRefined} · yol rafine: ${out.roadRefined}`);
 for (const [k, v] of Object.entries(out.classes)) console.log(`  ${k.padEnd(6)} ${String(v.areaHa).padStart(8)} ha  %${String(v.pct).padStart(6)}`);
 if (out.xagree) for (const [k, v] of Object.entries(out.xagree)) console.log(`  çapraz-uzlaşma ${k.padEnd(6)} %${v.agreementPct.toFixed(1)}`);

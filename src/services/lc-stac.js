@@ -5,13 +5,48 @@
  * test/critical-fixes.test.mjs), yıl filtresi, asset seçimi, image meta
  * ve okuma penceresi hesabı. */
 
+/* Retry only transient transport failures. One 30 s budget covers attempts,
+ * backoff AND response decoding; cancellation is never swallowed. */
+function dgLcRetryable(status){return [408,429,500,502,503,504].includes(status);}
+function dgLcRetryWait(attempt,signal,response){
+ const value=response?.headers?.get?.("Retry-After");
+ const seconds=Number(value),date=Date.parse(value);
+ const requested=value?(Number.isFinite(seconds)?seconds*1000:date-Date.now()):0;
+ const delay=Math.min(2000,Math.max(0,requested||500*Math.pow(2,attempt)+Math.random()*200));
+ return new Promise((resolve,reject)=>{
+  let timer;
+  const abort=()=>{clearTimeout(timer);signal?.removeEventListener('abort',abort);reject(Object.assign(new Error("İstek iptal edildi."),{name:"AbortError"}));};
+  if(signal?.aborted){abort();return;}
+  signal?.addEventListener('abort',abort,{once:true});
+  timer=setTimeout(()=>{signal?.removeEventListener('abort',abort);resolve();},delay);
+ });
+}
 async function dgLcFetchJson(url,options){
  const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),30000);
  const parent=options?.signal,abort=()=>controller.abort();
  if(parent?.aborted)controller.abort();else parent?.addEventListener('abort',abort,{once:true});
- try{const res=await fetch(url,{cache:"no-store",headers:{Accept:"application/json"},...options,signal:controller.signal});
-  if(!res.ok){const txt=await res.text().catch(()=>"");throw new Error("HTTP "+res.status+" · "+txt.slice(0,180));}
-  return await res.json();
+ try{
+  for(let attempt=0;attempt<3;attempt++){
+   if(controller.signal.aborted)throw Object.assign(new Error("İstek iptal edildi."),{name:"AbortError"});
+   const child=new AbortController(),relay=()=>child.abort();
+   controller.signal.addEventListener('abort',relay,{once:true});
+   const limit=setTimeout(relay,10000);
+   let response,transport=false;
+   try{
+    try{response=await fetch(url,{cache:"no-store",headers:{Accept:"application/json"},...options,signal:child.signal});}
+    catch(e){transport=true;throw e;}
+    if(!response.ok){
+     const err=new Error("HTTP "+response.status);
+     err.transient=dgLcRetryable(response.status);
+     await response.body?.cancel();
+     throw err;
+    }
+    return await response.json();
+   }catch(e){
+    if(controller.signal.aborted||attempt===2||(!transport&&!child.signal.aborted&&!e.transient))throw e;
+   }finally{clearTimeout(limit);controller.signal.removeEventListener('abort',relay);}
+   await dgLcRetryWait(attempt,controller.signal,response);
+  }
  }finally{clearTimeout(timer);parent?.removeEventListener('abort',abort);}
 }
 
@@ -31,7 +66,15 @@ function dgLcOpenRaster(href,sourceSignal){
    const signals=[signal,sourceSignal].filter(Boolean);
    const abort=()=>controller.abort(),done=()=>{clearTimeout(timer);for(const s of signals)s.removeEventListener('abort',abort);};
    for(const s of signals){if(s.aborted)controller.abort();else s.addEventListener('abort',abort,{once:true});}
-   try{const response=await fetch(this.url,{headers,signal:controller.signal});if(!response.ok){try{await response.body?.cancel();}finally{done();}throw new Error("Raster HTTP "+response.status); }return new RangeResponse(response,done);}
+   try{
+    for(let attempt=0;attempt<3;attempt++){
+     const response=await fetch(this.url,{headers,signal:controller.signal});
+     if(response.ok)return new RangeResponse(response,done);
+     await response.body?.cancel();
+     if(!dgLcRetryable(response.status)||attempt===2)throw new Error("Raster HTTP "+response.status);
+     await dgLcRetryWait(attempt,controller.signal,response);
+    }
+   }
    catch(e){done();throw e;}
   }
  }
@@ -90,12 +133,24 @@ async function dgLcFindTiles(bbox,source,signal){
   return items;
 }
 
+const DG_LC_SAS_CACHE=new Map();
 async function dgLcGetSas(collection,signal){
   const coll=collection||DG_LC_SOURCES.cross.collection;
+  if(signal?.aborted)throw Object.assign(new Error("İstek iptal edildi."),{name:"AbortError"});
+  const cached=DG_LC_SAS_CACHE.get(coll);
+  if(cached&&cached.expires>Date.now()+120000)return cached.token;
+  DG_LC_SAS_CACHE.delete(coll);
   try{
     const data=await dgLcFetchJson(DG_LC_SAS+coll,{headers:{Accept:"application/json"},signal});
-    return data?.token||"";
+    const token=data?.token||"";
+    const expiry=Date.parse(data?.msftExpiry||new URLSearchParams(String(token).replace(/^\?/,"")).get("se"));
+    if(token&&Number.isFinite(expiry)&&expiry>Date.now()+120000){
+     if(DG_LC_SAS_CACHE.size>=8)DG_LC_SAS_CACHE.delete(DG_LC_SAS_CACHE.keys().next().value);
+     DG_LC_SAS_CACHE.set(coll,{token,expires:expiry});
+    }
+    return token;
   }catch(err){
+    if(signal?.aborted||err.name==="AbortError")throw err;
     console.warn("DENDROGEO · Veri imzalama tokenı alınamadı; doğrudan açık asset deneniyor.",err);
     return"";
   }

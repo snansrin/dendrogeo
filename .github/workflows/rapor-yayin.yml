@@ -34,6 +34,7 @@ on:
   workflow_dispatch: {}   # "hemen çalıştır" (sabırsız anlar için, zorunlu değil)
 
 permissions:
+  id-token: write
   contents: write
   actions: write   # 0016: kalp atışı zinciri (kendi ardılını tetikler)
 
@@ -45,6 +46,8 @@ concurrency:
 
 jobs:
   kuyruk:
+    env:
+      DG_REPORT_READER: oidc
     runs-on: ubuntu-latest
     timeout-minutes: 25
     steps:

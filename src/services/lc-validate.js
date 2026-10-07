@@ -420,10 +420,12 @@ function dgValSpectralPredict(m,sens){
    * mndwiYear = yıllık max (ilkbahar/sonbahar taraması) → yaz max → medyan
    * ndviYear  = yıllık max → yaz max → medyan
    * Eski profillerde max alanları yoktur; medyanla çalışmaya devam eder. */
-  const mndwiMax=Number.isFinite(Number(m.mndwiMax))?Number(m.mndwiMax):mndwi;
-  const mndwiYear=Number.isFinite(Number(m.mndwiMaxYear))?Number(m.mndwiMaxYear):mndwiMax;
-  const ndviMax=Number.isFinite(Number(m.ndviMax))?Number(m.ndviMax):ndvi;
-  const ndviYear=Number.isFinite(Number(m.ndviMaxYear))?Number(m.ndviMaxYear):ndviMax;
+  const finite=v=>v!==null&&v!==undefined&&Number.isFinite(Number(v));
+  const extreme=(confirmed,legacy,fallback)=>Object.hasOwn(m,confirmed)?(finite(m[confirmed])?Number(m[confirmed]):fallback):(finite(m[legacy])?Number(m[legacy]):fallback);
+  const mndwiMax=extreme("mndwiConfirmed","mndwiMax",mndwi);
+  const mndwiYear=extreme("mndwiConfirmedYear","mndwiMaxYear",mndwiMax);
+  const ndviMax=extreme("ndviConfirmed","ndviMax",ndvi);
+  const ndviYear=extreme("ndviConfirmedYear","ndviMaxYear",ndviMax);
   /* 1) Su: (a) medyan kanıtı — mutlak taban + NDVI'ya görelilik
    *       (b) ÇOK ZAMANLI kanıt — YILLIK MAX MNDWI ≥ 0.45 ve taç baskın
    *           değil (ndvi ve ndviYear < 0.50): mevsimsel çekilen göl kıyısı

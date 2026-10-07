@@ -22,9 +22,9 @@ describe('0016 · rapor-kalp.yml (kendi kendini süren nabız)', () => {
     assert.match(y, /cron: '17 \*\/6 \* \* \*'/, '6 saatlik yeniden-arme');
     assert.match(y, /workflow_dispatch/, 'elle tetik');
   });
-  test('boşta koşu ucuz: kuyruk denetimi YALNIZ HTTP (anon okuma)', () => {
-    assert.match(y, /report_requests\?status=eq\.Beklemede/);
-    assert.match(y, /report_retractions\?status=eq\.Beklemede/);
+  test('boşta koşu ucuz: kuyruk denetimi salt okunur OIDC kimliğiyle', () => {
+    assert.match(y, /report-reader-health\.mjs report_requests/);
+    assert.match(y, /report-reader-health\.mjs report_retractions/);
     assert.match(y, /yayin-kuyrugu\.json/, 'günlükteki request_id/retraction_id eşleşmesi');
   });
   test("üretim yalnız iş varsa ve kilit boşsa; iş rapor-yayin.yml’e devredilir", () => {
