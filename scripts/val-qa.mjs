@@ -8,11 +8,13 @@
  *
  *   node scripts/val-qa.mjs --park-id 25            (DB'deki park kimliği)
  *   node scripts/val-qa.mjs --park "Göksu Parkı"    (Overpass'ten polygon)
+ *   node scripts/val-qa.mjs --park-id 25 --s2-mode ytd (2026: yılbaşından bugüne)
  *
  * NOT: "karne" bölümünde referans olarak SPEKTRAL tahmin kullanılır — bu
  * yalnız hattın plumbing kanıtıdır; bilimsel referans İNSAN etiketidir
  * (uygulamadaki B adımı). Sayısal alan sonuçlarına DOKUNMAZ (salt okur). */
 import { readFileSync } from 'node:fs';
+import { writeFile } from 'node:fs/promises';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import vm from 'node:vm';
@@ -31,6 +33,9 @@ const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const arg = (ad) => { const i = process.argv.indexOf('--' + ad); return i >= 0 ? process.argv[i + 1] : null; };
 const PARK_ID = Number(arg('park-id') || 0);
 const PARK_ADI = arg('park');
+const VISUAL_SAMPLES_OUT = arg('visual-samples-out');
+const VISUAL_SAMPLES_ONLY = process.argv.includes('--visual-samples-only');
+const S2_MODE = ['ref','latest','ytd'].includes(arg('s2-mode')) ? arg('s2-mode') : 'ref';
 const SB_URL = 'https://xjbpounwdxrhelmixvqm.supabase.co';
 const SB_ANON = readFileSync(join(ROOT, 'src/config/supabase.js'), 'utf8').match(/SB_KEY="([^"]+)"/)[1];
 
@@ -100,6 +105,7 @@ const ctx = {
   ArrayBuffer, Uint8Array, Uint16Array, Int16Array, Int32Array, Float32Array,
   Float64Array, DataView, TextDecoder, TextEncoder, AbortController,
   Response, Headers, Request, Buffer,
+  S2_MODE,
   window: null, document: { createElement: () => ({}) },
   navigator: { userAgent: 'node-qa' }, location: { origin: 'https://qa.local' },
 };
@@ -126,15 +132,21 @@ const script = `(async () => {
   const cells = DG_LC_LAST.result.cells;
   const tA = Date.now() - t0;
 
+  /* Stratified mapped-class samples estimate class-wise agreement. A separate
+   * park-wide random frame can reveal classes absent from the mapped strata. */
+  const samples = dgValStratifiedSample(cells, { perStratum: 10, seed: 20261003 });
+  const visualSamples=[...samples.map(s=>({...s,frame:"stratified"})),...dgValSpatialSample(cells,{count:20,seed:20261007})];
+  if(${JSON.stringify(VISUAL_SAMPLES_ONLY)})return{visualSamples,parkAreaHa:parkAreaM2/10000,cellCount:cells.length};
+
   const t1 = Date.now();
   console.log('WorldCover tamamlandı; Sentinel-2 taraması başladı.');
-  const profile = await dgS2Profile(cells, outer, { year: 2021, mode: 'ref' });
+  const profileYear = S2_MODE === 'ytd' ? new Date().getUTCFullYear() : 2021;
+  const profile = await dgS2Profile(cells, outer, { year: profileYear, mode: S2_MODE });
   dgS2PredictAll(profile);
   const tB = Date.now() - t1;
 
   const agreement = dgValAgreement(cells, profile.cells);
 
-  const samples = dgValStratifiedSample(cells, { perStratum: 10, seed: 20261003 });
   const labeled = samples.map(s => {
     const sp = profile.cells[s.row + ':' + s.col];
     const pred = sp ? dgValSpectralPredict(sp) : 'nodata';
@@ -180,6 +192,9 @@ const script = `(async () => {
     s2: { scenes: profile.scenes, range: profile.range.label, stats: profile.stats, skipped: profile.skipped, waterScenes: profile.waterScenes || [] },
     autoAgreement: { overallPct: agreement.overallPct, n: agreement.nCandidates, perClass: agreement.perClass, flagged: agreement.flagged.length },
     idxSummary, sampleCount: samples.length,
+    /* Görsel inceleme için deterministik örneklem çerçevesi.
+     * Otomatik Sentinel tahmini referans etiketi olarak yazılmaz. */
+    visualSamples,
     disMatrix,
     /* COK ZAMANLI KANIT KATKISI: yillik max alanlari olmadan (yalniz yaz
      * medyani) tahmin vs yillik kanitla tahmin — kac hucre sinif degistirdi. */
@@ -236,12 +251,22 @@ const script = `(async () => {
 })()`;
 const out = await vm.runInContext(script, ctx, { filename: 'val-qa', timeout: 600000 });
 
+if(VISUAL_SAMPLES_OUT){
+  const payload={schema:'dendrogeo-visual-sample/1',park:src.meta,seed:20261003,randomSeed:20261007,perStratum:10,randomPerPark:20,
+    imagery:'Esri World Imagery (MapServer tile service)',createdAt:new Date().toISOString(),
+    note:'mapClass is only the mapped stratum. stratified points estimate class-wise agreement; park-random points provide an independent omission check. Assign refClass only after visual interpretation.',
+    samples:out.visualSamples};
+  await writeFile(VISUAL_SAMPLES_OUT,JSON.stringify(payload,null,2)+'\n');
+  console.log(`\nGörüntü örneklemi yazıldı: ${VISUAL_SAMPLES_OUT} (${out.visualSamples.length} nokta)`);
+  if(VISUAL_SAMPLES_ONLY)process.exit(0);
+}
+
 console.log('\n══ A) WorldCover 2021 — değişmez ham raster ══');
 console.log(`park: ${out.parkAreaHa.toFixed(2)} ha · hücre: ${out.cellCount} · süre: ${(out.tA_ms / 1000).toFixed(1)} sn · su rafine: ${out.waterRefined} · yol rafine: ${out.roadRefined}`);
 for (const [k, v] of Object.entries(out.classes)) console.log(`  ${k.padEnd(6)} ${String(v.areaHa).padStart(8)} ha  %${String(v.pct).padStart(6)}`);
 if (out.xagree) for (const [k, v] of Object.entries(out.xagree)) console.log(`  çapraz-uzlaşma ${k.padEnd(6)} %${v.agreementPct.toFixed(1)}`);
 
-console.log('\n══ B) Sentinel-2 L2A medyan kompozit ══');
+console.log(`\n══ B) Sentinel-2 L2A medyan kompozit · ${S2_MODE} ══`);
 console.log(`dönem: ${out.s2.range} · süre: ${(out.tB_ms / 1000).toFixed(1)} sn`);
 console.log(`sahneler: ${out.s2.scenes.map(s => s.datetime + ' ☁%' + s.cloud).join(' | ')}`);
 console.log(`profilli: ${out.s2.stats.nProfiled}/${out.s2.stats.nCells} · yetersiz: ${out.s2.stats.nInsufficient} · atlanan: ${out.s2.skipped.length}`);

@@ -23,7 +23,7 @@ const app = loadApp({ sadece: ['src/config/constants.js', 'src/utils/geo.js',
   'src/services/lc-validate.js', 'src/services/lc-s2.js',
   'src/ui/lc-report.js', 'src/services/landcover.js'] });
 const {
-  dgValRng, dgValStratifiedSample, dgValConfusion, dgValWeights, dgValMetrics,
+  dgValRng, dgValStratifiedSample, dgValSpatialSample, dgValConfusion, dgValWeights, dgValMetrics,
   dgValSpectralPredict, dgValAgreement, dgValGate, dgValCsv, dgValCampaignJson,
   DG_VAL_CLASSES, DG_VAL_GATE, DG_VAL_SPECTRAL,
   DG_S2_COLLECTION, DG_S2_MAX_SCENES, DG_S2_SCL_VALID, DG_S2_MIN_OBS_GUARD,
@@ -210,6 +210,27 @@ describe('lc-validate · tabakalı örnekleme (Olofsson tasarımı)', () => {
       center: { lat: 40.5, lon: 32.5 }, quadWgs: null });
     const s = dgValStratifiedSample(cells, { perStratum: 20, seed: 3 });
     assert.ok(!s.some(p => p.row === 99), 'kenar hücresi örneklendi');
+  });
+  test('park-geneli örnekleme sınıf tabakalarından bağımsız ve deterministiktir', () => {
+    const cells=hucreler();
+    const a=dgValSpatialSample(cells,{count:12,seed:42});
+    const b=dgValSpatialSample(cells,{count:12,seed:42});
+    assert.deepEqual(a,b);
+    assert.equal(a.length,12);
+    assert.ok(a.every(p=>p.frame==='park-random'));
+    assert.ok(a.every(p=>['green','water','hard'].includes(p.mapClass)),
+      'yalnız gerçekten bulunan sınıflar görünür; olmayan strata yerine park alanı örneklenir');
+    assert.equal(new Set(a.map(p=>p.row+':'+p.col)).size,a.length,'hücre tekrarı olmamalı');
+  });
+  test('park-geneli örnekleme da sınırlı kenar hücrelerini dışarıda bırakır', () => {
+    const cells=hucreler();
+    cells.push({row:99,col:99,classKey:'water',classCode:80,areaM2:12,
+      center:{lat:40.5,lon:32.5},quadWgs:null});
+    const s=dgValSpatialSample(cells,{count:cells.length,seed:3});
+    assert.ok(!s.some(p=>p.row===99),'park sınırındaki küçük kesik hücre örneklendi');
+  });
+  test('park-geneli örnek adedi 0 geçerli biçimde boş sonuç verir', () => {
+    assert.equal(dgValSpatialSample(hucreler(),{count:0,seed:0}).length,0);
   });
   test('PRNG tekdüze ve [0,1) aralığında', () => {
     const rng = dgValRng(1234);
@@ -422,7 +443,7 @@ describe('lc-validate · serileştirme ve kalıcılık sözleşmesi', () => {
   test('JSON şema alanı ve parmak izi taşır', () => {
     const j = JSON.parse(dgValCampaignJson(kampanya()));
     assert.equal(j.schema, 'dendrogeo-lc-validation/1');
-    assert.equal(j.validateVersion, '1.0.0');
+    assert.equal(j.validateVersion, '1.1.0');
     assert.equal(j.engineVersion, '4.2.0');
     assert.equal(j.seed, 42);
     assert.ok(j.metrics && j.gate);
@@ -455,6 +476,24 @@ describe('lc-s2 · Sentinel-2 sabitleri ve saf yardımcılar', () => {
     const g = dgS2SeasonRange(2021, 'latest');
     assert.notEqual(g.start, r.start);
     assert.match(g.label, /güncel/i);
+  });
+  test('güncel yıl modu 1 Ocak–bugün aralığını kullanır; 2021 referansını değiştirmez', () => {
+    const now = Date.now(), year = new Date().getUTCFullYear();
+    const ytd = dgS2SeasonRange(2021, 'ytd');
+    assert.equal(ytd.start, `${year}-01-01T00:00:00.000Z`);
+    assert.ok(Date.parse(ytd.end) <= now);
+    assert.match(ytd.label, new RegExp(String(year)));
+    const ref = dgS2SeasonRange(2021, 'ref');
+    assert.equal(ref.start, '2021-06-01T00:00:00Z');
+  });
+  test('güncel yıl su pencereleri seçilen yıla sabitlenir ve geleceğe uzamaz', () => {
+    const now = new Date('2026-10-07T12:00:00Z');
+    const windows = app.DG_LC_S2.waterWindows(2021, 'ytd', now);
+    assert.equal(windows.length, 2);
+    assert.ok(windows.every(w => w.start.startsWith('2026-')));
+    assert.ok(windows.every(w => Date.parse(w.end) <= now.getTime()));
+    assert.equal(windows[0].end, '2026-05-31T23:59:59.000Z');
+    assert.equal(windows[1].end, now.toISOString());
   });
   test('STAC araması GET kuralı korunuyor (CORS dersi — lc-stac mirası)', () => {
     const src = rd('src/services/lc-s2.js');
