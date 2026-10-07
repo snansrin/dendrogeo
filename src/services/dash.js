@@ -96,11 +96,11 @@ function renderAnalysis__scroll(rows,elId){
  const topSpecies=Object.entries(bySpecies).sort((a,b)=>b[1].n-a[1].n).slice(0,6);
  
  el.innerHTML=`
-  <div class="card">
-   <div class="shead" style="margin-bottom:14px"><span class="no">🌳</span><h2 style="font-size:1.15rem">Ağaç Çeşitliliği & Yapısal Analiz</h2><span class="rule"></span><span class="mono" style="font-size:.78rem;color:var(--mut)">${total} onaylı kayıt</span></div>
+  <div class="card dg-live-tree-card">
+   <header class="dg-live-tree-head"><div><span class="dg-live-eyebrow">${dgCf("ONAYLI SAHA VERİSİ")}</span><h2>Ağaç Çeşitliliği & Yapısal Analiz</h2><p>${total} onaylı kayıt</p></div><span class="dg-live-tree-mark" aria-hidden="true">🌳</span></header>
    
    <!-- Grup dağılımı yatay bar -->
-   <div style="margin-bottom:18px">
+   <section class="dg-live-tree-groups">
     <div class="lbl" style="margin-bottom:8px">Grup Dağılımı</div>
     <div style="display:flex;justify-content:space-between;font-size:.78rem;margin-bottom:6px;color:var(--mut)">
      <span><span style="display:inline-block;width:10px;height:10px;border-radius:3px;background:${GROUP_COLOR["İBRELİ"]};margin-right:5px"></span>İbreli <b style="color:var(--ink)">${ibPct}%</b></span>
@@ -112,10 +112,10 @@ function renderAnalysis__scroll(rows,elId){
      <div style="width:${yaPct}%;background:${GROUP_COLOR["YAPRAKLI"]};transition:width .6s"></div>
      <div style="width:${diPct}%;background:${GROUP_COLOR["DİĞER"]};transition:width .6s"></div>
     </div>
-   </div>
+   </section>
    
    <!-- Ortalamalar -->
-   <div class="grid g4" style="margin-bottom:18px">
+   <div class="dg-live-tree-metrics">
     <div class="stat" style="padding:14px"><div class="lbl">Ort. Çap</div><div class="val" style="font-size:1.15rem">${avgDbh} <span style="font-size:.7rem;font-weight:400">cm</span></div></div>
     <div class="stat" style="padding:14px"><div class="lbl">Ort. Boy</div><div class="val" style="font-size:1.15rem">${avgH} <span style="font-size:.7rem;font-weight:400">m</span></div></div>
     <div class="stat" style="padding:14px"><div class="lbl" style="color:${GROUP_COLOR_INK["İBRELİ"]}">İbreli Ort.Boy</div><div class="val" style="font-size:1.15rem">${groups["İBRELİ"].n?(groups["İBRELİ"].h/groups["İBRELİ"].n).toFixed(1):"—"} <span style="font-size:.7rem;font-weight:400">m</span></div></div>
@@ -123,7 +123,9 @@ function renderAnalysis__scroll(rows,elId){
    </div>
    
    <!-- Top 6 tür -->
-   <div class="lbl" style="margin-bottom:10px">En Yaygın 6 Tür</div>
+   <details class="dg-live-species">
+    <summary><span>En Yaygın 6 Tür</span><small>${topSpecies.length} tür · ${dgCf("tür sıralaması")}</small><span aria-hidden="true">⌄</span></summary>
+    <div class="dg-live-species-body">
    ${topSpecies.map(([sp,v])=>`<div style="margin-bottom:12px">
      <div style="display:flex;justify-content:space-between;font-size:.78rem;margin-bottom:6px;color:var(--mut)">
       <span><span style="display:inline-block;width:10px;height:10px;border-radius:3px;background:${GROUP_COLOR[v.grp]};margin-right:5px"></span>${esc(sp)} <i style="font-style:italic;font-size:.7rem;color:var(--mut)">${esc(LATIN[sp])||""}</i></span>
@@ -133,6 +135,8 @@ function renderAnalysis__scroll(rows,elId){
       <div style="width:${pct(v.n)}%;background:${GROUP_COLOR[v.grp]};transition:width .6s"></div>
      </div>
     </div>`).join("")}
+    </div>
+   </details>
   </div>`;
 }
 // 7. Dünya verisi yükle
