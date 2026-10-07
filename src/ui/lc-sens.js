@@ -103,10 +103,20 @@ async function dgSensLoadRecord(){
   try{const r=await window.DG_SURFACE_REVIEW.load(fresh.parkId,fresh.owner);if(r){remote=r.payload;remote.fingerprint=r.source_fingerprint;revision=r.revision;}}
   catch(e){DG_SENS.status=_tvs("Hesap kaydı yüklenemedi; cihaz taslağı kullanılıyor.");}
  }
- const chosen=local&&(!remote||String(local.modifiedAt||"")>String(remote.modifiedAt||""))?local:remote||local||fresh;
+ // Supabase is authoritative for accepted results. A newer device timestamp
+ // may only reflect display settings or an old IndexedDB write; let it replace
+ // the account snapshot only when it is an explicitly dirty, newer draft.
+ const newerLocalDraft=!!(local?.draftDirty&&(!remote||String(local.modifiedAt||"")>String(remote.modifiedAt||"")));
+ const chosen=newerLocalDraft?local:remote||local||fresh;
  const safe=chosen.owner===fresh.owner&&String(chosen.parkId)===String(fresh.parkId)?chosen:fresh;
  const sens={...fresh.sens};for(const k of DG_SENS_CLASSES){const n=Number(safe.sens?.[k]);sens[k]=Number.isFinite(n)?Math.max(0,Math.min(100,n)):50;}
- return{...fresh,...safe,serverRevision:revision,sens,corrections:safe.corrections&&typeof safe.corrections==="object"&&!Array.isArray(safe.corrections)?safe.corrections:{},features:Array.isArray(safe.features)?safe.features.filter(f=>window.DG_SURFACE_REVIEW.validFeature(f)):[]};
+ const record={...fresh,...safe,serverRevision:revision,sens,corrections:safe.corrections&&typeof safe.corrections==="object"&&!Array.isArray(safe.corrections)?safe.corrections:{},features:Array.isArray(safe.features)?safe.features.filter(f=>window.DG_SURFACE_REVIEW.validFeature(f)):[]};
+ const accepted=record.acceptedResult,areas=record.acceptedAreas,acceptedAreas=accepted?.areas;
+ if(accepted&&(!areas||accepted.schema!=="dendrogeo-surface/2"||String(accepted.parkId)!==String(record.parkId)||accepted.fingerprint!==record.fingerprint||!Array.isArray(accepted.features)||!Array.isArray(accepted.displayFeatures)||!acceptedAreas||Object.keys({...areas,...acceptedAreas}).some(k=>Math.abs(Number(areas[k]||0)-Number(acceptedAreas[k]||0))>Math.max(.1,Math.abs(Number(areas[k]||0))*.00001)))){
+  record.acceptedResult=null;record.draftDirty=true;
+  DG_SENS.status=_tvs("Kayıtlı sınır ile analiz özeti uyuşmadı. Eski sonuç gösterilmiyor; önizlemeyi kontrol edip yeniden kabul edin.");
+ }
+ return record;
 }
 function dgSensSave(){
  if(!DG_SENS.record)return Promise.resolve(false);
