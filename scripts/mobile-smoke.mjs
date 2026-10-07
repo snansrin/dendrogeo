@@ -30,7 +30,7 @@ try{
   });
   await page.screenshot({path:`/tmp/dendrogeo-mobile/${width}.png`,fullPage:true});
   console.log(JSON.stringify({width,...size,errors}));
-  if(size.document>width||size.overflow.length||errors.length||(size.mapHeight<height*.55))throw Error(`Mobile smoke failed at ${width}px`);
+  if(size.document>width||size.overflow.length||errors.length||size.mapHeight<height*.55)throw Error(`Mobile smoke failed at ${width}px`);
   await page.close();
  }
 }finally{await browser.close();}
