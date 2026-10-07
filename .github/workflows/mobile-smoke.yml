@@ -1,0 +1,35 @@
+name: Mobile smoke
+on:
+  pull_request:
+    paths:
+      - 'src/**'
+      - 'style.css'
+      - 'index.html'
+      - 'partials/**'
+      - 'scripts/mobile-smoke.mjs'
+      - '.github/workflows/mobile-smoke.yml'
+  workflow_dispatch: {}
+permissions:
+  contents: read
+jobs:
+  mobile:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - run: npm ci
+      - name: Chromium
+        run: npx --yes --package=playwright@1.62.1 playwright install --with-deps chromium
+      - name: 360, 390 ve 430 px
+        run: |
+          python3 -m http.server 8765 --bind 127.0.0.1 >/tmp/mobile-server.log 2>&1 &
+          node scripts/mobile-smoke.mjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: mobile-smoke
+          path: /tmp/dendrogeo-mobile/
+          retention-days: 7
