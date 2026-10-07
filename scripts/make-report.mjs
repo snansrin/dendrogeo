@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+import { reportRead } from './lib/report-reader.mjs';
 import {reportContext} from './lib/report-context.mjs';
 import { decodeReportContext } from './lib/report-context.mjs';
 import { reviewedSurface } from './surface-report.mjs';
@@ -68,7 +69,7 @@ const SB = (() => {
 })();
 async function rest(table, params) {
   const u = SB.url + '/rest/v1/' + table + '?' + new URLSearchParams(params);
-  const r = await fetch(u, { headers: { apikey: SB.key, Authorization: 'Bearer ' + SB.key } });
+  const r = await reportRead(u, { headers: { apikey: SB.key, Authorization: 'Bearer ' + SB.key } });
   if (!r.ok) throw new Error(table + ' HTTP ' + r.status);
   return r.json();
 }

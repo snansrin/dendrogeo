@@ -14,9 +14,12 @@ jobs:
   kuyruk:
     name: Rapor kuyruğu (push tetiği)
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    env:
+      DG_REPORT_READER: oidc
     runs-on: ubuntu-latest
     timeout-minutes: 25
     permissions:
+      id-token: write
       contents: write
       actions: write   # 0016: kalp atışı zinciri
     concurrency:
@@ -33,6 +36,9 @@ jobs:
 
       - name: Bağımlılıklar (npm ci)
         run: npm ci
+
+      - name: Özel yayın okuyucusu OIDC sağlık kontrolü
+        run: node scripts/report-reader-health.mjs --verify
 
       - name: Bekleyen yayın/geri çekme isteklerini işle
         run: node scripts/publish-queue.mjs

@@ -21,6 +21,7 @@ on:
         default: false
 
 permissions:
+  id-token: write
   contents: write
 
 concurrency:
@@ -29,6 +30,8 @@ concurrency:
 
 jobs:
   rapor:
+    env:
+      DG_REPORT_READER: oidc
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4

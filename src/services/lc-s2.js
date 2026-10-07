@@ -65,18 +65,35 @@ async function dgS2FindScenesRange(bbox,start,end,maxN){
   });
   const items=Array.isArray(data&&data.features)?data.features:[];
   const unique=new Set();
-  const ranked=items
+  const candidates=items
     .map(it=>({it,cloud:Number((it.properties&&it.properties["eo:cloud_cover"])??101)}))
     .filter(x=>x.cloud<=DG_S2_MAX_CLOUD&&Object.keys(DG_S2_BANDS).every(b=>x.it.assets?.[b]?.href))
-    .sort((a,b)=>String(b.it.properties.datetime).localeCompare(String(a.it.properties.datetime))||a.cloud-b.cloud)
-    .filter(x=>{const p=x.it.properties||{},key=String(p["s2:mgrs_tile"]||p["grid:code"]||"")+":"+String(p.datetime).slice(0,10);if(unique.has(key))return false;unique.add(key);return true;})
-    .slice(0,maxN||DG_S2_MAX_SCENES);
+    .sort((a,b)=>a.cloud-b.cloud||String(b.it.properties.datetime).localeCompare(String(a.it.properties.datetime)))
+    .filter(x=>{const p=x.it.properties||{},key=String(p["s2:mgrs_tile"]||p["grid:code"]||"")+":"+String(p.datetime).slice(0,10);if(unique.has(key))return false;unique.add(key);return true;});
+  // Cover the season instead of using only its last few dates. Reserve one
+  // candidate per tile before filling remaining slots by temporal distance.
+  const ranked=dgS2SelectScenes(candidates,maxN||DG_S2_MAX_SCENES);
   return ranked.map(x=>({
     id:x.it.id,
     item:x.it,
     cloud:+x.cloud.toFixed(1),
     datetime:String((x.it.properties&&(x.it.properties.datetime||x.it.properties.sentinel_product_id))||x.it.id).slice(0,10)
   }));
+}
+
+function dgS2SelectScenes(candidates,maxN){
+ const pending=candidates.slice(),selected=[];
+ const tile=x=>String(x.it.properties?.["s2:mgrs_tile"]||x.it.properties?.["grid:code"]||"");
+ const day=x=>Date.parse(String(x.it.properties?.datetime||"").slice(0,10));
+ while(pending.length&&selected.length<maxN){
+  const seen=new Set(selected.map(tile));
+  let pool=pending.filter(x=>!seen.has(tile(x)));
+  if(!pool.length)pool=pending;
+  const distance=x=>{const peers=selected.filter(y=>tile(y)===tile(x));return peers.length?Math.min(...peers.map(y=>Math.abs(day(x)-day(y)))):Infinity;};
+  pool.sort((a,b)=>{const da=distance(a),db=distance(b);return (da===db?0:db-da)||a.cloud-b.cloud||day(b)-day(a);});
+  const best=pool[0];selected.push(best);pending.splice(pending.indexOf(best),1);
+ }
+ return selected;
 }
 
 async function dgS2FindScenes(bbox,year,mode){
@@ -153,6 +170,13 @@ function dgS2Median(arr){
   return s.length%2?s[m]:(s[m-1]+s[m])/2;
 }
 
+/* Two independent acquisition days must support a seasonal extreme. A single
+ * residual cloud, shadow or wet pavement observation cannot drive the review. */
+function dgS2ConfirmedExtreme(values){
+ const sorted=values.filter(Number.isFinite).sort((a,b)=>b-a);
+ return sorted.length>=2?sorted[1]:null;
+}
+
 /* Planetary Computer baseline-change notebook + ESA PB04 radiometry.
  * DN=0 remains NoData. Asset scale/offset metadata takes precedence. */
 function dgS2Reflectance(raw,item,band){
@@ -189,7 +213,7 @@ async function dgS2Profile(cells,outer,opts){
   const token=await dgLcGetSas(DG_S2_COLLECTION);
   const bboxDeg=bbox;
 
-  const acc={};   /* key → {b03:[],b04:[],b08:[],b11:[]} */
+  const acc={};   /* key → bands + distinct acquisition days */
   const skipped=[];
   for(const sc of found.scenes){
     try{
@@ -202,10 +226,11 @@ async function dgS2Profile(cells,outer,opts){
       for(const b of Object.keys(DG_S2_BANDS)){
         const href=hrefFor(b);
         if(!href)throw new Error(b+" asset'i yok");
-        bandReads[b]=GeoTIFF.fromUrl(href).then(t=>t.getImage());
+        bandReads[b]=dgLcOpenRaster(href).then(t=>t.getImage());
       }
-      const images={};
-      for(const b of Object.keys(bandReads))images[b]=await bandReads[b];
+      const names=Object.keys(bandReads);
+      const loaded=await Promise.all(names.map(b=>bandReads[b]));
+      const images=Object.fromEntries(names.map((b,i)=>[b,loaded[i]]));
 
       /* SCL önce: geçerlilik maskesi 20 m ızgarada */
       const scl=await dgS2ReadBand(images.SCL,bboxDeg);
@@ -238,7 +263,9 @@ async function dgS2Profile(cells,outer,opts){
         }
         if(!ok)continue;
         const key=cells[ci].row+":"+cells[ci].col;
-        if(!acc[key])acc[key]={b03:[],b04:[],b08:[],b11:[],mndwis:[],ndvis:[]};
+        if(!acc[key])acc[key]={b03:[],b04:[],b08:[],b11:[],mndwis:[],ndvis:[],ndbis:[],dates:new Set()};
+        if(acc[key].dates.has(sc.datetime))continue;
+        acc[key].dates.add(sc.datetime);
         acc[key].b03.push(vals.B03);
         acc[key].b04.push(vals.B04);
         acc[key].b08.push(vals.B08);
@@ -253,6 +280,7 @@ async function dgS2Profile(cells,outer,opts){
         if(gSW+swSW>0)acc[key].mndwis.push((gSW-swSW)/(gSW+swSW));
         const rSW=vals.B04,nSW=vals.B08;
         if(rSW+nSW>0)acc[key].ndvis.push((nSW-rSW)/(nSW+rSW));
+        if(vals.B11+vals.B08>0)acc[key].ndbis.push((vals.B11-vals.B08)/(vals.B11+vals.B08));
         used++;
       }
       sc.usedCells=used;
@@ -271,13 +299,16 @@ async function dgS2Profile(cells,outer,opts){
     const g=dgS2Median(a.b03),r=dgS2Median(a.b04),nir=dgS2Median(a.b08),sw=dgS2Median(a.b11);
     if(obs<DG_S2_MIN_OBS_GUARD||g===null||r===null||nir===null||sw===null){out[key]={obs,predict:"nodata"};nLow++;continue;}
     if(nir+r<=0||g+sw<=0||sw+nir<=0){out[key]={obs,predict:"nodata"};nLow++;continue;}
-    const ndvi=(nir-r)/(nir+r);
-    const mndwi=(g-sw)/(g+sw);
-    const ndbi=(sw-nir)/(sw+nir);
+    // Median of actual, simultaneous spectral observations. Separate band
+    // medians can synthesize a spectrum that never occurred on any date.
+    const ndvi=dgS2Median(a.ndvis);
+    const mndwi=dgS2Median(a.mndwis);
+    const ndbi=dgS2Median(a.ndbis);
     const mndwiMax=a.mndwis&&a.mndwis.length?Math.max(...a.mndwis):mndwi;
     const ndviMax=a.ndvis&&a.ndvis.length?Math.max(...a.ndvis):ndvi;
     out[key]={
       obs,
+      ndviConfirmed:dgS2ConfirmedExtreme(a.ndvis),mndwiConfirmed:dgS2ConfirmedExtreme(a.mndwis),
       b03:+g.toFixed(4),b04:+r.toFixed(4),b08:+nir.toFixed(4),b11:+sw.toFixed(4),
       ndvi:+ndvi.toFixed(4),mndwi:+mndwi.toFixed(4),ndbi:+ndbi.toFixed(4),
       mndwiMax:+mndwiMax.toFixed(4),ndviMax:+ndviMax.toFixed(4)
@@ -297,8 +328,9 @@ async function dgS2Profile(cells,outer,opts){
    *    toprak baharda yeşerir (ndviMaxYear ≥ 0.25), asfalt asla.
    * İlkbahar (şub-may) + sonbahar (eki-ara) pencerelerinde 5 asset okunur;
    * hücre başına YILLIK MAX MNDWI ve MAX NDVI üretilir. */
-  const waterMax={};
-  const vegMax={};
+  const waterMax={},vegMax={};
+  const evidence={};
+  for(const key of Object.keys(acc))evidence[key]={ndvi:acc[key].ndvis.slice(),mndwi:acc[key].mndwis.slice(),dates:new Set(acc[key].dates)};
   const waterScenes=[];
   if(o.waterYear!==false&&o.mode!=="latest"){
     for(const w of dgS2WaterWindows(o.year||2021,o.mode)){
@@ -311,11 +343,11 @@ async function dgS2Profile(cells,outer,opts){
           const hB03=hrefFor("B03"),hB04=hrefFor("B04"),hB08=hrefFor("B08"),hB11=hrefFor("B11"),hSCL=hrefFor("SCL");
           if(!hB03||!hB04||!hB08||!hB11||!hSCL)continue;
           const imgs=await Promise.all([
-            GeoTIFF.fromUrl(hB03).then(t=>t.getImage()),
-            GeoTIFF.fromUrl(hB04).then(t=>t.getImage()),
-            GeoTIFF.fromUrl(hB08).then(t=>t.getImage()),
-            GeoTIFF.fromUrl(hB11).then(t=>t.getImage()),
-            GeoTIFF.fromUrl(hSCL).then(t=>t.getImage())
+            dgLcOpenRaster(hB03).then(t=>t.getImage()),
+            dgLcOpenRaster(hB04).then(t=>t.getImage()),
+            dgLcOpenRaster(hB08).then(t=>t.getImage()),
+            dgLcOpenRaster(hB11).then(t=>t.getImage()),
+            dgLcOpenRaster(hSCL).then(t=>t.getImage())
           ]);
           const rSCL=await dgS2ReadBand(imgs[4],bboxDeg);
           const rB03=await dgS2ReadBand(imgs[0],bboxDeg);
@@ -336,9 +368,13 @@ async function dgS2Profile(cells,outer,opts){
             const okB=v=>v!==null&&Number.isFinite(v);
             if(!okB(gW)||!okB(rW)||!okB(nW)||!okB(sW)||gW+sW<=0||nW+rW<=0)continue;
             const kW=cells[ci].row+":"+cells[ci].col;
+            if(!evidence[kW])evidence[kW]={ndvi:[],mndwi:[],dates:new Set()};
+            if(evidence[kW].dates.has(sc.datetime))continue;
+            evidence[kW].dates.add(sc.datetime);
             const mW=(gW-sW)/(gW+sW);
             if(waterMax[kW]===undefined||mW>waterMax[kW])waterMax[kW]=mW;
             const nV=(nW-rW)/(nW+rW);
+            evidence[kW].ndvi.push(nV);evidence[kW].mndwi.push(mW);
             if(vegMax[kW]===undefined||nV>vegMax[kW])vegMax[kW]=nV;
             usedW++;
           }
@@ -350,6 +386,9 @@ async function dgS2Profile(cells,outer,opts){
     }
     for(const key of Object.keys(out)){
       const c0=out[key];
+      c0.ndviConfirmedYear=dgS2ConfirmedExtreme(evidence[key]?.ndvi||[]);
+      c0.mndwiConfirmedYear=dgS2ConfirmedExtreme(evidence[key]?.mndwi||[]);
+      c0.yearObs=evidence[key]?.dates.size||0;
       const wm=waterMax[key];
       const summer=Number.isFinite(c0.mndwiMax)?c0.mndwiMax:null;
       const merged=(wm!==undefined&&summer!==null)?Math.max(wm,summer):(wm!==undefined?wm:summer);
@@ -367,9 +406,10 @@ async function dgS2Profile(cells,outer,opts){
     waterScenes,
     range:found.range,
     radiometryVersion:"pb04-offset-v1",
+    evidenceVersion:"distinct-dates-index-median-confirmed-extremes-v2",
     epsg,
     skipped,
-    stats:{nCells:cells.length,nProfiled:nOk,nInsufficient:nLow}
+    stats:{nCells:cells.length,nProfiled:nOk,nInsufficient:cells.length-nOk,nMissing:cells.length-Object.keys(acc).length}
   };
 }
 /* MIN_OBS guard'ı lc-validate sabitiyle TEK kaynaktan: zincirde lc-validate
@@ -380,9 +420,9 @@ function dgS2AssetEpsg(image){
   try{
     const keys=typeof image.getGeoKeys==="function"?image.getGeoKeys():null;
     const k=Math.round(Number(keys&&keys.ProjectedCSTypeGeoKey||0));
-    if(k>=32601&&k<=32760)return k;
+    if((k>=32601&&k<=32660)||(k>=32701&&k<=32760))return k;
   }catch(e){/* geokeys yoksa varsayılan */}
-  return dgLcUtmEpsgForLatLon(40,32);
+  throw Error("Sentinel-2 bant koordinat sistemi eksik veya desteklenmiyor; sahne kullanılmadı.");
 }
 
 /* Spektral profilden hücre bazında tahmin üret (lc-validate kural seti) */

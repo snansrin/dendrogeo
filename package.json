@@ -19,6 +19,7 @@
   "license": "CC-BY-NC-4.0",
   "author": "Nagihan ŞİRİN & Sinan ŞİRİN",
   "devDependencies": {
+    "jose": "6.1.0",
     "playwright-core": "1.62.1",
     "polygon-clipping": "0.15.7",
     "qrcode": "^1.5.4"
