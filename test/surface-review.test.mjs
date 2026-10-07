@@ -132,6 +132,23 @@ test('selected OSM water boundary goes through real geometry preparation and upd
  await a.run('dgSensAccept()');assert.ok(accepted);assert.ok(Math.abs(accepted.acceptedAreas.water-36)<.02);assert.ok(Math.abs(accepted.acceptedAreas.green-164)<.02);assert.equal(a.run('DG_SENS.revision'),2);
 });
 
+test('mobile confirm applies a selected boundary, recomputes areas, and saves the accepted result',async()=>{
+ const a=app(),f=fixture(a),boundary=f.ring(2,2,8,8);boundary.push([...boundary[0]]);
+ a.ctx.selection={type:'water',osmId:'way/77',geometry:{type:'MultiPolygon',coordinates:[[boundary]]}};
+ a.run('DG_SENS.objectPreview=selection;DG_SENS.objectPreviewLayer=null;DG_SENS.drawType="water";dgSensRender=()=>{};dgSensRefreshLayer=()=>{};dgSensUpdateSummary=()=>{};dgSensUpdateStatus=()=>{}');
+ a.run('dgSensRenderPaintTools()');
+ const toolbar=a.el('surfaceMapTools').innerHTML;
+ assert.match(toolbar,/onclick="dgSensObjectApplyAndAccept\(\)"/);
+ assert.match(toolbar,/Önizlemeyi uygula, analiz et ve kaydet/);
+ let accepted=null;a.ctx.window.DG_SURFACE_REVIEW.save=async snapshot=>{accepted=snapshot;return 4;};a.ctx.window.DG_LC_VALIDATE.saveCampaign=async()=>true;
+ await a.run('dgSensObjectApplyAndAccept()');
+ assert.ok(accepted);assert.ok(Math.abs(accepted.acceptedAreas.water-36)<.02);assert.ok(Math.abs(accepted.acceptedAreas.green-164)<.02);
+ assert.equal(a.run('DG_SENS.record.features[0].source'),'osm-selected');
+ assert.equal(a.run('DG_SENS.record.acceptedAt!==undefined'),true);
+ assert.equal(a.run('DG_SENS.objectPreview'),null);
+ assert.equal(a.run('DG_SENS.revision'),4);
+});
+
 test('failed selected-boundary partition preserves the previous analysis and leaves the pick retryable',async()=>{
  const a=app(),f=fixture(a),boundary=f.ring(2,2,8,8);boundary.push([...boundary[0]]);
  a.ctx.selection={type:'water',osmId:'way/77',geometry:{type:'MultiPolygon',coordinates:[[boundary]]}};
