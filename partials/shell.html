@@ -129,9 +129,9 @@
   </div>
 
 <div class="view" id="v-map"><h2 class="disp" style="margin-bottom:16px">Canlı Harita</h2>
-<div class="live-map-tools" style="display:flex;gap:10px;align-items:center;margin-bottom:10px;flex-wrap:wrap">
+<div class="live-map-tools dg-live-map-controls" style="display:flex;gap:10px;align-items:center;margin-bottom:10px;flex-wrap:wrap" aria-label="Harita görünümü ve park analizi kontrolleri">
  <button class="btn sm blue" id="parkModeBtn" onclick="window.dgToggleParkMode()">🌳 Park Analizi Modu: KAPALI</button>
- <label style="font-size:.82rem;margin-left:8px">Harita:</label>
+ <label class="dg-live-map-label" for="baseLayerSelect">Harita:</label>
  <select id="baseLayerSelect" onchange="switchBaseLayer(this.value)" style="font-size:.82rem;padding:4px 8px;border-radius:6px;border:1px solid var(--line)">
   <option value="osm">🗺️ Sokak</option>
   <option value="sat">🛰️ Uydu</option>
@@ -147,7 +147,7 @@
      YALNIZ BİR KEZ yükleniyordu (liveLoaded kapısı). Onaydan sonra sekmeye
      dönen yönetici eski kümeyi görüyordu. Kapı artık DG_LIVE_DIRTY ile
      tazeleniyor; başka bir kullanıcının girdiği veri için de bu düğme var. -->
-<div style="display:flex;gap:8px;align-items:center;margin-bottom:8px">
+<div class="dg-live-map-refresh">
  <button class="btn sm ghost" onclick="loadLiveMap()" title="Onaylı kayıtları sunucudan yeniden çek">↻ İşaretçileri tazele</button>
  <span style="color:var(--mut);font-size:.76rem">Onayladığın kayıt hemen görünmüyorsa bu düğmeye bas.</span>
 </div>
@@ -158,7 +158,7 @@
 </div>
 <div id="surfacePendingTools" class="dg-sens-map-tools" style="display:none"><label for="dgPendingBaseSelect">Harita</label><select id="dgPendingBaseSelect" onchange="switchBaseLayer(this.value)"><option value="osm">Sokak</option><option value="sat">Uydu</option><option value="topo">Topoğrafik</option></select><button class="dg-png-btn ghost sm" disabled>📍 Yeni konum</button><span class="measure-help" role="status">⏳ Yüzey analizi hazırlanıyor…</span></div>
 <div id="surfaceMapWorkspace" class="dg-editor-workspace"><div id="surfaceMapTools"></div><div id="map" class="notranslate" translate="no"></div></div>
-<div id="parkInfo" class="card" style="display:none;margin-top:12px;border-left:4px solid var(--blue)"></div><p style="color:var(--mut);font-size:.8rem;margin-top:8px">🟢 Noktalara dokunun → onaylı ölçüm bilgisi + varsa fotoğraf.</p><div id="liveAnalysis" style="margin-top:18px"></div></div>
+<div id="parkInfo" class="card dg-live-park-info" style="display:none;margin-top:12px;border-left:4px solid var(--blue)"></div><p class="dg-live-map-hint">🟢 Noktalara dokunun → onaylı ölçüm bilgisi + varsa fotoğraf.</p><div id="liveAnalysis" class="dg-live-analysis-stack" style="margin-top:18px"></div></div>
 
   <div class="view" id="v-projects">
    <div class="project-hero">
