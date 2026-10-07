@@ -502,6 +502,9 @@
 .dg-editor-menu-body select{display:block;box-sizing:border-box;width:100%;min-height:42px;margin:4px 0 12px;padding:6px;border:1px solid var(--line);border-radius:5px;background:var(--bg);color:var(--ink);font:inherit}
 .dg-editor-menu-body .measure-share{font-size:.76rem;line-height:1.5}
 .dg-editor-status{padding:5px 12px;border-top:1px solid var(--line);color:var(--mut);font-size:.7rem}
+.dg-editor-status{display:flex;align-items:center;gap:7px;min-height:32px;flex-wrap:wrap;background:color-mix(in srgb,var(--bg) 55%,var(--surface));font-variant-numeric:tabular-nums}
+.dg-editor-status-dot{width:7px;height:7px;flex:0 0 7px;border-radius:50%;background:var(--green);box-shadow:0 0 0 3px color-mix(in srgb,var(--green) 14%,transparent)}
+.dg-editor-key-hint{margin-left:auto;color:var(--mut);font-size:.64rem}
 .dg-editor-workspace{position:relative;min-width:0}
 #surfaceMapTools{position:absolute;left:10px;top:92px;z-index:1000}
 #surfaceMapTools:empty{display:none}
@@ -510,6 +513,10 @@
 .dg-editor-tool:hover,.dg-editor-tool.is-active{background:var(--tint);border-color:var(--green);color:var(--green-dk)}
 .dg-editor-tool:disabled{opacity:.45;cursor:default}
 .dg-editor-tool:focus-visible,.dg-editor-menu>summary:focus-visible{outline:2px solid var(--green);outline-offset:2px}
+.dg-vegetation-legend{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:8px 0;padding:9px 10px;border:1px solid var(--line);border-radius:8px;background:var(--bg);font-size:.68rem;color:var(--ink)}
+.dg-vegetation-legend span{display:inline-flex;align-items:center;gap:5px;white-space:nowrap}
+.dg-vegetation-legend i{display:inline-block;width:12px;height:12px;border:1px solid #355b3a66;border-radius:3px}
+.dg-vegetation-legend small{flex-basis:100%;color:var(--mut);line-height:1.4}
 @media(max-width:640px){.dg-editor-menu>summary{min-height:42px;padding:5px 7px;font-size:.7rem;gap:4px}.dg-editor-menu-body{padding:10px}.dg-editor-status{font-size:.65rem}#surfaceMapTools{left:8px}.dg-editor-rail{padding:3px;gap:3px}}
 
 #surfaceParkTools:empty{display:none}
@@ -543,7 +550,7 @@
 #surfaceMenuBar .dg-editor-file .dg-sens-actions{gap:5px;margin:0}
 #surfaceMenuBar .dg-editor-file .dg-png-btn.red{margin-top:9px;border-top:1px solid var(--line)}
 .dg-editor-menu-shell .dg-editor-status{display:flex;align-items:center;min-height:30px;padding:5px 12px;background:var(--bg);border-radius:0 0 8px 8px;line-height:1.5}
-@media(max-width:640px){#surfaceMenuBar{gap:3px;padding:5px}#surfaceMenuBar>.dg-editor-menu>summary{padding:7px 9px;font-size:.7rem;min-height:44px}#surfaceMenuBar>.dg-editor-menu[data-menu-order]{border-left:0;padding-left:0}#surfaceMenuBar .dg-editor-menu-body{padding:12px;max-height:55vh}}
+@media(max-width:640px){#surfaceMenuBar{gap:3px;padding:5px}#surfaceMenuBar>.dg-editor-menu>summary{padding:7px 9px;font-size:.7rem;min-height:44px}#surfaceMenuBar>.dg-editor-menu[data-menu-order]{border-left:0;padding-left:0}#surfaceMenuBar .dg-editor-menu-body{padding:12px;max-height:55vh}.dg-editor-key-hint{margin-left:0}.dg-editor-status{font-size:.66rem;padding:6px 8px}.dg-editor-rail .dg-editor-tool{width:44px;height:44px;flex-basis:44px}}
 @media(prefers-reduced-motion:reduce){#surfaceMenuBar>.dg-editor-menu>summary{transition:none}}
 .dg-sens-object-preview{margin:10px 0;padding:10px;border:1px solid var(--line);border-left:3px solid var(--green);border-radius:6px;background:var(--bg)}
 .dg-sens-object-preview .dg-sens-actions{margin-bottom:0}

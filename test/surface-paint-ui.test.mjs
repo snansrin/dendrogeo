@@ -33,6 +33,12 @@ test('brush toolbar is placed below marker refresh and exposes the established c
   assert.match(source, /Sol tuş: fırça · Sağ tuş: haritayı kaydır/);
   assert.match(css, /\.dg-editor-tool\.is-active/);
   assert.match(source, /dgSensSetDrawType\(type\)/);
+  assert.match(source, /onclick="dgSensDrawStart\(\)"[\s\S]*?aria-pressed/);
+  assert.match(source, /onclick="dgSensDrawFinish\(\)"/);
+  assert.match(source, /dgSensUndoBoundary/);
+  assert.match(source, /e\.key==="Escape"\)\{if\(DG_SENS\.draw\)/);
+  assert.match(source, /vegetation_ndvi_relative_class/);
+  assert.match(css, /\.dg-vegetation-legend/);
   assert.match(shell, /id="surfaceMapWorkspace"[\s\S]*id="surfaceMapTools"[\s\S]*id="map"/);
   assert.doesNotMatch(source, /dg-editor-palette|dg-boundary-palette/);
   assert.match(source, /dgSensDataDetails[\s\S]*?dg-editor-menu/);

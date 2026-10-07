@@ -67,11 +67,18 @@ function dgLcOpenRaster(href,sourceSignal){
    const abort=()=>controller.abort(),done=()=>{clearTimeout(timer);for(const s of signals)s.removeEventListener('abort',abort);};
    for(const s of signals){if(s.aborted)controller.abort();else s.addEventListener('abort',abort,{once:true});}
    try{
-    for(let attempt=0;attempt<3;attempt++){
-     const response=await fetch(this.url,{headers,signal:controller.signal});
-     if(response.ok)return new RangeResponse(response,done);
-     await response.body?.cancel();
-     if(!dgLcRetryable(response.status)||attempt===2)throw new Error("Raster HTTP "+response.status);
+   for(let attempt=0;attempt<3;attempt++){
+     const child=new AbortController(),relay=()=>child.abort();
+     controller.signal.addEventListener('abort',relay,{once:true});
+     const attemptTimer=setTimeout(relay,10000);let response,keepAttempt=false;
+     try{
+      response=await fetch(this.url,{headers,signal:child.signal});
+      if(response.ok){keepAttempt=true;return new RangeResponse(response,()=>{clearTimeout(attemptTimer);controller.signal.removeEventListener('abort',relay);done();});}
+      await response.body?.cancel();
+      if(!dgLcRetryable(response.status)||attempt===2)throw new Error("Raster HTTP "+response.status);
+     }catch(e){
+      if(controller.signal.aborted||attempt===2||(response&&!dgLcRetryable(response.status))){done();throw e;}
+     }finally{if(!keepAttempt){clearTimeout(attemptTimer);controller.signal.removeEventListener('abort',relay);}}
      await dgLcRetryWait(attempt,controller.signal,response);
     }
    }
