@@ -242,12 +242,12 @@
 <!-- DİL KATMANI (0035): TR markup varsayılan; EN sözlüğü çalışma zamanında
      uygulanır (dgToggleLang). defer sırası önemli değil — DOMContentLoaded'da
      ya da hemen (hazırsa) çalışır. module-registry + CORE_ASSETS kaydı şart. -->
-<script src="src/config/i18n.js?v=9e11a38b" defer></script>
+<script src="src/config/i18n.js?v=b7c9b3d0" defer></script>
 <script src="src/utils/geo.js?v=3e796768" defer></script>
 <script src="src/utils/truncation.js?v=f43c76b3" defer></script>
 <!-- Faz 7: geotiff (317 KB) ve chart.js (208 KB) artık SENKRON yüklenmiyor;
      src/utils/lazylibs.js ihtiyaç anında enjekte eder (LULC analizi / panel grafiği). -->
-<script id="dgRuntimeBuild" type="application/json">"cd13af080c1d75d1"</script>
+<script id="dgRuntimeBuild" type="application/json">"c23e8f26af89e7d3"</script>
 <script src="src/utils/lazylibs.js?v=19763039" defer></script>
 <script src="src/services/allometry.js?v=46ea5b87" defer></script>
 <script src="src/services/auth.js?v=1e92b5cd" defer></script>
@@ -296,10 +296,10 @@
 <script src="src/ui/editor-ui.js?v=302c2941" defer></script>
 <script src="src/ui/park-panel.js?v=d7645048" defer></script>
 <script src="src/ui/park-export.js?v=c724cd32" defer></script>
-<script src="src/services/dash.js?v=7e8bde11" defer></script>
+<script src="src/services/dash.js?v=10e4cbfc" defer></script>
 <link rel="stylesheet" href="css/style.css?v=f78df8b4">
 <link rel="stylesheet" href="css/landing.css?v=547f9335">
-<link rel="stylesheet" href="css/park-panel.css?v=6103ff16">
+<link rel="stylesheet" href="css/park-panel.css?v=a4ef4f91">
 <!-- TASARIM SİSTEMİ (2026-09-27, 2. deneme): ui-standard.css geri BAĞLANDI
      ama ARTIK eleman seviyesi kuralları yalnız .dg-page (alt sayfalar) altında
      geçerli; kabuk (body.dg-app) yalnız sınıf-bazlı bileşenleri ve sekme
@@ -843,9 +843,9 @@
   </div>
 
 <div class="view" id="v-map"><h2 class="disp" style="margin-bottom:16px">Canlı Harita</h2>
-<div class="live-map-tools" style="display:flex;gap:10px;align-items:center;margin-bottom:10px;flex-wrap:wrap">
+<div class="live-map-tools dg-live-map-controls" style="display:flex;gap:10px;align-items:center;margin-bottom:10px;flex-wrap:wrap" aria-label="Harita görünümü ve park analizi kontrolleri">
  <button class="btn sm blue" id="parkModeBtn" onclick="window.dgToggleParkMode()">🌳 Park Analizi Modu: KAPALI</button>
- <label style="font-size:.82rem;margin-left:8px">Harita:</label>
+ <label class="dg-live-map-label" for="baseLayerSelect">Harita:</label>
  <select id="baseLayerSelect" onchange="switchBaseLayer(this.value)" style="font-size:.82rem;padding:4px 8px;border-radius:6px;border:1px solid var(--line)">
   <option value="osm">🗺️ Sokak</option>
   <option value="sat">🛰️ Uydu</option>
@@ -861,7 +861,7 @@
      YALNIZ BİR KEZ yükleniyordu (liveLoaded kapısı). Onaydan sonra sekmeye
      dönen yönetici eski kümeyi görüyordu. Kapı artık DG_LIVE_DIRTY ile
      tazeleniyor; başka bir kullanıcının girdiği veri için de bu düğme var. -->
-<div style="display:flex;gap:8px;align-items:center;margin-bottom:8px">
+<div class="dg-live-map-refresh">
  <button class="btn sm ghost" onclick="loadLiveMap()" title="Onaylı kayıtları sunucudan yeniden çek">↻ İşaretçileri tazele</button>
  <span style="color:var(--mut);font-size:.76rem">Onayladığın kayıt hemen görünmüyorsa bu düğmeye bas.</span>
 </div>
@@ -872,7 +872,7 @@
 </div>
 <div id="surfacePendingTools" class="dg-sens-map-tools" style="display:none"><label for="dgPendingBaseSelect">Harita</label><select id="dgPendingBaseSelect" onchange="switchBaseLayer(this.value)"><option value="osm">Sokak</option><option value="sat">Uydu</option><option value="topo">Topoğrafik</option></select><button class="dg-png-btn ghost sm" disabled>📍 Yeni konum</button><span class="measure-help" role="status">⏳ Yüzey analizi hazırlanıyor…</span></div>
 <div id="surfaceMapWorkspace" class="dg-editor-workspace"><div id="surfaceMapTools"></div><div id="map" class="notranslate" translate="no"></div></div>
-<div id="parkInfo" class="card" style="display:none;margin-top:12px;border-left:4px solid var(--blue)"></div><p style="color:var(--mut);font-size:.8rem;margin-top:8px">🟢 Noktalara dokunun → onaylı ölçüm bilgisi + varsa fotoğraf.</p><div id="liveAnalysis" style="margin-top:18px"></div></div>
+<div id="parkInfo" class="card dg-live-park-info" style="display:none;margin-top:12px;border-left:4px solid var(--blue)"></div><p class="dg-live-map-hint">🟢 Noktalara dokunun → onaylı ölçüm bilgisi + varsa fotoğraf.</p><div id="liveAnalysis" class="dg-live-analysis-stack" style="margin-top:18px"></div></div>
 
   <div class="view" id="v-projects">
    <div class="project-hero">
