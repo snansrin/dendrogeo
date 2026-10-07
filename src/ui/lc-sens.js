@@ -4,7 +4,7 @@
  * are isolated in lc-review.js. Accepted snapshots are bound to source/grid. */
 const _tvs=s=>typeof dgCf==="function"?dgCf(s):s;
 const _tvst=(s,v)=>typeof dgTfs==="function"?dgTfs(s,v):s.replace(/\{(\w+)\}/g,(m,k)=>v[k]??m);
-const DG_SENS={record:null,layer:null,busy:false,saving:false,showCand:true,base:"sat",guard:true,debounce:null,epoch:0,focus:null,editing:true,revision:0,geometry:null,parkGeometry:null,epsg:null,hostParent:null,hostNext:null,status:"",draw:null,drawLayer:null,objectPick:false,objectPreview:null,objectPreviewLayer:null,localQueue:Promise.resolve(),opacity:45,visualVersion:0,baselineShown:false,rawView:false,brush:null,rightPan:null,brushType:"hard",brushDiameter:10,strokeSeq:0,drawType:"building",vegetationView:false};
+const DG_SENS={record:null,layer:null,boundaryLayer:null,boundaryKey:null,busy:false,saving:false,showCand:true,base:"sat",guard:true,debounce:null,epoch:0,focus:null,editing:true,revision:0,geometry:null,parkGeometry:null,epsg:null,hostParent:null,hostNext:null,status:"",draw:null,drawLayer:null,objectPick:false,objectPreview:null,objectPreviewLayer:null,localQueue:Promise.resolve(),opacity:45,visualVersion:0,baselineShown:false,rawView:false,brush:null,rightPan:null,brushType:"hard",brushDiameter:10,strokeSeq:0,drawType:"building",vegetationView:false};
 const DG_SENS_COLORS={green:"#22c55e",water:"#3b82f6",hard:"#64748b",bare:"#8b5a2b",building:"#475569",pool:"#0ea5e9",other:"#94a3b8"};
 const DG_SENS_VEGETATION_COLORS={sparse:"#b7e4a8",moderate:"#4caf66",dense:"#14532d"};
 const DG_SENS_CLASSES=["green","water","hard","bare"];
@@ -71,8 +71,8 @@ async function dgSensRenderVegetation(){
  finally{DG_SENS.vegetationRenderBusy=false;if(DG_SENS.vegetationView&&DG_SENS.geometry&&key!==[DG_SENS.epoch,DG_SENS.partitionVersion,DG_SENS.visualVersion,dgSensVegetationTiers().count,DG_SENS.vegetationView].join(":"))setTimeout(dgSensRenderVegetation,0);}
 }
 function dgSensHa(a){return(Number(a||0)/10000).toFixed(3);}
-function dgSensNewRecord(){const pk=dgSensParkId(),owner=typeof USER!=="undefined"?USER?.id:null;return{id:"surface-"+(owner||"guest")+"-"+(pk.id||"x"),owner,parkId:pk.id,parkName:pk.name,sens:{green:50,water:50,hard:50,bare:50},corrections:{},features:[],useObjects:true,spectralEnabled:false,analysisEngine:"esa-raster-manual-v1",profile:null,period:"latest",createdAt:new Date().toISOString()};}
-function dgSensResetScanState(rec){if(!rec)return;rec.sens={green:50,water:50,hard:50,bare:50};rec.spectralEnabled=false;rec.profile=null;}
+function dgSensNewRecord(){const pk=dgSensParkId(),owner=typeof USER!=="undefined"?USER?.id:null;return{id:"surface-"+(owner||"guest")+"-"+(pk.id||"x"),owner,parkId:pk.id,parkName:pk.name,sens:{green:50,water:50,hard:50,bare:50},corrections:{},features:[],useObjects:true,spectralEnabled:false,analysisEngine:"esa-raster-manual-v1",profile:null,period:"ytd",createdAt:new Date().toISOString()};}
+function dgSensResetScanState(rec){if(!rec)return;rec.sens={green:50,water:50,hard:50,bare:50};rec.spectralEnabled=false;rec.profile=null;if(rec.period==="latest"&&!rec.periodExplicit)rec.period="ytd";}
 function dgSensMigrateOsmObjects(rec){if(!rec)return false;const stale=(!!rec.objectVersion&&rec.objectVersion!=="footprints-v3-area-semantics")||((rec.objectFeatures||[]).length>0&&rec.objectVersion!=="footprints-v3-area-semantics");if(!stale)return false;rec.objectFeatures=null;rec.objectVersion=null;rec.draftDirty=true;return true;}
 async function dgSensLoadRecord(){
  const fresh=dgSensNewRecord();let local=null,remote=null;
@@ -157,6 +157,28 @@ function dgSensParts(){
  return DG_SENS.partsMemo.parts;
 }
 function dgSensLayerClickIsCurrent(epoch,geometry){return !!DG_SENS.record&&!DG_SENS.busy&&!!geometry&&DG_SENS.epoch===epoch&&DG_SENS.geometry===geometry;}
+function dgSensBoundaryGeoJson(rec=DG_SENS.record){
+ const features=[];if(DG_SENS.rawView||!rec||!DG_SENS.parkGeometry||!DG_SENS.epsg)return{type:"FeatureCollection",features};
+ for(const boundary of rec.features||[]){
+  if(!window.DG_SURFACE_REVIEW.validFeature(boundary))continue;
+  try{
+   const clipped=dgSurfaceClip("intersection",dgSurfaceFeatureGeometry(boundary,DG_SENS.epsg),DG_SENS.parkGeometry);
+   if(!clipped.length||dgSurfaceArea(clipped)<=.01)continue;
+   features.push({type:"Feature",properties:{class:boundary.type,source:boundary.source||boundary.method||"manual",osmId:boundary.osmId||null},geometry:{type:"MultiPolygon",coordinates:dgSurfaceUnproject(clipped,DG_SENS.epsg)}});
+  }catch(e){console.warn("DENDROGEO · kabul edilmiş sınır çizilemedi:",String(e?.message||e));}
+ }
+ return{type:"FeatureCollection",features};
+}
+function dgSensRenderBoundaryLayer(){
+ if(typeof map==="undefined"||!map||!window.L)return;
+ const key=[DG_SENS.epoch,DG_SENS.partitionVersion,DG_SENS.visualVersion,DG_SENS.showCand,DG_SENS.rawView].join(":");
+ if(DG_SENS.boundaryKey===key&&DG_SENS.boundaryLayer){DG_SENS.boundaryLayer.bringToFront?.();return;}
+ if(DG_SENS.boundaryLayer){map.removeLayer(DG_SENS.boundaryLayer);DG_SENS.boundaryLayer=null;}
+ const geojson=dgSensBoundaryGeoJson();DG_SENS.boundaryKey=key;if(!DG_SENS.showCand||!geojson.features.length)return;
+ const casing=L.geoJSON(geojson,{style:{color:"#ffffff",weight:5,opacity:.96,fillOpacity:0,fill:false},interactive:false});
+ const stroke=L.geoJSON(geojson,{style:f=>({color:DG_SENS_COLORS[f.properties?.class]||"#0f172a",weight:2.5,opacity:1,fillOpacity:0,fill:false}),interactive:false});
+ DG_SENS.boundaryLayer=L.layerGroup([casing,stroke]).addTo(map);DG_SENS.boundaryLayer.bringToFront?.();
+}
 function dgSensAreas(){
  if(!DG_SENS.record||!DG_SENS.geometry)return null;
  const parts=dgSensParts(),memo=DG_SENS.partsMemo;
@@ -268,9 +290,10 @@ function dgSensUnbindRightPan(){const p=DG_SENS.rightPan;if(!p)return;for(const 
 function dgSensOpacity(value){DG_SENS.opacity=Math.max(0,Math.min(100,Number(value)||0));if(DG_SENS.record){DG_SENS.record.displayOpacity=DG_SENS.opacity;clearTimeout(DG_SENS.saveTimer);DG_SENS.saveTimer=setTimeout(()=>dgSensSave(),900);}const out=document.getElementById("dgSensOpacityValue");if(out)out.textContent="%"+DG_SENS.opacity;for(const p of DG_SENS.displayPaths||[])p.poly.setStyle({fillOpacity:DG_SENS.opacity/100});}
 function dgSensUpdateSummary(){
  const a=dgSensAreas(),rec=DG_SENS.record;if(!a||!rec)return;
- for(const k of DG_SENS_CLASSES){const el=document.getElementById("dgSensCnt-"+k);if(el)el.textContent=rec.sens[k]+" · "+dgSensHa(a[k])+" ha";}
- dgSensRenderCurrentReport(a);
- const el=document.getElementById("dgSensSummary");if(el)el.textContent=_tvs(DG_SENS.editing?"Önizleme":"Kayıtlı sonuç")+" · "+Object.keys(a).filter(k=>a[k]>0).map(k=>_tvs(window.DG_SURFACE_REVIEW.types[k]?.label||k)+": "+dgSensHa(a[k])+" ha").join(" · ");
+ const visibleAreas=!DG_SENS.rawView&&!DG_SENS.editing&&rec.acceptedResult?.areas?rec.acceptedResult.areas:a;
+ for(const k of DG_SENS_CLASSES){const el=document.getElementById("dgSensCnt-"+k);if(el)el.textContent=rec.sens[k]+" · "+dgSensHa(visibleAreas[k])+" ha";}
+ dgSensRenderCurrentReport(visibleAreas);
+ const el=document.getElementById("dgSensSummary");if(el)el.textContent=_tvs(DG_SENS.editing?"Önizleme":"Kayıtlı sonuç")+" · "+Object.keys(visibleAreas).filter(k=>visibleAreas[k]>0).map(k=>_tvs(window.DG_SURFACE_REVIEW.types[k]?.label||k)+": "+dgSensHa(visibleAreas[k])+" ha").join(" · ");
  const density=document.getElementById("dgSensVegetationSummary");if(density){const d=dgSensVegetationTiers(),cut=d.cutoffs?" · "+_tvs("terciller")+": "+d.cutoffs.map(v=>v.toFixed(2)).join(" / "):"";density.textContent=_tvs("Mevsimsel medyan NDVI · uygun hücre")+": "+d.count+" / "+d.eligible+cut+" · "+_tvs("Her hücrede en az 3 açık uydu gözlemi; park içi göreli sınıflar, taç örtüsü ölçümü değildir.");}
 }
 function dgSensUpdateStatus(){const el=document.getElementById("dgSensStatus");if(el)el.textContent=DG_SENS.status||(DG_SENS.mergeBusy?_tvs("Çizim güncelleniyor…"):_tvs(DG_SENS.record?.acceptedAt&&!DG_SENS.editing?"Kayıtlı sonuç korunuyor. Kaydırıcıyı değiştirerek yeni önizleme yapabilirsiniz.":"Önizleme henüz hesap kaydına yazılmadı."));}
@@ -286,7 +309,7 @@ async function dgSensScan(){
  }catch(e){if(epoch===DG_SENS.epoch){DG_SENS.status=_tvs("Tarama başarısız: ")+String(e.message||e);toast(DG_SENS.status,"err");}}
  finally{if(epoch===DG_SENS.epoch){DG_SENS.busy=false;dgSensRender();dgSensRefreshLayer();}}
 }
-function dgSensPeriod(v){if(DG_SENS.rawView||DG_SENS.brush||DG_SENS.busy||DG_SENS.saving||!DG_SENS.record)return;DG_SENS.record.period=v==="ref"?"ref":v==="latest"?"latest":"ytd";dgSensScan();}
+function dgSensPeriod(v){if(DG_SENS.rawView||DG_SENS.brush||DG_SENS.busy||DG_SENS.saving||!DG_SENS.record)return;DG_SENS.record.period=v==="ref"?"ref":v==="latest"?"latest":"ytd";DG_SENS.record.periodExplicit=true;dgSensScan();}
 function dgSensSlide(cls,val){
  const rec=DG_SENS.record;if(!rec||DG_SENS.rawView||DG_SENS.brush||DG_SENS.busy||DG_SENS.saving||!DG_SENS_CLASSES.includes(cls))return;
  const n=Number(val);rec.sens[cls]=Number.isFinite(n)?Math.max(0,Math.min(100,n)):50;
@@ -299,7 +322,7 @@ function dgSensBase(type){if(!["osm","sat","topo"].includes(type))return;DG_SENS
 async function dgSensRefreshLayer(){
  if(typeof map==="undefined"||!map||!window.L||!DG_SENS.record||!DG_SENS.geometry)return;
  if(!DG_SENS.layer){DG_SENS.layer=L.layerGroup().addTo(map);DG_SENS.renderer=L.canvas({padding:.1});DG_SENS.pathCache=new WeakMap();}
- if(!DG_SENS.showCand){DG_SENS.layer.clearLayers();return;}
+ if(!DG_SENS.showCand){DG_SENS.layer.clearLayers();DG_SENS.boundaryLayer&&map.removeLayer(DG_SENS.boundaryLayer);DG_SENS.boundaryLayer=null;return;}
  const key=[DG_SENS.epoch,DG_SENS.partitionVersion,DG_SENS.visualVersion,DG_SENS.editing].join(":");
  if(DG_SENS.mergedKey!==key){
   if(DG_SENS.mergeBusy)return;
@@ -320,8 +343,9 @@ async function dgSensRefreshLayer(){
   finally{DG_SENS.mergeBusy=false;dgSensUpdateStatus();if(epoch===DG_SENS.epoch&&key!==[DG_SENS.epoch,DG_SENS.partitionVersion,DG_SENS.visualVersion,DG_SENS.editing].join(":"))setTimeout(dgSensRefreshLayer,0);}
   if(key!==[DG_SENS.epoch,DG_SENS.partitionVersion,DG_SENS.visualVersion,DG_SENS.editing].join(":")){if(DG_SENS.record)setTimeout(dgSensRefreshLayer,0);return;}
  }
- if(!DG_SENS.showCand){DG_SENS.layer?.clearLayers();DG_SENS.vegetationLayer?.clearLayers();return;}
+ if(!DG_SENS.showCand){DG_SENS.layer?.clearLayers();DG_SENS.vegetationLayer?.clearLayers();if(DG_SENS.boundaryLayer)map.removeLayer(DG_SENS.boundaryLayer);DG_SENS.boundaryLayer=null;DG_SENS.boundaryKey=null;return;}
  for(const p of DG_SENS.displayPaths||[]){p.poly.setStyle({fillOpacity:DG_SENS.opacity/100});const visible=(!DG_SENS.focus||p.cls===DG_SENS.focus)&&!(DG_SENS.vegetationView&&p.cls==="green");if(visible){if(!DG_SENS.layer.hasLayer(p.poly))p.poly.addTo(DG_SENS.layer);}else DG_SENS.layer.removeLayer(p.poly);}
+ dgSensRenderBoundaryLayer();
  if(DG_SENS.vegetationView)dgSensRenderVegetation();else DG_SENS.vegetationLayer?.clearLayers();
 }
 /* Display-only corner rounding, at most 1.5m. Areas and exports retain exact geometry. */
@@ -343,7 +367,7 @@ async function dgSensRepartition(featureOverride=null){
   const cells=new Map(dgSensCells().map(c=>[dgSensCellKey(c),c]));for(const p of data.parts)p.cell=cells.get(p.key);
   dgSurfaceSeed(data.geometries,dgSensFeatures(),DG_SENS.epsg,data.park,data.parts,dgSensCells());
   DG_SENS.partsMemo=null;DG_SENS.visualMemo=null;completed=true;
-  if(DG_SENS.layer)map.removeLayer(DG_SENS.layer);if(DG_SENS.renderer)map.removeLayer(DG_SENS.renderer);DG_SENS.layer=null;DG_SENS.renderer=null;
+  if(DG_SENS.layer)map.removeLayer(DG_SENS.layer);if(DG_SENS.boundaryLayer)map.removeLayer(DG_SENS.boundaryLayer);if(DG_SENS.renderer)map.removeLayer(DG_SENS.renderer);DG_SENS.layer=null;DG_SENS.boundaryLayer=null;DG_SENS.boundaryKey=null;DG_SENS.renderer=null;
  }catch(e){if(epoch===DG_SENS.epoch){DG_SENS.status=_tvs("Sınır analizi tamamlanamadı: ")+String(e.message||e);toast(esc(DG_SENS.status),"err");}}
  finally{if(epoch===DG_SENS.epoch){DG_SENS.busy=false;dgSensRender();dgSensRefreshLayer();}}
  return completed;
@@ -587,7 +611,7 @@ async function dgSensRenderPng(layers={park:true,surface:true},waypoints=[]){
 function dgSensExportCsv(){const a=dgSensAreas();if(!a)return;const rec=DG_SENS.record;downloadBlob("dendrogeo_surface_"+rec.parkId+".csv","text/csv;charset=utf-8","\uFEFFclass,area_m2,area_ha,view,source_fingerprint\n"+Object.keys(a).map(k=>[k,a[k],a[k]/10000,DG_SENS.rawView?"raw":DG_SENS.editing?"preview":"accepted",rec.fingerprint].join(",")).join("\n"));}
 function dgSensCleanup(){
  dgSensBrushStop();dgSensUnbindRightPan();dgSensObjectCancel();DG_SENS.editView=null;DG_SENS.rawView=false;++DG_SENS.epoch;dgSurfaceCancelJobs();clearTimeout(DG_SENS.debounce);clearTimeout(DG_SENS.saveTimer);DG_SENS.debounce=null;DG_SENS.resizeObserver?.disconnect();DG_SENS.resizeObserver=null;
- if(typeof map!=="undefined"&&map){if(DG_SENS.layer)map.removeLayer(DG_SENS.layer);if(DG_SENS.vegetationLayer)map.removeLayer(DG_SENS.vegetationLayer);if(DG_SENS.renderer)map.removeLayer(DG_SENS.renderer);DG_SENS.layer=null;DG_SENS.vegetationLayer=null;DG_SENS.renderer=null;DG_SENS.pathCache=null;dgSensDrawCancel();map.off("moveend",dgSensRefreshLayer);}
+ if(typeof map!=="undefined"&&map){if(DG_SENS.layer)map.removeLayer(DG_SENS.layer);if(DG_SENS.boundaryLayer)map.removeLayer(DG_SENS.boundaryLayer);if(DG_SENS.vegetationLayer)map.removeLayer(DG_SENS.vegetationLayer);if(DG_SENS.renderer)map.removeLayer(DG_SENS.renderer);DG_SENS.layer=null;DG_SENS.boundaryLayer=null;DG_SENS.boundaryKey=null;DG_SENS.vegetationLayer=null;DG_SENS.renderer=null;DG_SENS.pathCache=null;dgSensDrawCancel();map.off("moveend",dgSensRefreshLayer);}
  const host=document.getElementById("lcSens");if(host){host.style.display="none";host.innerHTML="";if(DG_SENS.hostParent?.isConnected)DG_SENS.hostParent.insertBefore(host,DG_SENS.hostNext?.parentNode===DG_SENS.hostParent?DG_SENS.hostNext:null);else host.remove();}
  document.getElementById("map")?.classList.remove("surface-review-map");
  document.getElementById("v-map")?.classList.remove("surface-review-active");
@@ -595,7 +619,7 @@ function dgSensCleanup(){
  if(typeof dgEditorClearMenus==="function")dgEditorClearMenus("surface");
  for(const id of ["surfaceBrushTools","surfaceMapTools"]){const paint=document.getElementById(id);if(paint)paint.innerHTML="";}
  if(typeof map!=="undefined"&&map?.invalidateSize)map.invalidateSize({pan:false});
- Object.assign(DG_SENS,{record:null,layer:null,geometry:null,parkGeometry:null,busy:false,saving:false,exporting:false,baselineShown:false,baselineReport:null,mergedKey:null,mergedFeatures:null,displayPaths:null,hostParent:null,hostNext:null});
+ Object.assign(DG_SENS,{record:null,layer:null,boundaryLayer:null,boundaryKey:null,geometry:null,parkGeometry:null,busy:false,saving:false,exporting:false,baselineShown:false,baselineReport:null,mergedKey:null,mergedFeatures:null,displayPaths:null,hostParent:null,hostNext:null});
  DG_SENS.partsMemo=null;DG_SENS.visualMemo=null;
  dgSensGuard(false); /* 0056: park kapandı — algılama serbest */
 }
