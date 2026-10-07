@@ -32,8 +32,9 @@ Bu oturumda 2026 yılbaşından bugüne Sentinel‑2 park koşusu Supabase park 
 
 ### Son yayın kapısı kontrolü · 2026-10-07
 
-- `npm run build` ile `index.html` kaynak partial'lardan yeniden üretildi; ardından `npm run check` başarıyla tamamlandı: **1.339/1.339 test**, syntax, sürüm hash'leri, build tutarlılığı ve CSP kontrolleri geçti.
+- `npm run build` ile `index.html` kaynak partial'lardan yeniden üretildi; ardından `npm run check` başarıyla tamamlandı: **1.340/1.340 test**, syntax, sürüm hash'leri, build tutarlılığı ve CSP kontrolleri geçti.
 - 2026 canlı park koşusu tekrar denendi; uygulamanın Supabase REST alan adı `EAI_AGAIN` ile çözümlenemedi. Salt-okuma park sorgusunda Göksu geometrisi mevcut, Başkent geometrisi boş ve Kuğulu adıyla eşleşen kayıt dönmedi. Bu nedenle üç park için güncel veri koşusu üretilemedi.
 - Yedek `--park`/Nominatim yolu ile Göksu yeniden denendi; `nominatim.openstreetmap.org` DNS'i de `EAI_AGAIN` verdi. Chromium kurulumu denendi, ancak Playwright CDN indirmesi sıfır bayt/bozuk arşiv döndürdü. Bu yüzden 360/390/430 px Playwright duman testi ve bu dal için CI mobil iş akışı çalıştırılamadı.
-- Aday dal güncel `origin/main` (`8fe983772b288c0d481ced8e16be9a2dac13bc8a`) ile çakışmasız birleştirildi; birleştirilmiş adayda tam `npm run check` yeniden geçti (**1.339/1.339**).
+- Aday dal güncel `origin/main` (`8fe983772b288c0d481ced8e16be9a2dac13bc8a`) ile çakışmasız birleştirildi; birleştirilmiş adayda tam `npm run check` yeniden geçti (**1.340/1.340**).
+- İlk uzak park koşusu, seçilen `S2_MODE` değerinin izole QA VM'ine aktarılmadığını gösterdi; değişken bağlamı düzeltildi ve regresyon testi eklendi. Yeni commit’te uzak üç park koşusu yeniden tetiklenecek.
 - Park bazlı 2026 doğrulaması, mobil görünüm ve uzak CI tamamlanmadığından yayın kapısı **açık**. Kod `main`e alınmış veya push edilmiş değildir. Bu sonuçlar, önceki 2021 referans QA'sından ayrı tutulmalıdır.

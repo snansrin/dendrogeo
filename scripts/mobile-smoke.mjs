@@ -6,7 +6,7 @@ const browser=await chromium.launch({headless:true,args:['--no-sandbox']});
 try{
  for(const width of [360,390,430]){
   const page=await browser.newPage({viewport:{width,height:840}});
-  const errors=[];page.on('pageerror',e=>errors.push(e.message));
+  const errors=[];page.on('pageerror',e=>errors.push(e.stack||e.message));
   await page.goto('http://127.0.0.1:8765/index.html',{waitUntil:'domcontentloaded'});
   await page.locator('body').waitFor({state:'visible'});
   const size=await page.evaluate(()=>{

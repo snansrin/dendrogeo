@@ -105,6 +105,7 @@ const ctx = {
   ArrayBuffer, Uint8Array, Uint16Array, Int16Array, Int32Array, Float32Array,
   Float64Array, DataView, TextDecoder, TextEncoder, AbortController,
   Response, Headers, Request, Buffer,
+  S2_MODE,
   window: null, document: { createElement: () => ({}) },
   navigator: { userAgent: 'node-qa' }, location: { origin: 'https://qa.local' },
 };

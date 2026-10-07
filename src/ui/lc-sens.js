@@ -1,6 +1,3 @@
-Warning: truncated output (original token count: 20230)
-Total output lines: 712
-
 "use strict";
 /* Mobile surface review: one raster baseline → manual review → explicit acceptance.
  * Raster baseline stays read-only. Geometry clipping and cloud persistence
@@ -304,7 +301,14 @@ async function dgSensRefreshLayer(){
   const epoch=DG_SENS.epoch;DG_SENS.mergeBusy=true;dgSensUpdateStatus();
   try{const parts=dgSensParts();
    const job=await dgSensVisualResult(parts);
-   if(epoch!==DG_SENS.epoch||key!==[DG_SENS.epoch,DG_SENS.partitionVe…230 tokens truncated…G_SENS.objectPick){dgSensObjectPickAt(ev);return;}if(DG_SENS.brush)return;if(DG_SENS.draw){dgSensDrawPoint(ev);return;}const q=dgLcUtmForward(ev.latlng.lat,ev.latlng.lng,DG_SENS.epsg);const part=dgSensParts().find(p=>{const b=p.displayBounds||(p.displayBounds=dgSurfaceBounds(p.geom));return q.x>=b[0]&&q.x<=b[2]&&q.y>=b[1]&&q.y<=b[3]&&dgGridPointDistance([q.x,q.y],p.geom)>=0;});if(part)dgSensPopup(part.key);});
+   if(epoch!==DG_SENS.epoch||key!==[DG_SENS.epoch,DG_SENS.partitionVersion,DG_SENS.visualVersion,DG_SENS.editing].join(":"))return;
+   DG_SENS.mergedFeatures=job?.features||dgSurfaceMergeSync(parts,DG_SENS.epsg);DG_SENS.mergedKey=key;DG_SENS.layer.clearLayers();DG_SENS.displayPaths=[];
+   DG_SENS.displayFeatures=job?.displayFeatures||dgSurfaceDisplaySync(parts,DG_SENS.epsg,DG_SENS.parkGeometry);
+   const layerEpoch=DG_SENS.epoch,layerGeometry=DG_SENS.geometry;
+   for(const f of DG_SENS.displayFeatures){const cls=f.properties.class;
+    const rings=f.geometry.coordinates.map(poly=>poly.map(r=>r.map(p=>[p[1],p[0]])));
+    const poly=L.polygon(rings,{renderer:DG_SENS.renderer,stroke:false,weight:0,smoothFactor:1,bubblingMouseEvents:false,fillColor:DG_SENS_COLORS[cls]||DG_SENS_COLORS.other});
+    poly.on("click",ev=>{const oe=ev.originalEvent||ev;if(oe&&L.DomEvent?.stopPropagation)L.DomEvent.stopPropagation(oe);if(!dgSensLayerClickIsCurrent(layerEpoch,layerGeometry))return;if(DG_SENS.objectPick){dgSensObjectPickAt(ev);return;}if(DG_SENS.brush)return;if(DG_SENS.draw){dgSensDrawPoint(ev);return;}const q=dgLcUtmForward(ev.latlng.lat,ev.latlng.lng,DG_SENS.epsg);const part=dgSensParts().find(p=>{const b=p.displayBounds||(p.displayBounds=dgSurfaceBounds(p.geom));return q.x>=b[0]&&q.x<=b[2]&&q.y>=b[1]&&q.y<=b[3]&&dgGridPointDistance([q.x,q.y],p.geom)>=0;});if(part)dgSensPopup(part.key);});
     DG_SENS.displayPaths.push({poly,cls});
    }
   }catch(e){if(epoch===DG_SENS.epoch){DG_SENS.status=String(e.message||e);dgSensUpdateStatus();}}
