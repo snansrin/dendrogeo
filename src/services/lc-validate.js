@@ -421,7 +421,7 @@ function dgValThr(sens){
  *   3) SERT — IBI > 0 (Xu 2008) + NDVI ≥ 0.20 + kuru (MNDWI < 0.20).
  *   4) ÇIPLAK — düşük NDVI + kuru.
  *   5) Kalan her şey AMBIGUOUS — sınıfa zorlama yok; insan etiketine gider. */
-function dgValSpectralPredict(m,sens){
+function dgValSpectralPredict(m,sens,opts={}){
   if(!m)return"nodata";
   const obs=Number(m.obs)||0;
   if(obs<DG_VAL_SPECTRAL.MIN_OBS)return"nodata";
@@ -455,10 +455,10 @@ function dgValSpectralPredict(m,sens){
    *           değil (ndvi ve ndviYear < 0.50): mevsimsel çekilen göl kıyısı
    *           ilkbaharda açıksa WorldCover 80 tanımıyla ("yılın çoğunda su")
    *           uyumlu biçimde SU sayılır. Sazlık ndviYear 0.5+ verir → yeşil. */
-  if((mndwi>=T.mndwiWaterMin&&mndwi>=ndvi)||
+  if(opts.excludeWater!==true&&((mndwi>=T.mndwiWaterMin&&mndwi>=ndvi)||
      (mndwiYear>=T.mndwiYearWaterMin&&
       ndvi<T.canopyMax&&
-      ndviYear<T.canopyMax))return"water";
+      ndviYear<T.canopyMax)))return"water";
   /* 2) Yeşil: ya yaz medyanı güçlü ya YILLIK yeşillenme kanıtı (bahar
    *    yeşermesi — kuru step çayırı ve yaz sonu kuruyan çim buradan döner) */
   if(ndvi>=T.ndviGreenMin||ndviYear>=T.ndviYearGreenMin)return"green";
@@ -758,6 +758,7 @@ window.DG_LC_VALIDATE={
   weights:dgValWeights,
   metrics:dgValMetrics,
   spectralPredict:dgValSpectralPredict,
+  spectralLandPredict:(m,sens)=>dgValSpectralPredict(m,sens,{excludeWater:true}),
   agreement:dgValAgreement,
   applyCorrections:dgValApplyCorrections,
   correctedGeoJson:dgValCorrectedGeoJson,

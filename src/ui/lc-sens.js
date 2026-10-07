@@ -129,10 +129,24 @@ function dgSensSave(){
 function dgSensDirty(){DG_SENS.visualVersion++;DG_SENS.editing=true;if(DG_SENS.record)DG_SENS.record.draftDirty=true;DG_SENS.status="";}
 function dgSensPredict(sp){return window.DG_LC_VALIDATE.spectralPredict(sp,DG_SENS.record?.sens);}
 function dgSensCellKey(c){return c.row+":"+c.col;}
+function dgSensHasExplicitWaterBoundary(rec=DG_SENS.record){return !!(rec?.features||[]).some(f=>f?.type==="water"&&f?.method==="visual-boundary");}
+function dgSensWaterOutsideClass(c,rec=DG_SENS.record){
+ const key=dgSensCellKey(c),decision=rec?.corrections?.[key],land=new Set(["green","hard","bare"]);
+ if(decision&&land.has(decision.to)&&(decision.method==="visual-cell"||(!DG_SENS.editing&&decision.method==="sensitivity")))return decision.to;
+ const evidence=rec?.profile?.cells?.[key],predict=window.DG_LC_VALIDATE?.spectralLandPredict;
+ const result=typeof predict==="function"?predict(evidence,{green:50,water:50,hard:50,bare:50}):"nodata";
+ return land.has(result)?result:"other";
+}
+function dgSensWaterOutsideParts(){return dgSensParts().filter(p=>(p.cell?.rasterClassKey||p.cell?.classKey)==="water"&&p.method==="review-cell");}
+function dgSensWaterBoundaryUnresolved(){const unknown=new Set();for(const p of dgSensWaterOutsideParts())if(p.type==="other")unknown.add(p.key);return unknown.size;}
+function dgSensNeedsWaterScan(){return dgSensHasExplicitWaterBoundary()&&dgSensWaterOutsideParts().length>0&&!DG_SENS.record?.profile?.cells;}
 function dgSensEffective(c){
  const original=c.rasterClassKey||c.classKey;
  if(DG_SENS.rawView)return original;
  const dec=DG_SENS.record?.corrections?.[dgSensCellKey(c)];
+ // A user water polygon is authoritative for water. Outside it, raster-water
+ // cells use non-water spectral evidence; inadequate evidence stays review-only.
+ if(original==="water"&&dgSensHasExplicitWaterBoundary())return dgSensWaterOutsideClass(c);
  // Manual cells and accepted decisions take precedence over optional spectral review.
  if(dec&&(dec.method==="visual-cell"||!DG_SENS.editing))return window.DG_SURFACE_REVIEW.types[dec.to]?dec.to:original;
  if(!DG_SENS.editing||!DG_SENS.record?.spectralEnabled||Number(c.areaM2)<window.DG_LC_VALIDATE.defaults.edgeAreaM2)return original;
@@ -201,14 +215,10 @@ function dgSensBoundaryGeoJson(rec=DG_SENS.record){
  return{type:"FeatureCollection",features};
 }
 function dgSensRenderBoundaryLayer(){
- if(typeof map==="undefined"||!map||!window.L)return;
- const key=[DG_SENS.epoch,DG_SENS.partitionVersion,DG_SENS.visualVersion,DG_SENS.showCand,DG_SENS.rawView].join(":");
- if(DG_SENS.boundaryKey===key&&DG_SENS.boundaryLayer){DG_SENS.boundaryLayer.bringToFront?.();return;}
- if(DG_SENS.boundaryLayer){map.removeLayer(DG_SENS.boundaryLayer);DG_SENS.boundaryLayer=null;}
- const geojson=dgSensBoundaryGeoJson();DG_SENS.boundaryKey=key;if(!DG_SENS.showCand||!geojson.features.length)return;
- const casing=L.geoJSON(geojson,{style:{color:"#ffffff",weight:5,opacity:.96,fillOpacity:0,fill:false},interactive:false});
- const stroke=L.geoJSON(geojson,{style:f=>({color:DG_SENS_COLORS[f.properties?.class]||"#0f172a",weight:2.5,opacity:1,fillOpacity:0,fill:false}),interactive:false});
- DG_SENS.boundaryLayer=L.layerGroup([casing,stroke]).addTo(map);DG_SENS.boundaryLayer.bringToFront?.();
+ // The class fills already show the applied geometry. A separate stroked
+ // outline was wider than the analysis coverage and looked like water outside the mask.
+ if(DG_SENS.boundaryLayer&&typeof map!=="undefined"&&map)map.removeLayer(DG_SENS.boundaryLayer);
+ DG_SENS.boundaryLayer=null;DG_SENS.boundaryKey=null;
 }
 function dgSensAreas(){
  if(!DG_SENS.record||!DG_SENS.geometry)return null;
@@ -330,16 +340,19 @@ function dgSensUpdateSummary(){
 }
 function dgSensUpdateStatus(){const el=document.getElementById("dgSensStatus");if(el)el.textContent=DG_SENS.status||(DG_SENS.mergeBusy?_tvs("Çizim güncelleniyor…"):_tvs(DG_SENS.record?.acceptedAt&&!DG_SENS.editing?"Kayıtlı sonuç korunuyor. Kaydırıcıyı değiştirerek yeni önizleme yapabilirsiniz.":"Önizleme henüz hesap kaydına yazılmadı."));}
 async function dgSensScan(){
- if(DG_SENS.rawView||DG_SENS.busy||DG_SENS.saving||!DG_SENS.record)return;dgSensBrushStop();
+ if(DG_SENS.rawView||DG_SENS.busy||DG_SENS.saving||!DG_SENS.record)return false;dgSensBrushStop();
+ let completed=false;
  const rec=DG_SENS.record,epoch=DG_SENS.epoch;dgSensResetScanState(rec);DG_SENS.visualVersion++;DG_SENS.focus=null;DG_SENS.busy=true;dgSensRender();
  try{
   const profile=await window.DG_LC_S2.profile(dgSensCells(),PARK_POLY,{year:DG_LC_LAST.report?.year||2021,mode:rec.period});
   if(epoch!==DG_SENS.epoch||DG_SENS.record!==rec)return;
   rec.profile=profile;DG_SENS.vegetationRenderKey=null;rec.spectralEnabled=false;rec.scannedAt=new Date().toISOString();dgSensDirty();const audit=dgSensScanAudit(rec);DG_SENS.status=_tvst("Uydu taraması tamamlandı: {profiled}/{total} hücrede yeterli gözlem, {diff} hücrede sınıf farkı. 2021 ham rasterı değişmedi.",{profiled:audit?.profiled||0,total:audit?.total||0,diff:audit?.transitions.reduce((n,x)=>n+x.cells,0)||0});
+  const unresolved=dgSensWaterBoundaryUnresolved();if(dgSensHasExplicitWaterBoundary()&&unresolved)DG_SENS.status+=" Su sınırı dışında "+unresolved+" hücre belirsiz; yanlış su alanı kabul edilmedi, bu hücreleri haritada tek tek sınıflandırın.";
   dgSensRefreshLayer();dgSensUpdateSummary();
-  await dgSensSave();
+  await dgSensSave();completed=true;
  }catch(e){if(epoch===DG_SENS.epoch){DG_SENS.status=_tvs("Tarama başarısız: ")+String(e.message||e);toast(DG_SENS.status,"err");}}
  finally{if(epoch===DG_SENS.epoch){DG_SENS.busy=false;dgSensRender();dgSensRefreshLayer();}}
+ return completed;
 }
 function dgSensPeriod(v){if(DG_SENS.rawView||DG_SENS.brush||DG_SENS.busy||DG_SENS.saving||!DG_SENS.record)return;DG_SENS.record.period=v==="ref"?"ref":v==="latest"?"latest":"ytd";DG_SENS.record.periodExplicit=true;dgSensScan();}
 function dgSensSlide(cls,val){
@@ -421,7 +434,7 @@ function dgSensUndo(key){if(DG_SENS.rawView||!DG_SENS.record||DG_SENS.busy||DG_S
 function dgSensBulk(cls){for(const x of dgSensCandidates(cls))dgSensDecide(dgSensCellKey(x.cell),cls);}
 async function dgSensAccept(){
  const rec=DG_SENS.record;
- const blocked=!rec?"Kabul edilecek analiz bulunamadı.":DG_SENS.rawView?"Ham görünüm açık; önce düzenlemeye dönün.":DG_SENS.brush?"Fırça işlemi sürüyor; önce fırçayı kapatın.":DG_SENS.saving||DG_SENS.busy?"Yüzey işlemi sürüyor; tamamlanmasını bekleyin.":!DG_SENS.geometry?"Park geometrisi hazır değil; analizi yeniden açın.":DG_SENS.draw?"Sınır çizimi tamamlanmadı; çizimi tamamlayın veya iptal edin.":null;
+ const blocked=!rec?"Kabul edilecek analiz bulunamadı.":DG_SENS.rawView?"Ham görünüm açık; önce düzenlemeye dönün.":DG_SENS.brush?"Fırça işlemi sürüyor; önce fırçayı kapatın.":DG_SENS.saving||DG_SENS.busy?"Yüzey işlemi sürüyor; tamamlanmasını bekleyin.":!DG_SENS.geometry?"Park geometrisi hazır değil; analizi yeniden açın.":DG_SENS.draw?"Sınır çizimi tamamlanmadı; çizimi tamamlayın veya iptal edin.":dgSensWaterBoundaryUnresolved()>0?"Su sınırı dışındaki "+dgSensWaterBoundaryUnresolved()+" raster-su hücresi güncel uydu verisiyle sınıflandırılamadı. Her belirsiz hücreyi yeşil, sert veya çıplak olarak inceleyip düzeltin; sonuç kabul edilmedi.":null;
  if(blocked){DG_SENS.status=_tvs(blocked);dgSensUpdateStatus();toast(DG_SENS.status,"warn");return false;}
  const epoch=DG_SENS.epoch,snapshot=JSON.parse(JSON.stringify(rec));
  // Keep immutable geometry identities so acceptance cannot invalidate the partition cache.
@@ -498,6 +511,10 @@ function dgSensObjectApply(){
   const delta=Number(areas[type]||0)-Number(before[type]||0),label=_tvs(window.DG_SURFACE_REVIEW.types[type].label);
   DG_SENS.status=delta>.01?_tvst("{class} sınırı önizlemeye uygulandı (+{area} m²). Cihaz taslağı kaydedildi; hesaba kalıcı sonuç için Kabul et ve kaydet.",{class:label,area:delta.toFixed(1)}):_tvst("{class} sınırı cihaz taslağına eklendi; 10 m hücre alanı değişmedi. Bu hesap sonucu değildir; geometriyi kontrol edin.",{class:label});
   const saved=await dgSensSave();if(!saved)return false;
+  if(type==="water"&&dgSensNeedsWaterScan()){
+   DG_SENS.status=_tvs("Su sınırı dışındaki raster hücreleri güncel uydu verisiyle sınıflandırılıyor…");dgSensUpdateStatus();
+   const scanned=await dgSensScan();if(!scanned){DG_SENS.status=_tvs("Su sınırı önizlemeye uygulandı; dış hücre taraması başarısız. Taslak korunuyor, kabul edilmedi.");dgSensUpdateStatus();return false;}
+  }
   dgSensUpdateSummary();dgSensUpdateStatus();toast(DG_SENS.status,delta>.01?"info":"warn");return true;
  });
 }
@@ -518,7 +535,7 @@ function dgSensDrawFinish(){
  if(!window.DG_SURFACE_REVIEW.validRing(d.ring)){toast(_tvs("En az üç köşe seçin; sınır kendi üzerine kesişmemeli."),"warn");return;}
  let geom;try{geom=dgSurfaceClip("intersection",[dgSurfaceProject(d.ring,DG_SENS.epsg)],DG_SENS.parkGeometry);}catch(e){toast(esc(String(e.message||e)),"warn");return;}
  if(dgSurfaceArea(geom)<.1){toast(_tvs("Çizim park sınırının dışında veya çok küçük."),"warn");return;}
- DG_SENS.record.features.push({...d,method:"visual-boundary",ts:new Date().toISOString()});dgSensDirty();dgSensDrawCancel();dgSensRenderPaintTools();dgSensRepartition().then(ok=>ok&&dgSensSave());
+ DG_SENS.record.features.push({...d,method:"visual-boundary",ts:new Date().toISOString()});dgSensDirty();dgSensDrawCancel();dgSensRenderPaintTools();dgSensRepartition().then(async ok=>{if(!ok)return;await dgSensSave();if(d.type==="water"&&dgSensNeedsWaterScan()){DG_SENS.status=_tvs("Su sınırı dışındaki raster hücreleri güncel uydu verisiyle sınıflandırılıyor…");dgSensUpdateStatus();await dgSensScan();}});
 }
 function dgSensRemoveFeature(i){if(DG_SENS.rawView||DG_SENS.busy||DG_SENS.saving)return;DG_SENS.record.features.splice(i,1);dgSensDirty();dgSensRepartition().then(ok=>ok&&dgSensSave());}
 function dgSensUndoBoundary(){if(DG_SENS.rawView||DG_SENS.busy||DG_SENS.saving||!DG_SENS.record?.features?.length)return;dgSensRemoveFeature(DG_SENS.record.features.length-1);}

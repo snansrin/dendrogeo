@@ -137,6 +137,45 @@ test('selected OSM water boundary goes through real geometry preparation and upd
  await a.run('dgSensAccept()');assert.ok(accepted);assert.ok(Math.abs(accepted.acceptedAreas.water-36)<.02);assert.ok(Math.abs(accepted.acceptedAreas.green-164)<.02);assert.equal(a.run('DG_SENS.revision'),2);
 });
 
+test('explicit water footprint removes raster-water outside it and assigns supported land classes',()=>{
+ const a=app(),f=fixture(a),boundary=f.ring(2,2,8,8);boundary.push([...boundary[0]]);
+ a.ctx.boundary=boundary;
+ a.run('for(const c of cells){c.classKey="water";c.rasterClassKey="water"}DG_LC_LAST.result.groupAreas={green:0,water:200,hard:0,bare:0,other:0}');
+ a.run('DG_SENS.record.features=[{type:"water",method:"visual-boundary",geometry:{type:"MultiPolygon",coordinates:[[boundary]]}}];DG_SENS.record.profile={cells:{"0:0":{obs:4,ndvi:.62,mndwi:.02,ndbi:-.1,ndviMaxYear:.68},"0:1":{obs:4,ndvi:.62,mndwi:.02,ndbi:-.1,ndviMaxYear:.68}}}');
+ const areas=a.run('dgSensAreas()');
+ assert.ok(Math.abs(areas.water-36)<.02);assert.ok(Math.abs(areas.green-164)<.02);
+ assert.equal(a.run('DG_LC_LAST.result.cells.every(c=>c.rasterClassKey==="water")'),true,'ham kaynak hücre sınıfları değişmemeli');
+ assert.equal(a.run('dgSensWaterBoundaryUnresolved()'),0);
+});
+
+test('applying a selected water polygon scans residual raster-water cells before it can be accepted',async()=>{
+ const a=app(),f=fixture(a),boundary=f.ring(2,2,8,8);boundary.push([...boundary[0]]);a.ctx.boundary=boundary;
+ a.run('for(const c of cells){c.classKey="water";c.rasterClassKey="water"}DG_LC_LAST.result.groupAreas={green:0,water:200,hard:0,bare:0,other:0}');
+ a.ctx.selection={type:'water',osmId:'way/77',geometry:{type:'MultiPolygon',coordinates:[[boundary]]}};
+ a.run('DG_SENS.objectPreview=selection;DG_SENS.drawType="water";dgSensRender=()=>{};dgSensRefreshLayer=()=>{};dgSensRenderPaintTools=()=>{};dgSensUpdateSummary=()=>{};dgSensUpdateStatus=()=>{};dgSensSave=async()=>true');
+ a.ctx.window.DG_LC_S2.profile=async()=>({cells:{"0:0":{obs:4,ndvi:.62,mndwi:.02,ndbi:-.1,ndviMaxYear:.68},"0:1":{obs:4,ndvi:.62,mndwi:.02,ndbi:-.1,ndviMaxYear:.68}},scenes:[],stats:{nProfiled:2},skipped:[],range:{start:"2026-01-01",end:"2026-10-08"}});
+ assert.equal(await a.run('dgSensObjectApply()'),true);assert.ok(a.run('DG_SENS.record.profile.cells["0:1"]'));
+ assert.ok(Math.abs(a.run('dgSensAreas().water')-36)<.02);assert.ok(Math.abs(a.run('dgSensAreas().green')-164)<.02);
+});
+
+test('water-mask land classifier never emits water; ambiguous/out-of-date pixels block acceptance',async()=>{
+ const a=app();
+ const p=(ndvi,mndwi,ndbi,extra={})=>a.ctx.window.DG_LC_VALIDATE.spectralLandPredict({obs:4,ndvi,mndwi,ndbi,...extra},{green:50,water:50,hard:50,bare:50});
+ assert.equal(p(.62,.02,-.1,{ndviMaxYear:.68}),'green');
+ assert.equal(p(.3,-.1,.4),'hard');
+ assert.equal(p(.1,-.1,-.1),'bare');
+ assert.equal(p(.05,.8,-.1),'ambiguous');
+ const f=fixture(a),boundary=f.ring(2,2,8,8);boundary.push([...boundary[0]]);
+ a.ctx.boundary=boundary;
+ a.run('for(const c of cells){c.classKey="water";c.rasterClassKey="water"}DG_LC_LAST.result.groupAreas={green:0,water:200,hard:0,bare:0,other:0};DG_SENS.record.features=[{type:"water",method:"visual-boundary",geometry:{type:"MultiPolygon",coordinates:[[boundary]]}}]');
+ assert.equal(a.run('dgSensWaterBoundaryUnresolved()'),2);
+ assert.equal(await a.run('dgSensAccept()'),false);assert.match(a.run('DG_SENS.status'),/2 raster-su hücresi/);
+});
+
+test('review map grows on desktop while the phone height cap stays in place',()=>{
+ const css=source('css/park-panel.css');assert.match(css,/height:clamp\(520px,72vh,900px\)!important/);assert.match(css,/@media\(max-width:640px\)[\s\S]*?height:58vh!important;min-height:360px;max-height:560px/);
+});
+
 test('mobile confirm applies a selected boundary, recomputes areas, and saves the accepted result',async()=>{
  const a=app(),f=fixture(a),boundary=f.ring(2,2,8,8);boundary.push([...boundary[0]]);
  a.ctx.selection={type:'water',osmId:'way/77',geometry:{type:'MultiPolygon',coordinates:[[boundary]]}};
@@ -180,17 +219,11 @@ test('accepted boundary geometry reloads from the account record and remains dra
  assert.equal(shown.water,36);assert.equal(shown.green,164);
 });
 
-test('saved manual boundary receives a visible two-stroke outline above the raster fill',()=>{
- const a=app(),f=fixture(a),boundary=f.ring(2,2,8,8);boundary.push([...boundary[0]]);let group=null;
- const L={geoJSON:(data,options)=>({data,options}),layerGroup:layers=>({layers,addTo(){group=this;return this;},bringToFront(){this.front=true;}})};
- a.ctx.window.L=L;a.ctx.L=L;a.ctx.map={removeLayer(){}};
- a.ctx.boundaryFeature={type:'water',method:'visual-boundary',source:'osm-selected',osmId:'way/77',geometry:{type:'MultiPolygon',coordinates:[[boundary]]}};
- a.run('DG_SENS.record.features=[boundaryFeature];dgSensRenderBoundaryLayer()');
- assert.ok(group);assert.equal(group.layers.length,2);assert.equal(group.front,true);
- assert.equal(group.layers[1].data.features[0].properties.osmId,'way/77');
- assert.equal(group.layers[1].options.style({properties:{class:'water'}}).color,'#3b82f6');
- assert.equal(group.layers[1].options.style({properties:{class:'water'}}).fillOpacity,0);
- assert.equal(group.layers[0].options.style.fillOpacity,0);
+test('manual class fills do not add a white outline outside the analyzed raster coverage',()=>{
+ const a=app();let removed=0;a.ctx.map={removeLayer(){removed++;}};
+ a.run('DG_SENS.boundaryLayer={};dgSensRenderBoundaryLayer()');
+ assert.equal(removed,1);assert.equal(a.run('DG_SENS.boundaryLayer'),null);
+ assert.doesNotMatch(source('src/ui/lc-sens.js'),/color:"#ffffff",weight:5/);
 });
 
 test('failed selected-boundary partition preserves the previous analysis and leaves the pick retryable',async()=>{

@@ -416,7 +416,7 @@
   background:rgba(20,83,45,.07);
 }
 /* Surface editor sits beside a sticky map so the phone shows both. */
-#v-map #map.surface-review-map{position:sticky!important;top:0;width:100%;height:clamp(340px,52vh,560px)!important;z-index:3!important}
+#v-map #map.surface-review-map{position:sticky!important;top:0;width:100%;height:clamp(520px,72vh,900px)!important;z-index:3!important}
 #lcSens{margin:12px 0;background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:14px}
 #lcSens .dg-sens-head{align-items:flex-start}
 #lcSens .dg-sens-head>.dg-png-btn{width:auto;min-width:100px}
