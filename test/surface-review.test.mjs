@@ -6,6 +6,7 @@ test('fractional boundaries and overlaps conserve area; newest boundary takes pr
 test('park holes and outside geometry are excluded from reviewed building area',()=>{const a=app(),f=fixture(a,true);a.ctx.features=[{type:'building',ring:f.ring(-20,-20,30,30)}];const r=a.run('dgSurfaceSummarize({green:196},cells,c=>c.classKey,geoms,features,32631,park)');assert.ok(Math.abs(r.building-196)<.001);assert.ok(Math.abs(r.green)<.001);});
 test('self-crossing boundaries are rejected',()=>{const a=app();assert.equal(a.ctx.window.DG_SURFACE_REVIEW.validRing([[0,0],[1,1],[0,1],[1,0]]),false);assert.equal(a.ctx.window.DG_SURFACE_REVIEW.validRing([[0,0],[1,0],[1,1],[0,1]]),true);});
 test('relative NDVI tiers need at least three observations and never relabel green raster cells',()=>{const a=app();const cells=Array.from({length:12},(_,i)=>({row:0,col:i,classKey:'green',rasterClassKey:'green',areaM2:100}));a.ctx.cells=cells;a.run('DG_LC_LAST={result:{cells}};DG_SENS.record.profile={cells:{}}');for(let i=0;i<cells.length;i++)a.run(`DG_SENS.record.profile.cells['0:${i}']={ndviMedianYear:${.2+i*.04},ndviObs:${i===11?2:4}}`);const result=a.run('dgSensVegetationTiers()');assert.equal(result.count,11);assert.equal(result.eligible,12);assert.equal(result.tiers.get('0:0'),'sparse');assert.equal(result.tiers.get('0:10'),'dense');assert.equal(result.tiers.has('0:11'),false);assert.ok(cells.every(c=>c.classKey==='green'));});
+test('NDVI terciles keep tied median values together and expose park-relative cutoffs',()=>{const a=app(),cells=Array.from({length:12},(_,i)=>({row:0,col:i,classKey:'green',rasterClassKey:'green',areaM2:100}));a.ctx.cells=cells;a.run('DG_LC_LAST={result:{cells}};DG_SENS.record.profile={cells:{}}');for(let i=0;i<cells.length;i++)a.run(`DG_SENS.record.profile.cells['0:${i}']={ndviMedianYear:${i<10?.35:.7},ndviObs:4}`);const result=a.run('dgSensVegetationTiers()');assert.deepEqual([...result.tiers.values()].slice(0,10),Array(10).fill('sparse'));assert.ok(result.cutoffs.every(Number.isFinite));assert.equal(result.tiers.get('0:10'),'dense');});
 test('OSM basin and building-part outlines stay separate vector classes',()=>{const a=app(),f=fixture(a),coords=f.ring(2,2,8,8);coords.push(coords[0]);const ring=coords.map(([lon,lat])=>({lat,lon}));const objects=a.ctx.window.DG_SURFACE_REVIEW.objects([{type:'way',id:1,tags:{landuse:'basin'},geometry:ring},{type:'way',id:2,tags:{'building:part':'yes'},geometry:ring}],32631);assert.deepEqual(JSON.parse(JSON.stringify(objects.map(x=>x.type))),['water','building']);assert.ok(objects.every(x=>x.geometry.type==='MultiPolygon'));});
 test('OSM multipolygon water retains its inner hole when converted to a vector feature',()=>{const a=app(),f=fixture(a);const outer=f.ring(2,2,8,8).map(([lon,lat])=>[lat,lon]),inner=f.ring(4,4,6,6).map(([lon,lat])=>[lat,lon]);a.ctx.extractRings=()=>({outer:[outer],inner:[inner]});a.ctx.objects=a.ctx.window.DG_SURFACE_REVIEW.objects([{type:'relation',id:77,tags:{type:'multipolygon',natural:'water'},members:[]}],32631);assert.equal(a.ctx.objects.length,1);assert.equal(a.ctx.objects[0].type,'water');assert.equal(a.ctx.objects[0].geometry.coordinates[0].length,2);a.ctx.geom=a.run('dgSurfaceFeatureGeometry(objects[0],32631)');assert.ok(Math.abs(a.run('dgSurfaceArea(geom)')-32)<.02);});
 test('geometry fingerprint changes when the boundary or source classes change',async()=>{const a=app(),f=fixture(a);const R=a.ctx.window.DG_SURFACE_REVIEW;const first=await R.fingerprint(f.cells,a.ctx.PARK_POLY,[],{year:2021});assert.match(first,/^[a-f0-9]{64}$/);assert.equal(first,await R.fingerprint(f.cells,a.ctx.PARK_POLY,[],{year:2021}));const changed=structuredClone(f.cells);changed[0].classKey='water';assert.notEqual(first,await R.fingerprint(changed,a.ctx.PARK_POLY,[],{year:2021}));});
@@ -50,6 +51,7 @@ test('brush outside the park or invalid stroke cannot add a correction',async()=
 test('brush cell decisions and undo history survive draft/account reload; invalid geometry is rejected',async()=>{const a=app();fixture(a);a.run('dgSensRepartition=async()=>{};dgSensSave=async()=>true');a.ctx.stroke=a.run('cells.map(c=>[c.center.lat,c.center.lon])');await a.run('dgSensBrushCommit(stroke,"water",10)');const saved=a.run('JSON.parse(JSON.stringify(DG_SENS.record))');assert.equal(saved.features.length,0);assert.equal(Object.values(saved.corrections).length,2);assert.ok(Object.values(saved.corrections).every(d=>d.method==='visual-cell'));a.ctx.window.DG_LC_VALIDATE.loadCampaigns=async()=>[saved];a.ctx.window.DG_SURFACE_REVIEW.load=async()=>null;const loaded=await a.run('dgSensLoadRecord()');assert.deepEqual(JSON.parse(JSON.stringify(loaded.corrections)),JSON.parse(JSON.stringify(saved.corrections)));assert.deepEqual(JSON.parse(JSON.stringify(loaded.brushHistory)),JSON.parse(JSON.stringify(saved.brushHistory)));const bad={type:'water',method:'visual-boundary',geometry:{type:'MultiPolygon',coordinates:[[[[0,0],[1,0],[1,1],[0,1],[0,0]]]]}};bad.geometry.coordinates[0][0][0][0]=NaN;assert.equal(a.ctx.window.DG_SURFACE_REVIEW.validFeature(bad),false);});
 
 test('scan and all four sensitivity sliders remain in the original themed controls',()=>{const a=app();fixture(a);a.run('dgSensRender()');const html=a.el('lcSens').innerHTML;assert.equal(a.run('dgSensNewRecord().period'),'latest');assert.match(html,/id="dgSensScanBtn"/);assert.match(html,/onclick="dgSensScan\(\)"/);for(const k of ['green','water','hard','bare'])assert.ok(html.includes('id="dgSensRange-'+k+'"'));const toolbar=a.el("surfaceBrushTools").innerHTML;assert.match(toolbar,/id="dgSensPeriod"/);assert.match(toolbar,/value="ytd"[\s\S]*?Güncel yıl/);assert.doesNotMatch(html,/id="dgSensBrushType"/);assert.match(readFileSync(new URL("../src/ui/lc-sens.js",import.meta.url),"utf8"),/id="dgSensBrushBtn"[\s\S]*?dgSensBrushToggle/);assert.match(toolbar,/id="dgSensBoundaryDetails"[\s\S]*?id="dgSensDrawType"/);assert.match(toolbar,/id="dgSensDataDetails"[\s\S]*?dg-editor-menu-body/);});
+test('map toolbar status names the active tool instead of an inactive brush class',()=>{const a=app();fixture(a);a.run('dgSensRenderPaintTools()');const toolbar=a.el('surfaceBrushTools').innerHTML;assert.match(toolbar,/role="status" aria-live="polite"[^>]*>[\s\S]*?Haritayı kaydır/);assert.doesNotMatch(toolbar,/>[^<]*Haritayı kaydır[^<]*Sert zemin/);});
 test('scan obtains a profile but does not automatically replace raw classes',async()=>{const a=app();fixture(a);let calls=0;a.ctx.window.DG_LC_S2.profile=async()=>{calls++;return{cells:{'0:0':{obs:5,ndvi:.25,mndwi:-.15,ndbi:-.1}},scenes:[],radiometryVersion:'pb04-offset-v1'};};a.run('dgSensRender=()=>{};dgSensRefreshLayer=()=>{};dgSensSave=async()=>true');await a.run('dgSensScan()');assert.equal(calls,1);assert.equal(a.run('dgSensEffective(cells[0])'),'green');assert.equal(a.run('dgSensAreas().green'),200);assert.ok(a.run('DG_SENS.record.profile'));});
 test('each successful scan starts at neutral sensitivity and replaces the previous spectral profile',async()=>{const a=app();fixture(a);a.run('DG_SENS.record.sens={green:0,water:100,hard:0,bare:100};DG_SENS.record.spectralEnabled=true;DG_SENS.record.profile={cells:{old:{obs:5}}};dgSensRender=()=>{};dgSensRefreshLayer=()=>{};dgSensSave=async()=>true');a.ctx.window.DG_LC_S2.profile=async()=>({cells:{'0:0':{obs:5,ndvi:.2,mndwi:0,ndbi:0}},scenes:[],radiometryVersion:'pb04-offset-v1'});await a.run('dgSensScan()');assert.deepEqual(JSON.parse(JSON.stringify(a.run('DG_SENS.record.sens'))),{green:50,water:50,hard:50,bare:50});assert.equal(a.run('DG_SENS.record.spectralEnabled'),false);assert.equal(a.run('DG_SENS.record.profile.cells.old'),undefined);assert.equal(a.run('dgSensEffective(cells[0])'),'green');});
 test('user changes a sensitivity slider after scanning; returning to neutral restores raster',()=>{const a=app();fixture(a);a.run('DG_SENS.record.profile={cells:{"0:0":{obs:5,ndvi:.25,mndwi:-.15,ndbi:-.1}}};dgSensSlide("hard",100);clearTimeout(DG_SENS.debounce);clearTimeout(DG_SENS.saveTimer)');assert.equal(a.run('dgSensEffective(cells[0])'),'hard');assert.equal(a.run('DG_LC_LAST.result.groupAreas.green'),200);a.run('dgSensSlide("hard",50);clearTimeout(DG_SENS.debounce);clearTimeout(DG_SENS.saveTimer)');assert.equal(a.run('dgSensEffective(cells[0])'),'green');});
@@ -92,18 +94,56 @@ test('OSM object picker returns an exact pier footprint and rejects distant taps
  const picked=a.run('dgSensFindObjectAt(latlng,elements)');a.ctx.picked=picked;assert.equal(picked.type,'hard');assert.equal(picked.osmId,'way/77');assert.ok(Math.abs(a.run('dgSurfaceArea(dgSurfaceFeatureGeometry(picked,32631))')-36)<.01);
  const far=a.run('dgLcUtmInverse(500019,1009,32631)');a.ctx.latlng={lat:far.lat,lng:far.lon};assert.equal(a.run('dgSensFindObjectAt(latlng,elements)'),null);
 });
-test('OSM selected class stays authoritative and changes reviewed area on apply',async()=>{
- const a=app(),f=fixture(a);a.run('DG_SENS.parkGeometry=park;dgSensRepartition=async()=>{DG_SENS.geometry=geoms;DG_SENS.parkGeometry=park};dgSensSave=async()=>true');
+test('OSM selected boundary asks for a class and persists only after explicit apply',async()=>{
+ const a=app(),f=fixture(a);a.run('dgSensRender=()=>{};dgSensRefreshLayer=()=>{};dgSensRenderPaintTools=()=>{};dgSensUpdateSummary=()=>{};dgSensUpdateStatus=()=>{};dgSensSave=async()=>true');
  const boundary=f.ring(2,2,8,8);boundary.push([...boundary[0]]);a.ctx.selection={type:'hard',osmId:'way/77',geometry:{type:'MultiPolygon',coordinates:[[boundary]]}};
- a.run('DG_SENS.drawType="hard";DG_SENS.objectPreview=selection;DG_SENS.record.corrections={"0:1":{to:"hard",method:"visual-cell"}};dgSensSetDrawType("water")');
- a.el('dgSensDrawType').value='building';
+ a.run('DG_SENS.drawType="hard";DG_SENS.objectPreview=selection;DG_SENS.record.corrections={"0:0":{to:"water",method:"visual-cell"}}');
  assert.equal(a.run('DG_SENS.record.features.length'),0);
+ await a.run('dgSensObjectApply()');assert.equal(a.run('DG_SENS.record.features.length'),1);
+ assert.equal(a.run('DG_SENS.record.features[0].source'),'osm-selected');assert.equal(a.run('DG_SENS.record.features[0].type'),'hard');
+ assert.equal(a.run('DG_SENS.record.corrections["0:0"].to'),'water');assert.equal(a.run('DG_SENS.objectPreview'),null);
+});
+
+test('selected OSM water geometry changes reviewed cell areas and reports the applied class',async()=>{
+ const a=app(),f=fixture(a),boundary=f.ring(2,2,8,8);boundary.push([...boundary[0]]);
+ a.ctx.selection={type:'water',osmId:'way/77',geometry:{type:'MultiPolygon',coordinates:[[boundary]]}};
+ a.run('DG_SENS.objectPreview=selection;DG_SENS.objectPreviewLayer=null;dgSensSave=async()=>true;dgSensRender=()=>{};dgSensRefreshLayer=()=>{};dgSensRenderPaintTools=()=>{};dgSensUpdateSummary=()=>{};dgSensUpdateStatus=()=>{}');
+ a.el('dgSensDrawType').value='building';a.run('dgSensSetDrawType("water")');
+ assert.equal(a.run('DG_SENS.drawType'),'water');assert.equal(a.el('dgSensDrawType').value,'water');
+ a.el('dgSensDrawType').value='building'; // stale rendered control must not override the chosen class state
  await a.run('dgSensObjectApply()');
- assert.equal(a.run('DG_SENS.record.features[0].source'),'osm-selected');assert.equal(a.run('DG_SENS.record.features[0].type'),'water');
- assert.equal(a.run('DG_SENS.record.corrections["0:1"].to'),'hard');assert.equal(a.run('DG_SENS.objectPreview'),null);
- const areas=a.run('dgSurfaceSummarize({green:200,water:0,hard:0,bare:0,other:0},cells,c=>c.classKey,geoms,dgSensFeatures(),32631,park)');
- assert.ok(Math.abs(areas.water-36)<.01);assert.ok(Math.abs(areas.green-164)<.01);
- assert.match(a.run('DG_SENS.status'),/36/);
+ const areas=a.run('dgSensAreas()');assert.ok(Math.abs(areas.water-36)<.01);assert.ok(Math.abs(areas.green-164)<.01);
+ assert.equal(a.run('DG_SENS.record.features.at(-1).type'),'water');
+ assert.match(a.run('DG_SENS.status'),/Su sınırı önizlemeye uygulandı/);
+ assert.equal(a.ctx.messages.at(-1)[1],'ok');
+});
+
+test('selected OSM water boundary goes through real geometry preparation and updates analyzed areas',async()=>{
+ const a=app(),f=fixture(a),boundary=f.ring(2,2,8,8);boundary.push([...boundary[0]]);
+ a.ctx.selection={type:'water',osmId:'way/77',geometry:{type:'MultiPolygon',coordinates:[[boundary]]}};
+ a.run('DG_SENS.objectPreview=selection;DG_SENS.objectPreviewLayer=null;dgSensRender=()=>{};dgSensRefreshLayer=()=>{};dgSensRenderPaintTools=()=>{};dgSensUpdateSummary=()=>{};dgSensUpdateStatus=()=>{};dgSensSave=async()=>true');
+ a.el('dgSensDrawType').value='water';a.run('DG_SENS.drawType="water"');
+ await a.run('dgSensObjectApply()');
+ assert.ok(Math.abs(a.run('dgSensAreas().water')-36)<.02);
+ assert.ok(Math.abs(a.run('dgSensAreas().green')-164)<.02);
+ assert.equal(a.run('DG_SENS.record.features.length'),1);
+ assert.match(a.run('DG_SENS.status'),/önizlemeye uygulandı/);
+ let accepted=null;a.ctx.window.DG_SURFACE_REVIEW.save=async snapshot=>{accepted=snapshot;return 2;};a.ctx.window.DG_LC_VALIDATE.saveCampaign=async()=>true;
+ await a.run('dgSensAccept()');assert.ok(accepted);assert.ok(Math.abs(accepted.acceptedAreas.water-36)<.02);assert.ok(Math.abs(accepted.acceptedAreas.green-164)<.02);assert.equal(a.run('DG_SENS.revision'),2);
+});
+
+test('failed selected-boundary partition preserves the previous analysis and leaves the pick retryable',async()=>{
+ const a=app(),f=fixture(a),boundary=f.ring(2,2,8,8);boundary.push([...boundary[0]]);
+ a.ctx.selection={type:'water',osmId:'way/77',geometry:{type:'MultiPolygon',coordinates:[[boundary]]}};
+ a.run('DG_SENS.objectPreview=selection;DG_SENS.objectPreviewLayer=null;dgSensRender=()=>{};dgSensRefreshLayer=()=>{};dgSensRenderPaintTools=()=>{};dgSensUpdateSummary=()=>{};dgSensUpdateStatus=()=>{};dgSensSave=async()=>true');
+ const oldGeometry=a.run('DG_SENS.geometry'),intersection=a.ctx.window.polygonClipping.intersection;
+ a.ctx.window.polygonClipping.intersection=()=>{throw Error('simulated topology failure');};
+ try{await a.run('dgSensObjectApply()');}finally{a.ctx.window.polygonClipping.intersection=intersection;}
+ assert.equal(a.run('DG_SENS.record.features.length'),0);
+ assert.equal(a.run('DG_SENS.geometry'),oldGeometry);
+ assert.equal(a.run('dgSensAreas().water'),0);
+ assert.ok(a.run('DG_SENS.objectPreview'));
+ assert.match(a.run('DG_SENS.status'),/analizi tamamlanamadı/);
 });
 
 
