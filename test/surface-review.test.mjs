@@ -95,12 +95,12 @@ test('OSM object picker returns an exact pier footprint and rejects distant taps
 test('OSM selected class stays authoritative and changes reviewed area on apply',async()=>{
  const a=app(),f=fixture(a);a.run('DG_SENS.parkGeometry=park;dgSensRepartition=async()=>{DG_SENS.geometry=geoms;DG_SENS.parkGeometry=park};dgSensSave=async()=>true');
  const boundary=f.ring(2,2,8,8);boundary.push([...boundary[0]]);a.ctx.selection={type:'hard',osmId:'way/77',geometry:{type:'MultiPolygon',coordinates:[[boundary]]}};
- a.run('DG_SENS.drawType="hard";DG_SENS.objectPreview=selection;DG_SENS.record.corrections={"0:0":{to:"water",method:"visual-cell"}};dgSensSetDrawType("water")');
+ a.run('DG_SENS.drawType="hard";DG_SENS.objectPreview=selection;DG_SENS.record.corrections={"0:1":{to:"hard",method:"visual-cell"}};dgSensSetDrawType("water")');
  a.el('dgSensDrawType').value='building';
  assert.equal(a.run('DG_SENS.record.features.length'),0);
  await a.run('dgSensObjectApply()');
  assert.equal(a.run('DG_SENS.record.features[0].source'),'osm-selected');assert.equal(a.run('DG_SENS.record.features[0].type'),'water');
- assert.equal(a.run('DG_SENS.record.corrections["0:0"].to'),'water');assert.equal(a.run('DG_SENS.objectPreview'),null);
+ assert.equal(a.run('DG_SENS.record.corrections["0:1"].to'),'hard');assert.equal(a.run('DG_SENS.objectPreview'),null);
  const areas=a.run('dgSurfaceSummarize({green:200,water:0,hard:0,bare:0,other:0},cells,c=>c.classKey,geoms,dgSensFeatures(),32631,park)');
  assert.ok(Math.abs(areas.water-36)<.01);assert.ok(Math.abs(areas.green-164)<.01);
  assert.match(a.run('DG_SENS.status'),/36/);
