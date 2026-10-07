@@ -604,11 +604,13 @@ function dgParkMountMenus(){
  dgEditorClearMenus("park");
  host.replaceChildren();
  const nav=document.createElement("nav");nav.className="dg-editor-menubar";nav.setAttribute("aria-label",typeof dgCf==="function"?dgCf("Harita menüsü"):"Harita menüsü");
- for(const [id,label] of [["parkGridTools","🔲 Grid & Waypoint"],["parkLayerTools","🗺️ Katmanlar"]]){
+ for(const [id,label,icon,description] of [["parkGridTools","Grid & Waypoint","grid","Grid oluşturma ve waypoint araçları"],["parkLayerTools","Katmanlar","layers","Haritada gösterilecek katmanlar"]]){
   const controls=document.getElementById(id);if(!controls)continue;
   const menu=document.createElement("details");menu.className="dg-editor-menu";menu.setAttribute("data-menu-owner","park");menu.setAttribute("data-menu-order",id==="parkGridTools"?"30":"40");
-  const summary=document.createElement("summary");summary.textContent=(typeof dgCf==="function"?dgCf(label):label)+" ⌄";
-  const body=document.createElement("div");body.className="dg-editor-menu-body";body.append(controls);
+  const title=typeof dgCf==="function"?dgCf(label):label,subtitle=typeof dgCf==="function"?dgCf(description):description,safeTitle=typeof esc==="function"?esc(title):title,safeSubtitle=typeof esc==="function"?esc(subtitle):subtitle;
+  const editorUi=typeof window!=="undefined"?window.DG_EDITOR_UI:null;
+  const summary=document.createElement("summary");summary.innerHTML=editorUi?.menuLabel(icon,safeTitle)||safeTitle+" ⌄";
+  const body=document.createElement("div");body.className="dg-editor-menu-body";body.innerHTML=editorUi?.panelHead(icon,safeTitle,safeSubtitle)||"";body.append(controls);
   if(id==="parkGridTools"){const summary=document.getElementById("gridSummary");if(summary)body.append(summary);}
   menu.append(summary,body);menu.addEventListener("toggle",()=>{if(menu.open)(document.getElementById("surfaceMenuBar")||nav).querySelectorAll("details[open]").forEach(other=>{if(other!==menu)other.open=false;});});nav.append(menu);
  }
