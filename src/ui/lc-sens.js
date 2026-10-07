@@ -34,7 +34,7 @@ function dgSensMeta(k){return window.DG_LC_VALIDATE?.labels?.[k]||{tr:window.DG_
  * or an area adjustment. Require three distinct observations per cell. */
 function dgSensVegetationTiers(){
  const cells=dgSensCells()||[],profile=DG_SENS.record?.profile?.cells;
- if(!profile)return{tiers:new Map(),count:0,eligible:0};
+ if(!profile)return{tiers:new Map(),count:0,eligible:0,cutoffs:null};
  const candidates=[];
  for(const cell of cells){
   if(dgSensEffective(cell)!=="green")continue;
@@ -42,9 +42,13 @@ function dgSensVegetationTiers(){
   if(Number.isFinite(value)&&obs>=3)candidates.push({key:dgSensCellKey(cell),value});
  }
  candidates.sort((a,b)=>a.value-b.value||a.key.localeCompare(b.key));
- const tiers=new Map(),n=candidates.length;
- if(n>=9)for(let i=0;i<n;i++)tiers.set(candidates[i].key,i<Math.ceil(n/3)?"sparse":i>=Math.floor(2*n/3)?"dense":"moderate");
- return{tiers,count:n,eligible:cells.filter(c=>dgSensEffective(c)==="green").length};
+ const tiers=new Map(),n=candidates.length;let cutoffs=null;
+ if(n>=9){
+  const quantile=q=>{const at=(n-1)*q,lo=Math.floor(at),hi=Math.ceil(at);return candidates[lo].value+(candidates[hi].value-candidates[lo].value)*(at-lo);};
+  cutoffs=[quantile(1/3),quantile(2/3)];
+  for(const item of candidates)tiers.set(item.key,item.value<=cutoffs[0]?"sparse":item.value<=cutoffs[1]?"moderate":"dense");
+ }
+ return{tiers,count:n,eligible:cells.filter(c=>dgSensEffective(c)==="green").length,cutoffs};
 }
 function dgSensToggleVegetation(on){DG_SENS.vegetationView=!!on;DG_SENS.vegetationRenderKey=null;DG_SENS.vegetationLayer?.clearLayers();dgSensRefreshLayer();dgSensUpdateSummary();dgSensRenderPaintTools();}
 async function dgSensRenderVegetation(){
@@ -137,7 +141,7 @@ async function dgSensMount(hostId){
  map.invalidateSize({pan:false});
  if(typeof ResizeObserver!=="undefined"){DG_SENS.resizeObserver?.disconnect();DG_SENS.resizeObserver=new ResizeObserver(()=>map.invalidateSize({pan:false}));DG_SENS.resizeObserver.observe(mapEl);}
  // Leaflet canvas handles pan/zoom without recomputing or restyling geometry.
- await dgSensRepartition();if(epoch!==DG_SENS.epoch)return;if(rec.acceptedResult&&!DG_SENS.editing)dgSensRenderAccepted();
+ const partitioned=await dgSensRepartition();if(epoch!==DG_SENS.epoch||!partitioned)return;if(rec.acceptedResult&&!DG_SENS.editing)dgSensRenderAccepted();
  const pending=document.getElementById("surfacePendingTools");if(pending)pending.style.display="none";
  host.scrollIntoView({block:"nearest"});
 }
@@ -207,13 +211,14 @@ function dgSensRenderPaintTools(){
  const disabled=viewDisabled||DG_SENS.rawView;
  const scanned=!!rec.profile?.cells,vegReady=scanned&&dgSensVegetationTiers().count>=9;
  const types=["hard","green","water","building","pool","bare"],type=DG_SENS.brush?.type||DG_SENS.brushType;
- const label=window.DG_SURFACE_REVIEW.types[type].label;
+ const label=window.DG_SURFACE_REVIEW.types[type].label,drawLabel=window.DG_SURFACE_REVIEW.types[DG_SENS.drawType]?.label||label;
  let menus=`<details data-menu-owner="surface" data-menu-order="10" class="dg-editor-menu" ontoggle="dgSensMenuToggle(this)"><summary>${esc(_tvs("Dosya"))}<span aria-hidden="true">⌄</span></summary><div class="dg-editor-menu-body dg-editor-file"><div class="dg-sens-actions"><button type="button" class="dg-png-btn ghost sm" onclick="dgSensModePark()">🌳 ${esc(_tvs("Park seç"))}</button><button type="button" class="dg-png-btn ghost sm" onclick="dgSensModeAnalysis()">🛰 ${esc(_tvs("Analiz"))}</button><button type="button" class="dg-png-btn primary sm" onclick="dgSensExportPng()">🖼️ ${esc(_tvs("Doğrulanmış Harita"))}</button><button type="button" class="dg-png-btn ghost sm" onclick="dgSensExportGeoJson()">📥 GeoJSON</button><button type="button" class="dg-png-btn ghost sm" onclick="dgSensExportCsv()">📥 CSV</button><button type="button" class="dg-png-btn red sm" onclick="dgSensReset()">${esc(_tvs("Kararları sıfırla"))}</button></div></div></details>`;
  menus+=`<details data-menu-owner="surface" data-menu-order="20" class="dg-editor-menu" ontoggle="dgSensMenuToggle(this)"><summary>${esc(_tvs("Görünüm"))}<span aria-hidden="true">⌄</span></summary><div class="dg-editor-menu-body">${`<div class="dg-sens-map-tools"><label for="dgSensBaseSelect">${esc(_tvs("Harita"))}</label><select id="dgSensBaseSelect" onchange="dgSensBase(this.value)">${[["osm","Sokak"],["sat","Uydu"],["topo","Topoğrafik"]].map(([v,t])=>`<option value="${v}" ${DG_SENS.base===v?"selected":""}>${esc(_tvs(t))}</option>`).join("")}</select><button type="button" class="dg-png-btn ghost sm" onclick="dgChooseNewPark()">📍 ${esc(_tvs("Yeni konum"))}</button></div>`}<button type="button" class="dg-png-btn ghost sm" onclick="dgSensRawView(!DG_SENS.rawView)" ${viewDisabled?"disabled":""}>${esc(_tvs(DG_SENS.rawView?"Düzenlemeye dön":"Ham analizi göster"))}</button></div></details>`;
-menus+=`<details data-menu-owner="surface" data-menu-order="60" id="dgSensBoundaryDetails" class="dg-editor-menu" ontoggle="dgSensMenuToggle(this)"><summary><span>✏️ ${esc(_tvs("Sınır düzeltme"))}</span><span class="dg-paint-chevron" aria-hidden="true">⌄</span></summary><div class="dg-editor-menu-body"><p class="dg-sens-hint">${esc(_tvs("Sınıfı seç, haritada sınır köşelerine dokun, çizimi tamamla. Çizilen alan park sınırına kırpılır."))}</p><label class="dg-png-label" for="dgSensDrawType">${esc(_tvs("Sınır sınıfı"))}</label><select id="dgSensDrawType" onchange="dgSensSetDrawType(this.value)">${["building","pool","hard","water","green","bare"].map(k=>`<option value="${k}" ${DG_SENS.drawType===k?"selected":""}>${esc(_tvs(window.DG_SURFACE_REVIEW.types[k].label))}</option>`).join("")}</select>${DG_SENS.objectPick?`<p class="dg-sens-hint" role="status">${esc(_tvs("Haritada sınırını almak istediğiniz OSM nesnesine dokunun."))}</p>`:""}${DG_SENS.objectPreview?`<div class="dg-sens-object-preview"><p class="dg-sens-hint">${esc(_tvs("OSM nesne sınırı önizleniyor."))} · ${esc(DG_SENS.objectPreview.osmId)}<br>${esc(_tvs("OSM önerisi"))}: ${esc(_tvs(window.DG_SURFACE_REVIEW.types[DG_SENS.objectPreview.type].label))}<br>${esc(_tvs("Sınıfı seçip uygulayın; onaylamadan kaydedilmez."))}</p><div class="dg-sens-actions"><button type="button" class="dg-png-btn primary sm" onclick="dgSensObjectApply()" ${disabled?"disabled":""}>✓ ${esc(_tvs("Seçilen sınıfı uygula"))}</button><button type="button" class="dg-png-btn ghost sm" onclick="dgSensObjectCancel();dgSensRenderPaintTools()">${esc(_tvs("Vazgeç"))}</button></div></div>`:""}<div class="dg-sens-actions"><button type="button" class="dg-png-btn ghost sm" onclick="dgSensObjectPickStart()" ${disabled?"disabled":""}>📍 ${esc(_tvs(DG_SENS.objectPick?"Haritada nesneyi seç…":"Haritadan nesne seç"))}</button><button type="button" class="dg-png-btn blue sm" onclick="dgSensDrawStart()">✏ ${esc(_tvs("Sınır çiz"))}</button><button type="button" class="dg-png-btn primary sm" onclick="dgSensDrawFinish()">✓ ${esc(_tvs("Çizimi tamamla"))}</button><button type="button" class="dg-png-btn ghost sm" onclick="dgSensDrawBack()">↩ ${esc(_tvs("Son köşeyi sil"))}</button><button type="button" class="dg-png-btn ghost sm" onclick="dgSensDrawCancel()">${esc(_tvs("İptal"))}</button><button type="button" class="dg-png-btn ghost sm" onclick="dgSensUndoBoundary()" ${disabled||!(rec.features||[]).length?"disabled":""}>↶ ${esc(_tvs("Son sınırı geri al"))}</button></div><div id="dgSensFeatures">${(rec.features||[]).map((f,i)=>`<div class="dg-sens-feature"><span>${esc(_tvs(window.DG_SURFACE_REVIEW.types[f.type]?.label||f.type))}</span><button type="button" class="dg-png-btn ghost sm" onclick="dgSensRemoveFeature(${i})">↩ ${esc(_tvs("Geri al"))}</button></div>`).join("")}</div></div></details>`;
+menus+=`<details data-menu-owner="surface" data-menu-order="60" id="dgSensBoundaryDetails" class="dg-editor-menu" ontoggle="dgSensMenuToggle(this)"><summary><span>✏️ ${esc(_tvs("Sınır düzeltme"))}</span><span class="dg-paint-chevron" aria-hidden="true">⌄</span></summary><div class="dg-editor-menu-body"><p class="dg-sens-hint">${esc(_tvs("Sınıfı seç, haritada sınır köşelerine dokun, çizimi tamamla. Çizilen alan park sınırına kırpılır."))}</p><label class="dg-png-label" for="dgSensDrawType">${esc(_tvs("Sınır sınıfı"))}</label><select id="dgSensDrawType" onchange="dgSensSetDrawType(this.value)">${["building","pool","hard","water","green","bare"].map(k=>`<option value="${k}" ${DG_SENS.drawType===k?"selected":""}>${esc(_tvs(window.DG_SURFACE_REVIEW.types[k].label))}</option>`).join("")}</select>${DG_SENS.objectPick?`<p class="dg-sens-hint" role="status">${esc(_tvs("Haritada sınırını almak istediğiniz OSM nesnesine dokunun."))}</p>`:""}${DG_SENS.objectPreview?`<div class="dg-sens-object-preview"><p class="dg-sens-hint">${esc(_tvs("OSM nesne sınırı önizleniyor."))} · ${esc(DG_SENS.objectPreview.osmId)}<br>${esc(_tvs("OSM önerisi"))}: ${esc(_tvs(window.DG_SURFACE_REVIEW.types[DG_SENS.objectPreview.type].label))}<br>${esc(_tvs("Uygulanacak sınıf"))}: ${esc(_tvs(window.DG_SURFACE_REVIEW.types[DG_SENS.drawType].label))}<br>${esc(_tvs("Önizlemeye uygular; rapor için ayrıca Kabul et ve kaydet gerekir."))}</p><div class="dg-sens-actions"><button type="button" class="dg-png-btn primary sm" onclick="dgSensObjectApply()" ${disabled?"disabled":""}>✓ ${esc(_tvs("Önizlemeye uygula"))}</button><button type="button" class="dg-png-btn ghost sm" onclick="dgSensObjectCancel();dgSensRenderPaintTools()">${esc(_tvs("Vazgeç"))}</button></div></div>`:""}<div class="dg-sens-actions"><button type="button" class="dg-png-btn ghost sm" onclick="dgSensObjectPickStart()" ${disabled?"disabled":""}>📍 ${esc(_tvs(DG_SENS.objectPick?"Haritada nesneyi seç…":"Haritadan nesne seç"))}</button><button type="button" class="dg-png-btn blue sm" onclick="dgSensDrawStart()">✏ ${esc(_tvs("Sınır çiz"))}</button><button type="button" class="dg-png-btn primary sm" onclick="dgSensDrawFinish()">✓ ${esc(_tvs("Çizimi tamamla"))}</button><button type="button" class="dg-png-btn ghost sm" onclick="dgSensDrawBack()">↩ ${esc(_tvs("Son köşeyi sil"))}</button><button type="button" class="dg-png-btn ghost sm" onclick="dgSensDrawCancel()">${esc(_tvs("İptal"))}</button><button type="button" class="dg-png-btn ghost sm" onclick="dgSensUndoBoundary()" ${disabled||!(rec.features||[]).length?"disabled":""}>↶ ${esc(_tvs("Son sınırı geri al"))}</button></div><div id="dgSensFeatures">${(rec.features||[]).map((f,i)=>`<div class="dg-sens-feature"><span>${esc(_tvs(window.DG_SURFACE_REVIEW.types[f.type]?.label||f.type))}</span><button type="button" class="dg-png-btn ghost sm" onclick="dgSensRemoveFeature(${i})">↩ ${esc(_tvs("Geri al"))}</button></div>`).join("")}</div></div></details>`;
 menus+=`<details data-menu-owner="surface" data-menu-order="70" id="dgSensDataDetails" class="dg-editor-menu" ontoggle="dgSensMenuToggle(this)"><summary><span>⚙️ ${esc(_tvs("Veri ve ayarlar"))}</span><span class="dg-paint-chevron" aria-hidden="true">⌄</span></summary><div class="dg-editor-menu-body"><label class="measure-share"><input class="dg-switch" type="checkbox" ${rec.useObjects!==false?"checked":""} onchange="dgSensObjects(this.checked)"> ${esc(_tvs("OSM bina, su ve sert zemin sınırlarını kullan"))}</label><p class="dg-sens-hint">${esc(_tvs("Yeni analizlerde OSM vektör kanıtı başlangıçta açıktır; nesne kapsamı eksik olabilir. İsteğe bağlıdır ve ham rasterı değiştirmez. Yalnız kabul edilen düzeltmeler kaydedilir."))}</p><label class="dg-png-label" for="dgSensPeriod">${esc(_tvs("Uydu tarama dönemi"))}</label><select id="dgSensPeriod" ${disabled||DG_SENS.rawView||DG_SENS.brush?"disabled":""} onchange="dgSensPeriod(this.value)"><option value="latest" ${rec.period==="latest"?"selected":""}>${esc(_tvs("Güncel görüntüler · son 120 gün"))}</option><option value="ytd" ${rec.period==="ytd"?"selected":""}>${esc(_tvs("Güncel yıl · 1 Ocak–bugün"))}</option><option value="ref" ${rec.period==="ref"?"selected":""}>2021</option></select><p class="dg-sens-hint">${esc(_tvs("Son 120 gün güncel kısa dönem taramasıdır. Güncel yıl seçeneği bu yılın 1 Ocak tarihinden bugüne kadar uygun Sentinel‑2 gözlemlerini kullanır. 2021 tarih uyumlu karşılaştırma içindir. Altlık haritasının tarihi ve ham 2021 raster sınıfları ayrıdır."))}</p></div></details>`;
  menus+=`<details data-menu-owner="surface" data-menu-order="50" id="dgSensBrushDetails" class="dg-editor-menu" ontoggle="dgSensMenuToggle(this)"><summary>${esc(_tvs("Yüzey fırçası"))}<span aria-hidden="true">⌄</span></summary><div class="dg-editor-menu-body"><label class="dg-png-label" for="dgSensBrushType">${esc(_tvs("Fırça sınıfı"))}</label><select id="dgSensBrushType" onchange="dgSensBrushChoose(this.value)" ${disabled?"disabled":""}>${types.map(k=>`<option value="${k}" ${type===k?"selected":""}>${esc(_tvs(window.DG_SURFACE_REVIEW.types[k].label))}</option>`).join("")}</select><label class="dg-png-label" for="dgSensBrushSize">${esc(_tvs("Fırça çapı"))}</label><select id="dgSensBrushSize" onchange="dgSensBrushConfig()" ${disabled?"disabled":""}>${[5,10,20,40].map(n=>`<option value="${n}" ${n===(DG_SENS.brush?.diameter||DG_SENS.brushDiameter)?"selected":""}>${n} m</option>`).join("")}</select><p class="dg-sens-hint">${esc(_tvs("Sol tuş: fırça · Sağ tuş: haritayı kaydır"))}</p></div></details>`;
- host.innerHTML=`<section class="dg-editor" aria-label="${esc(_tvs("Harita düzenleyici"))}"><nav class="dg-editor-menubar" aria-label="${esc(_tvs("Harita menüsü"))}">${menus}</nav><div class="dg-editor-status"><span class="dg-editor-status-dot" aria-hidden="true"></span>${esc(_tvs(DG_SENS.draw?"Sınır çizimi · "+DG_SENS.draw.ring.length+" köşe":DG_SENS.brush?"Fırça etkin":"El ile kaydırma"))} · ${esc(_tvs(label))} · ${DG_SENS.brush?.diameter||DG_SENS.brushDiameter} m · <span class="dg-editor-key-hint">ESC ${esc(_tvs("iptal"))}</span></div></section>`;
+ const mode=DG_SENS.draw?_tvst("Sınır çizimi · {class}",{class:_tvs(drawLabel)}):DG_SENS.brush?_tvst("Fırça · {class} · {size} m",{class:_tvs(label),size:DG_SENS.brush.diameter}):DG_SENS.objectPick?_tvs("Haritadan nesne seç") :DG_SENS.objectPreview?_tvst("Nesne önizlemesi · {class}",{class:_tvs(drawLabel)}):_tvs("Haritayı kaydır");
+ host.innerHTML=`<section class="dg-editor" aria-label="${esc(_tvs("Harita düzenleyici"))}"><nav class="dg-editor-menubar" aria-label="${esc(_tvs("Harita menüsü"))}">${menus}</nav><div class="dg-editor-status" role="status" aria-live="polite"><span class="dg-editor-status-dot" aria-hidden="true"></span>${esc(mode)} · <span class="dg-editor-key-hint">ESC ${esc(_tvs("iptal"))}</span></div></section>`;
  const rail=document.getElementById("surfaceMapTools");if(rail)rail.innerHTML=`<div class="dg-editor-rail" role="group" aria-label="${esc(_tvs("Harita araçları"))}">
  <button type="button" class="dg-png-btn ghost sm dg-editor-tool ${!DG_SENS.brush&&!DG_SENS.draw?"is-active":""}" onclick="dgSensHandMode()" aria-pressed="${!DG_SENS.brush&&!DG_SENS.draw}" aria-label="${esc(_tvs("Haritayı kaydır"))}" title="${esc(_tvs("Haritayı kaydır"))}" ${disabled?"disabled":""}>✋</button>
  <button id="dgSensBrushBtn" type="button" class="dg-png-btn ghost sm dg-editor-tool ${DG_SENS.brush?"is-active":""}" onclick="dgSensBrushToggle()" aria-pressed="${!!DG_SENS.brush}" aria-label="${esc(_tvs(DG_SENS.brush?"Fırçayı kapat":"Fırçayı aç"))}" title="${esc(_tvs(DG_SENS.brush?"Fırçayı kapat":"Fırçayı aç"))}" ${disabled?"disabled":""}>🖌</button>
@@ -266,7 +271,7 @@ function dgSensUpdateSummary(){
  for(const k of DG_SENS_CLASSES){const el=document.getElementById("dgSensCnt-"+k);if(el)el.textContent=rec.sens[k]+" · "+dgSensHa(a[k])+" ha";}
  dgSensRenderCurrentReport(a);
  const el=document.getElementById("dgSensSummary");if(el)el.textContent=_tvs(DG_SENS.editing?"Önizleme":"Kayıtlı sonuç")+" · "+Object.keys(a).filter(k=>a[k]>0).map(k=>_tvs(window.DG_SURFACE_REVIEW.types[k]?.label||k)+": "+dgSensHa(a[k])+" ha").join(" · ");
- const density=document.getElementById("dgSensVegetationSummary");if(density){const d=dgSensVegetationTiers();density.textContent=_tvs("NDVI uygun hücreleri")+": "+d.count+" / "+d.eligible+" · "+_tvs("Park içi göreli sıralama; mutlak taç örtüsü ölçümü değildir.");}
+ const density=document.getElementById("dgSensVegetationSummary");if(density){const d=dgSensVegetationTiers(),cut=d.cutoffs?" · "+_tvs("terciller")+": "+d.cutoffs.map(v=>v.toFixed(2)).join(" / "):"";density.textContent=_tvs("Mevsimsel medyan NDVI · uygun hücre")+": "+d.count+" / "+d.eligible+cut+" · "+_tvs("Her hücrede en az 3 açık uydu gözlemi; park içi göreli sınıflar, taç örtüsü ölçümü değildir.");}
 }
 function dgSensUpdateStatus(){const el=document.getElementById("dgSensStatus");if(el)el.textContent=DG_SENS.status||(DG_SENS.mergeBusy?_tvs("Çizim güncelleniyor…"):_tvs(DG_SENS.record?.acceptedAt&&!DG_SENS.editing?"Kayıtlı sonuç korunuyor. Kaydırıcıyı değiştirerek yeni önizleme yapabilirsiniz.":"Önizleme henüz hesap kaydına yazılmadı."));}
 async function dgSensScan(){
@@ -322,21 +327,26 @@ async function dgSensRefreshLayer(){
 /* Display-only corner rounding, at most 1.5m. Areas and exports retain exact geometry. */
 function dgSensSoftRing(ring,epsg){const pts=ring.slice(0,-1).map(p=>dgLcUtmForward(p[1],p[0],epsg)),out=[];for(let i=0;i<pts.length;i++){const p=pts[i],prev=pts[(i+pts.length-1)%pts.length],next=pts[(i+1)%pts.length];for(const q of [prev,next]){const d=Math.hypot(q.x-p.x,q.y-p.y),t=d?Math.min(.2,1.5/d):0,z=dgLcUtmInverse(p.x+(q.x-p.x)*t,p.y+(q.y-p.y)*t,epsg);out.push([z.lat,z.lon]);}}if(out.length)out.push(out[0]);return out;}
 
-async function dgSensRepartition(){
- const rec=DG_SENS.record;if(!rec)return;const epoch=DG_SENS.epoch;
- DG_SENS.busy=true;DG_SENS.geometry=null;dgSensRender();
+async function dgSensRepartition(featureOverride=null){
+ const rec=DG_SENS.record;if(!rec)return false;const epoch=DG_SENS.epoch;let completed=false;
+ DG_SENS.busy=true;dgSensRender();
  try{
-  const data=await dgSurfacePrepare({cells:dgSensCells(),outer:PARK_POLY,holes:PARK_HOLES||[],epsg:DG_SENS.epsg,objects:rec.objectFeatures||null,elements:window.DG_SURFACE_OSM?.boundary===JSON.stringify(PARK_POLY)?window.DG_SURFACE_OSM.elements:[],features:DG_SENS.rawView?[]:rec.features||[],useObjects:!DG_SENS.rawView&&rec.useObjects});
-  if(epoch!==DG_SENS.epoch)return;
+  const features=featureOverride??(rec.features||[]);
+  const data=await dgSurfacePrepare({cells:dgSensCells(),outer:PARK_POLY,holes:PARK_HOLES||[],epsg:DG_SENS.epsg,objects:rec.objectFeatures||null,elements:window.DG_SURFACE_OSM?.boundary===JSON.stringify(PARK_POLY)?window.DG_SURFACE_OSM.elements:[],features:DG_SENS.rawView?[]:features,useObjects:!DG_SENS.rawView&&rec.useObjects});
+  if(epoch!==DG_SENS.epoch)return false;
+  // Commit staged boundaries only after geometry preparation succeeds.
+  if(featureOverride)rec.features=featureOverride;
   if(!rec.objectFeatures){rec.objectFeatures=data.objects;rec.objectVersion="footprints-v3-area-semantics";}
   DG_SENS.partitionVersion=(DG_SENS.partitionVersion||0)+1;DG_SENS.vegetationRenderKey=null;DG_SENS.vegetationLayer?.clearLayers();DG_SENS.parkGeometry=data.park;DG_SENS.geometry=data.geometries;
   if(dgSensMigrateBrushMasks(rec,dgSensCells(),data.geometries,data.park,DG_SENS.epsg)){rec.draftDirty=true;DG_SENS.editing=true;DG_SENS.visualVersion++;data.parts=window.DG_SURFACE_REVIEW.resolved(dgSensCells(),dgSensEffective,data.geometries,dgSensFeatures(),DG_SENS.epsg,data.park);}
   // Structured cloning preserves geometry references; rebind cells to the UI's canonical array.
   const cells=new Map(dgSensCells().map(c=>[dgSensCellKey(c),c]));for(const p of data.parts)p.cell=cells.get(p.key);
   dgSurfaceSeed(data.geometries,dgSensFeatures(),DG_SENS.epsg,data.park,data.parts,dgSensCells());
+  DG_SENS.partsMemo=null;DG_SENS.visualMemo=null;completed=true;
   if(DG_SENS.layer)map.removeLayer(DG_SENS.layer);if(DG_SENS.renderer)map.removeLayer(DG_SENS.renderer);DG_SENS.layer=null;DG_SENS.renderer=null;
- }catch(e){if(epoch===DG_SENS.epoch){DG_SENS.status=String(e.message||e);toast(esc(DG_SENS.status),"err");}}
+ }catch(e){if(epoch===DG_SENS.epoch){DG_SENS.status=_tvs("Sınır analizi tamamlanamadı: ")+String(e.message||e);toast(esc(DG_SENS.status),"err");}}
  finally{if(epoch===DG_SENS.epoch){DG_SENS.busy=false;dgSensRender();dgSensRefreshLayer();}}
+ return completed;
 }
 
 function dgSensPopup(key){
@@ -373,7 +383,7 @@ async function dgSensAccept(){
  }catch(e){if(epoch===DG_SENS.epoch){const local=await dgSensSave();DG_SENS.status=_tvs("Hesaba kaydedilemedi: ")+String(e.message||e)+(local?" · "+_tvs("Taslak bu cihazda saklandı."):"");toast(DG_SENS.status,"err");}}
  finally{if(epoch===DG_SENS.epoch){DG_SENS.saving=false;dgSensRender();dgSensRefreshLayer();}}
 }
-function dgSensReset(){if(DG_SENS.rawView||DG_SENS.busy||DG_SENS.saving||!confirm(_tvs("Tüm kullanıcı düzeltmeleri silinsin mi? Ham raster korunur.")))return;DG_SENS.record.corrections={};DG_SENS.record.features=[];DG_SENS.record.brushHistory=[];dgSensDirty();dgSensRepartition().then(dgSensSave);}
+function dgSensReset(){if(DG_SENS.rawView||DG_SENS.busy||DG_SENS.saving||!confirm(_tvs("Tüm kullanıcı düzeltmeleri silinsin mi? Ham raster korunur.")))return;DG_SENS.record.corrections={};DG_SENS.record.features=[];DG_SENS.record.brushHistory=[];dgSensDirty();dgSensRepartition().then(ok=>ok&&dgSensSave());}
 function dgSensFindObjectAt(latlng,elements=window.DG_SURFACE_OSM?.elements||[]){
  if(!latlng||!Array.isArray(elements)||!DG_SENS.geometry||!DG_SENS.parkGeometry||typeof dgSurfaceObjects!=="function")return null;
  const point=dgLcUtmForward(latlng.lat,latlng.lng,DG_SENS.epsg),candidates=dgSurfaceObjects(elements,DG_SENS.epsg);let best=null;
@@ -420,9 +430,11 @@ function dgSensObjectApply(){
  const before=dgSensAreas()||{};
  const feature={type,geometry:preview.geometry,method:"visual-boundary",source:"osm-selected",osmId:preview.osmId,ts:new Date().toISOString()};
  if(!window.DG_SURFACE_REVIEW.validFeature(feature)){DG_SENS.status=_tvs("Seçilen nesnenin geometrisi uygulanamadı; sınırı yeniden seçin.");dgSensUpdateStatus();toast(DG_SENS.status,"warn");return;}
- rec.features.push(feature);DG_SENS.drawType=type;dgSensObjectCancel();dgSensDirty();dgSensRenderPaintTools();
- return dgSensRepartition().then(async()=>{
-  if(DG_SENS.record!==rec)return;
+ DG_SENS.drawType=type;dgSensRenderPaintTools();
+ return dgSensRepartition([...(rec.features||[]),feature]).then(async ok=>{
+  if(!ok||DG_SENS.record!==rec)return;
+  dgSensObjectCancel();
+  dgSensDirty();dgSensRenderPaintTools();
   const areas=dgSensAreas();if(!areas)return;
   const delta=Number(areas[type]||0)-Number(before[type]||0),label=_tvs(window.DG_SURFACE_REVIEW.types[type].label);
   DG_SENS.status=delta>.01?_tvst("{class} sınırı önizlemeye uygulandı (+{area} m²). Kalıcı sonuç için Kabul et ve kaydet.",{class:label,area:delta.toFixed(1)}):_tvst("{class} sınırı eklendi; 10 m raster hücrelerinde sınıf değişikliği oluşmadı. Geometriyi kontrol edin.",{class:label});
@@ -441,9 +453,9 @@ function dgSensDrawFinish(){
  if(!window.DG_SURFACE_REVIEW.validRing(d.ring)){toast(_tvs("En az üç köşe seçin; sınır kendi üzerine kesişmemeli."),"warn");return;}
  let geom;try{geom=dgSurfaceClip("intersection",[dgSurfaceProject(d.ring,DG_SENS.epsg)],DG_SENS.parkGeometry);}catch(e){toast(esc(String(e.message||e)),"warn");return;}
  if(dgSurfaceArea(geom)<.1){toast(_tvs("Çizim park sınırının dışında veya çok küçük."),"warn");return;}
- DG_SENS.record.features.push({...d,method:"visual-boundary",ts:new Date().toISOString()});dgSensDirty();dgSensDrawCancel();dgSensRenderPaintTools();dgSensRepartition().then(dgSensSave);
+ DG_SENS.record.features.push({...d,method:"visual-boundary",ts:new Date().toISOString()});dgSensDirty();dgSensDrawCancel();dgSensRenderPaintTools();dgSensRepartition().then(ok=>ok&&dgSensSave());
 }
-function dgSensRemoveFeature(i){if(DG_SENS.rawView||DG_SENS.busy||DG_SENS.saving)return;DG_SENS.record.features.splice(i,1);dgSensDirty();dgSensRepartition().then(dgSensSave);}
+function dgSensRemoveFeature(i){if(DG_SENS.rawView||DG_SENS.busy||DG_SENS.saving)return;DG_SENS.record.features.splice(i,1);dgSensDirty();dgSensRepartition().then(ok=>ok&&dgSensSave());}
 function dgSensUndoBoundary(){if(DG_SENS.rawView||DG_SENS.busy||DG_SENS.saving||!DG_SENS.record?.features?.length)return;dgSensRemoveFeature(DG_SENS.record.features.length-1);}
 function dgSensExportGeoJson(){
  const rec=DG_SENS.record;if(!rec||!DG_SENS.geometry||DG_SENS.busy)return;
@@ -609,7 +621,7 @@ function dgSensRenderAccepted(){
 }
 
 function dgSensFeatures(rec=DG_SENS.record){if(DG_SENS.rawView)return [];return[...(rec?.useObjects!==false?rec?.objectFeatures||[]:[]),...(rec?.features||[])];}
-function dgSensObjects(on){if(DG_SENS.rawView||!DG_SENS.record||DG_SENS.busy||DG_SENS.saving)return;DG_SENS.record.useObjects=on;dgSensDirty();dgSensRepartition().then(dgSensSave);}
+function dgSensObjects(on){if(DG_SENS.rawView||!DG_SENS.record||DG_SENS.busy||DG_SENS.saving)return;DG_SENS.record.useObjects=on;dgSensDirty();dgSensRepartition().then(ok=>ok&&dgSensSave());}
 
 async function dgSensRawView(on){
  if(!DG_SENS.record||DG_SENS.busy||DG_SENS.saving||DG_SENS.exporting||DG_SENS.rawView===!!on)return;
