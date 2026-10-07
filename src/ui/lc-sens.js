@@ -29,6 +29,27 @@ function dgSensEditSummary(rec=DG_SENS.record,cells=dgSensCells()||[]){
  return{manualCells,sensitivityCells,boundaries,thresholds,appearance,total:manualCells+sensitivityCells+boundaries+thresholds+appearance};
 }
 function dgSensMeta(k){return window.DG_LC_VALIDATE?.labels?.[k]||{tr:window.DG_SURFACE_REVIEW?.types?.[k]?.label||k,emoji:""};}
+function dgSensScanAudit(rec=DG_SENS.record){
+ const cells=dgSensCells()||[],profile=rec?.profile;if(!profile?.cells)return null;
+ const classes=DG_SENS_CLASSES,transitions=new Map();let usable=0,matched=0,ambiguous=0,missing=0;
+ for(const cell of cells){
+  const e=profile.cells[dgSensCellKey(cell)];if(!e){missing++;continue;}
+  const prediction=window.DG_LC_VALIDATE.spectralPredict(e,{green:50,water:50,hard:50,bare:50});
+  if(prediction==="nodata"){missing++;continue;}if(!classes.includes(prediction)){ambiguous++;continue;}
+  const original=classes.includes(cell.rasterClassKey||cell.classKey)?(cell.rasterClassKey||cell.classKey):"other";
+  usable++;if(original===prediction)matched++;
+  const pair=original+"→"+prediction,entry=transitions.get(pair)||{from:original,to:prediction,cells:0,areaM2:0};entry.cells++;entry.areaM2+=Number(cell.areaM2)||0;transitions.set(pair,entry);
+ }
+ const scenes=(profile.scenes||[]).filter(s=>Number(s.usedCells)>0).sort((a,b)=>String(a.datetime).localeCompare(String(b.datetime)));
+ return{total:cells.length,profiled:Number(profile.stats?.nProfiled)||0,usable,matched,ambiguous,missing,transitions:[...transitions.values()].filter(x=>x.from!==x.to).sort((a,b)=>b.areaM2-a.areaM2),scenes,skipped:(profile.skipped||[]).length,range:profile.range||null};
+}
+function dgSensScanAuditHtml(rec=DG_SENS.record){
+ const a=dgSensScanAudit(rec);if(!a)return"";
+ const dates=a.scenes.map(s=>s.datetime).filter(Boolean),from=dates[0]?.slice(0,10)||a.range?.start||"—",to=dates.at(-1)?.slice(0,10)||a.range?.end||"—";
+ const transitions=a.transitions.length?a.transitions.slice(0,8).map(x=>`<li>${esc(_tvs(dgSensMeta(x.from).tr))} → ${esc(_tvs(dgSensMeta(x.to).tr))}: ${x.cells} ${esc(_tvs("hücre"))} · ${dgSensHa(x.areaM2)} ha</li>`).join(""):`<li>${esc(_tvs("Yeterli verili hücrelerde sınıf farkı görülmedi."))}</li>`;
+ const agreement=a.usable?`%${(100*a.matched/a.usable).toFixed(1)}`:"—";
+ return `<details id="dgSensEvidenceDetails" class="dg-sens-details dg-sens-evidence" ontoggle="dgSensRememberSection(this)" ${DG_SENS.sections?.dgSensEvidenceDetails===false?"":"open"}><summary>${esc(_tvs("Uydu tarama analizi"))}<span class="dg-paint-chevron" aria-hidden="true">⌄</span></summary><div class="dg-sens-evidence-body"><p><b>Sentinel‑2 L2A · ${esc(from)} – ${esc(to)}</b> · ${a.scenes.length} ${esc(_tvs("kullanılan sahne"))}${a.skipped?` · ${a.skipped} ${esc(_tvs("atlanan sahne"))}`:""}</p><p>${esc(_tvs("Analiz kapsamı"))}: ${a.profiled} / ${a.total} ${esc(_tvs("hücrede yeterli gözlem"))} · ${a.usable} ${esc(_tvs("karşılaştırılabilir tahmin"))} · ${a.ambiguous} ${esc(_tvs("belirsiz"))} · ${a.missing} ${esc(_tvs("yetersiz/verisiz"))}</p><p>${esc(_tvs("2021 ham sınıfıyla spektral eşleşme"))}: ${agreement} (${a.matched}/${a.usable})</p><p><b>${esc(_tvs("Fark görülen sınıflar"))}</b></p><ul>${transitions}</ul><p class="dg-sens-hint">${esc(_tvs("Bu eşleşme bağımsız doğruluk ölçümü değildir: uydu indeksi, ham 2021 sınıfıyla karşılaştırılır. Tarama sınıfları otomatik değiştirmez; harita sınıfı için sınır/hücre düzeltmesini inceleyip Kabul et ve kaydet kullanın."))}</p></div></details>`;
+}
 /* Park-relative NDVI terciles describe spectral greenness within the mapped
  * green class. They are a display aid, not canopy cover, a new raster class,
  * or an area adjustment. Require three distinct observations per cell. */
@@ -212,6 +233,7 @@ function dgSensRender(){
  if(scanned){
   const dates=(rec.profile.scenes||[]).filter(s=>s.usedCells>0).map(s=>s.datetime).sort();
   h+=`<p class="dg-sens-hint">Sentinel‑2 L2A · ${esc(dates[0]||"—")} – ${esc(dates.at(-1)||"—")} · ${rec.profile.stats?.nProfiled||0}/${dgSensCells().length} ${esc(_tvs("hücre"))} · 10 / 20 m</p>`;
+  h+=dgSensScanAuditHtml(rec);
  }
  h+=`<p class="dg-sens-hint">${esc(_tvs("Uydu altlığının tarihi bu tarihlerden farklı olabilir. Küçük bina ve havuzlar için sınır düzeltmesini kullanın."))}</p>`;
  h+=`<details id="dgSensThresholdDetails" class="dg-sens-details" ontoggle="dgSensRememberSection(this)" ${DG_SENS.sections?.dgSensThresholdDetails?"open":""}><summary>${esc(_tvs("Hassasiyet barları"))}<span class="dg-paint-chevron" aria-hidden="true">⌄</span></summary>`;
@@ -303,7 +325,7 @@ async function dgSensScan(){
  try{
   const profile=await window.DG_LC_S2.profile(dgSensCells(),PARK_POLY,{year:DG_LC_LAST.report?.year||2021,mode:rec.period});
   if(epoch!==DG_SENS.epoch||DG_SENS.record!==rec)return;
-  rec.profile=profile;DG_SENS.vegetationRenderKey=null;rec.spectralEnabled=false;rec.scannedAt=new Date().toISOString();dgSensDirty();DG_SENS.status=_tvs("Yeni tarama tamamlandı. Hassasiyet eşikleri nötr değerde; ham raster sınıfları korunuyor.");
+  rec.profile=profile;DG_SENS.vegetationRenderKey=null;rec.spectralEnabled=false;rec.scannedAt=new Date().toISOString();dgSensDirty();const audit=dgSensScanAudit(rec);DG_SENS.status=_tvst("Uydu taraması tamamlandı: {profiled}/{total} hücrede yeterli gözlem, {diff} hücrede sınıf farkı. 2021 ham rasterı değişmedi.",{profiled:audit?.profiled||0,total:audit?.total||0,diff:audit?.transitions.reduce((n,x)=>n+x.cells,0)||0});
   dgSensRefreshLayer();dgSensUpdateSummary();
   await dgSensSave();
  }catch(e){if(epoch===DG_SENS.epoch){DG_SENS.status=_tvs("Tarama başarısız: ")+String(e.message||e);toast(DG_SENS.status,"err");}}
@@ -388,7 +410,9 @@ function dgSensDecide(key,toCls){
 function dgSensUndo(key){if(DG_SENS.rawView||!DG_SENS.record||DG_SENS.busy||DG_SENS.saving)return;delete DG_SENS.record.corrections[key];dgSensDirty();map.closePopup();dgSensRefreshLayer();dgSensUpdateSummary();dgSensSave();}
 function dgSensBulk(cls){for(const x of dgSensCandidates(cls))dgSensDecide(dgSensCellKey(x.cell),cls);}
 async function dgSensAccept(){
- const rec=DG_SENS.record;if(!rec||DG_SENS.rawView||DG_SENS.brush||DG_SENS.saving||DG_SENS.busy||!DG_SENS.geometry||DG_SENS.draw)return;
+ const rec=DG_SENS.record;
+ const blocked=!rec?"Kabul edilecek analiz bulunamadı.":DG_SENS.rawView?"Ham görünüm açık; önce düzenlemeye dönün.":DG_SENS.brush?"Fırça işlemi sürüyor; önce fırçayı kapatın.":DG_SENS.saving||DG_SENS.busy?"Yüzey işlemi sürüyor; tamamlanmasını bekleyin.":!DG_SENS.geometry?"Park geometrisi hazır değil; analizi yeniden açın.":DG_SENS.draw?"Sınır çizimi tamamlanmadı; çizimi tamamlayın veya iptal edin.":null;
+ if(blocked){DG_SENS.status=_tvs(blocked);dgSensUpdateStatus();toast(DG_SENS.status,"warn");return false;}
  const epoch=DG_SENS.epoch,snapshot=JSON.parse(JSON.stringify(rec));
  // Keep immutable geometry identities so acceptance cannot invalidate the partition cache.
  snapshot.features=rec.features;snapshot.objectFeatures=rec.objectFeatures;
@@ -397,14 +421,15 @@ async function dgSensAccept(){
  DG_SENS.saving=true;dgSensRender();
  try{
   snapshot.acceptedResult=await dgSensResultSnapshot(snapshot);
-  if(epoch!==DG_SENS.epoch||DG_SENS.record!==rec)return;
+  if(epoch!==DG_SENS.epoch||DG_SENS.record!==rec)return false;
   if(!snapshot.owner||!snapshot.parkId)throw Error(_tvs("Hesaba kaydetmek için giriş yapın ve kayıtlı bir park seçin."));
   const revision=await window.DG_SURFACE_REVIEW.save(snapshot,DG_SENS.revision);
-  if(epoch!==DG_SENS.epoch)return;
+  if(epoch!==DG_SENS.epoch)return false;
   snapshot.serverRevision=revision;DG_SENS.record=snapshot;DG_SENS.revision=revision;dgSensRenderAccepted();DG_SENS.editing=false;DG_SENS.focus=null;
   const cached=await dgSensSave();DG_SENS.status=_tvs("✓ Sonuç hesabınıza kaydedildi; başka cihazda da açılabilir.")+(cached?"":" · "+_tvs("Cihaz önbelleği yazılamadı."));
   toast(DG_SENS.status,"ok");
- }catch(e){if(epoch===DG_SENS.epoch){const local=await dgSensSave();DG_SENS.status=_tvs("Hesaba kaydedilemedi: ")+String(e.message||e)+(local?" · "+_tvs("Taslak bu cihazda saklandı."):"");toast(DG_SENS.status,"err");}}
+  return true;
+ }catch(e){if(epoch===DG_SENS.epoch){const local=await dgSensSave();DG_SENS.status=_tvs("Hesaba kaydedilemedi: ")+String(e.message||e)+(local?" · "+_tvs("Yalnızca cihaz taslağı saklandı; hesap sonucu güncellenmedi."):"");toast(DG_SENS.status,"err");}return false;}
  finally{if(epoch===DG_SENS.epoch){DG_SENS.saving=false;dgSensRender();dgSensRefreshLayer();}}
 }
 function dgSensReset(){if(DG_SENS.rawView||DG_SENS.busy||DG_SENS.saving||!confirm(_tvs("Tüm kullanıcı düzeltmeleri silinsin mi? Ham raster korunur.")))return;DG_SENS.record.corrections={};DG_SENS.record.features=[];DG_SENS.record.brushHistory=[];dgSensDirty();dgSensRepartition().then(ok=>ok&&dgSensSave());}
@@ -461,15 +486,15 @@ function dgSensObjectApply(){
   dgSensDirty();dgSensRenderPaintTools();
   const areas=dgSensAreas();if(!areas)return;
   const delta=Number(areas[type]||0)-Number(before[type]||0),label=_tvs(window.DG_SURFACE_REVIEW.types[type].label);
-  DG_SENS.status=delta>.01?_tvst("{class} sınırı önizlemeye uygulandı (+{area} m²). Kalıcı sonuç için Kabul et ve kaydet.",{class:label,area:delta.toFixed(1)}):_tvst("{class} sınırı eklendi; 10 m raster hücrelerinde sınıf değişikliği oluşmadı. Geometriyi kontrol edin.",{class:label});
+  DG_SENS.status=delta>.01?_tvst("{class} sınırı önizlemeye uygulandı (+{area} m²). Cihaz taslağı kaydedildi; hesaba kalıcı sonuç için Kabul et ve kaydet.",{class:label,area:delta.toFixed(1)}):_tvst("{class} sınırı cihaz taslağına eklendi; 10 m hücre alanı değişmedi. Bu hesap sonucu değildir; geometriyi kontrol edin.",{class:label});
   const saved=await dgSensSave();if(!saved)return false;
-  dgSensUpdateSummary();dgSensUpdateStatus();toast(DG_SENS.status,delta>.01?"ok":"warn");return true;
+  dgSensUpdateSummary();dgSensUpdateStatus();toast(DG_SENS.status,delta>.01?"info":"warn");return true;
  });
 }
 async function dgSensObjectApplyAndAccept(){
  const applied=await dgSensObjectApply();
  if(!applied)return false;
- await dgSensAccept();
+ const accepted=await dgSensAccept();if(!accepted)return false;
  return !DG_SENS.record?.draftDirty&&!!DG_SENS.record?.acceptedAt;
 }
 function dgSensDrawStart(){if(DG_SENS.rawView||DG_SENS.busy||DG_SENS.saving)return;if(DG_SENS.draw){dgSensOpenMenu("dgSensBoundaryDetails");return;}dgSensObjectCancel();dgSensBrushStop();map.invalidateSize({pan:false});DG_SENS.drawType=document.getElementById("dgSensDrawType")?.value||DG_SENS.drawType||"building";DG_SENS.draw={type:DG_SENS.drawType,ring:[]};DG_SENS.status=_tvs("Haritada sınır köşelerine dokunun; tamamlamak için ✓ düğmesine basın.");dgSensUpdateStatus();dgSensGuard(true);map.on("click",dgSensDrawPoint);dgSensRenderPaintTools();dgSensOpenMenu("dgSensBoundaryDetails");}

@@ -12,6 +12,7 @@ test('OSM multipolygon water retains its inner hole when converted to a vector f
 test('geometry fingerprint changes when the boundary or source classes change',async()=>{const a=app(),f=fixture(a);const R=a.ctx.window.DG_SURFACE_REVIEW;const first=await R.fingerprint(f.cells,a.ctx.PARK_POLY,[],{year:2021});assert.match(first,/^[a-f0-9]{64}$/);assert.equal(first,await R.fingerprint(f.cells,a.ctx.PARK_POLY,[],{year:2021}));const changed=structuredClone(f.cells);changed[0].classKey='water';assert.notEqual(first,await R.fingerprint(changed,a.ctx.PARK_POLY,[],{year:2021}));});
 test('zero sensitivity stays zero and starts an unsaved preview',()=>{const a=app();a.run('dgSensSlide("hard",0)');assert.equal(a.run('DG_SENS.record.sens.hard'),0);assert.equal(a.run('DG_SENS.editing'),true);assert.equal(a.run('DG_SENS.record.draftDirty'),true);a.run('clearTimeout(DG_SENS.debounce)');});
 test('new analyses show optional OSM evidence by default while saved opt-outs remain respected',async()=>{const a=app();assert.equal(a.run('dgSensNewRecord().useObjects'),true);const saved={...a.run('dgSensNewRecord()'),useObjects:false};a.ctx.window.DG_LC_VALIDATE.loadCampaigns=async()=>[saved];a.ctx.window.DG_SURFACE_REVIEW.fingerprint=async()=>'';const loaded=await a.run('dgSensLoadRecord()');assert.equal(loaded.useObjects,false);});
+test('scan audit exposes coverage and class disagreements without calling agreement ground-truth accuracy',()=>{const a=app();fixture(a);a.run('DG_SENS.record.profile={cells:{"0:0":{obs:5,ndvi:.1,mndwi:.6,ndbi:-.2},"0:1":{obs:5,ndvi:.7,mndwi:-.3,ndbi:-.2}},scenes:[{datetime:"2026-06-01T00:00:00Z",usedCells:2}],stats:{nProfiled:2}}');const audit=a.run('dgSensScanAudit()');assert.equal(audit.profiled,2);assert.equal(audit.usable,2);assert.equal(audit.matched,1);assert.equal(audit.transitions[0].from,'green');assert.equal(audit.transitions[0].to,'water');assert.equal(audit.transitions[0].cells,1);assert.match(a.run('dgSensScanAuditHtml()'),/bağımsız doğruluk ölçümü değildir/);a.run('dgSensRender()');assert.match(a.el('lcSens').innerHTML,/id="dgSensEvidenceDetails"[^>]*open/);assert.match(a.el('lcSens').innerHTML,/Fark görülen sınıflar/);});
 test('reopening a park analysis resets only the scan controls, never accepted results or manual edits',()=>{const a=app();const accepted={areas:{green:100,hard:100},features:[{properties:{class:'green'}}]},brush={type:'green',method:'visual-boundary'},rec={sens:{green:5,water:15,hard:95,bare:85},spectralEnabled:true,profile:{cells:{x:{obs:3}}},acceptedResult:accepted,features:[brush],corrections:{'0:1':{to:'water',method:'visual-cell'}}};a.ctx.rec=rec;a.run('dgSensResetScanState(rec)');assert.deepEqual(JSON.parse(JSON.stringify(rec.sens)),{green:50,water:50,hard:50,bare:50});assert.equal(rec.profile,null);assert.equal(rec.spectralEnabled,false);assert.equal(rec.acceptedResult,accepted);assert.equal(rec.features[0],brush);assert.equal(rec.corrections['0:1'].to,'water');});
 test('legacy default scans upgrade to current-year evidence while explicit latest-window choice is preserved',()=>{const a=app();a.run('DG_SENS.record.period="latest";dgSensResetScanState(DG_SENS.record)');assert.equal(a.run('DG_SENS.record.period'),'ytd');a.run('DG_SENS.record.period="latest";DG_SENS.record.periodExplicit=true;dgSensResetScanState(DG_SENS.record)');assert.equal(a.run('DG_SENS.record.period'),'latest');});
 test('saved spectral decisions are frozen until editing; visual decisions remain protected',()=>{const a=app();fixture(a);a.run('DG_SENS.record.corrections={"0:0":{from:"green",to:"water",method:"sensitivity"}};DG_SENS.editing=false');assert.equal(a.run('dgSensEffective(cells[0])'),'water');a.run('DG_SENS.editing=true');assert.equal(a.run('dgSensEffective(cells[0])'),'green');a.run('DG_SENS.record.corrections["0:0"].method="visual-cell"');assert.equal(a.run('dgSensEffective(cells[0])'),'water');});
@@ -19,7 +20,7 @@ test('inadequate or edge spectral evidence preserves the original class',()=>{co
 test('PB04 offset and STAC scale-offset yield equivalent reflectance',()=>{const a=app();const fn=a.ctx.dgS2Reflectance;assert.equal(fn(3000,{properties:{'s2:processing_baseline':'05.11'}},'B04'),.2);assert.equal(fn(2000,{properties:{'s2:processing_baseline':'03.00'}},'B04'),.2);assert.ok(Math.abs(fn(3000,{assets:{B04:{'raster:bands':[{scale:.0001,offset:-.1}]}}},'B04')-.2)<1e-9);assert.equal(fn(0,{},'B04'),null);});
 test('latest acquisitions use a rolling window ending today without future dates',()=>{const a=app();const range=a.ctx.dgS2SeasonRange(2021,'latest');assert.ok(Date.parse(range.end)<=Date.now());assert.ok(Math.abs((Date.parse(range.end)-Date.parse(range.start))/86400000-120)<1e-6);assert.match(range.label,/güncel/);});
 test('account save uses revision compare-and-swap and reports conflicts',async()=>{const a=app();let filters=[];const q={eq:(k,v)=>{filters.push([k,v]);return q;},select:()=>q,maybeSingle:async()=>({data:null,error:null})};a.ctx.sb={from:()=>({update:()=>q})};await assert.rejects(()=>a.ctx.window.DG_SURFACE_REVIEW.save({owner:'u',parkId:7,fingerprint:'f'},4),/başka cihaz/);assert.ok(filters.some(([k,v])=>k==='revision'&&v===4));});
-test('failed account save retains draft and never announces saved success',async()=>{const a=app();fixture(a);a.run('DG_SENS.record.features=[{type:"building",ring:cells[0].quadWgs}];dgSensRender=()=>{};dgSensRefreshLayer=()=>{}');a.ctx.window.DG_SURFACE_REVIEW.save=async()=>{throw Error('offline');};a.ctx.window.DG_LC_VALIDATE.saveCampaign=async()=>true;await a.run('dgSensAccept()');assert.equal(a.run('DG_SENS.record.acceptedAt'),undefined);assert.match(a.run('DG_SENS.status'),/Hesaba kaydedilemedi/);assert.equal(a.ctx.messages.at(-1)[1],'err');});
+test('failed account save retains draft, states account result was not updated, and returns failure',async()=>{const a=app();fixture(a);a.run('DG_SENS.record.features=[{type:"building",ring:cells[0].quadWgs}];dgSensRender=()=>{};dgSensRefreshLayer=()=>{}');a.ctx.window.DG_SURFACE_REVIEW.save=async()=>{throw Error('offline');};a.ctx.window.DG_LC_VALIDATE.saveCampaign=async()=>true;const accepted=await a.run('dgSensAccept()');assert.equal(accepted,false);assert.equal(a.run('DG_SENS.record.acceptedAt'),undefined);assert.match(a.run('DG_SENS.status'),/Hesaba kaydedilemedi/);assert.match(a.run('DG_SENS.status'),/Yalnızca cihaz taslağı saklandı; hesap sonucu güncellenmedi/);assert.equal(a.ctx.messages.at(-1)[1],'err');});
 test('successful account save snapshots areas and freezes the accepted layer',async()=>{const a=app();fixture(a);a.run('DG_SENS.record.fingerprint="f";DG_SENS.record.features=[{type:"building",ring:cells[0].quadWgs}];dgSensRender=()=>{};dgSensRefreshLayer=()=>{}');a.ctx.window.DG_SURFACE_REVIEW.save=async()=>3;a.ctx.window.DG_LC_VALIDATE.saveCampaign=async()=>true;await a.run('dgSensAccept()');assert.equal(a.run('DG_SENS.revision'),3);assert.equal(a.run('DG_SENS.editing'),false);assert.equal(a.run('DG_SENS.record.draftDirty'),false);assert.ok(Math.abs(a.run('DG_SENS.record.acceptedAreas.building')-100)<.001);});
 test('legacy spectral thresholds cannot relabel the single raster baseline',()=>{const a=app();fixture(a);a.run('DG_SENS.record.profile={cells:{"0:0":{obs:5,ndvi:.25,mndwi:-.15,ndbi:-.1}}};DG_SENS.record.sens.hard=100');assert.equal(a.run('dgSensEffective(cells[0])'),'green');assert.equal(a.run('dgSensAreas().hard'),0);assert.equal(a.run('DG_LC_LAST.result.groupAreas.green'),200);});
 test('active park identity comes from DG_PARK, never the session cache Map',()=>{const a=app();assert.equal(a.run('dgSensParkId().id'),7);a.ctx.DG_PARK=null;assert.equal(a.run('dgSensParkId().id'),null);});
@@ -116,7 +117,7 @@ test('selected OSM water geometry changes reviewed cell areas and reports the ap
  const areas=a.run('dgSensAreas()');assert.ok(Math.abs(areas.water-36)<.01);assert.ok(Math.abs(areas.green-164)<.01);
  assert.equal(a.run('DG_SENS.record.features.at(-1).type'),'water');
  assert.match(a.run('DG_SENS.status'),/Su sınırı önizlemeye uygulandı/);
- assert.equal(a.ctx.messages.at(-1)[1],'ok');
+ assert.equal(a.ctx.messages.at(-1)[1],'info');
 });
 
 test('selected OSM water boundary goes through real geometry preparation and updates analyzed areas',async()=>{
@@ -142,12 +143,23 @@ test('mobile confirm applies a selected boundary, recomputes areas, and saves th
  assert.match(toolbar,/onclick="dgSensObjectApplyAndAccept\(\)"/);
  assert.match(toolbar,/Önizlemeyi uygula, analiz et ve kaydet/);
  let accepted=null;a.ctx.window.DG_SURFACE_REVIEW.save=async snapshot=>{accepted=snapshot;return 4;};a.ctx.window.DG_LC_VALIDATE.saveCampaign=async()=>true;
- await a.run('dgSensObjectApplyAndAccept()');
+ assert.equal(await a.run('dgSensObjectApplyAndAccept()'),true);
  assert.ok(accepted);assert.ok(Math.abs(accepted.acceptedAreas.water-36)<.02);assert.ok(Math.abs(accepted.acceptedAreas.green-164)<.02);
  assert.equal(a.run('DG_SENS.record.features[0].source'),'osm-selected');
  assert.equal(a.run('DG_SENS.record.acceptedAt!==undefined'),true);
  assert.equal(a.run('DG_SENS.objectPreview'),null);
  assert.equal(a.run('DG_SENS.revision'),4);
+});
+
+test('combined selection flow returns failure and names draft-only state when account persistence fails',async()=>{
+ const a=app(),f=fixture(a),boundary=f.ring(2,2,8,8);boundary.push([...boundary[0]]);
+ a.ctx.selection={type:'water',osmId:'way/77',geometry:{type:'MultiPolygon',coordinates:[[boundary]]}};
+ a.run('DG_SENS.objectPreview=selection;DG_SENS.objectPreviewLayer=null;DG_SENS.drawType="water";dgSensRender=()=>{};dgSensRefreshLayer=()=>{};dgSensRenderPaintTools=()=>{};dgSensUpdateSummary=()=>{};dgSensUpdateStatus=()=>{};dgSensSave=async()=>true');
+ a.ctx.window.DG_SURFACE_REVIEW.save=async()=>{throw Error('RLS denied');};
+ assert.equal(await a.run('dgSensObjectApplyAndAccept()'),false);
+ assert.match(a.run('DG_SENS.status'),/hesaba kaydedilemedi/i);
+ assert.match(a.run('DG_SENS.status'),/hesap sonucu güncellenmedi/i);
+ assert.equal(a.ctx.messages.at(-1)[1],'err');
 });
 
 test('accepted boundary geometry reloads from the account record and remains drawable over the scan',async()=>{
