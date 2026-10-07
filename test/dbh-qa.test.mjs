@@ -215,7 +215,7 @@ describe('0031 · karbon motoru DEĞİŞMEDİ (aynı formül, aynı katsayılar)
       /const head = 'NOKTA,TUR,GRUP,GOGUS_CEVRESI_CM,DBH_CM,BOY_M,KARBON_KG,KARBON_CI_LO_KG,KARBON_CI_HI_KG,ENLEM,BOYLAM,GPS_DOGRULUK_M,TARIH'/);
     const mig = readdirSync(join(ROOT, 'supabase/migrations')).filter((f) => /\.sql$/.test(f));
     assert.ok(mig.includes('0013_restore_measurements.sql'), '0013 iade migrationı yerinde');
-    for (const f of mig) assert.ok((parseInt(f.slice(0, 4), 10) <= 25 || ["20261003165331_surface_reviews.sql","20261003180749_surface_report_snapshot.sql","20261003203000_report_accepted_surface_snapshot.sql","20261003220749_surface_geometry_compat.sql","20261004165219_profile_privilege_guard.sql","20261006193500_data_requests_delete_own.sql"].includes(f)), '0031 yeni migration EKLEMEMELİ: ' + f);
+    for (const f of mig) assert.ok((parseInt(f.slice(0, 4), 10) <= 25 || ["20261003165331_surface_reviews.sql","20261003180749_surface_report_snapshot.sql","20261003203000_report_accepted_surface_snapshot.sql","20261003220749_surface_geometry_compat.sql","20261004165219_profile_privilege_guard.sql","20261006193500_data_requests_delete_own.sql","20261007083413_report_access_hardening.sql","20261007083543_rls_index_optimization.sql"].includes(f)), '0031 yeni migration EKLEMEMELİ: ' + f);
     assert.ok(!/alter\s+table\s+(?:public\.)?(?:measurements|projects|parks)/i.test(read('supabase/migrations/20261003165331_surface_reviews.sql')), 'yüzey kaydı ölçüm/park şemasını değiştirmez');
     const reqMig=read('supabase/migrations/20261006193500_data_requests_delete_own.sql');
     assert.match(reqMig,/on public\.data_requests[\s\S]*for delete/i,'yeni migration yalnız veri talepleri DELETE RLS içindir');

@@ -35,6 +35,7 @@ on:
   workflow_dispatch: {}
 
 permissions:
+  id-token: write
   contents: read
   actions: write               # zincir: kendi ardılını tetikler
 
@@ -44,6 +45,8 @@ concurrency:
 
 jobs:
   nabiz:
+    env:
+      DG_REPORT_READER: oidc
     runs-on: ubuntu-latest
     timeout-minutes: 8    # 0019: zincir adımı sleep 300 + kontroller ~5,5 dk; payıyla 8 dk
     steps:
@@ -102,12 +105,8 @@ jobs:
         id: kontrol
         run: |
           set -e
-          SB_URL=$(sed -n 's/.*SB_URL="\([^"]*\)".*/\1/p' src/config/supabase.js)
-          SB_KEY=$(sed -n 's/.*SB_KEY="\([^"]*\)".*/\1/p' src/config/supabase.js)
-          REQ=$(curl -sf -H "apikey: $SB_KEY" -H "Authorization: Bearer $SB_KEY" \
-            "$SB_URL/rest/v1/report_requests?status=eq.Beklemede&select=id" || echo '[]')
-          RET=$(curl -sf -H "apikey: $SB_KEY" -H "Authorization: Bearer $SB_KEY" \
-            "$SB_URL/rest/v1/report_retractions?status=eq.Beklemede&select=id,report_id" || echo '[]')
+          REQ=$(node scripts/report-reader-health.mjs report_requests)
+          RET=$(node scripts/report-reader-health.mjs report_retractions)
           node -e '
             const fs = require("fs");
             const reqS = process.argv[1], retS = process.argv[2];

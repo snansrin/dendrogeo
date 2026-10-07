@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+import { reportRead } from './lib/report-reader.mjs';
 import {decodeReportContext} from './lib/report-context.mjs';
 /* publish-queue.mjs — SİTE İÇİNDEN GELEN RAPOR YAYIN İSTEKLERİNİ İŞLER
  *
@@ -90,7 +91,7 @@ async function fetchRequestRows(select, limit, offset=0, cutoff=null) {
     order: 'created_at.asc',
     limit: String(limit),offset:String(offset),...(cutoff ? {created_at:"gte."+new Date(cutoff).toISOString()} : {}),
   });
-  return fetch(u, { headers: { apikey: SB.key, Authorization: 'Bearer ' + SB.key } });
+  return reportRead(u, { headers: { apikey: SB.key, Authorization: 'Bearer ' + SB.key } });
 }
 export async function fetchPending(limit = 50, processedIds=[],cutoff=null) {
   const done=new Set(processedIds.map(String)),out=[];let offset=0,select='id,park_id,with_lulc,status,note,created_at,surface_snapshot';
@@ -110,7 +111,7 @@ export async function fetchPendingRetractions(limit = 50,processedIds=[],cutoff=
  const out=[],done=new Set(processedIds.map(String));let offset=0;
  while(out.length<limit){
   const u=SB.url+'/rest/v1/report_retractions?'+new URLSearchParams({select:'id,report_id,park_id,reason,status,requested_by,created_at',status:'eq.Beklemede',order:'created_at.asc',limit:'50',offset:String(offset),...(cutoff?{created_at:'gte.'+new Date(cutoff).toISOString()}:{})});
-  const r=await fetch(u,{headers:{apikey:SB.key,Authorization:'Bearer '+SB.key}});
+  const r=await reportRead(u,{headers:{apikey:SB.key,Authorization:'Bearer '+SB.key}});
   if(r.status===404)return{rows:[],missing:true,message:'report_retractions tablosu yok — 0010_report_retraction.sql çalıştırılmalı'};
   if(!r.ok)throw Error('report_retractions HTTP '+r.status+': '+(await r.text()).slice(0,200));
   const rows=await r.json();if(!Array.isArray(rows))break;out.push(...rows.filter(r=>!done.has(String(r.id))));if(rows.length<50)break;offset+=rows.length;

@@ -1,0 +1,13 @@
+import {test} from 'node:test';
+import assert from 'node:assert/strict';
+import {generateKeyPair,exportJWK,SignJWT,createLocalJWKSet,jwtVerify} from 'jose';
+import {authorize,targetFor,AUDIENCE,ISSUER} from '../supabase/functions/report-reader/policy.mjs';
+const {privateKey,publicKey}=await generateKeyPair('RS256');
+const jwk=await exportJWK(publicKey);jwk.kid='test';jwk.alg='RS256';
+const jwks=createLocalJWKSet({keys:[jwk]});
+const claims={repository:'snansrin/dendrogeo',repository_id:'1351563490',repository_owner_id:'262906823',ref:'refs/heads/main',event_name:'push',workflow_ref:'snansrin/dendrogeo/.github/workflows/ci.yml@refs/heads/main'};
+const token=(overrides={})=>new SignJWT({...claims,...overrides}).setProtectedHeader({alg:'RS256',kid:'test'}).setIssuer(ISSUER).setAudience(AUDIENCE).setIssuedAt().setNotBefore('0s').setExpirationTime('5m').setJti('test-id').sign(privateKey);
+test('signed main publication identity is accepted',async()=>{assert.equal((await authorize(await token(),jwtVerify,jwks)).repository_id,claims.repository_id);});
+test('PRs, forks, other workflows, repositories and owner IDs are denied',async()=>{for(const patch of [{ref:'refs/pull/1/merge'},{event_name:'pull_request'},{repository_id:'9'},{repository_owner_id:'9'},{repository:'attacker/dendrogeo'},{workflow_ref:'snansrin/dendrogeo/.github/workflows/untrusted.yml@refs/heads/main'}])await assert.rejects(authorize(await token(patch),jwtVerify,jwks));});
+test('unsigned, malformed, expired and wrong-audience tokens are denied',async()=>{await assert.rejects(authorize('abc.def.ghi',jwtVerify,jwks));for(const patch of [{exp:Math.floor(Date.now()/1000)-30},{aud:'other'},{iss:'https://attacker.example'}]){const signed=await new SignJWT({...claims,iat:Math.floor(Date.now()/1000),nbf:Math.floor(Date.now()/1000)-1,exp:Math.floor(Date.now()/1000)+300,jti:'id',iss:ISSUER,aud:AUDIENCE,...patch}).setProtectedHeader({alg:'RS256',kid:'test'}).sign(privateKey);await assert.rejects(authorize(signed,jwtVerify,jwks));}});
+test('reader exposes only fixed read resources, columns and bounded pages',()=>{const base='https://project.supabase.co';const valid=targetFor(new URL('https://edge/?resource=report_requests&select=id,note,surface_snapshot&status=eq.Beklemede'),base);assert.equal(valid.origin,base);assert.equal(valid.pathname,'/rest/v1/report_requests');for(const query of ['resource=profiles','resource=report_requests&select=*','resource=report_requests&limit=101','resource=report_requests&offset=10001','resource=report_requests&or=(true)','resource=rpc/dg_park_author&park=1%3Bdrop','resource=report_requests&select=profiles(email)'])assert.throws(()=>targetFor(new URL('https://edge/?'+query),base));});
