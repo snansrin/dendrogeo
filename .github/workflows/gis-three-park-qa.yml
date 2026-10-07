@@ -1,0 +1,40 @@
+name: GIS three-park live QA
+
+on:
+  pull_request:
+    paths:
+      - 'scripts/val-qa.mjs'
+      - 'src/services/lc-*.js'
+      - 'src/ui/lc-sens.js'
+      - '.github/workflows/gis-three-park-qa.yml'
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+
+jobs:
+  parks:
+    name: 2026 Sentinel-2 · Ankara parks
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Dependencies
+        run: npm ci
+      - name: Run current-year park QA
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/dendrogeo-park-qa
+          node scripts/val-qa.mjs --park "Göksu Parkı" --city Ankara --s2-mode ytd 2>&1 | tee /tmp/dendrogeo-park-qa/goksu.log
+          node scripts/val-qa.mjs --park "Başkent Millet Bahçesi" --city Ankara --s2-mode ytd 2>&1 | tee /tmp/dendrogeo-park-qa/baskent.log
+          node scripts/val-qa.mjs --park "Kuğulu Parkı" --city Ankara --s2-mode ytd 2>&1 | tee /tmp/dendrogeo-park-qa/kugulu.log
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: gis-three-park-qa
+          path: /tmp/dendrogeo-park-qa/*.log
+          retention-days: 14

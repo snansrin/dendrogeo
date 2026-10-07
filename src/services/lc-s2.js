@@ -21,10 +21,10 @@
  * CORS DERSİ (lc-stac.js'ten miras): STAC araması daima GET+querystring —
  * POST preflight'i Planetary Computer'da 405. İmzalama dgLcGetSas(collection).
  *
- * Referans dönemi VARSAYILAN: WorldCover'ın yılı (2021) vejetasyon sezonu
- * (1 Haziran – 30 Eylül) — harita hangi dönemi temsil ediyorsa doğrulama
- * görüntüsü de o dönemin olmalı (fenolojik tutarlılık). Kullanıcı "güncel"
- * seçerse tarih aralığı değişir; karne bunu beyan eder.
+ * Güncel yıl seçeneği: içinde bulunulan yılın 1 Ocak–bugün aralığı.
+ * 2021 WorldCover ile dönem farkı açıkça raporlanır; güncel spektral profil
+ * ham 2021 raster sınıflarını kendiliğinden değiştirmez. Tarih uyumlu geçmiş
+ * kontrol için 2021 ve kısa dönem değişim taraması ayrıca seçilebilir.
  *
  * YÜKLEME SIRASI: lc-stac (dgLcFetchJson/dgLcGetSas/dgLcSignedHref/
  * dgLcImageMeta) ve lc-geo (dgLcUtmForward/dgLcUtmEpsgForLatLon) ÖNCE
@@ -44,6 +44,11 @@ const DG_S2_SCALE=10000;       /* L2A yansıma ölçeği */
 /* Referans dönemi seçenekleri (karne beyanı bunları kaynak gösterir) */
 function dgS2SeasonRange(year,mode){
   const y=Number(year)||2021;
+  if(mode==="ytd"){
+    const now=new Date(),currentYear=now.getUTCFullYear(),end=now.toISOString();
+    const start=new Date(Date.UTC(currentYear,0,1)).toISOString();
+    return{start,end,label:currentYear+" güncel yıl (1 Oca – "+end.slice(0,10)+")"};
+  }
   if(mode==="latest"){
     const now=new Date(),end=now.toISOString(),start=new Date(now.getTime()-120*86400000).toISOString();
     return{start,end,label:start.slice(0,10)+" – "+end.slice(0,10)+" (güncel, son 120 gün)"};
@@ -111,15 +116,19 @@ async function dgS2FindScenes(bbox,year,mode){
  * dersi 2026-10-03: su hücrelerinde p25 MNDWI = 0.006, ✗612). Bu yüzden su
  * kanıtı için yüksek su dönemi (ilkbahar) + sonbahar pencereleri ayrıca
  * taranır; MAX MNDWI "referans yılında açık su görüldü mü" sorusuna döner. */
-function dgS2WaterWindows(year,mode){
-  /* 'latest' modda kalıcılık pencereleri de GÜNCEL yılı kullanır (0054):
-   * hassasiyet paneli "en yeni uydu verisi" ile çalışır — su/yeşil kanıtı
-   * 2021'de değil içinde bulunulan yılda aranır. */
-  const y=(mode==="latest")?new Date().getUTCFullYear():(Number(year)||2021);
-  return[
+function dgS2WaterWindows(year,mode,nowOverride){
+  /* Güncel modlarda kalıcılık pencereleri de seçilen güncel yılı kullanır. */
+  const now=nowOverride!=null?new Date(nowOverride):new Date();
+  const y=(mode==="latest"||mode==="ytd")?now.getUTCFullYear():(Number(year)||2021);
+  const windows=[
     {start:y+"-02-01T00:00:00Z",end:y+"-05-31T23:59:59Z",max:3,label:y+" ilkbahar (yüksek su)"},
     {start:y+"-10-01T00:00:00Z",end:y+"-12-15T23:59:59Z",max:2,label:y+" sonbahar"}
   ];
+  if(mode!=="ytd")return windows;
+  return windows.flatMap(w=>{
+    const start=Date.parse(w.start),end=Math.min(Date.parse(w.end),now.getTime());
+    return end<start?[]:[{...w,end:new Date(end).toISOString()}];
+  });
 }
 
 /* Bir sahnenin tek bandı için pencere okuması.
@@ -460,5 +469,6 @@ window.DG_LC_S2={
   findScenes:dgS2FindScenes,
   profile:dgS2Profile,
   predictAll:dgS2PredictAll,
-  seasonRange:dgS2SeasonRange
+  seasonRange:dgS2SeasonRange,
+  waterWindows:dgS2WaterWindows
 };

@@ -67,7 +67,7 @@
  * DOM/ağ bağımlılığı YOKTUR (IndexedDB hariç, o da typeof korumalı) →
  * test/lc-validate.test.mjs doğrudan vm ile birim test eder. */
 
-const DG_VAL_VERSION="1.0.0";
+const DG_VAL_VERSION="1.1.0";
 
 /* Karne sınıfları — DG_LC_CLASSES'ın 'other' dışındaki 4 ana grubu, sabit
  * sıra (hata matrisi satır/sütun düzeni deterministik olmalı). */
@@ -206,6 +206,30 @@ function dgValStratifiedSample(cells,opts){
         classCode:c.classCode
       });
     }
+  }
+  return out;
+}
+
+/* ---------- PARK GENELİ RASTGELE ÖRNEKLEME (omisyon taraması) ----------
+ * Tabakalı örneklem, haritada hiç gösterilmeyen bir sınıfı ölçemez. Bu ikinci
+ * çerçeve tüm uygun hücre havuzundan sınıftan bağımsız seçim yapar; tek başına
+ * alan-düzeltilmiş doğruluk yerine geçmez, nadir/atlanmış sınıf adaylarını
+ * bulup incelemeye taşır. */
+function dgValSpatialSample(cells,opts){
+  const o=Object.assign({count:20,seed:20261007,edgeAreaM2:DG_VAL_DEFAULTS.edgeAreaM2},opts||{});
+  const pool=(cells||[]).filter(c=>Number(c.areaM2||0)>=Number(o.edgeAreaM2)&&c.center&&
+    Number.isFinite(Number(c.center.lat))&&Number.isFinite(Number(c.center.lon)));
+  const idx=pool.map((_,i)=>i);
+  const requested=Number(o.count),seed=Number(o.seed);
+  const rng=dgValRng(Number.isFinite(seed)?seed:20261007);
+  const n=Math.min(Number.isFinite(requested)?Math.max(0,Math.floor(requested)):20,idx.length),out=[];
+  for(let k=0;k<n;k++){
+    const j=k+Math.floor(rng()*(idx.length-k));
+    [idx[k],idx[j]]=[idx[j],idx[k]];
+    const c=pool[idx[k]];
+    out.push({id:"R"+String(k+1).padStart(3,"0"),lat:+Number(c.center.lat).toFixed(7),
+      lon:+Number(c.center.lon).toFixed(7),row:c.row,col:c.col,mapClass:c.classKey,
+      areaM2:+Number(c.areaM2||0).toFixed(3),classCode:c.classCode,edge:false,frame:"park-random"});
   }
   return out;
 }
@@ -729,6 +753,7 @@ window.DG_LC_VALIDATE={
   ibi:dgValIbi,
   thresholds:dgValThr,
   stratifiedSample:dgValStratifiedSample,
+  spatialSample:dgValSpatialSample,
   confusion:dgValConfusion,
   weights:dgValWeights,
   metrics:dgValMetrics,
