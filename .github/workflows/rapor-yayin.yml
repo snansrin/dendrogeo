@@ -64,6 +64,9 @@ jobs:
       - name: Bağımlılıklar (npm ci)
         run: npm ci
 
+      - name: Özel yayın okuyucusu OIDC sağlık kontrolü
+        run: node scripts/report-reader-health.mjs --verify
+
       - name: Bekleyen yayın isteklerini işle
         run: node scripts/publish-queue.mjs
 
