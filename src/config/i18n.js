@@ -24,6 +24,21 @@
 
 /* ---- EN sözlüğü: anahtar = TR dizenin trim'lenmiş hâli ---- */
 const DG_I18N_EN={
+"PARK YÜZEYİ":"PARK SURFACE",
+"PARK YÜZEY ANALİZİ":"PARK SURFACE ANALYSIS",
+"Uydu taraması henüz yapılmadı. Ham 2021 sonucu aşağıda görüntülenebilir; tarama sınıfları kendiliğinden değiştirmez.":"No satellite scan yet. The raw 2021 result is available below; scanning does not change classes automatically.",
+"spektral eşleşme":"spectral agreement",
+"4 sınıf · görünüm yoğunluğu":"4 classes · display opacity",
+"NDVI ile yeşil alan yoğunluğu":"Greenness density by NDVI",
+"Göreli park içi sınıflar":"Relative classes within the park",
+"Vektör kanıtı":"Vector evidence",
+"Bina, su ve havuz sınırları ayrı gösterilir":"Building, water and pool boundaries are shown separately",
+"KAYDEDİLMEDİ · ÖNİZLEME":"UNSAVED · PREVIEW",
+"KAYITLI SONUÇ":"SAVED RESULT",
+"HAM 2021 KAYNAĞI":"RAW 2021 SOURCE",
+"ESA WorldCover · 10 m · kaynak karşılaştırması":"ESA WorldCover · 10 m · source comparison",
+"ONAYLI SAHA VERİSİ":"APPROVED FIELD DATA",
+"tür sıralaması":"species ranking",
 "Başarısız üretimler en fazla 3 kez otomatik yeniden denenir. Başarılı rapor üretildikten sonra Zenodo DOI kaydı otomatik başlatılır.":"Failed publication attempts are retried automatically up to 3 times. Zenodo DOI registration starts automatically after a successful report is produced.",
 "Tarama isteğe bağlıdır. Ham analizi doğrudan inceleyebilir veya tarayıp hassasiyet barlarıyla ayarlayabilirsiniz.":"Scanning is optional. Inspect the raw analysis directly, or scan and adjust the sensitivity sliders.",
 "Tarama tamamlandı. Ham sınıflar korundu; hassasiyet barlarıyla önizlemeyi ayarlayabilirsiniz.":"Scan completed. Raw classes are preserved; adjust the preview using the sensitivity sliders.",
