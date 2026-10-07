@@ -177,6 +177,11 @@ function dgS2ConfirmedExtreme(values){
  return sorted.length>=2?sorted[1]:null;
 }
 
+function dgS2VegetationSummary(evidence){
+ const dates=evidence?.dates instanceof Set?evidence.dates:new Set(evidence?.dates||[]);
+ return{ndviMedianYear:dgS2Median(evidence?.ndvi||[]),ndviObs:dates.size};
+}
+
 /* Planetary Computer baseline-change notebook + ESA PB04 radiometry.
  * DN=0 remains NoData. Asset scale/offset metadata takes precedence. */
 function dgS2Reflectance(raw,item,band){
@@ -388,6 +393,7 @@ async function dgS2Profile(cells,outer,opts){
       const c0=out[key];
       c0.ndviConfirmedYear=dgS2ConfirmedExtreme(evidence[key]?.ndvi||[]);
       c0.mndwiConfirmedYear=dgS2ConfirmedExtreme(evidence[key]?.mndwi||[]);
+      c0.ndviMedianYear=dgS2VegetationSummary(evidence[key]).ndviMedianYear;
       c0.yearObs=evidence[key]?.dates.size||0;
       const wm=waterMax[key];
       const summer=Number.isFinite(c0.mndwiMax)?c0.mndwiMax:null;
@@ -400,13 +406,22 @@ async function dgS2Profile(cells,outer,opts){
     }
   }
 
+  // Relative green-signal view can also be used for the recent-scene mode.
+  // Keep it as profile metadata only: it never changes the ESA class or area.
+  for(const key of Object.keys(out)){
+    const e=evidence[key];
+    const summary=dgS2VegetationSummary(e);
+    if(!Number.isFinite(out[key].ndviMedianYear))out[key].ndviMedianYear=summary.ndviMedianYear;
+    out[key].ndviObs=summary.ndviObs;
+  }
+
   return{
     cells:out,
     scenes:found.scenes.map(s=>({id:s.id,cloud:s.cloud,datetime:s.datetime,usedCells:s.usedCells||0})),
     waterScenes,
     range:found.range,
     radiometryVersion:"pb04-offset-v1",
-    evidenceVersion:"distinct-dates-index-median-confirmed-extremes-v2",
+    evidenceVersion:"distinct-dates-index-median-confirmed-extremes-v3-relative-ndvi",
     epsg,
     skipped,
     stats:{nCells:cells.length,nProfiled:nOk,nInsufficient:cells.length-nOk,nMissing:cells.length-Object.keys(acc).length}
