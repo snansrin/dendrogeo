@@ -1,6 +1,3 @@
-Warning: truncated output (original token count: 5898)
-Total output lines: 556
-
 /* DendroGeo · css/park-panel.css — park paneli + PNG seçenekleri stilleri (Faz 4)
  *
  * Bu kurallar eskiden gridplan.js içindeki ensurePngUiStyles() tarafından
@@ -432,7 +429,45 @@ Total output lines: 556
 .dg-sens-feature .dg-png-btn{width:auto}
 #lcSens .dg-sens-actions .dg-png-btn{width:auto;min-height:44px;flex:1 1 auto}
 .dg-sens-popup{font-size:.8rem;line-height:1.5}
-@media(max-width:640px){#lcSens{padding:10px}#lcSens .dg-sens-row{grid-template-columns:90px minmax(60px…898 tokens truncated…ight:14px;flex:0 0 14px;border:2px solid var(--surface);border-radius:50%;background:var(--paint-color);box-shadow:0 0 0 1px var(--paint-color)}
+@media(max-width:640px){#lcSens{padding:10px}#lcSens .dg-sens-row{grid-template-columns:90px minmax(60px,1fr) 84px;gap:6px}#lcSens .dg-sens-label{font-size:.76rem}#lcSens .dg-sens-count{font-size:.7rem}#v-map #map.surface-review-map{height:58vh!important;min-height:360px;max-height:560px}.dg-sens-adj{font-size:.73rem}}
+@media(max-height:500px){#v-map #map.surface-review-map{height:44vh!important;min-height:180px;max-height:300px}}
+
+#v-map.surface-review-active #parkScanCard{display:none!important}
+.dg-sens-map-tools{display:flex;align-items:center;gap:8px;margin:10px 0;flex-wrap:wrap}
+.dg-sens-map-tools select{flex:1;min-width:110px;max-width:220px;min-height:44px}
+
+#v-map.surface-review-active .live-map-tools,#v-map.surface-review-active #parkSurfaceAction,#v-map.surface-review-active #parkRasterExport{display:none}
+/* Native ranges must not inherit text-input padding or full-row width. */
+#lcSens .dg-sens-row{display:grid;grid-template-columns:104px minmax(0,1fr) 88px;gap:8px;flex-wrap:nowrap}
+#lcSens input.dg-sens-slider{width:100%;min-width:0;padding:0;border:0;background:transparent;border-radius:0;margin:0;min-height:44px;box-sizing:border-box}
+#lcSens .dg-sens-count{min-width:0;overflow-wrap:anywhere}
+#lcSens .dg-switch{width:38px;min-width:38px;padding:0}
+.dg-surface-stat{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;padding:6px 0;border-bottom:1px solid var(--line)}
+@media(max-width:640px){#lcSens .dg-sens-row{grid-template-columns:80px minmax(0,1fr) 76px;gap:6px}}
+#lcSens .dg-sens-label{width:auto;min-width:0}
+@media(max-width:640px){#lcSens .dg-sens-row{grid-template-columns:90px minmax(0,1fr) 80px}#lcSens .dg-sens-count{font-size:.68rem}}
+
+/* Compact summary bars share the map palette. */
+.dg-surface-stat{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:3px 8px;padding:5px 0;font-size:.72rem}
+.dg-surface-track{grid-column:1/-1;height:5px;border-radius:4px;background:var(--line);overflow:hidden}
+.dg-surface-track i{display:block;height:100%;border-radius:inherit}
+.dg-export-dialog{width:min(420px,calc(100% - 32px));max-height:calc(100dvh - 40px);overflow:auto;color:var(--ink);background:var(--surface);border:1px solid var(--line);margin:auto}
+.dg-export-dialog::backdrop{background:#0008}
+.dg-export-dialog .measure-share{padding:10px 0}
+
+
+/* Paint-style controls live directly below the marker refresh action. */
+#surfaceBrushTools:empty{display:none}
+.dg-paint-tools{margin:0 0 12px;padding:12px;background:var(--surface);border:1px solid var(--line);border-radius:var(--r);box-shadow:0 3px 14px rgba(15,23,42,.06)}
+.dg-paint-head{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.dg-paint-icon{display:grid;place-items:center;width:38px;height:38px;flex:0 0 38px;border-radius:11px;background:rgba(20,83,45,.09);font-size:1.2rem}
+.dg-paint-head>div{display:grid;gap:2px}.dg-paint-head strong{font-size:.9rem}.dg-paint-head small{color:var(--mut);font-size:.72rem;line-height:1.4}
+.dg-paint-mode{margin-left:auto;padding:4px 9px;border:1px solid var(--line);border-radius:999px;color:var(--mut);font-size:.68rem;white-space:nowrap}
+.dg-paint-mode.is-active{border-color:var(--green);color:var(--green);background:rgba(20,83,45,.08)}
+.dg-paint-row{display:flex;align-items:end;gap:12px;flex-wrap:wrap}
+.dg-paint-palette{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;flex:1;min-width:min(100%,360px)}
+.dg-paint-swatch{display:flex;align-items:center;gap:7px;min-width:0;min-height:40px;padding:6px 8px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--ink);font:inherit;font-size:.72rem;text-align:left;cursor:pointer}
+.dg-paint-swatch>i{width:14px;height:14px;flex:0 0 14px;border:2px solid var(--surface);border-radius:50%;background:var(--paint-color);box-shadow:0 0 0 1px var(--paint-color)}
 .dg-paint-swatch>span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.dg-paint-swatch.is-selected{border-color:var(--paint-color);box-shadow:inset 0 0 0 1px var(--paint-color);background:color-mix(in srgb,var(--paint-color) 9%,var(--surface))}
 .dg-paint-swatch:focus-visible{outline:3px solid var(--blue);outline-offset:2px}.dg-paint-swatch:disabled{opacity:.5;cursor:not-allowed}
 .dg-paint-size{width:96px;flex:0 0 96px}.dg-paint-size>span{display:block;margin:0 0 6px;color:var(--mut);font-size:.7rem;font-weight:700}
