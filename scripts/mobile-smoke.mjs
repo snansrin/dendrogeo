@@ -13,7 +13,7 @@ try{
    const viewport=innerWidth,body=document.body.scrollWidth,documentWidth=document.documentElement.scrollWidth;
    const view=document.getElementById('v-map'),map=document.getElementById('map'),viewStyle=view?.getAttribute('style'),mapStyle=map?.getAttribute('style'),mapClass=map?.className;
    if(view&&map){view.style.display='block';map.style.display='block';map.classList.add('surface-review-map');}
-   const mapHeight=map?map.getBoundingClientRect().height:0;
+   const mapHeight=map?parseFloat(getComputedStyle(map).height)||0:0;
    if(view){if(viewStyle===null)view.removeAttribute('style');else view.setAttribute('style',viewStyle);}
    if(map){if(mapStyle===null)map.removeAttribute('style');else map.setAttribute('style',mapStyle);map.className=mapClass;}
    const overflow=[...document.querySelectorAll('body *')].map(el=>{
