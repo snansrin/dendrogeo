@@ -429,8 +429,8 @@
 .dg-sens-feature .dg-png-btn{width:auto}
 #lcSens .dg-sens-actions .dg-png-btn{width:auto;min-height:44px;flex:1 1 auto}
 .dg-sens-popup{font-size:.8rem;line-height:1.5}
-@media(max-width:640px){#lcSens{padding:10px}#lcSens .dg-sens-row{grid-template-columns:90px minmax(60px,1fr) 84px;gap:6px}#lcSens .dg-sens-label{font-size:.76rem}#lcSens .dg-sens-count{font-size:.7rem}#v-map #map.surface-review-map{height:42vh!important;min-height:260px;max-height:460px}.dg-sens-adj{font-size:.73rem}}
-@media(max-height:500px){#v-map #map.surface-review-map{height:35vh!important;min-height:150px}}
+@media(max-width:640px){#lcSens{padding:10px}#lcSens .dg-sens-row{grid-template-columns:90px minmax(60px,1fr) 84px;gap:6px}#lcSens .dg-sens-label{font-size:.76rem}#lcSens .dg-sens-count{font-size:.7rem}#v-map #map.surface-review-map{height:58vh!important;min-height:360px;max-height:560px}.dg-sens-adj{font-size:.73rem}}
+@media(max-height:500px){#v-map #map.surface-review-map{height:44vh!important;min-height:180px;max-height:300px}}
 
 #v-map.surface-review-active #parkScanCard{display:none!important}
 .dg-sens-map-tools{display:flex;align-items:center;gap:8px;margin:10px 0;flex-wrap:wrap}
