@@ -180,33 +180,3 @@ jobs:
               sys.exit(1)
           print('✅ Canlı site depoyla birebir aynı.')
           PY
-
-  gis_mobile_boundary_final_builder:
-    name: GIS mobile boundary and 4-mode PNG final QA
-    if: github.event_name == 'pull_request' && github.head_ref == 'fix/gis-png-basemaps-building-drawflow-20261008'
-    runs-on: ubuntu-latest
-    permissions:
-      contents: write
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          ref: fix/gis-png-basemaps-building-drawflow-20261008
-          fetch-depth: 0
-      - uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-      - run: npm ci
-      - name: Refresh static hashes and test locked source
-        run: |
-          npm run build
-          npm run check
-      - name: Restore pristine CI before committing index
-        run: |
-          git fetch origin main
-          git show origin/main:.github/workflows/ci.yml > .github/workflows/ci.yml
-          git add index.html .github/workflows/ci.yml
-          git config user.name "DendroGeo GIS QA"
-          git config user.email "gis-ui-repair@users.noreply.github.com"
-          git commit -m "build(gis): update versions for mobile quick boundary and basemap PNG"
-          git pull --rebase origin fix/gis-png-basemaps-building-drawflow-20261008
-          git push origin HEAD:fix/gis-png-basemaps-building-drawflow-20261008
