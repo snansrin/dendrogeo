@@ -282,7 +282,7 @@
     const mapColor=fill.style?.backgroundColor;
     if(mapColor)row.style.setProperty("--dg-ux-surface-color",mapColor);
     const original=value.textContent.trim();
-    const match=original.match(/^(.*?)\s*·\s*(%[\\d.,]+)$/);
+    const match=original.match(/^(.*?)\s*·\s*(%[0-9.,]+)$/);
     if(match){
      value.textContent=match[1]+" · ";
      const pct=document.createElement("span");pct.className="dg-ux-surface-percentage";
