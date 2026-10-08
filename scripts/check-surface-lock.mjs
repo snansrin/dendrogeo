@@ -11,7 +11,7 @@ import {join,resolve} from 'node:path';
 
 export const SURFACE_LOCK_ID='DG-SURFACE-LOCK-2026-10-09';
 export const APPROVED_COMMIT='ffd21c01ba55e013b2ff65ecf959f34c34ded9dd';
-export const PINNED_MANIFEST_BLOB='87b1fb2345e20099ee332db59fba6b2a89c5cf42';
+export const PINNED_MANIFEST_BLOB='e828bc1e53d0ed519efeb89c7bb8b2dbcb1c0c54';
 const PROJECT_ROOT=fileURLToPath(new URL('../',import.meta.url));
 const MANIFEST='docs/surface-engine-lock.json';
 
