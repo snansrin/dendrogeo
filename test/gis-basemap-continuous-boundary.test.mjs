@@ -91,8 +91,8 @@ test('hard/building scientific IDs and colors are locked; darker building is pre
  assert.match(source,/building:"#475569"/);
  assert.match(exporter,/const BUILDING_COLOR="#334155"/);
  assert.match(ui,/const BUILDING_PRESENTATION_COLOR="#334155"/);
- assert.match(ui,/item\.cls==="building"\?BUILDING_PRESENTATION_COLOR/);
- assert.match(exporter,/item\.cls==="building"\?BUILDING_COLOR/);
+ assert.match(ui,/type==="building"\?BUILDING_PRESENTATION_COLOR/);
+ assert.match(exporter,/type==="building"\?BUILDING_COLOR/);
  assert.doesNotMatch(ui,/rec\.corrections\s*=|\.acceptedAreas\s*=|DG_SENS_COLORS\s*=/);
  assert.doesNotMatch(exporter,/dgSensSave\(|DG_SENS_COLORS\s*=|\.acceptedAreas\s*=/);
 });
@@ -193,7 +193,7 @@ test('drawing dock shows the checkmark only at 4 corners and places class select
 
 test('verified vector PNG preserves full-strength locked green, hard, water and bare hues',()=>{
  const exporter=load('src/ui/gis-export.js'),workspace=load('src/ui/gis-workspace.js');
- assert.match(exporter,/basemap==="vector"\?1:Math\.max\(\.35,/);
+ assert.match(exporter,/drawVerifiedFeatures\(g,pr,exact,dict\)/);
  assert.match(exporter,/building:\{color:"#334155",label:"Bina"\}/);
  assert.match(exporter,/hard:\{color:"#64748b",label:"Sert zemin"\}/);
  assert.match(exporter,/water:\{color:"#3b82f6",label:"Su"\}/);

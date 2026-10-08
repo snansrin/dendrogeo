@@ -353,8 +353,8 @@
   const defaults={"Yeşil alan":"green","Su":"water","Sert zemin":"hard","Bina":"building","Havuz":"pool","Çıplak zemin":"bare","Diğer":"other"};
   for(const row of rows){
    const label=row.querySelector?.(":scope > span");
-   // 'Diğer' is the underlying unclassified residual, not a user-facing
-   // editable cover class. Keep it in area accounting/report records.
+   // Historical scientific 'other' remains in data/QA, but its nearest
+   // land-cover colour is applied in the map; no extra class is added to UI.
    if(label?.textContent?.trim()==="Diğer"){row.remove();continue;}
    const value=row.querySelector?.(":scope > b");
    const fill=row.querySelector?.(":scope > .dg-surface-track > i");
@@ -495,6 +495,7 @@
   const ha=value=>(Number(value||0)/10000).toFixed(3);
   const summary=(state.editing?"Önizleme":"Kayıtlı sonuç")+" · "+
    keys.filter(k=>Number(k==="water"?combined.water:areas[k])>0)
+    .filter(k=>k!=="other")
     .map(k=>label(k)+": "+ha(k==="water"?combined.water:areas[k])+" ha").join(" · ");
   const node=typeof document.querySelector==="function"?document.querySelector("#dgSensSummary"):null;
   if(node&&node.textContent!==summary)node.textContent=summary;
@@ -534,9 +535,17 @@
   // Map appearance only: legacy pool footprints are drawn as Su, but stored
   // feature identities, geometry and scientific partition remain unchanged.
   const paths=state?.displayPaths||[];
-  for(const item of paths){
-   const color=item.cls==="pool"?"#3b82f6":item.cls==="building"?BUILDING_PRESENTATION_COLOR:null;
+  const nearest=window.DG_GIS_PNG_EXPORT?.nearestPresentationTypes;
+  const paint=typeof nearest==="function"?nearest(state?.displayFeatures):[];
+  const opacity=Math.max(0,Math.min(1,(Number(state?.opacity)||65)/100));
+  for(let i=0;i<paths.length;i++){
+   const item=paths[i],type=item.cls==="other"?paint[i]:item.cls;
+   const color=type==="water"||type==="pool"?"#3b82f6":
+    type==="building"?BUILDING_PRESENTATION_COLOR:
+    type&&type!=="other"?(typeof DG_SENS_COLORS!=="undefined"?DG_SENS_COLORS[type]:null):null;
    if(color&&item.poly?.options?.fillColor!==color)item.poly.setStyle?.({fillColor:color});
+   if(item.cls==="other"&&color&&item.poly?.options?.fillOpacity!==opacity)
+    item.poly.setStyle?.({fillOpacity:opacity});
   }
  }
  let popupWaterMap=null;
@@ -582,8 +591,8 @@
   const resume=()=>{
    if(token!==pendingBoundaryRestart||state.record!==record||state.epoch!==epoch||
       state.rawView||!editorActive()||state.draw)return;
-   if(state.busy||state.saving||state.exporting){
-    if(++attempts<240)setTimeout(resume,250);
+   if(state.busy||state.saving||state.mergeBusy||state.exporting){
+    if(++attempts<140)setTimeout(resume,420);
     return;
    }
    if(typeof dgSensDrawStart!=="function")return;
@@ -593,7 +602,7 @@
    if(typeof dgSensCloseMenus==="function")dgSensCloseMenus();
    enqueue();
   };
-  setTimeout(resume,250);
+  setTimeout(resume,420);
   return true;
  }
  function syncQuickBoundary(){
@@ -639,6 +648,14 @@
   for(const slider of sliders)slider.style?.setProperty?.("--dg-ux-slider-fill",Math.max(0,Math.min(100,Number(slider.value)||0))+"%");
  }
  function sync(){
+  // During hand drawing/repartition the locked engine recreates the rail for
+  // every vertex. Running the full GIS panels + NDVI tally per mutation caused
+  // long main-thread stalls. Keep only the small drawing dock reactive here.
+  const state=window.DG_LC_SENS?.state;
+  if(state?.draw||state?.busy||state?.saving||state?.mergeBusy){
+   syncQuickBoundary();
+   return;
+  }
   syncPark();
   syncBrushChoices();
   syncWaterBoundary();

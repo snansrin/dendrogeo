@@ -204,7 +204,7 @@ test('mobile menu and relative NDVI status remain visible without editing locked
  assert.match(work,/typeof dgSensFocus==="function"\)dgSensFocus\(null\)/);
 });
 
-test('Other is hidden only from review rows, without removing its area from saved analysis',()=>{
+test('Nearest display coloring hides redundant Other label without changing its scientific area',()=>{
  const work=load('src/ui/gis-workspace.js');
  const science=load('src/ui/lc-sens.js');
  assert.match(work,/if\(label\?\.textContent\?\.trim\(\)==="Diğer"\)\{row\.remove\(\);continue;\}/);
@@ -345,7 +345,7 @@ test('boundary selection and report sidecar present pool as Su without erasing i
  assert.match(work,/function normalizeWaterText\(root\)/);
  assert.match(png,/k==="water"\?Number\(areas\.pool\|\|0\):0/);
  assert.match(png,/showNdvi\?await waitVegetation\(sens,30\):\[\]/);
- assert.match(png,/item\.cls===\"pool\"\?\"#3b82f6\"/);
+ assert.match(png,/type==="water"\|\|type==="pool"\?"#3b82f6"/);
  assert.match(load('src/services/lc-review.js'),/pool:\{group:"pool",label:"Havuz \/ süs havuzu"\}/);
 });
 

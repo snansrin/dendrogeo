@@ -115,6 +115,89 @@
   ctx.globalAlpha=1;
   return true;
  }
+
+ // Presentation-only neighbour tint. Scientific type/areas remain immutable.
+ const nearestPresentationCache=new WeakMap();
+ const DISPLAY_CLASSES=new Set(["green","water","hard","bare","building","pool"]);
+ function nearestPresentationTypes(features){
+  if(!Array.isArray(features))return [];
+  const cached=nearestPresentationCache.get(features);if(cached)return cached;
+  const boxes=features.map(feature=>{
+   const poly=feature?.geometry?.type==="MultiPolygon"?feature.geometry.coordinates:
+    feature?.geometry?.type==="Polygon"?[feature.geometry.coordinates]:[];
+   let west=Infinity,east=-Infinity,south=Infinity,north=-Infinity;
+   for(const p of poly||[])for(const ring of p||[])for(const xy of ring||[]){
+    if(!Array.isArray(xy)||!Number.isFinite(xy[0])||!Number.isFinite(xy[1]))continue;
+    west=Math.min(west,xy[0]);east=Math.max(east,xy[0]);
+    south=Math.min(south,xy[1]);north=Math.max(north,xy[1]);
+   }
+   return west<=east&&south<=north?{west,east,south,north,lon:(west+east)/2,lat:(south+north)/2}:null;
+  });
+  const known=[];
+  for(let i=0;i<features.length;i++){
+   const cls=features[i]?.properties?.class;
+   if(boxes[i]&&DISPLAY_CLASSES.has(cls))known.push({box:boxes[i],cls:cls==="pool"?"water":cls});
+  }
+  const out=features.map((f,i)=>{
+   const cls=f?.properties?.class;
+   if(cls!=="other"&&cls!=="nodata"&&cls!=null)return cls==="pool"?"water":cls;
+   const target=boxes[i];if(!target||!known.length)return "other";
+   const scale=Math.max(.05,Math.cos(target.lat*Math.PI/180));
+   let winner="other",best=Infinity,tieMin=Infinity;
+   for(const candidate of known){
+    const box=candidate.box;
+    // Projected distance to nearest envelope, not to a remote large-polygon centroid.
+    const dx=Math.max(box.west-target.lon,0,target.lon-box.east)*scale;
+    const dy=Math.max(box.south-target.lat,0,target.lat-box.north);
+    const score=dx*dx+dy*dy;
+    const cx=(target.lon-box.lon)*scale,cy=target.lat-box.lat;
+    const tie=cx*cx+cy*cy;
+    if(score<best||(score===best&&tie<tieMin)){
+     best=score;tieMin=tie;winner=candidate.cls;
+    }
+   }
+   return winner;
+  });
+  nearestPresentationCache.set(features,out);return out;
+ }
+ // Exact review geometry, not the transient Leaflet displayPaths (which may be
+ // filtered/empty on a verified map). Pure canvas rendering: no edits to data.
+ function drawVerifiedFeatures(ctx,pr,features,dict){
+  let painted=0;
+  const visual=nearestPresentationTypes(features);
+  for(let i=0;i<(features||[]).length;i++){
+   const feature=features[i],name=visual[i];
+   const polys=feature?.geometry?.type==="MultiPolygon"?feature.geometry.coordinates:null;
+   if(!polys?.length)continue;
+   ctx.beginPath();
+   let paths=0;
+   for(const poly of polys)for(const ring of poly||[]){
+    if(!Array.isArray(ring)||ring.length<3)continue;
+    for(let i=0;i<ring.length;i++){
+     const p=ring[i];if(!Array.isArray(p)||p.length<2)continue;
+     if(i===0)ctx.moveTo(pr.x(p[0]),pr.y(p[1]));
+     else ctx.lineTo(pr.x(p[0]),pr.y(p[1]));
+    }
+    ctx.closePath();paths++;
+   }
+   if(!paths)continue;
+   // An unresolved gap is tinted like its nearest valid class for display only.
+   ctx.fillStyle=name==="building"?BUILDING_COLOR:name==="water"?"#3b82f6":
+    (typeof DG_SENS_COLORS!=="undefined"?DG_SENS_COLORS[name]:null)||dict[name]?.color||"#94a3b8";
+   ctx.globalAlpha=1;
+   ctx.fill("evenodd");ctx.globalAlpha=1;painted++;
+  }
+  return painted;
+ }
+ async function resolveVerifiedDisplayFeatures(sens){
+  // The locked exporter reads fresh, resolved visual shapes. Reuse its exact
+  // read-only public functions; a cached Leaflet view is not authoritative.
+  if(typeof dgSensParts==="function"&&typeof dgSensVisualResult==="function"){
+   const parts=dgSensParts(),job=await dgSensVisualResult(parts);
+   if(Array.isArray(job?.displayFeatures)&&job.displayFeatures.length)return job.displayFeatures;
+  }
+  return Array.isArray(sens?.displayFeatures)?sens.displayFeatures:[];
+ }
  function drawRawPatches(ctx,pr,patches,dict,opacity=.52){
   let painted=0;
   for(const patch of patches||[]){
@@ -213,8 +296,12 @@
   if(opts.cover){
    const display=Array.isArray(sens?.displayPaths)&&!sens.rawView?sens.displayPaths:[];
    if(display.length){
-    for(const item of display){
-     if(drawLeaflet(ctx,pr,item.poly,Math.max(.28,(sens.opacity||65)/100),item.cls==="building"?BUILDING_COLOR:item.cls==="pool"?"#3b82f6":null))count++;
+    const nearest=nearestPresentationTypes(sens?.displayFeatures);
+    for(let i=0;i<display.length;i++){
+     const item=display[i],type=item.cls==="other"?nearest[i]:item.cls;
+     const color=type==="building"?BUILDING_COLOR:type==="water"||type==="pool"?"#3b82f6":
+      type&&type!=="other"?(typeof DG_SENS_COLORS!=="undefined"?DG_SENS_COLORS[type]:null)||dict[type]?.color:null;
+     if(drawLeaflet(ctx,pr,item.poly,Math.max(.28,(sens.opacity||65)/100),color))count++;
     }
    }else{
     const last=window.DG_LANDCOVER?.getLast?.();
@@ -294,7 +381,8 @@
   if(!rec||typeof PARK_POLY==="undefined"||!Array.isArray(PARK_POLY)||!PARK_POLY.length){
    notify("Önce parkın arazi örtüsü analizini açın.","warn");return false;
   }
-  const basemap=baseChoice();
+  // Doğrulanmış Harita is a scientific cartographic plate, not the PNG İndir
+  // tile screenshot. Keep its original full-color map appearance.
   const showNdvi=!!sens.vegetationView&&!sens.rawView&&!!layers.surface;
   if(showNdvi&&typeof dgSensVegetationTiers!=="function"){
    notify("Göreli NDVI sınıfları bu oturumda bulunamadı.","warn");return false;
@@ -357,14 +445,13 @@
   for(const ring of PARK_POLY)outline(g,pr,ring);
   if(typeof PARK_HOLES!=="undefined")for(const ring of PARK_HOLES||[])outline(g,pr,ring);
   g.clip("evenodd");
-  await paintBaseTiles(g,pr,bounds,basemap);
   let painted=0;
   if(layers.surface){
-   for(const item of sens.displayPaths||[])
-    if(drawLeaflet(g,pr,item.poly,basemap==="vector"?1:Math.max(.35,(sens.opacity||65)/100),item.cls==="building"?BUILDING_COLOR:item.cls==="pool"?"#3b82f6":null))painted++;
+   const exact=await resolveVerifiedDisplayFeatures(sens);
+   painted=drawVerifiedFeatures(g,pr,exact,dict);
    if(!painted){
-    const last=window.DG_LANDCOVER?.getLast?.();
-    painted=drawRawPatches(g,pr,last?.patches||last?.report?.patches||[],dict,basemap==="vector"?1:.65);
+    notify("Kayıtlı yüzey geometrisi henüz hazır değil; boş veya eksik Doğrulanmış Harita üretilmedi.","warn");
+    return false;
    }
    // NDVI is drawn after regular green class (and before grid/waypoints),
    // so only observed green cells become sparse / moderate / dense.
@@ -446,7 +533,7 @@
   g.fillStyle=GREEN;g.fillRect(0,CH-70,CW,70);
   g.fillStyle="#cfe3d3";g.font="19px Arial";
   g.fillText(showNdvi?"Raster + kullanıcı kararları; NDVI yeşil alanda göreli karşılaştırmadır.":"Raster + doğrulanmış kullanıcı kararları; su yüzeyleri tek sınıfta sunulur.",40,CH-54,CW-80);
-  g.fillText(BASE_ATTR[basemap]+" · ESA WorldCover (CC BY 4.0) · "+String(rec.fingerprint||"").slice(0,8),40,CH-26,CW-80);
+  g.fillText("ESA WorldCover 2021 v200 (CC BY 4.0) · "+String(rec.fingerprint||"").slice(0,8)+" · CC BY-NC 4.0",40,CH-26,CW-80);
   return await new Promise(resolve=>canvas.toBlob(blob=>{
    if(!blob){notify("Doğrulanmış harita PNG üretilemedi.","err");resolve(false);return;}
    const uri=URL.createObjectURL(blob),a=document.createElement("a");
@@ -494,6 +581,6 @@
   event.stopImmediatePropagation();
   exportMap();
  },true);
- window.DG_GIS_PNG_EXPORT={download:exportMap,downloadVerified:exportVerified,classes,eachRing,baseTilePlan};
+ window.DG_GIS_PNG_EXPORT={download:exportMap,downloadVerified:exportVerified,classes,eachRing,baseTilePlan,nearestPresentationTypes};
  window.downloadParkImage=exportMap;
 })();
