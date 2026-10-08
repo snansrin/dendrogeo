@@ -230,6 +230,7 @@ test('verified NDVI PNG uses 1240x1560 official layout and paints observed green
  assert.match(src,/dgSensEditSummary\(rec\)/);
  assert.match(src,/dgSensFeatures\(\)\.length/);
  assert.match(src,/NDVI katmanı tek başına doğrulanmış harita sayılmaz/);
+ assert.match(src,/const ndviPolys=await waitVegetation\(sens,30\)/);
  assert.match(src,/renderVerified\(layers\)/);
 });
 
