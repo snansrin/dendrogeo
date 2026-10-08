@@ -555,6 +555,85 @@
   }
   normalizeWaterText(root.querySelector(".dg-sens-popup"));
  }
+
+ const DRAW_CHOICES=[["water","Su"],["green","Yeşil alan"],["hard","Sert zemin"],["building","Bina"],["bare","Çıplak zemin"]];
+ function chooseQuickBoundary(type){
+  if(!DRAW_CHOICES.some(choice=>choice[0]===type))return false;
+  const state=window.DG_LC_SENS?.state;
+  if(!state?.draw||state.busy||state.saving||state.rawView)return false;
+  if(typeof dgSensSetDrawType==="function")dgSensSetDrawType(type);
+  // An unfinished drawing is an ephemeral preview; the new choice applies
+  // to this polygon, never to saved features or raster-cell decisions.
+  state.draw.type=type;
+  if(typeof dgSensDrawRender==="function")dgSensDrawRender();
+  if(typeof dgSensRenderPaintTools==="function")dgSensRenderPaintTools();
+  enqueue();
+  return true;
+ }
+ function finishAndContinueBoundary(){
+  const state=window.DG_LC_SENS?.state;
+  if(!state?.draw||state.draw.ring.length<4||state.busy||state.saving||
+    typeof dgSensDrawFinish!=="function")return false;
+  const drawing=state.draw,record=state.record,epoch=state.epoch;
+  const token=++pendingBoundaryRestart;
+  dgSensDrawFinish(); // the unchanged core clips, validates, saves and repartitions
+  if(state.draw===drawing){return false;} // core rejected a self-intersecting polygon
+  let attempts=0;
+  const resume=()=>{
+   if(token!==pendingBoundaryRestart||state.record!==record||state.epoch!==epoch||
+      state.rawView||!editorActive()||state.draw)return;
+   if(state.busy||state.saving||state.exporting){
+    if(++attempts<240)setTimeout(resume,250);
+    return;
+   }
+   if(typeof dgSensDrawStart!=="function")return;
+   dgSensDrawStart();
+   // The old Start button opens the large boundary panel. The quick workflow
+   // closes it immediately so the next polygon can be drawn on the map.
+   if(typeof dgSensCloseMenus==="function")dgSensCloseMenus();
+   enqueue();
+  };
+  setTimeout(resume,250);
+  return true;
+ }
+ function syncQuickBoundary(){
+  const host=$("surfaceMapTools"),state=window.DG_LC_SENS?.state;
+  const draw=state?.draw;
+  if(!host||!draw||!editorActive()||typeof document.createElement!=="function"){
+   host?.querySelector?.("#dgUxBoundaryDock")?.remove?.();return;
+  }
+  let dock=host.querySelector?.("#dgUxBoundaryDock");
+  if(!dock){
+   dock=el("div","dg-ux-boundary-dock");dock.id="dgUxBoundaryDock";
+   dock.setAttribute("role","group");dock.setAttribute("aria-label","Hızlı sınır çizimi");
+   const chooser=el("select","dg-ux-boundary-choice");chooser.id="dgUxBoundaryClass";
+   chooser.setAttribute("aria-label","Çizilecek sınır sınıfı");
+   for(const [value,label] of DRAW_CHOICES){
+    const option=document.createElement("option");option.value=value;option.textContent=label;
+    chooser.append(option);
+   }
+   chooser.addEventListener("change",()=>chooseQuickBoundary(chooser.value));
+   const finish=el("button","dg-png-btn primary sm dg-ux-boundary-finish","✓");
+   finish.id="dgUxBoundaryFinish";finish.type="button";
+   finish.setAttribute("aria-label","Dört köşe tamamlandı: sınırı kaydet ve çizime devam et");
+   finish.title="Sınırı tamamla ve yeni çizime devam et";
+   finish.addEventListener("click",()=>finishAndContinueBoundary());
+   const info=el("span","dg-ux-boundary-count");
+   info.id="dgUxBoundaryCount";info.setAttribute("aria-live","polite");
+   dock.append(chooser,finish,info);
+   dock.addEventListener("click",event=>event.stopPropagation());
+   dock.addEventListener("pointerdown",event=>event.stopPropagation());
+   host.append(dock);
+  }
+  const current=DRAW_CHOICES.some(choice=>choice[0]===draw.type)?draw.type:"water";
+  const chooser=dock.querySelector("#dgUxBoundaryClass");
+  if(chooser&&chooser.value!==current)chooser.value=current;
+  const count=draw.ring.length,finish=dock.querySelector("#dgUxBoundaryFinish");
+  if(finish){
+   finish.hidden=count<4;finish.disabled=count<4||state.busy||state.saving;
+  }
+  txt(dock.querySelector("#dgUxBoundaryCount"),count+" köşe · "+(count<4?"4 köşeden sonra ✓":"✓ hazır"));
+ }
  function syncSliderPaint(){
   const sliders=$("lcSens")?.querySelectorAll?.('input.dg-sens-slider[id^="dgSensRange-"]')||[];
   for(const slider of sliders)slider.style?.setProperty?.("--dg-ux-slider-fill",Math.max(0,Math.min(100,Number(slider.value)||0))+"%");
@@ -564,6 +643,7 @@
   syncBrushChoices();
   syncWaterBoundary();
   syncWaterPopup();
+  syncQuickBoundary();
   syncSurfaceReport();
   syncWaterSurfaceRows();
   syncWaterStatusSummary();
@@ -581,8 +661,8 @@
   if(!bar||!$("parkInfo")||!$("liveAnalysis"))return;
   if(typeof MutationObserver!=="function")return; // test/no-DOM fallback; browsers provide this API.
   observer=new MutationObserver(enqueue);
-  for(const id of ["surfaceMenuBar","parkInfo","liveAnalysis","landCoverReport","lcSens"]){
-   const node=$(id);if(node)observer.observe(node,{childList:true,subtree:true});
+  for(const id of ["surfaceMenuBar","parkInfo","liveAnalysis","landCoverReport","lcSens","surfaceMapTools"]){
+   const node=$(id);if(node)observer.observe(node,{childList:true,subtree:id!=="surfaceMapTools"});
   }
   bar.addEventListener("toggle",event=>{
    if(event.target?.matches?.(":scope > .dg-editor-menu")&&event.target.open)openMenu(event.target);
@@ -594,6 +674,12 @@
    const input=e.target;
    if(input?.matches?.('#lcSens input.dg-sens-slider[id^="dgSensRange-"]'))
     input.style.setProperty("--dg-ux-slider-fill",Math.max(0,Math.min(100,Number(input.value)||0))+"%");
+  },true);
+  // A user may abandon an automatic continuation while the original
+  // repartition/save is still in flight.
+  document.addEventListener("click",event=>{
+   if(event.target?.closest?.('button[onclick*="dgSensHandMode"],button[onclick*="dgSensDrawCancel"]'))
+    pendingBoundaryRestart++;
   },true);
   // If a previous class filter excludes green polygons, NDVI would appear in
   // the report but be invisible on the actual map. Clear only this view filter
@@ -608,6 +694,6 @@
   },true);
   sync();
  }
- window.DG_GIS_WORKSPACE_UI={sync,closeTool,activateTool,pathLength,areaMeters,waterPresentationAreas};
+ window.DG_GIS_WORKSPACE_UI={sync,closeTool,activateTool,pathLength,areaMeters,waterPresentationAreas,chooseQuickBoundary,finishAndContinueBoundary,syncQuickBoundary};
  if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",init,{once:true});else init();
 })();
