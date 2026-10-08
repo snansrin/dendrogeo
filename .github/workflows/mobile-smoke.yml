@@ -8,6 +8,7 @@ on:
       - 'partials/**'
       - 'scripts/mobile-smoke.mjs'
       - 'scripts/gis-mobile-qa.mjs'
+      - 'scripts/gis-output-mobile-qa.mjs'
       - 'css/gis-workspace.css'
       - '.github/workflows/mobile-smoke.yml'
   workflow_dispatch: {}
@@ -30,6 +31,7 @@ jobs:
           python3 -m http.server 8765 --bind 127.0.0.1 >/tmp/mobile-server.log 2>&1 &
           node scripts/mobile-smoke.mjs
           node scripts/gis-mobile-qa.mjs
+          node scripts/gis-output-mobile-qa.mjs
       - uses: actions/upload-artifact@v4
         if: always()
         with:

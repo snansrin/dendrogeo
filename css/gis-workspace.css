@@ -501,3 +501,157 @@
 @media (prefers-reduced-motion:reduce){
   #v-map #surfaceMenuBar>.dg-editor-menu>summary{transition:none}
 }
+
+/* GIS mobile reliability repairs · output/status styling only.
+   Only the presentation plane changes; accepted raster and thresholds do not. */
+#toastWrap{
+  z-index:2400; /* Above surface editor 1100, its mobile menu 1200 and map 1000. */
+  width:min(380px,calc(100vw - 20px));
+  max-width:calc(100vw - 20px);
+  box-sizing:border-box;
+}
+#toastWrap .toast{
+  width:100%;min-width:0;max-width:100%;box-sizing:border-box;
+  overflow-wrap:anywhere;word-break:normal;
+}
+#toastWrap .toast .msg{min-width:0;overflow-wrap:anywhere;white-space:normal}
+#toastWrap .toast .x{min-width:24px;flex:0 0 auto}
+#v-map #parkInfo > div[style*="grid-template-columns"]{
+  display:grid!important;
+  grid-template-columns:minmax(0,1fr)!important;
+  max-width:100%;min-width:0;
+}
+#v-map #parkInfo #parkSurfaceAction>.dg-png-sub:last-child{
+  flex:1 1 100%;
+  display:block;width:100%;min-width:0;max-width:100%;
+  overflow-wrap:anywhere;word-break:normal;white-space:normal;
+  hyphens:auto;
+}
+#v-map #parkInfo #parkSurfaceAction>.dg-png-sub:last-child *,
+#v-map #parkInfo .dg-png-sub{
+  min-width:0;max-width:100%;overflow-wrap:anywhere;white-space:normal;
+}
+#v-map #parkInfo #parkSurfaceAction .dg-png-badge{
+  max-width:100%;min-width:0;word-break:break-word;white-space:normal;
+}
+#v-map #landCoverReport{
+  width:100%;max-width:100%;min-width:0;
+  box-sizing:border-box;
+  padding:12px;
+  overflow-wrap:anywhere;white-space:normal;
+  border-radius:12px;
+}
+#v-map #landCoverReport > b{display:block;margin-bottom:10px;line-height:1.4}
+#v-map #landCoverReport > div[style*="border:1px"]{
+  min-width:0;max-width:100%;box-sizing:border-box;
+  padding:10px!important;margin:10px 0!important;
+}
+#v-map #landCoverReport > div[style*="border:1px"] > div{
+  min-width:0;max-width:100%;
+}
+#v-map #landCoverReport > div[style*="border:1px"] > div > div[style*="display:flex"]{
+  min-width:0;max-width:100%;
+}
+#v-map #landCoverReport [style*="font-size:.66rem"]{
+  overflow-wrap:anywhere;white-space:normal;
+}
+#v-map #landCoverReport .btn{
+  min-height:44px;
+}
+#v-map #lcSens .dg-sens-head,
+#v-map #lcSens .dg-sens-actions,
+#v-map #lcSens .dg-sens-actions .dg-png-btn{
+  min-width:0;max-width:100%;box-sizing:border-box;
+}
+#v-map #lcSens .dg-sens-actions .dg-png-btn{
+  overflow-wrap:anywhere;white-space:normal;
+}
+@media (max-width:700px){
+  #toastWrap{
+    top:max(68px,env(safe-area-inset-top) + 58px);
+    right:10px;left:10px;width:auto;
+    max-width:none;max-height:calc(100dvh - 94px);
+    overflow-y:auto;overscroll-behavior:contain;
+  }
+  #v-map #parkInfo{overflow:hidden;min-width:0}
+  #v-map #parkInfo>div[style*="grid-template-columns"]{
+    grid-template-columns:minmax(0,1fr)!important;
+  }
+  #v-map #parkInfo #parkSurfaceAction{
+    padding:10px;overflow-wrap:anywhere;
+  }
+  #v-map #parkInfo #parkSurfaceAction>.dg-png-sub:last-child{
+    font-size:.72rem!important;line-height:1.6;
+  }
+  /* Locked WorldCover report renders fixed 106px/108px flex items.
+     Reflow those rows into label/value + full-width evidence bar. */
+  #v-map #landCoverReport > div[style*="border:1px"] > div > div[style*="display:flex"]{
+    display:grid!important;grid-template-columns:minmax(0,1fr) auto;
+    align-items:center;gap:6px 8px;
+  }
+  #v-map #landCoverReport > div[style*="border:1px"] > div > div[style*="display:flex"] > div:first-child{
+    grid-column:1;grid-row:1;flex:auto!important;
+    min-width:0;max-width:100%;overflow-wrap:anywhere;
+  }
+  #v-map #landCoverReport > div[style*="border:1px"] > div > div[style*="display:flex"] > div:nth-child(2){
+    grid-column:1/-1;grid-row:2;min-width:0;
+    height:11px!important;
+  }
+  #v-map #landCoverReport > div[style*="border:1px"] > div > div[style*="display:flex"] > div:nth-child(3){
+    grid-column:2;grid-row:1;flex:auto!important;
+    white-space:normal;min-width:0;
+    max-width:135px;font-variant-numeric:tabular-nums;
+  }
+  #v-map #landCoverReport > div[style*="border:1px"] > div > div[style*="font-size:.66rem"]{
+    margin-left:0!important;padding:5px 0 8px 0!important;
+    white-space:normal;overflow-wrap:anywhere;
+    line-height:1.5;
+  }
+  #v-map #landCoverReport > div[style*="display:flex"] > .btn{
+    flex:1 1 135px;
+    white-space:normal;text-align:center;
+  }
+  #v-map #lcSens .dg-sens-actions{
+    display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;
+  }
+  #v-map #lcSens .dg-sens-actions .dg-png-btn{
+    width:100%;min-width:0;min-height:44px;
+    justify-content:center;text-align:center;
+    padding:10px 8px;
+  }
+}
+@media (max-width:365px){
+  #v-map #lcSens .dg-sens-actions{grid-template-columns:minmax(0,1fr)}
+  #v-map #parkInfo #parkSurfaceAction>.dg-png-sub:last-child{font-size:.69rem!important}
+}
+
+/* Exact mobile containment for the scientifically worded raster explanation.
+   Some legacy .dg-png-card flex declarations can otherwise retain row placement
+   despite the parent grid resizing. Block layout does not change its controls. */
+@media (max-width:700px){
+ #v-map #parkInfo #parkSurfaceAction{
+  display:block!important;
+  min-width:0!important;
+  max-width:100%!important;
+  width:100%!important;
+  box-sizing:border-box!important;
+ }
+ #v-map #parkInfo #parkSurfaceAction>.dg-png-head,
+ #v-map #parkInfo #parkSurfaceAction>.dg-png-btn,
+ #v-map #parkInfo #parkSurfaceAction>.dg-png-sub{
+  display:block!important;
+  flex:none!important;
+  width:100%!important;
+  min-width:0!important;
+  max-width:100%!important;
+  box-sizing:border-box!important;
+  margin:0 0 10px 0!important;
+  overflow-wrap:anywhere!important;
+  word-break:normal!important;
+  white-space:normal!important;
+ }
+ #v-map #parkInfo #parkSurfaceAction>.dg-png-sub:last-child{
+  margin-bottom:0!important;
+  padding:0!important;
+ }
+}
