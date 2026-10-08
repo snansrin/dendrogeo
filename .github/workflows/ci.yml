@@ -180,33 +180,3 @@ jobs:
               sys.exit(1)
           print('✅ Canlı site depoyla birebir aynı.')
           PY
-
-  one_file_menu_water_evidence_builder:
-    name: Original single File menu and targeted Sentinel shoreline full QA
-    if: github.event_name == 'pull_request' && github.head_ref == 'fix/single-file-menu-targeted-water-evidence-20261008'
-    runs-on: ubuntu-latest
-    permissions:
-      contents: write
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          ref: fix/single-file-menu-targeted-water-evidence-20261008
-          fetch-depth: 0
-      - uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-      - run: npm ci
-      - name: Build index and run complete locked-source CI suite
-        run: |
-          npm run build
-          npm run check
-      - name: Restore workflow and push only versioned asset references
-        run: |
-          git fetch origin main
-          git show origin/main:.github/workflows/ci.yml > .github/workflows/ci.yml
-          git add index.html .github/workflows/ci.yml
-          git config user.name "DendroGeo GIS QA"
-          git config user.email "gis-ui-repair@users.noreply.github.com"
-          git commit -m "build(gis): update one-File PNG and targeted evidence asset hashes"
-          git pull --rebase origin fix/single-file-menu-targeted-water-evidence-20261008
-          git push origin HEAD:fix/single-file-menu-targeted-water-evidence-20261008
