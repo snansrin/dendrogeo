@@ -118,11 +118,11 @@
   margin-top:9px;
 }
 #v-map #surfaceMenuBar .dg-ux-output-menu{
-  margin-left:auto;
+  margin-left:0;
 }
 #v-map #surfaceMenuBar>.dg-ux-output-menu>.dg-editor-menu-body{
   left:auto;
-  right:0;
+  right:auto;
 }
 #v-map #parkInfo{
   border:1px solid var(--line)!important;
