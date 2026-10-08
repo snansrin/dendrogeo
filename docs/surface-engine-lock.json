@@ -19,7 +19,7 @@
     "src/services/lc-config.js": "3cc9d331a383337b917da15cbc970dddf9d2b81f",
     "src/services/lc-engine.js": "15500b3c3e977a26e4320afba7b788968f320543",
     "src/services/lc-geo.js": "54e0c9af5ed0d79aefb76c540b09798b2106bff3",
-    "src/services/lc-osm.js": "453cae423fdc156688fc65767ad19494cc6e81de",
+    "src/services/lc-osm.js": "146720f9fb68dbf2f1239d239284375124edd34d",
     "src/services/lc-patches.js": "cb4861b567b7a23b39d181237113ae8e4e2958de",
     "src/services/lc-review.js": "f6e6bc76053da8fd2ef931b61b30bfe125f4678a",
     "src/services/lc-s2.js": "1ecc8be08a898ca4f77efa4c58381584f2a7c5c2",
@@ -33,7 +33,7 @@
     "src/services/park-state.js": "df532eac74559c3c6e3c882bfc53d9e37bbd6612",
     "src/ui/editor-ui.js": "63cc57af5ead0fe24f12c83c3fc13aa820d3c441",
     "src/ui/lc-report.js": "a11bb0ca5e619181e7a00bc4a7610b6860ee9a91",
-    "src/ui/lc-sens.js": "aa21a0d04c663b928e3692c665d0ff42dd30459c",
+    "src/ui/lc-sens.js": "6a420a8cd6ba43f58c529ed6acad41d9b7c70e5d",
     "src/ui/park-export.js": "ddf85d17c704d5f4832d216db364877eed152c93",
     "src/ui/park-panel.js": "0bf488f42229f83e96f50b107e2038a1911e8be4",
     "src/ui/state.js": "156945d6a219f8f620d574a4423a499c982bc237",
@@ -49,6 +49,7 @@
       "src/services/lc-osm.js",
       "src/services/park-query.js",
       "src/ui/lc-sens.js"
-    ]
+    ],
+    "scope": "Network retrieval, verified Göksu water mask outside reference shoreline; outside cells require spectral evidence or are marked uncertain. No original WorldCover/slider changes."
   }
 }
