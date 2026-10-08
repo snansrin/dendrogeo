@@ -118,11 +118,11 @@
   margin-top:9px;
 }
 #v-map #surfaceMenuBar .dg-ux-output-menu{
-  margin-left:auto;
+  margin-left:0;
 }
 #v-map #surfaceMenuBar>.dg-ux-output-menu>.dg-editor-menu-body{
   left:auto;
-  right:0;
+  right:auto;
 }
 #v-map #parkInfo{
   border:1px solid var(--line)!important;
@@ -247,4 +247,257 @@
 @media(prefers-reduced-motion:reduce){
  #v-map #surfaceMenuBar .dg-editor-menu>summary,
  #v-map #liveAnalysis .dg-ux-species-row{transition:none}
+}
+
+/* GIS WORKSPACE v2 · 2026-10-08. Presentation-only: uses existing theme tokens.
+   QGIS/ArcGIS-inspired single pane; WCAG 2.2 reflow / touch-target sizing.
+   No UI colors, surface raster classes, sliders or GIS classification are changed. */
+#v-map,#v-map .card,#v-map #surfaceEditorMenu,#v-map #surfaceMapWorkspace,
+#v-map #surfaceMenuBar,#v-map #liveAnalysis{min-width:0;max-width:100%;box-sizing:border-box}
+#v-map #surfaceMenuBar>.dg-ux-output-menu{
+  margin-left:0; /* Old "push to far right" caused the reported disorder. */
+}
+#v-map #surfaceMenuBar>.dg-ux-output-menu>.dg-editor-menu-body{
+  right:auto; /* JS positions the shared panel inside the viewport. */
+}
+#v-map.surface-review-active #surfaceMenuBar #parkRasterExport{
+  display:flex!important; /* report remains reachable even in analysis mode */
+}
+#v-map #surfaceMenuBar>.dg-editor-menu{
+  max-width:100%;
+  min-width:0;
+}
+#v-map #surfaceMenuBar>.dg-editor-menu>summary{
+  display:flex;
+  justify-content:flex-start;
+  max-width:100%;
+  box-sizing:border-box;
+  white-space:normal;
+  line-height:1.25;
+  gap:7px;
+}
+#v-map #surfaceMenuBar>.dg-editor-menu>summary .dg-editor-menu-chevron{
+  margin-left:auto;
+}
+#v-map #surfaceMenuBar .dg-editor-menu-body{
+  box-sizing:border-box;
+  max-width:calc(100vw - 20px);
+  max-height:min(72dvh,670px);
+  overflow-x:hidden;
+  overflow-y:auto;
+  overscroll-behavior:contain;
+  scrollbar-gutter:stable;
+  word-break:normal;
+  overflow-wrap:anywhere;
+  background:var(--surface);
+  color:var(--ink);
+}
+#v-map #surfaceMenuBar .dg-editor-menu-body .dg-editor-panel-head{
+  margin-bottom:10px;
+  min-width:0;
+}
+#v-map #surfaceMenuBar .dg-editor-menu-section,
+#v-map #surfaceMenuBar .dg-png-card,
+#v-map #surfaceMenuBar .dg-png-field,
+#v-map #surfaceMenuBar .dg-png-copy{min-width:0;max-width:100%;box-sizing:border-box}
+#v-map #surfaceMenuBar .dg-editor-menu-body input:not([type=checkbox]):not([type=range]),
+#v-map #surfaceMenuBar .dg-editor-menu-body select,
+#v-map #surfaceMenuBar .dg-editor-menu-body textarea{
+  max-width:100%;min-width:0;box-sizing:border-box;min-height:44px;
+}
+#v-map #surfaceMenuBar .dg-editor-menu-body .dg-png-option{
+  display:flex;gap:8px;align-items:center;
+  box-sizing:border-box;max-width:100%;min-width:0;
+  padding:10px;min-height:48px;
+  border-radius:9px;
+}
+#v-map #surfaceMenuBar .dg-png-option .dg-png-copy{
+  flex:1 1 auto;
+  overflow-wrap:anywhere;
+}
+#v-map #surfaceMenuBar .dg-png-option input[type=checkbox]{
+  width:auto;min-height:24px;flex:0 0 auto;
+}
+#v-map #surfaceMenuBar #parkRasterExport,
+#v-map #surfaceMenuBar #parkGridTools,
+#v-map #surfaceMenuBar #parkLayerTools{
+  background:transparent;border:0;box-shadow:none;padding:0;margin:0;
+  min-width:0;width:100%;max-width:100%;
+}
+#v-map #surfaceMenuBar .dg-ux-output-menu .dg-png-btn{
+  min-height:44px;justify-content:center;text-align:center;
+}
+#v-map #surfaceMenuBar .dg-ux-export-section{
+  border-top:1px solid var(--line);margin:12px 0 0;padding-top:12px;
+}
+#v-map #surfaceMenuBar .dg-ux-export-section h4{
+  margin:0;font-family:var(--f-ui);font-size:.79rem;
+  font-weight:700;letter-spacing:0;
+}
+#v-map #surfaceMenuBar .dg-ux-export-section .dg-png-field{
+  margin:8px 0 0;
+}
+#v-map #surfaceMenuBar .dg-ux-tool-grid{
+  display:grid;grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:8px;
+}
+#v-map #surfaceMenuBar .dg-ux-tool-grid>.dg-png-btn{
+  min-height:44px;min-width:0;
+  width:100%;justify-content:center;text-align:center;
+  white-space:normal;
+}
+#v-map #surfaceMenuBar .dg-ux-tool-grid>.dg-png-btn.is-active{
+  border-color:var(--green);
+  box-shadow:inset 0 0 0 1px var(--green);
+}
+#v-map #surfaceMenuBar .dg-ux-coordinate-row{
+  display:grid;grid-template-columns:minmax(0,1fr) auto auto;
+  align-items:center;gap:6px;
+}
+#v-map #surfaceMenuBar .dg-ux-coordinate-row .dg-png-input{
+  min-width:0;margin:0;width:100%;
+}
+#v-map #surfaceMenuBar .dg-ux-coordinate-row .dg-png-btn{
+  width:auto;min-height:44px;margin:0;
+  justify-content:center;
+}
+#v-map #surfaceMenuBar .dg-ux-option-note{font-size:.74rem;line-height:1.55;margin:8px 0}
+#v-map #surfaceMenuBar #parkGridTools .dg-png-fields{
+  grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;
+}
+#v-map #surfaceMenuBar #parkGridTools .dg-png-fields>.dg-png-field:first-child{
+  grid-column:1/-1;
+}
+#v-map #parkInfo{
+  overflow-wrap:anywhere;
+  max-width:100%;
+  min-width:0;
+}
+#v-map #parkInfo>div[style*="display:grid"]{
+  min-width:0;max-width:100%;
+}
+#v-map #parkInfo #parkSurfaceAction{
+  width:100%;max-width:100%;min-width:0;box-sizing:border-box;
+}
+#v-map #parkInfo #parkSurfaceAction .dg-png-head{min-width:0}
+#v-map #parkInfo #parkSurfaceAction .dg-png-badge{
+  white-space:normal;max-width:100%;overflow-wrap:anywhere;
+}
+#v-map #landCoverReport,#v-map #lcSens{
+  min-width:0;max-width:100%;box-sizing:border-box;
+  overflow-wrap:anywhere;
+}
+#v-map #landCoverReport .dg-surface-stat{
+  min-width:0;max-width:100%;
+}
+#v-map #landCoverReport .dg-surface-stat>b{
+  text-align:right;white-space:normal;min-width:0;
+}
+#v-map #liveAnalysis .dg-ux-species-head{
+  display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:6px;
+}
+#v-map #liveAnalysis .dg-ux-species-caption{
+  margin-left:auto;font-size:.69rem;color:var(--mut);
+  font-weight:500;letter-spacing:0;text-transform:none;
+}
+#v-map #liveAnalysis .dg-ux-species-head>.dg-png-btn{display:none}
+#v-map #liveAnalysis .dg-ux-species-row{
+  max-width:100%;min-width:0;overflow-wrap:anywhere;
+}
+#v-map #liveAnalysis .dg-ux-species-row>div{min-width:0;max-width:100%}
+#v-map #liveAnalysis .dg-ux-species-row>div:first-child>span{
+  overflow-wrap:anywhere;white-space:normal;
+}
+#v-map #liveAnalysis .grid.g4>.stat{overflow-wrap:anywhere}
+#v-map #surfaceMapWorkspace,#v-map #map{min-width:0;max-width:100%}
+#v-map #map .leaflet-control-attribution{font-size:10px;line-height:1.2;max-width:100%}
+@media (max-width:1000px){
+  #v-map #surfaceMenuBar{gap:5px}
+  #v-map #surfaceMenuBar>.dg-editor-menu>summary{padding:8px;min-height:44px}
+}
+@media (max-width:700px){
+  #v-map #surfaceEditorMenu{
+    border-radius:12px;overflow:visible;
+  }
+  #v-map #surfaceMenuBar{
+    display:grid;grid-template-columns:repeat(4,minmax(0,1fr));
+    align-items:stretch;gap:5px;padding:6px;
+  }
+  #v-map #surfaceMenuBar>.dg-editor-menu{
+    width:100%;max-width:100%;min-width:0;position:static;
+  }
+  #v-map #surfaceMenuBar>.dg-editor-menu>summary{
+    display:flex;flex-direction:column;align-items:center;
+    justify-content:center;gap:4px;
+    width:100%;min-width:0;min-height:60px;
+    padding:6px 3px;text-align:center;
+    border-radius:9px;font-size:.68rem;line-height:1.2;
+    overflow-wrap:anywhere;
+  }
+  #v-map #surfaceMenuBar .dg-editor-menu-icon{
+    width:21px;height:21px;flex:0 0 21px;
+  }
+  #v-map #surfaceMenuBar .dg-editor-menu-chevron{display:none}
+  #v-map #surfaceMenuBar .dg-editor-menu-label{
+    max-width:100%;white-space:normal;overflow-wrap:anywhere;
+  }
+  #v-map #surfaceMenuBar .dg-editor-menu-body{
+    position:fixed;z-index:1200;
+    width:calc(100vw - 20px);
+    max-width:calc(100vw - 20px);
+    max-height:60dvh;
+    border-radius:12px;
+    padding:12px;
+    overflow-x:hidden;
+    overflow-y:auto;
+    -webkit-overflow-scrolling:touch;
+  }
+  #v-map .dg-editor-status{
+    width:100%;min-width:0;
+    font-size:.7rem;line-height:1.45;
+  }
+  #v-map #parkInfo #parkSurfaceAction{
+    flex-direction:column;align-items:stretch;gap:8px;
+  }
+  #v-map #parkInfo #parkSurfaceAction>.dg-png-head{
+    flex:0 1 auto;width:100%;
+  }
+  #v-map #parkInfo #parkSurfaceAction>.dg-png-btn{
+    width:100%;min-height:44px;
+  }
+  #v-map #surfaceMenuBar #parkGridTools .dg-png-fields{
+    grid-template-columns:minmax(0,1fr);
+  }
+  #v-map #surfaceMenuBar #parkGridTools .dg-png-fields>.dg-png-field:first-child{grid-column:auto}
+  #v-map #liveAnalysis .card{padding:12px;max-width:100%}
+  #v-map #liveAnalysis .grid.g4{grid-template-columns:repeat(2,minmax(0,1fr))}
+  #v-map #lcSens .dg-sens-head{flex-wrap:wrap;gap:8px}
+  #v-map #lcSens .dg-sens-head>.dg-png-btn{min-height:44px}
+  #v-map #lcSens .dg-sens-row{grid-template-columns:82px minmax(0,1fr) 75px;gap:6px}
+  #v-map #lcSens .dg-sens-row .dg-sens-label{font-size:.7rem}
+  #v-map #lcSens .dg-sens-row .dg-sens-count{font-size:.69rem}
+  #v-map #map.surface-review-map{max-width:100%;box-sizing:border-box}
+  #v-map #surfaceMapTools{left:6px;top:68px}
+  #v-map #surfaceMapTools .dg-editor-rail{padding:3px;gap:2px}
+  #v-map #surfaceMapTools .dg-editor-tool{width:42px;height:42px}
+  #v-map #surfaceMenuBar .dg-ux-tool-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media (max-width:360px){
+  #v-map #surfaceMenuBar{
+    grid-template-columns:repeat(3,minmax(0,1fr));
+  }
+  #v-map #surfaceMenuBar>.dg-editor-menu>summary{
+    font-size:.68rem;min-height:54px;
+  }
+  #v-map #lcSens .dg-sens-row{grid-template-columns:74px minmax(0,1fr) 66px;gap:4px}
+  #v-map #lcSens .dg-sens-row .dg-sens-count{font-size:.65rem}
+  #v-map #surfaceMenuBar .dg-ux-coordinate-row{
+    grid-template-columns:minmax(0,1fr) auto;
+  }
+  #v-map #surfaceMenuBar .dg-ux-coordinate-row .dg-png-btn:last-child{
+    grid-column:1/-1;width:100%;
+  }
+}
+@media (prefers-reduced-motion:reduce){
+  #v-map #surfaceMenuBar>.dg-editor-menu>summary{transition:none}
 }
