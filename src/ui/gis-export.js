@@ -202,7 +202,7 @@
  // Capture the legacy inline PNG button before its locked handler runs.
  // The older handler assumes a lazily loaded class array and may throw on .find().
  // Do not modify that locked module or the scientific analysis state.
- document.addEventListener("click",event=>{
+ if(typeof document.addEventListener==="function")document.addEventListener("click",event=>{
   const button=event.target?.closest?.('button[onclick*="downloadParkImage"]');
   if(!button)return;
   event.preventDefault();
