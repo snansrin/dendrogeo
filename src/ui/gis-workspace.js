@@ -350,12 +350,12 @@
   rows[0].before(panel);
   const types=window.DG_SURFACE_REVIEW?.types||{};
   const icons={green:"🌿",water:"💧",hard:"🧱",building:"🏢",pool:"💦",bare:"🟫",other:"⬜"};
-  const defaults={"Yeşil alan":"green","Su":"water","Sert zemin":"hard","Bina":"building","Havuz":"pool","Çıplak zemin":"bare","Diğer":"other"};
+  const defaults={"Yeşil alan":"green","Su":"water","Sert zemin":"hard","Bina":"building","Havuz":"pool","Çıplak zemin":"bare","Diğer":"other","Sınıflandırılamayan":"other"};
   for(const row of rows){
    const label=row.querySelector?.(":scope > span");
-   // 'Diğer' is the underlying unclassified residual, not a user-facing
-   // editable cover class. Keep it in area accounting/report records.
-   if(label?.textContent?.trim()==="Diğer"){row.remove();continue;}
+   // Unresolved cells must be EXPLICIT rather than silently dropped from
+   // the visible table. They remain unclassified in the locked science data.
+   if(label?.textContent?.trim()==="Diğer")label.textContent="Sınıflandırılamayan";
    const value=row.querySelector?.(":scope > b");
    const fill=row.querySelector?.(":scope > .dg-surface-track > i");
    if(label&&value&&fill){
@@ -495,7 +495,7 @@
   const ha=value=>(Number(value||0)/10000).toFixed(3);
   const summary=(state.editing?"Önizleme":"Kayıtlı sonuç")+" · "+
    keys.filter(k=>Number(k==="water"?combined.water:areas[k])>0)
-    .map(k=>label(k)+": "+ha(k==="water"?combined.water:areas[k])+" ha").join(" · ");
+    .map(k=>(k==="other"?"Sınıflandırılamayan":label(k))+": "+ha(k==="water"?combined.water:areas[k])+" ha").join(" · ");
   const node=typeof document.querySelector==="function"?document.querySelector("#dgSensSummary"):null;
   if(node&&node.textContent!==summary)node.textContent=summary;
   const counter=typeof document.querySelector==="function"?document.querySelector("#dgSensCnt-water"):null;
@@ -537,6 +537,10 @@
   for(const item of paths){
    const color=item.cls==="pool"?"#3b82f6":item.cls==="building"?BUILDING_PRESENTATION_COLOR:null;
    if(color&&item.poly?.options?.fillColor!==color)item.poly.setStyle?.({fillColor:color});
+   // Unclassified residuals remain discoverable but do not appear as a
+   // competing, saturated land-cover class. No missing area is assigned.
+   if(item.cls==="other"&&item.poly?.options?.fillOpacity!==.16)
+    item.poly.setStyle?.({fillOpacity:.16});
   }
  }
  let popupWaterMap=null;
@@ -582,8 +586,8 @@
   const resume=()=>{
    if(token!==pendingBoundaryRestart||state.record!==record||state.epoch!==epoch||
       state.rawView||!editorActive()||state.draw)return;
-   if(state.busy||state.saving||state.exporting){
-    if(++attempts<240)setTimeout(resume,250);
+   if(state.busy||state.saving||state.mergeBusy||state.exporting){
+    if(++attempts<140)setTimeout(resume,420);
     return;
    }
    if(typeof dgSensDrawStart!=="function")return;
@@ -593,7 +597,7 @@
    if(typeof dgSensCloseMenus==="function")dgSensCloseMenus();
    enqueue();
   };
-  setTimeout(resume,250);
+  setTimeout(resume,420);
   return true;
  }
  function syncQuickBoundary(){
@@ -639,6 +643,14 @@
   for(const slider of sliders)slider.style?.setProperty?.("--dg-ux-slider-fill",Math.max(0,Math.min(100,Number(slider.value)||0))+"%");
  }
  function sync(){
+  // During hand drawing/repartition the locked engine recreates the rail for
+  // every vertex. Running the full GIS panels + NDVI tally per mutation caused
+  // long main-thread stalls. Keep only the small drawing dock reactive here.
+  const state=window.DG_LC_SENS?.state;
+  if(state?.draw||state?.busy||state?.saving||state?.mergeBusy){
+   syncQuickBoundary();
+   return;
+  }
   syncPark();
   syncBrushChoices();
   syncWaterBoundary();
