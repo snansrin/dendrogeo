@@ -758,10 +758,6 @@
 #v-map #lcSens input.dg-sens-slider#dgSensRange-bare{
   accent-color:var(--dg-ux-slider-color,#8b5a2b);
 }
-#v-map #lcSens .dg-sens-row:has(#dgSensRange-green) .dg-sens-label{color:#22c55e}
-#v-map #lcSens .dg-sens-row:has(#dgSensRange-water) .dg-sens-label{color:#3b82f6}
-#v-map #lcSens .dg-sens-row:has(#dgSensRange-hard) .dg-sens-label{color:#64748b}
-#v-map #lcSens .dg-sens-row:has(#dgSensRange-bare) .dg-sens-label{color:#8b5a2b}
 @media(max-width:700px){
   #v-map #landCoverReport .dg-ux-surface-rows{
     padding:9px 8px;
