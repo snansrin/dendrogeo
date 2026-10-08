@@ -927,3 +927,27 @@
   padding:5px 12px 10px;
   border-top:1px solid var(--line);
 }
+
+/* Distance labels sit midway between measured points (map-only, no raster edits). */
+#v-map #map .leaflet-tooltip.dg-ux-distance-label{
+  pointer-events:none!important;
+  color:var(--ink);
+  background:var(--surface);
+  border:1px solid var(--green);
+  border-radius:7px;
+  box-shadow:0 2px 9px #18242033;
+  padding:4px 8px;
+  font:700 .78rem/1.35 var(--f-ui);
+  white-space:nowrap;
+  text-align:center;
+  font-variant-numeric:tabular-nums;
+}
+#v-map #map .leaflet-tooltip.dg-ux-distance-label:before{
+  display:none;
+}
+@media(max-width:700px){
+  #v-map #map .leaflet-tooltip.dg-ux-distance-label{
+    font-size:.74rem;
+    padding:4px 7px;
+  }
+}

@@ -118,12 +118,12 @@ test('preview bars match the raw WorldCover row typography, geometry and class-s
 
 
 test('distance measurement captures polygon clicks before editor popup even in review and park modes',()=>{
- const handlers={},events={},statuses=[];
+ const handlers={},events={},statuses=[],labels=[];
  const mapContainer={
   addEventListener:(name,fn,capture)=>{assert.equal(capture,true);events[name]=fn;},
   removeEventListener:(name,fn)=>{if(events[name]===fn)delete events[name];}
  };
- const layers={clearLayers(){},remove(){}};
+ const layers={clearLayers(){labels.length=0;},remove(){}};
  const mockedMap={
   on:(ev,cb)=>{handlers[ev]=cb;},off:(ev,cb)=>{if(handlers[ev]===cb)delete handlers[ev];},
   addLayer(){},removeLayer(){},
@@ -144,7 +144,11 @@ test('distance measurement captures polygon clicks before editor popup even in r
   layerGroup:()=>({addTo:()=>layers,clearLayers(){}}),
   circleMarker:()=>({addTo(){}}),
   polyline:()=>({addTo(){}}),
-  latLng:p=>({distanceTo:q=>Math.abs((q?.lng||0)-(p?.lng||0))*100})
+  tooltip:opts=>{
+   const result={opts};
+   return {setLatLng(at){result.at=at;return this;},setContent(value){result.value=value;return this;},addTo(){labels.push(result);return this;}};
+  },
+  latLng:p=>({...p,distanceTo:q=>Math.abs((q?.lng||0)-(p?.lng||0))*100})
  };
  const sandbox={window:{L:leaflet},L:leaflet,map:mockedMap,PARK_MODE:true,document:doc,
   getComputedStyle:()=>({getPropertyValue:()=>''}),setTimeout,clearTimeout,console};
@@ -157,7 +161,17 @@ test('distance measurement captures polygon clicks before editor popup even in r
   events.click({button:0,point:{lat:40,lng},target:{closest:()=>null},stopImmediatePropagation:()=>{swallowed++;},stopPropagation(){}});
  }
  assert.equal(swallowed,2);
- assert.match(statuses.join(' '),/Mesafe:/);
+ assert.equal(labels.length,1,'one visible label for the first measured segment');
+ assert.equal(labels[0].value,'100.0 m');
+ assert.equal(labels[0].at.lng,1.5);
+ assert.equal(labels[0].at.lat,40);
+ assert.equal(labels[0].opts.permanent,true);
+ assert.equal(labels[0].opts.interactive,false);
+ events.click({button:0,point:{lat:40,lng:3},target:{closest:()=>null},stopImmediatePropagation(){},stopPropagation(){}});
+ assert.equal(labels.length,2,'one distance label per segment, no duplicates');
+ assert.deepEqual(labels.map(x=>x.value),['100.0 m','100.0 m']);
+ assert.equal(labels[1].at.lng,2.5);
+ assert.match(statuses.join(' '),/Mesafe: 200.0 m/);
  sandbox.window.DG_GIS_WORKSPACE_UI.closeTool();
  assert.equal(events.click,undefined);
 });
@@ -262,4 +276,16 @@ test('verified-map original dialog is untouched with NDVI off; its PNG download 
  assert.equal(prevented,1);assert.equal(stopped,1);
  assert.equal(dialog.closeCount,1);
  assert.match(warnings.join(' '),/Önce parkın arazi örtüsü analizini açın/);
+});
+
+test('midpoint label styling does not capture map clicks or alter GIS core presentation',()=>{
+ const css=load('css/gis-workspace.css');
+ const js=load('src/ui/gis-workspace.js');
+ assert.match(css,/\.leaflet-tooltip\.dg-ux-distance-label/);
+ assert.match(css,/pointer-events:none!important/);
+ assert.match(css,/font-variant-numeric:tabular-nums/);
+ assert.match(js,/if\(mapTool==="distance"&&typeof L\.tooltip==="function"\)/);
+ assert.match(js,/\.setLatLng\(middle\)\.setContent\(unit\(meters\)\)\.addTo\(drawLayer\)/);
+ assert.match(js,/drawLayer\.clearLayers\(\)/);
+ assert.match(js,/if\(mapInstance&&drawLayer\)mapInstance\.removeLayer\(drawLayer\)/);
 });
