@@ -35,7 +35,9 @@ test('all original Grid, layer and PNG IDs and event handlers remain wired',()=>
  assert.match(ui,/panel\.append\(exportCard\)/);
  assert.match(ui,/section\.append\(pngFields\)/);
  assert.doesNotMatch(ui,/cloneNode\(/);
- assert.match(ui,/menu\.dataset\.menuOrder="45"/);
+ assert.doesNotMatch(ui,/menu\.dataset\.menuOrder="45"/);
+ assert.match(ui,/function keepSingleFileMenu\(bar\)/);
+ assert.match(ui,/const menu=coreFile/);
  assert.doesNotMatch(css,/#v-map #surfaceMenuBar \.dg-ux-output-menu\s*\{\s*margin-left:auto/);
 });
 
@@ -85,4 +87,12 @@ test('mobile 320/360/390/430 widths and card/slider reflow are explicitly scoped
  assert.match(css, /#v-map #surfaceMenuBar \.dg-editor-menu-body/);
  assert.match(css, /var\(--green\)/);
  assert.doesNotMatch(css,/\.dg-png-btn\.primary\s*\{/);
+});
+
+test('single original File dropdown repositions on real async details toggle on narrow phones',()=>{
+ assert.match(ui,/event\.target\?\.parentElement===bar&&event\.target\?\.matches\?\.\("details\.dg-editor-menu"\)/);
+ assert.doesNotMatch(ui,/matches\?\.\(":scope > \.dg-editor-menu"\)/);
+ const qa=file('scripts/gis-mobile-qa.mjs');
+ assert.match(qa,/seed\.fileCount!==1\|\|seed\.generatedFileCount!==0/);
+ assert.match(qa,/details\[data-menu-owner="surface"\]\[data-menu-order="10"\]/);
 });

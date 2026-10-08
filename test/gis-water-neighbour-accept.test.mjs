@@ -108,10 +108,10 @@ test('no numeric raster/threshold/geometry fallback was introduced; old science 
 });
 test('Doğrulanmış Harita and all four PNG basemaps stay available while pool is only shown as Su',()=>{
  const ui=read('src/ui/gis-workspace.js'),png=read('src/ui/gis-export.js');
- assert.match(ui,/function ensureQuickPngAction\(bar\)/);
- assert.match(ui,/dgUxQuickPngDownload/);
+ assert.match(ui,/function keepSingleFileMenu\(bar\)/);
+ assert.match(ui,/core\.querySelector\("#dgUxQuickPngDownload"\)\?\.remove\(\)/);
  assert.match(ui,/verified\.textContent="🖼️ Doğrulanmış Harita"/);
- for(const cls of ['vector','osm','sat','topo'])assert.ok(ui.includes('"'+cls+'"'));
+ for(const cls of ['vector','osm','sat','topo'])assert.ok(read('src/ui/park-panel.js').includes('value="'+cls+'"'));
  assert.match(png,/async function renderVerified\(layers\)/);
  assert.match(ui,/item\.cls==="pool"\?"#3b82f6"/);
  assert.match(ui,/pool=Number\(areas\.pool\|\|0\)/);
@@ -131,4 +131,27 @@ test('island road classification comes only from the frozen engine and verified 
  assert.doesNotMatch(ordinaryPng,/const nearest=nearestPresentationTypes\(sens\?\.displayFeatures\)/);
  assert.match(ordinaryPng,/const type=item\.cls/);
  assert.match(science,/const DG_SENS_COLORS=\{green:"#22c55e",water:"#3b82f6",hard:"#64748b"/);
+});
+
+test('the old File menu alone hosts original PNG export card; no second File menu, PNG button or base choice',()=>{
+ const ui=read('src/ui/gis-workspace.js');
+ const png=read('src/ui/gis-export.js');
+ assert.doesNotMatch(ui,/function makeOutput\(/);
+ assert.doesNotMatch(ui,/document\.createElement\("details"\)/);
+ assert.doesNotMatch(ui,/ensureQuickPngAction\(/);
+ assert.match(ui,/const menu=coreFile/);
+ assert.match(ui,/if\(exportCard\.parentElement!==panel\)panel\.append\(exportCard\)/);
+ assert.match(ui,/const legacy=exportCard\.querySelector\('button\[onclick\*="downloadParkImage"\]'\)/);
+ assert.match(png,/const baseChoice=\(\)=>read\("pngBg"\)\?\.value\|\|"vector"/);
+ assert.match(read('src/ui/park-panel.js'),/id="pngBg"/);
+ assert.match(read('src/ui/lc-sens.js'),/onclick="dgSensExportPng\(\)"/);
+});
+
+test('uncertain shoreline pixels are retested using only Sentinel-2 validated evidence, not nearest-green guessing',async()=>{
+ const script=read('src/ui/gis-water-neighbour.js');
+ assert.match(script,/window\.DG_LC_VALIDATE\.spectralLandPredict\(e,/);
+ assert.match(script,/window\.DG_LC_S2\.profile\(queue\.map\(p=>p\.cell\)/);
+ assert.match(script,/const LAND=new Set\(\["green","hard","bare"\]\)/);
+ assert.doesNotMatch(script,/function propose\(|nearestCellKey|\.corrections\[key\]=/);
+ assert.doesNotMatch(script,/rec\.acceptedResult\s*=|rec\.acceptedAreas\s*=|dgSensAccept\s*=/);
 });
