@@ -189,13 +189,14 @@ async function dgSensMount(hostId){
  const partitioned=await dgSensRepartition();if(epoch!==DG_SENS.epoch||!partitioned)return;if(rec.acceptedResult&&!DG_SENS.editing)dgSensRenderAccepted();
  const pending=document.getElementById("surfacePendingTools");if(pending)pending.style.display="none";
  host.scrollIntoView({block:"nearest"});
- // Start one fresh scan for an unaccepted surface review; accepted snapshots stay untouched.
- if(!rec.acceptedResult&&!rec.profile?.cells)void dgSensAutoScanOnMount();
+ // Every analysis opening scans once, including parks with an accepted snapshot.
+ // Scanning updates the draft; acceptedResult remains immutable.
+ void dgSensAutoScanOnMount();
 }
 function dgSensAutoScanOnMount(){
  const epoch=DG_SENS.epoch;
  if(DG_SENS.autoScanEpoch===epoch)return DG_SENS.autoScanPromise||Promise.resolve(false);
- if(!DG_SENS.record||DG_SENS.record.acceptedResult||DG_SENS.busy||DG_SENS.saving)return Promise.resolve(false);
+ if(!DG_SENS.record||DG_SENS.busy||DG_SENS.saving)return Promise.resolve(false);
  DG_SENS.autoScanEpoch=epoch;
  DG_SENS.status=_tvs("Park analizi açıldı; güncel uydu taraması otomatik başlatılıyor…");
  dgSensUpdateStatus();
