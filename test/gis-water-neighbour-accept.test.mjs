@@ -128,3 +128,21 @@ test('the verified map is untouched; independent File > PNG İndir has four back
  assert.match(png,/const baseChoice=\(\)=>read\("dgUxQuickPngBase"\)/);
  assert.match(png,/const button=event\.target\?\.closest\?\.\('button\[onclick\*="downloadParkImage"\]'\)/);
 });
+
+test('accepted mode and active boundary drawing never trigger inferred class writes',()=>{
+ const accepted=fixture({state:{editing:false}});
+ assert.deepEqual(Array.from(accepted.api.findPending()),[]);
+ assert.equal(accepted.api.apply().count,0);
+ assert.equal(accepted.stats().saves,0);
+ const drawing=fixture({state:{draw:{ring:[],type:'water'}}});
+ assert.deepEqual(Array.from(drawing.api.findPending()),[]);
+ assert.equal(drawing.api.apply().count,0);
+ assert.equal(drawing.stats().dirty,0);
+});
+
+test('the existing locked QC guard still refuses unassigned shoreline residuals',()=>{
+ const source=read('src/ui/lc-sens.js');
+ assert.match(source,/dgSensWaterBoundaryUnresolved\(\)>0\?/);
+ assert.match(source,/sonuç kabul edilmedi/);
+ assert.match(read('src/ui/gis-water-neighbour.js'),/if\(!known\.length\)return\[\]/);
+});
