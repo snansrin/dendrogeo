@@ -33,6 +33,7 @@ function verifiedHarness({features=null,withRenderer=true}={}){
   window:{DG_LC_SENS:{state},DG_SURFACE_REVIEW:{types:{
    green:{label:'Yeşil alan'},building:{label:'Bina'},water:{label:'Su'},other:{label:'Diğer'}
   }}},
+  DG_SENS_COLORS:{green:'#22c55e',water:'#3b82f6',hard:'#64748b',bare:'#8b5a2b',building:'#475569',other:'#94a3b8'},
   PARK_POLY:[[[39.99,32.64],[39.99,32.66],[40.01,32.66],[40.01,32.64]]],
   PARK_HOLES:[],
   document:doc,URL:{createObjectURL:()=> 'blob:qa',revokeObjectURL(){}},
