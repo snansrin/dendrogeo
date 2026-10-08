@@ -78,7 +78,8 @@ test('second-pass Sentinel spectral samples resolve supported green and hard whi
  assert.deepEqual(f.events.slice(1),['dirty','refresh','summary','save']);
  assert.equal(f.events[0][0],'profile');
  assert.ok(f.events.includes('dirty'));
- assert.match(f.status.textContent,/29 hücre/);
+ assert.match(f.status.textContent,/kalan: 29/);
+ assert.match(f.status.textContent,/yeterli gözlem yok 14, kararsız spektrum 15/);
 });
 test('no data / ambiguous periods do not make up green land cover and never modify saved results',async()=>{
  const f=fixture();
