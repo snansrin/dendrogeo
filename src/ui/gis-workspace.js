@@ -248,6 +248,7 @@
  function init(){
   const bar=$("surfaceMenuBar");
   if(!bar||!$("parkInfo")||!$("liveAnalysis"))return;
+  if(typeof MutationObserver!=="function")return; // test/no-DOM fallback; browsers provide this API.
   observer=new MutationObserver(enqueue);
   for(const id of ["surfaceMenuBar","parkInfo","liveAnalysis"])observer.observe($(id),{childList:true,subtree:true});
   bar.addEventListener("toggle",event=>{
