@@ -1052,25 +1052,3 @@
 @media(max-width:700px){
  #v-map #surfaceMapTools .dg-ux-boundary-dock{flex-shrink:1}
 }
-
-/* 2026-10-08 | Keep independent PNG action reachable from the same File
-   group as Doğrulanmış Harita; never modify existing button color tokens. */
-#v-map #surfaceMenuBar .dg-ux-quick-png-base{
-  min-height:42px;
-  min-width:0;
-  flex:1 1 125px;
-  max-width:190px;
-  padding:7px 8px;
-  border:1px solid var(--line);
-  border-radius:8px;
-  background:var(--surface);
-  color:var(--ink);
-  font:600 .77rem var(--f-ui);
-}
-#v-map #surfaceMenuBar #dgUxQuickPngDownload{min-height:42px;flex:1 1 128px}
-@media(max-width:390px){
- #v-map #surfaceMenuBar .dg-ux-quick-png-base{
-  max-width:none;
-  flex:1 1 100%;
- }
-}
