@@ -606,8 +606,8 @@ function dgParkMountMenus(){
  const nav=document.createElement("nav");nav.className="dg-editor-menubar";nav.setAttribute("aria-label",typeof dgCf==="function"?dgCf("Harita menüsü"):"Harita menüsü");
  for(const [id,label,icon,description] of [["parkGridTools","Grid & Waypoint","grid","Grid boyutu, güvenli mesafe ve waypoint planı"],["parkLayerTools","Katmanlar","layers","Harita katmanlarının görünürlüğünü yönet"]]){
   const controls=document.getElementById(id);if(!controls)continue;
-  controls.classList.add("dg-editor-menu-controls");
-  controls.querySelector(".dg-png-head")?.remove();
+  controls.classList?.add?.("dg-editor-menu-controls");
+  controls.querySelector?.(".dg-png-head")?.remove?.();
   const menu=document.createElement("details");menu.className="dg-editor-menu";menu.setAttribute("data-menu-owner","park");menu.setAttribute("data-menu-order",id==="parkGridTools"?"30":"40");
   const title=typeof dgCf==="function"?dgCf(label):label,subtitle=typeof dgCf==="function"?dgCf(description):description,safeTitle=typeof esc==="function"?esc(title):title,safeSubtitle=typeof esc==="function"?esc(subtitle):subtitle;
   const editorUi=typeof window!=="undefined"?window.DG_EDITOR_UI:null;

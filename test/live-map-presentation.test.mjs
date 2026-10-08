@@ -54,8 +54,8 @@ test('GIS editor keeps PNG export in the toolbar and standardizes opened panels'
  assert.match(surface,/data-editor-action="png-export"/);
  assert.match(surface,/dataset\.menuOrder="15"/);
  assert.doesNotMatch(surface,/onclick="dgSensExportPng\(\)"/);
- assert.match(park,/controls\.classList\.add\("dg-editor-menu-controls"\)/);
- assert.match(park,/controls\.querySelector\("\.dg-png-head"\)\?\.remove\(\)/);
+ assert.match(park,/controls\.classList\?\.add\?\.\("dg-editor-menu-controls"\)/);
+ assert.match(park,/controls\.querySelector\?\.\("\.dg-png-head"\)\?\.remove\?\.\(\)/);
  assert.match(park,/Number\.isFinite\(n\)/);
  assert.match(css,/#surfaceMenuBar \.dg-editor-menu-body\{display:grid;align-content:start;gap:10px\}/);
  assert.match(css,/\.dg-editor-menu-controls\{display:grid;gap:12px/);

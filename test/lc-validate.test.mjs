@@ -702,8 +702,10 @@ describe('entegrasyon zinciri kilitleri (0054 · lc-sens)', () => {
 
 describe("0058 · Doğrulanmış Harita PNG (kullanıcının refactor'ü üstüne ek)", () => {
   const sens = rd('src/ui/lc-sens.js');
-  test('düğme + üretici mevcut ve onların kancalarını kullanır', () => {
-    assert.match(sens, /onclick="dgSensExportPng\(\)"/);
+  test('PNG hızlı eylemi üst araç çubuğunda üreticiye bağlanır', () => {
+    assert.match(sens, /dataset\.editorAction="png-export"/);
+    assert.match(sens, /addEventListener\("click",\(\)=>dgSensExportPng\(\)\)/);
+    assert.doesNotMatch(sens, /onclick="dgSensExportPng\(\)"/);
     assert.match(sens, /function dgSensExportPng\(\)\{/);
     /* onların kabul hattı: dgSensAreas (polygon-clipping summarize) + dgSensEffective */
     assert.match(sens, /const areas=dgSensAreas\(\)\|\|dgSensGroupAreas\(\);/);
