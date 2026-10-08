@@ -112,22 +112,24 @@
   // and building polygons. A grid blocker is NEVER enough to turn a lake,
   // a building or an unpaved tagged path into paved area.
   const masks=blockers.map(f=>{
-   try{return dgSurfaceFeatureGeometry(f,epsg);}catch(_){return[];}
-  }).filter(g=>g?.length);
+   try{return{type:f.type,geometry:dgSurfaceFeatureGeometry(f,epsg)};}
+   catch(_){return{type:f.type,geometry:[]};}
+  }).filter(item=>item.geometry?.length);
   const out=[];
   for(const road of roads.slice(0,250)){
    try{
     let geometry=dgSurfaceClip("intersection",roadFootprint(road,epsg),parkGeom);
     if(!geometry?.length)continue;
     if(!road.bridge){
-     for(const mask of masks){
-      geometry=dgSurfaceClip("difference",geometry,mask);
+     for(const item of masks){
+      geometry=dgSurfaceClip("difference",geometry,item.geometry);
       if(!geometry.length)break;
      }
     }else{
      // A true bridge can cross water, never a mapped building.
-     for(let i=0;i<blockers.length;i++)if(blockers[i].type==="building"&&masks[i]?.length){
-      geometry=dgSurfaceClip("difference",geometry,masks[i]);
+     for(const item of masks)if(item.type==="building"&&item.geometry.length){
+      geometry=dgSurfaceClip("difference",geometry,item.geometry);
+      if(!geometry.length)break;
      }
     }
     if(!geometry?.length||dgSurfaceArea(geometry)<.15)continue;
@@ -152,7 +154,6 @@
   const preexisting=original.filter(f=>f?.source!==GENERATED_ROAD_SOURCE);
   const roads=hardRoadDrafts(osm.elements,preexisting,s.epsg,s.parkGeometry);
   if(!roads.length)return{count:0,reason:"no-qualified-road"};
-  const keyed=new Map(roads.map(f=>[f.osmId,f]));
   const extras=roads.filter(f=>!preexisting.some(o=>o.osmId===f.osmId&&o.type==="hard"));
   if(!extras.length)return{count:0,reason:"already-classified"};
   const first=preexisting.filter(f=>!["water","pool","building"].includes(f.type));
@@ -200,6 +201,11 @@
    // change priority after these are installed.
    const roads=await applyGridRoads();
    if(token!==iteration)return false;
+   if(roads.count){
+    progress("OSM grid yol çizgilerinden "+roads.count+
+      " dar yol izi sert zemine aktarıldı; "+roads.provisional+
+      " iz malzeme etiketi içermediğinden saha kontrolü gerektiriyor.","working");
+   }
    // A secondary evidence-only recheck (different acquisition period) may
    // resolve old raster-water shoreline pixels, never guesses/manual labels.
    const water=window.DG_GIS_WATER_NEIGHBOUR;
@@ -214,11 +220,13 @@
     (water?.missingParts?.()?.length||0);
    reportVisibility("ready");
    const reviewed=Number(outcome?.resolved||0);
+   const roadNote=roads.count?" · OSM yol izi: "+roads.count+" (malzeme doğrulaması bekleyen: "+roads.provisional+")":"";
    progress(unresolved>0?
     "Tarama tamamlandı. Ek uydu kanıtıyla "+reviewed+" hücre çözüldü; "+
-     unresolved+" hücre bilimsel doğrulama bekliyor. Haritada düzeltme yapılmadan kabul edilemez.":
-    "Park analizi tamamlandı. Güncel yüzey sonuçları haritada ve tek kartta gösteriliyor.",
-    unresolved>0?"warning":"success");
+     unresolved+" hücre bilimsel doğrulama bekliyor"+roadNote+
+     ". Bu alanlar incelenmeden sonuç kabul edilemez.":
+    "Park analizi tamamlandı. Güncel yüzey sonuçları tek kartta gösteriliyor"+roadNote+".",
+    unresolved>0||roads.provisional>0?"warning":"success");
    ok=true;
    return true;
   }catch(error){
