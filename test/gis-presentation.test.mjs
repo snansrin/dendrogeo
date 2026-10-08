@@ -130,7 +130,7 @@ test('distance measurement captures polygon clicks before editor popup even in r
   getContainer:()=>mapContainer,mouseEventToLatLng:e=>e.point,
   dragging:{moved:()=>false}
  };
- const selected={setAttribute(){},classList:{add(){}}};
+ const selected={setAttribute(){},classList:{add(){},remove(){}}};
  const toolButtons={querySelector:()=>selected,querySelectorAll:()=>[selected]};
  const doc={
   readyState:'loading',addEventListener:()=>{},
