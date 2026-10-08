@@ -3,7 +3,7 @@
  * The original DOM nodes and onclick handlers are always retained. */
 (function(){
  "use strict";
- let pending=0, observer=null, mapTool="",mapInstance=null,drawLayer=null,drawPoints=[],clickHandler=null;
+ let pending=0, observer=null, mapTool="",mapInstance=null,drawLayer=null,drawPoints=[],clickHandler=null,captureTarget=null,captureClick=null;
  const $=id=>document.getElementById(id);
  const view=()=> $("v-map");
  const editorActive=()=>!!view()?.classList.contains("surface-review-active");
@@ -64,9 +64,9 @@
  function makeOutput(){
   const menu=el("details","dg-editor-menu dg-ux-output-menu");
   menu.dataset.menuOwner="park";
-  menu.dataset.menuOrder="45";
+  menu.dataset.menuOrder="10";
   const summary=el("summary");
-  summary.innerHTML=window.DG_EDITOR_UI?.menuLabel?.("file","Rapor & Çıktı")||"Rapor & Çıktı";
+  summary.innerHTML=window.DG_EDITOR_UI?.menuLabel?.("file","Dosya")||"Dosya";
   const panel=el("div","dg-editor-menu-body");
   panel.innerHTML=window.DG_EDITOR_UI?.panelHead?.("file","Harita çıktısı","Altlığı ve PNG içeriğini seç, ardından indir.")||"<strong>Harita çıktısı</strong>";
   const note=el("p","dg-ux-option-note","İndirme ayarları analizin hesaplarını veya kayıtlı sonuçları değiştirmez.");
@@ -77,13 +77,31 @@
  }
  function syncPark(){
   const bar=$("surfaceMenuBar"),exportCard=$("parkRasterExport"),layer=$("parkLayerTools");
-  if(!bar||!exportCard||!layer)return;
-  let menu=bar.querySelector(".dg-ux-output-menu");
-  if(!menu){menu=makeOutput();}
-  const next=[...bar.children].find(n=>n!==menu&&Number(n.dataset.menuOrder)>45)||null;
-  if(menu.parentElement!==bar||menu.nextElementSibling!==next)bar.insertBefore(menu,next);
+  if(!bar)return;
+  // Dynamically mounted park/surface menus must remain discoverable on phones.
+  // Recreate missing menu NODES only; neither raster nor park analysis is rerun.
+  if(!bar.querySelector('details[data-menu-owner="park"]')&&$("parkGridTools")&&$("parkLayerTools")&&typeof dgParkMountMenus==="function")
+   dgParkMountMenus();
+  if(window.DG_LC_SENS?.state?.record&&!bar.querySelector('details[data-menu-owner="surface"]')&&typeof dgSensRenderPaintTools==="function")
+   dgSensRenderPaintTools();
+  if(!exportCard||!layer)return;
+  const coreFile=bar.querySelector('details[data-menu-owner="surface"][data-menu-order="10"]');
+  let menu=coreFile||bar.querySelector(".dg-ux-output-menu");
+  if(coreFile){
+   bar.querySelector(".dg-ux-output-menu")?.remove(); // no duplicate Rapor & Çıktı tab
+  }else{
+   if(!menu)menu=makeOutput();
+   const next=[...bar.children].find(n=>n!==menu&&Number(n.dataset.menuOrder)>10)||null;
+   if(menu.parentElement!==bar||menu.nextElementSibling!==next)bar.insertBefore(menu,next);
+  }
   const panel=menu.querySelector(":scope > .dg-editor-menu-body");
+  if(!panel)return;
   if(exportCard.parentElement!==panel)panel.append(exportCard);
+  const verified=coreFile?.querySelector('button[onclick*="dgSensExportPng"]');
+  if(verified&&verified.textContent!=="🖼️ PNG İndir")verified.textContent="🖼️ PNG İndir";
+  const legacy=exportCard.querySelector('button[onclick*="downloadParkImage"]');
+  if(legacy)legacy.hidden=!!verified; // one PNG action, settings remain in Dosya
+
   const select=$("pngBg");
   const label=select?.closest(".dg-png-field")?.querySelector("label");
   if(label&&!label.htmlFor)label.htmlFor="pngBg";
@@ -163,8 +181,9 @@
  function setStatus(message){txt($("dgUxMapStatus"),message);}
  function closeTool(){
   if(mapInstance&&clickHandler)mapInstance.off("click",clickHandler);
+  if(captureTarget&&captureClick)captureTarget.removeEventListener("click",captureClick,true);
   if(mapInstance&&drawLayer)mapInstance.removeLayer(drawLayer);
-  mapInstance=null;drawLayer=null;clickHandler=null;drawPoints=[];mapTool="";
+  mapInstance=null;drawLayer=null;clickHandler=null;captureTarget=null;captureClick=null;drawPoints=[];mapTool="";
   const box=$("dgUxMapTools");
   box?.querySelectorAll("button[data-tool]").forEach(b=>{b.setAttribute("aria-pressed","false");b.classList.remove("is-active");});
  }
@@ -183,21 +202,31 @@
  function activateTool(mode){
   const m=getMap();
   if(!m){setStatus("Harita hazır değil. Canlı Harita'yı açıp yeniden deneyin.");return;}
-  if(editorActive()){
-   setStatus("Yüzey düzeltmesi açıkken ölçüm devre dışıdır. Önce El / harita görünümüne dönün.");
-   return;
-  }
-  // The existing park-selection listener runs on map.click. Do not let a
-  // measurement click accidentally replace the currently selected park.
-  if(typeof PARK_MODE!=="undefined"&&PARK_MODE){
-   setStatus("Ölçüm için önce Park Analizi Modu'nu kapatın. Seçili park ve analiz silinmez.");
-   return;
-  }
+  // Measurement is a transient read-only map operation. The surface editor
+  // may remain open, but its cell-popup and park-pick handlers must not fire.
   if(mapTool===mode){closeTool();setStatus("Ölçüm kapatıldı.");return;}
   closeTool();mapInstance=m;mapTool=mode;drawLayer=L.layerGroup().addTo(m);
-  clickHandler=e=>{drawPoints.push(e.latlng);redraw();};
-  m.on("click",clickHandler);
-  $("dgUxMapTools")?.querySelector('button[data-tool="'+mode+'"]')?.setAttribute("aria-pressed","true");
+  clickHandler=e=>{if(e?.latlng){drawPoints.push(e.latlng);redraw();}};
+  // Leaflet surface polygons handle a path's click and stop propagation.
+  // Capture map clicks BEFORE Leaflet's SVG/canvas delegation (and PARK_MODE).
+  // No interception occurs outside an explicitly active measure tool.
+  captureTarget=m.getContainer?.();
+  if(captureTarget?.addEventListener&&typeof m.mouseEventToLatLng==="function"){
+   captureClick=e=>{
+    if(!mapTool||!mapInstance||e.button===2||e.target?.closest?.(".leaflet-control,.leaflet-popup,.leaflet-tooltip,.dg-editor-rail"))return;
+    if(mapInstance.dragging?.moved?.())return;
+    const point=m.mouseEventToLatLng(e);
+    if(!point||!Number.isFinite(point.lat)||!Number.isFinite(point.lng))return;
+    e.stopImmediatePropagation?.();
+    e.stopPropagation?.();
+    clickHandler({latlng:point});
+   };
+   captureTarget.addEventListener("click",captureClick,true);
+  }else{
+   m.on("click",clickHandler);
+  }
+  const selected=$("dgUxMapTools")?.querySelector('button[data-tool="'+mode+'"]');
+  if(selected){selected.setAttribute("aria-pressed","true");selected.classList.add("is-active");}
   setStatus(mode==="area"?"Haritada alan köşelerine dokun. Bitirmek için Ölçümü bitir.":"Haritada mesafe noktalarına dokun. Bitirmek için Ölçümü bitir.");
  }
  function focusPark(){
@@ -247,6 +276,8 @@
    newControl("⌖ Parka odaklan",focusPark)
   );
   section.append(nav);
+  const current=nav.querySelector('button[data-tool="'+mapTool+'"]');
+  if(current){current.setAttribute("aria-pressed","true");current.classList.add("is-active");}
   const coordLabel=el("label","dg-png-label","WGS84 · ENLEM, BOYLAM");
   coordLabel.htmlFor="dgUxCoordInput";
   const row=el("div","dg-ux-coordinate-row"),input=el("input","dg-png-input");
@@ -317,15 +348,37 @@
    evidence.open=false; // QA remains available on demand; never lost.
   }
  }
+ function syncNdviMapInfo(){
+  const rail=$("surfaceMapTools"),state=window.DG_LC_SENS?.state;
+  if(!rail||typeof document.createElement!=="function")return;
+  let badge=$("dgUxNdviMapInfo");
+  if(!editorActive()||!state?.vegetationView){
+   badge?.remove();return;
+  }
+  if(!badge){
+   badge=el("div","dg-ux-ndvi-map-info");badge.id="dgUxNdviMapInfo";
+   badge.setAttribute("role","status");
+   rail.append(badge);
+  }
+  const tiers=typeof dgSensVegetationTiers==="function"?dgSensVegetationTiers():null;
+  const values=tiers?.tiers?[...tiers.tiers.values()]:[];
+  const counts={sparse:values.filter(x=>x==="sparse").length,moderate:values.filter(x=>x==="moderate").length,dense:values.filter(x=>x==="dense").length};
+  const cut=tiers?.cutoffs?.length===2?tiers.cutoffs.map(x=>Number(x).toFixed(2)).join(" / "):"—";
+  const description=tiers?.count>=9?
+   "Göreli NDVI açık · "+tiers.count+"/"+tiers.eligible+" uygun hücre · Seyrek "+counts.sparse+" / Orta "+counts.moderate+" / Yoğun "+counts.dense+" · eşikler "+cut:
+   "Göreli NDVI: uygun veri bekleniyor (hücre başına ≥3 gözlem, en az 9 hücre).";
+  txt(badge,description);
+ }
  function sync(){
   syncPark();
   syncSurfaceReport();
   syncGroupLayout();
   syncSpecies();
   syncMapTools();
+  syncNdviMapInfo();
   const bar=$("surfaceMenuBar");
   if(bar)bar.querySelectorAll(":scope > details[open]").forEach(menuPosition);
-  if(mapTool&&editorActive()){closeTool();setStatus("Analiz düzenleme moduna geçildiği için geçici ölçüm kapatıldı.");}
+  if(mapTool&&mapInstance&&getMap()!==mapInstance){closeTool();setStatus("Harita değiştiği için geçici ölçüm kapatıldı.");}
  }
  function init(){
   const bar=$("surfaceMenuBar");
@@ -341,6 +394,14 @@
   window.addEventListener("resize",()=>{bar.querySelectorAll(":scope > details[open]").forEach(menuPosition);},{passive:true});
   window.visualViewport?.addEventListener("resize",()=>{bar.querySelectorAll(":scope > details[open]").forEach(menuPosition);},{passive:true});
   document.addEventListener("keydown",e=>{if(e.key==="Escape"&&mapTool){closeTool();setStatus("Geçici ölçüm kapatıldı.");}});
+  // If a previous class filter excludes green polygons, NDVI would appear in
+  // the report but be invisible on the actual map. Clear only this view filter
+  // when enabling NDVI; never alter class areas, records or raster values.
+  document.addEventListener("click",e=>{
+   if(!e.target?.closest?.('button[onclick*="dgSensToggleVegetation"]'))return;
+   const state=window.DG_LC_SENS?.state;
+   if(state&&!state.vegetationView&&state.focus&&state.focus!=="green"&&typeof dgSensFocus==="function")dgSensFocus(null);
+  },true);
   sync();
  }
  window.DG_GIS_WORKSPACE_UI={sync,closeTool,pathLength,areaMeters};
