@@ -181,6 +181,8 @@ test('mobile menu and relative NDVI status remain visible without editing locked
  assert.match(css,/@media\(max-width:390px\)/);
  assert.match(css,/\.dg-ux-ndvi-map-info/);
  assert.match(work,/function syncNdviMapInfo\(/);
+ assert.match(work,/state\.vegetationLayer\.eachLayer\(layer=>layer\.bringToFront\?\.\(\)\)/);
+ assert.match(work,/dgSensToggleCand\(true\)/);
  assert.match(work,/typeof dgSensFocus==="function"\)dgSensFocus\(null\)/);
 });
 
