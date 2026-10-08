@@ -41,10 +41,10 @@ function harness(){
    DG_GIS_WATER_NEIGHBOUR:{missingParts:()=>[],recheckMissing:async()=>({remaining:0,resolved:0})},
    runLandCoverAnalysis:async()=>{posts.push('baseline');}},
   PARK_POLY:parkPoly,document,Date,setTimeout,clearTimeout,console,
-  dgSurfaceProject:(pts)=>pts.map(p=>[p[0]*10,p[1]*10]),
+  dgSurfaceProject:(pts)=>pts.map(p=>[p[0]*100000,p[1]*100000]),
   dgSurfaceClip:(operation,...polys)=>{
    logs.push(operation);
-   if(operation==='union')return polys.flatMap(p=>p);
+   if(operation==='union')return polys;
    return polys[0]||[];
   },
   dgSurfaceFeatureGeometry:feature=>feature?.geometry?.coordinates||[],
