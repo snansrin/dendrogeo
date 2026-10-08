@@ -180,3 +180,32 @@ jobs:
               sys.exit(1)
           print('✅ Canlı site depoyla birebir aynı.')
           PY
+
+  gis_ui_build_once:
+    name: GIS UI isolated build (feature branch only)
+    if: github.event_name == 'pull_request' && github.head_ref == 'fix/gis-ui-png-ndvi-mobile-20261008'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: fix/gis-ui-png-ndvi-mobile-20261008
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - run: npm ci
+      - name: Generate immutable asset hashes and test
+        run: |
+          npm run build
+          npm run check
+      - name: Restore main CI, remove temporary build workflow, and commit generated index
+        run: |
+          git fetch origin main
+          git show origin/main:.github/workflows/ci.yml > .github/workflows/ci.yml
+          git rm .github/workflows/gis-ui-rebuild-once.yml
+          git add .github/workflows/ci.yml index.html
+          git config user.name "DendroGeo GIS UI Build"
+          git config user.email "gis-ui-build@users.noreply.github.com"
+          git commit -m "build(gis-ui): refresh generated index; retain original CI [skip ci]"
+          git push origin HEAD:fix/gis-ui-png-ndvi-mobile-20261008
