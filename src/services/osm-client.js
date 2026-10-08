@@ -6,9 +6,9 @@
  * OVERPASS_* durumuna dokunur. */
 
 const OVERPASS_URLS=[
+  "https://overpass.openstreetmap.fr/api/interpreter",
   "https://overpass.private.coffee/api/interpreter",
   "https://overpass.kumi.systems/api/interpreter",
-  "https://overpass.openstreetmap.fr/api/interpreter",
   "https://overpass-api.de/api/interpreter",
   "https://lz4.overpass-api.de/api/interpreter",
   "https://z.overpass-api.de/api/interpreter"
