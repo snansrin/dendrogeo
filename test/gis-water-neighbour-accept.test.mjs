@@ -95,7 +95,7 @@ test('conserve full-cell total area in 69-cell water/land redistribution without
  assert.equal(Object.values(r.byClass).reduce((a,b)=>a+b,0),69);
  assert.equal(Object.keys(r.byClass).some(k=>!['green','hard','bare'].includes(k)),false);
 });
-test('never overwrite user's already edited cells and never assign without confirmed neighbour evidence',()=>{
+test("never overwrite user decisions or assign without confirmed neighbour evidence",()=>{
  const f=fixture({record:{corrections:{'5:0':{from:'water',to:'bare',method:'visual-cell',ts:'manual'}}}});
  const before=structuredClone(f.record.corrections['5:0']);
  assert.equal(f.api.apply().count,68);
