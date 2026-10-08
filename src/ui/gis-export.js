@@ -199,6 +199,16 @@
   try{return await render();}
   catch(error){console.error("DendroGeo PNG dışa aktarım:",error);notify("PNG oluşturulamadı: "+(error?.message||String(error)),"err");return false;}
  }
+ // Capture the legacy inline PNG button before its locked handler runs.
+ // The older handler assumes a lazily loaded class array and may throw on .find().
+ // Do not modify that locked module or the scientific analysis state.
+ document.addEventListener("click",event=>{
+  const button=event.target?.closest?.('button[onclick*="downloadParkImage"]');
+  if(!button)return;
+  event.preventDefault();
+  event.stopImmediatePropagation();
+  exportMap();
+ },true);
  window.DG_GIS_PNG_EXPORT={download:exportMap,classes,eachRing};
  window.downloadParkImage=exportMap;
 })();
