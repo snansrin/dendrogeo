@@ -6,7 +6,7 @@
 "use strict";
 const geo=window.DG_GIS_GEO;
 if(!geo)return;
-const state={mode:null,points:[],measureLayer:null,lastKind:null,marker:null,mapRef:null,scale:null,overlay:null,menu:null,notice:"Harita araçları hazır.",queryBusy:false,bookmarks:[]};
+const state={mode:null,points:[],restoreDoubleClick:false,measureLayer:null,lastKind:null,marker:null,mapRef:null,scale:null,overlay:null,menu:null,notice:"Harita araçları hazır.",queryBusy:false,bookmarks:[]};
 const $=id=>document.getElementById(id);
 const toastSafe=(text,type="info")=>{if(typeof window.toast==="function")window.toast(text,type);else console.info(text);};
 const isEditing=()=>Boolean((typeof PARK_MODE!=="undefined"&&PARK_MODE)||
@@ -164,7 +164,8 @@ function start(mode){
  if(state.mode==="line"||state.mode==="area")stopMode();
  if(["line","area","coordinate","identify"].indexOf(mode)===-1)return;
  state.mode=mode;state.lastKind=mode==="area"?"area":"line";state.points=[];
- if((mode==="line"||mode==="area")&&m.doubleClickZoom?.enabled())m.doubleClickZoom.disable();
+ state.restoreDoubleClick=Boolean((mode==="line"||mode==="area")&&m.doubleClickZoom?.enabled());
+ if(state.restoreDoubleClick)m.doubleClickZoom.disable();
  draw();ensureFloat();
  const instructions={line:"Mesafe: haritada köşelere tıkla; çift tıkla veya ✓ ile bitir.",area:"Alan: en az üç köşe seç; çift tıkla veya ✓ ile bitir.",coordinate:"Koordinat: haritadaki konuma dokun.",identify:"Nesne: haritadaki park veya yüzey geometrisine dokun."};
  setStatus(instructions[mode]);render();
@@ -172,7 +173,8 @@ function start(mode){
 function stopMode(){
  if(!state.mode)return;
  state.mode=null;
- if(state.mapRef?.doubleClickZoom&&!state.mapRef.doubleClickZoom.enabled())state.mapRef.doubleClickZoom.enable();
+ if(state.restoreDoubleClick&&state.mapRef?.doubleClickZoom&&!state.mapRef.doubleClickZoom.enabled())state.mapRef.doubleClickZoom.enable();
+ state.restoreDoubleClick=false;
  ensureFloat();render();
 }
 function onMapClick(e){
