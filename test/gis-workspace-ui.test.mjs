@@ -50,7 +50,10 @@ test('six most frequent species remains visible without redundant PNG download',
 test('professional map tools cannot change or write surface classification',()=>{
  const copy=ui.replace(/\r/g,'');
  for(const s of ['pathLength','areaMeters','coordinateQuery','focusPark','activateTool','closeTool'])assert.match(copy,new RegExp(s));
- assert.match(ui,/typeof PARK_MODE!=="undefined"&&PARK_MODE/);
+ // Measuring over selected parks is explicitly allowed; click capture prevents
+ // both park re-selection and interactive polygon correction popups.
+ assert.match(ui,/captureTarget\.addEventListener\("click",captureClick,true\)/);
+ assert.match(ui,/e\.stopImmediatePropagation\?\.\(\)/);
  assert.match(ui,/editorActive\(\)/);
  assert.doesNotMatch(ui,/dgSensScan|dgSensAreas|dgSensAccept|dgSensSave|DG_LC_LAST\s*=|localStorage\.setItem|sb\.from\(/);
 });
