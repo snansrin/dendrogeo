@@ -190,3 +190,14 @@ test('drawing dock shows the checkmark only at 4 corners and places class select
  assert.equal(dock.children[1].hidden,false,'tick shows at 4 corners');
  assert.equal(dock.children[1].disabled,false);
 });
+
+test('verified vector PNG preserves full-strength locked green, hard, water and bare hues',()=>{
+ const exporter=load('src/ui/gis-export.js'),workspace=load('src/ui/gis-workspace.js');
+ assert.match(exporter,/basemap==="vector"\?1:Math\.max\(\.35,/);
+ assert.match(exporter,/building:\{color:"#334155",label:"Bina"\}/);
+ assert.match(exporter,/hard:\{color:"#64748b",label:"Sert zemin"\}/);
+ assert.match(exporter,/water:\{color:"#3b82f6",label:"Su"\}/);
+ assert.match(workspace,/const BUILDING_PRESENTATION_COLOR="#334155"/);
+ assert.match(load('css/gis-workspace.css'),/\.dg-ux-boundary-finish\[hidden\]\{display:none!important\}/);
+ assert.match(load('css/gis-workspace.css'),/has\(\.dg-ux-boundary-dock\):has\(\.dg-ux-ndvi-map-info\)/);
+});
