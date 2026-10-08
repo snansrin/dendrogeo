@@ -247,7 +247,9 @@
 <script src="src/utils/truncation.js?v=f43c76b3" defer></script>
 <!-- Faz 7: geotiff (317 KB) ve chart.js (208 KB) artık SENKRON yüklenmiyor;
      src/utils/lazylibs.js ihtiyaç anında enjekte eder (LULC analizi / panel grafiği). -->
-<script id="dgRuntimeBuild" type="application/json">"ea1909660487374d"</script>
+<script id="dgRuntimeBuild" type="application/json">"3f56b1856a659b7a"</script>
+<!-- Verified fallback OSM water geometry, independent of the lazy raster engine. -->
+<script src="src/services/osm-water-backup.js?v=b3429cdc" defer></script>
 <script src="src/utils/lazylibs.js?v=19763039" defer></script>
 <script src="src/services/allometry.js?v=46ea5b87" defer></script>
 <script src="src/services/auth.js?v=810d5034" defer></script>
@@ -286,7 +288,7 @@
 <script src="src/services/osm-client.js?v=7b91c7e1" defer></script>
 <script src="src/services/park-geometry.js?v=ff23581a" defer></script>
 <script src="src/services/geofence.js?v=f1d93562" defer></script>
-<script src="src/services/park-query.js?v=400e3b3f" defer></script>
+<script src="src/services/park-query.js?v=f6151f71" defer></script>
 <!-- PARK KİMLİĞİ (2026-09-24): queryPark'ın bulduğu parkı public.parks'a yazar,
      projeyi parka bağlar, ölçüm kapısını (park algılanmadan ölçüm yok) kurar.
      Sıra ÖNEMLİ: park-query'den sonra, grid-engine'den önce (grid panelindeki

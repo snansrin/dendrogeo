@@ -18,24 +18,42 @@ function dgLcCachedOsm(bbox){
  return b.minLat<=bbox.minLat&&b.minLon<=bbox.minLon&&b.maxLat>=bbox.maxLat&&b.maxLon>=bbox.maxLon?cached:null;
 }
 async function dgLcOsmData(bbox){
+ const boundary=JSON.stringify(typeof PARK_POLY==="undefined"?null:PARK_POLY);
  const pending=window.DG_SURFACE_OSM_PENDING;
- if(pending?.boundary===JSON.stringify(typeof PARK_POLY==="undefined"?null:PARK_POLY)){
-  await pending.promise.catch(()=>false);
-  const shared=dgLcCachedOsm(bbox);if(shared)return shared;
-  // The complete detailed request already failed; do not repeat the same
-  // evidence request while the service is quarantined. Raster remains primary.
-  return null;
- }
- const coverage=dgLcCachedOsm(bbox);if(coverage)return coverage;
+ const detailedAlreadyAttempted=pending?.boundary===boundary;
+ if(detailedAlreadyAttempted)await pending.promise.catch(()=>false);
+ // Keep the last valid same-park geometry when a refresh is offline.
+ const coverage=dgLcCachedOsm(bbox);
+ if(coverage?.elements?.some(dgLcIsWaterElement))return coverage;
  const b=[bbox.minLat,bbox.minLon,bbox.maxLat,bbox.maxLon].join(","),old=DG_LC_OSM_CACHE.get(b);
  if(old&&Date.now()-old.time<600000)return old.promise;
- const query='[out:json][timeout:25];(nwr["natural"="water"]('+b+');nwr["waterway"="riverbank"]('+b+');nwr["leisure"="swimming_pool"]('+b+');nwr["landuse"="basin"]('+b+');way["highway"]('+b+');way["area:highway"]('+b+'););out geom;';
  const promise=(async()=>{
-  if(typeof overpassRequest==="function")return overpassRequest(query,"su+yol");
-  // Standalone CLI/QA contexts may load the land-cover modules without the
-  // app shell. Keep the same bounded request and do not accept partial data.
-  const r=await fetch("https://lz4.overpass-api.de/api/interpreter",{method:"POST",headers:{"Content-Type":"application/x-www-form-urlencoded",Accept:"application/json"},body:"data="+encodeURIComponent(query),signal:AbortSignal.timeout(18000)});
-  if(!r.ok)return null;const data=await r.json();return Array.isArray(data?.elements)&&!data.remark?data:null;
+  // Independent small backup source. Never synthesize a lake from 10 m pixels.
+  const fallback=typeof window.DG_OSM_WATER_BACKUP?.lookup==="function"
+   ?await window.DG_OSM_WATER_BACKUP.lookup(bbox).catch(()=>null):null;
+  if(fallback?.elements?.length){
+   const existing=(coverage?.elements||[]).filter(el=>el.type+"/"+el.id!=="way/423602740");
+   const result={elements:[...existing,...fallback.elements],bbox,boundary,fetchedAt:new Date().toISOString(),source:fallback.source};
+   if(boundary===JSON.stringify(typeof PARK_POLY==="undefined"?null:PARK_POLY))window.DG_SURFACE_OSM=result;
+   return result;
+  }
+  if(coverage)return coverage;
+  // Do not repeat a failed detailed Overpass request inside the same
+  // workflow: the independent OSM lookup above is the bounded recovery.
+  if(detailedAlreadyAttempted)return null;
+  // Detailed OSM may fail or time out; a smaller independent query must
+  // still be attempted (previous code returned null without trying).
+  const query='[out:json][timeout:25];(nwr["natural"="water"]('+b+');nwr["waterway"="riverbank"]('+b+');nwr["leisure"="swimming_pool"]('+b+');nwr["landuse"~"reservoir|basin"]('+b+');way["highway"]('+b+');way["area:highway"]('+b+'););out geom;';
+  let result=null;
+  if(typeof overpassRequest==="function")result=await overpassRequest(query,"su+yol");
+  else{
+   const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),15000);
+   try{
+    const res=await fetch("https://lz4.overpass-api.de/api/interpreter",{method:"POST",headers:{"Content-Type":"application/x-www-form-urlencoded",Accept:"application/json"},body:"data="+encodeURIComponent(query),signal:controller.signal});
+    if(res.ok){const data=await res.json();if(Array.isArray(data?.elements)&&!data.remark)result=data;}
+   }catch(error){}finally{clearTimeout(timer);}
+  }
+  return result;
  })().catch(()=>null).then(data=>{if(!data)DG_LC_OSM_CACHE.delete(b);return data;});
  DG_LC_OSM_CACHE.set(b,{time:Date.now(),promise});return promise;
 }

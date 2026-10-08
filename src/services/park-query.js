@@ -155,12 +155,11 @@ async function dgQueryDetailedCoverage(){
   }
 
   const boundary=JSON.stringify(PARK_POLY);
-  window.DG_SURFACE_OSM=null;
-  IMP_RINGS=[];
-  IMP_LINES=[];
-  GRID_BLOCK_LINES=[];
-  WATER_RINGS=[];
-  WATER_LINES=[];
+  // A failed refresh may not erase previously verified same-park geometries.
+  if(window.DG_SURFACE_OSM?.boundary!==boundary){
+    window.DG_SURFACE_OSM=null;
+    IMP_RINGS=[];IMP_LINES=[];GRID_BLOCK_LINES=[];WATER_RINGS=[];WATER_LINES=[];
+  }
 
   let minLat=90;
   let maxLat=-90;
@@ -235,6 +234,7 @@ async function dgQueryDetailedCoverage(){
     return false;
   }
 
+  IMP_RINGS=[];IMP_LINES=[];GRID_BLOCK_LINES=[];WATER_RINGS=[];WATER_LINES=[];
   window.DG_SURFACE_OSM={elements:json.elements||[],bbox:{minLat:minLat-pad,minLon:minLon-pad,maxLat:maxLat+pad,maxLon:maxLon+pad},boundary,fetchedAt:new Date().toISOString()};
   const seenWater=new Set();
   const seenImp=new Set();

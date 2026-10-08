@@ -248,6 +248,8 @@
 <!-- Faz 7: geotiff (317 KB) ve chart.js (208 KB) artık SENKRON yüklenmiyor;
      src/utils/lazylibs.js ihtiyaç anında enjekte eder (LULC analizi / panel grafiği). -->
 <script id="dgRuntimeBuild" type="application/json">"__DG_RUNTIME_BUILD__"</script>
+<!-- Verified fallback OSM water geometry, independent of the lazy raster engine. -->
+<script src="src/services/osm-water-backup.js?v=00000000" defer></script>
 <script src="src/utils/lazylibs.js?v=00000000" defer></script>
 <script src="src/services/allometry.js?v=23ec2992" defer></script>
 <script src="src/services/auth.js?v=7c805a8c" defer></script>

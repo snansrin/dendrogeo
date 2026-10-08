@@ -6,6 +6,8 @@ on:
       - 'scripts/val-qa.mjs'
       - 'src/services/lc-*.js'
       - 'src/ui/lc-sens.js'
+      - 'src/services/osm-water-backup.js'
+      - 'scripts/verify-osm-water-live.mjs'
       - '.github/workflows/gis-three-park-qa.yml'
   workflow_dispatch: {}
 
@@ -24,6 +26,8 @@ jobs:
           node-version: 20
       - name: Dependencies
         run: npm ci
+      - name: Verify current OSM water polygon geometry
+        run: node scripts/verify-osm-water-live.mjs
       - name: Run current-year park QA
         shell: bash
         run: |

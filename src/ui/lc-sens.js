@@ -130,6 +130,16 @@ function dgSensDirty(){DG_SENS.visualVersion++;DG_SENS.editing=true;if(DG_SENS.r
 function dgSensPredict(sp){return window.DG_LC_VALIDATE.spectralPredict(sp,DG_SENS.record?.sens);}
 function dgSensCellKey(c){return c.row+":"+c.col;}
 function dgSensHasExplicitWaterBoundary(rec=DG_SENS.record){return !!(rec?.features||[]).some(f=>f?.type==="water"&&f?.method==="visual-boundary");}
+/* A complete, validated OSM lake way is the authoritative water footprint
+ * only for its own park. Other parks keep baseline raster water unless
+ * explicitly reviewed; incomplete OSM data may not erase water elsewhere. */
+function dgSensHasVerifiedWaterBoundary(rec=DG_SENS.record){
+ return rec?.useObjects!==false&&!!(rec?.objectFeatures||[]).some(f=>
+  f?.type==="water"&&f?.method==="osm-boundary"&&f?.osmId==="way/423602740"&&
+  window.DG_SURFACE_REVIEW.validFeature(f));
+}
+function dgSensHasWaterFootprint(rec=DG_SENS.record){return dgSensHasExplicitWaterBoundary(rec)||dgSensHasVerifiedWaterBoundary(rec);}
+
 function dgSensWaterOutsideClass(c,rec=DG_SENS.record){
  const key=dgSensCellKey(c),decision=rec?.corrections?.[key],land=new Set(["green","hard","bare"]);
  if(decision&&land.has(decision.to)&&(decision.method==="visual-cell"||(!DG_SENS.editing&&decision.method==="sensitivity")))return decision.to;
@@ -139,14 +149,14 @@ function dgSensWaterOutsideClass(c,rec=DG_SENS.record){
 }
 function dgSensWaterOutsideParts(){return dgSensParts().filter(p=>(p.cell?.rasterClassKey||p.cell?.classKey)==="water"&&p.method==="review-cell");}
 function dgSensWaterBoundaryUnresolved(){const unknown=new Set();for(const p of dgSensWaterOutsideParts())if(p.type==="other")unknown.add(p.key);return unknown.size;}
-function dgSensNeedsWaterScan(){return dgSensHasExplicitWaterBoundary()&&dgSensWaterOutsideParts().length>0&&!DG_SENS.record?.profile?.cells;}
+function dgSensNeedsWaterScan(){return dgSensHasWaterFootprint()&&dgSensWaterOutsideParts().length>0&&!DG_SENS.record?.profile?.cells;}
 function dgSensEffective(c){
  const original=c.rasterClassKey||c.classKey;
  if(DG_SENS.rawView)return original;
  const dec=DG_SENS.record?.corrections?.[dgSensCellKey(c)];
  // A user water polygon is authoritative for water. Outside it, raster-water
  // cells use non-water spectral evidence; inadequate evidence stays review-only.
- if(original==="water"&&dgSensHasExplicitWaterBoundary())return dgSensWaterOutsideClass(c);
+ if(original==="water"&&dgSensHasWaterFootprint())return dgSensWaterOutsideClass(c);
  // Manual cells and accepted decisions take precedence over optional spectral review.
  if(dec&&(dec.method==="visual-cell"||!DG_SENS.editing))return window.DG_SURFACE_REVIEW.types[dec.to]?dec.to:original;
  if(!DG_SENS.editing||!DG_SENS.record?.spectralEnabled||Number(c.areaM2)<window.DG_LC_VALIDATE.defaults.edgeAreaM2)return original;
@@ -189,6 +199,8 @@ async function dgSensMount(hostId){
  const partitioned=await dgSensRepartition();if(epoch!==DG_SENS.epoch||!partitioned)return;if(rec.acceptedResult&&!DG_SENS.editing)dgSensRenderAccepted();
  const pending=document.getElementById("surfacePendingTools");if(pending)pending.style.display="none";
  host.scrollIntoView({block:"nearest"});
+ // The initial analysis also discovers water; Tara is not a prerequisite.
+ if(rec.useObjects!==false&&!(rec.objectFeatures||[]).some(f=>f.type==="water"||f.type==="pool"))void dgSensAutoWaterOnMount(rec,epoch);
 }
 function dgSensParts(){
  const cells=dgSensCells(),geometry=DG_SENS.geometry,park=DG_SENS.parkGeometry,rec=DG_SENS.record;
@@ -350,11 +362,22 @@ function dgSensUpdateSummary(){
 function dgSensUpdateStatus(){const el=document.getElementById("dgSensStatus");if(el)el.textContent=DG_SENS.status||(DG_SENS.mergeBusy?_tvs("Çizim güncelleniyor…"):_tvs(DG_SENS.record?.acceptedAt&&!DG_SENS.editing?"Kayıtlı sonuç korunuyor. Kaydırıcıyı değiştirerek yeni önizleme yapabilirsiniz.":"Önizleme henüz hesap kaydına yazılmadı."));}
 /* Scan refreshes water footprints; map object picking is not required.
  * Manual boundaries and published snapshots remain untouched. */
-async function dgSensAutoWaterOnScan(rec,epoch){
+async function dgSensAutoWaterOnMount(rec,epoch){
+ const n=await dgSensAutoWaterOnScan(rec,epoch,true);
+ if(epoch!==DG_SENS.epoch||DG_SENS.record!==rec||DG_SENS.busy)return;
+ if(n){
+  DG_SENS.status=_tvs("OSM su/havuz sınırı otomatik uygulandı. Ham raster korunuyor; kıyıyı doğrulayıp sonucu kabul edin.");
+  await dgSensSave();
+ }else if(!(rec.objectFeatures||[]).some(f=>f.type==="water"||f.type==="pool")){
+  DG_SENS.status=_tvs("OSM su geometrisine erişilemedi. Bu 10 m raster önizlemesidir; kıyı sınırını doğrulanmış kabul etmeyin. Yeniden Tara'yı deneyin.");
+ }
+ dgSensUpdateStatus();
+}
+async function dgSensAutoWaterOnScan(rec,epoch,fromMount=false){
  if(rec.useObjects===false||typeof dgLcOsmData!=="function"||typeof dgSurfaceObjects!=="function")return 0;
  const bbox=dgLcBboxFromGeometry(PARK_POLY,PARK_HOLES||[]);
  const data=await dgLcOsmData(bbox).catch(()=>null);
- if(!data?.elements?.length||epoch!==DG_SENS.epoch||DG_SENS.record!==rec)return 0;
+ if(!data?.elements?.length||epoch!==DG_SENS.epoch||DG_SENS.record!==rec||(fromMount&&(DG_SENS.busy||DG_SENS.saving||DG_SENS.exporting)))return 0;
  const objects=dgSurfaceObjects(data.elements,DG_SENS.epsg).filter(f=>(f.type==="water"||f.type==="pool")&&window.DG_SURFACE_REVIEW.validFeature(f));
  if(!objects.length)return 0;
  const ids=new Set(objects.map(f=>f.osmId));
@@ -383,7 +406,7 @@ async function dgSensScan(){
   const autoWater=await dgSensAutoWaterOnScan(rec,epoch);if(epoch!==DG_SENS.epoch||DG_SENS.record!==rec)return false;
   rec.profile=profile;DG_SENS.vegetationRenderKey=null;rec.spectralEnabled=false;rec.scannedAt=new Date().toISOString();dgSensDirty();const audit=dgSensScanAudit(rec);DG_SENS.status=_tvst("Uydu taraması tamamlandı: {profiled}/{total} hücrede yeterli gözlem, {diff} hücrede sınıf farkı. 2021 ham rasterı değişmedi.",{profiled:audit?.profiled||0,total:audit?.total||0,diff:audit?.transitions.reduce((n,x)=>n+x.cells,0)||0});
   if(autoWater)DG_SENS.status+=" OSM su/havuz sınırları otomatik değerlendirildi ("+autoWater+" nesne).";
-  const unresolved=dgSensWaterBoundaryUnresolved();if(dgSensHasExplicitWaterBoundary()&&unresolved)DG_SENS.status+=" Su sınırı dışında "+unresolved+" hücre belirsiz; yanlış su alanı kabul edilmedi, bu hücreleri haritada tek tek sınıflandırın.";
+  const unresolved=dgSensWaterBoundaryUnresolved();if(dgSensHasWaterFootprint()&&unresolved)DG_SENS.status+=" Su sınırı dışında "+unresolved+" hücre belirsiz; yanlış su alanı kabul edilmedi, bu hücreleri haritada tek tek sınıflandırın.";
   dgSensRefreshLayer();dgSensUpdateSummary();
   await dgSensSave();completed=true;
  }catch(e){if(epoch===DG_SENS.epoch){DG_SENS.status=_tvs("Tarama başarısız: ")+String(e.message||e);toast(DG_SENS.status,"err");}}
@@ -493,6 +516,19 @@ async function dgSensAccept(){
 }
 function dgSensReset(){if(DG_SENS.rawView||DG_SENS.busy||DG_SENS.saving||!confirm(_tvs("Tüm kullanıcı düzeltmeleri silinsin mi? Ham raster korunur.")))return;DG_SENS.record.corrections={};DG_SENS.record.features=[];DG_SENS.record.brushHistory=[];dgSensDirty();dgSensRepartition().then(ok=>ok&&dgSensSave());}
 function dgSensFindObjectAt(latlng,elements=window.DG_SURFACE_OSM?.elements||[]){
+ // Retain access to already-validated OSM polygons during a network outage.
+ if(!elements.length&&DG_SENS.record?.objectFeatures?.length&&latlng){
+  const pt=dgLcUtmForward(latlng.lat,latlng.lng,DG_SENS.epsg);
+  for(const f of DG_SENS.record.objectFeatures){
+   if(!window.DG_SURFACE_REVIEW.validFeature(f))continue;
+   for(const poly of dgSurfaceFeatureGeometry(f,DG_SENS.epsg)){
+    const box=dgSurfaceBounds([poly]);
+    if(pt.x<box[0]||pt.x>box[2]||pt.y<box[1]||pt.y>box[3])continue;
+    if(dgGridPointDistance([pt.x,pt.y],[poly])>=0)return{type:f.type,geometry:f.geometry,osmId:f.osmId||"OSM"};
+   }
+  }
+ }
+
  if(!latlng||!Array.isArray(elements)||!DG_SENS.geometry||!DG_SENS.parkGeometry||typeof dgSurfaceObjects!=="function")return null;
  const point=dgLcUtmForward(latlng.lat,latlng.lng,DG_SENS.epsg),candidates=dgSurfaceObjects(elements,DG_SENS.epsg);let best=null;
  for(const feature of candidates){
@@ -513,7 +549,7 @@ function dgSensFindObjectAt(latlng,elements=window.DG_SURFACE_OSM?.elements||[])
 }
 function dgSensObjectPickStart(){
  if(DG_SENS.rawView||DG_SENS.busy||DG_SENS.saving||DG_SENS.exporting)return;
- const data=window.DG_SURFACE_OSM;if(!data||data.boundary!==JSON.stringify(PARK_POLY)){toast(_tvs("Bu park için güncel OSM sınırları bulunamadı. OSM verisini yükleyip yeniden deneyin."),"warn");return;}
+ const data=window.DG_SURFACE_OSM,stored=(DG_SENS.record?.objectFeatures||[]).length>0;if((!data||data.boundary!==JSON.stringify(PARK_POLY))&&!stored){toast(_tvs("OSM nesneleri henüz yüklenemedi. Su sınırı otomatik aranır; çevrimiçi olduğunuzda Yeniden Tara’yı deneyin."),"warn");return;}
  dgSensBrushStop();dgSensDrawCancel();dgSensObjectCancel();DG_SENS.objectPick=true;dgSensGuard(true);DG_SENS.status=_tvs("Sınırını seçeceğiniz OSM nesnesine dokunun.");
  map.on("click",dgSensObjectPickAt);dgSensRenderPaintTools();dgSensUpdateStatus();
 }
