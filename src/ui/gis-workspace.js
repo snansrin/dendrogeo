@@ -422,6 +422,6 @@
   },true);
   sync();
  }
- window.DG_GIS_WORKSPACE_UI={sync,closeTool,pathLength,areaMeters};
+ window.DG_GIS_WORKSPACE_UI={sync,closeTool,activateTool,pathLength,areaMeters};
  if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",init,{once:true});else init();
 })();
