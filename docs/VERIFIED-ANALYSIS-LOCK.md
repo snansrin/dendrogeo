@@ -41,3 +41,7 @@ WorldCover SAS isteği mevcut Supabase projesinin `planetary-sas` Edge Function'
 Yeni analiz başında cihaz taslağı saklanır, eski inceleme katmanı kaldırılır ve raster state temizlenir. Başarısız analiz eski haritayı yeni sonuç gibi göstermez.
 
 `WorldCover browser CORS QA` gerçek Chromium'da DendroGeo origin'i ve uygulamanın CSP'si altında doğrudan Microsoft imza çağrısını engeller; yeni servis üzerinden aynı resmi WorldCover COG'undan gerçek kategorik pikseller okur. Bu kontrol Node QA'nın kapsamadığı tarayıcı CORS davranışını doğrular. Yeni geri dönüş dalı: `recovery/worldcover-cors-r89`; önceki r88 yedeği korunur.
+
+## r90 — İlk açılış panelini geri getirme
+
+Kullanıcının bildirdiği kayıp Tara kontrolü, hassasiyet barları ve başlamayan otomatik tam tarama onarıldı. r89 ilk açılışta monte edilmemiş `lcSens` yuvasına cleanup çağırıyordu; bu çağrı yuvayı DOM’dan kaldırıyordu. Temizlik artık yalnız önceki bir analiz kaydı varsa yapılır. Raster, geometri, sınıflandırma, barlar ve tarama motoru değişmedi. Gerçek ilk analiz köprüsü → panel mount → otomatik tarama → dört etkin nötr bar akışı regresyon ve Chromium kontrollerine eklendi. Geri dönüş dalı: `recovery/surface-panel-r90`.

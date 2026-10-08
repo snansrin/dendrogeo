@@ -20,14 +20,14 @@
     "src/services/park-query.js": "400e3b3ff4a659894423fa84d0d9ee20ee2ffcd545632d6ecd33e1bd485459ae",
     "src/ui/lc-report.js": "b8818f2e07ff8278d4dc40038c705c02e8724f84fa7f7c79d945d991afd57730",
     "src/ui/lc-sens.js": "6073c2f39bc6a6a2b84f15add9533869dc220c202f94d933c59b8c60a3a52700",
-    "src/ui/park-export.js": "8c9326b29e87898cc04da4ef9307beedec6afa39429db8eb2cfd43a0099e53ab",
+    "src/ui/park-export.js": "dea14ee013707b4f1e4e749b6c4728b52579bb7c4595840a0a0511becf781b67",
     "src/utils/lazylibs.js": "19763039af7bb2e235cd5720656234026d8aabafaab3fb02b8c5763cccb0a242",
     "src/workers/surface-worker.js": "2501b8a650c497805c976fe733222784919bdaa133905948e28aee9bad968858",
-    "sw.js": "7cc00a6efc8712e5ac159978000bc763426a864395d06680c9e1d0d198d5ae68",
+    "sw.js": "d82b16513a6365f5c3e1566b789cd68386988069a6b6f086b439b7ca0166c896",
     "test/gis-analysis-engine-lock.test.mjs": "2906986b2ceba9595b1c95a5d4254a4fa0023f944c791b40218f5910a068590b",
     "test/park-network-recovery.test.mjs": "f1fec906e3ffba3aef404881ea7b06327686e3cae7459a9eb557490aa3934a82",
     "test/surface-network-budget.test.mjs": "afd6f46aa25624555d14034c0c40fddb20a8520e3e1518f959caaf7a182bb181",
-    "test/surface-review.test.mjs": "b73739d98cdf4b2b92f073a66374a3271ff565054c51702df3bd11b50155e944",
+    "test/surface-review.test.mjs": "931557e7f7ee5aea82ceb08a0c2344b539a56986b5fa61cac3a47aa230cefa60",
     "test/sw-cache.test.mjs": "ec9d8cced385fcaa02dd2e0305daa9cecd7d0eccab8e0f97f72c884f4fa6d503",
     "vendor/geotiff-2.1.3.js": "cb5c9731bfee1f8bff1728e54e4436ada81ea3258b178a3d6603c61b58d99e6c",
     "vendor/polygon-clipping-0.15.7.js": "7f8619e84a86ce8dd400c9b50430e9c8cf8f26027b19eeb479f109f5c1a9d688",
@@ -38,11 +38,12 @@
     "supabase/functions/planetary-sas/handler.mjs": "2e2f3042cda068dabba156b10c972cc88123124ecefe604bb65d408a1b45ccb4",
     "supabase/functions/planetary-sas/index.ts": "7ef50cdef45db491237707e814b3ba4b07c03998f6d8625084c5b3be82228b4c",
     "supabase/functions/planetary-sas/deno.json": "b8b9e69ca2d156d509025e88d5c8cd04d1436147e712e0f7be534fa60d6c5f3a",
-    "scripts/worldcover-browser-smoke.mjs": "61bd4427ffc2d36ac611344d7dda72ba7c654ffb0fe631726dff9487c5208aad",
+    "scripts/worldcover-browser-smoke.mjs": "8ede165d596fe03da5ba880960c78698499da9c1cc147bc81734e53965981985",
     "test/worldcover-cors.test.mjs": "c538dde04bef5468ec1f7c1dbe9e49fdb5478368710d0e66c056ecd64abd71b4",
-    ".github/workflows/worldcover-browser-qa.yml": "dc73c1deea6d9e7eb71aa0b0300bcbe0f13d3f4ac0764485c35f03de9753e967"
+    ".github/workflows/worldcover-browser-qa.yml": "da17eeea56279e4b62e516e4102716d2b8cb005a578198ef19f2c1197ded230e"
   },
-  "versionRefresh": "20261008r89 — browser WorldCover CORS repair release; numeric engine unchanged",
-  "lockedReleaseBranch": "recovery/worldcover-cors-r89",
-  "approvedRepair": "2026-10-08: reported Chrome WorldCover signing CORS failure; only signing transport and stale-preview cleanup were repaired. Numeric raster classification and geometry remain unchanged."
+  "versionRefresh": "20261008r90 — restore first-mount panel and automatic full scan; numeric engine unchanged",
+  "lockedReleaseBranch": "recovery/surface-panel-r90",
+  "approvedRepair": "2026-10-08: reported Chrome WorldCover signing CORS failure; only signing transport and stale-preview cleanup were repaired. Numeric raster classification and geometry remain unchanged.",
+  "approvedPanelRepair": "User explicitly requested restoring the missing scan control, sensitivity bars and full automatic scan. Only skip cleanup before the first panel mount; engine and controls unchanged."
 }
