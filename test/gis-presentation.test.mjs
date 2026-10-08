@@ -204,10 +204,10 @@ test('mobile menu and relative NDVI status remain visible without editing locked
  assert.match(work,/typeof dgSensFocus==="function"\)dgSensFocus\(null\)/);
 });
 
-test('Other is hidden only from review rows, without removing its area from saved analysis',()=>{
+test('Unclassified remainder is visibly named without modifying its scientific area',()=>{
  const work=load('src/ui/gis-workspace.js');
  const science=load('src/ui/lc-sens.js');
- assert.match(work,/if\(label\?\.textContent\?\.trim\(\)==="Diğer"\)\{row\.remove\(\);continue;\}/);
+ assert.match(work,/if\(label\?\.textContent\?\.trim\(\)==="Diğer"\)label\.textContent="Sınıflandırılamayan"/);
  assert.match(science,/function dgSensAreaBars\(areas\)/);
  assert.match(science,/Object\.entries\(areas\)/);
  assert.doesNotMatch(work,/\.delete\(other\)|areas\.other\s*=|record\.areas\s*=/);
