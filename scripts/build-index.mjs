@@ -47,7 +47,10 @@ const mode = process.argv.includes('--write') ? 'write'
            : process.argv.includes('--check') ? 'check'
            : 'check';
 
-const v8 = (rel) => createHash('sha256').update(readFileSync(join(ROOT, rel))).digest('hex').slice(0, 8);
+// Cache revision also invalidates unchanged assets after a rollback.
+const cacheRevision = readFileSync(join(ROOT, 'sw.js'), 'utf8').match(/const CACHE_VERSION = '([^']+)'/)[1];
+
+const v8 = (rel) => createHash('sha256').update(cacheRevision).update(readFileSync(join(ROOT, rel))).digest('hex').slice(0, 8);
 
 /* ?v= değerlerini içerik hash'iyle tazele (version-sync.mjs ile aynı regex) */
 function refreshHashes(text) {
@@ -60,7 +63,7 @@ function refreshHashes(text) {
 }
 
 function runtimeBuild(){
- const hash=createHash('sha256');
+ const hash=createHash('sha256').update(cacheRevision);
  function visit(dir){for(const item of readdirSync(join(ROOT,dir),{withFileTypes:true}).sort((a,b)=>a.name.localeCompare(b.name))){const path=dir+'/'+item.name;if(item.isDirectory())visit(path);else if(path.endsWith('.js'))hash.update(path).update(readFileSync(join(ROOT,path)));}}
  visit('src');visit('vendor');return hash.digest('hex').slice(0,16);
 }

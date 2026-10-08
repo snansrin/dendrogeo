@@ -29,7 +29,7 @@ const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const html = readFileSync(join(ROOT, 'index.html'), 'utf8');
 const sw = readFileSync(join(ROOT, 'sw.js'), 'utf8');
 
-const sha8 = (p) => createHash('sha256').update(readFileSync(join(ROOT, p))).digest('hex').slice(0, 8);
+const sha8 = (p) => createHash('sha256').update(sw.match(/const CACHE_VERSION = '([^']+)'/)[1]).update(readFileSync(join(ROOT, p))).digest('hex').slice(0, 8);
 
 function walk(dir) {
   const out = [];

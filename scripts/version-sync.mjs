@@ -34,7 +34,10 @@ const mod = process.argv.includes('--write') ? 'write'
 const htmlYol = join(ROOT, 'index.html');
 let html = readFileSync(htmlYol, 'utf8');
 
-const v8 = (p) => createHash('sha256').update(readFileSync(join(ROOT, p))).digest('hex').slice(0, 8);
+// Cache revision also invalidates unchanged assets after a rollback.
+const cacheRevision = readFileSync(join(ROOT, 'sw.js'), 'utf8').match(/const CACHE_VERSION = '([^']+)'/)[1];
+
+const v8 = (p) => createHash('sha256').update(cacheRevision).update(readFileSync(join(ROOT, p))).digest('hex').slice(0, 8);
 
 let degisen = 0, sorun = 0;
 html = html.replace(/((?:src|href)=")((?:src|css|vendor)\/[^"?]+)(\?v=)([A-Za-z0-9]+)(")/g,
