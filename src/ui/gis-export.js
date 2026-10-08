@@ -115,6 +115,44 @@
   ctx.globalAlpha=1;
   return true;
  }
+ // Exact review geometry, not the transient Leaflet displayPaths (which may be
+ // filtered/empty on a verified map). Pure canvas rendering: no edits to data.
+ function drawVerifiedFeatures(ctx,pr,features,dict){
+  let painted=0;
+  for(const feature of features||[]){
+   const name=feature?.properties?.class;
+   const polys=feature?.geometry?.type==="MultiPolygon"?feature.geometry.coordinates:null;
+   if(!polys?.length)continue;
+   ctx.beginPath();
+   let paths=0;
+   for(const poly of polys)for(const ring of poly||[]){
+    if(!Array.isArray(ring)||ring.length<3)continue;
+    for(let i=0;i<ring.length;i++){
+     const p=ring[i];if(!Array.isArray(p)||p.length<2)continue;
+     if(i===0)ctx.moveTo(pr.x(p[0]),pr.y(p[1]));
+     else ctx.lineTo(pr.x(p[0]),pr.y(p[1]));
+    }
+    ctx.closePath();paths++;
+   }
+   if(!paths)continue;
+   // All scientific classes retain their approved visual hue. Only building
+   // is darkened, pool is shown with water, and unresolved remains neutral.
+   ctx.fillStyle=name==="building"?BUILDING_COLOR:name==="pool"?"#3b82f6":
+    dict[name]?.color||(typeof DG_SENS_COLORS!=="undefined"?DG_SENS_COLORS[name]:null)||"#94a3b8";
+   ctx.globalAlpha=name==="other"?.18:1;
+   ctx.fill("evenodd");ctx.globalAlpha=1;painted++;
+  }
+  return painted;
+ }
+ async function verifiedFeatures(sens){
+  // The locked exporter reads fresh, resolved visual shapes. Reuse its exact
+  // read-only public functions; a cached Leaflet view is not authoritative.
+  if(typeof dgSensParts==="function"&&typeof dgSensVisualResult==="function"){
+   const parts=dgSensParts(),job=await dgSensVisualResult(parts);
+   if(Array.isArray(job?.displayFeatures)&&job.displayFeatures.length)return job.displayFeatures;
+  }
+  return Array.isArray(sens?.displayFeatures)?sens.displayFeatures:[];
+ }
  function drawRawPatches(ctx,pr,patches,dict,opacity=.52){
   let painted=0;
   for(const patch of patches||[]){
@@ -294,7 +332,8 @@
   if(!rec||typeof PARK_POLY==="undefined"||!Array.isArray(PARK_POLY)||!PARK_POLY.length){
    notify("Önce parkın arazi örtüsü analizini açın.","warn");return false;
   }
-  const basemap=baseChoice();
+  // Doğrulanmış Harita is a scientific cartographic plate, not the PNG İndir
+  // tile screenshot. Keep its original full-color map appearance.
   const showNdvi=!!sens.vegetationView&&!sens.rawView&&!!layers.surface;
   if(showNdvi&&typeof dgSensVegetationTiers!=="function"){
    notify("Göreli NDVI sınıfları bu oturumda bulunamadı.","warn");return false;
@@ -357,14 +396,13 @@
   for(const ring of PARK_POLY)outline(g,pr,ring);
   if(typeof PARK_HOLES!=="undefined")for(const ring of PARK_HOLES||[])outline(g,pr,ring);
   g.clip("evenodd");
-  await paintBaseTiles(g,pr,bounds,basemap);
   let painted=0;
   if(layers.surface){
-   for(const item of sens.displayPaths||[])
-    if(drawLeaflet(g,pr,item.poly,basemap==="vector"?1:Math.max(.35,(sens.opacity||65)/100),item.cls==="building"?BUILDING_COLOR:item.cls==="pool"?"#3b82f6":null))painted++;
+   const exact=await verifiedFeatures(sens);
+   painted=drawVerifiedFeatures(g,pr,exact,dict);
    if(!painted){
-    const last=window.DG_LANDCOVER?.getLast?.();
-    painted=drawRawPatches(g,pr,last?.patches||last?.report?.patches||[],dict,basemap==="vector"?1:.65);
+    notify("Kayıtlı yüzey geometrisi henüz hazır değil; boş veya eksik Doğrulanmış Harita üretilmedi.","warn");
+    return false;
    }
    // NDVI is drawn after regular green class (and before grid/waypoints),
    // so only observed green cells become sparse / moderate / dense.
@@ -446,7 +484,7 @@
   g.fillStyle=GREEN;g.fillRect(0,CH-70,CW,70);
   g.fillStyle="#cfe3d3";g.font="19px Arial";
   g.fillText(showNdvi?"Raster + kullanıcı kararları; NDVI yeşil alanda göreli karşılaştırmadır.":"Raster + doğrulanmış kullanıcı kararları; su yüzeyleri tek sınıfta sunulur.",40,CH-54,CW-80);
-  g.fillText(BASE_ATTR[basemap]+" · ESA WorldCover (CC BY 4.0) · "+String(rec.fingerprint||"").slice(0,8),40,CH-26,CW-80);
+  g.fillText("ESA WorldCover 2021 v200 (CC BY 4.0) · "+String(rec.fingerprint||"").slice(0,8)+" · CC BY-NC 4.0",40,CH-26,CW-80);
   return await new Promise(resolve=>canvas.toBlob(blob=>{
    if(!blob){notify("Doğrulanmış harita PNG üretilemedi.","err");resolve(false);return;}
    const uri=URL.createObjectURL(blob),a=document.createElement("a");
