@@ -153,11 +153,20 @@
     osm.boundary!==JSON.stringify(PARK_POLY))return{count:0,reason:"no-matched-osm"};
   if(s.busy||s.saving||s.draw||s.brush)return{count:0,reason:"busy"};
   const original=rec.objectFeatures||[];
+  const previousRoads=original.filter(f=>f?.source===GENERATED_ROAD_SOURCE);
   const preexisting=original.filter(f=>f?.source!==GENERATED_ROAD_SOURCE);
   const roads=hardRoadDrafts(osm.elements,preexisting,s.epsg,s.parkGeometry);
   if(!roads.length)return{count:0,reason:"no-qualified-road"};
   const extras=roads.filter(f=>!preexisting.some(o=>o.osmId===f.osmId&&o.type==="hard"));
   if(!extras.length)return{count:0,reason:"already-classified"};
+  // An idempotent second scan must NOT repartition or write back 250 roads
+  // again when OSM geometry is unchanged. Rebuild only if the actual
+  // footprint (including water/building mask) has changed.
+  if(previousRoads.length===extras.length&&extras.every(f=>{
+   const prev=previousRoads.find(x=>x.osmId===f.osmId);
+   return !!prev&&prev.roadEvidence===f.roadEvidence&&
+    JSON.stringify(prev.geometry)===JSON.stringify(f.geometry);
+  }))return{count:0,reason:"unchanged"};
   const first=preexisting.filter(f=>!["water","pool","building"].includes(f.type));
   const water=preexisting.filter(f=>["water","pool"].includes(f.type));
   const buildings=preexisting.filter(f=>f.type==="building");
