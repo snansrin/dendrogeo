@@ -322,3 +322,13 @@ test('previously selected pool brush safely becomes water on next UI update',()=
  assert.equal(chosen,'water');
  assert.equal(state.brushType,'water');
 });
+
+test('brush UI leaves saved pool boundaries alone while the water brush remains selected',()=>{
+ const work=load('src/ui/gis-workspace.js');
+ const core=load('src/ui/lc-sens.js');
+ assert.match(work,/legacyPool\.remove\(\)/);
+ assert.match(work,/if\(select\.value==="pool"\)select\.value="water"/);
+ assert.match(core,/function dgSensFeatures\(rec=DG_SENS\.record\)/);
+ assert.match(core,/dgSensDrawType/,'separate boundary classes remain available');
+ assert.match(core,/function dgSensSave\(\)/,'scientific persistence path remains original');
+});
