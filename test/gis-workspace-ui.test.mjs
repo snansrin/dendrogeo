@@ -60,7 +60,7 @@ test('measurements are useful map-only approximations, not scientific area chang
  const context={
   window:{addEventListener(){},visualViewport:null},
   document:{readyState:'loading',addEventListener(n,callback){handler=callback;}},
-  L:{latLng:p=>({distanceTo:q=>Math.hypot((p.lat-q.lat)*111200,(p.lng-q.lng)*85100)})},
+  L:{latLng:p=>({...p,distanceTo:q=>Math.hypot((p.lat-q.lat)*111200,(p.lng-q.lng)*85100)})},
   setTimeout,clearTimeout,console
  };
  vm.runInNewContext(ui,context,{timeout:1000});
