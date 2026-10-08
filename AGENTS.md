@@ -1,13 +1,15 @@
 # DendroGeo çalışma kuralları
 
-## Kilitli analiz — 8 Ekim 2026
+## Kesin dondurulmuş analiz — r90, 8 Ekim 2026
 
-Kullanıcı çalışan yüzey analizinin değiştirilmemesini açıkça istedi. `docs/verified-analysis-lock.json` içindeki dosyalar `90f0b0a2aa80cf684de8fc45e0a37fb3dbd97807` sürümünde kilitlidir. Motor, otomatik tam tarama, OSM su/yüzey maskeleri, geometri, harita gösterimi, modül yükleme ve tarayıcı önbelleği bu kapsamdadır.
+Kullanıcı kilidin onarım sırasında da aşılmamasını yeniden açıkça istedi. Çalışan yayın `f58deb7f936263d8ae3eb3e14328a494684d1de0` (r90), geri dönüş `recovery/surface-panel-r90`.
 
-- Kullanıcı bu kilidi açmayı açıkça istemeden korunan dosyaları değiştirmeyin. Arayüz/rapor/başka özellik isteği kilidi açma izni değildir.
-- Kontrolü geçirmek için hash, manifest, kilit betiği, CI kilit adımı veya regresyon testlerini güncellemeyin/silmeyin/devre dışı bırakmayın.
-- `npm run check:analysis-lock` ve `npm run check` geçmeli. Kapsam dışındaki değişiklikleri yapın; kilitli dosyaya dokunmak gerekiyorsa önce gerekçeyi ve somut değişikliği kullanıcıya sunun.
-- Geri dönüş: `recovery/verified-analysis-2026-10-08`. Ayrıntılar: `docs/VERIFIED-ANALYSIS-LOCK.md`.
+- Analiz motoru, tam otomatik tarama, Tara/Yeniden Tara, hassasiyet barları, geometri, OSM maskeleri, görüntüleme, tema, yükleme, erişim imzası ve önbellek dondurulmuştur. `src/`, `css/`, `vendor/`, `partials/`, WorldCover imza fonksiyonu, giriş sayfası, SW, yayın sürümü ve bağımlılıklar korunur.
+- Hata bildirimi, "düzelt", "çalışmıyor" veya genel geliştirme talebi kilidi açma izni DEĞİLDİR. Önce salt okunur teşhis ve somut öneri sunulur. Kullanıcı korunan dosyalar için açıkça "kilidi aç" demeden bu dosyalara yazılmaz.
+- Hash/manifest güncellemek, koruma betiğini veya CI'ı değiştirmek, kontrolü atlamak, farklı dal üzerinden merge etmek, korumayı kaldırmak ve bu kuralı yeniden yorumlamak yasaktır. Temsilci korumayı kendi başına gevşetmez.
+- Koruma dosyaları da korunur: `AGENTS.md`, `.github/workflows/`, `scripts/`, kilit manifesti ve kilit belgesi. Yeni CI kapısı PR kodunu çalıştırmaz; ana daldaki güvenilir betikle sabit r90'a karşı karşılaştırır. Kodla birlikte hash değiştirmek kontrolü geçirmez.
+- Korunan dosyada değişiklik gerekiyorsa yalnız somut öneriyi hazırla; kullanıcının açık kilit açma talimatını bekle. Onay yoksa canlıya uygulama, sürüm artırma veya motor düzeltmesi yapma.
+- Kapsam dışındaki işlerde mevcut koruma ve testler geçmelidir. Çalışan r90 yedeği silinmez veya ileri taşınmaz.
 
 
 - Amaç, sahada telefonla güvenilir veri toplamaktır. 360, 390 ve 430 px genişliklerde taşma ve gereksiz kaydırmayı kontrol edin.

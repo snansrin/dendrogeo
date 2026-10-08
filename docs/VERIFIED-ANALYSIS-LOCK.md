@@ -45,3 +45,11 @@ Yeni analiz başında cihaz taslağı saklanır, eski inceleme katmanı kaldır�
 ## r90 — İlk açılış panelini geri getirme
 
 Kullanıcının bildirdiği kayıp Tara kontrolü, hassasiyet barları ve başlamayan otomatik tam tarama onarıldı. r89 ilk açılışta monte edilmemiş `lcSens` yuvasına cleanup çağırıyordu; bu çağrı yuvayı DOM’dan kaldırıyordu. Temizlik artık yalnız önceki bir analiz kaydı varsa yapılır. Raster, geometri, sınıflandırma, barlar ve tarama motoru değişmedi. Gerçek ilk analiz köprüsü → panel mount → otomatik tarama → dört etkin nötr bar akışı regresyon ve Chromium kontrollerine eklendi. Geri dönüş dalı: `recovery/surface-panel-r90`.
+
+## Kesin r90 dondurma
+
+8 Ekim 2026 son kullanıcı talimatı önceki onarım istisnalarını kapatır. Sabit çalışma ağacı `f58deb7f936263d8ae3eb3e14328a494684d1de0` ve geri dönüş `recovery/surface-panel-r90`. Genel hata bildirimi kilit açma izni değildir.
+
+`Frozen r90 analysis gate` PR'ın kodunu çalıştırmadan ana dalın güvenilir betiğiyle uygulama dosyalarını sabit r90'a karşı, koruma/CI/derleme betiklerini güvenilir PR tabanına karşı karşılaştırır. Manifest ve hash'i birlikte değiştirme girişimi de başarısız olur. Mevcut hash denetimi ayrıca korunur. Bu dondurma uygulama dosyalarını veya r90 yayın sürümünü değiştirmez.
+
+GitHub sunucusunda zorunlu branch protection/ruleset ayarı ayrı bir katmandır. Bu bağlantı o yönetim ayarını değiştiren bir araç sunmuyor; CI kapısı yönetici erişimine karşı değiştirilemez bir sunucu kilidi olarak tanımlanamaz. Temsilci bu sınırı saklamaz ve kırmızı kontrolü görmezden gelerek merge yapmaz.
