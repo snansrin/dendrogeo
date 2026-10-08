@@ -180,33 +180,3 @@ jobs:
               sys.exit(1)
           print('✅ Canlı site depoyla birebir aynı.')
           PY
-
-  gok_su_island_hard_restore_build:
-    name: Göksu island hard-path and locked-core rollback QA
-    if: github.event_name == 'pull_request' && github.head_ref == 'fix/restore-locked-goksu-hard-paths-20261008'
-    runs-on: ubuntu-latest
-    permissions:
-      contents: write
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          ref: fix/restore-locked-goksu-hard-paths-20261008
-          fetch-depth: 0
-      - uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-      - run: npm ci
-      - name: Rebuild entrypoint and verify scientific lock and all tests
-        run: |
-          npm run build
-          npm run check
-      - name: Restore original CI and push only safe asset hash change
-        run: |
-          git fetch origin main
-          git show origin/main:.github/workflows/ci.yml > .github/workflows/ci.yml
-          git add index.html .github/workflows/ci.yml
-          git config user.name "DendroGeo GIS QA"
-          git config user.email "gis-ui-repair@users.noreply.github.com"
-          git commit -m "build(gis): refresh approved-core restoration and PNG presentation hashes"
-          git pull --rebase origin fix/restore-locked-goksu-hard-paths-20261008
-          git push origin HEAD:fix/restore-locked-goksu-hard-paths-20261008
