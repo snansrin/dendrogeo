@@ -790,3 +790,140 @@
     grid-row:2;
   }
 }
+
+/* 2026-10-08 · Measurement + file-menu consolidation + mobile restoration.
+   Existing button tokens, classes and GIS source colors remain unchanged. */
+#v-map #surfaceMenuBar>.dg-editor-menu.dg-ux-output-menu{margin-left:0}
+#v-map #surfaceMenuBar>.dg-editor-menu>summary{visibility:visible}
+#v-map #surfaceMapTools:has(.dg-ux-ndvi-map-info){
+  display:flex;align-items:flex-start;gap:7px;
+}
+#v-map #surfaceMapTools .dg-ux-ndvi-map-info{
+  pointer-events:none;
+  box-sizing:border-box;
+  width:min(260px,calc(100vw - 96px));
+  max-width:calc(100vw - 96px);
+  padding:9px 11px;
+  border:1px solid var(--line);
+  border-radius:9px;
+  background:var(--surface);
+  color:var(--ink);
+  box-shadow:0 3px 12px #18242020;
+  font:600 .7rem/1.55 var(--f-ui);
+  white-space:normal;
+  overflow-wrap:anywhere;
+}
+#v-map #surfaceMenuBar #parkRasterExport button[hidden]{display:none!important}
+@media(max-width:700px){
+  #v-map #surfaceMenuBar{
+    display:grid;
+    grid-template-columns:repeat(4,minmax(0,1fr));
+    width:100%;
+    max-width:100%;
+    overflow:visible;
+    grid-auto-flow:row;
+    grid-auto-rows:minmax(60px,auto);
+    justify-items:stretch;
+  }
+  #v-map #surfaceMenuBar>.dg-editor-menu{
+    display:block;
+    width:100%;
+    min-width:0;
+    min-height:60px;
+    margin:0;
+  }
+  #v-map #surfaceMenuBar>.dg-editor-menu>summary{
+    display:flex;
+    min-height:60px;
+    height:100%;
+    overflow-wrap:anywhere;
+    white-space:normal;
+    text-align:center;
+  }
+}
+@media(max-width:390px){
+  #v-map #surfaceMenuBar{grid-template-columns:repeat(3,minmax(0,1fr))}
+}
+
+/* Visible, theme-consistent native controls: overrides UA black range tracks.
+   Uses the existing map classes and never changes their scientific palette. */
+#v-map #lcSens input.dg-sens-slider[id^="dgSensRange-"]{
+  -webkit-appearance:none;
+  appearance:none;
+  background:transparent!important;
+  cursor:pointer;
+  height:44px;
+}
+#v-map #lcSens input.dg-sens-slider[id^="dgSensRange-"]::-webkit-slider-runnable-track{
+  height:9px;
+  border:1px solid var(--line);
+  border-radius:999px;
+  background:linear-gradient(to right,
+    var(--dg-ux-slider-color,#22c55e) 0%,
+    var(--dg-ux-slider-color,#22c55e) var(--dg-ux-slider-fill,50%),
+    var(--surface) var(--dg-ux-slider-fill,50%),
+    var(--surface) 100%);
+}
+#v-map #lcSens input.dg-sens-slider[id^="dgSensRange-"]::-webkit-slider-thumb{
+  -webkit-appearance:none;
+  appearance:none;
+  width:21px;height:21px;
+  margin-top:-7px;
+  border:2px solid var(--surface);
+  border-radius:50%;
+  background:var(--dg-ux-slider-color,#22c55e);
+  box-shadow:0 0 0 1px var(--line),0 2px 4px #0002;
+}
+#v-map #lcSens input.dg-sens-slider[id^="dgSensRange-"]::-moz-range-track{
+  height:9px;
+  border:1px solid var(--line);
+  border-radius:999px;
+  background:var(--surface);
+}
+#v-map #lcSens input.dg-sens-slider[id^="dgSensRange-"]::-moz-range-progress{
+  height:9px;
+  border-radius:999px;
+  background:var(--dg-ux-slider-color,#22c55e);
+}
+#v-map #lcSens input.dg-sens-slider[id^="dgSensRange-"]::-moz-range-thumb{
+  width:18px;height:18px;
+  border:2px solid var(--surface);
+  border-radius:50%;
+  background:var(--dg-ux-slider-color,#22c55e);
+  box-shadow:0 0 0 1px var(--line);
+}
+#v-map #lcSens input.dg-sens-slider:disabled{cursor:not-allowed;opacity:.6}
+
+/* A single accessible disclosure for the original top-six species bars. */
+#v-map #liveAnalysis details.dg-ux-species-collapse{
+  margin-top:13px;
+  padding:0;
+  border:1px solid var(--line);
+  border-radius:10px;
+  background:var(--surface);
+  overflow:hidden;
+}
+#v-map #liveAnalysis details.dg-ux-species-collapse>summary{
+  display:flex;
+  align-items:center;
+  min-height:48px;
+  padding:10px 12px;
+  cursor:pointer;
+  list-style:none;
+}
+#v-map #liveAnalysis details.dg-ux-species-collapse>summary::-webkit-details-marker{display:none}
+#v-map #liveAnalysis details.dg-ux-species-collapse>summary:after{
+  content:"⌄";
+  margin-left:12px;
+  font-size:1.1rem;
+  color:var(--mut);
+  transition:transform .15s;
+}
+#v-map #liveAnalysis details.dg-ux-species-collapse[open]>summary:after{transform:rotate(180deg)}
+#v-map #liveAnalysis details.dg-ux-species-collapse>summary:focus-visible{
+  outline:2px solid var(--green);outline-offset:-2px;
+}
+#v-map #liveAnalysis .dg-ux-species-list{
+  padding:5px 12px 10px;
+  border-top:1px solid var(--line);
+}

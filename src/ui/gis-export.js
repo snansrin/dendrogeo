@@ -97,6 +97,7 @@
   }
   const opts={cover:read("chkPngCover")?.checked!==false,grid:read("chkPngGrid")?.checked!==false,wp:read("chkPngWp")?.checked!==false};
   const sens=window.DG_LC_SENS?.state,ndvi=!!sens?.vegetationView&&!sens.rawView;
+  const ndviTiers=ndvi&&typeof dgSensVegetationTiers==="function"?dgSensVegetationTiers():null;
   const ndviPolys=ndvi?await waitVegetation(sens):[];
   if(ndvi&&!ndviPolys.length){
    notify("Göreli NDVI açık, ancak gösterilecek en az 3 gözlemli NDVI katmanı hazır değil. Yanlış PNG oluşturmamak için indirme durduruldu.","warn");
@@ -111,7 +112,7 @@
   const centerLat=(bounds.minLat+bounds.maxLat)/2;
   const mx=111320*Math.cos(centerLat*Math.PI/180),my=110540;
   const wMeters=(bounds.maxLon-bounds.minLon)*mx+30,hMeters=(bounds.maxLat-bounds.minLat)*my+30;
-  const PAD=76,TOP=110,LEGEND=146;
+  const PAD=76,TOP=110,LEGEND=ndvi?206:146;
   const scale=Math.min((1600-PAD*2)/wMeters,(1200-PAD*2)/hMeters);
   const W=Math.max(940,Math.ceil(wMeters*scale+PAD*2));
   const H=Math.ceil(hMeters*scale+TOP+PAD+LEGEND);
@@ -180,6 +181,17 @@
    x+=Math.max(116,ctx.measureText(label).width+46);
   }
   ctx.fillStyle="#64748b";ctx.font="11px system-ui,sans-serif";
+  if(ndvi&&ndviTiers?.count>=9){
+   const distribution={sparse:0,moderate:0,dense:0};
+   for(const tier of ndviTiers.tiers?.values?.()||[])if(tier in distribution)distribution[tier]++;
+   const line="Uygun yeşil hücre: "+fmt(ndviTiers.count)+" / "+fmt(ndviTiers.eligible)+
+    "  ·  Seyrek "+fmt(distribution.sparse)+"  ·  Orta "+fmt(distribution.moderate)+"  ·  Yoğun "+fmt(distribution.dense);
+   ctx.font="12px system-ui,sans-serif";ctx.fillStyle="#334155";
+   ctx.fillText(line,PAD,H-112,W-PAD*2);
+   const cut=ndviTiers.cutoffs;
+   if(Array.isArray(cut)&&cut.length===2)
+    ctx.fillText("NDVI park içi üçte birlik eşikleri: "+cut.map(n=>Number(n).toFixed(3)).join(" / ")+" · Hücre başına en az 3 geçerli gözlem",PAD,H-89,W-PAD*2);
+  }
   ctx.fillText(ndvi?"Göreli NDVI park içi karşılaştırmadır; mutlak taç örtüsü ölçümü değildir.":"Kaynak: ESA WorldCover 2021 v200 · OSM sınırı",PAD,H-58);
   ctx.fillText("© OpenStreetMap katkıcıları (ODbL) · © ESA WorldCover (CC BY 4.0) · DendroGeo",PAD,H-39);
   ctx.fillText("Çıktı görselleştirmedir; kayıtlı bilimsel sonucun yerine geçmez.",PAD,H-20);
@@ -203,7 +215,7 @@
  // The older handler assumes a lazily loaded class array and may throw on .find().
  // Do not modify that locked module or the scientific analysis state.
  if(typeof document.addEventListener==="function")document.addEventListener("click",event=>{
-  const button=event.target?.closest?.('button[onclick*="downloadParkImage"]');
+  const button=event.target?.closest?.('button[onclick*="downloadParkImage"],button[onclick*="dgSensExportPng"]');
   if(!button)return;
   event.preventDefault();
   event.stopImmediatePropagation();
