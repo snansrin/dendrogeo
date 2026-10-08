@@ -78,7 +78,8 @@ test('second-pass Sentinel spectral samples resolve supported green and hard whi
  assert.deepEqual(f.events.slice(1),['dirty','refresh','summary','save']);
  assert.equal(f.events[0][0],'profile');
  assert.ok(f.events.includes('dirty'));
- assert.match(f.status.textContent,/29 hücre/);
+ assert.match(f.status.textContent,/kalan: 29/);
+ assert.match(f.status.textContent,/yeterli gözlem yok 14, kararsız spektrum 15/);
 });
 test('no data / ambiguous periods do not make up green land cover and never modify saved results',async()=>{
  const f=fixture();
@@ -135,4 +136,92 @@ test('ongoing drawing or scan never launches automatic pixel review',async()=>{
   await new Promise(resolve=>setTimeout(resolve,0));
   assert.equal(f.events.length,0,'non-idle review must not start remote scan');
  }
+});
+
+test('real startup order: water retry attaches to lcSens CREATED AFTER DOMContentLoaded',async()=>{
+ const observers=[],callbacks={};let host=null,profileCalls=0;
+ const park={id:'parkInfo'},status={textContent:''},timeouts=[];
+ class Observer{
+  constructor(cb){this.cb=cb;observers.push(this);}
+  observe(node,options){this.node=node;this.options=options;}
+  disconnect(){this.disconnected=true;}
+  trigger(){this.cb([]);}
+ }
+ const rec={id:'dynamic-park',fingerprint:'verified',scannedAt:null,
+  period:'latest',profile:{cells:{}},corrections:{},features:[]};
+ const s={record:rec,geometry:{ready:true},editing:true,busy:false,
+  saving:false,exporting:false,rawView:false,draw:null,brush:null,
+  epoch:3,partitionVersion:1,visualVersion:0};
+ const cell={row:1,col:1,areaM2:100,rasterClassKey:'water',classKey:'water',center:{lat:39.95,lon:32.64}};
+ const ctx={
+  window:{DG_LC_SENS:{state:s},DG_LC_S2:{profile:async()=>{
+   profileCalls++;
+   return {cells:{'1:1':{obs:4,ndvi:.62,mndwi:-.19,ndbi:-.3}},evidenceVersion:'QA'};
+  }},DG_LC_VALIDATE:{spectralLandPredict:v=>v?.obs>=3?'green':'nodata'}},
+  document:{readyState:'loading',addEventListener:(n,cb)=>{callbacks[n]=cb;},
+   getElementById:id=>id==='parkInfo'?park:id==='lcSens'?host:id==='dgUxDraftStatus'?status:null},
+  MutationObserver:Observer,
+  setTimeout:cb=>{timeouts.push(cb);return timeouts.length;},
+  clearTimeout(){},console,Date,
+  dgSensParts:()=>[{key:'1:1',cell,method:'review-cell',
+   type:rec.profile.cells['1:1']?'green':'other',areaM2:100}],
+  dgSensDirty(){s.editing=true;s.visualVersion++;},
+  dgSensRefreshLayer(){return Promise.resolve();},
+  dgSensUpdateSummary(){},
+  dgSensSave(){return Promise.resolve(true);},
+  dgSensWaterBoundaryUnresolved:()=>rec.profile.cells['1:1']?0:1
+ };
+ vm.runInNewContext(read('src/ui/gis-water-neighbour.js'),ctx);
+ callbacks.DOMContentLoaded();
+ assert.equal(observers.length,1,'park container observed even when lcSens does not exist');
+ assert.equal(observers[0].node,park);
+ assert.equal(profileCalls,0);
+ host={id:'lcSens'};
+ observers[0].trigger();
+ assert.equal(observers.length,2,'new scientific panel is now observed');
+ assert.equal(observers[1].node,host);
+ assert.equal(observers[1].options.subtree,false,'panel observation is cheap');
+ while(timeouts.length)timeouts.shift()();
+ assert.equal(profileCalls,0,'no auto request before source scan');
+ rec.scannedAt='2026-10-08T18:00:00Z';
+ observers[1].trigger();
+ while(timeouts.length)timeouts.shift()();
+ await new Promise(resolve=>setImmediate(resolve));
+ assert.equal(profileCalls,1,'first real scan triggers the missing retry');
+ assert.equal(rec.profile.cells['1:1'].obs,4);
+ assert.match(status.textContent,/bilimsel olarak çözülen: 1/);
+ observers[1].trigger();
+ while(timeouts.length)timeouts.shift()();
+ await new Promise(resolve=>setImmediate(resolve));
+ assert.equal(profileCalls,1,'re-render never triggers redundant rechecks');
+ host={id:'lcSens-new'};
+ observers[0].trigger();
+ assert.equal(observers[1].disconnected,true);
+ assert.equal(observers.at(-1).node,host,'switching parks reattaches instead of keeping stale node');
+});
+test('draft UI also registers parkInfo watcher when lcSens is created after load',()=>{
+ const observers=[],callbacks={},park={id:'parkInfo'};
+ let host=null;
+ class Observer{
+  constructor(cb){this.cb=cb;observers.push(this);}
+  observe(node,options){this.node=node;this.options=options;}
+  disconnect(){this.disconnected=true;}
+  trigger(){this.cb([]);}
+ }
+ const ctx={window:{DG_LC_SENS:{state:{}}},console,Date,setTimeout,clearTimeout,
+  document:{readyState:'loading',addEventListener:(n,cb)=>{callbacks[n]=cb;},
+   getElementById:id=>id==='parkInfo'?park:id==='lcSens'?host:null},
+  MutationObserver:Observer};
+ vm.runInNewContext(read('src/ui/gis-project-draft.js'),ctx);
+ callbacks.DOMContentLoaded();
+ assert.equal(observers.length,1);
+ assert.equal(observers[0].node,park);
+ host={id:'lcSens',querySelector:()=>null};
+ observers[0].trigger();
+ assert.equal(observers.length,2);
+ assert.equal(observers[1].node,host);
+ host={id:'lcSens-2',querySelector:()=>null};
+ observers[0].trigger();
+ assert.equal(observers[1].disconnected,true);
+ assert.equal(observers.at(-1).node,host);
 });
