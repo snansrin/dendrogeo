@@ -1,5 +1,9 @@
 # DendroGeo ana çekirdek ve kırmızı çizgiler
 
+## Güncel kilit — 8 Ekim 2026
+
+Kullanıcının doğruladığı çalışan analiz `90f0b0a2aa80cf684de8fc45e0a37fb3dbd97807` sürümünde kilitlenmiştir. [Analiz kilidi](VERIFIED-ANALYSIS-LOCK.md) ve `AGENTS.md` kuralları önce gelir. Yeni geri dönüş noktası `recovery/verified-analysis-2026-10-08` dalıdır. Aşağıdaki 4 Ekim referansları önceki kurtarma tarihçesidir.
+
 ## Ürün kararı
 
 4 Ekim 2026 itibarıyla saha, yüzey analizi ve canlı harita sistemi DendroGeo'nun ana ürün çekirdeğidir. Bu sürüm, yeni geliştirmelerin davranış tabanıdır. Kurtarma dalı `recovery/core-2026-10-04`, kullanıcı onayıyla ana dalda çalışan çekirdeğe ilerletilmiştir.
@@ -16,7 +20,7 @@
 
 - Yüzey analizi ve canlı harita bu ürünün temel akışıdır. Bu bileşenler kullanıcı isteği dışında yeniden tasarlanmaz, kapatılmaz, kaldırılmaz veya davranışları değiştirilmez.
 - Ham yüzey sınıfları ESA WorldCover 2021 v200 verisinden ve gerçek raster hücresi–park sınırı kesişimlerinden gelir. Alanı hedef yüzdeye uydurmayın; kaynak hücreleri, kabul edilmiş geometriyi veya yayınlanmış sonucu sessizce değiştirmeyin.
-- Sentinel-2 taraması isteğe bağlı inceleme verisi sağlar; tarama tek başına sınıfları değiştirmez. Her yeni park/analiz taraması eşiklerde nötr 50 değerleriyle başlar. Kullanıcının hücre, fırça veya sınır kararı önceliklidir.
+- Yüzey Analizi açılışında Sentinel-2 taraması otomatik tamamlanır ve inceleme verisi sağlar; tarama tek başına sınıfları değiştirmez. Her yeni park/analiz taraması eşiklerde nötr 50 değerleriyle başlar. Kullanıcının hücre, fırça veya sınır kararı önceliklidir.
 - Fırça, geçtiği raster hücrelerini tek tek sınıflandırır; yol/poligon çizimine dönüşmez. Ham raster ve kabul edilmiş sonuç, kullanıcı kararı olmadan değişmez.
 - OSM yardımcı vektör verisidir; ham rasterın yerine geçmez ve yol çizgileri dolu yüzey poligonu sayılmaz. OSM hataları veya zaman aşımı yüzey analizi ve harita akışını kilitlememelidir.
 - Canlı harita katmanları, waypoint ve navigasyon, ölçüm noktaları/fotoğrafları, canlı kullanıcı/ziyaretçi görünümü, fırça, görünürlük kontrolleri, doğrulanmış harita dışa aktarımı ve çevrimdışı ölçüm senkronizasyonu korunur. İzin, oturum koruması ve mevcut veri erişim kuralları gevşetilmez.

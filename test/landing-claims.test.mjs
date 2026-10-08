@@ -366,7 +366,7 @@ describe('i18n katmanı sözleşmesi (0035)', () => {
     assert.match(i18n, /dg:lang/, 'dil olayı yayınlanıyor (modüller yeniden render için)');
   });
   test('i18n.js kayıt zinciri: index.html tag + defer + CORE_ASSETS', () => {
-    assert.match(index, /<script src="src\/config\/i18n\.js\?v=[0-9a-f]{8}" defer>/);
+    assert.match(index, /<script src="src\/config\/i18n\.js\?v=[A-Za-z0-9]+" defer>/);
     assert.match(rd('sw.js'), /'\/src\/config\/i18n\.js'/);
   });
   test('⭐ dinamik şablonlar dgTf/dgT ile çevriliyor (0035c — EN modunda Türkçe kalmaz)', () => {

@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+import {assetVersion} from './asset-version.mjs';
 /* version-sync.mjs — ?v= sürüm numaralarını İÇERİK HASH'inden türetir.
  *
  * Sorun
@@ -34,18 +35,18 @@ const mod = process.argv.includes('--write') ? 'write'
 const htmlYol = join(ROOT, 'index.html');
 let html = readFileSync(htmlYol, 'utf8');
 
-const v8 = (p) => createHash('sha256').update(readFileSync(join(ROOT, p))).digest('hex').slice(0, 8);
+const v8 = (p) => assetVersion(ROOT,p);
 
 let degisen = 0, sorun = 0;
-html = html.replace(/((?:src|href)=")((?:src|css|vendor)\/[^"?]+)(\?v=)([A-Za-z0-9]+)(")/g,
-  (tum, on, yol, soru, eski, son) => {
+html = html.replace(/((?:src|href)=")((?:src|css|vendor)\/[^"?]+)(?:\?v=([A-Za-z0-9]+))?(")/g,
+  (tum, on, yol, eski, son) => {
     let beklenen;
     try { beklenen = v8(yol); }
     catch { console.error(`🔴 index.html kayıp dosyaya işaret ediyor: ${yol}`); sorun++; return tum; }
     if (eski === beklenen) return tum;
     degisen++;
     console.log(`${mod === 'write' ? '✏️ ' : '🔴 '}${yol}  ?v=${eski} → ?v=${beklenen}`);
-    return on + yol + soru + beklenen + son;
+    return on + yol + "?v=" + beklenen + son;
   });
 
 if (sorun) process.exit(1);
