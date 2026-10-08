@@ -289,3 +289,46 @@ test('midpoint label styling does not capture map clicks or alter GIS core prese
  assert.match(js,/drawLayer\.clearLayers\(\)/);
  assert.match(js,/if\(mapInstance&&drawLayer\)mapInstance\.removeLayer\(drawLayer\)/);
 });
+
+test('surface brush omits pool/fountain but retains water and all historical science classes',()=>{
+ const ui=load('src/ui/gis-workspace.js');
+ const core=load('src/ui/lc-sens.js');
+ assert.match(core,/const types=\["hard","green","water","building","pool","bare"\]/);
+ assert.match(ui,/function syncBrushChoices\(\)/);
+ assert.match(ui,/select\.querySelector\('option\[value="pool"\]'\)/);
+ assert.match(ui,/legacyPool\.remove\(\)/);
+ assert.match(ui,/dgSensBrushChoose\("water"\)/);
+ const removed=[],select={value:'water',querySelector:q=>q==='option[value="pool"]'?{remove(){removed.push('pool');}}:null};
+ const sandbox={window:{DG_LC_SENS:{state:{brushType:'water'}}},
+  document:{readyState:'loading',addEventListener(){},querySelector:q=>q==='#dgSensBrushType'?select:null,getElementById:()=>null},
+  setTimeout,clearTimeout,console};
+ vm.runInNewContext(ui,sandbox);
+ sandbox.window.DG_GIS_WORKSPACE_UI.sync();
+ assert.deepEqual(removed,['pool'],'only the brush pool option is removed');
+ assert.equal(select.value,'water');
+ assert.equal(sandbox.window.DG_LC_SENS.state.brushType,'water');
+});
+
+test('previously selected pool brush safely becomes water on next UI update',()=>{
+ const ui=load('src/ui/gis-workspace.js');
+ let chosen=null;
+ const select={value:'pool',querySelector:()=>({remove(){}})};
+ const state={brushType:'pool',busy:false,saving:false,rawView:false};
+ const sandbox={window:{DG_LC_SENS:{state}},dgSensBrushChoose:type=>{chosen=type;state.brushType=type;},
+  document:{readyState:'loading',addEventListener(){},querySelector:q=>q==='#dgSensBrushType'?select:null,getElementById:()=>null},
+  setTimeout,clearTimeout,console};
+ vm.runInNewContext(ui,sandbox);
+ sandbox.window.DG_GIS_WORKSPACE_UI.sync();
+ assert.equal(chosen,'water');
+ assert.equal(state.brushType,'water');
+});
+
+test('brush UI leaves saved pool boundaries alone while the water brush remains selected',()=>{
+ const work=load('src/ui/gis-workspace.js');
+ const core=load('src/ui/lc-sens.js');
+ assert.match(work,/legacyPool\.remove\(\)/);
+ assert.match(work,/if\(select\.value==="pool"\)select\.value="water"/);
+ assert.match(core,/function dgSensFeatures\(rec=DG_SENS\.record\)/);
+ assert.match(core,/dgSensDrawType/,'separate boundary classes remain available');
+ assert.match(core,/function dgSensSave\(\)/,'scientific persistence path remains original');
+});
