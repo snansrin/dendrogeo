@@ -1,0 +1,169 @@
+{
+  "schema": "dendrogeo/surface-scientific-contract/v1",
+  "lock_id": "DG-SURFACE-LOCK-2026-10-08",
+  "verified_release_commit": "7680cab4a7fd9102bef64e5cf031b740940a5be0",
+  "recovery_branch": "recovery/surface-verified-water-20261008",
+  "engine_version": "4.3.0",
+  "scope": "park surface classification and review only; not tree allometry, measurements or site accounts",
+  "baseline": {
+    "provider": "ESA WorldCover",
+    "collection": "esa-worldcover",
+    "product": "2021 v200",
+    "year": 2021,
+    "spatial_resolution_m": 10,
+    "classification_source": "published COG",
+    "geometry": "park-raster overlap weighted by clipped cell area in UTM",
+    "mapping": {
+      "green": [
+        10,
+        20,
+        30,
+        40,
+        95,
+        100
+      ],
+      "water": [
+        80,
+        90
+      ],
+      "hard": [
+        50
+      ],
+      "bare": [
+        60
+      ]
+    },
+    "max_park_raster_area_mismatch_percent": 0.5,
+    "does_not_change_raw_raster": true
+  },
+  "spectral": {
+    "provider": "Copernicus Sentinel-2 L2A",
+    "stac": "https://planetarycomputer.microsoft.com/api/stac/v1",
+    "collection": "sentinel-2-l2a",
+    "max_scene_count": 6,
+    "max_scene_cloud_percent": 20,
+    "min_distinct_clear_observations_per_cell": 3,
+    "bands": {
+      "B03": 10,
+      "B04": 10,
+      "B08": 10,
+      "B11": 20,
+      "SCL": 20
+    },
+    "accepted_scl": [
+      2,
+      4,
+      5,
+      6,
+      7
+    ],
+    "period_modes": {
+      "ytd": "current UTC year Jan 1 through scan UTC timestamp",
+      "latest": "last 120 days from scan UTC timestamp",
+      "ref": "reference year Jun 1 through Sep 30"
+    },
+    "water_windows_utc": [
+      {
+        "start": "Feb 1",
+        "end": "May 31",
+        "max_scene_count": 3
+      },
+      {
+        "start": "Oct 1",
+        "end": "Dec 15",
+        "max_scene_count": 2
+      }
+    ],
+    "water_thresholds": {
+      "mndwi_median_min": 0.2,
+      "mndwi_season_max_min": 0.45,
+      "ndvi_canopy_max": 0.5
+    },
+    "green_thresholds": {
+      "ndvi_min": 0.35,
+      "ndvi_year_max_min": 0.5
+    },
+    "hard_thresholds": {
+      "ibi_min": 0,
+      "ndvi_min": 0.2
+    },
+    "bare_thresholds": {
+      "ndvi_max": 0.2
+    },
+    "slider_defaults": {
+      "green": 50,
+      "water": 50,
+      "hard": 50,
+      "bare": 50
+    },
+    "sliders_allowed_range": [
+      0,
+      100
+    ],
+    "slider_coefficients": {
+      "greenNdvi": -0.003,
+      "greenYear": -0.003,
+      "waterMndwi": -0.003,
+      "waterYear": -0.003,
+      "hardIbi": -0.005,
+      "hardNdvi": -0.001,
+      "hardStrongIbi": -0.003,
+      "bareNdvi": 0.0015
+    }
+  },
+  "water": {
+    "primary": "OSM polygon geometry, not synthesized raster water",
+    "verified_goksu_water_object": "way/423602740",
+    "verified_goksu_park_object": "way/423602737",
+    "verified_goksu_water_vertices": 411,
+    "automatic_discovery_on_initial_analysis": true,
+    "preserve_valid_same_park_osm_on_network_failure": true,
+    "block_unresolved_water_cells_from_acceptance": true,
+    "require_spectral_evidence_for_residual_raster_water_outside_approved_footprint": true
+  },
+  "acceptance": {
+    "area_conservation_required": true,
+    "scan_does_not_modify_esa_baseline": true,
+    "accepted_snapshot_immutable": true,
+    "no_unobserved_class_forced_to_green_hard_or_bare": true,
+    "report_uses_last_accepted_record_not_unsaved_preview": true
+  },
+  "reproducibility": {
+    "invariant": [
+      "release commit",
+      "source code and vendored parser hashes",
+      "park boundary geometry and holes",
+      "ESA tile IDs plus raster checksums",
+      "OSM water and built-feature geometry with retrieved revision",
+      "Sentinel scene IDs and acquisition dates, signed asset content",
+      "selected scan period and UTC scan time",
+      "bar values",
+      "manual brush/object/feature decisions",
+      "coordinate system and cell geometry",
+      "accepted result and source fingerprint"
+    ],
+    "warning": "The code/source protocol is locked, but public OSM geometry and time-dependent Sentinel scenes may change. Matching output requires the exact recorded input assets, AOI and decisions; this file is not an archive of external imagery.",
+    "currently_recorded_in_accepted_result": [
+      "parkId",
+      "acceptedAt",
+      "fingerprint",
+      "epsg",
+      "cellCount",
+      "areas",
+      "outer",
+      "holes",
+      "scenes",
+      "features",
+      "displayFeatures",
+      "editSummary"
+    ],
+    "data_not_fully_embedded_in_accepted_result": [
+      "COG pixel/asset hashes",
+      "complete Sentinel asset bytes and seasonal water-scene metadata",
+      "upstream OSM revision and full underlying OSM response",
+      "full spectral per-cell evidence and slider history",
+      "full user correction edit history"
+    ],
+    "policy": "Do not claim bitwise numerical reproducibility or field-validated 100 percent accuracy without full input archiving and independent validation."
+  }
+}

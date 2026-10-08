@@ -1,16 +1,21 @@
 {
   "schema": "dendrogeo/surface-engine-source-lock/v1",
   "id": "DG-SURFACE-LOCK-2026-10-08",
-  "baseline_commit": "f6a68b7b5fe075ce280bd566d04d5e021e0dba9a",
-  "recovery_branch": "recovery/surface-engine-locked-2026-10-08",
+  "baseline_commit": "7680cab4a7fd9102bef64e5cf031b740940a5be0",
+  "recovery_branch": "recovery/surface-verified-water-20261008",
   "policy": "NO_CHANGES_WITHOUT_EXPLICIT_USER_APPROVAL",
-  "description": "Surface analysis, sensitivity bars, raster/OSM/Sentinel-2 interpretation, geometry, grid, map tools, user interface and styling locked to working baseline. UI controls remain usable.",
+  "description": "User-verified water/land surface analytical stack, frozen at commit 7680cab, including geospatial parsers, evidence selection, sensitivity thresholds, QA and known park fixture. Controls remain operable; dynamic external input is NOT frozen.",
   "file_hash_algorithm": "git-blob-sha1",
   "locked_files": {
+    ".github/workflows/gis-three-park-qa.yml": "e5dc449c023e4dc6345063efc23ae99373db17ef",
     "css/park-panel.css": "6b8854a7eb62e6005e3f985943c3fe3ad586ae3a",
     "css/style.css": "410ae597664b409f146a8f391b3ef83d5b14df59",
     "css/ui-standard.css": "e0a9536a35644708115c930d53d1343c8aa6c693",
+    "docs/surface-scientific-contract.json": "a9ae0934d6002b0e4e704a367b5bbe30c5d44b27",
     "partials/shell.html": "6974fcbae66d7eb6eb07b336b5b672315c3c17d0",
+    "scripts/lulc-qa.mjs": "a048ab5e6fd762a42b214610007ba5b5682fbc71",
+    "scripts/val-qa.mjs": "0e9f97cab488282a2b656827a4f51e1ee5e5d054",
+    "scripts/verify-osm-water-live.mjs": "73aa3352650abb2e9f5349e7d4508933243f6021",
     "src/config/constants.js": "f6b0eac367d0818d39af14e4e6811d7ba5387b22",
     "src/core/surface-display.js": "a2a7406852bcd47fbe450ae2f75163908833ee2b",
     "src/services/geofence.js": "1cadbd9cf63708fa142e34656392710f6b10e8d1",
@@ -27,6 +32,7 @@
     "src/services/lc-validate.js": "0a177508090f7f8681ba5594f436851e942376a1",
     "src/services/map.js": "755e25846c8ae9b3c6c28d1c926b44c4193b817c",
     "src/services/osm-client.js": "b4c9de899e16811cca72eee96031b2c49cae3d3c",
+    "src/services/osm-water-backup.js": "661169bee1b664a659916d6b8d21494aa5427cd5",
     "src/services/park-geometry.js": "3a33d00f20709162f9a26bfab62ffe5d34ad4e0b",
     "src/services/park-query.js": "7fa6af224de4a0e3d8656e39b1db712c64108a59",
     "src/services/park-registry.js": "14462c927f46ccde5444eaf95c462940e4e61141",
@@ -39,7 +45,19 @@
     "src/ui/state.js": "156945d6a219f8f620d574a4423a499c982bc237",
     "src/utils/geo.js": "666e4be10e5131f0b3285c00b75dcad93f39c984",
     "src/utils/lazylibs.js": "55dd7ebe86397e55db12c3065c722d8c68a43175",
-    "src/workers/surface-worker.js": "7c25e0d712156b0503e7b518ccffc03af6b9a62e"
+    "src/workers/surface-worker.js": "7c25e0d712156b0503e7b518ccffc03af6b9a62e",
+    "test/fixtures/goksu-park.json": "d0797aa21fd94090bedb92f7f0a9bddc9badf3d3",
+    "test/landcover-v4.test.mjs": "ebd09b7536446c597f5ed9a8128135bdd1fd1d69",
+    "test/lc-validate.test.mjs": "74cafc899f49bd171db6bebe787c5d36829612d5",
+    "test/surface-engine-lock.test.mjs": "012fc69305e48f4a5bbf2d7d50fc0039b4f8a783",
+    "test/surface-network-budget.test.mjs": "024b4cfebb65c8d147da18c7d14b72ef443608ae",
+    "test/surface-review.test.mjs": "b2f651cca98d2aca23faf7ef5d1e0a78f1764a5a",
+    "test/surface-scientific-contract.test.mjs": "3e96db0308f9095480ca6a2ed5ca4bb752169576",
+    "test/verified-water-footprint.test.mjs": "73e57e88447d6e39f7eea06d9c8106da1e2b6727",
+    "test/water-osm-reliability.test.mjs": "87d24ddb89168d6a6dcaf43f96f79027a335c917",
+    "vendor/geotiff-2.1.3.js": "6dca90b1672cbd5eab085b7275e71bf40a3e9159",
+    "vendor/leaflet-1.9.4.js": "a3bf693d0fcaff885cc5f21b3a699aaa567b3533",
+    "vendor/polygon-clipping-0.15.7.js": "f3a6f7dde586ea0a44fa95ae223ca8fb3ca1e604"
   },
   "approved_targeted_repair": {
     "date": "2026-10-08",
@@ -51,5 +69,9 @@
       "src/ui/lc-sens.js"
     ],
     "scope": "Network retrieval, verified Göksu water mask outside reference shoreline; outside cells require spectral evidence or are marked uncertain. No original WorldCover/slider changes."
-  }
+  },
+  "legacy_baseline_commit": "f6a68b7b5fe075ce280bd566d04d5e021e0dba9a",
+  "legacy_recovery_branch": "recovery/surface-engine-locked-2026-10-08",
+  "verified_conditions_file": "docs/surface-scientific-contract.json",
+  "source_caveat": "Live OSM objects, Sentinel-2 acquisition scenes and actual park geometry/user decisions are dynamic and must be preserved per-run for numerical repeatability. No external imagery is archived by this lock."
 }

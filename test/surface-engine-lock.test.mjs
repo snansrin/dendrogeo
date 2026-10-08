@@ -10,11 +10,11 @@ const root=fileURLToPath(new URL('../',import.meta.url));
 const manifestBytes=readFileSync(join(root,'docs/surface-engine-lock.json'));
 const manifest=JSON.parse(manifestBytes.toString('utf8'));
 
-test('yüzey motoru manifesti sabit ve 33 dosya tam korunuyor',()=>{
+test('yüzey motoru manifesti sabit ve 51 dosya ve tam bağımlılık zinciri korunuyor',()=>{
  assert.equal(gitBlobSha(manifestBytes),PINNED_MANIFEST_BLOB);
  assert.equal(manifest.baseline_commit,APPROVED_COMMIT);
  assert.equal(manifest.policy,'NO_CHANGES_WITHOUT_EXPLICIT_USER_APPROVAL');
- assert.equal(Object.keys(manifest.locked_files).length,33);
+ assert.equal(Object.keys(manifest.locked_files).length,51);
  assert.deepEqual(verifySurfaceLock(root),[]);
 });
 
@@ -40,6 +40,22 @@ test('barlar, Sentinel, OSM, fırça, geometri ve harita kodu kapsam dışında 
   'src/services/park-query.js','src/services/park-geometry.js',
   'src/workers/surface-worker.js','css/style.css','partials/shell.html'
  ])assert.ok(manifest.locked_files[rel],'Kilitte yok: '+rel);
+});
+
+test('OSM yedeği, raster parser, poligon ve bilimsel protokol/test zinciri kilitte',()=>{
+ const mandatory=[
+  'src/services/osm-water-backup.js','vendor/geotiff-2.1.3.js','vendor/polygon-clipping-0.15.7.js',
+  'vendor/leaflet-1.9.4.js','test/fixtures/goksu-park.json','scripts/verify-osm-water-live.mjs',
+  'scripts/val-qa.mjs','scripts/lulc-qa.mjs','docs/surface-scientific-contract.json',
+  'test/surface-scientific-contract.test.mjs','test/verified-water-footprint.test.mjs',
+  'test/water-osm-reliability.test.mjs','test/surface-review.test.mjs',
+  'test/surface-network-budget.test.mjs','test/landcover-v4.test.mjs',
+  'test/lc-validate.test.mjs','test/surface-engine-lock.test.mjs',
+  '.github/workflows/gis-three-park-qa.yml'
+ ];
+ for(const path of mandatory)assert.ok(manifest.locked_files[path],'Korunan bağımlılık eksik: '+path);
+ assert.equal(manifest.recovery_branch,'recovery/surface-verified-water-20261008');
+ assert.equal(manifest.baseline_commit,'7680cab4a7fd9102bef64e5cf031b740940a5be0');
 });
 
 test('PR CI yüzey kilidini testlerden bağımsız çalıştırır',()=>{
