@@ -39,5 +39,9 @@ test('live map control groups and review cards use the existing theme and mobile
  assert.match(css,/\.dg-live-result-badge\.is-saved/);
  assert.match(css,/\.dg-live-tree-metrics\{display:grid;grid-template-columns:repeat\(2,minmax\(0,1fr\)\)/);
  assert.match(css,/@media\(max-width:640px\)[\s\S]*?#lcSens \.dg-live-review-actions\{grid-template-columns:repeat\(2,minmax\(0,1fr\)\)\}/);
+ assert.match(css,/@media\(max-width:640px\)\{[\s\S]*?#v-map #map\.surface-review-map\{[\s\S]*?position:relative!important[\s\S]*?height:min\(64svh,580px\)!important/);
+ assert.match(css,/@media\(max-width:640px\)\{[\s\S]*?#surfaceMenuBar\{[\s\S]*?grid-template-columns:repeat\(3,minmax\(0,1fr\)\)/);
+ assert.match(css,/@media\(max-width:640px\)\{[\s\S]*?#surfaceMenuBar>\.dg-editor-menu:not\(:nth-child\(3n\+1\)\)>\.dg-editor-menu-body\{left:auto;right:0\}/);
+ assert.match(css,/@media\(max-width:640px\) and \(max-height:520px\)\{[\s\S]*?height:48svh!important/);
  assert.match(css,/var\(--surface\)/);
 });

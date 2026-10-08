@@ -679,3 +679,77 @@
  .dg-live-tree-head h2{font-size:1rem}
  .dg-live-tree-metrics .stat{padding:10px!important}
 }
+
+
+/* Phone-only live GIS refinements. Desktop rules above remain unchanged. */
+@media(max-width:640px){
+ #v-map #map.surface-review-map{
+  position:relative!important;
+  top:auto!important;
+  z-index:0!important;
+  width:100%;
+  height:min(64vh,580px)!important;
+  height:min(64svh,580px)!important;
+  min-height:400px;
+  max-height:580px;
+ }
+ .dg-live-map-controls{align-items:center;gap:7px!important;padding:9px}
+ .dg-live-map-controls #parkModeBtn{flex:1 0 100%;width:100%;min-height:46px;justify-content:center}
+ .dg-live-map-controls .dg-live-map-label{flex:0 0 auto;margin:0 2px 0 1px}
+ .dg-live-map-controls #baseLayerSelect{flex:1 1 160px;width:auto;min-width:0;min-height:44px}
+ .dg-live-map-refresh{align-items:stretch;gap:6px;margin-bottom:8px;padding:8px}
+ .dg-live-map-refresh .btn{min-height:44px;justify-content:center}
+ .dg-live-map-refresh>span{flex-basis:100%;font-size:.69rem}
+ #surfaceMenuBar{
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  flex:1 1 100%;
+  gap:6px;
+  padding:8px;
+ }
+ #surfaceMenuBar>.dg-editor-menu{width:100%;min-width:0}
+ #surfaceMenuBar>.dg-editor-menu>summary{
+  display:grid;
+  grid-template-columns:18px minmax(0,1fr) 10px;
+  align-content:center;
+  justify-items:start;
+  gap:4px;
+  width:100%;
+  min-height:56px;
+  padding:7px;
+  border-radius:9px;
+  white-space:normal;
+  font-size:.67rem;
+  line-height:1.2;
+ }
+ #surfaceMenuBar .dg-editor-menu-icon{width:18px;height:18px;flex-basis:18px}
+ #surfaceMenuBar .dg-editor-menu-icon .dg-editor-icon{width:13px;height:13px;flex-basis:13px}
+ #surfaceMenuBar .dg-editor-menu-label{align-self:center;overflow-wrap:anywhere}
+ #surfaceMenuBar .dg-editor-menu-chevron{width:10px;height:10px;flex-basis:10px}
+ #surfaceMenuBar .dg-editor-menu-body{
+  top:calc(100% + 5px);
+  width:min(410px,calc(100vw - 24px));
+  max-height:min(58svh,500px);
+  padding:12px;
+  border-radius:12px;
+  -webkit-overflow-scrolling:touch;
+ }
+ #surfaceMenuBar>.dg-editor-menu:not(:nth-child(3n+1))>.dg-editor-menu-body{left:auto;right:0}
+ #surfaceMenuBar .dg-editor-action-grid{grid-template-columns:1fr}
+ #surfaceMenuBar .dg-editor-action-grid .dg-png-btn,
+ #surfaceMenuBar .dg-editor-wide-action{min-height:46px}
+ #surfaceMenuBar .dg-editor-panel-head{gap:9px}
+ #surfaceMapTools{top:82px;left:8px}
+ .dg-editor-rail{max-height:calc(64svh - 96px);overflow-y:auto;overscroll-behavior:contain}
+ .dg-live-surface-head{align-items:flex-start}
+ .dg-live-surface-head>.dg-png-btn{min-height:44px;white-space:nowrap}
+ #lcSens .dg-live-surface-card{padding:12px}
+ #lcSens .dg-live-review-actions .dg-png-btn{min-height:46px;padding-inline:8px;font-size:.72rem}
+ .dg-live-result-card{padding:12px}
+ .dg-live-surface-breakdown{grid-template-columns:repeat(2,minmax(0,1fr));gap:6px 10px}
+ .dg-live-tree-metrics{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media(max-width:640px) and (max-height:520px){
+ #v-map #map.surface-review-map{height:48vh!important;height:48svh!important;min-height:220px;max-height:320px}
+ .dg-editor-rail{max-height:calc(48svh - 96px)}
+}
