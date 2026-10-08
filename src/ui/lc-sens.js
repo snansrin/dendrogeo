@@ -348,6 +348,31 @@ function dgSensUpdateSummary(){
  const density=document.getElementById("dgSensVegetationSummary");if(density){const d=dgSensVegetationTiers(),cut=d.cutoffs?" · "+_tvs("terciller")+": "+d.cutoffs.map(v=>v.toFixed(2)).join(" / "):"";density.textContent=_tvs("Mevsimsel medyan NDVI · uygun hücre")+": "+d.count+" / "+d.eligible+cut+" · "+_tvs("Her hücrede en az 3 açık uydu gözlemi; park içi göreli sınıflar, taç örtüsü ölçümü değildir.");}
 }
 function dgSensUpdateStatus(){const el=document.getElementById("dgSensStatus");if(el)el.textContent=DG_SENS.status||(DG_SENS.mergeBusy?_tvs("Çizim güncelleniyor…"):_tvs(DG_SENS.record?.acceptedAt&&!DG_SENS.editing?"Kayıtlı sonuç korunuyor. Kaydırıcıyı değiştirerek yeni önizleme yapabilirsiniz.":"Önizleme henüz hesap kaydına yazılmadı."));}
+/* Scan refreshes water footprints; map object picking is not required.
+ * Manual boundaries and published snapshots remain untouched. */
+async function dgSensAutoWaterOnScan(rec,epoch){
+ if(rec.useObjects===false||typeof dgLcOsmData!=="function"||typeof dgSurfaceObjects!=="function")return 0;
+ const bbox=dgLcBboxFromGeometry(PARK_POLY,PARK_HOLES||[]);
+ const data=await dgLcOsmData(bbox).catch(()=>null);
+ if(!data?.elements?.length||epoch!==DG_SENS.epoch||DG_SENS.record!==rec)return 0;
+ const objects=dgSurfaceObjects(data.elements,DG_SENS.epsg).filter(f=>(f.type==="water"||f.type==="pool")&&window.DG_SURFACE_REVIEW.validFeature(f));
+ if(!objects.length)return 0;
+ const ids=new Set(objects.map(f=>f.osmId));
+ const existing=rec.objectFeatures||[];
+ const next=[...existing.filter(f=>f.type!=="water"&&f.type!=="pool"),...objects];
+ const changed=JSON.stringify(existing.filter(f=>f.type==="water"||f.type==="pool").map(f=>[f.osmId,f.geometry]))!==
+  JSON.stringify(objects.map(f=>[f.osmId,f.geometry]));
+ const superseded=(rec.features||[]).filter(f=>f.method==="visual-boundary"&&f.source==="osm-selected"&&(f.type==="water"||f.type==="pool")&&ids.has(f.osmId));
+ if(!changed&&!superseded.length)return objects.length;
+ const previous=rec.objectFeatures,previousFeatures=rec.features;
+ rec.objectFeatures=next;
+ const features=(rec.features||[]).filter(f=>!superseded.includes(f));
+ const ok=await dgSensRepartition(features);
+ if(!ok){rec.objectFeatures=previous;rec.features=previousFeatures;return 0;}
+ if(epoch!==DG_SENS.epoch||DG_SENS.record!==rec)return 0;
+ dgSensDirty();
+ return objects.length;
+}
 async function dgSensScan(){
  if(DG_SENS.rawView||DG_SENS.busy||DG_SENS.saving||!DG_SENS.record)return false;dgSensBrushStop();
  let completed=false;
@@ -355,7 +380,9 @@ async function dgSensScan(){
  try{
   const profile=await window.DG_LC_S2.profile(dgSensCells(),PARK_POLY,{year:DG_LC_LAST.report?.year||2021,mode:rec.period});
   if(epoch!==DG_SENS.epoch||DG_SENS.record!==rec)return;
+  const autoWater=await dgSensAutoWaterOnScan(rec,epoch);if(epoch!==DG_SENS.epoch||DG_SENS.record!==rec)return false;
   rec.profile=profile;DG_SENS.vegetationRenderKey=null;rec.spectralEnabled=false;rec.scannedAt=new Date().toISOString();dgSensDirty();const audit=dgSensScanAudit(rec);DG_SENS.status=_tvst("Uydu taraması tamamlandı: {profiled}/{total} hücrede yeterli gözlem, {diff} hücrede sınıf farkı. 2021 ham rasterı değişmedi.",{profiled:audit?.profiled||0,total:audit?.total||0,diff:audit?.transitions.reduce((n,x)=>n+x.cells,0)||0});
+  if(autoWater)DG_SENS.status+=" OSM su/havuz sınırları otomatik değerlendirildi ("+autoWater+" nesne).";
   const unresolved=dgSensWaterBoundaryUnresolved();if(dgSensHasExplicitWaterBoundary()&&unresolved)DG_SENS.status+=" Su sınırı dışında "+unresolved+" hücre belirsiz; yanlış su alanı kabul edilmedi, bu hücreleri haritada tek tek sınıflandırın.";
   dgSensRefreshLayer();dgSensUpdateSummary();
   await dgSensSave();completed=true;
