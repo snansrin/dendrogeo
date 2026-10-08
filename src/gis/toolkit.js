@@ -6,7 +6,7 @@
 "use strict";
 const geo=window.DG_GIS_GEO;
 if(!geo)return;
-const state={mode:null,points:[],measureLayer:null,marker:null,mapRef:null,scale:null,overlay:null,menu:null,notice:"Harita araçları hazır.",queryBusy:false,bookmarks:[]};
+const state={mode:null,points:[],measureLayer:null,lastKind:null,marker:null,mapRef:null,scale:null,overlay:null,menu:null,notice:"Harita araçları hazır.",queryBusy:false,bookmarks:[]};
 const $=id=>document.getElementById(id);
 const toastSafe=(text,type="info")=>{if(typeof window.toast==="function")window.toast(text,type);else console.info(text);};
 const isEditing=()=>Boolean((typeof PARK_MODE!=="undefined"&&PARK_MODE)||
@@ -163,7 +163,7 @@ function start(mode){
  const m=ensureMap();if(!m)return;
  if(state.mode==="line"||state.mode==="area")stopMode();
  if(["line","area","coordinate","identify"].indexOf(mode)===-1)return;
- state.mode=mode;state.points=[];
+ state.mode=mode;state.lastKind=mode==="area"?"area":"line";state.points=[];
  if((mode==="line"||mode==="area")&&m.doubleClickZoom?.enabled())m.doubleClickZoom.disable();
  draw();ensureFloat();
  const instructions={line:"Mesafe: haritada köşelere tıkla; çift tıkla veya ✓ ile bitir.",area:"Alan: en az üç köşe seç; çift tıkla veya ✓ ile bitir.",coordinate:"Koordinat: haritadaki konuma dokun.",identify:"Nesne: haritadaki park veya yüzey geometrisine dokun."};
@@ -197,7 +197,7 @@ function draw(){
  if(state.mode==="area"&&p.length>=3)L.polygon(p,{color:"#0e7490",weight:2,fillOpacity:.12,interactive:false}).addTo(state.overlay);
 }
 function clear(){
- stopMode();state.points=[];
+ stopMode();state.points=[];state.lastKind=null;state.coordinateText=null;
  if(state.overlay)state.overlay.clearLayers();
  const result=$("dgGisResult");if(result)result.replaceChildren();
  setStatus("Geçici çizim temizlendi. Kaydedilmiş analiz değişmedi.");
@@ -211,7 +211,7 @@ function finish(){
  if(state.mode!=="line"&&state.mode!=="area")return;
  const needed=state.mode==="area"?3:2;
  if(state.points.length<needed){setStatus("Ölçüm için en az "+needed+" köşe gerekli.");return;}
- draw();const kind=state.mode;stopMode();
+ state.lastKind=state.mode;draw();const kind=state.mode;stopMode();
  setStatus(kind==="area"?"Alan ölçümü tamamlandı.":"Mesafe ölçümü tamamlandı.");
  render();
 }
@@ -233,14 +233,14 @@ function render(){
  box.append(el("small","dg-gis-help","Bağımsız, yaklaşık WGS84 ölçümü; onaylı arazi analizini değiştirmez."));
 }
 function showCoordinate(latlng){
- const p=geo.point(latlng),utm=geo.utm(p);
+ const p=geo.point(latlng);let utm=null;try{utm=geo.utm(p);}catch{}
  const text=p.lat.toFixed(7)+", "+p.lng.toFixed(7);
  state.coordinateText=text;
  const box=$("dgGisResult");if(!box)return;
  box.replaceChildren();
  box.append(el("strong","",text));
  box.append(el("span","",geo.dms(p.lat,true)+" · "+geo.dms(p.lng,false)));
- box.append(el("span","", "EPSG:"+utm.epsg+" · "+utm.easting.toFixed(2)+" E · "+utm.northing.toFixed(2)+" N"));
+ if(utm)box.append(el("span","", "EPSG:"+utm.epsg+" · "+utm.easting.toFixed(2)+" E · "+utm.northing.toFixed(2)+" N"));
  box.append(button("Koordinatı kopyala",()=>copyText(text)));
  setStatus("Koordinat okundu · EPSG:4326.");
 }
