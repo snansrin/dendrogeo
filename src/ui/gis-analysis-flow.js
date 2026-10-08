@@ -1,0 +1,132 @@
+/* DendroGeo · One Park Analysis action.
+ * The scientific 10m WorldCover grid is a REQUIRED input to the locked
+ * Sentinel review. Keep this prerequisite but present it only as progress,
+ * never as a second user-facing analysis or a duplicate map/report.
+ * Does not write corrections, change class decisions, tweak thresholds or
+ * mutate an accepted result. Published reports, verified map and PNG untouched.
+ */
+(function(){
+ "use strict";
+ const $=id=>document.getElementById(id);
+ const hookId="landCoverBtn";
+ let active=false,iteration=0,observer=null,parkObserver=null,attached=null;
+ const LABEL="🛰 Park Analizi";
+ function syncButton(){
+  const btn=$(hookId);
+  if(btn&&!active&&!btn.disabled&&btn.textContent!==LABEL)btn.textContent=LABEL;
+ }
+ function progress(text,phase){
+  const action=$("parkSurfaceAction");
+  if(!action)return;
+  let status=$("dgUnifiedParkAnalysisStatus");
+  if(!status){
+   status=document.createElement("p");
+   status.id="dgUnifiedParkAnalysisStatus";
+   status.className="dg-ux-park-analysis-progress";
+   status.setAttribute("role","status");
+   status.setAttribute("aria-live","polite");
+   action.append(status);
+  }
+  if(status.textContent!==text)status.textContent=text;
+  status.dataset.phase=phase||"info";
+ }
+ function reportVisibility(phase){
+  const report=$("landCoverReport");
+  if(report)report.dataset.dgUnifiedPhase=phase;
+ }
+ function validSurface(){
+  const s=window.DG_LC_SENS?.state;
+  const lc=window.DG_LANDCOVER?.getLast?.();
+  const cells=lc?.report?.cells||lc?.cells;
+  return !!s?.record&&!!s.geometry&&!!s.parkGeometry&&
+    !!lc&&(!Array.isArray(cells)||cells.length>0)&&!s.rawView;
+ }
+ async function run(){
+  if(active||window._dgLandCoverBusy)return false;
+  if(typeof window.runLandCoverAnalysis!=="function"){
+   progress("Park analizi modülü yüklenemedi. Yeniden deneyin.","error");return false;
+  }
+  const token=++iteration;
+  active=true;reportVisibility("pending");
+  const btn=$(hookId);
+  if(btn){btn.disabled=true;btn.textContent="⏳ Park analiz ediliyor…";}
+  progress("1/3 · Park sınırı ve 10 m raster hazırlanıyor…","working");
+  let ok=false;
+  try{
+   // The locked baseline builds DG_LC_LAST.report.cells. It also mounts
+   // the approved review engine; its interim report stays visually hidden.
+   await window.runLandCoverAnalysis();
+   if(token!==iteration)return false;
+   if(!validSurface())throw Error("10 m raster veya park tarama altyapısı hazır değil. İlk analiz sonucu gösterilmedi.");
+   progress("2/3 · Sentinel-2 taraması ve mevcut su/yol/bina sınırları inceleniyor…","working");
+   if(typeof dgSensScan!=="function")throw Error("Yüzey tarayıcısı hazır değil.");
+   const scanned=await dgSensScan();
+   if(token!==iteration)return false;
+   if(scanned!==true)throw Error(window.DG_LC_SENS?.state?.status||"Uydu taraması tamamlanamadı.");
+   // A secondary evidence-only recheck (different acquisition period) may
+   // resolve old raster-water shoreline pixels, never guesses/manual labels.
+   const water=window.DG_GIS_WATER_NEIGHBOUR;
+   const pending=water?.missingParts?.()?.length||0;
+   let outcome=null;
+   if(pending&&typeof water?.recheckMissing==="function"){
+    progress("3/3 · Su çekilme alanlarındaki "+pending+" hücre ek uydu kanıtıyla kontrol ediliyor…","working");
+    outcome=await water.recheckMissing();
+   }
+   if(token!==iteration)return false;
+   const unresolved=Number.isFinite(outcome?.remaining)?outcome.remaining:
+    (water?.missingParts?.()?.length||0);
+   reportVisibility("ready");
+   const reviewed=Number(outcome?.resolved||0);
+   progress(unresolved>0?
+    "Tarama tamamlandı. Ek uydu kanıtıyla "+reviewed+" hücre çözüldü; "+
+     unresolved+" hücre bilimsel doğrulama bekliyor. Haritada düzeltme yapılmadan kabul edilemez.":
+    "Park analizi tamamlandı. Güncel yüzey sonuçları haritada ve tek kartta gösteriliyor.",
+    unresolved>0?"warning":"success");
+   ok=true;
+   return true;
+  }catch(error){
+   // Never show the preliminary WorldCover area report as if it were a
+   // successfully reviewed result. Prevent a false 'all clear' state.
+   reportVisibility("failed");
+   progress("Park analizi tamamlanamadı: "+String(error?.message||error),"error");
+   return false;
+  }finally{
+   active=false;
+   const live=$(hookId);
+   if(live){live.disabled=false;live.textContent=LABEL;}
+   if(!ok&&token===iteration)reportVisibility("failed");
+  }
+ }
+ function onClick(event){
+  const btn=event.target?.closest?.("#"+hookId);
+  if(!btn||btn.disabled||active)return;
+  if(typeof window.runLandCoverAnalysis!=="function")return;
+  event.preventDefault?.();
+  event.stopImmediatePropagation?.();
+  void run();
+ }
+ function attach(){
+  const host=$("parkInfo");
+  if(host&&host!==attached){
+   attached=host;
+   observer?.disconnect?.();
+   if(typeof MutationObserver==="function"){
+    observer=new MutationObserver(syncButton);
+    observer.observe(host,{childList:true,subtree:true});
+   }
+  }
+  syncButton();
+ }
+ function init(){
+  document.addEventListener?.("click",onClick,true);
+  attach();
+  const park=$("v-map");
+  if(park&&typeof MutationObserver==="function"){
+   parkObserver=new MutationObserver(attach);
+   parkObserver.observe(park,{childList:true,subtree:false});
+  }
+ }
+ window.DG_GIS_PARK_ANALYSIS={run,syncButton};
+ if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",init,{once:true});
+ else init();
+})();
