@@ -1188,3 +1188,7 @@
 #v-map #parkSurfaceAction .dg-ux-park-analysis-progress[data-phase="error"]{
   color:var(--red);
 }
+
+/* Keep the satellite editor hidden until the automatic first scan is complete.
+   An error releases the original controls so a user can retry safely. */
+#lcSens[data-dg-unified-phase="pending"]{display:none!important}
