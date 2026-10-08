@@ -9,9 +9,9 @@ import {createHash} from 'node:crypto';
 import {fileURLToPath} from 'node:url';
 import {join,resolve} from 'node:path';
 
-export const SURFACE_LOCK_ID='DG-SURFACE-LOCK-2026-10-08';
-export const APPROVED_COMMIT='7680cab4a7fd9102bef64e5cf031b740940a5be0';
-export const PINNED_MANIFEST_BLOB='7b5c4746033305545dfdcf3e13a751b687bd2f5c';
+export const SURFACE_LOCK_ID='DG-SURFACE-LOCK-2026-10-09';
+export const APPROVED_COMMIT='ffd21c01ba55e013b2ff65ecf959f34c34ded9dd';
+export const PINNED_MANIFEST_BLOB='87b1fb2345e20099ee332db59fba6b2a89c5cf42';
 const PROJECT_ROOT=fileURLToPath(new URL('../',import.meta.url));
 const MANIFEST='docs/surface-engine-lock.json';
 
