@@ -171,7 +171,7 @@ test('verified map PNG and legacy PNG action use the same NDVI-aware export path
  assert.match(workspace,/verified\.textContent="🖼️ PNG İndir"/);
  assert.match(workspace,/legacy\.hidden=!!verified/);
  assert.match(workspace,/if\(window\.DG_LC_SENS\?\.state\?\.record/);
- assert.match(workspace,/parked\.grid/);
+ assert.match(workspace,/parked\[key\]/);
 });
 
 test('mobile menu and relative NDVI status remain visible without editing locked CSS or raster code',()=>{
@@ -182,4 +182,30 @@ test('mobile menu and relative NDVI status remain visible without editing locked
  assert.match(css,/\.dg-ux-ndvi-map-info/);
  assert.match(work,/function syncNdviMapInfo\(/);
  assert.match(work,/typeof dgSensFocus==="function"\)dgSensFocus\(null\)/);
+});
+
+test('Other is hidden only from review rows, without removing its area from saved analysis',()=>{
+ const work=load('src/ui/gis-workspace.js');
+ const science=load('src/ui/lc-sens.js');
+ assert.match(work,/if\(label\?\.textContent\?\.trim\(\)==="Diğer"\)\{row\.remove\(\);continue;\}/);
+ assert.match(science,/function dgSensAreaBars\(areas\)/);
+ assert.match(science,/Object\.entries\(areas\)/);
+ assert.doesNotMatch(work,/\.delete\(other\)|areas\.other\s*=|record\.areas\s*=/);
+});
+
+test('Top six species disclosure retains original bar rows and supports keyboard native details',()=>{
+ const script=load('src/ui/gis-workspace.js'),css=load('css/gis-workspace.css');
+ assert.match(script,/el\("details","dg-ux-species-collapse"\)/);
+ assert.match(script,/el\("summary","dg-ux-species-toggle"\)/);
+ assert.match(script,/list\.append\(node\)/);
+ assert.match(css,/details\.dg-ux-species-collapse>summary:focus-visible/);
+});
+
+test('green sensitivity uses a colored explicit browser-native track and no black background',()=>{
+ const css=load('css/gis-workspace.css'),work=load('src/ui/gis-workspace.js');
+ assert.match(css,/::-webkit-slider-runnable-track/);
+ assert.match(css,/::-moz-range-progress/);
+ assert.match(css,/var\(--dg-ux-slider-color,#22c55e\)/);
+ assert.match(work,/--dg-ux-slider-fill/);
+ assert.match(css,/\.dg-sens-slider\[id\^="dgSensRange-"\]/);
 });
