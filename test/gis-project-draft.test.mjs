@@ -116,3 +116,13 @@ test('draft integration does not override locked acceptance or science and is pr
  assert.match(src,/DG_SURFACE_REVIEW\.save\(snapshot,s\.revision\)/);
  assert.match(src,/DG_SURFACE_REVIEW\.load\(rec\.parkId,rec\.owner\)/);
 });
+
+test('the original locked acceptance gate is never changed by project draft saving',()=>{
+ const locked=file('src/ui/lc-sens.js');
+ const adapter=file('src/ui/gis-project-draft.js');
+ assert.match(locked,/dgSensWaterBoundaryUnresolved\(\)>0\?/);
+ assert.match(locked,/sonuç kabul edilmedi/);
+ assert.match(adapter,/draftWaterUnresolved=count/);
+ assert.match(adapter,/snapshot\.draftDirty=true/);
+ assert.doesNotMatch(adapter,/acceptedResult\s*:\s*null|\.acceptedAt\s*=|corrections\[[^\]]+\]\s*=/);
+});
