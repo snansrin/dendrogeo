@@ -604,8 +604,10 @@ function dgParkMountMenus(){
  dgEditorClearMenus("park");
  host.replaceChildren();
  const nav=document.createElement("nav");nav.className="dg-editor-menubar";nav.setAttribute("aria-label",typeof dgCf==="function"?dgCf("Harita menüsü"):"Harita menüsü");
- for(const [id,label,icon,description] of [["parkGridTools","Grid & Waypoint","grid","Grid oluşturma ve waypoint araçları"],["parkLayerTools","Katmanlar","layers","Haritada gösterilecek katmanlar"]]){
+ for(const [id,label,icon,description] of [["parkGridTools","Grid & Waypoint","grid","Grid boyutu, güvenli mesafe ve waypoint planı"],["parkLayerTools","Katmanlar","layers","Harita katmanlarının görünürlüğünü yönet"]]){
   const controls=document.getElementById(id);if(!controls)continue;
+  controls.classList.add("dg-editor-menu-controls");
+  controls.querySelector(".dg-png-head")?.remove();
   const menu=document.createElement("details");menu.className="dg-editor-menu";menu.setAttribute("data-menu-owner","park");menu.setAttribute("data-menu-order",id==="parkGridTools"?"30":"40");
   const title=typeof dgCf==="function"?dgCf(label):label,subtitle=typeof dgCf==="function"?dgCf(description):description,safeTitle=typeof esc==="function"?esc(title):title,safeSubtitle=typeof esc==="function"?esc(subtitle):subtitle;
   const editorUi=typeof window!=="undefined"?window.DG_EDITOR_UI:null;
@@ -631,5 +633,6 @@ function dgEditorArrangeMenus(){
  for(const id of ["surfaceParkTools","surfaceBrushTools"]){
   document.getElementById(id)?.querySelectorAll(".dg-editor-menu").forEach(menu=>bar.append(menu));
  }
- [...bar.children].sort((a,b)=>Number(a.dataset.menuOrder)-Number(b.dataset.menuOrder)).forEach(menu=>bar.append(menu));
+ const order=el=>{const n=Number(el.dataset.menuOrder);return Number.isFinite(n)?n:Number.MAX_SAFE_INTEGER;};
+ [...bar.children].sort((a,b)=>order(a)-order(b)).forEach(item=>bar.append(item));
 }
