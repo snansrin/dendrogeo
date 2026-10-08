@@ -106,3 +106,15 @@ test('unknown patch inherits the actual nearest confirmed class, not a gray new 
  assert.deepEqual(Array.from(fn(list)),['green','building','building','green']);
  assert.equal(JSON.stringify(list),original,'never write guessed classes to original feature objects');
 });
+
+test('no new unclassified label is introduced and locked source area ledger is untouched',()=>{
+ const work=read('src/ui/gis-workspace.js');
+ const exp=read('src/ui/gis-export.js');
+ const lock=JSON.parse(read('docs/surface-engine-lock.json'));
+ assert.equal(Object.keys(lock.locked_files).length,51);
+ assert.doesNotMatch(work,/Sınıflandırılamayan/);
+ assert.match(exp,/nearestPresentationTypes\(features\)/);
+ assert.match(exp,/nearestPresentationTypes\(sens\?\.displayFeatures\)/);
+ assert.doesNotMatch(work,/rec\.corrections\s*=|record\.areas\s*=|rec\.acceptedResult\s*=/);
+ assert.doesNotMatch(exp,/dgSensAccept\(|dgSensSave\(|record\.areas\s*=/);
+});
