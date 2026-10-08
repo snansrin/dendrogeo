@@ -122,7 +122,8 @@ const SERVICE_BLOBS = {
 
 function gitBlobSha(content) {
   return createHash("sha1")
-    .update(`blob ${Buffer.byteLength(content)}\\0`)
+    .update(`blob ${Buffer.byteLength(content)}`)
+    .update(Buffer.from([0]))
     .update(content, "utf8")
     .digest("hex");
 }
@@ -137,7 +138,7 @@ function fnv64(source) {
 }
 
 function topLevelFunctions(source) {
-  const declarations = [...source.matchAll(/^(?:async\\s+)?function\\s+([A-Za-z0-9_$]+)\\s*\\(/gm)];
+  const declarations = [...source.matchAll(/^(?:async\s+)?function\s+([A-Za-z0-9_$]+)\s*\(/gm)];
   return new Map(declarations.map((declaration, index) => [
     declaration[1],
     source.slice(declaration.index, declarations[index + 1]?.index ?? source.length).trim(),
