@@ -674,7 +674,7 @@
    const node=$(id);if(node)observer.observe(node,{childList:true,subtree:id!=="surfaceMapTools"});
   }
   bar.addEventListener("toggle",event=>{
-   if(event.target?.matches?.(":scope > .dg-editor-menu")&&event.target.open)openMenu(event.target);
+   if(event.target?.parentElement===bar&&event.target?.matches?.("details.dg-editor-menu")&&event.target.open)openMenu(event.target);
   },true);
   window.addEventListener("resize",()=>{bar.querySelectorAll(":scope > details[open]").forEach(menuPosition);},{passive:true});
   window.visualViewport?.addEventListener("resize",()=>{bar.querySelectorAll(":scope > details[open]").forEach(menuPosition);},{passive:true});
