@@ -259,6 +259,43 @@
   note.id="dgUxMapStatus";note.setAttribute("role","status");note.setAttribute("aria-live","polite");
   section.append(note);body.append(section);
  }
+ // Visual parity only: reconstruct the preview rows in the exact three-part
+ // layout of the WorldCover result (label, 16px class bar, area + percent).
+ // Numerical values and the accepted/raw records are never recalculated here.
+ function styleSurfacePreview(host){
+  if(typeof document.createElement!=="function"||typeof host.querySelectorAll!=="function")return;
+  const rows=[...host.querySelectorAll(":scope > .dg-surface-stat")];
+  if(!rows.length||!rows[0]?.before)return;
+  const panel=document.createElement("div");panel.className="dg-ux-surface-rows";
+  rows[0].before(panel);
+  const types=window.DG_SURFACE_REVIEW?.types||{};
+  const icons={green:"🌿",water:"💧",hard:"🧱",building:"🏢",pool:"💦",bare:"🟫",other:"⬜"};
+  const defaults={"Yeşil alan":"green","Su":"water","Sert zemin":"hard","Bina":"building","Havuz":"pool","Çıplak zemin":"bare","Diğer":"other"};
+  for(const row of rows){
+   const label=row.querySelector?.(":scope > span");
+   const value=row.querySelector?.(":scope > b");
+   const fill=row.querySelector?.(":scope > .dg-surface-track > i");
+   if(label&&value&&fill){
+    const name=label.textContent.trim();
+    const type=Object.entries(types).find(([,meta])=>meta?.label===name)?.[0]||defaults[name];
+    if(type&&icons[type])label.prepend(document.createTextNode(icons[type]+" "));
+    const mapColor=fill.style?.backgroundColor;
+    if(mapColor){
+     row.style.setProperty("--dg-ux-surface-color",mapColor);
+     const slider=typeof document.getElementById==="function"&&type?document.getElementById("dgSensRange-"+type):null;
+     if(slider)slider.style.setProperty("--dg-ux-slider-color",mapColor);
+    }
+    const original=value.textContent.trim();
+    const match=original.match(/^(.*?)\s*·\s*(%[0-9.,]+)$/);
+    if(match){
+     value.textContent=match[1]+" · ";
+     const pct=document.createElement("span");pct.className="dg-ux-surface-percentage";
+     pct.textContent=match[2];value.append(pct);
+    }
+   }
+   panel.append(row);
+  }
+ }
  // The locked core generates both source and edited summaries in one DOM.
  // Present exactly one at a time; its calculations, records and raw source stay intact.
  function syncSurfaceReport(){
@@ -272,6 +309,7 @@
   }else{
    // Historical raw report remains in state.baselineReport and in 'Ham analizi göster'.
    host.querySelectorAll(":scope > details.dg-sens-details").forEach(n=>n.remove());
+   styleSurfacePreview(host);
   }
   const evidence=typeof document.querySelector==="function"?document.querySelector("#dgSensEvidenceDetails"):null;
   if(evidence&&!evidence.dataset.dgUxInitialized){

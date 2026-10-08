@@ -670,3 +670,123 @@
     gap:4px;
   }
 }
+
+/* 2026-10-08 · Parity with ESA WorldCover result presentation ONLY.
+   The raw source report remains unchanged. Reviewed area totals and the
+   map's source palette are read, never modified. */
+#v-map #landCoverReport>b:first-child{
+  font:700 .82rem/1.6 var(--f-ui);
+  margin:0 0 7px;
+}
+#v-map #landCoverReport .dg-ux-surface-rows{
+  margin:6px 0 4px;
+  padding:10px 12px;
+  border:1px solid var(--line);
+  border-radius:12px;
+  background:var(--bg);
+}
+#v-map #landCoverReport .dg-ux-surface-rows>.dg-surface-stat{
+  display:grid;
+  grid-template-columns:106px minmax(0,1fr) 132px;
+  align-items:center;
+  column-gap:8px;
+  row-gap:0;
+  min-width:0;
+  margin:8px 0;
+  padding:0;
+  border:0;
+  border-radius:0;
+  background:transparent;
+}
+#v-map #landCoverReport .dg-ux-surface-rows>.dg-surface-stat>span{
+  grid-column:1;
+  grid-row:1;
+  min-width:0;
+  font:700 .75rem/1.45 var(--f-ui);
+  white-space:normal;
+  overflow-wrap:normal;
+}
+#v-map #landCoverReport .dg-ux-surface-rows>.dg-surface-stat>.dg-surface-track{
+  grid-column:2;
+  grid-row:1;
+  width:100%;
+  height:16px;
+  min-width:0;
+  margin:0;
+  background:rgba(20,30,25,.06);
+  overflow:hidden;
+  border-radius:8px;
+}
+#v-map #landCoverReport .dg-ux-surface-rows>.dg-surface-stat>.dg-surface-track>i{
+  display:block;
+  height:100%;
+  box-sizing:border-box;
+  border:1px solid var(--dg-ux-surface-color,#94a3b8);
+  border-radius:8px;
+  background:color-mix(in srgb,var(--dg-ux-surface-color,#94a3b8) 40%,transparent)!important;
+}
+#v-map #landCoverReport .dg-ux-surface-rows>.dg-surface-stat>b{
+  grid-column:3;
+  grid-row:1;
+  min-width:0;
+  font:600 .75rem/1.45 var(--f-mono,ui-monospace,monospace);
+  text-align:right;
+  font-variant-numeric:tabular-nums;
+  white-space:normal;
+  overflow-wrap:normal;
+}
+#v-map #landCoverReport .dg-ux-surface-percentage{
+  color:var(--mut);
+  font-weight:400;
+}
+#v-map #landCoverReport>.dg-sens-hint{
+  font-size:.67rem;
+  line-height:1.6;
+  margin-top:8px;
+}
+/* Native accent colors match the map's reviewed polygon palette. They also
+   act as fallbacks before preview rows have loaded/been scanned. */
+#v-map #lcSens input.dg-sens-slider#dgSensRange-green{
+  accent-color:var(--dg-ux-slider-color,#22c55e);
+}
+#v-map #lcSens input.dg-sens-slider#dgSensRange-water{
+  accent-color:var(--dg-ux-slider-color,#3b82f6);
+}
+#v-map #lcSens input.dg-sens-slider#dgSensRange-hard{
+  accent-color:var(--dg-ux-slider-color,#64748b);
+}
+#v-map #lcSens input.dg-sens-slider#dgSensRange-bare{
+  accent-color:var(--dg-ux-slider-color,#8b5a2b);
+}
+@media(max-width:700px){
+  #v-map #landCoverReport .dg-ux-surface-rows{
+    padding:9px 8px;
+  }
+  #v-map #landCoverReport .dg-ux-surface-rows>.dg-surface-stat{
+    grid-template-columns:96px minmax(0,1fr) 122px;
+    column-gap:6px;
+  }
+}
+@media(max-width:380px){
+  #v-map #landCoverReport .dg-ux-surface-rows>.dg-surface-stat{
+    grid-template-columns:84px minmax(0,1fr) 110px;
+    column-gap:5px;
+  }
+  #v-map #landCoverReport .dg-ux-surface-rows>.dg-surface-stat>span,
+  #v-map #landCoverReport .dg-ux-surface-rows>.dg-surface-stat>b{
+    font-size:.7rem;
+  }
+}
+@media(max-width:330px){
+  #v-map #landCoverReport .dg-ux-surface-rows>.dg-surface-stat{
+    grid-template-columns:minmax(0,1fr) auto;
+    row-gap:4px;
+  }
+  #v-map #landCoverReport .dg-ux-surface-rows>.dg-surface-stat>b{
+    grid-column:2;
+  }
+  #v-map #landCoverReport .dg-ux-surface-rows>.dg-surface-stat>.dg-surface-track{
+    grid-column:1/-1;
+    grid-row:2;
+  }
+}
