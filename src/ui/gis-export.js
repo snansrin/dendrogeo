@@ -296,8 +296,12 @@
   if(opts.cover){
    const display=Array.isArray(sens?.displayPaths)&&!sens.rawView?sens.displayPaths:[];
    if(display.length){
-    for(const item of display){
-     if(drawLeaflet(ctx,pr,item.poly,item.cls==="other"?.16:Math.max(.28,(sens.opacity||65)/100),item.cls==="building"?BUILDING_COLOR:item.cls==="pool"?"#3b82f6":null))count++;
+    const nearest=nearestPresentationTypes(sens?.displayFeatures);
+    for(let i=0;i<display.length;i++){
+     const item=display[i],type=item.cls==="other"?nearest[i]:item.cls;
+     const color=type==="building"?BUILDING_COLOR:type==="water"||type==="pool"?"#3b82f6":
+      type&&type!=="other"?(typeof DG_SENS_COLORS!=="undefined"?DG_SENS_COLORS[type]:null)||dict[type]?.color:null;
+     if(drawLeaflet(ctx,pr,item.poly,Math.max(.28,(sens.opacity||65)/100),color))count++;
     }
    }else{
     const last=window.DG_LANDCOVER?.getLast?.();
