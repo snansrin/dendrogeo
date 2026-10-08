@@ -130,6 +130,16 @@ function dgSensDirty(){DG_SENS.visualVersion++;DG_SENS.editing=true;if(DG_SENS.r
 function dgSensPredict(sp){return window.DG_LC_VALIDATE.spectralPredict(sp,DG_SENS.record?.sens);}
 function dgSensCellKey(c){return c.row+":"+c.col;}
 function dgSensHasExplicitWaterBoundary(rec=DG_SENS.record){return !!(rec?.features||[]).some(f=>f?.type==="water"&&f?.method==="visual-boundary");}
+/* A complete, validated OSM lake way is the authoritative water footprint
+ * only for its own park. Other parks keep baseline raster water unless
+ * explicitly reviewed; incomplete OSM data may not erase water elsewhere. */
+function dgSensHasVerifiedWaterBoundary(rec=DG_SENS.record){
+ return rec?.useObjects!==false&&!!(rec?.objectFeatures||[]).some(f=>
+  f?.type==="water"&&f?.method==="osm-boundary"&&f?.osmId==="way/423602740"&&
+  window.DG_SURFACE_REVIEW.validFeature(f));
+}
+function dgSensHasWaterFootprint(rec=DG_SENS.record){return dgSensHasExplicitWaterBoundary(rec)||dgSensHasVerifiedWaterBoundary(rec);}
+
 function dgSensWaterOutsideClass(c,rec=DG_SENS.record){
  const key=dgSensCellKey(c),decision=rec?.corrections?.[key],land=new Set(["green","hard","bare"]);
  if(decision&&land.has(decision.to)&&(decision.method==="visual-cell"||(!DG_SENS.editing&&decision.method==="sensitivity")))return decision.to;
@@ -139,14 +149,14 @@ function dgSensWaterOutsideClass(c,rec=DG_SENS.record){
 }
 function dgSensWaterOutsideParts(){return dgSensParts().filter(p=>(p.cell?.rasterClassKey||p.cell?.classKey)==="water"&&p.method==="review-cell");}
 function dgSensWaterBoundaryUnresolved(){const unknown=new Set();for(const p of dgSensWaterOutsideParts())if(p.type==="other")unknown.add(p.key);return unknown.size;}
-function dgSensNeedsWaterScan(){return dgSensHasExplicitWaterBoundary()&&dgSensWaterOutsideParts().length>0&&!DG_SENS.record?.profile?.cells;}
+function dgSensNeedsWaterScan(){return dgSensHasWaterFootprint()&&dgSensWaterOutsideParts().length>0&&!DG_SENS.record?.profile?.cells;}
 function dgSensEffective(c){
  const original=c.rasterClassKey||c.classKey;
  if(DG_SENS.rawView)return original;
  const dec=DG_SENS.record?.corrections?.[dgSensCellKey(c)];
  // A user water polygon is authoritative for water. Outside it, raster-water
  // cells use non-water spectral evidence; inadequate evidence stays review-only.
- if(original==="water"&&dgSensHasExplicitWaterBoundary())return dgSensWaterOutsideClass(c);
+ if(original==="water"&&dgSensHasWaterFootprint())return dgSensWaterOutsideClass(c);
  // Manual cells and accepted decisions take precedence over optional spectral review.
  if(dec&&(dec.method==="visual-cell"||!DG_SENS.editing))return window.DG_SURFACE_REVIEW.types[dec.to]?dec.to:original;
  if(!DG_SENS.editing||!DG_SENS.record?.spectralEnabled||Number(c.areaM2)<window.DG_LC_VALIDATE.defaults.edgeAreaM2)return original;
@@ -396,7 +406,7 @@ async function dgSensScan(){
   const autoWater=await dgSensAutoWaterOnScan(rec,epoch);if(epoch!==DG_SENS.epoch||DG_SENS.record!==rec)return false;
   rec.profile=profile;DG_SENS.vegetationRenderKey=null;rec.spectralEnabled=false;rec.scannedAt=new Date().toISOString();dgSensDirty();const audit=dgSensScanAudit(rec);DG_SENS.status=_tvst("Uydu taraması tamamlandı: {profiled}/{total} hücrede yeterli gözlem, {diff} hücrede sınıf farkı. 2021 ham rasterı değişmedi.",{profiled:audit?.profiled||0,total:audit?.total||0,diff:audit?.transitions.reduce((n,x)=>n+x.cells,0)||0});
   if(autoWater)DG_SENS.status+=" OSM su/havuz sınırları otomatik değerlendirildi ("+autoWater+" nesne).";
-  const unresolved=dgSensWaterBoundaryUnresolved();if(dgSensHasExplicitWaterBoundary()&&unresolved)DG_SENS.status+=" Su sınırı dışında "+unresolved+" hücre belirsiz; yanlış su alanı kabul edilmedi, bu hücreleri haritada tek tek sınıflandırın.";
+  const unresolved=dgSensWaterBoundaryUnresolved();if(dgSensHasWaterFootprint()&&unresolved)DG_SENS.status+=" Su sınırı dışında "+unresolved+" hücre belirsiz; yanlış su alanı kabul edilmedi, bu hücreleri haritada tek tek sınıflandırın.";
   dgSensRefreshLayer();dgSensUpdateSummary();
   await dgSensSave();completed=true;
  }catch(e){if(epoch===DG_SENS.epoch){DG_SENS.status=_tvs("Tarama başarısız: ")+String(e.message||e);toast(DG_SENS.status,"err");}}
