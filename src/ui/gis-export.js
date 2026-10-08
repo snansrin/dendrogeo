@@ -115,12 +115,58 @@
   ctx.globalAlpha=1;
   return true;
  }
+
+ // Presentation-only neighbour tint. Scientific type/areas remain immutable.
+ const nearestPresentationCache=new WeakMap();
+ const DISPLAY_CLASSES=new Set(["green","water","hard","bare","building","pool"]);
+ function nearestPresentationTypes(features){
+  if(!Array.isArray(features))return [];
+  const cached=nearestPresentationCache.get(features);if(cached)return cached;
+  const boxes=features.map(feature=>{
+   const poly=feature?.geometry?.type==="MultiPolygon"?feature.geometry.coordinates:
+    feature?.geometry?.type==="Polygon"?[feature.geometry.coordinates]:[];
+   let west=Infinity,east=-Infinity,south=Infinity,north=-Infinity;
+   for(const p of poly||[])for(const ring of p||[])for(const xy of ring||[]){
+    if(!Array.isArray(xy)||!Number.isFinite(xy[0])||!Number.isFinite(xy[1]))continue;
+    west=Math.min(west,xy[0]);east=Math.max(east,xy[0]);
+    south=Math.min(south,xy[1]);north=Math.max(north,xy[1]);
+   }
+   return west<=east&&south<=north?{west,east,south,north,lon:(west+east)/2,lat:(south+north)/2}:null;
+  });
+  const known=[];
+  for(let i=0;i<features.length;i++){
+   const cls=features[i]?.properties?.class;
+   if(boxes[i]&&DISPLAY_CLASSES.has(cls))known.push({box:boxes[i],cls:cls==="pool"?"water":cls});
+  }
+  const out=features.map((f,i)=>{
+   const cls=f?.properties?.class;
+   if(cls!=="other"&&cls!=="nodata"&&cls!=null)return cls==="pool"?"water":cls;
+   const target=boxes[i];if(!target||!known.length)return "other";
+   const scale=Math.max(.05,Math.cos(target.lat*Math.PI/180));
+   let winner="other",best=Infinity,tieMin=Infinity;
+   for(const candidate of known){
+    const box=candidate.box;
+    // Projected distance to nearest envelope, not to a remote large-polygon centroid.
+    const dx=Math.max(box.west-target.lon,0,target.lon-box.east)*scale;
+    const dy=Math.max(box.south-target.lat,0,target.lat-box.north);
+    const score=dx*dx+dy*dy;
+    const cx=(target.lon-box.lon)*scale,cy=target.lat-box.lat;
+    const tie=cx*cx+cy*cy;
+    if(score<best||(score===best&&tie<tieMin)){
+     best=score;tieMin=tie;winner=candidate.cls;
+    }
+   }
+   return winner;
+  });
+  nearestPresentationCache.set(features,out);return out;
+ }
  // Exact review geometry, not the transient Leaflet displayPaths (which may be
  // filtered/empty on a verified map). Pure canvas rendering: no edits to data.
  function drawVerifiedFeatures(ctx,pr,features,dict){
   let painted=0;
-  for(const feature of features||[]){
-   const name=feature?.properties?.class;
+  const visual=nearestPresentationTypes(features);
+  for(let i=0;i<(features||[]).length;i++){
+   const feature=features[i],name=visual[i];
    const polys=feature?.geometry?.type==="MultiPolygon"?feature.geometry.coordinates:null;
    if(!polys?.length)continue;
    ctx.beginPath();
@@ -135,11 +181,10 @@
     ctx.closePath();paths++;
    }
    if(!paths)continue;
-   // All scientific classes retain their approved visual hue. Only building
-   // is darkened, pool is shown with water, and unresolved remains neutral.
-   ctx.fillStyle=name==="building"?BUILDING_COLOR:name==="pool"?"#3b82f6":
+   // An unresolved gap is tinted like its nearest valid class for display only.
+   ctx.fillStyle=name==="building"?BUILDING_COLOR:name==="water"?"#3b82f6":
     (typeof DG_SENS_COLORS!=="undefined"?DG_SENS_COLORS[name]:null)||dict[name]?.color||"#94a3b8";
-   ctx.globalAlpha=name==="other"?.18:1;
+   ctx.globalAlpha=1;
    ctx.fill("evenodd");ctx.globalAlpha=1;painted++;
   }
   return painted;
@@ -532,6 +577,6 @@
   event.stopImmediatePropagation();
   exportMap();
  },true);
- window.DG_GIS_PNG_EXPORT={download:exportMap,downloadVerified:exportVerified,classes,eachRing,baseTilePlan};
+ window.DG_GIS_PNG_EXPORT={download:exportMap,downloadVerified:exportVerified,classes,eachRing,baseTilePlan,nearestPresentationTypes};
  window.downloadParkImage=exportMap;
 })();
