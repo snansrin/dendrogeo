@@ -180,33 +180,3 @@ jobs:
               sys.exit(1)
           print('✅ Canlı site depoyla birebir aynı.')
           PY
-
-  water_summary_final_build:
-    name: Final Su class and report compilation
-    if: github.event_name == 'pull_request' && github.head_ref == 'fix/unify-pool-water-boundary-report-20261008'
-    runs-on: ubuntu-latest
-    permissions:
-      contents: write
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          ref: fix/unify-pool-water-boundary-report-20261008
-          fetch-depth: 0
-      - uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-      - run: npm ci
-      - name: Rebuild and run all science-lock and user-interface regressions
-        run: |
-          npm run build
-          npm run check
-      - name: Restore immutable CI and commit versioned entrypoint
-        run: |
-          git fetch origin main
-          git show origin/main:.github/workflows/ci.yml > .github/workflows/ci.yml
-          git add index.html .github/workflows/ci.yml
-          git config user.name "DendroGeo GIS QA"
-          git config user.email "gis-ui-repair@users.noreply.github.com"
-          git commit -m "build(gis): update Su-only report and surface summary assets"
-          git pull --rebase origin fix/unify-pool-water-boundary-report-20261008
-          git push origin HEAD:fix/unify-pool-water-boundary-report-20261008
