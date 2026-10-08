@@ -17,14 +17,14 @@ const MANIFEST='docs/surface-engine-lock.json';
 
 export function gitBlobSha(bytes){
  const data=Buffer.isBuffer(bytes)?bytes:Buffer.from(bytes);
- return createHash('sha1').update(Buffer.from('blob '+data.length+'\\0')).update(data).digest('hex');
+ return createHash('sha1').update(Buffer.from('blob '+data.length+'\0')).update(data).digest('hex');
 }
 
 export function verifySurfaceFiles(root,lockedFiles){
  const errors=[];
  if(!lockedFiles||typeof lockedFiles!=='object'||Array.isArray(lockedFiles))return ['Kilit listesi geçersiz.'];
  for(const [path,expected] of Object.entries(lockedFiles)){
-  if(!/^([a-zA-Z0-9._-]+\\/)*[a-zA-Z0-9._-]+$/.test(path)||path.includes('..')){
+  if(!/^([a-zA-Z0-9._-]+\/)*[a-zA-Z0-9._-]+$/.test(path)||path.includes('..')){
    errors.push('Geçersiz yol: '+path);continue;
   }
   if(!/^[a-f0-9]{40}$/.test(expected)){errors.push('Geçersiz hash: '+path);continue;}
