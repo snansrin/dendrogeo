@@ -4,7 +4,7 @@
 // NOT: Senkronizasyon artık Ana Thread (Supabase JS SDK) tarafından yapılıyor
 // ============================================================
 
-const CACHE_VERSION = 'dendrogeo-sw-v2-r87';
+const CACHE_VERSION = 'dendrogeo-sw-v2-r88';
 
 /* İKİ AYRI STATİK CACHE — bu ayrım bilinçli ve önemli.
  *
@@ -362,4 +362,4 @@ self.addEventListener('notificationclick', event => {
     );
 });
 
-console.log('[SW] 🌲 DendroGeo Service Worker v2.10 r87 — network-first app assets');
+console.log('[SW] 🌲 DendroGeo Service Worker v2.10 r88 — network-first app assets');

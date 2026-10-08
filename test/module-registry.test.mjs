@@ -21,7 +21,7 @@
 import { test, describe } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync, readdirSync, statSync, existsSync } from 'node:fs';
-import { createHash } from 'node:crypto';
+import {assetVersion,releaseVersion} from '../scripts/asset-version.mjs';
 import { join, dirname, relative } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -29,7 +29,7 @@ const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const html = readFileSync(join(ROOT, 'index.html'), 'utf8');
 const sw = readFileSync(join(ROOT, 'sw.js'), 'utf8');
 
-const sha8 = (p) => createHash('sha256').update(readFileSync(join(ROOT, p))).digest('hex').slice(0, 8);
+const sha8 = (p) => assetVersion(ROOT,p);
 
 function walk(dir) {
   const out = [];
@@ -57,13 +57,21 @@ describe('index.html ↔ disk ↔ ?v= tutarlılığı', () => {
     assert.deepEqual(yok, [], 'diskte olmayan asset: ' + yok.join(', '));
   });
 
-  test('src/css varlıklarının ?v= değeri içerik hash’i (version-sync şeması)', () => {
+  test('src/css varlıklarının ?v= değeri yayın sürümü ve içerik hash’i (version-sync şeması)', () => {
     const bozuk = assets
       .filter((a) => a.path.startsWith('src/') || a.path.startsWith('css/'))
       .filter((a) => a.v !== sha8(a.path))
       .map((a) => `${a.path} ?v=${a.v} ≠ ${sha8(a.path)}`);
     assert.deepEqual(bozuk, [], 'hash uyumsuz: ' + bozuk.join(' | ') + ' → node scripts/version-sync.mjs --write');
   });
+});
+
+test('all direct assets and lazy modules receive the current release version',()=>{
+ const release=releaseVersion(ROOT);
+ assert.ok(assets.length>40);
+ for(const asset of assets)assert.ok(asset.v.startsWith(release),asset.path+' lacks release version');
+ const runtime=JSON.parse(html.match(/<script id="dgRuntimeBuild" type="application\/json">([^<]+)<\/script>/)[1]);
+ assert.ok(runtime.startsWith(release));
 });
 
 describe('service worker CORE_ASSETS kaydı', () => {

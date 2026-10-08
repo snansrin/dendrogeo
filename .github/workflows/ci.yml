@@ -111,6 +111,9 @@ jobs:
       - name: Bağımlılıklar (npm ci)
         run: npm ci
 
+      - name: Kullanıcı onaylı analiz çekirdeği kilidi
+        run: node scripts/check-analysis-lock.mjs
+
       - name: Sözdizimi denetimi (tarayıcı semantiği)
         run: npm run check:syntax
 

@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+import {assetVersion,releaseVersion} from './asset-version.mjs';
 /* build-index.mjs — index.html ÜRETİCİSİ (Faz 3: landing gerçekten ayrı modül)
  *
  * index.html artık ELLE düzenlenmez; partials/ altındaki dört modülden
@@ -47,22 +48,22 @@ const mode = process.argv.includes('--write') ? 'write'
            : process.argv.includes('--check') ? 'check'
            : 'check';
 
-const v8 = (rel) => createHash('sha256').update(readFileSync(join(ROOT, rel))).digest('hex').slice(0, 8);
+const v8 = (rel) => assetVersion(ROOT,rel);
 
 /* ?v= değerlerini içerik hash'iyle tazele (version-sync.mjs ile aynı regex) */
 function refreshHashes(text) {
-  return text.replace(/((?:src|href)=")((?:src|css|vendor)\/[^"?]+)(\?v=)([A-Za-z0-9]+)(")/g,
-    (m, a, path, c, _old, d) => {
+  return text.replace(/((?:src|href)=")((?:src|css|vendor)\/[^"?]+)(?:\?v=([A-Za-z0-9]+))?(")/g,
+    (m, a, path, _old, d) => {
       const rel = path.split('?')[0];
       if (!existsSync(join(ROOT, rel))) return m;
-      return a + path + c + v8(rel) + d;
+      return a + path + "?v=" + v8(rel) + d;
     });
 }
 
 function runtimeBuild(){
  const hash=createHash('sha256');
  function visit(dir){for(const item of readdirSync(join(ROOT,dir),{withFileTypes:true}).sort((a,b)=>a.name.localeCompare(b.name))){const path=dir+'/'+item.name;if(item.isDirectory())visit(path);else if(path.endsWith('.js'))hash.update(path).update(readFileSync(join(ROOT,path)));}}
- visit('src');visit('vendor');return hash.digest('hex').slice(0,16);
+ visit('src');visit('vendor');return releaseVersion(ROOT)+hash.digest('hex').slice(0,16);
 }
 
 function assemble() {
