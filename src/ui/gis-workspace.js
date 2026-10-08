@@ -116,9 +116,9 @@
   if(!panel)return;
   if(exportCard.parentElement!==panel)panel.append(exportCard);
   const verified=coreFile?.querySelector('button[onclick*="dgSensExportPng"]');
-  if(verified&&verified.textContent!=="🖼️ PNG İndir")verified.textContent="🖼️ PNG İndir";
+  if(verified&&verified.textContent!=="🖼️ Doğrulanmış Harita")verified.textContent="🖼️ Doğrulanmış Harita";
   const legacy=exportCard.querySelector('button[onclick*="downloadParkImage"]');
-  if(legacy)legacy.hidden=!!verified; // one PNG action, settings remain in Dosya
+  if(legacy)legacy.hidden=false; // Restore the separate quick PNG action; verified map keeps its original layer-selection dialog.
 
   const select=$("pngBg");
   const label=select?.closest(".dg-png-field")?.querySelector("label");

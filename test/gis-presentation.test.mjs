@@ -162,14 +162,18 @@ test('distance measurement captures polygon clicks before editor popup even in r
  assert.equal(events.click,undefined);
 });
 
-test('verified map PNG and legacy PNG action use the same NDVI-aware export path',()=>{
+test('verified-map original label/dialog are restored, separate quick PNG stays in File',()=>{
  const script=load('src/ui/gis-export.js');
  const workspace=load('src/ui/gis-workspace.js');
- assert.match(script,/button\[onclick\*="dgSensExportPng"\]/);
- assert.match(script,/ndviTiers\.cutoffs/);
- assert.match(script,/ndviTiers\.tiers/);
- assert.match(workspace,/verified\.textContent="🖼️ PNG İndir"/);
- assert.match(workspace,/legacy\.hidden=!!verified/);
+ const locked=load('src/ui/lc-sens.js');
+ assert.match(workspace,/verified\.textContent="🖼️ Doğrulanmış Harita"/);
+ assert.match(workspace,/legacy\.hidden=false/);
+ assert.match(locked,/function dgSensExportPng\(\)/);
+ assert.match(locked,/dialog\.showModal\(\)/);
+ assert.match(script,/const exportAction=event\.target\?\.closest\?\.\("#dgExportDownload"\)/);
+ assert.match(script,/if\(exportAction&&sens\?\.vegetationView&&!sens\.rawView\)/);
+ assert.match(script,/if\(dialog\?\.id==="dgSurfaceExportDialog"&&dialog\.querySelector\('\[name="surface"\]'\)\?\.checked\)/);
+ assert.match(script,/const button=event\.target\?\.closest\?\.\('button\[onclick\*="downloadParkImage"\]'\)/);
  assert.match(workspace,/if\(window\.DG_LC_SENS\?\.state\?\.record/);
  assert.match(workspace,/parked\[key\]/);
 });
@@ -211,4 +215,51 @@ test('green sensitivity uses a colored explicit browser-native track and no blac
  assert.match(css,/var\(--dg-ux-slider-color,#22c55e\)/);
  assert.match(work,/--dg-ux-slider-fill/);
  assert.match(css,/\.dg-sens-slider\[id\^="dgSensRange-"\]/);
+});
+
+
+test('verified NDVI PNG uses 1240x1560 official layout and paints observed green tiers over land cover',()=>{
+ const src=load('src/ui/gis-export.js');
+ assert.match(src,/async function renderVerified\(layers\)/);
+ assert.match(src,/CW=1240,CH=1560,MX=40,MY=240,MW=760,MH=1180/);
+ assert.match(src,/g\.fillText\("DOĞRULANMIŞ PARK HARİTASI"/);
+ assert.match(src,/for\(const poly of ndviPolys\)[\s\S]*?drawLeaflet\(g,pr,poly/);
+ assert.match(src,/const counts=\{sparse:0,moderate:0,dense:0\}/);
+ assert.match(src,/tiers\.cutoffs\.map\(n=>Number\(n\)\.toFixed\(3\)\)/);
+ assert.match(src,/if\(tiers\.count<9\|\|!tiers\.cutoffs\)/);
+ assert.match(src,/dgSensEditSummary\(rec\)/);
+ assert.match(src,/dgSensFeatures\(\)\.length/);
+ assert.match(src,/NDVI katmanı tek başına doğrulanmış harita sayılmaz/);
+ assert.match(src,/const ndviPolys=await waitVegetation\(sens,30\)/);
+ assert.match(src,/renderVerified\(layers\)/);
+});
+
+test('verified-map original dialog is untouched with NDVI off; its PNG download switches to actual NDVI when on',async()=>{
+ const hooks={},warnings=[];
+ const state={vegetationView:false,rawView:false};
+ const dialog={
+  id:'dgSurfaceExportDialog',
+  closeCount:0,
+  querySelector:sel=>({checked:sel==='[name="surface"]'||sel==='[name="park"]'}),
+  close(){this.closeCount++;}
+ };
+ const action={closest:()=>dialog};
+ const target={closest:selector=>selector==='#dgExportDownload'?action:null};
+ const context={
+  window:{DG_LC_SENS:{state}},
+  document:{getElementById:()=>null,addEventListener:(name,fn)=>{hooks[name]=fn;}},
+  toast:msg=>warnings.push(msg),
+  setTimeout,clearTimeout,console,Date,Math
+ };
+ vm.runInNewContext(load('src/ui/gis-export.js'),context);
+ let prevented=0,stopped=0;
+ const click=()=>({target,preventDefault:()=>{prevented++;},stopImmediatePropagation:()=>{stopped++;}});
+ hooks.click(click());
+ assert.equal(prevented,0);assert.equal(dialog.closeCount,0);
+ state.vegetationView=true;
+ hooks.click(click());
+ await Promise.resolve();
+ assert.equal(prevented,1);assert.equal(stopped,1);
+ assert.equal(dialog.closeCount,1);
+ assert.match(warnings.join(' '),/Önce parkın arazi örtüsü analizini açın/);
 });
