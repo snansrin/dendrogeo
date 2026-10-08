@@ -1159,3 +1159,32 @@
     font-size:.65rem;
   }
 }
+
+/* One Park Analysis action: WorldCover remains an invisible input to the
+   locked scanner. It is NOT an additional result. Only the scientific review
+   summary is displayed after a successful Sentinel scan. */
+#v-map #landCoverReport[data-dg-unified-phase="pending"],
+#v-map #landCoverReport[data-dg-unified-phase="failed"]{
+  display:none!important;
+}
+#v-map #parkSurfaceAction .dg-ux-park-analysis-progress{
+  width:100%;
+  margin:0;
+  padding:9px 10px;
+  border-radius:9px;
+  border:1px solid var(--line);
+  background:var(--surface);
+  color:var(--mut);
+  font:600 .73rem/1.5 var(--f-ui);
+  white-space:normal;
+  overflow-wrap:anywhere;
+}
+#v-map #parkSurfaceAction .dg-ux-park-analysis-progress[data-phase="success"]{
+  color:var(--green);
+}
+#v-map #parkSurfaceAction .dg-ux-park-analysis-progress[data-phase="warning"]{
+  color:var(--ink);
+}
+#v-map #parkSurfaceAction .dg-ux-park-analysis-progress[data-phase="error"]{
+  color:var(--red);
+}
