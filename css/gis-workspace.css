@@ -1038,3 +1038,17 @@
  #v-map #surfaceMapTools .dg-ux-boundary-dock{max-width:calc(100vw - 86px);padding:5px;gap:5px}
  #v-map #surfaceMapTools .dg-ux-boundary-choice{flex-basis:105px}
 }
+
+/* Both the NDVI evidence badge and the drawing dock may be present together.
+   Wrap instead of extending the rail beyond a field phone viewport. */
+#v-map #surfaceMapTools:has(.dg-ux-boundary-dock):has(.dg-ux-ndvi-map-info){
+ flex-wrap:wrap;
+ max-width:calc(100vw - 16px);
+}
+#v-map #surfaceMapTools:has(.dg-ux-boundary-dock) .dg-ux-ndvi-map-info{
+ order:3;
+ max-width:calc(100vw - 32px);
+}
+@media(max-width:700px){
+ #v-map #surfaceMapTools .dg-ux-boundary-dock{flex-shrink:1}
+}
