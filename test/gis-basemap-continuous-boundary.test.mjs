@@ -92,7 +92,7 @@ test('hard/building scientific IDs and colors are locked; darker building is pre
  assert.match(exporter,/const BUILDING_COLOR="#334155"/);
  assert.match(ui,/const BUILDING_PRESENTATION_COLOR="#334155"/);
  assert.match(ui,/type==="building"\?BUILDING_PRESENTATION_COLOR/);
- assert.match(exporter,/item\.cls==="building"\?BUILDING_COLOR/);
+ assert.match(exporter,/type==="building"\?BUILDING_COLOR/);
  assert.doesNotMatch(ui,/rec\.corrections\s*=|\.acceptedAreas\s*=|DG_SENS_COLORS\s*=/);
  assert.doesNotMatch(exporter,/dgSensSave\(|DG_SENS_COLORS\s*=|\.acceptedAreas\s*=/);
 });
