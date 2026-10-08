@@ -39,3 +39,22 @@
 /src/utils/geo.js @snansrin
 /src/utils/lazylibs.js @snansrin
 /src/workers/surface-worker.js @snansrin
+
+# Verified scientific inputs, source integrity and regression proof
+/src/services/osm-water-backup.js @snansrin
+/vendor/geotiff-2.1.3.js @snansrin
+/vendor/polygon-clipping-0.15.7.js @snansrin
+/vendor/leaflet-1.9.4.js @snansrin
+/test/fixtures/goksu-park.json @snansrin
+/scripts/verify-osm-water-live.mjs @snansrin
+/scripts/val-qa.mjs @snansrin
+/scripts/lulc-qa.mjs @snansrin
+/docs/surface-scientific-contract.json @snansrin
+/test/surface-scientific-contract.test.mjs @snansrin
+/test/verified-water-footprint.test.mjs @snansrin
+/test/water-osm-reliability.test.mjs @snansrin
+/test/surface-review.test.mjs @snansrin
+/test/surface-network-budget.test.mjs @snansrin
+/test/landcover-v4.test.mjs @snansrin
+/test/lc-validate.test.mjs @snansrin
+/.github/workflows/gis-three-park-qa.yml @snansrin
