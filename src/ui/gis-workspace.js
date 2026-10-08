@@ -231,6 +231,17 @@
   const style={color:getComputedStyle(document.body).getPropertyValue("--green").trim()||"#16803d",weight:3};
   drawPoints.forEach(p=>L.circleMarker(p,{radius:5,color:style.color,weight:2,fillOpacity:.9}).addTo(drawLayer));
   if(drawPoints.length>1)L.polyline(drawPoints,style).addTo(drawLayer);
+  // A permanent, non-interactive label marks EACH segment's own distance.
+  // Clearing the transient layer also clears all labels when measuring ends.
+  if(mapTool==="distance"&&typeof L.tooltip==="function"){
+   for(let i=1;i<drawPoints.length;i++){
+    const from=drawPoints[i-1],to=drawPoints[i];
+    const middle=L.latLng((from.lat+to.lat)/2,(from.lng+to.lng)/2);
+    const meters=L.latLng(from).distanceTo(L.latLng(to));
+    L.tooltip({permanent:true,direction:"center",interactive:false,opacity:1,className:"dg-ux-distance-label"})
+     .setLatLng(middle).setContent(unit(meters)).addTo(drawLayer);
+   }
+  }
   if(mapTool==="area"&&drawPoints.length>2)L.polygon(drawPoints,{...style,fillOpacity:.1}).addTo(drawLayer);
   const length=pathLength(drawPoints);
   setStatus(drawPoints.length+" köşe · "+(mapTool==="area"?(drawPoints.length>=3?unit(areaMeters(drawPoints),true):"Alan için en az 3 köşe seç"):"Mesafe: "+unit(length)));
