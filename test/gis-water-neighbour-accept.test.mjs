@@ -119,3 +119,16 @@ test('Doğrulanmış Harita and all four PNG basemaps stay available while pool 
  assert.match(png,/type==="pool"\?"#3b82f6"/);
  assert.doesNotMatch(ui,/item\.cls==="other"\?paint\[i\]/);
 });
+
+test('island road classification comes only from the frozen engine and verified geometry, never a sidecar vote',()=>{
+ const science=read('src/ui/lc-sens.js');
+ const workspace=read('src/ui/gis-workspace.js');
+ const ordinaryPng=read('src/ui/gis-export.js');
+ assert.match(science,/fillColor:DG_SENS_COLORS\[cls\]\|\|DG_SENS_COLORS\.other/);
+ assert.match(science,/DG_SENS\.displayPaths\.push\(\{poly,cls\}\)/);
+ assert.match(workspace,/for\(const item of paths\)/);
+ assert.doesNotMatch(workspace,/const paint=typeof nearest/);
+ assert.doesNotMatch(ordinaryPng,/const nearest=nearestPresentationTypes\(sens\?\.displayFeatures\)/);
+ assert.match(ordinaryPng,/const type=item\.cls/);
+ assert.match(science,/const DG_SENS_COLORS=\{green:"#22c55e",water:"#3b82f6",hard:"#64748b"/);
+});
