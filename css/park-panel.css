@@ -557,7 +557,16 @@
 #surfaceMenuBar .dg-editor-menu-chevron{width:12px;height:12px;flex:0 0 12px;fill:none;stroke:currentColor;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round;color:var(--mut);transition:transform .15s ease}
 #surfaceMenuBar>.dg-editor-menu[open]>summary .dg-editor-menu-chevron{transform:rotate(180deg)}
 #surfaceMenuBar>.dg-editor-menu>summary::-webkit-details-marker{display:none}
-#surfaceMenuBar .dg-editor-menu-body{top:calc(100% + 6px);left:0;width:min(430px,calc(100vw - 24px));padding:16px;border-radius:10px;border:1px solid var(--line);box-shadow:0 8px 28px #18242024;overscroll-behavior:contain}
+#surfaceMenuBar .dg-editor-menu-body{top:calc(100% + 6px);left:0;width:min(430px,calc(100vw - 24px));max-height:min(70vh,620px);overflow:auto;box-sizing:border-box;padding:16px;border-radius:10px;border:1px solid var(--line);background:var(--surface);box-shadow:0 8px 28px #18242024;overscroll-behavior:contain}
+#surfaceMenuBar .dg-editor-menu-body{display:grid;align-content:start;gap:10px}
+#surfaceMenuBar .dg-editor-menu-controls{display:grid;gap:12px;margin:0!important;padding:0!important;border:0!important;border-radius:0!important;background:transparent!important;box-shadow:none!important}
+#surfaceMenuBar .dg-editor-menu-controls .dg-png-head{display:none}
+#surfaceMenuBar .dg-editor-menu-controls .dg-png-fields,#surfaceMenuBar .dg-editor-menu-controls .dg-png-options{display:grid;gap:10px}
+#surfaceMenuBar .dg-editor-menu-controls>.dg-png-btn{width:100%;min-height:44px;justify-content:center}
+#surfaceMenuBar .dg-editor-menu-body>select{width:100%;min-width:0;min-height:44px;box-sizing:border-box}
+#surfaceMenuBar .dg-editor-menu-body>.dg-sens-actions{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px;margin:0}
+#surfaceMenuBar .dg-editor-menu-body>.dg-sens-actions .dg-png-btn{width:100%;min-width:0;min-height:44px;justify-content:center}
+#surfaceMenuBar>.dg-editor-toolbar-action{flex:0 0 auto;width:auto;min-height:42px;justify-content:center;white-space:nowrap}
 #surfaceMenuBar>.dg-editor-menu[data-menu-order="60"]>.dg-editor-menu-body,#surfaceMenuBar>.dg-editor-menu[data-menu-order="70"]>.dg-editor-menu-body{left:auto;right:0}
 #surfaceMenuBar .dg-editor-panel-head{display:flex;align-items:center;gap:11px;margin:0 0 14px;padding:0 0 12px;border-bottom:1px solid var(--line)}
 #surfaceMenuBar .dg-editor-panel-head>.dg-editor-icon{width:34px;height:34px;flex:0 0 34px;padding:8px;box-sizing:border-box;border:1px solid var(--line);border-radius:9px;background:var(--bg);color:var(--green-dk)}
@@ -597,12 +606,13 @@
 .dg-live-analysis-stack{display:grid;gap:12px}
 #lcSens{padding:0;overflow:hidden}
 #lcSens .dg-live-surface-card{display:grid;gap:12px;padding:16px}
-.dg-live-surface-head,.dg-live-result-head,.dg-live-tree-head{display:flex;align-items:flex-start;justify-content:space-between;gap:14px}
-.dg-live-surface-title{min-width:0}
+.dg-live-surface-head{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:14px;min-width:0}
+.dg-live-result-head,.dg-live-tree-head{display:flex;align-items:flex-start;justify-content:space-between;gap:14px}
+.dg-live-surface-title{min-width:0;flex:1 1 auto}
 .dg-live-eyebrow{display:block;color:var(--green-dk);font-size:.65rem;font-weight:750;letter-spacing:.09em;line-height:1.4}
 .dg-live-surface-title h3{margin:4px 0 3px;color:var(--ink);font-family:var(--f-ui);font-size:1.05rem;line-height:1.3}
 .dg-live-surface-title p{margin:0;color:var(--mut);font-size:.78rem;line-height:1.5}
-.dg-live-surface-head>.dg-png-btn{flex:0 0 auto;min-height:44px}
+.dg-live-surface-head>.dg-png-btn{flex:0 0 auto;width:auto;min-width:112px;max-width:46vw;min-height:44px;justify-self:end;white-space:nowrap}
 .dg-live-scan-meta{display:flex;align-items:center;gap:7px;flex-wrap:wrap}
 .dg-live-scan-meta span{display:inline-flex;align-items:center;min-height:28px;padding:3px 9px;border:1px solid var(--line);border-radius:999px;background:var(--bg);color:var(--mut);font-size:.69rem;font-variant-numeric:tabular-nums}
 .dg-live-scan-meta .dg-live-meta-source{border-color:color-mix(in srgb,var(--green) 28%,var(--line));background:var(--tint);color:var(--green-dk);font-weight:700}
@@ -734,15 +744,15 @@
   border-radius:12px;
   -webkit-overflow-scrolling:touch;
  }
- #surfaceMenuBar>.dg-editor-menu:not(:nth-child(3n+1))>.dg-editor-menu-body{left:auto;right:0}
+ #surfaceMenuBar>.dg-editor-menu:not(:nth-of-type(3n+1))>.dg-editor-menu-body{left:auto;right:0}
  #surfaceMenuBar .dg-editor-action-grid{grid-template-columns:1fr}
  #surfaceMenuBar .dg-editor-action-grid .dg-png-btn,
  #surfaceMenuBar .dg-editor-wide-action{min-height:46px}
  #surfaceMenuBar .dg-editor-panel-head{gap:9px}
  #surfaceMapTools{top:82px;left:8px}
  .dg-editor-rail{max-height:calc(64svh - 96px);overflow-y:auto;overscroll-behavior:contain}
- .dg-live-surface-head{align-items:flex-start}
- .dg-live-surface-head>.dg-png-btn{min-height:44px;white-space:nowrap}
+ .dg-live-surface-head{grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:8px}
+ .dg-live-surface-head>.dg-png-btn{width:auto;min-width:96px;max-width:44vw;min-height:44px;padding:8px 9px;font-size:.72rem;white-space:nowrap}
  #lcSens .dg-live-surface-card{padding:12px}
  #lcSens .dg-live-review-actions .dg-png-btn{min-height:46px;padding-inline:8px;font-size:.72rem}
  .dg-live-result-card{padding:12px}
