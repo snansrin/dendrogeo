@@ -111,7 +111,7 @@ test('Doğrulanmış Harita and all four PNG basemaps stay available while pool 
  assert.match(ui,/function keepSingleFileMenu\(bar\)/);
  assert.match(ui,/core\.querySelector\("#dgUxQuickPngDownload"\)\?\.remove\(\)/);
  assert.match(ui,/verified\.textContent="🖼️ Doğrulanmış Harita"/);
- for(const cls of ['vector','osm','sat','topo'])assert.ok(ui.includes('"'+cls+'"'));
+ for(const cls of ['vector','osm','sat','topo'])assert.ok(read('src/ui/park-panel.js').includes('value="'+cls+'"'));
  assert.match(png,/async function renderVerified\(layers\)/);
  assert.match(ui,/item\.cls==="pool"\?"#3b82f6"/);
  assert.match(ui,/pool=Number\(areas\.pool\|\|0\)/);
