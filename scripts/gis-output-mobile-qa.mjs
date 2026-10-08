@@ -26,7 +26,7 @@ try{
      '<div id="landCoverReport" class="dg-png-result"><b>🗺️ Arazi Örtüsü · 10 m · 2021</b>'+
      '<div style="font-size:.67rem;color:var(--mut)">ESA WorldCover 10 m · 2021 (v200) · ✓ geometrik QA geçti (%0.20 fark)</div>'+
      '<div style="margin:6px 0 4px;padding:10px 12px;border:1px solid var(--line);border-radius:12px">'+
-     ...["🌿 Yeşil alan","💧 Su","🧱 Sert zemin","🟫 Çıplak zemin"].map((label,i)=>
+     ["🌿 Yeşil alan","💧 Su","🧱 Sert zemin","🟫 Çıplak zemin"].map((label,i)=>
        '<div style="margin:8px 0"><div style="display:flex;align-items:center;gap:8px">'+
        '<div style="flex:0 0 106px;font-size:.75rem;font-weight:700">'+label+'</div>'+
        '<div style="flex:1;height:16px;background:rgba(20,30,25,.06);border-radius:8px;overflow:hidden">'+
