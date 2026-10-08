@@ -11,6 +11,9 @@ try{
    const workspace=window.DG_GIS_WORKSPACE_UI,view=document.getElementById('v-map');
    const bar=document.getElementById('surfaceMenuBar'),park=document.getElementById('parkInfo');
    if(!workspace||!view||!bar||!park)return{ready:false};
+   const shell=document.getElementById('shell'),landing=document.getElementById('landing');
+   if(shell)shell.style.display='block';
+   if(landing)landing.style.display='none';
    view.style.display='block';park.style.display='block';
    bar.innerHTML='<details class="dg-editor-menu" data-menu-owner="surface" data-menu-order="20"><summary>Görünüm</summary><div class="dg-editor-menu-body"><div class="dg-editor-panel-head">Harita görünümü</div></div></details>'+
     '<details class="dg-editor-menu" data-menu-owner="surface" data-menu-order="50"><summary>Yüzey fırçası</summary><div class="dg-editor-menu-body">Düzenleme</div></details>';
