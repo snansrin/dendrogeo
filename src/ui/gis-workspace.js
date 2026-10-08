@@ -37,6 +37,17 @@
   }
   const rect=menu.getBoundingClientRect(),ideal=Math.min(440,width-24);
   const left=Math.max(offsetLeft+12,Math.min(rect.left,width+offsetLeft-ideal-12));
+  // Tablet/desktop: an anchored dropdown near the lower edge must open
+  // inside the visible viewport, not extend below it.
+  const panelHeight=Math.min(Math.max(140,panel.scrollHeight||0),Math.max(140,height-20));
+  if(rect.bottom+panelHeight+8>height+offsetTop){
+   panel.style.position="fixed";
+   panel.style.left=left+"px";panel.style.right="auto";
+   panel.style.top=Math.max(offsetTop+8,height+offsetTop-panelHeight-10)+"px";
+   panel.style.width="min(440px,calc(100vw - 24px))";
+   panel.style.maxHeight=Math.max(120,height-20)+"px";
+   return;
+  }
   panel.style.position="absolute";
   panel.style.left=(left-rect.left)+"px";
   panel.style.right="auto";
