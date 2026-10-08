@@ -54,7 +54,7 @@ test('OSM yedeği, raster parser, poligon ve bilimsel protokol/test zinciri kili
   '.github/workflows/gis-three-park-qa.yml'
  ];
  for(const path of mandatory)assert.ok(manifest.locked_files[path],'Korunan bağımlılık eksik: '+path);
- assert.equal(manifest.recovery_branch,'recovery/surface-verified-water-20261008');
+ assert.equal(manifest.recovery_branch,'recovery/analysis-engine-20261009');
  assert.equal(manifest.baseline_commit,APPROVED_COMMIT);
 });
 

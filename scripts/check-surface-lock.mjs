@@ -9,9 +9,9 @@ import {createHash} from 'node:crypto';
 import {fileURLToPath} from 'node:url';
 import {join,resolve} from 'node:path';
 
-export const SURFACE_LOCK_ID='DG-SURFACE-LOCK-2026-10-09-R1';
-export const APPROVED_COMMIT='e91158999a3c6d63b5abd3b2efd4ed52c9192816';
-export const PINNED_MANIFEST_BLOB='ee5e112642a57fb2042bcf0a7ce7720db7aa4d99';
+export const SURFACE_LOCK_ID='DG-SURFACE-LOCK-2026-10-09-R2';
+export const APPROVED_COMMIT='e1ef75ba98a480880b50af2a82ecca8897cd25a7';
+export const PINNED_MANIFEST_BLOB='d0af5bf829bff525261c1d12a0d7808f9e99dc2b';
 const PROJECT_ROOT=fileURLToPath(new URL('../',import.meta.url));
 const MANIFEST='docs/surface-engine-lock.json';
 
@@ -49,7 +49,7 @@ export function verifySurfaceLock(root=PROJECT_ROOT){
     manifest.policy!=='NO_CHANGES_WITHOUT_EXPLICIT_USER_APPROVAL')
   errors.push('Kilit kimliği, referansı veya koruma politikası değişti.');
  if(Object.keys(manifest.locked_files||{}).length!==51)errors.push('Korunan dosya sayısı değişti (beklenen 51).');
- if(manifest.recovery_branch!=='recovery/surface-verified-water-20261008'||
+ if(manifest.recovery_branch!=='recovery/analysis-engine-20261009'||
     manifest.verified_conditions_file!=='docs/surface-scientific-contract.json'||
     !manifest.source_caveat?.includes('dynamic'))
   errors.push('Onaylı kurtarma noktası veya tekrarlanabilirlik uyarısı değiştirildi.');
