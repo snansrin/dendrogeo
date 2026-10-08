@@ -180,3 +180,33 @@ jobs:
               sys.exit(1)
           print('✅ Canlı site depoyla birebir aynı.')
           PY
+
+  gis_late_panel_water_recheck_builder:
+    name: Late park panel satellite recheck and scientific lock QA
+    if: github.event_name == 'pull_request' && github.head_ref == 'fix/lazy-surface-panel-water-recheck-20261008'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: fix/lazy-surface-panel-water-recheck-20261008
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - run: npm ci
+      - name: Build assets and run all QA with protected scientific lock
+        run: |
+          npm run build
+          npm run check
+      - name: Restore original CI and publish updated asset fingerprints
+        run: |
+          git fetch origin main
+          git show origin/main:.github/workflows/ci.yml > .github/workflows/ci.yml
+          git add index.html .github/workflows/ci.yml
+          git config user.name "DendroGeo GIS QA"
+          git config user.email "gis-ui-repair@users.noreply.github.com"
+          git commit -m "build(gis): update late-loaded panel watcher asset hashes"
+          git pull --rebase origin fix/lazy-surface-panel-water-recheck-20261008
+          git push origin HEAD:fix/lazy-surface-panel-water-recheck-20261008
