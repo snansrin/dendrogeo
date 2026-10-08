@@ -162,6 +162,12 @@ async function dgSensMount(hostId){
  const host=document.getElementById(hostId||"lcSens"),cells=dgSensCells();if(!host||!cells?.length)return;
  dgSensBrushStop();DG_SENS.rawView=false;const epoch=++DG_SENS.epoch;DG_SENS.status="";dgSensGuard(true);
  const rec=await dgSensLoadRecord();if(epoch!==DG_SENS.epoch)return;
+ // Reuse only this analysis's current OSM response, never a device-cached mask.
+ const boundary=JSON.stringify(PARK_POLY);
+ if(window.DG_SURFACE_OSM?.boundary!==boundary&&typeof queryDetailedCoverage==="function"){
+  try{await queryDetailedCoverage();}catch(e){console.warn("DENDROGEO · OSM yüzey yenilemesi:",e);}
+  if(epoch!==DG_SENS.epoch)return;
+ }
  const R=window.DG_SURFACE_REVIEW;
  const fingerprint=await R.fingerprint(cells,PARK_POLY,PARK_HOLES||[],{year:DG_LC_LAST.report?.year,engine:DG_LC_ENGINE_VERSION});if(epoch!==DG_SENS.epoch)return;
  if(rec.fingerprint&&rec.fingerprint!==fingerprint){Object.assign(rec,{corrections:{},features:[],objectFeatures:null,profile:null,acceptedAt:null,acceptedAreas:null,acceptedResult:null});DG_SENS.status=_tvs("Park sınırı veya veri değişti; eski kararlar yeni veriye uygulanmadı.");}
@@ -170,6 +176,10 @@ async function dgSensMount(hostId){
  // Accepted publication snapshots remain immutable in acceptedResult.
  dgSensResetScanState(rec);
  const rebuildOsmObjects=dgSensMigrateOsmObjects(rec);
+ if(window.DG_SURFACE_OSM?.boundary===boundary){
+  rec.objectFeatures=null;rec.objectVersion=null;rec.useObjects=true;
+  rec.draftDirty=true;
+ }
  if(rebuildOsmObjects)DG_SENS.status=_tvs("OSM yüzey geometrileri yeni alan kurallarıyla yeniden hesaplanıyor; önceki kabul edilmiş rapor korunuyor.");
  DG_SENS.record=rec;DG_SENS.opacity=rec.displayOpacity??45;DG_SENS.revision=rec.serverRevision||0;DG_SENS.editing=!!rec.draftDirty||!rec.acceptedAt||!rec.acceptedResult;
  if(rec.acceptedAt&&!rec.acceptedResult)DG_SENS.status=_tvs("Önceki kabul alanları hesabınızda korunuyor. Bu yeni harita önizlemesini kontrol edip kaydedin.");DG_SENS.focus=null;DG_SENS.showCand=true;
@@ -191,7 +201,7 @@ async function dgSensMount(hostId){
  host.scrollIntoView({block:"nearest"});
  // Every analysis opening scans once, including parks with an accepted snapshot.
  // Scanning updates the draft; acceptedResult remains immutable.
- void dgSensAutoScanOnMount();
+ return await dgSensAutoScanOnMount();
 }
 function dgSensAutoScanOnMount(){
  const epoch=DG_SENS.epoch;
@@ -266,7 +276,7 @@ function dgSensRememberSection(el){DG_SENS.sections=DG_SENS.sections||{};DG_SENS
 function dgSensRender(){
  const host=document.getElementById("lcSens"),rec=DG_SENS.record;if(!host||!rec)return;
  const scanned=!!rec.profile?.cells,vegReady=scanned&&dgSensVegetationTiers().count>=9,disabled=DG_SENS.busy||DG_SENS.saving||DG_SENS.exporting;
- let h=`<section class="dg-live-surface-card" aria-label="${esc(_tvs("Park yüzey analizi"))}"><header class="dg-live-surface-head"><div class="dg-live-surface-title"><span class="dg-live-eyebrow">🛰 ${esc(_tvs("PARK YÜZEY ANALİZİ"))}</span><h3>${esc(_tvs("Yüzey düzenleme"))}</h3><p>${esc(_tvs("Tara, haritada ayarla, doğru gördüğün sonucu kaydet."))}</p></div><button id="dgSensScanBtn" type="button" class="dg-png-btn ${scanned?"ghost":"primary"} sm" onclick="dgSensScan()" ${disabled||DG_SENS.rawView||DG_SENS.brush?"disabled":""}>${DG_SENS.busy?"⏳":scanned?"🔁":"🔍"} ${esc(_tvs(scanned?"Yeniden Tara":"Tara"))}</button></header>`;
+ let h=`<section class="dg-live-surface-card" aria-label="${esc(_tvs("Park yüzey analizi"))}"><header class="dg-live-surface-head"><div class="dg-live-surface-title"><span class="dg-live-eyebrow">🛰 ${esc(_tvs("PARK YÜZEY ANALİZİ"))}</span><h3>${esc(_tvs("Yüzey düzenleme"))}</h3><p>${esc(_tvs("Uydu taraması otomatik çalışır. Sonucu inceleyip kaydedin."))}</p></div><button id="dgSensScanBtn" type="button" class="dg-png-btn ${scanned?"ghost":"primary"} sm" onclick="dgSensScan()" ${disabled||DG_SENS.rawView||DG_SENS.brush?"disabled":""}>${DG_SENS.busy?"⏳":scanned?"🔁":"🔍"} ${esc(_tvs(scanned?"Yeniden Tara":"Tara"))}</button></header>`;
  if(scanned){
   const dates=(rec.profile.scenes||[]).filter(s=>s.usedCells>0).map(s=>s.datetime).sort();
   h+=`<div class="dg-live-scan-meta"><span class="dg-live-meta-source">Sentinel‑2 L2A</span><span>${esc(dates[0]?.slice(0,10)||"—")} – ${esc(dates.at(-1)?.slice(0,10)||"—")}</span><span>${(rec.profile.stats?.nProfiled||0).toLocaleString("tr-TR")} / ${dgSensCells().length.toLocaleString("tr-TR")} ${esc(_tvs("hücre"))}</span><span>10 / 20 m</span></div>`;
