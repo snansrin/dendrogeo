@@ -311,7 +311,7 @@ function parseCoords(query){
  return geo.point({lat:Number(match[1].replace(",",".")),lng:Number(match[2].replace(",","."))});
 }
 async function searchPlace(){
- const q=$("dgGisSearch")?.value.trim()||"";
+ const q=document.getElementById("dgGisSearch")?.value.trim()||"";
  if(!q)return;
  let p=null;
  try{p=parseCoords(q);}catch(e){setStatus(e.message);return;}
@@ -346,7 +346,7 @@ function persistBookmarks(){
 }
 function saveBookmark(){
  const m=ensureMap();if(!m)return;
- const name=($("dgGisBookmarkName")?.value||"").trim().slice(0,80);
+ const name=(document.getElementById("dgGisBookmarkName")?.value||"").trim().slice(0,80);
  if(!name){setStatus("Yer işareti adı girin.");return;}
  const p=m.getCenter();
  state.bookmarks.unshift({name,lat:p.lat,lng:p.lng});
@@ -387,14 +387,16 @@ function toggleScale(){
 function onKey(e){
  if(e.key==="Escape"&&state.mode){stopMode();setStatus("GIS işlemi durduruldu.");}
 }
-function boot(){
+function dgGisToolkitInit(){
  const bar=$("surfaceMenuBar");
- if(!bar)return;
+ if(!bar||typeof bar.append!=="function")return;
  openPanel();loadBookmarks();ensureFloat();
- const obs=new MutationObserver(()=>{if(!$("dgGisMenu")){state.menu=null;openPanel();loadBookmarks();}ensureFloat();});
- obs.observe(bar,{childList:true});
+ if(typeof MutationObserver!=="undefined"){
+  const obs=new MutationObserver(()=>{if(!$("dgGisMenu")){state.menu=null;openPanel();loadBookmarks();}ensureFloat();});
+  obs.observe(bar,{childList:true});
+ }
  document.addEventListener("keydown",onKey);
  window.DG_GIS_TOOLKIT=Object.freeze({start,finish,clear,undo,fitPark,exportFile,open:()=>{openPanel();if(state.menu)state.menu.open=true;}});
 }
-if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",boot,{once:true});else boot();
+if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",dgGisToolkitInit,{once:true});else dgGisToolkitInit();
 })();
