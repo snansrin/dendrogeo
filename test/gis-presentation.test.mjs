@@ -300,7 +300,7 @@ test('surface brush omits pool/fountain but retains water and all historical sci
  assert.match(ui,/dgSensBrushChoose\("water"\)/);
  const removed=[],select={value:'water',querySelector:q=>q==='option[value="pool"]'?{remove(){removed.push('pool');}}:null};
  const sandbox={window:{DG_LC_SENS:{state:{brushType:'water'}}},
-  document:{readyState:'loading',addEventListener(){},getElementById:id=>id==='dgSensBrushType'?select:null},
+  document:{readyState:'loading',addEventListener(){},querySelector:q=>q==='#dgSensBrushType'?select:null,getElementById:()=>null},
   setTimeout,clearTimeout,console};
  vm.runInNewContext(ui,sandbox);
  sandbox.window.DG_GIS_WORKSPACE_UI.sync();
@@ -315,7 +315,7 @@ test('previously selected pool brush safely becomes water on next UI update',()=
  const select={value:'pool',querySelector:()=>({remove(){}})};
  const state={brushType:'pool',busy:false,saving:false,rawView:false};
  const sandbox={window:{DG_LC_SENS:{state}},dgSensBrushChoose:type=>{chosen=type;state.brushType=type;},
-  document:{readyState:'loading',addEventListener(){},getElementById:id=>id==='dgSensBrushType'?select:null},
+  document:{readyState:'loading',addEventListener(){},querySelector:q=>q==='#dgSensBrushType'?select:null,getElementById:()=>null},
   setTimeout,clearTimeout,console};
  vm.runInNewContext(ui,sandbox);
  sandbox.window.DG_GIS_WORKSPACE_UI.sync();
