@@ -1,10 +1,10 @@
 {
   "schema": "dendrogeo/surface-engine-source-lock/v1",
-  "id": "DG-SURFACE-LOCK-2026-10-09-R1",
-  "baseline_commit": "e91158999a3c6d63b5abd3b2efd4ed52c9192816",
-  "recovery_branch": "recovery/surface-verified-water-20261008",
+  "id": "DG-SURFACE-LOCK-2026-10-09-R2",
+  "baseline_commit": "e1ef75ba98a480880b50af2a82ecca8897cd25a7",
+  "recovery_branch": "recovery/analysis-engine-20261009",
   "policy": "NO_CHANGES_WITHOUT_EXPLICIT_USER_APPROVAL",
-  "description": "Approved local-metric-frame polygon overlay repair for UTM numerical stability; mobile presentation fixes are isolated in GIS workspace CSS. Dynamic external imagery and OSM inputs remain versioned at analysis time.",
+  "description": "Immutable, user-approved analysis-engine baseline. Every protected engine module is hash-pinned; all tracked repository files are preserved on the named recovery branch.",
   "file_hash_algorithm": "git-blob-sha1",
   "locked_files": {
     ".github/workflows/gis-three-park-qa.yml": "e5dc449c023e4dc6345063efc23ae99373db17ef",
@@ -49,7 +49,7 @@
     "test/fixtures/goksu-park.json": "d0797aa21fd94090bedb92f7f0a9bddc9badf3d3",
     "test/landcover-v4.test.mjs": "ebd09b7536446c597f5ed9a8128135bdd1fd1d69",
     "test/lc-validate.test.mjs": "74cafc899f49bd171db6bebe787c5d36829612d5",
-    "test/surface-engine-lock.test.mjs": "de9fcff072ff2918b211633e9a9e1cc9b3c44055",
+    "test/surface-engine-lock.test.mjs": "3487462278a867ea809f873eab50dda3cbe7d225",
     "test/surface-network-budget.test.mjs": "024b4cfebb65c8d147da18c7d14b72ef443608ae",
     "test/surface-review.test.mjs": "5087447386abb0321648972d641610428ca01752",
     "test/surface-scientific-contract.test.mjs": "3e96db0308f9095480ca6a2ed5ca4bb752169576",
@@ -61,14 +61,14 @@
   },
   "approved_targeted_repair": {
     "date": "2026-10-09",
-    "reason": "User-requested correction for UTM-scale polygon overlay instability that stopped surface scans, plus mobile toast and action-label layout repair. Raster classes, sensitivity thresholds, and accepted reports are unchanged.",
-    "previous_lock_manifest_blob": "e828bc1e53d0ed519efeb89c7bb8b2dbcb1c0c54",
+    "reason": "User explicitly requested that the verified surface analysis engine be locked against changes and that a complete repository recovery snapshot be created.",
+    "previous_lock_manifest_blob": "ee5e112642a57fb2042bcf0a7ce7720db7aa4d99",
     "source_files": [
-      "src/services/lc-review.js",
-      "test/surface-review.test.mjs",
-      "css/gis-workspace.css"
+      "docs/surface-engine-lock.json",
+      "scripts/check-surface-lock.mjs",
+      "test/surface-engine-lock.test.mjs"
     ],
-    "scope": "Apply a common integer-metre origin before polygon clipping and restore it after overlay to preserve geometry and area while reducing UTM floating-point event error. Keep phone toasts at the safe-area top and wrap surface action text."
+    "scope": "Freeze the 51 protected engine, GIS, raster, OSM, geometry, dependency, and regression-test files at the reviewed main baseline. Preserve the complete tracked repository on recovery/analysis-engine-20261009."
   },
   "legacy_baseline_commit": "f6a68b7b5fe075ce280bd566d04d5e021e0dba9a",
   "legacy_recovery_branch": "recovery/surface-engine-locked-2026-10-08",
