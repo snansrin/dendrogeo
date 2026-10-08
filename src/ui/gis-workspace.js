@@ -581,6 +581,6 @@
   },true);
   sync();
  }
- window.DG_GIS_WORKSPACE_UI={sync,closeTool,activateTool,pathLength,areaMeters};
+ window.DG_GIS_WORKSPACE_UI={sync,closeTool,activateTool,pathLength,areaMeters,waterPresentationAreas};
  if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",init,{once:true});else init();
 })();
