@@ -55,7 +55,7 @@ test('OSM yedeği, raster parser, poligon ve bilimsel protokol/test zinciri kili
  ];
  for(const path of mandatory)assert.ok(manifest.locked_files[path],'Korunan bağımlılık eksik: '+path);
  assert.equal(manifest.recovery_branch,'recovery/surface-verified-water-20261008');
- assert.equal(manifest.baseline_commit,'7680cab4a7fd9102bef64e5cf031b740940a5be0');
+ assert.equal(manifest.baseline_commit,APPROVED_COMMIT);
 });
 
 test('PR CI yüzey kilidini testlerden bağımsız çalıştırır',()=>{

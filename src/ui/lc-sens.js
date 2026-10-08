@@ -94,7 +94,7 @@ async function dgSensRenderVegetation(){
 function dgSensHa(a){return(Number(a||0)/10000).toFixed(3);}
 function dgSensNewRecord(){const pk=dgSensParkId(),owner=typeof USER!=="undefined"?USER?.id:null;return{id:"surface-"+(owner||"guest")+"-"+(pk.id||"x"),owner,parkId:pk.id,parkName:pk.name,sens:{green:50,water:50,hard:50,bare:50},corrections:{},features:[],useObjects:true,spectralEnabled:false,analysisEngine:"esa-raster-manual-v1",profile:null,period:"ytd",createdAt:new Date().toISOString()};}
 function dgSensResetScanState(rec){if(!rec)return;rec.sens={green:50,water:50,hard:50,bare:50};rec.spectralEnabled=false;rec.profile=null;if(rec.period==="latest"&&!rec.periodExplicit)rec.period="ytd";}
-function dgSensMigrateOsmObjects(rec){if(!rec)return false;const stale=(!!rec.objectVersion&&rec.objectVersion!=="footprints-v3-area-semantics")||((rec.objectFeatures||[]).length>0&&rec.objectVersion!=="footprints-v3-area-semantics");if(!stale)return false;rec.objectFeatures=null;rec.objectVersion=null;rec.draftDirty=true;return true;}
+function dgSensMigrateOsmObjects(rec){if(!rec)return false;const stale=(!!rec.objectVersion&&rec.objectVersion!=="footprints-v4-road-widths")||((rec.objectFeatures||[]).length>0&&rec.objectVersion!=="footprints-v4-road-widths");if(!stale)return false;rec.objectFeatures=null;rec.objectVersion=null;rec.draftDirty=true;return true;}
 async function dgSensLoadRecord(){
  const fresh=dgSensNewRecord();let local=null,remote=null;
  try{const rows=await window.DG_LC_VALIDATE.loadCampaigns(fresh.parkId);local=rows.find(r=>r.id===fresh.id&&r.owner===fresh.owner);if(!local&&fresh.parkId){const drafts=await window.DG_LC_VALIDATE.loadCampaigns(null);const fp=await window.DG_SURFACE_REVIEW.fingerprint(dgSensCells(),PARK_POLY,PARK_HOLES||[],{year:DG_LC_LAST.report?.year,engine:DG_LC_ENGINE_VERSION});const old=drafts.find(r=>r.id==="surface-"+fresh.owner+"-x"&&r.owner===fresh.owner&&r.fingerprint===fp);if(old)local={...old,id:fresh.id,parkId:fresh.parkId,parkName:fresh.parkName};}}catch(e){}
@@ -145,7 +145,26 @@ function dgSensWaterOutsideClass(c,rec=DG_SENS.record){
  if(decision&&land.has(decision.to)&&(decision.method==="visual-cell"||(!DG_SENS.editing&&decision.method==="sensitivity")))return decision.to;
  const evidence=rec?.profile?.cells?.[key],predict=window.DG_LC_VALIDATE?.spectralLandPredict;
  const result=typeof predict==="function"?predict(evidence,{green:50,water:50,hard:50,bare:50}):"nodata";
- return land.has(result)?result:"other";
+ if(land.has(result))return result;
+ // A verified shoreline says the remainder of this raster-water cell is
+ // land. When a mixed 10 m pixel has no decisive spectrum at its centre,
+ // transfer the nearest observed non-water land class from the same raster
+ // grid. This uses local park evidence and never invents a fixed class.
+ const cells=dgSensCells()||[],row=Number(c.row),col=Number(c.col);let best=null;
+ for(const neighbor of cells){
+  const dr=Number(neighbor.row)-row,dc=Number(neighbor.col)-col;if(!dr&&!dc)continue;
+  const distance=Math.hypot(dr,dc);if(best&&distance>best.distance)continue;
+  let cls=neighbor.rasterClassKey||neighbor.classKey;
+  if(cls==="water"){
+   const sp=rec?.profile?.cells?.[dgSensCellKey(neighbor)],pred=typeof predict==="function"?predict(sp,{green:50,water:50,hard:50,bare:50}):"nodata";
+   if(land.has(pred))cls=pred;
+  }
+  if(!land.has(cls))continue;
+  if(!best||distance<best.distance)best={distance,weights:{green:0,hard:0,bare:0}};
+  if(Math.abs(distance-best.distance)<1e-9)best.weights[cls]++;
+ }
+ if(!best)return"other";
+ return ["green","hard","bare"].sort((a,b)=>best.weights[b]-best.weights[a]||["green","hard","bare"].indexOf(a)-["green","hard","bare"].indexOf(b))[0];
 }
 function dgSensWaterOutsideParts(){return dgSensParts().filter(p=>(p.cell?.rasterClassKey||p.cell?.classKey)==="water"&&p.method==="review-cell");}
 function dgSensWaterBoundaryUnresolved(){const unknown=new Set();for(const p of dgSensWaterOutsideParts())if(p.type==="other")unknown.add(p.key);return unknown.size;}
@@ -464,7 +483,7 @@ async function dgSensRepartition(featureOverride=null){
   if(epoch!==DG_SENS.epoch)return false;
   // Commit staged boundaries only after geometry preparation succeeds.
   if(featureOverride)rec.features=featureOverride;
-  if(!rec.objectFeatures){rec.objectFeatures=data.objects;rec.objectVersion="footprints-v3-area-semantics";}
+  if(!rec.objectFeatures){rec.objectFeatures=data.objects;rec.objectVersion="footprints-v4-road-widths";}
   DG_SENS.partitionVersion=(DG_SENS.partitionVersion||0)+1;DG_SENS.vegetationRenderKey=null;DG_SENS.vegetationLayer?.clearLayers();DG_SENS.parkGeometry=data.park;DG_SENS.geometry=data.geometries;
   if(dgSensMigrateBrushMasks(rec,dgSensCells(),data.geometries,data.park,DG_SENS.epsg)){rec.draftDirty=true;DG_SENS.editing=true;DG_SENS.visualVersion++;data.parts=window.DG_SURFACE_REVIEW.resolved(dgSensCells(),dgSensEffective,data.geometries,dgSensFeatures(),DG_SENS.epsg,data.park);}
   // Structured cloning preserves geometry references; rebind cells to the UI's canonical array.
