@@ -111,6 +111,10 @@ jobs:
       - name: Bağımlılıklar (npm ci)
         run: npm ci
 
+      # User-approved surface baseline: any source drift fails the PR build.
+      - name: Korunan yüzey motoru bütünlük kilidi
+        run: node scripts/check-surface-lock.mjs
+
       - name: Sözdizimi denetimi (tarayıcı semantiği)
         run: npm run check:syntax
 
