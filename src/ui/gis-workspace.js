@@ -426,7 +426,7 @@
  function syncBrushChoices(){
   // Pool/fountain shares the Su brush workflow; keep the historical class,
   // recorded pool polygons and boundary editor untouched.
-  const select=document.querySelector("#dgSensBrushType"),state=window.DG_LC_SENS?.state;
+  const select=typeof document.querySelector==="function"?document.querySelector("#dgSensBrushType"):null,state=window.DG_LC_SENS?.state;
   if(!select)return;
   if(state?.brushType==="pool"&&!state.busy&&!state.saving&&!state.rawView&&typeof dgSensBrushChoose==="function"){
    dgSensBrushChoose("water"); // also replaces an already-active pool brush safely
