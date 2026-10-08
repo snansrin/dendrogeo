@@ -274,11 +274,11 @@ function dgSensRenderPaintTools(){
  const host=document.getElementById("surfaceBrushTools"),rec=DG_SENS.record;if(!host)return;
  if(typeof dgEditorClearMenus==="function")dgEditorClearMenus("surface");
  const menuBar=document.getElementById("surfaceMenuBar");
- menuBar?.querySelector('[data-editor-action="png-export"]')?.remove();
+ menuBar?.querySelector?.('[data-editor-action="png-export"]')?.remove();
  if(!rec){host.innerHTML="";return;}
  const viewDisabled=DG_SENS.busy||DG_SENS.saving||DG_SENS.exporting;
  const disabled=viewDisabled||DG_SENS.rawView;
- if(menuBar){
+ if(menuBar?.append&&typeof document.createElement==="function"){
   const pngButton=document.createElement("button");
   pngButton.type="button";pngButton.className="dg-png-btn primary sm dg-editor-toolbar-action";
   pngButton.dataset.editorAction="png-export";pngButton.dataset.menuOrder="15";
