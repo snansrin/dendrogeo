@@ -81,6 +81,38 @@
   menu.addEventListener("toggle",()=>{if(menu.open)openMenu(menu);});
   return menu;
  }
+
+ // Keep BOTH export actions independently available even when the park panel
+ // gets rebuilt and the old parkRasterExport DOM node is temporarily detached.
+ function ensureQuickPngAction(bar){
+  const coreFile=bar?.querySelector?.('details[data-menu-owner="surface"][data-menu-order="10"]');
+  if(!coreFile)return;
+  const verified=coreFile.querySelector('button[onclick*="dgSensExportPng"]');
+  const actions=verified?.parentElement;
+  if(!actions||typeof document.createElement!=="function")return;
+  let quick=coreFile.querySelector("#dgUxQuickPngDownload");
+  if(!quick){
+   quick=el("button","dg-png-btn ghost sm","🖼️ PNG İndir");
+   quick.id="dgUxQuickPngDownload";quick.type="button";
+   quick.addEventListener("click",()=>window.DG_GIS_PNG_EXPORT?.download?.());
+   verified.after(quick);
+  }
+  let choice=coreFile.querySelector("#dgUxQuickPngBase");
+  if(!choice){
+   choice=el("select","dg-ux-quick-png-base");
+   choice.id="dgUxQuickPngBase";
+   choice.setAttribute("aria-label","PNG altlığı");
+   for(const [value,label] of [["vector","Vektör"],["osm","OSM"],["sat","Uydu"],["topo","Topoğrafik"]]){
+    const opt=document.createElement("option");opt.value=value;opt.textContent=label;choice.append(opt);
+   }
+   choice.value=$("pngBg")?.value||"vector";
+   choice.addEventListener("change",()=>{
+    const existing=$("pngBg");if(existing)existing.value=choice.value;
+   });
+   quick.before(choice);
+  }
+  quick.hidden=false;choice.hidden=false;
+ }
  function syncPark(){
   const bar=$("surfaceMenuBar");
   if(!bar)return;
@@ -102,6 +134,7 @@
   }
   if(window.DG_LC_SENS?.state?.record&&!bar.querySelector('details[data-menu-owner="surface"]')&&typeof dgSensRenderPaintTools==="function")
    dgSensRenderPaintTools();
+  ensureQuickPngAction(bar);
   const exportCard=$("parkRasterExport")||parked.export;
   const layer=$("parkLayerTools")||parked.layer;
   if(!exportCard||!layer)return;
