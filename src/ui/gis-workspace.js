@@ -68,7 +68,7 @@
  function makeOutput(){
   const menu=el("details","dg-editor-menu dg-ux-output-menu");
   menu.dataset.menuOwner="workspace";
-  menu.dataset.menuOrder="10";
+  menu.dataset.menuOrder="45";
   const summary=el("summary");
   summary.innerHTML=window.DG_EDITOR_UI?.menuLabel?.("file","Dosya")||"Dosya";
   const panel=el("div","dg-editor-menu-body");
@@ -109,7 +109,7 @@
    bar.querySelector(".dg-ux-output-menu")?.remove(); // no duplicate Rapor & Çıktı tab
   }else{
    if(!menu)menu=makeOutput();
-   const next=[...bar.children].find(n=>n!==menu&&Number(n.dataset.menuOrder)>10)||null;
+   const next=[...bar.children].find(n=>n!==menu&&Number(n.dataset.menuOrder)>45)||null;
    if(menu.parentElement!==bar||menu.nextElementSibling!==next)bar.insertBefore(menu,next);
   }
   const panel=menu.querySelector(":scope > .dg-editor-menu-body");
@@ -408,9 +408,14 @@
    "Göreli NDVI: uygun veri bekleniyor (hücre başına ≥3 gözlem, en az 9 hücre).";
   txt(badge,description);
  }
+ function syncSliderPaint(){
+  const sliders=$("lcSens")?.querySelectorAll?.('input.dg-sens-slider[id^="dgSensRange-"]')||[];
+  for(const slider of sliders)slider.style?.setProperty?.("--dg-ux-slider-fill",Math.max(0,Math.min(100,Number(slider.value)||0))+"%");
+ }
  function sync(){
   syncPark();
   syncSurfaceReport();
+  syncSliderPaint();
   syncGroupLayout();
   syncSpecies();
   syncMapTools();
@@ -433,6 +438,11 @@
   window.addEventListener("resize",()=>{bar.querySelectorAll(":scope > details[open]").forEach(menuPosition);},{passive:true});
   window.visualViewport?.addEventListener("resize",()=>{bar.querySelectorAll(":scope > details[open]").forEach(menuPosition);},{passive:true});
   document.addEventListener("keydown",e=>{if(e.key==="Escape"&&mapTool){closeTool();setStatus("Geçici ölçüm kapatıldı.");}});
+  document.addEventListener("input",e=>{
+   const input=e.target;
+   if(input?.matches?.('#lcSens input.dg-sens-slider[id^="dgSensRange-"]'))
+    input.style.setProperty("--dg-ux-slider-fill",Math.max(0,Math.min(100,Number(input.value)||0))+"%");
+  },true);
   // If a previous class filter excludes green polygons, NDVI would appear in
   // the report but be invisible on the actual map. Clear only this view filter
   // when enabling NDVI; never alter class areas, records or raster values.
