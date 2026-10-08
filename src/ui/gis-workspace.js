@@ -350,12 +350,12 @@
   rows[0].before(panel);
   const types=window.DG_SURFACE_REVIEW?.types||{};
   const icons={green:"🌿",water:"💧",hard:"🧱",building:"🏢",pool:"💦",bare:"🟫",other:"⬜"};
-  const defaults={"Yeşil alan":"green","Su":"water","Sert zemin":"hard","Bina":"building","Havuz":"pool","Çıplak zemin":"bare","Diğer":"other","Sınıflandırılamayan":"other"};
+  const defaults={"Yeşil alan":"green","Su":"water","Sert zemin":"hard","Bina":"building","Havuz":"pool","Çıplak zemin":"bare","Diğer":"other"};
   for(const row of rows){
    const label=row.querySelector?.(":scope > span");
-   // Unresolved cells must be EXPLICIT rather than silently dropped from
-   // the visible table. They remain unclassified in the locked science data.
-   if(label?.textContent?.trim()==="Diğer")label.textContent="Sınıflandırılamayan";
+   // Historical scientific 'other' remains in data/QA, but its nearest
+   // land-cover colour is applied in the map; no extra class is added to UI.
+   if(label?.textContent?.trim()==="Diğer"){row.remove();continue;}
    const value=row.querySelector?.(":scope > b");
    const fill=row.querySelector?.(":scope > .dg-surface-track > i");
    if(label&&value&&fill){
@@ -495,7 +495,8 @@
   const ha=value=>(Number(value||0)/10000).toFixed(3);
   const summary=(state.editing?"Önizleme":"Kayıtlı sonuç")+" · "+
    keys.filter(k=>Number(k==="water"?combined.water:areas[k])>0)
-    .map(k=>(k==="other"?"Sınıflandırılamayan":label(k))+": "+ha(k==="water"?combined.water:areas[k])+" ha").join(" · ");
+    .filter(k=>k!=="other")
+    .map(k=>label(k)+": "+ha(k==="water"?combined.water:areas[k])+" ha").join(" · ");
   const node=typeof document.querySelector==="function"?document.querySelector("#dgSensSummary"):null;
   if(node&&node.textContent!==summary)node.textContent=summary;
   const counter=typeof document.querySelector==="function"?document.querySelector("#dgSensCnt-water"):null;
@@ -534,13 +535,17 @@
   // Map appearance only: legacy pool footprints are drawn as Su, but stored
   // feature identities, geometry and scientific partition remain unchanged.
   const paths=state?.displayPaths||[];
-  for(const item of paths){
-   const color=item.cls==="pool"?"#3b82f6":item.cls==="building"?BUILDING_PRESENTATION_COLOR:null;
+  const nearest=window.DG_GIS_PNG_EXPORT?.nearestPresentationTypes;
+  const paint=typeof nearest==="function"?nearest(state?.displayFeatures):[];
+  const opacity=Math.max(0,Math.min(1,(Number(state?.opacity)||65)/100));
+  for(let i=0;i<paths.length;i++){
+   const item=paths[i],type=item.cls==="other"?paint[i]:item.cls;
+   const color=type==="water"||type==="pool"?"#3b82f6":
+    type==="building"?BUILDING_PRESENTATION_COLOR:
+    type&&type!=="other"?(typeof DG_SENS_COLORS!=="undefined"?DG_SENS_COLORS[type]:null):null;
    if(color&&item.poly?.options?.fillColor!==color)item.poly.setStyle?.({fillColor:color});
-   // Unclassified residuals remain discoverable but do not appear as a
-   // competing, saturated land-cover class. No missing area is assigned.
-   if(item.cls==="other"&&item.poly?.options?.fillOpacity!==.16)
-    item.poly.setStyle?.({fillOpacity:.16});
+   if(item.cls==="other"&&color&&item.poly?.options?.fillOpacity!==opacity)
+    item.poly.setStyle?.({fillOpacity:opacity});
   }
  }
  let popupWaterMap=null;
