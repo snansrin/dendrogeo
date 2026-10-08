@@ -64,7 +64,7 @@ const CORE_ASSETS = [
     /* UI katmanı (Faz 1): index.html'in inline <script> bloğu bu dört modüle
      * taşındı — global state, toast, landing beyni ve kabuk önyüklemesi.
      * Yükleme sırası index.html'de de aynıdır: state → toast → landing → shell. */
-    '/src/ui/gis-workspace.js', '/src/ui/gis-project-draft.js', '/src/ui/gis-export.js', '/src/ui/state.js', '/src/ui/toast.js', '/src/ui/landing.js', '/src/ui/shell.js',
+    '/src/ui/gis-workspace.js', '/src/ui/gis-project-draft.js', '/src/ui/gis-water-neighbour.js', '/src/ui/gis-export.js', '/src/ui/state.js', '/src/ui/toast.js', '/src/ui/landing.js', '/src/ui/shell.js',
     '/css/park-panel.css','/css/ui-standard.css','/css/gis-workspace.css',
     /* Üçüncü taraf kütüphaneler artık depoda (vendor/) — bkz. vendor/VERSIONS.md.
      * Aynı köken oldukları için SRI gerekmiyor ve çevrimdışı davranış
