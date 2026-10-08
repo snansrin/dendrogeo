@@ -57,6 +57,21 @@
  const LAND=new Set(["green","hard","bare"]);
  const CELL_LIMIT=120;
  let rechecking=false;
+ const automaticSessions=new WeakMap();
+ function maybeRecheckAfterScan(){
+  const s=state(),rec=s?.record;
+  // The core scan is complete (fresh profile + scannedAt) and the user has
+  // no active drawing/brush/accept. One automatic evidence-only pass per
+  // record and scan date; a failed retry remains manually available.
+  if(!rec?.scannedAt||!rec.profile?.cells||!s.geometry||
+      !s.editing||s.rawView||s.busy||s.saving||s.exporting||
+      s.draw||s.brush||rechecking)return;
+  const session=[s.epoch,rec.scannedAt,rec.period,s.partitionVersion].join("|");
+  if(automaticSessions.get(rec)===session)return;
+  if(!missingParts().length)return;
+  automaticSessions.set(rec,session);
+  void recheckMissing();
+ }
  const missingParts=()=>{
   const s=state();if(!s?.geometry||!s.record||s.rawView||typeof dgSensParts!=="function")return[];
   const pending=new Map();
@@ -152,7 +167,7 @@
  }
  function queue(){
   if(pendingTimer)return;
-  pendingTimer=setTimeout(()=>{pendingTimer=0;restore();syncWaterReviewAction();},200);
+  pendingTimer=setTimeout(()=>{pendingTimer=0;restore();syncWaterReviewAction();maybeRecheckAfterScan();},200);
  }
  function init(){
   const host=document.getElementById("lcSens");
@@ -163,7 +178,7 @@
   }
   queue();
  }
- window.DG_GIS_WATER_NEIGHBOUR={restore,stats,queue,missingParts,recheckMissing,syncWaterReviewAction};
+ window.DG_GIS_WATER_NEIGHBOUR={restore,stats,queue,missingParts,recheckMissing,syncWaterReviewAction,maybeRecheckAfterScan};
  if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",init,{once:true});
  else init();
 })();
