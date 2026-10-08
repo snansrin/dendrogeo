@@ -11,13 +11,88 @@
   water:{color:"#3b82f6",label:"Su"},
   hard:{color:"#64748b",label:"Sert zemin"},
   bare:{color:"#8b5a2b",label:"Çıplak zemin"},
+  building:{color:"#334155",label:"Bina"},
   other:{color:"#94a3b8",label:"Diğer"}
  };
  function classes(){
   // DG_LC_CLASSES is loaded lazily, so never capture it at startup.
-  if(typeof DG_LC_CLASSES!=="undefined"&&Array.isArray(DG_LC_CLASSES))
-   return Object.fromEntries(DG_LC_CLASSES.map(x=>[x.key,{color:x.color,label:x.label}]));
+  if(typeof DG_LC_CLASSES!=="undefined"&&Array.isArray(DG_LC_CLASSES)){
+   const dict=Object.fromEntries(DG_LC_CLASSES.map(x=>[x.key,{color:x.color,label:x.label}]));
+   dict.building={...dict.building,color:BUILDING_COLOR,label:dict.building?.label||"Bina"};
+   return dict;
+  }
   return PALETTE;
+ }
+
+ const BUILDING_COLOR="#334155";
+ const BASE_URLS={
+  osm:(z,x,y)=>"https://tile.openstreetmap.org/"+z+"/"+x+"/"+y+".png",
+  sat:(z,x,y)=>"https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/"+z+"/"+y+"/"+x,
+  topo:(z,x,y)=>"https://a.tile.opentopomap.org/"+z+"/"+x+"/"+y+".png"
+ };
+ const BASE_ATTR={
+  vector:"Vektör · DendroGeo",
+  osm:"© OpenStreetMap contributors (ODbL)",
+  sat:"Tiles © Esri, Maxar, Earthstar Geographics, GIS User Community",
+  topo:"© OpenTopoMap (CC BY-SA) · © OpenStreetMap contributors (ODbL)"
+ };
+ const baseChoice=()=>read("pngBg")?.value||"vector";
+ const lonAt=(x,z)=>x/2**z*360-180;
+ const latAt=(y,z)=>Math.atan(Math.sinh(Math.PI*(1-2*y/2**z)))*180/Math.PI;
+ const tileX=(lon,z)=>Math.floor((lon+180)/360*2**z);
+ const tileY=(lat,z)=>{
+  const rad=Math.max(-85.05,Math.min(85.05,lat))*Math.PI/180;
+  return Math.floor((1-Math.asinh(Math.tan(rad))/Math.PI)/2*2**z);
+ };
+ // Area-driven, capped tile mosaic independent of visible screen zoom.
+ function baseTilePlan(bounds,mode,maxTiles=48){
+  if(mode==="vector")return{mode,z:0,tiles:[]};
+  if(!BASE_URLS[mode])throw Error("Bilinmeyen harita altlığı.");
+  const {maxLat:north,minLat:south,minLon:west,maxLon:east}=bounds;
+  if(![north,south,west,east].every(Number.isFinite)||north<=south||east<=west||
+    west < -180||east>180||Math.abs(north)>85.05||Math.abs(south)>85.05)
+    throw Error("PNG altlık haritası için park sınırı geçersiz.");
+  for(let z=mode==="topo"?17:18;z>=3;z--){
+   const x0=tileX(west,z),x1=tileX(east,z),y0=tileY(north,z),y1=tileY(south,z);
+   const count=(x1-x0+1)*(y1-y0+1);
+   if(count>0&&count<=maxTiles){
+    const tiles=[];
+    for(let y=y0;y<=y1;y++)for(let x=x0;x<=x1;x++)tiles.push({z,x,y,url:BASE_URLS[mode](z,x,y)});
+    return{mode,z,tiles};
+   }
+  }
+  throw Error("Bu park için altlık PNG sınırı çok geniş.");
+ }
+ function loadTileImage(url){
+  return new Promise((resolve,reject)=>{
+   if(typeof Image!=="function"){reject(Error("Tarayıcı harita görseli oluşturamıyor."));return;}
+   const img=new Image();let settled=false;
+   const finish=error=>{
+    if(settled)return;settled=true;clearTimeout(timeout);
+    img.onload=null;img.onerror=null;
+    error?reject(error):resolve(img);
+   };
+   const timeout=setTimeout(()=>finish(Error("Harita karosu zaman aşımı.")),7500);
+   img.crossOrigin="anonymous";
+   img.onload=()=>img.naturalWidth?finish():finish(Error("Boş altlık karosu."));
+   img.onerror=()=>finish(Error("Altlık sağlayıcısı CORS veya ağ nedeniyle karoyu sunamadı."));
+   img.src=url;
+  });
+ }
+ async function paintBaseTiles(ctx,pr,bounds,mode){
+  const plan=baseTilePlan(bounds,mode);
+  if(mode==="vector")return 0;
+  for(let start=0;start<plan.tiles.length;start+=4){
+   const loaded=await Promise.all(plan.tiles.slice(start,start+4).map(async tile=>({tile,img:await loadTileImage(tile.url)})));
+   for(const {tile,img} of loaded){
+    const x0=pr.x(lonAt(tile.x,tile.z)),x1=pr.x(lonAt(tile.x+1,tile.z));
+    const y0=pr.y(latAt(tile.y,tile.z)),y1=pr.y(latAt(tile.y+1,tile.z));
+    ctx.drawImage(img,x0,y0,x1-x0,y1-y0);
+   }
+  }
+  try{ctx.getImageData?.(0,0,1,1);}
+  catch{throw Error("Seçili altlık PNG kullanımına izin vermiyor (CORS).");}
+  return plan.tiles.length;
  }
  function eachRing(tree,visit){
   if(!Array.isArray(tree)||!tree.length)return;
@@ -40,7 +115,7 @@
   ctx.globalAlpha=1;
   return true;
  }
- function drawRawPatches(ctx,pr,patches,dict){
+ function drawRawPatches(ctx,pr,patches,dict,opacity=.52){
   let painted=0;
   for(const patch of patches||[]){
    const rings=patch.rings||[];
@@ -50,7 +125,7 @@
     ring.forEach((p,i)=>{const x=pr.x(p[1]),y=pr.y(p[0]);if(i===0)ctx.moveTo(x,y);else ctx.lineTo(x,y);});
     ctx.closePath();
    }
-   ctx.globalAlpha=.52;
+   ctx.globalAlpha=opacity;
    ctx.fillStyle=dict[patch.classKey||patch.group]?.color||"#94a3b8";
    ctx.fill("evenodd");ctx.globalAlpha=1;painted++;
   }
@@ -96,6 +171,7 @@
    notify("Önce bir park seçin.","warn");return false;
   }
   const opts={cover:read("chkPngCover")?.checked!==false,grid:read("chkPngGrid")?.checked!==false,wp:read("chkPngWp")?.checked!==false};
+  const basemap=baseChoice();
   const sens=window.DG_LC_SENS?.state,ndvi=!!sens?.vegetationView&&!sens.rawView;
   const ndviTiers=ndvi&&typeof dgSensVegetationTiers==="function"?dgSensVegetationTiers():null;
   const ndviPolys=ndvi?await waitVegetation(sens):[];
@@ -132,12 +208,13 @@
   for(const ring of PARK_POLY)outline(ctx,pr,ring);
   if(typeof PARK_HOLES!=="undefined")for(const ring of PARK_HOLES||[])outline(ctx,pr,ring);
   ctx.clip("evenodd");
+  await paintBaseTiles(ctx,pr,bounds,basemap);
   let count=0;
   if(opts.cover){
    const display=Array.isArray(sens?.displayPaths)&&!sens.rawView?sens.displayPaths:[];
    if(display.length){
     for(const item of display){
-     if(drawLeaflet(ctx,pr,item.poly,Math.max(.28,(sens.opacity||65)/100),item.cls==='pool'?'#3b82f6':null))count++;
+     if(drawLeaflet(ctx,pr,item.poly,Math.max(.28,(sens.opacity||65)/100),item.cls==="building"?BUILDING_COLOR:item.cls==="pool"?"#3b82f6":null))count++;
     }
    }else{
     const last=window.DG_LANDCOVER?.getLast?.();
@@ -193,7 +270,7 @@
     ctx.fillText("NDVI park içi üçte birlik eşikleri: "+cut.map(n=>Number(n).toFixed(3)).join(" / ")+" · Hücre başına en az 3 geçerli gözlem",PAD,H-89,W-PAD*2);
   }
   ctx.fillText(ndvi?"Göreli NDVI park içi karşılaştırmadır; mutlak taç örtüsü ölçümü değildir.":"Kaynak: ESA WorldCover 2021 v200 · OSM sınırı",PAD,H-58);
-  ctx.fillText("© OpenStreetMap katkıcıları (ODbL) · © ESA WorldCover (CC BY 4.0) · DendroGeo",PAD,H-39);
+  ctx.fillText(BASE_ATTR[basemap]+" · © ESA WorldCover (CC BY 4.0) · DendroGeo",PAD,H-39);
   ctx.fillText("Çıktı görselleştirmedir; kayıtlı bilimsel sonucun yerine geçmez.",PAD,H-20);
   if(!count&&!ndvi){notify("Bu park için çizilecek yüzey geometrisi henüz hazırlanmadı. Önce analizi açın.","warn");return false;}
   return await new Promise(resolve=>cv.toBlob(blob=>{
@@ -217,6 +294,7 @@
   if(!rec||typeof PARK_POLY==="undefined"||!Array.isArray(PARK_POLY)||!PARK_POLY.length){
    notify("Önce parkın arazi örtüsü analizini açın.","warn");return false;
   }
+  const basemap=baseChoice();
   const showNdvi=!!sens.vegetationView&&!sens.rawView&&!!layers.surface;
   if(showNdvi&&typeof dgSensVegetationTiers!=="function"){
    notify("Göreli NDVI sınıfları bu oturumda bulunamadı.","warn");return false;
@@ -261,7 +339,7 @@
   if(!g){notify("Tarayıcı PNG oluşturamıyor.","err");return false;}
   const GREEN="#14532d",MUT="#5c6a63",INK="#182420",BG="#f7f6f2";
   const dict=classes();
-  const color=k=>k==="pool"?"#3b82f6":(typeof DG_SENS_COLORS!=="undefined"&&DG_SENS_COLORS[k])||
+  const color=k=>k==="building"?BUILDING_COLOR:k==="pool"?"#3b82f6":(typeof DG_SENS_COLORS!=="undefined"&&DG_SENS_COLORS[k])||
     (typeof DG_SENS_VEGETATION_COLORS!=="undefined"&&DG_SENS_VEGETATION_COLORS[k])||
     dict[k]?.color||{building:"#475569",pool:"#0ea5e9",sparse:"#fde68a",moderate:"#4ade80",dense:"#166534"}[k]||"#94a3b8";
   g.fillStyle=BG;g.fillRect(0,0,CW,CH);
@@ -279,13 +357,14 @@
   for(const ring of PARK_POLY)outline(g,pr,ring);
   if(typeof PARK_HOLES!=="undefined")for(const ring of PARK_HOLES||[])outline(g,pr,ring);
   g.clip("evenodd");
+  await paintBaseTiles(g,pr,bounds,basemap);
   let painted=0;
   if(layers.surface){
    for(const item of sens.displayPaths||[])
-    if(drawLeaflet(g,pr,item.poly,Math.max(.28,(sens.opacity||65)/100),item.cls==='pool'?'#3b82f6':null))painted++;
+    if(drawLeaflet(g,pr,item.poly,basemap==="vector"?1:Math.max(.35,(sens.opacity||65)/100),item.cls==="building"?BUILDING_COLOR:item.cls==="pool"?"#3b82f6":null))painted++;
    if(!painted){
     const last=window.DG_LANDCOVER?.getLast?.();
-    painted=drawRawPatches(g,pr,last?.patches||last?.report?.patches||[],dict);
+    painted=drawRawPatches(g,pr,last?.patches||last?.report?.patches||[],dict,basemap==="vector"?1:.65);
    }
    // NDVI is drawn after regular green class (and before grid/waypoints),
    // so only observed green cells become sparse / moderate / dense.
@@ -367,7 +446,7 @@
   g.fillStyle=GREEN;g.fillRect(0,CH-70,CW,70);
   g.fillStyle="#cfe3d3";g.font="19px Arial";
   g.fillText(showNdvi?"Raster + kullanıcı kararları; NDVI yeşil alanda göreli karşılaştırmadır.":"Raster + doğrulanmış kullanıcı kararları; su yüzeyleri tek sınıfta sunulur.",40,CH-54,CW-80);
-  g.fillText("ESA WorldCover 2021 v200 (CC BY 4.0) · "+String(rec.fingerprint||"").slice(0,8)+" · CC BY-NC 4.0",40,CH-26,CW-80);
+  g.fillText(BASE_ATTR[basemap]+" · ESA WorldCover (CC BY 4.0) · "+String(rec.fingerprint||"").slice(0,8),40,CH-26,CW-80);
   return await new Promise(resolve=>canvas.toBlob(blob=>{
    if(!blob){notify("Doğrulanmış harita PNG üretilemedi.","err");resolve(false);return;}
    const uri=URL.createObjectURL(blob),a=document.createElement("a");
@@ -415,6 +494,6 @@
   event.stopImmediatePropagation();
   exportMap();
  },true);
- window.DG_GIS_PNG_EXPORT={download:exportMap,downloadVerified:exportVerified,classes,eachRing};
+ window.DG_GIS_PNG_EXPORT={download:exportMap,downloadVerified:exportVerified,classes,eachRing,baseTilePlan};
  window.downloadParkImage=exportMap;
 })();
