@@ -1052,3 +1052,110 @@
 @media(max-width:700px){
  #v-map #surfaceMapTools .dg-ux-boundary-dock{flex-shrink:1}
 }
+
+/* Reviewed surface-card parity · 2026-10-08.
+   Mirrors the existing dg-png-card theme and the verified land-cover palette.
+   ONLY presentation. Scientific percentage widths and areas are untouched. */
+#v-map #landCoverReport .dg-ux-surface-rows{
+  display:grid;
+  grid-template-columns:minmax(0,1fr);
+  gap:8px;
+  padding:10px;
+  margin:8px 0;
+  border:1px solid var(--line);
+  border-radius:12px;
+  background:var(--bg);
+}
+#v-map #landCoverReport .dg-ux-surface-rows>.dg-surface-stat{
+  display:grid;
+  grid-template-columns:minmax(0,1fr) auto;
+  grid-template-rows:auto 10px;
+  align-items:center;
+  gap:7px 10px;
+  margin:0;
+  padding:10px 11px;
+  min-width:0;
+  border:1px solid var(--line);
+  border-left:4px solid var(--dg-ux-surface-color,#94a3b8);
+  border-radius:9px;
+  background:var(--surface);
+}
+#v-map #landCoverReport .dg-ux-surface-rows>.dg-surface-stat>span{
+  grid-column:1;
+  grid-row:1;
+  font:700 .78rem/1.4 var(--f-ui);
+  color:var(--ink);
+  white-space:normal;
+  min-width:0;
+  overflow-wrap:break-word;
+}
+#v-map #landCoverReport .dg-ux-surface-rows>.dg-surface-stat>b{
+  grid-column:2;
+  grid-row:1;
+  font:650 .76rem/1.4 var(--f-ui);
+  font-variant-numeric:tabular-nums;
+  color:var(--ink);
+  text-align:right;
+  white-space:nowrap;
+  justify-self:end;
+}
+#v-map #landCoverReport .dg-ux-surface-rows>.dg-surface-stat>.dg-surface-track{
+  grid-column:1/-1;
+  grid-row:2;
+  height:10px;
+  min-width:0;
+  width:100%;
+  margin:0;
+  border-radius:999px;
+  background:var(--line);
+  overflow:hidden;
+}
+#v-map #landCoverReport .dg-ux-surface-rows>.dg-surface-stat>.dg-surface-track>i{
+  display:block;
+  height:100%;
+  max-width:100%;
+  border:0;
+  border-radius:999px;
+  background:var(--dg-ux-surface-color,#94a3b8)!important;
+}
+#v-map #landCoverReport .dg-ux-surface-rows .dg-ux-surface-percentage{
+  font:650 .72rem/1.4 var(--f-ui);
+  color:var(--mut);
+}
+@media(max-width:430px){
+  #v-map #landCoverReport .dg-ux-surface-rows{
+    padding:7px;
+    gap:6px;
+  }
+  #v-map #landCoverReport .dg-ux-surface-rows>.dg-surface-stat{
+    grid-template-columns:minmax(0,1fr) auto;
+    grid-template-rows:auto 9px;
+    padding:9px 8px;
+    column-gap:5px;
+    row-gap:7px;
+  }
+  #v-map #landCoverReport .dg-ux-surface-rows>.dg-surface-stat>span{
+    font-size:.72rem;
+  }
+  #v-map #landCoverReport .dg-ux-surface-rows>.dg-surface-stat>b{
+    font-size:.68rem;
+    text-align:right;
+    justify-self:end;
+  }
+  #v-map #landCoverReport .dg-ux-surface-rows>.dg-surface-stat>.dg-surface-track{
+    grid-column:1/-1;
+    grid-row:2;
+    height:9px;
+  }
+}
+@media(max-width:330px){
+  #v-map #landCoverReport .dg-ux-surface-rows>.dg-surface-stat{
+    grid-template-columns:minmax(0,1fr) auto;
+    grid-template-rows:auto 9px;
+  }
+  #v-map #landCoverReport .dg-ux-surface-rows>.dg-surface-stat>b{
+    grid-column:2;
+    grid-row:1;
+    font-size:.65rem;
+  }
+}
