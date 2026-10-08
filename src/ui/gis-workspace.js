@@ -423,12 +423,26 @@
   if(tiers?.count>=9&&state.vegetationLayer?.eachLayer)
    state.vegetationLayer.eachLayer(layer=>layer.bringToFront?.());
  }
+ function syncBrushChoices(){
+  // Pool/fountain shares the Su brush workflow; keep the historical class,
+  // recorded pool polygons and boundary editor untouched.
+  const select=$("dgSensBrushType"),state=window.DG_LC_SENS?.state;
+  if(!select)return;
+  if(state?.brushType==="pool"&&!state.busy&&!state.saving&&!state.rawView&&typeof dgSensBrushChoose==="function"){
+   dgSensBrushChoose("water"); // also replaces an already-active pool brush safely
+   return;
+  }
+  const legacyPool=select.querySelector('option[value="pool"]');
+  if(legacyPool)legacyPool.remove();
+  if(select.value==="pool")select.value="water";
+ }
  function syncSliderPaint(){
   const sliders=$("lcSens")?.querySelectorAll?.('input.dg-sens-slider[id^="dgSensRange-"]')||[];
   for(const slider of sliders)slider.style?.setProperty?.("--dg-ux-slider-fill",Math.max(0,Math.min(100,Number(slider.value)||0))+"%");
  }
  function sync(){
   syncPark();
+  syncBrushChoices();
   syncSurfaceReport();
   syncSliderPaint();
   syncGroupLayout();
