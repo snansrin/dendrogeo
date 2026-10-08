@@ -287,4 +287,5 @@ test('midpoint label styling does not capture map clicks or alter GIS core prese
  assert.match(js,/if\(mapTool==="distance"&&typeof L\.tooltip==="function"\)/);
  assert.match(js,/\.setLatLng\(middle\)\.setContent\(unit\(meters\)\)\.addTo\(drawLayer\)/);
  assert.match(js,/drawLayer\.clearLayers\(\)/);
+ assert.match(js,/if\(mapInstance&&drawLayer\)mapInstance\.removeLayer\(drawLayer\)/);
 });
