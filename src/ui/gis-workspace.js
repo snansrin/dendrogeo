@@ -165,6 +165,12 @@
    setStatus("Yüzey düzeltmesi açıkken ölçüm devre dışıdır. Önce El / harita görünümüne dönün.");
    return;
   }
+  // The existing park-selection listener runs on map.click. Do not let a
+  // measurement click accidentally replace the currently selected park.
+  if(typeof PARK_MODE!=="undefined"&&PARK_MODE){
+   setStatus("Ölçüm için önce Park Analizi Modu'nu kapatın. Seçili park ve analiz silinmez.");
+   return;
+  }
   if(mapTool===mode){closeTool();setStatus("Ölçüm kapatıldı.");return;}
   closeTool();mapInstance=m;mapTool=mode;drawLayer=L.layerGroup().addTo(m);
   clickHandler=e=>{drawPoints.push(e.latlng);redraw();};
