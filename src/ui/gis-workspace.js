@@ -280,7 +280,11 @@
     const type=Object.entries(types).find(([,meta])=>meta?.label===name)?.[0]||defaults[name];
     if(type&&icons[type])label.prepend(document.createTextNode(icons[type]+" "));
     const mapColor=fill.style?.backgroundColor;
-    if(mapColor)row.style.setProperty("--dg-ux-surface-color",mapColor);
+    if(mapColor){
+     row.style.setProperty("--dg-ux-surface-color",mapColor);
+     const slider=typeof document.getElementById==="function"&&type?document.getElementById("dgSensRange-"+type):null;
+     if(slider)slider.style.setProperty("--dg-ux-slider-color",mapColor);
+    }
     const original=value.textContent.trim();
     const match=original.match(/^(.*?)\s*·\s*(%[0-9.,]+)$/);
     if(match){
