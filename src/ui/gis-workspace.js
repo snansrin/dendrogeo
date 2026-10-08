@@ -568,18 +568,16 @@
   normalizeWaterText($("lcSens"));normalizeWaterText($("surfaceMapTools"));
   // Map appearance only: legacy pool footprints are drawn as Su, but stored
   // feature identities, geometry and scientific partition remain unchanged.
+  // IMPORTANT: never convert an unknown source region into a neighbouring
+  // green/hard class on the live map. That overlay concealed Göksu's thin
+  // hard-surface roads. Preserve the locked map renderer for all such areas.
+  // The only intended exceptions are pool->water and darker building hue.
   const paths=state?.displayPaths||[];
-  const nearest=window.DG_GIS_PNG_EXPORT?.nearestPresentationTypes;
-  const paint=typeof nearest==="function"?nearest(state?.displayFeatures):[];
-  const opacity=Math.max(0,Math.min(1,(Number(state?.opacity)||65)/100));
-  for(let i=0;i<paths.length;i++){
-   const item=paths[i],type=item.cls==="other"?paint[i]:item.cls;
-   const color=type==="water"||type==="pool"?"#3b82f6":
-    type==="building"?BUILDING_PRESENTATION_COLOR:
-    type&&type!=="other"?(typeof DG_SENS_COLORS!=="undefined"?DG_SENS_COLORS[type]:null):null;
-   if(color&&item.poly?.options?.fillColor!==color)item.poly.setStyle?.({fillColor:color});
-   if(item.cls==="other"&&color&&item.poly?.options?.fillOpacity!==opacity)
-    item.poly.setStyle?.({fillOpacity:opacity});
+  for(const item of paths){
+   const color=item.cls==="pool"?"#3b82f6":
+    item.cls==="building"?BUILDING_PRESENTATION_COLOR:null;
+   if(color&&item.poly?.options?.fillColor!==color)
+    item.poly.setStyle?.({fillColor:color});
   }
  }
  let popupWaterMap=null;
