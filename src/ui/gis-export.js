@@ -24,7 +24,7 @@
   if(tree[0]&&typeof tree[0].lat==="number"&&typeof tree[0].lng==="number"){visit(tree);return;}
   for(const child of tree)eachRing(child,visit);
  }
- function drawLeaflet(ctx,pr,layer,opacity=0.6){
+ function drawLeaflet(ctx,pr,layer,opacity=0.6,overrideColor=null){
   const rings=[];
   if(typeof layer?.getLatLngs!=="function")return false;
   eachRing(layer.getLatLngs(),ring=>rings.push(ring));
@@ -34,7 +34,7 @@
    ring.forEach((p,i)=>{const x=pr.x(p.lng),y=pr.y(p.lat);if(i===0)ctx.moveTo(x,y);else ctx.lineTo(x,y);});
    ctx.closePath();
   }
-  ctx.fillStyle=layer.options?.fillColor||layer.options?.color||"#94a3b8";
+  ctx.fillStyle=overrideColor||layer.options?.fillColor||layer.options?.color||"#94a3b8";
   ctx.globalAlpha=Math.min(1,Math.max(0,opacity));
   ctx.fill("evenodd");
   ctx.globalAlpha=1;
@@ -137,7 +137,7 @@
    const display=Array.isArray(sens?.displayPaths)&&!sens.rawView?sens.displayPaths:[];
    if(display.length){
     for(const item of display){
-     if(drawLeaflet(ctx,pr,item.poly,Math.max(.28,(sens.opacity||65)/100)))count++;
+     if(drawLeaflet(ctx,pr,item.poly,Math.max(.28,(sens.opacity||65)/100),item.cls==='pool'?'#3b82f6':null))count++;
     }
    }else{
     const last=window.DG_LANDCOVER?.getLast?.();
@@ -217,18 +217,16 @@
   if(!rec||typeof PARK_POLY==="undefined"||!Array.isArray(PARK_POLY)||!PARK_POLY.length){
    notify("Önce parkın arazi örtüsü analizini açın.","warn");return false;
   }
-  if(!sens.vegetationView||sens.rawView){
-   notify("Göreli NDVI görünümü açık değil.","warn");return false;
-  }
-  if(typeof dgSensVegetationTiers!=="function"){
+  const showNdvi=!!sens.vegetationView&&!sens.rawView&&!!layers.surface;
+  if(showNdvi&&typeof dgSensVegetationTiers!=="function"){
    notify("Göreli NDVI sınıfları bu oturumda bulunamadı.","warn");return false;
   }
-  const tiers=dgSensVegetationTiers();
-  if(tiers.count<9||!tiers.cutoffs){
+  const tiers=showNdvi?dgSensVegetationTiers():null;
+  if(showNdvi&&(tiers.count<9||!tiers.cutoffs)){
    notify("Doğrulanmış harita için yeterli NDVI verisi bulunamadı; en az 9 uygun yeşil hücre ve hücre başına 3 gözlem gerekir.","warn");return false;
   }
-  const ndviPolys=await waitVegetation(sens,30);
-  if(!ndviPolys.length){
+  const ndviPolys=showNdvi?await waitVegetation(sens,30):[];
+  if(showNdvi&&!ndviPolys.length){
    notify("NDVI katmanı henüz çizilemedi. Eksik veriyi varmış gibi göstermemek için çıktı oluşturulmadı.","warn");return false;
   }
   // Match the original verified map's publication gate (no false verification).
@@ -263,7 +261,7 @@
   if(!g){notify("Tarayıcı PNG oluşturamıyor.","err");return false;}
   const GREEN="#14532d",MUT="#5c6a63",INK="#182420",BG="#f7f6f2";
   const dict=classes();
-  const color=k=>(typeof DG_SENS_COLORS!=="undefined"&&DG_SENS_COLORS[k])||
+  const color=k=>k==="pool"?"#3b82f6":(typeof DG_SENS_COLORS!=="undefined"&&DG_SENS_COLORS[k])||
     (typeof DG_SENS_VEGETATION_COLORS!=="undefined"&&DG_SENS_VEGETATION_COLORS[k])||
     dict[k]?.color||{building:"#475569",pool:"#0ea5e9",sparse:"#fde68a",moderate:"#4ade80",dense:"#166534"}[k]||"#94a3b8";
   g.fillStyle=BG;g.fillRect(0,0,CW,CH);
@@ -284,7 +282,7 @@
   let painted=0;
   if(layers.surface){
    for(const item of sens.displayPaths||[])
-    if(drawLeaflet(g,pr,item.poly,Math.max(.28,(sens.opacity||65)/100)))painted++;
+    if(drawLeaflet(g,pr,item.poly,Math.max(.28,(sens.opacity||65)/100),item.cls==='pool'?'#3b82f6':null))painted++;
    if(!painted){
     const last=window.DG_LANDCOVER?.getLast?.();
     painted=drawRawPatches(g,pr,last?.patches||last?.report?.patches||[],dict);
@@ -295,7 +293,7 @@
     notify("Arazi örtüsü çizilemedi; NDVI katmanı tek başına doğrulanmış harita sayılmaz.","warn");
     return false;
    }
-   for(const poly of ndviPolys)
+   if(showNdvi)for(const poly of ndviPolys)
     if(drawLeaflet(g,pr,poly,Math.max(.45,(sens.opacity||65)/100)))painted++;
   }
   if(layers.grid&&typeof GRID_CELLS!=="undefined")for(const cell of GRID_CELLS||[]){
@@ -341,8 +339,8 @@
   g.fillStyle=INK;g.font="bold 54px Arial";g.fillText(String(nDec),X0,472);
   g.fillStyle=MUT;g.font="bold 20px Arial";g.fillText("DOĞRULANMIŞ ALANLAR",X0,540);
   let y=572;
-  if(layers.surface)for(const k of ["green","water","hard","bare","building","pool"]){
-   const v=Number(areas[k]||0);
+  if(layers.surface)for(const k of ["green","water","hard","bare","building"]){
+   const v=Number(areas[k]||0)+(k==="water"?Number(areas.pool||0):0);
    if(v<=0)continue;
    const label=window.DG_SURFACE_REVIEW?.types?.[k]?.label||dict[k]?.label||k;
    g.fillStyle=color(k);g.fillRect(X0,y,26,26);
@@ -350,6 +348,7 @@
    g.fillStyle=MUT;g.font="18px Arial";g.fillText(fmt(v/10000)+" ha",X0+39,y+44,CW-X0-70);
    y+=67;
   }
+  if(showNdvi){
   y+=16;g.strokeStyle="#dfe5df";g.lineWidth=2;g.beginPath();g.moveTo(X0,y);g.lineTo(CW-40,y);g.stroke();y+=35;
   g.fillStyle=GREEN;g.font="bold 19px Arial";g.fillText("GÖRELİ NDVI · YEŞİL ALAN",X0,y,CW-X0-35);y+=20;
   const counts={sparse:0,moderate:0,dense:0};
@@ -364,18 +363,19 @@
   y+=30;g.font="15px Arial";
   g.fillText("Park içi göreli sınıflama; taç örtüsü",X0,y,CW-X0-40);
   y+=22;g.fillText("ölçümü değildir. ≥3 gözlem/hücre.",X0,y,CW-X0-40);
+  }
   g.fillStyle=GREEN;g.fillRect(0,CH-70,CW,70);
   g.fillStyle="#cfe3d3";g.font="19px Arial";
-  g.fillText("Raster + doğrulanmış kullanıcı kararları; NDVI yeşil alanda görsel karşılaştırmadır.",40,CH-54,CW-80);
+  g.fillText(showNdvi?"Raster + kullanıcı kararları; NDVI yeşil alanda göreli karşılaştırmadır.":"Raster + doğrulanmış kullanıcı kararları; su yüzeyleri tek sınıfta sunulur.",40,CH-54,CW-80);
   g.fillText("ESA WorldCover 2021 v200 (CC BY 4.0) · "+String(rec.fingerprint||"").slice(0,8)+" · CC BY-NC 4.0",40,CH-26,CW-80);
   return await new Promise(resolve=>canvas.toBlob(blob=>{
    if(!blob){notify("Doğrulanmış harita PNG üretilemedi.","err");resolve(false);return;}
    const uri=URL.createObjectURL(blob),a=document.createElement("a");
    a.href=uri;
-   a.download="dendrogeo_dogrulanmis_harita_"+safeName(name)+"_goreli_ndvi.png";
+   a.download="dendrogeo_dogrulanmis_harita_"+safeName(name)+(showNdvi?"_goreli_ndvi":"")+".png";
    document.body.append(a);a.click();a.remove();
    setTimeout(()=>URL.revokeObjectURL(uri),2000);
-   notify("Doğrulanmış Harita PNG indirildi · Yeşil alan göreli NDVI dahil","ok");
+   notify("Doğrulanmış Harita PNG indirildi"+(showNdvi?" · Yeşil alan göreli NDVI dahil":""),"ok");
    resolve(true);
   },"image/png"));
  }
@@ -394,9 +394,9 @@
  if(typeof document.addEventListener==="function")document.addEventListener("click",event=>{
   const exportAction=event.target?.closest?.("#dgExportDownload");
   const sens=window.DG_LC_SENS?.state;
-  // Keep the locked, original verified-map dialog and renderer fully intact
-  // unless a real NDVI overlay is requested as part of the surface layer.
-  if(exportAction&&sens?.vegetationView&&!sens.rawView){
+  // Preserve original verified-map layer selector; both NDVI and standard
+  // maps now present legacy pool inside Su, without editing the locked core.
+  if(exportAction){
    const dialog=exportAction.closest("dialog");
    if(dialog?.id==="dgSurfaceExportDialog"&&dialog.querySelector('[name="surface"]')?.checked){
     const layers=Object.fromEntries(["park","surface","grid","waypoints"].map(key=>[key,!!dialog.querySelector('[name="'+key+'"]')?.checked]));
