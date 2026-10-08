@@ -345,7 +345,7 @@ test('boundary selection and report sidecar present pool as Su without erasing i
  assert.match(work,/function normalizeWaterText\(root\)/);
  assert.match(png,/k==="water"\?Number\(areas\.pool\|\|0\):0/);
  assert.match(png,/showNdvi\?await waitVegetation\(sens,30\):\[\]/);
- assert.match(png,/item\.cls===\"pool\"\?\"#3b82f6\"/);
+ assert.match(png,/type==="water"\|\|type==="pool"\?"#3b82f6"/);
  assert.match(load('src/services/lc-review.js'),/pool:\{group:"pool",label:"Havuz \/ süs havuzu"\}/);
 });
 
