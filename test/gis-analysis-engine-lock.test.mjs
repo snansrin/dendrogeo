@@ -43,7 +43,9 @@ const ENGINE_FUNCTIONS = {
   "dgSensNeedsWaterScan": "e0385fec8e199ce0",
   "dgSensEffective": "118f8ac0a0192fe3",
   "dgSensCandidates": "532d9551a365f760",
-  "dgSensMount": "95deb141490e8ece",
+  "dgSensMount": "111bb66f2a1f1b0e",
+  // Approved orchestration-only addition: auto-scan unaccepted reviews; all classification functions remain PR #59-pinned.
+  "dgSensAutoScanOnMount": "c9f0532d7851bf4d",
   "dgSensParts": "cccdc674de21087c",
   "dgSensLayerClickIsCurrent": "e3364d9b1429090d",
   "dgSensBoundaryGeoJson": "42922f76c4e5c165",

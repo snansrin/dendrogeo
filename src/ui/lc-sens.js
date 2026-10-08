@@ -189,6 +189,22 @@ async function dgSensMount(hostId){
  const partitioned=await dgSensRepartition();if(epoch!==DG_SENS.epoch||!partitioned)return;if(rec.acceptedResult&&!DG_SENS.editing)dgSensRenderAccepted();
  const pending=document.getElementById("surfacePendingTools");if(pending)pending.style.display="none";
  host.scrollIntoView({block:"nearest"});
+ // Start one fresh scan for an unaccepted surface review; accepted snapshots stay untouched.
+ if(!rec.acceptedResult&&!rec.profile?.cells)void dgSensAutoScanOnMount();
+}
+function dgSensAutoScanOnMount(){
+ const epoch=DG_SENS.epoch;
+ if(DG_SENS.autoScanEpoch===epoch)return DG_SENS.autoScanPromise||Promise.resolve(false);
+ if(!DG_SENS.record||DG_SENS.record.acceptedResult||DG_SENS.busy||DG_SENS.saving)return Promise.resolve(false);
+ DG_SENS.autoScanEpoch=epoch;
+ DG_SENS.status=_tvs("Park analizi açıldı; güncel uydu taraması otomatik başlatılıyor…");
+ dgSensUpdateStatus();
+ const pending=dgSensScan().catch(error=>{
+  if(epoch===DG_SENS.epoch){DG_SENS.status=_tvs("Otomatik uydu taraması başarısız: ")+String(error?.message||error);dgSensUpdateStatus();}
+  return false;
+ });
+ DG_SENS.autoScanPromise=pending.finally(()=>{if(DG_SENS.autoScanEpoch===epoch)DG_SENS.autoScanPromise=null;});
+ return DG_SENS.autoScanPromise;
 }
 function dgSensParts(){
  const cells=dgSensCells(),geometry=DG_SENS.geometry,park=DG_SENS.parkGeometry,rec=DG_SENS.record;
