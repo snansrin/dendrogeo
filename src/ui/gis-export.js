@@ -234,7 +234,8 @@
   // Match the original verified map's publication gate (no false verification).
   const edits=typeof dgSensEditSummary==="function"?dgSensEditSummary(rec):null;
   const nDec=Number(edits?.total||0);
-  if(layers.surface&&!nDec&&!rec.acceptedAt&&!(rec.features||[]).length){
+  const verifiedFeatures=typeof dgSensFeatures==="function"?dgSensFeatures().length:(rec.features||[]).length;
+  if(layers.surface&&!nDec&&!rec.acceptedAt&&!verifiedFeatures){
    notify("Önce yüzey kararlarını doğrulayıp kaydedin; doğrulanmamış analiz haritası yayımlanmaz.","warn");return false;
   }
   const areas=typeof dgSensAreas==="function"?dgSensAreas():rec.acceptedResult?.areas||rec.acceptedAreas||null;
@@ -290,6 +291,10 @@
    }
    // NDVI is drawn after regular green class (and before grid/waypoints),
    // so only observed green cells become sparse / moderate / dense.
+   if(!painted){
+    notify("Arazi örtüsü çizilemedi; NDVI katmanı tek başına doğrulanmış harita sayılmaz.","warn");
+    return false;
+   }
    for(const poly of ndviPolys)
     if(drawLeaflet(g,pr,poly,Math.max(.45,(sens.opacity||65)/100)))painted++;
   }
