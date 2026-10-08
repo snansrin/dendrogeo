@@ -19,6 +19,77 @@
    return Object.fromEntries(DG_LC_CLASSES.map(x=>[x.key,{color:x.color,label:x.label}]));
   return PALETTE;
  }
+
+ const BUILDING_COLOR="#334155";
+ const BASE_URLS={
+  osm:(z,x,y)=>"https://tile.openstreetmap.org/"+z+"/"+x+"/"+y+".png",
+  sat:(z,x,y)=>"https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/"+z+"/"+y+"/"+x,
+  topo:(z,x,y)=>"https://a.tile.opentopomap.org/"+z+"/"+x+"/"+y+".png"
+ };
+ const BASE_ATTR={
+  vector:"Vektör · DendroGeo",
+  osm:"© OpenStreetMap contributors (ODbL)",
+  sat:"Tiles © Esri, Maxar, Earthstar Geographics, GIS User Community",
+  topo:"© OpenTopoMap (CC BY-SA) · © OpenStreetMap contributors (ODbL)"
+ };
+ const baseChoice=()=>read("pngBg")?.value||"vector";
+ const lonAt=(x,z)=>x/2**z*360-180;
+ const latAt=(y,z)=>Math.atan(Math.sinh(Math.PI*(1-2*y/2**z)))*180/Math.PI;
+ const tileX=(lon,z)=>Math.floor((lon+180)/360*2**z);
+ const tileY=(lat,z)=>{
+  const rad=Math.max(-85.05,Math.min(85.05,lat))*Math.PI/180;
+  return Math.floor((1-Math.asinh(Math.tan(rad))/Math.PI)/2*2**z);
+ };
+ // Area-driven, capped tile mosaic independent of visible screen zoom.
+ function baseTilePlan(bounds,mode,maxTiles=48){
+  if(mode==="vector")return{mode,z:0,tiles:[]};
+  if(!BASE_URLS[mode])throw Error("Bilinmeyen harita altlığı.");
+  const {maxLat:north,minLat:south,minLon:west,maxLon:east}=bounds;
+  if(![north,south,west,east].every(Number.isFinite)||north<=south||east<=west||
+    west < -180||east>180||Math.abs(north)>85.05||Math.abs(south)>85.05)
+    throw Error("PNG altlık haritası için park sınırı geçersiz.");
+  for(let z=mode==="topo"?17:18;z>=3;z--){
+   const x0=tileX(west,z),x1=tileX(east,z),y0=tileY(north,z),y1=tileY(south,z);
+   const count=(x1-x0+1)*(y1-y0+1);
+   if(count>0&&count<=maxTiles){
+    const tiles=[];
+    for(let y=y0;y<=y1;y++)for(let x=x0;x<=x1;x++)tiles.push({z,x,y,url:BASE_URLS[mode](z,x,y)});
+    return{mode,z,tiles};
+   }
+  }
+  throw Error("Bu park için altlık PNG sınırı çok geniş.");
+ }
+ function loadTileImage(url){
+  return new Promise((resolve,reject)=>{
+   if(typeof Image!=="function"){reject(Error("Tarayıcı harita görseli oluşturamıyor."));return;}
+   const img=new Image();let settled=false;
+   const finish=error=>{
+    if(settled)return;settled=true;clearTimeout(timeout);
+    img.onload=null;img.onerror=null;
+    error?reject(error):resolve(img);
+   };
+   const timeout=setTimeout(()=>finish(Error("Harita karosu zaman aşımı.")),7500);
+   img.crossOrigin="anonymous";
+   img.onload=()=>img.naturalWidth?finish():finish(Error("Boş altlık karosu."));
+   img.onerror=()=>finish(Error("Altlık sağlayıcısı CORS veya ağ nedeniyle karoyu sunamadı."));
+   img.src=url;
+  });
+ }
+ async function paintBaseTiles(ctx,pr,bounds,mode){
+  const plan=baseTilePlan(bounds,mode);
+  if(mode==="vector")return 0;
+  for(let start=0;start<plan.tiles.length;start+=4){
+   const loaded=await Promise.all(plan.tiles.slice(start,start+4).map(async tile=>({tile,img:await loadTileImage(tile.url)})));
+   for(const {tile,img} of loaded){
+    const x0=pr.x(lonAt(tile.x,tile.z)),x1=pr.x(lonAt(tile.x+1,tile.z));
+    const y0=pr.y(latAt(tile.y,tile.z)),y1=pr.y(latAt(tile.y+1,tile.z));
+    ctx.drawImage(img,x0,y0,x1-x0,y1-y0);
+   }
+  }
+  try{ctx.getImageData?.(0,0,1,1);}
+  catch{throw Error("Seçili altlık PNG kullanımına izin vermiyor (CORS).");}
+  return plan.tiles.length;
+ }
  function eachRing(tree,visit){
   if(!Array.isArray(tree)||!tree.length)return;
   if(tree[0]&&typeof tree[0].lat==="number"&&typeof tree[0].lng==="number"){visit(tree);return;}
