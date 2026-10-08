@@ -2,7 +2,7 @@ import {chromium} from 'playwright-core';
 import {readFileSync} from 'node:fs';
 import {fileURLToPath} from 'node:url';
 import {resolve,extname} from 'node:path';
-const root=fileURLToPath(new URL('..',import.meta.url));
+const root=resolve(fileURLToPath(new URL('..',import.meta.url)));
 const browser=await chromium.launch({headless:true,args:['--no-sandbox']});
 try{
  const context=await browser.newContext({serviceWorkers:'block'}),page=await context.newPage();

@@ -38,7 +38,7 @@
     "supabase/functions/planetary-sas/handler.mjs": "2e2f3042cda068dabba156b10c972cc88123124ecefe604bb65d408a1b45ccb4",
     "supabase/functions/planetary-sas/index.ts": "7ef50cdef45db491237707e814b3ba4b07c03998f6d8625084c5b3be82228b4c",
     "supabase/functions/planetary-sas/deno.json": "b8b9e69ca2d156d509025e88d5c8cd04d1436147e712e0f7be534fa60d6c5f3a",
-    "scripts/worldcover-browser-smoke.mjs": "a83b72ffb58775f04336efc161c6e492e1da6059f06835f79db95b526b003140",
+    "scripts/worldcover-browser-smoke.mjs": "61bd4427ffc2d36ac611344d7dda72ba7c654ffb0fe631726dff9487c5208aad",
     "test/worldcover-cors.test.mjs": "c538dde04bef5468ec1f7c1dbe9e49fdb5478368710d0e66c056ecd64abd71b4",
     ".github/workflows/worldcover-browser-qa.yml": "dc73c1deea6d9e7eb71aa0b0300bcbe0f13d3f4ac0764485c35f03de9753e967"
   },
