@@ -72,3 +72,15 @@ test('report render retains source classes and the public report archive remains
  assert.doesNotMatch(report,/\['pool','havuz \/ süs havuzu'\]/);
  assert.match(load('scripts/surface-report.mjs'),/export function reviewedSurface/);
 });
+
+test('live GIS UI, exported PNG and future report agree on a single Su caption',()=>{
+ const ui=load('src/ui/gis-workspace.js');
+ const png=load('src/ui/gis-export.js');
+ const report=load('scripts/make-report.mjs');
+ assert.match(ui,/function syncWaterStatusSummary\(\)/);
+ assert.match(ui,/function syncWaterBoundary\(\)/);
+ assert.match(ui,/function syncWaterSurfaceRows\(\)/);
+ assert.match(png,/if\(layers\.surface\)for\(const k of \["green","water","hard","bare","building"\]\)/);
+ assert.match(report,/const visibleSurfaceClasses = presentationSurfaceClasses\(L\?\.classes\)/);
+ assert.match(report,/su yüzeyleri tek Su başlığında sunulur/);
+});
