@@ -108,6 +108,9 @@
    // The species analysis is already visible here and in the report.
    // Remove the extra one-off PNG button, not the record/chart itself.
    head.querySelectorAll(".dg-png-btn").forEach(b=>b.remove());
+   // Older renders placed the same redundant button beside the heading.
+   const adjacent=head.nextElementSibling;
+   if(adjacent?.matches?.("button.dg-png-btn")&&/png indir/i.test(adjacent.textContent||""))adjacent.remove();
    if(!head.querySelector(".dg-ux-species-caption"))head.append(el("span","dg-ux-species-caption","6 tür · onaylı kayıt sıralaması"));
    let node=head.nextElementSibling;
    for(let i=0;i<6&&node;i++,node=node.nextElementSibling)
