@@ -296,11 +296,11 @@
   if(opts.cover){
    const display=Array.isArray(sens?.displayPaths)&&!sens.rawView?sens.displayPaths:[];
    if(display.length){
-    const nearest=nearestPresentationTypes(sens?.displayFeatures);
-    for(let i=0;i<display.length;i++){
-     const item=display[i],type=item.cls==="other"?nearest[i]:item.cls;
-     const color=type==="building"?BUILDING_COLOR:type==="water"||type==="pool"?"#3b82f6":
-      type&&type!=="other"?(typeof DG_SENS_COLORS!=="undefined"?DG_SENS_COLORS[type]:null)||dict[type]?.color:null;
+    // Export the locked renderer's actual class, not the UI's old
+    // nearest-colour guess; narrow hard-surface paths must stay hard.
+    for(const item of display){
+     const type=item.cls;
+     const color=type==="building"?BUILDING_COLOR:type==="pool"?"#3b82f6":null;
      if(drawLeaflet(ctx,pr,item.poly,Math.max(.28,(sens.opacity||65)/100),color))count++;
     }
    }else{

@@ -3,146 +3,132 @@ import assert from 'node:assert/strict';
 import vm from 'node:vm';
 import {readFileSync} from 'node:fs';
 const read=p=>readFileSync(new URL('../'+p,import.meta.url),'utf8');
-const key=(row,col)=>row+':'+col;
-function fixture(options={}){
+
+function fixture({accepted=false,busy=false,empty=false}={}){
+ const oldSnapshot={schema:'dendrogeo-surface/2',acceptedAt:'2026-10-08',areas:{
+  hard:65000,green:300000,water:123000,building:12000,bare:8000
+ },evidence:['frozen-2026-10-08']};
+ const manual={from:'green',to:'hard',method:'visual-cell',ts:'confirmed',source:'user'};
  const rec={
-  id:'surface-goksu',parkId:'goksu',owner:'user',fingerprint:'baseline-c2',
-  features:[{type:'water',method:'visual-boundary'}],
-  corrections:{'4:5':{from:'water',to:'hard',method:'visual-cell',ts:'original'}},
-  acceptedResult:{schema:'dendrogeo-surface/2',areas:{water:120000,hard:65000},acceptedAt:'2026-10-06',id:'previous'},
-  draftDirty:true,
-  ...options.record
+  id:'surface-goksu',owner:'field',parkId:25,draftDirty:!accepted,
+  features:[{type:'water',method:'visual-boundary',osmId:'way/423602740'}],
+  objectFeatures:[{type:'hard',method:'osm-boundary',osmId:'way/island-road'}],
+  corrections:{'1:1':manual},
+  acceptedResult:structuredClone(oldSnapshot),
+  acceptedAreas:structuredClone(oldSnapshot.areas),
+  acceptedAt:oldSnapshot.acceptedAt
  };
- const state={record:rec,editing:true,rawView:false,busy:false,saving:false,
-  epoch:3,partitionVersion:9,visualVersion:2,geometry:{ready:true},...options.state};
- const outside=Array.from({length:69},(_,i)=>{
-  const row=5+Math.floor(i/12),col=i%12;
-  return {key:key(row,col),type:'other',method:'review-cell',areaM2:100,
-   cell:{row,col,classKey:'water',rasterClassKey:'water',areaM2:100,
-    center:{lat:39.95+row*.00009,lon:32.65+col*.00011}}};
- });
- const known=[
-  {key:'0:0',type:'green',method:'review-cell',areaM2:100,
-   cell:{row:0,col:0,classKey:'green',center:{lat:39.95,lon:32.65}}},
-  {key:'0:12',type:'hard',method:'review-cell',areaM2:100,
-   cell:{row:0,col:12,classKey:'hard',center:{lat:39.95,lon:32.65132}}},
-  {key:'12:6',type:'bare',method:'review-cell',areaM2:100,
-   cell:{row:12,col:6,classKey:'bare',center:{lat:39.95108,lon:32.65066}}},
-  {key:'4:5',type:'hard',method:'review-cell',areaM2:100,
-   cell:{row:4,col:5,classKey:'water',center:{lat:39.95036,lon:32.65055}}}
- ];
- const parts=[...outside,...known];
- let dirty=0,saves=0,summary=0,render=0,status=0;
- const pending=()=>parts.map(p=>rec.corrections[p.key]&&p.type==='other'?
-  {...p,type:rec.corrections[p.key].to}:p);
- const doc={readyState:'loading',getElementById:()=>null,addEventListener(){}};
- const scope={
-  window:{DG_LC_SENS:{state}},document:doc,console,setTimeout,clearTimeout,Date,
-  dgSensParts:pending,
-  dgSensDirty(){dirty++;rec.draftDirty=true;state.visualVersion++;},
-  dgSensSave(){saves++;return Promise.resolve(true);},
-  dgSensRefreshLayer(){render++;return Promise.resolve();},
-  dgSensUpdateSummary(){summary++;},
-  dgSensUpdateStatus(){status++;},
-  dgSensWaterBoundaryUnresolved:()=>pending().filter(p=>p.method==='review-cell'&&p.cell.classKey==='water'&&p.type==='other').length
- };
- vm.runInNewContext(read('src/ui/gis-water-neighbour.js'),scope);
- return{api:scope.window.DG_GIS_WATER_NEIGHBOUR,scope,record:rec,state,outside,known,parts,
-  stats:()=>({dirty,saves,summary,render,status}),pending};
-}
-test('69 Göksu-like receded water cells: propose unique land only, never water/building or an extra class',()=>{
- const f=fixture(),proposal=f.api.propose(f.pending(),f.record.corrections);
- assert.equal(proposal.length,69);
- assert.equal(new Set(proposal.map(p=>p.key)).size,69);
- assert.ok(proposal.every(p=>['green','hard','bare'].includes(p.to)));
- assert.ok(proposal.every(p=>Number.isFinite(p.distanceM)&&p.distanceM>=0));
- assert.ok(proposal.every(p=>p.neighbour!==p.key));
-});
-test('applying 69 inferred corrections releases the original locked acceptance gate without bypassing it',()=>{
- const f=fixture();
- const acceptedBefore=structuredClone(f.record.acceptedResult);
- const sourceBefore=structuredClone(f.parts);
- assert.equal(f.scope.dgSensWaterBoundaryUnresolved(),69);
- const r=f.api.apply();
- assert.equal(r.count,69);
- assert.equal(r.remaining,0);
- assert.equal(f.scope.dgSensWaterBoundaryUnresolved(),0);
- assert.deepEqual(f.record.acceptedResult,acceptedBefore,'never edit previously accepted report');
- assert.deepEqual(f.parts,sourceBefore,'do not change input raster cells, geometry or source parts');
- assert.deepEqual(f.record.corrections['4:5'],{from:'water',to:'hard',method:'visual-cell',ts:'original'});
- assert.equal(Object.keys(f.record.corrections).length,70);
- for(const c of f.outside){
-  const correction=f.record.corrections[c.key];
-  assert.ok(['green','hard','bare'].includes(correction.to));
-  assert.equal(correction.from,'water');
-  assert.equal(correction.method,'visual-cell','locked engine requires explicit decision record');
-  assert.equal(correction.source,'spatial-nearest-inference');
-  assert.match(correction.evidence.classification,/not-satellite/);
-  assert.ok(Number.isFinite(correction.evidence.distanceM));
+ if(!empty)for(let i=0;i<69;i++){
+  const key=(10+Math.floor(i/10))+':'+(i%10);
+  rec.corrections[key]={from:'water',to:i%4===0?'hard':'green',method:'visual-cell',
+   source:'spatial-nearest-inference',evidence:{nearestCellKey:'1:1',distanceM:27}};
  }
- assert.equal(f.stats().dirty,1);
- assert.equal(f.stats().saves,1);
- assert.equal(f.stats().render,1);
- assert.equal(f.api.apply().count,0,'repeat is idempotent');
- assert.equal(f.stats().saves,1);
+ const state={record:rec,geometry:{'1:1':[{road:true}]},parkGeometry:{park:true},epsg:32636,
+  busy,saving:false,exporting:false,rawView:false,draw:null,brush:null,
+  editing:!accepted,epoch:3,visualVersion:8,partitionVersion:4,opacity:65};
+ const reports=[],calls={dirty:0,refresh:0,update:0,save:0};
+ const ctx={window:{DG_LC_SENS:{state}},document:{readyState:'loading',addEventListener(){},getElementById(){return null;}},
+  console,setTimeout,clearTimeout,Date,
+  dgSensDirty(){calls.dirty++;state.visualVersion++;state.editing=true;rec.draftDirty=true;},
+  dgSensRefreshLayer(){calls.refresh++;return Promise.resolve();},
+  dgSensUpdateSummary(){calls.update++;},
+  dgSensUpdateStatus(){reports.push(state.status);},
+  dgSensSave(){calls.save++;return Promise.resolve(true);}
+ };
+ vm.runInNewContext(read('src/ui/gis-water-neighbour.js'),ctx);
+ return{api:ctx.window.DG_GIS_WATER_NEIGHBOUR,state,rec,oldSnapshot,manual,calls,reports,ctx};
+}
+
+test('restores all 69 inferred Göksu water-land cells, preserving true manually reviewed island hard paths',()=>{
+ const f=fixture(),backup=structuredClone(f.rec.objectFeatures);
+ assert.equal(f.api.stats(f.rec).count,69);
+ const actual=f.api.restore();
+ assert.equal(actual.removed,69);
+ assert.equal(Object.keys(f.rec.corrections).length,1);
+ assert.deepEqual(f.rec.corrections['1:1'],f.manual);
+ assert.deepEqual(f.rec.objectFeatures,backup,'locked OSM road footprints unchanged');
+ assert.equal(f.rec.corrections['1:1'].to,'hard');
+ assert.deepEqual(f.rec.acceptedResult,f.oldSnapshot,'the prior accepted scientific result remains exactly unchanged');
+ assert.deepEqual(f.rec.acceptedAreas,f.oldSnapshot.areas);
+ assert.equal(f.rec.acceptedAt,f.oldSnapshot.acceptedAt);
+ assert.equal(f.state.editing,true);
+ assert.equal(f.rec.draftDirty,true);
+ assert.deepEqual(f.calls,{dirty:1,refresh:1,update:1,save:1});
+ assert.match(f.state.status,/69/);
 });
-test('conserve full-cell total area in 69-cell water/land redistribution without inventing new park area',()=>{
- const f=fixture(),baseArea=f.outside.reduce((a,b)=>a+b.areaM2,0);
- const r=f.api.apply();
- const inferred=f.outside.reduce((a,p)=>a+((f.record.corrections[p.key]?.to)?p.areaM2:0),0);
- assert.equal(baseArea,6900);
- assert.equal(inferred,baseArea);
- assert.equal(Object.values(r.byClass).reduce((a,b)=>a+b,0),69);
- assert.equal(Object.keys(r.byClass).some(k=>!['green','hard','bare'].includes(k)),false);
+test('restoration is idempotent, does not guess any new raster classifications',()=>{
+ const f=fixture();
+ f.api.restore();
+ assert.equal(f.api.restore().removed,0);
+ assert.equal(f.api.stats(f.rec).count,0);
+ assert.equal(f.calls.save,1);
+ const g=fixture({empty:true});
+ assert.equal(g.api.restore().removed,0);
+ assert.equal(g.calls.dirty,0);
+ assert.deepEqual(g.rec.corrections['1:1'],g.manual);
 });
-test("never overwrite user decisions or assign without confirmed neighbour evidence",()=>{
- const f=fixture({record:{corrections:{'5:0':{from:'water',to:'bare',method:'visual-cell',ts:'manual'}}}});
- const before=structuredClone(f.record.corrections['5:0']);
- assert.equal(f.api.apply().count,68);
- assert.deepEqual(f.record.corrections['5:0'],before);
- const g=fixture();
- assert.equal(g.api.propose(g.outside,g.record.corrections).length,0,'missing neighbouring land => no fabricated assignments');
+test('previously accepted inferred predictions reopen as preview without mutating approved snapshot',()=>{
+ const f=fixture({accepted:true}),snap=structuredClone(f.rec.acceptedResult);
+ assert.equal(f.state.editing,false);
+ assert.equal(f.api.restore().removed,69);
+ assert.equal(f.state.editing,true);
+ assert.equal(f.rec.draftDirty,true);
+ assert.deepEqual(f.rec.acceptedResult,snap);
 });
-test('no changes to locked source acceptance, scientific engine or published source; helper is precached',()=>{
+test('operations during drawing, raw view, busy scan or saving never modify the review',()=>{
+ for(const mode of [{busy:true},{rawView:true},{draw:{ring:[]}},{brush:{type:'hard'}},{saving:true}]){
+  const f=fixture();Object.assign(f.state,mode);
+  assert.equal(f.api.restore().removed,0);
+  assert.equal(f.api.stats(f.rec).count,69);
+  assert.equal(f.calls.save,0);
+ }
+});
+test('only source-marked guesses are undone: never delete a manual class or changed source metadata',()=>{
+ const f=fixture();
+ f.rec.corrections['11:0']={from:'water',to:'hard',method:'visual-cell',
+  source:'user-reviewed',ts:'manual-2026-10-08'};
+ const before=structuredClone(f.rec.corrections['11:0']);
+ assert.equal(f.api.restore().removed,68);
+ assert.deepEqual(f.rec.corrections['11:0'],before);
+ assert.deepEqual(f.rec.corrections['1:1'],f.manual);
+});
+test('no numeric raster/threshold/geometry fallback was introduced; old science accept gate still protects uncertain classes',()=>{
+ const helper=read('src/ui/gis-water-neighbour.js');
+ const core=read('src/ui/lc-sens.js');
  const lock=JSON.parse(read('docs/surface-engine-lock.json'));
- const src=read('src/ui/gis-water-neighbour.js'),core=read('src/ui/lc-sens.js');
  assert.equal(Object.keys(lock.locked_files).length,51);
- assert.ok(!lock.locked_files['src/ui/gis-water-neighbour.js']);
  assert.ok(lock.locked_files['src/ui/lc-sens.js']);
- assert.match(core,/decision\.method==="visual-cell"/);
+ assert.ok(!lock.locked_files['src/ui/gis-water-neighbour.js']);
+ assert.match(helper,/decision\.source===SOURCE/);
+ assert.doesNotMatch(helper,/dgSensAccept\s*=|dgSensEffective\s*=|acceptedResult\s*=|acceptedAreas\s*=|\.to\s*=\s*['"]green/);
+ assert.doesNotMatch(helper,/spatial-nearest-inference-not-satellite|function propose\(/);
  assert.match(core,/dgSensWaterBoundaryUnresolved\(\)>0\?/);
- assert.doesNotMatch(src,/dgSensAccept\s*=|dgSensEffective\s*=|acceptedResult\s*=|dgSensWaterOutsideClass\s*=/);
- assert.match(src,/source:"spatial-nearest-inference"/);
- assert.match(read('index.html'),/src\/ui\/gis-water-neighbour\.js\?v=[a-f0-9]{8}/);
- assert.match(read('partials/boot.html'),/src\/ui\/gis-water-neighbour\.js\?v=[a-f0-9]{8}/);
+ assert.match(core,/sonuç kabul edilmedi/);
  assert.match(read('sw.js'),/\/src\/ui\/gis-water-neighbour\.js/);
 });
-test('the verified map is untouched; independent File > PNG İndir has four background choices',()=>{
+test('Doğrulanmış Harita and all four PNG basemaps stay available while pool is only shown as Su',()=>{
  const ui=read('src/ui/gis-workspace.js'),png=read('src/ui/gis-export.js');
  assert.match(ui,/function ensureQuickPngAction\(bar\)/);
- assert.match(ui,/quick\.textContent|el\("button","dg-png-btn ghost sm","🖼️ PNG İndir"\)/);
  assert.match(ui,/dgUxQuickPngDownload/);
- for(const name of ['vector','osm','sat','topo'])assert.ok(ui.includes('"'+name+'"'));
  assert.match(ui,/verified\.textContent="🖼️ Doğrulanmış Harita"/);
+ for(const cls of ['vector','osm','sat','topo'])assert.ok(ui.includes('"'+cls+'"'));
  assert.match(png,/async function renderVerified\(layers\)/);
- assert.match(png,/const baseChoice=\(\)=>read\("dgUxQuickPngBase"\)/);
- assert.match(png,/const button=event\.target\?\.closest\?\.\('button\[onclick\*="downloadParkImage"\]'\)/);
+ assert.match(ui,/item\.cls==="pool"\?"#3b82f6"/);
+ assert.match(ui,/pool=Number\(areas\.pool\|\|0\)/);
+ assert.match(ui,/if\(pool\)pool\.remove\(\)/);
+ assert.match(png,/type==="pool"\?"#3b82f6"/);
+ assert.doesNotMatch(ui,/item\.cls==="other"\?paint\[i\]/);
 });
 
-test('accepted mode and active boundary drawing never trigger inferred class writes',()=>{
- const accepted=fixture({state:{editing:false}});
- assert.deepEqual(Array.from(accepted.api.findPending()),[]);
- assert.equal(accepted.api.apply().count,0);
- assert.equal(accepted.stats().saves,0);
- const drawing=fixture({state:{draw:{ring:[],type:'water'}}});
- assert.deepEqual(Array.from(drawing.api.findPending()),[]);
- assert.equal(drawing.api.apply().count,0);
- assert.equal(drawing.stats().dirty,0);
-});
-
-test('the existing locked QC guard still refuses unassigned shoreline residuals',()=>{
- const source=read('src/ui/lc-sens.js');
- assert.match(source,/dgSensWaterBoundaryUnresolved\(\)>0\?/);
- assert.match(source,/sonuç kabul edilmedi/);
- assert.match(read('src/ui/gis-water-neighbour.js'),/if\(!known\.length\)return\[\]/);
+test('island road classification comes only from the frozen engine and verified geometry, never a sidecar vote',()=>{
+ const science=read('src/ui/lc-sens.js');
+ const workspace=read('src/ui/gis-workspace.js');
+ const ordinaryPng=read('src/ui/gis-export.js');
+ assert.match(science,/fillColor:DG_SENS_COLORS\[cls\]\|\|DG_SENS_COLORS\.other/);
+ assert.match(science,/DG_SENS\.displayPaths\.push\(\{poly,cls\}\)/);
+ assert.match(workspace,/for\(const item of paths\)/);
+ assert.doesNotMatch(workspace,/const paint=typeof nearest/);
+ assert.doesNotMatch(ordinaryPng,/const nearest=nearestPresentationTypes\(sens\?\.displayFeatures\)/);
+ assert.match(ordinaryPng,/const type=item\.cls/);
+ assert.match(science,/const DG_SENS_COLORS=\{green:"#22c55e",water:"#3b82f6",hard:"#64748b"/);
 });

@@ -72,11 +72,12 @@ test('verified map refuses missing geospatial results, rather than exporting a b
  assert.equal(h.downloads.length,0);
  assert.match(h.notice.join(' '),/geometrisi.*hazır değil|yüzey.*geometri/i);
 });
-test('raw scientific other class is unchanged while map borrows nearest presentation color',()=>{
+test('locked live map preserves hard roads: only pool water and building hue are presentation overrides',()=>{
  const ui=read('src/ui/gis-workspace.js'),science=read('src/ui/lc-sens.js');
  assert.match(ui,/if\(label\?\.textContent\?\.trim\(\)==="Diğer"\)\{row\.remove\(\);continue;\}/);
- assert.match(ui,/const paint=typeof nearest==="function"\?nearest\(state\?\.displayFeatures\):\[\]/);
- assert.match(ui,/item\.cls==="other"\?paint\[i\]:item\.cls/);
+ assert.doesNotMatch(ui,/item\.cls==="other"\?paint\[i\]:item\.cls/);
+ assert.match(ui,/item\.cls==="pool"\?"#3b82f6"/);
+ assert.match(ui,/item\.cls==="building"\?BUILDING_PRESENTATION_COLOR/);
  assert.match(science,/const DG_SENS_COLORS=\{green:"#22c55e",water:"#3b82f6",hard:"#64748b",bare:"#8b5a2b",building:"#475569",pool:"#0ea5e9",other:"#94a3b8"\}/);
  assert.doesNotMatch(ui,/\.delete\(other\)|areas\.other\s*=|record\.areas\s*=/);
 });
@@ -114,7 +115,7 @@ test('no new unclassified label is introduced and locked source area ledger is u
  assert.equal(Object.keys(lock.locked_files).length,51);
  assert.doesNotMatch(work,/Sınıflandırılamayan/);
  assert.match(exp,/nearestPresentationTypes\(features\)/);
- assert.match(exp,/nearestPresentationTypes\(sens\?\.displayFeatures\)/);
+ assert.doesNotMatch(exp,/const nearest=nearestPresentationTypes\(sens\?\.displayFeatures\)/);
  assert.doesNotMatch(work,/rec\.corrections\s*=|record\.areas\s*=|rec\.acceptedResult\s*=/);
  assert.doesNotMatch(exp,/dgSensAccept\(|dgSensSave\(|record\.areas\s*=/);
 });
