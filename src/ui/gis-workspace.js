@@ -480,6 +480,25 @@
    water.style?.setProperty?.("--dg-ux-surface-color","#3b82f6");
   }
  }
+ function syncWaterStatusSummary(){
+  const state=window.DG_LC_SENS?.state,rec=state?.record;
+  if(!rec||state.rawView)return;
+  const areas=state.editing?state.partsMemo?.areas:(rec.acceptedResult?.areas||state.partsMemo?.areas);
+  const combined=waterPresentationAreas(areas);
+  if(!combined||!combined.total)return;
+  const label=key=>key==="water"?"Su":(window.DG_SURFACE_REVIEW?.types?.[key]?.label||key);
+  const keys=Object.keys(areas).filter(k=>k!=="pool");
+  if(Number(areas.pool||0)>0&&!keys.includes("water"))keys.push("water");
+  const ha=value=>(Number(value||0)/10000).toFixed(3);
+  const summary=(state.editing?"Önizleme":"Kayıtlı sonuç")+" · "+
+   keys.filter(k=>Number(k==="water"?combined.water:areas[k])>0)
+    .map(k=>label(k)+": "+ha(k==="water"?combined.water:areas[k])+" ha").join(" · ");
+  const node=typeof document.querySelector==="function"?document.querySelector("#dgSensSummary"):null;
+  if(node&&node.textContent!==summary)node.textContent=summary;
+  const counter=typeof document.querySelector==="function"?document.querySelector("#dgSensCnt-water"):null;
+  const display=String(rec.sens?.water??50)+" · "+ha(combined.water)+" ha";
+  if(counter&&counter.textContent!==display)counter.textContent=display;
+ }
  function normalizeWaterText(root){
   if(!root||typeof document.createTreeWalker!=="function")return;
   const walk=document.createTreeWalker(root,4); // text nodes only, keep inputs/buttons
@@ -542,6 +561,7 @@
   syncWaterPopup();
   syncSurfaceReport();
   syncWaterSurfaceRows();
+  syncWaterStatusSummary();
   syncSliderPaint();
   syncGroupLayout();
   syncSpecies();
