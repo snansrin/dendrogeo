@@ -112,6 +112,7 @@
    quick.before(choice);
   }
   quick.hidden=false;choice.hidden=false;
+  const base=$("pngBg");if(base&&base.value!==choice.value)base.value=choice.value;
  }
  function syncPark(){
   const bar=$("surfaceMenuBar");
