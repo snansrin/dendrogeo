@@ -341,6 +341,8 @@
   const rows=[...host.querySelectorAll(":scope > .dg-surface-stat")];
   if(!rows.length||!rows[0]?.before)return;
   const panel=document.createElement("div");panel.className="dg-ux-surface-rows";
+  panel.setAttribute?.("role","group");
+  panel.setAttribute?.("aria-label","Yüzey örtüsü sınıfları ve alanları");
   rows[0].before(panel);
   const types=window.DG_SURFACE_REVIEW?.types||{};
   const icons={green:"🌿",water:"💧",hard:"🧱",building:"🏢",pool:"💦",bare:"🟫",other:"⬜"};
@@ -379,7 +381,10 @@
  function syncSurfaceReport(){
   const state=window.DG_LC_SENS?.state;
   const host=$("landCoverReport");
-  if(!host||!state?.record)return;
+  if(!host)return;
+  // Initial WorldCover report is created before the surface review record.
+  // It must use the SAME visual rows as the later reviewed preview.
+  if(!state?.record){styleSurfacePreview(host);return;}
   if(state.rawView){
    const original=state.baselineReport;
    if(typeof original==="string"&&original&&host.innerHTML!==original)
