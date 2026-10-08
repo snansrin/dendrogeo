@@ -361,3 +361,22 @@ test('water presentation calculates correct combined area, share and leaves sour
  assert.equal(result.total,500000);
  assert.equal(result.pct,25.2);
 });
+
+test('surface status and water sensitivity count show exact pool-inclusive water totals',()=>{
+ const work=load('src/ui/gis-workspace.js');
+ const areas={green:250000,water:120000,pool:5000,hard:125000};
+ const summary={textContent:''},counter={textContent:''};
+ const doc={readyState:'loading',addEventListener(){},getElementById(){return null;},
+  querySelector:q=>q==='#dgSensSummary'?summary:q==='#dgSensCnt-water'?counter:null};
+ const window={DG_LC_SENS:{state:{editing:true,rawView:false,partsMemo:{areas},
+  record:{sens:{water:50}}}},
+  DG_SURFACE_REVIEW:{types:{green:{label:'Yeşil alan'},water:{label:'Su'},hard:{label:'Sert zemin'}}}};
+ const sandbox={window,document:doc,setTimeout,clearTimeout,console};
+ vm.runInNewContext(work,sandbox);
+ window.DG_GIS_WORKSPACE_UI.sync();
+ assert.equal(counter.textContent,'50 · 12.500 ha');
+ assert.match(summary.textContent,/Su: 12\.500 ha/);
+ assert.doesNotMatch(summary.textContent,/Havuz|pool/i);
+ assert.equal(areas.water,120000);
+ assert.equal(areas.pool,5000,'legacy evidence remains separate in data');
+});
