@@ -59,3 +59,57 @@ test('mobile GIS stylesheet keeps notifications visible and the analysis usable 
  assert.match(style,/bottom:calc\(12px \+ env\(safe-area-inset-bottom\)\)!important/);
  assert.match(style,/#v-map #lcSens #dgSensSummary\{display:none\}/);
 });
+
+
+test('reviewed result uses the source bar color, native-row labels and preserves its original measurement',()=>{
+ const colors={};const style={setProperty:(key,value)=>{colors[key]=value;}};
+ const label={textContent:'Yeşil alan',prepend(node){this.textContent=node.text+this.textContent;}};
+ const metric={textContent:'21.352 ha · %42.7',append(node){this.textContent+=node.textContent;}};
+ const fill={style:{backgroundColor:'rgb(34, 197, 94)'}};
+ const row={
+  before(panel){this.panel=panel;},
+  style,
+  querySelector(sel){
+   if(sel===':scope > span')return label;
+   if(sel===':scope > b')return metric;
+   if(sel===':scope > .dg-surface-track > i')return fill;
+   return null;
+  }
+ };
+ const slider={style:{setProperty:(key,value)=>{colors['slider:'+key]=value;}}};
+ const host={
+  innerHTML:'<b>Güncel yüzey önizlemesi</b>',wrapped:false,
+  querySelectorAll(sel){
+   if(sel===':scope > details.dg-sens-details')return[];
+   if(sel===':scope > .dg-surface-stat')return this.wrapped?[]:[row];
+   return[];
+  }
+ };
+ const document={
+  readyState:'loading',
+  createElement:tag=>tag==='div'?{className:'',append(){host.wrapped=true;}}:{className:'',textContent:''},
+  createTextNode:text=>({text}),
+  getElementById:id=>id==='landCoverReport'?host:id==='dgSensRange-green'?slider:null,
+  addEventListener:()=>{},querySelector:()=>null
+ };
+ const sandbox={document,window:{DG_LC_SENS:{state:{record:{},rawView:false}},DG_SURFACE_REVIEW:{types:{green:{label:'Yeşil alan'}}}},console,setTimeout,clearTimeout};
+ vm.runInNewContext(load('src/ui/gis-workspace.js'),sandbox);
+ sandbox.window.DG_GIS_WORKSPACE_UI.sync();
+ assert.equal(label.textContent,'🌿 Yeşil alan');
+ assert.equal(metric.textContent,'21.352 ha · %42.7');
+ assert.equal(colors['--dg-ux-surface-color'],'rgb(34, 197, 94)');
+ assert.equal(colors['slider:--dg-ux-slider-color'],'rgb(34, 197, 94)');
+ assert.equal(row.panel.className,'dg-ux-surface-rows');
+});
+
+test('preview bars match the raw WorldCover row typography, geometry and class-specific slider colors',()=>{
+ const css=load('css/gis-workspace.css');
+ assert.match(css,/\.dg-ux-surface-rows>\.dg-surface-stat\s*\{[\s\S]*?grid-template-columns:106px minmax\(0,1fr\) 132px/);
+ assert.match(css,/\.dg-surface-track\s*\{[\s\S]*?height:16px/);
+ assert.match(css,/font:700 \.75rem\/1\.45 var\(--f-ui\)/);
+ for(const [cls,color] of Object.entries({green:'#22c55e',water:'#3b82f6',hard:'#64748b',bare:'#8b5a2b'})){
+  assert.ok(css.includes('input.dg-sens-slider#dgSensRange-'+cls));
+  assert.ok(css.includes('accent-color:var(--dg-ux-slider-color,'+color+')'));
+ }
+ assert.match(css,/@media\(max-width:330px\)/);
+});
