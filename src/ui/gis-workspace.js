@@ -407,6 +407,10 @@
    "Göreli NDVI açık · "+tiers.count+"/"+tiers.eligible+" uygun hücre · Seyrek "+counts.sparse+" / Orta "+counts.moderate+" / Yoğun "+counts.dense+" · eşikler "+cut:
    "Göreli NDVI: uygun veri bekleniyor (hücre başına ≥3 gözlem, en az 9 hücre).";
   txt(badge,description);
+  // Keep already-computed display polygons above the base/land-cover canvas,
+  // otherwise valid NDVI is described in the report but hidden on the map.
+  if(tiers?.count>=9&&state.vegetationLayer?.eachLayer)
+   state.vegetationLayer.eachLayer(layer=>layer.bringToFront?.());
  }
  function syncSliderPaint(){
   const sliders=$("lcSens")?.querySelectorAll?.('input.dg-sens-slider[id^="dgSensRange-"]')||[];
@@ -449,7 +453,10 @@
   document.addEventListener("click",e=>{
    if(!e.target?.closest?.('button[onclick*="dgSensToggleVegetation"]'))return;
    const state=window.DG_LC_SENS?.state;
-   if(state&&!state.vegetationView&&state.focus&&state.focus!=="green"&&typeof dgSensFocus==="function")dgSensFocus(null);
+   if(state&&!state.vegetationView){
+    if(state.focus&&state.focus!=="green"&&typeof dgSensFocus==="function")dgSensFocus(null);
+    if(state.showCand===false&&typeof dgSensToggleCand==="function")dgSensToggleCand(true);
+   }
   },true);
   sync();
  }
