@@ -501,3 +501,115 @@
 @media (prefers-reduced-motion:reduce){
   #v-map #surfaceMenuBar>.dg-editor-menu>summary{transition:none}
 }
+
+/* 2026-10-08 · Unified surface analysis and mobile output QA.
+ * Display-only rules: no scientific values, palette or control semantics change. */
+#v-map, #v-map #parkInfo, #v-map #landCoverReport,
+#v-map #lcSens, #v-map #liveAnalysis{
+  box-sizing:border-box;min-width:0;max-width:100%;
+}
+#v-map #parkInfo *, #v-map #lcSens *, #v-map #landCoverReport *,
+#v-map #liveAnalysis *{box-sizing:border-box;min-width:0}
+#v-map #parkInfo #parkSurfaceAction .dg-png-sub,
+#v-map #parkInfo #parkSurfaceAction>.dg-png-sub:last-child,
+#v-map #landCoverReport, #v-map #lcSens .dg-sens-hint{
+  max-width:100%;width:auto;white-space:normal;
+  overflow-wrap:anywhere;word-break:normal;line-height:1.55;
+}
+#v-map #parkInfo #parkSurfaceAction>.dg-png-sub:last-child{
+  flex-basis:100%;min-width:0;max-width:100%;
+}
+#v-map #landCoverReport{
+  border:1px solid var(--line);border-radius:12px;
+  background:var(--surface);padding:15px;
+}
+#v-map #landCoverReport>b:first-child{
+  display:block;margin:0 0 11px;
+  font:700 .93rem/1.4 var(--f-ui);color:var(--ink);
+}
+#v-map #landCoverReport>.dg-surface-stat{
+  display:grid;grid-template-columns:minmax(0,1fr) auto;
+  align-items:center;gap:5px 12px;
+  margin:0;padding:12px 8px;border-bottom:1px solid var(--line);
+}
+#v-map #landCoverReport>.dg-surface-stat:nth-of-type(even){
+  background:color-mix(in srgb,var(--tint) 24%,transparent);
+  border-radius:8px;
+}
+#v-map #landCoverReport>.dg-surface-stat>span{
+  min-width:0;overflow-wrap:anywhere;font-size:.82rem;font-weight:650;
+}
+#v-map #landCoverReport>.dg-surface-stat>b{
+  min-width:0;font-size:.79rem;white-space:normal;
+  text-align:right;overflow-wrap:anywhere;
+}
+#v-map #landCoverReport>.dg-surface-stat>.dg-surface-track{
+  grid-column:1/-1;width:100%;min-width:0;margin:2px 0 0;
+}
+#v-map.surface-review-active #landCoverReport>details.dg-sens-details{
+  display:none!important; /* Raw summary is shown via the existing 'Ham analizi göster' button, not twice. */
+}
+#v-map #lcSens .dg-sens-actions{
+  display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;
+  align-items:stretch;
+}
+#v-map #lcSens .dg-sens-actions>.dg-png-btn{
+  width:100%;min-width:0;min-height:44px;
+  text-align:center;justify-content:center;
+  overflow-wrap:anywhere;white-space:normal;
+}
+#v-map #liveAnalysis .dg-ux-group-summary{
+  display:flex!important;flex-wrap:wrap;gap:8px 13px;
+  justify-content:flex-start!important;align-items:center;
+}
+#v-map #liveAnalysis .dg-ux-group-summary>span{
+  white-space:normal;overflow-wrap:anywhere;flex:0 1 auto;
+}
+#v-map #liveAnalysis .dg-ux-species-row>div:first-child{
+  display:grid!important;grid-template-columns:minmax(0,1fr) auto;
+  gap:8px;align-items:start;
+}
+#v-map #liveAnalysis .dg-ux-species-row>div:first-child>span:first-child{
+  overflow-wrap:anywhere;line-height:1.4;
+}
+/* Toast messages must be the topmost visible region, including on iOS Safari. */
+#toastWrap{
+  z-index:2147483000!important;
+  top:max(12px,env(safe-area-inset-top) + 12px)!important;
+  right:max(10px,env(safe-area-inset-right) + 10px)!important;
+  max-width:min(380px,calc(100vw - 20px))!important;
+  width:max-content;box-sizing:border-box;
+}
+#toastWrap .toast{
+  width:100%;max-width:100%;min-width:0;box-sizing:border-box;
+  overflow-wrap:anywhere;white-space:normal;
+}
+@media(max-width:700px){
+  #toastWrap{left:10px!important;right:10px!important;width:auto!important;max-width:calc(100vw - 20px)!important}
+  #v-map #parkInfo #parkSurfaceAction .dg-png-sub,
+  #v-map #parkInfo #parkSurfaceAction>.dg-png-sub:last-child{
+    display:block;width:100%;min-width:0;max-width:100%;
+    white-space:normal;overflow-wrap:anywhere;
+  }
+  #v-map #landCoverReport{padding:11px}
+  #v-map #landCoverReport>.dg-surface-stat{
+    grid-template-columns:minmax(0,1fr) auto;
+    gap:5px 8px;padding:10px 5px;
+  }
+  #v-map #lcSens .dg-sens-actions{
+    grid-template-columns:repeat(2,minmax(0,1fr));
+  }
+  #v-map #lcSens .dg-sens-actions>.dg-png-btn:last-child{
+    grid-column:1/-1;
+  }
+  #v-map #liveAnalysis .grid.g4{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+  #v-map #liveAnalysis .shead{align-items:flex-start}
+}
+@media(max-width:360px){
+  #v-map #lcSens .dg-sens-actions{grid-template-columns:minmax(0,1fr)}
+  #v-map #lcSens .dg-sens-actions>.dg-png-btn:last-child{grid-column:auto}
+  #v-map #landCoverReport>.dg-surface-stat{
+    grid-template-columns:minmax(0,1fr);
+  }
+  #v-map #landCoverReport>.dg-surface-stat>b{text-align:left}
+}
