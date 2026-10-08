@@ -16,10 +16,17 @@ const head=load('partials/head.html');
 const qa=load('.github/workflows/gis-three-park-qa.yml');
 
 function literal(source,name){
- const regex=new RegExp('const '+name+'\\s*=\\s*([\\s\\S]*?);(?=\\s*(?:\\n|\\/|$))');
- const match=source.match(regex);
+ // Object constants may contain prose comments with semicolons. Stop at the
+ // real closing "};", not at a semicolon inside a documentation comment.
+ const match=source.match(new RegExp('const\\s+'+name+'\\s*=\\s*'));
  assert.ok(match,'Source constant not found: '+name);
- const value=vm.runInNewContext('('+match[1]+')',{},{timeout:1000});
+ const remainder=source.slice(match.index+match[0].length);
+ let end;
+ if(remainder[0]==='{')end=remainder.indexOf('};');
+ else if(remainder[0]==='[')end=remainder.indexOf('];');
+ else end=remainder.indexOf(';');
+ assert.ok(end>0,'Malformed frozen constant: '+name);
+ const value=vm.runInNewContext('('+remainder.slice(0,end+1)+')',{},{timeout:1000});
  return JSON.parse(JSON.stringify(value));
 }
 test('approved surface contract references verified release and clear provenance limits',()=>{
@@ -91,7 +98,8 @@ test('water identity, automatic first analysis, failure behavior and uncertainty
 });
 test('verified loader, accepted snapshot and no forced changes to published reports',()=>{
  assert.ok(head.indexOf('osm-water-backup.js')>=0);
- assert.ok(head.indexOf('osm-water-backup.js')<head.indexOf('src/utils/lazylibs.js'));
+ assert.ok(head.indexOf('<script src="src/services/osm-water-backup.js')<
+   head.indexOf('<script src="src/utils/lazylibs.js'));
  assert.match(lazy,/vendor\/polygon-clipping-0\.15\.7\.js/);
  assert.match(review,/schema:"dendrogeo-surface\/2"/);
  assert.match(review,/scenes:rec\.profile\?\.scenes\|\|\[\]/);
