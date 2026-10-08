@@ -33,6 +33,8 @@
  function reportVisibility(phase){
   const report=$("landCoverReport");
   if(report)report.dataset.dgUnifiedPhase=phase;
+  const controls=$("lcSens");
+  if(controls)controls.dataset.dgUnifiedPhase=phase;
  }
  function validSurface(){
   const s=window.DG_LC_SENS?.state;
