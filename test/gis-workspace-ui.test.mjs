@@ -35,7 +35,9 @@ test('all original Grid, layer and PNG IDs and event handlers remain wired',()=>
  assert.match(ui,/panel\.append\(exportCard\)/);
  assert.match(ui,/section\.append\(pngFields\)/);
  assert.doesNotMatch(ui,/cloneNode\(/);
- assert.match(ui,/menu\.dataset\.menuOrder="45"/);
+ assert.doesNotMatch(ui,/menu\.dataset\.menuOrder="45"/);
+ assert.match(ui,/function keepSingleFileMenu\(bar\)/);
+ assert.match(ui,/const menu=coreFile/);
  assert.doesNotMatch(css,/#v-map #surfaceMenuBar \.dg-ux-output-menu\s*\{\s*margin-left:auto/);
 });
 
