@@ -5,10 +5,9 @@
  * Bağımlılık: park-state.js'in WATER/IMP state'ine DEĞİL, yalnız kendi
  * OVERPASS_* durumuna dokunur. */
 
+// Global kapsamlı servisler; aynı altyapıya giden kumi takma adı kullanılmaz.
 const OVERPASS_URLS=[
-  "https://overpass.private.coffee/api/interpreter",
-  "https://overpass.kumi.systems/api/interpreter",
-  "https://overpass.openstreetmap.fr/api/interpreter",
+  "https://maps.mail.ru/osm/tools/overpass/api/interpreter",
   "https://overpass-api.de/api/interpreter",
   "https://lz4.overpass-api.de/api/interpreter",
   "https://z.overpass-api.de/api/interpreter"
@@ -61,9 +60,12 @@ async function overpassRun(query,label="OSM"){
         return x.index-y.index;
       });
 
-    const pool=ordered.length
-      ? ordered
-      : OVERPASS_URLS.map((url,index)=>({url,index,badUntil:0,lastOk:0}));
+    // Karantinadaki sunuculara her yeni sorguda yeniden bağlanmayın.
+    if(!ordered.length){
+      LAST_OVERPASS_ERROR=label+" · OSM sunucuları geçici olarak kullanılamıyor";
+      return null;
+    }
+    const pool=ordered;
 
     const deadline=Date.now()+(label==="park"?15000:20000);
     for(const item of pool){
@@ -99,9 +101,9 @@ async function overpassRun(query,label="OSM"){
 
         const status=res.status;
         LAST_OVERPASS_ERROR=label+" HTTP "+status+(res.ok?" · Eksik OSM yanıtı":"");
-        if(status===429){
+        if(status===429||status===406){
           OVERPASS_HEALTH.set(item.url,{lastOk:item.lastOk,badUntil:Date.now()+30000});
-          console.warn("Overpass 429:",item.url,"→ 30 sn karantina");
+          console.warn("Overpass "+status+":",item.url,"→ 30 sn karantina");
           continue;
         }
 

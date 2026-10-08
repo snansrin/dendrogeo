@@ -22,40 +22,49 @@ function authTab(t){
 const id="f"+x[0].toUpperCase()+x.slice(1);
 if($(id))$(id).style.display=(x===t?"block":"none");
 });
-const tsId=t==="login"?"tsLogin":t==="reg"?"tsReg":"tsReset";
-setTimeout(()=>{
-if(TS[tsId]){try{turnstile.reset(TS[tsId]);}catch(e){}}
-},120);
+DG_AUTH_TAB=t==="reg"?"reg":t==="reset"?"reset":"login";
+window._tsVisible=true;
+loadTurnstileScript();
+initTurnstile();
 }
 const TS = window.TS = {};
+let DG_AUTH_TAB="login";
 function loadTurnstileScript(){
- if(window._tsLoadStarted||typeof turnstile!=="undefined")return;
+ if(typeof turnstile!=="undefined"){initTurnstile();return;}
+ if(window._tsLoadStarted)return;
  window._tsLoadStarted=true;
  const s=document.createElement("script");
- s.src="https://challenges.cloudflare.com/turnstile/v0/api.js";
+ s.src="https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit";
+ s.onload=initTurnstile;
+ s.onerror=()=>{window._tsLoadStarted=false;s.remove();};
  s.async=true;
  document.head.appendChild(s);
 }
 function scheduleTurnstile(){
  const el=document.getElementById("erisim");
- if(!el||!("IntersectionObserver" in window)){loadTurnstileScript();return;}
+ if(!el)return;
+ if(!("IntersectionObserver" in window)){window._tsVisible=true;loadTurnstileScript();return;}
  const io=new IntersectionObserver(es=>{
-  if(es.some(e=>e.isIntersecting)){loadTurnstileScript();io.disconnect();}
+  if(es.some(e=>e.isIntersecting)){window._tsVisible=true;loadTurnstileScript();io.disconnect();}
  },{rootMargin:"300px"});
  io.observe(el);
 }
 function initTurnstile(){
-if(typeof turnstile==="undefined"){setTimeout(initTurnstile,500);return;}
+if(!window._tsVisible||typeof turnstile==="undefined")return;
+const activeId=DG_AUTH_TAB==="reg"?"tsReg":DG_AUTH_TAB==="reset"?"tsReset":"tsLogin";
 ["tsLogin","tsReg","tsReset"].forEach(id=>{
-const el=$(id);
-if(el&&!TS[id]){
-try{TS[id]=turnstile.render(el,{sitekey:"0x4AAAAAAEkJfXuFvNgUrwUb",theme:"light"});}
-catch(e){console.log("TS render error",id,e);}
-}
+ if(id!==activeId&&TS[id]!==undefined){
+  try{turnstile.remove(TS[id]);delete TS[id];}catch(e){console.warn("TS remove error",id,e);}
+ }
 });
+const el=$(activeId);
+if(el&&TS[activeId]===undefined){
+ try{TS[activeId]=turnstile.render(el,{sitekey:"0x4AAAAAAEkJfXuFvNgUrwUb",theme:"light"});}
+ catch(e){console.warn("TS render error",activeId,e);}
 }
-if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",()=>{initTurnstile();scheduleTurnstile();});
-else{initTurnstile();scheduleTurnstile();}
+}
+if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",scheduleTurnstile);
+else scheduleTurnstile();
 function tsToken(id){
 if(typeof turnstile==="undefined"||!TS[id])return null;
 try{return turnstile.getResponse(TS[id])||null;}catch(e){return null;}

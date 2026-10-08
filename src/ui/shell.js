@@ -10,19 +10,8 @@ async function boot(){
         window._swRegistered = true;
 
         navigator.serviceWorker.register('./sw.js',{updateViaCache:'none'})
-        .then(reg=>{
-            // Force a single reload when a newly deployed worker takes control.
-            // This prevents the current page from continuing to execute the
-            // previous LULC bundle after a successful deployment.
-            if(navigator.serviceWorker.controller){
-                navigator.serviceWorker.addEventListener('controllerchange',()=>{
-                    if(sessionStorage.getItem('dg_sw_runtime_reload:'+dgRuntimeBuild())==='1')return;
-                    sessionStorage.setItem('dg_sw_runtime_reload:'+dgRuntimeBuild(),'1');
-                    location.reload();
-                },{once:true});
-            }
-            return reg.update();
-        })
+        // Worker güncellemesi açık park analizini yeniden başlatmamalı.
+        .then(reg=>reg.update())
         .catch(e=>console.log('SW registration failed:',e));
     }
     

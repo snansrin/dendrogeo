@@ -4,7 +4,7 @@
 // NOT: Senkronizasyon artık Ana Thread (Supabase JS SDK) tarafından yapılıyor
 // ============================================================
 
-const CACHE_VERSION = 'dendrogeo-sw-v2-r86';
+const CACHE_VERSION = 'dendrogeo-sw-v2-r91';
 
 /* İKİ AYRI STATİK CACHE — bu ayrım bilinçli ve önemli.
  *
@@ -149,10 +149,13 @@ self.addEventListener('fetch', event => {
         return;
     }
 
-    if (
-        url.hostname.includes('fonts.googleapis.com') ||
-        url.hostname.includes('challenges.cloudflare.com')
-    ) {
+    // Turnstile sürümleri CacheStorage'dan tekrar oynatılmamalı.
+    if (url.hostname === 'challenges.cloudflare.com') {
+        event.respondWith(networkOnly(request));
+        return;
+    }
+
+    if (url.hostname === 'fonts.googleapis.com') {
         event.respondWith(staleWhileRevalidate(request, RUNTIME));
         return;
     }
@@ -300,7 +303,10 @@ async function staleWhileRevalidate(request, cacheName) {
 
 async function networkOnly(request) {
     try {
-        return await fetch(request);
+        // Bozuk HTTP önbelleğindeki font yanıtını tekrar kullanmayın.
+        const options = new URL(request.url).hostname === 'fonts.gstatic.com'
+            ? { cache: 'reload' } : undefined;
+        return await fetch(request, options);
     } catch (err) {
         return new Response(JSON.stringify({ error: 'Offline' }), {
             status: 503, headers: { 'Content-Type': 'application/json' }
