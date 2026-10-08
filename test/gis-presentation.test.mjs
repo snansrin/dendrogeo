@@ -240,7 +240,7 @@ test('verified NDVI PNG uses 1240x1560 official layout and paints observed green
  assert.match(src,/for\(const poly of ndviPolys\)[\s\S]*?drawLeaflet\(g,pr,poly/);
  assert.match(src,/const counts=\{sparse:0,moderate:0,dense:0\}/);
  assert.match(src,/tiers\.cutoffs\.map\(n=>Number\(n\)\.toFixed\(3\)\)/);
- assert.match(src,/if\(tiers\.count<9\|\|!tiers\.cutoffs\)/);
+ assert.match(src,/if\(showNdvi&&\(tiers\.count<9\|\|!tiers\.cutoffs\)\)/);
  assert.match(src,/dgSensEditSummary\(rec\)/);
  assert.match(src,/dgSensFeatures\(\)\.length/);
  assert.match(src,/NDVI katmanı tek başına doğrulanmış harita sayılmaz/);
