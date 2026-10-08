@@ -102,11 +102,19 @@ test('reviewed result uses the source bar color, native-row labels and preserves
  assert.equal(row.panel.className,'dg-ux-surface-rows');
 });
 
-test('preview bars match the raw WorldCover row typography, geometry and class-specific slider colors',()=>{
+test('preview bars use original park card style, vivid locked class colors and compact responsive layout',()=>{
  const css=load('css/gis-workspace.css');
- assert.match(css,/\.dg-ux-surface-rows>\.dg-surface-stat\s*\{[\s\S]*?grid-template-columns:106px minmax\(0,1fr\) 132px/);
- assert.match(css,/\.dg-surface-track\s*\{[\s\S]*?height:16px/);
- assert.match(css,/font:700 \.75rem\/1\.45 var\(--f-ui\)/);
+ assert.match(css,/\/\* Reviewed surface-card parity · 2026-10-08/);
+ const latest=css.split('/* Reviewed surface-card parity · 2026-10-08.')[1];
+ assert.ok(latest,'final surface preview style should override historical narrow 3-column layout');
+ assert.match(latest,/grid-template-columns:minmax\(0,1fr\) auto/);
+ assert.match(latest,/grid-template-rows:auto 10px/);
+ assert.match(latest,/height:10px/);
+ assert.match(latest,/border-left:4px solid var\(--dg-ux-surface-color,#94a3b8\)/);
+ assert.match(latest,/background:var\(--dg-ux-surface-color,#94a3b8\)!important/);
+ assert.match(latest,/font:700 \.78rem\/1\.4 var\(--f-ui\)/);
+ assert.match(latest,/@media\(max-width:430px\)/);
+ assert.match(latest,/@media\(max-width:330px\)/);
  for(const [cls,color] of Object.entries({green:'#22c55e',water:'#3b82f6',hard:'#64748b',bare:'#8b5a2b'})){
   assert.ok(css.includes('input.dg-sens-slider#dgSensRange-'+cls));
   assert.ok(css.includes('accent-color:var(--dg-ux-slider-color,'+color+')'));
@@ -117,6 +125,50 @@ test('preview bars match the raw WorldCover row typography, geometry and class-s
 });
 
 
+
+test('initial WorldCover surface analysis and reviewed preview receive identical bar styling',()=>{
+ const make=record=>{
+  const colors={};
+  const row={
+   before(panel){this.panel=panel;},
+   style:{setProperty:(key,value)=>{colors[key]=value;}},
+   querySelector(sel){
+    if(sel===':scope > span')return this.label;
+    if(sel===':scope > b')return this.metric;
+    if(sel===':scope > .dg-surface-track > i')return this.fill;
+    return null;
+   },
+   label:{textContent:'Sert zemin',prepend(n){this.textContent=n.text+this.textContent;}},
+   metric:{textContent:'17.922 ha · %35.8',append(n){this.textContent+=n.textContent;}},
+   fill:{style:{backgroundColor:'rgb(100, 116, 139)'}}
+  };
+  let moved=false;
+  const host={querySelectorAll(sel){
+   if(sel===':scope > details.dg-sens-details')return[];
+   if(sel===':scope > .dg-surface-stat')return moved?[]:[row];
+   return[];
+  }};
+  const document={readyState:'loading',addEventListener(){},
+   createElement:tag=>tag==='div'?{className:'',setAttribute(){},append(){moved=true;}}:{className:'',textContent:''},
+   createTextNode:text=>({text}),
+   getElementById:id=>id==='landCoverReport'?host:null,
+   querySelector:()=>null};
+  const sandbox={window:{DG_LC_SENS:{state:{record,rawView:false}},DG_SURFACE_REVIEW:{types:{hard:{label:'Sert zemin'}}}},
+   document,console,setTimeout,clearTimeout};
+  vm.runInNewContext(load('src/ui/gis-workspace.js'),sandbox);
+  sandbox.window.DG_GIS_WORKSPACE_UI.sync();
+  return {row,moved,colors};
+ };
+ const initial=make(null),reviewed=make({});
+ assert.equal(initial.moved,true,'WorldCover report should be styled before campaign is initialized');
+ assert.equal(reviewed.moved,true,'same styled row in reviewed result');
+ for(const part of [initial,reviewed]){
+  assert.equal(part.row.label.textContent,'🧱 Sert zemin');
+  assert.equal(part.row.metric.textContent,'17.922 ha · %35.8');
+  assert.equal(part.colors['--dg-ux-surface-color'],'rgb(100, 116, 139)');
+  assert.equal(part.row.panel.className,'dg-ux-surface-rows');
+ }
+});
 test('distance measurement captures polygon clicks before editor popup even in review and park modes',()=>{
  const handlers={},events={},statuses=[],labels=[];
  const mapContainer={
