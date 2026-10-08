@@ -78,7 +78,9 @@ test('road footprints use real path buffers and provenance, never full 100m² ra
  assert.ok(f.every(x=>x.type==='hard'&&x.method==='osm-boundary'&&x.source==='osm-grid-road-exact-footprint'));
  assert.ok(f.every(x=>x.geometry.type==='MultiPolygon'&&x.geometry.coordinates.length>0));
  assert.ok(f.every(x=>!Object.hasOwn(x,'classKey')&&!Object.hasOwn(x,'to')));
- assert.ok(h.logs.includes('union')&&h.logs.includes('intersection')&&h.logs.includes('difference'));
+ assert.ok(h.logs.includes('union')&&h.logs.includes('intersection'));
+ // Empty mocked blockers do not need a difference operation. The real
+ // water/building subtraction is checked by the integration test below.
 });
 test('hard-road patches do not overwrite accepted scientific snapshot, water or building and are idempotent',async()=>{
  const h=harness(),oldAccepted=structuredClone(h.rec.acceptedResult),oldWater=h.rec.objectFeatures[0],oldBuilding=h.rec.objectFeatures[1];
