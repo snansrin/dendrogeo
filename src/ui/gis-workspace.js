@@ -259,8 +259,29 @@
   note.id="dgUxMapStatus";note.setAttribute("role","status");note.setAttribute("aria-live","polite");
   section.append(note);body.append(section);
  }
+ // The locked core generates both source and edited summaries in one DOM.
+ // Present exactly one at a time; its calculations, records and raw source stay intact.
+ function syncSurfaceReport(){
+  const state=window.DG_LC_SENS?.state;
+  const host=$("landCoverReport");
+  if(!host||!state?.record)return;
+  if(state.rawView){
+   const original=state.baselineReport;
+   if(typeof original==="string"&&original&&host.innerHTML!==original)
+    host.innerHTML=original;
+  }else{
+   // Historical raw report remains in state.baselineReport and in 'Ham analizi göster'.
+   host.querySelectorAll(":scope > details.dg-sens-details").forEach(n=>n.remove());
+  }
+  const evidence=$("dgSensEvidenceDetails");
+  if(evidence&&!evidence.dataset.dgUxInitialized){
+   evidence.dataset.dgUxInitialized="1";
+   evidence.open=false; // QA remains available on demand; never lost.
+  }
+ }
  function sync(){
   syncPark();
+  syncSurfaceReport();
   syncGroupLayout();
   syncSpecies();
   syncMapTools();
@@ -273,7 +294,9 @@
   if(!bar||!$("parkInfo")||!$("liveAnalysis"))return;
   if(typeof MutationObserver!=="function")return; // test/no-DOM fallback; browsers provide this API.
   observer=new MutationObserver(enqueue);
-  for(const id of ["surfaceMenuBar","parkInfo","liveAnalysis"])observer.observe($(id),{childList:true,subtree:true});
+  for(const id of ["surfaceMenuBar","parkInfo","liveAnalysis","landCoverReport","lcSens"]){
+   const node=$(id);if(node)observer.observe(node,{childList:true,subtree:true});
+  }
   bar.addEventListener("toggle",event=>{
    if(event.target?.matches?.(":scope > .dg-editor-menu")&&event.target.open)openMenu(event.target);
   },true);
