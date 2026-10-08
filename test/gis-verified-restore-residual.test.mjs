@@ -53,8 +53,8 @@ test('verified map uses all exact surface geometries even when no display polygo
  const before=JSON.stringify(h.state.displayFeatures);
  assert.equal(await h.download(),true);
  assert.equal(h.requested.length,1,'locked surface display result is read without mutation');
- assert.deepEqual(h.fills.slice(0,3).map(x=>x.color),['#22c55e','#334155','#94a3b8']);
- assert.equal(h.fills[2].alpha,.18,'unclassified residual is visible but neutral');
+ assert.deepEqual(h.fills.slice(0,3).map(x=>x.color),['#22c55e','#334155','#22c55e']);
+ assert.equal(h.fills[2].alpha,1,'visual neighbour fill has no gray seams');
  assert.equal(h.downloads.filter(x=>x.endsWith('.png')).length,1);
  assert.equal(JSON.stringify(h.state.displayFeatures),before);
 });
@@ -72,11 +72,11 @@ test('verified map refuses missing geospatial results, rather than exporting a b
  assert.equal(h.downloads.length,0);
  assert.match(h.notice.join(' '),/geometrisi.*hazır değil|yüzey.*geometri/i);
 });
-test('unclassified class is not turned into green/hard/water and remains in summary for QA',()=>{
+test('raw scientific other class is unchanged while map borrows nearest presentation color',()=>{
  const ui=read('src/ui/gis-workspace.js'),science=read('src/ui/lc-sens.js');
- assert.match(ui,/label\.textContent="Sınıflandırılamayan"/);
- assert.match(ui,/item\.cls==="other"&&item\.poly\?\.options\?\.fillOpacity!==\.16/);
- assert.match(ui,/item\.poly\.setStyle\?\.\(\{fillOpacity:\.16\}\)/);
+ assert.match(ui,/if\(label\?\.textContent\?\.trim\(\)==="Diğer"\)\{row\.remove\(\);continue;\}/);
+ assert.match(ui,/const paint=typeof nearest==="function"\?nearest\(state\?\.displayFeatures\):\[\]/);
+ assert.match(ui,/item\.cls==="other"\?paint\[i\]:item\.cls/);
  assert.match(science,/const DG_SENS_COLORS=\{green:"#22c55e",water:"#3b82f6",hard:"#64748b",bare:"#8b5a2b",building:"#475569",pool:"#0ea5e9",other:"#94a3b8"\}/);
  assert.doesNotMatch(ui,/\.delete\(other\)|areas\.other\s*=|record\.areas\s*=/);
 });
@@ -85,4 +85,24 @@ test('continuous drawing bypasses expensive report and NDVI refresh while editin
  assert.match(ui,/if\(state\?\.draw\|\|state\?\.busy\|\|state\?\.saving\|\|state\?\.mergeBusy\)\{\s*syncQuickBoundary\(\);\s*return;/);
  assert.match(ui,/state\.busy\|\|state\.saving\|\|state\.mergeBusy\|\|state\.exporting/);
  assert.doesNotMatch(ui,/dgSensRepartition\(|dgSurfacePrepare\(|dgSensScan\(/);
+});
+
+test('unknown patch inherits the actual nearest confirmed class, not a gray new category',()=>{
+ const b=(left,bottom,right,top)=>[[[
+  [left,bottom],[right,bottom],[right,top],[left,top],[left,bottom]
+ ]]];
+ const list=[
+  {properties:{class:'green'},geometry:{type:'MultiPolygon',coordinates:b(31,39,31.01,39.01)}},
+  {properties:{class:'building'},geometry:{type:'MultiPolygon',coordinates:b(32,40,32.01,40.01)}},
+  {properties:{class:'other'},geometry:{type:'MultiPolygon',coordinates:b(32.011,40,32.013,40.003)}},
+  {properties:{class:'other'},geometry:{type:'MultiPolygon',coordinates:b(31.011,39,31.013,39.003)}}
+ ];
+ const h=verifiedHarness();
+ const fn=vm.runInNewContext('window.DG_GIS_PNG_EXPORT.nearestPresentationTypes',(()=>{
+  const shell={window:{},document:{getElementById(){return null;},addEventListener(){}},console,setTimeout,clearTimeout,Math,Date};
+  vm.runInNewContext(read('src/ui/gis-export.js'),shell);return shell;
+ })());
+ const original=JSON.stringify(list);
+ assert.deepEqual(Array.from(fn(list)),['green','building','building','green']);
+ assert.equal(JSON.stringify(list),original,'never write guessed classes to original feature objects');
 });
