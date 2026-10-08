@@ -189,6 +189,8 @@ async function dgSensMount(hostId){
  const partitioned=await dgSensRepartition();if(epoch!==DG_SENS.epoch||!partitioned)return;if(rec.acceptedResult&&!DG_SENS.editing)dgSensRenderAccepted();
  const pending=document.getElementById("surfacePendingTools");if(pending)pending.style.display="none";
  host.scrollIntoView({block:"nearest"});
+ // The initial analysis also discovers water; Tara is not a prerequisite.
+ if(rec.useObjects!==false&&!(rec.objectFeatures||[]).some(f=>f.type==="water"||f.type==="pool"))void dgSensAutoWaterOnMount(rec,epoch);
 }
 function dgSensParts(){
  const cells=dgSensCells(),geometry=DG_SENS.geometry,park=DG_SENS.parkGeometry,rec=DG_SENS.record;
@@ -350,11 +352,22 @@ function dgSensUpdateSummary(){
 function dgSensUpdateStatus(){const el=document.getElementById("dgSensStatus");if(el)el.textContent=DG_SENS.status||(DG_SENS.mergeBusy?_tvs("Çizim güncelleniyor…"):_tvs(DG_SENS.record?.acceptedAt&&!DG_SENS.editing?"Kayıtlı sonuç korunuyor. Kaydırıcıyı değiştirerek yeni önizleme yapabilirsiniz.":"Önizleme henüz hesap kaydına yazılmadı."));}
 /* Scan refreshes water footprints; map object picking is not required.
  * Manual boundaries and published snapshots remain untouched. */
-async function dgSensAutoWaterOnScan(rec,epoch){
+async function dgSensAutoWaterOnMount(rec,epoch){
+ const n=await dgSensAutoWaterOnScan(rec,epoch,true);
+ if(epoch!==DG_SENS.epoch||DG_SENS.record!==rec||DG_SENS.busy)return;
+ if(n){
+  DG_SENS.status=_tvs("OSM su/havuz sınırı otomatik uygulandı. Ham raster korunuyor; kıyıyı doğrulayıp sonucu kabul edin.");
+  await dgSensSave();
+ }else if(!(rec.objectFeatures||[]).some(f=>f.type==="water"||f.type==="pool")){
+  DG_SENS.status=_tvs("OSM su geometrisine erişilemedi. Bu 10 m raster önizlemesidir; kıyı sınırını doğrulanmış kabul etmeyin. Yeniden Tara'yı deneyin.");
+ }
+ dgSensUpdateStatus();
+}
+async function dgSensAutoWaterOnScan(rec,epoch,fromMount=false){
  if(rec.useObjects===false||typeof dgLcOsmData!=="function"||typeof dgSurfaceObjects!=="function")return 0;
  const bbox=dgLcBboxFromGeometry(PARK_POLY,PARK_HOLES||[]);
  const data=await dgLcOsmData(bbox).catch(()=>null);
- if(!data?.elements?.length||epoch!==DG_SENS.epoch||DG_SENS.record!==rec)return 0;
+ if(!data?.elements?.length||epoch!==DG_SENS.epoch||DG_SENS.record!==rec||(fromMount&&(DG_SENS.busy||DG_SENS.saving||DG_SENS.exporting)))return 0;
  const objects=dgSurfaceObjects(data.elements,DG_SENS.epsg).filter(f=>(f.type==="water"||f.type==="pool")&&window.DG_SURFACE_REVIEW.validFeature(f));
  if(!objects.length)return 0;
  const ids=new Set(objects.map(f=>f.osmId));
@@ -493,6 +506,19 @@ async function dgSensAccept(){
 }
 function dgSensReset(){if(DG_SENS.rawView||DG_SENS.busy||DG_SENS.saving||!confirm(_tvs("Tüm kullanıcı düzeltmeleri silinsin mi? Ham raster korunur.")))return;DG_SENS.record.corrections={};DG_SENS.record.features=[];DG_SENS.record.brushHistory=[];dgSensDirty();dgSensRepartition().then(ok=>ok&&dgSensSave());}
 function dgSensFindObjectAt(latlng,elements=window.DG_SURFACE_OSM?.elements||[]){
+ // Retain access to already-validated OSM polygons during a network outage.
+ if(!elements.length&&DG_SENS.record?.objectFeatures?.length&&latlng){
+  const pt=dgLcUtmForward(latlng.lat,latlng.lng,DG_SENS.epsg);
+  for(const f of DG_SENS.record.objectFeatures){
+   if(!window.DG_SURFACE_REVIEW.validFeature(f))continue;
+   for(const poly of dgSurfaceFeatureGeometry(f,DG_SENS.epsg)){
+    const box=dgSurfaceBounds([poly]);
+    if(pt.x<box[0]||pt.x>box[2]||pt.y<box[1]||pt.y>box[3])continue;
+    if(dgGridPointDistance([pt.x,pt.y],[poly])>=0)return{type:f.type,geometry:f.geometry,osmId:f.osmId||"OSM"};
+   }
+  }
+ }
+
  if(!latlng||!Array.isArray(elements)||!DG_SENS.geometry||!DG_SENS.parkGeometry||typeof dgSurfaceObjects!=="function")return null;
  const point=dgLcUtmForward(latlng.lat,latlng.lng,DG_SENS.epsg),candidates=dgSurfaceObjects(elements,DG_SENS.epsg);let best=null;
  for(const feature of candidates){
@@ -513,7 +539,7 @@ function dgSensFindObjectAt(latlng,elements=window.DG_SURFACE_OSM?.elements||[])
 }
 function dgSensObjectPickStart(){
  if(DG_SENS.rawView||DG_SENS.busy||DG_SENS.saving||DG_SENS.exporting)return;
- const data=window.DG_SURFACE_OSM;if(!data||data.boundary!==JSON.stringify(PARK_POLY)){toast(_tvs("Bu park için güncel OSM sınırları bulunamadı. OSM verisini yükleyip yeniden deneyin."),"warn");return;}
+ const data=window.DG_SURFACE_OSM,stored=(DG_SENS.record?.objectFeatures||[]).length>0;if((!data||data.boundary!==JSON.stringify(PARK_POLY))&&!stored){toast(_tvs("OSM nesneleri henüz yüklenemedi. Su sınırı otomatik aranır; çevrimiçi olduğunuzda Yeniden Tara’yı deneyin."),"warn");return;}
  dgSensBrushStop();dgSensDrawCancel();dgSensObjectCancel();DG_SENS.objectPick=true;dgSensGuard(true);DG_SENS.status=_tvs("Sınırını seçeceğiniz OSM nesnesine dokunun.");
  map.on("click",dgSensObjectPickAt);dgSensRenderPaintTools();dgSensUpdateStatus();
 }
