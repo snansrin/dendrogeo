@@ -4,7 +4,7 @@
 // NOT: Senkronizasyon artık Ana Thread (Supabase JS SDK) tarafından yapılıyor
 // ============================================================
 
-const CACHE_VERSION = 'dendrogeo-sw-v2-r91';
+const CACHE_VERSION = 'dendrogeo-sw-v2-r92';
 
 /* İKİ AYRI STATİK CACHE — bu ayrım bilinçli ve önemli.
  *
@@ -65,7 +65,7 @@ const CORE_ASSETS = [
      * taşındı — global state, toast, landing beyni ve kabuk önyüklemesi.
      * Yükleme sırası index.html'de de aynıdır: state → toast → landing → shell. */
     '/src/ui/state.js', '/src/ui/toast.js', '/src/ui/landing.js', '/src/ui/shell.js',
-    '/css/park-panel.css','/css/ui-standard.css',
+    '/css/park-panel.css','/css/ui-standard.css','/css/gis-workspace.css',
     /* Üçüncü taraf kütüphaneler artık depoda (vendor/) — bkz. vendor/VERSIONS.md.
      * Aynı köken oldukları için SRI gerekmiyor ve çevrimdışı davranış
      * deterministik: CDN erişilemezse ya da CDN'de farklı bir sürüm
