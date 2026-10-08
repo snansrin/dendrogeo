@@ -1,5 +1,23 @@
 /* A publication consumes the immutable accepted result attached to its request. */
 export const SURFACE_CLASSES={green:{label:'Yeşil alan',color:'#22c55e'},hard:{label:'Sert zemin',color:'#64748b'},building:{label:'Bina',color:'#475569'},water:{label:'Su',color:'#3b82f6'},pool:{label:'Havuz / süs havuzu',color:'#0ea5e9'},bare:{label:'Çıplak zemin',color:'#8b5a2b'},other:{label:'Diğer',color:'#94a3b8'}};
+
+/* Report PRESENTATION only: water bodies and legacy pool geometries occupy
+ * one water row, without changing the validated immutable source snapshot.
+ * The original classes / areas / feature IDs remain available for QA. */
+export function presentationSurfaceClasses(classes){
+ const source=Array.isArray(classes)?classes:[];
+ const oldPool=source.find(c=>c?.key==='pool');
+ if(!oldPool)return source.slice();
+ const poolHa=Number(oldPool.ha)||0,poolPct=Number(oldPool.pct)||0;
+ let waterFound=false;
+ const out=source.filter(c=>c?.key!=='pool').map(c=>{
+  if(c.key!=='water')return {...c};
+  waterFound=true;
+  return {...c,label:'Su',ha:(Number(c.ha)||0)+poolHa,pct:(Number(c.pct)||0)+poolPct};
+ });
+ if(!waterFound)out.push({key:'water',label:'Su',ha:poolHa,pct:poolPct});
+ return out;
+}
 export function reviewedSurface(snapshot,parkId){
  if(!snapshot||snapshot.schema!=='dendrogeo-surface/2'||String(snapshot.parkId)!==String(parkId)||!Number.isFinite(Date.parse(snapshot.acceptedAt)))throw Error('Kayıtlı analiz kimliği geçersiz.');
  const areas=snapshot.areas,features=snapshot.features;

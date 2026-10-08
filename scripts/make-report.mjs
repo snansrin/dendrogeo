@@ -2,7 +2,7 @@
 import { reportRead } from './lib/report-reader.mjs';
 import {reportContext} from './lib/report-context.mjs';
 import { decodeReportContext } from './lib/report-context.mjs';
-import { reviewedSurface } from './surface-report.mjs';
+import { reviewedSurface, presentationSurfaceClasses } from './surface-report.mjs';
 /* make-report.mjs — DendroGeo Bilimsel Rapor Yayın Hattı (R1+R3, 2026-09-27)
  *
  * AMAÇ: bir park/proje için PAYLAŞILABİLİR, DEĞİŞMEZ (immutable), tez biçiminde
@@ -805,6 +805,7 @@ export function renderReport(snap, { id, hash, version = 1, meta = null }) {
   const doi = /^10\.\d{4,9}\/[-._;()/:A-Za-z0-9]+$/.test(String(M.doi || '')) ? String(M.doi) : null;
   const verTxt = String(version).includes('.') ? String(version) : version + '.0';
   const L = (snap.lulc && !snap.lulc.error) ? snap.lulc : null;
+  const visibleSurfaceClasses = presentationSurfaceClasses(L?.classes);
   const GQ = snap.geometry_qa || null;
   const GJ = (GQ && GQ.geom_json_bbox_ignored) || null;
   /* §2 saha sınırı kaynağı: GQ.source'a esc() tümüyle uygulanıyordu → <code>
@@ -976,12 +977,12 @@ export function renderReport(snap, { id, hash, version = 1, meta = null }) {
   const QA_WHY = qaWhy.join('; ');
 
   /* ---- Değerlendirme: yalnız veriden türeyen betimleme ---- */
-  const clsPct = (k) => { const c = ((L && L.classes) || []).find((x) => x.key === k); return c ? c.pct : null; };
+  const clsPct = (k) => { const c = visibleSurfaceClasses.find((x) => x.key === k); return c ? c.pct : null; };
   const distParts = [];
-  for (const [k, label] of [['green', 'yeşil alan'], ['hard', 'sert yüzey'], ['building','bina'], ['water', 'su'], ['pool','havuz / süs havuzu'], ['bare', 'açık/çıplak alan'], ['other', 'diğer']]) {
+  for (const [k, label] of [['green', 'yeşil alan'], ['hard', 'sert yüzey'], ['building','bina'], ['water', 'su'], ['bare', 'açık/çıplak alan'], ['other', 'diğer']]) {
     const v = clsPct(k); if (v != null && v > 0) distParts.push(`${label} %${trNum(v, 1)}`);
   }
-  const dominant = (((L && L.classes) || []).slice().sort((a, b) => b.pct - a.pct))[0] || null;
+  const dominant = (visibleSurfaceClasses.slice().sort((a, b) => b.pct - a.pct))[0] || null;
   const grpTot = {};
   for (const s of snap.species) grpTot[s.grp] = (grpTot[s.grp] || 0) + s.carbon_kg;
   const grpShares = Object.entries(grpTot).map(([g, c]) => `${grpTr(g)} türlerde %${trNum(100 * c / (t.carbon_kg || 1), 1)}`).join(', ');
@@ -1090,7 +1091,7 @@ export function renderReport(snap, { id, hash, version = 1, meta = null }) {
     ? ` (kaydedilen doğruluk: ${G.n_with_acc}/${G.n ?? NR} kayıt · ortalama ±${trNum(G.mean_acc_m, 1)} m)`
     : ` — ancak alıcı doğruluk değeri (accuracy_m) bu veri sürümünde kaydedilmediğinden GNSS hassasiyeti sayısal olarak beyan edilememektedir; konumsal doğrulama park poligonu üyelik testiyle sınırlıdır (§7)`;
   const photoTxt = (nPhoto === NR) ? 'zorunlu tutulmuş ve tüm kayıtlarda sağlanmıştır' : `kısmen sağlanmıştır (${nPhoto}/${NR} kayıt)`;
-  const lulcMethod = L?.accepted ? `<p><b>4.4 Kayıtlı analiz sonucu.</b> ${esc(fmtDateTr(L.accepted_at))} tarihinde kabul edilmiş sınıf alanları yayın isteğinden alınmıştır. Eski kayıt ayrıntılı geometri taşımadığından yeni harita üretilmemiştir. Bu yayın için uydu analizi yeniden çalıştırılmamıştır.</p>` : L?.review ? `<p><b>4.4 Kayıtlı analiz sonucu.</b> ${esc(fmtDateTr(L.review.acceptedAt))} tarihinde kabul edilen analiz, yayın isteğine sabitlenerek aktarılmıştır. Bina ve havuzlar ayrı sınıftır; OSM nesne sınırları ve kullanıcı çizimleri park sınırına kırpılmıştır. Sayısal değerler ve harita aynı kayıtlı geometriden gelir. Uydu verisinin 10/20 m çözünürlük sınırı ile harita geometrilerinin tarih ve doğruluk sınırlamaları geçerlidir; bu kayıt bağımsız saha doğrulaması sayılmaz.</p>` : L ? `<p><b>4.4 Arazi örtüsü sınıflandırması.</b> Arazi örtüsü sınıflandırması, park sınırı içerisinde mekânsal çözünürlüğü 10 m olan raster veri (${esc(dataset)}) ile gerçekleştirilmiştir. Sınıflandırma sonuçları park geometrisi ile kesiştirilerek değerlendirilmiş; sınır hücrelerinde alan ağırlıklı hesaplama uygulanmıştır${epsg ? ` (analiz projeksiyonu: ${esc(epsg)})` : ''}. Bulut/gölge gölgesinde kalan hücreler maskelenmiş ve sınıf toplamına dahil edilmemiştir${L.masked_ha > 0 ? ` (bu sürümde ${trNum(L.masked_ha, 2)} ha)` : ''}. Raster kapsama alanı ile park geometrisi alanı arasındaki bağıl fark %0,5 eşiğini aşarsa sonuç YAYINLANMAZ; bu sürümde fark %${trNum(deltaPct ?? 0, 3)} olarak ölçülmüştür (Çizelge 3).</p>` : '';
+  const lulcMethod = L?.accepted ? `<p><b>4.4 Kayıtlı analiz sonucu.</b> ${esc(fmtDateTr(L.accepted_at))} tarihinde kabul edilmiş sınıf alanları yayın isteğinden alınmıştır. Eski kayıt ayrıntılı geometri taşımadığından yeni harita üretilmemiştir. Bu yayın için uydu analizi yeniden çalıştırılmamıştır.</p>` : L?.review ? `<p><b>4.4 Kayıtlı analiz sonucu.</b> ${esc(fmtDateTr(L.review.acceptedAt))} tarihinde kabul edilen analiz, yayın isteğine sabitlenerek aktarılmıştır. Bina ayrı sınıftır; su yüzeyleri tek Su başlığında sunulur. OSM nesne sınırları ve kullanıcı çizimleri park sınırına kırpılmıştır. Sayısal değerler ve harita aynı kayıtlı geometriden gelir. Uydu verisinin 10/20 m çözünürlük sınırı ile harita geometrilerinin tarih ve doğruluk sınırlamaları geçerlidir; bu kayıt bağımsız saha doğrulaması sayılmaz.</p>` : L ? `<p><b>4.4 Arazi örtüsü sınıflandırması.</b> Arazi örtüsü sınıflandırması, park sınırı içerisinde mekânsal çözünürlüğü 10 m olan raster veri (${esc(dataset)}) ile gerçekleştirilmiştir. Sınıflandırma sonuçları park geometrisi ile kesiştirilerek değerlendirilmiş; sınır hücrelerinde alan ağırlıklı hesaplama uygulanmıştır${epsg ? ` (analiz projeksiyonu: ${esc(epsg)})` : ''}. Bulut/gölge gölgesinde kalan hücreler maskelenmiş ve sınıf toplamına dahil edilmemiştir${L.masked_ha > 0 ? ` (bu sürümde ${trNum(L.masked_ha, 2)} ha)` : ''}. Raster kapsama alanı ile park geometrisi alanı arasındaki bağıl fark %0,5 eşiğini aşarsa sonuç YAYINLANMAZ; bu sürümde fark %${trNum(deltaPct ?? 0, 3)} olarak ölçülmüştür (Çizelge 3).</p>` : '';
 
   return `<!doctype html>
 <html lang="tr">
@@ -1281,7 +1282,7 @@ ${snap.study ? `<div class="meta" aria-label="Akademik çalışma künyesi">${Ob
 
 <h2><span class="no">3</span>Veri Kaynakları</h2>
 ${L?.accepted ? `<p><b>3.1 Birincil veri.</b> ${esc(fmtDateTr(L.accepted_at))} tarihli kabul edilmiş yüzey alanları, kayıt sürümü ${esc(L.revision||"—")}.</p>` : L?.review ? `<p><b>3.1 Birincil veri.</b> Yayın isteğindeki kayıtlı analiz; kabul tarihi ${esc(fmtDateTr(L.review.acceptedAt))}. Kullanılan sahneler: ${esc((L.review.scenes||[]).filter(s=>s.usedCells>0).map(s=>s.datetime).join(", ")||"uydu taraması yok")}. Nesne sınırları: © OpenStreetMap contributors (ODbL) ve kullanıcı çizimleri. Kayıt geometrileri <a href="surface.geojson">GeoJSON</a> olarak indirilebilir.</p>` : `<p><b>3.1 Birincil veri.</b> ${esc(dataset)}: Sentinel-1 ve Sentinel-2 füzyonundan üretilmiş küresel arazi örtüsü ürünü; mekânsal çözünürlük 10 m; veri dönemi ${dataYear}; lisans CC BY 4.0. Erişim, STAC kataloğu (Planetary Computer) üzerinden park poligonunu kesen karolar için gerçekleştirilmiştir.</p>`}
-${L?.accepted ? `<p><b>3.2 Bütünleyici veri.</b> Bu eski kayıt sınıf alanlarını taşır; nesne geometrileri ve uydu sahne ayrıntıları kayıtlı değildir.</p>` : L?.review ? `<p><b>3.2 Bütünleyici veri.</b> OpenStreetMap bina, su, havuz ve açıkça tanımlanmış sert zemin sınırları ile kullanıcı çizimleri, kayıtlı analizde raster hücrelerini keserek ayrı yüzey alanları oluşturur. Çakışan çizimlerde son kullanıcı düzeltmesi önceliklidir. Harita tarihi, eksik nesneler ve konumsal doğruluk sonucu sınırlayabilir.</p>` : `<p><b>3.2 Bütünleyici veri.</b> OpenStreetMap (ODbL): park sınırı geometrisi ile su ve açıkça tanımlanmış sert yüzeylerin geometrik doğrulaması/iyileştirmesi amacıyla kullanılmıştır. <b>OSM verisi raster sınıflandırmanın yerine geçmez:</b> sınıf alanları birincil raster üründen hesaplanır; OSM yalnız sınır geometrisi ve bağımsız kontrol için kullanılır.</p>`}
+${L?.accepted ? `<p><b>3.2 Bütünleyici veri.</b> Bu eski kayıt sınıf alanlarını taşır; nesne geometrileri ve uydu sahne ayrıntıları kayıtlı değildir.</p>` : L?.review ? `<p><b>3.2 Bütünleyici veri.</b> OpenStreetMap bina, su ve açıkça tanımlanmış sert zemin sınırları ile kullanıcı çizimleri, kayıtlı analizde raster hücrelerini keserek ayrı yüzey alanları oluşturur. Çakışan çizimlerde son kullanıcı düzeltmesi önceliklidir. Harita tarihi, eksik nesneler ve konumsal doğruluk sonucu sınırlayabilir.</p>` : `<p><b>3.2 Bütünleyici veri.</b> OpenStreetMap (ODbL): park sınırı geometrisi ile su ve açıkça tanımlanmış sert yüzeylerin geometrik doğrulaması/iyileştirmesi amacıyla kullanılmıştır. <b>OSM verisi raster sınıflandırmanın yerine geçmez:</b> sınıf alanları birincil raster üründen hesaplanır; OSM yalnız sınır geometrisi ve bağımsız kontrol için kullanılır.</p>`}
 <p><b>3.3 Saha verisi ve kapsam.</b> ${t.n} adet DendroGeo saha ölçümü (göğüs çevresi, türetilmiş DBH, boy, tür, GNSS konumu, fotoğraf kanıtı); tümü moderatör onaylıdır. Kayıt kapsamı, onaylı ölçümlerle sınırlıdır; tam sayım veya olasılıklı örnekleme tasarımına ilişkin ek bilgi bulunmamaktadır. Ölçüm değişkenleri §4.6'da tanımlanmıştır.</p>
 ${L && L.cross ? `<p><b>3.4 Çapraz doğrulama verisi.</b> ${esc(L.cross)}: bağımsız ikinci sınıflandırma kaynağı; grup bazlı uzlaşma §7'de raporlanır${L.crossError ? ` (bu sürümde çapraz karşılaştırma tamamlanamadı: ${esc(L.crossError)})` : ''}.</p>` : ''}
 
@@ -1312,7 +1313,7 @@ ${lulcMethod || '<p><b>4.4 Arazi örtüsü sınıflandırması.</b> Bu sürümde
 <div class="ci">📐 Toplam karbon stoku: <b>${ciTxt}</b> · Monte Carlo n=${snap.mc.N}, tohum=${snap.mc.SEED}, model CV=%${snap.mc.MODEL_CV * 100} (korele). ${'Aralık, belirtilen model ve girdi belirsizliklerini kapsar; parkın ölçülmeyen ağaçlarından kaynaklanan örnekleme belirsizliğini kapsamaz.'}</div>
 <p class="qnote"><b>Ölçüm notu:</b> Ham saha değişkeni göğüs çevresidir; DBH = çevre / π ile türetilmiştir (değişken tanımları: §4.6 veri sözlüğü). ${govdeAralikTxt ? ` <b>Türetilmiş DBH aralığı:</b> ${govdeAralikTxt}. Ham çevre değerleri korunmuş, yalnız matematiksel çevre→çap dönüşümü uygulanmıştır (§9 sınırlılıklar).` : ''}</p>
 ${L ? `<p><b>5.2 Arazi örtüsü.</b> Sınıf alanları Çizelge 2'de sunulmuştur; mekânsal dağılım §6'da (Şekil 2) gösterilmektedir.</p>
-<div class="tscroll"><table class="summary"><caption>Çizelge 2. Park sınırı içindeki yüzey sınıflarının alanları.</caption><thead><tr><th>Sınıf</th><th>Alan (ha)</th><th>Pay</th></tr></thead><tbody>${L.classes.map((c) => `<tr><td class="tr">${esc(c.label)}</td><td>${trNum(c.ha, 2)}</td><td>%${trNum(c.pct, 1)}</td></tr>`).join('')}</tbody></table></div>
+<div class="tscroll"><table class="summary"><caption>Çizelge 2. Park sınırı içindeki yüzey sınıflarının alanları.</caption><thead><tr><th>Sınıf</th><th>Alan (ha)</th><th>Pay</th></tr></thead><tbody>${visibleSurfaceClasses.map((c) => `<tr><td class="tr">${esc(c.label)}</td><td>${trNum(c.ha, 2)}</td><td>%${trNum(c.pct, 1)}</td></tr>`).join('')}</tbody></table></div>
 <p><b>5.3 Alan dengesi.</b> Çizelge 3, park geometrisi ile raster kapsama alanının karşılaştırmasını verir; bu karşılaştırma sonuçların üretilmesinden önce hesaplama bütünlüğünün kontrol edildiğini belgeler.</p>
 <div class="tscroll"><table class="summary"><caption>Çizelge 3. Park alanı ve sınıflandırılmış yüzey alanı dengesi.</caption><thead><tr><th>Büyüklük</th><th>Değer</th></tr></thead><tbody>
 <tr><td class="tr">Park geometrisi alanı</td><td>${trNum(parkHa, 2)} ha</td></tr>

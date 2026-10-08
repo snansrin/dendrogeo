@@ -185,7 +185,7 @@ test('verified-map original label/dialog are restored, separate quick PNG stays 
  assert.match(locked,/function dgSensExportPng\(\)/);
  assert.match(locked,/dialog\.showModal\(\)/);
  assert.match(script,/const exportAction=event\.target\?\.closest\?\.\("#dgExportDownload"\)/);
- assert.match(script,/if\(exportAction&&sens\?\.vegetationView&&!sens\.rawView\)/);
+ assert.match(script,/if\(exportAction\)/);
  assert.match(script,/if\(dialog\?\.id==="dgSurfaceExportDialog"&&dialog\.querySelector\('\[name="surface"\]'\)\?\.checked\)/);
  assert.match(script,/const button=event\.target\?\.closest\?\.\('button\[onclick\*="downloadParkImage"\]'\)/);
  assert.match(workspace,/if\(window\.DG_LC_SENS\?\.state\?\.record/);
@@ -240,15 +240,15 @@ test('verified NDVI PNG uses 1240x1560 official layout and paints observed green
  assert.match(src,/for\(const poly of ndviPolys\)[\s\S]*?drawLeaflet\(g,pr,poly/);
  assert.match(src,/const counts=\{sparse:0,moderate:0,dense:0\}/);
  assert.match(src,/tiers\.cutoffs\.map\(n=>Number\(n\)\.toFixed\(3\)\)/);
- assert.match(src,/if\(tiers\.count<9\|\|!tiers\.cutoffs\)/);
+ assert.match(src,/if\(showNdvi&&\(tiers\.count<9\|\|!tiers\.cutoffs\)\)/);
  assert.match(src,/dgSensEditSummary\(rec\)/);
  assert.match(src,/dgSensFeatures\(\)\.length/);
  assert.match(src,/NDVI katmanı tek başına doğrulanmış harita sayılmaz/);
- assert.match(src,/const ndviPolys=await waitVegetation\(sens,30\)/);
+ assert.match(src,/const ndviPolys=showNdvi\?await waitVegetation\(sens,30\):\[\]/);
  assert.match(src,/renderVerified\(layers\)/);
 });
 
-test('verified-map original dialog is untouched with NDVI off; its PNG download switches to actual NDVI when on',async()=>{
+test('verified-map original layer dialog remains; downloading combines water with pool in both NDVI modes',async()=>{
  const hooks={},warnings=[];
  const state={vegetationView:false,rawView:false};
  const dialog={
@@ -269,12 +269,12 @@ test('verified-map original dialog is untouched with NDVI off; its PNG download 
  let prevented=0,stopped=0;
  const click=()=>({target,preventDefault:()=>{prevented++;},stopImmediatePropagation:()=>{stopped++;}});
  hooks.click(click());
- assert.equal(prevented,0);assert.equal(dialog.closeCount,0);
+ assert.equal(prevented,1);assert.equal(dialog.closeCount,1);
  state.vegetationView=true;
  hooks.click(click());
  await Promise.resolve();
- assert.equal(prevented,1);assert.equal(stopped,1);
- assert.equal(dialog.closeCount,1);
+ assert.equal(prevented,2);assert.equal(stopped,2);
+ assert.equal(dialog.closeCount,2);
  assert.match(warnings.join(' '),/Önce parkın arazi örtüsü analizini açın/);
 });
 
@@ -331,4 +331,52 @@ test('brush UI leaves saved pool boundaries alone while the water brush remains 
  assert.match(core,/function dgSensFeatures\(rec=DG_SENS\.record\)/);
  assert.match(core,/dgSensDrawType/,'separate boundary classes remain available');
  assert.match(core,/function dgSensSave\(\)/,'scientific persistence path remains original');
+});
+
+test('boundary selection and report sidecar present pool as Su without erasing its scientific class',()=>{
+ const work=load('src/ui/gis-workspace.js'),png=load('src/ui/gis-export.js');
+ assert.match(work,/function syncWaterBoundary\(\)/);
+ assert.match(work,/option\[value="pool"\]/);
+ assert.match(work,/dgSensSetDrawType\("water"\)/);
+ assert.match(work,/function syncWaterSurfaceRows\(\)/);
+ assert.match(work,/if\(pool!==water\)pool\.remove\(\)/);
+ assert.match(work,/merged\.water\/10000/);
+ assert.match(work,/function onWaterPopup\(event\)/);
+ assert.match(work,/function normalizeWaterText\(root\)/);
+ assert.match(png,/k==="water"\?Number\(areas\.pool\|\|0\):0/);
+ assert.match(png,/showNdvi\?await waitVegetation\(sens,30\):\[\]/);
+ assert.match(png,/item\.cls==='pool'\?'#3b82f6'/);
+ assert.match(load('src/services/lc-review.js'),/pool:\{group:"pool",label:"Havuz \/ süs havuzu"\}/);
+});
+
+test('water presentation calculates correct combined area, share and leaves source totals intact',()=>{
+ const src=load('src/ui/gis-workspace.js');
+ const sandbox={document:{readyState:'loading',addEventListener(){},getElementById(){return null;}},window:{},setTimeout,clearTimeout,console};
+ vm.runInNewContext(src,sandbox);
+ const result=sandbox.window.DG_GIS_WORKSPACE_UI.waterPresentationAreas({
+  green:310000,water:121000,pool:5000,hard:64000
+ });
+ assert.equal(result.water,126000);
+ assert.equal(result.pool,5000);
+ assert.equal(result.total,500000);
+ assert.equal(result.pct,25.2);
+});
+
+test('surface status and water sensitivity count show exact pool-inclusive water totals',()=>{
+ const work=load('src/ui/gis-workspace.js');
+ const areas={green:250000,water:120000,pool:5000,hard:125000};
+ const summary={textContent:''},counter={textContent:''};
+ const doc={readyState:'loading',addEventListener(){},getElementById(){return null;},
+  querySelector:q=>q==='#dgSensSummary'?summary:q==='#dgSensCnt-water'?counter:null};
+ const window={DG_LC_SENS:{state:{editing:true,rawView:false,partsMemo:{areas},
+  record:{sens:{water:50}}}},
+  DG_SURFACE_REVIEW:{types:{green:{label:'Yeşil alan'},water:{label:'Su'},hard:{label:'Sert zemin'}}}};
+ const sandbox={window,document:doc,setTimeout,clearTimeout,console};
+ vm.runInNewContext(work,sandbox);
+ window.DG_GIS_WORKSPACE_UI.sync();
+ assert.equal(counter.textContent,'50 · 12.500 ha');
+ assert.match(summary.textContent,/Su: 12\.500 ha/);
+ assert.doesNotMatch(summary.textContent,/Havuz|pool/i);
+ assert.equal(areas.water,120000);
+ assert.equal(areas.pool,5000,'legacy evidence remains separate in data');
 });
