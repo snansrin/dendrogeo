@@ -4,6 +4,10 @@
 (function(){
  "use strict";
  let pending=0, observer=null, mapTool="",mapInstance=null,drawLayer=null,drawPoints=[],clickHandler=null,captureTarget=null,captureClick=null;
+ // Park controls are moved into transient details nodes by the legacy menus.
+ // Their owner may remove/rebuild a details node while preserving its old
+ // child references only here. Restore those EXISTING inputs, never clone them.
+ const parked={grid:null,layer:null,export:null,summary:null};
  const $=id=>document.getElementById(id);
  const view=()=> $("v-map");
  const editorActive=()=>!!view()?.classList.contains("surface-review-active");
@@ -76,14 +80,28 @@
   return menu;
  }
  function syncPark(){
-  const bar=$("surfaceMenuBar"),exportCard=$("parkRasterExport"),layer=$("parkLayerTools");
+  const bar=$("surfaceMenuBar");
   if(!bar)return;
-  // Dynamically mounted park/surface menus must remain discoverable on phones.
-  // Recreate missing menu NODES only; neither raster nor park analysis is rerun.
-  if(!bar.querySelector('details[data-menu-owner="park"]')&&$("parkGridTools")&&$("parkLayerTools")&&typeof dgParkMountMenus==="function")
-   dgParkMountMenus();
+  for(const [key,id] of [["grid","parkGridTools"],["layer","parkLayerTools"],["export","parkRasterExport"],["summary","gridSummary"]]){
+   const live=$(id);if(live)parked[key]=live;
+  }
+  // When the original park menu was reconstructed, its old moved controls
+  // could have been detached by innerHTML/replaceChildren. Recover the exact
+  // same form nodes before asking the original menu renderer to mount them.
+  if(!bar.querySelector('details[data-menu-owner="park"]')){
+   const home=$("surfaceParkTools");
+   if(home){
+    for(const key of ["grid","layer"]){
+     if(!$(parked[key]?.id)&&parked[key])home.append(parked[key]);
+    }
+    if(!$("gridSummary")&&parked.summary)home.append(parked.summary);
+   }
+   if($("parkGridTools")&&$("parkLayerTools")&&typeof dgParkMountMenus==="function")dgParkMountMenus();
+  }
   if(window.DG_LC_SENS?.state?.record&&!bar.querySelector('details[data-menu-owner="surface"]')&&typeof dgSensRenderPaintTools==="function")
    dgSensRenderPaintTools();
+  const exportCard=$("parkRasterExport")||parked.export;
+  const layer=$("parkLayerTools")||parked.layer;
   if(!exportCard||!layer)return;
   const coreFile=bar.querySelector('details[data-menu-owner="surface"][data-menu-order="10"]');
   let menu=coreFile||bar.querySelector(".dg-ux-output-menu");
