@@ -203,6 +203,8 @@
    // change priority after these are installed.
    const roads=await applyGridRoads();
    if(token!==iteration)return false;
+   if(roads.reason==="geometry-failed")
+    throw Error("OSM yollarını güvenli biçimde yerleştirme başarısız; tarama kaydı korundu, yeniden deneyin.");
    if(roads.count){
     progress("OSM grid yol çizgilerinden "+roads.count+
       " dar yol izi sert zemine aktarıldı; "+roads.provisional+
