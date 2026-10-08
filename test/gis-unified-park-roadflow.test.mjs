@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import vm from 'node:vm';
+import polygonClipping from 'polygon-clipping';
 import {readFileSync} from 'node:fs';
 const load=p=>readFileSync(new URL('../'+p,import.meta.url),'utf8');
 function harness(){
@@ -138,4 +139,37 @@ test('locked engine untouched, old scientific WC prerequisite is retained but du
  assert.match(boot,/src\/ui\/gis-analysis-flow\.js\?v=[a-f0-9]{8}/);
  assert.match(sw,/\/src\/ui\/gis-analysis-flow\.js/);
  assert.doesNotMatch(flow,/DG_LC_SENS\.state\.acceptedResult\s*=|dgSensWaterBoundaryUnresolved\s*=/);
+});
+
+test('real polygon clipping: road strip is kept inside park and cannot cover scientific water/buildings',()=>{
+ const ctx=vm.createContext({
+  window:{polygonClipping},document:{readyState:'loading',addEventListener(){}},
+  console,setTimeout,clearTimeout,Math,Date
+ });
+ for(const path of ['src/services/lc-geo.js','src/services/lc-review.js','src/ui/gis-analysis-flow.js'])
+  vm.runInContext(load(path),ctx);
+ const ring=[[39.9498,32.6498],[39.9498,32.6512],[39.9504,32.6512],[39.9504,32.6498]];
+ ctx.ring=ring;
+ const park=vm.runInContext('dgSurfacePark([ring],[],32636)',ctx);
+ const polygon=(west,south,east,north)=>[[[
+  [west,south],[east,south],[east,north],[west,north],[west,south]
+ ]]];
+ const water={type:'water',geometry:{type:'MultiPolygon',
+  coordinates:polygon(32.6498,39.9498,32.6501,39.9504)}};
+ const building={type:'building',geometry:{type:'MultiPolygon',
+  coordinates:polygon(32.65064,39.9498,32.6508,39.9503)}};
+ const road={type:'way',id:807,tags:{highway:'footway',surface:'asphalt',width:'2.5'},
+  geometry:[{lon:32.65,lat:39.9501},{lon:32.651,lat:39.9501}]};
+ const features=ctx.window.DG_GIS_PARK_ANALYSIS.hardRoadDrafts(
+  [road],[water,building],32636,park);
+ assert.equal(features.length,1);
+ assert.equal(features[0].osmId,'way/807');
+ assert.equal(features[0].roadEvidence,'explicit-paved');
+ ctx.road=features[0];ctx.water=water;ctx.building=building;
+ const area=vm.runInContext('dgSurfaceArea(dgSurfaceFeatureGeometry(road,32636))',ctx);
+ const overlapWater=vm.runInContext('dgSurfaceArea(dgSurfaceClip("intersection",dgSurfaceFeatureGeometry(road,32636),dgSurfaceFeatureGeometry(water,32636)))',ctx);
+ const overlapBuilding=vm.runInContext('dgSurfaceArea(dgSurfaceClip("intersection",dgSurfaceFeatureGeometry(road,32636),dgSurfaceFeatureGeometry(building,32636)))',ctx);
+ assert.ok(area>0&&area<500,'real vector path area is not an entire 10m raster cell');
+ assert.ok(overlapWater<0.01,'real mapped lake is never relabeled hard');
+ assert.ok(overlapBuilding<0.01,'real mapped building is never relabeled hard');
 });
