@@ -120,7 +120,7 @@
   ctx.fillStyle=background;ctx.fillRect(0,0,canvas.width,canvas.height);
   ctx.fillStyle=ink;ctx.font="bold 35px Manrope, sans-serif";ctx.fillText("DendroGeo · Ağaç çeşitliliği",56,74);
   ctx.font="23px Manrope, sans-serif";ctx.fillStyle=muted;
-  const park=document.querySelector("#parkInfo>div:first-child>b")?.textContent?.replace(/^🌳\\s*/,"").trim()||"Onaylı saha verisi";
+  const park=document.querySelector("#parkInfo>div:first-child>b")?.textContent?.replace(/^🌳\s*/,"").trim()||"Onaylı saha verisi";
   ctx.fillText(park,56,118);
   ctx.font="bold 28px Manrope, sans-serif";ctx.fillStyle=ink;ctx.fillText("En Yaygın 6 Tür",56,190);
   rows.forEach(function(row,i){
