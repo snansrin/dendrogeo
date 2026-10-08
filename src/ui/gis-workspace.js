@@ -506,7 +506,9 @@
   }else if(select?.value==="pool")select.value="water";
   const editor=typeof document.querySelector==="function"?document.querySelector("#dgSensBoundaryDetails"):null;
   normalizeWaterText(editor);
-  const status=$("dgSensStatus");normalizeWaterText(status);
+  const status=typeof document.querySelector==="function"?document.querySelector("#dgSensStatus"):null;
+  normalizeWaterText(status);
+  normalizeWaterText($("lcSens"));normalizeWaterText($("surfaceMapTools"));
   // Map appearance only: legacy pool footprints are drawn as Su, but stored
   // feature identities, geometry and scientific partition remain unchanged.
   const paths=state?.displayPaths||[];
