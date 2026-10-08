@@ -116,3 +116,23 @@ test('locked source unchanged; targeted retry is opt-in inside existing draft an
  assert.match(source,/row\.append\(button\)/);
  assert.doesNotMatch(source,/createElement\("details"\)|\.acceptedResult\s*=|\.corrections\[key\]\s*=/);
 });
+
+test('fresh scan automatically attempts exactly one evidence-backed follow-up, without repeated requests',async()=>{
+ const f=fixture();
+ f.api.maybeRecheckAfterScan();
+ f.api.maybeRecheckAfterScan();
+ await new Promise(resolve=>setTimeout(resolve,0));
+ assert.equal(f.events.filter(e=>Array.isArray(e)&&e[0]==='profile').length,1);
+ assert.equal(f.rec.profile.supplementalSpectral.cellsResolved,40);
+ f.api.maybeRecheckAfterScan();
+ await new Promise(resolve=>setTimeout(resolve,0));
+ assert.equal(f.events.filter(e=>Array.isArray(e)&&e[0]==='profile').length,1,'never launch repeated Sentinel downloads on UI rerenders');
+});
+test('ongoing drawing or scan never launches automatic pixel review',async()=>{
+ for(const state of [{busy:true},{draw:{ring:[]}},{brush:{type:'hard'}},{editing:false}]){
+  const f=fixture();Object.assign(f.state,state);
+  f.api.maybeRecheckAfterScan();
+  await new Promise(resolve=>setTimeout(resolve,0));
+  assert.equal(f.events.length,0,'non-idle review must not start remote scan');
+ }
+});
