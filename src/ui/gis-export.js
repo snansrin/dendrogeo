@@ -144,7 +144,7 @@
   }
   return painted;
  }
- async function verifiedFeatures(sens){
+ async function resolveVerifiedDisplayFeatures(sens){
   // The locked exporter reads fresh, resolved visual shapes. Reuse its exact
   // read-only public functions; a cached Leaflet view is not authoritative.
   if(typeof dgSensParts==="function"&&typeof dgSensVisualResult==="function"){
@@ -398,7 +398,7 @@
   g.clip("evenodd");
   let painted=0;
   if(layers.surface){
-   const exact=await verifiedFeatures(sens);
+   const exact=await resolveVerifiedDisplayFeatures(sens);
    painted=drawVerifiedFeatures(g,pr,exact,dict);
    if(!painted){
     notify("Kayıtlı yüzey geometrisi henüz hazır değil; boş veya eksik Doğrulanmış Harita üretilmedi.","warn");
