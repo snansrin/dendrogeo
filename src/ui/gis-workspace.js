@@ -8,6 +8,8 @@
  // Their owner may remove/rebuild a details node while preserving its old
  // child references only here. Restore those EXISTING inputs, never clone them.
  const parked={grid:null,layer:null,export:null,summary:null};
+ const BUILDING_PRESENTATION_COLOR="#334155";
+ let pendingBoundaryRestart=0;
  const $=id=>document.getElementById(id);
  const view=()=> $("v-map");
  const editorActive=()=>!!view()?.classList.contains("surface-review-active");
@@ -360,7 +362,8 @@
     const name=label.textContent.trim();
     const type=Object.entries(types).find(([,meta])=>meta?.label===name)?.[0]||defaults[name];
     if(type&&icons[type])label.prepend(document.createTextNode(icons[type]+" "));
-    const mapColor=fill.style?.backgroundColor;
+    const mapColor=type==="building"?BUILDING_PRESENTATION_COLOR:fill.style?.backgroundColor;
+    if(type==="building")fill.style.backgroundColor=BUILDING_PRESENTATION_COLOR;
     if(mapColor){
      row.style.setProperty("--dg-ux-surface-color",mapColor);
      const slider=typeof document.getElementById==="function"&&type?document.getElementById("dgSensRange-"+type):null;
@@ -531,8 +534,10 @@
   // Map appearance only: legacy pool footprints are drawn as Su, but stored
   // feature identities, geometry and scientific partition remain unchanged.
   const paths=state?.displayPaths||[];
-  for(const item of paths)if(item.cls==="pool"&&item.poly?.options?.fillColor!=="#3b82f6")
-   item.poly.setStyle?.({fillColor:"#3b82f6"});
+  for(const item of paths){
+   const color=item.cls==="pool"?"#3b82f6":item.cls==="building"?BUILDING_PRESENTATION_COLOR:null;
+   if(color&&item.poly?.options?.fillColor!==color)item.poly.setStyle?.({fillColor:color});
+  }
  }
  let popupWaterMap=null;
  function syncWaterPopup(){
