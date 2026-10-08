@@ -273,7 +273,7 @@
    // Historical raw report remains in state.baselineReport and in 'Ham analizi göster'.
    host.querySelectorAll(":scope > details.dg-sens-details").forEach(n=>n.remove());
   }
-  const evidence=document.getElementById("dgSensEvidenceDetails");
+  const evidence=typeof document.querySelector==="function"?document.querySelector("#dgSensEvidenceDetails"):null;
   if(evidence&&!evidence.dataset.dgUxInitialized){
    evidence.dataset.dgUxInitialized="1";
    evidence.open=false; // QA remains available on demand; never lost.
