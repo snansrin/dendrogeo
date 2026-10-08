@@ -236,7 +236,7 @@
   if(mapTool==="distance"&&typeof L.tooltip==="function"){
    for(let i=1;i<drawPoints.length;i++){
     const from=drawPoints[i-1],to=drawPoints[i];
-    const middle=L.latLng((from.lat+to.lat)/2,(from.lng+to.lng)/2);
+    const middle=L.latLng({lat:(from.lat+to.lat)/2,lng:(from.lng+to.lng)/2});
     const meters=L.latLng(from).distanceTo(L.latLng(to));
     L.tooltip({permanent:true,direction:"center",interactive:false,opacity:1,className:"dg-ux-distance-label"})
      .setLatLng(middle).setContent(unit(meters)).addTo(drawLayer);
