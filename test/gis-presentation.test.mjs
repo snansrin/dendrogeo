@@ -112,4 +112,6 @@ test('preview bars match the raw WorldCover row typography, geometry and class-s
   assert.ok(css.includes('accent-color:var(--dg-ux-slider-color,'+color+')'));
  }
  assert.match(css,/@media\(max-width:330px\)/);
+ assert.match(css,/\.dg-ux-surface-percentage\s*\{[\s\S]*?font-weight:400/);
+ assert.match(css,/--dg-ux-surface-color/);
 });
