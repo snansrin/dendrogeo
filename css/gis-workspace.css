@@ -613,3 +613,60 @@
   }
   #v-map #landCoverReport>.dg-surface-stat>b{text-align:left}
 }
+
+/* Oct 2026 mobile polish: output is single-source, engine/locked theme untouched. */
+#v-map #parkInfo #parkSurfaceAction .dg-png-sub,
+#v-map #parkInfo #parkSurfaceAction .dg-png-badge,
+#v-map #landCoverReport,
+#v-map #lcSens{
+  min-width:0;
+  overflow-wrap:anywhere;
+  word-break:normal;
+  hyphens:auto;
+}
+#v-map #landCoverReport .dg-surface-track{border-radius:8px;overflow:hidden}
+#v-map #landCoverReport>.dg-surface-stat{min-width:0}
+#v-map #lcSens #dgSensSummary{display:none} /* duplicate numbers under the result card */
+#v-map #liveAnalysis .dg-ux-species-row{counter-increment:dg-species;position:relative}
+#v-map #liveAnalysis .dg-ux-species-head{counter-reset:dg-species}
+#v-map #liveAnalysis .dg-ux-species-row>div:first-child{align-items:center}
+#v-map #liveAnalysis .dg-ux-species-row>div:first-child>span:last-child{
+  white-space:nowrap;justify-self:end;font-variant-numeric:tabular-nums
+}
+#v-map #liveAnalysis .dg-ux-group-summary>span{
+  display:inline-flex;gap:5px;align-items:baseline;min-height:32px
+}
+#v-map #liveAnalysis .grid.g4>.stat .val{overflow-wrap:anywhere}
+#toastWrap{
+  position:fixed!important;
+  isolation:isolate;
+  z-index:2147483646!important;
+  max-height:min(65dvh,560px);
+  overflow-y:auto;
+  overscroll-behavior:contain;
+}
+#toastWrap .toast{background:var(--surface);box-shadow:var(--sh)}
+@media(max-width:700px){
+  /* Messages appear below the GIS workspace rather than beneath its sticky menu. */
+  #toastWrap{
+    top:auto!important;
+    bottom:calc(12px + env(safe-area-inset-bottom))!important;
+    left:10px!important;right:10px!important;
+    width:auto!important;
+    max-height:min(38dvh,320px);
+  }
+  #v-map #parkInfo #parkSurfaceAction .dg-png-sub{font-size:.71rem;line-height:1.55}
+  #v-map #liveAnalysis .dg-ux-species-row{padding:9px 7px}
+  #v-map #liveAnalysis .dg-ux-group-summary{gap:4px 10px}
+}
+@media(max-width:380px){
+  #v-map #landCoverReport>.dg-surface-stat{
+    grid-template-columns:minmax(0,1fr);
+    gap:4px;
+  }
+  #v-map #landCoverReport>.dg-surface-stat>b{text-align:left;justify-self:start}
+  #v-map #liveAnalysis .dg-ux-species-row>div:first-child{
+    grid-template-columns:minmax(0,1fr) auto;
+    gap:4px;
+  }
+}
