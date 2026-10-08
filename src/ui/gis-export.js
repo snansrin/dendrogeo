@@ -138,7 +138,7 @@
    // All scientific classes retain their approved visual hue. Only building
    // is darkened, pool is shown with water, and unresolved remains neutral.
    ctx.fillStyle=name==="building"?BUILDING_COLOR:name==="pool"?"#3b82f6":
-    dict[name]?.color||(typeof DG_SENS_COLORS!=="undefined"?DG_SENS_COLORS[name]:null)||"#94a3b8";
+    (typeof DG_SENS_COLORS!=="undefined"?DG_SENS_COLORS[name]:null)||dict[name]?.color||"#94a3b8";
    ctx.globalAlpha=name==="other"?.18:1;
    ctx.fill("evenodd");ctx.globalAlpha=1;painted++;
   }
@@ -252,7 +252,7 @@
    const display=Array.isArray(sens?.displayPaths)&&!sens.rawView?sens.displayPaths:[];
    if(display.length){
     for(const item of display){
-     if(drawLeaflet(ctx,pr,item.poly,Math.max(.28,(sens.opacity||65)/100),item.cls==="building"?BUILDING_COLOR:item.cls==="pool"?"#3b82f6":null))count++;
+     if(drawLeaflet(ctx,pr,item.poly,item.cls==="other"?.16:Math.max(.28,(sens.opacity||65)/100),item.cls==="building"?BUILDING_COLOR:item.cls==="pool"?"#3b82f6":null))count++;
     }
    }else{
     const last=window.DG_LANDCOVER?.getLast?.();
