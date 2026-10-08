@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="tr" data-autostart="true">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex,nofollow"><title>DendroGeo · Güncel sürümü yükle</title>
+<style>body{margin:0;padding:32px;background:#f4f7f3;color:#173d2a;font:16px/1.6 system-ui,sans-serif}main{max-width:600px;margin:12vh auto}h1{font-size:24px}button{padding:12px 18px;cursor:pointer}small{display:block;margin-top:20px;color:#536558}</style></head>
+<body><main><h1>Güncel DendroGeo yükleniyor</h1><p id="status" role="status" aria-live="polite">Uygulama önbelleği kontrol ediliyor…</p><button id="retry" hidden onclick="dgChromeCacheRefresh().catch(dgRefreshError)">Yeniden dene</button><small>Saha ölçümleri, fotoğraflar, oturum ve kaydedilmiş kararlar korunur.</small></main>
+<script>
+async function dgChromeCacheRefresh(env=window){
+ const origin=env.location.origin,nonce=Date.now().toString(36),status=text=>{const node=env.document.getElementById('status');if(node)node.textContent=text;};
+ const read=async path=>{const response=await env.fetch(new URL(path,origin),{cache:'reload',credentials:'same-origin',signal:AbortSignal.timeout(30000)});if(!response.ok)throw Error('Güncel dosya alınamadı: '+response.status);return response;};
+ status('Güncel yayın ağdan doğrulanıyor…');
+ const release=await(await read('/release-version.json?dg_refresh='+nonce)).json();
+ const html=await(await read('/?dg_refresh='+nonce)).text();
+ const build=html.match(/id="dgRuntimeBuild"[^>]*>"([^"]+)"/);
+ const version=String(release.version).match(/^(\d{8})r(\d+)$/);
+ if(!version||!build?.[1].startsWith(release.version)||Number(version[1])<20261008||(Number(version[1])===20261008&&Number(version[2])<90))throw Error('Güncel r90 veya sonrası doğrulanamadı; eski sayfaya dönülmedi.');
+ status('Eski uygulama kaydı kaldırılıyor…');
+ let workers=0;
+ if(env.navigator.serviceWorker){
+  for(const reg of await env.navigator.serviceWorker.getRegistrations()){
+   const script=reg.active?.scriptURL||reg.waiting?.scriptURL||reg.installing?.scriptURL;
+   if(!script)continue;const url=new URL(script);
+   if(url.origin===origin&&url.pathname==='/sw.js'&&new URL(reg.scope).origin===origin){await reg.unregister();workers++;}
+  }
+ }
+ const assets=[...new Set([...html.matchAll(/(?:src|href)="((?:src|css|vendor)\/[^" ]+)"/g)].map(m=>m[1]))];
+ if(assets.length<40)throw Error('Güncel uygulama dosya listesi doğrulanamadı.');
+ status('Güncel uygulama dosyaları HTTP önbelleğine yeniden yükleniyor…');
+ for(let i=0;i<assets.length;i+=6){await Promise.all(assets.slice(i,i+6).map(async path=>{const response=await read('/'+path);await response.arrayBuffer();}));status('Güncel dosyalar: '+Math.min(i+6,assets.length)+' / '+assets.length);}
+ let removed=0;
+ if(env.caches)for(const key of await env.caches.keys()){
+  if(/^(?:precache|runtime|static|api)-dendrogeo(?:-|$)/.test(key)){await env.caches.delete(key);removed++;}
+ }
+ // Clear only the app's one-time SW reload markers, never login or user data.
+ try{for(let i=env.sessionStorage.length-1;i>=0;i--){const key=env.sessionStorage.key(i);if(key?.startsWith('dg_sw_runtime_reload:'))env.sessionStorage.removeItem(key);}}catch{}
+ status('✓ '+release.version+' doğrulandı. Güncel sayfa açılıyor…');
+ env.location.replace('/?dg_fresh='+nonce);
+ return{release:release.version,workers,removed,assets:assets.length};
+}
+function dgRefreshError(error){document.getElementById('status').textContent='Yenileme tamamlanamadı: '+String(error.message||error);document.getElementById('retry').hidden=false;}
+if(document.documentElement.dataset.autostart==='true')dgChromeCacheRefresh().catch(dgRefreshError);
+</script></body></html>
