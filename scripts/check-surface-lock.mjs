@@ -10,8 +10,8 @@ import {fileURLToPath} from 'node:url';
 import {join,resolve} from 'node:path';
 
 export const SURFACE_LOCK_ID='DG-SURFACE-LOCK-2026-10-08';
-export const APPROVED_COMMIT='f6a68b7b5fe075ce280bd566d04d5e021e0dba9a';
-export const PINNED_MANIFEST_BLOB='62879bbb36264b788dd6661841ca7c16feb53cec';
+export const APPROVED_COMMIT='7680cab4a7fd9102bef64e5cf031b740940a5be0';
+export const PINNED_MANIFEST_BLOB='3f3a0e755d0e828f635ad35de704fdfe87a9981f';
 const PROJECT_ROOT=fileURLToPath(new URL('../',import.meta.url));
 const MANIFEST='docs/surface-engine-lock.json';
 
@@ -48,7 +48,12 @@ export function verifySurfaceLock(root=PROJECT_ROOT){
     manifest.schema!=='dendrogeo/surface-engine-source-lock/v1'||
     manifest.policy!=='NO_CHANGES_WITHOUT_EXPLICIT_USER_APPROVAL')
   errors.push('Kilit kimliği, referansı veya koruma politikası değişti.');
- if(Object.keys(manifest.locked_files||{}).length!==33)errors.push('Korunan dosya sayısı değişti (beklenen 33).');
+ if(Object.keys(manifest.locked_files||{}).length!==51)errors.push('Korunan dosya sayısı değişti (beklenen 51).');
+ if(manifest.recovery_branch!=='recovery/surface-verified-water-20261008'||
+    manifest.verified_conditions_file!=='docs/surface-scientific-contract.json'||
+    !manifest.source_caveat?.includes('dynamic'))
+  errors.push('Onaylı kurtarma noktası veya tekrarlanabilirlik uyarısı değiştirildi.');
+
  return [...errors,...verifySurfaceFiles(root,manifest.locked_files)];
 }
 
@@ -60,6 +65,6 @@ if(invoked){
   console.error('Korunan yüzey çekirdeği izinsiz değiştirilemez. Önce kullanıcıdan açık onay alın; mevcut sonucu otomatik güncellemeyin.');
   process.exitCode=1;
  }else{
-  console.log('✅ '+SURFACE_LOCK_ID+' · 33 çekirdek dosyası ve manifest değişmedi.');
+  console.log('✅ '+SURFACE_LOCK_ID+' · 51 kilitli analiz/QA/bağımlılık dosyası ve manifest değişmedi.');
  }
 }
