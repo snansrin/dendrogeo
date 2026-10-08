@@ -207,6 +207,7 @@ test('green sensitivity uses a colored explicit browser-native track and no blac
  const css=load('css/gis-workspace.css'),work=load('src/ui/gis-workspace.js');
  assert.match(css,/::-webkit-slider-runnable-track/);
  assert.match(css,/::-moz-range-progress/);
+ assert.match(css,/::-webkit-slider-thumb/);
  assert.match(css,/var\(--dg-ux-slider-color,#22c55e\)/);
  assert.match(work,/--dg-ux-slider-fill/);
  assert.match(css,/\.dg-sens-slider\[id\^="dgSensRange-"\]/);
