@@ -436,6 +436,99 @@
   if(legacyPool)legacyPool.remove();
   if(select.value==="pool")select.value="water";
  }
+ // Presentation-only unification. The locked engine retains legacy pool
+ // geometry and its separate area key for audit; users see one Su class.
+ function waterPresentationAreas(areas){
+  if(!areas||typeof areas!=="object")return null;
+  const water=Number(areas.water||0),pool=Number(areas.pool||0);
+  const total=Object.values(areas).reduce((n,value)=>n+(Number(value)||0),0);
+  return {water:water+pool,pool,total,pct:total>0?(water+pool)*100/total:0};
+ }
+ function syncWaterSurfaceRows(){
+  const host=$("landCoverReport"),state=window.DG_LC_SENS?.state;
+  if(!host||!state?.record||state.rawView)return;
+  const entries=[...host.querySelectorAll(".dg-ux-surface-rows > .dg-surface-stat")];
+  const label=row=>row?.querySelector?.(":scope > span")?.textContent||"";
+  const pool=entries.find(row=>/Havuz|süs havuzu/i.test(label(row)));
+  if(!pool)return; // already reconciled (avoid mutation-observer loops)
+  let water=entries.find(row=>/Su|💧/.test(label(row)));
+  if(!water){water=pool;const name=water.querySelector(":scope > span");if(name)name.textContent="💧 Su";}
+  const areas=state.editing?state.partsMemo?.areas:(state.record.acceptedResult?.areas||state.partsMemo?.areas);
+  const merged=waterPresentationAreas(areas);
+  if(merged&&merged.total>0){
+   const value=water.querySelector(":scope > b");
+   if(value){
+    value.textContent=(merged.water/10000).toFixed(3)+" ha · ";
+    const percent=document.createElement("span");
+    percent.className="dg-ux-surface-percentage";percent.textContent="%"+merged.pct.toFixed(1);
+    value.append(percent);
+   }
+  }else if(pool!==water){
+   // Only displayed rounded numbers are available (never edit source data).
+   const parse=row=>{const t=row.querySelector?.(":scope > b")?.textContent||"";
+    return Number((t.match(/([0-9]+(?:[.,][0-9]+)?)\s*ha/)||[])[1]?.replace(",","."))||0;};
+   const waterHa=parse(water)+parse(pool);
+   const value=water.querySelector(":scope > b");
+   if(value)value.textContent=waterHa.toFixed(3)+" ha";
+  }
+  if(pool!==water)pool.remove();
+  if(water){
+   const labelNode=water.querySelector(":scope > span");
+   if(labelNode&&labelNode.textContent!=="💧 Su")labelNode.textContent="💧 Su";
+   const fill=water.querySelector(":scope > .dg-surface-track > i");
+   if(fill)fill.style.backgroundColor="#3b82f6";
+   water.style?.setProperty?.("--dg-ux-surface-color","#3b82f6");
+  }
+ }
+ function normalizeWaterText(root){
+  if(!root||typeof document.createTreeWalker!=="function")return;
+  const walk=document.createTreeWalker(root,4); // text nodes only, keep inputs/buttons
+  let node;
+  while((node=walk.nextNode())){
+   const old=node.nodeValue||"";
+   const current=old.replace(/Bina, su ve havuz sınırları ayrı vektör kanıtı olarak gösterilir/g,
+     "Bina ve su sınırları vektör kanıtı olarak gösterilir")
+    .replace(/Küçük bina ve havuzlar için/g,"Küçük binalar ve su yapıları için")
+    .replace(/\bsu\/havuz\b/gi,"su")
+    .replace(/Havuz\s*\/\s*süs havuzu|Havuz\s*\/\s*Süs Havuzu/gi,"Su")
+    .replace(/\bhavuzlar\b/gi,"su yapıları")
+    .replace(/\bhavuz\b/gi,"su");
+   if(old!==current)node.nodeValue=current;
+  }
+ }
+ function syncWaterBoundary(){
+  const state=window.DG_LC_SENS?.state;
+  const select=typeof document.querySelector==="function"?document.querySelector("#dgSensDrawType"):null;
+  const pool=select?.querySelector?.('option[value="pool"]');
+  if(pool)pool.remove();
+  if(select&&state?.drawType==="pool"&&!state.busy&&!state.saving&&!state.draw&&typeof dgSensSetDrawType==="function"){
+   dgSensSetDrawType("water");
+  }else if(select?.value==="pool")select.value="water";
+  const editor=typeof document.querySelector==="function"?document.querySelector("#dgSensBoundaryDetails"):null;
+  normalizeWaterText(editor);
+  const status=$("dgSensStatus");normalizeWaterText(status);
+  // Map appearance only: legacy pool footprints are drawn as Su, but stored
+  // feature identities, geometry and scientific partition remain unchanged.
+  const paths=state?.displayPaths||[];
+  for(const item of paths)if(item.cls==="pool"&&item.poly?.options?.fillColor!=="#3b82f6")
+   item.poly.setStyle?.({fillColor:"#3b82f6"});
+ }
+ let popupWaterMap=null;
+ function syncWaterPopup(){
+  const m=getMap();
+  if(!m||m===popupWaterMap)return;
+  if(popupWaterMap?.off)popupWaterMap.off("popupopen",onWaterPopup);
+  popupWaterMap=m;m.on("popupopen",onWaterPopup);
+ }
+ function onWaterPopup(event){
+  const root=event.popup?.getElement?.();
+  if(!root)return;
+  for(const button of root.querySelectorAll(".dg-sens-popup button")){
+   const action=button.getAttribute?.("onclick")||"";
+   if(/dgSensDecide\([^)]*['"]pool['"]\)/.test(action))button.remove();
+  }
+  normalizeWaterText(root.querySelector(".dg-sens-popup"));
+ }
  function syncSliderPaint(){
   const sliders=$("lcSens")?.querySelectorAll?.('input.dg-sens-slider[id^="dgSensRange-"]')||[];
   for(const slider of sliders)slider.style?.setProperty?.("--dg-ux-slider-fill",Math.max(0,Math.min(100,Number(slider.value)||0))+"%");
@@ -443,7 +536,10 @@
  function sync(){
   syncPark();
   syncBrushChoices();
+  syncWaterBoundary();
+  syncWaterPopup();
   syncSurfaceReport();
+  syncWaterSurfaceRows();
   syncSliderPaint();
   syncGroupLayout();
   syncSpecies();
