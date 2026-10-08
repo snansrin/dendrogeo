@@ -494,6 +494,6 @@
   event.stopImmediatePropagation();
   exportMap();
  },true);
- window.DG_GIS_PNG_EXPORT={download:exportMap,downloadVerified:exportVerified,classes,eachRing};
+ window.DG_GIS_PNG_EXPORT={download:exportMap,downloadVerified:exportVerified,classes,eachRing,baseTilePlan};
  window.downloadParkImage=exportMap;
 })();
