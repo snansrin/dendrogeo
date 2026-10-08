@@ -118,6 +118,17 @@
   scheduled=setTimeout(()=>{scheduled=0;maybeApply();},250);
  }
  function init(){
+  // Capture executes before the locked inline onclick, so an immediate
+  // "Kabul et ve kaydet" applies only the missing inferred-cell proposals.
+  // It NEVER replaces, suppresses, or bypasses the locked acceptance gate.
+  document.addEventListener("click",event=>{
+   const accept=event.target?.closest?.("#dgSensAcceptBtn");
+   if(!accept||accept.disabled)return;
+   const s=state();
+   if(!s?.record||s.rawView||s.busy||s.saving||s.draw||s.brush)return;
+   try{apply({save:false});}
+   catch(error){console.warn("Su çekilme komşuluk incelemesi:",error);}
+  },true);
   const host=document.getElementById("lcSens");
   if(!host)return;
   if(typeof MutationObserver==="function"){
