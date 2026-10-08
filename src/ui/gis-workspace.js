@@ -67,52 +67,15 @@
   });
   menuPosition(menu);
  }
- function makeOutput(){
-  const menu=el("details","dg-editor-menu dg-ux-output-menu");
-  menu.dataset.menuOwner="workspace";
-  menu.dataset.menuOrder="45";
-  const summary=el("summary");
-  summary.innerHTML=window.DG_EDITOR_UI?.menuLabel?.("file","Dosya")||"Dosya";
-  const panel=el("div","dg-editor-menu-body");
-  panel.innerHTML=window.DG_EDITOR_UI?.panelHead?.("file","Harita çıktısı","Altlığı ve PNG içeriğini seç, ardından indir.")||"<strong>Harita çıktısı</strong>";
-  const note=el("p","dg-ux-option-note","İndirme ayarları analizin hesaplarını veya kayıtlı sonuçları değiştirmez.");
-  panel.append(note);
-  menu.append(summary,panel);
-  menu.addEventListener("toggle",()=>{if(menu.open)openMenu(menu);});
-  return menu;
- }
-
- // Keep BOTH export actions independently available even when the park panel
- // gets rebuilt and the old parkRasterExport DOM node is temporarily detached.
- function ensureQuickPngAction(bar){
-  const coreFile=bar?.querySelector?.('details[data-menu-owner="surface"][data-menu-order="10"]');
-  if(!coreFile)return;
-  const verified=coreFile.querySelector('button[onclick*="dgSensExportPng"]');
-  const actions=verified?.parentElement;
-  if(!actions||typeof document.createElement!=="function")return;
-  let quick=coreFile.querySelector("#dgUxQuickPngDownload");
-  if(!quick){
-   quick=el("button","dg-png-btn ghost sm","🖼️ PNG İndir");
-   quick.id="dgUxQuickPngDownload";quick.type="button";
-   quick.addEventListener("click",()=>window.DG_GIS_PNG_EXPORT?.download?.());
-   verified.after(quick);
-  }
-  let choice=coreFile.querySelector("#dgUxQuickPngBase");
-  if(!choice){
-   choice=el("select","dg-ux-quick-png-base");
-   choice.id="dgUxQuickPngBase";
-   choice.setAttribute("aria-label","PNG altlığı");
-   for(const [value,label] of [["vector","Vektör"],["osm","OSM"],["sat","Uydu"],["topo","Topoğrafik"]]){
-    const opt=document.createElement("option");opt.value=value;opt.textContent=label;choice.append(opt);
-   }
-   choice.value=$("pngBg")?.value||"vector";
-   choice.addEventListener("change",()=>{
-    const existing=$("pngBg");if(existing)existing.value=choice.value;
-   });
-   quick.before(choice);
-  }
-  quick.hidden=false;choice.hidden=false;
-  const base=$("pngBg");if(base&&base.value!==choice.value)base.value=choice.value;
+ // Export controls belong to the ORIGINAL locked File menu. Never
+ // generate another top-level "Dosya" and never duplicate its PNG action.
+ function keepSingleFileMenu(bar){
+  if(!bar?.querySelectorAll)return;
+  for(const extra of bar.querySelectorAll(":scope > details.dg-ux-output-menu"))extra.remove();
+  const core=bar.querySelector('details[data-menu-owner="surface"][data-menu-order="10"]');
+  if(!core)return;
+  core.querySelector("#dgUxQuickPngDownload")?.remove();
+  core.querySelector("#dgUxQuickPngBase")?.remove();
  }
  function syncPark(){
   const bar=$("surfaceMenuBar");
@@ -135,19 +98,16 @@
   }
   if(window.DG_LC_SENS?.state?.record&&!bar.querySelector('details[data-menu-owner="surface"]')&&typeof dgSensRenderPaintTools==="function")
    dgSensRenderPaintTools();
-  ensureQuickPngAction(bar);
+  keepSingleFileMenu(bar);
   const exportCard=$("parkRasterExport")||parked.export;
   const layer=$("parkLayerTools")||parked.layer;
   if(!exportCard||!layer)return;
   const coreFile=bar.querySelector('details[data-menu-owner="surface"][data-menu-order="10"]');
-  let menu=coreFile||bar.querySelector(".dg-ux-output-menu");
-  if(coreFile){
-   bar.querySelector(".dg-ux-output-menu")?.remove(); // no duplicate Rapor & Çıktı tab
-  }else{
-   if(!menu)menu=makeOutput();
-   const next=[...bar.children].find(n=>n!==menu&&Number(n.dataset.menuOrder)>45)||null;
-   if(menu.parentElement!==bar||menu.nextElementSibling!==next)bar.insertBefore(menu,next);
-  }
+  // Do not invent an export menu while the surface editor is loading:
+  // the pre-existing parkRasterExport card remains available until the
+  // original surface "Dosya" menu mounts. Then move that SAME card into it.
+  if(!coreFile)return;
+  const menu=coreFile;
   const panel=menu.querySelector(":scope > .dg-editor-menu-body");
   if(!panel)return;
   if(exportCard.parentElement!==panel)panel.append(exportCard);
