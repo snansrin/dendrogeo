@@ -93,7 +93,7 @@ async function dgSensRenderVegetation(){
 }
 function dgSensHa(a){return(Number(a||0)/10000).toFixed(3);}
 function dgSensNewRecord(){const pk=dgSensParkId(),owner=typeof USER!=="undefined"?USER?.id:null;return{id:"surface-"+(owner||"guest")+"-"+(pk.id||"x"),owner,parkId:pk.id,parkName:pk.name,sens:{green:50,water:50,hard:50,bare:50},corrections:{},features:[],useObjects:true,spectralEnabled:false,analysisEngine:"esa-raster-manual-v1",profile:null,period:"ytd",createdAt:new Date().toISOString()};}
-function dgSensResetScanState(rec){if(!rec)return;rec.sens={green:50,water:50,hard:50,bare:50};rec.spectralEnabled=false;rec.profile=null;if(rec.period==="latest"&&!rec.periodExplicit)rec.period="ytd";}
+function dgSensResetScanState(rec){if(!rec)return;rec.sens={green:50,water:50,hard:50,bare:50};rec.spectralEnabled=false;rec.autoClassify=false;rec.profile=null;if(rec.period==="latest"&&!rec.periodExplicit)rec.period="ytd";}
 function dgSensMigrateOsmObjects(rec){if(!rec)return false;const stale=(!!rec.objectVersion&&rec.objectVersion!=="footprints-v3-area-semantics")||((rec.objectFeatures||[]).length>0&&rec.objectVersion!=="footprints-v3-area-semantics");if(!stale)return false;rec.objectFeatures=null;rec.objectVersion=null;rec.draftDirty=true;return true;}
 async function dgSensLoadRecord(){
  const fresh=dgSensNewRecord();let local=null,remote=null;
@@ -127,7 +127,7 @@ function dgSensSave(){
  return job.then(()=>true).catch(()=>{if(DG_SENS.record?.id===snapshot.id){DG_SENS.status=_tvs("Cihaz kaydı başarısız. Kaydet düğmesiyle hesap kaydını deneyin.");dgSensUpdateStatus();}return false;});
 }
 function dgSensDirty(){DG_SENS.visualVersion++;DG_SENS.editing=true;if(DG_SENS.record)DG_SENS.record.draftDirty=true;DG_SENS.status="";}
-function dgSensPredict(sp){return window.DG_LC_VALIDATE.spectralPredict(sp,DG_SENS.record?.sens);}
+function dgSensPredict(sp){return window.DG_LC_VALIDATE.spectralPredict(sp,DG_SENS.record?.sens,{seasonalWater:!DG_SENS.record?.autoClassify});}
 function dgSensCellKey(c){return c.row+":"+c.col;}
 function dgSensHasExplicitWaterBoundary(rec=DG_SENS.record){return !!(rec?.features||[]).some(f=>f?.type==="water"&&f?.method==="visual-boundary");}
 /* A complete, validated OSM lake way is the authoritative water footprint
@@ -145,7 +145,7 @@ function dgSensWaterOutsideClass(c,rec=DG_SENS.record){
  if(decision&&land.has(decision.to)&&(decision.method==="visual-cell"||(!DG_SENS.editing&&decision.method==="sensitivity")))return decision.to;
  const evidence=rec?.profile?.cells?.[key],predict=window.DG_LC_VALIDATE?.spectralLandPredict;
  const result=typeof predict==="function"?predict(evidence,{green:50,water:50,hard:50,bare:50}):"nodata";
- return land.has(result)?result:"other";
+ return land.has(result)?result:(rec?.autoClassify?(c.rasterClassKey||c.classKey):"other");
 }
 function dgSensWaterOutsideParts(){return dgSensParts().filter(p=>(p.cell?.rasterClassKey||p.cell?.classKey)==="water"&&p.method==="review-cell");}
 function dgSensWaterBoundaryUnresolved(){const unknown=new Set();for(const p of dgSensWaterOutsideParts())if(p.type==="other")unknown.add(p.key);return unknown.size;}
@@ -159,13 +159,13 @@ function dgSensEffective(c){
  if(original==="water"&&dgSensHasWaterFootprint())return dgSensWaterOutsideClass(c);
  // Manual cells and accepted decisions take precedence over optional spectral review.
  if(dec&&(dec.method==="visual-cell"||!DG_SENS.editing))return window.DG_SURFACE_REVIEW.types[dec.to]?dec.to:original;
- if(!DG_SENS.editing||!DG_SENS.record?.spectralEnabled||Number(c.areaM2)<window.DG_LC_VALIDATE.defaults.edgeAreaM2)return original;
+ if(!DG_SENS.editing||!(DG_SENS.record?.spectralEnabled||DG_SENS.record?.autoClassify)||Number(c.areaM2)<window.DG_LC_VALIDATE.defaults.edgeAreaM2)return original;
  const sens=DG_SENS.record.sens;
- if(!DG_SENS_CLASSES.some(k=>Number(sens[k])!==50))return original;
+ if(!DG_SENS.record.autoClassify&&!DG_SENS_CLASSES.some(k=>Number(sens[k])!==50))return original;
  const pred=dgSensPredict(DG_SENS.record.profile?.cells?.[dgSensCellKey(c)]);
  if(!DG_SENS_CLASSES.includes(pred))return original;
  // A slider cannot silently relabel unrelated classes at their default thresholds.
- return Number(sens[pred])!==50||Number(sens[original])!==50?pred:original;
+ return DG_SENS.record.autoClassify||Number(sens[pred])!==50||Number(sens[original])!==50?pred:original;
 }
 function dgSensCandidates(cls){return(dgSensCells()||[]).filter(c=>dgSensEffective(c)===cls&&c.classKey!==cls).map(cell=>({cell,pred:cls,sp:DG_SENS.record?.profile?.cells?.[dgSensCellKey(cell)]}));}
 async function dgSensMount(hostId){
@@ -396,15 +396,16 @@ async function dgSensAutoWaterOnScan(rec,epoch,fromMount=false){
  dgSensDirty();
  return objects.length;
 }
-async function dgSensScan(){
+async function dgSensScan(options={}){
  if(DG_SENS.rawView||DG_SENS.busy||DG_SENS.saving||!DG_SENS.record)return false;dgSensBrushStop();
  let completed=false;
  const rec=DG_SENS.record,epoch=DG_SENS.epoch;dgSensResetScanState(rec);DG_SENS.visualVersion++;DG_SENS.focus=null;DG_SENS.busy=true;dgSensRender();
+ if(options.classify===true&&!rec.periodExplicit)rec.period="latest";
  try{
   const profile=await window.DG_LC_S2.profile(dgSensCells(),PARK_POLY,{year:DG_LC_LAST.report?.year||2021,mode:rec.period});
   if(epoch!==DG_SENS.epoch||DG_SENS.record!==rec)return;
   const autoWater=await dgSensAutoWaterOnScan(rec,epoch);if(epoch!==DG_SENS.epoch||DG_SENS.record!==rec)return false;
-  rec.profile=profile;DG_SENS.vegetationRenderKey=null;rec.spectralEnabled=false;rec.scannedAt=new Date().toISOString();dgSensDirty();const audit=dgSensScanAudit(rec);DG_SENS.status=_tvst("Uydu taraması tamamlandı: {profiled}/{total} hücrede yeterli gözlem, {diff} hücrede sınıf farkı. 2021 ham rasterı değişmedi.",{profiled:audit?.profiled||0,total:audit?.total||0,diff:audit?.transitions.reduce((n,x)=>n+x.cells,0)||0});
+  rec.profile=profile;rec.autoClassify=options.classify===true;DG_SENS.vegetationRenderKey=null;rec.spectralEnabled=false;rec.scannedAt=new Date().toISOString();dgSensDirty();const audit=dgSensScanAudit(rec);DG_SENS.status=_tvst("Uydu taraması tamamlandı: {profiled}/{total} hücrede yeterli gözlem, {diff} hücrede sınıf farkı. 2021 ham rasterı değişmedi.",{profiled:audit?.profiled||0,total:audit?.total||0,diff:audit?.transitions.reduce((n,x)=>n+x.cells,0)||0});
   if(autoWater)DG_SENS.status+=" OSM su/havuz sınırları otomatik değerlendirildi ("+autoWater+" nesne).";
   const unresolved=dgSensWaterBoundaryUnresolved();if(dgSensHasWaterFootprint()&&unresolved)DG_SENS.status+=" Su sınırı dışında "+unresolved+" hücre belirsiz; yanlış su alanı kabul edilmedi, bu hücreleri haritada tek tek sınıflandırın.";
   dgSensRefreshLayer();dgSensUpdateSummary();

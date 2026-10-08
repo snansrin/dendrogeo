@@ -2,8 +2,8 @@
  * The scientific 10m WorldCover grid is a REQUIRED input to the locked
  * Sentinel review. Keep this prerequisite but present it only as progress,
  * never as a second user-facing analysis or a duplicate map/report.
- * Does not write corrections, change class decisions, tweak thresholds or
- * mutate an accepted result. Published reports, verified map and PNG untouched.
+ * One spectral profile classifies the draft at neutral thresholds. Exact OSM
+ * footprints refine the same partition. Accepted results remain immutable.
  */
 (function(){
  "use strict";
@@ -39,9 +39,9 @@
  function validSurface(){
   const s=window.DG_LC_SENS?.state;
   const lc=window.DG_LANDCOVER?.getLast?.();
-  const cells=lc?.report?.cells||lc?.cells;
+  const cells=lc?.result?.cells;
   return !!s?.record&&!!s.geometry&&!!s.parkGeometry&&
-    !!lc&&(!Array.isArray(cells)||cells.length>0)&&!s.rawView;
+    Array.isArray(cells)&&cells.length>0&&!s.rawView;
  }
 
  // The grid knows OSM highway centerlines, but the locked scientific
@@ -87,7 +87,7 @@
    const id="way/"+el.id;if(seen.has(id))continue;seen.add(id);
    const points=el.geometry.filter(p=>Number.isFinite(p?.lon)&&Number.isFinite(p?.lat))
     .map(p=>[p.lon,p.lat]);
-   if(points.length<2||points.length>450)continue;
+   if(points.length<2)continue;
    list.push({id,points,...tag});
   }
   return list;
@@ -118,7 +118,7 @@
    catch(_){return{type:f.type,geometry:[]};}
   }).filter(item=>item.geometry?.length);
   const out=[];
-  for(const road of roads.slice(0,250)){
+  for(const road of roads){
    try{
     let geometry=dgSurfaceClip("intersection",roadFootprint(road,epsg),parkGeom);
     if(!geometry?.length)continue;
@@ -190,28 +190,32 @@
   if(typeof window.runLandCoverAnalysis!=="function"){
    progress("Park analizi modülü yüklenemedi. Yeniden deneyin.","error");return false;
   }
-  const token=++iteration;
+  const token=++iteration,park=typeof PARK_POLY!=="undefined"?PARK_POLY:null;
+  const beforeEpoch=window.DG_LC_SENS?.state?.epoch;
+  const current=()=>{
+   if(token!==iteration||park!==PARK_POLY)throw Error("Park değişti; önceki tarama uygulanmadı.");
+  };
   active=true;reportVisibility("pending");
   const btn=$(hookId);
   if(btn){btn.disabled=true;btn.textContent="⏳ Park analiz ediliyor…";}
-  progress("1/3 · Park sınırı ve 10 m raster hazırlanıyor…","working");
+  progress("Park sınırı ve yüzey verisi hazırlanıyor…","working");
   let ok=false;
   try{
    // The locked baseline builds DG_LC_LAST.report.cells. It also mounts
    // the approved review engine; its interim report stays visually hidden.
    await window.runLandCoverAnalysis();
-   if(token!==iteration)return false;
-   if(!validSurface())throw Error("10 m raster veya park tarama altyapısı hazır değil. İlk analiz sonucu gösterilmedi.");
-   progress("2/3 · Sentinel-2 taraması ve mevcut su/yol/bina sınırları inceleniyor…","working");
+   current();
+   if(beforeEpoch===window.DG_LC_SENS?.state?.epoch||!validSurface())throw Error("10 m raster veya park tarama altyapısı hazır değil. İlk analiz sonucu gösterilmedi.");
+   progress("Parkın yeşil alan, sert zemin, bina, su ve çıplak zemin sınıfları hesaplanıyor…","working");
    if(typeof dgSensScan!=="function")throw Error("Yüzey tarayıcısı hazır değil.");
-   const scanned=await dgSensScan();
-   if(token!==iteration)return false;
+   const scanned=await dgSensScan({classify:true});
+   current();
    if(scanned!==true)throw Error(window.DG_LC_SENS?.state?.status||"Uydu taraması tamamlanamadı.");
    // Same OSM ways used by grid exclusion, now exact sub-cell hard road
    // footprints in the review draft. Do not let the scan's water updater
    // change priority after these are installed.
    const roads=await applyGridRoads();
-   if(token!==iteration)return false;
+   current();
    if(roads.reason==="geometry-failed")
     throw Error("OSM yollarını güvenli biçimde yerleştirme başarısız; tarama kaydı korundu, yeniden deneyin.");
    if(roads.count){
@@ -219,27 +223,9 @@
       " dar yol izi sert zemine aktarıldı; "+roads.provisional+
       " iz malzeme etiketi içermediğinden saha kontrolü gerektiriyor.","working");
    }
-   // A secondary evidence-only recheck (different acquisition period) may
-   // resolve old raster-water shoreline pixels, never guesses/manual labels.
-   const water=window.DG_GIS_WATER_NEIGHBOUR;
-   const pending=water?.missingParts?.()?.length||0;
-   let outcome=null;
-   if(pending&&typeof water?.recheckMissing==="function"){
-    progress("3/3 · Su çekilme alanlarındaki "+pending+" hücre ek uydu kanıtıyla kontrol ediliyor…","working");
-    outcome=await water.recheckMissing();
-   }
-   if(token!==iteration)return false;
-   const unresolved=Number.isFinite(outcome?.remaining)?outcome.remaining:
-    (water?.missingParts?.()?.length||0);
    reportVisibility("ready");
-   const reviewed=Number(outcome?.resolved||0);
-   const roadNote=roads.count?" · OSM yol izi: "+roads.count+" (malzeme doğrulaması bekleyen: "+roads.provisional+")":"";
-   progress(unresolved>0?
-    "Tarama tamamlandı. Ek uydu kanıtıyla "+reviewed+" hücre çözüldü; "+
-     unresolved+" hücre bilimsel doğrulama bekliyor"+roadNote+
-     ". Bu alanlar incelenmeden sonuç kabul edilemez.":
-    "Park analizi tamamlandı. Güncel yüzey sonuçları tek kartta gösteriliyor"+roadNote+".",
-    unresolved>0||roads.provisional>0?"warning":"success");
+   const roadNote=roads.count?" · Yol izi: "+roads.count:"";
+   progress("Park analizi tamamlandı"+roadNote+". Sonucu kontrol ederek kabul edip kaydedin.","success");
    ok=true;
    return true;
   }catch(error){
@@ -284,7 +270,7 @@
    parkObserver.observe(park,{childList:true,subtree:false});
   }
  }
- window.DG_GIS_PARK_ANALYSIS={run,syncButton,candidateRoads,roadEvidence,hardRoadDrafts,applyGridRoads};
+ window.DG_GIS_PARK_ANALYSIS={get busy(){return active;},run,syncButton,candidateRoads,roadEvidence,hardRoadDrafts,applyGridRoads};
  if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",init,{once:true});
  else init();
 })();

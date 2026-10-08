@@ -456,7 +456,7 @@ function dgValSpectralPredict(m,sens,opts={}){
    *           ilkbaharda açıksa WorldCover 80 tanımıyla ("yılın çoğunda su")
    *           uyumlu biçimde SU sayılır. Sazlık ndviYear 0.5+ verir → yeşil. */
   if(opts.excludeWater!==true&&((mndwi>=T.mndwiWaterMin&&mndwi>=ndvi)||
-     (mndwiYear>=T.mndwiYearWaterMin&&
+     (opts.seasonalWater!==false&&mndwiYear>=T.mndwiYearWaterMin&&
       ndvi<T.canopyMax&&
       ndviYear<T.canopyMax)))return"water";
   /* 2) Yeşil: ya yaz medyanı güçlü ya YILLIK yeşillenme kanıtı (bahar

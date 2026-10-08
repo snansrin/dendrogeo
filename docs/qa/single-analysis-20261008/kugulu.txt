@@ -1,0 +1,41 @@
+🌳 AOI: Kuğulu Parkı (nominatim:way/10126955) · 42 köşe
+WorldCover analizi başladı.
+WorldCover tamamlandı; Sentinel-2 taraması başladı.
+
+══ A) WorldCover 2021 — değişmez ham raster ══
+park: 1.17 ha · hücre: 210 · süre: 10.4 sn · su rafine: 0 · yol rafine: 0
+  green       0.9 ha  %  76.6
+  water         0 ha  %     0
+  hard      0.275 ha  %  23.4
+  bare          0 ha  %     0
+  other         0 ha  %     0
+
+══ B) Sentinel-2 L2A medyan kompozit · latest ══
+dönem: 2026-06-10 – 2026-10-08 (güncel, son 120 gün) · süre: 21.5 sn
+sahneler: 2026-09-12 ☁%0 | 2026-06-21 ☁%6.4 | 2026-07-31 ☁%1.3 | 2026-08-20 ☁%1.3 | 2026-07-11 ☁%2 | 2026-07-01 ☁%0
+profilli: 210/210 · yetersiz: 0 · atlanan: 0
+su-kalıcılığı sahneleri: 0 → YOK
+
+══ C) Sınıf bazında indeks medyanları (fizik sağduyusu) ══
+  green  n=  147  NDVI 0.670  MNDWI -0.447  NDBI -0.241
+  hard   n=   63  NDVI 0.227  MNDWI -0.237  NDBI -0.033
+
+══ D) Otomatik uzlaşma (harita ↔ spektral) ══
+genel: %84.1 (145 aday · 23 uyuşmazlık)
+  green  %96.7  (✓118 ✗4 ❓4 ⬜0 kenar:21)
+  water  —  (✓0 ✗0 ❓0 ⬜0 kenar:0)
+  hard   %17.4  (✓4 ✗19 ❓3 ⬜0 kenar:37)
+  bare   —  (✓0 ✗0 ❓0 ⬜0 kenar:0)
+
+══ D2) Uyuşmazlık teşhisi (harita → spektral) ══
+  hard   → green:15, bare:4
+  green  → bare:3, hard:1
+  UYUŞMAYAN su hücreleri (n=0): yıllık maxMNDWI p25 0.000 · p50 0.000 · p75 0.000 | ndviMax p50 0.000 · p75 0.000
+  su MNDWI yüzdelikleri (n=0): p10 0.000 · p25 0.000 · p50 0.000 · p75 0.000
+
+══ D3) Ham ESA kod dağılımı + su grubu kod×spektral çaprazı ══
+  rawCounts: {"10":147,"50":63}
+  cok-zamanli kanit katkisi: yillik max ile sinifi DUZELEN hucre → su +0, yesil +0 (toplam 210)
+
+══ E) Karne plumbing (spektral sahte-referans — bilimsel hüküm değil) ══
+örnek: 20 · OA: %78.9 · κ: 0.25 · kapı: 🔴 KRİTİK (4 sebep)

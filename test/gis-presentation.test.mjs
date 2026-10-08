@@ -108,8 +108,8 @@ test('preview bars use original park card style, vivid locked class colors and c
  const latest=css.split('/* Reviewed surface-card parity · 2026-10-08.')[1];
  assert.ok(latest,'final surface preview style should override historical narrow 3-column layout');
  assert.match(latest,/grid-template-columns:minmax\(0,1fr\) auto/);
- assert.match(latest,/grid-template-rows:auto 10px/);
- assert.match(latest,/height:10px/);
+ assert.match(latest,/grid-template-rows:auto 6px/);
+ assert.match(latest,/height:6px/);
  assert.match(latest,/border-left:4px solid var\(--dg-ux-surface-color,#94a3b8\)/);
  assert.match(latest,/background:var\(--dg-ux-surface-color,#94a3b8\)!important/);
  assert.match(latest,/font:700 \.78rem\/1\.4 var\(--f-ui\)/);

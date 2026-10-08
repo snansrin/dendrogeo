@@ -246,3 +246,29 @@ test('missing surface geometry makes review parts empty and safe',()=>{const a=a
 test('surface clipping removes millimetre-collapsed vertices before sweep-line processing',()=>{const a=app();fixture(a);const pc=a.ctx.window.polygonClipping,intersection=pc.intersection;let sanitized=false;pc.intersection=(left,right)=>{sanitized=left[0][0].length===5;return intersection(left,right);};a.ctx.noisy=[[[500000,1000],[500010,1000],[500010,1010],[500010.0001,1010],[500000,1010],[500000,1000]]];a.ctx.clipped=a.run('dgSurfaceClip("intersection",[noisy],DG_SENS.parkGeometry)');assert.equal(sanitized,true);assert.ok(Math.abs(a.run('dgSurfaceArea(clipped)')-100)<.001);});
 test('sweep-line topology failures become a contained boundary error',()=>{const a=app();fixture(a);const pc=a.ctx.window.polygonClipping,intersection=pc.intersection;pc.intersection=()=>{throw Error('Unable to find segment #2005777 in SweepLine tree.');};assert.throws(()=>a.run('dgSurfaceClip("intersection",DG_SENS.parkGeometry,DG_SENS.parkGeometry)'),/çakışan veya bozuk köşe/);pc.intersection=intersection;});
 test('stale and busy surface layers cannot handle current map clicks',()=>{const a=app();fixture(a);const state=a.run('({epoch:DG_SENS.epoch,geometry:DG_SENS.geometry})');assert.equal(a.run(`dgSensLayerClickIsCurrent(${state.epoch},DG_SENS.geometry)`),true);a.run('DG_SENS.busy=true');assert.equal(a.run(`dgSensLayerClickIsCurrent(${state.epoch},DG_SENS.geometry)`),false);a.run('DG_SENS.busy=false;DG_SENS.epoch++');assert.equal(a.run(`dgSensLayerClickIsCurrent(${state.epoch},DG_SENS.geometry)`),false);a.run('DG_SENS.epoch--;DG_SENS.geometry=null');assert.equal(a.run(`dgSensLayerClickIsCurrent(${state.epoch},null)`),false);});
+
+test('single automatic scan classifies neutral draft evidence while raw cells, manual decisions and accepted history stay intact',async()=>{
+ const a=app();fixture(a);
+ a.run('DG_SENS.record.acceptedResult={id:"history"};dgSensRender=()=>{};dgSensRefreshLayer=()=>{};dgSensSave=async()=>true;dgSensUpdateSummary=()=>{}');
+ const history=a.run('DG_SENS.record.acceptedResult');
+ a.ctx.window.DG_LC_S2.profile=async()=>({cells:{'0:0':{obs:5,ndvi:.1,mndwi:-.15,ndbi:.3},'0:1':{obs:5,ndvi:.6,mndwi:0,ndbi:-.1}}});
+ assert.equal(await a.run('dgSensScan({classify:true})'),true);
+ assert.equal(a.run('DG_SENS.record.period'),'latest');
+ assert.equal(a.run('dgSensEffective(cells[0])'),'hard');
+ assert.equal(a.run('dgSensEffective(cells[1])'),'green');
+ assert.equal(a.run('DG_LC_LAST.result.cells[0].classKey'),'green');
+ assert.equal(a.run('DG_SENS.record.acceptedResult'),history);
+ assert.equal(a.run('dgSensAreas().hard'),100);
+ a.run('DG_SENS.record.corrections["0:0"]={to:"bare",method:"visual-cell"};DG_SENS.visualVersion++');
+ assert.equal(a.run('dgSensEffective(cells[0])'),'bare');
+});
+
+test('automatic scan preserves source class on insufficient evidence and never invents withdrawn seasonal water',()=>{
+ const a=app();fixture(a);
+ a.run('DG_SENS.editing=true;DG_SENS.record.autoClassify=true;DG_SENS.record.profile={cells:{"0:0":{obs:2,ndvi:.1,mndwi:-.15,ndbi:.3},"0:1":{obs:5,ndvi:.1,mndwi:-.15,ndbi:.3,mndwiConfirmedYear:.9}}}');
+ assert.equal(a.run('dgSensEffective(cells[0])'),'green');
+ assert.equal(a.run('dgSensEffective(cells[1])'),'hard');
+ a.run('cells[0].classKey="water";cells[0].rasterClassKey="water"');
+ assert.equal(a.run('dgSensWaterOutsideClass(cells[0])'),'water');
+ assert.equal(a.run('DG_LC_LAST.result.cells[1].classKey'),'green');
+});

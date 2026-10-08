@@ -1,0 +1,46 @@
+🌳 AOI: Göksu Parkı (nominatim:way/423602737) · 111 köşe
+WorldCover analizi başladı.
+WorldCover tamamlandı; Sentinel-2 taraması başladı.
+
+══ A) WorldCover 2021 — değişmez ham raster ══
+park: 50.01 ha · hücre: 7864 · süre: 14.3 sn · su rafine: 0 · yol rafine: 0
+  green    22.216 ha  % 44.42
+  water    12.503 ha  %    25
+  hard     14.717 ha  % 29.43
+  bare      0.577 ha  %  1.15
+  other         0 ha  %     0
+
+══ B) Sentinel-2 L2A medyan kompozit · latest ══
+dönem: 2026-06-10 – 2026-10-08 (güncel, son 120 gün) · süre: 30.0 sn
+sahneler: 2026-09-12 ☁%0 | 2026-06-21 ☁%6.4 | 2026-07-31 ☁%1.3 | 2026-08-20 ☁%1.3 | 2026-07-11 ☁%2 | 2026-07-01 ☁%0
+profilli: 7864/7864 · yetersiz: 0 · atlanan: 0
+su-kalıcılığı sahneleri: 0 → YOK
+
+══ C) Sınıf bazında indeks medyanları (fizik sağduyusu) ══
+  hard   n= 2422  NDVI 0.255  MNDWI -0.284  NDBI -0.043
+  green  n= 3453  NDVI 0.549  MNDWI -0.425  NDBI -0.162
+  bare   n=   89  NDVI 0.149  MNDWI -0.248  NDBI -0.020
+  water  n= 1900  NDVI -0.091  MNDWI 0.322  NDBI -0.052
+
+══ D) Otomatik uzlaşma (harita ↔ spektral) ══
+genel: %69.1 (6999 aday · 2161 uyuşmazlık)
+  green  %88.2  (✓2826 ✗378 ❓117 ⬜0 kenar:132)
+  water  %60.6  (✓1121 ✗728 ❓51 ⬜0 kenar:0)
+  hard   %46.3  (✓867 ✗1005 ❓253 ⬜0 kenar:297)
+  bare   %32.4  (✓24 ✗50 ❓11 ⬜0 kenar:4)
+
+══ D2) Uyuşmazlık teşhisi (harita → spektral) ══
+  hard   → green:664, bare:332, water:9
+  green  → hard:343, bare:35
+  bare   → hard:41, water:1, green:8
+  water  → green:116, hard:480, bare:132
+  UYUŞMAYAN su hücreleri (n=779): yıllık maxMNDWI p25 -0.166 · p50 -0.034 · p75 0.155 | ndviMax p50 0.172 · p75 0.315
+  su MNDWI yüzdelikleri (n=1900): p10 -0.313 · p25 -0.111 · p50 0.322 · p75 0.498
+
+══ D3) Ham ESA kod dağılımı + su grubu kod×spektral çaprazı ══
+  rawCounts: {"10":1577,"30":1872,"40":4,"50":2422,"60":89,"80":1900}
+  ESA 80 → ambiguous:51, green:116, hard:480, bare:132, water:1121
+  cok-zamanli kanit katkisi: yillik max ile sinifi DUZELEN hucre → su +0, yesil +0 (toplam 7864)
+
+══ E) Karne plumbing (spektral sahte-referans — bilimsel hüküm değil) ══
+örnek: 40 · OA: %71.2 · κ: 0.59 · kapı: 🔴 KRİTİK (4 sebep)

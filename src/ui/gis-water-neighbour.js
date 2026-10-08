@@ -176,7 +176,7 @@
  }
  function queue(){
   if(pendingTimer)return;
-  pendingTimer=setTimeout(()=>{pendingTimer=0;restore();syncWaterReviewAction();maybeRecheckAfterScan();},200);
+  pendingTimer=setTimeout(()=>{pendingTimer=0;restore();},200);
  }
  // #lcSens is created only when a park is selected (parkInfo.innerHTML),
  // AFTER DOMContentLoaded. An observer installed on a missing element silently

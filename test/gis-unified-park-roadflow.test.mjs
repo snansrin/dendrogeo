@@ -39,7 +39,7 @@ function harness(){
   window:{DG_LC_SENS:{state},DG_SURFACE_OSM:{boundary:JSON.stringify(parkPoly),elements:elementsOsm},
    DG_LANDCOVER:{getLast:()=>({result:{cells:[{key:'a'}]}})},
    DG_GIS_WATER_NEIGHBOUR:{missingParts:()=>[],recheckMissing:async()=>({remaining:0,resolved:0})},
-   runLandCoverAnalysis:async()=>{posts.push('baseline');}},
+   runLandCoverAnalysis:async()=>{posts.push('baseline');state.epoch++;}},
   PARK_POLY:parkPoly,document,Date,setTimeout,clearTimeout,console,
   dgSurfaceProject:(pts)=>pts.map(p=>[p[0]*100000,p[1]*100000]),
   dgSurfaceClip:(operation,...polys)=>{
@@ -105,7 +105,7 @@ test('Park Analizi replaces two sequential user operations with one; only review
  assert.equal(h.report.dataset.dgUnifiedPhase,'ready');
  assert.equal(h.btn.textContent,'🛰 Park Analizi');
  assert.equal(h.btn.disabled,false);
- assert.match(h.status.textContent,/OSM yol izi: 3/);
+ assert.match(h.status.textContent,/Yol izi: 3/);
  assert.equal(h.state.record.objectFeatures.length,5);
 });
 test('a failed initial raster must not be shown as a completed review or accepted automatically',async()=>{
@@ -116,12 +116,12 @@ test('a failed initial raster must not be shown as a completed review or accepte
  assert.match(h.status.textContent,/raster unavailable/);
  assert.ok(!h.logs.includes('draftSaved'));
 });
-test('existing scanned map is never treated as scientific evidence of ALL 62 resolved shoreline pixels',async()=>{
+test('one analysis does not launch a second shoreline profile or report unsupported resolution',async()=>{
  const h=harness();h.global.window.DG_GIS_WATER_NEIGHBOUR={
-  missingParts:()=>Array(62).fill('unresolved'),recheckMissing:async()=>({remaining:62,resolved:0})};
+  missingParts:()=>Array(62).fill('unresolved'),recheckMissing:async()=>{throw Error('second scan forbidden');}};
  assert.equal(await h.api.run(),true);
- assert.match(h.status.textContent,/62 hücre bilimsel doğrulama bekliyor/);
- assert.equal(h.status.dataset.phase,'warning');
+ assert.doesNotMatch(h.status.textContent,/hücre.*çözüldü|su çekil/i);
+ assert.equal(h.status.dataset.phase,'success');
  assert.equal(h.report.dataset.dgUnifiedPhase,'ready','review preview remains visible while acceptance is still guarded');
 });
 test('locked engine untouched, old scientific WC prerequisite is retained but duplicate report hidden',()=>{
@@ -133,7 +133,7 @@ test('locked engine untouched, old scientific WC prerequisite is retained but du
  const boot=load('partials/boot.html');
  const sw=load('sw.js');
  assert.match(flow,/await window\.runLandCoverAnalysis\(\)/);
- assert.match(flow,/const scanned=await dgSensScan\(\)/);
+ assert.match(flow,/const scanned=await dgSensScan\(\{classify:true\}\)/);
  assert.match(flow,/const roads=await applyGridRoads\(\)/);
  assert.match(flow,/reportVisibility\("pending"\)/);
  assert.match(flow,/reportVisibility\("ready"\)/);
@@ -174,4 +174,28 @@ test('real polygon clipping: road strip is kept inside park and cannot cover sci
  assert.ok(area>0&&area<500,'real vector path area is not an entire 10m raster cell');
  assert.ok(overlapWater<0.01,'real mapped lake is never relabeled hard');
  assert.ok(overlapBuilding<0.01,'real mapped building is never relabeled hard');
+});
+
+test('failed baseline cannot reuse the previous park analysis as a successful scan',async()=>{
+ const h=harness();h.global.window.runLandCoverAnalysis=async()=>{};
+ assert.equal(await h.api.run(),false);
+ assert.deepEqual(h.posts,[]);
+ assert.equal(h.api.busy,false);
+});
+test('park change during scan prevents road updates and releases the single-flight guard',async()=>{
+ const h=harness();h.global.dgSensScan=async()=>{h.global.PARK_POLY=[];return true;};
+ assert.equal(await h.api.run(),false);
+ assert.ok(!h.logs.includes('partition'));
+ assert.equal(h.api.busy,false);
+ assert.equal(h.btn.disabled,false);
+});
+test('reentrant Park Analysis does not launch overlapping scans',async()=>{
+ const h=harness();let release;
+ h.global.dgSensScan=()=>new Promise(r=>{release=r;});
+ const first=h.api.run();await new Promise(r=>setTimeout(r,0));
+ assert.equal(h.api.busy,true);
+ assert.equal(await h.api.run(),false);
+ release(true);assert.equal(await first,true);
+ assert.equal(h.api.busy,false);
+ assert.equal(h.posts.filter(x=>x==='baseline').length,1);
 });

@@ -187,13 +187,13 @@ test('real startup order: water retry attaches to lcSens CREATED AFTER DOMConten
  observers[1].trigger();
  while(timeouts.length)timeouts.shift()();
  await new Promise(resolve=>setImmediate(resolve));
- assert.equal(profileCalls,1,'first real scan triggers the missing retry');
- assert.equal(rec.profile.cells['1:1'].obs,4);
- assert.match(status.textContent,/bilimsel olarak çözülen: 1/);
+ assert.equal(profileCalls,0,'rendering must never launch a second scan');
+ assert.equal(rec.profile.cells['1:1'],undefined);
+ assert.equal(status.textContent,'');
  observers[1].trigger();
  while(timeouts.length)timeouts.shift()();
  await new Promise(resolve=>setImmediate(resolve));
- assert.equal(profileCalls,1,'re-render never triggers redundant rechecks');
+ assert.equal(profileCalls,0,'re-render never triggers redundant rechecks');
  host={id:'lcSens-new'};
  observers[0].trigger();
  assert.equal(observers[1].disconnected,true);

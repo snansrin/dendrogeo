@@ -1,0 +1,46 @@
+🌳 AOI: Başkent Millet Bahçesi (nominatim:way/1038047711) · 143 köşe
+WorldCover analizi başladı.
+WorldCover tamamlandı; Sentinel-2 taraması başladı.
+
+══ A) WorldCover 2021 — değişmez ham raster ══
+park: 56.77 ha · hücre: 8919 · süre: 12.6 sn · su rafine: 0 · yol rafine: 0
+  green    43.122 ha  % 75.96
+  water     0.487 ha  %  0.86
+  hard      4.697 ha  %  8.27
+  bare      8.466 ha  % 14.91
+  other         0 ha  %     0
+
+══ B) Sentinel-2 L2A medyan kompozit · latest ══
+dönem: 2026-06-10 – 2026-10-08 (güncel, son 120 gün) · süre: 27.9 sn
+sahneler: 2026-09-12 ☁%0 | 2026-06-21 ☁%6.4 | 2026-07-31 ☁%1.3 | 2026-08-20 ☁%1.3 | 2026-07-11 ☁%2 | 2026-07-01 ☁%0
+profilli: 8919/8919 · yetersiz: 0 · atlanan: 0
+su-kalıcılığı sahneleri: 0 → YOK
+
+══ C) Sınıf bazında indeks medyanları (fizik sağduyusu) ══
+  hard   n=  866  NDVI 0.183  MNDWI -0.272  NDBI -0.009
+  green  n= 6625  NDVI 0.563  MNDWI -0.463  NDBI -0.152
+  bare   n= 1354  NDVI 0.137  MNDWI -0.248  NDBI 0.023
+  water  n=   74  NDVI 0.025  MNDWI -0.014  NDBI -0.056
+
+══ D) Otomatik uzlaşma (harita ↔ spektral) ══
+genel: %72.9 (8139 aday · 2208 uyuşmazlık)
+  green  %84.8  (✓5324 ✗953 ❓215 ⬜0 kenar:133)
+  water  %0  (✓0 ✗74 ❓0 ⬜0 kenar:0)
+  hard   %52.5  (✓318 ✗288 ❓34 ⬜0 kenar:226)
+  bare   %24.5  (✓289 ✗893 ❓65 ⬜0 kenar:107)
+
+══ D2) Uyuşmazlık teşhisi (harita → spektral) ══
+  hard   → green:156, bare:132
+  green  → hard:841, bare:110, water:2
+  bare   → hard:770, green:123
+  water  → bare:58, hard:15, green:1
+  UYUŞMAYAN su hücreleri (n=74): yıllık maxMNDWI p25 -0.040 · p50 0.033 · p75 0.086 | ndviMax p50 0.042 · p75 0.084
+  su MNDWI yüzdelikleri (n=74): p10 -0.323 · p25 -0.089 · p50 -0.013 · p75 0.036
+
+══ D3) Ham ESA kod dağılımı + su grubu kod×spektral çaprazı ══
+  rawCounts: {"10":1609,"30":3876,"40":1140,"50":866,"60":1354,"80":74}
+  ESA 80 → bare:58, hard:15, green:1
+  cok-zamanli kanit katkisi: yillik max ile sinifi DUZELEN hucre → su +0, yesil +0 (toplam 8919)
+
+══ E) Karne plumbing (spektral sahte-referans — bilimsel hüküm değil) ══
+örnek: 40 · OA: %80.8 · κ: 0.50 · kapı: 🔴 KRİTİK (2 sebep)
