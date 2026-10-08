@@ -180,33 +180,3 @@ jobs:
               sys.exit(1)
           print('✅ Canlı site depoyla birebir aynı.')
           PY
-
-  gis_distance_labels_build:
-    name: Measure segment labels build and locked-source regression
-    if: github.event_name == 'pull_request' && github.head_ref == 'fix/measure-segment-distance-labels-20261008'
-    runs-on: ubuntu-latest
-    permissions:
-      contents: write
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          ref: fix/measure-segment-distance-labels-20261008
-          fetch-depth: 0
-      - uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-      - run: npm ci
-      - name: Build and check all tests and locked scientific files
-        run: |
-          npm run build
-          npm run check
-      - name: Restore CI and commit new asset versions
-        run: |
-          git fetch origin main
-          git show origin/main:.github/workflows/ci.yml > .github/workflows/ci.yml
-          git add index.html .github/workflows/ci.yml
-          git config user.name "DendroGeo GIS QA"
-          git config user.email "gis-ui-repair@users.noreply.github.com"
-          git commit -m "build(gis): refresh midpoint tooltip asset hashes"
-          git pull --rebase origin fix/measure-segment-distance-labels-20261008
-          git push origin HEAD:fix/measure-segment-distance-labels-20261008
