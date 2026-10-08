@@ -20,7 +20,8 @@ function dgLcCachedOsm(bbox){
 async function dgLcOsmData(bbox){
  const boundary=JSON.stringify(typeof PARK_POLY==="undefined"?null:PARK_POLY);
  const pending=window.DG_SURFACE_OSM_PENDING;
- if(pending?.boundary===boundary)await pending.promise.catch(()=>false);
+ const detailedAlreadyAttempted=pending?.boundary===boundary;
+ if(detailedAlreadyAttempted)await pending.promise.catch(()=>false);
  // Keep the last valid same-park geometry when a refresh is offline.
  const coverage=dgLcCachedOsm(bbox);
  if(coverage?.elements?.some(dgLcIsWaterElement))return coverage;
@@ -37,6 +38,9 @@ async function dgLcOsmData(bbox){
    return result;
   }
   if(coverage)return coverage;
+  // Do not repeat a failed detailed Overpass request inside the same
+  // workflow: the independent OSM lookup above is the bounded recovery.
+  if(detailedAlreadyAttempted)return null;
   // Detailed OSM may fail or time out; a smaller independent query must
   // still be attempted (previous code returned null without trying).
   const query='[out:json][timeout:25];(nwr["natural"="water"]('+b+');nwr["waterway"="riverbank"]('+b+');nwr["leisure"="swimming_pool"]('+b+');nwr["landuse"~"reservoir|basin"]('+b+');way["highway"]('+b+');way["area:highway"]('+b+'););out geom;';
