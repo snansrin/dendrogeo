@@ -56,7 +56,7 @@
  // the frozen three-observation, index-based validator exactly.
  const LAND=new Set(["green","hard","bare"]);
  const CELL_LIMIT=120;
- let rechecking=false;
+ let rechecking=false,lastReviewMessage="";
  const automaticSessions=new WeakMap();
  function maybeRecheckAfterScan(){
   const s=state(),rec=s?.record;
@@ -96,7 +96,13 @@
   const action=document.getElementById("dgUxRetryWater");
   rechecking=true;if(action)action.disabled=true;
   const output=document.getElementById("dgUxDraftStatus");
-  const say=message=>{if(output)output.textContent=message;};
+  const say=message=>{
+   lastReviewMessage=message;
+   // The core rebuilds its panel after the scan; never write to a detached
+   // old status node and lose the second-pass result.
+   const current=document.getElementById("dgUxDraftStatus");
+   if(current)current.textContent=message;
+  };
   say(queue.length+" belirsiz hücre için yeni Sentinel-2 gözlemleri inceleniyor…");
   try{
    const mode=rec.period==="latest"?"ytd":"latest";
@@ -107,13 +113,13 @@
    if(s.epoch!==epoch||s.record!==rec||rec.fingerprint!==src||
       s.partitionVersion!==part||s.rawView||s.busy||s.saving||s.draw||s.brush)
     return{checked:0,resolved:0,remaining:null,reason:"park-changed"};
-   const newData={};const byClass={};
+   const newData={};const byClass={},rejected={nodata:0,ambiguous:0,missing:0};
    for(const {key} of queue){
     if(rec.corrections?.[key]?.method==="visual-cell")continue;
-    const e=profile?.cells?.[key];if(!e)continue;
+    const e=profile?.cells?.[key];if(!e){rejected.missing++;continue;}
     const target=window.DG_LC_VALIDATE.spectralLandPredict(e,
       {green:50,water:50,hard:50,bare:50});
-    if(!LAND.has(target))continue;
+    if(!LAND.has(target)){rejected[target==="nodata"?"nodata":"ambiguous"]++;continue;}
     newData[key]=e;
     byClass[target]=(byClass[target]||0)+1;
    }
@@ -138,11 +144,12 @@
    }
    const remaining=typeof dgSensWaterBoundaryUnresolved==="function"?
      dgSensWaterBoundaryUnresolved():Math.max(0,pending.length-resolved);
-   say("Uydu kanıtıyla "+resolved+" hücre çözüldü ("+
-    Object.entries(byClass).map(([k,n])=>k+": "+n).join(", ")+
-    "); "+remaining+" hücre için yeterli bilimsel kanıt yok. "+
-    (remaining?"Belirsiz hücreleri haritada inceleyin.":"Kabul et ve kaydet ile sonucu doğrulayın."));
-   return{checked:queue.length,resolved,remaining,byClass};
+   say("Uyduyla tekrar incelendi: "+queue.length+" hücre; bilimsel olarak çözülen: "+
+    resolved+" ("+Object.entries(byClass).map(([k,n])=>k+": "+n).join(", ")+
+    "); kalan: "+remaining+". Kanıt özeti: görüntü/veri yok "+rejected.missing+
+    ", yeterli gözlem yok "+rejected.nodata+", kararsız spektrum "+rejected.ambiguous+". "+
+    (remaining?"Kalanları haritada doğrulamadan kabul edilemez.":"Sonucu kontrol ederek Kabul et ve kaydet yapın."));
+   return{checked:queue.length,resolved,remaining,byClass,rejected};
   }catch(error){
    const message="Eksik hücrelere yönelik uydu kontrolü tamamlanamadı: "+String(error?.message||error);
    say(message);return{checked:queue.length,resolved:0,remaining:pending.length,reason:"service-error"};
@@ -150,6 +157,8 @@
  }
  function syncWaterReviewAction(){
   const section=document.getElementById("dgUxDraftSave"),s=state();
+  const status=document.getElementById("dgUxDraftStatus");
+  if(lastReviewMessage&&status&&status.textContent!==lastReviewMessage)status.textContent=lastReviewMessage;
   if(!section||!s?.record||!s.geometry)return;
   const row=section.querySelector?.(".dg-ux-draft-actions");if(!row)return;
   let button=document.getElementById("dgUxRetryWater");
