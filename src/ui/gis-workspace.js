@@ -96,6 +96,14 @@
   }
   if(menu.open)menuPosition(menu);
  }
+ function syncGroupLayout(){
+  const host=$("liveAnalysis");if(!host)return;
+  const groups=[...host.querySelectorAll(".card .lbl")].filter(n=>n.textContent.trim()==="Grup Dağılımı");
+  for(const label of groups){
+   const stats=label.nextElementSibling;
+   if(stats?.tagName==="DIV")stats.classList.add("dg-ux-group-summary");
+  }
+ }
  function syncSpecies(){
   const host=$("liveAnalysis");
   if(!host)return;
@@ -242,6 +250,7 @@
  }
  function sync(){
   syncPark();
+  syncGroupLayout();
   syncSpecies();
   syncMapTools();
   const bar=$("surfaceMenuBar");
