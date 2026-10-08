@@ -36,7 +36,7 @@
   sat:"Tiles © Esri, Maxar, Earthstar Geographics, GIS User Community",
   topo:"© OpenTopoMap (CC BY-SA) · © OpenStreetMap contributors (ODbL)"
  };
- const baseChoice=()=>read("pngBg")?.value||"vector";
+ const baseChoice=()=>read("dgUxQuickPngBase")?.value||read("pngBg")?.value||"vector";
  const lonAt=(x,z)=>x/2**z*360-180;
  const latAt=(y,z)=>Math.atan(Math.sinh(Math.PI*(1-2*y/2**z)))*180/Math.PI;
  const tileX=(lon,z)=>Math.floor((lon+180)/360*2**z);
