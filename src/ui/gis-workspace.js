@@ -63,7 +63,7 @@
  }
  function makeOutput(){
   const menu=el("details","dg-editor-menu dg-ux-output-menu");
-  menu.dataset.menuOwner="park";
+  menu.dataset.menuOwner="workspace";
   menu.dataset.menuOrder="10";
   const summary=el("summary");
   summary.innerHTML=window.DG_EDITOR_UI?.menuLabel?.("file","Dosya")||"Dosya";
