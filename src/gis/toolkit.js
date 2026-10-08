@@ -54,7 +54,8 @@ function openPanel(){
  heading.append(el("strong","", "GIS çalışma araçları"),el("small","", "Ölçüm · sorgu · koordinat · QGIS"));
  const search=group(body,"Konum bul","Koordinat (enlem, boylam) veya yer adıyla arama.");
  const searchRow=row(search);
- const q=field("ENLEM, BOYLAM VEYA YER ADI","dgGisSearch","39.99, 32.65 veya park adı");
+ const q=el("label","dg-gis-field");
+ q.innerHTML='<span class="dg-png-label">ENLEM, BOYLAM VEYA YER ADI</span><input id="dgGisSearch" class="dg-png-input" placeholder="39.99, 32.65 veya park adı">';
  searchRow.append(q,button("Ara",searchPlace,"primary sm"));
  q.querySelector("input").addEventListener("keydown",e=>{if(e.key==="Enter"){e.preventDefault();searchPlace();}});
  const m=group(body,"Ölçüm ve sorgulama","Haritaya tıklayarak köşe ekle. Çift tıkla tamamla; dokunmatik cihazda ✓ kullan.");
@@ -83,7 +84,8 @@ function openPanel(){
  const legend=el("div","dg-gis-legend");legend.id="dgGisLegend";layers.append(legend);
  layers.append(button("↻ Katman listesini güncelle",updateLayers));
  const nav=group(body,"Konum ve saha","Geçici yer işaretleri yalnız bu tarayıcıda saklanır.");
- const bookmarkName=field("YER İŞARETİ ADI","dgGisBookmarkName","Örneğin: kuzey giriş");
+ const bookmarkName=el("label","dg-gis-field");
+ bookmarkName.innerHTML='<span class="dg-png-label">YER İŞARETİ ADI</span><input id="dgGisBookmarkName" class="dg-png-input" placeholder="Örneğin: kuzey giriş">';
  nav.append(bookmarkName);
  const bookmarkActions=row(nav);
  bookmarkActions.append(button("☆ Konumu kaydet",saveBookmark),button("◎ Konumumu bul",locate),button("▣ Ölçek",toggleScale));
