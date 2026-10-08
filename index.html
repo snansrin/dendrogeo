@@ -247,7 +247,7 @@
 <script src="src/utils/truncation.js?v=f43c76b3" defer></script>
 <!-- Faz 7: geotiff (317 KB) ve chart.js (208 KB) artık SENKRON yüklenmiyor;
      src/utils/lazylibs.js ihtiyaç anında enjekte eder (LULC analizi / panel grafiği). -->
-<script id="dgRuntimeBuild" type="application/json">"6267cedeb6cfe711"</script>
+<script id="dgRuntimeBuild" type="application/json">"157e55def68587b3"</script>
 <!-- Verified fallback OSM water geometry, independent of the lazy raster engine. -->
 <script src="src/services/osm-water-backup.js?v=b3429cdc" defer></script>
 <script src="src/utils/lazylibs.js?v=19763039" defer></script>
@@ -309,7 +309,7 @@
 <link rel="stylesheet" href="css/ui-standard.css?v=cf5fc000">
 <link rel="stylesheet" href="css/academic-profile.css?v=488be7d0">
 <!-- GIS workspace: scoped presentation, keeps locked engine and theme untouched. -->
-<link rel="stylesheet" href="css/gis-workspace.css?v=9811470e">
+<link rel="stylesheet" href="css/gis-workspace.css?v=2d21e06e">
 </head>
 <body class="dg-app">
 <a class="dg-skip" href="#main">İçeriğe atla</a>
@@ -1245,11 +1245,13 @@
 <script src="src/ui/landing.js?v=96e1176c" defer></script>
 <script src="src/ui/shell.js?v=61caa854" defer></script>
 <!-- Accessible GIS workspace controls; presentation-only module. -->
-<script src="src/ui/gis-workspace.js?v=a7b3e987" defer></script>
+<script src="src/ui/gis-workspace.js?v=0aa5fe56" defer></script>
 <!-- Account-backed park surface drafts: preserve pending-water evidence. -->
 <script src="src/ui/gis-project-draft.js?v=5f771a1c" defer></script>
 <!-- Provenance-marked nearest-neighbour proposal for receded-water cells; unchanged locked engine. -->
 <script src="src/ui/gis-water-neighbour.js?v=a5e496a5" defer></script>
+<!-- One Park Analysis: initial raster is only a hidden scientific prerequisite; grid OSM hard-road vectors remain exact draft footprints. -->
+<script src="src/ui/gis-analysis-flow.js?v=dd7a7416" defer></script>
 <!-- PNG vector output adapter: captures current reviewed geometry and relative NDVI. -->
 <script src="src/ui/gis-export.js?v=3adb8b5f" defer></script>
 
