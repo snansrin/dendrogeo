@@ -81,6 +81,11 @@ test('mobile overflow and toast layer are addressed without changing locked CSS 
  assert.match(style, /@media\(max-width:360px\)/);
  assert.match(style, /#v-map #lcSens \.dg-sens-actions/);
  assert.match(ui,/dg-ux-group-summary/);
+ const mobile=style.slice(style.indexOf('/* Oct 2026 mobile polish'));
+ assert.match(mobile,/#toastWrap\{[\s\S]*?top:max\(12px,env\(safe-area-inset-top\) \+ 12px\)!important/);
+ assert.match(mobile,/#toastWrap\{[\s\S]*?bottom:auto!important/);
+ assert.match(mobile,/#parkSurfaceAction>\.dg-png-btn\{[\s\S]*?white-space:normal/);
+ assert.match(mobile,/#parkSurfaceAction>\.dg-png-head\{[\s\S]*?grid-template-columns:minmax\(0,1fr\)/);
 });
 test('boot, SW and index will expose PNG adapter after locked exporter',()=>{
  const boot=file('partials/boot.html'),sw=file('sw.js'),index=file('index.html');

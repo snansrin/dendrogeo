@@ -647,13 +647,25 @@
 }
 #toastWrap .toast{background:var(--surface);box-shadow:var(--sh)}
 @media(max-width:700px){
-  /* Messages appear below the GIS workspace rather than beneath its sticky menu. */
+  /* Keep alerts at the top of the viewport; bottom toasts covered mobile controls. */
   #toastWrap{
-    top:auto!important;
-    bottom:calc(12px + env(safe-area-inset-bottom))!important;
+    top:max(12px,env(safe-area-inset-top) + 12px)!important;
+    bottom:auto!important;
     left:10px!important;right:10px!important;
     width:auto!important;
     max-height:min(38dvh,320px);
+  }
+  #v-map #parkInfo #parkSurfaceAction>.dg-png-btn{
+    display:flex;width:100%;min-width:0;max-width:100%;
+    white-space:normal;overflow-wrap:anywhere;line-height:1.35;
+    text-align:center;
+  }
+  #v-map #parkInfo #parkSurfaceAction>.dg-png-head{
+    display:grid;grid-template-columns:minmax(0,1fr);gap:6px;
+    width:100%;min-width:0;max-width:100%;
+  }
+  #v-map #parkInfo #parkSurfaceAction .dg-png-badge{
+    max-width:100%;white-space:normal;overflow-wrap:anywhere;
   }
   #v-map #parkInfo #parkSurfaceAction .dg-png-sub{font-size:.71rem;line-height:1.55}
   #v-map #liveAnalysis .dg-ux-species-row{padding:9px 7px}

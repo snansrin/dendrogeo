@@ -9,9 +9,18 @@ function dgSurfaceUnproject(geom,epsg){const old=DG_SURFACE_WGS_CACHE.get(geom);
 function dgSurfaceArea(geom){let total=0;for(const poly of geom||[])for(let i=0;i<poly.length;i++){const r=poly[i];let area=0;for(let j=0;j<r.length;j++){const p=r[j],q=r[(j+1)%r.length];area+=p[0]*q[1]-q[0]*p[1];}total+=(i? -1:1)*Math.abs(area)/2;}return Math.max(0,total);}
 function dgSurfaceClip(op,...geoms){
  const pc=window.polygonClipping;if(!pc||typeof pc[op]!=="function")throw Error("Sınır hesaplama modülü yüklenmedi.");
- const input=geoms.map(dgSurfaceClean);
- try{return dgSurfaceClean(pc[op](...input));}
- catch(e){if(!/Unable to find segment|SweepLine tree/i.test(String(e?.message||e)))throw e;throw Error("OSM sınırında çakışan veya bozuk köşe bulundu. Geçersiz nesne atlandı.");}
+ const input=geoms.map(dgSurfaceClean),points=input.flat(3);
+ if(!points.length)return [];
+ // polygon-clipping's sweep line uses floating-point event ordering. UTM
+ // coordinates around 4,400,000 m lose useful precision in that ordering even
+ // though the input is already snapped to millimetres. Translate every operand
+ // by the same whole-metre origin before overlay, then restore it exactly.
+ // Integer translation preserves all snapped coordinates and polygon areas.
+ const origin=points.reduce((b,p)=>[Math.min(b[0],p[0]),Math.min(b[1],p[1])],[Infinity,Infinity]),ox=Math.floor(origin[0]),oy=Math.floor(origin[1]);
+ const shift=(geom,dx,dy)=>geom.map(poly=>poly.map(ring=>ring.map(p=>[p[0]+dx,p[1]+dy])));
+ const local=input.map(g=>shift(g,-ox,-oy));
+ try{return shift(dgSurfaceClean(pc[op](...local)),ox,oy);}
+ catch(e){if(!/Unable to find segment|SweepLine tree|Unable to complete output ring/i.test(String(e?.message||e)))throw e;throw Error("Sınır geometrisi sayısal olarak kararsız; tarama güvenli biçimde durduruldu. Park sınırını veya çakışan OSM geometrisini düzeltip yeniden deneyin.");}
 }
 function dgSurfacePark(outer,holes,epsg){
  const pc=window.polygonClipping;

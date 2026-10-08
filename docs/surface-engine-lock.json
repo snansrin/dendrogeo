@@ -1,10 +1,10 @@
 {
   "schema": "dendrogeo/surface-engine-source-lock/v1",
-  "id": "DG-SURFACE-LOCK-2026-10-09",
-  "baseline_commit": "ffd21c01ba55e013b2ff65ecf959f34c34ded9dd",
+  "id": "DG-SURFACE-LOCK-2026-10-09-R1",
+  "baseline_commit": "e91158999a3c6d63b5abd3b2efd4ed52c9192816",
   "recovery_branch": "recovery/surface-verified-water-20261008",
   "policy": "NO_CHANGES_WITHOUT_EXPLICIT_USER_APPROVAL",
-  "description": "Explicitly approved shoreline edge-context classification and OSM road-width surface masks, based on the stable r97 GIS core. Dynamic external imagery and OSM inputs remain versioned at analysis time.",
+  "description": "Approved local-metric-frame polygon overlay repair for UTM numerical stability; mobile presentation fixes are isolated in GIS workspace CSS. Dynamic external imagery and OSM inputs remain versioned at analysis time.",
   "file_hash_algorithm": "git-blob-sha1",
   "locked_files": {
     ".github/workflows/gis-three-park-qa.yml": "e5dc449c023e4dc6345063efc23ae99373db17ef",
@@ -26,7 +26,7 @@
     "src/services/lc-geo.js": "54e0c9af5ed0d79aefb76c540b09798b2106bff3",
     "src/services/lc-osm.js": "146720f9fb68dbf2f1239d239284375124edd34d",
     "src/services/lc-patches.js": "cb4861b567b7a23b39d181237113ae8e4e2958de",
-    "src/services/lc-review.js": "8bc134e1da4d0aa766971bb634ba3d736a808c74",
+    "src/services/lc-review.js": "cb49acca1c428db95119333252e82e1ba2c0e83b",
     "src/services/lc-s2.js": "1ecc8be08a898ca4f77efa4c58381584f2a7c5c2",
     "src/services/lc-stac.js": "fa5aa29c5f5d269ade7aaf2732907082806fd897",
     "src/services/lc-validate.js": "0a177508090f7f8681ba5594f436851e942376a1",
@@ -51,7 +51,7 @@
     "test/lc-validate.test.mjs": "74cafc899f49bd171db6bebe787c5d36829612d5",
     "test/surface-engine-lock.test.mjs": "de9fcff072ff2918b211633e9a9e1cc9b3c44055",
     "test/surface-network-budget.test.mjs": "024b4cfebb65c8d147da18c7d14b72ef443608ae",
-    "test/surface-review.test.mjs": "aa63f5994b1f94ab4c1ee41fc910e7a5816a59e5",
+    "test/surface-review.test.mjs": "5087447386abb0321648972d641610428ca01752",
     "test/surface-scientific-contract.test.mjs": "3e96db0308f9095480ca6a2ed5ca4bb752169576",
     "test/verified-water-footprint.test.mjs": "73e57e88447d6e39f7eea06d9c8106da1e2b6727",
     "test/water-osm-reliability.test.mjs": "87d24ddb89168d6a6dcaf43f96f79027a335c917",
@@ -60,15 +60,15 @@
     "vendor/polygon-clipping-0.15.7.js": "f3a6f7dde586ea0a44fa95ae223ca8fb3ca1e604"
   },
   "approved_targeted_repair": {
-    "date": "2026-10-08",
-    "reason": "User-requested correction of missing OSM water geometry on initial park analysis, without changing ESA raster, sensitivity thresholds, or accepted reports.",
-    "previous_lock_manifest_blob": "6c3b3a3a88f44ef4ca48419ac592ed1cc9e2f978",
+    "date": "2026-10-09",
+    "reason": "User-requested correction for UTM-scale polygon overlay instability that stopped surface scans, plus mobile toast and action-label layout repair. Raster classes, sensitivity thresholds, and accepted reports are unchanged.",
+    "previous_lock_manifest_blob": "e828bc1e53d0ed519efeb89c7bb8b2dbcb1c0c54",
     "source_files": [
-      "src/services/lc-osm.js",
-      "src/services/park-query.js",
-      "src/ui/lc-sens.js"
+      "src/services/lc-review.js",
+      "test/surface-review.test.mjs",
+      "css/gis-workspace.css"
     ],
-    "scope": "Network retrieval, verified Göksu water mask outside reference shoreline; outside cells require spectral evidence or are marked uncertain. No original WorldCover/slider changes."
+    "scope": "Apply a common integer-metre origin before polygon clipping and restore it after overlay to preserve geometry and area while reducing UTM floating-point event error. Keep phone toasts at the safe-area top and wrap surface action text."
   },
   "legacy_baseline_commit": "f6a68b7b5fe075ce280bd566d04d5e021e0dba9a",
   "legacy_recovery_branch": "recovery/surface-engine-locked-2026-10-08",
