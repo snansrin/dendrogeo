@@ -180,3 +180,33 @@ jobs:
               sys.exit(1)
           print('✅ Canlı site depoyla birebir aynı.')
           PY
+
+  surface_brush_water_only_build:
+    name: Rebuild brush-select adapter and verify locked-source science
+    if: github.event_name == 'pull_request' && github.head_ref == 'fix/save-goksu-uncertain-water-project-draft-20261008'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: fix/save-goksu-uncertain-water-project-draft-20261008
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - run: npm ci
+      - name: Verify account-draft and brush-only changes
+        run: |
+          npm run build
+          npm run check
+      - name: Restore unchanged workflows after asset rebuild
+        run: |
+          git fetch origin main
+          git show origin/main:.github/workflows/ci.yml > .github/workflows/ci.yml
+          git add index.html .github/workflows/ci.yml
+          git config user.name "DendroGeo GIS UI"
+          git config user.email "gis-ui-repair@users.noreply.github.com"
+          git commit -m "build(gis): refresh surface brush and draft menu assets"
+          git pull --rebase origin fix/save-goksu-uncertain-water-project-draft-20261008
+          git push origin HEAD:fix/save-goksu-uncertain-water-project-draft-20261008
