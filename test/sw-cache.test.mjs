@@ -47,7 +47,7 @@ class FakeCacheStorage {
 }
 
 /* ---------- sw.js'ten seçilen fonksiyonları izole çalıştır ---------- */
-function yukle({ agCalisiyor = false } = {}) {
+function yukle({ agCalisiyor = false, onFetch = () => {} } = {}) {
   const adlar = ['networkFirstWithLimit', 'staleWhileRevalidate', 'trimCache', 'cacheFirstWithLimit', 'clearCachedWebFonts'];
   const govde = adlar
     .map((n) => {
@@ -65,7 +65,7 @@ function yukle({ agCalisiyor = false } = {}) {
     Response: class { constructor(body, init) { this.body = body; Object.assign(this, init); } },
     URL, Math, Number, JSON, console: { log() {}, warn() {}, error() {} },
     fetch: agCalisiyor
-      ? async (r) => ({ ok: true, url: typeof r === 'string' ? r : r.url, clone() { return this; }, body: 'AGDAN' })
+      ? async (r, options) => { onFetch(r, options); return { ok: true, url: typeof r === 'string' ? r : r.url, clone() { return this; }, body: 'AGDAN' }; }
       : async () => { throw new TypeError('Failed to fetch'); },
   };
   vm.createContext(ctx);
@@ -151,11 +151,12 @@ describe('networkFirstWithLimit — çevrimdışı yedek yolu', () => {
   });
 
   test('çevrimiçi → ağdan döner ve RUNTIME’a yazar', async () => {
-    const api2 = yukle({ agCalisiyor: true });
+    let fetchCache=null;const api2 = yukle({ agCalisiyor: true, onFetch: (_r,options) => {fetchCache=options?.cache;} });
     const res = await api2.networkFirstWithLimit(
       REQ(ORIGIN + '/src/services/gridplan.js?v=139'), api2.RUNTIME, api2.MAX_RUNTIME, api2.PRECACHE
     );
     assert.equal(res.body, 'AGDAN');
+    assert.equal(fetchCache, 'no-cache', 'normal-profile HTTP cache must revalidate application assets');
   });
 });
 

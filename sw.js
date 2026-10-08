@@ -4,7 +4,7 @@
 // NOT: Senkronizasyon artık Ana Thread (Supabase JS SDK) tarafından yapılıyor
 // ============================================================
 
-const CACHE_VERSION = 'dendrogeo-sw-v2-r86';
+const CACHE_VERSION = 'dendrogeo-sw-v2-r87';
 
 /* İKİ AYRI STATİK CACHE — bu ayrım bilinçli ve önemli.
  *
@@ -239,7 +239,7 @@ async function cacheFirstWithLimit(request, cacheName, limit) {
  * yok oluyordu (bkz. dosya başındaki PRECACHE/RUNTIME açıklaması). */
 async function networkFirstWithLimit(request, cacheName, limit, fallbackCache) {
     try {
-        const response = await fetch(request);
+        const response = await fetch(request, {cache: "no-cache"});
         if (response.ok) {
             const cache = await caches.open(cacheName);
             await cache.put(request, response.clone());
@@ -362,4 +362,4 @@ self.addEventListener('notificationclick', event => {
     );
 });
 
-console.log('[SW] 🌲 DendroGeo Service Worker v2.10 r74 — network-first app assets');
+console.log('[SW] 🌲 DendroGeo Service Worker v2.10 r87 — network-first app assets');

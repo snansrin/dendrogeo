@@ -43,7 +43,7 @@ const ENGINE_FUNCTIONS = {
   "dgSensNeedsWaterScan": "e0385fec8e199ce0",
   "dgSensEffective": "118f8ac0a0192fe3",
   "dgSensCandidates": "532d9551a365f760",
-  "dgSensMount": "6bd51889f9588b51",
+  "dgSensMount": "a6f4be5242d465e2",
   // Approved orchestration-only addition: scan every analysis opening, preserving accepted snapshots; all classification functions remain PR #59-pinned.
   "dgSensAutoScanOnMount": "7d1a4a73c3b99771",
   "dgSensParts": "cccdc674de21087c",

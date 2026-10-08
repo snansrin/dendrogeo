@@ -133,6 +133,8 @@ const DG_I18N_EN={
 "Bu park için güncel OSM sınırları bulunamadı. OSM verisini yükleyip yeniden deneyin.":"No current OSM boundaries are available for this park. Load OSM data and try again.",
 "Bu noktada kapalı bir OSM nesne sınırı bulunamadı. Sınırı elle çizebilirsiniz.":"No closed OSM object boundary was found here. You can draw the boundary manually.",
 "Sınırını seçeceğiniz OSM nesnesine dokunun.":"Tap the OSM object whose boundary you want to select.",
+"Uydu taraması otomatik çalışır. Sonucu inceleyip kaydedin.":"The satellite scan runs automatically. Review and save the result.",
+"Raster analizi hazır; otomatik uydu taraması tamamlanamadı. Bağlantıyı kontrol edip yeniden deneyin.":"Raster analysis is ready; the automatic satellite scan could not finish. Check your connection and try again.",
 "Tara, haritada ayarla, doğru gördüğün sonucu kaydet.":"Scan, adjust on the map, and save the result you reviewed.",
 "hücre":"cells",
 "Uydu altlığının tarihi bu tarihlerden farklı olabilir. Küçük bina ve havuzlar için sınır düzeltmesini kullanın.":"The basemap date may differ from these acquisitions. Use boundary review for small buildings and pools.",

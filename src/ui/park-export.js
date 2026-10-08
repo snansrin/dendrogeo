@@ -222,7 +222,7 @@ async function runLandCoverAnalysis(){
      * başında dgEnsureLulc koşuldu); mount başarısızsa analiz SONUCU
      * etkilenmez — typeof + try koruması. */
     if(window.DG_LC_SENS&&typeof window.DG_LC_SENS.mount==="function"){
-      try{await window.DG_LC_SENS.mount("lcSens");}
+      try{const scanned=await window.DG_LC_SENS.mount("lcSens");if(scanned===false){toast(dgCf("Raster analizi hazır; otomatik uydu taraması tamamlanamadı. Bağlantıyı kontrol edip yeniden deneyin."),"warn","🛰️");return;}}
       catch(e){console.warn("DENDROGEO · hassasiyet paneli monte edilemedi:",e);toast(dgCf("Yüzey düzenleme açılamadı: ")+String(e.message||e),"err");}
     }
     toast(
