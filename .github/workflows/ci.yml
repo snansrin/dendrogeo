@@ -180,33 +180,3 @@ jobs:
               sys.exit(1)
           print('✅ Canlı site depoyla birebir aynı.')
           PY
-
-  verified_nearest_visual_final_qa:
-    name: Nearest-neighbour visual infill and protected 51-file science QA
-    if: github.event_name == 'pull_request' && github.head_ref == 'fix/verified-map-unknown-boundary-flow-20261008'
-    runs-on: ubuntu-latest
-    permissions:
-      contents: write
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          ref: fix/verified-map-unknown-boundary-flow-20261008
-          fetch-depth: 0
-      - uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-      - run: npm ci
-      - name: Build and test full project with science source lock
-        run: |
-          npm run build
-          npm run check
-      - name: Restore original workflow and update browser asset hashes
-        run: |
-          git fetch origin main
-          git show origin/main:.github/workflows/ci.yml > .github/workflows/ci.yml
-          git add index.html .github/workflows/ci.yml
-          git config user.name "DendroGeo GIS QA"
-          git config user.email "gis-ui-repair@users.noreply.github.com"
-          git commit -m "build(gis): refresh verified map and nearest visual class fingerprints"
-          git pull --rebase origin fix/verified-map-unknown-boundary-flow-20261008
-          git push origin HEAD:fix/verified-map-unknown-boundary-flow-20261008
