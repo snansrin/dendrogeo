@@ -397,7 +397,7 @@
   // Preserve original verified-map layer selector; both NDVI and standard
   // maps now present legacy pool inside Su, without editing the locked core.
   if(exportAction){
-   const dialog=exportAction.closest("dialog");
+   const dialog=exportAction.closest?.("dialog");
    if(dialog?.id==="dgSurfaceExportDialog"&&dialog.querySelector('[name="surface"]')?.checked){
     const layers=Object.fromEntries(["park","surface","grid","waypoints"].map(key=>[key,!!dialog.querySelector('[name="'+key+'"]')?.checked]));
     event.preventDefault();
