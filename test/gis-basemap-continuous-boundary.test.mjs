@@ -151,3 +151,42 @@ test('quick class changes only unfinished preview; not accepted or historical fe
  assert.equal(api.chooseQuickBoundary('pool'),false);
  assert.equal(api.chooseQuickBoundary('water'),true);
 });
+
+test('drawing dock shows the checkmark only at 4 corners and places class selector immediately beside it',()=>{
+ class Node{
+  constructor(tag){this.tag=tag;this.children=[];this.attributes={};this.textContent='';this.hidden=false;this.value='';}
+  setAttribute(k,v){this.attributes[k]=v;}
+  append(...nodes){this.children.push(...nodes);}
+  addEventListener(){}
+  querySelector(q){
+   if(!q.startsWith('#'))return null;
+   const id=q.slice(1);
+   const visit=root=>{
+    for(const child of root.children){if(child.id===id)return child;const found=visit(child);if(found)return found;}
+    return null;
+   };
+   return visit(this);
+  }
+  remove(){this.removed=true;}
+ }
+ const host=new Node('div'),view={classList:{contains:k=>k==='surface-review-active'}};
+ const state={draw:{type:'building',ring:[[32.1,39.9],[32.2,39.9],[32.2,40.0]]},busy:false,saving:false};
+ const doc={readyState:'loading',addEventListener(){},
+  getElementById:id=>id==='surfaceMapTools'?host:id==='v-map'?view:null,
+  createElement:tag=>new Node(tag)};
+ const sandbox={window:{DG_LC_SENS:{state}},document:doc,setTimeout,clearTimeout,console};
+ vm.runInNewContext(load('src/ui/gis-workspace.js'),sandbox);
+ const api=sandbox.window.DG_GIS_WORKSPACE_UI;
+ api.syncQuickBoundary();
+ const dock=host.querySelector('#dgUxBoundaryDock');
+ assert.ok(dock);
+ assert.equal(dock.children[0].id,'dgUxBoundaryClass');
+ assert.equal(dock.children[1].id,'dgUxBoundaryFinish');
+ assert.equal(dock.children[0].value,'building');
+ assert.equal(dock.children[1].hidden,true,'no tick after 3 corners');
+ assert.equal(dock.children[0].children.length,5,'exactly 5 classes, without old pool');
+ state.draw.ring.push([32.1,40.0]);
+ api.syncQuickBoundary();
+ assert.equal(dock.children[1].hidden,false,'tick shows at 4 corners');
+ assert.equal(dock.children[1].disabled,false);
+});
