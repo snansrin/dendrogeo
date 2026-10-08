@@ -26,7 +26,7 @@ function literal(source,name){
  else if(remainder[0]==='[')end=remainder.indexOf('];');
  else end=remainder.indexOf(';');
  assert.ok(end>0,'Malformed frozen constant: '+name);
- const value=vm.runInNewContext('('+remainder.slice(0,end+1)+')',{},{timeout:1000});
+ const value=vm.runInNewContext('('+remainder.slice(0,end+(remainder[0]==='{'||remainder[0]==='['?1:0))+')',{},{timeout:1000});
  return JSON.parse(JSON.stringify(value));
 }
 test('approved surface contract references verified release and clear provenance limits',()=>{
