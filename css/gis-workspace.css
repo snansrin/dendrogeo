@@ -1,0 +1,250 @@
+/* DendroGeo GIS workspace · presentation-only layer.
+ * No raster classification, bar sensitivity, data structures, or button colors change.
+ * Scoped to the live map to preserve site-wide design tokens and themes. */
+#v-map #surfaceEditorMenu{
+  border-radius:12px;
+  box-shadow:0 2px 12px color-mix(in srgb,var(--ink) 5%,transparent);
+}
+#v-map #surfaceMenuBar{
+  display:flex;
+  flex-wrap:wrap;
+  gap:5px;
+  align-items:center;
+  width:100%;
+  box-sizing:border-box;
+  padding:6px;
+}
+#v-map #surfaceMenuBar>.dg-editor-menu>summary{
+  border-radius:9px;
+  min-height:42px;
+  padding:8px 11px;
+  font-size:.78rem;
+  gap:8px;
+}
+#v-map #surfaceMenuBar>.dg-editor-menu[open]>.dg-editor-menu-body{
+  max-height:min(73dvh,670px);
+  overflow:auto;
+  overscroll-behavior:contain;
+  scrollbar-width:thin;
+}
+#v-map #surfaceMenuBar .dg-editor-menu-body{
+  width:min(420px,calc(100vw - 22px));
+  padding:16px;
+  line-height:1.5;
+}
+#v-map #surfaceMenuBar .dg-editor-panel-head{
+  align-items:center;
+  margin-bottom:12px;
+}
+#v-map #surfaceMenuBar .dg-editor-menu-body .dg-sens-actions{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:7px;
+  margin:10px 0;
+}
+#v-map #surfaceMenuBar .dg-editor-menu-body .dg-sens-actions .dg-png-btn{
+  width:100%;
+  justify-content:center;
+  text-align:center;
+  white-space:normal;
+  overflow-wrap:anywhere;
+  min-height:43px;
+}
+#v-map #surfaceMenuBar .dg-editor-menu-body .dg-png-btn:focus-visible,
+#v-map #surfaceMenuBar select:focus-visible,
+#v-map #surfaceMenuBar input:focus-visible{
+  outline:2px solid var(--green);
+  outline-offset:2px;
+}
+#v-map #surfaceMenuBar .dg-editor-menu-body .dg-png-label{
+  margin:10px 0 5px;
+}
+#v-map #surfaceMenuBar #parkGridTools .dg-png-head,
+#v-map #surfaceMenuBar #parkLayerTools .dg-png-head,
+#v-map #surfaceMenuBar #parkRasterExport .dg-png-head{
+  display:none;
+}
+#v-map #surfaceMenuBar #parkGridTools .dg-png-fields{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:12px;
+}
+#v-map #surfaceMenuBar #parkGridTools .dg-png-fields>.dg-png-field:first-child{
+  grid-column:1/-1;
+}
+#v-map #surfaceMenuBar #parkGridTools .dg-png-fields>.dg-png-field{
+  min-width:0;
+}
+#v-map #surfaceMenuBar #parkGridTools .dg-png-select,
+#v-map #surfaceMenuBar #parkGridTools .dg-png-input{
+  min-height:44px;
+}
+#v-map #surfaceMenuBar #parkGridTools .dg-png-option{
+  border-radius:9px;
+}
+#v-map #surfaceMenuBar #parkRasterExport{
+  display:flex;
+  flex-direction:column;
+  gap:12px;
+}
+#v-map #surfaceMenuBar #parkRasterExport .dg-png-btn,
+#v-map #surfaceMenuBar #parkGridTools #gridBuildBtn{
+  justify-content:center;
+  font-weight:700;
+}
+#v-map #surfaceMenuBar #parkLayerTools .dg-png-options{
+  margin:0 0 8px;
+}
+#v-map #surfaceMenuBar .dg-ux-option-note{
+  margin:8px 0;
+  color:var(--mut);
+  font-size:.73rem;
+  line-height:1.6;
+}
+#v-map #surfaceMenuBar .dg-ux-export-section{
+  margin-top:12px;
+  padding-top:12px;
+  border-top:1px solid var(--line);
+}
+#v-map #surfaceMenuBar .dg-ux-export-section h4{
+  font:700 .8rem/1.4 var(--f-ui);
+  color:var(--ink);
+  margin:0 0 6px;
+}
+#v-map #surfaceMenuBar .dg-ux-export-section .dg-png-field{
+  margin:8px 0 0;
+}
+#v-map #surfaceMenuBar .dg-ux-export-section .dg-png-options{
+  margin-top:9px;
+}
+#v-map #surfaceMenuBar .dg-ux-output-menu{
+  margin-left:auto;
+}
+#v-map #surfaceMenuBar>.dg-ux-output-menu>.dg-editor-menu-body{
+  left:auto;
+  right:0;
+}
+#v-map #parkInfo{
+  border:1px solid var(--line)!important;
+  border-left:4px solid var(--green)!important;
+  padding:14px;
+  border-radius:12px;
+  box-shadow:0 2px 9px color-mix(in srgb,var(--ink) 4%,transparent);
+}
+#v-map #parkInfo>div[style*="display:flex"]:first-child{
+  margin-bottom:8px!important;
+}
+#v-map #parkInfo>div[style*="display:grid"]:nth-child(2){
+  grid-template-columns:minmax(0,1fr)!important;
+  gap:0!important;
+}
+#v-map #parkInfo #parkSurfaceAction{
+  display:flex;
+  flex-direction:row;
+  flex-wrap:wrap;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+  padding:12px;
+}
+#v-map #parkInfo #parkSurfaceAction .dg-png-head{
+  flex:1 1 260px;
+  margin:0;
+}
+#v-map #parkInfo #parkSurfaceAction .dg-png-head .dg-png-sub{
+  line-height:1.4;
+}
+#v-map #parkInfo #parkSurfaceAction>button{
+  flex:0 0 auto;
+  min-height:44px;
+  width:auto;
+  padding-inline:18px;
+}
+#v-map #parkInfo #parkSurfaceAction>.dg-png-sub:last-child{
+  flex-basis:100%;
+  margin:0;
+  max-width:86ch;
+}
+#v-map #liveAnalysis .card{
+  border-radius:13px;
+  border:1px solid var(--line);
+  overflow:hidden;
+  min-width:0;
+}
+#v-map #liveAnalysis .shead{
+  flex-wrap:wrap;
+  gap:8px;
+}
+#v-map #liveAnalysis .grid.g4{
+  display:grid;
+  grid-template-columns:repeat(4,minmax(0,1fr));
+  gap:9px;
+}
+#v-map #liveAnalysis .grid.g4>.stat{
+  min-width:0;
+}
+#v-map #liveAnalysis .dg-ux-species-head{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+  flex-wrap:wrap;
+  margin-bottom:12px;
+}
+#v-map #liveAnalysis .dg-ux-species-head>.lbl{margin:0!important}
+#v-map #liveAnalysis .dg-ux-species-head .dg-png-btn{
+  margin-left:auto;
+  width:auto;
+}
+#v-map #liveAnalysis .dg-ux-species-row{
+  border-radius:8px;
+  padding:5px 8px;
+  margin:0 0 5px!important;
+}
+#v-map #liveAnalysis .dg-ux-species-row:nth-child(even){
+  background:color-mix(in srgb,var(--tint) 35%,transparent);
+}
+#v-map #liveAnalysis .dg-ux-species-row>div:first-child{
+  gap:6px;
+  align-items:start;
+  min-width:0;
+}
+#v-map #liveAnalysis .dg-ux-species-row>div:first-child>span:first-child{
+  min-width:0;
+  overflow-wrap:anywhere;
+}
+@media (max-width:850px){
+ #v-map #surfaceMenuBar>.dg-editor-menu>summary{padding:7px 9px}
+ #v-map #liveAnalysis .grid.g4{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media (max-width:640px){
+ #v-map #surfaceMenuBar{gap:4px;padding:5px}
+ #v-map #surfaceMenuBar>.dg-editor-menu>summary{
+   min-height:42px;
+   padding:6px 8px;
+   gap:5px;
+   font-size:.69rem;
+ }
+ #v-map #surfaceMenuBar .dg-editor-menu-body{
+   max-height:min(68dvh,570px);
+   padding:12px;
+ }
+ #v-map #surfaceMenuBar #parkGridTools .dg-png-fields{
+   grid-template-columns:minmax(0,1fr);
+ }
+ #v-map #surfaceMenuBar #parkGridTools .dg-png-fields>.dg-png-field:first-child{
+   grid-column:auto;
+ }
+ #v-map #surfaceMenuBar .dg-editor-menu-body .dg-sens-actions{
+   grid-template-columns:minmax(0,1fr);
+ }
+ #v-map #parkInfo{padding:10px}
+ #v-map #parkInfo #parkSurfaceAction{flex-direction:column;align-items:stretch}
+ #v-map #parkInfo #parkSurfaceAction>button{width:100%}
+ #v-map #liveAnalysis .grid.g4{grid-template-columns:repeat(2,minmax(0,1fr))}
+ #v-map #liveAnalysis .dg-ux-species-head .dg-png-btn{min-height:42px}
+}
+@media(prefers-reduced-motion:reduce){
+ #v-map #surfaceMenuBar .dg-editor-menu>summary,
+ #v-map #liveAnalysis .dg-ux-species-row{transition:none}
+}

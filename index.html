@@ -306,6 +306,8 @@
      başlığı ölçeğini alır → Park Karşılaştırma kartı kıpırdamaz. -->
 <link rel="stylesheet" href="css/ui-standard.css?v=cf5fc000">
 <link rel="stylesheet" href="css/academic-profile.css?v=488be7d0">
+<!-- GIS workspace: scoped presentation, keeps locked engine and theme untouched. -->
+<link rel="stylesheet" href="css/gis-workspace.css?v=38c7ca20">
 </head>
 <body class="dg-app">
 <a class="dg-skip" href="#main">İçeriğe atla</a>
@@ -1240,5 +1242,166 @@
 <script src="src/ui/toast.js?v=50dab987" defer></script>
 <script src="src/ui/landing.js?v=96e1176c" defer></script>
 <script src="src/ui/shell.js?v=61caa854" defer></script>
+<!-- GIS presentation-only enhancement. It moves the ORIGINAL controls, never clones IDs or calls the analysis engine. -->
+<script id="dg-gis-workspace">
+(function(){
+ "use strict";
+ let task=null;
+ function schedule(){
+  if(task!==null)return;
+  task=window.setTimeout(function(){task=null;sync();},40);
+ }
+ function makeMenu(){
+  const menu=document.createElement("details");
+  menu.className="dg-editor-menu dg-ux-output-menu";
+  menu.dataset.menuOwner="park";
+  menu.dataset.menuOrder="45";
+  const summary=document.createElement("summary");
+  const title="Rapor & Çıktı";
+  summary.innerHTML=window.DG_EDITOR_UI?.menuLabel?.("file",title)||"🖼️ "+title;
+  const body=document.createElement("div");
+  body.className="dg-editor-menu-body";
+  body.innerHTML=window.DG_EDITOR_UI?.panelHead?.("file","Harita çıktısı","Altlığı seç, PNG raporunu hazırla ve indir.")||"<strong>Harita çıktısı</strong>";
+  menu.append(summary,body);
+  menu.addEventListener("toggle",function(){
+   if(!menu.open)return;
+   document.querySelectorAll("#surfaceMenuBar>details[open]").forEach(function(other){if(other!==menu)other.open=false;});
+  });
+  return menu;
+ }
+ function syncPark(){
+  const bar=document.getElementById("surfaceMenuBar");
+  const output=document.getElementById("parkRasterExport");
+  const layer=document.getElementById("parkLayerTools");
+  if(!bar||!output||!layer)return;
+  let menu=bar.querySelector(".dg-ux-output-menu");
+  if(!menu){
+   menu=makeMenu();
+   const after=[...bar.children].find(function(node){return Number(node.dataset.menuOrder)>45;});
+   bar.insertBefore(menu,after||null);
+  }
+  const body=menu.querySelector(".dg-editor-menu-body");
+  if(output.parentElement!==body)body.append(output);
+  const pngOpts=document.getElementById("chkPngGrid")?.closest(".dg-png-field");
+  if(pngOpts){
+   let section=layer.querySelector(".dg-ux-export-section");
+   if(!section){
+    section=document.createElement("section");
+    section.className="dg-ux-export-section";
+    const title=document.createElement("h4");
+    title.textContent="PNG görünüm katmanları";
+    const note=document.createElement("p");
+    note.className="dg-ux-option-note";
+    note.textContent="Bu seçimler yalnızca indirilen PNG dosyasına uygulanır. Yukarıdaki harita görünürlüğünü ve analiz sonucunu değiştirmez.";
+    section.append(title,note);
+    const reset=layer.querySelector(".dg-png-btn.red");
+    if(reset)reset.before(section);
+    else layer.append(section);
+   }
+   if(pngOpts.parentElement!==section)section.append(pngOpts);
+  }
+  const labelPairs=[["gridProject","PROJE"],["gridSize","GRID BOYUTU"],["refHa","REFERANS ALAN (HA)"]];
+  for(const [id,label] of labelPairs){
+   const input=document.getElementById(id);
+   const el=input?.parentElement?.querySelector("label");
+   if(el&&el.textContent.trim()===label&&!el.htmlFor)el.htmlFor=id;
+  }
+ }
+ function renderSpeciesExport(){
+  const live=document.getElementById("liveAnalysis");
+  if(!live)return;
+  const label=[...live.querySelectorAll(".card .lbl")].find(function(el){
+   return /^En Yaygın 6 Tür$/i.test(el.textContent.trim());
+  });
+  if(!label||label.closest(".dg-ux-species-head"))return;
+  const heading=document.createElement("div");
+  heading.className="dg-ux-species-head";
+  label.before(heading);
+  heading.append(label);
+  const button=document.createElement("button");
+  button.type="button";
+  button.className="dg-png-btn ghost sm";
+  button.textContent="⬇️ PNG indir";
+  button.setAttribute("aria-label","En yaygın altı ağaç türü grafiğini PNG olarak indir");
+  heading.append(button);
+  let next=heading.nextElementSibling,n=0;
+  while(next&&n<6){
+   const first=next.firstElementChild,bar=next.lastElementChild?.firstElementChild;
+   if(!first||!bar||!first.querySelector("span"))break;
+   next.classList.add("dg-ux-species-row");
+   n++;next=next.nextElementSibling;
+  }
+  button.disabled=n===0;
+  button.addEventListener("click",function(){exportSpecies(heading,button);});
+ }
+ function exportSpecies(heading,button){
+  const rows=[],header=heading.closest(".card");
+  let el=heading.nextElementSibling;
+  for(let i=0;i<6&&el;i++,el=el.nextElementSibling){
+   if(!el.classList.contains("dg-ux-species-row"))break;
+   const line=el.firstElementChild;
+   const name=line?.firstElementChild?.textContent?.trim()||"";
+   const count=line?.lastElementChild?.textContent?.trim()||"";
+   const fill=el.lastElementChild?.firstElementChild;
+   const dot=line?.firstElementChild?.firstElementChild;
+   const pct=Math.max(0,Math.min(100,parseFloat(fill?.style.width)||0));
+   if(name)rows.push({name,count,pct,color:dot?.style.backgroundColor||fill?.style.backgroundColor||"#64748b"});
+  }
+  if(!rows.length)return;
+  const canvas=document.createElement("canvas");
+  canvas.width=1080;
+  canvas.height=235+rows.length*116+95;
+  const ctx=canvas.getContext("2d");
+  if(!ctx)return;
+  const css=getComputedStyle(document.body);
+  const ink=css.getPropertyValue("--ink").trim()||"#172c24";
+  const muted=css.getPropertyValue("--mut").trim()||"#5b7069";
+  const background=css.getPropertyValue("--bg").trim()||"#ffffff";
+  ctx.fillStyle=background;ctx.fillRect(0,0,canvas.width,canvas.height);
+  ctx.fillStyle=ink;ctx.font="bold 35px Manrope, sans-serif";ctx.fillText("DendroGeo · Ağaç çeşitliliği",56,74);
+  ctx.font="23px Manrope, sans-serif";ctx.fillStyle=muted;
+  const park=document.querySelector("#parkInfo>div:first-child>b")?.textContent?.replace(/^🌳\s*/,"").trim()||"Onaylı saha verisi";
+  ctx.fillText(park,56,118);
+  ctx.font="bold 28px Manrope, sans-serif";ctx.fillStyle=ink;ctx.fillText("En Yaygın 6 Tür",56,190);
+  rows.forEach(function(row,i){
+   const y=242+i*116;
+   ctx.fillStyle=ink;ctx.font="23px Manrope, sans-serif";
+   const name=row.name.length>67?row.name.slice(0,64)+"…":row.name;
+   ctx.fillText(name,56,y,790);
+   ctx.font="bold 23px Manrope, sans-serif";
+   ctx.fillText(row.count,842,y,195);
+   ctx.fillStyle="rgba(130,130,130,.14)";ctx.fillRect(56,y+22,965,24);
+   ctx.fillStyle=row.color;ctx.fillRect(56,y+22,965*row.pct/100,24);
+  });
+  ctx.fillStyle=muted;ctx.font="20px Manrope, sans-serif";
+  ctx.fillText("Kaynak: DendroGeo · Onaylı saha ölçümleri",56,canvas.height-40);
+  button.disabled=true;
+  canvas.toBlob(function(blob){
+   button.disabled=false;
+   if(!blob)return;
+   const url=URL.createObjectURL(blob);
+   const a=document.createElement("a");
+   a.href=url;a.download="dendrogeo_en_yaygin_6_tur.png";
+   document.body.append(a);a.click();a.remove();
+   setTimeout(function(){URL.revokeObjectURL(url);},1000);
+  },"image/png");
+ }
+ function sync(){
+  syncPark();
+  renderSpeciesExport();
+ }
+ function boot(){
+  const bar=document.getElementById("surfaceMenuBar");
+  const park=document.getElementById("parkInfo");
+  const live=document.getElementById("liveAnalysis");
+  if(!bar||!park||!live)return;
+  const observer=new MutationObserver(schedule);
+  for(const node of [bar,park,live])observer.observe(node,{childList:true,subtree:true});
+  sync();
+ }
+ if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",boot,{once:true});
+ else boot();
+})();
+</script>
 </body>
 </html>
