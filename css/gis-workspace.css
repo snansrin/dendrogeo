@@ -624,3 +624,34 @@
   #v-map #lcSens .dg-sens-actions{grid-template-columns:minmax(0,1fr)}
   #v-map #parkInfo #parkSurfaceAction>.dg-png-sub:last-child{font-size:.69rem!important}
 }
+
+/* Exact mobile containment for the scientifically worded raster explanation.
+   Some legacy .dg-png-card flex declarations can otherwise retain row placement
+   despite the parent grid resizing. Block layout does not change its controls. */
+@media (max-width:700px){
+ #v-map #parkInfo #parkSurfaceAction{
+  display:block!important;
+  min-width:0!important;
+  max-width:100%!important;
+  width:100%!important;
+  box-sizing:border-box!important;
+ }
+ #v-map #parkInfo #parkSurfaceAction>.dg-png-head,
+ #v-map #parkInfo #parkSurfaceAction>.dg-png-btn,
+ #v-map #parkInfo #parkSurfaceAction>.dg-png-sub{
+  display:block!important;
+  flex:none!important;
+  width:100%!important;
+  min-width:0!important;
+  max-width:100%!important;
+  box-sizing:border-box!important;
+  margin:0 0 10px 0!important;
+  overflow-wrap:anywhere!important;
+  word-break:normal!important;
+  white-space:normal!important;
+ }
+ #v-map #parkInfo #parkSurfaceAction>.dg-png-sub:last-child{
+  margin-bottom:0!important;
+  padding:0!important;
+ }
+}
