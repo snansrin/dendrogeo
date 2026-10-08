@@ -185,7 +185,7 @@ self.addEventListener('fetch', event => {
 
     if (request.mode === 'navigate') {
         event.respondWith(
-            fetch(request)
+            fetch(request, {cache: "no-cache"})
                 .then(response => {
                     const responseClone = response.clone();
                     caches.open(RUNTIME).then(cache => cache.put(request, responseClone));

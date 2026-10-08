@@ -23,7 +23,7 @@
     "src/ui/park-export.js": "36b97a238dcfd3fc841a6106c0b28cbdb41c5e576f7dd53372c628cd9ffbbbc1",
     "src/utils/lazylibs.js": "19763039af7bb2e235cd5720656234026d8aabafaab3fb02b8c5763cccb0a242",
     "src/workers/surface-worker.js": "2501b8a650c497805c976fe733222784919bdaa133905948e28aee9bad968858",
-    "sw.js": "d70354270e0603e36348d8c64ae4ea722ad85ec1ca2aa6b85d61de928a7e63ae",
+    "sw.js": "38d3c9d4ee9dda7d6272832a402d59ab258e655aada237d1a94aa1b99ae82dce",
     "test/gis-analysis-engine-lock.test.mjs": "2906986b2ceba9595b1c95a5d4254a4fa0023f944c791b40218f5910a068590b",
     "test/park-network-recovery.test.mjs": "f1fec906e3ffba3aef404881ea7b06327686e3cae7459a9eb557490aa3934a82",
     "test/surface-network-budget.test.mjs": "afd6f46aa25624555d14034c0c40fddb20a8520e3e1518f959caaf7a182bb181",
