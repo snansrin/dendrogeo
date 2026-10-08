@@ -19,7 +19,7 @@
     "src/services/lc-config.js": "3cc9d331a383337b917da15cbc970dddf9d2b81f",
     "src/services/lc-engine.js": "15500b3c3e977a26e4320afba7b788968f320543",
     "src/services/lc-geo.js": "54e0c9af5ed0d79aefb76c540b09798b2106bff3",
-    "src/services/lc-osm.js": "73b6cfd79327436ed639d487d97d79232d7219b2",
+    "src/services/lc-osm.js": "453cae423fdc156688fc65767ad19494cc6e81de",
     "src/services/lc-patches.js": "cb4861b567b7a23b39d181237113ae8e4e2958de",
     "src/services/lc-review.js": "f6e6bc76053da8fd2ef931b61b30bfe125f4678a",
     "src/services/lc-s2.js": "1ecc8be08a898ca4f77efa4c58381584f2a7c5c2",
@@ -28,17 +28,27 @@
     "src/services/map.js": "755e25846c8ae9b3c6c28d1c926b44c4193b817c",
     "src/services/osm-client.js": "b4c9de899e16811cca72eee96031b2c49cae3d3c",
     "src/services/park-geometry.js": "3a33d00f20709162f9a26bfab62ffe5d34ad4e0b",
-    "src/services/park-query.js": "b4b816e4b7763170c09d3472995f006879f73ff0",
+    "src/services/park-query.js": "7fa6af224de4a0e3d8656e39b1db712c64108a59",
     "src/services/park-registry.js": "14462c927f46ccde5444eaf95c462940e4e61141",
     "src/services/park-state.js": "df532eac74559c3c6e3c882bfc53d9e37bbd6612",
     "src/ui/editor-ui.js": "63cc57af5ead0fe24f12c83c3fc13aa820d3c441",
     "src/ui/lc-report.js": "a11bb0ca5e619181e7a00bc4a7610b6860ee9a91",
-    "src/ui/lc-sens.js": "3a0f21de356e6a6df5239c936d446462746f17d0",
+    "src/ui/lc-sens.js": "aa21a0d04c663b928e3692c665d0ff42dd30459c",
     "src/ui/park-export.js": "ddf85d17c704d5f4832d216db364877eed152c93",
     "src/ui/park-panel.js": "0bf488f42229f83e96f50b107e2038a1911e8be4",
     "src/ui/state.js": "156945d6a219f8f620d574a4423a499c982bc237",
     "src/utils/geo.js": "666e4be10e5131f0b3285c00b75dcad93f39c984",
     "src/utils/lazylibs.js": "55dd7ebe86397e55db12c3065c722d8c68a43175",
     "src/workers/surface-worker.js": "7c25e0d712156b0503e7b518ccffc03af6b9a62e"
+  },
+  "approved_targeted_repair": {
+    "date": "2026-10-08",
+    "reason": "User-requested correction of missing OSM water geometry on initial park analysis, without changing ESA raster, sensitivity thresholds, or accepted reports.",
+    "previous_lock_manifest_blob": "6c3b3a3a88f44ef4ca48419ac592ed1cc9e2f978",
+    "source_files": [
+      "src/services/lc-osm.js",
+      "src/services/park-query.js",
+      "src/ui/lc-sens.js"
+    ]
   }
 }
