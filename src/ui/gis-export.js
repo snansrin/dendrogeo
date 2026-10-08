@@ -167,6 +167,7 @@
    notify("Önce bir park seçin.","warn");return false;
   }
   const opts={cover:read("chkPngCover")?.checked!==false,grid:read("chkPngGrid")?.checked!==false,wp:read("chkPngWp")?.checked!==false};
+  const basemap=baseChoice();
   const sens=window.DG_LC_SENS?.state,ndvi=!!sens?.vegetationView&&!sens.rawView;
   const ndviTiers=ndvi&&typeof dgSensVegetationTiers==="function"?dgSensVegetationTiers():null;
   const ndviPolys=ndvi?await waitVegetation(sens):[];
@@ -203,6 +204,7 @@
   for(const ring of PARK_POLY)outline(ctx,pr,ring);
   if(typeof PARK_HOLES!=="undefined")for(const ring of PARK_HOLES||[])outline(ctx,pr,ring);
   ctx.clip("evenodd");
+  await paintBaseTiles(ctx,pr,bounds,basemap);
   let count=0;
   if(opts.cover){
    const display=Array.isArray(sens?.displayPaths)&&!sens.rawView?sens.displayPaths:[];
@@ -264,7 +266,7 @@
     ctx.fillText("NDVI park içi üçte birlik eşikleri: "+cut.map(n=>Number(n).toFixed(3)).join(" / ")+" · Hücre başına en az 3 geçerli gözlem",PAD,H-89,W-PAD*2);
   }
   ctx.fillText(ndvi?"Göreli NDVI park içi karşılaştırmadır; mutlak taç örtüsü ölçümü değildir.":"Kaynak: ESA WorldCover 2021 v200 · OSM sınırı",PAD,H-58);
-  ctx.fillText("© OpenStreetMap katkıcıları (ODbL) · © ESA WorldCover (CC BY 4.0) · DendroGeo",PAD,H-39);
+  ctx.fillText(BASE_ATTR[basemap]+" · © ESA WorldCover (CC BY 4.0) · DendroGeo",PAD,H-39);
   ctx.fillText("Çıktı görselleştirmedir; kayıtlı bilimsel sonucun yerine geçmez.",PAD,H-20);
   if(!count&&!ndvi){notify("Bu park için çizilecek yüzey geometrisi henüz hazırlanmadı. Önce analizi açın.","warn");return false;}
   return await new Promise(resolve=>cv.toBlob(blob=>{
@@ -288,6 +290,7 @@
   if(!rec||typeof PARK_POLY==="undefined"||!Array.isArray(PARK_POLY)||!PARK_POLY.length){
    notify("Önce parkın arazi örtüsü analizini açın.","warn");return false;
   }
+  const basemap=baseChoice();
   const showNdvi=!!sens.vegetationView&&!sens.rawView&&!!layers.surface;
   if(showNdvi&&typeof dgSensVegetationTiers!=="function"){
    notify("Göreli NDVI sınıfları bu oturumda bulunamadı.","warn");return false;
@@ -332,7 +335,7 @@
   if(!g){notify("Tarayıcı PNG oluşturamıyor.","err");return false;}
   const GREEN="#14532d",MUT="#5c6a63",INK="#182420",BG="#f7f6f2";
   const dict=classes();
-  const color=k=>k==="pool"?"#3b82f6":(typeof DG_SENS_COLORS!=="undefined"&&DG_SENS_COLORS[k])||
+  const color=k=>k==="building"?BUILDING_COLOR:k==="pool"?"#3b82f6":(typeof DG_SENS_COLORS!=="undefined"&&DG_SENS_COLORS[k])||
     (typeof DG_SENS_VEGETATION_COLORS!=="undefined"&&DG_SENS_VEGETATION_COLORS[k])||
     dict[k]?.color||{building:"#475569",pool:"#0ea5e9",sparse:"#fde68a",moderate:"#4ade80",dense:"#166534"}[k]||"#94a3b8";
   g.fillStyle=BG;g.fillRect(0,0,CW,CH);
@@ -350,10 +353,11 @@
   for(const ring of PARK_POLY)outline(g,pr,ring);
   if(typeof PARK_HOLES!=="undefined")for(const ring of PARK_HOLES||[])outline(g,pr,ring);
   g.clip("evenodd");
+  await paintBaseTiles(g,pr,bounds,basemap);
   let painted=0;
   if(layers.surface){
    for(const item of sens.displayPaths||[])
-    if(drawLeaflet(g,pr,item.poly,Math.max(.28,(sens.opacity||65)/100),item.cls==='pool'?'#3b82f6':null))painted++;
+    if(drawLeaflet(g,pr,item.poly,basemap==="vector"?1:Math.max(.35,(sens.opacity||65)/100),item.cls==="building"?BUILDING_COLOR:item.cls==="pool"?"#3b82f6":null))painted++;
    if(!painted){
     const last=window.DG_LANDCOVER?.getLast?.();
     painted=drawRawPatches(g,pr,last?.patches||last?.report?.patches||[],dict);
@@ -438,7 +442,7 @@
   g.fillStyle=GREEN;g.fillRect(0,CH-70,CW,70);
   g.fillStyle="#cfe3d3";g.font="19px Arial";
   g.fillText(showNdvi?"Raster + kullanıcı kararları; NDVI yeşil alanda göreli karşılaştırmadır.":"Raster + doğrulanmış kullanıcı kararları; su yüzeyleri tek sınıfta sunulur.",40,CH-54,CW-80);
-  g.fillText("ESA WorldCover 2021 v200 (CC BY 4.0) · "+String(rec.fingerprint||"").slice(0,8)+" · CC BY-NC 4.0",40,CH-26,CW-80);
+  g.fillText(BASE_ATTR[basemap]+" · ESA WorldCover (CC BY 4.0) · "+String(rec.fingerprint||"").slice(0,8),40,CH-26,CW-80);
   return await new Promise(resolve=>canvas.toBlob(blob=>{
    if(!blob){notify("Doğrulanmış harita PNG üretilemedi.","err");resolve(false);return;}
    const uri=URL.createObjectURL(blob),a=document.createElement("a");
