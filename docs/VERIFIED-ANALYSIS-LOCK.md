@@ -5,7 +5,7 @@
 - Çalışan sürüm: `90f0b0a2aa80cf684de8fc45e0a37fb3dbd97807` (PR #67).
 - Tam kilitli yayın yedeği: `recovery/locked-release-20261008r88`.
 - Motorun önceki geri dönüş dalı: `recovery/verified-analysis-2026-10-08` — bu commit.
-- Kilit manifesti: `docs/verified-analysis-lock.json`, 31 dosyanın SHA-256 özeti.
+- Kilit manifesti: `docs/verified-analysis-lock.json`, 37 dosyanın SHA-256 özeti.
 - Denetim: `npm run check:analysis-lock`; tam kontrolde ve CI'da zorunlu çalışır.
 
 Kullanıcının sonraki açık talimatıyla yalnız yayın sürümü `20261008r88` ve Service Worker r88 olarak yenilendi. Analiz motoru ve yüzey sonuçlarını üreten kaynaklar aynı kaldı. JS/CSS URL'leri yayın sürümü + içerik hash'i içerir; tembel modüller ve geometri worker'ı da aynı yayın sürümünü kullanır. `release-version.json` ilerideki açıkça istenmiş önbellek yenilemeleri için ayrı tutulur.
@@ -31,3 +31,13 @@ Bu koruma geliştirici talimatı ve CI denetimidir. Depo sahibi/yönetici GitHub
 ## Açıkça onaylanmış ilerideki değişiklik
 
 Kullanıcı kilitli kapsam için açıkça değişiklik isterse, önce bu commit ve geri dönüş dalı korunur. Değişiklik ayrı dalda değerlendirilir; ilgili regresyonlar, tam kontrol, telefon görünümü ve Göksu/Başkent Millet Bahçesi/Kuğulu Park canlı QA geçmeden kilit tabanı güncellenmez. Eski anlık görüntüler ve raporlar değiştirilmez. Otomatik hash yenileme komutu bulunmaz.
+
+## Chrome CORS arızasına yönelik sınırlı düzeltme — r89
+
+Kullanıcı r88 yüklenmesine rağmen Chrome'da WorldCover SAS isteğinin CORS hatası verdiğini ve eski analiz görüntüsünün kaldığını bildirdi. Bu düzeltme yalnız imza taşıma katmanını ve yeni analiz başlangıcındaki eski önizleme temizliğini kapsar. Matematiksel raster sınıflandırması, kesin geometri ve kabul edilmiş raporlar değiştirilmez.
+
+WorldCover SAS isteği mevcut Supabase projesinin `planetary-sas` Edge Function'ından alınır. İşlev JWT doğrulaması açık olarak yayımlanır; mevcut public client JWT'si kullanılır, service-role anahtarı kullanılmaz. Yalnız sabit WorldCover imza kaynağı desteklenir; rastgele URL proxy'si değildir. Tarayıcıya DendroGeo origin'i için CORS başlıkları döner. İmza geçerli değilse analiz hata verir; imzasız ve erişimi kapalı COG yeni sonuç olarak sunulmaz.
+
+Yeni analiz başında cihaz taslağı saklanır, eski inceleme katmanı kaldırılır ve raster state temizlenir. Başarısız analiz eski haritayı yeni sonuç gibi göstermez.
+
+`WorldCover browser CORS QA` gerçek Chromium'da DendroGeo origin'i ve uygulamanın CSP'si altında doğrudan Microsoft imza çağrısını engeller; yeni servis üzerinden aynı resmi WorldCover COG'undan gerçek kategorik pikseller okur. Bu kontrol Node QA'nın kapsamadığı tarayıcı CORS davranışını doğrular. Yeni geri dönüş dalı: `recovery/worldcover-cors-r89`; önceki r88 yedeği korunur.

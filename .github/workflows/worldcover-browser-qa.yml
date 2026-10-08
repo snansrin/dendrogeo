@@ -1,0 +1,26 @@
+name: WorldCover browser CORS QA
+on:
+  pull_request:
+    paths:
+      - 'src/services/lc-stac.js'
+      - 'supabase/functions/planetary-sas/**'
+      - 'scripts/worldcover-browser-smoke.mjs'
+      - '.github/workflows/worldcover-browser-qa.yml'
+  workflow_dispatch: {}
+permissions:
+  contents: read
+jobs:
+  worldcover-browser:
+    name: Chromium real-origin WorldCover CORS
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - run: npm ci
+      - name: Chromium
+        run: npx --yes --package=playwright@1.62.1 playwright install --with-deps chromium
+      - name: Block direct signing and read real WorldCover COG from application origin
+        run: node scripts/worldcover-browser-smoke.mjs

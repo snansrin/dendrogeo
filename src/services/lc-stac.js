@@ -148,7 +148,10 @@ async function dgLcGetSas(collection,signal){
   if(cached&&cached.expires>Date.now()+120000)return cached.token;
   DG_LC_SAS_CACHE.delete(coll);
   try{
-    const data=await dgLcFetchJson(DG_LC_SAS+coll,{headers:{Accept:"application/json"},signal});
+    const bridge=coll==="esa-worldcover"&&typeof SB_URL!=="undefined"&&typeof SB_KEY!=="undefined";
+    const url=bridge?SB_URL+"/functions/v1/planetary-sas?collection=esa-worldcover":DG_LC_SAS+coll;
+    const headers=bridge?{Accept:"application/json",apikey:SB_KEY,Authorization:"Bearer "+SB_KEY}:{Accept:"application/json"};
+    const data=await dgLcFetchJson(url,{headers,signal});
     const token=data?.token||"";
     const expiry=Date.parse(data?.msftExpiry||new URLSearchParams(String(token).replace(/^\?/,"")).get("se"));
     if(token&&Number.isFinite(expiry)&&expiry>Date.now()+120000){
@@ -158,6 +161,7 @@ async function dgLcGetSas(collection,signal){
     return token;
   }catch(err){
     if(signal?.aborted||err.name==="AbortError")throw err;
+    if(coll==="esa-worldcover")throw new Error("WorldCover veri erişim imzası alınamadı; yeni analiz oluşturulmadı. "+String(err?.message||err));
     console.warn("DENDROGEO · Veri imzalama tokenı alınamadı; doğrudan açık asset deneniyor.",err);
     return"";
   }
