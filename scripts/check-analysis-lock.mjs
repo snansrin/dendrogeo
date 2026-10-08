@@ -4,7 +4,7 @@ import {resolve} from 'node:path';
 import {fileURLToPath} from 'node:url';
 
 // User-approved working analysis, 8 October 2026. No automatic lock regeneration.
-const MANIFEST_SHA256 = "060ee972e0c439a8389851b1f72768a0085749c4f25d535b023ef40c0d4ad3e3";
+const MANIFEST_SHA256 = "42510744b5438265a53b4fbb61611670281f319c15d1a5355738fc516c085bc7";
 const root=fileURLToPath(new URL('..',import.meta.url));
 const sha256=bytes=>createHash('sha256').update(bytes).digest('hex');
 
