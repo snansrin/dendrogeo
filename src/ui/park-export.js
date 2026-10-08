@@ -178,8 +178,11 @@ async function runLandCoverAnalysis(){
 
   window._dgLandCoverBusy=true;
   // A failed new analysis must never leave the previous map posing as its result.
-  if(window.DG_LC_SENS?.state?.record&&typeof dgSensSave==="function")await dgSensSave();
-  window.DG_LC_SENS?.cleanup?.();
+  // Before the first mount, cleanup would remove the unmounted lcSens host.
+  if(window.DG_LC_SENS?.state?.record){
+    if(typeof dgSensSave==="function")await dgSensSave();
+    window.DG_LC_SENS.cleanup?.();
+  }
   window.DG_LANDCOVER.clear?.();
   document.getElementById("v-map")?.classList.add("surface-review-active");
   const pending=document.getElementById("surfacePendingTools");if(pending)pending.style.display="flex";

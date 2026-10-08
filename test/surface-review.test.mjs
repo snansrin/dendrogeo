@@ -259,3 +259,24 @@ test('a new surface review starts one automatic Sentinel-2 scan without a toolba
  assert.equal(await mounting,true);assert.equal(await first,true);assert.equal(calls,1);assert.equal(a.run('DG_SENS.record.profile.stats.nProfiled'),2);assert.equal(a.run('DG_SENS.busy'),false);assert.equal(a.run('DG_SENS.autoScanEpoch'),1);
 });
 test('automatic scans do not rewrite an accepted surface result',async()=>{const a=app();fixture(a);a.run('DG_SENS.epoch=2;DG_SENS.record.acceptedResult={areas:{green:1}}');let calls=0;a.ctx.window.DG_LC_S2.profile=async()=>{calls++;return{cells:{}}};a.run('dgSensRender=()=>{};dgSensRefreshLayer=()=>{};dgSensUpdateSummary=()=>{};dgSensUpdateStatus=()=>{};dgSensSave=async()=>true');const before=a.run('JSON.stringify(DG_SENS.record.acceptedResult)');assert.equal(await a.run('dgSensAutoScanOnMount()'),true);assert.equal(calls,1);assert.equal(a.run('JSON.stringify(DG_SENS.record.acceptedResult)'),before);await a.run('dgSensAutoScanOnMount()');assert.equal(calls,1);});
+
+test('first analysis button keeps the unmounted panel and awaits the full scan with all sensitivity bars',async()=>{
+ const a=app();fixture(a);let removed=false,calls=0,finish;
+ const gate=new Promise(resolve=>finish=resolve),host=a.el('lcSens'),get=a.ctx.document.getElementById;
+ host.remove=()=>{removed=true;};host.parentNode={isConnected:true,insertBefore(){}};host.scrollIntoView=()=>{};
+ a.ctx.document.getElementById=id=>id==='lcSens'&&removed?null:get(id);
+ for(const id of ['map','v-map','surfaceMapWorkspace']){a.el(id).classList={add(){},remove(){}};a.el(id).after=()=>{};}
+ a.el('landCoverBtn').dataset={};a.ctx.$=get;a.ctx.parkAreaM2=()=>200;
+ a.run('initialRecord=dgSensNewRecord();DG_SENS.record=null;window.DG_SURFACE_OSM={boundary:JSON.stringify(PARK_POLY),elements:[]};dgSensLoadRecord=async()=>initialRecord;window.DG_SURFACE_REVIEW.fingerprint=async()=>"fp";dgSensRepartition=async()=>{dgSensRender();return true};dgSensBrushStop=()=>{};dgSensUnbindRightPan=()=>{};dgSensObjectCancel=()=>{};dgSensDrawCancel=()=>{};dgSensRenderPaintTools=()=>{};dgSensBindRightPan=()=>{};dgSensRefreshLayer=()=>{};dgSensUpdateSummary=()=>{};dgSensUpdateStatus=()=>{};dgSensSave=async()=>true;map.hasLayer=()=>false;map.invalidateSize=()=>{};map.off=()=>{};window.DG_LANDCOVER={clear(){},analyze:async()=>({})};window.DG_LANDCOVER_RENDER_REPORT=()=>{}');
+ a.ctx.window.DG_LC_S2.profile=async(cells,outer,options)=>{calls++;assert.equal(cells.length,2);assert.equal(options.mode,'ytd');await gate;return{cells:{'0:0':{obs:4,ndvi:.62,mndwi:.02,ndbi:-.1},'0:1':{obs:4,ndvi:.61,mndwi:.01,ndbi:-.1}},scenes:[],stats:{nProfiled:2},skipped:[]};};
+ vm.runInContext(source('src/ui/park-export.js'),a.ctx);
+ let completed=false;const analyzing=a.run('runLandCoverAnalysis()');analyzing.then(()=>completed=true);
+ await new Promise(resolve=>setTimeout(resolve,0));
+ assert.equal(removed,false);assert.equal(calls,1);assert.equal(completed,false);
+ assert.equal(host.style.display,'block');assert.match(host.innerHTML,/id="dgSensScanBtn"/);
+ for(const cls of ['green','water','hard','bare'])assert.match(host.innerHTML,new RegExp('id="dgSensRange-'+cls+'"'));
+ finish();await analyzing;
+ assert.equal(a.run('DG_SENS.record.profile.stats.nProfiled'),2);assert.equal(a.ctx.window._dgLandCoverBusy,false);
+ for(const cls of ['green','water','hard','bare']){const slider=host.innerHTML.match(new RegExp('<input id="dgSensRange-'+cls+'"[^>]*>'))?.[0];assert.match(slider,/value="50"/);assert.doesNotMatch(slider,/disabled/);}
+ assert.match(host.innerHTML,/Yeniden Tara/);assert.equal(removed,false);
+});
