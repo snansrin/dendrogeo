@@ -43,6 +43,9 @@ try{
     throw Error('GIS placement / singleton regression at '+width+': '+JSON.stringify(seed));
   const menu=page.locator('#surfaceMenuBar > details[data-menu-owner="surface"][data-menu-order="10"]');
   await menu.locator('summary').click();
+  // Native <details> dispatches toggle asynchronously; wait for the real
+  // responsive positioning callback before measuring menu overflow.
+  await page.waitForTimeout(200);
   const geometry=await menu.locator(':scope > .dg-editor-menu-body').evaluate(node=>{
    const r=node.getBoundingClientRect();
    return {left:r.left,right:r.right,top:r.top,bottom:r.bottom,viewport:innerWidth,width:r.width,scrollWidth:document.documentElement.scrollWidth};
