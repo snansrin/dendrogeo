@@ -3,7 +3,7 @@
  * remain "other", with original raster and published result untouched. */
 (function(){
  "use strict";
- let pendingLayer=null,pendingIdentity=null,observer=null,queued=0,busy=false;
+ let pendingLayer=null,pendingIdentity=null,observer=null,parkObserver=null,observedHost=null,queued=0,busy=false;
  const $=id=>document.getElementById(id);
  const state=()=>window.DG_LC_SENS?.state;
  const message=(value,kind="info")=>{
@@ -163,13 +163,25 @@
   if(queued)return;
   queued=setTimeout(()=>{queued=0;sync();},90);
  }
- function init(){
+ // The scientific surface panel is created after a park selection.
+ // Attaching ONLY at DOMContentLoaded left the manual/draft toolbar missing.
+ function attachSurfacePanel(){
   const host=$("lcSens");
-  if(!host)return;
+  if(!host||host===observedHost)return;
+  observer?.disconnect?.();
+  observedHost=host;
   sync();
   if(typeof MutationObserver==="function"){
    observer=new MutationObserver(schedule);
    observer.observe(host,{childList:true,subtree:false});
+  }
+ }
+ function init(){
+  attachSurfacePanel();
+  const park=$("parkInfo");
+  if(park&&typeof MutationObserver==="function"){
+   parkObserver=new MutationObserver(attachSurfacePanel);
+   parkObserver.observe(park,{childList:true,subtree:false});
   }
  }
  window.DG_GIS_PROJECT_DRAFT={saveDraft,highlightPending,pendingParts,sync};
