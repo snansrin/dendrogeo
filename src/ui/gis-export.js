@@ -11,12 +11,16 @@
   water:{color:"#3b82f6",label:"Su"},
   hard:{color:"#64748b",label:"Sert zemin"},
   bare:{color:"#8b5a2b",label:"Çıplak zemin"},
+  building:{color:"#334155",label:"Bina"},
   other:{color:"#94a3b8",label:"Diğer"}
  };
  function classes(){
   // DG_LC_CLASSES is loaded lazily, so never capture it at startup.
-  if(typeof DG_LC_CLASSES!=="undefined"&&Array.isArray(DG_LC_CLASSES))
-   return Object.fromEntries(DG_LC_CLASSES.map(x=>[x.key,{color:x.color,label:x.label}]));
+  if(typeof DG_LC_CLASSES!=="undefined"&&Array.isArray(DG_LC_CLASSES)){
+   const dict=Object.fromEntries(DG_LC_CLASSES.map(x=>[x.key,{color:x.color,label:x.label}]));
+   dict.building={...dict.building,color:BUILDING_COLOR,label:dict.building?.label||"Bina"};
+   return dict;
+  }
   return PALETTE;
  }
 
@@ -111,7 +115,7 @@
   ctx.globalAlpha=1;
   return true;
  }
- function drawRawPatches(ctx,pr,patches,dict){
+ function drawRawPatches(ctx,pr,patches,dict,opacity=.52){
   let painted=0;
   for(const patch of patches||[]){
    const rings=patch.rings||[];
@@ -121,7 +125,7 @@
     ring.forEach((p,i)=>{const x=pr.x(p[1]),y=pr.y(p[0]);if(i===0)ctx.moveTo(x,y);else ctx.lineTo(x,y);});
     ctx.closePath();
    }
-   ctx.globalAlpha=.52;
+   ctx.globalAlpha=opacity;
    ctx.fillStyle=dict[patch.classKey||patch.group]?.color||"#94a3b8";
    ctx.fill("evenodd");ctx.globalAlpha=1;painted++;
   }
@@ -210,7 +214,7 @@
    const display=Array.isArray(sens?.displayPaths)&&!sens.rawView?sens.displayPaths:[];
    if(display.length){
     for(const item of display){
-     if(drawLeaflet(ctx,pr,item.poly,Math.max(.28,(sens.opacity||65)/100),item.cls==='pool'?'#3b82f6':null))count++;
+     if(drawLeaflet(ctx,pr,item.poly,Math.max(.28,(sens.opacity||65)/100),item.cls==="building"?BUILDING_COLOR:item.cls==="pool"?"#3b82f6":null))count++;
     }
    }else{
     const last=window.DG_LANDCOVER?.getLast?.();
@@ -360,7 +364,7 @@
     if(drawLeaflet(g,pr,item.poly,basemap==="vector"?1:Math.max(.35,(sens.opacity||65)/100),item.cls==="building"?BUILDING_COLOR:item.cls==="pool"?"#3b82f6":null))painted++;
    if(!painted){
     const last=window.DG_LANDCOVER?.getLast?.();
-    painted=drawRawPatches(g,pr,last?.patches||last?.report?.patches||[],dict);
+    painted=drawRawPatches(g,pr,last?.patches||last?.report?.patches||[],dict,basemap==="vector"?1:.65);
    }
    // NDVI is drawn after regular green class (and before grid/waypoints),
    // so only observed green cells become sparse / moderate / dense.
