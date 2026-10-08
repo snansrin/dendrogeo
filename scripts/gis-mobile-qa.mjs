@@ -36,12 +36,13 @@ try{
     generatedFileCount:bar.querySelectorAll('details.dg-ux-output-menu').length,
     verifiedCount:bar.querySelectorAll('details[data-menu-order="10"] button[onclick*="dgSensExportPng"]').length,
     pngCount:bar.querySelectorAll('details[data-menu-order="10"] button[onclick*="downloadParkImage"]').length,
+    pngBaseInOriginalFile:!!bar.querySelector('details[data-menu-order="10"] select#pngBg'),
     pngLayersUnderLayers:!!document.querySelector('#parkLayerTools .dg-ux-export-section #chkPngGrid'),
     speciesButtonCount:list?.querySelectorAll('button').length??-1,
     toolMenuReady:!!document.getElementById('dgUxMapTools')
    };
   });
-  if(!seed.ready||seed.singleExport!==1||seed.fileCount!==1||seed.generatedFileCount!==0||seed.verifiedCount!==1||seed.pngCount!==1||!seed.pngUnderMenu||!seed.pngLayersUnderLayers||
+  if(!seed.ready||seed.singleExport!==1||seed.fileCount!==1||seed.generatedFileCount!==0||seed.verifiedCount!==1||seed.pngCount!==1||!seed.pngBaseInOriginalFile||!seed.pngUnderMenu||!seed.pngLayersUnderLayers||
      seed.speciesButtonCount!==0||!seed.toolMenuReady||
      seed.order.indexOf(10)<0||seed.order.indexOf(10)>seed.order.indexOf(20))
     throw Error('GIS placement / singleton regression at '+width+': '+JSON.stringify(seed));
