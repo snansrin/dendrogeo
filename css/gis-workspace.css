@@ -951,3 +951,35 @@
     padding:4px 7px;
   }
 }
+
+/* Reviewed surface drafts: the active map, button palette and scientific
+   acceptance action remain unchanged. This is a separate account-save path. */
+#v-map #lcSens .dg-ux-draft-save{
+  margin:8px 0 10px;
+  padding:10px 11px;
+  border:1px solid var(--line);
+  border-radius:9px;
+  background:var(--surface);
+}
+#v-map #lcSens .dg-ux-draft-actions{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:8px;
+}
+#v-map #lcSens .dg-ux-draft-actions>.dg-png-btn{
+  min-width:0;
+  white-space:normal;
+  min-height:42px;
+  text-align:center;
+}
+#v-map #lcSens .dg-ux-draft-hint,
+#v-map #lcSens .dg-ux-draft-status{
+  margin:7px 0 0;
+  color:var(--mut);
+  font:500 .73rem/1.55 var(--f-ui);
+}
+#v-map #lcSens .dg-ux-draft-status[data-status="ok"]{color:var(--green)}
+#v-map #lcSens .dg-ux-draft-status[data-status="error"]{color:#b42318}
+@media(max-width:390px){
+ #v-map #lcSens .dg-ux-draft-actions{grid-template-columns:1fr}
+}
