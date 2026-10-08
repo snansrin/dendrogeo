@@ -9,7 +9,7 @@
  "use strict";
  const SOURCE="spatial-nearest-inference";
  const state=()=>window.DG_LC_SENS?.state;
- let pendingTimer=0,running=false,observer=null;
+ let pendingTimer=0,running=false,observer=null,parkObserver=null,observedHost=null;
  const stats=rec=>{
   const entries=Object.entries(rec?.corrections||{});
   const targets=entries.filter(([,decision])=>decision&&decision.source===SOURCE);
@@ -169,14 +169,34 @@
   if(pendingTimer)return;
   pendingTimer=setTimeout(()=>{pendingTimer=0;restore();syncWaterReviewAction();maybeRecheckAfterScan();},200);
  }
- function init(){
+ // #lcSens is created only when a park is selected (parkInfo.innerHTML),
+ // AFTER DOMContentLoaded. An observer installed on a missing element silently
+ // disabled the earlier satellite retry and draft controls for the whole visit.
+ // Watch the existing park container for NEW panel instances, and attach to
+ // each actual panel. No polling, and no changes to the locked scanner.
+ function attachSurfacePanel(){
   const host=document.getElementById("lcSens");
-  if(!host)return;
+  if(!host||host===observedHost)return;
+  observer?.disconnect?.();
+  observedHost=host;
   if(typeof MutationObserver==="function"){
    observer=new MutationObserver(queue);
    observer.observe(host,{childList:true,subtree:false});
   }
   queue();
+ }
+ function init(){
+  attachSurfacePanel();
+  const park=document.getElementById("parkInfo");
+  if(park&&typeof MutationObserver==="function"){
+   parkObserver=new MutationObserver(attachSurfacePanel);
+   parkObserver.observe(park,{childList:true,subtree:false});
+  }
+  // If a late-mounted scientific panel is created and a scan starts without
+  // mutating the outer park container, reattach on that real user gesture.
+  document.addEventListener?.("click",event=>{
+   if(event.target?.closest?.("#dgSensScanBtn")){attachSurfacePanel();queue();}
+  },true);
  }
  window.DG_GIS_WATER_NEIGHBOUR={restore,stats,queue,missingParts,recheckMissing,syncWaterReviewAction,maybeRecheckAfterScan};
  if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",init,{once:true});
