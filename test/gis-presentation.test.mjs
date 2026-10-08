@@ -228,6 +228,8 @@ test('verified NDVI PNG uses 1240x1560 official layout and paints observed green
  assert.match(src,/tiers\.cutoffs\.map\(n=>Number\(n\)\.toFixed\(3\)\)/);
  assert.match(src,/if\(tiers\.count<9\|\|!tiers\.cutoffs\)/);
  assert.match(src,/dgSensEditSummary\(rec\)/);
+ assert.match(src,/dgSensFeatures\(\)\.length/);
+ assert.match(src,/NDVI katmanı tek başına doğrulanmış harita sayılmaz/);
  assert.match(src,/renderVerified\(layers\)/);
 });
 
