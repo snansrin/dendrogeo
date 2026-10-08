@@ -647,11 +647,12 @@
 }
 #toastWrap .toast{background:var(--surface);box-shadow:var(--sh)}
 @media(max-width:700px){
-  /* Messages appear below the GIS workspace rather than beneath its sticky menu. */
+  /* Keep messages in the safe top area; bottom placement hid them behind mobile controls. */
   #toastWrap{
-    top:auto!important;
-    bottom:calc(12px + env(safe-area-inset-bottom))!important;
-    left:10px!important;right:10px!important;
+    top:max(12px,env(safe-area-inset-top) + 12px)!important;
+    bottom:auto!important;
+    left:max(10px,env(safe-area-inset-left) + 10px)!important;
+    right:max(10px,env(safe-area-inset-right) + 10px)!important;
     width:auto!important;
     max-height:min(38dvh,320px);
   }
@@ -817,7 +818,7 @@
 @media(max-width:700px){
   #v-map #surfaceMenuBar{
     display:grid;
-    grid-template-columns:repeat(4,minmax(0,1fr));
+    grid-template-columns:repeat(3,minmax(0,1fr));
     width:100%;
     max-width:100%;
     overflow:visible;
@@ -841,10 +842,6 @@
     text-align:center;
   }
 }
-@media(max-width:390px){
-  #v-map #surfaceMenuBar{grid-template-columns:repeat(3,minmax(0,1fr))}
-}
-
 /* Visible, theme-consistent native controls: overrides UA black range tracks.
    Uses the existing map classes and never changes their scientific palette. */
 #v-map #lcSens input.dg-sens-slider[id^="dgSensRange-"]{

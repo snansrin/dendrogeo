@@ -56,7 +56,9 @@ test('GIS review DOM shows original report in raw mode and removes duplicate raw
 test('mobile GIS stylesheet keeps notifications visible and the analysis usable on narrow viewports',()=>{
  const style=load('css/gis-workspace.css');
  assert.match(style,/#toastWrap\s*\{[\s\S]*?z-index:2147483646!important/);
- assert.match(style,/bottom:calc\(12px \+ env\(safe-area-inset-bottom\)\)!important/);
+ assert.match(style,/top:max\(12px,env\(safe-area-inset-top\) \+ 12px\)!important/);
+ assert.match(style,/bottom:auto!important/);
+ assert.doesNotMatch(style,/bottom:calc\(12px \+ env\(safe-area-inset-bottom\)\)!important/);
  assert.match(style,/#v-map #lcSens #dgSensSummary\{display:none\}/);
 });
 

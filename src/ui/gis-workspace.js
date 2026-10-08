@@ -3,7 +3,7 @@
  * The original DOM nodes and onclick handlers are always retained. */
 (function(){
  "use strict";
- let pending=0, observer=null, mapTool="",mapInstance=null,drawLayer=null,drawPoints=[],clickHandler=null,captureTarget=null,captureClick=null;
+ let pending=0, observer=null, mapTool="",mapInstance=null,drawLayer=null,drawPoints=[],clickHandler=null,captureTarget=null,captureClick=null,menuPositionFrame=false;
  // Park controls are moved into transient details nodes by the legacy menus.
  // Their owner may remove/rebuild a details node while preserving its old
  // child references only here. Restore those EXISTING inputs, never clone them.
@@ -27,18 +27,24 @@
   const panel=menu.querySelector(":scope > .dg-editor-menu-body");
   if(!panel)return;
   const viewport=window.visualViewport;
-  const width=viewport?.width||window.innerWidth;
-  const height=viewport?.height||window.innerHeight;
+  const width=viewport?.width||document.documentElement?.clientWidth||window.innerWidth;
+  const height=viewport?.height||document.documentElement?.clientHeight||window.innerHeight;
   const offsetTop=viewport?.offsetTop||0,offsetLeft=viewport?.offsetLeft||0;
   if(width<=700){
    const menuRect=menu.getBoundingClientRect();
-   const top=Math.max(offsetTop+8,Math.min(menuRect.bottom+6,height+offsetTop-155));
+   const viewportTop=offsetTop+8,viewportBottom=offsetTop+height-8;
+   const availableHeight=Math.max(0,viewportBottom-viewportTop);
+   const panelHeight=Math.min(availableHeight,Math.max(140,panel.scrollHeight||0));
+   const top=Math.max(viewportTop,Math.min(menuRect.bottom+6,viewportBottom-panelHeight));
+   const sideInset=Math.min(10,Math.max(0,width/2));
    panel.style.position="fixed";
-   panel.style.left=(offsetLeft+10)+"px";
+   panel.style.left=(offsetLeft+sideInset)+"px";
    panel.style.right="auto";
    panel.style.top=top+"px";
-   panel.style.width="calc(100vw - 20px)";
-   panel.style.maxHeight=Math.max(120,height+offsetTop-top-12)+"px";
+   panel.style.width=Math.max(0,width-sideInset*2)+"px";
+   panel.style.maxWidth=panel.style.width;
+   panel.style.boxSizing="border-box";
+   panel.style.maxHeight=Math.max(0,viewportBottom-top)+"px";
    return;
   }
   const rect=menu.getBoundingClientRect(),ideal=Math.min(440,width-24);
@@ -51,6 +57,7 @@
    panel.style.left=left+"px";panel.style.right="auto";
    panel.style.top=Math.max(offsetTop+8,height+offsetTop-panelHeight-10)+"px";
    panel.style.width="min(440px,calc(100vw - 24px))";
+   panel.style.maxWidth="";
    panel.style.maxHeight=Math.max(120,height-20)+"px";
    return;
   }
@@ -59,7 +66,18 @@
   panel.style.right="auto";
   panel.style.top="calc(100% + 6px)";
   panel.style.width="min(440px,calc(100vw - 24px))";
+  panel.style.maxWidth="";
   panel.style.maxHeight="";
+ }
+ function scheduleMenuPosition(){
+  if(menuPositionFrame)return;
+  menuPositionFrame=true;
+  const update=()=>{
+   menuPositionFrame=false;
+   $("surfaceMenuBar")?.querySelectorAll(":scope > details[open]").forEach(menuPosition);
+  };
+  if(typeof window.requestAnimationFrame==="function")window.requestAnimationFrame(update);
+  else setTimeout(update,16);
  }
  function openMenu(menu){
   $("surfaceMenuBar")?.querySelectorAll(":scope > details[open]").forEach(other=>{
@@ -718,8 +736,11 @@
   bar.addEventListener("toggle",event=>{
    if(event.target?.matches?.(":scope > .dg-editor-menu")&&event.target.open)openMenu(event.target);
   },true);
-  window.addEventListener("resize",()=>{bar.querySelectorAll(":scope > details[open]").forEach(menuPosition);},{passive:true});
-  window.visualViewport?.addEventListener("resize",()=>{bar.querySelectorAll(":scope > details[open]").forEach(menuPosition);},{passive:true});
+  window.addEventListener("resize",scheduleMenuPosition,{passive:true});
+  window.addEventListener("orientationchange",scheduleMenuPosition,{passive:true});
+  document.addEventListener("scroll",scheduleMenuPosition,{capture:true,passive:true});
+  window.visualViewport?.addEventListener("resize",scheduleMenuPosition,{passive:true});
+  window.visualViewport?.addEventListener("scroll",scheduleMenuPosition,{passive:true});
   document.addEventListener("keydown",e=>{if(e.key==="Escape"&&mapTool){closeTool();setStatus("Geçici ölçüm kapatıldı.");}});
   document.addEventListener("input",e=>{
    const input=e.target;

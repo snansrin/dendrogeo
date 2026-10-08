@@ -86,3 +86,28 @@ test('mobile 320/360/390/430 widths and card/slider reflow are explicitly scoped
  assert.match(css, /var\(--green\)/);
  assert.doesNotMatch(css,/\.dg-png-btn\.primary\s*\{/);
 });
+
+test('phone toast stays in the safe top area and menu panels track the visible viewport',()=>{
+ assert.match(css,/@media\(max-width:700px\)[\s\S]*?#toastWrap\s*\{[\s\S]*?top:max\(12px,env\(safe-area-inset-top\) \+ 12px\)!important;[\s\S]*?bottom:auto!important;/);
+ assert.doesNotMatch(css,/bottom:calc\(12px \+ env\(safe-area-inset-bottom\)\)!important/);
+ assert.match(css,/@media\(max-width:700px\)[\s\S]*?#v-map #surfaceMenuBar\s*\{[\s\S]*?grid-template-columns:repeat\(3,minmax\(0,1fr\)\)/);
+ assert.doesNotMatch(css,/@media\(max-width:390px\)[\s\S]{0,100}#v-map #surfaceMenuBar\s*\{[\s\S]{0,80}grid-template-columns/);
+ assert.match(ui,/document\.addEventListener\("scroll",scheduleMenuPosition/);
+ assert.match(ui,/window\.visualViewport\?\.addEventListener\("scroll",scheduleMenuPosition/);
+ assert.match(ui,/viewportBottom-panelHeight/);
+});
+
+test('mobile menu geometry is clamped to visualViewport even when its anchor is near the lower edge',()=>{
+ const start=ui.indexOf('function menuPosition(menu){');
+ const end=ui.indexOf('\n function scheduleMenuPosition',start);
+ assert.ok(start>=0&&end>start,'menu positioning helper is present');
+ const panel={style:{},scrollHeight:480};
+ const menu={open:true,querySelector:()=>panel,getBoundingClientRect:()=>({bottom:690,left:320,right:380})};
+ const context={window:{visualViewport:{width:390,height:500,offsetTop:30,offsetLeft:0},innerWidth:390,innerHeight:800},document:{documentElement:{clientWidth:390,clientHeight:800}},menu};
+ vm.runInNewContext(ui.slice(start,end)+';menuPosition(menu);',context);
+ assert.equal(panel.style.position,'fixed');
+ assert.equal(panel.style.left,'10px');
+ assert.equal(panel.style.width,'370px');
+ assert.equal(panel.style.top,'42px');
+ assert.equal(panel.style.maxHeight,'480px');
+});
