@@ -75,7 +75,7 @@ test('second-pass Sentinel spectral samples resolve supported green and hard whi
  assert.equal(Object.keys(f.rec.profile.cells).length,41);
  assert.equal(f.rec.profile.supplementalSpectral.cellsResolved,40);
  assert.equal(f.rec.profile.supplementalSpectral.period,'latest');
- assert.deepEqual(f.events,['profile', 'dirty','refresh','summary','save'].flatMap(x=>[x]).map(x=>x).length?f.events:f.events);
+ assert.deepEqual(f.events.slice(1),['dirty','refresh','summary','save']);
  assert.equal(f.events[0][0],'profile');
  assert.ok(f.events.includes('dirty'));
  assert.match(f.status.textContent,/29 hücre/);
@@ -83,9 +83,6 @@ test('second-pass Sentinel spectral samples resolve supported green and hard whi
 test('no data / ambiguous periods do not make up green land cover and never modify saved results',async()=>{
  const f=fixture();
  f.rec.period='latest';
- for(let i=1;i<=69;i++){
-  // Spectral predict in this scenario intentionally cannot validate land.
- }
  f.state.rawView=true;
  assert.equal((await f.api.recheckMissing()).reason,'busy');
  assert.equal(f.events.length,0);
