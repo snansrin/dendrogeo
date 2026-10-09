@@ -57,11 +57,14 @@ function dgLcLoadWithRetry(src,globalName){
 ========================================================= */
 const DG_LULC_CHAIN=[
   "src/services/lc-config.js",
+  "src/domain/surface/classify-landcover-code.js",
+  "src/domain/surface/compare-source-class-areas.js",
   "src/services/lc-geo.js",
   "src/services/lc-stac.js",
   "src/domain/surface/merge-tile-results.js",
   "src/adapters/surface/result-exports.js",
   "src/application/surface/analyze-source.js",
+  "src/adapters/surface/process-landcover-tile.js",
   "src/services/lc-engine.js",
   "src/services/lc-osm.js",
   "src/services/lc-patches.js",

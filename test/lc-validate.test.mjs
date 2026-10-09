@@ -18,9 +18,12 @@ import { loadApp } from '../scripts/test-harness.mjs';
 const rd = (p) => readFileSync(new URL('../' + p, import.meta.url), 'utf8');
 
 const app = loadApp({ sadece: ['src/config/constants.js', 'src/utils/geo.js',
-  'src/services/lc-config.js', 'src/services/lc-geo.js', 'src/services/lc-stac.js',
+  'src/services/lc-config.js', 'src/domain/surface/classify-landcover-code.js',
+  'src/domain/surface/compare-source-class-areas.js',
+  'src/services/lc-geo.js', 'src/services/lc-stac.js',
   'src/domain/surface/merge-tile-results.js', 'src/adapters/surface/result-exports.js',
   'src/application/surface/analyze-source.js',
+  'src/adapters/surface/process-landcover-tile.js',
   'src/services/lc-engine.js',
   'src/services/lc-osm.js', 'src/services/lc-patches.js',
   'src/services/lc-validate.js', 'src/services/lc-s2.js',

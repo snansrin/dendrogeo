@@ -14,9 +14,12 @@ import { readFileSync } from 'node:fs';
 import { loadApp } from '../scripts/test-harness.mjs';
 
 const app = loadApp({ sadece: ['src/config/constants.js', 'src/utils/geo.js',
-  'src/services/lc-config.js', 'src/services/lc-geo.js', 'src/services/lc-stac.js',
+  'src/services/lc-config.js', 'src/domain/surface/classify-landcover-code.js',
+  'src/domain/surface/compare-source-class-areas.js',
+  'src/services/lc-geo.js', 'src/services/lc-stac.js',
   'src/domain/surface/merge-tile-results.js', 'src/adapters/surface/result-exports.js',
   'src/application/surface/analyze-source.js',
+  'src/adapters/surface/process-landcover-tile.js',
   'src/services/lc-engine.js',
   'src/services/lc-osm.js', 'src/services/lc-patches.js',
   'src/ui/lc-report.js', 'src/services/landcover.js'] });
@@ -568,6 +571,7 @@ describe('v9: sapma düzeltmesi + yapay havuz rafinasyonu + PNG park kıpı', ()
     readFileSync(new URL('../src/application/surface/run-analysis.js', import.meta.url), 'utf8'),
     readFileSync(new URL('../src/services/lc-osm.js', import.meta.url), 'utf8'),
     readFileSync(new URL('../src/services/lc-engine.js', import.meta.url), 'utf8'),
+    readFileSync(new URL('../src/adapters/surface/process-landcover-tile.js', import.meta.url), 'utf8'),
   ].join('\n');
   /* Faz 4: waypoint üretimi grid-engine.js'te, PNG kırpma ui/park-export.js'te */
   const srcGp = [
@@ -651,7 +655,7 @@ test('LULC: tek ESA motoru ham kodları korur, ikincil motor ve OSM sınıfland�
   assert.doesNotMatch(application,/dgLcRefineWater\(result/);
   assert.doesNotMatch(application,/analyzeSource\(sources\.cross/);
   assert.match(application,/waterRefinedCells:waterRefined/);
-  /* Faz 5: ham raster sayaçları dgLcProcessTile içinde → lc-engine.js */
-  const engine = readFileSync(new URL('../src/services/lc-engine.js', import.meta.url), 'utf8');
-  assert.match(engine, /rawCounts\[raw\]=/);
+  /* Ham raster sayaçları tek-karolu raster adapterında üretilir. */
+  const tileProcessor = readFileSync(new URL('../src/adapters/surface/process-landcover-tile.js', import.meta.url), 'utf8');
+  assert.match(tileProcessor, /rawCounts\[raw\]=/);
 });

@@ -1,0 +1,251 @@
+"use strict";
+/* DendroGeo · adapters/surface/process-landcover-tile.js
+ * Reads and intersects one COG tile with the analysis polygon. All raster,
+ * CRS, geometry, and class dependencies are wired once below; processing
+ * returns the established tile-result DTO and does not publish UI state.
+ */
+window.DG_SURFACE_TILE_PROCESSOR=((ports)=>{
+  const DG_LC_SOURCES=ports.sources;
+  const DG_LC_MAX_READ_PIXELS=ports.maxReadPixels;
+  const dgLcOpenRaster=ports.openRaster;
+  const dgLcUtmEpsgForLatLon=ports.utmEpsgForLatLon;
+  const dgLcProjectGeometry=ports.projectGeometry;
+  const dgLcProjectedArea=ports.projectedArea;
+  const dgLcImageMeta=ports.imageMeta;
+  const dgLcWindowForPark=ports.windowForPark;
+  const dgLcBboxFromGeometry=ports.bboxFromGeometry;
+  const dgLcQuadBBox=ports.quadBBox;
+  const dgLcBboxOverlap=ports.bboxOverlap;
+  const dgLcIntersectionAreaConvex=ports.intersectionAreaConvex;
+  const dgLcUtmForward=ports.utmForward;
+  const dgLcUtmInverse=ports.utmInverse;
+  const dgLcIsMasked=ports.classification.isMasked;
+  const dgLcGroupForCode=ports.classification.groupForCode;
+
+function dgLcRunPush(runs,row,start,end,cls,meta,epsg){
+  if(end<=start)return;
+  const yTop=meta.maxY-row*meta.dy;
+  const yBottom=yTop-meta.dy;
+  runs.push({
+    row,
+    col0:start,
+    col1:end,
+    classKey:cls,
+    epsg,
+    x0:meta.minX+start*meta.dx,
+    x1:meta.minX+end*meta.dx,
+    y0:yBottom,
+    y1:yTop
+  });
+}
+
+/* Bir veri karosunu işler.
+ *
+ * CRS desteği:
+ *   · UTM karoları (io-lulc): hücreler analiz UTM'sinde eksen hizalı dikdörtgen.
+ *   · EPSG:4326 karoları (ESA WorldCover): hücrenin derece köşeleri analiz
+ *     UTM'sine projekte edilir → hafif yamuk dışbükey dörtgen; alanlar
+ *     dgLcIntersectionAreaConvex ile TAM hesaplanır. Metrede anizotropik
+ *     (~7,1 x 9,3 m) hücrenin gerçek şekli korunur.
+ *
+ * Çıktılar grup anahtarlıdır (green/water/hard/bare/other) + ham kod kırılımı.
+ */
+function dgProcessLandcoverTile(item,href,geometryWgs,source,signal){
+  const src=source||DG_LC_SOURCES.cross;
+  return dgLcOpenRaster(href,signal).then(async tiff=>{
+    const image=await tiff.getImage();
+    const keys=typeof image.getGeoKeys==="function"?image.getGeoKeys():null;
+    const keyEpsg=Math.round(Number(keys&&keys.ProjectedCSTypeGeoKey||0));
+    const propEpsg=Math.round(Number(item?.properties?.["proj:epsg"]||0));
+    const rasterEpsg=keyEpsg||propEpsg||4326;
+    const isUtm=rasterEpsg>=32601&&rasterEpsg<=32760;
+    const analysisEpsg=isUtm?rasterEpsg:dgLcUtmEpsgForLatLon(
+      (geometryWgs.outer[0]?.[0]?.[0]??40),
+      (geometryWgs.outer[0]?.[0]?.[1]??32)
+    );
+    const geometry=dgLcProjectGeometry(geometryWgs.outer,geometryWgs.holes,analysisEpsg);
+    const parkAreaNative=dgLcProjectedArea(geometry);
+    if(!(parkAreaNative>0))throw new Error("Park polygonu veri karosunun UTM alanında geçersiz.");
+
+    const meta=dgLcImageMeta(image);
+    const parkBBox=geometry.outer.reduce((acc,r)=>{
+      acc.minX=Math.min(acc.minX,r._bbox.minX);
+      acc.minY=Math.min(acc.minY,r._bbox.minY);
+      acc.maxX=Math.max(acc.maxX,r._bbox.maxX);
+      acc.maxY=Math.max(acc.maxY,r._bbox.maxY);
+      return acc;
+    },{minX:Infinity,minY:Infinity,maxX:-Infinity,maxY:-Infinity});
+
+    /* Okuma penceresi: UTM'de metre, 4326'da derece uzayında hesaplanır. */
+    let win;
+    if(isUtm){
+      win=dgLcWindowForPark(meta,parkBBox);
+    }else{
+      const wgs=dgLcBboxFromGeometry(geometryWgs.outer,geometryWgs.holes);
+      const minCol=Math.max(0,Math.floor((wgs.minLon-meta.minX)/meta.dx)-1);
+      const maxCol=Math.min(meta.width,Math.ceil((wgs.maxLon-meta.minX)/meta.dx)+1);
+      const minRow=Math.max(0,Math.floor((meta.maxY-wgs.maxLat)/meta.dy)-1);
+      const maxRow=Math.min(meta.height,Math.ceil((meta.maxY-wgs.minLat)/meta.dy)+1);
+      if(maxCol<=minCol||maxRow<=minRow)throw new Error("Park ile 10 m veri karosu arasında piksel kesişimi yok.");
+      win=[minCol,minRow,maxCol,maxRow];
+    }
+    const px=(win[2]-win[0])*(win[3]-win[1]);
+    if(px>DG_LC_MAX_READ_PIXELS){
+      throw new Error("Park alanı tek karoda çok büyük; güvenli 10 m COG okuma sınırını aşıyor.");
+    }
+
+    /* Run bantları meta uzayında (UTM karoda metre, 4326 karoda DERECE)
+     * tutulur. Render'da doğru ters dönüşüm seçilsin diye run'lara meta
+     * uzayının EPSG'si yazılır: 4326 karoda 4326 (derece), UTM karoda bölge.
+     * ⚠️ Buraya analysisEpsg yazmak SAHADAKİ GÖRÜNMEZ KATMAN HATASIYDI:
+     * derece değerler metre gibi ters UTM'ye sokulup okyanusa çiziliyordu. */
+    const runEpsg=isUtm?analysisEpsg:4326;
+
+    const values=await image.readRasters({
+      window:win,
+      samples:[0],
+      interleave:true,signal
+    });
+
+    const groupCounts={},groupAreas={},rawCounts={},rawAreas={};
+    const runs=[];
+    const cells=[];
+    let assignedAreaM2=0,classifiedAreaM2=0,maskedAreaM2=0,maskedCount=0,sourceCells=0;
+    const rowStart=win[1],colStart=win[0],localW=win[2]-win[0];
+
+    for(let rr=0;rr<(win[3]-win[1]);rr++){
+      const globalRow=rowStart+rr;
+      let runStart=-1,runCls=null;
+      for(let cc=0;cc<localW;cc++){
+        const globalCol=colStart+cc;
+        /* Hücre dörtgeni (analiz UTM'sinde, CCW) */
+        let quad;
+        if(isUtm){
+          const yTop=meta.maxY-globalRow*meta.dy;
+          const yBottom=yTop-meta.dy;
+          const x0=meta.minX+globalCol*meta.dx;
+          const x1=x0+meta.dx;
+          quad=[{x:x0,y:yBottom},{x:x1,y:yBottom},{x:x1,y:yTop},{x:x0,y:yTop}];
+        }else{
+          const latTop=meta.maxY-globalRow*meta.dy;
+          const latBot=latTop-meta.dy;
+          const lon0=meta.minX+globalCol*meta.dx;
+          const lon1=lon0+meta.dx;
+          const f=(lon,lat)=>dgLcUtmForward(lat,lon,analysisEpsg);
+          quad=[f(lon0,latBot),f(lon1,latBot),f(lon1,latTop),f(lon0,latTop)];
+        }
+        quad._bbox=dgLcQuadBBox(quad);
+        if(!dgLcBboxOverlap(quad._bbox,parkBBox))continue;
+        const area=dgLcIntersectionAreaConvex(geometry.outer,geometry.holes,quad);
+        if(!(area>1e-8))continue;
+
+        sourceCells++;
+        assignedAreaM2+=area;
+
+        const raw=Number(values[rr*localW+cc]);
+        const masked=dgLcIsMasked(raw,src);
+        const classKey=masked?null:dgLcGroupForCode(raw,src);
+
+        rawCounts[raw]=(rawCounts[raw]||0)+1;
+        rawAreas[raw]=(rawAreas[raw]||0)+area;
+
+        if(masked||!classKey){
+          maskedAreaM2+=area;
+          maskedCount++;
+          if(runStart>=0){
+            dgLcRunPush(runs,globalRow,runStart,globalCol,runCls,meta,runEpsg);
+            runStart=-1;runCls=null;
+          }
+          continue;
+        }
+        classifiedAreaM2+=area;
+        groupCounts[classKey]=(groupCounts[classKey]||0)+1;
+        groupAreas[classKey]=(groupAreas[classKey]||0)+area;
+
+        if(runStart>=0&&runCls===classKey){
+          /* bant devam ediyor */
+        }else{
+          if(runStart>=0)dgLcRunPush(runs,globalRow,runStart,globalCol,runCls,meta,runEpsg);
+          runStart=globalCol;runCls=classKey;
+        }
+
+        if(cells.length<10000){
+          const cx=(quad[0].x+quad[1].x+quad[2].x+quad[3].x)/4;
+          const cy=(quad[0].y+quad[1].y+quad[2].y+quad[3].y)/4;
+          const inv=p=>dgLcUtmInverse(p.x,p.y,analysisEpsg);
+          /* ⚠️ SAPMA HATASI BURADAYDI: 4326 karolarında inv() argümanı yok
+           * sayıp dört köşeye de HÜCRE MERKEZİNİ yazıyordu. quadWgs dört aynı
+           * noktadan oluşuyor, halkalar hücre merkezlerinden kuruluyor, şekil
+           * yarımşar piksel kayıyor ve alan geri ölçekleme onu şişirip komşu
+           * sınıfların (su/ada) üzerine taşıyordu. Artık köşeler derece
+           * sınırlarından DOĞRUDAN hesaplanır. */
+          let c0,c1,c2,c3,center;
+          if(isUtm){
+            c0=inv(quad[0]);c1=inv(quad[1]);c2=inv(quad[2]);c3=inv(quad[3]);
+            center=inv({x:cx,y:cy});
+          }else{
+            const latTop=meta.maxY-globalRow*meta.dy,latBot=latTop-meta.dy;
+            const lon0=meta.minX+globalCol*meta.dx,lon1=lon0+meta.dx;
+            c0={lat:latBot,lon:lon0};
+            c1={lat:latBot,lon:lon1};
+            c2={lat:latTop,lon:lon1};
+            c3={lat:latTop,lon:lon0};
+            center={lat:(latTop+latBot)/2,lon:(lon0+lon1)/2};
+          }
+          cells.push({
+            row:globalRow,
+            col:globalCol,
+            epsg:analysisEpsg,
+            classCode:Math.round(Number(raw)),
+            classKey,
+            rasterClassKey:classKey,
+            areaM2:area,
+            center,
+            quadWgs:[[c0.lon,c0.lat],[c1.lon,c1.lat],[c2.lon,c2.lat],[c3.lon,c3.lat]],
+            source:src.key
+          });
+        }
+      }
+      if(runStart>=0){
+        dgLcRunPush(runs,globalRow,runStart,colStart+localW,runCls,meta,runEpsg);
+        runStart=-1;runCls=null;
+      }
+    }
+
+    return{
+      source:src.key,
+      epsg:analysisEpsg,
+      rasterEpsg,
+      sourceCells,
+      assignedAreaM2,
+      classifiedAreaM2,
+      maskedAreaM2,
+      maskedCount,
+      groupCounts,
+      groupAreas,
+      rawCounts,
+      rawAreas,
+      runs,
+      cells
+    };
+  });
+}
+
+  return Object.freeze({process:dgProcessLandcoverTile});
+})({
+  sources:DG_LC_SOURCES,
+  maxReadPixels:DG_LC_MAX_READ_PIXELS,
+  openRaster:dgLcOpenRaster,
+  utmEpsgForLatLon:dgLcUtmEpsgForLatLon,
+  projectGeometry:dgLcProjectGeometry,
+  projectedArea:dgLcProjectedArea,
+  imageMeta:dgLcImageMeta,
+  windowForPark:dgLcWindowForPark,
+  bboxFromGeometry:dgLcBboxFromGeometry,
+  quadBBox:dgLcQuadBBox,
+  bboxOverlap:dgLcBboxOverlap,
+  intersectionAreaConvex:dgLcIntersectionAreaConvex,
+  utmForward:dgLcUtmForward,
+  utmInverse:dgLcUtmInverse,
+  classification:window.DG_SURFACE_CLASSIFICATION
+});

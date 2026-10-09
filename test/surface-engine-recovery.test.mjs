@@ -4,6 +4,7 @@ import vm from 'node:vm';
 import {readFileSync} from 'node:fs';
 import {join,dirname} from 'node:path';
 import {fileURLToPath} from 'node:url';
+import {loadApp} from '../scripts/test-harness.mjs';
 
 const root=join(dirname(fileURLToPath(import.meta.url)),'..');
 const read=path=>readFileSync(join(root,path),'utf8');
@@ -72,6 +73,44 @@ test('kaynak analizi adapterı yinelenen karoyu bir kez işler ve kanıt kimlikl
  assert.deepEqual(Array.from(output.items),['a','a','b']);
 });
 
+test('sınıf karar modülü kaynak kodu ve nodata politikasını tek API ile sunar',()=>{
+ const ctx={window:null,Object,Math,Number,Array};ctx.window=ctx;vm.createContext(ctx);
+ vm.runInContext(read('src/services/lc-config.js'),ctx);
+ vm.runInContext(read('src/domain/surface/classify-landcover-code.js'),ctx);
+ assert.equal(vm.runInContext('DG_SURFACE_CLASSIFICATION.groupForCode(50,{key:"primary"})',ctx),'hard');
+ assert.equal(vm.runInContext('DG_SURFACE_CLASSIFICATION.groupForCode(7,{key:"cross"})',ctx),'hard');
+ assert.equal(vm.runInContext('DG_SURFACE_CLASSIFICATION.isMasked(0,{key:"primary"})',ctx),true);
+ assert.equal(vm.runInContext('DG_SURFACE_CLASSIFICATION.isMasked(10,{key:"primary"})',ctx),false);
+ assert.equal(vm.runInContext('DG_SURFACE_CLASSIFICATION.isMasked(10,{key:"cross"})',ctx),true);
+});
+
+test('tek karo raster adapterı 4326 rasterdaki gerçek kesişimleri ve ham kodları korur',async()=>{
+ const ctx=loadApp({sadece:[
+  'src/config/constants.js','src/services/lc-config.js','src/domain/surface/classify-landcover-code.js',
+  'src/services/lc-geo.js','src/services/lc-stac.js','src/domain/surface/merge-tile-results.js',
+  'src/adapters/surface/result-exports.js','src/application/surface/analyze-source.js'
+ ]});
+ const image={
+  getGeoKeys:()=>({}),getBoundingBox:()=>[32.85,39.92,32.87,39.94],getWidth:()=>2,getHeight:()=>2,
+  readRasters:async()=>new Uint16Array([10,50,80,0])
+ };
+ ctx.dgLcOpenRaster=async()=>({getImage:async()=>image});
+ vm.runInContext(read('src/adapters/surface/process-landcover-tile.js'),ctx);
+ vm.runInContext(read('src/services/lc-engine.js'),ctx);
+ ctx.geometry={outer:[[[39.92,32.85],[39.92,32.87],[39.94,32.87],[39.94,32.85]]],holes:[]};
+ const tile=await vm.runInContext('dgLcProcessTile({id:"fixture",properties:{}},"fixture.tif",geometry,DG_LC_SOURCES.primary)',ctx);
+ assert.equal(tile.sourceCells,4);
+ assert.equal(tile.groupCounts.green,1);
+ assert.equal(tile.groupCounts.hard,1);
+ assert.equal(tile.groupCounts.water,1);
+ assert.equal(tile.maskedCount,1);
+ assert.equal(tile.rawCounts[10],1);
+ assert.equal(tile.rawCounts[50],1);
+ assert.equal(tile.rawCounts[80],1);
+ assert.equal(tile.cells.length,3);
+ assert.ok(tile.cells.every(cell=>cell.areaM2>0&&cell.quadWgs.length===4));
+});
+
 test('eski motor kilidi yürürlükten kalktı; kurtarma snapshotı salt arşiv olarak kaldı',()=>{
  const record=JSON.parse(read('docs/surface-engine-lock.json'));
  const pkg=JSON.parse(read('package.json'));
@@ -82,4 +121,5 @@ test('eski motor kilidi yürürlükten kalktı; kurtarma snapshotı salt arşiv 
  assert.ok(!pkg.scripts.check.includes('check:surface-lock'));
  assert.ok(!ci.includes('check-surface-lock.mjs'));
  assert.ok(read('sw.js').includes('/src/adapters/surface/result-exports.js'));
+ assert.ok(read('sw.js').includes('/src/adapters/surface/process-landcover-tile.js'));
 });
