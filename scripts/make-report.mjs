@@ -44,6 +44,7 @@ import { DGR_ID_RE, rebuildIndex, nextReportId, parkHistory } from './lib/report
 export { DGR_ID_RE, rebuildIndex, nextReportId, parkHistory };
 import { citeName, fmtDateTr, fmtDateDot, epsgLabel } from './lib/report-formatting.mjs';
 export { citeName, fmtDateTr, fmtDateDot, epsgLabel };
+import { createRetractionNotice } from './lib/report-retraction.mjs';
 const fmtT = value => trNum(value / 1000, 2);
 import { PngCanvas, hex2rgb } from './lib/png.mjs';
 import { createRequire } from 'node:module';
@@ -1206,53 +1207,8 @@ async function dgShareReport(){
 }
 
 /* ---------- CSV / GeoJSON / liste ---------- */
-/* Geri çekme bildirimi (0010): rapor adresi KALIR, içerik kalkar. Bilimsel
- * teamül: sessiz silme yok — gerekçeli, tarihli, kimliği korunmuş bildirim.
- * reason kaçışlanır: günlük/istemci kaynaklı serbest metin HTML'e ham geçmez. */
-export function renderRetractionNotice({ id, parkName = '', reason = '', retractedAt = null }) {
-  const date = retractedAt ? fmtDateTr(retractedAt) : '—';
-  return `<!doctype html>
-<html lang="tr">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="robots" content="noindex, follow">
-<title>${esc(id)} — Geri Çekildi · DendroGeo</title>
-<link rel="canonical" href="${SITE_ORIGIN}/rapor/${esc(id)}/">
-<style>
-:root{--ink:#182420;--mut:#5f6d65;--line:#e6e3d9;--green:#1e6f4b;--gd:#14532d;--amber:#9a4a08;--bg:#f7f6f2}
-*{box-sizing:border-box;margin:0}body{background:var(--bg);color:var(--ink);font:15px/1.7 Georgia,'Times New Roman',serif}
-.wrap{max-width:720px;margin:0 auto;padding:48px 28px 80px;background:#fff;border:1px solid var(--line);border-top:6px solid var(--amber)}
-.kick{font-family:ui-monospace,Consolas,monospace;font-size:.72rem;letter-spacing:.16em;text-transform:uppercase;color:var(--amber)}
-h1{font-size:1.6rem;color:var(--gd);margin:10px 0 14px;font-weight:600}
-table{width:100%;border-collapse:collapse;margin:14px 0;font-family:system-ui,sans-serif;font-size:.82rem}
-td{padding:8px 10px;border-bottom:1px solid var(--line)}
-td.k{color:var(--mut);font-size:.68rem;letter-spacing:.1em;text-transform:uppercase;width:190px}
-p{margin:10px 0;text-align:justify}
-code{font-family:ui-monospace,Consolas,monospace;font-size:.78rem;word-break:break-all}
-.foot{margin-top:32px;padding-top:12px;border-top:1px solid var(--line);font-family:system-ui,sans-serif;font-size:.74rem;color:var(--mut)}
-a{color:var(--green)}
-</style>
-</head>
-<body>
-<div class="wrap">
-<div class="kick">DendroGeo Bilimsel Analiz Raporu · ${esc(id)}</div>
-<h1>Bu rapor geri çekilmiştir</h1>
-<table>
-<tr><td class="k">Rapor kimliği</td><td><code>${esc(id)}</code></td></tr>
-<tr><td class="k">Park</td><td>${esc(parkName || '—')}</td></tr>
-<tr><td class="k">Geri çekme tarihi</td><td>${esc(date)}</td></tr>
-<tr><td class="k">Gerekçe</td><td>${reason ? esc(reason) : 'Gerekçe belirtilmedi.'}</td></tr>
-<tr><td class="k">Durum</td><td><b>Geri çekildi</b> — geçerli sürüm değildir</td></tr>
-</table>
-<p>Geri çekme, yanlışlıkla yayımlanan veya geçerliliğini yitiren içerik için uygulanan standart işlemdir: raporun veri dosyaları (ölçüm verisi, konumlar, snapshot, harita ve üst veri) yayından kaldırılmış; bu adres bilgilendirme bildirimine dönüştürülmüştür. <b>DGR kimliği kalıcıdır ve yeniden kullanılmaz.</b></p>
-<p>Geri çekme kaydı, gerekçesi ve zaman damgasıyla <code>rapor/yayin-kuyrugu.json</code> günlüğünde ve git geçmişinde saklanır. Kaldırılan içeriğe ilişkin talepler (ör. kişisel veri bildirimi) için depo sahibiyle iletişime geçiniz; önceki sürümler git geçmişinde teknik olarak bulunmaya devam edebilir.</p>
-<p><a href="../">← Yayınlanmış raporlar dizini</a></p>
-<div class="foot">DendroGeo · ${DGR_TITLE_DEF} · © DendroGeo · CC BY-NC 4.0</div>
-</div>
-</body>
-</html>`;
-}
+/* Geri çekme bildirimi ayrı şablon modülündedir; eski API korunur. */
+export const renderRetractionNotice = createRetractionNotice({ siteOrigin: SITE_ORIGIN, reportTitle: DGR_TITLE_DEF });
 
 /* Makine okur rapor üst verisi: üretim sabitleri make-report adapter'ında bağlanır;
  * alanların saf üretimi scripts/lib/report-metadata.mjs içindedir. */
