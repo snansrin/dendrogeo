@@ -4,7 +4,7 @@
 // NOT: Senkronizasyon artık Ana Thread (Supabase JS SDK) tarafından yapılıyor
 // ============================================================
 
-const CACHE_VERSION = 'dendrogeo-sw-v2-r114';
+const CACHE_VERSION = 'dendrogeo-sw-v2-r115';
 
 /* İKİ AYRI STATİK CACHE — bu ayrım bilinçli ve önemli.
  *
@@ -55,7 +55,7 @@ const CORE_ASSETS = [
     '/src/services/park-invites.js',
     /* LULC ZİNCİRİ (Faz 5): eski landcover.js altı modüle bölündü; facade son sırada
      * (window.DG_LANDCOVER'u o kurar, yükleme anında lc-* global'lerini referanslar). */
-    '/src/services/lc-config.js','/src/domain/surface/classify-landcover-code.js','/src/domain/surface/compare-source-class-areas.js','/src/services/lc-geo.js','/src/services/lc-stac.js','/src/domain/surface/merge-tile-results.js','/src/adapters/surface/result-exports.js','/src/application/surface/analyze-source.js','/src/adapters/surface/process-landcover-tile.js','/src/services/lc-engine.js','/src/services/lc-osm.js','/src/domain/surface/patch-geometry.js','/src/domain/surface/group-patch-cells.js','/src/domain/surface/measure-patch-components.js','/src/domain/surface/query-green-patches.js','/src/services/lc-patches.js','/src/services/lc-validate.js','/src/services/lc-s2.js','/src/ui/lc-report.js','/vendor/polygon-clipping-0.15.7.js','/src/workers/surface-worker.js','/src/services/lc-review.js','/src/ui/lc-sens.js','/src/domain/surface/quality-gates.js','/src/contracts/surface-analysis.js','/src/application/surface/run-analysis.js','/src/services/landcover.js',
+    '/src/services/lc-config.js','/src/domain/surface/classify-landcover-code.js','/src/domain/surface/compare-source-class-areas.js','/src/services/lc-geo.js','/src/services/lc-stac.js','/src/domain/surface/merge-tile-results.js','/src/adapters/surface/result-exports.js','/src/application/surface/analyze-source.js','/src/adapters/surface/process-landcover-tile.js','/src/services/lc-engine.js','/src/services/lc-osm.js','/src/domain/surface/patch-geometry.js','/src/domain/surface/group-patch-cells.js','/src/domain/surface/measure-patch-components.js','/src/domain/surface/query-green-patches.js','/src/services/lc-patches.js','/src/services/lc-validate.js','/src/services/lc-s2.js','/src/ui/lc-report.js','/vendor/polygon-clipping-0.15.7.js','/src/workers/surface-worker.js','/src/contracts/surface-review.js','/src/services/lc-review.js','/src/ui/lc-sens.js','/src/domain/surface/quality-gates.js','/src/contracts/surface-analysis.js','/src/application/surface/run-analysis.js','/src/services/landcover.js',
     /* PARK ZİNCİRİ (Faz 4): eski gridplan.js yedi modüle bölündü — yükleme
      * sırası index.html ile aynı olmalı (state → client → geometry → query →
      * engine → panel → export). */
