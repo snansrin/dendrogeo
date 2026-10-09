@@ -369,4 +369,3 @@ try {
   console.error('  ❌ ANALİZ HATASI:', e.message);
   process.exitCode = 1;
 }
-
