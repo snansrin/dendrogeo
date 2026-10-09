@@ -957,4 +957,3 @@ export async function main() {
   console.log(`   atıf   : ${r.citation}`);
 }
 if (process.argv[1] === fileURLToPath(import.meta.url)) main().catch((e) => { console.error('❌', e.message); process.exit(1); });
-
