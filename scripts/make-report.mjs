@@ -96,6 +96,7 @@ export function bootLC() {
     'src/services/lc-config.js', 'src/services/lc-geo.js', 'src/services/lc-stac.js',
     'src/domain/surface/merge-tile-results.js',
     'src/adapters/surface/result-exports.js',
+    'src/application/surface/analyze-source.js',
     'src/services/lc-engine.js', 'src/services/lc-osm.js', 'src/services/lc-patches.js',
     'src/ui/lc-report.js', 'src/domain/surface/quality-gates.js',
     'src/application/surface/run-analysis.js', 'src/services/landcover.js'];

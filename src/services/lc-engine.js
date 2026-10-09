@@ -1,9 +1,8 @@
 "use strict";
 /* DendroGeo · services/lc-engine.js — LULC sınıflandırma motoru (Faz 5)
- * landcover.js'ten birebir taşındı: kod→sınıf haritaları, COG okuma +
- * hücre kesişimi (dgLcProcessTile), karo sonuçlarının birleştirilmesi,
- * kaynak uzlaşma yüzdesi, tek kaynak analizi (dgLcAnalyzeSource) ve
- * CSV/GeoJSON serileştiriciler. GeoTIFF global'ini çağrı anında kullanır. */
+ * COG karo sınıflandırması + gerçek hücre kesişimi ve sınıf eşlemeleri burada;
+ * kaynak orkestrasyonu, karo birleştirme ve çıktı biçimleri tek-sorumlu
+ * application/domain/adapter modüllerine taşındı. Legacy global API korunur. */
 
 function dgLcCodeToClass(code){
   const n=Math.round(Number(code));
@@ -276,35 +275,15 @@ function dgLcGroupAgreement(a,b){
 }
 
 /* Tek kaynak için tam analiz zinciri */
-async function dgLcAnalyzeSource(src,bbox,geom){
- const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),90000);
- try{
-  /* STAC karo listesi ile SAS tokenı birbirinden bağımsızdır: aynı anda
-   * istenmesi mobil bağlantıda gereksiz beklemeyi azaltır. */
-  const [items,token]=await Promise.all([
-    dgLcFindTiles(bbox,src,controller.signal),
-    dgLcGetSas(src.collection,controller.signal)
-  ]);
-
-  if(items.length>DG_LC_MAX_TILES){
-    throw new Error("AOI çok sayıda 10 m veri karosuna taşıyor; analiz güvenliği nedeniyle durduruldu.");
-  }
-
-  const parts=[];
-  const seen=new Set();
-  const jobs=[];
-  for(const item of items){
-    if(seen.has(item.id))continue;
-    seen.add(item.id);
-    const asset=dgLcGetDataAsset(item,src);
-    if(!asset?.href)throw new Error(src.year+" veri karosunun COG asset'i bulunamadı: "+item.id);
-    const href=dgLcSignedHref(asset.href,token);
-    jobs.push(dgLcProcessTile(item,href,geom,src,controller.signal));
-  }
-  /* Kesişen karolar bağımsızdır; seri GeoTIFF okuması yerine paralel
-   * işlenir. Sonuçların birleştirilmesi deterministiktir. */
-  parts.push(...await Promise.all(jobs));
-  return{result:dgLcMergeTileResults(parts),items:items.map(i=>i.id)};
- }catch(e){if(controller.signal.aborted)throw new Error(src.label+" veri okuması zaman aşımına uğradı; yeniden deneyin.");throw e;}
- finally{clearTimeout(timer);}
+function dgLcAnalyzeSource(src,bbox,geom){
+  return window.DG_SURFACE_SOURCE_ANALYSIS.run(src,bbox,geom,{
+    findTiles:dgLcFindTiles,
+    getSas:dgLcGetSas,
+    getDataAsset:dgLcGetDataAsset,
+    signedHref:dgLcSignedHref,
+    processTile:dgLcProcessTile,
+    mergeTileResults:dgLcMergeTileResults,
+    maxTiles:DG_LC_MAX_TILES,
+    timeoutMs:90000
+  });
 }

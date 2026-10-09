@@ -53,6 +53,25 @@ test('sonuç export adapterı CSV ve hücre GeoJSON sözleşmesini korur',()=>{
  assert.equal(geojson.features[0].properties.intersection_area_m2,123.4568);
 });
 
+test('kaynak analizi adapterı yinelenen karoyu bir kez işler ve kanıt kimliklerini korur',async()=>{
+ const ctx={window:null,Object,Math,Number,Array,Promise,Set,AbortController,setTimeout,clearTimeout};ctx.window=ctx;vm.createContext(ctx);
+ vm.runInContext(read('src/application/surface/analyze-source.js'),ctx);
+ const seen=[];
+ ctx.ports={
+  maxTiles:4,timeoutMs:1000,
+  findTiles:async()=>[{id:'a',properties:{}},{id:'a',properties:{}},{id:'b',properties:{}}],
+  getSas:async()=> 'token',
+  getDataAsset:item=>({href:'https://data.test/'+item.id}),
+  signedHref:(href,token)=>{assert.equal(token,'token');return href+'?signed';},
+  processTile:async(item,href,geometry,source)=>{seen.push(item.id);return{assignedAreaM2:item.id==='a'?1:2};},
+  mergeTileResults:parts=>({assignedAreaM2:parts.reduce((sum,part)=>sum+part.assignedAreaM2,0)})
+ };
+ const output=await vm.runInContext('DG_SURFACE_SOURCE_ANALYSIS.run({collection:"c",label:"Primary",year:2021},{},[],ports)',ctx);
+ assert.deepEqual(seen,['a','b']);
+ assert.equal(output.result.assignedAreaM2,3);
+ assert.deepEqual(Array.from(output.items),['a','a','b']);
+});
+
 test('eski motor kilidi yürürlükten kalktı; kurtarma snapshotı salt arşiv olarak kaldı',()=>{
  const record=JSON.parse(read('docs/surface-engine-lock.json'));
  const pkg=JSON.parse(read('package.json'));

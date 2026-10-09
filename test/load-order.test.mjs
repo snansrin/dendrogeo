@@ -67,6 +67,7 @@ function scriptSirasi() {
 const LULC_ZINCIRI = [
   'src/services/lc-config.js', 'src/services/lc-geo.js', 'src/services/lc-stac.js',
   'src/domain/surface/merge-tile-results.js', 'src/adapters/surface/result-exports.js',
+  'src/application/surface/analyze-source.js',
   'src/services/lc-engine.js',
   'src/services/lc-osm.js', 'src/services/lc-patches.js',
   /* Uydu hassasiyet (0054): validate çekirdeği s2'den önce

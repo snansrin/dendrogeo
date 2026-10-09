@@ -116,6 +116,7 @@ vm.runInContext(readFileSync(join(ROOT, 'vendor/geotiff-2.1.3.js'), 'utf8'), ctx
 for (const f of ['src/config/constants.js',
   'src/services/lc-config.js', 'src/services/lc-geo.js', 'src/services/lc-stac.js',
   'src/domain/surface/merge-tile-results.js', 'src/adapters/surface/result-exports.js',
+  'src/application/surface/analyze-source.js',
   'src/services/lc-engine.js',
   'src/services/lc-osm.js', 'src/services/lc-patches.js',
   'src/services/lc-validate.js', 'src/services/lc-s2.js',
