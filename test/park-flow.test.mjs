@@ -163,7 +163,8 @@ function makeWorld() {
  * testleri onu gerektirmiyor ama facade'ı kullanan akışlar için yüklüyoruz. */
 scripts.push('src/services/lc-config.js', 'src/services/lc-geo.js', 'src/services/lc-stac.js',
   'src/services/lc-engine.js', 'src/services/lc-osm.js', 'src/services/lc-patches.js',
-  'src/ui/lc-report.js', 'src/services/landcover.js');
+  'src/ui/lc-report.js', 'src/domain/surface/quality-gates.js',
+  'src/application/surface/run-analysis.js', 'src/services/landcover.js');
   for (const f of scripts) {
     vm.runInContext(readFileSync(join(ROOT, f), 'utf8'), ctx, { filename: f });
   }

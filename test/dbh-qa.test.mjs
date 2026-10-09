@@ -172,11 +172,13 @@ const codeFiles = () => {
 describe('0031 · karbon motoru DEĞİŞMEDİ (aynı formül, aynı katsayılar)', () => {
   test('katsayılar mc.mjs, panel allometry.js ve rapor metninde birebir aynı', () => {
     const mc = read('scripts/lib/mc.mjs');
+    const domain = read('src/domain/trees/allometry.js');
     const panel = read('src/services/allometry.js');
     for (const k of ['0.0673', '0.976', '0.26', '0.47']) {
       assert.ok(mc.includes(k), 'mc.mjs katsayısı: ' + k);
-      assert.ok(panel.includes(k), 'allometry.js katsayısı: ' + k);
+      assert.ok(domain.includes(k), 'domain allometry katsayısı: ' + k);
     }
+    assert.doesNotMatch(panel,/0\.0673|0\.976|0\.26|0\.47/, 'servis adapter denklemi yeniden tanımlamamalı');
     assert.match(HTML, /AGB = 0\.0673·\(ρ·D²·H\)\^0\.976/);
     assert.match(HTML, /AGB×0\.26/);
     assert.match(HTML, /0\.47 katsayısı/);

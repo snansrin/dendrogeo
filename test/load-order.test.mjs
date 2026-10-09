@@ -71,7 +71,8 @@ const LULC_ZINCIRI = [
    * (DG_S2_MIN_OBS_GUARD sabiti ondan okunur); lc-sens, lc-report'tan
    * sonra; facade daima en son. */
   'src/services/lc-validate.js', 'src/services/lc-s2.js',
-  'src/ui/lc-report.js', 'src/ui/lc-sens.js', 'src/services/landcover.js',
+  'src/ui/lc-report.js', 'src/ui/lc-sens.js', 'src/domain/surface/quality-gates.js',
+  'src/application/surface/run-analysis.js', 'src/services/landcover.js',
 ];
 
 /* const/let üst düzey bildirimleri ctx NESNESİNDE görünmez (global lexical

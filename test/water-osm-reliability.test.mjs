@@ -68,12 +68,13 @@ test('Previously verified water remains available during a failed refresh',async
 });
 
 test('Initial surface analysis requests water automatically and preserves raw cells',()=>{
- const ui=load('src/ui/lc-sens.js'),park=load('src/services/park-query.js'),baseline=load('src/services/landcover.js');
+ const ui=load('src/ui/lc-sens.js'),park=load('src/services/park-query.js'),baseline=load('src/services/landcover.js'),application=load('src/application/surface/run-analysis.js');
  assert.match(ui,/dgSensAutoWaterOnMount\(rec,epoch\)/);
  assert.match(ui,/async function dgSensAutoWaterOnScan/);
  assert.match(ui,/dgSurfaceObjects\(data\.elements,DG_SENS\.epsg\)/);
  assert.match(park,/if\(window\.DG_SURFACE_OSM\?\.boundary!==boundary\)/);
- assert.match(baseline,/const cross=null,crossErr=null,waterRefined=0,roadRefined=0/);
+ assert.match(baseline,/DG_RUN_SURFACE_ANALYSIS\.run\(params\)/);
+ assert.match(application,/const patches=detectPatches\(result\.cells\),cross=null,crossErr=null,waterRefined=0,roadRefined=0/);
  assert.doesNotMatch(ui,/dgLcRefineWater\(/);
 });
 

@@ -10,6 +10,8 @@ const validate=load('src/services/lc-validate.js');
 const spectral=load('src/services/lc-s2.js');
 const review=load('src/ui/lc-sens.js');
 const engine=load('src/services/landcover.js');
+const application=load('src/application/surface/run-analysis.js');
+const quality=load('src/domain/surface/quality-gates.js');
 const backup=load('src/services/osm-water-backup.js');
 const lazy=load('src/utils/lazylibs.js');
 const head=load('partials/head.html');
@@ -46,9 +48,10 @@ test('WorldCover v200 2021 input, class mapping and 10 m fractional area remain 
  const mapping=literal(config,'DG_ESA_GROUP');
  for(const [group,codes] of Object.entries(contract.baseline.mapping))
   for(const code of codes)assert.equal(mapping[code],group);
- assert.match(engine,/deltaPct>0\.5/);
+ assert.match(application,/assertCoverage\(result\.assignedAreaM2,parkAreaM2,0\.5\)/);
+ assert.match(quality,/deltaPct>maxMismatchPercent/);
  assert.equal(contract.baseline.max_park_raster_area_mismatch_percent,0.5);
- assert.match(engine,/waterRefined=0,roadRefined=0/);
+ assert.match(application,/waterRefined=0,roadRefined=0/);
 });
 test('Sentinel input composition and scan windows have not drifted',()=>{
  const s=contract.spectral;

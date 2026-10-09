@@ -41,7 +41,9 @@ describe('tembel vendor yükleme (Faz 7)', () => {
 
   test('çağrı noktaları ensure kullanıyor ve QA guard’ı yerinde', () => {
     const facade = read('src/services/landcover.js');
-    assert.match(facade, /if\(window\.dgEnsureGeoTIFF\)await window\.dgEnsureGeoTIFF\(\);/);
+    const application = read('src/application/surface/run-analysis.js');
+    assert.match(facade,/ensureRaster:\(\)=>window\.dgEnsureGeoTIFF\?window\.dgEnsureGeoTIFF\(\):Promise\.resolve\(\)/);
+    assert.match(application,/await ensureRaster\(\)/);
     const dash = read('src/services/dash.js');
     assert.match(dash, /async function drawChart\(/);
     assert.match(dash, /if\(window\.dgEnsureChart\)await window\.dgEnsureChart\(\);/);
@@ -52,5 +54,7 @@ describe('tembel vendor yükleme (Faz 7)', () => {
     assert.ok(sw.includes("'/vendor/geotiff-2.1.3.js'"), 'geotiff PRECACHE’ten düşmüş');
     assert.ok(sw.includes("'/vendor/chart.js-4.5.1.js'"), 'chart PRECACHE’ten düşmüş');
     assert.ok(sw.includes("'/src/utils/lazylibs.js'"), 'lazylibs PRECACHE’te yok');
+    assert.ok(sw.includes("'/src/domain/surface/quality-gates.js'"), "yüzey kalite domain'i PRECACHE’te yok");
+    assert.ok(sw.includes("'/src/application/surface/run-analysis.js'"), "analiz use-case'i PRECACHE’te yok");
   });
 });

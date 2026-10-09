@@ -72,6 +72,8 @@ export function loadApp({ sadece } = {}) {
     'src/config/species.js',
     'src/utils/geo.js',
     'src/utils/truncation.js',
+    'src/domain/trees/allometry.js',
+    'src/application/trees/calculate-tree-carbon.js',
     'src/services/allometry.js',
     /* LULC ZİNCİRİ (Faz 5): index.html'deki sırayla. ui/lc-report facade'tan
      * ÖNCE yüklenmeli (facade dgLcRenderReport'u yükleme anında referanslar). */
@@ -90,6 +92,8 @@ export function loadApp({ sadece } = {}) {
     'src/services/lc-validate.js',
     'src/services/lc-s2.js',
     'src/ui/lc-report.js',
+    'src/domain/surface/quality-gates.js',
+    'src/application/surface/run-analysis.js',
     'src/services/landcover.js',
     /* PARK ZİNCİRİ (Faz 4): eski gridplan.js'in mantık modülleri, index.html'deki
      * yükleme sırasıyla. UI modülleri (src/ui/park-panel, src/ui/park-export)
@@ -114,6 +118,12 @@ export function loadApp({ sadece } = {}) {
   if (secim && (secim.has('src/config/species.js') || secim.has('src/services/allometry.js'))) {
     secim.add('src/config/measurement-protocol-lock.js');
     secim.add('src/config/wood-density-lock.js');
+    secim.add('src/domain/trees/allometry.js');
+    secim.add('src/application/trees/calculate-tree-carbon.js');
+  }
+  if (secim && secim.has('src/services/landcover.js')) {
+    secim.add('src/domain/surface/quality-gates.js');
+    secim.add('src/application/surface/run-analysis.js');
   }
   const dosyalar = secim ? SIRALAMA.filter((f) => secim.has(f)) : SIRALAMA;
 

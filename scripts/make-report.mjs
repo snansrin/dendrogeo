@@ -81,7 +81,8 @@ export function bootLC() {
   const MODS = ['src/utils/geo.js', 'src/services/park-state.js', 'src/services/park-geometry.js',
     'src/services/lc-config.js', 'src/services/lc-geo.js', 'src/services/lc-stac.js',
     'src/services/lc-engine.js', 'src/services/lc-osm.js', 'src/services/lc-patches.js',
-    'src/ui/lc-report.js', 'src/services/landcover.js'];
+    'src/ui/lc-report.js', 'src/domain/surface/quality-gates.js',
+    'src/application/surface/run-analysis.js', 'src/services/landcover.js'];
   const ctx = {
     console: { log() {}, warn() {}, error() {} },
     fetch: (u, o) => fetch(u, Object.assign({ headers: { 'User-Agent': 'dendrogeo-rapor/1.0' } }, o)),

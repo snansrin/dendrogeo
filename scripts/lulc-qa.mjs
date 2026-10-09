@@ -137,6 +137,8 @@ function baglam() {
   ctx.window = ctx;
   ctx.self = ctx;
   vm.createContext(ctx);
+  vm.runInContext(readFileSync(join(ROOT, 'src/domain/surface/quality-gates.js'), 'utf8'), ctx, { filename: 'surface-quality-gates.js' });
+  vm.runInContext(readFileSync(join(ROOT, 'src/application/surface/run-analysis.js'), 'utf8'), ctx, { filename: 'run-surface-analysis.js' });
   vm.runInContext(readFileSync(join(ROOT, 'vendor/geotiff-2.1.3.js'), 'utf8'), ctx, { filename: 'geotiff.js' });
   vm.runInContext(readFileSync(join(ROOT, 'src/services/landcover.js'), 'utf8'), ctx, { filename: 'landcover.js' });
   vm.runInContext('this.__api={dgLcFindTiles,dgLcGetSas,dgLcGetDataAsset,dgLcSignedHref,dgLcProcessTile,' +
@@ -186,6 +188,8 @@ const ctx2 = (() => {
   shimIsci(ctx);
   ctx.window = ctx; ctx.self = ctx;
   vm.createContext(ctx);
+  vm.runInContext(readFileSync(join(ROOT, 'src/domain/surface/quality-gates.js'), 'utf8'), ctx, { filename: 'surface-quality-gates.js' });
+  vm.runInContext(readFileSync(join(ROOT, 'src/application/surface/run-analysis.js'), 'utf8'), ctx, { filename: 'run-surface-analysis.js' });
   vm.runInContext(readFileSync(join(ROOT, 'vendor/geotiff-2.1.3.js'), 'utf8'), ctx, { filename: 'geotiff.js' });
   vm.runInContext(readFileSync(join(ROOT, 'src/services/landcover.js'), 'utf8'), ctx, { filename: 'landcover.js' });
   return ctx;

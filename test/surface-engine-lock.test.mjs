@@ -10,11 +10,11 @@ const root=fileURLToPath(new URL('../',import.meta.url));
 const manifestBytes=readFileSync(join(root,'docs/surface-engine-lock.json'));
 const manifest=JSON.parse(manifestBytes.toString('utf8'));
 
-test('yüzey motoru manifesti sabit ve 51 dosya ve tam bağımlılık zinciri korunuyor',()=>{
+test('yüzey motoru manifesti sabit ve 54 dosya ve tam bağımlılık zinciri korunuyor',()=>{
  assert.equal(gitBlobSha(manifestBytes),PINNED_MANIFEST_BLOB);
  assert.equal(manifest.baseline_commit,APPROVED_COMMIT);
  assert.equal(manifest.policy,'NO_CHANGES_WITHOUT_EXPLICIT_USER_APPROVAL');
- assert.equal(Object.keys(manifest.locked_files).length,51);
+ assert.equal(Object.keys(manifest.locked_files).length,54);
  assert.deepEqual(verifySurfaceLock(root),[]);
 });
 
@@ -51,6 +51,7 @@ test('OSM yedeği, raster parser, poligon ve bilimsel protokol/test zinciri kili
   'test/water-osm-reliability.test.mjs','test/surface-review.test.mjs',
   'test/surface-network-budget.test.mjs','test/landcover-v4.test.mjs',
   'test/lc-validate.test.mjs','test/surface-engine-lock.test.mjs',
+  'src/domain/surface/quality-gates.js','src/application/surface/run-analysis.js','test/surface-application.test.mjs',
   '.github/workflows/gis-three-park-qa.yml'
  ];
  for(const path of mandatory)assert.ok(manifest.locked_files[path],'Korunan bağımlılık eksik: '+path);

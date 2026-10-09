@@ -107,7 +107,7 @@ test('draft integration does not override locked acceptance or science and is pr
  const src=file('src/ui/gis-project-draft.js');
  const boot=file('partials/boot.html'),sw=file('sw.js');
  const lock=JSON.parse(file('docs/surface-engine-lock.json'));
- assert.equal(Object.keys(lock.locked_files).length,51);
+ assert.equal(Object.keys(lock.locked_files).length,54);
  assert.ok(!lock.locked_files['src/ui/gis-project-draft.js']);
  assert.match(boot,/src\/ui\/gis-project-draft\.js\?v=[a-f0-9]{8}/);
  assert.match(sw,/\x27\/src\/ui\/gis-project-draft\.js\x27/);

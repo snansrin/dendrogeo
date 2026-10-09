@@ -470,7 +470,7 @@ describe('⭐ yumuşak vektör çizim — halka çıkarma + Chaikin (kare kare d
   test('canary: kare bant render kodu tamamen kalktı', () => {
     const src = readFileSync(new URL('../src/services/landcover.js', import.meta.url), 'utf8');
     assert.ok(!src.includes('dgLcRenderRuns'), 'run bant render fonksiyonu yok');
-    assert.match(src, /dgLcRenderObjects\(patches\)/, 'analyze nesneleri çiziyor');
+    assert.match(src, /dgLcRenderObjects\(output\.patches\)/, 'facade application sonucunu çiziyor');
   });
 });
 
@@ -562,6 +562,7 @@ describe('v9: sapma düzeltmesi + yapay havuz rafinasyonu + PNG park kıpı', ()
   /* Faz 5: LULC zinciri — facade + osm + engine birlikte taranır */
   const srcLc = [
     readFileSync(new URL('../src/services/landcover.js', import.meta.url), 'utf8'),
+    readFileSync(new URL('../src/application/surface/run-analysis.js', import.meta.url), 'utf8'),
     readFileSync(new URL('../src/services/lc-osm.js', import.meta.url), 'utf8'),
     readFileSync(new URL('../src/services/lc-engine.js', import.meta.url), 'utf8'),
   ].join('\n');
@@ -639,15 +640,14 @@ describe('v9: sapma düzeltmesi + yapay havuz rafinasyonu + PNG park kıpı', ()
 
 test('LULC: tek ESA motoru ham kodları korur, ikincil motor ve OSM sınıflandırması çalışmaz', () => {
   const src = readFileSync(new URL('../src/services/landcover.js', import.meta.url), 'utf8');
-  const start = src.indexOf('async function dgLcAnalyze(params)');
-  const end = src.indexOf('function downloadLandCoverClassCSV', start);
-  assert.ok(start >= 0 && end > start, 'dgLcAnalyze sınırları bulunamadı');
-  const body = src.slice(start, end);
-  assert.match(body, /const primPromise=dgLcAnalyzeSource\(DG_LC_SOURCES\.primary/);
-  assert.doesNotMatch(body, /dgLcFetchWaterPolygons\(bbox\)/);
-  assert.doesNotMatch(body, /dgLcRefineWater\(result/);
-  assert.doesNotMatch(body, /dgLcAnalyzeSource\(DG_LC_SOURCES\.cross/);
-  assert.match(body, /waterRefinedCells:waterRefined/);
+  const application = readFileSync(new URL('../src/application/surface/run-analysis.js', import.meta.url), 'utf8');
+  assert.match(src,/const DG_RUN_SURFACE_ANALYSIS=window\.DG_SURFACE_APPLICATION\.createRunSurfaceAnalysis/);
+  assert.match(src,/async function dgLcAnalyze\(params\)[\s\S]*DG_RUN_SURFACE_ANALYSIS\.run\(params\)/);
+  assert.match(application,/analyzeSource\(sources\.primary,bbox,geom\)/);
+  assert.doesNotMatch(application,/dgLcFetchWaterPolygons\(bbox\)/);
+  assert.doesNotMatch(application,/dgLcRefineWater\(result/);
+  assert.doesNotMatch(application,/analyzeSource\(sources\.cross/);
+  assert.match(application,/waterRefinedCells:waterRefined/);
   /* Faz 5: ham raster sayaçları dgLcProcessTile içinde → lc-engine.js */
   const engine = readFileSync(new URL('../src/services/lc-engine.js', import.meta.url), 'utf8');
   assert.match(engine, /rawCounts\[raw\]=/);

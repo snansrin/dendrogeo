@@ -290,8 +290,9 @@ describe('karbon yeniden hesabı yalnız FINAL kilitli ρ ile yapılır', () => 
     assert.ok(Math.abs(altin.total_carbon-(altin.agb+altin.bhb)*0.47)<1e-9);
     for(const k of ['0.0673','0.976','0.26','0.47']){
       assert.ok(read('scripts/lib/mc.mjs').includes(k),'mc.mjs: '+k);
-      assert.ok(read('src/services/allometry.js').includes(k),'allometry.js: '+k);
+      assert.ok(read('src/domain/trees/allometry.js').includes(k),'domain allometry: '+k);
     }
+    assert.doesNotMatch(read('src/services/allometry.js'),/0\.0673|0\.976|0\.26|0\.47/);
   });
 });
 

@@ -9,11 +9,11 @@ const ui=file('src/ui/gis-workspace.js'),park=file('src/ui/park-panel.js');
 const dashboard=file('src/services/dash.js'),sw=file('sw.js');
 const lock=JSON.parse(file('docs/surface-engine-lock.json'));
 
-test('workspace lives strictly outside the 51 frozen science files',()=>{
+test('workspace lives strictly outside the 54 frozen science files',()=>{
  for(const p of ['partials/boot.html','src/ui/gis-workspace.js','css/gis-workspace.css','sw.js','test/gis-workspace-ui.test.mjs']){
   assert.ok(!lock.locked_files[p],p);
  }
- assert.equal(Object.keys(lock.locked_files).length,51);
+ assert.equal(Object.keys(lock.locked_files).length,54);
  assert.ok(lock.locked_files['src/ui/lc-sens.js']);
 });
 

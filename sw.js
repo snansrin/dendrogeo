@@ -4,7 +4,7 @@
 // NOT: Senkronizasyon artık Ana Thread (Supabase JS SDK) tarafından yapılıyor
 // ============================================================
 
-const CACHE_VERSION = 'dendrogeo-sw-v2-r98';
+const CACHE_VERSION = 'dendrogeo-sw-v2-r99';
 
 /* İKİ AYRI STATİK CACHE — bu ayrım bilinçli ve önemli.
  *
@@ -37,7 +37,7 @@ const CORE_ASSETS = [
     '/', '/index.html', '/manifest.json', '/icon.png', '/apple-touch-icon.png', '/social-preview.jpg', '/css/style.css',
     '/css/landing.css',
     '/src/config/supabase.js', '/src/config/constants.js', '/src/config/measurement-protocol-lock.js', '/src/config/wood-density-lock.js', '/src/config/species.js', '/src/config/i18n.js', 
-    '/src/services/osm-water-backup.js', '/src/utils/geo.js', '/src/utils/truncation.js', '/src/utils/lazylibs.js', '/src/services/allometry.js', '/src/services/auth.js','/src/services/export.js', '/src/services/offline.js',
+    '/src/services/osm-water-backup.js', '/src/utils/geo.js', '/src/utils/truncation.js', '/src/utils/lazylibs.js', '/src/domain/trees/allometry.js','/src/application/trees/calculate-tree-carbon.js','/src/services/allometry.js', '/src/services/auth.js','/src/services/export.js', '/src/services/offline.js',
     /* YÖNETİM ZİNCİRİ (Faz 6): ziyaret sayacı, veri talepleri, kullanıcı yönetimi,
      * yedek ve moderasyon çekirdeği ayrı modüller. */
     '/src/services/visit-stats.js','/src/services/data-requests.js','/src/services/user-admin.js','/src/services/backup.js',
@@ -53,7 +53,7 @@ const CORE_ASSETS = [
     '/src/services/park-invites.js',
     /* LULC ZİNCİRİ (Faz 5): eski landcover.js altı modüle bölündü; facade son sırada
      * (window.DG_LANDCOVER'u o kurar, yükleme anında lc-* global'lerini referanslar). */
-    '/src/services/lc-config.js','/src/services/lc-geo.js','/src/services/lc-stac.js','/src/services/lc-engine.js','/src/services/lc-osm.js','/src/services/lc-patches.js','/src/services/lc-validate.js','/src/services/lc-s2.js','/src/ui/lc-report.js','/vendor/polygon-clipping-0.15.7.js','/src/workers/surface-worker.js','/src/services/lc-review.js','/src/ui/lc-sens.js','/src/services/landcover.js',
+    '/src/services/lc-config.js','/src/services/lc-geo.js','/src/services/lc-stac.js','/src/services/lc-engine.js','/src/services/lc-osm.js','/src/services/lc-patches.js','/src/services/lc-validate.js','/src/services/lc-s2.js','/src/ui/lc-report.js','/vendor/polygon-clipping-0.15.7.js','/src/workers/surface-worker.js','/src/services/lc-review.js','/src/ui/lc-sens.js','/src/domain/surface/quality-gates.js','/src/application/surface/run-analysis.js','/src/services/landcover.js',
     /* PARK ZİNCİRİ (Faz 4): eski gridplan.js yedi modüle bölündü — yükleme
      * sırası index.html ile aynı olmalı (state → client → geometry → query →
      * engine → panel → export). */
