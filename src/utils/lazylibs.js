@@ -67,7 +67,7 @@ const DG_LULC_CHAIN=[
   "src/adapters/surface/process-landcover-tile.js",
   "src/services/lc-engine.js",
   "src/services/lc-osm.js",
-  "src/domain/surface/patch-geometry.js",
+  "src/domain/surface/patch-geometry.js", "src/domain/surface/group-patch-cells.js",
   "src/services/lc-patches.js",
   /* UYDU HASSASİYET (0054 · 2026-10-03): lc-validate eşik/metrics çekirdeği
    * + lc-s2 Sentinel-2 spektral kanıt + ui/lc-sens basit kaydırıcı paneli

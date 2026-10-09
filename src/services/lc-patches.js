@@ -11,30 +11,8 @@
  * en büyük yeşil blok nerede?" sorularının cevabıdır. */
 function dgLcDetectPatches(cells,minHa){
   const threshold=(minHa==null?0.05:minHa)*10000;
-  const key=c=>c.epsg+":"+c.row+":"+c.col;
-  const grid=new Map();
-  for(const c of cells)grid.set(key(c),c);
-  const seen=new Set();
   const patches=[];
-  for(const c of cells){
-    const k0=key(c);
-    if(seen.has(k0))continue;
-    seen.add(k0);
-    const stack=[c];
-    const comp=[c];
-    while(stack.length){
-      const cur=stack.pop();
-      const nb=[[1,0],[-1,0],[0,1],[0,-1]];
-      for(const [dr,dc] of nb){
-        const nk=cur.epsg+":"+(cur.row+dr)+":"+(cur.col+dc);
-        const n=grid.get(nk);
-        if(n&&!seen.has(nk)&&n.classKey===cur.classKey){
-          seen.add(nk);
-          stack.push(n);
-          comp.push(n);
-        }
-      }
-    }
+  for(const comp of window.DG_SURFACE_PATCH_COMPONENTS.groupCells(cells)){
     const area=comp.reduce((t,x)=>t+(x.areaM2||0),0);
     if(area<threshold)continue;
     let wl=0,wo=0;
