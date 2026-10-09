@@ -170,4 +170,3 @@ export function loadApp({ sadece } = {}) {
 }
 
 export { ROOT };
-
