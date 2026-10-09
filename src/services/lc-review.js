@@ -2,7 +2,7 @@
 /* Surface review geometry and persistence. Baseline raster remains immutable.
  * Polygon clipping operates in the raster analysis UTM CRS, including park
  * holes. User-drawn boundaries have explicit visual-review provenance. */
-const DG_SURFACE_TYPES={green:{group:"green",label:"Yeşil alan"},hard:{group:"hard",label:"Sert zemin"},building:{group:"building",label:"Bina"},water:{group:"water",label:"Su"},pool:{group:"pool",label:"Havuz / süs havuzu"},bare:{group:"bare",label:"Çıplak zemin"},other:{group:"other",label:"Diğer"}};
+const DG_SURFACE_TYPES=window.DG_SURFACE_REVIEW_CONTRACTS.types;
 // Millimetre snapping removes UTM round-trip noise at shared raster edges.
 function dgSurfaceProject(ring,epsg){return ring.map(p=>{const q=dgLcUtmForward(p[1],p[0],epsg);return[Math.round(q.x*1000)/1000,Math.round(q.y*1000)/1000];});}
 function dgSurfaceUnproject(geom,epsg){const old=DG_SURFACE_WGS_CACHE.get(geom);if(old?.epsg===epsg)return old.wgs;const wgs=geom.map(poly=>poly.map(ring=>ring.map(p=>{const q=dgLcUtmInverse(p[0],p[1],epsg);return[q.lon,q.lat];})));DG_SURFACE_WGS_CACHE.set(geom,{epsg,wgs});return wgs;}
@@ -69,16 +69,7 @@ function dgSurfaceSummarizeParts(base,parts){
  for(const k of Object.keys(areas))if(Math.abs(areas[k])<1e-5)areas[k]=0;
  return areas;
 }
-function dgSurfaceValidRing(ring){
- if(!Array.isArray(ring)||ring.length<3||ring.length>300||ring.some(p=>!Array.isArray(p)||p.length!==2||!p.every(Number.isFinite)||Math.abs(p[0])>180||Math.abs(p[1])>90))return false;
- const cross=(a,b,c)=>(b[0]-a[0])*(c[1]-a[1])-(b[1]-a[1])*(c[0]-a[0]);
- for(let i=0;i<ring.length;i++)for(let j=i+1;j<ring.length;j++){
-  if(j===i+1||(i===0&&j===ring.length-1))continue;
-  const a=ring[i],b=ring[(i+1)%ring.length],c=ring[j],d=ring[(j+1)%ring.length];
-  if(cross(a,b,c)*cross(a,b,d)<=0&&cross(c,d,a)*cross(c,d,b)<=0&&Math.max(Math.min(a[0],b[0]),Math.min(c[0],d[0]))<=Math.min(Math.max(a[0],b[0]),Math.max(c[0],d[0]))&&Math.max(Math.min(a[1],b[1]),Math.min(c[1],d[1]))<=Math.min(Math.max(a[1],b[1]),Math.max(c[1],d[1])))return false;
- }
- return true;
-}
+function dgSurfaceValidRing(ring){return window.DG_SURFACE_REVIEW_CONTRACTS.isValidRing(ring);}
 async function dgSurfaceLoadRemote(parkId,owner){
  const{data,error}=await sb.from("surface_reviews").select("payload,revision,source_fingerprint").eq("park_id",parkId).eq("owner",owner).maybeSingle();
  if(error)throw error;
@@ -271,18 +262,6 @@ async function dgSurfaceGrid(data){
 
 // Reviewed brush footprints survive account/draft reloads, with bounded numeric geometry.
 function dgSurfaceValidFeature(f){
- if(!DG_SURFACE_TYPES[f?.type])return false;
- if(f.ring)return dgSurfaceValidRing(f.ring);
- const g=f.geometry;if(g?.type!=="MultiPolygon"||!Array.isArray(g.coordinates)||!g.coordinates.length||g.coordinates.length>1000)return false;
- let points=0;
- for(const poly of g.coordinates){
-  if(!Array.isArray(poly)||!poly.length)return false;
-  for(const ring of poly){
-   if(!Array.isArray(ring)||ring.length<4||(points+=ring.length)>20000)return false;
-   if(ring.some(p=>!Array.isArray(p)||p.length!==2||!p.every(Number.isFinite)||Math.abs(p[0])>180||Math.abs(p[1])>90))return false;
-   if(ring[0][0]!==ring.at(-1)[0]||ring[0][1]!==ring.at(-1)[1])return false;
-  }
- }
- return true;
+ return window.DG_SURFACE_REVIEW_CONTRACTS.isValidFeature(f);
 }
 window.DG_SURFACE_REVIEW.validFeature=dgSurfaceValidFeature;
