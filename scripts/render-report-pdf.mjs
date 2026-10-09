@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-import{readFileSync,writeFileSync,readdirSync,existsSync}from'node:fs';import{join,dirname}from'node:path';import{fileURLToPath,pathToFileURL}from'node:url';import{chromium}from'playwright-core';import{execFileSync}from'node:child_process';import{renderReport,qrDataUri,DGR_ID_RE}from'./make-report.mjs';import{canonicalHash}from'./lib/mc.mjs';import{prepareReportDoi}from'./prepare-report-doi.mjs';
+import{readFileSync,writeFileSync,readdirSync,existsSync}from'node:fs';import{join,dirname}from'node:path';import{fileURLToPath,pathToFileURL}from'node:url';import{chromium}from'playwright-core';import{execFileSync}from'node:child_process';import{renderReport,qrDataUri,DGR_ID_RE}from'./make-report.mjs';import{canonicalHash}from'./lib/canonical-hash.mjs';import{prepareReportDoi}from'./prepare-report-doi.mjs';
 const ROOT=join(dirname(fileURLToPath(import.meta.url)),'..');
 export async function renderReportPdf(id,{root=ROOT,browser=process.env.DG_REPORT_BROWSER,force=false}={}){
  if(!DGR_ID_RE.test(id))throw Error('Geçersiz rapor kimliği.');const dir=join(root,'rapor',id),pdf=join(dir,'rapor.pdf');if(existsSync(pdf)&&!force)return{skipped:true,id};

@@ -44,7 +44,7 @@ import { readFileSync, writeFileSync, existsSync, unlinkSync } from 'node:fs';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { publishPark, renderRetractionNotice, rebuildIndex, DGR_ID_RE, renderReport, buildMetadata, qrDataUri, parkHistory } from './make-report.mjs';
-import { canonicalHash } from './lib/mc.mjs';
+import { canonicalHash } from './lib/canonical-hash.mjs';
 import { acceptedSurfaceToLulc, stripUnavailableSurfaceMap, isAcceptedSurfaceSnapshot } from './lib/surface-snapshot.mjs';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');

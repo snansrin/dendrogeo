@@ -2,7 +2,7 @@ import {readFileSync,writeFileSync,existsSync} from 'node:fs';
 import {join,dirname} from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {createHash} from 'node:crypto';
-import {canonicalHash} from './lib/mc.mjs';
+import {canonicalHash} from './lib/canonical-hash.mjs';
 const ROOT=join(dirname(fileURLToPath(import.meta.url)),'..');
 export function reportDoiDescription(md,snap){
  const esc=value=>String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));

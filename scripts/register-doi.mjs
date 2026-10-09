@@ -8,7 +8,7 @@ import {fileURLToPath} from 'node:url';
 import {prepareReportDoi} from './prepare-report-doi.mjs';
 import {parseZenodoDepositState} from './lib/publication.mjs';
 import {buildMetadata} from './make-report.mjs';
-import {canonicalHash} from './lib/mc.mjs';
+import {canonicalHash} from './lib/canonical-hash.mjs';
 import {renderReportPdf} from './render-report-pdf.mjs';
 const root=fileURLToPath(new URL('..',import.meta.url));
 const id=process.argv[2];

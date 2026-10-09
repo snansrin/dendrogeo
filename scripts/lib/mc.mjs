@@ -14,7 +14,6 @@
  *                 varsayımının yapay daralttığı aralıklardan kaçınılır.
  *   örneklem: mulberry32 + sabit seed → aynı veri aynı aralık (hakem tekrarı).
  */
-import { createHash } from 'node:crypto';
 import vm from 'node:vm';
 import { readFileSync } from 'node:fs';
 import { join, dirname } from 'node:path';
@@ -243,13 +242,7 @@ export function mcTotalCI(rows, cfg = {}) {
   o.n = list.length;
   return o;
 }
-export function canonicalHash(obj) {
-  /* instanceof DEĞİL duck-typing: vm realm'inden gelen nesnelerde instanceof
-   * false döner ve anahtar sıralaması atlanırdı → hash realm'e bağımlı olurdu. */
-  const stable = (v) => JSON.stringify(v, (k, val) => (val !== null && typeof val === 'object' && !Array.isArray(val)
-    ? Object.keys(val).sort().reduce((o, key) => (o[key] = val[key], o), {})
-    : val));
-  return createHash('sha256').update(stable(obj)).digest('hex');
-}
+/* Backwards-compatible export; report integrity no longer belongs to MC/QA. */
+export { canonicalHash } from './canonical-hash.mjs';
 export const fmtT = (kg) => (kg / 1000).toFixed(2);
 export const fmtCI = (ci) => `${fmtT(ci.mean)} t [%95 GA: ${fmtT(ci.lo)}–${fmtT(ci.hi)}]`;
