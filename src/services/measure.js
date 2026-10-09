@@ -223,12 +223,26 @@ function showLatin(){
  const sp=$("mSpecies").value;
  $("latinName").textContent=(LATIN[sp]&&LATIN[sp]!=="—")?("🔬 "+LATIN[sp]):"";
 }
+const DG_TREE_MEASUREMENT_VALIDATOR=window.DG_TREE_MEASUREMENT_APPLICATION.createTreeMeasurementValidator({
+ measurementGroups:typeof MEASUREMENT_GROUPS!=="undefined"?MEASUREMENT_GROUPS:[],
+ resolveDensity:(species,group)=>(typeof densityKgFor==="function")?densityKgFor(species,group):null,
+ isCircumferenceValid:c=>(typeof circumferenceIsValid==="function")?circumferenceIsValid(c):false
+});
+const DG_TREE_MEASUREMENT_ERRORS=Object.freeze({
+ PROJECT_REQUIRED:["mProject","Bir çalışma projesi seçin."],
+ POINT_ID_INVALID:["mPoint","Nokta ID pozitif bir tam sayı olmalı."],
+ MEASUREMENT_NO_INVALID:["mNo","Ölçüm No pozitif bir tam sayı olmalı."],
+ GROUP_REQUIRED:["mGroup","Ağaç grubunu seçin."],
+ GROUP_UNSUPPORTED:["mGroup","Ölçüm yalnız İBRELİ veya YAPRAKLI grubunda yapılabilir."],
+ SPECIES_REQUIRED:["mSpecies","Ağaç türünü seçin."],
+ DENSITY_MISSING:["mSpecies","Tür/grup eşleşmesi kilitli yoğunluk tablosuna uygun değil."],
+ CIRCUMFERENCE_INVALID:["mDbh","Göğüs çevresi 0’dan büyük olmalı ve çevre/π ile bulunan DBH en fazla 400 cm olabilir."],
+ HEIGHT_INVALID:["mHeight","Boy 0’dan büyük, en fazla 100 m olmalı."]
+});
 function liveCalc(){
  const c=+$("mDbh").value,h=+$("mHeight").value,s=$("mSpecies").value,g=$("mGroup").value;
- const groupOk=(typeof MEASUREMENT_GROUPS!=="undefined"&&MEASUREMENT_GROUPS.includes(g));
- const densityOk=(typeof densityKgFor==="function"&&densityKgFor(s,g)>0);
- const measureOk=(typeof circumferenceIsValid==="function"&&circumferenceIsValid(c));
- const valid=Number.isFinite(c)&&Number.isFinite(h)&&measureOk&&h>0&&h<=100&&s&&groupOk&&densityOk;
+ const check=DG_TREE_MEASUREMENT_VALIDATOR.validateBiometrics({group:g,species:s,circumferenceCm:c,heightM:h});
+ const valid=check.valid;
  $("liveCalc").style.display=valid?"block":"none";
  const hint=$("measureSaveHint");if(hint)hint.style.display=valid?"none":"block";
  if(!valid)return;
@@ -506,19 +520,9 @@ async function saveMeas(){
 async function dgSaveMeasInner(){
     const pid=+$("mProject").value,pt=+$("mPoint").value,sp=$("mSpecies").value,circumference=+$("mDbh").value,h=+$("mHeight").value,grp=$("mGroup").value;
     for(const id of ["mProject","mPoint","mNo","mGroup","mSpecies","mDbh","mHeight"])$(id).setAttribute("aria-invalid","false");
-    if(!pid)return dgMeasureInvalid("mProject",_tms("Bir çalışma projesi seçin."));
-    if(!Number.isSafeInteger(pt)||pt<=0)return dgMeasureInvalid("mPoint",_tms("Nokta ID pozitif bir tam sayı olmalı."));
     const measurementNo=+$("mNo").value;
-    if(!Number.isSafeInteger(measurementNo)||measurementNo<=0)return dgMeasureInvalid("mNo",_tms("Ölçüm No pozitif bir tam sayı olmalı."));
-    if(!grp)return dgMeasureInvalid("mGroup",_tms("Ağaç grubunu seçin."));
-    if(typeof MEASUREMENT_GROUPS==="undefined"||!MEASUREMENT_GROUPS.includes(grp))
-      return dgMeasureInvalid("mGroup",_tms("Ölçüm yalnız İBRELİ veya YAPRAKLI grubunda yapılabilir."));
-    if(!sp)return dgMeasureInvalid("mSpecies",_tms("Ağaç türünü seçin."));
-    if(typeof densityKgFor!=="function"||!(densityKgFor(sp,grp)>0))
-      return dgMeasureInvalid("mSpecies",_tms("Tür/grup eşleşmesi kilitli yoğunluk tablosuna uygun değil."));
-    if(!Number.isFinite(circumference)||typeof circumferenceIsValid!=="function"||!circumferenceIsValid(circumference))
-      return dgMeasureInvalid("mDbh",_tms("Göğüs çevresi 0’dan büyük olmalı ve çevre/π ile bulunan DBH en fazla 400 cm olabilir."));
-    if(!Number.isFinite(h)||h<=0||h>100)return dgMeasureInvalid("mHeight",_tms("Boy 0’dan büyük, en fazla 100 m olmalı."));
+    const inputCheck=DG_TREE_MEASUREMENT_VALIDATOR.validateNewMeasurement({projectId:pid,pointId:pt,measurementNo,group:grp,species:sp,circumferenceCm:circumference,heightM:h});
+    if(!inputCheck.valid){const issue=DG_TREE_MEASUREMENT_ERRORS[inputCheck.reason];return dgMeasureInvalid(issue[0],_tms(issue[1]));}
 
     /* ⛔ PARK KAPISI: park algılanmamış projeye ölçüm girilemez. Düzenleme
      * (EDIT_ID) mevcut kaydı günceller, yeni ölçüm değildir → kapı uygulanmaz.
