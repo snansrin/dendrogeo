@@ -2,7 +2,7 @@ import {test} from 'node:test';
 import assert from 'node:assert/strict';
 import {loadApp} from '../scripts/test-harness.mjs';
 
-const app=loadApp({sadece:['src/domain/surface/quality-gates.js','src/application/surface/run-analysis.js']});
+const app=loadApp({sadece:['src/domain/surface/quality-gates.js','src/contracts/surface-analysis.js','src/application/surface/run-analysis.js']});
 
 function makeUseCase(overrides={}){
   const calls=[];

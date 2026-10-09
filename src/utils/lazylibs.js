@@ -79,6 +79,7 @@ const DG_LULC_CHAIN=[
   "src/services/lc-review.js",
   "src/ui/lc-sens.js",
   "src/domain/surface/quality-gates.js",
+  "src/contracts/surface-analysis.js",
   "src/application/surface/run-analysis.js",
   "src/services/landcover.js"
 ];
@@ -130,3 +131,4 @@ function dgEnsureFieldUx(){
 window.dgEnsureFieldUx=dgEnsureFieldUx;
 const dgBootFieldUx=()=>dgEnsureFieldUx().catch(err=>console.warn("DENDROGEO · saha UX yüklenemedi:",err));
 if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",dgBootFieldUx,{once:true});else dgBootFieldUx();
+

@@ -123,7 +123,7 @@ for (const f of ['src/config/constants.js',
   'src/services/lc-engine.js',
   'src/services/lc-osm.js', 'src/domain/surface/patch-geometry.js', 'src/domain/surface/group-patch-cells.js', 'src/domain/surface/measure-patch-components.js', 'src/domain/surface/query-green-patches.js', 'src/services/lc-patches.js',
   'src/services/lc-validate.js', 'src/services/lc-s2.js',
-  'src/ui/lc-report.js', 'src/domain/surface/quality-gates.js',
+  'src/ui/lc-report.js', 'src/domain/surface/quality-gates.js', 'src/contracts/surface-analysis.js',
   'src/application/surface/run-analysis.js', 'src/services/landcover.js']) {
   vm.runInContext(readFileSync(join(ROOT, f), 'utf8'), ctx, { filename: f });
 }
@@ -301,3 +301,4 @@ console.log('  cok-zamanli kanit katkisi: yillik max ile sinifi DUZELEN hucre �
 
 console.log('\n══ E) Karne plumbing (spektral sahte-referans — bilimsel hüküm değil) ══');
 console.log(`örnek: ${out.sampleCount} · OA: %${(out.metrics.oa * 100).toFixed(1)} · κ: ${out.metrics.kappa === null ? '—' : out.metrics.kappa.toFixed(2)} · kapı: ${out.gate.label} (${out.gate.reasons} sebep)`);
+

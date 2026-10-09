@@ -55,6 +55,7 @@ describe('tembel vendor yükleme (Faz 7)', () => {
     assert.ok(sw.includes("'/vendor/chart.js-4.5.1.js'"), 'chart PRECACHE’ten düşmüş');
     assert.ok(sw.includes("'/src/utils/lazylibs.js'"), 'lazylibs PRECACHE’te yok');
     assert.ok(sw.includes("'/src/domain/surface/quality-gates.js'"), "yüzey kalite domain'i PRECACHE’te yok");
+    assert.ok(sw.includes("'/src/contracts/surface-analysis.js'"), "yüzey DTO sözleşmeleri PRECACHE’te yok");
     assert.ok(sw.includes("'/src/application/surface/run-analysis.js'"), "analiz use-case'i PRECACHE’te yok");
   });
 });

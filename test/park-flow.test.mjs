@@ -170,7 +170,7 @@ scripts.push('src/services/lc-config.js', 'src/domain/surface/classify-landcover
   'src/adapters/surface/process-landcover-tile.js',
   'src/services/lc-engine.js', 'src/services/lc-osm.js', 'src/domain/surface/patch-geometry.js', 'src/domain/surface/group-patch-cells.js', 'src/domain/surface/measure-patch-components.js', 'src/domain/surface/query-green-patches.js', 'src/services/lc-patches.js',
   'src/ui/lc-report.js', 'src/domain/surface/quality-gates.js',
-  'src/application/surface/run-analysis.js', 'src/services/landcover.js');
+  'src/contracts/surface-analysis.js', 'src/application/surface/run-analysis.js', 'src/services/landcover.js');
   for (const f of scripts) {
     vm.runInContext(readFileSync(join(ROOT, f), 'utf8'), ctx, { filename: f });
   }
@@ -1229,3 +1229,4 @@ describe('Park Kimlikleri listesi: boş parklar düşmez (2026-09-27)', () => {
     assert.ok(!el('parkAdminBox').innerHTML.includes('Bos Sorgu Parki'), 'kapatınca tekrar gizlenir');
   });
 });
+
