@@ -42,6 +42,8 @@ export { pointInRing, pointInPolygon, ringSelfIntersections, geometrySelfInterse
 import { reportMeasurementsCsv, reportMeasurementsGeoJson } from './lib/report-export.mjs';
 import { DGR_ID_RE, rebuildIndex, nextReportId, parkHistory } from './lib/report-archive.mjs';
 export { DGR_ID_RE, rebuildIndex, nextReportId, parkHistory };
+import { citeName, fmtDateTr, fmtDateDot, epsgLabel } from './lib/report-formatting.mjs';
+export { citeName, fmtDateTr, fmtDateDot, epsgLabel };
 const fmtT = value => trNum(value / 1000, 2);
 import { PngCanvas, hex2rgb } from './lib/png.mjs';
 import { createRequire } from 'node:module';
@@ -538,18 +540,6 @@ export async function buildSnapshot(parkId, { skipLulc = false, meta = null, sur
  * DGR — DendroGeo Bilimsel Analiz Raporu (iç/alan kimliği); DOI atanırsa
  * harici kalıcı kimlik olarak §11'e ve metadata.json'a işlenir. */
 const DGR_TITLE_DEF = 'DGR — DendroGeo Bilimsel Analiz Raporu';
-/* Yazar/ad biçimleme (0012): "Ad Soyad" → "Soyad, A." (atıf düzeni).
- * Tek kelimeli adlar olduğu gibi kalır; virgüllü adlar zaten atıf biçimindedir. */
-export function citeName(full) {
-  const t = String(full || '').trim().replace(/\s+/g, ' ');
-  if (!t) return null;
-  if (t.includes(',')) return t;
-  const ps = t.split(' ');
-  if (ps.length < 2) return t;
-  const soy = ps[ps.length - 1];
-  const ad = ps.slice(0, -1).join(' ');
-  return soy + ', ' + ad.charAt(0) + '.';
-}
 /* Site kurucuları her raporda beyan edilir (kullanıcı standardı 2026-09-28);
  * yazar DEĞİLDİR — yazar, yayını isteyen kullanıcının kendisidir. */
 export const FOUNDERS_LINE = 'Site kurucuları: Nagihan Şirin, Sinan Şirin';
@@ -559,24 +549,6 @@ const GROUP_TR = { 'İBRELİ': 'ibreli', 'IBRELI': 'ibreli', 'YAPRAKLI': 'yaprak
 const GRP_COLORS = { 'İBRELİ': '#2f9e44', 'IBRELI': '#2f9e44', 'YAPRAKLI': '#e8590c', 'DİĞER': '#8a928c', 'DIGER': '#8a928c' };
 const grpColor = (g) => GRP_COLORS[String(g || '')] || '#8a928c';
 const grpTr = (g) => GROUP_TR[String(g || '')] || String(g || '').toLowerCase();
-export function fmtDateTr(iso, tz = 'UTC') {
-  try { return new Date(iso).toLocaleDateString('tr-TR', { day: 'numeric', month: 'long', year: 'numeric', timeZone: tz }); }
-  catch (e) { return String(iso || '').slice(0, 10); }
-}
-export function fmtDateDot(iso) {
-  try {
-    const d = new Date(iso);
-    return String(d.getUTCDate()).padStart(2, '0') + '.' + String(d.getUTCMonth() + 1).padStart(2, '0') + '.' + d.getUTCFullYear();
-  } catch (e) { return '—'; }
-}
-export function epsgLabel(epsg) {
-  const n = Number(epsg);
-  if (!Number.isFinite(n) || n <= 0) return null;
-  if (n === 4326) return 'EPSG:4326 (WGS 84 coğrafi)';
-  if (n >= 32601 && n <= 32660) return `EPSG:${n} (UTM ${n - 32600}N)`;
-  return 'EPSG:' + n;
-}
-
 export function renderReport(snap, { id, hash, version = 1, meta = null }) {
   const t = snap.totals, P = snap.park;
   const M = Object.assign({}, snap.provenance || {}, meta || {});
