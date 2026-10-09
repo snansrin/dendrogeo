@@ -188,7 +188,8 @@ describe('0033 · kapsam: yasal statü iddiası, eşik tabanlı gövde sınıfı
     assert.deepEqual(bul(YASAL_STATU_KAPSAM), [], 'beyan metni de yasaklı sözcük içermez');
     /* tek kaynak: rapor hem §9da hem metadatada aynı sabiti kullanır */
     assert.match(read('scripts/make-report.mjs'), /^    YASAL_STATU_KAPSAM,$/m);
-    assert.match(read('scripts/make-report.mjs'), /scopeNote: YASAL_STATU_KAPSAM,/);
+    assert.match(read('scripts/make-report.mjs'), /legalStatusScope: YASAL_STATU_KAPSAM,/);
+    assert.match(read('scripts/lib/report-metadata.mjs'), /scopeNote: legalStatusScope,/);
   });
 
   test('üretilen rapor HTMLi ve metadata.json yasaklı ifade İÇERMEZ', () => {
