@@ -45,6 +45,7 @@ export { DGR_ID_RE, rebuildIndex, nextReportId, parkHistory };
 import { citeName, fmtDateTr, fmtDateDot, epsgLabel } from './lib/report-formatting.mjs';
 export { citeName, fmtDateTr, fmtDateDot, epsgLabel };
 import { createRetractionNotice } from './lib/report-retraction.mjs';
+import { createQrDataUri } from './lib/report-qr.mjs';
 const fmtT = value => trNum(value / 1000, 2);
 import { PngCanvas, hex2rgb } from './lib/png.mjs';
 import { createRequire } from 'node:module';
@@ -55,6 +56,7 @@ const require_ = createRequire(import.meta.url);
  * bağımsızdır. */
 let QRlib = null;
 try { QRlib = require_('qrcode'); } catch (e) { QRlib = null; }
+export const qrDataUri = createQrDataUri(QRlib);
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const read = (p) => readFileSync(join(ROOT, p), 'utf8');
@@ -1223,16 +1225,6 @@ export function buildMetadata(snap, options) {
     qaLimits: QA_LIMITS,
     qaState: QA_STATE,
   });
-}
-
-/* QR üretimi (qrcode, MIT — devDependency): kalıcı adresin SVG data-URI'si.
- * Hata yayını DURDURMAZ: QR kozmetik bir tamamlayıcıdır, rapor kimliği ve
- * hash doğrulaması ondan bağımsızdır. */
-export async function qrDataUri(url) {
-  try {
-    const svg = await QRlib.toString(String(url), { type: 'svg', errorCorrectionLevel: 'M', margin: 1, width: 104, color: { dark: '#182420', light: '#ffffff' } });
-    return 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg);
-  } catch (e) { return null; }
 }
 
 /* ---------- YAYINLAMA ÇEKİRDEĞİ ----------
