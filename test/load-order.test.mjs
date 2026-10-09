@@ -184,4 +184,3 @@ describe('tam sayfa yükleme sırası (vm smoke)', () => {
     }
   });
 });
-
