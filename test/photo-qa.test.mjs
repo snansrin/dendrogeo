@@ -31,6 +31,7 @@ import vm from 'node:vm';
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const rd = (p) => readFileSync(join(ROOT, p), 'utf8');
 const meas = rd('src/services/measure.js');
+const photoDomain = rd('src/domain/trees/photo-quality.js');
 
 /* measure.js'i İZOLE bağlamda yükle (DOM/ağ yok; yalnız saf tarayıcı). */
 function yukle() {
@@ -39,12 +40,13 @@ function yukle() {
     apply: () => stub, construct: () => stub, set: () => true,
   });
   const ctx = {
-    window: stub, document: stub, navigator: stub,
+    window: {addEventListener(){},DG_TREE_MEASUREMENT_APPLICATION:{createTreeMeasurementValidator:()=>({validateBiometrics:()=>({valid:false}),validateNewMeasurement:()=>({valid:false})})}}, document: stub, navigator: stub,
     localStorage: { getItem: () => null, setItem() {} },
     console: { log() {}, warn() {}, error() {} },
     URL: { createObjectURL: () => '', revokeObjectURL() {} },
   };
   vm.createContext(ctx);
+  vm.runInContext(photoDomain, ctx);
   vm.runInContext(meas + ';this.__scan=dgPhotoScan;this.__gate=dgPhotoGate;this.__label=dgPhotoLabel;', ctx);
   return ctx;
 }
@@ -134,9 +136,10 @@ describe('0044 · statik kilitler', () => {
   test('⭐ eski yeşil-tek kapı GERİ GELMEZ (kök neden kilitli)', () => {
     assert.ok(!/2\*G-R-B>20&&G>50/.test(meas), 'eski yeşil-tek formülü');
     assert.ok(!/vegR>=0\.25/.test(meas), 'eski %25 sabit kapısı');
-    assert.match(meas, /G>=B-2/, 'mavi gök sızmasını kesen koruma');
-    assert.match(meas, /function dgPhotoScan/, 'saf tarayıcı');
-    assert.match(meas, /function dgPhotoGate/, 'kalibre kapı');
+    assert.match(photoDomain, /G>=B-2/, 'mavi gök sızmasını kesen koruma');
+    assert.match(photoDomain, /function scan/, 'saf tarayıcı domain modülü');
+    assert.match(photoDomain, /function gate/, 'kalibre kapı domain modülü');
+    assert.match(meas, /function dgPhotoScan\(d,S\)\{return window\.DG_TREE_PHOTO_QUALITY\.scan\(d,S\);\}/, 'legacy adapter aynı domain fonksiyonunu çağırır');
   });
 
   test('⭐ kaydetme kapısı DURUYOR (photoOk sözleşmesi bozulmadı)', () => {

@@ -72,6 +72,7 @@ export function loadApp({ sadece } = {}) {
     'src/config/species.js',
     'src/utils/geo.js',
     'src/utils/truncation.js',
+    'src/domain/trees/photo-quality.js',
     'src/domain/trees/allometry.js',
     'src/application/trees/calculate-tree-carbon.js',
     'src/application/trees/calculate-tree-carbon-from-circumference.js',
