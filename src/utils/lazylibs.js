@@ -131,4 +131,3 @@ function dgEnsureFieldUx(){
 window.dgEnsureFieldUx=dgEnsureFieldUx;
 const dgBootFieldUx=()=>dgEnsureFieldUx().catch(err=>console.warn("DENDROGEO · saha UX yüklenemedi:",err));
 if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",dgBootFieldUx,{once:true});else dgBootFieldUx();
-
