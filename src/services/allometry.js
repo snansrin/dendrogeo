@@ -5,12 +5,13 @@ const DG_TREE_CARBON_USE_CASE=window.DG_TREE_CARBON_APPLICATION.createTreeCarbon
  calculateAllometry:window.DG_TREE_ALLOMETRY.calculate,
  resolveDensity:(species,group)=>(typeof densityKgFor==="function")?densityKgFor(species,group):null
 });
+const DG_TREE_CIRCUMFERENCE_USE_CASE=window.DG_TREE_CIRCUMFERENCE_APPLICATION.createCircumferenceCarbonUseCase({
+ calculateCarbon:input=>calc(input.dbhCm,input.heightM,input.species,input.group),
+ diameterFromCircumference:c=>(typeof diameterCmFromCircumference==="function")?diameterCmFromCircumference(c):null
+});
 function calc(dbh,h,sp,grp){
  return DG_TREE_CARBON_USE_CASE.calculate({dbhCm:dbh,heightM:h,species:sp,group:grp});
 }
 function calcFromCircumference(circumferenceCm,h,sp,grp){
- const c=Number(circumferenceCm);
- const d=(typeof diameterCmFromCircumference==="function")?diameterCmFromCircumference(c):null;
- const r=calc(d,h,sp,grp);
- return r.valid?Object.assign({},r,{circumference_cm:c}):Object.assign({},r,{circumference_cm:Number.isFinite(c)?c:null});
+ return DG_TREE_CIRCUMFERENCE_USE_CASE.calculate({circumferenceCm,heightM:h,species:sp,group:grp});
 }

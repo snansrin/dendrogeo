@@ -4,7 +4,7 @@
 // NOT: Senkronizasyon artık Ana Thread (Supabase JS SDK) tarafından yapılıyor
 // ============================================================
 
-const CACHE_VERSION = 'dendrogeo-sw-v2-r99';
+const CACHE_VERSION = 'dendrogeo-sw-v2-r100';
 
 /* İKİ AYRI STATİK CACHE — bu ayrım bilinçli ve önemli.
  *
@@ -37,7 +37,7 @@ const CORE_ASSETS = [
     '/', '/index.html', '/manifest.json', '/icon.png', '/apple-touch-icon.png', '/social-preview.jpg', '/css/style.css',
     '/css/landing.css',
     '/src/config/supabase.js', '/src/config/constants.js', '/src/config/measurement-protocol-lock.js', '/src/config/wood-density-lock.js', '/src/config/species.js', '/src/config/i18n.js', 
-    '/src/services/osm-water-backup.js', '/src/utils/geo.js', '/src/utils/truncation.js', '/src/utils/lazylibs.js', '/src/domain/trees/allometry.js','/src/application/trees/calculate-tree-carbon.js','/src/services/allometry.js', '/src/services/auth.js','/src/services/export.js', '/src/services/offline.js',
+    '/src/services/osm-water-backup.js', '/src/utils/geo.js', '/src/utils/truncation.js', '/src/utils/lazylibs.js', '/src/domain/trees/allometry.js','/src/application/trees/calculate-tree-carbon.js','/src/application/trees/calculate-tree-carbon-from-circumference.js','/src/services/allometry.js', '/src/services/auth.js','/src/services/export.js', '/src/services/offline.js',
     /* YÖNETİM ZİNCİRİ (Faz 6): ziyaret sayacı, veri talepleri, kullanıcı yönetimi,
      * yedek ve moderasyon çekirdeği ayrı modüller. */
     '/src/services/visit-stats.js','/src/services/data-requests.js','/src/services/user-admin.js','/src/services/backup.js',

@@ -37,7 +37,7 @@ function field() {
     dgCf:s=>s,dgT:s=>s,map:null,drawNav() {}, console
   });
   function $(id) { return el(id); }
-  for (const path of ['src/config/measurement-protocol-lock.js','src/config/wood-density-lock.js','src/config/species.js','src/domain/trees/allometry.js','src/application/trees/calculate-tree-carbon.js','src/services/allometry.js','src/services/measure.js']) {
+  for (const path of ['src/config/measurement-protocol-lock.js','src/config/wood-density-lock.js','src/config/species.js','src/domain/trees/allometry.js','src/application/trees/calculate-tree-carbon.js','src/application/trees/calculate-tree-carbon-from-circumference.js','src/services/allometry.js','src/services/measure.js']) {
     vm.runInContext(readFileSync(new URL('../'+path,import.meta.url),'utf8'),ctx,{filename:path});
   }
   for (const [id,value] of Object.entries({mProject:'1',mPoint:'5',mNo:'1',mGroup:'YAPRAKLI',mSpecies:'IHLAMUR',mDbh:'52',mHeight:'7.2'})) el(id).value=value;

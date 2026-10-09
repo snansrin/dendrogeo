@@ -74,6 +74,7 @@ export function loadApp({ sadece } = {}) {
     'src/utils/truncation.js',
     'src/domain/trees/allometry.js',
     'src/application/trees/calculate-tree-carbon.js',
+    'src/application/trees/calculate-tree-carbon-from-circumference.js',
     'src/services/allometry.js',
     /* LULC ZİNCİRİ (Faz 5): index.html'deki sırayla. ui/lc-report facade'tan
      * ÖNCE yüklenmeli (facade dgLcRenderReport'u yükleme anında referanslar). */
@@ -120,6 +121,7 @@ export function loadApp({ sadece } = {}) {
     secim.add('src/config/wood-density-lock.js');
     secim.add('src/domain/trees/allometry.js');
     secim.add('src/application/trees/calculate-tree-carbon.js');
+    secim.add('src/application/trees/calculate-tree-carbon-from-circumference.js');
   }
   if (secim && secim.has('src/services/landcover.js')) {
     secim.add('src/domain/surface/quality-gates.js');
