@@ -72,7 +72,7 @@ const LULC_ZINCIRI = [
   'src/application/surface/analyze-source.js',
   'src/adapters/surface/process-landcover-tile.js',
   'src/services/lc-engine.js',
-  'src/services/lc-osm.js', 'src/services/lc-patches.js',
+  'src/services/lc-osm.js', 'src/domain/surface/patch-geometry.js', 'src/services/lc-patches.js',
   /* Uydu hassasiyet (0054): validate çekirdeği s2'den önce
    * (DG_S2_MIN_OBS_GUARD sabiti ondan okunur); lc-sens, lc-report'tan
    * sonra; facade daima en son. */
