@@ -29,8 +29,18 @@ async function dgAcademicProfileSave(event){
  try{const{data,error}=await sb.auth.updateUser({data:{dendrogeo_profile:v}});if(error)throw error;if(!data?.user)throw Error('Hesap yanıtı alınamadı.');USER=data.user;dgAcademicProfileRender();$("dgAcademicSavedStatus").textContent="Profil hesabınıza kaydedildi.";toast('Akademik profiliniz hesabınıza kaydedildi.','ok','👤');}catch(e){status.textContent='Kaydedilemedi: '+String(e.message||e);toast('Profil kaydedilemedi. Girdiğiniz bilgiler formda korunuyor.','err','👤');}finally{button.disabled=false;}
 }
 let DG_REPORT_DIALOG=null;
-const DG_REPORT_DRAFTS=new Map(),DG_REPORT_POSTING=new Set();
-async function dgReportCollectRequest(parkId,lulc){const key=USER.id+":"+parkId;if(DG_REPORT_POSTING.has(key))return null;DG_REPORT_POSTING.add(key);try{const project=typeof PROJ_LIST!=="undefined"?PROJ_LIST.find(p=>Number(p.id)===Number(typeof DG_USER_PUB!=="undefined"?DG_USER_PUB.projectId:0)):null;const context=await dgReportQuestions(parkId,project?.name||"");if(!context)return null;const r=await dgPubInsertRequest(parkId,lulc,JSON.stringify(context));if(r.ok)DG_REPORT_DRAFTS.delete(key);return r;}finally{DG_REPORT_POSTING.delete(key);}}
+const DG_REPORT_DRAFTS=new Map();
+const DG_REPORT_REQUEST_COLLECTOR=window.DG_REPORT_PUBLICATION_REQUEST_APPLICATION.createReportPublicationRequestCollector({
+ getRequestKey:parkId=>typeof USER!=="undefined"&&USER?.id?USER.id+":"+parkId:null,
+ getProjectName:()=>{
+  const project=typeof PROJ_LIST!=="undefined"?PROJ_LIST.find(p=>Number(p.id)===Number(typeof DG_USER_PUB!=="undefined"?DG_USER_PUB.projectId:0)):null;
+  return project?.name||"";
+ },
+ collectContext:(parkId,projectName)=>dgReportQuestions(parkId,projectName),
+ insertRequest:(parkId,lulc,note)=>dgPubInsertRequest(parkId,lulc,note),
+ onSubmitted:key=>DG_REPORT_DRAFTS.delete(key)
+});
+function dgReportCollectRequest(parkId,lulc){return DG_REPORT_REQUEST_COLLECTOR(parkId,lulc);}
 function dgReportQuestions(parkId,projectName){
  if(DG_REPORT_DIALOG)return Promise.resolve(null);if(typeof USER==="undefined"||!USER)return Promise.resolve(null);
  const defaults=dgAcademicDefaults(),name=PROFILE?.full_name||USER.user_metadata?.full_name||'';let parkName='Park #'+parkId;
