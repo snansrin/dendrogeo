@@ -156,7 +156,7 @@ describe('0033 · QA eşikleri: 0031 değerleri KORUNDU, form eşikleri aynı, g
     assert.ok(QA_LIMITS.HD_PHYS_MAX > QA_LIMITS.HD_MAX);
   });
   test('hd_block kodda KALICI false (0031 hükmü korunur)', () => {
-    assert.match(read('scripts/make-report.mjs'), /out\.hd_block = false;/);
+    assert.match(read('scripts/lib/report-inventory-qa.mjs'), /out\.hd_block = false;/);
   });
 });
 
