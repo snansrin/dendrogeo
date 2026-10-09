@@ -6,7 +6,7 @@ const shell=readFileSync(new URL('../partials/shell.html',import.meta.url),'utf8
 const css=readFileSync(new URL('../css/style.css',import.meta.url),'utf8');
 const measure=readFileSync(new URL('../src/services/measure.js',import.meta.url),'utf8');
 const academic=readFileSync(new URL('../src/services/academic-profile.js',import.meta.url),'utf8');
-const context=readFileSync(new URL('../src/core/report-context.js',import.meta.url),'utf8');
+const context=readFileSync(new URL('../src/domain/reports/report-context.js',import.meta.url),'utf8');
 
 describe('Saha ekranı · mobil sadeleştirme sözleşmesi',()=>{
  test('Bir ağaç · bir kayıt etiketi telefonda da görünür',()=>{

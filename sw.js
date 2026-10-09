@@ -4,7 +4,7 @@
 // NOT: Senkronizasyon artık Ana Thread (Supabase JS SDK) tarafından yapılıyor
 // ============================================================
 
-const CACHE_VERSION = 'dendrogeo-sw-v2-r103';
+const CACHE_VERSION = 'dendrogeo-sw-v2-r104';
 
 /* İKİ AYRI STATİK CACHE — bu ayrım bilinçli ve önemli.
  *
@@ -45,6 +45,7 @@ const CORE_ASSETS = [
     /* SİTE İÇİNDEN RAPOR YAYINI (2026-09-27): report_requests kuyruğu +
      * rapor/yayin-kuyrugu.json günlüğü → 📄 Yayınla / 🔗 Aç / 📤 Paylaş. */
     '/src/core/surface-display.js',
+    '/src/domain/reports/report-context.js',
     '/src/core/report-context.js',
     '/src/application/reports/collect-publication-request.js',
     '/src/services/academic-profile.js',
