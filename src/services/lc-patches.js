@@ -10,13 +10,12 @@
  * alan-ağırlıklı merkez üretilir. Park ölçeğinde "kaç su kütlesi var,
  * en büyük yeşil blok nerede?" sorularının cevabıdır. */
 function dgLcDetectPatches(cells,minHa){
-  const threshold=(minHa==null?0.05:minHa)*10000;
+  const measured=window.DG_SURFACE_PATCH_METRICS.summarizeComponents(
+    window.DG_SURFACE_PATCH_COMPONENTS.groupCells(cells),minHa
+  );
   const patches=[];
-  for(const comp of window.DG_SURFACE_PATCH_COMPONENTS.groupCells(cells)){
-    const area=comp.reduce((t,x)=>t+(x.areaM2||0),0);
-    if(area<threshold)continue;
-    let wl=0,wo=0;
-    for(const x of comp){wl+=x.center.lat*(x.areaM2||0);wo+=x.center.lon*(x.areaM2||0);}
+  for(const item of measured){
+    const comp=item.cells,area=item.areaM2;
     /* Görsel katman için vektör halkalar: kare kare değil, yumuşak çizim.
      * Rapor sayılarına dokunmaz (alan hücre kesişiminden gelir). */
     let rings=[],ringsRaw=[];
@@ -43,15 +42,13 @@ function dgLcDetectPatches(cells,minHa){
       classKey:comp[0].classKey,
       areaM2:area,
       cells:comp.length,
-      centroid:{lat:wl/area,lon:wo/area},
+      centroid:item.centroid,
       rings,
       ringsRaw
     });
   }
-  patches.sort((a,b)=>b.areaM2-a.areaM2);
   return patches;
 }
-
 /* ---------- Piksel yığınını vektör halkalara çevir ----------
  * Kare kare bant çizimi yerine: bir nesnenin (bağlantılı bileşen) hücre
  * kümesinden SINIR İZİ çıkarılır → dış halka + delikler → Chaikin ile
