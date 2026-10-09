@@ -136,11 +136,12 @@ describe('0015 · yazar = veri sahibi (öncelik zinciri)', () => {
     assert.match(sql, /grant execute on function public\.dg_park_author\(bigint\) to anon, authenticated/);
   });
   test('motor: önce rpc/dg_park_author, sonra v_report_authors (kod sözleşmesi)', () => {
-    const src = read('scripts/make-report.mjs');
+    const src = read('scripts/lib/report-author.mjs');
     const i1 = src.indexOf("rest('rpc/dg_park_author'");
     const i2 = src.indexOf("rest('v_report_authors'");
     assert.ok(i1 > 0 && i2 > i1, 'öncelik sırası: data_owner → report_request (i1=' + i1 + ' i2=' + i2 + ')');
-    assert.match(src, /setName\(String\(pa\[0\]\.full_name\)\.trim\(\), 'data_owner'\)/, 'data_owner kaynağı');
+    assert.match(src, /setName\(String\(owner\[0\]\.full_name\)\.trim\(\), 'data_owner'\)/, 'data_owner kaynağı');
+    assert.match(read('scripts/make-report.mjs'), /resolveReportAuthor\(parkId, rest\)/, 'snapshot üreticisi modülü kullanır');
   });
 });
 

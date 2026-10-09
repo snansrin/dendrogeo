@@ -46,6 +46,7 @@ import { citeName, fmtDateTr, fmtDateDot, epsgLabel } from './lib/report-formatt
 export { citeName, fmtDateTr, fmtDateDot, epsgLabel };
 import { createRetractionNotice } from './lib/report-retraction.mjs';
 import { createQrDataUri } from './lib/report-qr.mjs';
+import { resolveReportAuthor } from './lib/report-author.mjs';
 const fmtT = value => trNum(value / 1000, 2);
 import { createRequire } from 'node:module';
 const require_ = createRequire(import.meta.url);
@@ -252,18 +253,7 @@ export async function buildSnapshot(parkId, { skipLulc = false, meta = null, sur
    *   3) kurumsal "DendroGeo"  — İSİM UYDURULMAZ
    * (DGR-2026-0004 dersi: istek Sinan'dan gelince künyede Sinan yazdı; oysa
    * 34 kaydın sahibi Nagihan. Ölçen kişi istek açandan önceliklidir.) */
-  let author = { name: null, full_name: null, source: 'unresolved' };
-  const setName = (nm, src) => { author = { name: nm, full_name: nm, source: src }; };
-  try {
-    const pa = await rest('rpc/dg_park_author', { park: parkId });
-    if (pa && pa[0] && String(pa[0].full_name || '').trim()) setName(String(pa[0].full_name).trim(), 'data_owner');
-  } catch (e) { /* 0015 henüz uygulanmadı → sıradaki kaynak */ }
-  if (!author.name) {
-    try {
-      const ra = await rest('v_report_authors', { park_id: 'eq.' + parkId, order: 'created_at.desc', limit: '1' });
-      if (ra && ra[0] && String(ra[0].full_name || '').trim()) setName(String(ra[0].full_name).trim(), 'report_request');
-    } catch (e) { author = { name: null, full_name: null, source: 'unavailable', note: String((e && e.message) || e).slice(0, 120) }; }
-  }
+  let author = await resolveReportAuthor(parkId, rest);
   let lulc = null;
   if (!skipLulc && surfaceSnapshot) {
     lulc=savedSurface;
@@ -315,7 +305,7 @@ export async function buildSnapshot(parkId, { skipLulc = false, meta = null, sur
   const png = lulc && lulc._png ? lulc._png : null;
   const outerL = lulc && lulc._outer ? lulc._outer : null;
   if (lulc) { delete lulc._png; delete lulc._outer; }
-  if(meta?.study?.author_name)setName(meta.study.author_name,'publication_context');
+  if(meta?.study?.author_name)author={name:meta.study.author_name,full_name:meta.study.author_name,source:'publication_context'};
   const snap = {
     ...(meta?.study ? {study:meta.study} : {}),
     schema: 'dendrogeo-report/1',
