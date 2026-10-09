@@ -80,14 +80,10 @@ function dgLcPointInRings(lat,lon,rings){return window.DG_SURFACE_PATCH_GEOMETRY
 function dgLcIsGreen(lat,lon){
   const last=DG_LC_LAST;
   if(!last||!last.patches)return false;
-  for(const pt of last.patches){
-    if((pt.classKey||pt.group)!=="green")continue;
-    if(dgLcPointInRings(lat,lon,pt.ringsRaw||pt.rings))return true;
-  }
-  return false;
+  return window.DG_SURFACE_GREEN_PATCH_QUERY.isPointInGreenPatch(lat,lon,last.patches,dgLcPointInRings);
 }
 
 function dgLcHasGreen(){
   const last=DG_LC_LAST;
-  return !!(last&&last.patches&&last.patches.some(p=>(p.classKey||p.group)==="green"));
+  return !!(last&&window.DG_SURFACE_GREEN_PATCH_QUERY.hasGreenPatch(last.patches));
 }

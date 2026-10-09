@@ -155,7 +155,7 @@ function baglam() {
     'src/adapters/surface/process-landcover-tile.js',
     'src/services/lc-engine.js',
     'src/services/lc-osm.js',
-    'src/domain/surface/patch-geometry.js', 'src/domain/surface/group-patch-cells.js',
+    'src/domain/surface/patch-geometry.js', 'src/domain/surface/group-patch-cells.js', 'src/domain/surface/query-green-patches.js',
     'src/services/lc-patches.js',
     'src/ui/lc-report.js',
     'src/domain/surface/quality-gates.js',
@@ -231,7 +231,7 @@ const ctx2 = (() => {
     'src/adapters/surface/process-landcover-tile.js',
     'src/services/lc-engine.js',
     'src/services/lc-osm.js',
-    'src/domain/surface/patch-geometry.js', 'src/domain/surface/group-patch-cells.js',
+    'src/domain/surface/patch-geometry.js', 'src/domain/surface/group-patch-cells.js', 'src/domain/surface/query-green-patches.js',
     'src/services/lc-patches.js',
     'src/ui/lc-report.js',
     'src/services/landcover.js'

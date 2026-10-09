@@ -21,7 +21,7 @@ const app = loadApp({ sadece: ['src/config/constants.js', 'src/utils/geo.js',
   'src/application/surface/analyze-source.js',
   'src/adapters/surface/process-landcover-tile.js',
   'src/services/lc-engine.js',
-  'src/services/lc-osm.js', 'src/domain/surface/patch-geometry.js', 'src/domain/surface/group-patch-cells.js', 'src/services/lc-patches.js',
+  'src/services/lc-osm.js', 'src/domain/surface/patch-geometry.js', 'src/domain/surface/group-patch-cells.js', 'src/domain/surface/query-green-patches.js', 'src/services/lc-patches.js',
   'src/ui/lc-report.js', 'src/services/landcover.js'] });
 const {
   dgLcEnsureCcw, dgLcClipPolygonConvex, dgLcIntersectionAreaConvex, dgLcQuadBBox,
