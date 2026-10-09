@@ -35,6 +35,7 @@ import vm from 'node:vm';
 import { execSync } from 'node:child_process';
 import { mcTotalCI, mcRowCI, MC_CFG, loadRho, loadSpeciesDict, QA_LIMITS, QA_STATE, qaStateOf, DBH_REASON_TR, calcRow as _calcRow, carbonKg, medianOf, madOf, modifiedZ, YASAL_STATU_KAPSAM } from './lib/mc.mjs';
 import { canonicalHash } from './lib/canonical-hash.mjs';
+import { buildReportProvenance } from './lib/report-provenance.mjs';
 const fmtT = value => trNum(value / 1000, 2);
 import { PngCanvas, hex2rgb } from './lib/png.mjs';
 import { createRequire } from 'node:module';
@@ -715,21 +716,18 @@ export async function buildSnapshot(parkId, { skipLulc = false, meta = null, sur
     generated_at: genAt,
     /* Üretim izi (2026-09-28): §11 Analiz Parmak İzi ve metadata.json buradan
      * okur. Hash bu alanları da kapsar → parmak izi sonradan değiştirilemez. */
-    provenance: {
-      engine: 'DendroGeo LC Engine',
-      engine_version: ENGINE_VERSION,
-      app_version: APP_VERSION,
-      git_commit: (meta && meta.git_commit) || GIT_COMMIT || null,
-      report_id: (meta && meta.id) || null,
-      report_standard: 'DendroGeo Academic Report 3.0',
-      publication_stage: 'production',
-      measurement_protocol: rhoBase.measurementLockId,
-      measurement_protocol_fingerprint: rhoBase.measurementLockFingerprint,
-      epsg: (lulc && lulc.epsg) || null,
-      resolution_m: savedSurface ? null : 10,
-      resolution_note: savedSurface ? "Uydu 10/20 m; OSM ve çizim vektör sınırları" : "10 m",
-      dataset: (lulc && lulc.source) || DATASET_DEFAULT,
-    },
+    provenance: buildReportProvenance({
+      engineVersion: ENGINE_VERSION,
+      appVersion: APP_VERSION,
+      gitCommit: meta && meta.git_commit,
+      fallbackGitCommit: GIT_COMMIT,
+      reportId: meta && meta.id,
+      measurementProtocol: rhoBase.measurementLockId,
+      measurementProtocolFingerprint: rhoBase.measurementLockFingerprint,
+      lulc,
+      savedSurface,
+      datasetDefault: DATASET_DEFAULT,
+    }),
     mc: { ...MC_CFG },
     totals: { n: rows.length, carbon_kg: +rows.reduce((a, r) => a + +r.carbon_kg, 0).toFixed(2), ci: { mean: +ci.mean.toFixed(2), lo: +ci.lo.toFixed(2), hi: +ci.hi.toFixed(2) }, per_ha_kg: park.area_m2 > 0 ? +(rows.reduce((a, r) => a + +r.carbon_kg, 0) / (park.area_m2 / 10000)).toFixed(2) : null },
     species: Object.entries(bySp).map(([sp, b]) => ({ species: sp, grp: b.grp, n: b.n, mean_dbh: +(b.dbh / b.n).toFixed(1), mean_h: +(b.h / b.n).toFixed(1), carbon_kg: +b.c.toFixed(2), share_pct: +(100 * b.c / rows.reduce((a, r) => a + +r.carbon_kg, 0)).toFixed(1) })),

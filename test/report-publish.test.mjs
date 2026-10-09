@@ -183,8 +183,9 @@ describe('make-report.mjs: tek üretici publishPark()', () => {
 
   test('ölçüm protokolü provenance kaynağı buildSnapshot kapsamında tanımlıdır', () => {
     assert.match(MR,/const rhoBase = loadRho\(\)/);
-    assert.match(MR,/measurement_protocol: rhoBase\.measurementLockId/);
-    assert.match(MR,/measurement_protocol_fingerprint: rhoBase\.measurementLockFingerprint/);
+    assert.match(MR,/measurementProtocol: rhoBase\.measurementLockId/);
+    assert.match(MR,/measurementProtocolFingerprint: rhoBase\.measurementLockFingerprint/);
+    assert.match(MR,/buildReportProvenance\(/);
     assert.doesNotMatch(MR,/measurement_protocol: base\.measurementLockId/);
   });
 
