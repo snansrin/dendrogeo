@@ -1229,4 +1229,3 @@ describe('Park Kimlikleri listesi: boş parklar düşmez (2026-09-27)', () => {
     assert.ok(!el('parkAdminBox').innerHTML.includes('Bos Sorgu Parki'), 'kapatınca tekrar gizlenir');
   });
 });
-
