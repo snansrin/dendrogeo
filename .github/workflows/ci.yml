@@ -111,10 +111,6 @@ jobs:
       - name: Bağımlılıklar (npm ci)
         run: npm ci
 
-      # User-approved surface baseline: any source drift fails the PR build.
-      - name: Korunan yüzey motoru bütünlük kilidi
-        run: node scripts/check-surface-lock.mjs
-
       - name: Sözdizimi denetimi (tarayıcı semantiği)
         run: npm run check:syntax
 
@@ -136,7 +132,7 @@ jobs:
         run: npm run check:csp
 
       # Allometri, geometri, LULC motoru (UTM + alan korunumu) ve SW cache
-      # stratejisi. Bilimsel çıktıyı üreten matematik burada kilitli.
+      # stratejisi; modül sınırları değişirken sayısal regresyonları yakalar.
       - name: Birim testler
         run: npm test
 

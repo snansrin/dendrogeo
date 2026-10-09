@@ -59,6 +59,7 @@ const DG_LULC_CHAIN=[
   "src/services/lc-config.js",
   "src/services/lc-geo.js",
   "src/services/lc-stac.js",
+  "src/domain/surface/merge-tile-results.js",
   "src/services/lc-engine.js",
   "src/services/lc-osm.js",
   "src/services/lc-patches.js",

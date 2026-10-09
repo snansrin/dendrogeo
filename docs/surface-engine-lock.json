@@ -1,10 +1,12 @@
 {
-  "schema": "dendrogeo/surface-engine-source-lock/v1",
+  "schema": "dendrogeo/surface-engine-recovery-record/v1",
   "id": "DG-SURFACE-LOCK-2026-10-09-R2",
   "baseline_commit": "e1ef75ba98a480880b50af2a82ecca8897cd25a7",
   "recovery_branch": "recovery/analysis-engine-20261009",
-  "policy": "NO_CHANGES_WITHOUT_EXPLICIT_USER_APPROVAL",
-  "description": "Immutable, user-approved analysis-engine baseline. Every protected engine module is hash-pinned; all tracked repository files are preserved on the named recovery branch.",
+  "policy": "ARCHIVE_ONLY_NO_ENFORCEMENT",
+  "status": "RETIRED_BY_USER",
+  "retired_date": "2026-10-09",
+  "description": "Historical recovery record only. The former source lock and CI hash enforcement were explicitly removed by the user so analysis-engine modularization can continue. Hashes below describe the archived baseline and are not enforced.",
   "file_hash_algorithm": "git-blob-sha1",
   "locked_files": {
     ".github/workflows/gis-three-park-qa.yml": "e5dc449c023e4dc6345063efc23ae99373db17ef",

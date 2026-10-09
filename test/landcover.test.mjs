@@ -27,7 +27,8 @@ import { loadApp } from '../scripts/test-harness.mjs';
 
 const app = loadApp({ sadece: ['src/config/constants.js', 'src/utils/geo.js',
   'src/services/lc-config.js', 'src/services/lc-geo.js', 'src/services/lc-stac.js',
-  'src/services/lc-engine.js', 'src/services/lc-osm.js', 'src/services/lc-patches.js',
+  'src/domain/surface/merge-tile-results.js', 'src/services/lc-engine.js',
+  'src/services/lc-osm.js', 'src/services/lc-patches.js',
   'src/ui/lc-report.js', 'src/services/landcover.js'] });
 const {
   dgLcUtmForward, dgLcUtmInverse, dgLcUtmEpsgForLatLon,

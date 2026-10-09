@@ -94,6 +94,7 @@ const trNum = (x, d = 2) => Number(x).toLocaleString('tr-TR', { minimumFractionD
 export function bootLC() {
   const MODS = ['src/utils/geo.js', 'src/services/park-state.js', 'src/services/park-geometry.js',
     'src/services/lc-config.js', 'src/services/lc-geo.js', 'src/services/lc-stac.js',
+    'src/domain/surface/merge-tile-results.js',
     'src/services/lc-engine.js', 'src/services/lc-osm.js', 'src/services/lc-patches.js',
     'src/ui/lc-report.js', 'src/domain/surface/quality-gates.js',
     'src/application/surface/run-analysis.js', 'src/services/landcover.js'];

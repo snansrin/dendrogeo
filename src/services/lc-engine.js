@@ -245,37 +245,10 @@ function dgLcProcessTile(item,href,geometryWgs,source,signal){
   });
 }
 
+/* Compatibility adapter: aggregation logic lives in its single-purpose
+ * domain module; keep the existing global API stable for facade and QA. */
 function dgLcMergeTileResults(parts){
-  const outGroupCounts={},outGroupAreas={},outRawCounts={},outRawAreas={};
-  const runs=[];
-  const cells=[];
-  let assigned=0,classified=0,masked=0,maskedCount=0,sourceCells=0;
-  for(const p of parts){
-    assigned+=p.assignedAreaM2;
-    classified+=p.classifiedAreaM2;
-    masked+=p.maskedAreaM2;
-    maskedCount+=p.maskedCount||0;
-    sourceCells+=p.sourceCells;
-    for(const [k,v] of Object.entries(p.groupCounts||{}))outGroupCounts[k]=(outGroupCounts[k]||0)+v;
-    for(const [k,v] of Object.entries(p.groupAreas||{}))outGroupAreas[k]=(outGroupAreas[k]||0)+v;
-    for(const [k,v] of Object.entries(p.rawCounts||{}))outRawCounts[k]=(outRawCounts[k]||0)+v;
-    for(const [k,v] of Object.entries(p.rawAreas||{}))outRawAreas[k]=(outRawAreas[k]||0)+v;
-    runs.push(...(p.runs||[]));
-    if(cells.length<10000)cells.push(...(p.cells||[]));
-  }
-  return{
-    assignedAreaM2:assigned,
-    classifiedAreaM2:classified,
-    maskedAreaM2:masked,
-    maskedCount,
-    sourceCells,
-    groupCounts:outGroupCounts,
-    groupAreas:outGroupAreas,
-    rawCounts:outRawCounts,
-    rawAreas:outRawAreas,
-    runs,
-    cells
-  };
+  return window.DG_SURFACE_TILE_MERGER.merge(parts);
 }
 
 function dgLcClassCsv(result,meta){

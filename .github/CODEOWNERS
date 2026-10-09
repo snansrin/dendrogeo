@@ -1,9 +1,5 @@
-# Surface analysis protected source: require CODEOWNER review through GitHub Rulesets.
-# CODEOWNERS alone is advisory until branch rules enforce it.
-/docs/surface-engine-lock.json @snansrin
-/docs/SURFACE-ENGINE-LOCK.md @snansrin
-/scripts/check-surface-lock.mjs @snansrin
-/test/surface-engine-lock.test.mjs @snansrin
+# Analysis-engine source lock was retired at the user's request. Analysis
+# modules are no longer pinned to individual CODEOWNER review paths.
 /.github/workflows/ci.yml @snansrin
 /.github/CODEOWNERS @snansrin
 /css/park-panel.css @snansrin
@@ -11,19 +7,8 @@
 /css/ui-standard.css @snansrin
 /partials/shell.html @snansrin
 /src/config/constants.js @snansrin
-/src/core/surface-display.js @snansrin
 /src/services/geofence.js @snansrin
 /src/services/grid-engine.js @snansrin
-/src/services/landcover.js @snansrin
-/src/services/lc-config.js @snansrin
-/src/services/lc-engine.js @snansrin
-/src/services/lc-geo.js @snansrin
-/src/services/lc-osm.js @snansrin
-/src/services/lc-patches.js @snansrin
-/src/services/lc-review.js @snansrin
-/src/services/lc-s2.js @snansrin
-/src/services/lc-stac.js @snansrin
-/src/services/lc-validate.js @snansrin
 /src/services/map.js @snansrin
 /src/services/osm-client.js @snansrin
 /src/services/park-geometry.js @snansrin
@@ -31,8 +16,6 @@
 /src/services/park-registry.js @snansrin
 /src/services/park-state.js @snansrin
 /src/ui/editor-ui.js @snansrin
-/src/ui/lc-report.js @snansrin
-/src/ui/lc-sens.js @snansrin
 /src/ui/park-export.js @snansrin
 /src/ui/park-panel.js @snansrin
 /src/ui/state.js @snansrin

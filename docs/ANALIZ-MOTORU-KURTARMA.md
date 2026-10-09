@@ -1,21 +1,21 @@
 # Analiz motoru kurtarma
 
-## Kilitli sürüm
+## Önceki temel ve kurtarma kaydı
 
-- Kilit: DG-SURFACE-LOCK-2026-10-09-R2
+- Eski kilit kaydı: DG-SURFACE-LOCK-2026-10-09-R2 (kaldırıldı)
 - Motor ve GIS temel commit'i: e1ef75ba98a480880b50af2a82ecca8897cd25a7
-- Kilitli dosya/modül sayısı: 51
+- Önceki snapshot dosya/modül sayısı: 54
 - Tam depo kurtarma dalı: recovery/analysis-engine-20261009
 
-Yüzey analizi, raster/uydu kanıtı, OSM vektörleri, projeksiyon/geometri, grid, worker, GIS arayüz bağlantıları ve bunların regresyon testleri docs/surface-engine-lock.json içinde dosya bazında SHA-1 Git blob imzalarıyla sabitlenir. npm run check:surface-lock bu imzaları doğrular; npm run check aynı kilidi yayın kontrolünde çalıştırır. Kilitli motor dosyalarında değişiklik, yalnızca yeni ve açıkça onaylanmış bir motor sürümüyle yapılabilir.
+`docs/surface-engine-lock.json` önceki motor temelinin hash listesini ve kurtarma referansını arşiv olarak saklar. Kullanıcının 2026-10-09 tarihli talimatıyla kaynak kilidi ve CI hash denetimi kaldırılmıştır; analiz motorunun modüllerine artık mimari çalışma kapsamında müdahale edilebilir. Eski hash'ler yalnızca geçmişteki dosya içeriklerini tanımlar, güncel kodu doğrulamaz.
 
 ## Tam kaynak depo yedeği
 
-recovery/analysis-engine-20261009 dalı kilit yayımlandıktan sonra oluşturulacak; kilit dosyası dahil deponun tüm takip edilen dosyalarını ve Git geçmişini saklayacaktır. GitHub bu dalın kaynak arşivini şu adresten sunar:
+`recovery/analysis-engine-20261009` dalı deponun takip edilen dosyalarını ve Git geçmişini saklayan kurtarma noktasıdır. GitHub bu dalın kaynak arşivini şu adresten sunar:
 
 https://github.com/snansrin/dendrogeo/archive/refs/heads/recovery/analysis-engine-20261009.zip
 
-Geri yüklemek için depoyu klonlayıp git switch --detach recovery/analysis-engine-20261009 çalıştırın. Değişiklikleri ana dala almadan önce yeni dal açın; npm ci, npm run check ve npm run check:surface-lock kontrollerini çalıştırın. Ana dalı geçmişe zorla taşımayın.
+Geri yüklemek için depoyu klonlayıp `git switch --detach recovery/analysis-engine-20261009` çalıştırın. Değişiklikleri ana dala almadan önce yeni dal açın; `npm ci` ve `npm run check` kontrollerini çalıştırın. Ana dalı geçmişe zorla taşımayın.
 
 ## Yedek kapsamı
 
