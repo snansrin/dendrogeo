@@ -7,6 +7,7 @@
  * çalıştırıp her ara değeri döker:
  *
  *   node scripts/lulc-qa.mjs --park "Göksu Parkı"          (Overpass'ten polygon)
+ *   node scripts/lulc-qa.mjs --fixture goksu               (depolanmış gerçek park sınırı)
  *   node scripts/lulc-qa.mjs --lat 39.96 --lon 32.68 --r 400  (daire yaklaşık AOI)
  *
  * Çıktı: item id, EPSG, COG meta (minX/maxY/dx/dy), park UTM bbox, okuma
@@ -25,6 +26,7 @@ const arg = (ad) => {
   return i >= 0 ? process.argv[i + 1] : null;
 };
 const PARK = arg('park');
+const FIXTURE = arg('fixture');
 const LAT = Number(arg('lat')), LON = Number(arg('lon')), R = Number(arg('r') || 400);
 
 /* ---------- park polygonu ---------- */
@@ -137,10 +139,31 @@ function baglam() {
   ctx.window = ctx;
   ctx.self = ctx;
   vm.createContext(ctx);
-  vm.runInContext(readFileSync(join(ROOT, 'src/domain/surface/quality-gates.js'), 'utf8'), ctx, { filename: 'surface-quality-gates.js' });
-  vm.runInContext(readFileSync(join(ROOT, 'src/application/surface/run-analysis.js'), 'utf8'), ctx, { filename: 'run-surface-analysis.js' });
+  vm.runInContext(readFileSync(join(ROOT, 'src/config/constants.js'), 'utf8'), ctx, { filename: 'constants.js' });
   vm.runInContext(readFileSync(join(ROOT, 'vendor/geotiff-2.1.3.js'), 'utf8'), ctx, { filename: 'geotiff.js' });
-  vm.runInContext(readFileSync(join(ROOT, 'src/services/landcover.js'), 'utf8'), ctx, { filename: 'landcover.js' });
+  /* Keep the CLI QA host on the same injected analysis module chain used by
+   * the browser and report generator. */
+  const modules=[
+    'src/services/lc-config.js',
+    'src/domain/surface/classify-landcover-code.js',
+    'src/domain/surface/compare-source-class-areas.js',
+    'src/services/lc-geo.js',
+    'src/services/lc-stac.js',
+    'src/domain/surface/merge-tile-results.js',
+    'src/adapters/surface/result-exports.js',
+    'src/application/surface/analyze-source.js',
+    'src/adapters/surface/process-landcover-tile.js',
+    'src/services/lc-engine.js',
+    'src/services/lc-osm.js',
+    'src/services/lc-patches.js',
+    'src/ui/lc-report.js',
+    'src/domain/surface/quality-gates.js',
+    'src/application/surface/run-analysis.js',
+    'src/services/landcover.js'
+  ];
+  for(const module of modules){
+    vm.runInContext(readFileSync(join(ROOT,module),'utf8'),ctx,{filename:module});
+  }
   vm.runInContext('this.__api={dgLcFindTiles,dgLcGetSas,dgLcGetDataAsset,dgLcSignedHref,dgLcProcessTile,' +
     'dgLcMergeTileResults,dgLcProjectGeometry,dgLcProjectedArea,dgLcBboxFromGeometry,' +
     'dgLcUtmEpsgForLatLon,dgLcUtmForward,dgLcImageMeta,dgLcWindowForPark,' +
@@ -160,7 +183,11 @@ function shoelaceHa(ring) {
 }
 
 /* ---------- ana akış ---------- */
-const src = PARK ? await overpassPark(PARK) : daireAOI(LAT, LON, R);
+let src;
+if(FIXTURE){
+  if(FIXTURE!=='goksu')throw new Error('Desteklenmeyen park QA fixtureı: '+FIXTURE);
+  src=JSON.parse(readFileSync(join(ROOT,'test/fixtures/goksu-park.json'),'utf8'));
+}else src=PARK?await overpassPark(PARK):daireAOI(LAT,LON,R);
 console.log(`\n🌳 AOI: ${src.meta.name} (${src.meta.osm}) · ${src.ring.length} köşe · yaklaşık ${shoelaceHa(src.ring).toFixed(2)} ha`);
 
 const api = baglam();
@@ -191,7 +218,25 @@ const ctx2 = (() => {
   vm.runInContext(readFileSync(join(ROOT, 'src/domain/surface/quality-gates.js'), 'utf8'), ctx, { filename: 'surface-quality-gates.js' });
   vm.runInContext(readFileSync(join(ROOT, 'src/application/surface/run-analysis.js'), 'utf8'), ctx, { filename: 'run-surface-analysis.js' });
   vm.runInContext(readFileSync(join(ROOT, 'vendor/geotiff-2.1.3.js'), 'utf8'), ctx, { filename: 'geotiff.js' });
-  vm.runInContext(readFileSync(join(ROOT, 'src/services/landcover.js'), 'utf8'), ctx, { filename: 'landcover.js' });
+  const modules=[
+    'src/services/lc-config.js',
+    'src/domain/surface/classify-landcover-code.js',
+    'src/domain/surface/compare-source-class-areas.js',
+    'src/services/lc-geo.js',
+    'src/services/lc-stac.js',
+    'src/domain/surface/merge-tile-results.js',
+    'src/adapters/surface/result-exports.js',
+    'src/application/surface/analyze-source.js',
+    'src/adapters/surface/process-landcover-tile.js',
+    'src/services/lc-engine.js',
+    'src/services/lc-osm.js',
+    'src/services/lc-patches.js',
+    'src/ui/lc-report.js',
+    'src/services/landcover.js'
+  ];
+  for(const module of modules){
+    vm.runInContext(readFileSync(join(ROOT,module),'utf8'),ctx,{filename:module});
+  }
   return ctx;
 })();
 

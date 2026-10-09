@@ -123,3 +123,14 @@ test('eski motor kilidi yürürlükten kalktı; kurtarma snapshotı salt arşiv 
  assert.ok(read('sw.js').includes('/src/adapters/surface/result-exports.js'));
  assert.ok(read('sw.js').includes('/src/adapters/surface/process-landcover-tile.js'));
 });
+
+test('canlı park QA komut satırı analiz modüllerinin tamamını iki VM bağlamında yükler',()=>{
+ const qa=read('scripts/lulc-qa.mjs');
+ for(const module of [
+  'src/domain/surface/classify-landcover-code.js','src/domain/surface/compare-source-class-areas.js',
+  'src/domain/surface/merge-tile-results.js','src/adapters/surface/result-exports.js',
+  'src/application/surface/analyze-source.js','src/adapters/surface/process-landcover-tile.js','src/services/lc-engine.js'
+ ])assert.equal(qa.split(module).length-1,2,'QA bağlamında eksik/tekrarlı modül: '+module);
+ assert.match(qa,/--fixture goksu/);
+ assert.match(qa,/test\/fixtures\/goksu-park\.json/);
+});
