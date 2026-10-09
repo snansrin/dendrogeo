@@ -371,4 +371,3 @@ self.addEventListener('notificationclick', event => {
 });
 
 console.log('[SW] 🌲 DendroGeo Service Worker v2.10 r74 — network-first app assets');
-
