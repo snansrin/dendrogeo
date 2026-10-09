@@ -296,7 +296,7 @@ describe('rapor v2: harita PNG üst bilgisi', () => {
     assert.ok(c2.encode().length>1000,'havuz geometrisi PNG üretimini bozmaz');
   });
   test('PNG altbilgisinde bozuk telif glifi yerine ASCII-safe DendroGeo imzası vardır', () => {
-    const src=readFileSync(new URL('../scripts/make-report.mjs',import.meta.url),'utf8');
+    const src=readFileSync(new URL('../scripts/lib/report-map.mjs',import.meta.url),'utf8');
     assert.match(src,/const brandMark = 'DENDROGEO 2026'/);
     assert.doesNotMatch(src,/const cr = '© DENDROGEO'/);
   });
