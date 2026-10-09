@@ -28,7 +28,7 @@ import { reviewedSurface } from './surface-report.mjs';
  *   node scripts/make-report.mjs --park 5 --skip-lulc     (hızlı prova)
  *   GitHub Actions: workflow_dispatch "Rapor Yayınla" (rapor.yml)
  */
-import { readFileSync, writeFileSync, mkdirSync, readdirSync, existsSync } from 'node:fs';
+import { readFileSync, writeFileSync, mkdirSync } from 'node:fs';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import vm from 'node:vm';
@@ -40,6 +40,8 @@ import { createReportMetadata } from './lib/report-metadata.mjs';
 import { pointInRing, pointInPolygon, ringSelfIntersections, geometrySelfIntersections, bboxRing, ringGeodesicAreaM2 } from './lib/report-geometry.mjs';
 export { pointInRing, pointInPolygon, ringSelfIntersections, geometrySelfIntersections, bboxRing, ringGeodesicAreaM2 };
 import { reportMeasurementsCsv, reportMeasurementsGeoJson } from './lib/report-export.mjs';
+import { DGR_ID_RE, rebuildIndex, nextReportId, parkHistory } from './lib/report-archive.mjs';
+export { DGR_ID_RE, rebuildIndex, nextReportId, parkHistory };
 const fmtT = value => trNum(value / 1000, 2);
 import { PngCanvas, hex2rgb } from './lib/png.mjs';
 import { createRequire } from 'node:module';
@@ -67,7 +69,6 @@ const APP_VERSION = (() => { try { return JSON.parse(read('package.json')).versi
 const GIT_COMMIT = (() => { try { return execSync('git rev-parse HEAD', { cwd: ROOT, encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] }).trim() || null; } catch (e) { return null; } })();
 const DATASET_DEFAULT = 'ESA WorldCover 10 m · 2021 (v200)';
 const DATASET_ASCII = 'ESA WORLDCOVER 2021 V200';
-export const DGR_ID_RE = /^DGR-\d{4}-\d{4}$/;
 
 const SB = (() => {
   const s = read('src/config/supabase.js');
@@ -1399,36 +1400,6 @@ async function dgShareReport(){
 }
 
 /* ---------- CSV / GeoJSON / liste ---------- */
-function renderIndex(list) {
-  const rows = list.map((r) => `<tr><td><a href="${r.id}/">${r.id}</a></td><td class="tr">${esc(r.park)}</td><td>${r.n}</td><td>${r.carbon}</td><td>${r.date}</td><td><span class="badge on">Geçerli</span></td></tr>`).join('');
-  return `<!doctype html><html lang="tr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Yayınlanmış Raporlar — DendroGeo</title>
-<meta name="description" content="DendroGeo tarafından yayınlanmış, içerik hash'i ile dondurulmuş park ölçekli bilimsel raporların dizini.">
-<link rel="canonical" href="https://dendrogeo.org/rapor/">
-<link rel="stylesheet" href="../css/style.css"><link rel="stylesheet" href="../css/ui-standard.css">
-</head><body class="dg-page"><header class="top"><div class="wrap nav"><a class="brand" href="../">🌲 DendroGeo</a><nav class="links"><a href="../">Uygulama</a><a href="../yontem/">Yöntem</a></nav></div></header>
-<main><div class="wrap"><div class="hero"><div class="tag">BİLİMSEL RAPOR DİZİNİ</div><h1>Yayınlanmış Park Raporları</h1>
-<p class="lead">Her rapor yayın anında dondurulur; kimlik (DGR — DendroGeo Bilimsel Analiz Raporu), sürüm ve SHA-256 içerik hash'i ile atanır. Bir raporun verisi değişmez; yeni çözümleme yeni rapor kimliği olarak yayınlanır.</p></div>
-<table><thead><tr><th>Rapor</th><th>Park</th><th>n</th><th>Karbon (%95 GA)</th><th>Yayın</th><th>Durum</th></tr></thead><tbody>${rows || '<tr><td colspan=6>Henüz rapor yayınlanmadı.</td></tr>'}</tbody></table>
-<p class="lead" style="margin-top:14px;font-size:.85rem">Geri çekilen raporlar bu listeden düşer; geri çekme kayıtları <a href="yayin-kuyrugu.json">yayın günlüğünde</a> gerekçesiyle saklanır ve DGR kimliği yeniden kullanılmaz.</p>
-</div></main><footer><div class="wrap">DendroGeo · CC BY-NC 4.0</div></footer></body></html>`;
-}
-
-/* Liste yeniden kurulumu: YALNIZ data.json taşıyan dizinler listelenir —
- * geri çekilen raporun data.json'ı silindiği için listeden kendiliğinden
- * düşer. dir parametrik (testler geçici dizinde doğrular). */
-export function rebuildIndex(dir = join(ROOT, 'rapor')) {
-  if (!existsSync(dir)) return [];
-  const list = readdirSync(dir).filter((d) => DGR_ID_RE.test(d)).sort().map((d) => {
-    try {
-      const j = JSON.parse(readFileSync(join(dir, d, 'data.json'), 'utf8'));
-      return { id: d, park: j.park.name, n: j.totals.n, carbon: `${fmtT(j.totals.ci.mean)} t [${fmtT(j.totals.ci.lo)}–${fmtT(j.totals.ci.hi)}]`, date: j.generated_at.slice(0, 10) };
-    } catch (e) { return null; }
-  }).filter(Boolean);
-  writeFileSync(join(dir, 'index.html'), renderIndex(list));
-  return list;
-}
-
 /* Geri çekme bildirimi (0010): rapor adresi KALIR, içerik kalkar. Bilimsel
  * teamül: sessiz silme yok — gerekçeli, tarihli, kimliği korunmuş bildirim.
  * reason kaçışlanır: günlük/istemci kaynaklı serbest metin HTML'e ham geçmez. */
@@ -1510,32 +1481,6 @@ export async function qrDataUri(url) {
  * Dönüş değeri yayın kimliğini taşır; kuyruk günlüğü (rapor/yayin-kuyrugu.json)
  * bu nesneden yazılır ve uygulamadaki "📄 Bilimsel Rapor Yayını" kartı kalıcı
  * bağlantıyı oradan okur. */
-/* Sıradaki DGR kimliği: yıl + dizindeki mevcut kayıt sayısı (basit, çakışmasız:
- * yayın TEK iş parçacığından (Actions concurrency kilidi) yürür). */
-export function nextReportId(dir, year) {
-  const existing = existsSync(dir) ? readdirSync(dir).filter((d) => d.startsWith('DGR-' + year + '-')).sort() : [];
-  const highest = existing.reduce((n, d) => Math.max(n, Number(d.split('-')[2]) || 0), 0);
-  return `DGR-${year}-${String(highest + 1).padStart(4, '0')}`;
-}
-
-/* Aynı parkın önceki yayınları (rapor geçmişi §12 + metadata relatedIdentifiers):
- * kaynak, repo günlüğüdür — geri çekilmiş raporlar NOT'lu gösterilir. */
-export function parkHistory(dir, parkId, selfId) {
-  try {
-    const q = JSON.parse(readFileSync(join(dir, 'yayin-kuyrugu.json'), 'utf8'));
-    const es = Array.isArray(q.entries) ? q.entries : [];
-    const retired=new Set(q.retired_report_ids||[]);
-    const retracted = new Set(es.filter((e) => e.status === 'Geri çekildi').map((e) => String(e.report_id)));
-    return es.filter((e) => !retired.has(e.report_id) && e.status === 'Yayınlandı' && Number(e.park_id) === Number(parkId) && String(e.report_id) !== String(selfId))
-      .map((e) => ({
-        id: String(e.report_id),
-        date: String(e.finished_at || '').slice(0, 10),
-        retracted: retracted.has(String(e.report_id)),
-        note: retracted.has(String(e.report_id)) ? 'Aynı parkın önceki analizi (geri çekildi)' : 'Aynı parkın önceki analizi (bu raporla yenilendi)',
-      }));
-  } catch (e) { return []; }
-}
-
 export async function publishPark(parkId, opts = {}) {
   const validation=reportContext.validate(opts.study);if(!validation.valid)throw Error('Yayın künyesi gerekli: '+Object.values(validation.errors).join(' '));opts={...opts,study:validation.value};
   const year = new Date().getFullYear();
