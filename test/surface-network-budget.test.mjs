@@ -1,22 +1,62 @@
-import {test} from 'node:test';import assert from 'node:assert/strict';import vm from 'node:vm';import {readFileSync} from 'node:fs';
-const src=p=>readFileSync(new URL('../'+p,import.meta.url),'utf8');
-function ctx(extra={}){return vm.createContext({window:{},Date,Map,AbortController,AbortSignal,URLSearchParams,console:{log(){},warn(){}},setTimeout,clearTimeout,...extra});}
-const bbox={minLat:39,minLon:32,maxLat:40,maxLon:33};const data={elements:[{type:'way',tags:{natural:'water'},geometry:[{lat:39.2,lon:32.2},{lat:39.3,lon:32.2},{lat:39.3,lon:32.3},{lat:39.2,lon:32.2}]},{type:'way',tags:{building:'yes'},geometry:[{lat:39.2,lon:32.2},{lat:39.3,lon:32.2},{lat:39.3,lon:32.3}]},{type:'way',tags:{highway:'service',surface:'asphalt',width:'4'},geometry:[{lat:39.4,lon:32.4},{lat:39.5,lon:32.5}]}]};
-test('water and road evidence share one bounded request; building polygons are not water',async()=>{let calls=0;const c=ctx({fetch:async()=>{calls++;return{ok:true,json:async()=>data};}});vm.runInContext(src('src/services/lc-osm.js'),c);c.bbox=bbox;const [water,road]=await Promise.all([vm.runInContext('dgLcFetchWaterPolygons(bbox)',c),vm.runInContext('dgLcFetchRoadFeatures(bbox)',c)]);assert.equal(calls,1);assert.equal(water.length,1);assert.equal(road.length,1);});
-test('fresh complete park coverage is reused without any additional request',async()=>{let calls=0;const c=ctx({overpassRequest:async()=>{calls++;return data;}});c.window.DG_SURFACE_OSM={...data,bbox,fetchedAt:new Date().toISOString()};vm.runInContext(src('src/services/lc-osm.js'),c);c.bbox=bbox;await Promise.all([vm.runInContext('dgLcFetchWaterPolygons(bbox)',c),vm.runInContext('dgLcFetchRoadFeatures(bbox)',c)]);assert.equal(calls,0);});
-test('analysis waits for its pending detailed coverage and does not repeat a failed request',async()=>{let calls=0,release;const park=[[[39,32],[40,33]]],c=ctx({PARK_POLY:park,overpassRequest:async()=>{calls++;return data;}});c.window.DG_SURFACE_OSM_PENDING={boundary:JSON.stringify(park),promise:new Promise(r=>release=r)};vm.runInContext(src('src/services/lc-osm.js'),c);c.bbox=bbox;const job=vm.runInContext('dgLcOsmData(bbox)',c);release(false);assert.equal(await job,null);assert.equal(calls,0);});
-test('other parks and expired coverage are not reused',async()=>{let calls=0;const c=ctx({overpassRequest:async()=>{calls++;return data;}});c.window.DG_SURFACE_OSM={...data,bbox:{...bbox,maxLon:32.5},fetchedAt:new Date().toISOString()};vm.runInContext(src('src/services/lc-osm.js'),c);c.bbox=bbox;await vm.runInContext('dgLcOsmData(bbox)',c);assert.equal(calls,1);});
-test('the total detailed Overpass budget stops mirror rotation, even on repeated 504 errors',async()=>{let calls=0,time=0;class Clock extends Date{static now(){return time;}}const c=ctx({Date:Clock,fetch:async()=>{calls++;time+=10000;return{ok:false,status:504,text:async()=>''};}});vm.runInContext(src('src/services/osm-client.js'),c);assert.equal(await vm.runInContext('overpassRequest("detail","yÃ¼zey+su")',c),null);assert.equal(calls,2);});
-test('a stalled STAC request is aborted and rejects instead of returning fabricated data',async()=>{const c=ctx({setTimeout:(f,ms)=>setTimeout(f,ms/1000),fetch:(_u,{signal})=>new Promise((_,reject)=>signal.addEventListener('abort',()=>reject(Object.assign(Error('aborted'),{name:'AbortError'}))))});vm.runInContext(src('src/services/lc-stac.js'),c);await assert.rejects(vm.runInContext('dgLcFetchJson("https://example.test")',c),/aborted/);});
-test('range client preserves byte-range headers and keeps the timeout through response-body reads',async()=>{let client,seen;const c=ctx({setTimeout:(f,ms)=>setTimeout(f,ms/1000),GeoTIFF:{BaseClient:class{constructor(url){this.url=url;}},BaseResponse:class{},fromCustomClient:x=>{client=x;return Promise.resolve(x);}},fetch:async(_url,{headers,signal})=>{seen=headers;return{ok:true,status:206,headers:new Map([['Content-Range','bytes 0-10/100']]),arrayBuffer:()=>new Promise((_,reject)=>signal.addEventListener('abort',()=>reject(Error('body aborted'))))};}});vm.runInContext(src('src/services/lc-stac.js'),c);await vm.runInContext('dgLcOpenRaster("https://example.test/cog.tif")',c);const r=await client.request({headers:{Range:'bytes=0-10'}});assert.equal(seen.Range,'bytes=0-10');assert.equal(r.status,206);assert.equal(r.getHeader('Content-Range'),'bytes 0-10/100');await assert.rejects(r.getData(),/body aborted/);});
-test('a source-wide timeout cancels a stalled directory/range stage and cannot publish partial tiles',async()=>{let signal;const c=ctx({setTimeout:(f,ms)=>setTimeout(f,ms/1000)});vm.runInContext(src('src/application/surface/analyze-source.js'),c);vm.runInContext(src('src/services/lc-engine.js'),c);Object.assign(c,{DG_LC_MAX_TILES:12,dgLcFindTiles:async()=>[{id:'tile',assets:{map:{href:'https://example.test'}}}],dgLcGetSas:async()=>'',dgLcGetDataAsset:x=>x.assets.map,dgLcSignedHref:x=>x,dgLcProcessTile:(_i,_h,_g,_s,s)=>{signal=s;return new Promise((_,reject)=>s.addEventListener('abort',()=>reject(Error('abort'))));}});await assert.rejects(vm.runInContext('dgLcAnalyzeSource({label:"Primary"},{},{})',c),/zaman aÅŸÄ±mÄ±/);assert.equal(signal.aborted,true);});
+YªçŠx-®éÜj×¢ëiºÚ+Š§j[h‘éÜ¢éíÛmûN‹Z–‹­¦ëeŠw¬Õ¥µÁ½ÉÐíÑ•ÍÑô™É½´€¹½‘”éÑ•ÍÐœí¥µÁ½ÉÐ…ÍÍ•ÉÐ™É½´€¹½‘”é…ÍÍ•ÉÐ½ÍÑÉ¥Ðœí¥µÁ½ÉÐÙ´™É½´€¹½‘”éÙ´œí¥µÁ½ÉÐíÉ•…‘¥±•Må¹ô™É½´€¹½‘”é™Ìœì)½¹ÍÐÍÉŒõÀôùÉ•…‘¥±•Må¹Œ¡¹•ÜUI0 œ¸¸¼œ­À±¥µÁ½ÉÐ¹µ•Ñ„¹ÕÉ°¤°ÕÑ˜àœ¤ì)™Õ¹Ñ¥½¸Ñà¡•áÑÉ„õíô¥íÉ•ÑÕÉ¸Ù´¹É•…Ñ•½¹Ñ•áÐ¡íÝ¥¹‘½Üéíô±…Ñ”±5…À±‰½ÉÑ½¹ÑÉ½±±•È±‰½ÉÑM¥¹…°±UI1M•…É¡A…É…µÌ±½¹Í½±”éí±½œ ¥íô±Ý…É¸ ¥íõô±Í•ÑQ¥µ•½ÕÐ±±•…ÉQ¥µ•½ÕÐ°¸¸¹•áÑÉ…ô¤íô)½¹ÍÐ‰‰½àõíµ¥¹1…ÐèÌä±µ¥¹1½¸èÌÈ±µ…á1…ÐèÐÀ±µ…á1½¸èÌÍôí½¹ÍÐ‘…Ñ„õí•±•µ•¹ÑÌémíÑåÁ”èÝ…äœ±Ñ…Ìéí¹…ÑÕÉ…°èÝ…Ñ•Èô±•½µ•ÑÉäémí±…ÐèÌä¸È±±½¸èÌÈ¸Éô±í±…ÐèÌä¸Ì±±½¸èÌÈ¸Éô±í±…ÐèÌä¸Ì±±½¸èÌÈ¸Íô±í±…ÐèÌä¸È±±½¸èÌÈ¸Éõuô±íÑåÁ”èÝ…äœ±Ñ…Ìéí‰Õ¥±‘¥¹œèå•Ìô±•½µ•ÑÉäémí±…ÐèÌä¸È±±½¸èÌÈ¸Éô±í±…ÐèÌä¸Ì±±½¸èÌÈ¸Éô±í±…ÐèÌä¸Ì±±½¸èÌÈ¸Íõuô±íÑåÁ”èÝ…äœ±Ñ…Ìéí¡¥¡Ý…äèÍ•ÉÙ¥”œ±ÍÕÉ™…”è…ÍÁ¡…±Ðœ±Ý¥‘Ñ èœÐô±•½µ•ÑÉäémí±…ÐèÌä¸Ð±±½¸èÌÈ¸Ñô±í±…ÐèÌä¸Ô±±½¸èÌÈ¸Õõuõuôì)Ñ•ÍÐ Ý…Ñ•È…¹É½…•Ù¥‘•¹”Í¡…É”½¹”‰½Õ¹‘•É•ÅÕ•ÍÐì‰Õ¥±‘¥¹œÁ½±å½¹Ì…É”¹½ÐÝ…Ñ•Èœ±…Íå¹Œ ¤ôùí±•Ð…±±ÌôÀí½¹ÍÐŒõÑà¡í™•Ñ é…Íå¹Œ ¤ôùí…±±Ì¬¬íÉ•ÑÕÉ¹í½¬éÑÉÕ”±©Í½¸é…Íå¹Œ ¤ôù‘…Ñ…ôíõô¤íÙ´¹ÉÕ¹%¹½¹Ñ•áÐ¡ÍÉŒ ÍÉŒ½Í•ÉÙ¥•Ì½±Œµ½Í´¹©Ìœ¤±Œ¤íŒ¹‰‰½àõ‰‰½àí½¹ÍÐmÝ…Ñ•È±É½…‘tõ…Ý…¥ÐAÉ½µ¥Í”¹…±°¡mÙ´¹ÉÕ¹%¹½¹Ñ•áÐ ‘1•Ñ¡]…Ñ•ÉA½±å½¹Ì¡‰‰½à¤œ±Œ¤±Ù´¹ÉÕ¹%¹½¹Ñ•áÐ ‘1•Ñ¡I½…‘•…ÑÕÉ•Ì¡‰‰½à¤œ±Œ¥t¤í…ÍÍ•ÉÐ¹•ÅÕ…°¡…±±Ì°Ä¤í…ÍÍ•ÉÐ¹•ÅÕ…°¡Ý…Ñ•È¹±•¹Ñ °Ä¤í…ÍÍ•ÉÐ¹•ÅÕ…°¡É½…¹±•¹Ñ °Ä¤íô¤ì)Ñ•ÍÐ ™É•Í ½µÁ±•Ñ”Á…É¬½Ù•É…”¥ÌÉ•ÕÍ•Ý¥Ñ¡½ÕÐ…¹ä…‘‘¥Ñ¥½¹…°É•ÅÕ•ÍÐœ±…Íå¹Œ ¤ôùí±•Ð…±±ÌôÀí½¹ÍÐŒõÑà¡í½Ù•ÉÁ…ÍÍI•ÅÕ•ÍÐé…Íå¹Œ ¤ôùí…±±Ì¬¬íÉ•ÑÕÉ¸‘…Ñ„íõô¤íŒ¹Ý¥¹‘½Ü¹}MUI}=M4õì¸¸¹‘…Ñ„±‰‰½à±™•Ñ¡•‘Ðé¹•Ü…Ñ” ¤¹Ñ½%M=MÑÉ¥¹œ ¥ôíÙ´¹ÉÕ¹%¹½¹Ñ•áÐ¡ÍÉŒ ÍÉŒ½Í•ÉÙ¥•Ì½±Œµ½Í´¹©Ìœ¤±Œ¤íŒ¹‰‰½àõ‰‰½àí…Ý…¥ÐAÉ½µ¥Í”¹…±°¡mÙ´¹ÉÕ¹%¹½¹Ñ•áÐ ‘1•Ñ¡]…Ñ•ÉA½±å½¹Ì¡‰‰½à¤œ±Œ¤±Ù´¹ÉÕ¹%¹½¹Ñ•áÐ ‘1•Ñ¡I½…‘•…ÑÕÉ•Ì¡‰‰½à¤œ±Œ¥t¤í…ÍÍ•ÉÐ¹•ÅÕ…°¡…±±Ì°À¤íô¤ì)Ñ•ÍÐ …¹…±åÍ¥ÌÝ…¥ÑÌ™½È¥ÑÌÁ•¹‘¥¹œ‘•Ñ…¥±•½Ù•É…”…¹‘½•Ì¹½ÐÉ•Á•…Ð„™…¥±•É•ÅÕ•ÍÐœ±…Íå¹Œ ¤ôùí±•Ð…±±ÌôÀ±É•±•…Í”í½¹ÍÐÁ…É¬õmmlÌä°ÌÉt±lÐÀ°ÌÍuut±ŒõÑà¡íAI-}A=1déÁ…É¬±½Ù•ÉÁ…ÍÍI•ÅÕ•ÍÐé…Íå¹Œ ¤ôùí…±±Ì¬¬íÉ•ÑÕÉ¸‘…Ñ„íõô¤íŒ¹Ý¥¹‘½Ü¹}MUI}=M5}A9%9õí‰½Õ¹‘…Éäé)M=8¹ÍÑÉ¥¹¥™ä¡Á…É¬¤±ÁÉ½µ¥Í”é¹•ÜAÉ½µ¥Í”¡ÈôùÉ•±•…Í”õÈ¥ôíÙ´¹ÉÕ¹%¹½¹Ñ•áÐ¡ÍÉŒ ÍÉŒ½Í•ÉÙ¥•Ì½±Œµ½Í´¹©Ìœ¤±Œ¤íŒ¹‰‰½àõ‰‰½àí½¹ÍÐ©½ˆõÙ´¹ÉÕ¹%¹½¹Ñ•áÐ ‘1=Íµ…Ñ„¡‰‰½à¤œ±Œ¤íÉ•±•…Í”¡™…±Í”¤í…ÍÍ•ÉÐ¹•ÅÕ…°¡…Ý…¥Ð©½ˆ±¹Õ±°¤í…ÍÍ•ÉÐ¹•ÅÕ…°¡…±±Ì°À¤íô¤ì)Ñ•ÍÐ ½Ñ¡•ÈÁ…É­Ì…¹•áÁ¥É•½Ù•É…”…É”¹½ÐÉ•ÕÍ•œ±…Íå¹Œ ¤ôùí±•Ð…±±ÌôÀí½¹ÍÐŒõÑà¡í½Ù•ÉÁ…ÍÍI•ÅÕ•ÍÐé…Íå¹Œ ¤ôùí…±±Ì¬¬íÉ•ÑÕÉ¸‘…Ñ„íõô¤íŒ¹Ý¥¹‘½Ü¹}MUI}=M4õì¸¸¹‘…Ñ„±‰‰½àéì¸¸¹‰‰½à±µ…á1½¸èÌÈ¸Õô±™•Ñ¡•‘Ðé¹•Ü…Ñ” ¤¹Ñ½%M=MÑÉ¥¹œ ¥ôíÙ´¹ÉÕ¹%¹½¹Ñ•áÐ¡ÍÉŒ ÍÉŒ½Í•ÉÙ¥•Ì½±Œµ½Í´¹©Ìœ¤±Œ¤íŒ¹‰‰½àõ‰‰½àí…Ý…¥ÐÙ´¹ÉÕ¹%¹½¹Ñ•áÐ ‘1=Íµ…Ñ„¡‰‰½à¤œ±Œ¤í…ÍÍ•ÉÐ¹•ÅÕ…°¡…±±Ì°Ä¤íô¤ì)Ñ•ÍÐ Ñ¡”Ñ½Ñ…°‘•Ñ…¥±•=Ù•ÉÁ…ÍÌ‰Õ‘•ÐÍÑ½ÁÌµ¥ÉÉ½ÈÉ½Ñ…Ñ¥½¸°•Ù•¸½¸É•Á•…Ñ•€ÔÀÐ•ÉÉ½ÉÌœ±…Íå¹Œ ¤ôùí±•Ð…±±ÌôÀ±Ñ¥µ”ôÀí±…ÍÌ±½¬•áÑ•¹‘Ì…Ñ•íÍÑ…Ñ¥Œ¹½Ü ¥íÉ•ÑÕÉ¸Ñ¥µ”íõõ½¹ÍÐŒõÑà¡í…Ñ”é±½¬±™•Ñ é…Íå¹Œ ¤ôùí…±±Ì¬¬íÑ¥µ”¬ôÄÀÀÀÀíÉ•ÑÕÉ¹í½¬é™…±Í”±ÍÑ…ÑÕÌèÔÀÐ±Ñ•áÐé…Íå¹Œ ¤ôøœôíõô¤íÙ´¹ÉÕ¹%¹½¹Ñ•áÐ¡ÍÉŒ ÍÉŒ½Í•ÉÙ¥•Ì½½Í´µ±¥•¹Ð¹©Ìœ¤±Œ¤í…ÍÍ•ÉÐ¹•ÅÕ…°¡…Ý…¥ÐÙ´¹ÉÕ¹%¹½¹Ñ•áÐ ½Ù•ÉÁ…ÍÍI•ÅÕ•ÍÐ ‰‘•Ñ…¥°ˆ°‰çñé•ä­ÍÔˆ§mû¶‰žËkºwµç[ÛœÝXÝÜŠ\›
+^Ý\Ë\›]\›ß_K˜\ÙT™\ÜÛœÙN˜Û\ÜÞßKœ›ÛPÝ\ÝÛPÛY[žOžØÛY[^Ü™]\›ˆ›ÛZ\ÙKœ™\ÛÛ™J
+Nß_K™]Ú˜\Þ[˜ÊÝ\›ÚXY\œËÚYÛ˜[JOOžÜÙY[ZXY\œÎÜ™]\›žÛÚÎYKÝ]\ÎŒŒ‹XY\œÎ›™]ÈX\
+ÖÉÐÛÛ[T˜[™ÙIË	Øž]\ÈLLÌL	×WJK\œ˜^PY™™\ŽŠ
+OO›™]È›ÛZ\ÙJ
+Ë™Z™XÝ
+OOœÚYÛ˜[˜Y]™[\Ý[™\Š	ØX›Ü	Ë
 
-test('single analysis invokes only ESA and returns immutable raster without auxiliary services',async()=>{
- const calls=[],c=ctx({window:{GeoTIFF:{}},dgLcBboxFromGeometry:()=>bbox,dgLcAnalyzeSource:async()=>{},dgLcDetectPatches:()=>[],dgLcRenderObjects(){},dgLcRenderReport(){},dgLcIsGreen(){},dgLcHasGreen(){}});
- vm.runInContext(src('src/services/lc-config.js'),c);vm.runInContext(src('src/domain/surface/quality-gates.js'),c);vm.runInContext(src('src/application/surface/run-analysis.js'),c);vm.runInContext(src('src/services/landcover.js'),c);
- const baseline={assignedAreaM2:100,classifiedAreaM2:100,maskedAreaM2:0,sourceCells:1,groupAreas:{green:100},groupCounts:{green:1},rawCounts:{10:1},rawAreas:{10:100},cells:[{classKey:'green',rasterClassKey:'green',areaM2:100}],runs:[]};
- c.dgLcBboxFromGeometry=()=>bbox;c.dgLcAnalyzeSource=async source=>{calls.push(source.key);return{result:baseline,items:['real-source-contract']};};
- for(const name of ['dgLcFetchWaterPolygons','dgLcFetchRoadFeatures','dgLcRefineWater','dgLcRefineHardByOsm'])c[name]=()=>{throw Error('Auxiliary reclassification must not run');};
- const before=JSON.stringify(baseline);const report=await vm.runInContext('dgLcAnalyze({outer:[[[39,32],[40,33],[39,33]]],parkAreaM2:100})',c);
- assert.deepEqual(calls,['primary']);assert.equal(JSON.stringify(baseline),before);assert.equal(report.classes.green.areaM2,100);assert.equal(report.crossCitation,null);assert.equal(report.waterRefinedCells,0);assert.equal(report.roadRefinedCells,0);
-});
+OOœ™Z™XÝ
+\œ›ÜŠ	Ø›ÙHX›ÜY	ÊJJJ_Nß_JNÝ›Kœ[’[ÛÛ^
+Ü˜Ê	ÜÜ˜ËÜÙ\šXÙ\ËÛË\ÝXËšœÉÊKÊNØ]ØZ]›Kœ[’[ÛÛ^
+	ÙÓÓÜ[”˜\Ý\ŠšÎ‹ËÙ^[\K\ÝØÛÙËYˆŠIËÊNØÛÛœÝX]ØZ]ÛY[œ™\]Y\Ý
+ÚXY\œÎžÔ˜[™ÙN‰Øž]\ÏLLL	ß_JNØ\ÜÙ\™\]X[
+ÙY[‹”˜[™ÙK	Øž]\ÏLLL	ÊNØ\ÜÙ\™\]X[
+‹œÝ]\ËŒŠNØ\ÜÙ\™\]X[
+‹™Ù]XY\Š	ÐÛÛ[T˜[™ÙIÊK	Øž]\ÈLLÌL	ÊNØ]ØZ]\ÜÙ\œ™Z™XÝÊ‹™Ù]]J
+KØ›ÙHX›ÜYÊNßJNÂ\Ý
+	ØHÛÝ\˜ÙK]ÚYH[Y[Ý]Ø[˜Ù[ÈHÝ[Y\™XÝÜžKÜ˜[™ÙHÝYÙH[™Ø[››ÝX›\Ú\X[[\ÉË\Þ[˜Ê
+OOžÛ]ÚYÛ˜[ØÛÛœÝÏXÝ
+ÜÙ][Y[Ý]Š‹\ÊOOœÙ][Y[Ý]
+‹\ËÌL
+_JNÝ›Kœ[’[ÛÛ^
+Ü˜Ê	ÜÜ˜ËØ\XØ][Û‹ÜÝ\™˜XÙKØ[˜[^™K\ÛÝ\˜ÙKšœÉÊKÊNÝ›Kœ[’[ÛÛ^
+Ü˜Ê	ÜÜ˜ËÜÙ\šXÙ\ËÛËY[™Ú[™KšœÉÊKÊNÓØš™XÝ˜\ÜÚYÛŠËÑ×Ó×ÓPVÕSTÎŒL‹ÓÑš[™[\Î˜\Þ[˜Ê
+OO–ÞÚY‰Ý[IË\ÜÙ]ÎžÛX\žÚ™YŽ‰ÚÎ‹ËÙ^[\K\Ý	ß__WKÓÑÙ]Ø\Î˜\Þ[˜Ê
+OO‰ÉËÓÑÙ]]P\ÜÙ]žOž˜\ÜÙ]Ë›X\ÓÔÚYÛ™Y™YŽžOžÓÔ›ØÙ\ÜÕ[NŠÚKÚÙËÜËÊOOžÜÚYÛ˜[\ÎÜ™]\›ˆ™]È›ÛZ\ÙJ
+Ë™Z™XÝ
+OOœË˜Y]™[\Ý[™\Š	ØX›Ü	Ë
+
+OOœ™Z™XÝ
+\œ›ÜŠ	ØX›Ü	ÊJJJNß_JNØ]ØZ]\ÜÙ\œ™Z™XÝÊ›Kœ[’[ÛÛ^
+	ÙÓÐ[˜[^™TÛÝ\˜ÙJÛX™[ˆ”š[X\žHŸKßKßJIËÊKÞ˜[X[ˆqgñ,[q,KÊNØ\ÜÙ\™\]X[
+ÚYÛ˜[˜X›ÜYYJNßJNÂ‚\Ý
+	ÜÚ[™ÛH[˜[\Ú\È[›ÚÙ\ÈÛ›HTÐH[™™]\›œÈ[[]]X›H˜\Ý\ˆÚ]Ý]]^[X\žHÙ\šXÙ\ÉË\Þ[˜Ê
+OOžÂˆÛÛœÝØ[ÏV×KÏXÝ
+ÝÚ[™ÝÎžÑÙ[ÕQ‘Žžß_KÓÐ˜›Þœ›ÛQÙ[ÛY]žNŠ
+OO˜˜›ÞÓÐ[˜[^™TÛÝ\˜ÙN˜\Þ[˜Ê
+OOžßKÓÑ]XÝ]Ú\ÎŠ
+OO–×KÓÔ™[™\“Øš™XÝÊ
+^ßKÓÔ™[™\”™\Ü
+
+^ßKÓÒ\ÑÜ™Y[Š
+^ßKÓÒ\ÑÜ™Y[Š
+^ß_JNÂˆ›Kœ[’[ÛÛ^
+Ü˜Ê	ÜÜ˜ËÜÙ\šXÙ\ËÛËXÛÛ™šYËšœÉÊKÊNÝ›Kœ[’[ÛÛ^
+Ü˜Ê	ÜÜ˜ËÙÛXZ[‹ÜÝ\™˜XÙKÜ]X[]KYØ]\ËšœÉÊKÊNÝ›Kœ[’[ÛÛ^
+Ü˜Ê	ÜÜ˜ËØ\XØ][Û‹ÜÝ\™˜XÙKÜ[‹X[˜[\Ú\ËšœÉÊKÊNÝ›Kœ[’[ÛÛ^
+Ü˜Ê	ÜÜ˜ËÜÙ\šXÙ\ËÛ[™ÛÝ™\‹šœÉÊKÊNÂˆÛÛœÝ˜\Ù[[™O^Ø\ÜÚYÛ™Y\™XSLŽŒLÛ\ÜÚYšYY\™XSLŽŒLX\ÚÙY\™XSLŽŒÛÝ\˜ÙPÙ[ÎŒKÜ›Ý\\™X\ÎžÙÜ™Y[ŽŒLKÜ›Ý\ÛÝ[ÎžÙÜ™Y[ŽŒ_K˜]ÐÛÝ[ÎžÌLŒ_K˜]Ð\™X\ÎžÌLŒLKÙ[Î–ÞØÛ\ÜÒÙ^N‰ÙÜ™Y[‰Ë˜\Ý\Û\ÜÒÙ^N‰ÙÜ™Y[‰Ë\™XSLŽŒLWK[œÎ–×_NÂˆË™ÓÐ˜›Þœ›ÛQÙ[ÛY]žOJ
+OO˜˜›ÞØË™ÓÐ[˜[^™TÛÝ\˜ÙOX\Þ[˜ÈÛÝ\˜ÙOOžØØ[Ëœ\Ú
+ÛÝ\˜ÙKšÙ^JNÜ™]\›žÜ™\Ý[˜˜\Ù[[™K][\Î–ÉÜ™X[\ÛÝ\˜ÙKXÛÛ˜XÝ	×_NßNÂˆ›ÜŠÛÛœÝ˜[YHÙˆÉÙÓÑ™]ÚØ]\”ÛYÛÛœÉË	ÙÓÑ™]Ú›ØY™X]\™\ÉË	ÙÓÔ™Yš[™UØ]\‰Ë	ÙÓÔ™Yš[™R\™žSÜÛI×JXÖÛ˜[YWOJ
+OOžÝ›ÝÈ\œ›ÜŠ	Ð]^[X\žH™XÛ\ÜÚYšXØ][Ûˆ]\Ý›Ý[‰ÊNßNÂˆÛÛœÝ™Y›Ü™OR”ÓÓ‹œÝš[™ÚYžJ˜\Ù[[™JNØÛÛœÝ™\ÜX]ØZ]›Kœ[’[ÛÛ^
+	ÙÓÐ[˜[^™JÛÝ]\Ž–ÖÖÌÎKÌ—KÍÌ×KÌÎKÌ×WWK\šÐ\™XSLŽŒLJIËÊNÂˆ\ÜÙ\™Y\\]X[
+Ø[ËÉÜš[X\žI×JNØ\ÜÙ\™\]X[
+”ÓÓ‹œÝš[™ÚYžJ˜\Ù[[™JK™Y›Ü™JNØ\ÜÙ\™\]X[
+™\Ü˜Û\ÜÙ\Ë™Ü™Y[‹˜\™XSL‹L
+NØ\ÜÙ\™\]X[
+™\Ü˜Ü›ÜÜÐÚ]][Û‹[
+NØ\ÜÙ\™\]X[
+™\ÜØ]\”™Yš[™YÙ[Ë
+NØ\ÜÙ\™\]X[
+™\Üœ›ØY™Yš[™YÙ[Ë
+NÂŸJNÂ
