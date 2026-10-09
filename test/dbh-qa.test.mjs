@@ -213,8 +213,8 @@ describe('0031 · karbon motoru DEĞİŞMEDİ (aynı formül, aynı katsayılar)
   });
 
   test('CSV biçimi ve veri tabanı şeması değişmedi (yeni migration YOK)', () => {
-    assert.match(read('scripts/make-report.mjs'),
-      /const head = 'NOKTA,TUR,GRUP,GOGUS_CEVRESI_CM,DBH_CM,BOY_M,KARBON_KG,KARBON_CI_LO_KG,KARBON_CI_HI_KG,ENLEM,BOYLAM,GPS_DOGRULUK_M,TARIH'/);
+    assert.match(read('scripts/lib/report-export.mjs'),
+      /export const REPORT_CSV_HEADER = 'NOKTA,TUR,GRUP,GOGUS_CEVRESI_CM,DBH_CM,BOY_M,KARBON_KG,KARBON_CI_LO_KG,KARBON_CI_HI_KG,ENLEM,BOYLAM,GPS_DOGRULUK_M,TARIH'/);
     const mig = readdirSync(join(ROOT, 'supabase/migrations')).filter((f) => /\.sql$/.test(f));
     assert.ok(mig.includes('0013_restore_measurements.sql'), '0013 iade migrationı yerinde');
     for (const f of mig) assert.ok((parseInt(f.slice(0, 4), 10) <= 25 || ["20261003165331_surface_reviews.sql","20261003180749_surface_report_snapshot.sql","20261003203000_report_accepted_surface_snapshot.sql","20261003220749_surface_geometry_compat.sql","20261004165219_profile_privilege_guard.sql","20261006193500_data_requests_delete_own.sql","20261007083413_report_access_hardening.sql","20261007083543_rls_index_optimization.sql"].includes(f)), '0031 yeni migration EKLEMEMELİ: ' + f);

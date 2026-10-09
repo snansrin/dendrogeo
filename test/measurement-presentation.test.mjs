@@ -21,8 +21,9 @@ describe('DBH sunum standardı',()=>{
  });
  test('rapor, CSV ve okunabilir GeoJSON DBHyi 1 ondalık sunar',()=>{
   const r=rd('scripts/make-report.mjs');
+  const reportExport=rd('scripts/lib/report-export.mjs');
   assert.match(r,/rapor tablolarında DBH 1 ondalık basamakla gösterilir/);
-  assert.match(r,/\(\+r\.dbh_cm\)\.toFixed\(1\)/);
+  assert.match(reportExport,/\(\+r\.dbh_cm\)\.toFixed\(1\)/);
   const ex=rd('src/services/export.js');
   assert.match(ex,/const dbh=Number\.isFinite\(\+r\.dbh_cm\)\?\(\+r\.dbh_cm\)\.toFixed\(1\)/);
  });

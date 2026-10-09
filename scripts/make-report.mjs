@@ -39,6 +39,7 @@ import { buildReportProvenance } from './lib/report-provenance.mjs';
 import { createReportMetadata } from './lib/report-metadata.mjs';
 import { pointInRing, pointInPolygon, ringSelfIntersections, geometrySelfIntersections, bboxRing, ringGeodesicAreaM2 } from './lib/report-geometry.mjs';
 export { pointInRing, pointInPolygon, ringSelfIntersections, geometrySelfIntersections, bboxRing, ringGeodesicAreaM2 };
+import { reportMeasurementsCsv, reportMeasurementsGeoJson } from './lib/report-export.mjs';
 const fmtT = value => trNum(value / 1000, 2);
 import { PngCanvas, hex2rgb } from './lib/png.mjs';
 import { createRequire } from 'node:module';
@@ -1398,18 +1399,6 @@ async function dgShareReport(){
 }
 
 /* ---------- CSV / GeoJSON / liste ---------- */
-function csvOf(snap) {
-  const head = 'NOKTA,TUR,GRUP,GOGUS_CEVRESI_CM,DBH_CM,BOY_M,KARBON_KG,KARBON_CI_LO_KG,KARBON_CI_HI_KG,ENLEM,BOYLAM,GPS_DOGRULUK_M,TARIH';
-  const { rho, grho } = loadRho();
-  const lines = snap.rows.map((r) => {
-    const ci = mcRowCI(r);
-    return [r.point_id, `"${r.species}"`, r.grp, r.girth_cm ?? '', Number.isFinite(+r.dbh_cm) ? (+r.dbh_cm).toFixed(1) : '', r.height_m, r.carbon_kg, ci.lo.toFixed(1), ci.hi.toFixed(1), r.lat, r.lon, r.acc_m ?? '', r.date].join(',');
-  });
-  return '\uFEFF' + head + '\n' + lines.join('\n') + '\n';
-}
-function geojsonOf(snap) {
-  return { type: 'FeatureCollection', features: snap.rows.map((r) => ({ type: 'Feature', geometry: { type: 'Point', coordinates: [r.lon, r.lat] }, properties: { nokta: r.point_id, tur: r.species, grup: r.grp, gogus_cevresi_cm: r.girth_cm, dbh_cm: Number.isFinite(+r.dbh_cm) ? +(+r.dbh_cm).toFixed(1) : null, boy_m: r.height_m, karbon_kg: r.carbon_kg, tarih: r.date } })) };
-}
 function renderIndex(list) {
   const rows = list.map((r) => `<tr><td><a href="${r.id}/">${r.id}</a></td><td class="tr">${esc(r.park)}</td><td>${r.n}</td><td>${r.carbon}</td><td>${r.date}</td><td><span class="badge on">Geçerli</span></td></tr>`).join('');
   return `<!doctype html><html lang="tr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
@@ -1568,8 +1557,8 @@ export async function publishPark(parkId, opts = {}) {
   const html = renderReport(snap, { id, hash, version, meta: Object.assign({}, meta, { history }) });
   writeFileSync(join(out, 'index.html'), html);
   writeFileSync(join(out, 'data.json'), JSON.stringify(snap)); /* 0012: sıkıştırılmış (arşiv boyutu ~%45 küçük) */
-  writeFileSync(join(out, 'olcum.csv'), csvOf(snap));
-  writeFileSync(join(out, 'park.geojson'), JSON.stringify(geojsonOf(snap), null, 2));
+  writeFileSync(join(out, 'olcum.csv'), reportMeasurementsCsv(snap, mcRowCI));
+  writeFileSync(join(out, 'park.geojson'), JSON.stringify(reportMeasurementsGeoJson(snap), null, 2));
   writeFileSync(join(out, 'metadata.json'), JSON.stringify(buildMetadata(snap, { id, hash, version: verTxt, meta, history })) + '\n'); /* 0012: sıkıştırılmış */
   rebuildIndex();
   const url = SITE_ORIGIN + '/rapor/' + id + '/';
