@@ -130,7 +130,7 @@ test('canlı park QA komut satırı analiz modüllerinin tamamını iki VM bağl
   'src/domain/surface/classify-landcover-code.js','src/domain/surface/compare-source-class-areas.js',
   'src/domain/surface/merge-tile-results.js','src/adapters/surface/result-exports.js',
   'src/application/surface/analyze-source.js','src/adapters/surface/process-landcover-tile.js',
-  'src/domain/surface/patch-geometry.js', 'src/domain/surface/group-patch-cells.js', 'src/domain/surface/query-green-patches.js','src/services/lc-engine.js'
+  'src/domain/surface/patch-geometry.js', 'src/domain/surface/group-patch-cells.js', 'src/domain/surface/measure-patch-components.js', 'src/domain/surface/query-green-patches.js','src/services/lc-engine.js'
  ])assert.equal(qa.split(module).length-1,2,'QA bağlamında eksik/tekrarlı modül: '+module);
  assert.match(qa,/--fixture goksu/);
  assert.match(qa,/test\/fixtures\/goksu-park\.json/);
