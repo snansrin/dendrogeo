@@ -49,6 +49,7 @@ import { createQrDataUri } from './lib/report-qr.mjs';
 import { resolveReportAuthor } from './lib/report-author.mjs';
 import { REPORT_SHARE_SCRIPT } from './lib/report-share.mjs';
 import { reportStyles } from './lib/report-style.mjs';
+import { summarizeReportMeasurements } from './lib/report-measurement-summary.mjs';
 const fmtT = value => trNum(value / 1000, 2);
 import { createRequire } from 'node:module';
 const require_ = createRequire(import.meta.url);
@@ -213,16 +214,7 @@ export async function buildSnapshot(parkId, { skipLulc = false, meta = null, sur
     rows = await rest('measurements', { select: SEL_V2, park_id: 'eq.' + parkId, status: 'eq.Onaylı', order: 'point_id.asc' });
   }
   if (!rows.length) throw new Error('Bu park için onaylı kayıt yok; rapor yayınlanamaz.');
-  const ci = mcTotalCI(rows);
-  const bySp = {};
-  for (const r of rows) {
-    const b = bySp[r.species] ||= { n: 0, c: 0, dbh: 0, h: 0, grp: r.grp, ci: null };
-    b.n++; b.c += +r.carbon_kg; b.dbh += +r.dbh_cm; b.h += +r.height_m;
-  }
-  for (const [sp, b] of Object.entries(bySp)) b.ci = mcRowCI(rows.find((r) => r.species === sp));
-  const acc = rows.map((r) => +r.accuracy_m).filter((x) => Number.isFinite(x) && x > 0);
-  const dates = rows.map((r) => r.created_at).sort();
-  const reviewed = rows.filter((r) => r.reviewed_at).length;
+  const measurementSummary = summarizeReportMeasurements(rows, park.area_m2, { mcTotalCI, mcRowCI });
   /* Konum çiti denetimi SAYILARLA: her kayıt için gerçek nokta–poligon testi.
    * Daha önce verified_rows = rows.length varsayılıyordu; poligon dışında
    * koordinat taşıyan kayıt varsa rapor bunu beyan etmek zorundadır. */
@@ -328,11 +320,11 @@ export async function buildSnapshot(parkId, { skipLulc = false, meta = null, sur
       datasetDefault: DATASET_DEFAULT,
     }),
     mc: { ...MC_CFG },
-    totals: { n: rows.length, carbon_kg: +rows.reduce((a, r) => a + +r.carbon_kg, 0).toFixed(2), ci: { mean: +ci.mean.toFixed(2), lo: +ci.lo.toFixed(2), hi: +ci.hi.toFixed(2) }, per_ha_kg: park.area_m2 > 0 ? +(rows.reduce((a, r) => a + +r.carbon_kg, 0) / (park.area_m2 / 10000)).toFixed(2) : null },
-    species: Object.entries(bySp).map(([sp, b]) => ({ species: sp, grp: b.grp, n: b.n, mean_dbh: +(b.dbh / b.n).toFixed(1), mean_h: +(b.h / b.n).toFixed(1), carbon_kg: +b.c.toFixed(2), share_pct: +(100 * b.c / rows.reduce((a, r) => a + +r.carbon_kg, 0)).toFixed(1) })),
-    gps: { n: rows.length, n_with_acc: acc.length, n_null_acc: rows.length - acc.length, mean_acc_m: acc.length ? +((acc.reduce((a, b) => a + b, 0) / acc.length)).toFixed(1) : null },
-    period: { from: dates[0], to: dates[dates.length - 1] },
-    moderation: { approved: rows.length, reviewed },
+    totals: measurementSummary.totals,
+    species: measurementSummary.species,
+    gps: measurementSummary.gps,
+    period: measurementSummary.period,
+    moderation: measurementSummary.moderation,
     geofence: {
       policy: 'park poligonu içinde ölçüm zorunlu (trg_geo_fence, 0007)',
       total: rows.length,
