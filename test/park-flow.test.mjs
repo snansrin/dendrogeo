@@ -163,6 +163,7 @@ function makeWorld() {
  * testleri onu gerektirmiyor ama facade'ı kullanan akışlar için yüklüyoruz. */
 scripts.push('src/services/lc-config.js', 'src/services/lc-geo.js', 'src/services/lc-stac.js',
   'src/domain/surface/merge-tile-results.js',
+  'src/adapters/surface/result-exports.js',
   'src/services/lc-engine.js', 'src/services/lc-osm.js', 'src/services/lc-patches.js',
   'src/ui/lc-report.js', 'src/domain/surface/quality-gates.js',
   'src/application/surface/run-analysis.js', 'src/services/landcover.js');

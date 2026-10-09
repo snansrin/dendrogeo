@@ -34,6 +34,25 @@ test('lc-engine eski dgLcMergeTileResults API adını domain modülüne yönlend
  assert.equal(out.groupAreas.green,3);
 });
 
+test('sonuç export adapterı CSV ve hücre GeoJSON sözleşmesini korur',()=>{
+ const ctx={window:null,Object,Math,Number,Array,String,JSON};ctx.window=ctx;vm.createContext(ctx);
+ vm.runInContext(read('src/services/lc-config.js'),ctx);
+ vm.runInContext(read('src/adapters/surface/result-exports.js'),ctx);
+ ctx.result={assignedAreaM2:10000,groupCounts:{green:1,hard:1},groupAreas:{green:6000,hard:4000},
+   rawCounts:{50:1,10:1},rawAreas:{50:4000,10:6000},maskedCount:0,maskedAreaM2:0,
+   cells:[{row:3,col:4,classCode:50,classKey:'hard',areaM2:123.45678,center:{lat:39.9,lon:32.8},
+     quadWgs:[[32.7,39.8],[32.9,39.8],[32.9,40],[32.7,40]],source:'primary'}]};
+ ctx.meta={year:2021,resolutionM:10,primaryLabel:'ESA, "2021"'};
+ const csv=vm.runInContext('DG_SURFACE_RESULT_EXPORTS.classCsv(result,meta)',ctx);
+ assert.match(csv,/^\uFEFFCLASS,GROUP,SOURCE_CELL_COUNT,AREA_HA,PERCENT_OF_ANALYSIS_AREA,YEAR,RESOLUTION_M,SOURCE\n/);
+ assert.match(csv,/"Yeşil alan","green",1,0\.6000,60\.0000,2021,10,"ESA, ""2021"""/);
+ const geojson=JSON.parse(JSON.stringify(vm.runInContext('DG_SURFACE_RESULT_EXPORTS.cellsGeoJson(result)',ctx)));
+ assert.equal(geojson.type,'FeatureCollection');
+ assert.equal(geojson.features[0].properties.class_name,'Yapılı');
+ assert.deepEqual(geojson.features[0].geometry.coordinates[0][0],geojson.features[0].geometry.coordinates[0].at(-1));
+ assert.equal(geojson.features[0].properties.intersection_area_m2,123.4568);
+});
+
 test('eski motor kilidi yürürlükten kalktı; kurtarma snapshotı salt arşiv olarak kaldı',()=>{
  const record=JSON.parse(read('docs/surface-engine-lock.json'));
  const pkg=JSON.parse(read('package.json'));
@@ -43,4 +62,5 @@ test('eski motor kilidi yürürlükten kalktı; kurtarma snapshotı salt arşiv 
  assert.equal(record.recovery_branch,'recovery/analysis-engine-20261009');
  assert.ok(!pkg.scripts.check.includes('check:surface-lock'));
  assert.ok(!ci.includes('check-surface-lock.mjs'));
+ assert.ok(read('sw.js').includes('/src/adapters/surface/result-exports.js'));
 });

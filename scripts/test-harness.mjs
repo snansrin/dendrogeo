@@ -84,6 +84,7 @@ export function loadApp({ sadece } = {}) {
     'src/services/lc-geo.js',
     'src/services/lc-stac.js',
     'src/domain/surface/merge-tile-results.js',
+    'src/adapters/surface/result-exports.js',
     'src/services/lc-engine.js',
     'src/services/lc-osm.js',
     'src/services/lc-patches.js',

@@ -19,7 +19,8 @@ const rd = (p) => readFileSync(new URL('../' + p, import.meta.url), 'utf8');
 
 const app = loadApp({ sadece: ['src/config/constants.js', 'src/utils/geo.js',
   'src/services/lc-config.js', 'src/services/lc-geo.js', 'src/services/lc-stac.js',
-  'src/domain/surface/merge-tile-results.js', 'src/services/lc-engine.js',
+  'src/domain/surface/merge-tile-results.js', 'src/adapters/surface/result-exports.js',
+  'src/services/lc-engine.js',
   'src/services/lc-osm.js', 'src/services/lc-patches.js',
   'src/services/lc-validate.js', 'src/services/lc-s2.js',
   'src/ui/lc-report.js', 'src/services/landcover.js'] });

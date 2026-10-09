@@ -252,73 +252,11 @@ function dgLcMergeTileResults(parts){
 }
 
 function dgLcClassCsv(result,meta){
-  const q=v=>'"'+String(v??"").replace(/"/g,'""')+'"';
-  const m=meta||{};
-  const rows=[["CLASS","GROUP","SOURCE_CELL_COUNT","AREA_HA","PERCENT_OF_ANALYSIS_AREA","YEAR","RESOLUTION_M","SOURCE"]];
-  const denominator=result.assignedAreaM2;
-  const GROUP_ORDER=["green","water","hard","bare","other"];
-  for(const k of GROUP_ORDER){
-    const cls=DG_LC_CLASSES.find(c=>c.key===k);
-    const count=result.groupCounts?.[k]||0;
-    const area=result.groupAreas?.[k]||0;
-    if(!count&&!area)continue;
-    rows.push([
-      q(cls.label),q(k),count,
-      (area/10000).toFixed(4),
-      denominator>0?(area/denominator*100).toFixed(4):"0",
-      m.year||"",m.resolutionM||10,q(m.primaryLabel||"")
-    ]);
-  }
-  /* Ham kaynak kod kırılımı — bilimsel şeffaflık */
-  for(const code of Object.keys(result.rawCounts||{}).sort((a,b)=>Number(a)-Number(b))){
-    const count=result.rawCounts[code];
-    if(!count)continue;
-    rows.push([
-      q("RAW kod "+code),q("raw"),count,
-      ((result.rawAreas?.[code]||0)/10000).toFixed(4),
-      denominator>0?((result.rawAreas?.[code]||0)/denominator*100).toFixed(4):"0",
-      m.year||"",m.resolutionM||10,q(m.primaryLabel||"")
-    ]);
-  }
-  rows.push([
-    q("MASKELİ / NODATA"),q("masked"),result.maskedCount||0,
-    (result.maskedAreaM2/10000).toFixed(4),
-    denominator>0?(result.maskedAreaM2/denominator*100).toFixed(4):"0",
-    m.year||"",m.resolutionM||10,q(m.primaryLabel||"")
-  ]);
-  return"\uFEFF"+rows.map(r=>r.join(",")).join("\n")+"\n";
+  return window.DG_SURFACE_RESULT_EXPORTS.classCsv(result,meta);
 }
 
 function dgLcCellsGeoJson(result){
-  const features=(result.cells||[]).map((c,i)=>{
-    const ring=c.quadWgs&&c.quadWgs.length===4
-      ?[...c.quadWgs,c.quadWgs[0]]
-      :[[c.center.lon,c.center.lat],[c.center.lon,c.center.lat]];
-    return{
-      type:"Feature",
-      properties:{
-        cell_id:i+1,
-        row:c.row,
-        column:c.col,
-        class_code:c.classCode,
-        class_name:(DG_ESA_CODES[c.classCode]||DG_LC_CODES[c.classCode]||"Bilinmeyen"),
-        group:c.classKey,
-        intersection_area_m2:+Number(c.areaM2||0).toFixed(4),
-        center_lat:+c.center.lat.toFixed(7),
-        center_lon:+c.center.lon.toFixed(7),
-        source:c.source||""
-      },
-      geometry:{
-        type:"Polygon",
-        coordinates:[ring]
-      }
-    };
-  });
-  return{
-    type:"FeatureCollection",
-    name:"dendrogeo_10m_landcover",
-    features
-  };
+  return window.DG_SURFACE_RESULT_EXPORTS.cellsGeoJson(result);
 }
 
 /* İki kaynağın grup alanları arasındaki uzlaşma (belirsizlik göstergesi) */

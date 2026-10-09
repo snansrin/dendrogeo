@@ -66,7 +66,8 @@ function scriptSirasi() {
  * dgEnsureLulc'nin kullandığı sırayla (DG_LULC_CHAIN). */
 const LULC_ZINCIRI = [
   'src/services/lc-config.js', 'src/services/lc-geo.js', 'src/services/lc-stac.js',
-  'src/domain/surface/merge-tile-results.js', 'src/services/lc-engine.js',
+  'src/domain/surface/merge-tile-results.js', 'src/adapters/surface/result-exports.js',
+  'src/services/lc-engine.js',
   'src/services/lc-osm.js', 'src/services/lc-patches.js',
   /* Uydu hassasiyet (0054): validate çekirdeği s2'den önce
    * (DG_S2_MIN_OBS_GUARD sabiti ondan okunur); lc-sens, lc-report'tan
