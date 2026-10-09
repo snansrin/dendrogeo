@@ -301,4 +301,3 @@ console.log('  cok-zamanli kanit katkisi: yillik max ile sinifi DUZELEN hucre �
 
 console.log('\n══ E) Karne plumbing (spektral sahte-referans — bilimsel hüküm değil) ══');
 console.log(`örnek: ${out.sampleCount} · OA: %${(out.metrics.oa * 100).toFixed(1)} · κ: ${out.metrics.kappa === null ? '—' : out.metrics.kappa.toFixed(2)} · kapı: ${out.gate.label} (${out.gate.reasons} sebep)`);
-
