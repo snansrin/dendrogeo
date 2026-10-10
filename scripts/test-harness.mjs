@@ -92,6 +92,12 @@ export function loadApp({ sadece } = {}) {
     'src/services/lc-engine.js',
     'src/services/lc-osm.js',
     'src/domain/surface/patch-geometry.js', 'src/domain/surface/group-patch-cells.js', 'src/domain/surface/measure-patch-components.js', 'src/domain/surface/query-green-patches.js',
+    'src/domain/surface/review-geometry.js',
+    'src/adapters/surface/review-store.js',
+    'src/adapters/surface/osm-review-objects.js',
+    'src/adapters/surface/review-worker.js',
+    'src/application/surface/prepare-review.js',
+    'src/application/surface/merge-review-features.js',
     'src/services/lc-patches.js',
     /* UYDU HASSASİYET (0054): validate çekirdeği saf matematiktir (eşikler,
      * hassasiyet, Olofsson metrikleri, düzeltme katmanı) — birim testleri
@@ -103,6 +109,7 @@ export function loadApp({ sadece } = {}) {
     'src/services/lc-s2.js',
     'src/ui/lc-report.js',
     'src/domain/surface/quality-gates.js',
+    'src/contracts/surface-analysis.js',
     'src/application/surface/run-analysis.js',
     'src/services/landcover.js',
     /* PARK ZİNCİRİ (Faz 4): eski gridplan.js'in mantık modülleri, index.html'deki
@@ -135,6 +142,7 @@ export function loadApp({ sadece } = {}) {
   if (secim && secim.has('src/services/measure.js')) secim.add('src/application/trees/validate-measurement.js');
   if (secim && secim.has('src/services/landcover.js')) {
     secim.add('src/domain/surface/quality-gates.js');
+    secim.add('src/contracts/surface-analysis.js');
     secim.add('src/application/surface/run-analysis.js');
   }
   const dosyalar = secim ? SIRALAMA.filter((f) => secim.has(f)) : SIRALAMA;

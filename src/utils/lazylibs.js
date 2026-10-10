@@ -76,9 +76,17 @@ const DG_LULC_CHAIN=[
   "src/services/lc-s2.js",
   "src/ui/lc-report.js",
   "vendor/polygon-clipping-0.15.7.js",
+  "src/contracts/surface-review.js",
+  "src/adapters/surface/review-store.js",
+  "src/domain/surface/review-geometry.js",
+  "src/adapters/surface/osm-review-objects.js",
+  "src/adapters/surface/review-worker.js",
+  "src/application/surface/prepare-review.js",
+  "src/application/surface/merge-review-features.js",
   "src/services/lc-review.js",
   "src/ui/lc-sens.js",
   "src/domain/surface/quality-gates.js",
+  "src/contracts/surface-analysis.js",
   "src/application/surface/run-analysis.js",
   "src/services/landcover.js"
 ];

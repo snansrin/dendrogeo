@@ -55,6 +55,16 @@ describe('tembel vendor yükleme (Faz 7)', () => {
     assert.ok(sw.includes("'/vendor/chart.js-4.5.1.js'"), 'chart PRECACHE’ten düşmüş');
     assert.ok(sw.includes("'/src/utils/lazylibs.js'"), 'lazylibs PRECACHE’te yok');
     assert.ok(sw.includes("'/src/domain/surface/quality-gates.js'"), "yüzey kalite domain'i PRECACHE’te yok");
+    assert.ok(sw.includes("'/src/contracts/surface-analysis.js'"), "yüzey DTO sözleşmeleri PRECACHE’te yok");
+    assert.ok(sw.includes("'/src/contracts/surface-review.js'"), "yüzey inceleme sözleşmeleri PRECACHE’te yok");
     assert.ok(sw.includes("'/src/application/surface/run-analysis.js'"), "analiz use-case'i PRECACHE’te yok");
+    const loader=read('src/utils/lazylibs.js');
+    assert.ok(loader.indexOf('"src/contracts/surface-review.js"')<loader.indexOf('"src/services/lc-review.js"'), 'inceleme sözleşmesi servisinden önce yüklenmeli');
+    assert.ok(loader.indexOf('"src/domain/surface/review-geometry.js"')<loader.indexOf('"src/services/lc-review.js"'), 'inceleme geometri domaini servisinden önce yüklenmeli');
+    assert.ok(loader.indexOf('"src/adapters/surface/review-store.js"')<loader.indexOf('"src/services/lc-review.js"'), 'inceleme depolama adapterı servisinden önce yüklenmeli');
+    assert.ok(loader.indexOf('"src/adapters/surface/osm-review-objects.js"')<loader.indexOf('"src/services/lc-review.js"'), 'OSM inceleme adapterı servisinden önce yüklenmeli');
+    assert.ok(loader.indexOf('"src/adapters/surface/review-worker.js"')<loader.indexOf('"src/services/lc-review.js"'), 'worker adapterı servisinden önce yüklenmeli');
+    assert.ok(loader.indexOf('"src/application/surface/prepare-review.js"')<loader.indexOf('"src/services/lc-review.js"'), 'review use-case servisten önce yüklenmeli');
+    assert.ok(loader.indexOf('"src/application/surface/merge-review-features.js"')<loader.indexOf('"src/services/lc-review.js"'), 'review output use-case servisten önce yüklenmeli');
   });
 });

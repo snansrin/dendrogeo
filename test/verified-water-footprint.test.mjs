@@ -9,7 +9,7 @@ const src=p=>readFileSync(new URL('../'+p,import.meta.url),'utf8');
 function setup(){
  const elements=new Map(),el=id=>{if(!elements.has(id))elements.set(id,{innerHTML:'',textContent:'',style:{},value:'',querySelectorAll:()=>[]});return elements.get(id);};
  const ctx=vm.createContext({window:{polygonClipping},crypto:webcrypto,TextEncoder,URLSearchParams,Date,setTimeout,clearTimeout,console,document:{getElementById:el,querySelectorAll:()=>[]},esc:String,dgCf:s=>s,toast(){},USER:{id:'user-a'},DG_PARK:{id:25,name:'Göksu Parkı'},DG_PARK_SESSION:new Map(),PARK_POLY:[],PARK_HOLES:[],map:{removeLayer(){},closePopup(){}},sb:{}});
- for(const p of ['src/core/surface-display.js','src/services/lc-config.js','src/services/lc-geo.js','src/services/lc-validate.js','src/services/lc-s2.js','src/services/lc-review.js','src/ui/editor-ui.js','src/ui/lc-sens.js'])vm.runInContext(src(p),ctx);
+ for(const p of ['src/core/surface-display.js','src/services/lc-config.js','src/services/lc-geo.js','src/services/lc-validate.js','src/services/lc-s2.js','src/contracts/surface-review.js','src/adapters/surface/review-store.js','src/domain/surface/review-geometry.js','src/adapters/surface/osm-review-objects.js','src/adapters/surface/review-worker.js','src/application/surface/prepare-review.js','src/application/surface/merge-review-features.js','src/services/lc-review.js','src/ui/editor-ui.js','src/ui/lc-sens.js'])vm.runInContext(src(p),ctx);
  const run=s=>vm.runInContext(s,ctx);
  run('DG_SENS.record=dgSensNewRecord()');
  const epsg=32631,point=(x,y)=>{const p=run('dgLcUtmInverse('+(500000+x)+','+(1000+y)+','+epsg+')');return[p.lon,p.lat];};

@@ -23,6 +23,8 @@
       const result=primary?.result;
       if(!result||typeof result!=="object")throw new Error("Birincil raster kaynağı geçerli analiz sonucu döndürmedi.");
       const deltaPct=assertCoverage(result.assignedAreaM2,parkAreaM2,0.5);
+      if(!root.DG_SURFACE_CONTRACTS)throw new Error("Yüzey analiz DTO sözleşmeleri yüklenmedi.");
+      root.DG_SURFACE_CONTRACTS.assertSourceEvidence(primary);
       const patches=detectPatches(result.cells),cross=null,crossErr=null,waterRefined=0,roadRefined=0;
       const report={
         year:sources.primary.year,crossYear:sources.cross.year,resolutionM:getPixelSize(),
@@ -42,7 +44,7 @@
             areaHa:+(area/10000).toFixed(3),pct:result.assignedAreaM2>0?+(area/result.assignedAreaM2*100).toFixed(2):0}];
         }))
       };
-      return{report,result,crossResult:cross?cross.result:null,patches};
+      return root.DG_SURFACE_CONTRACTS.assertAnalysisOutput({report,result,crossResult:cross?cross.result:null,patches});
     }});
   }
   root.DG_SURFACE_APPLICATION=Object.freeze({createRunSurfaceAnalysis});

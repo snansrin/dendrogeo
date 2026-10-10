@@ -159,6 +159,7 @@ function baglam() {
     'src/services/lc-patches.js',
     'src/ui/lc-report.js',
     'src/domain/surface/quality-gates.js',
+    'src/contracts/surface-analysis.js',
     'src/application/surface/run-analysis.js',
     'src/services/landcover.js'
   ];
@@ -217,6 +218,7 @@ const ctx2 = (() => {
   ctx.window = ctx; ctx.self = ctx;
   vm.createContext(ctx);
   vm.runInContext(readFileSync(join(ROOT, 'src/domain/surface/quality-gates.js'), 'utf8'), ctx, { filename: 'surface-quality-gates.js' });
+  vm.runInContext(readFileSync(join(ROOT, 'src/contracts/surface-analysis.js'), 'utf8'), ctx, { filename: 'surface-analysis-contracts.js' });
   vm.runInContext(readFileSync(join(ROOT, 'src/application/surface/run-analysis.js'), 'utf8'), ctx, { filename: 'run-surface-analysis.js' });
   vm.runInContext(readFileSync(join(ROOT, 'vendor/geotiff-2.1.3.js'), 'utf8'), ctx, { filename: 'geotiff.js' });
   const modules=[

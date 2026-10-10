@@ -13,8 +13,8 @@ test('a source-wide timeout cancels a stalled directory/range stage and cannot p
 
 test('single analysis invokes only ESA and returns immutable raster without auxiliary services',async()=>{
  const calls=[],c=ctx({window:{GeoTIFF:{}},dgLcBboxFromGeometry:()=>bbox,dgLcAnalyzeSource:async()=>{},dgLcDetectPatches:()=>[],dgLcRenderObjects(){},dgLcRenderReport(){},dgLcIsGreen(){},dgLcHasGreen(){}});
- vm.runInContext(src('src/services/lc-config.js'),c);vm.runInContext(src('src/domain/surface/quality-gates.js'),c);vm.runInContext(src('src/application/surface/run-analysis.js'),c);vm.runInContext(src('src/services/landcover.js'),c);
- const baseline={assignedAreaM2:100,classifiedAreaM2:100,maskedAreaM2:0,sourceCells:1,groupAreas:{green:100},groupCounts:{green:1},rawCounts:{10:1},rawAreas:{10:100},cells:[{classKey:'green',rasterClassKey:'green',areaM2:100}],runs:[]};
+ vm.runInContext(src('src/services/lc-config.js'),c);vm.runInContext(src('src/domain/surface/quality-gates.js'),c);vm.runInContext(src('src/contracts/surface-analysis.js'),c);vm.runInContext(src('src/application/surface/run-analysis.js'),c);vm.runInContext(src('src/services/landcover.js'),c);
+ const baseline={assignedAreaM2:100,classifiedAreaM2:100,maskedAreaM2:0,sourceCells:1,groupAreas:{green:100},groupCounts:{green:1},rawCounts:{10:1},rawAreas:{10:100},cells:[],runs:[]};
  c.dgLcBboxFromGeometry=()=>bbox;c.dgLcAnalyzeSource=async source=>{calls.push(source.key);return{result:baseline,items:['real-source-contract']};};
  for(const name of ['dgLcFetchWaterPolygons','dgLcFetchRoadFeatures','dgLcRefineWater','dgLcRefineHardByOsm'])c[name]=()=>{throw Error('Auxiliary reclassification must not run');};
  const before=JSON.stringify(baseline);const report=await vm.runInContext('dgLcAnalyze({outer:[[[39,32],[40,33],[39,33]]],parkAreaM2:100})',c);

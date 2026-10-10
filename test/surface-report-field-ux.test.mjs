@@ -25,9 +25,11 @@ assert.ok(!stripped.includes('href="harita.png"'));
 assert.ok(stripped.includes('son kabul edilmiş yüzey alanlarını'));
 
 const review=readFileSync(new URL('../src/services/lc-review.js',import.meta.url),'utf8');
-assert.match(review,/building:\{group:"building",label:"Bina"\}/);
-assert.match(review,/pool:\{group:"pool",label:"Havuz \/ süs havuzu"\}/);
-assert.match(review,/hard:\{group:"hard",label:"Sert zemin"\}/);
+const osmReviewObjects=readFileSync(new URL('../src/adapters/surface/osm-review-objects.js',import.meta.url),'utf8');
+const reviewContract=readFileSync(new URL('../src/contracts/surface-review.js',import.meta.url),'utf8');
+assert.match(reviewContract,/building:Object\.freeze\(\{group:"building",label:"Bina"\}\)/);
+assert.match(reviewContract,/pool:Object\.freeze\(\{group:"pool",label:"Havuz \/ süs havuzu"\}\)/);
+assert.match(reviewContract,/hard:Object\.freeze\(\{group:"hard",label:"Sert zemin"\}\)/);
 
 const field=readFileSync(new URL('../src/services/field-ux.js',import.meta.url),'utf8');
 assert.doesNotMatch(field,/window\.(startGps|renderWaypointList|dgSensRefreshLayer)\s*=/,'compatibility loader must not replace native field behavior');
@@ -38,7 +40,7 @@ const map=readFileSync(new URL('../src/services/map.js',import.meta.url),'utf8')
 assert.match(map,/DG_WP_PAGE_SIZE=8/);
 const measure=readFileSync(new URL('../src/services/measure.js',import.meta.url),'utf8');
 assert.match(measure,/12000/);
-assert.match(review,/t\.building/);
+assert.match(osmReviewObjects,/t\.building/);
 
 const migration=readFileSync(new URL('../supabase/migrations/20261003203000_report_accepted_surface_snapshot.sql',import.meta.url),'utf8');
 assert.match(migration,/surface_snapshot jsonb/);
