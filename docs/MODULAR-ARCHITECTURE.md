@@ -104,6 +104,7 @@ src/
 - `adapters/parks/fetch-grid-measurement-candidates.js`, park bbox'ı içinde onaylı ölçümlerin koordinatlarını ve toplam sayısını 5.000 satır sınırıyla getirir; hücre eşleme ve projeksiyon uygulama katmanında kalır.
 - `domain/parks/grid-options.js`, grid hücre boyutu ve 1–20 m clearance varsayılan/sınır kurallarını mevcut sayısal davranışla çözer; DOM girdilerini servis okur.
 - `domain/parks/grid-bounds.js`, dış halka ve delik koordinatlarından grid sorgusunun enlem/boylam sınırlarını üretir; `grid-engine.js` bbox'ı ölçüm adapter'ına aktarır.
+- `application/parks/prepare-grid-surface-parts.js`, kayıtlı inceleme geometrisine öncelik verir, yoksa en son yüzey analizini mevcut hazırlama servisine gönderir; hiçbiri yoksa boş parça listesi döndürür.
 - `domain/parks/road-half-width.js`, `highway` sınıfına göre grid çakışma tamponunun varsayılan yarı-genişliğini üretir; açık OSM `width`/`lanes` değerlerinin önceliği ve tüm geometriler `park-geometry.js` içinde kalır.
 - `domain/parks/classify-surface-tags.js`, eski `isWater()` ve `isImpervious()` OSM etiket kararlarını saf API'de tutar; `park-geometry.js` bu kuralları global uyumluluk sarmalayıcılarıyla sunar.
 - `domain/parks/area.js`, mevcut jeodezik halka alan formülünü ve dış halka eksi iç halkalar toplamını `[LON,LAT]` sözleşmesiyle korur; `park-geometry.js` eski `ringGeodesicArea()`/`polyArea()` adlarını sarmalar.
