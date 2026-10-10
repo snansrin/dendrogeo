@@ -181,3 +181,5 @@ Her modülün tek bir dış API'si, sahibi olduğu açık durumu ve kendi testle
 - `ui/grid-layer.js`, grid katmanını ve canvas renderer oluşturur; mevcut hücre şekil/stil işlevleri, seçim callback ve tooltip çevirisini kullanır. Servis katman referanslarını ve özet bağını sağlar; `_cellId`, tıklama yayılımının durdurulması ve sticky tooltip davranışı korunur.
 
 - `application/parks/create-grid-waypoints.js`, büyük waypoint partisi onayı, son kimliği okuma, asenkron bağlamı yeniden doğrulama, parti hazırlama ve kayıt sırasını yönetir. Servis önkoşul mesajlarını, son satır durumunu, katman çizimini, proje alanını ve tamamlanma bildirimini korur.
+
+- `ui/grid-waypoint-completion.js`, başarılı waypoint kaydı ardından katmanı çizer, proje kontrolünü eşitler, listeyi yeniler, kimlik aralığı bildirimini gösterir ve hücre seçimini temizler. Servis başarı durumunu doğrular ve mevcut çizim/DOM/bildirim callback bağlarını sağlar.
