@@ -14,11 +14,11 @@ const _tgrf=(t,v)=>(typeof dgTfs==="function"?dgTfs(t,v):String(t).replace(/\{(\
    GRID
 ========================================================= */
 
-let DG_GRID_EPOCH=0,DG_GRID_RENDERER=null,DG_GRID_SOURCE=null,DG_GRID_META="";
+const DG_GRID_SESSION=window.DG_GRID_SESSION_STATE.create();
 function dgGridReviewSignature(){return window.DG_GRID_REVIEW_SIGNATURE.resolve(window.DG_LC_SENS?.state);}
 const DG_GRID_BUILD=window.DG_GRID_BUILD_APPLICATION.create({
  ensureSurface:()=>typeof dgEnsureLulc==="function"?dgEnsureLulc():undefined,
- isCurrent:({park,epoch})=>epoch===DG_GRID_EPOCH&&park===PARK_POLY,
+ isCurrent:({park,epoch})=>epoch===DG_GRID_SESSION.getEpoch()&&park===PARK_POLY,
  getGreenOnly:()=>DG_GREEN_ONLY,
  getLastCells:()=>typeof DG_LC_LAST!=="undefined"?DG_LC_LAST?.result?.cells:null,
  getReview:()=>window.DG_LC_SENS?.state,getSignature:dgGridReviewSignature,
@@ -39,11 +39,11 @@ const DG_GRID_BUILD=window.DG_GRID_BUILD_APPLICATION.create({
 const DG_GRID_BUILD_CONTROLLER=window.DG_GRID_BUILD_CONTROLLER_UI.create({
  getPark:()=>PARK_POLY,
  getOptions:()=>window.DG_GRID_OPTIONS.resolve($("gridSize")?.value,$("gridClearance")?.value),
- nextEpoch:()=>++DG_GRID_EPOCH,getButton:()=>$("gridBuildBtn"),
+ nextEpoch:()=>DG_GRID_SESSION.nextEpoch(),getButton:()=>$("gridBuildBtn"),
  build:context=>DG_GRID_BUILD(context),
  accept:(outcome,context)=>window.DG_GRID_BUILD_COMPLETION_UI.complete({
   outcome,clearance:context.clearance,clear:clearGrid,
-  setSource:signature=>{DG_GRID_SOURCE=signature;},setMeta:meta=>{DG_GRID_META=meta;},
+  setSource:signature=>{DG_GRID_SESSION.setSource(signature);},setMeta:meta=>{DG_GRID_SESSION.setMeta(meta);},
   cells:GRID_CELLS,render:drawGridLayer,translate:_tgr,translateFormat:_tgrf,
   notify:(...args)=>toast(...args)
  }),notify:(...args)=>toast(...args)
@@ -56,13 +56,13 @@ async function buildGrid(){return DG_GRID_BUILD_CONTROLLER();}
 
 function drawGridLayer(){
   return window.DG_GRID_LAYER_UI.render({
-    leaflet:L,map,previousLayer:GRID_LAYER,previousRenderer:DG_GRID_RENDERER,
+    leaflet:L,map,previousLayer:GRID_LAYER,previousRenderer:DG_GRID_SESSION.getRenderer(),
     cells:GRID_CELLS,selection:SELECTED_CELLS,
     resolveStyle:(cell,selected)=>window.DG_GRID_CELL_STYLE.resolve(cell,selected),
     resolveShape:cell=>window.DG_GRID_CELL_SHAPE.resolve(cell),
     countStates:cells=>window.DG_GRID_CELL_STATES.count(cells),translateFormat:_tgrf,
     onSelect:(id,rect)=>toggleCellSelection(id,rect),
-    onCreated:({layer,renderer})=>{GRID_LAYER=layer;DG_GRID_RENDERER=renderer;},
+    onCreated:({layer,renderer})=>{GRID_LAYER=layer;DG_GRID_SESSION.setRenderer(renderer);},
     updateSummary:(measured,empty)=>updateGridSummary(measured,empty)
   });
 }
@@ -78,7 +78,7 @@ function updateGridSummary(
     measured:g,
     empty:r0,
     selected:SELECTED_CELLS.size,
-    meta:DG_GRID_META,
+    meta:DG_GRID_SESSION.getMeta(),
     translate:_tgr,
     translateFormat:_tgrf
   });
@@ -98,12 +98,11 @@ function toggleCellSelection(cellId,rect){return DG_GRID_SELECTION.toggle(cellId
 function clearCellSelection(){return DG_GRID_SELECTION.clear();}
 
 function clearGrid(){
-  DG_GRID_META="";DG_GRID_SOURCE=null;
-  ++DG_GRID_EPOCH;
+  DG_GRID_SESSION.invalidate();
   return window.DG_GRID_RESET_UI.clear({
-    map,renderer:DG_GRID_RENDERER,gridLayer:GRID_LAYER,waypointLayer:WP_AUTO_LAYER,
+    map,renderer:DG_GRID_SESSION.getRenderer(),gridLayer:GRID_LAYER,waypointLayer:WP_AUTO_LAYER,
     cells:GRID_CELLS,selection:SELECTED_CELLS,
-    rendererCleared:()=>{DG_GRID_RENDERER=null;},
+    rendererCleared:()=>{DG_GRID_SESSION.setRenderer(null);},
     gridCleared:()=>{GRID_LAYER=null;},waypointsCleared:()=>{WP_AUTO_LAYER=null;},
     getSummary:()=>$("gridSummary"),getGridControl:()=>$("togGrid"),getWaypointControl:()=>$("togWp")
   });
@@ -127,7 +126,7 @@ const DG_GRID_WAYPOINT_CREATE=window.DG_GRID_WAYPOINT_CREATE_APPLICATION.create(
   fetchLatest:pid=>window.DG_GRID_WAYPOINT_STORE.fetchLatest(sb,pid),
   isCurrent:({source,park,projectId})=>window.DG_GRID_WAYPOINT_CONTEXT.isCurrent({
     source,park,projectId,getReviewSignature:dgGridReviewSignature,
-    getGridSource:()=>DG_GRID_SOURCE,getPark:()=>PARK_POLY,
+    getGridSource:()=>DG_GRID_SESSION.getSource(),getPark:()=>PARK_POLY,
     getProjectId:()=>+$("gridProject").value
   }),
   getUserId:()=>USER.id,
@@ -137,7 +136,7 @@ const DG_GRID_WAYPOINT_CREATE=window.DG_GRID_WAYPOINT_CREATE_APPLICATION.create(
 });
 
 const DG_GRID_WAYPOINT_CONTROLLER=window.DG_GRID_WAYPOINT_CONTROLLER_UI.create({
- getContext:()=>({source:DG_GRID_SOURCE,park:PARK_POLY}),
+ getContext:()=>({source:DG_GRID_SESSION.getSource(),park:PARK_POLY}),
  resolveReadiness:(mode,source)=>window.DG_GRID_WAYPOINT_READINESS.resolve({
   cells:GRID_CELLS,mode,selectedCells:SELECTED_CELLS,source,
   getCurrentSource:dgGridReviewSignature,getProjectId:()=>+$("gridProject").value||0,
