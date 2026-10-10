@@ -162,40 +162,22 @@ async function dgRegisterPark(cand,opt){return DG_PARK_REGISTER_USE_CASE(cand,op
 /* Belirli bir noktada park ara → bulunduysa çiz, bulunamadıysa elle oluştur
  * teklif et. bindParkClick (harita tıklaması), "konumumdan algıla" ve
  * geri doldurma aracı AYNI yolu kullanır. */
-let DG_PARK_DETECT_SEQ=0;
-async function dgDetectAt(lat,lon,opt){
-  opt=opt||{};
-  if(!Number.isFinite(+lat)||!Number.isFinite(+lon)){
-    return toast("Geçersiz konum","err","🌳");
+const DG_PARK_DETECT_USE_CASE=window.DG_PARK_DETECTION_APPLICATION.create({
+  isOnline:()=>navigator.onLine,
+  queryPark:(lat,lon,radius)=>queryPark(lat,lon,radius),
+  setAnchor:point=>{DG_PARK_ANCHOR=point;},
+  setCandidates:parks=>{PARK_CANDS=parks;},
+  offerManual:(lat,lon)=>dgOfferManualPark(lat,lon),
+  drawPark:park=>drawPark(park),
+  warn:error=>console.warn("DENDROGEO · park sorgusu hatası:",error),
+  notify:(kind)=>{
+    if(kind==="invalid-location")return toast("Geçersiz konum","err","🌳");
+    if(kind==="offline")return toast("Park algılama internet gerektirir (OSM/Overpass).","err","🌳");
+    if(kind==="searching")return toast("🌳 Park sorgulanıyor…","info");
+    if(kind==="query-failed")return toast(_tpr("OSM bağlantısı başarısız; parkın olmadığı doğrulanamadı. Yeniden algılamayı deneyin."),"err","🌳");
   }
-  if(!navigator.onLine&&!opt.silent){
-    return toast("Park algılama internet gerektirir (OSM/Overpass).","err","🌳");
-  }
-  if(!opt.silent)toast("🌳 Park sorgulanıyor…","info");
-  DG_PARK_ANCHOR={lat:+lat,lon:+lon};
-
-  const request=++DG_PARK_DETECT_SEQ;
-  let parks=null;
-  try{
-    parks=await queryPark(+lat,+lon,opt.radius||1200);
-  }catch(e){
-    console.warn("DENDROGEO · park sorgusu hatası:",e);
-    if(request===DG_PARK_DETECT_SEQ&&!opt.silent)toast(_tpr("OSM bağlantısı başarısız; parkın olmadığı doğrulanamadı. Yeniden algılamayı deneyin."),"err","🌳");
-    return null;
-  }
-  if(request!==DG_PARK_DETECT_SEQ)return null;
-
-  if(!parks||!parks.length){
-    if(opt.silent)return null;
-    dgOfferManualPark(+lat,+lon);
-    return null;
-  }
-
-  PARK_CANDS=parks;
-  if(opt.silent)return parks;
-  await drawPark(parks[0]);
-  return parks;
-}
+});
+async function dgDetectAt(lat,lon,opt){return DG_PARK_DETECT_USE_CASE(lat,lon,opt);}
 
 /* UZAKTAN PARK ARAMA: 1) kayıtlı parklarda ada göre bul (name_norm),
  * 2) yoksa Nominatim'den koordinat → dgDetectAt (aynı boru hattı: queryPark →
