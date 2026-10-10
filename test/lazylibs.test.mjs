@@ -65,5 +65,6 @@ describe('tembel vendor yükleme (Faz 7)', () => {
     assert.ok(loader.indexOf('"src/adapters/surface/osm-review-objects.js"')<loader.indexOf('"src/services/lc-review.js"'), 'OSM inceleme adapterı servisinden önce yüklenmeli');
     assert.ok(loader.indexOf('"src/adapters/surface/review-worker.js"')<loader.indexOf('"src/services/lc-review.js"'), 'worker adapterı servisinden önce yüklenmeli');
     assert.ok(loader.indexOf('"src/application/surface/prepare-review.js"')<loader.indexOf('"src/services/lc-review.js"'), 'review use-case servisten önce yüklenmeli');
+    assert.ok(loader.indexOf('"src/application/surface/merge-review-features.js"')<loader.indexOf('"src/services/lc-review.js"'), 'review output use-case servisten önce yüklenmeli');
   });
 });
