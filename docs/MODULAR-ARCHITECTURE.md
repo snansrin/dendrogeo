@@ -207,3 +207,5 @@ Her modülün tek bir dış API'si, sahibi olduğu açık durumu ve kendi testle
 - `ui/park-click-controller.js`, harita click dinleyicisini bir kez bağlar; her tıklamada güncel park modu ve yüzey inceleme korumasını kontrol eder. Algılama ve hata kayıt/bildirim portlarını park ekranı sağlar. Koordinat sırası, harita yokken yeniden bağlama fırsatı ve mevcut hata metni korunur.
 
 - `ui/choose-new-park-controller.js`, yeni park seçimine dönüşte meşgul kapısını, varsa mevcut incelemeyi kaydetmeyi bekleme, park/grid/analiz temizliği ve harita yönlendirme sırasını yönetir. Park ekranı mevcut callback bağlarını sağlar; kayıt hatasında temizleme başlamaz.
+
+- `ui/park-reset-controller.js`, menü temizliği, park/su/sert katman kaldırma, geometri/kimlik sıfırlama, inceleme cleanup ve yerel yüzey kaplarını sıfırlama sırasını yönetir. Harita yokken katman referansları korunur; yalnız cleanup hatası eski davranıştaki gibi yutulur. Park ekranı mevcut durum bağlarını sağlar.

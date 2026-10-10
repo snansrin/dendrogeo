@@ -399,66 +399,19 @@ async function drawPark(park){
    CLEAR
 ========================================================= */
 
-function clearPark(){
-  const menus=document.getElementById("surfaceParkTools");if(menus)menus.replaceChildren();
-  dgEditorClearMenus("park");
-  if(
-    PARK_LAYER &&
-    map
-  ){
-    map.removeLayer(
-      PARK_LAYER
-    );
-
-    PARK_LAYER=null;
-  }
-
-  if(
-    WATER_LAYER &&
-    map
-  ){
-    map.removeLayer(
-      WATER_LAYER
-    );
-
-    WATER_LAYER=null;
-  }
-
-  if(
-    IMP_LAYER &&
-    map
-  ){
-    map.removeLayer(
-      IMP_LAYER
-    );
-
-    IMP_LAYER=null;
-  }
-
-PARK_POLY=null;
-  PARK_HOLES=[];
-  PARK_SELECTED_AREA_M2=null;
-
-  /* Oturumun aktif park kimliği de düşer (proje bağı DB'de kalır; ölçüm
-   * kapısı PROJ_LIST üzerinden okur). */
-  if(typeof dgResetParkIdentity==="function")dgResetParkIdentity();
-
-  /* UYDU HASSASİYET PANELİ (0054): park değişince katman/kayıt belleği
-   * temizlenir. Lazy zincir hiç yüklenmediyse sessiz no-op — typeof
-   * koruması 0037 deseni. Kararlar IndexedDB'de park başına kalıcıdır. */
-  if(window.DG_LC_SENS&&typeof window.DG_LC_SENS.cleanup==="function"){
-    try{window.DG_LC_SENS.cleanup();}catch(e){}
-  }
-
-  WATER_RINGS=[];
-  WATER_LINES=[];
-
-  IMP_RINGS=[];
-  IMP_LINES=[];
-
-  GRID_BLOCK_LINES=[];
-
-}
+const DG_PARK_RESET_CONTROLLER=window.DG_PARK_RESET_CONTROLLER_UI.create({
+ clearMenus:()=>{const menus=document.getElementById("surfaceParkTools");if(menus)menus.replaceChildren();dgEditorClearMenus("park");},
+ getMap:()=>map,layers:[
+  {get:()=>PARK_LAYER,clear:()=>{PARK_LAYER=null;}},
+  {get:()=>WATER_LAYER,clear:()=>{WATER_LAYER=null;}},
+  {get:()=>IMP_LAYER,clear:()=>{IMP_LAYER=null;}}
+ ],
+ resetGeometry:()=>{PARK_POLY=null;PARK_HOLES=[];PARK_SELECTED_AREA_M2=null;},
+ resetIdentity:()=>{if(typeof dgResetParkIdentity==="function")dgResetParkIdentity();},
+ cleanupReview:()=>{if(window.DG_LC_SENS&&typeof window.DG_LC_SENS.cleanup==="function")window.DG_LC_SENS.cleanup();},
+ resetSurface:()=>{WATER_RINGS=[];WATER_LINES=[];IMP_RINGS=[];IMP_LINES=[];GRID_BLOCK_LINES=[];}
+});
+function clearPark(){return DG_PARK_RESET_CONTROLLER();}
 
 function switchPark(i){
   const p=PARK_CANDS[i];
