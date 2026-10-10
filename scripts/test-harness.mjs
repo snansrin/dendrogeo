@@ -124,6 +124,7 @@ export function loadApp({ sadece } = {}) {
     /* KONUM DOĞRULAMASI (0007): saf karar fonksiyonu dgGeoDecide birim testleri
      * bu zincirden yüklenir (DOM/ağ yok). */
     'src/services/geofence.js',
+    'src/application/parks/find-park-candidates.js',
     'src/services/park-query.js',
     /* PARK KİMLİĞİ (2026-09-24): park-registry.js saf yardımcılarının
      * (ad normalizasyonu, anahtar üretimi, proje adı kuralı) birim testleri
@@ -154,6 +155,7 @@ export function loadApp({ sadece } = {}) {
     secim.add('src/application/trees/calculate-tree-carbon-from-circumference.js');
   }
   if (secim && secim.has('src/services/measure.js')) secim.add('src/application/trees/validate-measurement.js');
+  if (secim && secim.has('src/services/park-query.js')) secim.add('src/application/parks/find-park-candidates.js');
   if (secim && secim.has('src/services/park-registry.js')) {
     secim.add('src/domain/parks/identity.js');
     secim.add('src/adapters/parks/park-store.js');

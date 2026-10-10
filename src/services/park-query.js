@@ -10,83 +10,15 @@
    PARK QUERY
 ========================================================= */
 
-async function queryPark(
-  lat,
-  lon,
-  radius=1200
-){
-  const q1=
-    `[out:json][timeout:35];(`+
-    `way["leisure"~"park|garden|nature_reserve|common|recreation_ground"](around:${radius},${lat},${lon});`+
-    `relation["leisure"~"park|garden|nature_reserve|common|recreation_ground"](around:${radius},${lat},${lon});`+
-    `);`+
-    `out geom;`;
-
-  const parkData=await overpassRequest(q1,"park");
-
-  if(!parkData||!Array.isArray(parkData.elements)||parkData.remark){
-    const fallback=await dgParkBoundaryFallback(lat,lon,radius);
-    if(fallback.length)return fallback;
-    throw new Error("OSM park sınırı alınamadı. Bağlantı hatası parkın bulunmadığı anlamına gelmez; yeniden deneyin.");
-  }
-  if(!parkData.elements.length)return [];
-
-  const cands=[];
-
-  for(const el of parkData.elements){
-    const geometry=extractRings(el);
-
-    if(!geometry)continue;
-
-    const hasGeometry=
-      Array.isArray(geometry)
-        ? geometry.length>0
-        : (
-          geometry.outer &&
-          geometry.outer.length>0
-        );
-
-    if(!hasGeometry)continue;
-
-    const area=polyArea(geometry);
-
-    cands.push({
-      rings:geometry,
-      name:(el.tags&&el.tags.name)||null,
-      area,
-      type:el.type,
-      id:el.id
-    });
-  }
-
-  if(!cands.length)throw new Error("OSM park geometrisi eksik; yeniden deneyin.");
-
-  const validCands=cands.filter(c=>{
-    if(Array.isArray(c.rings)){
-      return c.rings.some(r=>Array.isArray(r)&&r.length>=4);
-    }
-    return !!(
-      c.rings &&
-      Array.isArray(c.rings.outer) &&
-      c.rings.outer.some(r=>Array.isArray(r)&&r.length>=4)
-    );
-  });
-
-  if(!validCands.length)throw new Error("OSM park geometrisi geçersiz; yeniden deneyin.");
-
-  const inside=validCands.filter(c=>
-    pointInPark(
-      lat,
-      lon,
-      c.rings
-    )
-  );
-
-  const sorted=inside.length
-    ? inside.slice().sort((a,b)=>a.area-b.area)
-    : validCands.slice().sort((a,b)=>a.area-b.area);
-
-  return sorted;
+const DG_PARK_CANDIDATE_SEARCH=window.DG_PARK_CANDIDATE_SEARCH_APPLICATION.create({
+  queryOsm:query=>overpassRequest(query,"park"),
+  boundaryFallback:(lat,lon,radius)=>dgParkBoundaryFallback(lat,lon,radius),
+  extractRings:element=>extractRings(element),
+  areaOf:rings=>polyArea(rings),
+  containsPoint:(lat,lon,rings)=>pointInPark(lat,lon,rings)
+});
+async function queryPark(lat,lon,radius=1200){
+  return DG_PARK_CANDIDATE_SEARCH(lat,lon,radius);
 }
 
 /* A geocoding result is only a candidate: never substitute its bounding box
