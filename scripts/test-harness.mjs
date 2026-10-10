@@ -170,6 +170,7 @@ export function loadApp({ sadece } = {}) {
     'src/application/parks/prepare-grid-waypoint-batch.js',
     'src/adapters/parks/fetch-latest-grid-waypoint.js',
     'src/adapters/parks/insert-grid-waypoints.js',
+    'src/adapters/parks/fetch-grid-measurement-candidates.js',
     'src/services/grid-engine.js',
     /* YÖNETİM AĞACI (2026-09-24): dgTreeGroup/dgTreeFilterRows saf
      * fonksiyonları burada test edilir (DOM'a dokunan çizim kısmı değil). */

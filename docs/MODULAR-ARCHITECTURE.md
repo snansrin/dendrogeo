@@ -101,6 +101,7 @@ src/
 - `adapters/parks/fetch-latest-grid-waypoint.js`, proje kapsamındaki en yüksek waypoint kimliğini Supabase'ten azalan sıralama ve tek satır sınırıyla okur; `grid-engine.js` mevcut kimlik devamını aynı sorgu sonucu üzerinden sürdürür.
 - `adapters/parks/insert-grid-waypoints.js`, hazırlanmış waypoint satırlarını `waypoints` tablosuna yazar ve Supabase sonucunu aynen döndürür; servis mevcut hata toast'ını ve harita çizimini sürdürür.
 - `application/parks/prepare-grid-waypoint-batch.js`, son proje waypoint kimliğinden başlayarak seçili grid hücreleri için satır üretimini mevcut satır kurucusuna devreder; `grid-engine.js` son kimlik aralığını aynı batch'ten hesaplar.
+- `adapters/parks/fetch-grid-measurement-candidates.js`, park bbox'ı içinde onaylı ölçümlerin koordinatlarını ve toplam sayısını 5.000 satır sınırıyla getirir; hücre eşleme ve projeksiyon uygulama katmanında kalır.
 - `domain/parks/road-half-width.js`, `highway` sınıfına göre grid çakışma tamponunun varsayılan yarı-genişliğini üretir; açık OSM `width`/`lanes` değerlerinin önceliği ve tüm geometriler `park-geometry.js` içinde kalır.
 - `domain/parks/classify-surface-tags.js`, eski `isWater()` ve `isImpervious()` OSM etiket kararlarını saf API'de tutar; `park-geometry.js` bu kuralları global uyumluluk sarmalayıcılarıyla sunar.
 - `domain/parks/area.js`, mevcut jeodezik halka alan formülünü ve dış halka eksi iç halkalar toplamını `[LON,LAT]` sözleşmesiyle korur; `park-geometry.js` eski `ringGeodesicArea()`/`polyArea()` adlarını sarmalar.
