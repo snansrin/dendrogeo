@@ -6,6 +6,8 @@ on:
       - 'scripts/val-qa.mjs'
       - 'src/services/lc-*.js'
       - 'src/ui/lc-sens.js'
+      - 'src/ui/park-panel.js'
+      - 'src/ui/park-reference-area.js'
       - 'docs/surface-engine-lock.json'
       - 'docs/surface-scientific-contract.json'
       - 'test/surface-scientific-contract.test.mjs'
