@@ -163,3 +163,5 @@ Bu ayrım raster sınıflandırma kodlarını, kaynak eşlemesini, eşikleri, Se
 ## Modül kabul ölçütü
 
 Her modülün tek bir dış API'si, sahibi olduğu açık durumu ve kendi testleri bulunmalı. Başka modülün iç değişkenine erişim yerine DTO/port kullanmalı. Network hatası, worker çökmesi, bozuk geometri, eksik sınıf kanıtı ve yeniden deneme ayrı testlerle doğrulanmalı. Kalite kapısını geçmeyen analiz yayınlanmamalı; ölçülmeyen kesinlik veya sıfır hata iddiası üretilmemeli.
+
+- `ui/park-backfill-progress.js`, eski projelerin park eşleştirme ilerlemesini verilen kutu, proje adı ve sayaçlarla çizer; `park-registry.js` DOM seçimi ve HTML kaçış işlevini bağlar. Arama sırası, bekleme süreleri ve kayıt işlemleri korunur.
