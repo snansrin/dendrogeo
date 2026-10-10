@@ -16,6 +16,26 @@ const _tgrf=(t,v)=>(typeof dgTfs==="function"?dgTfs(t,v):String(t).replace(/\{(\
 
 let DG_GRID_BUSY=false,DG_GRID_EPOCH=0,DG_GRID_RENDERER=null,DG_GRID_SOURCE=null,DG_GRID_META="";
 function dgGridReviewSignature(){return window.DG_GRID_REVIEW_SIGNATURE.resolve(window.DG_LC_SENS?.state);}
+const DG_GRID_BUILD=window.DG_GRID_BUILD_APPLICATION.create({
+ ensureSurface:()=>typeof dgEnsureLulc==="function"?dgEnsureLulc():undefined,
+ isCurrent:({park,epoch})=>epoch===DG_GRID_EPOCH&&park===PARK_POLY,
+ getGreenOnly:()=>DG_GREEN_ONLY,
+ getLastCells:()=>typeof DG_LC_LAST!=="undefined"?DG_LC_LAST?.result?.cells:null,
+ getReview:()=>window.DG_LC_SENS?.state,getSignature:dgGridReviewSignature,
+ resolveEpsg:park=>dgLcUtmEpsgForLatLon(park[0][0][0],park[0][0][1]),
+ prepareParts:({park,review,epsg,lastCells})=>window.DG_GRID_SURFACE_PARTS.prepare({
+  review,lastCells,outer:park,holes:PARK_HOLES||[],epsg,
+  osmElements:window.DG_SURFACE_OSM?.boundary===JSON.stringify(park)?window.DG_SURFACE_OSM.elements:[],
+  resolveReviewParts:()=>window.DG_SURFACE_REVIEW.resolved(dgSensCells(),dgSensEffective,review.geometry,dgSensFeatures(),review.epsg,review.parkGeometry),
+  prepare:dgSurfacePrepare
+ }),
+ buildRequest:({park,size,clearance,epsg,parts})=>window.DG_GRID_REQUEST.build({size,clearance,epsg,outer:park,holes:PARK_HOLES,greenOnly:DG_GREEN_ONLY,parts,waterRings:WATER_RINGS,imperviousRings:IMP_RINGS,waterLines:WATER_LINES,imperviousLines:IMP_LINES,gridBlockLines:GRID_BLOCK_LINES}),
+ runWorker:request=>dgSurfaceWorkerJob(request),runGrid:request=>dgSurfaceGrid(request),
+ resolveBounds:park=>window.DG_GRID_BOUNDS.resolve(park),
+ fetchMeasurements:bounds=>window.DG_GRID_MEASUREMENT_STORE.fetchCandidates(sb,bounds),
+ warnTruncated:(data,count)=>dgWarnIfTruncated(data,5000,"Izgara ölçüm yoğunluğu",count),
+ countMeasurements:(result,data,{size,epsg})=>window.DG_GRID_CELL_MEASUREMENTS.count(result.cells,data,{size,epsg,x0:result.x0,y0:result.y0,project:dgLcUtmForward,pointDistance:dgGridPointDistance,featureGeometry:dgSurfaceFeatureGeometry})
+});
 async function buildGrid(){
  if(DG_GRID_BUSY)return;
  if(!PARK_POLY?.length)return toast("Önce park seç","warn");
@@ -23,33 +43,9 @@ async function buildGrid(){
  const park=PARK_POLY,epoch=++DG_GRID_EPOCH,btn=$("gridBuildBtn");DG_GRID_BUSY=true;
  if(btn){btn.disabled=true;btn.textContent="⏳ Grid hazırlanıyor…";}
  try{
-  if(typeof dgEnsureLulc==="function")await dgEnsureLulc();
-  if(epoch!==DG_GRID_EPOCH||park!==PARK_POLY)return;
-  if(DG_GREEN_ONLY&&!(typeof DG_LC_LAST!=="undefined"&&DG_LC_LAST?.result?.cells?.length))throw Error("Önce yüzey analizi yapın; grid güncel yeşil alanı kullanır.");
-  const review=window.DG_LC_SENS?.state;if(review?.busy||review?.saving)throw Error("Yüzey işleminin tamamlanmasını bekleyin.");
-  const signature=dgGridReviewSignature(),epsg=dgLcUtmEpsgForLatLon(park[0][0][0],park[0][0][1]);
-  const lastCells=typeof DG_LC_LAST!=="undefined"?DG_LC_LAST?.result?.cells:null;
-  const osmElements=window.DG_SURFACE_OSM?.boundary===JSON.stringify(park)?window.DG_SURFACE_OSM.elements:[];
-  const parts=await window.DG_GRID_SURFACE_PARTS.prepare({
-   review,
-   lastCells,
-   outer:park,
-   holes:PARK_HOLES||[],
-   epsg,
-   osmElements,
-   resolveReviewParts:()=>window.DG_SURFACE_REVIEW.resolved(dgSensCells(),dgSensEffective,review.geometry,dgSensFeatures(),review.epsg,review.parkGeometry),
-   prepare:dgSurfacePrepare
-  });
-  const request=window.DG_GRID_REQUEST.build({size,clearance,epsg,outer:park,holes:PARK_HOLES,greenOnly:DG_GREEN_ONLY,parts,waterRings:WATER_RINGS,imperviousRings:IMP_RINGS,waterLines:WATER_LINES,imperviousLines:IMP_LINES,gridBlockLines:GRID_BLOCK_LINES});
-  const result=await dgSurfaceWorkerJob(request)||await dgSurfaceGrid(request);
-  if(epoch!==DG_GRID_EPOCH||park!==PARK_POLY)return;
-  if(signature!==dgGridReviewSignature())throw Error("Yüzey değişti. Güncel yüzeyle gridi tekrar oluşturun.");
-  const bounds=window.DG_GRID_BOUNDS.resolve(park);
-  const {data,count,error}=await window.DG_GRID_MEASUREMENT_STORE.fetchCandidates(sb,bounds);
-  if(error)throw error;if(epoch!==DG_GRID_EPOCH||park!==PARK_POLY)return;
-  dgWarnIfTruncated(data,5000,"Izgara ölçüm yoğunluğu",count);
-  window.DG_GRID_CELL_MEASUREMENTS.count(result.cells,data,{size,epsg,x0:result.x0,y0:result.y0,project:dgLcUtmForward,pointDistance:dgGridPointDistance,featureGeometry:dgSurfaceFeatureGeometry});
-  if(signature!==dgGridReviewSignature())throw Error("Yüzey değişti. Güncel yüzeyle gridi tekrar oluşturun.");
+  const outcome=await DG_GRID_BUILD({park,epoch,size,clearance});
+  if(outcome.status==="stale")return;
+  const {result,signature,review}=outcome;
   clearGrid();DG_GRID_SOURCE=signature;DG_GRID_META=`<p class="measure-help">${_tgr("Su ve sert zeminden uzaklık")}: ${clearance} m · ${_tgr(review?.editing?"Yüzey önizlemesi":"Kayıtlı yüzey")} · ${(result.areaM2/10000).toFixed(3)} ha ${_tgr("uygun alan")}</p>`;GRID_CELLS.push(...result.cells);drawGridLayer();
   toast(_tgrf("✓ Grid hazır: {n} hücre",{n:GRID_CELLS.length}),GRID_CELLS.length?"ok":"warn","🔲");
  }catch(e){toast(String(e.message||e),"err","🔲");}
