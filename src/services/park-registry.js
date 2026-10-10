@@ -568,6 +568,15 @@ function dgScanRedirectedOnce(pid){
   }catch(e){return true;}   /* gizli mod: yönlendirme döngüsüne girme */
 }
 
+const DG_PARK_MEASUREMENT_GATE=window.DG_PARK_MEASUREMENT_GATE_APPLICATION.create({
+  schemaReady:()=>DG_PARK_SCHEMA_OK,
+  editing:()=>typeof EDIT_ID!=="undefined"&&!!EDIT_ID,
+  hasGate:()=>!!$("parkGate"),
+  getProject:dgSelectedProject,
+  isAdmin:dgIsAdmin,
+  redirectAlreadyUsed:dgScanRedirectedOnce
+});
+
 /* Ölçüm ekranının üstündeki kapı kartı. saveMeas() da aynı kontrolü yapar —
  * kart yalnız görsel geri bildirim değil, butonu gerçekten kilitler.
  * Sunucu tarafı garanti: trg_enforce_park_link (PARK_REQUIRED).
@@ -577,30 +586,29 @@ function dgScanRedirectedOnce(pid){
 function dgParkGate(auto){
   const box=$("parkGate");
   const save=$("saveBtn");
+  const result=DG_PARK_MEASUREMENT_GATE(auto);
 
   /* Şema eski: park_id sütunu yok, kapı uygulanamaz. Ölçümü KİLİTLEMEK
    * kullanıcıyı tamamen çalışamaz hâle getirirdi; onun yerine uyarı gösterip
    * eski akışa izin veriyoruz (karşılaştırma da proje bazlı yedeğe düşer). */
-  if(!DG_PARK_SCHEMA_OK){
+  if(result.status==="schema-unavailable"){
     if(box){box.style.display="block";box.className="alert warn";box.innerHTML=dgSchemaWarnHTML();}
     if(save)save.disabled=false;
     return true;
   }
 
-  const p=dgSelectedProject();
+  const p=result.project;
 
   /* Düzenleme modu: mevcut kaydı güncellemek yeni ölçüm değildir, kilitleme. */
-  const editing=typeof EDIT_ID!=="undefined"&&EDIT_ID;
+  if(result.status==="gate-unavailable")return result.allowed;
 
-  if(!box)return !!(p&&p.park_id);
-
-  if(editing){
+  if(result.status==="editing"){
     box.style.display="none";
     if(save)save.disabled=false;
     return true;
   }
 
-  if(!p){
+  if(result.status==="project-required"){
     box.style.display="block";
     box.className="alert err";
     box.innerHTML=
@@ -609,16 +617,16 @@ function dgParkGate(auto){
       `"<b>Göksu Parkı - deneme</b>" biçiminde oluşsun.</span>`+
       `<div style="margin-top:10px"><button class="btn sm blue" onclick="startParkScan({returnTo:'measure'})">🌳 Park Algılama Ekranına Git</button></div>`;
     if(save)save.disabled=true;
-    if(auto===true&&!dgScanRedirectedOnce(0))startParkScan({returnTo:"measure"});
+    if(result.redirect)startParkScan(result.redirect);
     return false;
   }
 
-  if(!p.park_id){
+  if(result.status==="park-required"){
     box.style.display="block";
     box.className="alert err";
     /* Yönetici: projeyi parka bağlayabilir. Normal kullanıcı: bağlama yetkisi
      * yok (0006 → PARK_ADMIN_ONLY), o yüzden yalnız "yeni proje" yolu gösterilir. */
-    box.innerHTML=dgIsAdmin()
+    box.innerHTML=result.isAdmin
       ? `<b>⛔ Bu projede park algılanmadı — ölçüm girilemez.</b><br>`+
         `<span style="font-size:.82rem">Proje: <b>${esc(p.name)}</b>. `+
         `Park kimliği olmadan girilen ölçümler karşılaştırmada park bazında izlenemez; `+
@@ -636,16 +644,16 @@ function dgParkGate(auto){
     if(save)save.disabled=true;
     /* ⭐ Otomatik yönlendirme: ölçüme geçmeye çalışan kullanıcı parkı
      * algılamadan forma ulaşamaz (proje başına bir kez). */
-    if(auto===true&&!dgScanRedirectedOnce(p.id))startParkScan({projectId:p.id,returnTo:"measure"});
+    if(result.redirect)startParkScan(result.redirect);
     return false;
   }
 
-  const parkName=p.parks&&p.parks.name?p.parks.name:(p.park_name||"Park");
+  const parkName=result.parkName;
   box.style.display="block";
   box.className="alert ok";
   box.innerHTML=
     `<div class="measure-park-summary"><span><b>🌳 ${esc(parkName)}</b>`+
-    (p.parks&&p.parks.area_m2?` · ${dgFmtHa(p.parks.area_m2)}`:``)+
+    (result.areaM2?` · ${dgFmtHa(result.areaM2)}`:``)+
     `</span><button class="btn sm ghost" onclick="startParkScan({projectId:${p.id},returnTo:'measure'})">Parkı değiştir</button></div>`;
   if(save)save.disabled=false;
   return true;

@@ -44,6 +44,7 @@ const sw = readFileSync(join(ROOT, 'sw.js'), 'utf8');
 const world = readFileSync(join(ROOT, 'src/services/world.js'), 'utf8');
 const measure = readFileSync(join(ROOT, 'src/services/measure.js'), 'utf8');
 const registry = readFileSync(join(ROOT, 'src/services/park-registry.js'), 'utf8');
+const measurementParkGate = readFileSync(join(ROOT, 'src/application/parks/evaluate-measurement-park-gate.js'), 'utf8');
 const parkAdminRenderer = readFileSync(join(ROOT, 'src/ui/park-admin-renderer.js'), 'utf8');
 const parkMergeApplication = readFileSync(join(ROOT, 'src/application/parks/merge-park-identities.js'), 'utf8');
 const parkRenameApplication = readFileSync(join(ROOT, 'src/application/parks/rename-park-identity.js'), 'utf8');
@@ -403,10 +404,10 @@ describe('parka bağlama YALNIZ yönetici (0006 + kullanıcı isteği 2026-09-24
   });
 
   test('ölçüm kapısı yönetici olmayanı "yeni proje" yoluna yönlendirir', () => {
-    const fn = registry.slice(registry.indexOf('function dgParkGate'), registry.indexOf('/* Proje seçimi değişti'));
-    assert.match(fn, /dgIsAdmin\(\)\s*\?/, 'kapıda rol ayrımı olmalı');
-    assert.match(fn, /Park Algıla → Yeni Proje Oluştur/);
-    assert.match(fn, /yalnız yöneticide/);
+    assert.match(measurementParkGate, /isAdmin:\!\!isAdmin\(\)/, 'use-case rol bilgisini almalı');
+    assert.match(registry, /result\.isAdmin\s*\?/);
+    assert.match(registry, /Park Algıla → Yeni Proje Oluştur/);
+    assert.match(registry, /yalnız yöneticide/);
   });
 
   test('algılama kartında bağlama seçenekleri yöneticiye göre süzülür', () => {
@@ -516,14 +517,16 @@ describe('kabuk: park algılama ekranı + ölçüm kapısı id’leri', () => {
     const merge = idx.indexOf('src/application/parks/merge-park-identities.js');
     const rename = idx.indexOf('src/application/parks/rename-park-identity.js');
     const remove = idx.indexOf('src/application/parks/delete-park-identity.js');
+    const gate = idx.indexOf('src/application/parks/evaluate-measurement-park-gate.js');
     const c = idx.indexOf('src/services/grid-engine.js');
-    assert.ok(a > -1 && d > -1 && merge > -1 && rename > -1 && remove > -1 && b > -1 && c > -1, 'modüller index.html’de olmalı');
-    assert.ok(a < d && d < merge && merge < rename && rename < remove && remove < b && b < c, `sıra bozuk: query=${a} domain=${d} merge=${merge} rename=${rename} remove=${remove} registry=${b} grid=${c}`);
+    assert.ok(a > -1 && d > -1 && merge > -1 && rename > -1 && remove > -1 && gate > -1 && b > -1 && c > -1, 'modüller index.html’de olmalı');
+    assert.ok(a < d && d < merge && merge < rename && rename < remove && remove < gate && gate < b && b < c, `sıra bozuk: query=${a} domain=${d} merge=${merge} rename=${rename} remove=${remove} gate=${gate} registry=${b} grid=${c}`);
   });
 
   test('park-registry.js service worker PRECACHE listesinde (çevrimdışı)', () => {
     assert.ok(sw.includes("'/src/services/park-registry.js'"), 'CORE_ASSETS’te yok');
     assert.ok(sw.includes("'/src/domain/parks/identity.js'"), 'park identity domain CORE_ASSETS’te yok');
+    assert.ok(sw.includes("'/src/application/parks/evaluate-measurement-park-gate.js'"), 'ölçüm kapısı uygulama modülü CORE_ASSETS’te yok');
   });
 });
 
@@ -593,13 +596,14 @@ describe('akış: karşılaştırma park bazlı, ölçüm kapalı, park kaydedil
     const fn = registry.slice(registry.indexOf('function dgParkGate'), registry.indexOf('/* Proje seçimi değişti'));
     assert.match(fn, /save\.disabled=true/);
     assert.match(fn, /save\.disabled=false/);
-    /* Düzenleme modu kilitlenmez: mevcut kaydı güncellemek yeni ölçüm değil */
-    assert.match(fn, /editing/);
+    assert.match(fn, /result\.status==="editing"/);
+    assert.match(measurementParkGate, /status:"editing",allowed:true/);
   });
 
   test('şema eskiyse kapı ölçümü KİLİTLEMEZ (kullanıcı çalışamaz kalmasın)', () => {
     const fn = registry.slice(registry.indexOf('function dgParkGate'), registry.indexOf('/* Proje seçimi değişti'));
-    assert.match(fn, /if\(!DG_PARK_SCHEMA_OK\)\{/);
+    assert.match(fn, /result\.status==="schema-unavailable"/);
+    assert.match(measurementParkGate, /status:"schema-unavailable",allowed:true/);
   });
 
   test('park kaydı upsert DEĞİL select→insert (RLS: başkasının satırını yazma)', () => {
