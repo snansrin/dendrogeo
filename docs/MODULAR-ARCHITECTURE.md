@@ -167,3 +167,5 @@ Her modülün tek bir dış API'si, sahibi olduğu açık durumu ve kendi testle
 - `ui/park-backfill-progress.js`, eski projelerin park eşleştirme ilerlemesini verilen kutu, proje adı ve sayaçlarla çizer; `park-registry.js` DOM seçimi ve HTML kaçış işlevini bağlar. Arama sırası, bekleme süreleri ve kayıt işlemleri korunur.
 
 - `ui/park-backfill-plan.js`, eşleşmiş, park bulunamayan ve ölçümsüz proje satırlarının önizlemesini üretir; planı değiştirmez ve veri yazmaz. Servis DOM, HTML kaçışı, hektar biçimi ve çeviri bağlarını sağlar.
+
+- `ui/park-identity.js`, park kimlik çipini ve elle park formunu verilen durumdan üretir; `park-registry.js` taslak → harita anchor → GPS konum önceliğini ve HTML kaçışını bağlar. Form kimlikleri, alan biçimleri, düğmeler ve mevcut global çağrılar korunur.
