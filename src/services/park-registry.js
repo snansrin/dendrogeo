@@ -1,6 +1,3 @@
-Warning: truncated output (original token count: 14850)
-Total output lines: 1247
-
 "use strict";
 /* 0037: i18n güvenlikli yerel yardımcılar. */
 const _tpr=(s)=>(typeof dgCf==="function"?dgCf(s):s);
@@ -400,7 +397,447 @@ function dgRenderScanCard__scroll(forceManual){
 }
 
 function dgScanStep(){
-  if(DG_PARK)re…4850 tokens truncated…");
+  if(DG_PARK)return 3;
+  if(DG_PARK_CAND)return 2;
+  return 1;
+}
+
+function dgScanPreviewName(){
+  const el=$("scanNamePreview");
+  const inp=$("scanLabel");
+  if(!el||!inp)return;
+  const park=DG_PARK||DG_PARK_CAND;
+  el.textContent=dgProjectName((park&&park.name)||"",inp.value||"");
+}
+
+function dgManualFormHTML(open){
+  const pt=DG_MANUAL_PENDING||DG_PARK_ANCHOR||(GPS?{lat:GPS.latitude,lon:GPS.longitude}:null);
+  return `<div id="manualParkBox" style="display:${open?"block":"none"};margin-top:12px;border-top:1px solid var(--line);padding-top:12px">`+
+    `<div class="lbl">ELLE PARK OLUŞTUR</div>`+
+    `<div class="alert info" style="margin:6px 0;font-size:.8rem">OSM'de park sınırı yoksa buradan kimlik aç. `+
+    `Nokta: <b class="mono">${pt&&Number.isFinite(+pt.lat)?(+pt.lat).toFixed(5)+", "+(+pt.lon).toFixed(5):"haritada parkın içine tıkla veya GPS'i aç"}</b></div>`+
+    `<div class="grid g2" style="gap:8px">`+
+      `<div><div class="lbl">PARK ADI</div><input id="manualParkName" class="dg-png-input" placeholder="örn. Göksu Parkı"></div>`+
+      `<div><div class="lbl">ALAN (HA, opsiyonel)</div><input id="manualParkArea" class="dg-png-input" type="number" step="0.1" placeholder="örn. 42.5"></div>`+
+    `</div>`+
+    `<button class="btn sm amber" style="margin-top:10px" onclick="dgCreateManualPark()">✓ Parkı Oluştur</button>`+
+  `</div>`;
+}
+
+function dgShowManualParkForm(){
+  const box=$("manualParkBox");
+  if(box&&box.style){box.style.display="block";return;}
+  DG_MANUAL_PENDING=DG_MANUAL_PENDING||DG_PARK_ANCHOR||(GPS?{lat:GPS.latitude,lon:GPS.longitude}:null);
+  dgRenderScanCard(true);
+}
+
+function dgToggleParkModeFromScan(){
+  if(typeof toggleParkMode==="function")toggleParkMode();
+  dgRenderScanCard();
+}
+
+function dgCancelScan(){
+  DG_PARK_SCAN=false;
+  DG_PARK_TARGET_PROJ=null;
+  const back=DG_PARK_RETURN_TO;
+  DG_PARK_RETURN_TO=null;
+  dgRenderScanCard();
+  if(back&&typeof go==="function")go(back);
+}
+
+/* DB kaydı başarısız olduysa (çevrimdışı/RLS) yeniden dene. */
+async function dgRetryRegister(){
+  if(!DG_PARK_CAND)return toast("Önce park algıla","err","🌳");
+  const row=await dgRegisterPark(DG_PARK_CAND,{});
+  if(row){
+    DG_PARK=row;
+    dgRenderScanCard();
+    toast(dgCf("✓ Park kimliği yazıldı: ")+esc(row.name),"ok","🌳");
+    if(typeof dgPresenceAct==="function"){try{dgPresenceAct("park",row.name);}catch(e){}}
+  }
+}
+
+/* Panel başlığındaki kimlik çipi: park DB'de mi, hangi anahtarla? */
+function dgParkIdChip(parkRow){
+  if(!parkRow){
+    return `<span class="dg-png-badge" style="background:rgba(220,38,38,.12);color:#b91c1c" title="Park kimliği sunucuya yazılamadı">⚠ kimlik yok</span>`;
+  }
+  const src=parkRow.source==="manual"?"elle":(parkRow.source==="backfill"?"geri doldurma":"OSM");
+  return `<span class="dg-png-badge" title="${esc(parkRow.osm_key||"")}">kimlik #${parkRow.id} · ${esc(src)}</span>`;
+}
+
+/* Paneldeki "Proje oluştur / bağla" düğmesi: algılama kartının 3. adımına götürür. */
+function dgShowProjectStep(){
+  DG_PARK_SCAN=true;
+  dgRenderScanCard();
+  const card=$("parkScanCard");
+  if(card&&card.scrollIntoView)card.scrollIntoView({behavior:"smooth",block:"start"});
+}
+
+/* =========================================================
+   6. PROJE OLUŞTUR / BAĞLA
+========================================================= */
+
+const DG_PARK_PROJECT_STORE=window.DG_PARK_PROJECT_STORE_ADAPTER.create({getClient:()=>sb});
+const DG_PARK_CREATE_PROJECT_USE_CASE=window.DG_PARK_CREATE_PROJECT_APPLICATION.create({
+  getUser:()=>USER,
+  getPark:()=>DG_PARK,
+  getLabel:()=>{const el=$("scanLabel");return el?String(el.value||"").trim():"";},
+  projectName:dgProjectName,
+  insertProject:row=>DG_PARK_PROJECT_STORE.insert(row),
+  persistGeometry:park=>typeof dgPersistParkGeom==="function"?dgPersistParkGeom(park):undefined
+});
+const DG_PARK_PROJECT_LINK_STORE=window.DG_PARK_PROJECT_LINK_STORE_ADAPTER.create({getClient:()=>sb});
+const DG_PARK_LINK_PROJECT_USE_CASE=window.DG_PARK_LINK_PROJECT_APPLICATION.create({
+  isAdmin:dgIsAdmin,
+  getPark:()=>DG_PARK,
+  getProject:pid=>(PROJ_LIST||[]).find(p=>p.id===pid)||null,
+  getLabel:()=>{const el=$("scanLabel");return el?String(el.value||""):null;},
+  labelFromLegacy:dgLabelFromLegacy,
+  updateProject:(pid,patch)=>DG_PARK_PROJECT_LINK_STORE.updateProject(pid,patch),
+  backfillMeasurements:(pid,parkId)=>DG_PARK_PROJECT_LINK_STORE.backfillMeasurements(pid,parkId)
+});
+
+async function dgScanCreateProject(){
+  const result=await DG_PARK_CREATE_PROJECT_USE_CASE();
+  if(result.status==="unauthenticated")return toast("Oturum yok","err");
+  if(result.status==="park-missing")return toast("Park kimliği sunucuya yazılmadan proje oluşturulamaz. 🔄 ile yeniden dene.","err","🌳");
+  if(result.status==="write-failed")return toast(dgCf("Proje oluşturulamadı: ")+esc(result.error.message),"err");
+  const data=result.data;
+  toast(dgCf("✓ Proje hazır: ")+esc(data.name),"ok","📁");
+  await dgAfterProjectLinked(data);
+  return data;
+}
+
+
+
+async function dgLinkProject(pid){
+  const result=await DG_PARK_LINK_PROJECT_USE_CASE(pid);
+  if(result.status==="forbidden"){
+    toast("⛔ Mevcut projeyi parka bağlama yetkisi yalnız yöneticide. Yeni proje için park algılayabilirsin.","err","🔐");
+    return null;
+  }
+  if(result.status==="park-missing")return toast("Önce park algıla","err","🌳");
+  if(result.status==="project-missing")return toast("Proje bulunamadı","err");
+  if(result.status==="write-failed")return toast(dgCf("Bağlanamadı: ")+esc(result.error.message),"err");
+  toast("✓ "+esc(result.data.name)+" → "+esc(result.park.name),"ok","🔗");
+  await dgAfterProjectLinked(result.data);
+  return result.data;
+}
+
+async function dgAfterProjectLinked(proj){
+  if(typeof loadProjects==="function")await loadProjects();
+
+  const sel=$("mProject");
+  if(sel&&proj){
+    sel.value=String(proj.id);
+    if(typeof dgParkGate==="function")dgParkGate();
+  }
+  const nsel=$("nProject");
+  if(nsel&&proj)nsel.value=String(proj.id);
+
+  const back=DG_PARK_RETURN_TO;
+  DG_PARK_SCAN=false;
+  DG_PARK_TARGET_PROJ=null;
+  DG_PARK_RETURN_TO=null;
+  dgRenderScanCard();
+  if(back&&typeof go==="function")go(back);
+}
+
+/* =========================================================
+   7. ÖLÇÜM KAPISI (v-measure)
+========================================================= */
+
+function dgSelectedProject(){
+  const sel=$("mProject");
+  const pid=sel?+sel.value:0;
+  if(!pid)return null;
+  return (PROJ_LIST||[]).find(p=>p.id===pid)||null;
+}
+
+/* Ölçüm sekmesine OTOMATİK yönlendirme proje başına bir kez yapılır.
+ * Sebep: kullanıcı "Yeni Ölçüm"e her tıkladığında haritaya fırlatılırsa
+ * ölçüm sekmesine hiç ulaşamaz (kapan); ikinci denemede banner'ı okuyup
+ * ne yapacağına kendisi karar verir. */
+function dgScanRedirectedOnce(pid){
+  const key="dg_park_scan_"+pid;
+  try{
+    if(sessionStorage.getItem(key))return true;
+    sessionStorage.setItem(key,"1");
+    return false;
+  }catch(e){return true;}   /* gizli mod: yönlendirme döngüsüne girme */
+}
+
+/* Ölçüm ekranının üstündeki kapı kartı. saveMeas() da aynı kontrolü yapar —
+ * kart yalnız görsel geri bildirim değil, butonu gerçekten kilitler.
+ * Sunucu tarafı garanti: trg_enforce_park_link (PARK_REQUIRED).
+ * auto=true (sekme açılışı) → parksız projede kullanıcı doğrudan park
+ * algılama ekranına götürülür ("ölçüm yapılacağı zaman direkt park algılama
+ * ekranına yönlendirsin"). */
+function dgParkGate(auto){
+  const box=$("parkGate");
+  const save=$("saveBtn");
+
+  /* Şema eski: park_id sütunu yok, kapı uygulanamaz. Ölçümü KİLİTLEMEK
+   * kullanıcıyı tamamen çalışamaz hâle getirirdi; onun yerine uyarı gösterip
+   * eski akışa izin veriyoruz (karşılaştırma da proje bazlı yedeğe düşer). */
+  if(!DG_PARK_SCHEMA_OK){
+    if(box){box.style.display="block";box.className="alert warn";box.innerHTML=dgSchemaWarnHTML();}
+    if(save)save.disabled=false;
+    return true;
+  }
+
+  const p=dgSelectedProject();
+
+  /* Düzenleme modu: mevcut kaydı güncellemek yeni ölçüm değildir, kilitleme. */
+  const editing=typeof EDIT_ID!=="undefined"&&EDIT_ID;
+
+  if(!box)return !!(p&&p.park_id);
+
+  if(editing){
+    box.style.display="none";
+    if(save)save.disabled=false;
+    return true;
+  }
+
+  if(!p){
+    box.style.display="block";
+    box.className="alert err";
+    box.innerHTML=
+      `<b>⛔ Ölçüm için park algılanmış bir proje gerekli.</b><br>`+
+      `<span style="font-size:.82rem">Park algılama ekranına git → parkı seç → proje adı otomatik `+
+      `"<b>Göksu Parkı - deneme</b>" biçiminde oluşsun.</span>`+
+      `<div style="margin-top:10px"><button class="btn sm blue" onclick="startParkScan({returnTo:'measure'})">🌳 Park Algılama Ekranına Git</button></div>`;
+    if(save)save.disabled=true;
+    if(auto===true&&!dgScanRedirectedOnce(0))startParkScan({returnTo:"measure"});
+    return false;
+  }
+
+  if(!p.park_id){
+    box.style.display="block";
+    box.className="alert err";
+    /* Yönetici: projeyi parka bağlayabilir. Normal kullanıcı: bağlama yetkisi
+     * yok (0006 → PARK_ADMIN_ONLY), o yüzden yalnız "yeni proje" yolu gösterilir. */
+    box.innerHTML=dgIsAdmin()
+      ? `<b>⛔ Bu projede park algılanmadı — ölçüm girilemez.</b><br>`+
+        `<span style="font-size:.82rem">Proje: <b>${esc(p.name)}</b>. `+
+        `Park kimliği olmadan girilen ölçümler karşılaştırmada park bazında izlenemez; `+
+        `bu yüzden önce park kimliği oluşturuluyor.</span>`+
+        `<div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap">`+
+          `<button class="btn sm blue" onclick="go('admin')">🔐 Yönetim → Park Kimlikleri</button>`+
+        `</div>`
+      : `<b>⛔ Bu proje parka bağlı değil — ölçüm girilemez.</b><br>`+
+        `<span style="font-size:.82rem">Proje: <b>${esc(p.name)}</b>. Mevcut projeyi parka bağlama yetkisi `+
+        `<b>yalnız yöneticide</b> 🔐. İki yol: (1) yönetici park atamasını Yönetim → Park Kimlikleri'nden yapsın, `+
+        `(2) aşağıdan park algılayıp <b>yeni proje</b> aç ve ölçümlere orada devam et.</span>`+
+        `<div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap">`+
+          `<button class="btn sm blue" onclick="startParkScan({returnTo:'measure'})">🌳 Park Algıla → Yeni Proje Oluştur</button>`+
+        `</div>`;
+    if(save)save.disabled=true;
+    /* ⭐ Otomatik yönlendirme: ölçüme geçmeye çalışan kullanıcı parkı
+     * algılamadan forma ulaşamaz (proje başına bir kez). */
+    if(auto===true&&!dgScanRedirectedOnce(p.id))startParkScan({projectId:p.id,returnTo:"measure"});
+    return false;
+  }
+
+  const parkName=p.parks&&p.parks.name?p.parks.name:(p.park_name||"Park");
+  box.style.display="block";
+  box.className="alert ok";
+  box.innerHTML=
+    `<div class="measure-park-summary"><span><b>🌳 ${esc(parkName)}</b>`+
+    (p.parks&&p.parks.area_m2?` · ${dgFmtHa(p.parks.area_m2)}`:``)+
+    `</span><button class="btn sm ghost" onclick="startParkScan({projectId:${p.id},returnTo:'measure'})">Parkı değiştir</button></div>`;
+  if(save)save.disabled=false;
+  return true;
+}
+
+/* Proje seçimi değişti (v-measure). shell.html'deki onchange bunu çağırır. */
+function dgProjectChanged(){
+ /* 0045: seçim cihaz belleğine yazılır (yenilemede geri gelir). */
+ if(typeof dgProjectRemember==="function"){try{dgProjectRemember($("mProject").value);}catch(e){}}
+ /* 0036 (T5): proje değişince canlı konum kanalı yeni parka taşınır. */
+ if(typeof dgLiveShareJoinCurrent==="function"){try{dgLiveShareJoinCurrent();}catch(e){}}
+  dgParkGate();
+  if(typeof manualPoint!=="undefined"&&!manualPoint&&!EDIT_ID&&typeof autoFillPointId==="function"){
+    $("mPoint").value="";
+    $("pointQueryResult").style.display="none";
+    autoFillPointId();
+  }
+}
+
+/* Proje listesi seçeneği: parkı olan 🌳, olmayan ⛔ ile işaretlenir. */
+function dgProjectOptionLabel(p){
+  if(!p)return "";
+  return p.park_id?p.name:"⛔ "+p.name+" (park yok)";
+}
+
+/* Grid panelindeki proje seçimi yalnız bu parkın projelerini gösterir:
+ * grid/waypoint yanlışlıkla başka parka yazılmasın. */
+function dgProjectOptionsForPark(parkId,fallbackAll){
+  const list=PROJ_LIST||[];
+  const mine=parkId?list.filter(p=>p.park_id===parkId):[];
+  if(mine.length){
+    return mine.map(p=>`<option value="${p.id}">${esc(p.name)}</option>`).join("");
+  }
+  if(fallbackAll&&list.length){
+    return list.map(p=>`<option value="${p.id}">${esc(p.name)}</option>`).join("");
+  }
+  return `<option value="0">Bu park için proje yok — algılama kartından oluştur</option>`;
+}
+
+/* =========================================================
+   8. YÖNETİM: PARKLARI GERİ DOLDUR (eski projeler)
+========================================================= */
+
+/* Park bağı olmayan projeleri ölçümlerinin merkezinden parkla eşleştirir.
+ * İKİ FAZLI: önce plan çıkarır + önizleme gösterir (hiçbir şey yazmaz),
+ * yönetici onaylayınca dgApplyBackfill() yazar. Sebep: bu araç proje ADLARINI
+ * da değiştirir ("Göksu Parkı - <eski ad>"); sürpriz olmasın.
+ *
+ * 2026-09-24 İYİLEŞTİRME (kullanıcı geri bildirimi: "otomatik geri doldurma
+ * çalışmadı, sadece Göksu'yu algılayabildim"):
+ *   · üç kademeli arama: 1500 m → 3500 m → ADA GÖRE OSM araması
+ *     (Dikmen Vadisi gibi, merkez noktası polygon dışında kalan ya da
+ *     OSM'de farklı etiketlenmiş yerler için)
+ *   · canlı ilerleme (kaçıncı proje, hangi ad) — 6 proje ~20 sn sürer,
+ *     eskiden kutu sabit durunca "çalışmıyor" sanılıyordu
+ *   · hiç eşleşmeyen proje için satırda "✍️ Elle park kimliği aç":
+ *     ölçüm merkezinde, proje adıyla manuel park kimliği açar. Böylece
+ *     OSM'de park olmayan yerler de park bazlı karşılaştırmaya girer. */
+const dgSleep=ms=>new Promise(r=>setTimeout(r,ms));
+
+async function dgQueryParkSafe(lat,lon,radius){
+  try{
+    return await queryPark(lat,lon,radius);
+  }catch(e){
+    console.warn("DENDROGEO · park sorgusu ("+radius+" m) başarısız:",e);
+    return null;
+  }
+}
+
+/* Ada göre OSM araması: proje adının anlamlı sözcükleriyle leisure=park|garden|…
+ * elemanlarını 5 km yarıçapta arar. queryPark'ın "merkez noktası polygon
+ * içinde mi" varsayımına bağlı değildir. */
+async function dgQueryParkByName(lat,lon,projName){
+  const words=dgNormParkLoose(projName).split(" ").filter(w=>w.length>2);
+  if(!words.length||typeof overpassRequest!=="function")return null;
+  const re=words.join("|").replace(/["\\]/g,"");
+  if(!re)return null;
+  const leisure="park|garden|nature_reserve|common|recreation_ground";
+  const q=
+    `[out:json][timeout:35];(`+
+    `way["leisure"~"${leisure}"]["name"~"${re}",i](around:5000,${lat},${lon});`+
+    `relation["leisure"~"${leisure}"]["name"~"${re}",i](around:5000,${lat},${lon});`+
+    `way["landuse"~"recreation_ground|meadow|grass"]["name"~"${re}",i](around:5000,${lat},${lon});`+
+    `);out geom;`;
+  let json=null;
+  try{json=await overpassRequest(q,"park adıyla");}catch(e){return null;}
+  if(!json||!json.elements||!json.elements.length)return null;
+
+  const cands=[];
+  for(const el of json.elements){
+    if(typeof extractRings!=="function")break;
+    const rings=extractRings(el);
+    if(!rings)continue;
+    const area=(typeof polyArea==="function")?polyArea(rings):null;
+    cands.push({rings,name:(el.tags&&el.tags.name)||null,area,type:el.type,id:el.id});
+  }
+  if(!cands.length)return null;
+  cands.sort((a,b)=>(b.area||0)-(a.area||0));
+  return cands;
+}
+
+async function dgDetectParkForProject(lat,lon,projName){
+  let c=await dgQueryParkSafe(lat,lon,1500);
+  if(c&&c.length)return{cands:c,yol:"1500 m"};
+  await dgSleep(2100);
+  c=await dgQueryParkSafe(lat,lon,3500);
+  if(c&&c.length)return{cands:c,yol:"3500 m"};
+  await dgSleep(2100);
+  c=await dgQueryParkByName(lat,lon,projName);
+  if(c&&c.length)return{cands:c,yol:"ad araması"};
+  return{cands:null,yol:"bulunamadı"};
+}
+
+function dgBackfillProgress(i,n,label){
+  const box=$("backfillBox");
+  if(!box)return;
+  const pct=Math.round((i/n)*100);
+  box.style.display="block";
+  box.innerHTML=
+    `<div class="alert info" style="margin:6px 0">⏳ Park geri doldurma · <b>${i+1}/${n}</b> · ${esc(label)}<br>`+
+    `<span style="font-size:.78rem">Her proje için ölçüm merkezi hesaplanıp OSM'de park aranıyor `+
+    `(1500 m → 3500 m → ad araması). Overpass nezaketi için ~2 sn arayla.</span></div>`+
+    `<div style="height:8px;background:var(--line);border-radius:5px;overflow:hidden">`+
+    `<div style="height:100%;width:${pct}%;background:var(--green);transition:width .3s"></div></div>`;
+}
+
+async function backfillParks(){
+  if(!PROFILE||(PROFILE.role!=="admin"&&PROFILE.role!=="owner"))return toast("Yetki yok.","err");
+  const box=$("backfillBox");
+
+  if(!navigator.onLine){
+    if(box){box.style.display="block";box.innerHTML=`<div class="alert err">⛔ Park geri doldurma internet gerektirir (OSM/Overpass sorgusu).</div>`;}
+    return toast("Çevrimdışı: park geri doldurma çalışmaz.","err","📴");
+  }
+
+  const{data:projs,error}=await sb.from("projects").select("id,name,owner,park_id,park_name,label,city,country");
+  if(error){
+    if(box){box.style.display="block";box.innerHTML=`<div class="alert err">⚠ Projeler okunamadı: <span class="mono">${esc(error.message)}</span></div>`;}
+    return toast(dgCf("Projeler okunamadı: ")+esc(error.message),"err");
+  }
+  const targets=(projs||[]).filter(p=>!p.park_id);
+
+  if(!targets.length){
+    if(box){box.style.display="block";box.innerHTML=`<div class="alert ok">✓ Park bağı eksik proje yok — hepsi bir parka bağlı.</div>`;}
+    return toast("Park bağı eksik proje yok ✓","ok","🌳");
+  }
+
+  dgBackfillProgress(0,targets.length,targets[0].name);
+
+  const plan=[];
+  for(let i=0;i<targets.length;i++){
+    const p=targets[i];
+    dgBackfillProgress(i,targets.length,p.name);
+
+    const{data:m}=await sb.from("measurements").select("lat,lon").eq("project_id",p.id).limit(1000);
+    const pts=(m||[]).filter(r=>Number.isFinite(+r.lat)&&Number.isFinite(+r.lon));
+    if(!pts.length){
+      plan.push({project:p,durum:"ölçüm yok",park:null,cand:null,lat:null,lon:null});
+      continue;
+    }
+    const lat=pts.reduce((a,r)=>a+ +r.lat,0)/pts.length;
+    const lon=pts.reduce((a,r)=>a+ +r.lon,0)/pts.length;
+
+    const found=await dgDetectParkForProject(lat,lon,p.name);
+    await dgSleep(2100);
+
+    if(!found.cands||!found.cands.length){
+      plan.push({project:p,durum:"OSM'de park yok",park:null,cand:null,lat,lon,n:pts.length});
+      continue;
+    }
+    const c=found.cands[0];
+    /* OSM elemanında ad yoksa "İsimsiz Park" yerine proje adından öneri:
+     * canlıda iki park "İsimsiz Park" olarak kalmıştı, karşılaştırmada
+     * anlamsız satır üretiyordu. */
+    const parkName=c.name||dgSuggestParkName(p.name);
+    plan.push({
+      project:p,durum:"eşleşti",yol:found.yol,cand:c,lat,lon,n:pts.length,
+      parkName,
+      adsiz:!c.name,
+      newName:dgProjectName(parkName,dgLabelFromLegacy(p.name,parkName))
+    });
+  }
+
+  DG_BACKFILL_PLAN=plan;
+  dgRenderBackfillPlan();
+}
+
+function dgRenderBackfillPlan(){
+  const box=$("backfillBox");
+  if(!box)return;
+  const plan=DG_BACKFILL_PLAN||[];
+  const ok=plan.filter(x=>x.durum==="eşleşti");
   const noPark=plan.filter(x=>x.durum==="OSM'de park yok");
   const noMeas=plan.filter(x=>x.durum==="ölçüm yok");
 
