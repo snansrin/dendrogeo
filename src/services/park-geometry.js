@@ -90,40 +90,7 @@ function rectCorners(r){
 }
 
 function segmentIntersectsRect(a,b,rect){
-  const cs=rectCorners(rect);
-
-  for(let i=0;i<4;i++){
-    if(
-      segmentsIntersect(
-        a,
-        b,
-        cs[i],
-        cs[(i+1)%4]
-      )
-    ){
-      return true;
-    }
-  }
-
-  if(
-    a.x>=rect.minX &&
-    a.x<=rect.maxX &&
-    a.y>=rect.minY &&
-    a.y<=rect.maxY
-  ){
-    return true;
-  }
-
-  if(
-    b.x>=rect.minX &&
-    b.x<=rect.maxX &&
-    b.y>=rect.minY &&
-    b.y<=rect.maxY
-  ){
-    return true;
-  }
-
-  return false;
+  return window.DG_PARK_RECT_INTERSECTION.segmentIntersectsRect(a,b,rect);
 }
 
 function geometryIntersectsRect(
@@ -132,63 +99,7 @@ function geometryIntersectsRect(
   refLat,
   bufferM=0
 ){
-  if(!points||points.length<2)return false;
-
-  const pts=points.map(p=>
-    projectPoint(
-      p[0],
-      p[1],
-      refLat
-    )
-  );
-
-  const sourceBox=expandBBox(
-    ringBBox(points,refLat),
-    bufferM
-  );
-
-  const testRect=expandBBox(
-    rect,
-    bufferM
-  );
-
-  if(!bboxesOverlap(sourceBox,testRect)){
-    return false;
-  }
-
-  for(const p of pts){
-    if(
-      p.x>=testRect.minX &&
-      p.x<=testRect.maxX &&
-      p.y>=testRect.minY &&
-      p.y<=testRect.maxY
-    ){
-      return true;
-    }
-  }
-
-  for(const c of rectCorners(testRect)){
-    if(pointInPolygonXY(c.x,c.y,pts)){
-      return true;
-    }
-  }
-
-  for(let i=0;i<pts.length;i++){
-    const a=pts[i];
-    const b=pts[(i+1)%pts.length];
-
-    if(
-      segmentIntersectsRect(
-        a,
-        b,
-        testRect
-      )
-    ){
-      return true;
-    }
-  }
-
-  return false;
+  return window.DG_PARK_RECT_INTERSECTION.geometryIntersectsRect(points,rect,refLat,bufferM);
 }
 
 function geometryLineIntersectsRect(
@@ -197,43 +108,7 @@ function geometryLineIntersectsRect(
   refLat,
   bufferM=0
 ){
-  if(!points||points.length<2)return false;
-
-  const sourceBox=expandBBox(
-    ringBBox(points,refLat),
-    bufferM
-  );
-
-  const testRect=expandBBox(
-    rect,
-    bufferM
-  );
-
-  if(!bboxesOverlap(sourceBox,testRect)){
-    return false;
-  }
-
-  const pts=points.map(p=>
-    projectPoint(
-      p[0],
-      p[1],
-      refLat
-    )
-  );
-
-  for(let i=0;i<pts.length-1;i++){
-    if(
-      segmentIntersectsRect(
-        pts[i],
-        pts[i+1],
-        testRect
-      )
-    ){
-      return true;
-    }
-  }
-
-  return false;
+  return window.DG_PARK_RECT_INTERSECTION.geometryLineIntersectsRect(points,rect,refLat,bufferM);
 }
 
 /* =========================================================
