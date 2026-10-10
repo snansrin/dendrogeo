@@ -24,19 +24,8 @@ async function queryPark(lat,lon,radius=1200){
 /* A geocoding result is only a candidate: never substitute its bounding box
  * for a park boundary. Use the actual OSM polygon, including all holes. */
 const DG_PARK_BOUNDARY_CACHE=new Map();
-let DG_PARK_NOMINATIM_QUEUE=Promise.resolve(),DG_PARK_NOMINATIM_TIME=0;
-function dgParkNominatim(params){
- const task=DG_PARK_NOMINATIM_QUEUE.catch(()=>{}).then(async()=>{
-  const wait=Math.max(0,1000-(Date.now()-DG_PARK_NOMINATIM_TIME));
-  if(wait)await new Promise(r=>setTimeout(r,wait));
-  DG_PARK_NOMINATIM_TIME=Date.now();
-  const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),15000);
-  try{const res=await fetch("https://nominatim.openstreetmap.org/"+params.path+"?"+new URLSearchParams(params.query),{headers:{Accept:"application/json"},signal:controller.signal});
-   if(!res.ok)throw new Error("OSM sınır servisi HTTP "+res.status);
-   const data=await res.json();if(!Array.isArray(data))throw new Error("OSM sınır yanıtı geçersiz");return data;
-  }finally{clearTimeout(timer);}
- });DG_PARK_NOMINATIM_QUEUE=task;return task;
-}
+const DG_NOMINATIM_CLIENT=window.DG_NOMINATIM_CLIENT_ADAPTER.create();
+function dgParkNominatim(params){return DG_NOMINATIM_CLIENT.request(params);}
 const DG_NOMINATIM_BOUNDARY=window.DG_NOMINATIM_BOUNDARY_APPLICATION.create({
  cache:DG_PARK_BOUNDARY_CACHE,
  fetchNominatim:params=>dgParkNominatim(params),
