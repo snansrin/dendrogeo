@@ -15,6 +15,8 @@ on:
       - 'src/services/visit-stats.js'
       - 'src/application/visitors/**'
       - 'src/application/parks/**'
+      - 'src/adapters/parks/**'
+      - 'src/services/grid-engine.js'
       - 'src/domain/parks/**'
       - 'scripts/verify-osm-water-live.mjs'
       - '.github/workflows/gis-three-park-qa.yml'
@@ -51,3 +53,4 @@ jobs:
           name: gis-three-park-qa
           path: /tmp/dendrogeo-park-qa/*.log
           retention-days: 14
+

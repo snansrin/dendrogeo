@@ -448,17 +448,7 @@ async function createWaypointsFromGrid(mode){
     return;
   }
 
-  const{data:mx}=await sb
-    .from("waypoints")
-    .select("wp_id")
-    .eq("project_id",pid)
-    .order(
-      "wp_id",
-      {
-        ascending:false
-      }
-    )
-    .limit(1);
+  const{data:mx}=await window.DG_GRID_WAYPOINT_STORE.fetchLatest(sb,pid);
 
   if(source!==dgGridReviewSignature()||source!==DG_GRID_SOURCE||park!==PARK_POLY||pid!==+$("gridProject").value)return toast(_tgr("Yüzey değişti. Waypoint üretmeden önce gridi yeniden oluşturun."),"warn");
 
