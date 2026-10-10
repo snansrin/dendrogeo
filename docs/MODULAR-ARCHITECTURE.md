@@ -104,6 +104,7 @@ src/
 - `domain/parks/line-distance.js`, nokta-segment mesafesini ve sert yüzey/yol çizgisine yakınlık kurallarını mevcut metre hesabı, varsayılan genişlik ve kapsayıcı eşiklerle sunar; servis eski fonksiyon adlarını korur.
 - `domain/parks/osm-rings.js`, OSM way/relation koordinatlarını filtreleyip mevcut kapanış ve `1e-6` uç eşleştirme kurallarıyla dış/iç halkaları kurar; `park-geometry.js` eski yardımcı adlarını sarmalar.
 - `domain/parks/rect-intersection.js`, projeksiyonlu segment, halka ve çizgilerin dikdörtgenle kesişimini; bbox erken elemesi ve mevcut genişletme davranışıyla hesaplar.
+- `domain/parks/cell-in-park.js`, merkez/köşe doğrulaması, park sınırı kesişimi ve iç delik denetimiyle örnekleme hücresinin parkta kalmasını güvenli biçimde belirler; park geometrisi servisi seçili halkaları aktarır.
 - `domain/parks/simplify-ring.js`, park sınır halkasını deterministik nokta sınırına indirir; `application/parks/persist-park-geometry.js` dış/ iç halkaları hazırlar, `adapters/parks/park-geometry-store.js` Supabase `geom_json` yazımını yapar. `geofence.js` eski sadeleştirme ve kalıcılık fonksiyonlarını uyumluluk sarmalayıcısı olarak korur; yazım başarısızlığında daire yedeği davranışı sürer.
 - Yeni dosyalar analiz zincirine sürümlü lazy loader ve service worker precache üzerinden eklenmiştir.
 
