@@ -535,14 +535,15 @@ describe('v8: grid yeşil-alan kapısı + PNG dışa aktarım (canary)', () => {
   /* Faz 4: eski gridplan.js üç modüle bölündü — canary aynı desenleri yeni
    * dosyalarda arıyor (geometry=kapı, panel=UI anahtarı, export=PNG). */
   const src = [
+    readFileSync(new URL('../src/domain/parks/cell-validity.js', import.meta.url), 'utf8'),
     readFileSync(new URL('../src/services/park-geometry.js', import.meta.url), 'utf8'),
     readFileSync(new URL('../src/ui/park-panel.js', import.meta.url), 'utf8'),
     readFileSync(new URL('../src/ui/park-export.js', import.meta.url), 'utf8'),
   ].join('\n');
 
   test('isCellValid yeşil-alan kapısını içeriyor', () => {
-    assert.match(src, /DG_GREEN_ONLY&&/);
-    assert.match(src, /window\.DG_LANDCOVER\.isGreen\(cLat/);
+    assert.match(src, /dependencies\.greenOnly\s*&&/);
+    assert.match(src, /landcover\.isGreen\(centerLat/);
   });
 
   test('UI: chkGreenOnly anahtarı var ve varsayılan AÇIK', () => {
