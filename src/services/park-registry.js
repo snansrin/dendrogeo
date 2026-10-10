@@ -996,28 +996,16 @@ function dgRenderParkAdmin(projects,measurements){
   if(!box)return;
   const rows=DG_PARK_ADMIN_ROWS;
 
-  const projByPark={},measByPark={};
-  (projects||[]).forEach(p=>{if(p.park_id)projByPark[p.park_id]=(projByPark[p.park_id]||0)+1;});
-  (measurements||[]).forEach(m=>{if(m.park_id)measByPark[m.park_id]=(measByPark[m.park_id]||0)+1;});
   DG_PARK_ADMIN_LAST={projects:projects||[],measurements:measurements||[]};
-
-  /* BOŞ PARK FİLTRESİ (2026-09-27 · kullanıcı): "her park sorgulamada buraya
-   * yazıyor; projeye kayıt yapıldıktan sonra buraya düşsün, boşlar düşmesin."
-   * Park kimliği algılamada yazılmaya DEVAM eder (kimlik bütünlüğü ve çit
-   * için gerekli) ama yönetim LİSTESİ varsayılan olarak yalnızca projesi
-   * VEYA kaydı olan parkları gösterir; boşlar sayaçlı düğmeyle açılır
-   * (veri silinmez, yalnızca görünüm). */
-  const dgParkIsEmpty=(p)=>!(projByPark[p.id]>0)&&!(measByPark[p.id]>0);
-  const emptyRows=rows.filter(dgParkIsEmpty);
-  const shown=rows.filter(p=>!dgParkIsEmpty(p)||DG_PARK_ADMIN_SHOW_EMPTY);
-
-  /* Çift kimlik adayları: aynı (gevşek) adı taşıyan parklar */
-  const byName={};
-  shown.forEach(p=>{
-    const k=dgNormParkLoose(p.name)||("#"+p.id);
-    (byName[k]=byName[k]||[]).push(p);
+  const overview=window.DG_PARK_ADMIN_OVERVIEW.build({
+    rows,
+    projects,
+    measurements,
+    showEmpty:DG_PARK_ADMIN_SHOW_EMPTY,
+    normalizeLoose:dgNormParkLoose,
+    normalizeName:dgNormParkName
   });
-  const dupGroups=Object.values(byName).filter(g=>g.length>1);
+  const {projByPark,measByPark,emptyRows,shown,dupGroups,unnamed}=overview;
 
   const dupHTML=dupGroups.length
     ? `<div class="alert warn" style="margin-bottom:10px"><b>⚠ ${dupGroups.length} ${_tpr("çift kimlik adayı var")}</b> ${_tpr("— aynı park iki satırda duruyorsa karşılaştırma bölünür.")}`+
@@ -1034,10 +1022,6 @@ function dgRenderParkAdmin(projects,measurements){
       }).join("")+`</div>`
     : (rows.length?`<div class="alert ok" style="margin-bottom:10px">✓ Çift kimlik yok — her park tek satırda.</div>`:``);
 
-  /* ⚠ /isimsiz/i kullanılmaz: JS'te i bayrağı ASCII katlar, "İsimsiz" (U+0130)
-   * eşleşmez — uyarı sessizce hiç çıkmazdı. dgNormParkName ile aksansız/küçük
-   * harfe indirip öyle bakılır (aynı tuzak dgNormParkName'in de varlık sebebi). */
-  const unnamed=shown.filter(p=>!p.name||dgNormParkName(p.name).indexOf("isimsiz")===0);
   const unnamedHTML=unnamed.length
     ? `<div class="alert info" style="margin-bottom:10px">ℹ ${unnamed.length} ${_tpr("parkın adı yok (OSM elemanında ad etiketi yoktu):")} `+
       unnamed.map(p=>`#${p.id}`).join(", ")+` ${_tpr("— ✏️ ile ad ver (örn. projenin adı).")}</div>`
