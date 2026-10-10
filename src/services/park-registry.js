@@ -128,119 +128,32 @@ function dgParkCenter(cand,opt){
    3. PARK KAYDI (public.parks)
 ========================================================= */
 
-async function dgSelectParkByKey(key){
-  try{
-    const{data}=await sb.from("parks").select("*").eq("osm_key",key).limit(1);
-    return (data&&data[0])||null;
-  }catch(e){return null;}
+function dgParkStore(){
+  return window.DG_PARK_STORE_ADAPTER.create({client:sb,normalizeLoose:dgNormParkLoose,distance:hav});
 }
+async function dgSelectParkByKey(key){return dgParkStore().selectByKey(key);}
+async function dgSelectParkNear(nameNorm,lat,lon,radiusM){return dgParkStore().selectNear(nameNorm,lat,lon,radiusM);}
 
-/* Aynı ad (gevşek) + yakın konum → TEK park say. parks_select herkese açık
- * olduğu için bu sorgu yönetici olmayan kullanıcıda da çalışır. */
-async function dgSelectParkNear(nameNorm,lat,lon,radiusM){
-  if(!Number.isFinite(+lat)||!Number.isFinite(+lon))return null;
-  const loose=dgNormParkLoose(nameNorm);
-  if(!loose)return null;
-  /* Kaba bbox filtresi (1° ≈ 111 km) → adaylar küçük bir küme olur. */
-  const dLat=(+radiusM)/111000;
-  const dLon=(+radiusM)/(111000*Math.max(.2,Math.cos(lat*Math.PI/180)));
-  try{
-    const{data}=await sb.from("parks")
-      .select("*")
-      .gte("centroid_lat",lat-dLat).lte("centroid_lat",lat+dLat)
-      .gte("centroid_lon",lon-dLon).lte("centroid_lon",lon+dLon)
-      .limit(50);
-    const hits=(data||[]).filter(p=>dgNormParkLoose(p.name)===loose);
-    if(!hits.length)return null;
-    hits.sort((a,b)=>
-      hav(lat,lon,+a.centroid_lat,+a.centroid_lon)-
-      hav(lat,lon,+b.centroid_lat,+b.centroid_lon));
-    const best=hits[0];
-    const dist=hav(lat,lon,+best.centroid_lat,+best.centroid_lon);
-    return dist<=radiusM?best:null;
-  }catch(e){return null;}
-}
-
-/* Adayı (OSM veya elle) `parks` tablosuna yazar / mevcut satırı döndürür.
- * RLS NOTU: upsert KULLANMIYORUZ. upsert çakışmada UPDATE'e döner ve
- * parks_update yalnız satır sahibi + yöneticiye açık; ikinci kullanıcı aynı
- * parkı algıladığında RLS'e takılıp 23505 alırdı. Bunun yerine select → yoksa
- * insert → yarışta 23505 gelirse yeniden select. Böylece herkes aynı satırı
- * okur, kimse başkasının satırını yazmak zorunda kalmaz. */
-async function dgRegisterPark(cand,opt){
-  opt=opt||{};
-  if(!USER||!sb)return null;
-  /* Şema eski (public.parks yok) → kimlik yazılamaz; ölçüm akışı eski
-   * davranışla devam eder (dgParkGate kapıyı devre dışı bırakır). */
-  if(!DG_PARK_SCHEMA_OK)return null;
-
-  const rawName=String((cand&&cand.name)||opt.name||"").trim();
-  const name=rawName||"İsimsiz Park";
-  const manual=opt.manual===true||(cand&&cand.source==="manual");
-  const center=dgParkCenter(cand,opt);
-  const key=manual
-    ? dgManualParkKey(name,center.lat,center.lon)
-    : dgParkKey(cand&&cand.type,cand&&cand.id);
-
-  if(DG_PARK_SESSION.has(key))return DG_PARK_SESSION.get(key);
-
-  /* Şehir/ülke: reverseGeocode pahalı (Nominatim ~1 istek/sn), yalnız kayıt
-   * gerçekten YENİ ise ve elimizde hiç bilgi yoksa çağrılır. */
-  let city=opt.city||null,country=opt.country||null;
-
-  const area=Number(cand&&cand.area);
-  const row={
-    osm_key:key,
-    osm_type:manual?"manual":String((cand&&cand.type)||"way"),
-    osm_id:manual?null:(Number(cand&&cand.id)||null),
-    name,
-    name_norm:dgNormParkName(name),
-    country,city,
-    centroid_lat:center.lat,
-    centroid_lon:center.lon,
-    area_m2:Number.isFinite(area)&&area>0?Math.round(area):null,
-    source:opt.source||(manual?"manual":"osm"),
-    created_by:USER.id
-  };
-
-  /* 1) zaten kayıtlı mı? */
-  let hit=await dgSelectParkByKey(key);
-
-  /* 2) aynı ad + yakın konum → OSM kimliği farklı olsa da TEK park */
-  if(!hit&&Number.isFinite(+center.lat)){
-    hit=await dgSelectParkNear(row.name_norm,+center.lat,+center.lon,dgParkMatchRadius(row.area_m2));
-  }
-
-  if(hit){
-    DG_PARK_SESSION.set(key,hit);
-    /* Elle oluşturulmuş kayıt OSM kimliğiyle çakıştı: tekilleştirme YÖNETİCİ
-     * işidir (sessiz veri taşıma yapılmaz) ama kullanıcı bilmeli. */
-    if(!manual&&hit.source==="manual"&&typeof toast==="function"){
-      toast(dgCf("ℹ Bu park daha önce elle oluşturulmuş (#")+hit.id+")"+_tpr("; aynı kimlik kullanılıyor. OSM kimliğine geçmek için: Yönetim → 🌳 Park Kimlikleri → 🔀 birleştir."),"info","🌳");
-    }
-    return hit;
-  }
-
-  /* 3) yeni kayıt — şehir/ülke gerekirse burada çözülür */
-  if(Number.isFinite(+center.lat)&&(!city||!country)&&typeof reverseGeocode==="function"){
-    const geo=await reverseGeocode(+center.lat,+center.lon);
-    if(geo){city=geo.city;country=geo.country;row.city=city;row.country=country;}
-  }
-
-  const{data,error}=await sb.from("parks").insert(row).select().single();
-  if(error){
-    if(error.code==="23505"){
-      const again=await dgSelectParkByKey(key);
-      if(again){DG_PARK_SESSION.set(again.osm_key,again);return again;}
-    }
-    console.warn("DENDROGEO · park kimliği yazılamadı:",error.message);
-    toast(dgCf("Park kimliği sunucuya yazılamadı: ")+esc(error.message),"err","🌳");
-    return null;
-  }
-
-  DG_PARK_SESSION.set(key,data);
-  return data;
-}
+/* Supabase, oturum/cache, reverse geocoding ve kullanıcı bildirimlerini
+ * uygulama use-case'ine bağlayan eski servis facade'ı. */
+const DG_PARK_REGISTER_USE_CASE=window.DG_PARK_REGISTRATION_APPLICATION.create({
+  getStore:()=>typeof sb==="undefined"||!sb?null:dgParkStore(),
+  getUser:()=>typeof USER==="undefined"?null:USER,
+  isEnabled:()=>DG_PARK_SCHEMA_OK,
+  session:DG_PARK_SESSION,
+  centerFor:dgParkCenter,
+  manualKey:dgManualParkKey,
+  osmKey:dgParkKey,
+  normalizeName:dgNormParkName,
+  matchRadius:dgParkMatchRadius,
+  getReverseGeocode:()=>typeof reverseGeocode==="function"?reverseGeocode:null,
+  notifyManualConflict:hit=>{
+    if(typeof toast==="function")toast(dgCf("ℹ Bu park daha önce elle oluşturulmuş (#")+hit.id+")"+_tpr("; aynı kimlik kullanılıyor. OSM kimliğine geçmek için: Yönetim → 🌳 Park Kimlikleri → 🔀 birleştir."),"info","🌳");
+  },
+  warn:error=>console.warn("DENDROGEO · park kimliği yazılamadı:",error&&error.message),
+  notifyWriteFailure:error=>toast(dgCf("Park kimliği sunucuya yazılamadı: ")+esc(error.message),"err","🌳")
+});
+async function dgRegisterPark(cand,opt){return DG_PARK_REGISTER_USE_CASE(cand,opt);}
 
 /* =========================================================
    4. ALGILAMA AKIŞI (ölçümden yönlendirme dahil)
