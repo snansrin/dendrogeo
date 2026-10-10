@@ -66,39 +66,7 @@ function pointInPolygon(lat,lon,ring){
 }
 
 function pointInPark(lat,lon,rings){
-  if(!rings)return false;
-
-  if(Array.isArray(rings)){
-    if(!rings.length)return false;
-
-    const insideOuter=rings.some(r=>
-      pointInPolygon(lat,lon,r)
-    );
-
-    if(!insideOuter)return false;
-
-    const insideHole=PARK_HOLES.some(r=>
-      pointInPolygon(lat,lon,r)
-    );
-
-    return !insideHole;
-  }
-
-  if(rings.outer){
-    const insideOuter=rings.outer.some(r=>
-      pointInPolygon(lat,lon,r)
-    );
-
-    if(!insideOuter)return false;
-
-    const insideHole=(rings.inner||[]).some(r=>
-      pointInPolygon(lat,lon,r)
-    );
-
-    return !insideHole;
-  }
-
-  return false;
+  return window.DG_PARK_CONTAINMENT.pointInPark(lat,lon,rings,PARK_HOLES);
 }
 
 /* =========================================================
