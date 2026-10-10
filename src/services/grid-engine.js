@@ -127,70 +127,17 @@ function updateGridSummary(
   g,
   r0
 ){
-  const gs=$("gridSummary");
-  if(gs)gs.style.display="block";
-
-  const tot=
-    GRID_CELLS.length;
-
-  const pct=v=>
-    tot
-      ?Math.round(
-        v/tot*100
-      )
-      :0;
-
-  const selCount=
-    SELECTED_CELLS.size;
-
-  gs.innerHTML=
-
-    `<b>📊 Grid</b> · `+
-    `${$("gridSize")?.value||20}×${$("gridSize")?.value||20} m<br>`+
-
-    `${_tgr("Toplam:")} <b>${tot}</b> · `+
-    `🟢 ${_tgr("Ölçülmüş:")} ${g} (%${pct(g)}) · `+
-    `🔴 ${_tgr("Boş:")} ${r0} (%${pct(r0)})<br>`+
-
-    (
-      selCount>0
-        ?
-        `<b style="color:#1d4ed8">🔵 ${_tgr("Seçili:")} ${selCount}</b><br>`
-        :
-        ""
-    )+
-
-    `<div style="margin-top:8px;display:flex;gap:6px;flex-wrap:wrap">`+
-
-    (
-      r0>0
-        ?
-        `<button class="btn sm blue" onclick="createWaypointsFromGrid('auto')">${_tgrf("📍 Otomatik ({n})",{n:r0})}</button>`
-        :
-        ""
-    )+
-
-    (
-      selCount>0
-        ?
-        `<button class="btn sm" style="background:#1d4ed8;color:#fff" onclick="createWaypointsFromGrid('manual')">${_tgrf("📍 Seçili ({n})",{n:selCount})}</button>`
-        :
-        ""
-    )+
-
-    (
-      selCount>0
-        ?
-        `<button class="btn sm ghost" onclick="clearCellSelection()">✕ Seçimi Temizle</button>`
-        :
-        ""
-    )+
-
-    `<button class="btn sm ghost" onclick="downloadGridGeoJSON()">📥 GeoJSON</button>`+
-
-    `<button class="btn sm ghost" onclick="downloadWaypointsCSV()">📥 WP CSV</button>`+
-
-    `</div>`+DG_GRID_META;
+  window.DG_GRID_SUMMARY.render({
+    element:$("gridSummary"),
+    size:$("gridSize")?.value||20,
+    total:GRID_CELLS.length,
+    measured:g,
+    empty:r0,
+    selected:SELECTED_CELLS.size,
+    meta:DG_GRID_META,
+    translate:_tgr,
+    translateFormat:_tgrf
+  });
 }
 
 /* =========================================================
