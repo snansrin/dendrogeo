@@ -73,17 +73,13 @@ function drawGridLayer(){
   if(DG_GRID_RENDERER&&map)map.removeLayer(DG_GRID_RENDERER);
   GRID_LAYER=L.layerGroup().addTo(map);DG_GRID_RENDERER=L.canvas({padding:.1});
 
-  let g=0;
-  let r0=0;
+  const {measured:g,empty:r0}=window.DG_GRID_CELL_STATES.count(GRID_CELLS);
 
   GRID_CELLS.forEach(cell=>{
     const col=
       cell.n===0
         ?"#e11d48"
         :"#16a34a";
-
-    if(cell.n===0)r0++;
-    else g++;
 
     const isSel=
       SELECTED_CELLS.has(
@@ -269,14 +265,7 @@ function toggleCellSelection(
     });
   }
 
-  let g=0;
-  let r0=0;
-
-  GRID_CELLS.forEach(c=>{
-    if(c.n===0)r0++;
-    else g++;
-  });
-
+  const {measured:g,empty:r0}=window.DG_GRID_CELL_STATES.count(GRID_CELLS);
   updateGridSummary(
     g,
     r0
@@ -316,14 +305,7 @@ function clearCellSelection(){
     });
   }
 
-  let g=0;
-  let r0=0;
-
-  GRID_CELLS.forEach(c=>{
-    if(c.n===0)r0++;
-    else g++;
-  });
-
+  const {measured:g,empty:r0}=window.DG_GRID_CELL_STATES.count(GRID_CELLS);
   updateGridSummary(
     g,
     r0
