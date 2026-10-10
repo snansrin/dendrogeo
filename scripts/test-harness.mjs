@@ -164,6 +164,7 @@ export function loadApp({ sadece } = {}) {
     'src/domain/parks/is-schema-error.js',
     'src/application/parks/build-park-admin-overview.js',
     'src/ui/park-admin-renderer.js',
+    'src/application/parks/merge-park-identities.js',
     'src/services/park-registry.js',
     'src/application/parks/build-grid-waypoint-rows.js',
     'src/application/parks/count-grid-cell-measurements.js',
@@ -208,6 +209,7 @@ export function loadApp({ sadece } = {}) {
     secim.add('src/adapters/parks/nominatim-client.js');
   }
   if (secim && secim.has('src/services/park-registry.js')) {
+    secim.add('src/application/parks/merge-park-identities.js');
     secim.add('src/domain/parks/is-schema-error.js');
     secim.add('src/domain/parks/identity.js');
     secim.add('src/adapters/parks/park-store.js');

@@ -1054,28 +1054,30 @@ function dgParkMergeFromSelect(id){
   dgParkMergeInto(id,dst);
 }
 
-async function dgParkMergeInto(srcId,dstId){
-  if(!dgIsAdmin())return toast("🔐 Bu işlem yalnız yöneticiye açık.","err");
-  srcId=+srcId;dstId=+dstId;
-  if(!srcId||!dstId||srcId===dstId)return toast("Geçersiz birleştirme","err");
-  const src=DG_PARK_ADMIN_ROWS.find(x=>x.id===srcId);
-  const dst=DG_PARK_ADMIN_ROWS.find(x=>x.id===dstId);
-  if(!src||!dst)return toast("Park bulunamadı — 🔄 ile yenile","err");
-
-  if(!confirm(_tprf(
+const DG_PARK_ADMIN_MERGE=window.DG_PARK_ADMIN_MERGE_APPLICATION.create({
+  isAdmin:dgIsAdmin,
+  getParks:()=>DG_PARK_ADMIN_ROWS,
+  confirmMerge:(src,dst)=>confirm(_tprf(
     '"{src}" (#{sid}) → "{dst}" (#{did}) birleştirilsin mi?\n\n· Projeler ve ölçümler hedef parka taşınır\n· Proje adları hedef park adına göre yeniden kurulur\n· Kaynak kimlik (#{sid}) SİLİNİR — geri alınamaz\n\nKarşılaştırma artık TEK "{dst}" satırı gösterir.',
-    {src:src.name,sid:srcId,dst:dst.name,did:dstId})))return;
+    {src:src.name,sid:src.id,dst:dst.name,did:dst.id})),
+  moveProjects:(srcId,dstId)=>sb.from("projects").update({park_id:dstId}).eq("park_id",srcId),
+  moveMeasurements:(srcId,dstId)=>sb.from("measurements").update({park_id:dstId}).eq("park_id",srcId),
+  resyncProjectNames:dgResyncProjectNames,
+  deletePark:id=>sb.from("parks").delete().eq("id",id),
+  clearSession:()=>DG_PARK_SESSION.clear()
+});
 
-  const{error:e1}=await sb.from("projects").update({park_id:dstId}).eq("park_id",srcId);
-  if(e1)return toast(dgCf("Projeler taşınamadı: ")+esc(e1.message),"err");
-  const{error:e2}=await sb.from("measurements").update({park_id:dstId}).eq("park_id",srcId);
-  if(e2)toast(dgCf("Ölçümler taşınırken hata: ")+esc(e2.message),"warn");
-  await dgResyncProjectNames(dstId);
-  const{error:e3}=await sb.from("parks").delete().eq("id",srcId);
-  if(e3)return toast(_tpr("Kaynak kimlik silinemedi: ")+esc(e3.message),"err");
+async function dgParkMergeInto(srcId,dstId){
+  const result=await DG_PARK_ADMIN_MERGE(srcId,dstId);
+  if(result.status==="forbidden")return toast("🔐 Bu işlem yalnız yöneticiye açık.","err");
+  if(result.status==="invalid")return toast("Geçersiz birleştirme","err");
+  if(result.status==="park-missing")return toast("Park bulunamadı — 🔄 ile yenile","err");
+  if(result.status==="cancelled")return;
+  if(result.status==="projects-failed")return toast(dgCf("Projeler taşınamadı: ")+esc(result.error.message),"err");
+  if(result.measurementError)toast(dgCf("Ölçümler taşınırken hata: ")+esc(result.measurementError.message),"warn");
+  if(result.status==="delete-failed")return toast(_tpr("Kaynak kimlik silinemedi: ")+esc(result.error.message),"err");
 
-  DG_PARK_SESSION.clear();
-  toast(_tprf("✓ #{a} → #{b} birleştirildi",{a:srcId,b:dstId}),"ok","🔀");
+  toast(_tprf("✓ #{a} → #{b} birleştirildi",{a:result.sourceId,b:result.destinationId}),"ok","🔀");
   await dgAfterParkAdminChange();
 }
 
