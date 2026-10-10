@@ -174,38 +174,15 @@ function pointInPark(lat,lon,rings){
 ========================================================= */
 
 function orientation(a,b,c){
-  const v=
-    (b.x-a.x)*(c.y-a.y)-
-    (b.y-a.y)*(c.x-a.x);
-
-  if(Math.abs(v)<1e-9)return 0;
-
-  return v>0?1:2;
+  return window.DG_PARK_SEGMENTS.orientation(a,b,c);
 }
 
 function onSegment(a,b,p){
-  return(
-    p.x>=Math.min(a.x,b.x)-1e-9 &&
-    p.x<=Math.max(a.x,b.x)+1e-9 &&
-    p.y>=Math.min(a.y,b.y)-1e-9 &&
-    p.y<=Math.max(a.y,b.y)+1e-9
-  );
+  return window.DG_PARK_SEGMENTS.onSegment(a,b,p);
 }
 
 function segmentsIntersect(a,b,c,d){
-  const o1=orientation(a,b,c);
-  const o2=orientation(a,b,d);
-  const o3=orientation(c,d,a);
-  const o4=orientation(c,d,b);
-
-  if(o1!==o2&&o3!==o4)return true;
-
-  if(o1===0&&onSegment(a,b,c))return true;
-  if(o2===0&&onSegment(a,b,d))return true;
-  if(o3===0&&onSegment(c,d,a))return true;
-  if(o4===0&&onSegment(c,d,b))return true;
-
-  return false;
+  return window.DG_PARK_SEGMENTS.segmentsIntersect(a,b,c,d);
 }
 
 function rectCorners(r){
