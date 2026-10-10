@@ -482,16 +482,7 @@ async function createWaypointsFromGrid(mode){
 
   const first=next;
 
-  const rows=
-    targetCells.map(c=>({
-      owner:USER.id,
-      project_id:pid,
-      wp_id:next++,
-      /* Yeni gridin güvenli iç noktası; eski kayıtlar için merkez yedeği. */
-      lat:+((Number.isFinite(c.lat)?c.lat:(c.s0+c.s1)/2).toFixed(6)),
-      lon:+((Number.isFinite(c.lon)?c.lon:(c.w0+c.w1)/2).toFixed(6)),
-      visited:false
-    }));
+  const rows=window.DG_GRID_WAYPOINT_ROWS.build(targetCells,next,USER.id,pid);
 
   LAST_WP_ROWS=rows;
 
