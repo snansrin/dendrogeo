@@ -421,16 +421,7 @@ async function createWaypointsFromGrid(mode){
     );
   }
 
-  let targetCells=
-    mode==="manual"
-      ?
-      GRID_CELLS.filter(
-        c=>SELECTED_CELLS.has(c.id)
-      )
-      :
-      GRID_CELLS.filter(
-        c=>c.n===0
-      );
+  let targetCells=window.DG_GRID_WAYPOINT_SELECTION.select(GRID_CELLS,mode,SELECTED_CELLS);
 
   if(
     mode==="manual" &&
