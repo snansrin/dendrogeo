@@ -28,12 +28,18 @@ async function buildGrid(){
   if(DG_GREEN_ONLY&&!(typeof DG_LC_LAST!=="undefined"&&DG_LC_LAST?.result?.cells?.length))throw Error("Önce yüzey analizi yapın; grid güncel yeşil alanı kullanır.");
   const review=window.DG_LC_SENS?.state;if(review?.busy||review?.saving)throw Error("Yüzey işleminin tamamlanmasını bekleyin.");
   const signature=dgGridReviewSignature(),epsg=dgLcUtmEpsgForLatLon(park[0][0][0],park[0][0][1]);
-  let parts=[];
-  if(review?.record&&review.geometry)parts=window.DG_SURFACE_REVIEW.resolved(dgSensCells(),dgSensEffective,review.geometry,dgSensFeatures(),review.epsg,review.parkGeometry);
-  else if(typeof DG_LC_LAST!=="undefined"&&DG_LC_LAST?.result?.cells?.length){
-   const cells=DG_LC_LAST.result.cells,prepared=await dgSurfacePrepare({cells,outer:park,holes:PARK_HOLES||[],epsg,objects:null,elements:window.DG_SURFACE_OSM?.boundary===JSON.stringify(park)?window.DG_SURFACE_OSM.elements:[],features:[]});
-   parts=prepared.parts;
-  }
+  const lastCells=typeof DG_LC_LAST!=="undefined"?DG_LC_LAST?.result?.cells:null;
+  const osmElements=window.DG_SURFACE_OSM?.boundary===JSON.stringify(park)?window.DG_SURFACE_OSM.elements:[];
+  const parts=await window.DG_GRID_SURFACE_PARTS.prepare({
+   review,
+   lastCells,
+   outer:park,
+   holes:PARK_HOLES||[],
+   epsg,
+   osmElements,
+   resolveReviewParts:()=>window.DG_SURFACE_REVIEW.resolved(dgSensCells(),dgSensEffective,review.geometry,dgSensFeatures(),review.epsg,review.parkGeometry),
+   prepare:dgSurfacePrepare
+  });
   const request=window.DG_GRID_REQUEST.build({size,clearance,epsg,outer:park,holes:PARK_HOLES,greenOnly:DG_GREEN_ONLY,parts,waterRings:WATER_RINGS,imperviousRings:IMP_RINGS,waterLines:WATER_LINES,imperviousLines:IMP_LINES,gridBlockLines:GRID_BLOCK_LINES});
   const result=await dgSurfaceWorkerJob(request)||await dgSurfaceGrid(request);
   if(epoch!==DG_GRID_EPOCH||park!==PARK_POLY)return;
