@@ -674,7 +674,7 @@ describe('entegrasyon zinciri kilitleri (0054 · lc-sens)', () => {
      *     üstlerine tıklama doğrudan haritaya düşer; tek kesin çözüm guard),
      * (b) lc-sens mount'ta guard'ı AÇAR, cleanup'ta KAPATIR,
      * (c) 🌳 Park seç düğmesi guard'ı kullanıcı iradesiyle düşürür. */
-    assert.match(panel, /if\(window\._dgSensGuard\)return;/);
+    assert.match(panel, /isReviewActive:\(\)=>window\._dgSensGuard/);
     assert.match(sens, /dgSensGuard\(true\); \/\* 0056: analiz başladı/);
     assert.match(sens, /dgSensGuard\(false\); \/\* 0056: park kapandı/);
     assert.match(sens, /function dgSensModePark\(\)\{\s*dgSensGuard\(false\);/);

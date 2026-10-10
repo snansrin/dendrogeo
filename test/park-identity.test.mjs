@@ -584,7 +584,7 @@ describe('akış: karşılaştırma park bazlı, ölçüm kapalı, park kaydedil
   });
 
   test('harita tıklaması tek algılama yolundan geçer (elle park teklifi dahil)', () => {
-    assert.match(panel, /await dgDetectAt\(e\.latlng\.lat,e\.latlng\.lng\)/);
+    assert.match(panel, /detect:\(lat,lng\)=>dgDetectAt\(lat,lng\)/);
     assert.match(registry, /dgOfferManualPark\(/);
   });
 

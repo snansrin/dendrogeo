@@ -38,58 +38,13 @@ const DG_PARK_MODE_CONTROLLER=window.DG_PARK_MODE_CONTROLLER_UI.create({
 });
 function toggleParkMode(){return DG_PARK_MODE_CONTROLLER();}
 
-function bindParkClick(){
-  if(
-    PARK_CLICK_BOUND ||
-    !map
-  ){
-    return;
-  }
-
-  PARK_CLICK_BOUND=true;
-
-  map.on(
-    "click",
-    async e=>{
-      if(!PARK_MODE)return;
-
-      /* 0056 MOD AYRIMI (kullanıcı kuralı: "park algılama ile analizi
-       * ayıramıyosun" — haklıydı): Hassasiyet paneli etkinken harita
-       * tıklamaları park algılamaya HİÇ gitmez. Sızıntının iki yolu vardı:
-       *   (a) 0055: interaktif aday poligonuna tıklama DOM'da kabarıyordu
-       *       (stopPropagation ile kapatıldı),
-       *   (b) 0056: LULC rapor poligonları interactive:false — üstlerine
-       *       tıklama DOĞRUDAN haritaya düşer; aday olmayan yeşil/su
-       *       gridlerine basınca dgDetectAt çalışıp paneli söküyordu.
-       * Bekçi (b)'yi kökten kapatır: guard panel mount'unda açılır,
-       * cleanup'ta kapanır. Park değiştirmek için: 🌳 Park Analizi Modu
-       * düğmesini kapat-aç (clearPark guard'ı düşürür) veya paneldeki
-       * "🌳 Park seç" düğmesi. */
-      if(window._dgSensGuard)return;
-
-      /* 2026-09-24: tıklama artık dgDetectAt'e gider (park-registry.js).
-       * Tek yol olmasının sebebi: aynı fonksiyon "konumumdan algıla" ve
-       * geri doldurma aracı tarafından da kullanılıyor; park bulunamazsa
-       * elle park oluşturma teklifini de o veriyor. Eskiden burada sadece
-       * "Park bulunamadı" toast'ı vardı ve kullanıcı kilitli kalıyordu. */
-      try{
-        await dgDetectAt(e.latlng.lat,e.latlng.lng);
-      }catch(err){
-        console.error(
-          "DENDROGEO · Park tıklama hatası:",
-          err
-        );
-
-        toast(
-          "Park analizi başarısız: "+
-          (err?.message||String(err)),
-          "err",
-          "🌳"
-        );
-      }
-    }
-  );
-}
+const DG_PARK_CLICK_CONTROLLER=window.DG_PARK_CLICK_CONTROLLER_UI.create({
+ isBound:()=>PARK_CLICK_BOUND,setBound:value=>{PARK_CLICK_BOUND=value;},getMap:()=>map,
+ getMode:()=>PARK_MODE,isReviewActive:()=>window._dgSensGuard,
+ detect:(lat,lng)=>dgDetectAt(lat,lng),logError:(...args)=>console.error(...args),
+ notify:(...args)=>toast(...args)
+});
+function bindParkClick(){return DG_PARK_CLICK_CONTROLLER();}
 
 /* =========================================================
    DRAW PARK (MODERN UI)
