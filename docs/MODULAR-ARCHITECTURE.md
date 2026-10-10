@@ -107,6 +107,7 @@ src/
 - `domain/parks/cell-in-park.js`, merkez/köşe doğrulaması, park sınırı kesişimi ve iç delik denetimiyle örnekleme hücresinin parkta kalmasını güvenli biçimde belirler; park geometrisi servisi seçili halkaları aktarır.
 - `domain/parks/park-overlap.js`, aday halka/çizgiyi park sınırına karşı bbox, nokta-içeride, 5 m çizgi örnekleme ve segment kesişimiyle değerlendirir; `park-geometry.js` legacy `ringTouchesPark()`/`lineTouchesPark()` API'lerini korur.
 - `domain/parks/impervious-geometry.js`, OSM sert zemin alanı, yol çizgisi ve yaya yolu grid engelleyicisi kurallarını uygular; `park-geometry.js` eski toplama fonksiyonlarını mevcut global dizilere bağlayan sarmalayıcılar olarak korur.
+- `domain/parks/cell-validity.js`, park sınırı, isteğe bağlı yeşil alan ve su/sert zemin engelleri karşısında grid hücresinin geçerliliğini bağımlılıklarla verilen saf kurallarda değerlendirir; `park-geometry.js` legacy `isCellValid()` API'sini global durum adaptörü olarak korur.
 - `domain/parks/simplify-ring.js`, park sınır halkasını deterministik nokta sınırına indirir; `application/parks/persist-park-geometry.js` dış/ iç halkaları hazırlar, `adapters/parks/park-geometry-store.js` Supabase `geom_json` yazımını yapar. `geofence.js` eski sadeleştirme ve kalıcılık fonksiyonlarını uyumluluk sarmalayıcısı olarak korur; yazım başarısızlığında daire yedeği davranışı sürer.
 - Yeni dosyalar analiz zincirine sürümlü lazy loader ve service worker precache üzerinden eklenmiştir.
 
