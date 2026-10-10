@@ -46,44 +46,15 @@ function projectPoint(lat,lon,refLat){
 }
 
 function ringBBox(ring,refLat){
-  let minX=Infinity;
-  let minY=Infinity;
-  let maxX=-Infinity;
-  let maxY=-Infinity;
-
-  for(const p of ring){
-    const q=projectPoint(p[0],p[1],refLat);
-
-    if(q.x<minX)minX=q.x;
-    if(q.y<minY)minY=q.y;
-    if(q.x>maxX)maxX=q.x;
-    if(q.y>maxY)maxY=q.y;
-  }
-
-  return {
-    minX,
-    minY,
-    maxX,
-    maxY
-  };
+  return window.DG_PARK_BOUNDS.ringBBox(ring,refLat);
 }
 
 function expandBBox(x,d){
-  return {
-    minX:x.minX-d,
-    minY:x.minY-d,
-    maxX:x.maxX+d,
-    maxY:x.maxY+d
-  };
+  return window.DG_PARK_BOUNDS.expandBBox(x,d);
 }
 
 function bboxesOverlap(a,b){
-  return !(
-    a.maxX<b.minX ||
-    a.minX>b.maxX ||
-    a.maxY<b.minY ||
-    a.minY>b.maxY
-  );
+  return window.DG_PARK_BOUNDS.bboxesOverlap(a,b);
 }
 
 function pointInPolygonXY(x,y,poly){
@@ -147,12 +118,7 @@ function segmentsIntersect(a,b,c,d){
 }
 
 function rectCorners(r){
-  return[
-    {x:r.minX,y:r.minY},
-    {x:r.maxX,y:r.minY},
-    {x:r.maxX,y:r.maxY},
-    {x:r.minX,y:r.maxY}
-  ];
+  return window.DG_PARK_BOUNDS.rectCorners(r);
 }
 
 function segmentIntersectsRect(a,b,rect){
