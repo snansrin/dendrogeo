@@ -356,36 +356,12 @@ async function createWaypointsFromGrid(mode){
     );
   }
 
-  if(
-    WP_AUTO_LAYER &&
-    map
-  ){
-    map.removeLayer(
-      WP_AUTO_LAYER
-    );
-  }
-
-  WP_AUTO_LAYER=
-    L.layerGroup().addTo(map);
-
-  rows.forEach(r=>
-    L.circleMarker(
-      [
-        r.lat,
-        r.lon
-      ],
-      {
-        radius:5,
-        color:"#fff",
-        weight:1.5,
-        fillColor:"#e11d48",
-        fillOpacity:.95,
-        interactive:false
-      }
-    ).addTo(
-      WP_AUTO_LAYER
-    )
-  );
+  WP_AUTO_LAYER=window.DG_GRID_WAYPOINT_LAYER.render({
+    map,
+    previousLayer:WP_AUTO_LAYER,
+    rows,
+    leaflet:L
+  });
 
   $("nProject").value=
     String(pid);
