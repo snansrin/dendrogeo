@@ -852,6 +852,7 @@ function dgCloseBackfill(){
 
 const DG_PARK_BACKFILL_APPLY=window.DG_PARK_BACKFILL_APPLY_APPLICATION.create({
   isAdmin:()=>!!PROFILE&&(PROFILE.role==="admin"||PROFILE.role==="owner"),
+
   confirmApply:count=>confirm(_tprf("{n} proje parkla eşleşecek ve adları yeniden kurulacak. Devam?",{n:count})),
   onProgress:(i,n,label)=>dgBackfillProgress(i,n,label),
   registerPark:(candidate,options)=>dgRegisterPark(candidate,options),
@@ -890,21 +891,21 @@ async function dgLinkProjectToPark(proj,park){
 /* OSM'de park bulunamayan proje: ölçüm merkezinde, proje adıyla MANUEL park
  * kimliği aç ve bağla. Böylece "Ülkü", "Dikmen Vadisi" gibi yerler de park
  * bazlı karşılaştırmaya girer. */
+const DG_PARK_BACKFILL_MANUAL=window.DG_PARK_BACKFILL_MANUAL_APPLICATION.create({
+  isAdmin:()=>!!PROFILE&&(PROFILE.role==="admin"||PROFILE.role==="owner"),
+  getPlanRow:id=>(DG_BACKFILL_PLAN||[]).find(row=>row.project.id===id),
+  confirmCreate:({name,lat,lon})=>confirm(_tprf('"{name}" adıyla elle park kimliği oluşturulsun ve proje bağlansın mı?\nKonum: ölçümlerin merkezi ({la}, {lo})',{name,la:lat.toFixed(5),lo:lon.toFixed(5)})),
+  createPark:(name,row)=>dgRegisterPark({name,source:"manual",area:null},{manual:true,lat:row.lat,lon:row.lon,source:"manual"}),
+  linkProject:(project,park)=>dgLinkProjectToPark(project,park)
+});
+
 async function dgBackfillManual(projectId){
-  if(!PROFILE||(PROFILE.role!=="admin"&&PROFILE.role!=="owner"))return toast("Yetki yok.","err");
-  const x=(DG_BACKFILL_PLAN||[]).find(k=>k.project.id===projectId);
-  if(!x||x.lat==null)return toast("Bu proje için ölçüm merkezi yok.","err");
-  const name=String(x.project.name||"").trim()||"İsimsiz Park";
-  if(!confirm(_tprf('"{name}" adıyla elle park kimliği oluşturulsun ve proje bağlansın mı?\nKonum: ölçümlerin merkezi ({la}, {lo})',{name:name,la:x.lat.toFixed(5),lo:x.lon.toFixed(5)})))return;
-
-  const park=await dgRegisterPark(
-    {name,source:"manual",area:null},
-    {manual:true,lat:x.lat,lon:x.lon,source:"manual"}
-  );
-  if(!park)return toast("Park kimliği oluşturulamadı.","err","🌳");
-
-  const done=await dgLinkProjectToPark(x.project,park);
-  if(!done)return;
+  const result=await DG_PARK_BACKFILL_MANUAL(projectId);
+  if(result.status==="forbidden")return toast("Yetki yok.","err");
+  if(result.status==="measurement-center-missing")return toast("Bu proje için ölçüm merkezi yok.","err");
+  if(result.status==="cancelled"||result.status==="project-link-failed")return;
+  if(result.status==="park-create-failed")return toast("Park kimliği oluşturulamadı.","err","🌳");
+  const x=result.row,park=result.park;
 
   /* Plan satırını "eşleşti"ye çevir ki liste güncel kalsın */
   x.durum="eşleşti";x.parkName=park.name;x.yol="elle oluşturuldu";

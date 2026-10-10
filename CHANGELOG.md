@@ -12,6 +12,7 @@ Yeni sürüm yayımlama adımları: [`docs/surum-yayini.md`](docs/surum-yayini.m
 ### İyileştirildi — Park geri doldurma planı
 Park bağı olmayan projeler için ölçüm merkezini hesaplama, OSM adayını arama ve uygulanabilir/eksik satırları planlama akışı uygulama modülüne taşındı. Yönetici/çevrimiçi kapıları, 2,1 saniyelik sorgu aralığı ve mevcut önizleme davranışı korunuyor.
 Planı onayla-yaz akışı da ayrı uygulama modülüne alındı; sıralı park kaydı ve proje bağı yazımları, kısmi hataları saymaya devam ediyor.
+OSM'de eşleşmeyen tek bir proje için elle park açma, onay ve bağlama akışı da uygulama modülüne ayrıldı; mevcut plan satırı yalnız bağlama başarılıysa güncelleniyor.
 
 ### İyileştirildi — Park kimliği yönetim listesinin yükleme akışı
 Yönetici yetkisi ve park/proje/ölçüm verilerinin paralel yüklenmesi uygulama modülüne taşındı. Yönetim ekranı mevcut hata mesajlarını ve çizim akışını koruyor; yeni modül çevrimdışı önbelleğe ve test yükleme zincirine eklendi.
@@ -660,6 +661,7 @@ dali silinecek). 0034'un uzerine insa eder.
 - GROUP_COLOR_INK (metin tonlari): dash.js etiketleri 3.03/2.37:1 → ≥5.0:1.
   #68766e kalintilari (dash.js chart ticks, map.js popup) → #5f6d65.
 - Klavye: sol menu 10 div → role="button" tabindex="0" + dgKeyActivate
+
   (Enter/Space); landing ulke/sehir satirlari tabindex+keydown.
 - 14 form alanina label for / aria-label; 65 <th> → scope="col"
   (partials + alt sayfalar + src sablonlari; make-report.mjs DOKUNULMADI —
@@ -1270,6 +1272,7 @@ kaplamasın."
   olarak gömülür → sayfada dış istek YOK, PDF/çevrimdışı çalışır.
 - **Sıkı arşiv**: `data.json` + `metadata.json` artık minified (arşiv ~%40
   küçük); `publish-queue` her yayının `archive_bytes` değerini günlüğe yazar.
+
   Yayımlanmış (donmuş) raporlar DEĞİŞMEZ.
 - Testler: `test/report-author-qr.test.mjs` (yazar/QR/atıf/metadata
   sözleşmeleri); CANARY 50/28.
@@ -1884,6 +1887,7 @@ değiştirildiği** için SemVer gereği büyük sürüm artışı yapıldı.
   deseni `İsimsiz`'i eşleştirmiyordu → uyarı hiç çıkmıyordu; `"İ".toLowerCase()`
   birleşen nokta ürettiği için park adı normalizasyonu elle çözülüyor.
 - `parks_id_seq` USAGE grant'ı eksikti → `authenticated` rolü park kaydı
+
   eklerken `permission denied for sequence` alıyordu.
 - Rıza kutusunda `consentEl.focus()` savunmacı çağrıya çevrildi.
 
