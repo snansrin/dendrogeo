@@ -103,6 +103,7 @@ src/
 - `application/parks/prepare-grid-waypoint-batch.js`, son proje waypoint kimliğinden başlayarak seçili grid hücreleri için satır üretimini mevcut satır kurucusuna devreder; `grid-engine.js` son kimlik aralığını aynı batch'ten hesaplar.
 - `adapters/parks/fetch-grid-measurement-candidates.js`, park bbox'ı içinde onaylı ölçümlerin koordinatlarını ve toplam sayısını 5.000 satır sınırıyla getirir; hücre eşleme ve projeksiyon uygulama katmanında kalır.
 - `domain/parks/grid-options.js`, grid hücre boyutu ve 1–20 m clearance varsayılan/sınır kurallarını mevcut sayısal davranışla çözer; DOM girdilerini servis okur.
+- `domain/parks/grid-cell-shape.js`, GeoJSON hücre halkalarını `[LON,LAT]` düzeninden Leaflet `[LAT,LON]` düzenine çevirir; geometri taşımayan eski hücreler mevcut dört köşe yedeğini kullanır.
 - `domain/parks/grid-bounds.js`, dış halka ve delik koordinatlarından grid sorgusunun enlem/boylam sınırlarını üretir; `grid-engine.js` bbox'ı ölçüm adapter'ına aktarır.
 - `application/parks/prepare-grid-surface-parts.js`, kayıtlı inceleme geometrisine öncelik verir, yoksa en son yüzey analizini mevcut hazırlama servisine gönderir; hiçbiri yoksa boş parça listesi döndürür.
 - `application/parks/resolve-grid-cell-style.js`, boş, ölçülmüş ve seçili grid hücrelerinin Leaflet stilini tek kuralla üretir; çizim ve seçim akışları aynı stili kullanır.
