@@ -234,57 +234,57 @@
 <link rel="stylesheet" href="vendor/MarkerCluster.Default-1.5.3.css">
 <script src="vendor/leaflet.markercluster-1.5.3.js" defer></script>
 <script src="vendor/supabase-js-2.116.0.js" defer></script>
-<script src="src/config/supabase.js?v=266ebf0a" defer></script>
-<script src="src/config/constants.js?v=5ad5a789" defer></script>
-<script src="src/config/measurement-protocol-lock.js?v=750a1076" defer></script>
-<script src="src/config/wood-density-lock.js?v=f77a1a29" defer></script>
-<script src="src/config/species.js?v=83ee1479" defer></script>
+<script src="src/config/supabase.js?v=f1e0d2dd" defer></script>
+<script src="src/config/constants.js?v=9a9e5e28" defer></script>
+<script src="src/config/measurement-protocol-lock.js?v=e1072e57" defer></script>
+<script src="src/config/wood-density-lock.js?v=04bbb8c6" defer></script>
+<script src="src/config/species.js?v=495c3d82" defer></script>
 <!-- DİL KATMANI (0035): TR markup varsayılan; EN sözlüğü çalışma zamanında
      uygulanır (dgToggleLang). defer sırası önemli değil — DOMContentLoaded'da
      ya da hemen (hazırsa) çalışır. module-registry + CORE_ASSETS kaydı şart. -->
-<script src="src/config/i18n.js?v=d8a4e8c3" defer></script>
-<script src="src/utils/geo.js?v=414a8425" defer></script>
-<script src="src/utils/truncation.js?v=89668337" defer></script>
+<script src="src/config/i18n.js?v=71e41524" defer></script>
+<script src="src/utils/geo.js?v=b21b0f85" defer></script>
+<script src="src/utils/truncation.js?v=44f93d2f" defer></script>
 <!-- Faz 7: geotiff (317 KB) ve chart.js (208 KB) artık SENKRON yüklenmiyor;
      src/utils/lazylibs.js ihtiyaç anında enjekte eder (LULC analizi / panel grafiği). -->
 <script id="dgRuntimeBuild" type="application/json">"4fcbb1d1fed015fb"</script>
 <!-- Verified fallback OSM water geometry, independent of the lazy raster engine. -->
-<script src="src/services/osm-water-backup.js?v=915fb8fa" defer></script>
-<script src="src/utils/lazylibs.js?v=7d50a591" defer></script>
-<script src="src/domain/trees/photo-quality.js?v=24644243" defer></script>
-<script src="src/domain/trees/allometry.js?v=e8abfbe0" defer></script>
-<script src="src/application/trees/calculate-tree-carbon.js?v=bdad5684" defer></script>
-<script src="src/application/trees/calculate-tree-carbon-from-circumference.js?v=0323c459" defer></script>
-<script src="src/application/trees/validate-measurement.js?v=04b97a5e" defer></script>
-<script src="src/services/allometry.js?v=f2c9d9d4" defer></script>
-<script src="src/services/auth.js?v=3a14b8bf" defer></script>
-<script src="src/services/export.js?v=47f908da" defer></script>
-<script src="src/services/offline.js?v=9dc36da8" defer></script>
+<script src="src/services/osm-water-backup.js?v=35857dbe" defer></script>
+<script src="src/utils/lazylibs.js?v=29fa34cf" defer></script>
+<script src="src/domain/trees/photo-quality.js?v=a8959a49" defer></script>
+<script src="src/domain/trees/allometry.js?v=24fab98b" defer></script>
+<script src="src/application/trees/calculate-tree-carbon.js?v=1d77b330" defer></script>
+<script src="src/application/trees/calculate-tree-carbon-from-circumference.js?v=665af831" defer></script>
+<script src="src/application/trees/validate-measurement.js?v=83caa1b1" defer></script>
+<script src="src/services/allometry.js?v=0ce9ac1d" defer></script>
+<script src="src/services/auth.js?v=20972ff8" defer></script>
+<script src="src/services/export.js?v=d920f5cb" defer></script>
+<script src="src/services/offline.js?v=fb56b832" defer></script>
 <!-- YÖNETİM ZİNCİRİ (Faz 6 — eski admin.js beş modüle bölündü) -->
-<script src="src/application/visitors/build-live-activity.js?v=58bb85ee" defer></script>
-<script src="src/application/visitors/build-live-roster.js?v=1a975a02" defer></script>
-<script src="src/services/visit-stats.js?v=84ffb71d" defer></script>
-<script src="src/services/data-requests.js?v=8ce04681" defer></script>
-<script src="src/services/user-admin.js?v=e24fae81" defer></script>
-<script src="src/services/backup.js?v=f7cb0a66" defer></script>
-<script src="src/services/admin.js?v=91991b9b" defer></script>
+<script src="src/application/visitors/build-live-activity.js?v=6fbb7b5a" defer></script>
+<script src="src/application/visitors/build-live-roster.js?v=7a2d2c72" defer></script>
+<script src="src/services/visit-stats.js?v=ffdfc749" defer></script>
+<script src="src/services/data-requests.js?v=c9e0230b" defer></script>
+<script src="src/services/user-admin.js?v=0280073c" defer></script>
+<script src="src/services/backup.js?v=918847d6" defer></script>
+<script src="src/services/admin.js?v=e6cb885f" defer></script>
 <!-- YÖNETİM AĞACI (2026-09-24): park → proje → kullanıcı → ölçüm kademeli
      görünümü + sorgu hatası görünürlüğü. admin.js'ten SONRA yüklenir
      (approve/reject/del fonksiyonlarını çağırır). -->
-<script src="src/services/admin-tree.js?v=29e3a687" defer></script>
+<script src="src/services/admin-tree.js?v=bbb7af4f" defer></script>
 <!-- BİLİMSEL RAPOR YAYINI (2026-09-27): site içinden yayın kuyruğu —
      📄 Yayınla → report_requests (0008) → rapor-yayin.yml → rapor/DGR-…/
      → kalıcı bağlantı + 📤 Paylaş. admin.js loadAdmin() bu modülü çağırır. -->
-<script src="src/core/surface-display.js?v=9436cf4c" defer></script>
-<script src="src/domain/reports/report-context.js?v=d00b719b" defer></script>
-<script src="src/core/report-context.js?v=ae652649" defer></script>
-<script src="src/application/reports/collect-publication-request.js?v=30eb15e0" defer></script>
-<script src="src/services/academic-profile.js?v=5b18f045" defer></script>
-<script src="src/services/report-publish.js?v=4d1b4a76" defer></script>
-<script src="src/services/park-invites.js?v=7b3f92a6" defer></script>
-<script src="src/services/world.js?v=ef142790" defer></script>
-<script src="src/services/measure.js?v=fb236e79" defer></script>
-<script src="src/services/map.js?v=bf432eab" defer></script>
+<script src="src/core/surface-display.js?v=7288acc2" defer></script>
+<script src="src/domain/reports/report-context.js?v=fe2eadb3" defer></script>
+<script src="src/core/report-context.js?v=d9780f46" defer></script>
+<script src="src/application/reports/collect-publication-request.js?v=63642649" defer></script>
+<script src="src/services/academic-profile.js?v=29cfa525" defer></script>
+<script src="src/services/report-publish.js?v=c4e318f4" defer></script>
+<script src="src/services/park-invites.js?v=c1295f43" defer></script>
+<script src="src/services/world.js?v=6119719d" defer></script>
+<script src="src/services/measure.js?v=5e0196c5" defer></script>
+<script src="src/services/map.js?v=9250d1c6" defer></script>
 <!-- LULC ZİNCİRİ ARTIK TEMBEL (2026-09-25 · Faz 8): 8 dosya ilk yüklemede
      indirilmiyor. Yalnız "🌿 Yüzey Örtüsü Analizi"ne basan kullanıcı için
      src/utils/lazylibs.js → dgEnsureLulc() sırayla enjekte eder
@@ -293,70 +293,71 @@
      yani çevrimdışı davranış değişmez. Kazanç: ilk yüklemede 8 istek azalır. -->
 <!-- PARK ZİNCİRİ (Faz 4 — eski gridplan.js yedi modüle bölündü; sıralama ÖNEMLİ:
      state → istemci → geometri → sorgu → motor → panel → export) -->
-<script src="src/services/park-state.js?v=7b25acbf" defer></script>
-<script src="src/services/osm-client.js?v=dbcf97bf" defer></script>
-<script src="src/domain/parks/road-half-width.js?v=18bf17c4" defer></script>
-<script src="src/domain/parks/classify-surface-tags.js?v=443639fb" defer></script>
-<script src="src/domain/parks/impervious-geometry.js?v=78747dd4" defer></script>
-<script src="src/domain/parks/area.js?v=8560bbea" defer></script>
-<script src="src/domain/parks/resolve-park-area.js?v=8b196454" defer></script>
-<script src="src/domain/parks/segment-intersection.js?v=abe19ecf" defer></script>
-<script src="src/domain/parks/point-in-polygon.js?v=d57e2be3" defer></script>
-<script src="src/domain/parks/bounds.js?v=757b8dbd" defer></script>
-<script src="src/domain/parks/park-containment.js?v=f7e9127f" defer></script>
-<script src="src/domain/parks/line-distance.js?v=dd5c38e3" defer></script>
-<script src="src/domain/parks/osm-rings.js?v=e5c871fc" defer></script>
-<script src="src/domain/parks/rect-intersection.js?v=223053d1" defer></script>
-<script src="src/domain/parks/cell-in-park.js?v=67978be4" defer></script>
-<script src="src/domain/parks/cell-validity.js?v=ea1de918" defer></script>
-<script src="src/domain/parks/park-overlap.js?v=e4e4d5f5" defer></script>
-<script src="src/services/park-geometry.js?v=e88835dd" defer></script>
-<script src="src/domain/parks/simplify-ring.js?v=e258732a" defer></script>
-<script src="src/adapters/parks/park-geometry-store.js?v=27d77725" defer></script>
-<script src="src/application/parks/persist-park-geometry.js?v=efd6c723" defer></script>
-<script src="src/services/geofence.js?v=b4a00c60" defer></script>
-<script src="src/application/parks/find-park-candidates.js?v=58e8b055" defer></script>
-<script src="src/application/parks/fetch-detailed-coverage.js?v=abd36841" defer></script>
-<script src="src/application/parks/classify-coverage-elements.js?v=96f9f0f5" defer></script>
-<script src="src/application/parks/find-nominatim-boundary.js?v=d4040ab7" defer></script>
-<script src="src/adapters/parks/nominatim-client.js?v=971d31a8" defer></script>
-<script src="src/services/park-query.js?v=0ed63915" defer></script>
-<script src="src/domain/parks/identity.js?v=9dcd82c3" defer></script>
-<script src="src/adapters/parks/park-store.js?v=b6347f56" defer></script>
-<script src="src/application/parks/register-park.js?v=d31e0b1a" defer></script>
-<script src="src/adapters/parks/project-store.js?v=edc03523" defer></script>
-<script src="src/application/parks/create-project.js?v=37c4cb55" defer></script>
-<script src="src/adapters/parks/project-link-store.js?v=5781a00c" defer></script>
-<script src="src/application/parks/link-project.js?v=1e840ded" defer></script>
-<script src="src/application/parks/detect-park.js?v=1a3ea816" defer></script>
-<script src="src/application/parks/create-manual-park.js?v=97320981" defer></script>
-<script src="src/adapters/parks/park-search.js?v=b0fc2c5f" defer></script>
-<script src="src/application/parks/search-park-by-name.js?v=6348419b" defer></script>
-<script src="src/domain/parks/is-schema-error.js?v=91d53b54" defer></script>
+<script src="src/services/park-state.js?v=d9549386" defer></script>
+<script src="src/services/osm-client.js?v=c4460f7a" defer></script>
+<script src="src/domain/parks/road-half-width.js?v=5a7fb410" defer></script>
+<script src="src/domain/parks/classify-surface-tags.js?v=1e4a5aae" defer></script>
+<script src="src/domain/parks/impervious-geometry.js?v=36c156aa" defer></script>
+<script src="src/domain/parks/area.js?v=e0181a8b" defer></script>
+<script src="src/domain/parks/resolve-park-area.js?v=b04b9103" defer></script>
+<script src="src/domain/parks/segment-intersection.js?v=8fc97300" defer></script>
+<script src="src/domain/parks/point-in-polygon.js?v=84568665" defer></script>
+<script src="src/domain/parks/bounds.js?v=4796140e" defer></script>
+<script src="src/domain/parks/park-containment.js?v=7e8a9751" defer></script>
+<script src="src/domain/parks/line-distance.js?v=d24f13db" defer></script>
+<script src="src/domain/parks/osm-rings.js?v=df787e20" defer></script>
+<script src="src/domain/parks/rect-intersection.js?v=f930c521" defer></script>
+<script src="src/domain/parks/cell-in-park.js?v=237dff9a" defer></script>
+<script src="src/domain/parks/cell-validity.js?v=e0c74ffe" defer></script>
+<script src="src/domain/parks/park-overlap.js?v=a8a417e3" defer></script>
+<script src="src/services/park-geometry.js?v=8306bf00" defer></script>
+<script src="src/domain/parks/simplify-ring.js?v=16280978" defer></script>
+<script src="src/adapters/parks/park-geometry-store.js?v=3a5ee2cc" defer></script>
+<script src="src/application/parks/persist-park-geometry.js?v=81cf8650" defer></script>
+<script src="src/services/geofence.js?v=2d4840c0" defer></script>
+<script src="src/application/parks/find-park-candidates.js?v=a718dde1" defer></script>
+<script src="src/application/parks/fetch-detailed-coverage.js?v=90eac1d9" defer></script>
+<script src="src/application/parks/classify-coverage-elements.js?v=0c3f22dd" defer></script>
+<script src="src/application/parks/find-nominatim-boundary.js?v=908becd3" defer></script>
+<script src="src/adapters/parks/nominatim-client.js?v=8ab0a194" defer></script>
+<script src="src/services/park-query.js?v=23643868" defer></script>
+<script src="src/domain/parks/identity.js?v=1a508f67" defer></script>
+<script src="src/adapters/parks/park-store.js?v=33785da0" defer></script>
+<script src="src/application/parks/register-park.js?v=704cf383" defer></script>
+<script src="src/adapters/parks/project-store.js?v=6354c82a" defer></script>
+<script src="src/application/parks/create-project.js?v=4ac8fea8" defer></script>
+<script src="src/adapters/parks/project-link-store.js?v=8c5ee0ab" defer></script>
+<script src="src/application/parks/link-project.js?v=8efe1ec6" defer></script>
+<script src="src/application/parks/detect-park.js?v=da6f23fc" defer></script>
+<script src="src/application/parks/create-manual-park.js?v=87e43beb" defer></script>
+<script src="src/adapters/parks/park-search.js?v=312181c8" defer></script>
+<script src="src/application/parks/search-park-by-name.js?v=e8f8f1e4" defer></script>
+<script src="src/domain/parks/is-schema-error.js?v=d884e05b" defer></script>
 <!-- PARK KİMLİĞİ (2026-09-24): queryPark'ın bulduğu parkı public.parks'a yazar,
      projeyi parka bağlar, ölçüm kapısını (park algılanmadan ölçüm yok) kurar.
      Sıra ÖNEMLİ: park-query'den sonra, grid-engine'den önce (grid panelindeki
      proje listesi bu modülden beslenir). -->
-<script src="src/services/park-registry.js?v=d176e596" defer></script>
-<script src="src/application/parks/build-grid-waypoint-rows.js?v=14a8a7f1" defer></script>
-<script src="src/application/parks/count-grid-cell-measurements.js?v=018a0693" defer></script>
-<script src="src/application/parks/build-grid-request.js?v=f9ff6b84" defer></script>
-<script src="src/services/grid-engine.js?v=3908cc03" defer></script>
-<script src="src/ui/editor-ui.js?v=c0ac9bfd" defer></script>
-<script src="src/ui/park-panel.js?v=d4eaeea0" defer></script>
-<script src="src/ui/park-export.js?v=a435fba9" defer></script>
-<script src="src/services/dash.js?v=378660af" defer></script>
-<link rel="stylesheet" href="css/style.css?v=006d559f">
-<link rel="stylesheet" href="css/landing.css?v=0771a195">
-<link rel="stylesheet" href="css/park-panel.css?v=bccb24a6">
+<script src="src/services/park-registry.js?v=e8b7255a" defer></script>
+<script src="src/application/parks/build-grid-waypoint-rows.js?v=c0b27311" defer></script>
+<script src="src/application/parks/count-grid-cell-measurements.js?v=41aaa6a6" defer></script>
+<script src="src/application/parks/build-grid-request.js?v=c0a1009b" defer></script>
+<script src="src/application/parks/select-grid-waypoint-cells.js?v=e93e7b28" defer></script>
+<script src="src/services/grid-engine.js?v=b4f0c168" defer></script>
+<script src="src/ui/editor-ui.js?v=31e01f38" defer></script>
+<script src="src/ui/park-panel.js?v=9f44b123" defer></script>
+<script src="src/ui/park-export.js?v=9760d5a6" defer></script>
+<script src="src/services/dash.js?v=a733a6d1" defer></script>
+<link rel="stylesheet" href="css/style.css?v=46611995">
+<link rel="stylesheet" href="css/landing.css?v=da7ed975">
+<link rel="stylesheet" href="css/park-panel.css?v=5455184c">
 <!-- TASARIM SİSTEMİ (2026-09-27, 2. deneme): ui-standard.css geri BAĞLANDI
      ama ARTIK eleman seviyesi kuralları yalnız .dg-page (alt sayfalar) altında
      geçerli; kabuk (body.dg-app) yalnız sınıf-bazlı bileşenleri ve sekme
      başlığı ölçeğini alır → Park Karşılaştırma kartı kıpırdamaz. -->
-<link rel="stylesheet" href="css/ui-standard.css?v=6971cab2">
-<link rel="stylesheet" href="css/academic-profile.css?v=2e4a0279">
+<link rel="stylesheet" href="css/ui-standard.css?v=d62a796f">
+<link rel="stylesheet" href="css/academic-profile.css?v=fd6b0df1">
 <!-- GIS workspace: scoped presentation, keeps locked engine and theme untouched. -->
-<link rel="stylesheet" href="css/gis-workspace.css?v=1199ea2a">
+<link rel="stylesheet" href="css/gis-workspace.css?v=0f2e96df">
 </head>
 <body class="dg-app">
 <a class="dg-skip" href="#main">İçeriğe atla</a>
@@ -1287,16 +1288,16 @@
  <div id="pvBody" class="tblwrap" style="overflow:auto;flex:1"></div>
  <button class="btn" style="margin-top:12px" id="pvDownload">📥 İndir</button>
 </div></div>
-<script src="src/ui/state.js?v=da9d6c62" defer></script>
-<script src="src/ui/toast.js?v=e5336245" defer></script>
-<script src="src/ui/landing.js?v=c606b518" defer></script>
-<script src="src/ui/shell.js?v=d6d2f5f3" defer></script>
+<script src="src/ui/state.js?v=e611cda2" defer></script>
+<script src="src/ui/toast.js?v=418e08b6" defer></script>
+<script src="src/ui/landing.js?v=2c1b7d65" defer></script>
+<script src="src/ui/shell.js?v=818b59a1" defer></script>
 <!-- Accessible GIS workspace controls; presentation-only module. -->
-<script src="src/ui/gis-workspace.js?v=06f01f35" defer></script>
+<script src="src/ui/gis-workspace.js?v=02b5b0fc" defer></script>
 <!-- Account-backed park surface drafts: preserve pending-water evidence. -->
-<script src="src/ui/gis-project-draft.js?v=2a703123" defer></script>
+<script src="src/ui/gis-project-draft.js?v=5bcdd1a3" defer></script>
 <!-- PNG vector output adapter: captures current reviewed geometry and relative NDVI. -->
-<script src="src/ui/gis-export.js?v=8be6b6df" defer></script>
+<script src="src/ui/gis-export.js?v=432cffd2" defer></script>
 
 </body>
 </html>
