@@ -19,7 +19,7 @@ function dgGridReviewSignature(){const s=window.DG_LC_SENS?.state;return s?.reco
 async function buildGrid(){
  if(DG_GRID_BUSY)return;
  if(!PARK_POLY?.length)return toast("Önce park seç","warn");
- const size=Number($("gridSize")?.value)||20,clearance=Math.max(1,Math.min(20,Number($("gridClearance")?.value)||3));
+ const {size,clearance}=window.DG_GRID_OPTIONS.resolve($("gridSize")?.value,$("gridClearance")?.value);
  const park=PARK_POLY,epoch=++DG_GRID_EPOCH,btn=$("gridBuildBtn");DG_GRID_BUSY=true;
  if(btn){btn.disabled=true;btn.textContent="⏳ Grid hazırlanıyor…";}
  try{
