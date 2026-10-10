@@ -39,7 +39,7 @@ async function buildGrid(){
   if(epoch!==DG_GRID_EPOCH||park!==PARK_POLY)return;
   if(signature!==dgGridReviewSignature())throw Error("Yüzey değişti. Güncel yüzeyle gridi tekrar oluşturun.");
   const all=park.flat(),minLat=Math.min(...all.map(p=>p[0])),maxLat=Math.max(...all.map(p=>p[0])),minLon=Math.min(...all.map(p=>p[1])),maxLon=Math.max(...all.map(p=>p[1]));
-  const {data,count,error}=await sb.from("measurements").select("lat,lon",{count:"exact"}).eq("status","Onaylı").gte("lat",minLat).lte("lat",maxLat).gte("lon",minLon).lte("lon",maxLon).limit(5000);
+  const {data,count,error}=await window.DG_GRID_MEASUREMENT_STORE.fetchCandidates(sb,{minLat,maxLat,minLon,maxLon});
   if(error)throw error;if(epoch!==DG_GRID_EPOCH||park!==PARK_POLY)return;
   dgWarnIfTruncated(data,5000,"Izgara ölçüm yoğunluğu",count);
   window.DG_GRID_CELL_MEASUREMENTS.count(result.cells,data,{size,epsg,x0:result.x0,y0:result.y0,project:dgLcUtmForward,pointDistance:dgGridPointDistance,featureGeometry:dgSurfaceFeatureGeometry});
