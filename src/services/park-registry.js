@@ -1032,18 +1032,23 @@ async function dgResyncProjectNames(parkId,knownName){
   await sb.from("projects").update({park_name:nm}).eq("park_id",parkId);
 }
 
+const DG_PARK_ADMIN_RENAME=window.DG_PARK_ADMIN_RENAME_APPLICATION.create({
+  isAdmin:dgIsAdmin,
+  getParks:()=>DG_PARK_ADMIN_ROWS,
+  promptName:park=>prompt(_tpr("Park adı (örn. Göksu Parkı):"),park.name),
+  normalizeName:dgNormParkName,
+  updatePark:(id,patch)=>sb.from("parks").update(patch).eq("id",id),
+  resyncProjectNames:dgResyncProjectNames
+});
+
 async function dgParkRename(id){
-  if(!dgIsAdmin())return toast("🔐 Bu işlem yalnız yöneticiye açık.","err");
-  const p=DG_PARK_ADMIN_ROWS.find(x=>x.id===id);
-  if(!p)return toast("Park bulunamadı","err");
-  const nn=prompt(_tpr("Park adı (örn. Göksu Parkı):"),p.name);
-  if(nn===null)return;
-  const name=String(nn).trim();
-  if(!name)return toast("Ad boş olamaz","err");
-  const{error}=await sb.from("parks").update({name,name_norm:dgNormParkName(name)}).eq("id",id);
-  if(error)return toast(dgCf("Ad güncellenemedi: ")+esc(error.message),"err");
-  await dgResyncProjectNames(id,name);
-  toast(dgCf("✓ Park adı güncellendi: ")+esc(name)+" "+_tpr("— proje adları yeniden kuruldu"),"ok","🌳");
+  const result=await DG_PARK_ADMIN_RENAME(id);
+  if(result.status==="forbidden")return toast("🔐 Bu işlem yalnız yöneticiye açık.","err");
+  if(result.status==="park-missing")return toast("Park bulunamadı","err");
+  if(result.status==="cancelled")return;
+  if(result.status==="empty-name")return toast("Ad boş olamaz","err");
+  if(result.status==="write-failed")return toast(dgCf("Ad güncellenemedi: ")+esc(result.error.message),"err");
+  toast(dgCf("✓ Park adı güncellendi: ")+esc(result.name)+" "+_tpr("— proje adları yeniden kuruldu"),"ok","🌳");
   await dgAfterParkAdminChange();
 }
 
