@@ -14,55 +14,11 @@
 ========================================================= */
 
 function ringGeodesicArea(ring){
-  const R=6378137;
-  let t=0;
-
-  for(let i=0;i<ring.length;i++){
-    const p1=ring[i];
-    const p2=ring[(i+1)%ring.length];
-
-    const l1=p1[1]*Math.PI/180;
-    const l2=p2[1]*Math.PI/180;
-
-    const f1=p1[0]*Math.PI/180;
-    const f2=p2[0]*Math.PI/180;
-
-    t+=(l2-l1)*(2+Math.sin(f1)+Math.sin(f2));
-  }
-
-  return Math.abs(t*R*R/2);
+  return window.DG_PARK_AREA.ringGeodesicArea(ring);
 }
 
 function polyArea(rings){
-  if(!rings)return 0;
-
-  if(!Array.isArray(rings) && rings.outer){
-    let outerArea=0;
-    let innerArea=0;
-
-    for(const ring of rings.outer){
-      if(ring&&ring.length>=3){
-        outerArea+=ringGeodesicArea(ring);
-      }
-    }
-
-    for(const ring of (rings.inner||[])){
-      if(ring&&ring.length>=3){
-        innerArea+=ringGeodesicArea(ring);
-      }
-    }
-
-    return Math.max(0,outerArea-innerArea);
-  }
-
-  let total=0;
-
-  for(const ring of rings){
-    if(!ring||ring.length<3)continue;
-    total+=ringGeodesicArea(ring);
-  }
-
-  return total;
+  return window.DG_PARK_AREA.polyArea(rings);
 }
 
 function parkAreaM2(){
