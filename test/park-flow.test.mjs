@@ -485,10 +485,10 @@ describe('aynı parkı 3 kişi algılarsa TEK kimlik', () => {
   });
 
   test('⚠ upsert kullanılmaz (RLS: başkasının park satırını yazma yetkisi yok)', () => {
-    const src = readFileSync(join(ROOT, 'src/services/park-registry.js'), 'utf8');
-    const fn = src.slice(src.indexOf('async function dgRegisterPark'), src.indexOf('async function dgDetectAt'));
-    assert.ok(!/\.upsert\(/.test(fn), 'upsert RLS update politikasına takılır');
-    assert.ok(fn.includes('23505'), 'yarış durumu ele alınmalı');
+    const app = readFileSync(join(ROOT, 'src/application/parks/register-park.js'), 'utf8');
+    const adapter = readFileSync(join(ROOT, 'src/adapters/parks/park-store.js'), 'utf8');
+    assert.ok(!/\.upsert\(/.test(app+adapter), 'upsert RLS update politikasına takılır');
+    assert.ok(app.includes('error.code==="23505"'), 'yarış durumu ele alınmalı');
   });
 
   test('şema eskiyse kimlik yazmaya hiç kalkışmaz', async () => {
