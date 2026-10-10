@@ -5,7 +5,7 @@ import {readFileSync} from 'node:fs';
 const file=p=>readFileSync(new URL('../'+p,import.meta.url),'utf8');
 const adapter=file('src/ui/gis-export.js'),style=file('css/gis-workspace.css'),ui=file('src/ui/gis-workspace.js');
 const lock=JSON.parse(file('docs/surface-engine-lock.json'));
-function env({ndvi=false,ndviAvailable=true}={}){
+function env({ndvi=false,ndviAvailable=true,gridCells=[]}={}){
  const messages=[],ops=[],downloads=[],elements={},polygon=[
   [{lat:39.99,lng:32.64},{lat:39.99,lng:32.66},{lat:40.01,lng:32.66},{lat:40.01,lng:32.64}]
  ];
@@ -18,12 +18,12 @@ function env({ndvi=false,ndviAvailable=true}={}){
   dgSensVegetationTiers:()=>({count:ndviAvailable?12:0}),
   dgSensRenderVegetation:async()=>{},
   PARK_POLY:[[[39.99,32.64],[39.99,32.66],[40.01,32.66],[40.01,32.64]]],
-  PARK_HOLES:[],GRID_CELLS:[],WP:[],DG_PARK:{name:'Göksu Parkı'},
+  PARK_HOLES:[],DG_GRID_SESSION:{getCells:()=>gridCells},WP:[],DG_PARK:{name:'Göksu Parkı'},
   toast:(m,type)=>messages.push([m,type]),
   document:{getElementById:id=>elements[id]||null,body:{append:()=>{}},createElement:tag=>{
    if(tag==='canvas')return {width:0,height:0,
     getContext:()=>({beginPath:()=>{},moveTo:()=>{},lineTo:()=>{},closePath:()=>{},
-      fill:()=>ops.push('fill'),fillRect:()=>{},strokeRect:()=>{},stroke:()=>{},setLineDash:()=>{},
+      fill:()=>ops.push('fill'),fillRect:()=>{},strokeRect:()=>ops.push('grid'),stroke:()=>{},setLineDash:()=>{},
       fillText:()=>{},arc:()=>{},save:()=>{},restore:()=>{},clip:()=>{},measureText:()=>({width:20})}),
     toBlob:cb=>cb({size:1024})};
    if(tag==='a')return {click:()=>downloads.push('click'),remove:()=>{},set href(v){},set download(v){downloads.push(v)}};
@@ -94,3 +94,5 @@ test('boot, SW and index will expose PNG adapter after locked exporter',()=>{
  assert.match(sw,/\/src\/ui\/gis-export\.js/);
  assert.ok(index.indexOf('src/ui/park-export.js')<index.indexOf('src/ui/gis-export.js'));
 });
+test('PNG reads current session cells at export time and skips invalid cell bounds',async()=>{const cells=[];const {ctx,ops}=env({gridCells:cells});cells.push({w0:32.645,w1:32.65,s0:39.995,s1:40.0},{w0:NaN,w1:32.65,s0:39.995,s1:40.0});assert.equal(await ctx.window.downloadParkImage(),true);const baseline=env();assert.equal(await baseline.ctx.window.downloadParkImage(),true);assert.equal(ops.filter(x=>x==='grid').length-baseline.ops.filter(x=>x==='grid').length,1);});
+test('PNG remains available when the optional grid session is absent',async()=>{const {ctx}=env();delete ctx.DG_GRID_SESSION;assert.equal(await ctx.window.downloadParkImage(),true);});

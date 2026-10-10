@@ -44,7 +44,7 @@ function downloadBlob(
 }
 
 function downloadGridGeoJSON(){
-  if(!GRID_CELLS.length){
+  if(!DG_GRID_SESSION.getCells().length){
     return toast(
       "Önce grid"
     );
@@ -54,7 +54,7 @@ function downloadGridGeoJSON(){
     type:"FeatureCollection",
 
     features:
-      GRID_CELLS.map(c=>({
+      DG_GRID_SESSION.getCells().map(c=>({
         type:"Feature",
 
         properties:{
@@ -393,11 +393,11 @@ function downloadParkImage(){
     }
 
     /* 3) grid hücreleri */
-    if(opts.grid&&(GRID_CELLS||[]).length){
+    if(opts.grid&&(DG_GRID_SESSION.getCells()||[]).length){
       ctx.strokeStyle="rgba(20,83,45,.8)";ctx.lineWidth=1;
       ctx.fillStyle="rgba(20,83,45,.85)";
       ctx.font="600 9px ui-monospace,monospace";
-      for(const c of GRID_CELLS){
+      for(const c of DG_GRID_SESSION.getCells()){
         const x0=pr.X(c.w0),x1=pr.X(c.w1),y0=pr.Y(c.s0),y1=pr.Y(c.s1);
         ctx.strokeRect(x0,y0,x1-x0,y1-y0);
         if((x1-x0)>34&&(y1-y0)>16){

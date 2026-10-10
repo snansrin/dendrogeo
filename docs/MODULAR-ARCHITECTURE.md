@@ -197,3 +197,5 @@ Her modülün tek bir dış API'si, sahibi olduğu açık durumu ve kendi testle
 - Grid oturumu `park-state.js` içinde bir kez kurulur ve hücre/seçim kaplarına da sahip olur. `GRID_CELLS`/`SELECTED_CELLS` dışa aktarma ve park ekranları için aynı kaplara bağlı uyumluluk adlarıdır; grid servisi açık oturum metotlarını kullanır. Oturum modülü park durumundan önce yüklenir.
 
 - Grid ve otomatik waypoint katman referansları da grid oturumuna aittir; servis çizim, görünürlük ve temizleme callback’lerini oturum metotlarına bağlar. Eski mutable `GRID_LAYER`/`WP_AUTO_LAYER` global değişkenleri kaldırılmıştır. Harita yokken katman referanslarını koruyan mevcut temizleme davranışı sürer.
+
+- Park ekranı, park/GIS dışa aktarımları ve yüzey önizleme çıktısı hücreleri grid oturumunun `getCells()` arayüzünden okur; eski `GRID_CELLS`/`SELECTED_CELLS` global aliasları kaldırılmıştır. Grid yüklenmemişken isteğe bağlı çıktı yollarının mevcut guard davranışı korunur.
