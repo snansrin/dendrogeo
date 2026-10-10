@@ -93,6 +93,7 @@ src/
 - `application/visitors/build-live-roster.js`, geçici Realtime presence girdilerinden oturumları tekilleştirir, yaşa göre sıralar ve arama/ekran/konum filtrelerini uygular; `visit-stats.js` eski `dgVis*` API'sini ve DOM/harita akışını korur. Modül veritabanına erişmez ve presence verisini kalıcılaştırmaz.
 - `application/visitors/build-live-activity.js`, geçici oturum, gezinme ve kullanıcı eylemi alanlarından çevrilebilir, en yeni olayları önceleyen canlı etkinlik listesini üretir; `dgVisFeed()` yalnız mevcut DOM biçimlendirmesini ve HTML çizimini yapar.
 - `application/parks/find-park-candidates.js`, Overpass sorgusu, Nominatim sınır yedeği, geometri doğrulama ve kullanıcı konumuna göre en küçük park adayını seçme sırasını yürütür; `park-query.js` eski `queryPark()` API'sini ve geometri callback'lerini bağlar.
+- `application/parks/classify-coverage-elements.js`, detaylı OSM kapsamındaki su, yaya engeli ve sert yüzey öğelerini önceki sıra ve tekilleştirme kurallarıyla yönlendirir; geometri üretimi ve `park-query.js` durum yazımı adapter'da kalır.
 - `domain/parks/simplify-ring.js`, park sınır halkasını deterministik nokta sınırına indirir; `application/parks/persist-park-geometry.js` dış/ iç halkaları hazırlar, `adapters/parks/park-geometry-store.js` Supabase `geom_json` yazımını yapar. `geofence.js` eski sadeleştirme ve kalıcılık fonksiyonlarını uyumluluk sarmalayıcısı olarak korur; yazım başarısızlığında daire yedeği davranışı sürer.
 - Yeni dosyalar analiz zincirine sürümlü lazy loader ve service worker precache üzerinden eklenmiştir.
 

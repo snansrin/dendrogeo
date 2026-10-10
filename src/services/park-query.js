@@ -83,15 +83,16 @@ async function dgQueryDetailedCoverage(){
 
   IMP_RINGS=[];IMP_LINES=[];GRID_BLOCK_LINES=[];WATER_RINGS=[];WATER_LINES=[];
   window.DG_SURFACE_OSM={elements:json.elements||[],bbox:{minLat:minLat-pad,minLon:minLon-pad,maxLat:maxLat+pad,maxLon:maxLon+pad},boundary:fetchedBoundary,fetchedAt:new Date().toISOString()};
-  const seenWater=new Set();
-  const seenImp=new Set();
+  const classified=window.DG_PARK_COVERAGE_ELEMENT_CLASSIFIER.classify(json.elements||[],{
+    isWater:element=>isWater(element),
+    isImpervious:element=>isImpervious(element)
+  });
 
-  for(const el of (json.elements||[])){
-    const id=el.type+":"+el.id;
+  for(const item of classified){
+    const {element:el}=item;
 
-    if(isWater(el)){
-      if(seenWater.has(id))continue;
-      seenWater.add(id);
+    if(item.skip)continue;
+    if(item.water){
 
       if(el.type==="relation"){
         const r=extractRings(el);
@@ -128,14 +129,11 @@ async function dgQueryDetailedCoverage(){
      * olmadığı için IMP olarak sınıflandırılmasa bile grid hücresini
      * engellemelidir. Arazi örtüsü hesabına sert alan olarak eklenmez.
      */
-    if(el.type==="way" && el.tags && el.tags.highway){
+    if(item.pedestrian){
       collectPedestrianGridBlocker(el);
     }
 
-    if(!isImpervious(el))continue;
-    if(seenImp.has(id))continue;
-
-    seenImp.add(id);
+    if(!item.impervious)continue;
     collectImperviousGeometry(el);
   }
 

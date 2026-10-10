@@ -128,6 +128,7 @@ export function loadApp({ sadece } = {}) {
     'src/services/geofence.js',
     'src/application/parks/find-park-candidates.js',
     'src/application/parks/fetch-detailed-coverage.js',
+    'src/application/parks/classify-coverage-elements.js',
     'src/application/parks/find-nominatim-boundary.js',
     'src/adapters/parks/nominatim-client.js',
     'src/services/park-query.js',
@@ -168,6 +169,7 @@ export function loadApp({ sadece } = {}) {
   if (secim && secim.has('src/services/park-query.js')) {
     secim.add('src/application/parks/find-park-candidates.js');
     secim.add('src/application/parks/fetch-detailed-coverage.js');
+    secim.add('src/application/parks/classify-coverage-elements.js');
     secim.add('src/application/parks/find-nominatim-boundary.js');
     secim.add('src/adapters/parks/nominatim-client.js');
   }
