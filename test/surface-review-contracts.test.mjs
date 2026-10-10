@@ -8,6 +8,7 @@ const store=readFileSync(new URL('../src/adapters/surface/review-store.js',impor
 const osm=readFileSync(new URL('../src/adapters/surface/osm-review-objects.js',import.meta.url),'utf8');
 const worker=readFileSync(new URL('../src/adapters/surface/review-worker.js',import.meta.url),'utf8');
 const preparation=readFileSync(new URL('../src/application/surface/prepare-review.js',import.meta.url),'utf8');
+const featureOutput=readFileSync(new URL('../src/application/surface/merge-review-features.js',import.meta.url),'utf8');
 const geometry=readFileSync(new URL('../src/domain/surface/review-geometry.js',import.meta.url),'utf8');
 const service=readFileSync(new URL('../src/services/lc-review.js',import.meta.url),'utf8');
 function api(){const window={};vm.runInContext(source,vm.createContext({window}));return window.DG_SURFACE_REVIEW_CONTRACTS;}
@@ -37,6 +38,7 @@ test('review service compatibility methods delegate to the contract module',()=>
   vm.runInContext(osm,ctx);
   vm.runInContext(worker,ctx);
   vm.runInContext(preparation,ctx);
+  vm.runInContext(featureOutput,ctx);
   vm.runInContext(geometry,ctx);
   vm.runInContext(service,ctx);
   assert.equal(window.DG_SURFACE_REVIEW.validRing([[0,0],[1,0],[1,1]]),true);
