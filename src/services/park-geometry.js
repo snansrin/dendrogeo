@@ -1257,42 +1257,7 @@ function isClosedLine(l){
 ========================================================= */
 
 function roadHalfWidth(hw){
-  hw=
-    String(hw||"")
-      .toLowerCase();
-
-  if(/^motorway$/.test(hw))return 6;
-  if(/^trunk$/.test(hw))return 5.5;
-  if(/^primary$/.test(hw))return 5;
-  if(/^secondary$/.test(hw))return 4.5;
-  if(/^tertiary$/.test(hw))return 4;
-
-  if(/^residential$/.test(hw))return 3;
-  if(/^unclassified$/.test(hw))return 3;
-  if(/^living_street$/.test(hw))return 3;
-
-  if(/^service$/.test(hw))return 2.5;
-
-  /*
-   * Yaya yolları için OSM'de width çoğu zaman boş geliyor.
-   * Bu durumda 1 m'lik varsayılan tampon, 20 m grid hücresinde
-   * dar yürüyüş yollarının hücreyi kesmesine rağmen pratikte
-   * güvenilir biçimde dışlanmamasına yol açabiliyor.
-   *
-   * Buradaki değerler "yolu sert zemin ilan etmek" için değil,
-   * yalnızca OSM highway çizgisinin grid hücresiyle çakışma
-   * kontrolünde kullanılacak yarı-genişliktir. Açıkça width
-   * verilmişse üstteki gerçek width değeri önceliklidir.
-   */
-  if(/^footway$/.test(hw))return 1.25;
-  if(/^path$/.test(hw))return 1.25;
-  if(/^cycleway$/.test(hw))return 1.5;
-  if(/^pedestrian$/.test(hw))return 2;
-  if(/^steps$/.test(hw))return 1.25;
-  if(/^bridleway$/.test(hw))return 1.25;
-  if(/^track$/.test(hw))return 1.5;
-
-  return 3;
+  return window.DG_PARK_ROAD_WIDTH.halfWidth(hw);
 }
 
 /* =========================================================
