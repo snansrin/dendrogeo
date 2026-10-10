@@ -121,6 +121,7 @@ export function loadApp({ sadece } = {}) {
     'src/services/osm-client.js',
     'src/domain/parks/road-half-width.js',
     'src/domain/parks/classify-surface-tags.js',
+    'src/domain/parks/impervious-geometry.js',
     'src/domain/parks/area.js',
     'src/domain/parks/segment-intersection.js',
     'src/domain/parks/point-in-polygon.js',
