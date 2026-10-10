@@ -377,9 +377,10 @@ describe('parka bağlama YALNIZ yönetici (0006 + kullanıcı isteği 2026-09-24
   });
 
   test('istemci: dgLinkProject yönetici bekçisi taşıyor', () => {
+    const app = readFileSync(join(ROOT, 'src/application/parks/link-project.js'), 'utf8');
     const fn = registry.slice(registry.indexOf('async function dgLinkProject'), registry.indexOf('async function dgAfterProjectLinked'));
-    assert.match(fn, /if\(!dgIsAdmin\(\)\)\{/, 'bekçi yok');
-    assert.match(fn, /PARK_ADMIN_ONLY|yalnız yöneticide/, 'kullanıcıya sebep söylenmeli');
+    assert.match(app, /if\(!isAdmin\(\)\)return\{status:"forbidden"\}/, 'use-case yetki bekçisi yok');
+    assert.match(fn, /yalnız yöneticide/, 'kullanıcıya sebep söylenmeli');
   });
 
   test('park kimliği araçları (adlandır/birleştir/sil) da bekçili', () => {

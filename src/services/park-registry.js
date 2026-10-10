@@ -504,6 +504,16 @@ const DG_PARK_CREATE_PROJECT_USE_CASE=window.DG_PARK_CREATE_PROJECT_APPLICATION.
   insertProject:row=>DG_PARK_PROJECT_STORE.insert(row),
   persistGeometry:park=>typeof dgPersistParkGeom==="function"?dgPersistParkGeom(park):undefined
 });
+const DG_PARK_PROJECT_LINK_STORE=window.DG_PARK_PROJECT_LINK_STORE_ADAPTER.create({getClient:()=>sb});
+const DG_PARK_LINK_PROJECT_USE_CASE=window.DG_PARK_LINK_PROJECT_APPLICATION.create({
+  isAdmin:dgIsAdmin,
+  getPark:()=>DG_PARK,
+  getProject:pid=>(PROJ_LIST||[]).find(p=>p.id===pid)||null,
+  getLabel:()=>{const el=$("scanLabel");return el?String(el.value||""):null;},
+  labelFromLegacy:dgLabelFromLegacy,
+  updateProject:(pid,patch)=>DG_PARK_PROJECT_LINK_STORE.updateProject(pid,patch),
+  backfillMeasurements:(pid,parkId)=>DG_PARK_PROJECT_LINK_STORE.backfillMeasurements(pid,parkId)
+});
 
 async function dgScanCreateProject(){
   const result=await DG_PARK_CREATE_PROJECT_USE_CASE();
@@ -519,52 +529,17 @@ async function dgScanCreateProject(){
 
 
 async function dgLinkProject(pid){
-  /* ⛔ YALNIZ YÖNETİCİ (kullanıcı isteği 2026-09-24): MEVCUT bir projeyi
-   * parka bağlamak onarım işidir. Normal kullanıcı kendi YENİ projesini
-   * park algılayarak açmaya devam eder (dgScanCreateProject). Sunucu da
-   * aynı kuralı zorlar: trg_enforce_park_admin → PARK_ADMIN_ONLY. */
-  if(!dgIsAdmin()){
+  const result=await DG_PARK_LINK_PROJECT_USE_CASE(pid);
+  if(result.status==="forbidden"){
     toast("⛔ Mevcut projeyi parka bağlama yetkisi yalnız yöneticide. Yeni proje için park algılayabilirsin.","err","🔐");
     return null;
   }
-  const park=DG_PARK;
-  if(!park)return toast("Önce park algıla","err","🌳");
-  const proj=(PROJ_LIST||[]).find(p=>p.id===pid);
-  if(!proj)return toast("Proje bulunamadı","err");
-
-  /* Kart açıksa kullanıcının yazdığı etiket; değilse eski adın park sonrası
-   * kısmı etiket olur. */
-  const labelEl=$("scanLabel");
-  let label=labelEl
-    ? String(labelEl.value||"").trim()
-    : dgLabelFromLegacy(proj.name,park.name);
-
-  /* ⚠ VERİ KAYBI KORUMASI: projeyi İLK KEZ bir parka bağlıyorsak ve etiket boş
-   * kaldıysa, eski ad etikete taşınır. Yoksa "Eski Proje" → "Göksu Parkı" olur
-   * ve kullanıcının verdiği ad sessizce kaybolurdu. Zaten bu parka bağlı bir
-   * projede etiket boş bırakılırsa bu BİLİNÇLİ bir yeniden adlandırmadır
-   * (ad = park adı) ve dokunulmaz. */
-  if(!label&&proj.park_id!==park.id){
-    const legacy=dgLabelFromLegacy(proj.name,park.name);
-    if(legacy&&legacy!==park.name)label=legacy;
-  }
-
-  const{data,error}=await sb.from("projects").update({
-    park_id:park.id,
-    label
-  }).eq("id",pid).select().single();
-
-  if(error)return toast(dgCf("Bağlanamadı: ")+esc(error.message),"err");
-
-  /* Ölçümlerin denormalize park_id'sini de doldur (view zaten yedekli okur,
-   * ama sorgu hızı ve dışa aktarım alanı için tutarlılık iyi). */
-  try{
-    await sb.from("measurements").update({park_id:park.id}).eq("project_id",pid).is("park_id",null);
-  }catch(e){}
-
-  toast("✓ "+esc(data.name)+" → "+esc(park.name),"ok","🔗");
-  await dgAfterProjectLinked(data);
-  return data;
+  if(result.status==="park-missing")return toast("Önce park algıla","err","🌳");
+  if(result.status==="project-missing")return toast("Proje bulunamadı","err");
+  if(result.status==="write-failed")return toast(dgCf("Bağlanamadı: ")+esc(result.error.message),"err");
+  toast("✓ "+esc(result.data.name)+" → "+esc(result.park.name),"ok","🔗");
+  await dgAfterProjectLinked(result.data);
+  return result.data;
 }
 
 async function dgAfterProjectLinked(proj){
