@@ -128,6 +128,20 @@ function toggleWpVis(){
    WAYPOINT
 ========================================================= */
 
+const DG_GRID_WAYPOINT_CREATE=window.DG_GRID_WAYPOINT_CREATE_APPLICATION.create({
+  confirmBatch:count=>confirm(count+" waypoint?\nDevam?"),
+  fetchLatest:pid=>window.DG_GRID_WAYPOINT_STORE.fetchLatest(sb,pid),
+  isCurrent:({source,park,projectId})=>window.DG_GRID_WAYPOINT_CONTEXT.isCurrent({
+    source,park,projectId,getReviewSignature:dgGridReviewSignature,
+    getGridSource:()=>DG_GRID_SOURCE,getPark:()=>PARK_POLY,
+    getProjectId:()=>+$("gridProject").value
+  }),
+  getUserId:()=>USER.id,
+  prepareBatch:(cells,latest,userId,pid)=>window.DG_GRID_WAYPOINT_BATCH.prepare(cells,latest,userId,pid,window.DG_GRID_WAYPOINT_ROWS.build),
+  setLastRows:rows=>{LAST_WP_ROWS=rows;},
+  insert:rows=>window.DG_GRID_WAYPOINT_INSERT.insert(sb,rows)
+});
+
 async function createWaypointsFromGrid(mode){
   const source=DG_GRID_SOURCE,park=PARK_POLY;
   const readiness=window.DG_GRID_WAYPOINT_READINESS.resolve({
@@ -151,52 +165,12 @@ async function createWaypointsFromGrid(mode){
     return toast(messages[readiness.reason]);
   }
 
-  const targetCells=readiness.targetCells;
   const pid=readiness.projectId;
-  if(
-    targetCells.length>500 &&
-    !confirm(
-      targetCells.length+
-      " waypoint?\nDevam?"
-    )
-  ){
-    return;
-  }
-
-  const{data:mx}=await window.DG_GRID_WAYPOINT_STORE.fetchLatest(sb,pid);
-
-  if(!window.DG_GRID_WAYPOINT_CONTEXT.isCurrent({
-    source,
-    park,
-    projectId:pid,
-    getReviewSignature:dgGridReviewSignature,
-    getGridSource:()=>DG_GRID_SOURCE,
-    getPark:()=>PARK_POLY,
-    getProjectId:()=>+$("gridProject").value
-  }))return toast(_tgr("Yüzey değişti. Waypoint üretmeden önce gridi yeniden oluşturun."),"warn");
-
-  const batch=window.DG_GRID_WAYPOINT_BATCH.prepare(
-    targetCells,
-    mx,
-    USER.id,
-    pid,
-    window.DG_GRID_WAYPOINT_ROWS.build
-  );
-  const first=batch.firstWpId;
-  const rows=batch.rows;
-  const next=first+rows.length;
-
-  LAST_WP_ROWS=rows;
-
-  const{error}=await window.DG_GRID_WAYPOINT_INSERT.insert(sb,rows);
-
-  if(error){
-    return toast(
-      "Hata: "+
-      error.message,
-      "err"
-    );
-  }
+  const result=await DG_GRID_WAYPOINT_CREATE({source,park,projectId:pid,targetCells:readiness.targetCells});
+  if(result.status==="cancelled")return;
+  if(result.status==="stale")return toast(_tgr("Yüzey değişti. Waypoint üretmeden önce gridi yeniden oluşturun."),"warn");
+  if(result.status==="write-failed")return toast("Hata: "+result.error.message,"err");
+  const {rows,first,next}=result;
 
   WP_AUTO_LAYER=window.DG_GRID_WAYPOINT_LAYER.render({
     map,

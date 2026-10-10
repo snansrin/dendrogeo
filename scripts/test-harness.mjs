@@ -198,6 +198,7 @@ export function loadApp({ sadece } = {}) {
     'src/domain/parks/grid-options.js',
     'src/domain/parks/grid-bounds.js',
     'src/domain/parks/grid-cell-shape.js',
+    'src/application/parks/create-grid-waypoints.js',
     'src/ui/grid-layer.js',
     'src/ui/grid-reset.js',
     'src/ui/map-layer-visibility.js',
@@ -229,6 +230,7 @@ export function loadApp({ sadece } = {}) {
   }
   if (secim && secim.has('src/services/grid-engine.js')) {
     secim.add('src/ui/grid-selection.js');
+    secim.add('src/application/parks/create-grid-waypoints.js');
     secim.add('src/ui/grid-layer.js');
     secim.add('src/ui/grid-reset.js');
     secim.add('src/ui/map-layer-visibility.js');
