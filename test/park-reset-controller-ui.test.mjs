@@ -1,0 +1,10 @@
+import {test} from 'node:test';
+import assert from 'node:assert/strict';
+import vm from 'node:vm';
+import {readFileSync} from 'node:fs';
+const c=vm.createContext({window:{}});vm.runInContext(readFileSync(new URL('../src/ui/park-reset-controller.js',import.meta.url),'utf8'),c);
+function setup({map=true,cleanupError=false,removeError=false}={}){const events=[],refs=['park','water','hard'];const run=c.window.DG_PARK_RESET_CONTROLLER_UI.create({clearMenus:()=>events.push('menus'),getMap:()=>map?{removeLayer:layer=>{if(removeError)throw Error('remove failed');events.push('remove:'+layer);}}:null,layers:refs.map((_,i)=>({get:()=>refs[i],clear:()=>{refs[i]=null;events.push('clear:'+i);}})),resetGeometry:()=>events.push('geometry'),resetIdentity:()=>events.push('identity'),cleanupReview:()=>{events.push('review');if(cleanupError)throw Error('cleanup failed');},resetSurface:()=>events.push('surface')});return{run,events,refs};}
+test('clears layers and park state in existing order; repeated clear does not remove old layers',()=>{const x=setup();x.run();assert.deepEqual(x.events,['menus','remove:park','clear:0','remove:water','clear:1','remove:hard','clear:2','geometry','identity','review','surface']);assert.deepEqual(x.refs,[null,null,null]);x.events.length=0;x.run();assert.deepEqual(x.events,['menus','geometry','identity','review','surface']);});
+test('missing map preserves layer references while clearing local geometry and surface state',()=>{const x=setup({map:false});x.run();assert.deepEqual(x.refs,['park','water','hard']);assert.deepEqual(x.events,['menus','geometry','identity','review','surface']);});
+test('review cleanup failure still permits local surface reset',()=>{const x=setup({cleanupError:true});assert.doesNotThrow(x.run);assert.deepEqual(x.events.slice(-4),['geometry','identity','review','surface']);});
+test('layer removal failure propagates and does not falsely clear its reference',()=>{const x=setup({removeError:true});assert.throws(x.run,/remove failed/);assert.deepEqual(x.refs,['park','water','hard']);assert.deepEqual(x.events,['menus']);});
