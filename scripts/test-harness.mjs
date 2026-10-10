@@ -125,6 +125,7 @@ export function loadApp({ sadece } = {}) {
      * bu zincirden yüklenir (DOM/ağ yok). */
     'src/services/geofence.js',
     'src/application/parks/find-park-candidates.js',
+    'src/application/parks/fetch-detailed-coverage.js',
     'src/services/park-query.js',
     /* PARK KİMLİĞİ (2026-09-24): park-registry.js saf yardımcılarının
      * (ad normalizasyonu, anahtar üretimi, proje adı kuralı) birim testleri
@@ -155,7 +156,10 @@ export function loadApp({ sadece } = {}) {
     secim.add('src/application/trees/calculate-tree-carbon-from-circumference.js');
   }
   if (secim && secim.has('src/services/measure.js')) secim.add('src/application/trees/validate-measurement.js');
-  if (secim && secim.has('src/services/park-query.js')) secim.add('src/application/parks/find-park-candidates.js');
+  if (secim && secim.has('src/services/park-query.js')) {
+    secim.add('src/application/parks/find-park-candidates.js');
+    secim.add('src/application/parks/fetch-detailed-coverage.js');
+  }
   if (secim && secim.has('src/services/park-registry.js')) {
     secim.add('src/domain/parks/identity.js');
     secim.add('src/adapters/parks/park-store.js');
