@@ -314,18 +314,7 @@ function isImpervious(el){
 }
 
 function isClosedLine(l){
-  return(
-    l &&
-    l.length>2 &&
-    Math.abs(
-      l[0][0]-
-      l[l.length-1][0]
-    )<1e-7 &&
-    Math.abs(
-      l[0][1]-
-      l[l.length-1][1]
-    )<1e-7
-  );
+  return window.DG_PARK_IMPERVIOUS_GEOMETRY.isClosedLine(l);
 }
 
 /* =========================================================
@@ -343,161 +332,11 @@ function roadHalfWidth(hw){
 ========================================================= */
 
 function collectImperviousGeometry(el){
-  if(el.type==="relation"){
-    const r=extractRings(el);
-
-    if(!r)return;
-
-    if(Array.isArray(r)){
-      r.forEach(rr=>{
-        if(
-          rr &&
-          rr.length>=3
-        ){
-          IMP_RINGS.push(rr);
-        }
-      });
-    }else if(r.outer){
-      r.outer.forEach(rr=>{
-        if(
-          rr &&
-          rr.length>=3
-        ){
-          IMP_RINGS.push(rr);
-        }
-      });
-    }
-
-    return;
-  }
-
-  if(!el.geometry)return;
-
-  const pts=
-    el.geometry.map(g=>[
-      g.lat,
-      g.lon
-    ]);
-
-  if(pts.length<2)return;
-
-  const t=el.tags||{};
-
-  const surface=
-    String(
-      t.surface||""
-    ).toLowerCase().trim();
-
-  const hardSurfaces=new Set([
-    "asphalt",
-    "concrete",
-    "paving_stones",
-    "sett",
-    "concrete:plates",
-    "concrete:lanes",
-    "cobblestone",
-    "bricks",
-    "metal"
-  ]);
-
-  const isArea=
-    !!t.building ||
-    t.amenity==="parking" ||
-    t.amenity==="bicycle_parking" ||
-    t.amenity==="motorcycle_parking" ||
-    !!t["area:highway"] ||
-    t.landuse==="highway" ||
-    (
-      (
-        t.leisure==="pitch" ||
-        t.leisure==="track" ||
-        t.leisure==="playground"
-      ) &&
-      hardSurfaces.has(surface)
-    );
-
-  /*
-   * Kapalı polygon → alan
-   */
-  if(isClosedLine(pts)){
-    if(isArea){
-      IMP_RINGS.push(pts);
-      return;
-    }
-
-    /*
-     * Kapalı ama sert olarak tanımlanmamış
-     * polygon ise alma.
-     */
-    return;
-  }
-
-  /*
-   * AÇIK geometri → asla polygon yapma!
-   * Sadece çizgi olarak işle.
-   * Bu, "yamuk yumuk şekilsiz sert zemin"
-   * sorununu ortadan kaldırır.
-   */
-
-  let w=0;
-
-  if(t.highway){
-    const width=
-      parseFloat(
-        String(
-          t.width||""
-        ).replace(",",".")
-      );
-
-    if(
-      Number.isFinite(width) &&
-      width>0 &&
-      width<30
-    ){
-      w=width/2;
-    }else{
-      const lanes=parseFloat(
-        String(t.lanes||"").replace(",",".")
-      );
-
-      if(
-        Number.isFinite(lanes) &&
-        lanes>0 &&
-        lanes<10
-      ){
-        w=Math.max(
-          1.25,
-          (lanes*3.0)/2
-        );
-      }else{
-        w=roadHalfWidth(
-          t.highway
-        );
-      }
-    }
-  }else if(hardSurfaces.has(surface)){
-    w=3;
-  }else{
-    w=2;
-  }
-
-  IMP_LINES.push({
-    pts,
-    w
-  });
-
-  if(
-    t.highway &&
-    !/^(footway|path|cycleway|steps|pedestrian|bridleway|track)$/
-      .test(
-        String(t.highway).toLowerCase()
-      )
-  ){
-    GRID_BLOCK_LINES.push({
-      pts,
-      w:Math.max(1,w)
-    });
-  }
+  window.DG_PARK_IMPERVIOUS_GEOMETRY.collectImperviousGeometry(
+    el,
+    { rings: IMP_RINGS, lines: IMP_LINES, blockLines: GRID_BLOCK_LINES },
+    { extractRings, roadHalfWidth }
+  );
 }
 
 /*
@@ -510,31 +349,9 @@ function collectImperviousGeometry(el){
  * GRID_BLOCK_LINES'a eklenir; IMP_RINGS/IMP_LINES'a eklenmez.
  */
 function collectPedestrianGridBlocker(el){
-  if(!el || !el.geometry || !el.tags || !el.tags.highway)return;
-
-  const hw=String(el.tags.highway).toLowerCase();
-  if(!/^(footway|path|cycleway|steps|pedestrian|bridleway|track)$/.test(hw))return;
-
-  const pts=el.geometry.map(g=>[g.lat,g.lon]);
-  if(pts.length<2)return;
-
-  const width=parseFloat(
-    String(el.tags.width||"").replace(",",".")
+  window.DG_PARK_IMPERVIOUS_GEOMETRY.collectPedestrianGridBlocker(
+    el,
+    { blockLines: GRID_BLOCK_LINES },
+    { roadHalfWidth }
   );
-
-  let halfWidth;
-  if(Number.isFinite(width) && width>0 && width<30){
-    halfWidth=width/2;
-  }else{
-    const lanes=parseFloat(
-      String(el.tags.lanes||"").replace(",",".")
-    );
-    if(Number.isFinite(lanes) && lanes>0 && lanes<10){
-      halfWidth=Math.max(1.25,(lanes*3.0)/2);
-    }else{
-      halfWidth=roadHalfWidth(hw);
-    }
-  }
-
-  GRID_BLOCK_LINES.push({pts,w:Math.max(1,halfWidth)});
 }
