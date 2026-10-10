@@ -167,6 +167,7 @@ export function loadApp({ sadece } = {}) {
     'src/application/parks/count-grid-cell-measurements.js',
     'src/application/parks/build-grid-request.js',
     'src/application/parks/select-grid-waypoint-cells.js',
+    'src/adapters/parks/fetch-latest-grid-waypoint.js',
     'src/services/grid-engine.js',
     /* YÖNETİM AĞACI (2026-09-24): dgTreeGroup/dgTreeFilterRows saf
      * fonksiyonları burada test edilir (DOM'a dokunan çizim kısmı değil). */
