@@ -99,6 +99,7 @@ src/
 - `application/parks/build-grid-request.js`, çözülmüş yüzey parçaları ve legacy su/sert zemin engellerini mevcut worker request DTO'suna dönüştürür; parça varsa eski halka engellerini, yoksa fallback halka ve çizgi listelerini taşır.
 - `application/parks/select-grid-waypoint-cells.js`, otomatik modda ölçümsüz hücreleri, elle modda yalnız seçili hücreleri özgün sırayla döndürür; `grid-engine.js` eski uyarı ve kayıt akışını korur.
 - `adapters/parks/fetch-latest-grid-waypoint.js`, proje kapsamındaki en yüksek waypoint kimliğini Supabase'ten azalan sıralama ve tek satır sınırıyla okur; `grid-engine.js` mevcut kimlik devamını aynı sorgu sonucu üzerinden sürdürür.
+- `adapters/parks/insert-grid-waypoints.js`, hazırlanmış waypoint satırlarını `waypoints` tablosuna yazar ve Supabase sonucunu aynen döndürür; servis mevcut hata toast'ını ve harita çizimini sürdürür.
 - `domain/parks/road-half-width.js`, `highway` sınıfına göre grid çakışma tamponunun varsayılan yarı-genişliğini üretir; açık OSM `width`/`lanes` değerlerinin önceliği ve tüm geometriler `park-geometry.js` içinde kalır.
 - `domain/parks/classify-surface-tags.js`, eski `isWater()` ve `isImpervious()` OSM etiket kararlarını saf API'de tutar; `park-geometry.js` bu kuralları global uyumluluk sarmalayıcılarıyla sunar.
 - `domain/parks/area.js`, mevcut jeodezik halka alan formülünü ve dış halka eksi iç halkalar toplamını `[LON,LAT]` sözleşmesiyle korur; `park-geometry.js` eski `ringGeodesicArea()`/`polyArea()` adlarını sarmalar.
