@@ -4,7 +4,7 @@
 // NOT: Senkronizasyon artık Ana Thread (Supabase JS SDK) tarafından yapılıyor
 // ============================================================
 
-const CACHE_VERSION = 'dendrogeo-sw-v2-r122';
+const CACHE_VERSION = 'dendrogeo-sw-v2-r123';
 
 /* İKİ AYRI STATİK CACHE — bu ayrım bilinçli ve önemli.
  *
@@ -61,7 +61,7 @@ const CORE_ASSETS = [
      * engine → panel → export). */
     /* park-registry.js (2026-09-24): park kimliği + ölçüm kapısı. Sıra
      * index.html ile aynı: query'den sonra, grid-engine'den önce. */
-    '/src/services/park-state.js','/src/services/osm-client.js','/src/services/park-geometry.js','/src/services/geofence.js','/src/services/park-query.js','/src/domain/parks/identity.js','/src/adapters/parks/park-store.js','/src/application/parks/register-park.js','/src/services/park-registry.js','/src/services/grid-engine.js','/src/ui/editor-ui.js','/src/ui/park-panel.js','/src/ui/park-export.js',
+    '/src/services/park-state.js','/src/services/osm-client.js','/src/services/park-geometry.js','/src/services/geofence.js','/src/services/park-query.js','/src/domain/parks/identity.js','/src/adapters/parks/park-store.js','/src/application/parks/register-park.js','/src/adapters/parks/project-store.js','/src/application/parks/create-project.js','/src/services/park-registry.js','/src/services/grid-engine.js','/src/ui/editor-ui.js','/src/ui/park-panel.js','/src/ui/park-export.js',
     '/src/services/dash.js',
     /* UI katmanı (Faz 1): index.html'in inline <script> bloğu bu dört modüle
      * taşındı — global state, toast, landing beyni ve kabuk önyüklemesi.

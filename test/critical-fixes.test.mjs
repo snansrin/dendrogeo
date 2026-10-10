@@ -165,8 +165,9 @@ describe('uzaktan proje + canlı kaydet butonu — 2026-09-27', () => {
     assert.match(pr, /id="scanRemote"/, 'arama kutusu scan kartında');
     assert.match(pr, /Uzak parkta .*proje açabilirsin/, 'kural kullanıcıya yazılı söylenir');
     const i = pr.indexOf('async function dgScanCreateProject');
-    const govde = pr.slice(i, pr.indexOf('async function dgScanLinkTarget', i));
-    assert.doesNotMatch(govde, /dgVerifyAtPark/, 'proje açılışında konum bloğu YOK');
+    const govde = pr.slice(i, pr.indexOf('async function dgLinkProject', i));
+    const app = read2('src/application/parks/create-project.js');
+    assert.doesNotMatch(govde+app, /dgVerifyAtPark/, 'proje açılışında konum bloğu YOK');
   });
   test('ölçüm kapısı DURUYOR: saveMeas hâlâ konum doğruluyor', () => {
     const m = read2('src/services/measure.js');

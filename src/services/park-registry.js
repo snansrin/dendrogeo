@@ -495,31 +495,22 @@ function dgShowProjectStep(){
    6. PROJE OLUŞTUR / BAĞLA
 ========================================================= */
 
+const DG_PARK_PROJECT_STORE=window.DG_PARK_PROJECT_STORE_ADAPTER.create({getClient:()=>sb});
+const DG_PARK_CREATE_PROJECT_USE_CASE=window.DG_PARK_CREATE_PROJECT_APPLICATION.create({
+  getUser:()=>USER,
+  getPark:()=>DG_PARK,
+  getLabel:()=>{const el=$("scanLabel");return el?String(el.value||"").trim():"";},
+  projectName:dgProjectName,
+  insertProject:row=>DG_PARK_PROJECT_STORE.insert(row),
+  persistGeometry:park=>typeof dgPersistParkGeom==="function"?dgPersistParkGeom(park):undefined
+});
+
 async function dgScanCreateProject(){
-  if(!USER)return toast("Oturum yok","err");
-  const park=DG_PARK;
-  if(!park)return toast("Park kimliği sunucuya yazılmadan proje oluşturulamaz. 🔄 ile yeniden dene.","err","🌳");
-  const labelEl=$("scanLabel");
-  const label=labelEl?String(labelEl.value||"").trim():"";
-
-
-  const{data,error}=await sb.from("projects").insert({
-    owner:USER.id,
-    park_id:park.id,
-    label,
-    /* DB trigger'ı adı zaten kurar; istemci aynı kuralı gönderir ki
-     * trigger çalışmazsa (eski şema) bile ad tutarlı kalsın. */
-    name:dgProjectName(park.name,label),
-    city:park.city||"",
-    country:park.country||""
-  }).select().single();
-
-  if(error)return toast(dgCf("Proje oluşturulamadı: ")+esc(error.message),"err");
-
-  /* 0007: taramadaki halkayı sunucuya yaz → trg_geo_fence bundan sonra bu
-   * park için daire yedeği değil TAM POLİGON ile doğrular. */
-  if(typeof dgPersistParkGeom==="function")await dgPersistParkGeom(park);
-
+  const result=await DG_PARK_CREATE_PROJECT_USE_CASE();
+  if(result.status==="unauthenticated")return toast("Oturum yok","err");
+  if(result.status==="park-missing")return toast("Park kimliği sunucuya yazılmadan proje oluşturulamaz. 🔄 ile yeniden dene.","err","🌳");
+  if(result.status==="write-failed")return toast(dgCf("Proje oluşturulamadı: ")+esc(result.error.message),"err");
+  const data=result.data;
   toast(dgCf("✓ Proje hazır: ")+esc(data.name),"ok","📁");
   await dgAfterProjectLinked(data);
   return data;
