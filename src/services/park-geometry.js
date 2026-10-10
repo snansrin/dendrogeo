@@ -42,10 +42,7 @@ function parkAreaHa(){
 ========================================================= */
 
 function projectPoint(lat,lon,refLat){
-  return {
-    x:lon*111320*Math.cos(refLat*Math.PI/180),
-    y:lat*110540
-  };
+  return window.DG_PARK_POINT_IN_POLYGON.projectPoint(lat,lon,refLat);
 }
 
 function ringBBox(ring,refLat){
@@ -90,47 +87,11 @@ function bboxesOverlap(a,b){
 }
 
 function pointInPolygonXY(x,y,poly){
-  let inside=false;
-
-  for(
-    let i=0,j=poly.length-1;
-    i<poly.length;
-    j=i++
-  ){
-    const xi=poly[i].x;
-    const yi=poly[i].y;
-
-    const xj=poly[j].x;
-    const yj=poly[j].y;
-
-    if(
-      ((yi>y)!==(yj>y)) &&
-      (
-        x<
-        (xj-xi)*(y-yi)/(yj-yi)+xi
-      )
-    ){
-      inside=!inside;
-    }
-  }
-
-  return inside;
+  return window.DG_PARK_POINT_IN_POLYGON.pointInPolygonXY(x,y,poly);
 }
 
 function pointInPolygon(lat,lon,ring){
-  if(!ring||ring.length<3)return false;
-
-  const p=projectPoint(lat,lon,lat);
-
-  const poly=ring.map(q=>
-    projectPoint(q[0],q[1],lat)
-  );
-
-  return pointInPolygonXY(
-    p.x,
-    p.y,
-    poly
-  );
+  return window.DG_PARK_POINT_IN_POLYGON.pointInPolygon(lat,lon,ring);
 }
 
 function pointInPark(lat,lon,rings){
