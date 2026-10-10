@@ -76,40 +76,16 @@ function drawGridLayer(){
   const {measured:g,empty:r0}=window.DG_GRID_CELL_STATES.count(GRID_CELLS);
 
   GRID_CELLS.forEach(cell=>{
-    const col=
-      cell.n===0
-        ?"#e11d48"
-        :"#16a34a";
-
-    const isSel=
-      SELECTED_CELLS.has(
-        cell.id
-      );
+    const style=window.DG_GRID_CELL_STYLE.resolve(
+      cell,
+      SELECTED_CELLS.has(cell.id)
+    );
 
     const shape=cell.geometry?cell.geometry.coordinates.map(poly=>poly.map(r=>r.map(p=>[p[1],p[0]]))):[[cell.s0,cell.w0],[cell.s0,cell.w1],[cell.s1,cell.w1],[cell.s1,cell.w0]];
     const rect=L.polygon(shape,
         {
           renderer:DG_GRID_RENDERER,
-          color:
-            isSel
-              ?"#1d4ed8"
-              :col,
-
-          weight:
-            isSel
-              ?3
-              :1.2,
-
-          fillColor:
-            isSel
-              ?"#3b82f6"
-              :col,
-
-          fillOpacity:
-            isSel
-              ?.55
-              :.32,
-
+          ...style,
           interactive:true
         }
       ).addTo(
@@ -240,29 +216,19 @@ function toggleCellSelection(
       );
 
     if(cell){
-      const col=
-        cell.n===0
-          ?"#e11d48"
-          :"#16a34a";
-
-      rect.setStyle({
-        color:col,
-        weight:1.2,
-        fillColor:col,
-        fillOpacity:.32
-      });
+      rect.setStyle(
+        window.DG_GRID_CELL_STYLE.resolve(cell,false)
+      );
     }
   }else{
     SELECTED_CELLS.add(
       cellId
     );
 
-    rect.setStyle({
-      color:"#1d4ed8",
-      weight:3,
-      fillColor:"#3b82f6",
-      fillOpacity:.55
-    });
+    const cell=GRID_CELLS.find(c=>c.id===cellId);
+    if(cell)rect.setStyle(
+      window.DG_GRID_CELL_STYLE.resolve(cell,true)
+    );
   }
 
   const {measured:g,empty:r0}=window.DG_GRID_CELL_STATES.count(GRID_CELLS);
@@ -289,17 +255,9 @@ function clearCellSelection(){
           );
 
         if(cell){
-          const col=
-            cell.n===0
-              ?"#e11d48"
-              :"#16a34a";
-
-          l.setStyle({
-            color:col,
-            weight:1.2,
-            fillColor:col,
-            fillOpacity:.32
-          });
+          l.setStyle(
+            window.DG_GRID_CELL_STYLE.resolve(cell,false)
+          );
         }
       }
     });
