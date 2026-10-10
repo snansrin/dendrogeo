@@ -126,6 +126,7 @@ export function loadApp({ sadece } = {}) {
     'src/domain/parks/point-in-polygon.js',
     'src/domain/parks/bounds.js',
     'src/domain/parks/park-containment.js',
+    'src/domain/parks/line-distance.js',
     'src/services/park-geometry.js',
     'src/domain/parks/simplify-ring.js',
     'src/adapters/parks/park-geometry-store.js',

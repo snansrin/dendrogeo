@@ -92,7 +92,7 @@ const trNum = (x, d = 2) => Number(x).toLocaleString('tr-TR', { minimumFractionD
 
 /* ---------- LULC (uygulamanın kendi motoru, vm içinde) ---------- */
 export function bootLC() {
-  const MODS = ['src/utils/geo.js', 'src/services/park-state.js', 'src/domain/parks/area.js', 'src/domain/parks/segment-intersection.js', 'src/domain/parks/point-in-polygon.js', 'src/domain/parks/bounds.js', 'src/domain/parks/park-containment.js', 'src/services/park-geometry.js',
+  const MODS = ['src/utils/geo.js', 'src/services/park-state.js', 'src/domain/parks/area.js', 'src/domain/parks/segment-intersection.js', 'src/domain/parks/point-in-polygon.js', 'src/domain/parks/bounds.js', 'src/domain/parks/park-containment.js', 'src/domain/parks/line-distance.js', 'src/services/park-geometry.js',
     'src/services/lc-config.js', 'src/domain/surface/classify-landcover-code.js',
     'src/domain/surface/compare-source-class-areas.js',
     'src/services/lc-geo.js', 'src/services/lc-stac.js',
