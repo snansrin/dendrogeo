@@ -110,16 +110,11 @@ const DG_SURFACE_REVIEW_PREPARE=window.DG_SURFACE_REVIEW_PREPARATION.create({
  resolved:dgSurfaceResolved,yieldTask:()=>new Promise(r=>setTimeout(r,0))
 });
 function dgSurfacePrepare(data){return DG_SURFACE_REVIEW_PREPARE(data);}
-function dgSurfaceMergeSync(parts,epsg){
- const groups={};for(const p of parts){const g=groups[p.type]||(groups[p.type]={geoms:[],area:0,methods:new Set()});g.geoms.push(p.geom);g.area+=p.areaM2;g.methods.add(p.method);}
- return Object.entries(groups).map(([k,g])=>({type:'Feature',properties:{class:k,area_m2:g.area,method:[...g.methods].sort().join('+')},geometry:{type:'MultiPolygon',coordinates:dgSurfaceUnproject(dgSurfaceClip("union",...g.geoms),epsg)}}));
-}
-
-function dgSurfaceDisplaySync(parts,epsg,park,prepared=null){
- // The user requested the original exact map, without display smoothing.
- // Reuse the already merged analytical features; no second topology pass.
- return prepared||dgSurfaceMergeSync(parts,epsg);
-}
+const DG_SURFACE_REVIEW_FEATURE_OUTPUT=window.DG_SURFACE_REVIEW_FEATURES.create({
+ union:geometries=>dgSurfaceClip("union",...geometries),unproject:dgSurfaceUnproject
+});
+function dgSurfaceMergeSync(parts,epsg){return DG_SURFACE_REVIEW_FEATURE_OUTPUT.merge(parts,epsg);}
+function dgSurfaceDisplaySync(parts,epsg,park,prepared=null){return DG_SURFACE_REVIEW_FEATURE_OUTPUT.display(parts,epsg,park,prepared);}
 
 /* Sampling geometry is derived from the displayed review, never from patch centroids.
  * Erode the usable domain, clip metric cells, then choose an interior point.
