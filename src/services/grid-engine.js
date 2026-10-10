@@ -14,7 +14,7 @@ const _tgrf=(t,v)=>(typeof dgTfs==="function"?dgTfs(t,v):String(t).replace(/\{(\
    GRID
 ========================================================= */
 
-let DG_GRID_BUSY=false,DG_GRID_EPOCH=0,DG_GRID_RENDERER=null,DG_GRID_SOURCE=null,DG_GRID_META="";
+let DG_GRID_EPOCH=0,DG_GRID_RENDERER=null,DG_GRID_SOURCE=null,DG_GRID_META="";
 function dgGridReviewSignature(){return window.DG_GRID_REVIEW_SIGNATURE.resolve(window.DG_LC_SENS?.state);}
 const DG_GRID_BUILD=window.DG_GRID_BUILD_APPLICATION.create({
  ensureSurface:()=>typeof dgEnsureLulc==="function"?dgEnsureLulc():undefined,
@@ -36,21 +36,17 @@ const DG_GRID_BUILD=window.DG_GRID_BUILD_APPLICATION.create({
  warnTruncated:(data,count)=>dgWarnIfTruncated(data,5000,"Izgara ölçüm yoğunluğu",count),
  countMeasurements:(result,data,{size,epsg})=>window.DG_GRID_CELL_MEASUREMENTS.count(result.cells,data,{size,epsg,x0:result.x0,y0:result.y0,project:dgLcUtmForward,pointDistance:dgGridPointDistance,featureGeometry:dgSurfaceFeatureGeometry})
 });
-async function buildGrid(){
- if(DG_GRID_BUSY)return;
- if(!PARK_POLY?.length)return toast("Önce park seç","warn");
- const {size,clearance}=window.DG_GRID_OPTIONS.resolve($("gridSize")?.value,$("gridClearance")?.value);
- const park=PARK_POLY,epoch=++DG_GRID_EPOCH,btn=$("gridBuildBtn");DG_GRID_BUSY=true;
- if(btn){btn.disabled=true;btn.textContent="⏳ Grid hazırlanıyor…";}
- try{
-  const outcome=await DG_GRID_BUILD({park,epoch,size,clearance});
-  if(outcome.status==="stale")return;
-  const {result,signature,review}=outcome;
+const DG_GRID_BUILD_CONTROLLER=window.DG_GRID_BUILD_CONTROLLER_UI.create({
+ getPark:()=>PARK_POLY,
+ getOptions:()=>window.DG_GRID_OPTIONS.resolve($("gridSize")?.value,$("gridClearance")?.value),
+ nextEpoch:()=>++DG_GRID_EPOCH,getButton:()=>$("gridBuildBtn"),
+ build:context=>DG_GRID_BUILD(context),
+ accept:({result,signature,review},{clearance})=>{
   clearGrid();DG_GRID_SOURCE=signature;DG_GRID_META=`<p class="measure-help">${_tgr("Su ve sert zeminden uzaklık")}: ${clearance} m · ${_tgr(review?.editing?"Yüzey önizlemesi":"Kayıtlı yüzey")} · ${(result.areaM2/10000).toFixed(3)} ha ${_tgr("uygun alan")}</p>`;GRID_CELLS.push(...result.cells);drawGridLayer();
   toast(_tgrf("✓ Grid hazır: {n} hücre",{n:GRID_CELLS.length}),GRID_CELLS.length?"ok":"warn","🔲");
- }catch(e){toast(String(e.message||e),"err","🔲");}
- finally{DG_GRID_BUSY=false;if(btn?.isConnected){btn.disabled=false;btn.textContent="🔲 Grid Oluştur";}}
-}
+ },notify:(...args)=>toast(...args)
+});
+async function buildGrid(){return DG_GRID_BUILD_CONTROLLER();}
 
 /* =========================================================
    GRID DRAW

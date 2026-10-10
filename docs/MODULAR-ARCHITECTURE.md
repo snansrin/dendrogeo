@@ -185,3 +185,5 @@ Her modülün tek bir dış API'si, sahibi olduğu açık durumu ve kendi testle
 - `ui/grid-waypoint-completion.js`, başarılı waypoint kaydı ardından katmanı çizer, proje kontrolünü eşitler, listeyi yeniler, kimlik aralığı bildirimini gösterir ve hücre seçimini temizler. Servis başarı durumunu doğrular ve mevcut çizim/DOM/bildirim callback bağlarını sağlar.
 
 - `application/parks/build-grid.js`, yüzey hazırlama, worker/yedek grid üretimi, ölçüm sorgusu/sayımı ve park/epoch/yüzey imzası doğrulama sırasını yürütür. Servis işlem kilidini, buton durumunu, kabul edilen hücreleri haritaya aktarmayı ve bildirimleri sağlar; mevcut hesap işlevleri değişmez.
+
+- `ui/grid-build-controller.js`, tek grid üretimi kilidini ve buton yaşam döngüsünü yönetir; park yokluğu, eski sonuç, hata ve tamamlanma yollarında mevcut bildirimleri/temizliği sürdürür. Servis epoch ve kabul edilen grid durumunu günceller; eski `buildGrid()` girişini korur.
