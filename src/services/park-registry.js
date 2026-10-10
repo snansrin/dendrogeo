@@ -977,7 +977,6 @@ async function loadParkAdmin__scroll(){
   const result=await DG_PARK_ADMIN_LOAD();
   if(result.status==="forbidden")return toast("Yetki yok.","err");
   const box=$("parkAdminBox");
-  if(box)box.innerHTML='<div class="alert info">⏳ Park kimlikleri yükleniyor…</div>';
   if(result.status==="park-load-failed"){
     if(box)box.innerHTML=`<div class="alert err">⚠ Parklar okunamadı: <span class="mono">${esc(result.error.message)}</span></div>`;
     return;
@@ -988,6 +987,7 @@ async function loadParkAdmin__scroll(){
 
 const DG_PARK_ADMIN_LOAD=window.DG_PARK_ADMIN_LOAD_APPLICATION.create({
   isAdmin:()=>!!PROFILE&&(PROFILE.role==="admin"||PROFILE.role==="owner"),
+  showLoading:()=>{const box=$("parkAdminBox");if(box)box.innerHTML='<div class="alert info">⏳ Park kimlikleri yükleniyor…</div>';},
   fetchParks:()=>sb.from("parks").select("*").order("name"),
   fetchProjects:()=>sb.from("projects").select("id,name,park_id"),
   fetchMeasurements:()=>sb.from("measurements").select("park_id").limit(5000)
