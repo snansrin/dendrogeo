@@ -201,3 +201,5 @@ Her modülün tek bir dış API'si, sahibi olduğu açık durumu ve kendi testle
 - Park ekranı, park/GIS dışa aktarımları ve yüzey önizleme çıktısı hücreleri grid oturumunun `getCells()` arayüzünden okur; eski `GRID_CELLS`/`SELECTED_CELLS` global aliasları kaldırılmıştır. Grid yüklenmemişken isteğe bağlı çıktı yollarının mevcut guard davranışı korunur.
 
 - `ui/park-reference-area.js`, referans alan girişinin mevcut parseFloat/pozitif değer kuralını ve sapma rozetini yönetir. Park ekranı referans durumunu ve ölçülen alanı bağlar; referans yalnız karşılaştırmadır, geometri/hesaplanan alanı değiştirmez. %3 renk eşiği ve sayı biçimleri korunur.
+
+- `ui/park-mode-controller.js`, park modu düğmesi/ipuçlarını, tıklama bağlama sırasını, kapatmada aday/park temizliğini ve harita hazır değilken kapalı duruma dönüşü yönetir. Park ekranı mevcut durum ve harita callback bağlarını sağlar; metin, blue sınıfı ve aria-pressed davranışı korunur.

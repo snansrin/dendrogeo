@@ -8,6 +8,7 @@ on:
       - 'src/ui/lc-sens.js'
       - 'src/ui/park-panel.js'
       - 'src/ui/park-reference-area.js'
+      - 'src/ui/park-mode-controller.js'
       - 'docs/surface-engine-lock.json'
       - 'docs/surface-scientific-contract.json'
       - 'test/surface-scientific-contract.test.mjs'

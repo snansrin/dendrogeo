@@ -30,59 +30,13 @@ function renderRefBadge(){return DG_PARK_REFERENCE_AREA.render();}
    PARK MODE
 ========================================================= */
 
-function toggleParkMode(){
-  PARK_MODE=!PARK_MODE;
-
-  const b=$("parkModeBtn");
-  const hint=$("parkModeHint");
-
-  if(b){
-    b.textContent=
-      "🌳 Park Analizi Modu: "+
-      (PARK_MODE?"AÇIK":"KAPALI");
-
-    b.classList.toggle("blue",!PARK_MODE);
-    b.setAttribute(
-      "aria-pressed",
-      PARK_MODE?"true":"false"
-    );
-  }
-
-  if(hint){
-    hint.textContent=
-      PARK_MODE
-        ?"Şimdi haritada parkın içine tıkla."
-        :"Açınca haritada bir parkın içine tıkla → sınırı otomatik algılanır.";
-  }
-
-  bindParkClick();
-
-  if(!PARK_MODE){
-    PARK_CANDS=[];
-    clearPark();
-    return;
-  }
-
-  if(!map){
-    PARK_MODE=false;
-    if(b){
-      b.textContent="🌳 Park Analizi Modu: KAPALI";
-      b.classList.add("blue");
-      b.setAttribute("aria-pressed","false");
-    }
-    if(hint){
-      hint.textContent=
-        "Harita henüz hazır değil; tekrar deneyin.";
-    }
-    return;
-  }
-
-  toast(
-    "🌳 Park Analizi modu açıldı. Haritada bir parkın içine tıklayın.",
-    "ok",
-    "🌳"
-  );
-}
+const DG_PARK_MODE_CONTROLLER=window.DG_PARK_MODE_CONTROLLER_UI.create({
+ getMode:()=>PARK_MODE,setMode:value=>{PARK_MODE=value;},
+ getButton:()=>$("parkModeBtn"),getHint:()=>$("parkModeHint"),
+ bindClick:()=>bindParkClick(),clearCandidates:()=>{PARK_CANDS=[];},
+ clear:()=>clearPark(),getMap:()=>map,notify:(...args)=>toast(...args)
+});
+function toggleParkMode(){return DG_PARK_MODE_CONTROLLER();}
 
 function bindParkClick(){
   if(
