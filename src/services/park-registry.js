@@ -182,24 +182,26 @@ async function dgDetectAt(lat,lon,opt){return DG_PARK_DETECT_USE_CASE(lat,lon,op
 /* UZAKTAN PARK ARAMA: 1) kayıtlı parklarda ada göre bul (name_norm),
  * 2) yoksa Nominatim'den koordinat → dgDetectAt (aynı boru hattı: queryPark →
  * kimlik → DG_PARK). Konum BİLGİSİ gerektirmez → kullanıcı evden de proje açar. */
-async function dgScanSearchByName(name){
- const q=String(name||"").trim();
- if(!q)return toast("Önce park adını yaz.","warn","🔍");
- const norm=(typeof dgNormParkName==="function"?dgNormParkName(q):q).toLocaleLowerCase("tr-TR");
- try{
-  const{data}=await sb.from("parks").select("*").ilike("name_norm",norm+"%").order("name").limit(5);
-  if(data&&data.length){
-   DG_PARK_CAND=null;DG_PARK=data[0];dgRenderScanCard();
-   return toast("🌳 "+esc(data[0].name)+" "+_tpr("seçildi — proje açabilirsin; ölçüm için parkta olman gerekir."),"ok","🌳");
+const DG_PARK_SEARCH_STORE=window.DG_PARK_SEARCH_ADAPTER.create({getClient:()=>sb,getFetch:()=>fetch});
+const DG_PARK_SEARCH_USE_CASE=window.DG_PARK_SEARCH_APPLICATION.create({
+  normalizeName:dgNormParkName,
+  findRegistered:prefix=>DG_PARK_SEARCH_STORE.findRegistered(prefix),
+  geocode:query=>DG_PARK_SEARCH_STORE.geocode(query),
+  onEvent:(kind,payload)=>{
+    if(kind==="database-error")console.warn("DENDROGEO · uzak park arama (DB):",payload&&payload.message);
+    if(kind==="searching-osm")toast("🔍 "+payload+" "+_tpr("OSM'de aranıyor…"),"info","🌳");
   }
- }catch(e){console.warn("DENDROGEO · uzak park arama (DB):",e.message);}
- toast("🔍 "+q+" "+_tpr("OSM'de aranıyor…"),"info","🌳");
- try{
-  const r=await fetch("https://nominatim.openstreetmap.org/search?format=jsonv2&limit=1&q="+encodeURIComponent(q+" park"));
-  const j=await r.json();
-  if(!j||!j.length)return toast("Bulunamadı: haritada parkın içine tıkla ya da ✍️ elle oluştur.","warn","🔍");
-  return await dgDetectAt(+j[0].lat,+j[0].lon);
- }catch(e){return toast(dgCf("Arama hatası: ")+esc(e.message)+" "+_tpr("— haritada tıkla veya elle oluştur."),"err","🔍");}
+});
+async function dgScanSearchByName(name){
+ const result=await DG_PARK_SEARCH_USE_CASE(name);
+ if(result.status==="empty-query")return toast("Önce park adını yaz.","warn","🔍");
+ if(result.status==="registered"){
+  DG_PARK_CAND=null;DG_PARK=result.park;dgRenderScanCard();
+  return toast("🌳 "+esc(result.park.name)+" "+_tpr("seçildi — proje açabilirsin; ölçüm için parkta olman gerekir."),"ok","🌳");
+ }
+ if(result.status==="not-found")return toast("Bulunamadı: haritada parkın içine tıkla ya da ✍️ elle oluştur.","warn","🔍");
+ if(result.status==="geocode-failed")return toast(dgCf("Arama hatası: ")+esc(result.error.message)+" "+_tpr("— haritada tıkla veya elle oluştur."),"err","🔍");
+ if(result.status==="geocoded")return await dgDetectAt(+result.point.lat,+result.point.lon);
 }
 
 function dgDetectAtMyLocation(){
@@ -326,7 +328,7 @@ function dgRenderScanCard__scroll(forceManual){
   /* --- 1) park henüz yok --- */
   if(!park&&!cand){
     el.innerHTML=schemaWarn+steps+
-      `<div class="alert info" style="margin:6px 0">Haritada <b>parkın içine tıkla</b> — sınır ve ad otomatik algılanır. `+
+      `<div class="alert info" style="margin:6px 0">Haritada <b>parkın içine tıkla</b> ��� sınır ve ad otomatik algılanır. `+
       `Park modu kapalıysa aşağıdaki buton açar.</div>`+
       `<div style="display:flex;gap:8px;flex-wrap:wrap">`+
         `<button class="btn sm blue" onclick="dgToggleParkModeFromScan()">🌳 Park Modunu Aç</button>`+
