@@ -214,6 +214,12 @@ function dgDetectAtMyLocation(){
 
 /* Park bulunamadı → elle park oluşturma formu (OSM'de olmayan parklar için
  * kaçış yolu; yoksa kullanıcı ölçüm giremez hâlde kilitlenirdi). */
+const DG_PARK_MANUAL_CREATION_USE_CASE=window.DG_PARK_MANUAL_CREATION_APPLICATION.create({
+  getName:()=>{const el=$("manualParkName");return el?String(el.value||""):"";},
+  getAreaHectares:()=>{const el=$("manualParkArea");return el?String(el.value||""):"";},
+  getLocation:()=>DG_MANUAL_PENDING||DG_PARK_ANCHOR||(typeof GPS!=="undefined"&&GPS?{lat:GPS.latitude,lon:GPS.longitude}:null),
+  registerPark:(candidate,opt)=>dgRegisterPark(candidate,opt)
+});
 function dgOfferManualPark(lat,lon){
   DG_PARK_CAND=null;
   DG_PARK=null;
@@ -224,18 +230,11 @@ function dgOfferManualPark(lat,lon){
 }
 
 async function dgCreateManualPark(){
-  const nameEl=$("manualParkName");
-  const name=nameEl?String(nameEl.value||"").trim():"";
-  if(!name)return toast("Park adı gerekli","err","🌳");
-  const pt=DG_MANUAL_PENDING||DG_PARK_ANCHOR||(GPS?{lat:GPS.latitude,lon:GPS.longitude}:null);
-  if(!pt||!Number.isFinite(+pt.lat))return toast("Konum yok: haritada parkın içine tıkla veya GPS'i aç.","err","📍");
-
-  const areaEl=$("manualParkArea");
-  const ha=areaEl?parseFloat(String(areaEl.value||"").replace(",",".")):NaN;
-
-  const cand={name,source:"manual",area:Number.isFinite(ha)&&ha>0?ha*10000:null};
-  const row=await dgRegisterPark(cand,{manual:true,lat:+pt.lat,lon:+pt.lon});
-  if(!row)return toast("Elle park oluşturulamadı.","err","🌳");
+  const result=await DG_PARK_MANUAL_CREATION_USE_CASE();
+  if(result.status==="name-required")return toast("Park adı gerekli","err","🌳");
+  if(result.status==="location-required")return toast("Konum yok: haritada parkın içine tıkla veya GPS'i aç.","err","📍");
+  if(result.status==="registration-failed")return toast("Elle park oluşturulamadı.","err","🌳");
+  const row=result.row;
 
   DG_PARK=row;
   DG_MANUAL_PENDING=null;
