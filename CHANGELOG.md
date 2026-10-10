@@ -9,6 +9,9 @@ Yeni sürüm yayımlama adımları: [`docs/surum-yayini.md`](docs/surum-yayini.m
 
 ## [Yayımlanmadı]
 
+### İyileştirildi — Park geometrisi backfill modülü
+Yönetim ekranındaki OSM sınırı backfill akışı uygulama use-case'ine taşındı; yetki, park bulunamaması, OSM hatası, yazım hatası ve başarılı yenileme sonuçları eski bildirimlerle korunuyor. OSM way/relation sınır çözümlemesi adapter'a ayrıldı ve uygulama/adapter için odaklı testler eklendi.
+
 ### İyileştirildi — Park geri doldurma planı
 Park bağı olmayan projeler için ölçüm merkezini hesaplama, OSM adayını arama ve uygulanabilir/eksik satırları planlama akışı uygulama modülüne taşındı. Yönetici/çevrimiçi kapıları, 2,1 saniyelik sorgu aralığı ve mevcut önizleme davranışı korunuyor.
 Planı onayla-yaz akışı da ayrı uygulama modülüne alındı; sıralı park kaydı ve proje bağı yazımları, kısmi hataları saymaya devam ediyor.
