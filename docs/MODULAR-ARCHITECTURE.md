@@ -137,6 +137,8 @@ Bu ayrım raster sınıflandırma kodlarını, kaynak eşlemesini, eşikleri, Se
 
 - `application/parks/merge-park-identities.js`, park birleştirmede projeleri ve ölçümleri taşıma, proje adlarını eşitleme, kaynak kimliği silme sırasını açık portlarla yönetir; `park-registry.js` Supabase/UI adapterlarını ve eski global çağrıyı korur.
 
+- `application/parks/rename-park-identity.js`, park adını ve kanonik ad anahtarını güncelleyip bağlı proje adlarını eşitleme akışını yürütür; `park-registry.js` Supabase, istem ve bildirim bağlayıcılarını korur.
+
 ## Güvenli geçiş sırası
 
 1. Önce tek bir bounded use-case'i ayır; eski global çağrı sözleşmesini adapter'da koru.
