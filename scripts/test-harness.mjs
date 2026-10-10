@@ -122,6 +122,7 @@ export function loadApp({ sadece } = {}) {
     'src/domain/parks/road-half-width.js',
     'src/domain/parks/classify-surface-tags.js',
     'src/domain/parks/area.js',
+    'src/domain/parks/segment-intersection.js',
     'src/services/park-geometry.js',
     'src/domain/parks/simplify-ring.js',
     'src/adapters/parks/park-geometry-store.js',
