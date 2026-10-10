@@ -723,48 +723,24 @@ async function dgQueryParkSafe(lat,lon,radius){
   }
 }
 
-/* Ada göre OSM araması: proje adının anlamlı sözcükleriyle leisure=park|garden|…
- * elemanlarını 5 km yarıçapta arar. queryPark'ın "merkez noktası polygon
- * içinde mi" varsayımına bağlı değildir. */
+/* Eski dg* çağrıları uyumluluk facade'ı olarak kalır; arama adapter/use-case'te. */
+const DG_BACKFILL_PARK_NAME_SEARCH=window.DG_OSM_PARK_NAME_SEARCH_ADAPTER.create({
+  normalizeName:name=>dgNormParkLoose(name),
+  request:(query,label)=>overpassRequest(query,label),
+  extractRings:element=>extractRings(element),
+  polyArea:rings=>polyArea(rings)
+});
 async function dgQueryParkByName(lat,lon,projName){
-  const words=dgNormParkLoose(projName).split(" ").filter(w=>w.length>2);
-  if(!words.length||typeof overpassRequest!=="function")return null;
-  const re=words.join("|").replace(/["\\]/g,"");
-  if(!re)return null;
-  const leisure="park|garden|nature_reserve|common|recreation_ground";
-  const q=
-    `[out:json][timeout:35];(`+
-    `way["leisure"~"${leisure}"]["name"~"${re}",i](around:5000,${lat},${lon});`+
-    `relation["leisure"~"${leisure}"]["name"~"${re}",i](around:5000,${lat},${lon});`+
-    `way["landuse"~"recreation_ground|meadow|grass"]["name"~"${re}",i](around:5000,${lat},${lon});`+
-    `);out geom;`;
-  let json=null;
-  try{json=await overpassRequest(q,"park adıyla");}catch(e){return null;}
-  if(!json||!json.elements||!json.elements.length)return null;
-
-  const cands=[];
-  for(const el of json.elements){
-    if(typeof extractRings!=="function")break;
-    const rings=extractRings(el);
-    if(!rings)continue;
-    const area=(typeof polyArea==="function")?polyArea(rings):null;
-    cands.push({rings,name:(el.tags&&el.tags.name)||null,area,type:el.type,id:el.id});
-  }
-  if(!cands.length)return null;
-  cands.sort((a,b)=>(b.area||0)-(a.area||0));
-  return cands;
+  return DG_BACKFILL_PARK_NAME_SEARCH(lat,lon,projName);
 }
 
+const DG_BACKFILL_PARK_DETECT=window.DG_BACKFILL_PARK_DETECTION_APPLICATION.create({
+  queryNear:(lat,lon,radius)=>dgQueryParkSafe(lat,lon,radius),
+  queryByName:(lat,lon,name)=>dgQueryParkByName(lat,lon,name),
+  sleep:ms=>dgSleep(ms)
+});
 async function dgDetectParkForProject(lat,lon,projName){
-  let c=await dgQueryParkSafe(lat,lon,1500);
-  if(c&&c.length)return{cands:c,yol:"1500 m"};
-  await dgSleep(2100);
-  c=await dgQueryParkSafe(lat,lon,3500);
-  if(c&&c.length)return{cands:c,yol:"3500 m"};
-  await dgSleep(2100);
-  c=await dgQueryParkByName(lat,lon,projName);
-  if(c&&c.length)return{cands:c,yol:"ad araması"};
-  return{cands:null,yol:"bulunamadı"};
+  return DG_BACKFILL_PARK_DETECT(lat,lon,projName);
 }
 
 function dgBackfillProgress(i,n,label){

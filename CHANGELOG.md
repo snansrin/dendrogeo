@@ -15,6 +15,9 @@ Yönetim ekranındaki OSM sınırı backfill akışı uygulama use-case'ine taş
 ### İyileştirildi — Ölçüm park kapısı
 Park şeması yedeği, kayıt düzenleme, proje/park bağı ve tek seferlik algılama yönlendirmesi kararları uygulama use-case'ine taşındı; mevcut uyarı kartları ve ölçüm düğmesi davranışı korundu.
 
+### İyileştirildi — Park backfill araması
+Eski projeler için 1500 m → 3500 m → ada göre OSM arama sırası uygulama modülüne, ada göre Overpass sorgusu ve geometrik aday sıralaması adapter'a taşındı. 2,1 saniyelik sorgu aralığı ve eski `dg*` çağrıları korundu.
+
 ### İyileştirildi — Park geri doldurma planı
 Park bağı olmayan projeler için ölçüm merkezini hesaplama, OSM adayını arama ve uygulanabilir/eksik satırları planlama akışı uygulama modülüne taşındı. Yönetici/çevrimiçi kapıları, 2,1 saniyelik sorgu aralığı ve mevcut önizleme davranışı korunuyor.
 Planı onayla-yaz akışı da ayrı uygulama modülüne alındı; sıralı park kaydı ve proje bağı yazımları, kısmi hataları saymaya devam ediyor.

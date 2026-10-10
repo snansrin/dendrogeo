@@ -173,6 +173,8 @@ export function loadApp({ sadece } = {}) {
     'src/application/parks/create-backfill-park.js',
     'src/application/parks/backfill-park-geometry.js',
     'src/adapters/parks/fetch-osm-park-ring.js',
+    'src/application/parks/detect-backfill-park.js',
+    'src/adapters/parks/search-osm-park-by-name.js',
     'src/application/parks/evaluate-measurement-park-gate.js',
     'src/services/park-registry.js',
     'src/application/parks/build-grid-waypoint-rows.js',
@@ -227,6 +229,8 @@ export function loadApp({ sadece } = {}) {
     secim.add('src/application/parks/create-backfill-park.js');
     secim.add('src/application/parks/backfill-park-geometry.js');
     secim.add('src/adapters/parks/fetch-osm-park-ring.js');
+    secim.add('src/application/parks/detect-backfill-park.js');
+    secim.add('src/adapters/parks/search-osm-park-by-name.js');
     secim.add('src/application/parks/evaluate-measurement-park-gate.js');
     secim.add('src/domain/parks/is-schema-error.js');
     secim.add('src/domain/parks/identity.js');
