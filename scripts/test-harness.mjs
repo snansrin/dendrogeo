@@ -128,6 +128,7 @@ export function loadApp({ sadece } = {}) {
     'src/domain/parks/park-containment.js',
     'src/domain/parks/line-distance.js',
     'src/domain/parks/osm-rings.js',
+    'src/domain/parks/rect-intersection.js',
     'src/services/park-geometry.js',
     'src/domain/parks/simplify-ring.js',
     'src/adapters/parks/park-geometry-store.js',
