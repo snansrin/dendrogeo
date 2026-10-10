@@ -260,17 +260,7 @@ function isCellValid(
 ========================================================= */
 
 function segmentsIntersectLatLon(a1,a2,b1,b2){
-  const refLat=(a1[0]+a2[0]+b1[0]+b2[0])/4;
-  const cosLat=Math.cos(refLat*Math.PI/180);
-  const ax=a1[1]*111320*cosLat;
-  const ay=a1[0]*110540;
-  const bx=a2[1]*111320*cosLat;
-  const by=a2[0]*110540;
-  const cx=b1[1]*111320*cosLat;
-  const cy=b1[0]*110540;
-  const dx=b2[1]*111320*cosLat;
-  const dy=b2[0]*110540;
-  return segmentsIntersect({x:ax,y:ay},{x:bx,y:by},{x:cx,y:cy},{x:dx,y:dy});
+  return window.DG_PARK_OVERLAP.segmentsIntersectLatLon(a1,a2,b1,b2);
 }
 
 /* =========================================================
@@ -282,86 +272,7 @@ function ringTouchesPark(
   parkRings,
   pb
 ){
-  if(!ring||ring.length<3)return false;
-
-  let minLat=90;
-  let maxLat=-90;
-  let minLon=180;
-  let maxLon=-180;
-
-  for(const p of ring){
-    if(p[0]<minLat)minLat=p[0];
-    if(p[0]>maxLat)maxLat=p[0];
-
-    if(p[1]<minLon)minLon=p[1];
-    if(p[1]>maxLon)maxLon=p[1];
-  }
-
-  const buf=0.0005;
-  if(
-    maxLat<pb.minLat-buf ||
-    minLat>pb.maxLat+buf ||
-    maxLon<pb.minLon-buf ||
-    minLon>pb.maxLon+buf
-  ){
-    return false;
-  }
-
-  for(const p of ring){
-    if(
-      pointInPark(
-        p[0],
-        p[1],
-        parkRings
-      )
-    ){
-      return true;
-    }
-  }
-
-  const centerLat=(minLat+maxLat)/2;
-  const centerLon=(minLon+maxLon)/2;
-
-  if(
-    pointInPark(
-      centerLat,
-      centerLon,
-      parkRings
-    )
-  ){
-    return true;
-  }
-
-    for(let i=0;i<ring.length-1;i++){
-    const a=ring[i];
-    const b=ring[i+1];
-
-    const lat=(a[0]+b[0])/2;
-    const lon=(a[1]+b[1])/2;
-
-    if(
-      pointInPark(
-        lat,
-        lon,
-        parkRings
-      )
-    ){
-      return true;
-    }
-  }
-
-  const parkOuter=Array.isArray(parkRings)?parkRings:(parkRings.outer||[]);
-  for(const pRing of parkOuter){
-    for(let i=0;i<pRing.length-1;i++){
-      for(let j=0;j<ring.length-1;j++){
-        if(segmentsIntersectLatLon(pRing[i],pRing[i+1],ring[j],ring[j+1])){
-          return true;
-        }
-      }
-    }
-  }
-
-  return false;
+  return window.DG_PARK_OVERLAP.ringTouchesPark(ring,parkRings,pb,PARK_HOLES);
 }
 
 function lineTouchesPark(
@@ -369,104 +280,7 @@ function lineTouchesPark(
   parkRings,
   pb
 ){
-  if(!line||line.length<2)return false;
-
-  let minLat=90;
-  let maxLat=-90;
-  let minLon=180;
-  let maxLon=-180;
-
-  for(const p of line){
-    if(p[0]<minLat)minLat=p[0];
-    if(p[0]>maxLat)maxLat=p[0];
-
-    if(p[1]<minLon)minLon=p[1];
-    if(p[1]>maxLon)maxLon=p[1];
-  }
-
-  const buf=0.0005;
-  if(
-    maxLat<pb.minLat-buf ||
-    minLat>pb.maxLat+buf ||
-    maxLon<pb.minLon-buf ||
-    minLon>pb.maxLon+buf
-  ){
-    return false;
-  }
-
-  for(const p of line){
-    if(
-      pointInPark(
-        p[0],
-        p[1],
-        parkRings
-      )
-    ){
-      return true;
-    }
-  }
-
-  for(let i=0;i<line.length-1;i++){
-    const a=line[i];
-    const b=line[i+1];
-
-    const midLat=(a[0]+b[0])/2;
-
-    const dy=
-      (b[0]-a[0])*110540;
-
-    const dx=
-      (b[1]-a[1])*
-      111320*
-      Math.cos(midLat*Math.PI/180);
-
-    const len=
-      Math.sqrt(
-        dx*dx+
-        dy*dy
-      );
-
-   const steps=
-      Math.max(
-        1,
-        Math.ceil(len/5)
-      );
-
-    for(let k=1;k<steps;k++){
-      const t=k/steps;
-
-      const lat=
-        a[0]+
-        (b[0]-a[0])*t;
-
-      const lon=
-        a[1]+
-        (b[1]-a[1])*t;
-
-         if(
-        pointInPark(
-          lat,
-          lon,
-          parkRings
-        )
-      ){
-        return true;
-      }
-    }
-  }
-
-  const parkOuter=Array.isArray(parkRings)?parkRings:(parkRings.outer||[]);
-  for(const pRing of parkOuter){
-    for(let i=0;i<pRing.length-1;i++){
-      for(let j=0;j<line.length-1;j++){
-        if(segmentsIntersectLatLon(pRing[i],pRing[i+1],line[j],line[j+1])){
-          return true;
-        }
-      }
-    }
-  }
-
-  return false;
+  return window.DG_PARK_OVERLAP.lineTouchesPark(line,parkRings,pb,PARK_HOLES);
 }
 
 /* =========================================================
