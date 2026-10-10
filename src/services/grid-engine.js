@@ -466,9 +466,7 @@ async function createWaypointsFromGrid(mode){
 
   LAST_WP_ROWS=rows;
 
-  const{error}=await sb
-    .from("waypoints")
-    .insert(rows);
+  const{error}=await window.DG_GRID_WAYPOINT_INSERT.insert(sb,rows);
 
   if(error){
     return toast(
