@@ -577,6 +577,7 @@ describe('v9: sapma düzeltmesi + yapay havuz rafinasyonu + PNG park kıpı', ()
   /* Faz 4: waypoint üretimi grid-engine.js'te, PNG kırpma ui/park-export.js'te */
   const srcGp = [
     readFileSync(new URL('../src/services/grid-engine.js', import.meta.url), 'utf8'),
+    readFileSync(new URL('../src/application/parks/build-grid-waypoint-rows.js', import.meta.url), 'utf8'),
     readFileSync(new URL('../src/ui/park-export.js', import.meta.url), 'utf8'),
   ].join('\n');
 
@@ -631,7 +632,7 @@ describe('v9: sapma düzeltmesi + yapay havuz rafinasyonu + PNG park kıpı', ()
   });
 
   test('⭐ waypoint: güvenli iç nokta kullanılır; eski hücrelerde merkez yedeği var', () => {
-    assert.match(srcGp, /Number\.isFinite\(c\.lat\)\?c\.lat:\(c\.s0\+c\.s1\)\/2/);
+    assert.match(srcGp, /Number\.isFinite\(cell\.lat\)[\s\S]*cell\.s0[\s\S]*cell\.s1/);
     assert.ok(!srcGp.includes('lat:+c.lat.toFixed(6),'), 'eski çöken satır geri gelmemeli');
   });
 
