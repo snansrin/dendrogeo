@@ -154,105 +154,21 @@ function isCellValid(
   w0,
   w1
 ){
-  if(!cellInsidePark(s0,s1,w0,w1))return false;
-
-  const cLat=(s0+s1)/2;
-
-  /* YEŞİL ALAN KISITI: LULC analizi varsa ve açıksa, hücre merkezi yeşil
-   * nesne içinde olmalı. Waypoint'ler grid hücrelerinden türediği için
-   * otomatik olarak yeşil alandan seçilir. */
-  if(
-    DG_GREEN_ONLY&&
-    window.DG_LANDCOVER&&
-    typeof window.DG_LANDCOVER.isGreen==="function"&&
-    window.DG_LANDCOVER.hasGreen&&
-    window.DG_LANDCOVER.hasGreen()
-  ){
-    if(!window.DG_LANDCOVER.isGreen(cLat,(w0+w1)/2))return false;
-  }
-
-  const cellRect=ringBBox(
-    [
-      [s0,w0],
-      [s0,w1],
-      [s1,w1],
-      [s1,w0]
-    ],
-    cLat
-  );
-
-  for(const w of (WATER_RINGS||[])){
-    if(
-      geometryIntersectsRect(
-        w,
-        cellRect,
-        cLat,
-        WATER_CLEARANCE_M
-      )
-    )return false;
-  }
-
-  for(const l of (WATER_LINES||[])){
-    if(
-      geometryLineIntersectsRect(
-        l,
-        cellRect,
-        cLat,
-        WATER_CLEARANCE_M
-      )
-    )return false;
-  }
-
-  for(const b of (IMP_RINGS||[])){
-    if(
-      geometryIntersectsRect(
-        b,
-        cellRect,
-        cLat,
-        IMP_CLEARANCE_M
-      )
-    )return false;
-  }
-
-  /*
-   * Linear impervious features were previously collected but skipped by
-   * the grid validator. Their stored half-width is now respected.
-   */
-  for(const l of (IMP_LINES||[])){
-    if(!l||!Array.isArray(l.pts)||l.pts.length<2)continue;
-
-    const buffer=Number.isFinite(l.w)
-      ?Math.max(0,l.w)
-      :IMP_CLEARANCE_M;
-
-    if(
-      geometryLineIntersectsRect(
-        l.pts,
-        cellRect,
-        cLat,
-        buffer
-      )
-    )return false;
-  }
-
-  for(const l of (GRID_BLOCK_LINES||[])){
-    if(!l||!Array.isArray(l.pts)||l.pts.length<2)continue;
-
-    const buffer=Number.isFinite(l.w)
-      ?Math.max(0,l.w)
-      :IMP_CLEARANCE_M;
-
-    if(
-      geometryLineIntersectsRect(
-        l.pts,
-        cellRect,
-        cLat,
-        buffer
-      )
-    )return false;
-  }
-
-  return true;
+  return window.DG_PARK_CELL_VALIDITY.isCellValid(s0,s1,w0,w1,{
+    cellInsidePark,
+    greenOnly:DG_GREEN_ONLY,
+    landcover:window.DG_LANDCOVER,
+    ringBBox,
+    geometryIntersectsRect,
+    geometryLineIntersectsRect,
+    waterRings:WATER_RINGS,
+    waterLines:WATER_LINES,
+    imperviousRings:IMP_RINGS,
+    imperviousLines:IMP_LINES,
+    gridBlockLines:GRID_BLOCK_LINES,
+    waterClearanceM:WATER_CLEARANCE_M,
+    imperviousClearanceM:IMP_CLEARANCE_M
+  });
 }
 
 /* =========================================================
