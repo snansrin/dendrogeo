@@ -4,7 +4,7 @@
 // NOT: Senkronizasyon artık Ana Thread (Supabase JS SDK) tarafından yapılıyor
 // ============================================================
 
-const CACHE_VERSION = 'dendrogeo-sw-v2-r133';
+const CACHE_VERSION = 'dendrogeo-sw-v2-r134';
 
 /* İKİ AYRI STATİK CACHE — bu ayrım bilinçli ve önemli.
  *
@@ -40,7 +40,7 @@ const CORE_ASSETS = [
     '/src/services/osm-water-backup.js', '/src/utils/geo.js', '/src/utils/truncation.js', '/src/utils/lazylibs.js', '/src/domain/trees/photo-quality.js','/src/domain/trees/allometry.js','/src/application/trees/calculate-tree-carbon.js','/src/application/trees/calculate-tree-carbon-from-circumference.js','/src/application/trees/validate-measurement.js','/src/services/allometry.js', '/src/services/auth.js','/src/services/export.js', '/src/services/offline.js',
     /* YÖNETİM ZİNCİRİ (Faz 6): ziyaret sayacı, veri talepleri, kullanıcı yönetimi,
      * yedek ve moderasyon çekirdeği ayrı modüller. */
-    '/src/application/visitors/build-live-roster.js','/src/services/visit-stats.js','/src/services/data-requests.js','/src/services/user-admin.js','/src/services/backup.js',
+    '/src/application/visitors/build-live-activity.js','/src/application/visitors/build-live-roster.js','/src/services/visit-stats.js','/src/services/data-requests.js','/src/services/user-admin.js','/src/services/backup.js',
     '/src/services/admin.js','/src/services/admin-tree.js','/src/services/world.js', '/src/services/measure.js','/src/services/map.js','/src/services/field-ux.js',
     /* SİTE İÇİNDEN RAPOR YAYINI (2026-09-27): report_requests kuyruğu +
      * rapor/yayin-kuyrugu.json günlüğü → 📄 Yayınla / 🔗 Aç / 📤 Paylaş. */

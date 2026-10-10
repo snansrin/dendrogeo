@@ -113,6 +113,7 @@ const DG_DEV_TAG=(()=>{try{
 }catch(e){return "?";}})();
 let DG_VIEW_HIST=[],DG_LAST_ACT=null,DG_LOC_HIST=[];
 const DG_ACT_LABELS={save:"ölçüm kaydetti",edit:"kayıt güncelledi",park:"park algıladı",export:"dışa aktardı",publish:"rapor yayını istedi"};
+const DG_VISITOR_ACTIVITY=window.DG_VISITOR_ACTIVITY_APPLICATION.create();
 /* Sekme değişince çağrılır (shell go()): gezinme zincirine yazar. */
 function dgPresenceView(v){
  try{
@@ -267,15 +268,7 @@ function dgVisFeed(rows){
  const box=$("visFeed");if(!box)return;
  const T=(x)=>(typeof dgCf==="function"?dgCf(x):x);
  const loc=(typeof DG_LANG!=="undefined"&&DG_LANG==="en")?"en-GB":"tr-TR";
- const ev=[];
- for(const r of (rows||[])){
-  const who=r.p.n||"?";
-  if(r.p.st)ev.push({t:r.p.st,who:who,k:T("çevrimiçi oldu"),d:r.p.dev||""});
-  for(const h of (r.p.vh||[]))ev.push({t:h.t,who:who,k:T("görüntüledi"),d:T(DG_VIEW_LABELS[h.v]||h.v)});
-  if(r.p.act)ev.push({t:r.p.act.t,who:who,k:T(DG_ACT_LABELS[r.p.act.k]||r.p.act.k),d:r.p.act.d||""});
- }
- ev.sort((a,b)=>b.t-a.t);
- const top=ev.slice(0,18);
+ const top=DG_VISITOR_ACTIVITY.build(rows,{viewLabels:DG_VIEW_LABELS,actionLabels:DG_ACT_LABELS,translate:T,maxItems:18});
  if(!top.length){box.textContent=T("—");return;}
  box.innerHTML=top.map(e=>{
   const hm=new Date(e.t).toLocaleTimeString(loc,{hour:"2-digit",minute:"2-digit",second:"2-digit"});
