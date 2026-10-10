@@ -61,5 +61,6 @@ describe('tembel vendor yükleme (Faz 7)', () => {
     const loader=read('src/utils/lazylibs.js');
     assert.ok(loader.indexOf('"src/contracts/surface-review.js"')<loader.indexOf('"src/services/lc-review.js"'), 'inceleme sözleşmesi servisinden önce yüklenmeli');
     assert.ok(loader.indexOf('"src/domain/surface/review-geometry.js"')<loader.indexOf('"src/services/lc-review.js"'), 'inceleme geometri domaini servisinden önce yüklenmeli');
+    assert.ok(loader.indexOf('"src/adapters/surface/review-store.js"')<loader.indexOf('"src/services/lc-review.js"'), 'inceleme depolama adapterı servisinden önce yüklenmeli');
   });
 });
