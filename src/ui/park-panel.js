@@ -475,15 +475,18 @@ window.bindParkClick=bindParkClick;
 
 window.clearPark=clearPark;
 
-async function dgChooseNewPark(){
- if(window._dgLandCoverBusy||window.DG_LC_SENS?.state?.saving||window.DG_LC_SENS?.state?.exporting)return;
- if(window.DG_LC_SENS?.state?.record&&typeof dgSensSave==="function")await dgSensSave();
- clearPark();clearGrid();if(window.DG_LANDCOVER?.clear)window.DG_LANDCOVER.clear();
- const info=$("parkInfo");if(info){info.style.display="none";info.innerHTML="";}
- if(!PARK_MODE)toggleParkMode();else bindParkClick();
- map?.invalidateSize({pan:false});document.getElementById("map")?.scrollIntoView({block:"nearest"});
- toast(_tgrSafeNewPark(),"info","📍");
-}
+const DG_CHOOSE_NEW_PARK_CONTROLLER=window.DG_CHOOSE_NEW_PARK_CONTROLLER_UI.create({
+ isBusy:()=>window._dgLandCoverBusy||window.DG_LC_SENS?.state?.saving||window.DG_LC_SENS?.state?.exporting,
+ getSave:()=>window.DG_LC_SENS?.state?.record&&typeof dgSensSave==="function"?()=>dgSensSave():null,
+ clearPark:()=>clearPark(),clearGrid:()=>clearGrid(),
+ clearAnalysis:()=>{if(window.DG_LANDCOVER?.clear)window.DG_LANDCOVER.clear();},
+ hideInfo:()=>{const info=$("parkInfo");if(info){info.style.display="none";info.innerHTML="";}},
+ getMode:()=>PARK_MODE,toggleMode:()=>toggleParkMode(),bindClick:()=>bindParkClick(),
+ resizeMap:()=>map?.invalidateSize({pan:false}),
+ scrollMap:()=>document.getElementById("map")?.scrollIntoView({block:"nearest"}),
+ notify:()=>toast(_tgrSafeNewPark(),"info","📍")
+});
+async function dgChooseNewPark(){return DG_CHOOSE_NEW_PARK_CONTROLLER();}
 function _tgrSafeNewPark(){return typeof dgCf==="function"?dgCf("Haritada yeni parkın içine dokunun."):"Haritada yeni parkın içine dokunun.";}
 window.dgChooseNewPark=dgChooseNewPark;
 
