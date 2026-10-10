@@ -128,6 +128,8 @@ export function loadApp({ sadece } = {}) {
     'src/domain/parks/identity.js',
     'src/adapters/parks/park-store.js',
     'src/application/parks/register-park.js',
+    'src/adapters/parks/project-store.js',
+    'src/application/parks/create-project.js',
     'src/services/park-registry.js',
     'src/services/grid-engine.js',
     /* YÖNETİM AĞACI (2026-09-24): dgTreeGroup/dgTreeFilterRows saf
@@ -147,6 +149,8 @@ export function loadApp({ sadece } = {}) {
     secim.add('src/domain/parks/identity.js');
     secim.add('src/adapters/parks/park-store.js');
     secim.add('src/application/parks/register-park.js');
+    secim.add('src/adapters/parks/project-store.js');
+    secim.add('src/application/parks/create-project.js');
   }
   if (secim && secim.has('src/services/landcover.js')) {
     secim.add('src/domain/surface/quality-gates.js');
