@@ -119,6 +119,7 @@ export function loadApp({ sadece } = {}) {
      * BİLEREK yüklenmez — DOM'a yapışırlar; onları ui-audit statik tarar. */
     'src/services/park-state.js',
     'src/services/osm-client.js',
+    'src/domain/parks/road-half-width.js',
     'src/services/park-geometry.js',
     'src/domain/parks/simplify-ring.js',
     'src/adapters/parks/park-geometry-store.js',
