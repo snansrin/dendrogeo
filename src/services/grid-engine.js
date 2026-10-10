@@ -61,66 +61,16 @@ async function buildGrid(){
 ========================================================= */
 
 function drawGridLayer(){
-  if(
-    GRID_LAYER &&
-    map
-  ){
-    map.removeLayer(
-      GRID_LAYER
-    );
-  }
-
-  if(DG_GRID_RENDERER&&map)map.removeLayer(DG_GRID_RENDERER);
-  GRID_LAYER=L.layerGroup().addTo(map);DG_GRID_RENDERER=L.canvas({padding:.1});
-
-  const {measured:g,empty:r0}=window.DG_GRID_CELL_STATES.count(GRID_CELLS);
-
-  GRID_CELLS.forEach(cell=>{
-    const style=window.DG_GRID_CELL_STYLE.resolve(
-      cell,
-      SELECTED_CELLS.has(cell.id)
-    );
-
-    const shape=window.DG_GRID_CELL_SHAPE.resolve(cell);
-    const rect=L.polygon(shape,
-        {
-          renderer:DG_GRID_RENDERER,
-          ...style,
-          interactive:true
-        }
-      ).addTo(
-        GRID_LAYER
-      );
-
-    rect._cellId=
-      cell.id;
-
-    rect.on(
-      "click",
-      e=>{
-        L.DomEvent.stopPropagation(
-          e
-        );
-
-        toggleCellSelection(
-          cell.id,
-          rect
-        );
-      }
-    );
-
-    rect.bindTooltip(
-      _tgrf("Hücre {id} · {n} ölçüm",{id:cell.id,n:cell.n}),
-      {
-        sticky:true
-      }
-    );
+  return window.DG_GRID_LAYER_UI.render({
+    leaflet:L,map,previousLayer:GRID_LAYER,previousRenderer:DG_GRID_RENDERER,
+    cells:GRID_CELLS,selection:SELECTED_CELLS,
+    resolveStyle:(cell,selected)=>window.DG_GRID_CELL_STYLE.resolve(cell,selected),
+    resolveShape:cell=>window.DG_GRID_CELL_SHAPE.resolve(cell),
+    countStates:cells=>window.DG_GRID_CELL_STATES.count(cells),translateFormat:_tgrf,
+    onSelect:(id,rect)=>toggleCellSelection(id,rect),
+    onCreated:({layer,renderer})=>{GRID_LAYER=layer;DG_GRID_RENDERER=renderer;},
+    updateSummary:(measured,empty)=>updateGridSummary(measured,empty)
   });
-
-  updateGridSummary(
-    g,
-    r0
-  );
 }
 
 function updateGridSummary(
