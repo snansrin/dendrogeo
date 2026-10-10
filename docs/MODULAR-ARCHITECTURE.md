@@ -135,6 +135,8 @@ src/
 
 Bu ayrım raster sınıflandırma kodlarını, kaynak eşlemesini, eşikleri, Sentinel/OSM inceleme davranışını veya alan hesabı formüllerini değiştirmez. Kabul edilen rapor ve Supabase şeması değişmemiştir.
 
+- `application/parks/merge-park-identities.js`, park birleştirmede projeleri ve ölçümleri taşıma, proje adlarını eşitleme, kaynak kimliği silme sırasını açık portlarla yönetir; `park-registry.js` Supabase/UI adapterlarını ve eski global çağrıyı korur.
+
 ## Güvenli geçiş sırası
 
 1. Önce tek bir bounded use-case'i ayır; eski global çağrı sözleşmesini adapter'da koru.
