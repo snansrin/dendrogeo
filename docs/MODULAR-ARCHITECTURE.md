@@ -100,6 +100,7 @@ src/
 - `domain/parks/segment-intersection.js`, düzlemde yönelim, nokta-doğru parçası ve doğru parçası kesişim kararlarını eski `1e-9` toleransıyla korur; `park-geometry.js` global yardımcı adlarını sarmalar.
 - `domain/parks/point-in-polygon.js`, metre tabanlı yerel izdüşümü ve `[LAT,LON]` halkaları kullanan ışın-kesişim nokta testini taşır; `park-geometry.js` eski global adlarını sarmalar.
 - `domain/parks/bounds.js`, izdüşürülmüş halka sınırlarını, genişletme/çakışma kararlarını ve dikdörtgen köşe sırasını üretir; izdüşüm kuralını nokta-poligon domain API'sinden alır.
+- `domain/parks/park-containment.js`, dış park halkası ile iç delikleri noktanın `[LAT,LON]` sözleşmesine göre değerlendirir; `park-geometry.js` eski global `pointInPark()` adını korur ve legacy delikleri açıkça aktarır.
 - `domain/parks/simplify-ring.js`, park sınır halkasını deterministik nokta sınırına indirir; `application/parks/persist-park-geometry.js` dış/ iç halkaları hazırlar, `adapters/parks/park-geometry-store.js` Supabase `geom_json` yazımını yapar. `geofence.js` eski sadeleştirme ve kalıcılık fonksiyonlarını uyumluluk sarmalayıcısı olarak korur; yazım başarısızlığında daire yedeği davranışı sürer.
 - Yeni dosyalar analiz zincirine sürümlü lazy loader ve service worker precache üzerinden eklenmiştir.
 
