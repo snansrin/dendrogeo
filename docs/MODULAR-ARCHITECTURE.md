@@ -171,3 +171,5 @@ Her modülün tek bir dış API'si, sahibi olduğu açık durumu ve kendi testle
 - `ui/park-identity.js`, park kimlik çipini ve elle park formunu verilen durumdan üretir; `park-registry.js` taslak → harita anchor → GPS konum önceliğini ve HTML kaçışını bağlar. Form kimlikleri, alan biçimleri, düğmeler ve mevcut global çağrılar korunur.
 
 - `ui/park-scan-card.js`, park bulma, kimlik doğrulama ve proje oluşturma kartını verilen görünüm durumundan çizer. Servis kaydırma korumasını, yüzey inceleme sırasında kartın gizlenmesini ve durum/işlev bağlarını sürdürür. Yöneticiye bağlı proje seçenekleri ve mevcut düğme çağrıları korunur.
+
+- `ui/grid-selection.js`, hücre seçimini açma/kapatma ve temizleme sırasında seçili kimlikleri, hücre stillerini ve özet yenilemesini koordine eder. `grid-engine.js` güncel grid/katman durumunu ve mevcut stil/sayaç işlevlerini bağlar; eski `toggleCellSelection` ve `clearCellSelection` çağrıları korunur.
