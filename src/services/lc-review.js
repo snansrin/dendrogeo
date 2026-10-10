@@ -3,10 +3,11 @@
  * Polygon clipping operates in the raster analysis UTM CRS, including park
  * holes. User-drawn boundaries have explicit visual-review provenance. */
 const DG_SURFACE_TYPES=window.DG_SURFACE_REVIEW_CONTRACTS.types;
+const DG_SURFACE_REVIEW_GEOMETRY=window.DG_SURFACE_REVIEW_GEOMETRY;
 // Millimetre snapping removes UTM round-trip noise at shared raster edges.
 function dgSurfaceProject(ring,epsg){return ring.map(p=>{const q=dgLcUtmForward(p[1],p[0],epsg);return[Math.round(q.x*1000)/1000,Math.round(q.y*1000)/1000];});}
 function dgSurfaceUnproject(geom,epsg){const old=DG_SURFACE_WGS_CACHE.get(geom);if(old?.epsg===epsg)return old.wgs;const wgs=geom.map(poly=>poly.map(ring=>ring.map(p=>{const q=dgLcUtmInverse(p[0],p[1],epsg);return[q.lon,q.lat];})));DG_SURFACE_WGS_CACHE.set(geom,{epsg,wgs});return wgs;}
-function dgSurfaceArea(geom){let total=0;for(const poly of geom||[])for(let i=0;i<poly.length;i++){const r=poly[i];let area=0;for(let j=0;j<r.length;j++){const p=r[j],q=r[(j+1)%r.length];area+=p[0]*q[1]-q[0]*p[1];}total+=(i? -1:1)*Math.abs(area)/2;}return Math.max(0,total);}
+function dgSurfaceArea(geom){return DG_SURFACE_REVIEW_GEOMETRY.area(geom);}
 function dgSurfaceClip(op,...geoms){
  const pc=window.polygonClipping;if(!pc||typeof pc[op]!=="function")throw Error("Sınır hesaplama modülü yüklenmedi.");
  const input=geoms.map(dgSurfaceClean),points=input.flat(3);
@@ -85,8 +86,8 @@ async function dgSurfaceSaveRemote(record,revision){
 }
 window.DG_SURFACE_REVIEW={types:DG_SURFACE_TYPES,park:dgSurfacePark,cell:dgSurfaceCell,area:dgSurfaceArea,fingerprint:dgSurfaceFingerprint,summarize:dgSurfaceSummarize,resolved:dgSurfaceResolved,validRing:dgSurfaceValidRing,load:dgSurfaceLoadRemote,save:dgSurfaceSaveRemote};
 
-function dgSurfaceBounds(geom){const pts=geom.flat(2);return pts.reduce((b,p)=>[Math.min(b[0],p[0]),Math.min(b[1],p[1]),Math.max(b[2],p[0]),Math.max(b[3],p[1])],[Infinity,Infinity,-Infinity,-Infinity]);}
-function dgSurfaceOverlap(a,b){return a[0]<b[2]&&a[2]>b[0]&&a[1]<b[3]&&a[3]>b[1];}
+function dgSurfaceBounds(geom){return DG_SURFACE_REVIEW_GEOMETRY.bounds(geom);}
+function dgSurfaceOverlap(a,b){return DG_SURFACE_REVIEW_GEOMETRY.overlap(a,b);}
 function dgSurfaceFeatureGeometry(f,epsg){
  if(f.geometry?.type==="MultiPolygon")return f.geometry.coordinates.map(poly=>poly.map(r=>dgSurfaceProject(r,epsg)));
  return dgSurfaceValidRing(f.ring)?[ [dgSurfaceProject(f.ring,epsg)] ]:[];
