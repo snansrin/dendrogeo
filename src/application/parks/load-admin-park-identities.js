@@ -1,9 +1,10 @@
 "use strict";
 /* Load park identity rows and their project/measurement context for admin UI. */
 (function(root){
-  function create({isAdmin,fetchParks,fetchProjects,fetchMeasurements}){
+  function create({isAdmin,showLoading,fetchParks,fetchProjects,fetchMeasurements}){
     return async function loadAdminParkIdentities(){
       if(!isAdmin())return{status:"forbidden"};
+      showLoading();
       const[parks,projects,measurements]=await Promise.all([
         fetchParks(),fetchProjects(),fetchMeasurements()
       ]);
