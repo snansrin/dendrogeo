@@ -118,6 +118,9 @@ export function loadApp({ sadece } = {}) {
     'src/services/park-state.js',
     'src/services/osm-client.js',
     'src/services/park-geometry.js',
+    'src/domain/parks/simplify-ring.js',
+    'src/adapters/parks/park-geometry-store.js',
+    'src/application/parks/persist-park-geometry.js',
     /* KONUM DOĞRULAMASI (0007): saf karar fonksiyonu dgGeoDecide birim testleri
      * bu zincirden yüklenir (DOM/ağ yok). */
     'src/services/geofence.js',

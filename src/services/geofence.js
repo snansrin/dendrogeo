@@ -138,29 +138,24 @@ function dgGeoStamp(base,dec){
 /* Halkayı sunucuya yazılabilir boyuta indir (500 nokta/park ≈ 30 KB üstü jsonb
  * gereksiz; çit için bu çözünürlük fazlasıyla yeterli). */
 function dgSimplifyRing(ring,max){
- if(!Array.isArray(ring)||ring.length<=max)return ring;
- /* İndeks matematiği (k*n/max): kayan nokta ADIM birikimiyle (i+=step) halka
-  * boyu ±1 oynuyordu ve jsonb boyutu testte 502 çıkıyordu; bu biçim
-  * DETERMİNİSTİK tam max nokta üretir. */
- const out=[];
- for(let k=0;k<max;k++)out.push(ring[Math.floor(k*ring.length/max)]);
- if(out.length<3)return ring;
- out.push(out[0]);
- return out;
+ return window.DG_PARK_RING_DOMAIN.simplifyRing(ring,max);
 }
 
 /* Tarama sırasında bellekteki halkayı parks.geom_json'a yazar (0007).
  * PARK_POLY/PARK_HOLES park-state.js'te; çağrı anında çözülür.
  * Başarısızlık ÖLÜMCÜL DEĞİL: sunucu o park için daire yedine düşer. */
-async function dgPersistParkGeom(park){
- try{
-  const outer=(typeof PARK_POLY!=="undefined"&&Array.isArray(PARK_POLY)&&PARK_POLY.length>=3)?PARK_POLY:null;
-  if(!park||!park.id||!outer)return park;
-  const holes=(typeof PARK_HOLES!=="undefined"&&Array.isArray(PARK_HOLES))?PARK_HOLES:[];
-  const geom={outer:[dgSimplifyRing(outer,DG_GEO.RING_MAX_POINTS)],
-              inner:holes.map(h=>dgSimplifyRing(h,DG_GEO.RING_MAX_POINTS)).filter(h=>h&&h.length>=3)};
-  const{data,error}=await sb.from("parks").update({geom_json:geom}).eq("id",park.id).select().single();
-  if(error){console.warn("DENDROGEO · park geometrisi sunucuya yazılamadı (daire yedeği geçerli):",error.message);return park;}
-  return data||park;
- }catch(e){console.warn("DENDROGEO · dgPersistParkGeom:",e);return park;}
-}
+const DG_PARK_GEOMETRY_STORE=window.DG_PARK_GEOMETRY_STORE_ADAPTER.create({getClient:()=>sb});
+const DG_PARK_PERSIST_GEOMETRY_USE_CASE=window.DG_PARK_GEOMETRY_APPLICATION.create({
+ getGeometry:()=>({
+  outer:typeof PARK_POLY!=="undefined"&&Array.isArray(PARK_POLY)?PARK_POLY:null,
+  inner:typeof PARK_HOLES!=="undefined"&&Array.isArray(PARK_HOLES)?PARK_HOLES:[]
+ }),
+ maxPoints:DG_GEO.RING_MAX_POINTS,
+ simplifyRing:dgSimplifyRing,
+ updateGeometry:(parkId,geom)=>DG_PARK_GEOMETRY_STORE.updateGeometry(parkId,geom),
+ warn:(kind,error)=>{
+  if(kind==="write-error")console.warn("DENDROGEO · park geometrisi sunucuya yazılamadı (daire yedeği geçerli):",error&&error.message);
+  else console.warn("DENDROGEO · dgPersistParkGeom:",error);
+ }
+});
+async function dgPersistParkGeom(park){return DG_PARK_PERSIST_GEOMETRY_USE_CASE(park);}
