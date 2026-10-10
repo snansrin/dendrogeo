@@ -166,6 +166,7 @@ export function loadApp({ sadece } = {}) {
     'src/application/parks/build-grid-waypoint-rows.js',
     'src/application/parks/count-grid-cell-measurements.js',
     'src/application/parks/build-grid-request.js',
+    'src/application/parks/is-grid-waypoint-context-current.js',
     'src/application/parks/resolve-grid-waypoint-readiness.js',
     'src/application/parks/select-grid-waypoint-cells.js',
     'src/application/parks/prepare-grid-surface-parts.js',

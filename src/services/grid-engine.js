@@ -331,7 +331,15 @@ async function createWaypointsFromGrid(mode){
 
   const{data:mx}=await window.DG_GRID_WAYPOINT_STORE.fetchLatest(sb,pid);
 
-  if(source!==dgGridReviewSignature()||source!==DG_GRID_SOURCE||park!==PARK_POLY||pid!==+$("gridProject").value)return toast(_tgr("Yüzey değişti. Waypoint üretmeden önce gridi yeniden oluşturun."),"warn");
+  if(!window.DG_GRID_WAYPOINT_CONTEXT.isCurrent({
+    source,
+    park,
+    projectId:pid,
+    getReviewSignature:dgGridReviewSignature,
+    getGridSource:()=>DG_GRID_SOURCE,
+    getPark:()=>PARK_POLY,
+    getProjectId:()=>+$("gridProject").value
+  }))return toast(_tgr("Yüzey değişti. Waypoint üretmeden önce gridi yeniden oluşturun."),"warn");
 
   const batch=window.DG_GRID_WAYPOINT_BATCH.prepare(
     targetCells,
