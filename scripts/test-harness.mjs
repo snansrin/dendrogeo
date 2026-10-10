@@ -97,6 +97,7 @@ export function loadApp({ sadece } = {}) {
     'src/adapters/surface/osm-review-objects.js',
     'src/adapters/surface/review-worker.js',
     'src/application/surface/prepare-review.js',
+    'src/application/surface/merge-review-features.js',
     'src/services/lc-patches.js',
     /* UYDU HASSASİYET (0054): validate çekirdeği saf matematiktir (eşikler,
      * hassasiyet, Olofsson metrikleri, düzeltme katmanı) — birim testleri
