@@ -411,8 +411,10 @@ describe('parka bağlama YALNIZ yönetici (0006 + kullanıcı isteği 2026-09-24
   });
 
   test('algılama kartında bağlama seçenekleri yöneticiye göre süzülür', () => {
-    assert.match(registry, /const admin=dgIsAdmin\(\);/);
-    assert.match(registry, /const others=admin\s*\?/, 'yönetici değilse bağlanacak proje listesi boş');
+    assert.match(registry, /isAdmin:dgIsAdmin\(\)/);
+    const card=readFileSync(join(ROOT, "src/ui/park-scan-card.js"), "utf8");
+    assert.match(card, /const admin=isAdmin;/);
+    assert.match(card, /const others=admin\s*\?/, 'yönetici değilse bağlanacak proje listesi boş');
   });
 });
 
