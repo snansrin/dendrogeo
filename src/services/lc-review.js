@@ -105,15 +105,11 @@ const DG_SURFACE_REVIEW_WORKER=window.DG_SURFACE_REVIEW_WORKER_ADAPTER.create({
 });
 function dgSurfaceCancelJobs(){DG_SURFACE_REVIEW_WORKER.cancelAll();}
 function dgSurfaceWorkerJob(data){return DG_SURFACE_REVIEW_WORKER.run(data);}
-async function dgSurfacePrepare(data){
- const result=await dgSurfaceWorkerJob(data);if(result)return result;
- // Older browsers / worker load failures: yield between bounded geometry batches.
- const park=dgSurfacePark(data.outer,data.holes,data.epsg),geometries={},parts=[];
- const objects=data.objects||dgSurfaceObjects(data.elements||[],data.epsg);
- const features=[...(data.useObjects!==false?objects:[]),...data.features];
- for(let i=0;i<data.cells.length;i+=128){const batch=data.cells.slice(i,i+128);for(const c of batch)geometries[c.row+':'+c.col]=dgSurfaceCell(c,park,data.epsg);parts.push(...dgSurfaceResolved(batch,c=>c.classKey,geometries,features,data.epsg,park));await new Promise(r=>setTimeout(r,0));}
- return{park,geometries,objects,parts};
-}
+const DG_SURFACE_REVIEW_PREPARE=window.DG_SURFACE_REVIEW_PREPARATION.create({
+ runWorker:dgSurfaceWorkerJob,park:dgSurfacePark,objects:dgSurfaceObjects,cell:dgSurfaceCell,
+ resolved:dgSurfaceResolved,yieldTask:()=>new Promise(r=>setTimeout(r,0))
+});
+function dgSurfacePrepare(data){return DG_SURFACE_REVIEW_PREPARE(data);}
 function dgSurfaceMergeSync(parts,epsg){
  const groups={};for(const p of parts){const g=groups[p.type]||(groups[p.type]={geoms:[],area:0,methods:new Set()});g.geoms.push(p.geom);g.area+=p.areaM2;g.methods.add(p.method);}
  return Object.entries(groups).map(([k,g])=>({type:'Feature',properties:{class:k,area_m2:g.area,method:[...g.methods].sort().join('+')},geometry:{type:'MultiPolygon',coordinates:dgSurfaceUnproject(dgSurfaceClip("union",...g.geoms),epsg)}}));
