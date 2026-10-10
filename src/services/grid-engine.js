@@ -15,7 +15,7 @@ const _tgrf=(t,v)=>(typeof dgTfs==="function"?dgTfs(t,v):String(t).replace(/\{(\
 ========================================================= */
 
 let DG_GRID_BUSY=false,DG_GRID_EPOCH=0,DG_GRID_RENDERER=null,DG_GRID_SOURCE=null,DG_GRID_META="";
-function dgGridReviewSignature(){const s=window.DG_LC_SENS?.state;return s?.record?JSON.stringify([s.epoch,s.partitionVersion,s.record.scannedAt,s.editing,s.record.sens,s.record.corrections,s.record.features,s.record.useObjects]):null;}
+function dgGridReviewSignature(){return window.DG_GRID_REVIEW_SIGNATURE.resolve(window.DG_LC_SENS?.state);}
 async function buildGrid(){
  if(DG_GRID_BUSY)return;
  if(!PARK_POLY?.length)return toast("Önce park seç","warn");
