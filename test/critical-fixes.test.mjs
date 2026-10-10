@@ -162,8 +162,8 @@ describe('uzaktan proje + canlı kaydet butonu — 2026-09-27', () => {
     const pr = read2('src/services/park-registry.js');
     assert.match(pr, /async function dgScanSearchByName/, 'ada göre arama fonksiyonu');
     assert.match(pr, /window\.dgScanSearchByName=/, 'scan kartından çağrılabilir');
-    assert.match(pr, /id="scanRemote"/, 'arama kutusu scan kartında');
-    assert.match(pr, /Uzak parkta .*proje açabilirsin/, 'kural kullanıcıya yazılı söylenir');
+    assert.match(read2("src/ui/park-scan-card.js"), /id="scanRemote"/, 'arama kutusu scan kartında');
+    assert.match(read2("src/ui/park-scan-card.js"), /Uzak parkta .*proje açabilirsin/, 'kural kullanıcıya yazılı söylenir');
     const i = pr.indexOf('async function dgScanCreateProject');
     const govde = pr.slice(i, pr.indexOf('async function dgLinkProject', i));
     const app = read2('src/application/parks/create-project.js');
