@@ -328,7 +328,7 @@ function dgRenderScanCard__scroll(forceManual){
   /* --- 1) park henüz yok --- */
   if(!park&&!cand){
     el.innerHTML=schemaWarn+steps+
-      `<div class="alert info" style="margin:6px 0">Haritada <b>parkın içine tıkla</b> ��� sınır ve ad otomatik algılanır. `+
+      `<div class="alert info" style="margin:6px 0">Haritada <b>parkın içine tıkla</b> — sınır ve ad otomatik algılanır. `+
       `Park modu kapalıysa aşağıdaki buton açar.</div>`+
       `<div style="display:flex;gap:8px;flex-wrap:wrap">`+
         `<button class="btn sm blue" onclick="dgToggleParkModeFromScan()">🌳 Park Modunu Aç</button>`+
