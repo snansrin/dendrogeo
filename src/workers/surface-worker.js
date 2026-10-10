@@ -2,7 +2,7 @@
 (function(){
  self.window=self;
  const version=new URL(self.location.href).searchParams.get('v')||'current';
- importScripts(...['../core/surface-display.js','../../vendor/polygon-clipping-0.15.7.js','../services/park-geometry.js','../services/lc-geo.js','../contracts/surface-review.js','../domain/surface/review-geometry.js','../services/lc-review.js'].map(p=>p+'?v='+encodeURIComponent(version)));
+ importScripts(...['../core/surface-display.js','../../vendor/polygon-clipping-0.15.7.js','../services/park-geometry.js','../services/lc-geo.js','../contracts/surface-review.js','../adapters/surface/review-store.js','../domain/surface/review-geometry.js','../services/lc-review.js'].map(p=>p+'?v='+encodeURIComponent(version)));
  self.onmessage=async event=>{
   try{const d=event.data;
    if(d.job==='grid'){self.postMessage(await dgSurfaceGrid(d));return;}
