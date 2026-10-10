@@ -199,14 +199,13 @@ async function dgVisCounts(){
  }catch(e){}
 }
 function dgVisAllowed(){return typeof PROFILE!=="undefined"&&PROFILE?.role==="owner";}
-function dgVisHasLocation(p){return p?.la!=null&&p?.lo!=null&&Number.isFinite(Number(p.la))&&Number.isFinite(Number(p.lo))&&Math.abs(Number(p.la))<=90&&Math.abs(Number(p.lo))<=180&&!(Number(p.la)===0&&Number(p.lo)===0);}
+const DG_VISITOR_ROSTER=window.DG_VISITOR_ROSTER_APPLICATION.create();
+function dgVisHasLocation(p){return DG_VISITOR_ROSTER.hasLocation(p);}
 function dgVisRows(){
  let st={};try{st=dgPresenceList();}catch(e){}
- const now=Date.now(),users=new Map();
- for(const k in st)for(const p of (st[k]||[])){if(!p?.id)continue;const t=Number(p.t);if(!Number.isFinite(t))continue;const age=Math.max(0,Math.round((now-t)/1000));if(age>120&&!dgPresenceReady())continue;const old=users.get(String(p.id));if(!old||age<old.age)users.set(String(p.id),{p,age});}
- return [...users.values()].sort((a,b)=>a.age-b.age);
+ return DG_VISITOR_ROSTER.rows(st,Date.now(),dgPresenceReady());
 }
-function dgVisFilter(rows){const query=String($("visSearch")?.value||"").trim().toLocaleLowerCase("tr-TR"),view=$("visViewFilter")?.value||"",located=!!$("visLocated")?.checked;return rows.filter(r=>(!query||String((r.p.n||"")+" "+(r.p.dev||"")).toLocaleLowerCase("tr-TR").includes(query))&&(!view||r.p.v===view)&&(!located||dgVisHasLocation(r.p)));}
+function dgVisFilter(rows){return DG_VISITOR_ROSTER.filter(rows,{query:$("visSearch")?.value||"",view:$("visViewFilter")?.value||"",located:!!$("visLocated")?.checked});}
 function dgVisResetFilters(){for(const id of ["visSearch","visViewFilter"]){const el=$(id);if(el)el.value="";}const located=$("visLocated");if(located)located.checked=false;renderVisitorsLive();}
 function dgVisQuick(view,located){
  const search=$("visSearch"),filter=$("visViewFilter"),loc=$("visLocated");

@@ -112,6 +112,7 @@ export function loadApp({ sadece } = {}) {
     'src/contracts/surface-analysis.js',
     'src/application/surface/run-analysis.js',
     'src/services/landcover.js',
+    'src/application/visitors/build-live-roster.js',
     /* PARK ZİNCİRİ (Faz 4): eski gridplan.js'in mantık modülleri, index.html'deki
      * yükleme sırasıyla. UI modülleri (src/ui/park-panel, src/ui/park-export)
      * BİLEREK yüklenmez — DOM'a yapışırlar; onları ui-audit statik tarar. */
@@ -158,6 +159,7 @@ export function loadApp({ sadece } = {}) {
     secim.add('src/application/trees/calculate-tree-carbon-from-circumference.js');
   }
   if (secim && secim.has('src/services/measure.js')) secim.add('src/application/trees/validate-measurement.js');
+  if (secim && secim.has('src/services/visit-stats.js')) secim.add('src/application/visitors/build-live-roster.js');
   if (secim && secim.has('src/services/park-query.js')) {
     secim.add('src/application/parks/find-park-candidates.js');
     secim.add('src/application/parks/fetch-detailed-coverage.js');
