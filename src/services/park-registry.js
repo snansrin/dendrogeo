@@ -772,64 +772,36 @@ function dgBackfillProgress(i,n,label){
     `<div style="height:100%;width:${pct}%;background:var(--green);transition:width .3s"></div></div>`;
 }
 
-async function backfillParks(){
-  if(!PROFILE||(PROFILE.role!=="admin"&&PROFILE.role!=="owner"))return toast("Yetki yok.","err");
-  const box=$("backfillBox");
+const DG_PARK_BACKFILL_PLAN=window.DG_PARK_BACKFILL_PLAN_APPLICATION.create({
+  isAdmin:()=>!!PROFILE&&(PROFILE.role==="admin"||PROFILE.role==="owner"),
+  isOnline:()=>navigator.onLine,
+  fetchProjects:()=>sb.from("projects").select("id,name,owner,park_id,park_name,label,city,country"),
+  fetchMeasurements:id=>sb.from("measurements").select("lat,lon").eq("project_id",id).limit(1000),
+  detectPark:(lat,lon,name)=>dgDetectParkForProject(lat,lon,name),
+  sleep:ms=>dgSleep(ms),
+  suggestParkName:name=>dgSuggestParkName(name),
+  projectName:(name,label)=>dgProjectName(name,label),
+  labelFromLegacy:(name,parkName)=>dgLabelFromLegacy(name,parkName),
+  onProgress:(i,n,name)=>dgBackfillProgress(i,n,name)
+});
 
-  if(!navigator.onLine){
+async function backfillParks(){
+  const result=await DG_PARK_BACKFILL_PLAN();
+  const box=$("backfillBox");
+  if(result.status==="forbidden")return toast("Yetki yok.","err");
+  if(result.status==="offline"){
     if(box){box.style.display="block";box.innerHTML=`<div class="alert err">⛔ Park geri doldurma internet gerektirir (OSM/Overpass sorgusu).</div>`;}
     return toast("Çevrimdışı: park geri doldurma çalışmaz.","err","📴");
   }
-
-  const{data:projs,error}=await sb.from("projects").select("id,name,owner,park_id,park_name,label,city,country");
-  if(error){
-    if(box){box.style.display="block";box.innerHTML=`<div class="alert err">⚠ Projeler okunamadı: <span class="mono">${esc(error.message)}</span></div>`;}
-    return toast(dgCf("Projeler okunamadı: ")+esc(error.message),"err");
+  if(result.status==="projects-load-failed"){
+    if(box){box.style.display="block";box.innerHTML=`<div class="alert err">⚠ Projeler okunamadı: <span class="mono">${esc(result.error.message)}</span></div>`;}
+    return toast(dgCf("Projeler okunamadı: ")+esc(result.error.message),"err");
   }
-  const targets=(projs||[]).filter(p=>!p.park_id);
-
-  if(!targets.length){
+  if(result.status==="no-targets"){
     if(box){box.style.display="block";box.innerHTML=`<div class="alert ok">✓ Park bağı eksik proje yok — hepsi bir parka bağlı.</div>`;}
     return toast("Park bağı eksik proje yok ✓","ok","🌳");
   }
-
-  dgBackfillProgress(0,targets.length,targets[0].name);
-
-  const plan=[];
-  for(let i=0;i<targets.length;i++){
-    const p=targets[i];
-    dgBackfillProgress(i,targets.length,p.name);
-
-    const{data:m}=await sb.from("measurements").select("lat,lon").eq("project_id",p.id).limit(1000);
-    const pts=(m||[]).filter(r=>Number.isFinite(+r.lat)&&Number.isFinite(+r.lon));
-    if(!pts.length){
-      plan.push({project:p,durum:"ölçüm yok",park:null,cand:null,lat:null,lon:null});
-      continue;
-    }
-    const lat=pts.reduce((a,r)=>a+ +r.lat,0)/pts.length;
-    const lon=pts.reduce((a,r)=>a+ +r.lon,0)/pts.length;
-
-    const found=await dgDetectParkForProject(lat,lon,p.name);
-    await dgSleep(2100);
-
-    if(!found.cands||!found.cands.length){
-      plan.push({project:p,durum:"OSM'de park yok",park:null,cand:null,lat,lon,n:pts.length});
-      continue;
-    }
-    const c=found.cands[0];
-    /* OSM elemanında ad yoksa "İsimsiz Park" yerine proje adından öneri:
-     * canlıda iki park "İsimsiz Park" olarak kalmıştı, karşılaştırmada
-     * anlamsız satır üretiyordu. */
-    const parkName=c.name||dgSuggestParkName(p.name);
-    plan.push({
-      project:p,durum:"eşleşti",yol:found.yol,cand:c,lat,lon,n:pts.length,
-      parkName,
-      adsiz:!c.name,
-      newName:dgProjectName(parkName,dgLabelFromLegacy(p.name,parkName))
-    });
-  }
-
-  DG_BACKFILL_PLAN=plan;
+  DG_BACKFILL_PLAN=result.plan;
   dgRenderBackfillPlan();
 }
 
