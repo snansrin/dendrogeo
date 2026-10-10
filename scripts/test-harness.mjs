@@ -165,6 +165,7 @@ export function loadApp({ sadece } = {}) {
     'src/application/parks/build-park-admin-overview.js',
     'src/ui/park-admin-renderer.js',
     'src/application/parks/merge-park-identities.js',
+    'src/application/parks/rename-park-identity.js',
     'src/services/park-registry.js',
     'src/application/parks/build-grid-waypoint-rows.js',
     'src/application/parks/count-grid-cell-measurements.js',
@@ -210,6 +211,7 @@ export function loadApp({ sadece } = {}) {
   }
   if (secim && secim.has('src/services/park-registry.js')) {
     secim.add('src/application/parks/merge-park-identities.js');
+    secim.add('src/application/parks/rename-park-identity.js');
     secim.add('src/domain/parks/is-schema-error.js');
     secim.add('src/domain/parks/identity.js');
     secim.add('src/adapters/parks/park-store.js');
