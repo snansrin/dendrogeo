@@ -47,6 +47,7 @@ const registry = readFileSync(join(ROOT, 'src/services/park-registry.js'), 'utf8
 const parkAdminRenderer = readFileSync(join(ROOT, 'src/ui/park-admin-renderer.js'), 'utf8');
 const parkMergeApplication = readFileSync(join(ROOT, 'src/application/parks/merge-park-identities.js'), 'utf8');
 const parkRenameApplication = readFileSync(join(ROOT, 'src/application/parks/rename-park-identity.js'), 'utf8');
+const parkDeleteApplication = readFileSync(join(ROOT, 'src/application/parks/delete-park-identity.js'), 'utf8');
 const panel = readFileSync(join(ROOT, 'src/ui/park-panel.js'), 'utf8');
 
 /* =========================================================
@@ -385,12 +386,9 @@ describe('parka bağlama YALNIZ yönetici (0006 + kullanıcı isteği 2026-09-24
   });
 
   test('park kimliği araçları (adlandır/birleştir/sil) da bekçili', () => {
-    for (const fn of ['dgParkDelete']) {
-      const body = registry.slice(registry.indexOf('async function ' + fn), registry.indexOf('async function ' + fn) + 400);
-      assert.match(body, /dgIsAdmin\(\)/, fn + ' bekçisiz');
-    }
     assert.match(parkMergeApplication, /if\(!isAdmin\(\)\)return\{status:"forbidden"\}/, 'birleştirme use-case bekçisiz');
     assert.match(parkRenameApplication, /if\(!isAdmin\(\)\)return\{status:"forbidden"\}/, 'yeniden adlandırma use-case bekçisiz');
+    assert.match(parkDeleteApplication, /if\(!isAdmin\(\)\)return\{status:"forbidden"\}/, 'silme use-case bekçisiz');
   });
 
   test('⭐ karşılaştırmadaki onarım düğmesi yalnız yöneticiye', () => {
@@ -517,9 +515,10 @@ describe('kabuk: park algılama ekranı + ölçüm kapısı id’leri', () => {
     const b = idx.indexOf('src/services/park-registry.js');
     const merge = idx.indexOf('src/application/parks/merge-park-identities.js');
     const rename = idx.indexOf('src/application/parks/rename-park-identity.js');
+    const remove = idx.indexOf('src/application/parks/delete-park-identity.js');
     const c = idx.indexOf('src/services/grid-engine.js');
-    assert.ok(a > -1 && d > -1 && merge > -1 && rename > -1 && b > -1 && c > -1, 'modüller index.html’de olmalı');
-    assert.ok(a < d && d < merge && merge < rename && rename < b && b < c, `sıra bozuk: query=${a} domain=${d} merge=${merge} rename=${rename} registry=${b} grid=${c}`);
+    assert.ok(a > -1 && d > -1 && merge > -1 && rename > -1 && remove > -1 && b > -1 && c > -1, 'modüller index.html’de olmalı');
+    assert.ok(a < d && d < merge && merge < rename && rename < remove && remove < b && b < c, `sıra bozuk: query=${a} domain=${d} merge=${merge} rename=${rename} remove=${remove} registry=${b} grid=${c}`);
   });
 
   test('park-registry.js service worker PRECACHE listesinde (çevrimdışı)', () => {

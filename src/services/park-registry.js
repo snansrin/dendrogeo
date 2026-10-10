@@ -1086,18 +1086,24 @@ async function dgParkMergeInto(srcId,dstId){
   await dgAfterParkAdminChange();
 }
 
-async function dgParkDelete(id){
-  if(!dgIsAdmin())return toast("🔐 Bu işlem yalnız yöneticiye açık.","err");
-  const p=DG_PARK_ADMIN_ROWS.find(x=>x.id===id);
-  if(!p)return toast("Park bulunamadı","err");
-  if(!confirm(
-    `"${p.name}" (#${id}) silinsin mi?\n\n`+
+const DG_PARK_ADMIN_DELETE=window.DG_PARK_ADMIN_DELETE_APPLICATION.create({
+  isAdmin:dgIsAdmin,
+  getPark:id=>DG_PARK_ADMIN_ROWS.find(park=>park.id===id),
+  confirmDelete:park=>confirm(
+    `"${park.name}" (#${park.id}) silinsin mi?\n\n`+
     `· Bağlı projeler park bağını KAYBEDER ("park yok" durumuna düşer, adları değişmez)\n`+
     `· Ölçümlerin park_id'si null olur — ÖLÇÜM SİLİNMEZ\n`+
-    `· Yanlış/çift kimlikse silmek yerine 🔀 birleştirmeyi kullan`))return;
-  const{error}=await sb.from("parks").delete().eq("id",id);
-  if(error)return toast("Silinemedi: "+esc(error.message),"err");
-  DG_PARK_SESSION.clear();
+    `· Yanlış/çift kimlikse silmek yerine 🔀 birleştirmeyi kullan`),
+  deletePark:id=>sb.from("parks").delete().eq("id",id),
+  clearSession:()=>DG_PARK_SESSION.clear()
+});
+
+async function dgParkDelete(id){
+  const result=await DG_PARK_ADMIN_DELETE(id);
+  if(result.status==="forbidden")return toast("🔐 Bu işlem yalnız yöneticiye açık.","err");
+  if(result.status==="park-missing")return toast("Park bulunamadı","err");
+  if(result.status==="cancelled")return;
+  if(result.status==="write-failed")return toast("Silinemedi: "+esc(result.error.message),"err");
   toast("✓ Park kimliği silindi","ok","🗑️");
   await dgAfterParkAdminChange();
 }

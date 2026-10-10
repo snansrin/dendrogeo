@@ -139,6 +139,8 @@ Bu ayrım raster sınıflandırma kodlarını, kaynak eşlemesini, eşikleri, Se
 
 - `application/parks/rename-park-identity.js`, park adını ve kanonik ad anahtarını güncelleyip bağlı proje adlarını eşitleme akışını yürütür; `park-registry.js` Supabase, istem ve bildirim bağlayıcılarını korur.
 
+- `application/parks/delete-park-identity.js`, park kimliği silme yetkisini, uyarı onayını ve başarılı silme sonrası oturum temizliğini yönetir; DB işlemi ve bildirimler serviste kalır.
+
 ## Güvenli geçiş sırası
 
 1. Önce tek bir bounded use-case'i ayır; eski global çağrı sözleşmesini adapter'da koru.
