@@ -452,17 +452,16 @@ async function createWaypointsFromGrid(mode){
 
   if(source!==dgGridReviewSignature()||source!==DG_GRID_SOURCE||park!==PARK_POLY||pid!==+$("gridProject").value)return toast(_tgr("Yüzey değişti. Waypoint üretmeden önce gridi yeniden oluşturun."),"warn");
 
-  let next=
-    (
-      mx&&
-      mx.length
-        ?mx[0].wp_id
-        :0
-    )+1;
-
-  const first=next;
-
-  const rows=window.DG_GRID_WAYPOINT_ROWS.build(targetCells,next,USER.id,pid);
+  const batch=window.DG_GRID_WAYPOINT_BATCH.prepare(
+    targetCells,
+    mx,
+    USER.id,
+    pid,
+    window.DG_GRID_WAYPOINT_ROWS.build
+  );
+  const first=batch.firstWpId;
+  const rows=batch.rows;
+  const next=first+rows.length;
 
   LAST_WP_ROWS=rows;
 
