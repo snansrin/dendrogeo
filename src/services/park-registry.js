@@ -974,22 +974,24 @@ let DG_PARK_ADMIN_LAST=null;          /* son projects/measurements bağlamı */
 /* 0040: kaydırma koruma sarmalı — yeniden çizimde #main scrollTop korunur. */
 async function loadParkAdmin(){const _y=(typeof dgScrollKeep==="function"?dgScrollKeep():null);try{return await loadParkAdmin__scroll.apply(this,arguments);}finally{if(typeof dgScrollRestore==="function")dgScrollRestore(_y);}}
 async function loadParkAdmin__scroll(){
-  if(!PROFILE||(PROFILE.role!=="admin"&&PROFILE.role!=="owner"))return toast("Yetki yok.","err");
+  const result=await DG_PARK_ADMIN_LOAD();
+  if(result.status==="forbidden")return toast("Yetki yok.","err");
   const box=$("parkAdminBox");
-  if(box)box.innerHTML='<div class="alert info">⏳ Park kimlikleri yükleniyor…</div>';
-
-  const[pk,pj,mm]=await Promise.all([
-    sb.from("parks").select("*").order("name"),
-    sb.from("projects").select("id,name,park_id"),
-    sb.from("measurements").select("park_id").limit(5000)
-  ]);
-  if(pk.error){
-    if(box)box.innerHTML=`<div class="alert err">⚠ Parklar okunamadı: <span class="mono">${esc(pk.error.message)}</span></div>`;
+  if(result.status==="park-load-failed"){
+    if(box)box.innerHTML=`<div class="alert err">⚠ Parklar okunamadı: <span class="mono">${esc(result.error.message)}</span></div>`;
     return;
   }
-  DG_PARK_ADMIN_ROWS=pk.data||[];
-  dgRenderParkAdmin(pj.data||[],mm.data||[]);
+  DG_PARK_ADMIN_ROWS=result.parks;
+  dgRenderParkAdmin(result.projects,result.measurements);
 }
+
+const DG_PARK_ADMIN_LOAD=window.DG_PARK_ADMIN_LOAD_APPLICATION.create({
+  isAdmin:()=>!!PROFILE&&(PROFILE.role==="admin"||PROFILE.role==="owner"),
+  showLoading:()=>{const box=$("parkAdminBox");if(box)box.innerHTML='<div class="alert info">⏳ Park kimlikleri yükleniyor…</div>';},
+  fetchParks:()=>sb.from("parks").select("*").order("name"),
+  fetchProjects:()=>sb.from("projects").select("id,name,park_id"),
+  fetchMeasurements:()=>sb.from("measurements").select("park_id").limit(5000)
+});
 
 function dgRenderParkAdmin(projects,measurements){
   const box=$("parkAdminBox");

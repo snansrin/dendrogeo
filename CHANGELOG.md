@@ -9,6 +9,9 @@ Yeni sürüm yayımlama adımları: [`docs/surum-yayini.md`](docs/surum-yayini.m
 
 ## [Yayımlanmadı]
 
+### İyileştirildi — Park kimliği yönetim listesinin yükleme akışı
+Yönetici yetkisi ve park/proje/ölçüm verilerinin paralel yüklenmesi uygulama modülüne taşındı. Yönetim ekranı mevcut hata mesajlarını ve çizim akışını koruyor; yeni modül çevrimdışı önbelleğe ve test yükleme zincirine eklendi.
+
 ### Düzeltildi — FINAL saha ölçüm protokolü ve DBH gösterimi
 Saha ham değişkeni yerden 1,30 m yükseklikte mezurayla ölçülen **göğüs çevresi C (cm)** olarak kilitlendi. Ham değer `girth_cm` alanında korunur; DBH çapı yalnız **D = C / π** ile türetilip `dbh_cm` alanına yazılır. Allometri, hacim, QA ve Monte Carlo yuvarlanmamış türetilmiş D ile çalışır. Arayüz, rapor tabloları ve okunabilir dışa aktarımlar DBH'yi **1 ondalık basamakla** gösterir (örn. 28,647889… → 28,6 cm). README, yöntem, rapor yayını, envanter/karbon sayfaları ve İngilizce yöntem metni aynı protokole hizalandı. Aşağıdaki 0031/0013 kayıtları tarihsel karar günlüğüdür; güncel yöntem otoritesi değildir.
 
