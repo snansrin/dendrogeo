@@ -10,7 +10,7 @@
 
 function setGreenOnly(v){
   DG_GREEN_ONLY=!!v;
-  if(PARK_POLY&&PARK_POLY.length&&GRID_CELLS.length){
+  if(PARK_POLY&&PARK_POLY.length&&DG_GRID_SESSION.getCells().length){
     buildGrid();
   }
 }

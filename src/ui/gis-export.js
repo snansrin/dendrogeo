@@ -147,9 +147,9 @@
   if(ndvi){
    for(const layer of ndviPolys)drawLeaflet(ctx,pr,layer,Math.max(.28,(sens?.opacity||65)/100));
   }
-  if(opts.grid&&typeof GRID_CELLS!=="undefined"){
+  if(opts.grid&&typeof DG_GRID_SESSION!=="undefined"){
    ctx.lineWidth=1;ctx.strokeStyle="#166534";
-   for(const cell of GRID_CELLS||[]){
+   for(const cell of DG_GRID_SESSION.getCells()||[]){
     if(![cell.w0,cell.w1,cell.s0,cell.s1].every(Number.isFinite))continue;
     ctx.strokeRect(pr.x(cell.w0),pr.y(cell.s1),pr.x(cell.w1)-pr.x(cell.w0),pr.y(cell.s0)-pr.y(cell.s1));
    }
@@ -298,7 +298,7 @@
    for(const poly of ndviPolys)
     if(drawLeaflet(g,pr,poly,Math.max(.45,(sens.opacity||65)/100)))painted++;
   }
-  if(layers.grid&&typeof GRID_CELLS!=="undefined")for(const cell of GRID_CELLS||[]){
+  if(layers.grid&&typeof DG_GRID_SESSION!=="undefined")for(const cell of DG_GRID_SESSION.getCells()||[]){
    if(Array.isArray(cell.geometry?.coordinates)){
     for(const polygon of cell.geometry.coordinates)for(const ring of polygon){
      g.beginPath();ring.forEach((p,i)=>{if(i)g.lineTo(pr.x(p[0]),pr.y(p[1]));else g.moveTo(pr.x(p[0]),pr.y(p[1]));});

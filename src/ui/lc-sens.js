@@ -648,7 +648,7 @@ function dgSensExportGeoJson(){
 function dgSensExportPng(){
  if(document.getElementById("dgSurfaceExportDialog"))return;
  const dialog=document.createElement("dialog");dialog.id="dgSurfaceExportDialog";dialog.className="dg-export-dialog card";
- const grid=typeof GRID_CELLS!=="undefined"&&GRID_CELLS.length>0;
+ const grid=typeof DG_GRID_SESSION!=="undefined"&&DG_GRID_SESSION.getCells().length>0;
  const points=[...(typeof LAST_WP_ROWS!=="undefined"?LAST_WP_ROWS:[]),...(typeof WP!=="undefined"?WP:[])];
  const pid=Number(document.getElementById("gridProject")?.value);
  const waypoints=[...new Map(points.filter(w=>Number.isFinite(Number(w.lat))&&Number.isFinite(Number(w.lon))&&(!w.project_id||Number(w.project_id)===pid)).map(w=>[String(w.project_id||pid)+":"+String(w.wp_id??w.id),w])).values()];
@@ -707,7 +707,7 @@ async function dgSensRenderPng(layers={park:true,surface:true},waypoints=[]){
     for(const r of [...PARK_POLY,...(typeof PARK_HOLES!=="undefined"?PARK_HOLES:[])]){let first=true;for(const q of r){const p=px(PR(q[0],q[1]));first?g.moveTo(p[0],p[1]):g.lineTo(p[0],p[1]);first=false;}g.closePath();}
     g.strokeStyle="#111827";g.lineWidth=2.5;g.stroke();
   }
-  if(layers.grid&&typeof GRID_CELLS!=="undefined")for(const cell of GRID_CELLS){
+  if(layers.grid&&typeof DG_GRID_SESSION!=="undefined")for(const cell of DG_GRID_SESSION.getCells()){
     g.beginPath();for(const poly of cell.geometry?.coordinates||[])for(const ring of poly){ring.forEach((q,i)=>{const p=px(PR(q[1],q[0]));i?g.lineTo(...p):g.moveTo(...p);});g.closePath();}g.strokeStyle="#14532d";g.lineWidth=1;g.stroke();
   }
   if(layers.waypoints)for(const w of waypoints){const p=px(PR(Number(w.lat),Number(w.lon)));g.beginPath();g.arc(p[0],p[1],7,0,Math.PI*2);g.fillStyle=w.visited?"#22c55e":"#ef4444";g.fill();g.strokeStyle="#fff";g.lineWidth=2;g.stroke();g.fillStyle=INK;g.font="bold 14px Arial";g.fillText(String(w.wp_id??w.id??""),p[0]+10,p[1]+4);}

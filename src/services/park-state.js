@@ -50,11 +50,6 @@ let IMP_LAYER=null;
 let GRID_BLOCK_LINES=[];
 
 const DG_GRID_SESSION=window.DG_GRID_SESSION_STATE.create();
-/* Compatibility aliases retain container identity for exports and park UI. */
-const GRID_CELLS=DG_GRID_SESSION.getCells();
-
-const SELECTED_CELLS=DG_GRID_SESSION.getSelection();
-
 let LAST_WP_ROWS=[];
 
 let PARK_REF_HA=null;
