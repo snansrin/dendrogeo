@@ -170,30 +170,10 @@ async function createWaypointsFromGrid(mode){
   if(result.status==="cancelled")return;
   if(result.status==="stale")return toast(_tgr("Yüzey değişti. Waypoint üretmeden önce gridi yeniden oluşturun."),"warn");
   if(result.status==="write-failed")return toast("Hata: "+result.error.message,"err");
-  const {rows,first,next}=result;
-
-  WP_AUTO_LAYER=window.DG_GRID_WAYPOINT_LAYER.render({
-    map,
-    previousLayer:WP_AUTO_LAYER,
-    rows,
-    leaflet:L
+  return window.DG_GRID_WAYPOINT_COMPLETION_UI.complete({
+    result,projectId:pid,
+    renderLayer:rows=>window.DG_GRID_WAYPOINT_LAYER.render({map,previousLayer:WP_AUTO_LAYER,rows,leaflet:L}),
+    setLayer:layer=>{WP_AUTO_LAYER=layer;},getProjectControl:()=>$("nProject"),
+    loadWaypoints,notify:toast,clearSelection:clearCellSelection
   });
-
-  $("nProject").value=
-    String(pid);
-
-  loadWaypoints();
-
-  toast(
-    "✓ "+
-    rows.length+
-    " waypoint (P"+
-    first+"–P"+
-    (next-1)+
-    ")",
-    "ok",
-    "📍"
-  );
-
-  clearCellSelection();
 }
