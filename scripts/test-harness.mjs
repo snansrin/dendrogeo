@@ -202,6 +202,7 @@ export function loadApp({ sadece } = {}) {
     'src/ui/grid-build-controller.js',
     'src/application/parks/build-grid.js',
     'src/application/parks/create-grid-waypoints.js',
+    'src/ui/grid-waypoint-controller.js',
     'src/ui/grid-waypoint-completion.js',
     'src/ui/grid-layer.js',
     'src/ui/grid-reset.js',
@@ -238,6 +239,7 @@ export function loadApp({ sadece } = {}) {
     secim.add('src/ui/grid-build-controller.js');
     secim.add('src/application/parks/build-grid.js');
     secim.add('src/application/parks/create-grid-waypoints.js');
+    secim.add('src/ui/grid-waypoint-controller.js');
     secim.add('src/ui/grid-waypoint-completion.js');
     secim.add('src/ui/grid-layer.js');
     secim.add('src/ui/grid-reset.js');
