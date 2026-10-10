@@ -203,3 +203,5 @@ Her modülün tek bir dış API'si, sahibi olduğu açık durumu ve kendi testle
 - `ui/park-reference-area.js`, referans alan girişinin mevcut parseFloat/pozitif değer kuralını ve sapma rozetini yönetir. Park ekranı referans durumunu ve ölçülen alanı bağlar; referans yalnız karşılaştırmadır, geometri/hesaplanan alanı değiştirmez. %3 renk eşiği ve sayı biçimleri korunur.
 
 - `ui/park-mode-controller.js`, park modu düğmesi/ipuçlarını, tıklama bağlama sırasını, kapatmada aday/park temizliğini ve harita hazır değilken kapalı duruma dönüşü yönetir. Park ekranı mevcut durum ve harita callback bağlarını sağlar; metin, blue sınıfı ve aria-pressed davranışı korunur.
+
+- `ui/park-click-controller.js`, harita click dinleyicisini bir kez bağlar; her tıklamada güncel park modu ve yüzey inceleme korumasını kontrol eder. Algılama ve hata kayıt/bildirim portlarını park ekranı sağlar. Koordinat sırası, harita yokken yeniden bağlama fırsatı ve mevcut hata metni korunur.

@@ -1,0 +1,10 @@
+import {test} from 'node:test';
+import assert from 'node:assert/strict';
+import vm from 'node:vm';
+import {readFileSync} from 'node:fs';
+const c=vm.createContext({window:{}});vm.runInContext(readFileSync(new URL('../src/ui/park-click-controller.js',import.meta.url),'utf8'),c);
+function setup({detect}={}){let bound=false,mode=true,review=false,map=null,handler;const calls=[],messages=[],logs=[];const readyMap={on:(name,fn)=>{assert.equal(name,'click');calls.push('bind');handler=fn;}};const bind=c.window.DG_PARK_CLICK_CONTROLLER_UI.create({isBound:()=>bound,setBound:v=>bound=v,getMap:()=>map,getMode:()=>mode,isReviewActive:()=>review,detect:detect||((...args)=>calls.push(args)),logError:(...args)=>logs.push(args),notify:(...args)=>messages.push(args)});return{bind,calls,messages,logs,ready:()=>map=readyMap,mode:v=>mode=v,review:v=>review=v,click:()=>handler({latlng:{lat:39,lng:32}}),bound:()=>bound};}
+test('missing map leaves binding available; ready map receives one listener across repeated binds',()=>{const x=setup();x.bind();assert.equal(x.bound(),false);x.ready();x.bind();x.bind();assert.deepEqual(x.calls,['bind']);assert.equal(x.bound(),true);});
+test('each click reads current mode and review guard before detection',async()=>{const x=setup();x.ready();x.bind();x.mode(false);await x.click();x.mode(true);x.review(true);await x.click();assert.deepEqual(x.calls,['bind']);x.review(false);await x.click();assert.deepEqual(x.calls,['bind',[39,32]]);assert.equal(x.messages.length,0);});
+test('asynchronous detection errors log original error and retain existing toast',async()=>{const error=Error('offline'),x=setup({detect:async()=>{throw error;}});x.ready();x.bind();await x.click();assert.equal(x.logs[0][1],error);assert.deepEqual(x.messages,[['Park analizi başarısız: offline','err','🌳']]);});
+test('non-Error thrown values preserve string fallback',async()=>{const x=setup({detect:()=>{throw 'timeout';}});x.ready();x.bind();await x.click();assert.equal(x.messages[0][0],'Park analizi başarısız: timeout');});
