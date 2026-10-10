@@ -139,9 +139,10 @@ describe('istemci kancaları yerinde (atlama yok)', () => {
      * artık hem kod hem test tek doğruda. */
     const p = read('src/services/park-registry.js');
     const i = p.indexOf('async function dgScanCreateProject');
-    const govde = p.slice(i, p.indexOf('async function dgScanLinkTarget', i));
-    assert.doesNotMatch(govde, /dgVerifyAtPark/, 'proje açılışı GPS ile bloklanmamalı');
-    assert.match(govde, /dgPersistParkGeom\(park\)/, 'halkalar sunucuya yazılmalı');
+    const govde = p.slice(i, p.indexOf('async function dgLinkProject', i));
+    const app = read('src/application/parks/create-project.js');
+    assert.doesNotMatch(govde+app, /dgVerifyAtPark/, 'proje açılışı GPS ile bloklanmamalı');
+    assert.match(app, /persistGeometry\(park\)/, 'halkalar sunucuya yazılmalı');
     assert.match(p, /async function dgScanSearchByName/, 'uzak park için ada göre arama olmalı');
   });
 
