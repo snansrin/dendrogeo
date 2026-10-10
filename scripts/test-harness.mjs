@@ -163,6 +163,7 @@ export function loadApp({ sadece } = {}) {
     'src/application/parks/search-park-by-name.js',
     'src/domain/parks/is-schema-error.js',
     'src/services/park-registry.js',
+    'src/application/parks/build-grid-waypoint-rows.js',
     'src/services/grid-engine.js',
     /* YÖNETİM AĞACI (2026-09-24): dgTreeGroup/dgTreeFilterRows saf
      * fonksiyonları burada test edilir (DOM'a dokunan çizim kısmı değil). */
