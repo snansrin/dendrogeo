@@ -127,6 +127,7 @@ export function loadApp({ sadece } = {}) {
     'src/application/parks/find-park-candidates.js',
     'src/application/parks/fetch-detailed-coverage.js',
     'src/application/parks/find-nominatim-boundary.js',
+    'src/adapters/parks/nominatim-client.js',
     'src/services/park-query.js',
     /* PARK KİMLİĞİ (2026-09-24): park-registry.js saf yardımcılarının
      * (ad normalizasyonu, anahtar üretimi, proje adı kuralı) birim testleri
@@ -161,6 +162,7 @@ export function loadApp({ sadece } = {}) {
     secim.add('src/application/parks/find-park-candidates.js');
     secim.add('src/application/parks/fetch-detailed-coverage.js');
     secim.add('src/application/parks/find-nominatim-boundary.js');
+    secim.add('src/adapters/parks/nominatim-client.js');
   }
   if (secim && secim.has('src/services/park-registry.js')) {
     secim.add('src/domain/parks/identity.js');
