@@ -99,21 +99,12 @@ function dgSurfaceSeed(geometries,features,epsg,park,parts,cells){
  DG_SURFACE_PART_CACHE.set(geometries,{features:features.slice(),epsg,park,parts,cellCount:cells?.length,cellFirst:cells?.[0]});
  for(const p of parts)if(p.wgs)DG_SURFACE_WGS_CACHE.set(p.geom,{epsg,wgs:p.wgs});
 }
-const DG_SURFACE_JOBS=new Set();
-function dgSurfaceCancelJobs(){for(const cancel of [...DG_SURFACE_JOBS])cancel();}
-function dgSurfaceWorkerJob(data){
- return new Promise((resolve,reject)=>{
-  if(typeof Worker==='undefined'){resolve(null);return;}
-  let worker;try{worker=new Worker(typeof dgRuntimeScriptUrl==='function'?dgRuntimeScriptUrl('/src/workers/surface-worker.js'):'/src/workers/surface-worker.js');}catch(e){resolve(null);return;}
-  const finish=()=>{clearTimeout(timer);worker.terminate();DG_SURFACE_JOBS.delete(cancel);};
-  const cancel=()=>{finish();reject(Error('Analiz kapatıldı.'));};
-  const timer=setTimeout(()=>{finish();reject(Error('Sınır hesabı zaman aşımına uğradı.'));},90000);
-  DG_SURFACE_JOBS.add(cancel);
-  worker.onmessage=e=>{finish();if(e.data.error)reject(Error(e.data.error));else resolve(e.data);};
-  worker.onerror=()=>{finish();resolve(null);};
-  try{worker.postMessage(data);}catch(e){finish();reject(e);}
- });
-}
+const DG_SURFACE_REVIEW_WORKER=window.DG_SURFACE_REVIEW_WORKER_ADAPTER.create({
+ getWorker:()=>typeof Worker==="undefined"?null:Worker,
+ scriptUrl:()=>typeof dgRuntimeScriptUrl==="function"?dgRuntimeScriptUrl("/src/workers/surface-worker.js"):"/src/workers/surface-worker.js"
+});
+function dgSurfaceCancelJobs(){DG_SURFACE_REVIEW_WORKER.cancelAll();}
+function dgSurfaceWorkerJob(data){return DG_SURFACE_REVIEW_WORKER.run(data);}
 async function dgSurfacePrepare(data){
  const result=await dgSurfaceWorkerJob(data);if(result)return result;
  // Older browsers / worker load failures: yield between bounded geometry batches.
