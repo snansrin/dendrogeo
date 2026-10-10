@@ -14,7 +14,6 @@ const _tgrf=(t,v)=>(typeof dgTfs==="function"?dgTfs(t,v):String(t).replace(/\{(\
    GRID
 ========================================================= */
 
-const DG_GRID_SESSION=window.DG_GRID_SESSION_STATE.create();
 function dgGridReviewSignature(){return window.DG_GRID_REVIEW_SIGNATURE.resolve(window.DG_LC_SENS?.state);}
 const DG_GRID_BUILD=window.DG_GRID_BUILD_APPLICATION.create({
  ensureSurface:()=>typeof dgEnsureLulc==="function"?dgEnsureLulc():undefined,
@@ -44,7 +43,7 @@ const DG_GRID_BUILD_CONTROLLER=window.DG_GRID_BUILD_CONTROLLER_UI.create({
  accept:(outcome,context)=>window.DG_GRID_BUILD_COMPLETION_UI.complete({
   outcome,clearance:context.clearance,clear:clearGrid,
   setSource:signature=>{DG_GRID_SESSION.setSource(signature);},setMeta:meta=>{DG_GRID_SESSION.setMeta(meta);},
-  cells:GRID_CELLS,render:drawGridLayer,translate:_tgr,translateFormat:_tgrf,
+  cells:DG_GRID_SESSION.getCells(),render:drawGridLayer,translate:_tgr,translateFormat:_tgrf,
   notify:(...args)=>toast(...args)
  }),notify:(...args)=>toast(...args)
 });
@@ -57,7 +56,7 @@ async function buildGrid(){return DG_GRID_BUILD_CONTROLLER();}
 function drawGridLayer(){
   return window.DG_GRID_LAYER_UI.render({
     leaflet:L,map,previousLayer:GRID_LAYER,previousRenderer:DG_GRID_SESSION.getRenderer(),
-    cells:GRID_CELLS,selection:SELECTED_CELLS,
+    cells:DG_GRID_SESSION.getCells(),selection:DG_GRID_SESSION.getSelection(),
     resolveStyle:(cell,selected)=>window.DG_GRID_CELL_STYLE.resolve(cell,selected),
     resolveShape:cell=>window.DG_GRID_CELL_SHAPE.resolve(cell),
     countStates:cells=>window.DG_GRID_CELL_STATES.count(cells),translateFormat:_tgrf,
@@ -74,10 +73,10 @@ function updateGridSummary(
   window.DG_GRID_SUMMARY.render({
     element:$("gridSummary"),
     size:$("gridSize")?.value||20,
-    total:GRID_CELLS.length,
+    total:DG_GRID_SESSION.getCells().length,
     measured:g,
     empty:r0,
-    selected:SELECTED_CELLS.size,
+    selected:DG_GRID_SESSION.getSelection().size,
     meta:DG_GRID_SESSION.getMeta(),
     translate:_tgr,
     translateFormat:_tgrf
@@ -89,7 +88,7 @@ function updateGridSummary(
 ========================================================= */
 
 const DG_GRID_SELECTION=window.DG_GRID_SELECTION_UI.create({
-  getCells:()=>GRID_CELLS,getSelection:()=>SELECTED_CELLS,getLayer:()=>GRID_LAYER,
+  getCells:()=>DG_GRID_SESSION.getCells(),getSelection:()=>DG_GRID_SESSION.getSelection(),getLayer:()=>GRID_LAYER,
   resolveStyle:(cell,selected)=>window.DG_GRID_CELL_STYLE.resolve(cell,selected),
   countStates:cells=>window.DG_GRID_CELL_STATES.count(cells),
   updateSummary:(measured,empty)=>updateGridSummary(measured,empty)
@@ -101,7 +100,7 @@ function clearGrid(){
   DG_GRID_SESSION.invalidate();
   return window.DG_GRID_RESET_UI.clear({
     map,renderer:DG_GRID_SESSION.getRenderer(),gridLayer:GRID_LAYER,waypointLayer:WP_AUTO_LAYER,
-    cells:GRID_CELLS,selection:SELECTED_CELLS,
+    cells:DG_GRID_SESSION.getCells(),selection:DG_GRID_SESSION.getSelection(),
     rendererCleared:()=>{DG_GRID_SESSION.setRenderer(null);},
     gridCleared:()=>{GRID_LAYER=null;},waypointsCleared:()=>{WP_AUTO_LAYER=null;},
     getSummary:()=>$("gridSummary"),getGridControl:()=>$("togGrid"),getWaypointControl:()=>$("togWp")
@@ -138,7 +137,7 @@ const DG_GRID_WAYPOINT_CREATE=window.DG_GRID_WAYPOINT_CREATE_APPLICATION.create(
 const DG_GRID_WAYPOINT_CONTROLLER=window.DG_GRID_WAYPOINT_CONTROLLER_UI.create({
  getContext:()=>({source:DG_GRID_SESSION.getSource(),park:PARK_POLY}),
  resolveReadiness:(mode,source)=>window.DG_GRID_WAYPOINT_READINESS.resolve({
-  cells:GRID_CELLS,mode,selectedCells:SELECTED_CELLS,source,
+  cells:DG_GRID_SESSION.getCells(),mode,selectedCells:DG_GRID_SESSION.getSelection(),source,
   getCurrentSource:dgGridReviewSignature,getProjectId:()=>+$("gridProject").value||0,
   select:window.DG_GRID_WAYPOINT_SELECTION.select
  }),
