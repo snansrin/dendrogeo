@@ -42,8 +42,7 @@ async function buildGrid(){
   const {data,count,error}=await sb.from("measurements").select("lat,lon",{count:"exact"}).eq("status","Onaylı").gte("lat",minLat).lte("lat",maxLat).gte("lon",minLon).lte("lon",maxLon).limit(5000);
   if(error)throw error;if(epoch!==DG_GRID_EPOCH||park!==PARK_POLY)return;
   dgWarnIfTruncated(data,5000,"Izgara ölçüm yoğunluğu",count);
-  const byId=new Map();for(const c of result.cells){const a=byId.get(c.baseId)||[];a.push(c);byId.set(c.baseId,a);}
-  for(const m of data||[]){const q=dgLcUtmForward(+m.lat,+m.lon,epsg),c=(byId.get(Math.floor((q.y-result.y0)/size)+"_"+Math.floor((q.x-result.x0)/size))||[]).find(c=>dgGridPointDistance([q.x,q.y],dgSurfaceFeatureGeometry({geometry:c.geometry},epsg))>=0);if(c)c.n++;}
+  window.DG_GRID_CELL_MEASUREMENTS.count(result.cells,data,{size,epsg,x0:result.x0,y0:result.y0,project:dgLcUtmForward,pointDistance:dgGridPointDistance,featureGeometry:dgSurfaceFeatureGeometry});
   if(signature!==dgGridReviewSignature())throw Error("Yüzey değişti. Güncel yüzeyle gridi tekrar oluşturun.");
   clearGrid();DG_GRID_SOURCE=signature;DG_GRID_META=`<p class="measure-help">${_tgr("Su ve sert zeminden uzaklık")}: ${clearance} m · ${_tgr(review?.editing?"Yüzey önizlemesi":"Kayıtlı yüzey")} · ${(result.areaM2/10000).toFixed(3)} ha ${_tgr("uygun alan")}</p>`;GRID_CELLS.push(...result.cells);drawGridLayer();
   toast(_tgrf("✓ Grid hazır: {n} hücre",{n:GRID_CELLS.length}),GRID_CELLS.length?"ok":"warn","🔲");
