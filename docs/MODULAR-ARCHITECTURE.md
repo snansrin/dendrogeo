@@ -189,3 +189,5 @@ Her modülün tek bir dış API'si, sahibi olduğu açık durumu ve kendi testle
 - `ui/grid-build-controller.js`, tek grid üretimi kilidini ve buton yaşam döngüsünü yönetir; park yokluğu, eski sonuç, hata ve tamamlanma yollarında mevcut bildirimleri/temizliği sürdürür. Servis epoch ve kabul edilen grid durumunu günceller; eski `buildGrid()` girişini korur.
 
 - `ui/grid-build-completion.js`, kabul edilen gridin temizleme, kaynak/özet güncelleme, hücreleri aktarma, çizim ve bildirim sırasını yönetir. Servis mevcut durum kaplarını ve callback bağlarını sağlar; alan biçimi ve önizleme/kayıtlı yüzey etiketi korunur.
+
+- `ui/grid-waypoint-controller.js`, önkoşul ve üretim sonuçlarını mevcut mesajlarla yönlendirir; iptal, eski yüzey ve yazım hatasında tamamlanma ekranını çalıştırmaz. Servis güncel bağlamı ve mevcut üretim/tamamlama portlarını sağlar.

@@ -136,38 +136,19 @@ const DG_GRID_WAYPOINT_CREATE=window.DG_GRID_WAYPOINT_CREATE_APPLICATION.create(
   insert:rows=>window.DG_GRID_WAYPOINT_INSERT.insert(sb,rows)
 });
 
-async function createWaypointsFromGrid(mode){
-  const source=DG_GRID_SOURCE,park=PARK_POLY;
-  const readiness=window.DG_GRID_WAYPOINT_READINESS.resolve({
-    cells:GRID_CELLS,
-    mode,
-    selectedCells:SELECTED_CELLS,
-    source,
-    getCurrentSource:dgGridReviewSignature,
-    getProjectId:()=>+$("gridProject").value||0,
-    select:window.DG_GRID_WAYPOINT_SELECTION.select
-  });
-
-  if(!readiness.ok){
-    if(readiness.reason==="surface-stale")return toast(_tgr("Yüzey değişti. Waypoint üretmeden önce gridi yeniden oluşturun."),"warn");
-    const messages={
-      "grid-missing":"Önce grid oluştur",
-      "project-missing":"Önce proje seç",
-      "manual-selection-missing":"Önce hücre seçin",
-      "target-cells-missing":"Uygun hücre yok"
-    };
-    return toast(messages[readiness.reason]);
-  }
-
-  const pid=readiness.projectId;
-  const result=await DG_GRID_WAYPOINT_CREATE({source,park,projectId:pid,targetCells:readiness.targetCells});
-  if(result.status==="cancelled")return;
-  if(result.status==="stale")return toast(_tgr("Yüzey değişti. Waypoint üretmeden önce gridi yeniden oluşturun."),"warn");
-  if(result.status==="write-failed")return toast("Hata: "+result.error.message,"err");
-  return window.DG_GRID_WAYPOINT_COMPLETION_UI.complete({
-    result,projectId:pid,
-    renderLayer:rows=>window.DG_GRID_WAYPOINT_LAYER.render({map,previousLayer:WP_AUTO_LAYER,rows,leaflet:L}),
-    setLayer:layer=>{WP_AUTO_LAYER=layer;},getProjectControl:()=>$("nProject"),
-    loadWaypoints,notify:toast,clearSelection:clearCellSelection
-  });
-}
+const DG_GRID_WAYPOINT_CONTROLLER=window.DG_GRID_WAYPOINT_CONTROLLER_UI.create({
+ getContext:()=>({source:DG_GRID_SOURCE,park:PARK_POLY}),
+ resolveReadiness:(mode,source)=>window.DG_GRID_WAYPOINT_READINESS.resolve({
+  cells:GRID_CELLS,mode,selectedCells:SELECTED_CELLS,source,
+  getCurrentSource:dgGridReviewSignature,getProjectId:()=>+$("gridProject").value||0,
+  select:window.DG_GRID_WAYPOINT_SELECTION.select
+ }),
+ create:context=>DG_GRID_WAYPOINT_CREATE(context),
+ complete:(result,pid)=>window.DG_GRID_WAYPOINT_COMPLETION_UI.complete({
+  result,projectId:pid,
+  renderLayer:rows=>window.DG_GRID_WAYPOINT_LAYER.render({map,previousLayer:WP_AUTO_LAYER,rows,leaflet:L}),
+  setLayer:layer=>{WP_AUTO_LAYER=layer;},getProjectControl:()=>$("nProject"),
+  loadWaypoints:()=>loadWaypoints(),notify:(...args)=>toast(...args),clearSelection:clearCellSelection
+ }),translate:_tgr,notify:(...args)=>toast(...args)
+});
+async function createWaypointsFromGrid(mode){return DG_GRID_WAYPOINT_CONTROLLER(mode);}
