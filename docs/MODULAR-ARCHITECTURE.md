@@ -177,3 +177,5 @@ Her modülün tek bir dış API'si, sahibi olduğu açık durumu ve kendi testle
 - `ui/map-layer-visibility.js`, var olan Leaflet katmanının görünürlüğünü haritanın gerçek katman durumuna göre değiştirir ve ilgili kontrolü eşitler. `grid-engine.js` grid/otomatik waypoint katmanlarını ve mevcut `togGrid`/`togWp` kontrollerini geçirir; katman yoksa işlem yapılmaz.
 
 - `ui/grid-reset.js`, mevcut grid renderer/katmanlarını kaldırır, hücre ve seçim kaplarını yerinde temizler, özeti gizler ve görünürlük kontrollerini sıfırlar. `clearGrid()` metadata/kaynak temizliğini ve epoch artırarak devam eden üretimi geçersiz kılmayı sürdürür; katman referansları callback ile aynı sırada güncellenir.
+
+- `ui/grid-layer.js`, grid katmanını ve canvas renderer oluşturur; mevcut hücre şekil/stil işlevleri, seçim callback ve tooltip çevirisini kullanır. Servis katman referanslarını ve özet bağını sağlar; `_cellId`, tıklama yayılımının durdurulması ve sticky tooltip davranışı korunur.
