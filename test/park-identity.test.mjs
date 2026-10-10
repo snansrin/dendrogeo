@@ -509,14 +509,16 @@ describe('kabuk: park algılama ekranı + ölçüm kapısı id’leri', () => {
 
   test('⭐ park-registry.js yükleme sırası: park-query → registry → grid-engine', () => {
     const a = idx.indexOf('src/services/park-query.js');
+    const d = idx.indexOf('src/domain/parks/identity.js');
     const b = idx.indexOf('src/services/park-registry.js');
     const c = idx.indexOf('src/services/grid-engine.js');
-    assert.ok(a > -1 && b > -1 && c > -1, 'üç modül de index.html’de olmalı');
-    assert.ok(a < b && b < c, `sıra bozuk: query=${a} registry=${b} grid=${c}`);
+    assert.ok(a > -1 && d > -1 && b > -1 && c > -1, 'dört modül de index.html’de olmalı');
+    assert.ok(a < d && d < b && b < c, `sıra bozuk: query=${a} domain=${d} registry=${b} grid=${c}`);
   });
 
   test('park-registry.js service worker PRECACHE listesinde (çevrimdışı)', () => {
     assert.ok(sw.includes("'/src/services/park-registry.js'"), 'CORE_ASSETS’te yok');
+    assert.ok(sw.includes("'/src/domain/parks/identity.js'"), 'park identity domain CORE_ASSETS’te yok');
   });
 });
 
