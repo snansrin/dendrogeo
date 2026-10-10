@@ -127,6 +127,7 @@ export function loadApp({ sadece } = {}) {
     'src/domain/parks/bounds.js',
     'src/domain/parks/park-containment.js',
     'src/domain/parks/line-distance.js',
+    'src/domain/parks/osm-rings.js',
     'src/services/park-geometry.js',
     'src/domain/parks/simplify-ring.js',
     'src/adapters/parks/park-geometry-store.js',
