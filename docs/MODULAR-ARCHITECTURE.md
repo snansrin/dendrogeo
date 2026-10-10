@@ -193,3 +193,5 @@ Her modülün tek bir dış API'si, sahibi olduğu açık durumu ve kendi testle
 - `ui/grid-waypoint-controller.js`, önkoşul ve üretim sonuçlarını mevcut mesajlarla yönlendirir; iptal, eski yüzey ve yazım hatasında tamamlanma ekranını çalıştırmaz. Servis güncel bağlamı ve mevcut üretim/tamamlama portlarını sağlar.
 
 - `application/parks/grid-session-state.js`, grid epoch, renderer, kabul edilen yüzey imzası ve özet metadata durumuna sahiptir. Her oturum ayrı closure kullanır; invalidation kaynak/özet temizler ve epoch artırır. Paylaşılan hücre/seçim kapları ve katman uyumluluk bağları bu aşamada korunur.
+
+- Grid oturumu `park-state.js` içinde bir kez kurulur ve hücre/seçim kaplarına da sahip olur. `GRID_CELLS`/`SELECTED_CELLS` dışa aktarma ve park ekranları için aynı kaplara bağlı uyumluluk adlarıdır; grid servisi açık oturum metotlarını kullanır. Oturum modülü park durumundan önce yüklenir.

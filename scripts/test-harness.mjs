@@ -117,6 +117,7 @@ export function loadApp({ sadece } = {}) {
     /* PARK ZİNCİRİ (Faz 4): eski gridplan.js'in mantık modülleri, index.html'deki
      * yükleme sırasıyla. UI modülleri (src/ui/park-panel, src/ui/park-export)
      * BİLEREK yüklenmez — DOM'a yapışırlar; onları ui-audit statik tarar. */
+    'src/application/parks/grid-session-state.js',
     'src/services/park-state.js',
     'src/services/osm-client.js',
     'src/domain/parks/road-half-width.js',
@@ -198,7 +199,6 @@ export function loadApp({ sadece } = {}) {
     'src/domain/parks/grid-options.js',
     'src/domain/parks/grid-bounds.js',
     'src/domain/parks/grid-cell-shape.js',
-    'src/application/parks/grid-session-state.js',
     'src/ui/grid-build-completion.js',
     'src/ui/grid-build-controller.js',
     'src/application/parks/build-grid.js',
@@ -234,7 +234,9 @@ export function loadApp({ sadece } = {}) {
     secim.add('src/application/parks/find-nominatim-boundary.js');
     secim.add('src/adapters/parks/nominatim-client.js');
   }
+  if (secim && secim.has('src/services/park-state.js')) secim.add('src/application/parks/grid-session-state.js');
   if (secim && secim.has('src/services/grid-engine.js')) {
+    secim.add('src/services/park-state.js');
     secim.add('src/ui/grid-selection.js');
     secim.add('src/application/parks/grid-session-state.js');
     secim.add('src/ui/grid-build-completion.js');

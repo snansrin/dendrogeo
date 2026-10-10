@@ -1,9 +1,10 @@
 "use strict";
 /* Own build invalidation and accepted-grid metadata independently of the DOM. */
 (function(root){
- function create(){
+ function create({cells=[],selection=new Set()}={}){
   let epoch=0,renderer=null,source=null,meta="";
   return Object.freeze({
+   getCells:()=>cells,getSelection:()=>selection,
    getEpoch:()=>epoch,nextEpoch:()=>++epoch,
    getRenderer:()=>renderer,setRenderer:value=>{renderer=value;},
    getSource:()=>source,setSource:value=>{source=value;},

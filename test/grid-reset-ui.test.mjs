@@ -9,7 +9,7 @@ function setup(withMap=true){
  const context=vm.createContext(state);
  vm.runInContext(readFileSync(new URL('../src/ui/grid-reset.js',import.meta.url),'utf8'),context);
  vm.runInContext(readFileSync(new URL('../src/application/parks/grid-session-state.js',import.meta.url),'utf8'),context);
- context.DG_GRID_SESSION=context.window.DG_GRID_SESSION_STATE.create();
+ context.DG_GRID_SESSION=context.window.DG_GRID_SESSION_STATE.create({cells,selection});
  for(let i=0;i<4;i++)context.DG_GRID_SESSION.nextEpoch();
  context.DG_GRID_SESSION.setMeta('meta');context.DG_GRID_SESSION.setSource({});context.DG_GRID_SESSION.setRenderer({kind:'renderer'});
  const service=readFileSync(new URL('../src/services/grid-engine.js',import.meta.url),'utf8');
