@@ -11,6 +11,7 @@ Yeni sürüm yayımlama adımları: [`docs/surum-yayini.md`](docs/surum-yayini.m
 
 ### İyileştirildi — Park geri doldurma planı
 Park bağı olmayan projeler için ölçüm merkezini hesaplama, OSM adayını arama ve uygulanabilir/eksik satırları planlama akışı uygulama modülüne taşındı. Yönetici/çevrimiçi kapıları, 2,1 saniyelik sorgu aralığı ve mevcut önizleme davranışı korunuyor.
+Planı onayla-yaz akışı da ayrı uygulama modülüne alındı; sıralı park kaydı ve proje bağı yazımları, kısmi hataları saymaya devam ediyor.
 
 ### İyileştirildi — Park kimliği yönetim listesinin yükleme akışı
 Yönetici yetkisi ve park/proje/ölçüm verilerinin paralel yüklenmesi uygulama modülüne taşındı. Yönetim ekranı mevcut hata mesajlarını ve çizim akışını koruyor; yeni modül çevrimdışı önbelleğe ve test yükleme zincirine eklendi.
