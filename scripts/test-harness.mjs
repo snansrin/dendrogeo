@@ -120,6 +120,7 @@ export function loadApp({ sadece } = {}) {
     'src/services/park-state.js',
     'src/services/osm-client.js',
     'src/domain/parks/road-half-width.js',
+    'src/domain/parks/classify-surface-tags.js',
     'src/services/park-geometry.js',
     'src/domain/parks/simplify-ring.js',
     'src/adapters/parks/park-geometry-store.js',
