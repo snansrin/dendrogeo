@@ -238,7 +238,7 @@ describe('kalite denetimi 2026-09-27 kilidi (P1/P3/P7/P9)', () => {
     const r = rd('src/services/park-registry.js');
     assert.match(r, /async function dgBackfillGeom/, 'backfill fonksiyonu');
     assert.match(r, /yetki|role!==\"admin\"/, 'yonetici kapisi');
-    assert.match(r, /api\.openstreetmap\.org\/api\/0\.6/, 'OSM ana API');
+    assert.match(rd('src/adapters/parks/fetch-osm-park-ring.js'), /api\.openstreetmap\.org\/api\/0\.6/, 'OSM ana API adapteri');
     assert.match(rd('partials/head.html'), /https:\/\/api\.openstreetmap\.org/, 'CSP beyaz listesi');
   });
   test('P9 EN methods sayfasi + sitemap + hreflang', () => {

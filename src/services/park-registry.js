@@ -1167,35 +1167,27 @@ window.dgScanSearchByName=dgScanSearchByName;
    RLS'e takılır (parks_update: created_by veya admin).
 ========================================================= */
 async function dgFetchOsmRing(osmKey){
-  const m=String(osmKey||"").match(/^(way|relation)\/(\d+)$/);
-  if(!m)return null;
-  const r=await fetch("https://api.openstreetmap.org/api/0.6/"+m[1]+"/"+m[2]+"/full.json",{headers:{"Accept":"application/json"}});
-  if(!r.ok)throw new Error("OSM HTTP "+r.status);
-  const j=await r.json();
-  if(m[1]==="way"){
-    const ring=j.elements.filter(e=>e.type==="node").map(n=>[n.lat,n.lon]);
-    return ring.length>=4?{outer:[ring],inner:[]}:null;
-  }
-  const nodes={};for(const e of j.elements)if(e.type==="node")nodes[e.id]=[e.lat,e.lon];
-  const ways=j.elements.filter(e=>e.type==="way").map(w=>(w.nodes||[]).map(id=>nodes[id]).filter(Boolean));
-  const rings=(typeof joinWaysToRings==="function")?joinWaysToRings(j.elements.filter(e=>e.type==="way")):null;
-  if(rings&&rings.length)return{outer:[rings[0]],inner:rings.slice(1)};
-  const outer=ways.filter(w=>w.length>3&&w[0][0]===w[w.length-1][0]&&w[0][1]===w[w.length-1][1]).sort((a,b)=>b.length-a.length)[0];
-  return outer?{outer:[outer],inner:[]}:null;
+  return DG_OSM_PARK_RING_ADAPTER.create({fetch,joinWaysToRings})(osmKey);
 }
+const DG_PARK_GEOMETRY_BACKFILL_USE_CASE=window.DG_PARK_GEOMETRY_BACKFILL_APPLICATION.create({
+  isAdmin:()=>!!(PROFILE&&(PROFILE.role==="admin"||PROFILE.role==="owner")),
+  getPark:async parkId=>{const{data}=await sb.from("parks").select("*").eq("id",parkId).maybeSingle();return data||null;},
+  fetchRing:dgFetchOsmRing,
+  calculateArea:geom=>typeof polyArea==="function"?polyArea(geom.outer):NaN,
+  saveGeometry:(parkId,update)=>sb.from("parks").update(update).eq("id",parkId),
+  notify:(kind,park,error)=>{
+    if(kind==="loading")toast("🛰 OSM sınırı çekiliyor…","info","🛰");
+    if(kind==="osm-error")toast(dgCf("OSM hatası: ")+esc(error.message),"err","🛰");
+    if(kind==="boundary-not-found")toast("OSM'de kapalı sınır bulunamadı (relation parçalı olabilir).","warn","🛰");
+    if(kind==="write-error")toast(dgCf("Yazılamadı (yetki/ağ): ")+esc(error.message),"err","🛰");
+    if(kind==="saved")toast("✓ "+esc(park.name)+" geometrisi yazıldı — çit artık tam poligonla.","ok","🛰");
+  },
+  onComplete:()=>loadParkAdmin()
+});
 async function dgBackfillGeom(parkId){
-  if(!PROFILE||(PROFILE.role!=="admin"&&PROFILE.role!=="owner"))return toast("Yetki yok.","err");
-  const{data:park}=await sb.from("parks").select("*").eq("id",parkId).maybeSingle();
-  if(!park)return toast("Park bulunamadı","err");
-  toast("🛰 OSM sınırı çekiliyor…","info","🛰");
-  let geom;
-  try{geom=await dgFetchOsmRing(park.osm_key);}catch(e){return toast(dgCf("OSM hatası: ")+esc(e.message),"err","🛰");}
-  if(!geom)return toast("OSM'de kapalı sınır bulunamadı (relation parçalı olabilir).","warn","🛰");
-  const area=typeof polyArea==="function"?polyArea(geom.outer):park.area_m2;
-  const{error}=await sb.from("parks").update({geom_json:geom,area_m2:area>0?Math.round(area):park.area_m2}).eq("id",parkId);
-  if(error)return toast(dgCf("Yazılamadı (yetki/ağ): ")+esc(error.message),"err","🛰");
-  toast("✓ "+esc(park.name)+" geometrisi yazıldı — çit artık tam poligonla.","ok","🛰");
-  loadParkAdmin();
+  const result=await DG_PARK_GEOMETRY_BACKFILL_USE_CASE(parkId);
+  if(result.status==="forbidden")return toast("Yetki yok.","err");
+  if(result.status==="park-not-found")return toast("Park bulunamadı","err");
 }
 window.dgBackfillGeom=dgBackfillGeom;
 function dgParkAdminToggleEmpty(){
