@@ -121,68 +121,7 @@ function cellInsidePark(
   w0,
   w1
 ){
-  const cLat=(s0+s1)/2;
-  const cLon=(w0+w1)/2;
-
-  const corners=[
-    [s0,w0],
-    [s0,w1],
-    [s1,w1],
-    [s1,w0]
-  ];
-
-  if(!pointInPark(cLat,cLon,PARK_POLY))return false;
-
-  for(const p of corners){
-    if(!pointInPark(p[0],p[1],PARK_POLY))return false;
-  }
-
-  const rect=ringBBox(corners,cLat);
-
-  /*
-   * Conservative boundary rule: no park outer boundary segment may
-   * cross the cell. This prevents cells crossing concave indentations.
-   */
-  for(const ring of (PARK_POLY||[])){
-    if(!ring||ring.length<2)continue;
-
-    const pts=ring.map(p=>projectPoint(p[0],p[1],cLat));
-
-    for(let i=0;i<pts.length-1;i++){
-      if(segmentIntersectsRect(pts[i],pts[i+1],rect))return false;
-    }
-  }
-
-  for(const ring of (PARK_HOLES||[])){
-    if(!ring||ring.length<3)continue;
-
-    const rb=ringBBox(ring,cLat);
-    if(!bboxesOverlap(rb,rect))continue;
-
-    /*
-     * Any cell intersecting or lying inside a park hole is invalid.
-     * Testing the hole's own centroid was insufficient when a cell
-     * was fully enclosed by a larger hole.
-     */
-    if(pointInPolygon(cLat,cLon,ring))return false;
-
-    for(const corner of corners){
-      if(pointInPolygon(corner[0],corner[1],ring))return false;
-    }
-
-    if(
-      geometryIntersectsRect(
-        ring,
-        rect,
-        cLat,
-        0
-      )
-    ){
-      return false;
-    }
-  }
-
-  return true;
+  return window.DG_PARK_CELL_CONTAINMENT.cellInsidePark(s0,s1,w0,w1,PARK_POLY,PARK_HOLES);
 }
 
 function pointToSegmentDistanceM(lat,lon,a,b){
