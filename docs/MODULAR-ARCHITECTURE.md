@@ -187,3 +187,5 @@ Her modülün tek bir dış API'si, sahibi olduğu açık durumu ve kendi testle
 - `application/parks/build-grid.js`, yüzey hazırlama, worker/yedek grid üretimi, ölçüm sorgusu/sayımı ve park/epoch/yüzey imzası doğrulama sırasını yürütür. Servis işlem kilidini, buton durumunu, kabul edilen hücreleri haritaya aktarmayı ve bildirimleri sağlar; mevcut hesap işlevleri değişmez.
 
 - `ui/grid-build-controller.js`, tek grid üretimi kilidini ve buton yaşam döngüsünü yönetir; park yokluğu, eski sonuç, hata ve tamamlanma yollarında mevcut bildirimleri/temizliği sürdürür. Servis epoch ve kabul edilen grid durumunu günceller; eski `buildGrid()` girişini korur.
+
+- `ui/grid-build-completion.js`, kabul edilen gridin temizleme, kaynak/özet güncelleme, hücreleri aktarma, çizim ve bildirim sırasını yönetir. Servis mevcut durum kaplarını ve callback bağlarını sağlar; alan biçimi ve önizleme/kayıtlı yüzey etiketi korunur.

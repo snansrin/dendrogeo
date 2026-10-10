@@ -41,10 +41,12 @@ const DG_GRID_BUILD_CONTROLLER=window.DG_GRID_BUILD_CONTROLLER_UI.create({
  getOptions:()=>window.DG_GRID_OPTIONS.resolve($("gridSize")?.value,$("gridClearance")?.value),
  nextEpoch:()=>++DG_GRID_EPOCH,getButton:()=>$("gridBuildBtn"),
  build:context=>DG_GRID_BUILD(context),
- accept:({result,signature,review},{clearance})=>{
-  clearGrid();DG_GRID_SOURCE=signature;DG_GRID_META=`<p class="measure-help">${_tgr("Su ve sert zeminden uzaklık")}: ${clearance} m · ${_tgr(review?.editing?"Yüzey önizlemesi":"Kayıtlı yüzey")} · ${(result.areaM2/10000).toFixed(3)} ha ${_tgr("uygun alan")}</p>`;GRID_CELLS.push(...result.cells);drawGridLayer();
-  toast(_tgrf("✓ Grid hazır: {n} hücre",{n:GRID_CELLS.length}),GRID_CELLS.length?"ok":"warn","🔲");
- },notify:(...args)=>toast(...args)
+ accept:(outcome,context)=>window.DG_GRID_BUILD_COMPLETION_UI.complete({
+  outcome,clearance:context.clearance,clear:clearGrid,
+  setSource:signature=>{DG_GRID_SOURCE=signature;},setMeta:meta=>{DG_GRID_META=meta;},
+  cells:GRID_CELLS,render:drawGridLayer,translate:_tgr,translateFormat:_tgrf,
+  notify:(...args)=>toast(...args)
+ }),notify:(...args)=>toast(...args)
 });
 async function buildGrid(){return DG_GRID_BUILD_CONTROLLER();}
 
