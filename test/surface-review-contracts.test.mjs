@@ -5,6 +5,7 @@ import {readFileSync} from 'node:fs';
 
 const source=readFileSync(new URL('../src/contracts/surface-review.js',import.meta.url),'utf8');
 const store=readFileSync(new URL('../src/adapters/surface/review-store.js',import.meta.url),'utf8');
+const osm=readFileSync(new URL('../src/adapters/surface/osm-review-objects.js',import.meta.url),'utf8');
 const geometry=readFileSync(new URL('../src/domain/surface/review-geometry.js',import.meta.url),'utf8');
 const service=readFileSync(new URL('../src/services/lc-review.js',import.meta.url),'utf8');
 function api(){const window={};vm.runInContext(source,vm.createContext({window}));return window.DG_SURFACE_REVIEW_CONTRACTS;}
@@ -31,6 +32,7 @@ test('review service compatibility methods delegate to the contract module',()=>
   const window={};const ctx=vm.createContext({window});
   vm.runInContext(source,ctx);
   vm.runInContext(store,ctx);
+  vm.runInContext(osm,ctx);
   vm.runInContext(geometry,ctx);
   vm.runInContext(service,ctx);
   assert.equal(window.DG_SURFACE_REVIEW.validRing([[0,0],[1,0],[1,1]]),true);
