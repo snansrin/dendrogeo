@@ -92,6 +92,7 @@ export function loadApp({ sadece } = {}) {
     'src/services/lc-engine.js',
     'src/services/lc-osm.js',
     'src/domain/surface/patch-geometry.js', 'src/domain/surface/group-patch-cells.js', 'src/domain/surface/measure-patch-components.js', 'src/domain/surface/query-green-patches.js',
+    'src/domain/surface/review-geometry.js',
     'src/services/lc-patches.js',
     /* UYDU HASSASİYET (0054): validate çekirdeği saf matematiktir (eşikler,
      * hassasiyet, Olofsson metrikleri, düzeltme katmanı) — birim testleri
