@@ -850,27 +850,21 @@ function dgCloseBackfill(){
   DG_BACKFILL_PLAN=null;
 }
 
+const DG_PARK_BACKFILL_APPLY=window.DG_PARK_BACKFILL_APPLY_APPLICATION.create({
+  isAdmin:()=>!!PROFILE&&(PROFILE.role==="admin"||PROFILE.role==="owner"),
+  confirmApply:count=>confirm(_tprf("{n} proje parkla eşleşecek ve adları yeniden kurulacak. Devam?",{n:count})),
+  onProgress:(i,n,label)=>dgBackfillProgress(i,n,label),
+  registerPark:(candidate,options)=>dgRegisterPark(candidate,options),
+  linkProject:(project,park)=>dgLinkProjectToPark(project,park)
+});
+
 async function dgApplyBackfill(){
-  if(!PROFILE||(PROFILE.role!=="admin"&&PROFILE.role!=="owner"))return toast("Yetki yok.","err");
-  const plan=(DG_BACKFILL_PLAN||[]).filter(x=>x.durum==="eşleşti");
-  if(!plan.length)return toast("Uygulanacak eşleşme yok","warn");
-  if(!confirm(_tprf("{n} proje parkla eşleşecek ve adları yeniden kurulacak. Devam?",{n:plan.length})))return;
+  const result=await DG_PARK_BACKFILL_APPLY(DG_BACKFILL_PLAN);
+  if(result.status==="forbidden")return toast("Yetki yok.","err");
+  if(result.status==="empty-plan")return toast("Uygulanacak eşleşme yok","warn");
+  if(result.status==="cancelled")return;
 
-  let ok=0,fail=0;
-  for(let i=0;i<plan.length;i++){
-    const x=plan[i];
-    dgBackfillProgress(i,plan.length,x.project.name+" → bağlanıyor");
-
-    /* Park kimliğini yaz/oku (aynı park birden çok projede geçiyorsa
-     * dgRegisterPark aynı satırı döndürür → karşılaştırmada birleşirler).
-     * cand.name boşsa önerilen adı taşı (dgRegisterPark adı buradan okur). */
-    const cand=Object.assign({},x.cand,{name:x.parkName||(x.cand&&x.cand.name)});
-    const park=await dgRegisterPark(cand,{lat:x.lat,lon:x.lon,source:"backfill"});
-    if(!park){fail++;continue;}
-    if(await dgLinkProjectToPark(x.project,park))ok++;else fail++;
-  }
-
-  toast(_tprf("✓ {n} proje parkla eşleştirildi{f}",{n:ok,f:fail?_tprf(" · {n} hata",{n:fail}):""}),fail?"warn":"ok","🌳");
+  toast(_tprf("✓ {n} proje parkla eşleştirildi{f}",{n:result.successes,f:result.failures?_tprf(" · {n} hata",{n:result.failures}):""}),result.failures?"warn":"ok","🌳");
   DG_BACKFILL_PLAN=null;
   dgCloseBackfill();
   dgAfterBackfillWrites();
