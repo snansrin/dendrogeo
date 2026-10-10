@@ -1,7 +1,7 @@
 "use strict";
 
 /* Capture only the reviewed-surface fields that invalidate a built grid. */
-function dgGridReviewSignature(state) {
+function dgResolveGridReviewSignature(state) {
   return state?.record
     ? JSON.stringify([
       state.epoch,
@@ -16,4 +16,4 @@ function dgGridReviewSignature(state) {
     : null;
 }
 
-window.DG_GRID_REVIEW_SIGNATURE = Object.freeze({ resolve: dgGridReviewSignature });
+window.DG_GRID_REVIEW_SIGNATURE = Object.freeze({ resolve: dgResolveGridReviewSignature });
