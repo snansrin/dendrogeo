@@ -19,32 +19,12 @@ window.setGreenOnly=setGreenOnly;
 
 /* Reference-area helpers are intentionally local to the active gridplan module.
  * gridplan_core.js is an older parallel implementation and is not loaded by index.html. */
-function setRefHa(v){
-  const n=parseFloat(v);
-  PARK_REF_HA=Number.isFinite(n)&&n>0?n:null;
-  renderRefBadge();
-}
-
-function renderRefBadge(){
-  const el=$("refBadge");
-  if(!el) return;
-  if(!(PARK_REF_HA>0) || !PARK_POLY){
-    el.style.display="none";
-    el.textContent="";
-    return;
-  }
-  const ha=parkAreaHa();
-  if(!(ha>0)){
-    el.style.display="none";
-    el.textContent="";
-    return;
-  }
-  const dev=Math.abs(((ha-PARK_REF_HA)/PARK_REF_HA)*100);
-  el.style.display="inline-flex";
-  el.textContent="Referans: "+PARK_REF_HA.toFixed(2)+" ha · Sapma: %"+dev.toFixed(1);
-  el.style.background=dev<3?"rgba(22,163,74,.12)":"rgba(245,158,11,.14)";
-  el.style.color=dev<3?"#16a34a":"#b45309";
-}
+const DG_PARK_REFERENCE_AREA=window.DG_PARK_REFERENCE_AREA_UI.create({
+ getElement:()=>$("refBadge"),getReference:()=>PARK_REF_HA,
+ setReference:value=>{PARK_REF_HA=value;},getPark:()=>PARK_POLY,getAreaHa:()=>parkAreaHa()
+});
+function setRefHa(value){return DG_PARK_REFERENCE_AREA.set(value);}
+function renderRefBadge(){return DG_PARK_REFERENCE_AREA.render();}
 
 /* =========================================================
    PARK MODE
