@@ -195,3 +195,5 @@ Her modülün tek bir dış API'si, sahibi olduğu açık durumu ve kendi testle
 - `application/parks/grid-session-state.js`, grid epoch, renderer, kabul edilen yüzey imzası ve özet metadata durumuna sahiptir. Her oturum ayrı closure kullanır; invalidation kaynak/özet temizler ve epoch artırır. Paylaşılan hücre/seçim kapları ve katman uyumluluk bağları bu aşamada korunur.
 
 - Grid oturumu `park-state.js` içinde bir kez kurulur ve hücre/seçim kaplarına da sahip olur. `GRID_CELLS`/`SELECTED_CELLS` dışa aktarma ve park ekranları için aynı kaplara bağlı uyumluluk adlarıdır; grid servisi açık oturum metotlarını kullanır. Oturum modülü park durumundan önce yüklenir.
+
+- Grid ve otomatik waypoint katman referansları da grid oturumuna aittir; servis çizim, görünürlük ve temizleme callback’lerini oturum metotlarına bağlar. Eski mutable `GRID_LAYER`/`WP_AUTO_LAYER` global değişkenleri kaldırılmıştır. Harita yokken katman referanslarını koruyan mevcut temizleme davranışı sürer.

@@ -55,13 +55,13 @@ async function buildGrid(){return DG_GRID_BUILD_CONTROLLER();}
 
 function drawGridLayer(){
   return window.DG_GRID_LAYER_UI.render({
-    leaflet:L,map,previousLayer:GRID_LAYER,previousRenderer:DG_GRID_SESSION.getRenderer(),
+    leaflet:L,map,previousLayer:DG_GRID_SESSION.getGridLayer(),previousRenderer:DG_GRID_SESSION.getRenderer(),
     cells:DG_GRID_SESSION.getCells(),selection:DG_GRID_SESSION.getSelection(),
     resolveStyle:(cell,selected)=>window.DG_GRID_CELL_STYLE.resolve(cell,selected),
     resolveShape:cell=>window.DG_GRID_CELL_SHAPE.resolve(cell),
     countStates:cells=>window.DG_GRID_CELL_STATES.count(cells),translateFormat:_tgrf,
     onSelect:(id,rect)=>toggleCellSelection(id,rect),
-    onCreated:({layer,renderer})=>{GRID_LAYER=layer;DG_GRID_SESSION.setRenderer(renderer);},
+    onCreated:({layer,renderer})=>{DG_GRID_SESSION.setGridLayer(layer);DG_GRID_SESSION.setRenderer(renderer);},
     updateSummary:(measured,empty)=>updateGridSummary(measured,empty)
   });
 }
@@ -88,7 +88,7 @@ function updateGridSummary(
 ========================================================= */
 
 const DG_GRID_SELECTION=window.DG_GRID_SELECTION_UI.create({
-  getCells:()=>DG_GRID_SESSION.getCells(),getSelection:()=>DG_GRID_SESSION.getSelection(),getLayer:()=>GRID_LAYER,
+  getCells:()=>DG_GRID_SESSION.getCells(),getSelection:()=>DG_GRID_SESSION.getSelection(),getLayer:()=>DG_GRID_SESSION.getGridLayer(),
   resolveStyle:(cell,selected)=>window.DG_GRID_CELL_STYLE.resolve(cell,selected),
   countStates:cells=>window.DG_GRID_CELL_STATES.count(cells),
   updateSummary:(measured,empty)=>updateGridSummary(measured,empty)
@@ -99,21 +99,21 @@ function clearCellSelection(){return DG_GRID_SELECTION.clear();}
 function clearGrid(){
   DG_GRID_SESSION.invalidate();
   return window.DG_GRID_RESET_UI.clear({
-    map,renderer:DG_GRID_SESSION.getRenderer(),gridLayer:GRID_LAYER,waypointLayer:WP_AUTO_LAYER,
+    map,renderer:DG_GRID_SESSION.getRenderer(),gridLayer:DG_GRID_SESSION.getGridLayer(),waypointLayer:DG_GRID_SESSION.getWaypointLayer(),
     cells:DG_GRID_SESSION.getCells(),selection:DG_GRID_SESSION.getSelection(),
     rendererCleared:()=>{DG_GRID_SESSION.setRenderer(null);},
-    gridCleared:()=>{GRID_LAYER=null;},waypointsCleared:()=>{WP_AUTO_LAYER=null;},
+    gridCleared:()=>{DG_GRID_SESSION.setGridLayer(null);},waypointsCleared:()=>{DG_GRID_SESSION.setWaypointLayer(null);},
     getSummary:()=>$("gridSummary"),getGridControl:()=>$("togGrid"),getWaypointControl:()=>$("togWp")
   });
 }
 
 function toggleGridVis(){
-  if(!GRID_LAYER)return;
-  return window.DG_MAP_LAYER_VISIBILITY_UI.toggle({map,layer:GRID_LAYER,control:$("togGrid")});
+  if(!DG_GRID_SESSION.getGridLayer())return;
+  return window.DG_MAP_LAYER_VISIBILITY_UI.toggle({map,layer:DG_GRID_SESSION.getGridLayer(),control:$("togGrid")});
 }
 function toggleWpVis(){
-  if(!WP_AUTO_LAYER)return;
-  return window.DG_MAP_LAYER_VISIBILITY_UI.toggle({map,layer:WP_AUTO_LAYER,control:$("togWp")});
+  if(!DG_GRID_SESSION.getWaypointLayer())return;
+  return window.DG_MAP_LAYER_VISIBILITY_UI.toggle({map,layer:DG_GRID_SESSION.getWaypointLayer(),control:$("togWp")});
 }
 
 /* =========================================================
@@ -144,8 +144,8 @@ const DG_GRID_WAYPOINT_CONTROLLER=window.DG_GRID_WAYPOINT_CONTROLLER_UI.create({
  create:context=>DG_GRID_WAYPOINT_CREATE(context),
  complete:(result,pid)=>window.DG_GRID_WAYPOINT_COMPLETION_UI.complete({
   result,projectId:pid,
-  renderLayer:rows=>window.DG_GRID_WAYPOINT_LAYER.render({map,previousLayer:WP_AUTO_LAYER,rows,leaflet:L}),
-  setLayer:layer=>{WP_AUTO_LAYER=layer;},getProjectControl:()=>$("nProject"),
+  renderLayer:rows=>window.DG_GRID_WAYPOINT_LAYER.render({map,previousLayer:DG_GRID_SESSION.getWaypointLayer(),rows,leaflet:L}),
+  setLayer:layer=>{DG_GRID_SESSION.setWaypointLayer(layer);},getProjectControl:()=>$("nProject"),
   loadWaypoints:()=>loadWaypoints(),notify:(...args)=>toast(...args),clearSelection:clearCellSelection
  }),translate:_tgr,notify:(...args)=>toast(...args)
 });
