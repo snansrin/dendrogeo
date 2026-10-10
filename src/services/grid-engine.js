@@ -81,7 +81,7 @@ function drawGridLayer(){
       SELECTED_CELLS.has(cell.id)
     );
 
-    const shape=cell.geometry?cell.geometry.coordinates.map(poly=>poly.map(r=>r.map(p=>[p[1],p[0]]))):[[cell.s0,cell.w0],[cell.s0,cell.w1],[cell.s1,cell.w1],[cell.s1,cell.w0]];
+    const shape=window.DG_GRID_CELL_SHAPE.resolve(cell);
     const rect=L.polygon(shape,
         {
           renderer:DG_GRID_RENDERER,
