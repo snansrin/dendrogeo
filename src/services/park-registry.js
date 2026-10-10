@@ -1207,11 +1207,7 @@ async function dgOnParkDrawn(cand){
  * park_id=null yazılıyordu (measure.js:318) — yani GEÇİCİ bir 401 kalıcı
  * veri bütünlüğü kaybına dönüşüyordu. */
 function dgIsSchemaError(err){
- const code=String((err&&(err.code||err.status))||"");
- const msg=String((err&&err.message)||err||"");
- if(/^(42P01|42703|42883)$/.test(code))return true;           /* undefined table/column/function */
- if(/PGRST205|PGRST202/.test(msg)||/PGRST205|PGRST202/.test(code))return true;  /* could not find the table/view */
- return /does not exist|could not find the (table|view)|42P01|42703/i.test(msg);
+ return window.DG_PARK_SCHEMA_CAPABILITY.isSchemaError(err);
 }
 
 function dgParkSchemaMissing(reason){
