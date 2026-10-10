@@ -176,6 +176,7 @@ export function loadApp({ sadece } = {}) {
     'src/application/parks/detect-backfill-park.js',
     'src/adapters/parks/search-osm-park-by-name.js',
     'src/application/parks/evaluate-measurement-park-gate.js',
+    'src/ui/park-backfill-progress.js',
     'src/services/park-registry.js',
     'src/application/parks/build-grid-waypoint-rows.js',
     'src/application/parks/count-grid-cell-measurements.js',
@@ -220,6 +221,7 @@ export function loadApp({ sadece } = {}) {
     secim.add('src/adapters/parks/nominatim-client.js');
   }
   if (secim && secim.has('src/services/park-registry.js')) {
+    secim.add('src/ui/park-backfill-progress.js');
     secim.add('src/application/parks/merge-park-identities.js');
     secim.add('src/application/parks/rename-park-identity.js');
     secim.add('src/application/parks/delete-park-identity.js');
