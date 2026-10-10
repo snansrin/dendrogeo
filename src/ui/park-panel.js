@@ -96,32 +96,8 @@ async function drawPark(park){
           : []
       );
 
-  PARK_LAYER=
-    L.layerGroup().addTo(map);
-
-  L.polygon(
-    PARK_POLY,
-    {
-      color:"#2b6cb0",
-      weight:2.5,
-      dashArray:"6,6",
-      fillColor:"#3b82f6",
-      fillOpacity:.10,
-      interactive:false
-    }
-  ).addTo(PARK_LAYER);
-
-  PARK_HOLES.forEach(r=>{
-    L.polygon(
-      r,
-      {
-        color:"#2b6cb0",
-        weight:1.5,
-        fillColor:"#ffffff",
-        fillOpacity:.85,
-        interactive:false
-      }
-    ).addTo(PARK_LAYER);
+  window.DG_PARK_BOUNDARY_LAYER_UI.render({
+   leaflet:L,map,outer:PARK_POLY,holes:PARK_HOLES,onCreated:layer=>{PARK_LAYER=layer;}
   });
 
   /*
@@ -142,24 +118,7 @@ async function drawPark(park){
      PARK BOUNDS (manuel, L.layerGroup getBounds yok)
   ===================================================== */
 
-  const parkBounds = L.latLngBounds(PARK_POLY);
-
-  if(PARK_HOLES && PARK_HOLES.length){
-    PARK_HOLES.forEach(ring=>{
-      ring.forEach(p=>{
-        parkBounds.extend(p);
-      });
-    });
-  }
-
-  if(parkBounds.isValid()){
-    map.fitBounds(
-      parkBounds,
-      {
-        padding:[30,30]
-      }
-    );
-  }
+  window.DG_PARK_BOUNDARY_LAYER_UI.fit({leaflet:L,map,outer:PARK_POLY,holes:PARK_HOLES});
 
   const haTotal =
     parkAreaHa().toFixed(1);
