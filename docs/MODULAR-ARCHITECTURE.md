@@ -107,6 +107,7 @@ src/
 - `domain/parks/grid-cell-shape.js`, GeoJSON hücre halkalarını `[LON,LAT]` düzeninden Leaflet `[LAT,LON]` düzenine çevirir; geometri taşımayan eski hücreler mevcut dört köşe yedeğini kullanır.
 - `domain/parks/grid-bounds.js`, dış halka ve delik koordinatlarından grid sorgusunun enlem/boylam sınırlarını üretir; `grid-engine.js` bbox'ı ölçüm adapter'ına aktarır.
 - `application/parks/prepare-grid-surface-parts.js`, kayıtlı inceleme geometrisine öncelik verir, yoksa en son yüzey analizini mevcut hazırlama servisine gönderir; hiçbiri yoksa boş parça listesi döndürür.
+- `ui/grid-waypoint-layer.js`, yeni waypoint marker katmanını oluşturur, önceki katmanı kaldırır ve her kayıt için sabit görünümde daire işaretçisi çizer; servis dönen katman referansını saklar.
 - `ui/grid-summary.js`, grid hücre sayıları ve seçim sayısından mevcut HTML özetini üretir; `grid-engine.js` yalnız DOM öğesini, sayaçları ve çeviri yardımcılarını geçirir.
 - `application/parks/resolve-grid-cell-style.js`, boş, ölçülmüş ve seçili grid hücrelerinin Leaflet stilini tek kuralla üretir; çizim ve seçim akışları aynı stili kullanır.
 - `application/parks/count-grid-cell-states.js`, `n === 0` kuralıyla boş ve ölçülmüş grid hücrelerini sayar; çizim, seçim ve temizleme aynı sayım sonucunu kullanır.
