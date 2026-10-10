@@ -156,46 +156,13 @@ function clearCellSelection(){return DG_GRID_SELECTION.clear();}
 function clearGrid(){
   DG_GRID_META="";DG_GRID_SOURCE=null;
   ++DG_GRID_EPOCH;
-  if(DG_GRID_RENDERER&&map)map.removeLayer(DG_GRID_RENDERER);DG_GRID_RENDERER=null;
-  if(
-    GRID_LAYER &&
-    map
-  ){
-    map.removeLayer(
-      GRID_LAYER
-    );
-
-    GRID_LAYER=null;
-  }
-
-  if(
-    WP_AUTO_LAYER &&
-    map
-  ){
-    map.removeLayer(
-      WP_AUTO_LAYER
-    );
-
-    WP_AUTO_LAYER=null;
-  }
-
-  GRID_CELLS.length=0;
-
-  SELECTED_CELLS.clear();
-
-  const gs=
-    $("gridSummary");
-
-  if(gs){
-    gs.innerHTML="";
-    gs.style.display="none";
-  }
-
-  const togGrid=$("togGrid");
-  if(togGrid)togGrid.checked=true;
-
-  const togWp=$("togWp");
-  if(togWp)togWp.checked=true;
+  return window.DG_GRID_RESET_UI.clear({
+    map,renderer:DG_GRID_RENDERER,gridLayer:GRID_LAYER,waypointLayer:WP_AUTO_LAYER,
+    cells:GRID_CELLS,selection:SELECTED_CELLS,
+    rendererCleared:()=>{DG_GRID_RENDERER=null;},
+    gridCleared:()=>{GRID_LAYER=null;},waypointsCleared:()=>{WP_AUTO_LAYER=null;},
+    getSummary:()=>$("gridSummary"),getGridControl:()=>$("togGrid"),getWaypointControl:()=>$("togWp")
+  });
 }
 
 function toggleGridVis(){
