@@ -169,6 +169,7 @@ export function loadApp({ sadece } = {}) {
     'src/application/parks/delete-park-identity.js',
     'src/application/parks/load-admin-park-identities.js',
     'src/application/parks/plan-park-backfill.js',
+    'src/application/parks/apply-park-backfill.js',
     'src/services/park-registry.js',
     'src/application/parks/build-grid-waypoint-rows.js',
     'src/application/parks/count-grid-cell-measurements.js',
@@ -218,6 +219,7 @@ export function loadApp({ sadece } = {}) {
     secim.add('src/application/parks/delete-park-identity.js');
     secim.add('src/application/parks/load-admin-park-identities.js');
     secim.add('src/application/parks/plan-park-backfill.js');
+    secim.add('src/application/parks/apply-park-backfill.js');
     secim.add('src/domain/parks/is-schema-error.js');
     secim.add('src/domain/parks/identity.js');
     secim.add('src/adapters/parks/park-store.js');
