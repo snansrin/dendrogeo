@@ -175,3 +175,5 @@ Her modülün tek bir dış API'si, sahibi olduğu açık durumu ve kendi testle
 - `ui/grid-selection.js`, hücre seçimini açma/kapatma ve temizleme sırasında seçili kimlikleri, hücre stillerini ve özet yenilemesini koordine eder. `grid-engine.js` güncel grid/katman durumunu ve mevcut stil/sayaç işlevlerini bağlar; eski `toggleCellSelection` ve `clearCellSelection` çağrıları korunur.
 
 - `ui/map-layer-visibility.js`, var olan Leaflet katmanının görünürlüğünü haritanın gerçek katman durumuna göre değiştirir ve ilgili kontrolü eşitler. `grid-engine.js` grid/otomatik waypoint katmanlarını ve mevcut `togGrid`/`togWp` kontrollerini geçirir; katman yoksa işlem yapılmaz.
+
+- `ui/grid-reset.js`, mevcut grid renderer/katmanlarını kaldırır, hücre ve seçim kaplarını yerinde temizler, özeti gizler ve görünürlük kontrollerini sıfırlar. `clearGrid()` metadata/kaynak temizliğini ve epoch artırarak devam eden üretimi geçersiz kılmayı sürdürür; katman referansları callback ile aynı sırada güncellenir.
