@@ -598,9 +598,10 @@ describe('akış: karşılaştırma park bazlı, ölçüm kapalı, park kaydedil
   });
 
   test('park kaydı upsert DEĞİL select→insert (RLS: başkasının satırını yazma)', () => {
-    const fn = registry.slice(registry.indexOf('async function dgRegisterPark'), registry.indexOf('/* =========================================================\n   4. ALGILAMA'));
-    assert.ok(!/\.upsert\(/.test(fn), 'upsert RLS update politikasına takılır');
-    assert.match(fn, /23505/, 'yarış durumunda duplicate key ele alınmalı');
-    assert.match(registry, /dgSelectParkNear/, 'ad + konum birleşmesi olmalı');
+    const app = readFileSync(join(ROOT, 'src/application/parks/register-park.js'), 'utf8');
+    const adapter = readFileSync(join(ROOT, 'src/adapters/parks/park-store.js'), 'utf8');
+    assert.ok(!/\.upsert\(/.test(app+adapter), 'upsert RLS update politikasına takılır');
+    assert.match(app, /23505/, 'yarış durumunda duplicate key ele alınmalı');
+    assert.match(adapter, /selectNear/, 'ad + konum birleşmesi olmalı');
   });
 });
