@@ -14,6 +14,7 @@ on:
       - 'src/services/osm-water-backup.js'
       - 'src/services/visit-stats.js'
       - 'src/application/visitors/**'
+      - 'src/application/parks/**'
       - 'src/domain/parks/**'
       - 'scripts/verify-osm-water-live.mjs'
       - '.github/workflows/gis-three-park-qa.yml'
