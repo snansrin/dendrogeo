@@ -1005,68 +1005,18 @@ function dgRenderParkAdmin(projects,measurements){
     normalizeLoose:dgNormParkLoose,
     normalizeName:dgNormParkName
   });
-  const {projByPark,measByPark,emptyRows,shown,dupGroups,unnamed}=overview;
-
-  const dupHTML=dupGroups.length
-    ? `<div class="alert warn" style="margin-bottom:10px"><b>⚠ ${dupGroups.length} ${_tpr("çift kimlik adayı var")}</b> ${_tpr("— aynı park iki satırda duruyorsa karşılaştırma bölünür.")}`+
-      dupGroups.map(g=>{
-        const mesafe=(g[0].centroid_lat&&g[1].centroid_lat)
-          ? Math.round(hav(+g[0].centroid_lat,+g[0].centroid_lon,+g[1].centroid_lat,+g[1].centroid_lon))
-          : null;
-        const osmOne=g.find(p=>p.source!=="manual")||g[1];
-        const other=g.find(p=>p.id!==osmOne.id)||g[0];
-        return `<div style="margin-top:6px;font-size:.82rem">🌳 <b>${esc(g[0].name)}</b>: `+
-          g.map(p=>`#${p.id} (${esc(p.osm_key||"?")} · ${dgFmtHa(p.area_m2)} · ${projByPark[p.id]||0} proje · ${measByPark[p.id]||0} kayıt)`).join("  ↔  ")+
-          (mesafe!==null?` · aradaki mesafe <b>${mesafe} m</b>`:"")+
-          ` <button class="btn sm amber" onclick="dgParkMergeInto(${other.id},${osmOne.id})">🔀 #${other.id} → #${osmOne.id} birleştir</button></div>`;
-      }).join("")+`</div>`
-    : (rows.length?`<div class="alert ok" style="margin-bottom:10px">✓ Çift kimlik yok — her park tek satırda.</div>`:``);
-
-  const unnamedHTML=unnamed.length
-    ? `<div class="alert info" style="margin-bottom:10px">ℹ ${unnamed.length} ${_tpr("parkın adı yok (OSM elemanında ad etiketi yoktu):")} `+
-      unnamed.map(p=>`#${p.id}`).join(", ")+` ${_tpr("— ✏️ ile ad ver (örn. projenin adı).")}</div>`
-    : ``;
-
-  box.innerHTML=dupHTML+unnamedHTML+
-    (emptyRows.length
-      ? `<div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:8px">`+
-          `<button class="btn sm ghost" onclick="dgParkAdminToggleEmpty()">`+
-          (DG_PARK_ADMIN_SHOW_EMPTY?_tpr("🙈 Boş parkları gizle"):_tprf("🫥 Boş parkları göster ({n})",{n:emptyRows.length}))+`</button>`+
-          `<span class="dg-tree-meta">Yalnız sorgulanmış, projesi/kaydı olmayan parklar; temizlemek için gösterip 🗑️ kullan.</span>`+
-        `</div>`
-      : "")+
-    /* dg-cards: 640px altında tablo kart düzenine döner (css/style.css).
-     * data-label değerleri mobilde her satırın başlığı olur. */
-    `<div class="tblwrap dg-parkadmin-wrap"><table class="dg-cards">`+
-    `<thead><tr><th scope='col'>ID</th><th scope='col'>Park Adı</th><th scope='col'>Kimlik</th><th scope='col'>Şehir</th><th scope='col'>Alan</th><th scope='col'>Proje</th><th scope='col'>Kayıt</th><th scope='col'>Kaynak</th><th scope='col'>İşlem</th></tr></thead><tbody>`+
-    (shown.map(p=>{
-      const others=shown.filter(x=>x.id!==p.id);
-      const isDup=dupGroups.some(g=>g.some(x=>x.id===p.id));
-      return `<tr${isDup?' class="dg-dup"':''}>`+
-        `<td data-label="ID" class="mono">${p.id}</td>`+
-        `<td data-label="Park Adı"><b>${esc(p.name)}</b>${isDup?' <span class="badge admin">çift?</span>':""}</td>`+
-        `<td data-label="Kimlik" class="mono dg-key">${esc(p.osm_key||"—")}</td>`+
-        `<td data-label="Şehir">${esc(p.city||"—")}</td>`+
-        `<td data-label="Alan">${dgFmtHa(p.area_m2)}</td>`+
-        `<td data-label="Proje">${projByPark[p.id]||0}</td>`+
-        `<td data-label="Kayıt">${measByPark[p.id]||0}</td>`+
-        `<td data-label="Kaynak">${esc(p.source||"—")}</td>`+
-        `<td data-label="İşlem"><div class="dg-act">`+
-          `<button class="btn sm blue" onclick="dgParkRename(${p.id})" title="Yeniden adlandır">✏️</button>`+
-          `<button class="btn sm ghost" onclick="dgBackfillGeom(${p.id})" title="OSM sınırını geom_json'a yaz → konum çiti tam poligonla çalışır">🛰</button>`+
-          `<select id="parkMergeSel${p.id}" class="dg-png-select dg-merge-sel">`+
-            `<option value="">→ birleştir…</option>`+
-            others.map(o=>`<option value="${o.id}">#${o.id} ${esc(o.name)}</option>`).join("")+
-          `</select>`+
-          `<button class="btn sm amber" onclick="dgParkMergeFromSelect(${p.id})" title="Bu parkı seçilene taşı">🔀</button>`+
-          `<button class="btn sm red" onclick="dgParkDelete(${p.id})" title="Sil">🗑️</button>`+
-        `</div></td></tr>`;
-    }).join("")||`<tr><td colspan=9>Henüz park kimliği yok — Canlı Harita → 🌳 Park Algılama ile oluştur.</td></tr>`)+
-    `</tbody></table></div>`+
-    (emptyRows.length&&!DG_PARK_ADMIN_SHOW_EMPTY
-      ? `<div class="dg-tree-meta" style="margin-top:8px">🫥 ${emptyRows.length} `+(typeof dgT==="function"?dgT("boş park (projesi/kaydı yok) gizlendi — yalnız sorgulanmışlar."):"boş park (projesi/kaydı yok) gizlendi — yalnız sorgulanmışlar.")+`</div>`:"")+
-    `<div class="dg-parkadmin-note">🔀 = bu parkı seçtiğin hedefin içine taşır (projeler + ölçümler + adlar), kaynak kimlik silinir. `+
-    `✏️ = adı düzeltir; proje adları otomatik yeniden kurulur ("park - etiket"). 🗑️ = yalnız yanlış kimlikse; bağ kopar, veri silinmez.</div>`;
+  window.DG_PARK_ADMIN_RENDERER.render({
+    element:box,
+    rows,
+    overview,
+    showEmpty:DG_PARK_ADMIN_SHOW_EMPTY,
+    formatHectares:dgFmtHa,
+    distance:hav,
+    escapeHTML:esc,
+    translate:_tpr,
+    translateFormat:_tprf,
+    translatePlain:value=>typeof dgT==="function"?dgT(value):value
+  });
 }
 
 async function dgResyncProjectNames(parkId,knownName){
