@@ -34,7 +34,7 @@ async function buildGrid(){
    const cells=DG_LC_LAST.result.cells,prepared=await dgSurfacePrepare({cells,outer:park,holes:PARK_HOLES||[],epsg,objects:null,elements:window.DG_SURFACE_OSM?.boundary===JSON.stringify(park)?window.DG_SURFACE_OSM.elements:[],features:[]});
    parts=prepared.parts;
   }
-  const request={job:"grid",size,clearance,epsg,outer:park,holes:PARK_HOLES||[],greenOnly:DG_GREEN_ONLY,parts:parts.map(p=>({type:p.type,geom:p.geom})),blockRings:parts.length?[]:[...(WATER_RINGS||[]),...(IMP_RINGS||[])],blockLines:[...(WATER_LINES||[]).map(pts=>({pts,w:1})),...(IMP_LINES||[]),...(GRID_BLOCK_LINES||[])]};
+  const request=window.DG_GRID_REQUEST.build({size,clearance,epsg,outer:park,holes:PARK_HOLES,greenOnly:DG_GREEN_ONLY,parts,waterRings:WATER_RINGS,imperviousRings:IMP_RINGS,waterLines:WATER_LINES,imperviousLines:IMP_LINES,gridBlockLines:GRID_BLOCK_LINES});
   const result=await dgSurfaceWorkerJob(request)||await dgSurfaceGrid(request);
   if(epoch!==DG_GRID_EPOCH||park!==PARK_POLY)return;
   if(signature!==dgGridReviewSignature())throw Error("Yüzey değişti. Güncel yüzeyle gridi tekrar oluşturun.");
