@@ -10,6 +10,7 @@ on:
       - 'src/ui/park-reference-area.js'
       - 'src/ui/park-mode-controller.js'
       - 'src/ui/park-click-controller.js'
+      - 'src/ui/choose-new-park-controller.js'
       - 'docs/surface-engine-lock.json'
       - 'docs/surface-scientific-contract.json'
       - 'test/surface-scientific-contract.test.mjs'
