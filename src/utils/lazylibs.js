@@ -81,6 +81,7 @@ const DG_LULC_CHAIN=[
   "src/domain/surface/review-geometry.js",
   "src/adapters/surface/osm-review-objects.js",
   "src/adapters/surface/review-worker.js",
+  "src/application/surface/prepare-review.js",
   "src/services/lc-review.js",
   "src/ui/lc-sens.js",
   "src/domain/surface/quality-gates.js",
