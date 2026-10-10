@@ -162,6 +162,7 @@ export function loadApp({ sadece } = {}) {
     'src/adapters/parks/park-search.js',
     'src/application/parks/search-park-by-name.js',
     'src/domain/parks/is-schema-error.js',
+    'src/application/parks/build-park-admin-overview.js',
     'src/services/park-registry.js',
     'src/application/parks/build-grid-waypoint-rows.js',
     'src/application/parks/count-grid-cell-measurements.js',
