@@ -177,6 +177,7 @@ export function loadApp({ sadece } = {}) {
     'src/adapters/parks/fetch-grid-measurement-candidates.js',
     'src/domain/parks/grid-options.js',
     'src/domain/parks/grid-bounds.js',
+    'src/domain/parks/grid-cell-shape.js',
     'src/services/grid-engine.js',
     /* YÖNETİM AĞACI (2026-09-24): dgTreeGroup/dgTreeFilterRows saf
      * fonksiyonları burada test edilir (DOM'a dokunan çizim kısmı değil). */
