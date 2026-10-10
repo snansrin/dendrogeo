@@ -86,142 +86,30 @@ function dgIsAdmin(){
     (PROFILE.role==="admin"||PROFILE.role==="owner"));
 }
 
-/* Proje adı ayracı — DB trigger'ı (compose_project_name) ile BİREBİR aynı. */
-const DG_PARK_SEP=" - ";
-
-/* Ad + konum eşleştirmesinin TABAN yarıçapı (m).
- * 2026-09-24'te 250 → 400: canlıda aynı Göksu Parkı İKİ kimlikle kaydedildi
- * (biri elle #1, biri OSM way/423602737 #2). Sebep: 50 ha park ~700 m kenar
- * demek; elle oluştururken tıklanan nokta ile OSM poligonunun merkezi 250 m'den
- * uzak düşebiliyor. Yarıçap artık park alanıyla da büyüyor (dgParkMatchRadius). */
-const DG_PARK_MATCH_M=400;
-
 /* =========================================================
    2. SAF YARDIMCILAR (DOM/ağ yok — birim testlenebilir)
 ========================================================= */
 
-const DG_TR_FOLD={
-  "ç":"c","ğ":"g","ı":"i","ö":"o","ş":"s","ü":"u",
-  "â":"a","î":"i","û":"u","é":"e","à":"a","ñ":"n"
-};
+const DG_PARK_IDENTITY=window.DG_PARK_IDENTITY;
+const DG_PARK_SEP=DG_PARK_IDENTITY.SEPARATOR;
+const DG_PARK_MATCH_M=DG_PARK_IDENTITY.BASE_MATCH_RADIUS_M;
 
-/* "GÖKSU PARKI" = "goksu parki" = "Göksu  Parkı" → "goksu parki"
- * Türkçe büyük/küçük harf tuzağı bilinçli olarak elle çözülür: JS
- * toLowerCase() "İ" harfini "i̇" (i + birleşen nokta) yapar, bu da
- * eşleştirmeyi sessizce bozar. Önce İ/I → i, sonra küçük harf, sonra aksan. */
-function dgNormParkName(s){
-  let t=String(s??"").trim();
-  if(!t)return "";
-  t=t.replace(/[İI]/g,"i").toLowerCase();
-  t=t.replace(/[çğıöşüâîûéàñ]/g,c=>DG_TR_FOLD[c]||c);
-  t=t.replace(/[^a-z0-9]+/g," ").trim().replace(/\s+/g," ");
-  return t;
-}
-
-/* Eşleştirme için gevşek biçim: sonda/kökte duran "park/parki" sözcüğünü atar.
- * "Göksu Parkı" ile "Göksu Park" aynı parktır; ad farkı yüzünden ikinci bir
- * kimlik açılmasın diye yalnız YAKIN KONUM kontrolünde kullanılır
- * (osm_key'de kullanılmaz — anahtar her zaman kesin biçimden üretilir). */
-function dgNormParkLoose(s){
-  return dgNormParkName(s)
-    .replace(/\b(park|parki|parklar|parki)\b/g,"")
-    .trim()
-    .replace(/\s+/g," ");
-}
-
-function dgParkKey(type,id){
-  const t=String(type||"way").toLowerCase();
-  const n=Number(id);
-  return t+"/"+(Number.isFinite(n)?String(n):String(id??"").trim());
-}
-
-/* Elle oluşturulan park: ad + ~100 m hücresi. Aynı adla 100 m içinde ikinci
- * bir park açılamaz; farklı yerde aynı ad (örn. iki ayrı "Cumhuriyet Parkı")
- * ayrı kimlik olur — doğru davranış. */
-function dgManualParkKey(name,lat,lon){
-  const a=Number(lat),o=Number(lon);
-  const cell=Number.isFinite(a)&&Number.isFinite(o)
-    ? a.toFixed(3)+"/"+o.toFixed(3)
-    : "yok";
-  return "manual/"+(dgNormParkName(name)||"isimsiz")+"/"+cell;
-}
-
-/* Proje adı kuralı: park adı + ayrac + etiket. Etiket boşsa yalnız park adı.
- * DB'deki compose_project_name() ile aynı çıktıyı verir (test kilidi var). */
-function dgProjectName(parkName,label){
-  const p=String(parkName??"").trim();
-  const l=String(label??"").trim();
-  if(!p)return l;
-  return l?p+DG_PARK_SEP+l:p;
-}
-
-/* Eski (serbest adlı) projeden etiket çıkar:
- *  "Göksu Parkı - deneme"  → "deneme"
- *  "Göksu Parkı"           → ""        (ad zaten park adı)
- *  "Kuzey Kesim Envanteri" → aynı      (park adıyla ilgisi yok → etiket olur,
- *                                       sonuç: "Göksu Parkı - Kuzey Kesim Envanteri")
- * Geri doldurma aracında kullanılır; eski ad ASLA kaybolmaz. */
-function dgLabelFromLegacy(name,parkName){
-  const n=String(name??"").trim();
-  const p=String(parkName??"").trim();
-  if(!p)return n;
-  if(n.toLowerCase()===p.toLowerCase())return "";
-  if(n.toLowerCase().startsWith(p.toLowerCase())){
-    return n.slice(p.length).replace(/^[\s\-–—·:,.]+/,"").trim();
-  }
-  return n;
-}
-
-/* Parkın temsil yarıçapı: sqrt(alan) parkın karakteristik kenar uzunluğudur.
- * 50 ha → ~707 m; aynı parkın iki ucunda duran iki kullanıcı bu yüzden tek
- * kimlikte birleşir. Eski formül (sqrt/2 ≈ 354 m) canlıda çift kimlik üretti.
- * Alanı bilinmeyen/küçük parklarda taban 400 m. */
-function dgParkMatchRadius(areaM2){
+/* Klasik script çağrıları için eski API adları korunur. Kuralların sahibi
+ * domain/parks/identity.js; bu servis yalnız uyumluluk sarmalayıcılarını verir. */
+function dgNormParkName(s){return DG_PARK_IDENTITY.normalizeName(s);}
+function dgNormParkLoose(s){return DG_PARK_IDENTITY.normalizeLooseName(s);}
+function dgParkKey(type,id){return DG_PARK_IDENTITY.osmKey(type,id);}
+function dgManualParkKey(name,lat,lon){return DG_PARK_IDENTITY.manualKey(name,lat,lon);}
+function dgProjectName(parkName,label){return DG_PARK_IDENTITY.projectName(parkName,label);}
+function dgLabelFromLegacy(name,parkName){return DG_PARK_IDENTITY.labelFromLegacy(name,parkName);}
+function dgParkMatchRadius(areaM2){return DG_PARK_IDENTITY.matchRadius(areaM2);}
+function dgTitleCaseTR(t){return DG_PARK_IDENTITY.titleCaseTR(t);}
+function dgSuggestParkName(projName){return DG_PARK_IDENTITY.suggestName(projName);}
+function dgParkCenterFromRings(rings){return DG_PARK_IDENTITY.centerFromRings(rings);}
+function dgFmtHa(areaM2){
   const a=Number(areaM2);
-  if(!Number.isFinite(a)||a<=0)return DG_PARK_MATCH_M;
-  return Math.max(DG_PARK_MATCH_M,Math.sqrt(a));
-}
-
-/* Türkçe duyarlı başlık düzeni — DB'deki dg_tr_title() (0005) ile aynı kural.
- * İstemcide önizleme/öneri için; asıl garanti DB tetikleyicisindedir. */
-const DG_TR_UP={"i":"İ","ı":"I","ş":"Ş","ğ":"Ğ","ü":"Ü","ö":"Ö","ç":"Ç"};
-function dgTitleCaseTR(t){
-  return String(t??"").trim().split(/\s+/).map(w=>{
-    if(!w)return w;
-    const c=w.charAt(0);
-    return (DG_TR_UP[c]||c.toLocaleUpperCase("tr"))+w.slice(1);
-  }).join(" ");
-}
-
-/* OSM elemanının adı yoksa ("İsimsiz Park" yerine) proje adından öneri üret:
- * kullanıcı projeyi zaten parkın adıyla adlandırmış oluyor. */
-function dgSuggestParkName(projName){
-  const t=String(projName??"").trim();
-  if(!t)return "İsimsiz Park";
-  return /[A-ZİIŞĞÜÖÇ]/.test(t)?t:dgTitleCaseTR(t);
-}
-
-/* queryPark adayının halkalarından bbox merkezi ([lat,lon] sözleşmesi —
- * extractRings noktaları [lat,lon] üretir). Halka yoksa anchor'a düşer. */
-function dgParkCenterFromRings(rings){
-  const outer=Array.isArray(rings)
-    ? rings
-    : (rings&&Array.isArray(rings.outer)?rings.outer:null);
-  if(!outer||!outer.length)return null;
-  let a0=90,a1=-90,o0=180,o1=-180,n=0;
-  outer.forEach(r=>{
-    if(!Array.isArray(r))return;
-    r.forEach(p=>{
-      if(!Array.isArray(p))return;
-      const la=Number(p[0]),lo=Number(p[1]);
-      if(!Number.isFinite(la)||!Number.isFinite(lo))return;
-      if(la<a0)a0=la; if(la>a1)a1=la;
-      if(lo<o0)o0=lo; if(lo>o1)o1=lo;
-      n++;
-    });
-  });
-  if(!n)return null;
-  return{lat:+(((a0+a1)/2).toFixed(6)),lon:+(((o0+o1)/2).toFixed(6))};
+  if(!Number.isFinite(a)||a<=0)return "alan bilinmiyor";
+  return (a/10000).toFixed(1)+" ha";
 }
 
 /* Algılama noktası: anchor (tıklama/GPS) → halka merkezi → null */
@@ -234,13 +122,6 @@ function dgParkCenter(cand,opt){
     return{lat:+DG_PARK_ANCHOR.lat,lon:+DG_PARK_ANCHOR.lon};
   }
   return dgParkCenterFromRings(cand&&cand.rings)||{lat:null,lon:null};
-}
-
-/* Metre → okunabilir alan */
-function dgFmtHa(areaM2){
-  const a=Number(areaM2);
-  if(!Number.isFinite(a)||a<=0)return "alan bilinmiyor";
-  return (a/10000).toFixed(1)+" ha";
 }
 
 /* =========================================================

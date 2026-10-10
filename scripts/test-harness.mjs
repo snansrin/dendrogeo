@@ -125,6 +125,7 @@ export function loadApp({ sadece } = {}) {
     /* PARK KİMLİĞİ (2026-09-24): park-registry.js saf yardımcılarının
      * (ad normalizasyonu, anahtar üretimi, proje adı kuralı) birim testleri
      * bu zincirden yüklenir. ui/park-panel BİLEREK yok (DOM'a yapışır). */
+    'src/domain/parks/identity.js',
     'src/services/park-registry.js',
     'src/services/grid-engine.js',
     /* YÖNETİM AĞACI (2026-09-24): dgTreeGroup/dgTreeFilterRows saf
@@ -140,6 +141,7 @@ export function loadApp({ sadece } = {}) {
     secim.add('src/application/trees/calculate-tree-carbon-from-circumference.js');
   }
   if (secim && secim.has('src/services/measure.js')) secim.add('src/application/trees/validate-measurement.js');
+  if (secim && secim.has('src/services/park-registry.js')) secim.add('src/domain/parks/identity.js');
   if (secim && secim.has('src/services/landcover.js')) {
     secim.add('src/domain/surface/quality-gates.js');
     secim.add('src/contracts/surface-analysis.js');
