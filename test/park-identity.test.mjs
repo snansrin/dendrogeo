@@ -45,6 +45,7 @@ const world = readFileSync(join(ROOT, 'src/services/world.js'), 'utf8');
 const measure = readFileSync(join(ROOT, 'src/services/measure.js'), 'utf8');
 const registry = readFileSync(join(ROOT, 'src/services/park-registry.js'), 'utf8');
 const parkAdminRenderer = readFileSync(join(ROOT, 'src/ui/park-admin-renderer.js'), 'utf8');
+const parkMergeApplication = readFileSync(join(ROOT, 'src/application/parks/merge-park-identities.js'), 'utf8');
 const panel = readFileSync(join(ROOT, 'src/ui/park-panel.js'), 'utf8');
 
 /* =========================================================
@@ -335,12 +336,11 @@ describe('park kimlikleri yönetim aracı (yeniden adlandır · birleştir · si
   });
 
   test('birleştirme projeleri + ölçümleri taşır, kaynağı siler', () => {
-    const fn = registry.slice(registry.indexOf('async function dgParkMergeInto'), registry.indexOf('async function dgParkDelete'));
-    assert.match(fn, /from\("projects"\)\.update\(\{park_id:dstId\}\)\.eq\("park_id",srcId\)/);
-    assert.match(fn, /from\("measurements"\)\.update\(\{park_id:dstId\}\)\.eq\("park_id",srcId\)/);
-    assert.match(fn, /from\("parks"\)\.delete\(\)\.eq\("id",srcId\)/);
-    assert.match(fn, /dgResyncProjectNames\(dstId\)/, 'proje adları hedef park adına göre kurulmalı');
-    assert.match(fn, /confirm\(/, 'onay istenmeli (kaynak kimlik siliniyor)');
+    assert.match(parkMergeApplication, /moveProjects\(sourceId,destinationId\)/);
+    assert.match(parkMergeApplication, /moveMeasurements\(sourceId,destinationId\)/);
+    assert.match(parkMergeApplication, /resyncProjectNames\(destinationId\)/, 'proje adları hedef park adına göre kurulmalı');
+    assert.match(parkMergeApplication, /deletePark\(sourceId\)/);
+    assert.match(registry, /confirmMerge:/, 'silme öncesi UI onayı adapter üzerinden istenmeli');
   });
 
   test('yeniden adlandırma name_norm’u da günceller (eşleştirme bozulmasın)', () => {
@@ -385,10 +385,11 @@ describe('parka bağlama YALNIZ yönetici (0006 + kullanıcı isteği 2026-09-24
   });
 
   test('park kimliği araçları (adlandır/birleştir/sil) da bekçili', () => {
-    for (const fn of ['dgParkRename', 'dgParkMergeInto', 'dgParkDelete']) {
+    for (const fn of ['dgParkRename', 'dgParkDelete']) {
       const body = registry.slice(registry.indexOf('async function ' + fn), registry.indexOf('async function ' + fn) + 400);
       assert.match(body, /dgIsAdmin\(\)/, fn + ' bekçisiz');
     }
+    assert.match(parkMergeApplication, /if\(!isAdmin\(\)\)return\{status:"forbidden"\}/, 'birleştirme use-case bekçisiz');
   });
 
   test('⭐ karşılaştırmadaki onarım düğmesi yalnız yöneticiye', () => {
@@ -513,9 +514,10 @@ describe('kabuk: park algılama ekranı + ölçüm kapısı id’leri', () => {
     const a = idx.indexOf('src/services/park-query.js');
     const d = idx.indexOf('src/domain/parks/identity.js');
     const b = idx.indexOf('src/services/park-registry.js');
+    const merge = idx.indexOf('src/application/parks/merge-park-identities.js');
     const c = idx.indexOf('src/services/grid-engine.js');
-    assert.ok(a > -1 && d > -1 && b > -1 && c > -1, 'dört modül de index.html’de olmalı');
-    assert.ok(a < d && d < b && b < c, `sıra bozuk: query=${a} domain=${d} registry=${b} grid=${c}`);
+    assert.ok(a > -1 && d > -1 && merge > -1 && b > -1 && c > -1, 'modüller index.html’de olmalı');
+    assert.ok(a < d && d < merge && merge < b && b < c, `sıra bozuk: query=${a} domain=${d} merge=${merge} registry=${b} grid=${c}`);
   });
 
   test('park-registry.js service worker PRECACHE listesinde (çevrimdışı)', () => {
