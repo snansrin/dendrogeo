@@ -44,6 +44,7 @@ const sw = readFileSync(join(ROOT, 'sw.js'), 'utf8');
 const world = readFileSync(join(ROOT, 'src/services/world.js'), 'utf8');
 const measure = readFileSync(join(ROOT, 'src/services/measure.js'), 'utf8');
 const registry = readFileSync(join(ROOT, 'src/services/park-registry.js'), 'utf8');
+const parkAdminRenderer = readFileSync(join(ROOT, 'src/ui/park-admin-renderer.js'), 'utf8');
 const panel = readFileSync(join(ROOT, 'src/ui/park-panel.js'), 'utf8');
 
 /* =========================================================
@@ -350,7 +351,7 @@ describe('park kimlikleri yönetim aracı (yeniden adlandır · birleştir · si
 
   test('⭐ otomatik birleştirme YOK (aynı adlı iki ayrı park olabilir)', () => {
     assert.ok(!/dgAutoMerge|autoMergeParks/.test(registry), 'sessiz birleştirme eklenmemeli');
-    assert.match(registry, /çift kimlik adayı var/i, 'araç yalnız ÖNERİR, kararı yönetici verir');
+    assert.match(parkAdminRenderer, /çift kimlik adayı var/i, 'araç yalnız ÖNERİR, kararı yönetici verir');
   });
 });
 
@@ -439,9 +440,9 @@ describe('mobil düzen (kullanıcı: "telefondan güzel gözükmüyor")', () => 
   });
 
   test('park kimlikleri tablosu kart düzenini kullanıyor + etiketler var', () => {
-    assert.match(registry, /<table class="dg-cards">/);
+    assert.match(parkAdminRenderer, /<table class="dg-cards">/);
     for (const l of ['ID', 'Park Adı', 'Kimlik', 'Şehir', 'Alan', 'Proje', 'Kayıt', 'Kaynak', 'İşlem']) {
-      assert.match(registry, new RegExp('data-label="' + l + '"'), l + ' etiketi yok');
+      assert.match(parkAdminRenderer, new RegExp('data-label="' + l + '"'), l + ' etiketi yok');
     }
   });
 
@@ -465,7 +466,7 @@ describe('mobil düzen (kullanıcı: "telefondan güzel gözükmüyor")', () => 
 
   test('işlem düğmeleri mobilde sarar (dg-act flex-wrap)', () => {
     assert.match(css, /\.dg-act\{display:flex;gap:4px;flex-wrap:wrap/);
-    assert.match(registry, /<div class="dg-act">/);
+    assert.match(parkAdminRenderer, /<div class="dg-act">/);
     assert.match(treeSrc, /<div class="dg-act">/);
   });
 });
