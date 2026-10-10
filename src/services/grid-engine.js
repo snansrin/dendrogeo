@@ -200,30 +200,11 @@ function clearGrid(){
 
 function toggleGridVis(){
   if(!GRID_LAYER)return;
-
-  const togEl=$("togGrid");
-
-  if(map.hasLayer(GRID_LAYER)){
-    map.removeLayer(GRID_LAYER);
-    if(togEl)togEl.checked=false;
-  }else{
-    map.addLayer(GRID_LAYER);
-    if(togEl)togEl.checked=true;
-  }
+  return window.DG_MAP_LAYER_VISIBILITY_UI.toggle({map,layer:GRID_LAYER,control:$("togGrid")});
 }
-
 function toggleWpVis(){
   if(!WP_AUTO_LAYER)return;
-
-  const togEl=$("togWp");
-
-  if(map.hasLayer(WP_AUTO_LAYER)){
-    map.removeLayer(WP_AUTO_LAYER);
-    if(togEl)togEl.checked=false;
-  }else{
-    map.addLayer(WP_AUTO_LAYER);
-    if(togEl)togEl.checked=true;
-  }
+  return window.DG_MAP_LAYER_VISIBILITY_UI.toggle({map,layer:WP_AUTO_LAYER,control:$("togWp")});
 }
 
 /* =========================================================
