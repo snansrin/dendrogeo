@@ -86,6 +86,7 @@ src/
 - `application/parks/register-park.js`, parkı oturum cache'inden çözme, OSM anahtarı/ad-konum eşleşmesi, yeni kayıt satırını kurma, yer adını gerektiğinde çözme ve 23505 yarışını yeniden okuma sırasını yönetir. `adapters/parks/park-store.js` Supabase seçme ve ekleme sorgularını uygular; `park-registry.js` eski global API'yi ve bildirimleri bağlar.
 - `application/parks/create-project.js`, kullanıcı, kayıtlı park ve etiketi doğrulayıp park bağlı proje kaydını oluşturur; geometri yazımını bağımlılık olarak çağırır. `adapters/parks/project-store.js` Supabase insert'ini taşır; `dgScanCreateProject()` eski toast, yönlendirme ve global API davranışını korur.
 - `application/parks/link-project.js`, yönetici yetkisini, seçili parkı ve projeyi doğrular; eski proje etiketini korur, park bağını günceller ve ölçümlerin eksik `park_id` alanlarını best-effort tamamlar. `adapters/parks/project-link-store.js` iki Supabase yazımını taşır; `dgLinkProject()` eski bildirim ve yönlendirme API'sini korur.
+- `application/parks/detect-park.js`, koordinat doğrulama, çevrimiçi kontrolü, OSM sorgu sırası, eski yanıt iptali, elle park fallback'i ve sessiz arama davranışını yönetir; `dgDetectAt()` toast, state, manual form ve çizim callback'lerini bağlar.
 - Yeni dosyalar analiz zincirine sürümlü lazy loader ve service worker precache üzerinden eklenmiştir.
 
 Bu ayrım raster sınıflandırma kodlarını, kaynak eşlemesini, eşikleri, Sentinel/OSM inceleme davranışını veya alan hesabı formüllerini değiştirmez. Kabul edilen rapor ve Supabase şeması değişmemiştir.
