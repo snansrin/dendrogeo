@@ -123,6 +123,7 @@ export function loadApp({ sadece } = {}) {
     'src/domain/parks/classify-surface-tags.js',
     'src/domain/parks/impervious-geometry.js',
     'src/domain/parks/area.js',
+    'src/domain/parks/resolve-park-area.js',
     'src/domain/parks/segment-intersection.js',
     'src/domain/parks/point-in-polygon.js',
     'src/domain/parks/bounds.js',

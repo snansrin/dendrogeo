@@ -22,19 +22,16 @@ function polyArea(rings){
 }
 
 function parkAreaM2(){
-  if(Number.isFinite(PARK_SELECTED_AREA_M2) && PARK_SELECTED_AREA_M2>0){
-    return PARK_SELECTED_AREA_M2;
-  }
-  if(!PARK_POLY)return 0;
-
-  return polyArea({
-    outer:PARK_POLY,
-    inner:PARK_HOLES
-  });
+  return window.DG_PARK_AREA_RESOLUTION.resolveAreaM2(
+    PARK_SELECTED_AREA_M2,
+    PARK_POLY,
+    PARK_HOLES,
+    polyArea
+  );
 }
 
 function parkAreaHa(){
-  return parkAreaM2()/10000;
+  return window.DG_PARK_AREA_RESOLUTION.hectaresFromSquareMeters(parkAreaM2());
 }
 
 /* =========================================================
