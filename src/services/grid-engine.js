@@ -296,41 +296,29 @@ function toggleWpVis(){
 
 async function createWaypointsFromGrid(mode){
   const source=DG_GRID_SOURCE,park=PARK_POLY;
-  if(!GRID_CELLS.length){
-    return toast(
-      "Önce grid oluştur"
-    );
+  const readiness=window.DG_GRID_WAYPOINT_READINESS.resolve({
+    cells:GRID_CELLS,
+    mode,
+    selectedCells:SELECTED_CELLS,
+    source,
+    getCurrentSource:dgGridReviewSignature,
+    getProjectId:()=>+$("gridProject").value||0,
+    select:window.DG_GRID_WAYPOINT_SELECTION.select
+  });
+
+  if(!readiness.ok){
+    if(readiness.reason==="surface-stale")return toast(_tgr("Yüzey değişti. Waypoint üretmeden önce gridi yeniden oluşturun."),"warn");
+    const messages={
+      "grid-missing":"Önce grid oluştur",
+      "project-missing":"Önce proje seç",
+      "manual-selection-missing":"Önce hücre seçin",
+      "target-cells-missing":"Uygun hücre yok"
+    };
+    return toast(messages[readiness.reason]);
   }
 
-  if(DG_GRID_SOURCE!==dgGridReviewSignature())return toast(_tgr("Yüzey değişti. Waypoint üretmeden önce gridi yeniden oluşturun."),"warn");
-
-  const pid=
-    +$("gridProject").value||
-    0;
-
-  if(!pid){
-    return toast(
-      "Önce proje seç"
-    );
-  }
-
-  let targetCells=window.DG_GRID_WAYPOINT_SELECTION.select(GRID_CELLS,mode,SELECTED_CELLS);
-
-  if(
-    mode==="manual" &&
-    !SELECTED_CELLS.size
-  ){
-    return toast(
-      "Önce hücre seçin"
-    );
-  }
-
-  if(!targetCells.length){
-    return toast(
-      "Uygun hücre yok"
-    );
-  }
-
+  const targetCells=readiness.targetCells;
+  const pid=readiness.projectId;
   if(
     targetCells.length>500 &&
     !confirm(
