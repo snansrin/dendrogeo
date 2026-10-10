@@ -69,6 +69,11 @@ async function dgParkBoundaryFallback(lat,lon,radius){
    DETAILED COVERAGE QUERY
 ========================================================= */
 
+const DG_PARK_COVERAGE_FETCH=window.DG_PARK_COVERAGE_FETCH_APPLICATION.create({
+  getParkPolygon:()=>PARK_POLY,
+  queryOsm:(query,label)=>overpassRequest(query,label)
+});
+
 function queryDetailedCoverage(){
  const boundary=JSON.stringify(PARK_POLY);
  if(window.DG_SURFACE_OSM_PENDING?.boundary===boundary)return window.DG_SURFACE_OSM_PENDING.promise;
@@ -93,70 +98,10 @@ async function dgQueryDetailedCoverage(){
     IMP_RINGS=[];IMP_LINES=[];GRID_BLOCK_LINES=[];WATER_RINGS=[];WATER_LINES=[];
   }
 
-  let minLat=90;
-  let maxLat=-90;
-  let minLon=180;
-  let maxLon=-180;
-
-  PARK_POLY.forEach(r=>
-    r.forEach(p=>{
-      if(p[0]<minLat)minLat=p[0];
-      if(p[0]>maxLat)maxLat=p[0];
-      if(p[1]<minLon)minLon=p[1];
-      if(p[1]>maxLon)maxLon=p[1];
-    })
-  );
-
-  const pad=0.0005;
-
-  const bbox=
-    `${minLat-pad},${minLon-pad},`+
-    `${maxLat+pad},${maxLon+pad}`;
-
-  /*
-   * TEK sorgu:
-   * Su + bina + building:part + yol + area:highway +
-   * otopark + spor alanları + sert surface.
-   *
-   * Böylece aynı park için 2-3 ayrı Overpass çağrısı
-   * yapmak yerine tek veri seti kullanıyoruz.
-   */
-  const q=
-    `[out:json][timeout:90];(`+
-    `way["natural"="water"](${bbox});`+
-    `relation["natural"="water"](${bbox});`+
-    `way["water"](${bbox});`+
-    `relation["water"](${bbox});`+
-    `way["landuse"~"reservoir|basin"](${bbox});`+
-    `relation["landuse"~"reservoir|basin"](${bbox});`+
-    `way["leisure"="swimming_pool"](${bbox});`+
-    `relation["leisure"="swimming_pool"](${bbox});`+
-    `way["amenity"="fountain"](${bbox});`+
-    `relation["amenity"="fountain"](${bbox});`+
-    `way["waterway"="riverbank"](${bbox});`+
-    `relation["waterway"="riverbank"](${bbox});`+
-
-    `way["building"](${bbox});`+
-    `relation["building"](${bbox});`+
-    `way["building:part"](${bbox});`+
-    `relation["building:part"](${bbox});`+
-    `way["highway"](${bbox});`+
-    `way["area:highway"](${bbox});`+
-    `relation["area:highway"](${bbox});`+
-    `way["landuse"="highway"](${bbox});`+
-    `relation["landuse"="highway"](${bbox});`+
-    `way["amenity"~"parking|bicycle_parking|motorcycle_parking"](${bbox});`+
-    `relation["amenity"~"parking|bicycle_parking|motorcycle_parking"](${bbox});`+
-    `way["leisure"~"pitch|track|playground"](${bbox});`+
-    `relation["leisure"~"pitch|track|playground"](${bbox});`+
-    `way["surface"~"asphalt|paved|concrete|paving_stones|sett|concrete:plates|concrete:lanes|cobblestone|bricks|metal"](${bbox});`+
-    `relation["surface"~"asphalt|paved|concrete|paving_stones|sett|concrete:plates|concrete:lanes|cobblestone|bricks|metal"](${bbox});`+
-    `way["man_made"~"pier|bridge"](${bbox});`+
-    `relation["man_made"~"pier|bridge"](${bbox});`+
-    `);out geom;`;
-
-  const json=await overpassRequest(q,"yüzey+su");
-  if(boundary!==JSON.stringify(PARK_POLY))return false;
+  const coverage=await DG_PARK_COVERAGE_FETCH();
+  if(!coverage||coverage.stale||coverage.boundary!==boundary)return false;
+  const {boundary:fetchedBoundary,bbox:coverageBbox,pad,json}=coverage;
+  const {minLat,maxLat,minLon,maxLon}=coverageBbox;
 
   if(!json){
     console.warn(
@@ -167,7 +112,7 @@ async function dgQueryDetailedCoverage(){
   }
 
   IMP_RINGS=[];IMP_LINES=[];GRID_BLOCK_LINES=[];WATER_RINGS=[];WATER_LINES=[];
-  window.DG_SURFACE_OSM={elements:json.elements||[],bbox:{minLat:minLat-pad,minLon:minLon-pad,maxLat:maxLat+pad,maxLon:maxLon+pad},boundary,fetchedAt:new Date().toISOString()};
+  window.DG_SURFACE_OSM={elements:json.elements||[],bbox:{minLat:minLat-pad,minLon:minLon-pad,maxLat:maxLat+pad,maxLon:maxLon+pad},boundary:fetchedBoundary,fetchedAt:new Date().toISOString()};
   const seenWater=new Set();
   const seenImp=new Set();
 
