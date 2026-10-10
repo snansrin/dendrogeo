@@ -144,78 +144,14 @@ function updateGridSummary(
    CELL SELECTION
 ========================================================= */
 
-function toggleCellSelection(
-  cellId,
-  rect
-){
-  if(
-    SELECTED_CELLS.has(
-      cellId
-    )
-  ){
-    SELECTED_CELLS.delete(
-      cellId
-    );
-
-    const cell=
-      GRID_CELLS.find(
-        c=>c.id===cellId
-      );
-
-    if(cell){
-      rect.setStyle(
-        window.DG_GRID_CELL_STYLE.resolve(cell,false)
-      );
-    }
-  }else{
-    SELECTED_CELLS.add(
-      cellId
-    );
-
-    const cell=GRID_CELLS.find(c=>c.id===cellId);
-    if(cell)rect.setStyle(
-      window.DG_GRID_CELL_STYLE.resolve(cell,true)
-    );
-  }
-
-  const {measured:g,empty:r0}=window.DG_GRID_CELL_STATES.count(GRID_CELLS);
-  updateGridSummary(
-    g,
-    r0
-  );
-}
-
-function clearCellSelection(){
-  SELECTED_CELLS.clear();
-
-  if(GRID_LAYER){
-    GRID_LAYER.eachLayer(l=>{
-      if(
-        l.setStyle &&
-        l._cellId
-      ){
-        const cell=
-          GRID_CELLS.find(
-            c=>
-              c.id===
-              l._cellId
-          );
-
-        if(cell){
-          l.setStyle(
-            window.DG_GRID_CELL_STYLE.resolve(cell,false)
-          );
-        }
-      }
-    });
-  }
-
-  const {measured:g,empty:r0}=window.DG_GRID_CELL_STATES.count(GRID_CELLS);
-  updateGridSummary(
-    g,
-    r0
-  );
-}
+const DG_GRID_SELECTION=window.DG_GRID_SELECTION_UI.create({
+  getCells:()=>GRID_CELLS,getSelection:()=>SELECTED_CELLS,getLayer:()=>GRID_LAYER,
+  resolveStyle:(cell,selected)=>window.DG_GRID_CELL_STYLE.resolve(cell,selected),
+  countStates:cells=>window.DG_GRID_CELL_STATES.count(cells),
+  updateSummary:(measured,empty)=>updateGridSummary(measured,empty)
+});
+function toggleCellSelection(cellId,rect){return DG_GRID_SELECTION.toggle(cellId,rect);}
+function clearCellSelection(){return DG_GRID_SELECTION.clear();}
 
 function clearGrid(){
   DG_GRID_META="";DG_GRID_SOURCE=null;
