@@ -21,7 +21,7 @@
  }
  function outline(ctx,pr,ring){
   if(!Array.isArray(ring)||!ring.length)return;
-  window.DG_PARK_IMAGE_GEOMETRY.appendRing({context:ctx,projector:pr,ring});
+  window.DG_PARK_IMAGE_GEOMETRY.appendRing({context:ctx,projector:{X:pr.X||pr.x,Y:pr.Y||pr.y},ring});
  }
  function waitVegetation(sens,attempts=8){
   return window.DG_GIS_EXPORT_VEGETATION.waitForLayers(sens,{attempts,
@@ -227,10 +227,10 @@
   let painted=0;
   if(layers.surface){
    for(const item of sens.displayPaths||[])
-    if(drawLeaflet(g,pr,item.poly,Math.max(.28,(sens.opacity||65)/100)))painted++;
+    if(window.DG_GIS_EXPORT_CANVAS.drawLeaflet(g,pr,item.poly,Math.max(.28,(sens.opacity||65)/100)))painted++;
    if(!painted){
     const last=window.DG_LANDCOVER?.getLast?.();
-    painted=drawRawPatches(g,pr,last?.patches||last?.report?.patches||[],dict);
+    painted=window.DG_GIS_EXPORT_CANVAS.drawRawPatches(g,pr,last?.patches||last?.report?.patches||[],dict);
    }
    // NDVI is drawn after regular green class (and before grid/waypoints),
    // so only observed green cells become sparse / moderate / dense.
@@ -239,7 +239,7 @@
     return false;
    }
    for(const poly of ndviPolys)
-    if(drawLeaflet(g,pr,poly,Math.max(.45,(sens.opacity||65)/100)))painted++;
+    if(window.DG_GIS_EXPORT_CANVAS.drawLeaflet(g,pr,poly,Math.max(.45,(sens.opacity||65)/100)))painted++;
   }
   if(layers.grid&&typeof DG_GRID_SESSION!=="undefined")for(const cell of DG_GRID_SESSION.getCells()||[]){
    if(Array.isArray(cell.geometry?.coordinates)){
