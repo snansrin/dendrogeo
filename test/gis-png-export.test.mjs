@@ -50,6 +50,7 @@ function env({ndvi=false,ndviAvailable=true,gridCells=[],verified=false}={}){
  vm.runInContext(file('src/ui/gis-export-sources.js'),ctx);
  vm.runInContext(file('src/ui/gis-export-workflow.js'),ctx);
  vm.runInContext(file('src/ui/gis-export-verified-workflow.js'),ctx);
+ vm.runInContext(file('src/bootstrap/gis-export.js'),ctx);
  vm.runInContext(adapter,ctx,{filename:'gis-export.js'});
  return {ctx,messages,ops,downloads};
 }
@@ -60,8 +61,8 @@ test('PNG adapter is outside frozen scientific engine and does not mutate review
  assert.match(file('src/ui/gis-export-bootstrap.js'),/window\.downloadParkImage=exportMap/);
  assert.match(file('src/ui/gis-export-workflow.js'),/getGeometryApi\(\)\.project/);
  assert.match(file('src/ui/gis-export-standard-canvas.js'),/canvasApi\.drawLeaflet/);
- assert.match(adapter,/DG_GIS_EXPORT_VEGETATION\.waitForLayers/);
- assert.match(adapter,/DG_GIS_EXPORT_BOOTSTRAP\.install/);
+ assert.match(file('src/bootstrap/gis-export.js'),/DG_GIS_EXPORT_VEGETATION\.waitForLayers/);
+ assert.match(file('src/bootstrap/gis-export.js'),/DG_GIS_EXPORT_BOOTSTRAP\.install/);
  const {ctx}=env();
  assert.equal(typeof ctx.window.DG_GIS_PNG_EXPORT.eachRing,'function');
  assert.doesNotMatch(adapter,/dgSensSave\(|dgSensAccept\(|DG_LC_LAST\s*=|sb\.from\(/);
