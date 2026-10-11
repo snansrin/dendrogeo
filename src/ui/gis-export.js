@@ -90,21 +90,8 @@
   if(ndvi){
    for(const layer of ndviPolys)window.DG_GIS_EXPORT_CANVAS.drawLeaflet(ctx,pr,layer,Math.max(.28,(sens?.opacity||65)/100));
   }
-  if(opts.grid&&typeof DG_GRID_SESSION!=="undefined"){
-   ctx.lineWidth=1;ctx.strokeStyle="#166534";
-   for(const cell of DG_GRID_SESSION.getCells()||[]){
-    if(![cell.w0,cell.w1,cell.s0,cell.s1].every(Number.isFinite))continue;
-    ctx.strokeRect(pr.x(cell.w0),pr.y(cell.s1),pr.x(cell.w1)-pr.x(cell.w0),pr.y(cell.s0)-pr.y(cell.s1));
-   }
-  }
-  if(opts.wp&&typeof WP!=="undefined"){
-   for(const wp of WP||[]){
-    if(!Number.isFinite(wp.lat)||!Number.isFinite(wp.lon))continue;
-    ctx.fillStyle=wp.visited?"#16a34a":"#e11d48";
-    ctx.beginPath();ctx.arc(pr.x(wp.lon),pr.y(wp.lat),5,0,Math.PI*2);ctx.fill();
-    ctx.strokeStyle="#fff";ctx.lineWidth=1.7;ctx.stroke();
-   }
-  }
+  if(opts.grid&&typeof DG_GRID_SESSION!=="undefined")window.DG_GIS_EXPORT_CANVAS.drawGrid(ctx,pr,DG_GRID_SESSION.getCells()||[]);
+  if(opts.wp&&typeof WP!=="undefined")window.DG_GIS_EXPORT_CANVAS.drawWaypoints(ctx,pr,WP||[]);
   ctx.restore();
   ctx.strokeStyle="#166534";ctx.lineWidth=2;ctx.setLineDash([9,5]);
   for(const ring of PARK_POLY){ctx.beginPath();outline(ctx,pr,ring);ctx.stroke();}

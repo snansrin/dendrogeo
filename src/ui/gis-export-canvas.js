@@ -1,4 +1,4 @@
-/* Canvas rendering helpers for the verified-map PNG export. */
+/* Canvas rendering helpers for GIS PNG exports. */
 (function(root){
  "use strict";
  function eachRing(tree,visit){
@@ -46,5 +46,21 @@
   }
   return painted;
  }
- root.DG_GIS_EXPORT_CANVAS=Object.freeze({eachRing,drawLeaflet,drawRawPatches});
+ function drawGrid(context,projector,cells){
+  context.lineWidth=1;context.strokeStyle="#166534";
+  for(const cell of cells||[]){
+   if(![cell.w0,cell.w1,cell.s0,cell.s1].every(Number.isFinite))continue;
+   context.strokeRect(projector.x(cell.w0),projector.y(cell.s1),
+    projector.x(cell.w1)-projector.x(cell.w0),projector.y(cell.s0)-projector.y(cell.s1));
+  }
+ }
+ function drawWaypoints(context,projector,waypoints){
+  for(const waypoint of waypoints||[]){
+   if(!Number.isFinite(waypoint.lat)||!Number.isFinite(waypoint.lon))continue;
+   context.fillStyle=waypoint.visited?"#16a34a":"#e11d48";
+   context.beginPath();context.arc(projector.x(waypoint.lon),projector.y(waypoint.lat),5,0,Math.PI*2);context.fill();
+   context.strokeStyle="#fff";context.lineWidth=1.7;context.stroke();
+  }
+ }
+ root.DG_GIS_EXPORT_CANVAS=Object.freeze({eachRing,drawLeaflet,drawRawPatches,drawGrid,drawWaypoints});
 })(window);
