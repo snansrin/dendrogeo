@@ -8,7 +8,7 @@ vm.runInContext(readFileSync(new URL('../src/ui/gis-export-canvas.js',import.met
 const canvas=context.window.DG_GIS_EXPORT_CANVAS;
 function mockContext(){
  const events=[];
- return {events,beginPath:()=>events.push(['begin']),moveTo:(x,y)=>events.push(['move',x,y]),lineTo:(x,y)=>events.push(['line',x,y]),closePath:()=>events.push(['close']),fill:rule=>events.push(['fill',rule]),globalAlpha:1,fillStyle:''};
+ return {events,beginPath:()=>events.push(['begin']),moveTo:(x,y)=>events.push(['move',x,y]),lineTo:(x,y)=>events.push(['line',x,y]),closePath:()=>events.push(['close']),fill:rule=>events.push(['fill',rule]),stroke:()=>events.push(['stroke']),strokeRect:(...args)=>events.push(['rect',...args]),arc:(...args)=>events.push(['arc',...args]),globalAlpha:1,fillStyle:''};
 }
 
 test('Leaflet polygons draw every outer and inner ring into one even-odd fill',()=>{
@@ -42,4 +42,22 @@ test('raw surface patches preserve [latitude, longitude], class fallback, and pa
  assert.ok(ctx.events.some(x=>x[0]==='move'&&x[1]===102&&x[2]===201));
  assert.deepEqual(ctx.events.filter(x=>x[0]==='fill'),[['fill','evenodd'],['fill','evenodd']]);
  assert.equal(ctx.globalAlpha,1);
+});
+
+test('grid cells preserve projected bounds, style, and skip invalid coordinates',()=>{
+ const ctx=mockContext(),pr={x:lon=>lon*10,y:lat=>lat*20};
+ canvas.drawGrid(ctx,pr,[{w0:2,w1:4,s0:1,s1:3},{w0:0,w1:1,s0:2,s1:Infinity}]);
+ assert.deepEqual(ctx.events,[['rect',20,60,20,-40]]);
+ assert.equal(ctx.lineWidth,1);assert.equal(ctx.strokeStyle,'#166534');
+});
+
+test('waypoints preserve visited colors, projected locations, and skip invalid coordinates',()=>{
+ const ctx=mockContext(),pr={x:lon=>lon*10,y:lat=>lat*20};
+ canvas.drawWaypoints(ctx,pr,[{lat:2,lon:3,visited:true},{lat:4,lon:5,visited:false},{lat:NaN,lon:6},{lat:7,lon:Infinity}]);
+ assert.deepEqual(ctx.events.filter(x=>x[0]==='arc'),[
+  ['arc',30,40,5,0,Math.PI*2],['arc',50,80,5,0,Math.PI*2]
+ ]);
+ assert.equal(ctx.events.filter(x=>x[0]==='fill').length,2);
+ assert.equal(ctx.events.filter(x=>x[0]==='stroke').length,2);
+ assert.equal(ctx.fillStyle,'#e11d48');assert.equal(ctx.strokeStyle,'#fff');assert.equal(ctx.lineWidth,1.7);
 });

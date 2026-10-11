@@ -222,6 +222,6 @@ Her modülün tek bir dış API'si, sahibi olduğu açık durumu ve kendi testle
 
 - `ui/gis-export.js`, doğrulanmış harita PNG'sinde park halkası projeksiyonunu `park-image-geometry.js` üzerinden kullanır; çok halkalı kırpma halkaları aynı Canvas yolunda biriktirilir. Vektör katmanları ve göreli NDVI akışı değişmez.
 
-- `ui/gis-export-canvas.js`, doğrulanmış GIS PNG çıktısında Leaflet halka geometrilerini ve ham yüzey yamalarını Canvas'a çizer. `gis-export.js` orkestrasyon, park kırpması, grid/waypoint ve dışa aktarma akışını yönetir.
+- `ui/gis-export-canvas.js`, GIS PNG çıktısında Leaflet halka geometrilerini, ham yüzey yamalarını, standart grid hücrelerini ve waypoint işaretlerini Canvas'a çizer. `gis-export.js` orkestrasyon, park kırpması ve dışa aktarma akışını yönetir; onaylı harita yolundaki etiketli grid/waypoint sunumu orada kalır.
 
 - `ui/gis-export-vegetation.js`, göreli NDVI poligonlarının hazır olup olmadığını ve sınırlı bekleme davranışını yönetir. Eşik ve çizim işlevlerini çağıran aktarır; PNG export mevcut gözlemler hazır değilse durur.
