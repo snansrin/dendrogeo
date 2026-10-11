@@ -17,6 +17,7 @@ test('GIS PNG adapter tolerates late-loaded landcover classes and intercepts the
   setTimeout,clearTimeout,console,
   Date,Math
  };
+ vm.runInNewContext(load('src/ui/gis-export-events.js'),sandbox,{filename:'src/ui/gis-export-events.js'});
  vm.runInNewContext(load('src/ui/gis-export.js'),sandbox,{filename:'src/ui/gis-export.js'});
  const png=sandbox.window.DG_GIS_PNG_EXPORT;
  assert.equal(png.classes().green.label,'Yeşil alan');
@@ -180,16 +181,18 @@ test('distance measurement captures polygon clicks before editor popup even in r
 
 test('verified-map original label/dialog are restored, separate quick PNG stays in File',()=>{
  const script=load('src/ui/gis-export.js');
+ const events=load('src/ui/gis-export-events.js');
  const workspace=load('src/ui/gis-workspace.js');
  const locked=load('src/ui/lc-sens.js');
  assert.match(workspace,/verified\.textContent="🖼️ Doğrulanmış Harita"/);
  assert.match(workspace,/legacy\.hidden=false/);
  assert.match(locked,/function dgSensExportPng\(\)/);
  assert.match(locked,/dialog\.showModal\(\)/);
- assert.match(script,/const exportAction=event\.target\?\.closest\?\.\("#dgExportDownload"\)/);
- assert.match(script,/if\(exportAction&&sens\?\.vegetationView&&!sens\.rawView\)/);
- assert.match(script,/if\(dialog\?\.id==="dgSurfaceExportDialog"&&dialog\.querySelector\('\[name="surface"\]'\)\?\.checked\)/);
- assert.match(script,/const button=event\.target\?\.closest\?\.\('button\[onclick\*="downloadParkImage"\]'\)/);
+ assert.match(script,/DG_GIS_EXPORT_EVENTS\.bind/);
+ assert.match(events,/const exportAction=event\.target\?\.closest\?\.\("#dgExportDownload"\)/);
+ assert.match(events,/if\(exportAction&&sens\?\.vegetationView&&!sens\.rawView\)/);
+ assert.match(events,/if\(dialog\?\.id==="dgSurfaceExportDialog"&&dialog\.querySelector\('\[name="surface"\]'\)\?\.checked\)/);
+ assert.match(events,/const button=event\.target\?\.closest\?\.\('button\[onclick\*="downloadParkImage"\]'\)/);
  assert.match(workspace,/if\(window\.DG_LC_SENS\?\.state\?\.record/);
  assert.match(workspace,/parked\[key\]/);
 });
@@ -267,6 +270,7 @@ test('verified-map original dialog is untouched with NDVI off; its PNG download 
   toast:msg=>warnings.push(msg),
   setTimeout,clearTimeout,console,Date,Math
  };
+ vm.runInNewContext(load('src/ui/gis-export-events.js'),context);
  vm.runInNewContext(load('src/ui/gis-export.js'),context);
  let prevented=0,stopped=0;
  const click=()=>({target,preventDefault:()=>{prevented++;},stopImmediatePropagation:()=>{stopped++;}});

@@ -275,33 +275,7 @@
   try{return await render();}
   catch(error){console.error("DendroGeo PNG dışa aktarım:",error);notify("PNG oluşturulamadı: "+(error?.message||String(error)),"err");return false;}
  }
- // Capture the legacy inline PNG button before its locked handler runs.
- // The older handler assumes a lazily loaded class array and may throw on .find().
- // Do not modify that locked module or the scientific analysis state.
- if(typeof document.addEventListener==="function")document.addEventListener("click",event=>{
-  const exportAction=event.target?.closest?.("#dgExportDownload");
-  const sens=window.DG_LC_SENS?.state;
-  // Keep the locked, original verified-map dialog and renderer fully intact
-  // unless a real NDVI overlay is requested as part of the surface layer.
-  if(exportAction&&sens?.vegetationView&&!sens.rawView){
-   const dialog=exportAction.closest("dialog");
-   if(dialog?.id==="dgSurfaceExportDialog"&&dialog.querySelector('[name="surface"]')?.checked){
-    const layers=Object.fromEntries(["park","surface","grid","waypoints"].map(key=>[key,!!dialog.querySelector('[name="'+key+'"]')?.checked]));
-    event.preventDefault();
-    event.stopImmediatePropagation();
-    dialog.close();
-    exportVerified(layers);
-    return;
-   }
-  }
-  // Plain PNG is still exported by the safe adapter. The verified map
-  // button itself is never captured: it opens the original layer dialog.
-  const button=event.target?.closest?.('button[onclick*="downloadParkImage"]');
-  if(!button)return;
-  event.preventDefault();
-  event.stopImmediatePropagation();
-  exportMap();
- },true);
+ window.DG_GIS_EXPORT_EVENTS.bind({document,window,exportMap,exportVerified});
  window.DG_GIS_PNG_EXPORT={download:exportMap,downloadVerified:exportVerified,classes,eachRing};
  window.downloadParkImage=exportMap;
 })();
