@@ -275,3 +275,8 @@ Her modülün tek bir dış API'si, sahibi olduğu açık durumu ve kendi testle
 
 - scripts/lib/accepted-surface-publication.mjs kabul edilmiş yüzey sonucunu aynı rapor kimliğine bağlayan akışı kapsar. Dosya, HTML, QR ve arşiv işlemleri dışarıdan sağlanır.
 - publish-queue.mjs mevcut applyAcceptedSurfaceSnapshot dışa aktarımını ve varsayılan depo kökünü korur. Alan dönüşümü, içerik hash’i, üst veri ve geometri yayımlamama davranışı değişmedi.
+
+## Tek rapor yayın isteği — 11 Ekim 2026
+
+- scripts/lib/report-publication-request.mjs tek isteğin yayın sırasını, kabul edilmiş yüzey uygulamasını ve başarı/hata günlüğünü yönetir. Yayın, seçenek, arşiv boyutu ve saat bağımlılıkları dışarıdan sağlanır.
+- publish-queue.mjs mevcut yayın seçeneklerini ve dosya boyutu adaptörünü bağlar. Bilinmeyen yüzey şeması üretimden önce reddedilir; boyut ölçüm hatası yayını engellemez.
