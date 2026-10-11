@@ -220,5 +220,4 @@ Her modülün tek bir dış API'si, sahibi olduğu açık durumu ve kendi testle
 
 - `ui/park-image-geometry.js`, vektör PNG çıktısının enlem/boylam → piksel projeksiyonunu ve Canvas halka yolunu sağlar. Ölçek ve koordinat sırası mevcut `park-export.js` çağrılarında aynı kalır; çizim durumu dışarıda tutulur.
 
-
 - `ui/gis-export.js`, doğrulanmış harita PNG'sinde park halkası projeksiyonunu `park-image-geometry.js` üzerinden kullanır; çok halkalı kırpma halkaları aynı Canvas yolunda biriktirilir. Vektör katmanları ve göreli NDVI akışı değişmez.
