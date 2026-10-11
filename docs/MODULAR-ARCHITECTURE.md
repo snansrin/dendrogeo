@@ -419,3 +419,8 @@ Her modülün tek bir dış API'si, sahibi olduğu açık durumu ve kendi testle
 ### Report park geometry source (12 October 2026)
 
 `scripts/lib/report-park-geometry-source.mjs` resolves the park boundary used by report analysis. It prefers accepted non-bbox geometry, falls back to the OpenStreetMap way API or rotating Overpass relation mirrors, and retains outer/inner rings. Fetching, bbox detection and relation-ring parsing are injected; boundary choice and fallback behavior remain unchanged.
+
+
+### Report land-cover analysis adapter (12 October 2026)
+
+`scripts/lib/report-landcover-analysis.mjs` adapts the existing land-cover engine result for report snapshots and map imagery. It preserves boundary selection, analysis inputs, cell conversion, run-length coordinate conversion and EPSG recording. The analysis engine and scientific classification remain in the application runtime.
