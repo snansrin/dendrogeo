@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 import { reportRead } from './lib/report-reader.mjs';
+import {createReportQueueRunner} from './lib/report-queue-runner.mjs';
 import {createReportRetractionHandler} from './lib/report-retraction-workflow.mjs';
 import {createPublicationRequestHandler} from './lib/report-publication-request.mjs';
 import {decodeReportContext} from './lib/report-context.mjs';
@@ -125,72 +126,13 @@ export const handleRetraction = createReportRetractionHandler({
   existsSync, unlinkSync, writeFileSync, renderRetractionNotice, rebuildIndex
 });
 
-/* ---------- ana akış ---------- */
-export async function runQueue(opts = {}) {
-  const limit = Number(opts.limit || arg('limit') || RUN_LIMIT);
-  const dry = opts.dry || has('dry');
-  const q = loadQueue();
-  let requests = [];
-  try {
-    const effectiveProcessed=effectiveProcessedRequestIds(q.entries,q.processed_request_ids||[]);
-    requests = await fetchPending(50,effectiveProcessed,q.production_started_at||null);
-  } catch (e) {
-    console.log('⚠ Kuyruk okunamadı: ' + e.message);
-    return { ok: false, processed: 0, entries: q.entries, reason: e.code || 'FETCH' };
-  }
-  const plan = planQueue(q.entries, requests, limit, q.processed_request_ids || []);
-  console.log(`📄 Yayın kuyruğu: ${requests.length} bekleyen istek · ${plan.already} zaten işlenmiş · ${plan.todo.length} bu koşuda üretilecek${plan.skipped ? ` · ${plan.skipped} sonraki koşuya kaldı` : ''}`);
-
-  let retractions = [], retMissing = false;
-  try {
-    const rr = await fetchPendingRetractions(50,q.processed_retraction_ids||[],q.production_started_at||null);
-    retractions = rr.rows; retMissing = rr.missing;
-  } catch (e) {
-    console.log('⚠ Geri çekme kuyruğu okunamadı: ' + e.message);
-  }
-  const rplan = planRetractions(q.entries, retractions.filter(r=>!(q.processed_retraction_ids||[]).includes(String(r.id))), limit);
-  if (!retMissing && (retractions.length || rplan.todo.length))
-    console.log(`🗑 Geri çekme kuyruğu: ${retractions.length} bekleyen · ${rplan.todo.length} bu koşuda işlenecek${rplan.invalid.length ? ` · ${rplan.invalid.length} geçersiz/eşleşmeyen (İŞLENMEDİ)` : ''}`);
-
-  if (!plan.todo.length && !rplan.todo.length) { console.log('✅ Üretilecek rapor yok, işlenecek geri çekme yok.'); return { ok: true, processed: 0, entries: q.entries }; }
-  if (dry) {
-    for (const r of plan.todo) {
-      const mode=isAcceptedSurfaceSnapshot(r.surface_snapshot)?'son kabul edilmiş yüzey snapshotı':(r.with_lulc===false?'LULC atlanacak':'LULC dahil');
-      console.log(`   · (prova) park #${r.park_id} · istek ${r.id} · ${mode}`);
-    }
-    for (const r of rplan.todo) console.log(`   · (prova) geri çekme ${r.id} · ${r.report_id}`);
-    return { ok: true, processed: 0, dry: true, entries: q.entries };
-  }
-  let ok = 0, fail = 0;
-  for (const r of plan.todo) {
-    const mode=isAcceptedSurfaceSnapshot(r.surface_snapshot)?'kabul edilmiş yüzey snapshotı':(r.with_lulc===false?'LULC atlandı':'LULC dahil');
-    console.log(`\n▶ park #${r.park_id} (istek ${r.id}) · ${mode}`);
-    const entry = await handle(r);
-    q.entries.push(entry);
-    if (entry.status === 'Yayınlandı') {
-      ok++;
-      console.log(`  ✅ ${entry.report_id} · n=${entry.n} · ${entry.carbon_txt}`);
-      console.log(`     ${entry.url_path} · ${entry.report_hash.slice(0, 27)}…${entry.archive_bytes ? ' · arşiv ' + (entry.archive_bytes / 1024).toFixed(0) + ' KB' : ''}`);
-    } else {
-      fail++;
-      console.log(`  ❌ üretilemedi: ${entry.message}`);
-    }
-    saveQueue(q);
-  }
-
-  let retOk = 0, retFail = 0;
-  for (const rt of rplan.todo) {
-    console.log(`\n🗑 geri çekme ${rt.id} · ${rt.report_id}`);
-    const pubEntry = q.entries.find((e) => e.status === 'Yayınlandı' && String(e.report_id) === String(rt.report_id)) || null;
-    const entry = handleRetraction(rt, pubEntry);
-    q.entries.push(entry);
-    if (entry.status === 'Geri çekildi') { retOk++; console.log(`  ✅ ${entry.report_id} yayından kaldırıldı (bildirim yerinde, listeden düştü)`); }
-    else { retFail++; console.log(`  ❌ geri çekilemedi: ${entry.message}`); }
-    saveQueue(q);
-  }
-
-  console.log(`\n📦 Kuyruk sonucu: ${ok} yayınlandı, ${fail} başarısız, ${retOk} geri çekildi, ${retFail} geri çekme başarısız → ${QUEUE_PATH}`);
-  return { ok: fail === 0 && retFail === 0, processed: ok + fail + retOk + retFail, published: ok, failed: fail, retracted: retOk, retractFailed: retFail, entries: q.entries };
+const executeQueue = createReportQueueRunner({
+  RUN_LIMIT, QUEUE_PATH, loadQueue, saveQueue, effectiveProcessedRequestIds,
+  fetchPending, fetchPendingRetractions, planQueue, planRetractions, handle, handleRetraction,
+  log: message => console.log(message)
+});
+export function runQueue(opts = {}) {
+  return executeQueue({...opts, limit: Number(opts.limit || arg('limit') || RUN_LIMIT), dry: opts.dry || has('dry')});
 }
 
 if (process.argv[1] === fileURLToPath(import.meta.url)) {
