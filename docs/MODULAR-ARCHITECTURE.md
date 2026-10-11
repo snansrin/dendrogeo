@@ -325,3 +325,8 @@ Her modülün tek bir dış API'si, sahibi olduğu açık durumu ve kendi testle
 
 - scripts/lib/report-species-presentation.mjs tür grafiği, tablo satırları ve grup renk/etiketlerini kapsar. HTML kaçışı ve sayı biçimi mevcut adaptörlerden sağlanır.
 - make-report.mjs bu sunumu mevcut rapor şablonuna bağlar; karbon hesaplama, tür sırası, renkler ve içerik korunur.
+
+## Rapor QA sunumu — 11 Ekim 2026
+
+- scripts/lib/report-qa-presentation.mjs QA satır sınıflarını ve satırlardan türetilen rozet sunumunu kapsar. Mevcut qaStateOf ve QA_STATE bağımlılıkları kullanılır.
+- Kontrol eşikleri ve bilimsel değerlendirmeler make-report.mjs içinde kalır. Beyan satırları rozet durumunu etkilemez; her rapor ayrı satır durumu tutar.
