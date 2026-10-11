@@ -1,0 +1,6 @@
+/* Present an existing report map and its provenance; no map rendering effects. */
+export function createReportMapPresentation({esc}) {
+  return function renderMapSection({L, P, id, epsg}) {
+    return `${L ? `<div class="fig"><img src="harita.png" alt="${esc(P.name)} park sahası arazi örtüsü sınıfları haritası; park sınırı ve ölçüm noktaları işaretli" style="width:100%;border-radius:8px"><div class="cap">Şekil 2 — ${esc(L.source)} sınıflandırmasının park poligonu ile tam kesişimi; koyu çizgi park sınırını (OSM), siyah noktalar envanter ölçüm noktalarını gösterir. ${L.review?(L.review.displayFeatures?"Raster sınırları ortak kenarları koruyan görsel genelleştirme ile çizilmiştir; bina, yol ve kullanıcı sınırları korunur. Alanlar kesin kabul geometrisinden hesaplanır;":"Çizim, kabul edilmiş kayıt geometrilerinden üretilmiştir;"):"Çizim, çözümleme motorunun kesintisiz hücre çıktısından birebir ölçekli üretilmiştir;"} bağlayıcı sayısal değerler Çizelge 2'de ve data.json'dadır. Harita altbilgisi belge kimliğini (${id}), veri kaynağını, çözünürlüğü, projeksiyonu (${esc(epsg || '—')}) ve analiz tarihini taşır: kaynak bilgileri harita çıktısında da korunur.</div></div>` : '<p>Bu sürümde harita üretilmemiştir.</p>'}`;
+  };
+}

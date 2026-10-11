@@ -3,6 +3,7 @@ import {createReportPublicationApplication} from './lib/report-publication-appli
 import {createReportSpeciesPresentation, sw} from './lib/report-species-presentation.mjs';
 import {createReportQaPresentation} from './lib/report-qa-presentation.mjs';
 import {createReportEvaluationPresentation} from './lib/report-evaluation-presentation.mjs';
+import {createReportMapPresentation} from './lib/report-map-presentation.mjs';
 import {createReportOverviewPresentation} from './lib/report-overview-presentation.mjs';
 import {createReportCoverPresentation} from './lib/report-cover-presentation.mjs';
 import {createReportStudyPresentation} from './lib/report-study-presentation.mjs';
@@ -381,6 +382,7 @@ const renderLimitationsPresentation = createReportLimitationsPresentation({
     trNum, QA_LIMITS,
     YASAL_STATU_KAPSAM,
 });
+const renderMapPresentation = createReportMapPresentation({esc});
 const renderOverviewPresentation = createReportOverviewPresentation({esc, trNum});
 const renderCoverPresentation = createReportCoverPresentation({esc, trNum, QA_STATE, DGR_TITLE_DEF, FOUNDERS_LINE});
 const renderStudyPresentation = createReportStudyPresentation({esc});
@@ -531,7 +533,7 @@ ${L ? `<p><b>5.2 Arazi örtüsü.</b> Sınıf alanları Çizelge 2'de sunulmuşt
 </tbody></table></div>` : ''}
 
 <h2><span class="no">6</span>Harita</h2>
-${L ? `<div class="fig"><img src="harita.png" alt="${esc(P.name)} park sahası arazi örtüsü sınıfları haritası; park sınırı ve ölçüm noktaları işaretli" style="width:100%;border-radius:8px"><div class="cap">Şekil 2 — ${esc(L.source)} sınıflandırmasının park poligonu ile tam kesişimi; koyu çizgi park sınırını (OSM), siyah noktalar envanter ölçüm noktalarını gösterir. ${L.review?(L.review.displayFeatures?"Raster sınırları ortak kenarları koruyan görsel genelleştirme ile çizilmiştir; bina, yol ve kullanıcı sınırları korunur. Alanlar kesin kabul geometrisinden hesaplanır;":"Çizim, kabul edilmiş kayıt geometrilerinden üretilmiştir;"):"Çizim, çözümleme motorunun kesintisiz hücre çıktısından birebir ölçekli üretilmiştir;"} bağlayıcı sayısal değerler Çizelge 2'de ve data.json'dadır. Harita altbilgisi belge kimliğini (${id}), veri kaynağını, çözünürlüğü, projeksiyonu (${esc(epsg || '—')}) ve analiz tarihini taşır: kaynak bilgileri harita çıktısında da korunur.</div></div>` : '<p>Bu sürümde harita üretilmemiştir.</p>'}
+${renderMapPresentation({L, P, id, epsg})}
 
 <h2><span class="no">7</span>Kalite Kontrol ve Doğrulama</h2>
 <p>Sonuçlar üretilmeden önce hesaplamanın bütünlüğü aşağıdaki kontrollerle doğrulanmıştır (Çizelge 4). Kontroller otomatiktir. Rapor QA durumu üç hâllidir: <b>🔴 BLOKLU</b> — kritik veri hatası vardır, karbon sonucu bilimsel iletişimde kullanılmamalıdır; <b>🟡 İNCELEME</b> — veri geçerlidir, bazı istatistiksel kontroller inceleme uyarısı vermektedir; <b>🟢 GEÇERLİ</b> — tüm kritik kontroller geçmiştir. <b>Bu raporun QA durumu: ${QA_ST_LABEL}</b>${QA_BLOCKED ? ` — kritik hata: ${QA_WHY}. Karbon toplamı bu nedenle GEÇİCİDİR ve hata giderilmeden bilimsel iletişimde KULLANILMAMALIDIR.` : (QA_REVIEW ? ` — inceleme kalemleri: ${QA_WHY}. Bu uyarılar birer inceleme kalemidir; veri hatası hükmü DEĞİLDİR ve karbon sonucunun geçerliliğini ortadan kaldırmaz.${AGAC_DEGER_TEMIZ ? ' Bu rapordaki inceleme kalemlerinin HİÇBİRİ ağaç ölçüm değerleriyle (DBH, boy, tür, karbon) ilgili DEĞİLDİR: envanter kontrollerinin tümü geçerlidir; kalan kalem/kalemler ölçülemeyen veya kaydedilmeyen üst veri alanlarıdır (ör. GNSS alıcı doğruluğu accuracy_m boş bırakılmışsa bu kontrol koşamaz).' : ''}` : '')}${qaStates.includes('info') ? ' Çizelge 4’te ayrıca <b>ℹ️ BEYAN</b> işaretli bilgilendirme satırları bulunabilir: bunlar bir kalite hükmü DEĞİLDİR ve rapor durumunu etkilemez.' : ''} Karbon hesabı, sahada ölçülen göğüs çevresinden D=C/π ile türetilen yuvarlanmamış DBH (cm) değerleri kullanılarak gerçekleştirilmiştir; rapor tablolarında DBH 1 ondalık basamakla gösterilir.</p>

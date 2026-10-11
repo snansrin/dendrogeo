@@ -384,3 +384,7 @@ Her modülün tek bir dış API'si, sahibi olduğu açık durumu ve kendi testle
 ### Report overview presentation (11 October 2026)
 
 `report-overview-presentation.mjs` renders analysis summary and site descriptions from existing report values. Sample-scope statements, density formatting, optional source disclosure, ignored-rectangle/self-intersection notes and geofence counts retain their behavior. Scientific totals and geometry checks remain outside the module.
+
+### Report map presentation (11 October 2026)
+
+`report-map-presentation.mjs` renders the existing map image and provenance caption. Missing-map, raster, reviewed geometry and visually generalized geometry branches retain their wording and conditions. Image generation, accepted geometry and numeric areas remain outside this module.
