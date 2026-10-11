@@ -300,3 +300,8 @@ Her modülün tek bir dış API'si, sahibi olduğu açık durumu ve kendi testle
 
 - scripts/lib/report-artifact-writer.mjs HTML, PNG, yüzey geometrisi, veri, CSV, ölçüm geometrisi ve üst veri dosyalarının yazımını kapsar. Dosya ve rapor üretim bağımlılıkları dışarıdan sağlanır.
 - publishPark kimlik atama, snapshot üretme, geçmiş ve liste yenileme sırasını korur. Dosya adları ve JSON biçimleri değişmedi.
+
+## Park raporu yayın akışı — 11 Ekim 2026
+
+- scripts/lib/park-report-publication.mjs künye doğrulama, kimlik/QR, snapshot, geçmiş, arşiv ve liste yenileme sırasını yönetir. Hesaplama, dosya ve sürüm bağımlılıkları dışarıdan sağlanır.
+- make-report.mjs publishPark dışa aktarımını korur; kimlik snapshot öncesinde atanır, hesaplama ve yayın sonucu biçimi değişmedi.
