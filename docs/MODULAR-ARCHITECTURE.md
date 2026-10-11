@@ -414,3 +414,8 @@ Her modülün tek bir dış API'si, sahibi olduğu açık durumu ve kendi testle
 ### Report snapshot application (12 October 2026)
 
 `scripts/lib/report-snapshot-application.mjs` assembles the existing immutable report snapshot from injected data, measurement, geometry, QA, provenance and map dependencies. The application owns the existing schema fallback, geofence and geometry disclosures, author selection, and hash boundary; `make-report.mjs` wires dependencies and preserves the `buildSnapshot` export. Scientific calculations and publication behavior are unchanged.
+
+
+### Report park geometry source (12 October 2026)
+
+`scripts/lib/report-park-geometry-source.mjs` resolves the park boundary used by report analysis. It prefers accepted non-bbox geometry, falls back to the OpenStreetMap way API or rotating Overpass relation mirrors, and retains outer/inner rings. Fetching, bbox detection and relation-ring parsing are injected; boundary choice and fallback behavior remain unchanged.
