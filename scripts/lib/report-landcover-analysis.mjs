@@ -1,7 +1,7 @@
 /* Adapt the existing land-cover engine output for immutable reports.
  * The scientific engine itself remains in the application runtime. */
 export function createReportLandcoverAnalysis({parkOuter, bootLC}) {
-  return async function runLULC(park, preOuter = null) {
+  const runLULC = async function runLULC(park, preOuter = null) {
     const g = preOuter || (await parkOuter(park));
     if (!g) return null;
     const { outer, holes } = g;
@@ -33,5 +33,6 @@ export function createReportLandcoverAnalysis({parkOuter, bootLC}) {
      * (koordinat uzayı BÜYÜKLÜKTEN tanınmaya devam eder; bu yalnız kayıt). */
     const epsg = runs.length && Number.isFinite(Number(runs[0].epsg)) ? Number(runs[0].epsg) : null;
     return { report, cells: cells && cells.features ? cells.features : [], wruns, outer, holes, epsg };
-  }
+  };
+  return {runLULC};
 }
