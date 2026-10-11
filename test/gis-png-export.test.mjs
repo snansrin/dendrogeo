@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import vm from 'node:vm';
 import {readFileSync} from 'node:fs';
 const file=p=>readFileSync(new URL('../'+p,import.meta.url),'utf8');
-const adapter=file('src/ui/gis-export.js'),gate=file('src/application/surface/prepare-verified-map-export.js'),download=file('src/ui/gis-export-download.js'),vegetation=file('src/ui/gis-export-vegetation.js'),layout=file('src/ui/gis-export-layout.js'),canvas=file('src/ui/gis-export-canvas.js'),events=file('src/ui/gis-export-events.js'),style=file('css/gis-workspace.css'),ui=file('src/ui/gis-workspace.js');
+const adapter=file('src/ui/gis-export.js'),gate=file('src/application/surface/prepare-verified-map-export.js'),download=file('src/ui/gis-export-download.js'),verifiedCanvas=file('src/ui/gis-export-verified-canvas.js'),vegetation=file('src/ui/gis-export-vegetation.js'),layout=file('src/ui/gis-export-layout.js'),canvas=file('src/ui/gis-export-canvas.js'),events=file('src/ui/gis-export-events.js'),style=file('css/gis-workspace.css'),ui=file('src/ui/gis-workspace.js');
 const lock=JSON.parse(file('docs/surface-engine-lock.json'));
 function env({ndvi=false,ndviAvailable=true,gridCells=[],verified=false}={}){
  const messages=[],ops=[],downloads=[],elements={},polygon=[
@@ -42,6 +42,7 @@ function env({ndvi=false,ndviAvailable=true,gridCells=[],verified=false}={}){
  vm.runInContext(events,ctx,{filename:'gis-export-events.js'});
  vm.runInContext(gate,ctx,{filename:'prepare-verified-map-export.js'});
  vm.runInContext(download,ctx,{filename:'gis-export-download.js'});
+ vm.runInContext(verifiedCanvas,ctx,{filename:'gis-export-verified-canvas.js'});
  vm.runInContext(adapter,ctx,{filename:'gis-export.js'});
  return {ctx,messages,ops,downloads};
 }
@@ -112,15 +113,18 @@ test('boot, SW and index will expose PNG adapter after locked exporter',()=>{
  assert.match(boot,/src\/ui\/gis-export\.js\?v=[a-f0-9]{8}/);
  assert.match(boot,/src\/ui\/gis-export-canvas\.js\?v=[a-f0-9]{8}/);
  assert.match(boot,/src\/ui\/gis-export-events\.js\?v=[a-f0-9]{8}/);
+ assert.match(boot,/src\/ui\/gis-export-verified-canvas\.js\?v=[a-f0-9]{8}/);
  assert.match(boot,/src\/ui\/gis-export-vegetation\.js\?v=[a-f0-9]{8}/);
  assert.match(boot,/src\/ui\/gis-export-layout\.js\?v=[a-f0-9]{8}/);
  assert.match(index,/src\/ui\/gis-export\.js\?v=[a-f0-9]{8}/);
  assert.match(index,/src\/ui\/gis-export-canvas\.js\?v=[a-f0-9]{8}/);
  assert.match(index,/src\/ui\/gis-export-events\.js\?v=[a-f0-9]{8}/);
+ assert.match(index,/src\/ui\/gis-export-verified-canvas\.js\?v=[a-f0-9]{8}/);
  assert.match(index,/src\/ui\/gis-export-vegetation\.js\?v=[a-f0-9]{8}/);
  assert.match(index,/src\/ui\/gis-export-layout\.js\?v=[a-f0-9]{8}/);
  assert.match(sw,/\/src\/ui\/gis-export\.js/);
  assert.match(sw,/\/src\/ui\/gis-export-canvas\.js/);
+ assert.match(sw,/\/src\/ui\/gis-export-verified-canvas\.js/);
  assert.match(sw,/\/src\/ui\/gis-export-events\.js/);
  assert.match(sw,/\/src\/ui\/gis-export-vegetation\.js/);
  assert.match(sw,/\/src\/ui\/gis-export-layout\.js/);
@@ -129,6 +133,7 @@ test('boot, SW and index will expose PNG adapter after locked exporter',()=>{
  assert.ok(index.indexOf('src/ui/park-export.js')<index.indexOf('src/ui/gis-export.js'));
  assert.ok(index.indexOf('src/ui/gis-export-canvas.js')<index.indexOf('src/ui/gis-export.js'));
  assert.ok(index.indexOf('src/ui/gis-export-events.js')<index.indexOf('src/ui/gis-export.js'));
+ assert.ok(index.indexOf('src/ui/gis-export-verified-canvas.js')<index.indexOf('src/ui/gis-export.js'));
 });
 test('PNG reads current session cells at export time and skips invalid cell bounds',async()=>{const cells=[];const {ctx,ops}=env({gridCells:cells});cells.push({w0:32.645,w1:32.65,s0:39.995,s1:40.0},{w0:NaN,w1:32.65,s0:39.995,s1:40.0});assert.equal(await ctx.window.downloadParkImage(),true);const baseline=env();assert.equal(await baseline.ctx.window.downloadParkImage(),true);assert.equal(ops.filter(x=>x==='grid').length-baseline.ops.filter(x=>x==='grid').length,1);});
 test('PNG remains available when the optional grid session is absent',async()=>{const {ctx}=env();delete ctx.DG_GRID_SESSION;assert.equal(await ctx.window.downloadParkImage(),true);});
