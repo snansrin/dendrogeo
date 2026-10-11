@@ -107,105 +107,27 @@ function downloadWaypointsCSV(){
 ========================================================= */
 
 async function runLandCoverAnalysis(){
-  if(window._dgLandCoverBusy){
-    return toast("Arazi örtüsü analizi zaten çalışıyor.","info","🛰️");
-  }
-
-  /* Faz 8: LULC zinciri artık TEMBEL — ilk kullanımda sırayla yüklenir.
-   * Yüklenemezse kullanıcıya sebep söylenir (sessiz başarısızlık yok). */
-  if(!window.DG_LANDCOVER && typeof dgEnsureLulc==="function"){
-    toast("🛰️ Arazi örtüsü modülü yükleniyor…","info");
-    try{
-      await dgEnsureLulc();
-    }catch(err){
-      return toast(dgCf("Arazi örtüsü modülü yüklenemedi: ")+((err&&err.message)||err),"err","🛰️");
-    }
-  }
-
-  if(!window.DG_LANDCOVER || typeof window.DG_LANDCOVER.analyze!=="function"){
-    return toast("10 m arazi örtüsü modülü yüklenmedi.","err","🗺️");
-  }
-
-  if(!PARK_POLY || !PARK_POLY.length){
-    return toast("Önce park seç","warn","🌳");
-  }
-
-  window._dgLandCoverBusy=true;
-  document.getElementById("v-map")?.classList.add("surface-review-active");
-  const pending=document.getElementById("surfacePendingTools");if(pending)pending.style.display="flex";
-  const pendingBase=document.getElementById("dgPendingBaseSelect");if(pendingBase)pendingBase.value=document.getElementById("baseLayerSelect")?.value||"osm";
-  const btn=$("landCoverBtn");
-  if(btn){
-    btn.disabled=true;
-    btn.dataset.oldText=btn.innerHTML;
-    btn.innerHTML="⏳ Analiz yapılıyor…";
-    btn.style.opacity=".65";
-    btn.style.cursor="wait";
-  }
-
-  const rep=$("landCoverReport");
-  if(rep){
-    rep.style.display="block";
-    rep.innerHTML=
-      "<b>🛰️ Arazi örtüsü analizi çalışıyor…</b>"+
-      "<div style='font-size:.72rem;color:var(--mut);margin-top:6px'>"+
-      "10 m raster verisi park polygonu ile kesiştiriliyor. Bu işlem bağlantıya göre biraz sürebilir; sonuç tamamlanmadan rapor yazılmayacak."+
-      "</div>";
-  }
-
-  toast(
-    "Arazi örtüsü analizi başladı. 10 m raster verisi okunuyor…",
-    "info",
-    "🛰️"
-  );
-
-  const parkArea=parkAreaM2();
-
-  return window.DG_LANDCOVER.analyze({
-    outer:PARK_POLY,
-    holes:PARK_HOLES||[],
-    parkAreaM2:parkArea
-  }).then(async result=>{
-    if(window.DG_LANDCOVER_RENDER_REPORT){
-      window.DG_LANDCOVER_RENDER_REPORT(rep,result,parkArea);
-    }
-    /* 0054 · 🛰 UYDU HASSASİYET PANELİ: rapor barlarının hemen altında
-     * belirir (kullanıcı isteği: "barlar gibi yatay bar — kaydırınca
-     * hassasiyet artsın, uydu üstünde işaretlensin, kabul edince
-     * kaydedilip öylece kalsın"). LULC zinciri zaten yüklü (bu köprünün
-     * başında dgEnsureLulc koşuldu); mount başarısızsa analiz SONUCU
-     * etkilenmez — typeof + try koruması. */
-    if(window.DG_LC_SENS&&typeof window.DG_LC_SENS.mount==="function"){
-      try{await window.DG_LC_SENS.mount("lcSens");}
-      catch(e){console.warn("DENDROGEO · hassasiyet paneli monte edilemedi:",e);toast(dgCf("Yüzey düzenleme açılamadı: ")+String(e.message||e),"err");}
-    }
-    toast(
-      "✓ 10 m arazi örtüsü analizi tamamlandı (ESA WorldCover 2021 + çapraz IO LULC 2020).",
-      "ok",
-      "🗺️"
-    );
-  }).catch(err=>{
-    console.error("DENDROGEO · Arazi örtüsü analizi:",err);
-    if(rep){
-      rep.style.display="block";
-      rep.innerHTML=
-        "<b>❌ 10 m arazi örtüsü analizi tamamlanamadı.</b>"+
-        "<div style='font-size:.74rem;color:var(--red);margin-top:7px'>"+esc(err?.message||String(err))+"</div>"+
-        "<div style='font-size:.68rem;color:var(--mut);margin-top:7px'>Geçersiz veya eksik sonuç rapora yazılmadı.</div>";
-    }
-    toast(dgCf("Arazi örtüsü analizi hatası: ")+(err?.message||String(err)),"err","🗺️");
-  }).finally(()=>{
-    window._dgLandCoverBusy=false;
-    if(pending)pending.style.display="none";
-    if(!window.DG_LC_SENS?.state?.record)document.getElementById("v-map")?.classList.remove("surface-review-active");
-    if(btn){
-      btn.disabled=false;
-      btn.innerHTML=btn.dataset.oldText||"🌿 Yüzey Örtüsü Analizi";
-      btn.style.opacity="";
-      btn.style.cursor="";
-    }
-  });
+  return dgParkLandCoverUi.run();
 }
+
+const dgParkLandCoverUi=window.DG_PARK_LANDCOVER_UI.create({
+  isBusy:()=>window._dgLandCoverBusy,
+  setBusy:value=>{window._dgLandCoverBusy=value;},
+  getLandcover:()=>window.DG_LANDCOVER,
+  ensureLulc:typeof dgEnsureLulc==="function"?()=>dgEnsureLulc():null,
+  getOuter:()=>PARK_POLY,
+  getHoles:()=>PARK_HOLES,
+  parkAreaM2:()=>parkAreaM2(),
+  getElement:id=>document.getElementById(id),
+  getButton:()=>$("landCoverBtn"),
+  getReport:()=>$("landCoverReport"),
+  getReportRenderer:()=>window.DG_LANDCOVER_RENDER_REPORT,
+  getSensitivity:()=>window.DG_LC_SENS,
+  hasSensitivityRecord:()=>Boolean(window.DG_LC_SENS?.state?.record),
+  toast:(...args)=>toast(...args),
+  cf:value=>dgCf(value),
+  escape:value=>esc(value)
+});
 
 function downloadLandCoverClassCSV(){
   if(window.DG_LANDCOVER && typeof window.DG_LANDCOVER.downloadClassCSV==="function"){
