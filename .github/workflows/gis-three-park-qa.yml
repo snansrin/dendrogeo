@@ -18,6 +18,7 @@ on:
       - 'src/ui/park-menu-ui.js'
       - 'src/ui/park-image-geometry.js'
       - 'src/ui/gis-export.js'
+      - 'src/ui/gis-export-canvas.js'
       - 'docs/surface-engine-lock.json'
       - 'docs/surface-scientific-contract.json'
       - 'test/surface-scientific-contract.test.mjs'
