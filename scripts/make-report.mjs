@@ -3,6 +3,7 @@ import {createReportPublicationApplication} from './lib/report-publication-appli
 import {createReportSpeciesPresentation, sw} from './lib/report-species-presentation.mjs';
 import {createReportQaPresentation} from './lib/report-qa-presentation.mjs';
 import {createReportEvaluationPresentation} from './lib/report-evaluation-presentation.mjs';
+import {createReportCitationPresentation} from './lib/report-citation-presentation.mjs';
 import {createReportLimitationsPresentation} from './lib/report-limitations-presentation.mjs';
 import { reportRead } from './lib/report-reader.mjs';
 import {reportContext} from './lib/report-context.mjs';
@@ -70,6 +71,7 @@ const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const read = (p) => readFileSync(join(ROOT, p), 'utf8');
 /* Yayın kökü: CNAME'den türetilir (elle yazılmış sabit URL sürüklenmesin). */
 const SITE_ORIGIN = (() => { try { const c = read('CNAME').trim(); return c ? 'https://' + c : 'https://dendrogeo.org'; } catch (e) { return 'https://dendrogeo.org'; } })();
+const renderCitationPresentation = createReportCitationPresentation({citeName, siteOrigin: SITE_ORIGIN});
 const arg = (a) => { const i = process.argv.indexOf('--' + a); return i >= 0 ? process.argv[i + 1] : null; };
 const has = (a) => process.argv.includes('--' + a);
 
@@ -537,48 +539,7 @@ export function renderReport(snap, { id, hash, version = 1, meta = null }) {
   const hist = [...(M.history || []).map((h) => ({ ...h, cur: false })), { id, date: snap.generated_at.slice(0, 10), note: 'İlk yayımlama', cur: true }];
   const histRows = hist.map((h) => `<tr${h.cur ? ' style="font-weight:700"' : ''}><td><code>${esc(h.id)}</code></td><td>1.0</td><td>${esc(h.date || '—')}</td><td class="tr">${esc(h.note || '')}${h.cur ? ' (bu rapor · geçerli sürüm)' : ''}</td></tr>`).join('');
 
-  /* ---- Atıf ---- */
-  const citeTitle = snap.study?.title || `${P.name} ağaç envanteri ve karbon stoku raporu`;
-  /* Yazar bloğu (0012): yayını isteyen kullanıcı YAZARDIR; kurucular ayrıca
-   * beyan edilir (DataCite: creators ≠ contributors). */
-  const AU = snap.author || {};
-  const authorCite = citeName(AU.name);
-  const authorPlain = authorCite || 'DendroGeo';
-  const citePlain = `${authorPlain} (${snap.generated_at.slice(0, 4)}). ${citeTitle}. DendroGeo Bilimsel Analiz Raporu, ${id} (sürüm ${verTxt}). DendroGeo. ${doi ? 'https://doi.org/' + doi : SITE_ORIGIN + '/rapor/' + id + '/'}`;
-  const bib = `@techreport{${id.toLowerCase().replace(/-/g, '')},
-  author    = {${AU.name ? citeName(AU.name) : 'DendroGeo (kurumsal yazar)'}},
-  contributor = {Şirin, Nagihan and Şirin, Sinan},
-  title     = {${citeTitle}},
-  year      = {${snap.generated_at.slice(0, 4)}},
-  number    = {${id}},
-  version   = {${verTxt}},
-  publisher = {DendroGeo},
-  url       = {${SITE_ORIGIN}/rapor/${id}/},
-  ${doi ? 'doi       = {' + doi + '},\n  ' : ''}note      = {sha256:${hash.slice(0, 16)}…}
-}`;
-
-  /* ---- Makine okur üst veri (DataCite Schema 4.7 desenine yakın; §11 + metadata.json) ---- */
-  const jsonld = {
-    '@context': 'https://schema.org',
-    '@type': 'Report',
-    name: snap.study?.title || `${P.name}: Bireysel Ağaç Envanteri ve Toprak Üstü / Toprak Altı Karbon Stoku`,
-    alternateName: id,
-    reportNumber: id,
-    inLanguage: 'tr',
-    datePublished: snap.generated_at.slice(0, 10),
-    version: verTxt,
-    license: 'https://creativecommons.org/licenses/by-nc/4.0/',
-    author: AU.name
-      ? [{ '@type': 'Person', name: AU.name }]
-      : [{ '@type': 'Organization', name: 'DendroGeo' }],
-    contributor: [{ '@type': 'Person', familyName: 'Şirin', givenName: 'Nagihan' }, { '@type': 'Person', familyName: 'Şirin', givenName: 'Sinan' }],
-    publisher: { '@type': 'Organization', name: 'DendroGeo', url: SITE_ORIGIN },
-    url: `${SITE_ORIGIN}/rapor/${id}/`,
-    spatialCoverage: { '@type': 'Place', name: `${P.city}, ${P.country}` },
-    temporalCoverage: String(dataYear),
-    identifier: doi ? { '@type': 'PropertyValue', propertyID: 'DOI', value: doi } : id,
-    citation: [...(L ? ['https://doi.org/10.5281/zenodo.7254221'] : []), 'https://doi.org/10.1111/gcb.12629'],
-  };
+  const {AU, citePlain, bib, jsonld} = renderCitationPresentation({snap, P, id, hash, verTxt, doi, L, dataYear});
 
   /* §4.1 saha protokolü metni VERİDEN türetilir: hangi alanın nasıl
    * kaydedildiği veri tablosundan okunur; bilinmeyen hassasiyet ASLA

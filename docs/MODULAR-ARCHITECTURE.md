@@ -340,3 +340,7 @@ Her modülün tek bir dış API'si, sahibi olduğu açık durumu ve kendi testle
 
 - scripts/lib/report-limitations-presentation.mjs mevcut veri/model/GNSS/envanter sınırlılık cümlelerini kapsar. Eşikler ve yasal kapsam beyanı mevcut çekirdekten sağlanır.
 - Gösterim koşulları, sıra ve metinler korunur; kaynak ölçümler ve hesaplama değişmez.
+
+### Report citation presentation (11 October 2026)
+
+`report-citation-presentation.mjs` owns plain citations, BibTeX and JSON-LD report identity. The report renderer supplies its validated DOI, version and frozen snapshot; author fallbacks, founder contributions, source citations and publication URLs retain their existing behavior.
