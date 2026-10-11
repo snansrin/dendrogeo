@@ -364,3 +364,7 @@ Her modülün tek bir dış API'si, sahibi olduğu açık durumu ve kendi testle
 ### Report history presentation (11 October 2026)
 
 `report-history-presentation.mjs` renders supplied archive entries and appends the current report row without mutating history. Entry order, date/note fallbacks, escaping and current-report emphasis retain the existing behavior. Archive lookup and immutable publication storage remain separate.
+
+### Report source descriptions (11 October 2026)
+
+`report-sources-presentation.mjs` renders primary, supplementary, field and cross-validation source disclosures. It preserves accepted/reviewed/raster branches, used-scene filtering, escaped source values and scope statements, without loading data or changing analysis.
