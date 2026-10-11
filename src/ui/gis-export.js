@@ -4,8 +4,8 @@
  * Does not use cross-origin tile screenshots or alter approved records. */
 (function(){
  "use strict";
- const read=id=>document.getElementById(id);
- const notify=(s,type="info")=>{if(typeof toast==="function")toast(s,type,"🖼️");};
+ const platform=window.DG_GIS_EXPORT_PLATFORM.create({document,getToast:()=>typeof toast==="function"?toast:null});
+ const {read,notify}=platform;
  const presentation=window.DG_GIS_EXPORT_PRESENTATION;
  const classes=()=>presentation.classes(()=>typeof DG_LC_CLASSES!=="undefined"?DG_LC_CLASSES:null);
  const fmt=presentation.format,safeName=presentation.safeName;
@@ -24,7 +24,7 @@
   if(typeof PARK_POLY==="undefined"||!Array.isArray(PARK_POLY)||!PARK_POLY.length){
    notify("Önce bir park seçin.","warn");return false;
   }
-  const opts={cover:read("chkPngCover")?.checked!==false,grid:read("chkPngGrid")?.checked!==false,wp:read("chkPngWp")?.checked!==false};
+  const opts=platform.options();
   const sens=window.DG_LC_SENS?.state,ndvi=!!sens?.vegetationView&&!sens.rawView;
   const ndviTiers=ndvi&&typeof dgSensVegetationTiers==="function"?dgSensVegetationTiers():null;
   const ndviPolys=ndvi?await waitVegetation(sens):[];
@@ -34,9 +34,8 @@
   }
   const layout=window.DG_GIS_EXPORT_LAYOUT.compute({rings:PARK_POLY,ndvi,project:window.DG_PARK_IMAGE_GEOMETRY.project});
   if(!layout){notify("Park geometrisi geçersiz, PNG oluşturulmadı.","err");return false;}
-  const {W,H,PAD,TOP,LEGEND,projection:pr}=layout;
-  const cv=document.createElement("canvas");cv.width=W;cv.height=H;
-  const ctx=cv.getContext("2d");if(!ctx){notify("Bu tarayıcı PNG oluşturmayı desteklemiyor.","err");return false;}
+  const {W,H}=layout;
+  const {canvas:cv,context:ctx}=platform.canvas(W,H);if(!ctx){notify("Bu tarayıcı PNG oluşturmayı desteklemiyor.","err");return false;}
   const {count}=window.DG_GIS_EXPORT_STANDARD_CANVAS.draw({
    context:ctx,layout,options:opts,sensitivity:sens,ndvi,ndviTiers,ndviPolys,parkRings:PARK_POLY,
    holes:typeof PARK_HOLES!=="undefined"?PARK_HOLES||[]:[],
@@ -89,10 +88,8 @@
   if(!layout){
    notify("Park sınırı geçersiz; doğrulanmış harita üretilmedi.","warn");return false;
   }
-  const {CW,CH,MX,MY,MW,MH,projector:pr}=layout;
-  const canvas=document.createElement("canvas");
-  canvas.width=CW;canvas.height=CH;
-  const g=canvas.getContext("2d");
+  const {CW,CH}=layout;
+  const {canvas,context:g}=platform.canvas(CW,CH);
   if(!g){notify("Tarayıcı PNG oluşturamıyor.","err");return false;}
   const classMap=classes();
   const draw=window.DG_GIS_EXPORT_VERIFIED_CANVAS.draw({
