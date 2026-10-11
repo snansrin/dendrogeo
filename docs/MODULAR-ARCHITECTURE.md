@@ -368,3 +368,7 @@ Her modülün tek bir dış API'si, sahibi olduğu açık durumu ve kendi testle
 ### Report source descriptions (11 October 2026)
 
 `report-sources-presentation.mjs` renders primary, supplementary, field and cross-validation source disclosures. It preserves accepted/reviewed/raster branches, used-scene filtering, escaped source values and scope statements, without loading data or changing analysis.
+
+### Report document head (11 October 2026)
+
+`report-document-head.mjs` renders document titles, descriptions, canonical/alternate links, sharing cards, JSON-LD and report styles through injected formatters. Existing image-card conditions and serialization remain unchanged; report calculations and publication behavior stay outside this module.
