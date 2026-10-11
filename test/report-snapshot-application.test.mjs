@@ -42,7 +42,8 @@ test('snapshot application preserves the public snapshot and hash result',async(
   carbon_kg:2.1,volume_m3:0.1,lat:39,lon:32,acc_m:4,photo:false,photo_file:null,date:'2026-10-11'
  });
  assert.equal(calls[0].table,'parks');
- assert.match(calls[1].params.select,/girth_cm,volume_m3/);
+ assert.match(calls[1].params.select,/girth_cm/);
+ assert.match(calls[1].params.select,/volume_m3/);
  assert.equal(calls[1].params.status,'eq.Onaylı');
 });
 
