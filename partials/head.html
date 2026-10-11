@@ -239,9 +239,8 @@
 <script src="src/config/measurement-protocol-lock.js?v=cf22767c" defer></script>
 <script src="src/config/wood-density-lock.js?v=6d7e459c" defer></script>
 <script src="src/config/species.js?v=79d811de" defer></script>
-<!-- DİL KATMANI (0035): TR markup varsayılan; EN sözlüğü çalışma zamanında
-     uygulanır (dgToggleLang). defer sırası önemli değil — DOMContentLoaded'da
-     ya da hemen (hazırsa) çalışır. module-registry + CORE_ASSETS kaydı şart. -->
+<!-- DİL KATMANI (0035): sözlük verisi çalışma zamanı çeviricisinden önce yüklenir. -->
+<script src="src/config/i18n-en.js?v=00000000" defer></script>
 <script src="src/config/i18n.js?v=bef57cca" defer></script>
 <script src="src/utils/geo.js?v=60cc3610" defer></script>
 <script src="src/utils/truncation.js?v=0ad446b1" defer></script>

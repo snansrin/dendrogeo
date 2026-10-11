@@ -26,7 +26,7 @@ const shell = rd('partials/shell.html');
 const landing = rd('partials/landing.html');
 const meas = rd('src/services/measure.js');
 const vs = rd('src/services/visit-stats.js');
-const i18n = rd('src/config/i18n.js');
+const i18n = rd('src/config/i18n-en.js') + '\n' + rd('src/config/i18n.js');
 
 describe('0045 · form ipucu kaldırıldı', () => {
   test('⭐ ipucu satırı hiçbir yayın yüzeyinde yok', () => {
