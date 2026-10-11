@@ -305,3 +305,8 @@ Her modülün tek bir dış API'si, sahibi olduğu açık durumu ve kendi testle
 
 - scripts/lib/park-report-publication.mjs künye doğrulama, kimlik/QR, snapshot, geçmiş, arşiv ve liste yenileme sırasını yönetir. Hesaplama, dosya ve sürüm bağımlılıkları dışarıdan sağlanır.
 - make-report.mjs publishPark dışa aktarımını korur; kimlik snapshot öncesinde atanır, hesaplama ve yayın sonucu biçimi değişmedi.
+
+## Rapor komut satırı — 11 Ekim 2026
+
+- scripts/lib/report-cli.mjs liste yenileme, park/künye seçenekleri, yayın başlatma ve sonuç mesajlarını kapsar. Dosya, yayın, çıktı ve çıkış bağımlılıkları dışarıdan sağlanır.
+- make-report.mjs main dışa aktarımını ve hata çıkış kodlarını korur; eksik park veya künye yayını başlatmaz.

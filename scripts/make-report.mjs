@@ -39,6 +39,7 @@ import { buildReportProvenance } from './lib/report-provenance.mjs';
 import { createReportMetadata } from './lib/report-metadata.mjs';
 import { pointInRing, pointInPolygon, ringSelfIntersections, geometrySelfIntersections, bboxRing, ringGeodesicAreaM2 } from './lib/report-geometry.mjs';
 export { pointInRing, pointInPolygon, ringSelfIntersections, geometrySelfIntersections, bboxRing, ringGeodesicAreaM2 };
+import {createReportCli} from './lib/report-cli.mjs';
 import {createParkReportPublisher} from './lib/park-report-publication.mjs';
 import {createReportArtifactWriter} from './lib/report-artifact-writer.mjs';
 import { DGR_ID_RE, rebuildIndex, nextReportId, parkHistory } from './lib/report-archive.mjs';
@@ -905,24 +906,9 @@ export async function publishPark(parkId, opts = {}) {
   return executePublication(parkId, opts);
 }
 
-export async function main() {
-  if (has('reindex')) {
-    const l = rebuildIndex();
-    console.log(`✅ rapor/index.html yeniden kuruldu (${l.length} geçerli yayın).`);
-    return;
-  }
-  const parkId = arg('park');
-  if (!parkId) { console.error('Kullanım: node scripts/make-report.mjs --park <id> [--skip-lulc] | --reindex'); process.exit(2); }
-  const publicationFile=arg('publication-file');if(!publicationFile)throw Error('Yayın künyesi gerekli: --publication-file künye.json');const study=decodeReportContext(readFileSync(publicationFile,'utf8'));if(!study)throw Error('Geçerli yayın künyesi gerekli.');
-  const r = await publishPark(parkId, { skipLulc: has('skip-lulc'), study });
-  console.log(`✅ Rapor yayınlandı: ${r.path}`);
-  console.log(`   park   : ${r.park_name} (${r.city}) · n=${r.n}`);
-  console.log(`   karbon : ${r.carbon_txt}`);
-  console.log(`   hash   : sha256:${r.hash}`);
-  console.log(`   sürüm  : ${r.report_version}${r.supersedes.length ? ' · yeniler: ' + r.supersedes.join(', ') : ''}`);
-  console.log(`   LULC   : ${r.lulc}`);
-  console.log(`   üst v. : ${r.metadata_path}`);
-  console.log(`   bağlantı: ${r.url}`);
-  console.log(`   atıf   : ${r.citation}`);
-}
+const executeCli = createReportCli({
+  arg, has, rebuildIndex, readFileSync, decodeReportContext, publishPark,
+  log:message=>console.log(message), error:message=>console.error(message), exit:code=>process.exit(code)
+});
+export async function main() { return executeCli(); }
 if (process.argv[1] === fileURLToPath(import.meta.url)) main().catch((e) => { console.error('❌', e.message); process.exit(1); });
