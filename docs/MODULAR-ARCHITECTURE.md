@@ -225,3 +225,5 @@ Her modülün tek bir dış API'si, sahibi olduğu açık durumu ve kendi testle
 - `ui/gis-export-canvas.js`, GIS PNG çıktısındaki vektör katmanlarını, standart/GeoJSON grid hücrelerini, waypoint işaretlerini ve kaynak/NDVI legend'ını Canvas'a çizer. `gis-export.js` orkestrasyon, park kırpması, proje filtresi/tekilleştirme ve dışa aktarma akışını yönetir.
 
 - `ui/gis-export-vegetation.js`, göreli NDVI poligonlarının hazır olup olmadığını ve sınırlı bekleme davranışını yönetir. Eşik ve çizim işlevlerini çağıran aktarır; PNG export mevcut gözlemler hazır değilse durur.
+
+- `ui/gis-export-events.js`, eski PNG düğmesi ile yüzey dışa aktarım diyaloğunun click yakalama ve katman seçimi uyumluluğunu sağlar; indirme işini GIS export adapter'ına bırakır.

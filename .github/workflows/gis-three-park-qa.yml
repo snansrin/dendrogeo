@@ -19,6 +19,7 @@ on:
       - 'src/ui/park-image-geometry.js'
       - 'src/ui/gis-export.js'
       - 'src/ui/gis-export-canvas.js'
+      - 'src/ui/gis-export-events.js'
       - 'src/ui/gis-export-vegetation.js'
       - 'docs/surface-engine-lock.json'
       - 'docs/surface-scientific-contract.json'
