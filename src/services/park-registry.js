@@ -919,10 +919,7 @@ function dgParkSchemaMissing(reason){
 }
 
 function dgSchemaWarnHTML(){
- return DG_PARK_SCHEMA_OK?"":
-  `<div class="alert warn" style="margin:6px 0"><b>⚠ Park kimliği devre dışı:</b> veritabanında `+
-  `<span class="mono">public.parks</span> yok. <span class="mono">supabase/migrations/0004_parks.sql</span> `+
-  `çalıştırılana kadar karşılaştırma proje adı bazında kalır ve ölçüm kapısı uygulanamaz.</div>`;
+ return window.DG_PARK_SCHEMA_WARNING_UI.render({available:DG_PARK_SCHEMA_OK});
 }
 
 window.startParkScan=startParkScan;
