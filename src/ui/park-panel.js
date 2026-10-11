@@ -129,21 +129,9 @@ async function drawPark(park){
     ? PROJ_LIST.filter(p=>p.park_id===parkRow.id)
     : [];
 
-  const alt=
-    PARK_CANDS.length>1
-      ?
-      `<select id="parkAlt" onchange="switchPark(+this.value)" style="font-size:.8rem;padding:4px 8px;border-radius:6px;border:1px solid var(--line)">`+
-      PARK_CANDS
-        .map(
-          (c,i)=>
-            `<option value="${i}"${c===park?" selected":""}>`+
-            `${esc(c.name||"Alan "+(i+1))} · ${(c.area/10000).toFixed(1)} ha`+
-            `</option>`
-        )
-        .join("")+
-      `</select>`
-      :
-      "";
+  const alt=window.DG_PARK_CANDIDATE_SELECT_UI.render({
+    candidates:PARK_CANDS,selected:park,escape:esc,formatArea:value=>value.toFixed(1)
+  });
 
   $("parkInfo").style.display="block";
 

@@ -211,3 +211,5 @@ Her modülün tek bir dış API'si, sahibi olduğu açık durumu ve kendi testle
 - `ui/park-reset-controller.js`, menü temizliği, park/su/sert katman kaldırma, geometri/kimlik sıfırlama, inceleme cleanup ve yerel yüzey kaplarını sıfırlama sırasını yönetir. Harita yokken katman referansları korunur; yalnız cleanup hatası eski davranıştaki gibi yutulur. Park ekranı mevcut durum bağlarını sağlar.
 
 - `ui/park-boundary-layer.js`, park dış/iç halkalarını mevcut Leaflet stilleriyle çizer ve verilen halkalarla harita sınırını kurar. Çizim geometriyi değiştirmez; katman referansı polygon çiziminden önce bağlanır. Park ekranı OSM kapsamı sonrası fit sırasını ve 30 px padding değerini korur.
+
+- `ui/park-candidate-select.js`, alternatif park seçeneklerinin mevcut sırasını, aktif park kimliğini, HTML kaçışını ve bir ondalık hektar gösterimini üretir. Tek/boş aday listesinde seçici çizmez; park paneli `switchPark` çağrısını ve mevcut biçimleyicileri bağlar.
