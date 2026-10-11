@@ -96,35 +96,8 @@
   ctx.strokeStyle="#166534";ctx.lineWidth=2;ctx.setLineDash([9,5]);
   for(const ring of PARK_POLY){ctx.beginPath();outline(ctx,pr,ring);ctx.stroke();}
   ctx.setLineDash([]);
-  const y=H-LEGEND+26;
-  ctx.fillStyle="#fff";ctx.fillRect(PAD-10,y-26,W-2*PAD+20,LEGEND-40);
-  ctx.font="bold 14px system-ui,sans-serif";ctx.fillStyle="#14532d";
-  ctx.fillText(ndvi?"Göreli NDVI · park içi üçlü yeşillik sınıfı":"Arazi örtüsü sınıfları",PAD,y);
-  const swatches=ndvi?
-   [["Seyrek",typeof DG_SENS_VEGETATION_COLORS!=="undefined"?DG_SENS_VEGETATION_COLORS.sparse:"#fde68a"],
-    ["Orta",typeof DG_SENS_VEGETATION_COLORS!=="undefined"?DG_SENS_VEGETATION_COLORS.moderate:"#4ade80"],
-    ["Yoğun",typeof DG_SENS_VEGETATION_COLORS!=="undefined"?DG_SENS_VEGETATION_COLORS.dense:"#166534"]]:
-   ["green","water","hard","bare"].map(k=>[dict[k]?.label||k,dict[k]?.color||"#94a3b8"]);
-  let x=PAD;for(const [label,color] of swatches){
-   ctx.fillStyle=color;ctx.fillRect(x,y+17,15,12);ctx.fillStyle="#334155";
-   ctx.font="13px system-ui,sans-serif";ctx.fillText(label,x+20,y+28);
-   x+=Math.max(116,ctx.measureText(label).width+46);
-  }
-  ctx.fillStyle="#64748b";ctx.font="11px system-ui,sans-serif";
-  if(ndvi&&ndviTiers?.count>=9){
-   const distribution={sparse:0,moderate:0,dense:0};
-   for(const tier of ndviTiers.tiers?.values?.()||[])if(tier in distribution)distribution[tier]++;
-   const line="Uygun yeşil hücre: "+fmt(ndviTiers.count)+" / "+fmt(ndviTiers.eligible)+
-    "  ·  Seyrek "+fmt(distribution.sparse)+"  ·  Orta "+fmt(distribution.moderate)+"  ·  Yoğun "+fmt(distribution.dense);
-   ctx.font="12px system-ui,sans-serif";ctx.fillStyle="#334155";
-   ctx.fillText(line,PAD,H-112,W-PAD*2);
-   const cut=ndviTiers.cutoffs;
-   if(Array.isArray(cut)&&cut.length===2)
-    ctx.fillText("NDVI park içi üçte birlik eşikleri: "+cut.map(n=>Number(n).toFixed(3)).join(" / ")+" · Hücre başına en az 3 geçerli gözlem",PAD,H-89,W-PAD*2);
-  }
-  ctx.fillText(ndvi?"Göreli NDVI park içi karşılaştırmadır; mutlak taç örtüsü ölçümü değildir.":"Kaynak: ESA WorldCover 2021 v200 · OSM sınırı",PAD,H-58);
-  ctx.fillText("© OpenStreetMap katkıcıları (ODbL) · © ESA WorldCover (CC BY 4.0) · DendroGeo",PAD,H-39);
-  ctx.fillText("Çıktı görselleştirmedir; kayıtlı bilimsel sonucun yerine geçmez.",PAD,H-20);
+  window.DG_GIS_EXPORT_CANVAS.drawLegend(ctx,{width:W,height:H,pad:PAD,legend:LEGEND,ndvi,tiers:ndviTiers,
+   classes:dict,vegetationColors:typeof DG_SENS_VEGETATION_COLORS!=="undefined"?DG_SENS_VEGETATION_COLORS:{sparse:"#fde68a",moderate:"#4ade80",dense:"#166534"},format:fmt});
   if(!count&&!ndvi){notify("Bu park için çizilecek yüzey geometrisi henüz hazırlanmadı. Önce analizi açın.","warn");return false;}
   return await new Promise(resolve=>cv.toBlob(blob=>{
    if(!blob){notify("PNG üretilemedi.","err");resolve(false);return;}

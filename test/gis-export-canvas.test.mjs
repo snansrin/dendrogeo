@@ -8,7 +8,7 @@ vm.runInContext(readFileSync(new URL('../src/ui/gis-export-canvas.js',import.met
 const canvas=context.window.DG_GIS_EXPORT_CANVAS;
 function mockContext(){
  const events=[];
- return {events,beginPath:()=>events.push(['begin']),moveTo:(x,y)=>events.push(['move',x,y]),lineTo:(x,y)=>events.push(['line',x,y]),closePath:()=>events.push(['close']),fill:rule=>events.push(['fill',rule]),stroke:()=>events.push(['stroke']),strokeRect:(...args)=>events.push(['rect',...args]),arc:(...args)=>events.push(['arc',...args]),fillText:(...args)=>events.push(['text',...args]),globalAlpha:1,fillStyle:''};
+ return {events,beginPath:()=>events.push(['begin']),moveTo:(x,y)=>events.push(['move',x,y]),lineTo:(x,y)=>events.push(['line',x,y]),closePath:()=>events.push(['close']),fill:rule=>events.push(['fill',rule]),stroke:()=>events.push(['stroke']),strokeRect:(...args)=>events.push(['rect',...args]),arc:(...args)=>events.push(['arc',...args]),fillText:(...args)=>events.push(['text',...args]),fillRect:(...args)=>events.push(['fillRect',...args]),measureText:()=>({width:20}),globalAlpha:1,fillStyle:''};
 }
 
 test('Leaflet polygons draw every outer and inner ring into one even-odd fill',()=>{
@@ -80,4 +80,28 @@ test('verified waypoints retain numbered labels, status colors, and white outlin
  assert.deepEqual(ctx.events.filter(x=>x[0]==='text'),[['text','11',40,44],['text','12',60,84]]);
  assert.equal(ctx.events.filter(x=>x[0]==='stroke').length,2);
  assert.equal(ctx.fillStyle,'#182420');assert.equal(ctx.font,'bold 14px Arial');
+});
+
+test('standard legend keeps land-cover swatches and source footers',()=>{
+ const ctx=mockContext();
+ canvas.drawLegend(ctx,{width:940,height:900,pad:76,legend:146,ndvi:false,tiers:null,
+  classes:{green:{label:'Yeşil alan',color:'#4ade80'},water:{label:'Su',color:'#3b82f6'},hard:{label:'Sert zemin',color:'#64748b'},bare:{label:'Çıplak zemin',color:'#8b5a2b'}},
+  vegetationColors:{},format:n=>String(n)});
+ const labels=ctx.events.filter(x=>x[0]==='text').map(x=>x[1]);
+ assert.ok(labels.includes('Arazi örtüsü sınıfları'));
+ assert.ok(labels.includes('Yeşil alan'));
+ assert.ok(labels.includes('Kaynak: ESA WorldCover 2021 v200 · OSM sınırı'));
+ assert.ok(labels.includes('Çıktı görselleştirmedir; kayıtlı bilimsel sonucun yerine geçmez.'));
+});
+
+test('NDVI legend retains tier counts, thresholds, and comparative disclaimer',()=>{
+ const ctx=mockContext();
+ canvas.drawLegend(ctx,{width:1240,height:1560,pad:40,legend:206,ndvi:true,
+  tiers:{count:9,eligible:12,cutoffs:[.2,.4],tiers:new Map([['a','sparse'],['b','moderate'],['c','dense']])},
+  classes:{},vegetationColors:{sparse:'#fde68a',moderate:'#4ade80',dense:'#166534'},format:n=>String(n)});
+ const labels=ctx.events.filter(x=>x[0]==='text').map(x=>x[1]);
+ assert.ok(labels.includes('Göreli NDVI · park içi üçlü yeşillik sınıfı'));
+ assert.ok(labels.some(x=>x.includes('Uygun yeşil hücre: 9 / 12')));
+ assert.ok(labels.some(x=>x.includes('0.200 / 0.400')));
+ assert.ok(labels.includes('Göreli NDVI park içi karşılaştırmadır; mutlak taç örtüsü ölçümü değildir.'));
 });
