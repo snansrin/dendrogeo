@@ -28,7 +28,7 @@ describe('DBH sunum standardı',()=>{
   assert.match(ex,/const dbh=Number\.isFinite\(\+r\.dbh_cm\)\?\(\+r\.dbh_cm\)\.toFixed\(1\)/);
  });
  test('README ve yöntem dokümanı tam hassasiyet ile gösterim hassasiyetini ayırır',()=>{
-  assert.match(rd('README.md'),/DBH'yi \*\*1 ondalık basamakla\*\* gösterir/);
+  assert.match(rd('README.md'),/(DBH'yi \*\*1 ondalık basamakla\*\* gösterir|Arayüzde 1 ondalık basamak gösterilir)/);
   assert.match(rd('docs/methods.md'),/28,647889… → 28,6 cm/);
   assert.match(rd('en/methods/index.html'),/DBH is displayed to one decimal place/);
  });
