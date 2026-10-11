@@ -348,3 +348,7 @@ Her modülün tek bir dış API'si, sahibi olduğu açık durumu ve kendi testle
 ### Report method presentation (11 October 2026)
 
 `report-method-presentation.mjs` renders data-derived measurement, GNSS, photo and land-cover method statements. It preserves the existing accepted/reviewed/raster branches and receives formatters from the renderer; it performs no scientific calculation or publication side effect.
+
+### Report QA explanations (11 October 2026)
+
+`report-qa-explanation.mjs` assembles existing review reasons and the measurement-clean disclosure from snapshot QA findings. It preserves reason ordering, counts and the distinction between measurement findings and missing supporting evidence; classification and publication gates remain unchanged.

@@ -3,6 +3,7 @@ import {createReportPublicationApplication} from './lib/report-publication-appli
 import {createReportSpeciesPresentation, sw} from './lib/report-species-presentation.mjs';
 import {createReportQaPresentation} from './lib/report-qa-presentation.mjs';
 import {createReportEvaluationPresentation} from './lib/report-evaluation-presentation.mjs';
+import {createReportQaExplanation} from './lib/report-qa-explanation.mjs';
 import {createReportMethodPresentation} from './lib/report-method-presentation.mjs';
 import {createReportCitationPresentation} from './lib/report-citation-presentation.mjs';
 import {createReportLimitationsPresentation} from './lib/report-limitations-presentation.mjs';
@@ -372,6 +373,7 @@ const renderLimitationsPresentation = createReportLimitationsPresentation({
     trNum, QA_LIMITS,
     YASAL_STATU_KAPSAM,
 });
+const explainReportQa = createReportQaExplanation({QA_LIMITS});
 const renderMethodPresentation = createReportMethodPresentation({esc, trNum, fmtDateTr});
 const renderEvaluationPresentation = createReportEvaluationPresentation({esc, trNum});
 const renderSpeciesPresentation = createReportSpeciesPresentation({esc, trNum});
@@ -515,23 +517,7 @@ export function renderReport(snap, { id, hash, version = 1, meta = null }) {
    * FINAL: saha çevresi korunur ve DBH=C/π ile türetilir; Göksu benzeri gerçek
    * saha verisi artık ⛔ BLOKLU değil 🟡 İNCELEME / 🟢 GEÇERLİ olur. */
   const {QA_ST, QA_ST_LABEL, QA_ST_CLASS, QA_BLOCKED, QA_REVIEW, qaStates} = qaPresentation.summary();
-  /* 0032 · İnceleme kalemleri ağaç DEĞERLERİYLE ilgili mi? Değilse rapor bunu
-   * açıkça söyler: kullanıcı, kendi ölçümünün şüpheli olduğu izlenimini
-   * görmemeli. Örnek: GNSS accuracy_m alanı boşsa kontrol KOŞULAMAZ (⚠) ama
-   * DBH/boy/karbon kontrollerinin tümü geçerlidir. */
-  const AGAC_DEGER_TEMIZ = !INV || (!INV.dbh_fail.length && !INV.hd_fail.length && !INV.h_fail.length && !INV.dev_fail.length && !INV.n_unknown);
-  /* İnceleme/blok kalemlerinin adı — §7 giriş cümlesinde sayıyla beyan edilir. */
-  const qaWhy = [];
-  if (INV) {
-    if (INV.dbh_fail.length) qaWhy.push(`DBH geçerlilik kontrolünde ${INV.dbh_fail.length}/${INV.n} kayıt`);
-    if (INV.hd_review) qaWhy.push(`gövde formu (boy/çap) incelemesinde ${INV.hd_fail.length}/${INV.n} kayıt fiziksel makullük bandı dışında veya stand içi aykırı`);
-    if (INV.dev_fail.length) qaWhy.push(`karbon yeniden hesabında ${INV.dev_fail.length}/${INV.n} kayıt ±%${QA_LIMITS.CARBON_DEV_PCT} bandı dışında`);
-    if (INV.species_review) qaWhy.push(`${INV.n_unknown} tür kanonik sözlük dışında`);
-  }
-  if ((G.n_with_acc ?? 0) === 0) qaWhy.push('GNSS alıcı doğruluğu (accuracy_m) kaydedilmemiş');
-  if ((snap.geofence.outside_rows || 0) > 0) qaWhy.push(`${snap.geofence.outside_rows} kayıt poligon dışında`);
-  if (nPhoto < NR) qaWhy.push(`${NR - nPhoto} kayıtta fotoğraf kanıtı eksik`);
-  const QA_WHY = qaWhy.join('; ');
+  const {AGAC_DEGER_TEMIZ, QA_WHY} = explainReportQa({INV, G, snap, nPhoto, NR});
 
   const evalParas = renderEvaluationPresentation({snap, L, t, ciTxt});
 
