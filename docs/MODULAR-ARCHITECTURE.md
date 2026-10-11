@@ -295,3 +295,8 @@ Her modülün tek bir dış API'si, sahibi olduğu açık durumu ve kendi testle
 
 - scripts/lib/report-queue-application.mjs kabul edilmiş yüzey, yayın isteği, geri çekme ve kuyruk yürütücüsünü tek yerde bağlar. Oluşturulması yayın veya dosya işlemi başlatmaz.
 - publish-queue.mjs ağ/CLI ve mevcut yayın seçeneklerini sağlayan uyumluluk girişidir; dışa aktarımlar ve varsayılan kök korunur.
+
+## Rapor arşiv dosyaları — 11 Ekim 2026
+
+- scripts/lib/report-artifact-writer.mjs HTML, PNG, yüzey geometrisi, veri, CSV, ölçüm geometrisi ve üst veri dosyalarının yazımını kapsar. Dosya ve rapor üretim bağımlılıkları dışarıdan sağlanır.
+- publishPark kimlik atama, snapshot üretme, geçmiş ve liste yenileme sırasını korur. Dosya adları ve JSON biçimleri değişmedi.
