@@ -20,7 +20,7 @@ test('hash is independent of VM realm and legacy Monte Carlo import remains comp
 });
 
 test('report publishing consumers depend on the integrity helper directly',()=>{
- for(const path of ['scripts/make-report.mjs','scripts/publish-queue.mjs','scripts/prepare-report-doi.mjs','scripts/register-doi.mjs','scripts/render-report-pdf.mjs']){
+ for(const path of ['scripts/make-report.mjs','scripts/lib/accepted-surface-publication.mjs','scripts/prepare-report-doi.mjs','scripts/register-doi.mjs','scripts/render-report-pdf.mjs']){
   const source=readFileSync(new URL('../'+path,import.meta.url),'utf8');
   assert.match(source,/canonical-hash\.mjs/,path);
   assert.doesNotMatch(source,/canonicalHash[^\n]*lib\/mc\.mjs/,path+' should not couple integrity to statistics');

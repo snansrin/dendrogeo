@@ -44,8 +44,8 @@ import { readFileSync, writeFileSync, existsSync, unlinkSync } from 'node:fs';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { publishPark, renderRetractionNotice, rebuildIndex, DGR_ID_RE, renderReport, buildMetadata, qrDataUri, parkHistory } from './make-report.mjs';
-import { canonicalHash } from './lib/canonical-hash.mjs';
-import { acceptedSurfaceToLulc, stripUnavailableSurfaceMap, isAcceptedSurfaceSnapshot } from './lib/surface-snapshot.mjs';
+import {createAcceptedSurfacePublisher} from './lib/accepted-surface-publication.mjs';
+import { isAcceptedSurfaceSnapshot } from './lib/surface-snapshot.mjs';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const read = (p) => readFileSync(join(ROOT, p), 'utf8');
@@ -99,57 +99,10 @@ export async function fetchPendingRetractions(limit = 50,processedIds=[],cutoff=
  return{rows:out.slice(0,limit),missing:false};
 }
 
-/* Kabul edilmiş yüzey sonucu, publishPark'in ürettiği normal snapshot üzerine
- * rapor kimliği değişmeden yeniden dondurulur. Bu aşama geometri açığa çıkarmaz. */
-export async function applyAcceptedSurfaceSnapshot(pub, surfaceSnapshot, root = ROOT) {
-  if (!isAcceptedSurfaceSnapshot(surfaceSnapshot)) return pub;
-  const dir = join(root, 'rapor', String(pub.id));
-  const dataPath = join(dir, 'data.json');
-  if (!existsSync(dataPath)) throw new Error('Yayın snapshot dosyası bulunamadı: ' + pub.id);
-  const snap = JSON.parse(readFileSync(dataPath, 'utf8'));
-  const lulc = acceptedSurfaceToLulc(surfaceSnapshot, snap.park && snap.park.area_m2);
-  if (!lulc) throw new Error('Kabul edilmiş yüzey snapshot alanları geçersiz veya boş.');
-
-  snap.lulc = lulc;
-  snap.provenance = {
-    ...(snap.provenance || {}),
-    dataset: lulc.source,
-    epsg: null,
-    surface_review: {
-      schema: surfaceSnapshot.schema,
-      revision: lulc.revision,
-      accepted_at: lulc.accepted_at,
-      source_fingerprint: lulc.source_fingerprint,
-      object_fingerprint: lulc.object_fingerprint,
-      geometry_published: false,
-    },
-  };
-  const hash = canonicalHash(snap);
-  const rapDir = join(root, 'rapor');
-  const history = parkHistory(rapDir, snap.park.id, pub.id);
-  const meta = {
-    id: pub.id,
-    git_commit: snap.provenance.git_commit || null,
-    engine_version: snap.provenance.engine_version || null,
-    app_version: snap.provenance.app_version || null,
-    qr_uri: await qrDataUri(pub.url),
-  };
-  let html = renderReport(snap, { id: pub.id, hash, version: pub.version || 1, meta: { ...meta, history } });
-  html = stripUnavailableSurfaceMap(html);
-  writeFileSync(join(dir, 'index.html'), html);
-  writeFileSync(dataPath, JSON.stringify(snap));
-  writeFileSync(join(dir, 'metadata.json'), JSON.stringify(buildMetadata(snap, { id: pub.id, hash, version: '1.0', meta, history })) + '\n');
-  try { unlinkSync(join(dir, 'harita.png')); } catch (e) { /* kabul snapshot'ında geometri yayımlanmaz */ }
-  rebuildIndex(rapDir);
-  return {
-    ...pub,
-    hash,
-    lulc: `dahil (son kabul edilmiş yüzey kaydı · r${lulc.revision || '—'})`,
-    surface_snapshot: true,
-    surface_revision: lulc.revision,
-    surface_accepted_at: lulc.accepted_at,
-  };
-}
+export const applyAcceptedSurfaceSnapshot = createAcceptedSurfacePublisher({
+  defaultRoot: ROOT, readFileSync, writeFileSync, existsSync, unlinkSync,
+  renderReport, buildMetadata, qrDataUri, parkHistory, rebuildIndex
+});
 
 /* ---------- tek isteğin işlenmesi ---------- */
 async function handle(req) {
