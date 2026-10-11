@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+import {createReportPublicationApplication} from './lib/report-publication-application.mjs';
 import { reportRead } from './lib/report-reader.mjs';
 import {reportContext} from './lib/report-context.mjs';
 import { decodeReportContext } from './lib/report-context.mjs';
@@ -39,9 +40,6 @@ import { buildReportProvenance } from './lib/report-provenance.mjs';
 import { createReportMetadata } from './lib/report-metadata.mjs';
 import { pointInRing, pointInPolygon, ringSelfIntersections, geometrySelfIntersections, bboxRing, ringGeodesicAreaM2 } from './lib/report-geometry.mjs';
 export { pointInRing, pointInPolygon, ringSelfIntersections, geometrySelfIntersections, bboxRing, ringGeodesicAreaM2 };
-import {createReportCli} from './lib/report-cli.mjs';
-import {createParkReportPublisher} from './lib/park-report-publication.mjs';
-import {createReportArtifactWriter} from './lib/report-artifact-writer.mjs';
 import { DGR_ID_RE, rebuildIndex, nextReportId, parkHistory } from './lib/report-archive.mjs';
 export { DGR_ID_RE, rebuildIndex, nextReportId, parkHistory };
 import { citeName, fmtDateTr, fmtDateDot, epsgLabel } from './lib/report-formatting.mjs';
@@ -896,19 +894,17 @@ export function buildMetadata(snap, options) {
  * Dönüş değeri yayın kimliğini taşır; kuyruk günlüğü (rapor/yayin-kuyrugu.json)
  * bu nesneden yazılır ve uygulamadaki "📄 Bilimsel Rapor Yayını" kartı kalıcı
  * bağlantıyı oradan okur. */
-const writeReportArtifacts = createReportArtifactWriter({mkdirSync, writeFileSync, renderReport, buildMetadata, mcRowCI});
-const executePublication = createParkReportPublisher({
-  root:ROOT, siteOrigin:SITE_ORIGIN, gitCommit:GIT_COMMIT, engineVersion:ENGINE_VERSION, appVersion:APP_VERSION,
-  reportContext, mkdirSync, nextReportId, qrDataUri, buildSnapshot, parkHistory,
-  writeReportArtifacts, rebuildIndex, fmtT, citeName
+const publicationApplication = createReportPublicationApplication({
+  artifacts:{mkdirSync, writeFileSync, renderReport, buildMetadata, mcRowCI},
+  publication:{
+    root:ROOT, siteOrigin:SITE_ORIGIN, gitCommit:GIT_COMMIT, engineVersion:ENGINE_VERSION, appVersion:APP_VERSION,
+    reportContext, mkdirSync, nextReportId, qrDataUri, buildSnapshot, parkHistory, rebuildIndex, fmtT, citeName
+  },
+  cli:{
+    arg, has, rebuildIndex, readFileSync, decodeReportContext,
+    log:message=>console.log(message), error:message=>console.error(message), exit:code=>process.exit(code)
+  }
 });
-export async function publishPark(parkId, opts = {}) {
-  return executePublication(parkId, opts);
-}
-
-const executeCli = createReportCli({
-  arg, has, rebuildIndex, readFileSync, decodeReportContext, publishPark,
-  log:message=>console.log(message), error:message=>console.error(message), exit:code=>process.exit(code)
-});
-export async function main() { return executeCli(); }
+export async function publishPark(parkId, opts = {}) { return publicationApplication.publishPark(parkId, opts); }
+export async function main() { return publicationApplication.main(); }
 if (process.argv[1] === fileURLToPath(import.meta.url)) main().catch((e) => { console.error('❌', e.message); process.exit(1); });

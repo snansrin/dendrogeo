@@ -310,3 +310,8 @@ Her modülün tek bir dış API'si, sahibi olduğu açık durumu ve kendi testle
 
 - scripts/lib/report-cli.mjs liste yenileme, park/künye seçenekleri, yayın başlatma ve sonuç mesajlarını kapsar. Dosya, yayın, çıktı ve çıkış bağımlılıkları dışarıdan sağlanır.
 - make-report.mjs main dışa aktarımını ve hata çıkış kodlarını korur; eksik park veya künye yayını başlatmaz.
+
+## Rapor yayın bileşimi — 11 Ekim 2026
+
+- scripts/lib/report-publication-application.mjs arşiv yazımı, park yayını ve komut satırı akışını birleştirir. Oluşturulması dış işlem başlatmaz.
+- make-report.mjs publishPark/main girişlerini ve mevcut bağımlılıkları sağlar; kimlik, hesaplama ve dosya biçimleri korunur.
