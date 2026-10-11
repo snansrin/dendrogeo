@@ -512,22 +512,15 @@ function dgProjectChanged(){
 
 /* Proje listesi seçeneği: parkı olan 🌳, olmayan ⛔ ile işaretlenir. */
 function dgProjectOptionLabel(p){
-  if(!p)return "";
-  return p.park_id?p.name:"⛔ "+p.name+" (park yok)";
+  return window.DG_PARK_PROJECT_OPTIONS_UI.label(p);
 }
 
 /* Grid panelindeki proje seçimi yalnız bu parkın projelerini gösterir:
  * grid/waypoint yanlışlıkla başka parka yazılmasın. */
 function dgProjectOptionsForPark(parkId,fallbackAll){
-  const list=PROJ_LIST||[];
-  const mine=parkId?list.filter(p=>p.park_id===parkId):[];
-  if(mine.length){
-    return mine.map(p=>`<option value="${p.id}">${esc(p.name)}</option>`).join("");
-  }
-  if(fallbackAll&&list.length){
-    return list.map(p=>`<option value="${p.id}">${esc(p.name)}</option>`).join("");
-  }
-  return `<option value="0">Bu park için proje yok — algılama kartından oluştur</option>`;
+  return window.DG_PARK_PROJECT_OPTIONS_UI.forPark({
+    parkId,fallbackAll,projects:PROJ_LIST,escape:esc
+  });
 }
 
 /* =========================================================
