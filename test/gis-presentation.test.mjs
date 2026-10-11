@@ -23,6 +23,7 @@ test('GIS PNG adapter tolerates late-loaded landcover classes and intercepts the
  vm.runInNewContext(load('src/ui/gis-export-platform.js'),sandbox);
  vm.runInNewContext(load('src/ui/gis-export-sources.js'),sandbox);
  vm.runInNewContext(load('src/ui/gis-export-workflow.js'),sandbox);
+ vm.runInNewContext(load('src/ui/gis-export-verified-workflow.js'),sandbox);
  vm.runInNewContext(load('src/ui/gis-export.js'),sandbox,{filename:'src/ui/gis-export.js'});
  const png=sandbox.window.DG_GIS_PNG_EXPORT;
  assert.equal(png.classes().green.label,'Yeşil alan');
@@ -243,10 +244,10 @@ test('green sensitivity uses a colored explicit browser-native track and no blac
 
 
 test('verified NDVI PNG uses 1240x1560 official layout and paints observed green tiers over land cover',()=>{
- const src=load('src/ui/gis-export.js')+'\n'+load('src/application/surface/prepare-verified-map-export.js')+'\n'+load('src/ui/gis-export-verified-canvas.js');
+ const src=load('src/ui/gis-export-verified-workflow.js')+'\n'+load('src/ui/gis-export.js')+'\n'+load('src/application/surface/prepare-verified-map-export.js')+'\n'+load('src/ui/gis-export-verified-canvas.js');
  const layout=load('src/ui/gis-export-layout.js');
  assert.match(src,/async function renderVerified\(layers\)/);
- assert.match(src,/DG_GIS_EXPORT_LAYOUT\.computeVerified\(\{rings:PARK_POLY\}\)/);
+ assert.match(src,/computeLayout\(\{rings:getParkRings\(\)\}\)/);
  assert.match(layout,/CW=1240,CH=1560,MX=40,MY=240,MW=760,MH=1180/);
  assert.match(src,/g\.fillText\("DOĞRULANMIŞ PARK HARİTASI"/);
  assert.match(src,/for\(const poly of ndviPolys\)[\s\S]*?drawLeaflet\(g,pr,poly/);
@@ -287,6 +288,7 @@ test('verified-map original dialog is untouched with NDVI off; its PNG download 
  vm.runInNewContext(load('src/ui/gis-export-platform.js'),context);
  vm.runInNewContext(load('src/ui/gis-export-sources.js'),context);
  vm.runInNewContext(load('src/ui/gis-export-workflow.js'),context);
+ vm.runInNewContext(load('src/ui/gis-export-verified-workflow.js'),context);
  vm.runInNewContext(load('src/ui/gis-export.js'),context);
  let prevented=0,stopped=0;
  const click=()=>({target,preventDefault:()=>{prevented++;},stopImmediatePropagation:()=>{stopped++;}});
