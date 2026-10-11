@@ -230,6 +230,8 @@ Her modülün tek bir dış API'si, sahibi olduğu açık durumu ve kendi testle
 
 - `ui/gis-export-layout.js`, standart ve onaylı GIS PNG için park bounds, metre ölçüsü, canvas boyutu ve piksel projeksiyonunu hesaplar. Geçersiz ya da sıfır alanlı sınırı reddeder; çizim ve indirme adapter'da kalır.
 
+- `application/surface/prepare-verified-map-export.js`, doğrulanmış harita PNG'si için kayıt, park, NDVI görünümü ve en az dokuz uygun hücre kapılarını salt okunur biçimde değerlendirir. `gis-export.js` eski uyarıları ve indirme akışını korur; hassasiyet eşikleri ile analiz verisine yazmaz.
+
 - `ui/park-export-layout.js`, park analiz PNG'si için dış sınır ve deliklerden metre tamponlu bounds, canvas boyutu ve projeksiyon girdilerini hesaplar; görsel çizimi `park-export.js` içinde bırakır.
 
 - `domain/parks/park-export-formats.js`, grid GeoJSON özelliklerini/geometri yedeğini ve waypoint CSV satırlarını üretir; indirme ve kullanıcı bildirimi `park-export.js` içinde kalır.

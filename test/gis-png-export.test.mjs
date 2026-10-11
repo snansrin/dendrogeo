@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import vm from 'node:vm';
 import {readFileSync} from 'node:fs';
 const file=p=>readFileSync(new URL('../'+p,import.meta.url),'utf8');
-const adapter=file('src/ui/gis-export.js'),vegetation=file('src/ui/gis-export-vegetation.js'),layout=file('src/ui/gis-export-layout.js'),canvas=file('src/ui/gis-export-canvas.js'),events=file('src/ui/gis-export-events.js'),style=file('css/gis-workspace.css'),ui=file('src/ui/gis-workspace.js');
+const adapter=file('src/ui/gis-export.js'),gate=file('src/application/surface/prepare-verified-map-export.js'),vegetation=file('src/ui/gis-export-vegetation.js'),layout=file('src/ui/gis-export-layout.js'),canvas=file('src/ui/gis-export-canvas.js'),events=file('src/ui/gis-export-events.js'),style=file('css/gis-workspace.css'),ui=file('src/ui/gis-workspace.js');
 const lock=JSON.parse(file('docs/surface-engine-lock.json'));
 function env({ndvi=false,ndviAvailable=true,gridCells=[],verified=false}={}){
  const messages=[],ops=[],downloads=[],elements={},polygon=[
@@ -40,6 +40,7 @@ function env({ndvi=false,ndviAvailable=true,gridCells=[],verified=false}={}){
  vm.runInContext(layout,ctx,{filename:'gis-export-layout.js'});
  vm.runInContext(canvas,ctx,{filename:'gis-export-canvas.js'});
  vm.runInContext(events,ctx,{filename:'gis-export-events.js'});
+ vm.runInContext(gate,ctx,{filename:'prepare-verified-map-export.js'});
  vm.runInContext(adapter,ctx,{filename:'gis-export.js'});
  return {ctx,messages,ops,downloads};
 }

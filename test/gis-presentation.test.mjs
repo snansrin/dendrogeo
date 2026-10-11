@@ -238,7 +238,7 @@ test('green sensitivity uses a colored explicit browser-native track and no blac
 
 
 test('verified NDVI PNG uses 1240x1560 official layout and paints observed green tiers over land cover',()=>{
- const src=load('src/ui/gis-export.js');
+ const src=load('src/ui/gis-export.js')+'\n'+load('src/application/surface/prepare-verified-map-export.js');
  const layout=load('src/ui/gis-export-layout.js');
  assert.match(src,/async function renderVerified\(layers\)/);
  assert.match(src,/DG_GIS_EXPORT_LAYOUT\.computeVerified\(\{rings:PARK_POLY\}\)/);
@@ -273,6 +273,7 @@ test('verified-map original dialog is untouched with NDVI off; its PNG download 
   setTimeout,clearTimeout,console,Date,Math
  };
  vm.runInNewContext(load('src/ui/gis-export-events.js'),context);
+ vm.runInNewContext(load('src/application/surface/prepare-verified-map-export.js'),context);
  vm.runInNewContext(load('src/ui/gis-export.js'),context);
  let prevented=0,stopped=0;
  const click=()=>({target,preventDefault:()=>{prevented++;},stopImmediatePropagation:()=>{stopped++;}});
