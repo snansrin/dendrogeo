@@ -3,6 +3,7 @@ import {createReportPublicationApplication} from './lib/report-publication-appli
 import {createReportSpeciesPresentation, sw} from './lib/report-species-presentation.mjs';
 import {createReportQaPresentation} from './lib/report-qa-presentation.mjs';
 import {createReportEvaluationPresentation} from './lib/report-evaluation-presentation.mjs';
+import {createReportStudyPresentation} from './lib/report-study-presentation.mjs';
 import {createReportDocumentHead} from './lib/report-document-head.mjs';
 import {createReportSourcesPresentation} from './lib/report-sources-presentation.mjs';
 import {createReportHistoryPresentation} from './lib/report-history-presentation.mjs';
@@ -378,6 +379,7 @@ const renderLimitationsPresentation = createReportLimitationsPresentation({
     trNum, QA_LIMITS,
     YASAL_STATU_KAPSAM,
 });
+const renderStudyPresentation = createReportStudyPresentation({esc});
 const renderDocumentHead = createReportDocumentHead({esc, fmtT, reportStyles, siteOrigin: SITE_ORIGIN});
 const renderSourcesPresentation = createReportSourcesPresentation({esc, fmtDateTr});
 const renderHistoryPresentation = createReportHistoryPresentation({esc});
@@ -500,7 +502,7 @@ ${renderDocumentHead({id, P, t, dataset, ciTxt, hash, L, jsonld})}
  <div><b>Lisans</b><code>CC BY-NC 4.0</code></div>
  <div><b>İçerik hash'i</b><code>sha256:${hash.slice(0, 20)}…</code></div>
 </div>
-${snap.study ? `<div class="meta" aria-label="Akademik çalışma künyesi">${Object.entries({project_name:'Proje',study_type:'Çalışma türü',institution:'Üniversite / kurum',department:'Fakülte / bölüm',program:'Program / çalışma alanı',advisor:'Danışman',orcid:'ORCID',funding:'Destek / proje numarası',start_date:'Beyan edilen saha başlangıcı',end_date:'Beyan edilen saha bitişi'}).filter(([k])=>snap.study[k]).map(([k,l])=>`<div${k==='project_name'?' class="meta-wide"':''}><b>${esc(l)}</b><code>${esc(snap.study[k])}</code></div>`).join('')}${snap.study.independent ? '<div><b>Kurumsal bağ</b><code>Bağımsız çalışma</code></div>' : ''}</div><p><b>Çalışmanın amacı ve kapsamı.</b> ${esc(snap.study.purpose)}</p>${snap.study.sampling ? '<p><b>Örnekleme tasarımı.</b> '+esc(snap.study.sampling)+'</p>' : ''}${snap.study.instruments ? '<p><b>Saha yöntemi ve ölçüm cihazları.</b> '+esc(snap.study.instruments)+'</p>' : ''}` : ''}
+${renderStudyPresentation(snap)}
 <p class="stmt">Bu rapor, DendroGeo analiz sistemi tarafından belirlenen yöntem, veri kaynakları ve kalite kontrol prosedürleri doğrultusunda oluşturulmuştur. Rapor bir akreditasyon veya sertifikasyon belgesi değildir; bulgular, beyan edilen veri kaynakları ve çözümleme sürümü kapsamında geçerlidir.</p>
 
 <h2><span class="no">1</span>Analiz Özeti</h2>

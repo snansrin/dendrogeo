@@ -372,3 +372,7 @@ Her modülün tek bir dış API'si, sahibi olduğu açık durumu ve kendi testle
 ### Report document head (11 October 2026)
 
 `report-document-head.mjs` renders document titles, descriptions, canonical/alternate links, sharing cards, JSON-LD and report styles through injected formatters. Existing image-card conditions and serialization remain unchanged; report calculations and publication behavior stay outside this module.
+
+### Academic study presentation (11 October 2026)
+
+`report-study-presentation.mjs` renders declared academic context, purpose, sampling and instruments. Existing field order, optional-field conditions, project width, independent-study disclosure and escaping remain unchanged. The frozen study snapshot and report title selection stay with their existing owners.
