@@ -392,3 +392,7 @@ Her modülün tek bir dış API'si, sahibi olduğu açık durumu ve kendi testle
 ### Report provenance presentation (11 October 2026)
 
 `report-provenance-presentation.mjs` renders reproducibility records and the analysis fingerprint from already-resolved provenance. Missing-version/commit/projection/DOI fallbacks, reviewed-archive versus raster instructions and escaping retain their behavior. Provenance collection and scientific analysis remain separate.
+
+### Report references presentation (11 October 2026)
+
+`report-references-presentation.mjs` renders the existing bibliography. Reference order, DOI text, reviewed/accepted Sentinel disclosure, optional escaped cross-validation source and site-derived methods link remain unchanged. Citation generation and scientific calculations stay separate.
