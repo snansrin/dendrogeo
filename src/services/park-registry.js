@@ -595,15 +595,15 @@ async function backfillParks(){
   const box=$("backfillBox");
   if(result.status==="forbidden")return toast("Yetki yok.","err");
   if(result.status==="offline"){
-    if(box){box.style.display="block";box.innerHTML=`<div class="alert err">⛔ Park geri doldurma internet gerektirir (OSM/Overpass sorgusu).</div>`;}
+    window.DG_PARK_ADMIN_STATUS_UI.backfillOffline(box);
     return toast("Çevrimdışı: park geri doldurma çalışmaz.","err","📴");
   }
   if(result.status==="projects-load-failed"){
-    if(box){box.style.display="block";box.innerHTML=`<div class="alert err">⚠ Projeler okunamadı: <span class="mono">${esc(result.error.message)}</span></div>`;}
+    window.DG_PARK_ADMIN_STATUS_UI.backfillLoadFailed(box,result.error,esc);
     return toast(dgCf("Projeler okunamadı: ")+esc(result.error.message),"err");
   }
   if(result.status==="no-targets"){
-    if(box){box.style.display="block";box.innerHTML=`<div class="alert ok">✓ Park bağı eksik proje yok — hepsi bir parka bağlı.</div>`;}
+    window.DG_PARK_ADMIN_STATUS_UI.backfillNoTargets(box);
     return toast("Park bağı eksik proje yok ✓","ok","🌳");
   }
   DG_BACKFILL_PLAN=result.plan;
@@ -715,7 +715,7 @@ async function loadParkAdmin__scroll(){
   if(result.status==="forbidden")return toast("Yetki yok.","err");
   const box=$("parkAdminBox");
   if(result.status==="park-load-failed"){
-    if(box)box.innerHTML=`<div class="alert err">⚠ Parklar okunamadı: <span class="mono">${esc(result.error.message)}</span></div>`;
+    window.DG_PARK_ADMIN_STATUS_UI.parkLoadFailed(box,result.error,esc);
     return;
   }
   DG_PARK_ADMIN_ROWS=result.parks;
@@ -724,7 +724,7 @@ async function loadParkAdmin__scroll(){
 
 const DG_PARK_ADMIN_LOAD=window.DG_PARK_ADMIN_LOAD_APPLICATION.create({
   isAdmin:()=>!!PROFILE&&(PROFILE.role==="admin"||PROFILE.role==="owner"),
-  showLoading:()=>{const box=$("parkAdminBox");if(box)box.innerHTML='<div class="alert info">⏳ Park kimlikleri yükleniyor…</div>';},
+  showLoading:()=>window.DG_PARK_ADMIN_STATUS_UI.parkLoading($("parkAdminBox")),
   fetchParks:()=>sb.from("parks").select("*").order("name"),
   fetchProjects:()=>sb.from("projects").select("id,name,park_id"),
   fetchMeasurements:()=>sb.from("measurements").select("park_id").limit(5000)

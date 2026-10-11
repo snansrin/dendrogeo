@@ -40,6 +40,7 @@ on:
       - 'src/config/i18n.js'
       - 'src/services/park-registry.js'
       - 'src/ui/park-project-options.js'
+      - 'src/ui/park-admin-status.js'
       - 'src/ui/park-measurement-gate.js'
       - 'src/application/visitors/**'
       - 'src/application/parks/**'

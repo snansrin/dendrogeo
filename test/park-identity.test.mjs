@@ -523,9 +523,10 @@ describe('kabuk: park algılama ekranı + ölçüm kapısı id’leri', () => {
     const gate = idx.indexOf('src/application/parks/evaluate-measurement-park-gate.js');
     const gateUi = idx.indexOf('src/ui/park-measurement-gate.js');
     const projectOptions = idx.indexOf('src/ui/park-project-options.js');
+    const adminStatus = idx.indexOf('src/ui/park-admin-status.js');
     const c = idx.indexOf('src/services/grid-engine.js');
-    assert.ok(a > -1 && d > -1 && merge > -1 && rename > -1 && remove > -1 && gate > -1 && gateUi > -1 && projectOptions > -1 && b > -1 && c > -1, 'modüller index.html’de olmalı');
-    assert.ok(a < d && d < merge && merge < rename && rename < remove && remove < gate && gate < gateUi && gateUi < projectOptions && projectOptions < b && b < c, `sıra bozuk: query=${a} domain=${d} merge=${merge} rename=${rename} remove=${remove} gate=${gate} gateUi=${gateUi} projectOptions=${projectOptions} registry=${b} grid=${c}`);
+    assert.ok(a > -1 && d > -1 && merge > -1 && rename > -1 && remove > -1 && gate > -1 && gateUi > -1 && projectOptions > -1 && adminStatus > -1 && b > -1 && c > -1, 'modüller index.html’de olmalı');
+    assert.ok(a < d && d < merge && merge < rename && rename < remove && remove < gate && gate < gateUi && gateUi < projectOptions && projectOptions < adminStatus && adminStatus < b && b < c, `sıra bozuk: query=${a} domain=${d} merge=${merge} rename=${rename} remove=${remove} gate=${gate} gateUi=${gateUi} projectOptions=${projectOptions} adminStatus=${adminStatus} registry=${b} grid=${c}`);
   });
 
   test('park-registry.js service worker PRECACHE listesinde (çevrimdışı)', () => {
@@ -534,6 +535,7 @@ describe('kabuk: park algılama ekranı + ölçüm kapısı id’leri', () => {
     assert.ok(sw.includes("'/src/application/parks/evaluate-measurement-park-gate.js'"), 'ölçüm kapısı uygulama modülü CORE_ASSETS’te yok');
     assert.ok(sw.includes("'/src/ui/park-measurement-gate.js'"), 'ölçüm kapısı UI modülü CORE_ASSETS’te yok');
     assert.ok(sw.includes("'/src/ui/park-project-options.js'"), 'proje seçenekleri UI modülü CORE_ASSETS’te yok');
+    assert.ok(sw.includes("'/src/ui/park-admin-status.js'"), 'park admin durumu UI modülü CORE_ASSETS’te yok');
   });
 });
 
