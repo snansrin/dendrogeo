@@ -1,8 +1,5 @@
 #!/usr/bin/env node
 import { reportRead } from './lib/report-reader.mjs';
-import {createReportQueueRunner} from './lib/report-queue-runner.mjs';
-import {createReportRetractionHandler} from './lib/report-retraction-workflow.mjs';
-import {createPublicationRequestHandler} from './lib/report-publication-request.mjs';
 import {decodeReportContext} from './lib/report-context.mjs';
 /* publish-queue.mjs — SİTE İÇİNDEN GELEN RAPOR YAYIN İSTEKLERİNİ İŞLER
  *
@@ -47,8 +44,7 @@ import { readFileSync, writeFileSync, existsSync, unlinkSync } from 'node:fs';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { publishPark, renderRetractionNotice, rebuildIndex, DGR_ID_RE, renderReport, buildMetadata, qrDataUri, parkHistory } from './make-report.mjs';
-import {createAcceptedSurfacePublisher} from './lib/accepted-surface-publication.mjs';
-import { isAcceptedSurfaceSnapshot } from './lib/surface-snapshot.mjs';
+import {createReportQueueApplication} from './lib/report-queue-application.mjs';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const read = (p) => readFileSync(join(ROOT, p), 'utf8');
@@ -102,13 +98,11 @@ export async function fetchPendingRetractions(limit = 50,processedIds=[],cutoff=
  return{rows:out.slice(0,limit),missing:false};
 }
 
-export const applyAcceptedSurfaceSnapshot = createAcceptedSurfacePublisher({
-  defaultRoot: ROOT, readFileSync, writeFileSync, existsSync, unlinkSync,
-  renderReport, buildMetadata, qrDataUri, parkHistory, rebuildIndex
-});
-
-const handle = createPublicationRequestHandler({
-  publishPark, applyAcceptedSurfaceSnapshot,
+export {RETRACT_FILES} from './lib/report-retraction-workflow.mjs';
+const application = createReportQueueApplication({
+  root:ROOT,
+  files:{readFileSync, writeFileSync, existsSync, unlinkSync},
+  reports:{publishPark, renderRetractionNotice, rebuildIndex, DGR_ID_RE, renderReport, buildMetadata, qrDataUri, parkHistory},
   publicationOptions(req, {accepted, geometrySnapshot}) {
     const study=decodeReportContext(req.note);
     return { ...(study ? {study} : {}), skipLulc: accepted || (!geometrySnapshot && req.with_lulc === false), surfaceSnapshot: geometrySnapshot ? req.surface_snapshot : null };
@@ -117,20 +111,14 @@ const handle = createPublicationRequestHandler({
     const {readdirSync, statSync} = await import('node:fs');
     const dir = join(ROOT, 'rapor', id);
     return readdirSync(dir).reduce((sum, file) => sum + statSync(join(dir, file)).size, 0);
-  }
+  },
+  store:{RUN_LIMIT, QUEUE_PATH, loadQueue, saveQueue},
+  planner:{effectiveProcessedRequestIds, planQueue, planRetractions},
+  readers:{fetchPending, fetchPendingRetractions},
+  log:message=>console.log(message)
 });
-
-export {RETRACT_FILES} from './lib/report-retraction-workflow.mjs';
-export const handleRetraction = createReportRetractionHandler({
-  defaultRoot: ROOT, isReportId: value => DGR_ID_RE.test(value),
-  existsSync, unlinkSync, writeFileSync, renderRetractionNotice, rebuildIndex
-});
-
-const executeQueue = createReportQueueRunner({
-  RUN_LIMIT, QUEUE_PATH, loadQueue, saveQueue, effectiveProcessedRequestIds,
-  fetchPending, fetchPendingRetractions, planQueue, planRetractions, handle, handleRetraction,
-  log: message => console.log(message)
-});
+export const {applyAcceptedSurfaceSnapshot, handleRetraction} = application;
+const executeQueue = application.runQueue;
 export function runQueue(opts = {}) {
   return executeQueue({...opts, limit: Number(opts.limit || arg('limit') || RUN_LIMIT), dry: opts.dry || has('dry')});
 }
