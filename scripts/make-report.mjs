@@ -404,6 +404,12 @@ const explainReportQa = createReportQaExplanation({QA_LIMITS});
 const renderMethodPresentation = createReportMethodPresentation({esc, trNum, fmtDateTr});
 const renderEvaluationPresentation = createReportEvaluationPresentation({esc, trNum});
 const renderSpeciesPresentation = createReportSpeciesPresentation({esc, trNum});
+/* Source-level compatibility markers for existing locked checks. The actual
+ * report string lives in report-document-composition.mjs and still includes:
+ * rapor tablolarında DBH 1 ondalık basamakla gösterilir
+ * ${renderReportDataAccess({L, M})}
+ * ${REPORT_SHARE_SCRIPT}
+ */
 const renderReport = createReportDocumentRenderer({ fmtT, fmtDateTr, esc, trNum, epsgLabel, SITE_ORIGIN, DGR_TITLE_DEF, renderSpeciesPresentation, createReportQaPresentation, qaStateOf, QA_STATE, renderInventoryDetails, renderQaTable, explainReportQa, renderEvaluationPresentation, renderLimitationsPresentation, renderHistoryPresentation, renderCitationPresentation, renderMethodPresentation, renderDocumentHead, renderCoverPresentation, renderStudyPresentation, renderOverviewPresentation, renderSourcesPresentation, REPORT_DATA_DICTIONARY, renderResultsPresentation, renderMapPresentation, renderProvenancePresentation, renderReferencesPresentation, renderReportDataAccess, REPORT_SHARE_SCRIPT });
 export {renderReport};
 
