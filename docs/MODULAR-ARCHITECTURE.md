@@ -400,3 +400,7 @@ Her modülün tek bir dış API'si, sahibi olduğu açık durumu ve kendi testle
 ### Report data access presentation (11 October 2026)
 
 `report-data-access-presentation.mjs` renders artifact download links, print/share controls and reuse terms. Existing conditional map/PDF links, element identifiers, handlers, button classes and relative paths remain unchanged. Artifact production, PDF generation and sharing logic stay with their existing owners.
+
+### Report quantitative results presentation (12 October 2026)
+
+`report-results-presentation.mjs` renders precomputed species summaries, carbon intervals and surface/area-balance tables. Formatting, missing-value fallbacks, optional surface conditions and scientific scope statements remain unchanged. Monte Carlo and scientific area calculations stay outside this module.
