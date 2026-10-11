@@ -111,6 +111,9 @@ jobs:
       - name: Bağımlılıklar (npm ci)
         run: npm ci
 
+      - name: Değişmez çekirdek kaynak kilidi
+        run: npm run check:core-foundation
+
       - name: Sözdizimi denetimi (tarayıcı semantiği)
         run: npm run check:syntax
 

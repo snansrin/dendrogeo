@@ -7,7 +7,7 @@
 - Önceki snapshot dosya/modül sayısı: 54
 - Tam depo kurtarma dalı: recovery/analysis-engine-20261009
 
-`docs/surface-engine-lock.json` önceki motor temelinin hash listesini ve kurtarma referansını arşiv olarak saklar. Kullanıcının 2026-10-09 tarihli talimatıyla kaynak kilidi ve CI hash denetimi kaldırılmıştır; analiz motorunun modüllerine artık mimari çalışma kapsamında müdahale edilebilir. Eski hash'ler yalnızca geçmişteki dosya içeriklerini tanımlar, güncel kodu doğrulamaz.
+`docs/surface-engine-lock.json` önceki motor temelinin hash listesini ve kurtarma referansını arşiv olarak saklar. 2026-10-09'da bu eski kaynak kilidi ve CI hash denetimi kaldırılmıştı. Kullanıcının 2026-10-11 tarihli yeni talimatı ölçüm, park algılama, park analizi ve canlı harita temelinin mevcut dosyalarını yeniden değişmez kıldı; güncel envanter ve CI doğrulaması `docs/core-foundation-lock.json` ile `scripts/check-core-foundation.mjs` içindedir. Eski hash'ler yalnız tarihsel kaydı tanımlar.
 
 ## Tam kaynak depo yedeği
 
