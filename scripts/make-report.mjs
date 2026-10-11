@@ -3,6 +3,7 @@ import {createReportPublicationApplication} from './lib/report-publication-appli
 import {createReportSpeciesPresentation, sw} from './lib/report-species-presentation.mjs';
 import {createReportQaPresentation} from './lib/report-qa-presentation.mjs';
 import {createReportEvaluationPresentation} from './lib/report-evaluation-presentation.mjs';
+import {createReportSourcesPresentation} from './lib/report-sources-presentation.mjs';
 import {createReportHistoryPresentation} from './lib/report-history-presentation.mjs';
 import {createReportQaTable} from './lib/report-qa-table.mjs';
 import {createReportInventoryDetails} from './lib/report-inventory-details.mjs';
@@ -376,6 +377,7 @@ const renderLimitationsPresentation = createReportLimitationsPresentation({
     trNum, QA_LIMITS,
     YASAL_STATU_KAPSAM,
 });
+const renderSourcesPresentation = createReportSourcesPresentation({esc, fmtDateTr});
 const renderHistoryPresentation = createReportHistoryPresentation({esc});
 const renderQaTable = createReportQaTable({esc, trNum, QA_LIMITS, DBH_REASON_TR});
 const renderInventoryDetails = createReportInventoryDetails({trNum, QA_LIMITS});
@@ -521,10 +523,7 @@ ${snap.study ? `<div class="meta" aria-label="Akademik çalışma künyesi">${Ob
 <p>Analiz alanı, ${esc(P.city)} (${esc(P.country)}) sınırları içinde yer alan ${esc(P.name)} park sahasıdır. Saha sınırı, ${srcTxt} türetilmiş olup ${trNum(parkHa, 2)} ha alan kaplamaktadır.${GJ ? ` Uygulamada çizili sınır kaydı bir dikdörtgen (${GJ.ring_points} nokta; ${trNum(GJ.ring_area_m2 / 10000, 2)} ha) olduğundan gerçek park sınırı sayılmamış, analiz OpenStreetMap poligonundan yürütülmüştür (ayrıntı §7).` : ''}${knotted ? ` Poligonda <b>${knotN} kendini kesen segment çifti</b> (düğüm) saptanmıştır; bu durum alan hesapları ile raster ayrışımını birbirinden ayırır ve arazi örtüsü çözümlemesinin kalite eşiğine takılmasına yol açar (§7, §9).` : ''} Envanter, ${snap.period.from.slice(0, 10)} – ${snap.period.to.slice(0, 10)} tarihleri arasında ${t.n} ölçüm noktasında gerçekleştirilmiştir${snap.geofence.outside_rows > 0 ? `; kayıtların ${snap.geofence.verified_rows}/${snap.geofence.total} adedi poligon içinde, ${snap.geofence.outside_rows} adedi poligon dışında konumlanmaktadır (ayrıntı §7)` : `; kayıtların tamamı poligon içinde konumlanmaktadır (denetim §7)`}.</p>
 
 <h2><span class="no">3</span>Veri Kaynakları</h2>
-${L?.accepted ? `<p><b>3.1 Birincil veri.</b> ${esc(fmtDateTr(L.accepted_at))} tarihli kabul edilmiş yüzey alanları, kayıt sürümü ${esc(L.revision||"—")}.</p>` : L?.review ? `<p><b>3.1 Birincil veri.</b> Yayın isteğindeki kayıtlı analiz; kabul tarihi ${esc(fmtDateTr(L.review.acceptedAt))}. Kullanılan sahneler: ${esc((L.review.scenes||[]).filter(s=>s.usedCells>0).map(s=>s.datetime).join(", ")||"uydu taraması yok")}. Nesne sınırları: © OpenStreetMap contributors (ODbL) ve kullanıcı çizimleri. Kayıt geometrileri <a href="surface.geojson">GeoJSON</a> olarak indirilebilir.</p>` : `<p><b>3.1 Birincil veri.</b> ${esc(dataset)}: Sentinel-1 ve Sentinel-2 füzyonundan üretilmiş küresel arazi örtüsü ürünü; mekânsal çözünürlük 10 m; veri dönemi ${dataYear}; lisans CC BY 4.0. Erişim, STAC kataloğu (Planetary Computer) üzerinden park poligonunu kesen karolar için gerçekleştirilmiştir.</p>`}
-${L?.accepted ? `<p><b>3.2 Bütünleyici veri.</b> Bu eski kayıt sınıf alanlarını taşır; nesne geometrileri ve uydu sahne ayrıntıları kayıtlı değildir.</p>` : L?.review ? `<p><b>3.2 Bütünleyici veri.</b> OpenStreetMap bina, su, havuz ve açıkça tanımlanmış sert zemin sınırları ile kullanıcı çizimleri, kayıtlı analizde raster hücrelerini keserek ayrı yüzey alanları oluşturur. Çakışan çizimlerde son kullanıcı düzeltmesi önceliklidir. Harita tarihi, eksik nesneler ve konumsal doğruluk sonucu sınırlayabilir.</p>` : `<p><b>3.2 Bütünleyici veri.</b> OpenStreetMap (ODbL): park sınırı geometrisi ile su ve açıkça tanımlanmış sert yüzeylerin geometrik doğrulaması/iyileştirmesi amacıyla kullanılmıştır. <b>OSM verisi raster sınıflandırmanın yerine geçmez:</b> sınıf alanları birincil raster üründen hesaplanır; OSM yalnız sınır geometrisi ve bağımsız kontrol için kullanılır.</p>`}
-<p><b>3.3 Saha verisi ve kapsam.</b> ${t.n} adet DendroGeo saha ölçümü (göğüs çevresi, türetilmiş DBH, boy, tür, GNSS konumu, fotoğraf kanıtı); tümü moderatör onaylıdır. Kayıt kapsamı, onaylı ölçümlerle sınırlıdır; tam sayım veya olasılıklı örnekleme tasarımına ilişkin ek bilgi bulunmamaktadır. Ölçüm değişkenleri §4.6'da tanımlanmıştır.</p>
-${L && L.cross ? `<p><b>3.4 Çapraz doğrulama verisi.</b> ${esc(L.cross)}: bağımsız ikinci sınıflandırma kaynağı; grup bazlı uzlaşma §7'de raporlanır${L.crossError ? ` (bu sürümde çapraz karşılaştırma tamamlanamadı: ${esc(L.crossError)})` : ''}.</p>` : ''}
+${renderSourcesPresentation({L, dataset, dataYear, t})}
 
 <h2><span class="no">4</span>Yöntem</h2>
 <p><b>4.1 Saha protokolü.</b> ${dbhcTxt} Ağaç boyu ${hbRows > 0 ? 'sahada ölçülmüş (kayıt çözünürlüğü 0,1 m)' : '—'}; konum sivil GNSS alıcısıyla kaydedilmiş${gnssTxt}; her kayıt için sahada çekilmiş fotoğraf kanıtı ${photoTxt}.</p>
