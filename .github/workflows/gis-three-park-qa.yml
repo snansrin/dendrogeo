@@ -15,6 +15,7 @@ on:
       - 'src/ui/park-boundary-layer.js'
       - 'src/ui/park-candidate-select.js'
       - 'src/ui/park-info-panel.js'
+      - 'src/ui/park-menu-ui.js'
       - 'docs/surface-engine-lock.json'
       - 'docs/surface-scientific-contract.json'
       - 'test/surface-scientific-contract.test.mjs'

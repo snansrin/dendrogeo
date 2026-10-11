@@ -215,3 +215,5 @@ Her modülün tek bir dış API'si, sahibi olduğu açık durumu ve kendi testle
 - `ui/park-candidate-select.js`, alternatif park seçeneklerinin mevcut sırasını, aktif park kimliğini, HTML kaçışını ve bir ondalık hektar gösterimini üretir. Tek/boş aday listesinde seçici çizmez; park paneli `switchPark` çağrısını ve mevcut biçimleyicileri bağlar.
 
 - `ui/park-info-panel.js`, park sonucundaki grid, yüzey, PNG ve katman kontrollerinin markup yapısını üretir. Park state, park kimliği, proje seçenekleri, alternatif seçici ve kaçış işlevi çağıran ekrandan verilir; mevcut DOM kimlikleri ve eylem callback’leri korunur.
+
+- `ui/park-menu-ui.js`, park grid/katman kontrollerini mevcut DOM düğümlerini kopyalamadan menüye taşır; sahiplik temizliği, sıra, tek açık menü ve Escape/dış tıklamayla kapatma davranışlarını yönetir. `park-panel.js` mevcut `dgEditor*` çağrıları için uyumlu sarmalayıcıları tutar.
