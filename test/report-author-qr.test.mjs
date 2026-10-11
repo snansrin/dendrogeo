@@ -195,7 +195,7 @@ describe('0012 · sıkı arşiv (minified JSON) + archive_bytes', () => {
     assert.ok(!/data\.json'\), JSON\.stringify\(snap, null, 2\)/.test(src), 'eski pretty yazım kalktı');
   });
   test('publish-queue arşiv boyutunu günlüğe yazar', () => {
-    const src = read('scripts/publish-queue.mjs');
+    const src = read('scripts/lib/report-queue-runner.mjs');
     assert.match(src, /archive_bytes/, 'günlük alanı');
     assert.match(src, /arşiv/, 'konsol özeti');
   });

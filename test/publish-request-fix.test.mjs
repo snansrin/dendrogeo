@@ -42,7 +42,7 @@ describe('0014 · çift üretim koruması kodda duruyor (regresyon kilidi)', () 
     assert.match(ui, /e\.status==="Yayınlandı"/, 'başarılı günlük kaydı yayın durumuna geçer');
   });
   test('planQueue: request_id günlükte olan istek atlanır (already)', () => {
-    const q = read('scripts/publish-queue.mjs');
+    const q = read('scripts/lib/report-queue-runner.mjs');
     assert.match(q, /request_id/, 'günlük ⇔ istek eşleşmesi');
     assert.match(q, /already/, 'atlanan sayaç');
   });

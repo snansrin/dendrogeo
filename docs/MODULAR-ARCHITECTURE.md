@@ -285,3 +285,8 @@ Her modülün tek bir dış API'si, sahibi olduğu açık durumu ve kendi testle
 
 - scripts/lib/report-retraction-workflow.mjs geri çekme dosya listesini, kimlik kontrolünü, bildirim yazımını ve sonuç günlüğünü kapsar. Dosya, bildirim, arşiv ve saat bağımlılıkları dışarıdan sağlanır.
 - publish-queue.mjs handleRetraction ve RETRACT_FILES dışa aktarımlarını ve varsayılan kökü korur. Mevcut dosya kaldırma, eksik dosya toleransı ve hata kayıtları değişmedi.
+
+## Rapor kuyruk yürütücüsü — 11 Ekim 2026
+
+- scripts/lib/report-queue-runner.mjs kuyruk okuma, planlama, sıralı yayın/geri çekme, prova modu ve her sonuçtan sonra günlük kaydetme akışını kapsar. Tüm dış işlemler bağımlılık olarak sağlanır.
+- publish-queue.mjs CLI seçeneklerini ve mevcut runQueue dışa aktarımını korur; kuyruk okuma hatası, sayaçlar ve yayın sırası değişmedi.
