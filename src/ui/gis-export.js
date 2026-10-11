@@ -23,32 +23,11 @@
   if(!Array.isArray(ring)||!ring.length)return;
   window.DG_PARK_IMAGE_GEOMETRY.appendRing({context:ctx,projector:pr,ring});
  }
- function pngLayers(sens){
-  const result=[];
-  if(!sens?.vegetationLayer?.eachLayer)return result;
-  sens.vegetationLayer.eachLayer(layer=>{
-   if(typeof layer.getLatLngs==="function")result.push(layer);
+ function waitVegetation(sens,attempts=8){
+  return window.DG_GIS_EXPORT_VEGETATION.waitForLayers(sens,{attempts,
+   tiers:typeof dgSensVegetationTiers==="function"?dgSensVegetationTiers:null,
+   render:typeof dgSensRenderVegetation==="function"?dgSensRenderVegetation:null
   });
-  return result;
- }
- async function waitVegetation(sens,attempts=8){
-  if(!sens?.vegetationView)return[];
-  if(typeof dgSensVegetationTiers==="function"){
-   const tiers=dgSensVegetationTiers();
-   if(!tiers||tiers.count<9)return[];
-  }
-  let layers=pngLayers(sens);
-  if(layers.length)return layers;
-  if(typeof dgSensRenderVegetation==="function"){
-   try{await dgSensRenderVegetation();}catch(e){}
-  }
-  // The visible NDVI layer can still be in worker-rendering; wait a bounded time.
-  for(let i=0;i<attempts;i++){
-   layers=pngLayers(sens);
-   if(layers.length)return layers;
-   await new Promise(resolve=>setTimeout(resolve,120));
-  }
-  return[];
  }
  function fmt(n){return Number(n).toLocaleString("tr-TR",{maximumFractionDigits:2});}
  function safeName(s){return String(s||"park").normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/[^a-zA-Z0-9_-]+/g,"_").slice(0,48).toLowerCase();}
