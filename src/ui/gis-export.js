@@ -19,43 +19,6 @@
    return Object.fromEntries(DG_LC_CLASSES.map(x=>[x.key,{color:x.color,label:x.label}]));
   return PALETTE;
  }
- function eachRing(tree,visit){
-  if(!Array.isArray(tree)||!tree.length)return;
-  if(tree[0]&&typeof tree[0].lat==="number"&&typeof tree[0].lng==="number"){visit(tree);return;}
-  for(const child of tree)eachRing(child,visit);
- }
- function drawLeaflet(ctx,pr,layer,opacity=0.6){
-  const rings=[];
-  if(typeof layer?.getLatLngs!=="function")return false;
-  eachRing(layer.getLatLngs(),ring=>rings.push(ring));
-  if(!rings.length)return false;
-  ctx.beginPath();
-  for(const ring of rings){
-   ring.forEach((p,i)=>{const x=pr.x(p.lng),y=pr.y(p.lat);if(i===0)ctx.moveTo(x,y);else ctx.lineTo(x,y);});
-   ctx.closePath();
-  }
-  ctx.fillStyle=layer.options?.fillColor||layer.options?.color||"#94a3b8";
-  ctx.globalAlpha=Math.min(1,Math.max(0,opacity));
-  ctx.fill("evenodd");
-  ctx.globalAlpha=1;
-  return true;
- }
- function drawRawPatches(ctx,pr,patches,dict){
-  let painted=0;
-  for(const patch of patches||[]){
-   const rings=patch.rings||[];
-   if(!rings.length)continue;
-   ctx.beginPath();
-   for(const ring of rings){
-    ring.forEach((p,i)=>{const x=pr.x(p[1]),y=pr.y(p[0]);if(i===0)ctx.moveTo(x,y);else ctx.lineTo(x,y);});
-    ctx.closePath();
-   }
-   ctx.globalAlpha=.52;
-   ctx.fillStyle=dict[patch.classKey||patch.group]?.color||"#94a3b8";
-   ctx.fill("evenodd");ctx.globalAlpha=1;painted++;
-  }
-  return painted;
- }
  function outline(ctx,pr,ring){
   if(!Array.isArray(ring)||!ring.length)return;
   window.DG_PARK_IMAGE_GEOMETRY.appendRing({context:ctx,projector:pr,ring});
@@ -89,6 +52,7 @@
  }
  function fmt(n){return Number(n).toLocaleString("tr-TR",{maximumFractionDigits:2});}
  function safeName(s){return String(s||"park").normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/[^a-zA-Z0-9_-]+/g,"_").slice(0,48).toLowerCase();}
+ const eachRing=(tree,visit)=>window.DG_GIS_EXPORT_CANVAS.eachRing(tree,visit);
  async function render(){
   if(typeof PARK_POLY==="undefined"||!Array.isArray(PARK_POLY)||!PARK_POLY.length){
    notify("Önce bir park seçin.","warn");return false;
@@ -137,15 +101,15 @@
    const display=Array.isArray(sens?.displayPaths)&&!sens.rawView?sens.displayPaths:[];
    if(display.length){
     for(const item of display){
-     if(drawLeaflet(ctx,pr,item.poly,Math.max(.28,(sens.opacity||65)/100)))count++;
+     if(window.DG_GIS_EXPORT_CANVAS.drawLeaflet(ctx,pr,item.poly,Math.max(.28,(sens.opacity||65)/100)))count++;
     }
    }else{
     const last=window.DG_LANDCOVER?.getLast?.();
-    count+=drawRawPatches(ctx,pr,last?.patches||last?.report?.patches||[],dict);
+    count+=window.DG_GIS_EXPORT_CANVAS.drawRawPatches(ctx,pr,last?.patches||last?.report?.patches||[],dict);
    }
   }
   if(ndvi){
-   for(const layer of ndviPolys)drawLeaflet(ctx,pr,layer,Math.max(.28,(sens?.opacity||65)/100));
+   for(const layer of ndviPolys)window.DG_GIS_EXPORT_CANVAS.drawLeaflet(ctx,pr,layer,Math.max(.28,(sens?.opacity||65)/100));
   }
   if(opts.grid&&typeof DG_GRID_SESSION!=="undefined"){
    ctx.lineWidth=1;ctx.strokeStyle="#166534";
