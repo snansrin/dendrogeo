@@ -320,3 +320,8 @@ Her modülün tek bir dış API'si, sahibi olduğu açık durumu ve kendi testle
 
 - scripts/lib/report-runtime-provenance.mjs motor/app sürümü ve üretim commit’ini bağımsız kaynak okuma işlemleriyle toplar. Kaynak yoksa veya bozuksa mevcut null davranışı korunur.
 - make-report.mjs dosya ve Git adaptörlerini sağlar; bilimsel provenance sözleşmesi değişmedi.
+
+## Rapor tür sunumu — 11 Ekim 2026
+
+- scripts/lib/report-species-presentation.mjs tür grafiği, tablo satırları ve grup renk/etiketlerini kapsar. HTML kaçışı ve sayı biçimi mevcut adaptörlerden sağlanır.
+- make-report.mjs bu sunumu mevcut rapor şablonuna bağlar; karbon hesaplama, tür sırası, renkler ve içerik korunur.
