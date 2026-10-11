@@ -4,6 +4,8 @@
 
 4 Ekim 2026 itibarıyla saha, yüzey analizi ve canlı harita sistemi DendroGeo'nun ana ürün çekirdeğidir. Bu sürüm, yeni geliştirmelerin davranış tabanıdır. Kurtarma dalı `recovery/core-2026-10-04`, kullanıcı onayıyla ana dalda çalışan çekirdeğe ilerletilmiştir.
 
+11 Ekim 2026 itibarıyla ölçüm, park algılama, park analizi ve canlı haritanın main'deki dosyaları `docs/core-foundation-lock.json` içinde SHA-256 ile sabitlenmiştir. Kilitli dosyalar değiştirilmez; geliştirmeler yeni modül/adaptör olarak eklenir ve var olan davranışı devralıp geçersiz kılamaz. Entegrasyon için script yükleme listesi ve PWA precache gibi çevre dosyaları güncellenebilir.
+
 | Referans | Değer |
 |---|---|
 | Ana çekirdek | `main` — `61d4163a0a6d9d62d6b5f4f623894a6c9b57e29a` |
@@ -13,6 +15,9 @@
 | Kurtarma ve doğrulama | [Kurtarma kılavuzu](KURTARMA.md) |
 
 ## Kırmızı çizgiler
+
+- `npm run check:core-foundation` değişmez dosyaların hash'lerini ve kilit manifestinin kendi hash'ini doğrular. Değişiklik CI'ı düşürür; kilit manifesti baseline `867c7566645b43cf7a5a7caf56bac6c44c39ef79` commit'idir.
+- Eski `docs/surface-engine-lock.json` yalnız tarihsel yüzey motoru kaydıdır; güncel, daha geniş temel kilidi `docs/core-foundation-lock.json` dosyasıdır.
 
 - Yüzey analizi ve canlı harita bu ürünün temel akışıdır. Bu bileşenler kullanıcı isteği dışında yeniden tasarlanmaz, kapatılmaz, kaldırılmaz veya davranışları değiştirilmez.
 - Ham yüzey sınıfları ESA WorldCover 2021 v200 verisinden ve gerçek raster hücresi–park sınırı kesişimlerinden gelir. Alanı hedef yüzdeye uydurmayın; kaynak hücreleri, kabul edilmiş geometriyi veya yayınlanmış sonucu sessizce değiştirmeyin.
