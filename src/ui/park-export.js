@@ -278,22 +278,11 @@ function downloadLandCoverCellsGeoJSON(){
  * Katmanlar paneldeki anahtarlara bağlıdır: chkPngGrid / chkPngWp / chkPngCover.
  * ------------------------------------------------------------------------- */
 function dgPxProjector(minLat,maxLat,minLon,maxLon,W,Htop,scale){
-  const lat0=(minLat+maxLat)/2,lon0=(minLon+maxLon)/2;
-  const MX=111320*Math.cos(lat0*Math.PI/180),MY=110540;
-  return{
-    lat0,lon0,MX,MY,scale,
-    X(lon){return W/2+(lon-lon0)*MX*scale;},
-    Y(lat){return Htop+(maxLat-lat)*MY*scale;}
-  };
+  return window.DG_PARK_IMAGE_GEOMETRY.project({minLat,maxLat,minLon,maxLon,width:W,heightTop:Htop,scale});
 }
 
 function dgPxRingPath(ctx,pr,ring){
-  ctx.beginPath();
-  ring.forEach((p,i)=>{
-    const x=pr.X(p[1]),y=pr.Y(p[0]);
-    if(i===0)ctx.moveTo(x,y);else ctx.lineTo(x,y);
-  });
-  ctx.closePath();
+  return window.DG_PARK_IMAGE_GEOMETRY.traceRing({context:ctx,projector:pr,ring});
 }
 
 function downloadParkImage(){

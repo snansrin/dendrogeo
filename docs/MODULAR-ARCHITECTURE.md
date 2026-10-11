@@ -217,3 +217,5 @@ Her modülün tek bir dış API'si, sahibi olduğu açık durumu ve kendi testle
 - `ui/park-info-panel.js`, park sonucundaki grid, yüzey, PNG ve katman kontrollerinin markup yapısını üretir. Park state, park kimliği, proje seçenekleri, alternatif seçici ve kaçış işlevi çağıran ekrandan verilir; mevcut DOM kimlikleri ve eylem callback’leri korunur.
 
 - `ui/park-menu-ui.js`, park grid/katman kontrollerini mevcut DOM düğümlerini kopyalamadan menüye taşır; sahiplik temizliği, sıra, tek açık menü ve Escape/dış tıklamayla kapatma davranışlarını yönetir. `park-panel.js` mevcut `dgEditor*` çağrıları için uyumlu sarmalayıcıları tutar.
+
+- `ui/park-image-geometry.js`, vektör PNG çıktısının enlem/boylam → piksel projeksiyonunu ve Canvas halka yolunu sağlar. Ölçek ve koordinat sırası mevcut `park-export.js` çağrılarında aynı kalır; çizim durumu dışarıda tutulur.
