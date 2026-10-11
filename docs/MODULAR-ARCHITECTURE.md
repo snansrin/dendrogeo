@@ -409,3 +409,8 @@ Her modülün tek bir dış API'si, sahibi olduğu açık durumu ve kendi testle
 
 `report-data-dictionary.mjs` owns the static variable definitions, units and measurement note shown in §4.6. Text and markup are preserved verbatim, including raw girth versus derived DBH, biomass/carbon units and uncertainty scope. Scientific calculation and snapshot fields remain unchanged.
 - `scripts/lib/report-document-composition.mjs`, `renderReport` için HTML belgesini ve bölüm sırasını birleştirir; bölüm sunumlarını enjekte edilen fonksiyonlardan alır. Veri erişimi, snapshot hesabı ve yayın I/O'su bu modüle taşınmaz.
+
+
+### Report snapshot application (12 October 2026)
+
+`scripts/lib/report-snapshot-application.mjs` assembles the existing immutable report snapshot from injected data, measurement, geometry, QA, provenance and map dependencies. The application owns the existing schema fallback, geofence and geometry disclosures, author selection, and hash boundary; `make-report.mjs` wires dependencies and preserves the `buildSnapshot` export. Scientific calculations and publication behavior are unchanged.
