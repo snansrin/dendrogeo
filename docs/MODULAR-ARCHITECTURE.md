@@ -335,3 +335,8 @@ Her modülün tek bir dış API'si, sahibi olduğu açık durumu ve kendi testle
 
 - scripts/lib/report-evaluation-presentation.mjs yüzey dağılımı, baskın sınıf ve grup karbon paylarını betimleyen mevcut paragrafları kapsar. HTML kaçışı ve sayı biçimi dışarıdan sağlanır.
 - Ölçülmeyen alana ekstrapolasyon yapılmaması ve nedensel ilişki kurulmadığı beyanları korunur; kaynak sonuçlar değiştirilmez.
+
+## Rapor sınırlılık sunumu — 11 Ekim 2026
+
+- scripts/lib/report-limitations-presentation.mjs mevcut veri/model/GNSS/envanter sınırlılık cümlelerini kapsar. Eşikler ve yasal kapsam beyanı mevcut çekirdekten sağlanır.
+- Gösterim koşulları, sıra ve metinler korunur; kaynak ölçümler ve hesaplama değişmez.
