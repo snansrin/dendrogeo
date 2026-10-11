@@ -575,11 +575,12 @@ describe('v9: sapma düzeltmesi + yapay havuz rafinasyonu + PNG park kıpı', ()
     readFileSync(new URL('../src/services/lc-engine.js', import.meta.url), 'utf8'),
     readFileSync(new URL('../src/adapters/surface/process-landcover-tile.js', import.meta.url), 'utf8'),
   ].join('\n');
-  /* Faz 4: waypoint üretimi grid-engine.js'te, PNG kırpma ui/park-export.js'te */
+  /* Faz 4: waypoint üretimi grid-engine.js'te; park PNG çizimi kendi canvas modülünde. */
   const srcGp = [
     readFileSync(new URL('../src/services/grid-engine.js', import.meta.url), 'utf8'),
     readFileSync(new URL('../src/application/parks/build-grid-waypoint-rows.js', import.meta.url), 'utf8'),
     readFileSync(new URL('../src/ui/park-export.js', import.meta.url), 'utf8'),
+    readFileSync(new URL('../src/ui/park-export-canvas.js', import.meta.url), 'utf8'),
   ].join('\n');
 
   test('⭐ 4326 köşeleri hücre merkezi DEĞİL gerçek köşe (sapma kilidi)', () => {

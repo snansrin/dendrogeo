@@ -32,7 +32,7 @@ const idx = rd('index.html');
 const constants = rd('src/config/constants.js');
 const mapjs = rd('src/services/map.js');
 const landingjs = rd('src/ui/landing.js');
-const parkExport = rd('src/ui/park-export.js');
+const parkExport = rd('src/ui/park-export.js') + '\n' + rd('src/ui/park-export-canvas.js');
 const auth = rd('src/services/auth.js');
 
 /* =========================================================

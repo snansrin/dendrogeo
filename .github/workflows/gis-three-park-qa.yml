@@ -20,6 +20,7 @@ on:
       - 'src/ui/gis-export.js'
       - 'src/ui/gis-export-layout.js'
       - 'src/ui/park-export-layout.js'
+      - 'src/ui/park-export-canvas.js'
       - 'src/domain/parks/park-export-formats.js'
       - 'src/ui/gis-export-canvas.js'
       - 'src/ui/gis-export-events.js'
