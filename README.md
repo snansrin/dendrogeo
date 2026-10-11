@@ -1,6 +1,6 @@
 # 🌲 DendroGeo
 
-**Küresel Ağaç Envanteri ve Karbon Veri Sistemi.** DendroGeo; saha ağaç ölçümlerini, biyokütle ve karbon tahminlerini, park kimliğini, canlı haritayı ve park ölçeğinde arazi örtüsü analizini bir web GIS/PWA içinde birleştirir.
+**Küresel Ağaç Envanteri ve Karbon Veri Sistemi.** DendroGeo; saha ağaç ölçümlerini, biyokütle ve karbon tahminlerini, detaylı park analizlerini, göreceli NDVI çıktılarını, DOI atanabilir raporlamayı ve interaktif harita paylaşımını tek bir Web GIS/PWA çatısı altında birleştiren açık kaynaklı bir sistemdir.
 
 🌐 [DendroGeo sitesi](https://dendrogeo.org/) · [Ağaç envanteri](https://dendrogeo.org/agac-envanteri/) · [Karbon hesabı](https://dendrogeo.org/karbon-hesaplama/) · [Arazi örtüsü](https://dendrogeo.org/arazi-ortusu/) · [Kent parkları](https://dendrogeo.org/kent-parklari/) · [Yöntem](https://dendrogeo.org/yontem/) · [Rapor arşivi](https://dendrogeo.org/rapor/)
 
@@ -8,39 +8,51 @@
 [![License: CC BY-NC 4.0](https://img.shields.io/badge/License-CC%20BY--NC%204.0-lightgrey.svg)](https://creativecommons.org/licenses/by-nc/4.0/)
 [![CI](https://github.com/snansrin/dendrogeo/actions/workflows/ci.yml/badge.svg)](https://github.com/snansrin/dendrogeo/actions/workflows/ci.yml)
 
-## Sitede neler var?
+---
 
-- **Saha envanteri:** GPS konumu, yerden 1,30 m yükseklikte mezurayla ölçülen göğüs çevresi, boy, tür/grup ve isteğe bağlı fotoğraf. Sistem DBH çapını `D = C / π` ile türetir. Fotoğraf eklendiğinde tarayıcı içi QA/QC uygulanır. Ölçümler çevrimdışı kuyruğa alınabilir ve bağlantı gelince eşitlenir.
-- **Waypoint ve navigasyon:** proje noktalarını yükleme, sıralama ve sahada hedefe yönelme.
-- **Canlı harita:** yönetici onaylı ölçümleri görüntüleme; katmanları, park sınırını, gridleri ve waypointleri inceleme; harita çıktısı alma.
-- **Park yüzey analizi:** 10 m arazi örtüsü rasterını park sınırıyla kesiştirerek sınıf alanlarını hesaplama. Sentinel-2 taraması isteğe bağlıdır; yeni tarama nötr eşiklerden başlar ve kendi başına ham sınıfları yeniden etiketlemez. Hücre fırçası, elle hücre seçimi ve sınır çizimi kullanıcı kararlarını kaydeder.
-- **Projeler ve parklar:** aynı fiziksel parkta çalışan projeler park kimliği altında karşılaştırılabilir. Park çalışma arkadaşı akışı ortak saha ölçümünü destekler.
-- **Dünya verisi ve yönetim:** onaylı kayıtların harita/istatistik görünümü; moderasyon, kullanıcı ve ziyaretçi görünümü yönetim yetkileriyle sunulur.
-- **Dışa aktarım ve raporlar:** CSV, GeoJSON, QGIS biçimleri ve doğrulanmış harita çıktıları; park raporları DGR kimliği ve içerik parmak iziyle arşivlenir.
+## 🚀 Sitede Neler Var?
 
-## Veri ve yöntem
+DendroGeo, hem saha operasyonlarını kolaylaştıran hem de akademik standartlarda veri üreten modüler bir yapıya sahiptir:
 
-### Ağaç biyokütlesi ve karbon
+- **Akıllı Saha Envanteri (PWA):** GPS konumu, 1,30 m'den ölçülen göğüs çevresi, boy, tür/grup ve isteğe bağlı fotoğraf. Sistem DBH çapını `D = C / π` ile türetir. Fotoğraf eklendiğinde tarayıcı içi QA/QC uygulanır. Ölçümler çevrimdışı kuyruğa alınabilir ve bağlantı gelince otomatik eşitlenir.
+- **Gelişmiş Park ve Arazi Örtüsü Analizi:** ESA WorldCover 2021 (10 m) raster verisi park sınırıyla kesiştirilerek; ağaç, çalı, otsu bitki ve yapay yüzey gibi sınıfların gerçek kesişim alanları üzerinden hassas yüzdesel dağılımı hesaplanır.
+- **Göreceli NDVI Çıktısı:** Sentinel-2 uydu verileri üzerinden Normalleştirilmiş Farklılaşma Bitki Örtüsü Endeksi (NDVI) hesaplanarak park içindeki bitki sağlığı, gölgelik yoğunluğu ve potansiyel stres bölgeleri görselleştirilir.
+- **Canlı Harita ve Paylaşım:** Yönetici onaylı ölçümleri; park sınırı, gridler ve waypoint katmanlarıyla birlikte interaktif olarak görüntüleme. Harita çıktıları QR kodu veya kalıcı URL ile paydaşlarla kolayca paylaşılabilir.
+- **DOI Atanabilir Akademik Raporlama:** Park raporları, DGR (DendroGeo Raporu) kimliği ve SHA-256 içerik parmak iziyle arşivlenir. Raporlar değiştirilemez (immutable) formattadır ve Zenodo gibi platformlarla entegre DOI atanarak akademik yayına hazır hale getirilir.
+- **Projeler ve İşbirliği:** Aynı fiziksel parkta çalışan farklı projeler, park kimliği altında karşılaştırılabilir. "Park çalışma arkadaşı" akışı, ortak saha ölçümlerini ve veri girişini destekler.
+- **Esnek Dışa Aktarım:** Veriler, ileri analizler için CSV, GeoJSON ve QGIS (fotoğraf eşleştirmeli) biçimlerinde doğrulanmış olarak dışa aktarılabilir.
 
-Üstü gövde biyokütlesi Chave vd. (2014) allometrik modeliyle hesaplanır:
+---
+
+## 🔬 Veri ve Yöntem
+
+### Ağaç Biyokütlesi ve Karbon
+Üstü gövde biyokütlesi (AGB), uluslararası literatürde kabul görmüş **Chave vd. (2014)** allometrik modeliyle hesaplanır:
 
 `AGB = 0.0673 · (ρ · D² · H)^0.976`
 
-Burada saha değişkeni `C` göğüs çevresidir (cm); `D = C / π` ile türetilen DBH çapı (cm), `H` ağaç boyu (m), `ρ` odun yoğunluğudur. Ham çevre korunur; allometriye çevre değil türetilmiş `D` girer. Kullanıcı arayüzü ve rapor tabloları DBH'yi **1 ondalık basamakla** gösterir; hesap motoru tam hassasiyetli türetilmiş değeri kullanır. Kök biyokütlesi `AGB × 0,26`; karbon stoğu toplam biyokütlenin `0,47`'si olarak tahmin edilir. Tür yoğunluğu bulunmadığında belgelenmiş grup varsayımı uygulanabilir. Bunlar ölçülmüş karbon miktarı değil, model tabanlı tahminlerdir. Uygulama ve rapor belirsizlikleri ile sınırlılıkları açıklar.
+- **C:** Saha değişkeni, göğüs çevresi (cm).
+- **D:** `D = C / π` ile türetilen DBH çapı (cm). Ham çevre korunur; allometriye çevre değil, tam hassasiyetli türetilmiş `D` girer. Arayüzde 1 ondalık basamak gösterilir.
+- **H:** Ağaç boyu (m).
+- **ρ (rho):** Odun yoğunluğu (g/cm³). Tür yoğunluğu bulunmadığında belgelenmiş grup varsayımı uygulanır.
 
-### Park arazi örtüsü
+Kök biyokütlesi `AGB × 0,26` olarak; toplam karbon stoğu ise toplam biyokütlenin (AGB + Kök) `0,47`'si (IPCC standartları) olarak tahmin edilir. **Önemli:** Bunlar doğrudan ölçülmüş karbon miktarı değil, model tabanlı tahminlerdir. Uygulama ve raporlar, belirsizlik sınırlarını ve yöntem kısıtlarını şeffaf bir şekilde açıklar.
 
-- Birincil kaynak: **ESA WorldCover 2021 v200, 10 m**.
-- Bağımsız çapraz kontrol: **Impact Observatory LULC 2020**.
-- Alan hesabı, raster hücrelerinin park geometrisiyle gerçek kesişim alanlarını kullanır.
-- OSM park/yapı/geometri bilgileri yardımcı katmandır; ham raster sınıfının yerine geçmez. Bilinmeyen veya kapsam dışı alanlar hedef yüzdelere dağıtılmaz.
-- Sınıf sonuçları kaynak, yıl, geometri QA ve yöntem sınırlılıklarıyla yorumlanmalıdır. Ayrıntı: [yöntem belgesi](docs/methods.md) ve [arazi örtüsü yöntemi](docs/LULC_METHODOLOGY.md).
+### Park Arazi Örtüsü
+- **Birincil Kaynak:** ESA WorldCover 2021 v200, 10 m çözünürlük.
+- **Bağımsız Çapraz Kontrol:** Impact Observatory LULC 2020.
+- **Hesaplama:** Alan hesabı, raster hücrelerinin park geometrisiyle gerçek kesişim alanlarını kullanır. Bilinmeyen veya kapsam dışı alanlar hedef yüzdelere keyfi olarak dağıtılmaz.
+- **Not:** OSM park/yapı/geometri bilgileri yardımcı katmandır; ham raster sınıfının yerine geçmez. Ayrıntı için: [Yöntem Belgesi](docs/methods.md) ve [Arazi Örtüsü Yöntemi](docs/LULC_METHODOLOGY.md).
 
-## Rapor kimliği ve DOI
+---
 
-DGR, DendroGeo park raporunun kalıcı iç kimliğidir. Yayımlanan rapor sessizce değiştirilmez; düzeltme ve geri çekmeler kayıtlı yayın süreciyle yürütülür. [Rapor arşivinde](https://dendrogeo.org/rapor/) yayımlanan raporlar ve durumları görülebilir.
+## 📑 Rapor Kimliği ve DOI
 
-README başlığındaki Zenodo DOI, **DendroGeo v3.0.0 yazılım sürüm kaydına** aittir. Bir park raporunun DOI'si ancak o rapor için ayrıca atanmış ve yayımlanmışsa kullanılır; yazılım DOI'si DGR rapor DOI'si olarak gösterilmez.
+DGR, DendroGeo park raporunun kalıcı iç kimliğidir. Yayımlanan rapor sessizce değiştirilmez; düzeltme ve geri çekmeler kayıtlı, şeffaf bir yayın süreciyle yürütülür. Yayımlanan raporlar ve durumları [Rapor Arşivi](https://dendrogeo.org/rapor/) sayfasından izlenebilir.
+
+> ⚠️ **ÖNEMLİ UYARI:** README başlığındaki Zenodo DOI, **yalnızca DendroGeo v3.0.0 yazılım sürüm kaydına** aittir. Bir park raporunun DOI'si, ancak o rapor için ayrıca atanmış ve yayımlanmışsa kullanılır; yazılım DOI'si, DGR rapor DOI'si veya saha verisi DOI'si olarak gösterilemez.
+
+### Yazılım Atfı (BibTeX)
 ```bibtex
 @software{dendrogeo,
   title   = {DendroGeo: Global Tree Inventory and Carbon Data System},
@@ -50,48 +62,3 @@ README başlığındaki Zenodo DOI, **DendroGeo v3.0.0 yazılım sürüm kaydın
   doi     = {10.5281/zenodo.22948643},
   license = {CC-BY-NC-4.0}
 }
-```
-
-## Site sayfaları
-
-| Sayfa | İçerik |
-|---|---|
-| [Ağaç Envanteri](https://dendrogeo.org/agac-envanteri/) | Saha ölçümü ve veri yaşam döngüsü |
-| [Karbon Hesaplama](https://dendrogeo.org/karbon-hesaplama/) | Model, varsayımlar ve belirsizlik |
-| [Arazi Örtüsü](https://dendrogeo.org/arazi-ortusu/) | Raster kaynakları, hücre alanı ve sınırlılıklar |
-| [Kent Parkları](https://dendrogeo.org/kent-parklari/) | Park ölçeğinde veri kaynaklarının ayrımı |
-| [Veri ve Dışa Aktarım](https://dendrogeo.org/veri/) | Kayıtların yönetimi, formatlar ve lisanslar |
-| [Yöntem](https://dendrogeo.org/yontem/) · [English site](https://dendrogeo.org/en/) · [English methods](https://dendrogeo.org/en/methods/) | Bilimsel hesap zinciri |
-| [Hakkımızda](https://dendrogeo.org/hakkimizda/) · [Künye](https://dendrogeo.org/kunye/) | Proje, sorumlular ve iletişim |
-| [Gizlilik](https://dendrogeo.org/gizlilik/) · [KVKK Aydınlatma](https://dendrogeo.org/aydinlatma/) · [Kullanım Koşulları](https://dendrogeo.org/kullanim-kosullari/) | Yasal ve veri işleme bilgileri |
-
-## Geliştirme
-
-Site, GitHub Pages üzerinde yayımlanan statik bir web uygulaması/PWA'dır; kullanıcı ve proje verileri Supabase'e RLS politikalarıyla erişir. `index.html`, `partials/` içeriğinden üretilir. Geliştirme ortamı Node.js 20 veya üzerini gerektirir.
-
-```bash
-git clone https://github.com/snansrin/dendrogeo.git
-cd dendrogeo
-npm ci
-npm run check
-npm run build
-python3 -m http.server 8080
-```
-
-`npm run check` sözdizimi, sürüm işaretleri, üretilen HTML, CSP ve testleri denetler. Test sayısı zamanla değişebildiğinden burada sabit sayı verilmez. Üretim öncesi kontrol ve dağıtım CI üzerinden yapılır.
-
-## Lisans ve atıf
-
-DendroGeo'nun hak sahiplerinin yayımlama yetkisine sahip olduğu özgün kaynak kodu, arayüzü, belgeleri ve yazılım sürüm kayıtları [CC BY-NC 4.0](LICENSE) koşullarına tabidir. Ticari kullanım için hak sahiplerinden yazılı izin gerekir. Harita, raster, font, kütüphane ve diğer üçüncü taraf kaynaklar bu lisansla yeniden lisanslanmaz; kendi lisansları ve hizmet koşulları geçerlidir.
-
-Saha kullanıcılarının eklediği ölçüm, fotoğraf, konum ve kişisel veriler bu lisans bildirimiyle kendiliğinden yayımlanmış veya açık lisanslı hâle gelmez. Bu verilerin yayımlanması için hak, izin, rıza ve gizlilik koşulları ayrıca değerlendirilir. Üçüncü taraf yazılım, veri ve hizmetlerin sürüm/kaynak/lisans dökümü: [Üçüncü Taraf Lisans Envanteri](docs/THIRD_PARTY_LICENSES.md). Temel repo notları: [LICENSE](LICENSE) ve [NOTICE](NOTICE).
-
-Başlıca veri atıfları OpenStreetMap (ODbL), ESA WorldCover 2021 v200 (CC BY 4.0), Impact Observatory Maps for Good Annual LULC 2020 (CC BY 4.0) ve kullanımına bağlı Copernicus Sentinel-2 verisidir. OpenTopoMap ve Esri World Imagery için katmana özgü sağlayıcı atıfları gerekir; harita ve dışa aktarımlarda kullanılacak tam metinler envanterde açıklanmıştır.
-
-README başlığındaki Zenodo DOI, **DendroGeo v3.0.0 yazılım sürüm kaydına** aittir. Bir park raporunun DOI'si ancak o rapor için ayrıca atanmış ve yayımlanmışsa kullanılır; yazılım DOI'si rapor veya saha verisi DOI'si değildir. Sürüm ve yazılım atıf bilgisi [CITATION.cff](CITATION.cff) dosyasındadır.
-
-## Güvenlik ve katkı
-
-Güvenlik açığını herkese açık issue yerine [SECURITY.md](SECURITY.md) adresindeki özel bildirim yoluyla iletin. Hata ve geliştirme önerileri için [GitHub Issues](https://github.com/snansrin/dendrogeo/issues) kullanın.
-
-Yüzey analiz motoru ve canlı harita DendroGeo'nun ana çekirdeğidir. Bu akışlarda değişiklikler [çekirdek kırmızı çizgilerine](docs/CORE-KIRMIZI-CIZGILER.md) göre izole edilmeli; bilimsel veya harita regresyonları ilgili testler, çoklu park kontrolleri, mobil görünüm ve CI ile doğrulanmalıdır.
