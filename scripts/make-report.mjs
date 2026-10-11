@@ -3,6 +3,7 @@ import {createReportPublicationApplication} from './lib/report-publication-appli
 import {createReportSpeciesPresentation, sw} from './lib/report-species-presentation.mjs';
 import {createReportQaPresentation} from './lib/report-qa-presentation.mjs';
 import {createReportEvaluationPresentation} from './lib/report-evaluation-presentation.mjs';
+import {createReportCoverPresentation} from './lib/report-cover-presentation.mjs';
 import {createReportStudyPresentation} from './lib/report-study-presentation.mjs';
 import {createReportDocumentHead} from './lib/report-document-head.mjs';
 import {createReportSourcesPresentation} from './lib/report-sources-presentation.mjs';
@@ -379,6 +380,7 @@ const renderLimitationsPresentation = createReportLimitationsPresentation({
     trNum, QA_LIMITS,
     YASAL_STATU_KAPSAM,
 });
+const renderCoverPresentation = createReportCoverPresentation({esc, trNum, QA_STATE, DGR_TITLE_DEF, FOUNDERS_LINE});
 const renderStudyPresentation = createReportStudyPresentation({esc});
 const renderDocumentHead = createReportDocumentHead({esc, fmtT, reportStyles, siteOrigin: SITE_ORIGIN});
 const renderSourcesPresentation = createReportSourcesPresentation({esc, fmtDateTr});
@@ -481,27 +483,7 @@ ${renderDocumentHead({id, P, t, dataset, ciTxt, hash, L, jsonld})}
 </head>
 <body>
 <div class="wrap">
-<div class="kick">DendroGeo Bilimsel Analiz Raporu · ${id} · sürüm ${verTxt}</div>
-<h1>${snap.study?.title ? esc(snap.study.title) : titleMain}</h1>
-<div class="sub">Saha ölçümleri, allometrik hesaplama ve ${L?.review ? "kayıtlı yüzey sonucu" : "arazi örtüsü sınıflandırması"} ile park ölçekli analiz</div>
-
-<div class="meta">
- <div><b>Rapor kimliği</b><code>${id}</code><span class="hint">${DGR_TITLE_DEF}</span></div>
- <div><b>Rapor durumu</b><span class="${QA_ST_CLASS}">${QA_ST_LABEL}</span><span class="hint">${QA_ST === QA_STATE.BLOCKED ? 'kritik veri hatası: karbon sonucu bilimsel iletişimde kullanılmamalıdır' : QA_ST === QA_STATE.REVIEW ? 'veri geçerli; bazı istatistiksel kontroller inceleme uyarısı veriyor (§7)' : 'tüm kritik kontroller geçti'}</span></div>
- <div><b>Analiz konusu</b><code>${esc(subject)}</code></div>
- <div><b>Konum</b><code>${esc(P.city)}, ${esc(P.country)}</code></div>
- <div><b>Analiz tarihi</b><code>${genTr}</code></div>
- <div><b>Analiz sürümü</b><code>${esc(engine)}${engineVer ? ' v' + esc(engineVer) : ''}${appVer ? ' · DendroGeo v' + esc(appVer) : ''}</code></div>
- <div><b>Veri dönemi</b><code>${dataYear} (arazi örtüsü)</code><span class="hint">saha ölçümleri: ${snap.period.from.slice(0, 10)} → ${snap.period.to.slice(0, 10)}</span></div>
- <div><b>Mekânsal çözünürlük</b><code>${esc(resolutionLabel)}</code></div>
- <div><b>Park kimliği</b><code>${esc(P.osm_key || '—')} · DB #${P.id}</code></div>
- <div><b>Örneklem</b><code>${t.n} onaylı ölçüm · ${snap.species.length} tür</code></div>
- <div><b>Park alanı</b><code>${trNum(parkHa, 2)} ha (OSM poligonu)</code></div>
- <div><b>Yazar</b><code>${AU.name ? esc(AU.name) : 'DendroGeo (kurumsal)'}</code><span class="hint">${esc(FOUNDERS_LINE)}${AU.name ? '' : ' — istek sahibi adı çözülemedi'}</span></div>
- ${qrUri ? `<div><b>Kalıcı bağlantı (QR)</b><img src="${qrUri}" width="104" height="104" alt="${id} kalıcı rapor adresinin QR kodu" style="border:1px solid var(--line);border-radius:6px;background:#fff"><span class="hint">${esc(REPORT_URL)}</span></div>` : `<div><b>Kalıcı bağlantı</b><code>${esc(REPORT_URL)}</code></div>`}
- <div><b>Lisans</b><code>CC BY-NC 4.0</code></div>
- <div><b>İçerik hash'i</b><code>sha256:${hash.slice(0, 20)}…</code></div>
-</div>
+${renderCoverPresentation({id, verTxt, snap, titleMain, L, QA_ST_CLASS, QA_ST_LABEL, QA_ST, subject, P, genTr, engine, engineVer, appVer, dataYear, resolutionLabel, t, parkHa, AU, qrUri, REPORT_URL, hash})}
 ${renderStudyPresentation(snap)}
 <p class="stmt">Bu rapor, DendroGeo analiz sistemi tarafından belirlenen yöntem, veri kaynakları ve kalite kontrol prosedürleri doğrultusunda oluşturulmuştur. Rapor bir akreditasyon veya sertifikasyon belgesi değildir; bulgular, beyan edilen veri kaynakları ve çözümleme sürümü kapsamında geçerlidir.</p>
 
