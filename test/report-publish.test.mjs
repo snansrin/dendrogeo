@@ -190,7 +190,8 @@ describe('make-report.mjs: tek üretici publishPark()', () => {
   });
 
   test('⭐ üretilen sayfada paylaş düğmesi var (Web Share + pano yedeği)', () => {
-    assert.match(MR, /id="dgShareBtn" onclick="dgShareReport\(\)">📤 Paylaş</);
+    assert.match(read('scripts/lib/report-data-access-presentation.mjs'), /id="dgShareBtn" onclick="dgShareReport\(\)">📤 Paylaş</);
+    assert.match(MR, /\$\{renderReportDataAccess\(\{L, M\}\)\}/, 'indirme ve paylaşma modülü rapor şablonuna eklenir');
     assert.match(MR, /\$\{REPORT_SHARE_SCRIPT\}/, 'client helper rapor şablonuna eklenir');
     assert.match(read('scripts/lib/report-share.mjs'), /navigator\.share/, 'yerel paylaşım');
     assert.match(read('scripts/lib/report-share.mjs'), /navigator\.clipboard\.writeText\(url\)/, 'pano yedeği');

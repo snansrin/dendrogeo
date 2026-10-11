@@ -396,3 +396,7 @@ Her modülün tek bir dış API'si, sahibi olduğu açık durumu ve kendi testle
 ### Report references presentation (11 October 2026)
 
 `report-references-presentation.mjs` renders the existing bibliography. Reference order, DOI text, reviewed/accepted Sentinel disclosure, optional escaped cross-validation source and site-derived methods link remain unchanged. Citation generation and scientific calculations stay separate.
+
+### Report data access presentation (11 October 2026)
+
+`report-data-access-presentation.mjs` renders artifact download links, print/share controls and reuse terms. Existing conditional map/PDF links, element identifiers, handlers, button classes and relative paths remain unchanged. Artifact production, PDF generation and sharing logic stay with their existing owners.
