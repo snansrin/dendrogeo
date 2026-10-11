@@ -45,6 +45,8 @@ src/
 
 ## Uygulanmış ilk ayrım
 
+- `config/i18n-en.js`, Türkçe anahtarlarla İngilizce karşılıkların sabit sözlüğünü taşır; `config/i18n.js` yalnızca ters sözlük, DOM çevirisi, kalıcılık ve dil değişimi davranışını yönetir. Sözlük, çalışma zamanı çeviricisinden önce yüklenir.
+
 - `domain/trees/allometry.js`, Chave allometrisi, karbon katsayıları ve hacim denklemini saf fonksiyon olarak taşır.
 - `application/trees/calculate-tree-carbon.js`, yoğunluk çözümünü enjekte edilen bağımlılık olarak alır ve domain hesabını çağırır.
 - `application/trees/calculate-tree-carbon-from-circumference.js`, kilitli çevre/DBH protokolünü ve karbon akışını enjekte edilen portlarla sıralar; saha API'si korunur.

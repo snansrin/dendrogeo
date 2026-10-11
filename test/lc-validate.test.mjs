@@ -589,7 +589,7 @@ describe('entegrasyon zinciri kilitleri (0054 · lc-sens)', () => {
   const sw = rd('sw.js');
   const panel = rd('src/ui/park-panel.js') + '\n' + rd('src/ui/park-info-panel.js');
   const exportJs = rd('src/ui/park-export.js') + '\n' + rd('src/ui/park-landcover-analysis.js');
-  const i18n = rd('src/config/i18n.js');
+  const i18n = rd('src/config/i18n-en.js') + '\n' + rd('src/config/i18n.js');
   const sens = rd('src/ui/lc-sens.js');
   const css = rd('css/park-panel.css');
 
@@ -727,7 +727,7 @@ describe("0058 · Doğrulanmış Harita PNG (kullanıcının refactor'ü üstün
     assert.ok(!/groupAreas\s*=/.test(sens));
   });
   test('i18n anahtarları sözlükte', () => {
-    const i18n = rd('src/config/i18n.js');
+    const i18n = rd('src/config/i18n-en.js') + '\n' + rd('src/config/i18n.js');
     for (const k of ['Doğrulanmış Harita', '✓ Doğrulanmış harita PNG indirildi.', 'PNG üretilemedi.'])
       assert.ok(i18n.includes(JSON.stringify(k) + ':'), 'eksik: ' + k);
   });

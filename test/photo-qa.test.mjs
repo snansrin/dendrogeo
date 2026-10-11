@@ -158,7 +158,7 @@ describe('0044 · statik kilitler', () => {
     assert.ok(!rd('partials/shell.html').includes('dgAiAdmin'), 'shell: kart kutusu');
     assert.ok(!rd('src/services/admin.js').includes('dgAiAdminRender'), 'admin: çağrı');
     assert.ok(!meas.includes('dgAiOnPhoto'), 'measure: kanca');
-    const i18n = rd('src/config/i18n.js');
+    const i18n = rd('src/config/i18n-en.js') + '\n' + rd('src/config/i18n.js');
     assert.ok(!i18n.includes('AI Ağaç Algılama'), 'i18n: kart başlığı');
     assert.ok(!i18n.includes('yerleşik algılayıcı'), 'i18n: yerleşik algılayıcı');
     assert.ok(!i18n.includes('uç nokta'), 'i18n: uç nokta/CORS metni');
@@ -173,7 +173,7 @@ describe('0044 · statik kilitler', () => {
   });
 
   test('⭐ yeni kullanıcı dizeleri EN sözlüğünde (i18n sözleşmesi)', () => {
-    const i18n = rd('src/config/i18n.js');
+    const i18n = rd('src/config/i18n-en.js') + '\n' + rd('src/config/i18n.js');
     for (const s of ['yeşil örtü', 'kızıl/mor yaprak', 'sonbahar rengi', 'gövde/dal',
       'kış kadrajı (dal silüeti)', 'bitki/dal kanıtı yeterli', 'Fotoğraf denetleniyor…',
       'Yalnızca görsel dosyası yükleyin.',
@@ -187,7 +187,7 @@ describe('0044 · statik kilitler', () => {
     const claim = 'Fotoğraf eklenirse tarayıcı içi çok sınıflı denetim uygulanır: yeşil · kızıl/mor · sonbahar · gövde/dal · kış kadrajı + pozlama 25–245';
     assert.ok(rd('partials/landing.html').includes(claim), 'landing satırı güncel');
     assert.ok(rd('index.html').includes(claim), 'üretilmiş index güncel');
-    assert.ok(rd('src/config/i18n.js').includes(JSON.stringify(claim) + ':'), 'EN karşılığı');
+    assert.ok((rd('src/config/i18n-en.js') + '\n' + rd('src/config/i18n.js')).includes(JSON.stringify(claim) + ':'), 'EN karşılığı');
     assert.ok(!rd('partials/landing.html').includes('bitki örtüsü ≥ %25'), 'eski iddia kalktı');
   });
 

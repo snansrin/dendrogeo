@@ -36,6 +36,8 @@ on:
       - 'vendor/polygon-clipping-0.15.7.js'
       - 'src/services/osm-water-backup.js'
       - 'src/services/visit-stats.js'
+      - 'src/config/i18n-en.js'
+      - 'src/config/i18n.js'
       - 'src/application/visitors/**'
       - 'src/application/parks/**'
       - 'src/adapters/parks/**'

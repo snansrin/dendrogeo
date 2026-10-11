@@ -21,6 +21,7 @@ import { QA_LIMITS } from '../scripts/lib/mc.mjs';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const rd = (p) => readFileSync(join(ROOT, p), 'utf8');
+const i18nSource = () => rd('src/config/i18n-en.js') + '\n' + rd('src/config/i18n.js');
 const landing = rd('partials/landing.html');
 const shell = rd('partials/shell.html');
 const head = rd('partials/head.html');
@@ -58,7 +59,7 @@ describe('P0 · bilimsel iddialar kaynağıyla birebir', () => {
       CustomEvent: function () {},
     };
     vm.createContext(ictx);
-    vm.runInContext(rd('src/config/i18n.js') + ';this.E=DG_I18N_EN;this.T=DG_I18N_TR;', ictx);
+    vm.runInContext(i18nSource() + ';this.E=DG_I18N_EN;this.T=DG_I18N_TR;', ictx);
     const eksik = [];
     for (const arr of Object.values(sctx.S)) for (const s of arr) if (!(s.tr in ictx.E)) eksik.push(s.tr);
     assert.deepEqual(eksik, [], 'EN sözlüğünde eksik tür: ' + eksik.join(', '));
@@ -244,7 +245,7 @@ describe('0036 · özellik ve EN bütünlük kilitleri', () => {
     assert.match(rd('src/services/dash.js'), /point_id/, );
   });
   test('"Kayıt" çakışması giderildi: sekme "Kayıt Ol", tablo "Record"', () => {
-    const i18nSrc = rd('src/config/i18n.js');
+    const i18nSrc = i18nSource();
     assert.match(i18nSrc, /"Kayıt Ol":"Sign up"/);
     assert.ok(!/"Kayıt":"Sign up"/.test(i18nSrc), 'tablo başlığı Sign up olamaz');
     assert.match(rd('partials/landing.html'), />Kayıt Ol</);
@@ -316,7 +317,7 @@ describe('0036 · özellik ve EN bütünlük kilitleri', () => {
     assert.match(rd('src/services/measure.js'), /dgLiveSharePing/, 'GPS güncellemesi ping atar');
   });
   test('⭐ 0037 pinleri: kuyruk/rozet/panel çekirdek çevirileri sözlükte', () => {
-    const i18nSrc = rd('src/config/i18n.js');
+    const i18nSrc = i18nSource();
     for (const s of ['"Geri çekildi":"Retracted"', '"🚫 Reddet":"🚫 Reject"', '"✓ Onayla":"✓ Approve"',
       '"🌳 Park Algılama":"🌳 Park Detection"', '"Ortaklar":"Collaborators"', '"Bekliyor":"Waiting"',
       '"En Yaygın 6 Tür":"Top 6 Species"', '"Ölçüm fotoğrafı":"Measurement photo"'])
@@ -349,7 +350,7 @@ describe('0036 · özellik ve EN bütünlük kilitleri', () => {
 });
 
 describe('i18n katmanı sözleşmesi (0035)', () => {
-  const i18n = rd('src/config/i18n.js');
+  const i18n = i18nSource();
   test('sözlük kapsamlı ve çekirdek dizeler çevrili', () => {
     const n = (i18n.match(/":"/g) || []).length;
     assert.ok(n >= 150, 'EN sözlüğü en az 150 dize içermeli, bulunan: ' + n);
@@ -367,6 +368,9 @@ describe('i18n katmanı sözleşmesi (0035)', () => {
   });
   test('i18n.js kayıt zinciri: index.html tag + defer + CORE_ASSETS', () => {
     assert.match(index, /<script src="src\/config\/i18n\.js\?v=[0-9a-f]{8}" defer>/);
+    assert.match(index, /<script src="src\/config\/i18n-en\.js\?v=[0-9a-f]{8}" defer>/);
+    assert.ok(index.indexOf('src/config/i18n-en.js') < index.indexOf('src/config/i18n.js'), 'sözlük runtime çeviricisinden önce yüklenir');
+    assert.match(rd('sw.js'), /'\/src\/config\/i18n-en\.js'/);
     assert.match(rd('sw.js'), /'\/src\/config\/i18n\.js'/);
   });
   test('⭐ dinamik şablonlar dgTf/dgT ile çevriliyor (0035c — EN modunda Türkçe kalmaz)', () => {
@@ -387,7 +391,7 @@ describe('i18n katmanı sözleşmesi (0035)', () => {
     assert.ok(!i18n.includes('onaylıyorum. Rızamı dilediğim zaman'), 'rıza metni sözlüğe EKLENMEMELİ');
   });
   test('⭐ uygulamada çevrilmemiş Türkçe toast/confirm KALMADI (0035d)', () => {
-    const dictSrc = rd('src/config/i18n.js');
+    const dictSrc = i18nSource();
     const keys = new Set([...dictSrc.matchAll(/"((?:[^"\\]|\\.)+)":/g)]
       .map((m) => m[1].replace(/\\"/g, '"').replace(/\\n/g, '\n')));
     const TR = /[çğıöşüÇĞİÖŞÜ]/;
@@ -506,7 +510,7 @@ describe('0041 · kaydırma window kök düzeltmesi + 0044 soket kaldırma', () 
     assert.ok(!rd('src/services/admin.js').includes('dgAiAdminRender'), 'loadAdmin çağrısı izi kalmamalı');
     const mj = rd('src/services/measure.js');
     assert.ok(!mj.includes('dgAiOnPhoto'), 'fotoğraf kancası izi kalmamalı');
-    assert.ok(!rd('src/config/i18n.js').includes('AI Ağaç Algılama'), 'sözlük izi kalmamalı');
+    assert.ok(!i18nSource().includes('AI Ağaç Algılama'), 'sözlük izi kalmamalı');
     /* Fotoğraf denetimi SAHADA ve TEK yerde: Yeni Ölçüm sekmesi, fotoğraf düğmesi. */
     assert.match(shell, /onchange="checkPhoto\(event\)"/, 'denetim fotoğraf düğmesine bağlı');
     assert.match(shell, /id="photoCheck"/, 'sonuç kutusu ölçüm formunda');
