@@ -5,7 +5,8 @@ import vm from 'node:vm';
 
 const file=p=>readFileSync(new URL('../'+p,import.meta.url),'utf8');
 const html=file('index.html'),boot=file('partials/boot.html'),css=file('css/gis-workspace.css');
-const ui=file('src/ui/gis-workspace.js'),park=file('src/ui/park-panel.js');
+const ui=file('src/ui/gis-workspace.js'),park=file('src/ui/park-panel.js'),panelMarkup=file('src/ui/park-info-panel.js');
+const parkSurface=park+'\n'+panelMarkup;
 const dashboard=file('src/services/dash.js'),sw=file('sw.js');
 const lock=JSON.parse(file('docs/surface-engine-lock.json'));
 
@@ -28,10 +29,10 @@ test('workspace loads once from an external classic script and is precached',()=
 
 test('all original Grid, layer and PNG IDs and event handlers remain wired',()=>{
  for(const id of ['parkGridTools','parkLayerTools','parkRasterExport','gridProject','gridSize','gridClearance','pngBg','chkPngGrid','chkPngWp','chkPngCover','togGrid','togWp']){
-  assert.match(park,new RegExp('id="'+id+'"'));
+  assert.match(parkSurface,new RegExp('id="'+id+'"'));
  }
- assert.match(park,/onclick="buildGrid\(\)"/);
- assert.match(park,/onclick="downloadParkImage\(\)"/);
+ assert.match(parkSurface,/onclick="buildGrid\(\)"/);
+ assert.match(parkSurface,/onclick="downloadParkImage\(\)"/);
  assert.match(ui,/panel\.append\(exportCard\)/);
  assert.match(ui,/section\.append\(pngFields\)/);
  assert.doesNotMatch(ui,/cloneNode\(/);

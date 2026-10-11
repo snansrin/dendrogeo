@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import vm from 'node:vm';
 import {readFileSync} from 'node:fs';
 const source=readFileSync(new URL('../src/ui/park-panel.js',import.meta.url),'utf8');
+const panelMarkup=readFileSync(new URL('../src/ui/park-info-panel.js',import.meta.url),'utf8');
 class Element {
  constructor(){this.children=[];this.listeners={};this.open=false;}
  append(...nodes){this.children.push(...nodes);}
@@ -28,7 +29,8 @@ test('park menus move the original grid and layer nodes, retaining values and ha
 test('menus mount after park and waypoint markup is created, not on reference-area edits',()=>{
  const ref=source.slice(source.indexOf('function setRefHa'),source.indexOf('function renderRefBadge'));
  assert.doesNotMatch(ref,/dgParkMountMenus/);
- assert.match(source,/id="gridSummary"[\s\S]*?dgParkMountMenus\(\);[\s\S]*?renderRefBadge\(\);/);
+ assert.match(panelMarkup,/id="gridSummary"/);
+ assert.match(source,/DG_PARK_INFO_PANEL_UI\.render\([\s\S]*?dgParkMountMenus\(\);[\s\S]*?renderRefBadge\(\);/);
 });
 
 test('shared bar sorts file first and moves controls without recreating them',()=>{

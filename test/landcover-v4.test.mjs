@@ -538,6 +538,7 @@ describe('v8: grid yeşil-alan kapısı + PNG dışa aktarım (canary)', () => {
     readFileSync(new URL('../src/domain/parks/cell-validity.js', import.meta.url), 'utf8'),
     readFileSync(new URL('../src/services/park-geometry.js', import.meta.url), 'utf8'),
     readFileSync(new URL('../src/ui/park-panel.js', import.meta.url), 'utf8'),
+    readFileSync(new URL('../src/ui/park-info-panel.js', import.meta.url), 'utf8'),
     readFileSync(new URL('../src/ui/park-export.js', import.meta.url), 'utf8'),
   ].join('\n');
 
