@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import vm from 'node:vm';
 import {readFileSync} from 'node:fs';
 const file=p=>readFileSync(new URL('../'+p,import.meta.url),'utf8');
-const adapter=file('src/ui/gis-export.js'),vegetation=file('src/ui/gis-export-vegetation.js'),canvas=file('src/ui/gis-export-canvas.js'),events=file('src/ui/gis-export-events.js'),style=file('css/gis-workspace.css'),ui=file('src/ui/gis-workspace.js');
+const adapter=file('src/ui/gis-export.js'),vegetation=file('src/ui/gis-export-vegetation.js'),layout=file('src/ui/gis-export-layout.js'),canvas=file('src/ui/gis-export-canvas.js'),events=file('src/ui/gis-export-events.js'),style=file('css/gis-workspace.css'),ui=file('src/ui/gis-workspace.js');
 const lock=JSON.parse(file('docs/surface-engine-lock.json'));
 function env({ndvi=false,ndviAvailable=true,gridCells=[],verified=false}={}){
  const messages=[],ops=[],downloads=[],elements={},polygon=[
@@ -37,6 +37,7 @@ function env({ndvi=false,ndviAvailable=true,gridCells=[],verified=false}={}){
  vm.createContext(ctx);
  vm.runInContext(file('src/ui/park-image-geometry.js'),ctx,{filename:'park-image-geometry.js'});
  vm.runInContext(vegetation,ctx,{filename:'gis-export-vegetation.js'});
+ vm.runInContext(layout,ctx,{filename:'gis-export-layout.js'});
  vm.runInContext(canvas,ctx,{filename:'gis-export-canvas.js'});
  vm.runInContext(events,ctx,{filename:'gis-export-events.js'});
  vm.runInContext(adapter,ctx,{filename:'gis-export.js'});
@@ -110,15 +111,19 @@ test('boot, SW and index will expose PNG adapter after locked exporter',()=>{
  assert.match(boot,/src\/ui\/gis-export-canvas\.js\?v=[a-f0-9]{8}/);
  assert.match(boot,/src\/ui\/gis-export-events\.js\?v=[a-f0-9]{8}/);
  assert.match(boot,/src\/ui\/gis-export-vegetation\.js\?v=[a-f0-9]{8}/);
+ assert.match(boot,/src\/ui\/gis-export-layout\.js\?v=[a-f0-9]{8}/);
  assert.match(index,/src\/ui\/gis-export\.js\?v=[a-f0-9]{8}/);
  assert.match(index,/src\/ui\/gis-export-canvas\.js\?v=[a-f0-9]{8}/);
  assert.match(index,/src\/ui\/gis-export-events\.js\?v=[a-f0-9]{8}/);
  assert.match(index,/src\/ui\/gis-export-vegetation\.js\?v=[a-f0-9]{8}/);
+ assert.match(index,/src\/ui\/gis-export-layout\.js\?v=[a-f0-9]{8}/);
  assert.match(sw,/\/src\/ui\/gis-export\.js/);
  assert.match(sw,/\/src\/ui\/gis-export-canvas\.js/);
  assert.match(sw,/\/src\/ui\/gis-export-events\.js/);
  assert.match(sw,/\/src\/ui\/gis-export-vegetation\.js/);
+ assert.match(sw,/\/src\/ui\/gis-export-layout\.js/);
  assert.ok(index.indexOf('src/ui/gis-export-vegetation.js')<index.indexOf('src/ui/gis-export-canvas.js'));
+ assert.ok(index.indexOf('src/ui/gis-export-layout.js')<index.indexOf('src/ui/gis-export.js'));
  assert.ok(index.indexOf('src/ui/park-export.js')<index.indexOf('src/ui/gis-export.js'));
  assert.ok(index.indexOf('src/ui/gis-export-canvas.js')<index.indexOf('src/ui/gis-export.js'));
  assert.ok(index.indexOf('src/ui/gis-export-events.js')<index.indexOf('src/ui/gis-export.js'));

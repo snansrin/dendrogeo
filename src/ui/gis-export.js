@@ -44,23 +44,9 @@
    notify("Göreli NDVI açık, ancak gösterilecek en az 3 gözlemli NDVI katmanı hazır değil. Yanlış PNG oluşturmamak için indirme durduruldu.","warn");
    return false;
   }
-  const bounds={minLat:90,maxLat:-90,minLon:180,maxLon:-180};
-  function grow(p){if(!Array.isArray(p)||p.length<2||!Number.isFinite(p[0])||!Number.isFinite(p[1]))return;
-   bounds.minLat=Math.min(bounds.minLat,p[0]);bounds.maxLat=Math.max(bounds.maxLat,p[0]);
-   bounds.minLon=Math.min(bounds.minLon,p[1]);bounds.maxLon=Math.max(bounds.maxLon,p[1]);}
-  for(const ring of PARK_POLY)for(const p of ring)grow(p);
-  if(bounds.maxLat<=bounds.minLat||bounds.maxLon<=bounds.minLon){notify("Park geometrisi geçersiz, PNG oluşturulmadı.","err");return false;}
-  const centerLat=(bounds.minLat+bounds.maxLat)/2;
-  const mx=111320*Math.cos(centerLat*Math.PI/180),my=110540;
-  const wMeters=(bounds.maxLon-bounds.minLon)*mx+30,hMeters=(bounds.maxLat-bounds.minLat)*my+30;
-  const PAD=76,TOP=110,LEGEND=ndvi?206:146;
-  const scale=Math.min((1600-PAD*2)/wMeters,(1200-PAD*2)/hMeters);
-  const W=Math.max(940,Math.ceil(wMeters*scale+PAD*2));
-  const H=Math.ceil(hMeters*scale+TOP+PAD+LEGEND);
-  const pr=window.DG_PARK_IMAGE_GEOMETRY.project({
-   minLat:bounds.minLat-15/my,maxLat:bounds.maxLat+15/my,
-   minLon:bounds.minLon,maxLon:bounds.maxLon,width:W,heightTop:TOP,scale
-  });
+  const layout=window.DG_GIS_EXPORT_LAYOUT.compute({rings:PARK_POLY,ndvi,project:window.DG_PARK_IMAGE_GEOMETRY.project});
+  if(!layout){notify("Park geometrisi geçersiz, PNG oluşturulmadı.","err");return false;}
+  const {W,H,PAD,TOP,LEGEND,projection:pr}=layout;
   const cv=document.createElement("canvas");cv.width=W;cv.height=H;
   const ctx=cv.getContext("2d");if(!ctx){notify("Bu tarayıcı PNG oluşturmayı desteklemiyor.","err");return false;}
   const dict=classes();
