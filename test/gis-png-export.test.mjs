@@ -5,17 +5,19 @@ import {readFileSync} from 'node:fs';
 const file=p=>readFileSync(new URL('../'+p,import.meta.url),'utf8');
 const adapter=file('src/ui/gis-export.js'),vegetation=file('src/ui/gis-export-vegetation.js'),canvas=file('src/ui/gis-export-canvas.js'),style=file('css/gis-workspace.css'),ui=file('src/ui/gis-workspace.js');
 const lock=JSON.parse(file('docs/surface-engine-lock.json'));
-function env({ndvi=false,ndviAvailable=true,gridCells=[]}={}){
+function env({ndvi=false,ndviAvailable=true,gridCells=[],verified=false}={}){
  const messages=[],ops=[],downloads=[],elements={},polygon=[
   [{lat:39.99,lng:32.64},{lat:39.99,lng:32.66},{lat:40.01,lng:32.66},{lat:40.01,lng:32.64}]
  ];
  const ctx={
   window:{DG_LANDCOVER:{getLast:()=>({report:{patches:[{group:'water',rings:[[[39.99,32.64],[39.99,32.66],[40.01,32.66],[40.01,32.64]]] }]}})},
    DG_LC_SENS:{state:{vegetationView:ndvi,rawView:false,opacity:65,displayPaths:[],
+    record:verified?{parkName:'Göksu Parkı',acceptedAt:'2026-10-11',fingerprint:'abc123',acceptedResult:{areas:{green:10000}}}:null,
     vegetationLayer:{eachLayer:fn=>{if(ndviAvailable)fn({getLatLngs:()=>polygon,options:{fillColor:'#047857'}})}}}}},
   DG_LC_CLASSES:[{key:'water',color:'#3b82f6',label:'Su'}],
   DG_SENS_VEGETATION_COLORS:{sparse:'#fde68a',moderate:'#4ade80',dense:'#166534'},
-  dgSensVegetationTiers:()=>({count:ndviAvailable?12:0}),
+  dgSensVegetationTiers:()=>({count:ndviAvailable?12:0,eligible:12,cutoffs:[.2,.4],tiers:new Map()}),
+  dgSensEditSummary:()=>({total:1}),dgSensFeatures:()=>[],dgSensAreas:()=>({green:10000}),parkAreaHa:()=>1,
   dgSensRenderVegetation:async()=>{},
   PARK_POLY:[[[39.99,32.64],[39.99,32.66],[40.01,32.66],[40.01,32.64]]],
   PARK_HOLES:[],DG_GRID_SESSION:{getCells:()=>gridCells},WP:[],DG_PARK:{name:'Göksu Parkı'},
@@ -65,6 +67,11 @@ test('Relative NDVI ON includes real polygon layer in verified export',async()=>
  assert.equal(await ctx.window.downloadParkImage(),true);
  assert.ok(downloads.some(x=>/goreli_ndvi.*\.png/.test(x)));
  assert.ok(ops.length>=2,'raw surface plus NDVI fill should both render');
+});
+test('verified NDVI export uses the extracted Canvas renderer on its secondary path',async()=>{
+ const {ctx,downloads}=env({ndvi:true,verified:true});
+ assert.equal(await ctx.window.DG_GIS_PNG_EXPORT.downloadVerified({surface:true,grid:false,waypoints:false,park:true}),true);
+ assert.ok(downloads.some(x=>/dogrulanmis_harita.*goreli_ndvi\.png/.test(x)));
 });
 test('Missing NDVI observations do not pretend that green NDVI imagery was exported',async()=>{
  const {ctx,downloads,messages}=env({ndvi:true,ndviAvailable:false});
