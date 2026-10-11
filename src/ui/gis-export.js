@@ -131,21 +131,11 @@
   if(!areas){
    notify("Doğrulanmış alan verileri henüz hazır değil.","warn");return false;
   }
-  const bounds={minLat:90,maxLat:-90,minLon:180,maxLon:-180};
-  for(const ring of PARK_POLY)for(const p of ring||[]){
-   if(!Array.isArray(p)||!Number.isFinite(p[0])||!Number.isFinite(p[1]))continue;
-   bounds.minLat=Math.min(bounds.minLat,p[0]);bounds.maxLat=Math.max(bounds.maxLat,p[0]);
-   bounds.minLon=Math.min(bounds.minLon,p[1]);bounds.maxLon=Math.max(bounds.maxLon,p[1]);
-  }
-  if(bounds.maxLat<=bounds.minLat||bounds.maxLon<=bounds.minLon){
+  const layout=window.DG_GIS_EXPORT_LAYOUT.computeVerified({rings:PARK_POLY});
+  if(!layout){
    notify("Park sınırı geçersiz; doğrulanmış harita üretilmedi.","warn");return false;
   }
-  const CW=1240,CH=1560,MX=40,MY=240,MW=760,MH=1180;
-  const my=110540,mx=111320*Math.cos((bounds.minLat+bounds.maxLat)/2*Math.PI/180);
-  const width=(bounds.maxLon-bounds.minLon)*mx,height=(bounds.maxLat-bounds.minLat)*my;
-  const scale=Math.min((MW-40)/Math.max(width,1),(MH-40)/Math.max(height,1));
-  const ox=MX+(MW-width*scale)/2,oy=MY+(MH-height*scale)/2;
-  const pr={x:lon=>ox+(lon-bounds.minLon)*mx*scale,y:lat=>oy+(bounds.maxLat-lat)*my*scale};
+  const {CW,CH,MX,MY,MW,MH,projector:pr}=layout;
   const canvas=document.createElement("canvas");
   canvas.width=CW;canvas.height=CH;
   const g=canvas.getContext("2d");
