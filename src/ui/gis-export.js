@@ -6,6 +6,15 @@
  "use strict";
  const platform=window.DG_GIS_EXPORT_PLATFORM.create({document,getToast:()=>typeof toast==="function"?toast:null});
  const {read,notify}=platform;
+ const sources=window.DG_GIS_EXPORT_SOURCES.create({
+  getLandcover:()=>window.DG_LANDCOVER?.getLast?.(),
+  getGridSession:()=>typeof DG_GRID_SESSION!=="undefined"?DG_GRID_SESSION:undefined,
+  hasWaypoints:()=>typeof WP!=="undefined",getWaypoints:()=>WP,
+  getLastWaypoints:()=>typeof LAST_WP_ROWS!=="undefined"?LAST_WP_ROWS:[],
+  getParkAreaFunction:()=>typeof parkAreaHa!=="undefined"?parkAreaHa:undefined,
+  getSurfaceTypes:()=>window.DG_SURFACE_REVIEW?.types,
+  readProjectId:()=>Number(read("gridProject")?.value)
+ });
  const presentation=window.DG_GIS_EXPORT_PRESENTATION;
  const classes=()=>presentation.classes(()=>typeof DG_LC_CLASSES!=="undefined"?DG_LC_CLASSES:null);
  const fmt=presentation.format,safeName=presentation.safeName;
@@ -40,9 +49,7 @@
    context:ctx,layout,options:opts,sensitivity:sens,ndvi,ndviTiers,ndviPolys,parkRings:PARK_POLY,
    holes:typeof PARK_HOLES!=="undefined"?PARK_HOLES||[]:[],
    parkName:typeof DG_PARK!=="undefined"?DG_PARK?.name:null,classMap:classes(),canvasApi:window.DG_GIS_EXPORT_CANVAS,
-   getLandcover:()=>window.DG_LANDCOVER?.getLast?.(),
-   getGridCells:typeof DG_GRID_SESSION!=="undefined"?()=>DG_GRID_SESSION.getCells():null,
-   getWaypoints:typeof WP!=="undefined"?()=>WP:null,
+   ...sources.standard(),
    vegetationColors:typeof DG_SENS_VEGETATION_COLORS!=="undefined"?DG_SENS_VEGETATION_COLORS:{sparse:"#fde68a",moderate:"#4ade80",dense:"#166534"},
    format:fmt,outline
   });
@@ -96,14 +103,7 @@
    context:g,layout,layers,sensitivity:sens,record:rec,tiers,ndviPolys,parkRings:PARK_POLY,
    holes:typeof PARK_HOLES!=="undefined"?PARK_HOLES||[]:[],decisionCount:nDec,areas,parkName:name,classes:classMap,
    canvasApi:window.DG_GIS_EXPORT_CANVAS,
-   getLandcover:()=>window.DG_LANDCOVER?.getLast?.(),
-   readProjectId:()=>Number(read("gridProject")?.value),
-   getGridCells:()=>typeof DG_GRID_SESSION!=="undefined"?DG_GRID_SESSION.getCells()||[]:null,
-   getWaypoints:()=>typeof WP!=="undefined"?WP:[],
-   getLastWaypoints:()=>typeof LAST_WP_ROWS!=="undefined"?LAST_WP_ROWS:[],
-   hasParkAreaHa:()=>typeof parkAreaHa==="function",
-   getParkAreaHa:()=>parkAreaHa(),
-   getSurfaceTypes:()=>window.DG_SURFACE_REVIEW?.types,
+   ...sources.verified(),
    formatArea:fmt,outline,
    color:key=>presentation.color(key,{
     surfaceColors:typeof DG_SENS_COLORS!=="undefined"?DG_SENS_COLORS:null,
