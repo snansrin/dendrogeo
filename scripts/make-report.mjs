@@ -36,6 +36,7 @@ import vm from 'node:vm';
 import { execSync } from 'node:child_process';
 import { mcTotalCI, mcRowCI, MC_CFG, loadRho, loadSpeciesDict, QA_LIMITS, QA_STATE, qaStateOf, DBH_REASON_TR, carbonKg, YASAL_STATU_KAPSAM } from './lib/mc.mjs';
 import { canonicalHash } from './lib/canonical-hash.mjs';
+import {readReportRuntimeProvenance} from './lib/report-runtime-provenance.mjs';
 import { buildReportProvenance } from './lib/report-provenance.mjs';
 import { createReportMetadata } from './lib/report-metadata.mjs';
 import { pointInRing, pointInPolygon, ringSelfIntersections, geometrySelfIntersections, bboxRing, ringGeodesicAreaM2 } from './lib/report-geometry.mjs';
@@ -72,9 +73,9 @@ const has = (a) => process.argv.includes('--' + a);
  * lc-config'den (tek doğruluk kaynağı), uygulama sürümü package.json'dan,
  * git commit üretim anındaki depodan okunur. Değer yoksa null → rapor '—'
  * basar; ASLA uydurulmaz. */
-const ENGINE_VERSION = (() => { try { const m = read('src/services/lc-config.js').match(/DG_LC_ENGINE_VERSION\s*=\s*"([^"]+)"/); return m ? m[1] : null; } catch (e) { return null; } })();
-const APP_VERSION = (() => { try { return JSON.parse(read('package.json')).version || null; } catch (e) { return null; } })();
-const GIT_COMMIT = (() => { try { return execSync('git rev-parse HEAD', { cwd: ROOT, encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] }).trim() || null; } catch (e) { return null; } })();
+const {engineVersion:ENGINE_VERSION, appVersion:APP_VERSION, gitCommit:GIT_COMMIT} = readReportRuntimeProvenance({
+  read, readGitCommit:()=>execSync('git rev-parse HEAD', {cwd:ROOT, encoding:'utf8', stdio:['ignore','pipe','ignore']})
+});
 const DATASET_DEFAULT = 'ESA WorldCover 10 m · 2021 (v200)';
 
 const SB = (() => {

@@ -391,6 +391,6 @@ describe('repo kanıtı: yayımlanmış rapor dizini tutarlı (şablondan bağı
 
   test('şablon sabitleri lc-config tek kaynağından', () => {
     assert.match(read('src/services/lc-config.js'), /const DG_LC_ENGINE_VERSION="4\.3\.0";/);
-    assert.match(read('scripts/make-report.mjs'), /DG_LC_ENGINE_VERSION\\s\*=/);
+    assert.match(read('scripts/lib/report-runtime-provenance.mjs'), /DG_LC_ENGINE_VERSION\\s\*=/);
   });
 });

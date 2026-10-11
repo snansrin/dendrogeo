@@ -315,3 +315,8 @@ Her modülün tek bir dış API'si, sahibi olduğu açık durumu ve kendi testle
 
 - scripts/lib/report-publication-application.mjs arşiv yazımı, park yayını ve komut satırı akışını birleştirir. Oluşturulması dış işlem başlatmaz.
 - make-report.mjs publishPark/main girişlerini ve mevcut bağımlılıkları sağlar; kimlik, hesaplama ve dosya biçimleri korunur.
+
+## Rapor çalışma sürümleri — 11 Ekim 2026
+
+- scripts/lib/report-runtime-provenance.mjs motor/app sürümü ve üretim commit’ini bağımsız kaynak okuma işlemleriyle toplar. Kaynak yoksa veya bozuksa mevcut null davranışı korunur.
+- make-report.mjs dosya ve Git adaptörlerini sağlar; bilimsel provenance sözleşmesi değişmedi.
