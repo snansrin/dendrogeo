@@ -280,3 +280,8 @@ Her modülün tek bir dış API'si, sahibi olduğu açık durumu ve kendi testle
 
 - scripts/lib/report-publication-request.mjs tek isteğin yayın sırasını, kabul edilmiş yüzey uygulamasını ve başarı/hata günlüğünü yönetir. Yayın, seçenek, arşiv boyutu ve saat bağımlılıkları dışarıdan sağlanır.
 - publish-queue.mjs mevcut yayın seçeneklerini ve dosya boyutu adaptörünü bağlar. Bilinmeyen yüzey şeması üretimden önce reddedilir; boyut ölçüm hatası yayını engellemez.
+
+## Rapor geri çekme akışı — 11 Ekim 2026
+
+- scripts/lib/report-retraction-workflow.mjs geri çekme dosya listesini, kimlik kontrolünü, bildirim yazımını ve sonuç günlüğünü kapsar. Dosya, bildirim, arşiv ve saat bağımlılıkları dışarıdan sağlanır.
+- publish-queue.mjs handleRetraction ve RETRACT_FILES dışa aktarımlarını ve varsayılan kökü korur. Mevcut dosya kaldırma, eksik dosya toleransı ve hata kayıtları değişmedi.

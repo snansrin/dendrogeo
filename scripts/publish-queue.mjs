@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 import { reportRead } from './lib/report-reader.mjs';
+import {createReportRetractionHandler} from './lib/report-retraction-workflow.mjs';
 import {createPublicationRequestHandler} from './lib/report-publication-request.mjs';
 import {decodeReportContext} from './lib/report-context.mjs';
 /* publish-queue.mjs — SİTE İÇİNDEN GELEN RAPOR YAYIN İSTEKLERİNİ İŞLER
@@ -118,32 +119,11 @@ const handle = createPublicationRequestHandler({
   }
 });
 
-/* Geri çekmenin uygulanması: veri dosyaları silinir, index.html bildirime
- * döner, liste yenilenir. root parametrik (test geçici dizinde doğrular). */
-export const RETRACT_FILES = ['rapor.pdf','doi-yayin-paketi.zip','manifest.json','zenodo-metadata.json','data.json', 'olcum.csv', 'park.geojson', 'surface.geojson', 'harita.png', 'metadata.json'];
-export function handleRetraction(rt, pubEntry, root = ROOT) {
-  const started = new Date().toISOString();
-  const base = {
-    retraction_id: String(rt.id), report_id: String(rt.report_id), park_id: Number(rt.park_id),
-    park_name: (pubEntry && pubEntry.park_name) || null,
-    reason: rt.reason ? String(rt.reason).slice(0, 400) : null,
-    requested_by: rt.requested_by || null, requested_at: rt.created_at || null, started_at: started,
-  };
-  try {
-    if (!DGR_ID_RE.test(base.report_id)) throw new Error('Geçersiz rapor kimliği: ' + base.report_id);
-    const rapDir = join(root, 'rapor');
-    const dir = join(rapDir, base.report_id);
-    if (!dir.startsWith(rapDir) || !existsSync(dir)) throw new Error('Rapor dizini bulunamadı: ' + base.report_id);
-    for (const f of RETRACT_FILES) { try { unlinkSync(join(dir, f)); } catch (e) { /* dosya zaten yok */ } }
-    writeFileSync(join(dir, 'index.html'), renderRetractionNotice({
-      id: base.report_id, parkName: base.park_name || '', reason: base.reason || '', retractedAt: new Date().toISOString(),
-    }));
-    rebuildIndex(rapDir);
-    return { ...base, status: 'Geri çekildi', finished_at: new Date().toISOString() };
-  } catch (e) {
-    return { ...base, status: 'Geri çekme başarısız', message: String((e && e.message) || e).slice(0, 400), finished_at: new Date().toISOString() };
-  }
-}
+export {RETRACT_FILES} from './lib/report-retraction-workflow.mjs';
+export const handleRetraction = createReportRetractionHandler({
+  defaultRoot: ROOT, isReportId: value => DGR_ID_RE.test(value),
+  existsSync, unlinkSync, writeFileSync, renderRetractionNotice, rebuildIndex
+});
 
 /* ---------- ana akış ---------- */
 export async function runQueue(opts = {}) {
