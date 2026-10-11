@@ -5,6 +5,7 @@ on:
     paths:
       - 'scripts/val-qa.mjs'
       - 'scripts/lib/report-snapshot-application.mjs'
+      - 'scripts/lib/report-park-geometry-source.mjs'
       - 'src/services/lc-*.js'
       - 'src/ui/lc-sens.js'
       - 'src/ui/park-panel.js'
