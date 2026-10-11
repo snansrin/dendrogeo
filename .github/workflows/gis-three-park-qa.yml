@@ -7,6 +7,7 @@ on:
       - 'scripts/lib/report-snapshot-application.mjs'
       - 'scripts/lib/report-park-geometry-source.mjs'
       - 'scripts/lib/report-landcover-analysis.mjs'
+      - 'scripts/lib/report-landcover-runtime.mjs'
       - 'src/services/lc-*.js'
       - 'src/ui/lc-sens.js'
       - 'src/ui/park-panel.js'
