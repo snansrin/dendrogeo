@@ -376,3 +376,7 @@ Her modülün tek bir dış API'si, sahibi olduğu açık durumu ve kendi testle
 ### Academic study presentation (11 October 2026)
 
 `report-study-presentation.mjs` renders declared academic context, purpose, sampling and instruments. Existing field order, optional-field conditions, project width, independent-study disclosure and escaping remain unchanged. The frozen study snapshot and report title selection stay with their existing owners.
+
+### Report cover presentation (11 October 2026)
+
+`report-cover-presentation.mjs` renders report headings and the identity/provenance grid. Existing academic-title fallback, QA status hints, author fallback, optional versions and embedded QR/text-link branches remain unchanged; it consumes already-derived report values and performs no calculation or publication.
