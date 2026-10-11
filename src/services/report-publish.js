@@ -42,6 +42,9 @@ const DG_PUB_ORIGIN="https://dendrogeo.org";
 /* DGR-YYYY-NNNN: yayın kimliğinin TEK kabul edilen biçimi. */
 const DG_PUB_ID=/^DGR-\d{4}-\d{4}$/;
 const DG_PUB_DOI=/^10\.5281\/zenodo\.\d+$/;
+const DG_PUB_QUEUE_STATE=window.DG_REPORT_PUBLICATION_REQUEST_APPLICATION.createReportPublicationQueueState({
+ isReportId:value=>DG_PUB_ID.test(String(value||""))
+});
 const DG_PUB_POLL_MS=25000;      /* bekleyen istek varken tazeleme aralığı */
 const DG_PUB_POLL_MAX=80;        /* ~33 dk; sonra elle 🔄 Yenile */
 
@@ -98,52 +101,25 @@ async function dgPubFetchRetractions(){
 
 /* ---------- durum birleştirme: istek (DB) + sonuç (repo günlüğü) ---------- */
 function dgPubEntryFor(reqId){
- if((DG_PUB_STATE.queue?.archived_request_ids||[]).includes(String(reqId)))return {request_id:reqId,status:"Test arşivi"};
- const es=(DG_PUB_STATE.queue&&DG_PUB_STATE.queue.entries)||[];
- for(let i=es.length-1;i>=0;i--)if(String(es[i].request_id)===String(reqId))return es[i];
- return null;
+ return DG_PUB_QUEUE_STATE.entryFor(DG_PUB_STATE.queue,reqId);
 }
 /* GERİ ÇEKME FİLTRESİ (0010): günlükte 'Geri çekildi' kaydı olan rapor artık
  * "yayınlandı" sayılmaz — bağlantısı kurulmaz, listeden düşer, yerine durum
  * rozeti geçer. Kimlik biçimi burada da DOĞRULANIR (dgPubUrl tek kapı). */
 function dgPubRetractedIds(queue){
- const out={};
- for(const e of ((queue&&queue.entries)||[]))
-  if(e.status==="Geri çekildi"&&DG_PUB_ID.test(String(e.report_id||"")))out[String(e.report_id)]=e;
- return out;
+ return DG_PUB_QUEUE_STATE.retractedIds(queue);
 }
 function dgPubRetractDone(queue,retId){
- if((queue?.archived_retraction_ids||[]).includes(String(retId)))return {retraction_id:retId,status:"Test arşivi"};
- for(const e of ((queue&&queue.entries)||[]))
-  if(e.status==="Geri çekildi"&&String(e.retraction_id)===String(retId))return e;
- return null;
+ return DG_PUB_QUEUE_STATE.retractionDone(queue,retId);
 }
 function dgPubRetractedInPark(queue,parkId){
- const es=(queue&&queue.entries)||[];
- for(let i=es.length-1;i>=0;i--){
-  const e=es[i];
-  if(e.status==="Geri çekildi"&&String(e.park_id)===String(parkId))return e;
- }
- return null;
+ return DG_PUB_QUEUE_STATE.retractedInPark(queue,parkId);
 }
 function dgPubPublishedByPark(){
- const ret=dgPubRetractedIds(DG_PUB_STATE.queue);
- const out={};
- for(const e of ((DG_PUB_STATE.queue&&DG_PUB_STATE.queue.entries)||[])){
-  if(e.status==="Yayınlandı"&&DG_PUB_ID.test(String(e.report_id||""))&&!ret[String(e.report_id)])out[String(e.park_id)]=e;
- }
- return out;
+ return DG_PUB_QUEUE_STATE.publishedByPark(DG_PUB_STATE.queue);
 }
 function dgPubStatus(req){
- const e=dgPubEntryFor(req.id);
- if(e?.status==="Test arşivi")return {key:"cancelled",label:"Test arşivi",reportId:"",note:"Test yayını üretim geçmişinden çıkarıldı.",entry:e};
- /* Günlük herkese açık: kimlik biçimi doğrulanmadan ekrana/bağlantıya geçmez. */
- if(e&&e.status==="Yayınlandı")return{key:"published",label:"Yayınlandı",reportId:DG_PUB_ID.test(String(e.report_id||""))?e.report_id:"",note:"yayın "+String(e.finished_at||"").slice(0,10),entry:e};
- if(e&&e.status==="Başarısız")return{key:"failed",label:"Başarısız",reportId:"",note:String(e.message||"üretim hatası"),entry:e};
- if(req.status==="Vazgeçildi")return{key:"cancelled",label:"Vazgeçildi",reportId:"",note:"iptal "+String(req.cancelled_at||"").slice(0,10),entry:null};
- const dk=Math.max(0,Math.round((Date.now()-new Date(req.created_at||Date.now()).getTime())/60000));
- return{key:"pending",label:"Beklemede",reportId:"",
-  note:(dk<1?"az önce kuyruğa alındı":dk+" dk önce kuyruğa alındı"),entry:null};
+ return DG_PUB_QUEUE_STATE.status(req,DG_PUB_STATE.queue);
 }
 
 /* ---------- çizim ---------- */
@@ -715,3 +691,4 @@ window.dgUserPublish=dgUserPublish;
 window.dgUserCancel=dgUserCancel;
 window.dgUserPubSync=dgUserPubSync;
 window.dgReportRetract=dgReportRetract;
+

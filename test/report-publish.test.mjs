@@ -277,6 +277,7 @@ function bootUI() {
   ctx.window = ctx; ctx.self = ctx; ctx.globalThis = ctx;
   vm.createContext(ctx);
   vm.runInContext(read('src/config/constants.js'), ctx, { filename: 'constants.js' });
+  vm.runInContext(read('src/application/reports/collect-publication-request.js'), ctx, { filename: 'collect-publication-request.js' });
   vm.runInContext(UI, ctx, { filename: 'report-publish.js' });
   const run = (code) => vm.runInContext(code, ctx);
   const setState = (patch) => run('Object.assign(DG_PUB_STATE,' + JSON.stringify(patch) + ')');
