@@ -276,6 +276,7 @@ test('verified-map original dialog is untouched with NDVI off; its PNG download 
  vm.runInNewContext(load('src/application/surface/prepare-verified-map-export.js'),context);
  vm.runInNewContext(load('src/ui/gis-export-download.js'),context);
  vm.runInNewContext(load('src/ui/gis-export-verified-canvas.js'),context);
+ vm.runInNewContext(load('src/ui/gis-export-standard-canvas.js'),context);
  vm.runInNewContext(load('src/ui/gis-export.js'),context);
  let prevented=0,stopped=0;
  const click=()=>({target,preventDefault:()=>{prevented++;},stopImmediatePropagation:()=>{stopped++;}});
