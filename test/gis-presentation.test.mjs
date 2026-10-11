@@ -239,8 +239,10 @@ test('green sensitivity uses a colored explicit browser-native track and no blac
 
 test('verified NDVI PNG uses 1240x1560 official layout and paints observed green tiers over land cover',()=>{
  const src=load('src/ui/gis-export.js');
+ const layout=load('src/ui/gis-export-layout.js');
  assert.match(src,/async function renderVerified\(layers\)/);
- assert.match(src,/CW=1240,CH=1560,MX=40,MY=240,MW=760,MH=1180/);
+ assert.match(src,/DG_GIS_EXPORT_LAYOUT\.computeVerified\(\{rings:PARK_POLY\}\)/);
+ assert.match(layout,/CW=1240,CH=1560,MX=40,MY=240,MW=760,MH=1180/);
  assert.match(src,/g\.fillText\("DOĞRULANMIŞ PARK HARİTASI"/);
  assert.match(src,/for\(const poly of ndviPolys\)[\s\S]*?drawLeaflet\(g,pr,poly/);
  assert.match(src,/const counts=\{sparse:0,moderate:0,dense:0\}/);

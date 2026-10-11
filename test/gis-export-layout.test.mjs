@@ -34,3 +34,17 @@ test('zero-area or unbounded park rings do not produce a PNG layout',()=>{
  assert.equal(layout.compute({rings:[[[10,20],[10,20]]],ndvi:false,project}),null);
  assert.equal(layout.compute({rings:[[[NaN,Infinity]]],ndvi:false,project}),null);
 });
+
+test('verified layout keeps its 1240 by 1560 map frame and local metric projection',()=>{
+ const result=layout.computeVerified({rings:[[[10,30],[20,30],[20,40],[10,40],[NaN,35],null]]});
+ assert.deepEqual({...result.bounds},{minLat:10,maxLat:20,minLon:30,maxLon:40});
+ assert.deepEqual([result.CW,result.CH,result.MX,result.MY,result.MW,result.MH],[1240,1560,40,240,760,1180]);
+ assert.ok(Number.isFinite(result.scale));
+ assert.ok(Math.abs(result.projector.x(30)-result.ox)<1e-9);
+ assert.ok(Math.abs(result.projector.y(20)-result.oy)<1e-9);
+ assert.ok(Math.abs(result.projector.x(40)-(result.ox+result.width*result.scale))<1e-9);
+});
+
+test('verified layout rejects a missing or zero-area park ring',()=>{
+ assert.equal(layout.computeVerified({rings:[[],null,[[1,2],[1,2]]]}),null);
+});
