@@ -388,3 +388,7 @@ Her modülün tek bir dış API'si, sahibi olduğu açık durumu ve kendi testle
 ### Report map presentation (11 October 2026)
 
 `report-map-presentation.mjs` renders the existing map image and provenance caption. Missing-map, raster, reviewed geometry and visually generalized geometry branches retain their wording and conditions. Image generation, accepted geometry and numeric areas remain outside this module.
+
+### Report provenance presentation (11 October 2026)
+
+`report-provenance-presentation.mjs` renders reproducibility records and the analysis fingerprint from already-resolved provenance. Missing-version/commit/projection/DOI fallbacks, reviewed-archive versus raster instructions and escaping retain their behavior. Provenance collection and scientific analysis remain separate.

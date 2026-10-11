@@ -3,6 +3,7 @@ import {createReportPublicationApplication} from './lib/report-publication-appli
 import {createReportSpeciesPresentation, sw} from './lib/report-species-presentation.mjs';
 import {createReportQaPresentation} from './lib/report-qa-presentation.mjs';
 import {createReportEvaluationPresentation} from './lib/report-evaluation-presentation.mjs';
+import {createReportProvenancePresentation} from './lib/report-provenance-presentation.mjs';
 import {createReportMapPresentation} from './lib/report-map-presentation.mjs';
 import {createReportOverviewPresentation} from './lib/report-overview-presentation.mjs';
 import {createReportCoverPresentation} from './lib/report-cover-presentation.mjs';
@@ -382,6 +383,7 @@ const renderLimitationsPresentation = createReportLimitationsPresentation({
     trNum, QA_LIMITS,
     YASAL_STATU_KAPSAM,
 });
+const renderProvenancePresentation = createReportProvenancePresentation({esc});
 const renderMapPresentation = createReportMapPresentation({esc});
 const renderOverviewPresentation = createReportOverviewPresentation({esc, trNum});
 const renderCoverPresentation = createReportCoverPresentation({esc, trNum, QA_STATE, DGR_TITLE_DEF, FOUNDERS_LINE});
@@ -562,32 +564,7 @@ ${evalParas}
  ${limItems}
 </ul>
 
-<h2><span class="no">10</span>Tekrar Üretilebilirlik</h2>
-<div class="tscroll"><table><thead><tr><th>Öğe</th><th>Kayıt</th></tr></thead><tbody>
-<tr><td class="tr">Analiz sürümü</td><td class="qd">${esc(engine)}${engineVer ? ' ' + esc(engineVer) : ' —'}${appVer ? ' · uygulama ' + esc(appVer) : ''}</td></tr>
-<tr><td class="tr">Veri seti</td><td class="qd">${esc(dataset)}</td></tr>
-<tr><td class="tr">Çözünürlük</td><td class="qd">${esc(resolutionLabel)}</td></tr>
-<tr><td class="tr">Park geometrisi</td><td class="qd">kayıtlı (<code>${esc(P.osm_key || '—')}</code>; yayın anındaki sınır)</td></tr>
-<tr><td class="tr">Analiz yöntemi</td><td class="qd">sürüm kontrollü${git ? ` (git commit <code>${esc(String(git).slice(0, 7))}</code>)` : ' (git commit kaydı bu kopyada yok)'}</td></tr>
-<tr><td class="tr">Üretim komutu</td><td class="qd">${L?.review ? "Yayın isteğine sabitlenen analiz: data.json ve surface.geojson" : `<code>node scripts/make-report.mjs --park ${P.id}</code>`}</td></tr>
-</tbody></table></div>
-${L?.review ? `<p>Yeniden üretim girdileri <code>data.json</code> dosyasında sabitlenmiştir. Uydu sahne kimlikleri, kabul zamanı, sınıf alanları ve nesne geometrileri bu kayıtla korunur. <code>surface.geojson</code>, kabul edilmiş yüzey geometrilerini içerir. Canlı veri kaynağının yeniden sorgulanması aynı veri kümesini garanti etmez; tekrar analiz için bu arşiv girdileri kullanılmalıdır.</p>` : `<p>Bu raporun yeniden üretilebilmesi için kullanılan yöntem, veri kaynağı ve analiz sürümü rapor üst verisinde (<code>metadata.json</code>) kayıt altına alınmıştır. Raster girdi bulut kataloğundan okunduğu için, kaynak ürünün yeni bir sürümü yayımlanırsa aynı komut farklı sonuç üretebilir; bu nedenle veri seti sürümü (v200, ${dataYear}) ve üretim anı §11'de sabitlenmiştir.</p>`}
-
-
-<h2><span class="no">11</span>Analiz Parmak İzi</h2>
-<div class="meta">
- <div><b>Analysis ID</b><code>${id}</code></div>
- <div><b>Engine</b><code>${esc(engine)}</code></div>
- <div><b>Engine version</b><code>${engineVer ? esc(engineVer) : '—'}</code></div>
- <div><b>Source dataset</b><code>${esc(dataset)}</code></div>
- <div><b>Resolution</b><code>${esc(resolutionLabel)}</code></div>
- <div><b>Projection</b><code>${esc(epsg || '—')}</code></div>
- <div><b>Git commit</b><code>${git ? esc(String(git).slice(0, 7)) : '—'}</code></div>
- <div><b>Generated</b><code>${esc(snap.generated_at)}</code></div>
- <div><b>Result hash</b><code>sha256:${esc(hash)}</code></div>
- <div><b>DOI</b>${doi ? '<a href="https://doi.org/' + esc(doi) + '">' + esc(doi) + '</a>' : '<code>atanmadı</code>'}</div>
-</div>
-
+${renderProvenancePresentation({engine, engineVer, appVer, dataset, resolutionLabel, P, git, L, dataYear, id, epsg, snap, hash, doi})}
 <h2><span class="no">12</span>Rapor Geçmişi</h2>
 <div class="tscroll"><table><thead><tr><th>Rapor</th><th>Sürüm</th><th>Tarih</th><th>İşlem</th></tr></thead><tbody>${histRows}</tbody></table></div>
 <p class="qnote">Bu çizelge aynı parkın üretim yayınlarını gösterir. Test yayınları sürüm zincirine dahil edilmemiştir. Veri veya yöntem değişiklikleri yeni rapor kimliği ve sürüm kaydıyla yayımlanır.</p>
