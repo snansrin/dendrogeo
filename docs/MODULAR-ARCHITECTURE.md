@@ -360,3 +360,7 @@ Her modülün tek bir dış API'si, sahibi olduğu açık durumu ve kendi testle
 ### Report QA table composition (11 October 2026)
 
 `report-qa-table.mjs` composes the existing QA table rows using an injected report-local row/state collector. Row order, optional surface and inventory checks, escaped source values and review/block conditions remain unchanged. The renderer summarizes the same collector after composing the table.
+
+### Report history presentation (11 October 2026)
+
+`report-history-presentation.mjs` renders supplied archive entries and appends the current report row without mutating history. Entry order, date/note fallbacks, escaping and current-report emphasis retain the existing behavior. Archive lookup and immutable publication storage remain separate.

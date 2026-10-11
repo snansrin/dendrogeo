@@ -3,6 +3,7 @@ import {createReportPublicationApplication} from './lib/report-publication-appli
 import {createReportSpeciesPresentation, sw} from './lib/report-species-presentation.mjs';
 import {createReportQaPresentation} from './lib/report-qa-presentation.mjs';
 import {createReportEvaluationPresentation} from './lib/report-evaluation-presentation.mjs';
+import {createReportHistoryPresentation} from './lib/report-history-presentation.mjs';
 import {createReportQaTable} from './lib/report-qa-table.mjs';
 import {createReportInventoryDetails} from './lib/report-inventory-details.mjs';
 import {createReportQaExplanation} from './lib/report-qa-explanation.mjs';
@@ -375,6 +376,7 @@ const renderLimitationsPresentation = createReportLimitationsPresentation({
     trNum, QA_LIMITS,
     YASAL_STATU_KAPSAM,
 });
+const renderHistoryPresentation = createReportHistoryPresentation({esc});
 const renderQaTable = createReportQaTable({esc, trNum, QA_LIMITS, DBH_REASON_TR});
 const renderInventoryDetails = createReportInventoryDetails({trNum, QA_LIMITS});
 const explainReportQa = createReportQaExplanation({QA_LIMITS});
@@ -460,9 +462,7 @@ export function renderReport(snap, { id, hash, version = 1, meta = null }) {
 
   const limItems = renderLimitationsPresentation({L, knotted, knotN, t, G, INV, HD, DB, govdeAralikTxt, tN});
 
-  /* ---- Rapor geçmişi ---- */
-  const hist = [...(M.history || []).map((h) => ({ ...h, cur: false })), { id, date: snap.generated_at.slice(0, 10), note: 'İlk yayımlama', cur: true }];
-  const histRows = hist.map((h) => `<tr${h.cur ? ' style="font-weight:700"' : ''}><td><code>${esc(h.id)}</code></td><td>1.0</td><td>${esc(h.date || '—')}</td><td class="tr">${esc(h.note || '')}${h.cur ? ' (bu rapor · geçerli sürüm)' : ''}</td></tr>`).join('');
+  const histRows = renderHistoryPresentation({M, snap, id});
 
   const {AU, citePlain, bib, jsonld} = renderCitationPresentation({snap, P, id, hash, verTxt, doi, L, dataYear});
 
