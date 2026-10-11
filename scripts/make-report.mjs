@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 import {createReportPublicationApplication} from './lib/report-publication-application.mjs';
 import {createReportSpeciesPresentation, grpTr, sw} from './lib/report-species-presentation.mjs';
+import {createReportQaPresentation} from './lib/report-qa-presentation.mjs';
 import { reportRead } from './lib/report-reader.mjs';
 import {reportContext} from './lib/report-context.mjs';
 import { decodeReportContext } from './lib/report-context.mjs';
@@ -426,16 +427,8 @@ export function renderReport(snap, { id, hash, version = 1, meta = null }) {
    * (orantılı yazı, kelime ortasından KIRILMAZ) → tablo masaüstü/mobil/PDF
    * üçünde de düzenli görünür. Kontrol kolonu class="tr" olarak KALIR
    * (test/report-v2.test.mjs bu işareti kilitler). */
-  const qaStates = [];
-  const qaRow = (k, ok, det) => {
-    const txt = ok === true ? '✓ Geçerli' : ok === false ? '⚠ Kontrol edilemedi' : ok;
-    const s = String(txt);
-    const isInfo = s.startsWith('ℹ');
-    const cls = ok === true ? 'qok qst' : s.startsWith('⛔') ? 'qbad qst' : isInfo ? 'qinfo qst'
-      : (ok === false || s.startsWith('⚠')) ? 'qwarn qst' : 'qst';
-    qaStates.push(s.startsWith('⛔') ? 'block' : isInfo ? 'info' : (ok === true ? 'ok' : 'review'));
-    return `<tr><td class="tr">${k}</td><td class="${cls}">${txt}</td><td class="qd">${det}</td></tr>`;
-  };
+  const qaPresentation = createReportQaPresentation({qaStateOf, QA_STATE});
+  const qaRow = qaPresentation.row;
   /* Uzun nokta listelerini tabloda okunur tut (PDF/baskı düzeni bozulmasın). */
   const ptList = (arr, cap = 12) => {
     const ids = arr.map((x) => 'P' + x.point_id);
@@ -510,11 +503,7 @@ export function renderReport(snap, { id, hash, version = 1, meta = null }) {
   /* Üç hâlli rapor QA durumu: Çizelge 4'ün kendisinden türetilir.
    * FINAL: saha çevresi korunur ve DBH=C/π ile türetilir; Göksu benzeri gerçek
    * saha verisi artık ⛔ BLOKLU değil 🟡 İNCELEME / 🟢 GEÇERLİ olur. */
-  const QA_ST = qaStateOf({ block: qaStates.includes('block'), review: qaStates.includes('review') });
-  const QA_ST_LABEL = { [QA_STATE.BLOCKED]: '🔴 BLOKLU', [QA_STATE.REVIEW]: '🟡 İNCELEME', [QA_STATE.VALID]: '🟢 GEÇERLİ' }[QA_ST];
-  const QA_ST_CLASS = { [QA_STATE.BLOCKED]: 'st st-bad', [QA_STATE.REVIEW]: 'st st-warn', [QA_STATE.VALID]: 'st st-ok' }[QA_ST];
-  const QA_BLOCKED = QA_ST === QA_STATE.BLOCKED;
-  const QA_REVIEW = QA_ST === QA_STATE.REVIEW;
+  const {QA_ST, QA_ST_LABEL, QA_ST_CLASS, QA_BLOCKED, QA_REVIEW, qaStates} = qaPresentation.summary();
   /* 0032 · İnceleme kalemleri ağaç DEĞERLERİYLE ilgili mi? Değilse rapor bunu
    * açıkça söyler: kullanıcı, kendi ölçümünün şüpheli olduğu izlenimini
    * görmemeli. Örnek: GNSS accuracy_m alanı boşsa kontrol KOŞULAMAZ (⚠) ama
