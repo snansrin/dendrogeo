@@ -19,6 +19,7 @@ test('GIS PNG adapter tolerates late-loaded landcover classes and intercepts the
  };
  vm.runInNewContext(load('src/ui/gis-export-events.js'),sandbox,{filename:'src/ui/gis-export-events.js'});
  vm.runInNewContext(load('src/ui/gis-export-bootstrap.js'),sandbox);
+ vm.runInNewContext(load('src/ui/gis-export-presentation.js'),sandbox);
  vm.runInNewContext(load('src/ui/gis-export.js'),sandbox,{filename:'src/ui/gis-export.js'});
  const png=sandbox.window.DG_GIS_PNG_EXPORT;
  assert.equal(png.classes().green.label,'Yeşil alan');
@@ -279,6 +280,7 @@ test('verified-map original dialog is untouched with NDVI off; its PNG download 
  vm.runInNewContext(load('src/ui/gis-export-verified-canvas.js'),context);
  vm.runInNewContext(load('src/ui/gis-export-standard-canvas.js'),context);
  vm.runInNewContext(load('src/ui/gis-export-bootstrap.js'),context);
+ vm.runInNewContext(load('src/ui/gis-export-presentation.js'),context);
  vm.runInNewContext(load('src/ui/gis-export.js'),context);
  let prevented=0,stopped=0;
  const click=()=>({target,preventDefault:()=>{prevented++;},stopImmediatePropagation:()=>{stopped++;}});

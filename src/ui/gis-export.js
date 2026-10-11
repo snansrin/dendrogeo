@@ -6,19 +6,9 @@
  "use strict";
  const read=id=>document.getElementById(id);
  const notify=(s,type="info")=>{if(typeof toast==="function")toast(s,type,"🖼️");};
- const PALETTE={
-  green:{color:"#4ade80",label:"Yeşil alan"},
-  water:{color:"#3b82f6",label:"Su"},
-  hard:{color:"#64748b",label:"Sert zemin"},
-  bare:{color:"#8b5a2b",label:"Çıplak zemin"},
-  other:{color:"#94a3b8",label:"Diğer"}
- };
- function classes(){
-  // DG_LC_CLASSES is loaded lazily, so never capture it at startup.
-  if(typeof DG_LC_CLASSES!=="undefined"&&Array.isArray(DG_LC_CLASSES))
-   return Object.fromEntries(DG_LC_CLASSES.map(x=>[x.key,{color:x.color,label:x.label}]));
-  return PALETTE;
- }
+ const presentation=window.DG_GIS_EXPORT_PRESENTATION;
+ const classes=()=>presentation.classes(()=>typeof DG_LC_CLASSES!=="undefined"?DG_LC_CLASSES:null);
+ const fmt=presentation.format,safeName=presentation.safeName;
  function outline(ctx,pr,ring){
   if(!Array.isArray(ring)||!ring.length)return;
   window.DG_PARK_IMAGE_GEOMETRY.appendRing({context:ctx,projector:{X:pr.X||pr.x,Y:pr.Y||pr.y},ring});
@@ -29,8 +19,6 @@
    render:typeof dgSensRenderVegetation==="function"?dgSensRenderVegetation:null
   });
  }
- function fmt(n){return Number(n).toLocaleString("tr-TR",{maximumFractionDigits:2});}
- function safeName(s){return String(s||"park").normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/[^a-zA-Z0-9_-]+/g,"_").slice(0,48).toLowerCase();}
  const eachRing=(tree,visit)=>window.DG_GIS_EXPORT_CANVAS.eachRing(tree,visit);
  async function render(){
   if(typeof PARK_POLY==="undefined"||!Array.isArray(PARK_POLY)||!PARK_POLY.length){
@@ -120,9 +108,10 @@
    getParkAreaHa:()=>parkAreaHa(),
    getSurfaceTypes:()=>window.DG_SURFACE_REVIEW?.types,
    formatArea:fmt,outline,
-   color:key=>(typeof DG_SENS_COLORS!=="undefined"&&DG_SENS_COLORS[key])||
-    (typeof DG_SENS_VEGETATION_COLORS!=="undefined"&&DG_SENS_VEGETATION_COLORS[key])||
-    classMap[key]?.color||{building:"#475569",pool:"#0ea5e9",sparse:"#fde68a",moderate:"#4ade80",dense:"#166534"}[key]||"#94a3b8"
+   color:key=>presentation.color(key,{
+    surfaceColors:typeof DG_SENS_COLORS!=="undefined"?DG_SENS_COLORS:null,
+    vegetationColors:typeof DG_SENS_VEGETATION_COLORS!=="undefined"?DG_SENS_VEGETATION_COLORS:null,classes:classMap
+   })
   });
   if(!draw.ok){notify(draw.message,"warn");return false;}
   return await window.DG_GIS_EXPORT_DOWNLOAD.save({canvas,filename:"dendrogeo_dogrulanmis_harita_"+safeName(name)+"_goreli_ndvi.png",

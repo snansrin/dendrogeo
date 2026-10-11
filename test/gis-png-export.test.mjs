@@ -45,6 +45,7 @@ function env({ndvi=false,ndviAvailable=true,gridCells=[],verified=false}={}){
  vm.runInContext(verifiedCanvas,ctx,{filename:'gis-export-verified-canvas.js'});
  vm.runInContext(file('src/ui/gis-export-standard-canvas.js'),ctx);
  vm.runInContext(file('src/ui/gis-export-bootstrap.js'),ctx);
+ vm.runInContext(file('src/ui/gis-export-presentation.js'),ctx);
  vm.runInContext(adapter,ctx,{filename:'gis-export.js'});
  return {ctx,messages,ops,downloads};
 }
