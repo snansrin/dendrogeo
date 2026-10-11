@@ -29,38 +29,17 @@
   });
  }
  const eachRing=(tree,visit)=>window.DG_GIS_EXPORT_CANVAS.eachRing(tree,visit);
- async function render(){
-  if(typeof PARK_POLY==="undefined"||!Array.isArray(PARK_POLY)||!PARK_POLY.length){
-   notify("Önce bir park seçin.","warn");return false;
-  }
-  const opts=platform.options();
-  const sens=window.DG_LC_SENS?.state,ndvi=!!sens?.vegetationView&&!sens.rawView;
-  const ndviTiers=ndvi&&typeof dgSensVegetationTiers==="function"?dgSensVegetationTiers():null;
-  const ndviPolys=ndvi?await waitVegetation(sens):[];
-  if(ndvi&&!ndviPolys.length){
-   notify("Göreli NDVI açık, ancak gösterilecek en az 3 gözlemli NDVI katmanı hazır değil. Yanlış PNG oluşturmamak için indirme durduruldu.","warn");
-   return false;
-  }
-  const layout=window.DG_GIS_EXPORT_LAYOUT.compute({rings:PARK_POLY,ndvi,project:window.DG_PARK_IMAGE_GEOMETRY.project});
-  if(!layout){notify("Park geometrisi geçersiz, PNG oluşturulmadı.","err");return false;}
-  const {W,H}=layout;
-  const {canvas:cv,context:ctx}=platform.canvas(W,H);if(!ctx){notify("Bu tarayıcı PNG oluşturmayı desteklemiyor.","err");return false;}
-  const {count}=window.DG_GIS_EXPORT_STANDARD_CANVAS.draw({
-   context:ctx,layout,options:opts,sensitivity:sens,ndvi,ndviTiers,ndviPolys,parkRings:PARK_POLY,
-   holes:typeof PARK_HOLES!=="undefined"?PARK_HOLES||[]:[],
-   parkName:typeof DG_PARK!=="undefined"?DG_PARK?.name:null,classMap:classes(),canvasApi:window.DG_GIS_EXPORT_CANVAS,
-   ...sources.standard(),
-   vegetationColors:typeof DG_SENS_VEGETATION_COLORS!=="undefined"?DG_SENS_VEGETATION_COLORS:{sparse:"#fde68a",moderate:"#4ade80",dense:"#166534"},
-   format:fmt,outline
-  });
-  if(!count&&!ndvi){notify("Bu park için çizilecek yüzey geometrisi henüz hazırlanmadı. Önce analizi açın.","warn");return false;}
-  const filename="dendrogeo_"+safeName(typeof DG_PARK!=="undefined"?DG_PARK?.name:"park")+
-   (ndvi?"_goreli_ndvi":"_dogrulanmis_harita")+"_"+new Date().toISOString().slice(0,10)+".png";
-  return await window.DG_GIS_EXPORT_DOWNLOAD.save({canvas:cv,filename,
-   onUnavailable:()=>notify("PNG üretilemedi.","err"),
-   onDownloaded:()=>notify("PNG indirildi"+(ndvi?" · Göreli NDVI katmanı dahil":""),"ok")
-  });
- }
+ const {render}=window.DG_GIS_EXPORT_WORKFLOW.create({
+  platform,sources,classes,outline,waitVegetation,presentation,getLayoutApi:()=>window.DG_GIS_EXPORT_LAYOUT,
+  getGeometryApi:()=>window.DG_PARK_IMAGE_GEOMETRY,getCanvasApi:()=>window.DG_GIS_EXPORT_CANVAS,
+  draw:args=>window.DG_GIS_EXPORT_STANDARD_CANVAS.draw(args),save:args=>window.DG_GIS_EXPORT_DOWNLOAD.save(args),
+  getParkRings:()=>typeof PARK_POLY!=="undefined"?PARK_POLY:undefined,
+  getSensitivity:()=>window.DG_LC_SENS?.state,
+  getTiersFunction:()=>typeof dgSensVegetationTiers==="function"?dgSensVegetationTiers:null,
+  getHoles:()=>typeof PARK_HOLES!=="undefined"?PARK_HOLES||[]:[],
+  getParkName:()=>typeof DG_PARK!=="undefined"?DG_PARK?.name:null,
+  getVegetationColors:()=>typeof DG_SENS_VEGETATION_COLORS!=="undefined"?DG_SENS_VEGETATION_COLORS:{sparse:"#fde68a",moderate:"#4ade80",dense:"#166534"}
+ });
 
  // Restore the original 1240 × 1560 verified-map layout when NDVI is enabled.
  // The ordinary verified-map dialog and its existing exporter remain untouched
