@@ -43,6 +43,7 @@ function env({ndvi=false,ndviAvailable=true,gridCells=[],verified=false}={}){
  vm.runInContext(gate,ctx,{filename:'prepare-verified-map-export.js'});
  vm.runInContext(download,ctx,{filename:'gis-export-download.js'});
  vm.runInContext(verifiedCanvas,ctx,{filename:'gis-export-verified-canvas.js'});
+ vm.runInContext(file('src/ui/gis-export-standard-canvas.js'),ctx);
  vm.runInContext(adapter,ctx,{filename:'gis-export.js'});
  return {ctx,messages,ops,downloads};
 }
@@ -52,7 +53,7 @@ test('PNG adapter is outside frozen scientific engine and does not mutate review
  assert.ok(lock.locked_files['src/ui/lc-sens.js']);
  assert.match(adapter,/window\.downloadParkImage=exportMap/);
  assert.match(adapter,/DG_PARK_IMAGE_GEOMETRY\.project/);
- assert.match(adapter,/DG_GIS_EXPORT_CANVAS\.drawLeaflet/);
+ assert.match(file('src/ui/gis-export-standard-canvas.js'),/canvasApi\.drawLeaflet/);
  assert.match(adapter,/DG_GIS_EXPORT_VEGETATION\.waitForLayers/);
  assert.match(adapter,/DG_GIS_EXPORT_EVENTS\.bind/);
  const {ctx}=env();
