@@ -290,3 +290,8 @@ Her modülün tek bir dış API'si, sahibi olduğu açık durumu ve kendi testle
 
 - scripts/lib/report-queue-runner.mjs kuyruk okuma, planlama, sıralı yayın/geri çekme, prova modu ve her sonuçtan sonra günlük kaydetme akışını kapsar. Tüm dış işlemler bağımlılık olarak sağlanır.
 - publish-queue.mjs CLI seçeneklerini ve mevcut runQueue dışa aktarımını korur; kuyruk okuma hatası, sayaçlar ve yayın sırası değişmedi.
+
+## Rapor kuyruk bileşimi — 11 Ekim 2026
+
+- scripts/lib/report-queue-application.mjs kabul edilmiş yüzey, yayın isteği, geri çekme ve kuyruk yürütücüsünü tek yerde bağlar. Oluşturulması yayın veya dosya işlemi başlatmaz.
+- publish-queue.mjs ağ/CLI ve mevcut yayın seçeneklerini sağlayan uyumluluk girişidir; dışa aktarımlar ve varsayılan kök korunur.
