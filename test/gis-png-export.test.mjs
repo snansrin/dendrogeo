@@ -49,6 +49,7 @@ function env({ndvi=false,ndviAvailable=true,gridCells=[],verified=false}={}){
  vm.runInContext(file('src/ui/gis-export-platform.js'),ctx);
  vm.runInContext(file('src/ui/gis-export-sources.js'),ctx);
  vm.runInContext(file('src/ui/gis-export-workflow.js'),ctx);
+ vm.runInContext(file('src/ui/gis-export-verified-workflow.js'),ctx);
  vm.runInContext(adapter,ctx,{filename:'gis-export.js'});
  return {ctx,messages,ops,downloads};
 }
