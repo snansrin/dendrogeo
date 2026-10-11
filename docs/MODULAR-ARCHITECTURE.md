@@ -233,3 +233,5 @@ Her modülün tek bir dış API'si, sahibi olduğu açık durumu ve kendi testle
 - `ui/park-export-layout.js`, park analiz PNG'si için dış sınır ve deliklerden metre tamponlu bounds, canvas boyutu ve projeksiyon girdilerini hesaplar; görsel çizimi `park-export.js` içinde bırakır.
 
 - `domain/parks/park-export-formats.js`, grid GeoJSON özelliklerini/geometri yedeğini ve waypoint CSV satırlarını üretir; indirme ve kullanıcı bildirimi `park-export.js` içinde kalır.
+
+- `ui/park-export-canvas.js`, park dışa aktarım PNG'sinin zemin, başlık, kırpılmış park/örtü/grid/waypoint katmanları, lejant, ölçek ve lisans satırını çizer; canvas indirme adapter tarafından yönetilir.

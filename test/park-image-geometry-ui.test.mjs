@@ -23,9 +23,12 @@ test('ring tracing maps [latitude, longitude] and closes the canvas path',()=>{
 
 test('park exporter keeps its existing projector and ring-path compatibility helpers',()=>{
  const source=readFileSync(new URL('../src/ui/park-export.js',import.meta.url),'utf8');
+ const renderer=readFileSync(new URL('../src/ui/park-export-canvas.js',import.meta.url),'utf8');
  assert.match(source,/DG_PARK_IMAGE_GEOMETRY\.project/);
  assert.match(source,/DG_PARK_IMAGE_GEOMETRY\.traceRing/);
- assert.match(source,/dgPxRingPath\(ctx,pr,r\)/);
+ assert.match(source,/traceRing:\(context,projector,ring\)=>dgPxRingPath\(context,projector,ring\)/);
+ assert.match(renderer,/traceRing\(ctx,pr,r\)/);
  assert.match(source,/DG_PARK_EXPORT_LAYOUT\.compute/);
- assert.match(source,/projector:pr/);
+ assert.match(source,/DG_PARK_EXPORT_CANVAS\.draw/);
+ assert.match(renderer,/projector:pr/);
 });
