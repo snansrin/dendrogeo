@@ -1,0 +1,22 @@
+"use strict";
+/* Coordinate projection and ring tracing helpers for the vector park PNG. */
+(function(root){
+ function project({minLat,maxLat,minLon,maxLon,width,heightTop,scale}){
+  const lat0=(minLat+maxLat)/2,lon0=(minLon+maxLon)/2;
+  const MX=111320*Math.cos(lat0*Math.PI/180),MY=110540;
+  return{
+   lat0,lon0,MX,MY,scale,
+   X(lon){return width/2+(lon-lon0)*MX*scale;},
+   Y(lat){return heightTop+(maxLat-lat)*MY*scale;}
+  };
+ }
+ function traceRing({context,projector,ring}){
+  context.beginPath();
+  ring.forEach((point,index)=>{
+   const x=projector.X(point[1]),y=projector.Y(point[0]);
+   if(index===0)context.moveTo(x,y);else context.lineTo(x,y);
+  });
+  context.closePath();
+ }
+ root.DG_PARK_IMAGE_GEOMETRY=Object.freeze({project,traceRing});
+})(window);
