@@ -14,6 +14,7 @@ on:
       - 'src/ui/park-reset-controller.js'
       - 'src/ui/park-boundary-layer.js'
       - 'src/ui/park-candidate-select.js'
+      - 'src/ui/park-info-panel.js'
       - 'docs/surface-engine-lock.json'
       - 'docs/surface-scientific-contract.json'
       - 'test/surface-scientific-contract.test.mjs'

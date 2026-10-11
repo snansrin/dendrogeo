@@ -213,3 +213,5 @@ Her modülün tek bir dış API'si, sahibi olduğu açık durumu ve kendi testle
 - `ui/park-boundary-layer.js`, park dış/iç halkalarını mevcut Leaflet stilleriyle çizer ve verilen halkalarla harita sınırını kurar. Çizim geometriyi değiştirmez; katman referansı polygon çiziminden önce bağlanır. Park ekranı OSM kapsamı sonrası fit sırasını ve 30 px padding değerini korur.
 
 - `ui/park-candidate-select.js`, alternatif park seçeneklerinin mevcut sırasını, aktif park kimliğini, HTML kaçışını ve bir ondalık hektar gösterimini üretir. Tek/boş aday listesinde seçici çizmez; park paneli `switchPark` çağrısını ve mevcut biçimleyicileri bağlar.
+
+- `ui/park-info-panel.js`, park sonucundaki grid, yüzey, PNG ve katman kontrollerinin markup yapısını üretir. Park state, park kimliği, proje seçenekleri, alternatif seçici ve kaçış işlevi çağıran ekrandan verilir; mevcut DOM kimlikleri ve eylem callback’leri korunur.
