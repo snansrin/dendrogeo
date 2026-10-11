@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import vm from 'node:vm';
 import {readFileSync} from 'node:fs';
 const file=p=>readFileSync(new URL('../'+p,import.meta.url),'utf8');
-const adapter=file('src/ui/gis-export.js'),canvas=file('src/ui/gis-export-canvas.js'),style=file('css/gis-workspace.css'),ui=file('src/ui/gis-workspace.js');
+const adapter=file('src/ui/gis-export.js'),vegetation=file('src/ui/gis-export-vegetation.js'),canvas=file('src/ui/gis-export-canvas.js'),style=file('css/gis-workspace.css'),ui=file('src/ui/gis-workspace.js');
 const lock=JSON.parse(file('docs/surface-engine-lock.json'));
 function env({ndvi=false,ndviAvailable=true,gridCells=[]}={}){
  const messages=[],ops=[],downloads=[],elements={},polygon=[
@@ -34,6 +34,7 @@ function env({ndvi=false,ndviAvailable=true,gridCells=[]}={}){
  };
  vm.createContext(ctx);
  vm.runInContext(file('src/ui/park-image-geometry.js'),ctx,{filename:'park-image-geometry.js'});
+ vm.runInContext(vegetation,ctx,{filename:'gis-export-vegetation.js'});
  vm.runInContext(canvas,ctx,{filename:'gis-export-canvas.js'});
  vm.runInContext(adapter,ctx,{filename:'gis-export.js'});
  return {ctx,messages,ops,downloads};
@@ -45,6 +46,7 @@ test('PNG adapter is outside frozen scientific engine and does not mutate review
  assert.match(adapter,/window\.downloadParkImage=exportMap/);
  assert.match(adapter,/DG_PARK_IMAGE_GEOMETRY\.project/);
  assert.match(adapter,/DG_GIS_EXPORT_CANVAS\.drawLeaflet/);
+ assert.match(adapter,/DG_GIS_EXPORT_VEGETATION\.waitForLayers/);
  const {ctx}=env();
  assert.equal(typeof ctx.window.DG_GIS_PNG_EXPORT.eachRing,'function');
  assert.doesNotMatch(adapter,/dgSensSave\(|dgSensAccept\(|DG_LC_LAST\s*=|sb\.from\(/);
@@ -97,10 +99,14 @@ test('boot, SW and index will expose PNG adapter after locked exporter',()=>{
  const boot=file('partials/boot.html'),sw=file('sw.js'),index=file('index.html');
  assert.match(boot,/src\/ui\/gis-export\.js\?v=[a-f0-9]{8}/);
  assert.match(boot,/src\/ui\/gis-export-canvas\.js\?v=[a-f0-9]{8}/);
+ assert.match(boot,/src\/ui\/gis-export-vegetation\.js\?v=[a-f0-9]{8}/);
  assert.match(index,/src\/ui\/gis-export\.js\?v=[a-f0-9]{8}/);
  assert.match(index,/src\/ui\/gis-export-canvas\.js\?v=[a-f0-9]{8}/);
+ assert.match(index,/src\/ui\/gis-export-vegetation\.js\?v=[a-f0-9]{8}/);
  assert.match(sw,/\/src\/ui\/gis-export\.js/);
  assert.match(sw,/\/src\/ui\/gis-export-canvas\.js/);
+ assert.match(sw,/\/src\/ui\/gis-export-vegetation\.js/);
+ assert.ok(index.indexOf('src/ui/gis-export-vegetation.js')<index.indexOf('src/ui/gis-export-canvas.js'));
  assert.ok(index.indexOf('src/ui/park-export.js')<index.indexOf('src/ui/gis-export.js'));
  assert.ok(index.indexOf('src/ui/gis-export-canvas.js')<index.indexOf('src/ui/gis-export.js'));
 });
