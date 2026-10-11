@@ -270,3 +270,8 @@ Her modülün tek bir dış API'si, sahibi olduğu açık durumu ve kendi testle
 - scripts/lib/report-queue-planning.mjs yayın sırasını, üç deneme sınırını ve geri çekme eşleşmelerini saf fonksiyonlarla yönetir. Dosya veya ağ erişimi yoktur.
 - Rapor kimliği doğrulaması mevcut DGR_ID_RE üzerinden publish-queue.mjs tarafından sağlanır; mevcut dışa aktarımlar korunur.
 - Yayımlanmış isteklerin tekrar üretimini ve park eşleşmesi olmadan geri çekmeyi engelleyen kurallar değişmedi.
+
+## Kabul edilmiş yüzey rapor yayını — 11 Ekim 2026
+
+- scripts/lib/accepted-surface-publication.mjs kabul edilmiş yüzey sonucunu aynı rapor kimliğine bağlayan akışı kapsar. Dosya, HTML, QR ve arşiv işlemleri dışarıdan sağlanır.
+- publish-queue.mjs mevcut applyAcceptedSurfaceSnapshot dışa aktarımını ve varsayılan depo kökünü korur. Alan dönüşümü, içerik hash’i, üst veri ve geometri yayımlamama davranışı değişmedi.
