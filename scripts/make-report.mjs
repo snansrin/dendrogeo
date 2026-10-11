@@ -3,6 +3,7 @@ import {createReportPublicationApplication} from './lib/report-publication-appli
 import {createReportSpeciesPresentation, sw} from './lib/report-species-presentation.mjs';
 import {createReportQaPresentation} from './lib/report-qa-presentation.mjs';
 import {createReportEvaluationPresentation} from './lib/report-evaluation-presentation.mjs';
+import {createReportReferencesPresentation} from './lib/report-references-presentation.mjs';
 import {createReportProvenancePresentation} from './lib/report-provenance-presentation.mjs';
 import {createReportMapPresentation} from './lib/report-map-presentation.mjs';
 import {createReportOverviewPresentation} from './lib/report-overview-presentation.mjs';
@@ -383,6 +384,7 @@ const renderLimitationsPresentation = createReportLimitationsPresentation({
     trNum, QA_LIMITS,
     YASAL_STATU_KAPSAM,
 });
+const renderReferencesPresentation = createReportReferencesPresentation({esc, siteOrigin: SITE_ORIGIN});
 const renderProvenancePresentation = createReportProvenancePresentation({esc});
 const renderMapPresentation = createReportMapPresentation({esc});
 const renderOverviewPresentation = createReportOverviewPresentation({esc, trNum});
@@ -575,14 +577,7 @@ ${renderProvenancePresentation({engine, engineVer, appVer, dataset, resolutionLa
 <pre>${esc(bib)}</pre>
 
 <h2><span class="no">14</span>Kaynakça</h2>
-<ol class="refs">
- ${L?.review || L?.accepted ? `<li>Copernicus Sentinel-2 Level-2A [uydu görüntüleri]. Kullanılan sahne kimlikleri ve edinim tarihleri <code>data.json</code> dosyasında kayıtlıdır.</li>` : ''}
- <li>Zanaga, D., Van De Kerchove, R., De Keersmaecker, W. ve ark. (2022). <i>ESA WorldCover 10 m 2021 v200</i> [veri seti]. Zenodo. <code>10.5281/zenodo.7254221</code> (CC BY 4.0).</li>
- <li>Chave, J., Réjou-Méchain, M., Búrquez, A. ve ark. (2014). Improved allometric models to estimate the aboveground biomass of tropical trees. <i>Global Change Biology</i>, 20(10), 3177–3190. <code>10.1111/gcb.12629</code> — §4.2'de kullanılan allometrik denklem.</li>
- <li>OpenStreetMap katkıcıları. <i>OpenStreetMap verisi</i> [park sınırı geometrisi ve bütünleyici doğrulama]. Open Database License (ODbL). https://www.openstreetmap.org/copyright</li>
- ${L && L.cross ? `<li>${esc(L.cross)} [çapraz doğrulama veri seti] — grup bazlı uzlaşma §7'de raporlanmıştır.</li>` : ''}
- <li>Şirin, N. &amp; Şirin, S. (2026). <i>DendroGeo Saha Protokolü v1</i> (göğüs çevresi, DBH = çevre/π, boy, GNSS ve fotoğraf kanıtı kuralları) ve <i>DendroGeo yöntem dokümantasyonu</i>. ${SITE_ORIGIN}/yontem/</li>
-</ol>
+${renderReferencesPresentation(L)}
 
 <h2><span class="no">Ek</span>A — Veri Erişilebilirliği</h2>
 <div class="btnrow">
