@@ -4,6 +4,7 @@ on:
   pull_request:
     paths:
       - 'scripts/val-qa.mjs'
+      - 'scripts/lib/report-snapshot-application.mjs'
       - 'src/services/lc-*.js'
       - 'src/ui/lc-sens.js'
       - 'src/ui/park-panel.js'
