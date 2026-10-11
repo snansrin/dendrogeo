@@ -26,4 +26,6 @@ test('park exporter keeps its existing projector and ring-path compatibility hel
  assert.match(source,/DG_PARK_IMAGE_GEOMETRY\.project/);
  assert.match(source,/DG_PARK_IMAGE_GEOMETRY\.traceRing/);
  assert.match(source,/dgPxRingPath\(ctx,pr,r\)/);
+ assert.match(source,/DG_PARK_EXPORT_LAYOUT\.compute/);
+ assert.match(source,/projector:pr/);
 });

@@ -297,33 +297,15 @@ function downloadParkImage(){
   const opts={grid:chk("chkPngGrid"),wp:chk("chkPngWp"),cover:chk("chkPngCover"),clipPark:true};
   const lc=(window.DG_LANDCOVER&&window.DG_LANDCOVER.getLast)?window.DG_LANDCOVER.getLast():null;
   try{
-    /* sınırlar: park + seçili katmanlar */
-    let minLat=90,maxLat=-90,minLon=180,maxLon=-180;
-    const ext=(lat,lon)=>{
-      minLat=Math.min(minLat,lat);maxLat=Math.max(maxLat,lat);
-      minLon=Math.min(minLon,lon);maxLon=Math.max(maxLon,lon);
-    };
-    (PARK_POLY||[]).forEach(r=>(r||[]).forEach(p=>ext(p[0],p[1])));
-    (PARK_HOLES||[]).forEach(r=>(r||[]).forEach(p=>ext(p[0],p[1])));
-    if(!(minLat<=maxLat&&minLon<=maxLon))return toast("Görüntü için sınır üretilemedi","err","🖼️");
-    /* ~15 m tampon: kenar çizgisi kırpılmasın */
-    const bufLat=15/110540;
-    const bufLon=15/(111320*Math.cos(((minLat+maxLat)/2)*Math.PI/180));
-    minLat-=bufLat;maxLat+=bufLat;minLon-=bufLon;maxLon+=bufLon;
-
-    const lat0=(minLat+maxLat)/2;
-    const MX=111320*Math.cos(lat0*Math.PI/180),MY=110540;
-    const wM=Math.max(1,(maxLon-minLon)*MX),hM=Math.max(1,(maxLat-minLat)*MY);
-    const PAD=70,LEGH=132;
-    const scale=Math.min((1600-2*PAD)/wM,(1150-2*PAD)/hM);
-    const W=Math.max(960,Math.round(wM*scale+2*PAD));
-    const Htop=PAD+46;
-    const H=Math.round(Htop+hM*scale+PAD+LEGH);
+    const layout=window.DG_PARK_EXPORT_LAYOUT.compute({
+      outer:PARK_POLY,holes:PARK_HOLES||[],project:window.DG_PARK_IMAGE_GEOMETRY.project
+    });
+    if(!layout)return toast("Görüntü için sınır üretilemedi","err","🖼️");
+    const {W,Htop,H,PAD,LEGH,scale,projector:pr}=layout;
 
     const cv=document.createElement("canvas");
     cv.width=W;cv.height=H;
     const ctx=cv.getContext("2d");
-    const pr=dgPxProjector(minLat,maxLat,minLon,maxLon,W,Htop,scale);
 
     /* zemin */
     ctx.fillStyle="#f7f6f2";ctx.fillRect(0,0,W,H);
