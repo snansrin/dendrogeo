@@ -3,6 +3,7 @@ import {createReportPublicationApplication} from './lib/report-publication-appli
 import {createReportSpeciesPresentation, sw} from './lib/report-species-presentation.mjs';
 import {createReportQaPresentation} from './lib/report-qa-presentation.mjs';
 import {createReportEvaluationPresentation} from './lib/report-evaluation-presentation.mjs';
+import {createReportDocumentHead} from './lib/report-document-head.mjs';
 import {createReportSourcesPresentation} from './lib/report-sources-presentation.mjs';
 import {createReportHistoryPresentation} from './lib/report-history-presentation.mjs';
 import {createReportQaTable} from './lib/report-qa-table.mjs';
@@ -377,6 +378,7 @@ const renderLimitationsPresentation = createReportLimitationsPresentation({
     trNum, QA_LIMITS,
     YASAL_STATU_KAPSAM,
 });
+const renderDocumentHead = createReportDocumentHead({esc, fmtT, reportStyles, siteOrigin: SITE_ORIGIN});
 const renderSourcesPresentation = createReportSourcesPresentation({esc, fmtDateTr});
 const renderHistoryPresentation = createReportHistoryPresentation({esc});
 const renderQaTable = createReportQaTable({esc, trNum, QA_LIMITS, DBH_REASON_TR});
@@ -473,22 +475,7 @@ export function renderReport(snap, { id, hash, version = 1, meta = null }) {
   return `<!doctype html>
 <html lang="tr">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>${id} · ${esc(P.name)} — Ağaç Envanteri ve Karbon Stoku Raporu</title>
-<meta name="description" content="${esc(P.name)} (${esc(P.city)}) bireysel ağaç envanteri: ${t.n} onaylı ölçüm, toplam karbon ${fmtT(t.ci.mean)} t (%95 GA ${fmtT(t.ci.lo)}–${fmtT(t.ci.hi)}). Yöntem: Chave ve ark. 2014; Monte Carlo belirsizlik; konum çiti doğrulaması; ${esc(dataset)} arazi örtüsü bağlamı.">
-<link rel="canonical" href="${SITE_ORIGIN}/rapor/${id}/">
-<meta property="og:type" content="article">
-<meta property="og:site_name" content="DendroGeo">
-<meta property="og:title" content="${id} · ${esc(P.name)} Karbon Stoku Raporu">
-<meta property="og:description" content="${t.n} onaylı ölçüm · toplam ${ciTxt} · sha256:${hash.slice(0, 12)}…">
-<meta property="og:url" content="${SITE_ORIGIN}/rapor/${id}/">
-${L ? '<meta property="og:image" content="' + SITE_ORIGIN + '/rapor/' + id + '/harita.png">' : ''}
-<meta name="twitter:card" content="${L ? 'summary_large_image' : 'summary'}">
-<link rel="alternate" hreflang="tr" href="${SITE_ORIGIN}/rapor/${id}/">
-<link rel="alternate" type="application/json" href="metadata.json" title="Rapor üst verisi (DataCite deseni)">
-<script type="application/ld+json">${JSON.stringify(jsonld)}</script>
-<style>${reportStyles(id)}</style>
+${renderDocumentHead({id, P, t, dataset, ciTxt, hash, L, jsonld})}
 </head>
 <body>
 <div class="wrap">
