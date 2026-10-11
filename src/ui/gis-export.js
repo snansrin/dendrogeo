@@ -85,16 +85,12 @@
   window.DG_GIS_EXPORT_CANVAS.drawLegend(ctx,{width:W,height:H,pad:PAD,legend:LEGEND,ndvi,tiers:ndviTiers,
    classes:dict,vegetationColors:typeof DG_SENS_VEGETATION_COLORS!=="undefined"?DG_SENS_VEGETATION_COLORS:{sparse:"#fde68a",moderate:"#4ade80",dense:"#166534"},format:fmt});
   if(!count&&!ndvi){notify("Bu park için çizilecek yüzey geometrisi henüz hazırlanmadı. Önce analizi açın.","warn");return false;}
-  return await new Promise(resolve=>cv.toBlob(blob=>{
-   if(!blob){notify("PNG üretilemedi.","err");resolve(false);return;}
-   const url=URL.createObjectURL(blob);
-   const link=document.createElement("a");link.href=url;
-   link.download="dendrogeo_"+safeName(typeof DG_PARK!=="undefined"?DG_PARK?.name:"park")+
-    (ndvi?"_goreli_ndvi":"_dogrulanmis_harita")+"_"+new Date().toISOString().slice(0,10)+".png";
-   document.body.append(link);link.click();link.remove();
-   setTimeout(()=>URL.revokeObjectURL(url),2000);
-   notify("PNG indirildi"+(ndvi?" · Göreli NDVI katmanı dahil":""),"ok");resolve(true);
-  },"image/png"));
+  const filename="dendrogeo_"+safeName(typeof DG_PARK!=="undefined"?DG_PARK?.name:"park")+
+   (ndvi?"_goreli_ndvi":"_dogrulanmis_harita")+"_"+new Date().toISOString().slice(0,10)+".png";
+  return await window.DG_GIS_EXPORT_DOWNLOAD.save({canvas:cv,filename,
+   onUnavailable:()=>notify("PNG üretilemedi.","err"),
+   onDownloaded:()=>notify("PNG indirildi"+(ndvi?" · Göreli NDVI katmanı dahil":""),"ok")
+  });
  }
 
  // Restore the original 1240 × 1560 verified-map layout when NDVI is enabled.
@@ -225,16 +221,10 @@
   g.fillStyle="#cfe3d3";g.font="19px Arial";
   g.fillText("Raster + doğrulanmış kullanıcı kararları; NDVI yeşil alanda görsel karşılaştırmadır.",40,CH-54,CW-80);
   g.fillText("ESA WorldCover 2021 v200 (CC BY 4.0) · "+String(rec.fingerprint||"").slice(0,8)+" · CC BY-NC 4.0",40,CH-26,CW-80);
-  return await new Promise(resolve=>canvas.toBlob(blob=>{
-   if(!blob){notify("Doğrulanmış harita PNG üretilemedi.","err");resolve(false);return;}
-   const uri=URL.createObjectURL(blob),a=document.createElement("a");
-   a.href=uri;
-   a.download="dendrogeo_dogrulanmis_harita_"+safeName(name)+"_goreli_ndvi.png";
-   document.body.append(a);a.click();a.remove();
-   setTimeout(()=>URL.revokeObjectURL(uri),2000);
-   notify("Doğrulanmış Harita PNG indirildi · Yeşil alan göreli NDVI dahil","ok");
-   resolve(true);
-  },"image/png"));
+  return await window.DG_GIS_EXPORT_DOWNLOAD.save({canvas,filename:"dendrogeo_dogrulanmis_harita_"+safeName(name)+"_goreli_ndvi.png",
+   onUnavailable:()=>notify("Doğrulanmış harita PNG üretilemedi.","err"),
+   onDownloaded:()=>notify("Doğrulanmış Harita PNG indirildi · Yeşil alan göreli NDVI dahil","ok")
+  });
  }
  async function exportVerified(layers){
   try{return await renderVerified(layers);}
