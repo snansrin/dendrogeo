@@ -258,3 +258,9 @@ Her modülün tek bir dış API'si, sahibi olduğu açık durumu ve kendi testle
 - `ui/gis-export-platform.js`, DOM seçenekleri, Canvas oluşturma ve bildirimleri sağlar. `ui/gis-export-sources.js`, grid, waypoint ve park metadata okuyucularının standart/doğrulanmış yedek davranışlarını korur.
 - `ui/gis-export-presentation.js`, sınıf paleti, renk önceliği, Türkçe alan metni ve güvenli dosya adını sağlar. `ui/gis-export-bootstrap.js`, hata sarmalayıcılarını ve eski PNG düğmesi/global API bağlantısını kurar.
 - Olay, geometri, yerleşim, NDVI bekleme ve indirme modülleri açık arayüzleriyle kullanılır. Bu ayrımda bilimsel çekirdek, kabul edilmiş alanlar ve harita kayıtlarına yazma davranışı değiştirilmez.
+
+## Rapor kuyruk günlüğü — 11 Ekim 2026
+
+- scripts/lib/report-queue-store.mjs günlük şemasını, kapasiteyi ve dosya okuma/yazmayı kapsar; publish-queue.mjs mevcut dışa aktarımları korur.
+- Mutlak yollar node:path isAbsolute ile çözülür; Windows geçici dosyaları yanlışlıkla depo köküne eklenmez.
+- Yayın ve yeniden deneme kararları değişmedi. Mevcut günlük ve üretim regresyonları dahil 1.844 test Windows üzerinde geçti.

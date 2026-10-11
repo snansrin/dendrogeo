@@ -103,7 +103,7 @@ describe('rapor-yayin.yml: kuyruk 5 dakikada bir boşalır', () => {
     assert.equal(payload.role, 'anon', 'kuyruğun okuduğu anahtar anon rolünde');
     assert.match(PQ, /read\('src\/config\/supabase\.js'\)/, 'anahtar config’ten okunur (kopyalanmaz)');
     assert.match(PQ, /SB_KEY=/, 'betik anon anahtarı kullanıyor');
-    assert.match(PQ, /QUEUE_PATH = 'rapor\/yayin-kuyrugu\.json'/, 'sonuç günlüğü repo’da');
+    assert.match(read('scripts/lib/report-queue-store.mjs'), /QUEUE_PATH = 'rapor\/yayin-kuyrugu\.json'/, 'sonuç günlüğü repo’da');
   });
 });
 

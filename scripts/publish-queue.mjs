@@ -52,9 +52,8 @@ const read = (p) => readFileSync(join(ROOT, p), 'utf8');
 const arg = (a) => { const i = process.argv.indexOf('--' + a); return i >= 0 ? process.argv[i + 1] : null; };
 const has = (a) => process.argv.includes('--' + a);
 
-export const QUEUE_PATH = 'rapor/yayin-kuyrugu.json';
-export const QUEUE_SCHEMA = 'dendrogeo-publish-queue/1';
-export const QUEUE_CAP = 200;
+import {QUEUE_PATH, emptyQueue, loadQueue, saveQueue} from './lib/report-queue-store.mjs';
+export {QUEUE_PATH, QUEUE_SCHEMA, QUEUE_CAP, emptyQueue, loadQueue, saveQueue} from './lib/report-queue-store.mjs';
 export const RUN_LIMIT = 3;
 export const REQUEST_RETRY_MAX = 3;
 
@@ -64,25 +63,6 @@ const SB = (() => {
 })();
 
 /* ---------- günlük (repo tarafı, Pages ile yayınlanır) ---------- */
-const qpath = (rel) => (String(rel).startsWith('/') ? String(rel) : join(ROOT, rel));
-export function emptyQueue() {
-  return { schema: QUEUE_SCHEMA, updated_at: null, entries: [] };
-}
-export function loadQueue(rel = QUEUE_PATH) {
-  const p = qpath(rel);
-  if (!existsSync(p)) return emptyQueue();
-  try {
-    const j = JSON.parse(readFileSync(p, 'utf8'));
-    if (!j || j.schema !== QUEUE_SCHEMA || !Array.isArray(j.entries)) return emptyQueue();
-    return j;
-  } catch (e) { return emptyQueue(); }
-}
-export function saveQueue(q, rel = QUEUE_PATH) {
-  const out = { ...q, ...(q.production_started_at ? {processed_request_ids:[...new Set([...(q.processed_request_ids||[]),...(q.entries||[]).filter(e=>e.request_id).map(e=>String(e.request_id))])],processed_retraction_ids:[...new Set([...(q.processed_retraction_ids||[]),...(q.entries||[]).filter(e=>e.retraction_id).map(e=>String(e.retraction_id))])]} : {}), schema: QUEUE_SCHEMA, updated_at: new Date().toISOString(), entries: (q.entries || []).slice(-QUEUE_CAP) };
-  writeFileSync(qpath(rel), JSON.stringify(out, null, 2) + '\n');
-  return out;
-}
-
 /* ---------- istekler (Supabase, ANON anahtarla salt-okunur) ---------- */
 async function fetchRequestRows(select, limit, offset=0, cutoff=null) {
   const u = SB.url + '/rest/v1/report_requests?' + new URLSearchParams({
