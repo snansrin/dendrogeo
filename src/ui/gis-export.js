@@ -58,9 +58,7 @@
  }
  function outline(ctx,pr,ring){
   if(!Array.isArray(ring)||!ring.length)return;
-  ctx.moveTo(pr.x(ring[0][1]),pr.y(ring[0][0]));
-  for(const p of ring.slice(1))ctx.lineTo(pr.x(p[1]),pr.y(p[0]));
-  ctx.closePath();
+  window.DG_PARK_IMAGE_GEOMETRY.appendRing({context:ctx,projector:pr,ring});
  }
  function pngLayers(sens){
   const result=[];
@@ -116,8 +114,10 @@
   const scale=Math.min((1600-PAD*2)/wMeters,(1200-PAD*2)/hMeters);
   const W=Math.max(940,Math.ceil(wMeters*scale+PAD*2));
   const H=Math.ceil(hMeters*scale+TOP+PAD+LEGEND);
-  const lon0=(bounds.minLon+bounds.maxLon)/2;
-  const pr={x:lon=>W/2+(lon-lon0)*mx*scale,y:lat=>TOP+(bounds.maxLat+15/my-lat)*my*scale};
+  const pr=window.DG_PARK_IMAGE_GEOMETRY.project({
+   minLat:bounds.minLat-15/my,maxLat:bounds.maxLat+15/my,
+   minLon:bounds.minLon,maxLon:bounds.maxLon,width:W,heightTop:TOP,scale
+  });
   const cv=document.createElement("canvas");cv.width=W;cv.height=H;
   const ctx=cv.getContext("2d");if(!ctx){notify("Bu tarayıcı PNG oluşturmayı desteklemiyor.","err");return false;}
   const dict=classes();
