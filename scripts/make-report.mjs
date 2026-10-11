@@ -3,6 +3,7 @@ import {createReportPublicationApplication} from './lib/report-publication-appli
 import {createReportSpeciesPresentation, sw} from './lib/report-species-presentation.mjs';
 import {createReportQaPresentation} from './lib/report-qa-presentation.mjs';
 import {createReportEvaluationPresentation} from './lib/report-evaluation-presentation.mjs';
+import {createReportOverviewPresentation} from './lib/report-overview-presentation.mjs';
 import {createReportCoverPresentation} from './lib/report-cover-presentation.mjs';
 import {createReportStudyPresentation} from './lib/report-study-presentation.mjs';
 import {createReportDocumentHead} from './lib/report-document-head.mjs';
@@ -380,6 +381,7 @@ const renderLimitationsPresentation = createReportLimitationsPresentation({
     trNum, QA_LIMITS,
     YASAL_STATU_KAPSAM,
 });
+const renderOverviewPresentation = createReportOverviewPresentation({esc, trNum});
 const renderCoverPresentation = createReportCoverPresentation({esc, trNum, QA_STATE, DGR_TITLE_DEF, FOUNDERS_LINE});
 const renderStudyPresentation = createReportStudyPresentation({esc});
 const renderDocumentHead = createReportDocumentHead({esc, fmtT, reportStyles, siteOrigin: SITE_ORIGIN});
@@ -487,12 +489,7 @@ ${renderCoverPresentation({id, verTxt, snap, titleMain, L, QA_ST_CLASS, QA_ST_LA
 ${renderStudyPresentation(snap)}
 <p class="stmt">Bu rapor, DendroGeo analiz sistemi tarafından belirlenen yöntem, veri kaynakları ve kalite kontrol prosedürleri doğrultusunda oluşturulmuştur. Rapor bir akreditasyon veya sertifikasyon belgesi değildir; bulgular, beyan edilen veri kaynakları ve çözümleme sürümü kapsamında geçerlidir.</p>
 
-<h2><span class="no">1</span>Analiz Özeti</h2>
-<p>Bu rapor, ${esc(P.name)} sınırları içerisinde gerçekleştirilen ${t.n} bireysel ağaç ölçümüne (göğüs çevresi, türetilmiş DBH, boy, tür, GNSS konumu ve fotoğraf kanıtı) dayalı karbon stoku tahminini, %95 model belirsizlik aralığı ve veri kalite kontrol sonuçları ile sunar. Ölçümü yapılan ağaçların toplam karbon stoku <b>${ciTxt}</b> olarak hesaplanmıştır. Kayıtlı karbon toplamının park alanına oranı ${t.per_ha_kg == null ? '—' : trNum(t.per_ha_kg / 1000, 3) + ' t/ha'} değerindedir; bu oran, parkın toplam karbon stok yoğunluğu tahmini değildir. Bütün kayıtlar moderatör onayından geçirilmiştir; park poligonu konum çiti denetiminin kayıt düzeyindeki sonucu §7'de raporlanmıştır.${L ? ` Yüzey örtüsü verisi ${esc(dataset)} kaynağından alınmış; kalite kontrol sonuçları Çizelge 4'te sunulmuştur.` : ''}</p>
-
-<h2><span class="no">2</span>Analiz Alanı</h2>
-<p>Analiz alanı, ${esc(P.city)} (${esc(P.country)}) sınırları içinde yer alan ${esc(P.name)} park sahasıdır. Saha sınırı, ${srcTxt} türetilmiş olup ${trNum(parkHa, 2)} ha alan kaplamaktadır.${GJ ? ` Uygulamada çizili sınır kaydı bir dikdörtgen (${GJ.ring_points} nokta; ${trNum(GJ.ring_area_m2 / 10000, 2)} ha) olduğundan gerçek park sınırı sayılmamış, analiz OpenStreetMap poligonundan yürütülmüştür (ayrıntı §7).` : ''}${knotted ? ` Poligonda <b>${knotN} kendini kesen segment çifti</b> (düğüm) saptanmıştır; bu durum alan hesapları ile raster ayrışımını birbirinden ayırır ve arazi örtüsü çözümlemesinin kalite eşiğine takılmasına yol açar (§7, §9).` : ''} Envanter, ${snap.period.from.slice(0, 10)} – ${snap.period.to.slice(0, 10)} tarihleri arasında ${t.n} ölçüm noktasında gerçekleştirilmiştir${snap.geofence.outside_rows > 0 ? `; kayıtların ${snap.geofence.verified_rows}/${snap.geofence.total} adedi poligon içinde, ${snap.geofence.outside_rows} adedi poligon dışında konumlanmaktadır (ayrıntı §7)` : `; kayıtların tamamı poligon içinde konumlanmaktadır (denetim §7)`}.</p>
-
+${renderOverviewPresentation({P, t, ciTxt, L, dataset, srcTxt, parkHa, GJ, knotted, knotN, snap})}
 <h2><span class="no">3</span>Veri Kaynakları</h2>
 ${renderSourcesPresentation({L, dataset, dataYear, t})}
 
