@@ -103,19 +103,13 @@
  // the already computed relative NDVI tiers; no raster or accepted area changes.
  async function renderVerified(layers){
   const sens=window.DG_LC_SENS?.state,rec=sens?.record;
-  if(!rec||typeof PARK_POLY==="undefined"||!Array.isArray(PARK_POLY)||!PARK_POLY.length){
-   notify("Önce parkın arazi örtüsü analizini açın.","warn");return false;
-  }
-  if(!sens.vegetationView||sens.rawView){
-   notify("Göreli NDVI görünümü açık değil.","warn");return false;
-  }
-  if(typeof dgSensVegetationTiers!=="function"){
-   notify("Göreli NDVI sınıfları bu oturumda bulunamadı.","warn");return false;
-  }
-  const tiers=dgSensVegetationTiers();
-  if(tiers.count<9||!tiers.cutoffs){
-   notify("Doğrulanmış harita için yeterli NDVI verisi bulunamadı; en az 9 uygun yeşil hücre ve hücre başına 3 gözlem gerekir.","warn");return false;
-  }
+  const gate=window.DG_PREPARE_VERIFIED_MAP_EXPORT.prepare({
+   record:rec,hasPark:typeof PARK_POLY!=="undefined"&&Array.isArray(PARK_POLY)&&PARK_POLY.length>0,
+   vegetationView:sens?.vegetationView,rawView:sens?.rawView,
+   getTiers:typeof dgSensVegetationTiers==="function"?dgSensVegetationTiers:null
+  });
+  if(!gate.ok){notify(gate.message,gate.type);return false;}
+  const tiers=gate.tiers;
   const ndviPolys=await waitVegetation(sens,30);
   if(!ndviPolys.length){
    notify("NDVI katmanı henüz çizilemedi. Eksik veriyi varmış gibi göstermemek için çıktı oluşturulmadı.","warn");return false;

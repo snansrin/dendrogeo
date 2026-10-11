@@ -18,6 +18,7 @@ on:
       - 'src/ui/park-menu-ui.js'
       - 'src/ui/park-image-geometry.js'
       - 'src/ui/gis-export.js'
+      - 'src/application/surface/prepare-verified-map-export.js'
       - 'src/ui/gis-export-layout.js'
       - 'src/ui/park-export-layout.js'
       - 'src/ui/park-export-canvas.js'
