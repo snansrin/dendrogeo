@@ -50,40 +50,7 @@ function downloadGridGeoJSON(){
     );
   }
 
-  const fc={
-    type:"FeatureCollection",
-
-    features:
-      DG_GRID_SESSION.getCells().map(c=>({
-        type:"Feature",
-
-        properties:{
-          id:c.id,
-          olcum:c.n,
-          alan_m2:c.areaM2||null,
-          guvenlik_m:c.clearanceM||null,
-          waypoint_lat:c.lat??null,waypoint_lon:c.lon??null,
-          durum:
-            c.n===0
-              ?"bos"
-              :"olculmus"
-        },
-
-        geometry:c.geometry||{
-          type:"Polygon",
-
-          coordinates:[
-            [
-              [c.w0,c.s0],
-              [c.w1,c.s0],
-              [c.w1,c.s1],
-              [c.w0,c.s1],
-              [c.w0,c.s0]
-            ]
-          ]
-        }
-      }))
-  };
+  const fc=window.DG_PARK_EXPORT_FORMATS.gridGeoJSON(DG_GRID_SESSION.getCells());
 
   downloadBlob(
     "dendrogeo_grid.geojson",
@@ -117,20 +84,7 @@ function downloadWaypointsCSV(){
     );
   }
 
-  let csv=
-    "wp_id,lat,lon,visited\n";
-
-  rows.forEach(r=>{
-    csv+=
-      r.wp_id+
-      ","+
-      r.lat+
-      ","+
-      r.lon+
-      ","+
-      (r.visited?1:0)+
-      "\n";
-  });
+  const csv=window.DG_PARK_EXPORT_FORMATS.waypointsCSV(rows);
 
   downloadBlob(
     "dendrogeo_wp.csv",
