@@ -235,7 +235,7 @@ Her modülün tek bir dış API'si, sahibi olduğu açık durumu ve kendi testle
 
 - `ui/gis-export-download.js`, standart ve doğrulanmış GIS PNG'lerinde `Blob` üretimi sonrası bağlantı indirme, object-URL ömrü ve başarısız üretim bildirimi callback'lerini ortaklaştırır. Dosya adı ve başarı bildirimi her iki export akışında çağıranda kalır.
 
-- `ui/gis-export-verified-canvas.js`, doğrulanmış harita PNG'sinin başlık/özet alanını ve park kırpımlı yüzey, NDVI, grid, waypoint, sınır ve lejant katmanlarını mevcut sırayla çizer. Analiz ve yayın kapıları ile PNG indirme `gis-export.js` içinde kalır.
+- `ui/gis-export-verified-canvas.js`, doğrulanmış harita PNG'sinin başlık/özet alanını ve park kırpımlı yüzey, NDVI, grid, waypoint, sınır ve lejant katmanlarını mevcut sırayla çizer. Analiz ve yayın kapıları ile PNG indirme `gis-export-verified-workflow.js` tarafından yönetilir.
 
 - `ui/gis-export-layout.js`, standart ve onaylı GIS PNG için park bounds, metre ölçüsü, canvas boyutu ve piksel projeksiyonunu hesaplar. Geçersiz ya da sıfır alanlı sınırı reddeder; çizim ve indirme adapter'da kalır.
 
@@ -248,3 +248,13 @@ Her modülün tek bir dış API'si, sahibi olduğu açık durumu ve kendi testle
 - `ui/park-export-canvas.js`, park dışa aktarım PNG'sinin zemin, başlık, kırpılmış park/örtü/grid/waypoint katmanları, lejant, ölçek ve lisans satırını çizer; canvas indirme adapter tarafından yönetilir.
 
 - `ui/park-landcover-analysis.js`, park LULC analizi için tembel modül yükleme, busy/rapor UI durumu, sonuç çizimi, hassasiyet paneli ve kullanıcı bildirimlerini orkestre eder. `park-export.js` eski `runLandCoverAnalysis()` globalini ve park state/DOM bağımlılıklarını adapter olarak korur; sayısal analiz `DG_LANDCOVER` içinde kalır.
+
+
+## GIS PNG modülleri — 11 Ekim 2026
+
+- `bootstrap/gis-export.js`, tarayıcı, veri ve sunum adaptörlerini iki PNG akışıyla bağlayan başlangıç katmanıdır. `ui/gis-export.js` yalnız mevcut global harita değerlerini kullanım anında okuyan uyumluluk bağlantılarını sağlar.
+- `ui/gis-export-workflow.js`, standart PNG için park/NDVI kontrollerini, çizim hazırlığını ve indirmeyi yönetir. `ui/gis-export-verified-workflow.js`, doğrulanmış NDVI çıktısının yayın kapıları ve 1240×1560 çizim/indirme sırasını korur.
+- `ui/gis-export-standard-canvas.js` ve `ui/gis-export-verified-canvas.js`, ilgili harita çıktısını verilen girdilerden çizer.
+- `ui/gis-export-platform.js`, DOM seçenekleri, Canvas oluşturma ve bildirimleri sağlar. `ui/gis-export-sources.js`, grid, waypoint ve park metadata okuyucularının standart/doğrulanmış yedek davranışlarını korur.
+- `ui/gis-export-presentation.js`, sınıf paleti, renk önceliği, Türkçe alan metni ve güvenli dosya adını sağlar. `ui/gis-export-bootstrap.js`, hata sarmalayıcılarını ve eski PNG düğmesi/global API bağlantısını kurar.
+- Olay, geometri, yerleşim, NDVI bekleme ve indirme modülleri açık arayüzleriyle kullanılır. Bu ayrımda bilimsel çekirdek, kabul edilmiş alanlar ve harita kayıtlarına yazma davranışı değiştirilmez.

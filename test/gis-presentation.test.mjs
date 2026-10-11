@@ -24,6 +24,7 @@ test('GIS PNG adapter tolerates late-loaded landcover classes and intercepts the
  vm.runInNewContext(load('src/ui/gis-export-sources.js'),sandbox);
  vm.runInNewContext(load('src/ui/gis-export-workflow.js'),sandbox);
  vm.runInNewContext(load('src/ui/gis-export-verified-workflow.js'),sandbox);
+ vm.runInNewContext(load('src/bootstrap/gis-export.js'),sandbox);
  vm.runInNewContext(load('src/ui/gis-export.js'),sandbox,{filename:'src/ui/gis-export.js'});
  const png=sandbox.window.DG_GIS_PNG_EXPORT;
  assert.equal(png.classes().green.label,'Yeşil alan');
@@ -194,7 +195,7 @@ test('verified-map original label/dialog are restored, separate quick PNG stays 
  assert.match(workspace,/legacy\.hidden=false/);
  assert.match(locked,/function dgSensExportPng\(\)/);
  assert.match(locked,/dialog\.showModal\(\)/);
- assert.match(script,/DG_GIS_EXPORT_BOOTSTRAP\.install/);
+ assert.match(load('src/bootstrap/gis-export.js'),/DG_GIS_EXPORT_BOOTSTRAP\.install/);
  assert.match(events,/const exportAction=event\.target\?\.closest\?\.\("#dgExportDownload"\)/);
  assert.match(events,/if\(exportAction&&sens\?\.vegetationView&&!sens\.rawView\)/);
  assert.match(events,/if\(dialog\?\.id==="dgSurfaceExportDialog"&&dialog\.querySelector\('\[name="surface"\]'\)\?\.checked\)/);
@@ -289,6 +290,7 @@ test('verified-map original dialog is untouched with NDVI off; its PNG download 
  vm.runInNewContext(load('src/ui/gis-export-sources.js'),context);
  vm.runInNewContext(load('src/ui/gis-export-workflow.js'),context);
  vm.runInNewContext(load('src/ui/gis-export-verified-workflow.js'),context);
+ vm.runInNewContext(load('src/bootstrap/gis-export.js'),context);
  vm.runInNewContext(load('src/ui/gis-export.js'),context);
  let prevented=0,stopped=0;
  const click=()=>({target,preventDefault:()=>{prevented++;},stopImmediatePropagation:()=>{stopped++;}});
