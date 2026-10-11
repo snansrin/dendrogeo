@@ -344,3 +344,7 @@ Her modülün tek bir dış API'si, sahibi olduğu açık durumu ve kendi testle
 ### Report citation presentation (11 October 2026)
 
 `report-citation-presentation.mjs` owns plain citations, BibTeX and JSON-LD report identity. The report renderer supplies its validated DOI, version and frozen snapshot; author fallbacks, founder contributions, source citations and publication URLs retain their existing behavior.
+
+### Report method presentation (11 October 2026)
+
+`report-method-presentation.mjs` renders data-derived measurement, GNSS, photo and land-cover method statements. It preserves the existing accepted/reviewed/raster branches and receives formatters from the renderer; it performs no scientific calculation or publication side effect.
