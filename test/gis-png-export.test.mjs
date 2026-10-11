@@ -33,6 +33,7 @@ function env({ndvi=false,ndviAvailable=true,gridCells=[]}={}){
   setTimeout,clearTimeout,console,Date,Math,Array,Number,Promise,Intl
  };
  vm.createContext(ctx);
+ vm.runInContext(file('src/ui/park-image-geometry.js'),ctx,{filename:'park-image-geometry.js'});
  vm.runInContext(adapter,ctx,{filename:'gis-export.js'});
  return {ctx,messages,ops,downloads};
 }
@@ -41,6 +42,7 @@ test('PNG adapter is outside frozen scientific engine and does not mutate review
  assert.ok(lock.locked_files['src/ui/park-export.js']);
  assert.ok(lock.locked_files['src/ui/lc-sens.js']);
  assert.match(adapter,/window\.downloadParkImage=exportMap/);
+ assert.match(adapter,/DG_PARK_IMAGE_GEOMETRY\.project/);
  assert.doesNotMatch(adapter,/dgSensSave\(|dgSensAccept\(|DG_LC_LAST\s*=|sb\.from\(/);
  assert.doesNotThrow(()=>new vm.Script(adapter));
 });
