@@ -264,3 +264,9 @@ Her modülün tek bir dış API'si, sahibi olduğu açık durumu ve kendi testle
 - scripts/lib/report-queue-store.mjs günlük şemasını, kapasiteyi ve dosya okuma/yazmayı kapsar; publish-queue.mjs mevcut dışa aktarımları korur.
 - Mutlak yollar node:path isAbsolute ile çözülür; Windows geçici dosyaları yanlışlıkla depo köküne eklenmez.
 - Yayın ve yeniden deneme kararları değişmedi. Mevcut günlük ve üretim regresyonları dahil 1.844 test Windows üzerinde geçti.
+
+## Rapor kuyruğu planlama — 11 Ekim 2026
+
+- scripts/lib/report-queue-planning.mjs yayın sırasını, üç deneme sınırını ve geri çekme eşleşmelerini saf fonksiyonlarla yönetir. Dosya veya ağ erişimi yoktur.
+- Rapor kimliği doğrulaması mevcut DGR_ID_RE üzerinden publish-queue.mjs tarafından sağlanır; mevcut dışa aktarımlar korunur.
+- Yayımlanmış isteklerin tekrar üretimini ve park eşleşmesi olmadan geri çekmeyi engelleyen kurallar değişmedi.

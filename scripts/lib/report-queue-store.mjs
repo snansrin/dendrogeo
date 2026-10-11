@@ -24,4 +24,3 @@ export function saveQueue(q, rel = QUEUE_PATH) {
   writeFileSync(qpath(rel), JSON.stringify(out, null, 2) + '\n');
   return out;
 }
-
