@@ -57,7 +57,6 @@ import { reviewedSurface } from './surface-report.mjs';
 import { readFileSync, writeFileSync, mkdirSync } from 'node:fs';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import vm from 'node:vm';
 import { execSync } from 'node:child_process';
 import { mcTotalCI, mcRowCI, MC_CFG, loadRho, loadSpeciesDict, QA_LIMITS, QA_STATE, qaStateOf, DBH_REASON_TR, carbonKg, YASAL_STATU_KAPSAM } from './lib/mc.mjs';
 import { canonicalHash } from './lib/canonical-hash.mjs';
@@ -117,38 +116,10 @@ async function rest(table, params) {
 const esc = (s) => String(s ?? '').replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 const trNum = (x, d = 2) => Number(x).toLocaleString('tr-TR', { minimumFractionDigits: d, maximumFractionDigits: d });
 
-/* ---------- LULC (uygulamanın kendi motoru, vm içinde) ---------- */
-export function bootLC() {
-  const MODS = ['src/utils/geo.js', 'src/services/park-state.js', 'src/domain/parks/area.js', 'src/domain/parks/segment-intersection.js', 'src/domain/parks/point-in-polygon.js', 'src/domain/parks/bounds.js', 'src/domain/parks/park-containment.js', 'src/domain/parks/line-distance.js', 'src/domain/parks/osm-rings.js', 'src/domain/parks/rect-intersection.js', 'src/domain/parks/cell-in-park.js', 'src/domain/parks/park-overlap.js', 'src/services/park-geometry.js',
-    'src/services/lc-config.js', 'src/domain/surface/classify-landcover-code.js',
-    'src/domain/surface/compare-source-class-areas.js',
-    'src/services/lc-geo.js', 'src/services/lc-stac.js',
-    'src/domain/surface/merge-tile-results.js',
-    'src/adapters/surface/result-exports.js',
-    'src/application/surface/analyze-source.js',
-    'src/adapters/surface/process-landcover-tile.js',
-    'src/services/lc-engine.js', 'src/services/lc-osm.js', 'src/domain/surface/patch-geometry.js', 'src/domain/surface/group-patch-cells.js', 'src/domain/surface/measure-patch-components.js', 'src/domain/surface/query-green-patches.js', 'src/services/lc-patches.js',
-    'src/ui/lc-report.js', 'src/domain/surface/quality-gates.js', 'src/contracts/surface-analysis.js',
-    'src/application/surface/run-analysis.js', 'src/services/landcover.js'];
-  const ctx = {
-    console: { log() {}, warn() {}, error() {} },
-    fetch: (u, o) => fetch(u, Object.assign({ headers: { 'User-Agent': 'dendrogeo-rapor/1.0' } }, o)),
-    URL, URLSearchParams, TextEncoder, TextDecoder, AbortController,
-    Math, JSON, Date, Promise, Number, Array, Object, String, Boolean, RegExp, Error, Map, Set,
-    setTimeout, clearTimeout, parseInt, parseFloat, isNaN, Intl,
-    ArrayBuffer, Uint8Array, Uint16Array, Int32Array, Float32Array, Float64Array, DataView,
-    Response, Headers, Request, Buffer,
-    document: { createElement: () => ({}) }, navigator: { userAgent: 'rapor' }, location: { origin: 'https://rapor.local' },
-    Worker: class { postMessage() { throw new Error('worker yolu beklenmiyor'); } terminate() {} addEventListener() {} removeEventListener() {} },
-  };
-  ctx.window = ctx; ctx.self = ctx;
-  if (!ctx.URL.createObjectURL) ctx.URL.createObjectURL = () => 'blob:rapor';
-  vm.createContext(ctx);
-  vm.runInContext(read('vendor/geotiff-2.1.3.js'), ctx, { filename: 'geotiff' });
-  for (const m of MODS) vm.runInContext(read(m), ctx, { filename: m });
-  vm.runInContext('globalThis.__dgLast=function(){return typeof DG_LC_LAST!=="undefined"?DG_LC_LAST:null;};', ctx);
-  return ctx;
-}
+export {createReportLandcoverRuntime} from './lib/report-landcover-runtime.mjs';
+import {createReportLandcoverRuntime} from './lib/report-landcover-runtime.mjs';
+const bootLC = createReportLandcoverRuntime({read});
+export {bootLC};
 const parkOuter = createReportParkGeometrySource({
   fetch, bboxRing, extractRings:element=>bootLC().extractRings(element)
 });

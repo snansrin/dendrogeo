@@ -424,3 +424,8 @@ Her modülün tek bir dış API'si, sahibi olduğu açık durumu ve kendi testle
 ### Report land-cover analysis adapter (12 October 2026)
 
 `scripts/lib/report-landcover-analysis.mjs` adapts the existing land-cover engine result for report snapshots and map imagery. It preserves boundary selection, analysis inputs, cell conversion, run-length coordinate conversion and EPSG recording. The analysis engine and scientific classification remain in the application runtime.
+
+
+### Report land-cover runtime loader (12 October 2026)
+
+`scripts/lib/report-landcover-runtime.mjs` creates the existing isolated browser-like runtime and loads the application's land-cover dependencies in order. `make-report.mjs` keeps the `bootLC` export and injects its existing repository reader. Runtime globals, dependency paths, module order and analysis behavior are preserved.
