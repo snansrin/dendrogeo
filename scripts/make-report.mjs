@@ -39,7 +39,7 @@ import { buildReportProvenance } from './lib/report-provenance.mjs';
 import { createReportMetadata } from './lib/report-metadata.mjs';
 import { pointInRing, pointInPolygon, ringSelfIntersections, geometrySelfIntersections, bboxRing, ringGeodesicAreaM2 } from './lib/report-geometry.mjs';
 export { pointInRing, pointInPolygon, ringSelfIntersections, geometrySelfIntersections, bboxRing, ringGeodesicAreaM2 };
-import { reportMeasurementsCsv, reportMeasurementsGeoJson } from './lib/report-export.mjs';
+import {createReportArtifactWriter} from './lib/report-artifact-writer.mjs';
 import { DGR_ID_RE, rebuildIndex, nextReportId, parkHistory } from './lib/report-archive.mjs';
 export { DGR_ID_RE, rebuildIndex, nextReportId, parkHistory };
 import { citeName, fmtDateTr, fmtDateDot, epsgLabel } from './lib/report-formatting.mjs';
@@ -894,6 +894,7 @@ export function buildMetadata(snap, options) {
  * Dönüş değeri yayın kimliğini taşır; kuyruk günlüğü (rapor/yayin-kuyrugu.json)
  * bu nesneden yazılır ve uygulamadaki "📄 Bilimsel Rapor Yayını" kartı kalıcı
  * bağlantıyı oradan okur. */
+const writeReportArtifacts = createReportArtifactWriter({mkdirSync, writeFileSync, renderReport, buildMetadata, mcRowCI});
 export async function publishPark(parkId, opts = {}) {
   const validation=reportContext.validate(opts.study);if(!validation.valid)throw Error('Yayın künyesi gerekli: '+Object.values(validation.errors).join(' '));opts={...opts,study:validation.value};
   const year = new Date().getFullYear();
@@ -908,16 +909,7 @@ export async function publishPark(parkId, opts = {}) {
   const version = 1;          /* iç sürüm alanı (sayı) — kuyruk günlüğü bunu taşır */
   const verTxt = '1.0';       /* belge sürümü (gösterim/metadata): her DGR 1.0 doğar */
   const history = parkHistory(dir, snap.park.id, id);
-  const out = join(dir, id);
-  mkdirSync(out, { recursive: true });
-  if (png) writeFileSync(join(out, 'harita.png'), png);
-  if(snap.lulc?.review)writeFileSync(join(out,'surface.geojson'),JSON.stringify({type:'FeatureCollection',features:snap.lulc.review.features}));
-  const html = renderReport(snap, { id, hash, version, meta: Object.assign({}, meta, { history }) });
-  writeFileSync(join(out, 'index.html'), html);
-  writeFileSync(join(out, 'data.json'), JSON.stringify(snap)); /* 0012: sıkıştırılmış (arşiv boyutu ~%45 küçük) */
-  writeFileSync(join(out, 'olcum.csv'), reportMeasurementsCsv(snap, mcRowCI));
-  writeFileSync(join(out, 'park.geojson'), JSON.stringify(reportMeasurementsGeoJson(snap), null, 2));
-  writeFileSync(join(out, 'metadata.json'), JSON.stringify(buildMetadata(snap, { id, hash, version: verTxt, meta, history })) + '\n'); /* 0012: sıkıştırılmış */
+  writeReportArtifacts({dir, id, snap, hash, png, version, verTxt, meta, history});
   rebuildIndex();
   const url = SITE_ORIGIN + '/rapor/' + id + '/';
   return {

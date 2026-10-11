@@ -189,7 +189,7 @@ describe('0024 · mobil düzen v2 (kaydırma kabı — 0021 display:block dersi)
 
 describe('0012 · sıkı arşiv (minified JSON) + archive_bytes', () => {
   test('publishPark data.json/metadata.json sıkıştırılmış yazar', () => {
-    const src = read('scripts/make-report.mjs');
+    const src = read('scripts/lib/report-artifact-writer.mjs');
     assert.match(src, /writeFileSync\(join\(out, 'data\.json'\), JSON\.stringify\(snap\)\)/, 'data.json minified');
     assert.match(src, /JSON\.stringify\(buildMetadata\([^)]*\)\) \+ '\\n'/, 'metadata.json minified');
     assert.ok(!/data\.json'\), JSON\.stringify\(snap, null, 2\)/.test(src), 'eski pretty yazım kalktı');
