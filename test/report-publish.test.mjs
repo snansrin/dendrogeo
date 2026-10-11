@@ -29,6 +29,7 @@ const SQL = read('supabase/migrations/0008_report_publish.sql');
 const WF = read('.github/workflows/rapor-yayin.yml');
 const PQ = read('scripts/publish-queue.mjs');
 const MR = read('scripts/make-report.mjs');
+const REPORT_DOCUMENT = read('scripts/lib/report-document-composition.mjs');
 const UI = read('src/services/report-publish.js');
 const SHELL = read('partials/shell.html');
 const IDX = read('index.html');
@@ -191,8 +192,8 @@ describe('make-report.mjs: tek üretici publishPark()', () => {
 
   test('⭐ üretilen sayfada paylaş düğmesi var (Web Share + pano yedeği)', () => {
     assert.match(read('scripts/lib/report-data-access-presentation.mjs'), /id="dgShareBtn" onclick="dgShareReport\(\)">📤 Paylaş</);
-    assert.match(MR, /\$\{renderReportDataAccess\(\{L, M\}\)\}/, 'indirme ve paylaşma modülü rapor şablonuna eklenir');
-    assert.match(MR, /\$\{REPORT_SHARE_SCRIPT\}/, 'client helper rapor şablonuna eklenir');
+    assert.match(REPORT_DOCUMENT, /\$\{renderReportDataAccess\(\{L, M\}\)\}/, 'indirme ve paylaşma modülü rapor şablonuna eklenir');
+    assert.match(REPORT_DOCUMENT, /\$\{REPORT_SHARE_SCRIPT\}/, 'client helper rapor şablonuna eklenir');
     assert.match(read('scripts/lib/report-share.mjs'), /navigator\.share/, 'yerel paylaşım');
     assert.match(read('scripts/lib/report-share.mjs'), /navigator\.clipboard\.writeText\(url\)/, 'pano yedeği');
     assert.match(read('scripts/lib/report-share.mjs'), /window\.prompt\(/, 'pano da yoksa elle kopyalama');
