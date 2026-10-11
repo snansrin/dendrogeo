@@ -29,6 +29,7 @@ const SQL = read('supabase/migrations/0008_report_publish.sql');
 const WF = read('.github/workflows/rapor-yayin.yml');
 const PQ = read('scripts/publish-queue.mjs');
 const MR = read('scripts/make-report.mjs');
+const SNAPSHOT_APP = read('scripts/lib/report-snapshot-application.mjs');
 const REPORT_DOCUMENT = read('scripts/lib/report-document-composition.mjs');
 const UI = read('src/services/report-publish.js');
 const SHELL = read('partials/shell.html');
@@ -183,11 +184,11 @@ describe('make-report.mjs: tek üretici publishPark()', () => {
   });
 
   test('ölçüm protokolü provenance kaynağı buildSnapshot kapsamında tanımlıdır', () => {
-    assert.match(MR,/const rhoBase = loadRho\(\)/);
-    assert.match(MR,/measurementProtocol: rhoBase\.measurementLockId/);
-    assert.match(MR,/measurementProtocolFingerprint: rhoBase\.measurementLockFingerprint/);
-    assert.match(MR,/buildReportProvenance\(/);
-    assert.doesNotMatch(MR,/measurement_protocol: base\.measurementLockId/);
+    assert.match(SNAPSHOT_APP,/const rhoBase = loadRho\(\)/);
+    assert.match(SNAPSHOT_APP,/measurementProtocol: rhoBase\.measurementLockId/);
+    assert.match(SNAPSHOT_APP,/measurementProtocolFingerprint: rhoBase\.measurementLockFingerprint/);
+    assert.match(SNAPSHOT_APP,/buildReportProvenance\(/);
+    assert.doesNotMatch(SNAPSHOT_APP,/measurement_protocol: base\.measurementLockId/);
   });
 
   test('⭐ üretilen sayfada paylaş düğmesi var (Web Share + pano yedeği)', () => {

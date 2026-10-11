@@ -7,6 +7,7 @@ on:
       - 'index.html'
       - 'partials/**'
       - 'scripts/mobile-smoke.mjs'
+      - 'scripts/lib/report-snapshot-application.mjs'
       - 'scripts/gis-mobile-qa.mjs'
       - 'css/gis-workspace.css'
       - '.github/workflows/mobile-smoke.yml'
