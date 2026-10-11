@@ -6,6 +6,7 @@ const outer=[[39,32],[39.1,32],[39.1,32.1],[39,32]];
 const report={classes:{water:{area:10}}};
 function fakeContext({runs=[],features=[],inverse=null,onAnalyze=null}={}){
  const context={
+  ringGeodesicArea:()=>54321,
   dgLcAnalyze:async options=>{onAnalyze?.(options);return report;},
   __dgLast:()=>({result:{runs}}),
   dgLcCellsGeoJson:()=>({features}),
@@ -50,13 +51,16 @@ test('converts degree runs to bounded map coordinates and preserves EPSG',async(
 test('uses UTM inverse projection and drops non-finite runs',async()=>{
  const calls=[];
  const runs=[
-  {x0:1,x1:2,y0:3,y1:4,epsg:32636,classKey:'hard'},
-  {x0:5,x1:6,y0:7,y1:8,epsg:32636,classKey:'invalid'}
+  {x0:500000,x1:500100,y0:4300000,y1:4300100,epsg:32636,classKey:'hard'},
+  {x0:500200,x1:500300,y0:4300200,y1:4300300,epsg:32636,classKey:'invalid'}
  ];
- const ctx=fakeContext({runs,inverse:(x,y,epsg)=>{calls.push([x,y,epsg]);return x===5?{lon:NaN,lat:NaN}:{lon:x/100,lat:y/100};}});
+ const ctx=fakeContext({runs,inverse:(x,y,epsg)=>{
+  calls.push([x,y,epsg]);
+  return x===500200?{lon:NaN,lat:NaN}:{lon:32+(x-500000)/100000,lat:39+(y-4300000)/100000};
+ }});
  const {runLULC}=createReportLandcoverAnalysis({parkOuter:async()=>({outer,holes:[]}),bootLC:()=>ctx});
  const result=await runLULC({area_m2:1000});
- assert.deepEqual(result.wruns,[{lo0:0.01,lo1:0.02,la0:0.03,la1:0.04,key:'hard'}]);
- assert.deepEqual(calls,[[1,4,32636],[2,3,32636],[5,8,32636],[6,7,32636]]);
+ assert.deepEqual(result.wruns,[{lo0:32,lo1:32.001,la0:39,la1:39.001,key:'hard'}]);
+ assert.deepEqual(calls,[[500000,4300100,32636],[500100,4300000,32636],[500200,4300300,32636],[500300,4300200,32636]]);
  assert.equal(result.epsg,32636);
 });
