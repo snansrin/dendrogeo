@@ -356,3 +356,7 @@ Her modülün tek bir dış API'si, sahibi olduğu açık durumu ve kendi testle
 ### Inventory QA detail presentation (11 October 2026)
 
 `report-inventory-details.mjs` presents existing height/DBH, diameter distribution and carbon reproduction findings. Formatters and QA limits are injected; missing-value formatting, point-list truncation and review/block wording remain unchanged. Scientific QA decisions stay with the inventory engine.
+
+### Report QA table composition (11 October 2026)
+
+`report-qa-table.mjs` composes the existing QA table rows using an injected report-local row/state collector. Row order, optional surface and inventory checks, escaped source values and review/block conditions remain unchanged. The renderer summarizes the same collector after composing the table.
