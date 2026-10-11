@@ -235,3 +235,5 @@ Her modülün tek bir dış API'si, sahibi olduğu açık durumu ve kendi testle
 - `domain/parks/park-export-formats.js`, grid GeoJSON özelliklerini/geometri yedeğini ve waypoint CSV satırlarını üretir; indirme ve kullanıcı bildirimi `park-export.js` içinde kalır.
 
 - `ui/park-export-canvas.js`, park dışa aktarım PNG'sinin zemin, başlık, kırpılmış park/örtü/grid/waypoint katmanları, lejant, ölçek ve lisans satırını çizer; canvas indirme adapter tarafından yönetilir.
+
+- `ui/park-landcover-analysis.js`, park LULC analizi için tembel modül yükleme, busy/rapor UI durumu, sonuç çizimi, hassasiyet paneli ve kullanıcı bildirimlerini orkestre eder. `park-export.js` eski `runLandCoverAnalysis()` globalini ve park state/DOM bağımlılıklarını adapter olarak korur; sayısal analiz `DG_LANDCOVER` içinde kalır.

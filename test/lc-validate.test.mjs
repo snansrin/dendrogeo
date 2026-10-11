@@ -588,7 +588,7 @@ describe('entegrasyon zinciri kilitleri (0054 · lc-sens)', () => {
   const lazy = rd('src/utils/lazylibs.js');
   const sw = rd('sw.js');
   const panel = rd('src/ui/park-panel.js') + '\n' + rd('src/ui/park-info-panel.js');
-  const exportJs = rd('src/ui/park-export.js');
+  const exportJs = rd('src/ui/park-export.js') + '\n' + rd('src/ui/park-landcover-analysis.js');
   const i18n = rd('src/config/i18n.js');
   const sens = rd('src/ui/lc-sens.js');
   const css = rd('css/park-panel.css');
@@ -620,8 +620,8 @@ describe('entegrasyon zinciri kilitleri (0054 · lc-sens)', () => {
   });
 
   test('köprü: analiz bitince DG_LC_SENS.mount otomatik (typeof+try korumalı)', () => {
-    assert.match(exportJs, /window\.DG_LC_SENS&&typeof window\.DG_LC_SENS\.mount==="function"/);
-    assert.match(exportJs, /window\.DG_LC_SENS\.mount\("lcSens"\)/);
+    assert.match(exportJs, /sensitivity&&typeof sensitivity\.mount==="function"/);
+    assert.match(exportJs, /await sensitivity\.mount\("lcSens"\)/);
     assert.ok(!/function dgValOpen/.test(exportJs), 'eski köprü kalmamalı');
   });
 

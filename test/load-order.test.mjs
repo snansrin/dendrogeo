@@ -131,9 +131,11 @@ describe('tam sayfa yükleme sırası (vm smoke)', () => {
 
   test('analiz köprüsü zinciri gerçekten bekliyor', () => {
     const pe = readFileSync(join(ROOT, 'src/ui/park-export.js'), 'utf8');
-    const fn = pe.slice(pe.indexOf('async function runLandCoverAnalysis'), pe.indexOf('function downloadParkImage') > -1 ? pe.indexOf('function downloadParkImage') : pe.length);
-    assert.match(fn, /await dgEnsureLulc\(\)/);
-    assert.match(fn, /yüklenemedi/, 'yükleme hatası kullanıcıya söylenmeli');
+    const ui = readFileSync(join(ROOT, 'src/ui/park-landcover-analysis.js'), 'utf8');
+    assert.match(pe, /async function runLandCoverAnalysis\(\)\{\s*return dgParkLandCoverUi\.run\(\);/);
+    assert.match(pe, /ensureLulc:typeof dgEnsureLulc==="function"\?\(\)=>dgEnsureLulc\(\):null/);
+    assert.match(ui, /await deps\.ensureLulc\(\)/);
+    assert.match(ui, /yüklenemedi/, 'yükleme hatası kullanıcıya söylenmeli');
   });
 
   test('global lexical çakışma yok (vm instantiation geçti)', () => {
