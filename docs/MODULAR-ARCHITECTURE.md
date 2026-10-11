@@ -330,3 +330,8 @@ Her modülün tek bir dış API'si, sahibi olduğu açık durumu ve kendi testle
 
 - scripts/lib/report-qa-presentation.mjs QA satır sınıflarını ve satırlardan türetilen rozet sunumunu kapsar. Mevcut qaStateOf ve QA_STATE bağımlılıkları kullanılır.
 - Kontrol eşikleri ve bilimsel değerlendirmeler make-report.mjs içinde kalır. Beyan satırları rozet durumunu etkilemez; her rapor ayrı satır durumu tutar.
+
+## Rapor değerlendirme sunumu — 11 Ekim 2026
+
+- scripts/lib/report-evaluation-presentation.mjs yüzey dağılımı, baskın sınıf ve grup karbon paylarını betimleyen mevcut paragrafları kapsar. HTML kaçışı ve sayı biçimi dışarıdan sağlanır.
+- Ölçülmeyen alana ekstrapolasyon yapılmaması ve nedensel ilişki kurulmadığı beyanları korunur; kaynak sonuçlar değiştirilmez.

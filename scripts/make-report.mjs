@@ -1,7 +1,8 @@
 #!/usr/bin/env node
 import {createReportPublicationApplication} from './lib/report-publication-application.mjs';
-import {createReportSpeciesPresentation, grpTr, sw} from './lib/report-species-presentation.mjs';
+import {createReportSpeciesPresentation, sw} from './lib/report-species-presentation.mjs';
 import {createReportQaPresentation} from './lib/report-qa-presentation.mjs';
+import {createReportEvaluationPresentation} from './lib/report-evaluation-presentation.mjs';
 import { reportRead } from './lib/report-reader.mjs';
 import {reportContext} from './lib/report-context.mjs';
 import { decodeReportContext } from './lib/report-context.mjs';
@@ -363,6 +364,7 @@ const DGR_TITLE_DEF = 'DGR — DendroGeo Bilimsel Analiz Raporu';
 /* Site kurucuları her raporda beyan edilir (kullanıcı standardı 2026-09-28);
  * yazar DEĞİLDİR — yazar, yayını isteyen kullanıcının kendisidir. */
 export const FOUNDERS_LINE = 'Site kurucuları: Nagihan Şirin, Sinan Şirin';
+const renderEvaluationPresentation = createReportEvaluationPresentation({esc, trNum});
 const renderSpeciesPresentation = createReportSpeciesPresentation({esc, trNum});
 export function renderReport(snap, { id, hash, version = 1, meta = null }) {
   const t = snap.totals, P = snap.park;
@@ -522,22 +524,7 @@ export function renderReport(snap, { id, hash, version = 1, meta = null }) {
   if (nPhoto < NR) qaWhy.push(`${NR - nPhoto} kayıtta fotoğraf kanıtı eksik`);
   const QA_WHY = qaWhy.join('; ');
 
-  /* ---- Değerlendirme: yalnız veriden türeyen betimleme ---- */
-  const clsPct = (k) => { const c = ((L && L.classes) || []).find((x) => x.key === k); return c ? c.pct : null; };
-  const distParts = [];
-  for (const [k, label] of [['green', 'yeşil alan'], ['hard', 'sert yüzey'], ['building','bina'], ['water', 'su'], ['pool','havuz / süs havuzu'], ['bare', 'açık/çıplak alan'], ['other', 'diğer']]) {
-    const v = clsPct(k); if (v != null && v > 0) distParts.push(`${label} %${trNum(v, 1)}`);
-  }
-  const dominant = (((L && L.classes) || []).slice().sort((a, b) => b.pct - a.pct))[0] || null;
-  const grpTot = {};
-  for (const s of snap.species) grpTot[s.grp] = (grpTot[s.grp] || 0) + s.carbon_kg;
-  const grpShares = Object.entries(grpTot).map(([g, c]) => `${grpTr(g)} türlerde %${trNum(100 * c / (t.carbon_kg || 1), 1)}`).join(', ');
-  const evalParas = [
-    distParts.length ? `<p>Arazi örtüsü sınıflandırmasına göre analiz alanının ${distParts.join('; ')} şeklinde dağıldığı belirlenmiştir${dominant ? `; baskın sınıf %${trNum(dominant.pct, 1)} pay ile ${esc(dominant.label)} sınıfıdır` : ''}.</p>` : '',
-    `<p>Ölçüm kaydı bulunan ${t.n} ağacın toplam karbon stoku ${ciTxt} olarak hesaplanmış; stokun ${grpShares || 'tek grupta'} biriktiği görülmüştür. Ölçüm kaydı bulunan ağaçların karbon toplamının park alanına oranı ${t.per_ha_kg == null ? '—' : trNum(t.per_ha_kg / 1000, 3) + ' t/ha'} değerindedir; bu oran yalnız kayıt kapsamını tanımlar.</p>`,
-    `<p>Örneklem ${t.n} ağaç ölçümüne dayanmaktadır; sonuçlar ölçümü yapılan ağaçların toplamını verir ve parkın ölçülmeyen bölümlerine ekstrapole edilmemelidir.</p>`,
-    `<p class="qnote">Yüzey sınıfı oranları ile ağaçların karbon stoku arasındaki nedensel ilişki bu veri kapsamıyla test edilmemiştir.</p>`,
-  ].join('');
+  const evalParas = renderEvaluationPresentation({snap, L, t, ciTxt});
 
   /* ---- Sınırlılıklar ---- */
   const limItems = [
