@@ -42,7 +42,7 @@ const DG_PUB_ORIGIN="https://dendrogeo.org";
 /* DGR-YYYY-NNNN: yayın kimliğinin TEK kabul edilen biçimi. */
 const DG_PUB_ID=/^DGR-\d{4}-\d{4}$/;
 const DG_PUB_DOI=/^10\.5281\/zenodo\.\d+$/;
-const DG_PUB_QUEUE_STATE=DG_REPORT_PUBLICATION_REQUEST_APPLICATION.createReportPublicationQueueState({
+const DG_PUB_QUEUE_STATE=window.DG_REPORT_PUBLICATION_REQUEST_APPLICATION.createReportPublicationQueueState({
  isReportId:value=>DG_PUB_ID.test(String(value||""))
 });
 const DG_PUB_POLL_MS=25000;      /* bekleyen istek varken tazeleme aralığı */
