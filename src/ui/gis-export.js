@@ -228,29 +228,13 @@
    for(const poly of ndviPolys)
     if(window.DG_GIS_EXPORT_CANVAS.drawLeaflet(g,pr,poly,Math.max(.45,(sens.opacity||65)/100)))painted++;
   }
-  if(layers.grid&&typeof DG_GRID_SESSION!=="undefined")for(const cell of DG_GRID_SESSION.getCells()||[]){
-   if(Array.isArray(cell.geometry?.coordinates)){
-    for(const polygon of cell.geometry.coordinates)for(const ring of polygon){
-     g.beginPath();ring.forEach((p,i)=>{if(i)g.lineTo(pr.x(p[0]),pr.y(p[1]));else g.moveTo(pr.x(p[0]),pr.y(p[1]));});
-     g.closePath();g.strokeStyle=GREEN;g.lineWidth=1;g.stroke();
-    }
-   }else if([cell.w0,cell.w1,cell.s0,cell.s1].every(Number.isFinite)){
-    g.strokeStyle=GREEN;g.lineWidth=1;
-    g.strokeRect(pr.x(cell.w0),pr.y(cell.s1),pr.x(cell.w1)-pr.x(cell.w0),pr.y(cell.s0)-pr.y(cell.s1));
-   }
-  }
+  if(layers.grid&&typeof DG_GRID_SESSION!=="undefined")window.DG_GIS_EXPORT_CANVAS.drawVerifiedGrid(g,pr,DG_GRID_SESSION.getCells()||[],GREEN);
   if(layers.waypoints){
    const pid=Number(read("gridProject")?.value);
    const points=[...(typeof LAST_WP_ROWS!=="undefined"?LAST_WP_ROWS:[]),...(typeof WP!=="undefined"?WP:[])];
    const unique=new Map(points.filter(w=>Number.isFinite(Number(w.lat))&&Number.isFinite(Number(w.lon))&&(!w.project_id||Number(w.project_id)===pid))
     .map(w=>[String(w.project_id||pid)+":"+String(w.wp_id??w.id),w]));
-   for(const w of unique.values()){
-    const x=pr.x(Number(w.lon)),y=pr.y(Number(w.lat));
-    g.beginPath();g.arc(x,y,7,0,Math.PI*2);
-    g.fillStyle=w.visited?"#22c55e":"#ef4444";g.fill();
-    g.strokeStyle="#fff";g.lineWidth=2;g.stroke();
-    g.fillStyle=INK;g.font="bold 14px Arial";g.fillText(String(w.wp_id??w.id??""),x+10,y+4);
-   }
+   window.DG_GIS_EXPORT_CANVAS.drawVerifiedWaypoints(g,pr,[...unique.values()],INK);
   }
   g.restore();
   if(layers.park){

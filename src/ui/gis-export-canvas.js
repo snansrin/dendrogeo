@@ -62,5 +62,32 @@
    context.strokeStyle="#fff";context.lineWidth=1.7;context.stroke();
   }
  }
- root.DG_GIS_EXPORT_CANVAS=Object.freeze({eachRing,drawLeaflet,drawRawPatches,drawGrid,drawWaypoints});
+ function drawVerifiedGrid(context,projector,cells,color){
+  for(const cell of cells||[]){
+   if(Array.isArray(cell.geometry?.coordinates)){
+    for(const polygon of cell.geometry.coordinates)for(const ring of polygon){
+     context.beginPath();ring.forEach((point,index)=>{
+      if(index)context.lineTo(projector.x(point[0]),projector.y(point[1]));
+      else context.moveTo(projector.x(point[0]),projector.y(point[1]));
+     });
+     context.closePath();context.strokeStyle=color;context.lineWidth=1;context.stroke();
+    }
+   }else if([cell.w0,cell.w1,cell.s0,cell.s1].every(Number.isFinite)){
+    context.strokeStyle=color;context.lineWidth=1;
+    context.strokeRect(projector.x(cell.w0),projector.y(cell.s1),
+     projector.x(cell.w1)-projector.x(cell.w0),projector.y(cell.s0)-projector.y(cell.s1));
+   }
+  }
+ }
+ function drawVerifiedWaypoints(context,projector,waypoints,ink){
+  for(const waypoint of waypoints||[]){
+   const x=projector.x(Number(waypoint.lon)),y=projector.y(Number(waypoint.lat));
+   context.beginPath();context.arc(x,y,7,0,Math.PI*2);
+   context.fillStyle=waypoint.visited?"#22c55e":"#ef4444";context.fill();
+   context.strokeStyle="#fff";context.lineWidth=2;context.stroke();
+   context.fillStyle=ink;context.font="bold 14px Arial";
+   context.fillText(String(waypoint.wp_id??waypoint.id??""),x+10,y+4);
+  }
+ }
+ root.DG_GIS_EXPORT_CANVAS=Object.freeze({eachRing,drawLeaflet,drawRawPatches,drawGrid,drawWaypoints,drawVerifiedGrid,drawVerifiedWaypoints});
 })(window);
