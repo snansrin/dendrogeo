@@ -38,6 +38,8 @@ on:
       - 'src/services/visit-stats.js'
       - 'src/config/i18n-en.js'
       - 'src/config/i18n.js'
+      - 'src/services/park-registry.js'
+      - 'src/ui/park-measurement-gate.js'
       - 'src/application/visitors/**'
       - 'src/application/parks/**'
       - 'src/adapters/parks/**'

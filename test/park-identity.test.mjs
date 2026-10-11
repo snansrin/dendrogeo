@@ -45,6 +45,7 @@ const world = readFileSync(join(ROOT, 'src/services/world.js'), 'utf8');
 const measure = readFileSync(join(ROOT, 'src/services/measure.js'), 'utf8');
 const registry = readFileSync(join(ROOT, 'src/services/park-registry.js'), 'utf8');
 const measurementParkGate = readFileSync(join(ROOT, 'src/application/parks/evaluate-measurement-park-gate.js'), 'utf8');
+const measurementParkGateUi = readFileSync(join(ROOT, 'src/ui/park-measurement-gate.js'), 'utf8');
 const parkAdminRenderer = readFileSync(join(ROOT, 'src/ui/park-admin-renderer.js'), 'utf8');
 const parkMergeApplication = readFileSync(join(ROOT, 'src/application/parks/merge-park-identities.js'), 'utf8');
 const parkRenameApplication = readFileSync(join(ROOT, 'src/application/parks/rename-park-identity.js'), 'utf8');
@@ -405,9 +406,9 @@ describe('parka bağlama YALNIZ yönetici (0006 + kullanıcı isteği 2026-09-24
 
   test('ölçüm kapısı yönetici olmayanı "yeni proje" yoluna yönlendirir', () => {
     assert.match(measurementParkGate, /isAdmin:\!\!isAdmin\(\)/, 'use-case rol bilgisini almalı');
-    assert.match(registry, /result\.isAdmin\s*\?/);
-    assert.match(registry, /Park Algıla → Yeni Proje Oluştur/);
-    assert.match(registry, /yalnız yöneticide/);
+    assert.match(measurementParkGateUi, /result\.isAdmin\s*\?/);
+    assert.match(measurementParkGateUi, /Park Algıla → Yeni Proje Oluştur/);
+    assert.match(measurementParkGateUi, /yalnız yöneticide/);
   });
 
   test('algılama kartında bağlama seçenekleri yöneticiye göre süzülür', () => {
@@ -529,6 +530,7 @@ describe('kabuk: park algılama ekranı + ölçüm kapısı id’leri', () => {
     assert.ok(sw.includes("'/src/services/park-registry.js'"), 'CORE_ASSETS’te yok');
     assert.ok(sw.includes("'/src/domain/parks/identity.js'"), 'park identity domain CORE_ASSETS’te yok');
     assert.ok(sw.includes("'/src/application/parks/evaluate-measurement-park-gate.js'"), 'ölçüm kapısı uygulama modülü CORE_ASSETS’te yok');
+    assert.ok(sw.includes("'/src/ui/park-measurement-gate.js'"), 'ölçüm kapısı UI modülü CORE_ASSETS’te yok');
   });
 });
 
@@ -596,15 +598,16 @@ describe('akış: karşılaştırma park bazlı, ölçüm kapalı, park kaydedil
 
   test('gate ölçüm butonunu gerçekten kilitler (disabled)', () => {
     const fn = registry.slice(registry.indexOf('function dgParkGate'), registry.indexOf('/* Proje seçimi değişti'));
-    assert.match(fn, /save\.disabled=true/);
-    assert.match(fn, /save\.disabled=false/);
-    assert.match(fn, /result\.status==="editing"/);
+    assert.match(fn, /DG_PARK_MEASUREMENT_GATE_UI\.render/);
+    assert.match(measurementParkGateUi, /save\.disabled=true/);
+    assert.match(measurementParkGateUi, /save\.disabled=false/);
+    assert.match(measurementParkGateUi, /result\.status==="editing"/);
     assert.match(measurementParkGate, /status:"editing",allowed:true/);
   });
 
   test('şema eskiyse kapı ölçümü KİLİTLEMEZ (kullanıcı çalışamaz kalmasın)', () => {
     const fn = registry.slice(registry.indexOf('function dgParkGate'), registry.indexOf('/* Proje seçimi değişti'));
-    assert.match(fn, /result\.status==="schema-unavailable"/);
+    assert.match(measurementParkGateUi, /result\.status==="schema-unavailable"/);
     assert.match(measurementParkGate, /status:"schema-unavailable",allowed:true/);
   });
 

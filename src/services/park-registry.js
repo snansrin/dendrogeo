@@ -489,76 +489,11 @@ function dgParkGate(auto){
   const box=$("parkGate");
   const save=$("saveBtn");
   const result=DG_PARK_MEASUREMENT_GATE(auto);
-
-  /* Şema eski: park_id sütunu yok, kapı uygulanamaz. Ölçümü KİLİTLEMEK
-   * kullanıcıyı tamamen çalışamaz hâle getirirdi; onun yerine uyarı gösterip
-   * eski akışa izin veriyoruz (karşılaştırma da proje bazlı yedeğe düşer). */
-  if(result.status==="schema-unavailable"){
-    if(box){box.style.display="block";box.className="alert warn";box.innerHTML=dgSchemaWarnHTML();}
-    if(save)save.disabled=false;
-    return true;
-  }
-
-  const p=result.project;
-
-  /* Düzenleme modu: mevcut kaydı güncellemek yeni ölçüm değildir, kilitleme. */
-  if(result.status==="gate-unavailable")return result.allowed;
-
-  if(result.status==="editing"){
-    box.style.display="none";
-    if(save)save.disabled=false;
-    return true;
-  }
-
-  if(result.status==="project-required"){
-    box.style.display="block";
-    box.className="alert err";
-    box.innerHTML=
-      `<b>⛔ Ölçüm için park algılanmış bir proje gerekli.</b><br>`+
-      `<span style="font-size:.82rem">Park algılama ekranına git → parkı seç → proje adı otomatik `+
-      `"<b>Göksu Parkı - deneme</b>" biçiminde oluşsun.</span>`+
-      `<div style="margin-top:10px"><button class="btn sm blue" onclick="startParkScan({returnTo:'measure'})">🌳 Park Algılama Ekranına Git</button></div>`;
-    if(save)save.disabled=true;
-    if(result.redirect)startParkScan(result.redirect);
-    return false;
-  }
-
-  if(result.status==="park-required"){
-    box.style.display="block";
-    box.className="alert err";
-    /* Yönetici: projeyi parka bağlayabilir. Normal kullanıcı: bağlama yetkisi
-     * yok (0006 → PARK_ADMIN_ONLY), o yüzden yalnız "yeni proje" yolu gösterilir. */
-    box.innerHTML=result.isAdmin
-      ? `<b>⛔ Bu projede park algılanmadı — ölçüm girilemez.</b><br>`+
-        `<span style="font-size:.82rem">Proje: <b>${esc(p.name)}</b>. `+
-        `Park kimliği olmadan girilen ölçümler karşılaştırmada park bazında izlenemez; `+
-        `bu yüzden önce park kimliği oluşturuluyor.</span>`+
-        `<div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap">`+
-          `<button class="btn sm blue" onclick="go('admin')">🔐 Yönetim → Park Kimlikleri</button>`+
-        `</div>`
-      : `<b>⛔ Bu proje parka bağlı değil — ölçüm girilemez.</b><br>`+
-        `<span style="font-size:.82rem">Proje: <b>${esc(p.name)}</b>. Mevcut projeyi parka bağlama yetkisi `+
-        `<b>yalnız yöneticide</b> 🔐. İki yol: (1) yönetici park atamasını Yönetim → Park Kimlikleri'nden yapsın, `+
-        `(2) aşağıdan park algılayıp <b>yeni proje</b> aç ve ölçümlere orada devam et.</span>`+
-        `<div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap">`+
-          `<button class="btn sm blue" onclick="startParkScan({returnTo:'measure'})">🌳 Park Algıla → Yeni Proje Oluştur</button>`+
-        `</div>`;
-    if(save)save.disabled=true;
-    /* ⭐ Otomatik yönlendirme: ölçüme geçmeye çalışan kullanıcı parkı
-     * algılamadan forma ulaşamaz (proje başına bir kez). */
-    if(result.redirect)startParkScan(result.redirect);
-    return false;
-  }
-
-  const parkName=result.parkName;
-  box.style.display="block";
-  box.className="alert ok";
-  box.innerHTML=
-    `<div class="measure-park-summary"><span><b>🌳 ${esc(parkName)}</b>`+
-    (result.areaM2?` · ${dgFmtHa(result.areaM2)}`:``)+
-    `</span><button class="btn sm ghost" onclick="startParkScan({projectId:${p.id},returnTo:'measure'})">Parkı değiştir</button></div>`;
-  if(save)save.disabled=false;
-  return true;
+  const view=DG_PARK_MEASUREMENT_GATE_UI.render({
+    result,box,save,escape:esc,formatArea:dgFmtHa,schemaWarningHTML:dgSchemaWarnHTML
+  });
+  if(view.redirect)startParkScan(view.redirect);
+  return view.allowed;
 }
 
 /* Proje seçimi değişti (v-measure). shell.html'deki onchange bunu çağırır. */
