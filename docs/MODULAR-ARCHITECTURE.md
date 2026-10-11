@@ -404,3 +404,7 @@ Her modülün tek bir dış API'si, sahibi olduğu açık durumu ve kendi testle
 ### Report quantitative results presentation (12 October 2026)
 
 `report-results-presentation.mjs` renders precomputed species summaries, carbon intervals and surface/area-balance tables. Formatting, missing-value fallbacks, optional surface conditions and scientific scope statements remain unchanged. Monte Carlo and scientific area calculations stay outside this module.
+
+### Report data dictionary (12 October 2026)
+
+`report-data-dictionary.mjs` owns the static variable definitions, units and measurement note shown in §4.6. Text and markup are preserved verbatim, including raw girth versus derived DBH, biomass/carbon units and uncertainty scope. Scientific calculation and snapshot fields remain unchanged.

@@ -3,6 +3,7 @@ import {createReportPublicationApplication} from './lib/report-publication-appli
 import {createReportSpeciesPresentation, sw} from './lib/report-species-presentation.mjs';
 import {createReportQaPresentation} from './lib/report-qa-presentation.mjs';
 import {createReportEvaluationPresentation} from './lib/report-evaluation-presentation.mjs';
+import {REPORT_DATA_DICTIONARY} from './lib/report-data-dictionary.mjs';
 import {createReportResultsPresentation} from './lib/report-results-presentation.mjs';
 import {renderReportDataAccess} from './lib/report-data-access-presentation.mjs';
 import {createReportReferencesPresentation} from './lib/report-references-presentation.mjs';
@@ -508,20 +509,7 @@ ${renderSourcesPresentation({L, dataset, dataYear, t})}
 <p><b>4.3 Belirsizlik.</b> Girdi belirsizlikleri (§4.1) ve allometrik model belirsizliği (%22 değişim katsayısı) Monte Carlo yöntemiyle (n=${snap.mc.N}, sabit tohum=${snap.mc.SEED}) yayılmıştır; model hatası kayıtlar arasında korele kabul edilmiştir, zira aynı denklem tüm kayıtlarda ortak yönde sapma üretir. Aralık sınırları Monte Carlo dağılımının 2,5 ve 97,5 yüzdelikleridir. Bu aralık model ve girdi belirsizlikleri koşulunda hesaplanmıştır; olasılıklı örnekleme tasarımına dayalı park geneli güven aralığı değildir.</p>
 ${lulcMethod || '<p><b>4.4 Arazi örtüsü sınıflandırması.</b> Bu sürümde arazi örtüsü çözümlemesi yer almamaktadır' + (snap.lulc && snap.lulc.error ? ` (teknik not: ${esc(snap.lulc.error)})` : '') + (knotted ? ` Saptanan neden: sınır poligonundaki ${knotN} kendini kesen segment çifti (düğüm), poligon alanı ile raster kapsama alanını %0,5 eşiğinin üzerinde ayrıştırmaktadır. Sınır düzeltilip yeniden yayımlandığında çözümleme üretilir; bu raporun kimliği değişmez, yeni çözümleme yeni DGR kimliği alır.` : '') + (GJ ? ` Saptanan neden: uygulamada çizili sınır kaydı bir dikdörtgen (${GJ.ring_points} nokta; jeodezik alanı ${trNum(GJ.ring_area_m2 / 10000, 2)} ha) olup künye alanından (${trNum(parkHa, 2)} ha) belirgin biçimde büyüktür; alan dengesi eşiği bu nedenle aşılmıştır. Sınır kaydı düzeltilip (veya OSM poligonuna dönülüp) yeniden yayımlandığında çözümleme üretilir; bu raporun kimliği değişmez, yeni çözümleme yeni DGR kimliği alır.` : '') + '.</p>'}
 <p><b>4.5 Doğrulama zinciri.</b> (i) Her kayıt moderatör onayı gerektirir (${snap.moderation.approved}/${snap.moderation.approved} kayıt 'Onaylı' durumundadır; zaman damgalı onay kaydı ${snap.moderation.reviewed}/${snap.moderation.approved}); (ii) ölçüm konumunun park poligonu içinde olması veritabanı tetiği ile zorunlu kılınmıştır (trg_geo_fence; zorunluluk, 0007 geçişinden sonraki kayıtlara uygulanır, önceki kayıtlar için kayıt düzeyindeki denetim sonucu §7'de beyan edilir); (iii) arazi örtüsü çözümlemesinde raster/park alan farkı %0,5 eşiğini aşarsa sonuç yayınlanmaz; (iv) yayınlanan sayfanın içerik bütünlüğü SHA-256 hash'i ile açılışta canlı doğrulanır (§7).</p>
-<p><b>4.6 Veri sözlüğü.</b> Raporda ve <code>data.json</code>/<code>olcum.csv</code> çıktılarında kullanılan değişkenlerin anlamı ve birimi aşağıdadır.</p>
-<div class="tscroll"><table><thead><tr><th>Değişken</th><th>Açıklama</th><th>Birim</th></tr></thead><tbody>
-<tr><td class="tr">Göğüs çevresi (C)</td><td class="qd">Mezura ile yerden 1,30 m yükseklikte ölçülen ham gövde çevresi (<code>girth_cm</code>)</td><td class="qd">cm</td></tr>
-<tr><td class="tr">DBH (D)</td><td class="qd">Türetilmiş göğüs çapı: <b>D = C / π</b> (<code>dbh_cm</code>)</td><td class="qd">cm</td></tr>
-<tr><td class="tr">Boy (H)</td><td class="qd">Ağaç boyu</td><td class="qd">m</td></tr>
-<tr><td class="tr">ρ (rho)</td><td class="qd">Odun yoğunluğu (tür bazlı; bulunamazsa grup varsayılanı)</td><td class="qd">g/cm³</td></tr>
-<tr><td class="tr">AGB</td><td class="qd">Toprak üstü biyokütle</td><td class="qd">kg</td></tr>
-<tr><td class="tr">BGB</td><td class="qd">Toprak altı (kök) biyokütlesi = AGB × 0,26</td><td class="qd">kg</td></tr>
-<tr><td class="tr">Karbon</td><td class="qd">Tahmini karbon stoku = (AGB + BGB) × 0,47</td><td class="qd">kg C</td></tr>
-<tr><td class="tr">GA</td><td class="qd">%95 model belirsizlik aralığı (Monte Carlo, korele model hatası)</td><td class="qd">kg C</td></tr>
-<tr><td class="tr">h/DBH</td><td class="qd">Boy/çap oranı — yalnız inceleme göstergesi, hata hükmü değildir</td><td class="qd">birimsiz</td></tr>
-</tbody></table></div>
-<p class="qnote"><b>Ölçüm notu:</b> Sahada doğrudan çap ölçülmemiştir. Mezura ile 1,30 m yükseklikte göğüs çevresi ölçülmüş; DBH çapı her kayıt için <b>çevre / π</b> ile türetilmiştir. Allometrik modele yalnız türetilmiş DBH uygulanır; ham çevre ayrıca saklanır.</p>
-
+${REPORT_DATA_DICTIONARY}
 <h2><span class="no">5</span>Nicel Sonuçlar</h2>
 ${renderResultsPresentation({spRows, bars, ciTxt, snap, govdeAralikTxt, L, parkHa, covHa, clsHa, diffHa, deltaPct})}
 <h2><span class="no">6</span>Harita</h2>
