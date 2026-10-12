@@ -5,14 +5,14 @@ import vm from 'node:vm';
 
 const file=p=>readFileSync(new URL('../'+p,import.meta.url),'utf8');
 const html=file('index.html'),boot=file('partials/boot.html'),css=file('css/gis-workspace.css');
-const ui=file('src/ui/gis-workspace.js'),analysisLayout=file('src/ui/gis-workspace-analysis-layout.js'),menuPosition=file('src/ui/gis-workspace-menu-position.js'),park=file('src/ui/park-panel.js'),panelMarkup=file('src/ui/park-info-panel.js');
+const ui=file('src/ui/gis-workspace.js'),analysisLayout=file('src/ui/gis-workspace-analysis-layout.js'),menuPosition=file('src/ui/gis-workspace-menu-position.js'),mapToolsView=file('src/ui/gis-workspace-map-tools-view.js'),park=file('src/ui/park-panel.js'),panelMarkup=file('src/ui/park-info-panel.js');
 const workspacePresentation=ui+'\n'+analysisLayout;
 const parkSurface=park+'\n'+panelMarkup;
 const dashboard=file('src/services/dash.js'),sw=file('sw.js');
 const lock=JSON.parse(file('docs/surface-engine-lock.json'));
 
 test('workspace lives strictly outside the 54 frozen science files',()=>{
- for(const p of ['partials/boot.html','src/ui/gis-workspace.js','src/ui/gis-workspace-analysis-layout.js','src/ui/gis-workspace-menu-position.js','css/gis-workspace.css','sw.js','test/gis-workspace-ui.test.mjs']){
+ for(const p of ['partials/boot.html','src/ui/gis-workspace.js','src/ui/gis-workspace-analysis-layout.js','src/ui/gis-workspace-menu-position.js','src/ui/gis-workspace-map-tools-view.js','css/gis-workspace.css','sw.js','test/gis-workspace-ui.test.mjs']){
   assert.ok(!lock.locked_files[p],p);
  }
  assert.equal(Object.keys(lock.locked_files).length,54);
@@ -23,14 +23,18 @@ test('workspace loads once from an external classic script and is precached',()=
  assert.match(boot,/src\/ui\/gis-workspace\.js\?v=[a-f0-9]{8}/);
  assert.match(boot,/src\/ui\/gis-workspace-analysis-layout\.js\?v=[a-f0-9]{8}/);
  assert.match(boot,/src\/ui\/gis-workspace-menu-position\.js\?v=[a-f0-9]{8}/);
+ assert.match(boot,/src\/ui\/gis-workspace-map-tools-view\.js\?v=[a-f0-9]{8}/);
  assert.ok(boot.indexOf('src/ui/gis-workspace-analysis-layout.js')<boot.indexOf('src/ui/gis-workspace.js'));
  assert.ok(boot.indexOf('src/ui/gis-workspace-menu-position.js')<boot.indexOf('src/ui/gis-workspace.js'));
+ assert.ok(boot.indexOf('src/ui/gis-workspace-map-tools-view.js')<boot.indexOf('src/ui/gis-workspace.js'));
  assert.match(html,/src\/ui\/gis-workspace\.js\?v=[a-f0-9]{8}/);
  assert.match(html,/src\/ui\/gis-workspace-analysis-layout\.js\?v=[a-f0-9]{8}/);
  assert.match(html,/src\/ui\/gis-workspace-menu-position\.js\?v=[a-f0-9]{8}/);
+ assert.match(html,/src\/ui\/gis-workspace-map-tools-view\.js\?v=[a-f0-9]{8}/);
  assert.match(sw,/\/src\/ui\/gis-workspace\.js/);
  assert.match(sw,/\/src\/ui\/gis-workspace-analysis-layout\.js/);
  assert.match(sw,/\/src\/ui\/gis-workspace-menu-position\.js/);
+ assert.match(sw,/\/src\/ui\/gis-workspace-map-tools-view\.js/);
  assert.doesNotMatch(boot,/id="dg-gis-workspace"/);
  assert.doesNotThrow(()=>new vm.Script(ui));
  assert.match(html,/css\/gis-workspace\.css\?v=[a-f0-9]{8}/);
@@ -78,6 +82,7 @@ test('measurements are useful map-only approximations, not scientific area chang
  };
  vm.runInNewContext(analysisLayout,context);
  vm.runInNewContext(menuPosition,context);
+  vm.runInNewContext(mapToolsView,context);
  vm.runInNewContext(ui,context,{timeout:1000});
  const m=context.window.DG_GIS_WORKSPACE_UI;
  assert.ok(m,'Public UI helpers must be exposed for non-invasive tests');

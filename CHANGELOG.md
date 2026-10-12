@@ -9,6 +9,9 @@ Yeni sürüm yayımlama adımları: [`docs/surum-yayini.md`](docs/surum-yayini.m
 
 ## [Yayımlanmadı]
 
+### İyileştirildi — GIS harita araçları sunumu
+Mesafe/alan, park odağı ve koordinat araçlarının mevcut menü görünümü ayrı modüle taşındı; komut işleyicileri ve harita davranışı korundu.
+
 ### İyileştirildi — GIS menü paneli konumlandırması
 Açık menü panellerinin mobil ve masaüstü görünüm alanına göre yerleşimi ayrı UI modülüne taşındı; mevcut panel davranışı korundu.
 
