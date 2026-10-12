@@ -31,6 +31,7 @@ const PQ = read('scripts/publish-queue.mjs');
 const MR = read('scripts/make-report.mjs');
 const SNAPSHOT_APP = read('scripts/lib/report-snapshot-application.mjs');
 const REPORT_DOCUMENT = read('scripts/lib/report-document-composition.mjs');
+const REPORT_BACKMATTER = read('scripts/lib/report-document-backmatter.mjs');
 const UI = read('src/services/report-publish.js');
 const SHELL = read('partials/shell.html');
 const IDX = read('index.html');
@@ -193,7 +194,7 @@ describe('make-report.mjs: tek üretici publishPark()', () => {
 
   test('⭐ üretilen sayfada paylaş düğmesi var (Web Share + pano yedeği)', () => {
     assert.match(read('scripts/lib/report-data-access-presentation.mjs'), /id="dgShareBtn" onclick="dgShareReport\(\)">📤 Paylaş</);
-    assert.match(REPORT_DOCUMENT, /\$\{renderReportDataAccess\(\{L, M\}\)\}/, 'indirme ve paylaşma modülü rapor şablonuna eklenir');
+    assert.match(REPORT_BACKMATTER, /renderReportDataAccess\(\{L, M\}\)/, 'indirme ve paylaşma modülü rapor şablonuna eklenir');
     assert.ok(REPORT_DOCUMENT.includes('renderReportDocumentClientScript({hash, snapshot: snap, shareScript: REPORT_SHARE_SCRIPT})'), 'client helper rapor şablonuna eklenir');
     assert.ok(read('scripts/lib/report-document-client-script.mjs').includes('${shareScript}'), 'paylaşım betiği client helper tarafından eklenir');
     assert.match(read('scripts/lib/report-share.mjs'), /navigator\.share/, 'yerel paylaşım');
