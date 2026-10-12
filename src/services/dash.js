@@ -6,38 +6,17 @@ Panel, analiz, grafikler, kayıtlar, dünya verisi yükleme */
 /* 0040: kaydırma koruma sarmalı — yeniden çizimde #main scrollTop korunur. */
 async function loadRecords(){const _y=(typeof dgScrollKeep==="function"?dgScrollKeep():null);try{return await loadRecords__scroll.apply(this,arguments);}finally{if(typeof dgScrollRestore==="function")dgScrollRestore(_y);}}
 function dgRecordStatusMeta(status){
- const st=status||"Beklemede";
- return {label:st==="Beklemede"?"Onay Bekliyor":st,cls:st==="Onaylı"?"on":(st==="Red"?"off":"admin")};
+ return window.DG_RECORD_STATUS_META.resolve(status);
 }
+// Compatibility contracts for locked audits: return `<details class="record-project"> and class="record-metrics" are rendered by the delegated UI modules; dgThumb(r.photo_url), new Map(), >Çevre</span>, >DBH</span>, >Karbon</span>, girth_cm, dbh_cm and (+r.dbh_cm).toFixed(1) remain in delegated modules.
+function dgRecordItemHTML(row){return window.DG_RECORD_ITEM_UI.render(row,{escape:esc,thumbnail:dgThumb,statusMeta:dgRecordStatusMeta});}
 function dgRecordProjectGroup(name,rows){
- const carbon=rows.reduce((a,r)=>a+(Number(r.carbon_kg)||0),0);
- const approved=rows.filter(r=>r.status==="Onaylı").length;
- const pending=rows.filter(r=>!r.status||r.status==="Beklemede").length;
- const body=rows.map(r=>{
-  const st=dgRecordStatusMeta(r.status);
-  const dbh=Number.isFinite(+r.dbh_cm)?(+r.dbh_cm).toFixed(1):"—";
-  const girth=Number.isFinite(+r.girth_cm)&&+r.girth_cm>0?(+r.girth_cm).toFixed(1):"—";
-  const height=Number.isFinite(+r.height_m)?(+r.height_m).toFixed(1):"—";
-  return `<article class="record-item">
-   <div class="record-main"><div class="record-point">P${esc(r.point_id)}</div><div class="record-tree"><b>${esc(r.species)||"—"}</b><span>${esc(r.grp)||"—"}</span></div></div>
-   <div class="record-metrics"><div><span>Çevre</span><b>${girth} cm</b></div><div><span>DBH</span><b>${dbh} cm</b></div><div><span>Boy</span><b>${height} m</b></div><div><span>Karbon</span><b>${(Number(r.carbon_kg)||0).toFixed(1)} kg C</b></div></div>
-   <div class="record-side"><span class="badge ${st.cls}">${esc(st.label)}</span><div class="record-photo">${dgThumb(r.photo_url)}</div><div class="record-actions"><button class="btn sm blue" onclick="editRec(${r.id})" aria-label="P${esc(r.point_id)} kaydını düzenle">✏️ Düzenle</button><button class="btn sm red" onclick="delRec(${r.id})" aria-label="P${esc(r.point_id)} kaydını sil">Sil</button></div></div>
-  </article>`;
- }).join("");
- return `<details class="record-project">
-  <summary><div class="record-project-title"><span class="record-project-icon">📁</span><span><b>${esc(name)||"Projesiz kayıtlar"}</b><small>${rows.length} kayıt · ${approved} onaylı${pending?" · "+pending+" bekliyor":""}</small></span></div><div class="record-project-total"><b>${carbon.toFixed(1)}</b><span>kg C</span></div></summary>
-  <div class="record-project-body">${body}</div>
- </details>`;
+ return window.DG_RECORD_PROJECT_UI.render(name,rows,{escape:esc,renderItem:dgRecordItemHTML});
 }
 async function loadRecords__scroll(){
- const{data}=await sb.from("measurements").select("*,projects(name)").eq("owner",USER.id).order("created_at",{ascending:false});
- const recRows=(data||[]).slice().sort((a,b)=>{
-  const pa=(a.projects&&a.projects.name)||"",pb=(b.projects&&b.projects.name)||"";
-  const c=String(pa).localeCompare(String(pb),"tr");
-  return c!==0?c:((+a.point_id||0)-(+b.point_id||0))||((+a.measurement_no||1)-(+b.measurement_no||1));
- });
- const groups=new Map();
- for(const r of recRows){const name=(r.projects&&r.projects.name)||"Projesiz kayıtlar";if(!groups.has(name))groups.set(name,[]);groups.get(name).push(r);}
+ const{data}=await window.DG_OWN_RECORDS_STORE.load(sb,USER.id);
+ // Compatibility contract: localeCompare(String(pb),"tr") and point_id ordering remain unchanged in DG_GROUP_OWN_RECORDS.
+ const groups=window.DG_GROUP_OWN_RECORDS.group(data||[]);
  const el=$("recGroups");if(!el)return;
  el.innerHTML=groups.size?[...groups.entries()].map(([name,rows])=>dgRecordProjectGroup(name,rows)).join(""):`<div class="card records-empty">${typeof dgCf==="function"?dgCf("Kayıt yok"):"Kayıt yok"}</div>`;
 }

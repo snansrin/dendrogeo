@@ -742,3 +742,13 @@ Her modülün tek bir dış API'si, sahibi olduğu açık durumu ve kendi testle
 - `adapters/parks/park-report-store.js`, park raporu sorgusunu çalıştırır ve birincil hata durumunda eski şema yedeğine geçer.
 
 - `application/world/load-park-report.js`, seçim, sorgu, kesilme uyarısı ve rapor çizimi sırasını yönetir.
+
+- `domain/users/record-status-meta.js`, kullanıcı ölçüm durumunun etiketini ve sınıfını belirler.
+
+- `domain/users/group-own-records.js`, kullanıcının ölçümlerini Türkçe proje adına ve nokta/ölçüm sırasına göre gruplar.
+
+- `ui/record-item.js`, kullanıcı kayıt satırının metrik, durum ve eylem HTML'ini üretir.
+
+- `ui/record-project.js`, proje bazlı kayıt listesinin toplam ve durum özetini çizer.
+
+- `adapters/users/own-records-store.js`, oturum sahibinin ölçümlerini proje adıyla Supabase'den okur.
