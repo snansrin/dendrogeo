@@ -5,6 +5,7 @@ import {readFileSync} from 'node:fs';
 
 const window={};
 vm.runInNewContext(readFileSync(new URL('../src/domain/data-requests/find-pending-duplicate.js',import.meta.url),'utf8'),{window});
+vm.runInNewContext(readFileSync(new URL('../src/adapters/data-requests/submit-store.js',import.meta.url),'utf8'),{window});
 const find=window.DG_DATA_REQUEST_DUPLICATE.find;
 
 test('duplicate request filters preserve whitespace/case normalization and first-match identity',()=>{
