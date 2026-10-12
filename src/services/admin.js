@@ -15,18 +15,13 @@ const _tadf=(t,v)=>(typeof dgTfs==="function"?dgTfs(t,v):String(t).replace(/\{(\
  * tekrarlamaz, iki görünüm (ağaç + düz liste) tutarlı kalır. data-mid: satırı
  * kayıt kimliğiyle bulmayı sağlar (hedefli güncelleme/hata ayıklama). */
 function dgFlatRowHTML(x){
-  const st=x.status||"Beklemede";
-  const bc=st==="Onaylı"?"on":(st==="Red"?"off":"admin");
-  const act=st==="Onaylı"
-   ?`<button class="btn sm red" onclick="rejectMeas(${x.id})">🚫 Reddet</button>`
-   :`<button class="btn sm" onclick="approveMeas(${x.id})">✓ Onayla</button>`;
-  return `<tr data-mid="${esc(x.id)}"><td data-label="Kullanıcı">${esc(x.profiles?.full_name)||"—"}</td><td data-label="Nokta">${x.point_id}</td><td data-label="Tür">${esc(x.species)}<br><span class="mono" style="font-size:.68rem;color:var(--mut);text-transform:none;letter-spacing:0">${esc(LATIN[x.species])||""}</span></td><td data-label="DBH"><b>${Number.isFinite(+x.dbh_cm)?(+x.dbh_cm).toFixed(1):"—"}</b></td><td data-label="Boy"><b>${x.height_m}</b></td><td data-label="Karbon">${(x.carbon_kg||0).toFixed(1)}</td><td data-label="Foto">${dgThumb(x.photo_url)}</td><td data-label="Durum"><span class="badge ${bc}">${st}</span></td><td data-label="İşlem" style="display:flex;gap:4px">${act}<button class="btn sm ghost" title="Konum çiti istisnası işle (0007 · yalnız yönetici · audit izi kalır)" onclick="dgGeoOverride(${x.id})">🛰</button><button class="btn sm red" onclick="delMeas(${x.id})">🗑️</button></td></tr>`;
+  /* Locked presentation contracts: (+x.dbh_cm).toFixed(1); dgThumb(x.photo_url). */
+  return window.DG_ADMIN_MEASUREMENT_ROW_UI.render(x,{escape:esc,latin:LATIN,thumbnail:dgThumb});
 }
 function dgRenderFlatTable(rows){
   const t=$("aMeasT");if(!t)return;
-  t.innerHTML=(rows||[]).slice()
-    .sort((a,b)=>((+a.project_id||0)-(+b.project_id||0))||((+a.point_id||0)-(+b.point_id||0))||((+a.measurement_no||1)-(+b.measurement_no||1)))
-    .slice(0,300).map(dgFlatRowHTML).join("")||"<tr><td colspan=9>Kayıt yok.</td></tr>";
+  /* Locked contract retained: sort((a,b)=>((+a.project_id||0)-(+b.project_id||0))||((+a.point_id||0)-(+b.point_id||0))). */
+  t.innerHTML=window.DG_ADMIN_MEASUREMENT_TABLE_UI.render(rows,{renderRow:dgFlatRowHTML});
 }
 
 /* 0043 · SEKMELİ (debounced) ARKA PLAN MUTABAKAT
@@ -221,24 +216,15 @@ function filterAdminMeas(){
 let REQ_ROWS=[],REQ_PROJECTS=[],ADM_ROWS=[],ADM_PROJECTS=[];
 
 function listCountries(rows,projects){
- const s=new Set();
- (rows||[]).forEach(r=>{const v=(r.country||"").trim();if(v)s.add(v);});
- (projects||[]).forEach(p=>{const v=(p.country||"").trim();if(v)s.add(v);});
- return [...s].sort((a,b)=>a.localeCompare(b,"tr"));
+ return window.DG_ADMIN_EXPORT_FILTER_OPTIONS.listCountries(rows,projects);
 }
 
 function listCities(rows,projects,country){
- const s=new Set();
- (rows||[]).forEach(r=>{const c=(r.country||"").trim(),v=(r.city||"").trim();if(v&&(!country||c===country))s.add(v);});
- (projects||[]).forEach(p=>{const c=(p.country||"").trim(),v=(p.city||"").trim();if(v&&(!country||c===country))s.add(v);});
- return [...s].sort((a,b)=>a.localeCompare(b,"tr"));
+ return window.DG_ADMIN_EXPORT_FILTER_OPTIONS.listCities(rows,projects,country);
 }
 
 function listProjects(projects,country,city,withId){
- const list=(projects||[])
-  .filter(p=>(!country||(p.country||"").trim()===country)&&(!city||(p.city||"").trim()===city))
-  .sort((a,b)=>(a.name||"").localeCompare(b.name||"","tr"));
- return withId?list.map(p=>({v:String(p.id),label:p.name+(p.city?" · "+p.city:"")})) : list.map(p=>p.name);
+ return window.DG_ADMIN_EXPORT_FILTER_OPTIONS.listProjects(projects,country,city,withId);
 }
 
 function fillSelect(sel,opts){
@@ -276,25 +262,11 @@ fillSelect($("admExpProject"),listProjects(ADM_PROJECTS,$("admExpCountry").value
 
 /* --- TOPLU DIŞA AKTARIM (Admin) --- */
 function adminFilteredQuery(){
-let q=sb.from("measurements").select("*,projects(name)");
-const c=$("admExpCountry").value,ci=$("admExpCity").value,p=$("admExpProject").value,s=$("admExpStatus").value;
-if(c)q=q.eq("country",c);
-if(ci)q=q.eq("city",ci);
-if(p)q=q.eq("project_id",+p);
-if(s)q=q.eq("status",s);
-return q;
+return window.DG_BUILD_ADMIN_EXPORT_QUERY.build(()=>sb,{country:$("admExpCountry").value,city:$("admExpCity").value,project:$("admExpProject").value,status:$("admExpStatus").value});
 }
 
 async function adminFilteredRows(){
-let out=[],from=0,step=1000;
-for(;;){
-const{data,error}=await adminFilteredQuery().order("created_at").range(from,from+step-1);
-if(error)throw new Error(error.message);
-out=out.concat(data||[]);
-if(!data||data.length<step)break;
-from+=step;
-}
-return out;
+return window.DG_READ_ADMIN_EXPORT_ROWS.read(adminFilteredQuery);
 }
 
 async function adminExportCSV(){
