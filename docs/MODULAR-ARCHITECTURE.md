@@ -732,3 +732,13 @@ Her modülün tek bir dış API'si, sahibi olduğu açık durumu ve kendi testle
 - `domain/parks/build-park-report-csv.js`, aynı park künyesi ve tür satırlarıyla UTF-8 BOM'lu CSV üretir.
 
 - `ui/park-report-preview.js`, rapor başlığını, gövdesini, indirme eylemini ve önizleme modalını bağlar.
+
+- `domain/parks/resolve-park-report-target.js`, seçili park kimliğini veya eski proje adı seçeneğini rapor hedefine dönüştürür.
+
+- `domain/parks/build-park-report-request.js`, park kimliğiyle bütün projeleri kapsayan `!inner` sorgu isteğini kurar.
+
+- `domain/parks/build-legacy-park-report-request.js`, eski şema için proje adına dayalı sınırlı yedek sorgu isteğini kurar.
+
+- `adapters/parks/park-report-store.js`, park raporu sorgusunu çalıştırır ve birincil hata durumunda eski şema yedeğine geçer.
+
+- `application/world/load-park-report.js`, seçim, sorgu, kesilme uyarısı ve rapor çizimi sırasını yönetir.
