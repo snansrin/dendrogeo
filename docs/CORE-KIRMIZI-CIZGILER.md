@@ -32,3 +32,7 @@
 Motor veya canlı haritayı etkileyen her iş ayrı bir dalda yapılır. Önce mevcut çekirdek commit'i ve geri dönüş yolu kayda alınır; değişiklik yalnız istenen kapsamda tutulur. İlgili regresyonlar, tam `npm run check`, CI, 360/390/430 px telefon görünümü ve canlı dosya sürümleri doğrulanmadan ana dala alınmaz. Yüzey motoru değişiklikleri en az Göksu Parkı, Başkent Millet Bahçesi ve Kuğulu Park verileriyle karşılaştırılır; sınıf alanları, QA farkı, fırça hücre kararları, geri alma, dışa aktarma ve kabul edilmiş sonuç kontrol edilir. Analiz verisi veya kaynak hatası varsa yöntem açıkça raporlanır; sonuçlar elle hedef değere zorlanmaz.
 
 Saha çalışmasını durduracak bir arıza halinde önce düzeltme dalı değerlendirilir. Geri dönüş gerekirse etkin kurtarma commit'i ayrı worktree'de açılır; ana çalışma alanına `reset --hard`, force push, veritabanı geri yüklemesi veya yayın silme uygulanmaz.
+
+### 12 Ekim 2026 — izinli test sınırı taşıması
+
+Kullanıcının kilitli parçaları çalışır biçimde modüllere ayırma talimatıyla yalnız `test/critical-fixes.test.mjs` ve `test/park-invites.test.mjs` kaynak-konumu kontrolleri talep adapter/UI sınırlarına taşındı. Aynı sorgu/etiket şartları korunup servis delegasyonu eklendi. Önceki ve yeni hashler manifestte `authorized_modularizations` altında kayıtlıdır; manifest kendi hashine sabitlenmeye devam eder. Diğer temel dosya hashleri değiştirilmedi.

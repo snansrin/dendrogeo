@@ -84,51 +84,23 @@ function reqCityChanged(){
 /* 0040: kaydırma koruma sarmalı — yeniden çizimde #main scrollTop korunur. */
 async function loadRequests(){const _y=(typeof dgScrollKeep==="function"?dgScrollKeep():null);try{return await loadRequests__scroll.apply(this,arguments);}finally{if(typeof dgScrollRestore==="function")dgScrollRestore(_y);}}
 async function loadRequests__scroll(){
- const{data}=await sb.from("data_requests").select("*,profiles(full_name)").order("created_at",{ascending:false});
+ const{data}=await window.DG_DATA_REQUEST_QUEUE_STORE.load(sb);
  const reqs=data||[];
- const pending=reqs.filter(r=>r.status!=="Tamamlandı"&&r.status!=="Reddedildi");
- const closed=reqs.filter(r=>r.status==="Tamamlandı"||r.status==="Reddedildi");
+ const {pending,closed}=window.DG_DATA_REQUEST_QUEUE.partition(reqs);
  
  $("aReqPending").textContent=pending.length;
  $("aReqPendingMini").textContent=pending.length;
  $("aReqClosed").textContent=closed.length;
  
  // AKTİF TALEPLER TABLOSU
- $("aReqT").innerHTML=pending.length?pending.map(r=>{
-  const filt=[esc(r.country),esc(r.city),esc(r.project_name)].filter(Boolean).join(" / ")||"Tüm Veri";
-  const hasNote=r.note&&r.note.trim().length>0;
-  return `<tr>
-   <td data-label="Kullanıcı">${esc(r.profiles?.full_name)||"—"}</td>
-   <td data-label="E‑posta">${esc(r.email)||"—"}</td>
-   <td data-label="Filtre"><b>${esc(filt)}</b></td>
-   <td data-label="Tarih">${new Date(r.created_at).toLocaleDateString("tr-TR")}</td>
-   <td data-label="Durum"><span class="badge admin">${r.status}</span></td>
-   <td data-label="İşlem" style="display:flex;gap:4px;flex-wrap:wrap">
-    <button class="btn sm blue" onclick="fulfillRequest(${r.id})">📥✉️ İndir ve Yanıtla</button>
-    <button class="btn sm red" onclick="rejectRequest(${r.id})">🚫 Reddet</button>
-   </td>
-  </tr>${hasNote?`<tr><td colspan="6" style="background:var(--tint);font-size:.78rem;color:var(--mut);white-space:normal;padding:8px 12px;line-height:1.5"><b style="color:var(--green-dk)">📝 Not:</b> ${esc(r.note)}</td></tr>`:""}`;
- }).join(""):"<tr><td colspan=6 style='text-align:center;color:var(--mut)'>Bekleyen talep yok</td></tr>";
+ window.DG_DATA_REQUEST_PENDING_TABLE_UI.render($("aReqT"),pending,{escape:esc});
  
  // TAMAMLANAN/REDDEDİLENLER (COLLAPSIBLE)
  const closedWrap=$("closedRequestsWrap");
  if(closed.length>0){
   closedWrap.style.display="block";
   $("aReqClosed").textContent=closed.length;
-  $("closedReqT").innerHTML=closed.map(r=>{
-   const filt=[esc(r.country),esc(r.city),esc(r.project_name)].filter(Boolean).join(" / ")||"Tüm Veri";
-   const bc=r.status==="Tamamlandı"?"on":"off";
-   const hasNote=r.note&&r.note.trim().length>0;
-   const closedDate=r.fulfilled_at?new Date(r.fulfilled_at).toLocaleDateString("tr-TR"):"";
-   return `<tr>
-    <td data-label="Kullanıcı">${esc(r.profiles?.full_name)||"—"}</td>
-    <td data-label="E‑posta">${esc(r.email)||"—"}</td>
-    <td data-label="Filtre">${esc(filt)}</td>
-    <td data-label="Talep">${new Date(r.created_at).toLocaleDateString("tr-TR")}</td>
-    <td data-label="Kapanış">${closedDate}</td>
-    <td data-label="Durum"><span class="badge ${bc}">${r.status}</span></td>
-   </tr>${hasNote?`<tr><td colspan="6" style="background:var(--tint);font-size:.78rem;color:var(--mut);white-space:normal;padding:8px 12px;line-height:1.5"><b style="color:var(--green-dk)">📝 Not:</b> ${esc(r.note)}</td></tr>`:""}`;
-  }).join("");
+  window.DG_DATA_REQUEST_CLOSED_TABLE_UI.render($("closedReqT"),closed,{escape:esc});
  }else{
   closedWrap.style.display="none";
  }
@@ -136,7 +108,7 @@ async function loadRequests__scroll(){
 
 async function rejectRequest(id){
  if(!confirm(dgCf("Bu talebi reddetmek istediğinizden emin misiniz? Kullanıcıya yanıt gönderilmez, talep arşive kaldırılır.")))return;
- const{error}=await sb.from("data_requests").update({status:"Reddedildi",fulfilled_at:new Date().toISOString()}).eq("id",id);
+ const{error}=await window.DG_DATA_REQUEST_STATUS_STORE.update(sb,id,"Reddedildi",new Date().toISOString());
  if(error){toast("Hata: "+error.message,"err");return;}
  toast("✓ Talep reddedildi","warn","🚫");
  loadRequests();
@@ -209,17 +181,9 @@ async function fulfillRequest(id){
     const bodyTxt = bodyLines.filter(l => l !== null).join("\n");
     const subject = encodeURIComponent("✅ DendroGeo Veri Talebiniz Hazırlandı — " + n + " kayıt, " + (totalC/1000).toFixed(2) + " t C");
     
-    window.open(
-        "mailto:" + (req.email || "") +
-        "?subject=" + subject +
-        "&body=" + encodeURIComponent(bodyTxt),
-        "_blank"
-    );
+    window.DG_DATA_REQUEST_REPLY_WINDOW.open(window,req.email||"",subject,bodyTxt);
     
-    await sb.from("data_requests").update({
-        status: "Tamamlandı",
-        fulfilled_at: new Date().toISOString()
-    }).eq("id", id);
+    await window.DG_DATA_REQUEST_STATUS_STORE.update(sb,id,"Tamamlandı",new Date().toISOString());
     
     toast("✓ Mail hazırlandı — CSV'yi ekleyip gönderin", "ok", "📧");
     loadRequests();

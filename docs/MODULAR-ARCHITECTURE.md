@@ -532,3 +532,13 @@ Her modülün tek bir dış API'si, sahibi olduğu açık durumu ve kendi testle
 - `adapters/data-requests/options-store.js`, talep formu için onaylı ölçüm ülke/şehir listesini exact count ve 5000 sınırıyla, projeleri ad sırasıyla paralel okur; durum atama, kesilme uyarısı ve seçenek zinciri serviste kalır.
 
 - `adapters/data-requests/my-requests-store.js`, oturumdaki kullanıcının taleplerini mevcut user_id filtresi ve azalan created_at sırasıyla okur; oturum kapısı, kaydırma koruması, hata/boş görünüm ve silme eylemi serviste kalır.
+
+- `adapters/data-requests/status-store.js`, talep durumunu ve fulfilled_at değerini mevcut id filtresiyle günceller; onay, zaman üretimi, CSV/e-posta sırası ve hata/yenileme politikası serviste kalır.
+
+- `domain/data-requests/partition-queue.js`, yönetici kuyruğunu mevcut Tamamlandı/Reddedildi kuralıyla açık ve kapalı listelere ayırır; sıra ve kayıt kimliği korunur, sorgu/sayaç/HTML/kaydırma serviste kalır.
+
+- `ui/data-request-pending-table.js`, aktif taleplerin mevcut etiketli tablo satırlarını, not satırını ve boş görünümünü üretir; sorgu, kuyruk ayrımı, sayaçlar ve işlem fonksiyonları serviste kalır.
+
+- `adapters/data-requests/reply-window.js`, hazır yanıtı mevcut mailto/UTF-8 gövde kodlamasıyla _blank hedefinde açar; önceden kodlanan konu, metin, CSV ve tamamlanma sırası serviste kalır.
+
+- `adapters/data-requests/queue-store.js` ve `ui/data-request-closed-table.js`, yönetici sorgusunu ve kapalı tabloyu gerçek sınırlara ayırır. Kullanıcı talimatıyla iki kaynak-konumu regresyonu yeni modülleri ve servis delegasyonunu denetleyecek şekilde taşındı; önceki/yeni test hashleri çekirdek manifestinde kaydedildi, diğer 265 kilit korunur.
