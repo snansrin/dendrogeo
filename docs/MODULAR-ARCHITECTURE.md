@@ -702,3 +702,13 @@ Her modülün tek bir dış API'si, sahibi olduğu açık durumu ve kendi testle
 - `application/admin/build-export-query.js`, seçili ülke/şehir/proje/durum değerlerini mevcut Supabase sorgu zincirine uygular.
 
 - `application/admin/read-export-rows.js`, dışa aktarım sorgusunu sıralı sayfalarla okur ve hata mesajını korur.
+
+- `application/admin/read-photo-storage-usage.js`, fotoğraf deposundaki klasörleri sayıp dosya boyutu ve adet toplamını üretir.
+
+- `ui/admin-storage-usage.js`, depolama kullanımını mevcut kota renkleri ve çevrilmiş sayaç metniyle gösterir.
+
+- `application/admin/clean-orphan-photos.js`, ölçüm kayıtlarına bağlı olmayan herkese açık fotoğraf URL'lerini bulup depodan kaldırır.
+
+- `application/admin/re-geocode-measurements.js`, koordinatı geçerli satırları sırayla yeniden kodlar ve istek aralığını korur.
+
+- `domain/admin/measurement-geojson.js`, ölçüm satırlarını aynı özellik alanları ve DBH hassasiyetiyle GeoJSON'a dönüştürür.

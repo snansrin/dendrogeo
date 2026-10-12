@@ -141,35 +141,16 @@ async function rejectMeas(id){
 
 async function loadStorageStats(){
  try{
-  const root=await sb.storage.from("dendro-photos").list("",{limit:100});
-  let bytes=0,count=0;
-  for(const f of (root.data||[])){
-   const sub=await sb.storage.from("dendro-photos").list(f.name,{limit:1000});
-   (sub.data||[]).forEach(file=>{bytes+=(file.metadata&&file.metadata.size)||0;count++;});
-  }
-  const mb=bytes/1048576;
-  $("storeBar").style.width=Math.min(100,(mb/QUOTA_MB)*100)+"%";
-  $("storeBar").style.background=mb/QUOTA_MB>0.8?"var(--red)":(mb/QUOTA_MB>0.6?"var(--amber)":"var(--green)");
-  $("storeInfo").textContent=_tadf("{n} fotoğraf · {mb} MB / {q} MB",{n:count,mb:mb.toFixed(1),q:QUOTA_MB});
+  const usage=await window.DG_READ_PHOTO_STORAGE_USAGE.read(sb.storage);
+  window.DG_ADMIN_STORAGE_USAGE_UI.render($("storeBar"),$("storeInfo"),{...usage,quota:QUOTA_MB,format:_tadf});
  }catch(e){$("storeInfo").textContent=_tad("Depolama bilgisi alınamadı.");}
 }
 
 async function cleanOrphans(){
  if(!PROFILE||(PROFILE.role!=="admin"&&PROFILE.role!=="owner"))return toast("Yetki yok.");
  if(!confirm(dgCf("Hiçbir kayda bağlı olmayan depolama dosyaları silinsin mi?")))return;
- const root=await sb.storage.from("dendro-photos").list("",{limit:100});
  const{data:meas}=await sb.from("measurements").select("photo_url");
- const urls=new Set((meas||[]).map(m=>m.photo_url).filter(Boolean));
- let removed=0;
- for(const f of (root.data||[])){
-  const sub=await sb.storage.from("dendro-photos").list(f.name,{limit:1000});
-  const orphans=[];
-  for(const file of (sub.data||[])){
-   const pub=sb.storage.from("dendro-photos").getPublicUrl(f.name+"/"+file.name).data.publicUrl;
-   if(!urls.has(pub))orphans.push(f.name+"/"+file.name);
-  }
-  if(orphans.length){await sb.storage.from("dendro-photos").remove(orphans);removed+=orphans.length;}
- }
+ const removed=await window.DG_CLEAN_ORPHAN_PHOTOS.clean({storage:sb.storage,photoUrls:meas||[]});
  toast("✓ "+removed+" yetim dosya silindi.");
  loadStorageStats();
 }
@@ -178,16 +159,12 @@ async function reGeocodeAll(){
  if(!PROFILE||(PROFILE.role!=="admin"&&PROFILE.role!=="owner"))return toast("Yetki yok.");
  if(!confirm(dgCf("Tüm kayıtların şehir/ülke bilgisi GPS koordinatından yeniden algılansın mı? (Nominatim limiti ~1 istek/sn)")))return;
  const{data}=await sb.from("measurements").select("id,lat,lon,city,country");
- let done=0;
- for(const r of (data||[])){
-  if(!Number.isFinite(+r.lat)||!Number.isFinite(+r.lon))continue;
-  const geo=await reverseGeocode(r.lat,r.lon);
-  if(geo&&(geo.city!==r.city||geo.country!==r.country)){
-   await sb.from("measurements").update({city:geo.city,country:geo.country}).eq("id",r.id);
-   done++;
-  }
-  await new Promise(res=>setTimeout(res,1100));
- }
+ const done=await window.DG_RE_GEOCODE_MEASUREMENTS.run(data||[],{
+  isValidCoordinate:(lat,lon)=>Number.isFinite(+lat)&&Number.isFinite(+lon),
+  reverse:(lat,lon)=>reverseGeocode(lat,lon),
+  update:(id,fields)=>sb.from("measurements").update(fields).eq("id",id),
+  wait:ms=>new Promise(resolve=>setTimeout(resolve,ms))
+ });
  toast(_tadf("✓ {n} kaydın şehri güncellendi",{n:done}),"ok","🌍");
  loadWorld();loadAdmin();
 }
@@ -285,6 +262,6 @@ dl(fullCSV(rows),"dendrogeo_qgis_detayli.csv");toast(_tadf("✓ {n} kayıt dış
 async function adminExportGeo(){
 const rows=await adminFilteredRows();
 if(!rows.length)return toast("Filtreye uyan kayıt yok","warn");
-const gj={type:"FeatureCollection",features:rows.map(r=>({type:"Feature",geometry:{type:"Point",coordinates:[r.lon,r.lat]},properties:{point:r.point_id,species:r.species,latin:LATIN[r.species]||"",dbh:(Number.isFinite(+r.dbh_cm)?+(+r.dbh_cm).toFixed(1):null),height:r.height_m,carbon:r.carbon_kg,status:r.status,photo:r.photo_url||""}}))};
+const gj=window.DG_ADMIN_MEASUREMENT_GEOJSON.build(rows,LATIN);
 dl(JSON.stringify(gj,null,2),"dendrogeo_toplu.geojson");toast(_tadf("✓ {n} kayıt dışa aktarıldı",{n:rows.length}),"ok","🗺");
 }
