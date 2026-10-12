@@ -582,3 +582,13 @@ Her modülün tek bir dış API'si, sahibi olduğu açık durumu ve kendi testle
 - `application/backup/create-full-backup.js`, yetki, sıralı tam veri yükleme, isteğe bağlı talepler, belge/indirme/kayıt/bildirim akışını portlarla yönetir.
 
 - `domain/backup/reminder-state.js`, mevcut yedi gün eşiğini, eksik/geçersiz tarih ve gün yuvarlama davranışını saf olarak hesaplar.
+
+- `domain/reports/publication-link.js`, yalnız biçimi doğrulanmış DGR kimliğinden kanonik rapor bağlantısı kurar; günlükteki URL değeri kullanılmaz.
+
+- `adapters/reports/publication-log-store.js`, yayın günlüğünü her istekte cache-buster ve `no-store` ile okur; HTTP, JSON ve ağ hatalarında mevcut boş sonuç davranışını korur.
+
+- `adapters/reports/publication-request-store.js`, bekleyen yayın isteklerini mevcut alanlar, en yeni önce sırası ve 50 satır sınırıyla okur; şema/hata sunumunu servis belirler.
+
+- `adapters/reports/park-comparison-store.js`, karşılaştırma görünümünü karbon sırasıyla okur ve yalnız kimlikli, bekleyen olmayan, kayıt içeren parkları döndürür.
+
+- `adapters/reports/retraction-store.js`, geri çekme isteklerini mevcut alanlar ve azalan tarih sırasıyla okur; tablo/taşıma hatalarında boş liste yedeğini korur.
