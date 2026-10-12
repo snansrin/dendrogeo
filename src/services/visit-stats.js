@@ -332,12 +332,7 @@ async function dgVisActivity(){
   (data||[]).forEach(r=>push(r.created_at,"—",T("rapor yayını istedi"),"park #"+r.park_id+" · "+((typeof dgT==="function"?dgT(r.status||""):r.status)||"—")));
  }catch(e){}
  rows.sort((a,b)=>String(b.t||"").localeCompare(String(a.t||"")));
- if(!rows.length){box.innerHTML='<div class="alert info">'+T("Etkinlik yok")+'</div>';return;}
- box.innerHTML='<table><thead><tr><th scope="col">'+T("Zaman")+'</th><th scope="col">'+T("Kim")+'</th><th scope="col">'+T("Ne yaptı")+'</th><th scope="col">'+T("Ayrıntı")+'</th></tr></thead><tbody>'+
-  rows.slice(0,60).map(r=>{
-   let d="—";try{d=r.t?new Date(r.t).toLocaleString(loc):"—";}catch(e){}
-   return '<tr><td data-label="'+T("Zaman")+'" class="mono" style="white-space:nowrap">'+esc(d)+'</td><td data-label="'+T("Kim")+'">'+esc(String(r.who||"—"))+'</td><td data-label="'+T("Ne yaptı")+'">'+esc(String(r.what||"—"))+'</td><td data-label="'+T("Ayrıntı")+'">'+esc(String(r.det||"—"))+'</td></tr>';
-  }).join("")+'</tbody></table>';
+ DG_VISITOR_DATABASE_ACTIVITY_UI.render(box,rows,{locale:loc,translate:T,escape:esc});
 }
 
 /* 0040: elle yenileme + 10 sn otomatik tik (yalnız sekme açıkken) + odaklanma */
