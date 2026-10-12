@@ -712,3 +712,13 @@ Her modülün tek bir dış API'si, sahibi olduğu açık durumu ve kendi testle
 - `application/admin/re-geocode-measurements.js`, koordinatı geçerli satırları sırayla yeniden kodlar ve istek aralığını korur.
 
 - `domain/admin/measurement-geojson.js`, ölçüm satırlarını aynı özellik alanları ve DBH hassasiyetiyle GeoJSON'a dönüştürür.
+
+- `ui/park-comparison-row.js`, park karşılaştırma satırını mevcut mobil sınıflar, karbon ve alan başına değerlerle çizer.
+
+- `ui/park-comparison-pending.js`, henüz park kimliğine bağlanmamış kayıtları rol bilgisine uygun eylem/bilgiyle gösterir.
+
+- `ui/park-report-options.js`, bağlı parkları ve bekleyen projeleri rapor seçim listesine güvenli biçimde aktarır.
+
+- `ui/park-comparison-error.js`, şema bayrağına dokunmadan yetki/ağ hatası için mevcut hata kartını üretir.
+
+- `application/world/fit-measurement-rows.js`, doğrulanmış ölçüm koordinatlarına haritayı oturtur ve boş sonuç bildirimini üretir.

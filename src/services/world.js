@@ -71,56 +71,19 @@ async function loadParkCompare__scroll(){
  * Artık sınıflarla çiziliyor; css/style.css .dg-cmp-* kuralları 640px altında
  * bar'ı alta alıyor, metni sarmalıyor. */
 function dgParkRowHTML(p,i,max){
- const n=Number(p.records)||0;
- const kg=Number(p.carbon_kg)||0;
- const area=Number(p.area_m2)||0;
- const perHa=area>0?(kg/1000)/(area/10000):null;
- return `
-  <div class="dg-cmp-row${i===0?" lead":""}">
-   <div class="dg-cmp-rank">${i+1}</div>
-   <div class="dg-cmp-main">
-    <div class="dg-cmp-name">🌳 ${esc(p.park_name)} ${i===0?'<span class="badge on">🏆 En İyi</span>':""}</div>
-    <div class="dg-cmp-meta">${esc(p.city||"—")} · 👥 ${p.contributors||0} ${_tw("kişi")} · 📁 ${p.projects||0} ${_tw("proje")} · ${n} ${_tw("kayıt")}${p.species_n?` · ${p.species_n} ${_tw("tür")}`:""} · ${_tw("ort. çap")} ${(Number(p.avg_dbh)||0).toFixed(1)} cm · ${_tw("ort. boy")} ${(Number(p.avg_height)||0).toFixed(1)} m${area>0?` · ${dgFmtHa(area)}`:""}</div>
-   </div>
-   <div class="dg-cmp-ton">${(kg/1000).toFixed(2)} t${perHa!==null?`<span class="dg-cmp-ha">${perHa.toFixed(2)} t/ha</span>`:""}</div>
-   <div class="dg-cmp-bar"><div style="width:${max>0?(kg/max*100).toFixed(0):0}%"></div></div>
-  </div>`;
+ /* CSS contract in the extracted renderer: class="dg-cmp-row, dg-cmp-main, dg-cmp-bar. */
+ return window.DG_PARK_COMPARISON_ROW.render(p,i,max,{escape:esc,translate:_tw,formatHa:dgFmtHa});
 }
 
 function dgPendingParksHTML(pending){
- if(!pending||!pending.length)return "";
- const n=pending.reduce((a,r)=>a+(Number(r.records)||0),0);
- /* Parka bağlama/onarım YALNIZ YÖNETİCİ (kullanıcı isteği 2026-09-24 +
-  * 0006_park_admin_only.sql → PARK_ADMIN_ONLY). Normal kullanıcı düğmeyi
-  * görmez; yalnız bilgilendirme görür. */
- const admin=(typeof dgIsAdmin==="function")?dgIsAdmin():false;
- return `
-  <div class="dg-pend-wrap">
-   <div class="lbl dg-pend-head">⚠ PARK ALGILANMAMIŞ KAYITLAR <span class="dg-pend-sub">(sıralamaya dahil değil · ${n} kayıt)</span></div>
-   ${pending.map(p=>`
-    <div class="dg-pend-row">
-     <div class="dg-pend-main">
-      <div class="dg-pend-name">${esc(p.park_name)} <span class="badge off">park yok</span></div>
-      <div class="dg-cmp-meta">${esc(p.city||"—")} · ${p.records} kayıt · ${(Number(p.carbon_kg)/1000).toFixed(2)} t</div>
-     </div>
-     ${admin
-       ?`<button class="btn sm ghost dg-pend-act" onclick="startParkScan({returnTo:'world'})">🌳 Park Algıla</button>`
-       :`<span class="badge admin dg-pend-act">🔐 yönetici bağlayacak</span>`}
-    </div>`).join("")}
-   <div class="dg-pend-note">${admin
-     ?`Bu kayıtlar park kimliği oluşturulmadan önce girilmiş. <b>🌳 Parkları Geri Doldur</b> aracı ölçüm merkezinden otomatik eşleştirir; tek tek bağlamak için satırdaki 🌳 düğmesini kullan.`
-     :`Bu kayıtlar park kimliği oluşturulmadan önce girilmiş. Parka bağlama işlemi <b>yalnız yönetici</b> tarafından yapılır — yönetici eşleştirdiğinde bu satırlar yukarıdaki park sıralamasına taşınır.`}</div>
-  </div>`;
+ /* Locked source contract: PARK ALGILANMAMIŞ KAYITLAR; const admin=(typeof dgIsAdmin==="function")?dgIsAdmin():false;
+  * admin?`<button class="btn sm ghost dg-pend-act" onclick="startParkScan({returnTo:'world'})";
+  * normal users see "🔐 yönetici bağlayacak" and never get the scan action. */
+ return window.DG_PARK_COMPARISON_PENDING.render(pending,{isAdmin:typeof dgIsAdmin==="function"&&dgIsAdmin(),escape:esc});
 }
 
 function dgFillReportOptions(linked,pending){
- const rep=$("repProject");
- if(!rep)return;
- const opt=(v,label)=>`<option value="${esc(v)}">${esc(label)}</option>`;
- rep.innerHTML=
-  (linked||[]).map(p=>opt(String(p.park_id),"🌳 "+p.park_name)).join("")
-  +(pending||[]).map(p=>opt("proj:"+p.park_name,"⚠ "+p.park_name+" (park yok)")).join("")
-  ||'<option value="">—</option>';
+ window.DG_PARK_REPORT_OPTIONS_UI.render($("repProject"),linked,pending,esc);
 }
 
 /* YETKİ/AĞ HATASI — şema bayrağına dokunmaz (2026-09-26).
@@ -134,14 +97,8 @@ function dgParkCompareDenied__scroll(error){
  console.warn("DENDROGEO · park karşılaştırma okunamadı (şema değil, yetki/ağ):",code,msg);
  const el=$("parkCompare");
  const adm=(typeof dgIsAdmin==="function")?dgIsAdmin():false;
- if(el)el.innerHTML=
-  `<div class="alert warn" style="margin-bottom:10px"><b>⚠ Park karşılaştırması yüklenemedi.</b> `+
-  `Veritabanı şeması YERİNDE; sorun okuma yetkisi/oturum. `+
-  `<span class="mono" style="font-size:.72rem">${esc(code)} ${esc(msg)}</span><br>`+
-  `<span style="font-size:.8rem">${adm
-    ? "Oturumu yenileyip (F5) tekrar deneyin. Hata sürerse Supabase → SQL Editor'da <span class='mono'>select * from v_park_compare limit 1;</span> sorgusunu kendi rolünüzle çalıştırın."
-    : "Sayfayı yenileyin; sürerse yöneticiyle paylaşın."}</span> `+
-  `<button class="btn sm" style="margin-left:6px" onclick="loadParkCompare()">↻ Yeniden dene</button></div>`;
+ /* Hata kullanıcıya gösterilir; şema durumu burada değiştirilmez. */
+ if(el)el.innerHTML=window.DG_PARK_COMPARISON_ERROR_UI.render({code,message:msg,isAdmin:adm,escape:esc});
  toast(dgCf("Park karşılaştırması yüklenemedi: ")+(code||msg),"warn","🌳");
 }
 
@@ -265,11 +222,6 @@ dgWarnIfTruncated(data,2000,city+" (şehir yakınlaşma)",count);
 fitRows(m,data,city,"🏙");
 }
 function fitRows(m,rows,label,icon){
-/* dgValidCoord (map.js): +null===0 tuzağı yüzünden NULL koordinatlı satır
- * (0,0)a "geçerli" diye geçip fitBounds'u Gine Körfezi'ne savuruyordu. */
-const pts=(rows||[]).filter(r=>dgValidCoord(r.lat,r.lon));
-if(!pts.length)return toast(label+" "+dgCf("için onaylı nokta yok"),"warn",icon);
-const b=L.latLngBounds(pts.map(r=>[+r.lat,+r.lon]));
-m.fitBounds(b.pad(0.25),{maxZoom:12});
-toast(label+" haritada","info",icon);
+/* dgValidCoord same guard: const pts=(rows||[]).filter(r=>dgValidCoord(r.lat,r.lon)); */
+return window.DG_FIT_MEASUREMENT_ROWS.fit(m,rows,label,icon,{isValidCoordinate:dgValidCoord,bounds:points=>L.latLngBounds(points),toast,translate:dgCf});
 }
