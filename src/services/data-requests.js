@@ -136,7 +136,7 @@ async function loadRequests__scroll(){
 
 async function rejectRequest(id){
  if(!confirm(dgCf("Bu talebi reddetmek istediğinizden emin misiniz? Kullanıcıya yanıt gönderilmez, talep arşive kaldırılır.")))return;
- const{error}=await sb.from("data_requests").update({status:"Reddedildi",fulfilled_at:new Date().toISOString()}).eq("id",id);
+ const{error}=await window.DG_DATA_REQUEST_STATUS_STORE.update(sb,id,"Reddedildi",new Date().toISOString());
  if(error){toast("Hata: "+error.message,"err");return;}
  toast("✓ Talep reddedildi","warn","🚫");
  loadRequests();
@@ -216,10 +216,7 @@ async function fulfillRequest(id){
         "_blank"
     );
     
-    await sb.from("data_requests").update({
-        status: "Tamamlandı",
-        fulfilled_at: new Date().toISOString()
-    }).eq("id", id);
+    await window.DG_DATA_REQUEST_STATUS_STORE.update(sb,id,"Tamamlandı",new Date().toISOString());
     
     toast("✓ Mail hazırlandı — CSV'yi ekleyip gönderin", "ok", "📧");
     loadRequests();
