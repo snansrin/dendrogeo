@@ -518,3 +518,5 @@ Her modülün tek bir dış API'si, sahibi olduğu açık durumu ve kendi testle
 - `adapters/visitors/session-id-store.js`, sekmeye ait `dg_sid` değerini yeniden kullanır veya mevcut rastgele üretim kuralıyla saklar; storage erişim hatasındaki `x` yedeği servis katmanında korunur.
 
 - `ui/visitor-activity-disclosure.js`, Son Etkinlik sarmalının görünürlüğünü, çevrilmiş düğme etiketini ve `aria-expanded` durumunu birlikte günceller; tercih okuma/yazma ve eksik sarmal kontrolü servis katmanında kalır.
+
+- `ui/visitor-connection-status.js`, bağlantı metnini, görünen/toplam kullanıcı sayısını, mevcut Türkçe saat biçimini ve durum rengini günceller; duraklatma metni aynı API içindedir, presence/filtre/görünürlük ve pause durumu serviste kalır.

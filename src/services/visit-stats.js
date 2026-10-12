@@ -191,7 +191,7 @@ function dgVisQuick(view,located){
  if(loc)loc.checked=!!located;
  renderVisitorsLive();
 }
-function dgVisPause(on){DG_VIS_PAUSED=!!on;if(!on)renderVisitorsLive();else if($("visStatus"))$("visStatus").textContent="Görünüm duraklatıldı";}
+function dgVisPause(on){DG_VIS_PAUSED=!!on;if(!on)renderVisitorsLive();else DG_VISITOR_CONNECTION_STATUS_UI.paused($("visStatus"));}
 function dgVisFit(){DG_VIS_FIT=false;dgVisMapDraw(dgVisFilter(dgVisRows()));}
 function renderVisitorsLive(){
  if(!dgVisAllowed()||DG_VIS_PAUSED||document.hidden||(typeof DG_CUR_VIEW!=="undefined"&&DG_CUR_VIEW!=="visitors"))return;
@@ -199,7 +199,7 @@ function renderVisitorsLive(){
  const all=dgVisRows(),rows=dgVisFilter(all);
  if($("vzOnline"))$("vzOnline").textContent=all.length;
  if($("vzLocated"))$("vzLocated").textContent=all.filter(r=>dgVisHasLocation(r.p)).length;
- if($("visStatus")){const st=dgPresenceState();$("visStatus").textContent=(st==="on"?"Canlı bağlantı":"Bağlantı: "+st)+" · "+rows.length+" / "+all.length+" kullanıcı · "+new Date().toLocaleTimeString("tr-TR",{hour:"2-digit",minute:"2-digit"});const wrap=$("visStatus").closest(".visitor-connection");if(wrap)wrap.dataset.state=st;}
+ if($("visStatus"))DG_VISITOR_CONNECTION_STATUS_UI.render($("visStatus"),dgPresenceState(),rows.length,all.length);
  if(box){
   const T=(s)=>(typeof dgCf==="function"?dgCf(s):s);
   DG_VISITOR_ROSTER_UI.render(box,rows,{state:dgPresenceState(),allCount:all.length,viewLabels:DG_VIEW_LABELS,actionLabels:DG_ACT_LABELS,hasLocation:dgVisHasLocation,deviceLabel:r=>r.p.dev,translate:T,escape:esc});
