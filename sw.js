@@ -4,7 +4,7 @@
 // NOT: Senkronizasyon artık Ana Thread (Supabase JS SDK) tarafından yapılıyor
 // ============================================================
 
-const CACHE_VERSION = 'dendrogeo-sw-v2-r288';
+const CACHE_VERSION = 'dendrogeo-sw-v2-r289';
 
 /* İKİ AYRI STATİK CACHE — bu ayrım bilinçli ve önemli.
  *
@@ -68,6 +68,11 @@ const CORE_ASSETS = [
     '/src/application/reports/sync-user-publication-panel.js',
     '/src/application/reports/schedule-user-publication-poll.js',
     '/src/application/reports/share-report-link.js',
+    '/src/domain/reports/resolve-publication-park-status.js',
+    '/src/ui/render-publication-park-row.js',
+    '/src/ui/render-publication-history.js',
+    '/src/application/reports/summarize-publication-queue.js',
+    '/src/ui/render-publication-admin-card.js',
     '/src/services/academic-profile.js',
     '/css/academic-profile.css',
     '/src/services/report-publish.js',
