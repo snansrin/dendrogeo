@@ -592,3 +592,13 @@ Her modülün tek bir dış API'si, sahibi olduğu açık durumu ve kendi testle
 - `adapters/reports/park-comparison-store.js`, karşılaştırma görünümünü karbon sırasıyla okur ve yalnız kimlikli, bekleyen olmayan, kayıt içeren parkları döndürür.
 
 - `adapters/reports/retraction-store.js`, geri çekme isteklerini mevcut alanlar ve azalan tarih sırasıyla okur; tablo/taşıma hatalarında boş liste yedeğini korur.
+
+- `adapters/reports/publication-cancel-store.js`, bekleyen isteği mevcut `Vazgeçildi` durumu ve iptal zamanı ile yalnız istek kimliğinden günceller; yetki ve hata bildirimi servis katmanında kalır.
+
+- `adapters/reports/user-publication-request-store.js`, kullanıcı rapor panelinin park kapsamındaki son on isteğini mevcut alanlar ve azalan tarih sırasıyla yükler.
+
+- `adapters/reports/own-approved-measurements-store.js`, panelin bilgi amaçlı sayaç sorgusunu exact/head ve proje/kullanıcı/onaylı/silinmemiş filtreleriyle çalıştırır.
+
+- `adapters/reports/user-retraction-store.js`, kullanıcı panelindeki park geri çekme isteklerini mevcut on satır sınırıyla okur; eksik tablo ve taşıma hatalarında boş listeyi korur.
+
+- `application/reports/load-user-publication.js`, park kapsamındaki istek hatası/state güncellemesini ve kuyruk/sayaç/geri çekme okumalarının render/poll sırasını portlarla yürütür.

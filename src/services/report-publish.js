@@ -318,7 +318,7 @@ async function dgPublishReport(parkId){
 async function dgPublishCancel(id){
  if(!dgPubAdmin())return toast("Yalnız yönetici iptal edebilir.","err","📄");
  if(!confirm(dgCf("Bekleyen yayın isteği iptal edilsin mi?")))return;
- const{error}=await sb.from("report_requests").update({status:"Vazgeçildi",cancelled_at:new Date().toISOString()}).eq("id",id);
+ const{error}=await window.DG_REPORT_PUBLICATION_CANCEL_STORE.cancel(sb,id,new Date().toISOString());
  if(error)return toast(dgCf("İptal edilemedi: ")+esc(error.message),"err","📄");
  toast("İstek iptal edildi.","ok","📄");
  await dgLoadPublishQueue();
@@ -427,48 +427,34 @@ async function dgUserPubOpen(projectId){
 }
 
 async function dgUserPubRefresh(){
- const st=DG_USER_PUB;if(!st.parkId)return;
- try{
-  const{data,error}=await sb.from("report_requests")
-   .select("id,park_id,with_lulc,status,requested_by,created_at,cancelled_at")
-   .eq("park_id",st.parkId).order("created_at",{ascending:false}).limit(10);
-  if(error){
-   st.error=(error.code==="42P01"||/report_requests/i.test(error.message||""))
+ return window.DG_LOAD_USER_PUBLICATION.execute(DG_USER_PUB,{
+  loadRequests:parkId=>window.DG_USER_PUBLICATION_REQUEST_STORE.load(sb,parkId),
+  requestError:(error,transport)=>transport
+   ?("İstekler okunamadı: "+((error&&error.message)||error))
+   :((error.code==="42P01"||/report_requests/i.test(error.message||""))
     ?"SCHEMA"
-    :("İstekler okunamadı: "+(error.message||error.code||"bilinmeyen hata"));
-   st.requests=[];
-  }else{st.error="";st.requests=data||[];}
- }catch(e){st.error="İstekler okunamadı: "+((e&&e.message)||e);st.requests=[];}
- const[q,cnt,rets]=await Promise.all([dgPubFetchQueue(),dgUserOwnApproved(),dgUserFetchRetractions()]);
- if(q)st.queue=q;
- st.ownApproved=cnt;
- st.retracts=rets||[];
- dgUserPubRender();
- dgUserPubSchedulePoll();
+    :("İstekler okunamadı: "+(error.message||error.code||"bilinmeyen hata"))),
+  loadQueue:dgPubFetchQueue,
+  loadOwnApproved:dgUserOwnApproved,
+  loadRetractions:dgUserFetchRetractions,
+  render:dgUserPubRender,
+  schedulePoll:dgUserPubSchedulePoll
+ });
 }
 
 /* Bu projedeki kendi onaylı ölçüm sayısı (yalnız BİLGİ: yayın kararını
  * sunucu verir — aynı parktaki başka projenin onaylı verisi de yeter). */
 async function dgUserOwnApproved(){
  if(typeof USER==="undefined"||!USER||!DG_USER_PUB.projectId)return null;
- try{
-  const{count}=await sb.from("measurements").select("*",{count:"exact",head:true})
-   .eq("project_id",DG_USER_PUB.projectId).eq("owner",USER.id).eq("status","Onaylı").is("deleted_at",null);
-  return Number(count||0);
- }catch(e){return null;}
+ try{return await window.DG_OWN_APPROVED_MEASUREMENTS_STORE.count(sb,DG_USER_PUB.projectId,USER.id);}
+ catch(e){return null;}
 }
 
 /* Bu parkın geri çekme istekleri (0010): tablo yoksa sessizce boş — panel
  * yayın durumunu göstermeye devam eder, 🗑 sunucuda zaten reddedilir. */
 async function dgUserFetchRetractions(){
  if(!DG_USER_PUB.parkId)return[];
- try{
-  const{data,error}=await sb.from("report_retractions")
-   .select("id,report_id,park_id,reason,status,requested_by,created_at")
-   .eq("park_id",DG_USER_PUB.parkId).order("created_at",{ascending:false}).limit(10);
-  if(error)return[];
-  return data||[];
- }catch(e){return[];}
+ return window.DG_USER_RETRACTION_STORE.load(sb,DG_USER_PUB.parkId);
 }
 
 function dgUserPubRender(){
@@ -565,7 +551,7 @@ async function dgUserCancel(id){
  const own=!!(row&&String(row.requested_by||"")===String(mine));
  if(!own&&!dgPubAdmin())return toast("Yalnız kendi bekleyen isteğini iptal edebilirsin.","err","📄");
  if(!confirm(dgCf("Bekleyen yayın isteği iptal edilsin mi?")))return;
- const{error}=await sb.from("report_requests").update({status:"Vazgeçildi",cancelled_at:new Date().toISOString()}).eq("id",id);
+ const{error}=await window.DG_REPORT_PUBLICATION_CANCEL_STORE.cancel(sb,id,new Date().toISOString());
  if(error)return toast(dgCf("İptal edilemedi: ")+esc(error.message),"err","📄");
  toast("İstek iptal edildi.","ok","📄");
  await dgUserPubRefresh();
