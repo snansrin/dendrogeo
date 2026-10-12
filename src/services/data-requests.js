@@ -109,24 +109,15 @@ async function rejectRequest(id){
 }
 
 async function fulfillRequest(id){
-    const dataset=await window.DG_DATA_REQUEST_FULFILLMENT_STORE.load(sb,id);
-    if(!dataset)return;
-    const {request:req,rows}=dataset;
-    const {count:n,totalCarbon:totalC,countries,cities}=window.DG_DATA_REQUEST_DATASET_SUMMARY.summarize(rows);
-    
-    if(n === 0){
-        if(!confirm(dgCf("Bu filtreye uyan onaylı kayıt bulunamadı. Yine de kullanıcıya bilgilendirme maili göndermek ister misiniz?"))) return;
-    } else {
-        dl(fullCSV(rows), "dendrogeo_talep_" + id + ".csv");
-    }
-    
-    // 📧 Profesyonel & detaylı e-posta metni
-    const {subject,body:bodyTxt}=window.DG_DATA_REQUEST_REPLY_CONTENT_UI.build(req,{count:n,totalCarbon:totalC,countries,cities});
-
-    window.DG_DATA_REQUEST_REPLY_WINDOW.open(window,req.email||"",subject,bodyTxt);
-    
-    await window.DG_DATA_REQUEST_STATUS_STORE.update(sb,id,"Tamamlandı",new Date().toISOString());
-    
-    toast("✓ Mail hazırlandı — CSV'yi ekleyip gönderin", "ok", "📧");
-    loadRequests();
+ return await window.DG_FULFILL_DATA_REQUEST.execute(id,{
+  load:requestId=>window.DG_DATA_REQUEST_FULFILLMENT_STORE.load(sb,requestId),
+  summarize:rows=>window.DG_DATA_REQUEST_DATASET_SUMMARY.summarize(rows),
+  confirmEmpty:()=>confirm(dgCf("Bu filtreye uyan onaylı kayıt bulunamadı. Yine de kullanıcıya bilgilendirme maili göndermek ister misiniz?")),
+  download:(rows,requestId)=>dl(fullCSV(rows),"dendrogeo_talep_"+requestId+".csv"),
+  buildReply:(request,summary)=>window.DG_DATA_REQUEST_REPLY_CONTENT_UI.build(request,summary),
+  openReply:(request,reply)=>window.DG_DATA_REQUEST_REPLY_WINDOW.open(window,request.email||"",reply.subject,reply.body),
+  complete:requestId=>window.DG_DATA_REQUEST_STATUS_STORE.update(sb,requestId,"Tamamlandı",new Date().toISOString()),
+  notify:()=>toast("✓ Mail hazırlandı — CSV'yi ekleyip gönderin","ok","📧"),
+  refresh:()=>loadRequests()
+ });
 }

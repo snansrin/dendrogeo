@@ -9,6 +9,7 @@ vm.runInNewContext(readFileSync(new URL('../src/adapters/data-requests/fulfillme
 vm.runInNewContext(readFileSync(new URL('../src/adapters/data-requests/status-store.js',import.meta.url),'utf8'),{window});
 vm.runInNewContext(readFileSync(new URL('../src/adapters/data-requests/reply-window.js',import.meta.url),'utf8'),{window,encodeURIComponent});
 vm.runInNewContext(readFileSync(new URL('../src/ui/data-request-reply-content.js',import.meta.url),'utf8'),{window,Date,encodeURIComponent});
+vm.runInNewContext(readFileSync(new URL('../src/application/data-requests/fulfill-request.js',import.meta.url),'utf8'),{window});
 const summarize=window.DG_DATA_REQUEST_DATASET_SUMMARY.summarize;
 
 test('request summary preserves count, carbon precision and distinct country/city values',()=>{
