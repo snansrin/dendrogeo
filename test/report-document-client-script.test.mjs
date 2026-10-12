@@ -12,5 +12,6 @@ test('renders the existing print and immutable-snapshot verification behavior',(
  assert.ok(script.includes('const DG_DATA='+JSON.stringify(snapshot)+';'));
  assert.ok(script.includes("crypto.subtle.digest('SHA-256'"));
  assert.ok(script.includes("document.getElementById('dgVerify')"));
- assert.ok(script.endsWith(shareScript));
+ assert.ok(script.startsWith('\\n// Printed documents'));
+ assert.ok(script.endsWith(shareScript+'\\n'));
 });
