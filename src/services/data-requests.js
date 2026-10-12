@@ -16,10 +16,7 @@ async function sendDataRequest(){
  const note=$("reqNote").value.trim()||null;
  const m=$("reqMsg");
  try{
-  const{data:pending}=await sb.from("data_requests")
-   .select("country,city,project_name,status")
-   .eq("user_id",USER.id)
-   .in("status",["Beklemede","İşleme Alındı"]);
+  const{data:pending}=await window.DG_DATA_REQUEST_SUBMIT_STORE.pending(sb,USER.id);
   const dup=window.DG_DATA_REQUEST_DUPLICATE.find(pending,{country,city,project_name});
   if(dup){
    toast("⚠️ Bu veri talebiniz zaten alındı — yönetici onayı bekleniyor","warn","✉️");
@@ -29,7 +26,7 @@ async function sendDataRequest(){
   }
  }catch(e){console.log("Dup kontrolü:",e);}
  const body={user_id:USER.id,email:PROFILE?.email||USER.email,country,city,project_name,note,status:"Beklemede"};
- const{error}=await sb.from("data_requests").insert(body);
+ const{error}=await window.DG_DATA_REQUEST_SUBMIT_STORE.insert(sb,body);
  if(error){m.style.color="var(--red)";m.textContent="Hata: "+error.message;return;}
  toast("✓ Talep gönderildi — yönetici yanıtı bekleniyor","ok","✉️");
  m.style.color="var(--green-dk)";m.textContent="✓ Talebiniz yönetime iletildi, hazır olduğunda e‑postanıza gönderilecek.";
@@ -41,7 +38,7 @@ async function sendDataRequest(){
 async function loadMyRequests(){const _y=(typeof dgScrollKeep==="function"?dgScrollKeep():null);try{return await loadMyRequests__scroll.apply(this,arguments);}finally{if(typeof dgScrollRestore==="function")dgScrollRestore(_y);}}
 async function loadMyRequests__scroll(){
  if(!USER)return;
- const{data,error}=await sb.from("data_requests").select("*").eq("user_id",USER.id).order("created_at",{ascending:false});
+ const{data,error}=await window.DG_MY_DATA_REQUESTS_STORE.load(sb,USER.id);
  const el=$("myRequests");if(!el)return;
  if(error){el.innerHTML='<div class="alert err">Talepler yüklenemedi.</div>';return;}
  if(!data||!data.length){el.innerHTML="";return;}
@@ -65,10 +62,7 @@ async function deleteMyRequest(id){
 /* --- Kullanıcı talep formu --- */
 async function loadRequestOptions(){
  try{
-  const [m,p]=await Promise.all([
-   sb.from("measurements").select("country,city",{count:"exact"}).eq("status","Onaylı").limit(5000),
-   sb.from("projects").select("id,name,country,city").order("name")
-  ]);
+  const {measurements:m,projects:p}=await window.DG_DATA_REQUEST_OPTIONS_STORE.load(sb);
   REQ_ROWS=m.data||[];REQ_PROJECTS=p.data||[];
   /* Ülke/şehir seçenek listeleri kesilmişse talep formunda eksik seçenek görünür. */
   dgWarnIfTruncated(m.data,5000,"Talep formu seçenekleri",m.count);
@@ -149,26 +143,10 @@ async function rejectRequest(id){
 }
 
 async function fulfillRequest(id){
-   const {data:req} = await sb.from("data_requests").select("*,profiles(full_name)").eq("id",id).single();
-    if(!req) return;
-    
-    let projIds = null;
-    if(req.project_name){
-        const {data:projs} = await sb.from("projects").select("id").ilike("name","%"+req.project_name+"%");
-        projIds = (projs||[]).map(p=>p.id);
-    }
-    
-    let q = sb.from("measurements").select("*").eq("status","Onaylı");
-    if(req.country)  q = q.eq("country", req.country);
-    if(req.city)     q = q.eq("city",    req.city);
-    if(projIds)      q = q.in("project_id", projIds.length ? projIds : [-1]);
-    
-    const {data} = await q;
-    const rows = data || [];
-    const n = rows.length;
-    const totalC = rows.reduce((a,r) => a + (r.carbon_kg||0), 0);
-    const countries = new Set(rows.map(r=>r.country).filter(Boolean));
-    const cities    = new Set(rows.map(r=>r.city).filter(Boolean));
+    const dataset=await window.DG_DATA_REQUEST_FULFILLMENT_STORE.load(sb,id);
+    if(!dataset)return;
+    const {request:req,rows}=dataset;
+    const {count:n,totalCarbon:totalC,countries,cities}=window.DG_DATA_REQUEST_DATASET_SUMMARY.summarize(rows);
     
     if(n === 0){
         if(!confirm(dgCf("Bu filtreye uyan onaylı kayıt bulunamadı. Yine de kullanıcıya bilgilendirme maili göndermek ister misiniz?"))) return;
