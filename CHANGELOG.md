@@ -9,6 +9,9 @@ Yeni sürüm yayımlama adımları: [`docs/surum-yayini.md`](docs/surum-yayini.m
 
 ## [Yayımlanmadı]
 
+### İyileştirildi — GIS PNG waypoint çizimi
+Standart ve doğrulanmış haritalardaki waypoint işaretleri ayrı canvas modülüne taşındı; ziyaret renkleri, numaralı etiketler ve `DG_GIS_EXPORT_CANVAS` çağrıları korundu.
+
 ### İyileştirildi — GIS PNG lejant modülü
 Standart ve göreli NDVI PNG lejantı ile kaynak notları ayrı çizim modülüne taşındı; `DG_GIS_EXPORT_CANVAS.drawLegend` uyumluluğu, yükleme sırası ve çevrimdışı precache korundu.
 
