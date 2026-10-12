@@ -12,6 +12,9 @@ Yeni sürüm yayımlama adımları: [`docs/surum-yayini.md`](docs/surum-yayini.m
 ### İyileştirildi — Rapor haritası yüzey rasterizer'ı
 Yüzey poligonlarını ve deliklerini PNG piksellerine boyayan even-odd rasterizer bağımsız modüle ayrıldı; rapor haritasının çizim sırası, görüntü davranışı ve mevcut API'si korundu.
 
+### İyileştirildi — Rapor haritası çizim primitifleri
+Halka dolgusu, sınır/halo çizgisi ve dairesel envanter noktası çizimi ayrı modüle taşındı; mevcut çizgi kalınlığı, nokta maskesi ve rapor haritası davranışı korundu.
+
 ### İyileştirildi — Park geometrisi backfill modülü
 Yönetim ekranındaki OSM sınırı backfill akışı uygulama use-case'ine taşındı; yetki, park bulunamaması, OSM hatası, yazım hatası ve başarılı yenileme sonuçları eski bildirimlerle korunuyor. OSM way/relation sınır çözümlemesi adapter'a ayrıldı ve uygulama/adapter için odaklı testler eklendi.
 

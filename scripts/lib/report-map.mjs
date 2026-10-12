@@ -1,6 +1,7 @@
 import { PngCanvas, hex2rgb } from './png.mjs';
 import { fmtDateDot } from './report-formatting.mjs';
 import { fillSurfacePolygon } from './report-map-surface-fill.mjs';
+import { fillRing, strokeRing, disc } from './report-map-primitives.mjs';
 
 export const DATASET_ASCII = 'ESA WORLDCOVER 2021 V200';
 
@@ -11,30 +12,7 @@ export const DATASET_ASCII = 'ESA WORLDCOVER 2021 V200';
  * (4) park sınırı (beyaz halo + koyu mürekkep), (5) envanter noktaları,
  * (6) lejant / ölçek / kuzey oku. */
 export const MAP_TONES = { out: [238, 240, 238], nodata: [212, 212, 208], ink: [24, 36, 32], mut: [104, 118, 110], halo: [255, 255, 255] };
-function fillRing(cv, pts, col) {
-  let y0 = 1e9, y1 = -1e9;
-  for (const p of pts) { y0 = Math.min(y0, p[1]); y1 = Math.max(y1, p[1]); }
-  y0 = Math.max(0, Math.floor(y0)); y1 = Math.min(cv.h - 1, Math.ceil(y1));
-  for (let y = y0; y <= y1; y++) {
-    const xs = [];
-    for (let i = 0, j = pts.length - 1; i < pts.length; j = i++) {
-      const ya = pts[j][1], yb = pts[i][1];
-      if ((ya > y + 0.5) !== (yb > y + 0.5)) xs.push(pts[j][0] + (y + 0.5 - ya) / (yb - ya) * (pts[i][0] - pts[j][0]));
-    }
-    xs.sort((a, b) => a - b);
-    for (let i = 0; i + 1 < xs.length; i += 2) cv.rect(xs[i], y, xs[i + 1], y, col);
-  }
-}
-function strokeRing(cv, pts, col, thick = 1) {
-  const OFF = thick <= 1 ? [[0, 0]] : [[0, 0], [1, 0], [-1, 0], [0, 1], [0, -1], [1, 1], [-1, -1]];
-  for (const [ox, oy] of OFF)
-    for (let i = 0, j = pts.length - 1; i < pts.length; j = i++)
-      cv.line(pts[j][0] + ox, pts[j][1] + oy, pts[i][0] + ox, pts[i][1] + oy, col);
-}
-function disc(cv, x, y, r, col) {
-  for (let dy = -r; dy <= r; dy++) for (let dx = -r; dx <= r; dx++)
-    if (dx * dx + dy * dy <= r * r) cv.set(x + dx, y + dy, col);
-}
+
 export function mapCanvas({ outer, outers = null, surfaceFeatures = [], holes = [], wruns = [], classes = {}, parkName = '', sub = '', sub2 = '', maskHa = 0, points = [], pointStat = null, meta = null }) {
   const PAD = 26, TOP = 96, MAPH = 540, FOOT = 70;
   let minLa = 90, maxLa = -90, minLo = 180, maxLo = -180;
