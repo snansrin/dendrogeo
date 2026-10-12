@@ -9,6 +9,9 @@ Yeni sürüm yayımlama adımları: [`docs/surum-yayini.md`](docs/surum-yayini.m
 
 ## [Yayımlanmadı]
 
+### İyileştirildi — Rapor haritası envanter noktaları
+Envanter noktalarının harita çerçevesi içinde çizilmesi ayrı sunum modülüne alındı; sınırdaki noktaların görünmesi, halo/işaret renk sırası ve lejant/altbilgi üzerine taşmayı önleyen çerçeve denetimi korundu.
+
 ### İyileştirildi — Rapor haritası yüzey rasterizer'ı
 Yüzey poligonlarını ve deliklerini PNG piksellerine boyayan even-odd rasterizer bağımsız modüle ayrıldı; rapor haritasının çizim sırası, görüntü davranışı ve mevcut API'si korundu.
 
