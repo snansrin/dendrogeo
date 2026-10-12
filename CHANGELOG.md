@@ -9,6 +9,9 @@ Yeni sürüm yayımlama adımları: [`docs/surum-yayini.md`](docs/surum-yayini.m
 
 ## [Yayımlanmadı]
 
+### İyileştirildi — geçici canlı oturum olayları
+Sekme geçmişi, son eylem ve konum izinin sınırlı bellekte tutulması ayrı application modülüne taşındı; presence payload'ı ve geçici saklama davranışı korundu.
+
 ### İyileştirildi — GIS harita araçları sunumu
 Mesafe/alan, park odağı ve koordinat araçlarının mevcut menü görünümü ayrı modüle taşındı; komut işleyicileri ve harita davranışı korundu.
 

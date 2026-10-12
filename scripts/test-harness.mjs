@@ -114,6 +114,7 @@ export function loadApp({ sadece } = {}) {
     'src/services/landcover.js',
     'src/application/visitors/build-live-activity.js',
     'src/application/visitors/build-live-roster.js',
+    'src/application/visitors/record-live-session-events.js',
     /* PARK ZİNCİRİ (Faz 4): eski gridplan.js'in mantık modülleri, index.html'deki
      * yükleme sırasıyla. UI modülleri (src/ui/park-panel, src/ui/park-export)
      * BİLEREK yüklenmez — DOM'a yapışırlar; onları ui-audit statik tarar. */
@@ -226,6 +227,7 @@ export function loadApp({ sadece } = {}) {
   if (secim && secim.has('src/services/visit-stats.js')) {
     secim.add('src/application/visitors/build-live-activity.js');
     secim.add('src/application/visitors/build-live-roster.js');
+    secim.add('src/application/visitors/record-live-session-events.js');
   }
   if (secim && secim.has('src/services/park-query.js')) {
     secim.add('src/application/parks/find-park-candidates.js');

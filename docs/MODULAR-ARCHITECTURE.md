@@ -255,6 +255,7 @@ Her modülün tek bir dış API'si, sahibi olduğu açık durumu ve kendi testle
 - `ui/gis-workspace-analysis-layout.js`, mevcut analiz kartlarındaki grup satırı ve en yaygın altı tür açılır sunumunu düzenler; var olan DOM düğümlerini ve sayısal analiz değerlerini korur.
 - `ui/gis-workspace-menu-position.js`, açık GIS menülerinin panelini mobil ve masaüstü görünüm alanına göre yerleştirir; menü durumunu, harita etkileşimini ve içerikleri değiştirmez.
 - `ui/gis-workspace-map-tools-view.js`, mevcut mesafe/alan, park odağı ve WGS84 koordinat kontrollerini mevcut harita menüsüne kurar; komutları, ölçümleri ve harita durumunu workspace sahibi yönetir.
+- `application/visitors/record-live-session-events.js`, geçici presence için yinelenen sekme geçmişini, 60 karakterlik son eylemi ve 1e-5° eşiği/12 nokta sınırındaki konum izini bellekte tutar; ağ ve veritabanı çağrısı yapmaz.
 - `ui/gis-export-standard-layers.js`, standart GIS PNG'sinde park kırpması içindeki örtü, NDVI, grid ve waypoint katmanlarını sırayla birleştirir; dış sınırı aynı kırpma sonrası adımda çizer.
 
 - `ui/gis-export-layout.js`, standart ve onaylı GIS PNG için park bounds, metre ölçüsü, canvas boyutu ve piksel projeksiyonunu hesaplar. Geçersiz ya da sıfır alanlı sınırı reddeder; çizim ve indirme adapter'da kalır.
