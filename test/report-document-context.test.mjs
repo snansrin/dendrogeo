@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import {prepareReportDocumentContext} from '../scripts/lib/report-document-context.mjs';
 
 const dependencies={
-  fmtT:value=>Number(value).toFixed(2),
+  fmtT:value=>(Number(value)/1000).toFixed(2),
   fmtDateTr:value=>`tr:${value}`,
   esc:value=>String(value??'').replace(/[&<>"]/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[char])),
   epsgLabel:value=>value? `EPSG:${value}`: '—',
