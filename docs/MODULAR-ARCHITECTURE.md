@@ -506,3 +506,5 @@ Her modülün tek bir dış API'si, sahibi olduğu açık durumu ve kendi testle
 - `scripts/lib/report-git-commit.mjs` rapor kökünde mevcut commit’i aynı sessiz `git rev-parse HEAD` komutuyla okur; boş/erişilemeyen provenance için mevcut null yedeği `report-runtime-provenance.mjs` içinde korunur.
 
 - `scripts/lib/report-qr-loader.mjs` var olan `qrcode` build paketini çözer; paket bulunamazsa `null` döndürerek rapor üretiminin QR olmadan sürmesini sağlar, SVG üretimi `report-qr.mjs` içinde kalır.
+
+- `adapters/visitors/admin-visit-counts-store.js`, yönetim ziyaret sayaçlarının tekil exact/head sorgularını taşır; sıralı yükleme, yerel gün ve kayan yedi gün hesabı, kısmi DOM güncellemeleri ve hata sınırı `loadVisitStats()` içinde korunur.
