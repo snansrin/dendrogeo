@@ -14,7 +14,7 @@ const base={
   G:{},NR:2,nPhoto:2,L:null,dataset:'dataset',epsg:null,deltaPct:null,
   parkHa:1,GJ:null,knotted:false,knotN:null,
   renderMethodPresentation,REPORT_DATA_DICTIONARY:'<p>Dictionary.</p>',
-  esc:String,trNum:(value,digits)=>Number(value).toFixed(digits),
+  esc:value=>String(value).replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;'),trNum:(value,digits)=>Number(value).toFixed(digits),
 };
 
 test('method section preserves section order, existing disclosures and the data dictionary',()=>{
