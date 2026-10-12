@@ -11,6 +11,11 @@ function loadModules() {
     '../src/domain/admin/filter-measurement-tree.js',
     '../src/ui/admin-tree-formatters.js',
     '../src/ui/admin-tree-pending-summary.js',
+    '../src/ui/admin-tree-measurement-row.js',
+    '../src/ui/admin-tree-user.js',
+    '../src/ui/admin-tree-project.js',
+    '../src/ui/admin-tree-park.js',
+    '../src/ui/admin-tree-view.js',
   ]) vm.runInContext(readFileSync(new URL(file, import.meta.url), 'utf8'), context);
   return context.window;
 }
@@ -63,4 +68,29 @@ test('pending summary updates the side badge and hides an empty queue', () => {
   assert.deepEqual(updates, [0]);
   assert.equal(box.style.display, 'none');
   assert.equal(box.innerHTML, '');
+});
+
+test('row, user, project, park, and tree renderers preserve the hierarchy and moderation actions', () => {
+  const modules = loadModules();
+  const ports = {
+    escape: String, latin: { Çam: 'Pinus' }, thumbnail: () => '<img loading="lazy">', badge: status => status,
+    openKeys: new Set(['u1', 'j4', 'p9']), translate: value => value, pendingBadge: n => n ? `pending:${n}` : '',
+    tons: () => '1.00 t', statusSummary: () => 'status', rowHTML: () => '<tr></tr>',
+    userHTML: () => '<details class="dg-tree-user"></details>', canDelete: true,
+    projectHTML: () => '<details class="dg-tree-proj"></details>', formatHa: () => '1.00 ha',
+  };
+  const row = modules.DG_ADMIN_TREE_MEASUREMENT_ROW.render({ id: 1, point_id: 3, species: 'Çam', grp: 'İBRELİ', status: 'Beklemede',
+    dbh_cm: 12, height_m: 4, carbon_kg: 2 }, ports);
+  assert.ok(row.includes('approveMeas(1)') && row.includes('delMeas(1)') && row.includes('Pinus'));
+  const user = modules.DG_ADMIN_TREE_USER.render({ key: 'u1', name: 'Araştırmacı', beklemede: 1, n: 1, c: 100, rows: [] }, ports);
+  assert.ok(user.includes('ontoggle="dgTreeToggle(\'u1\',this.open)"') && user.includes(' open'));
+  const project = modules.DG_ADMIN_TREE_PROJECT.render({ key: 'j4', name: 'Proje', project_id: 4, beklemede: 1, users: [], n: 1, c: 100 }, ports);
+  assert.ok(project.includes('dgTreeDeleteProject(event,4)'));
+  const park = modules.DG_ADMIN_TREE_PARK.render({ key: 'p9', name: 'Park', city: 'Ankara', area_m2: 10000, pending: false,
+    beklemede: 1, projects: [{ users: [] }], n: 1, c: 1000 }, ports);
+  assert.ok(park.includes('1.00 ha') && park.includes('1.00 t/ha'));
+  const element = { innerHTML: '' };
+  modules.DG_ADMIN_TREE_VIEW.render({ element, tree: [{ pending: false, projects: [], n: 1, c: 1000 }], rows: [], status: '', query: '',
+    error: null, escape: String, translate: value => value, tons: () => '1.00 t', parkHTML: () => '<details class="dg-tree-park"></details>' });
+  assert.ok(element.innerHTML.includes('dgTreeExpand(true)') && element.innerHTML.includes('dg-tree-park'));
 });

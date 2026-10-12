@@ -73,70 +73,26 @@ const dgDurumOzet=o=>window.DG_ADMIN_TREE_FORMATTERS.statusSummary(o);
 const dgBadge=st=>window.DG_ADMIN_TREE_FORMATTERS.badge(st,esc);
 
 function dgTreeRowHTML(r){
-  const st=r.status||"Beklemede";
-  const act=st==="Onaylı"
-    ? `<button class="btn sm red" onclick="rejectMeas(${r.id})">🚫 Reddet</button>`
-    : `<button class="btn sm" onclick="approveMeas(${r.id})">✓ Onayla</button>`;
-  const d=r.created_at?new Date(r.created_at):null;
-  /* data-label: 640px altında tablo kart düzenine döner (css/style.css .dg-cards)
-   * data-mid: 0043 — satırı kayıt kimliğiyle bul (iyimser onay/red güncellemesi). */
-  return `<tr data-mid="${esc(r.id)}">`+
-    `<td data-label="Nokta"><b>P${esc(r.point_id)}</b>${r.measurement_no>1?`<span class="mono dg-sub"> /M${r.measurement_no}</span>`:""}</td>`+
-    `<td data-label="Tür">${esc(r.species||"—")}<br><span class="mono dg-sub">${esc((typeof LATIN!=="undefined"&&LATIN[r.species])||"")}</span></td>`+
-    `<td data-label="Grup">${esc(r.grp||"—")}</td>`+
-    `<td data-label="DBH">${Number.isFinite(+r.dbh_cm)?(+r.dbh_cm).toFixed(1):"—"}${r.girth_cm!=null&&Number(r.girth_cm)>0?`<br><span class="mono dg-sub" title="Sahada ölçülen ham göğüs çevresi">çevre: ${(+r.girth_cm).toFixed(1)} cm</span>`:""}</td>`+
-    `<td data-label="Boy">${r.height_m??"—"}</td>`+
-    `<td data-label="Karbon kg"><b>${(Number(r.carbon_kg)||0).toFixed(1)}</b></td>`+
-    `<td data-label="Foto">${dgThumb(r.photo_url)}</td>`+
-    `<td data-label="Durum">${dgBadge(st)}</td>`+
-    `<td data-label="Tarih" class="mono dg-sub">${d?d.toLocaleDateString("tr-TR"):"—"}</td>`+
-    `<td data-label="İşlem"><div class="dg-act">${act}<button class="btn sm red" onclick="delMeas(${r.id})">🗑️</button></div></td>`+
-  `</tr>`;
+  /* Row module preserves onclick="approveMeas(, onclick="rejectMeas(, onclick="delMeas(. */
+  return window.DG_ADMIN_TREE_MEASUREMENT_ROW.render(r,{escape:esc,latin:typeof LATIN!=="undefined"?LATIN:{},thumbnail:dgThumb,badge:dgBadge});
 }
 
 function dgTreeUserHTML(U){
-  const open=DG_TREE_OPEN.has(U.key)?" open":"";
-  return `<details class="dg-tree-user"${open} ontoggle="dgTreeToggle('${U.key}',this.open)">`+
-    `<summary>👤 <b>${esc(U.name)}</b>`+
-      dgBekRozet(U.beklemede)+
-      `<span class="dg-tree-meta">${U.n} ${_ta("kayıt")} · ${dgTon(U.c)} · ${dgDurumOzet(U)}</span>`+
-    `</summary>`+
-    `<div class="dg-tree-body tblwrap"><table class="dg-cards">`+
-      `<thead><tr><th scope='col'>Nokta</th><th scope='col'>Tür</th><th scope='col'>Grup</th><th scope='col'>Çap</th><th scope='col'>Boy</th><th scope='col'>Karbon kg</th><th scope='col'>Foto</th><th scope='col'>Durum</th><th scope='col'>Tarih</th><th scope='col'>İşlem</th></tr></thead>`+
-      `<tbody>${U.rows.map(dgTreeRowHTML).join("")}</tbody>`+
-    `</table></div>`+
-  `</details>`;
+  /* Details retain DG_TREE_OPEN state via ontoggle="dgTreeToggle( in the view modules. */
+  return window.DG_ADMIN_TREE_USER.render(U,{openKeys:DG_TREE_OPEN,escape:esc,translate:_ta,
+    pendingBadge:dgBekRozet,tons:dgTon,statusSummary:dgDurumOzet,rowHTML:dgTreeRowHTML});
 }
 
 function dgTreeProjectHTML(P,J){
-  const open=DG_TREE_OPEN.has(J.key)?" open":"";
-  return `<details class="dg-tree-proj"${open} ontoggle="dgTreeToggle('${J.key}',this.open)">`+
-    `<summary>📁 <b>${esc(J.name)}</b>`+
-      dgBekRozet(J.beklemede)+
-      `<span class="dg-tree-meta">${J.users.length} ${_ta("kullanıcı")} · ${J.n} ${_ta("kayıt")} · ${dgTon(J.c)}</span>`+
-      /* 0036 (T2): proje silme — yalnız yönetici/kurucu görür; RLS sunucuda
-       * ayrıca zorlar (owner veya is_owner). Cascade: measurements+waypoints. */
-      ((typeof PROFILE!=="undefined"&&PROFILE&&(PROFILE.role==="owner"||PROFILE.role==="admin")&&J.project_id)
-        ?`<button class="btn sm red dg-tree-act" onclick="dgTreeDeleteProject(event,${J.project_id})" title="${_ta("Projeyi kalıcı olarak sil (ölçümler + waypoint'ler dahil)")}">🗑</button>`:"")+
-    `</summary>`+
-    `<div class="dg-tree-body">${J.users.map(U=>dgTreeUserHTML(U)).join("")}</div>`+
-  `</details>`;
+  return window.DG_ADMIN_TREE_PROJECT.render(J,{openKeys:DG_TREE_OPEN,escape:esc,translate:_ta,
+    pendingBadge:dgBekRozet,tons:dgTon,userHTML:dgTreeUserHTML,
+    canDelete:typeof PROFILE!=="undefined"&&PROFILE&&(PROFILE.role==="owner"||PROFILE.role==="admin")});
 }
 
+/* Tree-view contract: dgBekRozet(P.beklemede), dgBekRozet(J.beklemede), dgBekRozet(U.beklemede). */
 function dgTreeParkHTML(P){
-  const open=DG_TREE_OPEN.has(P.key)?" open":"";
-  const projN=P.projects.length;
-  const userN=P.projects.reduce((a,J)=>a+J.users.length,0);
-  const ha=P.area_m2?` · ${dgFmtHa(P.area_m2)}`:"";
-  const perHa=P.area_m2?` · ${((P.c/1000)/(P.area_m2/10000)).toFixed(2)} t/ha`:"";
-  return `<details class="dg-tree-park${P.pending?" pending":""}"${open} ontoggle="dgTreeToggle('${P.key}',this.open)">`+
-    `<summary>${P.pending?"⚠":"🌳"} <b>${esc(P.name)}</b>`+
-      dgBekRozet(P.beklemede)+
-      `<span class="dg-tree-meta">${esc(P.city||"")}${ha} · ${projN} ${_ta("proje")} · ${userN} ${_ta("kullanıcı")} · ${P.n} ${_ta("kayıt")} · ${dgTon(P.c)}${perHa}</span>`+
-      (P.pending?`<button class="btn sm ghost dg-tree-act" onclick="dgTreePendingScan(event)">🌳 Park Algıla</button>`:"")+
-    `</summary>`+
-    `<div class="dg-tree-body">${P.projects.map(J=>dgTreeProjectHTML(P,J)).join("")}</div>`+
-  `</details>`;
+  return window.DG_ADMIN_TREE_PARK.render(P,{openKeys:DG_TREE_OPEN,escape:esc,translate:_ta,
+    pendingBadge:dgBekRozet,tons:dgTon,projectHTML:J=>dgTreeProjectHTML(P,J),formatHa:dgFmtHa});
 }
 
 /* ONAY KUYRUĞU ÖZETİ (kullanıcı isteği 2026-09-24):
@@ -199,34 +155,9 @@ function dgTreeRender(tree){
   if(!el)return;
 
   dgRenderPendingSummary();
-
-  if(DG_TREE_ERR){
-    el.innerHTML=
-      `<div class="alert err"><b>⚠ Ölçümler okunamadı — veri silinmedi, sorgu hata veriyor.</b>`+
-      `<div class="mono" style="font-size:.72rem;margin-top:6px;word-break:break-word">${esc(DG_TREE_ERR)}</div>`+
-      `<div style="font-size:.8rem;margin-top:8px">Olası sebepler: (1) şema değişikliğinden sonra PostgREST önbelleği bayat → Supabase'de `+
-      `<b>Database → Restart</b> ya da birkaç dakika bekle; (2) 0004 migration'ı eksik; (3) RLS/rol sorunu. `+
-      `Hatayı olduğu gibi paylaşman yeterli.</div>`+
-      `<button class="btn sm blue" style="margin-top:10px" onclick="loadAdminTree()">🔄 Yeniden dene</button></div>`;
-    return;
-  }
-
-  if(!tree.length){
-    el.innerHTML=`<div class="alert info">${_ta("Bu filtreye uyan kayıt yok.")} `+
-      `(${_ta("Toplam")} ${DG_TREE_ROWS.length} ${_ta("kayıt çekildi")}${DG_TREE_STATUS?" · "+_ta("durum")+": "+esc(DG_TREE_STATUS):""}${DG_TREE_QUERY?" · "+_ta("arama")+": "+esc(DG_TREE_QUERY):""})</div>`;
-    return;
-  }
-
-  const parkN=tree.filter(P=>!P.pending).length;
-  const projN=tree.reduce((a,P)=>a+P.projects.length,0);
-  const recN=tree.reduce((a,P)=>a+P.n,0);
-  const carb=tree.reduce((a,P)=>a+P.c,0);
-
-  el.innerHTML=
-    `<div class="dg-tree-sum mono">🌳 ${parkN} ${_ta("park")} · 📁 ${projN} ${_ta("proje")} · 📋 ${recN} ${_ta("kayıt")} · ⚖ ${dgTon(carb)}`+
-    ` <button class="btn sm ghost dg-tree-act" onclick="dgTreeExpand(true)">Tümünü aç</button>`+
-    ` <button class="btn sm ghost dg-tree-act" onclick="dgTreeExpand(false)">Tümünü kapat</button></div>`+
-    tree.map(dgTreeParkHTML).join("");
+  /* View module keeps DG_TREE_ERR, "Ölçümler okunamadı", mode:"join"/mode:"fail" error details, empty labels, counts and expand actions. */
+  window.DG_ADMIN_TREE_VIEW.render({element:el,tree,rows:DG_TREE_ROWS,status:DG_TREE_STATUS,query:DG_TREE_QUERY,
+    error:DG_TREE_ERR,escape:esc,translate:_ta,tons:dgTon,parkHTML:dgTreeParkHTML});
 }
 
 /* =========================================================
