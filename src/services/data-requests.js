@@ -146,22 +146,9 @@ async function rejectRequest(id){
 }
 
 async function fulfillRequest(id){
-   const {data:req} = await sb.from("data_requests").select("*,profiles(full_name)").eq("id",id).single();
-    if(!req) return;
-    
-    let projIds = null;
-    if(req.project_name){
-        const {data:projs} = await sb.from("projects").select("id").ilike("name","%"+req.project_name+"%");
-        projIds = (projs||[]).map(p=>p.id);
-    }
-    
-    let q = sb.from("measurements").select("*").eq("status","Onaylı");
-    if(req.country)  q = q.eq("country", req.country);
-    if(req.city)     q = q.eq("city",    req.city);
-    if(projIds)      q = q.in("project_id", projIds.length ? projIds : [-1]);
-    
-    const {data} = await q;
-    const rows = data || [];
+    const dataset=await window.DG_DATA_REQUEST_FULFILLMENT_STORE.load(sb,id);
+    if(!dataset)return;
+    const {request:req,rows}=dataset;
     const {count:n,totalCarbon:totalC,countries,cities}=window.DG_DATA_REQUEST_DATASET_SUMMARY.summarize(rows);
     
     if(n === 0){
