@@ -10,6 +10,13 @@ const files = readdirSync(join(root, 'test'))
   .filter(name => name.endsWith('.test.mjs')).sort()
   .map(name => join(root, 'test', name));
 if (!files.length) throw new Error('No test files found');
-const result = spawnSync(process.execPath, ['--test', ...files], { cwd: root, stdio: 'inherit' });
-if (result.error) throw result.error;
-process.exit(result.status ?? 1);
+// Keep the Windows process command line below its length limit on large suites.
+const batchSize = 30;
+let failed = false;
+for (let start = 0; start < files.length; start += batchSize) {
+  const batch = files.slice(start, start + batchSize);
+  const result = spawnSync(process.execPath, ['--test', ...batch], { cwd: root, stdio: 'inherit' });
+  if (result.error) throw result.error;
+  if (result.status !== 0) failed = true;
+}
+process.exit(failed ? 1 : 0);
