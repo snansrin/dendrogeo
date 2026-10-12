@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 import {createReportPublicationApplication} from './lib/report-publication-application.mjs';
+import {resolveReportSiteOrigin} from './lib/report-site-origin.mjs';
 import {createReportCliArguments} from './lib/report-cli-arguments.mjs';
 import {createReportSpeciesPresentation, sw} from './lib/report-species-presentation.mjs';
 import {createReportQaPresentation} from './lib/report-qa-presentation.mjs';
@@ -92,7 +93,7 @@ export const qrDataUri = createQrDataUri(QRlib);
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const read = (p) => readFileSync(join(ROOT, p), 'utf8');
 /* Yayın kökü: CNAME'den türetilir (elle yazılmış sabit URL sürüklenmesin). */
-const SITE_ORIGIN = (() => { try { const c = read('CNAME').trim(); return c ? 'https://' + c : 'https://dendrogeo.org'; } catch (e) { return 'https://dendrogeo.org'; } })();
+const SITE_ORIGIN = resolveReportSiteOrigin(read);
 const renderCitationPresentation = createReportCitationPresentation({citeName, siteOrigin: SITE_ORIGIN});
 const {arg, has} = createReportCliArguments(process.argv);
 
