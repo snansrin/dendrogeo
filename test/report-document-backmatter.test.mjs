@@ -29,7 +29,7 @@ test('back matter renders publication record sections in order and escapes citat
   }
   assert.match(html,/Park &lt;study&gt; &amp; source/);
   assert.match(html,/@report\{Park &amp; study\}/);
-  assert.match(html,/Dataset &lt;citation&gt;/);
+  assert.match(html,/Dataset <citation>/);
   assert.match(html,/DendroGeo · Küresel Ağaç Envanteri/);
 });
 
