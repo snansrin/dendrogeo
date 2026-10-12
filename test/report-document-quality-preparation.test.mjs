@@ -22,7 +22,7 @@ test('document QA preparation preserves snapshot counts, area disclosures and de
     explainReportQa:values=>{calls.push(['explanation',values]);return{AGAC_DEGER_TEMIZ:true,QA_WHY:'accuracy not recorded'};},
   });
   assert.equal(result.NR,2);
-  assert.equal(result.nPhoto,1);
+  assert.equal(result.nPhoto,2); // existing fallback treats nonzero/missing photo flags as present
   assert.equal(result.parkHa,10);
   assert.equal(result.covHa,11);
   assert.equal(result.clsHa,9);
@@ -34,7 +34,7 @@ test('document QA preparation preserves snapshot counts, area disclosures and de
   assert.equal(result.QA_WHY,'accuracy not recorded');
   assert.equal(calls.find(([name])=>name==='table')[1].qaRow,'qa-row');
   assert.equal(calls.find(([name])=>name==='table')[1].deltaPct,10);
-  assert.equal(calls.find(([name])=>name==='explanation')[1].nPhoto,1);
+  assert.equal(calls.find(([name])=>name==='explanation')[1].nPhoto,2);
 });
 
 test('snapshot-reported photo counts and explicit zero area delta take precedence',()=>{
