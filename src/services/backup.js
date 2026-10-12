@@ -15,18 +15,7 @@ async function fullBackup(){
     const wps = await fetchAllRows("waypoints","id");
     let reqs = [];
     try{ reqs = await fetchAllRows("data_requests","created_at"); }catch(e){ reqs = []; }
-    const backup={
-      app:"DendroGeo",
-      schema_version:"1.0.0",
-      doi:"10.5281/zenodo.22948643",
-      exported_at:new Date().toISOString(),
-      exported_by:(PROFILE&&PROFILE.full_name)||"",
-      counts:{measurements:meas.length,projects:projs.length,waypoints:wps.length,data_requests:reqs.length},
-      measurements:meas,
-      projects:projs,
-      waypoints:wps,
-      data_requests:reqs
-    };
+    const backup=window.DG_BACKUP_SNAPSHOT.build({measurements:meas,projects:projs,waypoints:wps,requests:reqs},{exportedAt:new Date().toISOString(),exportedBy:(PROFILE&&PROFILE.full_name)||""});
     const name="dendrogeo_yedek_"+new Date().toISOString().slice(0,10)+".json";
     const a=document.createElement("a");
     a.href=URL.createObjectURL(new Blob([JSON.stringify(backup,null,2)],{type:"application/json"}));

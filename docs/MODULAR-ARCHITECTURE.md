@@ -574,3 +574,5 @@ Her modülün tek bir dış API'si, sahibi olduğu açık durumu ve kendi testle
 - `application/users/load-admin-users.js`, admin/owner kapısını ve liste/cache/sayaç/çizim/filtre sırasını portlarla yönetir; hata/scroll/DOM serviste kalır.
 
 - `adapters/backup/paged-store.js`, 1000 satırlık sıralı tam dökümü ve tablo adıyla hata üretimini korur; eski fetchAllRows köprüsü serviste kalır.
+
+- `domain/backup/build-snapshot.js`, yedek schema/DOI/tarih/kullanıcı alanlarını ve kayıt sayılarını ham satırları değiştirmeden üretir.
