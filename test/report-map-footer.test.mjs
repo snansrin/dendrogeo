@@ -25,7 +25,7 @@ test('report map footer preserves document ID, brand, source, projection, and da
   assert.deepEqual(canvas.lines, [[26, 234, 474, 234, frameTone]]);
   assert.deepEqual(canvas.texts.map(([x, y, value]) => [x, y, value]), [
     [26, 242, 'DENDROGEO - DGR-123'],
-    [318, 242, 'DENDROGEO 2026'],
+    [306, 242, 'DENDROGEO 2026'],
     [26, 262, 'VERI: WorldCover 2021 / COZUNURLUK: 10 M / PROJEKSIYON: EPSG:4326'],
     [26, 282, 'ANALIZ TARIHI: 12.10.2026 / DENDROGEO LC ENGINE V3.4 / CC BY-NC 4.0']
   ]);
