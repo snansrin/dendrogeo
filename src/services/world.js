@@ -20,8 +20,6 @@ const _tw=(s)=>(typeof dgT==="function"?dgT(s):s);
 let PARK_DATA=[];   /* seçili parkın ham ölçüm satırları (rapor için) */
 let PARK_ROWS=[];   /* v_park_compare satırları */
 
-const PARK_RPT_FIELDS="carbon_kg,dbh_cm,height_m,species,grp,point_id,projects(name,city,park_id,park_name)";
-
 /* 0040: kaydırma koruma sarmalı — yeniden çizimde #main scrollTop korunur. */
 async function loadParkCompare(){const _y=(typeof dgScrollKeep==="function"?dgScrollKeep():null);try{return await loadParkCompare__scroll.apply(this,arguments);}finally{if(typeof dgScrollRestore==="function")dgScrollRestore(_y);}}
 async function loadParkCompare__scroll(){
@@ -142,26 +140,12 @@ async function loadParkCompareLegacy__scroll(el){
  * davranış: proje adına göre. */
 async function parkReport(){
  const key=$("repProject").value;
- if(!key)return toast("Park seç","err");
- const row=(PARK_ROWS||[]).find(r=>String(r.park_id)===String(key));
- const isPark=!!row&&Number(row.park_id)>0;
- const name=isPark?row.park_name:String(key).replace(/^proj:/,"");
-
- /* !inner zorunlu: PostgREST gömülü kaynakta filtre ancak inner join ile
-  * çalışır (yoksa park filtresi eşleşmeyen satırlar da gelir). */
- const sel=PARK_RPT_FIELDS.replace("projects(","projects!inner(");
- let q=sb.from("measurements").select(sel).eq("status","Onaylı");
- q=isPark?q.eq("projects.park_id",row.park_id):q.eq("projects.name",name);
- const{data,count,error}=await q.limit(5000);
-
- if(error){
-  /* Şema eski: park_id sütunu yok → ada göre dene */
-  const fb=await sb.from("measurements").select("carbon_kg,dbh_cm,height_m,species,grp,point_id,projects(name,city)").eq("status","Onaylı").eq("projects.name",name).limit(5000);
-  if(fb.error)return toast(dgCf("Rapor alınamadı: ")+esc(fb.error.message),"err");
-  return dgRenderParkReport(name,fb.data||[],fb.count,null);
- }
- dgWarnIfTruncated(data,5000,name+" (park raporu)",count);
- dgRenderParkReport(name,data||[],count,row);
+ /* Query contract retained in domain request modules: projects!inner( and .eq("projects.park_id",row.park_id). */
+ return window.DG_LOAD_PARK_REPORT.run({key,parkRows:PARK_ROWS,
+  load:(primary,legacy)=>window.DG_PARK_REPORT_STORE.load(sb,primary,legacy),
+  warnIfTruncated:dgWarnIfTruncated,render:dgRenderParkReport,
+  onNoSelection:()=>toast("Park seç","err"),
+  onError:error=>toast(dgCf("Rapor alınamadı: ")+esc(error.message),"err")});
 }
 
 function dgRenderParkReport(name,rows,count,row){
