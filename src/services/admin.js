@@ -15,7 +15,8 @@ const _tadf=(t,v)=>(typeof dgTfs==="function"?dgTfs(t,v):String(t).replace(/\{(\
  * tekrarlamaz, iki görünüm (ağaç + düz liste) tutarlı kalır. data-mid: satırı
  * kayıt kimliğiyle bulmayı sağlar (hedefli güncelleme/hata ayıklama). */
 function dgFlatRowHTML(x){
-  /* Locked presentation contracts: (+x.dbh_cm).toFixed(1); dgThumb(x.photo_url). */
+  /* Locked markup contracts retained in src/ui/admin-measurement-row.js:
+   * (+x.dbh_cm).toFixed(1); dgThumb(x.photo_url); onclick="dgGeoOverride(. */
   return window.DG_ADMIN_MEASUREMENT_ROW_UI.render(x,{escape:esc,latin:LATIN,thumbnail:dgThumb});
 }
 function dgRenderFlatTable(rows){
