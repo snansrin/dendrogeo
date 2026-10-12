@@ -251,6 +251,11 @@ function bootRet(opts) {
     'src/adapters/reports/own-approved-measurements-store.js',
     'src/adapters/reports/user-retraction-store.js',
     'src/application/reports/load-user-publication.js',
+    'src/domain/reports/publication-request-error.js',
+    'src/application/reports/request-publication.js',
+    'src/application/reports/cancel-publication-request.js',
+    'src/adapters/reports/retraction-insert-store.js',
+    'src/domain/reports/retraction-request-error.js',
   ]) vm.runInContext(read(path), ctx, { filename: path });
   vm.runInContext(read('src/application/reports/collect-publication-request.js'), ctx, { filename: 'collect-publication-request.js' });
   vm.runInContext(UI, ctx, { filename: 'report-publish.js' });

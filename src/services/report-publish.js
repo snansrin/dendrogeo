@@ -284,44 +284,39 @@ async function dgPubInsertRequest(parkId,lulc,note){
 /* Hata metni eşleme: PostgREST, RLS reddini ve tetikleyici hatalarını gövdede
  * taşır (REPORT_QUOTA / REPORT_NOT_YOUR_PARK / REPORT_NO_OWN_DATA / …). */
 function dgPubInsertError(r){
- const txt=String(r.txt||"");
- if(!r.status||/^NETWORK/.test(txt))return"Ağ hatası: "+txt.replace(/^NETWORK\s*/,"").slice(0,160);
- if(/does not exist|42P01/i.test(txt)||r.status===404)return"0008_report_publish.sql çalıştırılmalı (report_requests tablosu yok).";
- if(/duplicate key|23505/i.test(txt))return dgCf("Bu park için bekleyen bir istek zaten var — kuyruktaki iş bitsin.");
- if(/REPORT_QUOTA|DG0QT/i.test(txt))return"Günlük yayın isteği sınırına ulaştın (24 saatte 3) — sonra yeniden dene.";
- if(/REPORT_NOT_YOUR_PARK|DG0NP/i.test(txt))return"Bu park senin projene bağlı değil — yalnız kendi parkının raporunu yayınlayabilirsin.";
- if(/REPORT_NO_OWN_DATA|DG0ND/i.test(txt))return"Bu parkta onaylı ölçümün yok — ölçümlerin onaylanınca yayın isteyebilirsin.";
- if(/REPORT_NOT_SELF|DG0NS/i.test(txt))return"Yayın isteği yalnız kendi adına açılabilir.";
- if(/REPORT_NO_DATA|DGR0RD|22023/i.test(txt))return"Bu parkta onaylı ölçüm yok; rapor üretilemez.";
- if(/42501|401|403|row-level|permission/i.test(txt))return"Yetki yok: bu park için yayın isteği açamazsın.";
- return"İstek yazılamadı (HTTP "+r.status+"): "+txt.slice(0,160);
+ return window.DG_PUBLICATION_REQUEST_ERROR.message(r,dgCf);
 }
 
 async function dgPublishReport(parkId){
  if(typeof dgPresenceAct==="function"){try{dgPresenceAct("publish","park #"+parkId);}catch(e){}}
  if(!dgPubAdmin())return toast("Rapor yayını yalnız yönetici içindir.","err","📄");
  const lulc=$("dgPubLulc")?$("dgPubLulc").checked!==false:true;
- const r=await dgReportCollectRequest(parkId,lulc);if(!r)return;
- if(r.ok){
-  toast("📄 Yayın isteği kuyruğa alındı — rapor birkaç dakika içinde burada bağlanacak.","ok","📄");
-  DG_PUB_STATE.pollCount=0;
-  await dgLoadPublishQueue();
-  dgPubSchedulePoll();
-  return;
- }
- const msg=dgPubInsertError(r);
- if(/0008_report_publish/.test(msg))DG_PUB_STATE.error="SCHEMA";
- toast(msg,"err","📄");
- dgPubRender();
+ return window.DG_REQUEST_PUBLICATION.execute(parkId,lulc,{
+  collect:dgReportCollectRequest,
+  onSuccess:async()=>{
+   toast("📄 Yayın isteği kuyruğa alındı — rapor birkaç dakika içinde burada bağlanacak.","ok","📄");
+   DG_PUB_STATE.pollCount=0;
+   await dgLoadPublishQueue();
+   dgPubSchedulePoll();
+  },
+  onFailure:r=>{
+   const msg=dgPubInsertError(r);
+   if(/0008_report_publish/.test(msg))DG_PUB_STATE.error="SCHEMA";
+   toast(msg,"err","📄");
+   dgPubRender();
+  }
+ });
 }
 
 async function dgPublishCancel(id){
- if(!dgPubAdmin())return toast("Yalnız yönetici iptal edebilir.","err","📄");
- if(!confirm(dgCf("Bekleyen yayın isteği iptal edilsin mi?")))return;
- const{error}=await window.DG_REPORT_PUBLICATION_CANCEL_STORE.cancel(sb,id,new Date().toISOString());
- if(error)return toast(dgCf("İptal edilemedi: ")+esc(error.message),"err","📄");
- toast("İstek iptal edildi.","ok","📄");
- await dgLoadPublishQueue();
+ return window.DG_CANCEL_PUBLICATION_REQUEST.execute({
+  canCancel:dgPubAdmin,
+  onDenied:()=>toast("Yalnız yönetici iptal edebilir.","err","📄"),
+  confirm:()=>confirm(dgCf("Bekleyen yayın isteği iptal edilsin mi?")),
+  cancel:()=>window.DG_REPORT_PUBLICATION_CANCEL_STORE.cancel(sb,id,new Date().toISOString()),
+  onFailure:error=>toast(dgCf("İptal edilemedi: ")+esc(error.message),"err","📄"),
+  onSuccess:async()=>{toast("İstek iptal edildi.","ok","📄");await dgLoadPublishQueue();}
+ });
 }
 
 /* ---------- GERİ ÇEKME (0010): yayımlanmış rapor yayından kaldırılır ----------
@@ -332,33 +327,14 @@ async function dgPublishCancel(id){
  * projesinin parkının raporunu geri çekebilir (RLS + tg_report_retraction_gate).
  * report_id ↔ park_id eşleşmesini Actions günlükle ayrıca doğrular. */
 async function dgRetractInsert(reportId,parkId,reason){
- let token=SB_KEY;
- try{const{data}=await sb.auth.getSession();if(data&&data.session&&data.session.access_token)token=data.session.access_token;}catch(e){}
- try{
-  const r=await fetch(SB_URL+"/rest/v1/report_retractions",{
-   method:"POST",
-   headers:{"apikey":SB_KEY,"Authorization":"Bearer "+token,"Content-Type":"application/json","Prefer":"return=minimal"},
-   body:JSON.stringify([{report_id:String(reportId),park_id:Number(parkId),reason:reason||null,status:"Beklemede",
-    requested_by:(typeof USER!=="undefined"&&USER&&USER.id)||null}])
-  });
-  const ok=r.status===201||r.status===200;
-  const txt=ok?"":((await r.text().catch(()=> ""))||"");
-  return{ok:ok,status:r.status,txt:txt};
- }catch(e){return{ok:false,status:0,txt:"NETWORK "+((e&&e.message)||e)};}
+ return window.DG_REPORT_RETRACTION_INSERT_STORE.insert(sb,{
+  fetch,supabaseUrl:SB_URL,anonKey:SB_KEY,reportId,parkId,reason,
+  userId:(typeof USER!=="undefined"&&USER&&USER.id)||null
+ });
 }
 
 function dgRetractError(r){
- const txt=String(r.txt||"");
- if(!r.status||/^NETWORK/.test(txt))return "Ağ hatası: "+txt.replace(/^NETWORK\s*/,"").slice(0,160);
- if(/does not exist|42P01/i.test(txt)||r.status===404)return "Geri çekme kuyruğu kurulu değil: Supabase SQL Editor'da 0010_report_retraction.sql çalıştırılmalı.";
- if(/RETRACT_BAD_ID|DG0RF/i.test(txt))return "Rapor kimliği geçersiz (DGR-YYYY-NNNN bekleniyor).";
- if(/RETRACT_DUPLICATE|DG0RD|duplicate key|23505/i.test(txt))return "Bu rapor için bekleyen bir geri çekme isteği zaten var.";
- if(/RETRACT_QUOTA|DG0RQ/i.test(txt))return "Günlük geri çekme sınırına ulaştın (24 saatte 3) — sonra yeniden dene.";
- if(/RETRACT_NOT_YOUR_PARK|DG0RP/i.test(txt))return "Bu park senin projene bağlı değil — yalnız kendi parkının yayınını geri çekebilirsin.";
- if(/RETRACT_NOT_SELF|DG0RN/i.test(txt))return "Geri çekme isteği yalnız kendi adına açılabilir.";
- if(/RETRACT_INACTIVE|DG0RI/i.test(txt))return "Hesabın etkin değil.";
- if(/42501|401|403|row-level|permission/i.test(txt))return "Yetki yok: bu rapor için geri çekme isteği açamazsın.";
- return "İstek yazılamadı (HTTP "+r.status+"): "+txt.slice(0,160);
+ return window.DG_RETRACTION_REQUEST_ERROR.message(r);
 }
 
 async function dgReportRetract(reportId,parkId){
@@ -532,29 +508,34 @@ function dgUserPubRender(){
 async function dgUserPublish(parkId){
  if(typeof USER==="undefined"||!USER)return toast("Önce giriş yap.","err","📄");
  const lulc=$("dgUserPubLulc")?$("dgUserPubLulc").checked!==false:true;
- const r=await dgReportCollectRequest(parkId,lulc);if(!r)return;
- if(r.ok){
-  toast("📄 Yayın isteği kuyruğa alındı — rapor birkaç dakika içinde burada bağlanacak.","ok","📄");
-  DG_USER_PUB.polls=0;
-  await dgUserPubRefresh();
-  return;
- }
- const msg=dgPubInsertError(r);
- if(/0008_report_publish/.test(msg))DG_USER_PUB.error="SCHEMA";
- toast(msg,"err","📄");
- dgUserPubRender();
+ return window.DG_REQUEST_PUBLICATION.execute(parkId,lulc,{
+  collect:dgReportCollectRequest,
+  onSuccess:async()=>{
+   toast("📄 Yayın isteği kuyruğa alındı — rapor birkaç dakika içinde burada bağlanacak.","ok","📄");
+   DG_USER_PUB.polls=0;
+   await dgUserPubRefresh();
+  },
+  onFailure:r=>{
+   const msg=dgPubInsertError(r);
+   if(/0008_report_publish/.test(msg))DG_USER_PUB.error="SCHEMA";
+   toast(msg,"err","📄");
+   dgUserPubRender();
+  }
+ });
 }
 
 async function dgUserCancel(id){
  const mine=(typeof USER!=="undefined"&&USER&&USER.id)||"";
  const row=DG_USER_PUB.requests.find(r=>String(r.id)===String(id));
  const own=!!(row&&String(row.requested_by||"")===String(mine));
- if(!own&&!dgPubAdmin())return toast("Yalnız kendi bekleyen isteğini iptal edebilirsin.","err","📄");
- if(!confirm(dgCf("Bekleyen yayın isteği iptal edilsin mi?")))return;
- const{error}=await window.DG_REPORT_PUBLICATION_CANCEL_STORE.cancel(sb,id,new Date().toISOString());
- if(error)return toast(dgCf("İptal edilemedi: ")+esc(error.message),"err","📄");
- toast("İstek iptal edildi.","ok","📄");
- await dgUserPubRefresh();
+ return window.DG_CANCEL_PUBLICATION_REQUEST.execute({
+  canCancel:()=>own||dgPubAdmin(),
+  onDenied:()=>toast("Yalnız kendi bekleyen isteğini iptal edebilirsin.","err","📄"),
+  confirm:()=>confirm(dgCf("Bekleyen yayın isteği iptal edilsin mi?")),
+  cancel:()=>window.DG_REPORT_PUBLICATION_CANCEL_STORE.cancel(sb,id,new Date().toISOString()),
+  onFailure:error=>toast(dgCf("İptal edilemedi: ")+esc(error.message),"err","📄"),
+  onSuccess:async()=>{toast("İstek iptal edildi.","ok","📄");await dgUserPubRefresh();}
+ });
 }
 
 /* Kendi bekleyen isteği varken ve panel görünürken 25 sn'de bir sessiz tazeleme
