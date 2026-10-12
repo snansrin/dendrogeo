@@ -18,6 +18,9 @@ Halka dolgusu, sınır/halo çizgisi ve dairesel envanter noktası çizimi ayrı
 ### İyileştirildi — Rapor haritası koordinat projeksiyonu
 Tuval boyutu, yerel metre ölçeği ve koordinatların X/Y piksel dönüşümü ayrı modüle alındı; çok halkalı park sınırı ve mevcut görünüm ölçüleri korunuyor.
 
+### İyileştirildi — Rapor haritası sınıf lejantı
+PNG sınıf takma adları ve lejant satır sırası ayrı sunum modülüne alındı; havuzun yalnızca haritada suyla birleştirilmesi ve maskeli alan satırı koşulu korundu.
+
 ### İyileştirildi — Park geometrisi backfill modülü
 Yönetim ekranındaki OSM sınırı backfill akışı uygulama use-case'ine taşındı; yetki, park bulunamaması, OSM hatası, yazım hatası ve başarılı yenileme sonuçları eski bildirimlerle korunuyor. OSM way/relation sınır çözümlemesi adapter'a ayrıldı ve uygulama/adapter için odaklı testler eklendi.
 
