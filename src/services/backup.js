@@ -17,13 +17,7 @@ async function fullBackup(){
     try{ reqs = await fetchAllRows("data_requests","created_at"); }catch(e){ reqs = []; }
     const backup=window.DG_BACKUP_SNAPSHOT.build({measurements:meas,projects:projs,waypoints:wps,requests:reqs},{exportedAt:new Date().toISOString(),exportedBy:(PROFILE&&PROFILE.full_name)||""});
     const name="dendrogeo_yedek_"+new Date().toISOString().slice(0,10)+".json";
-    const a=document.createElement("a");
-    a.href=URL.createObjectURL(new Blob([JSON.stringify(backup,null,2)],{type:"application/json"}));
-    a.download=name;
-    document.body.appendChild(a);
-    a.click();
-    a.remove();
-    setTimeout(()=>URL.revokeObjectURL(a.href),5000);
+    window.DG_BACKUP_JSON_DOWNLOAD.download(window,backup,name);
     localStorage.setItem("dg_lastBackup", new Date().toISOString());
     toast((typeof dgTfs==="function"?dgTfs("✓ Yedek indirildi: {f} ({n} ölçüm)",{f:name,n:meas.length}):("✓ Yedek indirildi: "+name+" ("+meas.length+" ölçüm)")),"ok","💾");
   }catch(e){
