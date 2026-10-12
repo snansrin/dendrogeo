@@ -9,6 +9,9 @@ Yeni sürüm yayımlama adımları: [`docs/surum-yayini.md`](docs/surum-yayini.m
 
 ## [Yayımlanmadı]
 
+### İyileştirildi — Rapor haritası başlık künyesi
+Park adı, başlık satırları ve rapor kimliğinin PNG’ye çizimi ayrı sunum modülüne taşındı; metin koşulları, renkler ve piksel konumları korundu.
+
 ### İyileştirildi — Rapor haritası yüzey katmanları
 Veri-yok tabanı, hücre/yüzey örtüsü, sınır dışı piksel temizliği ve ince çerçevenin çizim sırası ayrı modüle alındı; sınıf renkleri, çok halkalı kırpma ve mevcut PNG çıktısı korundu.
 
