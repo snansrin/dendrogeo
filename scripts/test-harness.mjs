@@ -218,6 +218,11 @@ export function loadApp({ sadece } = {}) {
     'src/domain/admin/filter-measurement-tree.js',
     'src/ui/admin-tree-formatters.js',
     'src/ui/admin-tree-pending-summary.js',
+    'src/ui/admin-tree-measurement-row.js',
+    'src/ui/admin-tree-user.js',
+    'src/ui/admin-tree-project.js',
+    'src/ui/admin-tree-park.js',
+    'src/ui/admin-tree-view.js',
     'src/services/admin-tree.js',
   ];
   const secim = sadece ? new Set(sadece) : null;
@@ -235,6 +240,11 @@ export function loadApp({ sadece } = {}) {
     secim.add('src/domain/admin/filter-measurement-tree.js');
     secim.add('src/ui/admin-tree-formatters.js');
     secim.add('src/ui/admin-tree-pending-summary.js');
+    secim.add('src/ui/admin-tree-measurement-row.js');
+    secim.add('src/ui/admin-tree-user.js');
+    secim.add('src/ui/admin-tree-project.js');
+    secim.add('src/ui/admin-tree-park.js');
+    secim.add('src/ui/admin-tree-view.js');
   }
   if (secim && secim.has('src/services/visit-stats.js')) {
     secim.add('src/application/visitors/build-live-activity.js');

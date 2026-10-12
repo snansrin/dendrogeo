@@ -682,3 +682,13 @@ Her modülün tek bir dış API'si, sahibi olduğu açık durumu ve kendi testle
 - `ui/admin-tree-formatters.js`, karbon, bekleyen rozeti, durum özeti ve durum etiketlerini üretir.
 
 - `ui/admin-tree-pending-summary.js`, bekleyen kayıtları park/proje/kullanıcı düzeyinde özetleyip yönetim kısayollarını çizer.
+
+- `ui/admin-tree-measurement-row.js`, ölçüm değerlerini, görsel önizlemeyi ve moderasyon işlemlerini satıra dönüştürür.
+
+- `ui/admin-tree-user.js`, kullanıcı ölçüm tablosunu ve bekleyen/onay/red özetini üretir.
+
+- `ui/admin-tree-project.js`, proje düğümünü, kullanıcı alt ağacını ve yetkili silme eylemini çizer.
+
+- `ui/admin-tree-park.js`, park düğümünde alan, t/ha ve proje toplamlarını sunar.
+
+- `ui/admin-tree-view.js`, ağaç hata/boş durumlarını, özet sayaçlarını ve genişletme eylemlerini çizer.
