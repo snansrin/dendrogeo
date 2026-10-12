@@ -213,6 +213,11 @@ function bootUser(opts) {
     'src/application/reports/cancel-publication-request.js',
     'src/adapters/reports/retraction-insert-store.js',
     'src/domain/reports/retraction-request-error.js',
+    'src/application/reports/open-user-publication-panel.js',
+    'src/application/reports/close-user-publication-panel.js',
+    'src/application/reports/sync-user-publication-panel.js',
+    'src/application/reports/schedule-user-publication-poll.js',
+    'src/application/reports/share-report-link.js',
   ]) vm.runInContext(read(path), ctx, { filename: path });
   vm.runInContext(read('src/application/reports/collect-publication-request.js'), ctx, { filename: 'collect-publication-request.js' });
   vm.runInContext(UI, ctx, { filename: 'report-publish.js' });

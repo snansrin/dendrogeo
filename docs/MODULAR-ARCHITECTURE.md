@@ -612,3 +612,13 @@ Her modülün tek bir dış API'si, sahibi olduğu açık durumu ve kendi testle
 - `adapters/reports/retraction-insert-store.js`, geri çekme POST'unu kullanıcı oturum JWT'si, `Prefer: return=minimal` ve mevcut istek gövdesiyle taşır; RLS kararları Supabase'te kalır.
 
 - `domain/reports/retraction-request-error.js`, geri çekme API hata kodlarını mevcut Türkçe kullanıcı mesajlarına çevirir.
+
+- `application/reports/open-user-publication-panel.js`, giriş/proje/park kapılarını ve seçili park panelini açma sırasını servis portlarıyla yönetir.
+
+- `application/reports/close-user-publication-panel.js`, panel kapanırken zamanlayıcıyı durdurur, seçili kimlikleri sıfırlar ve görünümü temizler.
+
+- `application/reports/sync-user-publication-panel.js`, proje listesi güncellendiğinde seçili proje silinmişse paneli kapatır.
+
+- `application/reports/schedule-user-publication-poll.js`, yalnız kullanıcının tamamlanmamış isteği varken sınırlı yoklamayı ve görünürlük kapılarını uygular.
+
+- `application/reports/share-report-link.js`, doğrulanmış rapor bağlantısını paylaşır veya yeni sekmede açar; paylaşım API'si, pano ve prompt sırasını korur.
