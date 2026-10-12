@@ -209,38 +209,7 @@ function renderVisitorsLive(){
  if($("visStatus")){const st=dgPresenceState();$("visStatus").textContent=(st==="on"?"Canlı bağlantı":"Bağlantı: "+st)+" · "+rows.length+" / "+all.length+" kullanıcı · "+new Date().toLocaleTimeString("tr-TR",{hour:"2-digit",minute:"2-digit"});const wrap=$("visStatus").closest(".visitor-connection");if(wrap)wrap.dataset.state=st;}
  if(box){
   const T=(s)=>(typeof dgCf==="function"?dgCf(s):s);
-if(!rows.length){
-   const stt=dgPresenceState();
-   box.textContent=stt==="on"?T(all.length?"Seçili filtrelere uyan kullanıcı yok. Filtreleri temizleyebilirsiniz.":"Şu an bağlı kullanıcı yok.")
-    :stt==="connecting"?T("⏳ gerçek zamanlı katmana bağlanılıyor…")
-    :T("Canlı bağlantı yeniden kuruluyor. Yenile düğmesiyle tekrar bağlanabilirsiniz.");
-  }else{
-   box.innerHTML=rows.map(r=>{
-    const lbl=(DG_VIEW_LABELS[r.p.v]||r.p.v||"?");
-    const ageTxt=r.age<60?r.age+" "+T("sn"):Math.round(r.age/60)+" "+T("dk");
-    const hasLoc=dgVisHasLocation(r.p);
-    const role=r.p.r==="owner"?"KURUCU":(r.p.r==="admin"?"DENETÇİ":"KULLANICI");
-    const rc=r.p.r==="owner"?"on":(r.p.r==="admin"?"admin":"off");
-    const ses=r.p.st?Math.max(0,Math.round((Date.now()-r.p.st)/60000)):null;
-    const chain=(Array.isArray(r.p.vh)?r.p.vh:[]).slice(-3).map(h=>esc(T(DG_VIEW_LABELS[h.v]||h.v))).join(" → ");
-    const actTxt=r.p.act?T(DG_ACT_LABELS[r.p.act.k]||r.p.act.k)+(r.p.act.d?" · "+esc(r.p.act.d):""):"";
-    return '<div class="dg-vis-person" style="padding:6px 0;border-bottom:1px solid var(--line)'+(hasLoc?";cursor:pointer":"")+'"'+
-     (hasLoc?' onclick="dgVisFocus('+Number(r.p.la)+','+Number(r.p.lo)+')" title="'+T("Haritada odaklan")+'"':'')+'>'+
-     '<div style="display:flex;gap:8px;align-items:center">'+
-     '<span style="width:9px;height:9px;border-radius:50%;background:var(--green);flex:0 0 auto"></span>'+
-     '<b>'+esc(r.p.n||"?")+'</b>'+(r.p.hidden||r.age>120?'<span class="badge off">ARKA PLAN</span>':'')+
-     '<span class="badge '+rc+'" style="font-size:.6rem">'+role+'</span>'+
-     '<span style="color:var(--mut)">· '+esc(T(lbl))+(hasLoc?" 📍":"")+'</span>'+
-     '<span class="dg-meta" style="margin-left:auto;white-space:nowrap">'+ageTxt+" "+T("önce")+'</span></div>'+
-     '<div class="dg-meta" style="margin:3px 0 0 17px">'+
-     (r.p.dev?"🖥 "+esc(r.p.dev)+" · ":"")+
-     (ses!=null?T("oturum")+" "+ses+" "+T("dk")+" · ":"")+
-     (chain?T("gezinti")+": "+chain:"")+
-     (actTxt?" · "+T("son eylem")+": "+actTxt:"")+
-     (r.p.lh&&r.p.lh.length>1?" · 🧭 "+T("iz")+" ("+r.p.lh.length+")":"")+
-     '</div></div>';
-   }).join("");
-  }
+  DG_VISITOR_ROSTER_UI.render(box,rows,{state:dgPresenceState(),allCount:all.length,viewLabels:DG_VIEW_LABELS,actionLabels:DG_ACT_LABELS,hasLocation:dgVisHasLocation,deviceLabel:r=>r.p.dev,translate:T,escape:esc});
   dgVisFeed(rows);
  }
  dgVisMapDraw(rows);
