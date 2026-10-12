@@ -159,9 +159,7 @@ ${renderReferencesPresentation(L)}
 ${renderReportDataAccess({L, M})}
 <div class="foot">DendroGeo · Küresel Ağaç Envanteri ve Karbon Veri Sistemi · ${DGR_TITLE_DEF} · Bu sayfa yayın anında dondurulmuştur; sonraki çözümlemeler yeni DGR kimliği alır, geri çekmeler günlüğe işlenir. CC BY-NC 4.0 · © DendroGeo</div>
 </div>
-<script>
-${renderReportDocumentClientScript({hash, snapshot: snap, shareScript: REPORT_SHARE_SCRIPT})}
-</script>
+<script>${renderReportDocumentClientScript({hash, snapshot: snap, shareScript: REPORT_SHARE_SCRIPT})}</script>
 </body>
 </html>`;
 };
