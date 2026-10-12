@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 import {createReportPublicationApplication} from './lib/report-publication-application.mjs';
+import {createReportRepositoryAccess} from './lib/report-repository-access.mjs';
 import {resolveReportSiteOrigin} from './lib/report-site-origin.mjs';
 import {createReportCliArguments} from './lib/report-cli-arguments.mjs';
 import {createReportSpeciesPresentation, sw} from './lib/report-species-presentation.mjs';
@@ -58,7 +59,6 @@ import { reviewedSurface } from './surface-report.mjs';
  *   GitHub Actions: workflow_dispatch "Rapor Yayınla" (rapor.yml)
  */
 import { readFileSync, writeFileSync, mkdirSync } from 'node:fs';
-import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { execSync } from 'node:child_process';
 import { mcTotalCI, mcRowCI, MC_CFG, loadRho, loadSpeciesDict, QA_LIMITS, QA_STATE, qaStateOf, DBH_REASON_TR, carbonKg, YASAL_STATU_KAPSAM } from './lib/mc.mjs';
@@ -89,8 +89,7 @@ let QRlib = null;
 try { QRlib = require_('qrcode'); } catch (e) { QRlib = null; }
 export const qrDataUri = createQrDataUri(QRlib);
 
-const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
-const read = (p) => readFileSync(join(ROOT, p), 'utf8');
+const {root:ROOT, read} = createReportRepositoryAccess(import.meta.url);
 /* Yayın kökü: CNAME'den türetilir (elle yazılmış sabit URL sürüklenmesin). */
 const SITE_ORIGIN = resolveReportSiteOrigin(read);
 const renderCitationPresentation = createReportCitationPresentation({citeName, siteOrigin: SITE_ORIGIN});
