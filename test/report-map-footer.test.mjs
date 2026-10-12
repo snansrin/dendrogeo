@@ -30,7 +30,7 @@ test('report map footer preserves document ID, brand, source, projection, and da
     [26, 282, 'ANALIZ TARIHI: 12.10.2026 / DENDROGEO LC ENGINE V3.4 / CC BY-NC 4.0']
   ]);
   assert.deepEqual(canvas.texts.map(([, , , color, size]) => [color, size]), [
-    [tones.ink, 2], [tones.mut, 2], [tones.mut, 2], [tones.mut, 2]
+    [tones.ink, 2], [tones.mut, 2], [tones.mut, 1], [tones.mut, 1]
   ]);
 });
 
