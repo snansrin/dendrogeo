@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 import {createReportPublicationApplication} from './lib/report-publication-application.mjs';
+import {readReportGitCommit} from './lib/report-git-commit.mjs';
 import {createReportRepositoryAccess} from './lib/report-repository-access.mjs';
 import {resolveReportSiteOrigin} from './lib/report-site-origin.mjs';
 import {createReportCliArguments} from './lib/report-cli-arguments.mjs';
@@ -60,7 +61,6 @@ import { reviewedSurface } from './surface-report.mjs';
  */
 import { readFileSync, writeFileSync, mkdirSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
-import { execSync } from 'node:child_process';
 import { mcTotalCI, mcRowCI, MC_CFG, loadRho, loadSpeciesDict, QA_LIMITS, QA_STATE, qaStateOf, DBH_REASON_TR, carbonKg, YASAL_STATU_KAPSAM } from './lib/mc.mjs';
 import { canonicalHash } from './lib/canonical-hash.mjs';
 import {readReportRuntimeProvenance} from './lib/report-runtime-provenance.mjs';
@@ -100,7 +100,7 @@ const {arg, has} = createReportCliArguments(process.argv);
  * git commit üretim anındaki depodan okunur. Değer yoksa null → rapor '—'
  * basar; ASLA uydurulmaz. */
 const {engineVersion:ENGINE_VERSION, appVersion:APP_VERSION, gitCommit:GIT_COMMIT} = readReportRuntimeProvenance({
-  read, readGitCommit:()=>execSync('git rev-parse HEAD', {cwd:ROOT, encoding:'utf8', stdio:['ignore','pipe','ignore']})
+  read, readGitCommit:()=>readReportGitCommit(ROOT)
 });
 const DATASET_DEFAULT = 'ESA WorldCover 10 m · 2021 (v200)';
 
