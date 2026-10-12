@@ -70,7 +70,7 @@ import { pointInRing, pointInPolygon, ringSelfIntersections, geometrySelfInterse
 export { pointInRing, pointInPolygon, ringSelfIntersections, geometrySelfIntersections, bboxRing, ringGeodesicAreaM2 };
 import { DGR_ID_RE, rebuildIndex, nextReportId, parkHistory } from './lib/report-archive.mjs';
 export { DGR_ID_RE, rebuildIndex, nextReportId, parkHistory };
-import { citeName, fmtDateTr, fmtDateDot, epsgLabel, formatReportNumber as trNum } from './lib/report-formatting.mjs';
+import { citeName, fmtDateTr, fmtDateDot, epsgLabel, formatReportNumber as trNum, formatReportTonnesFromKg as fmtT } from './lib/report-formatting.mjs';
 import {escapeReportHtml} from './lib/report-html-escaping.mjs';
 export { citeName, fmtDateTr, fmtDateDot, epsgLabel };
 import { createRetractionNotice } from './lib/report-retraction.mjs';
@@ -79,7 +79,6 @@ import { resolveReportAuthor } from './lib/report-author.mjs';
 import { REPORT_SHARE_SCRIPT } from './lib/report-share.mjs';
 import { reportStyles } from './lib/report-style.mjs';
 import { summarizeReportMeasurements } from './lib/report-measurement-summary.mjs';
-const fmtT = value => trNum(value / 1000, 2);
 import { createRequire } from 'node:module';
 const require_ = createRequire(import.meta.url);
 /* qrcode (MIT) YALNIZ build bağımlılığıdır. Kurulu değilse (örn. npm install

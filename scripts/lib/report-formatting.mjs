@@ -36,3 +36,8 @@ export function epsgLabel(epsg) {
 export function formatReportNumber(x, d = 2) {
   return Number(x).toLocaleString('tr-TR', { minimumFractionDigits: d, maximumFractionDigits: d });
 }
+
+/* Format kilograms as metric tonnes for the existing report display. */
+export function formatReportTonnesFromKg(valueKg) {
+  return formatReportNumber(valueKg / 1000, 2);
+}
