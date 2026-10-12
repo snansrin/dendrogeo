@@ -113,6 +113,7 @@ const DG_DEV_TAG=(()=>{try{
 }catch(e){return "?";}})();
 const DG_ACT_LABELS={save:"ölçüm kaydetti",edit:"kayıt güncelledi",park:"park algıladı",export:"dışa aktardı",publish:"rapor yayını istedi"};
 const DG_VISITOR_ACTIVITY=window.DG_VISITOR_ACTIVITY_APPLICATION.create();
+const DG_VISITOR_STORED_ACTIVITY=window.DG_VISITOR_STORED_ACTIVITY_APPLICATION.create();
 const DG_VISITOR_SESSION_EVENTS=window.DG_VISITOR_SESSION_EVENTS_APPLICATION.create();
 /* Sekme değişince çağrılır (shell go()): gezinme zincirine yazar. */
 function dgPresenceView(v){
@@ -313,25 +314,25 @@ async function dgVisActivity(){
  const box=$("visActivity");if(!box)return;
  const T=(s)=>(typeof dgCf==="function"?dgCf(s):s);
  const loc=(typeof DG_LANG!=="undefined"&&DG_LANG==="en")?"en-GB":"tr-TR";
- const rows=[];
- const push=(t2,who,what,det)=>rows.push({t:t2,who:who,what:what,det:det});
+ const datasets={measurements:[],projects:[],dataRequests:[],reportRequests:[]};
  try{
-  const{data}=await sb.from("measurements").select("id,point_id,species,status,created_at,profiles!measurements_owner_fkey(full_name)").order("created_at",{ascending:false}).limit(40);
-  (data||[]).forEach(m=>push(m.created_at,(m.profiles&&m.profiles.full_name)||"—",T("ölçüm kaydı"),"P"+m.point_id+" · "+((typeof dgT==="function"?dgT(m.species||""):m.species)||"—")+" · "+((typeof dgT==="function"?dgT(m.status||""):m.status)||"—")));
+  const{data:records}=await sb.from("measurements").select("id,point_id,species,status,created_at,profiles!measurements_owner_fkey(full_name)").order("created_at",{ascending:false}).limit(40);
+  datasets.measurements=records||[];
  }catch(e){}
  try{
-  const{data}=await sb.from("projects").select("id,name,created_at,profiles(full_name)").order("created_at",{ascending:false}).limit(20);
-  (data||[]).forEach(p2=>push(p2.created_at,(p2.profiles&&p2.profiles.full_name)||"—",T("proje oluşturdu"),p2.name||""));
+  const{data:records}=await sb.from("projects").select("id,name,created_at,profiles(full_name)").order("created_at",{ascending:false}).limit(20);
+  datasets.projects=records||[];
  }catch(e){}
  try{
-  const{data}=await sb.from("data_requests").select("id,email,status,created_at").order("created_at",{ascending:false}).limit(20);
-  (data||[]).forEach(r=>push(r.created_at,r.email||"—",T("veri talebi"),(typeof dgT==="function"?dgT(r.status||""):r.status)||"—"));
+  const{data:records}=await sb.from("data_requests").select("id,email,status,created_at").order("created_at",{ascending:false}).limit(20);
+  datasets.dataRequests=records||[];
  }catch(e){}
  try{
-  const{data}=await sb.from("report_requests").select("id,status,created_at,park_id").order("created_at",{ascending:false}).limit(20);
-  (data||[]).forEach(r=>push(r.created_at,"—",T("rapor yayını istedi"),"park #"+r.park_id+" · "+((typeof dgT==="function"?dgT(r.status||""):r.status)||"—")));
+  const{data:records}=await sb.from("report_requests").select("id,status,created_at,park_id").order("created_at",{ascending:false}).limit(20);
+  datasets.reportRequests=records||[];
  }catch(e){}
- rows.sort((a,b)=>String(b.t||"").localeCompare(String(a.t||"")));
+ const translateValue=value=>typeof dgT==="function"?dgT(value||""):value;
+ const rows=DG_VISITOR_STORED_ACTIVITY.build(datasets,{translate:T,translateValue});
  DG_VISITOR_DATABASE_ACTIVITY_UI.render(box,rows,{locale:loc,translate:T,escape:esc});
 }
 
