@@ -49,6 +49,7 @@ function env({ndvi=false,ndviAvailable=true,gridCells=[],verified=false}={}){
  vm.runInContext(download,ctx,{filename:'gis-export-download.js'});
  vm.runInContext(verifiedFrame,ctx,{filename:'gis-export-verified-frame.js'});
  vm.runInContext(verifiedCanvas,ctx,{filename:'gis-export-verified-canvas.js'});
+ vm.runInContext(file('src/ui/gis-export-standard-layers.js'),ctx,{filename:'gis-export-standard-layers.js'});
  vm.runInContext(file('src/ui/gis-export-standard-canvas.js'),ctx);
  vm.runInContext(file('src/ui/gis-export-bootstrap.js'),ctx);
  vm.runInContext(file('src/ui/gis-export-presentation.js'),ctx);
@@ -66,7 +67,7 @@ test('PNG adapter is outside frozen scientific engine and does not mutate review
  assert.ok(lock.locked_files['src/ui/lc-sens.js']);
  assert.match(file('src/ui/gis-export-bootstrap.js'),/window\.downloadParkImage=exportMap/);
  assert.match(file('src/ui/gis-export-workflow.js'),/getGeometryApi\(\)\.project/);
- assert.match(file('src/ui/gis-export-standard-canvas.js'),/canvasApi\.drawLeaflet/);
+ assert.match(file('src/ui/gis-export-standard-layers.js'),/canvasApi\.drawLeaflet/);
  assert.match(file('src/bootstrap/gis-export.js'),/DG_GIS_EXPORT_VEGETATION\.waitForLayers/);
  assert.match(file('src/bootstrap/gis-export.js'),/DG_GIS_EXPORT_BOOTSTRAP\.install/);
  const {ctx}=env();
@@ -134,6 +135,7 @@ test('boot, SW and index will expose PNG adapter after locked exporter',()=>{
  assert.match(boot,/src\/ui\/gis-export-events\.js\?v=[a-f0-9]{8}/);
  assert.match(boot,/src\/ui\/gis-export-verified-canvas\.js\?v=[a-f0-9]{8}/);
  assert.match(boot,/src\/ui\/gis-export-verified-frame\.js\?v=[a-f0-9]{8}/);
+ assert.match(boot,/src\/ui\/gis-export-standard-layers\.js\?v=[a-f0-9]{8}/);
  assert.match(boot,/src\/ui\/gis-export-vegetation\.js\?v=[a-f0-9]{8}/);
  assert.match(boot,/src\/ui\/gis-export-layout\.js\?v=[a-f0-9]{8}/);
  assert.match(index,/src\/ui\/gis-export\.js\?v=[a-f0-9]{8}/);
@@ -146,6 +148,7 @@ test('boot, SW and index will expose PNG adapter after locked exporter',()=>{
  assert.match(index,/src\/ui\/gis-export-events\.js\?v=[a-f0-9]{8}/);
  assert.match(index,/src\/ui\/gis-export-verified-canvas\.js\?v=[a-f0-9]{8}/);
  assert.match(index,/src\/ui\/gis-export-verified-frame\.js\?v=[a-f0-9]{8}/);
+ assert.match(index,/src\/ui\/gis-export-standard-layers\.js\?v=[a-f0-9]{8}/);
  assert.match(index,/src\/ui\/gis-export-vegetation\.js\?v=[a-f0-9]{8}/);
  assert.match(index,/src\/ui\/gis-export-layout\.js\?v=[a-f0-9]{8}/);
  assert.match(sw,/\/src\/ui\/gis-export\.js/);
@@ -157,6 +160,7 @@ test('boot, SW and index will expose PNG adapter after locked exporter',()=>{
  assert.match(sw,/\/src\/ui\/gis-export-canvas-patches\.js/);
  assert.match(sw,/\/src\/ui\/gis-export-verified-canvas\.js/);
  assert.match(sw,/\/src\/ui\/gis-export-verified-frame\.js/);
+ assert.match(sw,/\/src\/ui\/gis-export-standard-layers\.js/);
  assert.match(sw,/\/src\/ui\/gis-export-events\.js/);
  assert.match(sw,/\/src\/ui\/gis-export-vegetation\.js/);
  assert.match(sw,/\/src\/ui\/gis-export-layout\.js/);
@@ -172,6 +176,7 @@ test('boot, SW and index will expose PNG adapter after locked exporter',()=>{
  assert.ok(index.indexOf('src/ui/gis-export-events.js')<index.indexOf('src/ui/gis-export.js'));
  assert.ok(index.indexOf('src/ui/gis-export-verified-canvas.js')<index.indexOf('src/ui/gis-export.js'));
  assert.ok(index.indexOf('src/ui/gis-export-verified-frame.js')<index.indexOf('src/ui/gis-export-verified-canvas.js'));
+ assert.ok(index.indexOf('src/ui/gis-export-standard-layers.js')<index.indexOf('src/ui/gis-export-standard-canvas.js'));
 });
 test('PNG reads current session cells at export time and skips invalid cell bounds',async()=>{const cells=[];const {ctx,ops}=env({gridCells:cells});cells.push({w0:32.645,w1:32.65,s0:39.995,s1:40.0},{w0:NaN,w1:32.65,s0:39.995,s1:40.0});assert.equal(await ctx.window.downloadParkImage(),true);const baseline=env();assert.equal(await baseline.ctx.window.downloadParkImage(),true);assert.equal(ops.filter(x=>x==='grid').length-baseline.ops.filter(x=>x==='grid').length,1);});
 test('PNG remains available when the optional grid session is absent',async()=>{const {ctx}=env();delete ctx.DG_GRID_SESSION;assert.equal(await ctx.window.downloadParkImage(),true);});
