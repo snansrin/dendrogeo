@@ -4,58 +4,26 @@
  * fullBackup (JSON indirme), checkBackupReminder (7 gün uyarısı). */
 
 /* ============ TAM YEDEK (JSON) — Tez verisi sigortası ============ */
-async function fetchAllRows(table, orderCol){
-  let out=[], from=0, step=1000;
-  for(;;){
-    const {data,error}=await sb.from(table).select("*").order(orderCol).range(from, from+step-1);
-    if(error) throw new Error(table+": "+error.message);
-    out=out.concat(data||[]);
-    if(!data||data.length<step) break;
-    from+=step;
-  }
-  return out;
-}
+async function fetchAllRows(table,orderCol){return await window.DG_BACKUP_PAGED_STORE.load(sb,table,orderCol);}
 
 async function fullBackup(){
-  if(!PROFILE||(PROFILE.role!=="admin"&&PROFILE.role!=="owner")) return toast("Yetki yok.","err");
-  toast("Yedek hazırlanıyor…","info","💾");
-  try{
-    const meas = await fetchAllRows("measurements","created_at");
-    const projs = await fetchAllRows("projects","id");
-    const wps = await fetchAllRows("waypoints","id");
-    let reqs = [];
-    try{ reqs = await fetchAllRows("data_requests","created_at"); }catch(e){ reqs = []; }
-    const backup={
-      app:"DendroGeo",
-      schema_version:"1.0.0",
-      doi:"10.5281/zenodo.22948643",
-      exported_at:new Date().toISOString(),
-      exported_by:(PROFILE&&PROFILE.full_name)||"",
-      counts:{measurements:meas.length,projects:projs.length,waypoints:wps.length,data_requests:reqs.length},
-      measurements:meas,
-      projects:projs,
-      waypoints:wps,
-      data_requests:reqs
-    };
-    const name="dendrogeo_yedek_"+new Date().toISOString().slice(0,10)+".json";
-    const a=document.createElement("a");
-    a.href=URL.createObjectURL(new Blob([JSON.stringify(backup,null,2)],{type:"application/json"}));
-    a.download=name;
-    document.body.appendChild(a);
-    a.click();
-    a.remove();
-    setTimeout(()=>URL.revokeObjectURL(a.href),5000);
-    localStorage.setItem("dg_lastBackup", new Date().toISOString());
-    toast((typeof dgTfs==="function"?dgTfs("✓ Yedek indirildi: {f} ({n} ölçüm)",{f:name,n:meas.length}):("✓ Yedek indirildi: "+name+" ("+meas.length+" ölçüm)")),"ok","💾");
-  }catch(e){
-    toast(dgCf("Yedek hatası: ")+e.message,"err","❌");
-  }
+ return await window.DG_CREATE_FULL_BACKUP.execute(PROFILE,{
+  load:(table,orderCol)=>fetchAllRows(table,orderCol),
+  build:data=>window.DG_BACKUP_SNAPSHOT.build(data,{exportedAt:new Date().toISOString(),exportedBy:(PROFILE&&PROFILE.full_name)||""}),
+  name:()=>"dendrogeo_yedek_"+new Date().toISOString().slice(0,10)+".json",
+  download:(backup,name)=>window.DG_BACKUP_JSON_DOWNLOAD.download(window,backup,name),
+  remember:()=>localStorage.setItem("dg_lastBackup",new Date().toISOString()),
+  onDenied:()=>toast("Yetki yok.","err"),
+  onStart:()=>toast("Yedek hazırlanıyor…","info","💾"),
+  onSuccess:(name,count)=>toast((typeof dgTfs==="function"?dgTfs("✓ Yedek indirildi: {f} ({n} ölçüm)",{f:name,n:count}):("✓ Yedek indirildi: "+name+" ("+count+" ölçüm)")),"ok","💾"),
+  onFailure:error=>toast(dgCf("Yedek hatası: ")+error.message,"err","❌")
+ });
 }
 
 function checkBackupReminder(){
   const last=localStorage.getItem("dg_lastBackup");
-  const days=last?(Date.now()-new Date(last).getTime())/86400000:999;
-  if(days>7) toast(dgTfs("⚠ Son tam yedeğin üzerinden {n} gün geçti — bugünkü yedeği alın",{n:Math.floor(days)}),"warn","💾");
+  const state=window.DG_BACKUP_REMINDER_STATE.evaluate(last);
+  if(state.overdue) toast(dgTfs("⚠ Son tam yedeğin üzerinden {n} gün geçti — bugünkü yedeği alın",{n:state.elapsedDays}),"warn","💾");
 }
 
 /* ═══════════ 0036 (T3) · YEDEKTEN YÜKLE ═══════════

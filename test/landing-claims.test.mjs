@@ -263,7 +263,8 @@ describe('0036 · özellik ve EN bütünlük kilitleri', () => {
     assert.match(b, /function dgRestoreSQL/);
     assert.match(b, /OVERRIDING SYSTEM VALUE/, 'identity kolonlarına özgün id yazımı');
     assert.match(b, /ON CONFLICT DO NOTHING/, 'idempotent');
-    assert.match(b, /zenodo\.22948643/, 'yedek künyesinde güncel DOI');
+    assert.match(rd('src/domain/backup/build-snapshot.js'), /zenodo\.22948643/, 'yedek künyesinde güncel DOI');
+    assert.match(b, /DG_BACKUP_SNAPSHOT\.build\(/, 'servis güncel yedek künyesini kullanır');
     assert.match(sh, /dgRestorePick/, 'kabukta giriş noktası');
   });
   test('T4/0038 kurucuya özel Ziyaretçi & Canlı sekmesi (açılır kartlar KALDIRILDI)', () => {
