@@ -429,3 +429,8 @@ Her modülün tek bir dış API'si, sahibi olduğu açık durumu ve kendi testle
 ### Report land-cover runtime loader (12 October 2026)
 
 `scripts/lib/report-landcover-runtime.mjs` creates the existing isolated browser-like runtime and loads the application's land-cover dependencies in order. `make-report.mjs` keeps the `bootLC` export and injects its existing repository reader. Runtime globals, dependency paths, module order and analysis behavior are preserved.
+
+
+### Report REST adapter (12 October 2026)
+
+`scripts/lib/report-rest-adapter.mjs` resolves the existing public Supabase URL and key, builds report REST requests, delegates reads to the existing `reportRead` policy, and preserves HTTP error messages and JSON responses. The report generator wires the adapter without changing query or authorization behavior.
