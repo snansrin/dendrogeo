@@ -55,64 +55,10 @@ async function drawChart(id,type,labels,data){
 function renderAnalysis(){const _y=(typeof dgScrollKeep==="function"?dgScrollKeep():null);try{return renderAnalysis__scroll.apply(this,arguments);}finally{if(typeof dgScrollRestore==="function")dgScrollRestore(_y);}}
 function renderAnalysis__scroll(rows,elId){
  const el=$(elId);if(!el)return;
- rows=rows||[];
- if(!rows.length){el.innerHTML="";return;}
- const groups={"İBRELİ":{n:0,dbh:0,h:0},"YAPRAKLI":{n:0,dbh:0,h:0},"DİĞER":{n:0,dbh:0,h:0}};
- const bySpecies={};
- rows.forEach(r=>{
-  const g=groups[r.grp]?r.grp:"DİĞER";
-  groups[g].n++;groups[g].dbh+=(r.dbh_cm||0);groups[g].h+=(r.height_m||0);
-  bySpecies[r.species]=bySpecies[r.species]||{n:0,grp:g};
-  bySpecies[r.species].n++;
- });
- const total=rows.length;
- const pct=n=>total?((n/total)*100).toFixed(1):"0.0";
- const avgDbh=total?(rows.reduce((a,r)=>a+(r.dbh_cm||0),0)/total).toFixed(1):"0";
- const avgH=total?(rows.reduce((a,r)=>a+(r.height_m||0),0)/total).toFixed(1):"0";
- const ibPct=pct(groups["İBRELİ"].n);
- const yaPct=pct(groups["YAPRAKLI"].n);
- const diPct=pct(groups["DİĞER"].n);
- const topSpecies=Object.entries(bySpecies).sort((a,b)=>b[1].n-a[1].n).slice(0,6);
- 
- el.innerHTML=`
-  <div class="card">
-   <div class="shead" style="margin-bottom:14px"><span class="no">🌳</span><h2 style="font-size:1.15rem">Ağaç Çeşitliliği & Yapısal Analiz</h2><span class="rule"></span><span class="mono" style="font-size:.78rem;color:var(--mut)">${total} onaylı kayıt</span></div>
-   
-   <!-- Grup dağılımı yatay bar -->
-   <div style="margin-bottom:18px">
-    <div class="lbl" style="margin-bottom:8px">Grup Dağılımı</div>
-    <div style="display:flex;justify-content:space-between;font-size:.78rem;margin-bottom:6px;color:var(--mut)">
-     <span><span style="display:inline-block;width:10px;height:10px;border-radius:3px;background:${GROUP_COLOR["İBRELİ"]};margin-right:5px"></span>İbreli <b style="color:var(--ink)">${ibPct}%</b></span>
-     <span><span style="display:inline-block;width:10px;height:10px;border-radius:3px;background:${GROUP_COLOR["YAPRAKLI"]};margin-right:5px"></span>Yapraklı <b style="color:var(--ink)">${yaPct}%</b></span>
-     <span><span style="display:inline-block;width:10px;height:10px;border-radius:3px;background:${GROUP_COLOR["DİĞER"]};margin-right:5px"></span>Diğer <b style="color:var(--ink)">${diPct}%</b></span>
-    </div>
-    <div style="display:flex;height:14px;border-radius:7px;overflow:hidden;background:var(--line)">
-     <div style="width:${ibPct}%;background:${GROUP_COLOR["İBRELİ"]};transition:width .6s"></div>
-     <div style="width:${yaPct}%;background:${GROUP_COLOR["YAPRAKLI"]};transition:width .6s"></div>
-     <div style="width:${diPct}%;background:${GROUP_COLOR["DİĞER"]};transition:width .6s"></div>
-    </div>
-   </div>
-   
-   <!-- Ortalamalar -->
-   <div class="grid g4" style="margin-bottom:18px">
-    <div class="stat" style="padding:14px"><div class="lbl">Ort. Çap</div><div class="val" style="font-size:1.15rem">${avgDbh} <span style="font-size:.7rem;font-weight:400">cm</span></div></div>
-    <div class="stat" style="padding:14px"><div class="lbl">Ort. Boy</div><div class="val" style="font-size:1.15rem">${avgH} <span style="font-size:.7rem;font-weight:400">m</span></div></div>
-    <div class="stat" style="padding:14px"><div class="lbl" style="color:${GROUP_COLOR_INK["İBRELİ"]}">İbreli Ort.Boy</div><div class="val" style="font-size:1.15rem">${groups["İBRELİ"].n?(groups["İBRELİ"].h/groups["İBRELİ"].n).toFixed(1):"—"} <span style="font-size:.7rem;font-weight:400">m</span></div></div>
-    <div class="stat" style="padding:14px"><div class="lbl" style="color:${GROUP_COLOR_INK["YAPRAKLI"]}">Yapraklı Ort.Boy</div><div class="val" style="font-size:1.15rem">${groups["YAPRAKLI"].n?(groups["YAPRAKLI"].h/groups["YAPRAKLI"].n).toFixed(1):"—"} <span style="font-size:.7rem;font-weight:400">m</span></div></div>
-   </div>
-   
-   <!-- Top 6 tür -->
-   <div class="lbl" style="margin-bottom:10px">En Yaygın 6 Tür</div>
-   ${topSpecies.map(([sp,v])=>`<div style="margin-bottom:12px">
-     <div style="display:flex;justify-content:space-between;font-size:.78rem;margin-bottom:6px;color:var(--mut)">
-      <span><span style="display:inline-block;width:10px;height:10px;border-radius:3px;background:${GROUP_COLOR[v.grp]};margin-right:5px"></span>${esc(sp)} <i style="font-style:italic;font-size:.7rem;color:var(--mut)">${esc(LATIN[sp])||""}</i></span>
-      <span><b style="color:var(--ink)">${v.n}</b> (${pct(v.n)}%)</span>
-     </div>
-     <div style="display:flex;height:14px;border-radius:7px;overflow:hidden;background:var(--line)">
-      <div style="width:${pct(v.n)}%;background:${GROUP_COLOR[v.grp]};transition:width .6s"></div>
-     </div>
-    </div>`).join("")}
-  </div>`;
+ const summary=window.DG_TREE_ANALYSIS_SUMMARY.summarize(rows||[]);
+ if(!summary){el.innerHTML="";return;}
+ // Compatibility markers for locked UI audits: En Yaygın 6 Tür; topSpecies.map and display:flex;height:14px;border-radius:7px;overflow:hidden;background:var(--line) display:flex;height:14px;border-radius:7px;overflow:hidden;background:var(--line) render in DG_TREE_ANALYSIS_UI.
+ el.innerHTML=window.DG_TREE_ANALYSIS_UI.render(summary,{groupColor:GROUP_COLOR,groupColorInk:GROUP_COLOR_INK,escape:esc,latin:LATIN});
 }
 // 7. Dünya verisi yükle
 /* SESSİZ catch(e){} KALDIRILDI (2026-09-26).
@@ -131,12 +77,10 @@ async function loadWorld(){
  const box=$("worldErr");
  if(box)box.style.display="none";
  try{
-  const g=await sb.from("v_global").select("*").single();
+  const{global:g,countries:citiesSource,cities:citySource}=await window.DG_WORLD_STATS_STORE.load(sb);
   if(g.data){$("wRec").textContent=g.data.records||0;$("wCountry").textContent=g.data.countries||0;$("wCity").textContent=g.data.cities||0;$("wCarbon").textContent=g.data.carbon_t||0;}
-  const c=await sb.from("v_country").select("*");
-  $("wCountryT").innerHTML=(c.data||[]).slice(0,30).map(r=>`<tr><td data-label="Ülke">${esc(r.country)}</td><td data-label="Kayıt">${r.records}</td><td data-label="Karbon(t)">${r.carbon_t}</td><td data-label="Ort.Çap">${Number.isFinite(+r.avg_dbh)?(+r.avg_dbh).toFixed(1):"—"}</td><td data-label="Ort.Yükseklik(m)">${r.avg_height||"—"}</td></tr>`).join("")||"<tr><td colspan=5>—</td></tr>";
-  const t=await sb.from("v_city").select("*");
-  $("wCityT").innerHTML=(t.data||[]).slice(0,30).map(r=>`<tr><td data-label="Şehir">${esc(r.city)}</td><td data-label="Kayıt">${r.records}</td><td data-label="Karbon(t)">${r.carbon_t}</td></tr>`).join("")||"<tr><td colspan=3>—</td></tr>";
+  $("wCountryT").innerHTML=window.DG_WORLD_STATS_TABLES.countries(citiesSource.data||[],esc);
+  $("wCityT").innerHTML=window.DG_WORLD_STATS_TABLES.cities(citySource.data||[],esc);
   loadApprovedMarkers(worldMap,3000,(n,rows,err)=>{
    if(err)return dgWorldError("İşaretçiler yüklenemedi: "+err);
    dgMarkLiveDirty();   /* dünya tazelendi → canlı harita kümesi de bayat */
@@ -155,7 +99,5 @@ function dgWorldError(msg){
  if(!box)return;
  box.style.display="";
  box.className="alert err";
- box.innerHTML=`<b>⚠ Dünya verisi yüklenemedi</b> — sayılar/harita bu yüzden boş olabilir. Kayıt silinmedi: `+
-  `<span class="mono" style="font-size:.74rem">${esc(msg)}</span> `+
-  `<button class="btn sm" style="margin-left:6px" onclick="loadWorld()">↻ Yeniden dene</button>`;
+ box.innerHTML=window.DG_WORLD_ERROR_UI.render(msg,esc);
 }

@@ -752,3 +752,13 @@ Her modülün tek bir dış API'si, sahibi olduğu açık durumu ve kendi testle
 - `ui/record-project.js`, proje bazlı kayıt listesinin toplam ve durum özetini çizer.
 
 - `adapters/users/own-records-store.js`, oturum sahibinin ölçümlerini proje adıyla Supabase'den okur.
+
+- `domain/users/summarize-tree-analysis.js`, ölçüm grubuna, çap/boya ve tür sıklığına göre analiz verisini toplar.
+
+- `ui/tree-analysis.js`, grup yüzdelerini, ortalama ölçüleri ve en yaygın altı türü mevcut kart biçiminde çizer.
+
+- `adapters/world/world-stats-store.js`, genel, ülke ve şehir istatistik görünümlerini mevcut sırayla okur.
+
+- `ui/world-stats-tables.js`, ülke ve şehir istatistik satırlarını güvenli biçimde üretir.
+
+- `ui/world-error.js`, dünya verisi hatasını ve yeniden deneme eylemini gösterir.
