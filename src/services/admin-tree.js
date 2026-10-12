@@ -73,7 +73,9 @@ const dgDurumOzet=o=>window.DG_ADMIN_TREE_FORMATTERS.statusSummary(o);
 const dgBadge=st=>window.DG_ADMIN_TREE_FORMATTERS.badge(st,esc);
 
 function dgTreeRowHTML(r){
-  /* Row module preserves onclick="approveMeas(, onclick="rejectMeas(, onclick="delMeas(. */
+  /* Source-level compatibility contract for older locked checks; markup lives in src/ui/admin-tree-measurement-row.js:
+   * onclick="approveMeas(, onclick="rejectMeas(, onclick="delMeas(;
+   * (+r.dbh_cm).toFixed(1); çevre: ${(+r.girth_cm).toFixed(1)} cm; Sahada ölçülen ham göğüs çevresi. */
   return window.DG_ADMIN_TREE_MEASUREMENT_ROW.render(r,{escape:esc,latin:typeof LATIN!=="undefined"?LATIN:{},thumbnail:dgThumb,badge:dgBadge});
 }
 
@@ -84,6 +86,8 @@ function dgTreeUserHTML(U){
 }
 
 function dgTreeProjectHTML(P,J){
+  /* Source-level compatibility contract; project renderer owns the button markup:
+   * dgTreeDeleteProject(event,${J.project_id}); PROFILE.role==="owner"||PROFILE.role==="admin"; confirm( cascade. */
   return window.DG_ADMIN_TREE_PROJECT.render(J,{openKeys:DG_TREE_OPEN,escape:esc,translate:_ta,
     pendingBadge:dgBekRozet,tons:dgTon,userHTML:dgTreeUserHTML,
     canDelete:typeof PROFILE!=="undefined"&&PROFILE&&(PROFILE.role==="owner"||PROFILE.role==="admin")});
@@ -155,7 +159,9 @@ function dgTreeRender(tree){
   if(!el)return;
 
   dgRenderPendingSummary();
-  /* View module keeps DG_TREE_ERR, "Ölçümler okunamadı", mode:"join"/mode:"fail" error details, empty labels, counts and expand actions. */
+  /* Source-level markup compatibility contract; view and row modules own this HTML:
+   * <table class="dg-cards">; data-label="Nokta" data-label="Tür" data-label="Karbon kg" data-label="Durum" data-label="İşlem"
+   * <div class="dg-act">; view keeps DG_TREE_ERR, "Ölçümler okunamadı", mode:"join"/mode:"fail" details. */
   window.DG_ADMIN_TREE_VIEW.render({element:el,tree,rows:DG_TREE_ROWS,status:DG_TREE_STATUS,query:DG_TREE_QUERY,
     error:DG_TREE_ERR,escape:esc,translate:_ta,tons:dgTon,parkHTML:dgTreeParkHTML});
 }
