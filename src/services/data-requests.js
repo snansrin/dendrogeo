@@ -86,8 +86,7 @@ async function loadRequests(){const _y=(typeof dgScrollKeep==="function"?dgScrol
 async function loadRequests__scroll(){
  const{data}=await sb.from("data_requests").select("*,profiles(full_name)").order("created_at",{ascending:false});
  const reqs=data||[];
- const pending=reqs.filter(r=>r.status!=="Tamamlandı"&&r.status!=="Reddedildi");
- const closed=reqs.filter(r=>r.status==="Tamamlandı"||r.status==="Reddedildi");
+ const {pending,closed}=window.DG_DATA_REQUEST_QUEUE.partition(reqs);
  
  $("aReqPending").textContent=pending.length;
  $("aReqPendingMini").textContent=pending.length;

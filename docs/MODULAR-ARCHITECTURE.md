@@ -534,3 +534,5 @@ Her modülün tek bir dış API'si, sahibi olduğu açık durumu ve kendi testle
 - `adapters/data-requests/my-requests-store.js`, oturumdaki kullanıcının taleplerini mevcut user_id filtresi ve azalan created_at sırasıyla okur; oturum kapısı, kaydırma koruması, hata/boş görünüm ve silme eylemi serviste kalır.
 
 - `adapters/data-requests/status-store.js`, talep durumunu ve fulfilled_at değerini mevcut id filtresiyle günceller; onay, zaman üretimi, CSV/e-posta sırası ve hata/yenileme politikası serviste kalır.
+
+- `domain/data-requests/partition-queue.js`, yönetici kuyruğunu mevcut Tamamlandı/Reddedildi kuralıyla açık ve kapalı listelere ayırır; sıra ve kayıt kimliği korunur, sorgu/sayaç/HTML/kaydırma serviste kalır.
