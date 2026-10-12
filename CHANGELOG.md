@@ -9,6 +9,9 @@ Yeni sürüm yayımlama adımları: [`docs/surum-yayini.md`](docs/surum-yayini.m
 
 ## [Yayımlanmadı]
 
+### İyileştirildi — GIS PNG yüzey patch çizimi
+Ham yüzey patch halkaları ayrı Canvas modülüne taşındı; enlem-boylam sırası, sınıf renk yedeği, alpha ve mevcut dış API korundu.
+
 ### İyileştirildi — GIS PNG Leaflet poligon çizimi
 Leaflet halka dolaşımı ve poligonların even-odd Canvas dolgusu ayrı modüle taşındı; çok halkalı kırpma ve eski `DG_GIS_EXPORT_CANVAS` API'leri korundu.
 

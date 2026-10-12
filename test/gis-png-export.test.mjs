@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import vm from 'node:vm';
 import {readFileSync} from 'node:fs';
 const file=p=>readFileSync(new URL('../'+p,import.meta.url),'utf8');
-const adapter=file('src/ui/gis-export.js'),gate=file('src/application/surface/prepare-verified-map-export.js'),download=file('src/ui/gis-export-download.js'),verifiedCanvas=file('src/ui/gis-export-verified-canvas.js'),vegetation=file('src/ui/gis-export-vegetation.js'),layout=file('src/ui/gis-export-layout.js'),legend=file('src/ui/gis-export-canvas-legend.js'),waypoints=file('src/ui/gis-export-canvas-waypoints.js'),grids=file('src/ui/gis-export-canvas-grids.js'),leafletCanvas=file('src/ui/gis-export-canvas-leaflet.js'),canvas=file('src/ui/gis-export-canvas.js'),events=file('src/ui/gis-export-events.js'),style=file('css/gis-workspace.css'),ui=file('src/ui/gis-workspace.js');
+const adapter=file('src/ui/gis-export.js'),gate=file('src/application/surface/prepare-verified-map-export.js'),download=file('src/ui/gis-export-download.js'),verifiedCanvas=file('src/ui/gis-export-verified-canvas.js'),vegetation=file('src/ui/gis-export-vegetation.js'),layout=file('src/ui/gis-export-layout.js'),legend=file('src/ui/gis-export-canvas-legend.js'),waypoints=file('src/ui/gis-export-canvas-waypoints.js'),grids=file('src/ui/gis-export-canvas-grids.js'),leafletCanvas=file('src/ui/gis-export-canvas-leaflet.js'),patches=file('src/ui/gis-export-canvas-patches.js'),canvas=file('src/ui/gis-export-canvas.js'),events=file('src/ui/gis-export-events.js'),style=file('css/gis-workspace.css'),ui=file('src/ui/gis-workspace.js');
 const lock=JSON.parse(file('docs/surface-engine-lock.json'));
 function env({ndvi=false,ndviAvailable=true,gridCells=[],verified=false}={}){
  const messages=[],ops=[],downloads=[],elements={},polygon=[
@@ -42,6 +42,7 @@ function env({ndvi=false,ndviAvailable=true,gridCells=[],verified=false}={}){
  vm.runInContext(waypoints,ctx,{filename:'gis-export-canvas-waypoints.js'});
  vm.runInContext(grids,ctx,{filename:'gis-export-canvas-grids.js'});
  vm.runInContext(leafletCanvas,ctx,{filename:'gis-export-canvas-leaflet.js'});
+ vm.runInContext(patches,ctx,{filename:'gis-export-canvas-patches.js'});
  vm.runInContext(canvas,ctx,{filename:'gis-export-canvas.js'});
  vm.runInContext(events,ctx,{filename:'gis-export-events.js'});
  vm.runInContext(gate,ctx,{filename:'prepare-verified-map-export.js'});
@@ -128,6 +129,7 @@ test('boot, SW and index will expose PNG adapter after locked exporter',()=>{
  assert.match(boot,/src\/ui\/gis-export-canvas-waypoints\.js\?v=[a-f0-9]{8}/);
  assert.match(boot,/src\/ui\/gis-export-canvas-grids\.js\?v=[a-f0-9]{8}/);
  assert.match(boot,/src\/ui\/gis-export-canvas-leaflet\.js\?v=[a-f0-9]{8}/);
+ assert.match(boot,/src\/ui\/gis-export-canvas-patches\.js\?v=[a-f0-9]{8}/);
  assert.match(boot,/src\/ui\/gis-export-events\.js\?v=[a-f0-9]{8}/);
  assert.match(boot,/src\/ui\/gis-export-verified-canvas\.js\?v=[a-f0-9]{8}/);
  assert.match(boot,/src\/ui\/gis-export-vegetation\.js\?v=[a-f0-9]{8}/);
@@ -138,6 +140,7 @@ test('boot, SW and index will expose PNG adapter after locked exporter',()=>{
  assert.match(index,/src\/ui\/gis-export-canvas-waypoints\.js\?v=[a-f0-9]{8}/);
  assert.match(index,/src\/ui\/gis-export-canvas-grids\.js\?v=[a-f0-9]{8}/);
  assert.match(index,/src\/ui\/gis-export-canvas-leaflet\.js\?v=[a-f0-9]{8}/);
+ assert.match(index,/src\/ui\/gis-export-canvas-patches\.js\?v=[a-f0-9]{8}/);
  assert.match(index,/src\/ui\/gis-export-events\.js\?v=[a-f0-9]{8}/);
  assert.match(index,/src\/ui\/gis-export-verified-canvas\.js\?v=[a-f0-9]{8}/);
  assert.match(index,/src\/ui\/gis-export-vegetation\.js\?v=[a-f0-9]{8}/);
@@ -148,6 +151,7 @@ test('boot, SW and index will expose PNG adapter after locked exporter',()=>{
  assert.match(sw,/\/src\/ui\/gis-export-canvas-waypoints\.js/);
  assert.match(sw,/\/src\/ui\/gis-export-canvas-grids\.js/);
  assert.match(sw,/\/src\/ui\/gis-export-canvas-leaflet\.js/);
+ assert.match(sw,/\/src\/ui\/gis-export-canvas-patches\.js/);
  assert.match(sw,/\/src\/ui\/gis-export-verified-canvas\.js/);
  assert.match(sw,/\/src\/ui\/gis-export-events\.js/);
  assert.match(sw,/\/src\/ui\/gis-export-vegetation\.js/);
@@ -158,6 +162,7 @@ test('boot, SW and index will expose PNG adapter after locked exporter',()=>{
  assert.ok(index.indexOf('src/ui/gis-export-canvas-waypoints.js')<index.indexOf('src/ui/gis-export-canvas.js'));
  assert.ok(index.indexOf('src/ui/gis-export-canvas-grids.js')<index.indexOf('src/ui/gis-export-canvas.js'));
  assert.ok(index.indexOf('src/ui/gis-export-canvas-leaflet.js')<index.indexOf('src/ui/gis-export-canvas.js'));
+ assert.ok(index.indexOf('src/ui/gis-export-canvas-patches.js')<index.indexOf('src/ui/gis-export-canvas.js'));
  assert.ok(index.indexOf('src/ui/park-export.js')<index.indexOf('src/ui/gis-export.js'));
  assert.ok(index.indexOf('src/ui/gis-export-canvas.js')<index.indexOf('src/ui/gis-export.js'));
  assert.ok(index.indexOf('src/ui/gis-export-events.js')<index.indexOf('src/ui/gis-export.js'));
