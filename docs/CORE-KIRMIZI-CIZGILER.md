@@ -36,3 +36,5 @@ Saha çalışmasını durduracak bir arıza halinde önce düzeltme dalı değer
 ### 12 Ekim 2026 — izinli test sınırı taşıması
 
 Kullanıcının kilitli parçaları çalışır biçimde modüllere ayırma talimatıyla yalnız `test/critical-fixes.test.mjs` ve `test/park-invites.test.mjs` kaynak-konumu kontrolleri talep adapter/UI sınırlarına taşındı. Aynı sorgu/etiket şartları korunup servis delegasyonu eklendi. Önceki ve yeni hashler manifestte `authorized_modularizations` altında kayıtlıdır; manifest kendi hashine sabitlenmeye devam eder. Diğer temel dosya hashleri değiştirilmedi.
+
+Kullanıcı yönetimi tablo ayrımında park-invites kompakt kullanıcı hücresi şartı gerçek UI modülüne taşınıp servis delegasyonu eklendi. Önceki/yeni test hashleri manifestte kayıtlıdır; aynı izinli modülerleştirme kapsamındadır.

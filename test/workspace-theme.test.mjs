@@ -88,7 +88,7 @@ test('panel sade, kullanıcı yönetimi ana tema standardında',()=>{
  assert.match(shell,/id="userRoleFilter"/);
  assert.match(shell,/id="userStatusFilter"/);
  assert.match(ua,/aUsersVisible/);
- assert.match(ua,/class="admin-user-person"/);
- assert.match(ua,/data-label="Kullanıcı"/);
+ assert.match(rd('src/ui/admin-user-table.js'),/class="admin-user-person"/);
+ assert.match(rd('src/ui/admin-user-table.js'),/data-label="Kullanıcı"/);
  assert.match(ua,/dataset\.role/);
 });

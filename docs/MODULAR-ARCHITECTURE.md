@@ -566,3 +566,5 @@ Her modülün tek bir dış API'si, sahibi olduğu açık durumu ve kendi testle
 - `adapters/users/admin-store.js`, profiles listeleme ve rol/aktiflik güncellemelerini mevcut sorgu gövdeleriyle taşır; yetki kapıları serviste kalır.
 
 - `domain/users/summarize-admin-users.js`, kullanıcı sayaçlarını mevcut aktiflik ve kurucu/denetçi sınıflandırmasıyla saf olarak üretir.
+
+- `ui/admin-user-table.js`, korunan kurucu satırı, salt okunur denetçi görünümü ve mevcut etkileşim/etiket/kaçış sözleşmesiyle kullanıcı tablosunu üretir.
