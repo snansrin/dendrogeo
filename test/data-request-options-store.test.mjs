@@ -6,7 +6,7 @@ import {readFileSync} from 'node:fs';
 function app({rejectTable=null,measurements={data:[{country:'TR',city:'Ankara'}],count:6000},projects={data:[{id:7,name:'Park'}]}}={}){
  const window={},calls=[],elements={reqCountry:{value:'TR'},reqCity:{value:'Ankara'},reqProject:{value:''}};
  const ctx=vm.createContext({window,REQ_ROWS:['old'],REQ_PROJECTS:['old'],$:id=>elements[id],dgWarnIfTruncated:(...args)=>calls.push(['warn',...args]),listCountries:(rows,projs)=>{calls.push(['countries',rows,projs]);return ['TR'];},listCities:(...args)=>{calls.push(['cities',...args]);return ['Ankara'];},listProjects:(...args)=>{calls.push(['projects',...args]);return ['Park'];},fillSelect:(el,values)=>calls.push(['fill',el,values]),sb:{from(table){calls.push(['from',table]);const q={select(columns,options){calls.push(['select',table,columns,options&&JSON.parse(JSON.stringify(options))]);return q;},eq(column,value){calls.push(['eq',column,value]);return q;},limit(n){calls.push(['limit',n]);return q;},order(column){calls.push(['order',column]);return q;},then(resolve,reject){calls.push(['await',table]);return (table===rejectTable?Promise.reject(Error('offline')):Promise.resolve(table==='measurements'?measurements:projects)).then(resolve,reject);}};return q;}}});
- for(const file of ['src/adapters/data-requests/options-store.js','src/services/data-requests.js'])vm.runInContext(readFileSync(new URL('../'+file,import.meta.url),'utf8'),ctx);
+ for(const file of ['src/adapters/data-requests/options-store.js','src/application/data-requests/load-options.js','src/services/data-requests.js'])vm.runInContext(readFileSync(new URL('../'+file,import.meta.url),'utf8'),ctx);
  return{ctx,calls,elements,run:()=>vm.runInContext('loadRequestOptions()',ctx)};
 }
 

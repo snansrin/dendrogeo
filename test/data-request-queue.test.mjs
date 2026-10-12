@@ -6,7 +6,7 @@ import {readFileSync} from 'node:fs';
 const window={};
 vm.runInNewContext(readFileSync(new URL('../src/domain/data-requests/partition-queue.js',import.meta.url),'utf8'),{window});
 vm.runInNewContext(readFileSync(new URL('../src/ui/data-request-pending-table.js',import.meta.url),'utf8'),{window,Date});
-for(const file of ['src/adapters/data-requests/queue-store.js','src/ui/data-request-closed-table.js'])vm.runInNewContext(readFileSync(new URL('../'+file,import.meta.url),'utf8'),{window,Date});
+for(const file of ['src/adapters/data-requests/queue-store.js','src/ui/data-request-closed-table.js','src/application/data-requests/load-queue.js'])vm.runInNewContext(readFileSync(new URL('../'+file,import.meta.url),'utf8'),{window,Date});
 const partition=window.DG_DATA_REQUEST_QUEUE.partition;
 
 test('request queue preserves exact closed statuses, order and row identities',()=>{

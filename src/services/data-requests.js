@@ -20,16 +20,15 @@ async function sendDataRequest(){
   findDuplicate:pending=>window.DG_DATA_REQUEST_DUPLICATE.find(pending,{country,city,project_name}),
   onDuplicate:dup=>{
    toast("⚠️ Bu veri talebiniz zaten alındı — yönetici onayı bekleniyor","warn","✉️");
-   m.style.color="var(--amber)";
-   m.textContent=(typeof dgTfs==="function"?dgTfs("⚠ Aynı filtreyle bir talebiniz zaten {s}. Yönetici yanıt verene kadar yeni talep oluşturulamaz.",{s:(dup.status==="Beklemede"?"beklemede":"işleme alındı")}):("⚠ Aynı filtreyle bir talebiniz zaten "+(dup.status==="Beklemede"?"beklemede":"işleme alındı")+". Yönetici yanıt verene kadar yeni talep oluşturulamaz."));
+   window.DG_DATA_REQUEST_SUBMISSION_FEEDBACK_UI.duplicate(m,dup.status,{translateFormatted:typeof dgTfs==="function"?dgTfs:null});
   },
   onCheckError:error=>console.log("Dup kontrolü:",error),
   buildBody:()=>({user_id:USER.id,email:PROFILE?.email||USER.email,country,city,project_name,note,status:"Beklemede"}),
   insert:body=>window.DG_DATA_REQUEST_SUBMIT_STORE.insert(sb,body),
-  onInsertError:error=>{m.style.color="var(--red)";m.textContent="Hata: "+error.message;},
+  onInsertError:error=>window.DG_DATA_REQUEST_SUBMISSION_FEEDBACK_UI.failure(m,error),
   onSuccess:()=>{
    toast("✓ Talep gönderildi — yönetici yanıtı bekleniyor","ok","✉️");
-   m.style.color="var(--green-dk)";m.textContent="✓ Talebiniz yönetime iletildi, hazır olduğunda e‑postanıza gönderilecek.";
+   window.DG_DATA_REQUEST_SUBMISSION_FEEDBACK_UI.success(m);
    $("reqCountry").value="";$("reqCity").value="";$("reqProject").value="";$("reqNote").value="";
    loadMyRequests();
   }
@@ -39,12 +38,13 @@ async function sendDataRequest(){
 /* 0040: kaydırma koruma sarmalı — yeniden çizimde #main scrollTop korunur. */
 async function loadMyRequests(){const _y=(typeof dgScrollKeep==="function"?dgScrollKeep():null);try{return await loadMyRequests__scroll.apply(this,arguments);}finally{if(typeof dgScrollRestore==="function")dgScrollRestore(_y);}}
 async function loadMyRequests__scroll(){
- if(!USER)return;
- const{data,error}=await window.DG_MY_DATA_REQUESTS_STORE.load(sb,USER.id);
- const el=$("myRequests");if(!el)return;
- if(error){el.innerHTML='<div class="alert err">Talepler yüklenemedi.</div>';return;}
- if(!data||!data.length){el.innerHTML="";return;}
- window.DG_MY_DATA_REQUESTS_UI.render(el,data,{escape:esc});
+ return await window.DG_LOAD_OWN_DATA_REQUESTS.execute(USER,{
+  load:userId=>window.DG_MY_DATA_REQUESTS_STORE.load(sb,userId),
+  getTarget:()=>$("myRequests"),
+  onFailure:el=>{el.innerHTML='<div class="alert err">Talepler yüklenemedi.</div>';},
+  onEmpty:el=>{el.innerHTML="";},
+  render:(el,data)=>window.DG_MY_DATA_REQUESTS_UI.render(el,data,{escape:esc})
+ });
 }
 async function deleteMyRequest(id){
  return await window.DG_DELETE_OWN_DATA_REQUEST_APPLICATION.execute(USER,id,{
@@ -58,14 +58,13 @@ async function deleteMyRequest(id){
 
 /* --- Kullanıcı talep formu --- */
 async function loadRequestOptions(){
- try{
-  const {measurements:m,projects:p}=await window.DG_DATA_REQUEST_OPTIONS_STORE.load(sb);
-  REQ_ROWS=m.data||[];REQ_PROJECTS=p.data||[];
-  /* Ülke/şehir seçenek listeleri kesilmişse talep formunda eksik seçenek görünür. */
-  dgWarnIfTruncated(m.data,5000,"Talep formu seçenekleri",m.count);
-  fillSelect($("reqCountry"),listCountries(REQ_ROWS,REQ_PROJECTS));
-  reqCountryChanged();
- }catch(e){}
+ return await window.DG_LOAD_DATA_REQUEST_OPTIONS.execute({
+  load:()=>window.DG_DATA_REQUEST_OPTIONS_STORE.load(sb),
+  apply:(rows,projects)=>{REQ_ROWS=rows;REQ_PROJECTS=projects;},
+  warn:m=>dgWarnIfTruncated(m.data,5000,"Talep formu seçenekleri",m.count),
+  fillCountries:()=>fillSelect($("reqCountry"),listCountries(REQ_ROWS,REQ_PROJECTS)),
+  refreshCities:()=>reqCountryChanged()
+ });
 }
 
 function reqCountryChanged(){
@@ -81,34 +80,36 @@ function reqCityChanged(){
 /* 0040: kaydırma koruma sarmalı — yeniden çizimde #main scrollTop korunur. */
 async function loadRequests(){const _y=(typeof dgScrollKeep==="function"?dgScrollKeep():null);try{return await loadRequests__scroll.apply(this,arguments);}finally{if(typeof dgScrollRestore==="function")dgScrollRestore(_y);}}
 async function loadRequests__scroll(){
- const{data}=await window.DG_DATA_REQUEST_QUEUE_STORE.load(sb);
- const reqs=data||[];
- const {pending,closed}=window.DG_DATA_REQUEST_QUEUE.partition(reqs);
- 
- $("aReqPending").textContent=pending.length;
- $("aReqPendingMini").textContent=pending.length;
- $("aReqClosed").textContent=closed.length;
- 
- // AKTİF TALEPLER TABLOSU
- window.DG_DATA_REQUEST_PENDING_TABLE_UI.render($("aReqT"),pending,{escape:esc});
- 
- // TAMAMLANAN/REDDEDİLENLER (COLLAPSIBLE)
- const closedWrap=$("closedRequestsWrap");
- if(closed.length>0){
-  closedWrap.style.display="block";
-  $("aReqClosed").textContent=closed.length;
-  window.DG_DATA_REQUEST_CLOSED_TABLE_UI.render($("closedReqT"),closed,{escape:esc});
- }else{
-  closedWrap.style.display="none";
- }
+ return await window.DG_LOAD_DATA_REQUEST_QUEUE.execute({
+  load:()=>window.DG_DATA_REQUEST_QUEUE_STORE.load(sb),
+  partition:rows=>window.DG_DATA_REQUEST_QUEUE.partition(rows),
+  updateCounts:(pending,closed)=>{
+   $("aReqPending").textContent=pending.length;
+   $("aReqPendingMini").textContent=pending.length;
+   $("aReqClosed").textContent=closed.length;
+  },
+  renderPending:pending=>window.DG_DATA_REQUEST_PENDING_TABLE_UI.render($("aReqT"),pending,{escape:esc}),
+  renderClosed:closed=>{
+   const closedWrap=$("closedRequestsWrap");
+   if(closed.length>0){
+    closedWrap.style.display="block";
+    $("aReqClosed").textContent=closed.length;
+    window.DG_DATA_REQUEST_CLOSED_TABLE_UI.render($("closedReqT"),closed,{escape:esc});
+   }else{
+    closedWrap.style.display="none";
+   }
+  }
+ });
 }
 
 async function rejectRequest(id){
- if(!confirm(dgCf("Bu talebi reddetmek istediğinizden emin misiniz? Kullanıcıya yanıt gönderilmez, talep arşive kaldırılır.")))return;
- const{error}=await window.DG_DATA_REQUEST_STATUS_STORE.update(sb,id,"Reddedildi",new Date().toISOString());
- if(error){toast("Hata: "+error.message,"err");return;}
- toast("✓ Talep reddedildi","warn","🚫");
- loadRequests();
+ return await window.DG_REJECT_DATA_REQUEST.execute(id,{
+  confirm:()=>confirm(dgCf("Bu talebi reddetmek istediğinizden emin misiniz? Kullanıcıya yanıt gönderilmez, talep arşive kaldırılır.")),
+  reject:requestId=>window.DG_DATA_REQUEST_STATUS_STORE.update(sb,requestId,"Reddedildi",new Date().toISOString()),
+  onFailure:error=>toast("Hata: "+error.message,"err"),
+  onSuccess:()=>toast("✓ Talep reddedildi","warn","🚫"),
+  refresh:()=>loadRequests()
+ });
 }
 
 async function fulfillRequest(id){

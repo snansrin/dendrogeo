@@ -18,7 +18,7 @@ test('request status adapter preserves exact update body, ID filter and response
 function app({confirmed=true,error=null}={}){
  const calls=[],window={};class Clock extends Date{constructor(){super('2026-10-12T12:00:00Z');}}
  const ctx=vm.createContext({window,Date:Clock,confirm:()=>{calls.push(['confirm']);return confirmed;},dgCf:s=>s,toast:(...args)=>calls.push(['toast',...args]),sb:{from(table){calls.push(['from',table]);return{update(body){calls.push(['update',JSON.parse(JSON.stringify(body))]);return this;},eq(column,value){calls.push(['eq',column,value]);return Promise.resolve({error});}};}}});
- vm.runInContext(source,ctx);vm.runInContext(readFileSync(new URL('../src/services/data-requests.js',import.meta.url),'utf8'),ctx);
+ vm.runInContext(source,ctx);vm.runInContext(readFileSync(new URL('../src/application/data-requests/reject-request.js',import.meta.url),'utf8'),ctx);vm.runInContext(readFileSync(new URL('../src/services/data-requests.js',import.meta.url),'utf8'),ctx);
  ctx.refresh=()=>calls.push(['refresh']);vm.runInContext('loadRequests=()=>refresh()',ctx);
  return{calls,run:()=>vm.runInContext('rejectRequest(7)',ctx)};
 }
