@@ -560,3 +560,5 @@ Her modülün tek bir dış API'si, sahibi olduğu açık durumu ve kendi testle
 - `application/data-requests/load-own-requests.js`, oturum kapısı, kullanıcıya bağlı yükleme ve hedef/hata/boş/dolu sonuç ayrımını yönetir; kaydırma sarmalı serviste kalır.
 
 - `application/data-requests/load-queue.js`, kuyruk yükleme, açık/kapalı ayrımı, sayaçlar ve tablo çizim sırasını portlarla yönetir; kaydırma ve DOM serviste kalır.
+
+- `ui/data-request-submission-feedback.js`, tekrar/hata/başarı form mesajını ve durum rengini mevcut çeviri sözleşmesiyle gösterir; toast, form temizleme ve yenileme serviste kalır.

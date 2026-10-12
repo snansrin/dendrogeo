@@ -20,16 +20,15 @@ async function sendDataRequest(){
   findDuplicate:pending=>window.DG_DATA_REQUEST_DUPLICATE.find(pending,{country,city,project_name}),
   onDuplicate:dup=>{
    toast("⚠️ Bu veri talebiniz zaten alındı — yönetici onayı bekleniyor","warn","✉️");
-   m.style.color="var(--amber)";
-   m.textContent=(typeof dgTfs==="function"?dgTfs("⚠ Aynı filtreyle bir talebiniz zaten {s}. Yönetici yanıt verene kadar yeni talep oluşturulamaz.",{s:(dup.status==="Beklemede"?"beklemede":"işleme alındı")}):("⚠ Aynı filtreyle bir talebiniz zaten "+(dup.status==="Beklemede"?"beklemede":"işleme alındı")+". Yönetici yanıt verene kadar yeni talep oluşturulamaz."));
+   window.DG_DATA_REQUEST_SUBMISSION_FEEDBACK_UI.duplicate(m,dup.status,{translateFormatted:typeof dgTfs==="function"?dgTfs:null});
   },
   onCheckError:error=>console.log("Dup kontrolü:",error),
   buildBody:()=>({user_id:USER.id,email:PROFILE?.email||USER.email,country,city,project_name,note,status:"Beklemede"}),
   insert:body=>window.DG_DATA_REQUEST_SUBMIT_STORE.insert(sb,body),
-  onInsertError:error=>{m.style.color="var(--red)";m.textContent="Hata: "+error.message;},
+  onInsertError:error=>window.DG_DATA_REQUEST_SUBMISSION_FEEDBACK_UI.failure(m,error),
   onSuccess:()=>{
    toast("✓ Talep gönderildi — yönetici yanıtı bekleniyor","ok","✉️");
-   m.style.color="var(--green-dk)";m.textContent="✓ Talebiniz yönetime iletildi, hazır olduğunda e‑postanıza gönderilecek.";
+   window.DG_DATA_REQUEST_SUBMISSION_FEEDBACK_UI.success(m);
    $("reqCountry").value="";$("reqCity").value="";$("reqProject").value="";$("reqNote").value="";
    loadMyRequests();
   }
