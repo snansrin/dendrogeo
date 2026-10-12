@@ -118,7 +118,7 @@ test('mobile overflow and toast layer are addressed without changing locked CSS 
  assert.match(style, /z-index:2147483000!important/);
  assert.match(style, /@media\(max-width:360px\)/);
  assert.match(style, /#v-map #lcSens \.dg-sens-actions/);
- assert.match(ui,/dg-ux-group-summary/);
+ assert.match(file('src/ui/gis-workspace-analysis-layout.js'),/dg-ux-group-summary/);
  const mobile=style.slice(style.indexOf('/* Oct 2026 mobile polish'));
  assert.match(mobile,/#toastWrap\{[\s\S]*?top:max\(12px,env\(safe-area-inset-top\) \+ 12px\)!important/);
  assert.match(mobile,/#toastWrap\{[\s\S]*?bottom:auto!important/);

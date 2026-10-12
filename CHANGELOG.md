@@ -9,6 +9,9 @@ Yeni sürüm yayımlama adımları: [`docs/surum-yayini.md`](docs/surum-yayini.m
 
 ## [Yayımlanmadı]
 
+### İyileştirildi — GIS analiz kartı sunumu
+Grup özeti ve en yaygın altı tür açılır sunumu ayrı UI modülüne taşındı; özgün DOM satırları ve analiz değerleri korundu.
+
 ### İyileştirildi — doğrulanmış GIS PNG harita katmanları
 Park kırpması içindeki yüzey, göreli NDVI, grid, waypoint ve sınır çizimi ayrı modüle taşındı; katman sırası ve doğrulanmış yüzey uyarıları korundu.
 
