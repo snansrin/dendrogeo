@@ -65,6 +65,7 @@ src/
 - `scripts/lib/report-retraction.mjs`, geri çekilmiş DGR'ler için kişisel/veri içeriği sızdırmayan bildirim HTML'ini üretir; `make-report.mjs` site künyesini bağlayıp eski fonksiyon API'sini korur.
 - `scripts/lib/report-qr.mjs`, isteğe bağlı QR kütüphanesini SVG data-URI adapter'ına bağlar; QR üretilemese bile rapor bağlantısının kalmasını sağlayan `null` davranışını korur.
 - `scripts/lib/report-map.mjs`, kabul edilmiş rapor yüzeyini sabit piksel kurallarıyla PNG'ye çizer; `make-report.mjs` eski `mapCanvas`, `renderMapPNG` ve `MAP_TONES` API'lerini korur.
+- `scripts/lib/report-map-clipping.mjs`, tarama çizgilerinde dış halka ve deliklerin dışındaki pikselleri bağlam rengine döndürür; sınıf bantlarının park sınırını aşmasını engelleyen mevcut piksel kuralını korur.
 - `scripts/lib/report-map-class-presentation.mjs`, PNG sınıf etiketlerini ve lejant satırlarının sabit sırasını çözer; `pool` yalnız harita sunumunda `water` sınıfına katılır, rapor snapshot'ı değişmez.
 - `scripts/lib/report-map-projection.mjs`, kabul edilmiş dış halkalardan yerel equirectangular X/Y dönüşümünü, ölçeği ve harita tuvali genişliğini hesaplar; `report-map.mjs` aynı piksel dönüşümünü kullanır.
 - `scripts/lib/report-map-primitives.mjs`, rapor PNG'sinde halka doldurma, halo çizme ve dairesel nokta rasterizasyonunu sabit piksel kurallarıyla yapar; `report-map.mjs` katman sırasını ve çizim çağrılarını korur.
