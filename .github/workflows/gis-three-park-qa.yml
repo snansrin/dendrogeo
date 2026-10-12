@@ -31,6 +31,8 @@ on:
       - 'src/ui/park-landcover-analysis.js'
       - 'src/domain/parks/park-export-formats.js'
       - 'src/ui/gis-export-canvas.js'
+      - 'src/ui/gis-export-canvas-*.js'
+      - 'src/ui/gis-export-standard-*.js'
       - 'src/ui/gis-export-events.js'
       - 'src/ui/gis-export-vegetation.js'
       - 'docs/surface-engine-lock.json'
