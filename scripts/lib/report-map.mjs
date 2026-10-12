@@ -3,6 +3,7 @@ import { fmtDateDot } from './report-formatting.mjs';
 import { fillSurfacePolygon } from './report-map-surface-fill.mjs';
 import { fillRing, strokeRing, disc } from './report-map-primitives.mjs';
 import { createReportMapProjection } from './report-map-projection.mjs';
+import { createReportMapClassPresentation } from './report-map-class-presentation.mjs';
 
 export const DATASET_ASCII = 'ESA WORLDCOVER 2021 V200';
 
@@ -19,17 +20,7 @@ export function mapCanvas({ outer, outers = null, surfaceFeatures = [], holes = 
   const { width: W, scale: k, x: X, y: Y } = createReportMapProjection({
     outer, outers, padding: PAD, top: TOP, mapHeight: MAPH
   });
-  /* PNG sunumu: havuz / süs havuzu ayrı bir kartografik sınıf değildir.
-   * Bilimsel snapshot ve rapor tablosundaki "pool" alanı DEĞİŞMEZ; yalnız PNG'de
-   * su ile aynı renkte ve aynı lejant satırında gösterilir. */
-  const pngClassKey = (key) => key === 'pool' ? 'water' : key;
-  const pngClass = (key) => {
-    const dk = pngClassKey(key);
-    return classes[dk] || classes[key] || null;
-  };
-  const legRows = ['green', 'hard', 'building', 'water', 'bare', 'other']
-    .filter((key) => key === 'water' ? (classes.water || classes.pool) : classes[key])
-    .concat(maskHa > 0 ? ['masked'] : [], ['border', 'point', 'outside']);
+  const { classFor: pngClass, rows: legRows } = createReportMapClassPresentation({ classes, maskHa });
   const H = TOP + MAPH + 16 + legRows.length * 28 + 18 + FOOT;
   const cv = new PngCanvas(W, H, MAP_TONES.out);
   const ring = outer.map(([la, lo]) => [X(lo), Y(la)]);
