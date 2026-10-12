@@ -194,12 +194,7 @@ async function fulfillRequest(id){
     const bodyTxt = bodyLines.filter(l => l !== null).join("\n");
     const subject = encodeURIComponent("✅ DendroGeo Veri Talebiniz Hazırlandı — " + n + " kayıt, " + (totalC/1000).toFixed(2) + " t C");
     
-    window.open(
-        "mailto:" + (req.email || "") +
-        "?subject=" + subject +
-        "&body=" + encodeURIComponent(bodyTxt),
-        "_blank"
-    );
+    window.DG_DATA_REQUEST_REPLY_WINDOW.open(window,req.email||"",subject,bodyTxt);
     
     await window.DG_DATA_REQUEST_STATUS_STORE.update(sb,id,"Tamamlandı",new Date().toISOString());
     
