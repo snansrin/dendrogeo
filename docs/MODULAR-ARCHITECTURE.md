@@ -538,3 +538,5 @@ Her modülün tek bir dış API'si, sahibi olduğu açık durumu ve kendi testle
 - `domain/data-requests/partition-queue.js`, yönetici kuyruğunu mevcut Tamamlandı/Reddedildi kuralıyla açık ve kapalı listelere ayırır; sıra ve kayıt kimliği korunur, sorgu/sayaç/HTML/kaydırma serviste kalır.
 
 - `ui/data-request-pending-table.js`, aktif taleplerin mevcut etiketli tablo satırlarını, not satırını ve boş görünümünü üretir; sorgu, kuyruk ayrımı, sayaçlar ve işlem fonksiyonları serviste kalır.
+
+- `adapters/data-requests/reply-window.js`, hazır yanıtı mevcut mailto/UTF-8 gövde kodlamasıyla _blank hedefinde açar; önceden kodlanan konu, metin, CSV ve tamamlanma sırası serviste kalır.
