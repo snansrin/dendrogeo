@@ -231,6 +231,7 @@ Her modülün tek bir dış API'si, sahibi olduğu açık durumu ve kendi testle
 - `application/visitors/build-stored-activity.js`, dört kurucu etkinlik sorgusundan ayrı ayrı gelen ölçüm, proje, veri isteği ve rapor isteği kayıtlarını mevcut çeviri ve ayrıntı metinleriyle en yeni sıradaki satırlara dönüştürür; erişim, sorgu limitleri ve tablo gösterimi çağıran katmanlarda kalır.
 - `adapters/visitors/stored-activity-store.js`, kurucu etkinlik tablosunun dört mevcut Supabase sorgusunu sıralama ve kayıt limitleriyle ayrı ayrı yükler; her sorgunun hata yalıtımı ve sonuç listesi korunur, yetki kontrolü servis katmanında kalır.
 - `adapters/visitors/live-visit-counts-store.js`, kurucu canlı ziyaretçi panelinin toplam, bugün ve kayan yedi günlük sayaçlarını mevcut `site_visits` count sorgularıyla okur; yerel gün başlangıcı, owner denetimi ve DOM güncellemesi servis katmanında kalır.
+- `adapters/visitors/track-visit.js`, tekil anonim ziyaret kaydını `site_visits` tablosuna ham REST isteğiyle ve `Prefer: return=minimal` başlığıyla ekler; sekme başına tekilleştirme ve hataları sessiz yalıtma `trackVisit()` içinde kalır.
 
 - `ui/park-info-panel.js`, park sonucundaki grid, yüzey, PNG ve katman kontrollerinin markup yapısını üretir. Park state, park kimliği, proje seçenekleri, alternatif seçici ve kaçış işlevi çağıran ekrandan verilir; mevcut DOM kimlikleri ve eylem callback’leri korunur.
 
