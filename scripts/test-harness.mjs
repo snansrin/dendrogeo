@@ -213,6 +213,11 @@ export function loadApp({ sadece } = {}) {
     'src/services/grid-engine.js',
     /* YÖNETİM AĞACI (2026-09-24): dgTreeGroup/dgTreeFilterRows saf
      * fonksiyonları burada test edilir (DOM'a dokunan çizim kısmı değil). */
+    'src/adapters/admin/admin-tree-store.js',
+    'src/domain/admin/group-measurement-tree.js',
+    'src/domain/admin/filter-measurement-tree.js',
+    'src/ui/admin-tree-formatters.js',
+    'src/ui/admin-tree-pending-summary.js',
     'src/services/admin-tree.js',
   ];
   const secim = sadece ? new Set(sadece) : null;
@@ -224,6 +229,13 @@ export function loadApp({ sadece } = {}) {
     secim.add('src/application/trees/calculate-tree-carbon-from-circumference.js');
   }
   if (secim && secim.has('src/services/measure.js')) secim.add('src/application/trees/validate-measurement.js');
+  if (secim && secim.has('src/services/admin-tree.js')) {
+    secim.add('src/adapters/admin/admin-tree-store.js');
+    secim.add('src/domain/admin/group-measurement-tree.js');
+    secim.add('src/domain/admin/filter-measurement-tree.js');
+    secim.add('src/ui/admin-tree-formatters.js');
+    secim.add('src/ui/admin-tree-pending-summary.js');
+  }
   if (secim && secim.has('src/services/visit-stats.js')) {
     secim.add('src/application/visitors/build-live-activity.js');
     secim.add('src/application/visitors/build-live-roster.js');

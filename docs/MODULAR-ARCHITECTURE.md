@@ -672,3 +672,13 @@ Her modülün tek bir dış API'si, sahibi olduğu açık durumu ve kendi testle
 - `application/reports/save-academic-profile.js`, ORCID doğrulaması, Supabase Auth güncellemesi, durum mesajları ve profil yenileme sırasını yönetir.
 
 - `application/reports/create-academic-report-collector.js`, kullanıcı/park tekilleştirme anahtarını ve rapor künye toplama portlarını kurar.
+
+- `adapters/admin/admin-tree-store.js`, yönetim ölçümlerini tam embed, istemci tarafı join ve görünür hata yedeğiyle yükler.
+
+- `domain/admin/group-measurement-tree.js`, ölçümleri park → proje → kullanıcı hiyerarşisinde toplar ve sıralar.
+
+- `domain/admin/filter-measurement-tree.js`, yönetim ağacını durum ve Türkçe arama sorgusuna göre süzer.
+
+- `ui/admin-tree-formatters.js`, karbon, bekleyen rozeti, durum özeti ve durum etiketlerini üretir.
+
+- `ui/admin-tree-pending-summary.js`, bekleyen kayıtları park/proje/kullanıcı düzeyinde özetleyip yönetim kısayollarını çizer.

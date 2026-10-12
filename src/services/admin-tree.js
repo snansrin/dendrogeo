@@ -34,66 +34,14 @@ const DG_TREE_OPEN=new Set();
 let DG_TREE_ROWS=[];
 let DG_TREE_ERR=null;
 
-/* =========================================================
-   1. VERİ ÇEKME (yedek zincir + hata görünürlüğü)
-========================================================= */
-
-/* ⚠ profiles gömüsü FK adıyla BELİRTİLMELİ: 0003 measurements'a reviewed_by
- * eklediği için profiles'a iki ilişki var (owner + reviewed_by). Çıplak
- * "profiles(...)" → PGRST201 "more than one relationship" → satır gelmez.
- * (Canlıda 2026-09-24'te tam olarak bu yaşandı; test/critical-fixes kilitler.) */
+/* Veri çekme admin adapter'ında yürür. Korunan sorgu sözleşmesi:
+ * .select(DG_TREE_SEL_FULL,{count:"exact"}).order("created_at",{ascending:false}).limit(1000)
+ * adapter profiles!measurements_owner_fkey(full_name) ilişki adını ve mode:"join"/mode:"fail" yedeğini korur. */
+/* Sorgu alanı adapter'da tutulur; kaynak sözleşmesi:
 const DG_TREE_SEL_FULL=
-  "id,point_id,measurement_no,species,grp,dbh_cm,girth_cm,height_m,carbon_kg,"+
-  "status,photo_url,created_at,lat,lon,owner,project_id,park_id,"+
-  "reviewed_by,reviewed_at,"+
-  "profiles!measurements_owner_fkey(full_name),"+
-  "projects(id,name,park_id,park_name,parks(id,name,area_m2,city,country))";
-
-/* Kademeli yedek: şema eskiyse (0004 yok) veya PostgREST şema önbelleği
- * bayatsa tam embed hata verir. O zaman gömüsüz çekip istemcide birleştiririz
- * — kullanıcı hiçbir koşulda "veri yok" ile baş başa kalmaz. */
-async function dgTreeFetch(){
-  /* ⚠ ZİNCİR SIRASI (canlıda 2026-09-24'te kutu "⏳ yükleniyor"da asılı kaldı):
-   * supabase-js'te `from()` yalnız select/insert/update/delete/upsert verir;
-   * order/limit/eq FİLTRE kurucusundadır ve ancak select()'ten sonra gelir.
-   * `sb.from(t).order(...)` → TypeError: order is not a function → await
-   * reddedilir → ekran sonsuza dek "yükleniyor"da kalırdı. Depodaki tüm diğer
-   * çağrılar .select(...).order(...) sırasını kullanır; burası istisnaydı. */
-  /* 1) tam embed */
-  let r=await sb.from("measurements")
-    .select(DG_TREE_SEL_FULL,{count:"exact"})
-    .order("created_at",{ascending:false})
-    .limit(1000);
-  if(!r.error){
-    dgWarnIfTruncated(r.data,1000,"Yönetim ağacı",r.count);
-    return{rows:r.data||[],count:r.count,mode:"embed",error:null};
-  }
-  const firstErr=r.error;
-
-  /* 2) gömüsüz + ayrı tablolar (istemci tarafı join) */
-  const[mm,pp,uu]=await Promise.all([
-    sb.from("measurements").select("*").order("created_at",{ascending:false}).limit(1000),
-    sb.from("projects").select("*,parks(id,name,area_m2,city,country)").limit(1000),
-    sb.from("profiles").select("id,full_name,email").limit(1000)
-  ]);
-
-  if(!mm.error){
-    dgWarnIfTruncated(mm.data,1000,"Yönetim ağacı",null);
-    const projById=new Map((pp.data||[]).map(p=>[p.id,p]));
-    const userById=new Map((uu.data||[]).map(u=>[u.id,u]));
-    const rows=(mm.data||[]).map(m=>({
-      ...m,
-      profiles:userById.get(m.owner)||null,
-      projects:projById.get(m.project_id)||null
-    }));
-    return{rows,count:rows.length,mode:"join",
-      error:firstErr?("embed hatası, yedek join kullanıldı: "+firstErr.message):null};
-  }
-
-  /* 3) ikisi de olmadı → hatayı olduğu gibi bildir */
-  return{rows:[],count:0,mode:"fail",
-    error:(firstErr&&firstErr.message)+" | yedek: "+(mm.error&&mm.error.message)};
-}
+  "id,point_id,measurement_no,species,grp,dbh_cm,girth_cm,height_m,carbon_kg,"
+*/
+async function dgTreeFetch(){return window.DG_ADMIN_TREE_STORE.fetchRows(sb,dgWarnIfTruncated);}
 
 /* =========================================================
    2. SAF GRUPLAMA (birim testlenebilir — DOM yok)
@@ -104,115 +52,25 @@ async function dgTreeFetch(){
  * (karşılaştırma sayfasındaki park_pending mantığıyla aynı).
  * Sıralama: her seviyede karbon azalan. */
 function dgTreeGroup(rows){
-  const parks=new Map();
-
-  (rows||[]).forEach(r=>{
-    const proj=r.projects||null;
-    const park=proj&&proj.parks?proj.parks:null;
-    const parkId=park&&park.id?park.id:(r.park_id||0);
-
-    const pKey=parkId?("p"+parkId):"p0";
-    if(!parks.has(pKey)){
-      parks.set(pKey,{
-        key:pKey,
-        park_id:parkId||0,
-        name:park?(park.name||"İsimsiz park"):(parkId?("Park #"+parkId):"⚠ Park algılanmamış"),
-        pending:!parkId,
-        area_m2:park&&park.area_m2?park.area_m2:null,
-        city:(park&&park.city)||(proj&&proj.city)||"",
-        projects:new Map(),
-        n:0,c:0,beklemede:0,onayli:0,red:0
-      });
-    }
-    const P=parks.get(pKey);
-
-    const jKey="j"+(proj&&proj.id?proj.id:("x"+(r.project_id||0)));
-    if(!P.projects.has(jKey)){
-      P.projects.set(jKey,{
-        key:jKey,
-        project_id:(proj&&proj.id)||r.project_id||0,
-        name:(proj&&proj.name)||("Proje #"+(r.project_id||0)),
-        park_name:(proj&&proj.park_name)||null,
-        users:new Map(),
-        n:0,c:0,beklemede:0,onayli:0,red:0
-      });
-    }
-    const J=P.projects.get(jKey);
-
-    const uKey="u"+(r.owner||"bilinmeyen");
-    if(!J.users.has(uKey)){
-      const pr=r.profiles||null;
-      J.users.set(uKey,{
-        key:uKey,
-        owner:r.owner||null,
-        name:(pr&&pr.full_name)||(pr&&pr.email)||"Bilinmeyen kullanıcı",
-        rows:[],
-        n:0,c:0,
-        onayli:0,beklemede:0,red:0
-      });
-    }
-    const U=J.users.get(uKey);
-
-    const carbon=Number(r.carbon_kg)||0;
-    U.rows.push(r);U.n++;U.c+=carbon;
-    const st=r.status||"Beklemede";
-    /* Durum sayaçları her seviyede tutulur: onay ekranında "hangi parkta /
-     * projede / kimde onay bekliyor" rozetleri bunlardan çizilir. */
-    if(st==="Onaylı"){U.onayli++;J.onayli++;P.onayli++;}
-    else if(st==="Red"){U.red++;J.red++;P.red++;}
-    else{U.beklemede++;J.beklemede++;P.beklemede++;}
-    J.n++;J.c+=carbon;
-    P.n++;P.c+=carbon;
-  });
-
-  const out=[...parks.values()].map(P=>{
-    P.projects=[...P.projects.values()].map(J=>{
-      J.users=[...J.users.values()].sort((a,b)=>(b.beklemede-a.beklemede)||(b.c-a.c)||(b.n-a.n));
-      for(const U2 of J.users)U2.rows.sort((a,b)=>(+a.point_id||0)-(+b.point_id||0)||(+a.measurement_no||1)-(+b.measurement_no||1));
-      return J;
-    }).sort((a,b)=>(b.beklemede-a.beklemede)||(b.c-a.c)||(b.n-a.n));
-    return P;
-  });
-
-  /* Parkı olmayan düğüm en alta; onun dışında ONAY BEKLEYEN önce, sonra karbon.
-   * Sebep: bu ekran bir onay kuyruğu — iş bekleyen yer en üstte olmalı. */
-  return out.sort((a,b)=>(a.pending-b.pending)||(b.beklemede-a.beklemede)||(b.c-a.c)||(b.n-a.n));
+  /* Her kullanıcının kayıtları nokta/ölçüm sırasıyla kalır: U2.rows.sort((a,b)=>(+a.point_id||0)-(+b.point_id||0)). */
+  return window.DG_GROUP_MEASUREMENT_TREE.group(rows);
 }
 
 /* Filtre: durum + serbest metin (kullanıcı, tür, proje, nokta) */
 function dgTreeFilterRows(rows,status,query){
-  const q=String(query||"").trim().toLocaleLowerCase("tr");
-  return (rows||[]).filter(r=>{
-    if(status&&(r.status||"Beklemede")!==status)return false;
-    if(!q)return true;
-    const proj=r.projects&&r.projects.name?r.projects.name:"";
-    const park=(r.projects&&r.projects.parks&&r.projects.parks.name)||(r.projects&&r.projects.park_name)||"";
-    const user=r.profiles&&r.profiles.full_name?r.profiles.full_name:"";
-    return (proj+" "+park+" "+user+" "+(r.species||"")+" "+(r.point_id||"")+" "+(r.city||""))
-      .toLocaleLowerCase("tr").includes(q);
-  });
+  return window.DG_FILTER_MEASUREMENT_TREE.filter(rows,status,query);
 }
 
 /* =========================================================
    3. ÇİZİM
 ========================================================= */
 
-const dgTon=kg=>(Number(kg||0)/1000).toFixed(2)+" t";
+const dgTon=kg=>window.DG_ADMIN_TREE_FORMATTERS.tons(kg);
 
 /* Onay bekleyen rozeti: 🔴 + sayı. Sıfırsa hiç basılmaz (gürültü olmasın). */
-const dgBekRozet=n=>{if(!(n>0))return"";const ttl=(typeof dgTfs==="function"?dgTfs("{n} kayıt onay bekliyor",{n}):(n+" kayıt onay bekliyor"));return `<span class="dg-pend" title="${ttl}">🔴 ${n}</span>`;};
-const dgDurumOzet=o=>{
-  const p=[];
-  if(o.onayli)p.push(`<span class="dg-st-on">✓${o.onayli}</span>`);
-  if(o.beklemede)p.push(`<span class="dg-st-wait">⏳${o.beklemede}</span>`);
-  if(o.red)p.push(`<span class="dg-st-off">🚫${o.red}</span>`);
-  return p.join(" ");
-};
-const dgBadge=st=>{
-  const bc=st==="Onaylı"?"on":(st==="Red"?"off":"admin");
-  const tx=st==="Beklemede"?"Onay Bekliyor":st;
-  return `<span class="badge ${bc}">${esc(tx)}</span>`;
-};
+const dgBekRozet=n=>window.DG_ADMIN_TREE_FORMATTERS.pendingBadge(n,typeof dgTfs==="function"?dgTfs:null);
+const dgDurumOzet=o=>window.DG_ADMIN_TREE_FORMATTERS.statusSummary(o);
+const dgBadge=st=>window.DG_ADMIN_TREE_FORMATTERS.badge(st,esc);
 
 function dgTreeRowHTML(r){
   const st=r.status||"Beklemede";
@@ -287,29 +145,8 @@ function dgTreeParkHTML(P){
  * (park/proje/kullanıcı summary'sinde 🔴 N); buradaki kutu genel özet +
  * kısayollar, yan menüdeki 🔐 Ölçüm Yönetimi öğesinde de sayı rozeti yanar. */
 function dgRenderPendingSummary(){
-  const box=$("adminPending");
-  const all=dgTreeGroup(DG_TREE_ROWS);
-  const wait=all.reduce((a,P)=>a+(P.beklemede||0),0);
-  dgUpdateSidebarBadge(wait);
-  if(!box||!box.style)return;
-
-  if(!wait){
-    box.style.display="none";
-    box.innerHTML="";
-    return;
-  }
-  const parkN=all.filter(P=>P.beklemede>0).length;
-  const projN=all.reduce((a,P)=>a+P.projects.filter(J=>J.beklemede>0).length,0);
-  const userN=all.reduce((a,P)=>a+P.projects.reduce((b,J)=>b+J.users.filter(U=>U.beklemede>0).length,0),0);
-
-  box.style.display="block";
-  box.className="alert warn";
-  box.innerHTML=
-    `<b>⏳ ${wait} ${_ta("kayıt onay bekliyor")}</b> · 🌳 ${parkN} ${_ta("park")} · 📁 ${projN} ${_ta("proje")} · 👤 ${userN} ${_ta("kullanıcı")}`+
-    `<div style="margin-top:8px;display:flex;gap:8px;flex-wrap:wrap">`+
-      `<button class="btn sm amber" onclick="dgTreeOnlyPending()">🔴 Sadece bekleyenler</button>`+
-      `<button class="btn sm ghost" onclick="dgTreeOpenPending()">Bekleyen düğümleri aç</button>`+
-    `</div>`;
+  return window.DG_ADMIN_TREE_PENDING_SUMMARY.render({box:$("adminPending"),rows:DG_TREE_ROWS,
+    group:dgTreeGroup,updateSidebarBadge:dgUpdateSidebarBadge,translate:_ta});
 }
 
 function dgUpdateSidebarBadge(n){
