@@ -6,7 +6,7 @@ import {readFileSync} from 'node:fs';
 function app({user={id:'qa'},data=[],error=null,reject=false}={}){
  const window={},calls=[],box={innerHTML:'old'};
  const ctx=vm.createContext({window,USER:user,Date,esc:value=>value==null?'':String(value).replaceAll('<','&lt;').replaceAll('>','&gt;'),$:id=>id==='myRequests'?box:null,dgScrollKeep:()=>{calls.push(['keep']);return 42;},dgScrollRestore:y=>calls.push(['restore',y]),sb:{from(table){calls.push(['from',table]);const q={select(columns){calls.push(['select',columns]);return q;},eq(column,value){calls.push(['eq',column,value]);return q;},order(column,options){calls.push(['order',column,JSON.parse(JSON.stringify(options))]);return q;},then(resolve,rejectFn){return (reject?Promise.reject(Error('offline')):Promise.resolve({data,error})).then(resolve,rejectFn);}};return q;}}});
- for(const file of ['src/adapters/data-requests/my-requests-store.js','src/services/data-requests.js'])vm.runInContext(readFileSync(new URL('../'+file,import.meta.url),'utf8'),ctx);
+ for(const file of ['src/adapters/data-requests/my-requests-store.js','src/ui/my-data-requests.js','src/services/data-requests.js'])vm.runInContext(readFileSync(new URL('../'+file,import.meta.url),'utf8'),ctx);
  return{calls,box,run:()=>vm.runInContext('loadMyRequests()',ctx)};
 }
 
