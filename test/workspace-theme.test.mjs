@@ -42,7 +42,11 @@ test('Taleplerim kapalı disclosure olur ve kullanıcı kendi talebini silebilir
  assert.match(req,/DG_MY_DATA_REQUESTS_UI\.render\(el,data/);
  assert.match(req,/async function deleteMyRequest\(id\)/);
  assert.match(rd('src/adapters/data-requests/delete-own-request.js'),/\.delete\(\)\.eq\("id",id\)\.eq\("user_id",userId\)/);
- assert.match(req,/DG_DELETE_OWN_DATA_REQUEST\.remove\(sb,\+id,USER\.id\)/);
+ assert.match(req,/DG_DELETE_OWN_DATA_REQUEST_APPLICATION\.execute\(USER,id/);
+ assert.match(req,/DG_DELETE_OWN_DATA_REQUEST\.remove\(sb,requestId,userId\)/);
+ const deletion=rd('src/application/data-requests/delete-own-request.js');
+ assert.match(deletion,/if\(!user\|\|!Number\.isFinite\(\+id\)\)return/);
+ assert.match(deletion,/remove\(\+id,user\.id\)/);
  const mig=rd('supabase/migrations/20261006193500_data_requests_delete_own.sql');
  assert.match(mig,/for delete\s+to authenticated/i);
  assert.match(mig,/auth\.uid\(\).*user_id/s);

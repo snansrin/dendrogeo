@@ -47,12 +47,13 @@ async function loadMyRequests__scroll(){
  window.DG_MY_DATA_REQUESTS_UI.render(el,data,{escape:esc});
 }
 async function deleteMyRequest(id){
- if(!USER||!Number.isFinite(+id))return;
- if(!confirm("Bu veri talebi silinsin mi?"))return;
- const{data,error}=await window.DG_DELETE_OWN_DATA_REQUEST.remove(sb,+id,USER.id);
- if(error||!data?.length){toast("Talep silinemedi: "+(error?.message||"Yetki veya kayıt bulunamadı."),"err","🗑");return;}
- toast("Talep silindi.","ok","🗑");
- loadMyRequests();
+ return await window.DG_DELETE_OWN_DATA_REQUEST_APPLICATION.execute(USER,id,{
+  confirm:()=>confirm("Bu veri talebi silinsin mi?"),
+  remove:(requestId,userId)=>window.DG_DELETE_OWN_DATA_REQUEST.remove(sb,requestId,userId),
+  onFailure:error=>toast("Talep silinemedi: "+(error?.message||"Yetki veya kayıt bulunamadı."),"err","🗑"),
+  onSuccess:()=>toast("Talep silindi.","ok","🗑"),
+  refresh:()=>loadMyRequests()
+ });
 }
 
 /* --- Kullanıcı talep formu --- */

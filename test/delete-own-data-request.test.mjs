@@ -5,7 +5,7 @@ import {readFileSync} from 'node:fs';
 
 function app({user={id:'qa'},confirmed=true,data=[{id:7}],error=null}={}){
  const window={},calls=[],ctx=vm.createContext({window,USER:user,confirm:()=>{calls.push(['confirm']);return confirmed;},toast:(...args)=>calls.push(['toast',...args]),sb:{from(table){calls.push(['from',table]);return{delete(){calls.push(['delete']);return this;},eq(column,value){calls.push(['eq',column,value]);return this;},select(columns){calls.push(['select',columns]);return Promise.resolve({data,error});}};}}});
- for(const file of ['src/adapters/data-requests/delete-own-request.js','src/services/data-requests.js'])vm.runInContext(readFileSync(new URL('../'+file,import.meta.url),'utf8'),ctx);
+ for(const file of ['src/adapters/data-requests/delete-own-request.js','src/application/data-requests/delete-own-request.js','src/services/data-requests.js'])vm.runInContext(readFileSync(new URL('../'+file,import.meta.url),'utf8'),ctx);
  ctx.refresh=()=>calls.push(['refresh']);vm.runInContext('loadMyRequests=()=>refresh()',ctx);
  return{calls,run:id=>vm.runInContext('deleteMyRequest('+JSON.stringify(id)+')',ctx)};
 }

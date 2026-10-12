@@ -550,3 +550,5 @@ Her modülün tek bir dış API'si, sahibi olduğu açık durumu ve kendi testle
 - `application/data-requests/fulfill-request.js`, veri yükleme→özet→boş onayı/CSV→yanıt→tamamlanma→bildirim→yenileme sırasını enjekte edilen portlarla yönetir; Supabase, DOM ve tarayıcı erişmez, servis bağımlılıkları bağlar.
 
 - `application/data-requests/submit-request.js`, tekrar kontrolü→kayıt gövdesi→insert→sonuç sırasını enjekte edilen portlarla yürütür; tekrar kontrolü hata sınırı korunur, form/metin/yenileme serviste kalır.
+
+- `application/data-requests/delete-own-request.js`, oturum/geçerli ID→onay→id+user_id silme→sonuç→yenileme sırasını enjekte edilen portlarla yönetir; mesajlar, adapter ve liste yenilemesi servisten bağlanır.
