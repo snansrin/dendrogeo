@@ -238,10 +238,8 @@ function dgVisMapDraw(rows){
   if(!dgVisHasLocation(r.p))continue;
   pts.push(r);
   const col=(typeof dgMateColor==="function")?dgMateColor(r.p.id):"#2b6cb0";
-  const ini=String(r.p.n||"?").trim().slice(0,1).toLocaleUpperCase("tr-TR");
-  const ic=L.divIcon({className:"",html:'<div style="width:20px;height:20px;border-radius:50%;background:'+col+';border:2px solid #fff;box-shadow:0 1px 4px rgba(0,0,0,.45);display:flex;align-items:center;justify-content:center;color:#fff;font-size:10px;font-weight:800">'+esc(ini)+'</div>',iconSize:[20,20],iconAnchor:[10,10]});
-  const lbl=(DG_VIEW_LABELS[r.p.v]||r.p.v||"");
-  const ageTxt=r.age<60?r.age+" "+T("sn"):Math.round(r.age/60)+" "+T("dk");
+  const presentation=DG_VISITOR_MAP_MARKER_UI.build(r,{color:col,viewLabels:DG_VIEW_LABELS,translate:T,escape:esc});
+  const ic=L.divIcon(presentation.icon);
   /* 0045: geçici konum İZİ (presence lh) — kesikli polizgi, DB'ye yazılmaz. */
   if($("visTrails")?.checked&&Array.isArray(r.p.lh)&&r.p.lh.length>1){
    try{
@@ -250,7 +248,7 @@ function dgVisMapDraw(rows){
    }catch(e){}
   }
   L.marker([r.p.la,r.p.lo],{icon:ic,interactive:true,keyboard:false,zIndexOffset:700}).addTo(DG_VIS_LAYER)
-   .bindTooltip("<b>"+esc(r.p.n||"?")+"</b><br>"+esc(T(lbl))+"<br>"+T("son konum")+": "+ageTxt+" "+T("önce"),{direction:"top",offset:[0,-12]});
+   .bindTooltip(presentation.tooltip,presentation.tooltipOptions);
  }
  try{
   if((!DG_VIS_FIT||$("visFollow")?.checked)&&pts.length===1)DG_VIS_MAP.setView([pts[0].p.la,pts[0].p.lo],13);
