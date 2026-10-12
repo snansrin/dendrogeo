@@ -385,21 +385,23 @@ function dgPubPublishedInPark(queue,parkId){
 }
 
 async function dgUserPubOpen(projectId){
- const box=$("dgUserPubBox");if(!box)return;
- if(typeof USER==="undefined"||!USER)return toast("Önce giriş yap.","err","📄");
  const list=(typeof PROJ_LIST!=="undefined"&&Array.isArray(PROJ_LIST))?PROJ_LIST:[];
- const p=list.find(x=>Number(x.id)===Number(projectId));
- if(!p)return toast("Proje bulunamadı — listeden yeniden dene.","err","📄");
- if(!p.park_id)return toast("Bu proje bir parka bağlı değil — rapor park kimliği ister.","err","🌳");
- if(DG_USER_PUB.timer){clearInterval(DG_USER_PUB.timer);DG_USER_PUB.timer=0;}
- DG_USER_PUB.projectId=Number(p.id);
- DG_USER_PUB.parkId=Number(p.park_id);
- DG_USER_PUB.parkName=(p.parks&&p.parks.name)||p.park_name||("park #"+p.park_id);
- DG_USER_PUB.requests=[];DG_USER_PUB.retracts=[];DG_USER_PUB.error="";DG_USER_PUB.ownApproved=null;DG_USER_PUB.polls=0;
- box.style.display="";
- box.innerHTML='<div class="dg-tree-meta">⏳ Rapor durumu yükleniyor…</div>';
- if(box.scrollIntoView)box.scrollIntoView({behavior:"smooth",block:"nearest"});
- await dgUserPubRefresh();
+ return window.DG_OPEN_USER_PUBLICATION_PANEL.execute(projectId,{
+  getBox:()=>$('dgUserPubBox'),
+  isAuthenticated:()=>typeof USER!=="undefined"&&!!USER,
+  findProject:id=>list.find(x=>Number(x.id)===Number(id)),
+  onUnauthenticated:()=>toast("Önce giriş yap.","err","📄"),
+  onMissingProject:()=>toast("Proje bulunamadı — listeden yeniden dene.","err","📄"),
+  onUnlinkedProject:()=>toast("Bu proje bir parka bağlı değil — rapor park kimliği ister.","err","🌳"),
+  stopPolling:()=>{if(DG_USER_PUB.timer){clearInterval(DG_USER_PUB.timer);DG_USER_PUB.timer=0;}},
+  selectProject:p=>{
+   DG_USER_PUB.projectId=Number(p.id);
+   DG_USER_PUB.parkId=Number(p.park_id);
+   DG_USER_PUB.parkName=(p.parks&&p.parks.name)||p.park_name||("park #"+p.park_id);
+   DG_USER_PUB.requests=[];DG_USER_PUB.retracts=[];DG_USER_PUB.error="";DG_USER_PUB.ownApproved=null;DG_USER_PUB.polls=0;
+  },
+  refresh:dgUserPubRefresh
+ });
 }
 
 async function dgUserPubRefresh(){
@@ -541,56 +543,50 @@ async function dgUserCancel(id){
 /* Kendi bekleyen isteği varken ve panel görünürken 25 sn'de bir sessiz tazeleme
  * (yönetici kartındaki dgPubSchedulePoll ile aynı desen ve sınırlar). */
 function dgUserPubSchedulePoll(){
- if(DG_USER_PUB.timer){clearInterval(DG_USER_PUB.timer);DG_USER_PUB.timer=0;}
- const mine=(typeof USER!=="undefined"&&USER&&USER.id)||"";
- const waiting=DG_USER_PUB.requests.some(r=>r.status==="Beklemede"&&String(r.requested_by||"")===String(mine)&&!dgPubEntryIn(DG_USER_PUB.queue,r.id))
-  ||(DG_USER_PUB.retracts||[]).some(x=>x.status==="Beklemede"&&String(x.requested_by||"")===String(mine)&&!dgPubRetractDone(DG_USER_PUB.queue,x.id));
- if(!waiting||DG_USER_PUB.polls>=DG_PUB_POLL_MAX)return;
- DG_USER_PUB.timer=setInterval(async()=>{
-  DG_USER_PUB.polls++;
-  const v=$("v-projects");
-  if(v&&!v.classList.contains("on"))return;      /* sekme kapalı: ağ isteği atma */
-  if(document.hidden)return;                       /* arka plan sekmesi: bekle */
-  const box=$("dgUserPubBox");
-  if(!box||box.style.display==="none")return;      /* panel kapalı: bekle */
-  await dgUserPubRefresh();
- },DG_PUB_POLL_MS);
+ return window.DG_SCHEDULE_USER_PUBLICATION_POLL.execute(DG_USER_PUB,{
+  clearTimer:clearInterval,
+  userId:()=>typeof USER!=="undefined"&&USER&&USER.id,
+  entryFor:dgPubEntryIn,
+  retractionDone:dgPubRetractDone,
+  maxPolls:DG_PUB_POLL_MAX,
+  setInterval,
+  intervalMs:DG_PUB_POLL_MS,
+  isProjectsTabActive:()=>{const tab=$("v-projects");return !tab||tab.classList.contains("on");},
+  isDocumentHidden:()=>document.hidden,
+  isPanelVisible:()=>{const box=$("dgUserPubBox");return !!box&&box.style.display!=="none";},
+  refresh:dgUserPubRefresh
+ });
 }
 
 function dgUserPubClose(){
- if(DG_USER_PUB.timer){clearInterval(DG_USER_PUB.timer);DG_USER_PUB.timer=0;}
- DG_USER_PUB.projectId=0;DG_USER_PUB.parkId=0;
- const box=$("dgUserPubBox");
- if(box){box.style.display="none";box.innerHTML="";}
+ return window.DG_CLOSE_USER_PUBLICATION_PANEL.execute(DG_USER_PUB,{clearTimer:clearInterval,getBox:()=>$('dgUserPubBox')});
 }
 
 /* loadProjects() her çizimde çağırır: paneli açık proje listeden silindiyse
  * (proje silindi) panel kapanır — hayalet durum gösterilmez. */
 function dgUserPubSync(list){
- if(!DG_USER_PUB.projectId)return;
- const arr=Array.isArray(list)?list:[];
- if(!arr.some(p=>Number(p.id)===DG_USER_PUB.projectId))dgUserPubClose();
+ return window.DG_SYNC_USER_PUBLICATION_PANEL.execute(DG_USER_PUB,list,dgUserPubClose);
 }
 
 /* ---------- paylaş ---------- */
 async function dgReportShare(reportId,parkName){
- const url=dgPubUrl(reportId);
- if(!url)return toast("Bağlantı kurulamadı: rapor kimliği geçersiz.","err","📄");
- const title=(parkName?parkName+" — ":"")+"DendroGeo bilimsel rapor "+reportId;
- const text=title+" · karbon stoku, belirsizlik aralığı ve doğrulama izleri";
- try{
-  if(navigator.share){await navigator.share({title:title,text:text,url:url});return;}
- }catch(e){/* kullanıcı vazgeçti ya da API yok → pano yedeği */}
- try{
-  await navigator.clipboard.writeText(url);
-  toast(dgCf("🔗 Bağlantı kopyalandı: ")+url,"ok","📄");
- }catch(e){window.prompt("Bağlantıyı kopyalayın (Ctrl+C):",url);}
+ return window.DG_SHARE_REPORT_LINK.share(reportId,{
+  parkName,
+  url:dgPubUrl,
+  share:navigator.share?navigator.share.bind(navigator):null,
+  copy:url=>navigator.clipboard.writeText(url),
+  copied:url=>toast(dgCf("🔗 Bağlantı kopyalandı: ")+url,"ok","📄"),
+  prompt:url=>window.prompt("Bağlantıyı kopyalayın (Ctrl+C):",url),
+  invalidLink:()=>toast("Bağlantı kurulamadı: rapor kimliği geçersiz.","err","📄")
+ });
 }
 
 function dgReportOpen(reportId){
- const url=dgPubUrl(reportId);
- if(!url)return toast("Bağlantı kurulamadı: rapor kimliği geçersiz.","err","📄");
- window.open(url,"_blank","noopener");
+ return window.DG_SHARE_REPORT_LINK.open(reportId,{
+  url:dgPubUrl,
+  open:url=>window.open(url,"_blank","noopener"),
+  invalidLink:()=>toast("Bağlantı kurulamadı: rapor kimliği geçersiz.","err","📄")
+ });
 }
 
 /* ---------- yükleme + kendiliğinden tazeleme ---------- */
