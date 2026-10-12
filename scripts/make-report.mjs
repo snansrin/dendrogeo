@@ -68,7 +68,7 @@ import { pointInRing, pointInPolygon, ringSelfIntersections, geometrySelfInterse
 export { pointInRing, pointInPolygon, ringSelfIntersections, geometrySelfIntersections, bboxRing, ringGeodesicAreaM2 };
 import { DGR_ID_RE, rebuildIndex, nextReportId, parkHistory } from './lib/report-archive.mjs';
 export { DGR_ID_RE, rebuildIndex, nextReportId, parkHistory };
-import { citeName, fmtDateTr, fmtDateDot, epsgLabel } from './lib/report-formatting.mjs';
+import { citeName, fmtDateTr, fmtDateDot, epsgLabel, formatReportNumber as trNum } from './lib/report-formatting.mjs';
 import {escapeReportHtml} from './lib/report-html-escaping.mjs';
 export { citeName, fmtDateTr, fmtDateDot, epsgLabel };
 import { createRetractionNotice } from './lib/report-retraction.mjs';
@@ -107,7 +107,6 @@ const DATASET_DEFAULT = 'ESA WorldCover 10 m · 2021 (v200)';
 
 const {rest} = createReportRestAdapter({read, reportRead});
 const esc = escapeReportHtml;
-const trNum = (x, d = 2) => Number(x).toLocaleString('tr-TR', { minimumFractionDigits: d, maximumFractionDigits: d });
 
 export {createReportLandcoverRuntime} from './lib/report-landcover-runtime.mjs';
 import {createReportLandcoverRuntime} from './lib/report-landcover-runtime.mjs';
