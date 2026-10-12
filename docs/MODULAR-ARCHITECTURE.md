@@ -466,4 +466,4 @@ Her modülün tek bir dış API'si, sahibi olduğu açık durumu ve kendi testle
 
 - `scripts/lib/report-formatting.mjs`, rapordaki mevcut kilogramdan metrik tona gösterim dönüşümünü iki sabit ondalık basamakla biçimler; `make-report.mjs` aynı `fmtT` bağını kullanır, kaynak kg değerleri ve hesaplama akışı değişmez.
 
-- `scripts/lib/report-repository-access.mjs` türetildiği giriş dosyasına göre aynı depo kökünü belirler ve rapor-relative dosyaları UTF-8 okur; `make-report.mjs` kök ve okuyucu bağlarını aynı yolla alır.
+- `scripts/lib/report-repository-access.mjs` türetildiği giriş dosyasına göre aynı depo kökünü belirler ve raporun kullandığı göreli dosya yollarını UTF-8 okur; `make-report.mjs` kök ve okuyucu bağlarını aynı yolla alır.
