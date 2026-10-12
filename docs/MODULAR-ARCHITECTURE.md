@@ -544,3 +544,5 @@ Her modülün tek bir dış API'si, sahibi olduğu açık durumu ve kendi testle
 - `adapters/data-requests/queue-store.js` ve `ui/data-request-closed-table.js`, yönetici sorgusunu ve kapalı tabloyu gerçek sınırlara ayırır. Kullanıcı talimatıyla iki kaynak-konumu regresyonu yeni modülleri ve servis delegasyonunu denetleyecek şekilde taşındı; önceki/yeni test hashleri çekirdek manifestinde kaydedildi, diğer 265 kilit korunur.
 
 - `ui/my-data-requests.js` ve `adapters/data-requests/delete-own-request.js`, kullanıcı talep kartlarını ve id+user_id ile sınırlı silme çağrısını ayırır; oturum, onay, hata, kaydırma ve yenileme serviste kalır. workspace-theme regresyonu aynı şartları yeni modüllerde ve servis bağlantısında denetler; RLS migration şartları korunur. Bu test hash manifestinde bulunmadığı için manifest değişmedi.
+
+- `ui/data-request-reply-content.js`, talep yanıtının tam e-posta metnini ve kodlanmış konu satırını mevcut tarih, özet, QGIS/lisans ve künye içeriğiyle üretir; veri sorgusu, CSV, tarayıcı ve durum güncellemesi serviste kalır.
