@@ -459,3 +459,5 @@ Her modülün tek bir dış API'si, sahibi olduğu açık durumu ve kendi testle
 - `scripts/lib/report-html-escaping.mjs`, immutable rapor HTML'ine metin olarak eklenen değerleri mevcut `&`, `<`, `>`, `"` dönüşümleriyle kaçırır; `make-report.mjs` aynı `esc` yardımcı API'sini bu saf fonksiyona bağlar.
 
 - `scripts/lib/report-formatting.mjs` artık Türkçe ondalık sayı biçimleyicisini de sağlar; `make-report.mjs` aynı `trNum` adını bu fonksiyona bağlar. Locale ve sabit ondalık basamak davranışı korunur.
+
+- `scripts/lib/report-cli-arguments.mjs` okunuşu `--name` biçimindeki rapor CLI bayraklarının varlık ve ilk değer davranışını sağlar; `make-report.mjs` mevcut süreç argümanlarını bağlar, CLI akışı ve çıkış davranışı değişmez.
