@@ -249,6 +249,7 @@ Her modülün tek bir dış API'si, sahibi olduğu açık durumu ve kendi testle
 - `ui/gis-export-download.js`, standart ve doğrulanmış GIS PNG'lerinde `Blob` üretimi sonrası bağlantı indirme, object-URL ömrü ve başarısız üretim bildirimi callback'lerini ortaklaştırır. Dosya adı ve başarı bildirimi her iki export akışında çağıranda kalır.
 
 - `ui/gis-export-verified-canvas.js`, doğrulanmış harita PNG'sinin başlık/özet alanını ve park kırpımlı yüzey, NDVI, grid, waypoint, sınır ve lejant katmanlarını mevcut sırayla çizer. Analiz ve yayın kapıları ile PNG indirme `gis-export-verified-workflow.js` tarafından yönetilir.
+- `ui/gis-export-verified-frame.js`, doğrulanmış GIS PNG'sinin sabit marka başlığı ve kaynak altbilgisini çizer; canvas bağdaştırıcısı bunları harita ve özet çiziminin mevcut sırasındaki noktalardan çağırır.
 
 - `ui/gis-export-layout.js`, standart ve onaylı GIS PNG için park bounds, metre ölçüsü, canvas boyutu ve piksel projeksiyonunu hesaplar. Geçersiz ya da sıfır alanlı sınırı reddeder; çizim ve indirme adapter'da kalır.
 
