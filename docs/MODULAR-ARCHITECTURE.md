@@ -253,6 +253,7 @@ Her modülün tek bir dış API'si, sahibi olduğu açık durumu ve kendi testle
 - `ui/gis-export-verified-summary.js`, doğrulanmış GIS PNG'sinin park alanı, düzenleme sayısı, yüzey alanları ve göreli NDVI sınıf özetini verilen değerlerden çizer; alan hesabı ve veri toplama bağdaştırıcıda kalır.
 - `ui/gis-export-verified-layers.js`, doğrulanmış GIS PNG'sinin park kırpması içindeki yüzey, göreli NDVI, grid ve waypoint katmanlarını birleştirip sınırı çizer; çizim başarısızlık uyarılarını ve katman sırasını korur.
 - `ui/gis-workspace-analysis-layout.js`, mevcut analiz kartlarındaki grup satırı ve en yaygın altı tür açılır sunumunu düzenler; var olan DOM düğümlerini ve sayısal analiz değerlerini korur.
+- `ui/gis-workspace-menu-position.js`, açık GIS menülerinin panelini mobil ve masaüstü görünüm alanına göre yerleştirir; menü durumunu, harita etkileşimini ve içerikleri değiştirmez.
 - `ui/gis-export-standard-layers.js`, standart GIS PNG'sinde park kırpması içindeki örtü, NDVI, grid ve waypoint katmanlarını sırayla birleştirir; dış sınırı aynı kırpma sonrası adımda çizer.
 
 - `ui/gis-export-layout.js`, standart ve onaylı GIS PNG için park bounds, metre ölçüsü, canvas boyutu ve piksel projeksiyonunu hesaplar. Geçersiz ya da sıfır alanlı sınırı reddeder; çizim ve indirme adapter'da kalır.

@@ -9,6 +9,9 @@ Yeni sürüm yayımlama adımları: [`docs/surum-yayini.md`](docs/surum-yayini.m
 
 ## [Yayımlanmadı]
 
+### İyileştirildi — GIS menü paneli konumlandırması
+Açık menü panellerinin mobil ve masaüstü görünüm alanına göre yerleşimi ayrı UI modülüne taşındı; mevcut panel davranışı korundu.
+
 ### İyileştirildi — GIS analiz kartı sunumu
 Grup özeti ve en yaygın altı tür açılır sunumu ayrı UI modülüne taşındı; özgün DOM satırları ve analiz değerleri korundu.
 
