@@ -9,6 +9,9 @@ Yeni sürüm yayımlama adımları: [`docs/surum-yayini.md`](docs/surum-yayini.m
 
 ## [Yayımlanmadı]
 
+### İyileştirildi — GIS PNG grid çizimi
+Standart ve doğrulanmış grid konturları ayrı canvas modülüne taşındı; GeoJSON halka çizimi, sınır kutusu yedeği ve `DG_GIS_EXPORT_CANVAS` çağrıları korundu.
+
 ### İyileştirildi — GIS PNG waypoint çizimi
 Standart ve doğrulanmış haritalardaki waypoint işaretleri ayrı canvas modülüne taşındı; ziyaret renkleri, numaralı etiketler ve `DG_GIS_EXPORT_CANVAS` çağrıları korundu.
 
