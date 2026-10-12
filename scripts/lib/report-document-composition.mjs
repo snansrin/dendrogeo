@@ -4,6 +4,7 @@ import {renderReportVerificationSection} from './report-verification-section.mjs
 import {renderReportDocumentBackmatter} from './report-document-backmatter.mjs';
 import {prepareReportDocumentQuality} from './report-document-quality-preparation.mjs';
 import {prepareReportDocumentContext} from './report-document-context.mjs';
+import {renderReportDiscussionSections} from './report-discussion-sections.mjs';
 /* Report HTML composition. The injected presentation functions keep this layer
  * independent from data access, snapshot calculation, and publication I/O. */
 export function createReportDocumentRenderer(dependencies) {
@@ -20,9 +21,10 @@ export function createReportDocumentRenderer(dependencies) {
     createReportQaPresentation, qaStateOf, QA_STATE, renderInventoryDetails, renderQaTable, explainReportQa
   });
 
-  const evalParas = renderEvaluationPresentation({snap, L, t, ciTxt});
-
-  const limItems = renderLimitationsPresentation({L, knotted, knotN, t, G, INV, HD, DB, govdeAralikTxt, tN});
+  const discussionSections = renderReportDiscussionSections({
+    snap, L, t, ciTxt, knotted, knotN, G, INV, HD, DB, govdeAralikTxt, tN,
+    renderEvaluationPresentation, renderLimitationsPresentation
+  });
 
   const histRows = renderHistoryPresentation({M, snap, id});
 
@@ -51,13 +53,7 @@ ${renderMapPresentation({L, P, id, epsg})}
 
 ${renderReportVerificationSection({QA_ST_LABEL, QA_BLOCKED, QA_WHY, QA_REVIEW, AGAC_DEGER_TEMIZ, qaStates, qaRows, id, verTxt, hash, snap})}
 
-<h2><span class="no">8</span>Değerlendirme</h2>
-${evalParas}
-
-<h2><span class="no">9</span>Sınırlılıklar</h2>
-<ul class="lim">
- ${limItems}
-</ul>
+${discussionSections}
 
 ${renderReportDocumentBackmatter({renderProvenancePresentation, provenance: {engine, engineVer, appVer, dataset, resolutionLabel, P, git, L, dataYear, id, epsg, snap, hash, doi}, histRows, citePlain, bib, L, renderReferencesPresentation, renderReportDataAccess, M, DGR_TITLE_DEF, esc})}
 </div>
