@@ -9,6 +9,9 @@ Yeni sürüm yayımlama adımları: [`docs/surum-yayini.md`](docs/surum-yayini.m
 
 ## [Yayımlanmadı]
 
+### İyileştirildi — doğrulanmış GIS PNG harita katmanları
+Park kırpması içindeki yüzey, göreli NDVI, grid, waypoint ve sınır çizimi ayrı modüle taşındı; katman sırası ve doğrulanmış yüzey uyarıları korundu.
+
 ### İyileştirildi — doğrulanmış GIS PNG özeti
 Park alanı, yüzey ve göreli NDVI özet paneli ayrı çizim modülüne taşındı; alan hesabı, metinler, değerler ve mevcut canvas çizim sırası korundu.
 
