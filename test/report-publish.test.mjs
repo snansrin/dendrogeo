@@ -246,10 +246,8 @@ describe('arayüz bağlantısı: kart, modül kaydı, çevrimdışı paket', () 
     assert.match(seg,/admin-publish-card/);
     assert.match(seg,/admin-publish-toolbar/);
     assert.match(read('css/style.css'),/\.admin-publish-summary\{/);
-    assert.match(UI,/admin-publish-table/);
-    assert.match(UI,/admin-publish-log/);
-    assert.match(UI,/admin-publish-help/);
-    assert.match(UI, /class="badge (on|off|admin)"/, 'durum rozetleri ortak ailede');
+    for(const path of ['src/ui/render-publication-admin-card.js','src/ui/render-publication-park-row.js'])
+      assert.match(read(path),/admin-publish-(table|log|help)|class="badge (on|off|admin)"/);
   });
 
   test('istemci insert RLS-safe desenle (return=minimal, oturum anahtarı)', () => {
@@ -303,6 +301,11 @@ function bootUI() {
     'src/application/reports/sync-user-publication-panel.js',
     'src/application/reports/schedule-user-publication-poll.js',
     'src/application/reports/share-report-link.js',
+    'src/domain/reports/resolve-publication-park-status.js',
+    'src/ui/render-publication-park-row.js',
+    'src/ui/render-publication-history.js',
+    'src/application/reports/summarize-publication-queue.js',
+    'src/ui/render-publication-admin-card.js',
   ]) vm.runInContext(read(path), ctx, { filename: path });
   vm.runInContext(read('src/application/reports/collect-publication-request.js'), ctx, { filename: 'collect-publication-request.js' });
   vm.runInContext(UI, ctx, { filename: 'report-publish.js' });

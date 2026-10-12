@@ -29,7 +29,9 @@ test('cancelled publication form writes no request; confirmed form preserves RLS
  for(const path of ['../src/domain/reports/publication-request-error.js','../src/application/reports/request-publication.js',
   '../src/application/reports/open-user-publication-panel.js','../src/application/reports/close-user-publication-panel.js',
   '../src/application/reports/sync-user-publication-panel.js','../src/application/reports/schedule-user-publication-poll.js',
-  '../src/application/reports/share-report-link.js'])
+  '../src/application/reports/share-report-link.js','../src/domain/reports/resolve-publication-park-status.js',
+  '../src/ui/render-publication-park-row.js','../src/ui/render-publication-history.js',
+  '../src/application/reports/summarize-publication-queue.js','../src/ui/render-publication-admin-card.js'])
   vm.runInContext(readFileSync(new URL(path,import.meta.url),'utf8'),ctx);
  vm.runInContext(readFileSync(new URL('../src/services/report-publish.js',import.meta.url),'utf8'),ctx);
  vm.runInContext('dgReportCollectRequest=async()=>null;dgPubAdmin=()=>true;dgLoadPublishQueue=async()=>{};dgPubSchedulePoll=()=>{}',ctx);

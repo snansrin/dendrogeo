@@ -261,6 +261,11 @@ function bootRet(opts) {
     'src/application/reports/sync-user-publication-panel.js',
     'src/application/reports/schedule-user-publication-poll.js',
     'src/application/reports/share-report-link.js',
+    'src/domain/reports/resolve-publication-park-status.js',
+    'src/ui/render-publication-park-row.js',
+    'src/ui/render-publication-history.js',
+    'src/application/reports/summarize-publication-queue.js',
+    'src/ui/render-publication-admin-card.js',
   ]) vm.runInContext(read(path), ctx, { filename: path });
   vm.runInContext(read('src/application/reports/collect-publication-request.js'), ctx, { filename: 'collect-publication-request.js' });
   vm.runInContext(UI, ctx, { filename: 'report-publish.js' });

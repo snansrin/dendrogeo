@@ -622,3 +622,13 @@ Her modülün tek bir dış API'si, sahibi olduğu açık durumu ve kendi testle
 - `application/reports/schedule-user-publication-poll.js`, yalnız kullanıcının tamamlanmamış isteği varken sınırlı yoklamayı ve görünürlük kapılarını uygular.
 
 - `application/reports/share-report-link.js`, doğrulanmış rapor bağlantısını paylaşır veya yeni sekmede açar; paylaşım API'si, pano ve prompt sırasını korur.
+
+- `domain/reports/resolve-publication-park-status.js`, her park için bekleyen istek, yayın, geri çekme ve son başarısızlık kayıtlarından görünür durumu belirler.
+
+- `ui/render-publication-park-row.js`, durum modelini mevcut rozet, bağlantı, DOI ve işlem düğmesi ailesiyle güvenli tablo satırına dönüştürür.
+
+- `ui/render-publication-history.js`, son altı yayın/geri çekme kaydını kimlik biçimi doğrulaması ve kaçışlamayla listeler; geri çekilmiş yayına ölü bağlantı üretmez.
+
+- `application/reports/summarize-publication-queue.js`, bekleyen istek, aktif yayın, DOI ve çözülmemiş hata sayılarını üretir.
+
+- `ui/render-publication-admin-card.js`, özet, hata uyarıları, park tablosu, yayın günlüğü ve değişmezlik yardımını yönetici kartında birleştirir.
