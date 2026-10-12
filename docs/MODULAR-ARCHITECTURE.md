@@ -469,3 +469,5 @@ Her modülün tek bir dış API'si, sahibi olduğu açık durumu ve kendi testle
 - `scripts/lib/report-repository-access.mjs` türetildiği giriş dosyasına göre aynı depo kökünü belirler ve raporun kullandığı göreli dosya yollarını UTF-8 okur; `make-report.mjs` kök ve okuyucu bağlarını aynı yolla alır.
 
 - `scripts/lib/report-git-commit.mjs` rapor kökünde mevcut commit’i aynı sessiz `git rev-parse HEAD` komutuyla okur; boş/erişilemeyen provenance için mevcut null yedeği `report-runtime-provenance.mjs` içinde korunur.
+
+- `scripts/lib/report-qr-loader.mjs` var olan `qrcode` build paketini çözer; paket bulunamazsa `null` döndürerek rapor üretiminin QR olmadan sürmesini sağlar, SVG üretimi `report-qr.mjs` içinde kalır.
