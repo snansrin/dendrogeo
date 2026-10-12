@@ -6,6 +6,7 @@ import {prepareReportDocumentQuality} from './report-document-quality-preparatio
 import {prepareReportDocumentContext} from './report-document-context.mjs';
 import {renderReportDiscussionSections} from './report-discussion-sections.mjs';
 import {renderReportDocumentOpening} from './report-document-opening.mjs';
+import {renderReportFindingsSections} from './report-findings-sections.mjs';
 /* Report HTML composition. The injected presentation functions keep this layer
  * independent from data access, snapshot calculation, and publication I/O. */
 export function createReportDocumentRenderer(dependencies) {
@@ -46,10 +47,10 @@ ${renderReportDocumentOpening({
 })}
 
 ${renderReportMethodSection({snap, G, NR, nPhoto, L, dataset, epsg, deltaPct, parkHa, GJ, knotted, knotN, renderMethodPresentation, REPORT_DATA_DICTIONARY, esc, trNum})}
-<h2><span class="no">5</span>Nicel Sonuçlar</h2>
-${renderResultsPresentation({spRows, bars, ciTxt, snap, govdeAralikTxt, L, parkHa, covHa, clsHa, diffHa, deltaPct})}
-<h2><span class="no">6</span>Harita</h2>
-${renderMapPresentation({L, P, id, epsg})}
+${renderReportFindingsSections({
+  renderResultsPresentation, results: {spRows, bars, ciTxt, snap, govdeAralikTxt, L, parkHa, covHa, clsHa, diffHa, deltaPct},
+  renderMapPresentation, map: {L, P, id, epsg}
+})}
 
 ${renderReportVerificationSection({QA_ST_LABEL, QA_BLOCKED, QA_WHY, QA_REVIEW, AGAC_DEGER_TEMIZ, qaStates, qaRows, id, verTxt, hash, snap})}
 
