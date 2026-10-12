@@ -7,6 +7,7 @@ import { createReportMapClassPresentation } from './report-map-class-presentatio
 import { restoreOutsideRings } from './report-map-clipping.mjs';
 import { drawReportMapScaleAndNorth } from './report-map-scale-orientation.mjs';
 import { drawReportMapLegend } from './report-map-legend.mjs';
+import { drawReportMapFooter } from './report-map-footer.mjs';
 
 export const DATASET_ASCII = 'ESA WORLDCOVER 2021 V200';
 
@@ -70,24 +71,10 @@ export function mapCanvas({ outer, outers = null, surfaceFeatures = [], holes = 
   drawReportMapScaleAndNorth({
     canvas: cv, width: W, padding: PAD, top: TOP, mapHeight: MAPH, scale: k, ink: MAP_TONES.ink
   });
-  /* ALT BİLGİ ŞERİDİ (kullanıcı standardı md. 10): belge kimliği, veri
-   * kaynağı, çözünürlük, projeksiyon, analiz tarihi, motor sürümü ve telif.
-   * Metin ASCII'ye translitere edilir (png.mjs glif kümesi); dar tuvallerde
-   * punto otomatik küçülür (Tfit), taşma olmaz. */
-  const fy = H - FOOT + 12;
-  cv.line(PAD, fy - 8, W - PAD, fy - 8, FR);
-  const Tfit = (x, y, txt, c) => T(x, y, txt, c, (12 * txt.length <= W - 2 * PAD) ? 2 : 1);
-  const idLine = meta && meta.id ? ('DENDROGEO - ' + meta.id) : 'DENDROGEO - BILIMSEL ANALIZ HARITASI';
-  T(PAD, fy, idLine, MAP_TONES.ink, 2);
-  const brandMark = 'DENDROGEO 2026';
-  if (W - PAD - 12 * brandMark.length > PAD + 12 * idLine.length + 8) T(W - PAD - 12 * brandMark.length, fy, brandMark, MAP_TONES.mut, 2);
-  Tfit(PAD, fy + 20, 'VERI: ' + ((meta && meta.source) || DATASET_ASCII) + ' / COZUNURLUK: '+(meta?.resolution||'10 M') + (meta && meta.epsg ? ' / PROJEKSIYON: EPSG:' + meta.epsg : ''), MAP_TONES.mut);
-  if (meta && (meta.dateStr || meta.engine)) {
-    const l3 = (meta.dateStr ? 'ANALIZ TARIHI: ' + meta.dateStr : '') +
-      (meta.dateStr && meta.engine ? ' / ' : '') +
-      (meta.engine ? 'DENDROGEO LC ENGINE V' + meta.engine : '') + ' / CC BY-NC 4.0';
-    Tfit(PAD, fy + 40, l3, MAP_TONES.mut);
-  }
+  drawReportMapFooter({
+    canvas: cv, width: W, height: H, padding: PAD, footerHeight: FOOT,
+    frameTone: FR, tones: MAP_TONES, dataset: DATASET_ASCII, meta
+  });
   return cv;
 }
 export function renderMapPNG(opts) { return mapCanvas(opts).encode(); }

@@ -68,6 +68,7 @@ src/
 - `scripts/lib/report-map-clipping.mjs`, tarama çizgilerinde dış halka ve deliklerin dışındaki pikselleri bağlam rengine döndürür; sınıf bantlarının park sınırını aşmasını engelleyen mevcut piksel kuralını korur.
 - `scripts/lib/report-map-scale-orientation.mjs`, metre ölçek seçimini, dönüşümlü ölçek çubuğunu ve kuzey okunu sabit piksel kurallarıyla çizer; `report-map.mjs` mevcut kartografik yerleşimi korur.
 - `scripts/lib/report-map-legend.mjs`, rapor PNG'sindeki sınır, nokta, bağlam, maskeli alan ve sınıf lejantı satırlarını mevcut sırayla çizer; `report-map.mjs` sınıf/alan sunum kararlarını bağlar.
+- `scripts/lib/report-map-footer.mjs`, harita altbilgisindeki belge kimliği, marka, veri kaynağı, çözünürlük, projeksiyon ve analiz künyesini çizer; dar tuvalde metin punto düşürme ve eksik metadata yedeğini korur.
 - `scripts/lib/report-map-class-presentation.mjs`, PNG sınıf etiketlerini ve lejant satırlarının sabit sırasını çözer; `pool` yalnız harita sunumunda `water` sınıfına katılır, rapor snapshot'ı değişmez.
 - `scripts/lib/report-map-projection.mjs`, kabul edilmiş dış halkalardan yerel equirectangular X/Y dönüşümünü, ölçeği ve harita tuvali genişliğini hesaplar; `report-map.mjs` aynı piksel dönüşümünü kullanır.
 - `scripts/lib/report-map-primitives.mjs`, rapor PNG'sinde halka doldurma, halo çizme ve dairesel nokta rasterizasyonunu sabit piksel kurallarıyla yapar; `report-map.mjs` katman sırasını ve çizim çağrılarını korur.

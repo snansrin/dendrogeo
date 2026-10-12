@@ -30,6 +30,9 @@ Metre ölçeği seçimi, dönüşümlü dört segmentli ölçek çubuğu ve kuze
 ### İyileştirildi — Rapor haritası lejant çizimi
 Sınır, envanter noktası, park dışı, maskeli alan ve sınıf örneklerinin lejant çizimi ayrı modüle taşındı; satır sırası, semboller, renkler, alan yuvarlaması ve metinler korundu.
 
+### İyileştirildi — Rapor haritası altbilgi künyesi
+Belge kimliği, marka, veri kaynağı, çözünürlük, projeksiyon ve analiz bilgisini çizen altbilgi ayrı modüle taşındı; dar haritalardaki punto uyarlaması ve eksik metadata varsayılanları korundu.
+
 ### İyileştirildi — Park geometrisi backfill modülü
 Yönetim ekranındaki OSM sınırı backfill akışı uygulama use-case'ine taşındı; yetki, park bulunamaması, OSM hatası, yazım hatası ve başarılı yenileme sonuçları eski bildirimlerle korunuyor. OSM way/relation sınır çözümlemesi adapter'a ayrıldı ve uygulama/adapter için odaklı testler eklendi.
 
