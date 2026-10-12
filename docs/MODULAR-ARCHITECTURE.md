@@ -602,3 +602,13 @@ Her modülün tek bir dış API'si, sahibi olduğu açık durumu ve kendi testle
 - `adapters/reports/user-retraction-store.js`, kullanıcı panelindeki park geri çekme isteklerini mevcut on satır sınırıyla okur; eksik tablo ve taşıma hatalarında boş listeyi korur.
 
 - `application/reports/load-user-publication.js`, park kapsamındaki istek hatası/state güncellemesini ve kuyruk/sayaç/geri çekme okumalarının render/poll sırasını portlarla yürütür.
+
+- `domain/reports/publication-request-error.js`, istek API hata metinlerini mevcut şema, RLS, kota ve sahiplik açıklamalarına dönüştürür; tek çevrilebilir tekrar iletisi çeviri portunu kullanır.
+
+- `application/reports/request-publication.js`, yönetici ve kullanıcı isteklerinde ortak collect/null/başarı/hata sırasını portlarla yürütür; her iki çağrı noktasının yetki ve arayüz tepkileri servis katmanında kalır.
+
+- `application/reports/cancel-publication-request.js`, izin→onay→iptal yazımı→hata/başarı callback sırasını yönetir; rol ve kullanıcı sahipliği kapıları çağıran serviste korunur.
+
+- `adapters/reports/retraction-insert-store.js`, geri çekme POST'unu kullanıcı oturum JWT'si, `Prefer: return=minimal` ve mevcut istek gövdesiyle taşır; RLS kararları Supabase'te kalır.
+
+- `domain/reports/retraction-request-error.js`, geri çekme API hata kodlarını mevcut Türkçe kullanıcı mesajlarına çevirir.
