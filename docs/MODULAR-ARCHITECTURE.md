@@ -580,3 +580,5 @@ Her modülün tek bir dış API'si, sahibi olduğu açık durumu ve kendi testle
 - `adapters/backup/json-download.js`, application/json indirmesini, geçici anchor yaşam döngüsünü ve 5000 ms URL temizliğini mevcut biçimde uygular.
 
 - `application/backup/create-full-backup.js`, yetki, sıralı tam veri yükleme, isteğe bağlı talepler, belge/indirme/kayıt/bildirim akışını portlarla yönetir.
+
+- `domain/backup/reminder-state.js`, mevcut yedi gün eşiğini, eksik/geçersiz tarih ve gün yuvarlama davranışını saf olarak hesaplar.
