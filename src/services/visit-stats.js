@@ -115,6 +115,7 @@ const DG_ACT_LABELS={save:"ölçüm kaydetti",edit:"kayıt güncelledi",park:"pa
 const DG_VISITOR_ACTIVITY=window.DG_VISITOR_ACTIVITY_APPLICATION.create();
 const DG_VISITOR_STORED_ACTIVITY=window.DG_VISITOR_STORED_ACTIVITY_APPLICATION.create();
 const DG_VISITOR_STORED_ACTIVITY_STORE=window.DG_VISITOR_STORED_ACTIVITY_STORE.create();
+const DG_VISITOR_LIVE_VISIT_COUNTS_STORE=window.DG_VISITOR_LIVE_VISIT_COUNTS_STORE.create();
 const DG_VISITOR_SESSION_EVENTS=window.DG_VISITOR_SESSION_EVENTS_APPLICATION.create();
 /* Sekme değişince çağrılır (shell go()): gezinme zincirine yazar. */
 function dgPresenceView(v){
@@ -187,15 +188,10 @@ async function loadVisitors(){
 async function dgVisCounts(){
  if(!dgVisAllowed())return;
  try{
-  const today=new Date();today.setHours(0,0,0,0);
-  const d7=new Date(Date.now()-7*86400000);
-  const[tt,td,tw]=await Promise.all([
-   sb.from("site_visits").select("*",{count:"exact",head:true}),
-   sb.from("site_visits").select("*",{count:"exact",head:true}).gte("visited_at",today.toISOString()),
-   sb.from("site_visits").select("*",{count:"exact",head:true}).gte("visited_at",d7.toISOString())]);
-  if($("vzTotal"))$("vzTotal").textContent=tt.count??0;
-  if($("vzToday"))$("vzToday").textContent=td.count??0;
-  if($("vz7"))$("vz7").textContent=tw.count??0;
+  const counts=await DG_VISITOR_LIVE_VISIT_COUNTS_STORE.load(sb);
+  if($("vzTotal"))$("vzTotal").textContent=counts.total;
+  if($("vzToday"))$("vzToday").textContent=counts.today;
+  if($("vz7"))$("vz7").textContent=counts.sevenDays;
  }catch(e){}
 }
 function dgVisAllowed(){return typeof PROFILE!=="undefined"&&PROFILE?.role==="owner";}
