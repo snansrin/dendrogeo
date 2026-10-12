@@ -441,3 +441,5 @@ Her modülün tek bir dış API'si, sahibi olduğu açık durumu ve kendi testle
 `scripts/lib/report-document-client-script.mjs` renders the browser script embedded in immutable report HTML. It preserves print-time icon stripping/restoration, canonical snapshot hash verification, and the existing share script insertion point. It does not change snapshot data or verification rules.
 
 - `scripts/lib/report-method-section.mjs`, raporun §4 Yöntem HTML bölümünü mevcut yöntem beyanlarıyla oluşturur; veri türetimi `report-method-presentation.mjs` içinde, metodoloji metinleri ve formüller aynen korunur.
+
+- `scripts/lib/report-verification-section.mjs`, raporun §7 QA ve içerik bütünlüğü beyanlarının mevcut HTML sunumunu üretir; QA kararları, Çizelge 4 satırları ve snapshot verileri uygulama katmanında kalır.
