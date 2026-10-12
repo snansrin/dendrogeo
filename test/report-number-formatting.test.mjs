@@ -8,7 +8,6 @@ test('report number formatting keeps Turkish locale and fixed precision', () => 
   assert.equal(formatReportNumber(-12.3, 1), '-12,3');
 });
 
-
 test('kilogram-to-tonne report display keeps the existing conversion and precision', () => {
   assert.equal(formatReportTonnesFromKg(12345.67), '12,35');
   assert.equal(formatReportTonnesFromKg(500), '0,50');
