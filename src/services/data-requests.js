@@ -58,14 +58,13 @@ async function deleteMyRequest(id){
 
 /* --- Kullanıcı talep formu --- */
 async function loadRequestOptions(){
- try{
-  const {measurements:m,projects:p}=await window.DG_DATA_REQUEST_OPTIONS_STORE.load(sb);
-  REQ_ROWS=m.data||[];REQ_PROJECTS=p.data||[];
-  /* Ülke/şehir seçenek listeleri kesilmişse talep formunda eksik seçenek görünür. */
-  dgWarnIfTruncated(m.data,5000,"Talep formu seçenekleri",m.count);
-  fillSelect($("reqCountry"),listCountries(REQ_ROWS,REQ_PROJECTS));
-  reqCountryChanged();
- }catch(e){}
+ return await window.DG_LOAD_DATA_REQUEST_OPTIONS.execute({
+  load:()=>window.DG_DATA_REQUEST_OPTIONS_STORE.load(sb),
+  apply:(rows,projects)=>{REQ_ROWS=rows;REQ_PROJECTS=projects;},
+  warn:m=>dgWarnIfTruncated(m.data,5000,"Talep formu seçenekleri",m.count),
+  fillCountries:()=>fillSelect($("reqCountry"),listCountries(REQ_ROWS,REQ_PROJECTS)),
+  refreshCities:()=>reqCountryChanged()
+ });
 }
 
 function reqCountryChanged(){
