@@ -9,6 +9,9 @@ Yeni sürüm yayımlama adımları: [`docs/surum-yayini.md`](docs/surum-yayini.m
 
 ## [Yayımlanmadı]
 
+### İyileştirildi — GIS PNG Leaflet poligon çizimi
+Leaflet halka dolaşımı ve poligonların even-odd Canvas dolgusu ayrı modüle taşındı; çok halkalı kırpma ve eski `DG_GIS_EXPORT_CANVAS` API'leri korundu.
+
 ### İyileştirildi — GIS PNG grid çizimi
 Standart ve doğrulanmış grid konturları ayrı canvas modülüne taşındı; GeoJSON halka çizimi, sınır kutusu yedeği ve `DG_GIS_EXPORT_CANVAS` çağrıları korundu.
 
