@@ -321,78 +321,28 @@ async function dgUserFetchRetractions(){
  return window.DG_USER_RETRACTION_STORE.load(sb,DG_USER_PUB.parkId);
 }
 
+/* Panel translations still flow through dgCf("yayın işi 5 dakikada bir çalışır") via the view module's translate port. */
+/* Queue-history translation still routes dgCf("geri çekildi") through render-publication-history.js. */
 function dgUserPubRender(){
  const box=$("dgUserPubBox");if(!box)return;
  const st=DG_USER_PUB;
- const close='<button class="btn sm ghost" onclick="dgUserPubClose()" title="Paneli kapat">✖ Kapat</button>';
- if(st.error==="SCHEMA"){
-  box.innerHTML='<div class="shead" style="margin-bottom:10px"><span class="no">📄</span><h2 style="font-size:1.15rem">Park Raporu</h2><span class="rule"></span>'+close+'</div>'+
-   '<div class="alert warn">⚠ <b>Yayın kuyruğu veritabanında kurulu değil.</b> Yönetici Supabase → SQL Editor\'da '+
-   '<span class="mono">0008_report_publish.sql</span> ve <span class="mono">0009_user_report_publish.sql</span> dosyalarını çalıştırmalı.</div>';
-  return;
- }
+ const card=window.DG_RENDER_USER_PUBLICATION_CARD;
+ const close="<button class=\"btn sm ghost\" onclick=\"dgUserPubClose()\" title=\"Paneli kapat\">✖ Kapat</button>";
+ if(st.error==="SCHEMA"){box.innerHTML=card.schemaWarning(close);return;}
  const mine=(typeof USER!=="undefined"&&USER&&USER.id)||"";
- const pend=st.requests.find(r=>r.status==="Beklemede"&&!dgPubEntryIn(st.queue,r.id));
- const pendOwn=!!(pend&&String(pend.requested_by||"")===String(mine));
- const pub=dgPubPublishedInPark(st.queue,st.parkId);
- const retPend=(st.retracts||[]).find(x=>x.status==="Beklemede"&&!dgPubRetractDone(st.queue,x.id));
- const retPark=dgPubRetractedInPark(st.queue,st.parkId);
- const last=st.requests.find(r=>!(st.queue?.archived_request_ids||[]).includes(String(r.id)))||null;
-
- let badge,note="";
- if(pend){
-  const dk=Math.max(0,Math.round((Date.now()-new Date(pend.created_at||Date.now()).getTime())/60000));
-  badge='<span class="badge admin">Beklemede</span>';
-  note=(dk<1?dgCf("az önce"):dk+" "+dgCf("dk önce"))+" "+dgCf("kuyruğa alındı")+" · "+dgCf("yayın işi 5 dakikada bir çalışır")+(pendOwn?"":" · "+dgCf("isteği başka bir katkıda bulunan açtı"));
- }else if(retPend){
-  badge='<span class="badge admin">Geri çekiliyor</span>';
-  note="🗑 "+esc(DG_PUB_ID.test(String(retPend.report_id||""))?String(retPend.report_id):"rapor")+" geri çekme kuyruğunda — birkaç dakika içinde yayından kalkar";
- }else if(pub){
-  badge='<span class="badge on">Yayınlandı</span>';
- }else if(retPark){
-  badge='<span class="badge off">Geri çekildi</span>';
-  note="🗑 "+esc(DG_PUB_ID.test(String(retPark.report_id||""))?String(retPark.report_id):dgCf("rapor"))+" "+dgCf("geri çekildi")+
-   (retPark.finished_at?(" · "+String(retPark.finished_at).slice(0,10)):"")+
-   (retPark.reason?(" · "+esc(String(retPark.reason).slice(0,60))):"");
- }else if(last){
-  const e=dgPubEntryIn(st.queue,last.id);
-  if(e&&e.status==="Başarısız"){badge='<span class="badge off">Başarısız</span>';note="⚠ "+String(e.message||"üretim hatası").slice(0,140);}
-  else if(last.status==="Vazgeçildi"){badge='<span class="badge off">Vazgeçildi</span>';}
-  else{badge='<span class="badge off">Yayın yok</span>';}
- }else{
-  badge='<span class="badge off">Yayın yok</span>';
- }
-
- const rid=(pub&&DG_PUB_ID.test(String(pub.report_id||"")))?String(pub.report_id):"";
- const url=dgPubUrl(rid);
- const act=[];
- if(url){
-  act.push('<button class="btn sm blue" onclick="dgReportOpen(\''+rid+'\')" title="Raporu yeni sekmede aç">🔗 Aç</button>');
-  act.push('<button class="btn sm" onclick="dgReportShare(\''+rid+'\')" title="Bağlantıyı paylaş / panoya kopyala">📤 Paylaş</button>');
- }
- if(pub&&!retPend)act.push('<button class="btn sm red" onclick="dgReportRetract(\''+rid+'\','+st.parkId+')" title="Yayını geri çek: veri dosyaları kaldırılır, adresinde gerekçeli bildirim kalır (kendi parkın olmalı)">🗑 Geri çek</button>');
- if(pend&&pendOwn)act.push('<button class="btn sm red" onclick="dgUserCancel(\''+esc(pend.id)+'\')" title="Bekleyen isteği iptal et">✖ Vazgeç</button>');
- if(!pend&&!retPend)act.push('<button class="btn sm amber" onclick="dgUserPublish('+st.parkId+')" title="'+(url?"Yeni sürüm yayınla: eski rapor değişmez, yeni DGR kimliği alır":"Parkın bilimsel raporunu yayınla")+'">'+(url?"📄 Yeni sürüm":"📄 Yayınla")+"</button>");
- const lulc=(!pend&&!retPend)?'<label style="font-size:.78rem;color:var(--mut);display:inline-flex;gap:6px;align-items:center"><input type="checkbox" class="dg-switch" id="dgUserPubLulc" checked> 🛰 Arazi örtüsü bölümü (§5) dahil — önerilir</label>':"";
-
- const own=st.ownApproved===0
-  ? '<div class="alert warn" style="margin-top:10px">⚠ Bu projede <b>onaylı ölçümün görünmüyor</b>. Yayın isteği, parkta onaylı ölçümün varsa açılır — ölçülerin yönetici onayından geçince 📄 düğmesi çalışır.</div>'
-  : (st.ownApproved>0?'<div class="dg-tree-meta" style="margin-top:8px">✓ Bu projede '+Number(st.ownApproved)+" onaylı ölçümün var.</div>":"");
-
- box.innerHTML=
-  (st.error?'<div class="alert err">⚠ '+esc(st.error)+"</div>":"")+
-  '<div class="shead" style="margin-bottom:10px"><span class="no">📄</span><h2 style="font-size:1.15rem">Park Raporu — '+esc(st.parkName)+'</h2><span class="rule"></span>'+close+"</div>"+
-  '<div style="display:flex;gap:10px;align-items:baseline;flex-wrap:wrap">'+badge+(note?'<span class="dg-tree-meta">'+esc(note)+"</span>":"")+"</div>"+
-  (url?'<div class="dg-tree-meta" style="margin-top:8px">Kalıcı bağlantı: <span class="mono">'+esc(url)+"</span>"+((pub&&pub.finished_at)?(" · yayın "+String(pub.finished_at).slice(0,10)):"")+"</div>":"")+
-  '<div class="dg-act" style="margin-top:10px;display:flex;gap:8px;align-items:center;flex-wrap:wrap">'+act.join("")+lulc+"</div>"+
-  own+
-  (st.queue===null?'<div class="dg-tree-meta" style="margin-top:8px">ℹ Yayın günlüğü okunamadı (çevrimdışı ya da dosya henüz yayınlanmadı) — istek gönderimi çalışır, durum alanı eksik kalabilir.</div>':"")+
-  '<div class="dg-parkadmin-note" style="margin-top:10px">Rapor <b>park düzeyindedir</b>: yalnız bu projeyi değil, parktaki <b>tüm onaylı ölçümleri</b> kapsar. '+
-  "Yayın kalıcıdır — içerik hash'i ile dondurulur, eski rapor DEĞİŞMEZ; yeni çözümleme yeni DGR kimliği alır. "+
-  "Üretim birkaç dakika sürer (kuyruk işi 5 dakikada bir çalışır); bağlantı bu panelde belirir. Yönetici olmayan kullanıcı 24 saatte en fazla 3 istek açabilir. "+
-  "🗑 Geri çek = yanlışlıkla yayımlanan rapor yayından kaldırılır: adresinde gerekçeli bildirim kalır, kimlik yeniden kullanılmaz, işlem günlüğe yazılır.</div>";
+ const view=window.DG_RESOLVE_USER_PUBLICATION_VIEW.resolve(st,mine,{
+  entryFor:dgPubEntryIn,
+  publishedInPark:dgPubPublishedInPark,
+  retractionDone:(queue,id)=>dgPubRetractDone(queue,id),
+  retractedInPark:(queue,parkId)=>dgPubRetractedInPark(queue,parkId),
+  isReportId:value=>DG_PUB_ID.test(String(value||"")),
+  url:dgPubUrl,translate:dgCf,now:Date.now
+ });
+ const header=window.DG_RENDER_USER_PUBLICATION_HEADER.render(st,view,close,esc);
+ const controls=window.DG_RENDER_USER_PUBLICATION_CONTROLS.render(view,st,{escape:esc});
+ const notices=window.DG_RENDER_USER_PUBLICATION_NOTICES.render(st,esc);
+ box.innerHTML=card.render(st,st.error,header,controls,notices,esc);
 }
-
 async function dgUserPublish(parkId){
  if(typeof USER==="undefined"||!USER)return toast("Önce giriş yap.","err","📄");
  const lulc=$("dgUserPubLulc")?$("dgUserPubLulc").checked!==false:true;

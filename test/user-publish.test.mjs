@@ -28,6 +28,8 @@ const read = (p) => readFileSync(join(ROOT, p), 'utf8');
 
 const SQL9 = read('supabase/migrations/0009_user_report_publish.sql');
 const UI = read('src/services/report-publish.js');
+const USER_PANEL_UI = ['src/application/reports/resolve-user-publication-view.js','src/ui/render-user-publication-controls.js','src/ui/render-user-publication-header.js',
+  'src/ui/render-user-publication-notices.js','src/ui/render-user-publication-card.js'].map(read).join('\n');
 const MEAS = read('src/services/measure.js');
 const SHELL = read('partials/shell.html');
 const SW = read('sw.js');
@@ -130,7 +132,7 @@ describe('arayüz kablolaması: 📄 düğmesi + panel kutusu', () => {
     assert.ok(!/dg-user-pub|user-publish\.css/.test(SHELL), 'yeni sınıf ailesi/dosyası yok');
     assert.ok(!existsSync(join(ROOT, 'css/user-publish.css')));
     for (const cls of ['shead', 'badge on', 'badge off', 'badge admin', 'btn sm blue', 'btn sm red', 'btn sm amber', 'alert warn', 'dg-tree-meta', 'dg-parkadmin-note'])
-      assert.ok(UI.includes(cls), 'UI sınıfı mevcut aileden: ' + cls);
+      assert.ok((UI + USER_PANEL_UI).includes(cls), 'UI sınıfı mevcut aileden: ' + cls);
   });
 
   test('çevrimdışı paket: sw.js r52 ve modül CORE_ASSETS’te kalır', () => {
@@ -223,6 +225,11 @@ function bootUser(opts) {
     'src/ui/render-publication-history.js',
     'src/application/reports/summarize-publication-queue.js',
     'src/ui/render-publication-admin-card.js',
+    'src/application/reports/resolve-user-publication-view.js',
+    'src/ui/render-user-publication-controls.js',
+    'src/ui/render-user-publication-header.js',
+    'src/ui/render-user-publication-notices.js',
+    'src/ui/render-user-publication-card.js',
   ]) vm.runInContext(read(path), ctx, { filename: path });
   vm.runInContext(read('src/application/reports/collect-publication-request.js'), ctx, { filename: 'collect-publication-request.js' });
   vm.runInContext(UI, ctx, { filename: 'report-publish.js' });

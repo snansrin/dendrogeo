@@ -632,3 +632,13 @@ Her modülün tek bir dış API'si, sahibi olduğu açık durumu ve kendi testle
 - `application/reports/summarize-publication-queue.js`, bekleyen istek, aktif yayın, DOI ve çözülmemiş hata sayılarını üretir.
 
 - `ui/render-publication-admin-card.js`, özet, hata uyarıları, park tablosu, yayın günlüğü ve değişmezlik yardımını yönetici kartında birleştirir.
+
+- `application/reports/resolve-user-publication-view.js`, kullanıcı paneli için bekleyen/başarısız istek, yayın ve geri çekme önceliğini görünüm modeline çevirir.
+
+- `ui/render-user-publication-controls.js`, paylaş/aç/geri çek/iptal/yeni yayın düğmeleriyle arazi örtüsü seçeneğini mevcut buton ailesinde üretir.
+
+- `ui/render-user-publication-header.js`, park raporu başlığını, durum rozetini, notu ve doğrulanmış kalıcı bağlantıyı çizer.
+
+- `ui/render-user-publication-notices.js`, kullanıcıya ait onaylı ölçüm sayacı, çevrimdışı notu ve yayın/geri çekme açıklamasını üretir.
+
+- `ui/render-user-publication-card.js`, şema uyarısını ve kullanıcı panelinin hata, başlık, eylem ve bilgi parçalarını birleştirir.
