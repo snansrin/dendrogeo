@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 import {createReportPublicationApplication} from './lib/report-publication-application.mjs';
+import {loadOptionalReportQr} from './lib/report-qr-loader.mjs';
 import {readReportGitCommit} from './lib/report-git-commit.mjs';
 import {createReportRepositoryAccess} from './lib/report-repository-access.mjs';
 import {resolveReportSiteOrigin} from './lib/report-site-origin.mjs';
@@ -80,13 +81,8 @@ import { REPORT_SHARE_SCRIPT } from './lib/report-share.mjs';
 import { reportStyles } from './lib/report-style.mjs';
 import { summarizeReportMeasurements } from './lib/report-measurement-summary.mjs';
 import { createRequire } from 'node:module';
-const require_ = createRequire(import.meta.url);
-/* qrcode (MIT) YALNIZ build bağımlılığıdır. Kurulu değilse (örn. npm install
- * çalıştırılmamış ortam) rapor üretimi ÇÖKMEZ: QR hücresi atlanır, kalıcı
- * adres künyede metin olarak kalır. QR kozmetiktir; kimlik/hash ondan
- * bağımsızdır. */
-let QRlib = null;
-try { QRlib = require_('qrcode'); } catch (e) { QRlib = null; }
+/* qrcode is an optional build dependency; reports remain publishable without it. */
+const QRlib = loadOptionalReportQr(createRequire(import.meta.url));
 export const qrDataUri = createQrDataUri(QRlib);
 
 const {root:ROOT, read} = createReportRepositoryAccess(import.meta.url);
