@@ -5,6 +5,7 @@ import { fillRing, strokeRing, disc } from './report-map-primitives.mjs';
 import { createReportMapProjection } from './report-map-projection.mjs';
 import { createReportMapClassPresentation } from './report-map-class-presentation.mjs';
 import { restoreOutsideRings } from './report-map-clipping.mjs';
+import { drawReportMapScaleAndNorth } from './report-map-scale-orientation.mjs';
 
 export const DATASET_ASCII = 'ESA WORLDCOVER 2021 V200';
 
@@ -89,23 +90,9 @@ export function mapCanvas({ outer, outers = null, surfaceFeatures = [], holes = 
     }
     ly += 28;
   }
-  /* ÖLÇEK ÇUBUĞU: dönüşümlü koyu/açık segmentler (klasik kartografik biçim);
-   * kuzey oku aynen kalır. */
-  const nice = [10, 20, 50, 100, 200, 500].find((m) => m * k > 90) || 1000;
-  const barW = nice * k, segN = 4, sx0 = W - PAD - barW, sy0 = TOP + MAPH - 40, sy1 = TOP + MAPH - 32;
-  for (let i = 0; i < segN; i++) {
-    const a = sx0 + barW * i / segN, b = sx0 + barW * (i + 1) / segN;
-    cv.rect(a, sy0, b - 1, sy1, i % 2 === 0 ? MAP_TONES.ink : [255, 255, 255]);
-  }
-  cv.line(sx0, sy0, sx0 + barW, sy0, MAP_TONES.ink);
-  cv.line(sx0, sy1, sx0 + barW, sy1, MAP_TONES.ink);
-  cv.line(sx0, sy0, sx0, sy1, MAP_TONES.ink);
-  cv.line(sx0 + barW, sy0, sx0 + barW, sy1, MAP_TONES.ink);
-  T(sx0, sy0 - 22, nice + ' m', MAP_TONES.ink, 2);
-  cv.line(W - PAD - 14, TOP + 60, W - PAD - 14, TOP + 26, MAP_TONES.ink);
-  cv.line(W - PAD - 20, TOP + 36, W - PAD - 14, TOP + 24, MAP_TONES.ink);
-  cv.line(W - PAD - 8, TOP + 36, W - PAD - 14, TOP + 24, MAP_TONES.ink);
-  T(W - PAD - 24, TOP + 66, 'N', MAP_TONES.ink, 2);
+  drawReportMapScaleAndNorth({
+    canvas: cv, width: W, padding: PAD, top: TOP, mapHeight: MAPH, scale: k, ink: MAP_TONES.ink
+  });
   /* ALT BİLGİ ŞERİDİ (kullanıcı standardı md. 10): belge kimliği, veri
    * kaynağı, çözünürlük, projeksiyon, analiz tarihi, motor sürümü ve telif.
    * Metin ASCII'ye translitere edilir (png.mjs glif kümesi); dar tuvallerde

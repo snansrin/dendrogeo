@@ -24,6 +24,9 @@ PNG sınıf takma adları ve lejant satır sırası ayrı sunum modülüne alın
 ### İyileştirildi — Rapor haritası poligon kırpması
 Sınıf piksellerinin çokgen ve delik sınırları dışına taşınca bağlam tonuna döndürülmesi ayrı raster modülüne alındı; çok halkalı sınırın mevcut tarama çizgisi davranışı korundu.
 
+### İyileştirildi — Rapor haritası ölçek çubuğu ve kuzey oku
+Metre ölçeği seçimi, dönüşümlü dört segmentli ölçek çubuğu ve kuzey oku ayrı kartografik sunum modülüne taşındı; mevcut piksel yerleşimi ve etiket davranışı korundu.
+
 ### İyileştirildi — Park geometrisi backfill modülü
 Yönetim ekranındaki OSM sınırı backfill akışı uygulama use-case'ine taşındı; yetki, park bulunamaması, OSM hatası, yazım hatası ve başarılı yenileme sonuçları eski bildirimlerle korunuyor. OSM way/relation sınır çözümlemesi adapter'a ayrıldı ve uygulama/adapter için odaklı testler eklendi.
 
