@@ -662,3 +662,13 @@ Her modülün tek bir dış API'si, sahibi olduğu açık durumu ve kendi testle
 - `domain/reports/validate-report-context.js`, temizlenmiş künyenin zorunlu alan, tarih ve ORCID kurallarını doğrular.
 
 - `domain/reports/decode-report-context.js`, şema, geçerlilik ve açık yayın onayı koşulları sağlanınca kayıtlı künyeyi döndürür.
+
+- `application/reports/resolve-academic-profile-defaults.js`, eski ve yeni hesap metadata alanlarını temizlenmiş profil varsayılanlarına dönüştürür.
+
+- `ui/academic-profile-fields.js`, örnek balonlu etiket ve form kontrollerini mevcut akademik profil sınıflarıyla üretir.
+
+- `ui/render-academic-profile.js`, kişi/kurum özeti, ORCID bağlantısı ve profil düzenleme formunun HTML'ini oluşturur.
+
+- `application/reports/save-academic-profile.js`, ORCID doğrulaması, Supabase Auth güncellemesi, durum mesajları ve profil yenileme sırasını yönetir.
+
+- `application/reports/create-academic-report-collector.js`, kullanıcı/park tekilleştirme anahtarını ve rapor künye toplama portlarını kurar.

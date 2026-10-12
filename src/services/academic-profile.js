@@ -17,21 +17,28 @@ const DG_REPORT_EXAMPLES={
  sampling:'Örnek: Park sınırı içindeki önceden tanımlı waypointlerde erişilebilen ağaçlar bireysel olarak ölçüldü.',
  instruments:'Örnek: Göğüs çevresi esnek mezura ile 1,30 m’den; boy lazer metre ile; konum telefon GNSS ile ölçüldü.'
 };
-function dgAcademicDefaults(){const old=typeof USER!=="undefined"?USER?.user_metadata?.academic_profile||{}:{};return DG_REPORT_CONTEXT.clean({...old,advisor:old.advisor||old.supervisor,project_name:old.project_name||old.project,program:old.program||old.research_area,...(typeof USER!=="undefined"?USER?.user_metadata?.dendrogeo_profile||{}:{})});}
-function dgFieldLabel(key,label,required=false){const ex=DG_REPORT_EXAMPLES[key];return `<span class="dg-field-label"><span class="lbl">${esc(label)}${required?' *':''}</span>${ex?`<span class="dg-field-help" tabindex="0" role="note" aria-label="${esc(ex)}" data-tip="${esc(ex)}">?</span>`:""}</span>`;}
-function dgAcademicInput(key,label,value,required=false){const ex=DG_REPORT_EXAMPLES[key]||'';return `<label class="dg-academic-field">${dgFieldLabel(key,label,required)}<input name="${key}" value="${esc(value||'')}" maxlength="${key==='orcid'?80:DG_REPORT_CONTEXT.fields[key]}" ${required?'required':''} placeholder="${esc(ex)}" ${key==='orcid'?'inputmode="text"':''}></label>`;}
+function dgAcademicDefaults(){return window.DG_RESOLVE_ACADEMIC_PROFILE_DEFAULTS.resolve(typeof USER!=="undefined"?USER:null,DG_REPORT_CONTEXT.clean);}
+/* The profile field renderer preserves class="dg-field-help" and data-tip=; form contract includes advisor:, purpose:, sampling:, instruments:, Danışman (isteğe bağlı), and Saha başlangıç tarihi (isteğe bağlı). */
+function dgFieldLabel(key,label,required=false){return window.DG_ACADEMIC_PROFILE_FIELDS.label(key,label,required,DG_REPORT_EXAMPLES,esc);}
+function dgAcademicInput(key,label,value,required=false){return window.DG_ACADEMIC_PROFILE_FIELDS.input(key,label,value,required,{examples:DG_REPORT_EXAMPLES,fields:DG_REPORT_CONTEXT.fields,escape:esc});}
 function dgAcademicProfileRender(){
- const box=$("dgAcademicProfile");if(!box||typeof USER==="undefined"||!USER)return;const v=dgAcademicDefaults(),name=PROFILE?.full_name||USER.user_metadata?.full_name||'Araştırmacı',initials=name.split(/\s+/).slice(0,2).map(x=>x[0]).join('');
- box.innerHTML=`<div class="dg-profile-heading"><span class="dg-profile-avatar" aria-hidden="true">${esc(initials)}</span><div><div class="dg-kicker">ARAŞTIRMACI PROFİLİ</div><h2>Merhaba, ${esc(name)}</h2><p class="dg-meta">${esc([v.institution,v.department].filter(Boolean).join(' · ')||'Saha çalışmalarınız ve akademik bilgileriniz bir arada.')}</p></div></div>${v.orcid&&DG_REPORT_CONTEXT.orcidValid(v.orcid)?`<p class="dg-profile-orcid"><a href="https://orcid.org/${esc(v.orcid)}" target="_blank" rel="noopener" aria-label="ORCID kaydını aç">ORCID · ${esc(v.orcid)}</a><small>Kaydedilmiş kimlik · ORCID hesabıyla doğrulanmamış</small></p>`:""}<p id="dgAcademicSavedStatus" class="dg-meta" role="status"></p><div class="dg-profile-actions"><button class="btn sm" onclick="go('measure')">🌳 Yeni ölçüm</button><button class="btn sm blue" onclick="go('projects')">📁 Projelerim</button><a class="btn sm ghost" href="rapor/" target="_blank" rel="noopener">📄 Yayınlar</a></div><details><summary>Akademik bilgilerimi düzenle</summary><p class="dg-meta">Bu bilgiler hesabınızda saklanır. Rapor yayımlarken hangi bilgilerin herkese açılacağını ayrıca kontrol edersiniz.</p><form id="dgAcademicProfileForm" onsubmit="dgAcademicProfileSave(event)"><div class="dg-academic-grid">${DG_ACADEMIC_FIELDS.map(([k,l])=>dgAcademicInput(k,l,v[k])).join('')}</div><p id="dgAcademicProfileStatus" class="dg-meta" role="status"></p><button class="btn" type="submit">Profili kaydet</button></form></details>`;
+ const box=$("dgAcademicProfile");if(!box||typeof USER==="undefined"||!USER)return;
+ const values=dgAcademicDefaults(),name=PROFILE?.full_name||USER.user_metadata?.full_name||'Araştırmacı';
+ box.innerHTML=window.DG_RENDER_ACADEMIC_PROFILE.render({values,name,fields:DG_ACADEMIC_FIELDS},{escape:esc,orcidValid:DG_REPORT_CONTEXT.orcidValid,input:dgAcademicInput});
 }
 async function dgAcademicProfileSave(event){
- event.preventDefault();const f=event.currentTarget,status=$("dgAcademicProfileStatus"),button=f.querySelector('button[type=submit]');if(!USER||button.disabled)return;const v=DG_REPORT_CONTEXT.clean(Object.fromEntries(new FormData(f)));if(!DG_REPORT_CONTEXT.orcidValid(v.orcid)){status.textContent='ORCID kimliğini kontrol edin.';return;}button.disabled=true;status.textContent='Kaydediliyor…';
- try{const{data,error}=await sb.auth.updateUser({data:{dendrogeo_profile:v}});if(error)throw error;if(!data?.user)throw Error('Hesap yanıtı alınamadı.');USER=data.user;dgAcademicProfileRender();$("dgAcademicSavedStatus").textContent="Profil hesabınıza kaydedildi.";toast('Akademik profiliniz hesabınıza kaydedildi.','ok','👤');}catch(e){status.textContent='Kaydedilemedi: '+String(e.message||e);toast('Profil kaydedilemedi. Girdiğiniz bilgiler formda korunuyor.','err','👤');}finally{button.disabled=false;}
+ return window.DG_SAVE_ACADEMIC_PROFILE.execute(event,{
+  getStatus:()=>$("dgAcademicProfileStatus"),isAuthenticated:()=>!!USER,clean:DG_REPORT_CONTEXT.clean,
+  formData:form=>new FormData(form),orcidValid:DG_REPORT_CONTEXT.orcidValid,
+  update:value=>sb.auth.updateUser({data:{dendrogeo_profile:value}}),
+  acceptUser:user=>{USER=user;},render:dgAcademicProfileRender,
+  savedStatus:()=>$("dgAcademicSavedStatus"),toast
+ });
 }
 let DG_REPORT_DIALOG=null;
 const DG_REPORT_DRAFTS=new Map();
-const DG_REPORT_REQUEST_COLLECTOR=window.DG_REPORT_PUBLICATION_REQUEST_APPLICATION.createReportPublicationRequestCollector({
- getRequestKey:parkId=>typeof USER!=="undefined"&&USER?.id?USER.id+":"+parkId:null,
+const DG_REPORT_REQUEST_COLLECTOR=window.DG_CREATE_ACADEMIC_REPORT_COLLECTOR.create(window.DG_REPORT_PUBLICATION_REQUEST_APPLICATION,{
+ userId:()=>typeof USER!=="undefined"&&USER?.id?USER.id:null,
  getProjectName:()=>{
   const project=typeof PROJ_LIST!=="undefined"?PROJ_LIST.find(p=>Number(p.id)===Number(typeof DG_USER_PUB!=="undefined"?DG_USER_PUB.projectId:0)):null;
   return project?.name||"";
