@@ -570,3 +570,5 @@ Her modülün tek bir dış API'si, sahibi olduğu açık durumu ve kendi testle
 - `ui/admin-user-table.js`, korunan kurucu satırı, salt okunur denetçi görünümü ve mevcut etkileşim/etiket/kaçış sözleşmesiyle kullanıcı tablosunu üretir.
 
 - `ui/admin-user-filter.js`, Türkçe arama, rol ve aktiflik koşullarını satır görünürlüğüne uygular; görünür sayaç serviste kalır.
+
+- `application/users/load-admin-users.js`, admin/owner kapısını ve liste/cache/sayaç/çizim/filtre sırasını portlarla yönetir; hata/scroll/DOM serviste kalır.

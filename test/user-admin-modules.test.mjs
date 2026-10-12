@@ -8,7 +8,7 @@ function app({role='owner',data=[],error=null}={}){
  for(const id of ['aUsersTotal','aUsersActive','aUsersAdmin','aUsersPassive','aUsersVisible'])elements.set(id,{});
  elements.set('aUsersT',{innerHTML:'old',querySelectorAll:()=>[]});
  const ctx=vm.createContext({window,PROFILE:{role},esc:value=>value==null?'':String(value).replaceAll('<','&lt;').replaceAll('>','&gt;'),$:id=>elements.get(id),toast:(...args)=>calls.push(['toast',...args]),dgScrollKeep:()=>42,dgScrollRestore:y=>calls.push(['restore',y]),sb:{from(table){calls.push(['from',table]);return{select(columns){calls.push(['select',columns]);return Promise.resolve({data,error});},update(body){calls.push(['update',JSON.parse(JSON.stringify(body))]);return this;},eq(column,value){calls.push(['eq',column,value]);return Promise.resolve({error});}};}}});
- for(const file of ['src/adapters/users/admin-store.js','src/domain/users/summarize-admin-users.js','src/ui/admin-user-table.js','src/ui/admin-user-filter.js','src/services/user-admin.js'])vm.runInContext(readFileSync(new URL('../'+file,import.meta.url),'utf8'),ctx);
+ for(const file of ['src/adapters/users/admin-store.js','src/domain/users/summarize-admin-users.js','src/ui/admin-user-table.js','src/ui/admin-user-filter.js','src/application/users/load-admin-users.js','src/services/user-admin.js'])vm.runInContext(readFileSync(new URL('../'+file,import.meta.url),'utf8'),ctx);
  return{ctx,calls,elements,run:code=>vm.runInContext(code,ctx)};
 }
 
