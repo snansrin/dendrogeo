@@ -556,3 +556,5 @@ Her modülün tek bir dış API'si, sahibi olduğu açık durumu ve kendi testle
 - `application/data-requests/reject-request.js`, ret onayı, durum sonucu ve bildirim/yenileme sırasını enjekte edilen portlarla yönetir.
 
 - `application/data-requests/load-options.js`, seçenek yükleme, durum atama, kesilme uyarısı ve ülke/şehir yenileme sırasını mevcut sessiz hata sınırıyla yönetir.
+
+- `application/data-requests/load-own-requests.js`, oturum kapısı, kullanıcıya bağlı yükleme ve hedef/hata/boş/dolu sonuç ayrımını yönetir; kaydırma sarmalı serviste kalır.

@@ -39,12 +39,13 @@ async function sendDataRequest(){
 /* 0040: kaydırma koruma sarmalı — yeniden çizimde #main scrollTop korunur. */
 async function loadMyRequests(){const _y=(typeof dgScrollKeep==="function"?dgScrollKeep():null);try{return await loadMyRequests__scroll.apply(this,arguments);}finally{if(typeof dgScrollRestore==="function")dgScrollRestore(_y);}}
 async function loadMyRequests__scroll(){
- if(!USER)return;
- const{data,error}=await window.DG_MY_DATA_REQUESTS_STORE.load(sb,USER.id);
- const el=$("myRequests");if(!el)return;
- if(error){el.innerHTML='<div class="alert err">Talepler yüklenemedi.</div>';return;}
- if(!data||!data.length){el.innerHTML="";return;}
- window.DG_MY_DATA_REQUESTS_UI.render(el,data,{escape:esc});
+ return await window.DG_LOAD_OWN_DATA_REQUESTS.execute(USER,{
+  load:userId=>window.DG_MY_DATA_REQUESTS_STORE.load(sb,userId),
+  getTarget:()=>$("myRequests"),
+  onFailure:el=>{el.innerHTML='<div class="alert err">Talepler yüklenemedi.</div>';},
+  onEmpty:el=>{el.innerHTML="";},
+  render:(el,data)=>window.DG_MY_DATA_REQUESTS_UI.render(el,data,{escape:esc})
+ });
 }
 async function deleteMyRequest(id){
  return await window.DG_DELETE_OWN_DATA_REQUEST_APPLICATION.execute(USER,id,{
