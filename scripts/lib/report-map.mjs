@@ -2,6 +2,7 @@ import { PngCanvas, hex2rgb } from './png.mjs';
 import { fmtDateDot } from './report-formatting.mjs';
 import { fillSurfacePolygon } from './report-map-surface-fill.mjs';
 import { fillRing, strokeRing, disc } from './report-map-primitives.mjs';
+import { createReportMapProjection } from './report-map-projection.mjs';
 
 export const DATASET_ASCII = 'ESA WORLDCOVER 2021 V200';
 
@@ -15,15 +16,9 @@ export const MAP_TONES = { out: [238, 240, 238], nodata: [212, 212, 208], ink: [
 
 export function mapCanvas({ outer, outers = null, surfaceFeatures = [], holes = [], wruns = [], classes = {}, parkName = '', sub = '', sub2 = '', maskHa = 0, points = [], pointStat = null, meta = null }) {
   const PAD = 26, TOP = 96, MAPH = 540, FOOT = 70;
-  let minLa = 90, maxLa = -90, minLo = 180, maxLo = -180;
-  for (const [la, lo] of (outers||[outer]).flat()) { minLa = Math.min(minLa, la); maxLa = Math.max(maxLa, la); minLo = Math.min(minLo, lo); maxLo = Math.max(maxLo, lo); }
-  const dxM = Math.max(1, (maxLo - minLo) * 111320 * Math.cos(((minLa + maxLa) / 2) * Math.PI / 180));
-  const dyM = Math.max(1, (maxLa - minLa) * 110540);
-  const W = Math.max(420, Math.min(1000, Math.round((MAPH - 2 * PAD) * dxM / dyM) + 2 * PAD));
-  const k = Math.max(0.02, Math.min((W - 2 * PAD) / dxM, (MAPH - 2 * PAD) / dyM));
-  const cx = (minLo + maxLo) / 2, cy = (minLa + maxLa) / 2;
-  const X = (lon) => W / 2 + (lon - cx) * 111320 * Math.cos(cy * Math.PI / 180) * k;
-  const Y = (lat) => TOP + (MAPH - 2 * PAD) / 2 - (lat - cy) * 110540 * k;
+  const { width: W, scale: k, x: X, y: Y } = createReportMapProjection({
+    outer, outers, padding: PAD, top: TOP, mapHeight: MAPH
+  });
   /* PNG sunumu: havuz / süs havuzu ayrı bir kartografik sınıf değildir.
    * Bilimsel snapshot ve rapor tablosundaki "pool" alanı DEĞİŞMEZ; yalnız PNG'de
    * su ile aynı renkte ve aynı lejant satırında gösterilir. */
