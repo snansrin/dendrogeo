@@ -397,6 +397,10 @@ Her modülün tek bir dış API'si, sahibi olduğu açık durumu ve kendi testle
 
 `report-map-presentation.mjs` renders the existing map image and provenance caption. Missing-map, raster, reviewed geometry and visually generalized geometry branches retain their wording and conditions. Image generation, accepted geometry and numeric areas remain outside this module.
 
+### Report map inventory points (12 October 2026)
+
+`report-map-inventory-points.mjs` draws the existing halo and ink markers only when projected inventory coordinates fall inside the map frame. Frame edges remain inclusive; projection, map layout, input records and all other report layers remain with the renderer.
+
 ### Report provenance presentation (11 October 2026)
 
 `report-provenance-presentation.mjs` renders reproducibility records and the analysis fingerprint from already-resolved provenance. Missing-version/commit/projection/DOI fallbacks, reviewed-archive versus raster instructions and escaping retain their behavior. Provenance collection and scientific analysis remain separate.
