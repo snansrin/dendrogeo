@@ -81,26 +81,26 @@ function reqCityChanged(){
 /* 0040: kaydırma koruma sarmalı — yeniden çizimde #main scrollTop korunur. */
 async function loadRequests(){const _y=(typeof dgScrollKeep==="function"?dgScrollKeep():null);try{return await loadRequests__scroll.apply(this,arguments);}finally{if(typeof dgScrollRestore==="function")dgScrollRestore(_y);}}
 async function loadRequests__scroll(){
- const{data}=await window.DG_DATA_REQUEST_QUEUE_STORE.load(sb);
- const reqs=data||[];
- const {pending,closed}=window.DG_DATA_REQUEST_QUEUE.partition(reqs);
- 
- $("aReqPending").textContent=pending.length;
- $("aReqPendingMini").textContent=pending.length;
- $("aReqClosed").textContent=closed.length;
- 
- // AKTİF TALEPLER TABLOSU
- window.DG_DATA_REQUEST_PENDING_TABLE_UI.render($("aReqT"),pending,{escape:esc});
- 
- // TAMAMLANAN/REDDEDİLENLER (COLLAPSIBLE)
- const closedWrap=$("closedRequestsWrap");
- if(closed.length>0){
-  closedWrap.style.display="block";
-  $("aReqClosed").textContent=closed.length;
-  window.DG_DATA_REQUEST_CLOSED_TABLE_UI.render($("closedReqT"),closed,{escape:esc});
- }else{
-  closedWrap.style.display="none";
- }
+ return await window.DG_LOAD_DATA_REQUEST_QUEUE.execute({
+  load:()=>window.DG_DATA_REQUEST_QUEUE_STORE.load(sb),
+  partition:rows=>window.DG_DATA_REQUEST_QUEUE.partition(rows),
+  updateCounts:(pending,closed)=>{
+   $("aReqPending").textContent=pending.length;
+   $("aReqPendingMini").textContent=pending.length;
+   $("aReqClosed").textContent=closed.length;
+  },
+  renderPending:pending=>window.DG_DATA_REQUEST_PENDING_TABLE_UI.render($("aReqT"),pending,{escape:esc}),
+  renderClosed:closed=>{
+   const closedWrap=$("closedRequestsWrap");
+   if(closed.length>0){
+    closedWrap.style.display="block";
+    $("aReqClosed").textContent=closed.length;
+    window.DG_DATA_REQUEST_CLOSED_TABLE_UI.render($("closedReqT"),closed,{escape:esc});
+   }else{
+    closedWrap.style.display="none";
+   }
+  }
+ });
 }
 
 async function rejectRequest(id){
