@@ -91,7 +91,7 @@ if(typeof document.addEventListener==="function")document.addEventListener("visi
  * taşınır (geçici) — kanal düşince/sekmeler kapanınca buharlaşır. Yeni tablo/
  * migration/RLS YOK (kırmızı çizgi); gizlilik metnindeki mevcut beyanla birebir
  * uyumlu (konum yalnız GPS açıksa ve geçici). Yalnız kurucu sekmesi okur. */
-const DG_SID=(()=>{try{let s=sessionStorage.getItem("dg_sid");if(!s){s=Math.random().toString(36).slice(2,10);sessionStorage.setItem("dg_sid",s);}return s;}catch(e){return "x";}})();
+const DG_SID=(()=>{try{return window.DG_VISITOR_SESSION_ID_STORE.load(sessionStorage);}catch(e){return "x";}})();
 const DG_SESSION_START=Date.now();
 const DG_DEV_TAG=(()=>{try{return window.DG_VISITOR_DEVICE_LABEL.build(navigator.userAgent);}catch(e){return "?";}})();
 const DG_ACT_LABELS={save:"ölçüm kaydetti",edit:"kayıt güncelledi",park:"park algıladı",export:"dışa aktardı",publish:"rapor yayını istedi"};
