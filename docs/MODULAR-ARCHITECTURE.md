@@ -516,3 +516,5 @@ Her modülün tek bir dış API'si, sahibi olduğu açık durumu ve kendi testle
 - `ui/visitor-map-marker.js`, ziyaretçi işaretinin baş harf ikonunu ve çevrilmiş/kaçış uygulanmış tooltip sunumunu üretir; Leaflet nesneleri, geçici izler, konum süzme ve harita takip durumu servis katmanında kalır.
 
 - `adapters/visitors/session-id-store.js`, sekmeye ait `dg_sid` değerini yeniden kullanır veya mevcut rastgele üretim kuralıyla saklar; storage erişim hatasındaki `x` yedeği servis katmanında korunur.
+
+- `ui/visitor-activity-disclosure.js`, Son Etkinlik sarmalının görünürlüğünü, çevrilmiş düğme etiketini ve `aria-expanded` durumunu birlikte günceller; tercih okuma/yazma ve eksik sarmal kontrolü servis katmanında kalır.
