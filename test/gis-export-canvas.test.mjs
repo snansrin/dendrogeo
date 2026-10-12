@@ -7,6 +7,7 @@ const context=vm.createContext({window:{}});
 vm.runInContext(readFileSync(new URL('../src/ui/gis-export-canvas-legend.js',import.meta.url),'utf8'),context);
 vm.runInContext(readFileSync(new URL('../src/ui/gis-export-canvas-waypoints.js',import.meta.url),'utf8'),context);
 vm.runInContext(readFileSync(new URL('../src/ui/gis-export-canvas-grids.js',import.meta.url),'utf8'),context);
+vm.runInContext(readFileSync(new URL('../src/ui/gis-export-canvas-leaflet.js',import.meta.url),'utf8'),context);
 vm.runInContext(readFileSync(new URL('../src/ui/gis-export-canvas.js',import.meta.url),'utf8'),context);
 const canvas=context.window.DG_GIS_EXPORT_CANVAS;
 assert.strictEqual(canvas.drawLegend,context.window.DG_GIS_EXPORT_CANVAS_LEGEND.drawLegend);
@@ -14,6 +15,8 @@ assert.strictEqual(canvas.drawWaypoints,context.window.DG_GIS_EXPORT_CANVAS_WAYP
 assert.strictEqual(canvas.drawVerifiedWaypoints,context.window.DG_GIS_EXPORT_CANVAS_WAYPOINTS.drawVerifiedWaypoints);
 assert.strictEqual(canvas.drawGrid,context.window.DG_GIS_EXPORT_CANVAS_GRIDS.drawGrid);
 assert.strictEqual(canvas.drawVerifiedGrid,context.window.DG_GIS_EXPORT_CANVAS_GRIDS.drawVerifiedGrid);
+assert.strictEqual(canvas.eachRing,context.window.DG_GIS_EXPORT_CANVAS_LEAFLET.eachRing);
+assert.strictEqual(canvas.drawLeaflet,context.window.DG_GIS_EXPORT_CANVAS_LEAFLET.drawLeaflet);
 function mockContext(){
  const events=[];
  return {events,beginPath:()=>events.push(['begin']),moveTo:(x,y)=>events.push(['move',x,y]),lineTo:(x,y)=>events.push(['line',x,y]),closePath:()=>events.push(['close']),fill:rule=>events.push(['fill',rule]),stroke:()=>events.push(['stroke']),strokeRect:(...args)=>events.push(['rect',...args]),arc:(...args)=>events.push(['arc',...args]),fillText:(...args)=>events.push(['text',...args]),fillRect:(...args)=>events.push(['fillRect',...args]),measureText:()=>({width:20}),globalAlpha:1,fillStyle:''};
