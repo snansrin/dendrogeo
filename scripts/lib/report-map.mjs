@@ -5,6 +5,7 @@ import { drawReportMapInventoryPoints } from './report-map-inventory-points.mjs'
 import { createReportMapProjection } from './report-map-projection.mjs';
 import { createReportMapClassPresentation } from './report-map-class-presentation.mjs';
 import { drawReportMapSurfaceLayers } from './report-map-surface-layers.mjs';
+import { drawReportMapHeading } from './report-map-heading.mjs';
 import { drawReportMapScaleAndNorth } from './report-map-scale-orientation.mjs';
 import { drawReportMapLegend } from './report-map-legend.mjs';
 import { drawReportMapFooter } from './report-map-footer.mjs';
@@ -43,15 +44,10 @@ export function mapCanvas({ outer, outers = null, surfaceFeatures = [], holes = 
     disc, tones: MAP_TONES
   });
   const T = (x, y, t, c, sc) => cv.text(x, y, t, c, sc);
-  T(PAD, 12, parkName, MAP_TONES.ink, 3);
-  T(PAD, 44, sub, MAP_TONES.mut, 2);
-  if (sub2) T(PAD, 66, sub2, MAP_TONES.mut, 2);
-  /* Belge kimliği sağ üstte: harita tek başına dolaşıma girse bile hangi
-   * DGR'ye ait olduğu üzerinde yazılıdır (kullanıcı standardı md. 10). */
-  if (meta && meta.id) {
-    const tid = String(meta.id);
-    T(Math.max(PAD, W - PAD - 12 * tid.length), 12, tid, MAP_TONES.mut, 2);
-  }
+  drawReportMapHeading({
+    text: T, width: W, padding: PAD, parkName, sub, sub2, meta,
+    ink: MAP_TONES.ink, muted: MAP_TONES.mut
+  });
   drawReportMapLegend({
     canvas: cv, rows: legRows, y: TOP + MAPH + 10, padding: PAD,
     classFor: pngClass, classes, maskHa, points, pointStat, tones: MAP_TONES, text: T
