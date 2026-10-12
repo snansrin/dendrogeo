@@ -548,3 +548,5 @@ Her modülün tek bir dış API'si, sahibi olduğu açık durumu ve kendi testle
 - `ui/data-request-reply-content.js`, talep yanıtının tam e-posta metnini ve kodlanmış konu satırını mevcut tarih, özet, QGIS/lisans ve künye içeriğiyle üretir; veri sorgusu, CSV, tarayıcı ve durum güncellemesi serviste kalır.
 
 - `application/data-requests/fulfill-request.js`, veri yükleme→özet→boş onayı/CSV→yanıt→tamamlanma→bildirim→yenileme sırasını enjekte edilen portlarla yönetir; Supabase, DOM ve tarayıcı erişmez, servis bağımlılıkları bağlar.
+
+- `application/data-requests/submit-request.js`, tekrar kontrolü→kayıt gövdesi→insert→sonuç sırasını enjekte edilen portlarla yürütür; tekrar kontrolü hata sınırı korunur, form/metin/yenileme serviste kalır.
