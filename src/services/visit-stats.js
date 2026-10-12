@@ -93,12 +93,7 @@ if(typeof document.addEventListener==="function")document.addEventListener("visi
  * uyumlu (konum yalnız GPS açıksa ve geçici). Yalnız kurucu sekmesi okur. */
 const DG_SID=(()=>{try{let s=sessionStorage.getItem("dg_sid");if(!s){s=Math.random().toString(36).slice(2,10);sessionStorage.setItem("dg_sid",s);}return s;}catch(e){return "x";}})();
 const DG_SESSION_START=Date.now();
-const DG_DEV_TAG=(()=>{try{
- const ua=navigator.userAgent||"";
- const br=/Edg\//.test(ua)?"Edge":/OPR\//.test(ua)?"Opera":/Chrome\//.test(ua)?"Chrome":/Firefox\//.test(ua)?"Firefox":/Safari\//.test(ua)?"Safari":"?";
- const os=/Windows/.test(ua)?"Windows":/Android/.test(ua)?"Android":/iPhone|iPad|iPod/.test(ua)?"iOS":/Mac OS X/.test(ua)?"macOS":/Linux/.test(ua)?"Linux":"?";
- return (/Mobi|Android|iPhone|iPad|iPod/.test(ua)?"mobil":"masaüstü")+" · "+os+" · "+br;
-}catch(e){return "?";}})();
+const DG_DEV_TAG=(()=>{try{return window.DG_VISITOR_DEVICE_LABEL.build(navigator.userAgent);}catch(e){return "?";}})();
 const DG_ACT_LABELS={save:"ölçüm kaydetti",edit:"kayıt güncelledi",park:"park algıladı",export:"dışa aktardı",publish:"rapor yayını istedi"};
 const DG_VISITOR_ACTIVITY=window.DG_VISITOR_ACTIVITY_APPLICATION.create();
 const DG_VISITOR_STORED_ACTIVITY=window.DG_VISITOR_STORED_ACTIVITY_APPLICATION.create();

@@ -510,3 +510,5 @@ Her modülün tek bir dış API'si, sahibi olduğu açık durumu ve kendi testle
 - `adapters/visitors/admin-visit-counts-store.js`, yönetim ziyaret sayaçlarının tekil exact/head sorgularını taşır; sıralı yükleme, yerel gün ve kayan yedi gün hesabı, kısmi DOM güncellemeleri ve hata sınırı `loadVisitStats()` içinde korunur.
 
 - `ui/visitor-roster.js`, geçici ziyaretçi listesinin bağlantı/filtre boş durumlarını ve kişi kartlarını mevcut çeviri, kaçış, rol, oturum ve konum gösterimiyle üretir; owner kapısı, filtreleme, akış ve harita güncellemesi servis katmanında kalır.
+
+- `domain/visitors/device-label.js`, geçici presence cihaz etiketini kullanıcı aracısı girdisinden saf olarak üretir; mevcut tarayıcı/işletim sistemi eşleşme önceliği korunur, navigator erişimi ve hata yedeği servis katmanında kalır.
