@@ -4,8 +4,10 @@ import vm from 'node:vm';
 import {readFileSync} from 'node:fs';
 
 const context=vm.createContext({window:{}});
+vm.runInContext(readFileSync(new URL('../src/ui/gis-export-canvas-legend.js',import.meta.url),'utf8'),context);
 vm.runInContext(readFileSync(new URL('../src/ui/gis-export-canvas.js',import.meta.url),'utf8'),context);
 const canvas=context.window.DG_GIS_EXPORT_CANVAS;
+assert.strictEqual(canvas.drawLegend,context.window.DG_GIS_EXPORT_CANVAS_LEGEND.drawLegend);
 function mockContext(){
  const events=[];
  return {events,beginPath:()=>events.push(['begin']),moveTo:(x,y)=>events.push(['move',x,y]),lineTo:(x,y)=>events.push(['line',x,y]),closePath:()=>events.push(['close']),fill:rule=>events.push(['fill',rule]),stroke:()=>events.push(['stroke']),strokeRect:(...args)=>events.push(['rect',...args]),arc:(...args)=>events.push(['arc',...args]),fillText:(...args)=>events.push(['text',...args]),fillRect:(...args)=>events.push(['fillRect',...args]),measureText:()=>({width:20}),globalAlpha:1,fillStyle:''};
