@@ -266,14 +266,7 @@ function dgVisFeed(rows){
  const T=(x)=>(typeof dgCf==="function"?dgCf(x):x);
  const loc=(typeof DG_LANG!=="undefined"&&DG_LANG==="en")?"en-GB":"tr-TR";
  const top=DG_VISITOR_ACTIVITY.build(rows,{viewLabels:DG_VIEW_LABELS,actionLabels:DG_ACT_LABELS,translate:T,maxItems:18});
- if(!top.length){box.textContent=T("—");return;}
- box.innerHTML=top.map(e=>{
-  const hm=new Date(e.t).toLocaleTimeString(loc,{hour:"2-digit",minute:"2-digit",second:"2-digit"});
-  return '<div style="display:flex;gap:8px;padding:4px 0;border-bottom:1px solid var(--line);font-size:.82rem">'+
-   '<span class="mono" style="color:var(--mut);flex:0 0 auto">'+hm+'</span>'+
-   '<b style="flex:0 0 auto">'+esc(e.who)+'</b>'+
-   '<span>'+esc(e.k)+(e.d?' <span style="color:var(--mut)">· '+esc(e.d)+'</span>':"")+'</span></div>';
- }).join("");
+ DG_VISITOR_ACTIVITY_FEED_UI.render(box,top,{locale:loc,translate:T,escape:esc});
 }
 function dgVisMapInit(){
  const el=$("visMap");
