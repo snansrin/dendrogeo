@@ -642,3 +642,13 @@ Her modülün tek bir dış API'si, sahibi olduğu açık durumu ve kendi testle
 - `ui/render-user-publication-notices.js`, kullanıcıya ait onaylı ölçüm sayacı, çevrimdışı notu ve yayın/geri çekme açıklamasını üretir.
 
 - `ui/render-user-publication-card.js`, şema uyarısını ve kullanıcı panelinin hata, başlık, eylem ve bilgi parçalarını birleştirir.
+
+- `application/reports/load-publication-queue.js`, park, istek, günlük ve geri çekme okumalarını paralel yükleyip mevcut state/render/poll sırasını korur.
+
+- `application/reports/schedule-publication-queue-poll.js`, yönetici kartındaki bekleyen yayın/geri çekme işleri için sınırlı ve görünürlük kontrollü yoklamayı yönetir.
+
+- `application/reports/request-report-retraction.js`, kimlik ve oturum kapısı, onay, gerekçe, insert ve sonuç callback sırasını yürütür.
+
+- `application/reports/refresh-after-report-retraction.js`, başarılı geri çekmeden sonra açık yönetici ve kullanıcı görünümlerini yeniler.
+
+- `application/reports/reset-publication-polling.js`, geri çekme sonrası iki panelin yoklama sayaçlarını başa alır.

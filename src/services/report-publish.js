@@ -224,20 +224,25 @@ function dgRetractError(r){
 }
 
 async function dgReportRetract(reportId,parkId){
- if(!DG_PUB_ID.test(String(reportId||"")))return toast("Rapor kimliği geçersiz.","err","🗑");
- if(typeof USER==="undefined"||!USER)return toast("Önce giriş yap.","err","🗑");
- if(!confirm(reportId+" yayından geri çekilsin mi?\n\nRaporun veri dosyaları kaldırılır; adresinde gerekçeli geri çekme bildirimi kalır. DGR kimliği yeniden kullanılmaz; işlem günlüğe ve git geçmişine yazılır."))return;
- let reason="";
- try{reason=window.prompt("Gerekçe (bildirim sayfasında ve günlükte yayımlanır; boş bırakılabilir):","yanlışlıkla yayınlandı")||"";}catch(e){reason="";}
- const r=await dgRetractInsert(reportId,parkId,String(reason).slice(0,400));
- if(r.ok){
-  toast("🗑 Geri çekme isteği kuyruğa alındı — rapor birkaç dakika içinde yayından kalkar.","ok","🗑");
-  DG_PUB_STATE.pollCount=0;DG_USER_PUB.polls=0;
-  if($("dgPubBox"))await dgLoadPublishQueue({silent:true});
-  if(DG_USER_PUB.parkId)await dgUserPubRefresh();
-  return;
- }
- toast(dgRetractError(r),"err","🗑");
+ return window.DG_REQUEST_REPORT_RETRACTION.execute(reportId,parkId,{
+  isValidReportId:value=>DG_PUB_ID.test(String(value||"")),
+  isAuthenticated:()=>typeof USER!=="undefined"&&!!USER,
+  onInvalidReport:()=>toast("Rapor kimliği geçersiz.","err","🗑"),
+  onUnauthenticated:()=>toast("Önce giriş yap.","err","🗑"),
+  confirm:id=>confirm(id+" yayından geri çekilsin mi?\n\nRaporun veri dosyaları kaldırılır; adresinde gerekçeli geri çekme bildirimi kalır. DGR kimliği yeniden kullanılmaz; işlem günlüğe ve git geçmişine yazılır."),
+  askReason:()=>window.prompt("Gerekçe (bildirim sayfasında ve günlükte yayımlanır; boş bırakılabilir):","yanlışlıkla yayınlandı"),
+  insert:dgRetractInsert,
+  onSuccess:async()=>{
+   toast("🗑 Geri çekme isteği kuyruğa alındı — rapor birkaç dakika içinde yayından kalkar.","ok","🗑");
+   window.DG_RESET_PUBLICATION_POLLING.reset(DG_PUB_STATE,DG_USER_PUB);
+   return window.DG_REFRESH_AFTER_REPORT_RETRACTION.execute(DG_USER_PUB,{
+    hasAdminView:()=>$('dgPubBox'),
+    refreshAdmin:()=>dgLoadPublishQueue({silent:true}),
+    refreshUser:dgUserPubRefresh
+   });
+  },
+  onFailure:r=>toast(dgRetractError(r),"err","🗑")
+ });
 }
 
 /* ---------- KULLANICI TARAFI (0009): 📁 Projeler → 📄 Park Raporu ----------
@@ -427,38 +432,33 @@ function dgReportOpen(reportId){
 
 /* ---------- yükleme + kendiliğinden tazeleme ---------- */
 async function dgLoadPublishQueue(opts){
- if(!$("dgPubBox"))return;
- if(DG_PUB_STATE.loading)return;
- DG_PUB_STATE.loading=true;
- if(!(opts&&opts.silent))$("dgPubBox").innerHTML='<div class="dg-tree-meta">⏳ Kuyruk yükleniyor…</div>';
- try{
-  const [parks,requests,queue,retracts]=await Promise.all([dgPubFetchParks(),dgPubFetchRequests(),dgPubFetchQueue(),dgPubFetchRetractions()]);
-  DG_PUB_STATE.parks=parks;
-  DG_PUB_STATE.requests=requests;
-  DG_PUB_STATE.retractions=retracts;
-  if(queue)DG_PUB_STATE.queue=queue;
-  DG_PUB_STATE.queueAt=Date.now();
- }catch(e){
-  DG_PUB_STATE.error="Kuyruk yüklenemedi: "+((e&&e.message)||e);
- }finally{DG_PUB_STATE.loading=false;}
- dgPubRender();
- dgPubSchedulePoll();
+ return window.DG_LOAD_PUBLICATION_QUEUE.execute(DG_PUB_STATE,opts,{
+  hasView:()=>!!$("dgPubBox"),
+  showLoading:()=>{$("dgPubBox").innerHTML='<div class="dg-tree-meta">⏳ Kuyruk yükleniyor…</div>';},
+  loadParks:dgPubFetchParks,
+  loadRequests:dgPubFetchRequests,
+  loadQueue:dgPubFetchQueue,
+  loadRetractions:dgPubFetchRetractions,
+  now:Date.now,
+  render:dgPubRender,
+  schedulePoll:dgPubSchedulePoll
+ });
 }
 
 /* Bekleyen istek varken ve yönetici sekmesi görünürken 25 sn'de bir sessiz
  * tazeleme → kullanıcı F5'e basmadan bağlantının belirdiğini görür. */
 function dgPubSchedulePoll(){
- if(DG_PUB_STATE.pollTimer){clearInterval(DG_PUB_STATE.pollTimer);DG_PUB_STATE.pollTimer=0;}
- const waiting=DG_PUB_STATE.requests.some(r=>r.status==="Beklemede"&&!dgPubEntryFor(r.id))
-  ||(DG_PUB_STATE.retractions||[]).some(x=>x.status==="Beklemede"&&!dgPubRetractDone(DG_PUB_STATE.queue,x.id));
- if(!waiting||DG_PUB_STATE.pollCount>=DG_PUB_POLL_MAX)return;
- DG_PUB_STATE.pollTimer=setInterval(async()=>{
-  DG_PUB_STATE.pollCount++;
-  const adminView=$("v-admin");
-  if(adminView&&!adminView.classList.contains("on"))return;   /* sekme kapalı: ağ isteği atma */
-  if(document.hidden)return;                                   /* arka plan sekmesi: bekle */
-  await dgLoadPublishQueue({silent:true});
- },DG_PUB_POLL_MS);
+ return window.DG_SCHEDULE_PUBLICATION_QUEUE_POLL.execute(DG_PUB_STATE,{
+  clearTimer:clearInterval,
+  entryFor:dgPubEntryFor,
+  retractionDone:id=>dgPubRetractDone(DG_PUB_STATE.queue,id),
+  maxPolls:DG_PUB_POLL_MAX,
+  setInterval,
+  intervalMs:DG_PUB_POLL_MS,
+  isAdminViewActive:()=>{const view=$("v-admin");return !view||view.classList.contains("on");},
+  isDocumentHidden:()=>document.hidden,
+  refresh:()=>dgLoadPublishQueue({silent:true})
+ });
 }
 
 window.dgLoadPublishQueue=dgLoadPublishQueue;
