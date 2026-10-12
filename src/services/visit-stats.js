@@ -149,16 +149,14 @@ function dgVisActToggle(){
  const w=$("visActivityWrap"),b=$("visActToggle");if(!w)return;
  const T=(x)=>(typeof dgCf==="function"?dgCf(x):x);
  const open=w.style.display!=="none";
- w.style.display=open?"none":"";
- if(b){b.innerHTML=open?T("⬇ Göster"):T("⬆ Gizle");b.setAttribute("aria-expanded",String(!open));}
+ DG_VISITOR_ACTIVITY_DISCLOSURE_UI.render(w,b,!open,{translate:T});
  try{localStorage.setItem("dg_vis_act_open",open?"0":"1");}catch(e){}
 }
 function dgVisActRestore(){
  const w=$("visActivityWrap"),b=$("visActToggle");if(!w)return;
  const T=(x)=>(typeof dgCf==="function"?dgCf(x):x);
  let open=true;try{open=localStorage.getItem("dg_vis_act_open")!=="0";}catch(e){}
- w.style.display=open?"":"none";
- if(b){b.innerHTML=open?T("⬆ Gizle"):T("⬇ Göster");b.setAttribute("aria-expanded",String(open));}
+ DG_VISITOR_ACTIVITY_DISCLOSURE_UI.render(w,b,open,{translate:T});
 }
 async function loadVisitors(){
  if(typeof PROFILE==="undefined"||!PROFILE||PROFILE.role!=="owner")return;
