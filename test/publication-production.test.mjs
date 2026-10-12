@@ -31,7 +31,9 @@ test('cancelled publication form writes no request; confirmed form preserves RLS
   '../src/application/reports/sync-user-publication-panel.js','../src/application/reports/schedule-user-publication-poll.js',
   '../src/application/reports/share-report-link.js','../src/domain/reports/resolve-publication-park-status.js',
   '../src/ui/render-publication-park-row.js','../src/ui/render-publication-history.js',
-  '../src/application/reports/summarize-publication-queue.js','../src/ui/render-publication-admin-card.js'])
+  '../src/application/reports/summarize-publication-queue.js','../src/ui/render-publication-admin-card.js',
+  '../src/application/reports/resolve-user-publication-view.js','../src/ui/render-user-publication-controls.js',
+  '../src/ui/render-user-publication-header.js','../src/ui/render-user-publication-notices.js','../src/ui/render-user-publication-card.js'])
   vm.runInContext(readFileSync(new URL(path,import.meta.url),'utf8'),ctx);
  vm.runInContext(readFileSync(new URL('../src/services/report-publish.js',import.meta.url),'utf8'),ctx);
  vm.runInContext('dgReportCollectRequest=async()=>null;dgPubAdmin=()=>true;dgLoadPublishQueue=async()=>{};dgPubSchedulePoll=()=>{}',ctx);
