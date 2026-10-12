@@ -84,7 +84,7 @@ function reqCityChanged(){
 /* 0040: kaydırma koruma sarmalı — yeniden çizimde #main scrollTop korunur. */
 async function loadRequests(){const _y=(typeof dgScrollKeep==="function"?dgScrollKeep():null);try{return await loadRequests__scroll.apply(this,arguments);}finally{if(typeof dgScrollRestore==="function")dgScrollRestore(_y);}}
 async function loadRequests__scroll(){
- const{data}=await sb.from("data_requests").select("*,profiles(full_name)").order("created_at",{ascending:false});
+ const{data}=await window.DG_DATA_REQUEST_QUEUE_STORE.load(sb);
  const reqs=data||[];
  const {pending,closed}=window.DG_DATA_REQUEST_QUEUE.partition(reqs);
  
@@ -100,20 +100,7 @@ async function loadRequests__scroll(){
  if(closed.length>0){
   closedWrap.style.display="block";
   $("aReqClosed").textContent=closed.length;
-  $("closedReqT").innerHTML=closed.map(r=>{
-   const filt=[esc(r.country),esc(r.city),esc(r.project_name)].filter(Boolean).join(" / ")||"Tüm Veri";
-   const bc=r.status==="Tamamlandı"?"on":"off";
-   const hasNote=r.note&&r.note.trim().length>0;
-   const closedDate=r.fulfilled_at?new Date(r.fulfilled_at).toLocaleDateString("tr-TR"):"";
-   return `<tr>
-    <td data-label="Kullanıcı">${esc(r.profiles?.full_name)||"—"}</td>
-    <td data-label="E‑posta">${esc(r.email)||"—"}</td>
-    <td data-label="Filtre">${esc(filt)}</td>
-    <td data-label="Talep">${new Date(r.created_at).toLocaleDateString("tr-TR")}</td>
-    <td data-label="Kapanış">${closedDate}</td>
-    <td data-label="Durum"><span class="badge ${bc}">${r.status}</span></td>
-   </tr>${hasNote?`<tr><td colspan="6" style="background:var(--tint);font-size:.78rem;color:var(--mut);white-space:normal;padding:8px 12px;line-height:1.5"><b style="color:var(--green-dk)">📝 Not:</b> ${esc(r.note)}</td></tr>`:""}`;
-  }).join("");
+  window.DG_DATA_REQUEST_CLOSED_TABLE_UI.render($("closedReqT"),closed,{escape:esc});
  }else{
   closedWrap.style.display="none";
  }

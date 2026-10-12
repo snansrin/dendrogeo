@@ -468,7 +468,7 @@
     "src/utils/geo.js": "3e796768b3d55a3f07c4be3281c9437f1602b6d5e68151b2af7b101707baf294",
     "src/utils/lazylibs.js": "baa0959cdacb99e13f62386e8cd157e4d71a94587e6967d58ab1e928dfb96383",
     "src/workers/surface-worker.js": "02878b04478f0c555b536f34d9807a0bf824d0f738d1468a8840069cc61e85ed",
-    "test/critical-fixes.test.mjs": "6f776b411834a9551a0819503ff66ec750d299d068b304a243c7344cc5151e56",
+    "test/critical-fixes.test.mjs": "3a2e62104763110bc734b3dc54a37cbf57c15b0038a78fdce35d56d9639c1989",
     "test/dbh-qa.test.mjs": "d3bbd29d292aa1214ede27a21ecb99315bc24a6346e2b0119f8c04eb8b532b95",
     "test/field-data-safety.test.mjs": "b8b9e8fc20bbbc59cf9562d60f87bdc5eb07c0106f8c71253731974fb08c0280",
     "test/fix-0045.test.mjs": "f2fd7bea2d7a43b1ca31a218bafa8af8d3e5a7fdd7d49823f8c48096ad009a68",
@@ -525,7 +525,7 @@
     "test/park-image-geometry-ui.test.mjs": "e47c0513c16fdbbc328c1fdaa3a115c029819032b7bc51fe79a98c0f311b16ad",
     "test/park-impervious-geometry-domain.test.mjs": "d7cfaedd1d34b6bcc4c7d874299c916fdea8a6897518db3bd29f3873449830f3",
     "test/park-info-panel-ui.test.mjs": "4d490f4d29a9164bf2f2dd0b934438525cd157c9d85bb214910533519eccbb8f",
-    "test/park-invites.test.mjs": "70658c7dbaf6238b31ad03cabc87f48720d80c69fa8dc6bdf91e251a386eb212",
+    "test/park-invites.test.mjs": "c9ef6065048eb17c7b99c1ed994a685fdecb6eefa8c922707d96dba4b58e102e",
     "test/park-landcover-analysis.test.mjs": "202ec7457f1e926f91bcbb69dbeb9b029c2bb89ad654ea34cae1347632d2d28f",
     "test/park-line-distance-domain.test.mjs": "ac3b2fa1b303de5fc82271f690dd41b45dc14ddd57c9da544882c890d82883d8",
     "test/park-menu-ui.test.mjs": "3c6eae61eb960b7895ec25bd21782060b382df0175cd23eca110fc51f6260d43",
@@ -564,5 +564,23 @@
     "vendor/geotiff-2.1.3.js": "cb5c9731bfee1f8bff1728e54e4436ada81ea3258b178a3d6603c61b58d99e6c",
     "vendor/leaflet-1.9.4.js": "db49d009c841f5ca34a888c96511ae936fd9f5533e90d8b2c4d57596f4e5641a",
     "vendor/polygon-clipping-0.15.7.js": "7f8619e84a86ce8dd400c9b50430e9c8cf8f26027b19eeb479f109f5c1a9d688"
-  }
+  },
+  "authorized_modularizations": [
+    {
+      "date": "2026-10-12",
+      "scope": "Relocate request query and closed-table source assertions to their actual modules and assert service delegation; preserve behavioral expectations.",
+      "files": [
+        {
+          "path": "test/critical-fixes.test.mjs",
+          "previous_sha256": "6f776b411834a9551a0819503ff66ec750d299d068b304a243c7344cc5151e56",
+          "sha256": "3a2e62104763110bc734b3dc54a37cbf57c15b0038a78fdce35d56d9639c1989"
+        },
+        {
+          "path": "test/park-invites.test.mjs",
+          "previous_sha256": "70658c7dbaf6238b31ad03cabc87f48720d80c69fa8dc6bdf91e251a386eb212",
+          "sha256": "c9ef6065048eb17c7b99c1ed994a685fdecb6eefa8c922707d96dba4b58e102e"
+        }
+      ]
+    }
+  ]
 }

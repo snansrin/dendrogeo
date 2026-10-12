@@ -259,8 +259,9 @@ describe('0025 · kablolama (index.html + shell + partials)', () => {
     assert.match(mp, /✓ Yapıldı/, 'tamamlanan waypoint açıkça işaretli');
     const ua = read('src/services/user-admin.js');
     assert.match(ua, /data-label="Kullanıcı"/, 'kullanıcı kimliği kompakt tek hücrede etiketli');
-    const dr = read('src/services/data-requests.js');
+    const dr = read('src/ui/data-request-closed-table.js');
     assert.match(dr, /data-label="Kapanış"/, 'talep tabloları etiketli');
+    assert.match(read('src/services/data-requests.js'), /DG_DATA_REQUEST_CLOSED_TABLE_UI\.render\(/, 'servis etiketli kapalı tablo modülünü kullanır');
     const css = read('css/style.css');
     /* yorum satırları çıkarılır (belgeleme amaçlı alıntılar kural sayılmasın) */
     const cssKod = css.split('\n').filter((l) => !l.trim().startsWith('/*') && !l.trim().startsWith('*')).join('\n');
