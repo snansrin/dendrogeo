@@ -530,3 +530,5 @@ Her modülün tek bir dış API'si, sahibi olduğu açık durumu ve kendi testle
 - `adapters/data-requests/fulfillment-store.js`, talep→proje→onaylı ölçüm okuma zincirini mevcut eşleştirme ve opsiyonel ülke/şehir filtreleriyle yükler; eşleşmeyen projede `[-1]` filtresi korunur, özet/CSV/e-posta ve tamamlanma serviste kalır.
 
 - `adapters/data-requests/options-store.js`, talep formu için onaylı ölçüm ülke/şehir listesini exact count ve 5000 sınırıyla, projeleri ad sırasıyla paralel okur; durum atama, kesilme uyarısı ve seçenek zinciri serviste kalır.
+
+- `adapters/data-requests/my-requests-store.js`, oturumdaki kullanıcının taleplerini mevcut user_id filtresi ve azalan created_at sırasıyla okur; oturum kapısı, kaydırma koruması, hata/boş görünüm ve silme eylemi serviste kalır.
