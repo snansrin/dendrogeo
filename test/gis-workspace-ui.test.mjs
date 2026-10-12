@@ -5,13 +5,14 @@ import vm from 'node:vm';
 
 const file=p=>readFileSync(new URL('../'+p,import.meta.url),'utf8');
 const html=file('index.html'),boot=file('partials/boot.html'),css=file('css/gis-workspace.css');
-const ui=file('src/ui/gis-workspace.js'),park=file('src/ui/park-panel.js'),panelMarkup=file('src/ui/park-info-panel.js');
+const ui=file('src/ui/gis-workspace.js'),analysisLayout=file('src/ui/gis-workspace-analysis-layout.js'),park=file('src/ui/park-panel.js'),panelMarkup=file('src/ui/park-info-panel.js');
+const workspacePresentation=ui+'\n'+analysisLayout;
 const parkSurface=park+'\n'+panelMarkup;
 const dashboard=file('src/services/dash.js'),sw=file('sw.js');
 const lock=JSON.parse(file('docs/surface-engine-lock.json'));
 
 test('workspace lives strictly outside the 54 frozen science files',()=>{
- for(const p of ['partials/boot.html','src/ui/gis-workspace.js','css/gis-workspace.css','sw.js','test/gis-workspace-ui.test.mjs']){
+ for(const p of ['partials/boot.html','src/ui/gis-workspace.js','src/ui/gis-workspace-analysis-layout.js','css/gis-workspace.css','sw.js','test/gis-workspace-ui.test.mjs']){
   assert.ok(!lock.locked_files[p],p);
  }
  assert.equal(Object.keys(lock.locked_files).length,54);
@@ -20,8 +21,12 @@ test('workspace lives strictly outside the 54 frozen science files',()=>{
 
 test('workspace loads once from an external classic script and is precached',()=>{
  assert.match(boot,/src\/ui\/gis-workspace\.js\?v=[a-f0-9]{8}/);
+ assert.match(boot,/src\/ui\/gis-workspace-analysis-layout\.js\?v=[a-f0-9]{8}/);
+ assert.ok(boot.indexOf('src/ui/gis-workspace-analysis-layout.js')<boot.indexOf('src/ui/gis-workspace.js'));
  assert.match(html,/src\/ui\/gis-workspace\.js\?v=[a-f0-9]{8}/);
+ assert.match(html,/src\/ui\/gis-workspace-analysis-layout\.js\?v=[a-f0-9]{8}/);
  assert.match(sw,/\/src\/ui\/gis-workspace\.js/);
+ assert.match(sw,/\/src\/ui\/gis-workspace-analysis-layout\.js/);
  assert.doesNotMatch(boot,/id="dg-gis-workspace"/);
  assert.doesNotThrow(()=>new vm.Script(ui));
  assert.match(html,/css\/gis-workspace\.css\?v=[a-f0-9]{8}/);
@@ -43,8 +48,8 @@ test('all original Grid, layer and PNG IDs and event handlers remain wired',()=>
 test('six most frequent species remains visible without redundant PNG download',()=>{
  assert.match(dashboard,/En Yaygın 6 Tür/);
  assert.match(dashboard,/topSpecies\.map/);
- assert.match(ui,/En Yaygın 6 Tür/);
- assert.match(ui,/\.dg-png-btn"\)\.forEach\(b=>b\.remove\(\)\)/);
+ assert.match(workspacePresentation,/En Yaygın 6 Tür/);
+ assert.match(workspacePresentation,/\.dg-png-btn"\)\.forEach\(b=>b\.remove\(\)\)/);
  assert.doesNotMatch(ui,/exportSpecies|canvas\.toBlob|dendrogeo_en_yaygin_6_tur\.png/);
 });
 
@@ -67,6 +72,7 @@ test('measurements are useful map-only approximations, not scientific area chang
   L:{latLng:p=>({...p,distanceTo:q=>Math.hypot((p.lat-q.lat)*111200,(p.lng-q.lng)*85100)})},
   setTimeout,clearTimeout,console
  };
+ vm.runInNewContext(analysisLayout,context);
  vm.runInNewContext(ui,context,{timeout:1000});
  const m=context.window.DG_GIS_WORKSPACE_UI;
  assert.ok(m,'Public UI helpers must be exposed for non-invasive tests');
