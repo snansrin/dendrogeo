@@ -32,3 +32,7 @@ export function epsgLabel(epsg) {
   if (n >= 32601 && n <= 32660) return `EPSG:${n} (UTM ${n - 32600}N)`;
   return 'EPSG:' + n;
 }
+/* Turkish report number formatting, preserving the existing fixed precision. */
+export function formatReportNumber(x, d = 2) {
+  return Number(x).toLocaleString('tr-TR', { minimumFractionDigits: d, maximumFractionDigits: d });
+}
