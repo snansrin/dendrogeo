@@ -229,6 +229,7 @@ Her modülün tek bir dış API'si, sahibi olduğu açık durumu ve kendi testle
 - `ui/visitor-activity-feed.js`, kurucuya gösterilen geçici canlı etkinlik listesini gelen olaylardan çizer. Veriyi üretmez veya saklamaz; yerel saat, mevcut çeviri ve HTML kaçışı çağıran servis tarafından verilir.
 - `ui/visitor-database-activity.js`, kurucunun saklı etkinlik sorgularından gelen satırları mevcut çevrilmiş ve kaçış uygulanmış tablo görünümüne çizer. Sorgu, sıralama ve 60 satırlık sınır `visit-stats.js` içinde kalır.
 - `application/visitors/build-stored-activity.js`, dört kurucu etkinlik sorgusundan ayrı ayrı gelen ölçüm, proje, veri isteği ve rapor isteği kayıtlarını mevcut çeviri ve ayrıntı metinleriyle en yeni sıradaki satırlara dönüştürür; erişim, sorgu limitleri ve tablo gösterimi çağıran katmanlarda kalır.
+- `adapters/visitors/stored-activity-store.js`, kurucu etkinlik tablosunun dört mevcut Supabase sorgusunu sıralama ve kayıt limitleriyle ayrı ayrı yükler; her sorgunun hata yalıtımı ve sonuç listesi korunur, yetki kontrolü servis katmanında kalır.
 
 - `ui/park-info-panel.js`, park sonucundaki grid, yüzey, PNG ve katman kontrollerinin markup yapısını üretir. Park state, park kimliği, proje seçenekleri, alternatif seçici ve kaçış işlevi çağıran ekrandan verilir; mevcut DOM kimlikleri ve eylem callback’leri korunur.
 
