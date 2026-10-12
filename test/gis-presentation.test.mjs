@@ -245,7 +245,7 @@ test('green sensitivity uses a colored explicit browser-native track and no blac
 
 
 test('verified NDVI PNG uses 1240x1560 official layout and paints observed green tiers over land cover',()=>{
- const src=load('src/ui/gis-export-verified-workflow.js')+'\n'+load('src/ui/gis-export.js')+'\n'+load('src/application/surface/prepare-verified-map-export.js')+'\n'+load('src/ui/gis-export-verified-frame.js')+'\n'+load('src/ui/gis-export-verified-summary.js')+'\n'+load('src/ui/gis-export-verified-canvas.js');
+ const src=load('src/ui/gis-export-verified-workflow.js')+'\n'+load('src/ui/gis-export.js')+'\n'+load('src/application/surface/prepare-verified-map-export.js')+'\n'+load('src/ui/gis-export-verified-frame.js')+'\n'+load('src/ui/gis-export-verified-summary.js')+'\n'+load('src/ui/gis-export-verified-layers.js')+'\n'+load('src/ui/gis-export-verified-canvas.js');
  const layout=load('src/ui/gis-export-layout.js');
  assert.match(src,/async function renderVerified\(layers\)/);
  assert.match(src,/computeLayout\(\{rings:getParkRings\(\)\}\)/);
@@ -282,6 +282,9 @@ test('verified-map original dialog is untouched with NDVI off; its PNG download 
  vm.runInNewContext(load('src/ui/gis-export-events.js'),context);
  vm.runInNewContext(load('src/application/surface/prepare-verified-map-export.js'),context);
  vm.runInNewContext(load('src/ui/gis-export-download.js'),context);
+ vm.runInNewContext(load('src/ui/gis-export-verified-frame.js'),context);
+ vm.runInNewContext(load('src/ui/gis-export-verified-summary.js'),context);
+ vm.runInNewContext(load('src/ui/gis-export-verified-layers.js'),context);
  vm.runInNewContext(load('src/ui/gis-export-verified-canvas.js'),context);
  vm.runInNewContext(load('src/ui/gis-export-standard-canvas.js'),context);
  vm.runInNewContext(load('src/ui/gis-export-bootstrap.js'),context);
