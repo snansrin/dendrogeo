@@ -81,7 +81,10 @@ import { REPORT_SHARE_SCRIPT } from './lib/report-share.mjs';
 import { reportStyles } from './lib/report-style.mjs';
 import { summarizeReportMeasurements } from './lib/report-measurement-summary.mjs';
 import { createRequire } from 'node:module';
-/* qrcode is an optional build dependency; reports remain publishable without it. */
+/* qrcode (MIT) YALNIZ build bağımlılığıdır. Kurulu değilse (örn. npm install
+ * çalıştırılmamış ortam) rapor üretimi ÇÖKMEZ: QR hücresi atlanır, kalıcı
+ * adres künyede metin olarak kalır. QR kozmetiktir; kimlik/hash ondan
+ * bağımsızdır. */
 const QRlib = loadOptionalReportQr(createRequire(import.meta.url));
 export const qrDataUri = createQrDataUri(QRlib);
 
