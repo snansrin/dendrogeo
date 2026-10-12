@@ -15,23 +15,25 @@ async function sendDataRequest(){
  const project_name=$("reqProject").value.trim()||null;
  const note=$("reqNote").value.trim()||null;
  const m=$("reqMsg");
- try{
-  const{data:pending}=await window.DG_DATA_REQUEST_SUBMIT_STORE.pending(sb,USER.id);
-  const dup=window.DG_DATA_REQUEST_DUPLICATE.find(pending,{country,city,project_name});
-  if(dup){
+ return await window.DG_SUBMIT_DATA_REQUEST.execute({
+  readPending:()=>window.DG_DATA_REQUEST_SUBMIT_STORE.pending(sb,USER.id),
+  findDuplicate:pending=>window.DG_DATA_REQUEST_DUPLICATE.find(pending,{country,city,project_name}),
+  onDuplicate:dup=>{
    toast("⚠️ Bu veri talebiniz zaten alındı — yönetici onayı bekleniyor","warn","✉️");
    m.style.color="var(--amber)";
    m.textContent=(typeof dgTfs==="function"?dgTfs("⚠ Aynı filtreyle bir talebiniz zaten {s}. Yönetici yanıt verene kadar yeni talep oluşturulamaz.",{s:(dup.status==="Beklemede"?"beklemede":"işleme alındı")}):("⚠ Aynı filtreyle bir talebiniz zaten "+(dup.status==="Beklemede"?"beklemede":"işleme alındı")+". Yönetici yanıt verene kadar yeni talep oluşturulamaz."));
-   return;
+  },
+  onCheckError:error=>console.log("Dup kontrolü:",error),
+  buildBody:()=>({user_id:USER.id,email:PROFILE?.email||USER.email,country,city,project_name,note,status:"Beklemede"}),
+  insert:body=>window.DG_DATA_REQUEST_SUBMIT_STORE.insert(sb,body),
+  onInsertError:error=>{m.style.color="var(--red)";m.textContent="Hata: "+error.message;},
+  onSuccess:()=>{
+   toast("✓ Talep gönderildi — yönetici yanıtı bekleniyor","ok","✉️");
+   m.style.color="var(--green-dk)";m.textContent="✓ Talebiniz yönetime iletildi, hazır olduğunda e‑postanıza gönderilecek.";
+   $("reqCountry").value="";$("reqCity").value="";$("reqProject").value="";$("reqNote").value="";
+   loadMyRequests();
   }
- }catch(e){console.log("Dup kontrolü:",e);}
- const body={user_id:USER.id,email:PROFILE?.email||USER.email,country,city,project_name,note,status:"Beklemede"};
- const{error}=await window.DG_DATA_REQUEST_SUBMIT_STORE.insert(sb,body);
- if(error){m.style.color="var(--red)";m.textContent="Hata: "+error.message;return;}
- toast("✓ Talep gönderildi — yönetici yanıtı bekleniyor","ok","✉️");
- m.style.color="var(--green-dk)";m.textContent="✓ Talebiniz yönetime iletildi, hazır olduğunda e‑postanıza gönderilecek.";
- $("reqCountry").value="";$("reqCity").value="";$("reqProject").value="";$("reqNote").value="";
- loadMyRequests();
+ });
 }
 
 /* 0040: kaydırma koruma sarmalı — yeniden çizimde #main scrollTop korunur. */
