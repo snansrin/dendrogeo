@@ -15,23 +15,25 @@ async function sendDataRequest(){
  const project_name=$("reqProject").value.trim()||null;
  const note=$("reqNote").value.trim()||null;
  const m=$("reqMsg");
- try{
-  const{data:pending}=await window.DG_DATA_REQUEST_SUBMIT_STORE.pending(sb,USER.id);
-  const dup=window.DG_DATA_REQUEST_DUPLICATE.find(pending,{country,city,project_name});
-  if(dup){
+ return await window.DG_SUBMIT_DATA_REQUEST.execute({
+  readPending:()=>window.DG_DATA_REQUEST_SUBMIT_STORE.pending(sb,USER.id),
+  findDuplicate:pending=>window.DG_DATA_REQUEST_DUPLICATE.find(pending,{country,city,project_name}),
+  onDuplicate:dup=>{
    toast("⚠️ Bu veri talebiniz zaten alındı — yönetici onayı bekleniyor","warn","✉️");
    m.style.color="var(--amber)";
    m.textContent=(typeof dgTfs==="function"?dgTfs("⚠ Aynı filtreyle bir talebiniz zaten {s}. Yönetici yanıt verene kadar yeni talep oluşturulamaz.",{s:(dup.status==="Beklemede"?"beklemede":"işleme alındı")}):("⚠ Aynı filtreyle bir talebiniz zaten "+(dup.status==="Beklemede"?"beklemede":"işleme alındı")+". Yönetici yanıt verene kadar yeni talep oluşturulamaz."));
-   return;
+  },
+  onCheckError:error=>console.log("Dup kontrolü:",error),
+  buildBody:()=>({user_id:USER.id,email:PROFILE?.email||USER.email,country,city,project_name,note,status:"Beklemede"}),
+  insert:body=>window.DG_DATA_REQUEST_SUBMIT_STORE.insert(sb,body),
+  onInsertError:error=>{m.style.color="var(--red)";m.textContent="Hata: "+error.message;},
+  onSuccess:()=>{
+   toast("✓ Talep gönderildi — yönetici yanıtı bekleniyor","ok","✉️");
+   m.style.color="var(--green-dk)";m.textContent="✓ Talebiniz yönetime iletildi, hazır olduğunda e‑postanıza gönderilecek.";
+   $("reqCountry").value="";$("reqCity").value="";$("reqProject").value="";$("reqNote").value="";
+   loadMyRequests();
   }
- }catch(e){console.log("Dup kontrolü:",e);}
- const body={user_id:USER.id,email:PROFILE?.email||USER.email,country,city,project_name,note,status:"Beklemede"};
- const{error}=await window.DG_DATA_REQUEST_SUBMIT_STORE.insert(sb,body);
- if(error){m.style.color="var(--red)";m.textContent="Hata: "+error.message;return;}
- toast("✓ Talep gönderildi — yönetici yanıtı bekleniyor","ok","✉️");
- m.style.color="var(--green-dk)";m.textContent="✓ Talebiniz yönetime iletildi, hazır olduğunda e‑postanıza gönderilecek.";
- $("reqCountry").value="";$("reqCity").value="";$("reqProject").value="";$("reqNote").value="";
- loadMyRequests();
+ });
 }
 
 /* 0040: kaydırma koruma sarmalı — yeniden çizimde #main scrollTop korunur. */
@@ -42,21 +44,16 @@ async function loadMyRequests__scroll(){
  const el=$("myRequests");if(!el)return;
  if(error){el.innerHTML='<div class="alert err">Talepler yüklenemedi.</div>';return;}
  if(!data||!data.length){el.innerHTML="";return;}
- const rows=data.map(r=>{
-  const filt=[esc(r.country),esc(r.city),esc(r.project_name)].filter(Boolean).join(" / ")||"Tüm Veri";
-  const bc=r.status==="Tamamlandı"?"on":(r.status==="İşleme Alındı"?"admin":"off");
-  const dt=r.created_at?new Date(r.created_at).toLocaleDateString("tr-TR"):"";
-  return `<div class="export-request-item"><div class="export-request-item-main"><b>${filt}</b><small>${dt}${r.note?" · "+esc(r.note):""}</small></div><span class="badge ${bc}">${esc(r.status||"Beklemede")}</span><button class="btn sm red export-request-delete" type="button" onclick="deleteMyRequest(${Number(r.id)})" aria-label="${esc(filt)} talebini sil">🗑 Sil</button></div>`;
- }).join("");
- el.innerHTML=`<details class="export-my-requests"><summary><span>📨 Taleplerim</span><span class="badge">${data.length}</span></summary><div class="export-request-list">${rows}</div></details>`;
+ window.DG_MY_DATA_REQUESTS_UI.render(el,data,{escape:esc});
 }
 async function deleteMyRequest(id){
- if(!USER||!Number.isFinite(+id))return;
- if(!confirm("Bu veri talebi silinsin mi?"))return;
- const{data,error}=await sb.from("data_requests").delete().eq("id",+id).eq("user_id",USER.id).select("id");
- if(error||!data?.length){toast("Talep silinemedi: "+(error?.message||"Yetki veya kayıt bulunamadı."),"err","🗑");return;}
- toast("Talep silindi.","ok","🗑");
- loadMyRequests();
+ return await window.DG_DELETE_OWN_DATA_REQUEST_APPLICATION.execute(USER,id,{
+  confirm:()=>confirm("Bu veri talebi silinsin mi?"),
+  remove:(requestId,userId)=>window.DG_DELETE_OWN_DATA_REQUEST.remove(sb,requestId,userId),
+  onFailure:error=>toast("Talep silinemedi: "+(error?.message||"Yetki veya kayıt bulunamadı."),"err","🗑"),
+  onSuccess:()=>toast("Talep silindi.","ok","🗑"),
+  refresh:()=>loadMyRequests()
+ });
 }
 
 /* --- Kullanıcı talep formu --- */
@@ -115,76 +112,15 @@ async function rejectRequest(id){
 }
 
 async function fulfillRequest(id){
-    const dataset=await window.DG_DATA_REQUEST_FULFILLMENT_STORE.load(sb,id);
-    if(!dataset)return;
-    const {request:req,rows}=dataset;
-    const {count:n,totalCarbon:totalC,countries,cities}=window.DG_DATA_REQUEST_DATASET_SUMMARY.summarize(rows);
-    
-    if(n === 0){
-        if(!confirm(dgCf("Bu filtreye uyan onaylı kayıt bulunamadı. Yine de kullanıcıya bilgilendirme maili göndermek ister misiniz?"))) return;
-    } else {
-        dl(fullCSV(rows), "dendrogeo_talep_" + id + ".csv");
-    }
-    
-    // 📧 Profesyonel & detaylı e-posta metni
-    const bugun = new Date().toLocaleDateString("tr-TR", { day:'numeric', month:'long', year:'numeric' });
-    
-    const bodyLines = [
-        "Merhaba " + (req.profiles?.full_name || "Değerli Kullanıcımız") + ",",
-        "",
-        "DendroGeo'daki veri talebiniz başarıyla hazırlandı. 🌲",
-        "",
-        "📊 TALEP ÖZETİ",
-        "─────────────────────────",
-        "• Ülke      : " + (req.country || "Tümü"),
-        "• Şehir     : " + (req.city    || "Tümü"),
-        "• Proje/Park: " + (req.project_name || "Tümü"),
-       (req.note ? "• Notunuz   : " + req.note : null),
-        "",
-        "📈 VERİ SETİ İÇERİĞİ",
-        "─────────────────────────",
-        "• Toplam kayıt     : " + n + " ağaç ölçümü",
-        "• Toplam karbon    : " + (totalC/1000).toFixed(2) + " ton C",
-        "• Kapsanan ülke    : " + countries.size,
-        "• Kapsanan şehir   : " + cities.size,
-        "• Hazırlanma tarihi: " + bugun,
-        "",
-        "📎 EKTE YER ALAN DOSYA",
-        "─────────────────────────",
-        "Veri seti CSV formatında hazırlanmıştır.",
-        "",
-        "CSV sütunları: POINT_ID, LATITUDE, LONGITUDE, TREE_GROUP, TREE_SPECIES, DBH_CM, HEIGHT_M, AGB_KG, BHB_KG, TOTAL_BIOMASS_KG, CARBON_KG, PHOTO_FILE ve daha fazlasını içerir.",
-        "",
-        "🗺 QGIS'DE NASIL AÇILIR?",
-        "─────────────────────────",
-        "1. QGIS → Layer → Add Layer → Add Delimited Text Layer",
-        "2. X = LONGITUDE, Y = LATITUDE, CRS = EPSG:4326",
-        "3. Fotoğraf balonu için katman özelliklerinde Map Tip özelliğini kullanabilirsiniz.",
-        "   Detaylı rehber: https://dendrogeo.org/ → Dışa Aktar bölümü",
-        "",
-        "📜 VERİ LİSANSI",
-        "─────────────────────────",
-        "Bu veri CC BY-NC 4.0 lisansı altındadır. Ticari olmayan amaçlarla, kaynak gösterilerek serbestçe kullanılabilir.",
-        "",
-        "Atıf önerisi:",
-"ŞİRİN, N. & ŞİRİN, S. (2026). DendroGeo: Küresel Ağaç Envanteri ve Karbon Veri Sistemi (Version 3.0.0) [Software] [Dataset]. Zenodo. https://doi.org/10.5281/zenodo.22646300",
-"",
-        "Herhangi bir sorunuz olursa bu e-postayı yanıtlayarak bize ulaşabilirsiniz.",
-        "",
-       "İyi çalışmalar dileriz,",
-	"DendroGeo Ekibi",
-	"Nagihan ŞİRİN — Doktora Öğrencisi · Sinan ŞİRİN — Sistem Geliştirici",
-	"Küresel Ağaç Envanteri ve Karbon Veri Sistemi",
-	"https://dendrogeo.org · DOI: 10.5281/zenodo.22646300",
-    ];
-    
-    const bodyTxt = bodyLines.filter(l => l !== null).join("\n");
-    const subject = encodeURIComponent("✅ DendroGeo Veri Talebiniz Hazırlandı — " + n + " kayıt, " + (totalC/1000).toFixed(2) + " t C");
-    
-    window.DG_DATA_REQUEST_REPLY_WINDOW.open(window,req.email||"",subject,bodyTxt);
-    
-    await window.DG_DATA_REQUEST_STATUS_STORE.update(sb,id,"Tamamlandı",new Date().toISOString());
-    
-    toast("✓ Mail hazırlandı — CSV'yi ekleyip gönderin", "ok", "📧");
-    loadRequests();
+ return await window.DG_FULFILL_DATA_REQUEST.execute(id,{
+  load:requestId=>window.DG_DATA_REQUEST_FULFILLMENT_STORE.load(sb,requestId),
+  summarize:rows=>window.DG_DATA_REQUEST_DATASET_SUMMARY.summarize(rows),
+  confirmEmpty:()=>confirm(dgCf("Bu filtreye uyan onaylı kayıt bulunamadı. Yine de kullanıcıya bilgilendirme maili göndermek ister misiniz?")),
+  download:(rows,requestId)=>dl(fullCSV(rows),"dendrogeo_talep_"+requestId+".csv"),
+  buildReply:(request,summary)=>window.DG_DATA_REQUEST_REPLY_CONTENT_UI.build(request,summary),
+  openReply:(request,reply)=>window.DG_DATA_REQUEST_REPLY_WINDOW.open(window,request.email||"",reply.subject,reply.body),
+  complete:requestId=>window.DG_DATA_REQUEST_STATUS_STORE.update(sb,requestId,"Tamamlandı",new Date().toISOString()),
+  notify:()=>toast("✓ Mail hazırlandı — CSV'yi ekleyip gönderin","ok","📧"),
+  refresh:()=>loadRequests()
+ });
 }

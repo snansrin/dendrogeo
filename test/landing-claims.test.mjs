@@ -431,10 +431,11 @@ describe('i18n katmanı sözleşmesi (0035)', () => {
   });
   test('⭐ dil değişince aktif görünüm yeniden çiziliyor + e-posta atfı güncel', () => {
     assert.match(rd('src/ui/shell.js'), /addEventListener\("dg:lang"/, 're-render kancası');
-    const dr = rd('src/services/data-requests.js');
+    const dr = rd('src/ui/data-request-reply-content.js');
     assert.match(dr, /ŞİRİN, N\. & ŞİRİN, S\./, 'e-posta atfında doğru yazar sırası');
     assert.match(dr, /Version 3\.0\.0/, 'e-posta atfında güncel sürüm');
     assert.ok(!dr.includes('(Version 1.0.0)'), 'eski sürüm atfı kalmamalı');
+    assert.match(rd('src/services/data-requests.js'), /DG_DATA_REQUEST_REPLY_CONTENT_UI\.build\(/, 'servis güncel künye modülünü kullanır');
   });
 });
 

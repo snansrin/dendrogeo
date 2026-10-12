@@ -6,7 +6,7 @@ import {readFileSync} from 'node:fs';
 function app({pendingError=false,insertError=null}={}){
  const window={},calls=[],elements={reqCountry:{value:' TR '},reqCity:{value:' Ankara '},reqProject:{value:' Park '},reqNote:{value:' note '},reqMsg:{style:{}}};
  const ctx=vm.createContext({window,USER:{id:'qa',email:'user@example.test'},PROFILE:{email:'profile@example.test'},$:id=>elements[id],console:{log(){calls.push(['log']);}},toast:(...args)=>calls.push(['toast',...args]),sb:{from(table){calls.push(['from',table]);const q={select(columns){calls.push(['select',columns]);return q;},eq(column,value){calls.push(['eq',column,value]);return q;},in(column,values){calls.push(['in',column,Array.from(values)]);return pendingError?Promise.reject(Error('offline')):Promise.resolve({data:[]});},insert(body){calls.push(['insert',JSON.parse(JSON.stringify(body))]);return Promise.resolve({error:insertError});}};return q;}}});
- for(const file of ['src/domain/data-requests/find-pending-duplicate.js','src/adapters/data-requests/submit-store.js','src/services/data-requests.js'])vm.runInContext(readFileSync(new URL('../'+file,import.meta.url),'utf8'),ctx);
+ for(const file of ['src/domain/data-requests/find-pending-duplicate.js','src/adapters/data-requests/submit-store.js','src/application/data-requests/submit-request.js','src/services/data-requests.js'])vm.runInContext(readFileSync(new URL('../'+file,import.meta.url),'utf8'),ctx);
  ctx.refresh=()=>calls.push(['refresh']);vm.runInContext('loadMyRequests=()=>refresh()',ctx);
  return{calls,elements,run:()=>vm.runInContext('sendDataRequest()',ctx)};
 }
