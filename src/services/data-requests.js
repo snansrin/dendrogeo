@@ -20,8 +20,7 @@ async function sendDataRequest(){
    .select("country,city,project_name,status")
    .eq("user_id",USER.id)
    .in("status",["Beklemede","İşleme Alındı"]);
-  const norm=v=>(v||"").toString().trim().toLowerCase();
-  const dup=(pending||[]).find(f=>norm(f.country)===norm(country)&&norm(f.city)===norm(city)&&norm(f.project_name)===norm(project_name));
+  const dup=window.DG_DATA_REQUEST_DUPLICATE.find(pending,{country,city,project_name});
   if(dup){
    toast("⚠️ Bu veri talebiniz zaten alındı — yönetici onayı bekleniyor","warn","✉️");
    m.style.color="var(--amber)";
