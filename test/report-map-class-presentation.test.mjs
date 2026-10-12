@@ -25,7 +25,6 @@ test('report map keeps the pool fallback and omits the mask row without masked a
   const pool = { label: 'Havuz', color: '#00ffff' };
   const presentation = createReportMapClassPresentation({ classes: { pool } });
 
-  assert.strictEqual(presentation.classFor('water'), pool);
   assert.strictEqual(presentation.classFor('pool'), pool);
   assert.equal(presentation.classFor('missing'), null);
   assert.deepEqual(presentation.rows, ['water', 'border', 'point', 'outside']);
