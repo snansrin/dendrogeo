@@ -27,6 +27,9 @@ Sınıf piksellerinin çokgen ve delik sınırları dışına taşınca bağlam 
 ### İyileştirildi — Rapor haritası ölçek çubuğu ve kuzey oku
 Metre ölçeği seçimi, dönüşümlü dört segmentli ölçek çubuğu ve kuzey oku ayrı kartografik sunum modülüne taşındı; mevcut piksel yerleşimi ve etiket davranışı korundu.
 
+### İyileştirildi — Rapor haritası lejant çizimi
+Sınır, envanter noktası, park dışı, maskeli alan ve sınıf örneklerinin lejant çizimi ayrı modüle taşındı; satır sırası, semboller, renkler, alan yuvarlaması ve metinler korundu.
+
 ### İyileştirildi — Park geometrisi backfill modülü
 Yönetim ekranındaki OSM sınırı backfill akışı uygulama use-case'ine taşındı; yetki, park bulunamaması, OSM hatası, yazım hatası ve başarılı yenileme sonuçları eski bildirimlerle korunuyor. OSM way/relation sınır çözümlemesi adapter'a ayrıldı ve uygulama/adapter için odaklı testler eklendi.
 
