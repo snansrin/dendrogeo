@@ -114,6 +114,7 @@ const DG_DEV_TAG=(()=>{try{
 const DG_ACT_LABELS={save:"ölçüm kaydetti",edit:"kayıt güncelledi",park:"park algıladı",export:"dışa aktardı",publish:"rapor yayını istedi"};
 const DG_VISITOR_ACTIVITY=window.DG_VISITOR_ACTIVITY_APPLICATION.create();
 const DG_VISITOR_STORED_ACTIVITY=window.DG_VISITOR_STORED_ACTIVITY_APPLICATION.create();
+const DG_VISITOR_STORED_ACTIVITY_STORE=window.DG_VISITOR_STORED_ACTIVITY_STORE.create();
 const DG_VISITOR_SESSION_EVENTS=window.DG_VISITOR_SESSION_EVENTS_APPLICATION.create();
 /* Sekme değişince çağrılır (shell go()): gezinme zincirine yazar. */
 function dgPresenceView(v){
@@ -314,23 +315,7 @@ async function dgVisActivity(){
  const box=$("visActivity");if(!box)return;
  const T=(s)=>(typeof dgCf==="function"?dgCf(s):s);
  const loc=(typeof DG_LANG!=="undefined"&&DG_LANG==="en")?"en-GB":"tr-TR";
- const datasets={measurements:[],projects:[],dataRequests:[],reportRequests:[]};
- try{
-  const{data:records}=await sb.from("measurements").select("id,point_id,species,status,created_at,profiles!measurements_owner_fkey(full_name)").order("created_at",{ascending:false}).limit(40);
-  datasets.measurements=records||[];
- }catch(e){}
- try{
-  const{data:records}=await sb.from("projects").select("id,name,created_at,profiles(full_name)").order("created_at",{ascending:false}).limit(20);
-  datasets.projects=records||[];
- }catch(e){}
- try{
-  const{data:records}=await sb.from("data_requests").select("id,email,status,created_at").order("created_at",{ascending:false}).limit(20);
-  datasets.dataRequests=records||[];
- }catch(e){}
- try{
-  const{data:records}=await sb.from("report_requests").select("id,status,created_at,park_id").order("created_at",{ascending:false}).limit(20);
-  datasets.reportRequests=records||[];
- }catch(e){}
+ const datasets=await DG_VISITOR_STORED_ACTIVITY_STORE.load(sb);
  const translateValue=value=>typeof dgT==="function"?dgT(value||""):value;
  const rows=DG_VISITOR_STORED_ACTIVITY.build(datasets,{translate:T,translateValue});
  DG_VISITOR_DATABASE_ACTIVITY_UI.render(box,rows,{locale:loc,translate:T,escape:esc});
