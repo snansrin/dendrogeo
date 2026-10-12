@@ -26,6 +26,7 @@ import {createReportMethodPresentation} from './lib/report-method-presentation.m
 import {createReportCitationPresentation} from './lib/report-citation-presentation.mjs';
 import {createReportLimitationsPresentation} from './lib/report-limitations-presentation.mjs';
 import { reportRead } from './lib/report-reader.mjs';
+import {createReportRestAdapter} from './lib/report-rest-adapter.mjs';
 import {reportContext} from './lib/report-context.mjs';
 import { decodeReportContext } from './lib/report-context.mjs';
 import { reviewedSurface } from './surface-report.mjs';
@@ -103,16 +104,7 @@ const {engineVersion:ENGINE_VERSION, appVersion:APP_VERSION, gitCommit:GIT_COMMI
 });
 const DATASET_DEFAULT = 'ESA WorldCover 10 m · 2021 (v200)';
 
-const SB = (() => {
-  const s = read('src/config/supabase.js');
-  return { url: s.match(/SB_URL="([^"]+)"/)[1], key: s.match(/SB_KEY="([^"]+)"/)[1] };
-})();
-async function rest(table, params) {
-  const u = SB.url + '/rest/v1/' + table + '?' + new URLSearchParams(params);
-  const r = await reportRead(u, { headers: { apikey: SB.key, Authorization: 'Bearer ' + SB.key } });
-  if (!r.ok) throw new Error(table + ' HTTP ' + r.status);
-  return r.json();
-}
+const {rest} = createReportRestAdapter({read, reportRead});
 const esc = (s) => String(s ?? '').replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 const trNum = (x, d = 2) => Number(x).toLocaleString('tr-TR', { minimumFractionDigits: d, maximumFractionDigits: d });
 
