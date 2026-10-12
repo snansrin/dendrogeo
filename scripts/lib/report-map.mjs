@@ -6,6 +6,7 @@ import { createReportMapProjection } from './report-map-projection.mjs';
 import { createReportMapClassPresentation } from './report-map-class-presentation.mjs';
 import { restoreOutsideRings } from './report-map-clipping.mjs';
 import { drawReportMapScaleAndNorth } from './report-map-scale-orientation.mjs';
+import { drawReportMapLegend } from './report-map-legend.mjs';
 
 export const DATASET_ASCII = 'ESA WORLDCOVER 2021 V200';
 
@@ -62,34 +63,10 @@ export function mapCanvas({ outer, outers = null, surfaceFeatures = [], holes = 
     const tid = String(meta.id);
     T(Math.max(PAD, W - PAD - 12 * tid.length), 12, tid, MAP_TONES.mut, 2);
   }
-  let ly = TOP + MAPH + 10;
-  for (const key of legRows) {
-    if (key === 'border') {
-      cv.line(PAD + 2, ly + 11, PAD + 20, ly + 11, MAP_TONES.ink);
-      T(PAD + 32, ly + 4, 'PARK SINIRI (OSM POLIGONU)', MAP_TONES.ink, 2);
-    } else if (key === 'point') {
-      disc(cv, PAD + 11, ly + 11, 5, MAP_TONES.halo); disc(cv, PAD + 11, ly + 11, 3, MAP_TONES.ink);
-      T(PAD + 32, ly + 4, pointStat && pointStat.outside > 0
-        ? `ENVANTER NOKTASI (ICINDE ${pointStat.inside} / DISINDA ${pointStat.outside})`
-        : `ENVANTER NOKTASI (n=${points.length}, POLIGON ICINDE)`, MAP_TONES.ink, 2);
-    } else if (key === 'outside') {
-      cv.rect(PAD + 1, ly + 1, PAD + 21, ly + 21, MAP_TONES.out);
-      cv.rect(PAD + 1, ly + 1, PAD + 21, ly + 2, [190, 194, 190]);
-      T(PAD + 32, ly + 4, 'PARK DISI (BAGLAM)', MAP_TONES.mut, 2);
-    } else if (key === 'masked') {
-      cv.rect(PAD + 1, ly + 1, PAD + 21, ly + 21, MAP_TONES.nodata);
-      T(PAD + 32, ly + 4, `MASKELI (BULUT/GOLGE) ${maskHa.toFixed(2)} ha`, MAP_TONES.mut, 2);
-    } else {
-      const c = pngClass(key);
-      const areaM2 = key === 'water'
-        ? Number(classes.water?.areaM2 || 0) + Number(classes.pool?.areaM2 || 0)
-        : Number(c?.areaM2 || 0);
-      const label = key === 'water' ? (classes.water?.label || 'Su') : c.label;
-      cv.rect(PAD + 1, ly + 1, PAD + 21, ly + 21, hex2rgb(c.color));
-      T(PAD + 32, ly + 4, `${label} ${(areaM2 / 10000).toFixed(2)} ha`, MAP_TONES.ink, 2);
-    }
-    ly += 28;
-  }
+  drawReportMapLegend({
+    canvas: cv, rows: legRows, y: TOP + MAPH + 10, padding: PAD,
+    classFor: pngClass, classes, maskHa, points, pointStat, tones: MAP_TONES, text: T
+  });
   drawReportMapScaleAndNorth({
     canvas: cv, width: W, padding: PAD, top: TOP, mapHeight: MAPH, scale: k, ink: MAP_TONES.ink
   });
