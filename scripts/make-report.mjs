@@ -69,6 +69,7 @@ export { pointInRing, pointInPolygon, ringSelfIntersections, geometrySelfInterse
 import { DGR_ID_RE, rebuildIndex, nextReportId, parkHistory } from './lib/report-archive.mjs';
 export { DGR_ID_RE, rebuildIndex, nextReportId, parkHistory };
 import { citeName, fmtDateTr, fmtDateDot, epsgLabel } from './lib/report-formatting.mjs';
+import {escapeReportHtml} from './lib/report-html-escaping.mjs';
 export { citeName, fmtDateTr, fmtDateDot, epsgLabel };
 import { createRetractionNotice } from './lib/report-retraction.mjs';
 import { createQrDataUri } from './lib/report-qr.mjs';
@@ -105,7 +106,7 @@ const {engineVersion:ENGINE_VERSION, appVersion:APP_VERSION, gitCommit:GIT_COMMI
 const DATASET_DEFAULT = 'ESA WorldCover 10 m · 2021 (v200)';
 
 const {rest} = createReportRestAdapter({read, reportRead});
-const esc = (s) => String(s ?? '').replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+const esc = escapeReportHtml;
 const trNum = (x, d = 2) => Number(x).toLocaleString('tr-TR', { minimumFractionDigits: d, maximumFractionDigits: d });
 
 export {createReportLandcoverRuntime} from './lib/report-landcover-runtime.mjs';
