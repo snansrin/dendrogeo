@@ -445,3 +445,5 @@ Her modülün tek bir dış API'si, sahibi olduğu açık durumu ve kendi testle
 - `scripts/lib/report-verification-section.mjs`, raporun §7 QA ve içerik bütünlüğü beyanlarının mevcut HTML sunumunu üretir; QA kararları, Çizelge 4 satırları ve snapshot verileri uygulama katmanında kalır.
 
 - `scripts/lib/report-document-backmatter.mjs`, raporun provenance, yayın geçmişi, atıf, kaynakça, veri erişimi ve footer sunumunu aynı sırada üretir; içerik ve üst veri girdileri mevcut rapor akışından gelir.
+
+- `scripts/lib/report-document-quality-preparation.mjs`, immutable raporun QA tablosu girdilerini, mevcut alan özetlerini ve sunum durumunu hazırlar; kontrol politikası ve kararları enjekte edilen QA modüllerinde kalır, yeni yayın kapısı eklemez.
