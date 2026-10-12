@@ -2,6 +2,7 @@ import { PngCanvas, hex2rgb } from './png.mjs';
 import { fmtDateDot } from './report-formatting.mjs';
 import { fillSurfacePolygon } from './report-map-surface-fill.mjs';
 import { fillRing, strokeRing, disc } from './report-map-primitives.mjs';
+import { drawReportMapInventoryPoints } from './report-map-inventory-points.mjs';
 import { createReportMapProjection } from './report-map-projection.mjs';
 import { createReportMapClassPresentation } from './report-map-class-presentation.mjs';
 import { restoreOutsideRings } from './report-map-clipping.mjs';
@@ -47,13 +48,12 @@ export function mapCanvas({ outer, outers = null, surfaceFeatures = [], holes = 
   cv.line(fx0, fy0, fx0, fy1, FR); cv.line(fx1, fy0, fx1, fy1, FR);
   strokeRing(cv, ring, MAP_TONES.halo, 2);                    /* halo: sınır her zeminde okunur */
   strokeRing(cv, ring, MAP_TONES.ink, 1);
-  /* Envanter noktaları YALNIZ harita çerçevesi içine çizilir: poligondan
-   * çok uzak (eski/hatalı GNSS) bir kayıt lejant/altbilgi üzerine binemez. */
-  for (const p of points) {
-    const pxX = X(p.lon), pxY = Y(p.lat);
-    if (pxX < fx0 || pxX > fx1 || pxY < fy0 || pxY > fy1) continue;
-    disc(cv, pxX, pxY, 5, MAP_TONES.halo); disc(cv, pxX, pxY, 3, MAP_TONES.ink);
-  }
+  /* Eski/hatalı GNSS konumları lejant ve altbilgiye taşmasın. */
+  drawReportMapInventoryPoints({
+    canvas: cv, points, project: (lon, lat) => [X(lon), Y(lat)],
+    frame: { left: fx0, right: fx1, top: fy0, bottom: fy1 },
+    disc, tones: MAP_TONES
+  });
   const T = (x, y, t, c, sc) => cv.text(x, y, t, c, sc);
   T(PAD, 12, parkName, MAP_TONES.ink, 3);
   T(PAD, 44, sub, MAP_TONES.mut, 2);
