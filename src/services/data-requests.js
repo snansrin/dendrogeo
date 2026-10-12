@@ -38,7 +38,7 @@ async function sendDataRequest(){
 async function loadMyRequests(){const _y=(typeof dgScrollKeep==="function"?dgScrollKeep():null);try{return await loadMyRequests__scroll.apply(this,arguments);}finally{if(typeof dgScrollRestore==="function")dgScrollRestore(_y);}}
 async function loadMyRequests__scroll(){
  if(!USER)return;
- const{data,error}=await sb.from("data_requests").select("*").eq("user_id",USER.id).order("created_at",{ascending:false});
+ const{data,error}=await window.DG_MY_DATA_REQUESTS_STORE.load(sb,USER.id);
  const el=$("myRequests");if(!el)return;
  if(error){el.innerHTML='<div class="alert err">Talepler yüklenemedi.</div>';return;}
  if(!data||!data.length){el.innerHTML="";return;}
