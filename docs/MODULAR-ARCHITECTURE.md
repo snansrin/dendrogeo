@@ -562,3 +562,5 @@ Her modülün tek bir dış API'si, sahibi olduğu açık durumu ve kendi testle
 - `application/data-requests/load-queue.js`, kuyruk yükleme, açık/kapalı ayrımı, sayaçlar ve tablo çizim sırasını portlarla yönetir; kaydırma ve DOM serviste kalır.
 
 - `ui/data-request-submission-feedback.js`, tekrar/hata/başarı form mesajını ve durum rengini mevcut çeviri sözleşmesiyle gösterir; toast, form temizleme ve yenileme serviste kalır.
+
+- `adapters/users/admin-store.js`, profiles listeleme ve rol/aktiflik güncellemelerini mevcut sorgu gövdeleriyle taşır; yetki kapıları serviste kalır.
