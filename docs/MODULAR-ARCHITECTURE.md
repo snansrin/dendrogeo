@@ -722,3 +722,13 @@ Her modülün tek bir dış API'si, sahibi olduğu açık durumu ve kendi testle
 - `ui/park-comparison-error.js`, şema bayrağına dokunmadan yetki/ağ hatası için mevcut hata kartını üretir.
 
 - `application/world/fit-measurement-rows.js`, doğrulanmış ölçüm koordinatlarına haritayı oturtur ve boş sonuç bildirimini üretir.
+
+- `domain/parks/summarize-park-report.js`, seçili park ölçümlerinden karbon, çap/boy, grup, tür ve proje özetini çıkarır.
+
+- `ui/park-report-summary.js`, park raporunun başlık, özet kartı, alan yoğunluğu ve birleşik proje bilgilerini çizer.
+
+- `ui/park-report-species-table.js`, tür istatistiklerini mevcut rapor tablosu alanlarıyla sunar.
+
+- `domain/parks/build-park-report-csv.js`, aynı park künyesi ve tür satırlarıyla UTF-8 BOM'lu CSV üretir.
+
+- `ui/park-report-preview.js`, rapor başlığını, gövdesini, indirme eylemini ve önizleme modalını bağlar.

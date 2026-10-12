@@ -25,6 +25,7 @@ const PARK_RPT_FIELDS="carbon_kg,dbh_cm,height_m,species,grp,point_id,projects(n
 /* 0040: kaydırma koruma sarmalı — yeniden çizimde #main scrollTop korunur. */
 async function loadParkCompare(){const _y=(typeof dgScrollKeep==="function"?dgScrollKeep():null);try{return await loadParkCompare__scroll.apply(this,arguments);}finally{if(typeof dgScrollRestore==="function")dgScrollRestore(_y);}}
 async function loadParkCompare__scroll(){
+ /* v_park_compare supplies park-level contributors; the primary path stays park-keyed. */
  const el=$("parkCompare");
  const{data,error}=await sb.from("v_park_compare").select("*").order("carbon_kg",{ascending:false});
 
@@ -166,47 +167,13 @@ async function parkReport(){
 function dgRenderParkReport(name,rows,count,row){
  PARK_DATA=rows;
  if(!rows.length)return toast("Bu park için onaylı kayıt yok.");
- const n=rows.length;
- const c=rows.reduce((a,r)=>a+(r.carbon_kg||0),0);
- const dbh=(rows.reduce((a,r)=>a+(r.dbh_cm||0),0)/n).toFixed(1);
- const h=(rows.reduce((a,r)=>a+(r.height_m||0),0)/n).toFixed(1);
- const ib=rows.filter(r=>r.grp==="İBRELİ").length, ya=rows.filter(r=>r.grp==="YAPRAKLI").length;
- const pct=x=>n?((x/n)*100).toFixed(1):"0";
- const bySp={};
- rows.forEach(r=>{const s=bySp[r.species]=bySp[r.species]||{n:0,c:0,dbh:0,h:0,grp:r.grp||"DİĞER"};s.n++;s.c+=(r.carbon_kg||0);s.dbh+=(r.dbh_cm||0);s.h+=(r.height_m||0);});
- const spRows=Object.entries(bySp).sort((a,b)=>b[1].c-a[1].c);
- const projNames=[...new Set(rows.map(r=>r.projects?.name).filter(Boolean))];
- const area=row&&Number(row.area_m2)>0?Number(row.area_m2):null;
- const perHa=area?(c/1000)/(area/10000):null;
- const html=`
-  <div class="alert info" style="margin-bottom:12px">🌳 <b>${esc(name)}</b> · 👥 ${row&&row.contributors?row.contributors+" "+_tw("kişi"):projNames.length+" "+_tw("proje")} · 📁 ${projNames.length} ${_tw("proje")} · ${count!=null?count+" "+_tw("onaylı kayıt")+" ("+_tw("raporda")+" "+n+")":n+" "+_tw("kayıt")}</div>
-  <div class="grid g4" style="margin-bottom:14px">
-   <div class="stat" style="padding:12px"><div class="lbl">Kayıt</div><div class="val" style="font-size:1.1rem">${n}</div></div>
-   <div class="stat" style="padding:12px"><div class="lbl">Karbon</div><div class="val" style="font-size:1.1rem">${(c/1000).toFixed(2)} t</div></div>
-   <div class="stat" style="padding:12px"><div class="lbl">Ort. Çap</div><div class="val" style="font-size:1.1rem">${dbh} cm</div></div>
-   <div class="stat" style="padding:12px"><div class="lbl">Ort. Boy</div><div class="val" style="font-size:1.1rem">${h} m</div></div>
-  </div>
-  <div style="font-size:.78rem;color:var(--mut);margin-bottom:12px">${_tw("🌲 İbreli")} %${pct(ib)} · ${_tw("🍃 Yapraklı")} %${pct(ya)} · ${_tw("Diğer")} %${pct(n-ib-ya)}${area?` · ${_tw("alan")} ${dgFmtHa(area)}${perHa!==null?` · <b>${perHa.toFixed(2)} t/ha</b>`:""}`:""} · ${new Date().toLocaleDateString("tr-TR")}</div>
-  ${projNames.length>1?`<div style="font-size:.74rem;color:var(--mut);margin-bottom:10px">Bu parkta birleşen projeler: ${projNames.map(esc).join(" · ")}</div>`:""}
-  <table><thead><tr><th scope='col'>Tür</th><th scope='col'>Latince</th><th scope='col'>Grup</th><th scope='col'>Adet</th><th scope='col'>Karbon (kg)</th><th scope='col'>Ort. Çap</th><th scope='col'>Ort. Boy</th></tr></thead><tbody>
-  ${spRows.map(([sp,v])=>`<tr><td>${sp}</td><td style="font-style:italic">${LATIN[sp]&&LATIN[sp]!=="—"?LATIN[sp]:"—"}</td><td>${v.grp}</td><td>${v.n}</td><td>${v.c.toFixed(1)}</td><td>${(v.dbh/v.n).toFixed(1)}</td><td>${(v.h/v.n).toFixed(1)}</td></tr>`).join("")}
-  </tbody></table>`;
- const csv="\uFEFF"+["PARK,\""+name.replace(/"/g,'""')+"\"",
-  "PARK_ID,"+(row&&row.park_id?row.park_id:""),
-  "SEHIR,"+(rows[0].projects?.city||row&&row.city||"—"),
-  "ALAN_M2,"+(area||""),
-  "KARBON_T_HA,"+(perHa!==null?perHa.toFixed(3):""),
-  "PROJELER,\""+projNames.join(" | ").replace(/"/g,'""')+"\"",
-  "TARIH,"+new Date().toLocaleDateString("tr-TR"),
-  "KAYIT,"+n,
-  "TOPLAM_KARBON_KG,"+c.toFixed(1),"TOPLAM_KARBON_T,"+(c/1000).toFixed(2),
-  "ORT_CAP_CM,"+dbh,"ORT_BOY_M,"+h,"IBRELI_%,"+pct(ib),"YAPRAKLI_%,"+pct(ya),
-  "TUR,LATIN,GRUP,ADET,KARBON_KG,ORT_CAP_CM,ORT_BOY_M"]
-  .concat(spRows.map(([sp,v])=>[sp,LATIN[sp]||"—",v.grp,v.n,v.c.toFixed(1),(v.dbh/v.n).toFixed(1),(v.h/v.n).toFixed(1)].join(","))).join("\n")+"\n";
- $("pvTitle").textContent="📄 "+name+" — "+_tw("Park Raporu");
- $("pvBody").innerHTML=html;
- $("pvDownload").onclick=()=>dl(csv,name.replace(/\s+/g,"_")+"_rapor.csv");
- $("previewModal").classList.add("on");
+ const model=window.DG_SUMMARIZE_PARK_REPORT.summarize(rows,row,count);
+ const today=new Date().toLocaleDateString("tr-TR");
+ const html=window.DG_PARK_REPORT_SUMMARY_UI.render(name,model,{escape:esc,translate:_tw,formatHa:dgFmtHa,date:today})+
+  window.DG_PARK_REPORT_SPECIES_TABLE.render(model.species,LATIN);
+ const csv=window.DG_BUILD_PARK_REPORT_CSV.build(name,model,{date:today,latin:LATIN});
+ window.DG_PARK_REPORT_PREVIEW_UI.show({title:"📄 "+name+" — "+_tw("Park Raporu"),body:html,csv,
+  fileName:name.replace(/\s+/g,"_")+"_rapor.csv",elements:{title:$("pvTitle"),body:$("pvBody"),download:$("pvDownload"),modal:$("previewModal")},download:dl});
 }
 /* Click-to-zoom */
 async function zoomToCountry(country){
