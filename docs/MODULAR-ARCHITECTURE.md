@@ -522,3 +522,5 @@ Her modülün tek bir dış API'si, sahibi olduğu açık durumu ve kendi testle
 - `ui/visitor-connection-status.js`, bağlantı metnini, görünen/toplam kullanıcı sayısını, mevcut Türkçe saat biçimini ve durum rengini günceller; duraklatma metni aynı API içindedir, presence/filtre/görünürlük ve pause durumu serviste kalır.
 
 - `domain/data-requests/find-pending-duplicate.js`, talep ülke/şehir/proje filtrelerini mevcut trim ve küçük harf kuralıyla karşılaştırır ve ilk eşleşmeyi döndürür; kullanıcı/status sorgusu, uyarı ve insert akışı serviste kalır.
+
+- `domain/data-requests/summarize-dataset.js`, talep yanıtının kayıt sayısını, mevcut karbon toplamını ve tekil ülke/şehir kümelerini saf olarak üretir; onaylı veri filtreleme, CSV, e-posta metni ve tamamlanma kaydı serviste kalır.
