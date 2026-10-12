@@ -652,3 +652,13 @@ Her modülün tek bir dış API'si, sahibi olduğu açık durumu ve kendi testle
 - `application/reports/refresh-after-report-retraction.js`, başarılı geri çekmeden sonra açık yönetici ve kullanıcı görünümlerini yeniler.
 
 - `application/reports/reset-publication-polling.js`, geri çekme sonrası iki panelin yoklama sayaçlarını başa alır.
+
+- `adapters/reports/publication-request-insert-store.js`, istek POST'unu oturum JWT'si, anon yedeği ve `Prefer: return=minimal` ile yürütür; RLS reddi ve ağ sonucunu mevcut biçimde döndürür.
+
+- `domain/reports/normalize-report-orcid.js`, ORCID URL/boşluk normalizasyonunu ve ISO 7064 kontrol basamağını tek domain sınırında hesaplar.
+
+- `domain/reports/clean-report-context.js`, yayın künyesi alan uzunluklarını, kontrol karakteri temizliğini ve bağımsızlık bayrağını korur.
+
+- `domain/reports/validate-report-context.js`, temizlenmiş künyenin zorunlu alan, tarih ve ORCID kurallarını doğrular.
+
+- `domain/reports/decode-report-context.js`, şema, geçerlilik ve açık yayın onayı koşulları sağlanınca kayıtlı künyeyi döndürür.

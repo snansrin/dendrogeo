@@ -1,3 +1,7 @@
+import '../../src/domain/reports/normalize-report-orcid.js';
+import '../../src/domain/reports/clean-report-context.js';
+import '../../src/domain/reports/validate-report-context.js';
+import '../../src/domain/reports/decode-report-context.js';
 import '../../src/domain/reports/report-context.js';
 import {parsePublication} from './publication.mjs';
 export const reportContext=globalThis.DG_REPORT_CONTEXT_DOMAIN;

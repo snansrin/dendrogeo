@@ -150,21 +150,12 @@ function dgPubRender__scroll(){
 /* ---------- yazma (ortak çekirdek: yönetici kartı + kullanıcı paneli) ---------- */
 /* RLS-safe insert (trackVisit ile aynı desen): "Prefer: return=minimal" —
  * return=representation olsaydı RETURNING satırı politikaya takılıp istek
- * sessizce ölebilirdi. Oturum anahtarı şart: anon istek açamaz. */
+ * sessizce ölebilirdi. Adapter `"Prefer":"return=minimal"` ve `await sb.auth.getSession()` desenini korur. */
 async function dgPubInsertRequest(parkId,lulc,note){
- let token=SB_KEY;
- try{const{data}=await sb.auth.getSession();if(data&&data.session&&data.session.access_token)token=data.session.access_token;}catch(e){}
- try{
-  const r=await fetch(SB_URL+"/rest/v1/report_requests",{
-   method:"POST",
-   headers:{"apikey":SB_KEY,"Authorization":"Bearer "+token,"Content-Type":"application/json","Prefer":"return=minimal"},
-   body:JSON.stringify([{park_id:Number(parkId),with_lulc:lulc!==false,status:"Beklemede",
-    requested_by:(typeof USER!=="undefined"&&USER&&USER.id)||null,note:note||"uygulama içi yayın"}])
-  });
-  const ok=r.status===201||r.status===200;
-  const txt=ok?"":((await r.text().catch(()=> ""))||"");
-  return{ok:ok,status:r.status,txt:txt};
- }catch(e){return{ok:false,status:0,txt:"NETWORK "+((e&&e.message)||e)};}
+ return window.DG_REPORT_PUBLICATION_REQUEST_INSERT_STORE.insert(sb,{
+  fetch,supabaseUrl:SB_URL,anonKey:SB_KEY,parkId,includeLandCover:lulc,
+  userId:(typeof USER!=="undefined"&&USER&&USER.id)||null,note
+ });
 }
 
 /* Hata metni eşleme: PostgREST, RLS reddini ve tetikleyici hatalarını gövdede
