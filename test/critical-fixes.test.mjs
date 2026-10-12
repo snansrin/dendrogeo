@@ -75,7 +75,7 @@ describe('QGIS rehberi içerik temizliği', () => {
 describe('PGRST201 çoklu ilişki: measurements→profiles gömüsü FK adıyla', () => {
   const adm = readFileSync(join(ROOT, 'src/services/admin.js'), 'utf8');
   const tree = readFileSync(join(ROOT, 'src/services/admin-tree.js'), 'utf8');
-  const dreq = readFileSync(join(ROOT, 'src/services/data-requests.js'), 'utf8');
+  const dreq = readFileSync(join(ROOT, 'src/adapters/data-requests/queue-store.js'), 'utf8');
 
   test('⭐ admin.js ölçüm sorgusu profiles!measurements_owner_fkey kullanıyor', () => {
     assert.match(adm, /measurements"\)\.select\("\*,profiles!measurements_owner_fkey\(full_name\)"\)/);
@@ -93,6 +93,7 @@ describe('PGRST201 çoklu ilişki: measurements→profiles gömüsü FK adıyla'
   test('data_requests tek FK olduğu için çıplak gömü güvenli (belgeleme)', () => {
     /* data_requests.user_id → profiles: tek ilişki, PGRST201 riski yok. */
     assert.match(dreq, /data_requests"\)\.select\("\*,profiles\(full_name\)"\)/);
+    assert.match(readFileSync(join(ROOT, 'src/services/data-requests.js'), 'utf8'), /DG_DATA_REQUEST_QUEUE_STORE\.load\(sb\)/, 'servis doğrulanan adapterı kullanır');
   });
 
   test('⭐ sorgu hatası sessizce "Kayıt yok."a dönüşmüyor', () => {
