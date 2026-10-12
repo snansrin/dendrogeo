@@ -692,3 +692,13 @@ Her modülün tek bir dış API'si, sahibi olduğu açık durumu ve kendi testle
 - `ui/admin-tree-park.js`, park düğümünde alan, t/ha ve proje toplamlarını sunar.
 
 - `ui/admin-tree-view.js`, ağaç hata/boş durumlarını, özet sayaçlarını ve genişletme eylemlerini çizer.
+
+- `ui/admin-measurement-row.js`, düz moderasyon listesindeki tek ölçüm satırını mevcut işlem düğmeleri ve kaçışlama ile üretir.
+
+- `ui/admin-measurement-table.js`, düz listeyi proje/nokta/ölçüm sırasına koyar ve 300 satır sınırını korur.
+
+- `domain/admin/export-filter-options.js`, ölçüm ve proje verilerinden ülke, şehir ve proje filtre seçeneklerini üretir.
+
+- `application/admin/build-export-query.js`, seçili ülke/şehir/proje/durum değerlerini mevcut Supabase sorgu zincirine uygular.
+
+- `application/admin/read-export-rows.js`, dışa aktarım sorgusunu sıralı sayfalarla okur ve hata mesajını korur.
