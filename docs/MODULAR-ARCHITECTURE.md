@@ -455,3 +455,5 @@ Her modülün tek bir dış API'si, sahibi olduğu açık durumu ve kendi testle
 - `scripts/lib/report-document-opening.mjs`, rapor kapağı, çalışma bilgisi, analiz özeti, veri kaynakları ve mevcut kapsam beyanını aynı sırada birleştirir; içerik ve veri üretimi enjekte edilen sunumlarda kalır.
 
 - `scripts/lib/report-findings-sections.mjs`, raporun §5 Nicel Sonuçlar ve §6 Harita HTML başlıklarını ve mevcut sunumları sırayla birleştirir; bilimsel sonuçlar ve harita sunumu enjekte edilen mevcut modüllerde kalır.
+
+- `scripts/lib/report-html-escaping.mjs`, immutable rapor HTML'ine metin olarak eklenen değerleri mevcut `&`, `<`, `>`, `"` dönüşümleriyle kaçırır; `make-report.mjs` aynı `esc` yardımcı API'sini bu saf fonksiyona bağlar.
