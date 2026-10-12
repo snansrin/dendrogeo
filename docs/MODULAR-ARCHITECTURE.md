@@ -239,6 +239,7 @@ Her modülün tek bir dış API'si, sahibi olduğu açık durumu ve kendi testle
 - `ui/gis-export-canvas-legend.js`, standart ve göreli NDVI export'larının legend/kaynak altbilgisini çizer. `DG_GIS_EXPORT_CANVAS.drawLegend` eski çağrılar için korunur; yeni script canvas API'sinden önce yüklenir.
 - `ui/gis-export-canvas-waypoints.js`, standart ve doğrulanmış GIS PNG'lerinde ziyaret durumu ve waypoint numarasına göre mevcut işaretleri çizer. `DG_GIS_EXPORT_CANVAS.drawWaypoints` ve `drawVerifiedWaypoints` uyumluluk API'leri korunur.
 - `ui/gis-export-canvas-grids.js`, standart sınır kutusu grid'lerini ve doğrulanmış GeoJSON/geriye uyumlu grid konturlarını çizer. `DG_GIS_EXPORT_CANVAS.drawGrid` ve `drawVerifiedGrid` API'leri korunur.
+- `ui/gis-export-canvas-leaflet.js`, Leaflet katmanlarının iç/dış halkalarını tek even-odd Canvas dolgusuna aktarır; `DG_GIS_EXPORT_CANVAS.eachRing` ve `drawLeaflet` çağrıları korunur.
 
 - `ui/gis-export-vegetation.js`, göreli NDVI poligonlarının hazır olup olmadığını ve sınırlı bekleme davranışını yönetir. Eşik ve çizim işlevlerini çağıran aktarır; PNG export mevcut gözlemler hazır değilse durur.
 
