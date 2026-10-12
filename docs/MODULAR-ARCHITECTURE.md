@@ -572,3 +572,5 @@ Her modülün tek bir dış API'si, sahibi olduğu açık durumu ve kendi testle
 - `ui/admin-user-filter.js`, Türkçe arama, rol ve aktiflik koşullarını satır görünürlüğüne uygular; görünür sayaç serviste kalır.
 
 - `application/users/load-admin-users.js`, admin/owner kapısını ve liste/cache/sayaç/çizim/filtre sırasını portlarla yönetir; hata/scroll/DOM serviste kalır.
+
+- `adapters/backup/paged-store.js`, 1000 satırlık sıralı tam dökümü ve tablo adıyla hata üretimini korur; eski fetchAllRows köprüsü serviste kalır.

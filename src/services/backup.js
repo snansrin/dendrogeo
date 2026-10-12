@@ -4,17 +4,7 @@
  * fullBackup (JSON indirme), checkBackupReminder (7 gün uyarısı). */
 
 /* ============ TAM YEDEK (JSON) — Tez verisi sigortası ============ */
-async function fetchAllRows(table, orderCol){
-  let out=[], from=0, step=1000;
-  for(;;){
-    const {data,error}=await sb.from(table).select("*").order(orderCol).range(from, from+step-1);
-    if(error) throw new Error(table+": "+error.message);
-    out=out.concat(data||[]);
-    if(!data||data.length<step) break;
-    from+=step;
-  }
-  return out;
-}
+async function fetchAllRows(table,orderCol){return await window.DG_BACKUP_PAGED_STORE.load(sb,table,orderCol);}
 
 async function fullBackup(){
   if(!PROFILE||(PROFILE.role!=="admin"&&PROFILE.role!=="owner")) return toast("Yetki yok.","err");
