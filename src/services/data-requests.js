@@ -16,10 +16,7 @@ async function sendDataRequest(){
  const note=$("reqNote").value.trim()||null;
  const m=$("reqMsg");
  try{
-  const{data:pending}=await sb.from("data_requests")
-   .select("country,city,project_name,status")
-   .eq("user_id",USER.id)
-   .in("status",["Beklemede","İşleme Alındı"]);
+  const{data:pending}=await window.DG_DATA_REQUEST_SUBMIT_STORE.pending(sb,USER.id);
   const dup=window.DG_DATA_REQUEST_DUPLICATE.find(pending,{country,city,project_name});
   if(dup){
    toast("⚠️ Bu veri talebiniz zaten alındı — yönetici onayı bekleniyor","warn","✉️");
@@ -29,7 +26,7 @@ async function sendDataRequest(){
   }
  }catch(e){console.log("Dup kontrolü:",e);}
  const body={user_id:USER.id,email:PROFILE?.email||USER.email,country,city,project_name,note,status:"Beklemede"};
- const{error}=await sb.from("data_requests").insert(body);
+ const{error}=await window.DG_DATA_REQUEST_SUBMIT_STORE.insert(sb,body);
  if(error){m.style.color="var(--red)";m.textContent="Hata: "+error.message;return;}
  toast("✓ Talep gönderildi — yönetici yanıtı bekleniyor","ok","✉️");
  m.style.color="var(--green-dk)";m.textContent="✓ Talebiniz yönetime iletildi, hazır olduğunda e‑postanıza gönderilecek.";

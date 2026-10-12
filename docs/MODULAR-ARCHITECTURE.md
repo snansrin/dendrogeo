@@ -524,3 +524,5 @@ Her modülün tek bir dış API'si, sahibi olduğu açık durumu ve kendi testle
 - `domain/data-requests/find-pending-duplicate.js`, talep ülke/şehir/proje filtrelerini mevcut trim ve küçük harf kuralıyla karşılaştırır ve ilk eşleşmeyi döndürür; kullanıcı/status sorgusu, uyarı ve insert akışı serviste kalır.
 
 - `domain/data-requests/summarize-dataset.js`, talep yanıtının kayıt sayısını, mevcut karbon toplamını ve tekil ülke/şehir kümelerini saf olarak üretir; onaylı veri filtreleme, CSV, e-posta metni ve tamamlanma kaydı serviste kalır.
+
+- `adapters/data-requests/submit-store.js`, kullanıcı/status ile sınırlı bekleyen talep okumasını ve mevcut insert çağrısını taşır; tekrar kuralı, form gövdesi, hata sınırları ve arayüz akışı serviste kalır.
