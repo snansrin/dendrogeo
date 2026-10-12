@@ -508,3 +508,5 @@ Her modülün tek bir dış API'si, sahibi olduğu açık durumu ve kendi testle
 - `scripts/lib/report-qr-loader.mjs` var olan `qrcode` build paketini çözer; paket bulunamazsa `null` döndürerek rapor üretiminin QR olmadan sürmesini sağlar, SVG üretimi `report-qr.mjs` içinde kalır.
 
 - `adapters/visitors/admin-visit-counts-store.js`, yönetim ziyaret sayaçlarının tekil exact/head sorgularını taşır; sıralı yükleme, yerel gün ve kayan yedi gün hesabı, kısmi DOM güncellemeleri ve hata sınırı `loadVisitStats()` içinde korunur.
+
+- `ui/visitor-roster.js`, geçici ziyaretçi listesinin bağlantı/filtre boş durumlarını ve kişi kartlarını mevcut çeviri, kaçış, rol, oturum ve konum gösterimiyle üretir; owner kapısı, filtreleme, akış ve harita güncellemesi servis katmanında kalır.
