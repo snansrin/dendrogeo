@@ -11,6 +11,7 @@
  const $=id=>document.getElementById(id);
  const analysisLayout=window.DG_GIS_WORKSPACE_ANALYSIS_LAYOUT.create({getElement:$,el});
  const menuLayout=window.DG_GIS_WORKSPACE_MENU_POSITION.create({windowRef:window});
+ const mapToolsView=window.DG_GIS_WORKSPACE_MAP_TOOLS_VIEW.create({getElement:$,el,getMapTool:()=>mapTool,activateTool,closeTool,setStatus,focusPark,coordinateQuery,copyCoordinate});
  const view=()=> $("v-map");
  const editorActive=()=>!!view()?.classList.contains("surface-review-active");
  function txt(node,s){if(node&&node.textContent!==s)node.textContent=s;}
@@ -219,40 +220,6 @@
    await navigator.clipboard.writeText(value);setStatus("Koordinat panoya kopyalandı.");
   }catch(e){$("dgUxCoordInput")?.select();setStatus("Koordinat seçildi; kopyalamak için Kopyala komutunu kullanın.");}
  }
- function newControl(label,onClick,kind){
-  const b=el("button","dg-png-btn ghost sm",label);b.type="button";
-  if(kind)b.dataset.tool=kind;
-  b.addEventListener("click",onClick);return b;
- }
- function syncMapTools(){
-  const bar=$("surfaceMenuBar"),viewMenu=bar?.querySelector('details[data-menu-order="20"]');
-  const body=viewMenu?.querySelector(".dg-editor-menu-body");
-  if(!body||body.querySelector("#dgUxMapTools"))return;
-  const section=el("section","dg-editor-menu-section dg-ux-map-section");
-  section.id="dgUxMapTools";
-  section.append(el("span","dg-editor-menu-section-label","HARİTA ÖLÇÜM VE İNCELEME"));
-  const nav=el("div","dg-ux-tool-grid");
-  nav.append(
-   newControl("📐 Mesafe ölç",()=>activateTool("distance"),"distance"),
-   newControl("⬡ Alan ölç",()=>activateTool("area"),"area"),
-   newControl("✓ Ölçümü bitir",()=>{closeTool();setStatus("Geçici ölçüm kaldırıldı.");}),
-   newControl("⌖ Parka odaklan",focusPark)
-  );
-  section.append(nav);
-  const current=nav.querySelector('button[data-tool="'+mapTool+'"]');
-  if(current){current.setAttribute("aria-pressed","true");current.classList.add("is-active");}
-  const coordLabel=el("label","dg-png-label","WGS84 · ENLEM, BOYLAM");
-  coordLabel.htmlFor="dgUxCoordInput";
-  const row=el("div","dg-ux-coordinate-row"),input=el("input","dg-png-input");
-  input.id="dgUxCoordInput";input.type="text";input.placeholder="39.992000, 32.650000";
-  input.inputMode="decimal";input.autocomplete="off";
-  input.addEventListener("keydown",e=>{if(e.key==="Enter"){e.preventDefault();coordinateQuery();}});
-  row.append(input,newControl("Git",coordinateQuery),newControl("Kopyala",copyCoordinate));
-  section.append(coordLabel,row);
-  const note=el("p","dg-ux-option-note","Ölçümler geçici harita araçlarıdır; analiz hücrelerini veya kayıtları değiştirmez.");
-  note.id="dgUxMapStatus";note.setAttribute("role","status");note.setAttribute("aria-live","polite");
-  section.append(note);body.append(section);
- }
  // Visual parity only: reconstruct the preview rows in the exact three-part
  // layout of the WorldCover result (label, 16px class bar, area + percent).
  // Numerical values and the accepted/raw records are never recalculated here.
@@ -363,7 +330,7 @@
   syncSliderPaint();
   analysisLayout.syncGroupLayout();
   analysisLayout.syncSpecies();
-  syncMapTools();
+  mapToolsView.sync();
   syncNdviMapInfo();
   const bar=$("surfaceMenuBar");
   if(bar)bar.querySelectorAll(":scope > details[open]").forEach(menuLayout.position);
