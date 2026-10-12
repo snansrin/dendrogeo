@@ -316,6 +316,7 @@ function bootUI() {
     'src/application/reports/request-report-retraction.js',
     'src/application/reports/refresh-after-report-retraction.js',
     'src/application/reports/reset-publication-polling.js',
+    'src/adapters/reports/publication-request-insert-store.js',
   ]) vm.runInContext(read(path), ctx, { filename: path });
   vm.runInContext(read('src/application/reports/collect-publication-request.js'), ctx, { filename: 'collect-publication-request.js' });
   vm.runInContext(UI, ctx, { filename: 'report-publish.js' });

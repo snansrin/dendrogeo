@@ -3,12 +3,13 @@ import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 import vm from 'node:vm';
 
-const domain=readFileSync(new URL('../src/domain/reports/report-context.js',import.meta.url),'utf8');
+const domainFiles=['normalize-report-orcid.js','clean-report-context.js','validate-report-context.js','decode-report-context.js','report-context.js'];
+const domain=domainFiles.map(file=>readFileSync(new URL('../src/domain/reports/'+file,import.meta.url),'utf8'));
 const bridge=readFileSync(new URL('../src/core/report-context.js',import.meta.url),'utf8');
 
 test('künye kuralları domain modülünde saf kalır ve eski global API aynı nesneyi sunar',()=>{
  const ctx=vm.createContext({});
- vm.runInContext(domain,ctx);
+ for(const source of domain)vm.runInContext(source,ctx);
  const api=ctx.DG_REPORT_CONTEXT_DOMAIN;
  assert.ok(api);
  vm.runInContext(bridge,ctx);
