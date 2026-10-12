@@ -4,6 +4,7 @@ import {readFileSync} from 'node:fs';
 
 const shell=readFileSync(new URL('../partials/shell.html',import.meta.url),'utf8');
 const js=readFileSync(new URL('../src/services/user-admin.js',import.meta.url),'utf8');
+const view=readFileSync(new URL('../src/ui/admin-user-table.js',import.meta.url),'utf8');
 const css=readFileSync(new URL('../css/style.css',import.meta.url),'utf8');
 
 describe('Kullanıcı yönetimi · kompakt DendroGeo tema sözleşmesi',()=>{
@@ -17,17 +18,18 @@ describe('Kullanıcı yönetimi · kompakt DendroGeo tema sözleşmesi',()=>{
  });
  test('hesap satırı kimliği tek kompakt hücrede birleştirir',()=>{
   assert.match(shell,/<th scope="col">Kullanıcı<\/th><th scope="col">Rol<\/th><th scope="col">Durum<\/th><th scope="col">İşlem<\/th>/);
-  assert.match(js,/class="admin-user-person"/);
-  assert.match(js,/class="admin-user-avatar"/);
-  assert.match(js,/class="admin-user-identity"/);
-  assert.match(js,/data-label="Kullanıcı"/);
+  assert.match(view,/class="admin-user-person"/);
+  assert.match(view,/class="admin-user-avatar"/);
+  assert.match(view,/class="admin-user-identity"/);
+  assert.match(view,/data-label="Kullanıcı"/);
  });
  test('rol ve aktiflik yetkileri korunur',()=>{
   assert.match(js,/if\(PROFILE\.role!=="owner"\)return toast/);
-  assert.match(js,/updateRole\('/);
-  assert.match(js,/toggleU\('/);
-  assert.match(js,/ownerRow/);
-  assert.match(js,/🛡 Korunuyor/);
+  assert.match(view,/updateRole\('/);
+  assert.match(view,/toggleU\('/);
+  assert.match(view,/ownerRow/);
+  assert.match(js,/DG_ADMIN_USER_TABLE_UI\.render\(/);
+  assert.match(view,/🛡 Korunuyor/);
  });
  test('masaüstü ve telefon satırları sıkı, dokunma hedefleri mobilde yeterli',()=>{
   assert.match(css,/#v-users \.admin-users-table td\{padding:7px 10px/);

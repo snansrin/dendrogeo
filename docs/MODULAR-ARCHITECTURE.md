@@ -562,3 +562,13 @@ Her modülün tek bir dış API'si, sahibi olduğu açık durumu ve kendi testle
 - `application/data-requests/load-queue.js`, kuyruk yükleme, açık/kapalı ayrımı, sayaçlar ve tablo çizim sırasını portlarla yönetir; kaydırma ve DOM serviste kalır.
 
 - `ui/data-request-submission-feedback.js`, tekrar/hata/başarı form mesajını ve durum rengini mevcut çeviri sözleşmesiyle gösterir; toast, form temizleme ve yenileme serviste kalır.
+
+- `adapters/users/admin-store.js`, profiles listeleme ve rol/aktiflik güncellemelerini mevcut sorgu gövdeleriyle taşır; yetki kapıları serviste kalır.
+
+- `domain/users/summarize-admin-users.js`, kullanıcı sayaçlarını mevcut aktiflik ve kurucu/denetçi sınıflandırmasıyla saf olarak üretir.
+
+- `ui/admin-user-table.js`, korunan kurucu satırı, salt okunur denetçi görünümü ve mevcut etkileşim/etiket/kaçış sözleşmesiyle kullanıcı tablosunu üretir.
+
+- `ui/admin-user-filter.js`, Türkçe arama, rol ve aktiflik koşullarını satır görünürlüğüne uygular; görünür sayaç serviste kalır.
+
+- `application/users/load-admin-users.js`, admin/owner kapısını ve liste/cache/sayaç/çizim/filtre sırasını portlarla yönetir; hata/scroll/DOM serviste kalır.

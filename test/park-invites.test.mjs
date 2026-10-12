@@ -257,8 +257,9 @@ describe('0025 · kablolama (index.html + shell + partials)', () => {
     assert.match(mp, /class="waypoint-point /, 'waypoint satırları mobil nokta kartı');
     assert.match(mp, /waypoint-state /, 'waypoint durum rozeti görünür');
     assert.match(mp, /✓ Yapıldı/, 'tamamlanan waypoint açıkça işaretli');
-    const ua = read('src/services/user-admin.js');
+    const ua = read('src/ui/admin-user-table.js');
     assert.match(ua, /data-label="Kullanıcı"/, 'kullanıcı kimliği kompakt tek hücrede etiketli');
+    assert.match(read('src/services/user-admin.js'), /DG_ADMIN_USER_TABLE_UI\.render\(/, 'servis tablo modülünü kullanır');
     const dr = read('src/ui/data-request-closed-table.js');
     assert.match(dr, /data-label="Kapanış"/, 'talep tabloları etiketli');
     assert.match(read('src/services/data-requests.js'), /DG_DATA_REQUEST_CLOSED_TABLE_UI\.render\(/, 'servis etiketli kapalı tablo modülünü kullanır');
