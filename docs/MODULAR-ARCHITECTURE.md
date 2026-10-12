@@ -449,3 +449,5 @@ Her modülün tek bir dış API'si, sahibi olduğu açık durumu ve kendi testle
 - `scripts/lib/report-document-quality-preparation.mjs`, immutable raporun QA tablosu girdilerini, mevcut alan özetlerini ve sunum durumunu hazırlar; kontrol politikası ve kararları enjekte edilen QA modüllerinde kalır, yeni yayın kapısı eklemez.
 
 - `scripts/lib/report-document-context.mjs`, snapshot ve yayın metaverisinden rapor HTML'inin mevcut sunum bağlamını hazırlar; DOI, sürüm, alan ve kaynak açıklaması yedekleri ile escaped başlık davranışı korunur.
+
+- `scripts/lib/report-discussion-sections.mjs`, raporun §8 Değerlendirme ve §9 Sınırlılıklar başlıklarını ve HTML kabuklarını mevcut sırada birleştirir; metin ve sınırlılık girdileri enjekte edilen sunum fonksiyonlarında kalır.
