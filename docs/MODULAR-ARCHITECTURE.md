@@ -578,3 +578,5 @@ Her modülün tek bir dış API'si, sahibi olduğu açık durumu ve kendi testle
 - `domain/backup/build-snapshot.js`, yedek schema/DOI/tarih/kullanıcı alanlarını ve kayıt sayılarını ham satırları değiştirmeden üretir.
 
 - `adapters/backup/json-download.js`, application/json indirmesini, geçici anchor yaşam döngüsünü ve 5000 ms URL temizliğini mevcut biçimde uygular.
+
+- `application/backup/create-full-backup.js`, yetki, sıralı tam veri yükleme, isteğe bağlı talepler, belge/indirme/kayıt/bildirim akışını portlarla yönetir.
