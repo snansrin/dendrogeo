@@ -197,6 +197,13 @@ function bootUser(opts) {
   ctx.window = ctx; ctx.self = ctx; ctx.globalThis = ctx;
   vm.createContext(ctx);
   vm.runInContext(read('src/config/constants.js'), ctx, { filename: 'constants.js' });
+  for (const path of [
+    'src/domain/reports/publication-link.js',
+    'src/adapters/reports/publication-log-store.js',
+    'src/adapters/reports/publication-request-store.js',
+    'src/adapters/reports/park-comparison-store.js',
+    'src/adapters/reports/retraction-store.js',
+  ]) vm.runInContext(read(path), ctx, { filename: path });
   vm.runInContext(read('src/application/reports/collect-publication-request.js'), ctx, { filename: 'collect-publication-request.js' });
   vm.runInContext(UI, ctx, { filename: 'report-publish.js' });
   const run = (code) => vm.runInContext(code, ctx);

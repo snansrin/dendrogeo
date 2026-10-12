@@ -49,24 +49,16 @@ const DG_PUB_POLL_MS=25000;      /* bekleyen istek varken tazeleme aralığı */
 const DG_PUB_POLL_MAX=80;        /* ~33 dk; sonra elle 🔄 Yenile */
 
 function dgPubAdmin(){return !!(typeof PROFILE!=="undefined"&&PROFILE&&(PROFILE.role==="admin"||PROFILE.role==="owner"));}
-function dgPubUrl(reportId){return DG_PUB_ID.test(String(reportId||""))?DG_PUB_ORIGIN+"/rapor/"+reportId+"/":"";}
+function dgPubUrl(reportId){return window.DG_REPORT_PUBLICATION_LINK.url(reportId,DG_PUB_ORIGIN);}
 
 /* ---------- okuma ---------- */
 async function dgPubFetchQueue(){
- try{
-  /* ?_=… : sw.js aynı-köken JSON'u stale-while-revalidate ile sunar; sorgu
-   * anahtarı her çağrıda değiştiği için durum HER zaman ağdan gelir. */
-  const r=await fetch(DG_PUB_QUEUE_URL+"?_="+Date.now(),{cache:"no-store"});
-  if(!r.ok)return null;
-  const j=await r.json();
-  return (j&&Array.isArray(j.entries))?j:null;
- }catch(e){return null;}
+ /* ?_=… : her okuma ağdan güncel kuyruğu ister; bozuk/erişilemeyen günlük boş kalır. */
+ return window.DG_REPORT_PUBLICATION_LOG_STORE.load({fetch,url:DG_PUB_QUEUE_URL,now:Date.now});
 }
 
 async function dgPubFetchRequests(){
- const{data,error}=await sb.from("report_requests")
-  .select("id,park_id,with_lulc,status,note,created_at,cancelled_at")
-  .order("created_at",{ascending:false}).limit(50);
+ const{data,error}=await window.DG_REPORT_PUBLICATION_REQUEST_STORE.load(sb);
  if(error){
   /* 42P01 = tablo yok → 0008 uygulanmamış. Sessiz kalmak yerine kartta
    * yapılacak iş yazılır (DG_PARK_SCHEMA_OK deseniyle aynı yaklaşım). */
@@ -80,23 +72,13 @@ async function dgPubFetchRequests(){
 }
 
 async function dgPubFetchParks(){
- const{data,error}=await sb.from("v_park_compare").select("*").order("carbon_kg",{ascending:false});
- if(error||!data)return [];
- /* park_pending / park_id=0 satırları OSM kimliği olmayan proje kümeleridir:
-  * rapor park poligonu ister, bu yüzden listede gösterilmezler. */
- return data.filter(r=>Number(r.park_id)>0&&!r.park_pending&&Number(r.records)>0);
+ return window.DG_REPORT_PARK_COMPARISON_STORE.load(sb);
 }
 
 /* Geri çekme istekleri (0010): tablo yoksa (0010 uygulanmamış) SESSİZCE boş
  * liste — yayın akışı bundan etkilenmez, 🗑 isteği sunucuda zaten reddedilir. */
 async function dgPubFetchRetractions(){
- try{
-  const{data,error}=await sb.from("report_retractions")
-   .select("id,report_id,park_id,reason,status,requested_by,created_at")
-   .order("created_at",{ascending:false}).limit(50);
-  if(error)return[];
-  return data||[];
- }catch(e){return[];}
+ return window.DG_REPORT_RETRACTION_STORE.load(sb);
 }
 
 /* ---------- durum birleştirme: istek (DB) + sonuç (repo günlüğü) ---------- */
