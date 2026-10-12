@@ -401,6 +401,8 @@ Her modülün tek bir dış API'si, sahibi olduğu açık durumu ve kendi testle
 
 `report-map-inventory-points.mjs` draws the existing halo and ink markers only when projected inventory coordinates fall inside the map frame. Frame edges remain inclusive; projection, map layout, input records and all other report layers remain with the renderer.
 
+`report-map-surface-layers.mjs` draws the existing no-data base, cell and surface overlays, restores context outside the multi-ring park boundary, and draws the thin frame in the established order. Projection and the report map API remain in `report-map.mjs`.
+
 ### Report provenance presentation (11 October 2026)
 
 `report-provenance-presentation.mjs` renders reproducibility records and the analysis fingerprint from already-resolved provenance. Missing-version/commit/projection/DOI fallbacks, reviewed-archive versus raster instructions and escaping retain their behavior. Provenance collection and scientific analysis remain separate.

@@ -9,6 +9,9 @@ Yeni sürüm yayımlama adımları: [`docs/surum-yayini.md`](docs/surum-yayini.m
 
 ## [Yayımlanmadı]
 
+### İyileştirildi — Rapor haritası yüzey katmanları
+Veri-yok tabanı, hücre/yüzey örtüsü, sınır dışı piksel temizliği ve ince çerçevenin çizim sırası ayrı modüle alındı; sınıf renkleri, çok halkalı kırpma ve mevcut PNG çıktısı korundu.
+
 ### İyileştirildi — Rapor haritası envanter noktaları
 Envanter noktalarının harita çerçevesi içinde çizilmesi ayrı sunum modülüne alındı; sınırdaki noktaların görünmesi, halo/işaret renk sırası ve lejant/altbilgi üzerine taşmayı önleyen çerçeve denetimi korundu.
 

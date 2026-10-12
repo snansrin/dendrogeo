@@ -1,11 +1,10 @@
-import { PngCanvas, hex2rgb } from './png.mjs';
+import { PngCanvas } from './png.mjs';
 import { fmtDateDot } from './report-formatting.mjs';
-import { fillSurfacePolygon } from './report-map-surface-fill.mjs';
-import { fillRing, strokeRing, disc } from './report-map-primitives.mjs';
+import { strokeRing, disc } from './report-map-primitives.mjs';
 import { drawReportMapInventoryPoints } from './report-map-inventory-points.mjs';
 import { createReportMapProjection } from './report-map-projection.mjs';
 import { createReportMapClassPresentation } from './report-map-class-presentation.mjs';
-import { restoreOutsideRings } from './report-map-clipping.mjs';
+import { drawReportMapSurfaceLayers } from './report-map-surface-layers.mjs';
 import { drawReportMapScaleAndNorth } from './report-map-scale-orientation.mjs';
 import { drawReportMapLegend } from './report-map-legend.mjs';
 import { drawReportMapFooter } from './report-map-footer.mjs';
@@ -28,30 +27,19 @@ export function mapCanvas({ outer, outers = null, surfaceFeatures = [], holes = 
   const { classFor: pngClass, rows: legRows } = createReportMapClassPresentation({ classes, maskHa });
   const H = TOP + MAPH + 16 + legRows.length * 28 + 18 + FOOT;
   const cv = new PngCanvas(W, H, MAP_TONES.out);
-  const ring = outer.map(([la, lo]) => [X(lo), Y(la)]);
-  fillRing(cv, ring, MAP_TONES.nodata);                       /* taban: veri yok tonu */
-  for (const h of holes) fillRing(cv, h.map(([la, lo]) => [X(lo), Y(la)]), MAP_TONES.out);
-  for (const r of wruns)                                      /* kesintisiz hücre örtüsü */
-    cv.rect(X(r.lo0), Y(r.la1), X(r.lo1), Y(r.la0), hex2rgb((pngClass(r.key) && pngClass(r.key).color) || '#94a3b8'));
-  for(const f of surfaceFeatures)for(const poly of f.geometry.coordinates){
-    const rings=poly.map(r=>r.map(([lo,la])=>[X(lo),Y(la)]));
-    fillSurfacePolygon(cv,rings,hex2rgb(pngClass(f.properties.class)?.color||'#94a3b8'));
-  }
-  /* KRIPMA GEÇİŞİ: sınıf bantlarının poligon dışına taşan piksellerini bağlam tonuna döndür. */
-  const allRings = [...(outers||[outer]).map(r=>r.map(([la,lo])=>[X(lo),Y(la)])), ...holes.map((h) => h.map(([la, lo]) => [X(lo), Y(la)]))];
-  restoreOutsideRings(cv, allRings, Math.min(cv.h - 1, TOP + MAPH), MAP_TONES.out);
-  /* İNCE ÇERÇEVE (2026-09-28): harita alanı kartografik çerçeve alır; kırpma
-   * geçişinden SONRA çizilir (aksi hâlde bağlam dokusu çerçeveyi silerdi). */
   const FR = [206, 210, 206];
-  const fx0 = PAD - 12, fy0 = TOP - 12, fx1 = W - PAD + 12, fy1 = TOP + MAPH + 12;
-  cv.line(fx0, fy0, fx1, fy0, FR); cv.line(fx0, fy1, fx1, fy1, FR);
-  cv.line(fx0, fy0, fx0, fy1, FR); cv.line(fx1, fy0, fx1, fy1, FR);
+  const { ring, frame } = drawReportMapSurfaceLayers({
+    canvas: cv, outer, outers, surfaceFeatures, holes, wruns,
+    project: (lon, lat) => [X(lon), Y(lat)], classFor: pngClass,
+    contextTone: MAP_TONES.out, noDataTone: MAP_TONES.nodata,
+    frameTone: FR, padding: PAD, top: TOP, mapHeight: MAPH
+  });
   strokeRing(cv, ring, MAP_TONES.halo, 2);                    /* halo: sınır her zeminde okunur */
   strokeRing(cv, ring, MAP_TONES.ink, 1);
   /* Eski/hatalı GNSS konumları lejant ve altbilgiye taşmasın. */
   drawReportMapInventoryPoints({
     canvas: cv, points, project: (lon, lat) => [X(lon), Y(lat)],
-    frame: { left: fx0, right: fx1, top: fy0, bottom: fy1 },
+    frame,
     disc, tones: MAP_TONES
   });
   const T = (x, y, t, c, sc) => cv.text(x, y, t, c, sc);
