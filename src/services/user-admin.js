@@ -12,11 +12,11 @@ async function loadUsers__scroll(){
  const{data,error}=await window.DG_USER_ADMIN_STORE.load(sb);
  if(error){toast("Kullanıcı listesi alınamadı: "+error.message,"err");return;}
  USERS_CACHE=data||[];
- const total=USERS_CACHE.length,active=USERS_CACHE.filter(x=>x.active).length;
- if($("aUsersTotal"))$("aUsersTotal").textContent=total;
- if($("aUsersActive"))$("aUsersActive").textContent=active;
- if($("aUsersAdmin"))$("aUsersAdmin").textContent=USERS_CACHE.filter(x=>x.role==="admin"||x.role==="owner").length;
- if($("aUsersPassive"))$("aUsersPassive").textContent=total-active;
+ const counts=window.DG_USER_ADMIN_SUMMARY.summarize(USERS_CACHE);
+ if($("aUsersTotal"))$("aUsersTotal").textContent=counts.total;
+ if($("aUsersActive"))$("aUsersActive").textContent=counts.active;
+ if($("aUsersAdmin"))$("aUsersAdmin").textContent=counts.admins;
+ if($("aUsersPassive"))$("aUsersPassive").textContent=counts.passive;
  $("aUsersT").innerHTML=USERS_CACHE.map(x=>{
   const ownerRow=x.role==="owner";
   const roleBadge=ownerRow?'<span class="badge admin-user-role owner">KURUCU</span>':(x.role==="admin"?'<span class="badge admin admin-user-role">DENETÇİ</span>':'<span class="badge on admin-user-role">KULLANICI</span>');

@@ -564,3 +564,5 @@ Her modülün tek bir dış API'si, sahibi olduğu açık durumu ve kendi testle
 - `ui/data-request-submission-feedback.js`, tekrar/hata/başarı form mesajını ve durum rengini mevcut çeviri sözleşmesiyle gösterir; toast, form temizleme ve yenileme serviste kalır.
 
 - `adapters/users/admin-store.js`, profiles listeleme ve rol/aktiflik güncellemelerini mevcut sorgu gövdeleriyle taşır; yetki kapıları serviste kalır.
+
+- `domain/users/summarize-admin-users.js`, kullanıcı sayaçlarını mevcut aktiflik ve kurucu/denetçi sınıflandırmasıyla saf olarak üretir.
