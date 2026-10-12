@@ -403,6 +403,8 @@ Her modülün tek bir dış API'si, sahibi olduğu açık durumu ve kendi testle
 
 `report-map-surface-layers.mjs` draws the existing no-data base, cell and surface overlays, restores context outside the multi-ring park boundary, and draws the thin frame in the established order. Projection and the report map API remain in `report-map.mjs`.
 
+`report-map-heading.mjs` draws the park title, optional subtitle lines and report ID in their existing positions and styles; `report-map.mjs` keeps the map layout and public API.
+
 ### Report provenance presentation (11 October 2026)
 
 `report-provenance-presentation.mjs` renders reproducibility records and the analysis fingerprint from already-resolved provenance. Missing-version/commit/projection/DOI fallbacks, reviewed-archive versus raster instructions and escaping retain their behavior. Provenance collection and scientific analysis remain separate.
