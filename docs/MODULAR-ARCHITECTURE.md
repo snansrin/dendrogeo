@@ -457,3 +457,5 @@ Her modülün tek bir dış API'si, sahibi olduğu açık durumu ve kendi testle
 - `scripts/lib/report-findings-sections.mjs`, raporun §5 Nicel Sonuçlar ve §6 Harita HTML başlıklarını ve mevcut sunumları sırayla birleştirir; bilimsel sonuçlar ve harita sunumu enjekte edilen mevcut modüllerde kalır.
 
 - `scripts/lib/report-html-escaping.mjs`, immutable rapor HTML'ine metin olarak eklenen değerleri mevcut `&`, `<`, `>`, `"` dönüşümleriyle kaçırır; `make-report.mjs` aynı `esc` yardımcı API'sini bu saf fonksiyona bağlar.
+
+- `scripts/lib/report-formatting.mjs` artık Türkçe ondalık sayı biçimleyicisini de sağlar; `make-report.mjs` aynı `trNum` adını bu fonksiyona bağlar. Locale ve sabit ondalık basamak davranışı korunur.
