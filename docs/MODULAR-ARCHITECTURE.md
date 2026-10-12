@@ -434,3 +434,8 @@ Her modülün tek bir dış API'si, sahibi olduğu açık durumu ve kendi testle
 ### Report REST adapter (12 October 2026)
 
 `scripts/lib/report-rest-adapter.mjs` resolves the existing public Supabase URL and key, builds report REST requests, delegates reads to the existing `reportRead` policy, and preserves HTTP error messages and JSON responses. The report generator wires the adapter without changing query or authorization behavior.
+
+
+### Report document client script (12 October 2026)
+
+`scripts/lib/report-document-client-script.mjs` renders the browser script embedded in immutable report HTML. It preserves print-time icon stripping/restoration, canonical snapshot hash verification, and the existing share script insertion point. It does not change snapshot data or verification rules.
