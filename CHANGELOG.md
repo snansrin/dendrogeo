@@ -15,6 +15,9 @@ Yüzey poligonlarını ve deliklerini PNG piksellerine boyayan even-odd rasteriz
 ### İyileştirildi — Rapor haritası çizim primitifleri
 Halka dolgusu, sınır/halo çizgisi ve dairesel envanter noktası çizimi ayrı modüle taşındı; mevcut çizgi kalınlığı, nokta maskesi ve rapor haritası davranışı korundu.
 
+### İyileştirildi — Rapor haritası koordinat projeksiyonu
+Tuval boyutu, yerel metre ölçeği ve koordinatların X/Y piksel dönüşümü ayrı modüle alındı; çok halkalı park sınırı ve mevcut görünüm ölçüleri korunuyor.
+
 ### İyileştirildi — Park geometrisi backfill modülü
 Yönetim ekranındaki OSM sınırı backfill akışı uygulama use-case'ine taşındı; yetki, park bulunamaması, OSM hatası, yazım hatası ve başarılı yenileme sonuçları eski bildirimlerle korunuyor. OSM way/relation sınır çözümlemesi adapter'a ayrıldı ve uygulama/adapter için odaklı testler eklendi.
 
