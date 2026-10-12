@@ -62,10 +62,7 @@ async function deleteMyRequest(id){
 /* --- Kullanıcı talep formu --- */
 async function loadRequestOptions(){
  try{
-  const [m,p]=await Promise.all([
-   sb.from("measurements").select("country,city",{count:"exact"}).eq("status","Onaylı").limit(5000),
-   sb.from("projects").select("id,name,country,city").order("name")
-  ]);
+  const {measurements:m,projects:p}=await window.DG_DATA_REQUEST_OPTIONS_STORE.load(sb);
   REQ_ROWS=m.data||[];REQ_PROJECTS=p.data||[];
   /* Ülke/şehir seçenek listeleri kesilmişse talep formunda eksik seçenek görünür. */
   dgWarnIfTruncated(m.data,5000,"Talep formu seçenekleri",m.count);
