@@ -227,6 +227,7 @@ Her modülün tek bir dış API'si, sahibi olduğu açık durumu ve kendi testle
 
 - `ui/park-candidate-select.js`, alternatif park seçeneklerinin mevcut sırasını, aktif park kimliğini, HTML kaçışını ve bir ondalık hektar gösterimini üretir. Tek/boş aday listesinde seçici çizmez; park paneli `switchPark` çağrısını ve mevcut biçimleyicileri bağlar.
 - `ui/visitor-activity-feed.js`, kurucuya gösterilen geçici canlı etkinlik listesini gelen olaylardan çizer. Veriyi üretmez veya saklamaz; yerel saat, mevcut çeviri ve HTML kaçışı çağıran servis tarafından verilir.
+- `ui/visitor-database-activity.js`, kurucunun saklı etkinlik sorgularından gelen satırları mevcut çevrilmiş ve kaçış uygulanmış tablo görünümüne çizer. Sorgu, sıralama ve 60 satırlık sınır `visit-stats.js` içinde kalır.
 
 - `ui/park-info-panel.js`, park sonucundaki grid, yüzey, PNG ve katman kontrollerinin markup yapısını üretir. Park state, park kimliği, proje seçenekleri, alternatif seçici ve kaçış işlevi çağıran ekrandan verilir; mevcut DOM kimlikleri ve eylem callback’leri korunur.
 
