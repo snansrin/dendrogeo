@@ -42,18 +42,12 @@ async function loadMyRequests__scroll(){
  const el=$("myRequests");if(!el)return;
  if(error){el.innerHTML='<div class="alert err">Talepler yüklenemedi.</div>';return;}
  if(!data||!data.length){el.innerHTML="";return;}
- const rows=data.map(r=>{
-  const filt=[esc(r.country),esc(r.city),esc(r.project_name)].filter(Boolean).join(" / ")||"Tüm Veri";
-  const bc=r.status==="Tamamlandı"?"on":(r.status==="İşleme Alındı"?"admin":"off");
-  const dt=r.created_at?new Date(r.created_at).toLocaleDateString("tr-TR"):"";
-  return `<div class="export-request-item"><div class="export-request-item-main"><b>${filt}</b><small>${dt}${r.note?" · "+esc(r.note):""}</small></div><span class="badge ${bc}">${esc(r.status||"Beklemede")}</span><button class="btn sm red export-request-delete" type="button" onclick="deleteMyRequest(${Number(r.id)})" aria-label="${esc(filt)} talebini sil">🗑 Sil</button></div>`;
- }).join("");
- el.innerHTML=`<details class="export-my-requests"><summary><span>📨 Taleplerim</span><span class="badge">${data.length}</span></summary><div class="export-request-list">${rows}</div></details>`;
+ window.DG_MY_DATA_REQUESTS_UI.render(el,data,{escape:esc});
 }
 async function deleteMyRequest(id){
  if(!USER||!Number.isFinite(+id))return;
  if(!confirm("Bu veri talebi silinsin mi?"))return;
- const{data,error}=await sb.from("data_requests").delete().eq("id",+id).eq("user_id",USER.id).select("id");
+ const{data,error}=await window.DG_DELETE_OWN_DATA_REQUEST.remove(sb,+id,USER.id);
  if(error||!data?.length){toast("Talep silinemedi: "+(error?.message||"Yetki veya kayıt bulunamadı."),"err","🗑");return;}
  toast("Talep silindi.","ok","🗑");
  loadMyRequests();
