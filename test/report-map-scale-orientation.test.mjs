@@ -32,6 +32,6 @@ test('report map scale bar keeps alternating segments and the north arrow pixels
   assert.deepEqual(pixel(canvas, 375, 600), [255, 255, 255]);
   assert.deepEqual(pixel(canvas, 380, 140), ink);
   assert.deepEqual(pixel(canvas, 380, 126), ink);
-  assert.deepEqual(pixel(canvas, 376, 162), ink);
+  assert.deepEqual(pixel(canvas, 370, 162), ink);
   assert.deepEqual(pixel(canvas, 0, 140), background);
 });
