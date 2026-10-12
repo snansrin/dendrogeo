@@ -21,6 +21,9 @@ Tuval boyutu, yerel metre ölçeği ve koordinatların X/Y piksel dönüşümü 
 ### İyileştirildi — Rapor haritası sınıf lejantı
 PNG sınıf takma adları ve lejant satır sırası ayrı sunum modülüne alındı; havuzun yalnızca haritada suyla birleştirilmesi ve maskeli alan satırı koşulu korundu.
 
+### İyileştirildi — Rapor haritası poligon kırpması
+Sınıf piksellerinin çokgen ve delik sınırları dışına taşınca bağlam tonuna döndürülmesi ayrı raster modülüne alındı; çok halkalı sınırın mevcut tarama çizgisi davranışı korundu.
+
 ### İyileştirildi — Park geometrisi backfill modülü
 Yönetim ekranındaki OSM sınırı backfill akışı uygulama use-case'ine taşındı; yetki, park bulunamaması, OSM hatası, yazım hatası ve başarılı yenileme sonuçları eski bildirimlerle korunuyor. OSM way/relation sınır çözümlemesi adapter'a ayrıldı ve uygulama/adapter için odaklı testler eklendi.
 
