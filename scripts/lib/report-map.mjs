@@ -4,6 +4,7 @@ import { fillSurfacePolygon } from './report-map-surface-fill.mjs';
 import { fillRing, strokeRing, disc } from './report-map-primitives.mjs';
 import { createReportMapProjection } from './report-map-projection.mjs';
 import { createReportMapClassPresentation } from './report-map-class-presentation.mjs';
+import { restoreOutsideRings } from './report-map-clipping.mjs';
 
 export const DATASET_ASCII = 'ESA WORLDCOVER 2021 V200';
 
@@ -32,28 +33,9 @@ export function mapCanvas({ outer, outers = null, surfaceFeatures = [], holes = 
     const rings=poly.map(r=>r.map(([lo,la])=>[X(lo),Y(la)]));
     fillSurfacePolygon(cv,rings,hex2rgb(pngClass(f.properties.class)?.color||'#94a3b8'));
   }
-  /* KRIPMA GEÇİŞİ: run-length bantları satır içindeki poligon dışı boşlukları
-   * köprüleyebildiği için (içbükey girinti) harita alanı taranır ve poligon
-   * (delikler dâhil, tek-çift kuralı) dışındaki pikseller bağlam dokusuna
-   * geri boyanır. Böylece hem beyaz/gri dilim kalmaz hem de park sahasının
-   * dışına sınıf rengi taşmaz. */
+  /* KRIPMA GEÇİŞİ: sınıf bantlarının poligon dışına taşan piksellerini bağlam tonuna döndür. */
   const allRings = [...(outers||[outer]).map(r=>r.map(([la,lo])=>[X(lo),Y(la)])), ...holes.map((h) => h.map(([la, lo]) => [X(lo), Y(la)]))];
-  const yMap1 = Math.min(cv.h - 1, TOP + MAPH);
-  for (let y = 0; y <= yMap1; y++) {
-    const xs = [];
-    for (const rg of allRings) for (let i = 0, j = rg.length - 1; i < rg.length; j = i++) {
-      const ya = rg[j][1], yb = rg[i][1];
-      if ((ya > y + 0.5) !== (yb > y + 0.5)) xs.push(rg[j][0] + (y + 0.5 - ya) / (yb - ya) * (rg[i][0] - rg[j][0]));
-    }
-    xs.sort((a, b) => a - b);
-    let x = 0;
-    for (let i = 0; i + 1 < xs.length; i += 2) {
-      const a = Math.max(0, Math.ceil(xs[i] ?? 0)), b = Math.min(cv.w - 1, Math.floor(xs[i + 1] ?? cv.w));
-      if (x < a) cv.rect(x, y, a - 1, y, MAP_TONES.out);
-      x = Math.max(x, b + 1);
-    }
-    if (x < cv.w) cv.rect(x, y, cv.w - 1, y, MAP_TONES.out);
-  }
+  restoreOutsideRings(cv, allRings, Math.min(cv.h - 1, TOP + MAPH), MAP_TONES.out);
   /* İNCE ÇERÇEVE (2026-09-28): harita alanı kartografik çerçeve alır; kırpma
    * geçişinden SONRA çizilir (aksi hâlde bağlam dokusu çerçeveyi silerdi). */
   const FR = [206, 210, 206];
