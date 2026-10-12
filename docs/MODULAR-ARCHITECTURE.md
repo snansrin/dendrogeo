@@ -552,3 +552,5 @@ Her modülün tek bir dış API'si, sahibi olduğu açık durumu ve kendi testle
 - `application/data-requests/submit-request.js`, tekrar kontrolü→kayıt gövdesi→insert→sonuç sırasını enjekte edilen portlarla yürütür; tekrar kontrolü hata sınırı korunur, form/metin/yenileme serviste kalır.
 
 - `application/data-requests/delete-own-request.js`, oturum/geçerli ID→onay→id+user_id silme→sonuç→yenileme sırasını enjekte edilen portlarla yönetir; mesajlar, adapter ve liste yenilemesi servisten bağlanır.
+
+- `application/data-requests/reject-request.js`, ret onayı, durum sonucu ve bildirim/yenileme sırasını enjekte edilen portlarla yönetir.

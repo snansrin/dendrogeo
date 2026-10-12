@@ -104,11 +104,13 @@ async function loadRequests__scroll(){
 }
 
 async function rejectRequest(id){
- if(!confirm(dgCf("Bu talebi reddetmek istediğinizden emin misiniz? Kullanıcıya yanıt gönderilmez, talep arşive kaldırılır.")))return;
- const{error}=await window.DG_DATA_REQUEST_STATUS_STORE.update(sb,id,"Reddedildi",new Date().toISOString());
- if(error){toast("Hata: "+error.message,"err");return;}
- toast("✓ Talep reddedildi","warn","🚫");
- loadRequests();
+ return await window.DG_REJECT_DATA_REQUEST.execute(id,{
+  confirm:()=>confirm(dgCf("Bu talebi reddetmek istediğinizden emin misiniz? Kullanıcıya yanıt gönderilmez, talep arşive kaldırılır.")),
+  reject:requestId=>window.DG_DATA_REQUEST_STATUS_STORE.update(sb,requestId,"Reddedildi",new Date().toISOString()),
+  onFailure:error=>toast("Hata: "+error.message,"err"),
+  onSuccess:()=>toast("✓ Talep reddedildi","warn","🚫"),
+  refresh:()=>loadRequests()
+ });
 }
 
 async function fulfillRequest(id){
