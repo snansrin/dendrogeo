@@ -762,3 +762,13 @@ Her modülün tek bir dış API'si, sahibi olduğu açık durumu ve kendi testle
 - `ui/world-stats-tables.js`, ülke ve şehir istatistik satırlarını güvenli biçimde üretir.
 
 - `ui/world-error.js`, dünya verisi hatasını ve yeniden deneme eylemini gösterir.
+
+- `domain/admin/measurement-review-payload.js`, ölçüm onayı ve reddi için durum/paylaşım alanlarını kurar.
+
+- `adapters/admin/measurement-moderation-store.js`, ölçüm moderasyon yazılarını, fotoğraf okumayı ve silmeyi Supabase'e aktarır.
+
+- `application/admin/review-measurement.js`, onay/red komutunu mevcut moderasyon deposuna gönderir.
+
+- `application/admin/override-measurement-geofence.js`, yönetici konum çiti istisnasını audit kimliğiyle kaydeder.
+
+- `application/admin/delete-measurement.js`, kaydı silmeden önce bağlı fotoğrafı temizler ve ölçümü kaldırır.
