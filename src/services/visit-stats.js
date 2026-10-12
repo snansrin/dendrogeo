@@ -111,22 +111,19 @@ const DG_DEV_TAG=(()=>{try{
  const os=/Windows/.test(ua)?"Windows":/Android/.test(ua)?"Android":/iPhone|iPad|iPod/.test(ua)?"iOS":/Mac OS X/.test(ua)?"macOS":/Linux/.test(ua)?"Linux":"?";
  return (/Mobi|Android|iPhone|iPad|iPod/.test(ua)?"mobil":"masaüstü")+" · "+os+" · "+br;
 }catch(e){return "?";}})();
-let DG_VIEW_HIST=[],DG_LAST_ACT=null,DG_LOC_HIST=[];
 const DG_ACT_LABELS={save:"ölçüm kaydetti",edit:"kayıt güncelledi",park:"park algıladı",export:"dışa aktardı",publish:"rapor yayını istedi"};
 const DG_VISITOR_ACTIVITY=window.DG_VISITOR_ACTIVITY_APPLICATION.create();
+const DG_VISITOR_SESSION_EVENTS=window.DG_VISITOR_SESSION_EVENTS_APPLICATION.create();
 /* Sekme değişince çağrılır (shell go()): gezinme zincirine yazar. */
 function dgPresenceView(v){
  try{
-  const last=DG_VIEW_HIST[DG_VIEW_HIST.length-1];
-  if(last&&last.v===v)return;
-  DG_VIEW_HIST.push({v:v,t:Date.now()});
-  if(DG_VIEW_HIST.length>8)DG_VIEW_HIST.shift();
+  if(!DG_VISITOR_SESSION_EVENTS.recordView(v))return;
   dgPresencePing(v,true);
  }catch(e){}
 }
 /* Önemli kullanıcı aksiyonunda çağrılır (kaydet/park/export/yayın). */
 function dgPresenceAct(k,d){
- try{DG_LAST_ACT={k:k,t:Date.now(),d:String(d||"").slice(0,60)};dgPresencePing(null,true);}catch(e){}
+ try{DG_VISITOR_SESSION_EVENTS.recordAction(k,d);dgPresencePing(null,true);}catch(e){}
 }
 function dgPresencePing(view,force){
  try{
@@ -143,14 +140,14 @@ function dgPresencePing(view,force){
    * onayında yönetici zaten saklı konumları görebilir. Park ORTAK kanalı
    * ayrıca kullanıcının 👥 anahtarına bağlıdır (map.js canlı paylaşım bayrağı). */
   if(typeof GPS!=="undefined"&&GPS&&GPS.latitude!=null){p.la=GPS.latitude;p.lo=GPS.longitude;
-   const lb=DG_LOC_HIST[DG_LOC_HIST.length-1];
-   if(!lb||Math.abs(lb[0]-p.la)>1e-5||Math.abs(lb[1]-p.lo)>1e-5){DG_LOC_HIST.push([p.la,p.lo,now]);if(DG_LOC_HIST.length>12)DG_LOC_HIST.shift();}
+   DG_VISITOR_SESSION_EVENTS.recordLocation(p.la,p.lo,now);
   }
   /* 0045: oturum/cihaz/gezinti/aksiyon/iz — hep geçici presence alanı. */
   p.sid=DG_SID;p.st=DG_SESSION_START;p.dev=DG_DEV_TAG;
-  if(DG_VIEW_HIST.length)p.vh=DG_VIEW_HIST.slice(-8);
+  const {views:DG_VIEW_HIST,lastAction:DG_LAST_ACT,locations:DG_LOC_HIST}=DG_VISITOR_SESSION_EVENTS.snapshot();
+  if(DG_VIEW_HIST.length)p.vh=DG_VIEW_HIST;
   if(DG_LAST_ACT)p.act=DG_LAST_ACT;
-  if(p.la!=null&&DG_LOC_HIST.length>1)p.lh=DG_LOC_HIST.slice(-12);
+  if(p.la!=null&&DG_LOC_HIST.length>1)p.lh=DG_LOC_HIST;
   p.hidden=!!document.hidden;
   const channel=DG_PRES,generation=DG_PRES_GENERATION;
   Promise.resolve(channel.track(p)).then(status=>{if(generation===DG_PRES_GENERATION&&status!=="ok")dgPresenceFail("TRACK");}).catch(()=>{if(generation===DG_PRES_GENERATION)dgPresenceFail("TRACK");});
