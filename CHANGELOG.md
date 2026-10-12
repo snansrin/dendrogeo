@@ -9,6 +9,12 @@ Yeni sürüm yayımlama adımları: [`docs/surum-yayini.md`](docs/surum-yayini.m
 
 ## [Yayımlanmadı]
 
+### İyileştirildi — standart GIS PNG katman bileşimi
+Park kırpması içindeki yüzey, göreli NDVI, grid ve waypoint çizim sırası ayrı canvas modülüne taşındı; sayım ve sınır çizimi davranışı korundu.
+
+### İyileştirildi — doğrulanmış GIS PNG çerçevesi
+Marka başlığı ve kaynak altbilgisi ayrı modüle taşındı; çizim sırası ve canlı çıktı korundu.
+
 ### İyileştirildi — GIS PNG yüzey patch çizimi
 Ham yüzey patch halkaları ayrı Canvas modülüne taşındı; enlem-boylam sırası, sınıf renk yedeği, alpha ve mevcut dış API korundu.
 
