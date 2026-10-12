@@ -514,3 +514,5 @@ Her modülün tek bir dış API'si, sahibi olduğu açık durumu ve kendi testle
 - `domain/visitors/device-label.js`, geçici presence cihaz etiketini kullanıcı aracısı girdisinden saf olarak üretir; mevcut tarayıcı/işletim sistemi eşleşme önceliği korunur, navigator erişimi ve hata yedeği servis katmanında kalır.
 
 - `ui/visitor-map-marker.js`, ziyaretçi işaretinin baş harf ikonunu ve çevrilmiş/kaçış uygulanmış tooltip sunumunu üretir; Leaflet nesneleri, geçici izler, konum süzme ve harita takip durumu servis katmanında kalır.
+
+- `adapters/visitors/session-id-store.js`, sekmeye ait `dg_sid` değerini yeniden kullanır veya mevcut rastgele üretim kuralıyla saklar; storage erişim hatasındaki `x` yedeği servis katmanında korunur.
