@@ -311,6 +311,11 @@ function bootUI() {
     'src/ui/render-user-publication-header.js',
     'src/ui/render-user-publication-notices.js',
     'src/ui/render-user-publication-card.js',
+    'src/application/reports/load-publication-queue.js',
+    'src/application/reports/schedule-publication-queue-poll.js',
+    'src/application/reports/request-report-retraction.js',
+    'src/application/reports/refresh-after-report-retraction.js',
+    'src/application/reports/reset-publication-polling.js',
   ]) vm.runInContext(read(path), ctx, { filename: path });
   vm.runInContext(read('src/application/reports/collect-publication-request.js'), ctx, { filename: 'collect-publication-request.js' });
   vm.runInContext(UI, ctx, { filename: 'report-publish.js' });
