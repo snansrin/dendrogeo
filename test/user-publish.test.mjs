@@ -203,6 +203,11 @@ function bootUser(opts) {
     'src/adapters/reports/publication-request-store.js',
     'src/adapters/reports/park-comparison-store.js',
     'src/adapters/reports/retraction-store.js',
+    'src/adapters/reports/publication-cancel-store.js',
+    'src/adapters/reports/user-publication-request-store.js',
+    'src/adapters/reports/own-approved-measurements-store.js',
+    'src/adapters/reports/user-retraction-store.js',
+    'src/application/reports/load-user-publication.js',
   ]) vm.runInContext(read(path), ctx, { filename: path });
   vm.runInContext(read('src/application/reports/collect-publication-request.js'), ctx, { filename: 'collect-publication-request.js' });
   vm.runInContext(UI, ctx, { filename: 'report-publish.js' });
