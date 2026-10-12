@@ -4,7 +4,7 @@
 // NOT: Senkronizasyon artık Ana Thread (Supabase JS SDK) tarafından yapılıyor
 // ============================================================
 
-const CACHE_VERSION = 'dendrogeo-sw-v2-r237';
+const CACHE_VERSION = 'dendrogeo-sw-v2-r238';
 
 /* İKİ AYRI STATİK CACHE — bu ayrım bilinçli ve önemli.
  *
@@ -66,7 +66,7 @@ const CORE_ASSETS = [
     /* UI katmanı (Faz 1): index.html'in inline <script> bloğu bu dört modüle
      * taşındı — global state, toast, landing beyni ve kabuk önyüklemesi.
      * Yükleme sırası index.html'de de aynıdır: state → toast → landing → shell. */
-    '/src/ui/gis-workspace-analysis-layout.js', '/src/ui/gis-workspace.js', '/src/ui/gis-project-draft.js', '/src/ui/gis-export-vegetation.js', '/src/ui/gis-export-layout.js', '/src/ui/gis-export-canvas-legend.js', '/src/ui/gis-export-canvas-waypoints.js', '/src/ui/gis-export-canvas-grids.js', '/src/ui/gis-export-canvas-leaflet.js', '/src/ui/gis-export-canvas-patches.js', '/src/ui/park-export-layout.js', '/src/domain/parks/park-export-formats.js', '/src/ui/park-export-canvas.js', '/src/ui/gis-export-canvas.js', '/src/ui/gis-export-events.js', '/src/application/surface/prepare-verified-map-export.js', '/src/ui/gis-export-download.js', '/src/ui/gis-export-verified-frame.js', '/src/ui/gis-export-verified-summary.js', '/src/ui/gis-export-verified-layers.js', '/src/ui/gis-export-verified-canvas.js', '/src/ui/gis-export-standard-layers.js', '/src/ui/gis-export-standard-canvas.js', '/src/ui/gis-export-bootstrap.js', '/src/ui/gis-export-presentation.js', '/src/ui/gis-export-platform.js', '/src/ui/gis-export-sources.js', '/src/ui/gis-export-workflow.js', '/src/ui/gis-export-verified-workflow.js', '/src/bootstrap/gis-export.js', '/src/ui/gis-export.js', '/src/ui/state.js', '/src/ui/toast.js', '/src/ui/landing.js', '/src/ui/shell.js',
+    '/src/ui/gis-workspace-analysis-layout.js', '/src/ui/gis-workspace-menu-position.js', '/src/ui/gis-workspace.js', '/src/ui/gis-project-draft.js', '/src/ui/gis-export-vegetation.js', '/src/ui/gis-export-layout.js', '/src/ui/gis-export-canvas-legend.js', '/src/ui/gis-export-canvas-waypoints.js', '/src/ui/gis-export-canvas-grids.js', '/src/ui/gis-export-canvas-leaflet.js', '/src/ui/gis-export-canvas-patches.js', '/src/ui/park-export-layout.js', '/src/domain/parks/park-export-formats.js', '/src/ui/park-export-canvas.js', '/src/ui/gis-export-canvas.js', '/src/ui/gis-export-events.js', '/src/application/surface/prepare-verified-map-export.js', '/src/ui/gis-export-download.js', '/src/ui/gis-export-verified-frame.js', '/src/ui/gis-export-verified-summary.js', '/src/ui/gis-export-verified-layers.js', '/src/ui/gis-export-verified-canvas.js', '/src/ui/gis-export-standard-layers.js', '/src/ui/gis-export-standard-canvas.js', '/src/ui/gis-export-bootstrap.js', '/src/ui/gis-export-presentation.js', '/src/ui/gis-export-platform.js', '/src/ui/gis-export-sources.js', '/src/ui/gis-export-workflow.js', '/src/ui/gis-export-verified-workflow.js', '/src/bootstrap/gis-export.js', '/src/ui/gis-export.js', '/src/ui/state.js', '/src/ui/toast.js', '/src/ui/landing.js', '/src/ui/shell.js',
     '/css/park-panel.css','/css/ui-standard.css','/css/gis-workspace.css',
     /* Üçüncü taraf kütüphaneler artık depoda (vendor/) — bkz. vendor/VERSIONS.md.
      * Aynı köken oldukları için SRI gerekmiyor ve çevrimdışı davranış

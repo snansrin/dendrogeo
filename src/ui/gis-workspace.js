@@ -10,6 +10,7 @@
  const parked={grid:null,layer:null,export:null,summary:null};
  const $=id=>document.getElementById(id);
  const analysisLayout=window.DG_GIS_WORKSPACE_ANALYSIS_LAYOUT.create({getElement:$,el});
+ const menuLayout=window.DG_GIS_WORKSPACE_MENU_POSITION.create({windowRef:window});
  const view=()=> $("v-map");
  const editorActive=()=>!!view()?.classList.contains("surface-review-active");
  function txt(node,s){if(node&&node.textContent!==s)node.textContent=s;}
@@ -21,50 +22,11 @@
   if(pending)return;
   pending=setTimeout(()=>{pending=0;sync();},75);
  }
- function menuPosition(menu){
-  if(!menu?.open)return;
-  const panel=menu.querySelector(":scope > .dg-editor-menu-body");
-  if(!panel)return;
-  const viewport=window.visualViewport;
-  const width=viewport?.width||window.innerWidth;
-  const height=viewport?.height||window.innerHeight;
-  const offsetTop=viewport?.offsetTop||0,offsetLeft=viewport?.offsetLeft||0;
-  if(width<=700){
-   const menuRect=menu.getBoundingClientRect();
-   const top=Math.max(offsetTop+8,Math.min(menuRect.bottom+6,height+offsetTop-155));
-   panel.style.position="fixed";
-   panel.style.left=(offsetLeft+10)+"px";
-   panel.style.right="auto";
-   panel.style.top=top+"px";
-   panel.style.width="calc(100vw - 20px)";
-   panel.style.maxHeight=Math.max(120,height+offsetTop-top-12)+"px";
-   return;
-  }
-  const rect=menu.getBoundingClientRect(),ideal=Math.min(440,width-24);
-  const left=Math.max(offsetLeft+12,Math.min(rect.left,width+offsetLeft-ideal-12));
-  // Tablet/desktop: an anchored dropdown near the lower edge must open
-  // inside the visible viewport, not extend below it.
-  const panelHeight=Math.min(Math.max(140,panel.scrollHeight||0),Math.max(140,height-20));
-  if(rect.bottom+panelHeight+8>height+offsetTop){
-   panel.style.position="fixed";
-   panel.style.left=left+"px";panel.style.right="auto";
-   panel.style.top=Math.max(offsetTop+8,height+offsetTop-panelHeight-10)+"px";
-   panel.style.width="min(440px,calc(100vw - 24px))";
-   panel.style.maxHeight=Math.max(120,height-20)+"px";
-   return;
-  }
-  panel.style.position="absolute";
-  panel.style.left=(left-rect.left)+"px";
-  panel.style.right="auto";
-  panel.style.top="calc(100% + 6px)";
-  panel.style.width="min(440px,calc(100vw - 24px))";
-  panel.style.maxHeight="";
- }
  function openMenu(menu){
   $("surfaceMenuBar")?.querySelectorAll(":scope > details[open]").forEach(other=>{
    if(other!==menu)other.open=false;
   });
-  menuPosition(menu);
+  menuLayout.position(menu);
  }
  function makeOutput(){
   const menu=el("details","dg-editor-menu dg-ux-output-menu");
@@ -142,7 +104,7 @@
    const input=$(id),label=input?.parentElement?.querySelector(".dg-png-label");
    if(label&&!label.htmlFor)label.htmlFor=id;
   }
-  if(menu.open)menuPosition(menu);
+  if(menu.open)menuLayout.position(menu);
  }
  const radians=n=>n*Math.PI/180;
  function pathLength(points){
@@ -404,7 +366,7 @@
   syncMapTools();
   syncNdviMapInfo();
   const bar=$("surfaceMenuBar");
-  if(bar)bar.querySelectorAll(":scope > details[open]").forEach(menuPosition);
+  if(bar)bar.querySelectorAll(":scope > details[open]").forEach(menuLayout.position);
   if(mapTool&&mapInstance&&getMap()!==mapInstance){closeTool();setStatus("Harita değiştiği için geçici ölçüm kapatıldı.");}
  }
  function init(){
@@ -418,8 +380,8 @@
   bar.addEventListener("toggle",event=>{
    if(event.target?.matches?.(":scope > .dg-editor-menu")&&event.target.open)openMenu(event.target);
   },true);
-  window.addEventListener("resize",()=>{bar.querySelectorAll(":scope > details[open]").forEach(menuPosition);},{passive:true});
-  window.visualViewport?.addEventListener("resize",()=>{bar.querySelectorAll(":scope > details[open]").forEach(menuPosition);},{passive:true});
+  window.addEventListener("resize",()=>{bar.querySelectorAll(":scope > details[open]").forEach(menuLayout.position);},{passive:true});
+  window.visualViewport?.addEventListener("resize",()=>{bar.querySelectorAll(":scope > details[open]").forEach(menuLayout.position);},{passive:true});
   document.addEventListener("keydown",e=>{if(e.key==="Escape"&&mapTool){closeTool();setStatus("Geçici ölçüm kapatıldı.");}});
   document.addEventListener("input",e=>{
    const input=e.target;

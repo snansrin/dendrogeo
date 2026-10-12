@@ -53,6 +53,7 @@ test('GIS review DOM shows original report in raw mode and removes duplicate raw
   setTimeout,clearTimeout,console
  };
  vm.runInNewContext(load('src/ui/gis-workspace-analysis-layout.js'),sandbox);
+ vm.runInNewContext(load('src/ui/gis-workspace-menu-position.js'),sandbox);
  vm.runInNewContext(load('src/ui/gis-workspace.js'),sandbox,{filename:'src/ui/gis-workspace.js'});
  sandbox.window.DG_GIS_WORKSPACE_UI.sync();
  assert.equal(host.removed,1);
@@ -105,6 +106,7 @@ test('reviewed result uses the source bar color, native-row labels and preserves
  };
  const sandbox={document,window:{DG_LC_SENS:{state:{record:{},rawView:false}},DG_SURFACE_REVIEW:{types:{green:{label:'Yeşil alan'}}}},console,setTimeout,clearTimeout};
  vm.runInNewContext(load('src/ui/gis-workspace-analysis-layout.js'),sandbox);
+ vm.runInNewContext(load('src/ui/gis-workspace-menu-position.js'),sandbox);
  vm.runInNewContext(load('src/ui/gis-workspace.js'),sandbox);
  sandbox.window.DG_GIS_WORKSPACE_UI.sync();
  assert.equal(label.textContent,'🌿 Yeşil alan');
@@ -165,6 +167,7 @@ test('distance measurement captures polygon clicks before editor popup even in r
  const sandbox={window:{L:leaflet},L:leaflet,map:mockedMap,PARK_MODE:true,document:doc,
   getComputedStyle:()=>({getPropertyValue:()=>''}),setTimeout,clearTimeout,console};
  vm.runInNewContext(load('src/ui/gis-workspace-analysis-layout.js'),sandbox);
+ vm.runInNewContext(load('src/ui/gis-workspace-menu-position.js'),sandbox);
  vm.runInNewContext(load('src/ui/gis-workspace.js'),sandbox,{filename:'gis-workspace.js'});
  assert.equal(typeof sandbox.window.DG_GIS_WORKSPACE_UI.activateTool,'function');
  sandbox.window.DG_GIS_WORKSPACE_UI.activateTool('distance');
@@ -335,6 +338,7 @@ test('surface brush omits pool/fountain but retains water and all historical sci
   document:{readyState:'loading',addEventListener(){},querySelector:q=>q==='#dgSensBrushType'?select:null,getElementById:()=>null},
   setTimeout,clearTimeout,console};
  vm.runInNewContext(load('src/ui/gis-workspace-analysis-layout.js'),sandbox);
+ vm.runInNewContext(load('src/ui/gis-workspace-menu-position.js'),sandbox);
  vm.runInNewContext(ui,sandbox);
  sandbox.window.DG_GIS_WORKSPACE_UI.sync();
  assert.deepEqual(removed,['pool'],'only the brush pool option is removed');
@@ -351,6 +355,7 @@ test('previously selected pool brush safely becomes water on next UI update',()=
   document:{readyState:'loading',addEventListener(){},querySelector:q=>q==='#dgSensBrushType'?select:null,getElementById:()=>null},
   setTimeout,clearTimeout,console};
  vm.runInNewContext(load('src/ui/gis-workspace-analysis-layout.js'),sandbox);
+ vm.runInNewContext(load('src/ui/gis-workspace-menu-position.js'),sandbox);
  vm.runInNewContext(ui,sandbox);
  sandbox.window.DG_GIS_WORKSPACE_UI.sync();
  assert.equal(chosen,'water');
