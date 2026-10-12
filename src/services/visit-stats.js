@@ -14,15 +14,16 @@ async function trackVisit(){
  }catch(e){}
 }
 
+const DG_VISITOR_ADMIN_VISIT_COUNTS_STORE=window.DG_VISITOR_ADMIN_VISIT_COUNTS_STORE.create();
 async function loadVisitStats(){
  try{
-  const total=await sb.from("site_visits").select("*",{count:"exact",head:true});
+  const total=await DG_VISITOR_ADMIN_VISIT_COUNTS_STORE.total(sb);
   $("aVisitTotal").textContent=total.count??0;
   const today=new Date();today.setHours(0,0,0,0);
-  const t=await sb.from("site_visits").select("*",{count:"exact",head:true}).gte("visited_at",today.toISOString());
+  const t=await DG_VISITOR_ADMIN_VISIT_COUNTS_STORE.since(sb,today.toISOString());
   $("aVisitToday").textContent=t.count??0;
   const d7=new Date(Date.now()-7*86400000);
-  const w=await sb.from("site_visits").select("*",{count:"exact",head:true}).gte("visited_at",d7.toISOString());
+  const w=await DG_VISITOR_ADMIN_VISIT_COUNTS_STORE.since(sb,d7.toISOString());
   $("aVisit7").textContent=w.count??0;
  }catch(e){$("aVisitTotal").textContent="—";}
 }
