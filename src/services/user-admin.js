@@ -22,14 +22,10 @@ async function loadUsers__scroll(){
 }
 
 function filterUsers(){
- const q=($("userSearch")?.value||"").trim().toLocaleLowerCase("tr-TR");
- const role=$("userRoleFilter")?.value||"";
- const status=$("userStatusFilter")?.value||"";
- let visible=0;
- $("aUsersT").querySelectorAll("tr").forEach(r=>{
-  const text=(r.textContent||"").toLocaleLowerCase("tr-TR");
-  const show=(!q||text.includes(q))&&(!role||r.dataset.role===role)&&(!status||r.dataset.status===status);
-  r.style.display=show?"":"none"; if(show)visible++;
+ const visible=window.DG_ADMIN_USER_FILTER_UI.apply($("aUsersT"),{
+  query:$("userSearch")?.value||"",
+  role:$("userRoleFilter")?.value||"",
+  status:$("userStatusFilter")?.value||""
  });
  if($("aUsersVisible"))$("aUsersVisible").textContent=visible+" kullanıcı";
 }
