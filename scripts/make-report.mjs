@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 import {createReportPublicationApplication} from './lib/report-publication-application.mjs';
+import {createReportCliArguments} from './lib/report-cli-arguments.mjs';
 import {createReportSpeciesPresentation, sw} from './lib/report-species-presentation.mjs';
 import {createReportQaPresentation} from './lib/report-qa-presentation.mjs';
 import {createReportEvaluationPresentation} from './lib/report-evaluation-presentation.mjs';
@@ -93,8 +94,7 @@ const read = (p) => readFileSync(join(ROOT, p), 'utf8');
 /* Yayın kökü: CNAME'den türetilir (elle yazılmış sabit URL sürüklenmesin). */
 const SITE_ORIGIN = (() => { try { const c = read('CNAME').trim(); return c ? 'https://' + c : 'https://dendrogeo.org'; } catch (e) { return 'https://dendrogeo.org'; } })();
 const renderCitationPresentation = createReportCitationPresentation({citeName, siteOrigin: SITE_ORIGIN});
-const arg = (a) => { const i = process.argv.indexOf('--' + a); return i >= 0 ? process.argv[i + 1] : null; };
-const has = (a) => process.argv.includes('--' + a);
+const {arg, has} = createReportCliArguments(process.argv);
 
 /* Rapor parmak izi sabitleri (2026-09-28 · kullanıcı standardı): motor sürümü
  * lc-config'den (tek doğruluk kaynağı), uygulama sürümü package.json'dan,
