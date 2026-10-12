@@ -165,10 +165,7 @@ async function fulfillRequest(id){
     
     const {data} = await q;
     const rows = data || [];
-    const n = rows.length;
-    const totalC = rows.reduce((a,r) => a + (r.carbon_kg||0), 0);
-    const countries = new Set(rows.map(r=>r.country).filter(Boolean));
-    const cities    = new Set(rows.map(r=>r.city).filter(Boolean));
+    const {count:n,totalCarbon:totalC,countries,cities}=window.DG_DATA_REQUEST_DATASET_SUMMARY.summarize(rows);
     
     if(n === 0){
         if(!confirm(dgCf("Bu filtreye uyan onaylı kayıt bulunamadı. Yine de kullanıcıya bilgilendirme maili göndermek ister misiniz?"))) return;
