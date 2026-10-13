@@ -5,6 +5,12 @@
    getSession(){return getClient().auth.getSession();},
    onAuthStateChange(callback){return getClient().auth.onAuthStateChange(callback);},
    setRealtimeAuth(token){const realtime=getClient().realtime;return realtime?.setAuth?realtime.setAuth(token):undefined;},
+   signInWithPassword(credentials){return getClient().auth.signInWithPassword(credentials);},
+   signUp(credentials){return getClient().auth.signUp(credentials);},
+   resetPasswordForEmail(email,options){return getClient().auth.resetPasswordForEmail(email,options);},
+   signOut(){return getClient().auth.signOut();},
+   updatePassword(password){return getClient().auth.updateUser({password});},
+   signInWithOAuth(options){return getClient().auth.signInWithOAuth(options);},
    loadProfile(id){return getClient().from("profiles").select("*").eq("id",id).single();}
   });
  }
