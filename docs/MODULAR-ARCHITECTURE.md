@@ -1279,6 +1279,13 @@ The collaborator map renderer now separates peer selection, display-model deriva
 - `application/surface/resolve-surface-review-cell.js` son düzenlenen maskeden başlayarak sınıf parçalarını ve ölçülmüş alan paylarını üretir. `resolve-surface-review-parts.js` mevcut geometri cache kapılarını ve memo seeding’i orkestre eder.
 - `domain/surface/summarize-surface-review-parts.js` raster hücre alanını çözülmüş parçalara aktarır. UI, worker ve offline önbellek bu modülleri servis öncesinde yükler; servis gövdeleri fallback olarak kalır.
 
+## Yüzey koordinat ve park geometrisi — 13 Ekim 2026
+
+- `domain/surface/snap-surface-review-coordinate.js` UTM koordinatını mevcut milimetre hassasiyetinde yuvarlar; `adapters/surface/project-surface-review-ring.js` `[lon,lat]` ringlerini enjekte edilen UTM dönüşümüne bağlar.
+- `adapters/surface/unproject-surface-review-geometry.js` geometriyi WGS84'e çevirir ve EPSG'ye bağlı mevcut WeakMap önbelleğini kullanır.
+- `application/surface/build-surface-review-park-geometry.js` dış park halkalarını birleştirip delikleri çıkarır; `build-surface-review-cell-geometry.js` grid hücresini aynı hassasiyetli clip adapter'ı üzerinden parka kırpar.
+- Modüller servis öncesinde ana thread ve worker'da yüklenir; servis gövdeleri eksik modül halinde yedek davranış olarak korunur.
+
 ## Park içi sampling grid geometrisi — 13 Ekim 2026
 
 - domain/surface/measure-grid-point-distance.js dış halka ve deliklerde işaretli sınır mesafesini hesaplar; ind-grid-interior-point.js sınırlı best-first alt bölmeyle güvenli iç nokta seçer.
