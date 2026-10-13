@@ -219,10 +219,12 @@ function liveCalc(){
  $("liveCalc").innerHTML=`<b>${_tms("Tahmini karbon")} · ${r.total_carbon.toFixed(1)} kg</b><br><small>${_tms("Göğüs çevresi")} ${c.toFixed(1)} cm → DBH ${r.dbh_cm.toFixed(1)} cm · AGB ${r.agb.toFixed(1)} · BHB ${r.bhb.toFixed(1)} kg · ${_tms("Hacim")} ${r.vol.toFixed(3)} m³ · ρ ${r.density_kg_m3} kg/m³</small>`;
 }
 function dgMeasureInvalid(id,message){
+ if(typeof window!=="undefined"&&Object.prototype.hasOwnProperty.call(window,"DG_SHOW_MEASUREMENT_VALIDATION_ERROR"))return window.DG_SHOW_MEASUREMENT_VALIDATION_ERROR.show({fieldId:id,message,element:$,notify:toast});
  const el=$(id);if(el){el.setAttribute("aria-invalid","true");el.focus();}
  toast(message,"err");
 }
 function dgResetMeasureFields(){
+ if(typeof window!=="undefined"&&Object.prototype.hasOwnProperty.call(window,"DG_RESET_MEASUREMENT_ENTRY_FIELDS"))return window.DG_RESET_MEASUREMENT_ENTRY_FIELDS.reset({element:$,clearPhoto:dgClearMeasurePhoto,setManualPoint:value=>{manualPoint=value;},liveCalc});
  for(const id of ["mPoint","mDbh","mHeight"])$(id).value="";
  dgClearMeasurePhoto();$("pointQueryResult").style.display="none";
  manualPoint=false;liveCalc();
@@ -448,6 +450,12 @@ async function createProject(){
  loadProjects();
 }
 async function deleteProject(id){
+ if(typeof window!=="undefined"&&Object.prototype.hasOwnProperty.call(window,"DG_DELETE_MEASUREMENT_PROJECT"))return window.DG_DELETE_MEASUREMENT_PROJECT.remove(id,{
+  count:projectId=>window.DG_MEASUREMENT_PROJECT_DELETION_STORE.countMeasurements({client:sb,projectId}),
+  confirm:count=>window.DG_CONFIRM_MEASUREMENT_PROJECT_DELETE.confirm({count,format:dgTfs,confirm}),
+  delete:projectId=>window.DG_MEASUREMENT_PROJECT_DELETION_STORE.delete({client:sb,projectId}),
+  refresh:loadProjects
+ });
  const{count}=await sb.from("measurements").select("*",{count:"exact",head:true}).eq("project_id",id);
  if(!confirm(dgTfs("Proje silinsin mi? Bağlı {n} ölçüm ve waypoint'ler de silinebilir.\n(Park kimliği silinmez — aynı parktaki diğer projelerin karşılaştırması devam eder.)",{n:(count||0)})))return;
  await sb.from("waypoints").delete().eq("project_id",id);

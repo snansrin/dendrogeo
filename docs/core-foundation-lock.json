@@ -419,7 +419,7 @@
     "src/services/lc-stac.js": "978c4be8c3bc4e7cda3f694d1f06290e661fed5bbd5b76b68719140edc18e71a",
     "src/services/lc-validate.js": "e78602fb957fbc425ade20ba907d96b12f8af7bd3d2563b4e858c60000bbab48",
     "src/services/map.js": "db155b938ac84b24d99a097d309ac5c37bd3235463f76e6fc96ceaa92e7cd4e1",
-    "src/services/measure.js": "4c8bf3f41b1bbef761cb0bbbefac7d7ff317da4780f6859fc9c21fe53000484a",
+    "src/services/measure.js": "7ce7293700c432fb27a4210f324476da2f45f27b63eacb3985c0a65d5401b351",
     "src/services/offline.js": "b0d13ca6c52213b2103e5c23727be42c92cea39855622d43abaad87a8e48280f",
     "src/services/osm-client.js": "2e5eeaa735bf05a603a0db142619f60747b9696f506e666d7df992454a56814f",
     "src/services/osm-water-backup.js": "b3429cdc9bfe0f84bd7b6644a1221d4daadc374ac046b036abf15b3b5ee7d269",
@@ -846,6 +846,17 @@
           "path": "src/services/measure.js",
           "previous_sha256": "14757142b12746cc2b500dbe8276b7b070c2e5f804b5b70ef72820ffd2fbeb4b",
           "sha256": "4c8bf3f41b1bbef761cb0bbbefac7d7ff317da4780f6859fc9c21fe53000484a"
+        }
+      ]
+    },
+    {
+      "date": "2026-10-13",
+      "scope": "User-authorized twenty-second five-module split of locked measurement form cleanup and project deletion: validation focus UI, measurement reset UI, count-aware delete confirmation UI, RLS-scoped project deletion adapter, and delete orchestration. Preserve per-tree-only field reset, confirmation text/count, measurement count query, waypoint-before-project deletion, cancellation safety, and refresh-after-delete; locked regression tests remain unchanged.",
+      "files": [
+        {
+          "path": "src/services/measure.js",
+          "previous_sha256": "4c8bf3f41b1bbef761cb0bbbefac7d7ff317da4780f6859fc9c21fe53000484a",
+          "sha256": "7ce7293700c432fb27a4210f324476da2f45f27b63eacb3985c0a65d5401b351"
         }
       ]
     }
