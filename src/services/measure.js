@@ -244,14 +244,19 @@ let EDIT_PROJ_PARK=null;
  * Geri yükleme KOŞULLU: id hâlâ PROJ_LIST'te varsa seçilir — silinmiş/paylaşımdan
  * çıkmış proje hortlamaz; düzenleme modu (EDIT_ID) değeri zaten kendisi yazar. */
 const DG_LAST_PROJ_KEY="dg_last_proj";
-function dgProjectRemember(id){try{if(id)localStorage.setItem(DG_LAST_PROJ_KEY,String(id));}catch(e){}}
+function dgProjectRemember(id){if(typeof window!=="undefined"&&Object.prototype.hasOwnProperty.call(window,"DG_PROJECT_SELECTION_MEMORY"))return window.DG_PROJECT_SELECTION_MEMORY.remember(localStorage,DG_LAST_PROJ_KEY,id);try{if(id)localStorage.setItem(DG_LAST_PROJ_KEY,String(id));}catch(e){}}
 function dgProjectRestore(){
+ if(typeof window!=="undefined"&&Object.prototype.hasOwnProperty.call(window,"DG_PROJECT_SELECTION_MEMORY")){const last=window.DG_PROJECT_SELECTION_MEMORY.restore(localStorage,DG_LAST_PROJ_KEY,PROJ_LIST);if(!last)return;for(const id of ["mProject","nProject"]){const s=$(id);if(s)s.value=last;}return;}
  let last=null;try{last=localStorage.getItem(DG_LAST_PROJ_KEY);}catch(e){}
  if(!last)return;
  if(!(PROJ_LIST||[]).some(p=>String(p.id)===last))return;
  for(const id of ["mProject","nProject"]){const s=$(id);if(s)s.value=last;}
 }
 function dgProjectOpenMeasure(id){
+ if(typeof window!=="undefined"&&window.DG_OPEN_PROJECT_FOR_MEASUREMENT)return window.DG_OPEN_PROJECT_FOR_MEASUREMENT.open(id,{
+  projects:()=>PROJ_LIST,remember:dgProjectRemember,go, schedule:(fn,delay)=>setTimeout(fn,delay),measureSelect:()=>$("mProject"),
+  projectChanged:()=>{if(typeof dgProjectChanged==="function")dgProjectChanged();},parkGate:()=>{if(typeof dgParkGate==="function")dgParkGate();}
+ });
  const p=(PROJ_LIST||[]).find(x=>Number(x.id)===Number(id));if(!p)return;
  dgProjectRemember(id);
  go("measure");
@@ -262,6 +267,7 @@ function dgProjectOpenMeasure(id){
  },80);
 }
 function dgProjectCard(p,isShared){
+ if(typeof window!=="undefined"&&window.DG_MEASUREMENT_PROJECT_CARD)return window.DG_MEASUREMENT_PROJECT_CARD.render(p,isShared,{formatArea:dgFmtHa,escape:esc,isAdmin:dgIsAdmin});
  const park=p.parks&&p.parks.name?p.parks.name:(p.park_name||"Park bağlantısı yok");
  const area=p.parks&&p.parks.area_m2?dgFmtHa(p.parks.area_m2):"";
  const loc=[p.city,p.country].filter(Boolean).map(esc).join(" · ")||"Konum belirtilmedi";
@@ -335,6 +341,7 @@ async function loadProjects__scroll(){
 
 /* Projeler sekmesindeki "park" kutusu: hangi park algılanmış, ad nasıl olacak. */
 function dgRenderProjectParkBox(){
+ if(typeof window!=="undefined"&&window.DG_MEASUREMENT_PROJECT_PARK_BOX){const park=EDIT_PROJ?EDIT_PROJ_PARK:DG_PARK;return window.DG_MEASUREMENT_PROJECT_PARK_BOX.render({box:$("projParkBox"),park,escape:esc,formatArea:dgFmtHa,getElement:$,previewName:dgProjectNamePreview});}
  const box=$("projParkBox");
  if(!box)return;
  const park=EDIT_PROJ?EDIT_PROJ_PARK:DG_PARK;
@@ -356,6 +363,7 @@ function dgRenderProjectParkBox(){
 }
 
 function dgProjectNamePreview(){
+ if(typeof window!=="undefined"&&window.DG_MEASUREMENT_PROJECT_NAME_PREVIEW){const park=EDIT_PROJ?EDIT_PROJ_PARK:DG_PARK;const label=($("pLabel")?$("pLabel").value:"").trim();return window.DG_MEASUREMENT_PROJECT_NAME_PREVIEW.render({element:$("pNamePreview"),park,label,projectName:dgProjectName});}
  const el=$("pNamePreview");
  if(!el)return;
  const park=EDIT_PROJ?EDIT_PROJ_PARK:DG_PARK;

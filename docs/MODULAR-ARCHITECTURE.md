@@ -1,47 +1,57 @@
 # DendroGeo modüler mimari
 
-## Sınırlar
+## Mevcut sistem ve karar
 
-- `domain/`: saf bilimsel ve coğrafi kurallar. DOM, Leaflet, ağ, Supabase ve kalıcı durum kullanmaz.
-- `application/`: bir kullanıcı işini baştan sona yürütür. Gerekli servisleri işlev bağımlılıkları olarak alır; doğrudan dış servis çağırmaz.
-- `ports/`: application katmanının beklediği veri ve servis sözleşmeleri. Adapter değişse de use-case sözleşmesi aynı kalır.
-- `adapters/`: STAC/COG, OSM, Supabase, IndexedDB, Leaflet ve dosya biçimleriyle konuşur.
-- `features/`: ekran, etkileşim ve görünüm modeli. Hesap kurallarını içermez.
-- `workers/`: uzun raster, geometri ve grid işleri. Mesajları sürümlü ve doğrulanmış DTO'lardır.
-- `bootstrap/`: bağımlılıkları bir kez kurar ve özellikleri başlatır.
-- `compatibility/`: klasik script ve `window.DG_*` çağrıları kaldırılana kadar geçici geriye uyum katmanı.
+Kod tabanı zaten alanlara göre ayrılmış `domain/`, `application/`, `adapters/` ve `ui/` katmanlarına sahip. Kaynakların büyük bölümü bundler kullanmayan klasik tarayıcı script'leri; `partials/head.html` yükleme sırasını, `index.html` üretilmiş sayfayı, `sw.js` ise çevrimdışı paket listesini belirliyor. Modüller çoğunlukla `window.DG_*` API'si yayımlıyor ve testler bu script'leri VM bağlamında yüklüyor. Bu çalışma modelinde önerilen `features/`, `ports/`, `platform/` ve `compatibility/` klasörleri henüz gerçek sınırlar değil.
 
-Bağımlılıklar `features → application → domain` yönünde ilerler. Application dış kaynakları yalnızca port sözleşmeleri üzerinden kullanır; adapter'lar bu portları uygular. Domain ve application birbirinden bağımsız test edilebilir.
+Bu nedenle mevcut dosyaları topluca taşıma veya yeni bir paket/bundler katmanı ekleme yapılmaz. Yeni ve değiştirilen davranışlar mevcut katmanlarda alan klasörleri altında geliştirilir; script sırası, eski global API ve service-worker precache aynı değişikliğin parçası olarak güncellenir. `docs/adr/0005-incremental-layered-architecture.md` bu kararı ve geçiş ölçütlerini kaydeder.
 
-## Hedef ağaç
+## Katman sözleşmeleri
+
+- `domain/{trees,parks,surface,reports,...}/`: deterministik iş/bilim/geometri kuralları. Tarayıcı API'si, Supabase, ağ, dosya sistemi, DOM veya başka katmanların global API'sini çağırmaz. Modül kendi `window.DG_*` adını dışa açabilir.
+- `application/{alan}/`: bir use-case'in sırasını ve hata/iptal kararlarını yönetir. Bağımlılıkları `create({...})` ile callback/port olarak alır; doğrudan `sb`, Leaflet, global `fetch` veya UI modülü çağırmaz. Tarayıcıdaki bazı UI orkestrasyonları bugün burada yaşar; yeni form ve çizim davranışı için `ui/` seçilir.
+- `adapters/{alan}/`: Supabase, REST/OSM/STAC, IndexedDB, dosya indirme ve tarayıcı dış kaynaklarıyla konuşur. Mevcut sorgu, RLS ve hata şekillerini taşır; domain kararını sahiplenmez.
+- `ui/`: HTML üretimi, DOM etkileşimi, harita görünümü ve form durumu. İş kurallarını kopyalamaz; gerekli biçimleyici/işlev callback'lerini alır.
+- `contracts/`: sınırdan geçen verinin çalışma anı şekil ve sürüm doğrulaması. `ports/` adında ayrı klasör henüz yok; callback nesneleri mevcut port sözleşmesidir. Sabit DTO sınırları çoğalıp ortak adlandırma gerektiğinde port dosyaları eklenir.
+- `services/`: eski çağrı adlarını ve `window.DG_*` API'lerini koruyan facade/composition katmanı. Yeni iş kuralı burada büyütülmez; mevcut kilitli dosyalar yalnız açık modülerleştirme kapsamında değiştirilir.
+- `bootstrap/`: global başlatma ve birden fazla katmanı bir araya getiren composition root. `core/` ve `utils/` yalnız mevcut uyumluluk/ortak yardımcılar için kullanılır; yeni iş alanı oraya konmaz.
+- `workers/`: uzun süren raster, geometri ve grid işi. Worker mesajları doğrulanabilir DTO'lardır.
+
+Yeni kod için bağımlılık yönü `ui/services → application → domain`, dış kaynak erişimi için `application → enjekte edilmiş callback ← adapters` biçimindedir. Global script düzeni nedeniyle yön yalnız klasör adına güvenmez; `scripts/check-architecture.mjs` domain ve application içindeki doğrudan altyapı kaçaklarını denetler.
+
+## Bugünkü fiziksel alanlar
 
 ```text
 src/
-├── bootstrap/                 # composition root ve başlangıç
-├── features/
-│   ├── park-analysis/         # tek yüzey analizi ekranı
-│   ├── parks/                 # park seçimi ve park akışı
-│   ├── gis-workspace/         # katmanlar ve çizim araçları
-│   ├── inventory/             # ağaç/saha ekranları
-│   └── reports/               # rapor ve yayın ekranları
-├── application/
-│   ├── surface/               # tara, düzelt, kabul et, grid üret
-│   ├── trees/                 # ölçüm ve karbon use-case'leri
-│   ├── parks/                 # park use-case'leri
-│   ├── reports/               # rapor snapshot/yayın akışı
-│   └── offline/               # kuyruk ve eşitleme
-├── domain/
-│   ├── surface/               # sınıflar, geometri ve kalite kuralları
-│   ├── gis/                   # CRS, alan ve grid kuralları
-│   ├── trees/                 # ölçüm ve allometri kuralları
-│   └── reports/               # değişmez kabul sonucu
-├── ports/                     # veri ve servis arayüzleri
-├── adapters/                  # raster, OSM, Supabase, IndexedDB, Leaflet, export
-├── workers/                   # raster, geometri ve grid işleri
-├── contracts/                 # sürümlü, çalışma anında doğrulanan DTO'lar
-├── platform/                  # zaman aşımı, kuyruk, iptal ve tanılama
-└── compatibility/             # geçiş sırasında legacy window API
+├── bootstrap/                 # uygulama başlatma
+├── config/                    # ortam, sözlük, sabitler ve kilitli protokol
+├── contracts/                 # surface-analysis ve surface-review DTO sınırları
+├── core/                      # dar, eski global API uyumluluk parçaları
+├── domain/                    # admin, auth, backup, export, map, parks, reports,
+│                               # surface, trees, visitors, waypoints ve diğer alanlar
+├── application/               # aynı alan aileleri için use-case/orkestrasyon
+├── adapters/                  # alan bazlı veri ve platform erişimi
+├── ui/                        # mevcut ekran/komponent/controller modülleri
+├── services/                  # geçiş facade'ları; yeni iş mantığı eklenmez
+├── utils/                     # küçük çapraz-katman yardımcıları
+└── workers/                   # yüzey ve grid worker'ları
 ```
+
+`src/domain/{surface,trees,parks,reports}` gibi alan ayrımları hedeflenen `lulc/`, `inventory/`, `carbon/` kavramlarının karşılığıdır; eşanlamlı klasörler açılmaz. Örneğin `surface/` hem WorldCover sınıflarını hem Sentinel-2 kanıtını içerir, `trees/` ise ölçüm ve allometriyi ayırır. `ui/` bugün dosya bazlıdır; `ui/pages`, `ui/components` veya `ui/pwa` ayrımı ancak aynı türde yeterli modül birikip yükleme sırası ve test sınırı netleşince yapılır. `en/` statik sayfa/dil katmanıdır; çalışma zamanı sözlükleri `config/` içindedir.
+
+## Geçiş sırası
+
+1. Önce davranış sahibi fonksiyonu ve kilitli regresyonlarını belirle; test dosyalarını modülleme gerekçesiyle oynatma.
+2. Saf kararları `domain/`a, sıralı iş akışını `application/`a, dış erişimi `adapters/`a, sunumu `ui/`a taşı. Eski servis API'sini ince bir facade olarak bırak.
+3. Yeni script'i `partials/head.html` içinde bağımlılıklarından sonra ve facade'dan önce yükle; `index.html`i build script'iyle üret; `sw.js` precache ve cache sürümünü güncelle.
+4. Modül kontrat testini, ilgili eski regresyonları ve tam `npm run check` paketini çalıştır. Çekirdek değişikliklerini lock manifestinde önceki/yeni hash ile kaydet.
+5. Bir klasör taşıması ancak gerçek bir katman/alan sınırını iyileştiriyor, bütün script/test/worker/CSP referansları birlikte güncelleniyor ve PR'da doğrulanabiliyorsa yapılır. Çoklu alanı tek committe yeniden adlandırma yapılmaz.
+
+Önerilen `supabase/`, `sentinel2/`, `worldcover/`, `zenodo/` alt klasörleri yerine mevcut alan bazlı adapter yolları korunur (`adapters/parks`, `adapters/surface`, `adapters/reports`). Teknolojiye göre ayrım aynı iş akışının parçalarını farklı ağaçlara dağıtır; alan bazlı yerleşim, değişen bir kullanım senaryosunun adapter ve testini birlikte bulmayı kolaylaştırır.
+
+## Mimari karar kayıtları ve sınır denetimi
+
+Yeni kalıcı mimari kararlar `docs/adr/NNNN-kisa-ad.md` içinde durum, bağlam, karar ve sonuçlarıyla tutulur. `npm run check:architecture`, domain/application yasaklı doğrudan bağımlılıklarını denetler; yeni bir legacy ihlali ortaya çıkarsa kuralı gevşetmek yerine çağrı sınırı açıkça incelenir.
 
 ## Uygulanmış ilk ayrım
 
