@@ -244,7 +244,12 @@
       "src/domain/surface/retype-cached-surface-review-parts.js",
       "src/adapters/surface/surface-review-cache.js",
       "src/adapters/surface/project-surface-review-feature-geometry.js",
-      "src/application/surface/build-surface-review-summary.js"
+      "src/application/surface/build-surface-review-summary.js",
+      "src/domain/surface/build-sentinel-profile-bbox.js",
+      "src/domain/surface/select-sentinel-profile-epsg.js",
+      "src/application/surface/prepare-sentinel-profile-input.js",
+      "src/application/surface/run-sentinel-scene-observation-pass.js",
+      "src/application/surface/run-sentinel-annual-observation-pass.js"
     ],
     "live_map": [
       "src/services/map.js",
@@ -440,7 +445,8 @@
       "test/waypoint-delete-modules.test.mjs",
       "test/waypoint-gps-overlay-modules.test.mjs",
       "test/waypoint-load-modules.test.mjs",
-      "test/surface-review-cache-modules.test.mjs"
+      "test/surface-review-cache-modules.test.mjs",
+      "test/sentinel-profile-orchestration-modules.test.mjs"
     ]
   },
   "sha256": {
@@ -664,7 +670,7 @@
     "src/services/lc-osm.js": "4244fd0ab3a64cbeae49c76609cc702c01a057beefb608fd483418e02b91f1cd",
     "src/services/lc-patches.js": "94bc7a7fd771672250655bbfd47a5f162bd06b84c23d2b03d2256bc057669919",
     "src/services/lc-review.js": "03579a67ccd6cef3e56424d0a2d1bcb6e912a480fdcf6acdfaac734ae004dcb6",
-    "src/services/lc-s2.js": "8c16009e690c019da3bd3882cb833126cac9108845342fd059c3ba71e744c534",
+    "src/services/lc-s2.js": "76e5547b6c26ce325934adf2593ea9aafd24369a2ba7a13331708cfa2e4aa543",
     "src/services/lc-stac.js": "978c4be8c3bc4e7cda3f694d1f06290e661fed5bbd5b76b68719140edc18e71a",
     "src/services/lc-validate.js": "b4d8327c62940b1af1a53ddb087188816ff2359c8456c2755c7c853c5919f42b",
     "src/services/map.js": "b5db0047dc86b53c13029e3bd407c087126672d23a6f30b5942d837127006b1f",
@@ -731,7 +737,7 @@
     "src/ui/sync-base-map-layer-selection.js": "2f93018846abac13f83486a1fc2b9df0cbb7f330cae202a0e91ef902c8263eeb",
     "src/ui/waypoint-gps-overlay.js": "e5bb70df065093b911d1c7ff5b5b9fb7db09b38df6bb7fb3271db7ea1e3f4b28",
     "src/utils/geo.js": "3e796768b3d55a3f07c4be3281c9437f1602b6d5e68151b2af7b101707baf294",
-    "src/utils/lazylibs.js": "68caac96df410e2ee1e4d37b41443927295f8c58198b4897064b6e21e142f35f",
+    "src/utils/lazylibs.js": "ab6c3a9f78ca0b3a6c67d01720defc9dff8a7933e556c8aecd6a658cbc5e46ed",
     "src/workers/surface-worker.js": "af6477f104a06342cf69ef7f702a3e95ed27cd390c5aae36a2fbe5dfd68ed2fe",
     "test/base-map-layer-modules.test.mjs": "5399d699e74ffd66e92df312b4301202add7352b2b6c0be24fd51cda63e7baff",
     "test/critical-fixes.test.mjs": "3a2e62104763110bc734b3dc54a37cbf57c15b0038a78fdce35d56d9639c1989",
@@ -857,7 +863,13 @@
     "src/adapters/surface/surface-review-cache.js": "1425826559081c1c4cc4ec8e16f7005db4c48fa600cc00e58bef8e664122362f",
     "src/adapters/surface/project-surface-review-feature-geometry.js": "c78e05c251201211c6b4d78c2b19ee5dd290d371645ca6f253fa25bdca672099",
     "src/application/surface/build-surface-review-summary.js": "16d321d1396524c5196c8ac0462b05d265dc354679ef06ab4a8a4959ca09e931",
-    "test/surface-review-cache-modules.test.mjs": "ef671ea3585169aef22a3b98e369da2ebd81d39757335b3f8d836c40c92b08c5"
+    "test/surface-review-cache-modules.test.mjs": "ef671ea3585169aef22a3b98e369da2ebd81d39757335b3f8d836c40c92b08c5",
+    "src/domain/surface/build-sentinel-profile-bbox.js": "4e8ed2e14a792a2953cc72007131c5e41d3033091e0d72b631ac31bc16c81df0",
+    "src/domain/surface/select-sentinel-profile-epsg.js": "394520711e94b6aada82d11c39d98b41f87a96ed6d9647a3fe45170eba6e8c03",
+    "src/application/surface/prepare-sentinel-profile-input.js": "ac29ab90fabe06357c689c8fca36dca0e096ed01d40dfd8badc8c8c548f51e55",
+    "src/application/surface/run-sentinel-scene-observation-pass.js": "8918573cc4ee087115da475e32abfe250ecbb180b86b0ab999dabd1a25105966",
+    "src/application/surface/run-sentinel-annual-observation-pass.js": "272115510018995d7d9e4e059bbf4efb72dc41c6ad0a839a30730199ae1b29a3",
+    "test/sentinel-profile-orchestration-modules.test.mjs": "33eb6857ae0ae45c6c30794e92445fd670f8866991a7d9ce95f62e046566c552"
   },
   "authorized_modularizations": [
     {
@@ -1968,6 +1980,22 @@
           "path": "src/workers/surface-worker.js",
           "previous_sha256": "22a2f5c374c151b08307df6543d470d075ba481a910c7aa7d9ba830d6b71b4c5",
           "sha256": "af6477f104a06342cf69ef7f702a3e95ed27cd390c5aae36a2fbe5dfd68ed2fe"
+        }
+      ]
+    },
+    {
+      "date": "2026-10-13",
+      "scope": "User-authorized seventy-sixth five-module split of the locked Sentinel profile pipeline: expanded cell window, analysis EPSG selection, input validation/preparation, primary scene observation pass, and annual water/vegetation observation pass. Preserve radiometry, CRS selection, band order, used-cell counts, annual-window behavior, per-scene error isolation, PWA/lazy load order, and all locked regressions.",
+      "files": [
+        {
+          "path": "src/services/lc-s2.js",
+          "previous_sha256": "8c16009e690c019da3bd3882cb833126cac9108845342fd059c3ba71e744c534",
+          "sha256": "76e5547b6c26ce325934adf2593ea9aafd24369a2ba7a13331708cfa2e4aa543"
+        },
+        {
+          "path": "src/utils/lazylibs.js",
+          "previous_sha256": "68caac96df410e2ee1e4d37b41443927295f8c58198b4897064b6e21e142f35f",
+          "sha256": "ab6c3a9f78ca0b3a6c67d01720defc9dff8a7933e556c8aecd6a658cbc5e46ed"
         }
       ]
     }
