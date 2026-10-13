@@ -211,6 +211,19 @@ async function dgSensMount(hostId){
  const rec=await dgSensLoadRecord();if(epoch!==DG_SENS.epoch)return;
  const R=window.DG_SURFACE_REVIEW;
  const fingerprint=await R.fingerprint(cells,PARK_POLY,PARK_HOLES||[],{year:DG_LC_LAST.report?.year,engine:DG_LC_ENGINE_VERSION});if(epoch!==DG_SENS.epoch)return;
+ const lifecycle=[window.DG_CLASSIFY_SURFACE_REVIEW_DATA_CHANGE,window.DG_RESET_SURFACE_REVIEW_DATA_CHANGE,window.DG_PREPARE_SURFACE_REVIEW_SESSION,window.DG_MOUNT_SURFACE_REVIEW_MAP_HOST,window.DG_FINISH_SURFACE_REVIEW_MOUNT];
+ if(lifecycle.every(Boolean)){
+  if(lifecycle[0].changed({savedFingerprint:rec.fingerprint,nextFingerprint:fingerprint})){lifecycle[1].reset(rec);DG_SENS.status=_tvs("Park sınırı veya veri değişti; eski kararlar yeni veriye uygulanmadı.");}
+  rec.fingerprint=fingerprint;dgSensResetScanState(rec);
+  const rebuildOsmObjects=dgSensMigrateOsmObjects(rec);
+  if(rebuildOsmObjects)DG_SENS.status=_tvs("OSM yüzey geometrileri yeni alan kurallarıyla yeniden hesaplanıyor; önceki kabul edilmiş rapor korunuyor.");
+  lifecycle[2].prepare({state:DG_SENS,record:rec,cells,status:value=>{DG_SENS.status=_tvs(value);}});
+  lifecycle[3].mount({host,document,map,state:DG_SENS,baselineLayer:typeof DG_LC_LAYER!=="undefined"?DG_LC_LAYER:null,switchBaseLayer:typeof switchBaseLayer==="function"?switchBaseLayer:null,ResizeObserverCtor:typeof ResizeObserver!=="undefined"?ResizeObserver:null});
+  dgSensGuard(true);
+  const pending=document.getElementById("surfacePendingTools");
+  await lifecycle[4].finish({record:rec,epoch,isCurrent:(record,currentEpoch)=>currentEpoch===DG_SENS.epoch&&DG_SENS.record===record,repartition:dgSensRepartition,canRenderAccepted:()=>!DG_SENS.editing,renderAccepted:dgSensRenderAccepted,hidePending:()=>{if(pending)pending.style.display="none";},scrollHost:()=>host.scrollIntoView({block:"nearest"}),autoWater:dgSensAutoWaterOnMount});
+  return;
+ }
  if(rec.fingerprint&&rec.fingerprint!==fingerprint){Object.assign(rec,{corrections:{},features:[],objectFeatures:null,profile:null,acceptedAt:null,acceptedAreas:null,acceptedResult:null});DG_SENS.status=_tvs("Park sınırı veya veri değişti; eski kararlar yeni veriye uygulanmadı.");}
  rec.fingerprint=fingerprint;
  // A new park analysis always starts with a fresh optional scan and neutral thresholds.
