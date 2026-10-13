@@ -1292,6 +1292,12 @@ The collaborator map renderer now separates peer selection, display-model deriva
 - `adapters/surface/run-surface-review-polygon-operation.js` polygon-clipping erişimini sınırlar; `application/surface/clip-surface-review-geometry.js` temizleme, yerel frame, clipping, koordinatları geri yükleme ve mevcut sayısal hata mesajını orkestre eder.
 - Ana-thread lazy loader ve yüzey worker'ı bu modülleri servis öncesi yükler; servis içi legacy algoritma yedek olarak kalır.
 
+## Yüzey inceleme fingerprint — 13 Ekim 2026
+
+- `domain/surface/select-surface-review-fingerprint-fields.js` yalnız sabitlenen sınır, kaynak metaverisi ve grid hücre alanlarını seçer; `serialize-surface-review-fingerprint-input.js` mevcut JSON gösterimini üretir.
+- `adapters/surface/encode-surface-review-fingerprint-input.js` UTF-8 byte dönüşümünü, `digest-surface-review-fingerprint.js` Web Crypto SHA-256 çağrısını yürütür.
+- `application/surface/build-surface-review-fingerprint.js` adımları birleştirip küçük harfli hex digest döndürür. Ana thread ve worker modülleri servis öncesi yükler; eski servis davranışı fallback olarak kalır.
+
 ## Park içi sampling grid geometrisi — 13 Ekim 2026
 
 - domain/surface/measure-grid-point-distance.js dış halka ve deliklerde işaretli sınır mesafesini hesaplar; ind-grid-interior-point.js sınırlı best-first alt bölmeyle güvenli iç nokta seçer.
