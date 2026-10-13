@@ -141,11 +141,14 @@
       "src/application/surface/prepare-review.js",
       "src/application/surface/prepare-sentinel-annual-evidence.js",
       "src/application/surface/prepare-surface-grid-domain.js",
+      "src/application/surface/prepare-surface-review-feature-masks.js",
       "src/application/surface/prepare-surface-review-session.js",
       "src/application/surface/prepare-verified-map-export.js",
       "src/application/surface/read-sentinel-annual-scene-windows.js",
       "src/application/surface/read-sentinel-scene-windows.js",
       "src/application/surface/reset-surface-review-data-change.js",
+      "src/application/surface/resolve-surface-review-cell.js",
+      "src/application/surface/resolve-surface-review-parts.js",
       "src/application/surface/run-analysis.js",
       "src/application/surface/run-surface-sampling-grid.js",
       "src/application/surface/serialize-validation-campaign-csv.js",
@@ -178,6 +181,8 @@
       "src/domain/surface/quality-gates.js",
       "src/domain/surface/query-green-patches.js",
       "src/domain/surface/review-geometry.js",
+      "src/domain/surface/select-surface-review-features.js",
+      "src/domain/surface/summarize-surface-review-parts.js",
       "src/domain/surface/validate-surface-grid-options.js",
       "src/services/grid-engine.js",
       "src/services/landcover.js",
@@ -400,6 +405,7 @@
       "test/surface-mount-lifecycle-modules.test.mjs",
       "test/surface-network-budget.test.mjs",
       "test/surface-report-field-ux.test.mjs",
+      "test/surface-review-resolution-modules.test.mjs",
       "test/surface-review.test.mjs",
       "test/surface-scientific-contract.test.mjs",
       "test/tree-carbon-architecture.test.mjs",
@@ -521,11 +527,14 @@
     "src/application/surface/prepare-review.js": "62e1e7aab38faf62d64b7080856874905030b7b9bcdaac151139b06efd9c5aaa",
     "src/application/surface/prepare-sentinel-annual-evidence.js": "20e834abcaa4dea5341320ebadf026a4f57a0419c161e4d95d64be65406f118c",
     "src/application/surface/prepare-surface-grid-domain.js": "ef673ea7b35a8226f96b0d096a32a0ed5d54ed33c348f6ece9cd6fb270c28bd6",
+    "src/application/surface/prepare-surface-review-feature-masks.js": "8a8c986c2376fb2cd833454c58d0ff3b6c59ac28498403dac8bc183d6072a5e2",
     "src/application/surface/prepare-surface-review-session.js": "74d5a62b04ff996d8b797903862255d93419a93905970f2a83c5df09bbf47efd",
     "src/application/surface/prepare-verified-map-export.js": "dc77c1bcb907d67fbddd8e9e83fa1f58543d54af6ca91587e502f6731d5eb737",
     "src/application/surface/read-sentinel-annual-scene-windows.js": "32ea6d48fb156755c3dde43a44e6b529a356079ab7b91c758295602a7b7ad70a",
     "src/application/surface/read-sentinel-scene-windows.js": "6308814a72fdba9ba2d25360059962e44e7b15fbd1f97dd27a5f4513030f32a8",
     "src/application/surface/reset-surface-review-data-change.js": "752db7f5acbf18b44c5a7a50439b7c5e0e7b643d3c3f3c21cd0785d7a29627ba",
+    "src/application/surface/resolve-surface-review-cell.js": "f5addacf9601668220d7a45b7ec738b75d944d66f4c9b2093fe059ce72989a6d",
+    "src/application/surface/resolve-surface-review-parts.js": "96301c39358df7eb782699b8375d0ae94fa9ea51bb2d6f1c56d8c6e1a1044802",
     "src/application/surface/run-analysis.js": "17961160900d79af74b7e171c4958c7cdbbd904345dc8ff455b6ecd0bdad778e",
     "src/application/surface/run-surface-sampling-grid.js": "98ef9d7ed0f1b49005a7c7b606662d473f32c58bfbe09f3ff2b1af2bd024dcf4",
     "src/application/surface/serialize-validation-campaign-csv.js": "f8da570d12031a36013c4173e390f3dafbbeb64de847fa1d54b7cf21c1b9b5b3",
@@ -601,6 +610,8 @@
     "src/domain/surface/quality-gates.js": "41cbd1ccfc27aacbf001a5cd3bbcf9b0a5277d85a8b34cccc6cab380e14fe238",
     "src/domain/surface/query-green-patches.js": "72bd10559329b561bc3f17e798ea37ae43dc5a1d1988fd16fcca495afe8c044b",
     "src/domain/surface/review-geometry.js": "29aa04a494002b4c93e9e09ff395cc62eeee3c70df984834c32d14938e91230e",
+    "src/domain/surface/select-surface-review-features.js": "9c88034231e33e2cd24d906674c2525e8a215b07967fc4e4e62e7e8b7dac926a",
+    "src/domain/surface/summarize-surface-review-parts.js": "2e0e62559ec30628b6c89587e115b6cc2165603674bfde0186e2290f36ceae9f",
     "src/domain/surface/validate-surface-grid-options.js": "e64627a330cc14447ac08003554f6e898c65f7eb12ff329f5d83f3426bb94047",
     "src/domain/trees/allometry.js": "d111ec3ae452cf9893671eff9dda63c4e4c4ac8244199bd0c4aba89907dd8a1b",
     "src/domain/trees/photo-quality.js": "c37f03fbbe19f1a2bcb6f4c68836e831f76f4ac215918aedf4ff4bf7c7b39390",
@@ -613,7 +624,7 @@
     "src/services/lc-geo.js": "ade537a9ea592914288c9c3cead038834919f4919b63be2a3cce28cfe2b97d73",
     "src/services/lc-osm.js": "4244fd0ab3a64cbeae49c76609cc702c01a057beefb608fd483418e02b91f1cd",
     "src/services/lc-patches.js": "94bc7a7fd771672250655bbfd47a5f162bd06b84c23d2b03d2256bc057669919",
-    "src/services/lc-review.js": "1b1d4cf9f2ca8bf7c100444d3b3c0c6af5b9c4c8a027ab6a92520775bae31ab7",
+    "src/services/lc-review.js": "37747d667bf5755262269e7dc4d43f06099f36c9f8558260e59acab57749b835",
     "src/services/lc-s2.js": "8c16009e690c019da3bd3882cb833126cac9108845342fd059c3ba71e744c534",
     "src/services/lc-stac.js": "978c4be8c3bc4e7cda3f694d1f06290e661fed5bbd5b76b68719140edc18e71a",
     "src/services/lc-validate.js": "b4d8327c62940b1af1a53ddb087188816ff2359c8456c2755c7c853c5919f42b",
@@ -681,8 +692,8 @@
     "src/ui/sync-base-map-layer-selection.js": "2f93018846abac13f83486a1fc2b9df0cbb7f330cae202a0e91ef902c8263eeb",
     "src/ui/waypoint-gps-overlay.js": "e5bb70df065093b911d1c7ff5b5b9fb7db09b38df6bb7fb3271db7ea1e3f4b28",
     "src/utils/geo.js": "3e796768b3d55a3f07c4be3281c9437f1602b6d5e68151b2af7b101707baf294",
-    "src/utils/lazylibs.js": "65d0aa3fbd5ea22c9fc7c300d54f2fa152bba5fa2b8181273c8bc9159f8f94ce",
-    "src/workers/surface-worker.js": "714705c45e49950cbcfe89ac67a5674414d181bd86f959b96dc7ee94743736c6",
+    "src/utils/lazylibs.js": "36a495c5db6df52ed72872829e2e2c5dc7807ca6ce70f2ce90e7734865583d2c",
+    "src/workers/surface-worker.js": "04927dc1d2545dbd11ad31d19402247e365c09568dbeadab1ca51f680f2451e5",
     "test/base-map-layer-modules.test.mjs": "5399d699e74ffd66e92df312b4301202add7352b2b6c0be24fd51cda63e7baff",
     "test/critical-fixes.test.mjs": "3a2e62104763110bc734b3dc54a37cbf57c15b0038a78fdce35d56d9639c1989",
     "test/dbh-qa.test.mjs": "d3bbd29d292aa1214ede27a21ecb99315bc24a6346e2b0119f8c04eb8b532b95",
@@ -784,6 +795,7 @@
     "test/surface-mount-lifecycle-modules.test.mjs": "db9f479034142c1c7531b012ae509d8df069efba723e71b71e490fa110bba12e",
     "test/surface-network-budget.test.mjs": "33e69c3d0de1d81561a9707dc3e9fd2eb8730f4a7331a90bd16171fb2677887d",
     "test/surface-report-field-ux.test.mjs": "cc0c2e640f2539f2062546f4acc6e8b590bfef256f47fd54cf5100d0c4b50cdc",
+    "test/surface-review-resolution-modules.test.mjs": "047f611c00e76b553d8a52b4a1a59366a97504bcf5356bcd43bfcafa3ae2a277",
     "test/surface-review.test.mjs": "79c8dc6f99883699dd2ac4ad890d1030807f273e3f094f013969e677ff669f2c",
     "test/surface-scientific-contract.test.mjs": "d4c7b1ea5707b77997921bc06b50973618409f9e192fcd83a6152a391e75d299",
     "test/tree-carbon-architecture.test.mjs": "10a30a213b8f4fc8b18f883bc30c0aa2ba72a12ccea6c4c2cb198f4536504023",
@@ -1798,6 +1810,27 @@
           "path": "src/workers/surface-worker.js",
           "previous_sha256": "844788d6364d35bd78e0a183f354b4acb2589e0be51761d1f577c762b7806faa",
           "sha256": "714705c45e49950cbcfe89ac67a5674414d181bd86f959b96dc7ee94743736c6"
+        }
+      ]
+    },
+    {
+      "date": "2026-10-13",
+      "scope": "User-authorized seventy-first five-module split of locked surface review resolution: known-feature selection, park-clipped mask preparation, per-cell overlay resolution, cache-aware orchestration, and area reconciliation. Preserve newest-boundary precedence, park clipping, measured area allocation, geometry memo reuse and locked review regressions.",
+      "files": [
+        {
+          "path": "src/services/lc-review.js",
+          "previous_sha256": "1b1d4cf9f2ca8bf7c100444d3b3c0c6af5b9c4c8a027ab6a92520775bae31ab7",
+          "sha256": "37747d667bf5755262269e7dc4d43f06099f36c9f8558260e59acab57749b835"
+        },
+        {
+          "path": "src/utils/lazylibs.js",
+          "previous_sha256": "65d0aa3fbd5ea22c9fc7c300d54f2fa152bba5fa2b8181273c8bc9159f8f94ce",
+          "sha256": "36a495c5db6df52ed72872829e2e2c5dc7807ca6ce70f2ce90e7734865583d2c"
+        },
+        {
+          "path": "src/workers/surface-worker.js",
+          "previous_sha256": "714705c45e49950cbcfe89ac67a5674414d181bd86f959b96dc7ee94743736c6",
+          "sha256": "04927dc1d2545dbd11ad31d19402247e365c09568dbeadab1ca51f680f2451e5"
         }
       ]
     }
