@@ -9,6 +9,7 @@ const modules=[
   'src/adapters/trees/fetch-shared-measurement-projects.js',
   'src/domain/trees/merge-measurement-projects.js',
   'src/ui/render-measurement-project-directory.js',
+  'src/application/trees/measurement-project-state.js',
   'src/application/trees/load-measurement-project-directory.js'
 ];
 function setup(){const window={};const context=vm.createContext({window});for(const path of modules)vm.runInContext(read(path),context,{filename:path});return{window,context};}
@@ -48,8 +49,8 @@ test('directory UI preserves selector restore, owner/shared cards, counts and em
 
 test('application loads, merges, stores and renders in order',async()=>{
   const{window}=setup(),events=[],owned=[{id:1}],shared=[{id:2,shared:true}];
-  const result=await window.DG_LOAD_MEASUREMENT_PROJECT_DIRECTORY.load({fetchOwned:async()=>{events.push('owned');return owned;},fetchShared:async rows=>{events.push(['shared',rows]);return shared;},merge:(a,b)=>{events.push('merge');return [...a,...b];},setProjects:rows=>events.push(['set',rows]),render:rows=>events.push(['render',rows]),afterRender:rows=>events.push(['after',rows])});
-  assert.deepEqual(result,[...owned,...shared]);assert.deepEqual(events.map(event=>Array.isArray(event)?event[0]:event),['owned','shared','merge','set','render','after']);
+  const result=await window.DG_LOAD_MEASUREMENT_PROJECT_DIRECTORY.load({onState:state=>events.push(['state',state.loading]),fetchOwned:async()=>{events.push('owned');return owned;},fetchShared:async rows=>{events.push(['shared',rows]);return shared;},merge:(a,b)=>{events.push('merge');return [...a,...b];},render:rows=>events.push(['render',rows]),afterRender:rows=>events.push(['after',rows])});
+  assert.deepEqual(result,[...owned,...shared]);assert.deepEqual(events.map(event=>Array.isArray(event)?event[0]:event),['state','owned','shared','merge','state','render','after']);
 });
 
 test('five directory modules load before measure.js and remain available offline',()=>{

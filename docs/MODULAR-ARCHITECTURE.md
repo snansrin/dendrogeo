@@ -4,6 +4,8 @@
 
 Kod tabanı zaten alanlara göre ayrılmış `domain/`, `application/`, `adapters/` ve `ui/` katmanlarına sahip. Kaynakların büyük bölümü bundler kullanmayan klasik tarayıcı script'leri; `partials/head.html` yükleme sırasını, `index.html` üretilmiş sayfayı, `sw.js` ise çevrimdışı paket listesini belirliyor. Modüller çoğunlukla `window.DG_*` API'si yayımlıyor ve testler bu script'leri VM bağlamında yüklüyor. Bu çalışma modelinde önerilen `features/`, `ports/`, `platform/` ve `compatibility/` klasörleri henüz gerçek sınırlar değil.
 
+Durum, Service Worker, güncelleme, lazy loading ve güvenlik önerilerinin kaynak kodla doğrulanmış ayrıntıları [`ARCHITECTURE-ASSESSMENT.md`](ARCHITECTURE-ASSESSMENT.md) içindedir. Yeni `store` veya PWA değişiklikleri bu kanıta ve [ADR 0006](adr/0006-state-and-pwa-migration.md) kararına göre yapılır.
+
 Bu nedenle mevcut dosyaları topluca taşıma veya yeni bir paket/bundler katmanı ekleme yapılmaz. Yeni ve değiştirilen davranışlar mevcut katmanlarda alan klasörleri altında geliştirilir; script sırası, eski global API ve service-worker precache aynı değişikliğin parçası olarak güncellenir. `docs/adr/0005-incremental-layered-architecture.md` bu kararı ve geçiş ölçütlerini kaydeder.
 
 ## Katman sözleşmeleri
@@ -63,6 +65,7 @@ Yeni kalıcı mimari kararlar `docs/adr/NNNN-kisa-ad.md` içinde durum, bağlam,
 - `application/trees/validate-measurement.js`, proje/nokta/ölçüm numarası ile grup/tür/çevre/boy kapısının sırasını yönetir; limitleri kopyalamaz, yoğunluk ve ölçüm protokolü adapter'larına sorar.
 - `adapters/trees/fetch-owned-measurement-projects.js` ve `fetch-shared-measurement-projects.js`, sahip ve collaborator proje okumalarını mevcut ilişki seçimi, eski şema yedeği ve park-scope filtreleriyle yürütür; `domain/trees/merge-measurement-projects.js` owner-first listeyi saf biçimde birleştirir.
 - `application/trees/load-measurement-project-directory.js` okuma, birleştirme ve sunum sırasını yönetir; `ui/render-measurement-project-directory.js` seçim kutularını, sayaçları, sahip/paylaşılan kartları ve boş durumu çizer. `services/measure.js` mevcut global API, rapor senkronu ve park/ölçüm kapılarını korur.
+- `application/trees/measurement-project-state.js`, proje dizini için `getState/setState/subscribe` sunan ilk feature-scoped store'dur; `PROJ_LIST` mevcut modüllere uyum için aynalanır. `domain/trees/build-measurement-project-write.js`, `adapters/trees/persist-measurement-project.js`, `application/trees/save-measurement-project.js` ve `ui/measurement-project-edit-form.js` yazma payload'ını, RLS adapter'ını, use-case sırasını ve düzenleme formunu birbirinden ayırır.
 - `domain/trees/photo-quality.js`, kalibre piksel sınıflandırmasını ve fotoğraf kanıtı kararını saf fonksiyonlar olarak tutar; canvas, DOM ve form durumuna erişmez.
 - `application/reports/collect-publication-request.js`, kullanıcı tarafından onaylanan yayın isteğinin tekilleştirme, künye toplama ve ekleme sırasını bağımlılık enjeksiyonuyla yürütür; Supabase ve modal uygulama servisinde kalır.
 - `domain/reports/report-context.js`, bibliyografik künye temizleme, ORCID ve tarih doğrulama kurallarını saf fonksiyonlarda tutar; `core/report-context.js` eski global API için uyumluluk köprüsüdür.
