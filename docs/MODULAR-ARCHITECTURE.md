@@ -1376,3 +1376,9 @@ The collaborator map renderer now separates peer selection, display-model deriva
 - `domain/parks/resolve-park-geometry-backfill-area.js` ölçülen OSM alanını aynı tam sayıya yuvarlar; geçersiz/boş ölçümde kayıtlı park alanını korur.
 - `adapters/parks/park-geometry-backfill-store.js` park satırını `id` filtresiyle okur ve geometri/alan güncellemesini mevcut RLS kapsamlı `parks` isteğiyle yazar. OSM ring adapter'ı mevcut Overpass ilişki-yol birleştirmesini sürdürür.
 - Uygulama modülü admin kapısı, OSM hata/eksik sınır, alan hesabı, yazım ve yenileme sırasını orkestre eder; UI feedback modülü mevcut çevrilmiş ve kaçırılmış toast mesajlarını tutar. Kontrat testleri beş modülün sırasını ve store sorgularını doğrular.
+
+## Park şema hatası ve geri bildirim — 13 Ekim 2026
+
+- `domain/parks/is-schema-error.js` gerçek tablo/sütun/function ve PostgREST schema-cache hatalarını sınıflandırır; permission, auth, ağ ve timeout hatalarını şema eksiği saymaz.
+- `application/parks/handle-park-schema-missing.js` geçici hatalarda durumu değiştirmez; gerçek şema eksikliğinde uyarıyı bir kez işaretler, `DG_PARK_SCHEMA_OK` kapısını düşürür ve park kartını yeniler.
+- `ui/park-schema-missing-feedback.js` transient ve eksik migration mesajlarını admin/normal kullanıcı rolüne göre üretir; var olan `park-schema-warning.js` HTML uyarısı aynı kalır. Kilitli hata sınıflandırma regresyonları değişmedi.
