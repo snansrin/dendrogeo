@@ -164,6 +164,15 @@ function dgSurfaceClean(geom){
 }
 function dgGridPrecisionClip(op,...geoms){if(window.DG_CLIP_GRID_GEOMETRY)return window.DG_CLIP_GRID_GEOMETRY.clip(op,geoms,{run:(operation,...values)=>window.polygonClipping[operation](...values),clean:dgSurfaceClean});return dgSurfaceClean(window.polygonClipping[op](...geoms.map(dgSurfaceClean)));}
 async function dgSurfaceGrid(data){
+ const validate=window.DG_VALIDATE_SURFACE_GRID_OPTIONS,prepare=window.DG_PREPARE_SURFACE_GRID_DOMAIN,erode=window.DG_ERODE_SURFACE_GRID_DOMAIN,buildCells=window.DG_BUILD_SURFACE_SAMPLING_GRID_CELLS,run=window.DG_RUN_SURFACE_SAMPLING_GRID;
+ if(validate&&prepare&&erode&&buildCells&&run)return run.run(data,{
+  validate:value=>validate.validate(value),
+  prepare:(value,options,operations)=>prepare.prepare(value,options,operations),
+  erode:(domain,clearance,operations)=>erode.erode(domain,clearance,operations),
+  buildCells:(input,operations)=>buildCells.build(input,operations),
+  operations:{buildPark:dgSurfacePark,bounds:dgSurfaceBounds,clean:dgSurfaceClean,project:dgSurfaceProject,lineMask:dgGridLineMask,clip:(operation,...geometries)=>dgGridPrecisionClip(operation,...geometries),area:dgSurfaceArea,overlap:dgSurfaceOverlap,pointDistance:dgGridPointDistance,interiorPoint:dgGridInterior,unprojectGeometry:dgSurfaceUnproject,unprojectPoint:dgLcUtmInverse,schedule:()=>new Promise(resolve=>setTimeout(resolve,0))},
+  schedule:()=>new Promise(resolve=>setTimeout(resolve,0))
+ });
  const pc={union:(...g)=>dgGridPrecisionClip("union",...g),difference:(...g)=>dgGridPrecisionClip("difference",...g),intersection:(...g)=>dgGridPrecisionClip("intersection",...g)},size=Number(data.size),clearance=Number(data.clearance),epsg=data.epsg;
  if(![10,20,50].includes(size)||!Number.isFinite(clearance)||clearance<1||clearance>20)throw Error('Grid boyutu veya güvenlik mesafesi geçersiz.');
  const globalPark=dgSurfacePark(data.outer,data.holes||[],epsg),origin=dgSurfaceBounds(globalPark).slice(0,2).map(v=>Math.floor(v));
