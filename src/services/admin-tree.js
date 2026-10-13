@@ -124,6 +124,7 @@ function dgUpdateSidebarBadge(n){
 /* Yan menü rozeti, yönetim sekmesi AÇILMADAN da güncel olsun diye ayrı bir
  * hafif sorgu (head:true → yalnız sayı, satır çekilmez). */
 async function dgRefreshPendingBadge(){
+  if(window.DG_REFRESH_ADMIN_TREE_PENDING_BADGE)return window.DG_REFRESH_ADMIN_TREE_PENDING_BADGE.execute(sb,dgUpdateSidebarBadge);
   try{
     const{count,error}=await sb.from("measurements")
       .select("*",{count:"exact",head:true}).eq("status","Beklemede");
@@ -140,6 +141,7 @@ function dgTreeOnlyPending(){
 
 /* Yalnız onay bekleyen kayıt içeren düğümleri açar (kuyrukta hızlı gezinme). */
 function dgTreeOpenPending(){
+  if(window.DG_OPEN_ADMIN_TREE_PENDING_NODES)return window.DG_OPEN_ADMIN_TREE_PENDING_NODES.open(DG_TREE_ROWS,DG_TREE_STATUS,DG_TREE_QUERY,{filter:dgTreeFilterRows,group:dgTreeGroup,openKeys:DG_TREE_OPEN,render:dgTreeRender});
   const rows=dgTreeFilterRows(DG_TREE_ROWS,DG_TREE_STATUS,DG_TREE_QUERY);
   const tree=dgTreeGroup(rows);
   tree.forEach(P=>{
@@ -257,6 +259,7 @@ function dgTreePendingScan(ev){
 }
 
 function dgTreeExpand(open){
+  if(window.DG_EXPAND_ADMIN_MEASUREMENT_TREE)return window.DG_EXPAND_ADMIN_MEASUREMENT_TREE.expand(DG_TREE_ROWS,DG_TREE_STATUS,DG_TREE_QUERY,DG_TREE_OPEN,{filter:dgTreeFilterRows,group:dgTreeGroup,render:dgTreeRender},open);
   const rows=dgTreeFilterRows(DG_TREE_ROWS,DG_TREE_STATUS,DG_TREE_QUERY);
   const tree=dgTreeGroup(rows);
   DG_TREE_OPEN.clear();
@@ -291,6 +294,7 @@ function dgTreeRows(){return DG_TREE_ROWS;}
  * yeniden çiz. Satır önbellekte yoksa false döner (çağıran tam loadAdmin'e
  * düşer — örn. düz listeden, ağaç henüz yüklenmemişken onay). */
 function dgTreeApplyStatus(id,status,shared){
+  if(window.DG_APPLY_ADMIN_TREE_ROW_STATUS)return window.DG_APPLY_ADMIN_TREE_ROW_STATUS.apply(DG_TREE_ROWS,id,status,shared,{draw:dgTreeDraw,renderFlat:rows=>{if(typeof dgRenderFlatTable==="function")dgRenderFlatTable(rows);}});
   const row=DG_TREE_ROWS.find(r=>Number(r.id)===Number(id));
   if(!row)return false;
   row.status=status;
@@ -302,6 +306,7 @@ function dgTreeApplyStatus(id,status,shared){
 
 /* Satırı yerel önbellekten sil (delMeas) + yerinde yeniden çiz. */
 function dgTreeRemoveRow(id){
+  if(window.DG_REMOVE_ADMIN_TREE_ROW)return window.DG_REMOVE_ADMIN_TREE_ROW.remove(DG_TREE_ROWS,id,{draw:dgTreeDraw,renderFlat:rows=>{if(typeof dgRenderFlatTable==="function")dgRenderFlatTable(rows);}});
   const i=DG_TREE_ROWS.findIndex(r=>Number(r.id)===Number(id));
   if(i<0)return false;
   DG_TREE_ROWS.splice(i,1);
