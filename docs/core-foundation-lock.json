@@ -239,7 +239,12 @@
       "src/ui/park-reset-controller.js",
       "src/ui/render-surface-accepted-result.js",
       "src/utils/lazylibs.js",
-      "src/workers/surface-worker.js"
+      "src/workers/surface-worker.js",
+      "src/domain/surface/is-surface-review-cache-current.js",
+      "src/domain/surface/retype-cached-surface-review-parts.js",
+      "src/adapters/surface/surface-review-cache.js",
+      "src/adapters/surface/project-surface-review-feature-geometry.js",
+      "src/application/surface/build-surface-review-summary.js"
     ],
     "live_map": [
       "src/services/map.js",
@@ -434,7 +439,8 @@
       "test/waypoint-csv-upload-modules.test.mjs",
       "test/waypoint-delete-modules.test.mjs",
       "test/waypoint-gps-overlay-modules.test.mjs",
-      "test/waypoint-load-modules.test.mjs"
+      "test/waypoint-load-modules.test.mjs",
+      "test/surface-review-cache-modules.test.mjs"
     ]
   },
   "sha256": {
@@ -561,7 +567,7 @@
     "src/application/surface/read-sentinel-scene-windows.js": "6308814a72fdba9ba2d25360059962e44e7b15fbd1f97dd27a5f4513030f32a8",
     "src/application/surface/reset-surface-review-data-change.js": "752db7f5acbf18b44c5a7a50439b7c5e0e7b643d3c3f3c21cd0785d7a29627ba",
     "src/application/surface/resolve-surface-review-cell.js": "f5addacf9601668220d7a45b7ec738b75d944d66f4c9b2093fe059ce72989a6d",
-    "src/application/surface/resolve-surface-review-parts.js": "96301c39358df7eb782699b8375d0ae94fa9ea51bb2d6f1c56d8c6e1a1044802",
+    "src/application/surface/resolve-surface-review-parts.js": "c4cd9d4475607d2b0dd87105fe25f24880983dc43af78d45b05d734848f984c4",
     "src/application/surface/run-analysis.js": "17961160900d79af74b7e171c4958c7cdbbd904345dc8ff455b6ecd0bdad778e",
     "src/application/surface/run-surface-sampling-grid.js": "98ef9d7ed0f1b49005a7c7b606662d473f32c58bfbe09f3ff2b1af2bd024dcf4",
     "src/application/surface/serialize-validation-campaign-csv.js": "f8da570d12031a36013c4173e390f3dafbbeb64de847fa1d54b7cf21c1b9b5b3",
@@ -657,7 +663,7 @@
     "src/services/lc-geo.js": "ade537a9ea592914288c9c3cead038834919f4919b63be2a3cce28cfe2b97d73",
     "src/services/lc-osm.js": "4244fd0ab3a64cbeae49c76609cc702c01a057beefb608fd483418e02b91f1cd",
     "src/services/lc-patches.js": "94bc7a7fd771672250655bbfd47a5f162bd06b84c23d2b03d2256bc057669919",
-    "src/services/lc-review.js": "a0314215db7abd965fdf4743661c3f9d90fc991b28672135e25f5dae08954875",
+    "src/services/lc-review.js": "03579a67ccd6cef3e56424d0a2d1bcb6e912a480fdcf6acdfaac734ae004dcb6",
     "src/services/lc-s2.js": "8c16009e690c019da3bd3882cb833126cac9108845342fd059c3ba71e744c534",
     "src/services/lc-stac.js": "978c4be8c3bc4e7cda3f694d1f06290e661fed5bbd5b76b68719140edc18e71a",
     "src/services/lc-validate.js": "b4d8327c62940b1af1a53ddb087188816ff2359c8456c2755c7c853c5919f42b",
@@ -725,8 +731,8 @@
     "src/ui/sync-base-map-layer-selection.js": "2f93018846abac13f83486a1fc2b9df0cbb7f330cae202a0e91ef902c8263eeb",
     "src/ui/waypoint-gps-overlay.js": "e5bb70df065093b911d1c7ff5b5b9fb7db09b38df6bb7fb3271db7ea1e3f4b28",
     "src/utils/geo.js": "3e796768b3d55a3f07c4be3281c9437f1602b6d5e68151b2af7b101707baf294",
-    "src/utils/lazylibs.js": "04a7cb60b619c82b8412a7d4d76378b254e9d2f20529f2f9e70c27d726b82f44",
-    "src/workers/surface-worker.js": "22a2f5c374c151b08307df6543d470d075ba481a910c7aa7d9ba830d6b71b4c5",
+    "src/utils/lazylibs.js": "68caac96df410e2ee1e4d37b41443927295f8c58198b4897064b6e21e142f35f",
+    "src/workers/surface-worker.js": "af6477f104a06342cf69ef7f702a3e95ed27cd390c5aae36a2fbe5dfd68ed2fe",
     "test/base-map-layer-modules.test.mjs": "5399d699e74ffd66e92df312b4301202add7352b2b6c0be24fd51cda63e7baff",
     "test/critical-fixes.test.mjs": "3a2e62104763110bc734b3dc54a37cbf57c15b0038a78fdce35d56d9639c1989",
     "test/dbh-qa.test.mjs": "d3bbd29d292aa1214ede27a21ecb99315bc24a6346e2b0119f8c04eb8b532b95",
@@ -845,7 +851,13 @@
     "test/waypoint-load-modules.test.mjs": "cd0f5b0436f1597a17d235e78f0554dec8ff341d2111dd1adf891d454635327b",
     "vendor/geotiff-2.1.3.js": "cb5c9731bfee1f8bff1728e54e4436ada81ea3258b178a3d6603c61b58d99e6c",
     "vendor/leaflet-1.9.4.js": "db49d009c841f5ca34a888c96511ae936fd9f5533e90d8b2c4d57596f4e5641a",
-    "vendor/polygon-clipping-0.15.7.js": "7f8619e84a86ce8dd400c9b50430e9c8cf8f26027b19eeb479f109f5c1a9d688"
+    "vendor/polygon-clipping-0.15.7.js": "7f8619e84a86ce8dd400c9b50430e9c8cf8f26027b19eeb479f109f5c1a9d688",
+    "src/domain/surface/is-surface-review-cache-current.js": "0c87841f274dcd940b71ba630d1a5c220e510176d0b56cb745f51048565bf280",
+    "src/domain/surface/retype-cached-surface-review-parts.js": "b2c524202d466641449d22e40bd6c9bf8ecece78adeadcf1ab228da54cf934f3",
+    "src/adapters/surface/surface-review-cache.js": "1425826559081c1c4cc4ec8e16f7005db4c48fa600cc00e58bef8e664122362f",
+    "src/adapters/surface/project-surface-review-feature-geometry.js": "c78e05c251201211c6b4d78c2b19ee5dd290d371645ca6f253fa25bdca672099",
+    "src/application/surface/build-surface-review-summary.js": "16d321d1396524c5196c8ac0462b05d265dc354679ef06ab4a8a4959ca09e931",
+    "test/surface-review-cache-modules.test.mjs": "ef671ea3585169aef22a3b98e369da2ebd81d39757335b3f8d836c40c92b08c5"
   },
   "authorized_modularizations": [
     {
@@ -1930,6 +1942,32 @@
           "path": "src/workers/surface-worker.js",
           "previous_sha256": "7ed4b193bb8b11e6bfd88c52b0fc29fcb356749e3044c83f2bf0d9eb1bb3dfe2",
           "sha256": "22a2f5c374c151b08307df6543d470d075ba481a910c7aa7d9ba830d6b71b4c5"
+        }
+      ]
+    },
+    {
+      "date": "2026-10-13",
+      "scope": "User-authorized seventy-fifth five-module split of locked surface review cache and summary flow: cache freshness policy, cached raster-part retyping, WeakMap cache adapter, feature geometry projection adapter, and summary application orchestration. Preserve park/CRS/cell/feature identity gates, explicit boundary features, WGS memoization, area reconciliation, worker/loading order, and all locked regressions.",
+      "files": [
+        {
+          "path": "src/services/lc-review.js",
+          "previous_sha256": "a0314215db7abd965fdf4743661c3f9d90fc991b28672135e25f5dae08954875",
+          "sha256": "03579a67ccd6cef3e56424d0a2d1bcb6e912a480fdcf6acdfaac734ae004dcb6"
+        },
+        {
+          "path": "src/application/surface/resolve-surface-review-parts.js",
+          "previous_sha256": "96301c39358df7eb782699b8375d0ae94fa9ea51bb2d6f1c56d8c6e1a1044802",
+          "sha256": "c4cd9d4475607d2b0dd87105fe25f24880983dc43af78d45b05d734848f984c4"
+        },
+        {
+          "path": "src/utils/lazylibs.js",
+          "previous_sha256": "04a7cb60b619c82b8412a7d4d76378b254e9d2f20529f2f9e70c27d726b82f44",
+          "sha256": "68caac96df410e2ee1e4d37b41443927295f8c58198b4897064b6e21e142f35f"
+        },
+        {
+          "path": "src/workers/surface-worker.js",
+          "previous_sha256": "22a2f5c374c151b08307df6543d470d075ba481a910c7aa7d9ba830d6b71b4c5",
+          "sha256": "af6477f104a06342cf69ef7f702a3e95ed27cd390c5aae36a2fbe5dfd68ed2fe"
         }
       ]
     }

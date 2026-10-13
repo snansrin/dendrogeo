@@ -128,6 +128,11 @@ export function loadApp({ sadece } = {}) {
     'src/application/surface/resolve-surface-review-cell.js',
     'src/application/surface/resolve-surface-review-parts.js',
     'src/domain/surface/summarize-surface-review-parts.js',
+    'src/domain/surface/is-surface-review-cache-current.js',
+    'src/domain/surface/retype-cached-surface-review-parts.js',
+    'src/adapters/surface/surface-review-cache.js',
+    'src/adapters/surface/project-surface-review-feature-geometry.js',
+    'src/application/surface/build-surface-review-summary.js',
     'src/services/lc-patches.js',
     /* UYDU HASSASİYET (0054): validate çekirdeği saf matematiktir (eşikler,
      * hassasiyet, Olofsson metrikleri, düzeltme katmanı) — birim testleri

@@ -1303,3 +1303,9 @@ The collaborator map renderer now separates peer selection, display-model deriva
 - domain/surface/measure-grid-point-distance.js dış halka ve deliklerde işaretli sınır mesafesini hesaplar; ind-grid-interior-point.js sınırlı best-first alt bölmeyle güvenli iç nokta seçer.
 - domain/surface/build-grid-line-mask.js çizgileri metre tabanlı engel poligonlarına çevirir; clean-grid-geometry.js UTM koordinatlarını milimetreye yuvarlayıp çöken halkaları eler.
 - dapters/surface/clip-grid-geometry.js polygon-clipping çağrılarını her adımda aynı hassasiyet temizliğiyle sarar. Worker bu modülleri lc-review.js öncesi yükler; legacy servis uygulaması uyumluluk yedeğidir.
+
+## Yüzey inceleme önbelleği ve özet orkestrasyonu — 13 Ekim 2026
+
+- `domain/surface/is-surface-review-cache-current.js` park, CRS, hücre ve feature kimliklerinin tamamı aynı değilse çözümleme cache'ini reddeder; `retype-cached-surface-review-parts.js` geometriyi yeniden kırpmadan yalnız raster kaynaklı sınıfı günceller.
+- `adapters/surface/surface-review-cache.js` part, mask ve WGS84 dönüşümleri için WeakMap ömrünü yönetir; `project-surface-review-feature-geometry.js` MultiPolygon ve eski ring formatlarını aktif UTM CRS'ine taşır.
+- `application/surface/build-surface-review-summary.js` çözülmüş parçaları mevcut alan uzlaştırıcısına bağlar. Ana thread ve worker modülleri servis öncesi yükler; oturum kimliği, geometri cache'i ve alan hesabı korunur. Kilitli regresyon dosyaları değiştirilmedi.

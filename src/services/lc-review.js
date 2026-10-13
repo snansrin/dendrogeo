@@ -6,7 +6,7 @@ const DG_SURFACE_TYPES=window.DG_SURFACE_REVIEW_CONTRACTS.types;
 const DG_SURFACE_REVIEW_GEOMETRY=window.DG_SURFACE_REVIEW_GEOMETRY;
 // Millimetre snapping removes UTM round-trip noise at shared raster edges.
 function dgSurfaceProject(ring,epsg){if(window.DG_PROJECT_SURFACE_REVIEW_RING)return window.DG_PROJECT_SURFACE_REVIEW_RING.project(ring,epsg,{forward:dgLcUtmForward,snap:(x,y)=>window.DG_SNAP_SURFACE_REVIEW_COORDINATE.snap(x,y)});return ring.map(p=>{const q=dgLcUtmForward(p[1],p[0],epsg);return[Math.round(q.x*1000)/1000,Math.round(q.y*1000)/1000];});}
-function dgSurfaceUnproject(geom,epsg){if(window.DG_UNPROJECT_SURFACE_REVIEW_GEOMETRY)return window.DG_UNPROJECT_SURFACE_REVIEW_GEOMETRY.unproject(geom,epsg,{cache:DG_SURFACE_WGS_CACHE,inverse:dgLcUtmInverse});const old=DG_SURFACE_WGS_CACHE.get(geom);if(old?.epsg===epsg)return old.wgs;const wgs=geom.map(poly=>poly.map(ring=>ring.map(p=>{const q=dgLcUtmInverse(p[0],p[1],epsg);return[q.lon,q.lat];})));DG_SURFACE_WGS_CACHE.set(geom,{epsg,wgs});return wgs;}
+function dgSurfaceUnproject(geom,epsg){if(window.DG_UNPROJECT_SURFACE_REVIEW_GEOMETRY)return window.DG_UNPROJECT_SURFACE_REVIEW_GEOMETRY.unproject(geom,epsg,{cache:DG_SURFACE_REVIEW_CACHE.wgs,inverse:dgLcUtmInverse});const old=DG_SURFACE_REVIEW_CACHE.wgs.get(geom);if(old?.epsg===epsg)return old.wgs;const wgs=geom.map(poly=>poly.map(ring=>ring.map(p=>{const q=dgLcUtmInverse(p[0],p[1],epsg);return[q.lon,q.lat];})));DG_SURFACE_REVIEW_CACHE.wgs.set(geom,{epsg,wgs});return wgs;}
 function dgSurfaceArea(geom){return DG_SURFACE_REVIEW_GEOMETRY.area(geom);}
 function dgSurfaceClip(op,...geoms){
  if(window.DG_CLIP_SURFACE_REVIEW_GEOMETRY)return window.DG_CLIP_SURFACE_REVIEW_GEOMETRY.clip(op,geoms,{clean:dgSurfaceClean,collectPoints:window.DG_COLLECT_SURFACE_REVIEW_CLIP_POINTS.collect,findOrigin:window.DG_FIND_SURFACE_REVIEW_CLIP_ORIGIN.find,translate:window.DG_TRANSLATE_SURFACE_REVIEW_GEOMETRY.translate,clipper:window.DG_RUN_SURFACE_REVIEW_POLYGON_OPERATION});
@@ -42,9 +42,8 @@ async function dgSurfaceFingerprint(cells,outer,holes,meta){
  const digest=await crypto.subtle.digest("SHA-256",new TextEncoder().encode(input));
  return Array.from(new Uint8Array(digest),b=>b.toString(16).padStart(2,"0")).join("");
 }
-const DG_SURFACE_MASK_CACHE=new WeakMap();
 function dgSurfaceResolved(cells,classFor,geometries,features,epsg,park){
- if(window.DG_RESOLVE_SURFACE_REVIEW_PARTS)return window.DG_RESOLVE_SURFACE_REVIEW_PARTS.resolve({cells,classFor,geometries,features,epsg,park,types:DG_SURFACE_TYPES,partCache:DG_SURFACE_PART_CACHE,maskCache:DG_SURFACE_MASK_CACHE,select:(source,types)=>window.DG_SELECT_SURFACE_REVIEW_FEATURES.select(source,types),prepareMasks:(source,ports)=>window.DG_PREPARE_SURFACE_REVIEW_FEATURE_MASKS.prepare(source,ports),resolveCell:(cell,geom,masks,ports)=>window.DG_RESOLVE_SURFACE_REVIEW_CELL.resolve(cell,geom,masks,ports),bounds:dgSurfaceBounds,overlap:dgSurfaceOverlap,clip:dgSurfaceClip,geometry:dgSurfaceFeatureGeometry,area:dgSurfaceArea,seed:dgSurfaceSeed});
+ if(window.DG_RESOLVE_SURFACE_REVIEW_PARTS)return window.DG_RESOLVE_SURFACE_REVIEW_PARTS.resolve({cells,classFor,geometries,features,epsg,park,types:DG_SURFACE_TYPES,partCache:DG_SURFACE_REVIEW_CACHE.parts,maskCache:DG_SURFACE_REVIEW_CACHE.masks,select:(source,types)=>window.DG_SELECT_SURFACE_REVIEW_FEATURES.select(source,types),prepareMasks:(source,ports)=>window.DG_PREPARE_SURFACE_REVIEW_FEATURE_MASKS.prepare(source,ports),resolveCell:(cell,geom,masks,ports)=>window.DG_RESOLVE_SURFACE_REVIEW_CELL.resolve(cell,geom,masks,ports),bounds:dgSurfaceBounds,overlap:dgSurfaceOverlap,clip:dgSurfaceClip,geometry:dgSurfaceFeatureGeometry,area:dgSurfaceArea,seed:dgSurfaceSeed,matchesCache:(cached,inputs)=>window.DG_IS_SURFACE_REVIEW_CACHE_CURRENT?window.DG_IS_SURFACE_REVIEW_CACHE_CURRENT.matches(cached,inputs):!!cached&&cached.park===inputs.park&&cached.epsg===inputs.epsg&&cached.cellCount===inputs.cells.length&&cached.cellFirst===inputs.cells[0]&&cached.features.length===inputs.features.length&&cached.features.every((feature,index)=>feature===inputs.features[index]),retypeCached:(parts,resolveClass,types)=>window.DG_RETYPE_CACHED_SURFACE_REVIEW_PARTS?window.DG_RETYPE_CACHED_SURFACE_REVIEW_PARTS.retype(parts,resolveClass,types):parts.map(part=>{if(part.method!=="review-cell")return part;const type=resolveClass(part.cell)||"other";return{...part,type,group:types[type]?.group||"other"};})});
  if(!Array.isArray(cells)||!cells.length||!geometries||typeof geometries!=="object"||!Array.isArray(park)||!park.length)return [];
  const cached=DG_SURFACE_PART_CACHE.get(geometries);
  if(cached&&cached.park===park&&cached.epsg===epsg&&cached.cellCount===cells.length&&cached.cellFirst===cells[0]&&cached.features.length===(features||[]).length&&cached.features.every((f,i)=>f===features[i]))return cached.parts.map(p=>{if(p.method!=="review-cell")return p;const type=classFor(p.cell)||"other";return{...p,type,group:DG_SURFACE_TYPES[type]?.group||"other"};});
@@ -63,6 +62,7 @@ function dgSurfaceResolved(cells,classFor,geometries,features,epsg,park){
  dgSurfaceSeed(geometries,features||[],epsg,park,parts,cells);return parts;
 }
 function dgSurfaceSummarize(base,cells,classFor,geometries,features,epsg,park){
+ if(window.DG_BUILD_SURFACE_REVIEW_SUMMARY)return window.DG_BUILD_SURFACE_REVIEW_SUMMARY.build({base,cells,classFor,geometries,features,epsg,park},{resolveParts:dgSurfaceResolved,summarizeParts:dgSurfaceSummarizeParts});
  return dgSurfaceSummarizeParts(base,dgSurfaceResolved(cells,classFor,geometries,features,epsg,park));
 }
 function dgSurfaceSummarizeParts(base,parts){
@@ -87,8 +87,9 @@ window.DG_SURFACE_REVIEW={types:DG_SURFACE_TYPES,park:dgSurfacePark,cell:dgSurfa
 function dgSurfaceBounds(geom){return DG_SURFACE_REVIEW_GEOMETRY.bounds(geom);}
 function dgSurfaceOverlap(a,b){return DG_SURFACE_REVIEW_GEOMETRY.overlap(a,b);}
 function dgSurfaceFeatureGeometry(f,epsg){
+ if(window.DG_PROJECT_SURFACE_REVIEW_FEATURE_GEOMETRY)return window.DG_PROJECT_SURFACE_REVIEW_FEATURE_GEOMETRY.project(f,epsg,{projectRing:dgSurfaceProject,isValidRing:dgSurfaceValidRing});
  if(f.geometry?.type==="MultiPolygon")return f.geometry.coordinates.map(poly=>poly.map(r=>dgSurfaceProject(r,epsg)));
- return dgSurfaceValidRing(f.ring)?[ [dgSurfaceProject(f.ring,epsg)] ]:[];
+ return dgSurfaceValidRing(f.ring)?[[dgSurfaceProject(f.ring,epsg)]]:[];
 }
 const DG_SURFACE_OSM_REVIEW_OBJECTS=window.DG_SURFACE_OSM_REVIEW_ADAPTER.create({
  projectRing:dgSurfaceProject,unprojectGeometry:dgSurfaceUnproject,parkGeometry:dgSurfacePark,
@@ -98,12 +99,10 @@ const DG_SURFACE_OSM_REVIEW_OBJECTS=window.DG_SURFACE_OSM_REVIEW_ADAPTER.create(
 function dgSurfaceObjects(elements,epsg){return DG_SURFACE_OSM_REVIEW_OBJECTS(elements,epsg);}
 window.DG_SURFACE_REVIEW.objects=dgSurfaceObjects;
 
-const DG_SURFACE_PART_CACHE=new WeakMap();
-const DG_SURFACE_WGS_CACHE=new WeakMap();
-function dgSurfaceSeed(geometries,features,epsg,park,parts,cells){
- DG_SURFACE_PART_CACHE.set(geometries,{features:features.slice(),epsg,park,parts,cellCount:cells?.length,cellFirst:cells?.[0]});
- for(const p of parts)if(p.wgs)DG_SURFACE_WGS_CACHE.set(p.geom,{epsg,wgs:p.wgs});
-}
+const DG_SURFACE_REVIEW_CACHE=window.DG_SURFACE_REVIEW_CACHE_FACTORY?.create?.()||{parts:new WeakMap(),masks:new WeakMap(),wgs:new WeakMap(),seed(geometries,features,epsg,park,parts,cells){this.parts.set(geometries,{features:features.slice(),epsg,park,parts,cellCount:cells?.length,cellFirst:cells?.[0]});for(const part of parts)if(part.wgs)this.wgs.set(part.geom,{epsg,wgs:part.wgs});}};
+const DG_SURFACE_PART_CACHE=DG_SURFACE_REVIEW_CACHE.parts;
+const DG_SURFACE_MASK_CACHE=DG_SURFACE_REVIEW_CACHE.masks;
+function dgSurfaceSeed(geometries,features,epsg,park,parts,cells){DG_SURFACE_REVIEW_CACHE.seed(geometries,features,epsg,park,parts,cells);}
 const DG_SURFACE_REVIEW_WORKER=window.DG_SURFACE_REVIEW_WORKER_ADAPTER.create({
  getWorker:()=>typeof Worker==="undefined"?null:Worker,
  scriptUrl:()=>typeof dgRuntimeScriptUrl==="function"?dgRuntimeScriptUrl("/src/workers/surface-worker.js"):"/src/workers/surface-worker.js"
