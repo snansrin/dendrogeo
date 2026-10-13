@@ -29,17 +29,37 @@ from+=step;
 }
 return out;
 }
+function dgSerializeUserExport(format,rows,preview=false){
+ if(window.DG_SERIALIZE_MEASUREMENT_EXPORT)return window.DG_SERIALIZE_MEASUREMENT_EXPORT.serialize(format,rows,{
+  preview,csv:fullCSV,
+  geojson:(items,showPreview)=>{
+   if(window.DG_BUILD_MEASUREMENT_GEOJSON)return window.DG_BUILD_MEASUREMENT_GEOJSON.build(items,LATIN,showPreview?{preview:true}:undefined);
+   return{type:"FeatureCollection",features:items.map(r=>({type:"Feature",geometry:{type:"Point",coordinates:[r.lon,r.lat]},properties:{point:r.point_id,species:r.species,latin:LATIN[r.species]||"",circumference_cm:(Number.isFinite(+r.girth_cm)?+r.girth_cm:null),dbh:(Number.isFinite(+r.dbh_cm)?+(+r.dbh_cm).toFixed(1):null),height:r.height_m,carbon:r.carbon_kg,photo:r.photo_url||""}}))};
+  }
+ });
+ if(format==="csv"||format==="qgis")return fullCSV(rows);
+ return JSON.stringify(window.DG_BUILD_MEASUREMENT_GEOJSON.build(rows,LATIN,preview?{preview:true}:undefined),null,2);
+}
+function dgUserExportPorts(){return{
+ resolve:format=>window.DG_RESOLVE_EXPORT_OPTIONS.resolve(format),load:getMine,
+ serialize:(format,rows,options)=>dgSerializeUserExport(format,rows,options.preview),
+ onActivity:label=>{if(typeof dgPresenceAct==="function"){try{dgPresenceAct("export",label);}catch(e){}}},
+ download:(content,name)=>dl(content,name)
+};}
 async function exportCSV(){
+ if(window.DG_DOWNLOAD_USER_MEASUREMENT_EXPORT)return window.DG_DOWNLOAD_USER_MEASUREMENT_EXPORT.execute("csv",dgUserExportPorts());
  if(typeof dgPresenceAct==="function"){try{dgPresenceAct("export","CSV");}catch(e){}}const d=await getMine();dl(fullCSV(d),"dendrogeo.csv");}
 async function exportQgis(){
+ if(window.DG_DOWNLOAD_USER_MEASUREMENT_EXPORT)return window.DG_DOWNLOAD_USER_MEASUREMENT_EXPORT.execute("qgis",dgUserExportPorts());
  if(typeof dgPresenceAct==="function"){try{dgPresenceAct("export","QGIS");}catch(e){}}const d=await getMine();dl(fullCSV(d),"dendrogeo_qgis.csv");}
 async function exportGeo(){
+ if(window.DG_DOWNLOAD_USER_MEASUREMENT_EXPORT)return window.DG_DOWNLOAD_USER_MEASUREMENT_EXPORT.execute("geojson",dgUserExportPorts());
  if(typeof dgPresenceAct==="function"){try{dgPresenceAct("export","GeoJSON");}catch(e){}}
  const d=await getMine();
  const gj=window.DG_BUILD_MEASUREMENT_GEOJSON?window.DG_BUILD_MEASUREMENT_GEOJSON.build(d,LATIN):{type:"FeatureCollection",features:d.map(r=>({type:"Feature",geometry:{type:"Point",coordinates:[r.lon,r.lat]},properties:{point:r.point_id,species:r.species,latin:LATIN[r.species]||"",circumference_cm:(Number.isFinite(+r.girth_cm)?+r.girth_cm:null),dbh:(Number.isFinite(+r.dbh_cm)?+(+r.dbh_cm).toFixed(1):null),height:r.height_m,carbon:r.carbon_kg,photo:r.photo_url||""}}))};
  dl(JSON.stringify(gj,null,2),"dendrogeo.geojson");
 }
-function dl(content,name){const a=document.createElement("a");a.href=URL.createObjectURL(new Blob([content],{type:"text/csv;charset=utf-8;"}));a.download=name;a.click();}
+function dl(content,name){if(window.DG_EXPORT_FILE_DOWNLOAD)return window.DG_EXPORT_FILE_DOWNLOAD.download(content,name,{document,URL,Blob});const a=document.createElement("a");a.href=URL.createObjectURL(new Blob([content],{type:"text/csv;charset=utf-8;"}));a.download=name;a.click();}
 
 function openPreview(title,content,isCSV,fname){
  if(window.DG_EXPORT_PREVIEW_UI)return window.DG_EXPORT_PREVIEW_UI.render(title,content,isCSV,fname,{title:()=>$("pvTitle"),body:()=>$("pvBody"),downloadButton:()=>$("pvDownload"),modal:()=>$("previewModal"),escape:esc,download:dl});
@@ -54,6 +74,6 @@ function openPreview(title,content,isCSV,fname){
  $("previewModal").classList.add("on");
 }
 function closePreview(){$("previewModal").classList.remove("on");}
-async function previewCSV(){const d=await getMine();openPreview("CSV Önizleme (ilk 100 satır)",fullCSV(d),true,"dendrogeo.csv");}
-async function previewGeo(){const d=await getMine();const gj=window.DG_BUILD_MEASUREMENT_GEOJSON?window.DG_BUILD_MEASUREMENT_GEOJSON.build(d,LATIN,{preview:true}):{type:"FeatureCollection",features:d.map(r=>({type:"Feature",geometry:{type:"Point",coordinates:[r.lon,r.lat]},properties:{point:r.point_id,species:r.species,carbon:r.carbon_kg}}))};openPreview("GeoJSON Önizleme",JSON.stringify(gj,null,2),false,"dendrogeo.geojson");}
+async function previewCSV(){if(window.DG_PREPARE_USER_MEASUREMENT_PREVIEW){const preview=await window.DG_PREPARE_USER_MEASUREMENT_PREVIEW.execute("csv",dgUserExportPorts());return openPreview(preview.title,preview.content,preview.isCSV,preview.fileName);}const d=await getMine();openPreview("CSV Önizleme (ilk 100 satır)",fullCSV(d),true,"dendrogeo.csv");}
+async function previewGeo(){if(window.DG_PREPARE_USER_MEASUREMENT_PREVIEW){const preview=await window.DG_PREPARE_USER_MEASUREMENT_PREVIEW.execute("geojson",dgUserExportPorts());return openPreview(preview.title,preview.content,preview.isCSV,preview.fileName);}const d=await getMine();const gj=window.DG_BUILD_MEASUREMENT_GEOJSON?window.DG_BUILD_MEASUREMENT_GEOJSON.build(d,LATIN,{preview:true}):{type:"FeatureCollection",features:d.map(r=>({type:"Feature",geometry:{type:"Point",coordinates:[r.lon,r.lat]},properties:{point:r.point_id,species:r.species,carbon:r.carbon_kg}}))};openPreview("GeoJSON Önizleme",JSON.stringify(gj,null,2),false,"dendrogeo.geojson");}
 
