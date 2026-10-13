@@ -561,8 +561,10 @@ async function dgSaveMeasInner(){
     let photoBlob = null;
     let photoFile = null;
     if(f){
-        photoBlob = await compress(f);
-        photoFile = "P"+String(pt).padStart(3,"0")+"_M"+measurementNo+".JPG";
+        if(typeof window!=="undefined"&&Object.prototype.hasOwnProperty.call(window,"DG_PREPARE_MEASUREMENT_PHOTO")){
+          const prepared=await window.DG_PREPARE_MEASUREMENT_PHOTO.prepare({file:f,pointId:pt,measurementNo,compress,buildFileName:parts=>window.DG_BUILD_MEASUREMENT_PHOTO_FILE_NAME.build(parts)});
+          photoBlob=prepared.blob;photoFile=prepared.fileName;
+        }else{photoBlob=await compress(f);photoFile="P"+String(pt).padStart(3,"0")+"_M"+measurementNo+".JPG";}
     }
     
     // 2. base objesini oluştur
@@ -642,11 +644,12 @@ if(EDIT_ID) base._editId = EDIT_ID; // ✅ çevrimdışı düzenleme işareti
     // 4. ONLINE: Fotoğrafı Supabase Storage'a yükle
     let photoUrl = null;
     if(photoBlob){
-        const path = USER.id+"/"+Date.now()+".jpg";
-        const {error} = await sb.storage.from("dendro-photos").upload(path, photoBlob, {contentType:"image/jpeg"});
-        if(error)throw error;
-        if(!error){
-            photoUrl = sb.storage.from("dendro-photos").getPublicUrl(path).data.publicUrl;
+        if(typeof window!=="undefined"&&Object.prototype.hasOwnProperty.call(window,"DG_UPLOAD_MEASUREMENT_PHOTO"))photoUrl=(await window.DG_UPLOAD_MEASUREMENT_PHOTO.upload({client:sb,userId:USER.id,blob:photoBlob})).publicUrl;
+        else{
+          const path=USER.id+"/"+Date.now()+".jpg";
+          const{error}=await sb.storage.from("dendro-photos").upload(path,photoBlob,{contentType:"image/jpeg"});
+          if(error)throw error;
+          photoUrl=sb.storage.from("dendro-photos").getPublicUrl(path).data.publicUrl;
         }
     }
     if(photoUrl){
@@ -691,6 +694,7 @@ async function editRec(id){
 }
 /* --- 9. FOTOĞRAF İŞLEME --- */
 async function compress(f){
+ if(typeof window!=="undefined"&&Object.prototype.hasOwnProperty.call(window,"DG_COMPRESS_MEASUREMENT_PHOTO"))return window.DG_COMPRESS_MEASUREMENT_PHOTO.compress(f,{loadImage:loadImg,document,URL});
  const{i,u}=await loadImg(f);
  try{
   const m=1024,sc=Math.min(1,m/Math.max(i.width,i.height)),c=document.createElement("canvas");
@@ -699,6 +703,7 @@ async function compress(f){
  }finally{URL.revokeObjectURL(u);}
 }
 async function removePhoto(url){
+ if(typeof window!=="undefined"&&Object.prototype.hasOwnProperty.call(window,"DG_REMOVE_MEASUREMENT_PHOTO"))return window.DG_REMOVE_MEASUREMENT_PHOTO.remove({client:sb,url});
  if(!url)return;
  try{
   let p=url.split("/dendro-photos/")[1];
