@@ -16,6 +16,7 @@ Harita init, marker yönetimi, waypoint CRUD, navigasyon çizimi */
  * Artık boş değer reddedilir ve küresel sınır kontrolü yapılır. Tam (0,0)
  * da reddedilir: gerçek bir envanter noktası olması fiilen imkânsız. */
 function dgValidCoord(lat,lon){
+ if(window.DG_MAP_COORDINATE)return window.DG_MAP_COORDINATE.isValid(lat,lon);
  if(lat===null||lat===undefined||lat==="")return false;
  if(lon===null||lon===undefined||lon==="")return false;
  const a=Number(lat),o=Number(lon);
@@ -26,6 +27,7 @@ function dgValidCoord(lat,lon){
 
 // 1. Marker HTML üretici
 function popupHtml(r){
+ if(window.DG_MAP_MEASUREMENT_POPUP)return window.DG_MAP_MEASUREMENT_POPUP.render(r,{escapeHTML:esc,translate:s=>typeof dgT==="function"?dgT(s):s});
  /* 0035b: balon etiketleri dgT() ile çevrilir (EN modu). Tür adı da sözlükte
   * (tam eşleşme) — balon her açılışta yeniden kurulduğu için dil anında yansır. */
  const _t=(s)=>(typeof dgT==="function"?dgT(s):s);
@@ -50,6 +52,7 @@ function popupHtml(r){
  * eklenmeye devam ederdi. Her yükleme m._markerToken'ı artırır; bayat tur
  * ilk adımında kendini iptal eder. */
 function addMarkersChunked(m,rows,chunk=150){
+ if(window.DG_MAP_MEASUREMENT_MARKERS)return window.DG_MAP_MEASUREMENT_MARKERS.add(m,rows,chunk,{leaflet:L,popupHTML:popupHtml,log:console,setTimer:setTimeout});
  let i=0;
  if(!m._cluster){
   /* YEDEK KATMAN (2026-09-26 · kullanıcı bildirimi: "listede var, haritada yok").
@@ -237,6 +240,18 @@ let DG_WP_PAGE=0,DG_WP_QUERY="";
 const DG_WP_PAGE_SIZE=8;
 function dgWaypointPage(delta){DG_WP_PAGE+=delta;renderWaypointList();}
 function renderWaypointList(){
+ if(window.DG_WAYPOINT_LIST_UI){
+  const result=window.DG_WAYPOINT_LIST_UI.render({
+   waypoints:WP,gps:GPS,projectId:$("nProject").value,
+   search:$("wpSearch")?.value,filter:$("wpFilter")?.value||"all",sort:$("wpSort")?.value||"id",
+   page:DG_WP_PAGE,signature:DG_WP_QUERY,selectedId:navTarget?.id,
+   distance:hav,setPage:value=>{DG_WP_PAGE=value;},setSignature:value=>{DG_WP_QUERY=value;}
+  });
+  $("dWp").textContent=WP.length;$("dVisit").textContent=result.done;$("navInfo").textContent=result.info;
+  const pager=$("wpPager");if(pager)pager.innerHTML=result.pager;
+  $("wpListTable").innerHTML=result.html;
+  return;
+ }
  const done=WP.filter(w=>w.visited).length;
  $("dWp").textContent=WP.length;$("dVisit").textContent=done;
  $("navInfo").textContent=WP.length+" nokta · "+(WP.length-done)+" bekleyen · "+done+" tamamlanan";
@@ -272,12 +287,14 @@ async function selectWaypoint(id){
 // Navigation actions select targets only; arrival retains the existing visit/save flow.
 function dgNearestWaypoint(){
  if(!GPS){toast(dgCf("En yakın noktayı seçmek için önce konumu etkinleştirin."),"warn","📡");try{if(typeof startGps==="function")startGps();}catch(e){}return;}
+ if(window.DG_WAYPOINT_TARGET){const nearest=window.DG_WAYPOINT_TARGET.nearest(WP,GPS,hav);if(!nearest)return toast(dgCf("Bekleyen waypoint kalmadı."),"info");return selectWaypoint(nearest.id);}
  const pending=WP.filter(w=>!w.visited);
  if(!pending.length)return toast(dgCf("Bekleyen waypoint kalmadı."),"info");
  const nearest=pending.reduce((a,b)=>hav(GPS.latitude,GPS.longitude,a.lat,a.lon)<=hav(GPS.latitude,GPS.longitude,b.lat,b.lon)?a:b);
  selectWaypoint(nearest.id);
 }
 function dgNextWaypoint(){
+ if(window.DG_WAYPOINT_TARGET){const next=window.DG_WAYPOINT_TARGET.next(WP,navTarget?.wp_id??-Infinity);if(!next)return toast(dgCf("Bekleyen waypoint kalmadı."),"info");return selectWaypoint(next.id);}
  const pending=WP.filter(w=>!w.visited).sort((a,b)=>a.wp_id-b.wp_id);
  if(!pending.length)return toast(dgCf("Bekleyen waypoint kalmadı."),"info");
  const next=pending.find(w=>w.wp_id>(navTarget?.wp_id??-Infinity))||pending[0];
