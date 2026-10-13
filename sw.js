@@ -4,7 +4,7 @@
 // NOT: Senkronizasyon artık Ana Thread (Supabase JS SDK) tarafından yapılıyor
 // ============================================================
 
-const CACHE_VERSION = 'dendrogeo-sw-v2-r300';
+const CACHE_VERSION = 'dendrogeo-sw-v2-r301';
 
 /* İKİ AYRI STATİK CACHE — bu ayrım bilinçli ve önemli.
  *
@@ -111,6 +111,11 @@ const CORE_ASSETS = [
     '/src/ui/park-invite-inbox.js',
     '/src/ui/park-collaboration-panel.js',
     '/src/application/park-invites/manage-invites.js',
+    '/src/application/park-invites/load-owned-parks.js',
+    '/src/application/park-invites/load-recipient-invites.js',
+    '/src/application/park-invites/load-owner-collaborations.js',
+    '/src/application/park-invites/refresh-collaborations.js',
+    '/src/ui/owner-park-options.js',
     '/src/services/park-invites.js',
     /* LULC ZİNCİRİ (Faz 5): eski landcover.js altı modüle bölündü; facade son sırada
      * (window.DG_LANDCOVER'u o kurar, yükleme anında lc-* global'lerini referanslar). */

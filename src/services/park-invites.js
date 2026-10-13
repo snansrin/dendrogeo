@@ -42,6 +42,11 @@ function dgCanManagePark(pid){
 
 /* v_my_parks: sahibi VEYA ortağı olduğum parklar (view auth.uid() süzer) */
 async function dgMyParks(force){
+ if(window.DG_LOAD_OWNED_INVITE_PARKS)return window.DG_LOAD_OWNED_INVITE_PARKS.execute(DG_INV,force,{
+  hasClient:()=>typeof sb!=="undefined"&&!!sb,
+  load:()=>DG_PARK_INVITE_MODULE_STORE?DG_PARK_INVITE_MODULE_STORE.myParks():sb.from("v_my_parks").select("*"),
+  onMissingSchema:()=>dgInvitesNote("0025_park_invites.sql çalıştırılmalı (v_my_parks yok)")
+ });
  if(!force&&DG_INV.mine)return DG_INV.mine;
  if(typeof sb==="undefined"||!sb)return [];
  try{
@@ -58,6 +63,19 @@ async function dgMyParks(force){
 /* 0040: kaydırma koruma sarmalı — yeniden çizimde #main scrollTop korunur. */
 async function dgInvitesLoadMine(){const _y=(typeof dgScrollKeep==="function"?dgScrollKeep():null);try{return await dgInvitesLoadMine__scroll.apply(this,arguments);}finally{if(typeof dgScrollRestore==="function")dgScrollRestore(_y);}}
 async function dgInvitesLoadMine__scroll(){
+ if(window.DG_LOAD_RECIPIENT_PARK_INVITES){
+  const box=$("dgInvBox");if(box)box.style.display="none";
+  if(typeof USER==="undefined"||!USER){const sharedBox=$("dgSharedBox");if(sharedBox)sharedBox.style.display="none";dgInvSetCount("projInviteCount",0);dgInvSetCount("projSharedCount",0);return;}
+  const email=String((PROFILE&&PROFILE.email)||USER.email||"").toLowerCase();
+  const rows=await window.DG_LOAD_RECIPIENT_PARK_INVITES.execute(email,()=>DG_PARK_INVITE_MODULE_STORE?DG_PARK_INVITE_MODULE_STORE.inbox():sb.from("park_invites").select("id,park_id,email,note,status,created_at,invited_by,parks(id,name,city)").eq("status","Beklemede"));
+  dgInvSetCount("projInviteCount",rows.length);
+  const parks=await dgMyParks(),shared=dgSharedParks(parks);dgInvSetCount("projSharedCount",shared.length);
+  const sharedBox=$("dgSharedBox");
+  if(sharedBox){if(shared.length){sharedBox.style.display="";sharedBox.innerHTML=window.DG_PARK_INVITE_INBOX_UI.sharedBanner(shared,esc);}else sharedBox.style.display="none";}
+  if(!rows.length)return;
+  if(box){box.style.display="";box.innerHTML=window.DG_PARK_INVITE_INBOX_UI.invites(rows,esc);}
+  return;
+ }
  const box=$("dgInvBox");
  if(box)box.style.display="none";
  if(typeof USER==="undefined"||!USER){
@@ -120,6 +138,15 @@ async function dgInviteRespond(id,accept){
 /* 0040: kaydırma koruma sarmalı — yeniden çizimde #main scrollTop korunur. */
 async function dgCollabLoad(){const _y=(typeof dgScrollKeep==="function"?dgScrollKeep():null);try{return await dgCollabLoad__scroll.apply(this,arguments);}finally{if(typeof dgScrollRestore==="function")dgScrollRestore(_y);}}
 async function dgCollabLoad__scroll(){
+ if(window.DG_LOAD_OWNER_PARK_COLLABORATIONS)return window.DG_LOAD_OWNER_PARK_COLLABORATIONS.execute({
+  getSelect:()=>$("dgInvPark"),isAuthenticated:()=>typeof USER!=="undefined"&&!!USER,
+  hideCard:()=>{const card=$("dgOwnerCollabCard");if(card)card.style.display="none";},
+  showCard:()=>{const card=$("dgOwnerCollabCard");if(card)card.style.display="";},
+  loadParks:dgMyParks,owned:dgOwnedParks,shared:dgSharedParks,
+  updateOwnedCount:count=>dgInvSetCount("projOwnCount",count),updateSharedCount:count=>dgInvSetCount("projSharedCount",count),
+  clearCollaborations:()=>{DG_INV.invites=[];DG_INV.collabs=[];},render:dgCollabRender,
+  renderOptions:(parks,selected)=>window.DG_OWNER_PARK_OPTIONS_UI.render(parks,selected,esc),refresh:dgCollabRefresh
+ });
  const sel=$("dgInvPark"), card=$("dgOwnerCollabCard");
  if(!sel)return;
  if(typeof USER==="undefined"||!USER){
@@ -144,6 +171,14 @@ async function dgCollabLoad__scroll(){
  await dgCollabRefresh();
 }
 async function dgCollabRefresh(){
+ if(window.DG_REFRESH_PARK_COLLABORATIONS)return window.DG_REFRESH_PARK_COLLABORATIONS.execute(DG_INV,{
+  getSelect:()=>$("dgInvPark"),canManage:dgCanManagePark,
+  load:parkId=>DG_PARK_INVITE_MODULE_STORE?DG_PARK_INVITE_MODULE_STORE.collaborations(parkId):Promise.all([
+   sb.from("park_invites").select("id,email,note,status,created_at,invited_by").eq("park_id",parkId).order("created_at",{ascending:false}).limit(50),
+   sb.from("park_collaborators").select("user_id,added_at,profiles(id,full_name,email)").eq("park_id",parkId).limit(50)
+  ]),
+  onMissingSchema:()=>dgInvitesNote("0025_park_invites.sql çalıştırılmalı (park_invites yok)"),render:dgCollabRender
+ });
  const sel=$("dgInvPark");if(!sel||!sel.value)return dgCollabRender();
  const pid=Number(sel.value);
  if(!dgCanManagePark(pid)){
