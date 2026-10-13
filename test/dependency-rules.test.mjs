@@ -29,9 +29,5 @@ test('dependency rules allow inward domain/application references and reject out
 test('current source modules obey the global module dependency rules',()=>{
   const result=checkDependencyRules(fileURLToPath(new URL('..',import.meta.url)));
   assert.deepEqual(result.errors,[]);
-  assert.deepEqual(result.knownDebt.map(item=>`${item.relativePath}:${item.name}`),[
-    'src/application/map/render-waypoint-gps-overlay.js:DG_CREATE_WAYPOINT_GPS_LOCATION_MARKER',
-    'src/application/map/render-waypoint-gps-overlay.js:DG_RENDER_WAYPOINT_GPS_GUIDANCE_READOUT',
-    'src/application/map/render-waypoint-gps-overlay.js:DG_ADD_WAYPOINT_GUIDANCE_LINE',
-  ]);
+  assert.deepEqual(result.knownDebt,[]);
 });
