@@ -749,6 +749,12 @@ Her modülün tek bir dış API'si, sahibi olduğu açık durumu ve kendi testle
 
 - `application/admin/read-export-rows.js`, dışa aktarım sorgusunu sıralı sayfalarla okur ve hata mesajını korur.
 
+- `ui/admin-measurement-filter.js`, yönetim listesindeki satırları mevcut küçük/büyük harf duyarsız arama kuralıyla gösterir veya gizler.
+- `ui/fill-admin-export-select.js`, dışa aktarım seçimlerini mevcut Tümü seçeneği, kaçış ve seçim değerini koruma davranışıyla doldurur.
+- `application/admin/load-admin-export-filters.js`, ölçüm ve proje filtre verilerini paralel yükleyip mevcut hata yalıtımıyla uygular.
+- `application/admin/update-admin-export-filter-options.js`, ülke → şehir → proje seçicilerinin kademeli yenileme sırasını ve proje kimliklerini korur.
+- `application/admin/download-admin-measurements.js`, filtrelenmiş ölçümleri CSV, ayrıntılı QGIS CSV veya GeoJSON dosyası olarak indirir; boş sonuç uyarılarını ve başarı akışını çağırana bırakır.
+
 - `application/admin/read-photo-storage-usage.js`, fotoğraf deposundaki klasörleri sayıp dosya boyutu ve adet toplamını üretir.
 
 - `ui/admin-storage-usage.js`, depolama kullanımını mevcut kota renkleri ve çevrilmiş sayaç metniyle gösterir.
