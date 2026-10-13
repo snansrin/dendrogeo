@@ -29,5 +29,11 @@
       tx.onabort=e=>{db.close();reject(e.target.error||new Error("Yerel kayıt iptal edildi."));};
     });
   }
-  root.DG_OFFLINE_MEASUREMENT_QUEUE=Object.freeze({open,save});
+  async function remove(db,id){
+    const tx=db.transaction('measurements','readwrite');
+    const done=root.DG_OFFLINE_IDB_PROMISES.transaction(tx);
+    tx.objectStore('measurements').delete(id);
+    await done;
+  }
+  root.DG_OFFLINE_MEASUREMENT_QUEUE=Object.freeze({open,save,remove});
 })(window);
