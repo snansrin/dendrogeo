@@ -679,8 +679,21 @@ if(EDIT_ID) base._editId = EDIT_ID; // ✅ çevrimdışı düzenleme işareti
 }
 
 /* --- 8. DÜZENLEME --- */
-function cancelEdit(){EDIT_ID=null;manualPoint=false;$("editBanner").style.display="none";$("saveBtn").textContent="💾 Hesapla ve Kaydet";dgParkGate();}
+function cancelEdit(){
+ if(typeof window!=="undefined"&&Object.prototype.hasOwnProperty.call(window,"DG_CANCEL_MEASUREMENT_EDIT"))return window.DG_CANCEL_MEASUREMENT_EDIT.cancel({setEditing:id=>{EDIT_ID=id;},setManualPoint:value=>{manualPoint=value;},element:$,parkGate:dgParkGate});
+ EDIT_ID=null;manualPoint=false;$("editBanner").style.display="none";$("saveBtn").textContent="💾 Hesapla ve Kaydet";dgParkGate();
+}
 async function editRec(id){
+ if(typeof window!=="undefined"&&Object.prototype.hasOwnProperty.call(window,"DG_EDIT_MEASUREMENT_RECORD"))return window.DG_EDIT_MEASUREMENT_RECORD.edit(id,{
+  fetch:recordId=>window.DG_FETCH_MEASUREMENT_FOR_EDIT.fetch({client:sb,id:recordId}),
+  clearPhoto:dgClearMeasurePhoto,
+  setEditing:value=>{EDIT_ID=value;},
+  build:record=>window.DG_BUILD_MEASUREMENT_EDIT_FORM.build(record,value=>typeof circumferenceCmFromDiameter==="function"?circumferenceCmFromDiameter(value):value),
+  render:form=>window.DG_RENDER_MEASUREMENT_EDIT_FORM.render(form,{element:$,fillSpecies,showLatin}),
+  liveCalc,
+  navigate:go,
+  projectChanged:dgProjectChanged
+ });
  const{data}=await sb.from("measurements").select("*").eq("id",id).single();
  if(!data)return;
  dgClearMeasurePhoto();
