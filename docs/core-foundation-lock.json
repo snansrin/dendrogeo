@@ -731,7 +731,7 @@
     "src/services/osm-water-backup.js": "b3429cdc9bfe0f84bd7b6644a1221d4daadc374ac046b036abf15b3b5ee7d269",
     "src/services/park-geometry.js": "ae89879b98ed8d9f3928d17b7258389c7a7c1abdabdd63dba1aac934aacc6f83",
     "src/services/park-query.js": "b0ddd9f7fb7d99b95e29dbe78c392c472ee149e60f7e941aca91d562c826cd7e",
-    "src/services/park-registry.js": "fce7177f21796e58575abf896394ccd47aef61f5f5785d47bd0951b51e256548",
+    "src/services/park-registry.js": "e1fa450ea299c357d83199c8e4cbb5e47c20b08737c9df655bfd1eac6d1b4336",
     "src/services/park-state.js": "cc241e32d716cc6c682f2e7e82caaada845b698b5bf1b914c17b94ea86823608",
     "src/ui/add-osm-map-layer.js": "c0a6c3d894d0271bbd8c5ae045e1552cfad72320a91ef60d14179d1e6b0ce42a",
     "src/ui/choose-new-park-controller.js": "c787f76aee2cc85b748a30e5e0ccbc1393f58acfa53cf0aff2e3500344e31989",
@@ -2208,6 +2208,17 @@
           "path": "src/services/park-registry.js",
           "previous_sha256": "b79de0f18cdf134d2eba326afd09aabd69e85606ffc0b672ddc5521901d8a7ac",
           "sha256": "fce7177f21796e58575abf896394ccd47aef61f5f5785d47bd0951b51e256548"
+        }
+      ]
+    },
+    {
+      "date": "2026-10-13",
+      "scope": "User-authorized five-responsibility park schema fallback modularization: retain the existing domain error classifier and warning renderer, add an application decision handler and UI feedback port, and compose them in the locked park registry. Preserve transient-error behavior, one-time warning, DG_PARK_SCHEMA_OK gate timing, role-specific migration copy, and locked regressions.",
+      "files": [
+        {
+          "path": "src/services/park-registry.js",
+          "previous_sha256": "fce7177f21796e58575abf896394ccd47aef61f5f5785d47bd0951b51e256548",
+          "sha256": "e1fa450ea299c357d83199c8e4cbb5e47c20b08737c9df655bfd1eac6d1b4336"
         }
       ]
     }

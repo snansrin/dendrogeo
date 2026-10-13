@@ -946,7 +946,23 @@ function dgIsSchemaError(err){
  return window.DG_PARK_SCHEMA_CAPABILITY.isSchemaError(err);
 }
 
+const DG_PARK_SCHEMA_MISSING_FEEDBACK=window.DG_PARK_SCHEMA_MISSING_FEEDBACK
+ ?window.DG_PARK_SCHEMA_MISSING_FEEDBACK.create({warn:(...args)=>console.warn(...args),toast:(...args)=>toast(...args),isAdmin:()=>typeof PROFILE!=="undefined"&&PROFILE&&(PROFILE.role==="admin"||PROFILE.role==="owner")})
+ :null;
+const DG_PARK_SCHEMA_MISSING_HANDLER=window.DG_HANDLE_PARK_SCHEMA_MISSING_APPLICATION&&DG_PARK_SCHEMA_MISSING_FEEDBACK
+ ?window.DG_HANDLE_PARK_SCHEMA_MISSING_APPLICATION.create({
+  isSchemaError:dgIsSchemaError,
+  hasWarned:()=>DG_PARK_SCHEMA_WARNED,
+  markWarned:()=>{DG_PARK_SCHEMA_WARNED=true;},
+  disableSchema:()=>{DG_PARK_SCHEMA_OK=false;},
+  notifyTransient:reason=>DG_PARK_SCHEMA_MISSING_FEEDBACK.notifyTransient(reason),
+  notifyMissing:reason=>DG_PARK_SCHEMA_MISSING_FEEDBACK.notifyMissing(reason),
+  renderCard:dgRenderScanCard
+ })
+ :null;
+
 function dgParkSchemaMissing(reason){
+ if(DG_PARK_SCHEMA_MISSING_HANDLER)return DG_PARK_SCHEMA_MISSING_HANDLER.handle(reason);
  /* YANLIŞ ALARM KAPANDI (2026-09-26): yetki/ağ hatası buraya düşerse şema
   * bayrağı DÜŞÜRÜLMEDEN yalnızca bilgi verilir. Gerçek şema eksiğinde
   * davranış eskisiyle birebir aynı. */
