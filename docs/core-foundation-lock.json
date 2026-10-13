@@ -130,12 +130,16 @@
       "src/adapters/surface/review-store.js",
       "src/adapters/surface/review-worker.js",
       "src/application/surface/analyze-source.js",
+      "src/application/surface/collect-sentinel-annual-evidence.js",
       "src/application/surface/collect-sentinel-scene-observations.js",
+      "src/application/surface/find-sentinel-annual-scenes.js",
       "src/application/surface/finish-surface-review-mount.js",
       "src/application/surface/merge-review-features.js",
       "src/application/surface/prepare-review.js",
+      "src/application/surface/prepare-sentinel-annual-evidence.js",
       "src/application/surface/prepare-surface-review-session.js",
       "src/application/surface/prepare-verified-map-export.js",
+      "src/application/surface/read-sentinel-annual-scene-windows.js",
       "src/application/surface/read-sentinel-scene-windows.js",
       "src/application/surface/reset-surface-review-data-change.js",
       "src/application/surface/run-analysis.js",
@@ -146,6 +150,7 @@
       "src/domain/surface/classify-surface-review-data-change.js",
       "src/domain/surface/compare-source-class-areas.js",
       "src/domain/surface/group-patch-cells.js",
+      "src/domain/surface/index-sentinel-annual-scene-cells.js",
       "src/domain/surface/index-sentinel-scene-cells.js",
       "src/domain/surface/measure-patch-components.js",
       "src/domain/surface/merge-sentinel-annual-evidence.js",
@@ -298,6 +303,7 @@
       "test/grid-waypoint-layer-ui.test.mjs",
       "test/grid-waypoint-readiness-application.test.mjs",
       "test/landcover-v4.test.mjs",
+      "test/lc-s2-annual-modules.test.mjs",
       "test/lc-s2-scene-modules.test.mjs",
       "test/lc-validate.test.mjs",
       "test/map-init-modules.test.mjs",
@@ -390,7 +396,7 @@
     "docs/surface-scientific-contract.json": "ad98bde39dc2e8dfd80d36d8f287349cf0ab8a91cd7a9f728e6dd533a844ffa3",
     "partials/shell.html": "4b0c951de70a9d89e26340751295a965bcc144424d1eab85088c4f16a7e972e8",
     "scripts/lulc-qa.mjs": "60a322b640c2a4bca447785bdeb056097c38e5094c10292b28049d31968ab827",
-    "scripts/val-qa.mjs": "f982c67497260532707bfa1b714cd1d03e96b48edd3a98385de45bd530d6f139",
+    "scripts/val-qa.mjs": "1bc6246708f8f358fc6511a200fd0b4726b0bf3f5f2c9b1f570d8dadd3d11d48",
     "scripts/verify-osm-water-live.mjs": "6465ba97904d88347aec388478ecf807cfbd495cdb2b4db0e2a957d985d365d7",
     "src/adapters/map/add-waypoint-guidance-line.js": "7c34f617b8e8417c2f05a9cb2aff7126ef21b715d01bdd166169ca9299ac7718",
     "src/adapters/map/create-base-map-layer.js": "ccf410d1a78eea7a7a062ce86b69dad57d774cfa3c922822df6d308392c640f2",
@@ -554,7 +560,7 @@
     "src/services/lc-osm.js": "4244fd0ab3a64cbeae49c76609cc702c01a057beefb608fd483418e02b91f1cd",
     "src/services/lc-patches.js": "94bc7a7fd771672250655bbfd47a5f162bd06b84c23d2b03d2256bc057669919",
     "src/services/lc-review.js": "91f69e59f76698a4d95c2dc411fdc05e09c3910c5c036eab21f6ae480c4a9d7f",
-    "src/services/lc-s2.js": "2754cd6ab0b5d06d88908825d740dfd59b304e624a2bdb8e5a29143a12322be2",
+    "src/services/lc-s2.js": "8c16009e690c019da3bd3882cb833126cac9108845342fd059c3ba71e744c534",
     "src/services/lc-stac.js": "978c4be8c3bc4e7cda3f694d1f06290e661fed5bbd5b76b68719140edc18e71a",
     "src/services/lc-validate.js": "b4d8327c62940b1af1a53ddb087188816ff2359c8456c2755c7c853c5919f42b",
     "src/services/map.js": "b5db0047dc86b53c13029e3bd407c087126672d23a6f30b5942d837127006b1f",
@@ -621,7 +627,7 @@
     "src/ui/sync-base-map-layer-selection.js": "2f93018846abac13f83486a1fc2b9df0cbb7f330cae202a0e91ef902c8263eeb",
     "src/ui/waypoint-gps-overlay.js": "e5bb70df065093b911d1c7ff5b5b9fb7db09b38df6bb7fb3271db7ea1e3f4b28",
     "src/utils/geo.js": "3e796768b3d55a3f07c4be3281c9437f1602b6d5e68151b2af7b101707baf294",
-    "src/utils/lazylibs.js": "0ffe179d56a2ded76f47b0e5bf473aff5905edb5843da69d352155d96cb60891",
+    "src/utils/lazylibs.js": "cedbe62bdb7b51288c08dc3e9659ae0a7117f51e2be7f56fc55fa1cdd00819b7",
     "src/workers/surface-worker.js": "02878b04478f0c555b536f34d9807a0bf824d0f738d1468a8840069cc61e85ed",
     "test/base-map-layer-modules.test.mjs": "5399d699e74ffd66e92df312b4301202add7352b2b6c0be24fd51cda63e7baff",
     "test/critical-fixes.test.mjs": "3a2e62104763110bc734b3dc54a37cbf57c15b0038a78fdce35d56d9639c1989",
@@ -737,7 +743,13 @@
     "src/application/surface/read-sentinel-scene-windows.js": "6308814a72fdba9ba2d25360059962e44e7b15fbd1f97dd27a5f4513030f32a8",
     "src/domain/surface/index-sentinel-scene-cells.js": "65580c5636a332580449aaf50637bd735778292248763a100d7cb0bbc826b4ae",
     "src/domain/surface/merge-sentinel-annual-evidence.js": "efd390ab6a058c6215e670830c41b1e900e8227aa3e7a5ca1e63274a55dd4848",
-    "test/lc-s2-scene-modules.test.mjs": "fe2f40ea0eb31c7b3d13ebc715fb8f8a6ac92ed88b4b5970b2fa86161edb43fc"
+    "test/lc-s2-scene-modules.test.mjs": "fe2f40ea0eb31c7b3d13ebc715fb8f8a6ac92ed88b4b5970b2fa86161edb43fc",
+    "src/application/surface/prepare-sentinel-annual-evidence.js": "20e834abcaa4dea5341320ebadf026a4f57a0419c161e4d95d64be65406f118c",
+    "src/application/surface/find-sentinel-annual-scenes.js": "b7be2102603b822937e2bfae10c4c3db47b91f1f04aab9f87d2bdd0e62b9f8a4",
+    "src/application/surface/read-sentinel-annual-scene-windows.js": "32ea6d48fb156755c3dde43a44e6b529a356079ab7b91c758295602a7b7ad70a",
+    "src/domain/surface/index-sentinel-annual-scene-cells.js": "9c2e0956d045322f45da79c47ec23b7c5a4bd57e35c32a9bb2bd6f6a8fe4d077",
+    "src/application/surface/collect-sentinel-annual-evidence.js": "ee899148c3da38162bb2a4ed3f7c61f1e5682e85a265f23cb80a9d8fff9eb32d",
+    "test/lc-s2-annual-modules.test.mjs": "ace3751b8a25e57f3aae2257d4704e03bcf0bbf6a44afad55b36bcaa51ee5020"
   },
   "authorized_modularizations": [
     {
@@ -1643,6 +1655,27 @@
           "path": "scripts/val-qa.mjs",
           "previous_sha256": "c7dc4f76a29765dfd249e37cb190501e003cd0914ac23d323712b4ab454a7a74",
           "sha256": "f982c67497260532707bfa1b714cd1d03e96b48edd3a98385de45bd530d6f139"
+        }
+      ]
+    },
+    {
+      "date": "2026-10-13",
+      "scope": "User-authorized five-module split of locked Sentinel-2 annual evidence scan: evidence preparation, ordered seasonal-scene discovery, mask-first annual raster reads, per-band cell indexing, and distinct-date water/vegetation evidence collection. Preserve the current SCL eligibility, band order, date-window failures, reflectance checks, seasonal maxima, duplicate-date guard, annual confirmation, and live GIS QA behavior.",
+      "files": [
+        {
+          "path": "src/services/lc-s2.js",
+          "previous_sha256": "2754cd6ab0b5d06d88908825d740dfd59b304e624a2bdb8e5a29143a12322be2",
+          "sha256": "8c16009e690c019da3bd3882cb833126cac9108845342fd059c3ba71e744c534"
+        },
+        {
+          "path": "src/utils/lazylibs.js",
+          "previous_sha256": "0ffe179d56a2ded76f47b0e5bf473aff5905edb5843da69d352155d96cb60891",
+          "sha256": "cedbe62bdb7b51288c08dc3e9659ae0a7117f51e2be7f56fc55fa1cdd00819b7"
+        },
+        {
+          "path": "scripts/val-qa.mjs",
+          "previous_sha256": "f982c67497260532707bfa1b714cd1d03e96b48edd3a98385de45bd530d6f139",
+          "sha256": "1bc6246708f8f358fc6511a200fd0b4726b0bf3f5f2c9b1f570d8dadd3d11d48"
         }
       ]
     }

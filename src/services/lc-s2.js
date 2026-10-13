@@ -298,58 +298,21 @@ async function dgS2Profile(cells,outer,opts){
    * İlkbahar (şub-may) + sonbahar (eki-ara) pencerelerinde 5 asset okunur;
    * hücre başına YILLIK MAX MNDWI ve MAX NDVI üretilir. */
   const waterMax={},vegMax={};
-  if(!evidence){evidence={};for(const key of Object.keys(acc))evidence[key]={ndvi:acc[key].ndvis.slice(),mndwi:acc[key].mndwis.slice(),dates:new Set(acc[key].dates)};}
   const waterScenes=[];
-  if(o.waterYear!==false&&o.mode!=="latest"){
-    for(const w of dgS2WaterWindows(o.year||2021,o.mode)){
-      let wScenes=[];
-      try{wScenes=await dgS2FindScenesRange(bbox,w.start,w.end,w.max);}catch(err){wScenes=[];}
-      for(const sc of wScenes){
-        try{
-          const assets=sc.item.assets||{};
-          const hrefFor=n2=>{const a2=assets[n2];return a2&&a2.href?dgLcSignedHref(a2.href,token):null;};
-          const hB03=hrefFor("B03"),hB04=hrefFor("B04"),hB08=hrefFor("B08"),hB11=hrefFor("B11"),hSCL=hrefFor("SCL");
-          if(!hB03||!hB04||!hB08||!hB11||!hSCL)continue;
-          const imgs=await Promise.all([
-            dgLcOpenRaster(hB03).then(t=>t.getImage()),
-            dgLcOpenRaster(hB04).then(t=>t.getImage()),
-            dgLcOpenRaster(hB08).then(t=>t.getImage()),
-            dgLcOpenRaster(hB11).then(t=>t.getImage()),
-            dgLcOpenRaster(hSCL).then(t=>t.getImage())
-          ]);
-          const rSCL=await dgS2ReadBand(imgs[4],bboxDeg);
-          const rB03=await dgS2ReadBand(imgs[0],bboxDeg);
-          const rB04=await dgS2ReadBand(imgs[1],bboxDeg);
-          const rB08=await dgS2ReadBand(imgs[2],bboxDeg);
-          const rB11=await dgS2ReadBand(imgs[3],bboxDeg);
-          const idxOf=band=>cells.map(c=>{
-            const z=dgLcUtmForward(c.center.lat,c.center.lon,band.epsg);
-            return dgS2CellIndex(band.meta,band.win,z.x,z.y);
-          });
-          const iS=idxOf(rSCL),i3=idxOf(rB03),i4=idxOf(rB04),i8=idxOf(rB08),i1=idxOf(rB11);
-          let usedW=0;
-          for(let ci=0;ci<cells.length;ci++){
-            if(iS[ci]===null||i3[ci]===null||i4[ci]===null||i8[ci]===null||i1[ci]===null)continue;
-            if(!DG_S2_SCL_VALID.includes(Math.round(Number(rSCL.values[iS[ci]]))))continue;
-            const gW=dgS2Reflectance(rB03.values[i3[ci]],sc.item,"B03"),rW=dgS2Reflectance(rB04.values[i4[ci]],sc.item,"B04");
-            const nW=dgS2Reflectance(rB08.values[i8[ci]],sc.item,"B08"),sW=dgS2Reflectance(rB11.values[i1[ci]],sc.item,"B11");
-            const okB=v=>v!==null&&Number.isFinite(v);
-            if(!okB(gW)||!okB(rW)||!okB(nW)||!okB(sW)||gW+sW<=0||nW+rW<=0)continue;
-            const kW=cells[ci].row+":"+cells[ci].col;
-            if(!evidence[kW])evidence[kW]={ndvi:[],mndwi:[],dates:new Set()};
-            if(evidence[kW].dates.has(sc.datetime))continue;
-            evidence[kW].dates.add(sc.datetime);
-            const mW=(gW-sW)/(gW+sW);
-            if(waterMax[kW]===undefined||mW>waterMax[kW])waterMax[kW]=mW;
-            const nV=(nW-rW)/(nW+rW);
-            evidence[kW].ndvi.push(nV);evidence[kW].mndwi.push(mW);
-            if(vegMax[kW]===undefined||nV>vegMax[kW])vegMax[kW]=nV;
-            usedW++;
-          }
-          waterScenes.push({id:sc.id,cloud:sc.cloud,datetime:sc.datetime,window:w.label,usedCells:usedW});
-        }catch(err){
-          console.warn("DENDROGEO · Sentinel-2 su sahnesi atlandı:",sc.id,String(err&&err.message||err).slice(0,120));
-        }
+  const annualScan=window.DG_PREPARE_SENTINEL_ANNUAL_EVIDENCE.prepare({evidence,accumulator:acc,year:o.year||2021,mode:o.mode,enabled:o.waterYear!==false&&o.mode!=="latest",waterWindows:dgS2WaterWindows});
+  evidence=annualScan.evidence;
+  if(annualScan.enabled){
+    const annualScenes=await window.DG_FIND_SENTINEL_ANNUAL_SCENES.find({windows:annualScan.windows,bbox,findRange:dgS2FindScenesRange});
+    for(const entry of annualScenes){
+      const w=entry.window,sc=entry.scene;
+      try{
+        const reads=await window.DG_READ_SENTINEL_ANNUAL_SCENE_WINDOWS.read({scene:sc,token,bbox:bboxDeg,loadBands:window.DG_LOAD_SENTINEL_SCENE_BANDS,readBands:window.DG_READ_SENTINEL_SCENE_WINDOWS,signHref:dgLcSignedHref,openRaster:dgLcOpenRaster,readBand:dgS2ReadBand});
+        if(!reads)continue;
+        const indices=window.DG_INDEX_SENTINEL_ANNUAL_SCENE_CELLS.build({cells,bands:reads,project:dgLcUtmForward,indexFor:dgS2CellIndex});
+        const usedW=window.DG_COLLECT_SENTINEL_ANNUAL_EVIDENCE.collect({cells,reads,indices,validClasses:DG_S2_SCL_VALID,item:sc.item,datetime:sc.datetime,reflectance:dgS2Reflectance,evidence,waterMax,vegMax});
+        waterScenes.push({id:sc.id,cloud:sc.cloud,datetime:sc.datetime,window:w.label,usedCells:usedW});
+      }catch(err){
+        console.warn("DENDROGEO · Sentinel-2 su sahnesi atlandı:",sc.id,String(err&&err.message||err).slice(0,120));
       }
     }
     window.DG_MERGE_SENTINEL_ANNUAL_EVIDENCE.merge({out,evidence,waterMax,vegMax,confirmedExtreme:dgS2ConfirmedExtreme,vegetationSummary:dgS2VegetationSummary});
