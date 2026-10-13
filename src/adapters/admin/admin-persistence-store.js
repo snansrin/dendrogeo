@@ -3,10 +3,27 @@
  function create(getClient){
   function storage(){return getClient().storage;}
   return Object.freeze({
-   loadMeasurementPhotoUrls(){return getClient().from("measurements").select("photo_url");},
-   listPhotoFiles(bucket,path,limit){return storage().from(bucket).list(path,{limit});},
-   getPhotoPublicUrl(bucket,path){return storage().from(bucket).getPublicUrl(path).data.publicUrl;},
-   removePhotoFiles(bucket,paths){return storage().from(bucket).remove(paths);},
+   async loadMeasurementPhotoUrls(){
+    const{data,error}=await getClient().from("measurements").select("photo_url");
+    if(error)throw error;
+    if(!Array.isArray(data))throw new Error("Ölçüm fotoğraf bağlantıları doğrulanamadı.");
+    return data;
+   },
+   async listPhotoFiles(bucket,path,limit){
+    const{data,error}=await storage().from(bucket).list(path,{limit});
+    if(error)throw error;
+    if(!Array.isArray(data))throw new Error("Fotoğraf depolama listesi doğrulanamadı.");
+    return data;
+   },
+   getPhotoPublicUrl(bucket,path){
+    const url=storage().from(bucket).getPublicUrl(path).data?.publicUrl;
+    if(typeof url!=="string"||!url)throw new Error("Fotoğraf bağlantısı doğrulanamadı.");
+    return url;
+   },
+   async removePhotoFiles(bucket,paths){
+    const{error}=await storage().from(bucket).remove(paths);
+    if(error)throw error;
+   },
    countPendingMeasurements(){return getClient().from("measurements").select("*",{count:"exact",head:true}).eq("status","Beklemede");},
    buildMeasurementExportQuery(filters){
     let query=getClient().from("measurements").select("*,projects(name)");

@@ -164,8 +164,9 @@ async function cleanOrphans(){
  if(!PROFILE||(PROFILE.role!=="admin"&&PROFILE.role!=="owner"))return toast("Yetki yok.");
  if(!confirm(dgCf("Hiçbir kayda bağlı olmayan depolama dosyaları silinsin mi?")))return;
  const adminStore=window.DG_ADMIN_PERSISTENCE_STORE.create(()=>sb);
- const{data:meas}=await adminStore.loadMeasurementPhotoUrls();
- const removed=await window.DG_CLEAN_ORPHAN_PHOTOS.clean({ports:adminStore,photoUrls:meas||[]});
+ let removed;
+ try{removed=await window.DG_CLEAN_ORPHAN_PHOTOS.clean({ports:adminStore});}
+ catch(error){return toast(_tad("Fotoğraf temizliği doğrulanamadı; silme durduruldu."),"err");}
  toast("✓ "+removed+" yetim dosya silindi.");
  loadStorageStats();
 }

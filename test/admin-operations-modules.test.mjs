@@ -36,9 +36,18 @@ test('orphan cleanup preserves measurement URLs and only removes unmatched publi
   getPublicUrl(path){return{data:{publicUrl:`https://cdn/${path}`}};},
   remove(paths){removed.push(paths);return Promise.resolve({error:null});}
  };}};
- const ports=window.DG_ADMIN_PERSISTENCE_STORE.create(()=>({storage}));
- const count=await window.DG_CLEAN_ORPHAN_PHOTOS.clean({ports,photoUrls:[{photo_url:'https://cdn/u1/keep.jpg'}]});
+ const ports=window.DG_ADMIN_PERSISTENCE_STORE.create(()=>({storage,from(table){assert.equal(table,'measurements');return{select:()=>Promise.resolve({data:[{photo_url:'https://cdn/u1/keep.jpg'}],error:null})};}}));
+ const count=await window.DG_CLEAN_ORPHAN_PHOTOS.clean({ports});
  assert.equal(count,1);assert.deepEqual(JSON.parse(JSON.stringify(removed)),[['u1/old.jpg']]);
+});
+
+test('orphan cleanup aborts before Storage access when measurement photo references cannot be verified',async()=>{
+ const window=app(),events=[];
+ await assert.rejects(window.DG_CLEAN_ORPHAN_PHOTOS.clean({ports:{
+  loadMeasurementPhotoUrls:async()=>{events.push('query');throw Error('permission denied');},
+  listPhotoFiles:async()=>{events.push('list');return[];},removePhotoFiles:async()=>events.push('remove')
+ }}),/permission denied/);
+ assert.deepEqual(events,['query']);
 });
 
 test('re-geocoding skips invalid coordinates, updates changed places and paces valid requests',async()=>{
