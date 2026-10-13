@@ -703,6 +703,12 @@ Her modülün tek bir dış API'si, sahibi olduğu açık durumu ve kendi testle
 
 - `application/reports/create-academic-report-collector.js`, kullanıcı/park tekilleştirme anahtarını ve rapor künye toplama portlarını kurar.
 
+- `application/reports/resolve-report-question-values.js`, park adını, kullanıcı/park taslağını ve akademik form değerlerini mevcut öncelik kurallarıyla çözer.
+- `ui/report-question-fields.js`, rapor yayın künye formunun sıralı akademik, tarih, amaç, örnekleme ve cihaz alanlarını mevcut sınıf ve kaçış bağlarıyla üretir.
+- `ui/report-question-confirmations.js`, DOI kapsam bilgisini, açık yayın/onay kutularını, hata bölgesini ve form eylemlerini çizer.
+- `application/reports/validate-report-question-answer.js`, tarayıcı doğrulamasını, temizlenmiş rapor bağlamı denetimini ve taslağın yalnız geçerli yanıtta saklanmasını koordine eder.
+- `application/reports/run-report-question-dialog.js`, erişilebilir modalın iptal, kapatma, form gönderme ve önceki odağa dönüş yaşam döngüsünü yönetir.
+
 - `adapters/admin/admin-tree-store.js`, yönetim ölçümlerini tam embed, istemci tarafı join ve görünür hata yedeğiyle yükler.
 
 - `domain/admin/group-measurement-tree.js`, ölçümleri park → proje → kullanıcı hiyerarşisinde toplar ve sıralar.
