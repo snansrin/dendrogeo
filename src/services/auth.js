@@ -30,6 +30,7 @@ initTurnstile();
 const TS = window.TS = {};
 let DG_AUTH_TAB="login";
 function loadTurnstileScript(){
+ if(window.DG_TURNSTILE_SCRIPT_LOADER){window.DG_TURNSTILE_SCRIPT_LOADER.load({window,document,available:typeof turnstile!=="undefined",onLoad:initTurnstile});return;}
  if(typeof turnstile!=="undefined"){initTurnstile();return;}
  if(window._tsLoadStarted)return;
  window._tsLoadStarted=true;
@@ -41,6 +42,7 @@ function loadTurnstileScript(){
  document.head.appendChild(s);
 }
 function scheduleTurnstile(){
+ if(window.DG_TURNSTILE_CONTROLLER){window.DG_TURNSTILE_CONTROLLER.schedule({window,document,load:loadTurnstileScript});return;}
  const el=document.getElementById("erisim");
  if(!el)return;
  if(!("IntersectionObserver" in window)){window._tsVisible=true;loadTurnstileScript();return;}
@@ -50,6 +52,7 @@ function scheduleTurnstile(){
  io.observe(el);
 }
 function initTurnstile(){
+ if(window.DG_TURNSTILE_CONTROLLER){window.DG_TURNSTILE_CONTROLLER.initialize({window,api:typeof turnstile==="undefined"?null:turnstile,tab:DG_AUTH_TAB,widgets:TS,getElement:$});return;}
 if(!window._tsVisible||typeof turnstile==="undefined")return;
 const activeId=DG_AUTH_TAB==="reg"?"tsReg":DG_AUTH_TAB==="reset"?"tsReset":"tsLogin";
 ["tsLogin","tsReg","tsReset"].forEach(id=>{
@@ -66,6 +69,7 @@ if(el&&TS[activeId]===undefined){
 if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",scheduleTurnstile);
 else scheduleTurnstile();
 function tsToken(id){
+if(window.DG_TURNSTILE_TOKEN)return window.DG_TURNSTILE_TOKEN.read(id,{api:typeof turnstile==="undefined"?null:turnstile,widgets:TS});
 if(typeof turnstile==="undefined"||!TS[id])return null;
 try{return turnstile.getResponse(TS[id])||null;}catch(e){return null;}
 }

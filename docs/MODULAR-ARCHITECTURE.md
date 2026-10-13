@@ -772,3 +772,13 @@ Her modülün tek bir dış API'si, sahibi olduğu açık durumu ve kendi testle
 - `application/admin/override-measurement-geofence.js`, yönetici konum çiti istisnasını audit kimliğiyle kaydeder.
 
 - `application/admin/delete-measurement.js`, kaydı silmeden önce bağlı fotoğrafı temizler ve ölçümü kaldırır.
+
+- `domain/auth/resolve-turnstile-form.js`, seçili auth sekmesini Turnstile widget kimliğine dönüştürür.
+
+- `adapters/auth/load-turnstile-script.js`, Cloudflare Turnstile kaynağını tek sefer yükler ve başarısızlığı sıfırlar.
+
+- `ui/turnstile-widget.js`, yalnız etkin form widget'ını gösterir ve önceki widget'ı kaldırır.
+
+- `application/auth/turnstile-controller.js`, form görünürlük zamanlamasını ve widget yaşam döngüsünü yönetir.
+
+- `domain/auth/read-turnstile-token.js`, seçili form token'ını güvenli biçimde okur.
