@@ -36,6 +36,7 @@ const MAX_RUNTIME = 400;     // ?v=NNN sürümlü script/style kopyaları
 const CORE_ASSETS = [
     '/', '/index.html', '/manifest.json', '/icon.png', '/apple-touch-icon.png', '/social-preview.jpg', '/css/style.css',
     '/css/landing.css',
+    '/src/domain/backup/sql-value.js','/src/domain/backup/build-restore-sql.js','/src/ui/restore-backup-prompt.js','/src/adapters/backup/download-restore-sql.js','/src/application/backup/restore-backup.js',
     '/src/domain/auth/resolve-turnstile-form.js','/src/adapters/auth/load-turnstile-script.js','/src/ui/turnstile-widget.js','/src/application/auth/turnstile-controller.js','/src/domain/auth/read-turnstile-token.js',
     '/src/domain/admin/measurement-review-payload.js','/src/adapters/admin/measurement-moderation-store.js','/src/application/admin/review-measurement.js','/src/application/admin/override-measurement-geofence.js','/src/application/admin/delete-measurement.js',
     '/src/config/supabase.js', '/src/config/constants.js', '/src/config/measurement-protocol-lock.js', '/src/config/wood-density-lock.js', '/src/config/species.js', '/src/config/i18n-en.js', '/src/config/i18n.js',

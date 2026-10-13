@@ -583,6 +583,16 @@ Her modülün tek bir dış API'si, sahibi olduğu açık durumu ve kendi testle
 
 - `domain/backup/reminder-state.js`, mevcut yedi gün eşiğini, eksik/geçersiz tarih ve gün yuvarlama davranışını saf olarak hesaplar.
 
+- `domain/backup/sql-value.js`, SQL literal değerlerini NULL, sonlu sayılar, boolean ve tek tırnak kaçış kurallarıyla serileştirir.
+
+- `domain/backup/build-restore-sql.js`, geri yükleme tablolarını mevcut sırayla, güvenli sütun tanımlayıcıları ve idempotent insertlerle SQL'e dönüştürür.
+
+- `ui/restore-backup-prompt.js`, geri yükleme onayındaki ölçüm, proje, waypoint, talep ve dışa aktarma tarihini mevcut Türkçe metne bağlar.
+
+- `adapters/backup/download-restore-sql.js`, SQL dosyasını geçici anchor ve beş saniyelik URL temizliğiyle indirir.
+
+- `application/backup/restore-backup.js`, onay, SQL üretimi, boş yedek sonucu ve indirme callback sırasını portlarla yönetir; servis fallback'i izole test ortamlarında korunur.
+
 - `domain/reports/publication-link.js`, yalnız biçimi doğrulanmış DGR kimliğinden kanonik rapor bağlantısı kurar; günlükteki URL değeri kullanılmaz.
 
 - `adapters/reports/publication-log-store.js`, yayın günlüğünü her istekte cache-buster ve `no-store` ile okur; HTTP, JSON ve ağ hatalarında mevcut boş sonuç davranışını korur.

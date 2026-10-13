@@ -50,12 +50,25 @@ function dgRestorePick(ev){
  rd.readAsText(f);
 }
 function dgSqlVal(v){
+ if(window.DG_BACKUP_SQL_VALUE)return window.DG_BACKUP_SQL_VALUE.serialize(v);
  if(v===null||v===undefined)return "NULL";
  if(typeof v==="number")return Number.isFinite(v)?String(v):"NULL";
  if(typeof v==="boolean")return v?"true":"false";
  return "'"+String(v).replace(/'/g,"''")+"'";
 }
 function dgRestoreSQL(bk){
+ if(window.DG_RESTORE_BACKUP_APPLICATION){
+  return window.DG_RESTORE_BACKUP_APPLICATION.execute(bk,{
+   confirm:message=>confirm(message),
+   prompt:backup=>window.DG_RESTORE_BACKUP_PROMPT.build(backup,dgTfs),
+   build:backup=>window.DG_BUILD_RESTORE_SQL.build(backup,dgSqlVal),
+   filename:()=>"dendrogeo_geri_yukleme_"+new Date().toISOString().slice(0,10)+".sql",
+   download:(sql,name)=>window.DG_BACKUP_RESTORE_SQL_DOWNLOAD.download(window,sql,name),
+   onInvalid:()=>toast(dgCf("Yedek dosyası okunamadı."),"err","📥"),
+   onSuccess:()=>toast(dgCf("✓ Geri yükleme SQL'i indirildi — Supabase → SQL Editor'da çalıştırın. Satırlar korunur, çakışanlar atlanır."),"ok","📥"),
+   onFailure:error=>toast(dgCf("Geri yükleme hazırlanamadı: ")+(error&&error.message||error),"err","📥")
+  });
+ }
  try{
   const c=bk.counts||{};
   const msg=dgTfs("{m} ölçüm · {p} proje · {w} waypoint · {r} talep içeriyor (dışa aktarma: {d}). Tam geri yükleme SQL dosyası indirilsin mi? (Supabase → SQL Editor'da çalıştırılır; kimlikler ve sahipler korunur, çakışan satırlar atlanır.)",
