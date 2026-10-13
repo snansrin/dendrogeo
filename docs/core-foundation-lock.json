@@ -541,7 +541,7 @@
     "src/application/map/load-approved-measurement-markers.js": "c984900116a28613979970082e513b90a7e9b2bea404d6ef54d17ba34a62c1c6",
     "src/application/map/load-live-measurements-map.js": "1446b2e749d316a8121cb5a0efbbf5bc366f75f9d27e4562b2808c99e5b472a1",
     "src/application/map/load-project-waypoints.js": "4a9b69a4e9548b0955c5ff0bb5b8d3998d8645ac99d1c1ecae9e38f9b79c7839",
-    "src/application/map/render-waypoint-gps-overlay.js": "c3456e064374c493ffd5125de7d178fd976dc9db185334e92e03837a47368fcb",
+    "src/application/map/render-waypoint-gps-overlay.js": "510eb8cd7968244b215658fc15f7397cbdd715bbd326a07e9fcdd40f23967891",
     "src/application/map/reset-waypoint-load-state.js": "8330f5b4fb225fe7e298ca16ce24e19d8eec89b618fd8bfd34851c391db4e909",
     "src/application/map/schedule-measurement-marker-chunks.js": "0a06c30c2b8297182385b1babc4f0d91d897d37b2294a6b4c6c567a469fa6aa9",
     "src/application/map/switch-base-map-layer.js": "55044d5dbaf855472db2d95e85846f826be33e643a34c417272df56b0e542c6c",
@@ -787,7 +787,7 @@
     "src/ui/show-waypoint-load-error.js": "dd72c902dd39f2e606c4a0cc631f7f17d9103ed2d0d232eefb991792d4d6d3de",
     "src/ui/state.js": "5feada9bc2052655d9be405043ffb6f71f39d51fcb58e189089c3d7d3fc8bafc",
     "src/ui/sync-base-map-layer-selection.js": "2f93018846abac13f83486a1fc2b9df0cbb7f330cae202a0e91ef902c8263eeb",
-    "src/ui/waypoint-gps-overlay.js": "e5bb70df065093b911d1c7ff5b5b9fb7db09b38df6bb7fb3271db7ea1e3f4b28",
+    "src/ui/waypoint-gps-overlay.js": "4f4396cf19bacb0e1f3e026b6a331c37db26631b7282f5b0267a2042a6226d1e",
     "src/utils/geo.js": "3e796768b3d55a3f07c4be3281c9437f1602b6d5e68151b2af7b101707baf294",
     "src/utils/lazylibs.js": "ab6c3a9f78ca0b3a6c67d01720defc9dff8a7933e556c8aecd6a658cbc5e46ed",
     "src/workers/surface-worker.js": "af6477f104a06342cf69ef7f702a3e95ed27cd390c5aae36a2fbe5dfd68ed2fe",
@@ -909,7 +909,7 @@
     "test/waypoint-arrival-modules.test.mjs": "db63b7fa5d3445c9ad8fd8493b472e87b1727c2ab6e045f609c41065bdcc2c2b",
     "test/waypoint-csv-upload-modules.test.mjs": "c2ac1fde9029a4123ed0c10a5937946555093fd8d6883760101f302de67dcead",
     "test/waypoint-delete-modules.test.mjs": "b3e21cff19b6b40f9233b69f02a21550f44318842b606c1b12e7ecccefad463b",
-    "test/waypoint-gps-overlay-modules.test.mjs": "40c3d449eb9c6e26d53f3292e4afba37d3f0cf8fb3a65756e161f8fac2341692",
+    "test/waypoint-gps-overlay-modules.test.mjs": "e8a26332bd4fdc49dbc524e60dd09fe7f7e8a8a3b31903af9c73cf689fc42236",
     "test/waypoint-load-modules.test.mjs": "cd0f5b0436f1597a17d235e78f0554dec8ff341d2111dd1adf891d454635327b",
     "vendor/geotiff-2.1.3.js": "cb5c9731bfee1f8bff1728e54e4436ada81ea3258b178a3d6603c61b58d99e6c",
     "vendor/leaflet-1.9.4.js": "db49d009c841f5ca34a888c96511ae936fd9f5533e90d8b2c4d57596f4e5641a",
@@ -2171,6 +2171,27 @@
           "path": "test/map-measurement-marker-chunk-modules.test.mjs",
           "previous_sha256": "8a228cebad287e0d0f4ca677a35f910160d82e1a42104c807e3a5d32b63448a4",
           "sha256": "319cdcb6b8f9fdc1b360cabc18acdf2dbfc7b8a85912e2c6138beefaf69dcb4c"
+        }
+      ]
+    },
+    {
+      "date": "2026-10-13",
+      "scope": "User-authorized five-responsibility waypoint GPS overlay boundary group: inject location marker, guidance readout, and route-line UI ports through the composition adapter, retain the domain guidance resolver, and update the locked module contract test for the explicit port signature. Preserve marker-first order, nearest-target selection, translated readout, dashed line styling, and local fallback.",
+      "files": [
+        {
+          "path": "src/application/map/render-waypoint-gps-overlay.js",
+          "previous_sha256": "c3456e064374c493ffd5125de7d178fd976dc9db185334e92e03837a47368fcb",
+          "sha256": "510eb8cd7968244b215658fc15f7397cbdd715bbd326a07e9fcdd40f23967891"
+        },
+        {
+          "path": "src/ui/waypoint-gps-overlay.js",
+          "previous_sha256": "e5bb70df065093b911d1c7ff5b5b9fb7db09b38df6bb7fb3271db7ea1e3f4b28",
+          "sha256": "4f4396cf19bacb0e1f3e026b6a331c37db26631b7282f5b0267a2042a6226d1e"
+        },
+        {
+          "path": "test/waypoint-gps-overlay-modules.test.mjs",
+          "previous_sha256": "40c3d449eb9c6e26d53f3292e4afba37d3f0cf8fb3a65756e161f8fac2341692",
+          "sha256": "e8a26332bd4fdc49dbc524e60dd09fe7f7e8a8a3b31903af9c73cf689fc42236"
         }
       ]
     }

@@ -1363,4 +1363,10 @@ The collaborator map renderer now separates peer selection, display-model deriva
 
 - `scripts/check-dependency-rules.mjs` domain ve application katmanlarının daha dış katmanlara global `DG_*` erişimini tarar; kural `npm run check` içinde çalışır ve fixture ile gerçek kaynak testlerine sahiptir.
 - Admin measurement use-case'leri Supabase moderation store'u parametre olarak alır; Turnstile controller UI aktivasyonunu callback ile, measurement marker use-case'i katman hazırlama/marker/scheduler bağımlılıklarını portlarla alır.
-- `render-waypoint-gps-overlay.js` içindeki üç UI globali dar kapsamlı, isim bazlı geçiş borcu olarak listelenmiştir; sonraki waypoint overlay grubunda callback portlarına taşınacaktır. Kilitli regresyon dosyalarına dokunulmadı.
+- Waypoint GPS overlay'deki UI global erişimleri sonraki beşli modül grubunda callback portlarına taşındı ve denetimin geçiş borcu sıfırlandı.
+
+## Waypoint GPS overlay portları — 13 Ekim 2026
+
+- `application/map/render-waypoint-gps-overlay.js` konum marker'ı, readout renderer'ı ve çizgi adapter'ını injected port olarak alır; yalnız domain guidance resolver'ına doğrudan bağlıdır.
+- `ui/waypoint-gps-overlay.js` composition sınırında üç portu bağlar. Marker → hedef seçimi → readout → çizgi sırası ve hedef güncelleme davranışı korunur; kilitli overlay sözleşme testi port kontratını doğrular.
+- Bağımlılık kuralı denetiminde bilinen geçiş istisnası kalmadı.

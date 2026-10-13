@@ -46,7 +46,7 @@ test('guidance adapter adds the existing dashed line and marks it as a waypoint 
 test('application draws current location first, then selects target and renders guidance',()=>{
   const window=setup(),render=window.DG_RENDER_WAYPOINT_GPS_OVERLAY.render,{events,leaflet}=api();let selected=null;
   const target={id:1,wp_id:1,lat:2,lon:1},waypoints=[target,{id:2,wp_id:2,lat:0,lon:1}],gps={latitude:1,longitude:1},els={navDist:{},navTarget:{},navArrow:{style:{}}};
-  const result=render({map:{},waypoints,target:null,gps,leaflet,distance:(_a,_b,lat)=>Math.abs(lat-1),bearing:(_a,_b,lat)=>lat*10,getElement:id=>els[id],translate:value=>value,setTarget:value=>{selected=value;}});
+  const result=render({map:{},waypoints,target:null,gps,leaflet,distance:(_a,_b,lat)=>Math.abs(lat-1),bearing:(_a,_b,lat)=>lat*10,getElement:id=>els[id],translate:value=>value,setTarget:value=>{selected=value;},createLocationMarker:window.DG_CREATE_WAYPOINT_GPS_LOCATION_MARKER,renderReadout:window.DG_RENDER_WAYPOINT_GPS_GUIDANCE_READOUT,addGuidanceLine:window.DG_ADD_WAYPOINT_GUIDANCE_LINE});
   assert.equal(result,target);assert.equal(selected,target);assert.equal(events[0][0],'marker');assert.equal(events[1][0],'line');assert.equal(els.navDist.textContent,'1 m');assert.equal(els.navTarget.textContent,'Hedef: P1 · 20°');
   assert.doesNotMatch(events[0][2].icon.html,/nav-arrow-svg/); // target was selected after the location marker, as before
 });
