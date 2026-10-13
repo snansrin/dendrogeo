@@ -424,7 +424,7 @@
     "src/services/osm-client.js": "7b91c7e1ce9a54656282a7cc7c7a25d9520867d37fb4d1316a6add8e5e74d86e",
     "src/services/osm-water-backup.js": "b3429cdc9bfe0f84bd7b6644a1221d4daadc374ac046b036abf15b3b5ee7d269",
     "src/services/park-geometry.js": "ae89879b98ed8d9f3928d17b7258389c7a7c1abdabdd63dba1aac934aacc6f83",
-    "src/services/park-query.js": "4420b4ba267e30e2ee3086dfb15368f299c13f88309ca339b6f40066f5c316c0",
+    "src/services/park-query.js": "b0ddd9f7fb7d99b95e29dbe78c392c472ee149e60f7e941aca91d562c826cd7e",
     "src/services/park-registry.js": "bd0b7054f533de561a4d3860ff73f05c08e86f27d38a019477c3e8654e3f9f9a",
     "src/services/park-state.js": "cc241e32d716cc6c682f2e7e82caaada845b698b5bf1b914c17b94ea86823608",
     "src/ui/choose-new-park-controller.js": "c787f76aee2cc85b748a30e5e0ccbc1393f58acfa53cf0aff2e3500344e31989",
@@ -634,6 +634,17 @@
           "path": "src/services/geofence.js",
           "previous_sha256": "2377481383ce5acc8227f118adaba545b6c3e9d4f09b1671c8cfa80cb1d0b6b3",
           "sha256": "27b11b89f3fbb51cf4cf3ef63912148033628dfafce80e3c293eb3e2a2c7ef0d"
+        }
+      ]
+    },
+    {
+      "date": "2026-10-13",
+      "scope": "User-authorized five-module split of the locked park-query service: shared in-flight coverage request, boundary-scoped cache reset/snapshot, OSM element collection, park-boundary filtering, and water-layer renderer. Preserve same-boundary request identity, stale-response rejection, padded extents, geometry collection/filtering, and legacy wrappers.",
+      "files": [
+        {
+          "path": "src/services/park-query.js",
+          "previous_sha256": "4420b4ba267e30e2ee3086dfb15368f299c13f88309ca339b6f40066f5c316c0",
+          "sha256": "b0ddd9f7fb7d99b95e29dbe78c392c472ee149e60f7e941aca91d562c826cd7e"
         }
       ]
     }
