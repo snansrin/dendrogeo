@@ -45,6 +45,12 @@ const DG_PARK_COVERAGE_FETCH=window.DG_PARK_COVERAGE_FETCH_APPLICATION.create({
 });
 
 function queryDetailedCoverage(){
+ if(window.DG_SHARE_DETAILED_COVERAGE_REQUEST)return window.DG_SHARE_DETAILED_COVERAGE_REQUEST.request(JSON.stringify(PARK_POLY),{
+  getPending:()=>window.DG_SURFACE_OSM_PENDING,
+  setPending:pending=>{window.DG_SURFACE_OSM_PENDING=pending;},
+  clearPending:()=>{window.DG_SURFACE_OSM_PENDING=null;},
+  run:()=>dgQueryDetailedCoverage()
+ });
  const boundary=JSON.stringify(PARK_POLY);
  if(window.DG_SURFACE_OSM_PENDING?.boundary===boundary)return window.DG_SURFACE_OSM_PENDING.promise;
  const promise=dgQueryDetailedCoverage();
@@ -63,7 +69,13 @@ async function dgQueryDetailedCoverage(){
 
   const boundary=JSON.stringify(PARK_POLY);
   // A failed refresh may not erase previously verified same-park geometries.
-  if(window.DG_SURFACE_OSM?.boundary!==boundary){
+  if(window.DG_COMMIT_PARK_COVERAGE_SNAPSHOT){
+    window.DG_COMMIT_PARK_COVERAGE_SNAPSHOT.clearForChangedBoundary(boundary,{
+      getCoverage:()=>window.DG_SURFACE_OSM,
+      clearCoverage:()=>{window.DG_SURFACE_OSM=null;},
+      clearGeometry:()=>{IMP_RINGS=[];IMP_LINES=[];GRID_BLOCK_LINES=[];WATER_RINGS=[];WATER_LINES=[];}
+    });
+  }else if(window.DG_SURFACE_OSM?.boundary!==boundary){
     window.DG_SURFACE_OSM=null;
     IMP_RINGS=[];IMP_LINES=[];GRID_BLOCK_LINES=[];WATER_RINGS=[];WATER_LINES=[];
   }
@@ -82,13 +94,22 @@ async function dgQueryDetailedCoverage(){
   }
 
   IMP_RINGS=[];IMP_LINES=[];GRID_BLOCK_LINES=[];WATER_RINGS=[];WATER_LINES=[];
-  window.DG_SURFACE_OSM={elements:json.elements||[],bbox:{minLat:minLat-pad,minLon:minLon-pad,maxLat:maxLat+pad,maxLon:maxLon+pad},boundary:fetchedBoundary,fetchedAt:new Date().toISOString()};
+  window.DG_SURFACE_OSM=window.DG_COMMIT_PARK_COVERAGE_SNAPSHOT
+    ?window.DG_COMMIT_PARK_COVERAGE_SNAPSHOT.commit({elements:json.elements,bbox:coverageBbox,pad,boundary:fetchedBoundary,fetchedAt:new Date().toISOString()})
+    :{elements:json.elements||[],bbox:{minLat:minLat-pad,minLon:minLon-pad,maxLat:maxLat+pad,maxLon:maxLon+pad},boundary:fetchedBoundary,fetchedAt:new Date().toISOString()};
   const classified=window.DG_PARK_COVERAGE_ELEMENT_CLASSIFIER.classify(json.elements||[],{
     isWater:element=>isWater(element),
     isImpervious:element=>isImpervious(element)
   });
 
-  for(const item of classified){
+  if(window.DG_COLLECT_PARK_COVERAGE_ELEMENTS){
+    window.DG_COLLECT_PARK_COVERAGE_ELEMENTS.collect(classified,{
+      extractRings, isClosedLine,
+      addWaterRing:ring=>WATER_RINGS.push(ring),
+      addWaterLine:line=>WATER_LINES.push(line),
+      collectPedestrianGridBlocker,collectImperviousGeometry
+    });
+  }else for(const item of classified){
     const {element:el}=item;
 
     if(item.skip)continue;
@@ -144,32 +165,23 @@ async function dgQueryDetailedCoverage(){
     maxLon
   };
 
-  WATER_RINGS=WATER_RINGS.filter(r=>
-    ringTouchesPark(r,PARK_POLY,pb)
-  );
-
-  WATER_LINES=WATER_LINES.filter(l=>
-    lineTouchesPark(l,PARK_POLY,pb)
-  );
-
-  IMP_RINGS=IMP_RINGS.filter(r=>
-    ringTouchesPark(r,PARK_POLY,pb)
-  );
-
-  IMP_LINES=IMP_LINES.filter(l=>
-    lineTouchesPark(l.pts,PARK_POLY,pb)
-  );
-
-  GRID_BLOCK_LINES=(GRID_BLOCK_LINES||[])
-    .map(l=>Array.isArray(l)
-      ?{pts:l,w:IMP_CLEARANCE_M}
-      :l
-    )
-    .filter(l=>
-      l&&Array.isArray(l.pts)&&
-      l.pts.length>=2&&
-      lineTouchesPark(l.pts,PARK_POLY,pb)
-    );
+  if(window.DG_FILTER_PARK_COVERAGE_TO_BOUNDARY){
+    const filtered=window.DG_FILTER_PARK_COVERAGE_TO_BOUNDARY.filter({
+      waterRings:WATER_RINGS,waterLines:WATER_LINES,imperviousRings:IMP_RINGS,imperviousLines:IMP_LINES,
+      gridBlockLines:GRID_BLOCK_LINES,park:PARK_POLY,bounds:pb,clearance:IMP_CLEARANCE_M,
+      isRingTouching:ringTouchesPark,lineTouches:lineTouchesPark
+    });
+    WATER_RINGS=filtered.waterRings;WATER_LINES=filtered.waterLines;IMP_RINGS=filtered.imperviousRings;
+    IMP_LINES=filtered.imperviousLines;GRID_BLOCK_LINES=filtered.gridBlockLines;
+  }else{
+    WATER_RINGS=WATER_RINGS.filter(r=>ringTouchesPark(r,PARK_POLY,pb));
+    WATER_LINES=WATER_LINES.filter(l=>lineTouchesPark(l,PARK_POLY,pb));
+    IMP_RINGS=IMP_RINGS.filter(r=>ringTouchesPark(r,PARK_POLY,pb));
+    IMP_LINES=IMP_LINES.filter(l=>lineTouchesPark(l.pts,PARK_POLY,pb));
+    GRID_BLOCK_LINES=(GRID_BLOCK_LINES||[])
+      .map(l=>Array.isArray(l)?{pts:l,w:IMP_CLEARANCE_M}:l)
+      .filter(l=>l&&Array.isArray(l.pts)&&l.pts.length>=2&&lineTouchesPark(l.pts,PARK_POLY,pb));
+  }
 
   // OSM surface geometry is kept as non-visual QC data for grid planning.
   console.log(
@@ -187,6 +199,10 @@ async function dgQueryDetailedCoverage(){
 }
 
 function refreshWaterLayer(){
+  if(window.DG_PARK_WATER_LAYER_RENDERER)return window.DG_PARK_WATER_LAYER_RENDERER.refresh({
+    layer:WATER_LAYER,map,leaflet:L,rings:WATER_RINGS,lines:WATER_LINES,satelliteMode,
+    setLayer:layer=>{WATER_LAYER=layer;}
+  });
   if(WATER_LAYER && map){
     map.removeLayer(WATER_LAYER);
   }
