@@ -419,7 +419,7 @@
     "src/services/lc-stac.js": "978c4be8c3bc4e7cda3f694d1f06290e661fed5bbd5b76b68719140edc18e71a",
     "src/services/lc-validate.js": "e78602fb957fbc425ade20ba907d96b12f8af7bd3d2563b4e858c60000bbab48",
     "src/services/map.js": "db155b938ac84b24d99a097d309ac5c37bd3235463f76e6fc96ceaa92e7cd4e1",
-    "src/services/measure.js": "9953f28c2e8f31f3ab30b2d6d801f02830826de814fba532f9480407cdc89199",
+    "src/services/measure.js": "8b345682619a8cb2b244966a7a354daacb6a131a655e72f8747e0aa2c9472154",
     "src/services/offline.js": "b0d13ca6c52213b2103e5c23727be42c92cea39855622d43abaad87a8e48280f",
     "src/services/osm-client.js": "2e5eeaa735bf05a603a0db142619f60747b9696f506e666d7df992454a56814f",
     "src/services/osm-water-backup.js": "b3429cdc9bfe0f84bd7b6644a1221d4daadc374ac046b036abf15b3b5ee7d269",
@@ -720,6 +720,17 @@
           "path": "src/utils/lazylibs.js",
           "previous_sha256": "dc1ccaafd9c682188da52c962c6cb590d60e20ff0bd1179dab29aaa8f75194ce",
           "sha256": "f19885ae01b97dcfb17dcdb208ef384d0adb8074ad58ae828d5194fad992205f"
+        }
+      ]
+    },
+    {
+      "date": "2026-10-13",
+      "scope": "User-authorized five-module split of locked measure service: reverse-geocode adapter, photo image decoding, photo evidence summary, GPS button state, and species selector UI. Preserve photo URL cleanup and stale-result cancellation, Turkish province resolution, all GPS permissions/watch/presence/wake-lock behavior, canonical species values and translation, save/geofence gates, and locked regression tests.",
+      "files": [
+        {
+          "path": "src/services/measure.js",
+          "previous_sha256": "9953f28c2e8f31f3ab30b2d6d801f02830826de814fba532f9480407cdc89199",
+          "sha256": "8b345682619a8cb2b244966a7a354daacb6a131a655e72f8747e0aa2c9472154"
         }
       ]
     },

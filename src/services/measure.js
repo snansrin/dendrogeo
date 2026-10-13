@@ -6,6 +6,7 @@ const _tmsf=(t,v)=>(typeof dgTfs==="function"?dgTfs(t,v):String(t).replace(/\{(\
 /* TÜRKİYE'de il adı "state" alanındadır (admin_level=4); ilçe "city/town"a düşer.
    TR için KESİN çözüm: önce state oku → ilçe asla gelmez. */
 async function reverseGeocode(lat,lon){
+ if(typeof window!=="undefined"&&window.DG_MEASUREMENT_REVERSE_GEOCODE)return window.DG_MEASUREMENT_REVERSE_GEOCODE.resolve(fetch,lat,lon);
  try{
   const r=await fetch("https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat="+lat+"&lon="+lon+"&accept-language=tr",{headers:{Accept:"application/json"}});
   if(!r.ok)return null;
@@ -42,7 +43,7 @@ async function reverseGeocode(lat,lon){
  *
  * dgPhotoScan SAF fonksiyondur (canvas verisi alır) → node'da testsiz
  * tarayıcı olmadan doğrulanabilir. */
-function loadImg(file){return new Promise((res,rej)=>{const u=URL.createObjectURL(file);const i=new Image();i.onload=()=>res({i,u});i.onerror=()=>{URL.revokeObjectURL(u);rej(new Error("image"));};i.src=u;});}
+function loadImg(file){if(typeof window!=="undefined"&&window.DG_MEASUREMENT_PHOTO_IMAGE)return window.DG_MEASUREMENT_PHOTO_IMAGE.load(file);return new Promise((res,rej)=>{const u=URL.createObjectURL(file);const i=new Image();i.onload=()=>res({i,u});i.onerror=()=>{URL.revokeObjectURL(u);rej(new Error("image"));};i.src=u;});}
 function dgPhotoScan(d,S){return window.DG_TREE_PHOTO_QUALITY.scan(d,S);}
 /* KAPI (0044 · kalibre): pozlama teknik eşikleri + en az BİR bitki/dal kanıtı.
  *   foliage ≥ %5  VEYA  gövde/dal ≥ %5  VEYA  kış kadrajı
@@ -53,6 +54,7 @@ function dgPhotoGate(m){
 }
 /* Kullanıcıya NEYİ gördüğümüzü söyler (uyarı anlaşılır olsun, ezbere değil). */
 function dgPhotoLabel(m){
+ if(typeof window!=="undefined"&&window.DG_MEASUREMENT_PHOTO_SUMMARY)return window.DG_MEASUREMENT_PHOTO_SUMMARY.format(m,_tms);
  const p=(x)=>"%"+Math.round(x*100);
  const t=[];
  if(m.green>=0.05)t.push(_tms("yeşil örtü")+" "+p(m.green));
@@ -123,6 +125,7 @@ if(!window._wakeLockHooked){
  * opacity .65 + cursor wait; sonuçta eski metnine döner. Yeni tema/animasyon
  * YOK — aynı sınıf (.dg-png-btn primary) ve aynı mekanizma. */
 function dgGpsBtnBusy(on){
+ if(typeof window!=="undefined"&&window.DG_MEASUREMENT_GPS_BUTTON)return window.DG_MEASUREMENT_GPS_BUTTON.setBusy(on,$);
  const b=$("gpsBtn");if(!b)return;
  if(on){b.dataset.oldText=b.innerHTML;b.innerHTML="⏳ Konum alınıyor…";b.disabled=true;b.style.opacity=".65";b.style.cursor="wait";}
  else{b.disabled=false;b.innerHTML=b.dataset.oldText||"📡 Konumu Etkinleştir";b.style.opacity="";b.style.cursor="";}
@@ -167,6 +170,7 @@ function updGps(){
 }
 /* --- 4. FORM YARDIMCILARI --- */
 function fillSpecies(){
+ if(typeof window!=="undefined"&&window.DG_MEASUREMENT_SPECIES_SELECTOR)return window.DG_MEASUREMENT_SPECIES_SELECTOR.fill({getElement:$,speciesData:typeof SPECIES_DATA!=="undefined"?SPECIES_DATA:null,turkishLabels:typeof DG_I18N_TR!=="undefined"?DG_I18N_TR:null,translate:value=>typeof dgT==="function"?dgT(value):value});
  const gv=$("mGroup").value,s=$("mSpecies");
  $("latinName").textContent="";
  /* 0036: EN modunda option GÖRÜNÜMÜ çevrilir; value kanonik TR kalmalıdır
@@ -183,6 +187,7 @@ function fillSpecies(){
  $("latinName").textContent="";
 }
 function showLatin(){
+ if(typeof window!=="undefined"&&window.DG_MEASUREMENT_SPECIES_SELECTOR)return window.DG_MEASUREMENT_SPECIES_SELECTOR.showLatin({getElement:$,latinNames:typeof LATIN!=="undefined"?LATIN:{}});
  const sp=$("mSpecies").value;
  $("latinName").textContent=(LATIN[sp]&&LATIN[sp]!=="—")?("🔬 "+LATIN[sp]):"";
 }
