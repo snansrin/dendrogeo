@@ -211,7 +211,13 @@
       "src/adapters/map/fetch-approved-map-measurements.js",
       "src/application/map/load-approved-measurement-markers.js",
       "src/ui/render-live-map-load-status.js",
-      "src/application/map/load-live-measurements-map.js"
+      "src/application/map/load-live-measurements-map.js",
+      "src/domain/map/measurement-marker-cluster-icon.js",
+      "src/ui/create-measurement-map-marker.js",
+      "src/adapters/map/ensure-measurement-marker-layer.js",
+      "src/application/map/schedule-measurement-marker-chunks.js",
+      "src/application/map/add-measurement-markers.js",
+      "src/ui/map-measurement-markers.js"
     ],
     "scientific_contract_and_inputs": [
       "css/park-panel.css",
@@ -324,7 +330,8 @@
       "test/park-presence-channel-modules.test.mjs",
       "test/park-presence-rendering-modules.test.mjs",
       "test/waypoint-csv-upload-modules.test.mjs",
-      "test/map-live-load-modules.test.mjs"
+      "test/map-live-load-modules.test.mjs",
+      "test/map-measurement-marker-chunk-modules.test.mjs"
     ]
   },
   "sha256": {
@@ -625,7 +632,14 @@
     "src/application/map/load-approved-measurement-markers.js": "c984900116a28613979970082e513b90a7e9b2bea404d6ef54d17ba34a62c1c6",
     "src/ui/render-live-map-load-status.js": "29c5b4b9df9b28aed806f915212a22bfa2ef31dd0e1d7dcc431a724a65e91d4a",
     "src/application/map/load-live-measurements-map.js": "1446b2e749d316a8121cb5a0efbbf5bc366f75f9d27e4562b2808c99e5b472a1",
-    "test/map-live-load-modules.test.mjs": "199482d8b88f50aaafe883d56f8702df1eaf092e58bfde77c485ac6848c307d6"
+    "test/map-live-load-modules.test.mjs": "199482d8b88f50aaafe883d56f8702df1eaf092e58bfde77c485ac6848c307d6",
+    "src/domain/map/measurement-marker-cluster-icon.js": "3506d8601aae61f75b16cf68a23ab4142b65f8fb03fa1cae012435fe18cd9a3e",
+    "src/ui/create-measurement-map-marker.js": "d16cbffbe5ae95897b973ea76181469bb6335421bbfef733e86c836097c94ab1",
+    "src/adapters/map/ensure-measurement-marker-layer.js": "10f5aa75932b90ce1ffa2e523ed02d44f13c4be9e8c467c1aed387e77826f818",
+    "src/application/map/schedule-measurement-marker-chunks.js": "0a06c30c2b8297182385b1babc4f0d91d897d37b2294a6b4c6c567a469fa6aa9",
+    "src/application/map/add-measurement-markers.js": "545ef0a9e18f9398573e3127037a7670518ceaaa0f87a9cce762ae1a7a0de78d",
+    "test/map-measurement-marker-chunk-modules.test.mjs": "8a228cebad287e0d0f4ca677a35f910160d82e1a42104c807e3a5d32b63448a4",
+    "src/ui/map-measurement-markers.js": "cedd193f2786604f84044f2ecf020144b5cba20c86160b729891b7d4f3668a67"
   },
   "authorized_modularizations": [
     {
@@ -1422,6 +1436,17 @@
           "path": "src/services/map.js",
           "previous_sha256": "5b71e0381d65f69d70ecbab99d9f9947b76c2ec5a7163e9c60b3cf3bb08fe449",
           "sha256": "02edbb26a2d1a6ebb00626876f4f5724477147279b4d7109a5db98bf004df652"
+        }
+      ]
+    },
+    {
+      "date": "2026-10-13",
+      "scope": "User-authorized fifty-seventh five-module split of measurement marker drawing: cluster icon model, marker and popup creation, cluster/fallback layer setup, stale-token-controlled chunk scheduling, and orchestration. Preserve cluster options and thresholds, degraded layer warning, marker order/style/popup, 16 ms chunk delay, layer clearing, cancellation semantics, and optional fallback.",
+      "files": [
+        {
+          "path": "src/ui/map-measurement-markers.js",
+          "previous_sha256": "871e27f80773f7fde985d01d2bf923da022d05a8f11621e0c95de6537cfb1b7e",
+          "sha256": "cedd193f2786604f84044f2ecf020144b5cba20c86160b729891b7d4f3668a67"
         }
       ]
     }

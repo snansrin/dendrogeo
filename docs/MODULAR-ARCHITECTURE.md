@@ -1214,3 +1214,10 @@ The collaborator map renderer now separates peer selection, display-model deriva
 - `domain/map/prepare-approved-map-measurements.js` mevcut koordinat politikasını kullanarak çizilebilir satırları seçer; `adapters/map/fetch-approved-map-measurements.js` onaylı kayıt sorgusunu ve kesilme uyarısını korur.
 - `application/map/load-approved-measurement-markers.js` harita/okuma/çizim akışını ve `done(n, rows, error)` geri çağırım sözleşmesini sürdürür. `ui/render-live-map-load-status.js` yükleniyor, hata/yeniden dene ve normal/degrade durumlarını üretir; `application/map/load-live-measurements-map.js` yükleme durumu, analiz ve marker akışını orkestre eder.
 - Kilitli `src/services/map.js` tüm beş modül mevcutken bu akışları devreder; eksik modül durumunda uyumluluk gövdesi çalışır. Veri alanları, RLS hatası bildirimi, kesilme uyarısı, marker çizim sırası ve canlı harita dirty/loaded kapıları korunur.
+
+
+## Ölçüm marker katmanı ve parça çizimi — 13 Ekim 2026
+
+- `domain/map/measurement-marker-cluster-icon.js` küme rozetinin görünümünü üretir; `ui/create-measurement-map-marker.js` yeşil ölçüm marker’ını ve mevcut popup’ı bağlar.
+- `adapters/map/ensure-measurement-marker-layer.js` küme katmanını kurar/temizler ve eklenti yoksa düz katmana düşer; `application/map/schedule-measurement-marker-chunks.js` token kontrollü, 16 ms aralıklı çizim parçalarını yürütür.
+- `application/map/add-measurement-markers.js`, bu dört modülü sırayla birleştirir. Var olan UI adapter’ı yeni modüller eksik olduğunda önceki yerel uygulamasına geri döner.
