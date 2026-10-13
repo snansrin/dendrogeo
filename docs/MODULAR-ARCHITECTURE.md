@@ -1070,3 +1070,10 @@ Her modülün tek bir dış API'si, sahibi olduğu açık durumu ve kendi testle
 - `application/surface/apply-surface-cell-decision.js`, doğrulanmış tekli kararı uygular; toplu değişiklikler aynı tekli girişten her hücreyi sırayla geçirir.
 - `application/surface/undo-surface-cell-decision.js` ve `reset-surface-corrections.js`, sahiplik kapıları, geri alma ve onaylı sıfırlama akışını yürütür.
 - `lc-sens.js` eski global girişlerini korur; yeni modüller servis öncesi lazy yüklenir ve çevrimdışı precache’e alınır.
+
+## LULC spektral kanıt ve NDVI sunumu — 13 Ekim 2026
+
+- `domain/surface/classify-surface-scan-audit.js`, Sentinel‑2 profiliyle değişmez ham raster sınıflarını karşılaştırıp eksik/belirsiz kapsam ve alan sıralı farkları üretir.
+- `ui/render-surface-scan-audit.js`, tarih aralığı ve kaçışlanmış kapsam/fark açıklamasını raporlar; bağımsız doğruluk ölçümü olmadığını açıkça korur.
+- `domain/surface/classify-surface-vegetation-tiers.js`, en az üç gözlemli yeşil hücrelerden park içi NDVI tercillerini kurar; `build-surface-vegetation-parts.js` yalnız hazır geometrili sınıfları birleştirme girdisine taşır.
+- `ui/render-surface-vegetation-features.js`, çözülmüş poligonları mevcut Leaflet katmanına çizer. `lc-sens.js` orkestrasyon, uyumluluk girişi ve ham sınıf korumasını sürdürür.
