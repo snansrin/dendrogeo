@@ -13,11 +13,13 @@
 const DG_LC_OSM_CACHE=new Map();
 function dgLcIsWaterElement(el){const t=el.tags||{};return t.natural==="water"||t.waterway==="riverbank"||t.leisure==="swimming_pool"||t.landuse==="basin";}
 function dgLcCachedOsm(bbox){
+ if(window.DG_LOAD_OSM_LANDCOVER_EVIDENCE)return window.DG_LOAD_OSM_LANDCOVER_EVIDENCE.cached(bbox);
  const cached=window.DG_SURFACE_OSM,b=cached?.bbox;
  if(!b||!Array.isArray(cached.elements)||Date.now()-Date.parse(cached.fetchedAt)>600000||!Number.isFinite(Date.parse(cached.fetchedAt)))return null;
  return b.minLat<=bbox.minLat&&b.minLon<=bbox.minLon&&b.maxLat>=bbox.maxLat&&b.maxLon>=bbox.maxLon?cached:null;
 }
 async function dgLcOsmData(bbox){
+ if(window.DG_LOAD_OSM_LANDCOVER_EVIDENCE)return window.DG_LOAD_OSM_LANDCOVER_EVIDENCE.load(bbox,{cache:DG_LC_OSM_CACHE,boundary:JSON.stringify(typeof PARK_POLY==="undefined"?null:PARK_POLY),isWaterElement:dgLcIsWaterElement,waterBackup:typeof window.DG_OSM_WATER_BACKUP?.lookup==="function"?window.DG_OSM_WATER_BACKUP.lookup.bind(window.DG_OSM_WATER_BACKUP):null,overpassRequest:typeof overpassRequest==="function"?overpassRequest:null,fetchImpl:fetch});
  const boundary=JSON.stringify(typeof PARK_POLY==="undefined"?null:PARK_POLY);
  const pending=window.DG_SURFACE_OSM_PENDING;
  const detailedAlreadyAttempted=pending?.boundary===boundary;
@@ -60,6 +62,7 @@ async function dgLcOsmData(bbox){
 
 async function dgLcFetchWaterPolygons(bbox){
   const data=await dgLcOsmData(bbox);
+  if(window.DG_EXTRACT_OSM_WATER_POLYGONS)return window.DG_EXTRACT_OSM_WATER_POLYGONS.extract(data,dgLcIsWaterElement);
   const rings=[];
   for(const el of (data&&data.elements)||[]){
     if(!dgLcIsWaterElement(el))continue;
@@ -80,6 +83,7 @@ async function dgLcFetchWaterPolygons(bbox){
  * maskeli alan tutarlı şekilde güncellenir; ham kaynak kod kırılımı
  * (rawCounts) ESA'nın kendi çıktısı olarak DOKUNULMADAN kalır. */
 function dgLcRefineWater(result,waterRings){
+  if(window.DG_REFINE_WATER_BY_OSM)return window.DG_REFINE_WATER_BY_OSM.refine(result,waterRings,dgLcPointInRing);
   if(!waterRings||!waterRings.length)return 0;
   let n=0;
   for(const cell of (result.cells||[])){
@@ -131,6 +135,7 @@ function dgLcRefineWater(result,waterRings){
  * ------------------------------------------------------------------------- */
 
 function dgLcRoadSurfaceIsHard(surface){
+  if(window.DG_OSM_ROAD_POLICY)return window.DG_OSM_ROAD_POLICY.surfaceIsHard(surface);
   const s=String(surface||"").toLowerCase().trim();
   return[
     "asphalt",
@@ -147,11 +152,13 @@ function dgLcRoadSurfaceIsHard(surface){
 }
 
 function dgLcRoadNumber(v){
+  if(window.DG_OSM_ROAD_POLICY)return window.DG_OSM_ROAD_POLICY.number(v);
   const n=parseFloat(String(v??"").replace(",",".").replace(/[^0-9.+-]/g,""));
   return Number.isFinite(n)&&n>0?n:null;
 }
 
 function dgLcRoadHalfWidth(tags){
+  if(window.DG_OSM_ROAD_POLICY)return window.DG_OSM_ROAD_POLICY.halfWidth(tags);
   const t=tags||{};
   const explicit=dgLcRoadNumber(t.width);
   if(explicit)return Math.max(0.75,explicit/2);
@@ -182,6 +189,7 @@ function dgLcRoadHalfWidth(tags){
 }
 
 function dgLcRoadShouldRefine(tags){
+  if(window.DG_OSM_ROAD_POLICY)return window.DG_OSM_ROAD_POLICY.shouldRefine(tags);
   const t=tags||{};
   const hw=String(t.highway||"").toLowerCase();
   if(!hw)return false;
@@ -209,6 +217,7 @@ function dgLcRoadShouldRefine(tags){
 
 async function dgLcFetchRoadFeatures(bbox){
   const data=await dgLcOsmData(bbox);
+  if(window.DG_OSM_ROAD_POLICY)return window.DG_OSM_ROAD_POLICY.build(data,dgLcRoadShouldRefine,dgLcRoadHalfWidth);
   const features=[];
   for(const el of (data&&data.elements)||[]){
     if(el?.type!=="way"||!Array.isArray(el.geometry)||el.geometry.length<2)continue;
@@ -239,6 +248,7 @@ async function dgLcFetchRoadFeatures(bbox){
 }
 
 function dgLcPointSegmentDistanceXY(p,a,b){
+  if(window.DG_REFINE_HARD_BY_OSM)return window.DG_REFINE_HARD_BY_OSM.pointSegmentDistance(p,a,b);
   const dx=b.x-a.x,dy=b.y-a.y;
   if(dx===0&&dy===0){
     return Math.hypot(p.x-a.x,p.y-a.y);
@@ -253,6 +263,7 @@ function dgLcPointSegmentDistanceXY(p,a,b){
 }
 
 function dgLcRoadTouchesCell(feature,cell,epsg){
+  if(window.DG_REFINE_HARD_BY_OSM)return window.DG_REFINE_HARD_BY_OSM.touchesCell(feature,cell,epsg,dgLcUtmForward);
   const pts=feature.pts||[];
   if(pts.length<2)return false;
 
@@ -317,6 +328,7 @@ function dgLcRoadTouchesCell(feature,cell,epsg){
 }
 
 function dgLcRefineHardByOsm(result,roadFeatures,epsg){
+  if(window.DG_REFINE_HARD_BY_OSM)return window.DG_REFINE_HARD_BY_OSM.refine(result,roadFeatures,epsg,dgLcUtmForward);
   if(!result||!Array.isArray(result.cells)||!roadFeatures?.length)return 0;
 
   let changed=0;
