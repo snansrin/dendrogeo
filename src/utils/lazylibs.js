@@ -74,6 +74,11 @@ const DG_LULC_CHAIN=[
   "src/services/lc-osm.js",
   "src/domain/surface/patch-geometry.js", "src/domain/surface/group-patch-cells.js", "src/domain/surface/measure-patch-components.js", "src/domain/surface/query-green-patches.js",
   "src/services/lc-patches.js",
+  "src/domain/surface/validation-sampling.js",
+  "src/domain/surface/validation-accuracy-metrics.js",
+  "src/domain/surface/validation-spectral-rules.js",
+  "src/application/surface/build-validation-agreement.js",
+  "src/application/surface/serialize-validation-campaign.js",
   /* UYDU HASSASİYET (0054 · 2026-10-03): lc-validate eşik/metrics çekirdeği
    * + lc-s2 Sentinel-2 spektral kanıt + ui/lc-sens basit kaydırıcı paneli
    * (0053'teki üç adımlı workbench kullanıcı isteğiyle kaldırıldı). */

@@ -131,6 +131,7 @@ const DG_VAL_SPECTRAL={
  *   IBI = 2·NDBI/(NDBI+1) − [NDVI/(NDVI+1) + MNDWI/(MNDWI+1)]
  * Paydalar sıfırlanamaz (indeksler (−1,1) aralığında), yine de savunmacı. */
 function dgValIbi(ndvi,mndwi,ndbi){
+  if(window.DG_VALIDATION_SPECTRAL_RULES)return window.DG_VALIDATION_SPECTRAL_RULES.ibi(ndvi,mndwi,ndbi);
   const d1=ndbi+1,d2=ndvi+1,d3=mndwi+1;
   if(!d1||!d2||!d3)return null;
   return(2*ndbi)/d1-((ndvi)/d2+(mndwi)/d3);
@@ -153,6 +154,7 @@ const DG_VAL_GATE={
 
 /* ---------- Deterministik PRNG: mc.mjs ile aynı aile (mulberry32) ---------- */
 function dgValRng(seed){
+  if(window.DG_VALIDATION_SAMPLING)return window.DG_VALIDATION_SAMPLING.rng(seed);
   let a=seed|0;
   return function(){
     a|=0;a=(a+0x6D2B79F5)|0;
@@ -168,6 +170,7 @@ function dgValRng(seed){
  * merkezi + hücre içi rastgele salınım (kenar etkisini azaltır).
  * Aynı (cells, opts) → aynı noktalar (tekrar üretilebilirlik). */
 function dgValStratifiedSample(cells,opts){
+  if(window.DG_VALIDATION_SAMPLING)return window.DG_VALIDATION_SAMPLING.stratified(cells,opts,{defaults:DG_VAL_DEFAULTS,classes:DG_VAL_CLASSES});
   const o=Object.assign({},DG_VAL_DEFAULTS,opts||{});
   const rng=dgValRng(Number(o.seed)||DG_VAL_DEFAULTS.seed);
   const out=[];
@@ -216,6 +219,7 @@ function dgValStratifiedSample(cells,opts){
  * alan-düzeltilmiş doğruluk yerine geçmez, nadir/atlanmış sınıf adaylarını
  * bulup incelemeye taşır. */
 function dgValSpatialSample(cells,opts){
+  if(window.DG_VALIDATION_SAMPLING)return window.DG_VALIDATION_SAMPLING.spatial(cells,opts,{defaults:DG_VAL_DEFAULTS});
   const o=Object.assign({count:20,seed:20261007,edgeAreaM2:DG_VAL_DEFAULTS.edgeAreaM2},opts||{});
   const pool=(cells||[]).filter(c=>Number(c.areaM2||0)>=Number(o.edgeAreaM2)&&c.center&&
     Number.isFinite(Number(c.center.lat))&&Number.isFinite(Number(c.center.lon)));
@@ -236,6 +240,7 @@ function dgValSpatialSample(cells,opts){
 
 /* ---------- B) HATA MATRİSİ ---------- */
 function dgValConfusion(samples){
+  if(window.DG_VALIDATION_ACCURACY_METRICS)return window.DG_VALIDATION_ACCURACY_METRICS.confusion(samples,DG_VAL_CLASSES);
   const n={};
   for(const i of DG_VAL_CLASSES){
     n[i]={};
@@ -260,6 +265,7 @@ function dgValConfusion(samples){
  * Wᵢ = sınıf i'in raster kesişim alanı / toplam kapsama alanı.
  * Örneklem oranı DEĞİL, tam sayım (Olofsson: ağırlıklar haritadan gelir). */
 function dgValWeights(groupAreasM2,assignedAreaM2){
+  if(window.DG_VALIDATION_ACCURACY_METRICS)return window.DG_VALIDATION_ACCURACY_METRICS.weights(groupAreasM2,assignedAreaM2,DG_VAL_CLASSES);
   const tot=Number(assignedAreaM2)||0;
   const W={};
   let wSum=0;
@@ -276,6 +282,7 @@ function dgValWeights(groupAreasM2,assignedAreaM2){
 
 /* ---------- C) METRİKLER (Olofsson 2014) ---------- */
 function dgValMetrics(conf,W,assignedAreaM2){
+  if(window.DG_VALIDATION_ACCURACY_METRICS)return window.DG_VALIDATION_ACCURACY_METRICS.metrics(conf,W,assignedAreaM2,DG_VAL_CLASSES);
   const cls=DG_VAL_CLASSES;
   const p={};
   for(const i of cls){
@@ -383,6 +390,7 @@ const DG_VAL_SENS_K={
 };
 
 function dgValThr(sens){
+  if(window.DG_VALIDATION_SPECTRAL_RULES)return window.DG_VALIDATION_SPECTRAL_RULES.thresholds(sens,{spectral:DG_VAL_SPECTRAL,sensitivity:DG_VAL_SENS_K});
   /* Savunmacı sayısallaştırma: null/''/bozuk değer → 50 (taban),
    * sayısal değer 0..100'e kırpılır. (Number(null)=0 tuzağına düşmez.) */
   const s100=(v)=>{
@@ -422,6 +430,7 @@ function dgValThr(sens){
  *   4) ÇIPLAK — düşük NDVI + kuru.
  *   5) Kalan her şey AMBIGUOUS — sınıfa zorlama yok; insan etiketine gider. */
 function dgValSpectralPredict(m,sens,opts={}){
+  if(window.DG_VALIDATION_SPECTRAL_RULES)return window.DG_VALIDATION_SPECTRAL_RULES.predict(m,sens,opts,{spectral:DG_VAL_SPECTRAL,thresholds:dgValThr,ibi:dgValIbi});
   if(!m)return"nodata";
   const obs=Number(m.obs)||0;
   if(obs<DG_VAL_SPECTRAL.MIN_OBS)return"nodata";
@@ -488,6 +497,7 @@ function dgValSpectralPredict(m,sens,opts={}){
  * paydadan çıkar: karışık piksel uzlaşmayı kirletmesin. Uyuşmayan hücreler
  * GÖZDEN GEÇİRME için işaretlenir (kırmızı kontur) — insan etiketi esastır. */
 function dgValAgreement(cells,spectralByCell,opts){
+  if(window.DG_BUILD_VALIDATION_AGREEMENT)return window.DG_BUILD_VALIDATION_AGREEMENT.agreement(cells,spectralByCell,opts,{defaults:DG_VAL_DEFAULTS,classes:DG_VAL_CLASSES,predict:dgValSpectralPredict});
   const o=Object.assign({},DG_VAL_DEFAULTS,opts||{});
   const sens=o.sens||null;
   const per={};
@@ -526,6 +536,7 @@ function dgValAgreement(cells,spectralByCell,opts){
  * Hüküm YALNIZ doğrulama rozetini sürer; LULC sayısal sonucu ve yayın
  * hattı bu modülden bağımsızdır (kırmızı çizgi). */
 function dgValGate(metrics,agreement,nLabeled){
+  if(window.DG_BUILD_VALIDATION_AGREEMENT)return window.DG_BUILD_VALIDATION_AGREEMENT.gate(metrics,agreement,nLabeled,DG_VAL_GATE);
   const reasons=[];
   const n=Number(nLabeled)||0;
   const G=DG_VAL_GATE;
@@ -554,6 +565,7 @@ function dgValGate(metrics,agreement,nLabeled){
 
 /* ---------- SERİLEŞTİRME ---------- */
 function dgValCsv(campaign){
+  if(window.DG_SERIALIZE_VALIDATION_CAMPAIGN)return window.DG_SERIALIZE_VALIDATION_CAMPAIGN.csv(campaign,{version:DG_VAL_VERSION,classes:DG_VAL_CLASSES});
   const q=v=>'"'+String(v??"").replace(/"/g,'""')+'"';
   const rows=[];
   rows.push(["# DendroGeo LULC doğrulama kampanyası"]);
@@ -618,6 +630,7 @@ function dgValCsv(campaign){
 }
 
 function dgValCampaignJson(campaign){
+  if(window.DG_SERIALIZE_VALIDATION_CAMPAIGN)return window.DG_SERIALIZE_VALIDATION_CAMPAIGN.campaignJson(campaign,DG_VAL_VERSION);
   return JSON.stringify(Object.assign({
     schema:"dendrogeo-lc-validation/1",
     validateVersion:DG_VAL_VERSION
@@ -684,6 +697,7 @@ async function dgValDeleteCampaign(id){
  * karne bunu dürüstçe beyan eder). Olofsson'un "harita + saha düzeltmesi"
  * ayrılığı: HAM raster kanıtı korunur, düzeltilmiş katman ayrıca raporlanır. */
 function dgValApplyCorrections(groupAreas,cells,corrections){
+  if(window.DG_SERIALIZE_VALIDATION_CAMPAIGN)return window.DG_SERIALIZE_VALIDATION_CAMPAIGN.applyCorrections(groupAreas,cells,corrections);
   const out={};
   for(const k of Object.keys(groupAreas||{}))out[k]=Number(groupAreas[k])||0;
   const lookup={};
@@ -709,6 +723,7 @@ function dgValApplyCorrections(groupAreas,cells,corrections){
 /* Karar verilen + bekleyen uyuşmazlık hücrelerinin GeoJSON'ı (denetim izi:
  * hangi hücre, hangi sınıftan hangi sınıfa, ne zaman, spektral kanıt neydi). */
 function dgValCorrectedGeoJson(cells,corrections,spectralCells){
+  if(window.DG_SERIALIZE_VALIDATION_CAMPAIGN)return window.DG_SERIALIZE_VALIDATION_CAMPAIGN.correctedGeoJson(cells,corrections,spectralCells,{predict:dgValSpectralPredict,defaults:DG_VAL_DEFAULTS});
   const feats=[];
   for(const c of (cells||[])){
     const key=c.row+":"+c.col;

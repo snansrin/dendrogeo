@@ -937,3 +937,12 @@ Her modülün tek bir dış API'si, sahibi olduğu açık durumu ve kendi testle
 - `domain/visitors/presence-ping-window.js`, geçici Realtime presence güncellemelerinde 10 saniyelik gönderim sınırını ve zorunlu yenileme geçişini saf kurala ayırır.
 - `application/visitors/record-presence-view.js` ve `record-presence-action.js`, yalnız değişen görünüm olayını veya önemli kullanıcı eylemini bellekteki oturum olaylarına yazar ve anlık presence yenilemesini tetikler.
 - `ui/visitor-view-labels.js` ve `visitor-action-labels.js`, canlı ziyaretçi görünümü ve aktivite akışının ortak Türkçe etiketlerini tek sunum kaynağında tutar.
+
+## LULC doğrulama modülleri — 13 Ekim 2026
+
+- `domain/surface/validation-sampling.js`, deterministik PRNG ile tabakalı ve park-geneli doğrulama örneklerini üretir.
+- `domain/surface/validation-accuracy-metrics.js`, alan ağırlıklarını, hata matrisini ve Olofsson doğruluk/belirsizlik ölçülerini hesaplar.
+- `domain/surface/validation-spectral-rules.js`, IBI, hassasiyet eşiklerini ve Sentinel-2 sınıf tahminini uygular.
+- `application/surface/build-validation-agreement.js`, spektral uzlaşmayı ve mevcut doğrulama kapısı hükmünü kurar.
+- `application/surface/serialize-validation-campaign.js`, kampanyayı CSV/JSON'a aktarır ve insan kararlarından doğrulanmış alan/GeoJSON üretir.
+- `services/lc-validate.js`, dış global API'yi ve IndexedDB kampanya kalıcılığını koruyan uyumluluk adapter'ıdır; modüller lazy zincirde ve service-worker precache'te ondan önce yüklenir.
