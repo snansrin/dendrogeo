@@ -4,7 +4,7 @@
 // NOT: Senkronizasyon artık Ana Thread (Supabase JS SDK) tarafından yapılıyor
 // ============================================================
 
-const CACHE_VERSION = 'dendrogeo-sw-v2-r326';
+const CACHE_VERSION = 'dendrogeo-sw-v2-r327';
 
 /* İKİ AYRI STATİK CACHE — bu ayrım bilinçli ve önemli.
  *
@@ -42,7 +42,7 @@ const CORE_ASSETS = [
     '/src/domain/auth/resolve-turnstile-form.js','/src/adapters/auth/load-turnstile-script.js','/src/ui/turnstile-widget.js','/src/application/auth/turnstile-controller.js','/src/domain/auth/read-turnstile-token.js',
     '/src/domain/admin/measurement-review-payload.js','/src/adapters/admin/measurement-moderation-store.js','/src/application/admin/review-measurement.js','/src/application/admin/override-measurement-geofence.js','/src/application/admin/delete-measurement.js',
     '/src/config/supabase.js', '/src/config/constants.js', '/src/config/measurement-protocol-lock.js', '/src/config/wood-density-lock.js', '/src/config/species.js', '/src/config/i18n-en.js', '/src/config/i18n.js',
-    '/src/adapters/trees/project-selection-memory.js','/src/application/trees/open-project-for-measurement.js','/src/ui/measurement-project-card.js','/src/ui/measurement-project-park-box.js','/src/ui/measurement-project-name-preview.js','/src/adapters/trees/reverse-geocode.js','/src/adapters/trees/load-measurement-photo.js','/src/ui/measurement-photo-summary.js','/src/ui/measurement-gps-button.js','/src/ui/measurement-species-selector.js',
+    '/src/adapters/trees/project-selection-memory.js','/src/application/trees/open-project-for-measurement.js','/src/ui/measurement-project-card.js','/src/ui/measurement-project-park-box.js','/src/ui/measurement-project-name-preview.js','/src/adapters/trees/fetch-owned-measurement-projects.js','/src/adapters/trees/fetch-shared-measurement-projects.js','/src/domain/trees/merge-measurement-projects.js','/src/ui/render-measurement-project-directory.js','/src/application/trees/load-measurement-project-directory.js','/src/adapters/trees/reverse-geocode.js','/src/adapters/trees/load-measurement-photo.js','/src/ui/measurement-photo-summary.js','/src/ui/measurement-gps-button.js','/src/ui/measurement-species-selector.js',
     '/src/application/auth/show-password-recovery.js','/src/ui/show-auth-panel.js','/src/application/auth/select-auth-tab.js','/src/ui/render-auth-message.js','/src/application/auth/start-google-sign-in.js',
     '/src/services/osm-water-backup.js', '/src/utils/geo.js', '/src/utils/truncation.js', '/src/utils/lazylibs.js', '/src/domain/trees/photo-quality.js','/src/domain/trees/allometry.js','/src/application/trees/calculate-tree-carbon.js','/src/application/trees/calculate-tree-carbon-from-circumference.js','/src/application/trees/validate-measurement.js','/src/services/allometry.js','/src/domain/auth/is-oauth-callback.js','/src/domain/auth/read-oauth-error.js','/src/application/auth/login-with-password.js','/src/application/auth/register-account.js','/src/application/auth/send-password-reset-email.js','/src/application/auth/sign-out.js','/src/application/auth/save-new-password.js','/src/application/auth/wait-for-oauth-session.js','/src/application/auth/clean-oauth-url.js','/src/ui/oauth-wait-indicator.js', '/src/services/auth.js','/src/services/export.js', '/src/services/offline.js',
     /* YÖNETİM ZİNCİRİ (Faz 6): ziyaret sayacı, veri talepleri, kullanıcı yönetimi,

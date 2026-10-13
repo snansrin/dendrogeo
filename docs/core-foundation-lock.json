@@ -419,7 +419,7 @@
     "src/services/lc-stac.js": "978c4be8c3bc4e7cda3f694d1f06290e661fed5bbd5b76b68719140edc18e71a",
     "src/services/lc-validate.js": "e78602fb957fbc425ade20ba907d96b12f8af7bd3d2563b4e858c60000bbab48",
     "src/services/map.js": "db155b938ac84b24d99a097d309ac5c37bd3235463f76e6fc96ceaa92e7cd4e1",
-    "src/services/measure.js": "efabfc5fb01a8626dfc91ab5cc437909c08665d863582ac5c24415e87264617b",
+    "src/services/measure.js": "adcb937cb34c35165c94a79d7f5aa479df9c735ff7b142aa86d5c2842709dcca",
     "src/services/offline.js": "b0d13ca6c52213b2103e5c23727be42c92cea39855622d43abaad87a8e48280f",
     "src/services/osm-client.js": "2e5eeaa735bf05a603a0db142619f60747b9696f506e666d7df992454a56814f",
     "src/services/osm-water-backup.js": "b3429cdc9bfe0f84bd7b6644a1221d4daadc374ac046b036abf15b3b5ee7d269",
@@ -769,6 +769,17 @@
           "path": "src/services/park-registry.js",
           "previous_sha256": "bd0b7054f533de561a4d3860ff73f05c08e86f27d38a019477c3e8654e3f9f9a",
           "sha256": "326f90e001854b04c2a9160ee95308c1126e4a916a47657b3b90ae0b739d46ce"
+        }
+      ]
+    },
+    {
+      "date": "2026-10-13",
+      "scope": "User-authorized fifteenth five-module split of locked measure service project directory loading: owned-project RLS read with old-schema fallback, collaborator-project read, owner-first merge, selector/card directory rendering, and load orchestration. Preserve owner/collaborator scope, project order, park embeds, selected-project restoration, empty state, park gate, report synchronization, and locked regression tests.",
+      "files": [
+        {
+          "path": "src/services/measure.js",
+          "previous_sha256": "efabfc5fb01a8626dfc91ab5cc437909c08665d863582ac5c24415e87264617b",
+          "sha256": "adcb937cb34c35165c94a79d7f5aa479df9c735ff7b142aa86d5c2842709dcca"
         }
       ]
     }

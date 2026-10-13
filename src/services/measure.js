@@ -286,6 +286,14 @@ function dgProjectCard(p,isShared){
 async function loadProjects(){const _y=(typeof dgScrollKeep==="function"?dgScrollKeep():null);try{return await loadProjects__scroll.apply(this,arguments);}finally{if(typeof dgScrollRestore==="function")dgScrollRestore(_y);}}
 async function loadProjects__scroll(){
  if(!USER)return;
+ if(typeof window!=="undefined"&&Object.prototype.hasOwnProperty.call(window,"DG_LOAD_MEASUREMENT_PROJECT_DIRECTORY"))return window.DG_LOAD_MEASUREMENT_PROJECT_DIRECTORY.load({
+  fetchOwned:()=>window.DG_OWNED_MEASUREMENT_PROJECTS.fetch({client:sb,userId:USER.id,onRelationError:dgParkSchemaMissing}),
+  fetchShared:owned=>window.DG_SHARED_MEASUREMENT_PROJECTS.fetch({client:sb,ownedProjects:owned,listMyParks:typeof dgMyParks==="function"?dgMyParks:undefined}),
+  merge:(owned,shared)=>window.DG_MERGE_MEASUREMENT_PROJECTS.merge(owned,shared),
+  setProjects:projects=>{PROJ_LIST=projects;},
+  render:projects=>window.DG_MEASUREMENT_PROJECT_DIRECTORY_UI.render({projects,element:$,escape:esc,optionLabel:dgProjectOptionLabel,restore:dgProjectRestore,renderCard:dgProjectCard,editing:EDIT_PROJ}),
+  afterRender:projects=>{dgRenderProjectParkBox();dgParkGate();if(typeof dgUserPubSync==="function")dgUserPubSync(projects);}
+ });
  /* parks gömüsü: projenin park kimliği + alanı (kapı kartı ve tablo için).
   * Şema eskiyse (0004 uygulanmamış) PostgREST ilişkiyi bulamaz ve hata döner;
   * o zaman düz select'e düşülür ki proje listesi tamamen boş kalmasın. */
