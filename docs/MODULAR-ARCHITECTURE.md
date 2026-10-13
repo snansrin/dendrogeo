@@ -960,6 +960,8 @@ Her modülün tek bir dış API'si, sahibi olduğu açık durumu ve kendi testle
 - `domain/surface/validation-spectral-rules.js`, IBI, hassasiyet eşiklerini ve Sentinel-2 sınıf tahminini uygular.
 - `application/surface/build-validation-agreement.js`, spektral uzlaşmayı ve mevcut doğrulama kapısı hükmünü kurar.
 - `application/surface/serialize-validation-campaign.js`, kampanyayı CSV/JSON'a aktarır ve insan kararlarından doğrulanmış alan/GeoJSON üretir.
+- CSV satır modeli `domain/surface/build-validation-campaign-csv-rows.js` içinde kurulur; BOM/yeni satır biçimini `application/surface/serialize-validation-campaign-csv.js` korur. JSON şema biçimi ayrı `serialize-validation-campaign-json.js` modülündedir.
+- `domain/surface/apply-validation-campaign-corrections.js` sınıf alanı geçişlerini, `build-validation-corrected-geojson.js` ise insan kararları ve spektral bulgular için denetim özelliklerini üretir.
 - `services/lc-validate.js`, dış global API'yi ve IndexedDB kampanya kalıcılığını koruyan uyumluluk adapter'ıdır; modüller lazy zincirde ve service-worker precache'te ondan önce yüklenir.
 
 ## Sentinel-2 kanıt modülleri — 13 Ekim 2026
