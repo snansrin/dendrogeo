@@ -1347,3 +1347,8 @@ The collaborator map renderer now separates peer selection, display-model deriva
 
 - `domain/map/build-waypoint-navigation-header.js` GPS başlığı ve GPS yokken hedef istemini üretir; `ui/render-waypoint-navigation-header.js` mevcut alanları yazar ve GPS varken mesafe/yönü canlı overlay'e bırakır.
 - `application/map/select-nearest-waypoint.js` GPS kapısı ve en yakın hedef seçimini, `advance-waypoint-target.js` sıradaki/birinci bekleyen hedefi yönetir; `ui/waypoint-navigation-feedback.js` mevcut uyarı ve GPS başlatma callback'ini sunar. Harita hedef seçme, marker ve GPS overlay akışları kullanıldığı gibi kalır.
+
+## Park canlı konum kanalına katılım — 13 Ekim 2026
+
+- `domain/parks/resolve-live-share-join.js` oturum, proje, park ve mevcut kanal durumuna göre okuma/ayrılma/yeniden kullanma/katılma kararını verir; `adapters/parks/fetch-live-share-project-park.js` mevcut `projects.park_id` `maybeSingle` okumasını aynı PostgREST zinciriyle yürütür.
+- `application/parks/join-live-share-park.js` park kanalına geçiş adımlarını sıralar; `handle-live-share-channel-status.js` abone olma, watchdog temizliği, ilk konum bildirimi ve hata yönlendirmesini korur; `ui/park-live-share-connection-status.js` bağlantı durumunu yazar. Mevcut Presence adapter'ı ve kilitli regresyonlar değişmedi.
