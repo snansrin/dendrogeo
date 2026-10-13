@@ -529,13 +529,14 @@ function dgSensUndo(key){const module=window.DG_UNDO_SURFACE_CELL_DECISION;if(mo
 function dgSensBulk(cls){const module=window.DG_APPLY_SURFACE_CELL_DECISION;if(module)return module.bulk({candidates:dgSensCandidates(cls),classKey:cls,cellKey:dgSensCellKey,apply:dgSensDecide});for(const x of dgSensCandidates(cls))dgSensDecide(dgSensCellKey(x.cell),cls);}
 async function dgSensAccept(){
  const rec=DG_SENS.record;
- const blocked=!rec?"Kabul edilecek analiz bulunamadı.":DG_SENS.rawView?"Ham görünüm açık; önce düzenlemeye dönün.":DG_SENS.brush?"Fırça işlemi sürüyor; önce fırçayı kapatın.":DG_SENS.saving||DG_SENS.busy?"Yüzey işlemi sürüyor; tamamlanmasını bekleyin.":!DG_SENS.geometry?"Park geometrisi hazır değil; analizi yeniden açın.":DG_SENS.draw?"Sınır çizimi tamamlanmadı; çizimi tamamlayın veya iptal edin.":dgSensWaterBoundaryUnresolved()>0?"Su sınırı dışındaki "+dgSensWaterBoundaryUnresolved()+" raster-su hücresi güncel uydu verisiyle sınıflandırılamadı. Her belirsiz hücreyi yeşil, sert veya çıplak olarak inceleyip düzeltin; sonuç kabul edilmedi.":null;
+ const gate=window.DG_EVALUATE_SURFACE_ACCEPTANCE_GATE;
+ const blocked=gate?gate.evaluate({record:rec,rawView:DG_SENS.rawView,brush:DG_SENS.brush,busy:DG_SENS.busy,saving:DG_SENS.saving,geometry:DG_SENS.geometry,draw:DG_SENS.draw,unresolvedWater:dgSensWaterBoundaryUnresolved()}):!rec?"Kabul edilecek analiz bulunamadı.":DG_SENS.rawView?"Ham görünüm açık; önce düzenlemeye dönün.":DG_SENS.brush?"Fırça işlemi sürüyor; önce fırçayı kapatın.":DG_SENS.saving||DG_SENS.busy?"Yüzey işlemi sürüyor; tamamlanmasını bekleyin.":!DG_SENS.geometry?"Park geometrisi hazır değil; analizi yeniden açın.":DG_SENS.draw?"Sınır çizimi tamamlanmadı; çizimi tamamlayın veya iptal edin.":dgSensWaterBoundaryUnresolved()>0?"Su sınırı dışındaki "+dgSensWaterBoundaryUnresolved()+" raster-su hücresi güncel uydu verisiyle sınıflandırılamadı. Her belirsiz hücreyi yeşil, sert veya çıplak olarak inceleyip düzeltin; sonuç kabul edilmedi.":null;
  if(blocked){DG_SENS.status=_tvs(blocked);dgSensUpdateStatus();toast(DG_SENS.status,"warn");return false;}
- const epoch=DG_SENS.epoch,snapshot=JSON.parse(JSON.stringify(rec));
- // Keep immutable geometry identities so acceptance cannot invalidate the partition cache.
- snapshot.features=rec.features;snapshot.objectFeatures=rec.objectFeatures;
- for(const c of dgSensCells()){const key=dgSensCellKey(c);if(snapshot.corrections[key]?.method!=="visual-cell")snapshot.corrections[key]={from:c.classKey,to:dgSensEffective(c),method:"sensitivity",ts:new Date().toISOString()};}
- snapshot.editSummary=dgSensEditSummary(snapshot);snapshot.draftDirty=false;snapshot.acceptedAreas=dgSensAreas();snapshot.acceptedAt=new Date().toISOString();snapshot.modifiedAt=snapshot.acceptedAt;
+ const epoch=DG_SENS.epoch,draft=window.DG_CREATE_SURFACE_ACCEPTANCE_DRAFT;
+ const snapshot=draft?draft.create({record:rec,cells:dgSensCells(),cellKey:dgSensCellKey,effectiveClass:dgSensEffective,editSummary:dgSensEditSummary,areas:dgSensAreas,timestamp:()=>new Date().toISOString()}):JSON.parse(JSON.stringify(rec));
+ if(!draft){snapshot.features=rec.features;snapshot.objectFeatures=rec.objectFeatures;for(const c of dgSensCells()){const key=dgSensCellKey(c);if(snapshot.corrections[key]?.method!=="visual-cell")snapshot.corrections[key]={from:c.classKey,to:dgSensEffective(c),method:"sensitivity",ts:new Date().toISOString()};}snapshot.editSummary=dgSensEditSummary(snapshot);snapshot.draftDirty=false;snapshot.acceptedAreas=dgSensAreas();snapshot.acceptedAt=new Date().toISOString();snapshot.modifiedAt=snapshot.acceptedAt;}
+ const accept=window.DG_ACCEPT_SURFACE_ANALYSIS;
+ if(accept)return accept.accept({record:snapshot,sourceRecord:rec,epoch,getEpoch:()=>DG_SENS.epoch,getRecord:()=>DG_SENS.record,buildResultSnapshot:dgSensResultSnapshot,setSaving:value=>{DG_SENS.saving=value;},render:dgSensRender,hasIdentity:value=>!!value.owner&&!!value.parkId,saveAccount:(value,revision)=>window.DG_SURFACE_REVIEW.save(value,revision),getRevision:()=>DG_SENS.revision,commit:(value,revision)=>{DG_SENS.record=value;DG_SENS.revision=revision;},renderAccepted:dgSensRenderAccepted,setEditing:value=>{DG_SENS.editing=value;},clearFocus:()=>{DG_SENS.focus=null;},saveLocal:dgSensSave,setStatus:value=>{DG_SENS.status=value;},translate:_tvs,toast,refresh:()=>dgSensRefreshLayer()});
  DG_SENS.saving=true;dgSensRender();
  try{
   snapshot.acceptedResult=await dgSensResultSnapshot(snapshot);
@@ -809,6 +810,8 @@ window.DG_LC_SENS={mount:dgSensMount,cleanup:dgSensCleanup,guard:dgSensGuard,sta
 async function dgSensResultSnapshot(rec){
  const epsg=DG_SENS.epsg,cells=dgSensCells(),outer=PARK_POLY,holes=PARK_HOLES||[];
  const parts=dgSensParts();
+ const module=window.DG_BUILD_SURFACE_RESULT_SNAPSHOT;
+ if(module)return module.build({record:rec,epsg,cells,outer,holes,parts,parkGeometry:DG_SENS.parkGeometry,visualResult:dgSensVisualResult,mergeSync:dgSurfaceMergeSync,displaySync:dgSurfaceDisplaySync,editSummary:dgSensEditSummary,translate:_tvs});
  const totals={};for(const p of parts)totals[p.type]=(totals[p.type]||0)+p.areaM2;
  for(const [k,a] of Object.entries(rec.acceptedAreas))if(Math.abs(a-(totals[k]||0))>Math.max(.1,a*.00001))throw Error(_tvs("Analiz tüm parkı kapsamıyor. Parkı yeniden analiz edip tekrar kaydedin."));
  const job=await dgSensVisualResult(parts);
@@ -827,7 +830,9 @@ function dgSensRenderCurrentReport(areas){
  host.innerHTML='<b>'+esc(_tvs(DG_SENS.rawView?"Ham 2021 raster sonucu":DG_SENS.editing?"Güncel yüzey önizlemesi":"Kayıtlı analiz sonucu"))+'</b>'+dgSensAreaBars(areas)+'<p class="dg-sens-hint">'+esc(_tvs(DG_SENS.editing?"Hassasiyet barları, fırça ve sınır düzeltmeleri bu özete yansır. Yayın için kabul edip kaydedin.":"Yayın isteğinde bu kayıt rapora aktarılır. Kaydedilmemiş önizleme rapora girmez."))+'</p><details class="dg-sens-details"><summary>'+esc(_tvs("Ham 2021 raster sonucu"))+'</summary>'+DG_SENS.baselineReport+'</details>';
 }
 function dgSensRenderAccepted(){
- const r=DG_SENS.record?.acceptedResult,host=document.getElementById("landCoverReport");if(!r||!host)return;
+ const r=DG_SENS.record?.acceptedResult,host=document.getElementById("landCoverReport"),module=window.DG_RENDER_SURFACE_ACCEPTED_RESULT;
+ if(module&&module.render({result:r,host,areaBars:dgSensAreaBars,escape:esc,translate:_tvs,formatDate:value=>new Date(value).toLocaleString()}))return;
+ if(!r||!host)return;
  host.innerHTML='<b>'+esc(_tvs("Kayıtlı analiz sonucu"))+'</b><p class="dg-meta">'+esc(new Date(r.acceptedAt).toLocaleString())+'</p>'+dgSensAreaBars(r.areas)+'<p class="dg-sens-hint">'+esc(_tvs("Yayın isteğinde bu kayıt rapora aktarılır. Kaydedilmemiş önizleme rapora girmez."))+'</p>';
 }
 
