@@ -329,6 +329,13 @@ function dgSensRenderPaintTools(){
  const host=document.getElementById("surfaceBrushTools"),rec=DG_SENS.record;if(!host)return;
  if(typeof dgEditorClearMenus==="function")dgEditorClearMenus("surface");
  if(!rec){host.innerHTML="";return;}
+ const modelBuilder=window.DG_BUILD_SURFACE_TOOLBAR_MODEL,menusRenderer=window.DG_RENDER_SURFACE_EDITOR_MENUS,toolbar=window.DG_RENDER_SURFACE_EDITOR_TOOL_RAIL;
+ if(modelBuilder&&menusRenderer&&toolbar){
+  const model=modelBuilder.build({record:rec,busy:DG_SENS.busy,saving:DG_SENS.saving,exporting:DG_SENS.exporting,rawView:DG_SENS.rawView,brush:DG_SENS.brush,draw:DG_SENS.draw,objectPick:DG_SENS.objectPick,objectPreview:DG_SENS.objectPreview,vegetationCount:rec.profile?.cells?dgSensVegetationTiers().count:0,brushType:DG_SENS.brushType,brushDiameter:DG_SENS.brushDiameter,drawType:DG_SENS.drawType,base:DG_SENS.base,sections:DG_SENS.sections,showCand:DG_SENS.showCand,vegetationView:DG_SENS.vegetationView,translate:_tvs,format:_tvst});
+  const menus=menusRenderer.render({record:rec,model,types:window.DG_SURFACE_REVIEW.types,menuLabel:dgSensMenuLabel,panelHead:dgSensPanelHead,translate:_tvs,escape:esc});
+  host.innerHTML=toolbar.compose({menus,mode:model.mode,escape:esc,translate:_tvs});const rail=document.getElementById("surfaceMapTools");if(rail)rail.innerHTML=toolbar.renderRail({model,escape:esc,translate:_tvs,icon:dgSensToolbarIcon});
+  if(typeof dgEditorArrangeMenus==="function")dgEditorArrangeMenus();return;
+ }
  const viewDisabled=DG_SENS.busy||DG_SENS.saving||DG_SENS.exporting;
  const disabled=viewDisabled||DG_SENS.rawView;
  const scanned=!!rec.profile?.cells,vegReady=scanned&&dgSensVegetationTiers().count>=9;
@@ -353,11 +360,13 @@ function dgSensRenderPaintTools(){
  if(typeof dgEditorArrangeMenus==="function")dgEditorArrangeMenus();
 }
 function dgSensMenuLabel(icon,label){
+ const module=window.DG_RENDER_SURFACE_EDITOR_MENU_LABEL;if(module)return module.render({icon,label,ui:window.DG_EDITOR_UI,translate:_tvs,escape:esc});
  const ui=window.DG_EDITOR_UI,safe=esc(_tvs(label));
  return ui?.menuLabel?ui.menuLabel(icon,safe):`<span class="dg-editor-menu-icon">${icon}</span><span class="dg-editor-menu-label">${safe}</span><span class="dg-editor-menu-chevron" aria-hidden="true">⌄</span>`;
 }
 function dgSensToolbarIcon(name,fallback){return window.DG_EDITOR_UI?.icon(name)||fallback;}
 function dgSensPanelHead(icon,title,description){
+ const module=window.DG_RENDER_SURFACE_EDITOR_PANEL_HEAD;if(module)return module.render({icon,title,description,ui:window.DG_EDITOR_UI,translate:_tvs,escape:esc});
  const ui=window.DG_EDITOR_UI;
  return ui?.panelHead?ui.panelHead(icon,esc(_tvs(title)),esc(_tvs(description))):`<div class="dg-editor-panel-head"><span class="dg-editor-panel-fallback-icon" aria-hidden="true">${icon}</span><span><strong>${esc(_tvs(title))}</strong><small>${esc(_tvs(description))}</small></span></div>`;
 }

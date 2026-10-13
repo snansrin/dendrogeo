@@ -1141,3 +1141,10 @@ Her modülün tek bir dış API'si, sahibi olduğu açık durumu ve kendi testle
 - `domain/surface/summarize-surface-review-areas.js` alan toplamlarını parçalarla eşler; `build-adjusted-surface-summary.js` ham raster tabanıyla düzeltilmiş sonucu birleştirir.
 - `application/surface/render-surface-review-geometry.js` worker geometrisini önizleme, kabul ve dışa aktarma arasında yeniden kullanır; geçerli kabul geometrisi varsa onu tercih eder.
 - `domain/surface/build-surface-boundary-geojson.js`, doğrulanmış kullanıcı sınırlarını parkla kesiştirir ve mevcut GeoJSON özellikleriyle dışa aktarır.
+
+## LULC harita araç çubuğu — 13 Ekim 2026
+
+- `domain/surface/build-surface-toolbar-model.js`, etkin araç, meşguliyet ve bitki görünümü durumunu menü/toolbar görünüm modeline indirger.
+- `ui/render-surface-editor-menu-label.js` ve `render-surface-editor-panel-head.js`, ortak erişilebilir menü etiketi ve panel başlığı kalıbını sunar.
+- `ui/render-surface-editor-menus.js`, dosya, görünüm, sınır, veri ve fırça menülerini mevcut kontrol kimlikleriyle üretir.
+- `ui/render-surface-editor-tool-rail.js`, harita araç rayını ve menü/durum kabuğunu üretir.

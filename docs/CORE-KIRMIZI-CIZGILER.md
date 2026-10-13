@@ -130,3 +130,6 @@ Kırk üçüncü grupta kilitli LULC su sınırı incelemesi beş modüle ayrıl
 
 
 Kırk dördüncü grupta kilitli LULC inceleme geometri ve alan akışı beş modüle ayrıldı: çözülmüş hücre parçalarının memo üretimi, alan özeti memo’su, düzeltilmiş özet modeli, worker tabanlı görünüm geometrisi ve park içine kırpılmış sınır GeoJSON’u. Memo kimliği/geçersizleştirme, kabul edilmiş geometriyi yeniden kullanma, worker yedeği, alan toplamları, sınır doğrulaması ve dışa aktarma alanları korundu. Kilitli regresyon testleri değiştirilmedi; yeni modül testleri eklendi.
+
+
+Kırk beşinci grupta kilitli LULC harita araç çubuğu beş modüle ayrıldı: araç durumu görünüm modeli, erişilebilir menü etiketi, panel başlığı, dosya/görünüm/sınır/veri/fırça menüleri ve araç rayı ile durum kabuğu. Menü ve kontrol kimlikleri, sınıf sırası, çeviri/kaçış, erişilebilir adlar, busy/raw/vejetasyon kapıları ve mevcut inline eylemler korundu. Kilitli regresyon testleri değiştirilmedi; yeni bileşen ve yükleme/precache testleri eklendi.
