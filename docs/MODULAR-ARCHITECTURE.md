@@ -1221,3 +1221,10 @@ The collaborator map renderer now separates peer selection, display-model deriva
 - `domain/map/measurement-marker-cluster-icon.js` küme rozetinin görünümünü üretir; `ui/create-measurement-map-marker.js` yeşil ölçüm marker’ını ve mevcut popup’ı bağlar.
 - `adapters/map/ensure-measurement-marker-layer.js` küme katmanını kurar/temizler ve eklenti yoksa düz katmana düşer; `application/map/schedule-measurement-marker-chunks.js` token kontrollü, 16 ms aralıklı çizim parçalarını yürütür.
 - `application/map/add-measurement-markers.js`, bu dört modülü sırayla birleştirir. Var olan UI adapter’ı yeni modüller eksik olduğunda önceki yerel uygulamasına geri döner.
+
+
+## Waypoint GPS canlı rehber — 13 Ekim 2026
+
+- `domain/map/resolve-waypoint-gps-guidance.js` hedef yokken en yakın bekleyen noktayı seçer ve mesafe/yön modelini kurar; `ui/create-waypoint-gps-location-marker.js` mevcut konum pinini başlangıç hedefinin oku ile çizer.
+- `ui/render-waypoint-gps-guidance-readout.js` mesafe, hedef ve okuma alanlarını; `adapters/map/add-waypoint-guidance-line.js` kesikli düz çizgiyi üretir.
+- `application/map/render-waypoint-gps-overlay.js` marker, hedef seçimi, okuma ve çizgi adımlarını sıralar. Mevcut `waypoint-gps-overlay` modülü beş bağımlılık eksikse önceki yerel akışına döner; GPS kapalı akış ve çağrı sözleşmesi aynı kalır.
