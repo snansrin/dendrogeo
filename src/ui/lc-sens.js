@@ -31,6 +31,7 @@ function dgSensEditSummary(rec=DG_SENS.record,cells=dgSensCells()||[]){
 }
 function dgSensMeta(k){return window.DG_LC_VALIDATE?.labels?.[k]||{tr:window.DG_SURFACE_REVIEW?.types?.[k]?.label||k,emoji:""};}
 function dgSensScanAudit(rec=DG_SENS.record){
+ const module=window.DG_CLASSIFY_SURFACE_SCAN_AUDIT;if(module)return module.build({cells:dgSensCells()||[],profile:rec?.profile,classes:DG_SENS_CLASSES,cellKey:dgSensCellKey,spectralPredict:(e,s)=>window.DG_LC_VALIDATE.spectralPredict(e,s)});
  const cells=dgSensCells()||[],profile=rec?.profile;if(!profile?.cells)return null;
  const classes=DG_SENS_CLASSES,transitions=new Map();let usable=0,matched=0,ambiguous=0,missing=0;
  for(const cell of cells){
@@ -45,6 +46,7 @@ function dgSensScanAudit(rec=DG_SENS.record){
  return{total:cells.length,profiled:Number(profile.stats?.nProfiled)||0,usable,matched,ambiguous,missing,transitions:[...transitions.values()].filter(x=>x.from!==x.to).sort((a,b)=>b.areaM2-a.areaM2),scenes,skipped:(profile.skipped||[]).length,range:profile.range||null};
 }
 function dgSensScanAuditHtml(rec=DG_SENS.record){
+ const module=window.DG_RENDER_SURFACE_SCAN_AUDIT;if(module)return module.render({audit:dgSensScanAudit(rec),translate:_tvs,escape:esc,meta:dgSensMeta,hectares:dgSensHa,sectionsOpen:DG_SENS.sections?.dgSensEvidenceDetails});
  const a=dgSensScanAudit(rec);if(!a)return"";
  const dates=a.scenes.map(s=>s.datetime).filter(Boolean),from=dates[0]?.slice(0,10)||a.range?.start||"—",to=dates.at(-1)?.slice(0,10)||a.range?.end||"—";
  const transitions=a.transitions.length?a.transitions.slice(0,8).map(x=>`<li>${esc(_tvs(dgSensMeta(x.from).tr))} → ${esc(_tvs(dgSensMeta(x.to).tr))}: ${x.cells} ${esc(_tvs("hücre"))} · ${dgSensHa(x.areaM2)} ha</li>`).join(""):`<li>${esc(_tvs("Yeterli verili hücrelerde sınıf farkı görülmedi."))}</li>`;
@@ -55,6 +57,7 @@ function dgSensScanAuditHtml(rec=DG_SENS.record){
  * green class. They are a display aid, not canopy cover, a new raster class,
  * or an area adjustment. Require three distinct observations per cell. */
 function dgSensVegetationTiers(){
+ const module=window.DG_CLASSIFY_SURFACE_VEGETATION_TIERS;if(module)return module.build({cells:dgSensCells()||[],profile:DG_SENS.record?.profile?.cells,cellKey:dgSensCellKey,effectiveClass:dgSensEffective});
  const cells=dgSensCells()||[],profile=DG_SENS.record?.profile?.cells;
  if(!profile)return{tiers:new Map(),count:0,eligible:0,cutoffs:null};
  const candidates=[];
@@ -80,14 +83,14 @@ async function dgSensRenderVegetation(){
  if(DG_SENS.vegetationRenderKey===key||DG_SENS.vegetationRenderBusy)return;
  DG_SENS.vegetationRenderBusy=true;const epoch=DG_SENS.epoch;
  try{
-  const cells=dgSensCells()||[],parts=[];
-  for(const c of cells){const tier=result.tiers.get(dgSensCellKey(c)),geom=DG_SENS.geometry[dgSensCellKey(c)];if(tier&&geom?.length)parts.push({type:tier,geom,areaM2:Number(c.areaM2)||0});}
+  const cells=dgSensCells()||[],parts=window.DG_BUILD_SURFACE_VEGETATION_PARTS?window.DG_BUILD_SURFACE_VEGETATION_PARTS.build({cells,tiers:result.tiers,geometry:DG_SENS.geometry,cellKey:dgSensCellKey}):[];
+  if(!window.DG_BUILD_SURFACE_VEGETATION_PARTS)for(const c of cells){const tier=result.tiers.get(dgSensCellKey(c)),geom=DG_SENS.geometry[dgSensCellKey(c)];if(tier&&geom?.length)parts.push({type:tier,geom,areaM2:Number(c.areaM2)||0});}
   const job=await dgSurfaceWorkerJob({job:"merge",parts,epsg:DG_SENS.epsg,display:true,park:DG_SENS.parkGeometry});
   if(epoch!==DG_SENS.epoch||!DG_SENS.vegetationView||key!==[DG_SENS.epoch,DG_SENS.partitionVersion,DG_SENS.visualVersion,result.count,DG_SENS.vegetationView].join(":"))return;
   const features=job?.displayFeatures||dgSurfaceDisplaySync(parts,DG_SENS.epsg,DG_SENS.parkGeometry,job?.features||dgSurfaceMergeSync(parts,DG_SENS.epsg));
-  if(!DG_SENS.vegetationLayer)DG_SENS.vegetationLayer=L.layerGroup().addTo(map);
-  DG_SENS.vegetationLayer.clearLayers();
-  for(const f of features){const cls=f.properties.class,rings=f.geometry.coordinates.map(poly=>poly.map(r=>r.map(p=>[p[1],p[0]])));L.polygon(rings,{renderer:DG_SENS.renderer,stroke:false,weight:0,interactive:false,fillColor:DG_SENS_VEGETATION_COLORS[cls]||DG_SENS_VEGETATION_COLORS.moderate,fillOpacity:DG_SENS.opacity/100}).addTo(DG_SENS.vegetationLayer);}
+  const renderer=window.DG_RENDER_SURFACE_VEGETATION_FEATURES;
+  if(renderer)DG_SENS.vegetationLayer=renderer.render({features,opacity:DG_SENS.opacity,renderer:DG_SENS.renderer,colors:DG_SENS_VEGETATION_COLORS,layer:DG_SENS.vegetationLayer,createLayer:()=>L.layerGroup().addTo(map),addLayer:(layer,target)=>layer.addTo(target),polygon:(rings,style)=>L.polygon(rings,style)});
+  else{if(!DG_SENS.vegetationLayer)DG_SENS.vegetationLayer=L.layerGroup().addTo(map);DG_SENS.vegetationLayer.clearLayers();for(const f of features){const cls=f.properties.class,rings=f.geometry.coordinates.map(poly=>poly.map(r=>r.map(p=>[p[1],p[0]])));L.polygon(rings,{renderer:DG_SENS.renderer,stroke:false,weight:0,interactive:false,fillColor:DG_SENS_VEGETATION_COLORS[cls]||DG_SENS_VEGETATION_COLORS.moderate,fillOpacity:DG_SENS.opacity/100}).addTo(DG_SENS.vegetationLayer);}}
   DG_SENS.vegetationRenderKey=key;
  }catch(e){DG_SENS.status=_tvs("NDVI görünümü hazırlanamadı: ")+String(e.message||e);dgSensUpdateStatus();}
  finally{DG_SENS.vegetationRenderBusy=false;if(DG_SENS.vegetationView&&DG_SENS.geometry&&key!==[DG_SENS.epoch,DG_SENS.partitionVersion,DG_SENS.visualVersion,dgSensVegetationTiers().count,DG_SENS.vegetationView].join(":"))setTimeout(dgSensRenderVegetation,0);}
