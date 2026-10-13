@@ -237,6 +237,14 @@ const DG_TREE_MEASUREMENT_ERRORS=Object.freeze({
  HEIGHT_INVALID:["mHeight","Boy 0’dan büyük, en fazla 100 m olmalı."]
 });
 function liveCalc(){
+ if(window.DG_CALCULATE_LIVE_MEASUREMENT_PREVIEW&&window.DG_BUILD_LIVE_MEASUREMENT_PREVIEW_INPUT&&window.DG_RENDER_LIVE_MEASUREMENT_PREVIEW){
+  const preview=window.DG_CALCULATE_LIVE_MEASUREMENT_PREVIEW.calculate({
+   input:()=>window.DG_BUILD_LIVE_MEASUREMENT_PREVIEW_INPUT.build({circumference:$("mDbh").value,height:$("mHeight").value,species:$("mSpecies").value,group:$("mGroup").value}),
+   validate:request=>DG_TREE_MEASUREMENT_VALIDATOR.validateBiometrics({group:request.group,species:request.species,circumferenceCm:request.circumferenceCm,heightM:request.heightM}),
+   calculate:request=>calcFromCircumference(request.circumferenceCm,request.heightM,request.species,request.group)
+  });
+  return window.DG_RENDER_LIVE_MEASUREMENT_PREVIEW.render({preview,element:$("liveCalc"),getHint:()=>$("measureSaveHint"),translate:_tms});
+ }
  const c=+$("mDbh").value,h=+$("mHeight").value,s=$("mSpecies").value,g=$("mGroup").value;
  const check=DG_TREE_MEASUREMENT_VALIDATOR.validateBiometrics({group:g,species:s,circumferenceCm:c,heightM:h});
  const valid=check.valid;
@@ -529,6 +537,16 @@ if(request===dgPointRequest&&!manualPoint&&!EDIT_ID&&+$("mProject").value===pid&
 
 async function queryPointId(){
  const pid=+$("mProject").value,pt=+$("mPoint").value,res=$("pointQueryResult");
+ if(window.DG_QUERY_MEASUREMENT_POINT&&window.DG_RESOLVE_MEASUREMENT_POINT_QUERY&&window.DG_FETCH_MEASUREMENT_AT_PROJECT_POINT&&window.DG_MEASUREMENT_POINT_QUERY_RESULT){
+  return window.DG_QUERY_MEASUREMENT_POINT.query({
+   projectId:pid,pointId:pt,
+   resolve:(projectId,pointId)=>window.DG_RESOLVE_MEASUREMENT_POINT_QUERY.resolve(projectId,pointId),
+   read:target=>window.DG_FETCH_MEASUREMENT_AT_PROJECT_POINT.fetch({client:sb,projectId:target.projectId,pointId:target.pointId}),
+   isCurrent:target=>+$("mProject").value===target.projectId&&+$("mPoint").value===target.pointId,
+   hide:()=>{res.style.display="none";},
+   render:(record,pointId)=>window.DG_MEASUREMENT_POINT_QUERY_RESULT.render({element:res,record,pointId,escape:esc,translate:_tms,translateFormat:_tmsf,circumferenceFromDiameter:value=>typeof circumferenceCmFromDiameter==="function"?circumferenceCmFromDiameter(+value):null})
+  });
+ }
  if(!pid||!pt){res.style.display="none";return;}
  if(typeof window!=="undefined"&&Object.prototype.hasOwnProperty.call(window,"DG_FETCH_MEASUREMENT_AT_PROJECT_POINT")){
   const record=await window.DG_FETCH_MEASUREMENT_AT_PROJECT_POINT.fetch({client:sb,projectId:pid,pointId:pt});
