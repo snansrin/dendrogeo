@@ -4,7 +4,7 @@
 // NOT: Senkronizasyon artık Ana Thread (Supabase JS SDK) tarafından yapılıyor
 // ============================================================
 
-const CACHE_VERSION = 'dendrogeo-sw-v2-r389';
+const CACHE_VERSION = 'dendrogeo-sw-v2-r390';
 
 /* İKİ AYRI STATİK CACHE — bu ayrım bilinçli ve önemli.
  *
@@ -162,7 +162,12 @@ const CORE_ASSETS = [
      * ediliyor ve Cloudflare bu betiği kendi sürümlüyor; sabitlemek widget
      * güncellemelerini kırar. Bu yüzden CSP'de challenges.cloudflare.com duruyor. */
     'https://challenges.cloudflare.com/turnstile/v0/api.js',
-    'https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Manrope:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap'
+    'https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Manrope:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap',
+    '/src/application/trees/validate-measurement-submission.js',
+    '/src/application/trees/prepare-measurement-submission.js',
+    '/src/application/trees/verify-measurement-submission-location.js',
+    '/src/application/trees/persist-measurement-submission.js',
+    '/src/application/trees/submit-measurement.js'
 ];
 
 self.addEventListener('install', event => {
