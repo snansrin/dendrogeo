@@ -83,6 +83,11 @@ const DG_LULC_CHAIN=[
    * + lc-s2 Sentinel-2 spektral kanıt + ui/lc-sens basit kaydırıcı paneli
    * (0053'teki üç adımlı workbench kullanıcı isteğiyle kaldırıldı). */
   "src/services/lc-validate.js",
+  "src/domain/surface/select-sentinel-scenes.js",
+  "src/domain/surface/sentinel-temporal-windows.js",
+  "src/domain/surface/sentinel-raster-grid.js",
+  "src/domain/surface/sentinel-spectral-evidence.js",
+  "src/application/surface/build-sentinel-profile.js",
   "src/services/lc-s2.js",
   "src/ui/lc-report.js",
   "vendor/polygon-clipping-0.15.7.js",

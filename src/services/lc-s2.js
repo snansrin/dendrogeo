@@ -43,6 +43,7 @@ const DG_S2_SCALE=10000;       /* L2A yansıma ölçeği */
 
 /* Referans dönemi seçenekleri (karne beyanı bunları kaynak gösterir) */
 function dgS2SeasonRange(year,mode){
+  if(window.DG_SENTINEL_TEMPORAL_WINDOWS)return window.DG_SENTINEL_TEMPORAL_WINDOWS.seasonRange(year,mode);
   const y=Number(year)||2021;
   if(mode==="ytd"){
     const now=new Date(),currentYear=now.getUTCFullYear(),end=now.toISOString();
@@ -58,6 +59,7 @@ function dgS2SeasonRange(year,mode){
 
 /* STAC sahne araması: GET (CORS dersi) → bulutsuz sahneler → en güncel farklı tarihleri seç */
 async function dgS2FindScenesRange(bbox,start,end,maxN){
+  if(window.DG_SELECT_SENTINEL_SCENES)return window.DG_SELECT_SENTINEL_SCENES.findRange(bbox,start,end,maxN,{collection:DG_S2_COLLECTION,searchLimit:DG_S2_SEARCH_LIMIT,maxCloud:DG_S2_MAX_CLOUD,bands:DG_S2_BANDS,fetchJson:dgLcFetchJson,selectScenes:dgS2SelectScenes});
   const qs=new URLSearchParams({
     collections:DG_S2_COLLECTION,
     bbox:[bbox.minLon,bbox.minLat,bbox.maxLon,bbox.maxLat].join(","),
@@ -87,6 +89,7 @@ async function dgS2FindScenesRange(bbox,start,end,maxN){
 }
 
 function dgS2SelectScenes(candidates,maxN){
+ if(window.DG_SELECT_SENTINEL_SCENES)return window.DG_SELECT_SENTINEL_SCENES.select(candidates,maxN);
  const pending=candidates.slice(),selected=[];
  const tile=x=>String(x.it.properties?.["s2:mgrs_tile"]||x.it.properties?.["grid:code"]||"");
  const day=x=>Date.parse(String(x.it.properties?.datetime||"").slice(0,10));
@@ -117,6 +120,7 @@ async function dgS2FindScenes(bbox,year,mode){
  * kanıtı için yüksek su dönemi (ilkbahar) + sonbahar pencereleri ayrıca
  * taranır; MAX MNDWI "referans yılında açık su görüldü mü" sorusuna döner. */
 function dgS2WaterWindows(year,mode,nowOverride){
+  if(window.DG_SENTINEL_TEMPORAL_WINDOWS)return window.DG_SENTINEL_TEMPORAL_WINDOWS.waterWindows(year,mode,nowOverride);
   /* Güncel modlarda kalıcılık pencereleri de seçilen güncel yılı kullanır. */
   const now=nowOverride!=null?new Date(nowOverride):new Date();
   const y=(mode==="latest"||mode==="ytd")?now.getUTCFullYear():(Number(year)||2021);
@@ -139,6 +143,7 @@ function dgS2WaterWindows(year,mode,nowOverride){
  * yüzden her görüntüde KENDİ epsg'sine projekte edilen bbox'tan hesaplanır.
  * Aynı disiplin hücre merkezi indekslemede de uygulanır (dgS2CellIndexXY). */
 async function dgS2ReadBand(image,bboxDeg){
+  if(window.DG_SENTINEL_RASTER_GRID)return window.DG_SENTINEL_RASTER_GRID.readBand(image,bboxDeg,{getMeta:dgLcImageMeta,windowFor:dgLcWindowForPark,project:dgLcUtmForward});
   const epsg=dgS2AssetEpsg(image);
   const meta=dgLcImageMeta(image);
   const win=dgLcWindowForPark(meta,dgS2UtmBBox(bboxDeg,epsg));
@@ -147,6 +152,7 @@ async function dgS2ReadBand(image,bboxDeg){
 }
 
 function dgS2UtmBBox(bboxDeg,epsg){
+  if(window.DG_SENTINEL_RASTER_GRID)return window.DG_SENTINEL_RASTER_GRID.utmBbox(bboxDeg,epsg,dgLcUtmForward);
   /* Derece bbox → verilen UTM bölgesinde köşe izdüşümlerinin zarfı */
   const corners=[
     [bboxDeg.minLat,bboxDeg.minLon],[bboxDeg.minLat,bboxDeg.maxLon],
@@ -164,6 +170,7 @@ function dgS2UtmBBox(bboxDeg,epsg){
 /* Hücre merkezi (lat/lon) → bant penceresinde satır/sütun. Bant çözünürlüğü
  * farklı olabilir (10/20 m): meta dx/dy kendi çözünürlüğündedir. */
 function dgS2CellIndex(meta,win,x,y){
+  if(window.DG_SENTINEL_RASTER_GRID)return window.DG_SENTINEL_RASTER_GRID.cellIndex(meta,win,x,y);
   const col=Math.floor((x-meta.minX)/meta.dx);
   const row=Math.floor((meta.maxY-y)/meta.dy);
   const lc=col-win[0],lr=row-win[1];
@@ -173,6 +180,7 @@ function dgS2CellIndex(meta,win,x,y){
 }
 
 function dgS2Median(arr){
+  if(window.DG_SENTINEL_SPECTRAL_EVIDENCE)return window.DG_SENTINEL_SPECTRAL_EVIDENCE.median(arr);
   if(!arr.length)return null;
   const s=arr.slice().sort((a,b)=>a-b);
   const m=s.length>>1;
@@ -182,11 +190,13 @@ function dgS2Median(arr){
 /* Two independent acquisition days must support a seasonal extreme. A single
  * residual cloud, shadow or wet pavement observation cannot drive the review. */
 function dgS2ConfirmedExtreme(values){
+ if(window.DG_SENTINEL_SPECTRAL_EVIDENCE)return window.DG_SENTINEL_SPECTRAL_EVIDENCE.confirmedExtreme(values);
  const sorted=values.filter(Number.isFinite).sort((a,b)=>b-a);
  return sorted.length>=2?sorted[1]:null;
 }
 
 function dgS2VegetationSummary(evidence){
+ if(window.DG_SENTINEL_SPECTRAL_EVIDENCE)return window.DG_SENTINEL_SPECTRAL_EVIDENCE.vegetationSummary(evidence);
  const dates=evidence?.dates instanceof Set?evidence.dates:new Set(evidence?.dates||[]);
  return{ndviMedianYear:dgS2Median(evidence?.ndvi||[]),ndviObs:dates.size};
 }
@@ -194,6 +204,7 @@ function dgS2VegetationSummary(evidence){
 /* Planetary Computer baseline-change notebook + ESA PB04 radiometry.
  * DN=0 remains NoData. Asset scale/offset metadata takes precedence. */
 function dgS2Reflectance(raw,item,band){
+ if(window.DG_SENTINEL_SPECTRAL_EVIDENCE)return window.DG_SENTINEL_SPECTRAL_EVIDENCE.reflectance(raw,item,band,DG_S2_SCALE);
  const v=Number(raw);if(!Number.isFinite(v)||v<=0||v>=65535)return null;
  const asset=item?.assets?.[band],meta=asset?.["raster:bands"]?.[0];
  const baseline=Number(item?.properties?.["s2:processing_baseline"]);
@@ -305,14 +316,17 @@ async function dgS2Profile(cells,outer,opts){
   }
 
   /* Medyan kompozit + indeksler */
-  const out={};
-  let nOk=0,nLow=0;
+  let out={},nOk=0,evidence;
+  if(window.DG_BUILD_SENTINEL_PROFILE){const initial=window.DG_BUILD_SENTINEL_PROFILE.initial(acc,DG_S2_MIN_OBS_GUARD,{median:dgS2Median,confirmedExtreme:dgS2ConfirmedExtreme});out=initial.out;evidence=initial.evidence;nOk=initial.nProfiled;}
+  else{
+  out={};
+  nOk=0;
   for(const key of Object.keys(acc)){
     const a=acc[key];
     const obs=Math.min(a.b03.length,a.b04.length,a.b08.length,a.b11.length);
     const g=dgS2Median(a.b03),r=dgS2Median(a.b04),nir=dgS2Median(a.b08),sw=dgS2Median(a.b11);
-    if(obs<DG_S2_MIN_OBS_GUARD||g===null||r===null||nir===null||sw===null){out[key]={obs,predict:"nodata"};nLow++;continue;}
-    if(nir+r<=0||g+sw<=0||sw+nir<=0){out[key]={obs,predict:"nodata"};nLow++;continue;}
+    if(obs<DG_S2_MIN_OBS_GUARD||g===null||r===null||nir===null||sw===null){out[key]={obs,predict:"nodata"};continue;}
+    if(nir+r<=0||g+sw<=0||sw+nir<=0){out[key]={obs,predict:"nodata"};continue;}
     // Median of actual, simultaneous spectral observations. Separate band
     // medians can synthesize a spectrum that never occurred on any date.
     const ndvi=dgS2Median(a.ndvis);
@@ -329,6 +343,7 @@ async function dgS2Profile(cells,outer,opts){
     };
     nOk++;
   }
+  }
 
   /* ═══ MEVSİMSEL KALICILIK TARAMASI (WorldCover sınıf semantiği) ═══
    * WorldCover sınıfları YIL BOYU kalıcılığı haritalar; yaz medyanı tek
@@ -343,8 +358,7 @@ async function dgS2Profile(cells,outer,opts){
    * İlkbahar (şub-may) + sonbahar (eki-ara) pencerelerinde 5 asset okunur;
    * hücre başına YILLIK MAX MNDWI ve MAX NDVI üretilir. */
   const waterMax={},vegMax={};
-  const evidence={};
-  for(const key of Object.keys(acc))evidence[key]={ndvi:acc[key].ndvis.slice(),mndwi:acc[key].mndwis.slice(),dates:new Set(acc[key].dates)};
+  if(!evidence){evidence={};for(const key of Object.keys(acc))evidence[key]={ndvi:acc[key].ndvis.slice(),mndwi:acc[key].mndwis.slice(),dates:new Set(acc[key].dates)};}
   const waterScenes=[];
   if(o.waterYear!==false&&o.mode!=="latest"){
     for(const w of dgS2WaterWindows(o.year||2021,o.mode)){
@@ -415,6 +429,8 @@ async function dgS2Profile(cells,outer,opts){
     }
   }
 
+  if(window.DG_BUILD_SENTINEL_PROFILE)return window.DG_BUILD_SENTINEL_PROFILE.finish({out,acc,evidence,waterMax,vegMax,cellCount:cells.length,found,waterScenes,epsg,skipped,nProfiled:nOk},{confirmedExtreme:dgS2ConfirmedExtreme,vegetationSummary:dgS2VegetationSummary});
+
   // Relative green-signal view can also be used for the recent-scene mode.
   // Keep it as profile metadata only: it never changes the ESA class or area.
   for(const key of Object.keys(out)){
@@ -441,6 +457,7 @@ async function dgS2Profile(cells,outer,opts){
 const DG_S2_MIN_OBS_GUARD=(window.DG_LC_VALIDATE&&window.DG_LC_VALIDATE.spectral&&window.DG_LC_VALIDATE.spectral.MIN_OBS)||3;
 
 function dgS2AssetEpsg(image){
+  if(window.DG_SENTINEL_RASTER_GRID)return window.DG_SENTINEL_RASTER_GRID.assetEpsg(image);
   try{
     const keys=typeof image.getGeoKeys==="function"?image.getGeoKeys():null;
     const k=Math.round(Number(keys&&keys.ProjectedCSTypeGeoKey||0));

@@ -946,3 +946,12 @@ Her modülün tek bir dış API'si, sahibi olduğu açık durumu ve kendi testle
 - `application/surface/build-validation-agreement.js`, spektral uzlaşmayı ve mevcut doğrulama kapısı hükmünü kurar.
 - `application/surface/serialize-validation-campaign.js`, kampanyayı CSV/JSON'a aktarır ve insan kararlarından doğrulanmış alan/GeoJSON üretir.
 - `services/lc-validate.js`, dış global API'yi ve IndexedDB kampanya kalıcılığını koruyan uyumluluk adapter'ıdır; modüller lazy zincirde ve service-worker precache'te ondan önce yüklenir.
+
+## Sentinel-2 kanıt modülleri — 13 Ekim 2026
+
+- `domain/surface/select-sentinel-scenes.js`, aynı MGRS tile/gün tekrarlarını ayıklar ve sahneleri tarih ile tile kapsamı boyunca dengeli seçer; STAC aramasını GET olarak yürütür.
+- `domain/surface/sentinel-temporal-windows.js`, WorldCover referans sezonunu ve seçilen yılın ilkbahar/sonbahar su kalıcılık pencerelerini kurar.
+- `domain/surface/sentinel-raster-grid.js`, her COG'un kendi UTM EPSG'sinde park penceresini ve hücre indekslerini hesaplar.
+- `domain/surface/sentinel-spectral-evidence.js`, PB04 yansımasını, medyanı, iki tarihli ekstrem kanıtını ve bitki özeti değerlerini üretir.
+- `application/surface/build-sentinel-profile.js`, günlük gözlemleri hücre kompozitlerine ve yıllık profil istatistiklerine dönüştürür.
+- `services/lc-s2.js`, sahne/bant okuma sırasını ve uyumlu `DG_LC_S2` globalini korur; beş modül lc-validate sonrasında, lc-s2 öncesinde yüklenir.
