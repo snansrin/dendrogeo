@@ -146,6 +146,11 @@
       "src/contracts/surface-analysis.js",
       "src/contracts/surface-review.js",
       "src/core/surface-display.js",
+      "src/domain/surface/build-validation-confusion-matrix.js",
+      "src/domain/surface/build-validation-stratum-weights.js",
+      "src/domain/surface/calculate-validation-area-estimates.js",
+      "src/domain/surface/calculate-validation-class-accuracy.js",
+      "src/domain/surface/calculate-validation-class-proportions.js",
       "src/domain/surface/classify-landcover-code.js",
       "src/domain/surface/classify-surface-review-data-change.js",
       "src/domain/surface/compare-source-class-areas.js",
@@ -306,6 +311,7 @@
       "test/lc-s2-annual-modules.test.mjs",
       "test/lc-s2-scene-modules.test.mjs",
       "test/lc-validate.test.mjs",
+      "test/lc-validation-accuracy-domain.test.mjs",
       "test/map-init-modules.test.mjs",
       "test/map-live-load-modules.test.mjs",
       "test/map-measurement-marker-chunk-modules.test.mjs",
@@ -396,7 +402,7 @@
     "docs/surface-scientific-contract.json": "ad98bde39dc2e8dfd80d36d8f287349cf0ab8a91cd7a9f728e6dd533a844ffa3",
     "partials/shell.html": "4b0c951de70a9d89e26340751295a965bcc144424d1eab85088c4f16a7e972e8",
     "scripts/lulc-qa.mjs": "60a322b640c2a4bca447785bdeb056097c38e5094c10292b28049d31968ab827",
-    "scripts/val-qa.mjs": "1bc6246708f8f358fc6511a200fd0b4726b0bf3f5f2c9b1f570d8dadd3d11d48",
+    "scripts/val-qa.mjs": "dd566313c2528630407838244c0b9473fa65e1c6fd06687d6567fd95546665ba",
     "scripts/verify-osm-water-live.mjs": "6465ba97904d88347aec388478ecf807cfbd495cdb2b4db0e2a957d985d365d7",
     "src/adapters/map/add-waypoint-guidance-line.js": "7c34f617b8e8417c2f05a9cb2aff7126ef21b715d01bdd166169ca9299ac7718",
     "src/adapters/map/create-base-map-layer.js": "ccf410d1a78eea7a7a062ce86b69dad57d774cfa3c922822df6d308392c640f2",
@@ -627,7 +633,7 @@
     "src/ui/sync-base-map-layer-selection.js": "2f93018846abac13f83486a1fc2b9df0cbb7f330cae202a0e91ef902c8263eeb",
     "src/ui/waypoint-gps-overlay.js": "e5bb70df065093b911d1c7ff5b5b9fb7db09b38df6bb7fb3271db7ea1e3f4b28",
     "src/utils/geo.js": "3e796768b3d55a3f07c4be3281c9437f1602b6d5e68151b2af7b101707baf294",
-    "src/utils/lazylibs.js": "cedbe62bdb7b51288c08dc3e9659ae0a7117f51e2be7f56fc55fa1cdd00819b7",
+    "src/utils/lazylibs.js": "223fa2132d1037ebda2bca0453d7bfde9e2e9795b78d74bb67daabde24bfa8bb",
     "src/workers/surface-worker.js": "02878b04478f0c555b536f34d9807a0bf824d0f738d1468a8840069cc61e85ed",
     "test/base-map-layer-modules.test.mjs": "5399d699e74ffd66e92df312b4301202add7352b2b6c0be24fd51cda63e7baff",
     "test/critical-fixes.test.mjs": "3a2e62104763110bc734b3dc54a37cbf57c15b0038a78fdce35d56d9639c1989",
@@ -749,7 +755,13 @@
     "src/application/surface/read-sentinel-annual-scene-windows.js": "32ea6d48fb156755c3dde43a44e6b529a356079ab7b91c758295602a7b7ad70a",
     "src/domain/surface/index-sentinel-annual-scene-cells.js": "9c2e0956d045322f45da79c47ec23b7c5a4bd57e35c32a9bb2bd6f6a8fe4d077",
     "src/application/surface/collect-sentinel-annual-evidence.js": "ee899148c3da38162bb2a4ed3f7c61f1e5682e85a265f23cb80a9d8fff9eb32d",
-    "test/lc-s2-annual-modules.test.mjs": "ace3751b8a25e57f3aae2257d4704e03bcf0bbf6a44afad55b36bcaa51ee5020"
+    "test/lc-s2-annual-modules.test.mjs": "ace3751b8a25e57f3aae2257d4704e03bcf0bbf6a44afad55b36bcaa51ee5020",
+    "src/domain/surface/build-validation-confusion-matrix.js": "e44c03f2d139991ab32ee2090813dd6546413ed5f4f294aa1853b96c809e324d",
+    "src/domain/surface/build-validation-stratum-weights.js": "54adbc661509a26ba60b3fbdd9cb9ff8adc111f55fe555d45cbdafc247ff79b4",
+    "src/domain/surface/calculate-validation-class-proportions.js": "dbbffe34723ab7ae447fdbae41967b02191122fe2c5d17bf68ddc8646d26f645",
+    "src/domain/surface/calculate-validation-area-estimates.js": "8145f02e745c919e3c9db11ba6f0542041504293b291b0f59d5d52e4adb92585",
+    "src/domain/surface/calculate-validation-class-accuracy.js": "b4ea36272a78403fe14bdca1fa3102f2c4aef0a2b7bf41604d766e3a894b4396",
+    "test/lc-validation-accuracy-domain.test.mjs": "6de28dd2dffdc1141122f2d466c8d7a5c904b759ae4ff64c1c364fdcbd5cb60b"
   },
   "authorized_modularizations": [
     {
@@ -1676,6 +1688,22 @@
           "path": "scripts/val-qa.mjs",
           "previous_sha256": "f982c67497260532707bfa1b714cd1d03e96b48edd3a98385de45bd530d6f139",
           "sha256": "1bc6246708f8f358fc6511a200fd0b4726b0bf3f5f2c9b1f570d8dadd3d11d48"
+        }
+      ]
+    },
+    {
+      "date": "2026-10-13",
+      "scope": "User-authorized five-module split of the Olofsson area-adjusted validation metrics: confusion counts, mapped-area stratum weights, class proportions, adjusted area/overall accuracy uncertainty, and class accuracy/kappa. Preserve ambiguous-label denominators, mapped-area weighting, finite-sample area uncertainty, reported precision and the existing validation regression expectations.",
+      "files": [
+        {
+          "path": "src/utils/lazylibs.js",
+          "previous_sha256": "cedbe62bdb7b51288c08dc3e9659ae0a7117f51e2be7f56fc55fa1cdd00819b7",
+          "sha256": "223fa2132d1037ebda2bca0453d7bfde9e2e9795b78d74bb67daabde24bfa8bb"
+        },
+        {
+          "path": "scripts/val-qa.mjs",
+          "previous_sha256": "1bc6246708f8f358fc6511a200fd0b4726b0bf3f5f2c9b1f570d8dadd3d11d48",
+          "sha256": "dd566313c2528630407838244c0b9473fa65e1c6fd06687d6567fd95546665ba"
         }
       ]
     }
