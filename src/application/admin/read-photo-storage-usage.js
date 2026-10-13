@@ -1,10 +1,10 @@
 "use strict";
 (function(root){
- async function read(storage,bucket="dendro-photos"){
-  const listing=await storage.from(bucket).list("",{limit:100});
+ async function read(ports,bucket="dendro-photos"){
+  const listing=await ports.listPhotoFiles(bucket,"",100);
   let bytes=0,count=0;
   for(const folder of (listing.data||[])){
-   const children=await storage.from(bucket).list(folder.name,{limit:1000});
+   const children=await ports.listPhotoFiles(bucket,folder.name,1000);
    (children.data||[]).forEach(file=>{bytes+=(file.metadata&&file.metadata.size)||0;count++;});
   }
   return{bytes,count};

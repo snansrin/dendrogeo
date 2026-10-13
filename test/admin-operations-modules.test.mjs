@@ -4,6 +4,7 @@ import vm from 'node:vm';
 import {readFileSync} from 'node:fs';
 
 const files=[
+ 'src/adapters/admin/admin-persistence-store.js',
  'src/application/admin/read-photo-storage-usage.js',
  'src/ui/admin-storage-usage.js',
  'src/application/admin/clean-orphan-photos.js',
@@ -19,7 +20,8 @@ function app(){
 test('storage usage sums the same folder listing sizes and UI preserves quota thresholds',async()=>{
  const window=app(),calls=[];
  const storage={from(bucket){assert.equal(bucket,'dendro-photos');return{list(path,options){calls.push([path,options.limit]);return Promise.resolve({data:path===''?[{name:'u1'}]:[{metadata:{size:1048576}},{metadata:{size:524288}}]});}};}};
- const usage=await window.DG_READ_PHOTO_STORAGE_USAGE.read(storage);
+ const ports=window.DG_ADMIN_PERSISTENCE_STORE.create(()=>({storage}));
+ const usage=await window.DG_READ_PHOTO_STORAGE_USAGE.read(ports);
  assert.deepEqual(JSON.parse(JSON.stringify(usage)),{bytes:1572864,count:2});
  assert.deepEqual(calls,[['',100],['u1',1000]]);
  const bar={style:{}},info={};
@@ -34,7 +36,8 @@ test('orphan cleanup preserves measurement URLs and only removes unmatched publi
   getPublicUrl(path){return{data:{publicUrl:`https://cdn/${path}`}};},
   remove(paths){removed.push(paths);return Promise.resolve({error:null});}
  };}};
- const count=await window.DG_CLEAN_ORPHAN_PHOTOS.clean({storage,photoUrls:[{photo_url:'https://cdn/u1/keep.jpg'}]});
+ const ports=window.DG_ADMIN_PERSISTENCE_STORE.create(()=>({storage}));
+ const count=await window.DG_CLEAN_ORPHAN_PHOTOS.clean({ports,photoUrls:[{photo_url:'https://cdn/u1/keep.jpg'}]});
  assert.equal(count,1);assert.deepEqual(JSON.parse(JSON.stringify(removed)),[['u1/old.jpg']]);
 });
 
