@@ -21,21 +21,24 @@ test('landing statistics adapter keeps parallel independent reads and partial fa
  assert.equal(result.errors.length,2);
 });
 
-test('auth session adapter keeps SDK session and profile query results intact',async()=>{
+test('auth session adapter keeps SDK session, auth listener, realtime auth and profile results intact',async()=>{
  const api=moduleApi('src/adapters/auth/session-store.js','DG_AUTH_SESSION_STORE'),calls=[];
- const profile={data:{id:'u1',role:'admin'},error:null},session={data:{session:{access_token:'jwt'}},error:null};
- const client={auth:{getSession:async()=>session},from(table){calls.push(['from',table]);return{select(columns){calls.push(['select',columns]);return{eq(column,value){calls.push(['eq',column,value]);return{single:async()=>profile};}};}};}};
+ const profile={data:{id:'u1',role:'admin'},error:null},session={data:{session:{access_token:'jwt'}},error:null},listener=()=>{};
+ const client={auth:{getSession:async()=>session,onAuthStateChange:callback=>{calls.push(['listen',callback]);return listener;}},realtime:{setAuth:async token=>calls.push(['auth',token])},from(table){calls.push(['from',table]);return{select(columns){calls.push(['select',columns]);return{eq(column,value){calls.push(['eq',column,value]);return{single:async()=>profile};}};}};}};
  const store=api.create(()=>client);
  assert.equal(await store.getSession(),session);
+ assert.equal(store.onAuthStateChange(()=>{}),listener);
+ await store.setRealtimeAuth('jwt');
  assert.equal(await store.loadProfile('u1'),profile);
- assert.deepEqual(JSON.parse(JSON.stringify(calls)),[['from','profiles'],['select','*'],['eq','id','u1']]);
+ const plainCalls=JSON.parse(JSON.stringify(calls,(key,value)=>typeof value==='function'?'callback':value));
+ assert.deepEqual(plainCalls,[['listen','callback'],['auth','jwt'],['from','profiles'],['select','*'],['eq','id','u1']]);
 });
 
 test('persistence boundary rejects direct queries in both application and UI layers',()=>{
  const modules=[
-  {layer:'application',relativePath:'src/application/example.js',source:'client.from("measurements");'},
+  {layer:'application',relativePath:'src/application/example.js',source:'client.from("measurements"); client.auth.getSession(); client.channel("presence");'},
   {layer:'ui',relativePath:'src/ui/example.js',source:'sb.from("profiles");'},
   {layer:'adapters',relativePath:'src/adapters/example.js',source:'client.from("measurements");'}
  ];
- assert.equal(findDirectPersistenceAccess(modules).length,2);
+ assert.equal(findDirectPersistenceAccess(modules).length,4);
 });

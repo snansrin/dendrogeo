@@ -248,7 +248,7 @@ function dgOAuthError(){
  * düşersek kullanıcı "giriş olmadı" sanır → oturum gelene kadar beklenir.
  * INITIAL_SESSION boş gelirse (takas hâlâ sürebilir) kısa bir ek süre tanınır. */
 function dgWaitForOAuthSession(timeoutMs){
- if(window.DG_AUTH_OAUTH_SESSION)return window.DG_AUTH_OAUTH_SESSION.wait(sb,timeoutMs);
+ if(window.DG_AUTH_OAUTH_SESSION)return window.DG_AUTH_OAUTH_SESSION.wait(window.DG_AUTH_SESSION_STORE.create(()=>sb),timeoutMs);
  const ms=Number(timeoutMs)||9000;
  return new Promise(resolve=>{
   let done=false,sub=null,grace=null;

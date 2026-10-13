@@ -2,9 +2,9 @@
 
 /* Start Presence immediately, guard callbacks by generation, and upgrade auth later. */
 window.DG_START_VISITOR_PRESENCE_SESSION={
- start({state,client,user,sessionId,channelAdapter,authUpgrade,timers,emit,ping,stop,fail,getView}){
+ start({state,user,sessionId,channelAdapter,authUpgrade,authPorts,timers,emit,ping,stop,fail,getView}){
   try{
-   if(!user||!client||typeof client.channel!=="function")return false;
+   if(!user||!channelAdapter)return false;
    if(state.channel&&state.user===String(user.id))return false;
    if(state.channel)stop();
    const generation=++state.generation;
@@ -19,17 +19,11 @@ window.DG_START_VISITOR_PRESENCE_SESSION={
      state.lastPing=0;ping(getView(),true);emit();
     }else if(status==="CHANNEL_ERROR"||status==="TIMED_OUT"||status==="CLOSED")fail(status);
    };
-   const channel=channelAdapter
-    ?channelAdapter.open(client,String(user.id),sessionId,onSync)
-    :client.channel("dg-presence",{config:{presence:{key:String(user.id)+":"+sessionId}}});
+   const channel=channelAdapter.open(String(user.id),sessionId,onSync);
    state.channel=channel;
-   if(channelAdapter)channelAdapter.subscribe(channel,onStatus);
-   else{channel.on("presence",{event:"sync"},onSync);channel.subscribe(onStatus);}
+   channelAdapter.subscribe(channel,onStatus);
    state.watchTimer=timers.setTimeout(()=>{if(generation===state.generation&&state.status==="connecting")fail("WATCHDOG");},20000);
-   if(authUpgrade)authUpgrade.run(client,generation,value=>value===state.generation);
-   else (async()=>{try{const{data}=await client.auth.getSession();const token=data?.session?.access_token;
-    if(generation===state.generation&&token&&client.realtime?.setAuth)await client.realtime.setAuth(token);
-   }catch(e){}})();
+   if(authUpgrade&&authPorts)authUpgrade.run(authPorts,generation,value=>value===state.generation);
    return true;
   }catch(e){
    state.ready=false;state.status="error";emit();

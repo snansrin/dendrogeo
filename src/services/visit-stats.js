@@ -53,9 +53,10 @@ async function loadVisitStats(){
  * ve GPS varsa payload'a girer; GEÇİCİDİR — veritabanına yazılmaz. */
 const DG_VIEW_LABELS=window.DG_VISITOR_VIEW_LABELS||{dash:"Panel",measure:"Yeni Ölçüm",nav:"Waypoint",map:"Canlı Harita",projects:"Projeler",records:"Kayıtlarım",export:"Dışa Aktar",world:"Dünya Verisi",admin:"Ölçüm Yönetimi",users:"Kullanıcılar",visitors:"Ziyaretçi & Canlı"};
 let DG_PRES=null,DG_PRES_OK=false,DG_PRES_STATE="idle",DG_PRES_RETRY=0,DG_PRES_LAST=0,DG_PRES_WATCH=null,DG_PRES_HEARTBEAT=null,DG_PRES_TIMER=null,DG_PRES_USER=null,DG_PRES_GENERATION=0;
-const DG_VISITOR_PRESENCE_CHANNEL_ADAPTER=window.DG_VISITOR_PRESENCE_CHANNEL_ADAPTER?.create?.()||null;
+const DG_VISITOR_PRESENCE_CHANNEL_ADAPTER=window.DG_VISITOR_PRESENCE_CHANNEL_ADAPTER?.create?.(()=>sb)||null;
 const DG_VISITOR_REMOVE_PRESENCE_CHANNEL=window.DG_VISITOR_REMOVE_PRESENCE_CHANNEL?.create?.()||null;
 const DG_UPGRADE_VISITOR_PRESENCE_AUTH=window.DG_UPGRADE_VISITOR_PRESENCE_AUTH?.create?.()||null;
+const DG_AUTH_SESSION_PORTS=window.DG_AUTH_SESSION_STORE?.create?.(()=>sb)||null;
 const DG_VISITOR_TRACK_PRESENCE=window.DG_VISITOR_TRACK_PRESENCE?.create?.()||null;
 const DG_VISITOR_PRESENCE_LIFECYCLE_STATE={
  get channel(){return DG_PRES;},set channel(value){DG_PRES=value;},
@@ -100,9 +101,9 @@ function dgPresenceFail(why){
 }
 function dgPresenceStart(){
  if(window.DG_START_VISITOR_PRESENCE_SESSION)return window.DG_START_VISITOR_PRESENCE_SESSION.start({
-  state:DG_VISITOR_PRESENCE_LIFECYCLE_STATE,client:typeof sb!=="undefined"?sb:null,
+  state:DG_VISITOR_PRESENCE_LIFECYCLE_STATE,
   user:typeof USER!=="undefined"?USER:null,sessionId:DG_SID,
-  channelAdapter:DG_VISITOR_PRESENCE_CHANNEL_ADAPTER,authUpgrade:DG_UPGRADE_VISITOR_PRESENCE_AUTH,
+  channelAdapter:DG_VISITOR_PRESENCE_CHANNEL_ADAPTER,authUpgrade:DG_UPGRADE_VISITOR_PRESENCE_AUTH,authPorts:DG_AUTH_SESSION_PORTS,
   timers:DG_VISITOR_PRESENCE_TIMERS,emit:dgPresenceEmit,ping:dgPresencePing,
   stop:dgPresenceStop,fail:dgPresenceFail,
   getView:()=>typeof DG_CUR_VIEW!=="undefined"?DG_CUR_VIEW:"dash"
@@ -123,12 +124,12 @@ function dgPresenceStart(){
    }else if(st==="CHANNEL_ERROR"||st==="TIMED_OUT"||st==="CLOSED")dgPresenceFail(st);
   };
   const channel=DG_PRES=DG_VISITOR_PRESENCE_CHANNEL_ADAPTER
-   ?DG_VISITOR_PRESENCE_CHANNEL_ADAPTER.open(sb,String(USER.id),DG_SID,onSync)
+   ?DG_VISITOR_PRESENCE_CHANNEL_ADAPTER.open(String(USER.id),DG_SID,onSync)
    :sb.channel("dg-presence",{config:{presence:{key:String(USER.id)+":"+DG_SID}}});
   if(DG_VISITOR_PRESENCE_CHANNEL_ADAPTER)DG_VISITOR_PRESENCE_CHANNEL_ADAPTER.subscribe(channel,onStatus);
   else{channel.on("presence",{event:"sync"},onSync);channel.subscribe(onStatus);}
   DG_PRES_WATCH=setTimeout(()=>{if(generation===DG_PRES_GENERATION&&DG_PRES_STATE==="connecting")dgPresenceFail("WATCHDOG");},20000);
-  if(DG_UPGRADE_VISITOR_PRESENCE_AUTH)DG_UPGRADE_VISITOR_PRESENCE_AUTH.run(sb,generation,value=>value===DG_PRES_GENERATION);
+  if(DG_UPGRADE_VISITOR_PRESENCE_AUTH&&DG_AUTH_SESSION_PORTS)DG_UPGRADE_VISITOR_PRESENCE_AUTH.run(DG_AUTH_SESSION_PORTS,generation,value=>value===DG_PRES_GENERATION);
   else (async()=>{try{const{data}=await sb.auth.getSession();const tok=data?.session?.access_token;
    if(generation===DG_PRES_GENERATION&&tok&&sb.realtime?.setAuth)await sb.realtime.setAuth(tok);
   }catch(e){}})();

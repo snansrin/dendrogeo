@@ -1,6 +1,6 @@
 "use strict";
 (function(root){
- function wait(client,timeoutMs,timers){
+ function wait(ports,timeoutMs,timers){
   const ms=Number(timeoutMs)||9000;
   const set=(timers&&timers.setTimeout)||setTimeout;
   const clear=(timers&&timers.clearTimeout)||clearTimeout;
@@ -14,7 +14,7 @@
     resolve(session||null);
    };
    try{
-    const r=client.auth.onAuthStateChange((event,session)=>{
+    const r=ports.onAuthStateChange((event,session)=>{
      if(event==="SIGNED_IN"||event==="USER_UPDATED"){finish(session);return;}
      if(event==="INITIAL_SESSION"){
       if(session){finish(session);return;}
@@ -24,7 +24,7 @@
     sub=(r&&r.data)||null;
    }catch(e){}
    try{
-    Promise.resolve(client.auth.getSession()).then(r=>{
+    Promise.resolve(ports.getSession()).then(r=>{
      const session=r&&r.data?r.data.session:null;
      if(session)finish(session);
     }).catch(()=>{});
