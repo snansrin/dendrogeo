@@ -19,13 +19,14 @@ const _tw=(s)=>(typeof dgT==="function"?dgT(s):s);
  * eşleştirip ana listeye taşır. */
 let PARK_DATA=[];   /* seçili parkın ham ölçüm satırları (rapor için) */
 let PARK_ROWS=[];   /* v_park_compare satırları */
+const DG_WORLD_PARK_COMPARISON_MODULE_STORE=window.DG_WORLD_PARK_COMPARISON_STORE?window.DG_WORLD_PARK_COMPARISON_STORE.create(()=>sb):null;
 
 /* 0040: kaydırma koruma sarmalı — yeniden çizimde #main scrollTop korunur. */
 async function loadParkCompare(){const _y=(typeof dgScrollKeep==="function"?dgScrollKeep():null);try{return await loadParkCompare__scroll.apply(this,arguments);}finally{if(typeof dgScrollRestore==="function")dgScrollRestore(_y);}}
 async function loadParkCompare__scroll(){
  /* v_park_compare supplies park-level contributors; the primary path stays park-keyed. */
  const el=$("parkCompare");
- const{data,error}=await sb.from("v_park_compare").select("*").order("carbon_kg",{ascending:false});
+ const{data,error}=await(DG_WORLD_PARK_COMPARISON_MODULE_STORE?DG_WORLD_PARK_COMPARISON_MODULE_STORE.primary():sb.from("v_park_compare").select("*").order("carbon_kg",{ascending:false}));
 
  /* Şema eski (0004 çalıştırılmamış) → sayfa boş kalmasın diye proje bazlı
   * eski toplama yedek olarak çalışır ve kullanıcıyı migration'a yönlendirir.
@@ -51,9 +52,10 @@ async function loadParkCompare__scroll(){
  }
 
  PARK_ROWS=data||[];
- const linked=PARK_ROWS.filter(r=>Number(r.park_id)>0);
- const pending=PARK_ROWS.filter(r=>!(Number(r.park_id)>0));
- const max=linked.length?Math.max(...linked.map(r=>Number(r.carbon_kg)||0)):1;
+ const prepared=window.DG_PREPARE_PARK_COMPARISON?window.DG_PREPARE_PARK_COMPARISON.prepare(PARK_ROWS):null;
+ const linked=prepared?prepared.linked:PARK_ROWS.filter(r=>Number(r.park_id)>0);
+ const pending=prepared?prepared.pending:PARK_ROWS.filter(r=>!(Number(r.park_id)>0));
+ const max=prepared?prepared.max:(linked.length?Math.max(...linked.map(r=>Number(r.carbon_kg)||0)):1);
 
  if(!el)return;
 
@@ -106,9 +108,17 @@ function dgParkCompareDenied__scroll(error){
 /* 0040: kaydırma koruma sarmalı — yeniden çizimde #main scrollTop korunur. */
 async function loadParkCompareLegacy(){const _y=(typeof dgScrollKeep==="function"?dgScrollKeep():null);try{return await loadParkCompareLegacy__scroll.apply(this,arguments);}finally{if(typeof dgScrollRestore==="function")dgScrollRestore(_y);}}
 async function loadParkCompareLegacy__scroll(el){
- const{data,count}=await sb.from("measurements").select("carbon_kg,dbh_cm,height_m,species,grp,projects(name,city)",{count:"exact"}).eq("status","Onaylı").limit(5000);
+ const{data,count}=await(DG_WORLD_PARK_COMPARISON_MODULE_STORE?DG_WORLD_PARK_COMPARISON_MODULE_STORE.legacy():sb.from("measurements").select("carbon_kg,dbh_cm,height_m,species,grp,projects(name,city)",{count:"exact"}).eq("status","Onaylı").limit(5000));
  dgWarnIfTruncated(data,5000,"Park karşılaştırma",count);
  PARK_DATA=data||[];
+ const grouped=window.DG_GROUP_LEGACY_PARK_COMPARISON?window.DG_GROUP_LEGACY_PARK_COMPARISON.group(PARK_DATA):null;
+ if(grouped&&window.DG_LEGACY_PARK_COMPARISON_UI){
+  const list=grouped.parks;
+  if(!el)return;
+  el.innerHTML=window.DG_LEGACY_PARK_COMPARISON_UI.render(list,grouped.max,{escape:esc,translate:_tw});
+  const rep=$("repProject");if(rep)rep.innerHTML=window.DG_LEGACY_PARK_COMPARISON_UI.reportOptions(list,esc);
+  return;
+ }
  const by={};
  PARK_DATA.forEach(r=>{
   const name=r.projects?.name||"—";
@@ -162,12 +172,14 @@ function dgRenderParkReport(name,rows,count,row){
 /* Click-to-zoom */
 async function zoomToCountry(country){
 const m=worldMapL||worldMap;if(!m)return;
+if(window.DG_WORLD_ZOOM_TO_LOCATION&&DG_WORLD_PARK_COMPARISON_MODULE_STORE)return window.DG_WORLD_ZOOM_TO_LOCATION.run(m,"country",country,country,"🌍",{load:(column,value)=>DG_WORLD_PARK_COMPARISON_MODULE_STORE.location(column,value),warnIfTruncated:dgWarnIfTruncated,fit:fitRows});
 const{data,count}=await sb.from("measurements").select("lat,lon",{count:"exact"}).eq("status","Onaylı").eq("country",country).limit(2000);
 dgWarnIfTruncated(data,2000,country+" (ülke yakınlaşma)",count);
 fitRows(m,data,country,"🌍");
 }
 async function zoomToCity(city){
 const m=worldMapL||worldMap;if(!m)return;
+if(window.DG_WORLD_ZOOM_TO_LOCATION&&DG_WORLD_PARK_COMPARISON_MODULE_STORE)return window.DG_WORLD_ZOOM_TO_LOCATION.run(m,"city",city,city,"🏙",{load:(column,value)=>DG_WORLD_PARK_COMPARISON_MODULE_STORE.location(column,value),warnIfTruncated:dgWarnIfTruncated,fit:fitRows});
 const{data,count}=await sb.from("measurements").select("lat,lon",{count:"exact"}).eq("status","Onaylı").eq("city",city).limit(2000);
 dgWarnIfTruncated(data,2000,city+" (şehir yakınlaşma)",count);
 fitRows(m,data,city,"🏙");
