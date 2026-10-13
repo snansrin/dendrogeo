@@ -435,6 +435,8 @@ function drawNav(){
  * ========================================================= */
 
 function switchBaseLayer(type){
+ const app=window.DG_SWITCH_BASE_MAP_LAYER,configuration=window.DG_RESOLVE_BASE_MAP_LAYER,selection=window.DG_SYNC_BASE_MAP_LAYER_SELECTION,layers=window.DG_MANAGE_BASE_MAP_LAYERS,create=window.DG_CREATE_BASE_MAP_LAYER;
+ if(app&&configuration&&selection&&layers&&create){app.switch({map,type,resolve:value=>configuration.resolve(value,DG_ATTR),syncSelection:value=>selection.sync({type:value,getElement:id=>document.getElementById(id),setSurfaceBase:base=>{if(window.DG_LC_SENS?.state)window.DG_LC_SENS.state.base=base;}}),hasCurrent:(target,value)=>layers.hasCurrent(target,value),removeTileLayers:target=>layers.removeTileLayers(target),createLayer:(target,value)=>create.create({leaflet:L,map:target,configuration:value}),notify:toast});return;}
  if(!map)return;
  if(!["osm","sat","topo"].includes(type))return;
  for(const id of ["baseLayerSelect","dgSensBaseSelect","dgPendingBaseSelect"]){const el=document.getElementById(id);if(el)el.value=type;}

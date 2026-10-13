@@ -1256,3 +1256,10 @@ The collaborator map renderer now separates peer selection, display-model deriva
 - `domain/map/map-initial-view.js` üç görünümün merkez ve zoom değerlerini sağlar; `adapters/map/create-osm-map.js` Leaflet instance’ını kurar ve başlangıç görünümünü uygular.
 - `ui/add-osm-map-layer.js` mevcut OSM karo URL’sini, attribution’ı ve zoom sınırını bağlar; `application/map/initialize-map-instance.js` oluşturmayı idempotent hale getirir ve instance’ı katman eklenmeden önce state’e yazar.
 - `application/map/initialize-workspace-maps.js` ana, navigasyon ve dünya haritalarını mevcut sırayla başlatır. Kilitli servis eksik modül durumunda uyumluluk yolunu korur.
+
+
+## Harita altlığı değiştirme — 13 Ekim 2026
+
+- `domain/map/resolve-base-map-layer.js` OSM, uydu ve topoğrafik sağlayıcıların URL, etiket, attribution ve zoom sınırlarını üretir; `ui/sync-base-map-layer-selection.js` üç kontrolü ve LULC altlık state’ini senkronlar.
+- `adapters/map/manage-base-map-layers.js` etkin altlığı bulur ve eski tile katmanlarını kaldırır; `adapters/map/create-base-map-layer.js` Leaflet katmanını var olan seçeneklerle kurar.
+- `application/map/switch-base-map-layer.js` boş harita, geçersiz tür ve zaten etkin katman kapılarını korur; servis modül yoksa mevcut yedek akışını çalıştırır.

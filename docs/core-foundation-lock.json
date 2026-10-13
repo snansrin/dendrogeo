@@ -243,7 +243,12 @@
       "src/adapters/map/create-osm-map.js",
       "src/ui/add-osm-map-layer.js",
       "src/application/map/initialize-map-instance.js",
-      "src/application/map/initialize-workspace-maps.js"
+      "src/application/map/initialize-workspace-maps.js",
+      "src/domain/map/resolve-base-map-layer.js",
+      "src/ui/sync-base-map-layer-selection.js",
+      "src/adapters/map/manage-base-map-layers.js",
+      "src/adapters/map/create-base-map-layer.js",
+      "src/application/map/switch-base-map-layer.js"
     ],
     "scientific_contract_and_inputs": [
       "css/park-panel.css",
@@ -362,7 +367,8 @@
       "test/waypoint-arrival-modules.test.mjs",
       "test/waypoint-load-modules.test.mjs",
       "test/waypoint-delete-modules.test.mjs",
-      "test/map-init-modules.test.mjs"
+      "test/map-init-modules.test.mjs",
+      "test/base-map-layer-modules.test.mjs"
     ]
   },
   "sha256": {
@@ -487,7 +493,7 @@
     "src/services/lc-s2.js": "0e2ac1af0b680e6f4358cb9d99980e32339d04f67f911cfe14d244898f014d40",
     "src/services/lc-stac.js": "978c4be8c3bc4e7cda3f694d1f06290e661fed5bbd5b76b68719140edc18e71a",
     "src/services/lc-validate.js": "b4d8327c62940b1af1a53ddb087188816ff2359c8456c2755c7c853c5919f42b",
-    "src/services/map.js": "9efdc07e4b6f8d2e1385f239767390e5a2f8c77aa2ce6786ce296344bdf2e159",
+    "src/services/map.js": "b5db0047dc86b53c13029e3bd407c087126672d23a6f30b5942d837127006b1f",
     "src/services/measure.js": "ef61d7a32cf16ce83785a7f8fc1c579c8bf2bff8f8ca25f0992c3701d15c71d9",
     "src/services/offline.js": "b0d13ca6c52213b2103e5c23727be42c92cea39855622d43abaad87a8e48280f",
     "src/services/osm-client.js": "2e5eeaa735bf05a603a0db142619f60747b9696f506e666d7df992454a56814f",
@@ -701,7 +707,13 @@
     "src/ui/add-osm-map-layer.js": "c0a6c3d894d0271bbd8c5ae045e1552cfad72320a91ef60d14179d1e6b0ce42a",
     "src/application/map/initialize-map-instance.js": "b0928d5a3821dd2841ad52b14ff7331bf94c37b71d6f8d67fc138096480d4986",
     "src/application/map/initialize-workspace-maps.js": "0100f50d315e29b76260a66aeed0821650354def71737de0d2e27f15939529f6",
-    "test/map-init-modules.test.mjs": "e78e65c5aed0ae360811b47e6f250f698c46a92e843a630f652269a6869dd331"
+    "test/map-init-modules.test.mjs": "e78e65c5aed0ae360811b47e6f250f698c46a92e843a630f652269a6869dd331",
+    "src/domain/map/resolve-base-map-layer.js": "4b9498394fb62cdd1ab71ea5e461b1d85b5a5c77e5d5afcd281c430e522cc92f",
+    "src/ui/sync-base-map-layer-selection.js": "2f93018846abac13f83486a1fc2b9df0cbb7f330cae202a0e91ef902c8263eeb",
+    "src/adapters/map/manage-base-map-layers.js": "ad8b791d9df345d7df036c15cd1bba66ba41c1e9a31330b8b6b72f28cfa0b6a7",
+    "src/adapters/map/create-base-map-layer.js": "ccf410d1a78eea7a7a062ce86b69dad57d774cfa3c922822df6d308392c640f2",
+    "src/application/map/switch-base-map-layer.js": "55044d5dbaf855472db2d95e85846f826be33e643a34c417272df56b0e542c6c",
+    "test/base-map-layer-modules.test.mjs": "5399d699e74ffd66e92df312b4301202add7352b2b6c0be24fd51cda63e7baff"
   },
   "authorized_modularizations": [
     {
@@ -1564,6 +1576,17 @@
           "path": "src/services/map.js",
           "previous_sha256": "c4d8d7d0a1ca9ffa71990df291bc9db31aec89bd3a9d7b87a6e8ad68216571da",
           "sha256": "9efdc07e4b6f8d2e1385f239767390e5a2f8c77aa2ce6786ce296344bdf2e159"
+        }
+      ]
+    },
+    {
+      "date": "2026-10-13",
+      "scope": "User-authorized sixty-third five-module split of locked base-layer switching: provider configuration, selector and LULC state synchronization, existing-layer detection/removal, Leaflet tile-layer adapter, and orchestration. Preserve URLs, attribution, max/native zoom and update options, same-layer early return, control/state update order, toast, and compatibility fallback; locked regression tests remain unchanged.",
+      "files": [
+        {
+          "path": "src/services/map.js",
+          "previous_sha256": "9efdc07e4b6f8d2e1385f239767390e5a2f8c77aa2ce6786ce296344bdf2e159",
+          "sha256": "b5db0047dc86b53c13029e3bd407c087126672d23a6f30b5942d837127006b1f"
         }
       ]
     }
