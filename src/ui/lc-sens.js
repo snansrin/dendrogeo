@@ -144,18 +144,20 @@ function dgSensSave(){
 function dgSensDirty(){DG_SENS.visualVersion++;DG_SENS.editing=true;if(DG_SENS.record)DG_SENS.record.draftDirty=true;DG_SENS.status="";}
 function dgSensPredict(sp){return window.DG_LC_VALIDATE.spectralPredict(sp,DG_SENS.record?.sens);}
 function dgSensCellKey(c){return c.row+":"+c.col;}
-function dgSensHasExplicitWaterBoundary(rec=DG_SENS.record){return !!(rec?.features||[]).some(f=>f?.type==="water"&&f?.method==="visual-boundary");}
+function dgSensHasExplicitWaterBoundary(rec=DG_SENS.record){const policy=window.DG_SURFACE_WATER_FOOTPRINT_POLICY;if(policy)return policy.hasExplicit(rec);return !!(rec?.features||[]).some(f=>f?.type==="water"&&f?.method==="visual-boundary");}
 /* A complete, validated OSM lake way is the authoritative water footprint
  * only for its own park. Other parks keep baseline raster water unless
  * explicitly reviewed; incomplete OSM data may not erase water elsewhere. */
 function dgSensHasVerifiedWaterBoundary(rec=DG_SENS.record){
+ const policy=window.DG_SURFACE_WATER_FOOTPRINT_POLICY;if(policy)return policy.hasVerified(rec,f=>window.DG_SURFACE_REVIEW.validFeature(f));
  return rec?.useObjects!==false&&!!(rec?.objectFeatures||[]).some(f=>
   f?.type==="water"&&f?.method==="osm-boundary"&&f?.osmId==="way/423602740"&&
   window.DG_SURFACE_REVIEW.validFeature(f));
 }
-function dgSensHasWaterFootprint(rec=DG_SENS.record){return dgSensHasExplicitWaterBoundary(rec)||dgSensHasVerifiedWaterBoundary(rec);}
+function dgSensHasWaterFootprint(rec=DG_SENS.record){const policy=window.DG_SURFACE_WATER_FOOTPRINT_POLICY;if(policy)return policy.hasFootprint(rec,f=>window.DG_SURFACE_REVIEW.validFeature(f));return dgSensHasExplicitWaterBoundary(rec)||dgSensHasVerifiedWaterBoundary(rec);}
 
 function dgSensWaterOutsideClass(c,rec=DG_SENS.record){
+ const classifier=window.DG_CLASSIFY_SURFACE_WATER_OUTSIDE_CELL;if(classifier)return classifier.classify({cell:c,record:rec,cells:dgSensCells()||[],cellKey:dgSensCellKey,landPredict:window.DG_LC_VALIDATE?.spectralLandPredict,editing:DG_SENS.editing});
  const key=dgSensCellKey(c),decision=rec?.corrections?.[key],land=new Set(["green","hard","bare"]);
  if(decision&&land.has(decision.to)&&(decision.method==="visual-cell"||(!DG_SENS.editing&&decision.method==="sensitivity")))return decision.to;
  const evidence=rec?.profile?.cells?.[key],predict=window.DG_LC_VALIDATE?.spectralLandPredict;
@@ -181,9 +183,9 @@ function dgSensWaterOutsideClass(c,rec=DG_SENS.record){
  if(!best)return"other";
  return ["green","hard","bare"].sort((a,b)=>best.weights[b]-best.weights[a]||["green","hard","bare"].indexOf(a)-["green","hard","bare"].indexOf(b))[0];
 }
-function dgSensWaterOutsideParts(){return dgSensParts().filter(p=>(p.cell?.rasterClassKey||p.cell?.classKey)==="water"&&p.method==="review-cell");}
-function dgSensWaterBoundaryUnresolved(){const unknown=new Set();for(const p of dgSensWaterOutsideParts())if(p.type==="other")unknown.add(p.key);return unknown.size;}
-function dgSensNeedsWaterScan(){return dgSensHasWaterFootprint()&&dgSensWaterOutsideParts().length>0&&!DG_SENS.record?.profile?.cells;}
+function dgSensWaterOutsideParts(){const selector=window.DG_SELECT_SURFACE_WATER_OUTSIDE_PARTS;if(selector)return selector.select(dgSensParts());return dgSensParts().filter(p=>(p.cell?.rasterClassKey||p.cell?.classKey)==="water"&&p.method==="review-cell");}
+function dgSensWaterBoundaryUnresolved(){const counter=window.DG_COUNT_UNRESOLVED_SURFACE_WATER_PARTS,parts=dgSensWaterOutsideParts();if(counter)return counter.count(parts);const unknown=new Set();for(const p of parts)if(p.type==="other")unknown.add(p.key);return unknown.size;}
+function dgSensNeedsWaterScan(){const gate=window.DG_REQUIRES_SURFACE_WATER_SCAN,hasFootprint=dgSensHasWaterFootprint();if(!hasFootprint)return false;const parts=dgSensWaterOutsideParts(),profile=DG_SENS.record?.profile;if(gate)return gate.requires({hasFootprint,parts,profile});return parts.length>0&&!profile?.cells;}
 function dgSensEffective(c){
  const original=c.rasterClassKey||c.classKey;
  if(DG_SENS.rawView)return original;

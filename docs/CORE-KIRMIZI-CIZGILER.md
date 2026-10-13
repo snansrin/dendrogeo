@@ -124,3 +124,6 @@ Kırk birinci grupta kilitli LULC dışa aktarma akışı beş modüle ayrıldı
 
 
 Kırk ikinci grupta kilitli LULC kayıt yükleme akışı beş modüle ayrıldı: varsayılan kayıt oluşturma, park kapsamlı cihaz taslağı ve parmak iziyle eski taslak göçü, hesap/cihaz kaynağı seçimi, kayıt alanı ve kabul snapshot doğrulaması, yükleme orkestrasyonu. Hesap snapshot’ının önceliği, yalnız daha yeni kirli cihaz taslağının seçilmesi, owner/park kapısı, duyarlılık sınırları, geçersiz kabul sonucunun gösterilmemesi ve mevcut hata mesajı korundu. Kilitli regresyon testleri değiştirilmedi; yeni akış ve precache testleri eklendi.
+
+
+Kırk üçüncü grupta kilitli LULC su sınırı incelemesi beş modüle ayrıldı: açık/doğrulanmış su alanı politikası, dış su hücresi sınıflandırması, incelenecek hücre parçalarının seçimi, belirsiz hücrelerin tekilleştirilmiş sayımı ve yeniden tarama kapısı. Parka ait doğrulanmış OSM sınırı, elle sınıflandırmalar, spektral kanıt, en yakın grid komşusu ve eşitlik sırası korundu. Kilitli regresyon testleri değiştirilmedi; yeni modül testleri eklendi.
