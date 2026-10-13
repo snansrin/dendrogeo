@@ -231,6 +231,8 @@ async function loadWaypoints(){const _y=(typeof dgScrollKeep==="function"?dgScro
 async function loadWaypoints__scroll(){
  const pid=+$("nProject").value;
  const previousTarget=navTarget;
+ const loader=window.DG_LOAD_PROJECT_WAYPOINTS,store=window.DG_FETCH_PROJECT_WAYPOINTS,selection=window.DG_SELECT_RESTORED_WAYPOINT_TARGET,reset=window.DG_RESET_WAYPOINT_LOAD_STATE,errorUI=window.DG_SHOW_WAYPOINT_LOAD_ERROR;
+ if(loader&&store&&selection&&reset&&errorUI){await loader.load({projectId:pid,getProjectId:()=>+$('nProject').value,previousTarget,reset:()=>reset.reset({clear:()=>{WP=[];navTarget=null;drawNav();},hasProject:!!pid,renderEmpty:renderWaypointList}),readProject:projectId=>store.fetch({client:sb,projectId}),selectTarget:(rows,target)=>selection.select(rows,target),setWaypoints:rows=>{WP=rows;},setTarget:target=>{navTarget=target;},draw:drawNav,showError:error=>errorUI.show({error,notify:toast,translate:dgCf})});return;}
  WP=[];navTarget=null;drawNav();
  if(!pid){renderWaypointList();return;}
  try{
