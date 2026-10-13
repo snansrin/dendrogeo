@@ -929,3 +929,7 @@ Her modülün tek bir dış API'si, sahibi olduğu açık durumu ve kendi testle
 - `application/auth/turnstile-controller.js`, form görünürlük zamanlamasını ve widget yaşam döngüsünü yönetir.
 
 - `domain/auth/read-turnstile-token.js`, seçili form token'ını güvenli biçimde okur.
+
+- `domain/visitors/presence-ping-window.js`, geçici Realtime presence güncellemelerinde 10 saniyelik gönderim sınırını ve zorunlu yenileme geçişini saf kurala ayırır.
+- `application/visitors/record-presence-view.js` ve `record-presence-action.js`, yalnız değişen görünüm olayını veya önemli kullanıcı eylemini bellekteki oturum olaylarına yazar ve anlık presence yenilemesini tetikler.
+- `ui/visitor-view-labels.js` ve `visitor-action-labels.js`, canlı ziyaretçi görünümü ve aktivite akışının ortak Türkçe etiketlerini tek sunum kaynağında tutar.
