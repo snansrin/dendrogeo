@@ -40,7 +40,7 @@ async function loadVisitStats(){
  *     yeniden denenir; olmazsa kart ⚠ durumunu GÖSTERİR (sessiz ölüm yok).
  * Konum alanı (la/lo) yalnız kullanıcı "canlı konum paylaşımı"nı AÇTIYSA
  * ve GPS varsa payload'a girer; GEÇİCİDİR — veritabanına yazılmaz. */
-const DG_VIEW_LABELS={dash:"Panel",measure:"Yeni Ölçüm",nav:"Waypoint",map:"Canlı Harita",projects:"Projeler",records:"Kayıtlarım",export:"Dışa Aktar",world:"Dünya Verisi",admin:"Ölçüm Yönetimi",users:"Kullanıcılar",visitors:"Ziyaretçi & Canlı"};
+const DG_VIEW_LABELS=window.DG_VISITOR_VIEW_LABELS||{dash:"Panel",measure:"Yeni Ölçüm",nav:"Waypoint",map:"Canlı Harita",projects:"Projeler",records:"Kayıtlarım",export:"Dışa Aktar",world:"Dünya Verisi",admin:"Ölçüm Yönetimi",users:"Kullanıcılar",visitors:"Ziyaretçi & Canlı"};
 let DG_PRES=null,DG_PRES_OK=false,DG_PRES_STATE="idle",DG_PRES_RETRY=0,DG_PRES_LAST=0,DG_PRES_WATCH=null,DG_PRES_HEARTBEAT=null,DG_PRES_TIMER=null,DG_PRES_USER=null,DG_PRES_GENERATION=0;
 const DG_VISITOR_PRESENCE_CHANNEL_ADAPTER=window.DG_VISITOR_PRESENCE_CHANNEL_ADAPTER?.create?.()||null;
 const DG_VISITOR_REMOVE_PRESENCE_CHANNEL=window.DG_VISITOR_REMOVE_PRESENCE_CHANNEL?.create?.()||null;
@@ -141,7 +141,7 @@ if(typeof document.addEventListener==="function")document.addEventListener("visi
 const DG_SID=(()=>{try{return window.DG_VISITOR_SESSION_ID_STORE.load(sessionStorage);}catch(e){return "x";}})();
 const DG_SESSION_START=Date.now();
 const DG_DEV_TAG=(()=>{try{return window.DG_VISITOR_DEVICE_LABEL.build(navigator.userAgent);}catch(e){return "?";}})();
-const DG_ACT_LABELS={save:"ölçüm kaydetti",edit:"kayıt güncelledi",park:"park algıladı",export:"dışa aktardı",publish:"rapor yayını istedi"};
+const DG_ACT_LABELS=window.DG_VISITOR_ACTION_LABELS||{save:"ölçüm kaydetti",edit:"kayıt güncelledi",park:"park algıladı",export:"dışa aktardı",publish:"rapor yayını istedi"};
 const DG_VISITOR_ACTIVITY=window.DG_VISITOR_ACTIVITY_APPLICATION.create();
 const DG_VISITOR_STORED_ACTIVITY=window.DG_VISITOR_STORED_ACTIVITY_APPLICATION.create();
 const DG_VISITOR_STORED_ACTIVITY_STORE=window.DG_VISITOR_STORED_ACTIVITY_STORE.create();
@@ -149,6 +149,7 @@ const DG_VISITOR_LIVE_VISIT_COUNTS_STORE=window.DG_VISITOR_LIVE_VISIT_COUNTS_STO
 const DG_VISITOR_SESSION_EVENTS=window.DG_VISITOR_SESSION_EVENTS_APPLICATION.create();
 /* Sekme değişince çağrılır (shell go()): gezinme zincirine yazar. */
 function dgPresenceView(v){
+ if(window.DG_RECORD_VISITOR_PRESENCE_VIEW)return window.DG_RECORD_VISITOR_PRESENCE_VIEW.record(v,DG_VISITOR_SESSION_EVENTS,dgPresencePing);
  try{
   if(!DG_VISITOR_SESSION_EVENTS.recordView(v))return;
   dgPresencePing(v,true);
@@ -156,13 +157,16 @@ function dgPresenceView(v){
 }
 /* Önemli kullanıcı aksiyonunda çağrılır (kaydet/park/export/yayın). */
 function dgPresenceAct(k,d){
+ if(window.DG_RECORD_VISITOR_PRESENCE_ACTION)return window.DG_RECORD_VISITOR_PRESENCE_ACTION.record(k,d,DG_VISITOR_SESSION_EVENTS,dgPresencePing);
  try{DG_VISITOR_SESSION_EVENTS.recordAction(k,d);dgPresencePing(null,true);}catch(e){}
 }
 function dgPresencePing(view,force){
  try{
   if(!DG_PRES||!DG_PRES_OK||typeof DG_PRES.track!=="function")return;
   const now=Date.now();
-  if(!force&&now-DG_PRES_LAST<10000)return;
+  if(window.DG_VISITOR_PRESENCE_PING_WINDOW){
+   if(!window.DG_VISITOR_PRESENCE_PING_WINDOW.shouldSend({force,now,lastSent:DG_PRES_LAST}))return;
+  }else if(!force&&now-DG_PRES_LAST<10000)return;
   DG_PRES_LAST=now;
   const p=window.DG_VISITOR_PRESENCE_PAYLOAD?window.DG_VISITOR_PRESENCE_PAYLOAD.build({
    user:USER,profile:typeof PROFILE!=="undefined"?PROFILE:null,
