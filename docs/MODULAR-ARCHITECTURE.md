@@ -1382,3 +1382,10 @@ The collaborator map renderer now separates peer selection, display-model deriva
 - `domain/parks/is-schema-error.js` gerçek tablo/sütun/function ve PostgREST schema-cache hatalarını sınıflandırır; permission, auth, ağ ve timeout hatalarını şema eksiği saymaz.
 - `application/parks/handle-park-schema-missing.js` geçici hatalarda durumu değiştirmez; gerçek şema eksikliğinde uyarıyı bir kez işaretler, `DG_PARK_SCHEMA_OK` kapısını düşürür ve park kartını yeniler.
 - `ui/park-schema-missing-feedback.js` transient ve eksik migration mesajlarını admin/normal kullanıcı rolüne göre üretir; var olan `park-schema-warning.js` HTML uyarısı aynı kalır. Kilitli hata sınıflandırma regresyonları değişmedi.
+
+## Çevrimdışı ölçüm senkronizasyonu — 14 Ekim 2026
+
+- `application/offline/drain-measurement-queue.js` yalnız etkin sahibin kayıtlarını senkronize eder; sunucu işlemi ve IndexedDB satır silme işlemi tamamlanmadan başarılı sayacı artırmaz. Başarısız kayıt kuyrukta kalır ve tur sonraki kayda geçmeden durur.
+- `application/offline/coordinate-measurement-sync.js` giriş, online ve kabuk tetiklerinde aynı drain promise'ını paylaşır; çevrimdışı veya oturumsuz durumda mevcut badge yenileme davranışını korur.
+- `application/offline/refresh-after-measurement-sync.js` senkron sonrası yalnız görünür panelleri yeniler, canlı haritayı kirli işaretler ve görünüyorsa tekrar yükler. `ui/offline-sync-feedback.js` mevcut Türkçe başarı/hata mesajlarını, `ui/offline-install-prompt.js` tarayıcı kurulum istemi ile toolbar bildirimini yönetir.
+- `adapters/offline/measurement-queue.js` IndexedDB açma/kaydetme/silme sınırını sağlar. Kilitli `src/services/offline.js` global giriş ve fallback uyumluluğunu korur; RLS/owner kapıları, fotoğraf yükleme ve çevrimiçi yazım sırası değiştirilmedi. Kilitli çevrimdışı regresyon testleri korunmuştur.
