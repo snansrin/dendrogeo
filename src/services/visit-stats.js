@@ -46,10 +46,28 @@ const DG_VISITOR_PRESENCE_CHANNEL_ADAPTER=window.DG_VISITOR_PRESENCE_CHANNEL_ADA
 const DG_VISITOR_REMOVE_PRESENCE_CHANNEL=window.DG_VISITOR_REMOVE_PRESENCE_CHANNEL?.create?.()||null;
 const DG_UPGRADE_VISITOR_PRESENCE_AUTH=window.DG_UPGRADE_VISITOR_PRESENCE_AUTH?.create?.()||null;
 const DG_VISITOR_TRACK_PRESENCE=window.DG_VISITOR_TRACK_PRESENCE?.create?.()||null;
+const DG_VISITOR_PRESENCE_LIFECYCLE_STATE={
+ get channel(){return DG_PRES;},set channel(value){DG_PRES=value;},
+ get ready(){return DG_PRES_OK;},set ready(value){DG_PRES_OK=value;},
+ get status(){return DG_PRES_STATE;},set status(value){DG_PRES_STATE=value;},
+ get retryCount(){return DG_PRES_RETRY;},set retryCount(value){DG_PRES_RETRY=value;},
+ get lastPing(){return DG_PRES_LAST;},set lastPing(value){DG_PRES_LAST=value;},
+ get watchTimer(){return DG_PRES_WATCH;},set watchTimer(value){DG_PRES_WATCH=value;},
+ get heartbeatTimer(){return DG_PRES_HEARTBEAT;},set heartbeatTimer(value){DG_PRES_HEARTBEAT=value;},
+ get retryTimer(){return DG_PRES_TIMER;},set retryTimer(value){DG_PRES_TIMER=value;},
+ get user(){return DG_PRES_USER;},set user(value){DG_PRES_USER=value;},
+ get generation(){return DG_PRES_GENERATION;},set generation(value){DG_PRES_GENERATION=value;}
+};
+const DG_VISITOR_PRESENCE_TIMERS={setTimeout,clearTimeout,setInterval,clearInterval};
 function dgPresenceState(){return DG_PRES_STATE;}
 function dgPresenceReady(){return !!DG_PRES_OK;}
 function dgPresenceEmit(){try{if(typeof DG_CUR_VIEW!=="undefined"&&DG_CUR_VIEW!=="visitors")return;if(typeof renderVisitorsLive==="function")renderVisitorsLive();}catch(e){}}
 function dgPresenceStop(){
+ if(window.DG_STOP_VISITOR_PRESENCE_SESSION)return window.DG_STOP_VISITOR_PRESENCE_SESSION.stop(DG_VISITOR_PRESENCE_LIFECYCLE_STATE,DG_VISITOR_PRESENCE_TIMERS,old=>{
+  if(typeof sb==="undefined")return;
+  if(DG_VISITOR_REMOVE_PRESENCE_CHANNEL)DG_VISITOR_REMOVE_PRESENCE_CHANNEL.remove(sb,old);
+  else Promise.resolve(sb.removeChannel(old)).catch(()=>{});
+ });
  ++DG_PRES_GENERATION;clearTimeout(DG_PRES_TIMER);clearTimeout(DG_PRES_WATCH);clearInterval(DG_PRES_HEARTBEAT);
  DG_PRES_TIMER=DG_PRES_WATCH=DG_PRES_HEARTBEAT=null;const old=DG_PRES;DG_PRES=null;DG_PRES_USER=null;DG_PRES_OK=false;DG_PRES_STATE="idle";
  if(old&&typeof sb!=="undefined"){
@@ -58,6 +76,11 @@ function dgPresenceStop(){
  }
 }
 function dgPresenceFail(why){
+ if(window.DG_FAIL_VISITOR_PRESENCE_SESSION)return window.DG_FAIL_VISITOR_PRESENCE_SESSION.fail(DG_VISITOR_PRESENCE_LIFECYCLE_STATE,why,{
+  timers:DG_VISITOR_PRESENCE_TIMERS,emit:dgPresenceEmit,
+  retryDelay:attempt=>window.DG_VISITOR_PRESENCE_RETRY_DELAY.resolve(attempt),
+  stop:dgPresenceStop,start:dgPresenceStart
+ });
  if(!DG_PRES||DG_PRES_TIMER)return;
  clearTimeout(DG_PRES_WATCH);clearInterval(DG_PRES_HEARTBEAT);DG_PRES_WATCH=DG_PRES_HEARTBEAT=null;
  DG_PRES_OK=false;DG_PRES_STATE="error";dgPresenceEmit();
@@ -65,6 +88,14 @@ function dgPresenceFail(why){
  DG_PRES_TIMER=setTimeout(()=>{DG_PRES_TIMER=null;dgPresenceStop();dgPresenceStart();},delay);
 }
 function dgPresenceStart(){
+ if(window.DG_START_VISITOR_PRESENCE_SESSION)return window.DG_START_VISITOR_PRESENCE_SESSION.start({
+  state:DG_VISITOR_PRESENCE_LIFECYCLE_STATE,client:typeof sb!=="undefined"?sb:null,
+  user:typeof USER!=="undefined"?USER:null,sessionId:DG_SID,
+  channelAdapter:DG_VISITOR_PRESENCE_CHANNEL_ADAPTER,authUpgrade:DG_UPGRADE_VISITOR_PRESENCE_AUTH,
+  timers:DG_VISITOR_PRESENCE_TIMERS,emit:dgPresenceEmit,ping:dgPresencePing,
+  stop:dgPresenceStop,fail:dgPresenceFail,
+  getView:()=>typeof DG_CUR_VIEW!=="undefined"?DG_CUR_VIEW:"dash"
+ });
  try{
   if(typeof USER==="undefined"||!USER||typeof sb==="undefined"||!sb||typeof sb.channel!=="function")return;
   if(DG_PRES&&DG_PRES_USER===String(USER.id))return;
@@ -93,6 +124,10 @@ function dgPresenceStart(){
  }catch(e){DG_PRES_OK=false;DG_PRES_STATE="error";dgPresenceEmit();if(DG_PRES)dgPresenceFail("START");}
 }
 function dgPresenceResume(){
+ if(window.DG_RESUME_VISITOR_PRESENCE_SESSION)return window.DG_RESUME_VISITOR_PRESENCE_SESSION.resume({
+  user:typeof USER!=="undefined"?USER:null,ready:DG_PRES_OK,
+  stop:dgPresenceStop,start:dgPresenceStart,ping:dgPresencePing
+ });
  if(typeof USER==="undefined"||!USER)return;
  if(!DG_PRES_OK){dgPresenceStop();dgPresenceStart();}else dgPresencePing(null,true);
 }
