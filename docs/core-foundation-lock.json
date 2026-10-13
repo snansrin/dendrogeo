@@ -223,7 +223,12 @@
       "src/ui/render-waypoint-gps-guidance-readout.js",
       "src/adapters/map/add-waypoint-guidance-line.js",
       "src/application/map/render-waypoint-gps-overlay.js",
-      "src/ui/waypoint-gps-overlay.js"
+      "src/ui/waypoint-gps-overlay.js",
+      "src/domain/map/select-waypoint-arrival-target.js",
+      "src/ui/confirm-waypoint-arrival-distance.js",
+      "src/adapters/map/mark-waypoint-visited.js",
+      "src/application/map/complete-waypoint-arrival.js",
+      "src/application/map/arrive-at-waypoint.js"
     ],
     "scientific_contract_and_inputs": [
       "css/park-panel.css",
@@ -338,7 +343,8 @@
       "test/waypoint-csv-upload-modules.test.mjs",
       "test/map-live-load-modules.test.mjs",
       "test/map-measurement-marker-chunk-modules.test.mjs",
-      "test/waypoint-gps-overlay-modules.test.mjs"
+      "test/waypoint-gps-overlay-modules.test.mjs",
+      "test/waypoint-arrival-modules.test.mjs"
     ]
   },
   "sha256": {
@@ -463,7 +469,7 @@
     "src/services/lc-s2.js": "0e2ac1af0b680e6f4358cb9d99980e32339d04f67f911cfe14d244898f014d40",
     "src/services/lc-stac.js": "978c4be8c3bc4e7cda3f694d1f06290e661fed5bbd5b76b68719140edc18e71a",
     "src/services/lc-validate.js": "b4d8327c62940b1af1a53ddb087188816ff2359c8456c2755c7c853c5919f42b",
-    "src/services/map.js": "02edbb26a2d1a6ebb00626876f4f5724477147279b4d7109a5db98bf004df652",
+    "src/services/map.js": "e46743318c617b0d6615153d8539ea42a2885a75ac9bbdc2cda9fdc1fdc8c952",
     "src/services/measure.js": "ef61d7a32cf16ce83785a7f8fc1c579c8bf2bff8f8ca25f0992c3701d15c71d9",
     "src/services/offline.js": "b0d13ca6c52213b2103e5c23727be42c92cea39855622d43abaad87a8e48280f",
     "src/services/osm-client.js": "2e5eeaa735bf05a603a0db142619f60747b9696f506e666d7df992454a56814f",
@@ -653,7 +659,13 @@
     "src/adapters/map/add-waypoint-guidance-line.js": "7c34f617b8e8417c2f05a9cb2aff7126ef21b715d01bdd166169ca9299ac7718",
     "src/application/map/render-waypoint-gps-overlay.js": "c3456e064374c493ffd5125de7d178fd976dc9db185334e92e03837a47368fcb",
     "test/waypoint-gps-overlay-modules.test.mjs": "40c3d449eb9c6e26d53f3292e4afba37d3f0cf8fb3a65756e161f8fac2341692",
-    "src/ui/waypoint-gps-overlay.js": "e5bb70df065093b911d1c7ff5b5b9fb7db09b38df6bb7fb3271db7ea1e3f4b28"
+    "src/ui/waypoint-gps-overlay.js": "e5bb70df065093b911d1c7ff5b5b9fb7db09b38df6bb7fb3271db7ea1e3f4b28",
+    "src/domain/map/select-waypoint-arrival-target.js": "970fbe26573647bc70e3e016eb7f17876e481a3ca2583359c82e283f715f9b5f",
+    "src/ui/confirm-waypoint-arrival-distance.js": "d202a4afc53c442a1254426a1343f9c1bf2ad37852b94ab01e13f176a5ee85a7",
+    "src/adapters/map/mark-waypoint-visited.js": "7bbb42b6038e16bec05b18597cfde45e57817a0e2342c0cedf6e3fc30da90a4a",
+    "src/application/map/complete-waypoint-arrival.js": "2d3e83e26fd2bf74e8d8179273ab1c751ac62c0fae3211583a01902d6ee6146a",
+    "src/application/map/arrive-at-waypoint.js": "a875bac2f370eb9ade3d9423240938b3ef2e43ad993b385dea563fb7e59d78a1",
+    "test/waypoint-arrival-modules.test.mjs": "db63b7fa5d3445c9ad8fd8493b472e87b1727c2ab6e045f609c41065bdcc2c2b"
   },
   "authorized_modularizations": [
     {
@@ -1472,6 +1484,17 @@
           "path": "src/ui/waypoint-gps-overlay.js",
           "previous_sha256": "be7fc65deab2f5a0943bd3c34cc0c8510c31e32fcbb5cb9e7abc49a65c22b2e3",
           "sha256": "e5bb70df065093b911d1c7ff5b5b9fb7db09b38df6bb7fb3271db7ea1e3f4b28"
+        }
+      ]
+    },
+    {
+      "date": "2026-10-13",
+      "scope": "User-authorized fifty-ninth five-module split of locked waypoint arrival: target selection, distance confirmation, visited-state Supabase adapter, successful local completion, and orchestration. Preserve 50 m threshold, GPS/no-GPS behavior, exact id update, early exits, error/notification text, state and refresh order, and public arriveWp entry; locked regression tests remain unchanged.",
+      "files": [
+        {
+          "path": "src/services/map.js",
+          "previous_sha256": "02edbb26a2d1a6ebb00626876f4f5724477147279b4d7109a5db98bf004df652",
+          "sha256": "e46743318c617b0d6615153d8539ea42a2885a75ac9bbdc2cda9fdc1fdc8c952"
         }
       ]
     }
