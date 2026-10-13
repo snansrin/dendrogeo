@@ -34,6 +34,7 @@ const DG_GEO={ACC_MAX_M:60,MARGIN_M:40,FIX_MAX_AGE_S:120,RING_MAX_POINTS:500};
  * Poligon DIŞINDAKİ bir noktanın "kenara ne kadar uzak" olduğunu söyler →
  * MARGIN_M kararı ve kullanıcıya gösterilen mesafe bununla kurulur. */
 function dgDistToParkM(lat,lon,geom){
+ if(window.DG_PARK_BOUNDARY_DISTANCE)return window.DG_PARK_BOUNDARY_DISTANCE.distance(lat,lon,geom,pointToSegmentDistanceM);
  if(!geom||!Array.isArray(geom.outer)||!geom.outer.length)return null;
  let best=Infinity;
  for(const ring of geom.outer){
@@ -54,6 +55,7 @@ function dgDistToParkM(lat,lon,geom){
  * verified=true yalnızca POLİGON (veya kenar payı) kararıyla damgalanır;
  * miras parkın daire yedeği "ok" olabilir ama "verified" OLMAZ. */
 function dgGeoDecide(fix,park,opt){
+ if(window.DG_PARK_GEOFENCE_DECISION)return window.DG_PARK_GEOFENCE_DECISION.decide(fix,park,opt,{config:DG_GEO,distanceToPark:dgDistToParkM,hav,pointInPark});
  const cfg=Object.assign({},DG_GEO,opt||{});
  if(!park)return{ok:true,verified:false,inside:false,reason:"no-park",distM:null,acc:fix&&fix.acc};
  if(!fix||!Number.isFinite(+fix.lat)||!Number.isFinite(+fix.lon))
@@ -84,6 +86,7 @@ function dgGeoDecide(fix,park,opt){
  * anında TEKİL yüksek-hassasiyetli okuma alınır. Red sebepleri kodludur:
  * denied (izin yok) | timeout | unavailable. */
 function dgFreshFix(maxAgeS){
+ if(window.DG_FRESH_GPS_FIX)return window.DG_FRESH_GPS_FIX.read({navigator:typeof navigator==="undefined"?null:navigator,maximumAgeSeconds:maxAgeS,defaultMaximumAgeSeconds:DG_GEO.FIX_MAX_AGE_S});
  return new Promise((res,rej)=>{
   if(typeof navigator==="undefined"||!("geolocation" in navigator))
    return rej({code:"unavailable",message:"Cihazda konum servisi yok"});
@@ -96,6 +99,14 @@ function dgFreshFix(maxAgeS){
 
 /* PARKTA MIYIM? Mesajları burada kurulur ki her çağrı yeri aynı dili konuşsun. */
 async function dgVerifyAtPark(park,why){
+ if(window.DG_VERIFY_AT_PARK_APPLICATION)return window.DG_VERIFY_AT_PARK_APPLICATION.verify(park,why,{
+  freshFix:()=>dgFreshFix(),
+  decide:(fix,p)=>dgGeoDecide(fix,p),
+  config:DG_GEO,
+  translate:_tgf,
+  translateFormat:_tgff,
+  warn:message=>console.warn(message)
+ });
  if(!park)return{ok:true,verified:false,reason:"no-park"};
  let fix;
  try{fix=await dgFreshFix();}
@@ -128,6 +139,7 @@ async function dgVerifyAtPark(park,why){
 
 /* Doğrulama damgası → ölçüm satırı (audit + yönetici görünürlüğü). */
 function dgGeoStamp(base,dec){
+ if(window.DG_GEOFENCE_AUDIT_STAMP)return window.DG_GEOFENCE_AUDIT_STAMP.stamp(base,dec);
  if(!base||!dec||!dec.fix)return base;
  base.geo_acc_m=dec.acc!=null?Math.round(dec.acc):null;
  base.geo_dist_m=dec.distM;
