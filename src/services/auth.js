@@ -77,6 +77,7 @@ function amsg(t,e){const m=$("authMsg");if(m){m.textContent=t;m.style.color=e?"v
 
 /* --- BLOK 3: Giriş / kayıt / sıfırlama / çıkış --- */
 async function doLogin(){
+if(window.DG_LOGIN_WITH_PASSWORD)return window.DG_LOGIN_WITH_PASSWORD.execute({email:$('liEmail').value,password:$('liPass').value,token:tsToken,wait:ms=>new Promise(r=>setTimeout(r,ms)),showMessage:amsg,auth:sb.auth,resetWidget:id=>turnstile.reset(TS[id]),setUser:user=>{USER=user;},setProfile:profile=>{PROFILE=profile;},loadProfile:id=>sb.from("profiles").select("*").eq("id",id).single(),startShell,isOnline:()=>navigator.onLine,schedule:setTimeout,syncOffline:syncOfflineData});
 const email = $("liEmail").value;
 const pass = $("liPass").value;
 if(!email || !pass){
@@ -113,6 +114,7 @@ setTimeout(() => syncOfflineData(), 2000);
 }
 }
 async function doRegister(){
+if(window.DG_REGISTER_ACCOUNT)return window.DG_REGISTER_ACCOUNT.execute({name:$('rgName').value,email:$('rgEmail').value,password:$('rgPass').value,organization:$('rgOrg').value,consent:$('rgConsent'),token:tsToken,wait:ms=>new Promise(r=>setTimeout(r,ms)),showMessage:amsg,auth:sb.auth,resetWidget:id=>turnstile.reset(TS[id]),redirectTo:window.location.origin+window.location.pathname.replace(/\/+$/,'')+'/',now:()=>new Date().toISOString()});
 const name=$("rgName").value;
 const email=$("rgEmail").value;
 const pass=$("rgPass").value;
@@ -169,6 +171,7 @@ try{turnstile.reset(TS.tsReg);}catch(e){}
 amsg(r.data.session?"Hesap oluşturuldu.":"✓ Doğrulama e‑postası gönderildi — maildeki linke tıklayın.",0);
 }
 async function sendResetEmail(){
+if(window.DG_SEND_PASSWORD_RESET_EMAIL)return window.DG_SEND_PASSWORD_RESET_EMAIL.execute({email:$('rsEmail').value,token:tsToken,wait:ms=>new Promise(r=>setTimeout(r,ms)),showMessage:amsg,auth:sb.auth,resetWidget:id=>turnstile.reset(TS[id]),redirectTo:window.location.origin+window.location.pathname.replace(/\/+$/,'')+'/' });
 const email=$("rsEmail").value;
 if(!email){amsg("Lütfen e-posta adresinizi girin.",1);return;}
 let tok=tsToken("tsReset");
@@ -194,7 +197,7 @@ amsg("Beklenmeyen hata: "+(e&&e.message?e.message:String(e)),1);
 try{turnstile.reset(TS.tsReset);}catch(e2){}
 }
 }
-async function logout(){if(typeof dgPresenceStop==="function")dgPresenceStop();await sb.auth.signOut();location.reload();}
+async function logout(){if(window.DG_SIGN_OUT)return window.DG_SIGN_OUT.execute({stopPresence:typeof dgPresenceStop==="function"?dgPresenceStop:null,signOut:()=>sb.auth.signOut(),reload:()=>location.reload()});if(typeof dgPresenceStop==="function")dgPresenceStop();await sb.auth.signOut();location.reload();}
 
 /* --- BLOK 4: Recovery modal --- */
 function cancelRecovery(){
@@ -202,6 +205,7 @@ $("recoveryModal").style.display="none";
 location.assign(window.location.pathname);
 }
 async function saveNewPassword(){
+if(window.DG_SAVE_NEW_PASSWORD)return window.DG_SAVE_NEW_PASSWORD.execute({password:$('rcPass').value,confirmation:$('rcPass2').value,updatePassword:password=>sb.auth.updateUser({password}),setMessage:(message,error)=>{const m=$('rcMsg');m.textContent=message;m.style.color=error?'var(--red)':'var(--green-dk)';},toast,replaceHistory:()=>history.replaceState(null,"",window.location.pathname),reload:()=>location.reload()});
 const p1=$("rcPass").value,p2=$("rcPass2").value,m=$("rcMsg");
 if(p1.length<6){m.textContent="Parola en az 6 karakter olmalı.";m.style.color="var(--red)";return;}
 if(p1!==p2){m.textContent="Parololar eşleşmiyor.";m.style.color="var(--red)";return;}
