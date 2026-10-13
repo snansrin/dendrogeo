@@ -303,6 +303,7 @@ async function selectWaypoint(id){
 }
 // Navigation actions select targets only; arrival retains the existing visit/save flow.
 function dgNearestWaypoint(){
+ if(window.DG_SELECT_NEAREST_WAYPOINT&&window.DG_WAYPOINT_NAVIGATION_FEEDBACK_UI&&window.DG_WAYPOINT_TARGET){return window.DG_SELECT_NEAREST_WAYPOINT.select({waypoints:WP,gps:GPS,distance:hav,nearest:(rows,gps,distance)=>window.DG_WAYPOINT_TARGET.nearest(rows,gps,distance),onGpsRequired:()=>window.DG_WAYPOINT_NAVIGATION_FEEDBACK_UI.gpsRequired({translate:dgCf,notify:toast,startGps:()=>typeof startGps==="function"?startGps():null}),onEmpty:()=>window.DG_WAYPOINT_NAVIGATION_FEEDBACK_UI.noPending({translate:dgCf,notify:toast}),onSelect:id=>selectWaypoint(id)});}
  if(!GPS){toast(dgCf("En yakın noktayı seçmek için önce konumu etkinleştirin."),"warn","📡");try{if(typeof startGps==="function")startGps();}catch(e){}return;}
  if(window.DG_WAYPOINT_TARGET){const nearest=window.DG_WAYPOINT_TARGET.nearest(WP,GPS,hav);if(!nearest)return toast(dgCf("Bekleyen waypoint kalmadı."),"info");return selectWaypoint(nearest.id);}
  const pending=WP.filter(w=>!w.visited);
@@ -311,6 +312,7 @@ function dgNearestWaypoint(){
  selectWaypoint(nearest.id);
 }
 function dgNextWaypoint(){
+ if(window.DG_ADVANCE_WAYPOINT_TARGET&&window.DG_WAYPOINT_NAVIGATION_FEEDBACK_UI&&window.DG_WAYPOINT_TARGET){return window.DG_ADVANCE_WAYPOINT_TARGET.advance({waypoints:WP,currentId:navTarget?.wp_id??-Infinity,next:(rows,currentId)=>window.DG_WAYPOINT_TARGET.next(rows,currentId),onEmpty:()=>window.DG_WAYPOINT_NAVIGATION_FEEDBACK_UI.noPending({translate:dgCf,notify:toast}),onSelect:id=>selectWaypoint(id)});}
  if(window.DG_WAYPOINT_TARGET){const next=window.DG_WAYPOINT_TARGET.next(WP,navTarget?.wp_id??-Infinity);if(!next)return toast(dgCf("Bekleyen waypoint kalmadı."),"info");return selectWaypoint(next.id);}
  const pending=WP.filter(w=>!w.visited).sort((a,b)=>a.wp_id-b.wp_id);
  if(!pending.length)return toast(dgCf("Bekleyen waypoint kalmadı."),"info");
@@ -381,12 +383,15 @@ async function arriveWp(){
 window.arriveWp=arriveWp;
 
 function drawNav(){
- if(!GPS){
+ if(window.DG_BUILD_WAYPOINT_NAVIGATION_HEADER&&window.DG_RENDER_WAYPOINT_NAVIGATION_HEADER){
+  const model=window.DG_BUILD_WAYPOINT_NAVIGATION_HEADER.build({gps:GPS,target:navTarget});
+  window.DG_RENDER_WAYPOINT_NAVIGATION_HEADER.render({model,getElement:$});
+ }else if(!GPS){
   $("navDist").textContent="—";
   $("navTarget").textContent=navTarget?"Hedef: P"+navTarget.wp_id:"Listeden veya haritadan hedef seçin.";
   $("navArrow").style.transform="rotate(0)";
  }
- if($("navGps"))$("navGps").textContent=GPS?"GPS doğruluğu: "+(Number.isFinite(GPS.accuracy)?"±"+Math.round(GPS.accuracy)+" m":"bilinmiyor"):"GPS konumu bekleniyor; hedef seçebilirsiniz.";
+ if(!(window.DG_BUILD_WAYPOINT_NAVIGATION_HEADER&&window.DG_RENDER_WAYPOINT_NAVIGATION_HEADER)&&$("navGps"))$("navGps").textContent=GPS?"GPS doğruluğu: "+(Number.isFinite(GPS.accuracy)?"±"+Math.round(GPS.accuracy)+" m":"bilinmiyor"):"GPS konumu bekleniyor; hedef seçebilirsiniz.";
  renderWaypointList();
  dgWaypointGuidance();
  if(!navMap)return;

@@ -1342,3 +1342,8 @@ The collaborator map renderer now separates peer selection, display-model deriva
 
 - `domain/trees/build-live-measurement-preview-input.js` form dizelerini sayısal ölçüm DTO'suna çevirir; `application/trees/calculate-live-measurement-preview.js` biyometrik kapıyı karbon hesabından önce çalıştırır; `ui/render-live-measurement-preview.js` önizleme ve kayıt yardımını mevcut metin/biçimlerle eşitler.
 - `domain/trees/resolve-measurement-point-query.js` proje ve nokta sorgu anahtarını çözer; `application/trees/query-measurement-point.js` eksik girdiyi kapatır, sorguyu yürütür ve alanlar değişmişse bayat yanıtı çizmez. Mevcut Supabase adapter'ı ve sonuç renderer'ı kullanılır; kilitli servis fallback'i ve regresyonlar korunur.
+
+## Waypoint navigasyon başlığı ve hedef seçimi — 13 Ekim 2026
+
+- `domain/map/build-waypoint-navigation-header.js` GPS başlığı ve GPS yokken hedef istemini üretir; `ui/render-waypoint-navigation-header.js` mevcut alanları yazar ve GPS varken mesafe/yönü canlı overlay'e bırakır.
+- `application/map/select-nearest-waypoint.js` GPS kapısı ve en yakın hedef seçimini, `advance-waypoint-target.js` sıradaki/birinci bekleyen hedefi yönetir; `ui/waypoint-navigation-feedback.js` mevcut uyarı ve GPS başlatma callback'ini sunar. Harita hedef seçme, marker ve GPS overlay akışları kullanıldığı gibi kalır.
