@@ -1389,3 +1389,10 @@ The collaborator map renderer now separates peer selection, display-model deriva
 - `application/offline/coordinate-measurement-sync.js` giriş, online ve kabuk tetiklerinde aynı drain promise'ını paylaşır; çevrimdışı veya oturumsuz durumda mevcut badge yenileme davranışını korur.
 - `application/offline/refresh-after-measurement-sync.js` senkron sonrası yalnız görünür panelleri yeniler, canlı haritayı kirli işaretler ve görünüyorsa tekrar yükler. `ui/offline-sync-feedback.js` mevcut Türkçe başarı/hata mesajlarını, `ui/offline-install-prompt.js` tarayıcı kurulum istemi ile toolbar bildirimini yönetir.
 - `adapters/offline/measurement-queue.js` IndexedDB açma/kaydetme/silme sınırını sağlar. Kilitli `src/services/offline.js` global giriş ve fallback uyumluluğunu korur; RLS/owner kapıları, fotoğraf yükleme ve çevrimiçi yazım sırası değiştirilmedi. Kilitli çevrimdışı regresyon testleri korunmuştur.
+
+## Rapor yayın kuyruğu feature state — 14 Ekim 2026
+
+- `application/reports/publication-queue-state.js` yönetici kuyruk state'i için immutable snapshot, patch güncelleme ve abonelik sunar; servis içindeki `DG_PUB_STATE` abonelikle güncel tutulan eski global görünüm olarak kalır.
+- `domain/reports/has-pending-publication-work.js` yönetici yayın ve geri çekme isteklerinde kuyrukta sonuç beklenip beklenmediğini saf bir policy ile belirler.
+- `application/reports/load-publication-queue.js`, `schedule-publication-queue-poll.js` ve `reset-publication-polling.js` store portlarını kullanır. Eski plain-object test/çağrı sözleşmesi de fallback olarak desteklenir; paralel yükleme, 25 saniyelik görünürlük kapılı yoklama ve yönetici/kullanıcı sayaç ayrımı korundu.
+- Bu, uygulama genelinde store değildir; rapor yayın feature'ının kendi durumu tek kaynakta tutulur. Kilitli temel dosyalar değiştirilmedi.

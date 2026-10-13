@@ -34,8 +34,14 @@
  * ile değişmezlik kuralları isteğe bağlı açılır. Kart yalnız v-admin içindedir.
  */
 
-/* Modül durumu (üst düzey let: module-registry global ad çakışmasını kilitler). */
-let DG_PUB_STATE={parks:[],requests:[],retractions:[],queue:null,queueAt:0,error:"",loading:false,pollTimer:0,pollCount:0};
+/* Feature-scoped state store; DG_PUB_STATE remains a live compatibility snapshot. */
+const DG_PUB_QUEUE_STORE=window.DG_PUBLICATION_QUEUE_STATE
+ ?window.DG_PUBLICATION_QUEUE_STATE.create()
+ :null;
+let DG_PUB_STATE=DG_PUB_QUEUE_STORE?DG_PUB_QUEUE_STORE.getState():{parks:[],requests:[],retractions:[],queue:null,queueAt:0,error:"",loading:false,pollTimer:0,pollCount:0};
+if(DG_PUB_QUEUE_STORE)DG_PUB_QUEUE_STORE.subscribe(state=>{DG_PUB_STATE=state;});
+function dgPubQueueState(){return DG_PUB_QUEUE_STORE?DG_PUB_QUEUE_STORE.getState():DG_PUB_STATE;}
+function dgPubQueueUpdate(patch){if(DG_PUB_QUEUE_STORE)return DG_PUB_QUEUE_STORE.setState(patch);return Object.assign(DG_PUB_STATE,patch);}
 
 const DG_PUB_QUEUE_URL="/rapor/yayin-kuyrugu.json";
 const DG_PUB_ORIGIN="https://dendrogeo.org";
@@ -62,12 +68,12 @@ async function dgPubFetchRequests(){
  if(error){
   /* 42P01 = tablo yok → 0008 uygulanmamış. Sessiz kalmak yerine kartta
    * yapılacak iş yazılır (DG_PARK_SCHEMA_OK deseniyle aynı yaklaşım). */
-  DG_PUB_STATE.error=(error.code==="42P01"||/report_requests/i.test(error.message||""))
+  dgPubQueueUpdate({error:(error.code==="42P01"||/report_requests/i.test(error.message||""))
    ? "SCHEMA"
-   : ("İstekler okunamadı: "+(error.message||error.code||"bilinmeyen hata"));
+   : ("İstekler okunamadı: "+(error.message||error.code||"bilinmeyen hata"))});
   return [];
  }
- DG_PUB_STATE.error="";
+ dgPubQueueUpdate({error:""});
  return data||[];
 }
 
@@ -172,13 +178,13 @@ async function dgPublishReport(parkId){
   collect:dgReportCollectRequest,
   onSuccess:async()=>{
    toast("📄 Yayın isteği kuyruğa alındı — rapor birkaç dakika içinde burada bağlanacak.","ok","📄");
-   DG_PUB_STATE.pollCount=0;
+   dgPubQueueUpdate({pollCount:0});
    await dgLoadPublishQueue();
    dgPubSchedulePoll();
   },
   onFailure:r=>{
    const msg=dgPubInsertError(r);
-   if(/0008_report_publish/.test(msg))DG_PUB_STATE.error="SCHEMA";
+   if(/0008_report_publish/.test(msg))dgPubQueueUpdate({error:"SCHEMA"});
    toast(msg,"err","📄");
    dgPubRender();
   }
@@ -225,7 +231,7 @@ async function dgReportRetract(reportId,parkId){
   insert:dgRetractInsert,
   onSuccess:async()=>{
    toast("🗑 Geri çekme isteği kuyruğa alındı — rapor birkaç dakika içinde yayından kalkar.","ok","🗑");
-   window.DG_RESET_PUBLICATION_POLLING.reset(DG_PUB_STATE,DG_USER_PUB);
+  window.DG_RESET_PUBLICATION_POLLING.reset(DG_PUB_QUEUE_STORE||DG_PUB_STATE,DG_USER_PUB);
    return window.DG_REFRESH_AFTER_REPORT_RETRACTION.execute(DG_USER_PUB,{
     hasAdminView:()=>$('dgPubBox'),
     refreshAdmin:()=>dgLoadPublishQueue({silent:true}),
@@ -423,7 +429,7 @@ function dgReportOpen(reportId){
 
 /* ---------- yükleme + kendiliğinden tazeleme ---------- */
 async function dgLoadPublishQueue(opts){
- return window.DG_LOAD_PUBLICATION_QUEUE.execute(DG_PUB_STATE,opts,{
+ return window.DG_LOAD_PUBLICATION_QUEUE.execute(DG_PUB_QUEUE_STORE||DG_PUB_STATE,opts,{
   hasView:()=>!!$("dgPubBox"),
   showLoading:()=>{$("dgPubBox").innerHTML='<div class="dg-tree-meta">⏳ Kuyruk yükleniyor…</div>';},
   loadParks:dgPubFetchParks,
@@ -439,8 +445,12 @@ async function dgLoadPublishQueue(opts){
 /* Bekleyen istek varken ve yönetici sekmesi görünürken 25 sn'de bir sessiz
  * tazeleme → kullanıcı F5'e basmadan bağlantının belirdiğini görür. */
 function dgPubSchedulePoll(){
- return window.DG_SCHEDULE_PUBLICATION_QUEUE_POLL.execute(DG_PUB_STATE,{
+ return window.DG_SCHEDULE_PUBLICATION_QUEUE_POLL.execute(DG_PUB_QUEUE_STORE||DG_PUB_STATE,{
   clearTimer:clearInterval,
+  hasPending:state=>window.DG_HAS_PENDING_PUBLICATION_WORK
+   ?window.DG_HAS_PENDING_PUBLICATION_WORK.check(state,{entryFor:dgPubEntryFor,retractionDone:id=>dgPubRetractDone(state.queue,id)})
+   :state.requests.some(request=>request.status==="Beklemede"&&!dgPubEntryFor(request.id))
+    ||(state.retractions||[]).some(request=>request.status==="Beklemede"&&!dgPubRetractDone(state.queue,request.id)),
   entryFor:dgPubEntryFor,
   retractionDone:id=>dgPubRetractDone(DG_PUB_STATE.queue,id),
   maxPolls:DG_PUB_POLL_MAX,
