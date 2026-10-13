@@ -450,6 +450,7 @@ async function dgLinkProject(pid){
 }
 
 async function dgAfterProjectLinked(proj){
+  if(typeof window!=="undefined"&&Object.prototype.hasOwnProperty.call(window,"DG_COMPLETE_PARK_PROJECT_LINK"))return window.DG_COMPLETE_PARK_PROJECT_LINK.complete(proj,{loadProjects:typeof loadProjects==="function"?()=>loadProjects():null,element:$,refreshGate:()=>{if(typeof dgParkGate==="function")dgParkGate();},getReturnTo:()=>DG_PARK_RETURN_TO,setScanActive:value=>{DG_PARK_SCAN=value;},setTargetProject:value=>{DG_PARK_TARGET_PROJ=value;},setReturnTo:value=>{DG_PARK_RETURN_TO=value;},renderCard:dgRenderScanCard,go:view=>{if(typeof go==="function")go(view);}});
   if(typeof loadProjects==="function")await loadProjects();
 
   const sel=$("mProject");
@@ -474,6 +475,7 @@ async function dgAfterProjectLinked(proj){
 
 function dgSelectedProject(){
   const sel=$("mProject");
+  if(typeof window!=="undefined"&&Object.prototype.hasOwnProperty.call(window,"DG_SELECT_PARK_PROJECT"))return window.DG_SELECT_PARK_PROJECT.resolve(sel?sel.value:"",PROJ_LIST);
   const pid=sel?+sel.value:0;
   if(!pid)return null;
   return (PROJ_LIST||[]).find(p=>p.id===pid)||null;
@@ -484,6 +486,7 @@ function dgSelectedProject(){
  * ölçüm sekmesine hiç ulaşamaz (kapan); ikinci denemede banner'ı okuyup
  * ne yapacağına kendisi karar verir. */
 function dgScanRedirectedOnce(pid){
+  if(typeof window!=="undefined"&&Object.prototype.hasOwnProperty.call(window,"DG_PARK_SCAN_REDIRECT_MEMORY"))return window.DG_PARK_SCAN_REDIRECT_MEMORY.wasRedirectedOrMark(pid,()=>sessionStorage);
   const key="dg_park_scan_"+pid;
   try{
     if(sessionStorage.getItem(key))return true;
@@ -520,6 +523,7 @@ function dgParkGate(auto){
 
 /* Proje seçimi değişti (v-measure). shell.html'deki onchange bunu çağırır. */
 function dgProjectChanged(){
+ if(typeof window!=="undefined"&&Object.prototype.hasOwnProperty.call(window,"DG_HANDLE_PARK_PROJECT_CHANGE"))return window.DG_HANDLE_PARK_PROJECT_CHANGE.changed({selectedValue:()=>$("mProject").value,rememberProject:value=>{if(typeof dgProjectRemember==="function")dgProjectRemember(value);},joinCurrentPark:()=>{if(typeof dgLiveShareJoinCurrent==="function")dgLiveShareJoinCurrent();},refreshGate:()=>dgParkGate(),hasManualPoint:()=>typeof manualPoint!=="undefined"&&!!manualPoint,isEditing:()=>!!EDIT_ID,refreshPointSuggestion:()=>{$("mPoint").value="";$("pointQueryResult").style.display="none";if(typeof autoFillPointId==="function")autoFillPointId();}});
  /* 0045: seçim cihaz belleğine yazılır (yenilemede geri gelir). */
  if(typeof dgProjectRemember==="function"){try{dgProjectRemember($("mProject").value);}catch(e){}}
  /* 0036 (T5): proje değişince canlı konum kanalı yeni parka taşınır. */
@@ -892,6 +896,7 @@ function dgResetParkIdentity(){
 /* drawPark() bunu bekler: park kimliği DB'ye yazılır, kart tazelenir.
  * park-panel.js çağırır; dönüş değeri paneldeki kimlik çipi için kullanılır. */
 async function dgOnParkDrawn(cand){
+  if(typeof window!=="undefined"&&Object.prototype.hasOwnProperty.call(window,"DG_HANDLE_PARK_DRAWN"))return window.DG_HANDLE_PARK_DRAWN.handle(cand,{isOnline:()=>navigator.onLine,register:candidate=>dgRegisterPark(candidate,{}),notifyOffline:()=>toast("Çevrimdışı: park kimliği yazılamıyor. Ölçüm için bağlantı gerek.","warn","📴"),setCandidate:value=>{DG_PARK_CAND=value;},setPark:value=>{DG_PARK=value;},renderCard:dgRenderScanCard});
   DG_PARK_CAND=cand||null;
   let row=null;
   if(cand&&navigator.onLine){
