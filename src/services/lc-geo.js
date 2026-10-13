@@ -6,6 +6,7 @@
  * test/landcover.test.mjs doğrudan birim test eder. */
 
 function dgLcBboxFromGeometry(outer,holes){
+  if(window.DG_SURFACE_GEOMETRY_BOUNDS)return window.DG_SURFACE_GEOMETRY_BOUNDS.fromGeometry(outer,holes);
   let minLat=90,maxLat=-90,minLon=180,maxLon=-180;
   const visit=ring=>{
     for(const p of (ring||[])){
@@ -26,11 +27,13 @@ function dgLcBboxFromGeometry(outer,holes){
 }
 
 function dgLcUtmEpsgForLatLon(lat,lon){
+  if(window.DG_SURFACE_UTM_PROJECTION)return window.DG_SURFACE_UTM_PROJECTION.epsgForLatLon(lat,lon);
   const zone=Math.max(1,Math.min(60,Math.floor((Number(lon)+180)/6)+1));
   return Number(lat)>=0?32600+zone:32700+zone;
 }
 
 function dgLcUtmForward(lat,lon,epsg){
+  if(window.DG_SURFACE_UTM_PROJECTION)return window.DG_SURFACE_UTM_PROJECTION.forward(lat,lon,epsg);
   const a=6378137;
   const e2=0.0066943799901413165;
   const ep2=e2/(1-e2);
@@ -59,6 +62,7 @@ function dgLcUtmForward(lat,lon,epsg){
 }
 
 function dgLcUtmInverse(x,y,epsg){
+  if(window.DG_SURFACE_UTM_PROJECTION)return window.DG_SURFACE_UTM_PROJECTION.inverse(x,y,epsg);
   const a=6378137;
   const e2=0.0066943799901413165;
   const ep2=e2/(1-e2);
@@ -91,6 +95,7 @@ function dgLcUtmInverse(x,y,epsg){
 }
 
 function dgLcRingBBoxXY(ring){
+  if(window.DG_SURFACE_GEOMETRY_BOUNDS)return window.DG_SURFACE_GEOMETRY_BOUNDS.ringXY(ring);
   let minX=Infinity,minY=Infinity,maxX=-Infinity,maxY=-Infinity;
   for(const p of (ring||[])){
     minX=Math.min(minX,p.x);
@@ -102,6 +107,7 @@ function dgLcRingBBoxXY(ring){
 }
 
 function dgLcBboxOverlap(a,b){
+  if(window.DG_SURFACE_GEOMETRY_BOUNDS)return window.DG_SURFACE_GEOMETRY_BOUNDS.overlap(a,b);
   /* Savunmacı: a, dgLcProjectGeometry'nin atadığı _bbox'tur. Bugünkü çağrı
    * yolunda daima doludur, ama halka başka bir yoldan gelirse a.maxX
    * TypeError fırlatıyordu. Üstüşme yok saymak, analiz çökmesinden iyidir. */
@@ -110,6 +116,7 @@ function dgLcBboxOverlap(a,b){
 }
 
 function dgLcClipPolygonRect(poly,rect){
+  if(window.DG_SURFACE_RECT_CLIP)return window.DG_SURFACE_RECT_CLIP.clip(poly,rect);
   if(!Array.isArray(poly)||poly.length<3)return[];
   let out=poly.slice();
 
@@ -163,6 +170,7 @@ function dgLcClipPolygonRect(poly,rect){
  * clipPoly köşeleri SAAT YÖNÜNÜN TERSİ (CCW) verilmelidir; değilse içeride
  * çevrilir. */
 function dgLcEnsureCcw(poly){
+  if(window.DG_SURFACE_CONVEX_CLIP)return window.DG_SURFACE_CONVEX_CLIP.ensureCcw(poly);
   let a=0;
   for(let i=0;i<poly.length;i++){
     const p=poly[i],q=poly[(i+1)%poly.length];
@@ -172,6 +180,7 @@ function dgLcEnsureCcw(poly){
 }
 
 function dgLcClipPolygonConvex(poly,clipRaw){
+  if(window.DG_SURFACE_CONVEX_CLIP)return window.DG_SURFACE_CONVEX_CLIP.clip(poly,clipRaw);
   if(!Array.isArray(poly)||poly.length<3)return[];
   const clip=dgLcEnsureCcw(clipRaw);
   if(clip.length<3)return[];
@@ -208,6 +217,7 @@ function dgLcClipPolygonConvex(poly,clipRaw){
  * Üretimde dgLcIntersectionAreaConvex kullanılır; bu fonksiyon testlerde
  * REFERANS gerçekleme olarak korunur (convex ile aynı sonucu üretmeli). */
 function dgLcIntersectionArea(outerRings,holeRings,rect){
+  if(window.DG_SURFACE_PROJECTED_GEOMETRY_AREA)return window.DG_SURFACE_PROJECTED_GEOMETRY_AREA.intersectionArea(outerRings,holeRings,rect,{overlap:dgLcBboxOverlap,clip:dgLcClipPolygonRect,area:dgLcPlanarArea});
   let area=0;
   for(const ring of (outerRings||[])){
     if(!dgLcBboxOverlap(ring._bbox,rect))continue;
@@ -221,6 +231,7 @@ function dgLcIntersectionArea(outerRings,holeRings,rect){
 }
 
 function dgLcIntersectionAreaConvex(outerRings,holeRings,quad){
+  if(window.DG_SURFACE_PROJECTED_GEOMETRY_AREA)return window.DG_SURFACE_PROJECTED_GEOMETRY_AREA.intersectionAreaConvex(outerRings,holeRings,quad,{overlap:dgLcBboxOverlap,clip:dgLcClipPolygonConvex,area:dgLcPlanarArea});
   let area=0;
   for(const ring of (outerRings||[])){
     if(!dgLcBboxOverlap(ring._bbox,quad._bbox))continue;
@@ -235,6 +246,7 @@ function dgLcIntersectionAreaConvex(outerRings,holeRings,quad){
 
 /* Dört köşeden _bbox türet */
 function dgLcQuadBBox(quad){
+  if(window.DG_SURFACE_PROJECTED_GEOMETRY_AREA)return window.DG_SURFACE_PROJECTED_GEOMETRY_AREA.quadBBox(quad);
   return quad.reduce((a,p)=>({
     minX:Math.min(a.minX,p.x),minY:Math.min(a.minY,p.y),
     maxX:Math.max(a.maxX,p.x),maxY:Math.max(a.maxY,p.y),
@@ -242,6 +254,7 @@ function dgLcQuadBBox(quad){
 }
 
 function dgLcPlanarArea(poly){
+  if(window.DG_SURFACE_PROJECTED_GEOMETRY_AREA)return window.DG_SURFACE_PROJECTED_GEOMETRY_AREA.planarArea(poly);
   if(!Array.isArray(poly)||poly.length<3)return 0;
   let s=0;
   for(let i=0;i<poly.length;i++){
@@ -252,6 +265,7 @@ function dgLcPlanarArea(poly){
 }
 
 function dgLcProjectGeometry(outer,holes,epsg){
+  if(window.DG_SURFACE_PROJECTED_GEOMETRY_AREA)return window.DG_SURFACE_PROJECTED_GEOMETRY_AREA.projectGeometry(outer,holes,epsg,{forward:dgLcUtmForward,ringBBox:dgLcRingBBoxXY});
   const projectRing=ring=>{
     const p=(ring||[]).map(q=>{
       const z=dgLcUtmForward(Number(q[0]),Number(q[1]),epsg);
@@ -267,6 +281,7 @@ function dgLcProjectGeometry(outer,holes,epsg){
 }
 
 function dgLcProjectedArea(geometry){
+  if(window.DG_SURFACE_PROJECTED_GEOMETRY_AREA)return window.DG_SURFACE_PROJECTED_GEOMETRY_AREA.projectedArea(geometry);
   let a=0;
   for(const r of geometry.outer)a+=dgLcPlanarArea(r);
   for(const r of geometry.holes)a-=dgLcPlanarArea(r);
