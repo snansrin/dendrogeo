@@ -24,6 +24,24 @@ const DG_WORLD_PARK_COMPARISON_MODULE_STORE=window.DG_WORLD_PARK_COMPARISON_STOR
 /* 0040: kaydırma koruma sarmalı — yeniden çizimde #main scrollTop korunur. */
 async function loadParkCompare(){const _y=(typeof dgScrollKeep==="function"?dgScrollKeep():null);try{return await loadParkCompare__scroll.apply(this,arguments);}finally{if(typeof dgScrollRestore==="function")dgScrollRestore(_y);}}
 async function loadParkCompare__scroll(){
+ if(window.DG_LOAD_PARK_COMPARISON)return window.DG_LOAD_PARK_COMPARISON.execute({
+  read:()=>DG_WORLD_PARK_COMPARISON_MODULE_STORE?DG_WORLD_PARK_COMPARISON_MODULE_STORE.primary():sb.from("v_park_compare").select("*").order("carbon_kg",{ascending:false}),
+  resolve:error=>window.DG_RESOLVE_PARK_COMPARISON_READ.resolve(error,dgIsSchemaError),
+  onDenied:dgParkCompareDenied,
+  onSchemaMissing:error=>dgParkSchemaMissing("v_park_compare: "+error.message),
+  loadLegacy:()=>loadParkCompareLegacy($("parkCompare")),
+  render:rows=>window.DG_RENDER_PRIMARY_PARK_COMPARISON.render(rows,{
+   setRows:value=>{PARK_ROWS=value;},
+   prepare:value=>window.DG_PREPARE_PARK_COMPARISON?window.DG_PREPARE_PARK_COMPARISON.prepare(value):{
+    linked:value.filter(row=>Number(row.park_id)>0),pending:value.filter(row=>!(Number(row.park_id)>0)),
+    max:value.length?Math.max(...value.map(row=>Number(row.carbon_kg)||0)):1
+   },
+   element:$("parkCompare"),
+   renderLinked:(linked,max)=>linked.map((park,index)=>dgParkRowHTML(park,index,max)).join(""),
+   renderPending:dgPendingParksHTML,
+   renderReportOptions:dgFillReportOptions
+  })
+ });
  /* v_park_compare supplies park-level contributors; the primary path stays park-keyed. */
  const el=$("parkCompare");
  const{data,error}=await(DG_WORLD_PARK_COMPARISON_MODULE_STORE?DG_WORLD_PARK_COMPARISON_MODULE_STORE.primary():sb.from("v_park_compare").select("*").order("carbon_kg",{ascending:false}));
@@ -93,6 +111,12 @@ function dgFillReportOptions(linked,pending){
 /* 0040: kaydırma koruma sarmalı. */
 function dgParkCompareDenied(){const _y=(typeof dgScrollKeep==="function"?dgScrollKeep():null);try{return dgParkCompareDenied__scroll.apply(this,arguments);}finally{if(typeof dgScrollRestore==="function")dgScrollRestore(_y);}}
 function dgParkCompareDenied__scroll(error){
+ if(window.DG_SHOW_PARK_COMPARISON_DENIED)return window.DG_SHOW_PARK_COMPARISON_DENIED.show(error,{
+  isAdmin:()=>typeof dgIsAdmin==="function"&&dgIsAdmin(),
+  log:(code,message)=>console.warn("DENDROGEO · park karşılaştırma okunamadı (şema değil, yetki/ağ):",code,message),
+  getElement:()=>$("parkCompare"),render:window.DG_PARK_COMPARISON_ERROR_UI.render,escape:esc,
+  toast,translate:dgCf
+ });
  const code=(error&&(error.code||error.status))||"";
  const msg=(error&&error.message)||String(error||"bilinmeyen hata");
  console.warn("DENDROGEO · park karşılaştırma okunamadı (şema değil, yetki/ağ):",code,msg);
@@ -108,10 +132,21 @@ function dgParkCompareDenied__scroll(error){
 /* 0040: kaydırma koruma sarmalı — yeniden çizimde #main scrollTop korunur. */
 async function loadParkCompareLegacy(){const _y=(typeof dgScrollKeep==="function"?dgScrollKeep():null);try{return await loadParkCompareLegacy__scroll.apply(this,arguments);}finally{if(typeof dgScrollRestore==="function")dgScrollRestore(_y);}}
 async function loadParkCompareLegacy__scroll(el){
- const{data,count}=await(DG_WORLD_PARK_COMPARISON_MODULE_STORE?DG_WORLD_PARK_COMPARISON_MODULE_STORE.legacy():sb.from("measurements").select("carbon_kg,dbh_cm,height_m,species,grp,projects(name,city)",{count:"exact"}).eq("status","Onaylı").limit(5000));
- dgWarnIfTruncated(data,5000,"Park karşılaştırma",count);
+ let data,count,legacyGrouped=null;
+ if(window.DG_LOAD_LEGACY_PARK_COMPARISON){
+  const result=await window.DG_LOAD_LEGACY_PARK_COMPARISON.execute({
+   load:()=>DG_WORLD_PARK_COMPARISON_MODULE_STORE?DG_WORLD_PARK_COMPARISON_MODULE_STORE.legacy():sb.from("measurements").select("carbon_kg,dbh_cm,height_m,species,grp,projects(name,city)",{count:"exact"}).eq("status","Onaylı").limit(5000),
+   warnIfTruncated:dgWarnIfTruncated,setRows:rows=>{PARK_DATA=rows;},
+   group:rows=>window.DG_GROUP_LEGACY_PARK_COMPARISON?window.DG_GROUP_LEGACY_PARK_COMPARISON.group(rows):null
+  });
+  data=result.rows;legacyGrouped=result.grouped;
+ }else{
+  const result=await(DG_WORLD_PARK_COMPARISON_MODULE_STORE?DG_WORLD_PARK_COMPARISON_MODULE_STORE.legacy():sb.from("measurements").select("carbon_kg,dbh_cm,height_m,species,grp,projects(name,city)",{count:"exact"}).eq("status","Onaylı").limit(5000));
+  data=result.data;count=result.count;
+  dgWarnIfTruncated(data,5000,"Park karşılaştırma",count);
+ }
  PARK_DATA=data||[];
- const grouped=window.DG_GROUP_LEGACY_PARK_COMPARISON?window.DG_GROUP_LEGACY_PARK_COMPARISON.group(PARK_DATA):null;
+ const grouped=legacyGrouped||(window.DG_GROUP_LEGACY_PARK_COMPARISON?window.DG_GROUP_LEGACY_PARK_COMPARISON.group(PARK_DATA):null);
  if(grouped&&window.DG_LEGACY_PARK_COMPARISON_UI){
   const list=grouped.parks;
   if(!el)return;
