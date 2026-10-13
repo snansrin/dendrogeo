@@ -412,7 +412,7 @@
     "src/services/lc-config.js": "293509c879db16cf7aa10613879c3bf63b286bcbcb01a3b668816e5148e4b176",
     "src/services/lc-engine.js": "233f87f8eeec9306e235ca1896f2e9405dfcfe0e8148fbf9801f48fe1c1afa1d",
     "src/services/lc-geo.js": "ade537a9ea592914288c9c3cead038834919f4919b63be2a3cce28cfe2b97d73",
-    "src/services/lc-osm.js": "b9daa57264d313f1fd2b969e0f6180900cdfbf45313d939dc554c8de58eb955d",
+    "src/services/lc-osm.js": "4244fd0ab3a64cbeae49c76609cc702c01a057beefb608fd483418e02b91f1cd",
     "src/services/lc-patches.js": "94bc7a7fd771672250655bbfd47a5f162bd06b84c23d2b03d2256bc057669919",
     "src/services/lc-review.js": "91f69e59f76698a4d95c2dc411fdc05e09c3910c5c036eab21f6ae480c4a9d7f",
     "src/services/lc-s2.js": "0e2ac1af0b680e6f4358cb9d99980e32339d04f67f911cfe14d244898f014d40",
@@ -466,7 +466,7 @@
     "src/ui/park-schema-warning.js": "9222beba708e3054eca73b0e30df0224abb264055d9ac3f8f6bf683823adcad8",
     "src/ui/state.js": "5feada9bc2052655d9be405043ffb6f71f39d51fcb58e189089c3d7d3fc8bafc",
     "src/utils/geo.js": "3e796768b3d55a3f07c4be3281c9437f1602b6d5e68151b2af7b101707baf294",
-    "src/utils/lazylibs.js": "dc1ccaafd9c682188da52c962c6cb590d60e20ff0bd1179dab29aaa8f75194ce",
+    "src/utils/lazylibs.js": "f19885ae01b97dcfb17dcdb208ef384d0adb8074ad58ae828d5194fad992205f",
     "src/workers/surface-worker.js": "02878b04478f0c555b536f34d9807a0bf824d0f738d1468a8840069cc61e85ed",
     "test/critical-fixes.test.mjs": "3a2e62104763110bc734b3dc54a37cbf57c15b0038a78fdce35d56d9639c1989",
     "test/dbh-qa.test.mjs": "d3bbd29d292aa1214ede27a21ecb99315bc24a6346e2b0119f8c04eb8b532b95",
@@ -704,6 +704,22 @@
           "path": "src/utils/lazylibs.js",
           "previous_sha256": "9d16a098c3d07595fa20a4b0ba1ead5c9c4815e6b8430fec05892603df64a85a",
           "sha256": "dc1ccaafd9c682188da52c962c6cb590d60e20ff0bd1179dab29aaa8f75194ce"
+        }
+      ]
+    },
+    {
+      "date": "2026-10-13",
+      "scope": "User-authorized five-module split of locked lc-osm service: bounded OSM evidence loading/cache, water polygon extraction, water refinement, road tag policy/feature preparation, and hard-surface refinement. Preserve request coalescing, park-boundary freshness, backup order, raster source evidence, water area/count updates, explicit road-surface policy, projected geometry and locked regression tests.",
+      "files": [
+        {
+          "path": "src/services/lc-osm.js",
+          "previous_sha256": "b9daa57264d313f1fd2b969e0f6180900cdfbf45313d939dc554c8de58eb955d",
+          "sha256": "4244fd0ab3a64cbeae49c76609cc702c01a057beefb608fd483418e02b91f1cd"
+        },
+        {
+          "path": "src/utils/lazylibs.js",
+          "previous_sha256": "dc1ccaafd9c682188da52c962c6cb590d60e20ff0bd1179dab29aaa8f75194ce",
+          "sha256": "f19885ae01b97dcfb17dcdb208ef384d0adb8074ad58ae828d5194fad992205f"
         }
       ]
     }

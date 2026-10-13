@@ -955,3 +955,12 @@ Her modülün tek bir dış API'si, sahibi olduğu açık durumu ve kendi testle
 - `domain/surface/sentinel-spectral-evidence.js`, PB04 yansımasını, medyanı, iki tarihli ekstrem kanıtını ve bitki özeti değerlerini üretir.
 - `application/surface/build-sentinel-profile.js`, günlük gözlemleri hücre kompozitlerine ve yıllık profil istatistiklerine dönüştürür.
 - `services/lc-s2.js`, sahne/bant okuma sırasını ve uyumlu `DG_LC_S2` globalini korur; beş modül lc-validate sonrasında, lc-s2 öncesinde yüklenir.
+
+## OSM land-cover kanıt modülleri — 13 Ekim 2026
+
+- `adapters/surface/load-osm-landcover-evidence.js`, aynı parkın kapsamını yeniden kullanır, bekleyen istekleri paylaşır ve sınırlı OSM su yedeğini yönetir.
+- `domain/surface/extract-osm-water-polygons.js`, way ve relation dış halkalarını mevcut `[lat,lon]` biçiminde çıkarır.
+- `application/surface/refine-water-by-osm.js`, açık su poligonlarıyla sınıf/sayaç alanlarını birlikte günceller ve ham raster izini korur.
+- `domain/surface/osm-road-policy.js`, izinli sert yüzey etiketlerini, yol tiplerini ve genişlik varsayılanlarını değerlendirip OSM yol özelliklerini hazırlar.
+- `application/surface/refine-hard-by-osm.js`, park EPSG'sinde yol-hücre temasını ölçer ve yalnızca mevcut sınıf/alan sözleşmesi içinde sert sınıf düzeltmesi yapar.
+- `services/lc-osm.js`, eski global fonksiyonları korur; modüller `lc-engine.js` sonrasında ve servis öncesinde yüklenir.
