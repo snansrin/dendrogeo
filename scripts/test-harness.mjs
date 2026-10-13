@@ -108,6 +108,11 @@ export function loadApp({ sadece } = {}) {
     'src/application/surface/erode-surface-grid-domain.js',
     'src/application/surface/build-surface-sampling-grid-cells.js',
     'src/application/surface/run-surface-sampling-grid.js',
+    'src/domain/surface/select-surface-review-features.js',
+    'src/application/surface/prepare-surface-review-feature-masks.js',
+    'src/application/surface/resolve-surface-review-cell.js',
+    'src/application/surface/resolve-surface-review-parts.js',
+    'src/domain/surface/summarize-surface-review-parts.js',
     'src/services/lc-patches.js',
     /* UYDU HASSASİYET (0054): validate çekirdeği saf matematiktir (eşikler,
      * hassasiyet, Olofsson metrikleri, düzeltme katmanı) — birim testleri

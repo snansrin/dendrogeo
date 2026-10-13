@@ -1273,6 +1273,12 @@ The collaborator map renderer now separates peer selection, display-model deriva
 - `application/surface/build-surface-sampling-grid-cells.js` kırpılmış bileşenlerden güvenli örnek noktalarını, WGS84 çizim geometrisini ve hücre meta verisini üretir; `run-surface-sampling-grid.js` use-case'i orkestre eder.
 - Ana-thread lazy loader ve yüzey worker'ı bu modülleri `lc-review.js` öncesinde yükler. Servis içindeki önceki uygulama, bu modüller yüklenmediğinde uyumluluk yedeği olarak kalır.
 
+## Yüzey inceleme çözümlemesi — 13 Ekim 2026
+
+- `domain/surface/select-surface-review-features.js` yalnız tanımlı yüzey sınıflarını seçer; `application/surface/prepare-surface-review-feature-masks.js` overlay geometrisini aktif parkla kesiştirip park/CRS anahtarıyla maskeyi yeniden kullanır.
+- `application/surface/resolve-surface-review-cell.js` son düzenlenen maskeden başlayarak sınıf parçalarını ve ölçülmüş alan paylarını üretir. `resolve-surface-review-parts.js` mevcut geometri cache kapılarını ve memo seeding’i orkestre eder.
+- `domain/surface/summarize-surface-review-parts.js` raster hücre alanını çözülmüş parçalara aktarır. UI, worker ve offline önbellek bu modülleri servis öncesinde yükler; servis gövdeleri fallback olarak kalır.
+
 ## Park içi sampling grid geometrisi — 13 Ekim 2026
 
 - domain/surface/measure-grid-point-distance.js dış halka ve deliklerde işaretli sınır mesafesini hesaplar; ind-grid-interior-point.js sınırlı best-first alt bölmeyle güvenli iç nokta seçer.

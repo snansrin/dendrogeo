@@ -41,6 +41,7 @@ async function dgSurfaceFingerprint(cells,outer,holes,meta){
 }
 const DG_SURFACE_MASK_CACHE=new WeakMap();
 function dgSurfaceResolved(cells,classFor,geometries,features,epsg,park){
+ if(window.DG_RESOLVE_SURFACE_REVIEW_PARTS)return window.DG_RESOLVE_SURFACE_REVIEW_PARTS.resolve({cells,classFor,geometries,features,epsg,park,types:DG_SURFACE_TYPES,partCache:DG_SURFACE_PART_CACHE,maskCache:DG_SURFACE_MASK_CACHE,select:(source,types)=>window.DG_SELECT_SURFACE_REVIEW_FEATURES.select(source,types),prepareMasks:(source,ports)=>window.DG_PREPARE_SURFACE_REVIEW_FEATURE_MASKS.prepare(source,ports),resolveCell:(cell,geom,masks,ports)=>window.DG_RESOLVE_SURFACE_REVIEW_CELL.resolve(cell,geom,masks,ports),bounds:dgSurfaceBounds,overlap:dgSurfaceOverlap,clip:dgSurfaceClip,geometry:dgSurfaceFeatureGeometry,area:dgSurfaceArea,seed:dgSurfaceSeed});
  if(!Array.isArray(cells)||!cells.length||!geometries||typeof geometries!=="object"||!Array.isArray(park)||!park.length)return [];
  const cached=DG_SURFACE_PART_CACHE.get(geometries);
  if(cached&&cached.park===park&&cached.epsg===epsg&&cached.cellCount===cells.length&&cached.cellFirst===cells[0]&&cached.features.length===(features||[]).length&&cached.features.every((f,i)=>f===features[i]))return cached.parts.map(p=>{if(p.method!=="review-cell")return p;const type=classFor(p.cell)||"other";return{...p,type,group:DG_SURFACE_TYPES[type]?.group||"other"};});
@@ -62,6 +63,7 @@ function dgSurfaceSummarize(base,cells,classFor,geometries,features,epsg,park){
  return dgSurfaceSummarizeParts(base,dgSurfaceResolved(cells,classFor,geometries,features,epsg,park));
 }
 function dgSurfaceSummarizeParts(base,parts){
+ if(window.DG_SUMMARIZE_SURFACE_REVIEW_PARTS)return window.DG_SUMMARIZE_SURFACE_REVIEW_PARTS.summarize(base,parts);
  const areas={green:0,hard:0,building:0,water:0,pool:0,bare:0,other:0,...base},seen=new Set();
  for(const p of parts){
   if(!seen.has(p.key)){const old=p.cell.classKey||"other";areas[old]=(areas[old]||0)-Number(p.cell.areaM2||0);seen.add(p.key);}
