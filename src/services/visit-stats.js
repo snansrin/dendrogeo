@@ -15,7 +15,18 @@ async function trackVisit(){
 }
 
 const DG_VISITOR_ADMIN_VISIT_COUNTS_STORE=window.DG_VISITOR_ADMIN_VISIT_COUNTS_STORE.create();
+const DG_ADMIN_VISIT_STATISTICS=window.DG_LOAD_ADMIN_VISIT_STATISTICS&&window.DG_RESOLVE_ADMIN_VISIT_WINDOWS&&window.DG_VISITOR_ADMIN_COUNTS_UI
+ ?window.DG_LOAD_ADMIN_VISIT_STATISTICS.create({
+  loadTotal:()=>DG_VISITOR_ADMIN_VISIT_COUNTS_STORE.total(sb),
+  loadSince:date=>DG_VISITOR_ADMIN_VISIT_COUNTS_STORE.since(sb,date),
+  resolveWindows:()=>window.DG_RESOLVE_ADMIN_VISIT_WINDOWS.resolve(Date.now()),
+  setTotal:value=>window.DG_VISITOR_ADMIN_COUNTS_UI.total($("aVisitTotal"),value),
+  setToday:value=>window.DG_VISITOR_ADMIN_COUNTS_UI.today($("aVisitToday"),value),
+  setSevenDays:value=>window.DG_VISITOR_ADMIN_COUNTS_UI.sevenDays($("aVisit7"),value),
+  fail:()=>window.DG_VISITOR_ADMIN_COUNTS_UI.failed($("aVisitTotal"))
+ }):null;
 async function loadVisitStats(){
+ if(DG_ADMIN_VISIT_STATISTICS)return DG_ADMIN_VISIT_STATISTICS();
  try{
   const total=await DG_VISITOR_ADMIN_VISIT_COUNTS_STORE.total(sb);
   $("aVisitTotal").textContent=total.count??0;
