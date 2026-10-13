@@ -1383,6 +1383,12 @@ The collaborator map renderer now separates peer selection, display-model deriva
 - `application/parks/handle-park-schema-missing.js` geçici hatalarda durumu değiştirmez; gerçek şema eksikliğinde uyarıyı bir kez işaretler, `DG_PARK_SCHEMA_OK` kapısını düşürür ve park kartını yeniler.
 - `ui/park-schema-missing-feedback.js` transient ve eksik migration mesajlarını admin/normal kullanıcı rolüne göre üretir; var olan `park-schema-warning.js` HTML uyarısı aynı kalır. Kilitli hata sınıflandırma regresyonları değişmedi.
 
+## Yüzey patch algılama ve çizim — 14 Ekim 2026
+
+- `domain/surface/scale-area-preserving-patch-ring.js` eski 1.0–1.5 alan ölçeği sınırını, sıfır/negatif alan yedeğini ve merkez hesabının yalnız ölçek uygulanırken çağrılmasını korur. `smooth-patch-ring.js` tek geçişli yumuşatma akışını, `build-patch-display-rings.js` halka koleksiyonunu yönetir.
+- `application/surface/build-surface-patch.js` ölçülmüş bileşeni mevcut DTO şekline dönüştürür; halka üretim hatasında ham halkaları ve metrikleri koruyup yalnız gösterim halkalarını boş bırakır. `detect-surface-patches.js` grup → eşik/metrik → DTO akışını sırayla orkestre eder.
+- Kilitli `services/lc-patches.js` gerçek LULC yüklemesinde bu modülleri bağlar; henüz yeni script'leri yüklemeyen klasik test/yarım cache bağlamlarında önceki global davranışı fallback olarak sunar. Yeni dosyalar tembel LULC zincirinde ve Service Worker precache'inde facade'dan önce yüklenir. Kilitli regresyon testleri değiştirilmedi.
+
 ## Çevrimdışı ölçüm senkronizasyonu — 14 Ekim 2026
 
 - `application/offline/drain-measurement-queue.js` yalnız etkin sahibin kayıtlarını senkronize eder; sunucu işlemi ve IndexedDB satır silme işlemi tamamlanmadan başarılı sayacı artırmaz. Başarısız kayıt kuyrukta kalır ve tur sonraki kayda geçmeden durur.

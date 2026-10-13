@@ -719,7 +719,7 @@
     "src/services/lc-engine.js": "233f87f8eeec9306e235ca1896f2e9405dfcfe0e8148fbf9801f48fe1c1afa1d",
     "src/services/lc-geo.js": "ade537a9ea592914288c9c3cead038834919f4919b63be2a3cce28cfe2b97d73",
     "src/services/lc-osm.js": "4244fd0ab3a64cbeae49c76609cc702c01a057beefb608fd483418e02b91f1cd",
-    "src/services/lc-patches.js": "94bc7a7fd771672250655bbfd47a5f162bd06b84c23d2b03d2256bc057669919",
+    "src/services/lc-patches.js": "87b62adfe85a7bf946a5c896126606b8af632bdec053d32b7f29d78bb8891d50",
     "src/services/lc-review.js": "03579a67ccd6cef3e56424d0a2d1bcb6e912a480fdcf6acdfaac734ae004dcb6",
     "src/services/lc-s2.js": "76e5547b6c26ce325934adf2593ea9aafd24369a2ba7a13331708cfa2e4aa543",
     "src/services/lc-stac.js": "978c4be8c3bc4e7cda3f694d1f06290e661fed5bbd5b76b68719140edc18e71a",
@@ -789,7 +789,7 @@
     "src/ui/sync-base-map-layer-selection.js": "2f93018846abac13f83486a1fc2b9df0cbb7f330cae202a0e91ef902c8263eeb",
     "src/ui/waypoint-gps-overlay.js": "4f4396cf19bacb0e1f3e026b6a331c37db26631b7282f5b0267a2042a6226d1e",
     "src/utils/geo.js": "3e796768b3d55a3f07c4be3281c9437f1602b6d5e68151b2af7b101707baf294",
-    "src/utils/lazylibs.js": "ab6c3a9f78ca0b3a6c67d01720defc9dff8a7933e556c8aecd6a658cbc5e46ed",
+    "src/utils/lazylibs.js": "682b71fda2279e58b8005de5e6bc42986cb05f7dcf324e3ca0b40b03b4f33f9f",
     "src/workers/surface-worker.js": "af6477f104a06342cf69ef7f702a3e95ed27cd390c5aae36a2fbe5dfd68ed2fe",
     "test/base-map-layer-modules.test.mjs": "5399d699e74ffd66e92df312b4301202add7352b2b6c0be24fd51cda63e7baff",
     "test/critical-fixes.test.mjs": "3a2e62104763110bc734b3dc54a37cbf57c15b0038a78fdce35d56d9639c1989",
@@ -2230,6 +2230,22 @@
           "path": "src/services/offline.js",
           "previous_sha256": "6f4ef41218c6621da9a5ae2f070e60de7efabc858e38035ee80cd89fd2f4a1ac",
           "sha256": "a1555235bf0e0e17ecea63e90b7347e7288295b6d7cf237ac0804ddc00d50e3f"
+        }
+      ]
+    },
+    {
+      "date": "2026-10-14",
+      "scope": "User-authorized five-responsibility modularization of locked LULC patch detection: extract area-preserving display scaling, ring smoothing, display-ring collection, patch DTO construction, and detector orchestration. Preserve raw geometry, area/centroid metrics, one-pass smoothing, scale bounds and display-only failure behavior; locked regressions remain unchanged.",
+      "files": [
+        {
+          "path": "src/services/lc-patches.js",
+          "previous_sha256": "94bc7a7fd771672250655bbfd47a5f162bd06b84c23d2b03d2256bc057669919",
+          "sha256": "87b62adfe85a7bf946a5c896126606b8af632bdec053d32b7f29d78bb8891d50"
+        },
+        {
+          "path": "src/utils/lazylibs.js",
+          "previous_sha256": "ab6c3a9f78ca0b3a6c67d01720defc9dff8a7933e556c8aecd6a658cbc5e46ed",
+          "sha256": "682b71fda2279e58b8005de5e6bc42986cb05f7dcf324e3ca0b40b03b4f33f9f"
         }
       ]
     }
