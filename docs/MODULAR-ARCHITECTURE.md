@@ -759,6 +759,14 @@ Her modülün tek bir dış API'si, sahibi olduğu açık durumu ve kendi testle
 
 - `application/admin/delete-admin-tree-project.js`, yönetici onayı, proje silme sonucu, canlı harita geçersizleştirme ve görünüm yenileme sırasını yönetir; RLS sunucu kararını korur.
 
+- `application/visitors/toggle-activity-disclosure.js` ve `restore-activity-disclosure.js`, etkinlik görünürlüğünü ve cihazdaki `dg_vis_act_open` tercihini mevcut render sırasıyla yönetir; storage hatası görünümü bozmaz.
+
+- `application/visitors/update-live-visitor-filters.js`, canlı arama/ekran/konum filtrelerini sıfırlama ve hızlı görünüm seçimlerini uygular.
+
+- `application/visitors/set-live-visitor-pause.js`, canlı panelin duraklatılmış durumunu korurken yeniden çizim ve duraklatma göstergesi callback'lerini seçer.
+
+- `application/visitors/fit-live-visitor-map.js`, kullanıcı haritaya sığdırma istediğinde fit bayrağını sıfırlar, mevcut filtreyi uygular ve sonucu harita çizicisine aktarır.
+
 - `ui/admin-measurement-row.js`, düz moderasyon listesindeki tek ölçüm satırını mevcut işlem düğmeleri ve kaçışlama ile üretir.
 
 - `ui/admin-measurement-table.js`, düz listeyi proje/nokta/ölçüm sırasına koyar ve 300 satır sınırını korur.
