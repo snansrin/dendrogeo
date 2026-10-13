@@ -533,6 +533,12 @@ Her modülün tek bir dış API'si, sahibi olduğu açık durumu ve kendi testle
 - `application/visitors/live-refresh-timer.js`, ziyaretçi sekmesi için 10 saniyelik çizim zamanlayıcısını başlatıp durdurur; görünüm kontrolü ve timer erişimi çağırandan sağlanır.
 - `application/visitors/focus-live-location.js`, owner ve geçerli konum kapılarından sonra takip seçeneğini kapatıp canlı haritayı 16. yakınlaştırmaya odaklar.
 
+- `application/admin/refresh-tree-pending-badge.js`, bekleyen ölçüm sayısını tek exact/head sorgusuyla okur ve sorgu hatalarını mevcut sessiz-rozet yedeğiyle sınırlar.
+- `application/admin/open-pending-tree-nodes.js`, yalnız bekleyen park, proje ve kullanıcı düğümlerini açık duruma getirerek ağaç görünümünü yeniden çizer.
+- `application/admin/expand-measurement-tree.js`, filtrelenmiş ağacın tüm düğümlerini açar veya kapatır ve açık anahtar kümesini mevcut kuralla günceller.
+- `application/admin/apply-tree-row-status.js`, moderasyon sonrası satır durumunu ve paylaşılan bilgisini yerel önbellekte güncelleyip ağaç ile düz listeyi yeniden çizer.
+- `application/admin/remove-tree-row.js`, silinen ölçümü yerel ağaç önbelleğinden çıkarıp iki mevcut yönetim görünümünü yeniden çizer.
+
 - `ui/visitor-connection-status.js`, bağlantı metnini, görünen/toplam kullanıcı sayısını, mevcut Türkçe saat biçimini ve durum rengini günceller; duraklatma metni aynı API içindedir, presence/filtre/görünürlük ve pause durumu serviste kalır.
 
 - `domain/data-requests/find-pending-duplicate.js`, talep ülke/şehir/proje filtrelerini mevcut trim ve küçük harf kuralıyla karşılaştırır ve ilk eşleşmeyi döndürür; kullanıcı/status sorgusu, uyarı ve insert akışı serviste kalır.
