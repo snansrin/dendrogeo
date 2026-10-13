@@ -108,6 +108,14 @@ src/
 - `ui/park-admin-status.js`, park geri doldurma ve park yönetimi kutularının çevrimdışı, hata, boş ve yükleniyor HTML durumlarını üretir; `park-registry.js` yetki, sorgu sonucu, toast ve DOM seçimini yönetir.
 - `ui/park-schema-warning.js`, park şeması kullanılamadığında mevcut uyarı HTML’ini üretir; şema yeteneği ve eski proje bazlı yedek kararı `park-registry.js` içinde kalır.
 - `application/parks/detect-backfill-park.js`, eski projelerin park aramasını 1500 m → 3500 m → ad sırasıyla yürütür ve iki Overpass sorgusu arasında 2,1 saniye bekler; `adapters/parks/search-osm-park-by-name.js` ada göre OSM sorgusunu ve aday alan sıralamasını yapar. `park-registry.js` sorgu, geometri ve uyumluluk bağlarını korur.
+
+- `domain/park-invites/access-policy.js`, sahip ve ortak parkları ayırır ve ekip yönetimi yetkisini sahip park kimliğiyle sınırlar.
+
+- `adapters/park-invites/store.js`, davet/park/ortak okumalarını ve üç davet RPC çağrısını mevcut tablo, filtre, sıralama ve gövde sözleşmeleriyle yürütür.
+
+- `ui/park-invite-inbox.js` ve `ui/park-collaboration-panel.js`, davet gelen kutusunu, ortak erişim bandını ve sahip ekip panelini mevcut HTML/kaçış kurallarıyla üretir.
+
+- `application/park-invites/manage-invites.js`, davet kabul/red, gönderme ve geri alma sonuç sırasını veri deposu ve arayüz callback’leriyle yönetir; erişim denetimi sunucu RPC’lerinde kalır.
 - `application/parks/register-park.js`, parkı oturum cache'inden çözme, OSM anahtarı/ad-konum eşleşmesi, yeni kayıt satırını kurma, yer adını gerektiğinde çözme ve 23505 yarışını yeniden okuma sırasını yönetir. `adapters/parks/park-store.js` Supabase seçme ve ekleme sorgularını uygular; `park-registry.js` eski global API'yi ve bildirimleri bağlar.
 - `application/parks/create-project.js`, kullanıcı, kayıtlı park ve etiketi doğrulayıp park bağlı proje kaydını oluşturur; geometri yazımını bağımlılık olarak çağırır. `adapters/parks/project-store.js` Supabase insert'ini taşır; `dgScanCreateProject()` eski toast, yönlendirme ve global API davranışını korur.
 - `application/parks/link-project.js`, yönetici yetkisini, seçili parkı ve projeyi doğrular; eski proje etiketini korur, park bağını günceller ve ölçümlerin eksik `park_id` alanlarını best-effort tamamlar. `adapters/parks/project-link-store.js` iki Supabase yazımını taşır; `dgLinkProject()` eski bildirim ve yönlendirme API'sini korur.
