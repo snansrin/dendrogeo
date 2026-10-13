@@ -1169,3 +1169,11 @@ Her modülün tek bir dış API'si, sahibi olduğu açık durumu ve kendi testle
 - `application/surface/toggle-surface-objects.js`, değişikliği mevcut repartition ve taslak kayıt akışından geçirir.
 - `application/surface/start-surface-object-pick.js` parkla eşleşen OSM kaynağını denetler ve harita seçim oturumunu başlatır; `cancel-surface-object-pick.js` tıklama dinleyicisiyle geçici katmanı temizler.
 - `application/surface/apply-and-accept-surface-object-boundary.js`, sınır uygulaması ve taslak kaydı başarılı olmadan kabul adımına geçmez.
+
+## LULC özet ve sonuç raporları — 13 Ekim 2026
+
+- `domain/surface/summarize-surface-edit-impact.js`, elle hücre, hassasiyet, sınır, eşik ve görünüm değişikliklerini mevcut sayımlarla özetler.
+- `application/surface/build-surface-report-model.js`, ham raster, canlı önizleme ve kabul edilmiş rapor için doğru başlık/yönlendirmeyi seçer.
+- `ui/render-surface-area-bars.js`, sınıf alanı, yüzde, renk ve çevrilmiş etiketleri mevcut bar markup’ıyla üretir.
+- `ui/render-surface-current-report.js`, mevcut rapor host’unu ve ilk ham rapor gövdesini koruyarak güncel özeti oluşturur.
+- `ui/render-surface-accepted-report.js`, kabul edilmiş snapshot’ı var olan tarih, alan çubuğu ve yayın açıklamasıyla gösterir.
