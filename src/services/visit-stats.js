@@ -198,6 +198,7 @@ async function dgVisCounts(){
 }
 function dgVisAllowed(){return typeof PROFILE!=="undefined"&&PROFILE?.role==="owner";}
 const DG_VISITOR_ROSTER=window.DG_VISITOR_ROSTER_APPLICATION.create();
+const DG_VISITOR_LIVE_MAP=window.DG_VISITOR_LIVE_MAP_UI?.create?.()||null;
 function dgVisHasLocation(p){return DG_VISITOR_ROSTER.hasLocation(p);}
 function dgVisRows(){
  let st={};try{st=dgPresenceList();}catch(e){}
@@ -215,6 +216,21 @@ function dgVisQuick(view,located){
 function dgVisPause(on){DG_VIS_PAUSED=!!on;if(!on)renderVisitorsLive();else DG_VISITOR_CONNECTION_STATUS_UI.paused($("visStatus"));}
 function dgVisFit(){DG_VIS_FIT=false;dgVisMapDraw(dgVisFilter(dgVisRows()));}
 function renderVisitorsLive(){
+ if(window.DG_RENDER_OWNER_LIVE_VISITOR_VIEW)return window.DG_RENDER_OWNER_LIVE_VISITOR_VIEW.render({
+  allowed:dgVisAllowed(),paused:DG_VIS_PAUSED,hidden:document.hidden,
+  view:typeof DG_CUR_VIEW!=="undefined"?DG_CUR_VIEW:"visitors",
+  readRows:dgVisRows,filterRows:dgVisFilter,hasLocation:dgVisHasLocation,
+  summarize:(rows,hasLocation)=>window.DG_SUMMARIZE_LIVE_VISITOR_COUNTS.summarize(rows,hasLocation),
+  updateCounts:counts=>{if($("vzOnline"))$("vzOnline").textContent=counts.online;if($("vzLocated"))$("vzLocated").textContent=counts.located;},
+  renderPanel:(rows,allCount)=>window.DG_VISITOR_LIVE_PANEL_UI.render({
+   statusElement:$("visStatus"),state:dgPresenceState(),rows,allCount,rosterElement:$("visLive"),
+   viewLabels:DG_VIEW_LABELS,actionLabels:DG_ACT_LABELS,hasLocation:dgVisHasLocation,
+   deviceLabel:row=>row.p.dev,translate:value=>typeof dgCf==="function"?dgCf(value):value,escape:esc,
+   connectionStatus:DG_VISITOR_CONNECTION_STATUS_UI,roster:DG_VISITOR_ROSTER_UI
+  }),
+  renderFeed:rows=>{if($("visLive"))dgVisFeed(rows);},
+  drawMap:dgVisMapDraw
+ });
  if(!dgVisAllowed()||DG_VIS_PAUSED||document.hidden||(typeof DG_CUR_VIEW!=="undefined"&&DG_CUR_VIEW!=="visitors"))return;
  const box=$("visLive");
  const all=dgVisRows(),rows=dgVisFilter(all);
@@ -238,6 +254,7 @@ function dgVisFeed(rows){
  DG_VISITOR_ACTIVITY_FEED_UI.render(box,top,{locale:loc,translate:T,escape:esc});
 }
 function dgVisMapInit(){
+ if(DG_VISITOR_LIVE_MAP){const result=DG_VISITOR_LIVE_MAP.initialize({element:$("visMap"),map:DG_VIS_MAP,layer:DG_VIS_LAYER,leaflet:typeof L!=="undefined"?L:null,attribution:typeof DG_ATTR!=="undefined"?DG_ATTR.osm:""});DG_VIS_MAP=result.map;DG_VIS_LAYER=result.layer;return;}
  const el=$("visMap");
  if(!el||DG_VIS_MAP||typeof L==="undefined")return;
  try{
@@ -247,6 +264,14 @@ function dgVisMapInit(){
  }catch(e){DG_VIS_MAP=null;}
 }
 function dgVisMapDraw(rows){
+ if(DG_VISITOR_LIVE_MAP){dgVisMapInit();DG_VIS_FIT=DG_VISITOR_LIVE_MAP.draw({
+  map:DG_VIS_MAP,layer:DG_VIS_LAYER,leaflet:typeof L!=="undefined"?L:null,rows,
+  hasLocation:dgVisHasLocation,viewLabels:DG_VIEW_LABELS,
+  translate:value=>typeof dgCf==="function"?dgCf(value):value,escape:esc,
+  colorFor:id=>typeof dgMateColor==="function"?dgMateColor(id):"#2b6cb0",
+  trails:!!$("visTrails")?.checked,follow:!!$("visFollow")?.checked,fit:DG_VIS_FIT,
+  buildTrail:window.DG_BUILD_LIVE_LOCATION_TRAIL.build
+ });return;}
  dgVisMapInit();
  if(!DG_VIS_MAP||!DG_VIS_LAYER)return;
  try{DG_VIS_MAP.invalidateSize();}catch(e){}

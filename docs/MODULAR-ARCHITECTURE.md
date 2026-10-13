@@ -250,6 +250,11 @@ Her modülün tek bir dış API'si, sahibi olduğu açık durumu ve kendi testle
 - `adapters/visitors/remove-presence-channel.js`, eski Presence kanalını Supabase istemcisinden kaldırır ve cleanup reddini yalıtır.
 - `adapters/visitors/track-presence.js`, presence payload'ını etkin kanala yollar ve yalnız geçerli nesil için durum/transport hatasını bildirir.
 - `application/visitors/upgrade-presence-auth.js`, subscribe başladıktan sonra oturumu arka planda okur ve bağlantı nesli hâlâ güncelse Realtime JWT'sini yükseltir.
+- `domain/visitors/summarize-live-visitor-counts.js`, geçici canlı oturum listesinden çevrimiçi ve geçerli konum sayılarını DOM bağı olmadan çıkarır.
+- `domain/visitors/build-live-location-trail.js`, presence içindeki konum izini doğrular, son 30 geçerli koordinatla sınırlar ve çizgi başlangıcını belirler.
+- `application/visitors/render-owner-live-view.js`, kurucu/yetki, görünürlük ve duraklatma kapılarından sonra sayaç, roster, akış ve harita portlarını sırayla çalıştırır.
+- `ui/visitor-live-panel.js`, mevcut bağlantı durumunu ve süzülmüş ziyaretçi roster'ını panel callback'lerine aktarır.
+- `ui/visitor-live-map.js`, mevcut Leaflet harita/katman kurulumunu, geçici konum izlerini, işaretçileri ve takip/fit davranışını yönetir.
 
 - `ui/park-info-panel.js`, park sonucundaki grid, yüzey, PNG ve katman kontrollerinin markup yapısını üretir. Park state, park kimliği, proje seçenekleri, alternatif seçici ve kaçış işlevi çağıran ekrandan verilir; mevcut DOM kimlikleri ve eylem callback’leri korunur.
 
