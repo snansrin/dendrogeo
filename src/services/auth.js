@@ -4,6 +4,7 @@ Giriş / kayıt / şifre sıfırlama / Turnstile / recovery modal */
 
 /* --- BLOK 1: Şifre kurtarma dinleyicisi --- */
 sb.auth.onAuthStateChange((event)=>{
+if(window.DG_SHOW_PASSWORD_RECOVERY){window.DG_SHOW_PASSWORD_RECOVERY.show(event,()=>document.getElementById("recoveryModal"));return;}
 if(event==="PASSWORD_RECOVERY"){
 const m=document.getElementById("recoveryModal");
 if(m)m.style.display="flex";
@@ -12,12 +13,14 @@ if(m)m.style.display="flex";
 
 /* --- BLOK 2: Form görünürlüğü + Turnstile --- */
 function showAuth(tab){
+ if(window.DG_SHOW_AUTH_PANEL)return window.DG_SHOW_AUTH_PANEL.show($("erisim"),$("authBox"),tab,{selectTab:authTab,schedule:setTimeout});
 const el=$("erisim");if(!el)return;
 el.scrollIntoView({behavior:"smooth"});authTab(tab||"login");
 const box=$("authBox");box.classList.remove("auth-glow");void box.offsetWidth;box.classList.add("auth-glow");
 setTimeout(()=>box.classList.remove("auth-glow"),3000);
 }
 function authTab(t){
+ if(window.DG_SELECT_AUTH_TAB)return window.DG_SELECT_AUTH_TAB.select(t,{getElement:$,setTab:value=>{DG_AUTH_TAB=value;},markVisible:()=>{window._tsVisible=true;},loadCaptcha:loadTurnstileScript,initializeCaptcha:initTurnstile});
 ["login","reg","reset"].forEach(x=>{
 const id="f"+x[0].toUpperCase()+x.slice(1);
 if($(id))$(id).style.display=(x===t?"block":"none");
@@ -73,7 +76,7 @@ if(window.DG_TURNSTILE_TOKEN)return window.DG_TURNSTILE_TOKEN.read(id,{api:typeo
 if(typeof turnstile==="undefined"||!TS[id])return null;
 try{return turnstile.getResponse(TS[id])||null;}catch(e){return null;}
 }
-function amsg(t,e){const m=$("authMsg");if(m){m.textContent=t;m.style.color=e?"var(--red)":"var(--green-dk)";}}
+function amsg(t,e){if(window.DG_RENDER_AUTH_MESSAGE)return window.DG_RENDER_AUTH_MESSAGE.render(t,e,$("authMsg"));const m=$("authMsg");if(m){m.textContent=t;m.style.color=e?"var(--red)":"var(--green-dk)";}}
 
 /* --- BLOK 3: Giriş / kayıt / sıfırlama / çıkış --- */
 async function doLogin(){
@@ -303,6 +306,12 @@ function dgHideOAuthWait(){
 }
 
 async function dgGoogleSignIn(){
+ if(window.DG_START_GOOGLE_SIGN_IN)return window.DG_START_GOOGLE_SIGN_IN.start({
+  setButtonDisabled:value=>{const button=$("googleBtn");if(button)button.disabled=value;},
+  showMessage:(message,isError)=>amsg(message,isError?1:0),showWait:dgShowOAuthWait,hideWait:dgHideOAuthWait,
+  redirectTo:()=>window.location.origin+window.location.pathname.replace(/\/+$/,"")+"/",
+  signIn:options=>sb.auth.signInWithOAuth(options)
+ });
  const btn=$("googleBtn");
  if(btn){btn.disabled=true;}
  amsg("Google'a yönlendiriliyorsun…",0);
