@@ -196,7 +196,12 @@
       "src/domain/parks/park-live-member-color.js",
       "src/adapters/parks/park-presence-channel.js",
       "src/adapters/parks/leave-park-presence-channel.js",
-      "src/application/parks/track-park-live-position.js"
+      "src/application/parks/track-park-live-position.js",
+      "src/domain/parks/select-park-live-collaborators.js",
+      "src/domain/parks/build-park-live-collaborator-view.js",
+      "src/ui/prepare-park-live-collaborator-layer.js",
+      "src/ui/render-park-live-collaborator-marker.js",
+      "src/ui/render-park-live-collaborator-count.js"
     ],
     "scientific_contract_and_inputs": [
       "css/park-panel.css",
@@ -306,7 +311,8 @@
       "test/verified-water-footprint.test.mjs",
       "test/water-osm-reliability.test.mjs",
       "test/surface-mount-lifecycle-modules.test.mjs",
-      "test/park-presence-channel-modules.test.mjs"
+      "test/park-presence-channel-modules.test.mjs",
+      "test/park-presence-rendering-modules.test.mjs"
     ]
   },
   "sha256": {
@@ -431,7 +437,7 @@
     "src/services/lc-s2.js": "0e2ac1af0b680e6f4358cb9d99980e32339d04f67f911cfe14d244898f014d40",
     "src/services/lc-stac.js": "978c4be8c3bc4e7cda3f694d1f06290e661fed5bbd5b76b68719140edc18e71a",
     "src/services/lc-validate.js": "b4d8327c62940b1af1a53ddb087188816ff2359c8456c2755c7c853c5919f42b",
-    "src/services/map.js": "4b184184bdf3a9f3ab9bb08a0d5186c3ca7df45b91fa205ca461af2476c72c93",
+    "src/services/map.js": "7ef3159450fa42bea6f735426c6732a6acc0a18ff06f70862c1b2375f3416390",
     "src/services/measure.js": "ef61d7a32cf16ce83785a7f8fc1c579c8bf2bff8f8ca25f0992c3701d15c71d9",
     "src/services/offline.js": "b0d13ca6c52213b2103e5c23727be42c92cea39855622d43abaad87a8e48280f",
     "src/services/osm-client.js": "2e5eeaa735bf05a603a0db142619f60747b9696f506e666d7df992454a56814f",
@@ -589,7 +595,13 @@
     "src/adapters/parks/park-presence-channel.js": "264ee480dfc9284fd3b77476567c5669c4632a4df2274af4d18783009ebec943",
     "src/adapters/parks/leave-park-presence-channel.js": "7721cacb7a41d61e25d646ab88100eab9b7b7b7aa32acd1de51a24dfa4a80e8c",
     "src/application/parks/track-park-live-position.js": "32bfdf3611468d04f4a40e9248527780fd86e7a003bb13f47f1eafd19efc6baa",
-    "test/park-presence-channel-modules.test.mjs": "4849133a9286e390d0aa3d5d1d8fcf17ef2aa6d30789148e6e87454e7b30308b"
+    "test/park-presence-channel-modules.test.mjs": "4849133a9286e390d0aa3d5d1d8fcf17ef2aa6d30789148e6e87454e7b30308b",
+    "src/domain/parks/select-park-live-collaborators.js": "3ae7c3499f6d2bb2b705cbf0b96531c811567ca7b4704fe475130a3519c34255",
+    "src/domain/parks/build-park-live-collaborator-view.js": "dd0c6205e126950882fdb87779855a6b37842b4ffc8c2e706b84fb2e691117a3",
+    "src/ui/prepare-park-live-collaborator-layer.js": "89b76bb39458ccaaa90c0377ca57e1f5bed0c3518426d5d08f43df3926f702c7",
+    "src/ui/render-park-live-collaborator-marker.js": "32126af50783f3704f104e1e35a7f0452af2afda19750cffa356ad34bdbd03af",
+    "src/ui/render-park-live-collaborator-count.js": "171e55d92f96470f8c6904f4744aaa1e3105de5bdc2c68b742042b92302e579d",
+    "test/park-presence-rendering-modules.test.mjs": "617b95caeecba22b1bf1a63dcb20bc9b9eeddbb357d2bb06a8778e3675b94a38"
   },
   "authorized_modularizations": [
     {
@@ -1353,6 +1365,17 @@
           "path": "src/services/map.js",
           "previous_sha256": "db155b938ac84b24d99a097d309ac5c37bd3235463f76e6fc96ceaa92e7cd4e1",
           "sha256": "4b184184bdf3a9f3ab9bb08a0d5186c3ca7df45b91fa205ca461af2476c72c93"
+        }
+      ]
+    },
+    {
+      "date": "2026-10-13",
+      "scope": "User-authorized fifty-fourth five-module split of the locked live-map collaborator renderer: peer selection, collaborator display model, Leaflet layer reuse, marker and tooltip rendering, and online-count presentation. Preserve Presence ordering, self/coordinate filtering, escaped text, marker style and z-order, tooltip age labels, and optional-service fallback; locked regression tests remain unchanged.",
+      "files": [
+        {
+          "path": "src/services/map.js",
+          "previous_sha256": "4b184184bdf3a9f3ab9bb08a0d5186c3ca7df45b91fa205ca461af2476c72c93",
+          "sha256": "7ef3159450fa42bea6f735426c6732a6acc0a18ff06f70862c1b2375f3416390"
         }
       ]
     }

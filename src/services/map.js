@@ -528,6 +528,15 @@ function dgLiveSharePing(){
  }catch(e){}
 }
 function dgLiveMatesDraw(){
+ const modules=[window.DG_SELECT_PARK_LIVE_COLLABORATORS,window.DG_BUILD_PARK_LIVE_COLLABORATOR_VIEW,window.DG_PREPARE_PARK_LIVE_COLLABORATOR_LAYER,window.DG_RENDER_PARK_LIVE_COLLABORATOR_MARKER,window.DG_RENDER_PARK_LIVE_COLLABORATOR_COUNT];
+ if(modules.every(Boolean)){try{
+  if(typeof map==="undefined"||!map||!DG_PARK_CH||typeof L==="undefined")return;
+  const layer=modules[2].prepare({layer:DG_MATES_LAYER,map,leaflet:L,setLayer:value=>{DG_MATES_LAYER=value;}});
+  const members=modules[0].select({presence:DG_PARK_CH.presenceState(),currentUserId:USER.id});
+  const now=Date.now();
+  for(const member of members){const view=modules[1].build({member,color:id=>dgMateColor(id),now,format:dgCf});modules[3].render({layer,leaflet:L,member,view,escape:esc,translate:_tmf});}
+  modules[4].render({element:$("dgMatesNote"),count:members.length,translate:_tmff});
+ }catch(e){}return;}
  try{
   if(typeof map==="undefined"||!map||!DG_PARK_CH||typeof L==="undefined")return;
   if(!DG_MATES_LAYER){DG_MATES_LAYER=L.layerGroup().addTo(map);}
