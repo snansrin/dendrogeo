@@ -1155,3 +1155,10 @@ Her modülün tek bir dış API'si, sahibi olduğu açık durumu ve kendi testle
 - `application/surface/select-surface-draw-type.js` ve `select-surface-brush-type.js`, desteklenen sınıf seçimini mevcut sınır/fırça kapılarıyla uygular.
 - `application/surface/return-surface-to-hand-mode.js`, çizim ve fırçayı kapatıp normal harita modunu geri getirir.
 - `application/surface/update-surface-opacity.js`, görünür dolgu opaklığını sınırlar ve var olan gecikmeli kayıt davranışını sürdürür.
+
+## LULC harita ve tarama kontrolleri — 13 Ekim 2026
+
+- `application/surface/select-surface-scan-period.js`, mevcut düzenleme kapılarını koruyarak dönem seçimini normalize eder ve taramayı başlatır.
+- `application/surface/update-surface-sensitivity.js`, hassasiyet değerini sınırlar ve değişiklik sonrası harita/özet yenilemesini geciktirir.
+- `application/surface/focus-surface-class.js` görüntülenen sınıf odağını; `toggle-surface-candidates.js` aday katmanı görünürlüğünü yönetir.
+- `application/surface/select-surface-basemap.js`, yalnız OSM, uydu ve topo altlıkları arasında seçim yapar.
