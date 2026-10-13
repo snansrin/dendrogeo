@@ -5,8 +5,8 @@
 const DG_SURFACE_TYPES=window.DG_SURFACE_REVIEW_CONTRACTS.types;
 const DG_SURFACE_REVIEW_GEOMETRY=window.DG_SURFACE_REVIEW_GEOMETRY;
 // Millimetre snapping removes UTM round-trip noise at shared raster edges.
-function dgSurfaceProject(ring,epsg){return ring.map(p=>{const q=dgLcUtmForward(p[1],p[0],epsg);return[Math.round(q.x*1000)/1000,Math.round(q.y*1000)/1000];});}
-function dgSurfaceUnproject(geom,epsg){const old=DG_SURFACE_WGS_CACHE.get(geom);if(old?.epsg===epsg)return old.wgs;const wgs=geom.map(poly=>poly.map(ring=>ring.map(p=>{const q=dgLcUtmInverse(p[0],p[1],epsg);return[q.lon,q.lat];})));DG_SURFACE_WGS_CACHE.set(geom,{epsg,wgs});return wgs;}
+function dgSurfaceProject(ring,epsg){if(window.DG_PROJECT_SURFACE_REVIEW_RING)return window.DG_PROJECT_SURFACE_REVIEW_RING.project(ring,epsg,{forward:dgLcUtmForward,snap:(x,y)=>window.DG_SNAP_SURFACE_REVIEW_COORDINATE.snap(x,y)});return ring.map(p=>{const q=dgLcUtmForward(p[1],p[0],epsg);return[Math.round(q.x*1000)/1000,Math.round(q.y*1000)/1000];});}
+function dgSurfaceUnproject(geom,epsg){if(window.DG_UNPROJECT_SURFACE_REVIEW_GEOMETRY)return window.DG_UNPROJECT_SURFACE_REVIEW_GEOMETRY.unproject(geom,epsg,{cache:DG_SURFACE_WGS_CACHE,inverse:dgLcUtmInverse});const old=DG_SURFACE_WGS_CACHE.get(geom);if(old?.epsg===epsg)return old.wgs;const wgs=geom.map(poly=>poly.map(ring=>ring.map(p=>{const q=dgLcUtmInverse(p[0],p[1],epsg);return[q.lon,q.lat];})));DG_SURFACE_WGS_CACHE.set(geom,{epsg,wgs});return wgs;}
 function dgSurfaceArea(geom){return DG_SURFACE_REVIEW_GEOMETRY.area(geom);}
 function dgSurfaceClip(op,...geoms){
  const pc=window.polygonClipping;if(!pc||typeof pc[op]!=="function")throw Error("Sınır hesaplama modülü yüklenmedi.");
@@ -24,6 +24,7 @@ function dgSurfaceClip(op,...geoms){
  catch(e){if(!/Unable to find segment|SweepLine tree|Unable to complete output ring/i.test(String(e?.message||e)))throw e;throw Error("Sınır geometrisi sayısal olarak kararsız; tarama güvenli biçimde durduruldu. Park sınırını veya çakışan OSM geometrisini düzeltip yeniden deneyin.");}
 }
 function dgSurfacePark(outer,holes,epsg){
+ if(window.DG_BUILD_SURFACE_REVIEW_PARK_GEOMETRY)return window.DG_BUILD_SURFACE_REVIEW_PARK_GEOMETRY.build(outer,holes,epsg,{project:dgSurfaceProject,clip:dgSurfaceClip});
  const pc=window.polygonClipping;
  if(!pc)throw Error("Sınır hesaplama modülü yüklenmedi.");
  const rings=(outer||[]).filter(r=>r.length>=3).map(r=>dgSurfaceProject(r.map(p=>[p[1],p[0]]),epsg));
@@ -33,7 +34,7 @@ function dgSurfacePark(outer,holes,epsg){
  if(h.length)geom=dgSurfaceClip("difference",geom,...h);
  return geom;
 }
-function dgSurfaceCell(c,park,epsg){return dgSurfaceClip("intersection",[dgSurfaceProject(c.quadWgs,epsg)],park);}
+function dgSurfaceCell(c,park,epsg){if(window.DG_BUILD_SURFACE_REVIEW_CELL_GEOMETRY)return window.DG_BUILD_SURFACE_REVIEW_CELL_GEOMETRY.build(c,park,epsg,{project:dgSurfaceProject,clip:dgSurfaceClip});return dgSurfaceClip("intersection",[dgSurfaceProject(c.quadWgs,epsg)],park);}
 async function dgSurfaceFingerprint(cells,outer,holes,meta){
  const input=JSON.stringify({outer,holes,source:meta,grid:cells.map(c=>[c.row,c.col,c.epsg,c.classKey,c.areaM2,c.quadWgs])});
  const digest=await crypto.subtle.digest("SHA-256",new TextEncoder().encode(input));

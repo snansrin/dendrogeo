@@ -127,10 +127,14 @@
       "src/adapters/surface/load-sentinel-scene-bands.js",
       "src/adapters/surface/osm-review-objects.js",
       "src/adapters/surface/process-landcover-tile.js",
+      "src/adapters/surface/project-surface-review-ring.js",
       "src/adapters/surface/result-exports.js",
       "src/adapters/surface/review-store.js",
       "src/adapters/surface/review-worker.js",
+      "src/adapters/surface/unproject-surface-review-geometry.js",
       "src/application/surface/analyze-source.js",
+      "src/application/surface/build-surface-review-cell-geometry.js",
+      "src/application/surface/build-surface-review-park-geometry.js",
       "src/application/surface/build-surface-sampling-grid-cells.js",
       "src/application/surface/collect-sentinel-annual-evidence.js",
       "src/application/surface/collect-sentinel-scene-observations.js",
@@ -182,6 +186,7 @@
       "src/domain/surface/query-green-patches.js",
       "src/domain/surface/review-geometry.js",
       "src/domain/surface/select-surface-review-features.js",
+      "src/domain/surface/snap-surface-review-coordinate.js",
       "src/domain/surface/summarize-surface-review-parts.js",
       "src/domain/surface/validate-surface-grid-options.js",
       "src/services/grid-engine.js",
@@ -405,6 +410,7 @@
       "test/surface-mount-lifecycle-modules.test.mjs",
       "test/surface-network-budget.test.mjs",
       "test/surface-report-field-ux.test.mjs",
+      "test/surface-review-projection-modules.test.mjs",
       "test/surface-review-resolution-modules.test.mjs",
       "test/surface-review.test.mjs",
       "test/surface-scientific-contract.test.mjs",
@@ -458,9 +464,11 @@
     "src/adapters/surface/load-sentinel-scene-bands.js": "323ee2c4df24f93c252457d7890195bd2ae7464d7871a8bf799ac6588158253d",
     "src/adapters/surface/osm-review-objects.js": "2815aefe602f821c43e3261d2fef13ac9b8cadebbcde3d8c547a3011c44c79a1",
     "src/adapters/surface/process-landcover-tile.js": "bca73635599935803c8d6dae4bc092e1704c052baa86eb7772dbb7aab1de9ed0",
+    "src/adapters/surface/project-surface-review-ring.js": "ea724e97f51d9620ad5170fb86196ee40fd5a3e51b1b403954b69851123e10b6",
     "src/adapters/surface/result-exports.js": "f265bd122ca8a48a2b12d148af4567144407d536a676947c3ce0e1ad77ad8b8a",
     "src/adapters/surface/review-store.js": "880b1df297bbc828d8ffb8e00ab67901430e01c4664477d8e0678976f8d172aa",
     "src/adapters/surface/review-worker.js": "f3b50e06a9f5093eecb044b68d99dd100c79ec20c6eb49d99035505862bb3621",
+    "src/adapters/surface/unproject-surface-review-geometry.js": "9070c89642c1ea59c3e7dd368f11d7e0520c937a2c8982320c6a9bcafc4d18e5",
     "src/application/map/add-measurement-markers.js": "545ef0a9e18f9398573e3127037a7670518ceaaa0f87a9cce762ae1a7a0de78d",
     "src/application/map/arrive-at-waypoint.js": "a875bac2f370eb9ade3d9423240938b3ef2e43ad993b385dea563fb7e59d78a1",
     "src/application/map/clear-deleted-waypoint-list.js": "0431bd050f39f5577f0e24a124783778634b3251f095c241248d09d683da732a",
@@ -517,6 +525,8 @@
     "src/application/parks/track-park-live-position.js": "32bfdf3611468d04f4a40e9248527780fd86e7a003bb13f47f1eafd19efc6baa",
     "src/application/parks/upload-waypoint-csv.js": "3abbaf00f10d5662417388c7becdbd3274cfb664ce38a691a37ae4e03c43ae67",
     "src/application/surface/analyze-source.js": "8d273e073133da91503fe8b42a070abcc3d7119a9613b368e0a5cb1053f8adec",
+    "src/application/surface/build-surface-review-cell-geometry.js": "b8df099838b689708fbf5b0cf4ef1c86a6c80c5bb067de8b8734fd149b12c7f1",
+    "src/application/surface/build-surface-review-park-geometry.js": "10695842c7b9fad5bd040f4eeefeab196f73eb62446d5d4b2cadb2d83bc675d9",
     "src/application/surface/build-surface-sampling-grid-cells.js": "b6997cf98a13258b97dbbcd193a45f21e0950fba639b7379d6659a369d28533e",
     "src/application/surface/collect-sentinel-annual-evidence.js": "ee899148c3da38162bb2a4ed3f7c61f1e5682e85a265f23cb80a9d8fff9eb32d",
     "src/application/surface/collect-sentinel-scene-observations.js": "490f76887cb4a8a48a74847c645f7e21cfc206fb7d38f3d6e12c5c33226e12ea",
@@ -611,6 +621,7 @@
     "src/domain/surface/query-green-patches.js": "72bd10559329b561bc3f17e798ea37ae43dc5a1d1988fd16fcca495afe8c044b",
     "src/domain/surface/review-geometry.js": "29aa04a494002b4c93e9e09ff395cc62eeee3c70df984834c32d14938e91230e",
     "src/domain/surface/select-surface-review-features.js": "9c88034231e33e2cd24d906674c2525e8a215b07967fc4e4e62e7e8b7dac926a",
+    "src/domain/surface/snap-surface-review-coordinate.js": "5f7927053d2801e9ed24c2232573ad8b97e674f98ad8bad7c0c456b1253eb9f0",
     "src/domain/surface/summarize-surface-review-parts.js": "2e0e62559ec30628b6c89587e115b6cc2165603674bfde0186e2290f36ceae9f",
     "src/domain/surface/validate-surface-grid-options.js": "e64627a330cc14447ac08003554f6e898c65f7eb12ff329f5d83f3426bb94047",
     "src/domain/trees/allometry.js": "d111ec3ae452cf9893671eff9dda63c4e4c4ac8244199bd0c4aba89907dd8a1b",
@@ -624,7 +635,7 @@
     "src/services/lc-geo.js": "ade537a9ea592914288c9c3cead038834919f4919b63be2a3cce28cfe2b97d73",
     "src/services/lc-osm.js": "4244fd0ab3a64cbeae49c76609cc702c01a057beefb608fd483418e02b91f1cd",
     "src/services/lc-patches.js": "94bc7a7fd771672250655bbfd47a5f162bd06b84c23d2b03d2256bc057669919",
-    "src/services/lc-review.js": "37747d667bf5755262269e7dc4d43f06099f36c9f8558260e59acab57749b835",
+    "src/services/lc-review.js": "255c07a92416f3da5b9e25a8f484792d49d175f65a9cdd4887ed1bf7ce1b020b",
     "src/services/lc-s2.js": "8c16009e690c019da3bd3882cb833126cac9108845342fd059c3ba71e744c534",
     "src/services/lc-stac.js": "978c4be8c3bc4e7cda3f694d1f06290e661fed5bbd5b76b68719140edc18e71a",
     "src/services/lc-validate.js": "b4d8327c62940b1af1a53ddb087188816ff2359c8456c2755c7c853c5919f42b",
@@ -692,8 +703,8 @@
     "src/ui/sync-base-map-layer-selection.js": "2f93018846abac13f83486a1fc2b9df0cbb7f330cae202a0e91ef902c8263eeb",
     "src/ui/waypoint-gps-overlay.js": "e5bb70df065093b911d1c7ff5b5b9fb7db09b38df6bb7fb3271db7ea1e3f4b28",
     "src/utils/geo.js": "3e796768b3d55a3f07c4be3281c9437f1602b6d5e68151b2af7b101707baf294",
-    "src/utils/lazylibs.js": "36a495c5db6df52ed72872829e2e2c5dc7807ca6ce70f2ce90e7734865583d2c",
-    "src/workers/surface-worker.js": "04927dc1d2545dbd11ad31d19402247e365c09568dbeadab1ca51f680f2451e5",
+    "src/utils/lazylibs.js": "97330bbe1ff5e532bfe041c9f6eedca7c65be810ff02c0019853161d059bc317",
+    "src/workers/surface-worker.js": "a8363ac6d9583bb96f8053ceae525bb33039d0e476b9be5f54e887ac6dd00396",
     "test/base-map-layer-modules.test.mjs": "5399d699e74ffd66e92df312b4301202add7352b2b6c0be24fd51cda63e7baff",
     "test/critical-fixes.test.mjs": "3a2e62104763110bc734b3dc54a37cbf57c15b0038a78fdce35d56d9639c1989",
     "test/dbh-qa.test.mjs": "d3bbd29d292aa1214ede27a21ecb99315bc24a6346e2b0119f8c04eb8b532b95",
@@ -795,6 +806,7 @@
     "test/surface-mount-lifecycle-modules.test.mjs": "db9f479034142c1c7531b012ae509d8df069efba723e71b71e490fa110bba12e",
     "test/surface-network-budget.test.mjs": "33e69c3d0de1d81561a9707dc3e9fd2eb8730f4a7331a90bd16171fb2677887d",
     "test/surface-report-field-ux.test.mjs": "cc0c2e640f2539f2062546f4acc6e8b590bfef256f47fd54cf5100d0c4b50cdc",
+    "test/surface-review-projection-modules.test.mjs": "0a5251d4134b958a48c1b9b7ccfbdc138c6591897792cdbdd9d9905a456e416c",
     "test/surface-review-resolution-modules.test.mjs": "047f611c00e76b553d8a52b4a1a59366a97504bcf5356bcd43bfcafa3ae2a277",
     "test/surface-review.test.mjs": "79c8dc6f99883699dd2ac4ad890d1030807f273e3f094f013969e677ff669f2c",
     "test/surface-scientific-contract.test.mjs": "d4c7b1ea5707b77997921bc06b50973618409f9e192fcd83a6152a391e75d299",
@@ -1831,6 +1843,27 @@
           "path": "src/workers/surface-worker.js",
           "previous_sha256": "714705c45e49950cbcfe89ac67a5674414d181bd86f959b96dc7ee94743736c6",
           "sha256": "04927dc1d2545dbd11ad31d19402247e365c09568dbeadab1ca51f680f2451e5"
+        }
+      ]
+    },
+    {
+      "date": "2026-10-13",
+      "scope": "User-authorized seventy-second five-module split of locked surface-review coordinate and park geometry: millimetre coordinate snapping, WGS84 ring projection, cached inverse projection, park/hole construction, and cell clipping. Preserve coordinate ordering, EPSG conversions, geometry cache identity, hole subtraction, worker behavior, and locked review regressions.",
+      "files": [
+        {
+          "path": "src/services/lc-review.js",
+          "previous_sha256": "37747d667bf5755262269e7dc4d43f06099f36c9f8558260e59acab57749b835",
+          "sha256": "255c07a92416f3da5b9e25a8f484792d49d175f65a9cdd4887ed1bf7ce1b020b"
+        },
+        {
+          "path": "src/utils/lazylibs.js",
+          "previous_sha256": "36a495c5db6df52ed72872829e2e2c5dc7807ca6ce70f2ce90e7734865583d2c",
+          "sha256": "97330bbe1ff5e532bfe041c9f6eedca7c65be810ff02c0019853161d059bc317"
+        },
+        {
+          "path": "src/workers/surface-worker.js",
+          "previous_sha256": "04927dc1d2545dbd11ad31d19402247e365c09568dbeadab1ca51f680f2451e5",
+          "sha256": "a8363ac6d9583bb96f8053ceae525bb33039d0e476b9be5f54e887ac6dd00396"
         }
       ]
     }
