@@ -1,6 +1,7 @@
-const DIRECT_CLIENT_ACCESS=/\b(?:sb|client|storage)\s*\.\s*from\s*\(/g;
-const DIRECT_AUTH_ACCESS=/\bclient\s*\.\s*auth\s*\./g;
-const DIRECT_CHANNEL_ACCESS=/\bclient\s*\.\s*channel\s*\(/g;
+const SDK_CLIENT="(?:sb|client|supabase|supabaseClient)";
+const DIRECT_CLIENT_ACCESS=new RegExp(`\\b(?:${SDK_CLIENT})\\s*\\.\\s*from\\s*\\(|\\b(?:${SDK_CLIENT})\\s*\\.\\s*storage\\s*\\.\\s*from\\s*\\(|\\bstorage\\s*\\.\\s*from\\s*\\(`,"g");
+const DIRECT_AUTH_ACCESS=new RegExp(`\\b${SDK_CLIENT}\\s*\\.\\s*auth\\s*\\.`,"g");
+const DIRECT_CHANNEL_ACCESS=new RegExp(`\\b${SDK_CLIENT}\\s*\\.\\s*channel\\s*\\(`,"g");
 
 export function findDirectPersistenceAccess(modules){
  const violations=[];
