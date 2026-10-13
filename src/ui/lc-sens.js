@@ -859,6 +859,7 @@ async function dgSensRawView(on){
  if(epoch===DG_SENS.epoch&&DG_SENS.record===rec)dgSensUpdateSummary();
 }
 function dgSensBrushStop(){
+ const module=window.DG_SURFACE_BRUSH_POINTER_SESSION;if(module)return module.stop({state:DG_SENS,map});
  const b=DG_SENS.brush;if(!b)return;DG_SENS.brush=null;
  for(const [event,fn] of b.handlers)b.container.removeEventListener(event,fn,true);
  try{if(b.stroke)b.container.releasePointerCapture(b.stroke.pointerId);}catch(e){}
@@ -913,6 +914,8 @@ function dgSensBrushToggle(){
  const diameter=Number(document.getElementById('dgSensBrushSize')?.value||DG_SENS.brushDiameter);
  if(!window.DG_SURFACE_REVIEW.types[type]||![5,10,20,40].includes(diameter))return;
  DG_SENS.brushType=type;DG_SENS.brushDiameter=diameter;container.classList.add('dg-paint-brush-active');
+ const session=window.DG_SURFACE_BRUSH_POINTER_SESSION;
+ if(session)return session.start({state:DG_SENS,map,leaflet:L,container,type,diameter,colors:DG_SENS_COLORS,forward:dgLcUtmForward,onCommit:dgSensBrushCommit,onError:error=>{DG_SENS.status=String(error.message||error);dgSensUpdateStatus();},render:dgSensRender});
  const b=DG_SENS.brush={container,type,diameter,epoch:DG_SENS.epoch,record:DG_SENS.record,dragging:map.dragging.enabled(),zoom:map.doubleClickZoom.enabled(),touchAction:container.style.touchAction,cursor:container.style.cursor,handlers:[]};
  map.dragging.disable();map.doubleClickZoom.disable();container.style.touchAction='none';container.style.cursor='crosshair';
  const point=e=>{const p=map.mouseEventToLatLng(e);return[p.lat,p.lng];};
@@ -934,6 +937,8 @@ function dgSensBrushToggle(){
  dgSensRender();
 }
 async function dgSensBrushCommit(points,type,diameter){
+ const module=window.DG_COMMIT_SURFACE_BRUSH_STROKE;
+ if(module)return module.commit({points,type,diameter,state:DG_SENS,types:window.DG_SURFACE_REVIEW.types,allowed:[5,10,20,40],validate:input=>window.DG_VALIDATE_SURFACE_BRUSH_STROKE.valid(input),selectCells:dgSensBrushCellKeys,cells:dgSensCells,cellKey:dgSensCellKey,createDecision:(cell,classKey,ts,strokeId)=>dgSensSetCellDecision(cell,classKey,ts,strokeId),appendHistory:dgSensPushBrushHistory,timestamp:()=>new Date().toISOString(),strokeId:()=>Date.now().toString(36)+"-"+(++DG_SENS.strokeSeq).toString(36),dirty:dgSensDirty,refresh:dgSensRefreshLayer,summary:dgSensUpdateSummary,status:dgSensUpdateStatus,save:dgSensSave});
  if(!points.length||points.length>300||!points.every(p=>Array.isArray(p)&&p.length===2&&p.every(Number.isFinite)&&Math.abs(p[0])<=90&&Math.abs(p[1])<=180)||!window.DG_SURFACE_REVIEW.types[type]||![5,10,20,40].includes(diameter)||!DG_SENS.record||DG_SENS.rawView||DG_SENS.busy||DG_SENS.saving)return;
  const rec=DG_SENS.record;
  const keys=dgSensBrushCellKeys(points,diameter);if(!keys.length)return;
@@ -943,6 +948,8 @@ async function dgSensBrushCommit(points,type,diameter){
  dgSensDirty();dgSensRefreshLayer();dgSensUpdateSummary();dgSensUpdateStatus();if(DG_SENS.record===rec)await dgSensSave();
 }
 function dgSensBrushUndo(){
+ const module=window.DG_UNDO_SURFACE_BRUSH_STROKE;
+ if(module)return module.undo({record:DG_SENS.record,rawView:DG_SENS.rawView,busy:DG_SENS.busy,saving:DG_SENS.saving,historyModule:window.DG_SURFACE_BRUSH_HISTORY,dirty:dgSensDirty,refresh:dgSensRefreshLayer,summary:dgSensUpdateSummary,status:dgSensUpdateStatus,save:dgSensSave});
  if(!DG_SENS.record||DG_SENS.rawView||DG_SENS.busy||DG_SENS.saving)return;
  const historyModule=window.DG_SURFACE_BRUSH_HISTORY;if(historyModule){if(historyModule.undoLatest(DG_SENS.record)){dgSensDirty();dgSensRefreshLayer();dgSensUpdateSummary();dgSensUpdateStatus();dgSensSave();}return;}
  const rec=DG_SENS.record,history=Array.isArray(rec.brushHistory)?rec.brushHistory:[],stroke=history.pop();rec.brushHistory=history;if(!stroke)return;let changed=false;
@@ -952,6 +959,7 @@ function dgSensBrushUndo(){
 
 function dgSensBrushConfig(){
  const type=document.getElementById('dgSensBrushType')?.value||DG_SENS.brushType,size=Number(document.getElementById('dgSensBrushSize')?.value||DG_SENS.brushDiameter);
+ const module=window.DG_UPDATE_SURFACE_BRUSH_CONFIG;if(module)return module.update({state:DG_SENS,type,size,types:window.DG_SURFACE_REVIEW.types,allowed:[5,10,20,40],stop:dgSensBrushStop,render:dgSensRender});
  if(window.DG_SURFACE_REVIEW.types[type])DG_SENS.brushType=type;
  if([5,10,20,40].includes(size))DG_SENS.brushDiameter=size;
  dgSensBrushStop();dgSensRender();

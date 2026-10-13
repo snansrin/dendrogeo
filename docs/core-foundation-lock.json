@@ -439,7 +439,7 @@
     "src/ui/grid-waypoint-controller.js": "eb4f58d30fd59a46840f58f2b428b79d8afc9e1211d48d26ea2cfb74ba2b3531",
     "src/ui/grid-waypoint-layer.js": "0c6db2a4329704ec9106735cc0a26b7ce01803666ee4b19d356c976d298eba2f",
     "src/ui/lc-report.js": "f8182bce9b5dbd8dcecceaa7afee69b52d12e7883badc65e27fb93e94ca2abf9",
-    "src/ui/lc-sens.js": "2f9b99e7baa4d6320e0f9ffd7341a934cf023bfff70f51518c9ed4cf156b9909",
+    "src/ui/lc-sens.js": "7d5f866e665eb20f715f83268d9f6b47463c79bcd1469c503b892acc7518bcd2",
     "src/ui/map-layer-visibility.js": "50d033fba51e90f49ae39254e0700b510938be4d271aada8a9a400be727c1a60",
     "src/ui/park-admin-renderer.js": "7a4ce3606df653784f63ef4055f64d5d66ab57bd5ae749f26aa1851487297111",
     "src/ui/park-admin-status.js": "a73ea8b2ecafd3be326fb6357dad04ce8675148966bd55c1449c88154d5dabba",
@@ -466,7 +466,7 @@
     "src/ui/park-schema-warning.js": "9222beba708e3054eca73b0e30df0224abb264055d9ac3f8f6bf683823adcad8",
     "src/ui/state.js": "5feada9bc2052655d9be405043ffb6f71f39d51fcb58e189089c3d7d3fc8bafc",
     "src/utils/geo.js": "3e796768b3d55a3f07c4be3281c9437f1602b6d5e68151b2af7b101707baf294",
-    "src/utils/lazylibs.js": "6d5f5deb39095138dcf0bf9b3befead339879f8ebd632422e5dd9f189bbbdb42",
+    "src/utils/lazylibs.js": "bc1459701c8fb0c45c72bbb7ca4c328ab7840d7c9a42d327695f252f60e6baa6",
     "src/workers/surface-worker.js": "02878b04478f0c555b536f34d9807a0bf824d0f738d1468a8840069cc61e85ed",
     "test/critical-fixes.test.mjs": "3a2e62104763110bc734b3dc54a37cbf57c15b0038a78fdce35d56d9639c1989",
     "test/dbh-qa.test.mjs": "d3bbd29d292aa1214ede27a21ecb99315bc24a6346e2b0119f8c04eb8b532b95",
@@ -1056,6 +1056,22 @@
           "path": "src/utils/lazylibs.js",
           "previous_sha256": "e3081d8465cc069ac7588cdd6ee6e93985413bb8b48c949d6064b2ed66ad4282",
           "sha256": "6d5f5deb39095138dcf0bf9b3befead339879f8ebd632422e5dd9f189bbbdb42"
+        }
+      ]
+    },
+    {
+      "date": "2026-10-13",
+      "scope": "User-authorized thirty-seventh five-module split of locked surface brush interaction: Leaflet pointer-session adapter, WGS84/class/diameter validation, per-cell stroke application and persistence, ownership-safe undo, and brush configuration update. Preserve pointer capture, map drag/zoom restoration, 300-point cap, spacing threshold, stale-park guard, visual-cell provenance, history ownership and save ordering; locked regression tests remain unchanged.",
+      "files": [
+        {
+          "path": "src/ui/lc-sens.js",
+          "previous_sha256": "2f9b99e7baa4d6320e0f9ffd7341a934cf023bfff70f51518c9ed4cf156b9909",
+          "sha256": "7d5f866e665eb20f715f83268d9f6b47463c79bcd1469c503b892acc7518bcd2"
+        },
+        {
+          "path": "src/utils/lazylibs.js",
+          "previous_sha256": "6d5f5deb39095138dcf0bf9b3befead339879f8ebd632422e5dd9f189bbbdb42",
+          "sha256": "bc1459701c8fb0c45c72bbb7ca4c328ab7840d7c9a42d327695f252f60e6baa6"
         }
       ]
     }
