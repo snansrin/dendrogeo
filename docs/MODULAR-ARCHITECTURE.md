@@ -1032,3 +1032,11 @@ Her modülün tek bir dış API'si, sahibi olduğu açık durumu ve kendi testle
 - `application/surface/validation-campaign-archive.js`, servis API'sini adapter üzerinden kurar; `validation-campaign-save-queue.js` başarısız kayıt sonrasında da yerel taslak sırasını sürdürür.
 - `application/surface/handle-validation-campaign-save-failure.js`, yalnız hâlâ etkin kampanyanın cihaz yazma hatasını gösterir.
 - `domain/surface/select-validation-campaign.js`, owner ve fingerprint eşleşmesiyle geçerli park kampanyasını veya taşınabilir eski cihaz taslağını seçer. `lc-validate.js` eski global API ve bağımsız bilimsel hesapları korur.
+
+## LULC yüzey fırçası — 13 Ekim 2026
+
+- `domain/surface/select-surface-brush-cells.js`, metrik fırça çizgisini park geometrisine kırpar ve yalnız raster hücreleriyle gerçek kesişimleri seçer.
+- `domain/surface/create-surface-cell-decision.js`, mevcut `visual-cell` düzeltme kaydını aynı alanlarla kurar; geçerli sınıfları UI sözleşmesinden alır.
+- `application/surface/surface-brush-history.js`, yirmi darbeli geçmiş sınırını ve yalnız hâlâ aynı darbeye ait hücreleri geri alan undo davranışını tutar.
+- `application/surface/migrate-legacy-brush-masks.js`, eski sürekli fırça poligonlarını kesişen hücre kararlarına taşır; park dışı geometriyi ve çözümlenemeyen maskeleri korur.
+- `domain/surface/surface-geometry-overlap.js`, pahalı kesin kesişim öncesi bounds filtresini sağlar. Kilitli `lc-sens.js` eski global girişlerini koruyarak modülleri birleştirir.

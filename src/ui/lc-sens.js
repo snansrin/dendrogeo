@@ -835,6 +835,8 @@ function dgSensBrushStop(){
  if(b.zoom)map.doubleClickZoom.enable();
 }
 function dgSensBrushCellKeys(points,diameter){
+ const module=window.DG_SURFACE_BRUSH_CELL_SELECTION;
+ if(module)return module.select({points,diameter,epsg:DG_SENS.epsg,polygonClipping:window.polygonClipping,parkGeometry:DG_SENS.parkGeometry,geometry:DG_SENS.geometry,cells:dgSensCells(),cellKey:dgSensCellKey,gridLineMask:dgGridLineMask,bounds:dgSurfaceBounds,overlap:dgSurfaceOverlap,area:dgSurfaceArea});
  const pc=window.polygonClipping;if(!pc||!DG_SENS.parkGeometry||!DG_SENS.geometry)return[];
  const masks=dgGridLineMask({pts:points,w:diameter/2},DG_SENS.epsg);if(!masks.length)return[];
  const brush=pc.intersection(pc.union(...masks),DG_SENS.parkGeometry);if(!brush.length)return[];
@@ -845,12 +847,16 @@ function dgSensBrushCellKeys(points,diameter){
  return keys;
 }
 function dgSensSetCellDecision(cell,toCls,ts=new Date().toISOString(),strokeId=null){
+ const module=window.DG_SURFACE_CELL_DECISION;
+ if(module){const applied=module.create({cell,toClass:toCls,types:window.DG_SURFACE_REVIEW.types,timestamp:ts,strokeId,cellKey:dgSensCellKey});if(applied)DG_SENS.record.corrections[applied.key]=applied.decision;return applied;}
  if(!cell||!window.DG_SURFACE_REVIEW.types[toCls])return null;
  const key=dgSensCellKey(cell),decision={from:cell.classKey,to:toCls,method:"visual-cell",ts};if(strokeId)decision.brushStrokeId=strokeId;
  DG_SENS.record.corrections[key]=decision;return{key,decision};
 }
-function dgSensPushBrushHistory(rec,stroke){if(!Array.isArray(rec.brushHistory))rec.brushHistory=[];rec.brushHistory.push(stroke);if(rec.brushHistory.length>20)rec.brushHistory.splice(0,rec.brushHistory.length-20);}
+function dgSensPushBrushHistory(rec,stroke){const module=window.DG_SURFACE_BRUSH_HISTORY;if(module)return module.append(rec,stroke);if(!Array.isArray(rec.brushHistory))rec.brushHistory=[];rec.brushHistory.push(stroke);if(rec.brushHistory.length>20)rec.brushHistory.splice(0,rec.brushHistory.length-20);}
 function dgSensMigrateBrushMasks(rec,cells,geometries,park,epsg){
+ const module=window.DG_LEGACY_BRUSH_MASK_MIGRATION;
+ if(module)return module.migrate({record:rec,cells,geometries,park,epsg,polygonClipping:window.polygonClipping,featureGeometry:dgSurfaceFeatureGeometry,bounds:dgSurfaceBounds,area:dgSurfaceArea,overlap:dgSensOverlapBounds,cellKey:dgSensCellKey,timestamp:()=>new Date().toISOString(),createDecision:({cell,toClass,timestamp,strokeId})=>window.DG_SURFACE_CELL_DECISION?.create({cell,toClass,types:window.DG_SURFACE_REVIEW.types,timestamp,strokeId,cellKey:dgSensCellKey}),appendHistory:dgSensPushBrushHistory});
  const old=Array.isArray(rec?.features)?rec.features:[];if(!old.some(f=>f.method==="visual-brush"))return false;
  const pc=window.polygonClipping,keep=[];rec.corrections=rec.corrections&&typeof rec.corrections==="object"?rec.corrections:{};let migrated=false;
  for(let i=0;i<old.length;i++){const f=old[i];if(f.method!=="visual-brush"){keep.push(f);continue;}
@@ -865,7 +871,7 @@ function dgSensMigrateBrushMasks(rec,cells,geometries,park,epsg){
  }
  if(migrated)rec.features=keep;return migrated;
 }
-function dgSensOverlapBounds(a,geometry){if(!geometry?.length)return false;const b=dgSurfaceBounds(geometry);return dgSurfaceOverlap(a,b);}
+function dgSensOverlapBounds(a,geometry){const module=window.DG_SURFACE_GEOMETRY_OVERLAP;if(module)return module.bounds(a,geometry,dgSurfaceBounds,dgSurfaceOverlap);if(!geometry?.length)return false;const b=dgSurfaceBounds(geometry);return dgSurfaceOverlap(a,b);}
 function dgSensBrushToggle(){
  if(DG_SENS.brush){dgSensBrushStop();dgSensRender();return;}
  if(!DG_SENS.record||DG_SENS.rawView||DG_SENS.busy||DG_SENS.saving||DG_SENS.exporting)return;
@@ -905,6 +911,7 @@ async function dgSensBrushCommit(points,type,diameter){
 }
 function dgSensBrushUndo(){
  if(!DG_SENS.record||DG_SENS.rawView||DG_SENS.busy||DG_SENS.saving)return;
+ const historyModule=window.DG_SURFACE_BRUSH_HISTORY;if(historyModule){if(historyModule.undoLatest(DG_SENS.record)){dgSensDirty();dgSensRefreshLayer();dgSensUpdateSummary();dgSensUpdateStatus();dgSensSave();}return;}
  const rec=DG_SENS.record,history=Array.isArray(rec.brushHistory)?rec.brushHistory:[],stroke=history.pop();rec.brushHistory=history;if(!stroke)return;let changed=false;
  for(const entry of [...stroke.changes].reverse()){const current=rec.corrections?.[entry.key];if(current?.brushStrokeId!==entry.strokeId)continue;if(entry.before)rec.corrections[entry.key]=entry.before;else delete rec.corrections[entry.key];changed=true;}
  if(changed){dgSensDirty();dgSensRefreshLayer();dgSensUpdateSummary();dgSensUpdateStatus();dgSensSave();}

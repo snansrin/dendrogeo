@@ -439,7 +439,7 @@
     "src/ui/grid-waypoint-controller.js": "eb4f58d30fd59a46840f58f2b428b79d8afc9e1211d48d26ea2cfb74ba2b3531",
     "src/ui/grid-waypoint-layer.js": "0c6db2a4329704ec9106735cc0a26b7ce01803666ee4b19d356c976d298eba2f",
     "src/ui/lc-report.js": "b8818f2e07ff8278d4dc40038c705c02e8724f84fa7f7c79d945d991afd57730",
-    "src/ui/lc-sens.js": "cb37b5030286911db076817c11209018b22ecea4a75296ad795d6e48fdd6101e",
+    "src/ui/lc-sens.js": "0a4c6dc640dbf796c0a803ba189a2b2811a66f65534d6d2d57fe52fd3ad8baf6",
     "src/ui/map-layer-visibility.js": "50d033fba51e90f49ae39254e0700b510938be4d271aada8a9a400be727c1a60",
     "src/ui/park-admin-renderer.js": "7a4ce3606df653784f63ef4055f64d5d66ab57bd5ae749f26aa1851487297111",
     "src/ui/park-admin-status.js": "a73ea8b2ecafd3be326fb6357dad04ce8675148966bd55c1449c88154d5dabba",
@@ -466,7 +466,7 @@
     "src/ui/park-schema-warning.js": "9222beba708e3054eca73b0e30df0224abb264055d9ac3f8f6bf683823adcad8",
     "src/ui/state.js": "5feada9bc2052655d9be405043ffb6f71f39d51fcb58e189089c3d7d3fc8bafc",
     "src/utils/geo.js": "3e796768b3d55a3f07c4be3281c9437f1602b6d5e68151b2af7b101707baf294",
-    "src/utils/lazylibs.js": "ddab1326b833d28700d4387e617c3e1b498a773aacbab12dd4b56a8c8ad2d444",
+    "src/utils/lazylibs.js": "a933d5f9f91a35bb559c0ef8cd4ff106e55b1626eedeac3b5d9746f62c28ca21",
     "src/workers/surface-worker.js": "02878b04478f0c555b536f34d9807a0bf824d0f738d1468a8840069cc61e85ed",
     "test/critical-fixes.test.mjs": "3a2e62104763110bc734b3dc54a37cbf57c15b0038a78fdce35d56d9639c1989",
     "test/dbh-qa.test.mjs": "d3bbd29d292aa1214ede27a21ecb99315bc24a6346e2b0119f8c04eb8b532b95",
@@ -944,6 +944,22 @@
           "path": "src/utils/lazylibs.js",
           "previous_sha256": "94b5c64ef90e59dab741e70ec84a7e100b641319539101391d01b1c1216ff64b",
           "sha256": "ddab1326b833d28700d4387e617c3e1b498a773aacbab12dd4b56a8c8ad2d444"
+        }
+      ]
+    },
+    {
+      "date": "2026-10-13",
+      "scope": "User-authorized thirtieth five-module split of locked surface-review brush responsibilities: park-clipped cell selection, visual cell decision construction, bounded undo history, legacy continuous-mask migration, and geometry bounds overlap. Preserve raster-cell-only editing, park clipping, exact intersection threshold, correction ownership, undo behavior, legacy mask retention, and existing brush UI contract; locked regression tests remain unchanged.",
+      "files": [
+        {
+          "path": "src/ui/lc-sens.js",
+          "previous_sha256": "cb37b5030286911db076817c11209018b22ecea4a75296ad795d6e48fdd6101e",
+          "sha256": "0a4c6dc640dbf796c0a803ba189a2b2811a66f65534d6d2d57fe52fd3ad8baf6"
+        },
+        {
+          "path": "src/utils/lazylibs.js",
+          "previous_sha256": "ddab1326b833d28700d4387e617c3e1b498a773aacbab12dd4b56a8c8ad2d444",
+          "sha256": "a933d5f9f91a35bb559c0ef8cd4ff106e55b1626eedeac3b5d9746f62c28ca21"
         }
       ]
     }
