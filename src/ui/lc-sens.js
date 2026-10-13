@@ -622,6 +622,7 @@ function dgSensFindObjectAt(latlng,elements=window.DG_SURFACE_OSM?.elements||[])
  return{type:best.feature.type,geometry,osmId:best.feature.osmId||"OSM"};
 }
 function dgSensObjectPickStart(){
+ const module=window.DG_START_SURFACE_OBJECT_PICK;if(module)return module.start({state:DG_SENS,data:window.DG_SURFACE_OSM,boundary:JSON.stringify(PARK_POLY),hasStored:(DG_SENS.record?.objectFeatures||[]).length>0,guard:dgSensGuard,stopBrush:dgSensBrushStop,cancelDraw:dgSensDrawCancel,cancelObject:dgSensObjectCancel,map,onPick:dgSensObjectPickAt,renderTools:dgSensRenderPaintTools,updateStatus:dgSensUpdateStatus,toast,unavailableMessage:_tvs("OSM nesneleri henüz yüklenemedi. Su sınırı otomatik aranır; çevrimiçi olduğunuzda Yeniden Tara’yı deneyin."),promptMessage:_tvs("Sınırını seçeceğiniz OSM nesnesine dokunun.")});
  if(DG_SENS.rawView||DG_SENS.busy||DG_SENS.saving||DG_SENS.exporting)return;
  const data=window.DG_SURFACE_OSM,stored=(DG_SENS.record?.objectFeatures||[]).length>0;if((!data||data.boundary!==JSON.stringify(PARK_POLY))&&!stored){toast(_tvs("OSM nesneleri henüz yüklenemedi. Su sınırı otomatik aranır; çevrimiçi olduğunuzda Yeniden Tara’yı deneyin."),"warn");return;}
  dgSensBrushStop();dgSensDrawCancel();dgSensObjectCancel();DG_SENS.objectPick=true;dgSensGuard(true);DG_SENS.status=_tvs("Sınırını seçeceğiniz OSM nesnesine dokunun.");
@@ -637,6 +638,7 @@ function dgSensObjectPickAt(ev){
  dgSensRenderPaintTools();dgSensOpenMenu("dgSensBoundaryDetails");dgSensUpdateStatus();
 }
 function dgSensObjectCancel(){
+ const module=window.DG_CANCEL_SURFACE_OBJECT_PICK;if(module){DG_SENS.objectPreviewLayer=module.cancel({state:DG_SENS,map:typeof map!=="undefined"?map:null,onPick:dgSensObjectPickAt,preview:window.DG_SURFACE_OBJECT_PREVIEW,layer:DG_SENS.objectPreviewLayer,removeLayer:(target,layer)=>target.removeLayer(layer)});return;}
  if(DG_SENS.objectPick&&typeof map!=="undefined"&&map)map.off("click",dgSensObjectPickAt);
  DG_SENS.objectPick=false;DG_SENS.objectPreview=null;
  const preview=window.DG_SURFACE_OBJECT_PREVIEW;if(preview)preview.remove({map:typeof map!=="undefined"?map:null,layer:DG_SENS.objectPreviewLayer});else if(DG_SENS.objectPreviewLayer&&typeof map!=="undefined"&&map)map.removeLayer(DG_SENS.objectPreviewLayer);
@@ -669,6 +671,7 @@ function dgSensObjectApply(){
  });
 }
 async function dgSensObjectApplyAndAccept(){
+ const runner=window.DG_APPLY_AND_ACCEPT_SURFACE_OBJECT_BOUNDARY;if(runner)return runner.run({apply:dgSensObjectApply,accept:dgSensAccept,isAccepted:()=>!DG_SENS.record?.draftDirty&&!!DG_SENS.record?.acceptedAt});
  const module=window.DG_APPLY_SURFACE_OBJECT_BOUNDARY;if(module)return module.run({apply:dgSensObjectApply,accept:dgSensAccept,isAccepted:()=>!DG_SENS.record?.draftDirty&&!!DG_SENS.record?.acceptedAt});
  const applied=await dgSensObjectApply();
  if(!applied)return false;
@@ -816,8 +819,8 @@ function dgSensRenderAccepted(){
  host.innerHTML='<b>'+esc(_tvs("Kayıtlı analiz sonucu"))+'</b><p class="dg-meta">'+esc(new Date(r.acceptedAt).toLocaleString())+'</p>'+dgSensAreaBars(r.areas)+'<p class="dg-sens-hint">'+esc(_tvs("Yayın isteğinde bu kayıt rapora aktarılır. Kaydedilmemiş önizleme rapora girmez."))+'</p>';
 }
 
-function dgSensFeatures(rec=DG_SENS.record){if(DG_SENS.rawView)return [];return[...(rec?.useObjects!==false?rec?.objectFeatures||[]:[]),...(rec?.features||[])];}
-function dgSensObjects(on){if(DG_SENS.rawView||!DG_SENS.record||DG_SENS.busy||DG_SENS.saving)return;DG_SENS.record.useObjects=on;dgSensDirty();dgSensRepartition().then(ok=>ok&&dgSensSave());}
+function dgSensFeatures(rec=DG_SENS.record){const module=window.DG_SELECT_SURFACE_OBJECT_FEATURES;if(module)return module.select({rawView:DG_SENS.rawView,record:rec});if(DG_SENS.rawView)return [];return[...(rec?.useObjects!==false?rec?.objectFeatures||[]:[]),...(rec?.features||[])];}
+function dgSensObjects(on){const module=window.DG_TOGGLE_SURFACE_OBJECTS;if(module)return module.toggle({state:DG_SENS,on,dirty:dgSensDirty,repartition:dgSensRepartition,save:dgSensSave});if(DG_SENS.rawView||!DG_SENS.record||DG_SENS.busy||DG_SENS.saving)return;DG_SENS.record.useObjects=on;dgSensDirty();dgSensRepartition().then(ok=>ok&&dgSensSave());}
 
 async function dgSensRawView(on){
  const switchModule=window.DG_SWITCH_SURFACE_RAW_VIEW,allowed=window.DG_IS_SURFACE_RAW_VIEW_TRANSITION_ALLOWED,capture=window.DG_CAPTURE_SURFACE_EDIT_VIEW_SNAPSHOT,prepare=window.DG_PREPARE_SURFACE_RAW_VIEW_TRANSITION,restore=window.DG_RESTORE_SURFACE_EDIT_VIEW_CACHE;

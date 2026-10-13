@@ -47,6 +47,8 @@ Kullanıcı, kilitli servislerin çalışmaları bozulmadan beşli modüller hal
 
 47. grupta aynı editörde tarama dönemi, spektral hassasiyet, sınıf odağı, aday görünürlüğü ve altlık haritası seçimi beş uygulama modülüne taşındı. Kayıt/ham görünüm/fırça/meşguliyet kapıları, 250 ms kaydırıcı debounce'u, `ytd` varsayılanı ve desteklenen üç altlık korundu. Raster ve geometri hesaplarına dokunulmadı; kilitli regresyon testleri değiştirilmedi.
 
+48. grupta OSM nesne ayak izlerinin seçimi ve sınır önizleme yaşam döngüsü beş yeni modüle ayrıldı. Görünür nesne ve elle çizilmiş sınır sırası, ham görünüm ve düzenleme kapıları, eşleşen park OSM kaynağı kontrolü, harita tıklama oturumunun temizlenmesi, repartition-kaydet sırası ve yalnız başarılı taslak sonrası kabul akışı korundu. Kilitli regresyon testleri değiştirilmedi.
+
 İkinci grupta kilitli `src/services/map.js` içindeki koordinat doğrulama, waypoint hedef seçimi, ölçüm popup'ı, chunk'lı işaretçi çizimi ve waypoint listesi sunumu beş yeni modüle taşındı. Marker idempotency/token iptali, GPS ve veri yazma kapıları değişmedi. Kilitli harita ve waypoint regresyonları çalıştırıldı, dosyalar değiştirilmedi; servis hash istisnası manifestte kayıtlıdır.
 
 Üçüncü grupta aynı kilitli servisten waypoint seçimi, harita viewport işlemleri, saha yönlendirme metni, waypoint marker çizimi ve GPS yön katmanı beş modüle ayrıldı. Seçim/yeniden çizim sırası, 50 m ve GPS belirsizliği metin eşikleri, harita odaklama ve veri yazma sınırı korundu. Kilitli testler değiştirilmedi; yeni servis hash'i ayrı bir manifest istisnasıdır.

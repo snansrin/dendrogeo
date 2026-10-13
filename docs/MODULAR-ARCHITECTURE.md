@@ -1162,3 +1162,10 @@ Her modülün tek bir dış API'si, sahibi olduğu açık durumu ve kendi testle
 - `application/surface/update-surface-sensitivity.js`, hassasiyet değerini sınırlar ve değişiklik sonrası harita/özet yenilemesini geciktirir.
 - `application/surface/focus-surface-class.js` görüntülenen sınıf odağını; `toggle-surface-candidates.js` aday katmanı görünürlüğünü yönetir.
 - `application/surface/select-surface-basemap.js`, yalnız OSM, uydu ve topo altlıkları arasında seçim yapar.
+
+## LULC OSM nesne seçimi ve sınır önizlemesi — 13 Ekim 2026
+
+- `domain/surface/select-surface-object-features.js`, ham görünüm hariç tutulduğunda OSM ayak izleri ve elle çizilmiş sınırları mevcut sırayla birleştirir.
+- `application/surface/toggle-surface-objects.js`, değişikliği mevcut repartition ve taslak kayıt akışından geçirir.
+- `application/surface/start-surface-object-pick.js` parkla eşleşen OSM kaynağını denetler ve harita seçim oturumunu başlatır; `cancel-surface-object-pick.js` tıklama dinleyicisiyle geçici katmanı temizler.
+- `application/surface/apply-and-accept-surface-object-boundary.js`, sınır uygulaması ve taslak kaydı başarılı olmadan kabul adımına geçmez.
