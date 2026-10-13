@@ -133,6 +133,7 @@ async function dgRefreshPendingBadge(){
 }
 
 function dgTreeOnlyPending(){
+  if(window.DG_UPDATE_ADMIN_TREE_FILTER)return window.DG_UPDATE_ADMIN_TREE_FILTER.onlyPending({status:DG_TREE_STATUS,query:DG_TREE_QUERY},{setStatus:value=>{DG_TREE_STATUS=value;},updateStatusControl:value=>{const sel=$("treeStatus");if(sel)sel.value=value;},draw:dgTreeDraw});
   DG_TREE_STATUS="Beklemede";
   const sel=$("treeStatus");
   if(sel)sel.value="Beklemede";
@@ -173,6 +174,24 @@ function dgTreeRender(tree){
 ========================================================= */
 
 async function loadAdminTree(){
+  if(window.DG_LOAD_ADMIN_TREE)return window.DG_LOAD_ADMIN_TREE.execute({
+    authorized:()=>!!PROFILE&&(PROFILE.role==="admin"||PROFILE.role==="owner"),
+    getBox:()=>$("adminTree"),
+    hasTree:box=>box.querySelector&&box.querySelector(".dg-tree-park,.dg-tree-sum,.alert.err,.alert.info"),
+    showLoading:box=>{box.innerHTML=`<div class="alert info">⏳ ${_ta("Ölçümler yükleniyor…")}</div>`;},
+    keepScroll:()=>typeof dgScrollKeep==="function"?dgScrollKeep():null,
+    restoreScroll:value=>{if(typeof dgScrollRestore==="function")dgScrollRestore(value);},
+    fetch:dgTreeFetch,
+    setRows:rows=>{DG_TREE_ROWS=rows;},
+    setError:error=>{DG_TREE_ERR=error;},
+    queryError:error=>_ta("beklenmedik sorgu hatası: ")+((error&&error.message)||String(error)),
+    warnFallback:error=>toast(dgCf("⚠ Gömülü sorgu başarısız, yedek birleştirme kullanıldı: ")+esc(error),"warn","🌳"),
+    draw:dgTreeDraw,
+    renderError:error=>_ta("çizim hatası: ")+((error&&error.message)||String(error)),
+    showRenderError:(box,message)=>{if(box)box.innerHTML=`<div class="alert err"><b>⚠ Ağaç çizilemedi</b> `+
+      `<span class="mono" style="font-size:.72rem">${esc(message)}</span> `+
+      `<button class="btn sm blue" onclick="loadAdminTree()">🔄 Yeniden dene</button></div>`;}
+  });
   if(!PROFILE||(PROFILE.role!=="admin"&&PROFILE.role!=="owner"))return;
   const box=$("adminTree");
   /* ═══ 0043 · KAYDIRMA SIÇRAMASININ KÖK NEDENİ BURADAYDI ═══
@@ -237,16 +256,19 @@ function dgTreeDraw__scroll(){
 }
 
 function dgTreeSetStatus(v){
+  if(window.DG_UPDATE_ADMIN_TREE_FILTER)return window.DG_UPDATE_ADMIN_TREE_FILTER.setStatus({status:DG_TREE_STATUS,query:DG_TREE_QUERY},v,{setStatus:value=>{DG_TREE_STATUS=value;},draw:dgTreeDraw});
   DG_TREE_STATUS=v||"";
   dgTreeDraw();
 }
 
 function dgTreeSetQuery(v){
+  if(window.DG_UPDATE_ADMIN_TREE_FILTER)return window.DG_UPDATE_ADMIN_TREE_FILTER.setQuery({status:DG_TREE_STATUS,query:DG_TREE_QUERY},v,{setQuery:value=>{DG_TREE_QUERY=value;},draw:dgTreeDraw});
   DG_TREE_QUERY=v||"";
   dgTreeDraw();
 }
 
 function dgTreeToggle(key,open){
+  if(window.DG_SET_ADMIN_TREE_NODE_OPEN)return window.DG_SET_ADMIN_TREE_NODE_OPEN.set(DG_TREE_OPEN,key,open);
   if(open)DG_TREE_OPEN.add(key);else DG_TREE_OPEN.delete(key);
 }
 
@@ -254,6 +276,7 @@ function dgTreeToggle(key,open){
  * event.preventDefault/stopPropagation şart — yoksa buton <summary> içinde
  * olduğu için düğümü de açar/kapatır. */
 function dgTreePendingScan(ev){
+  if(window.DG_NAVIGATE_ADMIN_TREE_PENDING_SCAN)return window.DG_NAVIGATE_ADMIN_TREE_PENDING_SCAN.navigate(ev,typeof startParkScan==="function"?startParkScan:null);
   if(ev&&ev.preventDefault){ev.preventDefault();ev.stopPropagation();}
   if(typeof startParkScan==="function")startParkScan({returnTo:"admin"});
 }
@@ -335,6 +358,16 @@ window.dgTreeRows=dgTreeRows;
  * FK'ler on delete cascade → projenin ölçümleri ve waypoint'leri birlikte gider.
  * Park kimliği (parks) SİLİNMEZ — karşılaştırma bütünlüğü korunur. */
 async function dgTreeDeleteProject(ev,pid){
+ if(window.DG_DELETE_ADMIN_TREE_PROJECT)return window.DG_DELETE_ADMIN_TREE_PROJECT.execute(ev,pid,{
+  confirmation:_ta("Proje TÜM ölçüm ve waypoint'leriyle kalıcı olarak silinsin mi? Bu işlem geri alınamaz (park kimliği kalır)."),
+  confirm:message=>confirm(message),
+  deleteProject:id=>sb.from("projects").delete().eq("id",id),
+  markLiveDirty:()=>{DG_LIVE_DIRTY=true;},
+  success:()=>toast(_ta("✓ Proje silindi (ölçümler + waypoint'ler cascade ile kaldırıldı)"),"ok","🗑"),
+  failure:error=>toast(_ta("Proje silinemedi: ")+(error&&error.message||error),"err","🗑"),
+  redraw:()=>{if(typeof dgTreeDraw==="function")dgTreeDraw();},
+  refresh:()=>{if(typeof loadAdmin==="function")loadAdmin();}
+ });
  if(ev){ev.preventDefault();ev.stopPropagation();}
  const msg=_ta("Proje TÜM ölçüm ve waypoint'leriyle kalıcı olarak silinsin mi? Bu işlem geri alınamaz (park kimliği kalır).");
  if(!confirm(msg))return;
