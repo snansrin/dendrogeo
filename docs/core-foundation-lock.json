@@ -439,7 +439,7 @@
     "src/ui/grid-waypoint-controller.js": "eb4f58d30fd59a46840f58f2b428b79d8afc9e1211d48d26ea2cfb74ba2b3531",
     "src/ui/grid-waypoint-layer.js": "0c6db2a4329704ec9106735cc0a26b7ce01803666ee4b19d356c976d298eba2f",
     "src/ui/lc-report.js": "f8182bce9b5dbd8dcecceaa7afee69b52d12e7883badc65e27fb93e94ca2abf9",
-    "src/ui/lc-sens.js": "ea9630488375fb012ef7864d5b84539ff681767645f27603cc54fad3c2cf8753",
+    "src/ui/lc-sens.js": "b35f41885ba58e18033f714ab5bb1f8c63b3820e9377e7000a6038cdb3e8b681",
     "src/ui/map-layer-visibility.js": "50d033fba51e90f49ae39254e0700b510938be4d271aada8a9a400be727c1a60",
     "src/ui/park-admin-renderer.js": "7a4ce3606df653784f63ef4055f64d5d66ab57bd5ae749f26aa1851487297111",
     "src/ui/park-admin-status.js": "a73ea8b2ecafd3be326fb6357dad04ce8675148966bd55c1449c88154d5dabba",
@@ -466,7 +466,7 @@
     "src/ui/park-schema-warning.js": "9222beba708e3054eca73b0e30df0224abb264055d9ac3f8f6bf683823adcad8",
     "src/ui/state.js": "5feada9bc2052655d9be405043ffb6f71f39d51fcb58e189089c3d7d3fc8bafc",
     "src/utils/geo.js": "3e796768b3d55a3f07c4be3281c9437f1602b6d5e68151b2af7b101707baf294",
-    "src/utils/lazylibs.js": "284d9dab0fe6ad37b4148898e24921287a7ff73f2ca65c137cb08e388828bad1",
+    "src/utils/lazylibs.js": "c24cdb97debd094a350e12c2f63b9fceddb29da8b76f99d34341d957eb02e66d",
     "src/workers/surface-worker.js": "02878b04478f0c555b536f34d9807a0bf824d0f738d1468a8840069cc61e85ed",
     "test/critical-fixes.test.mjs": "3a2e62104763110bc734b3dc54a37cbf57c15b0038a78fdce35d56d9639c1989",
     "test/dbh-qa.test.mjs": "d3bbd29d292aa1214ede27a21ecb99315bc24a6346e2b0119f8c04eb8b532b95",
@@ -992,6 +992,22 @@
           "path": "src/utils/lazylibs.js",
           "previous_sha256": "9c0fc1e4e8fef6bf41f0352c26cf9f7f63a9dec6ddabc47c01adc6d9bd0a69c3",
           "sha256": "284d9dab0fe6ad37b4148898e24921287a7ff73f2ca65c137cb08e388828bad1"
+        }
+      ]
+    },
+    {
+      "date": "2026-10-13",
+      "scope": "User-authorized thirty-third five-module split of locked surface boundary drawing: permissive park-point policy, metric validation/clipping, temporary map preview, drawing-session lifecycle, and draft save/water-rescan completion. Preserve 300-point limit, [LON,LAT] storage, ring gate, park clipping, 0.1 m² area floor, feature payload, and draft-before-scan order; locked regression tests remain unchanged.",
+      "files": [
+        {
+          "path": "src/ui/lc-sens.js",
+          "previous_sha256": "ea9630488375fb012ef7864d5b84539ff681767645f27603cc54fad3c2cf8753",
+          "sha256": "b35f41885ba58e18033f714ab5bb1f8c63b3820e9377e7000a6038cdb3e8b681"
+        },
+        {
+          "path": "src/utils/lazylibs.js",
+          "previous_sha256": "284d9dab0fe6ad37b4148898e24921287a7ff73f2ca65c137cb08e388828bad1",
+          "sha256": "c24cdb97debd094a350e12c2f63b9fceddb29da8b76f99d34341d957eb02e66d"
         }
       ]
     }

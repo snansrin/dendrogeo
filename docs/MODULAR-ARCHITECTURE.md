@@ -1054,3 +1054,11 @@ Her modülün tek bir dış API'si, sahibi olduğu açık durumu ve kendi testle
 - `domain/surface/create-selected-object-boundary.js`, seçilen geometriyi mevcut `visual-boundary` provenance alanlarıyla kayıt girdisine dönüştürür.
 - `ui/surface-object-preview.js` Leaflet önizleme katmanını kurup temizler; `application/surface/handle-surface-object-pick.js` tıklama, uyarı ve önizlemeye geçiş sırasını yürütür.
 - `application/surface/apply-surface-object-boundary.js`, cihaz taslağını ilk kaydeder, su sınırı gerekiyorsa dış raster hücrelerini tarar ve yalnız ayrı kabul çağrısında hesabı günceller.
+
+## LULC elle sınır çizimi — 13 Ekim 2026
+
+- `domain/surface/surface-boundary-point-policy.js`, mevcut park nokta denetimini ve destek yokken korunan devam davranışını tutar.
+- `domain/surface/prepare-surface-boundary.js`, halkayı doğrular, park geometrisine kırpar ve 0,1 m² alt sınırını uygular.
+- `ui/surface-boundary-drawing-preview.js`, geçici çizgi, kapanış kenarı ve köşe işaretlerini üretir.
+- `application/surface/surface-boundary-drawing-session.js`, harita çizim oturumunu başlatır, en fazla 300 noktayı kabul eder, geri alma ve iptali yönetir.
+- `application/surface/finish-surface-boundary-drawing.js`, mevcut feature payload'ını cihaza kaydeder ve gerekirse su dış hücre taramasını başlatır.
