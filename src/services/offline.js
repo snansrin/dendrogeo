@@ -7,6 +7,7 @@ const _toff=(t,v)=>(typeof dgTfs==="function"?dgTfs(t,v):String(t).replace(/\{(\
 
 // 🎲 UUID v4 üretici (client_id için)
 function uuidv4() {
+if(window.DG_OFFLINE_CLIENT_ID)return window.DG_OFFLINE_CLIENT_ID.create();
 if (window.crypto && crypto.randomUUID) return crypto.randomUUID();
 return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => {
 const r = Math.random() * 16 | 0;
@@ -14,6 +15,7 @@ return (c === 'x' ? r : (r & 0x3 | 0x8)).toString(16);
 });
 }
 async function saveOfflineMeasurement(data){
+if(window.DG_OFFLINE_MEASUREMENT_QUEUE)return window.DG_OFFLINE_MEASUREMENT_QUEUE.save(data);
 const db = await openOfflineDB();
 const tx = db.transaction('measurements','readwrite');
 const store = tx.objectStore('measurements');
@@ -37,6 +39,7 @@ tx.onabort = e => {db.close();reject(e.target.error||new Error("Yerel kayıt ipt
 });
 }
 function openOfflineDB(){
+if(window.DG_OFFLINE_MEASUREMENT_QUEUE)return window.DG_OFFLINE_MEASUREMENT_QUEUE.open();
 return new Promise((resolve,reject)=>{
 const req=indexedDB.open('DendroGeoOffline',1);
 req.onupgradeneeded=e=>{
@@ -64,12 +67,14 @@ try{return await DG_OFFLINE_SYNC;}
 finally{DG_OFFLINE_SYNC=null;await updateSyncBadge();}
 }
 function dgOfflineRequest(request){
+if(window.DG_OFFLINE_IDB_PROMISES)return window.DG_OFFLINE_IDB_PROMISES.request(request);
 return new Promise((resolve,reject)=>{
 request.onsuccess=()=>resolve(request.result);
 request.onerror=()=>reject(request.error);
 });
 }
 function dgOfflineTransaction(tx){
+if(window.DG_OFFLINE_IDB_PROMISES)return window.DG_OFFLINE_IDB_PROMISES.transaction(tx);
 return new Promise((resolve,reject)=>{
 tx.oncomplete=()=>resolve();
 tx.onerror=()=>reject(tx.error||new Error("Yerel kuyruk işlemi başarısız."));
@@ -77,6 +82,7 @@ tx.onabort=()=>reject(tx.error||new Error("Yerel kuyruk işlemi iptal edildi."))
 });
 }
 function dgOfflineSameMeasurement(local,remote){
+if(window.DG_OFFLINE_MEASUREMENT_MATCH)return window.DG_OFFLINE_MEASUREMENT_MATCH.same(local,remote);
 if(!remote||String(remote.owner)!==String(local.owner)||remote.client_id!==local.client_id)return false;
 const fields=["project_id","point_id","measurement_no","grp","species","girth_cm","dbh_cm","height_m","volume_m3","carbon_kg","lat","lon"];
 return fields.every(k=>String(local[k]??"")===String(remote[k]??""))&&(!local.photoBlob||!!remote.photo_url);
@@ -180,6 +186,7 @@ window.dgInstallApp=dgInstallApp;
    Saha kullanıcısı "kaç ölçümüm bekliyor?" sorusunun cevabını her an görür.
    saveOfflineMeasurement ve syncOfflineData sonrası otomatik güncellenir. */
 async function updateSyncBadge(){
+if(window.DG_OFFLINE_SYNC_BADGE)return window.DG_OFFLINE_SYNC_BADGE.update();
   const b=document.getElementById("syncBadge");
   if(!b)return;
   try{
