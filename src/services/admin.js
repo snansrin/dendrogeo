@@ -187,6 +187,7 @@ async function delMeas(id){
 }
 
 function filterAdminMeas(){
+ if(window.DG_ADMIN_MEASUREMENT_FILTER)return window.DG_ADMIN_MEASUREMENT_FILTER.apply($("adminMeasSearch").value,$("aMeasT"));
  const q=$("adminMeasSearch").value.toLowerCase();
  $("aMeasT").querySelectorAll("tr").forEach(r=>{r.style.display=r.textContent.toLowerCase().includes(q)?"":"none";});
 }
@@ -207,6 +208,7 @@ function listProjects(projects,country,city,withId){
 }
 
 function fillSelect(sel,opts){
+ if(window.DG_FILL_ADMIN_EXPORT_SELECT)return window.DG_FILL_ADMIN_EXPORT_SELECT.render(sel,opts,esc);
  if(!sel)return;
  const cur=sel.value;
  sel.innerHTML='<option value="">Tümü</option>'+opts.map(o=>{
@@ -219,6 +221,7 @@ function fillSelect(sel,opts){
 
 /* --- Yönetici paneli --- */
 async function loadAdminExportFilters(){
+ if(window.DG_LOAD_ADMIN_EXPORT_FILTERS)return window.DG_LOAD_ADMIN_EXPORT_FILTERS.execute({load:()=>Promise.all([sb.from("measurements").select("country,city"),sb.from("projects").select("id,name,country,city").order("name")]),apply:(m,p)=>{ADM_ROWS=m.data||[];ADM_PROJECTS=p.data||[];fillSelect($("admExpCountry"),listCountries(ADM_ROWS,ADM_PROJECTS));admCountryChanged();}});
  try{
   const [m,p]=await Promise.all([
    sb.from("measurements").select("country,city"),
@@ -231,11 +234,13 @@ async function loadAdminExportFilters(){
 }
 
 function admCountryChanged(){
+ if(window.DG_UPDATE_ADMIN_EXPORT_FILTER_OPTIONS)return window.DG_UPDATE_ADMIN_EXPORT_FILTER_OPTIONS.countryChanged(ADM_ROWS,ADM_PROJECTS,$("admExpCountry").value,{listCities,fillCity:options=>fillSelect($("admExpCity"),options),cityChanged:()=>admCityChanged()});
  fillSelect($("admExpCity"),listCities(ADM_ROWS,ADM_PROJECTS,$("admExpCountry").value));
  admCityChanged();
 }
 
 function admCityChanged(){
+ if(window.DG_UPDATE_ADMIN_EXPORT_FILTER_OPTIONS)return window.DG_UPDATE_ADMIN_EXPORT_FILTER_OPTIONS.cityChanged(ADM_PROJECTS,$("admExpCountry").value,$("admExpCity").value,{listProjects,fillProject:options=>fillSelect($("admExpProject"),options)});
 fillSelect($("admExpProject"),listProjects(ADM_PROJECTS,$("admExpCountry").value,$("admExpCity").value,true));
 }
 
@@ -249,20 +254,24 @@ return window.DG_READ_ADMIN_EXPORT_ROWS.read(adminFilteredQuery);
 }
 
 async function adminExportCSV(){
+if(window.DG_DOWNLOAD_ADMIN_MEASUREMENTS)return window.DG_DOWNLOAD_ADMIN_MEASUREMENTS.execute("csv",dgAdminExportPorts());
 const rows=await adminFilteredRows();
 if(!rows.length)return toast(_tad("Filtreye uyan kayıt yok"),"warn");
 dl(fullCSV(rows),"dendrogeo_toplu.csv");toast(_tadf("✓ {n} kayıt dışa aktarıldı",{n:rows.length}),"ok","📥");
 }
 
 async function adminExportQgis(){
+if(window.DG_DOWNLOAD_ADMIN_MEASUREMENTS)return window.DG_DOWNLOAD_ADMIN_MEASUREMENTS.execute("qgis",dgAdminExportPorts());
 const rows=await adminFilteredRows();
 if(!rows.length)return toast("Filtreye uyan kayıt yok","warn");
 dl(fullCSV(rows),"dendrogeo_qgis_detayli.csv");toast(_tadf("✓ {n} kayıt dışa aktarıldı",{n:rows.length}),"ok","🧾");
 }
 
 async function adminExportGeo(){
+if(window.DG_DOWNLOAD_ADMIN_MEASUREMENTS)return window.DG_DOWNLOAD_ADMIN_MEASUREMENTS.execute("geojson",dgAdminExportPorts());
 const rows=await adminFilteredRows();
 if(!rows.length)return toast("Filtreye uyan kayıt yok","warn");
 const gj=window.DG_ADMIN_MEASUREMENT_GEOJSON.build(rows,LATIN);
 dl(JSON.stringify(gj,null,2),"dendrogeo_toplu.geojson");toast(_tadf("✓ {n} kayıt dışa aktarıldı",{n:rows.length}),"ok","🗺");
 }
+function dgAdminExportPorts(){return{read:()=>adminFilteredRows(),csv:rows=>fullCSV(rows),geojson:rows=>window.DG_ADMIN_MEASUREMENT_GEOJSON.build(rows,LATIN),download:(content,name)=>dl(content,name),onEmpty:format=>toast(format==="csv"?_tad("Filtreye uyan kayıt yok"):"Filtreye uyan kayıt yok","warn"),onSuccess:(format,count)=>toast(_tadf("✓ {n} kayıt dışa aktarıldı",{n:count}),"ok",format==="csv"?"📥":format==="qgis"?"🧾":"🗺")};}
