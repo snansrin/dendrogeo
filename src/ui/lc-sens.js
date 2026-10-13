@@ -412,6 +412,12 @@ async function dgSensAutoWaterOnMount(rec,epoch){
  dgSensUpdateStatus();
 }
 async function dgSensAutoWaterOnScan(rec,epoch,fromMount=false){
+ const loader=window.DG_LOAD_SURFACE_WATER_OBJECTS,apply=window.DG_APPLY_AUTO_SURFACE_WATER_OBJECTS;
+ if(loader&&apply){
+  if(rec.useObjects===false||typeof dgLcOsmData!=="function"||typeof dgSurfaceObjects!=="function")return 0;
+  const objects=await loader.load({enabled:true,loadOsmData:dgLcOsmData,bbox:dgLcBboxFromGeometry(PARK_POLY,PARK_HOLES||[]),buildObjects:dgSurfaceObjects,epsg:DG_SENS.epsg,validFeature:window.DG_SURFACE_REVIEW.validFeature,isCurrent:()=>epoch===DG_SENS.epoch&&DG_SENS.record===rec,fromMount,isUnavailable:()=>DG_SENS.busy||DG_SENS.saving||DG_SENS.exporting});
+  return apply.apply({record:rec,objects,epoch,getEpoch:()=>DG_SENS.epoch,getRecord:()=>DG_SENS.record,repartition:features=>dgSensRepartition(features),dirty:dgSensDirty});
+ }
  if(rec.useObjects===false||typeof dgLcOsmData!=="function"||typeof dgSurfaceObjects!=="function")return 0;
  const bbox=dgLcBboxFromGeometry(PARK_POLY,PARK_HOLES||[]);
  const data=await dgLcOsmData(bbox).catch(()=>null);
@@ -435,6 +441,8 @@ async function dgSensAutoWaterOnScan(rec,epoch,fromMount=false){
  return objects.length;
 }
 async function dgSensScan(){
+ const runner=window.DG_RUN_SURFACE_SCAN,complete=window.DG_COMPLETE_SURFACE_SCAN,summary=window.DG_BUILD_SURFACE_SCAN_SUMMARY;
+ if(runner&&complete&&summary)return runner.run({state:DG_SENS,canRun:()=>!DG_SENS.rawView&&!DG_SENS.busy&&!DG_SENS.saving&&!!DG_SENS.record,stopBrush:dgSensBrushStop,resetScanState:dgSensResetScanState,render:dgSensRender,loadProfile:()=>window.DG_LC_S2.profile(dgSensCells(),PARK_POLY,{year:DG_LC_LAST.report?.year||2021,mode:DG_SENS.record.period}),isCurrent:(record,epoch)=>epoch===DG_SENS.epoch&&DG_SENS.record===record,autoWater:dgSensAutoWaterOnScan,complete:({record,profile,autoWater})=>complete.complete({state:DG_SENS,record,profile,autoWater,scanAudit:dgSensScanAudit,hasWaterFootprint:dgSensHasWaterFootprint,unresolvedWater:dgSensWaterBoundaryUnresolved,buildSummary:values=>summary.build({...values,format:_tvst}),timestamp:()=>new Date().toISOString(),dirty:dgSensDirty,refreshLayer:dgSensRefreshLayer,updateSummary:dgSensUpdateSummary,save:dgSensSave}),translate:_tvs,toast,refreshLayer:dgSensRefreshLayer});
  if(DG_SENS.rawView||DG_SENS.busy||DG_SENS.saving||!DG_SENS.record)return false;dgSensBrushStop();
  let completed=false;
  const rec=DG_SENS.record,epoch=DG_SENS.epoch;dgSensResetScanState(rec);DG_SENS.visualVersion++;DG_SENS.focus=null;DG_SENS.busy=true;dgSensRender();
