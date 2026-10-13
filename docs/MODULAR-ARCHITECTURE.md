@@ -760,6 +760,11 @@ Her modülün tek bir dış API'si, sahibi olduğu açık durumu ve kendi testle
 - `application/auth/wait-for-oauth-session.js`, Supabase auth olayları, mevcut oturum ve zaman aşımını aynı bekleme akışında birleştirir.
 - `application/auth/clean-oauth-url.js`, OAuth dönüşünden sonra adres çubuğundaki parametreleri temizler.
 - `ui/oauth-wait-indicator.js`, Google oturum geçişi sırasında bekleme metnini gösterip gizler.
+- `application/auth/login-with-password.js`, parola girişini captcha, profil yükleme ve çevrimdışı senkron sırasını koruyarak yürütür.
+- `application/auth/register-account.js`, kayıt alanlarını ve KVKK açık rıza zaman damgasını Supabase signup isteğine taşır.
+- `application/auth/send-password-reset-email.js`, captcha doğrulamasıyla parola sıfırlama bağlantısını ister ve mevcut hata mesajlarını korur.
+- `application/auth/sign-out.js`, varlık kapatma, Supabase çıkışı ve sayfa yenilemeyi sırayla yürütür.
+- `application/auth/save-new-password.js`, parola eşleşmesi/uzunluğu doğrulamasını, güncellemeyi ve başarılı çıkışı yönetir.
 
 - `application/admin/read-photo-storage-usage.js`, fotoğraf deposundaki klasörleri sayıp dosya boyutu ve adet toplamını üretir.
 
