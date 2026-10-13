@@ -228,7 +228,12 @@
       "src/ui/confirm-waypoint-arrival-distance.js",
       "src/adapters/map/mark-waypoint-visited.js",
       "src/application/map/complete-waypoint-arrival.js",
-      "src/application/map/arrive-at-waypoint.js"
+      "src/application/map/arrive-at-waypoint.js",
+      "src/domain/map/select-restored-waypoint-target.js",
+      "src/adapters/map/fetch-project-waypoints.js",
+      "src/application/map/reset-waypoint-load-state.js",
+      "src/ui/show-waypoint-load-error.js",
+      "src/application/map/load-project-waypoints.js"
     ],
     "scientific_contract_and_inputs": [
       "css/park-panel.css",
@@ -344,7 +349,8 @@
       "test/map-live-load-modules.test.mjs",
       "test/map-measurement-marker-chunk-modules.test.mjs",
       "test/waypoint-gps-overlay-modules.test.mjs",
-      "test/waypoint-arrival-modules.test.mjs"
+      "test/waypoint-arrival-modules.test.mjs",
+      "test/waypoint-load-modules.test.mjs"
     ]
   },
   "sha256": {
@@ -469,7 +475,7 @@
     "src/services/lc-s2.js": "0e2ac1af0b680e6f4358cb9d99980e32339d04f67f911cfe14d244898f014d40",
     "src/services/lc-stac.js": "978c4be8c3bc4e7cda3f694d1f06290e661fed5bbd5b76b68719140edc18e71a",
     "src/services/lc-validate.js": "b4d8327c62940b1af1a53ddb087188816ff2359c8456c2755c7c853c5919f42b",
-    "src/services/map.js": "e46743318c617b0d6615153d8539ea42a2885a75ac9bbdc2cda9fdc1fdc8c952",
+    "src/services/map.js": "bd39240f270d50be8117754598fcbac380b7879cb23333440e9017fb047736c4",
     "src/services/measure.js": "ef61d7a32cf16ce83785a7f8fc1c579c8bf2bff8f8ca25f0992c3701d15c71d9",
     "src/services/offline.js": "b0d13ca6c52213b2103e5c23727be42c92cea39855622d43abaad87a8e48280f",
     "src/services/osm-client.js": "2e5eeaa735bf05a603a0db142619f60747b9696f506e666d7df992454a56814f",
@@ -665,7 +671,13 @@
     "src/adapters/map/mark-waypoint-visited.js": "7bbb42b6038e16bec05b18597cfde45e57817a0e2342c0cedf6e3fc30da90a4a",
     "src/application/map/complete-waypoint-arrival.js": "2d3e83e26fd2bf74e8d8179273ab1c751ac62c0fae3211583a01902d6ee6146a",
     "src/application/map/arrive-at-waypoint.js": "a875bac2f370eb9ade3d9423240938b3ef2e43ad993b385dea563fb7e59d78a1",
-    "test/waypoint-arrival-modules.test.mjs": "db63b7fa5d3445c9ad8fd8493b472e87b1727c2ab6e045f609c41065bdcc2c2b"
+    "test/waypoint-arrival-modules.test.mjs": "db63b7fa5d3445c9ad8fd8493b472e87b1727c2ab6e045f609c41065bdcc2c2b",
+    "src/domain/map/select-restored-waypoint-target.js": "30c75398bc216723abfacd116cf921a109b9987641b8cfb7fb3264dcfcf926b3",
+    "src/adapters/map/fetch-project-waypoints.js": "eca437cf0b443db6c45348b075185f155b11c1af7a6a9f317b3b8808bbccb6aa",
+    "src/application/map/reset-waypoint-load-state.js": "8330f5b4fb225fe7e298ca16ce24e19d8eec89b618fd8bfd34851c391db4e909",
+    "src/ui/show-waypoint-load-error.js": "dd72c902dd39f2e606c4a0cc631f7f17d9103ed2d0d232eefb991792d4d6d3de",
+    "src/application/map/load-project-waypoints.js": "4a9b69a4e9548b0955c5ff0bb5b8d3998d8645ac99d1c1ecae9e38f9b79c7839",
+    "test/waypoint-load-modules.test.mjs": "cd0f5b0436f1597a17d235e78f0554dec8ff341d2111dd1adf891d454635327b"
   },
   "authorized_modularizations": [
     {
@@ -1495,6 +1507,17 @@
           "path": "src/services/map.js",
           "previous_sha256": "02edbb26a2d1a6ebb00626876f4f5724477147279b4d7109a5db98bf004df652",
           "sha256": "e46743318c617b0d6615153d8539ea42a2885a75ac9bbdc2cda9fdc1fdc8c952"
+        }
+      ]
+    },
+    {
+      "date": "2026-10-13",
+      "scope": "User-authorized sixtieth five-module split of locked waypoint list loading: pending-target restoration, project-scoped Supabase read adapter, list reset/empty state, error notification, and race-gated orchestration. Preserve project filter/order, post-query project gate before error handling, target identity policy, scroll wrapper, current toast, and optional compatibility fallback; locked regression tests remain unchanged.",
+      "files": [
+        {
+          "path": "src/services/map.js",
+          "previous_sha256": "e46743318c617b0d6615153d8539ea42a2885a75ac9bbdc2cda9fdc1fdc8c952",
+          "sha256": "bd39240f270d50be8117754598fcbac380b7879cb23333440e9017fb047736c4"
         }
       ]
     }

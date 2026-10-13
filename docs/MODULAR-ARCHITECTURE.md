@@ -1235,3 +1235,10 @@ The collaborator map renderer now separates peer selection, display-model deriva
 - `domain/map/select-waypoint-arrival-target.js` etkin hedefi korur veya GPS ile en yakın bekleyen noktayı seçer; `ui/confirm-waypoint-arrival-distance.js` 50 m sınırındaki mevcut onayı yönetir.
 - `adapters/map/mark-waypoint-visited.js` yalnız mevcut `id` filtresiyle `visited=true` yazar. `application/map/complete-waypoint-arrival.js` başarılı yazımdan sonra hedefi, ölçüm noktasını, harita listesini ve proje seçimini günceller.
 - `application/map/arrive-at-waypoint.js` erken çıkışları, yazma hatasını ve başarı orkestrasyonunu yönetir. Kilitli servis tüm modüller mevcutsa devreder; eski gövde modül yüklenememe yedeği olarak durur.
+
+
+## Waypoint proje listesi yüklemesi — 13 Ekim 2026
+
+- `domain/map/select-restored-waypoint-target.js` yalnız aynı kimlikli ve bekleyen hedefi yeniden seçer; `adapters/map/fetch-project-waypoints.js` mevcut proje filtresi ve `wp_id` sırasını korur.
+- `application/map/reset-waypoint-load-state.js` eski liste/hedefi temizler ve proje yokken mevcut ek çizimi sürdürür; `ui/show-waypoint-load-error.js` hata metnini ve toast türünü gösterir.
+- `application/map/load-project-waypoints.js` yarışan proje sorgularını eski kapıdan geçirir, geçerli yanıtı state’e yazar ve önceki bekleyen hedefi geri yükler. Servis modüller eksikse yerel uyumluluk gövdesini kullanır.
