@@ -1396,3 +1396,9 @@ The collaborator map renderer now separates peer selection, display-model deriva
 - `domain/reports/has-pending-publication-work.js` yönetici yayın ve geri çekme isteklerinde kuyrukta sonuç beklenip beklenmediğini saf bir policy ile belirler.
 - `application/reports/load-publication-queue.js`, `schedule-publication-queue-poll.js` ve `reset-publication-polling.js` store portlarını kullanır. Eski plain-object test/çağrı sözleşmesi de fallback olarak desteklenir; paralel yükleme, 25 saniyelik görünürlük kapılı yoklama ve yönetici/kullanıcı sayaç ayrımı korundu.
 - Bu, uygulama genelinde store değildir; rapor yayın feature'ının kendi durumu tek kaynakta tutulur. Kilitli temel dosyalar değiştirilmedi.
+
+## Park davetleri feature state — 14 Ekim 2026
+
+- `application/park-invites/park-invite-state.js` sahip parkları, gelen davetleri, ekip listesini ve yükleme durumunu immutable snapshot store'da birleştirir. `services/park-invites.js` içindeki `DG_INV` canlı uyumluluk görünümü olarak aboneliğe bağlı kalır.
+- `load-owned-parks.js`, `load-recipient-invites.js`, `load-owner-collaborations.js` ve `refresh-collaborations.js` store güncellemelerini kullanır; önceki plain-object çağrıları da korunur.
+- RPC adları, sahiplik kapısı, davet e-posta filtresi, eksik migration yedeği ve UI sırası değişmedi. Store `partials/head.html` içinde yüklenir ve Service Worker precache listesine alınır.

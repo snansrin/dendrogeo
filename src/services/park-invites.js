@@ -29,7 +29,10 @@ const _tinvf=(t,v)=>(typeof dgTfs==="function"?dgTfs(t,v):String(t).replace(/\{(
  */
 
 /* ---------------- ortak durum ---------------- */
-const DG_INV={parks:null,invites:null,collabs:null,mine:null,loading:false};
+const DG_PARK_INVITE_STATE_STORE=window.DG_PARK_INVITE_STATE?window.DG_PARK_INVITE_STATE.create():null;
+const DG_INV=DG_PARK_INVITE_STATE_STORE?{...DG_PARK_INVITE_STATE_STORE.getState()}:{parks:null,invites:null,collabs:null,mine:null,received:[],loading:false};
+if(DG_PARK_INVITE_STATE_STORE)DG_PARK_INVITE_STATE_STORE.subscribe(state=>Object.assign(DG_INV,state));
+function dgInviteStateUpdate(patch){if(DG_PARK_INVITE_STATE_STORE)return DG_PARK_INVITE_STATE_STORE.setState(patch);return Object.assign(DG_INV,patch);}
 const DG_PARK_INVITE_MODULE_STORE=window.DG_PARK_INVITE_STORE?window.DG_PARK_INVITE_STORE.create(()=>sb):null;
 
 function dgInvSetCount(id,n){const el=$(id);if(el)el.textContent=String(Number(n)||0);}
@@ -42,7 +45,7 @@ function dgCanManagePark(pid){
 
 /* v_my_parks: sahibi VEYA ortağı olduğum parklar (view auth.uid() süzer) */
 async function dgMyParks(force){
- if(window.DG_LOAD_OWNED_INVITE_PARKS)return window.DG_LOAD_OWNED_INVITE_PARKS.execute(DG_INV,force,{
+ if(window.DG_LOAD_OWNED_INVITE_PARKS)return window.DG_LOAD_OWNED_INVITE_PARKS.execute(DG_PARK_INVITE_STATE_STORE||DG_INV,force,{
   hasClient:()=>typeof sb!=="undefined"&&!!sb,
   load:()=>DG_PARK_INVITE_MODULE_STORE?DG_PARK_INVITE_MODULE_STORE.myParks():sb.from("v_my_parks").select("*"),
   onMissingSchema:()=>dgInvitesNote("0025_park_invites.sql çalıştırılmalı (v_my_parks yok)")
@@ -55,7 +58,7 @@ async function dgMyParks(force){
    if(/42P01|relation|view/i.test(error.message||""))dgInvitesNote("0025_park_invites.sql çalıştırılmalı (v_my_parks yok)");
    return [];
   }
-  return DG_INV.mine=data||[];
+  dgInviteStateUpdate({mine:data||[]});return DG_INV.mine;
  }catch(e){return [];}
 }
 
@@ -67,7 +70,7 @@ async function dgInvitesLoadMine__scroll(){
   const box=$("dgInvBox");if(box)box.style.display="none";
   if(typeof USER==="undefined"||!USER){const sharedBox=$("dgSharedBox");if(sharedBox)sharedBox.style.display="none";dgInvSetCount("projInviteCount",0);dgInvSetCount("projSharedCount",0);return;}
   const email=String((PROFILE&&PROFILE.email)||USER.email||"").toLowerCase();
-  const rows=await window.DG_LOAD_RECIPIENT_PARK_INVITES.execute(email,()=>DG_PARK_INVITE_MODULE_STORE?DG_PARK_INVITE_MODULE_STORE.inbox():sb.from("park_invites").select("id,park_id,email,note,status,created_at,invited_by,parks(id,name,city)").eq("status","Beklemede"));
+  const rows=await window.DG_LOAD_RECIPIENT_PARK_INVITES.execute(email,()=>DG_PARK_INVITE_MODULE_STORE?DG_PARK_INVITE_MODULE_STORE.inbox():sb.from("park_invites").select("id,park_id,email,note,status,created_at,invited_by,parks(id,name,city)").eq("status","Beklemede"),DG_PARK_INVITE_STATE_STORE);
   dgInvSetCount("projInviteCount",rows.length);
   const parks=await dgMyParks(),shared=dgSharedParks(parks);dgInvSetCount("projSharedCount",shared.length);
   const sharedBox=$("dgSharedBox");
@@ -120,7 +123,7 @@ async function dgInviteRespond(id,accept){
   onUnauthenticated:()=>toast("Önce giriş yap.","err","📬"),
   onFailure:error=>toast(dgCf("İşlenemedi: ")+(error.message||"").slice(0,90),"err","📬"),
   onSuccess:accepted=>toast(accepted?"Davet kabul edildi — proje listene bak 🌳":"Davet reddedildi","ok","📬"),
-  onAccepted:()=>{DG_INV.mine=null;if(typeof loadProjects==="function")loadProjects();},
+  onAccepted:()=>{dgInviteStateUpdate({mine:null});if(typeof loadProjects==="function")loadProjects();},
   onComplete:()=>dgInvitesLoadMine()
  });
  if(typeof USER==="undefined"||!USER)return toast("Önce giriş yap.","err","📬");
@@ -128,7 +131,7 @@ async function dgInviteRespond(id,accept){
  if(error){toast(dgCf("İşlenemedi: ")+(error.message||"").slice(0,90),"err","📬");return;}
  toast(accept?"Davet kabul edildi — proje listene bak 🌳":"Davet reddedildi","ok","📬");
  if(accept){
-  DG_INV.mine=null;                       // ortak park listesi tazelensin
+  dgInviteStateUpdate({mine:null});       // ortak park listesi tazelensin
   if(typeof loadProjects==="function")loadProjects();
  }
  dgInvitesLoadMine();
@@ -144,7 +147,7 @@ async function dgCollabLoad__scroll(){
   showCard:()=>{const card=$("dgOwnerCollabCard");if(card)card.style.display="";},
   loadParks:dgMyParks,owned:dgOwnedParks,shared:dgSharedParks,
   updateOwnedCount:count=>dgInvSetCount("projOwnCount",count),updateSharedCount:count=>dgInvSetCount("projSharedCount",count),
-  clearCollaborations:()=>{DG_INV.invites=[];DG_INV.collabs=[];},render:dgCollabRender,
+  state:DG_PARK_INVITE_STATE_STORE,clearCollaborations:()=>dgInviteStateUpdate({invites:[],collabs:[]}),render:dgCollabRender,
   renderOptions:(parks,selected)=>window.DG_OWNER_PARK_OPTIONS_UI.render(parks,selected,esc),refresh:dgCollabRefresh
  });
  const sel=$("dgInvPark"), card=$("dgOwnerCollabCard");
@@ -160,7 +163,7 @@ async function dgCollabLoad__scroll(){
  if(!owned.length){
   if(card)card.style.display="none";
   sel.innerHTML='<option value="">Sahibi olduğun proje yok</option>';
-  DG_INV.invites=[];DG_INV.collabs=[];
+  dgInviteStateUpdate({invites:[],collabs:[]});
   dgCollabRender();
   return;
  }
@@ -171,7 +174,7 @@ async function dgCollabLoad__scroll(){
  await dgCollabRefresh();
 }
 async function dgCollabRefresh(){
- if(window.DG_REFRESH_PARK_COLLABORATIONS)return window.DG_REFRESH_PARK_COLLABORATIONS.execute(DG_INV,{
+ if(window.DG_REFRESH_PARK_COLLABORATIONS)return window.DG_REFRESH_PARK_COLLABORATIONS.execute(DG_PARK_INVITE_STATE_STORE||DG_INV,{
   getSelect:()=>$("dgInvPark"),canManage:dgCanManagePark,
   load:parkId=>DG_PARK_INVITE_MODULE_STORE?DG_PARK_INVITE_MODULE_STORE.collaborations(parkId):Promise.all([
    sb.from("park_invites").select("id,email,note,status,created_at,invited_by").eq("park_id",parkId).order("created_at",{ascending:false}).limit(50),
@@ -182,7 +185,7 @@ async function dgCollabRefresh(){
  const sel=$("dgInvPark");if(!sel||!sel.value)return dgCollabRender();
  const pid=Number(sel.value);
  if(!dgCanManagePark(pid)){
-  DG_INV.invites=[];DG_INV.collabs=[];
+  dgInviteStateUpdate({invites:[],collabs:[]});
   sel.value="";
   dgCollabRender();
   return;
@@ -191,8 +194,7 @@ async function dgCollabRefresh(){
   sb.from("park_invites").select("id,email,note,status,created_at,invited_by").eq("park_id",pid).order("created_at",{ascending:false}).limit(50),
   sb.from("park_collaborators").select("user_id,added_at,profiles(id,full_name,email)").eq("park_id",pid).limit(50),
  ]));
- DG_INV.invites=inv.error?null:(inv.data||[]);
- DG_INV.collabs=col.error?null:(col.data||[]);
+ dgInviteStateUpdate({invites:inv.error?null:(inv.data||[]),collabs:col.error?null:(col.data||[])});
  if(inv.error&&/42P01|relation/i.test(inv.error.message||""))dgInvitesNote("0025_park_invites.sql çalıştırılmalı (park_invites yok)");
  dgCollabRender();
 }
@@ -238,12 +240,12 @@ async function dgInviteRevoke(target,kind){
  if(window.DG_MANAGE_PARK_INVITES&&DG_PARK_INVITE_MODULE_STORE)return window.DG_MANAGE_PARK_INVITES.revoke({parkId:Number(sel.value),target,kind},{store:DG_PARK_INVITE_MODULE_STORE,
   onFailure:error=>toast(dgCf("İşlenemedi: ")+(error.message||"").slice(0,90),"err","👥"),
   onSuccess:acceptedKind=>toast(acceptedKind==="collab"?"Ortak kaldırıldı":"Davet geri alındı","ok","👥"),
-  onComplete:()=>{DG_INV.mine=null;dgCollabRefresh();}
+  onComplete:()=>{dgInviteStateUpdate({mine:null});dgCollabRefresh();}
  });
  const{error}=await sb.rpc("dg_invite_revoke",{p_park:Number(sel.value),p_target:target,p_kind:kind});
  if(error){toast(dgCf("İşlenemedi: ")+(error.message||"").slice(0,90),"err","👥");return;}
  toast(kind==="collab"?"Ortak kaldırıldı":"Davet geri alındı","ok","👥");
- DG_INV.mine=null;
+ dgInviteStateUpdate({mine:null});
  dgCollabRefresh();
 }
 
