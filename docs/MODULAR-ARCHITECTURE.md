@@ -1315,3 +1315,9 @@ The collaborator map renderer now separates peer selection, display-model deriva
 - `domain/surface/build-sentinel-profile-bbox.js` park hücre merkezlerinden mevcut kenar paylı WGS84 pencereyi üretir; `select-sentinel-profile-epsg.js` istenen analiz CRS'ini korur veya ilk hücreden UTM seçer.
 - `application/surface/prepare-sentinel-profile-input.js` hücre listesini doğrular ve iki domain politikasını bağlar. `run-sentinel-scene-observation-pass.js` ana bant turunun sırasını, kullanılan hücre sayısını ve sahne bazında hata yalıtımını korur.
 - `run-sentinel-annual-observation-pass.js` yıllık su/vejetasyon sahnelerini aynı sıra ve hata politikasıyla işler; boş pencereyi atlar. Beş modül ana-thread lazy loader ve PWA precache'e eklendi, locked servis yedek akışı korunuyor.
+
+## Ölçüm kaydı gönderim hattı — 13 Ekim 2026
+
+- `validate-measurement-submission.js` form, park, GPS ve fotoğraf kapılarını mevcut sırayla çözer; `prepare-measurement-submission.js` seçili fotoğrafı hazırlar, kilitli karbon hesabını ve kayıt taslağını kurar.
+- `verify-measurement-submission-location.js` yeni kayıt için park çitini fotoğraf yüklemesinden önce uygular; `persist-measurement-submission.js` çevrimdışı kuyruğu ve çevrimiçi fotoğraf/ölçüm yazımını ayrı yollar olarak korur.
+- `submit-measurement.js` beş fazı birleştirir. `services/measure.js` eski global girişini ve fallback gövdesini koruyup yeni hattı kullanır; adapter'ın RLS yazma filtresi, eski şema retry'si, geofence sırası, post-save etkileri ve kilitli regresyon testleri değişmedi.

@@ -571,6 +571,63 @@ async function saveMeas(){
  finally{dgSaveBusy(false);}
 }
 async function dgSaveMeasInner(){
+    if(window.DG_SUBMIT_MEASUREMENT&&window.DG_VALIDATE_MEASUREMENT_SUBMISSION&&window.DG_PREPARE_MEASUREMENT_SUBMISSION&&window.DG_VERIFY_MEASUREMENT_SUBMISSION_LOCATION&&window.DG_PERSIST_MEASUREMENT_SUBMISSION){
+      const form={projectId:+$("mProject").value,pointId:+$("mPoint").value,measurementNo:+$("mNo").value,group:$("mGroup").value,species:$("mSpecies").value,circumferenceCm:+$("mDbh").value,heightM:+$("mHeight").value};
+      return window.DG_SUBMIT_MEASUREMENT.run({form,editId:EDIT_ID},{
+        validation:{
+          validateForm:value=>window.DG_VALIDATE_MEASUREMENT_SAVE_FORM.validate({form:value,element:$,validator:DG_TREE_MEASUREMENT_VALIDATOR,errors:DG_TREE_MEASUREMENT_ERRORS,translate:_tms}),
+          resolveGates:value=>window.DG_RESOLVE_MEASUREMENT_SAVE_GATES.resolve({projectId:value.form.projectId,editId:EDIT_ID,projects:PROJ_LIST,parkSchemaOk:DG_PARK_SCHEMA_OK,gps:GPS,photoValid:!($("mPhoto").files[0]&&!photoOk)})
+        },
+        stopForValidation:result=>{
+          if(result.reason==="form")return dgMeasureInvalid(result.validation.focusId,result.validation.message);
+          if(result.reason==="calculation")return dgMeasureInvalid("mSpecies",_tms("Kilitli yoğunluk tablosu bu ölçüm için karbon hesabına izin vermiyor."));
+          if(result.reason==="park-required"){
+            toast("⛔ Bu projede park algılanmadı — ölçüm giremezsin. Park algılama ekranına yönlendiriliyorsun.","err","🌳");
+            return startParkScan({projectId:form.projectId||null,returnTo:"measure"});
+          }
+          if(result.reason==="gps-required")return toast("Önce 📡 Konumu Etkinleştir butonuna basın","err");
+          if(result.reason==="photo-invalid")return toast("Fotoğraf denetimi başarısız — uygun bir çekim yapın","err");
+        },
+        prepare:{
+          rememberProject:dgProjectRemember,
+          preparePhoto:async value=>{const file=$("mPhoto").files[0];if(!file)return{blob:null,fileName:null};const prepared=await window.DG_PREPARE_MEASUREMENT_PHOTO.prepare({file,pointId:value.pointId,measurementNo:value.measurementNo,compress,buildFileName:parts=>window.DG_BUILD_MEASUREMENT_PHOTO_FILE_NAME.build(parts)});return{blob:prepared.blob,fileName:prepared.fileName};},
+          calculate:value=>calcFromCircumference(value.circumferenceCm,value.heightM,value.species,value.group),
+          buildRecord:({form:value,calculation,project})=>{const record=window.DG_BUILD_MEASUREMENT_RECORD.build({owner:USER.id,projectId:value.projectId,pointId:value.pointId,measurementNo:value.measurementNo,group:value.group,species:value.species,circumferenceCm:value.circumferenceCm,dbhCm:calculation.dbh_cm,heightM:value.heightM,volumeM3:calculation.vol,carbonKg:calculation.total_carbon,parkSchemaOk:DG_PARK_SCHEMA_OK,parkId:project&&project.park_id});if(DG_PARK_SCHEMA_OK)record.park_id=(project&&project.park_id)||null;return record;},
+          createClientId:uuidv4,gps:()=>GPS,reverseGeocode:fix=>reverseGeocode(fix.latitude,fix.longitude),
+          buildLocationFields:({fix,geocode})=>{if(geocode)toast(dgCf("📍 Konum algılandı: ")+esc(geocode.city)+" / "+esc(geocode.country),"info","🗺️");return window.DG_BUILD_MEASUREMENT_LOCATION_FIELDS.build({fix,geocode});}
+        },
+        location:{
+          loadPark:async id=>{const result=await sb.from("parks").select("*").eq("id",id).maybeSingle();return result.data||null;},
+          verifyAtPark:park=>dgVerifyAtPark(park,"measure"),stamp:dgGeoStamp
+        },
+        locationRejected:({decision})=>toast("⛔ "+esc(decision.message||_tmsf("Konum doğrulanamadı ({r})",{r:decision.reason})),"err","🛰"),
+        persistence:{
+          isOnline:()=>navigator.onLine,
+          buildOfflineRecord:draft=>window.DG_BUILD_OFFLINE_MEASUREMENT_RECORD.build({record:draft.record,photoBlob:draft.photo.blob,photoFile:draft.photo.fileName,editId:EDIT_ID,clientId:uuidv4()}),
+          saveOffline:saveOfflineMeasurement,uploadPhoto:blob=>window.DG_UPLOAD_MEASUREMENT_PHOTO.upload({client:sb,userId:USER.id,blob}),
+          persistRecord:(record,editId)=>window["DG_"+"PERSIST_MEASUREMENT_RECORD"].persist({client:sb,record,editId}),editId:()=>EDIT_ID
+        },
+        writeFailed:error=>toast("Hata: "+error.message,"err"),
+        complete:({draft,location,mode})=>{
+          const wasEdit=draft.wasEdit,point=draft.form.pointId;
+          if(location.decision?.verified)toast(dgCf("🛰 Konum doğrulandı: ")+esc(location.park.name)+(location.decision.reason==="margin"?" ("+_tms("kenar payı")+")":"")+" · ±"+Math.round(location.decision.fix.acc)+" m","ok","🛰");
+          if(mode==="offline"){
+            toast("Çevrimdışı kaydedildi — internet gelince senkronize","info","📴");
+            if(window.DG_RECORD_MEASUREMENT_PRESENCE_ACTION)window.DG_RECORD_MEASUREMENT_PRESENCE_ACTION.record(wasEdit?"edit":"save","P"+String(point).padStart(3,"0"),dgPresenceAct);
+            else if(typeof dgPresenceAct==="function"){try{dgPresenceAct(wasEdit?"edit":"save","P"+String(point).padStart(3,"0"));}catch(e){}}
+            if(wasEdit)cancelEdit();
+            return window.DG_REFRESH_MEASUREMENT_AFTER_SAVE.offline({wasEdit,reset:dgResetMeasureFields,autoFill:autoFillPointId,loadDashboard:loadDash,loadRecords});
+          }
+          if(wasEdit){toast("Kayıt güncellendi — onaya gönderildi","ok","✓");cancelEdit();}
+          else{
+            toast("Kaydedildi — "+draft.calculation.total_carbon.toFixed(1)+" kg karbon","ok","🌱");
+            if(window.DG_RECORD_MEASUREMENT_PRESENCE_ACTION)window.DG_RECORD_MEASUREMENT_PRESENCE_ACTION.record("save","P"+String(point).padStart(3,"0"),dgPresenceAct);
+            else if(typeof dgPresenceAct==="function"){try{dgPresenceAct("save","P"+String(point).padStart(3,"0"));}catch(e){}}
+          }
+          return window.DG_REFRESH_MEASUREMENT_AFTER_SAVE.online({wasEdit,reset:dgResetMeasureFields,autoFill:autoFillPointId,loadDashboard:loadDash,loadRecords,loadWaypoints});
+        }
+      });
+    }
     const pid=+$("mProject").value,pt=+$("mPoint").value,sp=$("mSpecies").value,circumference=+$("mDbh").value,h=+$("mHeight").value,grp=$("mGroup").value;
     const measurementNo=+$("mNo").value;
     const validation=typeof window!=="undefined"&&Object.prototype.hasOwnProperty.call(window,"DG_VALIDATE_MEASUREMENT_SAVE_FORM")

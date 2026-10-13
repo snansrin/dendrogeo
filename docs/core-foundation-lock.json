@@ -20,7 +20,12 @@
       "src/domain/trees/photo-quality.js",
       "src/services/allometry.js",
       "src/services/measure.js",
-      "src/services/offline.js"
+      "src/services/offline.js",
+      "src/application/trees/validate-measurement-submission.js",
+      "src/application/trees/prepare-measurement-submission.js",
+      "src/application/trees/verify-measurement-submission-location.js",
+      "src/application/trees/persist-measurement-submission.js",
+      "src/application/trees/submit-measurement.js"
     ],
     "park_detection": [
       "src/adapters/parks/fetch-grid-measurement-candidates.js",
@@ -446,7 +451,8 @@
       "test/waypoint-gps-overlay-modules.test.mjs",
       "test/waypoint-load-modules.test.mjs",
       "test/surface-review-cache-modules.test.mjs",
-      "test/sentinel-profile-orchestration-modules.test.mjs"
+      "test/sentinel-profile-orchestration-modules.test.mjs",
+      "test/measurement-submission-modules.test.mjs"
     ]
   },
   "sha256": {
@@ -674,7 +680,7 @@
     "src/services/lc-stac.js": "978c4be8c3bc4e7cda3f694d1f06290e661fed5bbd5b76b68719140edc18e71a",
     "src/services/lc-validate.js": "b4d8327c62940b1af1a53ddb087188816ff2359c8456c2755c7c853c5919f42b",
     "src/services/map.js": "b5db0047dc86b53c13029e3bd407c087126672d23a6f30b5942d837127006b1f",
-    "src/services/measure.js": "ef61d7a32cf16ce83785a7f8fc1c579c8bf2bff8f8ca25f0992c3701d15c71d9",
+    "src/services/measure.js": "89a9071230fd16ba25e39838151eb7212035795128b0757ac1d90f18ed74befc",
     "src/services/offline.js": "6f4ef41218c6621da9a5ae2f070e60de7efabc858e38035ee80cd89fd2f4a1ac",
     "src/services/osm-client.js": "2e5eeaa735bf05a603a0db142619f60747b9696f506e666d7df992454a56814f",
     "src/services/osm-water-backup.js": "b3429cdc9bfe0f84bd7b6644a1221d4daadc374ac046b036abf15b3b5ee7d269",
@@ -869,7 +875,13 @@
     "src/application/surface/prepare-sentinel-profile-input.js": "ac29ab90fabe06357c689c8fca36dca0e096ed01d40dfd8badc8c8c548f51e55",
     "src/application/surface/run-sentinel-scene-observation-pass.js": "8918573cc4ee087115da475e32abfe250ecbb180b86b0ab999dabd1a25105966",
     "src/application/surface/run-sentinel-annual-observation-pass.js": "272115510018995d7d9e4e059bbf4efb72dc41c6ad0a839a30730199ae1b29a3",
-    "test/sentinel-profile-orchestration-modules.test.mjs": "33eb6857ae0ae45c6c30794e92445fd670f8866991a7d9ce95f62e046566c552"
+    "test/sentinel-profile-orchestration-modules.test.mjs": "33eb6857ae0ae45c6c30794e92445fd670f8866991a7d9ce95f62e046566c552",
+    "src/application/trees/validate-measurement-submission.js": "bd78a826e1b6ff95fcdc8adbb4001231dc691e8c8b6fb8c6fcb89472fa4a7f04",
+    "src/application/trees/prepare-measurement-submission.js": "f57a5894fcc59787fb99ff2d7d646aba6505e7a29d8209a612ba72de5812f040",
+    "src/application/trees/verify-measurement-submission-location.js": "25ed90b5af86face2d1d00c0cc9b492caf766be58d27ea5f8f691ad71114d995",
+    "src/application/trees/persist-measurement-submission.js": "d7e0a5bf3c5341771d3f087178101daffd318b433fc52262dcffc723884e31bf",
+    "src/application/trees/submit-measurement.js": "8e47c19559b3c5d78a70f0a4946593ccb01cad3d021ff5d13299eba061989bba",
+    "test/measurement-submission-modules.test.mjs": "6d9b661f5dbb3362fb37968063f17f542c99e647efb8c2f07b28409e6799b495"
   },
   "authorized_modularizations": [
     {
@@ -1996,6 +2008,17 @@
           "path": "src/utils/lazylibs.js",
           "previous_sha256": "68caac96df410e2ee1e4d37b41443927295f8c58198b4897064b6e21e142f35f",
           "sha256": "ab6c3a9f78ca0b3a6c67d01720defc9dff8a7933e556c8aecd6a658cbc5e46ed"
+        }
+      ]
+    },
+    {
+      "date": "2026-10-13",
+      "scope": "User-authorized seventy-seventh five-module split of the locked measurement submission flow: ordered preflight gates, draft/photo preparation, park geofence verification, offline/online persistence, and submit orchestration. Preserve the public service API, RLS-scoped persistence adapter, old-schema retry, geofence-before-upload rule, online/offline completion order, and all locked regression tests.",
+      "files": [
+        {
+          "path": "src/services/measure.js",
+          "previous_sha256": "ef61d7a32cf16ce83785a7f8fc1c579c8bf2bff8f8ca25f0992c3701d15c71d9",
+          "sha256": "89a9071230fd16ba25e39838151eb7212035795128b0757ac1d90f18ed74befc"
         }
       ]
     }
