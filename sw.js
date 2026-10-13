@@ -4,7 +4,7 @@
 // NOT: Senkronizasyon artık Ana Thread (Supabase JS SDK) tarafından yapılıyor
 // ============================================================
 
-const CACHE_VERSION = 'dendrogeo-sw-v2-r408';
+const CACHE_VERSION = 'dendrogeo-sw-v2-r409';
 
 /* İKİ AYRI STATİK CACHE — bu ayrım bilinçli ve önemli.
  *
@@ -124,6 +124,7 @@ const CORE_ASSETS = [
     '/src/adapters/park-invites/store.js',
     '/src/ui/park-invite-inbox.js',
     '/src/ui/park-collaboration-panel.js',
+    '/src/application/park-invites/park-invite-state.js',
     '/src/application/park-invites/manage-invites.js',
     '/src/application/park-invites/load-owned-parks.js',
     '/src/application/park-invites/load-recipient-invites.js',
