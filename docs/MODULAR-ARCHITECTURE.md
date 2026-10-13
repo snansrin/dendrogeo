@@ -1047,3 +1047,10 @@ Her modülün tek bir dış API'si, sahibi olduğu açık durumu ve kendi testle
 - `domain/surface/build-landcover-report-model.js`, sınıf sırası, alan/pay, çapraz uzlaşma, nesne ve park alanı QA değerlerini HTML'den bağımsız hazırlar.
 - `ui/render-landcover-report-rows.js` sınıf barlarını; `ui/render-landcover-report-metadata.js` QA, maske, kapsam ve kaynak satırlarını üretir.
 - `ui/compose-landcover-report.js` tek blok HTML'i kurar. `lc-report.js` eski global fonksiyonu koruyup sunum modüllerini birleştirir.
+
+## LULC OSM nesne incelemesi — 13 Ekim 2026
+
+- `domain/surface/find-surface-object-at-point.js`, doğrulanmış cihaz geometrisi yedeğini ve en küçük içeren OSM nesnesini seçer; park kırpması ve kesin doğrulama devam eder.
+- `domain/surface/create-selected-object-boundary.js`, seçilen geometriyi mevcut `visual-boundary` provenance alanlarıyla kayıt girdisine dönüştürür.
+- `ui/surface-object-preview.js` Leaflet önizleme katmanını kurup temizler; `application/surface/handle-surface-object-pick.js` tıklama, uyarı ve önizlemeye geçiş sırasını yürütür.
+- `application/surface/apply-surface-object-boundary.js`, cihaz taslağını ilk kaydeder, su sınırı gerekiyorsa dış raster hücrelerini tarar ve yalnız ayrı kabul çağrısında hesabı günceller.

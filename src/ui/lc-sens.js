@@ -545,6 +545,8 @@ async function dgSensAccept(){
 }
 function dgSensReset(){if(DG_SENS.rawView||DG_SENS.busy||DG_SENS.saving||!confirm(_tvs("Tüm kullanıcı düzeltmeleri silinsin mi? Ham raster korunur.")))return;DG_SENS.record.corrections={};DG_SENS.record.features=[];DG_SENS.record.brushHistory=[];dgSensDirty();dgSensRepartition().then(ok=>ok&&dgSensSave());}
 function dgSensFindObjectAt(latlng,elements=window.DG_SURFACE_OSM?.elements||[]){
+ const module=window.DG_SURFACE_OBJECT_PICKER;
+ if(module)return module.find({latlng,elements,storedFeatures:DG_SENS.record?.objectFeatures||[],epsg:DG_SENS.epsg,parkGeometry:DG_SENS.parkGeometry,cellGeometry:DG_SENS.geometry,project:dgSurfaceProject,unproject:dgSurfaceUnproject,forward:dgLcUtmForward,featureGeometry:dgSurfaceFeatureGeometry,bounds:dgSurfaceBounds,pointDistance:dgGridPointDistance,clip:dgSurfaceClip,area:dgSurfaceArea,objects:dgSurfaceObjects,validFeature:window.DG_SURFACE_REVIEW.validFeature});
  // Retain access to already-validated OSM polygons during a network outage.
  if(!elements.length&&DG_SENS.record?.objectFeatures?.length&&latlng){
   const pt=dgLcUtmForward(latlng.lat,latlng.lng,DG_SENS.epsg);
@@ -583,6 +585,8 @@ function dgSensObjectPickStart(){
  map.on("click",dgSensObjectPickAt);dgSensRenderPaintTools();dgSensUpdateStatus();
 }
 function dgSensObjectPickAt(ev){
+ const module=window.DG_HANDLE_SURFACE_OBJECT_PICK;
+ if(module)return module.handle({event:ev,picking:DG_SENS.objectPick,find:latlng=>dgSensFindObjectAt(latlng),onError:()=>_tvs("OSM nesne sınırı geçersiz olduğu için seçilemedi. Sınırı elle çizebilirsiniz."),onMissing:()=>_tvs("Bu noktada kapalı bir OSM nesne sınırı bulunamadı. Sınırı elle çizebilirsiniz."),removeClick:()=>map.off("click",dgSensObjectPickAt),setPreview:result=>{DG_SENS.objectPick=false;DG_SENS.objectPreview=result;},setDrawType:dgSensSetDrawType,renderPreview:result=>{DG_SENS.objectPreviewLayer=window.DG_SURFACE_OBJECT_PREVIEW.render({map,leaflet:L,result,colors:DG_SENS_COLORS});},renderTools:dgSensRenderPaintTools,openBoundaryMenu:()=>dgSensOpenMenu("dgSensBoundaryDetails"),updateStatus:dgSensUpdateStatus,toast});
  if(!DG_SENS.objectPick||!ev?.latlng)return;
  let result=null;try{result=dgSensFindObjectAt(ev.latlng);}catch(e){toast(_tvs("OSM nesne sınırı geçersiz olduğu için seçilemedi. Sınırı elle çizebilirsiniz."),"warn");return;}if(!result){toast(_tvs("Bu noktada kapalı bir OSM nesne sınırı bulunamadı. Sınırı elle çizebilirsiniz."),"info");return;}
  map.off("click",dgSensObjectPickAt);DG_SENS.objectPick=false;DG_SENS.objectPreview=result;dgSensSetDrawType(result.type);
@@ -592,10 +596,12 @@ function dgSensObjectPickAt(ev){
 function dgSensObjectCancel(){
  if(DG_SENS.objectPick&&typeof map!=="undefined"&&map)map.off("click",dgSensObjectPickAt);
  DG_SENS.objectPick=false;DG_SENS.objectPreview=null;
- if(DG_SENS.objectPreviewLayer&&typeof map!=="undefined"&&map)map.removeLayer(DG_SENS.objectPreviewLayer);
+ const preview=window.DG_SURFACE_OBJECT_PREVIEW;if(preview)preview.remove({map:typeof map!=="undefined"?map:null,layer:DG_SENS.objectPreviewLayer});else if(DG_SENS.objectPreviewLayer&&typeof map!=="undefined"&&map)map.removeLayer(DG_SENS.objectPreviewLayer);
  DG_SENS.objectPreviewLayer=null;
 }
 function dgSensObjectApply(){
+ const module=window.DG_APPLY_SURFACE_OBJECT_BOUNDARY;
+ if(module)return module.apply({preview:DG_SENS.objectPreview,rawView:DG_SENS.rawView,busy:DG_SENS.busy,saving:DG_SENS.saving,exporting:DG_SENS.exporting,drawType:DG_SENS.drawType,selectedType:document.getElementById("dgSensDrawType")?.value,types:window.DG_SURFACE_REVIEW.types,record:()=>DG_SENS.record,areas:dgSensAreas,createFeature:args=>window.DG_SELECTED_OBJECT_BOUNDARY.create(args),validFeature:window.DG_SURFACE_REVIEW.validFeature,repartition:dgSensRepartition,cancelPreview:dgSensObjectCancel,setDrawType:value=>{DG_SENS.drawType=value;},renderTools:dgSensRenderPaintTools,markDirty:dgSensDirty,getRecord:()=>DG_SENS.record,getAreas:dgSensAreas,needsWaterScan:dgSensNeedsWaterScan,save:dgSensSave,setStatus:value=>{DG_SENS.status=value;},getStatus:()=>DG_SENS.status,updateStatus:dgSensUpdateStatus,toast,scan:dgSensScan,translate:_tvs,formatApplied:(label,area)=>_tvst("{class} sınırı önizlemeye uygulandı (+{area} m²). Cihaz taslağı kaydedildi; hesaba kalıcı sonuç için Kabul et ve kaydet.",{class:label,area}),formatNoArea:label=>_tvst("{class} sınırı cihaz taslağına eklendi; 10 m hücre alanı değişmedi. Bu hesap sonucu değildir; geometriyi kontrol edin.",{class:label}),formatScanning:()=>_tvs("Su sınırı dışındaki raster hücreleri güncel uydu verisiyle sınıflandırılıyor…"),formatScanFailed:()=>_tvs("Su sınırı önizlemeye uygulandı; dış hücre taraması başarısız. Taslak korunuyor, kabul edilmedi."),summary:dgSensUpdateSummary});
  const preview=DG_SENS.objectPreview,select=document.getElementById("dgSensDrawType"),type=window.DG_SURFACE_REVIEW.types[DG_SENS.drawType]?DG_SENS.drawType:select?.value||preview?.type;
  if(!preview||DG_SENS.rawView||DG_SENS.busy||DG_SENS.saving||DG_SENS.exporting)return;
  if(!window.DG_SURFACE_REVIEW.types[type]){DG_SENS.status=_tvs("Önce uygulanacak sınıfı seçin.");dgSensUpdateStatus();toast(DG_SENS.status,"warn");return;}
@@ -620,6 +626,7 @@ function dgSensObjectApply(){
  });
 }
 async function dgSensObjectApplyAndAccept(){
+ const module=window.DG_APPLY_SURFACE_OBJECT_BOUNDARY;if(module)return module.run({apply:dgSensObjectApply,accept:dgSensAccept,isAccepted:()=>!DG_SENS.record?.draftDirty&&!!DG_SENS.record?.acceptedAt});
  const applied=await dgSensObjectApply();
  if(!applied)return false;
  const accepted=await dgSensAccept();if(!accepted)return false;
