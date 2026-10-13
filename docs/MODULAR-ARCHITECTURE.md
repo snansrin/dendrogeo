@@ -1337,3 +1337,8 @@ The collaborator map renderer now separates peer selection, display-model deriva
 
 - `domain/parks/build-manual-backfill-park-update.js` elle park bağlantısından sonra plan satırı alanlarını kurar; `application/parks/complete-manual-backfill-park.js` mevcut satıra uygulama, başarı bildirimi, plan çizimi ve yenileme sırasını yönetir.
 - `ui/park-backfill-manual-feedback.js` ve `ui/park-backfill-apply-feedback.js` başarı metinlerini sunar; `application/parks/complete-park-backfill-apply.js` toplu sonuç bildirimi → plan temizleme/kapatma → yenileme sırasını korur. Servis fallback'i ve kilitli regresyonlar korunur.
+
+## Ölçüm önizlemesi ve nokta sorgusu — 13 Ekim 2026
+
+- `domain/trees/build-live-measurement-preview-input.js` form dizelerini sayısal ölçüm DTO'suna çevirir; `application/trees/calculate-live-measurement-preview.js` biyometrik kapıyı karbon hesabından önce çalıştırır; `ui/render-live-measurement-preview.js` önizleme ve kayıt yardımını mevcut metin/biçimlerle eşitler.
+- `domain/trees/resolve-measurement-point-query.js` proje ve nokta sorgu anahtarını çözer; `application/trees/query-measurement-point.js` eksik girdiyi kapatır, sorguyu yürütür ve alanlar değişmişse bayat yanıtı çizmez. Mevcut Supabase adapter'ı ve sonuç renderer'ı kullanılır; kilitli servis fallback'i ve regresyonlar korunur.

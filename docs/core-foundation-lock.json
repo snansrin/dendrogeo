@@ -25,7 +25,12 @@
       "src/application/trees/prepare-measurement-submission.js",
       "src/application/trees/verify-measurement-submission-location.js",
       "src/application/trees/persist-measurement-submission.js",
-      "src/application/trees/submit-measurement.js"
+      "src/application/trees/submit-measurement.js",
+      "src/domain/trees/build-live-measurement-preview-input.js",
+      "src/application/trees/calculate-live-measurement-preview.js",
+      "src/ui/render-live-measurement-preview.js",
+      "src/domain/trees/resolve-measurement-point-query.js",
+      "src/application/trees/query-measurement-point.js"
     ],
     "park_detection": [
       "src/adapters/parks/fetch-grid-measurement-candidates.js",
@@ -708,7 +713,7 @@
     "src/services/lc-stac.js": "978c4be8c3bc4e7cda3f694d1f06290e661fed5bbd5b76b68719140edc18e71a",
     "src/services/lc-validate.js": "b4d8327c62940b1af1a53ddb087188816ff2359c8456c2755c7c853c5919f42b",
     "src/services/map.js": "b5db0047dc86b53c13029e3bd407c087126672d23a6f30b5942d837127006b1f",
-    "src/services/measure.js": "89a9071230fd16ba25e39838151eb7212035795128b0757ac1d90f18ed74befc",
+    "src/services/measure.js": "4e90e357417802724a46853df5652199354e9491cf11bc97af64f0c00060d6a4",
     "src/services/offline.js": "6f4ef41218c6621da9a5ae2f070e60de7efabc858e38035ee80cd89fd2f4a1ac",
     "src/services/osm-client.js": "2e5eeaa735bf05a603a0db142619f60747b9696f506e666d7df992454a56814f",
     "src/services/osm-water-backup.js": "b3429cdc9bfe0f84bd7b6644a1221d4daadc374ac046b036abf15b3b5ee7d269",
@@ -901,7 +906,12 @@
     "src/application/parks/complete-manual-backfill-park.js": "57b0faad12139e785523c42e11826fbafb76bf303acaa0caef799bdb82cc6593",
     "src/ui/park-backfill-manual-feedback.js": "9c4e8a84c0d6ede604d8e79b1f454a42321db101d28e252113ad6e3b5459ccd5",
     "src/application/parks/complete-park-backfill-apply.js": "7ee164b2811de63a9e187893133e2ab44d87edc6d4081cd239faf4c0996af37f",
-    "src/ui/park-backfill-apply-feedback.js": "c038e1ca3a4387fcc493a14b8629081aa641a2d8b2fbb4bc8fba06eb3e021737"
+    "src/ui/park-backfill-apply-feedback.js": "c038e1ca3a4387fcc493a14b8629081aa641a2d8b2fbb4bc8fba06eb3e021737",
+    "src/domain/trees/build-live-measurement-preview-input.js": "333ef80a906316cbd052cef5da71eb871fc9ecf5395e17051bfbc342c6183bfd",
+    "src/application/trees/calculate-live-measurement-preview.js": "e5ee1356be6d708b479ada479bc0d0dc74894e2d087737bae30a18ddbca4213e",
+    "src/ui/render-live-measurement-preview.js": "c3e2047ece841cc486e940092a94ff02c8671a7f7054a492f042f277e8a39006",
+    "src/domain/trees/resolve-measurement-point-query.js": "4c439864134b9f13f461f5c5895672c11f9346589dbaf0c5c895898ad658a22d",
+    "src/application/trees/query-measurement-point.js": "0f80310f85fde4732b9c5700b959406bfc067a046fb498559dfbb4cd87ca8fd3"
   },
   "authorized_modularizations": [
     {
@@ -2066,6 +2076,17 @@
           "path": "src/services/park-registry.js",
           "previous_sha256": "3b1d6540948e00e9217308fa3f18ea98e8cabaeb4a340f337ada463de01cb74d",
           "sha256": "1b6fc82574a2d38d1d20086ef034e0c3bd613e4360715cad35ec687670f6f043"
+        }
+      ]
+    },
+    {
+      "date": "2026-10-13",
+      "scope": "User-authorized eightieth five-module split of the locked measurement service live carbon preview and project-point lookup: typed preview input, validation-first calculation, preview rendering, query target policy, and stale-response guarded query orchestration. Preserve calculator, labels/precision, save-hint visibility, existing Supabase read adapter/renderer, and all locked regression tests.",
+      "files": [
+        {
+          "path": "src/services/measure.js",
+          "previous_sha256": "89a9071230fd16ba25e39838151eb7212035795128b0757ac1d90f18ed74befc",
+          "sha256": "4e90e357417802724a46853df5652199354e9491cf11bc97af64f0c00060d6a4"
         }
       ]
     }
