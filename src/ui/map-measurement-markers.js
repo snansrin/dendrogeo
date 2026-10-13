@@ -2,6 +2,7 @@
 /* Draw approved measurement markers in cancellable chunks on a cluster layer. */
 (function(root){
   function add(map,rows,chunk,{leaflet,popupHTML,log=console,setTimer=setTimeout}){
+    if(root.DG_ADD_MEASUREMENT_MARKERS&&root.DG_ADD_MEASUREMENT_MARKERS.add(map,rows,chunk,{leaflet,popupHTML,log,setTimer}))return;
     let i=0;
     if(!map._cluster){
       if(typeof leaflet.markerClusterGroup==="function"){
