@@ -767,6 +767,16 @@ Her modülün tek bir dış API'si, sahibi olduğu açık durumu ve kendi testle
 
 - `application/visitors/fit-live-visitor-map.js`, kullanıcı haritaya sığdırma istediğinde fit bayrağını sıfırlar, mevcut filtreyi uygular ve sonucu harita çizicisine aktarır.
 
+- `domain/export/resolve-export-options.js`, CSV/QGIS/GeoJSON indirme adlarını, aktivite etiketlerini ve önizleme başlıklarını tek biçim tablosunda çözer.
+
+- `application/export/serialize-measurement-export.js`, CSV/QGIS çıktısını mevcut CSV üreticisine, GeoJSON çıktısını mevcut GeoJSON üreticisine bağlar; önizleme seçeneklerini korur.
+
+- `adapters/export/file-download.js`, metni `Blob` ve object URL ile indirme bağlantısına aktarır; `export.js` mevcut `dl` globalini korur.
+
+- `application/export/download-user-measurement-export.js`, aktivite bildirimi, kullanıcının tüm sayfalanmış satırlarını okuma, serileştirme ve dosya indirme sırasını yönetir.
+
+- `application/export/prepare-user-measurement-preview.js`, CSV veya GeoJSON önizlemesi için aynı kullanıcı sorgusu ve biçim kurallarını kullanıp mevcut önizleme UI’sine veri hazırlar.
+
 - `ui/admin-measurement-row.js`, düz moderasyon listesindeki tek ölçüm satırını mevcut işlem düğmeleri ve kaçışlama ile üretir.
 
 - `ui/admin-measurement-table.js`, düz listeyi proje/nokta/ölçüm sırasına koyar ve 300 satır sınırını korur.
