@@ -6,12 +6,22 @@ import {readFileSync} from 'node:fs';
 const source=path=>readFileSync(new URL('../'+path,import.meta.url),'utf8');
 function load(paths){const window={};for(const path of paths)vm.runInNewContext(source(path),{window});return window;}
 const modules=['src/domain/visitors/summarize-live-visitor-counts.js','src/domain/visitors/build-live-location-trail.js',
- 'src/application/visitors/render-owner-live-view.js','src/ui/visitor-map-marker.js','src/ui/visitor-live-panel.js','src/ui/visitor-live-map.js'];
+ 'src/application/visitors/render-owner-live-view.js','src/application/visitors/prepare-live-map-frame.js',
+ 'src/adapters/map/create-visitor-live-map.js','src/ui/visitor-map-marker.js','src/ui/add-visitor-live-map-marker.js',
+ 'src/ui/visitor-live-map-trails.js','src/ui/visitor-live-map-fit.js','src/ui/visitor-live-panel.js','src/ui/visitor-live-map.js'];
 
 test('live visitor summary counts valid locations only',()=>{
  const api=load(modules).DG_SUMMARIZE_LIVE_VISITOR_COUNTS;
  const rows=[{p:{la:39,lo:32}},{p:{la:0,lo:0}},{p:{la:'bad',lo:32}}];
  assert.deepEqual(JSON.parse(JSON.stringify(api.summarize(rows,p=>p?.la!=null&&p?.lo!=null&&p.la!==0)),null),{online:3,located:2});
+});
+
+test('live map frame filters invalid locations and preserves fit intent',()=>{
+ const prepare=load(modules).DG_PREPARE_LIVE_VISITOR_MAP_FRAME.prepare;
+ const valid={p:{la:39,lo:32}},invalid={p:{la:0,lo:0}};
+ const frame=prepare({rows:[valid,invalid],hasLocation:p=>p.la!==0,fit:true,follow:true});
+ assert.deepEqual(Array.from(frame.located),[valid]);assert.equal(frame.shouldFit,true);
+ assert.equal(prepare({rows:[valid],hasLocation:()=>true,fit:true,follow:false}).shouldFit,false);
 });
 
 test('live location trails filter invalid points and cap the newest path',()=>{
@@ -65,7 +75,7 @@ test('visitor live map preserves initialization, trail presentation, and fit beh
 test('visit service wires all five live-view modules before the service facade',()=>{
  const service=source('src/services/visit-stats.js'),head=source('partials/head.html'),precache=source('sw.js');
  for(const api of ['DG_SUMMARIZE_LIVE_VISITOR_COUNTS','DG_BUILD_LIVE_LOCATION_TRAIL','DG_RENDER_OWNER_LIVE_VISITOR_VIEW','DG_VISITOR_LIVE_PANEL_UI','DG_VISITOR_LIVE_MAP_UI'])assert.match(service,new RegExp(api));
- for(const path of ['src/domain/visitors/summarize-live-visitor-counts.js','src/domain/visitors/build-live-location-trail.js','src/application/visitors/render-owner-live-view.js','src/ui/visitor-live-panel.js','src/ui/visitor-live-map.js']){
+ for(const path of ['src/domain/visitors/summarize-live-visitor-counts.js','src/domain/visitors/build-live-location-trail.js','src/application/visitors/render-owner-live-view.js','src/adapters/map/create-visitor-live-map.js','src/application/visitors/prepare-live-map-frame.js','src/ui/visitor-map-marker.js','src/ui/add-visitor-live-map-marker.js','src/ui/visitor-live-map-trails.js','src/ui/visitor-live-map-fit.js','src/ui/visitor-live-panel.js','src/ui/visitor-live-map.js']){
   assert.ok(head.indexOf(path)<head.indexOf('src/services/visit-stats.js'));assert.ok(precache.includes('/'+path));
  }
 });

@@ -560,7 +560,7 @@ Her modülün tek bir dış API'si, sahibi olduğu açık durumu ve kendi testle
 
 - `domain/visitors/device-label.js`, geçici presence cihaz etiketini kullanıcı aracısı girdisinden saf olarak üretir; mevcut tarayıcı/işletim sistemi eşleşme önceliği korunur, navigator erişimi ve hata yedeği servis katmanında kalır.
 
-- `ui/visitor-map-marker.js`, ziyaretçi işaretinin baş harf ikonunu ve çevrilmiş/kaçış uygulanmış tooltip sunumunu üretir; Leaflet nesneleri, geçici izler, konum süzme ve harita takip durumu servis katmanında kalır.
+- `ui/visitor-map-marker.js` ziyaretçi işaretinin kaçış uygulanmış görünümünü üretir; `ui/add-visitor-live-map-marker.js` bunu Leaflet katmanına ekler.
 
 - `adapters/visitors/session-id-store.js`, sekmeye ait `dg_sid` değerini yeniden kullanır veya mevcut rastgele üretim kuralıyla saklar; storage erişim hatasındaki `x` yedeği servis katmanında korunur.
 
@@ -1216,6 +1216,12 @@ The collaborator map renderer now separates peer selection, display-model deriva
 - `domain/map/prepare-approved-map-measurements.js` mevcut koordinat politikasını kullanarak çizilebilir satırları seçer; `adapters/map/fetch-approved-map-measurements.js` onaylı kayıt sorgusunu ve kesilme uyarısını korur.
 - `application/map/load-approved-measurement-markers.js` harita/okuma/çizim akışını ve `done(n, rows, error)` geri çağırım sözleşmesini sürdürür. `ui/render-live-map-load-status.js` yükleniyor, hata/yeniden dene ve normal/degrade durumlarını üretir; `application/map/load-live-measurements-map.js` yükleme durumu, analiz ve marker akışını orkestre eder.
 - Kilitli `src/services/map.js` tüm beş modül mevcutken bu akışları devreder; eksik modül durumunda uyumluluk gövdesi çalışır. Veri alanları, RLS hatası bildirimi, kesilme uyarısı, marker çizim sırası ve canlı harita dirty/loaded kapıları korunur.
+
+## Ziyaretçi canlı harita sunumu — 13 Ekim 2026
+
+- `application/visitors/prepare-live-map-frame.js` yalnız geçerli konumlu roster satırlarını seçip ilk çizim/takip kadrajı kararını verir.
+- `adapters/map/create-visitor-live-map.js` enjekte edilen Leaflet ile OSM haritasını kurar; `ui/visitor-live-map-trails.js` geçici izleri, `ui/visitor-live-map-fit.js` tek/çok kullanıcı kadrajını çizer.
+- `ui/visitor-live-map.js` bu adapter ve sunum modüllerini birleştirir; marker üretimi `ui/visitor-map-marker.js` ile katmana ekleme `ui/add-visitor-live-map-marker.js` arasında ayrılmıştır. İzler veritabanına kaydedilmez.
 
 
 ## Ölçüm marker katmanı ve parça çizimi — 13 Ekim 2026
