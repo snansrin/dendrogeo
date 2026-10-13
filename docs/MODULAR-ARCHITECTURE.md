@@ -988,3 +988,11 @@ Her modülün tek bir dış API'si, sahibi olduğu açık durumu ve kendi testle
 - `domain/surface/select-stac-tiles.js`, STAC GET URL'sini kurar, yıllık ürün filtresini ve GeoTIFF asset seçimini uygular.
 - `domain/surface/resolve-raster-window.js`, görüntü metadata'sını ve sınır dışına taşmayan park piksel penceresini hesaplar.
 - `services/lc-stac.js`, geriye uyumlu `dgLc*` API'sini tutar; modüller `lc-geo.js` sonrasında, STAC servisi öncesinde yüklenir.
+
+## Park proje geçişleri — 13 Ekim 2026
+
+- `domain/parks/select-park-project.js`, seçili DOM değerini proje kimliğiyle çözer; mevcut numeric ID eşleşmesini korur.
+- `adapters/parks/park-scan-redirect-memory.js`, proje başına sekme oturumunda tek yönlendirmeyi ve storage engellendiğinde güvenli geri dönüşü yönetir.
+- `application/parks/complete-park-project-link.js`, proje listesi yenileme, seçicileri güncelleme, tarama state'ini temizleme ve kaynak ekrana dönüş sırasını yürütür.
+- `application/parks/handle-park-project-change.js`, son seçim, canlı park presence, ölçüm kapısı ve uygun nokta önerisi sırasını korur.
+- `application/parks/handle-park-drawn.js`, çevrimiçi kayıt/çevrimdışı bildirim, aktif aday ve park state'i ile kart yenilemesini yönetir.
