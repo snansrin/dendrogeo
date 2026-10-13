@@ -996,3 +996,10 @@ Her modülün tek bir dış API'si, sahibi olduğu açık durumu ve kendi testle
 - `application/parks/complete-park-project-link.js`, proje listesi yenileme, seçicileri güncelleme, tarama state'ini temizleme ve kaynak ekrana dönüş sırasını yürütür.
 - `application/parks/handle-park-project-change.js`, son seçim, canlı park presence, ölçüm kapısı ve uygun nokta önerisi sırasını korur.
 - `application/parks/handle-park-drawn.js`, çevrimiçi kayıt/çevrimdışı bildirim, aktif aday ve park state'i ile kart yenilemesini yönetir.
+
+## Park yönetim state'i ve sunumu — 13 Ekim 2026
+
+- `application/parks/park-admin-state.js`, park kimlikleri ekranının satır, boş park görünürlüğü ve son sorgu bağlamını değişmez snapshot ve `subscribe` ile tutar; servis global adları geçiş uyumluluğu için aynalar.
+- `adapters/parks/sync-park-project-names.js`, bilinen park adını kullanır veya gerekiyorsa park adını okur, ardından projelerin park adı alanını aynı RLS sorgu kapsamıyla günceller.
+- `ui/render-park-admin.js`, state, mevcut overview hesabı ve satır renderer'ını birleştirir; görünür ekran yoksa mevcut erken dönüşü korur.
+- `application/parks/refresh-park-admin-views.js` ve `toggle-park-admin-empty.js`, yönetim değişikliği sonrası yenileme ile boş park filtresi state/render sırasını yönetir.
