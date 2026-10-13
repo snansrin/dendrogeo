@@ -1352,3 +1352,9 @@ The collaborator map renderer now separates peer selection, display-model deriva
 
 - `domain/parks/resolve-live-share-join.js` oturum, proje, park ve mevcut kanal durumuna göre okuma/ayrılma/yeniden kullanma/katılma kararını verir; `adapters/parks/fetch-live-share-project-park.js` mevcut `projects.park_id` `maybeSingle` okumasını aynı PostgREST zinciriyle yürütür.
 - `application/parks/join-live-share-park.js` park kanalına geçiş adımlarını sıralar; `handle-live-share-channel-status.js` abone olma, watchdog temizliği, ilk konum bildirimi ve hata yönlendirmesini korur; `ui/park-live-share-connection-status.js` bağlantı durumunu yazar. Mevcut Presence adapter'ı ve kilitli regresyonlar değişmedi.
+
+## Park yönetimi kimlik mutasyonları — 13 Ekim 2026
+
+- `adapters/parks/park-admin-mutation-store.js` park yeniden adlandırma, proje/ölçüm taşıma ve park silme yazılarını Supabase adapter sınırında toplar; mevcut `id` ve `park_id` filtreleri aynen korunur.
+- `ui/park-admin-mutation.js` rename/merge/delete onay metinlerini ve sonuç bildirimlerini sunar. Üç mevcut application use-case'i yetki kapılarını, yazım sırasını, hata durumlarını ve oturum temizliğini sürdürür.
+- `park-registry.js` eski global girişleri ve modüller eksik olduğunda inline fallback'i korur. Kilitli regresyon testleri değiştirilmedi; adapter/UI kontrat testleri eklendi.

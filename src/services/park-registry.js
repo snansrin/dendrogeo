@@ -807,6 +807,7 @@ function dgRenderParkAdmin(projects,measurements){
 }
 
 const DG_PARK_PROJECT_NAME_SYNC=window.DG_SYNC_PARK_PROJECT_NAMES_ADAPTER?window.DG_SYNC_PARK_PROJECT_NAMES_ADAPTER.create({getClient:()=>sb}):null;
+const DG_PARK_ADMIN_MUTATION_STORE=window.DG_PARK_ADMIN_MUTATION_STORE?window.DG_PARK_ADMIN_MUTATION_STORE.create({getClient:()=>sb}):null;
 async function dgResyncProjectNames(parkId,knownName){
   if(window.DG_SYNC_PARK_PROJECT_NAMES_ADAPTER)return DG_PARK_PROJECT_NAME_SYNC(parkId,knownName);
   let nm=knownName?String(knownName).trim():"";
@@ -818,14 +819,15 @@ async function dgResyncProjectNames(parkId,knownName){
 const DG_PARK_ADMIN_RENAME=window.DG_PARK_ADMIN_RENAME_APPLICATION.create({
   isAdmin:dgIsAdmin,
   getParks:()=>DG_PARK_ADMIN_ROWS,
-  promptName:park=>prompt(_tpr("Park adı (örn. Göksu Parkı):"),park.name),
+  promptName:park=>window.DG_PARK_ADMIN_MUTATION_UI?window.DG_PARK_ADMIN_MUTATION_UI.promptRename(park,{prompt,translate:_tpr}):prompt(_tpr("Park adı (örn. Göksu Parkı):"),park.name),
   normalizeName:dgNormParkName,
-  updatePark:(id,patch)=>sb.from("parks").update(patch).eq("id",id),
+  updatePark:(id,patch)=>DG_PARK_ADMIN_MUTATION_STORE?DG_PARK_ADMIN_MUTATION_STORE.updatePark(id,patch):sb.from("parks").update(patch).eq("id",id),
   resyncProjectNames:dgResyncProjectNames
 });
 
 async function dgParkRename(id){
   const result=await DG_PARK_ADMIN_RENAME(id);
+  if(window.DG_PARK_ADMIN_MUTATION_UI){if(window.DG_PARK_ADMIN_MUTATION_UI.renameResult(result,{translate:_tpr,translateCommon:dgCf,escape:esc,toast}) )await dgAfterParkAdminChange();return;}
   if(result.status==="forbidden")return toast("🔐 Bu işlem yalnız yöneticiye açık.","err");
   if(result.status==="park-missing")return toast("Park bulunamadı","err");
   if(result.status==="cancelled")return;
@@ -845,18 +847,19 @@ function dgParkMergeFromSelect(id){
 const DG_PARK_ADMIN_MERGE=window.DG_PARK_ADMIN_MERGE_APPLICATION.create({
   isAdmin:dgIsAdmin,
   getParks:()=>DG_PARK_ADMIN_ROWS,
-  confirmMerge:(src,dst)=>confirm(_tprf(
+  confirmMerge:(src,dst)=>window.DG_PARK_ADMIN_MUTATION_UI?window.DG_PARK_ADMIN_MUTATION_UI.confirmMerge(src,dst,{confirm,translateFormat:_tprf}):confirm(_tprf(
     '"{src}" (#{sid}) → "{dst}" (#{did}) birleştirilsin mi?\n\n· Projeler ve ölçümler hedef parka taşınır\n· Proje adları hedef park adına göre yeniden kurulur\n· Kaynak kimlik (#{sid}) SİLİNİR — geri alınamaz\n\nKarşılaştırma artık TEK "{dst}" satırı gösterir.',
     {src:src.name,sid:src.id,dst:dst.name,did:dst.id})),
-  moveProjects:(srcId,dstId)=>sb.from("projects").update({park_id:dstId}).eq("park_id",srcId),
-  moveMeasurements:(srcId,dstId)=>sb.from("measurements").update({park_id:dstId}).eq("park_id",srcId),
+  moveProjects:(srcId,dstId)=>DG_PARK_ADMIN_MUTATION_STORE?DG_PARK_ADMIN_MUTATION_STORE.moveProjects(srcId,dstId):sb.from("projects").update({park_id:dstId}).eq("park_id",srcId),
+  moveMeasurements:(srcId,dstId)=>DG_PARK_ADMIN_MUTATION_STORE?DG_PARK_ADMIN_MUTATION_STORE.moveMeasurements(srcId,dstId):sb.from("measurements").update({park_id:dstId}).eq("park_id",srcId),
   resyncProjectNames:dgResyncProjectNames,
-  deletePark:id=>sb.from("parks").delete().eq("id",id),
+  deletePark:id=>DG_PARK_ADMIN_MUTATION_STORE?DG_PARK_ADMIN_MUTATION_STORE.deletePark(id):sb.from("parks").delete().eq("id",id),
   clearSession:()=>DG_PARK_SESSION.clear()
 });
 
 async function dgParkMergeInto(srcId,dstId){
   const result=await DG_PARK_ADMIN_MERGE(srcId,dstId);
+  if(window.DG_PARK_ADMIN_MUTATION_UI){if(window.DG_PARK_ADMIN_MUTATION_UI.mergeResult(result,{translate:_tpr,translateCommon:dgCf,translateFormat:_tprf,escape:esc,toast}) )await dgAfterParkAdminChange();return;}
   if(result.status==="forbidden")return toast("🔐 Bu işlem yalnız yöneticiye açık.","err");
   if(result.status==="invalid")return toast("Geçersiz birleştirme","err");
   if(result.status==="park-missing")return toast("Park bulunamadı — 🔄 ile yenile","err");
@@ -872,17 +875,18 @@ async function dgParkMergeInto(srcId,dstId){
 const DG_PARK_ADMIN_DELETE=window.DG_PARK_ADMIN_DELETE_APPLICATION.create({
   isAdmin:dgIsAdmin,
   getPark:id=>DG_PARK_ADMIN_ROWS.find(park=>park.id===id),
-  confirmDelete:park=>confirm(
+  confirmDelete:park=>window.DG_PARK_ADMIN_MUTATION_UI?window.DG_PARK_ADMIN_MUTATION_UI.confirmDelete(park,{confirm}):confirm(
     `"${park.name}" (#${park.id}) silinsin mi?\n\n`+
     `· Bağlı projeler park bağını KAYBEDER ("park yok" durumuna düşer, adları değişmez)\n`+
     `· Ölçümlerin park_id'si null olur — ÖLÇÜM SİLİNMEZ\n`+
     `· Yanlış/çift kimlikse silmek yerine 🔀 birleştirmeyi kullan`),
-  deletePark:id=>sb.from("parks").delete().eq("id",id),
+  deletePark:id=>DG_PARK_ADMIN_MUTATION_STORE?DG_PARK_ADMIN_MUTATION_STORE.deletePark(id):sb.from("parks").delete().eq("id",id),
   clearSession:()=>DG_PARK_SESSION.clear()
 });
 
 async function dgParkDelete(id){
   const result=await DG_PARK_ADMIN_DELETE(id);
+  if(window.DG_PARK_ADMIN_MUTATION_UI){if(window.DG_PARK_ADMIN_MUTATION_UI.deleteResult(result,{escape:esc,toast}) )await dgAfterParkAdminChange();return;}
   if(result.status==="forbidden")return toast("🔐 Bu işlem yalnız yöneticiye açık.","err");
   if(result.status==="park-missing")return toast("Park bulunamadı","err");
   if(result.status==="cancelled")return;
