@@ -114,6 +114,9 @@ jobs:
       - name: Değişmez çekirdek kaynak kilidi
         run: npm run check:core-foundation
 
+      - name: Mimari katman sınırları
+        run: npm run check:architecture
+
       - name: Sözdizimi denetimi (tarayıcı semantiği)
         run: npm run check:syntax
 

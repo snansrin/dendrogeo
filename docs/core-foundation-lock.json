@@ -419,7 +419,7 @@
     "src/services/lc-stac.js": "978c4be8c3bc4e7cda3f694d1f06290e661fed5bbd5b76b68719140edc18e71a",
     "src/services/lc-validate.js": "e78602fb957fbc425ade20ba907d96b12f8af7bd3d2563b4e858c60000bbab48",
     "src/services/map.js": "db155b938ac84b24d99a097d309ac5c37bd3235463f76e6fc96ceaa92e7cd4e1",
-    "src/services/measure.js": "8b345682619a8cb2b244966a7a354daacb6a131a655e72f8747e0aa2c9472154",
+    "src/services/measure.js": "efabfc5fb01a8626dfc91ab5cc437909c08665d863582ac5c24415e87264617b",
     "src/services/offline.js": "b0d13ca6c52213b2103e5c23727be42c92cea39855622d43abaad87a8e48280f",
     "src/services/osm-client.js": "2e5eeaa735bf05a603a0db142619f60747b9696f506e666d7df992454a56814f",
     "src/services/osm-water-backup.js": "b3429cdc9bfe0f84bd7b6644a1221d4daadc374ac046b036abf15b3b5ee7d269",
@@ -747,6 +747,17 @@
           "path": "src/utils/lazylibs.js",
           "previous_sha256": "f19885ae01b97dcfb17dcdb208ef384d0adb8074ad58ae828d5194fad992205f",
           "sha256": "94b5c64ef90e59dab741e70ec84a7e100b641319539101391d01b1c1216ff64b"
+        }
+      ]
+    },
+    {
+      "date": "2026-10-13",
+      "scope": "User-authorized follow-on five-module split of locked measure service: local last-project memory, project-to-measure navigation, project card markup, project/park context display, and canonical name preview. Preserve device-only preference, project eligibility checks, shared/owner actions, HTML escaping, city/country defaults, and locked regression tests.",
+      "files": [
+        {
+          "path": "src/services/measure.js",
+          "previous_sha256": "8b345682619a8cb2b244966a7a354daacb6a131a655e72f8747e0aa2c9472154",
+          "sha256": "efabfc5fb01a8626dfc91ab5cc437909c08665d863582ac5c24415e87264617b"
         }
       ]
     },
