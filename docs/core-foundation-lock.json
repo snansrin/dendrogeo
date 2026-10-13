@@ -206,7 +206,12 @@
       "src/domain/parks/validate-waypoint-csv-row.js",
       "src/application/parks/build-waypoint-upsert-command.js",
       "src/adapters/parks/upsert-project-waypoint.js",
-      "src/application/parks/upload-waypoint-csv.js"
+      "src/application/parks/upload-waypoint-csv.js",
+      "src/domain/map/prepare-approved-map-measurements.js",
+      "src/adapters/map/fetch-approved-map-measurements.js",
+      "src/application/map/load-approved-measurement-markers.js",
+      "src/ui/render-live-map-load-status.js",
+      "src/application/map/load-live-measurements-map.js"
     ],
     "scientific_contract_and_inputs": [
       "css/park-panel.css",
@@ -318,7 +323,8 @@
       "test/surface-mount-lifecycle-modules.test.mjs",
       "test/park-presence-channel-modules.test.mjs",
       "test/park-presence-rendering-modules.test.mjs",
-      "test/waypoint-csv-upload-modules.test.mjs"
+      "test/waypoint-csv-upload-modules.test.mjs",
+      "test/map-live-load-modules.test.mjs"
     ]
   },
   "sha256": {
@@ -443,7 +449,7 @@
     "src/services/lc-s2.js": "0e2ac1af0b680e6f4358cb9d99980e32339d04f67f911cfe14d244898f014d40",
     "src/services/lc-stac.js": "978c4be8c3bc4e7cda3f694d1f06290e661fed5bbd5b76b68719140edc18e71a",
     "src/services/lc-validate.js": "b4d8327c62940b1af1a53ddb087188816ff2359c8456c2755c7c853c5919f42b",
-    "src/services/map.js": "5b71e0381d65f69d70ecbab99d9f9947b76c2ec5a7163e9c60b3cf3bb08fe449",
+    "src/services/map.js": "02edbb26a2d1a6ebb00626876f4f5724477147279b4d7109a5db98bf004df652",
     "src/services/measure.js": "ef61d7a32cf16ce83785a7f8fc1c579c8bf2bff8f8ca25f0992c3701d15c71d9",
     "src/services/offline.js": "b0d13ca6c52213b2103e5c23727be42c92cea39855622d43abaad87a8e48280f",
     "src/services/osm-client.js": "2e5eeaa735bf05a603a0db142619f60747b9696f506e666d7df992454a56814f",
@@ -613,7 +619,13 @@
     "src/application/parks/build-waypoint-upsert-command.js": "0b21d2aab12c8ae4ed05ab4c26cf38dde141582b218b1ef289c5bc0aa358ae90",
     "src/adapters/parks/upsert-project-waypoint.js": "26f616ebbae7c0a5bd727c2f8916330a1ee00dcd2e6b1483c772a9d4b436cd62",
     "src/application/parks/upload-waypoint-csv.js": "3abbaf00f10d5662417388c7becdbd3274cfb664ce38a691a37ae4e03c43ae67",
-    "test/waypoint-csv-upload-modules.test.mjs": "c2ac1fde9029a4123ed0c10a5937946555093fd8d6883760101f302de67dcead"
+    "test/waypoint-csv-upload-modules.test.mjs": "c2ac1fde9029a4123ed0c10a5937946555093fd8d6883760101f302de67dcead",
+    "src/domain/map/prepare-approved-map-measurements.js": "6a58cd5172b98aa43cbc8ba7d04b720cd938e841da99fe34423d77c67eba9c32",
+    "src/adapters/map/fetch-approved-map-measurements.js": "4ce2180ff6c2164a1e5bc19f31e37070f50b6364f21cbf4196168c171bac9fad",
+    "src/application/map/load-approved-measurement-markers.js": "c984900116a28613979970082e513b90a7e9b2bea404d6ef54d17ba34a62c1c6",
+    "src/ui/render-live-map-load-status.js": "29c5b4b9df9b28aed806f915212a22bfa2ef31dd0e1d7dcc431a724a65e91d4a",
+    "src/application/map/load-live-measurements-map.js": "1446b2e749d316a8121cb5a0efbbf5bc366f75f9d27e4562b2808c99e5b472a1",
+    "test/map-live-load-modules.test.mjs": "199482d8b88f50aaafe883d56f8702df1eaf092e58bfde77c485ac6848c307d6"
   },
   "authorized_modularizations": [
     {
@@ -1399,6 +1411,17 @@
           "path": "src/services/map.js",
           "previous_sha256": "7ef3159450fa42bea6f735426c6732a6acc0a18ff06f70862c1b2375f3416390",
           "sha256": "5b71e0381d65f69d70ecbab99d9f9947b76c2ec5a7163e9c60b3cf3bb08fe449"
+        }
+      ]
+    },
+    {
+      "date": "2026-10-13",
+      "scope": "User-authorized fifty-sixth five-module split of locked live approved-map loading: coordinate-based row preparation, Supabase read adapter, marker load use case, load-status presentation, and live-map orchestration. Preserve approved query, truncation warning, done(n, rows, error) callback, marker order, RLS error visibility, dirty/loaded gates, and optional module fallback; locked regression tests remain unchanged.",
+      "files": [
+        {
+          "path": "src/services/map.js",
+          "previous_sha256": "5b71e0381d65f69d70ecbab99d9f9947b76c2ec5a7163e9c60b3cf3bb08fe449",
+          "sha256": "02edbb26a2d1a6ebb00626876f4f5724477147279b4d7109a5db98bf004df652"
         }
       ]
     }

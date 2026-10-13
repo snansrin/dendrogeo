@@ -127,6 +127,8 @@ function addMarkersChunked(m,rows,chunk=150){
  * devam eder (n=-1'i 0 gibi görürler); ama repo içindeki üç çağıran da
  * (loadLiveMap, loadWorld, initLanding) güncellendi. */
 async function loadApprovedMarkers(m,limit,done){
+ const app=window.DG_LOAD_APPROVED_MEASUREMENT_MARKERS,adapter=window.DG_FETCH_APPROVED_MAP_MEASUREMENTS,prepare=window.DG_PREPARE_APPROVED_MAP_MEASUREMENTS;
+ if(app&&adapter&&prepare){await app.load({map:m,limit,done,readRows:()=>adapter.fetch({client:sb,limit,warnIfTruncated:dgWarnIfTruncated}),prepare:rows=>prepare.prepare(rows,dgValidCoord),draw:(target,rows)=>addMarkersChunked(target,rows),log:console});return;}
  if(!m){done&&done(-1,[],"Harita henüz kurulmadı (initMaps çağrılmadı)");return;}
  try{
   const{data,count,error}=await sb.from("measurements")
@@ -160,6 +162,8 @@ async function loadApprovedMarkers(m,limit,done){
  * senkronizasyon dgMarkLiveDirty() çağırır; go("map") bayrağı görünce
  * yeniden çeker. Elle tazelemek için karta ↻ düğmesi kondu (partials/shell.html). */
 async function loadLiveMap(){
+ const app=window.DG_LOAD_LIVE_MEASUREMENTS_MAP,status=window.DG_RENDER_LIVE_MAP_LOAD_STATUS;
+ if(app&&status){const format=typeof dgTf==="function"?dgTf:(_t,v)=>_t.replace(/\{(\w+)\}/g,(match,key)=>v[key]);await app.load({element:$("mapLoad"),loadMarkers:callback=>loadApprovedMarkers(map,3000,callback),markLoaded:ok=>dgMarkLiveLoaded(ok),status,escapeHTML:esc,format,setTimer:setTimeout,clusterDegraded:()=>map&&map._clusterDegraded,renderAnalysis});return;}
  const el=$("mapLoad");
  if(el){el.style.display="";el.className="alert info";el.textContent="⏳ Onaylı kayıtlar yükleniyor…";}
  await loadApprovedMarkers(map,3000,(n,rows,err)=>{
