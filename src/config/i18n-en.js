@@ -523,6 +523,7 @@ const DG_I18N_EN={
 "Kayıt reddedildi":"Record rejected",
 "Filtreye uyan kayıt yok":"No records match the filter",
 "Depolama bilgisi alınamadı.":"Could not retrieve storage info.",
+"Fotoğraf temizliği doğrulanamadı; silme durduruldu.":"Photo cleanup could not be verified; deletion was stopped.",
 "Tarayıcı kurulum istemini göstermedi — menüden 'Ana ekrana ekle' deneyin.":"The browser didn't show the install prompt — try 'Add to Home Screen' from the menu.",
 "⚠ Genel istatistikler yüklenemedi (ağ/oturum). Sayfayı yenileyin.":"⚠ Could not load general statistics (network/session). Refresh the page.",
 "Yedek hazırlanıyor…":"Preparing backup…",
