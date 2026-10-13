@@ -154,7 +154,8 @@ async function rejectMeas(id){
 
 async function loadStorageStats(){
  try{
-  const usage=await window.DG_READ_PHOTO_STORAGE_USAGE.read(sb.storage);
+  const adminStore=window.DG_ADMIN_PERSISTENCE_STORE.create(()=>sb);
+  const usage=await window.DG_READ_PHOTO_STORAGE_USAGE.read(adminStore);
   window.DG_ADMIN_STORAGE_USAGE_UI.render($("storeBar"),$("storeInfo"),{...usage,quota:QUOTA_MB,format:_tadf});
  }catch(e){$("storeInfo").textContent=_tad("Depolama bilgisi alınamadı.");}
 }
@@ -162,8 +163,9 @@ async function loadStorageStats(){
 async function cleanOrphans(){
  if(!PROFILE||(PROFILE.role!=="admin"&&PROFILE.role!=="owner"))return toast("Yetki yok.");
  if(!confirm(dgCf("Hiçbir kayda bağlı olmayan depolama dosyaları silinsin mi?")))return;
- const{data:meas}=await sb.from("measurements").select("photo_url");
- const removed=await window.DG_CLEAN_ORPHAN_PHOTOS.clean({storage:sb.storage,photoUrls:meas||[]});
+ const adminStore=window.DG_ADMIN_PERSISTENCE_STORE.create(()=>sb);
+ const{data:meas}=await adminStore.loadMeasurementPhotoUrls();
+ const removed=await window.DG_CLEAN_ORPHAN_PHOTOS.clean({ports:adminStore,photoUrls:meas||[]});
  toast("✓ "+removed+" yetim dosya silindi.");
  loadStorageStats();
 }
@@ -256,7 +258,7 @@ fillSelect($("admExpProject"),listProjects(ADM_PROJECTS,$("admExpCountry").value
 
 /* --- TOPLU DIŞA AKTARIM (Admin) --- */
 function adminFilteredQuery(){
-return window.DG_BUILD_ADMIN_EXPORT_QUERY.build(()=>sb,{country:$("admExpCountry").value,city:$("admExpCity").value,project:$("admExpProject").value,status:$("admExpStatus").value});
+return window.DG_BUILD_ADMIN_EXPORT_QUERY.build(window.DG_ADMIN_PERSISTENCE_STORE.create(()=>sb),{country:$("admExpCountry").value,city:$("admExpCity").value,project:$("admExpProject").value,status:$("admExpStatus").value});
 }
 
 async function adminFilteredRows(){

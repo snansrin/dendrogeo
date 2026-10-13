@@ -4,6 +4,7 @@ import vm from 'node:vm';
 import {readFileSync} from 'node:fs';
 
 const files=[
+ 'src/adapters/admin/admin-persistence-store.js',
  'src/application/admin/refresh-tree-pending-badge.js',
  'src/application/admin/open-pending-tree-nodes.js',
  'src/application/admin/expand-measurement-tree.js',
@@ -19,10 +20,10 @@ function load(){
 test('pending badge keeps exact/head query, status filter and silent failures',async()=>{
  const api=load().DG_REFRESH_ADMIN_TREE_PENDING_BADGE,calls=[],updates=[];
  const query={select:(...args)=>{calls.push(['select',...args]);return query;},eq:(...args)=>{calls.push(['eq',...args]);return Promise.resolve({count:4,error:null});}};
- await api.execute({from:table=>{calls.push(['from',table]);return query;}},n=>updates.push(n));
+ await api.execute({countPendingMeasurements:()=>{calls.push(['from','measurements']);return query.select('*',{count:'exact',head:true}).eq('status','Beklemede');}},n=>updates.push(n));
  assert.deepEqual(JSON.parse(JSON.stringify(calls)),[['from','measurements'],['select','*',{count:'exact',head:true}],['eq','status','Beklemede']]);assert.deepEqual(updates,[4]);
- await api.execute({from:()=>({select:()=>({eq:async()=>({count:9,error:Error('denied')})})})},n=>updates.push(n));
- await api.execute({from:()=>{throw Error('offline');}},n=>updates.push(n));assert.deepEqual(updates,[4]);
+ await api.execute({countPendingMeasurements:async()=>({count:9,error:Error('denied')})},n=>updates.push(n));
+ await api.execute({countPendingMeasurements(){throw Error('offline');}},n=>updates.push(n));assert.deepEqual(updates,[4]);
 });
 
 test('pending shortcut opens only pending hierarchy keys and renders the filtered tree',()=>{

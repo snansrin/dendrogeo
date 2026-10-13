@@ -4,6 +4,7 @@ import vm from 'node:vm';
 import {readFileSync} from 'node:fs';
 
 const files=[
+ 'src/adapters/admin/admin-persistence-store.js',
  'src/ui/admin-measurement-row.js',
  'src/ui/admin-measurement-table.js',
  'src/domain/admin/export-filter-options.js',
@@ -48,7 +49,7 @@ test('admin export options merge project and measurement locations and retain ca
 test('admin export query applies only selected filters and paged reads stop at final partial page',async()=>{
  const {window}=app(),calls=[];
  const query={from(table){calls.push(['from',table]);return this;},select(columns){calls.push(['select',columns]);return this;},eq(column,value){calls.push(['eq',column,value]);return this;}};
- window.DG_BUILD_ADMIN_EXPORT_QUERY.build(()=>query,{country:'Türkiye',city:'Ankara',project:'7',status:'Onaylı'});
+ window.DG_BUILD_ADMIN_EXPORT_QUERY.build({buildMeasurementExportQuery(filters){let result=query.from('measurements').select('*,projects(name)');if(filters.country)result=result.eq('country',filters.country);if(filters.city)result=result.eq('city',filters.city);if(filters.project)result=result.eq('project_id',+filters.project);if(filters.status)result=result.eq('status',filters.status);return result;}},{country:'Türkiye',city:'Ankara',project:'7',status:'Onaylı'});
  assert.deepEqual(calls,[['from','measurements'],['select','*,projects(name)'],['eq','country','Türkiye'],['eq','city','Ankara'],['eq','project_id',7],['eq','status','Onaylı']]);
  const ranges=[];
  const rows=await window.DG_READ_ADMIN_EXPORT_ROWS.read(()=>({order(column){assert.equal(column,'created_at');return this;},range(from,to){ranges.push([from,to]);const data=from===0?Array.from({length:2},(_,id)=>({id})): [{id:2}];return Promise.resolve({data,error:null});}}),{pageSize:2});

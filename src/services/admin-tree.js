@@ -124,7 +124,7 @@ function dgUpdateSidebarBadge(n){
 /* Yan menü rozeti, yönetim sekmesi AÇILMADAN da güncel olsun diye ayrı bir
  * hafif sorgu (head:true → yalnız sayı, satır çekilmez). */
 async function dgRefreshPendingBadge(){
-  if(window.DG_REFRESH_ADMIN_TREE_PENDING_BADGE)return window.DG_REFRESH_ADMIN_TREE_PENDING_BADGE.execute(sb,dgUpdateSidebarBadge);
+  if(window.DG_REFRESH_ADMIN_TREE_PENDING_BADGE)return window.DG_REFRESH_ADMIN_TREE_PENDING_BADGE.execute(window.DG_ADMIN_PERSISTENCE_STORE.create(()=>sb),dgUpdateSidebarBadge);
   try{
     const{count,error}=await sb.from("measurements")
       .select("*",{count:"exact",head:true}).eq("status","Beklemede");

@@ -1,8 +1,8 @@
 "use strict";
 (function(root){
- async function execute(client,update){
+ async function execute(ports,update){
   try{
-   const{count,error}=await client.from("measurements").select("*",{count:"exact",head:true}).eq("status","Beklemede");
+   const{count,error}=await ports.countPendingMeasurements();
    if(!error)update(count||0);
   }catch(error){}
  }
