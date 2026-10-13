@@ -1062,3 +1062,11 @@ Her modülün tek bir dış API'si, sahibi olduğu açık durumu ve kendi testle
 - `ui/surface-boundary-drawing-preview.js`, geçici çizgi, kapanış kenarı ve köşe işaretlerini üretir.
 - `application/surface/surface-boundary-drawing-session.js`, harita çizim oturumunu başlatır, en fazla 300 noktayı kabul eder, geri alma ve iptali yönetir.
 - `application/surface/finish-surface-boundary-drawing.js`, mevcut feature payload'ını cihaza kaydeder ve gerekirse su dış hücre taramasını başlatır.
+
+## LULC hücre karar akışı — 13 Ekim 2026
+
+- `domain/surface/build-cell-decision-popup-model.js`, hücre alanı, sınıf seçimi ve geri alma durumunu popup görünüm modeline dönüştürür.
+- `ui/render-cell-decision-popup.js`, mevcut sınıf sırası, eylem adları ve kaçışlanmış metinle popup HTML’sini üretir.
+- `application/surface/apply-surface-cell-decision.js`, doğrulanmış tekli kararı uygular; toplu değişiklikler aynı tekli girişten her hücreyi sırayla geçirir.
+- `application/surface/undo-surface-cell-decision.js` ve `reset-surface-corrections.js`, sahiplik kapıları, geri alma ve onaylı sıfırlama akışını yürütür.
+- `lc-sens.js` eski global girişlerini korur; yeni modüller servis öncesi lazy yüklenir ve çevrimdışı precache’e alınır.

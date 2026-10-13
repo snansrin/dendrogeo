@@ -507,6 +507,8 @@ async function dgSensRepartition(featureOverride=null){
 }
 
 function dgSensPopup(key){
+ const modelModule=window.DG_SURFACE_CELL_DECISION_POPUP_MODEL,viewModule=window.DG_SURFACE_CELL_DECISION_POPUP_VIEW;
+ if(modelModule&&viewModule){const cell=dgSensCells()?.find(item=>dgSensCellKey(item)===key);if(!cell)return;const currentClass=dgSensEffective(cell),model=modelModule.build({cell,key,currentClass,decision:DG_SENS.record.corrections[key],meta:dgSensMeta});L.popup({maxWidth:280}).setLatLng([cell.center.lat,cell.center.lon]).setContent(viewModule.render({model,escape:esc,translate:_tvs})).openOn(map);return;}
  const c=dgSensCells()?.find(c=>dgSensCellKey(c)===key);if(!c)return;
  const cls=dgSensEffective(c),dec=DG_SENS.record.corrections[key];
  let html=`<div class="dg-sens-popup"><b>${esc(_tvs(dgSensMeta(cls).tr))}</b> · ${Number(c.areaM2).toFixed(1)} m²<p>${esc(_tvs("Görüntüdeki sınıfı seçerek bu hücreyi düzeltin."))}</p><div class="dg-sens-actions">`;
@@ -515,11 +517,13 @@ function dgSensPopup(key){
  html+="</div></div>";L.popup({maxWidth:280}).setLatLng([c.center.lat,c.center.lon]).setContent(html).openOn(map);
 }
 function dgSensDecide(key,toCls){
+ const module=window.DG_APPLY_SURFACE_CELL_DECISION;
+ if(module){const cell=dgSensCells()?.find(item=>dgSensCellKey(item)===key);return module.apply({rawView:DG_SENS.rawView,cell,types:window.DG_SURFACE_REVIEW.types,toClass:toCls,busy:DG_SENS.busy,saving:DG_SENS.saving,createDecision:dgSensSetCellDecision,dirty:dgSensDirty,closePopup:()=>map.closePopup(),refresh:dgSensRefreshLayer,summary:dgSensUpdateSummary,status:dgSensUpdateStatus,save:dgSensSave});}
  const c=dgSensCells()?.find(c=>dgSensCellKey(c)===key);if(DG_SENS.rawView||!c||!window.DG_SURFACE_REVIEW.types[toCls]||DG_SENS.busy||DG_SENS.saving)return;
  if(!dgSensSetCellDecision(c,toCls))return;dgSensDirty();map.closePopup();dgSensRefreshLayer();dgSensUpdateSummary();dgSensUpdateStatus();dgSensSave();
 }
-function dgSensUndo(key){if(DG_SENS.rawView||!DG_SENS.record||DG_SENS.busy||DG_SENS.saving)return;delete DG_SENS.record.corrections[key];dgSensDirty();map.closePopup();dgSensRefreshLayer();dgSensUpdateSummary();dgSensSave();}
-function dgSensBulk(cls){for(const x of dgSensCandidates(cls))dgSensDecide(dgSensCellKey(x.cell),cls);}
+function dgSensUndo(key){const module=window.DG_UNDO_SURFACE_CELL_DECISION;if(module)return module.undo({rawView:DG_SENS.rawView,record:DG_SENS.record,key,busy:DG_SENS.busy,saving:DG_SENS.saving,dirty:dgSensDirty,closePopup:()=>map.closePopup(),refresh:dgSensRefreshLayer,summary:dgSensUpdateSummary,save:dgSensSave});if(DG_SENS.rawView||!DG_SENS.record||DG_SENS.busy||DG_SENS.saving)return;delete DG_SENS.record.corrections[key];dgSensDirty();map.closePopup();dgSensRefreshLayer();dgSensUpdateSummary();dgSensSave();}
+function dgSensBulk(cls){const module=window.DG_APPLY_SURFACE_CELL_DECISION;if(module)return module.bulk({candidates:dgSensCandidates(cls),classKey:cls,cellKey:dgSensCellKey,apply:dgSensDecide});for(const x of dgSensCandidates(cls))dgSensDecide(dgSensCellKey(x.cell),cls);}
 async function dgSensAccept(){
  const rec=DG_SENS.record;
  const blocked=!rec?"Kabul edilecek analiz bulunamadı.":DG_SENS.rawView?"Ham görünüm açık; önce düzenlemeye dönün.":DG_SENS.brush?"Fırça işlemi sürüyor; önce fırçayı kapatın.":DG_SENS.saving||DG_SENS.busy?"Yüzey işlemi sürüyor; tamamlanmasını bekleyin.":!DG_SENS.geometry?"Park geometrisi hazır değil; analizi yeniden açın.":DG_SENS.draw?"Sınır çizimi tamamlanmadı; çizimi tamamlayın veya iptal edin.":dgSensWaterBoundaryUnresolved()>0?"Su sınırı dışındaki "+dgSensWaterBoundaryUnresolved()+" raster-su hücresi güncel uydu verisiyle sınıflandırılamadı. Her belirsiz hücreyi yeşil, sert veya çıplak olarak inceleyip düzeltin; sonuç kabul edilmedi.":null;
@@ -543,7 +547,7 @@ async function dgSensAccept(){
  }catch(e){if(epoch===DG_SENS.epoch){const local=await dgSensSave();DG_SENS.status=_tvs("Hesaba kaydedilemedi: ")+String(e.message||e)+(local?" · "+_tvs("Yalnızca cihaz taslağı saklandı; hesap sonucu güncellenmedi."):"");toast(DG_SENS.status,"err");}return false;}
  finally{if(epoch===DG_SENS.epoch){DG_SENS.saving=false;dgSensRender();dgSensRefreshLayer();}}
 }
-function dgSensReset(){if(DG_SENS.rawView||DG_SENS.busy||DG_SENS.saving||!confirm(_tvs("Tüm kullanıcı düzeltmeleri silinsin mi? Ham raster korunur.")))return;DG_SENS.record.corrections={};DG_SENS.record.features=[];DG_SENS.record.brushHistory=[];dgSensDirty();dgSensRepartition().then(ok=>ok&&dgSensSave());}
+function dgSensReset(){const module=window.DG_RESET_SURFACE_CORRECTIONS;if(module)return module.reset({rawView:DG_SENS.rawView,busy:DG_SENS.busy,saving:DG_SENS.saving,confirmReset:()=>confirm(_tvs("Tüm kullanıcı düzeltmeleri silinsin mi? Ham raster korunur.")),record:DG_SENS.record,dirty:dgSensDirty,repartition:dgSensRepartition,save:dgSensSave});if(DG_SENS.rawView||DG_SENS.busy||DG_SENS.saving||!confirm(_tvs("Tüm kullanıcı düzeltmeleri silinsin mi? Ham raster korunur.")))return;DG_SENS.record.corrections={};DG_SENS.record.features=[];DG_SENS.record.brushHistory=[];dgSensDirty();dgSensRepartition().then(ok=>ok&&dgSensSave());}
 function dgSensFindObjectAt(latlng,elements=window.DG_SURFACE_OSM?.elements||[]){
  const module=window.DG_SURFACE_OBJECT_PICKER;
  if(module)return module.find({latlng,elements,storedFeatures:DG_SENS.record?.objectFeatures||[],epsg:DG_SENS.epsg,parkGeometry:DG_SENS.parkGeometry,cellGeometry:DG_SENS.geometry,project:dgSurfaceProject,unproject:dgSurfaceUnproject,forward:dgLcUtmForward,featureGeometry:dgSurfaceFeatureGeometry,bounds:dgSurfaceBounds,pointDistance:dgGridPointDistance,clip:dgSurfaceClip,area:dgSurfaceArea,objects:dgSurfaceObjects,validFeature:window.DG_SURFACE_REVIEW.validFeature});
