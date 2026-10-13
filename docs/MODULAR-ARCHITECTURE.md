@@ -1286,6 +1286,12 @@ The collaborator map renderer now separates peer selection, display-model deriva
 - `application/surface/build-surface-review-park-geometry.js` dış park halkalarını birleştirip delikleri çıkarır; `build-surface-review-cell-geometry.js` grid hücresini aynı hassasiyetli clip adapter'ı üzerinden parka kırpar.
 - Modüller servis öncesinde ana thread ve worker'da yüklenir; servis gövdeleri eksik modül halinde yedek davranış olarak korunur.
 
+## Hassas yüzey geometri kırpma — 13 Ekim 2026
+
+- `domain/surface/collect-surface-review-clip-points.js` temizlenmiş operand noktalarını toplar; `find-surface-review-clip-origin.js` tam metreli ortak UTM başlangıcını bulur ve `translate-surface-review-geometry.js` tüm ringleri aynı offsetle taşır.
+- `adapters/surface/run-surface-review-polygon-operation.js` polygon-clipping erişimini sınırlar; `application/surface/clip-surface-review-geometry.js` temizleme, yerel frame, clipping, koordinatları geri yükleme ve mevcut sayısal hata mesajını orkestre eder.
+- Ana-thread lazy loader ve yüzey worker'ı bu modülleri servis öncesi yükler; servis içi legacy algoritma yedek olarak kalır.
+
 ## Park içi sampling grid geometrisi — 13 Ekim 2026
 
 - domain/surface/measure-grid-point-distance.js dış halka ve deliklerde işaretli sınır mesafesini hesaplar; ind-grid-interior-point.js sınırlı best-first alt bölmeyle güvenli iç nokta seçer.
