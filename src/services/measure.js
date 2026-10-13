@@ -104,7 +104,10 @@ async function checkPhoto(e){
  * kendiliğinden bırakıldığı için visibilitychange ile yeniden alınır.
  * Desteklemeyen tarayıcılarda sessizce yok sayılır; ölçüm akışını etkilemez. */
 let WAKE_LOCK=null;
+const DG_MEASUREMENT_GEOLOCATION=window.DG_MEASUREMENT_GEOLOCATION_ADAPTER?window.DG_MEASUREMENT_GEOLOCATION_ADAPTER.create({getNavigator:()=>navigator}):null;
+const DG_MEASUREMENT_WAKE_LOCK=window.DG_MEASUREMENT_WAKE_LOCK_ADAPTER?window.DG_MEASUREMENT_WAKE_LOCK_ADAPTER.create({getNavigator:()=>navigator}):null;
 async function acquireWakeLock(){
+ if(DG_MEASUREMENT_WAKE_LOCK)return DG_MEASUREMENT_WAKE_LOCK.acquire();
  if(!("wakeLock" in navigator))return;
  try{
   if(WAKE_LOCK)return;
@@ -131,6 +134,15 @@ function dgGpsBtnBusy(on){
  else{b.disabled=false;b.innerHTML=b.dataset.oldText||"📡 Konumu Etkinleştir";b.style.opacity="";b.style.cursor="";}
 }
 async function startGps(){
+ if(typeof window!=="undefined"&&window.DG_START_MEASUREMENT_GPS&&DG_MEASUREMENT_GEOLOCATION&&window.DG_MEASUREMENT_GPS_STATUS_UI&&window.DG_HANDLE_MEASUREMENT_GPS_ERROR)return window.DG_START_MEASUREMENT_GPS.start({
+  geolocation:DG_MEASUREMENT_GEOLOCATION,
+  isIOS:()=>/iPhone|iPad|iPod/.test(navigator.userAgent)||(navigator.platform==="MacIntel"&&navigator.maxTouchPoints>1),
+  showIOSHint:()=>toast("<b>"+_tms("iPhone kullanıcısı mısınız?")+"</b><br>"+_tms("Ayarlar → Gizlilik ve Güvenlik → Konum Servisleri → Safari Siteleri → Uygulamayı Kullanırken."),"info","📍",12000),
+  showStatus:(message,isError)=>window.DG_MEASUREMENT_GPS_STATUS_UI.show(message,isError,{element:$,setBusy:dgGpsBtnBusy,notify:message=>{if(typeof toast==="function")toast(message,"err","📍");}}),
+  setBusy:dgGpsBtnBusy,setGPS:coords=>{GPS=coords;},updateGPS:updGps,
+  liveSharePing:()=>{if(typeof dgLiveSharePing==="function")dgLiveSharePing();},presencePing:()=>{if(typeof dgPresencePing==="function")dgPresencePing();},
+  acquireWakeLock,handleError:(error,ports)=>window.DG_HANDLE_MEASUREMENT_GPS_ERROR.handle(error,ports)
+ });
  const gpsMsg=(t,e)=>{const g=$("gpsState");if(g){g.textContent=t;g.className="alert "+(e?"err":"info");}if(e)dgGpsBtnBusy(false);if(e){const b=$("gpsBtn");if(b){b.classList.remove("is-active");b.textContent="📡 Konumu Tekrar Dene";b.dataset.oldText=b.textContent;}const bd=$("gpsBadge");if(bd){bd.textContent="konum kapalı";bd.className="dg-png-badge ";}if(typeof toast==="function")toast(t,"err","📍");}};
  if(!navigator.geolocation)return gpsMsg("Tarayıcı konum desteklemiyor.",1);
  if(/iPhone|iPad|iPod/.test(navigator.userAgent)||(navigator.platform==="MacIntel"&&navigator.maxTouchPoints>1))toast("<b>"+_tms("iPhone kullanıcısı mısınız?")+"</b><br>"+_tms("Ayarlar → Gizlilik ve Güvenlik → Konum Servisleri → Safari Siteleri → Uygulamayı Kullanırken."),"info","📍",12000);
