@@ -1134,3 +1134,10 @@ Her modülün tek bir dış API'si, sahibi olduğu açık durumu ve kendi testle
 - `domain/surface/classify-surface-water-outside-cell.js`, sınır dışı raster su hücresini elle karar, spektral kanıt ve en yakın sınıflı grid komşusuna göre sınıflandırır.
 - `domain/surface/select-surface-water-outside-parts.js` gözden geçirilmiş raster su parçalarını seçer; `count-unresolved-surface-water-parts.js` belirsiz hücreleri anahtarla tekilleştirir.
 - `domain/surface/requires-surface-water-scan.js`, su sınırı ve profil durumuna göre gerekli yeniden taramayı belirler.
+
+## LULC inceleme geometri ve alan özeti — 13 Ekim 2026
+
+- `application/surface/build-surface-review-parts.js`, kayıt, geometri, profil ve görsel nesil aynı kaldığında çözülmüş parçaları memo’dan döndürür.
+- `domain/surface/summarize-surface-review-areas.js` alan toplamlarını parçalarla eşler; `build-adjusted-surface-summary.js` ham raster tabanıyla düzeltilmiş sonucu birleştirir.
+- `application/surface/render-surface-review-geometry.js` worker geometrisini önizleme, kabul ve dışa aktarma arasında yeniden kullanır; geçerli kabul geometrisi varsa onu tercih eder.
+- `domain/surface/build-surface-boundary-geojson.js`, doğrulanmış kullanıcı sınırlarını parkla kesiştirir ve mevcut GeoJSON özellikleriyle dışa aktarır.

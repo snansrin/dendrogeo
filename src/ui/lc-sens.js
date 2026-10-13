@@ -239,6 +239,7 @@ async function dgSensMount(hostId){
  if(rec.useObjects!==false&&!(rec.objectFeatures||[]).some(f=>f.type==="water"||f.type==="pool"))void dgSensAutoWaterOnMount(rec,epoch);
 }
 function dgSensParts(){
+ const builder=window.DG_BUILD_SURFACE_REVIEW_PARTS;if(builder){const result=builder.build({record:DG_SENS.record,geometry:DG_SENS.geometry,park:DG_SENS.parkGeometry,cells:dgSensCells(),epoch:DG_SENS.epoch,partitionVersion:DG_SENS.partitionVersion,visualVersion:DG_SENS.visualVersion,editing:DG_SENS.editing,features:dgSensFeatures(),sens:DG_SENS.record?.sens,corrections:DG_SENS.record?.corrections,profile:DG_SENS.record?.profile,epsg:DG_SENS.epsg,memo:DG_SENS.partsMemo,resolved:(...args)=>window.DG_SURFACE_REVIEW.resolved(...args),effective:dgSensEffective});DG_SENS.partsMemo=result.memo;return result.parts;}
  const cells=dgSensCells(),geometry=DG_SENS.geometry,park=DG_SENS.parkGeometry,rec=DG_SENS.record;
  if(!rec||!geometry||!park||!Array.isArray(cells)||!cells.length){DG_SENS.partsMemo=null;return [];}
  const key=[DG_SENS.epoch,DG_SENS.partitionVersion,DG_SENS.visualVersion,DG_SENS.editing].join(":");
@@ -251,6 +252,7 @@ function dgSensParts(){
 }
 function dgSensLayerClickIsCurrent(epoch,geometry){return !!DG_SENS.record&&!DG_SENS.busy&&!!geometry&&DG_SENS.epoch===epoch&&DG_SENS.geometry===geometry;}
 function dgSensBoundaryGeoJson(rec=DG_SENS.record){
+ const builder=window.DG_BUILD_SURFACE_BOUNDARY_GEOJSON;if(builder)return builder.build({record:rec,rawView:DG_SENS.rawView,parkGeometry:DG_SENS.parkGeometry,epsg:DG_SENS.epsg,validFeature:feature=>window.DG_SURFACE_REVIEW.validFeature(feature),featureGeometry:dgSurfaceFeatureGeometry,clip:dgSurfaceClip,area:dgSurfaceArea,unproject:dgSurfaceUnproject,warn:(...args)=>console.warn(...args)});
  const features=[];if(DG_SENS.rawView||!rec||!DG_SENS.parkGeometry||!DG_SENS.epsg)return{type:"FeatureCollection",features};
  for(const boundary of rec.features||[]){
   if(!window.DG_SURFACE_REVIEW.validFeature(boundary))continue;
@@ -270,10 +272,12 @@ function dgSensRenderBoundaryLayer(){
 }
 function dgSensAreas(){
  if(!DG_SENS.record||!DG_SENS.geometry)return null;
+ const summarizer=window.DG_SUMMARIZE_SURFACE_REVIEW_AREAS;if(summarizer)return summarizer.summarize({record:DG_SENS.record,geometry:DG_SENS.geometry,parts:dgSensParts(),memo:DG_SENS.partsMemo,rasterAreas:dgSensGroupAreas(),summarizeParts:dgSurfaceSummarizeParts});
  const parts=dgSensParts(),memo=DG_SENS.partsMemo;
  return memo.areas||(memo.areas=dgSurfaceSummarizeParts(dgSensGroupAreas(),parts));
 }
 async function dgSensVisualResult(parts=dgSensParts()){
+ const renderer=window.DG_RENDER_SURFACE_REVIEW_GEOMETRY;if(renderer)return renderer.render({epoch:DG_SENS.epoch,partitionVersion:DG_SENS.partitionVersion,parts,geometry:DG_SENS.geometry,epsg:DG_SENS.epsg,park:DG_SENS.parkGeometry,record:DG_SENS.record,rawView:DG_SENS.rawView,editing:DG_SENS.editing,memo:DG_SENS.visualMemo,getMemo:()=>DG_SENS.visualMemo,setMemo:value=>{DG_SENS.visualMemo=value;},workerJob:dgSurfaceWorkerJob,mergeSync:dgSurfaceMergeSync,displaySync:dgSurfaceDisplaySync});
  // Class labels, rather than slider positions, determine geometry. Identical
  // classifications reuse the same pending/completed worker result for preview,
  // acceptance and PNG export; styling never invalidates geometry.
@@ -292,7 +296,7 @@ async function dgSensVisualResult(parts=dgSensParts()){
  })().catch(e=>{if(DG_SENS.visualMemo===memo)DG_SENS.visualMemo=null;throw e;});
  return memo.promise;
 }
-function dgSensAdjusted(){const a=dgSensAreas();if(!a)return null;const rec=DG_SENS.record,n=Object.keys(rec.corrections).length;return{raster:dgSensGroupAreas(),corrected:a,n,nCorrected:n,nConfirmed:0};}
+function dgSensAdjusted(){const builder=window.DG_BUILD_ADJUSTED_SURFACE_SUMMARY,a=dgSensAreas();if(builder)return builder.build({areas:a,rasterAreas:dgSensGroupAreas(),record:DG_SENS.record});if(!a)return null;const rec=DG_SENS.record,n=Object.keys(rec.corrections).length;return{raster:dgSensGroupAreas(),corrected:a,n,nCorrected:n,nConfirmed:0};}
 function dgSensRememberSection(el){DG_SENS.sections=DG_SENS.sections||{};DG_SENS.sections[el.id]=el.open;}
 function dgSensRender(){
  const host=document.getElementById("lcSens"),rec=DG_SENS.record;if(!host||!rec)return;
