@@ -4,7 +4,7 @@
 
 4 Ekim 2026 itibarıyla saha, yüzey analizi ve canlı harita sistemi DendroGeo'nun ana ürün çekirdeğidir. Bu sürüm, yeni geliştirmelerin davranış tabanıdır. Kurtarma dalı `recovery/core-2026-10-04`, kullanıcı onayıyla ana dalda çalışan çekirdeğe ilerletilmiştir.
 
-11 Ekim 2026 itibarıyla ölçüm, park algılama, park analizi ve canlı haritanın main'deki dosyaları `docs/core-foundation-lock.json` içinde SHA-256 ile sabitlenmiştir. Kilitli dosyalar değiştirilmez; geliştirmeler yeni modül/adaptör olarak eklenir ve var olan davranışı devralıp geçersiz kılamaz. Entegrasyon için script yükleme listesi ve PWA precache gibi çevre dosyaları güncellenebilir.
+11 Ekim 2026 itibarıyla ölçüm, park algılama, park analizi ve canlı haritanın main'deki dosyaları `docs/core-foundation-lock.json` içinde SHA-256 ile sabitlenmiştir. Kilitli dosyalar varsayılan olarak değişmez; kullanıcı açıkça kilitli servisin modülleştirilmesini istediğinde yalnız ilgili servis, davranış ve regresyon testleri korunarak değiştirilebilir. Her istisna önceki/yeni SHA-256 değerleriyle manifestte kayıtlı kalır. Entegrasyon için script yükleme listesi ve PWA precache gibi çevre dosyaları güncellenebilir.
 
 | Referans | Değer |
 |---|---|
@@ -38,3 +38,7 @@ Saha çalışmasını durduracak bir arıza halinde önce düzeltme dalı değer
 Kullanıcının kilitli parçaları çalışır biçimde modüllere ayırma talimatıyla yalnız `test/critical-fixes.test.mjs` ve `test/park-invites.test.mjs` kaynak-konumu kontrolleri talep adapter/UI sınırlarına taşındı. Aynı sorgu/etiket şartları korunup servis delegasyonu eklendi. Önceki ve yeni hashler manifestte `authorized_modularizations` altında kayıtlıdır; manifest kendi hashine sabitlenmeye devam eder. Diğer temel dosya hashleri değiştirilmedi.
 
 Kullanıcı yönetimi tablo ayrımında park-invites kompakt kullanıcı hücresi şartı gerçek UI modülüne taşınıp servis delegasyonu eklendi. Önceki/yeni test hashleri manifestte kayıtlıdır; aynı izinli modülerleştirme kapsamındadır.
+
+### 13 Ekim 2026 — açık kullanıcı talimatıyla kilitli servis modülerleştirmesi
+
+Kullanıcı, kilitli servislerin çalışmaları bozulmadan beşli modüller halinde ayrılmasını ve her grubun `main`'e alınmasını istedi. İlk grupta kilitli `src/services/offline.js` içindeki istemci kimliği üretimi, ölçüm eşleştirmesi, IndexedDB promise adaptörleri, kuyruk deposu ve senkron rozet sunumu beş yeni modüle taşındı. Owner/oturum kapıları, Supabase erişimi, fotoğraf yükleme ve yazma sırası değiştirilmedi. Kilitli `test/offline-safety.test.mjs` ve diğer temel regresyon testleri değiştirilmedi. Önceki ve yeni servis hash'i `authorized_modularizations` kaydında bulunur; 267 dosyalık temel hash denetimi ve sabit baseline çalışmaya devam eder.
