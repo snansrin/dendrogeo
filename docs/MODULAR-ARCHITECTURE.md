@@ -759,6 +759,11 @@ Her modülün tek bir dış API'si, sahibi olduğu açık durumu ve kendi testle
 - `application/admin/load-admin-export-filters.js`, ölçüm ve proje filtre verilerini paralel yükleyip mevcut hata yalıtımıyla uygular.
 - `application/admin/update-admin-export-filter-options.js`, ülke → şehir → proje seçicilerinin kademeli yenileme sırasını ve proje kimliklerini korur.
 - `application/admin/download-admin-measurements.js`, filtrelenmiş ölçümleri CSV, ayrıntılı QGIS CSV veya GeoJSON dosyası olarak indirir; boş sonuç uyarılarını ve başarı akışını çağırana bırakır.
+- `adapters/admin/admin-overview-store.js`, yönetici sayfasının profil/ölçüm/proje/genel görünüm sorgularını ve toplam ölçüm sayımını aynı paralellik/sıra ile yürütür.
+- `domain/admin/summarize-admin-overview.js`, yönetici sayaçlarının tek özet modelini hesaplar.
+- `ui/admin-overview-metrics.js`, dört yönetici özet sayısını mevcut DOM alanlarına yazar.
+- `ui/admin-overview-measurements.js`, ölçüm sorgu hatasını mevcut açıklamayla gösterir veya düz moderasyon tablosunu çizer.
+- `application/admin/load-admin-overview.js`, rol kapısını, özet yükleme/render sırasını ve yönetici alt panellerinin yenilenmesini yönetir.
 
 - `domain/auth/is-oauth-callback.js`, OAuth dönüşünü code, access token veya hata parametreleriyle tanır.
 - `domain/auth/read-oauth-error.js`, OAuth hata parametresini çözümler.

@@ -51,6 +51,16 @@ function dgAdminSyncSoon(){
 /* 0040: kaydırma koruma sarmalı — yeniden çizimde #main scrollTop korunur. */
 async function loadAdmin(){const _y=(typeof dgScrollKeep==="function"?dgScrollKeep():null);try{return await loadAdmin__scroll.apply(this,arguments);}finally{if(typeof dgScrollRestore==="function")dgScrollRestore(_y);}}
 async function loadAdmin__scroll(){
+ if(window.DG_LOAD_ADMIN_OVERVIEW)return window.DG_LOAD_ADMIN_OVERVIEW.execute(PROFILE,{
+  load:()=>window.DG_ADMIN_OVERVIEW_STORE.create(()=>sb).load(),
+  summarize:window.DG_ADMIN_OVERVIEW_SUMMARY.summarize,
+  updateMetrics:summary=>window.DG_ADMIN_OVERVIEW_METRICS_UI.render(summary,$),
+  renderMeasurements:(response,rows)=>window.DG_ADMIN_OVERVIEW_MEASUREMENTS_UI.render(response,rows,{getElement:$,escape:esc,renderTable:dgRenderFlatTable}),
+  refreshBasePanels:()=>{loadStorageStats();checkBackupReminder();loadVisitStats();loadRequests();loadAdminExportFilters();},
+  refreshTree:()=>{if(typeof loadAdminTree==="function")loadAdminTree();},
+  refreshParkAdmin:()=>{if(typeof loadParkAdmin==="function")loadParkAdmin();},
+  refreshPublicationQueue:()=>{if(typeof dgLoadPublishQueue==="function")dgLoadPublishQueue();}
+ });
  if(!PROFILE||(PROFILE.role!=="admin"&&PROFILE.role!=="owner"))return;
  const[uRes,mRes,pRes,gRes]=await Promise.all([
   sb.from("profiles").select("*"),
