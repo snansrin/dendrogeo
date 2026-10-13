@@ -9,6 +9,7 @@ function dgSurfaceProject(ring,epsg){if(window.DG_PROJECT_SURFACE_REVIEW_RING)re
 function dgSurfaceUnproject(geom,epsg){if(window.DG_UNPROJECT_SURFACE_REVIEW_GEOMETRY)return window.DG_UNPROJECT_SURFACE_REVIEW_GEOMETRY.unproject(geom,epsg,{cache:DG_SURFACE_WGS_CACHE,inverse:dgLcUtmInverse});const old=DG_SURFACE_WGS_CACHE.get(geom);if(old?.epsg===epsg)return old.wgs;const wgs=geom.map(poly=>poly.map(ring=>ring.map(p=>{const q=dgLcUtmInverse(p[0],p[1],epsg);return[q.lon,q.lat];})));DG_SURFACE_WGS_CACHE.set(geom,{epsg,wgs});return wgs;}
 function dgSurfaceArea(geom){return DG_SURFACE_REVIEW_GEOMETRY.area(geom);}
 function dgSurfaceClip(op,...geoms){
+ if(window.DG_CLIP_SURFACE_REVIEW_GEOMETRY)return window.DG_CLIP_SURFACE_REVIEW_GEOMETRY.clip(op,geoms,{clean:dgSurfaceClean,collectPoints:window.DG_COLLECT_SURFACE_REVIEW_CLIP_POINTS.collect,findOrigin:window.DG_FIND_SURFACE_REVIEW_CLIP_ORIGIN.find,translate:window.DG_TRANSLATE_SURFACE_REVIEW_GEOMETRY.translate,clipper:window.DG_RUN_SURFACE_REVIEW_POLYGON_OPERATION});
  const pc=window.polygonClipping;if(!pc||typeof pc[op]!=="function")throw Error("Sınır hesaplama modülü yüklenmedi.");
  const input=geoms.map(dgSurfaceClean),points=input.flat(3);
  if(!points.length)return [];
