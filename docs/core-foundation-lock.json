@@ -201,7 +201,12 @@
       "src/domain/parks/build-park-live-collaborator-view.js",
       "src/ui/prepare-park-live-collaborator-layer.js",
       "src/ui/render-park-live-collaborator-marker.js",
-      "src/ui/render-park-live-collaborator-count.js"
+      "src/ui/render-park-live-collaborator-count.js",
+      "src/domain/parks/parse-waypoint-csv.js",
+      "src/domain/parks/validate-waypoint-csv-row.js",
+      "src/application/parks/build-waypoint-upsert-command.js",
+      "src/adapters/parks/upsert-project-waypoint.js",
+      "src/application/parks/upload-waypoint-csv.js"
     ],
     "scientific_contract_and_inputs": [
       "css/park-panel.css",
@@ -312,7 +317,8 @@
       "test/water-osm-reliability.test.mjs",
       "test/surface-mount-lifecycle-modules.test.mjs",
       "test/park-presence-channel-modules.test.mjs",
-      "test/park-presence-rendering-modules.test.mjs"
+      "test/park-presence-rendering-modules.test.mjs",
+      "test/waypoint-csv-upload-modules.test.mjs"
     ]
   },
   "sha256": {
@@ -437,7 +443,7 @@
     "src/services/lc-s2.js": "0e2ac1af0b680e6f4358cb9d99980e32339d04f67f911cfe14d244898f014d40",
     "src/services/lc-stac.js": "978c4be8c3bc4e7cda3f694d1f06290e661fed5bbd5b76b68719140edc18e71a",
     "src/services/lc-validate.js": "b4d8327c62940b1af1a53ddb087188816ff2359c8456c2755c7c853c5919f42b",
-    "src/services/map.js": "7ef3159450fa42bea6f735426c6732a6acc0a18ff06f70862c1b2375f3416390",
+    "src/services/map.js": "5b71e0381d65f69d70ecbab99d9f9947b76c2ec5a7163e9c60b3cf3bb08fe449",
     "src/services/measure.js": "ef61d7a32cf16ce83785a7f8fc1c579c8bf2bff8f8ca25f0992c3701d15c71d9",
     "src/services/offline.js": "b0d13ca6c52213b2103e5c23727be42c92cea39855622d43abaad87a8e48280f",
     "src/services/osm-client.js": "2e5eeaa735bf05a603a0db142619f60747b9696f506e666d7df992454a56814f",
@@ -601,7 +607,13 @@
     "src/ui/prepare-park-live-collaborator-layer.js": "89b76bb39458ccaaa90c0377ca57e1f5bed0c3518426d5d08f43df3926f702c7",
     "src/ui/render-park-live-collaborator-marker.js": "32126af50783f3704f104e1e35a7f0452af2afda19750cffa356ad34bdbd03af",
     "src/ui/render-park-live-collaborator-count.js": "171e55d92f96470f8c6904f4744aaa1e3105de5bdc2c68b742042b92302e579d",
-    "test/park-presence-rendering-modules.test.mjs": "617b95caeecba22b1bf1a63dcb20bc9b9eeddbb357d2bb06a8778e3675b94a38"
+    "test/park-presence-rendering-modules.test.mjs": "617b95caeecba22b1bf1a63dcb20bc9b9eeddbb357d2bb06a8778e3675b94a38",
+    "src/domain/parks/parse-waypoint-csv.js": "f381b66ecbf16d45d99aef25b7266da04df638328dbf618a1d8e1c2f9af04383",
+    "src/domain/parks/validate-waypoint-csv-row.js": "7ec9ec705b4a9e4f4d325cc969ef6561b97e34ec617fccff724d0e3aecefbe2b",
+    "src/application/parks/build-waypoint-upsert-command.js": "0b21d2aab12c8ae4ed05ab4c26cf38dde141582b218b1ef289c5bc0aa358ae90",
+    "src/adapters/parks/upsert-project-waypoint.js": "26f616ebbae7c0a5bd727c2f8916330a1ee00dcd2e6b1483c772a9d4b436cd62",
+    "src/application/parks/upload-waypoint-csv.js": "3abbaf00f10d5662417388c7becdbd3274cfb664ce38a691a37ae4e03c43ae67",
+    "test/waypoint-csv-upload-modules.test.mjs": "c2ac1fde9029a4123ed0c10a5937946555093fd8d6883760101f302de67dcead"
   },
   "authorized_modularizations": [
     {
@@ -1376,6 +1388,17 @@
           "path": "src/services/map.js",
           "previous_sha256": "4b184184bdf3a9f3ab9bb08a0d5186c3ca7df45b91fa205ca461af2476c72c93",
           "sha256": "7ef3159450fa42bea6f735426c6732a6acc0a18ff06f70862c1b2375f3416390"
+        }
+      ]
+    },
+    {
+      "date": "2026-10-13",
+      "scope": "User-authorized fifty-fifth five-module split of locked waypoint CSV upload: CSV parsing, coordinate and ID validation, upsert command construction, Supabase adapter, and sequential upload orchestration. Preserve BOM/header/blank-line behavior, owner/project fields, project_id,wp_id conflict key, sequential writes, partial-failure reporting, toast text, refresh order, and optional module fallback; locked regression tests remain unchanged.",
+      "files": [
+        {
+          "path": "src/services/map.js",
+          "previous_sha256": "7ef3159450fa42bea6f735426c6732a6acc0a18ff06f70862c1b2375f3416390",
+          "sha256": "5b71e0381d65f69d70ecbab99d9f9947b76c2ec5a7163e9c60b3cf3bb08fe449"
         }
       ]
     }

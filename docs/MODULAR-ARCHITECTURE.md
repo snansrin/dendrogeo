@@ -1201,3 +1201,9 @@ The locked `src/ui/lc-sens.js` editor mount now delegates source fingerprint inv
 The locked map service delegates park Presence failure/retry policy, stable collaborator color selection, channel subscribe/auth setup, channel/layer teardown, and throttled location tracking to five modules. The adapter keeps subscription ahead of session JWT refresh; location payloads remain ephemeral and scoped to `dg-park-<parkId>`.
 
 The collaborator map renderer now separates peer selection, display-model derivation, Leaflet layer reuse, marker rendering, and online-count presentation. The render path keeps Presence ordering, self-exclusion, coordinate checks, escaping, marker style, and tooltip age labels.
+
+## Waypoint CSV yükleme — 13 Ekim 2026
+
+- `domain/parks/parse-waypoint-csv.js` BOM, başlık, boş satır ve mevcut virgül ayrıştırmasını kapsar; `validate-waypoint-csv-row.js` koordinat sınırları ve pozitif integer waypoint kimliğini doğrular.
+- `application/parks/build-waypoint-upsert-command.js` mevcut owner/proje/waypoint alanları ile `project_id,wp_id` çakışma anahtarını üretir; `adapters/parks/upsert-project-waypoint.js` aynı Supabase upsert işlemini yürütüp hatayı iletir.
+- `application/parks/upload-waypoint-csv.js` satırları sıralı kaydeder, kısmi başarıyı bildirir ve mevcut listeyi yeniler. Kilitli servis aynı toast, kayıt sırası ve refresh davranışını koruyarak orkestrasyonu modüle devreder; kilitli regresyon testleri değiştirilmedi.
