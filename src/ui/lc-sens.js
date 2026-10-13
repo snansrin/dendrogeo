@@ -380,6 +380,7 @@ if(typeof document.addEventListener==="function"){
   document.addEventListener("keydown",e=>{if(e.key==="Escape"){if(DG_SENS.draw){dgSensDrawCancel();DG_SENS.status=_tvs("Çizim iptal edildi.");dgSensRenderPaintTools();dgSensUpdateStatus();return;}const menu=document.querySelector("#surfaceEditorMenu details[open]");dgSensCloseMenus();menu?.querySelector("summary")?.focus();}});
 }
 function dgSensSetDrawType(type){
+ const module=window.DG_SELECT_SURFACE_DRAW_TYPE;if(module)return module.select({state:DG_SENS,type,types:window.DG_SURFACE_REVIEW.types,colors:DG_SENS_COLORS,document,querySelectorAll:selector=>document.querySelectorAll(selector)});
  if(!window.DG_SURFACE_REVIEW.types[type])return;
  DG_SENS.drawType=type;
  DG_SENS.objectPreviewLayer?.setStyle?.({color:DG_SENS_COLORS[type]||DG_SENS_COLORS.other});
@@ -389,11 +390,13 @@ function dgSensSetDrawType(type){
  });
 }
 function dgSensBrushChoose(type){
+ const module=window.DG_SELECT_SURFACE_BRUSH_TYPE;if(module)return module.select({state:DG_SENS,type,types:window.DG_SURFACE_REVIEW.types,stop:dgSensBrushStop,toggle:dgSensBrushToggle,render:dgSensRenderPaintTools});
  if(!window.DG_SURFACE_REVIEW.types[type]||DG_SENS.rawView||DG_SENS.busy||DG_SENS.saving)return;
  DG_SENS.brushType=type;if(DG_SENS.brush){dgSensBrushStop();dgSensBrushToggle();}else dgSensRenderPaintTools();
 }
-function dgSensHandMode(){dgSensBrushStop();if(DG_SENS.draw)dgSensDrawCancel();dgSensRender();}
+function dgSensHandMode(){const module=window.DG_RETURN_SURFACE_TO_HAND_MODE;if(module)return module.run({state:DG_SENS,stopBrush:dgSensBrushStop,cancelDraw:dgSensDrawCancel,render:dgSensRender});dgSensBrushStop();if(DG_SENS.draw)dgSensDrawCancel();dgSensRender();}
 function dgSensBindRightPan(){
+ const module=window.DG_SURFACE_RIGHT_PAN_SESSION;if(module)return module.bind({state:DG_SENS,map:typeof map==="undefined"?null:map,unbind:dgSensUnbindRightPan});
  if(typeof map==="undefined"||!map||typeof map.getContainer!=="function")return;
  const container=map.getContainer();if(!container?.addEventListener||DG_SENS.rightPan?.container===container)return;
  dgSensUnbindRightPan();
@@ -404,8 +407,8 @@ function dgSensBindRightPan(){
  const menu=e=>{e.preventDefault();e.stopImmediatePropagation();};
  for(const [name,fn] of [["pointerdown",down],["pointermove",move],["pointerup",finish],["pointercancel",finish],["contextmenu",menu]]){container.addEventListener(name,fn,true);state.handlers.push([name,fn]);}
 }
-function dgSensUnbindRightPan(){const p=DG_SENS.rightPan;if(!p)return;for(const [name,fn] of p.handlers)p.container.removeEventListener(name,fn,true);p.container.style.cursor=DG_SENS.brush?"crosshair":"";DG_SENS.rightPan=null;}
-function dgSensOpacity(value){DG_SENS.opacity=Math.max(0,Math.min(100,Number(value)||0));if(DG_SENS.record){DG_SENS.record.displayOpacity=DG_SENS.opacity;clearTimeout(DG_SENS.saveTimer);DG_SENS.saveTimer=setTimeout(()=>dgSensSave(),900);}const out=document.getElementById("dgSensOpacityValue");if(out)out.textContent="%"+DG_SENS.opacity;for(const p of DG_SENS.displayPaths||[])p.poly.setStyle({fillOpacity:DG_SENS.opacity/100});}
+function dgSensUnbindRightPan(){const module=window.DG_SURFACE_RIGHT_PAN_SESSION;if(module)return module.unbind({state:DG_SENS});const p=DG_SENS.rightPan;if(!p)return;for(const [name,fn] of p.handlers)p.container.removeEventListener(name,fn,true);p.container.style.cursor=DG_SENS.brush?"crosshair":"";DG_SENS.rightPan=null;}
+function dgSensOpacity(value){const module=window.DG_UPDATE_SURFACE_OPACITY;if(module)return module.update({state:DG_SENS,value,document,clearTimer:clearTimeout,setTimer:setTimeout,save:dgSensSave});DG_SENS.opacity=Math.max(0,Math.min(100,Number(value)||0));if(DG_SENS.record){DG_SENS.record.displayOpacity=DG_SENS.opacity;clearTimeout(DG_SENS.saveTimer);DG_SENS.saveTimer=setTimeout(()=>dgSensSave(),900);}const out=document.getElementById("dgSensOpacityValue");if(out)out.textContent="%"+DG_SENS.opacity;for(const p of DG_SENS.displayPaths||[])p.poly.setStyle({fillOpacity:DG_SENS.opacity/100});}
 function dgSensUpdateSummary(){
  const a=dgSensAreas(),rec=DG_SENS.record;if(!a||!rec)return;
  const visibleAreas=!DG_SENS.rawView&&!DG_SENS.editing&&rec.acceptedResult?.areas?rec.acceptedResult.areas:a;
