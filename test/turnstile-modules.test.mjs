@@ -80,7 +80,7 @@ test('controller waits for the auth section to intersect and initializes just on
   const calls = [];
   api.DG_TURNSTILE_CONTROLLER.initialize({
     window: api, api: { render: (element) => { calls.push(element.id); return 'widget'; }, remove() {} },
-    tab: 'reg', widgets: {}, getElement: (id) => ({ id }),
+    tab: 'reg', widgets: {}, getElement: (id) => ({ id }), activateWidget: input => api.DG_TURNSTILE_WIDGET.activate(input),
   });
   assert.deepEqual(calls, ['tsReg']);
 });

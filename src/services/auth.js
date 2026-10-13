@@ -55,7 +55,7 @@ function scheduleTurnstile(){
  io.observe(el);
 }
 function initTurnstile(){
- if(window.DG_TURNSTILE_CONTROLLER){window.DG_TURNSTILE_CONTROLLER.initialize({window,api:typeof turnstile==="undefined"?null:turnstile,tab:DG_AUTH_TAB,widgets:TS,getElement:$});return;}
+ if(window.DG_TURNSTILE_CONTROLLER){window.DG_TURNSTILE_CONTROLLER.initialize({window,api:typeof turnstile==="undefined"?null:turnstile,tab:DG_AUTH_TAB,widgets:TS,getElement:$,activateWidget:input=>window.DG_TURNSTILE_WIDGET.activate(input)});return;}
 if(!window._tsVisible||typeof turnstile==="undefined")return;
 const activeId=DG_AUTH_TAB==="reg"?"tsReg":DG_AUTH_TAB==="reset"?"tsReset":"tsLogin";
 ["tsLogin","tsReg","tsReset"].forEach(id=>{

@@ -531,7 +531,7 @@
     "src/adapters/surface/run-surface-review-polygon-operation.js": "677ad1cec7ac885c78e35c0f1340154c0341f822b4091cdc4c0528750cfb2388",
     "src/adapters/surface/surface-review-cache.js": "1425826559081c1c4cc4ec8e16f7005db4c48fa600cc00e58bef8e664122362f",
     "src/adapters/surface/unproject-surface-review-geometry.js": "9070c89642c1ea59c3e7dd368f11d7e0520c937a2c8982320c6a9bcafc4d18e5",
-    "src/application/map/add-measurement-markers.js": "545ef0a9e18f9398573e3127037a7670518ceaaa0f87a9cce762ae1a7a0de78d",
+    "src/application/map/add-measurement-markers.js": "ba3108e875ce7ab3f636c063362c8044ad6fb14bad785e453f7c77a5940eae75",
     "src/application/map/arrive-at-waypoint.js": "a875bac2f370eb9ade3d9423240938b3ef2e43ad993b385dea563fb7e59d78a1",
     "src/application/map/clear-deleted-waypoint-list.js": "0431bd050f39f5577f0e24a124783778634b3251f095c241248d09d683da732a",
     "src/application/map/complete-waypoint-arrival.js": "2d3e83e26fd2bf74e8d8179273ab1c751ac62c0fae3211583a01902d6ee6146a",
@@ -724,7 +724,7 @@
     "src/services/lc-s2.js": "76e5547b6c26ce325934adf2593ea9aafd24369a2ba7a13331708cfa2e4aa543",
     "src/services/lc-stac.js": "978c4be8c3bc4e7cda3f694d1f06290e661fed5bbd5b76b68719140edc18e71a",
     "src/services/lc-validate.js": "b4d8327c62940b1af1a53ddb087188816ff2359c8456c2755c7c853c5919f42b",
-    "src/services/map.js": "faa47a1298cce3abd8393d901429c93557774b9f031397741f0a518b98306eee",
+    "src/services/map.js": "7176931050f0334e339fd38d71b62c966a597dba3b3dafdb6c3622a26f38845e",
     "src/services/measure.js": "4e90e357417802724a46853df5652199354e9491cf11bc97af64f0c00060d6a4",
     "src/services/offline.js": "6f4ef41218c6621da9a5ae2f070e60de7efabc858e38035ee80cd89fd2f4a1ac",
     "src/services/osm-client.js": "2e5eeaa735bf05a603a0db142619f60747b9696f506e666d7df992454a56814f",
@@ -822,7 +822,7 @@
     "test/lc-validation-campaign-export-modules.test.mjs": "568a76922fbe715e71f0d828a56aa9ab11c32a5ef47b4c360a89b513d3f89af1",
     "test/map-init-modules.test.mjs": "e78e65c5aed0ae360811b47e6f250f698c46a92e843a630f652269a6869dd331",
     "test/map-live-load-modules.test.mjs": "199482d8b88f50aaafe883d56f8702df1eaf092e58bfde77c485ac6848c307d6",
-    "test/map-measurement-marker-chunk-modules.test.mjs": "8a228cebad287e0d0f4ca677a35f910160d82e1a42104c807e3a5d32b63448a4",
+    "test/map-measurement-marker-chunk-modules.test.mjs": "319cdcb6b8f9fdc1b360cabc18acdf2dbfc7b8a85912e2c6138beefaf69dcb4c",
     "test/map-refresh.test.mjs": "0e52754a356cb6bfbc146d4525f4befbad494b47beddcf42334549fe1db4afb9",
     "test/measure-field.test.mjs": "27b3a56479cef93c5f850f716a1457e167003485b780e0f5e316f588e7eb4114",
     "test/measurement-park-gate-application.test.mjs": "c80862b0b90ee02b6a961517f96d4ec7eca7eef17eec35256b7137657f46d3ed",
@@ -2144,6 +2144,33 @@
           "path": "src/services/park-registry.js",
           "previous_sha256": "1b6fc82574a2d38d1d20086ef034e0c3bd613e4360715cad35ec687670f6f043",
           "sha256": "b79de0f18cdf134d2eba326afd09aabd69e85606ffc0b672ddc5521901d8a7ac"
+        }
+      ]
+    },
+    {
+      "date": "2026-10-13",
+      "scope": "User-authorized five-module dependency-boundary batch: inject moderation storage into admin application use cases, inject Turnstile UI activation, inject measurement marker ports, and enforce global layer dependency rules. Preserve admin write order, Turnstile visibility gates, marker idempotency/chunk cancellation, and locked regression tests.",
+      "files": [
+        {
+          "path": "src/services/map.js",
+          "previous_sha256": "faa47a1298cce3abd8393d901429c93557774b9f031397741f0a518b98306eee",
+          "sha256": "7176931050f0334e339fd38d71b62c966a597dba3b3dafdb6c3622a26f38845e"
+        }
+      ]
+    },
+    {
+      "date": "2026-10-13",
+      "scope": "User-authorized dependency-port injection into the locked measurement marker application module and its module contract test. Preserve layer setup, tokenized chunk scheduling, popup construction, and marker cancellation assertions.",
+      "files": [
+        {
+          "path": "src/application/map/add-measurement-markers.js",
+          "previous_sha256": "545ef0a9e18f9398573e3127037a7670518ceaaa0f87a9cce762ae1a7a0de78d",
+          "sha256": "ba3108e875ce7ab3f636c063362c8044ad6fb14bad785e453f7c77a5940eae75"
+        },
+        {
+          "path": "test/map-measurement-marker-chunk-modules.test.mjs",
+          "previous_sha256": "8a228cebad287e0d0f4ca677a35f910160d82e1a42104c807e3a5d32b63448a4",
+          "sha256": "319cdcb6b8f9fdc1b360cabc18acdf2dbfc7b8a85912e2c6138beefaf69dcb4c"
         }
       ]
     }

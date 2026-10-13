@@ -103,7 +103,7 @@ $("aUsers").textContent=users.length;$("aRec").textContent=cnt.count??meas.lengt
 
 async function approveMeas(id){
  // Compatibility contract: {status:"Onaylı",shared:true} is built by DG_ADMIN_MEASUREMENT_REVIEW_PAYLOAD.
- const{error}=await window.DG_ADMIN_REVIEW_MEASUREMENT.review(sb,id,"Onaylı",true);
+ const{error}=await window.DG_ADMIN_REVIEW_MEASUREMENT.review(sb,id,"Onaylı",true,window.DG_ADMIN_MODERATION_STORE);
  if(error)return toast("Hata: "+error.message,"err");
  toast("Kayıt onaylandı","ok","✓");
  /* Canlı haritayı bayat işaretle (2026-09-26): onaylanan nokta Canlı Harita
@@ -131,7 +131,7 @@ async function dgGeoOverride(id){
  if(!PROFILE||(PROFILE.role!=="admin"&&PROFILE.role!=="owner"))return toast("Yetki yok.","err");
  if(!confirm(dgCf("Bu kayıt için KONUM ÇİTİ İSTİSNASI işlensin mi?\nSorumluluk işleyende; satıra audit izi (geo_override_by) yazılır.")))return;
  // Compatibility contract: geo_override_by:USER.id remains the audited server field.
- const{error}=await window.DG_ADMIN_OVERRIDE_MEASUREMENT_GEOFENCE.execute(sb,id,USER.id);
+ const{error}=await window.DG_ADMIN_OVERRIDE_MEASUREMENT_GEOFENCE.execute(sb,id,USER.id,window.DG_ADMIN_MODERATION_STORE);
  if(error)return toast("Hata: "+error.message,"err");
  toast("🛰 Konum istisnası işlendi (audit izi satırda)","ok","🛰");
  loadAdmin();
@@ -139,7 +139,7 @@ async function dgGeoOverride(id){
 
 async function rejectMeas(id){
  // Compatibility contract: {status:"Red",shared:false} is built by DG_ADMIN_MEASUREMENT_REVIEW_PAYLOAD.
- const{error}=await window.DG_ADMIN_REVIEW_MEASUREMENT.review(sb,id,"Red",false);
+ const{error}=await window.DG_ADMIN_REVIEW_MEASUREMENT.review(sb,id,"Red",false,window.DG_ADMIN_MODERATION_STORE);
  if(error)return toast("Hata: "+error.message,"err");
  toast("Kayıt reddedildi","warn","🚫");
  dgMarkLiveDirty();   /* red edilen nokta da haritadan düşmeli */
@@ -184,7 +184,7 @@ async function reGeocodeAll(){
 
 async function delMeas(id){
  if(!confirm(dgCf("Kayıt silinsin mi?")))return;
- const{error}=await window.DG_ADMIN_DELETE_MEASUREMENT.execute(sb,id,removePhoto);
+ const{error}=await window.DG_ADMIN_DELETE_MEASUREMENT.execute(sb,id,removePhoto,window.DG_ADMIN_MODERATION_STORE);
  if(error)return toast("Hata: "+error.message,"err");
  dgMarkLiveDirty();
  /* 0043: iyimser silme — satırı önbellekten düş + yerinde çiz (sıçrama yok);

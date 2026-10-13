@@ -43,10 +43,10 @@ test('chunk scheduler draws in order and cancels a stale token before the next c
 
 test('application prepares the layer before tokenized chunk rendering and keeps module fallback optional',()=>{
   const window=setup(),l=leaflet(),events=[],map={addLayer(layer){events.push(['layer',layer]);}};
-  assert.equal(window.DG_ADD_MEASUREMENT_MARKERS.add(map,[{lat:39,lon:32,wp_id:1},{lat:40,lon:33,wp_id:2}],1,{leaflet:l,popupHTML:row=>`P${row.wp_id}`,log:console,setTimer:(fn,ms)=>events.push(['timer',fn,ms])}),true);
+  assert.equal(window.DG_ADD_MEASUREMENT_MARKERS.add(map,[{lat:39,lon:32,wp_id:1},{lat:40,lon:33,wp_id:2}],1,{leaflet:l,popupHTML:row=>`P${row.wp_id}`,log:console,setTimer:(fn,ms)=>events.push(['timer',fn,ms]),ensureLayer:window.DG_ENSURE_MEASUREMENT_MARKER_LAYER,clusterIcon:window.DG_MEASUREMENT_MARKER_CLUSTER_ICON,createMarker:window.DG_CREATE_MEASUREMENT_MAP_MARKER,schedule:window.DG_SCHEDULE_MEASUREMENT_MARKER_CHUNKS}),true);
   assert.equal(map._markerToken,1);assert.equal(map._cluster.items.length,1);assert.deepEqual(events.map(event=>event[0]),['layer','timer']);
   delete window.DG_ENSURE_MEASUREMENT_MARKER_LAYER;
-  assert.equal(window.DG_ADD_MEASUREMENT_MARKERS.add({},[],1,{leaflet:l,popupHTML(){}}),false);
+  assert.equal(window.DG_ADD_MEASUREMENT_MARKERS.add({},[],1,{leaflet:l,popupHTML(){},clusterIcon:window.DG_MEASUREMENT_MARKER_CLUSTER_ICON,createMarker:window.DG_CREATE_MEASUREMENT_MAP_MARKER,schedule:window.DG_SCHEDULE_MEASUREMENT_MARKER_CHUNKS}),false);
 });
 
 test('marker modules are ordered before their UI adapter and cached offline',()=>{

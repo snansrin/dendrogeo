@@ -9,10 +9,10 @@
   },{rootMargin:"300px"});
   observer.observe(element);
  }
- function initialize({window,api,tab,widgets,getElement}){
+ function initialize({window,api,tab,widgets,getElement,activateWidget}){
   if(!window._tsVisible||!api)return;
   const activeId=root.DG_TURNSTILE_FORM.resolve(tab);
-  root.DG_TURNSTILE_WIDGET.activate({api,widgets,activeId,getElement});
+  activateWidget({api,widgets,activeId,getElement});
  }
  root.DG_TURNSTILE_CONTROLLER=Object.freeze({schedule,initialize});
 })(window);
