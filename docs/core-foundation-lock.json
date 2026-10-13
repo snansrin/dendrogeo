@@ -421,7 +421,7 @@
     "src/services/map.js": "db155b938ac84b24d99a097d309ac5c37bd3235463f76e6fc96ceaa92e7cd4e1",
     "src/services/measure.js": "9953f28c2e8f31f3ab30b2d6d801f02830826de814fba532f9480407cdc89199",
     "src/services/offline.js": "b0d13ca6c52213b2103e5c23727be42c92cea39855622d43abaad87a8e48280f",
-    "src/services/osm-client.js": "7b91c7e1ce9a54656282a7cc7c7a25d9520867d37fb4d1316a6add8e5e74d86e",
+    "src/services/osm-client.js": "2e5eeaa735bf05a603a0db142619f60747b9696f506e666d7df992454a56814f",
     "src/services/osm-water-backup.js": "b3429cdc9bfe0f84bd7b6644a1221d4daadc374ac046b036abf15b3b5ee7d269",
     "src/services/park-geometry.js": "ae89879b98ed8d9f3928d17b7258389c7a7c1abdabdd63dba1aac934aacc6f83",
     "src/services/park-query.js": "b0ddd9f7fb7d99b95e29dbe78c392c472ee149e60f7e941aca91d562c826cd7e",
@@ -645,6 +645,17 @@
           "path": "src/services/park-query.js",
           "previous_sha256": "4420b4ba267e30e2ee3086dfb15368f299c13f88309ca339b6f40066f5c316c0",
           "sha256": "b0ddd9f7fb7d99b95e29dbe78c392c472ee149e60f7e941aca91d562c826cd7e"
+        }
+      ]
+    },
+    {
+      "date": "2026-10-13",
+      "scope": "User-authorized five-module split of the locked Overpass client: normalized cache key, pending-query coalescing, healthy mirror ordering, request budgets, and mirror health/quarantine updates. Preserve all cache, retry, timeout, quarantine, error, and response contracts.",
+      "files": [
+        {
+          "path": "src/services/osm-client.js",
+          "previous_sha256": "7b91c7e1ce9a54656282a7cc7c7a25d9520867d37fb4d1316a6add8e5e74d86e",
+          "sha256": "2e5eeaa735bf05a603a0db142619f60747b9696f506e666d7df992454a56814f"
         }
       ]
     }
