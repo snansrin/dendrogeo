@@ -278,6 +278,10 @@ async function deleteAllWaypoints(){
  loadWaypoints();
 }
 async function selectWaypoint(id){
+ if(window.DG_SELECT_WAYPOINT)return window.DG_SELECT_WAYPOINT.select({
+  waypoints:WP,id,setTarget:point=>{navTarget=point;},isManual:()=>manualPoint,
+  pointInput:()=>$("mPoint"),draw:()=>drawNav(),focus:()=>dgFocusWaypoint()
+ });
  const w=WP.find(x=>x.id===id);if(!w)return;
  navTarget=w;
  if(!manualPoint)$("mPoint").value=w.wp_id;
@@ -301,6 +305,7 @@ function dgNextWaypoint(){
  selectWaypoint(next.id);
 }
 function dgFocusWaypoint(showMap=false){
+ if(window.DG_WAYPOINT_MAP_VIEWPORT)return window.DG_WAYPOINT_MAP_VIEWPORT.focus({showMap,map:navMap,target:navTarget,gps:GPS,panel:showMap?$("wpMapPanel"):null});
  if(showMap){const p=$("wpMapPanel");if(p)p.open=true;if(navMap?.invalidateSize)navMap.invalidateSize();}
  if(!navTarget||!navMap)return;
  const target=[navTarget.lat,navTarget.lon];
@@ -308,6 +313,7 @@ function dgFocusWaypoint(showMap=false){
  else navMap.setView(target,18);
 }
 function dgFitWaypoints(showMap=false){
+ if(window.DG_WAYPOINT_MAP_VIEWPORT)return window.DG_WAYPOINT_MAP_VIEWPORT.fit({showMap,map:navMap,waypoints:WP,gps:GPS,panel:showMap?$("wpMapPanel"):null});
  if(showMap){const p=$("wpMapPanel");if(p)p.open=true;if(navMap?.invalidateSize)navMap.invalidateSize();}
  if(!navMap||!WP.length)return;
  const points=WP.map(w=>[w.lat,w.lon]);
@@ -316,6 +322,7 @@ function dgFitWaypoints(showMap=false){
 }
 function dgWaypointGuidance(){
  const el=$("navGuidance");if(!el)return;
+ if(window.DG_WAYPOINT_GUIDANCE){el.textContent=window.DG_WAYPOINT_GUIDANCE.resolve({target:navTarget,gps:GPS,distance:hav,translate:s=>typeof dgCf==="function"?dgCf(s):s});return;}
  if(!navTarget||navTarget.visited){el.textContent=dgCf("Hedef seçerek navigasyona başlayın.");return;}
  if(!GPS){el.textContent=dgCf("Hedef seçildi. Mesafe ve yön için konumu etkinleştirin.");return;}
  const distance=hav(GPS.latitude,GPS.longitude,navTarget.lat,navTarget.lon);
@@ -368,6 +375,9 @@ function drawNav(){
  renderWaypointList();
  dgWaypointGuidance();
  if(!navMap)return;
+ if(window.DG_WAYPOINT_MAP_MARKERS){
+  window.DG_WAYPOINT_MAP_MARKERS.draw({map:navMap,waypoints:WP,leaflet:L,translate:s=>typeof dgCf==="function"?dgCf(s):s,onSelect:id=>selectWaypoint(id)});
+ }else{
  navMap.eachLayer(l=>{if(l._wp)navMap.removeLayer(l);});
  WP.forEach(w=>{
   const done=w.visited;
@@ -380,7 +390,11 @@ function drawNav(){
   const _tm=(s)=>(typeof dgCf==="function"?dgCf(s):s);m.bindPopup(done?"<s>P"+w.wp_id+"</s> "+_tm("✓ Yapıldı"):"P"+w.wp_id+" · "+_tm("Hedef yapmak için tıkla"));
   m.on("click",()=>{selectWaypoint(w.id);});
  });
+ }
  if(GPS){
+  if(window.DG_WAYPOINT_GPS_OVERLAY){
+   navTarget=window.DG_WAYPOINT_GPS_OVERLAY.draw({map:navMap,waypoints:WP,target:navTarget,gps:GPS,leaflet:L,distance:hav,bearing:brg,getElement:$,translate:s=>typeof dgCf==="function"?dgCf(s):s,setTarget:point=>{navTarget=point;}});
+  }else{
   const b=(navTarget&&!navTarget.visited)?brg(GPS.latitude,GPS.longitude,navTarget.lat,navTarget.lon):null;
   const me=L.marker([GPS.latitude,GPS.longitude],{
    icon:L.divIcon({
@@ -396,6 +410,7 @@ function drawNav(){
    $("navArrow").style.transform="rotate("+bearing+"deg)";
    const ln=L.polyline([[GPS.latitude,GPS.longitude],[navTarget.lat,navTarget.lon]],{color:"#c2452d",dashArray:"5,8",weight:2}).addTo(navMap);ln._wp=1;
   }else{$("navDist").textContent="—";$("navTarget").textContent=(typeof dgCf==="function"?dgCf("Hedef seç / tamamlandı"):"Hedef seç / tamamlandı");$("navArrow").style.transform="rotate(0)";}
+  }
  }
  renderWaypointList();
  dgWaypointGuidance();
