@@ -1332,3 +1332,8 @@ The collaborator map renderer now separates peer selection, display-model deriva
 - `validate-measurement-submission.js` form, park, GPS ve fotoğraf kapılarını mevcut sırayla çözer; `prepare-measurement-submission.js` seçili fotoğrafı hazırlar, kilitli karbon hesabını ve kayıt taslağını kurar.
 - `verify-measurement-submission-location.js` yeni kayıt için park çitini fotoğraf yüklemesinden önce uygular; `persist-measurement-submission.js` çevrimdışı kuyruğu ve çevrimiçi fotoğraf/ölçüm yazımını ayrı yollar olarak korur.
 - `submit-measurement.js` beş fazı birleştirir. `services/measure.js` eski global girişini ve fallback gövdesini koruyup yeni hattı kullanır; adapter'ın RLS yazma filtresi, eski şema retry'si, geofence sırası, post-save etkileri ve kilitli regresyon testleri değişmedi.
+
+## Park geri doldurma sonuçları — 13 Ekim 2026
+
+- `domain/parks/build-manual-backfill-park-update.js` elle park bağlantısından sonra plan satırı alanlarını kurar; `application/parks/complete-manual-backfill-park.js` mevcut satıra uygulama, başarı bildirimi, plan çizimi ve yenileme sırasını yönetir.
+- `ui/park-backfill-manual-feedback.js` ve `ui/park-backfill-apply-feedback.js` başarı metinlerini sunar; `application/parks/complete-park-backfill-apply.js` toplu sonuç bildirimi → plan temizleme/kapatma → yenileme sırasını korur. Servis fallback'i ve kilitli regresyonlar korunur.

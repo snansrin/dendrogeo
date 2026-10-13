@@ -666,6 +666,17 @@ async function dgApplyBackfill(){
   if(result.status==="empty-plan")return toast("Uygulanacak eşleşme yok","warn");
   if(result.status==="cancelled")return;
 
+  if(window.DG_COMPLETE_PARK_BACKFILL_APPLY&&window.DG_PARK_BACKFILL_APPLY_FEEDBACK_UI){
+    window.DG_COMPLETE_PARK_BACKFILL_APPLY.complete({
+      result,
+      showResult:value=>window.DG_PARK_BACKFILL_APPLY_FEEDBACK_UI.show({result:value,translateFormat:_tprf,notify:toast}),
+      clearPlan:()=>{DG_BACKFILL_PLAN=null;},
+      closePlan:dgCloseBackfill,
+      refresh:dgAfterBackfillWrites
+    });
+    return;
+  }
+
   toast(_tprf("✓ {n} proje parkla eşleştirildi{f}",{n:result.successes,f:result.failures?_tprf(" · {n} hata",{n:result.failures}):""}),result.failures?"warn":"ok","🌳");
   DG_BACKFILL_PLAN=null;
   dgCloseBackfill();
@@ -706,6 +717,19 @@ async function dgBackfillManual(projectId){
   if(result.status==="measurement-center-missing")return toast("Bu proje için ölçüm merkezi yok.","err");
   if(result.status==="cancelled"||result.status==="project-link-failed")return;
   if(result.status==="park-create-failed")return toast("Park kimliği oluşturulamadı.","err","🌳");
+
+  if(window.DG_COMPLETE_MANUAL_BACKFILL_PARK&&window.DG_BUILD_MANUAL_BACKFILL_PARK_UPDATE&&window.DG_PARK_BACKFILL_MANUAL_FEEDBACK_UI){
+    window.DG_COMPLETE_MANUAL_BACKFILL_PARK.complete({
+      result,
+      buildUpdate:(row,createdPark)=>window.DG_BUILD_MANUAL_BACKFILL_PARK_UPDATE.build({row,park:createdPark,projectName:dgProjectName,labelFromLegacy:dgLabelFromLegacy}),
+      updateRow:(row,patch)=>Object.assign(row,patch),
+      showSuccess:createdPark=>window.DG_PARK_BACKFILL_MANUAL_FEEDBACK_UI.show({park:createdPark,escape:esc,notify:toast}),
+      renderPlan:dgRenderBackfillPlan,
+      refresh:dgAfterBackfillWrites
+    });
+    return;
+  }
+
   const x=result.row,park=result.park;
 
   /* Plan satırını "eşleşti"ye çevir ki liste güncel kalsın */

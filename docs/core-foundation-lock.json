@@ -129,7 +129,12 @@
       "src/ui/park-reference-area.js",
       "src/ui/park-reset-controller.js",
       "src/ui/park-scan-card.js",
-      "src/ui/park-schema-warning.js"
+      "src/ui/park-schema-warning.js",
+      "src/domain/parks/build-manual-backfill-park-update.js",
+      "src/application/parks/complete-manual-backfill-park.js",
+      "src/ui/park-backfill-manual-feedback.js",
+      "src/application/parks/complete-park-backfill-apply.js",
+      "src/ui/park-backfill-apply-feedback.js"
     ],
     "park_analysis": [
       "src/adapters/surface/clip-grid-geometry.js",
@@ -709,7 +714,7 @@
     "src/services/osm-water-backup.js": "b3429cdc9bfe0f84bd7b6644a1221d4daadc374ac046b036abf15b3b5ee7d269",
     "src/services/park-geometry.js": "ae89879b98ed8d9f3928d17b7258389c7a7c1abdabdd63dba1aac934aacc6f83",
     "src/services/park-query.js": "b0ddd9f7fb7d99b95e29dbe78c392c472ee149e60f7e941aca91d562c826cd7e",
-    "src/services/park-registry.js": "3b1d6540948e00e9217308fa3f18ea98e8cabaeb4a340f337ada463de01cb74d",
+    "src/services/park-registry.js": "1b6fc82574a2d38d1d20086ef034e0c3bd613e4360715cad35ec687670f6f043",
     "src/services/park-state.js": "cc241e32d716cc6c682f2e7e82caaada845b698b5bf1b914c17b94ea86823608",
     "src/ui/add-osm-map-layer.js": "c0a6c3d894d0271bbd8c5ae045e1552cfad72320a91ef60d14179d1e6b0ce42a",
     "src/ui/choose-new-park-controller.js": "c787f76aee2cc85b748a30e5e0ccbc1393f58acfa53cf0aff2e3500344e31989",
@@ -891,7 +896,12 @@
     "test/waypoint-load-modules.test.mjs": "cd0f5b0436f1597a17d235e78f0554dec8ff341d2111dd1adf891d454635327b",
     "vendor/geotiff-2.1.3.js": "cb5c9731bfee1f8bff1728e54e4436ada81ea3258b178a3d6603c61b58d99e6c",
     "vendor/leaflet-1.9.4.js": "db49d009c841f5ca34a888c96511ae936fd9f5533e90d8b2c4d57596f4e5641a",
-    "vendor/polygon-clipping-0.15.7.js": "7f8619e84a86ce8dd400c9b50430e9c8cf8f26027b19eeb479f109f5c1a9d688"
+    "vendor/polygon-clipping-0.15.7.js": "7f8619e84a86ce8dd400c9b50430e9c8cf8f26027b19eeb479f109f5c1a9d688",
+    "src/domain/parks/build-manual-backfill-park-update.js": "0cfb2502cb7160f949f9a7a26874a4a65e2e03d8a67da81fa49145e3b68c7c42",
+    "src/application/parks/complete-manual-backfill-park.js": "57b0faad12139e785523c42e11826fbafb76bf303acaa0caef799bdb82cc6593",
+    "src/ui/park-backfill-manual-feedback.js": "9c4e8a84c0d6ede604d8e79b1f454a42321db101d28e252113ad6e3b5459ccd5",
+    "src/application/parks/complete-park-backfill-apply.js": "7ee164b2811de63a9e187893133e2ab44d87edc6d4081cd239faf4c0996af37f",
+    "src/ui/park-backfill-apply-feedback.js": "c038e1ca3a4387fcc493a14b8629081aa641a2d8b2fbb4bc8fba06eb3e021737"
   },
   "authorized_modularizations": [
     {
@@ -2045,6 +2055,17 @@
           "path": "src/adapters/parks/project-link-store.js",
           "previous_sha256": "a857ec15522f754d6cbdfa1b4687a5189fd9b922cdd54a2a4e69ad7c01f1ee40",
           "sha256": "8630f0476d66709169afb1540f515dabb991397afa078ef428e0a9586e0bd181"
+        }
+      ]
+    },
+    {
+      "date": "2026-10-13",
+      "scope": "User-authorized seventy-ninth five-module split of the locked park registry backfill completion flow: manual plan-row update, manual completion orchestration and feedback, bulk completion ordering and feedback. Preserve existing row identity, notification/render/refresh order, service fallback, and locked regression tests.",
+      "files": [
+        {
+          "path": "src/services/park-registry.js",
+          "previous_sha256": "3b1d6540948e00e9217308fa3f18ea98e8cabaeb4a340f337ada463de01cb74d",
+          "sha256": "1b6fc82574a2d38d1d20086ef034e0c3bd613e4360715cad35ec687670f6f043"
         }
       ]
     }
