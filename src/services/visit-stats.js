@@ -42,13 +42,20 @@ async function loadVisitStats(){
  * ve GPS varsa payload'a girer; GEÇİCİDİR — veritabanına yazılmaz. */
 const DG_VIEW_LABELS={dash:"Panel",measure:"Yeni Ölçüm",nav:"Waypoint",map:"Canlı Harita",projects:"Projeler",records:"Kayıtlarım",export:"Dışa Aktar",world:"Dünya Verisi",admin:"Ölçüm Yönetimi",users:"Kullanıcılar",visitors:"Ziyaretçi & Canlı"};
 let DG_PRES=null,DG_PRES_OK=false,DG_PRES_STATE="idle",DG_PRES_RETRY=0,DG_PRES_LAST=0,DG_PRES_WATCH=null,DG_PRES_HEARTBEAT=null,DG_PRES_TIMER=null,DG_PRES_USER=null,DG_PRES_GENERATION=0;
+const DG_VISITOR_PRESENCE_CHANNEL_ADAPTER=window.DG_VISITOR_PRESENCE_CHANNEL_ADAPTER?.create?.()||null;
+const DG_VISITOR_REMOVE_PRESENCE_CHANNEL=window.DG_VISITOR_REMOVE_PRESENCE_CHANNEL?.create?.()||null;
+const DG_UPGRADE_VISITOR_PRESENCE_AUTH=window.DG_UPGRADE_VISITOR_PRESENCE_AUTH?.create?.()||null;
+const DG_VISITOR_TRACK_PRESENCE=window.DG_VISITOR_TRACK_PRESENCE?.create?.()||null;
 function dgPresenceState(){return DG_PRES_STATE;}
 function dgPresenceReady(){return !!DG_PRES_OK;}
 function dgPresenceEmit(){try{if(typeof DG_CUR_VIEW!=="undefined"&&DG_CUR_VIEW!=="visitors")return;if(typeof renderVisitorsLive==="function")renderVisitorsLive();}catch(e){}}
 function dgPresenceStop(){
  ++DG_PRES_GENERATION;clearTimeout(DG_PRES_TIMER);clearTimeout(DG_PRES_WATCH);clearInterval(DG_PRES_HEARTBEAT);
  DG_PRES_TIMER=DG_PRES_WATCH=DG_PRES_HEARTBEAT=null;const old=DG_PRES;DG_PRES=null;DG_PRES_USER=null;DG_PRES_OK=false;DG_PRES_STATE="idle";
- if(old&&typeof sb!=="undefined")Promise.resolve(sb.removeChannel(old)).catch(()=>{});
+ if(old&&typeof sb!=="undefined"){
+  if(DG_VISITOR_REMOVE_PRESENCE_CHANNEL)DG_VISITOR_REMOVE_PRESENCE_CHANNEL.remove(sb,old);
+  else Promise.resolve(sb.removeChannel(old)).catch(()=>{});
+ }
 }
 function dgPresenceFail(why){
  if(!DG_PRES||DG_PRES_TIMER)return;
@@ -63,9 +70,8 @@ function dgPresenceStart(){
   if(DG_PRES&&DG_PRES_USER===String(USER.id))return;
   if(DG_PRES)dgPresenceStop();
   const generation=++DG_PRES_GENERATION;DG_PRES_USER=String(USER.id);DG_PRES_STATE="connecting";dgPresenceEmit();
-  const channel=DG_PRES=sb.channel("dg-presence",{config:{presence:{key:String(USER.id)+":"+DG_SID}}});
-  channel.on("presence",{event:"sync"},()=>{if(generation===DG_PRES_GENERATION)dgPresenceEmit();});
-  channel.subscribe(st=>{
+  const onSync=()=>{if(generation===DG_PRES_GENERATION)dgPresenceEmit();};
+  const onStatus=st=>{
    if(generation!==DG_PRES_GENERATION)return;
    if(st==="SUBSCRIBED"){
     DG_PRES_OK=true;DG_PRES_STATE="on";DG_PRES_RETRY=0;
@@ -73,9 +79,15 @@ function dgPresenceStart(){
     clearInterval(DG_PRES_HEARTBEAT);DG_PRES_HEARTBEAT=setInterval(()=>dgPresencePing(null,true),30000);
     DG_PRES_LAST=0;dgPresencePing(typeof DG_CUR_VIEW!=="undefined"?DG_CUR_VIEW:"dash",true);dgPresenceEmit();
    }else if(st==="CHANNEL_ERROR"||st==="TIMED_OUT"||st==="CLOSED")dgPresenceFail(st);
-  });
+  };
+  const channel=DG_PRES=DG_VISITOR_PRESENCE_CHANNEL_ADAPTER
+   ?DG_VISITOR_PRESENCE_CHANNEL_ADAPTER.open(sb,String(USER.id),DG_SID,onSync)
+   :sb.channel("dg-presence",{config:{presence:{key:String(USER.id)+":"+DG_SID}}});
+  if(DG_VISITOR_PRESENCE_CHANNEL_ADAPTER)DG_VISITOR_PRESENCE_CHANNEL_ADAPTER.subscribe(channel,onStatus);
+  else{channel.on("presence",{event:"sync"},onSync);channel.subscribe(onStatus);}
   DG_PRES_WATCH=setTimeout(()=>{if(generation===DG_PRES_GENERATION&&DG_PRES_STATE==="connecting")dgPresenceFail("WATCHDOG");},20000);
-  (async()=>{try{const{data}=await sb.auth.getSession();const tok=data?.session?.access_token;
+  if(DG_UPGRADE_VISITOR_PRESENCE_AUTH)DG_UPGRADE_VISITOR_PRESENCE_AUTH.run(sb,generation,value=>value===DG_PRES_GENERATION);
+  else (async()=>{try{const{data}=await sb.auth.getSession();const tok=data?.session?.access_token;
    if(generation===DG_PRES_GENERATION&&tok&&sb.realtime?.setAuth)await sb.realtime.setAuth(tok);
   }catch(e){}})();
  }catch(e){DG_PRES_OK=false;DG_PRES_STATE="error";dgPresenceEmit();if(DG_PRES)dgPresenceFail("START");}
@@ -117,7 +129,12 @@ function dgPresencePing(view,force){
   const now=Date.now();
   if(!force&&now-DG_PRES_LAST<10000)return;
   DG_PRES_LAST=now;
-  const p={id:String(USER.id),
+  const p=window.DG_VISITOR_PRESENCE_PAYLOAD?window.DG_VISITOR_PRESENCE_PAYLOAD.build({
+   user:USER,profile:typeof PROFILE!=="undefined"?PROFILE:null,
+   view:view||(typeof DG_CUR_VIEW!=="undefined"?DG_CUR_VIEW:"dash"),now,
+   gps:typeof GPS!=="undefined"?GPS:null,sid:DG_SID,sessionStart:DG_SESSION_START,deviceTag:DG_DEV_TAG,
+   events:DG_VISITOR_SESSION_EVENTS,hidden:document.hidden
+  }):{id:String(USER.id),
    n:(typeof PROFILE!=="undefined"&&PROFILE&&(PROFILE.full_name||PROFILE.email))||"?",
    r:(typeof PROFILE!=="undefined"&&PROFILE&&PROFILE.role)||"user",
    v:view||(typeof DG_CUR_VIEW!=="undefined"?DG_CUR_VIEW:"dash"),t:now};
@@ -125,18 +142,21 @@ function dgPresencePing(view,force){
    * paylaşılır (ayrı anahtar yok) — GEÇİCİDİR, veritabanına yazılmaz; kayıt
    * onayında yönetici zaten saklı konumları görebilir. Park ORTAK kanalı
    * ayrıca kullanıcının 👥 anahtarına bağlıdır (map.js canlı paylaşım bayrağı). */
-  if(typeof GPS!=="undefined"&&GPS&&GPS.latitude!=null){p.la=GPS.latitude;p.lo=GPS.longitude;
+  if(!window.DG_VISITOR_PRESENCE_PAYLOAD&&typeof GPS!=="undefined"&&GPS&&GPS.latitude!=null){p.la=GPS.latitude;p.lo=GPS.longitude;
    DG_VISITOR_SESSION_EVENTS.recordLocation(p.la,p.lo,now);
   }
   /* 0045: oturum/cihaz/gezinti/aksiyon/iz — hep geçici presence alanı. */
-  p.sid=DG_SID;p.st=DG_SESSION_START;p.dev=DG_DEV_TAG;
-  const {views:DG_VIEW_HIST,lastAction:DG_LAST_ACT,locations:DG_LOC_HIST}=DG_VISITOR_SESSION_EVENTS.snapshot();
-  if(DG_VIEW_HIST.length)p.vh=DG_VIEW_HIST;
-  if(DG_LAST_ACT)p.act=DG_LAST_ACT;
-  if(p.la!=null&&DG_LOC_HIST.length>1)p.lh=DG_LOC_HIST;
-  p.hidden=!!document.hidden;
+  if(!window.DG_VISITOR_PRESENCE_PAYLOAD){
+   p.sid=DG_SID;p.st=DG_SESSION_START;p.dev=DG_DEV_TAG;
+   const {views:DG_VIEW_HIST,lastAction:DG_LAST_ACT,locations:DG_LOC_HIST}=DG_VISITOR_SESSION_EVENTS.snapshot();
+   if(DG_VIEW_HIST.length)p.vh=DG_VIEW_HIST;
+   if(DG_LAST_ACT)p.act=DG_LAST_ACT;
+   if(p.la!=null&&DG_LOC_HIST.length>1)p.lh=DG_LOC_HIST;
+   p.hidden=!!document.hidden;
+  }
   const channel=DG_PRES,generation=DG_PRES_GENERATION;
-  Promise.resolve(channel.track(p)).then(status=>{if(generation===DG_PRES_GENERATION&&status!=="ok")dgPresenceFail("TRACK");}).catch(()=>{if(generation===DG_PRES_GENERATION)dgPresenceFail("TRACK");});
+  if(DG_VISITOR_TRACK_PRESENCE)DG_VISITOR_TRACK_PRESENCE.send(channel,p,generation,value=>value===DG_PRES_GENERATION,dgPresenceFail);
+  else Promise.resolve(channel.track(p)).then(status=>{if(generation===DG_PRES_GENERATION&&status!=="ok")dgPresenceFail("TRACK");}).catch(()=>{if(generation===DG_PRES_GENERATION)dgPresenceFail("TRACK");});
  }catch(e){}
 }
 function dgPresenceList(){try{return (DG_PRES&&typeof DG_PRES.presenceState==="function")?DG_PRES.presenceState():{};}catch(e){return{};}}
