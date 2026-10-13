@@ -340,11 +340,12 @@ function dgScanPreviewName(){
 }
 
 function dgManualFormHTML(open){
-  const point=DG_MANUAL_PENDING||DG_PARK_ANCHOR||(GPS?{lat:GPS.latitude,lon:GPS.longitude}:null);
+  const point=typeof window!=="undefined"&&Object.prototype.hasOwnProperty.call(window,"DG_RESOLVE_MANUAL_PARK_COORDINATE")?window.DG_RESOLVE_MANUAL_PARK_COORDINATE.resolve({pending:DG_MANUAL_PENDING,anchor:DG_PARK_ANCHOR,gps:GPS}):DG_MANUAL_PENDING||DG_PARK_ANCHOR||(GPS?{lat:GPS.latitude,lon:GPS.longitude}:null);
   return window.DG_PARK_IDENTITY_UI.manualForm({open,point});
 }
 
 function dgShowManualParkForm(){
+  if(typeof window!=="undefined"&&Object.prototype.hasOwnProperty.call(window,"DG_SHOW_MANUAL_PARK_FORM"))return window.DG_SHOW_MANUAL_PARK_FORM.show({element:$,setPending:value=>{DG_MANUAL_PENDING=value;},resolvePoint:()=>typeof window!=="undefined"&&window.DG_RESOLVE_MANUAL_PARK_COORDINATE?window.DG_RESOLVE_MANUAL_PARK_COORDINATE.resolve({pending:DG_MANUAL_PENDING,anchor:DG_PARK_ANCHOR,gps:GPS}):DG_MANUAL_PENDING||DG_PARK_ANCHOR||(GPS?{lat:GPS.latitude,lon:GPS.longitude}:null),renderCard:dgRenderScanCard});
   const box=$("manualParkBox");
   if(box&&box.style){box.style.display="block";return;}
   DG_MANUAL_PENDING=DG_MANUAL_PENDING||DG_PARK_ANCHOR||(GPS?{lat:GPS.latitude,lon:GPS.longitude}:null);
@@ -352,6 +353,7 @@ function dgShowManualParkForm(){
 }
 
 function dgToggleParkModeFromScan(){
+  if(typeof window!=="undefined"&&Object.prototype.hasOwnProperty.call(window,"DG_TOGGLE_PARK_MODE_FROM_SCAN"))return window.DG_TOGGLE_PARK_MODE_FROM_SCAN.toggle({toggle:()=>{if(typeof toggleParkMode==="function")toggleParkMode();},renderCard:dgRenderScanCard});
   if(typeof toggleParkMode==="function")toggleParkMode();
   dgRenderScanCard();
 }
@@ -371,6 +373,7 @@ function dgCancelScan(){
 
 /* DB kaydı başarısız olduysa (çevrimdışı/RLS) yeniden dene. */
 async function dgRetryRegister(){
+  if(typeof window!=="undefined"&&Object.prototype.hasOwnProperty.call(window,"DG_RETRY_PARK_REGISTRATION"))return window.DG_RETRY_PARK_REGISTRATION.retry(DG_PARK_CAND,{register:candidate=>dgRegisterPark(candidate,{}),setPark:row=>{DG_PARK=row;},renderCard:dgRenderScanCard,notify:(message,...args)=>toast(dgCf(message),...args),successMessage:row=>"✓ Park kimliği yazıldı: "+esc(row.name),recordPresence:(action,name)=>{if(typeof dgPresenceAct==="function"){try{dgPresenceAct(action,name);}catch(e){}}}});
   if(!DG_PARK_CAND)return toast("Önce park algıla","err","🌳");
   const row=await dgRegisterPark(DG_PARK_CAND,{});
   if(row){
@@ -388,6 +391,7 @@ function dgParkIdChip(parkRow){
 
 /* Paneldeki "Proje oluştur / bağla" düğmesi: algılama kartının 3. adımına götürür. */
 function dgShowProjectStep(){
+  if(typeof window!=="undefined"&&Object.prototype.hasOwnProperty.call(window,"DG_SHOW_PARK_PROJECT_STEP"))return window.DG_SHOW_PARK_PROJECT_STEP.show({setScanActive:value=>{DG_PARK_SCAN=value;},renderCard:dgRenderScanCard,element:$});
   DG_PARK_SCAN=true;
   dgRenderScanCard();
   const card=$("parkScanCard");
