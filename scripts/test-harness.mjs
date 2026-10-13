@@ -105,6 +105,12 @@ export function loadApp({ sadece } = {}) {
      * yardımcıları (dgS2Median, dgS2SeasonRange) test edilir.
      * ui/lc-sens BİLEREK yok (DOM'a yapışır; park-panel gibi statik
      * denetimden geçer). */
+    'src/domain/surface/build-validation-confusion-matrix.js',
+    'src/domain/surface/build-validation-stratum-weights.js',
+    'src/domain/surface/calculate-validation-class-proportions.js',
+    'src/domain/surface/calculate-validation-area-estimates.js',
+    'src/domain/surface/calculate-validation-class-accuracy.js',
+    'src/domain/surface/validation-accuracy-metrics.js',
     'src/services/lc-validate.js',
     'src/services/lc-s2.js',
     'src/ui/lc-report.js',
