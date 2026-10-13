@@ -986,19 +986,26 @@ window.dgScanSearchByName=dgScanSearchByName;
 async function dgFetchOsmRing(osmKey){
   return DG_OSM_PARK_RING_ADAPTER.create({fetch,joinWaysToRings})(osmKey);
 }
-const DG_PARK_GEOMETRY_BACKFILL_USE_CASE=window.DG_PARK_GEOMETRY_BACKFILL_APPLICATION.create({
-  isAdmin:()=>!!(PROFILE&&(PROFILE.role==="admin"||PROFILE.role==="owner")),
-  getPark:async parkId=>{const{data}=await sb.from("parks").select("*").eq("id",parkId).maybeSingle();return data||null;},
-  fetchRing:dgFetchOsmRing,
-  calculateArea:geom=>typeof polyArea==="function"?polyArea(geom.outer):NaN,
-  saveGeometry:(parkId,update)=>sb.from("parks").update(update).eq("id",parkId),
-  notify:(kind,park,error)=>{
+const DG_PARK_GEOMETRY_BACKFILL_STORE=window.DG_PARK_GEOMETRY_BACKFILL_STORE
+  ?window.DG_PARK_GEOMETRY_BACKFILL_STORE.create({getClient:()=>sb})
+  :{getPark:async parkId=>{const{data}=await sb.from("parks").select("*").eq("id",parkId).maybeSingle();return data||null;},saveGeometry:(parkId,update)=>sb.from("parks").update(update).eq("id",parkId)};
+const DG_PARK_GEOMETRY_BACKFILL_FEEDBACK=window.DG_PARK_GEOMETRY_BACKFILL_FEEDBACK
+  ?window.DG_PARK_GEOMETRY_BACKFILL_FEEDBACK.create({toast:(...args)=>toast(...args),escape:value=>esc(value),format:value=>dgCf(value)})
+  :{notify:(kind,park,error)=>{
     if(kind==="loading")toast("🛰 OSM sınırı çekiliyor…","info","🛰");
     if(kind==="osm-error")toast(dgCf("OSM hatası: ")+esc(error.message),"err","🛰");
     if(kind==="boundary-not-found")toast("OSM'de kapalı sınır bulunamadı (relation parçalı olabilir).","warn","🛰");
     if(kind==="write-error")toast(dgCf("Yazılamadı (yetki/ağ): ")+esc(error.message),"err","🛰");
     if(kind==="saved")toast("✓ "+esc(park.name)+" geometrisi yazıldı — çit artık tam poligonla.","ok","🛰");
-  },
+  }};
+const DG_PARK_GEOMETRY_BACKFILL_USE_CASE=window.DG_PARK_GEOMETRY_BACKFILL_APPLICATION.create({
+  isAdmin:()=>!!(PROFILE&&(PROFILE.role==="admin"||PROFILE.role==="owner")),
+  getPark:parkId=>DG_PARK_GEOMETRY_BACKFILL_STORE.getPark(parkId),
+  fetchRing:dgFetchOsmRing,
+  calculateArea:geom=>typeof polyArea==="function"?polyArea(geom.outer):NaN,
+  resolveArea:window.DG_RESOLVE_PARK_GEOMETRY_BACKFILL_AREA?(area,park)=>window.DG_RESOLVE_PARK_GEOMETRY_BACKFILL_AREA.resolve(area,park.area_m2):undefined,
+  saveGeometry:(parkId,update)=>DG_PARK_GEOMETRY_BACKFILL_STORE.saveGeometry(parkId,update),
+  notify:(kind,park,error)=>DG_PARK_GEOMETRY_BACKFILL_FEEDBACK.notify(kind,park,error),
   onComplete:()=>loadParkAdmin()
 });
 async function dgBackfillGeom(parkId){
