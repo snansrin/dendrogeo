@@ -50,6 +50,16 @@ const DG_REPORT_REQUEST_COLLECTOR=window.DG_CREATE_ACADEMIC_REPORT_COLLECTOR.cre
 function dgReportCollectRequest(parkId,lulc){return DG_REPORT_REQUEST_COLLECTOR(parkId,lulc);}
 function dgReportQuestions(parkId,projectName){
  if(DG_REPORT_DIALOG)return Promise.resolve(null);if(typeof USER==="undefined"||!USER)return Promise.resolve(null);
+ if(window.DG_RESOLVE_REPORT_QUESTION_VALUES&&window.DG_REPORT_QUESTION_FIELDS&&window.DG_REPORT_QUESTION_CONFIRMATIONS&&window.DG_VALIDATE_REPORT_QUESTION_ANSWER&&window.DG_RUN_REPORT_QUESTION_DIALOG){
+  const defaults=dgAcademicDefaults(),name=PROFILE?.full_name||USER.user_metadata?.full_name||'';
+  const currentPublication=typeof DG_USER_PUB!=="undefined"?DG_USER_PUB:null;
+  const publicationParks=typeof DG_PUB_STATE!=="undefined"?(DG_PUB_STATE.parks||[]):[];
+  const question=window.DG_RESOLVE_REPORT_QUESTION_VALUES.resolve({parkId,projectName,userId:USER.id,name,defaults,drafts:DG_REPORT_DRAFTS,currentPublication,publicationParks});
+  const fields=window.DG_REPORT_QUESTION_FIELDS.render(question.values,DG_ACADEMIC_FIELDS,DG_REPORT_EXAMPLES,{input:dgAcademicInput,label:dgFieldLabel,escape:esc});
+  const confirmations=window.DG_REPORT_QUESTION_CONFIRMATIONS.render();
+  const html=`<form id="dgReportQuestionForm"><div class="dg-profile-heading"><div><div class="dg-kicker">YAYIN ÖNCESİ KÜNYE</div><h2 id="dgReportQuestionTitle">Bilimsel rapor bilgileri</h2><p class="dg-meta">${esc(question.parkName)} · Ağaç ölçümleri ve kabul edilen analiz otomatik aktarılır.</p></div><button class="btn sm ghost" type="button" data-close aria-label="Formu kapat">✖</button></div>${fields}${confirmations}</form>`;
+  return window.DG_RUN_REPORT_QUESTION_DIALOG.run(html,{document,setCurrent:dialog=>{DG_REPORT_DIALOG=dialog;},studyType:question.values.study_type,submit:(form,modal)=>window.DG_VALIDATE_REPORT_QUESTION_ANSWER.execute(form,{formData:form=>new FormData(form),validate:value=>DG_REPORT_CONTEXT.validate(value),showErrors:text=>{modal.querySelector('#dgReportQuestionErrors').textContent=text;},saveDraft:value=>DG_REPORT_DRAFTS.set(question.key,value),now:()=>new Date().toISOString()})});
+ }
  const defaults=dgAcademicDefaults(),name=PROFILE?.full_name||USER.user_metadata?.full_name||'';let parkName='Park #'+parkId;
  if(typeof DG_USER_PUB!=="undefined"&&Number(DG_USER_PUB.parkId)===Number(parkId))parkName=DG_USER_PUB.parkName||parkName;
  if(typeof DG_PUB_STATE!=="undefined")parkName=DG_PUB_STATE.parks?.find(p=>Number(p.park_id)===Number(parkId))?.park_name||parkName;
