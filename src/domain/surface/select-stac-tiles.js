@@ -1,0 +1,8 @@
+"use strict";
+/* Filter STAC items to the requested product year and choose its data asset. */
+(function(root){
+  function matchesYear(item,year){const id=String(item?.id||"");if(id.endsWith("-"+year)||id.includes("_"+year+"_")||id.includes("/"+year+"/"))return true;const properties=item?.properties||{},datetime=String(properties.datetime||properties.start_datetime||"");if(datetime.slice(0,4)===String(year))return true;const match=id.match(/(19|20)\d{2}/);return!!(match&&Number(match[0])===year);}
+  async function findTiles(bbox,source,signal,{sources,stac,maxTiles,fetchJson,itemMatchesYear}){const selected=source||sources.cross,query=new URLSearchParams({collections:selected.collection,bbox:[bbox.minLon,bbox.minLat,bbox.maxLon,bbox.maxLat].join(","),datetime:selected.year+"-01-01T00:00:00Z/"+selected.year+"-12-31T23:59:59Z",limit:String(maxTiles)}),data=await fetchJson(stac+"/search?"+query.toString(),{headers:{Accept:"application/geo+json"},signal}),all=Array.isArray(data?.features)?data.features:[],items=all.filter(item=>itemMatchesYear(item,selected.year));if(!items.length)throw new Error(selected.label+" için parkla kesişen "+selected.year+" veri karosu bulunamadı."+(all.length?" ("+all.length+" karo döndü ama hiçbiri "+selected.year+" değil — yıl filtresi reddetti)":""));return items;}
+  function getDataAsset(item,source){const assets=item?.assets||{},keys=(source&&source.assetKeys)||["data","lulc","map"];for(const key of keys)if(assets[key]?.href)return assets[key];return Object.values(assets).find(value=>value&&String(value.type||"").toLowerCase().includes("geotiff")&&value.href)||null;}
+  root.DG_SELECT_STAC_TILES=Object.freeze({matchesYear,findTiles,getDataAsset});
+})(window);

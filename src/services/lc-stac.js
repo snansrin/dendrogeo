@@ -7,8 +7,9 @@
 
 /* Retry only transient transport failures. One 30 s budget covers attempts,
  * backoff AND response decoding; cancellation is never swallowed. */
-function dgLcRetryable(status){return [408,429,500,502,503,504].includes(status);}
+function dgLcRetryable(status){if(typeof window!=="undefined"&&window.DG_STAC_FETCH_POLICY)return window.DG_STAC_FETCH_POLICY.retryable(status);return [408,429,500,502,503,504].includes(status);}
 function dgLcRetryWait(attempt,signal,response){
+ if(typeof window!=="undefined"&&window.DG_STAC_FETCH_POLICY)return window.DG_STAC_FETCH_POLICY.retryWait(attempt,signal,response);
  const value=response?.headers?.get?.("Retry-After");
  const seconds=Number(value),date=Date.parse(value);
  const requested=value?(Number.isFinite(seconds)?seconds*1000:date-Date.now()):0;
@@ -22,6 +23,7 @@ function dgLcRetryWait(attempt,signal,response){
  });
 }
 async function dgLcFetchJson(url,options){
+ if(typeof window!=="undefined"&&window.DG_STAC_FETCH_POLICY)return window.DG_STAC_FETCH_POLICY.fetchJson(url,options,fetch);
  const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),30000);
  const parent=options?.signal,abort=()=>controller.abort();
  if(parent?.aborted)controller.abort();else parent?.addEventListener('abort',abort,{once:true});
@@ -53,6 +55,7 @@ async function dgLcFetchJson(url,options){
 /* Bound every HTTP range, including image-directory reads which GeoTIFF 2.1
  * does not pass a readRasters signal to. Keep Range headers and COG semantics. */
 function dgLcOpenRaster(href,sourceSignal){
+ if(typeof window!=="undefined"&&window.DG_OPEN_RASTER_RANGE_ADAPTER)return window.DG_OPEN_RASTER_RANGE_ADAPTER.open(href,sourceSignal,{GeoTIFF,fetchImpl:fetch,retryable:dgLcRetryable,retryWait:dgLcRetryWait});
  if(!GeoTIFF.fromCustomClient||!GeoTIFF.BaseClient||!GeoTIFF.BaseResponse)return GeoTIFF.fromUrl(href,{},sourceSignal);
  class RangeResponse extends GeoTIFF.BaseResponse{
   constructor(response,done){super();this.response=response;this.done=done;}
@@ -89,6 +92,7 @@ function dgLcOpenRaster(href,sourceSignal){
 }
 
 function dgLcSignedHref(href,token){
+  if(typeof window!=="undefined"&&window.DG_SIGN_STAC_ASSETS)return window.DG_SIGN_STAC_ASSETS.signedHref(href,token);
   if(!token)return href;
   const t=String(token).replace(/^[?&]/,"");
   if(!t)return href;
@@ -104,6 +108,7 @@ function dgLcSignedHref(href,token){
  * "QA başarısız: %99.61 fark" hatasının kökü buydu. Sorgudan dönen her item
  * bu yüzden id ve properties üzerinden yıla göre süzülür. */
 function dgLcItemMatchesYear(item,year){
+  if(typeof window!=="undefined"&&window.DG_SELECT_STAC_TILES)return window.DG_SELECT_STAC_TILES.matchesYear(item,year);
   const id=String(item?.id||"");
   if(id.endsWith("-"+year)||id.includes("_"+year+"_")||id.includes("/"+year+"/"))return true;
   const p=item?.properties||{};
@@ -116,6 +121,7 @@ function dgLcItemMatchesYear(item,year){
 }
 
 async function dgLcFindTiles(bbox,source,signal){
+  if(typeof window!=="undefined"&&window.DG_SELECT_STAC_TILES)return window.DG_SELECT_STAC_TILES.findTiles(bbox,source,signal,{sources:DG_LC_SOURCES,stac:DG_LC_STAC,maxTiles:DG_LC_MAX_TILES,fetchJson:dgLcFetchJson,itemMatchesYear:dgLcItemMatchesYear});
   const src=source||DG_LC_SOURCES.cross;
   /* ⚠️ CORS: POST + application/json tarayıcıda preflight (OPTIONS) tetikler ve
    * Planetary Computer /search OPTIONS isteğine 405 döner → analiz daha ilk
@@ -142,6 +148,7 @@ async function dgLcFindTiles(bbox,source,signal){
 
 const DG_LC_SAS_CACHE=new Map();
 async function dgLcGetSas(collection,signal){
+  if(typeof window!=="undefined"&&window.DG_SIGN_STAC_ASSETS)return window.DG_SIGN_STAC_ASSETS.getSas(collection,signal,{cache:DG_LC_SAS_CACHE,defaultCollection:DG_LC_SOURCES.cross.collection,sasEndpoint:DG_LC_SAS,fetchJson:dgLcFetchJson});
   const coll=collection||DG_LC_SOURCES.cross.collection;
   if(signal?.aborted)throw Object.assign(new Error("İstek iptal edildi."),{name:"AbortError"});
   const cached=DG_LC_SAS_CACHE.get(coll);
@@ -164,6 +171,7 @@ async function dgLcGetSas(collection,signal){
 }
 
 function dgLcGetDataAsset(item,source){
+  if(typeof window!=="undefined"&&window.DG_SELECT_STAC_TILES)return window.DG_SELECT_STAC_TILES.getDataAsset(item,source);
   const a=item?.assets||{};
   const keys=(source&&source.assetKeys)||["data","lulc","map"];
   for(const k of keys)if(a[k]?.href)return a[k];
@@ -173,6 +181,7 @@ function dgLcGetDataAsset(item,source){
 }
 
 function dgLcImageMeta(image){
+  if(typeof window!=="undefined"&&window.DG_RESOLVE_RASTER_WINDOW)return window.DG_RESOLVE_RASTER_WINDOW.imageMeta(image);
   const bbox=image.getBoundingBox();
   const width=image.getWidth();
   const height=image.getHeight();
@@ -190,6 +199,7 @@ function dgLcImageMeta(image){
 }
 
 function dgLcWindowForPark(meta,parkBBox){
+  if(typeof window!=="undefined"&&window.DG_RESOLVE_RASTER_WINDOW)return window.DG_RESOLVE_RASTER_WINDOW.windowForPark(meta,parkBBox);
   const minCol=Math.max(0,
     Math.floor((parkBBox.minX-meta.minX)/meta.dx)-1);
   const maxCol=Math.min(meta.width,
