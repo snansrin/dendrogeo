@@ -80,7 +80,7 @@ function amsg(t,e){if(window.DG_RENDER_AUTH_MESSAGE)return window.DG_RENDER_AUTH
 
 /* --- BLOK 3: Giriş / kayıt / sıfırlama / çıkış --- */
 async function doLogin(){
-if(window.DG_LOGIN_WITH_PASSWORD)return window.DG_LOGIN_WITH_PASSWORD.execute({email:$('liEmail').value,password:$('liPass').value,token:tsToken,wait:ms=>new Promise(r=>setTimeout(r,ms)),showMessage:amsg,auth:sb.auth,resetWidget:id=>turnstile.reset(TS[id]),setUser:user=>{USER=user;},setProfile:profile=>{PROFILE=profile;},loadProfile:id=>sb.from("profiles").select("*").eq("id",id).single(),startShell,isOnline:()=>navigator.onLine,schedule:setTimeout,syncOffline:syncOfflineData});
+if(window.DG_LOGIN_WITH_PASSWORD)return window.DG_LOGIN_WITH_PASSWORD.execute({email:$('liEmail').value,password:$('liPass').value,token:tsToken,wait:ms=>new Promise(r=>setTimeout(r,ms)),showMessage:amsg,auth:sb.auth,resetWidget:id=>turnstile.reset(TS[id]),setUser:user=>{USER=user;},setProfile:profile=>{PROFILE=profile;},loadProfile:id=>window.DG_AUTH_SESSION_STORE.create(()=>sb).loadProfile(id),startShell,isOnline:()=>navigator.onLine,schedule:setTimeout,syncOffline:syncOfflineData});
 const email = $("liEmail").value;
 const pass = $("liPass").value;
 if(!email || !pass){
@@ -109,7 +109,7 @@ return;
 }
 try { turnstile.reset(TS.tsLogin); } catch(e){}
 USER = r.data.user;
-const { data: p } = await sb.from("profiles").select("*").eq("id", USER.id).single();
+const { data: p } = await window.DG_AUTH_SESSION_STORE.create(()=>sb).loadProfile(USER.id);
 PROFILE = p;
 startShell();
 if (navigator.onLine) {

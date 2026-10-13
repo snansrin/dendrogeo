@@ -80,24 +80,11 @@ function initLanding(){
  if(worldMapL)dgLandingMarkers();
  else DG_LANDING_MARKERS_PENDING=true;
  (async()=>{
-  const jobs=[
-   sb.from("v_global").select("*").single().then(g=>{
-    if(g.error)throw g.error;
-    if(g.data){$("statRec").textContent=g.data.records||0;$("statCountry").textContent=g.data.countries||0;$("statCity").textContent=g.data.cities||0;$("statCarbon").textContent=g.data.carbon_t||0;}
-   }),
-   sb.from("v_country").select("*").then(c=>{
-    if(c.error)throw c.error;
-    const table=$("tblCountry"),body=table&&table.querySelector&&table.querySelector("tbody");
-    if(body)body.innerHTML=(c.data||[]).slice(0,20).map(r=>`<tr class="clickable-row" tabindex="0" role="link" onkeydown="dgKeyActivate(event,this)" onclick="zoomToCountry('${esc(r.country)}')"><td>${esc(r.country)}</td><td>${r.records}</td><td>${r.carbon_t}</td><td>${Number.isFinite(+r.avg_dbh)?(+r.avg_dbh).toFixed(1):"—"}</td><td>${r.avg_height||"—"}</td></tr>`).join("")||"<tr><td colspan=5>Henüz veri yok</td></tr>";
-   }),
-   sb.from("v_city").select("*").then(t=>{
-    if(t.error)throw t.error;
-    const table=$("tblCity"),body=table&&table.querySelector&&table.querySelector("tbody");
-    if(body)body.innerHTML=(t.data||[]).slice(0,20).map(r=>`<tr class="clickable-row" tabindex="0" role="link" onkeydown="dgKeyActivate(event,this)" onclick="zoomToCity('${esc(r.city)}')"><td>${esc(r.city)}</td><td>${r.records}</td><td>${r.carbon_t}</td></tr>`).join("")||"<tr><td colspan=3>Henüz veri yok</td></tr>";
-   })
-  ];
-  const results=await Promise.allSettled(jobs);
-  const errors=results.filter(r=>r.status==="rejected").map(r=>r.reason);
+  const result=await DG_WORLD_STATS_STORE.loadForLanding(sb);
+  if(result.global?.data){const g=result.global.data;$("statRec").textContent=g.records||0;$("statCountry").textContent=g.countries||0;$("statCity").textContent=g.cities||0;$("statCarbon").textContent=g.carbon_t||0;}
+  if(result.countries){const body=$("tblCountry")?.querySelector?.("tbody");if(body)body.innerHTML=(result.countries.data||[]).slice(0,20).map(r=>`<tr class="clickable-row" tabindex="0" role="link" onkeydown="dgKeyActivate(event,this)" onclick="zoomToCountry('${esc(r.country)}')"><td>${esc(r.country)}</td><td>${r.records}</td><td>${r.carbon_t}</td><td>${Number.isFinite(+r.avg_dbh)?(+r.avg_dbh).toFixed(1):"—"}</td><td>${r.avg_height||"—"}</td></tr>`).join("")||"<tr><td colspan=5>Henüz veri yok</td></tr>";}
+  if(result.cities){const body=$("tblCity")?.querySelector?.("tbody");if(body)body.innerHTML=(result.cities.data||[]).slice(0,20).map(r=>`<tr class="clickable-row" tabindex="0" role="link" onkeydown="dgKeyActivate(event,this)" onclick="zoomToCity('${esc(r.city)}')"><td>${esc(r.city)}</td><td>${r.records}</td><td>${r.carbon_t}</td></tr>`).join("")||"<tr><td colspan=3>Henüz veri yok</td></tr>";}
+  const errors=result.errors;
   if(errors.length){
    /* Üç bağımsız panelden biri aksasa bile diğer ikisi görünür kalır. */
    console.error("DENDROGEO · landing verisi kısmen yüklenemedi:",errors);

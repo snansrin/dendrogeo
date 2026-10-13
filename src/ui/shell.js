@@ -67,7 +67,7 @@ async function boot(){
             return;
         }
     }else{
-        const r=await sb.auth.getSession();
+        const r=await window.DG_AUTH_SESSION_STORE.create(()=>sb).getSession();
         session=r&&r.data?r.data.session:null;
     }
 const isRecovery=/type=recovery/.test(INITIAL_HASH);
@@ -85,7 +85,7 @@ return;
 }
     
     // 5. Profil yükle ve arayüzü başlat
-    const{data:p}=await sb.from("profiles").select("*").eq("id",USER.id).single();
+    const{data:p}=await window.DG_AUTH_SESSION_STORE.create(()=>sb).loadProfile(USER.id);
     PROFILE=p;
     startShell();
     
