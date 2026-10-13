@@ -1,23 +1,26 @@
 "use strict";
 
 window.DG_LOAD_PUBLICATION_QUEUE = (() => {
+  const read = state => state && typeof state.getState === "function" ? state.getState() : state;
+  const update = (state, patch) => state && typeof state.setState === "function"
+    ? state.setState(patch)
+    : Object.assign(state, patch);
+
   async function execute(state, options, ports) {
-    if (!ports.hasView() || state.loading) return;
-    state.loading = true;
+    if (!ports.hasView() || read(state).loading) return;
+    update(state, { loading: true });
     if (!(options && options.silent)) ports.showLoading();
     try {
       const [parks, requests, queue, retractions] = await Promise.all([
         ports.loadParks(), ports.loadRequests(), ports.loadQueue(), ports.loadRetractions(),
       ]);
-      state.parks = parks;
-      state.requests = requests;
-      state.retractions = retractions;
-      if (queue) state.queue = queue;
-      state.queueAt = ports.now();
+      const patch = { parks, requests, retractions, queueAt: ports.now() };
+      if (queue) patch.queue = queue;
+      update(state, patch);
     } catch (error) {
-      state.error = "Kuyruk yüklenemedi: " + ((error && error.message) || error);
+      update(state, { error: "Kuyruk yüklenemedi: " + ((error && error.message) || error) });
     } finally {
-      state.loading = false;
+      update(state, { loading: false });
     }
     ports.render();
     ports.schedulePoll();
