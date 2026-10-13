@@ -726,7 +726,7 @@
     "src/services/lc-validate.js": "b4d8327c62940b1af1a53ddb087188816ff2359c8456c2755c7c853c5919f42b",
     "src/services/map.js": "7176931050f0334e339fd38d71b62c966a597dba3b3dafdb6c3622a26f38845e",
     "src/services/measure.js": "4e90e357417802724a46853df5652199354e9491cf11bc97af64f0c00060d6a4",
-    "src/services/offline.js": "6f4ef41218c6621da9a5ae2f070e60de7efabc858e38035ee80cd89fd2f4a1ac",
+    "src/services/offline.js": "a1555235bf0e0e17ecea63e90b7347e7288295b6d7cf237ac0804ddc00d50e3f",
     "src/services/osm-client.js": "2e5eeaa735bf05a603a0db142619f60747b9696f506e666d7df992454a56814f",
     "src/services/osm-water-backup.js": "b3429cdc9bfe0f84bd7b6644a1221d4daadc374ac046b036abf15b3b5ee7d269",
     "src/services/park-geometry.js": "ae89879b98ed8d9f3928d17b7258389c7a7c1abdabdd63dba1aac934aacc6f83",
@@ -2219,6 +2219,17 @@
           "path": "src/services/park-registry.js",
           "previous_sha256": "fce7177f21796e58575abf896394ccd47aef61f5f5785d47bd0951b51e256548",
           "sha256": "e1fa450ea299c357d83199c8e4cbb5e47c20b08737c9df655bfd1eac6d1b4336"
+        }
+      ]
+    },
+    {
+      "date": "2026-10-14",
+      "scope": "User-authorized second five-module split of the locked offline service: extract queue draining, single-flight sync coordination, visible-view refresh, sync feedback, and PWA install prompt lifecycle. Preserve owner/session/network gates, exact replay checks, server acknowledgement, IndexedDB commit-before-success, toast copy, visible refresh behavior, and locked regression tests.",
+      "files": [
+        {
+          "path": "src/services/offline.js",
+          "previous_sha256": "6f4ef41218c6621da9a5ae2f070e60de7efabc858e38035ee80cd89fd2f4a1ac",
+          "sha256": "a1555235bf0e0e17ecea63e90b7347e7288295b6d7cf237ac0804ddc00d50e3f"
         }
       ]
     }

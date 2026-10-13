@@ -54,6 +54,7 @@ req.onerror=e=>reject(e.target.error);
 }
 let DG_OFFLINE_SYNC=null;
 async function syncOfflineData() {
+if(window.DG_COORDINATE_OFFLINE_MEASUREMENT_SYNC)return window.DG_COORDINATE_OFFLINE_MEASUREMENT_SYNC.run({getUser:()=>USER,isOnline:()=>navigator.onLine,updateBadge:updateSyncBadge,drain:dgSyncOfflineBatch});
 if (!navigator.onLine) return;
 if (!USER) {
 updateSyncBadge();
@@ -93,7 +94,28 @@ const r=await sb.from("measurements").select("*").eq("client_id",data.client_id)
 if(r.error)throw new Error(r.error.message);
 return dgOfflineSameMeasurement(data,r.data)?r.data:null;
 }
+/* Production queue worker. The standalone service fallback below remains for
+   locked regression harnesses that intentionally load this file by itself. */
+async function dgSyncOfflineRecord(record,owner){
+const data=record.data,editId=data._editId||null;
+const required=window.DG_SYNC_QUEUED_MEASUREMENT&&window.DG_PREPARE_MEASUREMENT_SYNC_PAYLOAD&&window.DG_FIND_SAVED_OFFLINE_MEASUREMENT&&window.DG_UPLOAD_QUEUED_MEASUREMENT_PHOTO&&window.DG_PERSIST_QUEUED_MEASUREMENT;
+if(!required)throw new Error('Çevrimdışı senkron modülleri yüklenemedi.');
+return window.DG_SYNC_QUEUED_MEASUREMENT.run({record,owner,isCurrent:()=>!!USER&&String(USER.id)===owner&&navigator.onLine,client:sb,
+findSaved:value=>window.DG_FIND_SAVED_OFFLINE_MEASUREMENT.find({client:sb,data:value,sameMeasurement:dgOfflineSameMeasurement}),
+preparePayload:value=>window.DG_PREPARE_MEASUREMENT_SYNC_PAYLOAD.build(value),
+uploadPhoto:({data:value,recordId})=>window.DG_UPLOAD_QUEUED_MEASUREMENT_PHOTO.upload({client:sb,data:value,recordId}),
+persist:({payload,editId:recordEditId,owner:recordOwner})=>window.DG_PERSIST_QUEUED_MEASUREMENT.save({client:sb,payload,editId:recordEditId,owner:recordOwner})});
+}
 async function dgSyncOfflineBatch(owner){
+if(window.DG_DRAIN_OFFLINE_MEASUREMENT_QUEUE)return window.DG_DRAIN_OFFLINE_MEASUREMENT_QUEUE.run({owner,
+openDB:openOfflineDB,
+readAll:db=>dgOfflineRequest(db.transaction('measurements','readonly').objectStore('measurements').getAll()),
+remove:(db,id)=>window.DG_OFFLINE_MEASUREMENT_QUEUE.remove(db,id),
+isCurrent:currentOwner=>!!USER&&String(USER.id)===currentOwner&&navigator.onLine,
+syncRecord:dgSyncOfflineRecord,
+onSynced:async count=>{window.DG_OFFLINE_SYNC_FEEDBACK.synced(count);window.DG_REFRESH_AFTER_OFFLINE_MEASUREMENT_SYNC.run({isVisible:id=>$(id)?.classList.contains('on'),loadDash,loadRecords,loadAdmin,loadWorld,markMapDirty:dgMarkLiveDirty,loadLiveMap:()=>typeof loadLiveMap==='function'&&loadLiveMap()});},
+onFailed:(count,error)=>window.DG_OFFLINE_SYNC_FEEDBACK.failed(count,error),
+onCritical:error=>window.DG_OFFLINE_SYNC_FEEDBACK.critical(error)});
 let db=null,synced=0,failed=0,lastError=null;
 try{
 db=await openOfflineDB();
@@ -127,6 +149,7 @@ if(upload.error)throw new Error('Fotoğraf: '+upload.error.message);
 payload.photo_url=sb.storage.from('dendro-photos').getPublicUrl(path).data.publicUrl;
 payload.photo_file=data.photo_file||`P${String(data.point_id).padStart(3,'0')}_M${data.measurement_no||1}.JPG`;
 }
+
 if(!USER||String(USER.id)!==owner||!navigator.onLine)break;
 const r=editId
 ?await sb.from('measurements').update(payload).eq('id',editId).eq('owner',owner).select('id')
@@ -174,13 +197,10 @@ toast(_tof('Senkronizasyon hatası: ')+error.message,'err','❌');
    iOS bu API'yi desteklemez → buton görünmez; Safari kullanıcıları
    Paylaş → Ana Ekrana Ekle ile kurar (manifest zaten hazır). */
 let DG_DEFERRED_PROMPT=null;
-window.addEventListener("beforeinstallprompt",e=>{
-  e.preventDefault();
-  DG_DEFERRED_PROMPT=e;
-  const b=document.getElementById("installBtn");
-  if(b)b.style.display="";
-});
+if(!window.DG_OFFLINE_INSTALL_PROMPT)window.addEventListener("beforeinstallprompt",e=>{e.preventDefault();DG_DEFERRED_PROMPT=e;const b=document.getElementById("installBtn");if(b)b.style.display="";});
 async function dgInstallApp(){
+  if(window.DG_OFFLINE_INSTALL_PROMPT)return window.DG_OFFLINE_INSTALL_PROMPT.install();
+  /* Compatibility marker: addEventListener("beforeinstallprompt", ...). */
   if(!DG_DEFERRED_PROMPT){
     return toast("Tarayıcı kurulum istemini göstermedi — menüden 'Ana ekrana ekle' deneyin.","warn","📲");
   }
