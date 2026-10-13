@@ -1113,3 +1113,10 @@ Her modülün tek bir dış API'si, sahibi olduğu açık durumu ve kendi testle
 - `application/surface/apply-auto-surface-water-objects.js`, otomatik maskeleri mevcut repartition use-case’inden geçirir ve başarısız geometri kurulumunu geri alır.
 - `domain/surface/build-surface-scan-summary.js`, yeterli gözlem, sınıf farkı ve belirsiz su sınırı mesajlarını üretir.
 - `application/surface/complete-surface-scan.js` başarılı profili kaydeder; `run-surface-scan.js` scan gate, nötr başlangıç, stale park koruması ve finally cleanup sırasını orkestre eder.
+
+## LULC dışa aktarma — 13 Ekim 2026
+
+- `domain/surface/build-surface-export-data.js`, mevcut alan sırasını ve GeoJSON provenance alanlarını koruyarak CSV/GeoJSON gövdelerini üretir.
+- `domain/surface/prepare-surface-export-map-frame.js`, hücre ve park halkalarının UTM kapsamından aynı ölçekli canvas koordinatlarını hesaplar.
+- `ui/render-surface-export-layer-dialog.js`, park, analiz, grid ve waypoint seçimlerini mevcut erişilebilir kontrollerle sunar.
+- `ui/draw-surface-export-map-layers.js`, seçili yüzey, park, grid ve waypoint katmanlarını çizim sırasıyla boyar; `ui/render-surface-export-infographic.js` başlık, alan özeti, lejant ve lisans dipnotunu üretir.
