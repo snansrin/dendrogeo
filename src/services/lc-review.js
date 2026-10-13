@@ -120,6 +120,7 @@ function dgSurfaceDisplaySync(parts,epsg,park,prepared=null){return DG_SURFACE_R
  * Erode the usable domain, clip metric cells, then choose an interior point.
  * The final point has an exact boundary-distance check after coordinate rounding. */
 function dgGridPointDistance(p,geom){
+ if(window.DG_MEASURE_GRID_POINT_DISTANCE)return window.DG_MEASURE_GRID_POINT_DISTANCE.measure(p,geom);
  let inside=false,min=Infinity;
  for(const poly of geom){let inPoly=false;for(let i=0;i<poly.length;i++){const ring=poly[i];let hit=false;for(let j=0,k=ring.length-1;j<ring.length;k=j++){
   const a=ring[k],b=ring[j];if((a[1]>p[1])!==(b[1]>p[1])&&p[0]<(b[0]-a[0])*(p[1]-a[1])/(b[1]-a[1])+a[0])hit=!hit;
@@ -129,6 +130,7 @@ function dgGridPointDistance(p,geom){
  return inside?min:-min;
 }
 function dgGridInterior(poly){
+ if(window.DG_FIND_GRID_INTERIOR_POINT)return window.DG_FIND_GRID_INTERIOR_POINT.find(poly,{bounds:dgSurfaceBounds,pointDistance:dgGridPointDistance});
  const b=dgSurfaceBounds([poly]);let best=null;
  const make=(x,y,h)=>{const d=dgGridPointDistance([x,y],[poly]);return{x,y,h,d,max:d+h*Math.SQRT2};};
  const queue=[make((b[0]+b[2])/2,(b[1]+b[3])/2,Math.max(b[2]-b[0],b[3]-b[1])/2)];
@@ -141,6 +143,7 @@ function dgGridInterior(poly){
  return best?.d>0?[best.x,best.y]:null;
 }
 function dgGridLineMask(line,epsg){
+ if(window.DG_BUILD_GRID_LINE_MASK)return window.DG_BUILD_GRID_LINE_MASK.build(line,epsg,{project:dgSurfaceProject});
  const pts=dgSurfaceProject(line.pts.map(p=>[p[1],p[0]]),epsg),width=Math.max(.1,Number(line.w)||1),out=[];
  for(let i=1;i<pts.length;i++){const a=pts[i-1],b=pts[i],dx=b[0]-a[0],dy=b[1]-a[1],len=Math.hypot(dx,dy);if(!len)continue;const ox=-dy/len*width,oy=dx/len*width;out.push([[[a[0]+ox,a[1]+oy],[b[0]+ox,b[1]+oy],[b[0]-ox,b[1]-oy],[a[0]-ox,a[1]-oy],[a[0]+ox,a[1]+oy]]]);}
  for(const p of pts)out.push([Array.from({length:17},(_,i)=>[p[0]+Math.cos(i*Math.PI/8)*width,p[1]+Math.sin(i*Math.PI/8)*width])]);
@@ -149,6 +152,7 @@ function dgGridLineMask(line,epsg){
 /* Local millimetre precision prevents UTM floating-point slivers accumulating
  * across repeated offset intersections. Never widen geometry after a failure. */
 function dgSurfaceClean(geom){
+ if(window.DG_CLEAN_GRID_GEOMETRY)return window.DG_CLEAN_GRID_GEOMETRY.clean(geom,{area:dgSurfaceArea});
  if(typeof geom?.[0]?.[0]?.[0]==="number")geom=[geom];
  const clean=[];
  for(const poly of geom||[]){const rings=[];for(let i=0;i<poly.length;i++){
@@ -158,7 +162,7 @@ function dgSurfaceClean(geom){
  }if(rings.length&&dgSurfaceArea([rings])>.000001)clean.push(rings);}
  return clean;
 }
-function dgGridPrecisionClip(op,...geoms){return dgSurfaceClean(window.polygonClipping[op](...geoms.map(dgSurfaceClean)));}
+function dgGridPrecisionClip(op,...geoms){if(window.DG_CLIP_GRID_GEOMETRY)return window.DG_CLIP_GRID_GEOMETRY.clip(op,geoms,{run:(operation,...values)=>window.polygonClipping[operation](...values),clean:dgSurfaceClean});return dgSurfaceClean(window.polygonClipping[op](...geoms.map(dgSurfaceClean)));}
 async function dgSurfaceGrid(data){
  const pc={union:(...g)=>dgGridPrecisionClip("union",...g),difference:(...g)=>dgGridPrecisionClip("difference",...g),intersection:(...g)=>dgGridPrecisionClip("intersection",...g)},size=Number(data.size),clearance=Number(data.clearance),epsg=data.epsg;
  if(![10,20,50].includes(size)||!Number.isFinite(clearance)||clearance<1||clearance>20)throw Error('Grid boyutu veya güvenlik mesafesi geçersiz.');

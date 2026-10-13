@@ -98,6 +98,11 @@ export function loadApp({ sadece } = {}) {
     'src/adapters/surface/review-worker.js',
     'src/application/surface/prepare-review.js',
     'src/application/surface/merge-review-features.js',
+    'src/domain/surface/measure-grid-point-distance.js',
+    'src/domain/surface/find-grid-interior-point.js',
+    'src/domain/surface/build-grid-line-mask.js',
+    'src/domain/surface/clean-grid-geometry.js',
+    'src/adapters/surface/clip-grid-geometry.js',
     'src/services/lc-patches.js',
     /* UYDU HASSASİYET (0054): validate çekirdeği saf matematiktir (eşikler,
      * hassasiyet, Olofsson metrikleri, düzeltme katmanı) — birim testleri
