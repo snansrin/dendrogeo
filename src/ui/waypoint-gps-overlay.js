@@ -2,6 +2,7 @@
 /* Draw GPS position, bearing arrow and straight-line guidance on the nav map. */
 (function(root){
   function draw({map,waypoints,target,gps,leaflet,distance,bearing,getElement,translate,setTarget}){
+    if(root.DG_RENDER_WAYPOINT_GPS_OVERLAY&&root.DG_CREATE_WAYPOINT_GPS_LOCATION_MARKER&&root.DG_RESOLVE_WAYPOINT_GPS_GUIDANCE&&root.DG_RENDER_WAYPOINT_GPS_GUIDANCE_READOUT&&root.DG_ADD_WAYPOINT_GUIDANCE_LINE)return root.DG_RENDER_WAYPOINT_GPS_OVERLAY.render({map,waypoints,target,gps,leaflet,distance,bearing,getElement,translate,setTarget});
     const arrowBearing=target&&!target.visited?bearing(gps.latitude,gps.longitude,target.lat,target.lon):null;
     const marker=leaflet.marker([gps.latitude,gps.longitude],{
       icon:leaflet.divIcon({

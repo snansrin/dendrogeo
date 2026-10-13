@@ -217,7 +217,13 @@
       "src/adapters/map/ensure-measurement-marker-layer.js",
       "src/application/map/schedule-measurement-marker-chunks.js",
       "src/application/map/add-measurement-markers.js",
-      "src/ui/map-measurement-markers.js"
+      "src/ui/map-measurement-markers.js",
+      "src/domain/map/resolve-waypoint-gps-guidance.js",
+      "src/ui/create-waypoint-gps-location-marker.js",
+      "src/ui/render-waypoint-gps-guidance-readout.js",
+      "src/adapters/map/add-waypoint-guidance-line.js",
+      "src/application/map/render-waypoint-gps-overlay.js",
+      "src/ui/waypoint-gps-overlay.js"
     ],
     "scientific_contract_and_inputs": [
       "css/park-panel.css",
@@ -331,7 +337,8 @@
       "test/park-presence-rendering-modules.test.mjs",
       "test/waypoint-csv-upload-modules.test.mjs",
       "test/map-live-load-modules.test.mjs",
-      "test/map-measurement-marker-chunk-modules.test.mjs"
+      "test/map-measurement-marker-chunk-modules.test.mjs",
+      "test/waypoint-gps-overlay-modules.test.mjs"
     ]
   },
   "sha256": {
@@ -639,7 +646,14 @@
     "src/application/map/schedule-measurement-marker-chunks.js": "0a06c30c2b8297182385b1babc4f0d91d897d37b2294a6b4c6c567a469fa6aa9",
     "src/application/map/add-measurement-markers.js": "545ef0a9e18f9398573e3127037a7670518ceaaa0f87a9cce762ae1a7a0de78d",
     "test/map-measurement-marker-chunk-modules.test.mjs": "8a228cebad287e0d0f4ca677a35f910160d82e1a42104c807e3a5d32b63448a4",
-    "src/ui/map-measurement-markers.js": "cedd193f2786604f84044f2ecf020144b5cba20c86160b729891b7d4f3668a67"
+    "src/ui/map-measurement-markers.js": "cedd193f2786604f84044f2ecf020144b5cba20c86160b729891b7d4f3668a67",
+    "src/domain/map/resolve-waypoint-gps-guidance.js": "cc4b54fcc1efa89b49d124074a0db0af7d982199e7b23887cb7540286303e2c1",
+    "src/ui/create-waypoint-gps-location-marker.js": "48e3ce0e4853f7285a7dac863f4abebf28cdf45b178b10120e9a16e50b86b7a4",
+    "src/ui/render-waypoint-gps-guidance-readout.js": "fa9cc0201cffab7ab8ca965a65c5f27a7cdf8deca70e19914fc30e405bd4b174",
+    "src/adapters/map/add-waypoint-guidance-line.js": "7c34f617b8e8417c2f05a9cb2aff7126ef21b715d01bdd166169ca9299ac7718",
+    "src/application/map/render-waypoint-gps-overlay.js": "c3456e064374c493ffd5125de7d178fd976dc9db185334e92e03837a47368fcb",
+    "test/waypoint-gps-overlay-modules.test.mjs": "40c3d449eb9c6e26d53f3292e4afba37d3f0cf8fb3a65756e161f8fac2341692",
+    "src/ui/waypoint-gps-overlay.js": "e5bb70df065093b911d1c7ff5b5b9fb7db09b38df6bb7fb3271db7ea1e3f4b28"
   },
   "authorized_modularizations": [
     {
@@ -1447,6 +1461,17 @@
           "path": "src/ui/map-measurement-markers.js",
           "previous_sha256": "871e27f80773f7fde985d01d2bf923da022d05a8f11621e0c95de6537cfb1b7e",
           "sha256": "cedd193f2786604f84044f2ecf020144b5cba20c86160b729891b7d4f3668a67"
+        }
+      ]
+    },
+    {
+      "date": "2026-10-13",
+      "scope": "User-authorized fifty-eighth five-module split of waypoint GPS overlay: nearest pending target and guidance model, current-location marker, translated guidance readout, dashed map line, and orchestration. Preserve marker-before-target-selection order, initial-target arrow, rounding, _wp marker ownership, fallback behavior, and existing call signature.",
+      "files": [
+        {
+          "path": "src/ui/waypoint-gps-overlay.js",
+          "previous_sha256": "be7fc65deab2f5a0943bd3c34cc0c8510c31e32fcbb5cb9e7abc49a65c22b2e3",
+          "sha256": "e5bb70df065093b911d1c7ff5b5b9fb7db09b38df6bb7fb3271db7ea1e3f4b28"
         }
       ]
     }
