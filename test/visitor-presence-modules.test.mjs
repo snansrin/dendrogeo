@@ -15,11 +15,12 @@ test('presence payload builder keeps bounded transient session and GPS history',
 });
 
 test('presence channel is prepared and subscribed through separate ordered calls',()=>{
- const api=load('src/adapters/visitors/presence-channel.js').DG_VISITOR_PRESENCE_CHANNEL_ADAPTER.create(),events=[];
+ const events=[];
  const channel={on(...args){events.push(['on',...args]);return this;},subscribe(callback){events.push(['subscribe',callback]);}};
  const client={channel(topic,options){events.push(['channel',topic,options]);return channel;}};
+ const api=load('src/adapters/visitors/presence-channel.js').DG_VISITOR_PRESENCE_CHANNEL_ADAPTER.create(()=>client);
  const onSync=()=>{},onStatus=()=>{};
- const opened=api.open(client,'user','session',onSync);
+ const opened=api.open('user','session',onSync);
  assert.equal(opened,channel);
  assert.deepEqual(events.map(event=>event[0]),['channel','on']);
  api.subscribe(channel,onStatus);
@@ -29,9 +30,9 @@ test('presence channel is prepared and subscribed through separate ordered calls
 
 test('presence auth upgrades only the current connection after subscribe setup',async()=>{
  const api=load('src/application/visitors/upgrade-presence-auth.js').DG_UPGRADE_VISITOR_PRESENCE_AUTH.create();
- const events=[],client={auth:{async getSession(){events.push('session');return{data:{session:{access_token:'jwt'}}};}},realtime:{async setAuth(token){events.push(token);}}};
- await api.run(client,4,generation=>generation===4);
- await api.run(client,5,generation=>generation===4);
+ const events=[],ports={async getSession(){events.push('session');return{data:{session:{access_token:'jwt'}}};},async setRealtimeAuth(token){events.push(token);}};
+ await api.run(ports,4,generation=>generation===4);
+ await api.run(ports,5,generation=>generation===4);
  assert.deepEqual(events,['session','jwt','session']);
 });
 
@@ -55,7 +56,8 @@ test('visit service composes presence modules without waiting for JWT before sub
   DG_VISITOR_ADMIN_VISIT_COUNTS_STORE:{create:()=>({})},DG_VISITOR_SESSION_ID_STORE:{load:()=>'sid'},
   DG_VISITOR_DEVICE_LABEL:{build:()=>'desktop'},DG_VISITOR_ACTIVITY_APPLICATION:{create:()=>({})},
   DG_VISITOR_STORED_ACTIVITY_APPLICATION:{create:()=>({})},DG_VISITOR_STORED_ACTIVITY_STORE:{create:()=>({})},
-  DG_VISITOR_LIVE_VISIT_COUNTS_STORE:{create:()=>({})},DG_VISITOR_ROSTER_APPLICATION:{create:()=>({})}};
+  DG_VISITOR_LIVE_VISIT_COUNTS_STORE:{create:()=>({})},DG_VISITOR_ROSTER_APPLICATION:{create:()=>({})},
+  DG_AUTH_SESSION_STORE:{create:()=>({getSession:async()=>{events.push('auth');return{data:{session:{access_token:'jwt'}}};},setRealtimeAuth:async token=>events.push(['auth-token',token])})}};
  for(const path of ['src/domain/visitors/build-presence-payload.js','src/application/visitors/record-live-session-events.js',
   'src/adapters/visitors/presence-channel.js','src/adapters/visitors/remove-presence-channel.js',
   'src/adapters/visitors/track-presence.js','src/application/visitors/upgrade-presence-auth.js',

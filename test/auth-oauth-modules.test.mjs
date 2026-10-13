@@ -29,7 +29,8 @@ test('OAuth callback detection and error decoding accept only the existing URL s
 test('OAuth session wait accepts sign-in and unsubscribes the auth listener',async()=>{
  const api=load(),events={};let unsubscribed=0;
  const client={auth:{onAuthStateChange(callback){events.callback=callback;return{data:{subscription:{unsubscribe(){unsubscribed++;}}}};},getSession:async()=>({data:{session:null}})}};
- const pending=api.DG_AUTH_OAUTH_SESSION.wait(client,5000);
+ const ports={onAuthStateChange:callback=>client.auth.onAuthStateChange(callback),getSession:()=>client.auth.getSession()};
+ const pending=api.DG_AUTH_OAUTH_SESSION.wait(ports,5000);
  events.callback('SIGNED_IN',{user:{id:'u1'}});
  assert.equal((await pending).user.id,'u1');
  assert.equal(unsubscribed,1);
@@ -38,7 +39,8 @@ test('OAuth session wait accepts sign-in and unsubscribes the auth listener',asy
 test('OAuth session wait resolves a session already present during code exchange',async()=>{
  const api=load(),session={user:{id:'u2'}};let unsubscribed=0;
  const client={auth:{onAuthStateChange(){return{data:{subscription:{unsubscribe(){unsubscribed++;}}}};},getSession:async()=>({data:{session}})}};
- assert.equal(await api.DG_AUTH_OAUTH_SESSION.wait(client,5000),session);
+ const ports={onAuthStateChange:callback=>client.auth.onAuthStateChange(callback),getSession:()=>client.auth.getSession()};
+ assert.equal(await api.DG_AUTH_OAUTH_SESSION.wait(ports,5000),session);
  assert.equal(unsubscribed,1);
 });
 

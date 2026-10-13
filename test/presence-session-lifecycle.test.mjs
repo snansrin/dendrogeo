@@ -47,9 +47,9 @@ test('starting a session subscribes before auth and guards stale callbacks',()=>
  const api=load().DG_START_VISITOR_PRESENCE_SESSION,clock=timers(),events=[],stateBefore=state({channel:null,ready:false,status:'idle',watchTimer:null,heartbeatTimer:null,user:null});
  let onStatus;
  const channel={};
- const result=api.start({state:stateBefore,client:{channel(){events.push('channel');return channel;}},user:{id:'u1'},sessionId:'sid',
-  channelAdapter:{open(client,userId,sid,onSync){events.push(['open',userId,sid]);return channel;},subscribe(value,callback){events.push('subscribe');onStatus=callback;}},
-  authUpgrade:{run(client,generation,isCurrent){events.push(['auth',generation,isCurrent(generation)]);}},
+ const result=api.start({state:stateBefore,user:{id:'u1'},sessionId:'sid',
+  channelAdapter:{open(userId,sid,onSync){events.push(['open',userId,sid]);return channel;},subscribe(value,callback){events.push('subscribe');onStatus=callback;}},
+  authPorts:{},authUpgrade:{run(ports,generation,isCurrent){events.push(['auth',generation,isCurrent(generation)]);}},
   timers:clock.api,emit:()=>events.push('emit'),ping:(...args)=>events.push(['ping',...args]),stop:()=>{},fail:reason=>events.push(['fail',reason]),getView:()=>'map'});
  assert.equal(result,true);assert.deepEqual(events.slice(0,3),['emit',['open','u1','sid'],'subscribe']);
  assert.ok(events.findIndex(event=>Array.isArray(event)&&event[0]==='auth')>events.indexOf('subscribe'));
@@ -63,8 +63,8 @@ test('starting a session subscribes before auth and guards stale callbacks',()=>
 
 test('presence watchdog fails only the same generation still connecting',()=>{
  const api=load().DG_START_VISITOR_PRESENCE_SESSION,clock=timers(),events=[],stateBefore=state({channel:null,ready:false,status:'idle',watchTimer:null,heartbeatTimer:null,user:null});
- api.start({state:stateBefore,client:{channel:()=>({})},user:{id:'u'},sessionId:'sid',
-  channelAdapter:{open:()=>({}),subscribe(){}},authUpgrade:{run(){}},timers:clock.api,emit(){},
+ api.start({state:stateBefore,user:{id:'u'},sessionId:'sid',
+  channelAdapter:{open:()=>({}),subscribe(){}},authPorts:{},authUpgrade:{run(){}},timers:clock.api,emit(){},
   ping(){},stop(){},fail:reason=>events.push(reason),getView:()=> 'dash'});
  const watchdog=clock.calls.find(call=>call[0]==='timeout')[1];assert.equal(watchdog.delay,20000);
  stateBefore.generation++;watchdog.callback();assert.deepEqual(events,[]);
