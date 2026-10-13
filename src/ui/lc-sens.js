@@ -479,16 +479,17 @@ async function dgSensScan(){
  finally{if(epoch===DG_SENS.epoch){DG_SENS.busy=false;dgSensRender();dgSensRefreshLayer();}}
  return completed;
 }
-function dgSensPeriod(v){if(DG_SENS.rawView||DG_SENS.brush||DG_SENS.busy||DG_SENS.saving||!DG_SENS.record)return;DG_SENS.record.period=v==="ref"?"ref":v==="latest"?"latest":"ytd";DG_SENS.record.periodExplicit=true;dgSensScan();}
+function dgSensPeriod(v){const module=window.DG_SELECT_SURFACE_SCAN_PERIOD;if(module)return module.select({state:DG_SENS,value:v,scan:dgSensScan});if(DG_SENS.rawView||DG_SENS.brush||DG_SENS.busy||DG_SENS.saving||!DG_SENS.record)return;DG_SENS.record.period=v==="ref"?"ref":v==="latest"?"latest":"ytd";DG_SENS.record.periodExplicit=true;dgSensScan();}
 function dgSensSlide(cls,val){
+ const module=window.DG_UPDATE_SURFACE_SENSITIVITY;if(module)return module.update({state:DG_SENS,type:cls,value:val,classes:DG_SENS_CLASSES,dirty:dgSensDirty,clearTimer:clearTimeout,setTimer:setTimeout,refresh:dgSensRefreshLayer,summary:dgSensUpdateSummary,status:dgSensUpdateStatus});
  const rec=DG_SENS.record;if(!rec||DG_SENS.rawView||DG_SENS.brush||DG_SENS.busy||DG_SENS.saving||!DG_SENS_CLASSES.includes(cls))return;
  const n=Number(val);rec.sens[cls]=Number.isFinite(n)?Math.max(0,Math.min(100,n)):50;
  rec.spectralEnabled=true;dgSensDirty();DG_SENS.focus=cls;DG_SENS.showCand=true;DG_SENS.status="";
  clearTimeout(DG_SENS.debounce);DG_SENS.debounce=setTimeout(()=>{DG_SENS.debounce=null;dgSensRefreshLayer();dgSensUpdateSummary();dgSensUpdateStatus();},250);
 }
-function dgSensFocus(cls){DG_SENS.focus=cls;dgSensRefreshLayer();}
-function dgSensToggleCand(on){DG_SENS.showCand=!!on;dgSensRefreshLayer();dgSensRender();}
-function dgSensBase(type){if(!["osm","sat","topo"].includes(type))return;DG_SENS.base=type;switchBaseLayer(type);}
+function dgSensFocus(cls){const module=window.DG_FOCUS_SURFACE_CLASS;if(module)return module.focus({state:DG_SENS,type:cls,refresh:dgSensRefreshLayer});DG_SENS.focus=cls;dgSensRefreshLayer();}
+function dgSensToggleCand(on){const module=window.DG_TOGGLE_SURFACE_CANDIDATES;if(module)return module.toggle({state:DG_SENS,on,refresh:dgSensRefreshLayer,render:dgSensRender});DG_SENS.showCand=!!on;dgSensRefreshLayer();dgSensRender();}
+function dgSensBase(type){const module=window.DG_SELECT_SURFACE_BASEMAP;if(module)return module.select({state:DG_SENS,type,switchLayer:switchBaseLayer});if(!["osm","sat","topo"].includes(type))return;DG_SENS.base=type;switchBaseLayer(type);}
 async function dgSensRefreshLayer(){
  if(typeof map==="undefined"||!map||!window.L||!DG_SENS.record||!DG_SENS.geometry)return;
  if(!DG_SENS.layer){DG_SENS.layer=L.layerGroup().addTo(map);DG_SENS.renderer=L.canvas({padding:.1});DG_SENS.pathCache=new WeakMap();}
