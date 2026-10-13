@@ -1265,3 +1265,9 @@ The collaborator map renderer now separates peer selection, display-model deriva
 - `domain/map/resolve-base-map-layer.js` OSM, uydu ve topoğrafik sağlayıcıların URL, etiket, attribution ve zoom sınırlarını üretir; `ui/sync-base-map-layer-selection.js` üç kontrolü ve LULC altlık state’ini senkronlar.
 - `adapters/map/manage-base-map-layers.js` etkin altlığı bulur ve eski tile katmanlarını kaldırır; `adapters/map/create-base-map-layer.js` Leaflet katmanını var olan seçeneklerle kurar.
 - `application/map/switch-base-map-layer.js` boş harita, geçersiz tür ve zaten etkin katman kapılarını korur; servis modül yoksa mevcut yedek akışını çalıştırır.
+
+## Park içi sampling grid geometrisi — 13 Ekim 2026
+
+- domain/surface/measure-grid-point-distance.js dış halka ve deliklerde işaretli sınır mesafesini hesaplar; ind-grid-interior-point.js sınırlı best-first alt bölmeyle güvenli iç nokta seçer.
+- domain/surface/build-grid-line-mask.js çizgileri metre tabanlı engel poligonlarına çevirir; clean-grid-geometry.js UTM koordinatlarını milimetreye yuvarlayıp çöken halkaları eler.
+- dapters/surface/clip-grid-geometry.js polygon-clipping çağrılarını her adımda aynı hassasiyet temizliğiyle sarar. Worker bu modülleri lc-review.js öncesi yükler; legacy servis uygulaması uyumluluk yedeğidir.

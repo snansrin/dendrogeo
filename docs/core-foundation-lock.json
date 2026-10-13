@@ -123,6 +123,7 @@
       "src/ui/park-schema-warning.js"
     ],
     "park_analysis": [
+      "src/adapters/surface/clip-grid-geometry.js",
       "src/adapters/surface/load-sentinel-scene-bands.js",
       "src/adapters/surface/osm-review-objects.js",
       "src/adapters/surface/process-landcover-tile.js",
@@ -149,6 +150,7 @@
       "src/contracts/surface-review.js",
       "src/core/surface-display.js",
       "src/domain/surface/apply-validation-campaign-corrections.js",
+      "src/domain/surface/build-grid-line-mask.js",
       "src/domain/surface/build-validation-campaign-csv-rows.js",
       "src/domain/surface/build-validation-confusion-matrix.js",
       "src/domain/surface/build-validation-corrected-geojson.js",
@@ -158,10 +160,13 @@
       "src/domain/surface/calculate-validation-class-proportions.js",
       "src/domain/surface/classify-landcover-code.js",
       "src/domain/surface/classify-surface-review-data-change.js",
+      "src/domain/surface/clean-grid-geometry.js",
       "src/domain/surface/compare-source-class-areas.js",
+      "src/domain/surface/find-grid-interior-point.js",
       "src/domain/surface/group-patch-cells.js",
       "src/domain/surface/index-sentinel-annual-scene-cells.js",
       "src/domain/surface/index-sentinel-scene-cells.js",
+      "src/domain/surface/measure-grid-point-distance.js",
       "src/domain/surface/measure-patch-components.js",
       "src/domain/surface/merge-sentinel-annual-evidence.js",
       "src/domain/surface/merge-tile-results.js",
@@ -385,6 +390,7 @@
       "test/park-surface-tags-domain.test.mjs",
       "test/photo-qa.test.mjs",
       "test/surface-application.test.mjs",
+      "test/surface-grid-domain-modules.test.mjs",
       "test/surface-mount-lifecycle-modules.test.mjs",
       "test/surface-network-budget.test.mjs",
       "test/surface-report-field-ux.test.mjs",
@@ -436,6 +442,7 @@
     "src/adapters/parks/project-store.js": "a93458eb59c97976d848521a0293ebc568acc093cb24f24c1193f0ee695fac19",
     "src/adapters/parks/search-osm-park-by-name.js": "7f96f244cb80c6813311184cf423a716c013edcae745180069b188568c321a24",
     "src/adapters/parks/upsert-project-waypoint.js": "26f616ebbae7c0a5bd727c2f8916330a1ee00dcd2e6b1483c772a9d4b436cd62",
+    "src/adapters/surface/clip-grid-geometry.js": "5b068a4b27d0ffff036ab8e79f3e4f76de13f7b6768f73e29dc4e6065dd849ef",
     "src/adapters/surface/load-sentinel-scene-bands.js": "323ee2c4df24f93c252457d7890195bd2ae7464d7871a8bf799ac6588158253d",
     "src/adapters/surface/osm-review-objects.js": "2815aefe602f821c43e3261d2fef13ac9b8cadebbcde3d8c547a3011c44c79a1",
     "src/adapters/surface/process-landcover-tile.js": "bca73635599935803c8d6dae4bc092e1704c052baa86eb7772dbb7aab1de9ed0",
@@ -560,6 +567,7 @@
     "src/domain/parks/simplify-ring.js": "31fa01783b7685eed776136e7208e1e50890132b1ecaf19c4b94a85379bd6fcb",
     "src/domain/parks/validate-waypoint-csv-row.js": "7ec9ec705b4a9e4f4d325cc969ef6561b97e34ec617fccff724d0e3aecefbe2b",
     "src/domain/surface/apply-validation-campaign-corrections.js": "0d4070c22db0261a11818d115c68973ea5efe4b5212c302bb1df94fe32579ac6",
+    "src/domain/surface/build-grid-line-mask.js": "a5e75e4755f6e0ea97020815118ca2fc98fdd1a66a25f4a508e88e8b86b29603",
     "src/domain/surface/build-validation-campaign-csv-rows.js": "7e46772d78f222ac8114f8f63193ca921515a5342d8e133773fb8b1e0d58cd38",
     "src/domain/surface/build-validation-confusion-matrix.js": "e44c03f2d139991ab32ee2090813dd6546413ed5f4f294aa1853b96c809e324d",
     "src/domain/surface/build-validation-corrected-geojson.js": "168a2ace75c09d109a4db5e2029b47d1eb42586cf5e9818e247dd6052ac4ac74",
@@ -569,10 +577,13 @@
     "src/domain/surface/calculate-validation-class-proportions.js": "dbbffe34723ab7ae447fdbae41967b02191122fe2c5d17bf68ddc8646d26f645",
     "src/domain/surface/classify-landcover-code.js": "307a39bc9995d864c554aed5f786deb29b786cd57fa6398abab40dc3be656629",
     "src/domain/surface/classify-surface-review-data-change.js": "2e8dd4a13a19f0e7db9baea1fb17510de4a49d453d7f26777b7a976aa241442d",
+    "src/domain/surface/clean-grid-geometry.js": "e31b99f9e63b7ad55bffb5d90f0d9c919799d5c201d000e24dc25773a6058edf",
     "src/domain/surface/compare-source-class-areas.js": "a8d5fff8cc20369b3a0db1a6376b51f72f8eb41c9f8bbd23f96dec04d3bc8be3",
+    "src/domain/surface/find-grid-interior-point.js": "5705aba37841c497883f287d765ab7f886620795f5e66597d45857c5e637ce84",
     "src/domain/surface/group-patch-cells.js": "7258611210ca5bcaa3d77d5aa644ce5d8df08deeb4ca4fbc3ef1319dacfca399",
     "src/domain/surface/index-sentinel-annual-scene-cells.js": "9c2e0956d045322f45da79c47ec23b7c5a4bd57e35c32a9bb2bd6f6a8fe4d077",
     "src/domain/surface/index-sentinel-scene-cells.js": "65580c5636a332580449aaf50637bd735778292248763a100d7cb0bbc826b4ae",
+    "src/domain/surface/measure-grid-point-distance.js": "3c7dd96e02efa5209a12f314f0a26dbf5a00d91da2fac4a15a711edda0f89cb7",
     "src/domain/surface/measure-patch-components.js": "909e3ce705f6059fac4c8a1f2aae67fc06c1195d0655aeef9564b6563ca0c257",
     "src/domain/surface/merge-sentinel-annual-evidence.js": "efd390ab6a058c6215e670830c41b1e900e8227aa3e7a5ca1e63274a55dd4848",
     "src/domain/surface/merge-tile-results.js": "b390cc3166bab54b0249fef7339ff7699a2fc3fd0bcd77242ab7da338b767cef",
@@ -591,7 +602,7 @@
     "src/services/lc-geo.js": "ade537a9ea592914288c9c3cead038834919f4919b63be2a3cce28cfe2b97d73",
     "src/services/lc-osm.js": "4244fd0ab3a64cbeae49c76609cc702c01a057beefb608fd483418e02b91f1cd",
     "src/services/lc-patches.js": "94bc7a7fd771672250655bbfd47a5f162bd06b84c23d2b03d2256bc057669919",
-    "src/services/lc-review.js": "91f69e59f76698a4d95c2dc411fdc05e09c3910c5c036eab21f6ae480c4a9d7f",
+    "src/services/lc-review.js": "0253841ad28f6a302bd2faa93468cb7a32d2f0657b44491e62741a9ec4d3d36f",
     "src/services/lc-s2.js": "8c16009e690c019da3bd3882cb833126cac9108845342fd059c3ba71e744c534",
     "src/services/lc-stac.js": "978c4be8c3bc4e7cda3f694d1f06290e661fed5bbd5b76b68719140edc18e71a",
     "src/services/lc-validate.js": "b4d8327c62940b1af1a53ddb087188816ff2359c8456c2755c7c853c5919f42b",
@@ -659,8 +670,8 @@
     "src/ui/sync-base-map-layer-selection.js": "2f93018846abac13f83486a1fc2b9df0cbb7f330cae202a0e91ef902c8263eeb",
     "src/ui/waypoint-gps-overlay.js": "e5bb70df065093b911d1c7ff5b5b9fb7db09b38df6bb7fb3271db7ea1e3f4b28",
     "src/utils/geo.js": "3e796768b3d55a3f07c4be3281c9437f1602b6d5e68151b2af7b101707baf294",
-    "src/utils/lazylibs.js": "94a916cfb4d475561cb3ebc3fe7145a01d1fd402b319f0f71736681c9a96769c",
-    "src/workers/surface-worker.js": "02878b04478f0c555b536f34d9807a0bf824d0f738d1468a8840069cc61e85ed",
+    "src/utils/lazylibs.js": "a99202e2b26833d5276293e2df0e654ab735dd9c6d900ecd56cf78ab8c8d8f79",
+    "src/workers/surface-worker.js": "844788d6364d35bd78e0a183f354b4acb2589e0be51761d1f577c762b7806faa",
     "test/base-map-layer-modules.test.mjs": "5399d699e74ffd66e92df312b4301202add7352b2b6c0be24fd51cda63e7baff",
     "test/critical-fixes.test.mjs": "3a2e62104763110bc734b3dc54a37cbf57c15b0038a78fdce35d56d9639c1989",
     "test/dbh-qa.test.mjs": "d3bbd29d292aa1214ede27a21ecb99315bc24a6346e2b0119f8c04eb8b532b95",
@@ -757,6 +768,7 @@
     "test/park-surface-tags-domain.test.mjs": "4c830e32e570e8ae611e387fdb35a80440868979faf66c8392277eb26642d532",
     "test/photo-qa.test.mjs": "9d9a722abc793e41723d8121b3765f101953709211248f29e78937ef56c23dbc",
     "test/surface-application.test.mjs": "93e5a4247a617e994215def0fe14f30664eb02b782ad84f2032c695bece56a65",
+    "test/surface-grid-domain-modules.test.mjs": "304c57655384517da812f270882f4a021939a2773a06e1a274424d8f76c3ef8e",
     "test/surface-mount-lifecycle-modules.test.mjs": "db9f479034142c1c7531b012ae509d8df069efba723e71b71e490fa110bba12e",
     "test/surface-network-budget.test.mjs": "33e69c3d0de1d81561a9707dc3e9fd2eb8730f4a7331a90bd16171fb2677887d",
     "test/surface-report-field-ux.test.mjs": "cc0c2e640f2539f2062546f4acc6e8b590bfef256f47fd54cf5100d0c4b50cdc",
@@ -1732,6 +1744,27 @@
           "path": "scripts/val-qa.mjs",
           "previous_sha256": "dd566313c2528630407838244c0b9473fa65e1c6fd06687d6567fd95546665ba",
           "sha256": "5da2d66337bf44092148bff6801867ac937bb61dcf9b4a8a5a008acf98a5f7c8"
+        }
+      ]
+    },
+    {
+      "date": "2026-10-13",
+      "scope": "User-authorized sixty-ninth five-module split of locked surface review grid geometry: signed point-to-polygon distance, bounded interior-point search, metric line masks, millimetre geometry cleanup, and precision polygon-clipping adapter. Preserve hole/boundary semantics, point clearance after coordinate rounding, road exclusion, small-component handling, grid output and locked GIS regression tests.",
+      "files": [
+        {
+          "path": "src/services/lc-review.js",
+          "previous_sha256": "91f69e59f76698a4d95c2dc411fdc05e09c3910c5c036eab21f6ae480c4a9d7f",
+          "sha256": "0253841ad28f6a302bd2faa93468cb7a32d2f0657b44491e62741a9ec4d3d36f"
+        },
+        {
+          "path": "src/utils/lazylibs.js",
+          "previous_sha256": "94a916cfb4d475561cb3ebc3fe7145a01d1fd402b319f0f71736681c9a96769c",
+          "sha256": "a99202e2b26833d5276293e2df0e654ab735dd9c6d900ecd56cf78ab8c8d8f79"
+        },
+        {
+          "path": "src/workers/surface-worker.js",
+          "previous_sha256": "02878b04478f0c555b536f34d9807a0bf824d0f738d1468a8840069cc61e85ed",
+          "sha256": "844788d6364d35bd78e0a183f354b4acb2589e0be51761d1f577c762b7806faa"
         }
       ]
     }
