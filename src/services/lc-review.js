@@ -37,6 +37,7 @@ function dgSurfacePark(outer,holes,epsg){
 }
 function dgSurfaceCell(c,park,epsg){if(window.DG_BUILD_SURFACE_REVIEW_CELL_GEOMETRY)return window.DG_BUILD_SURFACE_REVIEW_CELL_GEOMETRY.build(c,park,epsg,{project:dgSurfaceProject,clip:dgSurfaceClip});return dgSurfaceClip("intersection",[dgSurfaceProject(c.quadWgs,epsg)],park);}
 async function dgSurfaceFingerprint(cells,outer,holes,meta){
+ if(window.DG_BUILD_SURFACE_REVIEW_FINGERPRINT)return window.DG_BUILD_SURFACE_REVIEW_FINGERPRINT.fingerprint(cells,outer,holes,meta,{select:window.DG_SELECT_SURFACE_REVIEW_FINGERPRINT_FIELDS.select,serialize:window.DG_SERIALIZE_SURFACE_REVIEW_FINGERPRINT_INPUT.serialize,encode:window.DG_ENCODE_SURFACE_REVIEW_FINGERPRINT_INPUT.encode,digest:window.DG_DIGEST_SURFACE_REVIEW_FINGERPRINT.digest,TextEncoder,crypto});
  const input=JSON.stringify({outer,holes,source:meta,grid:cells.map(c=>[c.row,c.col,c.epsg,c.classKey,c.areaM2,c.quadWgs])});
  const digest=await crypto.subtle.digest("SHA-256",new TextEncoder().encode(input));
  return Array.from(new Uint8Array(digest),b=>b.toString(16).padStart(2,"0")).join("");

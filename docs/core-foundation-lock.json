@@ -124,6 +124,8 @@
     ],
     "park_analysis": [
       "src/adapters/surface/clip-grid-geometry.js",
+      "src/adapters/surface/digest-surface-review-fingerprint.js",
+      "src/adapters/surface/encode-surface-review-fingerprint-input.js",
       "src/adapters/surface/load-sentinel-scene-bands.js",
       "src/adapters/surface/osm-review-objects.js",
       "src/adapters/surface/process-landcover-tile.js",
@@ -135,6 +137,7 @@
       "src/adapters/surface/unproject-surface-review-geometry.js",
       "src/application/surface/analyze-source.js",
       "src/application/surface/build-surface-review-cell-geometry.js",
+      "src/application/surface/build-surface-review-fingerprint.js",
       "src/application/surface/build-surface-review-park-geometry.js",
       "src/application/surface/build-surface-sampling-grid-cells.js",
       "src/application/surface/clip-surface-review-geometry.js",
@@ -190,6 +193,8 @@
       "src/domain/surface/query-green-patches.js",
       "src/domain/surface/review-geometry.js",
       "src/domain/surface/select-surface-review-features.js",
+      "src/domain/surface/select-surface-review-fingerprint-fields.js",
+      "src/domain/surface/serialize-surface-review-fingerprint-input.js",
       "src/domain/surface/snap-surface-review-coordinate.js",
       "src/domain/surface/summarize-surface-review-parts.js",
       "src/domain/surface/translate-surface-review-geometry.js",
@@ -416,6 +421,7 @@
       "test/surface-network-budget.test.mjs",
       "test/surface-report-field-ux.test.mjs",
       "test/surface-review-clipping-modules.test.mjs",
+      "test/surface-review-fingerprint-modules.test.mjs",
       "test/surface-review-projection-modules.test.mjs",
       "test/surface-review-resolution-modules.test.mjs",
       "test/surface-review.test.mjs",
@@ -467,6 +473,8 @@
     "src/adapters/parks/search-osm-park-by-name.js": "7f96f244cb80c6813311184cf423a716c013edcae745180069b188568c321a24",
     "src/adapters/parks/upsert-project-waypoint.js": "26f616ebbae7c0a5bd727c2f8916330a1ee00dcd2e6b1483c772a9d4b436cd62",
     "src/adapters/surface/clip-grid-geometry.js": "5b068a4b27d0ffff036ab8e79f3e4f76de13f7b6768f73e29dc4e6065dd849ef",
+    "src/adapters/surface/digest-surface-review-fingerprint.js": "955cbc89c06e8160ba8b3fb5bec4276f9e4d304d2d4a404498394a90aa97bd6e",
+    "src/adapters/surface/encode-surface-review-fingerprint-input.js": "8df18a08b937214466000e5fbb2fa89d689c36328f78b34c28c5b3495d4f419f",
     "src/adapters/surface/load-sentinel-scene-bands.js": "323ee2c4df24f93c252457d7890195bd2ae7464d7871a8bf799ac6588158253d",
     "src/adapters/surface/osm-review-objects.js": "2815aefe602f821c43e3261d2fef13ac9b8cadebbcde3d8c547a3011c44c79a1",
     "src/adapters/surface/process-landcover-tile.js": "bca73635599935803c8d6dae4bc092e1704c052baa86eb7772dbb7aab1de9ed0",
@@ -533,6 +541,7 @@
     "src/application/parks/upload-waypoint-csv.js": "3abbaf00f10d5662417388c7becdbd3274cfb664ce38a691a37ae4e03c43ae67",
     "src/application/surface/analyze-source.js": "8d273e073133da91503fe8b42a070abcc3d7119a9613b368e0a5cb1053f8adec",
     "src/application/surface/build-surface-review-cell-geometry.js": "b8df099838b689708fbf5b0cf4ef1c86a6c80c5bb067de8b8734fd149b12c7f1",
+    "src/application/surface/build-surface-review-fingerprint.js": "2354d137724a5bb51b23db097f47c6dcfb2f2650bd5ea6f668809939fa78dc4c",
     "src/application/surface/build-surface-review-park-geometry.js": "10695842c7b9fad5bd040f4eeefeab196f73eb62446d5d4b2cadb2d83bc675d9",
     "src/application/surface/build-surface-sampling-grid-cells.js": "b6997cf98a13258b97dbbcd193a45f21e0950fba639b7379d6659a369d28533e",
     "src/application/surface/clip-surface-review-geometry.js": "cdf081c02317177ac06516daf367aeb65561abc8ecc7f7700e7a7b61f5ae19d5",
@@ -631,6 +640,8 @@
     "src/domain/surface/query-green-patches.js": "72bd10559329b561bc3f17e798ea37ae43dc5a1d1988fd16fcca495afe8c044b",
     "src/domain/surface/review-geometry.js": "29aa04a494002b4c93e9e09ff395cc62eeee3c70df984834c32d14938e91230e",
     "src/domain/surface/select-surface-review-features.js": "9c88034231e33e2cd24d906674c2525e8a215b07967fc4e4e62e7e8b7dac926a",
+    "src/domain/surface/select-surface-review-fingerprint-fields.js": "5731f326a6635fcebee818d9d63b4733c7f44cb578c8a038dd965e81923cda9a",
+    "src/domain/surface/serialize-surface-review-fingerprint-input.js": "d9dbaf5d796cf27b4a9446e62b3b777a05eacd9b5f9dfebb08453ac41ae05923",
     "src/domain/surface/snap-surface-review-coordinate.js": "5f7927053d2801e9ed24c2232573ad8b97e674f98ad8bad7c0c456b1253eb9f0",
     "src/domain/surface/summarize-surface-review-parts.js": "2e0e62559ec30628b6c89587e115b6cc2165603674bfde0186e2290f36ceae9f",
     "src/domain/surface/translate-surface-review-geometry.js": "4f90418981b7d6f01dc02ba29ecb1bc563c6fa719f304f1c2fe9b556618e33a3",
@@ -646,7 +657,7 @@
     "src/services/lc-geo.js": "ade537a9ea592914288c9c3cead038834919f4919b63be2a3cce28cfe2b97d73",
     "src/services/lc-osm.js": "4244fd0ab3a64cbeae49c76609cc702c01a057beefb608fd483418e02b91f1cd",
     "src/services/lc-patches.js": "94bc7a7fd771672250655bbfd47a5f162bd06b84c23d2b03d2256bc057669919",
-    "src/services/lc-review.js": "e11bbf3a201f4fc4c1797f51d0fa564a0101699551c0b25e96fb88c87da6f836",
+    "src/services/lc-review.js": "a0314215db7abd965fdf4743661c3f9d90fc991b28672135e25f5dae08954875",
     "src/services/lc-s2.js": "8c16009e690c019da3bd3882cb833126cac9108845342fd059c3ba71e744c534",
     "src/services/lc-stac.js": "978c4be8c3bc4e7cda3f694d1f06290e661fed5bbd5b76b68719140edc18e71a",
     "src/services/lc-validate.js": "b4d8327c62940b1af1a53ddb087188816ff2359c8456c2755c7c853c5919f42b",
@@ -714,8 +725,8 @@
     "src/ui/sync-base-map-layer-selection.js": "2f93018846abac13f83486a1fc2b9df0cbb7f330cae202a0e91ef902c8263eeb",
     "src/ui/waypoint-gps-overlay.js": "e5bb70df065093b911d1c7ff5b5b9fb7db09b38df6bb7fb3271db7ea1e3f4b28",
     "src/utils/geo.js": "3e796768b3d55a3f07c4be3281c9437f1602b6d5e68151b2af7b101707baf294",
-    "src/utils/lazylibs.js": "6e5d6eb1e5aec0417099b087cf2e5d9ba2976a9cfc2cbc2bffecff3507aae1bb",
-    "src/workers/surface-worker.js": "7ed4b193bb8b11e6bfd88c52b0fc29fcb356749e3044c83f2bf0d9eb1bb3dfe2",
+    "src/utils/lazylibs.js": "04a7cb60b619c82b8412a7d4d76378b254e9d2f20529f2f9e70c27d726b82f44",
+    "src/workers/surface-worker.js": "22a2f5c374c151b08307df6543d470d075ba481a910c7aa7d9ba830d6b71b4c5",
     "test/base-map-layer-modules.test.mjs": "5399d699e74ffd66e92df312b4301202add7352b2b6c0be24fd51cda63e7baff",
     "test/critical-fixes.test.mjs": "3a2e62104763110bc734b3dc54a37cbf57c15b0038a78fdce35d56d9639c1989",
     "test/dbh-qa.test.mjs": "d3bbd29d292aa1214ede27a21ecb99315bc24a6346e2b0119f8c04eb8b532b95",
@@ -818,6 +829,7 @@
     "test/surface-network-budget.test.mjs": "33e69c3d0de1d81561a9707dc3e9fd2eb8730f4a7331a90bd16171fb2677887d",
     "test/surface-report-field-ux.test.mjs": "cc0c2e640f2539f2062546f4acc6e8b590bfef256f47fd54cf5100d0c4b50cdc",
     "test/surface-review-clipping-modules.test.mjs": "50eba2da2d0ad57f8d4de21e50f865ea2f258e6c71877566930426bc6340d05f",
+    "test/surface-review-fingerprint-modules.test.mjs": "cfdd0b20e2ed38c20c48d2f5eba49275c3b8e9fae8ffe66ee6f9dc36c026e327",
     "test/surface-review-projection-modules.test.mjs": "0a5251d4134b958a48c1b9b7ccfbdc138c6591897792cdbdd9d9905a456e416c",
     "test/surface-review-resolution-modules.test.mjs": "047f611c00e76b553d8a52b4a1a59366a97504bcf5356bcd43bfcafa3ae2a277",
     "test/surface-review.test.mjs": "79c8dc6f99883699dd2ac4ad890d1030807f273e3f094f013969e677ff669f2c",
@@ -1897,6 +1909,27 @@
           "path": "src/workers/surface-worker.js",
           "previous_sha256": "a8363ac6d9583bb96f8053ceae525bb33039d0e476b9be5f54e887ac6dd00396",
           "sha256": "7ed4b193bb8b11e6bfd88c52b0fc29fcb356749e3044c83f2bf0d9eb1bb3dfe2"
+        }
+      ]
+    },
+    {
+      "date": "2026-10-13",
+      "scope": "User-authorized seventy-fourth five-module split of surface-review fingerprint generation: stable field selection, JSON serialization, UTF-8 encoding, Web Crypto SHA-256 adapter, and application orchestration. Preserve exact field/value order, UTF-8 digest inputs, lowercase hexadecimal output, worker behavior, and locked fingerprint regressions.",
+      "files": [
+        {
+          "path": "src/services/lc-review.js",
+          "previous_sha256": "e11bbf3a201f4fc4c1797f51d0fa564a0101699551c0b25e96fb88c87da6f836",
+          "sha256": "a0314215db7abd965fdf4743661c3f9d90fc991b28672135e25f5dae08954875"
+        },
+        {
+          "path": "src/utils/lazylibs.js",
+          "previous_sha256": "6e5d6eb1e5aec0417099b087cf2e5d9ba2976a9cfc2cbc2bffecff3507aae1bb",
+          "sha256": "04a7cb60b619c82b8412a7d4d76378b254e9d2f20529f2f9e70c27d726b82f44"
+        },
+        {
+          "path": "src/workers/surface-worker.js",
+          "previous_sha256": "7ed4b193bb8b11e6bfd88c52b0fc29fcb356749e3044c83f2bf0d9eb1bb3dfe2",
+          "sha256": "22a2f5c374c151b08307df6543d470d075ba481a910c7aa7d9ba830d6b71b4c5"
         }
       ]
     }
