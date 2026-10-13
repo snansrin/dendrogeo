@@ -337,7 +337,12 @@
       "src/ui/render-waypoint-navigation-header.js",
       "src/application/map/select-nearest-waypoint.js",
       "src/application/map/advance-waypoint-target.js",
-      "src/ui/waypoint-navigation-feedback.js"
+      "src/ui/waypoint-navigation-feedback.js",
+      "src/domain/parks/resolve-live-share-join.js",
+      "src/adapters/parks/fetch-live-share-project-park.js",
+      "src/ui/park-live-share-connection-status.js",
+      "src/application/parks/handle-live-share-channel-status.js",
+      "src/application/parks/join-live-share-park.js"
     ],
     "scientific_contract_and_inputs": [
       "css/park-panel.css",
@@ -473,7 +478,8 @@
       "test/waypoint-delete-modules.test.mjs",
       "test/waypoint-gps-overlay-modules.test.mjs",
       "test/waypoint-load-modules.test.mjs",
-      "test/waypoint-navigation-actions.test.mjs"
+      "test/waypoint-navigation-actions.test.mjs",
+      "test/park-live-share-join-modules.test.mjs"
     ]
   },
   "sha256": {
@@ -718,7 +724,7 @@
     "src/services/lc-s2.js": "76e5547b6c26ce325934adf2593ea9aafd24369a2ba7a13331708cfa2e4aa543",
     "src/services/lc-stac.js": "978c4be8c3bc4e7cda3f694d1f06290e661fed5bbd5b76b68719140edc18e71a",
     "src/services/lc-validate.js": "b4d8327c62940b1af1a53ddb087188816ff2359c8456c2755c7c853c5919f42b",
-    "src/services/map.js": "cb6dcc921f5ae8072782842cec2819be70a5688b0f5429333f23c1ede81b527f",
+    "src/services/map.js": "faa47a1298cce3abd8393d901429c93557774b9f031397741f0a518b98306eee",
     "src/services/measure.js": "4e90e357417802724a46853df5652199354e9491cf11bc97af64f0c00060d6a4",
     "src/services/offline.js": "6f4ef41218c6621da9a5ae2f070e60de7efabc858e38035ee80cd89fd2f4a1ac",
     "src/services/osm-client.js": "2e5eeaa735bf05a603a0db142619f60747b9696f506e666d7df992454a56814f",
@@ -923,7 +929,13 @@
     "src/application/map/select-nearest-waypoint.js": "b7bbe6e579ea6d25bc984ff14f87749e3d84bf5cc15ab4905a200e3556752bc9",
     "src/application/map/advance-waypoint-target.js": "eaccb1993040e2060860a0ddc4b5152b63a0b6568e052902d80ded483e307a78",
     "src/ui/waypoint-navigation-feedback.js": "72ddf74dd6945c0d6389b0d6c9421f1f4aed17da6174d8b580185f18616bf6e3",
-    "test/waypoint-navigation-actions.test.mjs": "4ae09da6603b88bb86517e30014925e4219c30aa33e09dccab4afe67e560bda0"
+    "test/waypoint-navigation-actions.test.mjs": "4ae09da6603b88bb86517e30014925e4219c30aa33e09dccab4afe67e560bda0",
+    "src/domain/parks/resolve-live-share-join.js": "2cf9620c5a4048335cbfef33ee04c1d4996a697d38389192649dca0dde08bf9c",
+    "src/adapters/parks/fetch-live-share-project-park.js": "26452b556948a1a4d4e640684bd7eca71904a318a9f99293e502882ab218dfcc",
+    "src/ui/park-live-share-connection-status.js": "10c54a532f0496dc51c7355c35beaa67c829cbd46507e07ad12de11b2ef1ab8b",
+    "src/application/parks/handle-live-share-channel-status.js": "b44e5ddf9790e9bd8c9f971463e8cb90daaef2585286848796e29c496828c394",
+    "src/application/parks/join-live-share-park.js": "242472dc247b42e799afa27873feda9fdf76d6bb43a1669b06cc36ce805f50f2",
+    "test/park-live-share-join-modules.test.mjs": "b801856d998594659768d4ce93ff0d5fce36cbb0566205fde1c0d291a91ac055"
   },
   "authorized_modularizations": [
     {
@@ -2110,6 +2122,17 @@
           "path": "src/services/map.js",
           "previous_sha256": "b5db0047dc86b53c13029e3bd407c087126672d23a6f30b5942d837127006b1f",
           "sha256": "cb6dcc921f5ae8072782842cec2819be70a5688b0f5429333f23c1ede81b527f"
+        }
+      ]
+    },
+    {
+      "date": "2026-10-13",
+      "scope": "User-authorized eighty-second five-module split of locked park live-share channel joining: join-state policy, existing project park_id read adapter, connection UI, subscription-status orchestration, and join use case. Preserve the projects.park_id maybeSingle query, park-scoped ephemeral Presence channel, subscribe-before-auth/watchdog order, retries, and all locked regression tests.",
+      "files": [
+        {
+          "path": "src/services/map.js",
+          "previous_sha256": "cb6dcc921f5ae8072782842cec2819be70a5688b0f5429333f23c1ede81b527f",
+          "sha256": "faa47a1298cce3abd8393d901429c93557774b9f031397741f0a518b98306eee"
         }
       ]
     }

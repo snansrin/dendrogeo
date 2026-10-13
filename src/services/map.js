@@ -492,6 +492,10 @@ function dgLiveShareToggle(on){
  if(typeof toast==="function")toast(_tmf(on?"Canlı konum paylaşımı açık (bu parkın ortaklarıyla).":"Canlı konum paylaşımı kapalı."),"info","👥");
 }
 async function dgLiveShareJoinCurrent(){
+ const join=window.DG_JOIN_LIVE_SHARE_PARK,resolve=window.DG_RESOLVE_LIVE_SHARE_JOIN,store=window.DG_FETCH_LIVE_SHARE_PROJECT_PARK,connection=window.DG_PARK_LIVE_SHARE_CONNECTION_UI,status=window.DG_HANDLE_LIVE_SHARE_CHANNEL_STATUS,presence=window.DG_PARK_PRESENCE_CHANNEL_ADAPTER;
+ if(join&&resolve&&store&&connection&&status&&presence){
+  try{return await join.join({enabled:DG_LIVE_ON,user:typeof USER!=="undefined"?USER:null,client:typeof sb!=="undefined"?sb:null,projectId:(()=>{const selected=$("mProject");return selected&&selected.value?+selected.value:0;})(),currentParkId:DG_PARK_CH_ID,channel:DG_PARK_CH,resolve:input=>resolve.resolve(input),readParkId:projectId=>store.fetch({client:sb,projectId}),leave:dgLiveShareLeave,setParkId:value=>{DG_PARK_CH_ID=value;},showConnecting:()=>connection.connecting({element:$("dgMatesNote"),translate:_tmf}),subscribe:({parkId,userId,onSync,onStatus})=>presence.join({client:sb,parkId,userId,onSync,setChannel:value=>{DG_PARK_CH=value;},getWatch:()=>DG_PARK_CH_WATCH,setWatch:value=>{DG_PARK_CH_WATCH=value;},clearTimer:clearTimeout,setTimer:setTimeout,onWatchdog:()=>dgParkShareFail(),setAuth:token=>{if(sb.realtime&&sb.realtime.setAuth)sb.realtime.setAuth(token);},onStatus}),onSync:()=>dgLiveMatesDraw(),onStatus:st=>status.handle(st,{getWatch:()=>DG_PARK_CH_WATCH,setWatch:value=>{DG_PARK_CH_WATCH=value;},clearTimer:clearTimeout,setLive:value=>{DG_PARK_CH_LIVE=value;},setLastPing:value=>{DG_LAST_PING=value;},ping:dgLiveSharePing,draw:dgLiveMatesDraw,fail:dgParkShareFail})});}catch(e){DG_PARK_CH=null;DG_PARK_CH_ID=0;return;}
+ }
  try{
   if(!DG_LIVE_ON||typeof USER==="undefined"||!USER||typeof sb==="undefined")return;
   const sel=$("mProject");const pid=sel&&sel.value?+sel.value:0;
