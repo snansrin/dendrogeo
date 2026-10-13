@@ -807,6 +807,12 @@ Her modülün tek bir dış API'si, sahibi olduğu açık durumu ve kendi testle
 
 - `ui/world-stats-tables.js`, ülke ve şehir istatistik satırlarını güvenli biçimde üretir.
 
+- `application/dashboard/load-own-records.js`, mevcut sahip-kayıt deposu ve gruplama alanından proje bazlı kayıt kartlarını üretir; scroll sarmalı servis katmanında kalır.
+- `application/dashboard/delete-own-record.js`, yalnız sunucu silmeyi doğruladıktan sonra fotoğrafı temizler, görünür kayıt/panel görünümlerini yeniler ve harita kirini işaretler.
+- `application/dashboard/load-owner-dashboard.js`, ölçüm kayıtlarından panel sayısı/karbon toplamını çıkarır ve ilk on noktayı grafik ile analiz görünümüne aktarır.
+- `ui/dashboard-chart.js`, Chart.js'i tembel yükleme bağından sonra açar; mevcut paleti, grafik seçeneklerini ve önceki grafiği yok etme davranışını korur.
+- `application/dashboard/load-world-dashboard.js`, ülke/şehir istatistiklerini ve onaylı işaretçi analizini mevcut hata kutusu ve harita kirletme akışıyla koordine eder.
+
 - `ui/world-error.js`, dünya verisi hatasını ve yeniden deneme eylemini gösterir.
 
 - `adapters/world/park-comparison-store.js`, park görünümünü, eski şema için onaylı ölçüm yedeğini ve ülke/şehir yakınlaştırma sorgularını mevcut kolon, filtre ve limitlerle yürütür.
