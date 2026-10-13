@@ -1242,3 +1242,10 @@ The collaborator map renderer now separates peer selection, display-model deriva
 - `domain/map/select-restored-waypoint-target.js` yalnız aynı kimlikli ve bekleyen hedefi yeniden seçer; `adapters/map/fetch-project-waypoints.js` mevcut proje filtresi ve `wp_id` sırasını korur.
 - `application/map/reset-waypoint-load-state.js` eski liste/hedefi temizler ve proje yokken mevcut ek çizimi sürdürür; `ui/show-waypoint-load-error.js` hata metnini ve toast türünü gösterir.
 - `application/map/load-project-waypoints.js` yarışan proje sorgularını eski kapıdan geçirir, geçerli yanıtı state’e yazar ve önceki bekleyen hedefi geri yükler. Servis modüller eksikse yerel uyumluluk gövdesini kullanır.
+
+
+## Waypoint listesini silme — 13 Ekim 2026
+
+- `domain/map/is-waypoint-project-selected.js` proje seçimi kapısını tanımlar; `ui/confirm-waypoint-list-deletion.js` mevcut kalıcı silme uyarısını gösterir.
+- `adapters/map/delete-project-waypoints.js` yalnız seçili `project_id` filtresiyle siler; `application/map/clear-deleted-waypoint-list.js` başarılı işlemden sonra hedef/liste state’ini temizler ve yeniler.
+- `application/map/delete-project-waypoints.js` proje/iptal/hata/başarı adımlarını orkestre eder. Kilitli servis modüller hazır değilse mevcut akışını kullanmayı sürdürür.

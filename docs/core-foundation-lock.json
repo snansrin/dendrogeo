@@ -233,7 +233,12 @@
       "src/adapters/map/fetch-project-waypoints.js",
       "src/application/map/reset-waypoint-load-state.js",
       "src/ui/show-waypoint-load-error.js",
-      "src/application/map/load-project-waypoints.js"
+      "src/application/map/load-project-waypoints.js",
+      "src/domain/map/is-waypoint-project-selected.js",
+      "src/ui/confirm-waypoint-list-deletion.js",
+      "src/adapters/map/delete-project-waypoints.js",
+      "src/application/map/clear-deleted-waypoint-list.js",
+      "src/application/map/delete-project-waypoints.js"
     ],
     "scientific_contract_and_inputs": [
       "css/park-panel.css",
@@ -350,7 +355,8 @@
       "test/map-measurement-marker-chunk-modules.test.mjs",
       "test/waypoint-gps-overlay-modules.test.mjs",
       "test/waypoint-arrival-modules.test.mjs",
-      "test/waypoint-load-modules.test.mjs"
+      "test/waypoint-load-modules.test.mjs",
+      "test/waypoint-delete-modules.test.mjs"
     ]
   },
   "sha256": {
@@ -475,7 +481,7 @@
     "src/services/lc-s2.js": "0e2ac1af0b680e6f4358cb9d99980e32339d04f67f911cfe14d244898f014d40",
     "src/services/lc-stac.js": "978c4be8c3bc4e7cda3f694d1f06290e661fed5bbd5b76b68719140edc18e71a",
     "src/services/lc-validate.js": "b4d8327c62940b1af1a53ddb087188816ff2359c8456c2755c7c853c5919f42b",
-    "src/services/map.js": "bd39240f270d50be8117754598fcbac380b7879cb23333440e9017fb047736c4",
+    "src/services/map.js": "c4d8d7d0a1ca9ffa71990df291bc9db31aec89bd3a9d7b87a6e8ad68216571da",
     "src/services/measure.js": "ef61d7a32cf16ce83785a7f8fc1c579c8bf2bff8f8ca25f0992c3701d15c71d9",
     "src/services/offline.js": "b0d13ca6c52213b2103e5c23727be42c92cea39855622d43abaad87a8e48280f",
     "src/services/osm-client.js": "2e5eeaa735bf05a603a0db142619f60747b9696f506e666d7df992454a56814f",
@@ -677,7 +683,13 @@
     "src/application/map/reset-waypoint-load-state.js": "8330f5b4fb225fe7e298ca16ce24e19d8eec89b618fd8bfd34851c391db4e909",
     "src/ui/show-waypoint-load-error.js": "dd72c902dd39f2e606c4a0cc631f7f17d9103ed2d0d232eefb991792d4d6d3de",
     "src/application/map/load-project-waypoints.js": "4a9b69a4e9548b0955c5ff0bb5b8d3998d8645ac99d1c1ecae9e38f9b79c7839",
-    "test/waypoint-load-modules.test.mjs": "cd0f5b0436f1597a17d235e78f0554dec8ff341d2111dd1adf891d454635327b"
+    "test/waypoint-load-modules.test.mjs": "cd0f5b0436f1597a17d235e78f0554dec8ff341d2111dd1adf891d454635327b",
+    "src/domain/map/is-waypoint-project-selected.js": "ee711e3c63e8101f752d7757037d5e9202a58b725cc498cab1f7c52f89e0fe98",
+    "src/ui/confirm-waypoint-list-deletion.js": "57857f3b153f47b1372204a672790f2fb5ef5eb5fbeebe3b7af4fe4ad71ad366",
+    "src/adapters/map/delete-project-waypoints.js": "424c8ddc9526142cde562296fe28efb577701e6e756607ca222bf907abc654cd",
+    "src/application/map/clear-deleted-waypoint-list.js": "0431bd050f39f5577f0e24a124783778634b3251f095c241248d09d683da732a",
+    "src/application/map/delete-project-waypoints.js": "1958083c3ac0ab1d02dda0fcc762abaa3f0a341c01ef98ebb8a608e755adbb51",
+    "test/waypoint-delete-modules.test.mjs": "b3e21cff19b6b40f9233b69f02a21550f44318842b606c1b12e7ecccefad463b"
   },
   "authorized_modularizations": [
     {
@@ -1518,6 +1530,17 @@
           "path": "src/services/map.js",
           "previous_sha256": "e46743318c617b0d6615153d8539ea42a2885a75ac9bbdc2cda9fdc1fdc8c952",
           "sha256": "bd39240f270d50be8117754598fcbac380b7879cb23333440e9017fb047736c4"
+        }
+      ]
+    },
+    {
+      "date": "2026-10-13",
+      "scope": "User-authorized sixty-first five-module split of locked bulk waypoint deletion: project-selection gate, permanent-delete confirmation UI, project-scoped Supabase adapter, successful local state cleanup, and orchestration. Preserve warning, project_id filter, early exits, error notification, clear-toast-refresh order, and optional compatibility fallback; locked regression tests remain unchanged.",
+      "files": [
+        {
+          "path": "src/services/map.js",
+          "previous_sha256": "bd39240f270d50be8117754598fcbac380b7879cb23333440e9017fb047736c4",
+          "sha256": "c4d8d7d0a1ca9ffa71990df291bc9db31aec89bd3a9d7b87a6e8ad68216571da"
         }
       ]
     }

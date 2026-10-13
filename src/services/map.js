@@ -277,6 +277,8 @@ function renderWaypointList(){
 
 async function deleteAllWaypoints(){
  const pid=+$("nProject").value;
+ const app=window.DG_DELETE_PROJECT_WAYPOINTS_USE_CASE,selected=window.DG_IS_WAYPOINT_PROJECT_SELECTED,confirmation=window.DG_CONFIRM_WAYPOINT_LIST_DELETION,store=window.DG_DELETE_PROJECT_WAYPOINTS,completion=window.DG_CLEAR_DELETED_WAYPOINT_LIST;
+ if(app&&selected&&confirmation&&store&&completion){await app.execute({projectId:pid,isSelected:selected.isSelected,confirmDeletion:()=>confirmation.confirm({confirm,translate:dgCf}),remove:projectId=>store.delete({client:sb,projectId}),showError:error=>toast("Hata: "+error.message,"err"),complete:()=>completion.clear({setTarget:value=>{navTarget=value;},setWaypoints:value=>{WP=value;},notify:toast,refresh:loadWaypoints}),notify:toast});return;}
  if(!pid)return toast("Proje seç");
  if(!confirm(dgCf("⚠ Bu projedeki TÜM waypoint'ler kalıcı olarak silinsin mi? Yanlış liste ise sonra yeniden yükleyebilirsiniz.")))return;
  const{error}=await sb.from("waypoints").delete().eq("project_id",pid);
