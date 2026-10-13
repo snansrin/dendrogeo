@@ -1025,3 +1025,10 @@ Her modülün tek bir dış API'si, sahibi olduğu açık durumu ve kendi testle
 - `ui/measurement-gps-readout.js` ayrıntı alanlarını; `ui/measurement-gps-active-state.js` aktif GPS mesajı, düğmesi ve rozetini günceller.
 - `adapters/trees/update-measurement-gps-map-marker.js`, mevcut konum işaretini harita API'si arkasında değiştirir.
 - `application/trees/refresh-measurement-gps-view.js`, form, durum, harita, navigasyon ve otomatik nokta önerisi sırasını birleştirir; servis `updGps()` uyumluluk girişini korur.
+
+## LULC doğrulama kampanyası kalıcılığı — 13 Ekim 2026
+
+- `adapters/surface/validation-campaign-store.js`, `DendroGeoValidate` IndexedDB veritabanının `campaigns` object store işlemlerini ve park kapsamlı okumayı taşır.
+- `application/surface/validation-campaign-archive.js`, servis API'sini adapter üzerinden kurar; `validation-campaign-save-queue.js` başarısız kayıt sonrasında da yerel taslak sırasını sürdürür.
+- `application/surface/handle-validation-campaign-save-failure.js`, yalnız hâlâ etkin kampanyanın cihaz yazma hatasını gösterir.
+- `domain/surface/select-validation-campaign.js`, owner ve fingerprint eşleşmesiyle geçerli park kampanyasını veya taşınabilir eski cihaz taslağını seçer. `lc-validate.js` eski global API ve bağımsız bilimsel hesapları korur.
