@@ -242,72 +242,12 @@ async function dgS2Profile(cells,outer,opts){
   const skipped=[];
   for(const sc of found.scenes){
     try{
-      const assets=sc.item.assets||{};
-      const hrefFor=name=>{
-        const a=assets[name];
-        return a&&a.href?dgLcSignedHref(a.href,token):null;
-      };
-      const bandReads={};
-      for(const b of Object.keys(DG_S2_BANDS)){
-        const href=hrefFor(b);
-        if(!href)throw new Error(b+" asset'i yok");
-        bandReads[b]=dgLcOpenRaster(href).then(t=>t.getImage());
-      }
-      const names=Object.keys(bandReads);
-      const loaded=await Promise.all(names.map(b=>bandReads[b]));
-      const images=Object.fromEntries(names.map((b,i)=>[b,loaded[i]]));
-
-      /* SCL önce: geçerlilik maskesi 20 m ızgarada */
-      const scl=await dgS2ReadBand(images.SCL,bboxDeg);
-      const reads={};
-      for(const b of ["B03","B04","B08","B11"]){
-        reads[b]=await dgS2ReadBand(images[b],bboxDeg);
-      }
-      /* Hücre merkezleri her bandın KENDİ epsg'sinde indekslenir */
-      const cellIdx=band=>cells.map(c=>{
-        const z=dgLcUtmForward(c.center.lat,c.center.lon,band.epsg);
-        return dgS2CellIndex(band.meta,band.win,z.x,z.y);
-      });
-      const idxScl=cellIdx(scl);
-      const idxB={B03:cellIdx(reads.B03),B04:cellIdx(reads.B04),B08:cellIdx(reads.B08),B11:cellIdx(reads.B11)};
-
-      let used=0;
-      for(let ci=0;ci<cells.length;ci++){
-        const si=idxScl[ci];
-        if(si===null)continue;
-        const sclVal=Number(scl.values[si]);
-        if(!DG_S2_SCL_VALID.includes(Math.round(sclVal)))continue;
-        const vals={};
-        let ok=true;
-        for(const b of ["B03","B04","B08","B11"]){
-          const bi=idxB[b][ci];
-          if(bi===null){ok=false;break;}
-          const v=dgS2Reflectance(reads[b].values[bi],sc.item,b);
-          if(v===null){ok=false;break;}
-          vals[b]=v;
-        }
-        if(!ok)continue;
-        const key=cells[ci].row+":"+cells[ci].col;
-        if(!acc[key])acc[key]={b03:[],b04:[],b08:[],b11:[],mndwis:[],ndvis:[],ndbis:[],dates:new Set()};
-        if(acc[key].dates.has(sc.datetime))continue;
-        acc[key].dates.add(sc.datetime);
-        acc[key].b03.push(vals.B03);
-        acc[key].b04.push(vals.B04);
-        acc[key].b08.push(vals.B08);
-        acc[key].b11.push(vals.B11);
-        /* SAHNE-BAŞI MNDWI: mevsimsel su kanıtı için. Dünya örtüsü sınıf 80
-         * "yılın çoğunda su" demektir; GÖKSU CANLI DERSİ (2026-10-03): gölün
-         * sığ kıyıları yaz sonu çekiliyor, yaz medyanı suyun %25'inde
-         * MNDWI≤0.01 veriyor → medyan tek başına mevsimsel suyu kaçırır.
-         * MAX MNDWI "bu hücre sezonun herhangi bir anında açık su muydu"
-         * sorusunu cevaplar (kalıcı su için medyan zaten yeter). */
-        const gSW=vals.B03,swSW=vals.B11;
-        if(gSW+swSW>0)acc[key].mndwis.push((gSW-swSW)/(gSW+swSW));
-        const rSW=vals.B04,nSW=vals.B08;
-        if(rSW+nSW>0)acc[key].ndvis.push((nSW-rSW)/(nSW+rSW));
-        if(vals.B11+vals.B08>0)acc[key].ndbis.push((vals.B11-vals.B08)/(vals.B11+vals.B08));
-        used++;
-      }
+      const images=await window.DG_LOAD_SENTINEL_SCENE_BANDS.load({scene:sc,token,bands:Object.keys(DG_S2_BANDS),signHref:dgLcSignedHref,openRaster:dgLcOpenRaster});
+      /* SCL first: its 20 m grid masks every spectral band observation. */
+      const reads=await window.DG_READ_SENTINEL_SCENE_WINDOWS.read({images,bands:["SCL","B03","B04","B08","B11"],bbox:bboxDeg,readBand:dgS2ReadBand});
+      /* Each cell center is indexed in each band's own UTM window. */
+      const indices=window.DG_INDEX_SENTINEL_SCENE_CELLS.build({cells,bands:reads,project:dgLcUtmForward,indexFor:dgS2CellIndex});
+      const used=window.DG_COLLECT_SENTINEL_SCENE_OBSERVATIONS.collect({cells,scl:reads.SCL,bands:reads,indices,validClasses:DG_S2_SCL_VALID,item:sc.item,datetime:sc.datetime,reflectance:dgS2Reflectance,accumulator:acc});
       sc.usedCells=used;
     }catch(err){
       skipped.push({id:sc.id,reason:String(err&&err.message||err).slice(0,160)});
@@ -412,21 +352,7 @@ async function dgS2Profile(cells,outer,opts){
         }
       }
     }
-    for(const key of Object.keys(out)){
-      const c0=out[key];
-      c0.ndviConfirmedYear=dgS2ConfirmedExtreme(evidence[key]?.ndvi||[]);
-      c0.mndwiConfirmedYear=dgS2ConfirmedExtreme(evidence[key]?.mndwi||[]);
-      c0.ndviMedianYear=dgS2VegetationSummary(evidence[key]).ndviMedianYear;
-      c0.yearObs=evidence[key]?.dates.size||0;
-      const wm=waterMax[key];
-      const summer=Number.isFinite(c0.mndwiMax)?c0.mndwiMax:null;
-      const merged=(wm!==undefined&&summer!==null)?Math.max(wm,summer):(wm!==undefined?wm:summer);
-      if(merged!==null&&Number.isFinite(merged))c0.mndwiMaxYear=+merged.toFixed(4);
-      const vm2=vegMax[key];
-      const summerV=Number.isFinite(c0.ndviMax)?c0.ndviMax:null;
-      const mergedV=(vm2!==undefined&&summerV!==null)?Math.max(vm2,summerV):(vm2!==undefined?vm2:summerV);
-      if(mergedV!==null&&Number.isFinite(mergedV))c0.ndviMaxYear=+mergedV.toFixed(4);
-    }
+    window.DG_MERGE_SENTINEL_ANNUAL_EVIDENCE.merge({out,evidence,waterMax,vegMax,confirmedExtreme:dgS2ConfirmedExtreme,vegetationSummary:dgS2VegetationSummary});
   }
 
   if(window.DG_BUILD_SENTINEL_PROFILE)return window.DG_BUILD_SENTINEL_PROFILE.finish({out,acc,evidence,waterMax,vegMax,cellCount:cells.length,found,waterScenes,epsg,skipped,nProfiled:nOk},{confirmedExtreme:dgS2ConfirmedExtreme,vegetationSummary:dgS2VegetationSummary});
