@@ -1011,3 +1011,10 @@ Her modülün tek bir dış API'si, sahibi olduğu açık durumu ve kendi testle
 - `application/trees/handle-measurement-gps-error.js`, izin reddi, timeout tekrar denemesi ve diğer GPS hatalarının mevcut mesaj/sırasını yürütür.
 - `adapters/trees/measurement-wake-lock.js`, destek varsa tekil ekran kilidini alır, release sonrasında yeniden alınabilmesini sağlar.
 - `application/trees/start-measurement-gps.js`, iOS yardımından izin ve busy durumu, ilk konum, canlı izleme, presence ve wake lock sırasını yönetir; eski `startGps()` globali servis facade'ında kalır.
+
+## Ölçüm fotoğraf kanıtı denetimi — 13 Ekim 2026
+
+- `application/trees/measurement-photo-check-state.js`, fotoğraf denetim nesillerini ve temizleme/değişim sonrası eski sonuçların geçersizliğini tutar.
+- `adapters/trees/read-measurement-photo-pixels.js`, tarayıcı canvas okumasını izole eder ve örnekleme için kullanılan object URL'yi kapatır.
+- `ui/measurement-photo-check.js` ve `ui/measurement-photo-file.js`, mevcut Türkçe durum mesajları, seçili dosya adı ve temizleme kontrollerini sunar.
+- `application/trees/check-measurement-photo.js`, görsel türü ve kalite kapısı, asenkron iptal ve UI geri bildirim sırasını birleştirir; `measure.js` eski global girişini ve kilitli tarama/eşik fonksiyonlarını korur.

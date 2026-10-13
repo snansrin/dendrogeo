@@ -65,12 +65,23 @@ function dgPhotoLabel(m){
  return t.join(" · ");
 }
 let dgPhotoCheckVersion=0;
+const DG_MEASUREMENT_PHOTO_CHECK_STATE=window.DG_MEASUREMENT_PHOTO_CHECK_STATE?window.DG_MEASUREMENT_PHOTO_CHECK_STATE.create(value=>{dgPhotoCheckVersion=value;}):null;
+const DG_CHECK_MEASUREMENT_PHOTO_USE_CASE=window.DG_CHECK_MEASUREMENT_PHOTO?window.DG_CHECK_MEASUREMENT_PHOTO.create({
+ state:DG_MEASUREMENT_PHOTO_CHECK_STATE,element:$,setPhotoOk:value=>{photoOk=value;},selectFile:file=>window.DG_MEASUREMENT_PHOTO_FILE_UI.select(file,$),
+ showInvalidType:box=>window.DG_MEASUREMENT_PHOTO_CHECK_UI.invalidType(box,_tms),showPending:box=>window.DG_MEASUREMENT_PHOTO_CHECK_UI.pending(box,_tms),
+ loadImage:loadImg,readPixels:(loaded,size)=>window.DG_READ_MEASUREMENT_PHOTO_PIXELS_ADAPTER.read({image:loaded.i,url:loaded.u},size,{createCanvas:()=>document.createElement("canvas"),revokeObjectURL:url=>URL.revokeObjectURL(url)}),
+ scan:dgPhotoScan,gate:dgPhotoGate,label:dgPhotoLabel,showPassed:(box,metrics,label)=>window.DG_MEASUREMENT_PHOTO_CHECK_UI.passed(box,metrics,label,_tms),
+ showFailed:(box,metrics)=>window.DG_MEASUREMENT_PHOTO_CHECK_UI.failed(box,metrics,_tms),showUnreadable:box=>window.DG_MEASUREMENT_PHOTO_CHECK_UI.unreadable(box,_tms),
+ revokeObjectURL:url=>URL.revokeObjectURL(url)
+}):null;
 function dgClearMeasurePhoto(){
+ if(DG_MEASUREMENT_PHOTO_CHECK_STATE&&window.DG_MEASUREMENT_PHOTO_FILE_UI){DG_MEASUREMENT_PHOTO_CHECK_STATE.invalidate();photoOk=false;return window.DG_MEASUREMENT_PHOTO_FILE_UI.clear($);}
  dgPhotoCheckVersion++;photoOk=false;
  $("mPhoto").value="";$("mPhotoName").textContent="";$("photoCheck").style.display="none";
  const remove=$("mPhotoRemove");if(remove)remove.style.display="none";
 }
 async function checkPhoto(e){
+ if(DG_CHECK_MEASUREMENT_PHOTO_USE_CASE)return DG_CHECK_MEASUREMENT_PHOTO_USE_CASE(e);
  const version=++dgPhotoCheckVersion;photoOk=false;
  const f=e.target.files[0],box=$("photoCheck");
  {const fn=$("mPhotoName");if(fn)fn.textContent=f?f.name:"";}
