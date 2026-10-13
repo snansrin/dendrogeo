@@ -1358,3 +1358,9 @@ The collaborator map renderer now separates peer selection, display-model deriva
 - `adapters/parks/park-admin-mutation-store.js` park yeniden adlandırma, proje/ölçüm taşıma ve park silme yazılarını Supabase adapter sınırında toplar; mevcut `id` ve `park_id` filtreleri aynen korunur.
 - `ui/park-admin-mutation.js` rename/merge/delete onay metinlerini ve sonuç bildirimlerini sunar. Üç mevcut application use-case'i yetki kapılarını, yazım sırasını, hata durumlarını ve oturum temizliğini sürdürür.
 - `park-registry.js` eski global girişleri ve modüller eksik olduğunda inline fallback'i korur. Kilitli regresyon testleri değiştirilmedi; adapter/UI kontrat testleri eklendi.
+
+## Katman bağımlılık kuralı ve beş port çıkarımı — 13 Ekim 2026
+
+- `scripts/check-dependency-rules.mjs` domain ve application katmanlarının daha dış katmanlara global `DG_*` erişimini tarar; kural `npm run check` içinde çalışır ve fixture ile gerçek kaynak testlerine sahiptir.
+- Admin measurement use-case'leri Supabase moderation store'u parametre olarak alır; Turnstile controller UI aktivasyonunu callback ile, measurement marker use-case'i katman hazırlama/marker/scheduler bağımlılıklarını portlarla alır.
+- `render-waypoint-gps-overlay.js` içindeki üç UI globali dar kapsamlı, isim bazlı geçiş borcu olarak listelenmiştir; sonraki waypoint overlay grubunda callback portlarına taşınacaktır. Kilitli regresyon dosyalarına dokunulmadı.

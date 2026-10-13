@@ -52,7 +52,7 @@ function popupHtml(r){
  * eklenmeye devam ederdi. Her yükleme m._markerToken'ı artırır; bayat tur
  * ilk adımında kendini iptal eder. */
 function addMarkersChunked(m,rows,chunk=150){
- if(window.DG_MAP_MEASUREMENT_MARKERS)return window.DG_MAP_MEASUREMENT_MARKERS.add(m,rows,chunk,{leaflet:L,popupHTML:popupHtml,log:console,setTimer:setTimeout});
+ if(window.DG_MAP_MEASUREMENT_MARKERS)return window.DG_MAP_MEASUREMENT_MARKERS.add(m,rows,chunk,{leaflet:L,popupHTML:popupHtml,log:console,setTimer:setTimeout,ensureLayer:window.DG_ENSURE_MEASUREMENT_MARKER_LAYER,clusterIcon:window.DG_MEASUREMENT_MARKER_CLUSTER_ICON,createMarker:window.DG_CREATE_MEASUREMENT_MAP_MARKER,schedule:window.DG_SCHEDULE_MEASUREMENT_MARKER_CHUNKS});
  let i=0;
  if(!m._cluster){
   /* YEDEK KATMAN (2026-09-26 · kullanıcı bildirimi: "listede var, haritada yok").

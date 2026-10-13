@@ -30,7 +30,7 @@ test('review application updates only the selected measurement and returns Postg
   const api = runtime();
   const calls = [];
   const sb = { from: (table) => ({ update: (payload) => ({ eq: async (field, id) => { calls.push([table, payload, field, id]); return { error: null }; } }) }) };
-  const result = await api.DG_ADMIN_REVIEW_MEASUREMENT.review(sb, 14, 'Onaylı', true);
+  const result = await api.DG_ADMIN_REVIEW_MEASUREMENT.review(sb, 14, 'Onaylı', true, api.DG_ADMIN_MODERATION_STORE);
   assert.deepEqual(JSON.parse(JSON.stringify(calls)), [['measurements', { status: 'Onaylı', shared: true }, 'id', 14]]);
   assert.deepEqual({ ...result }, { error: null });
 });
@@ -39,7 +39,7 @@ test('geofence override writes the acting administrator as the audit identity', 
   const api = runtime();
   let write;
   const sb = { from: () => ({ update: (payload) => ({ eq: async (field, id) => { write = [payload, field, id]; return { error: null }; } }) }) };
-  await api.DG_ADMIN_OVERRIDE_MEASUREMENT_GEOFENCE.execute(sb, 8, 'admin-2');
+  await api.DG_ADMIN_OVERRIDE_MEASUREMENT_GEOFENCE.execute(sb, 8, 'admin-2', api.DG_ADMIN_MODERATION_STORE);
   assert.deepEqual(JSON.parse(JSON.stringify(write)), [{ geo_override_by: 'admin-2' }, 'id', 8]);
 });
 
@@ -50,7 +50,7 @@ test('delete use case removes a linked photo before issuing the row delete', asy
     select: (columns) => ({ eq: (field, id) => ({ single: async () => { order.push(['read', table, columns, field, id]); return { data: { photo_url: 'public/tree.jpg' } }; } }) }),
     delete: () => ({ eq: async (field, id) => { order.push(['delete', table, field, id]); return { error: null }; } }),
   }) };
-  const result = await api.DG_ADMIN_DELETE_MEASUREMENT.execute(sb, 3, async (url) => order.push(['photo', url]));
+  const result = await api.DG_ADMIN_DELETE_MEASUREMENT.execute(sb, 3, async (url) => order.push(['photo', url]), api.DG_ADMIN_MODERATION_STORE);
   assert.deepEqual(JSON.parse(JSON.stringify(order)), [
     ['read', 'measurements', 'photo_url', 'id', 3], ['photo', 'public/tree.jpg'], ['delete', 'measurements', 'id', 3],
   ]);
@@ -65,7 +65,7 @@ test('moderation store preserves direct Supabase method sequence and missing-pho
     delete: () => ({ eq: async (field, id) => { order.push(['delete', table, field, id]); return { error: null }; } }),
   }) };
   let removed = false;
-  await api.DG_ADMIN_DELETE_MEASUREMENT.execute(sb, 9, async () => { removed = true; });
+  await api.DG_ADMIN_DELETE_MEASUREMENT.execute(sb, 9, async () => { removed = true; }, api.DG_ADMIN_MODERATION_STORE);
   assert.equal(removed, false);
   assert.deepEqual(JSON.parse(JSON.stringify(order)), [['measurements', 'photo_url', 'id', 9], ['delete', 'measurements', 'id', 9]]);
 });
