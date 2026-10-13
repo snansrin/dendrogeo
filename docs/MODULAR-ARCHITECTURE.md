@@ -1228,3 +1228,10 @@ The collaborator map renderer now separates peer selection, display-model deriva
 - `domain/map/resolve-waypoint-gps-guidance.js` hedef yokken en yakın bekleyen noktayı seçer ve mesafe/yön modelini kurar; `ui/create-waypoint-gps-location-marker.js` mevcut konum pinini başlangıç hedefinin oku ile çizer.
 - `ui/render-waypoint-gps-guidance-readout.js` mesafe, hedef ve okuma alanlarını; `adapters/map/add-waypoint-guidance-line.js` kesikli düz çizgiyi üretir.
 - `application/map/render-waypoint-gps-overlay.js` marker, hedef seçimi, okuma ve çizgi adımlarını sıralar. Mevcut `waypoint-gps-overlay` modülü beş bağımlılık eksikse önceki yerel akışına döner; GPS kapalı akış ve çağrı sözleşmesi aynı kalır.
+
+
+## Waypoint “Vardım” akışı — 13 Ekim 2026
+
+- `domain/map/select-waypoint-arrival-target.js` etkin hedefi korur veya GPS ile en yakın bekleyen noktayı seçer; `ui/confirm-waypoint-arrival-distance.js` 50 m sınırındaki mevcut onayı yönetir.
+- `adapters/map/mark-waypoint-visited.js` yalnız mevcut `id` filtresiyle `visited=true` yazar. `application/map/complete-waypoint-arrival.js` başarılı yazımdan sonra hedefi, ölçüm noktasını, harita listesini ve proje seçimini günceller.
+- `application/map/arrive-at-waypoint.js` erken çıkışları, yazma hatasını ve başarı orkestrasyonunu yönetir. Kilitli servis tüm modüller mevcutsa devreder; eski gövde modül yüklenememe yedeği olarak durur.

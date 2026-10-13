@@ -341,6 +341,8 @@ function dgWaypointGuidance(){
  * uzaklık 50 m'den fazlaysa onay sor, DB'de visited işaretle, ölçüm
  * formuna point id'yi yaz ve ölçüm sekmesine geç. */
 async function arriveWp(){
+  const app=window.DG_ARRIVE_AT_WAYPOINT,selection=window.DG_SELECT_WAYPOINT_ARRIVAL_TARGET,confirmation=window.DG_CONFIRM_WAYPOINT_ARRIVAL_DISTANCE,store=window.DG_MARK_WAYPOINT_VISITED,completion=window.DG_COMPLETE_WAYPOINT_ARRIVAL;
+  if(app&&selection&&confirmation&&store&&completion){await app.arrive({target:navTarget,waypoints:WP,gps:GPS,distance:hav,selectTarget:selection.select,confirmDistance:input=>confirmation.confirm({...input,confirm,format:dgTfs}),persist:id=>store.mark({client:sb,id}),complete:waypoint=>completion.complete({waypoint,isManual:()=>manualPoint,setPoint:value=>{$("mPoint").value=value;},setTarget:value=>{navTarget=value;},draw:drawNav,refresh:loadWaypoints,hasProjectField:()=>$("mProject"),setProject:value=>{$("mProject").value=value;},notify:toast,format:dgTfs,go}),notify:toast});return;}
   let w=navTarget;
   if(!w||w.visited){
     const ts=WP.filter(x=>!x.visited);
