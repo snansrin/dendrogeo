@@ -527,6 +527,12 @@ Her modülün tek bir dış API'si, sahibi olduğu açık durumu ve kendi testle
 
 - `ui/visitor-activity-disclosure.js`, Son Etkinlik sarmalının görünürlüğünü, çevrilmiş düğme etiketini ve `aria-expanded` durumunu birlikte günceller; tercih okuma/yazma ve eksik sarmal kontrolü servis katmanında kalır.
 
+- `application/visitors/load-owner-activity.js`, owner görünümündeki saklı ziyaret etkinliğini yükler, mevcut kurucu/çeviri/kaçış bağlarını kullanarak satırları üretip çizer; erişim ve DOM bağları çağıranda kalır.
+- `application/visitors/load-owner-counts.js`, owner sayaç yükleme akışındaki izin kapısını, mevcut sayaç deposunu ve üç DOM güncellemesini hata yalıtımıyla koordine eder.
+- `application/visitors/refresh-owner-view.js`, presence'i sürdürme, canlı listeyi çizme ve sayaç/etkinlik yüklemelerini paralel başlatma sırasını koruyarak yenileme kilidini `finally` içinde kaldırır.
+- `application/visitors/live-refresh-timer.js`, ziyaretçi sekmesi için 10 saniyelik çizim zamanlayıcısını başlatıp durdurur; görünüm kontrolü ve timer erişimi çağırandan sağlanır.
+- `application/visitors/focus-live-location.js`, owner ve geçerli konum kapılarından sonra takip seçeneğini kapatıp canlı haritayı 16. yakınlaştırmaya odaklar.
+
 - `ui/visitor-connection-status.js`, bağlantı metnini, görünen/toplam kullanıcı sayısını, mevcut Türkçe saat biçimini ve durum rengini günceller; duraklatma metni aynı API içindedir, presence/filtre/görünürlük ve pause durumu serviste kalır.
 
 - `domain/data-requests/find-pending-duplicate.js`, talep ülke/şehir/proje filtrelerini mevcut trim ve küçük harf kuralıyla karşılaştırır ve ilk eşleşmeyi döndürür; kullanıcı/status sorgusu, uyarı ve insert akışı serviste kalır.
