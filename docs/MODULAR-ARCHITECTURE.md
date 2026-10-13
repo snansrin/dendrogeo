@@ -858,6 +858,11 @@ Her modülün tek bir dış API'si, sahibi olduğu açık durumu ve kendi testle
 - `ui/world-error.js`, dünya verisi hatasını ve yeniden deneme eylemini gösterir.
 
 - `adapters/world/park-comparison-store.js`, park görünümünü, eski şema için onaylı ölçüm yedeğini ve ülke/şehir yakınlaştırma sorgularını mevcut kolon, filtre ve limitlerle yürütür.
+- `domain/parks/resolve-park-comparison-read.js`, park karşılaştırma okumasını başarılı, eski şema yedeği veya yetki/ağ hatası olarak sınıflandırır.
+- `application/world/load-park-comparison.js`, birincil görünümü yükler ve yalnız şema eksikliğinde eski yola geçer; yetki/ağ hatasında yedek sorgu çalıştırmaz.
+- `application/world/render-primary-park-comparison.js`, park satırlarını mevcut linked/pending sunum portlarına ve rapor seçicisine aktarır.
+- `application/world/load-legacy-park-comparison.js`, eski şema için onaylı ölçüm yedeğini mevcut 5.000 satır uyarısıyla yükler ve legacy gruplama portuna verir.
+- `application/world/show-park-comparison-denied.js`, yetki/ağ hatasını mevcut kaçışlı hata kartı ve uyarı bildirimiyle gösterir; park şema bayrağına dokunmaz.
 
 - `domain/parks/prepare-park-comparison.js`, park kimliği olan satırları ve bekleyen satırları ayırıp karbon sıralı çubuk ölçeğini üretir.
 
