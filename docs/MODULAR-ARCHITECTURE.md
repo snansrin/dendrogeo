@@ -1085,3 +1085,10 @@ Her modülün tek bir dış API'si, sahibi olduğu açık durumu ve kendi testle
 - `application/surface/build-surface-result-snapshot.js`, tüm park alanı korunumu doğrulandıktan sonra yayın geometri snapshot’ını üretir.
 - `application/surface/accept-surface-analysis.js`, epoch/kayıt eskime kapılarını, hesap yazımını, cihaz taslağı yedeğini ve sonuç durumunu yürütür.
 - `ui/render-surface-accepted-result.js`, hesapta kabul edilmiş alanları rapor host’una sunar; kilitli servis uyumluluk globalini korur.
+
+## LULC yüzey fırçası etkileşimi — 13 Ekim 2026
+
+- `adapters/surface/surface-brush-pointer-session.js`, birincil pointer capture, geçici çizgi/daire önizlemesi ve harita sürükleme/zoom kilidini yönetir.
+- `domain/surface/validate-surface-brush-stroke.js`, WGS84 noktaları, 300 nokta sınırı, desteklenen sınıf ve çapları doğrular.
+- `application/surface/commit-surface-brush-stroke.js`, seçilen hücre kararlarını provenance ve sınırlı geçmişle kaydeder; `undo-surface-brush-stroke.js` yalnız hâlâ kendi darbelerine ait hücreleri geri alır.
+- `application/surface/update-surface-brush-config.js`, geçerli sınıf/çap seçimini güncelleyip etkin pointer oturumunu kapatır. Kilitli UI globali orkestrasyon uyumluluğunu korur.
