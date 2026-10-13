@@ -823,6 +823,11 @@ Her modülün tek bir dış API'si, sahibi olduğu açık durumu ve kendi testle
 - `application/auth/select-auth-tab.js`, form görünürlüğünü, seçili Turnstile sekmesini ve widget yenileme sırasını koordine eder.
 - `ui/render-auth-message.js`, mevcut auth mesaj metnini ve hata/başarı rengini DOM'a yazar.
 - `application/auth/start-google-sign-in.js`, Google provider seçimi, origin/path tabanlı redirect, hesap seçme prompt'u ve hata sonrası düğme/bekleme durumu akışını yönetir.
+- `application/parks/start-park-scan.js`, ölçümden gelen park algılama yönlendirmesini, park modunu ve gecikmeli harita/kart odağını koordine eder.
+- `application/parks/focus-park-scan-target.js`, hedef projenin geçerli ölçüm noktalarına haritayı oturtur; sonuç yoksa GPS görünümüne döner.
+- `domain/parks/select-park-scan-step.js`, kayıtlı park ve geçici aday durumuna göre kart adımını üretir.
+- `ui/preview-park-project-name.js`, park adı ve etiket değişince mevcut proje adı önizlemesini günceller.
+- `application/parks/cancel-park-scan.js`, algılama yönlendirme durumunu temizleyip önceki ekrana döner.
 
 - `application/admin/read-photo-storage-usage.js`, fotoğraf deposundaki klasörleri sayıp dosya boyutu ve adet toplamını üretir.
 
