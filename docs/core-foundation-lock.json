@@ -411,7 +411,7 @@
     "src/services/landcover.js": "6caf344e84a74982f145ab7ce4976a07e97f23216d2e59f8dbfe9dab634902e4",
     "src/services/lc-config.js": "293509c879db16cf7aa10613879c3bf63b286bcbcb01a3b668816e5148e4b176",
     "src/services/lc-engine.js": "233f87f8eeec9306e235ca1896f2e9405dfcfe0e8148fbf9801f48fe1c1afa1d",
-    "src/services/lc-geo.js": "27f4a750ffcf89730457dc54c953b0edff915a63375ddae21d599af1cc31902a",
+    "src/services/lc-geo.js": "ade537a9ea592914288c9c3cead038834919f4919b63be2a3cce28cfe2b97d73",
     "src/services/lc-osm.js": "b9daa57264d313f1fd2b969e0f6180900cdfbf45313d939dc554c8de58eb955d",
     "src/services/lc-patches.js": "94bc7a7fd771672250655bbfd47a5f162bd06b84c23d2b03d2256bc057669919",
     "src/services/lc-review.js": "91f69e59f76698a4d95c2dc411fdc05e09c3910c5c036eab21f6ae480c4a9d7f",
@@ -466,7 +466,7 @@
     "src/ui/park-schema-warning.js": "9222beba708e3054eca73b0e30df0224abb264055d9ac3f8f6bf683823adcad8",
     "src/ui/state.js": "5feada9bc2052655d9be405043ffb6f71f39d51fcb58e189089c3d7d3fc8bafc",
     "src/utils/geo.js": "3e796768b3d55a3f07c4be3281c9437f1602b6d5e68151b2af7b101707baf294",
-    "src/utils/lazylibs.js": "baa0959cdacb99e13f62386e8cd157e4d71a94587e6967d58ab1e928dfb96383",
+    "src/utils/lazylibs.js": "2d8d69df2623655a053e29da8876cbb5dbb5c0189b6b4577c02512c2f2aeab8d",
     "src/workers/surface-worker.js": "02878b04478f0c555b536f34d9807a0bf824d0f738d1468a8840069cc61e85ed",
     "test/critical-fixes.test.mjs": "3a2e62104763110bc734b3dc54a37cbf57c15b0038a78fdce35d56d9639c1989",
     "test/dbh-qa.test.mjs": "d3bbd29d292aa1214ede27a21ecb99315bc24a6346e2b0119f8c04eb8b532b95",
@@ -656,6 +656,22 @@
           "path": "src/services/osm-client.js",
           "previous_sha256": "7b91c7e1ce9a54656282a7cc7c7a25d9520867d37fb4d1316a6add8e5e74d86e",
           "sha256": "2e5eeaa735bf05a603a0db142619f60747b9696f506e666d7df992454a56814f"
+        }
+      ]
+    },
+    {
+      "date": "2026-10-13",
+      "scope": "User-authorized five-module split of locked land-cover geometry services: bounds, UTM projection, rectangular clipping, convex clipping, and projected area/intersection. Preserve all coordinate ordering, equations, clipping tolerances, area results, legacy wrappers, and regression tests; register the modules in the lazy-load chain and offline cache.",
+      "files": [
+        {
+          "path": "src/services/lc-geo.js",
+          "previous_sha256": "27f4a750ffcf89730457dc54c953b0edff915a63375ddae21d599af1cc31902a",
+          "sha256": "ade537a9ea592914288c9c3cead038834919f4919b63be2a3cce28cfe2b97d73"
+        },
+        {
+          "path": "src/utils/lazylibs.js",
+          "previous_sha256": "baa0959cdacb99e13f62386e8cd157e4d71a94587e6967d58ab1e928dfb96383",
+          "sha256": "2d8d69df2623655a053e29da8876cbb5dbb5c0189b6b4577c02512c2f2aeab8d"
         }
       ]
     }
