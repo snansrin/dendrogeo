@@ -191,7 +191,12 @@
       "src/ui/editor-ui.js",
       "src/ui/state.js",
       "src/utils/geo.js",
-      "vendor/leaflet-1.9.4.js"
+      "vendor/leaflet-1.9.4.js",
+      "src/application/parks/fail-park-live-share.js",
+      "src/domain/parks/park-live-member-color.js",
+      "src/adapters/parks/park-presence-channel.js",
+      "src/adapters/parks/leave-park-presence-channel.js",
+      "src/application/parks/track-park-live-position.js"
     ],
     "scientific_contract_and_inputs": [
       "css/park-panel.css",
@@ -300,7 +305,8 @@
       "test/tree-measurement-validation.test.mjs",
       "test/verified-water-footprint.test.mjs",
       "test/water-osm-reliability.test.mjs",
-      "test/surface-mount-lifecycle-modules.test.mjs"
+      "test/surface-mount-lifecycle-modules.test.mjs",
+      "test/park-presence-channel-modules.test.mjs"
     ]
   },
   "sha256": {
@@ -425,7 +431,7 @@
     "src/services/lc-s2.js": "0e2ac1af0b680e6f4358cb9d99980e32339d04f67f911cfe14d244898f014d40",
     "src/services/lc-stac.js": "978c4be8c3bc4e7cda3f694d1f06290e661fed5bbd5b76b68719140edc18e71a",
     "src/services/lc-validate.js": "b4d8327c62940b1af1a53ddb087188816ff2359c8456c2755c7c853c5919f42b",
-    "src/services/map.js": "db155b938ac84b24d99a097d309ac5c37bd3235463f76e6fc96ceaa92e7cd4e1",
+    "src/services/map.js": "4b184184bdf3a9f3ab9bb08a0d5186c3ca7df45b91fa205ca461af2476c72c93",
     "src/services/measure.js": "ef61d7a32cf16ce83785a7f8fc1c579c8bf2bff8f8ca25f0992c3701d15c71d9",
     "src/services/offline.js": "b0d13ca6c52213b2103e5c23727be42c92cea39855622d43abaad87a8e48280f",
     "src/services/osm-client.js": "2e5eeaa735bf05a603a0db142619f60747b9696f506e666d7df992454a56814f",
@@ -577,7 +583,13 @@
     "src/application/surface/prepare-surface-review-session.js": "74d5a62b04ff996d8b797903862255d93419a93905970f2a83c5df09bbf47efd",
     "src/ui/mount-surface-review-map-host.js": "2ef1e62e2607084c3909016e324b09dba2eaaf13dfba25b0b8bcb82086e7986d",
     "src/application/surface/finish-surface-review-mount.js": "5571fc4e296cb88a581cb4991a0859c920f3a0507b50f9de19d37036b7ec1db0",
-    "test/surface-mount-lifecycle-modules.test.mjs": "db9f479034142c1c7531b012ae509d8df069efba723e71b71e490fa110bba12e"
+    "test/surface-mount-lifecycle-modules.test.mjs": "db9f479034142c1c7531b012ae509d8df069efba723e71b71e490fa110bba12e",
+    "src/application/parks/fail-park-live-share.js": "43393e3ef92a117df87aab40b8fe75b690b915fad9ed5d1a9e61c4ae006e2e36",
+    "src/domain/parks/park-live-member-color.js": "f8db106ae12445529f424d9d95a971e03a502e7ccf3e0c001d387bfb0869eeb3",
+    "src/adapters/parks/park-presence-channel.js": "264ee480dfc9284fd3b77476567c5669c4632a4df2274af4d18783009ebec943",
+    "src/adapters/parks/leave-park-presence-channel.js": "7721cacb7a41d61e25d646ab88100eab9b7b7b7aa32acd1de51a24dfa4a80e8c",
+    "src/application/parks/track-park-live-position.js": "32bfdf3611468d04f4a40e9248527780fd86e7a003bb13f47f1eafd19efc6baa",
+    "test/park-presence-channel-modules.test.mjs": "4849133a9286e390d0aa3d5d1d8fcf17ef2aa6d30789148e6e87454e7b30308b"
   },
   "authorized_modularizations": [
     {
@@ -1330,6 +1342,17 @@
           "path": "src/utils/lazylibs.js",
           "previous_sha256": "66ddef0238622b7495bef6e38acb09ea3db4862b81be497b027787b5651f2210",
           "sha256": "3a81c0137ff41131b6497e97f3dce484f44c8bd5cd01bc151c037e8f9eca07f9"
+        }
+      ]
+    },
+    {
+      "date": "2026-10-13",
+      "scope": "User-authorized fifty-third five-module split of the locked live-map park Presence lifecycle: failure/retry policy, stable collaborator colors, subscribe-before-auth channel setup, channel and Leaflet layer teardown, and throttled ephemeral location tracking. Preserve park topic and user key, two retries at three-second intervals, eight-second connection watchdog, ten-second tracking throttle, and optional Realtime behavior; locked regression tests remain unchanged.",
+      "files": [
+        {
+          "path": "src/services/map.js",
+          "previous_sha256": "db155b938ac84b24d99a097d309ac5c37bd3235463f76e6fc96ceaa92e7cd4e1",
+          "sha256": "4b184184bdf3a9f3ab9bb08a0d5186c3ca7df45b91fa205ca461af2476c72c93"
         }
       ]
     }

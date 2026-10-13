@@ -1195,3 +1195,7 @@ Her modülün tek bir dış API'si, sahibi olduğu açık durumu ve kendi testle
 ## Surface review mount lifecycle
 
 The locked `src/ui/lc-sens.js` editor mount now delegates source fingerprint invalidation, stale-record reset, session state preparation, map host setup, and epoch-gated mount completion to five modules. The UI entry point still owns compatibility fallback behavior; all modules are loaded before it and included in the offline precache. Accepted snapshots remain untouched when the source fingerprint is unchanged.
+
+## Park live Presence lifecycle
+
+The locked map service delegates park Presence failure/retry policy, stable collaborator color selection, channel subscribe/auth setup, channel/layer teardown, and throttled location tracking to five modules. The adapter keeps subscription ahead of session JWT refresh; location payloads remain ephemeral and scoped to `dg-park-<parkId>`.

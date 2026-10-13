@@ -454,6 +454,7 @@ function switchBaseLayer(type){
  * kapalıysa özellik sessizce devre dışı kalır, ölçüm akışı etkilenmez. */
 let DG_PARK_CH=null,DG_PARK_CH_ID=0,DG_LIVE_ON=true,DG_MATES_LAYER=null,DG_LAST_PING=0,DG_PARK_CH_RETRY=0,DG_PARK_CH_WATCH=null,DG_PARK_CH_LIVE=false;
 function dgParkShareFail(){
+ if(window.DG_FAIL_PARK_LIVE_SHARE)return window.DG_FAIL_PARK_LIVE_SHARE.fail({setLive:value=>{DG_PARK_CH_LIVE=value;},retries:()=>DG_PARK_CH_RETRY,setRetries:value=>{DG_PARK_CH_RETRY=value;},note:$('dgMatesNote'),translate:_tmf,setTimer:setTimeout,removeChannel:()=>{if(DG_PARK_CH&&sb&&sb.removeChannel)sb.removeChannel(DG_PARK_CH);},resetChannel:()=>{DG_PARK_CH=null;DG_PARK_CH_ID=0;},isEnabled:()=>DG_LIVE_ON,join:dgLiveShareJoinCurrent});
  DG_PARK_CH_LIVE=false;
  const nx=$("dgMatesNote");
  if(nx)nx.textContent=_tmf("⚠ Gerçek zamanlı katman kapalı — canlı konum gösterilemiyor (Supabase → Dashboard → Realtime).");
@@ -462,7 +463,7 @@ function dgParkShareFail(){
    DG_PARK_CH=null;DG_PARK_CH_ID=0;if(DG_LIVE_ON)dgLiveShareJoinCurrent();},3000);}
 }
 const DG_MATE_COLORS=["#c2452d","#2b6cb0","#7c3aed","#0f766e","#be185d","#4d7c0f","#b45309","#0e7490"];
-function dgMateColor(id){let h=0;const s=String(id||"?");for(let i=0;i<s.length;i++)h=(h*31+s.charCodeAt(i))>>>0;return DG_MATE_COLORS[h%DG_MATE_COLORS.length];}
+function dgMateColor(id){if(window.DG_PARK_LIVE_MEMBER_COLOR)return window.DG_PARK_LIVE_MEMBER_COLOR.color(id,DG_MATE_COLORS);let h=0;const s=String(id||"?");for(let i=0;i<s.length;i++)h=(h*31+s.charCodeAt(i))>>>0;return DG_MATE_COLORS[h%DG_MATE_COLORS.length];}
 function dgLiveShareToggle(on){
  DG_LIVE_ON=!!on;
  if(!DG_LIVE_ON)dgLiveShareLeave();else dgLiveShareJoinCurrent();
@@ -480,6 +481,15 @@ async function dgLiveShareJoinCurrent(){
   dgLiveShareLeave();
   DG_PARK_CH_ID=park;
   const note0=$("dgMatesNote");if(note0)note0.textContent=_tmf("⏳ gerçek zamanlı katmana bağlanılıyor…");
+  if(window.DG_PARK_PRESENCE_CHANNEL_ADAPTER){
+   window.DG_PARK_PRESENCE_CHANNEL_ADAPTER.join({client:sb,parkId:park,userId:USER.id,onSync:()=>dgLiveMatesDraw(),setChannel:value=>{DG_PARK_CH=value;},getWatch:()=>DG_PARK_CH_WATCH,setWatch:value=>{DG_PARK_CH_WATCH=value;},clearTimer:clearTimeout,setTimer:setTimeout,onWatchdog:()=>dgParkShareFail(),setAuth:token=>{if(sb.realtime&&sb.realtime.setAuth)sb.realtime.setAuth(token);},onStatus:st=>{
+    if(st==="SUBSCRIBED"){
+     if(DG_PARK_CH_WATCH){clearTimeout(DG_PARK_CH_WATCH);DG_PARK_CH_WATCH=null;}
+     DG_PARK_CH_LIVE=true;DG_LAST_PING=0;dgLiveSharePing();dgLiveMatesDraw();
+    }else if(st==="CHANNEL_ERROR"||st==="TIMED_OUT"||st==="CLOSED"){dgParkShareFail();}
+   }});
+   return;
+  }
   /* 0038: SUBSCRIBE ÖNCE (presence anon apikey ile çalışır — canlı WS
    * probuyla doğrulandı), JWT arka planda; 8 sn watchdog takılı düşürür. */
   DG_PARK_CH=sb.channel("dg-park-"+park,{config:{presence:{key:String(USER.id)}}});
@@ -501,6 +511,7 @@ async function dgLiveShareJoinCurrent(){
  }catch(e){DG_PARK_CH=null;DG_PARK_CH_ID=0;}
 }
 function dgLiveShareLeave(){
+ if(window.DG_LEAVE_PARK_PRESENCE_CHANNEL)return window.DG_LEAVE_PARK_PRESENCE_CHANNEL.leave({channel:DG_PARK_CH,client:typeof sb!=="undefined"?sb:null,layer:DG_MATES_LAYER,map:typeof map!=="undefined"?map:null,setChannel:value=>{DG_PARK_CH=value;},setParkId:value=>{DG_PARK_CH_ID=value;},setLayer:value=>{DG_MATES_LAYER=value;},note:$("dgMatesNote")});
  try{if(DG_PARK_CH&&sb&&sb.removeChannel)sb.removeChannel(DG_PARK_CH);}catch(e){}
  DG_PARK_CH=null;DG_PARK_CH_ID=0;
  if(DG_MATES_LAYER&&typeof map!=="undefined"&&map){try{map.removeLayer(DG_MATES_LAYER);}catch(e){}}
@@ -508,6 +519,7 @@ function dgLiveShareLeave(){
  const note=$("dgMatesNote");if(note)note.textContent="";
 }
 function dgLiveSharePing(){
+ if(window.DG_TRACK_PARK_LIVE_POSITION)return window.DG_TRACK_PARK_LIVE_POSITION.ping({channel:DG_PARK_CH,live:DG_PARK_CH_LIVE,enabled:DG_LIVE_ON,gps:typeof GPS!=="undefined"?GPS:null,userId:typeof USER!=="undefined"?USER?.id:null,name:typeof PROFILE!=="undefined"&&PROFILE?PROFILE.full_name:null,lastPing:DG_LAST_PING,now:Date.now(),setLastPing:value=>{DG_LAST_PING=value;}});
  try{
   if(!DG_PARK_CH||!DG_PARK_CH_LIVE||typeof DG_PARK_CH.track!=="function"||!DG_LIVE_ON)return;
   if(typeof GPS==="undefined"||!GPS||GPS.latitude==null)return;
