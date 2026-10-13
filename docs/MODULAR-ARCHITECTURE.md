@@ -1207,3 +1207,10 @@ The collaborator map renderer now separates peer selection, display-model deriva
 - `domain/parks/parse-waypoint-csv.js` BOM, başlık, boş satır ve mevcut virgül ayrıştırmasını kapsar; `validate-waypoint-csv-row.js` koordinat sınırları ve pozitif integer waypoint kimliğini doğrular.
 - `application/parks/build-waypoint-upsert-command.js` mevcut owner/proje/waypoint alanları ile `project_id,wp_id` çakışma anahtarını üretir; `adapters/parks/upsert-project-waypoint.js` aynı Supabase upsert işlemini yürütüp hatayı iletir.
 - `application/parks/upload-waypoint-csv.js` satırları sıralı kaydeder, kısmi başarıyı bildirir ve mevcut listeyi yeniler. Kilitli servis aynı toast, kayıt sırası ve refresh davranışını koruyarak orkestrasyonu modüle devreder; kilitli regresyon testleri değiştirilmedi.
+
+
+## Onaylı canlı harita yüklemesi — 13 Ekim 2026
+
+- `domain/map/prepare-approved-map-measurements.js` mevcut koordinat politikasını kullanarak çizilebilir satırları seçer; `adapters/map/fetch-approved-map-measurements.js` onaylı kayıt sorgusunu ve kesilme uyarısını korur.
+- `application/map/load-approved-measurement-markers.js` harita/okuma/çizim akışını ve `done(n, rows, error)` geri çağırım sözleşmesini sürdürür. `ui/render-live-map-load-status.js` yükleniyor, hata/yeniden dene ve normal/degrade durumlarını üretir; `application/map/load-live-measurements-map.js` yükleme durumu, analiz ve marker akışını orkestre eder.
+- Kilitli `src/services/map.js` tüm beş modül mevcutken bu akışları devreder; eksik modül durumunda uyumluluk gövdesi çalışır. Veri alanları, RLS hatası bildirimi, kesilme uyarısı, marker çizim sırası ve canlı harita dirty/loaded kapıları korunur.
