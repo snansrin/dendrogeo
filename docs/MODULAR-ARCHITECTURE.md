@@ -1092,3 +1092,10 @@ Her modülün tek bir dış API'si, sahibi olduğu açık durumu ve kendi testle
 - `domain/surface/validate-surface-brush-stroke.js`, WGS84 noktaları, 300 nokta sınırı, desteklenen sınıf ve çapları doğrular.
 - `application/surface/commit-surface-brush-stroke.js`, seçilen hücre kararlarını provenance ve sınırlı geçmişle kaydeder; `undo-surface-brush-stroke.js` yalnız hâlâ kendi darbelerine ait hücreleri geri alır.
 - `application/surface/update-surface-brush-config.js`, geçerli sınıf/çap seçimini güncelleyip etkin pointer oturumunu kapatır. Kilitli UI globali orkestrasyon uyumluluğunu korur.
+
+## LULC ana düzenleyici paneli — 13 Ekim 2026
+
+- `domain/surface/build-surface-editor-view-model.js`, tarama hazır oluşu ve meşgul/kayıt kapılarını görünüm modeline indirger.
+- `ui/render-surface-scan-panel.js`, tarama düğmesi, Sentinel‑2 kapsamı ve kanıt açıklamasını üretir.
+- `ui/render-surface-sensitivity-controls.js`, dört sınıf kaydırıcısını ve opaklık kontrolünü mevcut sırada kurar.
+- `ui/render-surface-review-actions.js`, kabul, ham görünüm ve durum alanlarını oluşturur; `ui/compose-surface-editor-panel.js` alt görünümleri sabit DOM sırasıyla birleştirir.

@@ -292,6 +292,12 @@ function dgSensAdjusted(){const a=dgSensAreas();if(!a)return null;const rec=DG_S
 function dgSensRememberSection(el){DG_SENS.sections=DG_SENS.sections||{};DG_SENS.sections[el.id]=el.open;}
 function dgSensRender(){
  const host=document.getElementById("lcSens"),rec=DG_SENS.record;if(!host||!rec)return;
+ const viewModel=window.DG_BUILD_SURFACE_EDITOR_VIEW_MODEL,scanPanel=window.DG_RENDER_SURFACE_SCAN_PANEL,controls=window.DG_RENDER_SURFACE_SENSITIVITY_CONTROLS,actions=window.DG_RENDER_SURFACE_REVIEW_ACTIONS,compose=window.DG_COMPOSE_SURFACE_EDITOR_PANEL;
+ if(viewModel&&scanPanel&&controls&&actions&&compose){
+  const model=viewModel.build({record:rec,busy:DG_SENS.busy,saving:DG_SENS.saving,exporting:DG_SENS.exporting,vegetationCount:rec.profile?.cells?dgSensVegetationTiers().count:0}),translate=_tvs,escape=esc;
+  const html=compose.render({scanPanel:scanPanel.render({model,record:rec,busy:DG_SENS.busy,rawView:DG_SENS.rawView,brush:DG_SENS.brush,cellCount:(dgSensCells()||[]).length,auditHtml:dgSensScanAuditHtml,translate,escape}),sensitivityControls:controls.render({model,record:rec,classes:DG_SENS_CLASSES,meta:dgSensMeta,focus:DG_SENS.focus,rawView:DG_SENS.rawView,brush:DG_SENS.brush,sectionsOpen:!!DG_SENS.sections?.dgSensThresholdDetails,opacity:DG_SENS.opacity,translate,escape}),reviewActions:actions.render({record:rec,disabled:model.disabled,rawView:DG_SENS.rawView,brush:DG_SENS.brush,showCandidates:DG_SENS.showCand,translate,escape})});
+  host.innerHTML=html;dgSensRenderPaintTools();dgSensBindRightPan();dgSensUpdateSummary();dgSensUpdateStatus();return;
+ }
  const scanned=!!rec.profile?.cells,vegReady=scanned&&dgSensVegetationTiers().count>=9,disabled=DG_SENS.busy||DG_SENS.saving||DG_SENS.exporting;
  let h=`<div class="dg-sens-head"><div><div class="dg-png-kicker">🛰 ${esc(_tvs("Yüzey düzenleme"))}</div><p class="dg-sens-hint">${esc(_tvs("Tara, haritada ayarla, doğru gördüğün sonucu kaydet."))}</p></div><button id="dgSensScanBtn" type="button" class="dg-png-btn ${scanned?"ghost":"primary"} sm" onclick="dgSensScan()" ${disabled||DG_SENS.rawView||DG_SENS.brush?"disabled":""}>${DG_SENS.busy?"⏳":scanned?"🔁":"🔍"} ${esc(_tvs(scanned?"Yeniden Tara":"Tara"))}</button></div>`;
  if(scanned){
