@@ -1127,3 +1127,10 @@ Her modülün tek bir dış API'si, sahibi olduğu açık durumu ve kendi testle
 - `domain/surface/select-surface-review-source.js` yalnız daha yeni ve açıkça kirli cihaz taslağına hesap snapshot’ı karşısında öncelik verir.
 - `domain/surface/normalize-surface-review-record.js` duyarlılıkları sınırlar, düzeltme/feature alanlarını doğrular ve tutarsız kabul edilmiş snapshot’ı reddeder.
 - `application/surface/load-surface-review-record.js`, cihaz/hesap kaynaklarını ve eski UI durum mesajlarını orkestre eder.
+
+## LULC su sınırı incelemesi — 13 Ekim 2026
+
+- `domain/surface/surface-water-footprint-policy.js`, açık elle çizilmiş ve parkla eşleşen doğrulanmış OSM su sınırlarını değerlendirir.
+- `domain/surface/classify-surface-water-outside-cell.js`, sınır dışı raster su hücresini elle karar, spektral kanıt ve en yakın sınıflı grid komşusuna göre sınıflandırır.
+- `domain/surface/select-surface-water-outside-parts.js` gözden geçirilmiş raster su parçalarını seçer; `count-unresolved-surface-water-parts.js` belirsiz hücreleri anahtarla tekilleştirir.
+- `domain/surface/requires-surface-water-scan.js`, su sınırı ve profil durumuna göre gerekli yeniden taramayı belirler.
