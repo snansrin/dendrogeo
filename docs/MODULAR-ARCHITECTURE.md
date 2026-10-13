@@ -1223,6 +1223,11 @@ The collaborator map renderer now separates peer selection, display-model deriva
 - `adapters/map/create-visitor-live-map.js` enjekte edilen Leaflet ile OSM haritasını kurar; `ui/visitor-live-map-trails.js` geçici izleri, `ui/visitor-live-map-fit.js` tek/çok kullanıcı kadrajını çizer.
 - `ui/visitor-live-map.js` bu adapter ve sunum modüllerini birleştirir; marker üretimi `ui/visitor-map-marker.js` ile katmana ekleme `ui/add-visitor-live-map-marker.js` arasında ayrılmıştır. İzler veritabanına kaydedilmez.
 
+## Park geri doldurma proje bağlantısı — 13 Ekim 2026
+
+- `domain/parks/build-backfill-project-link.js` park kimliği ile eski proje adından aynı `park_id` ve canonical label payload'ını üretir; `application/parks/link-backfill-project-to-park.js` önce proje bağını yazar, sonra ölçümlerdeki boş denormalize `park_id` alanlarını best-effort doldurur.
+- `adapters/parks/project-link-store.js` geri doldurma projesi için SELECT eklemeyen UPDATE-only sorguyu, ölçümlerde ise yalnız boş `park_id` alanlarını korur. `park-registry.js` bağlantı hatası metnini `ui/park-backfill-link-feedback.js` üzerinden, backfill sonrası proje/dünya/yönetim yenilemesini `application/parks/refresh-after-park-backfill.js` üzerinden yürütür. Locked servis fallback'i ve regresyonlar korunur.
+
 
 ## Ölçüm marker katmanı ve parça çizimi — 13 Ekim 2026
 

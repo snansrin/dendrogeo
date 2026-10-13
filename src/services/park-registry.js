@@ -412,6 +412,11 @@ const DG_PARK_CREATE_PROJECT_USE_CASE=window.DG_PARK_CREATE_PROJECT_APPLICATION.
   persistGeometry:park=>typeof dgPersistParkGeom==="function"?dgPersistParkGeom(park):undefined
 });
 const DG_PARK_PROJECT_LINK_STORE=window.DG_PARK_PROJECT_LINK_STORE_ADAPTER.create({getClient:()=>sb});
+const DG_PARK_BACKFILL_PROJECT_LINK=window.DG_LINK_BACKFILL_PROJECT_TO_PARK&&window.DG_BUILD_BACKFILL_PROJECT_LINK?window.DG_LINK_BACKFILL_PROJECT_TO_PARK.create({
+  buildPatch:(project,park)=>window.DG_BUILD_BACKFILL_PROJECT_LINK.build(project,park),
+  updateProject:(id,patch)=>DG_PARK_PROJECT_LINK_STORE.updateBackfillProject(id,patch),
+  backfillMeasurements:(projectId,parkId)=>DG_PARK_PROJECT_LINK_STORE.backfillMeasurements(projectId,parkId)
+}):null;
 const DG_PARK_LINK_PROJECT_USE_CASE=window.DG_PARK_LINK_PROJECT_APPLICATION.create({
   isAdmin:dgIsAdmin,
   getPark:()=>DG_PARK,
@@ -669,19 +674,19 @@ async function dgApplyBackfill(){
 
 /* Tek proje için ortak bağlama adımları (geri doldurma + elle oluşturma). */
 async function dgLinkProjectToPark(proj,park){
-  const label=dgLabelFromLegacy(proj.name,park.name);
-  const{error}=await sb.from("projects").update({park_id:park.id,label}).eq("id",proj.id);
-  if(error){
-    console.warn("DENDROGEO · backfill proje hatası:",error.message);
-    toast(dgCf("Bağlanamadı (")+esc(proj.name)+"): "+esc(error.message),"err");
+  if(!DG_PARK_BACKFILL_PROJECT_LINK){
+    const label=dgLabelFromLegacy(proj.name,park.name);
+    const{error}=await sb.from("projects").update({park_id:park.id,label}).eq("id",proj.id);
+    if(error){console.warn("DENDROGEO · backfill proje hatası:",error.message);toast(dgCf("Bağlanamadı (")+esc(proj.name)+"): "+esc(error.message),"err");return false;}
+    try{await sb.from("measurements").update({park_id:park.id}).eq("project_id",proj.id).is("park_id",null);}catch(e){}
+    return true;
+  }
+  const result=await DG_PARK_BACKFILL_PROJECT_LINK(proj,park);
+  if(result.status==="write-failed"){
+    window.DG_PARK_BACKFILL_LINK_FEEDBACK_UI.failed({project:proj,error:result.error,escape:esc,translate:dgCf,warn:(...args)=>console.warn(...args),notify:toast});
     return false;
   }
-  /* Ölçümlerin denormalize park_id'sini doldur (view zaten yedekli okur,
-   * ama rapor/dışa aktarım tutarlılığı için satır düzeyinde de dursun). */
-  try{
-    await sb.from("measurements").update({park_id:park.id}).eq("project_id",proj.id).is("park_id",null);
-  }catch(e){}
-  return true;
+  return result.status==="linked";
 }
 
 /* OSM'de park bulunamayan proje: ölçüm merkezinde, proje adıyla MANUEL park
@@ -714,9 +719,8 @@ async function dgBackfillManual(projectId){
 }
 
 function dgAfterBackfillWrites(){
-  if(typeof loadProjects==="function")loadProjects();
-  if(typeof loadWorld==="function")loadWorld();
-  if(typeof loadAdmin==="function")loadAdmin();
+  if(!window.DG_REFRESH_AFTER_PARK_BACKFILL){if(typeof loadProjects==="function")loadProjects();if(typeof loadWorld==="function")loadWorld();if(typeof loadAdmin==="function")loadAdmin();return;}
+  return window.DG_REFRESH_AFTER_PARK_BACKFILL.refresh({loadProjects:typeof loadProjects==="function"?loadProjects:null,loadWorld:typeof loadWorld==="function"?loadWorld:null,loadAdmin:typeof loadAdmin==="function"?loadAdmin:null});
 }
 
 /* =========================================================
