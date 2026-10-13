@@ -791,6 +791,16 @@ Her modülün tek bir dış API'si, sahibi olduğu açık durumu ve kendi testle
 
 - `ui/world-error.js`, dünya verisi hatasını ve yeniden deneme eylemini gösterir.
 
+- `adapters/world/park-comparison-store.js`, park görünümünü, eski şema için onaylı ölçüm yedeğini ve ülke/şehir yakınlaştırma sorgularını mevcut kolon, filtre ve limitlerle yürütür.
+
+- `domain/parks/prepare-park-comparison.js`, park kimliği olan satırları ve bekleyen satırları ayırıp karbon sıralı çubuk ölçeğini üretir.
+
+- `domain/parks/group-legacy-park-comparison.js`, eski şemada ölçümleri proje adına göre karbon, kayıt, çap ve boy toplamlarında toplar.
+
+- `ui/legacy-park-comparison.js`, eski şema bilgilendirmesini, proje karşılaştırma satırlarını ve geçici rapor seçeneklerini güvenli biçimde çizer.
+
+- `application/world/zoom-to-location.js`, harita, sayfalı olmayan konum sorgusu, kesilme uyarısı ve mevcut fit callback sırasını yönetir.
+
 - `domain/admin/measurement-review-payload.js`, ölçüm onayı ve reddi için durum/paylaşım alanlarını kurar.
 
 - `adapters/admin/measurement-moderation-store.js`, ölçüm moderasyon yazılarını, fotoğraf okumayı ve silmeyi Supabase'e aktarır.
