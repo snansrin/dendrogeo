@@ -425,7 +425,7 @@
     "src/services/osm-water-backup.js": "b3429cdc9bfe0f84bd7b6644a1221d4daadc374ac046b036abf15b3b5ee7d269",
     "src/services/park-geometry.js": "ae89879b98ed8d9f3928d17b7258389c7a7c1abdabdd63dba1aac934aacc6f83",
     "src/services/park-query.js": "b0ddd9f7fb7d99b95e29dbe78c392c472ee149e60f7e941aca91d562c826cd7e",
-    "src/services/park-registry.js": "326f90e001854b04c2a9160ee95308c1126e4a916a47657b3b90ae0b739d46ce",
+    "src/services/park-registry.js": "344f5a726444eb3f71e240d4b0bdfb9c62e777d41bd04fac56ef064575f41246",
     "src/services/park-state.js": "cc241e32d716cc6c682f2e7e82caaada845b698b5bf1b914c17b94ea86823608",
     "src/ui/choose-new-park-controller.js": "c787f76aee2cc85b748a30e5e0ccbc1393f58acfa53cf0aff2e3500344e31989",
     "src/ui/editor-ui.js": "302c294195aff4251a9eee6fe2565f9afc0f1fe959c36d946197842443f8916d",
@@ -857,6 +857,17 @@
           "path": "src/services/measure.js",
           "previous_sha256": "4c8bf3f41b1bbef761cb0bbbefac7d7ff317da4780f6859fc9c21fe53000484a",
           "sha256": "7ce7293700c432fb27a4210f324476da2f45f27b63eacb3985c0a65d5401b351"
+        }
+      ]
+    },
+    {
+      "date": "2026-10-13",
+      "scope": "User-authorized twenty-third five-module split of locked park scan transitions: manual-coordinate resolution, manual form UI, park-mode toggle orchestration, project-step navigation, and park-registration retry. Preserve pending/anchor/GPS priority, existing UI events and scroll, registration/select-insert behavior, and best-effort presence; locked regression tests remain unchanged.",
+      "files": [
+        {
+          "path": "src/services/park-registry.js",
+          "previous_sha256": "326f90e001854b04c2a9160ee95308c1126e4a916a47657b3b90ae0b739d46ce",
+          "sha256": "344f5a726444eb3f71e240d4b0bdfb9c62e777d41bd04fac56ef064575f41246"
         }
       ]
     }
