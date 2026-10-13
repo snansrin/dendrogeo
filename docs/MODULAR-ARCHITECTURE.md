@@ -1099,3 +1099,10 @@ Her modülün tek bir dış API'si, sahibi olduğu açık durumu ve kendi testle
 - `ui/render-surface-scan-panel.js`, tarama düğmesi, Sentinel‑2 kapsamı ve kanıt açıklamasını üretir.
 - `ui/render-surface-sensitivity-controls.js`, dört sınıf kaydırıcısını ve opaklık kontrolünü mevcut sırada kurar.
 - `ui/render-surface-review-actions.js`, kabul, ham görünüm ve durum alanlarını oluşturur; `ui/compose-surface-editor-panel.js` alt görünümleri sabit DOM sırasıyla birleştirir.
+
+## LULC ham/düzenleme görünüm geçişi — 13 Ekim 2026
+
+- `domain/surface/is-surface-raw-view-transition-allowed.js`, eksik kayıt, meşgul/kayıt/dışa aktarma ve yinelenen görünüm taleplerini kapatır.
+- `domain/surface/capture-surface-edit-view-snapshot.js`, aynı park nesli için hazırlanmış geometri ve görsel memo referanslarını yakalar.
+- `application/surface/prepare-surface-raw-view-transition.js`, fırça/çizim/nesne oturumlarını durdurup yalnız geçici görünüm state’ini sıfırlar.
+- `application/surface/restore-surface-edit-view-cache.js`, uyumlu düzenleme geometrisini yeniden kullanır; `switch-surface-raw-view.js` geçişi, yeniden bölümlendirme yedeğini ve özeti yönetir.

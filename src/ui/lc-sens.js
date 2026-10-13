@@ -846,6 +846,8 @@ function dgSensFeatures(rec=DG_SENS.record){if(DG_SENS.rawView)return [];return[
 function dgSensObjects(on){if(DG_SENS.rawView||!DG_SENS.record||DG_SENS.busy||DG_SENS.saving)return;DG_SENS.record.useObjects=on;dgSensDirty();dgSensRepartition().then(ok=>ok&&dgSensSave());}
 
 async function dgSensRawView(on){
+ const switchModule=window.DG_SWITCH_SURFACE_RAW_VIEW,allowed=window.DG_IS_SURFACE_RAW_VIEW_TRANSITION_ALLOWED,capture=window.DG_CAPTURE_SURFACE_EDIT_VIEW_SNAPSHOT,prepare=window.DG_PREPARE_SURFACE_RAW_VIEW_TRANSITION,restore=window.DG_RESTORE_SURFACE_EDIT_VIEW_CACHE;
+ if(switchModule&&allowed&&capture&&prepare&&restore)return switchModule.switch({state:DG_SENS,on:!!on,allowed:input=>allowed.check(input),captureSnapshot:()=>capture.capture({record:DG_SENS.record,epoch:DG_SENS.epoch,geometry:DG_SENS.geometry,parkGeometry:DG_SENS.parkGeometry,partitionVersion:DG_SENS.partitionVersion,visualMemo:DG_SENS.visualMemo}),prepareTransition:prepare.prepare,canRestore:(prepared,{record,epoch})=>prepared?.record===record&&prepared.epoch===epoch&&!!prepared.geometry,restoreCache:restore.restore,repartition:dgSensRepartition,stopBrush:dgSensBrushStop,cancelDraw:dgSensDrawCancel,cancelObject:dgSensObjectCancel,map,removeLayer:(target,layer)=>target.removeLayer(layer),render:dgSensRender,refresh:dgSensRefreshLayer,updateSummary:dgSensUpdateSummary});
  if(!DG_SENS.record||DG_SENS.busy||DG_SENS.saving||DG_SENS.exporting||DG_SENS.rawView===!!on)return;
  const rec=DG_SENS.record,epoch=DG_SENS.epoch;
  // Raw viewing cannot edit the record, so its prepared editing geometry is reusable.
