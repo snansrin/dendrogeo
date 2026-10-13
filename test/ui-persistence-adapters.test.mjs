@@ -44,8 +44,10 @@ test('auth adapter keeps session, auth commands, realtime auth and profile resul
 test('persistence boundary rejects direct queries in both application and UI layers',()=>{
  const modules=[
   {layer:'application',relativePath:'src/application/example.js',source:'client.from("measurements"); client.auth.getSession(); client.channel("presence");'},
-  {layer:'ui',relativePath:'src/ui/example.js',source:'sb.from("profiles");'},
+  {layer:'ui',relativePath:'src/ui/example.js',source:'sb.from("profiles"); sb.auth.signOut(); sb.channel("presence"); supabaseClient.storage.from("photos");'},
   {layer:'adapters',relativePath:'src/adapters/example.js',source:'client.from("measurements");'}
  ];
- assert.equal(findDirectPersistenceAccess(modules).length,4);
+ const violations=findDirectPersistenceAccess(modules);
+ assert.equal(violations.length,7);
+ assert.ok(violations.some(message=>message.startsWith('src/ui/example.js:1:')));
 });
