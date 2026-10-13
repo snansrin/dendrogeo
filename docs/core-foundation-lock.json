@@ -332,7 +332,12 @@
       "src/ui/sync-base-map-layer-selection.js",
       "src/adapters/map/manage-base-map-layers.js",
       "src/adapters/map/create-base-map-layer.js",
-      "src/application/map/switch-base-map-layer.js"
+      "src/application/map/switch-base-map-layer.js",
+      "src/domain/map/build-waypoint-navigation-header.js",
+      "src/ui/render-waypoint-navigation-header.js",
+      "src/application/map/select-nearest-waypoint.js",
+      "src/application/map/advance-waypoint-target.js",
+      "src/ui/waypoint-navigation-feedback.js"
     ],
     "scientific_contract_and_inputs": [
       "css/park-panel.css",
@@ -467,7 +472,8 @@
       "test/waypoint-csv-upload-modules.test.mjs",
       "test/waypoint-delete-modules.test.mjs",
       "test/waypoint-gps-overlay-modules.test.mjs",
-      "test/waypoint-load-modules.test.mjs"
+      "test/waypoint-load-modules.test.mjs",
+      "test/waypoint-navigation-actions.test.mjs"
     ]
   },
   "sha256": {
@@ -712,7 +718,7 @@
     "src/services/lc-s2.js": "76e5547b6c26ce325934adf2593ea9aafd24369a2ba7a13331708cfa2e4aa543",
     "src/services/lc-stac.js": "978c4be8c3bc4e7cda3f694d1f06290e661fed5bbd5b76b68719140edc18e71a",
     "src/services/lc-validate.js": "b4d8327c62940b1af1a53ddb087188816ff2359c8456c2755c7c853c5919f42b",
-    "src/services/map.js": "b5db0047dc86b53c13029e3bd407c087126672d23a6f30b5942d837127006b1f",
+    "src/services/map.js": "cb6dcc921f5ae8072782842cec2819be70a5688b0f5429333f23c1ede81b527f",
     "src/services/measure.js": "4e90e357417802724a46853df5652199354e9491cf11bc97af64f0c00060d6a4",
     "src/services/offline.js": "6f4ef41218c6621da9a5ae2f070e60de7efabc858e38035ee80cd89fd2f4a1ac",
     "src/services/osm-client.js": "2e5eeaa735bf05a603a0db142619f60747b9696f506e666d7df992454a56814f",
@@ -911,7 +917,13 @@
     "src/application/trees/calculate-live-measurement-preview.js": "e5ee1356be6d708b479ada479bc0d0dc74894e2d087737bae30a18ddbca4213e",
     "src/ui/render-live-measurement-preview.js": "c3e2047ece841cc486e940092a94ff02c8671a7f7054a492f042f277e8a39006",
     "src/domain/trees/resolve-measurement-point-query.js": "4c439864134b9f13f461f5c5895672c11f9346589dbaf0c5c895898ad658a22d",
-    "src/application/trees/query-measurement-point.js": "0f80310f85fde4732b9c5700b959406bfc067a046fb498559dfbb4cd87ca8fd3"
+    "src/application/trees/query-measurement-point.js": "0f80310f85fde4732b9c5700b959406bfc067a046fb498559dfbb4cd87ca8fd3",
+    "src/domain/map/build-waypoint-navigation-header.js": "eedcbd28179f4521be81f585b2efaa8d34cbffdfd04bff741f8ede6dfc5746a6",
+    "src/ui/render-waypoint-navigation-header.js": "754c2c98b3430dd8aef9e13aea1120dc436370f148b6a2a1b97d2688465dfb28",
+    "src/application/map/select-nearest-waypoint.js": "b7bbe6e579ea6d25bc984ff14f87749e3d84bf5cc15ab4905a200e3556752bc9",
+    "src/application/map/advance-waypoint-target.js": "eaccb1993040e2060860a0ddc4b5152b63a0b6568e052902d80ded483e307a78",
+    "src/ui/waypoint-navigation-feedback.js": "72ddf74dd6945c0d6389b0d6c9421f1f4aed17da6174d8b580185f18616bf6e3",
+    "test/waypoint-navigation-actions.test.mjs": "4ae09da6603b88bb86517e30014925e4219c30aa33e09dccab4afe67e560bda0"
   },
   "authorized_modularizations": [
     {
@@ -2087,6 +2099,17 @@
           "path": "src/services/measure.js",
           "previous_sha256": "89a9071230fd16ba25e39838151eb7212035795128b0757ac1d90f18ed74befc",
           "sha256": "4e90e357417802724a46853df5652199354e9491cf11bc97af64f0c00060d6a4"
+        }
+      ]
+    },
+    {
+      "date": "2026-10-13",
+      "scope": "User-authorized eighty-first five-module split of locked live-map waypoint navigation header and target actions: header view model and UI, GPS-gated nearest selection, next-target advancement, and feedback UI. Preserve GPS overlay ownership, target selection order, existing messages, GPS activation sequence, and locked regression tests.",
+      "files": [
+        {
+          "path": "src/services/map.js",
+          "previous_sha256": "b5db0047dc86b53c13029e3bd407c087126672d23a6f30b5942d837127006b1f",
+          "sha256": "cb6dcc921f5ae8072782842cec2819be70a5688b0f5429333f23c1ede81b527f"
         }
       ]
     }
