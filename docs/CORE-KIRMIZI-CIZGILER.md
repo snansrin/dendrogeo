@@ -51,6 +51,8 @@ Kullanıcı, kilitli servislerin çalışmaları bozulmadan beşli modüller hal
 
 49. grupta yüzey düzenleme özeti ile ham, önizleme ve kabul edilmiş sonuç raporlarının sunumu beş modüle ayrıldı. Düzenleme sayımları, sınıf alan çubukları, mevcut rapor gövdesi ve ilk yüklemedeki ham rapor yedeği korundu; kabul edilmiş sonuç değiştirilemez snapshot’tan okunmaya devam eder. Kilitli regresyon testleri değiştirilmedi.
 
+50. grupta yüzey harita katmanının render anahtarı ve eski async sonuç kapısı, Leaflet poligon üretimi, harita tıklama yönlendirmesi ve katman yenileme orkestrasyonu beş modüle taşındı. Epoch/geometry geçerliliği, nesne/fırça/çizim önceliği, sınıf odağı, opacity ve bitki katmanı davranışları korundu. Kilitli regresyon testleri değiştirilmedi.
+
 İkinci grupta kilitli `src/services/map.js` içindeki koordinat doğrulama, waypoint hedef seçimi, ölçüm popup'ı, chunk'lı işaretçi çizimi ve waypoint listesi sunumu beş yeni modüle taşındı. Marker idempotency/token iptali, GPS ve veri yazma kapıları değişmedi. Kilitli harita ve waypoint regresyonları çalıştırıldı, dosyalar değiştirilmedi; servis hash istisnası manifestte kayıtlıdır.
 
 Üçüncü grupta aynı kilitli servisten waypoint seçimi, harita viewport işlemleri, saha yönlendirme metni, waypoint marker çizimi ve GPS yön katmanı beş modüle ayrıldı. Seçim/yeniden çizim sırası, 50 m ve GPS belirsizliği metin eşikleri, harita odaklama ve veri yazma sınırı korundu. Kilitli testler değiştirilmedi; yeni servis hash'i ayrı bir manifest istisnasıdır.

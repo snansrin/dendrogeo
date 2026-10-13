@@ -440,7 +440,7 @@
     "src/ui/grid-waypoint-controller.js": "eb4f58d30fd59a46840f58f2b428b79d8afc9e1211d48d26ea2cfb74ba2b3531",
     "src/ui/grid-waypoint-layer.js": "0c6db2a4329704ec9106735cc0a26b7ce01803666ee4b19d356c976d298eba2f",
     "src/ui/lc-report.js": "f8182bce9b5dbd8dcecceaa7afee69b52d12e7883badc65e27fb93e94ca2abf9",
-    "src/ui/lc-sens.js": "6d195f362c0d30b1c94d141270c8fe3fce2697f3310aba9eb54467700aae269e",
+    "src/ui/lc-sens.js": "6227b0b14ce48a59d81e26adc3c8707a141b772bcdeb16ea820d20be8a01a7d8",
     "src/ui/map-layer-visibility.js": "50d033fba51e90f49ae39254e0700b510938be4d271aada8a9a400be727c1a60",
     "src/ui/park-admin-renderer.js": "7a4ce3606df653784f63ef4055f64d5d66ab57bd5ae749f26aa1851487297111",
     "src/ui/park-admin-status.js": "a73ea8b2ecafd3be326fb6357dad04ce8675148966bd55c1449c88154d5dabba",
@@ -467,7 +467,7 @@
     "src/ui/park-schema-warning.js": "9222beba708e3054eca73b0e30df0224abb264055d9ac3f8f6bf683823adcad8",
     "src/ui/state.js": "5feada9bc2052655d9be405043ffb6f71f39d51fcb58e189089c3d7d3fc8bafc",
     "src/utils/geo.js": "3e796768b3d55a3f07c4be3281c9437f1602b6d5e68151b2af7b101707baf294",
-    "src/utils/lazylibs.js": "44cb43e6391bce0384bdc39242db44c662954edf62c319b9715e9a2042d3479d",
+    "src/utils/lazylibs.js": "9f2d07e0b18971817de1561f43b224a35f8d1753131c33eabf461249b69622dc",
     "src/workers/surface-worker.js": "02878b04478f0c555b536f34d9807a0bf824d0f738d1468a8840069cc61e85ed",
     "test/critical-fixes.test.mjs": "3a2e62104763110bc734b3dc54a37cbf57c15b0038a78fdce35d56d9639c1989",
     "test/dbh-qa.test.mjs": "d3bbd29d292aa1214ede27a21ecb99315bc24a6346e2b0119f8c04eb8b532b95",
@@ -1270,6 +1270,22 @@
           "path": "src/utils/lazylibs.js",
           "previous_sha256": "a47316dc1b526d0d06783e58fc4b74091e4ed2767d42c984f07640561cac0fc1",
           "sha256": "44cb43e6391bce0384bdc39242db44c662954edf62c319b9715e9a2042d3479d"
+        }
+      ]
+    },
+    {
+      "date": "2026-10-13",
+      "scope": "User-authorized fiftieth five-module split of locked LULC review-layer rendering: render cache key, stale async-result gate, display polygon layer, click dispatcher, and refresh orchestration. Preserve epoch/geometry checks, object/brush/draw dispatch priority, Leaflet coordinate/style contract, retries, class focus, opacity, and boundary/vegetation overlay order; locked regression tests remain unchanged.",
+      "files": [
+        {
+          "path": "src/ui/lc-sens.js",
+          "previous_sha256": "6d195f362c0d30b1c94d141270c8fe3fce2697f3310aba9eb54467700aae269e",
+          "sha256": "6227b0b14ce48a59d81e26adc3c8707a141b772bcdeb16ea820d20be8a01a7d8"
+        },
+        {
+          "path": "src/utils/lazylibs.js",
+          "previous_sha256": "44cb43e6391bce0384bdc39242db44c662954edf62c319b9715e9a2042d3479d",
+          "sha256": "9f2d07e0b18971817de1561f43b224a35f8d1753131c33eabf461249b69622dc"
         }
       ]
     }

@@ -1177,3 +1177,10 @@ Her modülün tek bir dış API'si, sahibi olduğu açık durumu ve kendi testle
 - `ui/render-surface-area-bars.js`, sınıf alanı, yüzde, renk ve çevrilmiş etiketleri mevcut bar markup’ıyla üretir.
 - `ui/render-surface-current-report.js`, mevcut rapor host’unu ve ilk ham rapor gövdesini koruyarak güncel özeti oluşturur.
 - `ui/render-surface-accepted-report.js`, kabul edilmiş snapshot’ı var olan tarih, alan çubuğu ve yayın açıklamasıyla gösterir.
+
+## LULC harita katmanı render akışı — 13 Ekim 2026
+
+- `domain/build-surface-layer-render-key.js` epoch, partition, visual version ve edit durumundan deterministik cache anahtarı üretir; `is-surface-layer-render-current.js` geç kalmış işi reddeder.
+- `ui/render-surface-display-polygons.js` Leaflet sınıf poligonlarını ve mevcut koordinat dönüşümünü üretir.
+- `ui/handle-surface-display-layer-click.js` tıklamayı stale kapısı ardından OSM seçimi, çizim, fırça veya hücre incelemesine yönlendirir.
+- `application/refresh-surface-review-layer.js` async geometri birleştirme, tekrar deneme, sınıf odağı, opaklık ve sınır/bitki overlay sırasını orkestre eder.
