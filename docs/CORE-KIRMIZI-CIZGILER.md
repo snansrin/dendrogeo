@@ -121,3 +121,6 @@ Kırkıncı grupta kilitli yüzey spektral tarama ve otomatik su katmanı beş m
 
 
 Kırk birinci grupta kilitli LULC dışa aktarma akışı beş modüle ayrıldı: GeoJSON/CSV veri üretimi, UTM canvas çerçevesi, erişilebilir katman seçici, harita katman çizimi ve doğrulanmış harita infografiği. Sınıf/alan sırası, NDVI provenance, BOM içeren CSV, park/grid/waypoint katman seçimi, önizleme/kabul etiketi ve WorldCover lisans dipnotu korundu. Kilitli regresyon testleri değiştirilmedi; yeni modül sözleşme ve yükleme/precache testleri eklendi.
+
+
+Kırk ikinci grupta kilitli LULC kayıt yükleme akışı beş modüle ayrıldı: varsayılan kayıt oluşturma, park kapsamlı cihaz taslağı ve parmak iziyle eski taslak göçü, hesap/cihaz kaynağı seçimi, kayıt alanı ve kabul snapshot doğrulaması, yükleme orkestrasyonu. Hesap snapshot’ının önceliği, yalnız daha yeni kirli cihaz taslağının seçilmesi, owner/park kapısı, duyarlılık sınırları, geçersiz kabul sonucunun gösterilmemesi ve mevcut hata mesajı korundu. Kilitli regresyon testleri değiştirilmedi; yeni akış ve precache testleri eklendi.
