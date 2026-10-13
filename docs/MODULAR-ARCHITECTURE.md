@@ -1266,6 +1266,13 @@ The collaborator map renderer now separates peer selection, display-model deriva
 - `adapters/map/manage-base-map-layers.js` etkin altlığı bulur ve eski tile katmanlarını kaldırır; `adapters/map/create-base-map-layer.js` Leaflet katmanını var olan seçeneklerle kurar.
 - `application/map/switch-base-map-layer.js` boş harita, geçersiz tür ve zaten etkin katman kapılarını korur; servis modül yoksa mevcut yedek akışını çalıştırır.
 
+## Örnekleme grid orkestrasyonu — 13 Ekim 2026
+
+- `domain/surface/validate-surface-grid-options.js` mevcut grid boyutu ve güvenlik mesafesi sınırlarını doğrular.
+- `application/surface/prepare-surface-grid-domain.js` park, yeşil alan ve engelleri yerel UTM domain'inde birleştirir; `erode-surface-grid-domain.js` mevcut 16 yönlü clearance erozyonunu uygular.
+- `application/surface/build-surface-sampling-grid-cells.js` kırpılmış bileşenlerden güvenli örnek noktalarını, WGS84 çizim geometrisini ve hücre meta verisini üretir; `run-surface-sampling-grid.js` use-case'i orkestre eder.
+- Ana-thread lazy loader ve yüzey worker'ı bu modülleri `lc-review.js` öncesinde yükler. Servis içindeki önceki uygulama, bu modüller yüklenmediğinde uyumluluk yedeği olarak kalır.
+
 ## Park içi sampling grid geometrisi — 13 Ekim 2026
 
 - domain/surface/measure-grid-point-distance.js dış halka ve deliklerde işaretli sınır mesafesini hesaplar; ind-grid-interior-point.js sınırlı best-first alt bölmeyle güvenli iç nokta seçer.

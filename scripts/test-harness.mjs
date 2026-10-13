@@ -103,6 +103,11 @@ export function loadApp({ sadece } = {}) {
     'src/domain/surface/build-grid-line-mask.js',
     'src/domain/surface/clean-grid-geometry.js',
     'src/adapters/surface/clip-grid-geometry.js',
+    'src/domain/surface/validate-surface-grid-options.js',
+    'src/application/surface/prepare-surface-grid-domain.js',
+    'src/application/surface/erode-surface-grid-domain.js',
+    'src/application/surface/build-surface-sampling-grid-cells.js',
+    'src/application/surface/run-surface-sampling-grid.js',
     'src/services/lc-patches.js',
     /* UYDU HASSASİYET (0054): validate çekirdeği saf matematiktir (eşikler,
      * hassasiyet, Olofsson metrikleri, düzeltme katmanı) — birim testleri
