@@ -30,11 +30,13 @@ const _tinvf=(t,v)=>(typeof dgTfs==="function"?dgTfs(t,v):String(t).replace(/\{(
 
 /* ---------------- ortak durum ---------------- */
 const DG_INV={parks:null,invites:null,collabs:null,mine:null,loading:false};
+const DG_PARK_INVITE_MODULE_STORE=window.DG_PARK_INVITE_STORE?window.DG_PARK_INVITE_STORE.create(()=>sb):null;
 
 function dgInvSetCount(id,n){const el=$(id);if(el)el.textContent=String(Number(n)||0);}
-function dgOwnedParks(rows){return (rows||[]).filter(p=>p.role==="owner");}
-function dgSharedParks(rows){return (rows||[]).filter(p=>p.role==="collaborator");}
+function dgOwnedParks(rows){return window.DG_PARK_INVITE_ACCESS?window.DG_PARK_INVITE_ACCESS.owned(rows):(rows||[]).filter(p=>p.role==="owner");}
+function dgSharedParks(rows){return window.DG_PARK_INVITE_ACCESS?window.DG_PARK_INVITE_ACCESS.shared(rows):(rows||[]).filter(p=>p.role==="collaborator");}
 function dgCanManagePark(pid){
+ if(window.DG_PARK_INVITE_ACCESS)return window.DG_PARK_INVITE_ACCESS.canManage(pid,DG_INV.mine);
  return dgOwnedParks(DG_INV.mine).some(p=>Number(p.id)===Number(pid));
 }
 
@@ -43,7 +45,7 @@ async function dgMyParks(force){
  if(!force&&DG_INV.mine)return DG_INV.mine;
  if(typeof sb==="undefined"||!sb)return [];
  try{
-  const{data,error}=await sb.from("v_my_parks").select("*");
+  const{data,error}=await(DG_PARK_INVITE_MODULE_STORE?DG_PARK_INVITE_MODULE_STORE.myParks():sb.from("v_my_parks").select("*"));
   if(error){
    if(/42P01|relation|view/i.test(error.message||""))dgInvitesNote("0025_park_invites.sql çalıştırılmalı (v_my_parks yok)");
    return [];
@@ -66,7 +68,7 @@ async function dgInvitesLoadMine__scroll(){
  const me=String((PROFILE&&PROFILE.email)||USER.email||"").toLowerCase();
  let rows=[];
  try{
-  const{data,error}=await sb.from("park_invites").select("id,park_id,email,note,status,created_at,invited_by,parks(id,name,city)").eq("status","Beklemede");
+  const{data,error}=await(DG_PARK_INVITE_MODULE_STORE?DG_PARK_INVITE_MODULE_STORE.inbox():sb.from("park_invites").select("id,park_id,email,note,status,created_at,invited_by,parks(id,name,city)").eq("status","Beklemede"));
   if(!error)rows=(data||[]).filter(r=>String(r.email||"").toLowerCase()===me);
  }catch(e){/* tablo yok → sessiz geri dönüş */}
  dgInvSetCount("projInviteCount",rows.length);
@@ -78,7 +80,8 @@ async function dgInvitesLoadMine__scroll(){
  if(sbox){
   if(shared.length){
    sbox.style.display="";
-   sbox.innerHTML='<div class="project-member-banner-icon">🤝</div><div><b>Ortak çalışma erişimin var</b><span>'+
+   if(window.DG_PARK_INVITE_INBOX_UI)sbox.innerHTML=window.DG_PARK_INVITE_INBOX_UI.sharedBanner(shared,esc);
+   else sbox.innerHTML='<div class="project-member-banner-icon">🤝</div><div><b>Ortak çalışma erişimin var</b><span>'+
     shared.map(p=>esc(p.name)+(p.city?" · "+esc(p.city):"")).join(" · ")+
     '</span><small>Bu projelerde ölçüm girebilirsin. Proje düzenleme, ekip daveti ve erişim yönetimi proje sahibinde kalır.</small></div>';
   }else sbox.style.display="none";
@@ -87,11 +90,21 @@ async function dgInvitesLoadMine__scroll(){
  if(!rows.length)return;
  if(box){
   box.style.display="";
-  box.innerHTML='<div class="project-section-head"><div><span class="project-step">📬</span><div><h3>Sana gelen davetler</h3><p>Burada yalnız sana gönderilen çalışma davetleri görünür.</p></div></div><span class="badge admin">DAVET EDİLEN</span></div>'+
+  if(window.DG_PARK_INVITE_INBOX_UI)box.innerHTML=window.DG_PARK_INVITE_INBOX_UI.invites(rows,esc);
+  else box.innerHTML='<div class="project-section-head"><div><span class="project-step">📬</span><div><h3>Sana gelen davetler</h3><p>Burada yalnız sana gönderilen çalışma davetleri görünür.</p></div></div><span class="badge admin">DAVET EDİLEN</span></div>'+
    '<div class="project-invite-list">'+rows.map(r=>`<article class="project-invite-item"><div class="project-invite-main"><b>🌳 ${esc(r.parks&&r.parks.name?r.parks.name:("Park #"+r.park_id))}</b><span>${r.parks&&r.parks.city?esc(r.parks.city):""}</span>${r.note?`<small>Not: ${esc(r.note)}</small>`:""}</div><div class="project-invite-meta"><span class="mono">${new Date(r.created_at).toLocaleDateString("tr-TR")}</span><div><button class="btn sm" onclick="dgInviteRespond('${r.id}',true)">✓ Kabul et</button><button class="btn sm ghost" onclick="dgInviteRespond('${r.id}',false)">Reddet</button></div></div></article>`).join("")+'</div>';
  }
 }
 async function dgInviteRespond(id,accept){
+ if(window.DG_MANAGE_PARK_INVITES&&DG_PARK_INVITE_MODULE_STORE)return window.DG_MANAGE_PARK_INVITES.respond(id,accept,{
+  authenticated:()=>typeof USER!=="undefined"&&!!USER,
+  store:DG_PARK_INVITE_MODULE_STORE,
+  onUnauthenticated:()=>toast("Önce giriş yap.","err","📬"),
+  onFailure:error=>toast(dgCf("İşlenemedi: ")+(error.message||"").slice(0,90),"err","📬"),
+  onSuccess:accepted=>toast(accepted?"Davet kabul edildi — proje listene bak 🌳":"Davet reddedildi","ok","📬"),
+  onAccepted:()=>{DG_INV.mine=null;if(typeof loadProjects==="function")loadProjects();},
+  onComplete:()=>dgInvitesLoadMine()
+ });
  if(typeof USER==="undefined"||!USER)return toast("Önce giriş yap.","err","📬");
  const{error}=await sb.rpc("dg_invite_respond",{p_invite:id,p_accept:!!accept});
  if(error){toast(dgCf("İşlenemedi: ")+(error.message||"").slice(0,90),"err","📬");return;}
@@ -139,10 +152,10 @@ async function dgCollabRefresh(){
   dgCollabRender();
   return;
  }
- const[inv,col]=await Promise.all([
+ const[inv,col]=await(DG_PARK_INVITE_MODULE_STORE?DG_PARK_INVITE_MODULE_STORE.collaborations(pid):Promise.all([
   sb.from("park_invites").select("id,email,note,status,created_at,invited_by").eq("park_id",pid).order("created_at",{ascending:false}).limit(50),
   sb.from("park_collaborators").select("user_id,added_at,profiles(id,full_name,email)").eq("park_id",pid).limit(50),
- ]);
+ ]));
  DG_INV.invites=inv.error?null:(inv.data||[]);
  DG_INV.collabs=col.error?null:(col.data||[]);
  if(inv.error&&/42P01|relation/i.test(inv.error.message||""))dgInvitesNote("0025_park_invites.sql çalıştırılmalı (park_invites yok)");
@@ -153,6 +166,7 @@ function dgCollabRender(){const _y=(typeof dgScrollKeep==="function"?dgScrollKee
 function dgCollabRender__scroll(){
  const box=$("dgInvList");if(!box)return;
  const sel=$("dgInvPark");
+ if(window.DG_PARK_COLLABORATION_PANEL_UI){box.innerHTML=window.DG_PARK_COLLABORATION_PANEL_UI.render({invites:DG_INV.invites||[],collabs:DG_INV.collabs||[],selected:!!(sel&&sel.value),canManage:!!(sel&&sel.value&&dgCanManagePark(Number(sel.value))),escape:esc});return;}
  if(!sel||!sel.value||!dgCanManagePark(Number(sel.value))){
   box.innerHTML='<div class="project-empty"><b>Ekip yönetimi proje sahibine özeldir.</b><span>Sahibi olduğun bir proje varsa burada davet ve ortak yönetimi açılır.</span></div>';return;
  }
@@ -171,6 +185,10 @@ async function dgInviteSend(){
  if(!dgCanManagePark(Number(sel.value)))return toast(_tinv("Davet yetkisi yalnız proje sahibinde."),"err","👥");
  const email=(em&&em.value||"").trim();
  if(!email)return toast("E-posta gir.","err","👥");
+ if(window.DG_MANAGE_PARK_INVITES&&DG_PARK_INVITE_MODULE_STORE)return window.DG_MANAGE_PARK_INVITES.send({parkId:Number(sel.value),email,note:(nt&&nt.value)||null},{store:DG_PARK_INVITE_MODULE_STORE,
+  onFailure:error=>toast(dgCf("Davet gönderilemedi: ")+(error.message||"").slice(0,110),"err","👥"),
+  onSuccess:()=>{if(em)em.value="";if(nt)nt.value="";toast("Davet açıldı — arkadaşın giriş yaptığında 📬 kartını görecek ✉️","ok","👥");dgCollabRefresh();}
+ });
  const{data,error}=await sb.rpc("dg_invite_send",{p_park:Number(sel.value),p_email:email,p_note:(nt&&nt.value)||null});
  if(error){toast(dgCf("Davet gönderilemedi: ")+(error.message||"").slice(0,110),"err","👥");return;}
  if(em)em.value="";if(nt)nt.value="";
@@ -182,6 +200,11 @@ async function dgInviteRevoke(target,kind){
  const sel=$("dgInvPark");
  if(!sel||!sel.value)return;
  if(!dgCanManagePark(Number(sel.value)))return toast(_tinv("Ekip yönetimi yalnız proje sahibinde."),"err","👥");
+ if(window.DG_MANAGE_PARK_INVITES&&DG_PARK_INVITE_MODULE_STORE)return window.DG_MANAGE_PARK_INVITES.revoke({parkId:Number(sel.value),target,kind},{store:DG_PARK_INVITE_MODULE_STORE,
+  onFailure:error=>toast(dgCf("İşlenemedi: ")+(error.message||"").slice(0,90),"err","👥"),
+  onSuccess:acceptedKind=>toast(acceptedKind==="collab"?"Ortak kaldırıldı":"Davet geri alındı","ok","👥"),
+  onComplete:()=>{DG_INV.mine=null;dgCollabRefresh();}
+ });
  const{error}=await sb.rpc("dg_invite_revoke",{p_park:Number(sel.value),p_target:target,p_kind:kind});
  if(error){toast(dgCf("İşlenemedi: ")+(error.message||"").slice(0,90),"err","👥");return;}
  toast(kind==="collab"?"Ortak kaldırıldı":"Davet geri alındı","ok","👥");

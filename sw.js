@@ -100,6 +100,11 @@ const CORE_ASSETS = [
     '/css/academic-profile.css',
     '/src/services/report-publish.js',
     /* PARK ÇALIŞMA ARKADAŞI (0025): davet/kabul kartları + ortak proje listesi. */
+    '/src/domain/park-invites/access-policy.js',
+    '/src/adapters/park-invites/store.js',
+    '/src/ui/park-invite-inbox.js',
+    '/src/ui/park-collaboration-panel.js',
+    '/src/application/park-invites/manage-invites.js',
     '/src/services/park-invites.js',
     /* LULC ZİNCİRİ (Faz 5): eski landcover.js altı modüle bölündü; facade son sırada
      * (window.DG_LANDCOVER'u o kurar, yükleme anında lc-* global'lerini referanslar). */
