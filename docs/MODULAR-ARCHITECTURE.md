@@ -749,6 +749,16 @@ Her modülün tek bir dış API'si, sahibi olduğu açık durumu ve kendi testle
 
 - `ui/admin-tree-view.js`, ağaç hata/boş durumlarını, özet sayaçlarını ve genişletme eylemlerini çizer.
 
+- `application/admin/load-admin-tree.js`, yetkili yükleme, ilk yükleme durumu, scroll koruması, sorgu hatası/uyarıları ve çizim hatasını tek akışta koordine eder; servis eski global API’yi ve DOM metinlerini korur.
+
+- `application/admin/update-admin-tree-filter.js`, durum, metin araması ve bekleyen kısayolu değişikliklerini tek redraw sırasıyla uygular.
+
+- `application/admin/set-admin-tree-node-open.js`, ağaç düğümlerinin açık/kapalı anahtar kümesini günceller.
+
+- `application/admin/navigate-admin-tree-pending-scan.js`, özet satırındaki park tarama eyleminde olay yayılımını durdurup yönetim ekranına dönüş bilgisini taşır.
+
+- `application/admin/delete-admin-tree-project.js`, yönetici onayı, proje silme sonucu, canlı harita geçersizleştirme ve görünüm yenileme sırasını yönetir; RLS sunucu kararını korur.
+
 - `ui/admin-measurement-row.js`, düz moderasyon listesindeki tek ölçüm satırını mevcut işlem düğmeleri ve kaçışlama ile üretir.
 
 - `ui/admin-measurement-table.js`, düz listeyi proje/nokta/ölçüm sırasına koyar ve 300 satır sınırını korur.
