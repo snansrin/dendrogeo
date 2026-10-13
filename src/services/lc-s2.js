@@ -222,17 +222,10 @@ async function dgS2Profile(cells,outer,opts){
   if(window.dgEnsureGeoTIFF)await window.dgEnsureGeoTIFF();
   if(!window.GeoTIFF)throw new Error("GeoTIFF okuyucu yüklenmedi.");
   const o=opts||{};
-  if(!cells||!cells.length)throw new Error("Spektral tarama için hücre listesi yok (önce arazi örtüsü analizi).");
-
-  const lats=cells.map(c=>c.center.lat),lons=cells.map(c=>c.center.lon);
-  const bbox={
-    minLat:Math.min(...lats),maxLat:Math.max(...lats),
-    minLon:Math.min(...lons),maxLon:Math.max(...lons)
-  };
-  /* bbox'ı yarım hücre (~0.00005°) genişlet: kenar hücreleri pencere dışında kalmasın */
-  bbox.minLat-=0.0002;bbox.maxLat+=0.0002;bbox.minLon-=0.0003;bbox.maxLon+=0.0003;
-
-  const epsg=o.epsg||dgLcUtmEpsgForLatLon(lats[0],lons[0]);
+  const profileInput=window.DG_PREPARE_SENTINEL_PROFILE_INPUT
+    ?window.DG_PREPARE_SENTINEL_PROFILE_INPUT.prepare({cells,requestedEpsg:o.epsg},{buildBbox:rows=>window.DG_BUILD_SENTINEL_PROFILE_BBOX.build(rows),selectEpsg:(rows,requested,forLatLon)=>window.DG_SELECT_SENTINEL_PROFILE_EPSG.select(rows,requested,forLatLon),epsgForLatLon:dgLcUtmEpsgForLatLon})
+    :(()=>{if(!cells||!cells.length)throw new Error("Spektral tarama için hücre listesi yok (önce arazi örtüsü analizi).");const lats=cells.map(c=>c.center.lat),lons=cells.map(c=>c.center.lon),bbox={minLat:Math.min(...lats)-0.0002,maxLat:Math.max(...lats)+0.0002,minLon:Math.min(...lons)-0.0003,maxLon:Math.max(...lons)+0.0003};return{bbox,epsg:o.epsg||dgLcUtmEpsgForLatLon(lats[0],lons[0])};})();
+  const bbox=profileInput.bbox,epsg=profileInput.epsg;
   const found=await dgS2FindScenes(bbox,o.year||2021,o.mode);
   if(found.scenes.length<DG_S2_MIN_OBS_GUARD)throw Error("En az 3 farklı tarihte bulutsuz sahne gerekiyor; yeterli güncel veri bulunamadı.");
   const token=await dgLcGetSas(DG_S2_COLLECTION);
@@ -240,19 +233,14 @@ async function dgS2Profile(cells,outer,opts){
 
   const acc={};   /* key → bands + distinct acquisition days */
   const skipped=[];
-  for(const sc of found.scenes){
+  if(window.DG_RUN_SENTINEL_SCENE_OBSERVATION_PASS)await window.DG_RUN_SENTINEL_SCENE_OBSERVATION_PASS.run({scenes:found.scenes,cells,token,bbox:bboxDeg,bands:Object.keys(DG_S2_BANDS),validClasses:DG_S2_SCL_VALID,accumulator:acc,skipped},{loadBands:window.DG_LOAD_SENTINEL_SCENE_BANDS,readWindows:window.DG_READ_SENTINEL_SCENE_WINDOWS,indexCells:window.DG_INDEX_SENTINEL_SCENE_CELLS,collect:window.DG_COLLECT_SENTINEL_SCENE_OBSERVATIONS.collect,project:dgLcUtmForward,indexFor:dgS2CellIndex,reflectance:dgS2Reflectance,signHref:dgLcSignedHref,openRaster:dgLcOpenRaster,readBand:dgS2ReadBand,warn:(...args)=>console.warn(...args)});
+  else for(const sc of found.scenes){
     try{
       const images=await window.DG_LOAD_SENTINEL_SCENE_BANDS.load({scene:sc,token,bands:Object.keys(DG_S2_BANDS),signHref:dgLcSignedHref,openRaster:dgLcOpenRaster});
-      /* SCL first: its 20 m grid masks every spectral band observation. */
       const reads=await window.DG_READ_SENTINEL_SCENE_WINDOWS.read({images,bands:["SCL","B03","B04","B08","B11"],bbox:bboxDeg,readBand:dgS2ReadBand});
-      /* Each cell center is indexed in each band's own UTM window. */
       const indices=window.DG_INDEX_SENTINEL_SCENE_CELLS.build({cells,bands:reads,project:dgLcUtmForward,indexFor:dgS2CellIndex});
-      const used=window.DG_COLLECT_SENTINEL_SCENE_OBSERVATIONS.collect({cells,scl:reads.SCL,bands:reads,indices,validClasses:DG_S2_SCL_VALID,item:sc.item,datetime:sc.datetime,reflectance:dgS2Reflectance,accumulator:acc});
-      sc.usedCells=used;
-    }catch(err){
-      skipped.push({id:sc.id,reason:String(err&&err.message||err).slice(0,160)});
-      console.warn("DENDROGEO · Sentinel-2 sahnesi atlandı:",sc.id,String(err&&err.message||err).slice(0,120));
-    }
+      sc.usedCells=window.DG_COLLECT_SENTINEL_SCENE_OBSERVATIONS.collect({cells,scl:reads.SCL,bands:reads,indices,validClasses:DG_S2_SCL_VALID,item:sc.item,datetime:sc.datetime,reflectance:dgS2Reflectance,accumulator:acc});
+    }catch(err){skipped.push({id:sc.id,reason:String(err&&err.message||err).slice(0,160)});console.warn("DENDROGEO · Sentinel-2 sahnesi atlandı:",sc.id,String(err&&err.message||err).slice(0,120));}
   }
 
   /* Medyan kompozit + indeksler */
@@ -303,17 +291,11 @@ async function dgS2Profile(cells,outer,opts){
   evidence=annualScan.evidence;
   if(annualScan.enabled){
     const annualScenes=await window.DG_FIND_SENTINEL_ANNUAL_SCENES.find({windows:annualScan.windows,bbox,findRange:dgS2FindScenesRange});
-    for(const entry of annualScenes){
+    if(window.DG_RUN_SENTINEL_ANNUAL_OBSERVATION_PASS)await window.DG_RUN_SENTINEL_ANNUAL_OBSERVATION_PASS.run({entries:annualScenes,cells,token,bbox:bboxDeg,validClasses:DG_S2_SCL_VALID,evidence,waterMax,vegMax,waterScenes},{loadBands:window.DG_LOAD_SENTINEL_SCENE_BANDS,readWindows:window.DG_READ_SENTINEL_SCENE_WINDOWS,readAnnualWindows:window.DG_READ_SENTINEL_ANNUAL_SCENE_WINDOWS,indexCells:window.DG_INDEX_SENTINEL_ANNUAL_SCENE_CELLS,collect:window.DG_COLLECT_SENTINEL_ANNUAL_EVIDENCE.collect,project:dgLcUtmForward,indexFor:dgS2CellIndex,reflectance:dgS2Reflectance,signHref:dgLcSignedHref,openRaster:dgLcOpenRaster,readBand:dgS2ReadBand,warn:(...args)=>console.warn(...args)});
+    else for(const entry of annualScenes){
       const w=entry.window,sc=entry.scene;
-      try{
-        const reads=await window.DG_READ_SENTINEL_ANNUAL_SCENE_WINDOWS.read({scene:sc,token,bbox:bboxDeg,loadBands:window.DG_LOAD_SENTINEL_SCENE_BANDS,readBands:window.DG_READ_SENTINEL_SCENE_WINDOWS,signHref:dgLcSignedHref,openRaster:dgLcOpenRaster,readBand:dgS2ReadBand});
-        if(!reads)continue;
-        const indices=window.DG_INDEX_SENTINEL_ANNUAL_SCENE_CELLS.build({cells,bands:reads,project:dgLcUtmForward,indexFor:dgS2CellIndex});
-        const usedW=window.DG_COLLECT_SENTINEL_ANNUAL_EVIDENCE.collect({cells,reads,indices,validClasses:DG_S2_SCL_VALID,item:sc.item,datetime:sc.datetime,reflectance:dgS2Reflectance,evidence,waterMax,vegMax});
-        waterScenes.push({id:sc.id,cloud:sc.cloud,datetime:sc.datetime,window:w.label,usedCells:usedW});
-      }catch(err){
-        console.warn("DENDROGEO · Sentinel-2 su sahnesi atlandı:",sc.id,String(err&&err.message||err).slice(0,120));
-      }
+      try{const reads=await window.DG_READ_SENTINEL_ANNUAL_SCENE_WINDOWS.read({scene:sc,token,bbox:bboxDeg,loadBands:window.DG_LOAD_SENTINEL_SCENE_BANDS,readBands:window.DG_READ_SENTINEL_SCENE_WINDOWS,signHref:dgLcSignedHref,openRaster:dgLcOpenRaster,readBand:dgS2ReadBand});if(!reads)continue;const indices=window.DG_INDEX_SENTINEL_ANNUAL_SCENE_CELLS.build({cells,bands:reads,project:dgLcUtmForward,indexFor:dgS2CellIndex});const usedW=window.DG_COLLECT_SENTINEL_ANNUAL_EVIDENCE.collect({cells,reads,indices,validClasses:DG_S2_SCL_VALID,item:sc.item,datetime:sc.datetime,reflectance:dgS2Reflectance,evidence,waterMax,vegMax});waterScenes.push({id:sc.id,cloud:sc.cloud,datetime:sc.datetime,window:w.label,usedCells:usedW});}
+      catch(err){console.warn("DENDROGEO · Sentinel-2 su sahnesi atlandı:",sc.id,String(err&&err.message||err).slice(0,120));}
     }
     window.DG_MERGE_SENTINEL_ANNUAL_EVIDENCE.merge({out,evidence,waterMax,vegMax,confirmedExtreme:dgS2ConfirmedExtreme,vegetationSummary:dgS2VegetationSummary});
   }

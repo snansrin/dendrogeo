@@ -1309,3 +1309,9 @@ The collaborator map renderer now separates peer selection, display-model deriva
 - `domain/surface/is-surface-review-cache-current.js` park, CRS, hücre ve feature kimliklerinin tamamı aynı değilse çözümleme cache'ini reddeder; `retype-cached-surface-review-parts.js` geometriyi yeniden kırpmadan yalnız raster kaynaklı sınıfı günceller.
 - `adapters/surface/surface-review-cache.js` part, mask ve WGS84 dönüşümleri için WeakMap ömrünü yönetir; `project-surface-review-feature-geometry.js` MultiPolygon ve eski ring formatlarını aktif UTM CRS'ine taşır.
 - `application/surface/build-surface-review-summary.js` çözülmüş parçaları mevcut alan uzlaştırıcısına bağlar. Ana thread ve worker modülleri servis öncesi yükler; oturum kimliği, geometri cache'i ve alan hesabı korunur. Kilitli regresyon dosyaları değiştirilmedi.
+
+## Sentinel profil gözlem turları — 13 Ekim 2026
+
+- `domain/surface/build-sentinel-profile-bbox.js` park hücre merkezlerinden mevcut kenar paylı WGS84 pencereyi üretir; `select-sentinel-profile-epsg.js` istenen analiz CRS'ini korur veya ilk hücreden UTM seçer.
+- `application/surface/prepare-sentinel-profile-input.js` hücre listesini doğrular ve iki domain politikasını bağlar. `run-sentinel-scene-observation-pass.js` ana bant turunun sırasını, kullanılan hücre sayısını ve sahne bazında hata yalıtımını korur.
+- `run-sentinel-annual-observation-pass.js` yıllık su/vejetasyon sahnelerini aynı sıra ve hata politikasıyla işler; boş pencereyi atlar. Beş modül ana-thread lazy loader ve PWA precache'e eklendi, locked servis yedek akışı korunuyor.
