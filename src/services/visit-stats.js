@@ -167,6 +167,7 @@ async function loadVisitors(){
  dgVisTickStart();
 }
 async function dgVisCounts(){
+ if(window.DG_LOAD_OWNER_VISITOR_COUNTS){return window.DG_LOAD_OWNER_VISITOR_COUNTS.execute(dgVisAllowed,{load:()=>DG_VISITOR_LIVE_VISIT_COUNTS_STORE.load(sb),update:(id,value)=>{const el=$(id);if(el)el.textContent=value;}});}
  if(!dgVisAllowed())return;
  try{
   const counts=await DG_VISITOR_LIVE_VISIT_COUNTS_STORE.load(sb);
@@ -255,6 +256,7 @@ function dgVisMapDraw(rows){
  }catch(e){}
 }
 async function dgVisActivity(){
+ if(window.DG_LOAD_OWNER_VISITOR_ACTIVITY){const T=(s)=>(typeof dgCf==="function"?dgCf(s):s);return window.DG_LOAD_OWNER_VISITOR_ACTIVITY.execute(typeof PROFILE==="undefined"?null:PROFILE,{container:()=>$("visActivity"),load:()=>DG_VISITOR_STORED_ACTIVITY_STORE.load(sb),build:(data,options)=>DG_VISITOR_STORED_ACTIVITY.build(data,options),locale:()=>typeof DG_LANG!=="undefined"&&DG_LANG==="en"?"en-GB":"tr-TR",translate:T,translateValue:value=>typeof dgT==="function"?dgT(value||""):value,escape:esc,render:(box,rows,options)=>DG_VISITOR_DATABASE_ACTIVITY_UI.render(box,rows,options)});}
  if(!dgVisAllowed())return;
  const box=$("visActivity");if(!box)return;
  const T=(s)=>(typeof dgCf==="function"?dgCf(s):s);
@@ -266,8 +268,8 @@ async function dgVisActivity(){
 }
 
 /* 0040: elle yenileme + 10 sn otomatik tik (yalnız sekme açıkken) + odaklanma */
-async function dgVisRefresh(){if(!dgVisAllowed()||DG_VIS_REFRESHING)return;dgPresenceResume();DG_VIS_REFRESHING=true;try{renderVisitorsLive();await Promise.all([dgVisCounts(),dgVisActivity()]);}finally{DG_VIS_REFRESHING=false;}}
+async function dgVisRefresh(){if(window.DG_REFRESH_OWNER_VISITOR_VIEW){return window.DG_REFRESH_OWNER_VISITOR_VIEW.execute(dgVisAllowed,{isRefreshing:()=>DG_VIS_REFRESHING,resume:()=>dgPresenceResume(),setRefreshing:value=>{DG_VIS_REFRESHING=value;},render:()=>renderVisitorsLive(),counts:()=>dgVisCounts(),activity:()=>dgVisActivity()});}if(!dgVisAllowed()||DG_VIS_REFRESHING)return;dgPresenceResume();DG_VIS_REFRESHING=true;try{renderVisitorsLive();await Promise.all([dgVisCounts(),dgVisActivity()]);}finally{DG_VIS_REFRESHING=false;}}
 let DG_VIS_TIMER=null;
-function dgVisTickStart(){dgVisTickStop();DG_VIS_TIMER=setInterval(()=>{try{if(typeof DG_CUR_VIEW!=="undefined"&&DG_CUR_VIEW==="visitors")renderVisitorsLive();}catch(e){}},10000);}
-function dgVisTickStop(){if(DG_VIS_TIMER){clearInterval(DG_VIS_TIMER);DG_VIS_TIMER=null;}}
-function dgVisFocus(la,lo){try{if(!dgVisAllowed()||!dgVisHasLocation({la,lo}))return;const follow=$("visFollow");if(follow)follow.checked=false;if(DG_VIS_MAP)DG_VIS_MAP.setView([la,lo],16);}catch(e){}}
+function dgVisTickStart(){if(window.DG_VISITOR_LIVE_REFRESH_TIMER){return window.DG_VISITOR_LIVE_REFRESH_TIMER.start({getTimer:()=>DG_VIS_TIMER,setTimer:value=>{DG_VIS_TIMER=value;},setInterval:(callback,delay)=>setInterval(callback,delay),clearInterval:id=>clearInterval(id),isVisitorsView:()=>typeof DG_CUR_VIEW!=="undefined"&&DG_CUR_VIEW==="visitors",render:()=>renderVisitorsLive()});}dgVisTickStop();DG_VIS_TIMER=setInterval(()=>{try{if(typeof DG_CUR_VIEW!=="undefined"&&DG_CUR_VIEW==="visitors")renderVisitorsLive();}catch(e){}},10000);}
+function dgVisTickStop(){if(window.DG_VISITOR_LIVE_REFRESH_TIMER){return window.DG_VISITOR_LIVE_REFRESH_TIMER.stop({getTimer:()=>DG_VIS_TIMER,setTimer:value=>{DG_VIS_TIMER=value;},clearInterval:id=>clearInterval(id)});}if(DG_VIS_TIMER){clearInterval(DG_VIS_TIMER);DG_VIS_TIMER=null;}}
+function dgVisFocus(la,lo){if(window.DG_FOCUS_LIVE_VISITOR_LOCATION){return window.DG_FOCUS_LIVE_VISITOR_LOCATION.focus(la,lo,{allowed:dgVisAllowed,hasLocation:dgVisHasLocation,followControl:()=>$("visFollow"),map:()=>DG_VIS_MAP});}try{if(!dgVisAllowed()||!dgVisHasLocation({la,lo}))return;const follow=$("visFollow");if(follow)follow.checked=false;if(DG_VIS_MAP)DG_VIS_MAP.setView([la,lo],16);}catch(e){}}
