@@ -406,7 +406,7 @@
     "src/domain/trees/allometry.js": "d111ec3ae452cf9893671eff9dda63c4e4c4ac8244199bd0c4aba89907dd8a1b",
     "src/domain/trees/photo-quality.js": "c37f03fbbe19f1a2bcb6f4c68836e831f76f4ac215918aedf4ff4bf7c7b39390",
     "src/services/allometry.js": "80900b58ad133aff03915ba0a4645805b2a550967bc31e00967a5bded2203c6f",
-    "src/services/geofence.js": "2377481383ce5acc8227f118adaba545b6c3e9d4f09b1671c8cfa80cb1d0b6b3",
+    "src/services/geofence.js": "27b11b89f3fbb51cf4cf3ef63912148033628dfafce80e3c293eb3e2a2c7ef0d",
     "src/services/grid-engine.js": "92e9122dc34ed798e807a04ceb55a12cf24f4f85e9c0b5f110dbef3407f8a773",
     "src/services/landcover.js": "6caf344e84a74982f145ab7ce4976a07e97f23216d2e59f8dbfe9dab634902e4",
     "src/services/lc-config.js": "293509c879db16cf7aa10613879c3bf63b286bcbcb01a3b668816e5148e4b176",
@@ -623,6 +623,17 @@
           "path": "src/services/map.js",
           "previous_sha256": "fb82d7b174f5094c2c1ad35e3e79539de02af11fd2703d11838e82c2fb5032cf",
           "sha256": "db155b938ac84b24d99a097d309ac5c37bd3235463f76e6fc96ceaa92e7cd4e1"
+        }
+      ]
+    },
+    {
+      "date": "2026-10-13",
+      "scope": "User-authorized five-module split of the locked park geofence service: boundary distance, pure park decision, fresh GPS adapter, audit stamp, and verification use case. Preserve all accuracy/margin/freshness thresholds, legacy circle fallback, no-sensor soft pass, permission/timeout blocking, user messages, server enforcement, and locked regression tests.",
+      "files": [
+        {
+          "path": "src/services/geofence.js",
+          "previous_sha256": "2377481383ce5acc8227f118adaba545b6c3e9d4f09b1671c8cfa80cb1d0b6b3",
+          "sha256": "27b11b89f3fbb51cf4cf3ef63912148033628dfafce80e3c293eb3e2a2c7ef0d"
         }
       ]
     }
