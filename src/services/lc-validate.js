@@ -68,6 +68,8 @@
  * test/lc-validate.test.mjs doğrudan vm ile birim test eder. */
 
 const DG_VAL_VERSION="1.1.0";
+const DG_VAL_CAMPAIGN_STORE=window.DG_VALIDATION_CAMPAIGN_STORE_ADAPTER?window.DG_VALIDATION_CAMPAIGN_STORE_ADAPTER.create({getIndexedDB:()=>typeof indexedDB!=="undefined"?indexedDB:null}):null;
+const DG_VAL_CAMPAIGN_ARCHIVE=DG_VAL_CAMPAIGN_STORE&&window.DG_VALIDATION_CAMPAIGN_ARCHIVE?window.DG_VALIDATION_CAMPAIGN_ARCHIVE.create({store:DG_VAL_CAMPAIGN_STORE}):null;
 
 /* Karne sınıfları — DG_LC_CLASSES'ın 'other' dışındaki 4 ana grubu, sabit
  * sıra (hata matrisi satır/sütun düzeni deterministik olmalı). */
@@ -640,6 +642,7 @@ function dgValCampaignJson(campaign){
 /* ---------- KALICILIK (IndexedDB — offline.js deseni, AYRI veritabanı:
  * ölçüm kuyruğuna (DendroGeoOffline) dokunulmaz) ---------- */
 function dgValOpenDB(){
+  if(DG_VAL_CAMPAIGN_STORE)return DG_VAL_CAMPAIGN_STORE.open();
   return new Promise((resolve,reject)=>{
     if(typeof indexedDB==="undefined"){reject(new Error("IndexedDB yok"));return;}
     const req=indexedDB.open("DendroGeoValidate",1);
@@ -655,6 +658,7 @@ function dgValOpenDB(){
 }
 
 async function dgValSaveCampaign(campaign){
+  if(DG_VAL_CAMPAIGN_ARCHIVE)return DG_VAL_CAMPAIGN_ARCHIVE.saveCampaign(campaign);
   const db=await dgValOpenDB();
   return new Promise((resolve,reject)=>{
     const tx=db.transaction("campaigns","readwrite");
@@ -665,6 +669,7 @@ async function dgValSaveCampaign(campaign){
 }
 
 async function dgValLoadCampaigns(parkId){
+  if(DG_VAL_CAMPAIGN_ARCHIVE)return DG_VAL_CAMPAIGN_ARCHIVE.loadCampaigns(parkId);
   const db=await dgValOpenDB();
   return new Promise((resolve,reject)=>{
     const tx=db.transaction("campaigns","readonly");
@@ -678,6 +683,7 @@ async function dgValLoadCampaigns(parkId){
 }
 
 async function dgValDeleteCampaign(id){
+  if(DG_VAL_CAMPAIGN_ARCHIVE)return DG_VAL_CAMPAIGN_ARCHIVE.deleteCampaign(id);
   const db=await dgValOpenDB();
   return new Promise((resolve,reject)=>{
     const tx=db.transaction("campaigns","readwrite");

@@ -5,6 +5,7 @@
 const _tvs=s=>typeof dgCf==="function"?dgCf(s):s;
 const _tvst=(s,v)=>typeof dgTfs==="function"?dgTfs(s,v):s.replace(/\{(\w+)\}/g,(m,k)=>v[k]??m);
 const DG_SENS={record:null,layer:null,boundaryLayer:null,boundaryKey:null,busy:false,saving:false,showCand:true,base:"sat",guard:true,debounce:null,epoch:0,focus:null,editing:true,revision:0,geometry:null,parkGeometry:null,epsg:null,hostParent:null,hostNext:null,status:"",draw:null,drawLayer:null,objectPick:false,objectPreview:null,objectPreviewLayer:null,localQueue:Promise.resolve(),opacity:45,visualVersion:0,baselineShown:false,rawView:false,brush:null,rightPan:null,brushType:"hard",brushDiameter:10,strokeSeq:0,drawType:"building",vegetationView:false};
+const DG_SENS_CAMPAIGN_SAVE_QUEUE=window.DG_VALIDATION_CAMPAIGN_SAVE_QUEUE?window.DG_VALIDATION_CAMPAIGN_SAVE_QUEUE.create():null;
 const DG_SENS_COLORS={green:"#22c55e",water:"#3b82f6",hard:"#64748b",bare:"#8b5a2b",building:"#475569",pool:"#0ea5e9",other:"#94a3b8"};
 const DG_SENS_VEGETATION_COLORS={sparse:"#b7e4a8",moderate:"#4caf66",dense:"#14532d"};
 const DG_SENS_CLASSES=["green","water","hard","bare"];
@@ -97,7 +98,16 @@ function dgSensResetScanState(rec){if(!rec)return;rec.sens={green:50,water:50,ha
 function dgSensMigrateOsmObjects(rec){if(!rec)return false;const stale=(!!rec.objectVersion&&rec.objectVersion!=="footprints-v4-road-widths")||((rec.objectFeatures||[]).length>0&&rec.objectVersion!=="footprints-v4-road-widths");if(!stale)return false;rec.objectFeatures=null;rec.objectVersion=null;rec.draftDirty=true;return true;}
 async function dgSensLoadRecord(){
  const fresh=dgSensNewRecord();let local=null,remote=null;
- try{const rows=await window.DG_LC_VALIDATE.loadCampaigns(fresh.parkId);local=rows.find(r=>r.id===fresh.id&&r.owner===fresh.owner);if(!local&&fresh.parkId){const drafts=await window.DG_LC_VALIDATE.loadCampaigns(null);const fp=await window.DG_SURFACE_REVIEW.fingerprint(dgSensCells(),PARK_POLY,PARK_HOLES||[],{year:DG_LC_LAST.report?.year,engine:DG_LC_ENGINE_VERSION});const old=drafts.find(r=>r.id==="surface-"+fresh.owner+"-x"&&r.owner===fresh.owner&&r.fingerprint===fp);if(old)local={...old,id:fresh.id,parkId:fresh.parkId,parkName:fresh.parkName};}}catch(e){}
+ try{
+  const rows=await window.DG_LC_VALIDATE.loadCampaigns(fresh.parkId);
+  if(window.DG_SELECT_VALIDATION_CAMPAIGN)local=window.DG_SELECT_VALIDATION_CAMPAIGN.select(rows,fresh);
+  else local=rows.find(r=>r.id===fresh.id&&r.owner===fresh.owner);
+  if(!local&&fresh.parkId){
+   const drafts=await window.DG_LC_VALIDATE.loadCampaigns(null),fp=await window.DG_SURFACE_REVIEW.fingerprint(dgSensCells(),PARK_POLY,PARK_HOLES||[],{year:DG_LC_LAST.report?.year,engine:DG_LC_ENGINE_VERSION});
+   if(window.DG_SELECT_VALIDATION_CAMPAIGN)local=window.DG_SELECT_VALIDATION_CAMPAIGN.select(drafts,{...fresh,fingerprint:fp});
+   else{const old=drafts.find(r=>r.id==="surface-"+fresh.owner+"-x"&&r.owner===fresh.owner&&r.fingerprint===fp);if(old)local={...old,id:fresh.id,parkId:fresh.parkId,parkName:fresh.parkName};}
+  }
+ }catch(e){}
  let revision=0;
  if(fresh.owner&&fresh.parkId&&typeof sb!=="undefined"){
   try{const r=await window.DG_SURFACE_REVIEW.load(fresh.parkId,fresh.owner);if(r){remote=r.payload;remote.fingerprint=r.source_fingerprint;revision=r.revision;}}
@@ -122,9 +132,9 @@ function dgSensSave(){
  if(!DG_SENS.record)return Promise.resolve(false);
  DG_SENS.record.modifiedAt=new Date().toISOString();
  const snapshot=typeof structuredClone==="function"?structuredClone(DG_SENS.record):JSON.parse(JSON.stringify(DG_SENS.record));
- const job=DG_SENS.localQueue.catch(()=>{}).then(()=>window.DG_LC_VALIDATE.saveCampaign(snapshot));
+ const job=DG_SENS_CAMPAIGN_SAVE_QUEUE?DG_SENS_CAMPAIGN_SAVE_QUEUE.enqueue(()=>window.DG_LC_VALIDATE.saveCampaign(snapshot)):DG_SENS.localQueue.catch(()=>{}).then(()=>window.DG_LC_VALIDATE.saveCampaign(snapshot));
  DG_SENS.localQueue=job;
- return job.then(()=>true).catch(()=>{if(DG_SENS.record?.id===snapshot.id){DG_SENS.status=_tvs("Cihaz kaydı başarısız. Kaydet düğmesiyle hesap kaydını deneyin.");dgSensUpdateStatus();}return false;});
+ return job.then(()=>true).catch(()=>{if(window.DG_HANDLE_VALIDATION_CAMPAIGN_SAVE_FAILURE)window.DG_HANDLE_VALIDATION_CAMPAIGN_SAVE_FAILURE.handle(snapshot.id,{currentId:()=>DG_SENS.record?.id,setStatus:value=>{DG_SENS.status=value;},translate:_tvs,updateStatus:dgSensUpdateStatus});else if(DG_SENS.record?.id===snapshot.id){DG_SENS.status=_tvs("Cihaz kaydı başarısız. Kaydet düğmesiyle hesap kaydını deneyin.");dgSensUpdateStatus();}return false;});
 }
 function dgSensDirty(){DG_SENS.visualVersion++;DG_SENS.editing=true;if(DG_SENS.record)DG_SENS.record.draftDirty=true;DG_SENS.status="";}
 function dgSensPredict(sp){return window.DG_LC_VALIDATE.spectralPredict(sp,DG_SENS.record?.sens);}

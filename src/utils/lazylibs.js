@@ -89,6 +89,11 @@ const DG_LULC_CHAIN=[
   "src/domain/surface/validation-spectral-rules.js",
   "src/application/surface/build-validation-agreement.js",
   "src/application/surface/serialize-validation-campaign.js",
+  "src/adapters/surface/validation-campaign-store.js",
+  "src/application/surface/validation-campaign-archive.js",
+  "src/application/surface/validation-campaign-save-queue.js",
+  "src/application/surface/handle-validation-campaign-save-failure.js",
+  "src/domain/surface/select-validation-campaign.js",
   /* UYDU HASSASİYET (0054 · 2026-10-03): lc-validate eşik/metrics çekirdeği
    * + lc-s2 Sentinel-2 spektral kanıt + ui/lc-sens basit kaydırıcı paneli
    * (0053'teki üç adımlı workbench kullanıcı isteğiyle kaldırıldı). */
