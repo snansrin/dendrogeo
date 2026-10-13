@@ -1199,3 +1199,5 @@ The locked `src/ui/lc-sens.js` editor mount now delegates source fingerprint inv
 ## Park live Presence lifecycle
 
 The locked map service delegates park Presence failure/retry policy, stable collaborator color selection, channel subscribe/auth setup, channel/layer teardown, and throttled location tracking to five modules. The adapter keeps subscription ahead of session JWT refresh; location payloads remain ephemeral and scoped to `dg-park-<parkId>`.
+
+The collaborator map renderer now separates peer selection, display-model derivation, Leaflet layer reuse, marker rendering, and online-count presentation. The render path keeps Presence ordering, self-exclusion, coordinate checks, escaping, marker style, and tooltip age labels.
