@@ -1191,3 +1191,7 @@ Her modülün tek bir dış API'si, sahibi olduğu açık durumu ve kendi testle
 - `domain/is-surface-repartition-current.js`, yalnız aynı editor epoch’una ait hazırlık sonucunun commit edilmesine izin verir.
 - `application/commit-surface-repartition-result.js`, sınırları ve nesne sürümünü yazar; fırça maskesi göçünü uygular, parça hücrelerini kanonik hücre dizisine bağlar ve worker seed’i yeniler.
 - `adapters/surface/clear-surface-review-layers.js` eski Leaflet gruplarını kaldırır; `application/repartition-surface-review.js` busy/render/finally akışını korur.
+
+## Surface review mount lifecycle
+
+The locked `src/ui/lc-sens.js` editor mount now delegates source fingerprint invalidation, stale-record reset, session state preparation, map host setup, and epoch-gated mount completion to five modules. The UI entry point still owns compatibility fallback behavior; all modules are loaded before it and included in the offline precache. Accepted snapshots remain untouched when the source fingerprint is unchanged.

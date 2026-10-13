@@ -179,7 +179,12 @@
       "src/ui/park-reset-controller.js",
       "src/utils/lazylibs.js",
       "src/workers/surface-worker.js",
-      "src/ui/render-surface-accepted-result.js"
+      "src/ui/render-surface-accepted-result.js",
+      "src/domain/surface/classify-surface-review-data-change.js",
+      "src/application/surface/reset-surface-review-data-change.js",
+      "src/application/surface/prepare-surface-review-session.js",
+      "src/ui/mount-surface-review-map-host.js",
+      "src/application/surface/finish-surface-review-mount.js"
     ],
     "live_map": [
       "src/services/map.js",
@@ -294,7 +299,8 @@
       "test/tree-carbon-architecture.test.mjs",
       "test/tree-measurement-validation.test.mjs",
       "test/verified-water-footprint.test.mjs",
-      "test/water-osm-reliability.test.mjs"
+      "test/water-osm-reliability.test.mjs",
+      "test/surface-mount-lifecycle-modules.test.mjs"
     ]
   },
   "sha256": {
@@ -440,7 +446,7 @@
     "src/ui/grid-waypoint-controller.js": "eb4f58d30fd59a46840f58f2b428b79d8afc9e1211d48d26ea2cfb74ba2b3531",
     "src/ui/grid-waypoint-layer.js": "0c6db2a4329704ec9106735cc0a26b7ce01803666ee4b19d356c976d298eba2f",
     "src/ui/lc-report.js": "f8182bce9b5dbd8dcecceaa7afee69b52d12e7883badc65e27fb93e94ca2abf9",
-    "src/ui/lc-sens.js": "a93cd7c6be5980fbe33e199fae966239aac581232f90a88c069d560534ef6703",
+    "src/ui/lc-sens.js": "fbd4081eb714658f56fd3cca9bd01d980a4e3a562d85b3d6bf931d21e570d19b",
     "src/ui/map-layer-visibility.js": "50d033fba51e90f49ae39254e0700b510938be4d271aada8a9a400be727c1a60",
     "src/ui/park-admin-renderer.js": "7a4ce3606df653784f63ef4055f64d5d66ab57bd5ae749f26aa1851487297111",
     "src/ui/park-admin-status.js": "a73ea8b2ecafd3be326fb6357dad04ce8675148966bd55c1449c88154d5dabba",
@@ -467,7 +473,7 @@
     "src/ui/park-schema-warning.js": "9222beba708e3054eca73b0e30df0224abb264055d9ac3f8f6bf683823adcad8",
     "src/ui/state.js": "5feada9bc2052655d9be405043ffb6f71f39d51fcb58e189089c3d7d3fc8bafc",
     "src/utils/geo.js": "3e796768b3d55a3f07c4be3281c9437f1602b6d5e68151b2af7b101707baf294",
-    "src/utils/lazylibs.js": "66ddef0238622b7495bef6e38acb09ea3db4862b81be497b027787b5651f2210",
+    "src/utils/lazylibs.js": "3a81c0137ff41131b6497e97f3dce484f44c8bd5cd01bc151c037e8f9eca07f9",
     "src/workers/surface-worker.js": "02878b04478f0c555b536f34d9807a0bf824d0f738d1468a8840069cc61e85ed",
     "test/critical-fixes.test.mjs": "3a2e62104763110bc734b3dc54a37cbf57c15b0038a78fdce35d56d9639c1989",
     "test/dbh-qa.test.mjs": "d3bbd29d292aa1214ede27a21ecb99315bc24a6346e2b0119f8c04eb8b532b95",
@@ -565,7 +571,13 @@
     "vendor/geotiff-2.1.3.js": "cb5c9731bfee1f8bff1728e54e4436ada81ea3258b178a3d6603c61b58d99e6c",
     "vendor/leaflet-1.9.4.js": "db49d009c841f5ca34a888c96511ae936fd9f5533e90d8b2c4d57596f4e5641a",
     "vendor/polygon-clipping-0.15.7.js": "7f8619e84a86ce8dd400c9b50430e9c8cf8f26027b19eeb479f109f5c1a9d688",
-    "src/ui/render-surface-accepted-result.js": "ddc1acee07363ff658eb63d167deed5ced38294cda8090380a2a88ac093aeffb"
+    "src/ui/render-surface-accepted-result.js": "ddc1acee07363ff658eb63d167deed5ced38294cda8090380a2a88ac093aeffb",
+    "src/domain/surface/classify-surface-review-data-change.js": "2e8dd4a13a19f0e7db9baea1fb17510de4a49d453d7f26777b7a976aa241442d",
+    "src/application/surface/reset-surface-review-data-change.js": "752db7f5acbf18b44c5a7a50439b7c5e0e7b643d3c3f3c21cd0785d7a29627ba",
+    "src/application/surface/prepare-surface-review-session.js": "74d5a62b04ff996d8b797903862255d93419a93905970f2a83c5df09bbf47efd",
+    "src/ui/mount-surface-review-map-host.js": "2ef1e62e2607084c3909016e324b09dba2eaaf13dfba25b0b8bcb82086e7986d",
+    "src/application/surface/finish-surface-review-mount.js": "5571fc4e296cb88a581cb4991a0859c920f3a0507b50f9de19d37036b7ec1db0",
+    "test/surface-mount-lifecycle-modules.test.mjs": "db9f479034142c1c7531b012ae509d8df069efba723e71b71e490fa110bba12e"
   },
   "authorized_modularizations": [
     {
@@ -1302,6 +1314,22 @@
           "path": "src/utils/lazylibs.js",
           "previous_sha256": "9f2d07e0b18971817de1561f43b224a35f8d1753131c33eabf461249b69622dc",
           "sha256": "66ddef0238622b7495bef6e38acb09ea3db4862b81be497b027787b5651f2210"
+        }
+      ]
+    },
+    {
+      "date": "2026-10-13",
+      "scope": "User-authorized fifty-second five-module split of locked LULC review mounting: source fingerprint change policy, stale review reset, session preparation, map host setup, and epoch-gated mount completion. Preserve accepted snapshots for unchanged data, scan reset semantics, baseline/map setup, resize invalidation, partition gate, accepted rendering, and optional automatic water discovery; locked regression tests remain unchanged.",
+      "files": [
+        {
+          "path": "src/ui/lc-sens.js",
+          "previous_sha256": "a93cd7c6be5980fbe33e199fae966239aac581232f90a88c069d560534ef6703",
+          "sha256": "fbd4081eb714658f56fd3cca9bd01d980a4e3a562d85b3d6bf931d21e570d19b"
+        },
+        {
+          "path": "src/utils/lazylibs.js",
+          "previous_sha256": "66ddef0238622b7495bef6e38acb09ea3db4862b81be497b027787b5651f2210",
+          "sha256": "3a81c0137ff41131b6497e97f3dce484f44c8bd5cd01bc151c037e8f9eca07f9"
         }
       ]
     }
