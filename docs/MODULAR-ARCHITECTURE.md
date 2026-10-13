@@ -755,6 +755,12 @@ Her modülün tek bir dış API'si, sahibi olduğu açık durumu ve kendi testle
 - `application/admin/update-admin-export-filter-options.js`, ülke → şehir → proje seçicilerinin kademeli yenileme sırasını ve proje kimliklerini korur.
 - `application/admin/download-admin-measurements.js`, filtrelenmiş ölçümleri CSV, ayrıntılı QGIS CSV veya GeoJSON dosyası olarak indirir; boş sonuç uyarılarını ve başarı akışını çağırana bırakır.
 
+- `domain/auth/is-oauth-callback.js`, OAuth dönüşünü code, access token veya hata parametreleriyle tanır.
+- `domain/auth/read-oauth-error.js`, OAuth hata parametresini çözümler.
+- `application/auth/wait-for-oauth-session.js`, Supabase auth olayları, mevcut oturum ve zaman aşımını aynı bekleme akışında birleştirir.
+- `application/auth/clean-oauth-url.js`, OAuth dönüşünden sonra adres çubuğundaki parametreleri temizler.
+- `ui/oauth-wait-indicator.js`, Google oturum geçişi sırasında bekleme metnini gösterip gizler.
+
 - `application/admin/read-photo-storage-usage.js`, fotoğraf deposundaki klasörleri sayıp dosya boyutu ve adet toplamını üretir.
 
 - `ui/admin-storage-usage.js`, depolama kullanımını mevcut kota renkleri ve çevrilmiş sayaç metniyle gösterir.

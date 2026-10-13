@@ -223,12 +223,14 @@ location.reload();
  * Turnstile BİLEREK yok: doğrulama Google'ın kendi ekranında yapılıyor.
  * (Turnstile yalnız parola formunda bot koruması için gerekli.) */
 function dgIsOAuthCallback(){
+ if(window.DG_AUTH_OAUTH_CALLBACK)return window.DG_AUTH_OAUTH_CALLBACK.isCallback(window.location);
  const s=(typeof window!=="undefined"&&window.location&&window.location.search)||"";
  const h=(typeof window!=="undefined"&&window.location&&window.location.hash)||"";
  return /[?&]code=/.test(s)||/access_token=/.test(h)||/[?&]error=/.test(s);
 }
 
 function dgOAuthError(){
+ if(window.DG_AUTH_OAUTH_ERROR)return window.DG_AUTH_OAUTH_ERROR.read(window.location.search);
  const s=(typeof window!=="undefined"&&window.location&&window.location.search)||"";
  const m=/[?&]error=([^&]+)/.exec(s);
  return m?decodeURIComponent(m[1]):null;
@@ -239,6 +241,7 @@ function dgOAuthError(){
  * düşersek kullanıcı "giriş olmadı" sanır → oturum gelene kadar beklenir.
  * INITIAL_SESSION boş gelirse (takas hâlâ sürebilir) kısa bir ek süre tanınır. */
 function dgWaitForOAuthSession(timeoutMs){
+ if(window.DG_AUTH_OAUTH_SESSION)return window.DG_AUTH_OAUTH_SESSION.wait(sb,timeoutMs);
  const ms=Number(timeoutMs)||9000;
  return new Promise(resolve=>{
   let done=false,sub=null,grace=null;
@@ -273,6 +276,7 @@ function dgWaitForOAuthSession(timeoutMs){
 /* Adres çubuğundaki ?code=… kalıntısını temizle: yenilemede takas tekrar
  * denenmesin, ekran görüntüsünde/paylaşılan bağlantıda kod görünmesin. */
 function dgCleanOAuthUrl(){
+ if(window.DG_CLEAN_OAUTH_URL){window.DG_CLEAN_OAUTH_URL.clean(window);return;}
  try{
   if(window.history&&window.history.replaceState){
    history.replaceState(null,"",window.location.pathname);
@@ -281,6 +285,7 @@ function dgCleanOAuthUrl(){
 }
 
 function dgShowOAuthWait(msg){
+ if(window.DG_AUTH_OAUTH_WAIT_UI){window.DG_AUTH_OAUTH_WAIT_UI.show($,msg);return;}
  const el=$("oauthWait");
  if(el){
   el.style.display="block";
@@ -288,6 +293,7 @@ function dgShowOAuthWait(msg){
  }
 }
 function dgHideOAuthWait(){
+ if(window.DG_AUTH_OAUTH_WAIT_UI){window.DG_AUTH_OAUTH_WAIT_UI.hide($);return;}
  const el=$("oauthWait");
  if(el)el.style.display="none";
 }
