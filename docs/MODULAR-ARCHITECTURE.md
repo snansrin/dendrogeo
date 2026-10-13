@@ -255,6 +255,11 @@ Her modülün tek bir dış API'si, sahibi olduğu açık durumu ve kendi testle
 - `application/visitors/render-owner-live-view.js`, kurucu/yetki, görünürlük ve duraklatma kapılarından sonra sayaç, roster, akış ve harita portlarını sırayla çalıştırır.
 - `ui/visitor-live-panel.js`, mevcut bağlantı durumunu ve süzülmüş ziyaretçi roster'ını panel callback'lerine aktarır.
 - `ui/visitor-live-map.js`, mevcut Leaflet harita/katman kurulumunu, geçici konum izlerini, işaretçileri ve takip/fit davranışını yönetir.
+- `domain/visitors/presence-retry-delay.js`, canlı bağlantı yeniden deneme gecikmesini mevcut üst sınır ve üstel artış kuralıyla belirler.
+- `application/visitors/start-presence-session.js`, Presence kanalını JWT beklemeden açar; nesil denetimi, durum callback'i, heartbeat ve watchdog'u bağlar.
+- `application/visitors/stop-presence-session.js`, nesli geçersiz kılar, yaşam döngüsü timer'larını temizler ve eski kanalı kaldırır.
+- `application/visitors/fail-presence-session.js`, bağlantı hatasını görünür yapar ve sınırlı geri çekilme aralığıyla yeniden bağlanmayı planlar.
+- `application/visitors/resume-presence-session.js`, çevrimiçi/sekme görünür olduğunda bağlantıyı yeniden başlatır veya hazır oturuma yeni heartbeat gönderir.
 
 - `ui/park-info-panel.js`, park sonucundaki grid, yüzey, PNG ve katman kontrollerinin markup yapısını üretir. Park state, park kimliği, proje seçenekleri, alternatif seçici ve kaçış işlevi çağıran ekrandan verilir; mevcut DOM kimlikleri ve eylem callback’leri korunur.
 

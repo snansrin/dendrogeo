@@ -58,7 +58,10 @@ test('visit service composes presence modules without waiting for JWT before sub
   DG_VISITOR_LIVE_VISIT_COUNTS_STORE:{create:()=>({})},DG_VISITOR_ROSTER_APPLICATION:{create:()=>({})}};
  for(const path of ['src/domain/visitors/build-presence-payload.js','src/application/visitors/record-live-session-events.js',
   'src/adapters/visitors/presence-channel.js','src/adapters/visitors/remove-presence-channel.js',
-  'src/adapters/visitors/track-presence.js','src/application/visitors/upgrade-presence-auth.js']){
+  'src/adapters/visitors/track-presence.js','src/application/visitors/upgrade-presence-auth.js',
+  'src/domain/visitors/presence-retry-delay.js','src/application/visitors/stop-presence-session.js',
+  'src/application/visitors/fail-presence-session.js','src/application/visitors/start-presence-session.js',
+  'src/application/visitors/resume-presence-session.js']){
   vm.runInNewContext(source(path),{window});
  }
  const context=vm.createContext({window,document:{hidden:false,addEventListener(){}},navigator:{userAgent:'QA'},
