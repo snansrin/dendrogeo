@@ -245,6 +245,11 @@ Her modülün tek bir dış API'si, sahibi olduğu açık durumu ve kendi testle
 - `adapters/visitors/stored-activity-store.js`, kurucu etkinlik tablosunun dört mevcut Supabase sorgusunu sıralama ve kayıt limitleriyle ayrı ayrı yükler; her sorgunun hata yalıtımı ve sonuç listesi korunur, yetki kontrolü servis katmanında kalır.
 - `adapters/visitors/live-visit-counts-store.js`, kurucu canlı ziyaretçi panelinin toplam, bugün ve kayan yedi günlük sayaçlarını mevcut `site_visits` count sorgularıyla okur; yerel gün başlangıcı, owner denetimi ve DOM güncellemesi servis katmanında kalır.
 - `adapters/visitors/track-visit.js`, tekil anonim ziyaret kaydını `site_visits` tablosuna ham REST isteğiyle ve `Prefer: return=minimal` başlığıyla ekler; sekme başına tekilleştirme ve hataları sessiz yalıtma `trackVisit()` içinde kalır.
+- `domain/visitors/build-presence-payload.js`, Realtime Presence için kullanıcı, görünüm, cihaz, sınırlı oturum geçmişi ve yalnız mevcut GPS verisini içeren geçici yükü kurar; yük veritabanına yazılmaz.
+- `adapters/visitors/presence-channel.js`, ziyaretçi Presence kanalını kullanıcı/oturum anahtarıyla açar, sync ve status callback'lerini bağlar; subscribe akışı JWT beklemeden başlar.
+- `adapters/visitors/remove-presence-channel.js`, eski Presence kanalını Supabase istemcisinden kaldırır ve cleanup reddini yalıtır.
+- `adapters/visitors/track-presence.js`, presence payload'ını etkin kanala yollar ve yalnız geçerli nesil için durum/transport hatasını bildirir.
+- `application/visitors/upgrade-presence-auth.js`, subscribe başladıktan sonra oturumu arka planda okur ve bağlantı nesli hâlâ güncelse Realtime JWT'sini yükseltir.
 
 - `ui/park-info-panel.js`, park sonucundaki grid, yüzey, PNG ve katman kontrollerinin markup yapısını üretir. Park state, park kimliği, proje seçenekleri, alternatif seçici ve kaçış işlevi çağıran ekrandan verilir; mevcut DOM kimlikleri ve eylem callback’leri korunur.
 
