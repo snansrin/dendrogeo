@@ -23,10 +23,12 @@ const OVERPASS_PENDING=new Map();
 let LAST_OVERPASS_ERROR=null;
 
 function overpassCacheKey(query){
+  if(typeof window!=="undefined"&&window.DG_OVERPASS_CACHE_KEY)return window.DG_OVERPASS_CACHE_KEY.normalize(query);
   return query.replace(/\s+/g," ").trim();
 }
 
 function overpassRequest(query,label="OSM"){
+  if(typeof window!=="undefined"&&window.DG_COALESCE_OVERPASS_REQUESTS)return window.DG_COALESCE_OVERPASS_REQUESTS.request(query,label,{keyOf:overpassCacheKey,pending:OVERPASS_PENDING,run:overpassRun});
   const key=overpassCacheKey(query);
   if(OVERPASS_PENDING.has(key))return OVERPASS_PENDING.get(key);
   const job=overpassRun(query,label).finally(()=>OVERPASS_PENDING.delete(key));
@@ -49,7 +51,9 @@ async function overpassRun(query,label="OSM"){
 
   try{
     const now=Date.now();
-    const ordered=OVERPASS_URLS
+    const ordered=typeof window!=="undefined"&&window.DG_SELECT_OVERPASS_MIRRORS
+      ?window.DG_SELECT_OVERPASS_MIRRORS.select(OVERPASS_URLS,OVERPASS_HEALTH,now)
+      :OVERPASS_URLS
       .map((url,index)=>{
         const h=OVERPASS_HEALTH.get(url)||{};
         return {url,index,badUntil:h.badUntil||0,lastOk:h.lastOk||0};
@@ -67,11 +71,15 @@ async function overpassRun(query,label="OSM"){
     }
     const pool=ordered;
 
-    const deadline=Date.now()+(label==="park"?15000:20000);
+    const deadline=typeof window!=="undefined"&&window.DG_OVERPASS_REQUEST_BUDGET
+      ?window.DG_OVERPASS_REQUEST_BUDGET.deadline(label,Date.now)
+      :Date.now()+(label==="park"?15000:20000);
     for(const item of pool){
       if(Date.now()>=deadline){LAST_OVERPASS_ERROR=label+" bağlantı süresi aşıldı";break;}
       const controller=new AbortController();
-      const timeoutMs=Math.min(label==="park"?7500:10000,deadline-Date.now());
+      const timeoutMs=typeof window!=="undefined"&&window.DG_OVERPASS_REQUEST_BUDGET
+        ?window.DG_OVERPASS_REQUEST_BUDGET.timeout(label,deadline,Date.now)
+        :Math.min(label==="park"?7500:10000,deadline-Date.now());
       const timer=setTimeout(()=>controller.abort(),timeoutMs);
 
       try{
@@ -92,7 +100,8 @@ async function overpassRun(query,label="OSM"){
           const data=await res.json();
           if(data && Array.isArray(data.elements)&&!data.remark){
             OVERPASS_CACHE.set(key,{time:Date.now(),data});
-            OVERPASS_HEALTH.set(item.url,{lastOk:Date.now(),badUntil:0});
+            if(typeof window!=="undefined"&&window.DG_OVERPASS_MIRROR_HEALTH)window.DG_OVERPASS_MIRROR_HEALTH.success(OVERPASS_HEALTH,item.url,Date.now);
+            else OVERPASS_HEALTH.set(item.url,{lastOk:Date.now(),badUntil:0});
             LAST_OVERPASS_ERROR=null;
             console.log("✓ Overpass:",label,item.url,data.elements.length);
             return data;
@@ -102,26 +111,30 @@ async function overpassRun(query,label="OSM"){
         const status=res.status;
         LAST_OVERPASS_ERROR=label+" HTTP "+status+(res.ok?" · Eksik OSM yanıtı":"");
         if(status===429||status===406){
-          OVERPASS_HEALTH.set(item.url,{lastOk:item.lastOk,badUntil:Date.now()+30000});
+          if(typeof window!=="undefined"&&window.DG_OVERPASS_MIRROR_HEALTH)window.DG_OVERPASS_MIRROR_HEALTH.quarantine(OVERPASS_HEALTH,item.url,item.lastOk,30000,Date.now);
+          else OVERPASS_HEALTH.set(item.url,{lastOk:item.lastOk,badUntil:Date.now()+30000});
           console.warn("Overpass "+status+":",item.url,"→ 30 sn karantina");
           continue;
         }
 
         if(status===408||status===425||status>=500){
-          OVERPASS_HEALTH.set(item.url,{lastOk:item.lastOk,badUntil:Date.now()+60000});
+          if(typeof window!=="undefined"&&window.DG_OVERPASS_MIRROR_HEALTH)window.DG_OVERPASS_MIRROR_HEALTH.quarantine(OVERPASS_HEALTH,item.url,item.lastOk,60000,Date.now);
+          else OVERPASS_HEALTH.set(item.url,{lastOk:item.lastOk,badUntil:Date.now()+60000});
           console.warn("Overpass",status,item.url,"→ 60 sn karantina");
           continue;
         }
 
         const body=await res.text().catch(()=> "");
         LAST_OVERPASS_ERROR=label+" HTTP "+status+" "+body.slice(0,180);
-        OVERPASS_HEALTH.set(item.url,{lastOk:item.lastOk,badUntil:Date.now()+30000});
+        if(typeof window!=="undefined"&&window.DG_OVERPASS_MIRROR_HEALTH)window.DG_OVERPASS_MIRROR_HEALTH.quarantine(OVERPASS_HEALTH,item.url,item.lastOk,30000,Date.now);
+        else OVERPASS_HEALTH.set(item.url,{lastOk:item.lastOk,badUntil:Date.now()+30000});
         console.warn("Overpass hata:",LAST_OVERPASS_ERROR);
       }catch(err){
         clearTimeout(timer);
         const msg=err?.name==="AbortError" ? `timeout (${timeoutMs/1000}s)` : (err?.message||String(err));
         LAST_OVERPASS_ERROR=label+" "+msg;
-        OVERPASS_HEALTH.set(item.url,{lastOk:item.lastOk,badUntil:Date.now()+60000});
+        if(typeof window!=="undefined"&&window.DG_OVERPASS_MIRROR_HEALTH)window.DG_OVERPASS_MIRROR_HEALTH.quarantine(OVERPASS_HEALTH,item.url,item.lastOk,60000,Date.now);
+        else OVERPASS_HEALTH.set(item.url,{lastOk:item.lastOk,badUntil:Date.now()+60000});
         console.warn("Overpass bağlantı:",item.url,msg,"→ 60 sn karantina");
       }finally{clearTimeout(timer);}
     }
