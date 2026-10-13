@@ -127,3 +127,6 @@ Kırk ikinci grupta kilitli LULC kayıt yükleme akışı beş modüle ayrıldı
 
 
 Kırk üçüncü grupta kilitli LULC su sınırı incelemesi beş modüle ayrıldı: açık/doğrulanmış su alanı politikası, dış su hücresi sınıflandırması, incelenecek hücre parçalarının seçimi, belirsiz hücrelerin tekilleştirilmiş sayımı ve yeniden tarama kapısı. Parka ait doğrulanmış OSM sınırı, elle sınıflandırmalar, spektral kanıt, en yakın grid komşusu ve eşitlik sırası korundu. Kilitli regresyon testleri değiştirilmedi; yeni modül testleri eklendi.
+
+
+Kırk dördüncü grupta kilitli LULC inceleme geometri ve alan akışı beş modüle ayrıldı: çözülmüş hücre parçalarının memo üretimi, alan özeti memo’su, düzeltilmiş özet modeli, worker tabanlı görünüm geometrisi ve park içine kırpılmış sınır GeoJSON’u. Memo kimliği/geçersizleştirme, kabul edilmiş geometriyi yeniden kullanma, worker yedeği, alan toplamları, sınır doğrulaması ve dışa aktarma alanları korundu. Kilitli regresyon testleri değiştirilmedi; yeni modül testleri eklendi.
