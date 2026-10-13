@@ -1370,3 +1370,9 @@ The collaborator map renderer now separates peer selection, display-model deriva
 - `application/map/render-waypoint-gps-overlay.js` konum marker'ı, readout renderer'ı ve çizgi adapter'ını injected port olarak alır; yalnız domain guidance resolver'ına doğrudan bağlıdır.
 - `ui/waypoint-gps-overlay.js` composition sınırında üç portu bağlar. Marker → hedef seçimi → readout → çizgi sırası ve hedef güncelleme davranışı korunur; kilitli overlay sözleşme testi port kontratını doğrular.
 - Bağımlılık kuralı denetiminde bilinen geçiş istisnası kalmadı.
+
+## Park geometrisi backfill sınırları — 13 Ekim 2026
+
+- `domain/parks/resolve-park-geometry-backfill-area.js` ölçülen OSM alanını aynı tam sayıya yuvarlar; geçersiz/boş ölçümde kayıtlı park alanını korur.
+- `adapters/parks/park-geometry-backfill-store.js` park satırını `id` filtresiyle okur ve geometri/alan güncellemesini mevcut RLS kapsamlı `parks` isteğiyle yazar. OSM ring adapter'ı mevcut Overpass ilişki-yol birleştirmesini sürdürür.
+- Uygulama modülü admin kapısı, OSM hata/eksik sınır, alan hesabı, yazım ve yenileme sırasını orkestre eder; UI feedback modülü mevcut çevrilmiş ve kaçırılmış toast mesajlarını tutar. Kontrat testleri beş modülün sırasını ve store sorgularını doğrular.
