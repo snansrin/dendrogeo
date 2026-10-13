@@ -439,7 +439,7 @@
     "src/ui/grid-waypoint-controller.js": "eb4f58d30fd59a46840f58f2b428b79d8afc9e1211d48d26ea2cfb74ba2b3531",
     "src/ui/grid-waypoint-layer.js": "0c6db2a4329704ec9106735cc0a26b7ce01803666ee4b19d356c976d298eba2f",
     "src/ui/lc-report.js": "f8182bce9b5dbd8dcecceaa7afee69b52d12e7883badc65e27fb93e94ca2abf9",
-    "src/ui/lc-sens.js": "df8224d71cb23668ba4a37274088bb82abb45db007046860e1bf6dc9a39d12d0",
+    "src/ui/lc-sens.js": "f4e90700773405973b8b418d216eb850090a3f07398ca752c1ecd4dceb33e3e6",
     "src/ui/map-layer-visibility.js": "50d033fba51e90f49ae39254e0700b510938be4d271aada8a9a400be727c1a60",
     "src/ui/park-admin-renderer.js": "7a4ce3606df653784f63ef4055f64d5d66ab57bd5ae749f26aa1851487297111",
     "src/ui/park-admin-status.js": "a73ea8b2ecafd3be326fb6357dad04ce8675148966bd55c1449c88154d5dabba",
@@ -466,7 +466,7 @@
     "src/ui/park-schema-warning.js": "9222beba708e3054eca73b0e30df0224abb264055d9ac3f8f6bf683823adcad8",
     "src/ui/state.js": "5feada9bc2052655d9be405043ffb6f71f39d51fcb58e189089c3d7d3fc8bafc",
     "src/utils/geo.js": "3e796768b3d55a3f07c4be3281c9437f1602b6d5e68151b2af7b101707baf294",
-    "src/utils/lazylibs.js": "4d529de1af6259bd3e765d51c8011a2d4bf397d90385c709416d6fa1b8f6ef9f",
+    "src/utils/lazylibs.js": "7f4634cc20edff1daedd3b587e11f7933aca14d086f3b1d0a5ccb777579aea2a",
     "src/workers/surface-worker.js": "02878b04478f0c555b536f34d9807a0bf824d0f738d1468a8840069cc61e85ed",
     "test/critical-fixes.test.mjs": "3a2e62104763110bc734b3dc54a37cbf57c15b0038a78fdce35d56d9639c1989",
     "test/dbh-qa.test.mjs": "d3bbd29d292aa1214ede27a21ecb99315bc24a6346e2b0119f8c04eb8b532b95",
@@ -1104,6 +1104,22 @@
           "path": "src/utils/lazylibs.js",
           "previous_sha256": "f9c34c31e95618c9ecfc3e184701485972a787df612a86db90a7df3fa0bdcf49",
           "sha256": "4d529de1af6259bd3e765d51c8011a2d4bf397d90385c709416d6fa1b8f6ef9f"
+        }
+      ]
+    },
+    {
+      "date": "2026-10-13",
+      "scope": "User-authorized fortieth five-module split of locked surface scan orchestration: OSM water-object adapter, auto-water application with repartition rollback, scan summary model, successful-scan completion, and scan run use case. Preserve optional OSM gates, park/epoch checks, previous-feature rollback, neutral scan reset, no-raster-relabel behavior, error wording, refresh/save order and guaranteed busy cleanup; locked regression tests remain unchanged.",
+      "files": [
+        {
+          "path": "src/ui/lc-sens.js",
+          "previous_sha256": "df8224d71cb23668ba4a37274088bb82abb45db007046860e1bf6dc9a39d12d0",
+          "sha256": "f4e90700773405973b8b418d216eb850090a3f07398ca752c1ecd4dceb33e3e6"
+        },
+        {
+          "path": "src/utils/lazylibs.js",
+          "previous_sha256": "4d529de1af6259bd3e765d51c8011a2d4bf397d90385c709416d6fa1b8f6ef9f",
+          "sha256": "7f4634cc20edff1daedd3b587e11f7933aca14d086f3b1d0a5ccb777579aea2a"
         }
       ]
     }

@@ -1106,3 +1106,10 @@ Her modülün tek bir dış API'si, sahibi olduğu açık durumu ve kendi testle
 - `domain/surface/capture-surface-edit-view-snapshot.js`, aynı park nesli için hazırlanmış geometri ve görsel memo referanslarını yakalar.
 - `application/surface/prepare-surface-raw-view-transition.js`, fırça/çizim/nesne oturumlarını durdurup yalnız geçici görünüm state’ini sıfırlar.
 - `application/surface/restore-surface-edit-view-cache.js`, uyumlu düzenleme geometrisini yeniden kullanır; `switch-surface-raw-view.js` geçişi, yeniden bölümlendirme yedeğini ve özeti yönetir.
+
+## LULC spektral tarama orkestrasyonu — 13 Ekim 2026
+
+- `adapters/surface/load-surface-water-objects.js`, park kapsamlı OSM yanıtından yalnız doğrulanmış su/havuz geometrilerini seçer.
+- `application/surface/apply-auto-surface-water-objects.js`, otomatik maskeleri mevcut repartition use-case’inden geçirir ve başarısız geometri kurulumunu geri alır.
+- `domain/surface/build-surface-scan-summary.js`, yeterli gözlem, sınıf farkı ve belirsiz su sınırı mesajlarını üretir.
+- `application/surface/complete-surface-scan.js` başarılı profili kaydeder; `run-surface-scan.js` scan gate, nötr başlangıç, stale park koruması ve finally cleanup sırasını orkestre eder.
