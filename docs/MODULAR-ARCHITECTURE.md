@@ -964,3 +964,12 @@ Her modülün tek bir dış API'si, sahibi olduğu açık durumu ve kendi testle
 - `domain/surface/osm-road-policy.js`, izinli sert yüzey etiketlerini, yol tiplerini ve genişlik varsayılanlarını değerlendirip OSM yol özelliklerini hazırlar.
 - `application/surface/refine-hard-by-osm.js`, park EPSG'sinde yol-hücre temasını ölçer ve yalnızca mevcut sınıf/alan sözleşmesi içinde sert sınıf düzeltmesi yapar.
 - `services/lc-osm.js`, eski global fonksiyonları korur; modüller `lc-engine.js` sonrasında ve servis öncesinde yüklenir.
+
+## STAC ve COG ağ modülleri — 13 Ekim 2026
+
+- `domain/surface/stac-fetch-policy.js`, STAC JSON çağrılarının transient retry, iptal aktarımı ve toplam zaman sınırını yönetir.
+- `adapters/surface/open-raster-range.js`, GeoTIFF COG byte-range isteklerini aralık başlıkları, yeniden deneme ve gövde yaşam döngüsüyle taşır.
+- `adapters/surface/sign-stac-assets.js`, SAS token imzasını uygular ve koleksiyon başına süreli token cache'ini tutar.
+- `domain/surface/select-stac-tiles.js`, STAC GET URL'sini kurar, yıllık ürün filtresini ve GeoTIFF asset seçimini uygular.
+- `domain/surface/resolve-raster-window.js`, görüntü metadata'sını ve sınır dışına taşmayan park piksel penceresini hesaplar.
+- `services/lc-stac.js`, geriye uyumlu `dgLc*` API'sini tutar; modüller `lc-geo.js` sonrasında, STAC servisi öncesinde yüklenir.
