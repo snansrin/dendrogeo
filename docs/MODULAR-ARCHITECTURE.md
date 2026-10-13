@@ -1249,3 +1249,10 @@ The collaborator map renderer now separates peer selection, display-model deriva
 - `domain/map/is-waypoint-project-selected.js` proje seçimi kapısını tanımlar; `ui/confirm-waypoint-list-deletion.js` mevcut kalıcı silme uyarısını gösterir.
 - `adapters/map/delete-project-waypoints.js` yalnız seçili `project_id` filtresiyle siler; `application/map/clear-deleted-waypoint-list.js` başarılı işlemden sonra hedef/liste state’ini temizler ve yeniler.
 - `application/map/delete-project-waypoints.js` proje/iptal/hata/başarı adımlarını orkestre eder. Kilitli servis modüller hazır değilse mevcut akışını kullanmayı sürdürür.
+
+
+## Harita başlangıç yaşam döngüsü — 13 Ekim 2026
+
+- `domain/map/map-initial-view.js` üç görünümün merkez ve zoom değerlerini sağlar; `adapters/map/create-osm-map.js` Leaflet instance’ını kurar ve başlangıç görünümünü uygular.
+- `ui/add-osm-map-layer.js` mevcut OSM karo URL’sini, attribution’ı ve zoom sınırını bağlar; `application/map/initialize-map-instance.js` oluşturmayı idempotent hale getirir ve instance’ı katman eklenmeden önce state’e yazar.
+- `application/map/initialize-workspace-maps.js` ana, navigasyon ve dünya haritalarını mevcut sırayla başlatır. Kilitli servis eksik modül durumunda uyumluluk yolunu korur.

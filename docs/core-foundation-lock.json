@@ -238,7 +238,12 @@
       "src/ui/confirm-waypoint-list-deletion.js",
       "src/adapters/map/delete-project-waypoints.js",
       "src/application/map/clear-deleted-waypoint-list.js",
-      "src/application/map/delete-project-waypoints.js"
+      "src/application/map/delete-project-waypoints.js",
+      "src/domain/map/map-initial-view.js",
+      "src/adapters/map/create-osm-map.js",
+      "src/ui/add-osm-map-layer.js",
+      "src/application/map/initialize-map-instance.js",
+      "src/application/map/initialize-workspace-maps.js"
     ],
     "scientific_contract_and_inputs": [
       "css/park-panel.css",
@@ -356,7 +361,8 @@
       "test/waypoint-gps-overlay-modules.test.mjs",
       "test/waypoint-arrival-modules.test.mjs",
       "test/waypoint-load-modules.test.mjs",
-      "test/waypoint-delete-modules.test.mjs"
+      "test/waypoint-delete-modules.test.mjs",
+      "test/map-init-modules.test.mjs"
     ]
   },
   "sha256": {
@@ -481,7 +487,7 @@
     "src/services/lc-s2.js": "0e2ac1af0b680e6f4358cb9d99980e32339d04f67f911cfe14d244898f014d40",
     "src/services/lc-stac.js": "978c4be8c3bc4e7cda3f694d1f06290e661fed5bbd5b76b68719140edc18e71a",
     "src/services/lc-validate.js": "b4d8327c62940b1af1a53ddb087188816ff2359c8456c2755c7c853c5919f42b",
-    "src/services/map.js": "c4d8d7d0a1ca9ffa71990df291bc9db31aec89bd3a9d7b87a6e8ad68216571da",
+    "src/services/map.js": "9efdc07e4b6f8d2e1385f239767390e5a2f8c77aa2ce6786ce296344bdf2e159",
     "src/services/measure.js": "ef61d7a32cf16ce83785a7f8fc1c579c8bf2bff8f8ca25f0992c3701d15c71d9",
     "src/services/offline.js": "b0d13ca6c52213b2103e5c23727be42c92cea39855622d43abaad87a8e48280f",
     "src/services/osm-client.js": "2e5eeaa735bf05a603a0db142619f60747b9696f506e666d7df992454a56814f",
@@ -689,7 +695,13 @@
     "src/adapters/map/delete-project-waypoints.js": "424c8ddc9526142cde562296fe28efb577701e6e756607ca222bf907abc654cd",
     "src/application/map/clear-deleted-waypoint-list.js": "0431bd050f39f5577f0e24a124783778634b3251f095c241248d09d683da732a",
     "src/application/map/delete-project-waypoints.js": "1958083c3ac0ab1d02dda0fcc762abaa3f0a341c01ef98ebb8a608e755adbb51",
-    "test/waypoint-delete-modules.test.mjs": "b3e21cff19b6b40f9233b69f02a21550f44318842b606c1b12e7ecccefad463b"
+    "test/waypoint-delete-modules.test.mjs": "b3e21cff19b6b40f9233b69f02a21550f44318842b606c1b12e7ecccefad463b",
+    "src/domain/map/map-initial-view.js": "25cef7bec77d61b28340e4f03999f2bed67d9edd9f115c43bdfb2c00022d42ba",
+    "src/adapters/map/create-osm-map.js": "0afa2ec445fa6679b3f74185e96f695545f948e523066d94981f2d9087b6ebe2",
+    "src/ui/add-osm-map-layer.js": "c0a6c3d894d0271bbd8c5ae045e1552cfad72320a91ef60d14179d1e6b0ce42a",
+    "src/application/map/initialize-map-instance.js": "b0928d5a3821dd2841ad52b14ff7331bf94c37b71d6f8d67fc138096480d4986",
+    "src/application/map/initialize-workspace-maps.js": "0100f50d315e29b76260a66aeed0821650354def71737de0d2e27f15939529f6",
+    "test/map-init-modules.test.mjs": "e78e65c5aed0ae360811b47e6f250f698c46a92e843a630f652269a6869dd331"
   },
   "authorized_modularizations": [
     {
@@ -1541,6 +1553,17 @@
           "path": "src/services/map.js",
           "previous_sha256": "bd39240f270d50be8117754598fcbac380b7879cb23333440e9017fb047736c4",
           "sha256": "c4d8d7d0a1ca9ffa71990df291bc9db31aec89bd3a9d7b87a6e8ad68216571da"
+        }
+      ]
+    },
+    {
+      "date": "2026-10-13",
+      "scope": "User-authorized sixty-second five-module split of locked map initialization: per-view center/zoom policy, Leaflet map adapter, OSM tile layer presentation, idempotent single-map initialization, and ordered workspace initialization. Preserve all three centers and zooms, OSM attribution/maxZoom, instance assignment before layer attachment, map initialization order, and compatibility fallback; locked regression tests remain unchanged.",
+      "files": [
+        {
+          "path": "src/services/map.js",
+          "previous_sha256": "c4d8d7d0a1ca9ffa71990df291bc9db31aec89bd3a9d7b87a6e8ad68216571da",
+          "sha256": "9efdc07e4b6f8d2e1385f239767390e5a2f8c77aa2ce6786ce296344bdf2e159"
         }
       ]
     }

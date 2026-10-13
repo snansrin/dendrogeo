@@ -199,10 +199,13 @@ function dgMarkLiveDirty(){
 }
 // 5. Harita başlatma
 function initMaps(){
+ const views=window.DG_MAP_INITIAL_VIEW,creator=window.DG_CREATE_OSM_MAP,layer=window.DG_ADD_OSM_MAP_LAYER,instance=window.DG_INITIALIZE_MAP_INSTANCE,workspaces=window.DG_INITIALIZE_WORKSPACE_MAPS;
+ if(views&&creator&&layer&&instance&&workspaces){workspaces.initialize([{name:"map",container:"map",attribution:DG_ATTR.osm,getMap:()=>map,setMap:value=>{map=value;}},{name:"navMap",container:"navMap",attribution:DG_ATTR.osm,getMap:()=>navMap,setMap:value=>{navMap=value;}},{name:"worldMap",container:"worldMap",attribution:DG_ATTR.osm,getMap:()=>worldMap,setMap:value=>{worldMap=value;}}],entry=>{const view=views.resolve(entry.name);instance.initialize({getMap:entry.getMap,setMap:entry.setMap,create:()=>creator.create({leaflet:L,container:entry.container,...view}),addLayer:target=>layer.add({leaflet:L,map:target,attribution:entry.attribution})});});return;}
+ const osmAttribution=DG_ATTR.osm;
  /* ODbL: her OSM karosu katmanında attribution zorunlu (eski hâlde yoktu). */
- if(!map){map=L.map("map").setView([39.99,32.65],12);L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",{attribution:DG_ATTR.osm,maxZoom:19}).addTo(map);}
- if(!navMap){navMap=L.map("navMap").setView([39.992,32.6498],15);L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",{attribution:DG_ATTR.osm,maxZoom:19}).addTo(navMap);}
- if(!worldMap){worldMap=L.map("worldMap").setView([39,35],3);L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",{attribution:DG_ATTR.osm,maxZoom:19}).addTo(worldMap);}
+ if(!map){map=L.map("map").setView([39.99,32.65],12);L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",{attribution:osmAttribution,maxZoom:19}).addTo(map);}
+ if(!navMap){navMap=L.map("navMap").setView([39.992,32.6498],15);L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",{attribution:osmAttribution,maxZoom:19}).addTo(navMap);}
+ if(!worldMap){worldMap=L.map("worldMap").setView([39,35],3);L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",{attribution:osmAttribution,maxZoom:19}).addTo(worldMap);}
 }
 // 6. Waypoint CRUD
 async function uploadWpCsv(){
