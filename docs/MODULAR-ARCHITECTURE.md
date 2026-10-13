@@ -717,6 +717,16 @@ Her modülün tek bir dış API'si, sahibi olduğu açık durumu ve kendi testle
 
 - `domain/admin/export-filter-options.js`, ölçüm ve proje verilerinden ülke, şehir ve proje filtre seçeneklerini üretir.
 
+- `domain/export/measurement-row.js`, ölçüm satırını mevcut Türkçe tarih/saat, karbon, fotoğraf adı ve DBH hassasiyetiyle CSV alanlarına dönüştürür.
+
+- `domain/export/build-measurement-csv.js`, mevcut başlığı, UTF-8 BOM'u, satır sırasını ve son satır sonunu koruyarak tam CSV üretir.
+
+- `domain/export/build-measurement-geojson.js`, tam dışa aktarım ve hafif önizleme GeoJSON özellik kümelerini üretir; koordinat sırası [boylam, enlem] kalır.
+
+- `adapters/export/measurement-store.js`, kullanıcının ölçümlerini mevcut `owner` filtresi, azalan created_at sırası ve 1000 satırlık sayfalama ile okur.
+
+- `ui/export-preview.js`, CSV'nin ilk 100 satırını veya 20.000 karakterlik GeoJSON metnini mevcut önizleme modalına kaçışlamayla bağlar.
+
 - `application/admin/build-export-query.js`, seçili ülke/şehir/proje/durum değerlerini mevcut Supabase sorgu zincirine uygular.
 
 - `application/admin/read-export-rows.js`, dışa aktarım sorgusunu sıralı sayfalarla okur ve hata mesajını korur.
