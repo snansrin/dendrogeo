@@ -105,7 +105,17 @@ const data=record.data;
 if(!data||String(data.owner)!==owner)continue;
 try{
 const editId=data._editId||null;
-let saved=!editId?await dgOfflineFindSaved(data):null;
+let saved=null;
+if(window.DG_SYNC_QUEUED_MEASUREMENT&&window.DG_PREPARE_MEASUREMENT_SYNC_PAYLOAD&&window.DG_FIND_SAVED_OFFLINE_MEASUREMENT&&window.DG_UPLOAD_QUEUED_MEASUREMENT_PHOTO&&window.DG_PERSIST_QUEUED_MEASUREMENT){
+const result=await window.DG_SYNC_QUEUED_MEASUREMENT.run({record,owner,isCurrent:()=>!!USER&&String(USER.id)===owner&&navigator.onLine,client:sb,
+findSaved:value=>window.DG_FIND_SAVED_OFFLINE_MEASUREMENT.find({client:sb,data:value,sameMeasurement:dgOfflineSameMeasurement}),
+preparePayload:value=>window.DG_PREPARE_MEASUREMENT_SYNC_PAYLOAD.build(value),
+uploadPhoto:({data:value,recordId})=>window.DG_UPLOAD_QUEUED_MEASUREMENT_PHOTO.upload({client:sb,data:value,recordId}),
+persist:({payload,editId:recordEditId,owner:recordOwner})=>window.DG_PERSIST_QUEUED_MEASUREMENT.save({client:sb,payload,editId:recordEditId,owner:recordOwner})});
+if(result.stopped)break;
+saved=result.saved;
+}else{
+saved=!editId?await dgOfflineFindSaved(data):null;
 if(!USER||String(USER.id)!==owner||!navigator.onLine)break;
 if(!saved){
 const payload={...data};
@@ -129,6 +139,7 @@ if(!saved)throw new Error(r.error.message);
 }else{
 if(!r.data||!r.data.length)throw new Error('Sunucu kaydı doğrulanamadı; ölçüm kuyrukta tutuldu.');
 saved=r.data[0];
+}
 }
 }
 const delTx=db.transaction('measurements','readwrite');
