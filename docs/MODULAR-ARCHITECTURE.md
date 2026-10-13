@@ -1003,3 +1003,11 @@ Her modülün tek bir dış API'si, sahibi olduğu açık durumu ve kendi testle
 - `adapters/parks/sync-park-project-names.js`, bilinen park adını kullanır veya gerekiyorsa park adını okur, ardından projelerin park adı alanını aynı RLS sorgu kapsamıyla günceller.
 - `ui/render-park-admin.js`, state, mevcut overview hesabı ve satır renderer'ını birleştirir; görünür ekran yoksa mevcut erken dönüşü korur.
 - `application/parks/refresh-park-admin-views.js` ve `toggle-park-admin-empty.js`, yönetim değişikliği sonrası yenileme ile boş park filtresi state/render sırasını yönetir.
+
+## Ölçüm GPS aktivasyonu — 13 Ekim 2026
+
+- `adapters/trees/measurement-geolocation.js`, konum izni sorgusu, ilk fix ve canlı watch tarayıcı API'lerini enjekte edilen navigator üzerinden sağlar.
+- `ui/measurement-gps-status.js`, mevcut GPS mesajı, hata durumunda tekrar dene butonu/rozeti ve toast davranışını korur.
+- `application/trees/handle-measurement-gps-error.js`, izin reddi, timeout tekrar denemesi ve diğer GPS hatalarının mevcut mesaj/sırasını yürütür.
+- `adapters/trees/measurement-wake-lock.js`, destek varsa tekil ekran kilidini alır, release sonrasında yeniden alınabilmesini sağlar.
+- `application/trees/start-measurement-gps.js`, iOS yardımından izin ve busy durumu, ilk konum, canlı izleme, presence ve wake lock sırasını yönetir; eski `startGps()` globali servis facade'ında kalır.
