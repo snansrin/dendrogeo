@@ -23,6 +23,7 @@ function dgSensParkId(){try{if(typeof DG_PARK!=="undefined"&&DG_PARK?.id)return{
 function dgSensCells(){return typeof DG_LC_LAST!=="undefined"&&Array.isArray(DG_LC_LAST?.result?.cells)?DG_LC_LAST.result.cells:null;}
 function dgSensGroupAreas(){return typeof DG_LC_LAST!=="undefined"?DG_LC_LAST?.result?.groupAreas||{}:{};}
 function dgSensEditSummary(rec=DG_SENS.record,cells=dgSensCells()||[]){
+ const module=window.DG_SUMMARIZE_SURFACE_EDIT_IMPACT;if(module)return module.summarize({record:rec,currentRecord:DG_SENS.record,cells,rawView:DG_SENS.rawView,classes:DG_SENS_CLASSES,cellKey:dgSensCellKey,effective:dgSensEffective});
  if(DG_SENS.rawView||!rec)return{total:0,manualCells:0,sensitivityCells:0,boundaries:0,thresholds:0,appearance:0};
  const manualCells=Object.values(rec.corrections||{}).filter(d=>d.method==="visual-cell").length;
  const sensitivityCells=cells.filter(c=>{const d=rec.corrections?.[dgSensCellKey(c)];if(d?.method==="visual-cell")return false;const type=rec===DG_SENS.record?dgSensEffective(c):(d?.to||c.rasterClassKey||c.classKey);return type!==(c.rasterClassKey||c.classKey);}).length;
@@ -804,10 +805,12 @@ async function dgSensResultSnapshot(rec){
 }
 
 function dgSensAreaBars(areas){
+ const module=window.DG_RENDER_SURFACE_AREA_BARS;if(module)return module.render({areas,types:window.DG_SURFACE_REVIEW.types,colors:DG_SENS_COLORS,escape:esc,translate:_tvs,hectares:dgSensHa});
  const total=Object.values(areas).reduce((a,b)=>a+Number(b||0),0);
  return Object.entries(areas).filter(([k,v])=>v>0).map(([k,v])=>{const pct=total?100*v/total:0;return '<div class="dg-surface-stat"><span>'+esc(_tvs(window.DG_SURFACE_REVIEW.types[k]?.label||k))+'</span><b>'+dgSensHa(v)+' ha · %'+pct.toFixed(1)+'</b><div class="dg-surface-track" aria-hidden="true"><i style="width:'+pct+'%;background:'+DG_SENS_COLORS[k]+'"></i></div></div>';}).join('');
 }
 function dgSensRenderCurrentReport(areas){
+ const module=window.DG_RENDER_SURFACE_CURRENT_REPORT,model=window.DG_BUILD_SURFACE_REPORT_MODEL;if(module&&model)return module.render({host:document.getElementById("landCoverReport"),areas,baseline:DG_SENS.baselineReport,setBaseline:value=>{DG_SENS.baselineReport=value;},presentation:model.build({rawView:DG_SENS.rawView,editing:DG_SENS.editing,translate:_tvs}),areaBars:dgSensAreaBars,escape:esc});
  const host=document.getElementById("landCoverReport");if(!host)return;
  if(!DG_SENS.baselineReport)DG_SENS.baselineReport=host.innerHTML;
  host.innerHTML='<b>'+esc(_tvs(DG_SENS.rawView?"Ham 2021 raster sonucu":DG_SENS.editing?"Güncel yüzey önizlemesi":"Kayıtlı analiz sonucu"))+'</b>'+dgSensAreaBars(areas)+'<p class="dg-sens-hint">'+esc(_tvs(DG_SENS.editing?"Hassasiyet barları, fırça ve sınır düzeltmeleri bu özete yansır. Yayın için kabul edip kaydedin.":"Yayın isteğinde bu kayıt rapora aktarılır. Kaydedilmemiş önizleme rapora girmez."))+'</p><details class="dg-sens-details"><summary>'+esc(_tvs("Ham 2021 raster sonucu"))+'</summary>'+DG_SENS.baselineReport+'</details>';
