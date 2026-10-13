@@ -458,6 +458,17 @@ async function deleteProject(id){
 let manualPoint=false;
 let dgPointRequest=0;
 async function autoFillPointId(){
+if(typeof window!=="undefined"&&Object.prototype.hasOwnProperty.call(window,"DG_SUGGEST_NEXT_MEASUREMENT_POINT"))return window.DG_SUGGEST_NEXT_MEASUREMENT_POINT.suggest({
+ canStart:()=>!manualPoint&&!EDIT_ID,
+ projectId:()=>+$("mProject").value,
+ pointValue:()=>$("mPoint").value,
+ gps:()=>GPS,
+ canSuggest:pid=>!manualPoint&&!EDIT_ID&&+$("mProject").value===pid&&!$("mPoint").value,
+ fetchWaypoints:projectId=>window.DG_FETCH_UNVISITED_MEASUREMENT_WAYPOINTS.fetch({client:sb,projectId}),
+ fetchLatest:projectId=>window.DG_FETCH_LATEST_MEASUREMENT_POINT.fetch({client:sb,projectId}),
+ distance:(lat1,lon1,lat2,lon2)=>hav(lat1,lon1,lat2,lon2),
+ setPoint:value=>{$("mPoint").value=value;}
+});
 const request=++dgPointRequest;
 if(manualPoint||EDIT_ID)return;
 const pid=+$("mProject").value;
@@ -482,6 +493,11 @@ if(request===dgPointRequest&&!manualPoint&&!EDIT_ID&&+$("mProject").value===pid&
 async function queryPointId(){
  const pid=+$("mProject").value,pt=+$("mPoint").value,res=$("pointQueryResult");
  if(!pid||!pt){res.style.display="none";return;}
+ if(typeof window!=="undefined"&&Object.prototype.hasOwnProperty.call(window,"DG_FETCH_MEASUREMENT_AT_PROJECT_POINT")){
+  const record=await window.DG_FETCH_MEASUREMENT_AT_PROJECT_POINT.fetch({client:sb,projectId:pid,pointId:pt});
+  if(+$("mProject").value!==pid||+$("mPoint").value!==pt)return;
+  return window.DG_MEASUREMENT_POINT_QUERY_RESULT.render({element:res,record,pointId:pt,escape:esc,translate:_tms,translateFormat:_tmsf,circumferenceFromDiameter:value=>typeof circumferenceCmFromDiameter==="function"?circumferenceCmFromDiameter(+value):null});
+ }
  const{data}=await sb.from("measurements").select("*").eq("project_id",pid).eq("point_id",pt).order("created_at",{ascending:false}).limit(1);
  if(+$("mProject").value!==pid||+$("mPoint").value!==pt)return;
  if(data&&data.length>0){
