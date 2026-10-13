@@ -731,7 +731,7 @@
     "src/services/osm-water-backup.js": "b3429cdc9bfe0f84bd7b6644a1221d4daadc374ac046b036abf15b3b5ee7d269",
     "src/services/park-geometry.js": "ae89879b98ed8d9f3928d17b7258389c7a7c1abdabdd63dba1aac934aacc6f83",
     "src/services/park-query.js": "b0ddd9f7fb7d99b95e29dbe78c392c472ee149e60f7e941aca91d562c826cd7e",
-    "src/services/park-registry.js": "1b6fc82574a2d38d1d20086ef034e0c3bd613e4360715cad35ec687670f6f043",
+    "src/services/park-registry.js": "b79de0f18cdf134d2eba326afd09aabd69e85606ffc0b672ddc5521901d8a7ac",
     "src/services/park-state.js": "cc241e32d716cc6c682f2e7e82caaada845b698b5bf1b914c17b94ea86823608",
     "src/ui/add-osm-map-layer.js": "c0a6c3d894d0271bbd8c5ae045e1552cfad72320a91ef60d14179d1e6b0ce42a",
     "src/ui/choose-new-park-controller.js": "c787f76aee2cc85b748a30e5e0ccbc1393f58acfa53cf0aff2e3500344e31989",
@@ -2133,6 +2133,17 @@
           "path": "src/services/map.js",
           "previous_sha256": "cb6dcc921f5ae8072782842cec2819be70a5688b0f5429333f23c1ede81b527f",
           "sha256": "faa47a1298cce3abd8393d901429c93557774b9f031397741f0a518b98306eee"
+        }
+      ]
+    },
+    {
+      "date": "2026-10-13",
+      "scope": "User-authorized eighty-third five-module park-registry admin mutation split: rename, merge and delete use cases, scoped Supabase mutation adapter, and confirmation/result UI. Preserve exact id/park_id write filters, mutation order, project-name synchronization, error feedback, session cleanup, legacy service entry points/fallback, and locked regression tests.",
+      "files": [
+        {
+          "path": "src/services/park-registry.js",
+          "previous_sha256": "1b6fc82574a2d38d1d20086ef034e0c3bd613e4360715cad35ec687670f6f043",
+          "sha256": "b79de0f18cdf134d2eba326afd09aabd69e85606ffc0b672ddc5521901d8a7ac"
         }
       ]
     }
