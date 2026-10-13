@@ -14,6 +14,7 @@ function dgRecordProjectGroup(name,rows){
  return window.DG_RECORD_PROJECT_UI.render(name,rows,{escape:esc,renderItem:dgRecordItemHTML});
 }
 async function loadRecords__scroll(){
+ if(window.DG_LOAD_OWN_RECORDS_VIEW)return window.DG_LOAD_OWN_RECORDS_VIEW.execute(USER.id,{load:userId=>window.DG_OWN_RECORDS_STORE.load(sb,userId),group:rows=>window.DG_GROUP_OWN_RECORDS.group(rows),container:()=>$('recGroups'),renderGroup:(name,rows)=>dgRecordProjectGroup(name,rows),empty:()=>`<div class="card records-empty">${typeof dgCf==="function"?dgCf("Kayıt yok"):"Kayıt yok"}</div>`});
  const{data}=await window.DG_OWN_RECORDS_STORE.load(sb,USER.id);
  // Compatibility contract: localeCompare(String(pb),"tr") and point_id ordering remain unchanged in DG_GROUP_OWN_RECORDS.
  const groups=window.DG_GROUP_OWN_RECORDS.group(data||[]);
@@ -22,6 +23,7 @@ async function loadRecords__scroll(){
 }
 // 2. Kayıt sil
 async function delRec(id){
+ if(window.DG_DELETE_OWN_RECORD)return window.DG_DELETE_OWN_RECORD.execute(id,{confirm:()=>confirm(dgCf("Kayıt tamamen silinsin mi?")),remove:recordId=>sb.from("measurements").delete().eq("id",recordId).select("photo_url"),onFailure:error=>toast(dgCf("Kayıt silinemedi: ")+(error?.message||dgCf("Sunucu silmeyi doğrulamadı.")),"err"),removePhoto,refreshRecords:()=>loadRecords(),refreshDashboard:()=>loadDash(),markLiveDirty:()=>dgMarkLiveDirty(),shouldRefreshMap:()=>typeof loadLiveMap==="function"&&$("v-map")?.classList.contains("on"),refreshMap:()=>loadLiveMap()});
  if(!confirm(dgCf("Kayıt tamamen silinsin mi?")))return;
  // Delete the row first. A rejected/zero-row delete must retain its photo.
  const{data,error}=await sb.from("measurements").delete().eq("id",id).select("photo_url");
@@ -33,6 +35,7 @@ async function delRec(id){
 }
 // 3. Panel istatistikleri + grafik
 async function loadDash(){
+ if(window.DG_LOAD_OWNER_DASHBOARD)return window.DG_LOAD_OWNER_DASHBOARD.execute(USER.id,{renderProfile:()=>{if(typeof dgAcademicProfileRender==="function")dgAcademicProfileRender();},load:userId=>sb.from("measurements").select("*").eq("owner",userId),update:values=>{$("dMy").textContent=values.records;$("dCarbon").textContent=values.carbon;},renderChart:(labels,data)=>drawChart("chCarbon","bar",labels,data),renderAnalysis:(rows,id)=>renderAnalysis(rows,id)});
  if(typeof dgAcademicProfileRender==="function")dgAcademicProfileRender();
  const{data}=await sb.from("measurements").select("*").eq("owner",USER.id);
  $("dMy").textContent=(data||[]).length;
@@ -43,6 +46,7 @@ async function loadDash(){
 // 4. Tür dağılımı listesi
 // 5. Chart.js grafiği
 async function drawChart(id,type,labels,data){
+ if(window.DG_DASHBOARD_CHART)return window.DG_DASHBOARD_CHART.render(id,type,labels,data,{ensure:window.dgEnsureChart?()=>window.dgEnsureChart():null,charts,Chart,element:chartId=>$(chartId)});
  /* Faz 7: Chart.js tembel yüklenir; çağıranlar fire-and-forget bırakabilir. */
  if(window.dgEnsureChart)await window.dgEnsureChart();
  if(charts[id])charts[id].destroy();
@@ -74,6 +78,7 @@ function renderAnalysis__scroll(rows,elId){
  * İŞARETÇİ HATASI: loadApprovedMarkers artık hatayı 3. argümanla döndürüyor;
  * başarısızlıkta analiz bloğu yanlış veriyle (boş küme) doldurulmuyor. */
 async function loadWorld(){
+ if(window.DG_LOAD_WORLD_DASHBOARD)return window.DG_LOAD_WORLD_DASHBOARD.execute({hideError:()=>{const box=$("worldErr");if(box)box.style.display="none";},loadStats:()=>window.DG_WORLD_STATS_STORE.load(sb),updateStats:data=>{$("wRec").textContent=data.records||0;$("wCountry").textContent=data.countries||0;$("wCity").textContent=data.cities||0;$("wCarbon").textContent=data.carbon_t||0;},renderCountries:rows=>{$("wCountryT").innerHTML=window.DG_WORLD_STATS_TABLES.countries(rows,esc);},renderCities:rows=>{$("wCityT").innerHTML=window.DG_WORLD_STATS_TABLES.cities(rows,esc);},loadMarkers:(callback)=>loadApprovedMarkers(worldMap,3000,callback),markLiveDirty:()=>dgMarkLiveDirty(),clusterDegraded:()=>worldMap&&worldMap._clusterDegraded,warn:message=>console.warn(message),renderAnalysis:(rows,id)=>renderAnalysis(rows,id),loadParkCompare:()=>loadParkCompare(),showError:message=>dgWorldError(message)});
  const box=$("worldErr");
  if(box)box.style.display="none";
  try{
