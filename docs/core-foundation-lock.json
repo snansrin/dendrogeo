@@ -425,7 +425,7 @@
     "src/services/osm-water-backup.js": "b3429cdc9bfe0f84bd7b6644a1221d4daadc374ac046b036abf15b3b5ee7d269",
     "src/services/park-geometry.js": "ae89879b98ed8d9f3928d17b7258389c7a7c1abdabdd63dba1aac934aacc6f83",
     "src/services/park-query.js": "b0ddd9f7fb7d99b95e29dbe78c392c472ee149e60f7e941aca91d562c826cd7e",
-    "src/services/park-registry.js": "bd0b7054f533de561a4d3860ff73f05c08e86f27d38a019477c3e8654e3f9f9a",
+    "src/services/park-registry.js": "326f90e001854b04c2a9160ee95308c1126e4a916a47657b3b90ae0b739d46ce",
     "src/services/park-state.js": "cc241e32d716cc6c682f2e7e82caaada845b698b5bf1b914c17b94ea86823608",
     "src/ui/choose-new-park-controller.js": "c787f76aee2cc85b748a30e5e0ccbc1393f58acfa53cf0aff2e3500344e31989",
     "src/ui/editor-ui.js": "302c294195aff4251a9eee6fe2565f9afc0f1fe959c36d946197842443f8916d",
@@ -747,6 +747,17 @@
           "path": "src/utils/lazylibs.js",
           "previous_sha256": "f19885ae01b97dcfb17dcdb208ef384d0adb8074ad58ae828d5194fad992205f",
           "sha256": "94b5c64ef90e59dab741e70ec84a7e100b641319539101391d01b1c1216ff64b"
+        }
+      ]
+    },
+    {
+      "date": "2026-10-13",
+      "scope": "User-authorized five-module integration for locked park-registry scan workflows: start/handoff, measurement/GPS focus, scan-step selection, project-name preview, and cancellation. Preserve state and navigation order, delayed map resize, project-first viewport fit with GPS fallback, scan-card scroll behavior, and locked regression tests.",
+      "files": [
+        {
+          "path": "src/services/park-registry.js",
+          "previous_sha256": "bd0b7054f533de561a4d3860ff73f05c08e86f27d38a019477c3e8654e3f9f9a",
+          "sha256": "326f90e001854b04c2a9160ee95308c1126e4a916a47657b3b90ae0b739d46ce"
         }
       ]
     }

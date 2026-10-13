@@ -248,6 +248,13 @@ async function dgCreateManualPark(){
 /* Ölçüm ekranından gelen yönlendirme: park algılama ekranını aç.
  * opt: {projectId, returnTo} */
 function startParkScan(opt){
+  if(typeof window!=="undefined"&&window.DG_START_PARK_SCAN)return window.DG_START_PARK_SCAN.start(opt,{
+    setActive:value=>{DG_PARK_SCAN=value;},setTargetProject:value=>{DG_PARK_TARGET_PROJ=value;},setReturnTo:value=>{DG_PARK_RETURN_TO=value;},
+    go:view=>{if(typeof go==="function")go(view);},parkMode:()=>typeof PARK_MODE!=="undefined"&&PARK_MODE,
+    toggleParkMode:()=>{if(typeof toggleParkMode==="function")toggleParkMode();},schedule:(fn,delay)=>setTimeout(fn,delay),
+    map:()=>typeof map!=="undefined"?map:null,focusTarget:()=>dgFocusScanTarget(),render:()=>dgRenderScanCard(),
+    card:()=>$("parkScanCard"),notify:(...args)=>toast(...args)
+  });
   opt=opt||{};
   DG_PARK_SCAN=true;
   DG_PARK_TARGET_PROJ=opt.projectId||null;
@@ -273,6 +280,11 @@ function startParkScan(opt){
 
 /* Hedefe odaklan: bağlanacak projenin ölçümleri → GPS → mevcut görünüm */
 async function dgFocusScanTarget(){
+  if(typeof window!=="undefined"&&window.DG_FOCUS_PARK_SCAN_TARGET)return window.DG_FOCUS_PARK_SCAN_TARGET.focus(DG_PARK_TARGET_PROJ,{
+    map:()=>typeof map!=="undefined"?map:null,
+    readProjectMeasurements:projectId=>sb.from("measurements").select("lat,lon").eq("project_id",projectId).limit(500),
+    bounds:points=>L.latLngBounds(points),gps:()=>typeof GPS!=="undefined"?GPS:null
+  });
   if(!map)return;
   const pid=DG_PARK_TARGET_PROJ;
   if(pid){
@@ -312,12 +324,14 @@ function dgRenderScanCard__scroll(forceManual){
 }
 
 function dgScanStep(){
+  if(typeof window!=="undefined"&&window.DG_SELECT_PARK_SCAN_STEP)return window.DG_SELECT_PARK_SCAN_STEP.select(DG_PARK,DG_PARK_CAND);
   if(DG_PARK)return 3;
   if(DG_PARK_CAND)return 2;
   return 1;
 }
 
 function dgScanPreviewName(){
+  if(typeof window!=="undefined"&&window.DG_PREVIEW_PARK_PROJECT_NAME)return window.DG_PREVIEW_PARK_PROJECT_NAME.update($("scanNamePreview"),$("scanLabel"),DG_PARK,DG_PARK_CAND,dgProjectName);
   const el=$("scanNamePreview");
   const inp=$("scanLabel");
   if(!el||!inp)return;
@@ -343,6 +357,10 @@ function dgToggleParkModeFromScan(){
 }
 
 function dgCancelScan(){
+  if(typeof window!=="undefined"&&window.DG_CANCEL_PARK_SCAN)return window.DG_CANCEL_PARK_SCAN.cancel({
+    setActive:value=>{DG_PARK_SCAN=value;},setTargetProject:value=>{DG_PARK_TARGET_PROJ=value;},returnTo:()=>DG_PARK_RETURN_TO,
+    setReturnTo:value=>{DG_PARK_RETURN_TO=value;},render:()=>dgRenderScanCard(),go:view=>{if(typeof go==="function")go(view);}
+  });
   DG_PARK_SCAN=false;
   DG_PARK_TARGET_PROJ=null;
   const back=DG_PARK_RETURN_TO;
