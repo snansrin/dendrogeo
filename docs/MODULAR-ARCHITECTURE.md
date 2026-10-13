@@ -1077,3 +1077,11 @@ Her modülün tek bir dış API'si, sahibi olduğu açık durumu ve kendi testle
 - `ui/render-surface-scan-audit.js`, tarih aralığı ve kaçışlanmış kapsam/fark açıklamasını raporlar; bağımsız doğruluk ölçümü olmadığını açıkça korur.
 - `domain/surface/classify-surface-vegetation-tiers.js`, en az üç gözlemli yeşil hücrelerden park içi NDVI tercillerini kurar; `build-surface-vegetation-parts.js` yalnız hazır geometrili sınıfları birleştirme girdisine taşır.
 - `ui/render-surface-vegetation-features.js`, çözülmüş poligonları mevcut Leaflet katmanına çizer. `lc-sens.js` orkestrasyon, uyumluluk girişi ve ham sınıf korumasını sürdürür.
+
+## LULC kabul edilmiş sonuç akışı — 13 Ekim 2026
+
+- `domain/surface/evaluate-surface-acceptance-gate.js`, ham görünüm, çizim, meşgul durum ve çözümlenmemiş su hücrelerini mevcut öncelik sırasıyla değerlendirir.
+- `domain/surface/create-surface-acceptance-draft.js`, hücre düzeltmelerini ve alanları dondurulmuş kabul adayına taşır; özgün geometri kimliklerini korur.
+- `application/surface/build-surface-result-snapshot.js`, tüm park alanı korunumu doğrulandıktan sonra yayın geometri snapshot’ını üretir.
+- `application/surface/accept-surface-analysis.js`, epoch/kayıt eskime kapılarını, hesap yazımını, cihaz taslağı yedeğini ve sonuç durumunu yürütür.
+- `ui/render-surface-accepted-result.js`, hesapta kabul edilmiş alanları rapor host’una sunar; kilitli servis uyumluluk globalini korur.
