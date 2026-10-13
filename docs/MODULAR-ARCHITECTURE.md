@@ -1018,3 +1018,10 @@ Her modülün tek bir dış API'si, sahibi olduğu açık durumu ve kendi testle
 - `adapters/trees/read-measurement-photo-pixels.js`, tarayıcı canvas okumasını izole eder ve örnekleme için kullanılan object URL'yi kapatır.
 - `ui/measurement-photo-check.js` ve `ui/measurement-photo-file.js`, mevcut Türkçe durum mesajları, seçili dosya adı ve temizleme kontrollerini sunar.
 - `application/trees/check-measurement-photo.js`, görsel türü ve kalite kapısı, asenkron iptal ve UI geri bildirim sırasını birleştirir; `measure.js` eski global girişini ve kilitli tarama/eşik fonksiyonlarını korur.
+
+## Ölçüm GPS görünümü — 13 Ekim 2026
+
+- `domain/trees/format-measurement-gps-readout.js`, GPS doğruluk sınıfı, koordinat hassasiyeti, yükseklik ve mevcut rozet biçimini saf olarak üretir.
+- `ui/measurement-gps-readout.js` ayrıntı alanlarını; `ui/measurement-gps-active-state.js` aktif GPS mesajı, düğmesi ve rozetini günceller.
+- `adapters/trees/update-measurement-gps-map-marker.js`, mevcut konum işaretini harita API'si arkasında değiştirir.
+- `application/trees/refresh-measurement-gps-view.js`, form, durum, harita, navigasyon ve otomatik nokta önerisi sırasını birleştirir; servis `updGps()` uyumluluk girişini korur.

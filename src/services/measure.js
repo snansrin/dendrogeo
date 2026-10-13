@@ -170,6 +170,12 @@ async function startGps(){
  try{navigator.geolocation.getCurrentPosition(onOk,onErr,opts);}catch(e){gpsMsg("Konum başlatılamadı.",1);}
 }
 function updGps(){
+ if(typeof window!=="undefined"&&window.DG_REFRESH_MEASUREMENT_GPS_VIEW&&window.DG_FORMAT_MEASUREMENT_GPS_READOUT&&window.DG_MEASUREMENT_GPS_READOUT_UI&&window.DG_MEASUREMENT_GPS_ACTIVE_STATE_UI&&window.DG_UPDATE_MEASUREMENT_GPS_MAP_MARKER)return window.DG_REFRESH_MEASUREMENT_GPS_VIEW.refresh({
+  getGPS:()=>GPS,format:coords=>window.DG_FORMAT_MEASUREMENT_GPS_READOUT.format(coords),
+  renderReadout:view=>window.DG_MEASUREMENT_GPS_READOUT_UI.render(view,$),renderActive:view=>window.DG_MEASUREMENT_GPS_ACTIVE_STATE_UI.render(view,$),
+  updateMarker:coords=>window.DG_UPDATE_MEASUREMENT_GPS_MAP_MARKER.update(map,coords,{getCurrentMarker:()=>window._me,setCurrentMarker:marker=>{window._me=marker;},createMarker:(...args)=>L.circleMarker(...args)}),
+  drawNavigation:drawNav,suggestPoint:autoFillPointId
+ });
  const a=GPS.accuracy;
  const acc=$("gpsAcc"),lat=$("gLat"),lon=$("gLon"),alt=$("gAlt"),quality=$("gQ"),ring=$("gpsRing"),state=$("gpsState"),btn=$("gpsBtn");
  if(acc)acc.textContent=a.toFixed(0);
