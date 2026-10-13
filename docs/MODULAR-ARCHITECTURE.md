@@ -1184,3 +1184,10 @@ Her modülün tek bir dış API'si, sahibi olduğu açık durumu ve kendi testle
 - `ui/render-surface-display-polygons.js` Leaflet sınıf poligonlarını ve mevcut koordinat dönüşümünü üretir.
 - `ui/handle-surface-display-layer-click.js` tıklamayı stale kapısı ardından OSM seçimi, çizim, fırça veya hücre incelemesine yönlendirir.
 - `application/refresh-surface-review-layer.js` async geometri birleştirme, tekrar deneme, sınıf odağı, opaklık ve sınır/bitki overlay sırasını orkestre eder.
+
+## LULC yeniden bölümlendirme ve geometri commit’i — 13 Ekim 2026
+
+- `domain/build-surface-repartition-input.js`, park eşleşmesi olmayan OSM elementlerini ve ham görünüm düzenleme kapılarını dışlar.
+- `domain/is-surface-repartition-current.js`, yalnız aynı editor epoch’una ait hazırlık sonucunun commit edilmesine izin verir.
+- `application/commit-surface-repartition-result.js`, sınırları ve nesne sürümünü yazar; fırça maskesi göçünü uygular, parça hücrelerini kanonik hücre dizisine bağlar ve worker seed’i yeniler.
+- `adapters/surface/clear-surface-review-layers.js` eski Leaflet gruplarını kaldırır; `application/repartition-surface-review.js` busy/render/finally akışını korur.
