@@ -48,6 +48,13 @@ function dgLcClearLayer(){
  * Ayrı sınıf tablosu / çapraz tablo / nesne tablosu YOK — hepsi bu blokta. */
 function dgLcRenderReport(rep,result,parkAreaM2,extra){
   if(!rep)return;
+  const reportModel=window.DG_LANDCOVER_REPORT_MODEL,reportRows=window.DG_LANDCOVER_REPORT_ROWS,reportMetadata=window.DG_LANDCOVER_REPORT_METADATA,reportComposer=window.DG_LANDCOVER_REPORT_COMPOSER;
+  if(reportModel&&reportRows&&reportMetadata&&reportComposer){
+    const last=(typeof DG_LC_LAST!=="undefined"&&DG_LC_LAST&&DG_LC_LAST.report)?DG_LC_LAST.report:null;
+    const model=reportModel.build({result,extra,last,parkAreaM2,classes:DG_LC_CLASSES});
+    const metadata=reportMetadata.render(model),rows=reportRows.render(model.rows);
+    rep.innerHTML=reportComposer.compose({metadata,rows});return;
+  }
   const R=result.groupAreas?result:{
     groupCounts:result.groupCounts||{},
     groupAreas:result.groupAreasM2||{},

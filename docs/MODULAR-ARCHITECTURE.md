@@ -1040,3 +1040,10 @@ Her modülün tek bir dış API'si, sahibi olduğu açık durumu ve kendi testle
 - `application/surface/surface-brush-history.js`, yirmi darbeli geçmiş sınırını ve yalnız hâlâ aynı darbeye ait hücreleri geri alan undo davranışını tutar.
 - `application/surface/migrate-legacy-brush-masks.js`, eski sürekli fırça poligonlarını kesişen hücre kararlarına taşır; park dışı geometriyi ve çözümlenemeyen maskeleri korur.
 - `domain/surface/surface-geometry-overlap.js`, pahalı kesin kesişim öncesi bounds filtresini sağlar. Kilitli `lc-sens.js` eski global girişlerini koruyarak modülleri birleştirir.
+
+## LULC rapor sunumu — 13 Ekim 2026
+
+- `domain/surface/normalize-landcover-report-result.js`, raporun güncel ve eski sonuç DTO'larını ortak görünüm girdisine eşler.
+- `domain/surface/build-landcover-report-model.js`, sınıf sırası, alan/pay, çapraz uzlaşma, nesne ve park alanı QA değerlerini HTML'den bağımsız hazırlar.
+- `ui/render-landcover-report-rows.js` sınıf barlarını; `ui/render-landcover-report-metadata.js` QA, maske, kapsam ve kaynak satırlarını üretir.
+- `ui/compose-landcover-report.js` tek blok HTML'i kurar. `lc-report.js` eski global fonksiyonu koruyup sunum modüllerini birleştirir.
