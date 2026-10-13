@@ -10,22 +10,34 @@
  * alan-ağırlıklı merkez üretilir. Park ölçeğinde "kaç su kütlesi var,
  * en büyük yeşil blok nerede?" sorularının cevabıdır. */
 function dgLcDetectPatches(cells,minHa){
-  const measured=window.DG_SURFACE_PATCH_METRICS.summarizeComponents(
-    window.DG_SURFACE_PATCH_COMPONENTS.groupCells(cells),minHa
-  );
+  /* Klasik test/önbellek bağlamları yalnız eski zinciri yükleyebilir. Bu
+   * uyumluluk kolu, tam LULC zinciri hazır değilken eski sonucu korur. */
+  if(!window.DG_SURFACE_PATCH_DETECTOR||!window.DG_BUILD_SURFACE_PATCH||!window.DG_SURFACE_PATCH_DISPLAY_RINGS||!window.DG_SMOOTH_SURFACE_PATCH_RING||!window.DG_SCALE_AREA_PRESERVING_PATCH_RING){
+    return dgLcDetectPatchesLegacy(cells,minHa);
+  }
+  return window.DG_SURFACE_PATCH_DETECTOR.detect(cells,minHa,{
+    groupCells:values=>window.DG_SURFACE_PATCH_COMPONENTS.groupCells(values),
+    summarizeComponents:(components,threshold)=>window.DG_SURFACE_PATCH_METRICS.summarizeComponents(components,threshold),
+    buildPatch:item=>window.DG_BUILD_SURFACE_PATCH.build(item,{
+      extractRings:component=>dgLcPatchRings(component),
+      buildDisplayRings:rings=>window.DG_SURFACE_PATCH_DISPLAY_RINGS.build(rings,(ring,iters)=>window.DG_SMOOTH_SURFACE_PATCH_RING.smooth(ring,iters,{
+        smooth:(value,count)=>dgLcSmoothRing(value,count),
+        area:ringValue=>dgLcRingArea(ringValue),
+        centroid:ringValue=>dgLcRingCentroid(ringValue),
+        scale:(ringValue,before,after,center)=>window.DG_SCALE_AREA_PRESERVING_PATCH_RING.scale(ringValue,before,after,center)
+      })),
+      warn:error=>console.warn("DENDROGEO · nesne halkası kurulamadı, atlandı:",error)
+    })
+  });
+}
+function dgLcDetectPatchesLegacy(cells,minHa){
+  const measured=window.DG_SURFACE_PATCH_METRICS.summarizeComponents(window.DG_SURFACE_PATCH_COMPONENTS.groupCells(cells),minHa);
   const patches=[];
   for(const item of measured){
     const comp=item.cells,area=item.areaM2;
-    /* Görsel katman için vektör halkalar: kare kare değil, yumuşak çizim.
-     * Rapor sayılarına dokunmaz (alan hücre kesişiminden gelir). */
     let rings=[],ringsRaw=[];
     try{
       ringsRaw=dgLcPatchRings(comp);
-      /* Yumuşatma köşeleri kestiği için halkayı bir miktar içe büker;
-       * komşu nesnelerin sınırları birbirinden uzaklaşmış görünüyordu
-       * (kullanıcı geri bildirimi 2026-09-20). Çözüm: TEK tur Chaikin +
-       * alan geri ölçekleme — yumuşak çizgi, gerçek boyut, bitişik sınırlar
-       * tekrar birbirine değer. */
       rings=ringsRaw.map(r=>{
         const sm=dgLcSmoothRing(r,1);
         const a0=Math.abs(dgLcRingArea(r)),a1=Math.abs(dgLcRingArea(sm));
@@ -38,14 +50,7 @@ function dgLcDetectPatches(cells,minHa){
     }catch(err){
       console.warn("DENDROGEO · nesne halkası kurulamadı, atlandı:",err);
     }
-    patches.push({
-      classKey:comp[0].classKey,
-      areaM2:area,
-      cells:comp.length,
-      centroid:item.centroid,
-      rings,
-      ringsRaw
-    });
+    patches.push({classKey:comp[0].classKey,areaM2:area,cells:comp.length,centroid:item.centroid,rings,ringsRaw});
   }
   return patches;
 }
