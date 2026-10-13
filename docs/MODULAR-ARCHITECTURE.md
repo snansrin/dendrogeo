@@ -1148,3 +1148,10 @@ Her modülün tek bir dış API'si, sahibi olduğu açık durumu ve kendi testle
 - `ui/render-surface-editor-menu-label.js` ve `render-surface-editor-panel-head.js`, ortak erişilebilir menü etiketi ve panel başlığı kalıbını sunar.
 - `ui/render-surface-editor-menus.js`, dosya, görünüm, sınır, veri ve fırça menülerini mevcut kontrol kimlikleriyle üretir.
 - `ui/render-surface-editor-tool-rail.js`, harita araç rayını ve menü/durum kabuğunu üretir.
+
+## LULC harita etkileşimleri — 13 Ekim 2026
+
+- `adapters/surface/surface-right-pan-session.js`, sağ tuş pointer oturumunu ve Leaflet pan hareketlerini yönetir; sol tuş çizim/fırça akışları ayrı kalır.
+- `application/surface/select-surface-draw-type.js` ve `select-surface-brush-type.js`, desteklenen sınıf seçimini mevcut sınır/fırça kapılarıyla uygular.
+- `application/surface/return-surface-to-hand-mode.js`, çizim ve fırçayı kapatıp normal harita modunu geri getirir.
+- `application/surface/update-surface-opacity.js`, görünür dolgu opaklığını sınırlar ve var olan gecikmeli kayıt davranışını sürdürür.
