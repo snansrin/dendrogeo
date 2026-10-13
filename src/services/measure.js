@@ -582,13 +582,9 @@ async function dgSaveMeasInner(){
 // ⭐ EKLENEN: Her insert'te client_id ekle (duplicate koruması)
 if (!base.client_id) base.client_id = uuidv4();
     if(!EDIT_ID){
-        base.lat=GPS.latitude;
-        base.lon=GPS.longitude;
-        base.accuracy_m=GPS.accuracy;
-        base.altitude_m=GPS.altitude;
         const geo=await reverseGeocode(GPS.latitude,GPS.longitude);
-        base.country=geo?geo.country:"Bilinmiyor";
-        base.city=geo?geo.city:"Bilinmiyor";
+        if(typeof window!=="undefined"&&Object.prototype.hasOwnProperty.call(window,"DG_BUILD_MEASUREMENT_LOCATION_FIELDS"))Object.assign(base,window.DG_BUILD_MEASUREMENT_LOCATION_FIELDS.build({fix:GPS,geocode:geo}));
+        else{base.lat=GPS.latitude;base.lon=GPS.longitude;base.accuracy_m=GPS.accuracy;base.altitude_m=GPS.altitude;base.country=geo?geo.country:"Bilinmiyor";base.city=geo?geo.city:"Bilinmiyor";}
         if(geo)toast(dgCf("📍 Konum algılandı: ")+esc(geo.city)+" / "+esc(geo.country),"info","🗺️");
     }
 
@@ -612,22 +608,19 @@ if (!base.client_id) base.client_id = uuidv4();
     
      // 3. OFFLINE KONTROLÜ (Fotoğraf ve veriyi IndexedDB'ye kaydet)
     if(!navigator.onLine){
-        if(photoBlob) base.photoBlob = photoBlob;
-        if(photoFile) base.photo_file = photoFile;
-        base.client_id = uuidv4(); // Benzersiz ID (duplicate önleme)
-if(EDIT_ID) base._editId = EDIT_ID; // ✅ çevrimdışı düzenleme işareti
+        if(typeof window!=="undefined"&&Object.prototype.hasOwnProperty.call(window,"DG_BUILD_OFFLINE_MEASUREMENT_RECORD"))Object.assign(base,window.DG_BUILD_OFFLINE_MEASUREMENT_RECORD.build({record:base,photoBlob,photoFile,editId:EDIT_ID,clientId:uuidv4()}));
+        else{if(photoBlob)base.photoBlob=photoBlob;if(photoFile)base.photo_file=photoFile;base.client_id=uuidv4();if(EDIT_ID)base._editId=EDIT_ID;}
         
         await saveOfflineMeasurement(base);
         toast('Çevrimdışı kaydedildi — internet gelince senkronize','info','📴');
-        if(typeof dgPresenceAct==="function"){try{dgPresenceAct(wasEdit?"edit":"save","P"+String(pt).padStart(3,"0"));}catch(e){}}
+        if(typeof window!=="undefined"&&Object.prototype.hasOwnProperty.call(window,"DG_RECORD_MEASUREMENT_PRESENCE_ACTION"))window.DG_RECORD_MEASUREMENT_PRESENCE_ACTION.record(wasEdit?"edit":"save","P"+String(pt).padStart(3,"0"),dgPresenceAct);
+        else if(typeof dgPresenceAct==="function"){try{dgPresenceAct(wasEdit?"edit":"save","P"+String(pt).padStart(3,"0"));}catch(e){}}
         
         // ✅ Background Sync register KALDIRILDI (artık ana thread yönetiyor)
         
         if(wasEdit)cancelEdit();
-        dgResetMeasureFields();
-        if(!wasEdit)autoFillPointId();
-        loadDash();
-        loadRecords();
+        if(typeof window!=="undefined"&&Object.prototype.hasOwnProperty.call(window,"DG_REFRESH_MEASUREMENT_AFTER_SAVE"))window.DG_REFRESH_MEASUREMENT_AFTER_SAVE.offline({wasEdit,reset:dgResetMeasureFields,autoFill:autoFillPointId,loadDashboard:loadDash,loadRecords});
+        else{dgResetMeasureFields();if(!wasEdit)autoFillPointId();loadDash();loadRecords();}
         return;
     }
     
@@ -649,23 +642,26 @@ if(EDIT_ID) base._editId = EDIT_ID; // ✅ çevrimdışı düzenleme işareti
     
     // 5. Supabase insert/update
     if(EDIT_ID){
-        const{error}=await sb.from("measurements").update(base).eq("id",EDIT_ID);
+        const write=typeof window!=="undefined"&&Object.prototype.hasOwnProperty.call(window,"DG_PERSIST_MEASUREMENT_RECORD")
+          ?await window.DG_PERSIST_MEASUREMENT_RECORD.persist({client:sb,record:base,editId:EDIT_ID})
+          :await sb.from("measurements").update(base).eq("id",EDIT_ID);
+        const{error}=write;
         if(error)return toast("Hata: "+error.message,"err");
         toast("Kayıt güncellendi — onaya gönderildi","ok","✓");
         cancelEdit();
     }else{
-        let{error}=await sb.from("measurements").insert(base);
-        if(error){delete base.altitude_m;delete base.photo_file;({error}=await sb.from("measurements").insert(base));}
+        let write;
+        if(typeof window!=="undefined"&&Object.prototype.hasOwnProperty.call(window,"DG_PERSIST_MEASUREMENT_RECORD"))write=await window.DG_PERSIST_MEASUREMENT_RECORD.persist({client:sb,record:base,editId:null});
+        else{let{error}=await sb.from("measurements").insert(base);if(error){delete base.altitude_m;delete base.photo_file;({error}=await sb.from("measurements").insert(base));}write={error};}
+        const{error}=write;
         if(error)return toast("Hata: "+error.message,"err");
         toast("Kaydedildi — "+c.total_carbon.toFixed(1)+" kg karbon","ok","🌱");
-      if(typeof dgPresenceAct==="function"){try{dgPresenceAct(wasEdit?"edit":"save","P"+String(pt).padStart(3,"0"));}catch(e){}}
+      if(typeof window!=="undefined"&&Object.prototype.hasOwnProperty.call(window,"DG_RECORD_MEASUREMENT_PRESENCE_ACTION"))window.DG_RECORD_MEASUREMENT_PRESENCE_ACTION.record(wasEdit?"edit":"save","P"+String(pt).padStart(3,"0"),dgPresenceAct);
+      else if(typeof dgPresenceAct==="function"){try{dgPresenceAct(wasEdit?"edit":"save","P"+String(pt).padStart(3,"0"));}catch(e){}}
     }
     
-    dgResetMeasureFields();
-    loadDash();
-    loadRecords();
-    loadWaypoints();
-    if(!wasEdit)autoFillPointId();
+    if(typeof window!=="undefined"&&Object.prototype.hasOwnProperty.call(window,"DG_REFRESH_MEASUREMENT_AFTER_SAVE"))window.DG_REFRESH_MEASUREMENT_AFTER_SAVE.online({wasEdit,reset:dgResetMeasureFields,autoFill:autoFillPointId,loadDashboard:loadDash,loadRecords,loadWaypoints});
+    else{dgResetMeasureFields();loadDash();loadRecords();loadWaypoints();if(!wasEdit)autoFillPointId();}
 }
 
 /* --- 8. DÜZENLEME --- */
