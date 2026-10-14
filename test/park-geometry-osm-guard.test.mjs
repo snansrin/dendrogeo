@@ -15,4 +15,9 @@ test('OSM ring fallback exists before the domain adapter and does not override t
   assert.ok(head.indexOf('src/domain/parks/osm-rings.js')<head.indexOf('src/services/park-geometry.js'));
   const serviceWorker=readFileSync(new URL('../sw.js',import.meta.url),'utf8');
   assert.ok(serviceWorker.includes("'/src/domain/parks/ensure-osm-rings.js'"));
+  const bootstrap=readFileSync(new URL('../src/workers/surface-worker-bootstrap.js',import.meta.url),'utf8');
+  assert.ok(bootstrap.indexOf("'../domain/parks/osm-rings.js'")<bootstrap.indexOf("'./surface-worker.js'"),'worker bootstrap must load the ring implementation before the frozen worker');
+  assert.ok(bootstrap.indexOf("'../domain/parks/ensure-osm-rings.js'")<bootstrap.indexOf("'./surface-worker.js'"),'worker bootstrap must load a ring fallback before the frozen worker');
+  const router=readFileSync(new URL('../src/adapters/surface/route-surface-worker-bootstrap.js',import.meta.url),'utf8');
+  assert.ok(router.includes('/surface-worker-bootstrap.js'),'worker router must use the modular bootstrap');
 });

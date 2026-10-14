@@ -5,7 +5,7 @@
   const GREEN="#14532d",MUT="#5c6a63",INK="#182420",X0=840;
   g.fillStyle=MUT;g.font="bold 20px Arial";g.fillText("PARK SAHASI",X0,300);
   g.fillStyle=INK;g.font="bold 54px Arial";g.fillText(Number(parkHa).toFixed(1)+" ha",X0,352);
-  g.fillStyle=MUT;g.font="bold 20px Arial";g.fillText("KULLANICI DÜZENLEMESİ",X0,420,CW-X0-40);
+  g.fillStyle=MUT;g.font="bold 20px Arial";g.fillText("KABUL EDİLEN KARARLAR",X0,420,CW-X0-40);
   g.fillStyle=INK;g.font="bold 54px Arial";g.fillText(String(decisionCount),X0,472);
   g.fillStyle=MUT;g.font="bold 20px Arial";g.fillText("DOĞRULANMIŞ ALANLAR",X0,540);
   let y=572;

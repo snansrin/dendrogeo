@@ -19,6 +19,12 @@ test('brush selection keeps park clipping, bounds filtering, exact intersection 
   assert.deepEqual(JSON.parse(JSON.stringify(keys)),['a']);assert.deepEqual(events[0],['union','mask']);
 });
 
+test('brush selection thins dense pointer samples and preserves the stroke endpoint',()=>{
+  const window=setup(),points=Array.from({length:11},(_,index)=>[41+index*.00001,29]),seen=[];
+  window.DG_SURFACE_BRUSH_CELL_SELECTION.select({points,diameter:10,epsg:32631,polygonClipping:{union:()=>['brush'],intersection:()=>['hit']},parkGeometry:['park'],geometry:{a:['cell']},cells:[{id:'a'}],cellKey:cell=>cell.id,gridLineMask:line=>{seen.push(...line.pts);return['mask'];},bounds:geometry=>geometry,overlap:()=>true,area:()=>1});
+  assert.ok(seen.length<points.length);assert.deepEqual(seen[0],points[0]);assert.deepEqual(seen.at(-1),points.at(-1));
+});
+
 test('cell decision preserves the visual-cell payload and rejects unknown classes',()=>{
   const window=setup(),cell={row:2,col:7,classKey:'green'},types={water:{}};
   assert.deepEqual(JSON.parse(JSON.stringify(window.DG_SURFACE_CELL_DECISION.create({cell,toClass:'water',types,timestamp:'2026-01-01T00:00:00Z',strokeId:'stroke-1',cellKey:c=>`${c.row}:${c.col}`}))),{key:'2:7',decision:{from:'green',to:'water',method:'visual-cell',ts:'2026-01-01T00:00:00Z',brushStrokeId:'stroke-1'}});

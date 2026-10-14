@@ -16,7 +16,7 @@
   const GREEN="#14532d";
   g.fillStyle=GREEN;g.fillRect(0,CH-70,CW,70);
   g.fillStyle="#cfe3d3";g.font="19px Arial";
-  g.fillText("Raster + doğrulanmış kullanıcı kararları; NDVI yeşil alanda görsel karşılaştırmadır.",40,CH-54,CW-80);
+  g.fillText("Raster ve doğrulanmış yüzey sınıfları; NDVI yeşil alanda görsel karşılaştırmadır.",40,CH-54,CW-80);
   g.fillText("ESA WorldCover 2021 v200 (CC BY 4.0) · "+String(record.fingerprint||"").slice(0,8)+" · CC BY-NC 4.0",40,CH-26,CW-80);
  }
  root.DG_GIS_EXPORT_VERIFIED_FRAME=Object.freeze({drawHeader,drawFooter});

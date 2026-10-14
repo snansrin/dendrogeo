@@ -8,6 +8,7 @@ const files=[
  'src/domain/auth/read-oauth-error.js',
  'src/application/auth/wait-for-oauth-session.js',
  'src/application/auth/clean-oauth-url.js',
+ 'src/application/auth/start-authenticated-session.js',
  'src/ui/oauth-wait-indicator.js'
 ];
 function load(window={}){
@@ -72,6 +73,19 @@ test('OAuth URL cleanup keeps only pathname and safely tolerates history errors'
  const api=load();api.DG_CLEAN_OAUTH_URL.clean(host);
  assert.deepEqual(calls,[[null,'','/projects']]);
  api.DG_CLEAN_OAUTH_URL.clean({history:{replaceState(){throw Error('blocked');}},location:{pathname:'/'}});
+});
+
+test('authenticated shell opens before profile reads settle and applies profile asynchronously',async()=>{
+ const api=load(),events=[];let resolveProfile;
+ const started=api.DG_START_AUTHENTICATED_SESSION.start({user:{id:'u4'},setUser:user=>events.push(`user:${user.id}`),startShell:()=>events.push('shell'),loadProfile:id=>{events.push(`profile:${id}`);return new Promise(resolve=>{resolveProfile=resolve;});},applyProfile:profile=>events.push(`applied:${profile.full_name}`),onProfileError:error=>events.push(`error:${error.message}`)});
+ assert.equal(started,true);assert.deepEqual(events,['user:u4','shell']);
+ await Promise.resolve();assert.deepEqual(events,['user:u4','shell','profile:u4']);
+ resolveProfile({data:{full_name:'Ada'}});await new Promise(resolve=>setImmediate(resolve));assert.equal(events.join('|'),'user:u4|shell|profile:u4|applied:Ada');
+});
+
+test('authenticated shell remains open when profile loading fails',async()=>{
+ const api=load(),events=[];api.DG_START_AUTHENTICATED_SESSION.start({user:{id:'u5'},setUser(){},startShell:()=>events.push('shell'),loadProfile:async()=>{throw Error('offline');},applyProfile(){},onProfileError:error=>events.push(error.message)});
+ await new Promise(resolve=>setImmediate(resolve));assert.equal(events.join('|'),'shell|offline');
 });
 
 test('OAuth wait indicator preserves the original label and visibility states',()=>{

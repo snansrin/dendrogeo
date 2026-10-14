@@ -85,10 +85,22 @@ $("recoveryModal").style.display="flex";
 return;
 }
     
-    // 5. Profil yükle ve arayüzü başlat
-    const{data:p}=await window.DG_AUTH_SESSION_STORE.create(()=>sb).loadProfile(USER.id);
-    PROFILE=p;
-    startShell();
+    // 5. Kimlik doğrulaması biter bitmez arayüzü aç; profil isteği arka planda.
+    const startSession=window.DG_START_AUTHENTICATED_SESSION;
+    if(startSession){
+        startSession.start({
+            user:USER,
+            setUser:user=>{USER=user;},
+            startShell:()=>startShell(),
+            loadProfile:userId=>window.DG_AUTH_SESSION_STORE.create(()=>sb).loadProfile(userId),
+            applyProfile:profile=>{PROFILE=profile;dgApplyShellProfile();if(typeof dgPresencePing==="function")dgPresencePing("dash",true);if(typeof dgRefreshPendingBadge==="function")dgRefreshPendingBadge();},
+            onProfileError:error=>console.warn("DENDROGEO · Profil arka planda yüklenemedi:",error?.message||error)
+        });
+    }else{
+        const{data:p}=await window.DG_AUTH_SESSION_STORE.create(()=>sb).loadProfile(USER.id);
+        PROFILE=p;
+        startShell();
+    }
     
     // 6. Online ise kuyruğu senkronize et
     if (navigator.onLine) {
@@ -96,8 +108,20 @@ return;
     }
 }
 
+function dgApplyShellProfile(){
+ if(!PROFILE)return;
+ $("whoami").textContent=PROFILE.full_name||PROFILE.email||"";
+ if(PROFILE.role!=="admin"&&PROFILE.role!=="owner")return;
+ $("roleBadge").style.display="inline";
+ $("roleBadge").textContent=PROFILE.role==="owner"?"KURUCU":"ADMIN";
+ $("roleBadge").className=PROFILE.role==="owner"?"badge on":"badge admin";
+ $("adminSec").style.display="block";$("miAdmin").style.display="flex";$("miUsers").style.display="flex";
+ if(PROFILE.role==="owner"&&$("miVisitors"))$("miVisitors").style.display="flex";
+}
+
 async function startShell(){
 $("landing").style.display="none";$("shell").style.display="block";
+ dgApplyShellProfile();
  if(PROFILE){$("whoami").textContent=PROFILE.full_name;
   if(PROFILE.role==="admin"||PROFILE.role==="owner"){$("roleBadge").style.display="inline";$("roleBadge").textContent=PROFILE.role==="owner"?"KURUCU":"ADMIN";$("roleBadge").className=PROFILE.role==="owner"?"badge on":"badge admin";$("adminSec").style.display="block";$("miAdmin").style.display="flex";$("miUsers").style.display="flex";
    /* 0038: Ziyaretçi & Canlı sekmesi YALNIZ KURUCUYA açıktır (kullanıcı isteği). */

@@ -28,4 +28,6 @@ test('verified summary renders the supplied area and NDVI values unchanged',()=>
  assert.ok(labels.includes('Yoğun: 4 hücre'));
  assert.ok(labels.includes('Uygun hücre: 9 / 12'));
  assert.ok(labels.includes('Eşikler: 0.200 / 0.400'));
+ assert.ok(labels.includes('KABUL EDİLEN KARARLAR'));
+ assert.ok(!labels.includes('KULLANICI DÜZENLEMESİ'));
 });
