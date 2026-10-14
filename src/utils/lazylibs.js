@@ -134,6 +134,7 @@ const DG_LULC_CHAIN=[
   "src/application/surface/prepare-sentinel-profile-input.js",
   "src/application/surface/run-sentinel-scene-observation-pass.js",
   "src/application/surface/run-sentinel-annual-observation-pass.js",
+  "src/application/surface/find-sentinel-period-scenes.js",
   "src/services/lc-s2.js",
   "src/domain/surface/normalize-landcover-report-result.js",
   "src/domain/surface/build-landcover-report-model.js",
@@ -290,10 +291,14 @@ const DG_LULC_CHAIN=[
   "src/ui/render-surface-export-layer-dialog.js",
   "src/ui/draw-surface-export-map-layers.js",
   "src/ui/render-surface-export-infographic.js",
+  "src/application/surface/complete-initial-osm-evidence.js",
+  "src/ui/surface-cell-preview-layer.js",
+  "src/ui/surface-editor-lifecycle.js",
   "src/ui/lc-sens.js",
   "src/domain/surface/quality-gates.js",
   "src/contracts/surface-analysis.js",
   "src/application/surface/run-analysis.js",
+  "src/application/surface/export-landcover-result.js",
   "src/services/landcover.js"
 ];
 

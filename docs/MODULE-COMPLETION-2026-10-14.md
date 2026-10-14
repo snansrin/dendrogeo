@@ -15,6 +15,6 @@ Başlangıç: `092d01dd5508dc9bc94e5f76db75ed2812533b73` (r420). Kullanıcı kal
 
 | Grup | Kalan sorumluluk | Durum |
 |---|---|---|
-| 1 | Park arama/manual/proje sonuç UI; mevcut GPS ile algılama; güvenli backfill sorgusu | Beş modül eklendi, 101 ilgili test geçti |
-| 2 | Analiz indirme orkestrasyonu; Sentinel dönem-sahne orkestrasyonu; ilk OSM uygulama tamamlaması; hücre önizlemesi; editör çıkış/cleanup yaşam döngüsü | Sırada |
+| 1 | Park arama/manual/proje sonuç UI; mevcut GPS ile algılama; güvenli backfill sorgusu | Tamamlandı; 101 ilgili test, tam check, CI, mobil ve üç park QA geçti; PR #489 main’e alındı |
+| 2 | Analiz indirme orkestrasyonu; Sentinel dönem-sahne orkestrasyonu; ilk OSM uygulama tamamlaması; hücre önizlemesi; editör çıkış/cleanup yaşam döngüsü | Beş modül eklendi; doğrulama sürüyor |
 | 3 | Fiziksel modül→runtime yükleme→precache tutarlılık kapısı; yeni çekirdek modüllerinin hash koruması; gerçek browser akışlarının CI kapısına alınması | Sırada |

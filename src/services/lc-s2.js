@@ -105,6 +105,7 @@ function dgS2SelectScenes(candidates,maxN){
 }
 
 async function dgS2FindScenes(bbox,year,mode){
+  if(window.DG_FIND_SENTINEL_PERIOD_SCENES)return window.DG_FIND_SENTINEL_PERIOD_SCENES.find(bbox,year,mode,{seasonRange:dgS2SeasonRange,findRange:dgS2FindScenesRange,maxScenes:DG_S2_MAX_SCENES,maxCloud:DG_S2_MAX_CLOUD});
   const range=dgS2SeasonRange(year,mode);
   const scenes=await dgS2FindScenesRange(bbox,range.start,range.end,DG_S2_MAX_SCENES);
   if(!scenes.length)throw new Error(

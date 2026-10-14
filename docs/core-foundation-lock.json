@@ -714,14 +714,14 @@
     "src/services/allometry.js": "80900b58ad133aff03915ba0a4645805b2a550967bc31e00967a5bded2203c6f",
     "src/services/geofence.js": "27b11b89f3fbb51cf4cf3ef63912148033628dfafce80e3c293eb3e2a2c7ef0d",
     "src/services/grid-engine.js": "92e9122dc34ed798e807a04ceb55a12cf24f4f85e9c0b5f110dbef3407f8a773",
-    "src/services/landcover.js": "a4a98c49854a7835df2f61ee33fa71007dc8d55a87e55d3d7614cfefbc59ba78",
+    "src/services/landcover.js": "3e1a5d1b4ffc0a031326f0dbb484d69649d9a52fa118913886033d909813fb6a",
     "src/services/lc-config.js": "293509c879db16cf7aa10613879c3bf63b286bcbcb01a3b668816e5148e4b176",
     "src/services/lc-engine.js": "233f87f8eeec9306e235ca1896f2e9405dfcfe0e8148fbf9801f48fe1c1afa1d",
     "src/services/lc-geo.js": "ade537a9ea592914288c9c3cead038834919f4919b63be2a3cce28cfe2b97d73",
     "src/services/lc-osm.js": "4244fd0ab3a64cbeae49c76609cc702c01a057beefb608fd483418e02b91f1cd",
     "src/services/lc-patches.js": "87b62adfe85a7bf946a5c896126606b8af632bdec053d32b7f29d78bb8891d50",
     "src/services/lc-review.js": "03579a67ccd6cef3e56424d0a2d1bcb6e912a480fdcf6acdfaac734ae004dcb6",
-    "src/services/lc-s2.js": "76e5547b6c26ce325934adf2593ea9aafd24369a2ba7a13331708cfa2e4aa543",
+    "src/services/lc-s2.js": "feb1ee72af524935a8ccc20ce6eb9342777998f9b1ec93b2438bbedd456f9305",
     "src/services/lc-stac.js": "978c4be8c3bc4e7cda3f694d1f06290e661fed5bbd5b76b68719140edc18e71a",
     "src/services/lc-validate.js": "b4d8327c62940b1af1a53ddb087188816ff2359c8456c2755c7c853c5919f42b",
     "src/services/map.js": "7176931050f0334e339fd38d71b62c966a597dba3b3dafdb6c3622a26f38845e",
@@ -750,7 +750,7 @@
     "src/ui/grid-waypoint-controller.js": "eb4f58d30fd59a46840f58f2b428b79d8afc9e1211d48d26ea2cfb74ba2b3531",
     "src/ui/grid-waypoint-layer.js": "0c6db2a4329704ec9106735cc0a26b7ce01803666ee4b19d356c976d298eba2f",
     "src/ui/lc-report.js": "f8182bce9b5dbd8dcecceaa7afee69b52d12e7883badc65e27fb93e94ca2abf9",
-    "src/ui/lc-sens.js": "6afaa9f74021001a84043600580b41cbaf87cdbc2feabebf8c0d58c32ba6f3c7",
+    "src/ui/lc-sens.js": "90e4f92c130a8b36b68a1e83a285af237438900e1ffd40be3895029549e8383a",
     "src/ui/map-layer-visibility.js": "50d033fba51e90f49ae39254e0700b510938be4d271aada8a9a400be727c1a60",
     "src/ui/map-measurement-markers.js": "cedd193f2786604f84044f2ecf020144b5cba20c86160b729891b7d4f3668a67",
     "src/ui/mount-surface-review-map-host.js": "2ef1e62e2607084c3909016e324b09dba2eaaf13dfba25b0b8bcb82086e7986d",
@@ -789,7 +789,7 @@
     "src/ui/sync-base-map-layer-selection.js": "2f93018846abac13f83486a1fc2b9df0cbb7f330cae202a0e91ef902c8263eeb",
     "src/ui/waypoint-gps-overlay.js": "4f4396cf19bacb0e1f3e026b6a331c37db26631b7282f5b0267a2042a6226d1e",
     "src/utils/geo.js": "3e796768b3d55a3f07c4be3281c9437f1602b6d5e68151b2af7b101707baf294",
-    "src/utils/lazylibs.js": "f7a1c55ace1b1f25012e13536e8d1362e0a14fd647024c8a09e8a20eddc06367",
+    "src/utils/lazylibs.js": "66d1685035af0952f9aa2d9fa974711c35683e093e87fc7920e109c020599f8d",
     "src/workers/surface-worker.js": "af6477f104a06342cf69ef7f702a3e95ed27cd390c5aae36a2fbe5dfd68ed2fe",
     "test/base-map-layer-modules.test.mjs": "5399d699e74ffd66e92df312b4301202add7352b2b6c0be24fd51cda63e7baff",
     "test/critical-fixes.test.mjs": "38cecf8eca4cf3a7b48209e8ff950305e57c85a0b6564ce4b388164712b50154",
@@ -2550,6 +2550,43 @@
           "path": "src/services/park-registry.js",
           "previous_sha256": "e1fa450ea299c357d83199c8e4cbb5e47c20b08737c9df655bfd1eac6d1b4336",
           "sha256": "21a0ec0d0a6e2681b07af7c436ee8010adf2b5242b730bff8fbbc9c298b78195"
+        }
+      ]
+    },
+    {
+      "date": "2026-10-14",
+      "request": "Second sequential user-authorized completion group: analysis export, Sentinel period/scenes, initial OSM completion and editor UI lifecycle/preview; late save status guards; legacy regression fallbacks retained",
+      "files": [
+        {
+          "path": "src/services/landcover.js",
+          "previous_sha256": "a4a98c49854a7835df2f61ee33fa71007dc8d55a87e55d3d7614cfefbc59ba78",
+          "sha256": "3e1a5d1b4ffc0a031326f0dbb484d69649d9a52fa118913886033d909813fb6a"
+        },
+        {
+          "path": "src/services/lc-s2.js",
+          "previous_sha256": "76e5547b6c26ce325934adf2593ea9aafd24369a2ba7a13331708cfa2e4aa543",
+          "sha256": "feb1ee72af524935a8ccc20ce6eb9342777998f9b1ec93b2438bbedd456f9305"
+        },
+        {
+          "path": "src/ui/lc-sens.js",
+          "previous_sha256": "6afaa9f74021001a84043600580b41cbaf87cdbc2feabebf8c0d58c32ba6f3c7",
+          "sha256": "c8021da0a288ab70f1bb641a6dc90ec0d0fc3cd7340035c866c0cee635ebad90"
+        },
+        {
+          "path": "src/utils/lazylibs.js",
+          "previous_sha256": "f7a1c55ace1b1f25012e13536e8d1362e0a14fd647024c8a09e8a20eddc06367",
+          "sha256": "66d1685035af0952f9aa2d9fa974711c35683e093e87fc7920e109c020599f8d"
+        }
+      ]
+    },
+    {
+      "date": "2026-10-14",
+      "request": "Preserve frozen mode-gate-at-entry regression while delegating UI teardown in same authorized group",
+      "files": [
+        {
+          "path": "src/ui/lc-sens.js",
+          "previous_sha256": "c8021da0a288ab70f1bb641a6dc90ec0d0fc3cd7340035c866c0cee635ebad90",
+          "sha256": "90e4f92c130a8b36b68a1e83a285af237438900e1ffd40be3895029549e8383a"
         }
       ]
     }

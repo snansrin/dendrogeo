@@ -38,6 +38,7 @@ async function dgLcAnalyze(params){
 }
 
 function downloadLandCoverClassCSV(){
+  if(window.DG_EXPORT_LANDCOVER_RESULT)return window.DG_EXPORT_LANDCOVER_RESULT.run("csv",{last:DG_LC_LAST,resolutionM:DG_LC_PIXEL_M,classCsv:dgLcClassCsv,cellsGeoJson:dgLcCellsGeoJson,download:downloadBlob,notify:toast});
   if(!DG_LC_LAST)return toast("Önce arazi örtüsü analizini çalıştırın.","warn","🗺️");
   downloadBlob(
     "dendrogeo_landcover_"+(DG_LC_LAST.report?.year||2021)+"_classes.csv",
@@ -52,6 +53,7 @@ function downloadLandCoverClassCSV(){
 }
 
 function downloadLandCoverCellsGeoJSON(){
+  if(window.DG_EXPORT_LANDCOVER_RESULT)return window.DG_EXPORT_LANDCOVER_RESULT.run("geojson",{last:DG_LC_LAST,resolutionM:DG_LC_PIXEL_M,classCsv:dgLcClassCsv,cellsGeoJson:dgLcCellsGeoJson,download:downloadBlob,notify:toast});
   if(!DG_LC_LAST)return toast("Önce arazi örtüsü analizini çalıştırın.","warn","🗺️");
   downloadBlob(
     "dendrogeo_landcover_"+(DG_LC_LAST.report?.year||2021)+"_10m_cells.geojson",

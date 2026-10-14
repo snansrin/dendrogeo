@@ -13,6 +13,7 @@ function dgSensGuard(on){DG_SENS.guard=!!on;window._dgSensGuard=!!on;}
 function dgSensModeAnalysis(){dgSensGuard(true);dgSensRender();}
 function dgSensModePark(){
   dgSensGuard(false);
+  if(window.DG_SURFACE_EDITOR_LIFECYCLE)return window.DG_SURFACE_EDITOR_LIFECYCLE.parkMode({state:DG_SENS,stopBrush:dgSensBrushStop,cancelDraw:dgSensDrawCancel,cancelObject:dgSensObjectCancel,parkMode:()=>typeof PARK_MODE!=="undefined"&&PARK_MODE,toggleParkMode:()=>{if(typeof toggleParkMode==="function")toggleParkMode();},render:dgSensRender});
   dgSensBrushStop();
   if(DG_SENS.draw)dgSensDrawCancel();
   dgSensObjectCancel();
@@ -437,6 +438,7 @@ function dgSensUpdateStatus(){const evidence=window.DG_SURFACE_OSM_EVIDENCE_STAT
 /* Scan refreshes water footprints; map object picking is not required.
  * Manual boundaries and published snapshots remain untouched. */
 async function dgSensAutoWaterOnMount(rec,epoch){
+ if(window.DG_COMPLETE_INITIAL_OSM_EVIDENCE)return window.DG_COMPLETE_INITIAL_OSM_EVIDENCE.complete({record:rec,epoch,load:dgSensAutoWaterOnScan,isCurrent:(record,currentEpoch)=>currentEpoch===DG_SENS.epoch&&DG_SENS.record===record,isBusy:()=>DG_SENS.busy,setStatus:value=>{DG_SENS.status=value;},translate:_tvs,save:dgSensSave,updateStatus:dgSensUpdateStatus});
  const n=await dgSensAutoWaterOnScan(rec,epoch,true);
  if(epoch!==DG_SENS.epoch||DG_SENS.record!==rec||DG_SENS.busy)return;
  if(n||rec.osmCoverage?.changed){
@@ -579,6 +581,7 @@ function dgSensPreviewCell(cell,type){
  dgSensPreviewCells([{cell,type}]);
 }
 function dgSensPreviewCells(entries){
+ if(window.DG_SURFACE_CELL_PREVIEW_LAYER)return window.DG_SURFACE_CELL_PREVIEW_LAYER.render(entries,{state:DG_SENS,map:typeof map==="undefined"?null:map,leaflet:window.L,cellKey:dgSensCellKey,unproject:dgSurfaceUnproject,colors:DG_SENS_COLORS});
  if(!DG_SENS.showCand||!DG_SENS.geometry||!window.L||typeof map==="undefined"||!map)return;
  for(const entry of entries||[]){if(!entry?.cell)continue;const key=dgSensCellKey(entry.cell);if(DG_SENS.geometry[key]?.length)DG_SENS.optimisticPaths.set(key,entry.type);}
  if(!DG_SENS.optimisticPaths.size)return;
@@ -822,6 +825,7 @@ async function dgSensRenderPng(layers={park:true,surface:true},waypoints=[]){
 
 function dgSensExportCsv(){const a=dgSensAreas();if(!a)return;const rec=DG_SENS.record,view=DG_SENS.rawView?"raw":DG_SENS.editing?"preview":"accepted",csv=window.DG_BUILD_SURFACE_EXPORT_DATA.csv({areas:a,view,fingerprint:rec.fingerprint});downloadBlob("dendrogeo_surface_"+rec.parkId+".csv","text/csv;charset=utf-8",csv);}
 function dgSensCleanup(){
+ if(window.DG_SURFACE_EDITOR_LIFECYCLE)return window.DG_SURFACE_EDITOR_LIFECYCLE.cleanup({state:DG_SENS,map:typeof map==="undefined"?null:map,document,stopBrush:dgSensBrushStop,unbindRightPan:dgSensUnbindRightPan,cancelObject:dgSensObjectCancel,cancelJobs:dgSurfaceCancelJobs,clearTimer:id=>clearTimeout(id),cancelDraw:dgSensDrawCancel,refreshLayer:dgSensRefreshLayer,clearMenus:owner=>{if(typeof dgEditorClearMenus==="function")dgEditorClearMenus(owner);},guard:dgSensGuard});
  dgSensBrushStop();dgSensUnbindRightPan();dgSensObjectCancel();DG_SENS.editView=null;DG_SENS.rawView=false;++DG_SENS.epoch;dgSurfaceCancelJobs();clearTimeout(DG_SENS.debounce);clearTimeout(DG_SENS.saveTimer);DG_SENS.debounce=null;DG_SENS.resizeObserver?.disconnect();DG_SENS.resizeObserver=null;
  if(typeof map!=="undefined"&&map){if(DG_SENS.layer)map.removeLayer(DG_SENS.layer);if(DG_SENS.boundaryLayer)map.removeLayer(DG_SENS.boundaryLayer);if(DG_SENS.vegetationLayer)map.removeLayer(DG_SENS.vegetationLayer);if(DG_SENS.renderer)map.removeLayer(DG_SENS.renderer);DG_SENS.layer=null;DG_SENS.boundaryLayer=null;DG_SENS.boundaryKey=null;DG_SENS.vegetationLayer=null;DG_SENS.renderer=null;DG_SENS.pathCache=null;dgSensDrawCancel();map.off("moveend",dgSensRefreshLayer);}
  const host=document.getElementById("lcSens");if(host){host.style.display="none";host.innerHTML="";if(DG_SENS.hostParent?.isConnected)DG_SENS.hostParent.insertBefore(host,DG_SENS.hostNext?.parentNode===DG_SENS.hostParent?DG_SENS.hostNext:null);else host.remove();}
