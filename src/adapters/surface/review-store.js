@@ -6,7 +6,16 @@ async function dgSurfaceReviewLoad(client,parkId,owner){
  return data;
 }
 async function dgSurfaceReviewSave(client,record,revision){
- const row={park_id:record.parkId,owner:record.owner,source_fingerprint:record.fingerprint,payload:record,revision:(revision||0)+1,updated_at:new Date().toISOString()};
+ /* Per-cell Sentinel evidence is reproducible and already stays in the local
+  * draft. Sending its multi-megabyte cell map with every accepted snapshot
+  * pushed PostgREST close to the table's 8 MiB guard and caused statement
+  * timeouts. Keep small scan metadata; the raster/profile cells never change. */
+ const payload={...record};
+ if(record.profile&&typeof record.profile==="object"&&record.profile.cells){
+  const{cells,...profile}=record.profile;
+  payload.profile=Object.keys(profile).length?profile:null;
+ }
+ const row={park_id:record.parkId,owner:record.owner,source_fingerprint:record.fingerprint,payload,revision:(revision||0)+1,updated_at:new Date().toISOString()};
  const query=revision?client.from("surface_reviews").update(row).eq("park_id",record.parkId).eq("owner",record.owner).eq("revision",revision):client.from("surface_reviews").insert(row);
  const{data,error}=await query.select("revision").maybeSingle();
  if(error)throw error;

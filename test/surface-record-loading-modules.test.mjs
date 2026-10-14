@@ -27,6 +27,12 @@ test('account snapshot wins unless a newer dirty device draft belongs to the sam
  assert.equal(select({fresh,local,remote}).record,local);assert.equal(select({fresh,local:{...local,draftDirty:false},remote}).record,remote);assert.equal(select({fresh,local:{...local,parkId:8},remote:null}).record,fresh);
 });
 
+test('matching remote snapshots reuse only same-fingerprint local spectral cells',()=>{
+ const select=setup().DG_SELECT_SURFACE_REVIEW_SOURCE.select,fresh={owner:'owner',parkId:7},remote={owner:'owner',parkId:7,fingerprint:'fp',profile:{year:2025}},local={owner:'owner',parkId:7,fingerprint:'fp',draftDirty:false,profile:{year:2025,cells:{'0:0':{ndvi:.4}}}};
+ const restored=select({fresh,local,remote}).record;assert.equal(restored.profile.cells,local.profile.cells);assert.equal(remote.profile.cells,undefined);
+ const stale=select({fresh,local:{...local,fingerprint:'different'},remote}).record;assert.equal(stale.profile.cells,undefined);
+});
+
 test('record normalization clamps values, filters features and invalidates inconsistent accepted results',()=>{
  const normalize=setup().DG_NORMALIZE_SURFACE_REVIEW_RECORD.normalize,fresh={owner:'owner',parkId:7,sens:{green:50,water:50,hard:50,bare:50}},source={...fresh,fingerprint:'fp',sens:{green:-3,water:140,hard:'bad',bare:22},corrections:[],features:[{valid:true},{valid:false}],acceptedAreas:{green:100},acceptedResult:validResult()};
  const clean=normalize({fresh,source,revision:4,classes:['green','water','hard','bare'],validFeature:feature=>feature.valid});

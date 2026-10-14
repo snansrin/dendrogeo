@@ -4,7 +4,7 @@
  * are isolated in lc-review.js. Accepted snapshots are bound to source/grid. */
 const _tvs=s=>typeof dgCf==="function"?dgCf(s):s;
 const _tvst=(s,v)=>typeof dgTfs==="function"?dgTfs(s,v):s.replace(/\{(\w+)\}/g,(m,k)=>v[k]??m);
-const DG_SENS={record:null,layer:null,boundaryLayer:null,boundaryKey:null,busy:false,saving:false,showCand:true,base:"sat",guard:true,debounce:null,epoch:0,focus:null,editing:true,revision:0,geometry:null,parkGeometry:null,epsg:null,hostParent:null,hostNext:null,status:"",draw:null,drawLayer:null,objectPick:false,objectPreview:null,objectPreviewLayer:null,localQueue:Promise.resolve(),opacity:45,visualVersion:0,baselineShown:false,rawView:false,brush:null,rightPan:null,brushType:"hard",brushDiameter:10,strokeSeq:0,drawType:"building",vegetationView:false};
+const DG_SENS={record:null,layer:null,boundaryLayer:null,boundaryKey:null,optimisticLayer:null,optimisticPaths:new Map(),busy:false,saving:false,showCand:true,base:"sat",guard:true,debounce:null,epoch:0,focus:null,editing:true,revision:0,geometry:null,parkGeometry:null,epsg:null,hostParent:null,hostNext:null,status:"",draw:null,drawLayer:null,objectPick:false,objectPreview:null,objectPreviewLayer:null,localQueue:Promise.resolve(),opacity:45,visualVersion:0,baselineShown:false,rawView:false,brush:null,rightPan:null,brushType:"hard",brushDiameter:10,strokeSeq:0,drawType:"building",vegetationView:false};
 const DG_SENS_CAMPAIGN_SAVE_QUEUE=window.DG_VALIDATION_CAMPAIGN_SAVE_QUEUE?window.DG_VALIDATION_CAMPAIGN_SAVE_QUEUE.create():null;
 const DG_SENS_COLORS={green:"#22c55e",water:"#3b82f6",hard:"#64748b",bare:"#8b5a2b",building:"#475569",pool:"#3b82f6",other:"#94a3b8"};
 const DG_SENS_VEGETATION_COLORS={sparse:"#b7e4a8",moderate:"#4caf66",dense:"#14532d"};
@@ -207,7 +207,7 @@ function dgSensEffective(c){
 function dgSensCandidates(cls){return(dgSensCells()||[]).filter(c=>dgSensEffective(c)===cls&&c.classKey!==cls).map(cell=>({cell,pred:cls,sp:DG_SENS.record?.profile?.cells?.[dgSensCellKey(cell)]}));}
 async function dgSensMount(hostId){
  const host=document.getElementById(hostId||"lcSens"),cells=dgSensCells();if(!host||!cells?.length)return;
- dgSensBrushStop();DG_SENS.rawView=false;const epoch=++DG_SENS.epoch;DG_SENS.status="";dgSensGuard(true);
+ dgSensBrushStop();dgSensClearCellPreviews();DG_SENS.rawView=false;const epoch=++DG_SENS.epoch;DG_SENS.status="";dgSensGuard(true);
  const rec=await dgSensLoadRecord();if(epoch!==DG_SENS.epoch)return;
  const R=window.DG_SURFACE_REVIEW;
  const fingerprint=await R.fingerprint(cells,PARK_POLY,PARK_HOLES||[],{year:DG_LC_LAST.report?.year,engine:DG_LC_ENGINE_VERSION});if(epoch!==DG_SENS.epoch)return;
@@ -508,7 +508,7 @@ function dgSensFocus(cls){const module=window.DG_FOCUS_SURFACE_CLASS;if(module)r
 function dgSensToggleCand(on){const module=window.DG_TOGGLE_SURFACE_CANDIDATES;if(module)return module.toggle({state:DG_SENS,on,refresh:dgSensRefreshLayer,render:dgSensRender});DG_SENS.showCand=!!on;dgSensRefreshLayer();dgSensRender();}
 function dgSensBase(type){const module=window.DG_SELECT_SURFACE_BASEMAP;if(module)return module.select({state:DG_SENS,type,switchLayer:switchBaseLayer});if(!["osm","sat","topo"].includes(type))return;DG_SENS.base=type;switchBaseLayer(type);}
 async function dgSensRefreshLayer(){
- const module=window.DG_REFRESH_SURFACE_REVIEW_LAYER;if(module)return module.refresh({state:DG_SENS,map:typeof map==="undefined"?null:map,leafletReady:!!window.L,createLayer:target=>L.layerGroup().addTo(target),createRenderer:()=>L.canvas({padding:.1}),createPathCache:()=>new WeakMap(),buildKey:state=>window.DG_BUILD_SURFACE_LAYER_RENDER_KEY.build(state),isCurrent:args=>window.DG_IS_SURFACE_LAYER_RENDER_CURRENT.check(args),parts:dgSensParts,visualResult:dgSensVisualResult,mergeSync:dgSurfaceMergeSync,displaySync:dgSurfaceDisplaySync,renderPolygons:({features,state,epoch,geometry})=>window.DG_RENDER_SURFACE_DISPLAY_POLYGONS.render({features,state,leaflet:L,colors:DG_SENS_COLORS,onClick:(event,clickEpoch,clickGeometry)=>window.DG_HANDLE_SURFACE_DISPLAY_LAYER_CLICK.handle({event,state,leaflet:L,epoch:clickEpoch,geometry:clickGeometry,isCurrent:dgSensLayerClickIsCurrent,onObjectPick:dgSensObjectPickAt,drawPoint:dgSensDrawPoint,forward:(lat,lon,zone)=>dgLcUtmForward(lat,lon,zone),parts:dgSensParts,bounds:dgSurfaceBounds,pointDistance:dgGridPointDistance,popup:dgSensPopup})}),renderBoundary:dgSensRenderBoundaryLayer,renderVegetation:dgSensRenderVegetation,updateStatus:dgSensUpdateStatus,schedule:callback=>setTimeout(callback,0),refresh:dgSensRefreshLayer,onError:message=>{DG_SENS.status=message;dgSensUpdateStatus();},epsg:DG_SENS.epsg,parkGeometry:DG_SENS.parkGeometry});
+ const module=window.DG_REFRESH_SURFACE_REVIEW_LAYER;if(module)return module.refresh({state:DG_SENS,map:typeof map==="undefined"?null:map,leafletReady:!!window.L,createLayer:target=>L.layerGroup().addTo(target),createRenderer:()=>L.canvas({padding:.1}),createPathCache:()=>new WeakMap(),buildKey:state=>window.DG_BUILD_SURFACE_LAYER_RENDER_KEY.build(state),isCurrent:args=>window.DG_IS_SURFACE_LAYER_RENDER_CURRENT.check(args),parts:dgSensParts,visualResult:dgSensVisualResult,mergeSync:dgSurfaceMergeSync,displaySync:dgSurfaceDisplaySync,renderPolygons:({features,state,epoch,geometry})=>window.DG_RENDER_SURFACE_DISPLAY_POLYGONS.render({features,state,leaflet:L,colors:DG_SENS_COLORS,onClick:(event,clickEpoch,clickGeometry)=>window.DG_HANDLE_SURFACE_DISPLAY_LAYER_CLICK.handle({event,state,leaflet:L,epoch:clickEpoch,geometry:clickGeometry,isCurrent:dgSensLayerClickIsCurrent,onObjectPick:dgSensObjectPickAt,drawPoint:dgSensDrawPoint,forward:(lat,lon,zone)=>dgLcUtmForward(lat,lon,zone),parts:dgSensParts,bounds:dgSurfaceBounds,pointDistance:dgGridPointDistance,popup:dgSensPopup})}),renderBoundary:dgSensRenderBoundaryLayer,renderVegetation:dgSensRenderVegetation,clearPreview:dgSensClearCellPreviews,updateStatus:dgSensUpdateStatus,schedule:callback=>setTimeout(callback,0),refresh:dgSensRefreshLayer,onError:message=>{DG_SENS.status=message;dgSensUpdateStatus();},epsg:DG_SENS.epsg,parkGeometry:DG_SENS.parkGeometry});
  if(typeof map==="undefined"||!map||!window.L||!DG_SENS.record||!DG_SENS.geometry)return;
  if(!DG_SENS.layer){DG_SENS.layer=L.layerGroup().addTo(map);DG_SENS.renderer=L.canvas({padding:.1});DG_SENS.pathCache=new WeakMap();}
  if(!DG_SENS.showCand){DG_SENS.layer.clearLayers();DG_SENS.boundaryLayer&&map.removeLayer(DG_SENS.boundaryLayer);DG_SENS.boundaryLayer=null;return;}
@@ -573,13 +573,32 @@ function dgSensPopup(key){
  if(dec)html+=`<button type="button" class="dg-png-btn ghost sm" onclick="dgSensUndo('${key}')">↩ ${esc(_tvs("Geri al"))}</button>`;
  html+="</div></div>";L.popup({maxWidth:280}).setLatLng([c.center.lat,c.center.lon]).setContent(html).openOn(map);
 }
+/* Immediate display-only cell overlay while the exact class union is rebuilt. */
+function dgSensPreviewCell(cell,type){
+ dgSensPreviewCells([{cell,type}]);
+}
+function dgSensPreviewCells(entries){
+ if(!DG_SENS.showCand||!DG_SENS.geometry||!window.L||typeof map==="undefined"||!map)return;
+ for(const entry of entries||[]){if(!entry?.cell)continue;const key=dgSensCellKey(entry.cell);if(DG_SENS.geometry[key]?.length)DG_SENS.optimisticPaths.set(key,entry.type);}
+ if(!DG_SENS.optimisticPaths.size)return;
+ if(!DG_SENS.optimisticLayer)DG_SENS.optimisticLayer=L.layerGroup().addTo(map);
+ DG_SENS.optimisticLayer.clearLayers();const groups=new Map();
+ for(const[key,type]of DG_SENS.optimisticPaths){const geometry=DG_SENS.geometry[key];if(!geometry?.length)continue;let group=groups.get(type);if(!group)groups.set(type,group=[]);
+  const coordinates=dgSurfaceUnproject(geometry,DG_SENS.epsg);for(const polygon of coordinates)group.push(polygon.map(ring=>ring.map(point=>[point[1],point[0]])));
+ }
+ for(const[type,polygons]of groups){const layer=L.polygon(polygons,{renderer:DG_SENS.renderer||undefined,stroke:false,weight:0,fillColor:DG_SENS_COLORS[type]||DG_SENS_COLORS.other,fillOpacity:DG_SENS.opacity/100,interactive:false,smoothFactor:0});layer.addTo(DG_SENS.optimisticLayer);}
+}
+function dgSensClearCellPreviews(){
+ if(DG_SENS.optimisticLayer&&typeof map!=="undefined"&&map)map.removeLayer(DG_SENS.optimisticLayer);
+ DG_SENS.optimisticLayer=null;DG_SENS.optimisticPaths.clear();
+}
 function dgSensDecide(key,toCls){
  const module=window.DG_APPLY_SURFACE_CELL_DECISION;
- if(module){const cell=dgSensCells()?.find(item=>dgSensCellKey(item)===key);return module.apply({rawView:DG_SENS.rawView,cell,types:window.DG_SURFACE_REVIEW.types,toClass:toCls,busy:DG_SENS.busy,saving:DG_SENS.saving,createDecision:dgSensSetCellDecision,dirty:dgSensDirty,closePopup:()=>map.closePopup(),refresh:dgSensRefreshLayer,summary:dgSensUpdateSummary,status:dgSensUpdateStatus,save:dgSensSave});}
+ if(module){const cell=dgSensCells()?.find(item=>dgSensCellKey(item)===key);return module.apply({rawView:DG_SENS.rawView,cell,types:window.DG_SURFACE_REVIEW.types,toClass:toCls,busy:DG_SENS.busy,saving:DG_SENS.saving,createDecision:dgSensSetCellDecision,dirty:dgSensDirty,previewCell:dgSensPreviewCell,closePopup:()=>map.closePopup(),refresh:dgSensRefreshLayer,summary:dgSensUpdateSummary,status:dgSensUpdateStatus,save:dgSensSave});}
  const c=dgSensCells()?.find(c=>dgSensCellKey(c)===key);if(DG_SENS.rawView||!c||!window.DG_SURFACE_REVIEW.types[toCls]||DG_SENS.busy||DG_SENS.saving)return;
  if(!dgSensSetCellDecision(c,toCls))return;dgSensDirty();map.closePopup();dgSensRefreshLayer();dgSensUpdateSummary();dgSensUpdateStatus();dgSensSave();
 }
-function dgSensUndo(key){const module=window.DG_UNDO_SURFACE_CELL_DECISION;if(module)return module.undo({rawView:DG_SENS.rawView,record:DG_SENS.record,key,busy:DG_SENS.busy,saving:DG_SENS.saving,dirty:dgSensDirty,closePopup:()=>map.closePopup(),refresh:dgSensRefreshLayer,summary:dgSensUpdateSummary,save:dgSensSave});if(DG_SENS.rawView||!DG_SENS.record||DG_SENS.busy||DG_SENS.saving)return;delete DG_SENS.record.corrections[key];dgSensDirty();map.closePopup();dgSensRefreshLayer();dgSensUpdateSummary();dgSensSave();}
+function dgSensUndo(key){const module=window.DG_UNDO_SURFACE_CELL_DECISION;if(module)return module.undo({rawView:DG_SENS.rawView,record:DG_SENS.record,key,busy:DG_SENS.busy,saving:DG_SENS.saving,dirty:dgSensDirty,cellForKey:target=>dgSensCells()?.find(cell=>dgSensCellKey(cell)===target),classForCell:dgSensEffective,previewCell:dgSensPreviewCell,closePopup:()=>map.closePopup(),refresh:dgSensRefreshLayer,summary:dgSensUpdateSummary,save:dgSensSave});if(DG_SENS.rawView||!DG_SENS.record||DG_SENS.busy||DG_SENS.saving)return;delete DG_SENS.record.corrections[key];dgSensDirty();map.closePopup();dgSensRefreshLayer();dgSensUpdateSummary();dgSensSave();}
 function dgSensBulk(cls){const module=window.DG_APPLY_SURFACE_CELL_DECISION;if(module)return module.bulk({candidates:dgSensCandidates(cls),classKey:cls,cellKey:dgSensCellKey,apply:dgSensDecide});for(const x of dgSensCandidates(cls))dgSensDecide(dgSensCellKey(x.cell),cls);}
 async function dgSensAccept(){
  const rec=DG_SENS.record;
@@ -944,14 +963,14 @@ function dgSensBrushToggle(){
 }
 async function dgSensBrushCommit(points,type,diameter){
  const module=window.DG_COMMIT_SURFACE_BRUSH_STROKE;
- if(module)return module.commit({points,type,diameter,state:DG_SENS,types:window.DG_SURFACE_REVIEW.types,allowed:[5,10,20,40],validate:input=>window.DG_VALIDATE_SURFACE_BRUSH_STROKE.valid(input),selectCells:dgSensBrushCellKeys,cells:dgSensCells,cellKey:dgSensCellKey,createDecision:(cell,classKey,ts,strokeId)=>dgSensSetCellDecision(cell,classKey,ts,strokeId),appendHistory:dgSensPushBrushHistory,timestamp:()=>new Date().toISOString(),strokeId:()=>Date.now().toString(36)+"-"+(++DG_SENS.strokeSeq).toString(36),dirty:dgSensDirty,refresh:dgSensRefreshLayer,summary:dgSensUpdateSummary,status:dgSensUpdateStatus,save:dgSensSave});
+ if(module)return module.commit({points,type,diameter,state:DG_SENS,types:window.DG_SURFACE_REVIEW.types,allowed:[5,10,20,40],validate:input=>window.DG_VALIDATE_SURFACE_BRUSH_STROKE.valid(input),selectCells:dgSensBrushCellKeys,cells:dgSensCells,cellKey:dgSensCellKey,createDecision:(cell,classKey,ts,strokeId)=>dgSensSetCellDecision(cell,classKey,ts,strokeId),appendHistory:dgSensPushBrushHistory,timestamp:()=>new Date().toISOString(),strokeId:()=>Date.now().toString(36)+"-"+(++DG_SENS.strokeSeq).toString(36),dirty:dgSensDirty,previewCells:dgSensPreviewCells,refresh:dgSensRefreshLayer,summary:dgSensUpdateSummary,status:dgSensUpdateStatus,save:dgSensSave});
  if(!points.length||points.length>300||!points.every(p=>Array.isArray(p)&&p.length===2&&p.every(Number.isFinite)&&Math.abs(p[0])<=90&&Math.abs(p[1])<=180)||!window.DG_SURFACE_REVIEW.types[type]||![5,10,20,40].includes(diameter)||!DG_SENS.record||DG_SENS.rawView||DG_SENS.busy||DG_SENS.saving)return;
  const rec=DG_SENS.record;
  const keys=dgSensBrushCellKeys(points,diameter);if(!keys.length)return;
- const ts=new Date().toISOString(),strokeId=Date.now().toString(36)+"-"+(++DG_SENS.strokeSeq).toString(36),changes=[],cellByKey=new Map((dgSensCells()||[]).map(c=>[dgSensCellKey(c),c]));
- for(const key of keys){const cell=cellByKey.get(key);if(!cell)continue;const before=rec.corrections?.[key]?{...rec.corrections[key]}:null,applied=dgSensSetCellDecision(cell,type,ts,strokeId);if(applied)changes.push({key,before,strokeId});}
+ const ts=new Date().toISOString(),strokeId=Date.now().toString(36)+"-"+(++DG_SENS.strokeSeq).toString(36),changes=[],previews=[],cellByKey=new Map((dgSensCells()||[]).map(c=>[dgSensCellKey(c),c]));
+ for(const key of keys){const cell=cellByKey.get(key);if(!cell)continue;const before=rec.corrections?.[key]?{...rec.corrections[key]}:null,applied=dgSensSetCellDecision(cell,type,ts,strokeId);if(applied){changes.push({key,before,strokeId});previews.push({cell,type});}}
  if(!changes.length)return;dgSensPushBrushHistory(rec,{id:strokeId,changes,ts,type,diameter_m:diameter});
- dgSensDirty();dgSensRefreshLayer();dgSensUpdateSummary();dgSensUpdateStatus();if(DG_SENS.record===rec)await dgSensSave();
+ dgSensDirty();dgSensPreviewCells(previews);dgSensRefreshLayer();dgSensUpdateSummary();dgSensUpdateStatus();if(DG_SENS.record===rec)await dgSensSave();
 }
 function dgSensBrushUndo(){
  const module=window.DG_UNDO_SURFACE_BRUSH_STROKE;

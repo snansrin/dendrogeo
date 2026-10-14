@@ -2,10 +2,10 @@
 
 /* Orchestrate async display geometry, stale-result rejection and layer visibility. */
 window.DG_REFRESH_SURFACE_REVIEW_LAYER={
-  async refresh({state,map,leafletReady,createLayer,createRenderer,createPathCache,buildKey,isCurrent,parts,visualResult,mergeSync,displaySync,renderPolygons,renderBoundary,renderVegetation,updateStatus,schedule,refresh,onError,epsg,parkGeometry}){
+  async refresh({state,map,leafletReady,createLayer,createRenderer,createPathCache,buildKey,isCurrent,parts,visualResult,mergeSync,displaySync,renderPolygons,renderBoundary,renderVegetation,clearPreview,updateStatus,schedule,refresh,onError,epsg,parkGeometry}){
     if(!map||!leafletReady||!state.record||!state.geometry)return;
     if(!state.layer){state.layer=createLayer(map);state.renderer=createRenderer();state.pathCache=createPathCache();}
-    if(!state.showCand){state.layer.clearLayers();if(state.boundaryLayer)map.removeLayer(state.boundaryLayer);state.boundaryLayer=null;return;}
+    if(!state.showCand){state.layer.clearLayers();clearPreview?.();if(state.boundaryLayer)map.removeLayer(state.boundaryLayer);state.boundaryLayer=null;return;}
     const key=buildKey(state);
     if(state.mergedKey!==key){
       if(state.mergeBusy)return;
@@ -26,6 +26,7 @@ window.DG_REFRESH_SURFACE_REVIEW_LAYER={
       const visible=(!state.focus||path.cls===state.focus)&&!(state.vegetationView&&path.cls==="green");
       if(visible){if(!state.layer.hasLayer(path.poly))path.poly.addTo(state.layer);}else state.layer.removeLayer(path.poly);
     }
+    clearPreview?.();
     renderBoundary();if(state.vegetationView)renderVegetation();else state.vegetationLayer?.clearLayers();
   }
 };

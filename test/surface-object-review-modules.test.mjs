@@ -8,7 +8,7 @@ const modules=['src/domain/surface/find-surface-object-at-point.js','src/domain/
 function setup(){const window={};const context=vm.createContext({window,Date});for(const path of modules)vm.runInContext(read(path),context,{filename:path});return window;}
 
 test('object picker falls back to previously verified polygons during OSM outages',()=>{
-  const window=setup(),stored={type:'water',geometry:{type:'MultiPolygon',coordinates:[]},osmId:44},point=window.DG_SURFACE_OBJECT_PICKER.find({latlng:{lat:1,lng:2},elements:[],storedFeatures:[stored],epsg:32631,parkGeometry:['park'],cellGeometry:{},forward:()=>({x:5,y:5}),validFeature:()=>true,featureGeometry:()=>[['polygon']],bounds:()=>[0,0,10,10],pointDistance:()=>0});
+  const window=setup(),stored={type:'water',geometry:{type:'MultiPolygon',coordinates:[]},osmId:44},point=window.DG_SURFACE_OBJECT_PICKER.find({latlng:{lat:1,lng:2},elements:[],storedFeatures:[stored],epsg:32631,parkGeometry:['park'],cellGeometry:{},forward:()=>({x:5,y:5}),validFeature:()=>true,featureGeometry:()=>[['polygon']],bounds:()=>[0,0,10,10],pointDistance:()=>0,area:()=>1});
   assert.equal(point.geometry,stored.geometry);assert.deepEqual(JSON.parse(JSON.stringify(point)),{type:'water',geometry:stored.geometry,osmId:44});
 });
 
@@ -16,6 +16,12 @@ test('object picker ranks containing candidates by area and clips the selected g
   const window=setup(),calls=[],small={type:'water',geometry:{type:'MultiPolygon',coordinates:[[[[0,0],[1,0],[1,1],[0,0]]]]},osmId:2},large={type:'building',geometry:{type:'MultiPolygon',coordinates:[[[[0,0],[3,0],[3,3],[0,0]]]]},osmId:1};
   const result=window.DG_SURFACE_OBJECT_PICKER.find({latlng:{lat:1,lng:2},elements:[small,large],storedFeatures:[],epsg:32631,parkGeometry:['park'],cellGeometry:{},forward:()=>({x:5,y:5}),project:ring=>ring,unproject:()=>[[[1,2],[3,4],[1,2]]],objects:items=>items,validFeature:()=>true,bounds:()=>[0,0,10,10],pointDistance:()=>0,area:geometry=>geometry[0]?.[0]?.[1]?.[0]===3?100:10,clip:(op,geometry,park)=>{calls.push([op,geometry[0][0][0],park]);return[['clipped']];}});
   assert.equal(result.type,'water');assert.equal(result.osmId,2);assert.deepEqual(calls[0],['intersection',[0,0],['park']]);
+});
+
+test('stored OSM geometry is preferred and projected only once across repeated picks',()=>{
+ const picker=setup().DG_SURFACE_OBJECT_PICKER,stored={type:'building',geometry:{type:'MultiPolygon',coordinates:[]},osmId:9};let geometryBuilds=0,objectBuilds=0;
+ const ports={latlng:{lat:1,lng:2},elements:[{type:'water'}],storedFeatures:[stored],epsg:32631,parkGeometry:['park'],cellGeometry:{},forward:()=>({x:5,y:5}),project:ring=>ring,validFeature:()=>true,featureGeometry:()=>{geometryBuilds++;return[[[[0,0],[10,0],[10,10],[0,0]]]];},bounds:()=>[0,0,10,10],pointDistance:()=>0,area:()=>100,objects:()=>{objectBuilds++;return[];}};
+ assert.equal(picker.find(ports).type,'building');assert.equal(picker.find(ports).type,'building');assert.equal(geometryBuilds,1);assert.equal(objectBuilds,0);
 });
 
 test('selected boundary keeps the saved visual-boundary source and timestamp fields',()=>{

@@ -31,12 +31,15 @@ test('review store loads the owner scoped payload and propagates database errors
 });
 
 test('review store inserts first revision and keeps the revision compare-and-set update',async()=>{
-  const record={parkId:7,owner:'owner-a',fingerprint:'abc'};
+  const record={parkId:7,owner:'owner-a',fingerprint:'abc',profile:{year:2025,cells:{'0:0':{ndvi:0.4}}},corrections:{'0:0':{to:'hard'}}};
   const created=client({data:{revision:1},error:null});
   assert.equal(await store.save(created.client,record,0),1);
   const inserted=created.calls.find(x=>x[0]==='insert')[1];
   assert.deepEqual(Object.keys(inserted).sort(),['owner','park_id','payload','revision','source_fingerprint','updated_at'].sort());
-  assert.equal(inserted.payload,record);
+  assert.notEqual(inserted.payload,record);
+  assert.deepEqual(JSON.parse(JSON.stringify(inserted.payload.profile)),{year:2025});
+  assert.deepEqual(JSON.parse(JSON.stringify(record.profile.cells)),{'0:0':{ndvi:0.4}},'local scan evidence remains available');
+  assert.deepEqual(JSON.parse(JSON.stringify(inserted.payload.corrections)),{'0:0':{to:'hard'}});
   assert.equal(inserted.revision,1);
   assert.equal(Number.isNaN(Date.parse(inserted.updated_at)),false);
   assert.deepEqual(created.calls.map(x=>x[0]),['from','insert','select','maybeSingle']);
@@ -44,7 +47,9 @@ test('review store inserts first revision and keeps the revision compare-and-set
   const updated=client({data:{revision:6},error:null});
   assert.equal(await store.save(updated.client,record,5),6);
   assert.deepEqual(updated.calls.filter(x=>x[0]==='eq'),[['eq','park_id',7],['eq','owner','owner-a'],['eq','revision',5]]);
-  assert.equal(updated.calls.find(x=>x[0]==='update')[1].revision,6);
+  const update=updated.calls.find(x=>x[0]==='update')[1];
+  assert.equal(update.revision,6);
+  assert.equal('cells' in update.payload.profile,false);
 });
 
 test('review store reports stale revisions and write failures',async()=>{

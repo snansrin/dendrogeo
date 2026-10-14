@@ -17,9 +17,9 @@ test('popup view keeps the legacy class order, handlers and escaped text',()=>{
   assert.match(html,/12\.3 m²/);assert.match(html,/onclick="dgSensDecide\('2:7','green'\)"/);assert.match(html,/onclick="dgSensUndo\('2:7'\)"/);assert.ok(html.indexOf("'green'")<html.indexOf("'hard'")&&html.indexOf("'hard'")<html.indexOf("'building'")&&html.indexOf("'building'")<html.indexOf("'water'")&&html.indexOf("'water'")<html.indexOf("'bare'"));assert.doesNotMatch(html,/pool|Havuz/);assert.match(html,/&lt;water&gt;/);
 });
 
-test('single decision validates before preserving the dirty/close/refresh/save order',()=>{
-  const window=setup(),events=[],cell={row:1},apply=window.DG_APPLY_SURFACE_CELL_DECISION.apply,ports={rawView:false,cell,types:{water:{}},toClass:'water',busy:false,saving:false,createDecision:()=>{events.push('decision');return{key:'1:0'};},dirty:()=>events.push('dirty'),closePopup:()=>events.push('close'),refresh:()=>events.push('refresh'),summary:()=>events.push('summary'),status:()=>events.push('status'),save:()=>events.push('save')};
-  assert.equal(apply(ports),true);assert.deepEqual(events,['decision','dirty','close','refresh','summary','status','save']);events.length=0;assert.equal(apply({...ports,toClass:'bad'}),false);assert.deepEqual(events,[]);
+test('single decision previews immediately after applying the correction',()=>{
+  const window=setup(),events=[],cell={row:1},apply=window.DG_APPLY_SURFACE_CELL_DECISION.apply,ports={rawView:false,cell,types:{water:{}},toClass:'water',busy:false,saving:false,createDecision:()=>{events.push('decision');return{key:'1:0'};},dirty:()=>events.push('dirty'),previewCell:(target,type)=>events.push(`preview:${target.row}:${type}`),closePopup:()=>events.push('close'),refresh:()=>events.push('refresh'),summary:()=>events.push('summary'),status:()=>events.push('status'),save:()=>events.push('save')};
+  assert.equal(apply(ports),true);assert.deepEqual(events,['decision','dirty','preview:1:water','close','refresh','summary','status','save']);events.length=0;assert.equal(apply({...ports,toClass:'bad'}),false);assert.deepEqual(events,[]);
 });
 
 test('bulk correction keeps candidate order and calls the same single-cell entry',()=>{
@@ -31,6 +31,12 @@ test('undo and reset preserve ownership gates, confirmation, and state clear ord
   assert.equal(window.DG_UNDO_SURFACE_CELL_DECISION.undo({rawView:false,record,key:'a',busy:false,saving:false,dirty:()=>events.push('dirty'),closePopup:()=>events.push('close'),refresh:()=>events.push('refresh'),summary:()=>events.push('summary'),save:()=>events.push('save')}),true);assert.deepEqual(events,['dirty','close','refresh','summary','save']);assert.equal('a' in record.corrections,false);
   events.length=0;window.DG_RESET_SURFACE_CORRECTIONS.reset({rawView:false,busy:false,saving:false,confirmReset:()=>false,record,dirty:()=>events.push('dirty'),repartition:()=>events.push('partition'),save:()=>events.push('save')});assert.deepEqual(events,[]);
   window.DG_RESET_SURFACE_CORRECTIONS.reset({rawView:false,busy:false,saving:false,confirmReset:()=>true,record,dirty:()=>events.push('dirty'),repartition:()=>Promise.resolve(true),save:()=>events.push('save')});assert.equal(JSON.stringify(record.corrections),'{}');assert.equal(JSON.stringify(record.features),'[]');assert.equal(JSON.stringify(record.brushHistory),'[]');assert.equal(events[0],'dirty');
+});
+
+test('undo previews the restored effective class before rebuilding exact geometry',()=>{
+ const window=setup(),events=[],record={corrections:{a:{to:'water'}}};
+ assert.equal(window.DG_UNDO_SURFACE_CELL_DECISION.undo({rawView:false,record,key:'a',busy:false,saving:false,dirty:()=>events.push('dirty'),cellForKey:()=>({classKey:'green'}),classForCell:()=> 'green',previewCell:(cell,type)=>events.push(`preview:${type}`),closePopup:()=>events.push('close'),refresh:()=>events.push('refresh'),summary:()=>events.push('summary'),save:()=>events.push('save')}),true);
+ assert.deepEqual(events,['dirty','preview:green','close','refresh','summary','save']);
 });
 
 test('five decision modules load and are precached before the locked surface UI',()=>{

@@ -19,8 +19,8 @@ test('detailed coverage fetch uses one combined OSM query with the padded park b
 
   assert.equal(calls.length,1);
   assert.equal(calls[0][1],'yüzey+su');
-  assert.ok(calls[0][0].startsWith('[out:json][timeout:90];('));
-  for(const clause of ['["natural"="water"]','["building:part"]','["highway"]','["area:highway"]','["amenity"~"parking','["leisure"~"pitch|track|playground"]','["surface"~"asphalt','["man_made"~"pier|bridge"]']){
+  assert.ok(calls[0][0].startsWith('[out:json][timeout:45];('));
+  for(const clause of ['nwr["natural"="water"]','nwr["building:part"]','way["highway"]','way["area:highway"]','nwr["amenity"~"fountain|parking','nwr["leisure"~"swimming_pool|pitch|track|playground"]','nwr["surface"~"asphalt','nwr["man_made"~"pier|bridge"]']){
     assert.ok(calls[0][0].includes(clause),`missing query clause ${clause}`);
   }
   assert.deepEqual(JSON.parse(JSON.stringify(result.bbox)),{minLat:39,minLon:32,maxLat:40,maxLon:33});
