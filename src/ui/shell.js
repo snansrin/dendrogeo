@@ -10,8 +10,9 @@ async function boot(){
         window._swRegistered = true;
 
         navigator.serviceWorker.register('./sw.js',{updateViaCache:'none'})
-        // Worker güncellemesi açık park analizini yeniden başlatmamalı.
-        .then(reg=>reg.update())
+        // Registration already checks changed worker bytes; avoid an extra
+        // update request and defer the large offline-cache fill until idle.
+        .then(reg=>{reg.update();setTimeout(()=>navigator.serviceWorker.ready.then(ready=>ready.active?.postMessage({type:'PRECACHE_REMAINING'})).catch(()=>{}),12000);})
         .catch(e=>console.log('SW registration failed:',e));
     }
     
@@ -114,8 +115,7 @@ initMaps();
   let _swt=null;
   window.addEventListener("scroll",()=>{if(_swt)return;_swt=setTimeout(()=>{_swt=null;
    try{localStorage.setItem("dg_scrollw_"+DG_CUR_VIEW,String(window.scrollY||0));}catch(e){}},120);},{passive:true});}
-await loadProjects();
-await loadWaypoints();
+await Promise.allSettled([loadProjects(),loadWaypoints()]);
 loadDash();loadRecords();loadWorld();loadMyRequests();loadRequestOptions();
  /* KALDIĞIN YERDEN DEVAM: yenilemede son açık sekme geri gelir.
   * OAuth/recovery akışlarında bu satıra gelinmez (yukarıda return var). */

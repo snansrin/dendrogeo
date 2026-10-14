@@ -767,7 +767,7 @@
     "src/ui/park-export.js": "170fadbb94207665373337138321deb73694f2e7bb9c552d06c2ad6ea77d5357",
     "src/ui/park-identity.js": "32676d666b9e4f1e859f136fb895cf258246244306f4eeb53a7df865f9602018",
     "src/ui/park-image-geometry.js": "723a2870bf5c854824a074177c789ad75c566e93f04e3f2c0cc4cd5cf7a60e45",
-    "src/ui/park-info-panel.js": "724aafd1f948bbeb5fb246cbfb0a5e2dce0705b95ef25bdc59c37fbe747a8f39",
+    "src/ui/park-info-panel.js": "d6a2d300be362640e9c813cee839d7cd510e9c36d59e30ee77dc664844cd7153",
     "src/ui/park-landcover-analysis.js": "4d6d9970af0be40287ef9bbb44be333dd2ede933554d1c5afed07895f339d3b9",
     "src/ui/park-measurement-gate.js": "4772a5fb077f43b4e0f9369366816ad68da36aace791b2b55a3fe98541ac6119",
     "src/ui/park-menu-ui.js": "9b645342c5beb2df56901cacad4f785a08575ac1d70c1d9515758a8950e5e1ee",
@@ -817,7 +817,7 @@
     "test/landcover-v4.test.mjs": "c930298d333481190cbc7cd7756b3110313bcd126121b8f47fb689bd5b0c0fa4",
     "test/lc-s2-annual-modules.test.mjs": "ace3751b8a25e57f3aae2257d4704e03bcf0bbf6a44afad55b36bcaa51ee5020",
     "test/lc-s2-scene-modules.test.mjs": "fe2f40ea0eb31c7b3d13ebc715fb8f8a6ac92ed88b4b5970b2fa86161edb43fc",
-    "test/lc-validate.test.mjs": "8c44cf8393d1ec7c36ecba9f066a058b5ce8302b3c851e2c55c4c50dfdc0eb7f",
+    "test/lc-validate.test.mjs": "2af88dd3da11fc13e9237ab97292f3ade32ae8f3cf2fee8bd1d79111d0b44160",
     "test/lc-validation-accuracy-domain.test.mjs": "6de28dd2dffdc1141122f2d466c8d7a5c904b759ae4ff64c1c364fdcbd5cb60b",
     "test/lc-validation-campaign-export-modules.test.mjs": "568a76922fbe715e71f0d828a56aa9ab11c32a5ef47b4c360a89b513d3f89af1",
     "test/map-init-modules.test.mjs": "e78e65c5aed0ae360811b47e6f250f698c46a92e843a630f652269a6869dd331",
@@ -858,7 +858,7 @@
     "test/park-identity.test.mjs": "d4226e6f6537055ce0e7712bae85875059f014ed75e3f065edbf14d45bda94c5",
     "test/park-image-geometry-ui.test.mjs": "e47c0513c16fdbbc328c1fdaa3a115c029819032b7bc51fe79a98c0f311b16ad",
     "test/park-impervious-geometry-domain.test.mjs": "d7cfaedd1d34b6bcc4c7d874299c916fdea8a6897518db3bd29f3873449830f3",
-    "test/park-info-panel-ui.test.mjs": "4d490f4d29a9164bf2f2dd0b934438525cd157c9d85bb214910533519eccbb8f",
+    "test/park-info-panel-ui.test.mjs": "10673da99d53f4682454cf0443b171816aab9669b1cf889c0ec5af3978d4004d",
     "test/park-invites.test.mjs": "221d5b959c8347af39f43f646a2d9302170aeb54c686193515173e5e0941c0e9",
     "test/park-landcover-analysis.test.mjs": "202ec7457f1e926f91bcbb69dbeb9b029c2bb89ad654ea34cae1347632d2d28f",
     "test/park-line-distance-domain.test.mjs": "ac3b2fa1b303de5fc82271f690dd41b45dc14ddd57c9da544882c890d82883d8",
@@ -2418,6 +2418,32 @@
           "path": "test/park-coverage-application.test.mjs",
           "previous_sha256": "b7bc4120db992a4afd64dbd3493c4f0190a4ca8017ce4ad0c21aca6b0245e09f",
           "sha256": "f184a3d037fb7fdffd91048527657eb65c350bc0c8834a42ad9417191b1129d6"
+        }
+      ]
+    },
+    {
+      "date": "2026-10-14",
+      "scope": "User-authorized removal of the redundant post-analysis PNG/base-layer panel and its GIS reparenting; preserve the verified map export flow and pin the visible UI change with regression tests.",
+      "files": [
+        {
+          "path": "src/ui/park-info-panel.js",
+          "previous_sha256": "724aafd1f948bbeb5fb246cbfb0a5e2dce0705b95ef25bdc59c37fbe747a8f39",
+          "sha256": "9323aadb5a038d3aaa5fde5b088b134a1125861836fbece62a52995d3248cb9b"
+        },
+        {
+          "path": "test/park-info-panel-ui.test.mjs",
+          "previous_sha256": "4d490f4d29a9164bf2f2dd0b934438525cd157c9d85bb214910533519eccbb8f",
+          "sha256": "10673da99d53f4682454cf0443b171816aab9669b1cf889c0ec5af3978d4004d"
+        },
+        {
+          "path": "src/ui/park-info-panel.js",
+          "previous_sha256": "9323aadb5a038d3aaa5fde5b088b134a1125861836fbece62a52995d3248cb9b",
+          "sha256": "d6a2d300be362640e9c813cee839d7cd510e9c36d59e30ee77dc664844cd7153"
+        },
+        {
+          "path": "test/lc-validate.test.mjs",
+          "previous_sha256": "8c44cf8393d1ec7c36ecba9f066a058b5ce8302b3c851e2c55c4c50dfdc0eb7f",
+          "sha256": "2af88dd3da11fc13e9237ab97292f3ade32ae8f3cf2fee8bd1d79111d0b44160"
         }
       ]
     }

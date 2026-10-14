@@ -195,13 +195,13 @@ test('distance measurement captures polygon clicks before editor popup even in r
  assert.equal(events.click,undefined);
 });
 
-test('verified-map original label/dialog are restored, separate quick PNG stays in File',()=>{
+test('verified map export remains available while the redundant post-analysis PNG card is removed',()=>{
  const script=load('src/ui/gis-export.js');
  const events=load('src/ui/gis-export-events.js');
  const workspace=load('src/ui/gis-workspace.js');
  const locked=load('src/ui/lc-sens.js');
  assert.match(workspace,/verified\.textContent="🖼️ Doğrulanmış Harita"/);
- assert.match(workspace,/legacy\.hidden=false/);
+ assert.doesNotMatch(workspace,/legacy\.hidden=false|parkRasterExport|downloadParkImage/);
  assert.match(locked,/function dgSensExportPng\(\)/);
  assert.match(locked,/dialog\.showModal\(\)/);
  assert.match(load('src/bootstrap/gis-export.js'),/DG_GIS_EXPORT_BOOTSTRAP\.install/);

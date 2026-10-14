@@ -40,16 +40,15 @@ test('workspace loads once from an external classic script and is precached',()=
  assert.match(html,/css\/gis-workspace\.css\?v=[a-f0-9]{8}/);
 });
 
-test('all original Grid, layer and PNG IDs and event handlers remain wired',()=>{
- for(const id of ['parkGridTools','parkLayerTools','parkRasterExport','gridProject','gridSize','gridClearance','pngBg','chkPngGrid','chkPngWp','chkPngCover','togGrid','togWp']){
+test('Grid and layer controls remain wired while the post-analysis PNG card stays removed',()=>{
+ for(const id of ['parkGridTools','parkLayerTools','gridProject','gridSize','gridClearance','togGrid','togWp']){
   assert.match(parkSurface,new RegExp('id="'+id+'"'));
  }
+ assert.doesNotMatch(parkSurface,/parkRasterExport|pngBg|chkPngGrid|chkPngWp|chkPngCover|downloadParkImage/);
  assert.match(parkSurface,/onclick="buildGrid\(\)"/);
- assert.match(parkSurface,/onclick="downloadParkImage\(\)"/);
- assert.match(ui,/panel\.append\(exportCard\)/);
- assert.match(ui,/section\.append\(pngFields\)/);
+ assert.doesNotMatch(ui,/exportCard|pngFields|makeOutput/);
  assert.doesNotMatch(ui,/cloneNode\(/);
- assert.match(ui,/menu\.dataset\.menuOrder="45"/);
+ assert.doesNotMatch(ui,/menu\.dataset\.menuOrder="45"/);
  assert.doesNotMatch(css,/#v-map #surfaceMenuBar \.dg-ux-output-menu\s*\{\s*margin-left:auto/);
 });
 

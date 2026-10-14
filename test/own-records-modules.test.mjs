@@ -26,7 +26,6 @@ test('own-record modules preserve status labels and classes', () => {
   assert.deepEqual({ ...api.DG_RECORD_STATUS_META.resolve('Onaylı') }, { label: 'Onaylı', cls: 'on' });
   assert.deepEqual({ ...api.DG_RECORD_STATUS_META.resolve('Red') }, { label: 'Red', cls: 'off' });
 });
-
 test('own records group in Turkish project order and then point/measurement order', () => {
   const api = runtime();
   const rows = [
@@ -87,4 +86,22 @@ test('own-record adapter preserves the owner scoped, newest-first Supabase query
     ['order', 'created_at', { ascending: false }],
   ]);
   assert.deepEqual(JSON.parse(JSON.stringify(result)), { data: [] });
+});
+
+test('own-record adapter falls back to owner-scoped rows if the projects join is unavailable', async () => {
+  const api = runtime(), calls = [], replies = [
+    { data: null, error: { code: 'PGRST200', message: 'relationship not in schema cache' } },
+    { data: [{ id: 8, owner: 'user-1' }], error: null },
+  ];
+  const client = { from(table) { calls.push(['from', table]); return {
+    select(value) { calls.push(['select', value]); return this; },
+    eq(field, value) { calls.push(['eq', field, value]); return this; },
+    order(field, options) { calls.push(['order', field, options]); return Promise.resolve(replies.shift()); },
+  }; } };
+  const result = await api.DG_OWN_RECORDS_STORE.load(client, 'user-1');
+  assert.equal(result.data[0].id, 8);
+  assert.deepEqual(JSON.parse(JSON.stringify(calls)), [
+    ['from', 'measurements'], ['select', '*,projects(name)'], ['eq', 'owner', 'user-1'], ['order', 'created_at', { ascending: false }],
+    ['from', 'measurements'], ['select', '*'], ['eq', 'owner', 'user-1'], ['order', 'created_at', { ascending: false }],
+  ]);
 });

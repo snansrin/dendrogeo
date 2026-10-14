@@ -615,8 +615,8 @@ describe('entegrasyon zinciri kilitleri (0054 · lc-sens)', () => {
       'lcSens, landCoverReport’tan SONRA gelmeli (barların altı)');
     assert.ok(!panel.includes('valWorkbench'), 'workbench kartı silinmeliydi');
     assert.ok(!panel.includes('dgValOpen'), 'workbench köprüsü silinmeliydi');
-    assert.match(panel, /3 · RAPOR PNG/);
-    assert.match(panel, /4 · KATMANLAR/);
+    assert.doesNotMatch(panel, /RAPOR PNG|parkRasterExport|pngBg|downloadParkImage/);
+    assert.match(panel, /3 · KATMANLAR/);
   });
 
   test('köprü: analiz bitince DG_LC_SENS.mount otomatik (typeof+try korumalı)', () => {

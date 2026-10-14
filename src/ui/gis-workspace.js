@@ -7,7 +7,7 @@
  // Park controls are moved into transient details nodes by the legacy menus.
  // Their owner may remove/rebuild a details node while preserving its old
  // child references only here. Restore those EXISTING inputs, never clone them.
- const parked={grid:null,layer:null,export:null,summary:null};
+ const parked={grid:null,layer:null,summary:null};
  const $=id=>document.getElementById(id);
  const analysisLayout=window.DG_GIS_WORKSPACE_ANALYSIS_LAYOUT.create({getElement:$,el});
  const menuLayout=window.DG_GIS_WORKSPACE_MENU_POSITION.create({windowRef:window});
@@ -29,24 +29,10 @@
   });
   menuLayout.position(menu);
  }
- function makeOutput(){
-  const menu=el("details","dg-editor-menu dg-ux-output-menu");
-  menu.dataset.menuOwner="workspace";
-  menu.dataset.menuOrder="45";
-  const summary=el("summary");
-  summary.innerHTML=window.DG_EDITOR_UI?.menuLabel?.("file","Dosya")||"Dosya";
-  const panel=el("div","dg-editor-menu-body");
-  panel.innerHTML=window.DG_EDITOR_UI?.panelHead?.("file","Harita çıktısı","Altlığı ve PNG içeriğini seç, ardından indir.")||"<strong>Harita çıktısı</strong>";
-  const note=el("p","dg-ux-option-note","İndirme ayarları analizin hesaplarını veya kayıtlı sonuçları değiştirmez.");
-  panel.append(note);
-  menu.append(summary,panel);
-  menu.addEventListener("toggle",()=>{if(menu.open)openMenu(menu);});
-  return menu;
- }
  function syncPark(){
   const bar=$("surfaceMenuBar");
   if(!bar)return;
-  for(const [key,id] of [["grid","parkGridTools"],["layer","parkLayerTools"],["export","parkRasterExport"],["summary","gridSummary"]]){
+  for(const [key,id] of [["grid","parkGridTools"],["layer","parkLayerTools"],["summary","gridSummary"]]){
    const live=$(id);if(live)parked[key]=live;
   }
   // When the original park menu was reconstructed, its old moved controls
@@ -64,48 +50,19 @@
   }
   if(window.DG_LC_SENS?.state?.record&&!bar.querySelector('details[data-menu-owner="surface"]')&&typeof dgSensRenderPaintTools==="function")
    dgSensRenderPaintTools();
-  const exportCard=$("parkRasterExport")||parked.export;
   const layer=$("parkLayerTools")||parked.layer;
-  if(!exportCard||!layer)return;
+  if(!layer)return;
   const coreFile=bar.querySelector('details[data-menu-owner="surface"][data-menu-order="10"]');
-  let menu=coreFile||bar.querySelector(".dg-ux-output-menu");
+  bar.querySelector(".dg-ux-output-menu")?.remove();
   if(coreFile){
-   bar.querySelector(".dg-ux-output-menu")?.remove(); // no duplicate Rapor & Çıktı tab
-  }else{
-   if(!menu)menu=makeOutput();
-   const next=[...bar.children].find(n=>n!==menu&&Number(n.dataset.menuOrder)>45)||null;
-   if(menu.parentElement!==bar||menu.nextElementSibling!==next)bar.insertBefore(menu,next);
-  }
-  const panel=menu.querySelector(":scope > .dg-editor-menu-body");
-  if(!panel)return;
-  if(exportCard.parentElement!==panel)panel.append(exportCard);
-  const verified=coreFile?.querySelector('button[onclick*="dgSensExportPng"]');
-  if(verified&&verified.textContent!=="🖼️ Doğrulanmış Harita")verified.textContent="🖼️ Doğrulanmış Harita";
-  const legacy=exportCard.querySelector('button[onclick*="downloadParkImage"]');
-  if(legacy)legacy.hidden=false; // Restore the separate quick PNG action; verified map keeps its original layer-selection dialog.
-
-  const select=$("pngBg");
-  const label=select?.closest(".dg-png-field")?.querySelector("label");
-  if(label&&!label.htmlFor)label.htmlFor="pngBg";
-  const pngFields=$("chkPngGrid")?.closest(".dg-png-field");
-  if(pngFields){
-   let section=layer.querySelector(".dg-ux-export-section");
-   if(!section){
-    section=el("section","dg-ux-export-section");
-    section.append(el("h4","","PNG görünüm katmanları"),
-      el("p","dg-ux-option-note","Yalnızca indirilen PNG'de gösterilir. Canlı haritayı değiştirmez."));
-    const reset=layer.querySelector(".dg-png-btn.red");
-    if(reset)reset.before(section);else layer.append(section);
-   }
-   if(pngFields.parentElement!==section)section.append(pngFields);
-   const label=pngFields.querySelector(":scope > label.dg-png-label");
-   if(label)label.hidden=true; // section heading supplies the descriptive label
+   const verified=coreFile.querySelector('button[onclick*="dgSensExportPng"]');
+   if(verified&&verified.textContent!=="🖼️ Doğrulanmış Harita")verified.textContent="🖼️ Doğrulanmış Harita";
   }
   for(const id of ["gridProject","gridSize","refHa","gridClearance"]){
    const input=$(id),label=input?.parentElement?.querySelector(".dg-png-label");
    if(label&&!label.htmlFor)label.htmlFor=id;
   }
-  if(menu.open)menuLayout.position(menu);
+  if(coreFile?.open)menuLayout.position(coreFile);
  }
  const radians=n=>n*Math.PI/180;
  function pathLength(points){
@@ -345,7 +302,7 @@
    const node=$(id);if(node)observer.observe(node,{childList:true,subtree:true});
   }
   bar.addEventListener("toggle",event=>{
-   if(event.target?.matches?.(":scope > .dg-editor-menu")&&event.target.open)openMenu(event.target);
+   if(event.target?.parentElement===bar&&event.target.matches?.("details.dg-editor-menu")&&event.target.open)openMenu(event.target);
   },true);
   window.addEventListener("resize",()=>{bar.querySelectorAll(":scope > details[open]").forEach(menuLayout.position);},{passive:true});
   window.visualViewport?.addEventListener("resize",()=>{bar.querySelectorAll(":scope > details[open]").forEach(menuLayout.position);},{passive:true});

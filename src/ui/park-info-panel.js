@@ -87,71 +87,10 @@
         `</div>`+
       `</div>`+
 
-      `<div id="parkRasterExport" class="dg-png-card">`+
-        `<div class="dg-png-head">`+
-          `<div>`+
-            `<div class="dg-png-kicker">3 · RAPOR PNG</div>`+
-            `<div class="dg-png-title">🖼️ Harita çıktısı</div>`+
-            `<div class="dg-png-sub">Park şeklinde yüksek çözünürlük</div>`+
-          `</div>`+
-        `</div>`+
-
-        `<div class="dg-png-field">`+
-          `<label class="dg-png-label">ALTLIK</label>`+
-          `<select id="pngBg" class="dg-png-select">`+
-            `<option value="vector">Vektör · Temiz beyaz</option>`+
-            `<option value="osm">OSM · Sokak</option>`+
-            `<option value="sat">Uydu</option>`+
-            `<option value="topo">Topoğrafik</option>`+
-          `</select>`+
-        `</div>`+
-
-        `<div class="dg-png-field">`+
-          `<label class="dg-png-label">GÖRÜNÜM KATMANLARI</label>`+
-          `<div class="dg-png-options">`+
-
-            `<label class="dg-png-option">`+
-              `<span class="dg-png-icon">🔲</span>`+
-              `<span class="dg-png-copy">`+
-                `<strong>Grid hücreleri</strong>`+
-                `<span>Analiz hücrelerini göster</span>`+
-              `</span>`+
-              `<input type="checkbox" id="chkPngGrid" checked>`+
-              `<span class="dg-png-switch"></span>`+
-            `</label>`+
-
-            `<label class="dg-png-option">`+
-              `<span class="dg-png-icon">📍</span>`+
-              `<span class="dg-png-copy">`+
-                `<strong>Waypoint'ler</strong>`+
-                `<span>Ölçüm noktaları</span>`+
-              `</span>`+
-              `<input type="checkbox" id="chkPngWp" checked>`+
-              `<span class="dg-png-switch"></span>`+
-            `</label>`+
-
-            `<label class="dg-png-option">`+
-              `<span class="dg-png-icon">💧</span>`+
-              `<span class="dg-png-copy">`+
-                `<strong>Su / sert zemin</strong>`+
-                `<span>Yapısal yüzeyler</span>`+
-              `</span>`+
-              `<input type="checkbox" id="chkPngCover" checked>`+
-              `<span class="dg-png-switch"></span>`+
-            `</label>`+
-
-          `</div>`+
-        `</div>`+
-
-        `<button class="dg-png-btn ghost" onclick="downloadParkImage()">`+
-          `🖼️ PNG İndir`+
-        `</button>`+
-      `</div>`+
-
       `<div id="parkLayerTools" class="dg-png-card">`+
         `<div class="dg-png-head">`+
           `<div>`+
-            `<div class="dg-png-kicker">4 · KATMANLAR</div>`+
+            `<div class="dg-png-kicker">3 · KATMANLAR</div>`+
             `<div class="dg-png-title">🗺️ Görünürlük</div>`+
             `<div class="dg-png-sub">Harita üzerindeki katmanlar</div>`+
           `</div>`+

@@ -19,9 +19,13 @@ window.DG_SURFACE_BRUSH_POINTER_SESSION={
       const next=point(event),last=brush.stroke.points.at(-1),projected=forward(next[0],next[1],state.epsg);
       if(last){const previous=forward(last[0],last[1],state.epsg);if(Math.hypot(projected.x-previous.x,projected.y-previous.y)<brush.diameter/6)return;}
       if(brush.stroke.points.length<300)brush.stroke.points.push(next);
-      if(brush.preview)map.removeLayer(brush.preview);brush.preview=leaflet.layerGroup().addTo(map);
-      if(brush.stroke.points.length>1)leaflet.polyline(brush.stroke.points,{color:colors[brush.type],weight:4,interactive:false}).addTo(brush.preview);
-      leaflet.circle(next,{radius:brush.diameter/2,color:colors[brush.type],fillOpacity:.2,interactive:false}).addTo(brush.preview);
+      if(!brush.preview)brush.preview=leaflet.layerGroup().addTo(map);
+      if(brush.stroke.points.length>1){
+        if(!brush.previewLine)brush.previewLine=leaflet.polyline(brush.stroke.points,{color:colors[brush.type],weight:4,interactive:false}).addTo(brush.preview);
+        else brush.previewLine.setLatLngs(brush.stroke.points);
+      }
+      if(!brush.previewCircle)brush.previewCircle=leaflet.circle(next,{radius:brush.diameter/2,color:colors[brush.type],fillOpacity:.2,interactive:false}).addTo(brush.preview);
+      else brush.previewCircle.setLatLng(next);
     };
     const down=event=>{if(event.target?.closest?.('.leaflet-control')||event.button!==0||!event.isPrimary||state.busy||state.saving||brush.stroke)return;stopEvent(event);brush.stroke={pointerId:event.pointerId,points:[]};container.setPointerCapture(event.pointerId);add(event);};
     const move=event=>{if(brush.stroke?.pointerId!==event.pointerId)return;stopEvent(event);add(event);};

@@ -20,7 +20,7 @@ for(const activePark of [false,true])test(`worker activation preserves the open 
     }
   };
   const window={};
-  const context=vm.createContext({window,navigator:{serviceWorker},PARK_MODE:activePark,
+  const context=vm.createContext({window,navigator:{serviceWorker},setTimeout:()=>0,PARK_MODE:activePark,
     location:{reload(){reloads++;}},sessionStorage:{getItem(){throw Error('storage blocked');}},console});
   vm.runInContext(`async function registerWorker(){${registration}};registerWorker();`,context);
   await new Promise(resolve=>setImmediate(resolve));

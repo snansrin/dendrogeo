@@ -20,9 +20,27 @@ test('brush pointer adapter captures primary strokes and restores map state on s
   assert.equal(state.brush.handlers.length,5);assert.equal(map.dragging.enabled(),false);assert.equal(map.doubleClickZoom.enabled(),false);const event={button:0,isPrimary:true,pointerId:9,target:{closest:()=>false},preventDefault(){},stopImmediatePropagation(){}};listeners.pointerdown(event);assert.ok(state.brush.stroke);assert.ok(added.includes('circle'));window.DG_SURFACE_BRUSH_POINTER_SESSION.stop({state,map});assert.equal(state.brush,null);assert.equal(map.dragging.enabled(),true);assert.equal(map.doubleClickZoom.enabled(),true);assert.equal(container.style.touchAction,'pan-x');assert.ok(events.includes('release:9'));
 });
 
+test('brush pointer preview reuses Leaflet layers while the pointer moves',()=>{
+  const window=setup(),listeners={},counts={line:0,circle:0,lineUpdates:0,circleUpdates:0},layer={addTo(){return this;}},container={style:{},classList:{add(){},remove(){}},addEventListener:(name,fn)=>{listeners[name]=fn;},removeEventListener(){},setPointerCapture(){},releasePointerCapture(){}};
+  const interaction=()=>({enabled:()=>true,disable(){},enable(){}}),map={dragging:interaction(),doubleClickZoom:interaction(),mouseEventToLatLng:event=>({lat:event.y,lng:29}),removeLayer(){}};
+  const leaflet={layerGroup:()=>({addTo(){return layer;}}),polyline:()=>{counts.line++;return{addTo(){return this;},setLatLngs(){counts.lineUpdates++;}};},circle:()=>{counts.circle++;return{addTo(){return this;},setLatLng(){counts.circleUpdates++;}};}};
+  const state={record:{},epoch:1,epsg:32636,busy:false,saving:false};
+  window.DG_SURFACE_BRUSH_POINTER_SESSION.start({state,map,leaflet,container,type:'green',diameter:10,colors:{green:'#0f0'},forward:(lat)=>({x:lat,y:0}),onCommit:async()=>{},onError:()=>{},render(){}});
+  const event=y=>({button:0,isPrimary:true,pointerId:2,y,target:{closest:()=>false},preventDefault(){},stopImmediatePropagation(){}});
+  listeners.pointerdown(event(1));listeners.pointermove(event(6));listeners.pointermove(event(11));
+  assert.deepEqual(counts,{line:1,circle:1,lineUpdates:1,circleUpdates:2});
+  window.DG_SURFACE_BRUSH_POINTER_SESSION.stop({state,map});
+});
+
 test('brush commit preserves per-cell provenance, history, refresh order and save gate',async()=>{
   const window=setup(),events=[],record={corrections:{}},state={record,rawView:false,busy:false,saving:false},result=await window.DG_COMMIT_SURFACE_BRUSH_STROKE.commit({points:[[41,29]],type:'water',diameter:10,state,types:{water:{}},allowed:[5,10,20,40],validate:window.DG_VALIDATE_SURFACE_BRUSH_STROKE.valid,selectCells:()=>['1:2'],cells:()=>[{row:1,col:2,classKey:'green'}],cellKey:cell=>`${cell.row}:${cell.col}`,createDecision:(cell,to,ts,id)=>{const applied={key:'1:2',decision:{from:cell.classKey,to,ts,method:'visual-cell',brushStrokeId:id}};record.corrections[applied.key]=applied.decision;return applied;},appendHistory:(target,stroke)=>target.brushHistory=[stroke],timestamp:()=> 'now',strokeId:()=> 'stroke-1',dirty:()=>events.push('dirty'),previewCells:entries=>events.push(`preview:${entries.length}:${entries[0].cell.row}:${entries[0].type}`),refresh:()=>events.push('refresh'),summary:()=>events.push('summary'),status:()=>events.push('status'),save:async()=>events.push('save')});
   assert.equal(result,undefined);assert.equal(record.corrections['1:2'].brushStrokeId,'stroke-1');assert.deepEqual(events,['dirty','preview:1:1:water','refresh','summary','status','save']);assert.equal(record.brushHistory[0].changes[0].before,null);
+});
+
+test('brush explicitly converts a hard cell to green and previews the selected class',async()=>{
+  const window=setup(),record={corrections:{}},state={record,rawView:false,busy:false,saving:false},cell={row:4,col:8,classKey:'hard'},events=[];
+  await window.DG_COMMIT_SURFACE_BRUSH_STROKE.commit({points:[[41,29]],type:'green',diameter:10,state,types:{green:{}},allowed:[5,10,20,40],validate:window.DG_VALIDATE_SURFACE_BRUSH_STROKE.valid,selectCells:()=>['4:8'],cells:()=>[cell],cellKey:value=>`${value.row}:${value.col}`,createDecision:(value,to,ts,id)=>{const applied={key:'4:8',decision:{from:value.classKey,to,ts,method:'visual-cell',brushStrokeId:id}};record.corrections[applied.key]=applied.decision;return applied;},appendHistory:()=>{},timestamp:()=> 'now',strokeId:()=> 'green-stroke',dirty:()=>{},previewCells:entries=>events.push(entries[0].type),refresh:()=>{},summary:()=>{},status:()=>{},save:async()=>{}});
+  assert.equal(record.corrections['4:8'].from,'hard');assert.equal(record.corrections['4:8'].to,'green');assert.deepEqual(events,['green']);
 });
 
 test('brush undo restores only decisions still owned by the latest stroke',()=>{

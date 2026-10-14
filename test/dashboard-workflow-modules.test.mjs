@@ -24,6 +24,12 @@ test('own record view loads and groups before rendering with the established emp
  let read=false;await api.execute('u',{load:async()=>{read=true;return{data:[]};},group:()=>new Map(),container:()=>null,renderGroup:()=>'',empty:()=>''});assert.equal(read,true);
 });
 
+test('own record view reports database failures instead of showing an empty inventory',async()=>{
+ const api=load().DG_LOAD_OWN_RECORDS_VIEW,box={innerHTML:''},failure={message:'query failed'};
+ const ok=await api.execute('u',{load:async()=>({data:null,error:failure}),group:()=>new Map(),container:()=>box,renderGroup:()=>'',empty:()=>'<empty>',failed:error=>`<error>${error.message}</error>`});
+ assert.equal(ok,false);assert.equal(box.innerHTML,'<error>query failed</error>');
+});
+
 test('own record deletion requires confirmation and server proof before photo cleanup',async()=>{
  const api=load().DG_DELETE_OWN_RECORD,events=[];
  await api.execute(7,{confirm:()=>false,remove:()=>assert.fail('must not delete'),onFailure(){},removePhoto(){}});

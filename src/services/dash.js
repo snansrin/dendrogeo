@@ -14,8 +14,9 @@ function dgRecordProjectGroup(name,rows){
  return window.DG_RECORD_PROJECT_UI.render(name,rows,{escape:esc,renderItem:dgRecordItemHTML});
 }
 async function loadRecords__scroll(){
- if(window.DG_LOAD_OWN_RECORDS_VIEW)return window.DG_LOAD_OWN_RECORDS_VIEW.execute(USER.id,{load:userId=>window.DG_OWN_RECORDS_STORE.load(sb,userId),group:rows=>window.DG_GROUP_OWN_RECORDS.group(rows),container:()=>$('recGroups'),renderGroup:(name,rows)=>dgRecordProjectGroup(name,rows),empty:()=>`<div class="card records-empty">${typeof dgCf==="function"?dgCf("Kayıt yok"):"Kayıt yok"}</div>`});
- const{data}=await window.DG_OWN_RECORDS_STORE.load(sb,USER.id);
+ if(window.DG_LOAD_OWN_RECORDS_VIEW)return window.DG_LOAD_OWN_RECORDS_VIEW.execute(USER.id,{load:userId=>window.DG_OWN_RECORDS_STORE.load(sb,userId),group:rows=>window.DG_GROUP_OWN_RECORDS.group(rows),container:()=>$('recGroups'),renderGroup:(name,rows)=>dgRecordProjectGroup(name,rows),empty:()=>`<div class="card records-empty">${typeof dgCf==="function"?dgCf("Kayıt yok"):"Kayıt yok"}</div>`,failed:error=>`<div class="card records-empty records-error">${esc(dgCf("Kayıtlar yüklenemedi: "))}${esc(error?.message||dgCf("Bağlantı hatası"))}</div>`});
+ const{data,error}=await window.DG_OWN_RECORDS_STORE.load(sb,USER.id);
+ if(error){const el=$('recGroups');if(el)el.innerHTML=`<div class="card records-empty records-error">${esc(dgCf("Kayıtlar yüklenemedi: "))}${esc(error.message||dgCf("Bağlantı hatası"))}</div>`;return;}
  // Compatibility contract: localeCompare(String(pb),"tr") and point_id ordering remain unchanged in DG_GROUP_OWN_RECORDS.
  const groups=window.DG_GROUP_OWN_RECORDS.group(data||[]);
  const el=$("recGroups");if(!el)return;

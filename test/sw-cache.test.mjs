@@ -78,6 +78,18 @@ const REQ = (u) => ({ url: u, destination: 'script' });
 const ORIGIN = 'https://dendrogeo.org';
 
 describe('PRECACHE / RUNTIME ayrımı', () => {
+  test('worker install caches a small shell and receives the remaining offline warmup after startup', () => {
+    const shell = swKaynak.match(/const INSTALL_ASSETS = \[([\s\S]*?)\];/);
+    assert.ok(shell, 'small install asset list is required');
+    const assets = shell[1].match(/'[^']+'/g) || [];
+    assert.ok(assets.length <= 24, `install must not fetch the full app (${assets.length} assets)`);
+    const install = swKaynak.match(/self\.addEventListener\('install',[\s\S]*?\n\}\);/);
+    assert.ok(install && install[0].includes('INSTALL_ASSETS'));
+    assert.ok(!install[0].includes('CORE_ASSETS'));
+    assert.match(swKaynak, /event\.data\?\.type !== 'PRECACHE_REMAINING'/);
+    assert.match(swKaynak, /cacheAssetsInBatches\(cache, remaining, 4\)/);
+  });
+
   test('sw.js PRECACHE ve RUNTIME adında iki ayrı cache tanımlıyor', () => {
     const api = yukle();
     assert.match(api.PRECACHE, /^precache-/);

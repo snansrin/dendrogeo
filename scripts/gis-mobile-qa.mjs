@@ -17,9 +17,7 @@ try{
    view.style.display='block';park.style.display='block';
    bar.innerHTML='<details class="dg-editor-menu" data-menu-owner="surface" data-menu-order="20"><summary>Görünüm</summary><div class="dg-editor-menu-body"><div class="dg-editor-panel-head">Harita görünümü</div></div></details>'+
     '<details class="dg-editor-menu" data-menu-owner="surface" data-menu-order="50"><summary>Yüzey fırçası</summary><div class="dg-editor-menu-body">Düzenleme</div></details>';
-   park.innerHTML='<div id="parkRasterExport" class="dg-png-card"><div class="dg-png-field"><label class="dg-png-label">ALTLIK</label><select id="pngBg" class="dg-png-select"><option>Vektör</option></select></div>'+
-    '<div class="dg-png-field"><label class="dg-png-label">GÖRÜNÜM KATMANLARI</label><div class="dg-png-options"><label class="dg-png-option"><span>Grid</span><input type="checkbox" id="chkPngGrid" checked></label></div></div><button class="dg-png-btn ghost" onclick="void 0">PNG indir</button></div>'+
-    '<div id="parkLayerTools" class="dg-png-card"><div class="dg-png-options"><label class="dg-png-option"><span>Waypoint</span><input type="checkbox" id="togWp"></label></div></div>';
+   park.innerHTML='<div id="parkLayerTools" class="dg-png-card"><div class="dg-png-options"><label class="dg-png-option"><span>Waypoint</span><input type="checkbox" id="togWp"></label></div></div>';
    const list=document.getElementById('liveAnalysis');
    if(list)list.innerHTML='<div class="card"><div class="lbl">En Yaygın 6 Tür</div><button class="dg-png-btn">⬇️ PNG indir</button></div>';
    workspace.sync();
@@ -27,19 +25,19 @@ try{
     ready:true,
     menuLabels:[...bar.children].map(x=>x.querySelector('summary')?.textContent),
     order:[...bar.children].map(x=>Number(x.dataset.menuOrder)),
-    singleExport:document.querySelectorAll('#parkRasterExport').length,
-    pngUnderMenu:!!document.querySelector('.dg-ux-output-menu #parkRasterExport'),
-    pngLayersUnderLayers:!!document.querySelector('#parkLayerTools .dg-ux-export-section #chkPngGrid'),
+    exportCardCount:document.querySelectorAll('#parkRasterExport').length,
+    outputMenuCount:document.querySelectorAll('.dg-ux-output-menu').length,
     speciesButtonCount:list?.querySelectorAll('button').length??-1,
     toolMenuReady:!!document.getElementById('dgUxMapTools')
    };
   });
-  if(!seed.ready||seed.singleExport!==1||!seed.pngUnderMenu||!seed.pngLayersUnderLayers||
+  if(!seed.ready||seed.exportCardCount!==0||seed.outputMenuCount!==0||
      seed.speciesButtonCount!==0||!seed.toolMenuReady||
-     seed.order.indexOf(45)<0||seed.order.indexOf(45)>seed.order.indexOf(50))
+     seed.order.indexOf(50)<0)
     throw Error('GIS placement / singleton regression at '+width+': '+JSON.stringify(seed));
-  const menu=page.locator('#surfaceMenuBar > .dg-ux-output-menu');
+  const menu=page.locator('#surfaceMenuBar > details[data-menu-order="50"]');
   await menu.locator('summary').click();
+  await page.waitForTimeout(25); // Let the native <details> toggle event position its panel.
   const geometry=await menu.locator(':scope > .dg-editor-menu-body').evaluate(node=>{
    const r=node.getBoundingClientRect();
    return {left:r.left,right:r.right,top:r.top,bottom:r.bottom,viewport:innerWidth,width:r.width,scrollWidth:document.documentElement.scrollWidth};

@@ -24,7 +24,7 @@ test('landing statistics adapter keeps parallel independent reads and partial fa
 test('auth adapter keeps session, auth commands, realtime auth and profile results intact',async()=>{
  const api=moduleApi('src/adapters/auth/session-store.js','DG_AUTH_SESSION_STORE'),calls=[];
  const profile={data:{id:'u1',role:'admin'},error:null},session={data:{session:{access_token:'jwt'}},error:null},listener=()=>{},authResult={data:{user:{id:'u1'}},error:null};
- const client={auth:{getSession:async()=>session,onAuthStateChange:callback=>{calls.push(['listen',callback]);return listener;},signInWithPassword:async credentials=>{calls.push(['password',credentials]);return authResult;},signUp:async credentials=>{calls.push(['signup',credentials]);return authResult;},resetPasswordForEmail:async(email,options)=>{calls.push(['reset',email,options]);return authResult;},signOut:async()=>{calls.push(['signout']);return authResult;},updateUser:async attributes=>{calls.push(['update',attributes]);return authResult;},signInWithOAuth:async options=>{calls.push(['oauth',options]);return authResult;}},realtime:{setAuth:async token=>calls.push(['auth',token])},from(table){calls.push(['from',table]);return{select(columns){calls.push(['select',columns]);return{eq(column,value){calls.push(['eq',column,value]);return{single:async()=>profile};}};}};}};
+ const client={auth:{getSession:async()=>session,onAuthStateChange:callback=>{calls.push(['listen',callback]);return listener;},signInWithPassword:async credentials=>{calls.push(['password',credentials]);return authResult;},signUp:async credentials=>{calls.push(['signup',credentials]);return authResult;},resetPasswordForEmail:async(email,options)=>{calls.push(['reset',email,options]);return authResult;},signOut:async options=>{calls.push(['signout',options]);return authResult;},updateUser:async attributes=>{calls.push(['update',attributes]);return authResult;},signInWithOAuth:async options=>{calls.push(['oauth',options]);return authResult;}},realtime:{setAuth:async token=>calls.push(['auth',token])},from(table){calls.push(['from',table]);return{select(columns){calls.push(['select',columns]);return{eq(column,value){calls.push(['eq',column,value]);return{single:async()=>profile};}};}};}};
  const store=api.create(()=>client);
  assert.equal(await store.getSession(),session);
  assert.equal(store.onAuthStateChange(()=>{}),listener);
@@ -38,7 +38,7 @@ test('auth adapter keeps session, auth commands, realtime auth and profile resul
  await store.setRealtimeAuth('jwt');
  assert.equal(await store.loadProfile('u1'),profile);
  const plainCalls=JSON.parse(JSON.stringify(calls,(key,value)=>typeof value==='function'?'callback':value));
- assert.deepEqual(plainCalls,[['listen','callback'],['password',credentials],['signup',credentials],['reset',credentials.email,resetOptions],['signout'],['update',{password:'new-secret'}],['oauth',oauthOptions],['auth','jwt'],['from','profiles'],['select','*'],['eq','id','u1']]);
+ assert.deepEqual(plainCalls,[['listen','callback'],['password',credentials],['signup',credentials],['reset',credentials.email,resetOptions],['signout',{scope:'local'}],['update',{password:'new-secret'}],['oauth',oauthOptions],['auth','jwt'],['from','profiles'],['select','*'],['eq','id','u1']]);
 });
 
 test('persistence boundary rejects direct queries in both application and UI layers',()=>{

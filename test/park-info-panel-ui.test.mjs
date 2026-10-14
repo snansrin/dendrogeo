@@ -11,8 +11,9 @@ test('park panel keeps identity, hectares, selector and project markup in their 
  assert.ok(html.indexOf('Göksu &amp; Park')<html.indexOf('15.4 ha'));
  assert.ok(html.indexOf('<span id="park-id">#8</span>')<html.indexOf('<select id="parkAlt">'));
  assert.ok(html.indexOf('<select id="gridProject"')<html.indexOf('<option value="p">Proje</option>'));
- for(const id of ['parkGridTools','parkSurfaceAction','parkRasterExport','parkLayerTools','landCoverReport','lcSens','gridSummary'])assert.ok(html.includes(`id="${id}"`),`missing ${id}`);
- for(const handler of ['buildGrid()','runLandCoverAnalysis()','downloadParkImage()','clearGrid()'])assert.ok(html.includes(`onclick="${handler}"`),`missing ${handler}`);
+ for(const id of ['parkGridTools','parkSurfaceAction','parkLayerTools','landCoverReport','lcSens','gridSummary'])assert.ok(html.includes(`id="${id}"`),`missing ${id}`);
+ for(const handler of ['buildGrid()','runLandCoverAnalysis()','clearGrid()'])assert.ok(html.includes(`onclick="${handler}"`),`missing ${handler}`);
+ assert.doesNotMatch(html,/parkRasterExport|pngBg|chkPngGrid|downloadParkImage/);
  for(const handler of ['toggleGridVis()','toggleWpVis()'])assert.ok(html.includes(`onchange="${handler}"`),`missing ${handler}`);
 });
 
@@ -22,5 +23,5 @@ test('park panel keeps the registration retry slot optional and the menu control
  assert.ok(html.includes('id="refHa"'));
  assert.ok(html.includes('id="chkGreenOnly"'));
  assert.ok(html.includes('id="gridClearance"'));
- assert.ok(html.includes('id="pngBg"'));
+ assert.ok(!html.includes('id="pngBg"'));
 });

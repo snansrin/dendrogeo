@@ -175,17 +175,44 @@ const CORE_ASSETS = [
     '/src/application/trees/submit-measurement.js'
 ];
 
+const INSTALL_ASSETS = [
+    '/', '/index.html', '/manifest.json', '/icon.png', '/apple-touch-icon.png',
+    '/css/style.css', '/css/landing.css', '/css/park-panel.css', '/css/ui-standard.css',
+    '/src/config/supabase.js', '/src/config/constants.js', '/src/ui/state.js',
+    '/src/ui/toast.js', '/src/ui/landing.js', '/src/ui/shell.js',
+    '/vendor/supabase-js-2.116.0.js', '/vendor/leaflet-1.9.4.css', '/vendor/leaflet-1.9.4.js'
+];
+
+async function cacheAssetsInBatches(cache, assets, concurrency = 4) {
+    let cursor = 0;
+    const workers = Array.from({ length: Math.min(concurrency, assets.length) }, async () => {
+        while (cursor < assets.length) {
+            const url = assets[cursor++];
+            try { await cache.add(url); }
+            catch (error) { console.warn(`[SW] Cache başarısız: ${url}`, error); }
+        }
+    });
+    await Promise.all(workers);
+}
+
 self.addEventListener('install', event => {
     console.log('[SW] 🌲 Kuruluyor...');
     self.skipWaiting();
     event.waitUntil(
         caches.open(PRECACHE).then(cache => {
-            console.log('[SW] Temel varlıklar PRECACHE\'e yazılıyor (' + CORE_ASSETS.length + ' girdi)');
-            return Promise.allSettled(
-                CORE_ASSETS.map(url => cache.add(url).catch(err => console.warn(`[SW] Cache başarısız: ${url}`, err)))
-            );
+            console.log('[SW] Uygulama kabuğu PRECACHE\'e yazılıyor (' + INSTALL_ASSETS.length + ' girdi)');
+            return cacheAssetsInBatches(cache, INSTALL_ASSETS, 4);
         })
     );
+});
+
+self.addEventListener('message', event => {
+    if (event.data?.type !== 'PRECACHE_REMAINING') return;
+    event.waitUntil(caches.open(PRECACHE).then(cache => {
+        const installed = new Set(INSTALL_ASSETS);
+        const remaining = [...new Set(CORE_ASSETS)].filter(url => !installed.has(url));
+        return cacheAssetsInBatches(cache, remaining, 4);
+    }));
 });
 
 self.addEventListener('activate', event => {
