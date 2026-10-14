@@ -51,7 +51,7 @@ test('WorldCover v200 2021 input, class mapping and 10 m fractional area remain 
  assert.match(application,/assertCoverage\(result\.assignedAreaM2,parkAreaM2,0\.5\)/);
  assert.match(quality,/deltaPct>maxMismatchPercent/);
  assert.equal(contract.baseline.max_park_raster_area_mismatch_percent,0.5);
- assert.match(application,/waterRefined=0,roadRefined=0/);
+ assert.match(application,/waterRefined=Number\(primary\.waterRefined\)\|\|0,roadRefined=Number\(primary\.roadRefined\)\|\|0/);
 });
 test('Sentinel input composition and scan windows have not drifted',()=>{
  const s=contract.spectral;

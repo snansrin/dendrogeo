@@ -47,6 +47,13 @@ test('dashboard chart waits for lazy library, destroys the previous chart and ke
  assert.equal(created[0].options.data.datasets[0].backgroundColor({dataIndex:0}),'#14532d');assert.equal(created[0].options.options.scales.y.ticks.color,'#5f6d65');
 });
 
+test('dashboard chart resolves the global only after lazy loading completes',async()=>{
+ const api=load().DG_DASHBOARD_CHART,events=[],charts={},created=[];let Chart;
+ class LoadedChart{constructor(element,options){created.push({element,options});}}
+ await api.render('late','bar',['P1'],[1],{ensure:async()=>{events.push('ensure');Chart=LoadedChart;},getChart:()=>{events.push('resolve');return Chart;},charts,element:id=>({id})});
+ assert.deepEqual(events,['ensure','resolve']);assert.equal(created[0].element.id,'late');
+});
+
 test('world dashboard retains stats, table, marker, comparison and error flow',async()=>{
  const api=load().DG_LOAD_WORLD_DASHBOARD,events=[];
  await api.execute({hideError:()=>events.push('hide'),loadStats:async()=>({global:{data:{records:3}},countries:{data:[1]},cities:{data:[2]}}),updateStats:data=>events.push(['stats',data.records]),renderCountries:rows=>events.push(['countries',rows.length]),renderCities:rows=>events.push(['cities',rows.length]),loadMarkers:callback=>{events.push('markers');callback(1,[{id:1}],null);},markLiveDirty:()=>events.push('dirty'),clusterDegraded:()=>true,warn:message=>events.push(['warn',message]),renderAnalysis:(rows,id)=>events.push(['analysis',rows.length,id]),loadParkCompare:()=>events.push('compare'),showError:message=>events.push(['error',message])});

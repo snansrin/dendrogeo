@@ -8,9 +8,9 @@ const modules=['src/adapters/surface/load-surface-water-objects.js','src/applica
 function setup(){const window={};const context=vm.createContext({window,Promise,JSON,Set});for(const path of modules)vm.runInContext(read(path),context,{filename:path});return window;}
 
 test('water adapter observes OSM/data/park gates and filters valid footprints',async()=>{
-  const load=setup().DG_LOAD_SURFACE_WATER_OBJECTS.load,features=[{type:'water',osmId:1},{type:'pool',osmId:2},{type:'green',osmId:3},{type:'water',osmId:4}];let requests=0;
-  const args={enabled:true,loadOsmData:async()=>{requests++;return{elements:[1]};},bbox:[0,0,1,1],buildObjects:()=>features,epsg:32636,validFeature:feature=>feature.osmId!==4,isCurrent:()=>true,fromMount:false,isUnavailable:()=>false};
-  assert.deepEqual(JSON.parse(JSON.stringify(await load(args))),features.slice(0,2));assert.equal(requests,1);assert.equal(JSON.stringify(await load({...args,isCurrent:()=>false})),'[]');assert.equal(JSON.stringify(await load({...args,enabled:false})),'[]');
+  const load=setup().DG_LOAD_SURFACE_WATER_OBJECTS.load,features=[{type:'building',osmId:1},{type:'hard',osmId:2},{type:'water',osmId:3},{type:'pool',osmId:4},{type:'green',osmId:5}];let requests=0;
+  const args={enabled:true,loadOsmData:async()=>{requests++;return{elements:[1]};},bbox:[0,0,1,1],buildObjects:()=>features,epsg:32636,validFeature:feature=>feature.osmId!==5,isCurrent:()=>true,fromMount:false,isUnavailable:()=>false};
+  assert.deepEqual(JSON.parse(JSON.stringify(await load(args))),features.slice(0,4));assert.equal(requests,1);assert.equal(JSON.stringify(await load({...args,isCurrent:()=>false})),'[]');assert.equal(JSON.stringify(await load({...args,enabled:false})),'[]');
 });
 
 test('auto water apply replaces existing masks, preserves selected records and rolls back failed partition',async()=>{

@@ -46,7 +46,7 @@ async function loadDash(){
 // 4. Tür dağılımı listesi
 // 5. Chart.js grafiği
 async function drawChart(id,type,labels,data){
- if(window.DG_DASHBOARD_CHART)return window.DG_DASHBOARD_CHART.render(id,type,labels,data,{ensure:window.dgEnsureChart?()=>window.dgEnsureChart():null,charts,Chart,element:chartId=>$(chartId)});
+ if(window.DG_DASHBOARD_CHART)return window.DG_DASHBOARD_CHART.render(id,type,labels,data,{ensure:window.dgEnsureChart?()=>window.dgEnsureChart():null,charts,getChart:()=>Chart,element:chartId=>$(chartId)});
  /* Faz 7: Chart.js tembel yüklenir; çağıranlar fire-and-forget bırakabilir. */
  if(window.dgEnsureChart)await window.dgEnsureChart();
  if(charts[id])charts[id].destroy();

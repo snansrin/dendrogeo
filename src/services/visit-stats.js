@@ -70,7 +70,14 @@ const DG_VISITOR_PRESENCE_LIFECYCLE_STATE={
  get user(){return DG_PRES_USER;},set user(value){DG_PRES_USER=value;},
  get generation(){return DG_PRES_GENERATION;},set generation(value){DG_PRES_GENERATION=value;}
 };
-const DG_VISITOR_PRESENCE_TIMERS={setTimeout,clearTimeout,setInterval,clearInterval};
+/* Keep native Window timer methods on their required receiver when application
+ * use-cases call them through an injected port object. */
+const DG_VISITOR_PRESENCE_TIMERS={
+ setTimeout:(...args)=>window.setTimeout(...args),
+ clearTimeout:(...args)=>window.clearTimeout(...args),
+ setInterval:(...args)=>window.setInterval(...args),
+ clearInterval:(...args)=>window.clearInterval(...args)
+};
 function dgPresenceState(){return DG_PRES_STATE;}
 function dgPresenceReady(){return !!DG_PRES_OK;}
 function dgPresenceEmit(){try{if(typeof DG_CUR_VIEW!=="undefined"&&DG_CUR_VIEW!=="visitors")return;if(typeof renderVisitorsLive==="function")renderVisitorsLive();}catch(e){}}

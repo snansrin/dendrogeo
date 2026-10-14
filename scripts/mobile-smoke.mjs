@@ -1,7 +1,10 @@
 #!/usr/bin/env node
 import {chromium} from 'playwright-core';
 import {mkdirSync} from 'node:fs';
-mkdirSync('/tmp/dendrogeo-mobile',{recursive:true});
+import {tmpdir} from 'node:os';
+import {join} from 'node:path';
+const outputDir=join(tmpdir(),'dendrogeo-mobile');
+mkdirSync(outputDir,{recursive:true});
 const browser=await chromium.launch({headless:true,args:['--no-sandbox']});
 try{
  for(const width of [360,390,430]){
@@ -28,7 +31,7 @@ try{
    }).filter(Boolean).sort((a,b)=>b.right-a.right).slice(0,12);
    return{viewport,body,document:documentWidth,mapHeight,overflow};
   });
-  await page.screenshot({path:`/tmp/dendrogeo-mobile/${width}.png`,fullPage:true});
+  await page.screenshot({path:join(outputDir,`${width}.png`),fullPage:true});
   console.log(JSON.stringify({width,...size,errors}));
   if(size.document>width||size.overflow.length||errors.length||size.mapHeight<height*.55)throw Error(`Mobile smoke failed at ${width}px`);
   await page.close();

@@ -7,14 +7,14 @@ const read=path=>readFileSync(new URL('../'+path,import.meta.url),'utf8');
 const modules=['src/domain/surface/build-cell-decision-popup-model.js','src/ui/render-cell-decision-popup.js','src/application/surface/apply-surface-cell-decision.js','src/application/surface/undo-surface-cell-decision.js','src/application/surface/reset-surface-corrections.js'];
 function setup(){const window={};const context=vm.createContext({window});for(const path of modules)vm.runInContext(read(path),context,{filename:path});return window;}
 
-test('popup model retains area, current class, six choices and undo presence',()=>{
+test('popup model retains area, current class, five choices and undo presence',()=>{
   const window=setup(),cell={areaM2:12.34},meta=key=>({emoji:key==='water'?'💧':'🌳',tr:key});
-  const model=window.DG_SURFACE_CELL_DECISION_POPUP_MODEL.build({cell,key:'2:7',currentClass:'water',decision:{to:'water'},meta});assert.equal(model.areaM2,12.34);assert.equal(model.options.length,6);assert.equal(model.options[3].classKey,'water');assert.equal(model.options[3].selected,true);assert.equal(model.canUndo,true);
+  const model=window.DG_SURFACE_CELL_DECISION_POPUP_MODEL.build({cell,key:'2:7',currentClass:'water',decision:{to:'water'},meta});assert.equal(model.areaM2,12.34);assert.equal(model.options.length,5);assert.equal(model.options[3].classKey,'water');assert.equal(model.options[3].selected,true);assert.equal(model.canUndo,true);assert.ok(!model.options.some(option=>option.classKey==='pool'));
 });
 
 test('popup view keeps the legacy class order, handlers and escaped text',()=>{
   const window=setup(),model=window.DG_SURFACE_CELL_DECISION_POPUP_MODEL.build({cell:{areaM2:12.34},key:'2:7',currentClass:'water',decision:{},meta:key=>({emoji:'•',tr:`<${key}>`})}),html=window.DG_SURFACE_CELL_DECISION_POPUP_VIEW.render({model,escape:value=>value.replaceAll('<','&lt;').replaceAll('>','&gt;'),translate:value=>value});
-  assert.match(html,/12\.3 m²/);assert.match(html,/onclick="dgSensDecide\('2:7','green'\)"/);assert.match(html,/onclick="dgSensUndo\('2:7'\)"/);assert.ok(html.indexOf("'green'")<html.indexOf("'hard'")&&html.indexOf("'hard'")<html.indexOf("'building'")&&html.indexOf("'water'")<html.indexOf("'pool'")&&html.indexOf("'pool'")<html.indexOf("'bare'"));assert.match(html,/&lt;water&gt;/);
+  assert.match(html,/12\.3 m²/);assert.match(html,/onclick="dgSensDecide\('2:7','green'\)"/);assert.match(html,/onclick="dgSensUndo\('2:7'\)"/);assert.ok(html.indexOf("'green'")<html.indexOf("'hard'")&&html.indexOf("'hard'")<html.indexOf("'building'")&&html.indexOf("'building'")<html.indexOf("'water'")&&html.indexOf("'water'")<html.indexOf("'bare'"));assert.doesNotMatch(html,/pool|Havuz/);assert.match(html,/&lt;water&gt;/);
 });
 
 test('single decision validates before preserving the dirty/close/refresh/save order',()=>{

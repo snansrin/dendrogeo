@@ -57,7 +57,12 @@ window.DG_PARK_COVERAGE_FETCH_APPLICATION = {
         `relation["man_made"~"pier|bridge"](${bbox});`+
         `);out geom;`;
 
-      const json = await queryOsm(query, "yüzey+su");
+      let json=null;
+      try{json=await queryOsm(query,"yüzey+su");}catch(error){}
+      if(!json){
+        const recovery=`[out:json][timeout:30];(nwr["natural"="water"](${bbox});nwr["waterway"="riverbank"](${bbox});nwr["landuse"~"reservoir|basin"](${bbox});nwr["building"](${bbox});nwr["building:part"](${bbox});way["highway"](${bbox});way["area:highway"](${bbox}););out geom;`;
+        try{json=await queryOsm(recovery,"yüzey+su");}catch(error){}
+      }
       if (boundary !== JSON.stringify(getParkPolygon())) {
         return {stale: true, boundary, bbox: {minLat, minLon, maxLat, maxLon}, pad, json: null};
       }

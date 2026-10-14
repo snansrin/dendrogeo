@@ -13,7 +13,8 @@ assert.ok(L);
 assert.equal(L.accepted,true);
 assert.equal(L.revision,7);
 assert.equal(L.classes.find(x=>x.key==='building').ha,2);
-assert.equal(L.classes.find(x=>x.key==='pool').ha,0.4);
+assert.equal(L.classes.find(x=>x.key==='water').ha,12.4);
+assert.equal(L.classes.some(x=>x.key==='pool'),false);
 assert.equal(L.classes.find(x=>x.key==='hard').ha,6);
 assert.ok(Math.abs(L.classes.reduce((a,x)=>a+x.pct,0)-100)<0.1,'sınıf yüzdeleri yaklaşık %100 olmalı');
 assert.equal(L.coverage_m2,510000);
@@ -28,7 +29,7 @@ const review=readFileSync(new URL('../src/services/lc-review.js',import.meta.url
 const osmReviewObjects=readFileSync(new URL('../src/adapters/surface/osm-review-objects.js',import.meta.url),'utf8');
 const reviewContract=readFileSync(new URL('../src/contracts/surface-review.js',import.meta.url),'utf8');
 assert.match(reviewContract,/building:Object\.freeze\(\{group:"building",label:"Bina"\}\)/);
-assert.match(reviewContract,/pool:Object\.freeze\(\{group:"pool",label:"Havuz \/ süs havuzu"\}\)/);
+assert.match(reviewContract,/pool:Object\.freeze\(\{group:"water",label:"Su"\}\)/);
 assert.match(reviewContract,/hard:Object\.freeze\(\{group:"hard",label:"Sert zemin"\}\)/);
 
 const field=readFileSync(new URL('../src/services/field-ux.js',import.meta.url),'utf8');
@@ -54,4 +55,4 @@ assert.match(queue,/surface_snapshot/);
 assert.match(queue,/applyAcceptedSurfaceSnapshot/);
 assert.match(queue,/skipLulc: accepted \|\| \(!geometrySnapshot && req\.with_lulc === false\)/);
 
-console.log('✅ surface-report-field-ux: accepted snapshot + building/pool + 300-WP saha kilitleri geçti');
+console.log('✅ surface-report-field-ux: accepted snapshot + building/water + 300-WP saha kilitleri geçti');

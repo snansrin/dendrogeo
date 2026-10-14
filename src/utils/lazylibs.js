@@ -82,6 +82,7 @@ const DG_LULC_CHAIN=[
   "src/domain/surface/osm-road-policy.js",
   "src/application/surface/refine-hard-by-osm.js",
   "src/services/lc-osm.js",
+  "src/application/surface/apply-osm-surface-refinement.js",
   "src/domain/surface/patch-geometry.js", "src/domain/surface/group-patch-cells.js", "src/domain/surface/measure-patch-components.js", "src/domain/surface/scale-area-preserving-patch-ring.js", "src/domain/surface/smooth-patch-ring.js", "src/domain/surface/build-patch-display-rings.js", "src/domain/surface/query-green-patches.js", "src/application/surface/build-surface-patch.js", "src/application/surface/detect-surface-patches.js",
   "src/services/lc-patches.js",
   "src/domain/surface/validation-sampling.js",
