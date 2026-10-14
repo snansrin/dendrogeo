@@ -29,3 +29,10 @@ Başlangıç: `092d01dd5508dc9bc94e5f76db75ed2812533b73` (r420). Kullanıcı kal
 ## Devam eden geliştirme kuralı
 
 Yeni kritik modül önce sahipliği ve portlarıyla eklenir; yükleme, precache ve hash kaydı aynı değişikliktedir. Kilitli testler veya bilimsel hesaplar mimari değişiklik için gevşetilmez. Her grup ayrı dal/PR ile check, telefon ve ilgili canlı QA kapılarını geçer; çalışan kullanıcı ekranı otomatik reload ile kesilmez.
+
+## Daha geniş tarama — devam talebi
+
+Kullanıcı önceki üç grubun kapsamından sonra kalan tüm karma sorumlulukları tamamlamayı yeniden istedi. Tüm services/ui/core/utils üst seviye uzun fonksiyonları tarandı. Açılış, sekme geçişleri, park çizme, Blob indirme ve Web Mercator dönüşümleri kalan gerçek karma sınırlar olarak belirlendi. Bağımsız UI renderer dosyaları zaten doğru katmandadır ve yalnız global API adlandırması için tekrar bölünmez.
+
+- Açılış/navigasyon: platform adapter’ı, oturum application akışı, açılış UI controller’ı, DOM aktivasyonu ve sekme veri yenilemeleri beş modüle ayrıldı. Tam check, oturum/OAuth ve harita geçişi Chromium testleri geçti.
+- Sonraki grup: park çizme/kart orkestrasyonu, park geometri girdisi, indirme adapter’ı ve koordinat dönüşümleri.

@@ -809,7 +809,14 @@
       "test/module-integration.test.mjs",
       "test/osm-coverage-recovery.test.mjs",
       "test/osm-drawing-reliability.test.mjs",
-      "test/park-workflow-completion.test.mjs"
+      "test/park-workflow-completion.test.mjs",
+      "src/adapters/auth/initialize-shell-platform.js",
+      "src/application/auth/resolve-shell-session.js",
+      "src/ui/shell-boot-controller.js",
+      "src/ui/shell-view-effects.js",
+      "src/ui/shell-navigation-controller.js",
+      "test/shell-workflow-modules.test.mjs",
+      "src/ui/shell.js"
     ]
   },
   "sha256": {
@@ -1593,7 +1600,14 @@
     "test/module-integration.test.mjs": "6a253a027cd5a1fc697b82cbe6152ede35082c79fc288d27678ce550da89e123",
     "test/osm-coverage-recovery.test.mjs": "583b1cda6c7f503e273703b5c2ab25aedc99194cdedc6afe544a6a006d29e735",
     "test/osm-drawing-reliability.test.mjs": "043e1a2b06275ce5cd2a46f400b252e93f0bb6af4afb17d4d1ac947dab86bee6",
-    "test/park-workflow-completion.test.mjs": "a3f66f6f268c7b7d133234aa1b93120c5d760d487489bf7275132262fca819b7"
+    "test/park-workflow-completion.test.mjs": "a3f66f6f268c7b7d133234aa1b93120c5d760d487489bf7275132262fca819b7",
+    "src/adapters/auth/initialize-shell-platform.js": "414c8e29747a1e5630b242eae7f5365c26412ace469f1231599aa758ea1c47f7",
+    "src/application/auth/resolve-shell-session.js": "03e2be23bc6bd258ec2d8ca4f02820fa2d6584119e606f3fbbc644bc82537f37",
+    "src/ui/shell-boot-controller.js": "3417f5351fefa5a92833f24f2db17afa57b0b2ecc75647551009885c0aff2588",
+    "src/ui/shell-view-effects.js": "f85d2ed54e29126ede3e54e02c8567d109270e43e987c6176eb2c35f09217780",
+    "src/ui/shell-navigation-controller.js": "80d4c679a1a4ff43d997146b80827d7f5f2f277349b25f75f66a73e30b768166",
+    "test/shell-workflow-modules.test.mjs": "a7ddfd75981251c43f420908f53d1a1b4c25a7c667264c55f7799f6eb26fb3a7",
+    "src/ui/shell.js": "74cb4d81db2f33d92fc64aed84c0ebfcfafce75f3383290065326cf730fae938"
   },
   "authorized_modularizations": [
     {
@@ -3580,6 +3594,26 @@
         "test/osm-coverage-recovery.test.mjs",
         "test/osm-drawing-reliability.test.mjs",
         "test/park-workflow-completion.test.mjs"
+      ]
+    },
+    {
+      "date": "2026-10-14",
+      "request": "User explicitly requested continued modularization beyond prior scoped groups; extract shell platform, session resolution, boot outcomes, DOM navigation and per-view effects while preserving original regression fallbacks",
+      "files": [],
+      "added_protected_files": [
+        "src/adapters/auth/initialize-shell-platform.js",
+        "src/application/auth/resolve-shell-session.js",
+        "src/ui/shell-boot-controller.js",
+        "src/ui/shell-view-effects.js",
+        "src/ui/shell-navigation-controller.js",
+        "test/shell-workflow-modules.test.mjs"
+      ]
+    },
+    {
+      "date": "2026-10-14",
+      "request": "Protect the newly modularized startup/navigation composition root as explicitly requested by user",
+      "added_protected_files": [
+        "src/ui/shell.js"
       ]
     }
   ]

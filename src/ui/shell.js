@@ -5,6 +5,13 @@
  * startShell() ve go() sekme yönlendiricisi. Dosya sonunda boot() çağrılır —
  * eskiden inline script'in son satırındaki çağrıyla aynı zamanlama. */
 async function boot(){
+ if(window.DG_SHELL_BOOT_CONTROLLER&&window.DG_INITIALIZE_SHELL_PLATFORM&&window.DG_RESOLVE_SHELL_SESSION)return window.DG_SHELL_BOOT_CONTROLLER.run({
+  initializePlatform:()=>window.DG_INITIALIZE_SHELL_PLATFORM.initialize({window,navigator,schedule:(fn,delay)=>setTimeout(fn,delay),syncOfflineData,notify:toast,log:(...args)=>console.log(...args)}),trackVisit,
+  resolveSession:()=>window.DG_RESOLVE_SHELL_SESSION.resolve({isOAuth:typeof dgIsOAuthCallback==="function"?dgIsOAuthCallback:null,getOAuthError:typeof dgOAuthError==="function"?dgOAuthError:null,showOAuthWait:dgShowOAuthWait,waitOAuth:dgWaitForOAuthSession,cleanOAuth:typeof dgCleanOAuthUrl==="function"?dgCleanOAuthUrl:null,hideOAuth:typeof dgHideOAuthWait==="function"?dgHideOAuthWait:null,getSession:()=>window.DG_AUTH_SESSION_STORE.create(()=>sb).getSession(),initialHash:INITIAL_HASH}),
+  finishStartup:()=>window.DG_STARTUP_SCREEN?.finish(),showOAuthWait:dgShowOAuthWait,initLanding,schedule:(fn,delay)=>setTimeout(fn,delay),notify:toast,translate:dgCf,setUser:user=>{USER=user;},showAuth,resetAuth:()=>authTab("reset"),showRecovery:()=>{$("recoveryModal").style.display="flex";},
+  startAuthenticated:window.DG_START_AUTHENTICATED_SESSION?user=>window.DG_START_AUTHENTICATED_SESSION.start({user,setUser:user=>{USER=user;},startShell:()=>startShell(),loadProfile:id=>window.DG_AUTH_SESSION_STORE.create(()=>sb).loadProfile(id),applyProfile:profile=>{PROFILE=profile;dgApplyShellProfile();if(typeof dgPresencePing==="function")dgPresencePing("dash",true);if(typeof dgRefreshPendingBadge==="function")dgRefreshPendingBadge();},onProfileError:error=>console.warn("DENDROGEO · Profil arka planda yüklenemedi:",error?.message||error)}):null,
+  loadProfile:id=>window.DG_AUTH_SESSION_STORE.create(()=>sb).loadProfile(id),setProfile:profile=>{PROFILE=profile;},startShell,isOnline:()=>navigator.onLine,syncOfflineData
+ });
     // 1. Service Worker'ı kaydet (sadece bir kez)
     if('serviceWorker' in navigator && !window._swRegistered){
         window._swRegistered = true;
@@ -166,6 +173,11 @@ let DG_CUR_VIEW="dash";
 function dgSaveView(v){try{localStorage.setItem("dg_last_view",v);}catch(e){}}
 function dgLastView(){try{return localStorage.getItem("dg_last_view")||"";}catch(e){return "";}}
 function go(v){
+ if(window.DG_SHELL_NAVIGATION_CONTROLLER&&window.DG_SHELL_VIEW_EFFECTS)return window.DG_SHELL_NAVIGATION_CONTROLLER.activate(v,{
+  document,window,element:$,schedule:(fn,delay)=>setTimeout(fn,delay),initMaps:()=>{if(typeof initMaps==="function")initMaps();},setView:value=>{DG_CUR_VIEW=value;},saveView:dgSaveView,presenceView:typeof dgPresenceView==="function"?dgPresenceView:null,setScrollSwitching:value=>{DG_SCROLL_SWITCHING=value;},stopVisitorTick:typeof dgVisTickStop==="function"?dgVisTickStop:null,presencePing:typeof dgPresencePing==="function"?dgPresencePing:null,
+  readScroll:key=>{try{return localStorage.getItem(key)||"0";}catch(error){return"0";}},
+  runEffects:view=>window.DG_SHELL_VIEW_EFFECTS.run(view,{schedule:(fn,delay)=>setTimeout(fn,delay),getDataLoader:()=>window._dgShellViewData,loadWaypoints:()=>loadWaypoints(),loadDash:()=>loadDash(),refreshParkGate:()=>{if(typeof dgParkGate==="function")dgParkGate(true);},scheduleLiveShare:()=>{if(typeof dgLiveShareJoinCurrent==="function")setTimeout(()=>{try{dgLiveShareJoinCurrent();}catch(error){}},400);},refreshMap:()=>{map&&map.invalidateSize();if(!liveLoaded||DG_LIVE_DIRTY)loadLiveMap();},refreshNavigation:()=>navMap&&navMap.invalidateSize(),refreshWorld:()=>worldMap&&worldMap.invalidateSize(),loadAdmin:()=>loadAdmin(),loadInvites:()=>{if(typeof dgInvitesLoadMine==="function")dgInvitesLoadMine();},loadCollaborators:()=>{if(typeof dgCollabLoad==="function")dgCollabLoad();},loadUsers:()=>loadUsers(),loadVisitors:()=>{try{if(typeof loadVisitors==="function")loadVisitors();}catch(error){}},loadMyRequests:()=>loadMyRequests(),loadRequestOptions:()=>loadRequestOptions()})
+ });
  if(["map","nav","world"].includes(v)&&typeof initMaps==="function")initMaps();
  DG_CUR_VIEW=v;dgSaveView(v);
  if(typeof dgPresenceView==="function"){try{dgPresenceView(v);}catch(e){}}
