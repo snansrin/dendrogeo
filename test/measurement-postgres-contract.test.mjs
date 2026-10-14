@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 import {PGlite} from '@electric-sql/pglite';
 import vm from 'node:vm';
-const sql=readFileSync(new URL('../supabase/migrations/20261014190000_measurement_protocol_guard.sql',import.meta.url),'utf8');
+const sql=readFileSync(new URL('../supabase/migrations/20261014201828_measurement_protocol_guard.sql',import.meta.url),'utf8');
 test('isolated PostgreSQL migration enforces the locked client protocol and is idempotent',async()=>{
  const context=vm.createContext({});vm.runInContext(readFileSync(new URL('../src/config/measurement-protocol-lock.js',import.meta.url),'utf8'),context);
  assert.ok(sql.includes(context.DG_MEASUREMENT_PROTOCOL_LOCK.fingerprint));

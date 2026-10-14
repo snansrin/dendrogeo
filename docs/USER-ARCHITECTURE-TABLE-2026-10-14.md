@@ -32,3 +32,5 @@ Kapsam: 14 Ekim 2026'da eklenen 16 satırlı kullanıcı tablosu. Önceki r427 k
 ## Yayın kabulü
 
 UI/SQL odaklı testler ve yerel erişilebilirlik geçti. Tam release, PR CI/Mobile/GIS, canlı r428 ve migration katalog doğrulaması son kabul kapılarıdır. Bu kapılar geçmeden tablonun tamamı bitmiş olarak bildirilmez.
+
+Canlı migration `20261014201828_measurement_protocol_guard` uygulandı. RLS aktif kaldı; politika checksum’ı önce/sonra `0bdf1e3fc7610f12ef1565c12a1f7a3a`; dört eski trigger korundu, yalnız yeni protocol trigger eklendi. Kullanıcı satırı yazılmadan saf DB dönüşümü ve katalog doğrulandı.

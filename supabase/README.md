@@ -244,7 +244,7 @@ akışı, ölçüm kapısı, geri doldurma aracı) + `test/park-identity.test.mj
 
 `20261004165219_profile_privilege_guard.sql`, önceki migration'ların ardından uygulanır. SQL testleri geçici tabloda, normal kullanıcı ve kurucu rolleriyle çalıştırılıp rollback edilmiştir. Profil verileri değiştirilmez. Kod kurtarması bu güvenlik düzeltmesini geri almamalıdır.
 
-## 20261014190000 — Ölçüm protokolü yazma kapısı
+## 20261014201828 — Ölçüm protokolü yazma kapısı
 
 `measurement_protocol_guard` yeni kayıtların ham `girth_cm` ve tam hassasiyetli `dbh_cm = girth_cm / pi()` kontratını denetler. Merkezi fingerprint `4e48cf360622b5633e664618a8626756b3207cec8dd63a3158714e957eae3212` istemci kilidiyle eşleştirilir. Mevcut kayıtlara UPDATE/backfill çalıştırmaz. Durum/metadata güncellemeleri eski kanıtı korur; ham çevresi bulunmayan tarihsel satırlar için kanıt üretilmez. RLS/approval/geofence trigger’ları ve politikaları değiştirilmez. Yeni/gerçek boyut değişiminde çelişkili veya görüntü için yuvarlanmış DBH reddedilir.
 

@@ -902,7 +902,7 @@
       "scripts/check-phone.mjs",
       "scripts/check-accessibility.mjs",
       "scripts/lib/browser-acceptance-fixture.mjs",
-      "supabase/migrations/20261014190000_measurement_protocol_guard.sql",
+      "supabase/migrations/20261014201828_measurement_protocol_guard.sql",
       ".github/workflows/ci.yml",
       ".github/workflows/mobile-smoke.yml",
       ".github/workflows/rapor.yml",
@@ -1225,7 +1225,7 @@
     "src/workers/surface-worker.js": "af6477f104a06342cf69ef7f702a3e95ed27cd390c5aae36a2fbe5dfd68ed2fe",
     "test/base-map-layer-modules.test.mjs": "5399d699e74ffd66e92df312b4301202add7352b2b6c0be24fd51cda63e7baff",
     "test/critical-fixes.test.mjs": "38cecf8eca4cf3a7b48209e8ff950305e57c85a0b6564ce4b388164712b50154",
-    "test/dbh-qa.test.mjs": "21a2468530232751c1c675caaf2d8b955284de32761ac52d3bb3cffc4e031cef",
+    "test/dbh-qa.test.mjs": "5dd95e31d27c4d69f03c37af16ca1e19fb04d12a0d8b90a044fdb26df883e0ff",
     "test/field-data-safety.test.mjs": "b8b9e8fc20bbbc59cf9562d60f87bdc5eb07c0106f8c71253731974fb08c0280",
     "test/fix-0045.test.mjs": "f2fd7bea2d7a43b1ca31a218bafa8af8d3e5a7fdd7d49823f8c48096ad009a68",
     "test/fixtures/goksu-park.json": "96dd15fd11cddcc4015fd8bd00a61a7b12cfcf26f29a694b977f6b7b8850edff",
@@ -1785,11 +1785,10 @@
     "src/services/auth.js": "301abe78068e22e4d61431e996993558892c055a8c74d4aa03f0d471deb28f07",
     "src/ui/toast.js": "c4a947eaad22357656eba2b3058581ae7d6ddbee2de8fcd0b2ef4e0b4fe2c37b",
     "test/user-architecture-table.test.mjs": "21b35801343fda3e0a2604fbc18622aac05af5c6f0b13ab6771066c93725c045",
-    "test/measurement-postgres-contract.test.mjs": "02cb794265e621e850a5d703c62fbdd1c0b7ccff635a4a87a5c72447682df245",
+    "test/measurement-postgres-contract.test.mjs": "808f77608e2d82bdfa321ebadb47486bb9ee4b44f0a0adfd663b68678f1b8835",
     "scripts/check-phone.mjs": "9761d87d6bb8801011a79bce7ef44c862bc6d4ae4c4e4a8db9e2c6e73cfeb014",
     "scripts/check-accessibility.mjs": "4f8064156a8b0ab8f9ac53a205999b648d3e286cd36eec50aefa106bf4007961",
     "scripts/lib/browser-acceptance-fixture.mjs": "56993ac50e7c868027e0a8a07c4f807dea419736f0d8829f9d3b5ceba251b8f5",
-    "supabase/migrations/20261014190000_measurement_protocol_guard.sql": "fb27e57a956f5886cc01798d571a799251ccdb6941a667545d09073edbdc5097",
     ".github/workflows/ci.yml": "56f81781759fc606679b1da99145fb6a640028b1ded920e49a479869ee0d7e87",
     ".github/workflows/mobile-smoke.yml": "d1ae73335d7b1490b0249a51e42fd9ca4f695e8e3ab3328e80504abd9acb8750",
     ".github/workflows/rapor.yml": "be836bdd0631a268744b2454216bb64848022d4146afe80663ec69a32a9c06f6",
@@ -1798,8 +1797,9 @@
     "css/landing.css": "2557d139e9a28dbb979d02b7c3d7029a429df2b01eaab16e4708356b5bc9b4f0",
     "package.json": "455549edb21524a99f356a47519d216dd856d3f5b4dee2632450f865a3472ece",
     "package-lock.json": "37b76dd4d390030854e921d5b61a936989d1bc86cd36b7666ce5b08168a52926",
-    "test/form-qa.test.mjs": "dcb96d59ca412b8f445005705e8ac3169ba4ca44f3433ff5ef312e8e92505182",
-    "test/measurement-preview-point-modules.test.mjs": "94d9913ae41eb0a50dad3c8fdb16b500e3fd210f048ddcc93769786ddee5be2e"
+    "test/form-qa.test.mjs": "e0f9ea35e3a636a97df4122a960ddeb93909bd530d918885512fb5e73565f328",
+    "test/measurement-preview-point-modules.test.mjs": "94d9913ae41eb0a50dad3c8fdb16b500e3fd210f048ddcc93769786ddee5be2e",
+    "supabase/migrations/20261014201828_measurement_protocol_guard.sql": "fb27e57a956f5886cc01798d571a799251ccdb6941a667545d09073edbdc5097"
   },
   "authorized_modularizations": [
     {
@@ -4168,6 +4168,34 @@
         {
           "path": "supabase/migrations/20261014190000_measurement_protocol_guard.sql",
           "previous_sha256": "4af663598c34bcffd0a768e60e0961aebab0a53a9f224dda651514ddbbc9bed8",
+          "sha256": "fb27e57a956f5886cc01798d571a799251ccdb6941a667545d09073edbdc5097"
+        }
+      ]
+    },
+    {
+      "date": "2026-10-14",
+      "request": "Align local migration version and unchanged SQL bytes with successfully applied Supabase migration history; verify existing RLS checksum and triggers remain unchanged. Update only protected test migration filename references.",
+      "files": [
+        {
+          "path": "test/dbh-qa.test.mjs",
+          "previous_sha256": "21a2468530232751c1c675caaf2d8b955284de32761ac52d3bb3cffc4e031cef",
+          "sha256": "5dd95e31d27c4d69f03c37af16ca1e19fb04d12a0d8b90a044fdb26df883e0ff"
+        },
+        {
+          "path": "test/measurement-postgres-contract.test.mjs",
+          "previous_sha256": "02cb794265e621e850a5d703c62fbdd1c0b7ccff635a4a87a5c72447682df245",
+          "sha256": "808f77608e2d82bdfa321ebadb47486bb9ee4b44f0a0adfd663b68678f1b8835"
+        },
+        {
+          "path": "test/form-qa.test.mjs",
+          "previous_sha256": "dcb96d59ca412b8f445005705e8ac3169ba4ca44f3433ff5ef312e8e92505182",
+          "sha256": "e0f9ea35e3a636a97df4122a960ddeb93909bd530d918885512fb5e73565f328"
+        }
+      ],
+      "relocated_protected_files": [
+        {
+          "from": "supabase/migrations/20261014190000_measurement_protocol_guard.sql",
+          "to": "supabase/migrations/20261014201828_measurement_protocol_guard.sql",
           "sha256": "fb27e57a956f5886cc01798d571a799251ccdb6941a667545d09073edbdc5097"
         }
       ]
