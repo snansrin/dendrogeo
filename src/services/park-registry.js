@@ -194,6 +194,7 @@ const DG_PARK_SEARCH_USE_CASE=window.DG_PARK_SEARCH_APPLICATION.create({
 });
 async function dgScanSearchByName(name){
  const result=await DG_PARK_SEARCH_USE_CASE(name);
+ if(window.DG_PRESENT_PARK_SEARCH_RESULT)return window.DG_PRESENT_PARK_SEARCH_RESULT.present(result,{toast,escape:esc,translate:_tpr,translateCommon:dgCf,selectPark:park=>{DG_PARK_CAND=null;DG_PARK=park;},renderCard:dgRenderScanCard,detectAt:dgDetectAt});
  if(result.status==="empty-query")return toast("Önce park adını yaz.","warn","🔍");
  if(result.status==="registered"){
   DG_PARK_CAND=null;DG_PARK=result.park;dgRenderScanCard();
@@ -205,6 +206,7 @@ async function dgScanSearchByName(name){
 }
 
 function dgDetectAtMyLocation(){
+ if(window.DG_DETECT_PARK_AT_CURRENT_LOCATION)return window.DG_DETECT_PARK_AT_CURRENT_LOCATION.detect({gps:GPS,notifyMissing:()=>toast("Önce 📡 Konumu Etkinleştir","warn","🛰"),startGps:()=>{if(typeof startGps==="function")startGps();},detectAt:dgDetectAt});
   if(!GPS){
     toast("Önce 📡 Konumu Etkinleştir","warn","🛰");
     if(typeof startGps==="function")startGps();
@@ -223,6 +225,7 @@ const DG_PARK_MANUAL_CREATION_USE_CASE=window.DG_PARK_MANUAL_CREATION_APPLICATIO
   registerPark:(candidate,opt)=>dgRegisterPark(candidate,opt)
 });
 function dgOfferManualPark(lat,lon){
+ if(window.DG_PRESENT_MANUAL_PARK_RESULT)return window.DG_PRESENT_MANUAL_PARK_RESULT.offer(lat,lon,{offerAt:point=>{DG_PARK_CAND=null;DG_PARK=null;DG_PARK_ANCHOR=point;DG_MANUAL_PENDING={...point};},renderCard:dgRenderScanCard,toast});
   DG_PARK_CAND=null;
   DG_PARK=null;
   DG_PARK_ANCHOR={lat,lon};
@@ -233,6 +236,7 @@ function dgOfferManualPark(lat,lon){
 
 async function dgCreateManualPark(){
   const result=await DG_PARK_MANUAL_CREATION_USE_CASE();
+  if(window.DG_PRESENT_MANUAL_PARK_RESULT)return window.DG_PRESENT_MANUAL_PARK_RESULT.created(result,{toast,escape:esc,translateCommon:dgCf,selectPark:park=>{DG_PARK=park;DG_MANUAL_PENDING=null;},renderCard:dgRenderScanCard});
   if(result.status==="name-required")return toast("Park adı gerekli","err","🌳");
   if(result.status==="location-required")return toast("Konum yok: haritada parkın içine tıkla veya GPS'i aç.","err","📍");
   if(result.status==="registration-failed")return toast("Elle park oluşturulamadı.","err","🌳");
@@ -429,6 +433,7 @@ const DG_PARK_LINK_PROJECT_USE_CASE=window.DG_PARK_LINK_PROJECT_APPLICATION.crea
 
 async function dgScanCreateProject(){
   const result=await DG_PARK_CREATE_PROJECT_USE_CASE();
+  if(window.DG_PRESENT_PARK_PROJECT_RESULT)return window.DG_PRESENT_PARK_PROJECT_RESULT.present("create",result,{toast,escape:esc,translateCommon:dgCf,complete:dgAfterProjectLinked});
   if(result.status==="unauthenticated")return toast("Oturum yok","err");
   if(result.status==="park-missing")return toast("Park kimliği sunucuya yazılmadan proje oluşturulamaz. 🔄 ile yeniden dene.","err","🌳");
   if(result.status==="write-failed")return toast(dgCf("Proje oluşturulamadı: ")+esc(result.error.message),"err");
@@ -442,6 +447,7 @@ async function dgScanCreateProject(){
 
 async function dgLinkProject(pid){
   const result=await DG_PARK_LINK_PROJECT_USE_CASE(pid);
+  if(window.DG_PRESENT_PARK_PROJECT_RESULT)return window.DG_PRESENT_PARK_PROJECT_RESULT.present("link",result,{toast,escape:esc,translateCommon:dgCf,complete:dgAfterProjectLinked});
   if(result.status==="forbidden"){
     toast("⛔ Mevcut projeyi parka bağlama yetkisi yalnız yöneticide. Yeni proje için park algılayabilirsin.","err","🔐");
     return null;
@@ -576,6 +582,7 @@ function dgProjectOptionsForPark(parkId,fallbackAll){
 const dgSleep=ms=>new Promise(r=>setTimeout(r,ms));
 
 async function dgQueryParkSafe(lat,lon,radius){
+  if(window.DG_QUERY_PARK_SAFELY)return window.DG_QUERY_PARK_SAFELY.query(lat,lon,radius,{queryPark,warn:(radius,error)=>console.warn("DENDROGEO · park sorgusu ("+radius+" m) başarısız:",error)});
   try{
     return await queryPark(lat,lon,radius);
   }catch(e){

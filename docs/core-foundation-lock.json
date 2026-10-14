@@ -731,7 +731,7 @@
     "src/services/osm-water-backup.js": "b3429cdc9bfe0f84bd7b6644a1221d4daadc374ac046b036abf15b3b5ee7d269",
     "src/services/park-geometry.js": "ae89879b98ed8d9f3928d17b7258389c7a7c1abdabdd63dba1aac934aacc6f83",
     "src/services/park-query.js": "d149b1a6a7982374cf42837f86f8eeb96c6e70affe3de5d2b37b169287f3a3a3",
-    "src/services/park-registry.js": "e1fa450ea299c357d83199c8e4cbb5e47c20b08737c9df655bfd1eac6d1b4336",
+    "src/services/park-registry.js": "21a0ec0d0a6e2681b07af7c436ee8010adf2b5242b730bff8fbbc9c298b78195",
     "src/services/park-state.js": "cc241e32d716cc6c682f2e7e82caaada845b698b5bf1b914c17b94ea86823608",
     "src/ui/add-osm-map-layer.js": "c0a6c3d894d0271bbd8c5ae045e1552cfad72320a91ef60d14179d1e6b0ce42a",
     "src/ui/choose-new-park-controller.js": "c787f76aee2cc85b748a30e5e0ccbc1393f58acfa53cf0aff2e3500344e31989",
@@ -2539,6 +2539,17 @@
           "path": "src/services/park-query.js",
           "previous_sha256": "b0ddd9f7fb7d99b95e29dbe78c392c472ee149e60f7e941aca91d562c826cd7e",
           "sha256": "d149b1a6a7982374cf42837f86f8eeb96c6e70affe3de5d2b37b169287f3a3a3"
+        }
+      ]
+    },
+    {
+      "date": "2026-10-14",
+      "request": "User explicitly authorized completing remaining measurement/analysis modules sequentially; park workflow presentation and location/safe-query ports preserve baseline 092d01d",
+      "files": [
+        {
+          "path": "src/services/park-registry.js",
+          "previous_sha256": "e1fa450ea299c357d83199c8e4cbb5e47c20b08737c9df655bfd1eac6d1b4336",
+          "sha256": "21a0ec0d0a6e2681b07af7c436ee8010adf2b5242b730bff8fbbc9c298b78195"
         }
       ]
     }
