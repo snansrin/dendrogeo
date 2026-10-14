@@ -984,7 +984,7 @@ function dgSensBrushUndo(){
 
 function dgSensBrushConfig(){
  const type=document.getElementById('dgSensBrushType')?.value||DG_SENS.brushType,size=Number(document.getElementById('dgSensBrushSize')?.value||DG_SENS.brushDiameter);
- const module=window.DG_UPDATE_SURFACE_BRUSH_CONFIG;if(module)return module.update({state:DG_SENS,type,size,types:window.DG_SURFACE_REVIEW.types,allowed:[5,10,20,40],stop:dgSensBrushStop,render:dgSensRender});
+ const module=window.DG_UPDATE_SURFACE_BRUSH_CONFIG;if(module)return module.update({state:DG_SENS,type,size,types:window.DG_SURFACE_REVIEW.types,allowed:[5,10,20,40],stop:dgSensBrushStop,toggle:dgSensBrushToggle,render:dgSensRender});
  if(window.DG_SURFACE_REVIEW.types[type])DG_SENS.brushType=type;
  if([5,10,20,40].includes(size))DG_SENS.brushDiameter=size;
  dgSensBrushStop();dgSensRender();

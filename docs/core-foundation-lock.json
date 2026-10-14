@@ -750,7 +750,7 @@
     "src/ui/grid-waypoint-controller.js": "eb4f58d30fd59a46840f58f2b428b79d8afc9e1211d48d26ea2cfb74ba2b3531",
     "src/ui/grid-waypoint-layer.js": "0c6db2a4329704ec9106735cc0a26b7ce01803666ee4b19d356c976d298eba2f",
     "src/ui/lc-report.js": "f8182bce9b5dbd8dcecceaa7afee69b52d12e7883badc65e27fb93e94ca2abf9",
-    "src/ui/lc-sens.js": "725d9c49f5df1f1cc49a2d8e2dae1af2c3beacd47739bef6ffcb3d2eb65e3155",
+    "src/ui/lc-sens.js": "54211280a011880e11cc062cf125c28d3be5e34d22003a2fc194e2855f86b703",
     "src/ui/map-layer-visibility.js": "50d033fba51e90f49ae39254e0700b510938be4d271aada8a9a400be727c1a60",
     "src/ui/map-measurement-markers.js": "cedd193f2786604f84044f2ecf020144b5cba20c86160b729891b7d4f3668a67",
     "src/ui/mount-surface-review-map-host.js": "2ef1e62e2607084c3909016e324b09dba2eaaf13dfba25b0b8bcb82086e7986d",
@@ -2455,6 +2455,17 @@
           "path": "test/critical-fixes.test.mjs",
           "previous_sha256": "3a2e62104763110bc734b3dc54a37cbf57c15b0038a78fdce35d56d9639c1989",
           "sha256": "38cecf8eca4cf3a7b48209e8ff950305e57c85a0b6564ce4b388164712b50154"
+        }
+      ]
+    },
+    {
+      "date": "2026-10-14",
+      "scope": "Explicit user request to fix non-working surface brush within modular architecture. Add only the toggle port to the brush config use-case so diameter changes preserve active painting; retain scientific calculations and all other locked files.",
+      "files": [
+        {
+          "path": "src/ui/lc-sens.js",
+          "previous_sha256": "725d9c49f5df1f1cc49a2d8e2dae1af2c3beacd47739bef6ffcb3d2eb65e3155",
+          "sha256": "54211280a011880e11cc062cf125c28d3be5e34d22003a2fc194e2855f86b703"
         }
       ]
     }

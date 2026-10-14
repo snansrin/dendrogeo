@@ -71,3 +71,9 @@ test('five brush workflow modules are loaded and precached before locked UI',()=
   const chain=read('src/utils/lazylibs.js'),sw=read('sw.js'),ui=read('src/ui/lc-sens.js');for(const path of modules){assert.ok(chain.includes(`"${path}"`));assert.ok(sw.includes(`'/${path}'`));assert.ok(chain.indexOf(`"${path}"`)<chain.indexOf('"src/ui/lc-sens.js"'));}
   for(const name of ['DG_SURFACE_BRUSH_POINTER_SESSION','DG_VALIDATE_SURFACE_BRUSH_STROKE','DG_COMMIT_SURFACE_BRUSH_STROKE','DG_UNDO_SURFACE_BRUSH_STROKE','DG_UPDATE_SURFACE_BRUSH_CONFIG'])assert.ok(ui.includes(name));
 });
+
+test('changing diameter keeps the active brush running with its new settings',()=>{
+ const w=setup(),events=[],state={brush:{type:'green',diameter:5},brushType:'green',brushDiameter:5};
+ w.DG_UPDATE_SURFACE_BRUSH_CONFIG.update({state,type:'green',size:20,types:{green:{}},allowed:[5,10,20,40],stop:()=>{state.brush=null;events.push('stop');},toggle:()=>{state.brush={type:state.brushType,diameter:state.brushDiameter};events.push('restart');},render:()=>events.push('render')});
+ assert.deepEqual(events,['stop','restart']);assert.equal(state.brush.diameter,20);assert.equal(state.brush.type,'green');
+});

@@ -34,6 +34,7 @@ test('draw and brush selection preserve supported-type and editing gates',()=>{
  let stopped=0,toggled=0,rendered=0;const callbacks={stop:()=>stopped++,toggle:()=>toggled++,render:()=>rendered++};
  assert.equal(w.DG_SELECT_SURFACE_BRUSH_TYPE.select({state:{rawView:true,busy:false,saving:false},type:'water',types,...callbacks}),false);
  const active={brush:{}};assert.equal(w.DG_SELECT_SURFACE_BRUSH_TYPE.select({state:active,type:'water',types,...callbacks}),true);assert.equal(active.brushType,'water');assert.equal(stopped,1);assert.equal(toggled,1);assert.equal(rendered,0);
+ const inactive={brush:null};assert.equal(w.DG_SELECT_SURFACE_BRUSH_TYPE.select({state:inactive,type:'green',types,...callbacks}),true);assert.equal(inactive.brushType,'green');assert.equal(toggled,2);assert.equal(stopped,1);
 });
 
 test('hand mode closes brush/drawing before rendering',()=>{

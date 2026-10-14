@@ -17,7 +17,7 @@ window.DG_SURFACE_BRUSH_CELL_SELECTION={
     const brushBounds=bounds(brush),keys=[];
     for(const cell of cells||[]){
       const key=cellKey(cell),cellGeometry=geometry[key];if(!cellGeometry?.length)continue;
-      if(!overlap(brushBounds,cellGeometry))continue;
+      if(!overlap(brushBounds,bounds(cellGeometry)))continue;
       if(area(polygonClipping.intersection(cellGeometry,brush))>.01)keys.push(key);
     }
     return keys;
