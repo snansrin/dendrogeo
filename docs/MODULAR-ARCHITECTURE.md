@@ -1408,3 +1408,9 @@ The collaborator map renderer now separates peer selection, display-model deriva
 - `application/park-invites/park-invite-state.js` sahip parkları, gelen davetleri, ekip listesini ve yükleme durumunu immutable snapshot store'da birleştirir. `services/park-invites.js` içindeki `DG_INV` canlı uyumluluk görünümü olarak aboneliğe bağlı kalır.
 - `load-owned-parks.js`, `load-recipient-invites.js`, `load-owner-collaborations.js` ve `refresh-collaborations.js` store güncellemelerini kullanır; önceki plain-object çağrıları da korunur.
 - RPC adları, sahiplik kapısı, davet e-posta filtresi, eksik migration yedeği ve UI sırası değişmedi. Store `partials/head.html` içinde yüklenir ve Service Worker precache listesine alınır.
+
+## Yönetim ağacı filtre durumu — 14 Ekim 2026
+
+- `application/admin/admin-tree-state.js` filtre seçimini ve açık park/proje/kullanıcı düğümlerini yönetim ağacına ait tek store'da tutar.
+- Filtre, bekleyenleri açma, toplu genişletme ve düğüm aç/kapat akışları aynı store snapshot'ını kullanır; eski `DG_TREE_STATUS`, `DG_TREE_QUERY` ve `DG_TREE_OPEN` değişkenleri servis içindeki uyumluluk görünümü olarak kalır.
+- Yetki kapısı, sorgu ve çizim sırası ile satır moderasyonu değişmedi. Store, uygulama script sırasına ve çevrimdışı precache'e eklendi.

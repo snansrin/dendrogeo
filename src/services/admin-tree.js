@@ -28,7 +28,15 @@ const _ta=(s)=>(typeof dgT==="function"?dgT(s):s);
 /* Filtre + açık düğüm durumu (yeniden çizimde korunsun) */
 let DG_TREE_STATUS="";
 let DG_TREE_QUERY="";
-const DG_TREE_OPEN=new Set();
+let DG_TREE_OPEN=new Set();
+const DG_TREE_STATE_STORE=window.DG_ADMIN_TREE_STATE.create();
+DG_TREE_OPEN=DG_TREE_STATE_STORE.getState().openKeys;
+DG_TREE_STATE_STORE.subscribe(state=>{
+  DG_TREE_STATUS=state.status;
+  DG_TREE_QUERY=state.query;
+  DG_TREE_OPEN=state.openKeys;
+});
+function dgTreeStateUpdate(patch){return DG_TREE_STATE_STORE.setState(patch);}
 
 /* Ağaç için çekilen ham satırlar (dışa aktarım/denetim için de tutulur) */
 let DG_TREE_ROWS=[];
@@ -133,8 +141,8 @@ async function dgRefreshPendingBadge(){
 }
 
 function dgTreeOnlyPending(){
-  if(window.DG_UPDATE_ADMIN_TREE_FILTER)return window.DG_UPDATE_ADMIN_TREE_FILTER.onlyPending({status:DG_TREE_STATUS,query:DG_TREE_QUERY},{setStatus:value=>{DG_TREE_STATUS=value;},updateStatusControl:value=>{const sel=$("treeStatus");if(sel)sel.value=value;},draw:dgTreeDraw});
-  DG_TREE_STATUS="Beklemede";
+  if(window.DG_UPDATE_ADMIN_TREE_FILTER)return window.DG_UPDATE_ADMIN_TREE_FILTER.onlyPending(DG_TREE_STATE_STORE.getState(),{setStatus:value=>dgTreeStateUpdate({status:value}),updateStatusControl:value=>{const sel=$("treeStatus");if(sel)sel.value=value;},draw:dgTreeDraw});
+  dgTreeStateUpdate({status:"Beklemede"});
   const sel=$("treeStatus");
   if(sel)sel.value="Beklemede";
   dgTreeDraw();
@@ -142,19 +150,25 @@ function dgTreeOnlyPending(){
 
 /* Yalnız onay bekleyen kayıt içeren düğümleri açar (kuyrukta hızlı gezinme). */
 function dgTreeOpenPending(){
-  if(window.DG_OPEN_ADMIN_TREE_PENDING_NODES)return window.DG_OPEN_ADMIN_TREE_PENDING_NODES.open(DG_TREE_ROWS,DG_TREE_STATUS,DG_TREE_QUERY,{filter:dgTreeFilterRows,group:dgTreeGroup,openKeys:DG_TREE_OPEN,render:dgTreeRender});
-  const rows=dgTreeFilterRows(DG_TREE_ROWS,DG_TREE_STATUS,DG_TREE_QUERY);
-  const tree=dgTreeGroup(rows);
-  tree.forEach(P=>{
-    if(!(P.beklemede>0))return;
-    DG_TREE_OPEN.add(P.key);
-    P.projects.forEach(J=>{
-      if(!(J.beklemede>0))return;
-      DG_TREE_OPEN.add(J.key);
-      J.users.forEach(U=>{if(U.beklemede>0)DG_TREE_OPEN.add(U.key);});
+  const state=DG_TREE_STATE_STORE.getState();
+  let tree;
+  if(window.DG_OPEN_ADMIN_TREE_PENDING_NODES)tree=window.DG_OPEN_ADMIN_TREE_PENDING_NODES.open(DG_TREE_ROWS,state.status,state.query,{filter:dgTreeFilterRows,group:dgTreeGroup,openKeys:state.openKeys,render:dgTreeRender});
+  else {
+    const rows=dgTreeFilterRows(DG_TREE_ROWS,state.status,state.query);
+    tree=dgTreeGroup(rows);
+    tree.forEach(P=>{
+      if(!(P.beklemede>0))return;
+      DG_TREE_OPEN.add(P.key);
+      P.projects.forEach(J=>{
+        if(!(J.beklemede>0))return;
+        DG_TREE_OPEN.add(J.key);
+        J.users.forEach(U=>{if(U.beklemede>0)DG_TREE_OPEN.add(U.key);});
+      });
     });
-  });
-  dgTreeRender(tree);
+    dgTreeRender(tree);
+  }
+  dgTreeStateUpdate({openKeys:DG_TREE_OPEN});
+  return tree;
 }
 
 function dgTreeRender(tree){
@@ -256,20 +270,21 @@ function dgTreeDraw__scroll(){
 }
 
 function dgTreeSetStatus(v){
-  if(window.DG_UPDATE_ADMIN_TREE_FILTER)return window.DG_UPDATE_ADMIN_TREE_FILTER.setStatus({status:DG_TREE_STATUS,query:DG_TREE_QUERY},v,{setStatus:value=>{DG_TREE_STATUS=value;},draw:dgTreeDraw});
-  DG_TREE_STATUS=v||"";
+  if(window.DG_UPDATE_ADMIN_TREE_FILTER)return window.DG_UPDATE_ADMIN_TREE_FILTER.setStatus(DG_TREE_STATE_STORE.getState(),v,{setStatus:value=>dgTreeStateUpdate({status:value}),draw:dgTreeDraw});
+  dgTreeStateUpdate({status:v||""});
   dgTreeDraw();
 }
 
 function dgTreeSetQuery(v){
-  if(window.DG_UPDATE_ADMIN_TREE_FILTER)return window.DG_UPDATE_ADMIN_TREE_FILTER.setQuery({status:DG_TREE_STATUS,query:DG_TREE_QUERY},v,{setQuery:value=>{DG_TREE_QUERY=value;},draw:dgTreeDraw});
-  DG_TREE_QUERY=v||"";
+  if(window.DG_UPDATE_ADMIN_TREE_FILTER)return window.DG_UPDATE_ADMIN_TREE_FILTER.setQuery(DG_TREE_STATE_STORE.getState(),v,{setQuery:value=>dgTreeStateUpdate({query:value}),draw:dgTreeDraw});
+  dgTreeStateUpdate({query:v||""});
   dgTreeDraw();
 }
 
 function dgTreeToggle(key,open){
-  if(window.DG_SET_ADMIN_TREE_NODE_OPEN)return window.DG_SET_ADMIN_TREE_NODE_OPEN.set(DG_TREE_OPEN,key,open);
+  if(window.DG_SET_ADMIN_TREE_NODE_OPEN){const result=window.DG_SET_ADMIN_TREE_NODE_OPEN.set(DG_TREE_STATE_STORE.getState().openKeys,key,open);dgTreeStateUpdate({openKeys:DG_TREE_OPEN});return result;}
   if(open)DG_TREE_OPEN.add(key);else DG_TREE_OPEN.delete(key);
+  dgTreeStateUpdate({openKeys:DG_TREE_OPEN});
 }
 
 /* "⚠ Park algılanmamış" düğümündeki kısayol: park algılama ekranına gider.
@@ -282,20 +297,26 @@ function dgTreePendingScan(ev){
 }
 
 function dgTreeExpand(open){
-  if(window.DG_EXPAND_ADMIN_MEASUREMENT_TREE)return window.DG_EXPAND_ADMIN_MEASUREMENT_TREE.expand(DG_TREE_ROWS,DG_TREE_STATUS,DG_TREE_QUERY,DG_TREE_OPEN,{filter:dgTreeFilterRows,group:dgTreeGroup,render:dgTreeRender},open);
-  const rows=dgTreeFilterRows(DG_TREE_ROWS,DG_TREE_STATUS,DG_TREE_QUERY);
-  const tree=dgTreeGroup(rows);
-  DG_TREE_OPEN.clear();
-  if(open){
-    tree.forEach(P=>{
-      DG_TREE_OPEN.add(P.key);
-      P.projects.forEach(J=>{
-        DG_TREE_OPEN.add(J.key);
-        J.users.forEach(U=>DG_TREE_OPEN.add(U.key));
+  const state=DG_TREE_STATE_STORE.getState();
+  let tree;
+  if(window.DG_EXPAND_ADMIN_MEASUREMENT_TREE)tree=window.DG_EXPAND_ADMIN_MEASUREMENT_TREE.expand(DG_TREE_ROWS,state.status,state.query,state.openKeys,{filter:dgTreeFilterRows,group:dgTreeGroup,render:dgTreeRender},open);
+  else {
+    const rows=dgTreeFilterRows(DG_TREE_ROWS,state.status,state.query);
+    tree=dgTreeGroup(rows);
+    DG_TREE_OPEN.clear();
+    if(open){
+      tree.forEach(P=>{
+        DG_TREE_OPEN.add(P.key);
+        P.projects.forEach(J=>{
+          DG_TREE_OPEN.add(J.key);
+          J.users.forEach(U=>DG_TREE_OPEN.add(U.key));
+        });
       });
-    });
+    }
+    dgTreeRender(tree);
   }
-  dgTreeRender(tree);
+  dgTreeStateUpdate({openKeys:DG_TREE_OPEN});
+  return tree;
 }
 
 /* =========================================================
