@@ -21,7 +21,7 @@ test('OSM review adapter converts tagged closed areas and keeps the established 
     {type:'way',id:2,tags:{natural:'water'},geometry:ring.map(([lon,lat])=>({lon,lat}))},
     {type:'way',id:3,tags:{leisure:'swimming_pool'},geometry:ring.map(([lon,lat])=>({lon,lat}))}
   ],32631);
-  assert.deepEqual(Array.from(features,x=>x.type),['water','pool','building']);
+  assert.deepEqual(Array.from(features,x=>x.type),['water','water','building']);
   assert.deepEqual(Array.from(features,x=>x.osmId),['way/2','way/3','way/1']);
   assert.ok(features.every(x=>x.geometry.type==='MultiPolygon'&&x.method==='osm-boundary'));
 });

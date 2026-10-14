@@ -19,7 +19,7 @@ test('color priority remains surface, vegetation, landcover, legacy fallback',()
  assert.equal(api.color('water',inputs),'#111111');
  inputs.surfaceColors=null;assert.equal(api.color('water',inputs),'#222222');
  inputs.vegetationColors=null;assert.equal(api.color('water',inputs),'#333333');
- assert.equal(api.color('pool',inputs),'#0ea5e9');assert.equal(api.color('unknown',inputs),'#94a3b8');
+ assert.equal(api.color('pool',inputs),'#3b82f6');assert.equal(api.color('unknown',inputs),'#94a3b8');
 });
 test('file names stay bounded and area text uses Turkish formatting',()=>{
  assert.equal(api.safeName('Göksu Parkı'),'goksu_park_');assert.equal(api.safeName(null),'park');

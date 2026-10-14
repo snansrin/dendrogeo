@@ -521,7 +521,7 @@
     "src/adapters/surface/digest-surface-review-fingerprint.js": "955cbc89c06e8160ba8b3fb5bec4276f9e4d304d2d4a404498394a90aa97bd6e",
     "src/adapters/surface/encode-surface-review-fingerprint-input.js": "8df18a08b937214466000e5fbb2fa89d689c36328f78b34c28c5b3495d4f419f",
     "src/adapters/surface/load-sentinel-scene-bands.js": "323ee2c4df24f93c252457d7890195bd2ae7464d7871a8bf799ac6588158253d",
-    "src/adapters/surface/osm-review-objects.js": "2815aefe602f821c43e3261d2fef13ac9b8cadebbcde3d8c547a3011c44c79a1",
+    "src/adapters/surface/osm-review-objects.js": "2984967f6e48a6f1887bc179c09d12d8c45f170885ee05b62c6d605b8519921c",
     "src/adapters/surface/process-landcover-tile.js": "bca73635599935803c8d6dae4bc092e1704c052baa86eb7772dbb7aab1de9ed0",
     "src/adapters/surface/project-surface-review-feature-geometry.js": "c78e05c251201211c6b4d78c2b19ee5dd290d371645ca6f253fa25bdca672099",
     "src/adapters/surface/project-surface-review-ring.js": "ea724e97f51d9620ad5170fb86196ee40fd5a3e51b1b403954b69851123e10b6",
@@ -565,7 +565,7 @@
     "src/application/parks/detect-park.js": "214a59a9e7990d62c173bd9cf12931c9913c88f508417824095090b42a6f3991",
     "src/application/parks/evaluate-measurement-park-gate.js": "9067413d70dcae8de655690e4b842a0ad12364deb556654baa2c4d8d8aa17dab",
     "src/application/parks/fail-park-live-share.js": "43393e3ef92a117df87aab40b8fe75b690b915fad9ed5d1a9e61c4ae006e2e36",
-    "src/application/parks/fetch-detailed-coverage.js": "61222349a4e9364fc937ed34daf5a2274238fe3ca28f195d9f7b5b9a226f7c9e",
+    "src/application/parks/fetch-detailed-coverage.js": "6a4bad8904b0063f721895fc3e456a70725250153180bfceb04c79271744a026",
     "src/application/parks/find-nominatim-boundary.js": "f038af233913e251de4a3a46e5f4cd133f8bf1c60ee4915e07578f8b4c1099e2",
     "src/application/parks/find-park-candidates.js": "1f0f6cd93417eb60c0a6bc7cb966f182df6b9114785eefab9979c8c96711914e",
     "src/application/parks/grid-review-signature.js": "a2d65ee731ac9965e4b77266bcfece60ba201ef59ef2243dca44a78cd66fa6e6",
@@ -599,7 +599,7 @@
     "src/application/surface/collect-sentinel-scene-observations.js": "490f76887cb4a8a48a74847c645f7e21cfc206fb7d38f3d6e12c5c33226e12ea",
     "src/application/surface/erode-surface-grid-domain.js": "911a115935155c9b05c231252dcb83619475d45f84326817fd7551641fea3bc1",
     "src/application/surface/find-sentinel-annual-scenes.js": "b7be2102603b822937e2bfae10c4c3db47b91f1f04aab9f87d2bdd0e62b9f8a4",
-    "src/application/surface/finish-surface-review-mount.js": "5571fc4e296cb88a581cb4991a0859c920f3a0507b50f9de19d37036b7ec1db0",
+    "src/application/surface/finish-surface-review-mount.js": "55e81b37ce1d659bb97de490c26fba338d7dd6b8923efc354e2b2e38b5c03276",
     "src/application/surface/merge-review-features.js": "2cfbde3c3e74a6a27e8689f745eee6fd7972e019014ea54d4064155930d7070d",
     "src/application/surface/prepare-review.js": "62e1e7aab38faf62d64b7080856874905030b7b9bcdaac151139b06efd9c5aaa",
     "src/application/surface/prepare-sentinel-annual-evidence.js": "20e834abcaa4dea5341320ebadf026a4f57a0419c161e4d95d64be65406f118c",
@@ -613,7 +613,7 @@
     "src/application/surface/reset-surface-review-data-change.js": "752db7f5acbf18b44c5a7a50439b7c5e0e7b643d3c3f3c21cd0785d7a29627ba",
     "src/application/surface/resolve-surface-review-cell.js": "f5addacf9601668220d7a45b7ec738b75d944d66f4c9b2093fe059ce72989a6d",
     "src/application/surface/resolve-surface-review-parts.js": "c4cd9d4475607d2b0dd87105fe25f24880983dc43af78d45b05d734848f984c4",
-    "src/application/surface/run-analysis.js": "17961160900d79af74b7e171c4958c7cdbbd904345dc8ff455b6ecd0bdad778e",
+    "src/application/surface/run-analysis.js": "e2250667f82d3b0c3e95681853ed9f72198fe64c4bde28dc0b8c86af4abff5ae",
     "src/application/surface/run-sentinel-annual-observation-pass.js": "272115510018995d7d9e4e059bbf4efb72dc41c6ad0a839a30730199ae1b29a3",
     "src/application/surface/run-sentinel-scene-observation-pass.js": "8918573cc4ee087115da475e32abfe250ecbb180b86b0ab999dabd1a25105966",
     "src/application/surface/run-surface-sampling-grid.js": "98ef9d7ed0f1b49005a7c7b606662d473f32c58bfbe09f3ff2b1af2bd024dcf4",
@@ -632,7 +632,7 @@
     "src/config/species.js": "8d72ff0de79ed4c1db866170915a7b3cf98396b98684159cd5637ea50ccb8403",
     "src/config/wood-density-lock.js": "dd2e5fe50087b866c5fbf0021dba65ce41c96d582ee7460f6e625dccbc784150",
     "src/contracts/surface-analysis.js": "ad73e8aac79257360468c5687a8f6bd456d5e000f124bf6af05a01753397af52",
-    "src/contracts/surface-review.js": "3c79940d8a7c9068328e10f1b008ac7cf66634cec27b8358d32f740318e6f042",
+    "src/contracts/surface-review.js": "79abb18ded34beb4ccb15ec85443e0f67c723bbb3136abd8df3532ecd9585724",
     "src/core/surface-display.js": "0bed5180b3c9a5e9087e7640976081eb6f5d8be90b19389746d8b08a650c5892",
     "src/domain/map/is-waypoint-project-selected.js": "ee711e3c63e8101f752d7757037d5e9202a58b725cc498cab1f7c52f89e0fe98",
     "src/domain/map/map-initial-view.js": "25cef7bec77d61b28340e4f03999f2bed67d9edd9f115c43bdfb2c00022d42ba",
@@ -706,7 +706,7 @@
     "src/domain/surface/select-surface-review-fingerprint-fields.js": "5731f326a6635fcebee818d9d63b4733c7f44cb578c8a038dd965e81923cda9a",
     "src/domain/surface/serialize-surface-review-fingerprint-input.js": "d9dbaf5d796cf27b4a9446e62b3b777a05eacd9b5f9dfebb08453ac41ae05923",
     "src/domain/surface/snap-surface-review-coordinate.js": "5f7927053d2801e9ed24c2232573ad8b97e674f98ad8bad7c0c456b1253eb9f0",
-    "src/domain/surface/summarize-surface-review-parts.js": "2e0e62559ec30628b6c89587e115b6cc2165603674bfde0186e2290f36ceae9f",
+    "src/domain/surface/summarize-surface-review-parts.js": "13409d89d8cd90ea78fc37deee5db6dfd8a42709e461198661fa86d89b404f31",
     "src/domain/surface/translate-surface-review-geometry.js": "4f90418981b7d6f01dc02ba29ecb1bc563c6fa719f304f1c2fe9b556618e33a3",
     "src/domain/surface/validate-surface-grid-options.js": "e64627a330cc14447ac08003554f6e898c65f7eb12ff329f5d83f3426bb94047",
     "src/domain/trees/allometry.js": "d111ec3ae452cf9893671eff9dda63c4e4c4ac8244199bd0c4aba89907dd8a1b",
@@ -714,7 +714,7 @@
     "src/services/allometry.js": "80900b58ad133aff03915ba0a4645805b2a550967bc31e00967a5bded2203c6f",
     "src/services/geofence.js": "27b11b89f3fbb51cf4cf3ef63912148033628dfafce80e3c293eb3e2a2c7ef0d",
     "src/services/grid-engine.js": "92e9122dc34ed798e807a04ceb55a12cf24f4f85e9c0b5f110dbef3407f8a773",
-    "src/services/landcover.js": "6caf344e84a74982f145ab7ce4976a07e97f23216d2e59f8dbfe9dab634902e4",
+    "src/services/landcover.js": "a4a98c49854a7835df2f61ee33fa71007dc8d55a87e55d3d7614cfefbc59ba78",
     "src/services/lc-config.js": "293509c879db16cf7aa10613879c3bf63b286bcbcb01a3b668816e5148e4b176",
     "src/services/lc-engine.js": "233f87f8eeec9306e235ca1896f2e9405dfcfe0e8148fbf9801f48fe1c1afa1d",
     "src/services/lc-geo.js": "ade537a9ea592914288c9c3cead038834919f4919b63be2a3cce28cfe2b97d73",
@@ -750,7 +750,7 @@
     "src/ui/grid-waypoint-controller.js": "eb4f58d30fd59a46840f58f2b428b79d8afc9e1211d48d26ea2cfb74ba2b3531",
     "src/ui/grid-waypoint-layer.js": "0c6db2a4329704ec9106735cc0a26b7ce01803666ee4b19d356c976d298eba2f",
     "src/ui/lc-report.js": "f8182bce9b5dbd8dcecceaa7afee69b52d12e7883badc65e27fb93e94ca2abf9",
-    "src/ui/lc-sens.js": "fbd4081eb714658f56fd3cca9bd01d980a4e3a562d85b3d6bf931d21e570d19b",
+    "src/ui/lc-sens.js": "8dd02941d86ddf728acd78dbee0d8869506585b570ba4f4e0e138f3ed581e9a5",
     "src/ui/map-layer-visibility.js": "50d033fba51e90f49ae39254e0700b510938be4d271aada8a9a400be727c1a60",
     "src/ui/map-measurement-markers.js": "cedd193f2786604f84044f2ecf020144b5cba20c86160b729891b7d4f3668a67",
     "src/ui/mount-surface-review-map-host.js": "2ef1e62e2607084c3909016e324b09dba2eaaf13dfba25b0b8bcb82086e7986d",
@@ -789,7 +789,7 @@
     "src/ui/sync-base-map-layer-selection.js": "2f93018846abac13f83486a1fc2b9df0cbb7f330cae202a0e91ef902c8263eeb",
     "src/ui/waypoint-gps-overlay.js": "4f4396cf19bacb0e1f3e026b6a331c37db26631b7282f5b0267a2042a6226d1e",
     "src/utils/geo.js": "3e796768b3d55a3f07c4be3281c9437f1602b6d5e68151b2af7b101707baf294",
-    "src/utils/lazylibs.js": "682b71fda2279e58b8005de5e6bc42986cb05f7dcf324e3ca0b40b03b4f33f9f",
+    "src/utils/lazylibs.js": "9f78f3c8cd6bd1e4c702ef334ae05dbbfc404319c3a9489e3b52330050d68652",
     "src/workers/surface-worker.js": "af6477f104a06342cf69ef7f702a3e95ed27cd390c5aae36a2fbe5dfd68ed2fe",
     "test/base-map-layer-modules.test.mjs": "5399d699e74ffd66e92df312b4301202add7352b2b6c0be24fd51cda63e7baff",
     "test/critical-fixes.test.mjs": "3a2e62104763110bc734b3dc54a37cbf57c15b0038a78fdce35d56d9639c1989",
@@ -844,7 +844,7 @@
     "test/park-cell-validity-domain.test.mjs": "16eb554a6a3cd8829fb83d0a35150594af6559d93b500820f25517655cfa77fd",
     "test/park-click-controller-ui.test.mjs": "22bfe2434b991b0aacfd4758e3d2ac752ded55aa00d7e34ecf5d5f5d83d6e7e5",
     "test/park-containment-domain.test.mjs": "f33c640711c18240105de2ec93a32f403d849928709d68f1e82d5b28d32c0ee9",
-    "test/park-coverage-application.test.mjs": "eba40bd0a78720c90966d4a7118a06f4347e254aa13b63b19547b888ab4ba94f",
+    "test/park-coverage-application.test.mjs": "b7bc4120db992a4afd64dbd3493c4f0190a4ca8017ce4ad0c21aca6b0245e09f",
     "test/park-coverage-elements-application.test.mjs": "5e7a2f99ccf02340158de1859a35ef2a8bb653024e543e2604b0af07ef4f96c1",
     "test/park-detection-application.test.mjs": "6fd5cce5ccc35b3b8822d56448f67c5960ccbbcd3ff5630725eefa79ca3c3d96",
     "test/park-export-canvas.test.mjs": "132ed55d41c40150e60131fc0bda0deb144d16e492e5c9e031f4d1e97ed63c70",
@@ -893,19 +893,19 @@
     "test/surface-grid-domain-modules.test.mjs": "304c57655384517da812f270882f4a021939a2773a06e1a274424d8f76c3ef8e",
     "test/surface-grid-workflow-modules.test.mjs": "82351e7eefc2b06db65f051ebf1d8857a7ac0d14e67f185e79ff5afb304bf4ce",
     "test/surface-mount-lifecycle-modules.test.mjs": "db9f479034142c1c7531b012ae509d8df069efba723e71b71e490fa110bba12e",
-    "test/surface-network-budget.test.mjs": "33e69c3d0de1d81561a9707dc3e9fd2eb8730f4a7331a90bd16171fb2677887d",
-    "test/surface-report-field-ux.test.mjs": "cc0c2e640f2539f2062546f4acc6e8b590bfef256f47fd54cf5100d0c4b50cdc",
+    "test/surface-network-budget.test.mjs": "f529a589bcd28fe7ee6cf3e25be1a718d72921e88163bfc234277ae46b5b3898",
+    "test/surface-report-field-ux.test.mjs": "7f9d943a1eb74c430ed2613dfcadd292527fafa3797c2ef25d03221f8df11c19",
     "test/surface-review-cache-modules.test.mjs": "ef671ea3585169aef22a3b98e369da2ebd81d39757335b3f8d836c40c92b08c5",
     "test/surface-review-clipping-modules.test.mjs": "50eba2da2d0ad57f8d4de21e50f865ea2f258e6c71877566930426bc6340d05f",
     "test/surface-review-fingerprint-modules.test.mjs": "cfdd0b20e2ed38c20c48d2f5eba49275c3b8e9fae8ffe66ee6f9dc36c026e327",
     "test/surface-review-projection-modules.test.mjs": "0a5251d4134b958a48c1b9b7ccfbdc138c6591897792cdbdd9d9905a456e416c",
-    "test/surface-review-resolution-modules.test.mjs": "047f611c00e76b553d8a52b4a1a59366a97504bcf5356bcd43bfcafa3ae2a277",
-    "test/surface-review.test.mjs": "79c8dc6f99883699dd2ac4ad890d1030807f273e3f094f013969e677ff669f2c",
-    "test/surface-scientific-contract.test.mjs": "d4c7b1ea5707b77997921bc06b50973618409f9e192fcd83a6152a391e75d299",
+    "test/surface-review-resolution-modules.test.mjs": "c4054cd984d1386344e7ac1d32c78aa96786fd4600a3b4623b0e89484e9f96ba",
+    "test/surface-review.test.mjs": "e3ea1ad2b8c47988c8f20ea4461f6fbd51a59ea4736bc4d5f590de37e2a2358f",
+    "test/surface-scientific-contract.test.mjs": "2ce6d55ad171284c1b199b64b4ddaa8fc288b6403fda411d3f2fdf2b9461ddd2",
     "test/tree-carbon-architecture.test.mjs": "10a30a213b8f4fc8b18f883bc30c0aa2ba72a12ccea6c4c2cb198f4536504023",
     "test/tree-measurement-validation.test.mjs": "0020df09a4c09eb2378f2965fa35e16da3e20aad511d75f18339a7ad0ecc75fa",
     "test/verified-water-footprint.test.mjs": "42de1bc1fa91998c7de9447ca14d93718916b16242beb73c8f56a073db1cc52d",
-    "test/water-osm-reliability.test.mjs": "be57364b0890d918cb4dcbdcedd7d2c5109301b1508d67a8ad1da1b848510652",
+    "test/water-osm-reliability.test.mjs": "8069fdfd8fa33f757ff47f3bb2269825a36570c04b0773ae9615310c4b26661e",
     "test/waypoint-arrival-modules.test.mjs": "db63b7fa5d3445c9ad8fd8493b472e87b1727c2ab6e045f609c41065bdcc2c2b",
     "test/waypoint-csv-upload-modules.test.mjs": "c2ac1fde9029a4123ed0c10a5937946555093fd8d6883760101f302de67dcead",
     "test/waypoint-delete-modules.test.mjs": "b3e21cff19b6b40f9233b69f02a21550f44318842b606c1b12e7ecccefad463b",
@@ -2230,6 +2230,86 @@
           "path": "src/services/offline.js",
           "previous_sha256": "6f4ef41218c6621da9a5ae2f070e60de7efabc858e38035ee80cd89fd2f4a1ac",
           "sha256": "a1555235bf0e0e17ecea63e90b7347e7288295b6d7cf237ac0804ddc00d50e3f"
+        },
+        {
+          "path": "test/water-osm-reliability.test.mjs",
+          "previous_sha256": "be57364b0890d918cb4dcbdcedd7d2c5109301b1508d67a8ad1da1b848510652",
+          "sha256": "8069fdfd8fa33f757ff47f3bb2269825a36570c04b0773ae9615310c4b26661e"
+        },
+        {
+          "path": "src/adapters/surface/osm-review-objects.js",
+          "previous_sha256": "2815aefe602f821c43e3261d2fef13ac9b8cadebbcde3d8c547a3011c44c79a1",
+          "sha256": "2984967f6e48a6f1887bc179c09d12d8c45f170885ee05b62c6d605b8519921c"
+        },
+        {
+          "path": "src/application/parks/fetch-detailed-coverage.js",
+          "previous_sha256": "61222349a4e9364fc937ed34daf5a2274238fe3ca28f195d9f7b5b9a226f7c9e",
+          "sha256": "6a4bad8904b0063f721895fc3e456a70725250153180bfceb04c79271744a026"
+        },
+        {
+          "path": "src/application/surface/finish-surface-review-mount.js",
+          "previous_sha256": "5571fc4e296cb88a581cb4991a0859c920f3a0507b50f9de19d37036b7ec1db0",
+          "sha256": "55e81b37ce1d659bb97de490c26fba338d7dd6b8923efc354e2b2e38b5c03276"
+        },
+        {
+          "path": "src/application/surface/run-analysis.js",
+          "previous_sha256": "17961160900d79af74b7e171c4958c7cdbbd904345dc8ff455b6ecd0bdad778e",
+          "sha256": "e2250667f82d3b0c3e95681853ed9f72198fe64c4bde28dc0b8c86af4abff5ae"
+        },
+        {
+          "path": "src/contracts/surface-review.js",
+          "previous_sha256": "3c79940d8a7c9068328e10f1b008ac7cf66634cec27b8358d32f740318e6f042",
+          "sha256": "79abb18ded34beb4ccb15ec85443e0f67c723bbb3136abd8df3532ecd9585724"
+        },
+        {
+          "path": "src/domain/surface/summarize-surface-review-parts.js",
+          "previous_sha256": "2e0e62559ec30628b6c89587e115b6cc2165603674bfde0186e2290f36ceae9f",
+          "sha256": "13409d89d8cd90ea78fc37deee5db6dfd8a42709e461198661fa86d89b404f31"
+        },
+        {
+          "path": "src/services/landcover.js",
+          "previous_sha256": "6caf344e84a74982f145ab7ce4976a07e97f23216d2e59f8dbfe9dab634902e4",
+          "sha256": "a4a98c49854a7835df2f61ee33fa71007dc8d55a87e55d3d7614cfefbc59ba78"
+        },
+        {
+          "path": "src/ui/lc-sens.js",
+          "previous_sha256": "fbd4081eb714658f56fd3cca9bd01d980a4e3a562d85b3d6bf931d21e570d19b",
+          "sha256": "8dd02941d86ddf728acd78dbee0d8869506585b570ba4f4e0e138f3ed581e9a5"
+        },
+        {
+          "path": "src/utils/lazylibs.js",
+          "previous_sha256": "682b71fda2279e58b8005de5e6bc42986cb05f7dcf324e3ca0b40b03b4f33f9f",
+          "sha256": "9f78f3c8cd6bd1e4c702ef334ae05dbbfc404319c3a9489e3b52330050d68652"
+        },
+        {
+          "path": "test/park-coverage-application.test.mjs",
+          "previous_sha256": "eba40bd0a78720c90966d4a7118a06f4347e254aa13b63b19547b888ab4ba94f",
+          "sha256": "b7bc4120db992a4afd64dbd3493c4f0190a4ca8017ce4ad0c21aca6b0245e09f"
+        },
+        {
+          "path": "test/surface-network-budget.test.mjs",
+          "previous_sha256": "33e69c3d0de1d81561a9707dc3e9fd2eb8730f4a7331a90bd16171fb2677887d",
+          "sha256": "f529a589bcd28fe7ee6cf3e25be1a718d72921e88163bfc234277ae46b5b3898"
+        },
+        {
+          "path": "test/surface-report-field-ux.test.mjs",
+          "previous_sha256": "cc0c2e640f2539f2062546f4acc6e8b590bfef256f47fd54cf5100d0c4b50cdc",
+          "sha256": "7f9d943a1eb74c430ed2613dfcadd292527fafa3797c2ef25d03221f8df11c19"
+        },
+        {
+          "path": "test/surface-review-resolution-modules.test.mjs",
+          "previous_sha256": "047f611c00e76b553d8a52b4a1a59366a97504bcf5356bcd43bfcafa3ae2a277",
+          "sha256": "c4054cd984d1386344e7ac1d32c78aa96786fd4600a3b4623b0e89484e9f96ba"
+        },
+        {
+          "path": "test/surface-review.test.mjs",
+          "previous_sha256": "79c8dc6f99883699dd2ac4ad890d1030807f273e3f094f013969e677ff669f2c",
+          "sha256": "e3ea1ad2b8c47988c8f20ea4461f6fbd51a59ea4736bc4d5f590de37e2a2358f"
+        },
+        {
+          "path": "test/surface-scientific-contract.test.mjs",
+          "previous_sha256": "d4c7b1ea5707b77997921bc06b50973618409f9e192fcd83a6152a391e75d299",
+          "sha256": "2ce6d55ad171284c1b199b64b4ddaa8fc288b6403fda411d3f2fdf2b9461ddd2"
         }
       ]
     },
@@ -2246,6 +2326,72 @@
           "path": "src/utils/lazylibs.js",
           "previous_sha256": "ab6c3a9f78ca0b3a6c67d01720defc9dff8a7933e556c8aecd6a658cbc5e46ed",
           "sha256": "682b71fda2279e58b8005de5e6bc42986cb05f7dcf324e3ca0b40b03b4f33f9f"
+        }
+      ]
+    },
+    {
+      "date": "2026-10-14",
+      "scope": "User-authorized restoration of the modular surface-analysis behavior: retry bounded OSM evidence for buildings, roads, and water; feed water/road geometry back into the raster preview without mutating the raw raster; show building vectors; unify legacy pool evidence with water; and preserve presence/dashboard lazy-loading behavior with regression coverage.",
+      "files": [
+        {
+          "path": "src/adapters/surface/osm-review-objects.js",
+          "previous_sha256": "2815aefe602f821c43e3261d2fef13ac9b8cadebbcde3d8c547a3011c44c79a1",
+          "sha256": "2984967f6e48a6f1887bc179c09d12d8c45f170885ee05b62c6d605b8519921c"
+        },
+        {
+          "path": "src/application/parks/fetch-detailed-coverage.js",
+          "previous_sha256": "61222349a4e9364fc937ed34daf5a2274238fe3ca28f195d9f7b5b9a226f7c9e",
+          "sha256": "6a4bad8904b0063f721895fc3e456a70725250153180bfceb04c79271744a026"
+        },
+        {
+          "path": "src/application/surface/finish-surface-review-mount.js",
+          "previous_sha256": "5571fc4e296cb88a581cb4991a0859c920f3a0507b50f9de19d37036b7ec1db0",
+          "sha256": "55e81b37ce1d659bb97de490c26fba338d7dd6b8923efc354e2b2e38b5c03276"
+        },
+        {
+          "path": "src/application/surface/run-analysis.js",
+          "previous_sha256": "17961160900d79af74b7e171c4958c7cdbbd904345dc8ff455b6ecd0bdad778e",
+          "sha256": "e2250667f82d3b0c3e95681853ed9f72198fe64c4bde28dc0b8c86af4abff5ae"
+        },
+        {
+          "path": "src/contracts/surface-review.js",
+          "previous_sha256": "3c79940d8a7c9068328e10f1b008ac7cf66634cec27b8358d32f740318e6f042",
+          "sha256": "79abb18ded34beb4ccb15ec85443e0f67c723bbb3136abd8df3532ecd9585724"
+        },
+        {
+          "path": "src/domain/surface/summarize-surface-review-parts.js",
+          "previous_sha256": "2e0e62559ec30628b6c89587e115b6cc2165603674bfde0186e2290f36ceae9f",
+          "sha256": "13409d89d8cd90ea78fc37deee5db6dfd8a42709e461198661fa86d89b404f31"
+        },
+        {
+          "path": "src/services/landcover.js",
+          "previous_sha256": "6caf344e84a74982f145ab7ce4976a07e97f23216d2e59f8dbfe9dab634902e4",
+          "sha256": "a4a98c49854a7835df2f61ee33fa71007dc8d55a87e55d3d7614cfefbc59ba78"
+        },
+        {
+          "path": "src/ui/lc-sens.js",
+          "previous_sha256": "fbd4081eb714658f56fd3cca9bd01d980a4e3a562d85b3d6bf931d21e570d19b",
+          "sha256": "939545dc89b478cb15380a1b12ff151f72c1a5f9152cb9e7c81a14a4a01fc62d"
+        },
+        {
+          "path": "src/utils/lazylibs.js",
+          "previous_sha256": "682b71fda2279e58b8005de5e6bc42986cb05f7dcf324e3ca0b40b03b4f33f9f",
+          "sha256": "9f78f3c8cd6bd1e4c702ef334ae05dbbfc404319c3a9489e3b52330050d68652"
+        },
+        {
+          "path": "test/park-coverage-application.test.mjs",
+          "previous_sha256": "eba40bd0a78720c90966d4a7118a06f4347e254aa13b63b19547b888ab4ba94f",
+          "sha256": "b7bc4120db992a4afd64dbd3493c4f0190a4ca8017ce4ad0c21aca6b0245e09f"
+        },
+        {
+          "path": "test/surface-network-budget.test.mjs",
+          "previous_sha256": "33e69c3d0de1d81561a9707dc3e9fd2eb8730f4a7331a90bd16171fb2677887d",
+          "sha256": "f529a589bcd28fe7ee6cf3e25be1a718d72921e88163bfc234277ae46b5b3898"
+        },
+        {
+          "path": "test/surface-review.test.mjs",
+          "previous_sha256": "79c8dc6f99883699dd2ac4ad890d1030807f273e3f094f013969e677ff669f2c",
+          "sha256": "e3ea1ad2b8c47988c8f20ea4461f6fbd51a59ea4736bc4d5f590de37e2a2358f"
         }
       ]
     }

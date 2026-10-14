@@ -17,7 +17,7 @@
     // Filling a closed footpath loop turns the lawn inside it into hard surface.
     const isArea=t.area==="yes"||(!!t["area:highway"]&&t["area:highway"]!=="no"),isLinearHighway=!!t.highway&&t.highway!=="no";
     if((t.building&&t.building!=="no")||(t["building:part"]&&t["building:part"]!=="no"))type="building";
-    else if(t.leisure==="swimming_pool"||t.amenity==="fountain"||t.water==="reflecting_pool")type="pool";
+    else if(t.leisure==="swimming_pool"||t.amenity==="fountain"||t.water==="reflecting_pool")type="water";
     else if(t.natural==="water"||t.water||t.landuse==="reservoir"||t.landuse==="basin"||t.waterway==="riverbank")type="water";
     else if(deck||paved.test(t.surface||"")||t.amenity==="parking"||(isLinearHighway&&roadKinds.has(String(t.highway).toLowerCase())))type="hard";
     if(!type)continue;

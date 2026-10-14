@@ -11,7 +11,6 @@ export const SURFACE_CLASSES=[
   ['hard','Sert zemin'],
   ['building','Bina'],
   ['water','Su'],
-  ['pool','Havuz / süs havuzu'],
   ['bare','Çıplak zemin'],
   ['other','Diğer'],
 ];
@@ -24,6 +23,7 @@ export function isAcceptedSurfaceSnapshot(s){
 export function acceptedSurfaceToLulc(s,parkAreaM2=0){
   if(!isAcceptedSurfaceSnapshot(s))return null;
   const areas=Object.fromEntries(SURFACE_CLASSES.map(([k])=>[k,finite0(s.areas_m2[k])]));
+  areas.water+=finite0(s.areas_m2.pool);
   const total=Object.values(areas).reduce((a,b)=>a+b,0);
   if(!(total>0))return null;
   const park=finite0(parkAreaM2);

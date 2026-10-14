@@ -7,7 +7,8 @@
     hard:Object.freeze({group:"hard",label:"Sert zemin"}),
     building:Object.freeze({group:"building",label:"Bina"}),
     water:Object.freeze({group:"water",label:"Su"}),
-    pool:Object.freeze({group:"pool",label:"Havuz / süs havuzu"}),
+    /* Legacy pool polygons remain readable but are accounted as surface water. */
+    pool:Object.freeze({group:"water",label:"Su"}),
     bare:Object.freeze({group:"bare",label:"Çıplak zemin"}),
     other:Object.freeze({group:"other",label:"Diğer"})
   });

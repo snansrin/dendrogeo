@@ -32,7 +32,7 @@ test('editor menus keep control IDs, class order, export actions, and review gua
  const render=setup().DG_RENDER_SURFACE_EDITOR_MENUS.render,model={disabled:true,viewDisabled:true,rawView:true,brush:null,base:'sat',drawType:'building',objectPick:false,objectPreview:null,activeType:'hard',brushDiameter:10};
  const html=render({record:{features:[{type:'water'}],useObjects:true,period:'ytd'},model,types:setup().DG_SURFACE_REVIEW.types,menuLabel:(_icon,label)=>label,panelHead:(_icon,title)=>title,translate:identity,escape:identity});
  for(const value of ['dgSensBaseSelect','dgSensDrawType','dgSensBrushType','dgSensBrushSize','dgSensPeriod','dgSensFeatures','dgSensExportPng()','dgSensObjectPickStart()','dgSensUndoBoundary()'])assert.ok(html.includes(value),value);
- assert.ok(html.indexOf('value="building"')<html.indexOf('value="pool"'));assert.ok(html.includes('dgSensPeriod(this.value)'));
+ assert.ok(html.indexOf('value="building"')<html.indexOf('value="water"'));assert.doesNotMatch(html,/value="pool"|Havuz/);assert.ok(html.includes('dgSensPeriod(this.value)'));
 });
 
 test('toolbar rail keeps accessible action names, no-point draw guard, and ordered shell',()=>{

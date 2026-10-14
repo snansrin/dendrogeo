@@ -16,7 +16,15 @@ const DG_RUN_SURFACE_ANALYSIS=window.DG_SURFACE_APPLICATION.createRunSurfaceAnal
   getSources:()=>DG_LC_SOURCES,
   getPixelSize:()=>DG_LC_PIXEL_M,
   getBbox:dgLcBboxFromGeometry,
-  analyzeSource:(...args)=>dgLcAnalyzeSource(...args),
+  analyzeSource:async(src,bbox,geometry)=>{
+    const source=await dgLcAnalyzeSource(src,bbox,geometry);
+    const refine=window.DG_APPLY_OSM_SURFACE_REFINEMENT;
+    return refine?refine.apply(source,{
+      fetchWater:()=>dgLcFetchWaterPolygons(bbox),fetchRoads:()=>dgLcFetchRoadFeatures(bbox),
+      refineWater:dgLcRefineWater,refineRoads:dgLcRefineHardByOsm,epsg:source.result?.cells?.[0]?.epsg,
+      warn:(...args)=>console.warn(...args)
+    }):source;
+  },
   detectPatches:(...args)=>dgLcDetectPatches(...args),
   getClasses:()=>DG_LC_CLASSES,
   assertCoverage:window.DG_SURFACE_QUALITY.assertCoverage

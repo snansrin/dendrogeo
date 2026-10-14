@@ -14,7 +14,7 @@ test('editor view model derives scan readiness and operation gates',()=>{
 
 test('scan panel keeps its status button, profile range, audit and source hint',()=>{
   const window=setup(),model={scanned:true,disabled:false},record={profile:{scenes:[{usedCells:1,datetime:'2026-02-01'},{usedCells:1,datetime:'2026-01-01'}],stats:{nProfiled:9}}},html=window.DG_RENDER_SURFACE_SCAN_PANEL.render({model,record,busy:false,rawView:false,brush:null,cellCount:10,auditHtml:()=>'<audit>',translate:tr,escape});
-  assert.ok(html.indexOf('dgSensScanBtn')<html.indexOf('Sentinel‑2 L2A'));assert.ok(html.indexOf('Sentinel‑2 L2A')<html.indexOf('<audit>'));assert.match(html,/2026-01-01 – 2026-02-01/);assert.match(html,/9\/10/);assert.match(html,/Küçük bina ve havuzlar/);
+  assert.ok(html.indexOf('dgSensScanBtn')<html.indexOf('Sentinel‑2 L2A'));assert.ok(html.indexOf('Sentinel‑2 L2A')<html.indexOf('<audit>'));assert.match(html,/2026-01-01 – 2026-02-01/);assert.match(html,/9\/10/);assert.match(html,/Küçük bina, yol ve su alanları/);
 });
 
 test('sensitivity controls preserve class order, slider callbacks and raw/brush gates',()=>{

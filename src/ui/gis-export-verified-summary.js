@@ -9,8 +9,8 @@
   g.fillStyle=INK;g.font="bold 54px Arial";g.fillText(String(decisionCount),X0,472);
   g.fillStyle=MUT;g.font="bold 20px Arial";g.fillText("DOĞRULANMIŞ ALANLAR",X0,540);
   let y=572;
-  if(layers.surface)for(const k of ["green","water","hard","bare","building","pool"]){
-   const v=Number(areas[k]||0);
+  if(layers.surface)for(const k of ["green","water","hard","bare","building"]){
+   const v=Number(areas[k]||0)+(k==="water"?Number(areas.pool||0):0);
    if(v<=0)continue;
    const label=getSurfaceTypes()?.[k]?.label||classes[k]?.label||k;
    g.fillStyle=color(k);g.fillRect(X0,y,26,26);

@@ -41,7 +41,8 @@ test('five review-resolution modules preserve resolved geometry, area summaries,
   }
   assert.equal(canonical(modular.ctx.parts),canonical(legacy.ctx.parts));
   for(const app of [legacy,modular])app.ctx.areas=app.run('dgSurfaceSummarize({green:200},cells,classify,geometries,features,32631,park)');
-  assert.equal(canonical(modular.ctx.areas),canonical(legacy.ctx.areas));
+  assert.equal(modular.ctx.areas.water,legacy.ctx.areas.water+legacy.ctx.areas.pool);
+  assert.equal(Object.hasOwn(modular.ctx.areas,'pool'),false);
   for(const app of [legacy,modular]){
     const clipping=app.ctx.window.polygonClipping.intersection;let calls=0;
     app.ctx.window.polygonClipping.intersection=(...args)=>{calls++;return clipping(...args);};

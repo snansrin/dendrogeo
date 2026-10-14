@@ -41,6 +41,11 @@ test('late coverage data is marked stale when park selection changes during the 
   assert.equal(result.json,null);
 });
 
+test('failed detailed coverage retries a smaller building, road, and water request',async()=>{
+ const park=[[[39,32],[39,33],[40,33]]],calls=[];const fetch=create(()=>park,async(query,label)=>{calls.push({query,label});return calls.length===1?null:{elements:[{type:'way',id:3,tags:{highway:'service'}}]};});
+ const result=await fetch();assert.equal(calls.length,2);assert.ok(calls[1].query.includes('["building"]'));assert.ok(calls[1].query.includes('["highway"]'));assert.equal(calls[1].label,'yüzey+su');assert.equal(result.json.elements[0].id,3);
+});
+
 test('coverage fetch skips network access when there is no selected park',async()=>{
   let calls=0;
   const fetch=create(()=>null,async()=>{calls++;return{elements:[]};});

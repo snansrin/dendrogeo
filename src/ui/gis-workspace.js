@@ -230,8 +230,8 @@
   const panel=document.createElement("div");panel.className="dg-ux-surface-rows";
   rows[0].before(panel);
   const types=window.DG_SURFACE_REVIEW?.types||{};
-  const icons={green:"🌿",water:"💧",hard:"🧱",building:"🏢",pool:"💦",bare:"🟫",other:"⬜"};
-  const defaults={"Yeşil alan":"green","Su":"water","Sert zemin":"hard","Bina":"building","Havuz":"pool","Çıplak zemin":"bare","Diğer":"other"};
+  const icons={green:"🌿",water:"💧",hard:"🧱",building:"🏢",bare:"🟫",other:"⬜"};
+  const defaults={"Yeşil alan":"green","Su":"water","Sert zemin":"hard","Bina":"building","Havuz":"water","Çıplak zemin":"bare","Diğer":"other"};
   for(const row of rows){
    const label=row.querySelector?.(":scope > span");
    // 'Diğer' is the underlying unclassified residual, not a user-facing
@@ -241,6 +241,7 @@
    const fill=row.querySelector?.(":scope > .dg-surface-track > i");
    if(label&&value&&fill){
     const name=label.textContent.trim();
+    if(name==="Havuz")label.textContent="Su";
     const type=Object.entries(types).find(([,meta])=>meta?.label===name)?.[0]||defaults[name];
     if(type&&icons[type])label.prepend(document.createTextNode(icons[type]+" "));
     const mapColor=fill.style?.backgroundColor;
@@ -307,8 +308,7 @@
    state.vegetationLayer.eachLayer(layer=>layer.bringToFront?.());
  }
  function syncBrushChoices(){
-  // Pool/fountain shares the Su brush workflow; keep the historical class,
-  // recorded pool polygons and boundary editor untouched.
+  // Legacy pool/fountain records share the Su brush workflow.
   const select=typeof document.querySelector==="function"?document.querySelector("#dgSensBrushType"):null,state=window.DG_LC_SENS?.state;
   if(!select)return;
   if(state?.brushType==="pool"&&!state.busy&&!state.saving&&!state.rawView&&typeof dgSensBrushChoose==="function"){

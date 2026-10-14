@@ -75,7 +75,8 @@ test('Initial surface analysis requests water automatically and preserves raw ce
  assert.match(park,/if\(window\.DG_SURFACE_OSM\?\.boundary!==boundary\)/);
  assert.match(coverage,/if \(boundary !== JSON\.stringify\(getParkPolygon\(\)\)\)/);
  assert.match(baseline,/DG_RUN_SURFACE_ANALYSIS\.run\(params\)/);
- assert.match(application,/const patches=detectPatches\(result\.cells\),cross=null,crossErr=null,waterRefined=0,roadRefined=0/);
+ assert.match(baseline,/DG_APPLY_OSM_SURFACE_REFINEMENT/);
+ assert.match(application,/waterRefined=Number\(primary\.waterRefined\)\|\|0,roadRefined=Number\(primary\.roadRefined\)\|\|0/);
  assert.doesNotMatch(ui,/dgLcRefineWater\(/);
 });
 
