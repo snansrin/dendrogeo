@@ -2,14 +2,14 @@
 
 /* Preserve the existing administrator prompts and mutation-result messages. */
 window.DG_PARK_ADMIN_MUTATION_UI={
-  promptRename(park,ports){return ports.prompt(ports.translate("Park adı (örn. Göksu Parkı):"),park.name);},
+  promptRename(park,ports){return ports.prompt.call(window,ports.translate("Park adı (örn. Göksu Parkı):"),park.name);},
   confirmMerge(source,destination,ports){
-    return ports.confirm(ports.translateFormat(
+    return ports.confirm.call(window,ports.translateFormat(
       '"{src}" (#{sid}) → "{dst}" (#{did}) birleştirilsin mi?\n\n· Projeler ve ölçümler hedef parka taşınır\n· Proje adları hedef park adına göre yeniden kurulur\n· Kaynak kimlik (#{sid}) SİLİNİR — geri alınamaz\n\nKarşılaştırma artık TEK "{dst}" satırı gösterir.',
       {src:source.name,sid:source.id,dst:destination.name,did:destination.id}));
   },
   confirmDelete(park,ports){
-    return ports.confirm(
+    return ports.confirm.call(window,
       `"${park.name}" (#${park.id}) silinsin mi?\n\n`+
       `· Bağlı projeler park bağını KAYBEDER ("park yok" durumuna düşer, adları değişmez)\n`+
       `· Ölçümlerin park_id'si null olur — ÖLÇÜM SİLİNMEZ\n`+

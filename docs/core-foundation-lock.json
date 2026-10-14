@@ -565,7 +565,7 @@
     "src/application/parks/detect-park.js": "214a59a9e7990d62c173bd9cf12931c9913c88f508417824095090b42a6f3991",
     "src/application/parks/evaluate-measurement-park-gate.js": "9067413d70dcae8de655690e4b842a0ad12364deb556654baa2c4d8d8aa17dab",
     "src/application/parks/fail-park-live-share.js": "43393e3ef92a117df87aab40b8fe75b690b915fad9ed5d1a9e61c4ae006e2e36",
-    "src/application/parks/fetch-detailed-coverage.js": "a55570029ad384ea790f10693d4a5579b67e9a6c471586d619f2877748ffa7e0",
+    "src/application/parks/fetch-detailed-coverage.js": "6f69e96a610b6a2e7e9d5319ac621588d05ac3d4ae2371d15aa2719b5bd68338",
     "src/application/parks/find-nominatim-boundary.js": "f038af233913e251de4a3a46e5f4cd133f8bf1c60ee4915e07578f8b4c1099e2",
     "src/application/parks/find-park-candidates.js": "1f0f6cd93417eb60c0a6bc7cb966f182df6b9114785eefab9979c8c96711914e",
     "src/application/parks/grid-review-signature.js": "a2d65ee731ac9965e4b77266bcfece60ba201ef59ef2243dca44a78cd66fa6e6",
@@ -727,10 +727,10 @@
     "src/services/map.js": "7176931050f0334e339fd38d71b62c966a597dba3b3dafdb6c3622a26f38845e",
     "src/services/measure.js": "4e90e357417802724a46853df5652199354e9491cf11bc97af64f0c00060d6a4",
     "src/services/offline.js": "a1555235bf0e0e17ecea63e90b7347e7288295b6d7cf237ac0804ddc00d50e3f",
-    "src/services/osm-client.js": "99e7854075b8e5313268273cb787165c3240f4faf34520c403193c7d7d549af7",
+    "src/services/osm-client.js": "e8f811e0a464f18d3e3237166df434300b25de14a241dfdfc73b55f447e5d378",
     "src/services/osm-water-backup.js": "b3429cdc9bfe0f84bd7b6644a1221d4daadc374ac046b036abf15b3b5ee7d269",
     "src/services/park-geometry.js": "ae89879b98ed8d9f3928d17b7258389c7a7c1abdabdd63dba1aac934aacc6f83",
-    "src/services/park-query.js": "b0ddd9f7fb7d99b95e29dbe78c392c472ee149e60f7e941aca91d562c826cd7e",
+    "src/services/park-query.js": "d149b1a6a7982374cf42837f86f8eeb96c6e70affe3de5d2b37b169287f3a3a3",
     "src/services/park-registry.js": "e1fa450ea299c357d83199c8e4cbb5e47c20b08737c9df655bfd1eac6d1b4336",
     "src/services/park-state.js": "cc241e32d716cc6c682f2e7e82caaada845b698b5bf1b914c17b94ea86823608",
     "src/ui/add-osm-map-layer.js": "c0a6c3d894d0271bbd8c5ae045e1552cfad72320a91ef60d14179d1e6b0ce42a",
@@ -750,7 +750,7 @@
     "src/ui/grid-waypoint-controller.js": "eb4f58d30fd59a46840f58f2b428b79d8afc9e1211d48d26ea2cfb74ba2b3531",
     "src/ui/grid-waypoint-layer.js": "0c6db2a4329704ec9106735cc0a26b7ce01803666ee4b19d356c976d298eba2f",
     "src/ui/lc-report.js": "f8182bce9b5dbd8dcecceaa7afee69b52d12e7883badc65e27fb93e94ca2abf9",
-    "src/ui/lc-sens.js": "054e08d6b0142fb0c02d4cc1cd72a19f1a02a10a4b873920089854598d8a16ce",
+    "src/ui/lc-sens.js": "6afaa9f74021001a84043600580b41cbaf87cdbc2feabebf8c0d58c32ba6f3c7",
     "src/ui/map-layer-visibility.js": "50d033fba51e90f49ae39254e0700b510938be4d271aada8a9a400be727c1a60",
     "src/ui/map-measurement-markers.js": "cedd193f2786604f84044f2ecf020144b5cba20c86160b729891b7d4f3668a67",
     "src/ui/mount-surface-review-map-host.js": "2ef1e62e2607084c3909016e324b09dba2eaaf13dfba25b0b8bcb82086e7986d",
@@ -789,7 +789,7 @@
     "src/ui/sync-base-map-layer-selection.js": "2f93018846abac13f83486a1fc2b9df0cbb7f330cae202a0e91ef902c8263eeb",
     "src/ui/waypoint-gps-overlay.js": "4f4396cf19bacb0e1f3e026b6a331c37db26631b7282f5b0267a2042a6226d1e",
     "src/utils/geo.js": "3e796768b3d55a3f07c4be3281c9437f1602b6d5e68151b2af7b101707baf294",
-    "src/utils/lazylibs.js": "9f78f3c8cd6bd1e4c702ef334ae05dbbfc404319c3a9489e3b52330050d68652",
+    "src/utils/lazylibs.js": "f7a1c55ace1b1f25012e13536e8d1362e0a14fd647024c8a09e8a20eddc06367",
     "src/workers/surface-worker.js": "af6477f104a06342cf69ef7f702a3e95ed27cd390c5aae36a2fbe5dfd68ed2fe",
     "test/base-map-layer-modules.test.mjs": "5399d699e74ffd66e92df312b4301202add7352b2b6c0be24fd51cda63e7baff",
     "test/critical-fixes.test.mjs": "38cecf8eca4cf3a7b48209e8ff950305e57c85a0b6564ce4b388164712b50154",
@@ -2497,6 +2497,48 @@
           "path": "test/park-network-recovery.test.mjs",
           "previous_sha256": "3e92b71987594bd56c96829594910095011b1716ea2524eb81048ff56d801157",
           "sha256": "edeb7c1a545d0463d0cc6459e256ccccdfb106bba6796c9f39fce1f62b6363a6"
+        }
+      ]
+    },
+    {
+      "date": "2026-10-14",
+      "request": "User-authorized OSM recovery, native park prompts and continuous modular boundary drawing; baseline 2beb3e9, regressions retained",
+      "files": [
+        {
+          "path": "src/services/osm-client.js",
+          "previous_sha256": "99e7854075b8e5313268273cb787165c3240f4faf34520c403193c7d7d549af7",
+          "sha256": "bc1d63a108e434dee666545f3e35f99f60ab70959bf18180f54789b6d9d25434"
+        },
+        {
+          "path": "src/ui/lc-sens.js",
+          "previous_sha256": "054e08d6b0142fb0c02d4cc1cd72a19f1a02a10a4b873920089854598d8a16ce",
+          "sha256": "6afaa9f74021001a84043600580b41cbaf87cdbc2feabebf8c0d58c32ba6f3c7"
+        },
+        {
+          "path": "src/utils/lazylibs.js",
+          "previous_sha256": "9f78f3c8cd6bd1e4c702ef334ae05dbbfc404319c3a9489e3b52330050d68652",
+          "sha256": "f7a1c55ace1b1f25012e13536e8d1362e0a14fd647024c8a09e8a20eddc06367"
+        }
+      ]
+    },
+    {
+      "date": "2026-10-14",
+      "request": "Same authorized OSM recovery and continuous drawing scope: native API recovery integration and exact scoped wiring",
+      "files": [
+        {
+          "path": "src/application/parks/fetch-detailed-coverage.js",
+          "previous_sha256": "a55570029ad384ea790f10693d4a5579b67e9a6c471586d619f2877748ffa7e0",
+          "sha256": "6f69e96a610b6a2e7e9d5319ac621588d05ac3d4ae2371d15aa2719b5bd68338"
+        },
+        {
+          "path": "src/services/osm-client.js",
+          "previous_sha256": "bc1d63a108e434dee666545f3e35f99f60ab70959bf18180f54789b6d9d25434",
+          "sha256": "e8f811e0a464f18d3e3237166df434300b25de14a241dfdfc73b55f447e5d378"
+        },
+        {
+          "path": "src/services/park-query.js",
+          "previous_sha256": "b0ddd9f7fb7d99b95e29dbe78c392c472ee149e60f7e941aca91d562c826cd7e",
+          "sha256": "d149b1a6a7982374cf42837f86f8eeb96c6e70affe3de5d2b37b169287f3a3a3"
         }
       ]
     }

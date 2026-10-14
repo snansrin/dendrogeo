@@ -41,7 +41,9 @@ async function dgParkBoundaryFallback(lat,lon,radius){return DG_NOMINATIM_BOUNDA
 
 const DG_PARK_COVERAGE_FETCH=window.DG_PARK_COVERAGE_FETCH_APPLICATION.create({
   getParkPolygon:()=>PARK_POLY,
-  queryOsm:(query,label)=>overpassRequest(query,label)
+  queryOsm:(query,label)=>overpassRequest(query,label),
+  queryFallback:window.DG_LOAD_OSM_MAP_COVERAGE?.load,
+  preferFallback:()=>[...OVERPASS_HEALTH.values()].some(health=>health.badUntil>Date.now())
 });
 
 function queryDetailedCoverage(){

@@ -1,0 +1,31 @@
+import assert from 'node:assert/strict';
+import {createServer} from 'node:http';
+import {readFileSync} from 'node:fs';
+import {resolve,extname} from 'node:path';
+import {loadChromium} from './lib/playwright-runtime.mjs';
+const root=resolve('.');
+const paths=['vendor/leaflet-1.9.4.js','vendor/polygon-clipping-0.15.7.js','src/contracts/surface-review.js','src/domain/surface/utm-projection.js','src/domain/surface/review-geometry.js','src/domain/surface/build-boundary-shape-ring.js','src/domain/surface/prepare-surface-boundary.js','src/domain/surface/surface-boundary-point-policy.js','src/ui/surface-drawing-cursor-menu.js','src/ui/surface-boundary-drawing-preview.js','src/adapters/surface/surface-drawing-workspace.js','src/application/surface/surface-boundary-drawing-session.js','src/application/surface/finish-surface-boundary-drawing.js','src/application/surface/select-surface-draw-type.js','src/ui/park-admin-mutation.js','src/ui/lc-sens.js'];
+const fixture='<!doctype html><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><link rel="stylesheet" href="/vendor/leaflet-1.9.4.css"><link rel="stylesheet" href="/css/style.css"><link rel="stylesheet" href="/css/ui-standard.css"><link rel="stylesheet" href="/css/surface-drawing.css"><style>body{margin:0}#map{height:750px}</style><button id="start" onclick="dgSensDrawStart()">Start</button><div id="map"></div>'+paths.map(p=>'<script src="/'+p+'"></script>').join('')+String.raw`<script>
+const map=L.map('map').setView([39.99,32.65],19),types=DG_SURFACE_REVIEW_CONTRACTS.types,utm=DG_SURFACE_UTM_PROJECTION;
+window.DG_SURFACE_REVIEW={types,validRing:DG_SURFACE_REVIEW_CONTRACTS.isValidRing};
+DG_SENS.record={features:[]};DG_SENS.epsg=32636;const baseline=Object.freeze({classKey:'green',area:100});let saves=0;
+const esc=s=>String(s),toast=(s)=>{throw Error(s)},PARK_POLY=[[[39.98,32.64],[39.98,32.66],[40,32.66],[40,32.64]]];
+function dgLcUtmForward(lat,lon,epsg){return utm.forward(lat,lon,epsg)}function dgLcUtmInverse(x,y,epsg){return utm.inverse(x,y,epsg)}
+function dgSurfaceProject(ring,epsg){return ring.map(([lon,lat])=>{const p=utm.forward(lat,lon,epsg);return[p.x,p.y]})}
+function dgSurfaceClip(op,...g){return polygonClipping[op](...g)}function dgSurfaceArea(g){return DG_SURFACE_REVIEW_GEOMETRY.area(g)}
+DG_SENS.parkGeometry=[[dgSurfaceProject(PARK_POLY[0].map(([lat,lon])=>[lon,lat]),32636)]];
+dgSensObjectCancel=()=>{};dgSensBrushStop=()=>{};dgSensUpdateStatus=()=>{};dgSensDirty=()=>{};dgSensRenderPaintTools=()=>DG_SURFACE_DRAWING_WORKSPACE.update();
+dgSensRepartition=async()=>{DG_SENS.busy=true;await new Promise(r=>setTimeout(r,20));DG_SENS.busy=false;return true};dgSensSave=async()=>{saves++};dgSensNeedsWaterScan=()=>false;
+window.result=()=>({active:!!DG_SENS.draw,ring:DG_SENS.draw?.ring.length,features:DG_SENS.record.features,saves,baseline,area:DG_SENS.record.features.map(f=>dgSurfaceArea(dgSurfaceClip('intersection',[dgSurfaceProject(f.ring,32636)],DG_SENS.parkGeometry)))});
+window.point=(x,y)=>map.containerPointToLatLng([x,y]);
+</script>`;
+const server=createServer((req,res)=>{if(req.url==='/fixture'){res.setHeader('Content-Type','text/html');res.end(fixture);return;}const p=resolve(root,'.'+new URL(req.url,'http://localhost').pathname);if(!p.startsWith(root+'/')&&!p.startsWith(root+'\\')){res.writeHead(403).end();return;}try{res.setHeader('Content-Type',extname(p)==='.css'?'text/css':'text/javascript');res.end(readFileSync(p));}catch(e){res.writeHead(404).end();}});
+await new Promise(r=>server.listen(8767,'127.0.0.1',r));const browser=await(await loadChromium()).launch({headless:true});
+try{for(const width of [360,390,430,1280]){const page=await browser.newPage({viewport:{width,height:900},hasTouch:true}),errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('http://127.0.0.1:8767/fixture');await page.click('#start');
+const menu=page.locator('.dg-drawing-cursor-menu');await menu.waitFor();await menu.locator('select').selectOption('hard');
+for(const shape of ['rectangle','circle']){await page.click('[data-shape="'+shape+'"]');await page.evaluate(()=>{dgSensDrawPoint({latlng:point(30,70),containerPoint:L.point(30,70)});dgSensDrawPoint({latlng:point(130,160),containerPoint:L.point(130,160)})});await page.waitForFunction(n=>result().features.length===n&&result().saves===n,shape==='rectangle'?1:2);assert.equal((await page.evaluate(()=>result())).active,true);}
+await page.click('[data-shape="polygon"]');const mapBox=await page.locator('#map').boundingBox();await page.touchscreen.tap(60,mapBox.y+20);await page.touchscreen.tap(100,mapBox.y+20);await page.touchscreen.tap(60,mapBox.y+90);await page.click('[data-action="apply"]');await page.waitForFunction(()=>result().saves===3);let r=await page.evaluate(()=>result());assert.equal(r.active,true);assert.equal(r.ring,0);assert.ok(r.area.every(a=>a>0));assert.ok(r.features.every(f=>f.type==='hard'));assert.equal(r.baseline.classKey,'green');
+await page.click('[data-action="end"]');assert.equal(await menu.count(),0);assert.equal((await page.evaluate(()=>result())).active,false);await page.click('#start');await page.keyboard.press('Escape');assert.equal((await page.evaluate(()=>result())).active,false);
+page.on('dialog',dialog=>dialog.accept());await page.evaluate(()=>{const p={id:999,name:'Fixture'},ports={confirm:window.confirm,prompt:window.prompt,translate:s=>s,translateFormat:s=>s};DG_PARK_ADMIN_MUTATION_UI.confirmDelete(p,ports);DG_PARK_ADMIN_MUTATION_UI.promptRename(p,ports);DG_PARK_ADMIN_MUTATION_UI.confirmMerge(p,p,ports)});
+assert.deepEqual(errors,[]);assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),true);console.log(JSON.stringify({width,rectangle:true,circle:true,touchPolygon:true,continuous:true,explicitEnd:true,nativeDialogs:true,rawPreserved:true}));await page.close();}}
+finally{await browser.close();await new Promise(r=>server.close(r));}

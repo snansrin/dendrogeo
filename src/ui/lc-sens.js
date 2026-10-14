@@ -340,6 +340,7 @@ function dgSensRender(){
  dgSensRenderPaintTools();dgSensBindRightPan();dgSensUpdateSummary();dgSensUpdateStatus();
 }
 function dgSensRenderPaintTools(){
+ window.DG_SURFACE_DRAWING_WORKSPACE?.update();
  const host=document.getElementById("surfaceBrushTools"),rec=DG_SENS.record;if(!host)return;
  if(typeof dgEditorClearMenus==="function")dgEditorClearMenus("surface");
  if(!rec){host.innerHTML="";return;}
@@ -718,11 +719,13 @@ async function dgSensObjectApplyAndAccept(){
 }
 function dgSensDrawStart(){
  const module=window.DG_SURFACE_BOUNDARY_DRAWING_SESSION;
- if(module)return module.start({rawView:DG_SENS.rawView,busy:DG_SENS.busy,saving:DG_SENS.saving,draw:DG_SENS.draw,openMenu:()=>dgSensOpenMenu("dgSensBoundaryDetails"),cancelObject:dgSensObjectCancel,stopBrush:dgSensBrushStop,map,selectedType:document.getElementById("dgSensDrawType")?.value,currentType:DG_SENS.drawType,setDraw:draw=>{DG_SENS.drawType=draw.type;DG_SENS.draw=draw;},setStatus:value=>{DG_SENS.status=value;},translate:_tvs,updateStatus:dgSensUpdateStatus,guard:dgSensGuard,drawPoint:dgSensDrawPoint,renderTools:dgSensRenderPaintTools});
+ if(module){const result=module.start({rawView:DG_SENS.rawView,busy:DG_SENS.busy,saving:DG_SENS.saving,draw:DG_SENS.draw,openMenu:()=>{if(!window.DG_SURFACE_DRAWING_WORKSPACE)dgSensOpenMenu("dgSensBoundaryDetails");},cancelObject:dgSensObjectCancel,stopBrush:dgSensBrushStop,map,selectedType:document.getElementById("dgSensDrawType")?.value,currentType:DG_SENS.drawType,setDraw:draw=>{DG_SENS.drawType=draw.type;DG_SENS.draw=draw;},setStatus:value=>{DG_SENS.status=value;},translate:_tvs,updateStatus:dgSensUpdateStatus,guard:dgSensGuard,drawPoint:dgSensDrawPoint,renderTools:dgSensRenderPaintTools});
+ if(DG_SENS.draw&&window.DG_SURFACE_DRAWING_WORKSPACE)window.DG_SURFACE_DRAWING_WORKSPACE.open({state:DG_SENS,map,leaflet:L,document,createMenu:window.DG_SURFACE_DRAWING_CURSOR_MENU.create,buildShape:window.DG_BUILD_BOUNDARY_SHAPE_RING.build,forward:(lat,lon)=>dgLcUtmForward(lat,lon,DG_SENS.epsg),inverse:(x,y)=>dgLcUtmInverse(x,y,DG_SENS.epsg),render:dgSensDrawRender,apply:dgSensDrawFinish,end:dgSensDrawEnd,back:dgSensDrawBack,setType:dgSensSetDrawType,translate:_tvs,types:window.DG_SURFACE_REVIEW.types});return result;}
  if(DG_SENS.rawView||DG_SENS.busy||DG_SENS.saving)return;if(DG_SENS.draw){dgSensOpenMenu("dgSensBoundaryDetails");return;}dgSensObjectCancel();dgSensBrushStop();map.invalidateSize({pan:false});DG_SENS.drawType=document.getElementById("dgSensDrawType")?.value||DG_SENS.drawType||"building";DG_SENS.draw={type:DG_SENS.drawType,ring:[]};DG_SENS.status=_tvs("Haritada sınır köşelerine dokunun; tamamlamak için ✓ düğmesine basın.");dgSensUpdateStatus();dgSensGuard(true);map.on("click",dgSensDrawPoint);dgSensRenderPaintTools();dgSensOpenMenu("dgSensBoundaryDetails");
 }
 function dgSensPointInPark(lat,lon){try{return typeof pointInPark==="function"?pointInPark(lat,lon,PARK_POLY):true;}catch(e){return true;}}
 function dgSensDrawPoint(ev){
+ if(window.DG_SURFACE_DRAWING_WORKSPACE?.point(ev))return;
  const session=window.DG_SURFACE_BOUNDARY_DRAWING_SESSION;
  if(session)return session.addPoint({draw:DG_SENS.draw,event:ev,insidePark:(lat,lon)=>window.DG_SURFACE_BOUNDARY_POINT_POLICY.isInside({lat,lon,pointInPark:typeof pointInPark==="function"?pointInPark:null,parkPolygon:PARK_POLY}),setStatus:value=>{DG_SENS.status=value;},translate:_tvs,updateStatus:dgSensUpdateStatus,render:dgSensDrawRender,renderTools:dgSensRenderPaintTools});
  if(!DG_SENS.draw||!ev.latlng)return;const {lat,lng}=ev.latlng;if(!dgSensPointInPark(lat,lng)){DG_SENS.status=_tvs("Köşe park sınırının dışında; çizim park içine kırpılır.");dgSensUpdateStatus();return;}const p=[lng,lat];if(DG_SENS.draw.ring.length>=300)return;DG_SENS.draw.ring.push(p);dgSensDrawRender();dgSensRenderPaintTools();
@@ -733,10 +736,16 @@ function dgSensDrawRender(){
  if(DG_SENS.drawLayer)map.removeLayer(DG_SENS.drawLayer);DG_SENS.drawLayer=L.layerGroup().addTo(map);const pts=DG_SENS.draw.ring.map(p=>[p[1],p[0]]);if(pts.length>1)L.polyline(pts,{color:DG_SENS_COLORS[DG_SENS.draw.type],dashArray:"5 5",interactive:false}).addTo(DG_SENS.drawLayer);if(pts.length>2)L.polyline([pts.at(-1),pts[0]],{color:DG_SENS_COLORS[DG_SENS.draw.type],dashArray:"2 6",opacity:.7,interactive:false}).addTo(DG_SENS.drawLayer);for(const p of pts)L.circleMarker(p,{radius:5,color:DG_SENS_COLORS[DG_SENS.draw.type],fillColor:"#fff",fillOpacity:1,weight:2,interactive:false}).addTo(DG_SENS.drawLayer);
 }
 function dgSensDrawBack(){const module=window.DG_SURFACE_BOUNDARY_DRAWING_SESSION;if(module)return module.back({draw:DG_SENS.draw,render:dgSensDrawRender,renderTools:dgSensRenderPaintTools});if(DG_SENS.draw){DG_SENS.draw.ring.pop();dgSensDrawRender();dgSensRenderPaintTools();}}
-function dgSensDrawCancel(){const module=window.DG_SURFACE_BOUNDARY_DRAWING_SESSION;if(module)return module.cancel({map,layer:DG_SENS.drawLayer,setLayer:value=>{DG_SENS.drawLayer=value;},setDraw:value=>{DG_SENS.draw=value;},drawPoint:dgSensDrawPoint});if(DG_SENS.drawLayer)map.removeLayer(DG_SENS.drawLayer);DG_SENS.drawLayer=null;DG_SENS.draw=null;map.off("click",dgSensDrawPoint);}
+function dgSensDrawCancel(){window.DG_SURFACE_DRAWING_WORKSPACE?.stop();const module=window.DG_SURFACE_BOUNDARY_DRAWING_SESSION;if(module)return module.cancel({map,layer:DG_SENS.drawLayer,setLayer:value=>{DG_SENS.drawLayer=value;},setDraw:value=>{DG_SENS.draw=value;},drawPoint:dgSensDrawPoint});if(DG_SENS.drawLayer)map.removeLayer(DG_SENS.drawLayer);DG_SENS.drawLayer=null;DG_SENS.draw=null;map.off("click",dgSensDrawPoint);}
+async function dgSensDrawEnd(){
+ if(DG_SENS.rawView||DG_SENS.busy||DG_SENS.saving||DG_SENS.exporting)return;
+ if(DG_SENS.draw?.ring.length&&!(await dgSensDrawFinish()))return;
+ dgSensDrawCancel();dgSensRenderPaintTools();DG_SENS.status=_tvs("Çizim tamamlandı. Sınırlar cihaz taslağına kaydedildi.");dgSensUpdateStatus();
+}
 function dgSensDrawFinish(){
+ if(DG_SENS.rawView||DG_SENS.busy||DG_SENS.saving||DG_SENS.exporting)return;
  const module=window.DG_FINISH_SURFACE_BOUNDARY_DRAWING;
- if(module)return module.finish({draw:DG_SENS.draw,prepare:ring=>window.DG_PREPARE_SURFACE_BOUNDARY.prepare({ring,epsg:DG_SENS.epsg,parkGeometry:DG_SENS.parkGeometry,validRing:window.DG_SURFACE_REVIEW.validRing,project:dgSurfaceProject,clip:dgSurfaceClip,area:dgSurfaceArea}),showInvalid:()=>toast(_tvs("En az üç köşe seçin; sınır kendi üzerine kesişmemeli."),"warn"),showClipError:error=>toast(esc(String(error.message||error)),"warn"),showOutside:()=>toast(_tvs("Çizim park sınırının dışında veya çok küçük."),"warn"),record:()=>DG_SENS.record,timestamp:()=>new Date().toISOString(),markDirty:dgSensDirty,cancel:dgSensDrawCancel,renderTools:dgSensRenderPaintTools,repartition:()=>dgSensRepartition(),save:dgSensSave,needsWaterScan:dgSensNeedsWaterScan,setStatus:value=>{DG_SENS.status=value;},updateStatus:dgSensUpdateStatus,scan:dgSensScan,translate:_tvs});
+ if(module)return module.finish({draw:DG_SENS.draw,prepare:ring=>window.DG_PREPARE_SURFACE_BOUNDARY.prepare({ring,epsg:DG_SENS.epsg,parkGeometry:DG_SENS.parkGeometry,validRing:window.DG_SURFACE_REVIEW.validRing,project:dgSurfaceProject,clip:dgSurfaceClip,area:dgSurfaceArea}),showInvalid:()=>toast(_tvs("En az üç köşe seçin; sınır kendi üzerine kesişmemeli."),"warn"),showClipError:error=>toast(esc(String(error.message||error)),"warn"),showOutside:()=>toast(_tvs("Çizim park sınırının dışında veya çok küçük."),"warn"),record:()=>DG_SENS.record,timestamp:()=>new Date().toISOString(),markDirty:dgSensDirty,cancel:dgSensDrawCancel,continueDrawing:finished=>{if(DG_SENS.draw===finished){DG_SENS.draw.ring=[];window.DG_SURFACE_DRAWING_WORKSPACE?.reset();dgSensDrawRender();dgSensRenderPaintTools();}},renderTools:dgSensRenderPaintTools,repartition:()=>dgSensRepartition(),save:dgSensSave,needsWaterScan:dgSensNeedsWaterScan,setStatus:value=>{DG_SENS.status=value;},updateStatus:dgSensUpdateStatus,scan:dgSensScan,translate:_tvs});
  const d=DG_SENS.draw;if(!d)return;
  if(!window.DG_SURFACE_REVIEW.validRing(d.ring)){toast(_tvs("En az üç köşe seçin; sınır kendi üzerine kesişmemeli."),"warn");return;}
  let geom;try{geom=dgSurfaceClip("intersection",[dgSurfaceProject(d.ring,DG_SENS.epsg)],DG_SENS.parkGeometry);}catch(e){toast(esc(String(e.message||e)),"warn");return;}

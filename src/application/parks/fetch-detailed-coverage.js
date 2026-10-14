@@ -3,7 +3,7 @@
 /* Loads one complete OSM coverage response for the currently selected park.
  * Geometry classification and cache mutation remain in the service layer. */
 window.DG_PARK_COVERAGE_FETCH_APPLICATION = {
-  create({getParkPolygon, queryOsm}) {
+  create({getParkPolygon, queryOsm, queryFallback, preferFallback=()=>false}) {
     const completed=new Map(),valid=data=>Array.isArray(data?.elements)&&!data.remark;
     return async function fetchDetailedCoverage() {
       const parkPolygon = getParkPolygon();
@@ -26,7 +26,10 @@ window.DG_PARK_COVERAGE_FETCH_APPLICATION = {
       const bbox = `${minLat-pad},${minLon-pad},${maxLat+pad},${maxLon+pad}`;
       const previous=completed.get(boundary),policy=window.DG_OSM_SURFACE_QUERY;
       let json=previous&&Date.now()-previous.time<600000?previous.json:null;
-      if(!json)try{json=await queryOsm(policy.build(bbox),"yüzey+su");}catch(error){}
+      let triedFallback=false;
+      if(!json&&queryFallback&&preferFallback()){triedFallback=true;try{json=await queryFallback(bbox);}catch(error){}}
+      if(!valid(json))try{json=await queryOsm(policy.build(bbox),"yüzey+su");}catch(error){}
+      if(!valid(json)&&queryFallback&&!triedFallback)try{json=await queryFallback(bbox);}catch(error){}
       if(!valid(json)){
         json=null;const elements=new Map();
         for(const group of policy.groups){

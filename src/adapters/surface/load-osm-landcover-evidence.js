@@ -22,7 +22,8 @@
        * still refine the 10 m preview. */
       const query=root.DG_OSM_SURFACE_QUERY?.build(bounds)||'[out:json][timeout:25];(nwr["natural"="water"]('+bounds+');nwr["waterway"="riverbank"]('+bounds+');nwr["leisure"="swimming_pool"]('+bounds+');nwr["landuse"~"reservoir|basin"]('+bounds+');nwr["building"]('+bounds+');nwr["building:part"]('+bounds+');way["highway"]('+bounds+');way["area:highway"]('+bounds+'););out geom;';
       if(typeof overpassRequest==="function"){
-        const data=await overpassRequest(query,"su+yol").catch(()=>null);
+        let data=await overpassRequest(query,"su+yol").catch(()=>null);
+        if((!Array.isArray(data?.elements)||data.remark)&&root.DG_LOAD_OSM_MAP_COVERAGE)data=await root.DG_LOAD_OSM_MAP_COVERAGE.load(bounds).catch(()=>null);
         if(Array.isArray(data?.elements)&&!data.remark){const result={elements:mergeElements(root.DG_OSM_SURFACE_QUERY?[]:seedElements,data.elements),bbox,boundary,fetchedAt:new Date().toISOString(),complete:!!root.DG_OSM_SURFACE_QUERY};if(boundary===JSON.stringify(typeof PARK_POLY==="undefined"?null:PARK_POLY))root.DG_SURFACE_OSM=result;return result;}
         return seedElements.length?{elements:seedElements,bbox,boundary,fetchedAt:coverage?.fetchedAt||new Date().toISOString(),source:coverage?.source||fallback?.source,complete:false}:null;
       }

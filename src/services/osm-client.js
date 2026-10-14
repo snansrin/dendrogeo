@@ -8,9 +8,9 @@
 // Global kapsamlı servisler; aynı altyapıya giden kumi takma adı kullanılmaz.
 const OVERPASS_URLS=[
   "https://overpass-api.de/api/interpreter",
+  "https://maps.mail.ru/osm/tools/overpass/api/interpreter",
   "https://lz4.overpass-api.de/api/interpreter",
-  "https://z.overpass-api.de/api/interpreter",
-  "https://maps.mail.ru/osm/tools/overpass/api/interpreter"
+  "https://z.overpass-api.de/api/interpreter"
 ];
 
 const OVERPASS_CACHE=new Map();
@@ -75,6 +75,7 @@ async function overpassRun(query,label="OSM"){
       ?window.DG_OVERPASS_REQUEST_BUDGET.deadline(label,Date.now)
       :Date.now()+(label==="park"?15000:20000);
     for(const item of pool){
+      if((OVERPASS_HEALTH.get(item.url)?.badUntil||0)>Date.now())continue;
       if(Date.now()>=deadline){LAST_OVERPASS_ERROR=label+" bağlantı süresi aşıldı";break;}
       const controller=new AbortController();
       const timeoutMs=typeof window!=="undefined"&&window.DG_OVERPASS_REQUEST_BUDGET
@@ -137,9 +138,13 @@ async function overpassRun(query,label="OSM"){
         clearTimeout(timer);
         const msg=err?.name==="AbortError" ? `timeout (${timeoutMs/1000}s)` : (err?.message||String(err));
         LAST_OVERPASS_ERROR=label+" "+msg;
-        if(typeof window!=="undefined"&&window.DG_OVERPASS_MIRROR_HEALTH)window.DG_OVERPASS_MIRROR_HEALTH.quarantine(OVERPASS_HEALTH,item.url,item.lastOk,60000,Date.now);
-        else OVERPASS_HEALTH.set(item.url,{lastOk:item.lastOk,badUntil:Date.now()+60000});
-        console.warn("Overpass bağlantı:",item.url,msg,"→ 60 sn karantina");
+        // A short client park deadline does not prove the provider is unavailable.
+        const quarantine=!(err?.name==="AbortError"&&(label==="park"||timeoutMs<2000));
+        if(quarantine){
+          if(typeof window!=="undefined"&&window.DG_OVERPASS_MIRROR_HEALTH)window.DG_OVERPASS_MIRROR_HEALTH.quarantine(OVERPASS_HEALTH,item.url,item.lastOk,60000,Date.now);
+          else OVERPASS_HEALTH.set(item.url,{lastOk:item.lastOk,badUntil:Date.now()+60000});
+        }
+        console.warn("Overpass bağlantı:",item.url,msg,quarantine?"→ 60 sn karantina":"→ sorgu bütçesi doldu");
       }finally{clearTimeout(timer);}
     }
   }finally{

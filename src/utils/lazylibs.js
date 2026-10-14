@@ -192,7 +192,7 @@ const DG_LULC_CHAIN=[
   "src/application/surface/apply-surface-object-boundary.js",
   "src/domain/surface/surface-boundary-point-policy.js",
   "src/domain/surface/prepare-surface-boundary.js",
-  "src/ui/surface-boundary-drawing-preview.js",
+  "src/domain/surface/build-boundary-shape-ring.js","src/ui/surface-drawing-cursor-menu.js","src/adapters/surface/surface-drawing-workspace.js","src/ui/surface-boundary-drawing-preview.js",
   "src/application/surface/surface-boundary-drawing-session.js",
   "src/application/surface/finish-surface-boundary-drawing.js",
   "src/domain/surface/build-cell-decision-popup-model.js",
