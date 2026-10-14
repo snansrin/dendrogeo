@@ -69,3 +69,15 @@ test('HTTP 200 partial responses retain the actual Overpass error and rotate mir
  const data=await vm.runInContext('overpassRequest("coverage", "yüzey+su")',context);
  assert.equal(data.elements.length,0);assert.equal(calls,2);assert.equal(textReads,0);assert.ok(warnings.some(message=>message.includes('server timeout')));
 });
+
+test('a complete empty response supersedes old partial seeds instead of resurrecting deleted OSM objects',async()=>{
+ const w=env([queryPath,'src/adapters/surface/load-osm-landcover-evidence.js']);w.DG_SURFACE_OSM={bbox,elements:[{type:'way',id:5,tags:{building:'yes'}}],complete:false,fetchedAt:new Date().toISOString()};
+ const data=await w.DG_LOAD_OSM_LANDCOVER_EVIDENCE.load(bbox,{cache:new Map(),boundary:'null',overpassRequest:async()=>({elements:[]})});
+ assert.equal(data.complete,true);assert.equal(data.elements.length,0);
+});
+
+test('OSM disclosure remains visible alongside an existing scan completion message',()=>{
+ const window=env(['src/ui/surface-osm-evidence-status.js']),element={textContent:''},context=vm.createContext({window,document:{getElementById:()=>element},_tvs:value=>value,DG_SENS:{status:'Tarama tamamlandı.',record:{osmCoverage:{status:'partial'}}}});
+ vm.runInContext(read('src/ui/lc-sens.js').match(/^function dgSensUpdateStatus\(\).*$/m)[0],context);
+ vm.runInContext('dgSensUpdateStatus()',context);assert.match(element.textContent,/Tarama tamamlandı/);assert.match(element.textContent,/OSM bina, yol ve su verisi eksik/);
+});
