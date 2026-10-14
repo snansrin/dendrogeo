@@ -40,10 +40,10 @@ const cacheRevision = readFileSync(join(ROOT, 'sw.js'), 'utf8').match(/const CAC
 const v8 = (p) => createHash('sha256').update(cacheRevision).update(readFileSync(join(ROOT, p))).digest('hex').slice(0, 8);
 
 let degisen = 0, sorun = 0;
-html = html.replace(/((?:src|href)=")((?:src|css|vendor)\/[^"?]+)(\?v=)([A-Za-z0-9]+)(")/g,
+html = html.replace(/((?:src|href)=")((?:\/?src|css|vendor)\/[^"?]+)(\?v=)([A-Za-z0-9]+)(")/g,
   (tum, on, yol, soru, eski, son) => {
     let beklenen;
-    try { beklenen = v8(yol); }
+    try { beklenen = v8(yol.replace(/^\//,'')); }
     catch { console.error(`🔴 index.html kayıp dosyaya işaret ediyor: ${yol}`); sorun++; return tum; }
     if (eski === beklenen) return tum;
     degisen++;

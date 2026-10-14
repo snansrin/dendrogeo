@@ -232,7 +232,7 @@ describe('arayüz bağlantısı: kart, modül kaydı, çevrimdışı paket', () 
   });
 
   test('modül kaydı: index.html + sw.js CORE_ASSETS (çevrimdışı)', () => {
-    assert.match(IDX, /<script src="src\/services\/report-publish\.js\?v=[0-9a-f]{8}" defer><\/script>/);
+    assert.match(IDX, /<script src="src\/services\/report-publish\.js\?v=[0-9a-f]{8}" type="application\/x-dendrogeo-module" defer><\/script>/);
     assert.match(SW, /'\/src\/services\/report-publish\.js'/);
     assert.match(read('partials/head.html'), /src\/services\/report-publish\.js/, 'kaynak partial');
   });

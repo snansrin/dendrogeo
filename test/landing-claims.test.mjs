@@ -368,8 +368,8 @@ describe('i18n katmanı sözleşmesi (0035)', () => {
     assert.match(i18n, /dg:lang/, 'dil olayı yayınlanıyor (modüller yeniden render için)');
   });
   test('i18n.js kayıt zinciri: index.html tag + defer + CORE_ASSETS', () => {
-    assert.match(index, /<script src="src\/config\/i18n\.js\?v=[0-9a-f]{8}" defer>/);
-    assert.match(index, /<script src="src\/config\/i18n-en\.js\?v=[0-9a-f]{8}" defer>/);
+    assert.match(index, /<script src="src\/config\/i18n\.js\?v=[0-9a-f]{8}" type="application\/x-dendrogeo-module" defer>/);
+    assert.match(index, /<script src="src\/config\/i18n-en\.js\?v=[0-9a-f]{8}" type="application\/x-dendrogeo-module" defer>/);
     assert.ok(index.indexOf('src/config/i18n-en.js') < index.indexOf('src/config/i18n.js'), 'sözlük runtime çeviricisinden önce yüklenir');
     assert.match(rd('sw.js'), /'\/src\/config\/i18n-en\.js'/);
     assert.match(rd('sw.js'), /'\/src\/config\/i18n\.js'/);

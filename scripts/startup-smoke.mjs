@@ -21,9 +21,9 @@ const authFixture=`window.supabase={createClient(){
 }};`;
 try{
  for(const width of [360,390,430])for(const mode of ['session','oauth']){
-  const page=await browser.newPage({viewport:{width,height:840}}),errors=[],tiles=[];
+  const page=await browser.newPage({viewport:{width,height:840}}),errors=[],tiles=[],appScripts=[];
   page.on('pageerror',error=>errors.push(error.message));
-  page.on('request',request=>{if(request.url().includes('tile.openstreetmap.org'))tiles.push(request.url());});
+  page.on('request',request=>{if(request.url().includes('tile.openstreetmap.org'))tiles.push(request.url());if(request.resourceType()==='script'&&new URL(request.url()).pathname.startsWith('/src/'))appScripts.push(new URL(request.url()).pathname);});
   await page.route('**/vendor/supabase-js-2.116.0.js',route=>route.fulfill({contentType:'text/javascript',body:authFixture}));
   await page.route(/^https?:\/\/(?!127\.0\.0\.1)/,route=>route.abort());
   await page.addInitScript(()=>{localStorage.setItem('dg_last_view','nav');localStorage.setItem('dg_scroll_dash','1000');localStorage.setItem('dg_scrollw_dash','1800');});
@@ -34,6 +34,7 @@ try{
   assert.equal(state.view,'v-dash');assert.equal(state.cover,true);assert.equal(state.scroll,0);
   assert.equal(state.file,false);assert.ok(state.width<=state.viewport);assert.equal(tiles.length,0);
   assert.deepEqual(errors,[]);
+  assert.deepEqual(appScripts,['/src/bootstrap/app-runtime.js','/src/services/field-ux.js']);
   if(mode==='oauth')assert.equal(new URL(page.url()).search,'');
   const elapsed=Date.now()-started;
   // Navigation still initializes the maps after the clean dashboard start.
@@ -41,7 +42,7 @@ try{
   await page.locator('#v-nav.on').waitFor({state:'visible'});
   await page.locator('#navMap.leaflet-container').waitFor({state:'attached'});
   assert.deepEqual(errors,[]);
-  console.log(JSON.stringify({width,mode,startupMs:elapsed,view:state.view,hiddenFileInput:true,initialTileRequests:0,navigationMap:true}));
+  console.log(JSON.stringify({width,mode,startupMs:elapsed,view:state.view,initialAppScriptRequests:appScripts.length,hiddenFileInput:true,initialTileRequests:0,navigationMap:true}));
   await page.close();
  }
 }finally{await browser.close();await new Promise(resolve=>server.close(resolve));}

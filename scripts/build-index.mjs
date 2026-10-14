@@ -21,8 +21,9 @@
  *                                            sigortası; sonrasında --write ile
  *                                            tur atılır, byte-farkı çıkmaz)
  *
- * Birleştirme saf concatenation'dır: head+landing+shell+boot = index.html
- * (bayt bayt). ?v= sürüm hash'leri birleştirme sırasında dosya içeriğinin
+ * Partial sırası korunur; classic kaynak modülleri tek yayın paketinde taşınır.
+ * Her modül ayrı native script olarak yürütülür, global lexical kapsamı korunur.
+ * ?v= sürüm hash'leri birleştirme sırasında dosya içeriğinin
  * sha256'sından yeniden hesaplanır — version-sync.mjs ile aynı şema; yani
  * partials'taki ?v= değerlerinin bayat kalması zararsızdır.
  *
@@ -36,6 +37,7 @@ import { readFileSync, writeFileSync, existsSync, readdirSync } from 'node:fs';
 import { createHash } from 'node:crypto';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import {packageApplication,runtimePath} from './lib/app-runtime-package.mjs';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const PDIR = join(ROOT, 'partials');
@@ -64,7 +66,7 @@ function refreshHashes(text) {
 
 function runtimeBuild(){
  const hash=createHash('sha256').update(cacheRevision);
- function visit(dir){for(const item of readdirSync(join(ROOT,dir),{withFileTypes:true}).sort((a,b)=>a.name.localeCompare(b.name))){const path=dir+'/'+item.name;if(item.isDirectory())visit(path);else if(path.endsWith('.js'))hash.update(path).update(readFileSync(join(ROOT,path)));}}
+ function visit(dir){for(const item of readdirSync(join(ROOT,dir),{withFileTypes:true}).sort((a,b)=>a.name.localeCompare(b.name))){const path=dir+'/'+item.name;if(item.isDirectory())visit(path);else if(path.endsWith('.js')&&path!==runtimePath)hash.update(path).update(readFileSync(join(ROOT,path)));}}
  visit('src');visit('vendor');return hash.digest('hex').slice(0,16);
 }
 
@@ -78,7 +80,12 @@ function assemble() {
     }
     out += readFileSync(p, 'utf8');
   }
-  return refreshHashes(out).replaceAll("__DG_RUNTIME_BUILD__",runtimeBuild());
+  const {manifest,runtime}=packageApplication(refreshHashes(out).replaceAll("__DG_RUNTIME_BUILD__",runtimeBuild()),path=>readFileSync(join(ROOT,path),'utf8'));
+  const artifact=join(ROOT,runtimePath);
+  if(mode==='write'||mode==='split')writeFileSync(artifact,runtime);
+  else if(!existsSync(artifact)||readFileSync(artifact,'utf8')!==runtime){console.error('🔴 Runtime package is stale; run npm run build.');process.exit(1);}
+  const version=createHash('sha256').update(cacheRevision).update(runtime).digest('hex').slice(0,8);
+  return manifest.replace('</body>','<script src="/'+runtimePath+'?v='+version+'" defer></script>\n</body>');
 }
 
 /* index.html'i kararlı çapa noktalarından dörde böler */
@@ -89,6 +96,8 @@ const ANCHORS = [
   ['boot',   '<script src="src/ui/state.js'],
 ];
 function splitIndex(text) {
+  text=text.replace(/ type="application\/x-dendrogeo-module"/g,'').replace(/<script src="\/src\/bootstrap\/app-runtime\.js[^>]*><\/script>\n?/g,'');
+  text=text.replace(/(<script id="dgRuntimeBuild" type="application\/json">)"[a-f0-9]+"(<\/script>)/,'$1"__DG_RUNTIME_BUILD__"$2');
   const pos = {};
   for (const [name, a] of ANCHORS) {
     const first = text.indexOf(a);
@@ -116,7 +125,7 @@ if (mode === 'split') {
   }
   const rebuilt = assemble();
   const disk = readFileSync(INDEX, 'utf8');
-  if (refreshHashes(disk) !== rebuilt) {
+  if (disk !== rebuilt) {
     console.error('🔴 split→assemble turu bayt-birebir değil!'); process.exit(1);
   }
   console.log('✅ split→assemble turu bayt-birebir doğrulandı.');
@@ -133,5 +142,5 @@ if (mode === 'split') {
     console.error('   index.html\'i elle mi düzenledin?  node scripts/build-index.mjs --split');
     process.exit(1);
   }
-  console.log('✅ index.html == partials birleşimi (bayt-birebir).');
+  console.log('✅ index.html ve runtime paketi kaynak modüllerle tutarlı.');
 }

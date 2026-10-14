@@ -4,7 +4,7 @@
 // NOT: Senkronizasyon artık Ana Thread (Supabase JS SDK) tarafından yapılıyor
 // ============================================================
 
-const CACHE_VERSION = 'dendrogeo-sw-v2-r415';
+const CACHE_VERSION = 'dendrogeo-sw-v2-r416';
 
 /* İKİ AYRI STATİK CACHE — bu ayrım bilinçli ve önemli.
  *
@@ -34,6 +34,7 @@ const MAX_API_CACHE = 150;   // Nominatim vb. API yanıtları
 const MAX_RUNTIME = 400;     // ?v=NNN sürümlü script/style kopyaları
 
 const CORE_ASSETS = [
+    '/src/bootstrap/app-runtime.js',
     '/src/ui/startup-screen.js', '/css/startup.css',
     '/', '/index.html', '/manifest.json', '/icon.png', '/apple-touch-icon.png', '/social-preview.jpg', '/css/style.css',
     '/src/adapters/surface/route-surface-worker-bootstrap.js',
@@ -180,6 +181,7 @@ const CORE_ASSETS = [
 ];
 
 const INSTALL_ASSETS = [
+    '/src/bootstrap/app-runtime.js', '/css/startup.css', '/vendor/leaflet.markercluster-1.5.3.js',
     '/', '/index.html', '/manifest.json', '/icon.png', '/apple-touch-icon.png',
     '/css/style.css', '/css/landing.css', '/css/park-panel.css', '/css/ui-standard.css',
     '/src/config/supabase.js', '/src/config/constants.js', '/src/ui/state.js',
