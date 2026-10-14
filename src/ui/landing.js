@@ -73,6 +73,10 @@ document.addEventListener("click",e=>{
 });
 
 function initLanding(){
+ if(window.DG_LANDING_ENTRY_CONTROLLER&&window.DG_LOAD_LANDING_STATISTICS&&window.DG_RENDER_LANDING_TOTALS&&window.DG_RENDER_LANDING_COUNTRY_TABLE&&window.DG_RENDER_LANDING_CITY_TABLE)return window.DG_LANDING_ENTRY_CONTROLLER.activate({
+  element:$,mapWhenVisible:dgLandingMapWhenVisible,hasMap:()=>!!worldMapL,loadMarkers:dgLandingMarkers,markMarkersPending:()=>{DG_LANDING_MARKERS_PENDING=true;},trackVisit,
+  refreshStatistics:()=>window.DG_LOAD_LANDING_STATISTICS.load({load:()=>DG_WORLD_STATS_STORE.loadForLanding(sb),renderTotals:data=>window.DG_RENDER_LANDING_TOTALS.render(data,$),renderCountries:data=>window.DG_RENDER_LANDING_COUNTRY_TABLE.render(data,{element:$,escape:esc}),renderCities:data=>window.DG_RENDER_LANDING_CITY_TABLE.render(data,{element:$,escape:esc}),onError:errors=>{console.error("DENDROGEO · landing verisi kısmen yüklenemedi:",errors);toast("⚠ Genel istatistikler yüklenemedi (ağ/oturum). Sayfayı yenileyin.","warn","🌍");}})
+ });
  $("landing").style.display="block";$("shell").style.display="none";
  dgLandingMapWhenVisible();
  /* Harita noktalarını istatistik sorgularından bağımsız başlat: bir yavaş

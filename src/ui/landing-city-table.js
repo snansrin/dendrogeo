@@ -1,0 +1,2 @@
+"use strict";
+window.DG_RENDER_LANDING_CITY_TABLE={render(result,{element,escape:esc}){const body=element('tblCity')?.querySelector?.('tbody');if(body)body.innerHTML=(result.data||[]).slice(0,20).map(r=>`<tr class="clickable-row" tabindex="0" role="link" onkeydown="dgKeyActivate(event,this)" onclick="zoomToCity('${esc(r.city)}')"><td>${esc(r.city)}</td><td>${r.records}</td><td>${r.carbon_t}</td></tr>`).join('')||'<tr><td colspan=3>Henüz veri yok</td></tr>';}};

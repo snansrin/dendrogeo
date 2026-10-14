@@ -14,21 +14,22 @@ await new Promise(resolve=>server.listen(8765,'127.0.0.1',resolve));
 const chromium=await loadChromium(),browser=await chromium.launch({headless:true});
 // Fake session and read-only empty queries: no real account or database writes.
 const authFixture=`window.supabase={createClient(){
- const session={user:{id:'startup-fixture',email:'startup@example.test'},access_token:'fixture'};
+ const session=window.__dgAnonymous?null:{user:{id:'startup-fixture',email:'startup@example.test'},access_token:'fixture'};
  const query=table=>{let chain;chain=new Proxy({}, {get(_target,key){if(key==='then')return resolve=>resolve({data:table==='profiles'?{full_name:'Startup test',role:'user'}:[],error:null,count:0});return()=>chain;}});return chain;};
  const channel={on(){return this;},subscribe(){return this;},track:async()=>{},unsubscribe:async()=>{},presenceState:()=>({})};
  return{auth:{getSession:async()=>({data:{session}}),onAuthStateChange(callback){setTimeout(()=>callback('INITIAL_SESSION',session),0);return{data:{subscription:{unsubscribe(){}}}};}},from:query,rpc:()=>query('rpc'),channel:()=>channel,removeChannel:async()=>{},realtime:{setAuth:async()=>{}}};
 }};`;
 try{
- for(const width of [360,390,430])for(const mode of ['session','oauth']){
+ for(const width of [360,390,430])for(const mode of ['session','oauth','anonymous']){
   const page=await browser.newPage({viewport:{width,height:840}}),errors=[],tiles=[],appScripts=[];
   page.on('pageerror',error=>errors.push(error.message));
   page.on('request',request=>{if(request.url().includes('tile.openstreetmap.org'))tiles.push(request.url());if(request.resourceType()==='script'&&new URL(request.url()).pathname.startsWith('/src/'))appScripts.push(new URL(request.url()).pathname);});
   await page.route('**/vendor/supabase-js-2.116.0.js',route=>route.fulfill({contentType:'text/javascript',body:authFixture}));
   await page.route(/^https?:\/\/(?!127\.0\.0\.1)/,route=>route.abort());
-  await page.addInitScript(()=>{localStorage.setItem('dg_last_view','nav');localStorage.setItem('dg_scroll_dash','1000');localStorage.setItem('dg_scrollw_dash','1800');});
+  await page.addInitScript(anonymous=>{window.__dgAnonymous=anonymous;localStorage.setItem('dg_last_view','nav');localStorage.setItem('dg_scroll_dash','1000');localStorage.setItem('dg_scrollw_dash','1800');},mode==='anonymous');
   const started=Date.now();
   await page.goto('http://127.0.0.1:8765/index.html'+(mode==='oauth'?'?code=startup-fixture':''),{waitUntil:'domcontentloaded'});
+  if(mode==='anonymous'){await page.locator('#landing').waitFor({state:'visible'});await page.waitForFunction(()=>document.getElementById('tblCountry')?.querySelector('tbody')?.textContent.includes('Henüz veri yok'));assert.equal(await page.evaluate(()=>document.getElementById('dgStartupScreen').hidden),true);assert.equal(await page.evaluate(()=>document.getElementById('statRec').textContent),'0');assert.deepEqual(errors,[]);assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),true);console.log(JSON.stringify({width,mode,startupMs:Date.now()-started,publicLanding:true,independentStatistics:true,noPageErrors:true}));await page.close();continue;}
   await page.locator('#shell').waitFor({state:'visible'});
   const state=await page.evaluate(()=>({view:document.querySelector('.view.on')?.id,cover:document.getElementById('dgStartupScreen').hidden,scroll:scrollY,width:document.documentElement.scrollWidth,viewport:innerWidth,file:!!document.getElementById('mPhoto').getClientRects().length}));
   assert.equal(state.view,'v-dash');assert.equal(state.cover,true);assert.equal(state.scroll,0);

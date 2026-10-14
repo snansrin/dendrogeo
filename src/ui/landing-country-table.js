@@ -1,0 +1,2 @@
+"use strict";
+window.DG_RENDER_LANDING_COUNTRY_TABLE={render(result,{element,escape:esc}){const body=element('tblCountry')?.querySelector?.('tbody');if(body)body.innerHTML=(result.data||[]).slice(0,20).map(r=>`<tr class="clickable-row" tabindex="0" role="link" onkeydown="dgKeyActivate(event,this)" onclick="zoomToCountry('${esc(r.country)}')"><td>${esc(r.country)}</td><td>${r.records}</td><td>${r.carbon_t}</td><td>${Number.isFinite(+r.avg_dbh)?(+r.avg_dbh).toFixed(1):"—"}</td><td>${r.avg_height||"—"}</td></tr>`).join('')||'<tr><td colspan=5>Henüz veri yok</td></tr>';}};

@@ -823,7 +823,14 @@
       "src/ui/present-drawn-park.js",
       "src/adapters/export/download-blob.js",
       "test/park-drawing-export-modules.test.mjs",
-      "scripts/park-draw-smoke.mjs"
+      "scripts/park-draw-smoke.mjs",
+      "src/application/world/load-landing-statistics.js",
+      "src/ui/landing-totals.js",
+      "src/ui/landing-country-table.js",
+      "src/ui/landing-city-table.js",
+      "src/ui/landing-entry-controller.js",
+      "test/landing-workflow-modules.test.mjs",
+      "src/ui/landing.js"
     ]
   },
   "sha256": {
@@ -1287,7 +1294,7 @@
     "scripts/lib/runtime-precache-inventory.mjs": "80b8c61d8cbc4a6c00da1c738d9687b00118e6cee66c9a8befe19c2960e91489",
     "scripts/lib/validate-runtime-modules.mjs": "8ac99d410faf6856eb1868a900f7437a707f8ac14700fc7c7d412f4fb88ee849",
     "scripts/osm-map-recovery-smoke.mjs": "676781a52562d4d82944d1c64cb40db93fe8915b0a9513f8957daaaf553abf0f",
-    "scripts/startup-smoke.mjs": "875f7b2e74827861a94c90d750caba519a2f02a3e0904e5aa00727911a8eb585",
+    "scripts/startup-smoke.mjs": "5a0bb1a19f85774cbab7c54b1ed551d9927dd84cabfb0f328113796b3ed8cc00",
     "src/adapters/map/create-visitor-live-map.js": "4c33d91d0b6e4a4fe466a4f399dde4b22a31e4b11b158785333b04ccd15082b9",
     "src/adapters/offline/idb-promises.js": "992732c3c5ec3a089fbbbd88a3f5f23731856f27c236c41f42d9c4031085f6a4",
     "src/adapters/offline/measurement-queue.js": "fae026195052a762ec95eaba05e5ac4e9f4263c7d0cb24fede308aa4aa0f7522",
@@ -1621,7 +1628,14 @@
     "src/ui/present-drawn-park.js": "d9c91ea78fb6fe073f22da4feb05eaa210ef66a3a5aaa6cabe317854a0fa3464",
     "src/adapters/export/download-blob.js": "ba23b37f623d7f272c9840ad65c3a6501d5bcc8f6d512342f335a9fc16fb462c",
     "test/park-drawing-export-modules.test.mjs": "0555360c205fc4283a192de854eaab1ab0064435d8f1805b8c9ee6f63e746de4",
-    "scripts/park-draw-smoke.mjs": "6131752c8dccdc79068bea840cb25943dcac00c908e20ac505f9d5a5bacc71af"
+    "scripts/park-draw-smoke.mjs": "6131752c8dccdc79068bea840cb25943dcac00c908e20ac505f9d5a5bacc71af",
+    "src/application/world/load-landing-statistics.js": "84803081dd8d324246c043e4b8d4e649da9264d53f0421ce97a3b71ce441ae94",
+    "src/ui/landing-totals.js": "bd6e2b242b54f27ec363b5d58e2ad37df0e230e3a8596eefe77446e0a02c7bfd",
+    "src/ui/landing-country-table.js": "6a171487670f5d4f393cd914b03ba8cde07a794016cf45c57612c9d3ce19f945",
+    "src/ui/landing-city-table.js": "a851070241782bc44677cfe78e125d23e95a50c5370d115e39756a87ff44a8b6",
+    "src/ui/landing-entry-controller.js": "884d85c5982d5122d48f4b1cda331569a4f566afa02cc2c8584b7835388671a4",
+    "test/landing-workflow-modules.test.mjs": "03fa24bcca838abbfccd5bf71c61dcbf20a8904df8901af9acbadc197b03028b",
+    "src/ui/landing.js": "df6fc01a2379528121242c645cc1f8295c9f9999547af895a2e83f44aa30b132"
   },
   "authorized_modularizations": [
     {
@@ -3658,6 +3672,31 @@
         "src/adapters/export/download-blob.js",
         "test/park-drawing-export-modules.test.mjs",
         "scripts/park-draw-smoke.mjs"
+      ]
+    },
+    {
+      "date": "2026-10-14",
+      "request": "Finish remaining mixed landing entry responsibilities: nonblocking map/visibility, injected public statistics loading, summary and independent table renderers; preserve public adapter/RLS contract and localize unexpected loader failures",
+      "files": [],
+      "added_protected_files": [
+        "src/application/world/load-landing-statistics.js",
+        "src/ui/landing-totals.js",
+        "src/ui/landing-country-table.js",
+        "src/ui/landing-city-table.js",
+        "src/ui/landing-entry-controller.js",
+        "test/landing-workflow-modules.test.mjs",
+        "src/ui/landing.js"
+      ]
+    },
+    {
+      "date": "2026-10-14",
+      "request": "Extend authorized real Chromium startup regression to anonymous landing visibility and independent statistics rendering, keeping OAuth/session fixtures and protected scientific tests intact",
+      "files": [
+        {
+          "path": "scripts/startup-smoke.mjs",
+          "previous_sha256": "875f7b2e74827861a94c90d750caba519a2f02a3e0904e5aa00727911a8eb585",
+          "sha256": "5a0bb1a19f85774cbab7c54b1ed551d9927dd84cabfb0f328113796b3ed8cc00"
+        }
       ]
     }
   ]

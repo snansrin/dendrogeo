@@ -35,8 +35,15 @@ Yeni kritik modül önce sahipliği ve portlarıyla eklenir; yükleme, precache 
 Kullanıcı önceki üç grubun kapsamından sonra kalan tüm karma sorumlulukları tamamlamayı yeniden istedi. Tüm services/ui/core/utils üst seviye uzun fonksiyonları tarandı. Açılış, sekme geçişleri, park çizme, Blob indirme ve Web Mercator dönüşümleri kalan gerçek karma sınırlar olarak belirlendi. Bağımsız UI renderer dosyaları zaten doğru katmandadır ve yalnız global API adlandırması için tekrar bölünmez.
 
 - Açılış/navigasyon: platform adapter’ı, oturum application akışı, açılış UI controller’ı, DOM aktivasyonu ve sekme veri yenilemeleri beş modüle ayrıldı. Tam check, oturum/OAuth ve harita geçişi Chromium testleri geçti.
-- Sonraki grup: park çizme/kart orkestrasyonu, park geometri girdisi, indirme adapter’ı ve koordinat dönüşümleri.
+- Park/indirme: geometri girdisi, asenkron çizme orkestrasyonu, kart sunumu, indirme adapter’ı ve koordinat dönüşümleri tamamlandı; PR #493 main’e alındı.
 
 Park/indirme grubu: geometri normalizasyonu, seçili park çizme application akışı, park kartı UI sunumu, Blob indirme adapter’ı ve Web Mercator domain dönüşümü beş modüle ayrıldı. Eski dönüşüm sonuçları birebir korundu. Aktif drawPark girişinde epoch ve geometri referansı, geç OSM/kayıt yanıtının yeni kartı güncellemesini engeller. 360/390/430/1280 px gerçek Leaflet, delikli sınır ve native indirme testleri CI’a eklendi. Tam check ve mevcut açılış/çizim regresyonları geçti.
 
-Geniş taramadaki son karma giriş: landing açılışı, public özet yükleme ve ülke/şehir istatistik tablolarının sunumu. Bu grup da ayrı katmanlara bağlanacak.
+Landing grubu tamamlandı: giriş controller’ı, public istatistik application akışı, toplam/ülke/şehir UI renderer’ları beş ayrı modüle bağlandı. Mevcut public veri adapter’ı ve RLS kontratı korundu. Beklenmedik loader hatası yerelleşir; istatistik isteği görünür landing ve harita başlangıcını bekletmez. Oturum/OAuth yanında anonim giriş de 360/390/430 px Chromium regresyonuna eklendi.
+
+## Son kapsam denetimi
+
+- Devam talebiyle 15 runtime modülü daha tamamlandı; toplam 959 fiziksel runtime modülü yükleme/lazy/worker/precache kontrolünü geçer. 603 kritik runtime modülü ve toplam 802 dosya hash kilidindedir.
+- services/ui/core/utils altında 279 dosyanın AST taraması yapıldı. Modüle delegasyon içermeyen 15 satır üzeri üst seviye işlevler yalnız `dgRenderGridSummary` ve `dgRenderParkAdminHTML`: ikisi de bağımsız UI renderer dosyasında, veri erişimi veya bilimsel hesap orkestrasyonu üstlenmez. Kısa saf yardımcılar ve legacy fallbackler eksik karma modül sayılmaz.
+- Yeni fixture testleri gerçek kullanıcı kaydı değiştirmeden oturum/OAuth/anonim giriş, park sınırı ve delikler, bayat asenkron yanıt, native dosya indirme ve tablo sunumunu kapsar.
+- İlk tam check sırasında mevcut kilitli Sentinel tarih testi, Date.now ölçümüyle yeni Date çağrısı arasında milisaniye geçmesi nedeniyle bir kez başarısız oldu; 91 testlik odaklı tekrar geçti. Bilimsel dönem politikası ve kilitli test değiştirilmedi; son tam check ayrıca çalıştırıldı.
