@@ -1,10 +1,10 @@
 // ============================================================ 
-// 🌲 DendroGeo Service Worker v2.11 (Cache-Only, Production-Ready)
+// 🌲 DendroGeo Service Worker v2.12 (Cache-Only, Production-Ready)
 // Harita tile cache, fotoğraf cache, LRU temizliği
 // NOT: Senkronizasyon artık Ana Thread (Supabase JS SDK) tarafından yapılıyor
 // ============================================================
 
-const CACHE_VERSION = 'dendrogeo-sw-v2-r413';
+const CACHE_VERSION = 'dendrogeo-sw-v2-r414';
 
 /* İKİ AYRI STATİK CACHE — bu ayrım bilinçli ve önemli.
  *
@@ -36,6 +36,8 @@ const MAX_RUNTIME = 400;     // ?v=NNN sürümlü script/style kopyaları
 const CORE_ASSETS = [
     '/', '/index.html', '/manifest.json', '/icon.png', '/apple-touch-icon.png', '/social-preview.jpg', '/css/style.css',
     '/src/adapters/surface/route-surface-worker-bootstrap.js',
+    '/src/ui/guard-park-rename-feedback.js',
+    '/src/application/dashboard/load-shell-view-data.js',
     '/css/landing.css',
     '/src/domain/export/measurement-row.js','/src/domain/export/build-measurement-csv.js','/src/domain/export/build-measurement-geojson.js','/src/adapters/export/measurement-store.js','/src/domain/export/resolve-export-options.js','/src/application/export/serialize-measurement-export.js','/src/adapters/export/file-download.js','/src/application/export/download-user-measurement-export.js','/src/application/export/prepare-user-measurement-preview.js','/src/ui/export-preview.js',
     '/src/domain/offline/create-client-id.js','/src/domain/offline/same-measurement.js','/src/adapters/offline/idb-promises.js','/src/adapters/offline/measurement-queue.js','/src/ui/offline-sync-badge.js','/src/domain/offline/prepare-measurement-sync-payload.js','/src/adapters/offline/find-saved-measurement.js','/src/adapters/offline/upload-queued-measurement-photo.js','/src/adapters/offline/persist-queued-measurement.js','/src/application/offline/sync-queued-measurement.js','/src/application/offline/drain-measurement-queue.js','/src/application/offline/coordinate-measurement-sync.js','/src/application/offline/refresh-after-measurement-sync.js','/src/ui/offline-sync-feedback.js','/src/ui/offline-install-prompt.js',
@@ -145,7 +147,7 @@ const CORE_ASSETS = [
     '/src/domain/users/record-status-meta.js','/src/domain/users/group-own-records.js','/src/ui/record-item.js','/src/ui/record-project.js','/src/adapters/users/own-records-store.js',
     '/src/domain/surface/is-surface-review-cache-current.js','/src/domain/surface/retype-cached-surface-review-parts.js','/src/adapters/surface/surface-review-cache.js','/src/adapters/surface/project-surface-review-feature-geometry.js','/src/application/surface/build-surface-review-summary.js',
     '/src/domain/surface/build-sentinel-profile-bbox.js','/src/domain/surface/select-sentinel-profile-epsg.js','/src/application/surface/prepare-sentinel-profile-input.js','/src/application/surface/run-sentinel-scene-observation-pass.js','/src/application/surface/run-sentinel-annual-observation-pass.js',
-    '/src/domain/users/summarize-tree-analysis.js','/src/ui/tree-analysis.js','/src/adapters/world/world-stats-store.js','/src/ui/world-stats-tables.js','/src/ui/world-error.js','/src/application/dashboard/load-own-records.js','/src/application/dashboard/delete-own-record.js','/src/application/dashboard/load-owner-dashboard.js','/src/ui/dashboard-chart.js','/src/application/dashboard/load-world-dashboard.js',
+    '/src/domain/users/summarize-tree-analysis.js','/src/ui/tree-analysis.js','/src/adapters/world/world-stats-store.js','/src/ui/world-stats-tables.js','/src/ui/world-error.js','/src/application/dashboard/load-own-records.js','/src/application/dashboard/delete-own-record.js','/src/application/dashboard/load-owner-dashboard.js','/src/ui/dashboard-chart.js','/src/application/dashboard/load-world-dashboard.js','/src/application/dashboard/load-shell-view-data.js',
     '/src/services/dash.js',
     /* UI katmanı (Faz 1): index.html'in inline <script> bloğu bu dört modüle
      * taşındı — global state, toast, landing beyni ve kabuk önyüklemesi.

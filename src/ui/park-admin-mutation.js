@@ -21,7 +21,10 @@ window.DG_PARK_ADMIN_MUTATION_UI={
     else if(result.status==="park-missing")toast("Park bulunamadı","err");
     else if(result.status==="empty-name")toast("Ad boş olamaz","err");
     else if(result.status==="write-failed")toast(tc("Ad güncellenemedi: ")+esc(result.error.message),"err");
-    else if(result.status==="renamed")toast(tc("✓ Park adı güncellendi: ")+esc(result.name)+" "+t("— proje adları yeniden kuruldu"),"ok","🌳");
+    else if(result.status==="renamed"){
+      toast(tc("✓ Park adı güncellendi: ")+esc(result.name)+(result.projectSyncError?"":" "+t("— proje adları yeniden kuruldu")),result.projectSyncError?"warn":"ok","🌳");
+      if(result.projectSyncError)toast(tc("Proje adları eşitlenemedi: ")+esc(result.projectSyncError.message||String(result.projectSyncError)),"warn");
+    }
     return result.status==="renamed";
   },
   mergeResult(result,ports){

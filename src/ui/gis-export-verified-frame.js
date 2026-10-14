@@ -1,7 +1,7 @@
 "use strict";
 /* Fixed branded frame for the verified GIS PNG; map layers stay in the canvas adapter. */
 (function(root){
- function drawHeader({g,CW,CH,parkName,decisionCount,sensitivity}){
+ function drawHeader({g,CW,CH,parkName,sensitivity}){
   const GREEN="#14532d",MUT="#5c6a63",BG="#f7f6f2";
   g.fillStyle=BG;g.fillRect(0,0,CW,CH);
   g.fillStyle=GREEN;g.fillRect(0,0,CW,120);
@@ -10,7 +10,7 @@
   g.fillStyle="#eaf5ec";g.font="bold 30px Arial";g.textAlign="right";g.fillText("dendrogeo.org",CW-40,70);g.textAlign="left";
   g.fillStyle=GREEN;g.font="bold 32px Arial";g.fillText("DOĞRULANMIŞ PARK HARİTASI",40,172);
   g.fillStyle=MUT;g.font="20px Arial";
-  g.fillText(parkName+" · "+new Date().toISOString().slice(0,10)+" · "+decisionCount+" karar · "+(sensitivity.editing?"ÖNİZLEME":"KABUL EDİLMİŞ"),40,206,1150);
+  g.fillText(parkName+" · "+new Date().toISOString().slice(0,10)+" · "+(sensitivity.editing?"ÖNİZLEME":"DOĞRULANMIŞ YÜZEY ÖZETİ"),40,206,1150);
  }
  function drawFooter({g,CW,CH,record}){
   const GREEN="#14532d";

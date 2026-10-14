@@ -139,8 +139,14 @@ initMaps();
   let _swt=null;
   window.addEventListener("scroll",()=>{if(_swt)return;_swt=setTimeout(()=>{_swt=null;
    try{localStorage.setItem("dg_scrollw_"+DG_CUR_VIEW,String(window.scrollY||0));}catch(e){}},120);},{passive:true});}
-await Promise.allSettled([loadProjects(),loadWaypoints()]);
-loadDash();loadRecords();loadWorld();loadMyRequests();loadRequestOptions();
+if(window.DG_SHELL_VIEW_DATA){
+ const startup=window.DG_SHELL_VIEW_DATA.create({loadProjects,loadWaypoints,loadDashboard:loadDash,loadRecords,loadWorld,loadMyRequests,loadRequestOptions});
+ window._dgShellViewData=startup;
+ await startup.start();
+}else{
+ await Promise.allSettled([loadProjects(),loadWaypoints()]);
+ loadDash();loadRecords();loadWorld();loadMyRequests();loadRequestOptions();
+}
  /* KALDIĞIN YERDEN DEVAM: yenilemede son açık sekme geri gelir.
   * OAuth/recovery akışlarında bu satıra gelinmez (yukarıda return var). */
  const lv=dgLastView();
@@ -175,7 +181,7 @@ function go(v){
  const items=document.querySelectorAll("#side .item");
  const idx={dash:0,measure:1,nav:2,map:3,projects:4,records:5,export:6,world:7,admin:8,users:9,visitors:10};
 if(items[idx[v]])items[idx[v]].classList.add("on");
-if(v==="dash"){loadWaypoints().then(()=>loadDash());}
+if(v==="dash"){if(window._dgShellViewData)window._dgShellViewData.load(v);else loadWaypoints().then(()=>loadDash());}
  /* Ölçüm sekmesi her açıldığında park kapısı tazelenir: seçili projenin parkı
   * yoksa form kilitli gelir ve kullanıcı park algılama ekranına yönlendirilir.
   * (2026-09-24 · park-registry.js dgParkGate) */
@@ -189,7 +195,9 @@ if(v==="dash"){loadWaypoints().then(()=>loadDash());}
   * YENİ: ilk açılış VEYA veri bayatladıysa (onay/red/silme/senkronizasyon)
   *      yeniden çeker; bayat değilse gereksiz sorgu atılmaz. */
  if(v==="map")setTimeout(()=>{map&&map.invalidateSize();if(!liveLoaded||DG_LIVE_DIRTY)loadLiveMap();},150);
- if(v==="nav")setTimeout(()=>{navMap&&navMap.invalidateSize();loadWaypoints();},150);
+ if(v==="nav")setTimeout(()=>navMap&&navMap.invalidateSize(),150),window._dgShellViewData?window._dgShellViewData.load(v):loadWaypoints();
+ if(v==="records"&&window._dgShellViewData)window._dgShellViewData.load(v);
+ if(v==="world"&&window._dgShellViewData)window._dgShellViewData.load(v);
  if(v==="world")setTimeout(()=>worldMap&&worldMap.invalidateSize(),150);
 if(v==="admin")loadAdmin();
  /* 0025 · park çalışma arkadaşı: kartlar kendi modülünde (park-invites.js);
@@ -203,7 +211,7 @@ if(v==="admin")loadAdmin();
 if(v==="users")loadUsers();
  /* 0038: kurucu sekmesi — canlı liste + harita + etkinlik akışı */
  if(v==="visitors"){setTimeout(()=>{try{if(typeof loadVisitors==="function")loadVisitors();}catch(e){}},120);}
-if(v==="export")loadRequestOptions();
+if(v==="export"){if(window._dgShellViewData)window._dgShellViewData.load(v);else{loadMyRequests();loadRequestOptions();}}
  /* kaydırma konumunu geri getir (sekme içeriği çizildikten sonra) */
  setTimeout(()=>{const m=$("main");if(!m)return;
   const sc=parseInt((()=>{try{return localStorage.getItem("dg_scroll_"+v)||"0";}catch(e){return "0";}})(),10);

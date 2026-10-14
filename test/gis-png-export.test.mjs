@@ -5,6 +5,13 @@ import {readFileSync} from 'node:fs';
 const file=p=>readFileSync(new URL('../'+p,import.meta.url),'utf8');
 const adapter=file('src/ui/gis-export.js'),gate=file('src/application/surface/prepare-verified-map-export.js'),download=file('src/ui/gis-export-download.js'),verifiedFrame=file('src/ui/gis-export-verified-frame.js'),verifiedSummary=file('src/ui/gis-export-verified-summary.js'),verifiedLayers=file('src/ui/gis-export-verified-layers.js'),verifiedCanvas=file('src/ui/gis-export-verified-canvas.js'),vegetation=file('src/ui/gis-export-vegetation.js'),layout=file('src/ui/gis-export-layout.js'),legend=file('src/ui/gis-export-canvas-legend.js'),waypoints=file('src/ui/gis-export-canvas-waypoints.js'),grids=file('src/ui/gis-export-canvas-grids.js'),leafletCanvas=file('src/ui/gis-export-canvas-leaflet.js'),patches=file('src/ui/gis-export-canvas-patches.js'),canvas=file('src/ui/gis-export-canvas.js'),events=file('src/ui/gis-export-events.js'),style=file('css/gis-workspace.css'),ui=file('src/ui/gis-workspace.js');
 const lock=JSON.parse(file('docs/surface-engine-lock.json'));
+test('verified map header uses a neutral surface summary without decision counts',()=>{
+ const context={window:{}},labels=[],g={fillRect(){},fillText:value=>labels.push(String(value))};
+ vm.createContext(context);vm.runInContext(verifiedFrame,context);
+ context.window.DG_GIS_EXPORT_VERIFIED_FRAME.drawHeader({g,CW:1200,CH:800,parkName:'Göksu Parkı',decisionCount:8,sensitivity:{editing:false}});
+ assert.ok(labels.some(value=>value.includes('DOĞRULANMIŞ YÜZEY ÖZETİ')));
+ assert.ok(!labels.some(value=>/karar|kabul edilmiş/i.test(value)));
+});
 function env({ndvi=false,ndviAvailable=true,gridCells=[],verified=false}={}){
  const messages=[],ops=[],downloads=[],elements={},polygon=[
   [{lat:39.99,lng:32.64},{lat:39.99,lng:32.66},{lat:40.01,lng:32.66},{lat:40.01,lng:32.64}]

@@ -26,6 +26,20 @@ test('park identity adapter turns silent zero-row writes into actionable errors'
   assert.match((await store.deletePark(7)).error.message,/silinmedi/);
 });
 
+test('park mutation adapter converts thrown transport failures to visible errors',async()=>{
+  const failure=new Error('network unavailable'),client={from(){return this;},update(){return this;},delete(){return this;},eq(){return this;},select:async()=>{throw failure;}};
+  const store=setup().DG_PARK_ADMIN_MUTATION_STORE.create({getClient:()=>client});
+  assert.equal((await store.updatePark(7,{name:'Yeni'})).error,failure);
+  assert.equal((await store.deletePark(7)).error,failure);
+});
+
+test('park rename UI reports partial success and reloads the persisted identity',async()=>{
+  const feedback=[],events=[],window={dgParkRename:async()=>{throw new Error('project RLS denied');},toast:(...args)=>feedback.push(args),dgAfterParkAdminChange:async()=>events.push('refresh')},context=vm.createContext({window});
+  vm.runInContext(read('src/ui/guard-park-rename-feedback.js'),context);
+  assert.equal(await window.dgParkRename(7),false);
+  assert.match(feedback[0][0],/Park adı kaydedildi/);assert.match(feedback[0][0],/project RLS denied/);assert.deepEqual(events,['refresh']);
+});
+
 test('park-admin UI keeps confirmation wording and result feedback',()=>{
   const ui=setup().DG_PARK_ADMIN_MUTATION_UI,events=[];
   const translated=value=>'T:'+value,translateFormat=(value,params)=>value.replace('{src}',params.src).replace('{dst}',params.dst).replace('{sid}',params.sid).replace('{did}',params.did);
@@ -49,6 +63,8 @@ test('service composes mutation adapter and UI while retaining inline fallbacks'
   const head=read('partials/head.html'),sw=read('sw.js');
   for(const token of ['DG_PARK_ADMIN_MUTATION_STORE','DG_PARK_ADMIN_MUTATION_UI','DG_PARK_ADMIN_RENAME','DG_PARK_ADMIN_MERGE','DG_PARK_ADMIN_DELETE'])assert.ok(service.includes(token),token);
   for(const path of ['src/adapters/parks/park-admin-mutation-store.js','src/ui/park-admin-mutation.js']){assert.ok(head.indexOf(path)<head.indexOf('src/services/park-registry.js'),`${path} load order`);assert.ok(sw.includes(`'/${path}'`),`${path} precache`);}
+  assert.ok(head.indexOf('src/ui/guard-park-rename-feedback.js')>head.indexOf('src/services/park-registry.js'));
+  assert.ok(sw.includes("'/src/ui/guard-park-rename-feedback.js'"));
   assert.match(service,/DG_PARK_ADMIN_MUTATION_STORE\?DG_PARK_ADMIN_MUTATION_STORE\.moveProjects/);
   assert.match(service,/sb\.from\("projects"\)\.update\(\{park_id:dstId\}\)\.eq\("park_id",srcId\)/);
 });

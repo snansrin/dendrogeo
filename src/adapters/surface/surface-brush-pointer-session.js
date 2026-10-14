@@ -27,7 +27,8 @@ window.DG_SURFACE_BRUSH_POINTER_SESSION={
       if(!brush.previewCircle)brush.previewCircle=leaflet.circle(next,{radius:brush.diameter/2,color:colors[brush.type],fillOpacity:.2,interactive:false}).addTo(brush.preview);
       else brush.previewCircle.setLatLng(next);
     };
-    const down=event=>{if(event.target?.closest?.('.leaflet-control,.dg-editor,button,input,select,textarea,a,summary')||event.button!==0||!event.isPrimary||state.busy||state.saving||brush.stroke)return;stopEvent(event);brush.stroke={pointerId:event.pointerId,points:[]};try{container.setPointerCapture(event.pointerId);}catch(error){}add(event);};
+    /* The map itself sits inside .dg-editor. Exclude actual controls only. */
+    const down=event=>{if(event.target?.closest?.('.leaflet-control,button,input,select,textarea,a,summary')||event.button!==0||!event.isPrimary||state.busy||state.saving||brush.stroke)return;stopEvent(event);brush.stroke={pointerId:event.pointerId,points:[]};try{container.setPointerCapture(event.pointerId);}catch(error){}add(event);};
     const move=event=>{if(brush.stroke?.pointerId!==event.pointerId)return;stopEvent(event);add(event);};
     const finish=event=>{if(brush.stroke?.pointerId!==event.pointerId)return;stopEvent(event);if(event.type==='pointerup')add(event);const points=brush.stroke.points;brush.stroke=null;if(brush.preview)map.removeLayer(brush.preview);brush.preview=null;brush.previewLine=null;brush.previewCircle=null;try{container.releasePointerCapture(event.pointerId);}catch(error){}
       if(event.type==='pointerup'&&brush.epoch===state.epoch&&brush.record===state.record)onCommit(points,brush.type,brush.diameter).catch(onError);
