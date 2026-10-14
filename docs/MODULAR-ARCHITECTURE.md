@@ -856,6 +856,9 @@ Her modülün tek bir dış API'si, sahibi olduğu açık durumu ve kendi testle
 
 - `application/admin/re-geocode-measurements.js`, koordinatı geçerli satırları sırayla yeniden kodlar ve istek aralığını korur.
 
+- `adapters/admin/re-geocode-store.js`, toplu yönetici geocode akışının ölçüm projeksiyonunu ve `id` kapsamlı şehir/ülke güncellemesini Supabase sınırında tutar.
+- `ui/confirm-admin-re-geocode.js` mevcut onay metnini, `ui/admin-re-geocode-feedback.js` yetki ve başarı bildirimlerini sunar. Use-case yetki/onay kapılarını, sıralı geocode işlemini ve yenileme sırasını korur; servis modüller hazır değilse eski inline yedek çalışır.
+
 - `domain/admin/measurement-geojson.js`, ölçüm satırlarını aynı özellik alanları ve DBH hassasiyetiyle GeoJSON'a dönüştürür.
 
 - `ui/park-comparison-row.js`, park karşılaştırma satırını mevcut mobil sınıflar, karbon ve alan başına değerlerle çizer.
