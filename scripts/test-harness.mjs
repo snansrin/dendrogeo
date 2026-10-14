@@ -265,6 +265,11 @@ export function loadApp({ sadece } = {}) {
     'src/services/grid-engine.js',
     /* YÖNETİM AĞACI (2026-09-24): dgTreeGroup/dgTreeFilterRows saf
      * fonksiyonları burada test edilir (DOM'a dokunan çizim kısmı değil). */
+    'src/application/admin/admin-tree-state.js',
+    'src/application/admin/update-admin-tree-filter.js',
+    'src/application/admin/open-pending-tree-nodes.js',
+    'src/application/admin/expand-measurement-tree.js',
+    'src/application/admin/set-admin-tree-node-open.js',
     'src/adapters/admin/admin-tree-store.js',
     'src/domain/admin/group-measurement-tree.js',
     'src/domain/admin/filter-measurement-tree.js',
@@ -287,6 +292,11 @@ export function loadApp({ sadece } = {}) {
   }
   if (secim && secim.has('src/services/measure.js')) secim.add('src/application/trees/validate-measurement.js');
   if (secim && secim.has('src/services/admin-tree.js')) {
+    secim.add('src/application/admin/admin-tree-state.js');
+    secim.add('src/application/admin/update-admin-tree-filter.js');
+    secim.add('src/application/admin/open-pending-tree-nodes.js');
+    secim.add('src/application/admin/expand-measurement-tree.js');
+    secim.add('src/application/admin/set-admin-tree-node-open.js');
     secim.add('src/adapters/admin/admin-tree-store.js');
     secim.add('src/domain/admin/group-measurement-tree.js');
     secim.add('src/domain/admin/filter-measurement-tree.js');
