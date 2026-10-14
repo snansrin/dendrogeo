@@ -4,9 +4,9 @@ import vm from 'node:vm';
 import {readFileSync} from 'node:fs';
 
 const files=[
- 'src/application/auth/show-password-recovery.js',
+ 'src/ui/show-password-recovery.js',
  'src/ui/show-auth-panel.js',
- 'src/application/auth/select-auth-tab.js',
+ 'src/ui/select-auth-tab.js',
  'src/ui/render-auth-message.js',
  'src/application/auth/start-google-sign-in.js'
 ];

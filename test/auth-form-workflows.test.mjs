@@ -5,7 +5,7 @@ import {readFileSync} from 'node:fs';
 
 const files=[
  'src/application/auth/login-with-password.js',
- 'src/application/auth/register-account.js',
+ 'src/ui/register-account.js',
  'src/application/auth/send-password-reset-email.js',
  'src/application/auth/sign-out.js',
  'src/application/auth/save-new-password.js'

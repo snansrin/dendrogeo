@@ -6,8 +6,8 @@ import vm from 'node:vm';
 const read=path=>readFileSync(new URL('../'+path,import.meta.url),'utf8');
 const registry=read('src/services/park-registry.js');
 const modules=[
-  'src/application/parks/start-park-scan.js',
-  'src/application/parks/focus-park-scan-target.js',
+  'src/ui/start-park-scan.js',
+  'src/ui/focus-park-scan-target.js',
   'src/domain/parks/select-park-scan-step.js',
   'src/ui/preview-park-project-name.js',
   'src/application/parks/cancel-park-scan.js'

@@ -8,7 +8,7 @@ const files={
  counts:'src/application/visitors/load-owner-counts.js',
  refresh:'src/application/visitors/refresh-owner-view.js',
  timer:'src/application/visitors/live-refresh-timer.js',
- focus:'src/application/visitors/focus-live-location.js'
+ focus:'src/ui/focus-live-location.js'
 };
 function load(file){
  const window={};

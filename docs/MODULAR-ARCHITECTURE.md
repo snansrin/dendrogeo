@@ -1421,3 +1421,7 @@ The collaborator map renderer now separates peer selection, display-model deriva
 ## 14 Ekim 2026 tamamlanma ve koruma denetimi
 
 [Ölçüm/analiz tamamlanma envanteri](MODULE-COMPLETION-2026-10-14.md), üç grubun kapsamını ve kanıtını kaydeder. `check:modules`, bütün fiziksel runtime modüllerinin yükleme ve çevrimdışı zincirini denetler; kritik modüllerin hash kilidine alınması zorunludur. Aynı klasik modülün başlangıç/lazy zincirinde tekrar değerlendirilmesi reddedilir. Gerçek Chromium açılış, fırça, çizim ve cleanup kontrolleri CI Mobile smoke akışındadır.
+
+## Son sahiplik ve kabul kararı
+
+[ADR 0007](adr/0007-complete-layer-ownership.md) ve [mevcut/hedef tablosu](ARCHITECTURE-COMPLETION-2026-10-14.md) kanonik katmanların son kabulünü tanımlar. Application altında DOM/harita controller’ı kalmaz; domain saati explicit girdi olarak alır, STAC transport ve UUID adapter’a aittir. Klasik global API uyumluluğu, feature store ve seçici PWA politikası korunur.

@@ -5,7 +5,7 @@ import vm from 'node:vm';
 
 const read=path=>readFileSync(new URL('../'+path,import.meta.url),'utf8');
 const modules=[
-  'src/application/parks/fail-park-live-share.js',
+  'src/ui/fail-park-live-share.js',
   'src/domain/parks/park-live-member-color.js',
   'src/adapters/parks/park-presence-channel.js',
   'src/adapters/parks/leave-park-presence-channel.js',

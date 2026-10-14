@@ -27,7 +27,7 @@ test('cancelled publication form writes no request; confirmed form preserves RLS
  let sent=0;const ctx=vm.createContext({$:()=>null,USER:{id:'u'},PROFILE:{role:'admin'},DG_USER_PUB:{},document:{getElementById:()=>null},toast:()=>{},setInterval:()=>0,clearInterval:()=>{},JSON,Date,Number,String,window:{},sb:{auth:{getSession:async()=>({data:{session:{access_token:'session'}}})}},SB_URL:'https://example.invalid',SB_KEY:'anon',fetch:async()=>{sent++;return{status:201}},confirm:()=>true});
  vm.runInContext(readFileSync(new URL('../src/application/reports/collect-publication-request.js',import.meta.url),'utf8'),ctx);
  for(const path of ['../src/domain/reports/publication-request-error.js','../src/application/reports/request-publication.js',
-  '../src/application/reports/open-user-publication-panel.js','../src/application/reports/close-user-publication-panel.js',
+  '../src/ui/open-user-publication-panel.js','../src/ui/close-user-publication-panel.js',
   '../src/application/reports/sync-user-publication-panel.js','../src/application/reports/schedule-user-publication-poll.js',
   '../src/application/reports/share-report-link.js','../src/domain/reports/resolve-publication-park-status.js',
   '../src/ui/render-publication-park-row.js','../src/ui/render-publication-history.js',

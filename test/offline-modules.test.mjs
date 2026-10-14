@@ -4,7 +4,7 @@ import vm from 'node:vm';
 import {readFileSync} from 'node:fs';
 
 const files=[
-  '../src/domain/offline/create-client-id.js',
+  '../src/adapters/offline/create-client-id.js',
   '../src/domain/offline/same-measurement.js',
   '../src/adapters/offline/idb-promises.js',
   '../src/adapters/offline/measurement-queue.js',

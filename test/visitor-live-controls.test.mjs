@@ -8,7 +8,7 @@ function load(){
  for(const file of [
   'src/application/visitors/toggle-activity-disclosure.js',
   'src/application/visitors/restore-activity-disclosure.js',
-  'src/application/visitors/update-live-visitor-filters.js',
+  'src/ui/update-live-visitor-filters.js',
   'src/application/visitors/set-live-visitor-pause.js',
   'src/application/visitors/fit-live-visitor-map.js'
  ])vm.runInContext(readFileSync(new URL('../'+file,import.meta.url),'utf8'),context);

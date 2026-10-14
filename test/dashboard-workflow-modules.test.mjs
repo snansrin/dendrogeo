@@ -4,7 +4,7 @@ import vm from 'node:vm';
 import {readFileSync} from 'node:fs';
 
 const files=[
- 'src/application/dashboard/load-own-records.js',
+ 'src/ui/load-own-records.js',
  'src/application/dashboard/delete-own-record.js',
  'src/application/dashboard/load-owner-dashboard.js',
  'src/ui/dashboard-chart.js',

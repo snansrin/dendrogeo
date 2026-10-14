@@ -7,8 +7,8 @@ const files=[
  'src/application/admin/load-admin-tree.js',
  'src/application/admin/update-admin-tree-filter.js',
  'src/application/admin/set-admin-tree-node-open.js',
- 'src/application/admin/navigate-admin-tree-pending-scan.js',
- 'src/application/admin/delete-admin-tree-project.js'
+ 'src/ui/navigate-admin-tree-pending-scan.js',
+ 'src/ui/delete-admin-tree-project.js'
 ];
 function load(){
  const window={},context=vm.createContext({window,Promise,Number,Set,Array,Object,String});

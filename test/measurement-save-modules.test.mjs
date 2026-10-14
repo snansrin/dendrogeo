@@ -7,7 +7,7 @@ const read=path=>readFileSync(new URL('../'+path,import.meta.url),'utf8');
 const modules=[
   'src/application/trees/run-measurement-save.js',
   'src/ui/set-measurement-save-button.js',
-  'src/application/trees/validate-measurement-save-form.js',
+  'src/ui/validate-measurement-save-form.js',
   'src/application/trees/resolve-measurement-save-gates.js',
   'src/domain/trees/build-measurement-record.js'
 ];

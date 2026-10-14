@@ -6,10 +6,10 @@ import vm from 'node:vm';
 const read=path=>readFileSync(new URL('../'+path,import.meta.url),'utf8');
 const modules=[
  'src/adapters/surface/surface-right-pan-session.js',
- 'src/application/surface/select-surface-draw-type.js',
+ 'src/ui/select-surface-draw-type.js',
  'src/application/surface/select-surface-brush-type.js',
  'src/application/surface/return-surface-to-hand-mode.js',
- 'src/application/surface/update-surface-opacity.js'
+ 'src/ui/update-surface-opacity.js'
 ];
 function setup(){const window={};const context=vm.createContext({window,Math,Number,String,Object,Array});for(const path of modules)vm.runInContext(read(path),context,{filename:path});return window;}
 

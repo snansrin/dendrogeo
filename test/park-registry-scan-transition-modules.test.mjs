@@ -9,7 +9,7 @@ const modules=[
   'src/domain/parks/resolve-manual-park-coordinate.js',
   'src/ui/show-manual-park-form.js',
   'src/application/parks/toggle-park-mode-from-scan.js',
-  'src/application/parks/show-park-project-step.js',
+  'src/ui/show-park-project-step.js',
   'src/application/parks/retry-park-registration.js'
 ];
 function setup(extra={}){

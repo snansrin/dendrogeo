@@ -12,8 +12,8 @@ function load(paths) {
 }
 
 const modules = [
-  'src/application/reports/open-user-publication-panel.js',
-  'src/application/reports/close-user-publication-panel.js',
+  'src/ui/open-user-publication-panel.js',
+  'src/ui/close-user-publication-panel.js',
   'src/application/reports/sync-user-publication-panel.js',
   'src/application/reports/schedule-user-publication-poll.js',
   'src/application/reports/share-report-link.js',

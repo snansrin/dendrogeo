@@ -7,8 +7,8 @@ const paths = [
   'src/application/park-invites/park-invite-state.js',
   'src/application/park-invites/load-owned-parks.js',
   'src/application/park-invites/load-recipient-invites.js',
-  'src/application/park-invites/load-owner-collaborations.js',
-  'src/application/park-invites/refresh-collaborations.js',
+  'src/ui/load-owner-collaborations.js',
+  'src/ui/refresh-collaborations.js',
 ];
 const read = path => readFileSync(new URL('../' + path, import.meta.url), 'utf8');
 function setupContext() {

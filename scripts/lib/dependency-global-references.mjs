@@ -2,11 +2,11 @@ import {isForbiddenLayerDependency,KNOWN_LEGACY_REFERENCES} from './dependency-l
 
 export function findForbiddenModuleReferences(modules,providers){
   const violations=new Map(),knownDebt=new Map();
-  const expression=/\b(?:window|globalThis|root)\s*\.\s*(DG_[A-Z0-9_]+)\b/g;
+  const expression=/\b(?:window|globalThis|root)\s*\.\s*(DG_[A-Z0-9_]+)\b|\b(DG_[A-Z0-9_]+)\s*\./g;
   for(const module of modules){
-    if(!['domain','application'].includes(module.layer))continue;
+    if(!['domain','application','adapters'].includes(module.layer))continue;
     for(const match of module.source.matchAll(expression)){
-      const name=match[1];
+      const name=match[1]||match[2];
       for(const provider of providers.get(name)||[]){
         if(provider.path===module.path||!isForbiddenLayerDependency(module.layer,provider.layer))continue;
         const debtKey=`${module.relativePath}:${name}`;

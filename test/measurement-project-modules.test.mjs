@@ -6,7 +6,7 @@ import vm from 'node:vm';
 const read=path=>readFileSync(new URL('../'+path,import.meta.url),'utf8');
 const modules=[
   'src/adapters/trees/project-selection-memory.js',
-  'src/application/trees/open-project-for-measurement.js',
+  'src/ui/open-project-for-measurement.js',
   'src/ui/measurement-project-card.js',
   'src/ui/measurement-project-park-box.js',
   'src/ui/measurement-project-name-preview.js'

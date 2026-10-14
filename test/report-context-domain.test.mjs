@@ -7,13 +7,15 @@ const domainFiles=['normalize-report-orcid.js','clean-report-context.js','valida
 const domain=domainFiles.map(file=>readFileSync(new URL('../src/domain/reports/'+file,import.meta.url),'utf8'));
 const bridge=readFileSync(new URL('../src/core/report-context.js',import.meta.url),'utf8');
 
-test('künye kuralları domain modülünde saf kalır ve eski global API aynı nesneyi sunar',()=>{
+test('künye kuralları domain modülünde saf kalır ve uyumluluk köprüsü saat girdisini bağlar',()=>{
  const ctx=vm.createContext({});
  for(const source of domain)vm.runInContext(source,ctx);
  const api=ctx.DG_REPORT_CONTEXT_DOMAIN;
  assert.ok(api);
  vm.runInContext(bridge,ctx);
- assert.equal(ctx.DG_REPORT_CONTEXT,api);
+ assert.equal(ctx.DG_REPORT_CONTEXT.clean,api.clean);
+ assert.equal(ctx.DG_REPORT_CONTEXT.orcidValid,api.orcidValid);
+ assert.equal(ctx.DG_REPORT_CONTEXT.validate({}).valid,api.validate({}).valid);
  const valid=api.validate({author_name:'Araştırmacı',project_name:'Park envanteri',title:'Ağaç karbonu',purpose:'Parktaki ağaçların envanteri ve karbon stokunun belirlenmesi.'});
  assert.equal(valid.valid,true);
  assert.equal(api.normalizeOrcid('https://orcid.org/0000-0002-1825-0097'),'0000-0002-1825-0097');

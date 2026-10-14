@@ -43,7 +43,7 @@ const DG_S2_SCALE=10000;       /* L2A yansıma ölçeği */
 
 /* Referans dönemi seçenekleri (karne beyanı bunları kaynak gösterir) */
 function dgS2SeasonRange(year,mode){
-  if(window.DG_SENTINEL_TEMPORAL_WINDOWS)return window.DG_SENTINEL_TEMPORAL_WINDOWS.seasonRange(year,mode);
+  if(window.DG_SENTINEL_TEMPORAL_WINDOWS)return window.DG_SENTINEL_TEMPORAL_WINDOWS.seasonRange(year,mode,Date.now());
   const y=Number(year)||2021;
   if(mode==="ytd"){
     const now=new Date(),currentYear=now.getUTCFullYear(),end=now.toISOString();
@@ -121,7 +121,7 @@ async function dgS2FindScenes(bbox,year,mode){
  * kanıtı için yüksek su dönemi (ilkbahar) + sonbahar pencereleri ayrıca
  * taranır; MAX MNDWI "referans yılında açık su görüldü mü" sorusuna döner. */
 function dgS2WaterWindows(year,mode,nowOverride){
-  if(window.DG_SENTINEL_TEMPORAL_WINDOWS)return window.DG_SENTINEL_TEMPORAL_WINDOWS.waterWindows(year,mode,nowOverride);
+  if(window.DG_SENTINEL_TEMPORAL_WINDOWS)return window.DG_SENTINEL_TEMPORAL_WINDOWS.waterWindows(year,mode,nowOverride??new Date());
   /* Güncel modlarda kalıcılık pencereleri de seçilen güncel yılı kullanır. */
   const now=nowOverride!=null?new Date(nowOverride):new Date();
   const y=(mode==="latest"||mode==="ytd")?now.getUTCFullYear():(Number(year)||2021);

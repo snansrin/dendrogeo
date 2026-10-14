@@ -139,7 +139,7 @@ async function dgVerifyAtPark(park,why){
 
 /* Doğrulama damgası → ölçüm satırı (audit + yönetici görünürlüğü). */
 function dgGeoStamp(base,dec){
- if(window.DG_GEOFENCE_AUDIT_STAMP)return window.DG_GEOFENCE_AUDIT_STAMP.stamp(base,dec);
+ if(window.DG_GEOFENCE_AUDIT_STAMP)return window.DG_GEOFENCE_AUDIT_STAMP.stamp(base,dec,{now:()=>new Date()});
  if(!base||!dec||!dec.fix)return base;
  base.geo_acc_m=dec.acc!=null?Math.round(dec.acc):null;
  base.geo_dist_m=dec.distM;

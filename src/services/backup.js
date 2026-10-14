@@ -22,7 +22,7 @@ async function fullBackup(){
 
 function checkBackupReminder(){
   const last=localStorage.getItem("dg_lastBackup");
-  const state=window.DG_BACKUP_REMINDER_STATE.evaluate(last);
+  const state=window.DG_BACKUP_REMINDER_STATE.evaluate(last,Date.now());
   if(state.overdue) toast(dgTfs("⚠ Son tam yedeğin üzerinden {n} gün geçti — bugünkü yedeği alın",{n:state.elapsedDays}),"warn","💾");
 }
 

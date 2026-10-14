@@ -9,7 +9,7 @@ const modules=[
  'src/domain/surface/is-surface-layer-render-current.js',
  'src/ui/handle-surface-display-layer-click.js',
  'src/ui/render-surface-display-polygons.js',
- 'src/application/surface/refresh-surface-review-layer.js'
+ 'src/ui/refresh-surface-review-layer.js'
 ];
 function setup(){const window={};const context=vm.createContext({window,Math,Number,String,Object,Array,WeakMap});for(const path of modules)vm.runInContext(read(path),context,{filename:path});return window;}
 

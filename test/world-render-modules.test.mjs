@@ -6,7 +6,7 @@ import {readFileSync} from 'node:fs';
 const files=[
  'src/ui/park-comparison-row.js','src/ui/park-comparison-pending.js',
  'src/ui/park-report-options.js','src/ui/park-comparison-error.js',
- 'src/application/world/fit-measurement-rows.js'
+ 'src/ui/fit-measurement-rows.js'
 ];
 function app(){const window={},ctx=vm.createContext({window});for(const file of files)vm.runInContext(readFileSync(new URL('../'+file,import.meta.url),'utf8'),ctx,{filename:file});return window;}
 const escape=value=>String(value??'').replaceAll('<','&lt;').replaceAll('>','&gt;').replaceAll('"','&quot;');

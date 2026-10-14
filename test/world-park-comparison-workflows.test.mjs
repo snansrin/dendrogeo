@@ -5,8 +5,8 @@ import {readFileSync} from 'node:fs';
 
 const read=path=>readFileSync(new URL('../'+path,import.meta.url),'utf8');
 const modules=['src/domain/parks/resolve-park-comparison-read.js','src/application/world/load-park-comparison.js',
- 'src/application/world/render-primary-park-comparison.js','src/application/world/load-legacy-park-comparison.js',
- 'src/application/world/show-park-comparison-denied.js'];
+ 'src/ui/render-primary-park-comparison.js','src/application/world/load-legacy-park-comparison.js',
+ 'src/ui/show-park-comparison-denied.js'];
 function load(){const window={},context=vm.createContext({window,Promise,Math,Number,Array,Object,String});for(const path of modules)vm.runInContext(read(path),context);return{window,context};}
 
 test('park comparison read path keeps schema errors separate from denied reads',()=>{

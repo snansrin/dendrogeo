@@ -9,7 +9,7 @@ function loadModules() {
     '../src/application/reports/resolve-academic-profile-defaults.js',
     '../src/ui/academic-profile-fields.js',
     '../src/ui/render-academic-profile.js',
-    '../src/application/reports/save-academic-profile.js',
+    '../src/ui/save-academic-profile.js',
     '../src/application/reports/create-academic-report-collector.js',
   ]) {
     vm.runInContext(readFileSync(new URL(file, import.meta.url), 'utf8'), context);

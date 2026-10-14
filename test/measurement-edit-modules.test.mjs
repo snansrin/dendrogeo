@@ -9,7 +9,7 @@ const modules=[
   'src/domain/trees/build-measurement-edit-form.js',
   'src/ui/render-measurement-edit-form.js',
   'src/application/trees/edit-measurement-record.js',
-  'src/application/trees/cancel-measurement-edit.js'
+  'src/ui/cancel-measurement-edit.js'
 ];
 function setup(){const window={};const context=vm.createContext({window});for(const path of modules)vm.runInContext(read(path),context,{filename:path});return{window,context};}
 

@@ -9,7 +9,7 @@ const modules=[
   'src/adapters/trees/read-measurement-photo-pixels.js',
   'src/ui/measurement-photo-check.js',
   'src/ui/measurement-photo-file.js',
-  'src/application/trees/check-measurement-photo.js'
+  'src/ui/check-measurement-photo.js'
 ];
 function setup(){const window={};const context=vm.createContext({window});for(const path of modules)vm.runInContext(read(path),context,{filename:path});return{window,context};}
 

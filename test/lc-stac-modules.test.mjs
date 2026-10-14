@@ -5,7 +5,7 @@ import { readFileSync } from 'node:fs';
 
 const read = path => readFileSync(new URL('../' + path, import.meta.url), 'utf8');
 const modules = [
-  'src/domain/surface/stac-fetch-policy.js',
+  'src/adapters/surface/stac-fetch-policy.js',
   'src/adapters/surface/open-raster-range.js',
   'src/adapters/surface/sign-stac-assets.js',
   'src/domain/surface/select-stac-tiles.js',

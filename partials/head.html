@@ -266,7 +266,7 @@
 <script src="src/application/trees/validate-measurement.js?v=f07466a8" defer></script>
 <script src="src/services/allometry.js?v=75243fb8" defer></script>
 <script src="src/adapters/trees/project-selection-memory.js?v=00000000" defer></script>
-<script src="src/application/trees/open-project-for-measurement.js?v=00000000" defer></script>
+<script src="src/ui/open-project-for-measurement.js?v=00000000" defer></script>
 <script src="src/ui/measurement-project-card.js?v=00000000" defer></script>
 <script src="src/ui/measurement-project-park-box.js?v=00000000" defer></script>
 <script src="src/ui/measurement-project-name-preview.js?v=00000000" defer></script>
@@ -287,7 +287,7 @@
 <script src="src/adapters/trees/read-measurement-photo-pixels.js?v=00000000" defer></script>
 <script src="src/ui/measurement-photo-check.js?v=00000000" defer></script>
 <script src="src/ui/measurement-photo-file.js?v=00000000" defer></script>
-<script src="src/application/trees/check-measurement-photo.js?v=00000000" defer></script>
+<script src="src/ui/check-measurement-photo.js?v=00000000" defer></script>
 <script src="src/ui/measurement-gps-button.js?v=00000000" defer></script>
 <script src="src/domain/trees/format-measurement-gps-readout.js?v=00000000" defer></script>
 <script src="src/ui/measurement-gps-readout.js?v=00000000" defer></script>
@@ -298,12 +298,12 @@
 <script src="src/domain/auth/resolve-turnstile-form.js?v=00000000" defer></script>
 <script src="src/adapters/auth/load-turnstile-script.js?v=00000000" defer></script>
 <script src="src/ui/turnstile-widget.js?v=00000000" defer></script>
-<script src="src/application/auth/turnstile-controller.js?v=00000000" defer></script>
+<script src="src/ui/turnstile-controller.js?v=00000000" defer></script>
 <script src="src/domain/auth/read-turnstile-token.js?v=00000000" defer></script>
 <script src="src/domain/auth/is-oauth-callback.js?v=00000000" defer></script>
 <script src="src/domain/auth/read-oauth-error.js?v=00000000" defer></script>
 <script src="src/application/auth/login-with-password.js?v=00000000" defer></script>
-<script src="src/application/auth/register-account.js?v=00000000" defer></script>
+<script src="src/ui/register-account.js?v=00000000" defer></script>
 <script src="src/application/auth/send-password-reset-email.js?v=00000000" defer></script>
 <script src="src/application/auth/sign-out.js?v=00000000" defer></script>
 <script src="src/application/auth/save-new-password.js?v=00000000" defer></script>
@@ -311,9 +311,9 @@
 <script src="src/application/auth/clean-oauth-url.js?v=00000000" defer></script>
 <script src="src/application/auth/start-authenticated-session.js?v=00000000" defer></script>
 <script src="src/ui/oauth-wait-indicator.js?v=00000000" defer></script>
-<script src="src/application/auth/show-password-recovery.js?v=00000000" defer></script>
+<script src="src/ui/show-password-recovery.js?v=00000000" defer></script>
 <script src="src/ui/show-auth-panel.js?v=00000000" defer></script>
-<script src="src/application/auth/select-auth-tab.js?v=00000000" defer></script>
+<script src="src/ui/select-auth-tab.js?v=00000000" defer></script>
 <script src="src/ui/render-auth-message.js?v=00000000" defer></script>
 <script src="src/application/auth/start-google-sign-in.js?v=00000000" defer></script>
 <script src="src/adapters/auth/session-store.js?v=00000000" defer></script>
@@ -329,7 +329,7 @@
 <script src="src/application/export/prepare-user-measurement-preview.js?v=00000000" defer></script>
 <script src="src/ui/export-preview.js?v=00000000" defer></script>
 <script src="src/services/export.js?v=3ca1668e" defer></script>
-<script src="src/domain/offline/create-client-id.js?v=00000000" defer></script>
+<script src="src/adapters/offline/create-client-id.js?v=00000000" defer></script>
 <script src="src/domain/offline/same-measurement.js?v=00000000" defer></script>
 <script src="src/adapters/offline/idb-promises.js?v=00000000" defer></script>
 <script src="src/adapters/offline/measurement-queue.js?v=00000000" defer></script>
@@ -388,7 +388,7 @@
 <script src="src/application/visitors/load-owner-counts.js?v=00000000" defer></script>
 <script src="src/application/visitors/refresh-owner-view.js?v=00000000" defer></script>
 <script src="src/application/visitors/live-refresh-timer.js?v=00000000" defer></script>
-<script src="src/application/visitors/focus-live-location.js?v=00000000" defer></script>
+<script src="src/ui/focus-live-location.js?v=00000000" defer></script>
 <script src="src/application/visitors/upgrade-presence-auth.js?v=00000000" defer></script>
 <script src="src/application/visitors/render-owner-live-view.js?v=00000000" defer></script>
 <script src="src/application/visitors/stop-presence-session.js?v=00000000" defer></script>
@@ -397,7 +397,7 @@
 <script src="src/application/visitors/resume-presence-session.js?v=00000000" defer></script>
 <script src="src/application/visitors/toggle-activity-disclosure.js?v=00000000" defer></script>
 <script src="src/application/visitors/restore-activity-disclosure.js?v=00000000" defer></script>
-<script src="src/application/visitors/update-live-visitor-filters.js?v=00000000" defer></script>
+<script src="src/ui/update-live-visitor-filters.js?v=00000000" defer></script>
 <script src="src/application/visitors/set-live-visitor-pause.js?v=00000000" defer></script>
 <script src="src/application/visitors/fit-live-visitor-map.js?v=00000000" defer></script>
 <script src="src/services/visit-stats.js?v=880ecbbf" defer></script>
@@ -491,8 +491,8 @@
 <script src="src/application/admin/load-admin-tree.js?v=00000000" defer></script>
 <script src="src/application/admin/update-admin-tree-filter.js?v=00000000" defer></script>
 <script src="src/application/admin/set-admin-tree-node-open.js?v=00000000" defer></script>
-<script src="src/application/admin/navigate-admin-tree-pending-scan.js?v=00000000" defer></script>
-<script src="src/application/admin/delete-admin-tree-project.js?v=00000000" defer></script>
+<script src="src/ui/navigate-admin-tree-pending-scan.js?v=00000000" defer></script>
+<script src="src/ui/delete-admin-tree-project.js?v=00000000" defer></script>
 <!-- YÖNETİM AĞACI (2026-09-24): park → proje → kullanıcı → ölçüm kademeli
      görünümü + sorgu hatası görünürlüğü. admin.js'ten SONRA yüklenir
      (approve/reject/del fonksiyonlarını çağırır). -->
@@ -511,13 +511,13 @@
 <script src="src/application/reports/resolve-academic-profile-defaults.js?v=00000000" defer></script>
 <script src="src/ui/academic-profile-fields.js?v=00000000" defer></script>
 <script src="src/ui/render-academic-profile.js?v=00000000" defer></script>
-<script src="src/application/reports/save-academic-profile.js?v=00000000" defer></script>
+<script src="src/ui/save-academic-profile.js?v=00000000" defer></script>
 <script src="src/application/reports/create-academic-report-collector.js?v=00000000" defer></script>
 <script src="src/application/reports/resolve-report-question-values.js?v=00000000" defer></script>
 <script src="src/ui/report-question-fields.js?v=00000000" defer></script>
 <script src="src/ui/report-question-confirmations.js?v=00000000" defer></script>
-<script src="src/application/reports/validate-report-question-answer.js?v=00000000" defer></script>
-<script src="src/application/reports/run-report-question-dialog.js?v=00000000" defer></script>
+<script src="src/ui/validate-report-question-answer.js?v=00000000" defer></script>
+<script src="src/ui/run-report-question-dialog.js?v=00000000" defer></script>
 <script src="src/services/academic-profile.js?v=5447c88c" defer></script>
 <script src="src/domain/reports/publication-link.js?v=f306c3bd" defer></script>
 <script src="src/adapters/reports/publication-log-store.js?v=246244f8" defer></script>
@@ -534,8 +534,8 @@
 <script src="src/application/reports/cancel-publication-request.js?v=967bae66" defer></script>
 <script src="src/adapters/reports/retraction-insert-store.js?v=6dff7de1" defer></script>
 <script src="src/domain/reports/retraction-request-error.js?v=198981dc" defer></script>
-<script src="src/application/reports/open-user-publication-panel.js?v=00000000" defer></script>
-<script src="src/application/reports/close-user-publication-panel.js?v=00000000" defer></script>
+<script src="src/ui/open-user-publication-panel.js?v=00000000" defer></script>
+<script src="src/ui/close-user-publication-panel.js?v=00000000" defer></script>
 <script src="src/application/reports/sync-user-publication-panel.js?v=00000000" defer></script>
 <script src="src/application/reports/schedule-user-publication-poll.js?v=00000000" defer></script>
 <script src="src/application/reports/share-report-link.js?v=00000000" defer></script>
@@ -566,15 +566,15 @@
 <script src="src/application/park-invites/manage-invites.js?v=00000000" defer></script>
 <script src="src/application/park-invites/load-owned-parks.js?v=00000000" defer></script>
 <script src="src/application/park-invites/load-recipient-invites.js?v=00000000" defer></script>
-<script src="src/application/park-invites/load-owner-collaborations.js?v=00000000" defer></script>
-<script src="src/application/park-invites/refresh-collaborations.js?v=00000000" defer></script>
+<script src="src/ui/load-owner-collaborations.js?v=00000000" defer></script>
+<script src="src/ui/refresh-collaborations.js?v=00000000" defer></script>
 <script src="src/ui/owner-park-options.js?v=00000000" defer></script>
 <script src="src/services/park-invites.js?v=7ffe2828" defer></script>
 <script src="src/ui/park-comparison-row.js?v=00000000" defer></script>
 <script src="src/ui/park-comparison-pending.js?v=00000000" defer></script>
 <script src="src/ui/park-report-options.js?v=00000000" defer></script>
 <script src="src/ui/park-comparison-error.js?v=00000000" defer></script>
-<script src="src/application/world/fit-measurement-rows.js?v=00000000" defer></script>
+<script src="src/ui/fit-measurement-rows.js?v=00000000" defer></script>
 <script src="src/domain/parks/summarize-park-report.js?v=00000000" defer></script>
 <script src="src/ui/park-report-summary.js?v=00000000" defer></script>
 <script src="src/ui/park-report-species-table.js?v=00000000" defer></script>
@@ -591,9 +591,9 @@
 <script src="src/domain/parks/group-legacy-park-comparison.js?v=00000000" defer></script>
 <script src="src/ui/legacy-park-comparison.js?v=00000000" defer></script>
 <script src="src/application/world/load-park-comparison.js?v=00000000" defer></script>
-<script src="src/application/world/render-primary-park-comparison.js?v=00000000" defer></script>
+<script src="src/ui/render-primary-park-comparison.js?v=00000000" defer></script>
 <script src="src/application/world/load-legacy-park-comparison.js?v=00000000" defer></script>
-<script src="src/application/world/show-park-comparison-denied.js?v=00000000" defer></script>
+<script src="src/ui/show-park-comparison-denied.js?v=00000000" defer></script>
 <script src="src/application/world/zoom-to-location.js?v=00000000" defer></script>
 <script src="src/services/world.js?v=bf50a95a" defer></script>
 <script src="src/adapters/trees/fetch-unvisited-measurement-waypoints.js?v=00000000" defer></script>
@@ -612,10 +612,10 @@
 <script src="src/domain/trees/build-measurement-edit-form.js?v=00000000" defer></script>
 <script src="src/ui/render-measurement-edit-form.js?v=00000000" defer></script>
 <script src="src/application/trees/edit-measurement-record.js?v=00000000" defer></script>
-<script src="src/application/trees/cancel-measurement-edit.js?v=00000000" defer></script>
+<script src="src/ui/cancel-measurement-edit.js?v=00000000" defer></script>
 <script src="src/application/trees/run-measurement-save.js?v=00000000" defer></script>
 <script src="src/ui/set-measurement-save-button.js?v=00000000" defer></script>
-<script src="src/application/trees/validate-measurement-save-form.js?v=00000000" defer></script>
+<script src="src/ui/validate-measurement-save-form.js?v=00000000" defer></script>
 <script src="src/application/trees/resolve-measurement-save-gates.js?v=00000000" defer></script>
 <script src="src/domain/trees/build-measurement-record.js?v=00000000" defer></script>
 <script src="src/adapters/trees/persist-measurement-record.js?v=00000000" defer></script>
@@ -651,7 +651,7 @@
 <script src="src/application/map/add-measurement-markers.js?v=00000000" defer></script>
 <script src="src/ui/map-measurement-markers.js?v=00000000" defer></script>
 <script src="src/ui/waypoint-list.js?v=00000000" defer></script>
-<script src="src/application/map/select-waypoint.js?v=00000000" defer></script>
+<script src="src/ui/select-waypoint.js?v=00000000" defer></script>
 <script src="src/application/map/select-nearest-waypoint.js?v=00000000" defer></script>
 <script src="src/application/map/advance-waypoint-target.js?v=00000000" defer></script>
 <script src="src/ui/waypoint-navigation-feedback.js?v=00000000" defer></script>
@@ -664,7 +664,7 @@
 <script src="src/adapters/map/add-waypoint-guidance-line.js?v=00000000" defer></script>
 <script src="src/application/map/render-waypoint-gps-overlay.js?v=00000000" defer></script>
 <script src="src/ui/waypoint-gps-overlay.js?v=00000000" defer></script>
-<script src="src/application/parks/fail-park-live-share.js?v=00000000" defer></script>
+<script src="src/ui/fail-park-live-share.js?v=00000000" defer></script>
 <script src="src/domain/parks/resolve-live-share-join.js?v=00000000" defer></script>
 <script src="src/adapters/parks/fetch-live-share-project-park.js?v=00000000" defer></script>
 <script src="src/ui/park-live-share-connection-status.js?v=00000000" defer></script>
@@ -827,14 +827,14 @@
 <script src="src/ui/park-admin-status.js?v=00000000" defer></script>
 <script src="src/ui/park-schema-warning.js?v=00000000" defer></script>
 <script src="src/ui/park-schema-missing-feedback.js?v=00000000" defer></script>
-<script src="src/application/parks/start-park-scan.js?v=00000000" defer></script>
-<script src="src/application/parks/focus-park-scan-target.js?v=00000000" defer></script>
+<script src="src/ui/start-park-scan.js?v=00000000" defer></script>
+<script src="src/ui/focus-park-scan-target.js?v=00000000" defer></script>
 <script src="src/domain/parks/select-park-scan-step.js?v=00000000" defer></script>
 <script src="src/ui/preview-park-project-name.js?v=00000000" defer></script>
 <script src="src/application/parks/cancel-park-scan.js?v=00000000" defer></script>
 <script src="src/domain/parks/select-park-project.js?v=00000000" defer></script>
 <script src="src/adapters/parks/park-scan-redirect-memory.js?v=00000000" defer></script>
-<script src="src/application/parks/complete-park-project-link.js?v=00000000" defer></script>
+<script src="src/ui/complete-park-project-link.js?v=00000000" defer></script>
 <script src="src/application/parks/handle-park-project-change.js?v=00000000" defer></script>
 <script src="src/application/parks/handle-park-drawn.js?v=00000000" defer></script>
 <script src="src/application/parks/park-admin-state.js?v=00000000" defer></script>
@@ -845,7 +845,7 @@
 <script src="src/domain/parks/resolve-manual-park-coordinate.js?v=00000000" defer></script>
 <script src="src/ui/show-manual-park-form.js?v=00000000" defer></script>
 <script src="src/application/parks/toggle-park-mode-from-scan.js?v=00000000" defer></script>
-<script src="src/application/parks/show-park-project-step.js?v=00000000" defer></script>
+<script src="src/ui/show-park-project-step.js?v=00000000" defer></script>
 <script src="src/application/parks/retry-park-registration.js?v=00000000" defer></script>
 <script src="src/ui/park-search-result.js?v=00000000" defer></script>
 <script src="src/ui/manual-park-result.js?v=00000000" defer></script>
@@ -915,7 +915,7 @@
 <script src="src/adapters/world/world-stats-store.js?v=00000000" defer></script>
 <script src="src/ui/world-stats-tables.js?v=00000000" defer></script>
 <script src="src/ui/world-error.js?v=00000000" defer></script>
-<script src="src/application/dashboard/load-own-records.js?v=00000000" defer></script>
+<script src="src/ui/load-own-records.js?v=00000000" defer></script>
 <script src="src/application/dashboard/delete-own-record.js?v=00000000" defer></script>
 <script src="src/application/dashboard/load-owner-dashboard.js?v=00000000" defer></script>
 <script src="src/ui/dashboard-chart.js?v=00000000" defer></script>

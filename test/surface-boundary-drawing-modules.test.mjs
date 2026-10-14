@@ -4,7 +4,7 @@ import {readFileSync} from 'node:fs';
 import vm from 'node:vm';
 
 const read=path=>readFileSync(new URL('../'+path,import.meta.url),'utf8');
-const modules=['src/domain/surface/surface-boundary-point-policy.js','src/domain/surface/prepare-surface-boundary.js','src/ui/surface-boundary-drawing-preview.js','src/application/surface/surface-boundary-drawing-session.js','src/application/surface/finish-surface-boundary-drawing.js'];
+const modules=['src/domain/surface/surface-boundary-point-policy.js','src/domain/surface/prepare-surface-boundary.js','src/ui/surface-boundary-drawing-preview.js','src/ui/surface-boundary-drawing-session.js','src/application/surface/finish-surface-boundary-drawing.js'];
 function setup(){const window={};const context=vm.createContext({window});for(const path of modules)vm.runInContext(read(path),context,{filename:path});return window;}
 
 test('park point policy preserves allowed fallback when the gate is missing or throws',()=>{

@@ -8,7 +8,7 @@ const registry=read('src/services/park-registry.js');
 const modules=[
   'src/domain/parks/select-park-project.js',
   'src/adapters/parks/park-scan-redirect-memory.js',
-  'src/application/parks/complete-park-project-link.js',
+  'src/ui/complete-park-project-link.js',
   'src/application/parks/handle-park-project-change.js',
   'src/application/parks/handle-park-drawn.js'
 ];

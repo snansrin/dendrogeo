@@ -6,8 +6,8 @@ import {readFileSync} from 'node:fs';
 const files=[
  'src/application/park-invites/load-owned-parks.js',
  'src/application/park-invites/load-recipient-invites.js',
- 'src/application/park-invites/load-owner-collaborations.js',
- 'src/application/park-invites/refresh-collaborations.js',
+ 'src/ui/load-owner-collaborations.js',
+ 'src/ui/refresh-collaborations.js',
  'src/ui/owner-park-options.js'
 ];
 function load(){
@@ -73,7 +73,7 @@ test('park invite service delegates inbox and owner collaboration flows to the l
   'src/domain/park-invites/access-policy.js','src/adapters/park-invites/store.js',
   'src/ui/park-invite-inbox.js','src/ui/park-collaboration-panel.js','src/application/park-invites/manage-invites.js',
   'src/application/park-invites/load-owned-parks.js','src/application/park-invites/load-recipient-invites.js',
-  'src/application/park-invites/load-owner-collaborations.js','src/application/park-invites/refresh-collaborations.js',
+  'src/ui/load-owner-collaborations.js','src/ui/refresh-collaborations.js',
   'src/ui/owner-park-options.js','src/services/park-invites.js'
  ];
  for(const file of serviceFiles)vm.runInContext(readFileSync(new URL('../'+file,import.meta.url),'utf8'),context,{filename:file});

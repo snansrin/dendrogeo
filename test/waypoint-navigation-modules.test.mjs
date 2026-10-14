@@ -4,7 +4,7 @@ import vm from 'node:vm';
 import {readFileSync} from 'node:fs';
 
 const modules=[
-  '../src/application/map/select-waypoint.js',
+  '../src/ui/select-waypoint.js',
   '../src/ui/waypoint-map-viewport.js',
   '../src/domain/map/resolve-waypoint-guidance.js',
   '../src/ui/waypoint-map-markers.js',

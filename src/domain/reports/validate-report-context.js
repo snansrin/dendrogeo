@@ -1,7 +1,7 @@
 "use strict";
 
 (function (root) {
-  function validate(input) {
+  function validate(input,today) {
     const value = root.DG_CLEAN_REPORT_CONTEXT.clean(input);
     const errors = {};
     for (const [key, label] of Object.entries({
@@ -14,7 +14,9 @@
         || new Date(date).toISOString().slice(0, 10) !== date)) errors[key] = "Geçerli saha tarihi girin.";
     }
     if (value.start_date && value.end_date
-      && (value.end_date < value.start_date || value.end_date > new Date().toISOString().slice(0, 10))) {
+      && !/^\d{4}-\d{2}-\d{2}$/.test(today)) throw TypeError("Künye tarih doğrulaması açık today girdisi gerektirir.");
+    if (value.start_date && value.end_date
+      && (value.end_date < value.start_date || value.end_date > today)) {
       errors.end_date = "Saha tarih aralığı geçersiz.";
     }
     if (!root.DG_REPORT_ORCID_DOMAIN.valid(value.orcid)) errors.orcid = "ORCID kimliğinin biçimini ve kontrol basamağını denetleyin.";

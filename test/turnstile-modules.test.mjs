@@ -10,7 +10,7 @@ const paths = [
   'src/domain/auth/resolve-turnstile-form.js',
   'src/adapters/auth/load-turnstile-script.js',
   'src/ui/turnstile-widget.js',
-  'src/application/auth/turnstile-controller.js',
+  'src/ui/turnstile-controller.js',
   'src/domain/auth/read-turnstile-token.js',
 ];
 function runtime(window = {}) {

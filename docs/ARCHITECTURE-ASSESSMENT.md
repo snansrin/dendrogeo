@@ -53,3 +53,7 @@ Bu sıra, ideal yapıyı mevcut sistemin çalışır sözleşmelerine göre kura
 ## 14 Ekim 2026 tamamlanan koruma grubu
 
 Ölçüm/analiz kalan workflow sınırları on yeni modülle tamamlandı; tek satırlık facade/composition çağrıları ve kilitli regression yedekleri korundu. `npm run check:modules` 944 runtime dosyasını gerçek başlangıç/lazy/worker ve precache deklarasyonlarıyla eşler; kritik 600 runtime modülü çekirdek kilidine bağlıdır. Kilit 781 dosyadır. Startup/OAuth, fırça, çizim/cleanup ve OSM map recovery Chromium kontrolleri CI’a eklendi. Ayrıntılı kanıt ve kabul ölçütü `MODULE-COMPLETION-2026-10-14.md` içindedir. Bu tamamlanma; feature-first/ESM/Proxy/global telemetry gibi ihtiyaca bağlı ayrı mimari pilotları zorunlu kılmaz.
+
+## Son katman kabulü — 14 Ekim 2026
+
+Önceki ölçüm/analiz akış tamamlanması tüm fiziksel yerleşim için yeterli değildi. [Mevcut/hedef kabul tablosu](ARCHITECTURE-COMPLETION-2026-10-14.md) ve [ADR 0007](adr/0007-complete-layer-ownership.md) son denetimi kaydeder: 33 DOM/harita/form kontrolcüsü UI’a, STAC transport ve UUID üretimi adapter’a taşındı. Domain saatleri explicit girdidir; eski servis/Node köprüleri saat portunu bağlar. Mimari kapılar DOM/platform, gizli domain saati/rastgelelik, bare global ve adapter ters bağımlılıklarını kapsar. Son envanter: 959 runtime, 606 kritik runtime, 865 kilitli dosya. Önceki 944/600/781 sayıları tarihsel grubun envanteridir.

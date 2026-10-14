@@ -7,8 +7,8 @@ const files=[
  'src/application/reports/resolve-report-question-values.js',
  'src/ui/report-question-fields.js',
  'src/ui/report-question-confirmations.js',
- 'src/application/reports/validate-report-question-answer.js',
- 'src/application/reports/run-report-question-dialog.js'
+ 'src/ui/validate-report-question-answer.js',
+ 'src/ui/run-report-question-dialog.js'
 ];
 function load(){
  const window={},context=vm.createContext({window,Promise,Object,Number,Array});
