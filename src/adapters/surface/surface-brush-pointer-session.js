@@ -29,7 +29,7 @@ window.DG_SURFACE_BRUSH_POINTER_SESSION={
     };
     const down=event=>{if(event.target?.closest?.('.leaflet-control')||event.button!==0||!event.isPrimary||state.busy||state.saving||brush.stroke)return;stopEvent(event);brush.stroke={pointerId:event.pointerId,points:[]};container.setPointerCapture(event.pointerId);add(event);};
     const move=event=>{if(brush.stroke?.pointerId!==event.pointerId)return;stopEvent(event);add(event);};
-    const finish=event=>{if(brush.stroke?.pointerId!==event.pointerId)return;stopEvent(event);if(event.type==='pointerup')add(event);const points=brush.stroke.points;brush.stroke=null;if(brush.preview)map.removeLayer(brush.preview);brush.preview=null;try{container.releasePointerCapture(event.pointerId);}catch(error){}
+    const finish=event=>{if(brush.stroke?.pointerId!==event.pointerId)return;stopEvent(event);if(event.type==='pointerup')add(event);const points=brush.stroke.points;brush.stroke=null;if(brush.preview)map.removeLayer(brush.preview);brush.preview=null;brush.previewLine=null;brush.previewCircle=null;try{container.releasePointerCapture(event.pointerId);}catch(error){}
       if(event.type==='pointerup'&&brush.epoch===state.epoch&&brush.record===state.record)onCommit(points,brush.type,brush.diameter).catch(onError);
     };
     for(const [event,handler] of [['pointerdown',down],['pointermove',move],['pointerup',finish],['pointercancel',finish],['lostpointercapture',finish]]){container.addEventListener(event,handler,true);brush.handlers.push([event,handler]);}

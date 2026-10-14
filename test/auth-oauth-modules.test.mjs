@@ -44,6 +44,29 @@ test('OAuth session wait resolves a session already present during code exchange
  assert.equal(unsubscribed,1);
 });
 
+test('OAuth session wait does not treat INITIAL_SESSION null as a failed code exchange',async()=>{
+ const api=load(),events={},session={user:{id:'u3'}};let unsubscribed=0;
+ const ports={onAuthStateChange(callback){events.callback=callback;return{data:{subscription:{unsubscribe(){unsubscribed++;}}}};},getSession:async()=>({data:{session:null}})};
+ const pending=api.DG_AUTH_OAUTH_SESSION.wait(ports,5000);
+ events.callback('INITIAL_SESSION',null);
+ events.callback('SIGNED_IN',session);
+ assert.equal(await pending,session);assert.equal(unsubscribed,1);
+});
+
+test('OAuth callback failures and successes both clear token-bearing URL fragments',()=>{
+ const source=readFileSync(new URL('../src/ui/shell.js',import.meta.url),'utf8');
+ assert.match(source,/session=await dgWaitForOAuthSession\(\);\s*if\(typeof dgCleanOAuthUrl==="function"\)dgCleanOAuthUrl\(\);/);
+ const config=readFileSync(new URL('../src/config/supabase.js',import.meta.url),'utf8');
+ assert.ok(config.includes('const AUTH_FLOW_TYPE=/(?:^#|&)access_token=/.test(INITIAL_HASH)?"implicit":"pkce";'));
+ assert.match(config,/flowType:AUTH_FLOW_TYPE/);assert.match(config,/detectSessionInUrl:true/);
+});
+
+test('OAuth configuration keeps legacy fragment callbacks readable and uses PKCE for new sessions',()=>{
+ const source=readFileSync(new URL('../src/config/supabase.js',import.meta.url),'utf8');
+ const flow=hash=>{const context=vm.createContext({window:{location:{hash}},supabase:{createClient(_url,_key,options){context.options=options;return{};}}});vm.runInContext(source,context);return context.options.auth.flowType;};
+ assert.equal(flow('#access_token=legacy'),'implicit');assert.equal(flow(''),'pkce');
+});
+
 test('OAuth URL cleanup keeps only pathname and safely tolerates history errors',()=>{
  const calls=[],host={history:{replaceState:(...args)=>calls.push(args)},location:{pathname:'/projects'}};
  const api=load();api.DG_CLEAN_OAUTH_URL.clean(host);

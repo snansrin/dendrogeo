@@ -1,15 +1,16 @@
 #!/usr/bin/env node
-import {chromium} from 'playwright-core';
+import {loadChromium} from './lib/playwright-runtime.mjs';
 import {mkdirSync} from 'node:fs';
 import {tmpdir} from 'node:os';
 import {join} from 'node:path';
 const outputDir=join(tmpdir(),'dendrogeo-mobile');
 mkdirSync(outputDir,{recursive:true});
-const browser=await chromium.launch({headless:true,args:['--no-sandbox']});
+const chromium=await loadChromium(),browser=await chromium.launch({headless:true,args:['--no-sandbox']});
 try{
  for(const width of [360,390,430]){
   const height=840,page=await browser.newPage({viewport:{width,height}});
   const errors=[];page.on('pageerror',e=>errors.push(e.stack||e.message));
+  await page.route(/^https?:\/\/(?!127\.0\.0\.1)/,route=>route.abort());
   await page.goto('http://127.0.0.1:8765/index.html',{waitUntil:'domcontentloaded'});
   await page.locator('body').waitFor({state:'visible'});
   const size=await page.evaluate(()=>{

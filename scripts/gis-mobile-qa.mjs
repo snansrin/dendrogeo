@@ -1,11 +1,12 @@
 #!/usr/bin/env node
 /* Real Chromium layout regression, isolated fixture. No GIS data writes. */
-import {chromium} from 'playwright-core';
-const browser=await chromium.launch({headless:true,args:['--no-sandbox']});
+import {loadChromium} from './lib/playwright-runtime.mjs';
+const chromium=await loadChromium(),browser=await chromium.launch({headless:true,args:['--no-sandbox']});
 try{
  for(const width of [320,360,390,430,768]){
   const page=await browser.newPage({viewport:{width,height:840}});
   const errs=[];page.on('pageerror',e=>errs.push(e.message));
+  await page.route(/^https?:\/\/(?!127\.0\.0\.1)/,route=>route.abort());
   await page.goto('http://127.0.0.1:8765/index.html',{waitUntil:'domcontentloaded'});
   const seed=await page.evaluate(()=>{
    const workspace=window.DG_GIS_WORKSPACE_UI,view=document.getElementById('v-map');

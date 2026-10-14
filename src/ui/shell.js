@@ -60,7 +60,7 @@ async function boot(){
         }
         dgShowOAuthWait();
         session=await dgWaitForOAuthSession();
-        if(session&&typeof dgCleanOAuthUrl==="function")dgCleanOAuthUrl();
+        if(typeof dgCleanOAuthUrl==="function")dgCleanOAuthUrl();
         if(typeof dgHideOAuthWait==="function")dgHideOAuthWait();
         if(!session){
             initLanding();

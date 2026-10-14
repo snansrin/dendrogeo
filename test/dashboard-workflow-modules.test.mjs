@@ -24,6 +24,12 @@ test('own record view loads and groups before rendering with the established emp
  let read=false;await api.execute('u',{load:async()=>{read=true;return{data:[]};},group:()=>new Map(),container:()=>null,renderGroup:()=>'',empty:()=>''});assert.equal(read,true);
 });
 
+test('own records renders array-backed project groups instead of treating them as empty',async()=>{
+ const api=load().DG_LOAD_OWN_RECORDS_VIEW,box={innerHTML:''};
+ const ok=await api.execute('u',{load:async()=>({data:[{id:8}]}),group:()=>[['Project',[{id:8}]]],container:()=>box,renderGroup:(name,rows)=>`<section>${name}:${rows.length}</section>`,empty:()=>'<empty>'});
+ assert.equal(ok,true);assert.equal(box.innerHTML,'<section>Project:1</section>');
+});
+
 test('own record view reports database failures instead of showing an empty inventory',async()=>{
  const api=load().DG_LOAD_OWN_RECORDS_VIEW,box={innerHTML:''},failure={message:'query failed'};
  const ok=await api.execute('u',{load:async()=>({data:null,error:failure}),group:()=>new Map(),container:()=>box,renderGroup:()=>'',empty:()=>'<empty>',failed:error=>`<error>${error.message}</error>`});

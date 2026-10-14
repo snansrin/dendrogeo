@@ -20,7 +20,7 @@ async function loadRecords__scroll(){
  // Compatibility contract: localeCompare(String(pb),"tr") and point_id ordering remain unchanged in DG_GROUP_OWN_RECORDS.
  const groups=window.DG_GROUP_OWN_RECORDS.group(data||[]);
  const el=$("recGroups");if(!el)return;
- el.innerHTML=groups.size?[...groups.entries()].map(([name,rows])=>dgRecordProjectGroup(name,rows)).join(""):`<div class="card records-empty">${typeof dgCf==="function"?dgCf("Kayıt yok"):"Kayıt yok"}</div>`;
+ el.innerHTML=groups.length?groups.map(([name,rows])=>dgRecordProjectGroup(name,rows)).join(""):`<div class="card records-empty">${typeof dgCf==="function"?dgCf("Kayıt yok"):"Kayıt yok"}</div>`;
 }
 // 2. Kayıt sil
 async function delRec(id){

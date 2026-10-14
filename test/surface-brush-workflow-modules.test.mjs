@@ -32,6 +32,19 @@ test('brush pointer preview reuses Leaflet layers while the pointer moves',()=>{
   window.DG_SURFACE_BRUSH_POINTER_SESSION.stop({state,map});
 });
 
+test('brush recreates preview layers and commits every new stroke after pointerup',async()=>{
+  const window=setup(),listeners={},created={line:0,circle:0},commits=[],groups=[],container={style:{},classList:{add(){},remove(){}},addEventListener:(name,fn)=>{listeners[name]=fn;},removeEventListener(){},setPointerCapture(){},releasePointerCapture(){}};
+  const interaction=()=>({enabled:()=>true,disable(){},enable(){}}),map={dragging:interaction(),doubleClickZoom:interaction(),mouseEventToLatLng:event=>({lat:event.y,lng:29}),removeLayer(){}};
+  const leaflet={layerGroup:()=>{const group={addTo(){groups.push(group);return group;}};return group;},polyline:()=>{created.line++;return{addTo(){return this;},setLatLngs(){}};},circle:()=>{created.circle++;return{addTo(){return this;},setLatLng(){}};}};
+  const state={record:{},epoch:1,epsg:32636,busy:false,saving:false};
+  window.DG_SURFACE_BRUSH_POINTER_SESSION.start({state,map,leaflet,container,type:'green',diameter:10,colors:{green:'#0f0'},forward:lat=>({x:lat,y:0}),onCommit:async points=>commits.push(points.length),onError:assert.fail,render(){}});
+  const event=(type,y)=>({type,button:0,isPrimary:true,pointerId:2,y,target:{closest:()=>false},preventDefault(){},stopImmediatePropagation(){}});
+  for(const offset of [0,20]){listeners.pointerdown(event('pointerdown',offset));listeners.pointermove(event('pointermove',offset+5));listeners.pointerup(event('pointerup',offset+6));}
+  await Promise.resolve();
+  assert.deepEqual(created,{line:2,circle:2});assert.equal(groups.length,2);assert.deepEqual(commits,[2,2]);
+  window.DG_SURFACE_BRUSH_POINTER_SESSION.stop({state,map});
+});
+
 test('brush commit preserves per-cell provenance, history, refresh order and save gate',async()=>{
   const window=setup(),events=[],record={corrections:{}},state={record,rawView:false,busy:false,saving:false},result=await window.DG_COMMIT_SURFACE_BRUSH_STROKE.commit({points:[[41,29]],type:'water',diameter:10,state,types:{water:{}},allowed:[5,10,20,40],validate:window.DG_VALIDATE_SURFACE_BRUSH_STROKE.valid,selectCells:()=>['1:2'],cells:()=>[{row:1,col:2,classKey:'green'}],cellKey:cell=>`${cell.row}:${cell.col}`,createDecision:(cell,to,ts,id)=>{const applied={key:'1:2',decision:{from:cell.classKey,to,ts,method:'visual-cell',brushStrokeId:id}};record.corrections[applied.key]=applied.decision;return applied;},appendHistory:(target,stroke)=>target.brushHistory=[stroke],timestamp:()=> 'now',strokeId:()=> 'stroke-1',dirty:()=>events.push('dirty'),previewCells:entries=>events.push(`preview:${entries.length}:${entries[0].cell.row}:${entries[0].type}`),refresh:()=>events.push('refresh'),summary:()=>events.push('summary'),status:()=>events.push('status'),save:async()=>events.push('save')});
   assert.equal(result,undefined);assert.equal(record.corrections['1:2'].brushStrokeId,'stroke-1');assert.deepEqual(events,['dirty','preview:1:1:water','refresh','summary','status','save']);assert.equal(record.brushHistory[0].changes[0].before,null);

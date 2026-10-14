@@ -7,16 +7,23 @@ const read=path=>readFileSync(new URL('../'+path,import.meta.url),'utf8');
 function setup(){const window={};const context=vm.createContext({window});for(const path of ['src/adapters/parks/park-admin-mutation-store.js','src/ui/park-admin-mutation.js'])vm.runInContext(read(path),context,{filename:path});return window;}
 
 test('park-admin mutation adapter preserves table, payload, and id scopes',async()=>{
-  const calls=[];const client={from(table){calls.push(['from',table]);return this;},update(payload){calls.push(['update',payload]);return this;},delete(){calls.push(['delete']);return this;},eq(column,value){calls.push(['eq',column,value]);return Promise.resolve({error:null});}};
+  const calls=[];const client={from(table){calls.push(['from',table]);return this;},update(payload){calls.push(['update',payload]);return this;},delete(){calls.push(['delete']);return this;},eq(column,value){calls.push(['eq',column,value]);return this;},select(columns){calls.push(['select',columns]);return Promise.resolve({data:[{id:7}],error:null});}};
   const store=setup().DG_PARK_ADMIN_MUTATION_STORE.create({getClient:()=>client});
   await store.updatePark(7,{name:'Göksu',name_norm:'göksu'});
   await store.moveProjects(7,8);await store.moveMeasurements(7,8);await store.deletePark(7);
   assert.deepEqual(JSON.parse(JSON.stringify(calls)),[
-    ['from','parks'],['update',{name:'Göksu',name_norm:'göksu'}],['eq','id',7],
+    ['from','parks'],['update',{name:'Göksu',name_norm:'göksu'}],['eq','id',7],['select','id'],
     ['from','projects'],['update',{park_id:8}],['eq','park_id',7],
     ['from','measurements'],['update',{park_id:8}],['eq','park_id',7],
-    ['from','parks'],['delete'],['eq','id',7]
+    ['from','parks'],['delete'],['eq','id',7],['select','id']
   ]);
+});
+
+test('park identity adapter turns silent zero-row writes into actionable errors',async()=>{
+  const client={from(){return this;},update(){return this;},delete(){return this;},eq(){return this;},select:async()=>({data:[],error:null})};
+  const store=setup().DG_PARK_ADMIN_MUTATION_STORE.create({getClient:()=>client});
+  assert.match((await store.updatePark(7,{name:'Yeni'})).error.message,/güncellenmedi/);
+  assert.match((await store.deletePark(7)).error.message,/silinmedi/);
 });
 
 test('park-admin UI keeps confirmation wording and result feedback',()=>{

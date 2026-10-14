@@ -33,6 +33,11 @@ test('area bars preserve class order, hectare labels, percentages and HTML escap
  assert.ok(html.indexOf('&lt;Green&gt;')<html.indexOf('Water'));assert.ok(html.includes('0.750 ha · %75.0'));assert.ok(html.includes('background:#00f'));assert.equal((html.match(/dg-surface-stat/g)||[]).length,2);
 });
 
+test('current area report includes OSM building footprint area as its own class',()=>{
+ const render=setup().DG_RENDER_SURFACE_AREA_BARS.render,html=render({areas:{green:7000,building:3000},types:{green:{label:'Yeşil alan'},building:{label:'Bina'}},colors:{green:'#0f0',building:'#475569'},escape:identity,translate:identity,hectares:value=>(value/10000).toFixed(3)});
+ assert.ok(html.includes('Bina'));assert.ok(html.includes('0.300 ha · %30.0'));
+});
+
 test('current report captures baseline once and composes the shared area bars',()=>{
  const render=setup().DG_RENDER_SURFACE_CURRENT_REPORT.render,host={innerHTML:'baseline'},set=[],bars=()=>'<bars>',escape=value=>String(value),presentation={currentTitle:'Önizleme',currentHint:'Kaydet',baselineTitle:'Ham'};
  assert.equal(render({host,areas:{},baseline:'',setBaseline:value=>set.push(value),presentation,areaBars:bars,escape}),true);assert.deepEqual(set,['baseline']);assert.ok(host.innerHTML.includes('<bars>'));assert.ok(host.innerHTML.includes('<summary>Ham</summary>baseline'));

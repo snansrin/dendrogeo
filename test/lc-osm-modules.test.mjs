@@ -74,3 +74,15 @@ test('shared OSM request/cache and lazy/offline module ordering are preserved', 
     assert.ok(worker.includes("'/" + path + "'"), path);
   }
 });
+
+test('shared surface evidence query requests building footprints as well as roads and water', async () => {
+  const context=env(true),queries=[];
+  context.overpassRequest=async query=>{queries.push(query);return{elements:[]};};
+  context.bbox={minLat:39.8,minLon:32.7,maxLat:39.9,maxLon:32.8};
+  await vm.runInContext('dgLcOsmData(bbox)',context);
+  assert.equal(queries.length,1);
+  assert.match(queries[0],/nwr\["building"\]/);
+  assert.match(queries[0],/nwr\["building:part"\]/);
+  assert.match(queries[0],/way\["highway"\]/);
+  assert.match(queries[0],/natural"="water/);
+});

@@ -345,6 +345,8 @@ async function dgGoogleSignIn(){
  /* Yönlendirme başladı; sayfa değişene kadar bekleme ekranı kalır. */
 }
 
+window.showAuth=showAuth;
+window.authTab=authTab;
 window.dgGoogleSignIn=dgGoogleSignIn;
 window.dgIsOAuthCallback=dgIsOAuthCallback;
 window.dgWaitForOAuthSession=dgWaitForOAuthSession;

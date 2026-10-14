@@ -85,6 +85,15 @@ describe('Google ile giriş — auth.js', () => {
     assert.match(auth, /tsToken\("tsLogin"\)/, 'parola girişinde Turnstile korunmalı');
   });
 
+  test('OAuth flow için PKCE ve callback sonrası açık URL temizliği', () => {
+    const config=readFileSync(join(ROOT,'src/config/supabase.js'),'utf8');
+    assert.match(config,/flowType:AUTH_FLOW_TYPE/);
+    assert.match(config,/"implicit":"pkce"/);
+    assert.match(config,/detectSessionInUrl:true/);
+    const shell=readFileSync(join(ROOT,'src/ui/shell.js'),'utf8');
+    assert.match(shell,/if\(typeof dgCleanOAuthUrl==="function"\)dgCleanOAuthUrl\(\)/);
+  });
+
   test('hata durumunda düğme kilitli kalmıyor + rehber gösteriliyor', () => {
     const fn = auth.slice(auth.indexOf('async function dgGoogleSignIn'), auth.indexOf('window.dgGoogleSignIn'));
     assert.match(fn, /btn\.disabled=false/);
