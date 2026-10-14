@@ -438,7 +438,7 @@ function dgSensUpdateStatus(){const evidence=window.DG_SURFACE_OSM_EVIDENCE_STAT
 async function dgSensAutoWaterOnMount(rec,epoch){
  const n=await dgSensAutoWaterOnScan(rec,epoch,true);
  if(epoch!==DG_SENS.epoch||DG_SENS.record!==rec||DG_SENS.busy)return;
- if(n){
+ if(n||rec.osmCoverage?.changed){
   DG_SENS.status=_tvs("OSM bina, yol ve su geometrileri önizlemeye uygulandı. Ham raster korunuyor; sınırları doğrulayıp sonucu kabul edin.");
   await dgSensSave();
  }else if(rec.osmCoverage?.status!=="complete"&&!(rec.objectFeatures||[]).some(f=>f.type==="water"||f.type==="pool")){

@@ -59,7 +59,7 @@ test('partial refresh cannot erase previous building/road geometries, while a co
  const w=env(['src/application/surface/apply-auto-surface-water-objects.js']),old=[{type:'building',method:'osm-boundary',osmId:'way/1',geometry:'old'}],record={objectFeatures:old,features:[],osmCoverage:{status:'partial'}};let partitions=0;
  const ports={record,objects:[{type:'water',method:'osm-boundary',osmId:'way/2'}],epoch:1,getEpoch:()=>1,getRecord:()=>record,repartition:async()=>{partitions++;return true;},dirty(){}};
  assert.equal(await w.DG_APPLY_AUTO_SURFACE_WATER_OBJECTS.apply(ports),0);assert.equal(record.objectFeatures,old);assert.equal(partitions,0);
- record.osmCoverage={status:'complete',objectCount:0};ports.objects=[];await w.DG_APPLY_AUTO_SURFACE_WATER_OBJECTS.apply(ports);assert.equal(record.objectFeatures.length,0);assert.equal(partitions,1);
+ record.osmCoverage={status:'complete',objectCount:0};ports.objects=[];await w.DG_APPLY_AUTO_SURFACE_WATER_OBJECTS.apply(ports);assert.equal(record.objectFeatures.length,0);assert.equal(partitions,1);assert.equal(record.osmCoverage.changed,true);
 });
 
 test('HTTP 200 partial responses retain the actual Overpass error and rotate mirrors without reading an already-used body',async()=>{
@@ -80,4 +80,10 @@ test('OSM disclosure remains visible alongside an existing scan completion messa
  const window=env(['src/ui/surface-osm-evidence-status.js']),element={textContent:''},context=vm.createContext({window,document:{getElementById:()=>element},_tvs:value=>value,DG_SENS:{status:'Tarama tamamlandı.',record:{osmCoverage:{status:'partial'}}}});
  vm.runInContext(read('src/ui/lc-sens.js').match(/^function dgSensUpdateStatus\(\).*$/m)[0],context);
  vm.runInContext('dgSensUpdateStatus()',context);assert.match(element.textContent,/Tarama tamamlandı/);assert.match(element.textContent,/OSM bina, yol ve su verisi eksik/);
+});
+
+test('failed geometry application rolls back objects and cannot leave a complete evidence flag',async()=>{
+ const w=env(['src/application/surface/apply-auto-surface-water-objects.js']),old=[{type:'building',method:'osm-boundary',osmId:'old',geometry:'old'}],record={objectFeatures:old,features:[],osmCoverage:{status:'complete',objectCount:1}};
+ await w.DG_APPLY_AUTO_SURFACE_WATER_OBJECTS.apply({record,objects:[{type:'water',method:'osm-boundary',osmId:'new'}],epoch:1,getEpoch:()=>1,getRecord:()=>record,repartition:async()=>false,dirty:()=>assert.fail('failed geometry must not become a dirty new result')});
+ assert.equal(record.objectFeatures,old);assert.equal(record.osmCoverage.status,'unavailable');
 });

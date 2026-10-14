@@ -11,9 +11,11 @@ window.DG_APPLY_AUTO_SURFACE_WATER_OBJECTS={
     const superseded=(record.features||[]).filter(feature=>feature.method==="visual-boundary"&&feature.source==="osm-selected"&&ids.has(feature.osmId));
     if(!changed&&!superseded.length)return objects.length;
     const previous=record.objectFeatures,previousFeatures=record.features;record.objectFeatures=next;
-    const features=(record.features||[]).filter(feature=>!superseded.includes(feature)),ok=await repartition(features);
-    if(!ok){record.objectFeatures=previous;record.features=previousFeatures;return 0;}
+    const features=(record.features||[]).filter(feature=>!superseded.includes(feature));let ok;
+    const rollback=()=>{record.objectFeatures=previous;record.features=previousFeatures;if(record.osmCoverage)record.osmCoverage.status="unavailable";};
+    try{ok=await repartition(features);}catch(error){rollback();throw error;}
+    if(!ok){rollback();return 0;}
     if(epoch!==getEpoch()||getRecord()!==record)return 0;
-    record.objectVersion="footprints-v5-osm-all";dirty();return objects.length;
+    record.objectVersion="footprints-v5-osm-all";if(record.osmCoverage)record.osmCoverage.changed=true;dirty();return objects.length;
   }
 };
