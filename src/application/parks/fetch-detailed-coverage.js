@@ -23,38 +23,24 @@ window.DG_PARK_COVERAGE_FETCH_APPLICATION = {
 
       const pad = 0.0005;
       const bbox = `${minLat-pad},${minLon-pad},${maxLat+pad},${maxLon+pad}`;
+      /* Use one selector per tag family. The former way+relation pairs issued
+       * nearly thirty overlapping bbox scans and often exhausted the shared
+       * 20 s Overpass budget before returning grid-critical geometry. */
       const query =
-        `[out:json][timeout:90];(`+
-        `way["natural"="water"](${bbox});`+
-        `relation["natural"="water"](${bbox});`+
-        `way["water"](${bbox});`+
-        `relation["water"](${bbox});`+
-        `way["landuse"~"reservoir|basin"](${bbox});`+
-        `relation["landuse"~"reservoir|basin"](${bbox});`+
-        `way["leisure"="swimming_pool"](${bbox});`+
-        `relation["leisure"="swimming_pool"](${bbox});`+
-        `way["amenity"="fountain"](${bbox});`+
-        `relation["amenity"="fountain"](${bbox});`+
-        `way["waterway"="riverbank"](${bbox});`+
-        `relation["waterway"="riverbank"](${bbox});`+
-
-        `way["building"](${bbox});`+
-        `relation["building"](${bbox});`+
-        `way["building:part"](${bbox});`+
-        `relation["building:part"](${bbox});`+
+        `[out:json][timeout:45];(`+
+        `nwr["natural"="water"](${bbox});`+
+        `nwr["water"](${bbox});`+
+        `nwr["landuse"~"reservoir|basin|highway"](${bbox});`+
+        `nwr["waterway"="riverbank"](${bbox});`+
+        `nwr["leisure"~"swimming_pool|pitch|track|playground"](${bbox});`+
+        `nwr["amenity"~"fountain|parking|bicycle_parking|motorcycle_parking"](${bbox});`+
+        `nwr["building"](${bbox});`+
+        `nwr["building:part"](${bbox});`+
         `way["highway"](${bbox});`+
         `way["area:highway"](${bbox});`+
-        `relation["area:highway"](${bbox});`+
-        `way["landuse"="highway"](${bbox});`+
-        `relation["landuse"="highway"](${bbox});`+
-        `way["amenity"~"parking|bicycle_parking|motorcycle_parking"](${bbox});`+
-        `relation["amenity"~"parking|bicycle_parking|motorcycle_parking"](${bbox});`+
-        `way["leisure"~"pitch|track|playground"](${bbox});`+
-        `relation["leisure"~"pitch|track|playground"](${bbox});`+
-        `way["surface"~"asphalt|paved|concrete|paving_stones|sett|concrete:plates|concrete:lanes|cobblestone|bricks|metal"](${bbox});`+
-        `relation["surface"~"asphalt|paved|concrete|paving_stones|sett|concrete:plates|concrete:lanes|cobblestone|bricks|metal"](${bbox});`+
-        `way["man_made"~"pier|bridge"](${bbox});`+
-        `relation["man_made"~"pier|bridge"](${bbox});`+
+        `nwr["surface"~"asphalt|paved|concrete|paving_stones|sett|concrete:plates|concrete:lanes|cobblestone|bricks|metal"](${bbox});`+
+        `nwr["man_made"~"pier|bridge"](${bbox});`+
+        `nwr["bridge"="yes"](${bbox});`+
         `);out geom;`;
 
       let json=null;
