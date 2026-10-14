@@ -13,7 +13,7 @@ if(m)m.style.display="flex";
 
 /* --- BLOK 2: Form görünürlüğü + Turnstile --- */
 function showAuth(tab){
- if(window.DG_SHOW_AUTH_PANEL)return window.DG_SHOW_AUTH_PANEL.show($("erisim"),$("authBox"),tab,{selectTab:authTab,schedule:setTimeout});
+ if(window.DG_SHOW_AUTH_PANEL)return window.DG_SHOW_AUTH_PANEL.show($("erisim"),$("authBox"),tab,{selectTab:authTab,schedule:(callback,delay)=>window.setTimeout(callback,delay)});
 const el=$("erisim");if(!el)return;
 el.scrollIntoView({behavior:"smooth"});authTab(tab||"login");
 const box=$("authBox");box.classList.remove("auth-glow");void box.offsetWidth;box.classList.add("auth-glow");

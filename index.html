@@ -230,491 +230,491 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=Manrope:wght@400;600;700;800&family=IBM+Plex+Mono:wght@400;600;700&display=swap" media="print" onload="this.media='all'">
 <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=Manrope:wght@400;600;700;800&family=IBM+Plex+Mono:wght@400;600;700&display=swap"></noscript>
 <link rel="stylesheet" href="vendor/leaflet-1.9.4.css">
-<link rel="stylesheet" href="css/startup.css?v=694bc8b7">
-<link rel="stylesheet" href="css/style.css?v=ebf851dd">
-<link rel="stylesheet" href="css/landing.css?v=b1a07065">
-<script src="src/ui/startup-screen.js?v=bf8f80db" type="application/x-dendrogeo-module" defer></script>
+<link rel="stylesheet" href="css/startup.css?v=32dd7408">
+<link rel="stylesheet" href="css/style.css?v=cd8c44ad">
+<link rel="stylesheet" href="css/landing.css?v=22f55ab7">
+<script src="src/ui/startup-screen.js?v=7951ca99" type="application/x-dendrogeo-module" defer></script>
 <script src="vendor/leaflet-1.9.4.js" defer></script>
 <link rel="stylesheet" href="vendor/MarkerCluster-1.5.3.css">
 <link rel="stylesheet" href="vendor/MarkerCluster.Default-1.5.3.css">
 <script src="vendor/leaflet.markercluster-1.5.3.js" defer></script>
 <script src="vendor/supabase-js-2.116.0.js" defer></script>
-<script src="src/config/supabase.js?v=2edebabf" type="application/x-dendrogeo-module" defer></script>
-<script src="src/config/constants.js?v=0dd1da58" type="application/x-dendrogeo-module" defer></script>
-<script src="src/config/measurement-protocol-lock.js?v=891a7a1b" type="application/x-dendrogeo-module" defer></script>
-<script src="src/config/wood-density-lock.js?v=ebc86506" type="application/x-dendrogeo-module" defer></script>
-<script src="src/config/species.js?v=74f88f77" type="application/x-dendrogeo-module" defer></script>
+<script src="src/config/supabase.js?v=b61a268d" type="application/x-dendrogeo-module" defer></script>
+<script src="src/config/constants.js?v=64a3af10" type="application/x-dendrogeo-module" defer></script>
+<script src="src/config/measurement-protocol-lock.js?v=e0149748" type="application/x-dendrogeo-module" defer></script>
+<script src="src/config/wood-density-lock.js?v=49265fb5" type="application/x-dendrogeo-module" defer></script>
+<script src="src/config/species.js?v=4f83c582" type="application/x-dendrogeo-module" defer></script>
 <!-- DİL KATMANI (0035): sözlük verisi çalışma zamanı çeviricisinden önce yüklenir. -->
-<script src="src/config/i18n-en.js?v=994491e4" type="application/x-dendrogeo-module" defer></script>
-<script src="src/config/i18n.js?v=660ce021" type="application/x-dendrogeo-module" defer></script>
-<script src="src/domain/map/web-mercator-coordinates.js?v=4d8fb6a4" type="application/x-dendrogeo-module" defer></script>
-<script src="src/utils/geo.js?v=089d5485" type="application/x-dendrogeo-module" defer></script>
-<script src="src/utils/truncation.js?v=d15e4525" type="application/x-dendrogeo-module" defer></script>
+<script src="src/config/i18n-en.js?v=bf9858eb" type="application/x-dendrogeo-module" defer></script>
+<script src="src/config/i18n.js?v=5b19742f" type="application/x-dendrogeo-module" defer></script>
+<script src="src/domain/map/web-mercator-coordinates.js?v=28d7aad5" type="application/x-dendrogeo-module" defer></script>
+<script src="src/utils/geo.js?v=9a71a489" type="application/x-dendrogeo-module" defer></script>
+<script src="src/utils/truncation.js?v=5fa50aef" type="application/x-dendrogeo-module" defer></script>
 <!-- Faz 7: geotiff (317 KB) ve chart.js (208 KB) artık SENKRON yüklenmiyor;
      src/utils/lazylibs.js ihtiyaç anında enjekte eder (LULC analizi / panel grafiği). -->
-<script id="dgRuntimeBuild" type="application/json">"4d7007dcf89eed8f"</script>
+<script id="dgRuntimeBuild" type="application/json">"f15001ab8e6e8194"</script>
 <!-- Verified fallback OSM water geometry, independent of the lazy raster engine. -->
-<script src="src/services/osm-water-backup.js?v=5b715148" type="application/x-dendrogeo-module" defer></script>
-<script src="src/utils/lazylibs.js?v=05c3c1f6" type="application/x-dendrogeo-module" defer></script>
-<script src="src/domain/trees/photo-quality.js?v=f4847954" type="application/x-dendrogeo-module" defer></script>
-<script src="src/domain/trees/allometry.js?v=49d76f9a" type="application/x-dendrogeo-module" defer></script>
-<script src="src/domain/trees/build-live-measurement-preview-input.js?v=1a7051a3" type="application/x-dendrogeo-module" defer></script>
-<script src="src/application/trees/calculate-tree-carbon.js?v=ff9e4517" type="application/x-dendrogeo-module" defer></script>
-<script src="src/application/trees/calculate-tree-carbon-from-circumference.js?v=3def7a03" type="application/x-dendrogeo-module" defer></script>
-<script src="src/application/trees/calculate-live-measurement-preview.js?v=7bec7018" type="application/x-dendrogeo-module" defer></script>
-<script src="src/ui/render-live-measurement-preview.js?v=e89efea0" type="application/x-dendrogeo-module" defer></script>
-<script src="src/application/trees/validate-measurement.js?v=43644fb8" type="application/x-dendrogeo-module" defer></script>
-<script src="src/services/allometry.js?v=2a9484e9" type="application/x-dendrogeo-module" defer></script>
-<script src="src/adapters/trees/project-selection-memory.js?v=a54c2ec8" type="application/x-dendrogeo-module" defer></script>
-<script src="src/ui/open-project-for-measurement.js?v=0870b480" type="application/x-dendrogeo-module" defer></script>
-<script src="src/ui/measurement-project-card.js?v=23235609" type="application/x-dendrogeo-module" defer></script>
-<script src="src/ui/measurement-project-park-box.js?v=bce28e0a" type="application/x-dendrogeo-module" defer></script>
-<script src="src/ui/measurement-project-name-preview.js?v=e91bb13a" type="application/x-dendrogeo-module" defer></script>
-<script src="src/adapters/trees/fetch-owned-measurement-projects.js?v=e65e5f16" type="application/x-dendrogeo-module" defer></script>
-<script src="src/adapters/trees/fetch-shared-measurement-projects.js?v=c645da79" type="application/x-dendrogeo-module" defer></script>
-<script src="src/domain/trees/merge-measurement-projects.js?v=02b08045" type="application/x-dendrogeo-module" defer></script>
-<script src="src/ui/render-measurement-project-directory.js?v=e675d996" type="application/x-dendrogeo-module" defer></script>
-<script src="src/application/trees/measurement-project-state.js?v=e3a97361" type="application/x-dendrogeo-module" defer></script>
-<script src="src/application/trees/load-measurement-project-directory.js?v=7b8cb52b" type="application/x-dendrogeo-module" defer></script>
-<script src="src/domain/trees/build-measurement-project-write.js?v=a2ce4082" type="application/x-dendrogeo-module" defer></script>
-<script src="src/adapters/trees/persist-measurement-project.js?v=e830d4f8" type="application/x-dendrogeo-module" defer></script>
-<script src="src/application/trees/save-measurement-project.js?v=1342100a" type="application/x-dendrogeo-module" defer></script>
-<script src="src/ui/measurement-project-edit-form.js?v=4c1103a9" type="application/x-dendrogeo-module" defer></script>
-<script src="src/adapters/trees/reverse-geocode.js?v=33afe811" type="application/x-dendrogeo-module" defer></script>
-<script src="src/adapters/trees/load-measurement-photo.js?v=6360d45b" type="application/x-dendrogeo-module" defer></script>
-<script src="src/ui/measurement-photo-summary.js?v=59bc59a4" type="application/x-dendrogeo-module" defer></script>
-<script src="src/application/trees/measurement-photo-check-state.js?v=486cb907" type="application/x-dendrogeo-module" defer></script>
-<script src="src/adapters/trees/read-measurement-photo-pixels.js?v=6d1afb0b" type="application/x-dendrogeo-module" defer></script>
-<script src="src/ui/measurement-photo-check.js?v=b9f22878" type="application/x-dendrogeo-module" defer></script>
-<script src="src/ui/measurement-photo-file.js?v=967ad913" type="application/x-dendrogeo-module" defer></script>
-<script src="src/ui/check-measurement-photo.js?v=479e94ed" type="application/x-dendrogeo-module" defer></script>
-<script src="src/ui/measurement-gps-button.js?v=638ad24e" type="application/x-dendrogeo-module" defer></script>
-<script src="src/domain/trees/format-measurement-gps-readout.js?v=6e465729" type="application/x-dendrogeo-module" defer></script>
-<script src="src/ui/measurement-gps-readout.js?v=7e0e62ec" type="application/x-dendrogeo-module" defer></script>
-<script src="src/adapters/trees/update-measurement-gps-map-marker.js?v=0bdb3e5e" type="application/x-dendrogeo-module" defer></script>
-<script src="src/ui/measurement-gps-active-state.js?v=76cdabb3" type="application/x-dendrogeo-module" defer></script>
-<script src="src/application/trees/refresh-measurement-gps-view.js?v=fef7e1c7" type="application/x-dendrogeo-module" defer></script>
-<script src="src/ui/measurement-species-selector.js?v=f7a714c9" type="application/x-dendrogeo-module" defer></script>
-<script src="src/domain/auth/resolve-turnstile-form.js?v=6bd0a792" type="application/x-dendrogeo-module" defer></script>
-<script src="src/adapters/auth/load-turnstile-script.js?v=dd4a96a4" type="application/x-dendrogeo-module" defer></script>
-<script src="src/ui/turnstile-widget.js?v=65b947e1" type="application/x-dendrogeo-module" defer></script>
-<script src="src/ui/turnstile-controller.js?v=09681116" type="application/x-dendrogeo-module" defer></script>
-<script src="src/domain/auth/read-turnstile-token.js?v=60caf0fd" type="application/x-dendrogeo-module" defer></script>
-<script src="src/domain/auth/is-oauth-callback.js?v=344f2921" type="application/x-dendrogeo-module" defer></script>
-<script src="src/domain/auth/read-oauth-error.js?v=8da6a6f6" type="application/x-dendrogeo-module" defer></script>
-<script src="src/application/auth/login-with-password.js?v=ffe46c06" type="application/x-dendrogeo-module" defer></script>
-<script src="src/ui/register-account.js?v=85a7c0e1" type="application/x-dendrogeo-module" defer></script>
-<script src="src/application/auth/send-password-reset-email.js?v=ae2dbe1d" type="application/x-dendrogeo-module" defer></script>
-<script src="src/application/auth/sign-out.js?v=99312f0a" type="application/x-dendrogeo-module" defer></script>
-<script src="src/application/auth/save-new-password.js?v=faf0a6cd" type="application/x-dendrogeo-module" defer></script>
-<script src="src/application/auth/wait-for-oauth-session.js?v=ce239324" type="application/x-dendrogeo-module" defer></script>
-<script src="src/application/auth/clean-oauth-url.js?v=b61b6df1" type="application/x-dendrogeo-module" defer></script>
-<script src="src/application/auth/start-authenticated-session.js?v=93318f1e" type="application/x-dendrogeo-module" defer></script>
-<script src="src/ui/oauth-wait-indicator.js?v=b9ed5c09" type="application/x-dendrogeo-module" defer></script>
-<script src="src/ui/show-password-recovery.js?v=e81268b2" type="application/x-dendrogeo-module" defer></script>
-<script src="src/ui/show-auth-panel.js?v=8ed87634" type="application/x-dendrogeo-module" defer></script>
-<script src="src/ui/select-auth-tab.js?v=ac973b10" type="application/x-dendrogeo-module" defer></script>
-<script src="src/ui/render-auth-message.js?v=25d60885" type="application/x-dendrogeo-module" defer></script>
-<script src="src/application/auth/start-google-sign-in.js?v=254556fc" type="application/x-dendrogeo-module" defer></script>
-<script src="src/adapters/auth/session-store.js?v=40e18d80" type="application/x-dendrogeo-module" defer></script>
-<script src="src/services/auth.js?v=2450b537" type="application/x-dendrogeo-module" defer></script>
-<script src="src/domain/export/measurement-row.js?v=8ab5edd1" type="application/x-dendrogeo-module" defer></script>
-<script src="src/domain/export/build-measurement-csv.js?v=7bbdf01f" type="application/x-dendrogeo-module" defer></script>
-<script src="src/domain/export/build-measurement-geojson.js?v=6bd4164e" type="application/x-dendrogeo-module" defer></script>
-<script src="src/adapters/export/measurement-store.js?v=11ace219" type="application/x-dendrogeo-module" defer></script>
-<script src="src/domain/export/resolve-export-options.js?v=7620453a" type="application/x-dendrogeo-module" defer></script>
-<script src="src/application/export/serialize-measurement-export.js?v=6871311c" type="application/x-dendrogeo-module" defer></script>
-<script src="src/adapters/export/file-download.js?v=4e2ea75a" type="application/x-dendrogeo-module" defer></script>
-<script src="src/application/export/download-user-measurement-export.js?v=1c071c8e" type="application/x-dendrogeo-module" defer></script>
-<script src="src/application/export/prepare-user-measurement-preview.js?v=21599e03" type="application/x-dendrogeo-module" defer></script>
-<script src="src/ui/export-preview.js?v=bb2e4b43" type="application/x-dendrogeo-module" defer></script>
-<script src="src/services/export.js?v=dd384be2" type="application/x-dendrogeo-module" defer></script>
-<script src="src/adapters/offline/create-client-id.js?v=612cbfc6" type="application/x-dendrogeo-module" defer></script>
-<script src="src/domain/offline/same-measurement.js?v=6ef870f4" type="application/x-dendrogeo-module" defer></script>
-<script src="src/adapters/offline/idb-promises.js?v=0f8edbef" type="application/x-dendrogeo-module" defer></script>
-<script src="src/adapters/offline/measurement-queue.js?v=8b71b058" type="application/x-dendrogeo-module" defer></script>
-<script src="src/ui/offline-sync-badge.js?v=c5d1436a" type="application/x-dendrogeo-module" defer></script>
-<script src="src/domain/offline/prepare-measurement-sync-payload.js?v=7024a254" type="application/x-dendrogeo-module" defer></script>
-<script src="src/adapters/offline/find-saved-measurement.js?v=6b4545b5" type="application/x-dendrogeo-module" defer></script>
-<script src="src/adapters/offline/upload-queued-measurement-photo.js?v=c5c95516" type="application/x-dendrogeo-module" defer></script>
-<script src="src/adapters/offline/persist-queued-measurement.js?v=0eac3566" type="application/x-dendrogeo-module" defer></script>
-<script src="src/application/offline/sync-queued-measurement.js?v=827d75e2" type="application/x-dendrogeo-module" defer></script>
-<script src="src/application/offline/drain-measurement-queue.js?v=6a9233cf" type="application/x-dendrogeo-module" defer></script>
-<script src="src/application/offline/coordinate-measurement-sync.js?v=ab6365f3" type="application/x-dendrogeo-module" defer></script>
-<script src="src/application/offline/refresh-after-measurement-sync.js?v=70995e33" type="application/x-dendrogeo-module" defer></script>
-<script src="src/ui/offline-sync-feedback.js?v=5590d2d2" type="application/x-dendrogeo-module" defer></script>
-<script src="src/ui/offline-install-prompt.js?v=0c2868ce" type="application/x-dendrogeo-module" defer></script>
-<script src="src/services/offline.js?v=028e8f85" type="application/x-dendrogeo-module" defer></script>
+<script src="src/services/osm-water-backup.js?v=6baf769a" type="application/x-dendrogeo-module" defer></script>
+<script src="src/utils/lazylibs.js?v=9626796e" type="application/x-dendrogeo-module" defer></script>
+<script src="src/domain/trees/photo-quality.js?v=7648fe67" type="application/x-dendrogeo-module" defer></script>
+<script src="src/domain/trees/allometry.js?v=47cef2c1" type="application/x-dendrogeo-module" defer></script>
+<script src="src/domain/trees/build-live-measurement-preview-input.js?v=4a2c0929" type="application/x-dendrogeo-module" defer></script>
+<script src="src/application/trees/calculate-tree-carbon.js?v=7abd05b8" type="application/x-dendrogeo-module" defer></script>
+<script src="src/application/trees/calculate-tree-carbon-from-circumference.js?v=9f9b1f6c" type="application/x-dendrogeo-module" defer></script>
+<script src="src/application/trees/calculate-live-measurement-preview.js?v=aad0090a" type="application/x-dendrogeo-module" defer></script>
+<script src="src/ui/render-live-measurement-preview.js?v=013e29d7" type="application/x-dendrogeo-module" defer></script>
+<script src="src/application/trees/validate-measurement.js?v=96f46c36" type="application/x-dendrogeo-module" defer></script>
+<script src="src/services/allometry.js?v=85b8439a" type="application/x-dendrogeo-module" defer></script>
+<script src="src/adapters/trees/project-selection-memory.js?v=335d51e2" type="application/x-dendrogeo-module" defer></script>
+<script src="src/ui/open-project-for-measurement.js?v=798aac76" type="application/x-dendrogeo-module" defer></script>
+<script src="src/ui/measurement-project-card.js?v=b7040ede" type="application/x-dendrogeo-module" defer></script>
+<script src="src/ui/measurement-project-park-box.js?v=75dd9db0" type="application/x-dendrogeo-module" defer></script>
+<script src="src/ui/measurement-project-name-preview.js?v=478ff38a" type="application/x-dendrogeo-module" defer></script>
+<script src="src/adapters/trees/fetch-owned-measurement-projects.js?v=3af503ba" type="application/x-dendrogeo-module" defer></script>
+<script src="src/adapters/trees/fetch-shared-measurement-projects.js?v=283f6c19" type="application/x-dendrogeo-module" defer></script>
+<script src="src/domain/trees/merge-measurement-projects.js?v=69acc9ab" type="application/x-dendrogeo-module" defer></script>
+<script src="src/ui/render-measurement-project-directory.js?v=b464e587" type="application/x-dendrogeo-module" defer></script>
+<script src="src/application/trees/measurement-project-state.js?v=3acd9415" type="application/x-dendrogeo-module" defer></script>
+<script src="src/application/trees/load-measurement-project-directory.js?v=a0e451be" type="application/x-dendrogeo-module" defer></script>
+<script src="src/domain/trees/build-measurement-project-write.js?v=6f2c89c7" type="application/x-dendrogeo-module" defer></script>
+<script src="src/adapters/trees/persist-measurement-project.js?v=01bd7aa1" type="application/x-dendrogeo-module" defer></script>
+<script src="src/application/trees/save-measurement-project.js?v=4f5bde00" type="application/x-dendrogeo-module" defer></script>
+<script src="src/ui/measurement-project-edit-form.js?v=42678646" type="application/x-dendrogeo-module" defer></script>
+<script src="src/adapters/trees/reverse-geocode.js?v=6655f150" type="application/x-dendrogeo-module" defer></script>
+<script src="src/adapters/trees/load-measurement-photo.js?v=200f7048" type="application/x-dendrogeo-module" defer></script>
+<script src="src/ui/measurement-photo-summary.js?v=fa6b03ce" type="application/x-dendrogeo-module" defer></script>
+<script src="src/application/trees/measurement-photo-check-state.js?v=0f83ae36" type="application/x-dendrogeo-module" defer></script>
+<script src="src/adapters/trees/read-measurement-photo-pixels.js?v=e755216b" type="application/x-dendrogeo-module" defer></script>
+<script src="src/ui/measurement-photo-check.js?v=abb2b4c3" type="application/x-dendrogeo-module" defer></script>
+<script src="src/ui/measurement-photo-file.js?v=d6cbe677" type="application/x-dendrogeo-module" defer></script>
+<script src="src/ui/check-measurement-photo.js?v=fd909816" type="application/x-dendrogeo-module" defer></script>
+<script src="src/ui/measurement-gps-button.js?v=0d6e0182" type="application/x-dendrogeo-module" defer></script>
+<script src="src/domain/trees/format-measurement-gps-readout.js?v=93138372" type="application/x-dendrogeo-module" defer></script>
+<script src="src/ui/measurement-gps-readout.js?v=c997a582" type="application/x-dendrogeo-module" defer></script>
+<script src="src/adapters/trees/update-measurement-gps-map-marker.js?v=526e0904" type="application/x-dendrogeo-module" defer></script>
+<script src="src/ui/measurement-gps-active-state.js?v=55455acd" type="application/x-dendrogeo-module" defer></script>
+<script src="src/application/trees/refresh-measurement-gps-view.js?v=32d308e2" type="application/x-dendrogeo-module" defer></script>
+<script src="src/ui/measurement-species-selector.js?v=fbf11bf5" type="application/x-dendrogeo-module" defer></script>
+<script src="src/domain/auth/resolve-turnstile-form.js?v=2bf72877" type="application/x-dendrogeo-module" defer></script>
+<script src="src/adapters/auth/load-turnstile-script.js?v=13a8b429" type="application/x-dendrogeo-module" defer></script>
+<script src="src/ui/turnstile-widget.js?v=b0b9db4a" type="application/x-dendrogeo-module" defer></script>
+<script src="src/ui/turnstile-controller.js?v=91158977" type="application/x-dendrogeo-module" defer></script>
+<script src="src/domain/auth/read-turnstile-token.js?v=db3dfdd5" type="application/x-dendrogeo-module" defer></script>
+<script src="src/domain/auth/is-oauth-callback.js?v=50d82a02" type="application/x-dendrogeo-module" defer></script>
+<script src="src/domain/auth/read-oauth-error.js?v=c4ee6196" type="application/x-dendrogeo-module" defer></script>
+<script src="src/application/auth/login-with-password.js?v=864cfd77" type="application/x-dendrogeo-module" defer></script>
+<script src="src/ui/register-account.js?v=d1d9c6de" type="application/x-dendrogeo-module" defer></script>
+<script src="src/application/auth/send-password-reset-email.js?v=aca9fdcf" type="application/x-dendrogeo-module" defer></script>
+<script src="src/application/auth/sign-out.js?v=4b55b475" type="application/x-dendrogeo-module" defer></script>
+<script src="src/application/auth/save-new-password.js?v=00d56582" type="application/x-dendrogeo-module" defer></script>
+<script src="src/application/auth/wait-for-oauth-session.js?v=0ae5aa91" type="application/x-dendrogeo-module" defer></script>
+<script src="src/application/auth/clean-oauth-url.js?v=6c090682" type="application/x-dendrogeo-module" defer></script>
+<script src="src/application/auth/start-authenticated-session.js?v=0fd0f5b7" type="application/x-dendrogeo-module" defer></script>
+<script src="src/ui/oauth-wait-indicator.js?v=8594f42d" type="application/x-dendrogeo-module" defer></script>
+<script src="src/ui/show-password-recovery.js?v=21231476" type="application/x-dendrogeo-module" defer></script>
+<script src="src/ui/show-auth-panel.js?v=64afda23" type="application/x-dendrogeo-module" defer></script>
+<script src="src/ui/select-auth-tab.js?v=a558b92c" type="application/x-dendrogeo-module" defer></script>
+<script src="src/ui/render-auth-message.js?v=8f4d8db0" type="application/x-dendrogeo-module" defer></script>
+<script src="src/application/auth/start-google-sign-in.js?v=3ef835d7" type="application/x-dendrogeo-module" defer></script>
+<script src="src/adapters/auth/session-store.js?v=963fd879" type="application/x-dendrogeo-module" defer></script>
+<script src="src/services/auth.js?v=89d6c0fb" type="application/x-dendrogeo-module" defer></script>
+<script src="src/domain/export/measurement-row.js?v=a0749d49" type="application/x-dendrogeo-module" defer></script>
+<script src="src/domain/export/build-measurement-csv.js?v=aa2d18cd" type="application/x-dendrogeo-module" defer></script>
+<script src="src/domain/export/build-measurement-geojson.js?v=20592a79" type="application/x-dendrogeo-module" defer></script>
+<script src="src/adapters/export/measurement-store.js?v=a3dc2536" type="application/x-dendrogeo-module" defer></script>
+<script src="src/domain/export/resolve-export-options.js?v=d1a9bca0" type="application/x-dendrogeo-module" defer></script>
+<script src="src/application/export/serialize-measurement-export.js?v=fc6b28b7" type="application/x-dendrogeo-module" defer></script>
+<script src="src/adapters/export/file-download.js?v=51c00ee0" type="application/x-dendrogeo-module" defer></script>
+<script src="src/application/export/download-user-measurement-export.js?v=36c28603" type="application/x-dendrogeo-module" defer></script>
+<script src="src/application/export/prepare-user-measurement-preview.js?v=8fa38248" type="application/x-dendrogeo-module" defer></script>
+<script src="src/ui/export-preview.js?v=8f3f1455" type="application/x-dendrogeo-module" defer></script>
+<script src="src/services/export.js?v=f41cdd0c" type="application/x-dendrogeo-module" defer></script>
+<script src="src/adapters/offline/create-client-id.js?v=0c0a0e3e" type="application/x-dendrogeo-module" defer></script>
+<script src="src/domain/offline/same-measurement.js?v=3b8d15c5" type="application/x-dendrogeo-module" defer></script>
+<script src="src/adapters/offline/idb-promises.js?v=fc7a614a" type="application/x-dendrogeo-module" defer></script>
+<script src="src/adapters/offline/measurement-queue.js?v=fd564f36" type="application/x-dendrogeo-module" defer></script>
+<script src="src/ui/offline-sync-badge.js?v=18012074" type="application/x-dendrogeo-module" defer></script>
+<script src="src/domain/offline/prepare-measurement-sync-payload.js?v=4eaa6d7e" type="application/x-dendrogeo-module" defer></script>
+<script src="src/adapters/offline/find-saved-measurement.js?v=baf7e5ed" type="application/x-dendrogeo-module" defer></script>
+<script src="src/adapters/offline/upload-queued-measurement-photo.js?v=fc5b5372" type="application/x-dendrogeo-module" defer></script>
+<script src="src/adapters/offline/persist-queued-measurement.js?v=949a2cf3" type="application/x-dendrogeo-module" defer></script>
+<script src="src/application/offline/sync-queued-measurement.js?v=ea86230a" type="application/x-dendrogeo-module" defer></script>
+<script src="src/application/offline/drain-measurement-queue.js?v=939cf78e" type="application/x-dendrogeo-module" defer></script>
+<script src="src/application/offline/coordinate-measurement-sync.js?v=ae862f1d" type="application/x-dendrogeo-module" defer></script>
+<script src="src/application/offline/refresh-after-measurement-sync.js?v=b838d885" type="application/x-dendrogeo-module" defer></script>
+<script src="src/ui/offline-sync-feedback.js?v=d4db4a1b" type="application/x-dendrogeo-module" defer></script>
+<script src="src/ui/offline-install-prompt.js?v=d07615e5" type="application/x-dendrogeo-module" defer></script>
+<script src="src/services/offline.js?v=b4ae33bc" type="application/x-dendrogeo-module" defer></script>
 <!-- YÖNETİM ZİNCİRİ (Faz 6 — eski admin.js beş modüle bölündü) -->
-<script src="src/domain/visitors/device-label.js?v=e7831575" type="application/x-dendrogeo-module" defer></script>
-<script src="src/domain/visitors/build-presence-payload.js?v=ded3fb8c" type="application/x-dendrogeo-module" defer></script>
-<script src="src/domain/visitors/presence-ping-window.js?v=f299d005" type="application/x-dendrogeo-module" defer></script>
-<script src="src/domain/visitors/summarize-live-visitor-counts.js?v=5001e7c8" type="application/x-dendrogeo-module" defer></script>
-<script src="src/domain/visitors/build-live-location-trail.js?v=682d5139" type="application/x-dendrogeo-module" defer></script>
-<script src="src/domain/visitors/presence-retry-delay.js?v=8e438dd9" type="application/x-dendrogeo-module" defer></script>
-<script src="src/application/visitors/build-live-activity.js?v=38a43704" type="application/x-dendrogeo-module" defer></script>
-<script src="src/application/visitors/build-live-roster.js?v=2d8746f1" type="application/x-dendrogeo-module" defer></script>
-<script src="src/application/visitors/record-live-session-events.js?v=52f1061f" type="application/x-dendrogeo-module" defer></script>
-<script src="src/application/visitors/record-presence-view.js?v=5ae7dc3d" type="application/x-dendrogeo-module" defer></script>
-<script src="src/application/visitors/record-presence-action.js?v=987db450" type="application/x-dendrogeo-module" defer></script>
-<script src="src/application/visitors/build-stored-activity.js?v=5ddc43da" type="application/x-dendrogeo-module" defer></script>
-<script src="src/adapters/visitors/stored-activity-store.js?v=a0063c3d" type="application/x-dendrogeo-module" defer></script>
-<script src="src/adapters/visitors/live-visit-counts-store.js?v=397415a8" type="application/x-dendrogeo-module" defer></script>
-<script src="src/adapters/visitors/session-id-store.js?v=9dc24d42" type="application/x-dendrogeo-module" defer></script>
-<script src="src/adapters/visitors/track-visit.js?v=d01bbfa8" type="application/x-dendrogeo-module" defer></script>
-<script src="src/adapters/visitors/admin-visit-counts-store.js?v=532a538c" type="application/x-dendrogeo-module" defer></script>
-<script src="src/domain/visitors/resolve-admin-visit-windows.js?v=3648df9f" type="application/x-dendrogeo-module" defer></script>
-<script src="src/application/visitors/load-admin-visit-statistics.js?v=3f2a5e72" type="application/x-dendrogeo-module" defer></script>
-<script src="src/ui/visitor-admin-counts.js?v=d1ffbbda" type="application/x-dendrogeo-module" defer></script>
-<script src="src/adapters/visitors/presence-channel.js?v=8590af88" type="application/x-dendrogeo-module" defer></script>
-<script src="src/adapters/visitors/remove-presence-channel.js?v=dc93f5a7" type="application/x-dendrogeo-module" defer></script>
-<script src="src/adapters/visitors/track-presence.js?v=ec54d093" type="application/x-dendrogeo-module" defer></script>
-<script src="src/ui/visitor-map-marker.js?v=f99ab5ce" type="application/x-dendrogeo-module" defer></script>
-<script src="src/adapters/map/create-visitor-live-map.js?v=12af5d0c" type="application/x-dendrogeo-module" defer></script>
-<script src="src/ui/add-visitor-live-map-marker.js?v=383d5774" type="application/x-dendrogeo-module" defer></script>
-<script src="src/application/visitors/prepare-live-map-frame.js?v=b75d2a63" type="application/x-dendrogeo-module" defer></script>
-<script src="src/ui/visitor-live-map-trails.js?v=fcab91a9" type="application/x-dendrogeo-module" defer></script>
-<script src="src/ui/visitor-live-map-fit.js?v=ee61f091" type="application/x-dendrogeo-module" defer></script>
-<script src="src/ui/visitor-live-panel.js?v=def5e36a" type="application/x-dendrogeo-module" defer></script>
-<script src="src/ui/visitor-live-map.js?v=e3c80c71" type="application/x-dendrogeo-module" defer></script>
-<script src="src/ui/visitor-activity-disclosure.js?v=84ca9eda" type="application/x-dendrogeo-module" defer></script>
-<script src="src/ui/visitor-connection-status.js?v=8681217f" type="application/x-dendrogeo-module" defer></script>
-<script src="src/ui/visitor-roster.js?v=840cd461" type="application/x-dendrogeo-module" defer></script>
-<script src="src/ui/visitor-activity-feed.js?v=97e35cca" type="application/x-dendrogeo-module" defer></script>
-<script src="src/ui/visitor-database-activity.js?v=413df9a9" type="application/x-dendrogeo-module" defer></script>
-<script src="src/ui/visitor-view-labels.js?v=8303fded" type="application/x-dendrogeo-module" defer></script>
-<script src="src/ui/visitor-action-labels.js?v=6fe9e46e" type="application/x-dendrogeo-module" defer></script>
-<script src="src/application/visitors/load-owner-activity.js?v=26dc9e06" type="application/x-dendrogeo-module" defer></script>
-<script src="src/application/visitors/load-owner-counts.js?v=4ea19bbd" type="application/x-dendrogeo-module" defer></script>
-<script src="src/application/visitors/refresh-owner-view.js?v=63c5750f" type="application/x-dendrogeo-module" defer></script>
-<script src="src/application/visitors/live-refresh-timer.js?v=d6ebb91b" type="application/x-dendrogeo-module" defer></script>
-<script src="src/ui/focus-live-location.js?v=d678d0fa" type="application/x-dendrogeo-module" defer></script>
-<script src="src/application/visitors/upgrade-presence-auth.js?v=69cc12e6" type="application/x-dendrogeo-module" defer></script>
-<script src="src/application/visitors/render-owner-live-view.js?v=dd12fd74" type="application/x-dendrogeo-module" defer></script>
-<script src="src/application/visitors/stop-presence-session.js?v=35982df1" type="application/x-dendrogeo-module" defer></script>
-<script src="src/application/visitors/fail-presence-session.js?v=be91d864" type="application/x-dendrogeo-module" defer></script>
-<script src="src/application/visitors/start-presence-session.js?v=7a61b56f" type="application/x-dendrogeo-module" defer></script>
-<script src="src/application/visitors/resume-presence-session.js?v=d0fd7a2a" type="application/x-dendrogeo-module" defer></script>
-<script src="src/application/visitors/toggle-activity-disclosure.js?v=950560cd" type="application/x-dendrogeo-module" defer></script>
-<script src="src/application/visitors/restore-activity-disclosure.js?v=ec7a44ec" type="application/x-dendrogeo-module" defer></script>
-<script src="src/ui/update-live-visitor-filters.js?v=5e8ce6ef" type="application/x-dendrogeo-module" defer></script>
-<script src="src/application/visitors/set-live-visitor-pause.js?v=2aac353b" type="application/x-dendrogeo-module" defer></script>
-<script src="src/application/visitors/fit-live-visitor-map.js?v=cd91030f" type="application/x-dendrogeo-module" defer></script>
-<script src="src/services/visit-stats.js?v=11ebbd99" type="application/x-dendrogeo-module" defer></script>
-<script src="src/domain/data-requests/find-pending-duplicate.js?v=fc6aad3b" type="application/x-dendrogeo-module" defer></script>
-<script src="src/domain/data-requests/summarize-dataset.js?v=98aba1cc" type="application/x-dendrogeo-module" defer></script>
-<script src="src/adapters/data-requests/submit-store.js?v=13e85f75" type="application/x-dendrogeo-module" defer></script>
-<script src="src/adapters/data-requests/fulfillment-store.js?v=4d699411" type="application/x-dendrogeo-module" defer></script>
-<script src="src/adapters/data-requests/options-store.js?v=3e1b33a4" type="application/x-dendrogeo-module" defer></script>
-<script src="src/adapters/data-requests/my-requests-store.js?v=40f66ffb" type="application/x-dendrogeo-module" defer></script>
-<script src="src/adapters/data-requests/status-store.js?v=5d1775d9" type="application/x-dendrogeo-module" defer></script>
-<script src="src/domain/data-requests/partition-queue.js?v=dd3a833f" type="application/x-dendrogeo-module" defer></script>
-<script src="src/ui/data-request-pending-table.js?v=b5a6399f" type="application/x-dendrogeo-module" defer></script>
-<script src="src/adapters/data-requests/reply-window.js?v=62df792e" type="application/x-dendrogeo-module" defer></script>
-<script src="src/adapters/data-requests/queue-store.js?v=a0444b1c" type="application/x-dendrogeo-module" defer></script>
-<script src="src/ui/data-request-closed-table.js?v=172e017e" type="application/x-dendrogeo-module" defer></script>
-<script src="src/adapters/data-requests/delete-own-request.js?v=8acf6b79" type="application/x-dendrogeo-module" defer></script>
-<script src="src/ui/my-data-requests.js?v=37872e88" type="application/x-dendrogeo-module" defer></script>
-<script src="src/ui/data-request-reply-content.js?v=51692d97" type="application/x-dendrogeo-module" defer></script>
-<script src="src/application/data-requests/fulfill-request.js?v=90f419da" type="application/x-dendrogeo-module" defer></script>
-<script src="src/application/data-requests/submit-request.js?v=571d92b0" type="application/x-dendrogeo-module" defer></script>
-<script src="src/application/data-requests/delete-own-request.js?v=153b95da" type="application/x-dendrogeo-module" defer></script>
-<script src="src/application/data-requests/reject-request.js?v=d861038c" type="application/x-dendrogeo-module" defer></script>
-<script src="src/application/data-requests/load-options.js?v=cb793f7b" type="application/x-dendrogeo-module" defer></script>
-<script src="src/application/data-requests/load-own-requests.js?v=461eff13" type="application/x-dendrogeo-module" defer></script>
-<script src="src/application/data-requests/load-queue.js?v=7e057c86" type="application/x-dendrogeo-module" defer></script>
-<script src="src/ui/data-request-submission-feedback.js?v=4173311b" type="application/x-dendrogeo-module" defer></script>
-<script src="src/services/data-requests.js?v=c0265ac1" type="application/x-dendrogeo-module" defer></script>
-<script src="src/adapters/users/admin-store.js?v=d4f96818" type="application/x-dendrogeo-module" defer></script>
-<script src="src/domain/users/summarize-admin-users.js?v=2c1860eb" type="application/x-dendrogeo-module" defer></script>
-<script src="src/ui/admin-user-table.js?v=c29f6bb1" type="application/x-dendrogeo-module" defer></script>
-<script src="src/ui/admin-user-filter.js?v=46542d27" type="application/x-dendrogeo-module" defer></script>
-<script src="src/application/users/load-admin-users.js?v=a13918e6" type="application/x-dendrogeo-module" defer></script>
-<script src="src/services/user-admin.js?v=53a8b93e" type="application/x-dendrogeo-module" defer></script>
-<script src="src/adapters/backup/paged-store.js?v=5e3874b9" type="application/x-dendrogeo-module" defer></script>
-<script src="src/domain/backup/build-snapshot.js?v=dbaa01ae" type="application/x-dendrogeo-module" defer></script>
-<script src="src/adapters/backup/json-download.js?v=a7c7bf2a" type="application/x-dendrogeo-module" defer></script>
-<script src="src/application/backup/create-full-backup.js?v=b351ed58" type="application/x-dendrogeo-module" defer></script>
-<script src="src/domain/backup/reminder-state.js?v=329527da" type="application/x-dendrogeo-module" defer></script>
-<script src="src/domain/backup/sql-value.js?v=ea14153f" type="application/x-dendrogeo-module" defer></script>
-<script src="src/domain/backup/build-restore-sql.js?v=c0988a84" type="application/x-dendrogeo-module" defer></script>
-<script src="src/ui/restore-backup-prompt.js?v=a7c2f032" type="application/x-dendrogeo-module" defer></script>
-<script src="src/adapters/backup/download-restore-sql.js?v=fec93821" type="application/x-dendrogeo-module" defer></script>
-<script src="src/application/backup/restore-backup.js?v=c11eb7a0" type="application/x-dendrogeo-module" defer></script>
-<script src="src/services/backup.js?v=018b04de" type="application/x-dendrogeo-module" defer></script>
-<script src="src/ui/admin-measurement-row.js?v=4096a1c0" type="application/x-dendrogeo-module" defer></script>
-<script src="src/ui/admin-measurement-table.js?v=0be0458b" type="application/x-dendrogeo-module" defer></script>
-<script src="src/domain/admin/export-filter-options.js?v=5222dba0" type="application/x-dendrogeo-module" defer></script>
-<script src="src/adapters/admin/admin-persistence-store.js?v=ee50dc52" type="application/x-dendrogeo-module" defer></script>
-<script src="src/application/admin/build-export-query.js?v=a871180f" type="application/x-dendrogeo-module" defer></script>
-<script src="src/application/admin/read-export-rows.js?v=fd91d4c3" type="application/x-dendrogeo-module" defer></script>
-<script src="src/ui/admin-measurement-filter.js?v=6652ef68" type="application/x-dendrogeo-module" defer></script>
-<script src="src/ui/fill-admin-export-select.js?v=b3e34dfd" type="application/x-dendrogeo-module" defer></script>
-<script src="src/application/admin/load-admin-export-filters.js?v=efd2fb76" type="application/x-dendrogeo-module" defer></script>
-<script src="src/application/admin/update-admin-export-filter-options.js?v=9ffaeb5b" type="application/x-dendrogeo-module" defer></script>
-<script src="src/application/admin/download-admin-measurements.js?v=71a1c53f" type="application/x-dendrogeo-module" defer></script>
-<script src="src/application/admin/read-photo-storage-usage.js?v=7afbedd8" type="application/x-dendrogeo-module" defer></script>
-<script src="src/ui/admin-storage-usage.js?v=0c2c6196" type="application/x-dendrogeo-module" defer></script>
-<script src="src/application/admin/clean-orphan-photos.js?v=b0620289" type="application/x-dendrogeo-module" defer></script>
-<script src="src/application/admin/re-geocode-measurements.js?v=68ed2c71" type="application/x-dendrogeo-module" defer></script>
-<script src="src/adapters/admin/re-geocode-store.js?v=9518d995" type="application/x-dendrogeo-module" defer></script>
-<script src="src/ui/confirm-admin-re-geocode.js?v=96ae8eca" type="application/x-dendrogeo-module" defer></script>
-<script src="src/ui/admin-re-geocode-feedback.js?v=5f16cf40" type="application/x-dendrogeo-module" defer></script>
-<script src="src/domain/admin/measurement-geojson.js?v=35062c80" type="application/x-dendrogeo-module" defer></script>
-<script src="src/domain/admin/measurement-review-payload.js?v=49d91fb6" type="application/x-dendrogeo-module" defer></script>
-<script src="src/adapters/admin/measurement-moderation-store.js?v=06103e79" type="application/x-dendrogeo-module" defer></script>
-<script src="src/application/admin/review-measurement.js?v=8b9721ba" type="application/x-dendrogeo-module" defer></script>
-<script src="src/application/admin/override-measurement-geofence.js?v=6dcdfdf8" type="application/x-dendrogeo-module" defer></script>
-<script src="src/application/admin/delete-measurement.js?v=5846a237" type="application/x-dendrogeo-module" defer></script>
-<script src="src/adapters/admin/admin-overview-store.js?v=4caf9628" type="application/x-dendrogeo-module" defer></script>
-<script src="src/domain/admin/summarize-admin-overview.js?v=d85dafd7" type="application/x-dendrogeo-module" defer></script>
-<script src="src/ui/admin-overview-metrics.js?v=71452f98" type="application/x-dendrogeo-module" defer></script>
-<script src="src/ui/admin-overview-measurements.js?v=53ba2f20" type="application/x-dendrogeo-module" defer></script>
-<script src="src/application/admin/load-admin-overview.js?v=1a3f49e7" type="application/x-dendrogeo-module" defer></script>
-<script src="src/services/admin.js?v=493f79c4" type="application/x-dendrogeo-module" defer></script>
-<script src="src/application/admin/admin-tree-state.js?v=15afcb1d" type="application/x-dendrogeo-module" defer></script>
-<script src="src/adapters/admin/admin-tree-store.js?v=38329e3c" type="application/x-dendrogeo-module" defer></script>
-<script src="src/domain/admin/group-measurement-tree.js?v=47a5edbe" type="application/x-dendrogeo-module" defer></script>
-<script src="src/domain/admin/filter-measurement-tree.js?v=e1b348fc" type="application/x-dendrogeo-module" defer></script>
-<script src="src/ui/admin-tree-formatters.js?v=b528cbd9" type="application/x-dendrogeo-module" defer></script>
-<script src="src/ui/admin-tree-pending-summary.js?v=b08edbf6" type="application/x-dendrogeo-module" defer></script>
-<script src="src/ui/admin-tree-measurement-row.js?v=8f03ab08" type="application/x-dendrogeo-module" defer></script>
-<script src="src/ui/admin-tree-user.js?v=235a562c" type="application/x-dendrogeo-module" defer></script>
-<script src="src/ui/admin-tree-project.js?v=7565ff94" type="application/x-dendrogeo-module" defer></script>
-<script src="src/ui/admin-tree-park.js?v=f73d789f" type="application/x-dendrogeo-module" defer></script>
-<script src="src/ui/admin-tree-view.js?v=5231c6ce" type="application/x-dendrogeo-module" defer></script>
-<script src="src/application/admin/refresh-tree-pending-badge.js?v=aab6c78d" type="application/x-dendrogeo-module" defer></script>
-<script src="src/application/admin/open-pending-tree-nodes.js?v=feb789a7" type="application/x-dendrogeo-module" defer></script>
-<script src="src/application/admin/expand-measurement-tree.js?v=5cff86af" type="application/x-dendrogeo-module" defer></script>
-<script src="src/application/admin/apply-tree-row-status.js?v=f0189c86" type="application/x-dendrogeo-module" defer></script>
-<script src="src/application/admin/remove-tree-row.js?v=34f43883" type="application/x-dendrogeo-module" defer></script>
-<script src="src/application/admin/load-admin-tree.js?v=6a77393f" type="application/x-dendrogeo-module" defer></script>
-<script src="src/application/admin/update-admin-tree-filter.js?v=85ae84b6" type="application/x-dendrogeo-module" defer></script>
-<script src="src/application/admin/set-admin-tree-node-open.js?v=520b8ddc" type="application/x-dendrogeo-module" defer></script>
-<script src="src/ui/navigate-admin-tree-pending-scan.js?v=86c387a5" type="application/x-dendrogeo-module" defer></script>
-<script src="src/ui/delete-admin-tree-project.js?v=23f85494" type="application/x-dendrogeo-module" defer></script>
+<script src="src/domain/visitors/device-label.js?v=f88157b6" type="application/x-dendrogeo-module" defer></script>
+<script src="src/domain/visitors/build-presence-payload.js?v=bce6c9b9" type="application/x-dendrogeo-module" defer></script>
+<script src="src/domain/visitors/presence-ping-window.js?v=d66e1170" type="application/x-dendrogeo-module" defer></script>
+<script src="src/domain/visitors/summarize-live-visitor-counts.js?v=5ca69b22" type="application/x-dendrogeo-module" defer></script>
+<script src="src/domain/visitors/build-live-location-trail.js?v=890a29c9" type="application/x-dendrogeo-module" defer></script>
+<script src="src/domain/visitors/presence-retry-delay.js?v=fa14edec" type="application/x-dendrogeo-module" defer></script>
+<script src="src/application/visitors/build-live-activity.js?v=74ab366c" type="application/x-dendrogeo-module" defer></script>
+<script src="src/application/visitors/build-live-roster.js?v=3b1c45a6" type="application/x-dendrogeo-module" defer></script>
+<script src="src/application/visitors/record-live-session-events.js?v=1bc2c044" type="application/x-dendrogeo-module" defer></script>
+<script src="src/application/visitors/record-presence-view.js?v=d063f006" type="application/x-dendrogeo-module" defer></script>
+<script src="src/application/visitors/record-presence-action.js?v=c3d5f039" type="application/x-dendrogeo-module" defer></script>
+<script src="src/application/visitors/build-stored-activity.js?v=d323dcd7" type="application/x-dendrogeo-module" defer></script>
+<script src="src/adapters/visitors/stored-activity-store.js?v=b9a44b61" type="application/x-dendrogeo-module" defer></script>
+<script src="src/adapters/visitors/live-visit-counts-store.js?v=b27a1bc6" type="application/x-dendrogeo-module" defer></script>
+<script src="src/adapters/visitors/session-id-store.js?v=02bf9a9b" type="application/x-dendrogeo-module" defer></script>
+<script src="src/adapters/visitors/track-visit.js?v=222d8032" type="application/x-dendrogeo-module" defer></script>
+<script src="src/adapters/visitors/admin-visit-counts-store.js?v=8ef8e379" type="application/x-dendrogeo-module" defer></script>
+<script src="src/domain/visitors/resolve-admin-visit-windows.js?v=03bb61ee" type="application/x-dendrogeo-module" defer></script>
+<script src="src/application/visitors/load-admin-visit-statistics.js?v=3fea128b" type="application/x-dendrogeo-module" defer></script>
+<script src="src/ui/visitor-admin-counts.js?v=44a380c0" type="application/x-dendrogeo-module" defer></script>
+<script src="src/adapters/visitors/presence-channel.js?v=06cdbe0b" type="application/x-dendrogeo-module" defer></script>
+<script src="src/adapters/visitors/remove-presence-channel.js?v=4133a100" type="application/x-dendrogeo-module" defer></script>
+<script src="src/adapters/visitors/track-presence.js?v=ca9f4635" type="application/x-dendrogeo-module" defer></script>
+<script src="src/ui/visitor-map-marker.js?v=41c863e7" type="application/x-dendrogeo-module" defer></script>
+<script src="src/adapters/map/create-visitor-live-map.js?v=5768c18a" type="application/x-dendrogeo-module" defer></script>
+<script src="src/ui/add-visitor-live-map-marker.js?v=68657043" type="application/x-dendrogeo-module" defer></script>
+<script src="src/application/visitors/prepare-live-map-frame.js?v=64a20771" type="application/x-dendrogeo-module" defer></script>
+<script src="src/ui/visitor-live-map-trails.js?v=b80dc9ab" type="application/x-dendrogeo-module" defer></script>
+<script src="src/ui/visitor-live-map-fit.js?v=65ab0457" type="application/x-dendrogeo-module" defer></script>
+<script src="src/ui/visitor-live-panel.js?v=b061b3fa" type="application/x-dendrogeo-module" defer></script>
+<script src="src/ui/visitor-live-map.js?v=332270cc" type="application/x-dendrogeo-module" defer></script>
+<script src="src/ui/visitor-activity-disclosure.js?v=bd0eaaf4" type="application/x-dendrogeo-module" defer></script>
+<script src="src/ui/visitor-connection-status.js?v=ddf8acad" type="application/x-dendrogeo-module" defer></script>
+<script src="src/ui/visitor-roster.js?v=2b2d1378" type="application/x-dendrogeo-module" defer></script>
+<script src="src/ui/visitor-activity-feed.js?v=33552bd7" type="application/x-dendrogeo-module" defer></script>
+<script src="src/ui/visitor-database-activity.js?v=a3e4672e" type="application/x-dendrogeo-module" defer></script>
+<script src="src/ui/visitor-view-labels.js?v=96412670" type="application/x-dendrogeo-module" defer></script>
+<script src="src/ui/visitor-action-labels.js?v=654917ad" type="application/x-dendrogeo-module" defer></script>
+<script src="src/application/visitors/load-owner-activity.js?v=72b36ac9" type="application/x-dendrogeo-module" defer></script>
+<script src="src/application/visitors/load-owner-counts.js?v=6e50f371" type="application/x-dendrogeo-module" defer></script>
+<script src="src/application/visitors/refresh-owner-view.js?v=1a9a5684" type="application/x-dendrogeo-module" defer></script>
+<script src="src/application/visitors/live-refresh-timer.js?v=42218eda" type="application/x-dendrogeo-module" defer></script>
+<script src="src/ui/focus-live-location.js?v=873b17e0" type="application/x-dendrogeo-module" defer></script>
+<script src="src/application/visitors/upgrade-presence-auth.js?v=55c2e90a" type="application/x-dendrogeo-module" defer></script>
+<script src="src/application/visitors/render-owner-live-view.js?v=42d899c8" type="application/x-dendrogeo-module" defer></script>
+<script src="src/application/visitors/stop-presence-session.js?v=9a6000c1" type="application/x-dendrogeo-module" defer></script>
+<script src="src/application/visitors/fail-presence-session.js?v=d0584f11" type="application/x-dendrogeo-module" defer></script>
+<script src="src/application/visitors/start-presence-session.js?v=6fd1fbe6" type="application/x-dendrogeo-module" defer></script>
+<script src="src/application/visitors/resume-presence-session.js?v=9a650567" type="application/x-dendrogeo-module" defer></script>
+<script src="src/application/visitors/toggle-activity-disclosure.js?v=c6e1616a" type="application/x-dendrogeo-module" defer></script>
+<script src="src/application/visitors/restore-activity-disclosure.js?v=9f59fb1c" type="application/x-dendrogeo-module" defer></script>
+<script src="src/ui/update-live-visitor-filters.js?v=6b0fa47c" type="application/x-dendrogeo-module" defer></script>
+<script src="src/application/visitors/set-live-visitor-pause.js?v=8922b7b7" type="application/x-dendrogeo-module" defer></script>
+<script src="src/application/visitors/fit-live-visitor-map.js?v=cb54ead7" type="application/x-dendrogeo-module" defer></script>
+<script src="src/services/visit-stats.js?v=d63448a9" type="application/x-dendrogeo-module" defer></script>
+<script src="src/domain/data-requests/find-pending-duplicate.js?v=a1032105" type="application/x-dendrogeo-module" defer></script>
+<script src="src/domain/data-requests/summarize-dataset.js?v=5162a26c" type="application/x-dendrogeo-module" defer></script>
+<script src="src/adapters/data-requests/submit-store.js?v=d85cf862" type="application/x-dendrogeo-module" defer></script>
+<script src="src/adapters/data-requests/fulfillment-store.js?v=68636bcd" type="application/x-dendrogeo-module" defer></script>
+<script src="src/adapters/data-requests/options-store.js?v=377f0d9a" type="application/x-dendrogeo-module" defer></script>
+<script src="src/adapters/data-requests/my-requests-store.js?v=39095951" type="application/x-dendrogeo-module" defer></script>
+<script src="src/adapters/data-requests/status-store.js?v=3a0bcddb" type="application/x-dendrogeo-module" defer></script>
+<script src="src/domain/data-requests/partition-queue.js?v=1c554220" type="application/x-dendrogeo-module" defer></script>
+<script src="src/ui/data-request-pending-table.js?v=0579d538" type="application/x-dendrogeo-module" defer></script>
+<script src="src/adapters/data-requests/reply-window.js?v=2989ac4e" type="application/x-dendrogeo-module" defer></script>
+<script src="src/adapters/data-requests/queue-store.js?v=44d8078f" type="application/x-dendrogeo-module" defer></script>
+<script src="src/ui/data-request-closed-table.js?v=19028892" type="application/x-dendrogeo-module" defer></script>
+<script src="src/adapters/data-requests/delete-own-request.js?v=10117d30" type="application/x-dendrogeo-module" defer></script>
+<script src="src/ui/my-data-requests.js?v=481364eb" type="application/x-dendrogeo-module" defer></script>
+<script src="src/ui/data-request-reply-content.js?v=8dc8c90a" type="application/x-dendrogeo-module" defer></script>
+<script src="src/application/data-requests/fulfill-request.js?v=7837d408" type="application/x-dendrogeo-module" defer></script>
+<script src="src/application/data-requests/submit-request.js?v=5538206b" type="application/x-dendrogeo-module" defer></script>
+<script src="src/application/data-requests/delete-own-request.js?v=253160ae" type="application/x-dendrogeo-module" defer></script>
+<script src="src/application/data-requests/reject-request.js?v=296094b8" type="application/x-dendrogeo-module" defer></script>
+<script src="src/application/data-requests/load-options.js?v=5b64ca62" type="application/x-dendrogeo-module" defer></script>
+<script src="src/application/data-requests/load-own-requests.js?v=5f36a1bb" type="application/x-dendrogeo-module" defer></script>
+<script src="src/application/data-requests/load-queue.js?v=0d21015e" type="application/x-dendrogeo-module" defer></script>
+<script src="src/ui/data-request-submission-feedback.js?v=8d10dfed" type="application/x-dendrogeo-module" defer></script>
+<script src="src/services/data-requests.js?v=54476fd3" type="application/x-dendrogeo-module" defer></script>
+<script src="src/adapters/users/admin-store.js?v=4f5047b1" type="application/x-dendrogeo-module" defer></script>
+<script src="src/domain/users/summarize-admin-users.js?v=d98cb44f" type="application/x-dendrogeo-module" defer></script>
+<script src="src/ui/admin-user-table.js?v=a0591acd" type="application/x-dendrogeo-module" defer></script>
+<script src="src/ui/admin-user-filter.js?v=38686301" type="application/x-dendrogeo-module" defer></script>
+<script src="src/application/users/load-admin-users.js?v=a4ede24e" type="application/x-dendrogeo-module" defer></script>
+<script src="src/services/user-admin.js?v=c75dd65f" type="application/x-dendrogeo-module" defer></script>
+<script src="src/adapters/backup/paged-store.js?v=d293e7f4" type="application/x-dendrogeo-module" defer></script>
+<script src="src/domain/backup/build-snapshot.js?v=a9b65d43" type="application/x-dendrogeo-module" defer></script>
+<script src="src/adapters/backup/json-download.js?v=99f064da" type="application/x-dendrogeo-module" defer></script>
+<script src="src/application/backup/create-full-backup.js?v=c277da2b" type="application/x-dendrogeo-module" defer></script>
+<script src="src/domain/backup/reminder-state.js?v=28a2388d" type="application/x-dendrogeo-module" defer></script>
+<script src="src/domain/backup/sql-value.js?v=a1f9bcf6" type="application/x-dendrogeo-module" defer></script>
+<script src="src/domain/backup/build-restore-sql.js?v=739d10a2" type="application/x-dendrogeo-module" defer></script>
+<script src="src/ui/restore-backup-prompt.js?v=a4daf576" type="application/x-dendrogeo-module" defer></script>
+<script src="src/adapters/backup/download-restore-sql.js?v=0639247d" type="application/x-dendrogeo-module" defer></script>
+<script src="src/application/backup/restore-backup.js?v=32512b4b" type="application/x-dendrogeo-module" defer></script>
+<script src="src/services/backup.js?v=6f418c11" type="application/x-dendrogeo-module" defer></script>
+<script src="src/ui/admin-measurement-row.js?v=a3f5a664" type="application/x-dendrogeo-module" defer></script>
+<script src="src/ui/admin-measurement-table.js?v=75a1e790" type="application/x-dendrogeo-module" defer></script>
+<script src="src/domain/admin/export-filter-options.js?v=ac86c3e7" type="application/x-dendrogeo-module" defer></script>
+<script src="src/adapters/admin/admin-persistence-store.js?v=9851533f" type="application/x-dendrogeo-module" defer></script>
+<script src="src/application/admin/build-export-query.js?v=24917a09" type="application/x-dendrogeo-module" defer></script>
+<script src="src/application/admin/read-export-rows.js?v=bd887f11" type="application/x-dendrogeo-module" defer></script>
+<script src="src/ui/admin-measurement-filter.js?v=64ce3411" type="application/x-dendrogeo-module" defer></script>
+<script src="src/ui/fill-admin-export-select.js?v=64b5dbde" type="application/x-dendrogeo-module" defer></script>
+<script src="src/application/admin/load-admin-export-filters.js?v=00db5e19" type="application/x-dendrogeo-module" defer></script>
+<script src="src/application/admin/update-admin-export-filter-options.js?v=60369cd7" type="application/x-dendrogeo-module" defer></script>
+<script src="src/application/admin/download-admin-measurements.js?v=4523b23c" type="application/x-dendrogeo-module" defer></script>
+<script src="src/application/admin/read-photo-storage-usage.js?v=3aee0690" type="application/x-dendrogeo-module" defer></script>
+<script src="src/ui/admin-storage-usage.js?v=8700ddd7" type="application/x-dendrogeo-module" defer></script>
+<script src="src/application/admin/clean-orphan-photos.js?v=1f0730f1" type="application/x-dendrogeo-module" defer></script>
+<script src="src/application/admin/re-geocode-measurements.js?v=27b0eb3d" type="application/x-dendrogeo-module" defer></script>
+<script src="src/adapters/admin/re-geocode-store.js?v=d9e1c1cb" type="application/x-dendrogeo-module" defer></script>
+<script src="src/ui/confirm-admin-re-geocode.js?v=f8fb64c2" type="application/x-dendrogeo-module" defer></script>
+<script src="src/ui/admin-re-geocode-feedback.js?v=d0365ef0" type="application/x-dendrogeo-module" defer></script>
+<script src="src/domain/admin/measurement-geojson.js?v=74a63f0b" type="application/x-dendrogeo-module" defer></script>
+<script src="src/domain/admin/measurement-review-payload.js?v=3a9e2219" type="application/x-dendrogeo-module" defer></script>
+<script src="src/adapters/admin/measurement-moderation-store.js?v=d9305aaa" type="application/x-dendrogeo-module" defer></script>
+<script src="src/application/admin/review-measurement.js?v=72d3a777" type="application/x-dendrogeo-module" defer></script>
+<script src="src/application/admin/override-measurement-geofence.js?v=d3523a83" type="application/x-dendrogeo-module" defer></script>
+<script src="src/application/admin/delete-measurement.js?v=9943cb5f" type="application/x-dendrogeo-module" defer></script>
+<script src="src/adapters/admin/admin-overview-store.js?v=6371d7c4" type="application/x-dendrogeo-module" defer></script>
+<script src="src/domain/admin/summarize-admin-overview.js?v=be242eb8" type="application/x-dendrogeo-module" defer></script>
+<script src="src/ui/admin-overview-metrics.js?v=c9da85a7" type="application/x-dendrogeo-module" defer></script>
+<script src="src/ui/admin-overview-measurements.js?v=2b174bd2" type="application/x-dendrogeo-module" defer></script>
+<script src="src/application/admin/load-admin-overview.js?v=85717cfc" type="application/x-dendrogeo-module" defer></script>
+<script src="src/services/admin.js?v=83494702" type="application/x-dendrogeo-module" defer></script>
+<script src="src/application/admin/admin-tree-state.js?v=8898fa21" type="application/x-dendrogeo-module" defer></script>
+<script src="src/adapters/admin/admin-tree-store.js?v=66aa4d32" type="application/x-dendrogeo-module" defer></script>
+<script src="src/domain/admin/group-measurement-tree.js?v=e4561ead" type="application/x-dendrogeo-module" defer></script>
+<script src="src/domain/admin/filter-measurement-tree.js?v=c2fc80c8" type="application/x-dendrogeo-module" defer></script>
+<script src="src/ui/admin-tree-formatters.js?v=37a5cb2b" type="application/x-dendrogeo-module" defer></script>
+<script src="src/ui/admin-tree-pending-summary.js?v=537398b4" type="application/x-dendrogeo-module" defer></script>
+<script src="src/ui/admin-tree-measurement-row.js?v=d18e7296" type="application/x-dendrogeo-module" defer></script>
+<script src="src/ui/admin-tree-user.js?v=d129d646" type="application/x-dendrogeo-module" defer></script>
+<script src="src/ui/admin-tree-project.js?v=4a525272" type="application/x-dendrogeo-module" defer></script>
+<script src="src/ui/admin-tree-park.js?v=fc3dd4ee" type="application/x-dendrogeo-module" defer></script>
+<script src="src/ui/admin-tree-view.js?v=735c446b" type="application/x-dendrogeo-module" defer></script>
+<script src="src/application/admin/refresh-tree-pending-badge.js?v=64f307fe" type="application/x-dendrogeo-module" defer></script>
+<script src="src/application/admin/open-pending-tree-nodes.js?v=437d8469" type="application/x-dendrogeo-module" defer></script>
+<script src="src/application/admin/expand-measurement-tree.js?v=4dea41b0" type="application/x-dendrogeo-module" defer></script>
+<script src="src/application/admin/apply-tree-row-status.js?v=a8b95120" type="application/x-dendrogeo-module" defer></script>
+<script src="src/application/admin/remove-tree-row.js?v=3c4992e9" type="application/x-dendrogeo-module" defer></script>
+<script src="src/application/admin/load-admin-tree.js?v=d8aa654b" type="application/x-dendrogeo-module" defer></script>
+<script src="src/application/admin/update-admin-tree-filter.js?v=aa0f8eeb" type="application/x-dendrogeo-module" defer></script>
+<script src="src/application/admin/set-admin-tree-node-open.js?v=d830d5fb" type="application/x-dendrogeo-module" defer></script>
+<script src="src/ui/navigate-admin-tree-pending-scan.js?v=17ad8b59" type="application/x-dendrogeo-module" defer></script>
+<script src="src/ui/delete-admin-tree-project.js?v=3cbed4f0" type="application/x-dendrogeo-module" defer></script>
 <!-- YÖNETİM AĞACI (2026-09-24): park → proje → kullanıcı → ölçüm kademeli
      görünümü + sorgu hatası görünürlüğü. admin.js'ten SONRA yüklenir
      (approve/reject/del fonksiyonlarını çağırır). -->
-<script src="src/services/admin-tree.js?v=29628baa" type="application/x-dendrogeo-module" defer></script>
+<script src="src/services/admin-tree.js?v=00bd76ca" type="application/x-dendrogeo-module" defer></script>
 <!-- BİLİMSEL RAPOR YAYINI (2026-09-27): site içinden yayın kuyruğu —
      📄 Yayınla → report_requests (0008) → rapor-yayin.yml → rapor/DGR-…/
      → kalıcı bağlantı + 📤 Paylaş. admin.js loadAdmin() bu modülü çağırır. -->
-<script src="src/core/surface-display.js?v=81ad9f80" type="application/x-dendrogeo-module" defer></script>
-<script src="src/domain/reports/normalize-report-orcid.js?v=b4e63ef4" type="application/x-dendrogeo-module" defer></script>
-<script src="src/domain/reports/clean-report-context.js?v=57920825" type="application/x-dendrogeo-module" defer></script>
-<script src="src/domain/reports/validate-report-context.js?v=34054d90" type="application/x-dendrogeo-module" defer></script>
-<script src="src/domain/reports/decode-report-context.js?v=3f022d58" type="application/x-dendrogeo-module" defer></script>
-<script src="src/domain/reports/report-context.js?v=6fe047e0" type="application/x-dendrogeo-module" defer></script>
-<script src="src/core/report-context.js?v=324c1827" type="application/x-dendrogeo-module" defer></script>
-<script src="src/application/reports/collect-publication-request.js?v=61020adb" type="application/x-dendrogeo-module" defer></script>
-<script src="src/application/reports/resolve-academic-profile-defaults.js?v=7271be2b" type="application/x-dendrogeo-module" defer></script>
-<script src="src/ui/academic-profile-fields.js?v=5f693a22" type="application/x-dendrogeo-module" defer></script>
-<script src="src/ui/render-academic-profile.js?v=111c32cc" type="application/x-dendrogeo-module" defer></script>
-<script src="src/ui/save-academic-profile.js?v=32c6ac06" type="application/x-dendrogeo-module" defer></script>
-<script src="src/application/reports/create-academic-report-collector.js?v=f59bb56a" type="application/x-dendrogeo-module" defer></script>
-<script src="src/application/reports/resolve-report-question-values.js?v=2f922699" type="application/x-dendrogeo-module" defer></script>
-<script src="src/ui/report-question-fields.js?v=2f287aa6" type="application/x-dendrogeo-module" defer></script>
-<script src="src/ui/report-question-confirmations.js?v=72da76d2" type="application/x-dendrogeo-module" defer></script>
-<script src="src/ui/validate-report-question-answer.js?v=2a4b81f1" type="application/x-dendrogeo-module" defer></script>
-<script src="src/ui/run-report-question-dialog.js?v=de6d625b" type="application/x-dendrogeo-module" defer></script>
-<script src="src/services/academic-profile.js?v=918f6dab" type="application/x-dendrogeo-module" defer></script>
-<script src="src/domain/reports/publication-link.js?v=281ff06d" type="application/x-dendrogeo-module" defer></script>
-<script src="src/adapters/reports/publication-log-store.js?v=93606fe8" type="application/x-dendrogeo-module" defer></script>
-<script src="src/adapters/reports/publication-request-store.js?v=3b471598" type="application/x-dendrogeo-module" defer></script>
-<script src="src/adapters/reports/park-comparison-store.js?v=895068ba" type="application/x-dendrogeo-module" defer></script>
-<script src="src/adapters/reports/retraction-store.js?v=a93213fa" type="application/x-dendrogeo-module" defer></script>
-<script src="src/adapters/reports/publication-cancel-store.js?v=a3feb503" type="application/x-dendrogeo-module" defer></script>
-<script src="src/adapters/reports/user-publication-request-store.js?v=d09732d7" type="application/x-dendrogeo-module" defer></script>
-<script src="src/adapters/reports/own-approved-measurements-store.js?v=0797fd92" type="application/x-dendrogeo-module" defer></script>
-<script src="src/adapters/reports/user-retraction-store.js?v=b9a3d1e8" type="application/x-dendrogeo-module" defer></script>
-<script src="src/application/reports/load-user-publication.js?v=177ee287" type="application/x-dendrogeo-module" defer></script>
-<script src="src/domain/reports/publication-request-error.js?v=ca83f667" type="application/x-dendrogeo-module" defer></script>
-<script src="src/application/reports/request-publication.js?v=aa4f0865" type="application/x-dendrogeo-module" defer></script>
-<script src="src/application/reports/cancel-publication-request.js?v=d16fcc23" type="application/x-dendrogeo-module" defer></script>
-<script src="src/adapters/reports/retraction-insert-store.js?v=2cb8e766" type="application/x-dendrogeo-module" defer></script>
-<script src="src/domain/reports/retraction-request-error.js?v=02d86387" type="application/x-dendrogeo-module" defer></script>
-<script src="src/ui/open-user-publication-panel.js?v=1e8330e2" type="application/x-dendrogeo-module" defer></script>
-<script src="src/ui/close-user-publication-panel.js?v=354d3f2d" type="application/x-dendrogeo-module" defer></script>
-<script src="src/application/reports/sync-user-publication-panel.js?v=e7b15bcd" type="application/x-dendrogeo-module" defer></script>
-<script src="src/application/reports/schedule-user-publication-poll.js?v=284e8317" type="application/x-dendrogeo-module" defer></script>
-<script src="src/application/reports/share-report-link.js?v=5fa292a5" type="application/x-dendrogeo-module" defer></script>
-<script src="src/domain/reports/resolve-publication-park-status.js?v=bdb41d9b" type="application/x-dendrogeo-module" defer></script>
-<script src="src/ui/render-publication-park-row.js?v=c12be9cc" type="application/x-dendrogeo-module" defer></script>
-<script src="src/ui/render-publication-history.js?v=55036d7f" type="application/x-dendrogeo-module" defer></script>
-<script src="src/application/reports/summarize-publication-queue.js?v=c4eca65b" type="application/x-dendrogeo-module" defer></script>
-<script src="src/ui/render-publication-admin-card.js?v=409eaa7f" type="application/x-dendrogeo-module" defer></script>
-<script src="src/application/reports/resolve-user-publication-view.js?v=b9d88a17" type="application/x-dendrogeo-module" defer></script>
-<script src="src/ui/render-user-publication-controls.js?v=fca2b209" type="application/x-dendrogeo-module" defer></script>
-<script src="src/ui/render-user-publication-header.js?v=48602780" type="application/x-dendrogeo-module" defer></script>
-<script src="src/ui/render-user-publication-notices.js?v=79acb852" type="application/x-dendrogeo-module" defer></script>
-<script src="src/ui/render-user-publication-card.js?v=792e51e9" type="application/x-dendrogeo-module" defer></script>
-<script src="src/adapters/reports/publication-request-insert-store.js?v=8d0a0050" type="application/x-dendrogeo-module" defer></script>
-<script src="src/application/reports/publication-queue-state.js?v=61727b81" type="application/x-dendrogeo-module" defer></script>
-<script src="src/domain/reports/has-pending-publication-work.js?v=4b81a8d9" type="application/x-dendrogeo-module" defer></script>
-<script src="src/application/reports/load-publication-queue.js?v=cf57b5a2" type="application/x-dendrogeo-module" defer></script>
-<script src="src/application/reports/schedule-publication-queue-poll.js?v=145ba659" type="application/x-dendrogeo-module" defer></script>
-<script src="src/application/reports/request-report-retraction.js?v=6111a1a3" type="application/x-dendrogeo-module" defer></script>
-<script src="src/application/reports/refresh-after-report-retraction.js?v=81a552b6" type="application/x-dendrogeo-module" defer></script>
-<script src="src/application/reports/reset-publication-polling.js?v=8c21a889" type="application/x-dendrogeo-module" defer></script>
-<script src="src/services/report-publish.js?v=c27e5fad" type="application/x-dendrogeo-module" defer></script>
-<script src="src/domain/park-invites/access-policy.js?v=3f2894e9" type="application/x-dendrogeo-module" defer></script>
-<script src="src/adapters/park-invites/store.js?v=d2018b54" type="application/x-dendrogeo-module" defer></script>
-<script src="src/ui/park-invite-inbox.js?v=c3e8ac5e" type="application/x-dendrogeo-module" defer></script>
-<script src="src/ui/park-collaboration-panel.js?v=5bca2f10" type="application/x-dendrogeo-module" defer></script>
-<script src="src/application/park-invites/park-invite-state.js?v=8605b8a8" type="application/x-dendrogeo-module" defer></script>
-<script src="src/application/park-invites/manage-invites.js?v=dc3462dc" type="application/x-dendrogeo-module" defer></script>
-<script src="src/application/park-invites/load-owned-parks.js?v=bc8aaed7" type="application/x-dendrogeo-module" defer></script>
-<script src="src/application/park-invites/load-recipient-invites.js?v=a11c47b1" type="application/x-dendrogeo-module" defer></script>
-<script src="src/ui/load-owner-collaborations.js?v=77855ed7" type="application/x-dendrogeo-module" defer></script>
-<script src="src/ui/refresh-collaborations.js?v=9a38582a" type="application/x-dendrogeo-module" defer></script>
-<script src="src/ui/owner-park-options.js?v=d5556ed6" type="application/x-dendrogeo-module" defer></script>
-<script src="src/services/park-invites.js?v=e15b9bf5" type="application/x-dendrogeo-module" defer></script>
-<script src="src/ui/park-comparison-row.js?v=16ffe895" type="application/x-dendrogeo-module" defer></script>
-<script src="src/ui/park-comparison-pending.js?v=e07a6ebf" type="application/x-dendrogeo-module" defer></script>
-<script src="src/ui/park-report-options.js?v=8e837b47" type="application/x-dendrogeo-module" defer></script>
-<script src="src/ui/park-comparison-error.js?v=3619f610" type="application/x-dendrogeo-module" defer></script>
-<script src="src/ui/fit-measurement-rows.js?v=a4ebe251" type="application/x-dendrogeo-module" defer></script>
-<script src="src/domain/parks/summarize-park-report.js?v=fa0483e4" type="application/x-dendrogeo-module" defer></script>
-<script src="src/ui/park-report-summary.js?v=4fc1bda3" type="application/x-dendrogeo-module" defer></script>
-<script src="src/ui/park-report-species-table.js?v=90279a04" type="application/x-dendrogeo-module" defer></script>
-<script src="src/domain/parks/build-park-report-csv.js?v=b24c69bf" type="application/x-dendrogeo-module" defer></script>
-<script src="src/ui/park-report-preview.js?v=926876ae" type="application/x-dendrogeo-module" defer></script>
-<script src="src/domain/parks/resolve-park-report-target.js?v=2e655290" type="application/x-dendrogeo-module" defer></script>
-<script src="src/domain/parks/build-park-report-request.js?v=e9e44ad3" type="application/x-dendrogeo-module" defer></script>
-<script src="src/domain/parks/build-legacy-park-report-request.js?v=e39f34eb" type="application/x-dendrogeo-module" defer></script>
-<script src="src/adapters/parks/park-report-store.js?v=ff55ed2d" type="application/x-dendrogeo-module" defer></script>
-<script src="src/application/world/load-park-report.js?v=30773352" type="application/x-dendrogeo-module" defer></script>
-<script src="src/adapters/world/park-comparison-store.js?v=3bbc4572" type="application/x-dendrogeo-module" defer></script>
-<script src="src/domain/parks/resolve-park-comparison-read.js?v=b9c08965" type="application/x-dendrogeo-module" defer></script>
-<script src="src/domain/parks/prepare-park-comparison.js?v=7b91463c" type="application/x-dendrogeo-module" defer></script>
-<script src="src/domain/parks/group-legacy-park-comparison.js?v=51f53bc6" type="application/x-dendrogeo-module" defer></script>
-<script src="src/ui/legacy-park-comparison.js?v=81f55b01" type="application/x-dendrogeo-module" defer></script>
-<script src="src/application/world/load-park-comparison.js?v=7f078d54" type="application/x-dendrogeo-module" defer></script>
-<script src="src/ui/render-primary-park-comparison.js?v=e59704b3" type="application/x-dendrogeo-module" defer></script>
-<script src="src/application/world/load-legacy-park-comparison.js?v=6172cf70" type="application/x-dendrogeo-module" defer></script>
-<script src="src/ui/show-park-comparison-denied.js?v=a7cd6a73" type="application/x-dendrogeo-module" defer></script>
-<script src="src/application/world/zoom-to-location.js?v=14c062ff" type="application/x-dendrogeo-module" defer></script>
-<script src="src/services/world.js?v=5e2ea626" type="application/x-dendrogeo-module" defer></script>
-<script src="src/adapters/trees/fetch-unvisited-measurement-waypoints.js?v=9ae5033a" type="application/x-dendrogeo-module" defer></script>
-<script src="src/adapters/trees/fetch-latest-measurement-point.js?v=8e0a2e0e" type="application/x-dendrogeo-module" defer></script>
-<script src="src/application/trees/suggest-next-measurement-point.js?v=026718b6" type="application/x-dendrogeo-module" defer></script>
-<script src="src/adapters/trees/fetch-measurement-at-project-point.js?v=08cdbc2a" type="application/x-dendrogeo-module" defer></script>
-<script src="src/domain/trees/resolve-measurement-point-query.js?v=4444f023" type="application/x-dendrogeo-module" defer></script>
-<script src="src/application/trees/query-measurement-point.js?v=bcd4ce9b" type="application/x-dendrogeo-module" defer></script>
-<script src="src/ui/measurement-point-query-result.js?v=95c92e57" type="application/x-dendrogeo-module" defer></script>
-<script src="src/domain/trees/build-measurement-photo-file-name.js?v=2a4c88d1" type="application/x-dendrogeo-module" defer></script>
-<script src="src/ui/compress-measurement-photo.js?v=c48af10f" type="application/x-dendrogeo-module" defer></script>
-<script src="src/application/trees/prepare-measurement-photo.js?v=288c74f7" type="application/x-dendrogeo-module" defer></script>
-<script src="src/adapters/trees/upload-measurement-photo.js?v=b77d9de7" type="application/x-dendrogeo-module" defer></script>
-<script src="src/adapters/trees/remove-measurement-photo.js?v=3c154f39" type="application/x-dendrogeo-module" defer></script>
-<script src="src/adapters/trees/fetch-measurement-for-edit.js?v=e49b5aea" type="application/x-dendrogeo-module" defer></script>
-<script src="src/domain/trees/build-measurement-edit-form.js?v=17e1781a" type="application/x-dendrogeo-module" defer></script>
-<script src="src/ui/render-measurement-edit-form.js?v=24020dc2" type="application/x-dendrogeo-module" defer></script>
-<script src="src/application/trees/edit-measurement-record.js?v=ff0ed656" type="application/x-dendrogeo-module" defer></script>
-<script src="src/ui/cancel-measurement-edit.js?v=4ec03eb8" type="application/x-dendrogeo-module" defer></script>
-<script src="src/application/trees/run-measurement-save.js?v=d8e0b0e5" type="application/x-dendrogeo-module" defer></script>
-<script src="src/ui/set-measurement-save-button.js?v=6093d548" type="application/x-dendrogeo-module" defer></script>
-<script src="src/ui/validate-measurement-save-form.js?v=472f3dd6" type="application/x-dendrogeo-module" defer></script>
-<script src="src/application/trees/resolve-measurement-save-gates.js?v=dc732ab8" type="application/x-dendrogeo-module" defer></script>
-<script src="src/domain/trees/build-measurement-record.js?v=7db74a4c" type="application/x-dendrogeo-module" defer></script>
-<script src="src/adapters/trees/persist-measurement-record.js?v=4894b022" type="application/x-dendrogeo-module" defer></script>
-<script src="src/domain/trees/build-measurement-location-fields.js?v=9233cbef" type="application/x-dendrogeo-module" defer></script>
-<script src="src/domain/trees/build-offline-measurement-record.js?v=2d2e757a" type="application/x-dendrogeo-module" defer></script>
-<script src="src/application/trees/record-measurement-presence-action.js?v=5929849f" type="application/x-dendrogeo-module" defer></script>
-<script src="src/application/trees/refresh-measurement-after-save.js?v=93a3839c" type="application/x-dendrogeo-module" defer></script>
-<script src="src/application/trees/validate-measurement-submission.js?v=19eeb164" type="application/x-dendrogeo-module" defer></script>
-<script src="src/application/trees/prepare-measurement-submission.js?v=5b3a3162" type="application/x-dendrogeo-module" defer></script>
-<script src="src/application/trees/verify-measurement-submission-location.js?v=25dbf30e" type="application/x-dendrogeo-module" defer></script>
-<script src="src/application/trees/persist-measurement-submission.js?v=a5f13014" type="application/x-dendrogeo-module" defer></script>
-<script src="src/application/trees/submit-measurement.js?v=94eaa356" type="application/x-dendrogeo-module" defer></script>
-<script src="src/ui/show-measurement-validation-error.js?v=1f74b71e" type="application/x-dendrogeo-module" defer></script>
-<script src="src/adapters/trees/measurement-geolocation.js?v=3ba19035" type="application/x-dendrogeo-module" defer></script>
-<script src="src/ui/measurement-gps-status.js?v=500a7b90" type="application/x-dendrogeo-module" defer></script>
-<script src="src/application/trees/handle-measurement-gps-error.js?v=5741d545" type="application/x-dendrogeo-module" defer></script>
-<script src="src/adapters/trees/measurement-wake-lock.js?v=64301e72" type="application/x-dendrogeo-module" defer></script>
-<script src="src/application/trees/start-measurement-gps.js?v=fbd9145e" type="application/x-dendrogeo-module" defer></script>
-<script src="src/ui/reset-measurement-entry-fields.js?v=f843d983" type="application/x-dendrogeo-module" defer></script>
-<script src="src/ui/confirm-measurement-project-delete.js?v=fe76ca2f" type="application/x-dendrogeo-module" defer></script>
-<script src="src/adapters/trees/measurement-project-deletion-store.js?v=64afcffe" type="application/x-dendrogeo-module" defer></script>
-<script src="src/application/trees/delete-measurement-project.js?v=9c341a41" type="application/x-dendrogeo-module" defer></script>
-<script src="src/services/measure.js?v=ca06b98d" type="application/x-dendrogeo-module" defer></script>
-<script src="src/domain/map/is-valid-coordinate.js?v=ad46685e" type="application/x-dendrogeo-module" defer></script>
-<script src="src/domain/map/select-waypoint-target.js?v=3780740a" type="application/x-dendrogeo-module" defer></script>
-<script src="src/domain/map/build-waypoint-navigation-header.js?v=fc5e91aa" type="application/x-dendrogeo-module" defer></script>
-<script src="src/ui/render-waypoint-navigation-header.js?v=cc50da1c" type="application/x-dendrogeo-module" defer></script>
-<script src="src/ui/map-measurement-popup.js?v=1a8f5680" type="application/x-dendrogeo-module" defer></script>
-<script src="src/domain/map/measurement-marker-cluster-icon.js?v=db9e7885" type="application/x-dendrogeo-module" defer></script>
-<script src="src/ui/create-measurement-map-marker.js?v=3125bb5a" type="application/x-dendrogeo-module" defer></script>
-<script src="src/adapters/map/ensure-measurement-marker-layer.js?v=27c19bfe" type="application/x-dendrogeo-module" defer></script>
-<script src="src/application/map/schedule-measurement-marker-chunks.js?v=747cd5e1" type="application/x-dendrogeo-module" defer></script>
-<script src="src/application/map/add-measurement-markers.js?v=a85aabae" type="application/x-dendrogeo-module" defer></script>
-<script src="src/ui/map-measurement-markers.js?v=190f271d" type="application/x-dendrogeo-module" defer></script>
-<script src="src/ui/waypoint-list.js?v=bf6fad45" type="application/x-dendrogeo-module" defer></script>
-<script src="src/ui/select-waypoint.js?v=b519d974" type="application/x-dendrogeo-module" defer></script>
-<script src="src/application/map/select-nearest-waypoint.js?v=a7fd37d1" type="application/x-dendrogeo-module" defer></script>
-<script src="src/application/map/advance-waypoint-target.js?v=a8024bea" type="application/x-dendrogeo-module" defer></script>
-<script src="src/ui/waypoint-navigation-feedback.js?v=c4bc5b47" type="application/x-dendrogeo-module" defer></script>
-<script src="src/ui/waypoint-map-viewport.js?v=86e1facf" type="application/x-dendrogeo-module" defer></script>
-<script src="src/domain/map/resolve-waypoint-guidance.js?v=234abee1" type="application/x-dendrogeo-module" defer></script>
-<script src="src/ui/waypoint-map-markers.js?v=4d9960f7" type="application/x-dendrogeo-module" defer></script>
-<script src="src/domain/map/resolve-waypoint-gps-guidance.js?v=11b521a0" type="application/x-dendrogeo-module" defer></script>
-<script src="src/ui/create-waypoint-gps-location-marker.js?v=c7507703" type="application/x-dendrogeo-module" defer></script>
-<script src="src/ui/render-waypoint-gps-guidance-readout.js?v=bcb50837" type="application/x-dendrogeo-module" defer></script>
-<script src="src/adapters/map/add-waypoint-guidance-line.js?v=88c0228e" type="application/x-dendrogeo-module" defer></script>
-<script src="src/application/map/render-waypoint-gps-overlay.js?v=6dcd0e94" type="application/x-dendrogeo-module" defer></script>
-<script src="src/ui/waypoint-gps-overlay.js?v=fe452a7d" type="application/x-dendrogeo-module" defer></script>
-<script src="src/ui/fail-park-live-share.js?v=e8105f0c" type="application/x-dendrogeo-module" defer></script>
-<script src="src/domain/parks/resolve-live-share-join.js?v=ddf24afd" type="application/x-dendrogeo-module" defer></script>
-<script src="src/adapters/parks/fetch-live-share-project-park.js?v=e97fde6e" type="application/x-dendrogeo-module" defer></script>
-<script src="src/ui/park-live-share-connection-status.js?v=38af5048" type="application/x-dendrogeo-module" defer></script>
-<script src="src/application/parks/handle-live-share-channel-status.js?v=82c7660f" type="application/x-dendrogeo-module" defer></script>
-<script src="src/application/parks/join-live-share-park.js?v=24e45675" type="application/x-dendrogeo-module" defer></script>
-<script src="src/domain/parks/park-live-member-color.js?v=cd267a55" type="application/x-dendrogeo-module" defer></script>
-<script src="src/adapters/parks/park-presence-channel.js?v=82f2de2e" type="application/x-dendrogeo-module" defer></script>
-<script src="src/adapters/parks/leave-park-presence-channel.js?v=5b8fd3aa" type="application/x-dendrogeo-module" defer></script>
-<script src="src/application/parks/track-park-live-position.js?v=7da4b1ef" type="application/x-dendrogeo-module" defer></script>
-<script src="src/domain/parks/select-park-live-collaborators.js?v=9fb241e2" type="application/x-dendrogeo-module" defer></script>
-<script src="src/domain/parks/build-park-live-collaborator-view.js?v=01453f1d" type="application/x-dendrogeo-module" defer></script>
-<script src="src/ui/prepare-park-live-collaborator-layer.js?v=c78a795e" type="application/x-dendrogeo-module" defer></script>
-<script src="src/ui/render-park-live-collaborator-marker.js?v=7f585a2c" type="application/x-dendrogeo-module" defer></script>
-<script src="src/ui/render-park-live-collaborator-count.js?v=9f20b468" type="application/x-dendrogeo-module" defer></script>
-<script src="src/domain/parks/parse-waypoint-csv.js?v=9a3eed15" type="application/x-dendrogeo-module" defer></script>
-<script src="src/domain/parks/validate-waypoint-csv-row.js?v=dd3a8794" type="application/x-dendrogeo-module" defer></script>
-<script src="src/application/parks/build-waypoint-upsert-command.js?v=4bae7a8f" type="application/x-dendrogeo-module" defer></script>
-<script src="src/adapters/parks/upsert-project-waypoint.js?v=9b1e21fe" type="application/x-dendrogeo-module" defer></script>
-<script src="src/application/parks/upload-waypoint-csv.js?v=2b74a062" type="application/x-dendrogeo-module" defer></script>
-<script src="src/domain/map/prepare-approved-map-measurements.js?v=d532efb1" type="application/x-dendrogeo-module" defer></script>
-<script src="src/adapters/map/fetch-approved-map-measurements.js?v=4aa1a56b" type="application/x-dendrogeo-module" defer></script>
-<script src="src/application/map/load-approved-measurement-markers.js?v=75350bff" type="application/x-dendrogeo-module" defer></script>
-<script src="src/ui/render-live-map-load-status.js?v=18405a3b" type="application/x-dendrogeo-module" defer></script>
-<script src="src/application/map/load-live-measurements-map.js?v=6b8998e7" type="application/x-dendrogeo-module" defer></script>
-<script src="src/domain/map/select-waypoint-arrival-target.js?v=d0f17550" type="application/x-dendrogeo-module" defer></script>
-<script src="src/ui/confirm-waypoint-arrival-distance.js?v=c7612e30" type="application/x-dendrogeo-module" defer></script>
-<script src="src/adapters/map/mark-waypoint-visited.js?v=e720d81d" type="application/x-dendrogeo-module" defer></script>
-<script src="src/application/map/complete-waypoint-arrival.js?v=0ec7fdf5" type="application/x-dendrogeo-module" defer></script>
-<script src="src/application/map/arrive-at-waypoint.js?v=8e2d244d" type="application/x-dendrogeo-module" defer></script>
-<script src="src/domain/map/select-restored-waypoint-target.js?v=9b56eaf8" type="application/x-dendrogeo-module" defer></script>
-<script src="src/adapters/map/fetch-project-waypoints.js?v=93d3239c" type="application/x-dendrogeo-module" defer></script>
-<script src="src/application/map/reset-waypoint-load-state.js?v=b27280fd" type="application/x-dendrogeo-module" defer></script>
-<script src="src/ui/show-waypoint-load-error.js?v=062e8b55" type="application/x-dendrogeo-module" defer></script>
-<script src="src/application/map/load-project-waypoints.js?v=bf53cbd7" type="application/x-dendrogeo-module" defer></script>
-<script src="src/domain/map/is-waypoint-project-selected.js?v=26a7478a" type="application/x-dendrogeo-module" defer></script>
-<script src="src/ui/confirm-waypoint-list-deletion.js?v=3b8b1067" type="application/x-dendrogeo-module" defer></script>
-<script src="src/adapters/map/delete-project-waypoints.js?v=4d558cc3" type="application/x-dendrogeo-module" defer></script>
-<script src="src/application/map/clear-deleted-waypoint-list.js?v=f54768c9" type="application/x-dendrogeo-module" defer></script>
-<script src="src/application/map/delete-project-waypoints.js?v=17e97391" type="application/x-dendrogeo-module" defer></script>
-<script src="src/domain/map/map-initial-view.js?v=a546a88e" type="application/x-dendrogeo-module" defer></script>
-<script src="src/adapters/map/create-osm-map.js?v=4a93a0fb" type="application/x-dendrogeo-module" defer></script>
-<script src="src/ui/add-osm-map-layer.js?v=8031fd93" type="application/x-dendrogeo-module" defer></script>
-<script src="src/application/map/initialize-map-instance.js?v=6acb29df" type="application/x-dendrogeo-module" defer></script>
-<script src="src/application/map/initialize-workspace-maps.js?v=e48d4d18" type="application/x-dendrogeo-module" defer></script>
-<script src="src/domain/map/resolve-base-map-layer.js?v=d077ebf2" type="application/x-dendrogeo-module" defer></script>
-<script src="src/ui/sync-base-map-layer-selection.js?v=32b457cd" type="application/x-dendrogeo-module" defer></script>
-<script src="src/adapters/map/manage-base-map-layers.js?v=5795c9d8" type="application/x-dendrogeo-module" defer></script>
-<script src="src/adapters/map/create-base-map-layer.js?v=6d56face" type="application/x-dendrogeo-module" defer></script>
-<script src="src/application/map/switch-base-map-layer.js?v=98eb7a0b" type="application/x-dendrogeo-module" defer></script>
-<script src="src/services/map.js?v=970e61e1" type="application/x-dendrogeo-module" defer></script>
+<script src="src/core/surface-display.js?v=36210775" type="application/x-dendrogeo-module" defer></script>
+<script src="src/domain/reports/normalize-report-orcid.js?v=3d49dcc2" type="application/x-dendrogeo-module" defer></script>
+<script src="src/domain/reports/clean-report-context.js?v=92922bdc" type="application/x-dendrogeo-module" defer></script>
+<script src="src/domain/reports/validate-report-context.js?v=acb46d7f" type="application/x-dendrogeo-module" defer></script>
+<script src="src/domain/reports/decode-report-context.js?v=697e0062" type="application/x-dendrogeo-module" defer></script>
+<script src="src/domain/reports/report-context.js?v=8b7e453e" type="application/x-dendrogeo-module" defer></script>
+<script src="src/core/report-context.js?v=9911318f" type="application/x-dendrogeo-module" defer></script>
+<script src="src/application/reports/collect-publication-request.js?v=a875eceb" type="application/x-dendrogeo-module" defer></script>
+<script src="src/application/reports/resolve-academic-profile-defaults.js?v=7c6a7ba6" type="application/x-dendrogeo-module" defer></script>
+<script src="src/ui/academic-profile-fields.js?v=889fde1d" type="application/x-dendrogeo-module" defer></script>
+<script src="src/ui/render-academic-profile.js?v=a92513ba" type="application/x-dendrogeo-module" defer></script>
+<script src="src/ui/save-academic-profile.js?v=4e126966" type="application/x-dendrogeo-module" defer></script>
+<script src="src/application/reports/create-academic-report-collector.js?v=4d9f5adb" type="application/x-dendrogeo-module" defer></script>
+<script src="src/application/reports/resolve-report-question-values.js?v=675d39dc" type="application/x-dendrogeo-module" defer></script>
+<script src="src/ui/report-question-fields.js?v=30fe67ef" type="application/x-dendrogeo-module" defer></script>
+<script src="src/ui/report-question-confirmations.js?v=9b6483bd" type="application/x-dendrogeo-module" defer></script>
+<script src="src/ui/validate-report-question-answer.js?v=ebc82866" type="application/x-dendrogeo-module" defer></script>
+<script src="src/ui/run-report-question-dialog.js?v=d7227532" type="application/x-dendrogeo-module" defer></script>
+<script src="src/services/academic-profile.js?v=4117745a" type="application/x-dendrogeo-module" defer></script>
+<script src="src/domain/reports/publication-link.js?v=a43049e1" type="application/x-dendrogeo-module" defer></script>
+<script src="src/adapters/reports/publication-log-store.js?v=6836962f" type="application/x-dendrogeo-module" defer></script>
+<script src="src/adapters/reports/publication-request-store.js?v=ed2c9fff" type="application/x-dendrogeo-module" defer></script>
+<script src="src/adapters/reports/park-comparison-store.js?v=e39420ce" type="application/x-dendrogeo-module" defer></script>
+<script src="src/adapters/reports/retraction-store.js?v=895d65ef" type="application/x-dendrogeo-module" defer></script>
+<script src="src/adapters/reports/publication-cancel-store.js?v=04b61d53" type="application/x-dendrogeo-module" defer></script>
+<script src="src/adapters/reports/user-publication-request-store.js?v=8eca2f50" type="application/x-dendrogeo-module" defer></script>
+<script src="src/adapters/reports/own-approved-measurements-store.js?v=ee56ea1a" type="application/x-dendrogeo-module" defer></script>
+<script src="src/adapters/reports/user-retraction-store.js?v=9da99169" type="application/x-dendrogeo-module" defer></script>
+<script src="src/application/reports/load-user-publication.js?v=f07a18fd" type="application/x-dendrogeo-module" defer></script>
+<script src="src/domain/reports/publication-request-error.js?v=66b5bfd4" type="application/x-dendrogeo-module" defer></script>
+<script src="src/application/reports/request-publication.js?v=6060cbe4" type="application/x-dendrogeo-module" defer></script>
+<script src="src/application/reports/cancel-publication-request.js?v=15f22994" type="application/x-dendrogeo-module" defer></script>
+<script src="src/adapters/reports/retraction-insert-store.js?v=15645176" type="application/x-dendrogeo-module" defer></script>
+<script src="src/domain/reports/retraction-request-error.js?v=05e6cd6f" type="application/x-dendrogeo-module" defer></script>
+<script src="src/ui/open-user-publication-panel.js?v=25e159aa" type="application/x-dendrogeo-module" defer></script>
+<script src="src/ui/close-user-publication-panel.js?v=ae6702e6" type="application/x-dendrogeo-module" defer></script>
+<script src="src/application/reports/sync-user-publication-panel.js?v=f873e559" type="application/x-dendrogeo-module" defer></script>
+<script src="src/application/reports/schedule-user-publication-poll.js?v=9d767366" type="application/x-dendrogeo-module" defer></script>
+<script src="src/application/reports/share-report-link.js?v=86974fa3" type="application/x-dendrogeo-module" defer></script>
+<script src="src/domain/reports/resolve-publication-park-status.js?v=60976bc3" type="application/x-dendrogeo-module" defer></script>
+<script src="src/ui/render-publication-park-row.js?v=d7f1d835" type="application/x-dendrogeo-module" defer></script>
+<script src="src/ui/render-publication-history.js?v=65ad6ade" type="application/x-dendrogeo-module" defer></script>
+<script src="src/application/reports/summarize-publication-queue.js?v=3df40f46" type="application/x-dendrogeo-module" defer></script>
+<script src="src/ui/render-publication-admin-card.js?v=fa1c46b6" type="application/x-dendrogeo-module" defer></script>
+<script src="src/application/reports/resolve-user-publication-view.js?v=2d4fd802" type="application/x-dendrogeo-module" defer></script>
+<script src="src/ui/render-user-publication-controls.js?v=026d4097" type="application/x-dendrogeo-module" defer></script>
+<script src="src/ui/render-user-publication-header.js?v=fce5bf83" type="application/x-dendrogeo-module" defer></script>
+<script src="src/ui/render-user-publication-notices.js?v=f28dff1f" type="application/x-dendrogeo-module" defer></script>
+<script src="src/ui/render-user-publication-card.js?v=6b09a57d" type="application/x-dendrogeo-module" defer></script>
+<script src="src/adapters/reports/publication-request-insert-store.js?v=84b7eeca" type="application/x-dendrogeo-module" defer></script>
+<script src="src/application/reports/publication-queue-state.js?v=9614c3fe" type="application/x-dendrogeo-module" defer></script>
+<script src="src/domain/reports/has-pending-publication-work.js?v=5f0a8b19" type="application/x-dendrogeo-module" defer></script>
+<script src="src/application/reports/load-publication-queue.js?v=693454f4" type="application/x-dendrogeo-module" defer></script>
+<script src="src/application/reports/schedule-publication-queue-poll.js?v=8af730a6" type="application/x-dendrogeo-module" defer></script>
+<script src="src/application/reports/request-report-retraction.js?v=36b35c17" type="application/x-dendrogeo-module" defer></script>
+<script src="src/application/reports/refresh-after-report-retraction.js?v=17083c5a" type="application/x-dendrogeo-module" defer></script>
+<script src="src/application/reports/reset-publication-polling.js?v=39e7e924" type="application/x-dendrogeo-module" defer></script>
+<script src="src/services/report-publish.js?v=8d4ab6d4" type="application/x-dendrogeo-module" defer></script>
+<script src="src/domain/park-invites/access-policy.js?v=0abd3304" type="application/x-dendrogeo-module" defer></script>
+<script src="src/adapters/park-invites/store.js?v=d3a03dcb" type="application/x-dendrogeo-module" defer></script>
+<script src="src/ui/park-invite-inbox.js?v=e2d96058" type="application/x-dendrogeo-module" defer></script>
+<script src="src/ui/park-collaboration-panel.js?v=24033f66" type="application/x-dendrogeo-module" defer></script>
+<script src="src/application/park-invites/park-invite-state.js?v=6a9544e2" type="application/x-dendrogeo-module" defer></script>
+<script src="src/application/park-invites/manage-invites.js?v=8391d482" type="application/x-dendrogeo-module" defer></script>
+<script src="src/application/park-invites/load-owned-parks.js?v=0066f363" type="application/x-dendrogeo-module" defer></script>
+<script src="src/application/park-invites/load-recipient-invites.js?v=70d93f78" type="application/x-dendrogeo-module" defer></script>
+<script src="src/ui/load-owner-collaborations.js?v=ddd975a0" type="application/x-dendrogeo-module" defer></script>
+<script src="src/ui/refresh-collaborations.js?v=0ec3d666" type="application/x-dendrogeo-module" defer></script>
+<script src="src/ui/owner-park-options.js?v=139a4aac" type="application/x-dendrogeo-module" defer></script>
+<script src="src/services/park-invites.js?v=3c85aa06" type="application/x-dendrogeo-module" defer></script>
+<script src="src/ui/park-comparison-row.js?v=536422fa" type="application/x-dendrogeo-module" defer></script>
+<script src="src/ui/park-comparison-pending.js?v=52f983d2" type="application/x-dendrogeo-module" defer></script>
+<script src="src/ui/park-report-options.js?v=2920e655" type="application/x-dendrogeo-module" defer></script>
+<script src="src/ui/park-comparison-error.js?v=cd5f8c5e" type="application/x-dendrogeo-module" defer></script>
+<script src="src/ui/fit-measurement-rows.js?v=4faac2d3" type="application/x-dendrogeo-module" defer></script>
+<script src="src/domain/parks/summarize-park-report.js?v=faafc80a" type="application/x-dendrogeo-module" defer></script>
+<script src="src/ui/park-report-summary.js?v=82ee9509" type="application/x-dendrogeo-module" defer></script>
+<script src="src/ui/park-report-species-table.js?v=73ae8353" type="application/x-dendrogeo-module" defer></script>
+<script src="src/domain/parks/build-park-report-csv.js?v=ce960256" type="application/x-dendrogeo-module" defer></script>
+<script src="src/ui/park-report-preview.js?v=b761f6b7" type="application/x-dendrogeo-module" defer></script>
+<script src="src/domain/parks/resolve-park-report-target.js?v=0d445fb9" type="application/x-dendrogeo-module" defer></script>
+<script src="src/domain/parks/build-park-report-request.js?v=a516a226" type="application/x-dendrogeo-module" defer></script>
+<script src="src/domain/parks/build-legacy-park-report-request.js?v=a1b41a47" type="application/x-dendrogeo-module" defer></script>
+<script src="src/adapters/parks/park-report-store.js?v=ce386262" type="application/x-dendrogeo-module" defer></script>
+<script src="src/application/world/load-park-report.js?v=ad0e7050" type="application/x-dendrogeo-module" defer></script>
+<script src="src/adapters/world/park-comparison-store.js?v=9c47597d" type="application/x-dendrogeo-module" defer></script>
+<script src="src/domain/parks/resolve-park-comparison-read.js?v=013640b6" type="application/x-dendrogeo-module" defer></script>
+<script src="src/domain/parks/prepare-park-comparison.js?v=73933dc0" type="application/x-dendrogeo-module" defer></script>
+<script src="src/domain/parks/group-legacy-park-comparison.js?v=b961db90" type="application/x-dendrogeo-module" defer></script>
+<script src="src/ui/legacy-park-comparison.js?v=aeab30dd" type="application/x-dendrogeo-module" defer></script>
+<script src="src/application/world/load-park-comparison.js?v=ebfd3a06" type="application/x-dendrogeo-module" defer></script>
+<script src="src/ui/render-primary-park-comparison.js?v=ce324ffd" type="application/x-dendrogeo-module" defer></script>
+<script src="src/application/world/load-legacy-park-comparison.js?v=5e4b6a6d" type="application/x-dendrogeo-module" defer></script>
+<script src="src/ui/show-park-comparison-denied.js?v=c8a928e9" type="application/x-dendrogeo-module" defer></script>
+<script src="src/application/world/zoom-to-location.js?v=d732a13c" type="application/x-dendrogeo-module" defer></script>
+<script src="src/services/world.js?v=8ba9ca66" type="application/x-dendrogeo-module" defer></script>
+<script src="src/adapters/trees/fetch-unvisited-measurement-waypoints.js?v=018c7de1" type="application/x-dendrogeo-module" defer></script>
+<script src="src/adapters/trees/fetch-latest-measurement-point.js?v=84176ff1" type="application/x-dendrogeo-module" defer></script>
+<script src="src/application/trees/suggest-next-measurement-point.js?v=865f1720" type="application/x-dendrogeo-module" defer></script>
+<script src="src/adapters/trees/fetch-measurement-at-project-point.js?v=4885d94f" type="application/x-dendrogeo-module" defer></script>
+<script src="src/domain/trees/resolve-measurement-point-query.js?v=b4ed02f3" type="application/x-dendrogeo-module" defer></script>
+<script src="src/application/trees/query-measurement-point.js?v=baf76425" type="application/x-dendrogeo-module" defer></script>
+<script src="src/ui/measurement-point-query-result.js?v=2a4b091d" type="application/x-dendrogeo-module" defer></script>
+<script src="src/domain/trees/build-measurement-photo-file-name.js?v=fb7b6da6" type="application/x-dendrogeo-module" defer></script>
+<script src="src/ui/compress-measurement-photo.js?v=fc7d8645" type="application/x-dendrogeo-module" defer></script>
+<script src="src/application/trees/prepare-measurement-photo.js?v=676f1a4e" type="application/x-dendrogeo-module" defer></script>
+<script src="src/adapters/trees/upload-measurement-photo.js?v=5de6ff8c" type="application/x-dendrogeo-module" defer></script>
+<script src="src/adapters/trees/remove-measurement-photo.js?v=d7494e55" type="application/x-dendrogeo-module" defer></script>
+<script src="src/adapters/trees/fetch-measurement-for-edit.js?v=fa0d1ccb" type="application/x-dendrogeo-module" defer></script>
+<script src="src/domain/trees/build-measurement-edit-form.js?v=8a7ae652" type="application/x-dendrogeo-module" defer></script>
+<script src="src/ui/render-measurement-edit-form.js?v=45bf65a4" type="application/x-dendrogeo-module" defer></script>
+<script src="src/application/trees/edit-measurement-record.js?v=6eac5c4a" type="application/x-dendrogeo-module" defer></script>
+<script src="src/ui/cancel-measurement-edit.js?v=9bca77e4" type="application/x-dendrogeo-module" defer></script>
+<script src="src/application/trees/run-measurement-save.js?v=3a529091" type="application/x-dendrogeo-module" defer></script>
+<script src="src/ui/set-measurement-save-button.js?v=cacdd3f4" type="application/x-dendrogeo-module" defer></script>
+<script src="src/ui/validate-measurement-save-form.js?v=23f2075f" type="application/x-dendrogeo-module" defer></script>
+<script src="src/application/trees/resolve-measurement-save-gates.js?v=bc733fea" type="application/x-dendrogeo-module" defer></script>
+<script src="src/domain/trees/build-measurement-record.js?v=63e29a01" type="application/x-dendrogeo-module" defer></script>
+<script src="src/adapters/trees/persist-measurement-record.js?v=8d864e1f" type="application/x-dendrogeo-module" defer></script>
+<script src="src/domain/trees/build-measurement-location-fields.js?v=74ea4344" type="application/x-dendrogeo-module" defer></script>
+<script src="src/domain/trees/build-offline-measurement-record.js?v=549505db" type="application/x-dendrogeo-module" defer></script>
+<script src="src/application/trees/record-measurement-presence-action.js?v=82ccc25b" type="application/x-dendrogeo-module" defer></script>
+<script src="src/application/trees/refresh-measurement-after-save.js?v=1ea29ca0" type="application/x-dendrogeo-module" defer></script>
+<script src="src/application/trees/validate-measurement-submission.js?v=867f6796" type="application/x-dendrogeo-module" defer></script>
+<script src="src/application/trees/prepare-measurement-submission.js?v=7fd87009" type="application/x-dendrogeo-module" defer></script>
+<script src="src/application/trees/verify-measurement-submission-location.js?v=4ae57a3c" type="application/x-dendrogeo-module" defer></script>
+<script src="src/application/trees/persist-measurement-submission.js?v=65ca6572" type="application/x-dendrogeo-module" defer></script>
+<script src="src/application/trees/submit-measurement.js?v=40a34b0f" type="application/x-dendrogeo-module" defer></script>
+<script src="src/ui/show-measurement-validation-error.js?v=afffd3c2" type="application/x-dendrogeo-module" defer></script>
+<script src="src/adapters/trees/measurement-geolocation.js?v=c6da5372" type="application/x-dendrogeo-module" defer></script>
+<script src="src/ui/measurement-gps-status.js?v=ab197d03" type="application/x-dendrogeo-module" defer></script>
+<script src="src/application/trees/handle-measurement-gps-error.js?v=b7d9a332" type="application/x-dendrogeo-module" defer></script>
+<script src="src/adapters/trees/measurement-wake-lock.js?v=db1445f5" type="application/x-dendrogeo-module" defer></script>
+<script src="src/application/trees/start-measurement-gps.js?v=6f030436" type="application/x-dendrogeo-module" defer></script>
+<script src="src/ui/reset-measurement-entry-fields.js?v=8ab5b668" type="application/x-dendrogeo-module" defer></script>
+<script src="src/ui/confirm-measurement-project-delete.js?v=558514db" type="application/x-dendrogeo-module" defer></script>
+<script src="src/adapters/trees/measurement-project-deletion-store.js?v=490d6928" type="application/x-dendrogeo-module" defer></script>
+<script src="src/application/trees/delete-measurement-project.js?v=ea441b03" type="application/x-dendrogeo-module" defer></script>
+<script src="src/services/measure.js?v=f1371979" type="application/x-dendrogeo-module" defer></script>
+<script src="src/domain/map/is-valid-coordinate.js?v=269aa556" type="application/x-dendrogeo-module" defer></script>
+<script src="src/domain/map/select-waypoint-target.js?v=e3baef70" type="application/x-dendrogeo-module" defer></script>
+<script src="src/domain/map/build-waypoint-navigation-header.js?v=90529673" type="application/x-dendrogeo-module" defer></script>
+<script src="src/ui/render-waypoint-navigation-header.js?v=64196069" type="application/x-dendrogeo-module" defer></script>
+<script src="src/ui/map-measurement-popup.js?v=222ee94e" type="application/x-dendrogeo-module" defer></script>
+<script src="src/domain/map/measurement-marker-cluster-icon.js?v=0d395088" type="application/x-dendrogeo-module" defer></script>
+<script src="src/ui/create-measurement-map-marker.js?v=0dc66e10" type="application/x-dendrogeo-module" defer></script>
+<script src="src/adapters/map/ensure-measurement-marker-layer.js?v=9246b357" type="application/x-dendrogeo-module" defer></script>
+<script src="src/application/map/schedule-measurement-marker-chunks.js?v=bc0bb389" type="application/x-dendrogeo-module" defer></script>
+<script src="src/application/map/add-measurement-markers.js?v=02c77487" type="application/x-dendrogeo-module" defer></script>
+<script src="src/ui/map-measurement-markers.js?v=da90b7da" type="application/x-dendrogeo-module" defer></script>
+<script src="src/ui/waypoint-list.js?v=350d4a7a" type="application/x-dendrogeo-module" defer></script>
+<script src="src/ui/select-waypoint.js?v=a449aaff" type="application/x-dendrogeo-module" defer></script>
+<script src="src/application/map/select-nearest-waypoint.js?v=56f23346" type="application/x-dendrogeo-module" defer></script>
+<script src="src/application/map/advance-waypoint-target.js?v=4a89a1a4" type="application/x-dendrogeo-module" defer></script>
+<script src="src/ui/waypoint-navigation-feedback.js?v=39ee7385" type="application/x-dendrogeo-module" defer></script>
+<script src="src/ui/waypoint-map-viewport.js?v=c0c5f1a8" type="application/x-dendrogeo-module" defer></script>
+<script src="src/domain/map/resolve-waypoint-guidance.js?v=9d15dc5b" type="application/x-dendrogeo-module" defer></script>
+<script src="src/ui/waypoint-map-markers.js?v=c1f68d84" type="application/x-dendrogeo-module" defer></script>
+<script src="src/domain/map/resolve-waypoint-gps-guidance.js?v=02361310" type="application/x-dendrogeo-module" defer></script>
+<script src="src/ui/create-waypoint-gps-location-marker.js?v=d4e99afd" type="application/x-dendrogeo-module" defer></script>
+<script src="src/ui/render-waypoint-gps-guidance-readout.js?v=af4feb1d" type="application/x-dendrogeo-module" defer></script>
+<script src="src/adapters/map/add-waypoint-guidance-line.js?v=6f7762b0" type="application/x-dendrogeo-module" defer></script>
+<script src="src/application/map/render-waypoint-gps-overlay.js?v=571bc7ed" type="application/x-dendrogeo-module" defer></script>
+<script src="src/ui/waypoint-gps-overlay.js?v=aa5a0ca8" type="application/x-dendrogeo-module" defer></script>
+<script src="src/ui/fail-park-live-share.js?v=971ea008" type="application/x-dendrogeo-module" defer></script>
+<script src="src/domain/parks/resolve-live-share-join.js?v=2ac133f6" type="application/x-dendrogeo-module" defer></script>
+<script src="src/adapters/parks/fetch-live-share-project-park.js?v=368ab6a1" type="application/x-dendrogeo-module" defer></script>
+<script src="src/ui/park-live-share-connection-status.js?v=38c2e730" type="application/x-dendrogeo-module" defer></script>
+<script src="src/application/parks/handle-live-share-channel-status.js?v=add079ab" type="application/x-dendrogeo-module" defer></script>
+<script src="src/application/parks/join-live-share-park.js?v=715438a2" type="application/x-dendrogeo-module" defer></script>
+<script src="src/domain/parks/park-live-member-color.js?v=70eace36" type="application/x-dendrogeo-module" defer></script>
+<script src="src/adapters/parks/park-presence-channel.js?v=963a7689" type="application/x-dendrogeo-module" defer></script>
+<script src="src/adapters/parks/leave-park-presence-channel.js?v=6f0bb6d6" type="application/x-dendrogeo-module" defer></script>
+<script src="src/application/parks/track-park-live-position.js?v=f032dbcb" type="application/x-dendrogeo-module" defer></script>
+<script src="src/domain/parks/select-park-live-collaborators.js?v=44761518" type="application/x-dendrogeo-module" defer></script>
+<script src="src/domain/parks/build-park-live-collaborator-view.js?v=f32b4112" type="application/x-dendrogeo-module" defer></script>
+<script src="src/ui/prepare-park-live-collaborator-layer.js?v=bcdbeee7" type="application/x-dendrogeo-module" defer></script>
+<script src="src/ui/render-park-live-collaborator-marker.js?v=3cbda663" type="application/x-dendrogeo-module" defer></script>
+<script src="src/ui/render-park-live-collaborator-count.js?v=2c3baa2e" type="application/x-dendrogeo-module" defer></script>
+<script src="src/domain/parks/parse-waypoint-csv.js?v=92023dae" type="application/x-dendrogeo-module" defer></script>
+<script src="src/domain/parks/validate-waypoint-csv-row.js?v=bd41dd9f" type="application/x-dendrogeo-module" defer></script>
+<script src="src/application/parks/build-waypoint-upsert-command.js?v=87f2ed8a" type="application/x-dendrogeo-module" defer></script>
+<script src="src/adapters/parks/upsert-project-waypoint.js?v=0a633314" type="application/x-dendrogeo-module" defer></script>
+<script src="src/application/parks/upload-waypoint-csv.js?v=05163571" type="application/x-dendrogeo-module" defer></script>
+<script src="src/domain/map/prepare-approved-map-measurements.js?v=132cba74" type="application/x-dendrogeo-module" defer></script>
+<script src="src/adapters/map/fetch-approved-map-measurements.js?v=9039bc65" type="application/x-dendrogeo-module" defer></script>
+<script src="src/application/map/load-approved-measurement-markers.js?v=9fc0f0f8" type="application/x-dendrogeo-module" defer></script>
+<script src="src/ui/render-live-map-load-status.js?v=9283f79f" type="application/x-dendrogeo-module" defer></script>
+<script src="src/application/map/load-live-measurements-map.js?v=f2699a2c" type="application/x-dendrogeo-module" defer></script>
+<script src="src/domain/map/select-waypoint-arrival-target.js?v=a813ff79" type="application/x-dendrogeo-module" defer></script>
+<script src="src/ui/confirm-waypoint-arrival-distance.js?v=d0f26a04" type="application/x-dendrogeo-module" defer></script>
+<script src="src/adapters/map/mark-waypoint-visited.js?v=6719728b" type="application/x-dendrogeo-module" defer></script>
+<script src="src/application/map/complete-waypoint-arrival.js?v=14b8d370" type="application/x-dendrogeo-module" defer></script>
+<script src="src/application/map/arrive-at-waypoint.js?v=c742c02e" type="application/x-dendrogeo-module" defer></script>
+<script src="src/domain/map/select-restored-waypoint-target.js?v=ae821083" type="application/x-dendrogeo-module" defer></script>
+<script src="src/adapters/map/fetch-project-waypoints.js?v=4e63f392" type="application/x-dendrogeo-module" defer></script>
+<script src="src/application/map/reset-waypoint-load-state.js?v=fc4bd9a2" type="application/x-dendrogeo-module" defer></script>
+<script src="src/ui/show-waypoint-load-error.js?v=0c8f9072" type="application/x-dendrogeo-module" defer></script>
+<script src="src/application/map/load-project-waypoints.js?v=16cc8580" type="application/x-dendrogeo-module" defer></script>
+<script src="src/domain/map/is-waypoint-project-selected.js?v=ce7dab3f" type="application/x-dendrogeo-module" defer></script>
+<script src="src/ui/confirm-waypoint-list-deletion.js?v=44e51736" type="application/x-dendrogeo-module" defer></script>
+<script src="src/adapters/map/delete-project-waypoints.js?v=ef64f93c" type="application/x-dendrogeo-module" defer></script>
+<script src="src/application/map/clear-deleted-waypoint-list.js?v=29b1971f" type="application/x-dendrogeo-module" defer></script>
+<script src="src/application/map/delete-project-waypoints.js?v=781315b9" type="application/x-dendrogeo-module" defer></script>
+<script src="src/domain/map/map-initial-view.js?v=a3187cf1" type="application/x-dendrogeo-module" defer></script>
+<script src="src/adapters/map/create-osm-map.js?v=086e2d09" type="application/x-dendrogeo-module" defer></script>
+<script src="src/ui/add-osm-map-layer.js?v=75a3c5cb" type="application/x-dendrogeo-module" defer></script>
+<script src="src/application/map/initialize-map-instance.js?v=c49a6286" type="application/x-dendrogeo-module" defer></script>
+<script src="src/application/map/initialize-workspace-maps.js?v=5dfeec58" type="application/x-dendrogeo-module" defer></script>
+<script src="src/domain/map/resolve-base-map-layer.js?v=333ff1e7" type="application/x-dendrogeo-module" defer></script>
+<script src="src/ui/sync-base-map-layer-selection.js?v=adb6f5c5" type="application/x-dendrogeo-module" defer></script>
+<script src="src/adapters/map/manage-base-map-layers.js?v=609192f3" type="application/x-dendrogeo-module" defer></script>
+<script src="src/adapters/map/create-base-map-layer.js?v=fbc35397" type="application/x-dendrogeo-module" defer></script>
+<script src="src/application/map/switch-base-map-layer.js?v=4e9f973a" type="application/x-dendrogeo-module" defer></script>
+<script src="src/services/map.js?v=545caace" type="application/x-dendrogeo-module" defer></script>
 <!-- LULC ZİNCİRİ ARTIK TEMBEL (2026-09-25 · Faz 8): 8 dosya ilk yüklemede
      indirilmiyor. Yalnız "🌿 Yüzey Örtüsü Analizi"ne basan kullanıcı için
      src/utils/lazylibs.js → dgEnsureLulc() sırayla enjekte eder
@@ -723,215 +723,215 @@
      yani çevrimdışı davranış değişmez. Kazanç: ilk yüklemede 8 istek azalır. -->
 <!-- PARK ZİNCİRİ (Faz 4 — eski gridplan.js yedi modüle bölündü; sıralama ÖNEMLİ:
      state → istemci → geometri → sorgu → motor → panel → export) -->
-<script src="src/application/parks/grid-session-state.js?v=47e40f66" type="application/x-dendrogeo-module" defer></script>
-<script src="src/services/park-state.js?v=e219c69c" type="application/x-dendrogeo-module" defer></script>
-<script src="src/domain/parks/normalize-overpass-cache-key.js?v=fd70185b" type="application/x-dendrogeo-module" defer></script>
-<script src="src/adapters/parks/coalesce-overpass-requests.js?v=7e26ea41" type="application/x-dendrogeo-module" defer></script>
-<script src="src/domain/parks/select-overpass-mirrors.js?v=6bb71a3c" type="application/x-dendrogeo-module" defer></script>
-<script src="src/domain/parks/overpass-request-budget.js?v=d1935f53" type="application/x-dendrogeo-module" defer></script>
-<script src="src/adapters/parks/overpass-mirror-health.js?v=dc710ed8" type="application/x-dendrogeo-module" defer></script>
-<script src="src/services/osm-client.js?v=95b04beb" type="application/x-dendrogeo-module" defer></script>
-<script src="src/domain/parks/road-half-width.js?v=8b8ba2c8" type="application/x-dendrogeo-module" defer></script>
-<script src="src/domain/parks/classify-surface-tags.js?v=4ac0164a" type="application/x-dendrogeo-module" defer></script>
-<script src="src/domain/parks/impervious-geometry.js?v=8f4b42df" type="application/x-dendrogeo-module" defer></script>
-<script src="src/domain/parks/area.js?v=bdecad4a" type="application/x-dendrogeo-module" defer></script>
-<script src="src/domain/parks/resolve-park-area.js?v=d4d8c6a1" type="application/x-dendrogeo-module" defer></script>
-<script src="src/domain/parks/segment-intersection.js?v=12c78a3f" type="application/x-dendrogeo-module" defer></script>
-<script src="src/domain/parks/point-in-polygon.js?v=0b30a4f7" type="application/x-dendrogeo-module" defer></script>
-<script src="src/domain/parks/bounds.js?v=8444c60d" type="application/x-dendrogeo-module" defer></script>
-<script src="src/domain/parks/park-containment.js?v=61f21727" type="application/x-dendrogeo-module" defer></script>
-<script src="src/domain/parks/line-distance.js?v=790e0597" type="application/x-dendrogeo-module" defer></script>
-<script src="src/adapters/surface/route-surface-worker-bootstrap.js?v=71e371aa" type="application/x-dendrogeo-module" defer></script>
-<script src="src/domain/parks/ensure-osm-rings.js?v=d37df824" type="application/x-dendrogeo-module" defer></script>
-<script src="src/domain/parks/osm-rings.js?v=29603bbd" type="application/x-dendrogeo-module" defer></script>
-<script src="src/domain/parks/rect-intersection.js?v=f2292d4b" type="application/x-dendrogeo-module" defer></script>
-<script src="src/domain/parks/cell-in-park.js?v=79997d8e" type="application/x-dendrogeo-module" defer></script>
-<script src="src/domain/parks/cell-validity.js?v=f609bdfb" type="application/x-dendrogeo-module" defer></script>
-<script src="src/domain/parks/park-overlap.js?v=44e8ef84" type="application/x-dendrogeo-module" defer></script>
-<script src="src/services/park-geometry.js?v=e9852ad5" type="application/x-dendrogeo-module" defer></script>
-<script src="src/domain/parks/simplify-ring.js?v=4461a05f" type="application/x-dendrogeo-module" defer></script>
-<script src="src/adapters/parks/park-geometry-store.js?v=2e5987a9" type="application/x-dendrogeo-module" defer></script>
-<script src="src/application/parks/persist-park-geometry.js?v=ec7425b3" type="application/x-dendrogeo-module" defer></script>
-<script src="src/domain/parks/distance-to-park-boundary.js?v=b94d018f" type="application/x-dendrogeo-module" defer></script>
-<script src="src/domain/parks/decide-park-geofence.js?v=6315eae7" type="application/x-dendrogeo-module" defer></script>
-<script src="src/adapters/parks/read-fresh-gps-fix.js?v=5fefc629" type="application/x-dendrogeo-module" defer></script>
-<script src="src/domain/parks/stamp-geofence-decision.js?v=ad42f002" type="application/x-dendrogeo-module" defer></script>
-<script src="src/application/parks/verify-at-park.js?v=f047c087" type="application/x-dendrogeo-module" defer></script>
-<script src="src/services/geofence.js?v=3dd86ff3" type="application/x-dendrogeo-module" defer></script>
-<script src="src/application/parks/find-park-candidates.js?v=bf9f31ec" type="application/x-dendrogeo-module" defer></script>
-<script src="src/domain/parks/build-osm-surface-query.js?v=70b81582" type="application/x-dendrogeo-module" defer></script>
-<script src="src/ui/surface-osm-evidence-status.js?v=6ef7717e" type="application/x-dendrogeo-module" defer></script>
-<script src="src/domain/parks/decode-osm-map-geometry.js?v=76d1b4e9" type="application/x-dendrogeo-module" defer></script>
-<script src="src/adapters/parks/load-osm-map-coverage.js?v=f032ede2" type="application/x-dendrogeo-module" defer></script>
-<script src="src/application/parks/fetch-detailed-coverage.js?v=4f9b0ae0" type="application/x-dendrogeo-module" defer></script>
-<script src="src/application/parks/classify-coverage-elements.js?v=12e4b194" type="application/x-dendrogeo-module" defer></script>
-<script src="src/application/parks/find-nominatim-boundary.js?v=be03ef43" type="application/x-dendrogeo-module" defer></script>
-<script src="src/adapters/parks/nominatim-client.js?v=4163324e" type="application/x-dendrogeo-module" defer></script>
-<script src="src/application/parks/share-detailed-coverage-request.js?v=e9b5d8c4" type="application/x-dendrogeo-module" defer></script>
-<script src="src/application/parks/commit-park-coverage-snapshot.js?v=13ef167a" type="application/x-dendrogeo-module" defer></script>
-<script src="src/application/parks/collect-park-coverage-elements.js?v=e91cda0f" type="application/x-dendrogeo-module" defer></script>
-<script src="src/domain/parks/filter-park-coverage-to-boundary.js?v=e45e8241" type="application/x-dendrogeo-module" defer></script>
-<script src="src/ui/park-water-layer-renderer.js?v=26b5d500" type="application/x-dendrogeo-module" defer></script>
-<script src="src/services/park-query.js?v=fac4a7f8" type="application/x-dendrogeo-module" defer></script>
-<script src="src/domain/parks/identity.js?v=8bb199c4" type="application/x-dendrogeo-module" defer></script>
-<script src="src/adapters/parks/park-store.js?v=b65e6bbb" type="application/x-dendrogeo-module" defer></script>
-<script src="src/application/parks/register-park.js?v=c599ef90" type="application/x-dendrogeo-module" defer></script>
-<script src="src/adapters/parks/project-store.js?v=f0707daf" type="application/x-dendrogeo-module" defer></script>
-<script src="src/application/parks/create-project.js?v=2f6a8dbf" type="application/x-dendrogeo-module" defer></script>
-<script src="src/adapters/parks/project-link-store.js?v=cb2ab3f9" type="application/x-dendrogeo-module" defer></script>
-<script src="src/application/parks/link-project.js?v=3536d10b" type="application/x-dendrogeo-module" defer></script>
-<script src="src/domain/parks/build-backfill-project-link.js?v=d57796ef" type="application/x-dendrogeo-module" defer></script>
-<script src="src/application/parks/link-backfill-project-to-park.js?v=b7b9acaa" type="application/x-dendrogeo-module" defer></script>
-<script src="src/ui/park-backfill-link-feedback.js?v=f3b8a9b2" type="application/x-dendrogeo-module" defer></script>
-<script src="src/application/parks/refresh-after-park-backfill.js?v=5700492b" type="application/x-dendrogeo-module" defer></script>
-<script src="src/application/parks/detect-park.js?v=05c145c0" type="application/x-dendrogeo-module" defer></script>
-<script src="src/application/parks/create-manual-park.js?v=aa076060" type="application/x-dendrogeo-module" defer></script>
-<script src="src/adapters/parks/park-search.js?v=76c66120" type="application/x-dendrogeo-module" defer></script>
-<script src="src/application/parks/search-park-by-name.js?v=5c279345" type="application/x-dendrogeo-module" defer></script>
-<script src="src/domain/parks/is-schema-error.js?v=b4ee90c2" type="application/x-dendrogeo-module" defer></script>
-<script src="src/application/parks/handle-park-schema-missing.js?v=e9dd4170" type="application/x-dendrogeo-module" defer></script>
+<script src="src/application/parks/grid-session-state.js?v=e10791d2" type="application/x-dendrogeo-module" defer></script>
+<script src="src/services/park-state.js?v=927820ea" type="application/x-dendrogeo-module" defer></script>
+<script src="src/domain/parks/normalize-overpass-cache-key.js?v=d05f7307" type="application/x-dendrogeo-module" defer></script>
+<script src="src/adapters/parks/coalesce-overpass-requests.js?v=24323c98" type="application/x-dendrogeo-module" defer></script>
+<script src="src/domain/parks/select-overpass-mirrors.js?v=04c1f79b" type="application/x-dendrogeo-module" defer></script>
+<script src="src/domain/parks/overpass-request-budget.js?v=ec602325" type="application/x-dendrogeo-module" defer></script>
+<script src="src/adapters/parks/overpass-mirror-health.js?v=aeb5e282" type="application/x-dendrogeo-module" defer></script>
+<script src="src/services/osm-client.js?v=925cbd48" type="application/x-dendrogeo-module" defer></script>
+<script src="src/domain/parks/road-half-width.js?v=0d812153" type="application/x-dendrogeo-module" defer></script>
+<script src="src/domain/parks/classify-surface-tags.js?v=3d742179" type="application/x-dendrogeo-module" defer></script>
+<script src="src/domain/parks/impervious-geometry.js?v=bb6f5592" type="application/x-dendrogeo-module" defer></script>
+<script src="src/domain/parks/area.js?v=25f86866" type="application/x-dendrogeo-module" defer></script>
+<script src="src/domain/parks/resolve-park-area.js?v=6ef245a7" type="application/x-dendrogeo-module" defer></script>
+<script src="src/domain/parks/segment-intersection.js?v=7cca415a" type="application/x-dendrogeo-module" defer></script>
+<script src="src/domain/parks/point-in-polygon.js?v=413714e1" type="application/x-dendrogeo-module" defer></script>
+<script src="src/domain/parks/bounds.js?v=7cf9131d" type="application/x-dendrogeo-module" defer></script>
+<script src="src/domain/parks/park-containment.js?v=7fc0fcd9" type="application/x-dendrogeo-module" defer></script>
+<script src="src/domain/parks/line-distance.js?v=b03a4c29" type="application/x-dendrogeo-module" defer></script>
+<script src="src/adapters/surface/route-surface-worker-bootstrap.js?v=924d5a90" type="application/x-dendrogeo-module" defer></script>
+<script src="src/domain/parks/ensure-osm-rings.js?v=28ddf3f7" type="application/x-dendrogeo-module" defer></script>
+<script src="src/domain/parks/osm-rings.js?v=951162db" type="application/x-dendrogeo-module" defer></script>
+<script src="src/domain/parks/rect-intersection.js?v=b3e4a7d2" type="application/x-dendrogeo-module" defer></script>
+<script src="src/domain/parks/cell-in-park.js?v=65df9e53" type="application/x-dendrogeo-module" defer></script>
+<script src="src/domain/parks/cell-validity.js?v=a93e0f31" type="application/x-dendrogeo-module" defer></script>
+<script src="src/domain/parks/park-overlap.js?v=73b422f6" type="application/x-dendrogeo-module" defer></script>
+<script src="src/services/park-geometry.js?v=93bc2aa0" type="application/x-dendrogeo-module" defer></script>
+<script src="src/domain/parks/simplify-ring.js?v=61aa891a" type="application/x-dendrogeo-module" defer></script>
+<script src="src/adapters/parks/park-geometry-store.js?v=098bfc74" type="application/x-dendrogeo-module" defer></script>
+<script src="src/application/parks/persist-park-geometry.js?v=5642e09d" type="application/x-dendrogeo-module" defer></script>
+<script src="src/domain/parks/distance-to-park-boundary.js?v=8f8abf73" type="application/x-dendrogeo-module" defer></script>
+<script src="src/domain/parks/decide-park-geofence.js?v=012625fa" type="application/x-dendrogeo-module" defer></script>
+<script src="src/adapters/parks/read-fresh-gps-fix.js?v=2ba13f3f" type="application/x-dendrogeo-module" defer></script>
+<script src="src/domain/parks/stamp-geofence-decision.js?v=b8207b16" type="application/x-dendrogeo-module" defer></script>
+<script src="src/application/parks/verify-at-park.js?v=1647d8ce" type="application/x-dendrogeo-module" defer></script>
+<script src="src/services/geofence.js?v=0ebeaca7" type="application/x-dendrogeo-module" defer></script>
+<script src="src/application/parks/find-park-candidates.js?v=f17cac2d" type="application/x-dendrogeo-module" defer></script>
+<script src="src/domain/parks/build-osm-surface-query.js?v=5369cf8f" type="application/x-dendrogeo-module" defer></script>
+<script src="src/ui/surface-osm-evidence-status.js?v=ce56b73e" type="application/x-dendrogeo-module" defer></script>
+<script src="src/domain/parks/decode-osm-map-geometry.js?v=3ad9c3a9" type="application/x-dendrogeo-module" defer></script>
+<script src="src/adapters/parks/load-osm-map-coverage.js?v=86e18a83" type="application/x-dendrogeo-module" defer></script>
+<script src="src/application/parks/fetch-detailed-coverage.js?v=178b5521" type="application/x-dendrogeo-module" defer></script>
+<script src="src/application/parks/classify-coverage-elements.js?v=ce297efb" type="application/x-dendrogeo-module" defer></script>
+<script src="src/application/parks/find-nominatim-boundary.js?v=b5c013da" type="application/x-dendrogeo-module" defer></script>
+<script src="src/adapters/parks/nominatim-client.js?v=84c9ba1b" type="application/x-dendrogeo-module" defer></script>
+<script src="src/application/parks/share-detailed-coverage-request.js?v=49d45cc4" type="application/x-dendrogeo-module" defer></script>
+<script src="src/application/parks/commit-park-coverage-snapshot.js?v=63ecad8a" type="application/x-dendrogeo-module" defer></script>
+<script src="src/application/parks/collect-park-coverage-elements.js?v=b788cc3c" type="application/x-dendrogeo-module" defer></script>
+<script src="src/domain/parks/filter-park-coverage-to-boundary.js?v=31608a6c" type="application/x-dendrogeo-module" defer></script>
+<script src="src/ui/park-water-layer-renderer.js?v=8b4f9722" type="application/x-dendrogeo-module" defer></script>
+<script src="src/services/park-query.js?v=33f7069f" type="application/x-dendrogeo-module" defer></script>
+<script src="src/domain/parks/identity.js?v=d2948f90" type="application/x-dendrogeo-module" defer></script>
+<script src="src/adapters/parks/park-store.js?v=7af6c93e" type="application/x-dendrogeo-module" defer></script>
+<script src="src/application/parks/register-park.js?v=7ca7a651" type="application/x-dendrogeo-module" defer></script>
+<script src="src/adapters/parks/project-store.js?v=7a180dfc" type="application/x-dendrogeo-module" defer></script>
+<script src="src/application/parks/create-project.js?v=a32cc7a6" type="application/x-dendrogeo-module" defer></script>
+<script src="src/adapters/parks/project-link-store.js?v=5a4a2797" type="application/x-dendrogeo-module" defer></script>
+<script src="src/application/parks/link-project.js?v=7c82ee26" type="application/x-dendrogeo-module" defer></script>
+<script src="src/domain/parks/build-backfill-project-link.js?v=5a0ebc4d" type="application/x-dendrogeo-module" defer></script>
+<script src="src/application/parks/link-backfill-project-to-park.js?v=6d8bacf7" type="application/x-dendrogeo-module" defer></script>
+<script src="src/ui/park-backfill-link-feedback.js?v=54aab34d" type="application/x-dendrogeo-module" defer></script>
+<script src="src/application/parks/refresh-after-park-backfill.js?v=30951ea5" type="application/x-dendrogeo-module" defer></script>
+<script src="src/application/parks/detect-park.js?v=a683dd89" type="application/x-dendrogeo-module" defer></script>
+<script src="src/application/parks/create-manual-park.js?v=2d2da7de" type="application/x-dendrogeo-module" defer></script>
+<script src="src/adapters/parks/park-search.js?v=e12a60fd" type="application/x-dendrogeo-module" defer></script>
+<script src="src/application/parks/search-park-by-name.js?v=e8cd55b6" type="application/x-dendrogeo-module" defer></script>
+<script src="src/domain/parks/is-schema-error.js?v=d03bc4dd" type="application/x-dendrogeo-module" defer></script>
+<script src="src/application/parks/handle-park-schema-missing.js?v=fdc6ceaf" type="application/x-dendrogeo-module" defer></script>
 <!-- PARK KİMLİĞİ (2026-09-24): queryPark'ın bulduğu parkı public.parks'a yazar,
      projeyi parka bağlar, ölçüm kapısını (park algılanmadan ölçüm yok) kurar.
      Sıra ÖNEMLİ: park-query'den sonra, grid-engine'den önce (grid panelindeki
      proje listesi bu modülden beslenir). -->
-<script src="src/application/parks/build-park-admin-overview.js?v=61121ef7" type="application/x-dendrogeo-module" defer></script>
-<script src="src/ui/park-admin-renderer.js?v=59fe8725" type="application/x-dendrogeo-module" defer></script>
-<script src="src/application/parks/merge-park-identities.js?v=a2e992e3" type="application/x-dendrogeo-module" defer></script>
-<script src="src/application/parks/rename-park-identity.js?v=13dc4380" type="application/x-dendrogeo-module" defer></script>
-<script src="src/application/parks/delete-park-identity.js?v=dddebd46" type="application/x-dendrogeo-module" defer></script>
-<script src="src/adapters/parks/park-admin-mutation-store.js?v=93613c70" type="application/x-dendrogeo-module" defer></script>
-<script src="src/ui/park-admin-mutation.js?v=f316f423" type="application/x-dendrogeo-module" defer></script>
-<script src="src/application/parks/load-admin-park-identities.js?v=9f3a2632" type="application/x-dendrogeo-module" defer></script>
-<script src="src/application/parks/plan-park-backfill.js?v=d624369f" type="application/x-dendrogeo-module" defer></script>
-<script src="src/application/parks/apply-park-backfill.js?v=ecab9b65" type="application/x-dendrogeo-module" defer></script>
-<script src="src/application/parks/create-backfill-park.js?v=260ba8a9" type="application/x-dendrogeo-module" defer></script>
-<script src="src/domain/parks/build-manual-backfill-park-update.js?v=0e47845c" type="application/x-dendrogeo-module" defer></script>
-<script src="src/application/parks/complete-manual-backfill-park.js?v=cbd33475" type="application/x-dendrogeo-module" defer></script>
-<script src="src/application/parks/complete-park-backfill-apply.js?v=ff1f21e0" type="application/x-dendrogeo-module" defer></script>
-<script src="src/application/parks/backfill-park-geometry.js?v=011e0855" type="application/x-dendrogeo-module" defer></script>
-<script src="src/domain/parks/resolve-park-geometry-backfill-area.js?v=84ecf93c" type="application/x-dendrogeo-module" defer></script>
-<script src="src/adapters/parks/fetch-osm-park-ring.js?v=a85a96a1" type="application/x-dendrogeo-module" defer></script>
-<script src="src/adapters/parks/park-geometry-backfill-store.js?v=9d3271c4" type="application/x-dendrogeo-module" defer></script>
-<script src="src/ui/park-geometry-backfill-feedback.js?v=e4a5d21b" type="application/x-dendrogeo-module" defer></script>
-<script src="src/application/parks/detect-backfill-park.js?v=47e13afc" type="application/x-dendrogeo-module" defer></script>
-<script src="src/adapters/parks/search-osm-park-by-name.js?v=4cefb823" type="application/x-dendrogeo-module" defer></script>
-<script src="src/application/parks/evaluate-measurement-park-gate.js?v=02b94e5f" type="application/x-dendrogeo-module" defer></script>
-<script src="src/ui/park-scan-card.js?v=eb487f04" type="application/x-dendrogeo-module" defer></script>
-<script src="src/ui/park-identity.js?v=a348c341" type="application/x-dendrogeo-module" defer></script>
-<script src="src/ui/park-backfill-plan.js?v=109bc320" type="application/x-dendrogeo-module" defer></script>
-<script src="src/ui/park-backfill-progress.js?v=bc52656c" type="application/x-dendrogeo-module" defer></script>
-<script src="src/ui/park-backfill-manual-feedback.js?v=7370a690" type="application/x-dendrogeo-module" defer></script>
-<script src="src/ui/park-backfill-apply-feedback.js?v=815c13a7" type="application/x-dendrogeo-module" defer></script>
-<script src="src/ui/park-measurement-gate.js?v=89312793" type="application/x-dendrogeo-module" defer></script>
-<script src="src/ui/park-project-options.js?v=37670c87" type="application/x-dendrogeo-module" defer></script>
-<script src="src/ui/park-admin-status.js?v=ed629d7c" type="application/x-dendrogeo-module" defer></script>
-<script src="src/ui/park-schema-warning.js?v=df73d3c8" type="application/x-dendrogeo-module" defer></script>
-<script src="src/ui/park-schema-missing-feedback.js?v=ce56d141" type="application/x-dendrogeo-module" defer></script>
-<script src="src/ui/start-park-scan.js?v=0875a061" type="application/x-dendrogeo-module" defer></script>
-<script src="src/ui/focus-park-scan-target.js?v=65fed8e5" type="application/x-dendrogeo-module" defer></script>
-<script src="src/domain/parks/select-park-scan-step.js?v=1c87e21e" type="application/x-dendrogeo-module" defer></script>
-<script src="src/ui/preview-park-project-name.js?v=8a35ed37" type="application/x-dendrogeo-module" defer></script>
-<script src="src/application/parks/cancel-park-scan.js?v=cb36f361" type="application/x-dendrogeo-module" defer></script>
-<script src="src/domain/parks/select-park-project.js?v=7351e8e1" type="application/x-dendrogeo-module" defer></script>
-<script src="src/adapters/parks/park-scan-redirect-memory.js?v=c7afc149" type="application/x-dendrogeo-module" defer></script>
-<script src="src/ui/complete-park-project-link.js?v=bc2d39b1" type="application/x-dendrogeo-module" defer></script>
-<script src="src/application/parks/handle-park-project-change.js?v=2bb8662e" type="application/x-dendrogeo-module" defer></script>
-<script src="src/application/parks/handle-park-drawn.js?v=52ccad9b" type="application/x-dendrogeo-module" defer></script>
-<script src="src/application/parks/park-admin-state.js?v=08083425" type="application/x-dendrogeo-module" defer></script>
-<script src="src/adapters/parks/sync-park-project-names.js?v=896989a7" type="application/x-dendrogeo-module" defer></script>
-<script src="src/ui/render-park-admin.js?v=de8361a1" type="application/x-dendrogeo-module" defer></script>
-<script src="src/application/parks/refresh-park-admin-views.js?v=2eca2d53" type="application/x-dendrogeo-module" defer></script>
-<script src="src/application/parks/toggle-park-admin-empty.js?v=61a0e47c" type="application/x-dendrogeo-module" defer></script>
-<script src="src/domain/parks/resolve-manual-park-coordinate.js?v=e30681f6" type="application/x-dendrogeo-module" defer></script>
-<script src="src/ui/show-manual-park-form.js?v=02793924" type="application/x-dendrogeo-module" defer></script>
-<script src="src/application/parks/toggle-park-mode-from-scan.js?v=dc2da2c1" type="application/x-dendrogeo-module" defer></script>
-<script src="src/ui/show-park-project-step.js?v=22614ed1" type="application/x-dendrogeo-module" defer></script>
-<script src="src/application/parks/retry-park-registration.js?v=cb9a09c5" type="application/x-dendrogeo-module" defer></script>
-<script src="src/ui/park-search-result.js?v=bb7356a8" type="application/x-dendrogeo-module" defer></script>
-<script src="src/ui/manual-park-result.js?v=4b614504" type="application/x-dendrogeo-module" defer></script>
-<script src="src/ui/park-project-result.js?v=15798f9f" type="application/x-dendrogeo-module" defer></script>
-<script src="src/application/parks/detect-park-at-current-location.js?v=e9a26751" type="application/x-dendrogeo-module" defer></script>
-<script src="src/application/parks/query-park-safely.js?v=4f608583" type="application/x-dendrogeo-module" defer></script>
-<script src="src/services/park-registry.js?v=b1d08b9b" type="application/x-dendrogeo-module" defer></script>
-<script src="src/ui/guard-park-rename-feedback.js?v=77da0376" type="application/x-dendrogeo-module" defer></script>
-<script src="src/application/parks/build-grid-waypoint-rows.js?v=d7d91111" type="application/x-dendrogeo-module" defer></script>
-<script src="src/application/parks/count-grid-cell-measurements.js?v=b6cd3620" type="application/x-dendrogeo-module" defer></script>
-<script src="src/application/parks/build-grid-request.js?v=7b1373ab" type="application/x-dendrogeo-module" defer></script>
-<script src="src/application/parks/is-grid-waypoint-context-current.js?v=2537d54a" type="application/x-dendrogeo-module" defer></script>
-<script src="src/application/parks/resolve-grid-waypoint-readiness.js?v=048f3844" type="application/x-dendrogeo-module" defer></script>
-<script src="src/application/parks/select-grid-waypoint-cells.js?v=a1f92c74" type="application/x-dendrogeo-module" defer></script>
-<script src="src/application/parks/prepare-grid-surface-parts.js?v=321ebac9" type="application/x-dendrogeo-module" defer></script>
-<script src="src/application/parks/resolve-grid-cell-style.js?v=a79d66be" type="application/x-dendrogeo-module" defer></script>
-<script src="src/application/parks/count-grid-cell-states.js?v=d9c11bf2" type="application/x-dendrogeo-module" defer></script>
-<script src="src/application/parks/grid-review-signature.js?v=eb108d14" type="application/x-dendrogeo-module" defer></script>
-<script src="src/application/parks/prepare-grid-waypoint-batch.js?v=fd498746" type="application/x-dendrogeo-module" defer></script>
-<script src="src/adapters/parks/fetch-latest-grid-waypoint.js?v=c73a0d6d" type="application/x-dendrogeo-module" defer></script>
-<script src="src/adapters/parks/insert-grid-waypoints.js?v=58ec1d26" type="application/x-dendrogeo-module" defer></script>
-<script src="src/adapters/parks/fetch-grid-measurement-candidates.js?v=e100a707" type="application/x-dendrogeo-module" defer></script>
-<script src="src/domain/parks/grid-options.js?v=4de00a77" type="application/x-dendrogeo-module" defer></script>
-<script src="src/domain/parks/grid-bounds.js?v=0e7d8d3c" type="application/x-dendrogeo-module" defer></script>
-<script src="src/domain/parks/grid-cell-shape.js?v=2b03fc29" type="application/x-dendrogeo-module" defer></script>
-<script src="src/ui/grid-build-completion.js?v=388c4df1" type="application/x-dendrogeo-module" defer></script>
-<script src="src/ui/grid-build-controller.js?v=3980f2e1" type="application/x-dendrogeo-module" defer></script>
-<script src="src/application/parks/build-grid.js?v=b4d5a5fd" type="application/x-dendrogeo-module" defer></script>
-<script src="src/application/parks/create-grid-waypoints.js?v=b452a97c" type="application/x-dendrogeo-module" defer></script>
-<script src="src/ui/grid-waypoint-controller.js?v=9f7426a2" type="application/x-dendrogeo-module" defer></script>
-<script src="src/ui/grid-waypoint-completion.js?v=ceb522bc" type="application/x-dendrogeo-module" defer></script>
-<script src="src/ui/grid-layer.js?v=9552edf5" type="application/x-dendrogeo-module" defer></script>
-<script src="src/ui/grid-reset.js?v=f88922a9" type="application/x-dendrogeo-module" defer></script>
-<script src="src/ui/map-layer-visibility.js?v=65b0591b" type="application/x-dendrogeo-module" defer></script>
-<script src="src/ui/grid-selection.js?v=4318eb76" type="application/x-dendrogeo-module" defer></script>
-<script src="src/ui/grid-summary.js?v=3c8ac077" type="application/x-dendrogeo-module" defer></script>
-<script src="src/ui/grid-waypoint-layer.js?v=562efd38" type="application/x-dendrogeo-module" defer></script>
-<script src="src/services/grid-engine.js?v=3fa9f3f3" type="application/x-dendrogeo-module" defer></script>
-<script src="src/ui/editor-ui.js?v=3ed46d85" type="application/x-dendrogeo-module" defer></script>
-<script src="src/ui/park-reference-area.js?v=a39a2ab5" type="application/x-dendrogeo-module" defer></script>
-<script src="src/ui/park-mode-controller.js?v=59dd9f2b" type="application/x-dendrogeo-module" defer></script>
-<script src="src/ui/park-click-controller.js?v=e974115e" type="application/x-dendrogeo-module" defer></script>
-<script src="src/ui/choose-new-park-controller.js?v=8c780676" type="application/x-dendrogeo-module" defer></script>
-<script src="src/ui/park-reset-controller.js?v=6c7ab0b1" type="application/x-dendrogeo-module" defer></script>
-<script src="src/ui/park-boundary-layer.js?v=49a62ff8" type="application/x-dendrogeo-module" defer></script>
-<script src="src/ui/park-candidate-select.js?v=0d795c7d" type="application/x-dendrogeo-module" defer></script>
-<script src="src/ui/park-info-panel.js?v=546f2655" type="application/x-dendrogeo-module" defer></script>
-<script src="src/ui/park-menu-ui.js?v=3b7b9096" type="application/x-dendrogeo-module" defer></script>
-<script src="src/domain/parks/normalize-drawn-park-geometry.js?v=9bf64eec" type="application/x-dendrogeo-module" defer></script>
-<script src="src/application/parks/draw-selected-park.js?v=b9e59a4d" type="application/x-dendrogeo-module" defer></script>
-<script src="src/ui/present-drawn-park.js?v=5d235ca2" type="application/x-dendrogeo-module" defer></script>
-<script src="src/ui/park-panel.js?v=ce08b781" type="application/x-dendrogeo-module" defer></script>
-<script src="src/ui/park-image-geometry.js?v=d1204cd7" type="application/x-dendrogeo-module" defer></script>
-<script src="src/ui/park-export-layout.js?v=a0433a35" type="application/x-dendrogeo-module" defer></script>
-<script src="src/domain/parks/park-export-formats.js?v=86031031" type="application/x-dendrogeo-module" defer></script>
-<script src="src/ui/park-export-canvas.js?v=5b1b6014" type="application/x-dendrogeo-module" defer></script>
-<script src="src/ui/park-landcover-analysis.js?v=93800c00" type="application/x-dendrogeo-module" defer></script>
-<script src="src/adapters/export/download-blob.js?v=8ea95313" type="application/x-dendrogeo-module" defer></script>
-<script src="src/ui/park-export.js?v=3371cfc6" type="application/x-dendrogeo-module" defer></script>
-<script src="src/domain/users/record-status-meta.js?v=54337a64" type="application/x-dendrogeo-module" defer></script>
-<script src="src/domain/users/group-own-records.js?v=a35ccd7a" type="application/x-dendrogeo-module" defer></script>
-<script src="src/ui/record-item.js?v=1dceef37" type="application/x-dendrogeo-module" defer></script>
-<script src="src/ui/record-project.js?v=4c249931" type="application/x-dendrogeo-module" defer></script>
-<script src="src/adapters/users/own-records-store.js?v=0c29ef59" type="application/x-dendrogeo-module" defer></script>
-<script src="src/domain/users/summarize-tree-analysis.js?v=58cdc38f" type="application/x-dendrogeo-module" defer></script>
-<script src="src/ui/tree-analysis.js?v=8e9cd6ec" type="application/x-dendrogeo-module" defer></script>
-<script src="src/adapters/world/world-stats-store.js?v=227e08d2" type="application/x-dendrogeo-module" defer></script>
-<script src="src/ui/world-stats-tables.js?v=bb970b57" type="application/x-dendrogeo-module" defer></script>
-<script src="src/ui/world-error.js?v=5c7b5aa2" type="application/x-dendrogeo-module" defer></script>
-<script src="src/ui/load-own-records.js?v=371501d5" type="application/x-dendrogeo-module" defer></script>
-<script src="src/application/dashboard/delete-own-record.js?v=f60cd9d7" type="application/x-dendrogeo-module" defer></script>
-<script src="src/application/dashboard/load-owner-dashboard.js?v=8e3745e5" type="application/x-dendrogeo-module" defer></script>
-<script src="src/ui/dashboard-chart.js?v=4f970aa4" type="application/x-dendrogeo-module" defer></script>
-<script src="src/application/dashboard/load-world-dashboard.js?v=dbbefb7e" type="application/x-dendrogeo-module" defer></script>
-<script src="src/application/dashboard/load-shell-view-data.js?v=238318e1" type="application/x-dendrogeo-module" defer></script>
-<script src="src/services/dash.js?v=be3a1756" type="application/x-dendrogeo-module" defer></script>
-<link rel="stylesheet" href="css/park-panel.css?v=e6fd0764">
+<script src="src/application/parks/build-park-admin-overview.js?v=f542d0a2" type="application/x-dendrogeo-module" defer></script>
+<script src="src/ui/park-admin-renderer.js?v=b5e2dcd7" type="application/x-dendrogeo-module" defer></script>
+<script src="src/application/parks/merge-park-identities.js?v=1c66c379" type="application/x-dendrogeo-module" defer></script>
+<script src="src/application/parks/rename-park-identity.js?v=f5d8df26" type="application/x-dendrogeo-module" defer></script>
+<script src="src/application/parks/delete-park-identity.js?v=fe4cd3c3" type="application/x-dendrogeo-module" defer></script>
+<script src="src/adapters/parks/park-admin-mutation-store.js?v=cd4ece3b" type="application/x-dendrogeo-module" defer></script>
+<script src="src/ui/park-admin-mutation.js?v=1c6167a3" type="application/x-dendrogeo-module" defer></script>
+<script src="src/application/parks/load-admin-park-identities.js?v=7bac93d1" type="application/x-dendrogeo-module" defer></script>
+<script src="src/application/parks/plan-park-backfill.js?v=143b6824" type="application/x-dendrogeo-module" defer></script>
+<script src="src/application/parks/apply-park-backfill.js?v=cd730e93" type="application/x-dendrogeo-module" defer></script>
+<script src="src/application/parks/create-backfill-park.js?v=70faa4d3" type="application/x-dendrogeo-module" defer></script>
+<script src="src/domain/parks/build-manual-backfill-park-update.js?v=bde02d56" type="application/x-dendrogeo-module" defer></script>
+<script src="src/application/parks/complete-manual-backfill-park.js?v=9f2cbdf4" type="application/x-dendrogeo-module" defer></script>
+<script src="src/application/parks/complete-park-backfill-apply.js?v=989c2bf7" type="application/x-dendrogeo-module" defer></script>
+<script src="src/application/parks/backfill-park-geometry.js?v=42baa041" type="application/x-dendrogeo-module" defer></script>
+<script src="src/domain/parks/resolve-park-geometry-backfill-area.js?v=d9103571" type="application/x-dendrogeo-module" defer></script>
+<script src="src/adapters/parks/fetch-osm-park-ring.js?v=783b55f1" type="application/x-dendrogeo-module" defer></script>
+<script src="src/adapters/parks/park-geometry-backfill-store.js?v=39f91af4" type="application/x-dendrogeo-module" defer></script>
+<script src="src/ui/park-geometry-backfill-feedback.js?v=47526843" type="application/x-dendrogeo-module" defer></script>
+<script src="src/application/parks/detect-backfill-park.js?v=6aea134e" type="application/x-dendrogeo-module" defer></script>
+<script src="src/adapters/parks/search-osm-park-by-name.js?v=2c825db4" type="application/x-dendrogeo-module" defer></script>
+<script src="src/application/parks/evaluate-measurement-park-gate.js?v=f783ab14" type="application/x-dendrogeo-module" defer></script>
+<script src="src/ui/park-scan-card.js?v=d22d4615" type="application/x-dendrogeo-module" defer></script>
+<script src="src/ui/park-identity.js?v=5dfecfc3" type="application/x-dendrogeo-module" defer></script>
+<script src="src/ui/park-backfill-plan.js?v=8be5ab3c" type="application/x-dendrogeo-module" defer></script>
+<script src="src/ui/park-backfill-progress.js?v=0cfb2b5c" type="application/x-dendrogeo-module" defer></script>
+<script src="src/ui/park-backfill-manual-feedback.js?v=14b3418e" type="application/x-dendrogeo-module" defer></script>
+<script src="src/ui/park-backfill-apply-feedback.js?v=a21a0008" type="application/x-dendrogeo-module" defer></script>
+<script src="src/ui/park-measurement-gate.js?v=d0d8c3c3" type="application/x-dendrogeo-module" defer></script>
+<script src="src/ui/park-project-options.js?v=b224951c" type="application/x-dendrogeo-module" defer></script>
+<script src="src/ui/park-admin-status.js?v=1f42b1c4" type="application/x-dendrogeo-module" defer></script>
+<script src="src/ui/park-schema-warning.js?v=d2af01d8" type="application/x-dendrogeo-module" defer></script>
+<script src="src/ui/park-schema-missing-feedback.js?v=45d635c6" type="application/x-dendrogeo-module" defer></script>
+<script src="src/ui/start-park-scan.js?v=6ee13706" type="application/x-dendrogeo-module" defer></script>
+<script src="src/ui/focus-park-scan-target.js?v=22294725" type="application/x-dendrogeo-module" defer></script>
+<script src="src/domain/parks/select-park-scan-step.js?v=4cf16e78" type="application/x-dendrogeo-module" defer></script>
+<script src="src/ui/preview-park-project-name.js?v=bedcfddb" type="application/x-dendrogeo-module" defer></script>
+<script src="src/application/parks/cancel-park-scan.js?v=60354fb2" type="application/x-dendrogeo-module" defer></script>
+<script src="src/domain/parks/select-park-project.js?v=7e9e3bc7" type="application/x-dendrogeo-module" defer></script>
+<script src="src/adapters/parks/park-scan-redirect-memory.js?v=64c131aa" type="application/x-dendrogeo-module" defer></script>
+<script src="src/ui/complete-park-project-link.js?v=70053755" type="application/x-dendrogeo-module" defer></script>
+<script src="src/application/parks/handle-park-project-change.js?v=4f5fd869" type="application/x-dendrogeo-module" defer></script>
+<script src="src/application/parks/handle-park-drawn.js?v=c51eeded" type="application/x-dendrogeo-module" defer></script>
+<script src="src/application/parks/park-admin-state.js?v=e7e5b314" type="application/x-dendrogeo-module" defer></script>
+<script src="src/adapters/parks/sync-park-project-names.js?v=248efd32" type="application/x-dendrogeo-module" defer></script>
+<script src="src/ui/render-park-admin.js?v=92ec6809" type="application/x-dendrogeo-module" defer></script>
+<script src="src/application/parks/refresh-park-admin-views.js?v=2ec27bb3" type="application/x-dendrogeo-module" defer></script>
+<script src="src/application/parks/toggle-park-admin-empty.js?v=3fa5c1f2" type="application/x-dendrogeo-module" defer></script>
+<script src="src/domain/parks/resolve-manual-park-coordinate.js?v=8bdaf13b" type="application/x-dendrogeo-module" defer></script>
+<script src="src/ui/show-manual-park-form.js?v=142fbeb2" type="application/x-dendrogeo-module" defer></script>
+<script src="src/application/parks/toggle-park-mode-from-scan.js?v=ccb4234d" type="application/x-dendrogeo-module" defer></script>
+<script src="src/ui/show-park-project-step.js?v=bdaca959" type="application/x-dendrogeo-module" defer></script>
+<script src="src/application/parks/retry-park-registration.js?v=39690655" type="application/x-dendrogeo-module" defer></script>
+<script src="src/ui/park-search-result.js?v=191bbc2f" type="application/x-dendrogeo-module" defer></script>
+<script src="src/ui/manual-park-result.js?v=be300dd1" type="application/x-dendrogeo-module" defer></script>
+<script src="src/ui/park-project-result.js?v=9f3b96b0" type="application/x-dendrogeo-module" defer></script>
+<script src="src/application/parks/detect-park-at-current-location.js?v=65304276" type="application/x-dendrogeo-module" defer></script>
+<script src="src/application/parks/query-park-safely.js?v=7bf7abbe" type="application/x-dendrogeo-module" defer></script>
+<script src="src/services/park-registry.js?v=3968012a" type="application/x-dendrogeo-module" defer></script>
+<script src="src/ui/guard-park-rename-feedback.js?v=63a167b0" type="application/x-dendrogeo-module" defer></script>
+<script src="src/application/parks/build-grid-waypoint-rows.js?v=ce9ca9d8" type="application/x-dendrogeo-module" defer></script>
+<script src="src/application/parks/count-grid-cell-measurements.js?v=9daa2ed0" type="application/x-dendrogeo-module" defer></script>
+<script src="src/application/parks/build-grid-request.js?v=ad4d6f4e" type="application/x-dendrogeo-module" defer></script>
+<script src="src/application/parks/is-grid-waypoint-context-current.js?v=eb3caa1b" type="application/x-dendrogeo-module" defer></script>
+<script src="src/application/parks/resolve-grid-waypoint-readiness.js?v=8826f162" type="application/x-dendrogeo-module" defer></script>
+<script src="src/application/parks/select-grid-waypoint-cells.js?v=f319d334" type="application/x-dendrogeo-module" defer></script>
+<script src="src/application/parks/prepare-grid-surface-parts.js?v=316c9c22" type="application/x-dendrogeo-module" defer></script>
+<script src="src/application/parks/resolve-grid-cell-style.js?v=0e1aec67" type="application/x-dendrogeo-module" defer></script>
+<script src="src/application/parks/count-grid-cell-states.js?v=ac168d0d" type="application/x-dendrogeo-module" defer></script>
+<script src="src/application/parks/grid-review-signature.js?v=125a2608" type="application/x-dendrogeo-module" defer></script>
+<script src="src/application/parks/prepare-grid-waypoint-batch.js?v=2a77b261" type="application/x-dendrogeo-module" defer></script>
+<script src="src/adapters/parks/fetch-latest-grid-waypoint.js?v=a79f2647" type="application/x-dendrogeo-module" defer></script>
+<script src="src/adapters/parks/insert-grid-waypoints.js?v=298ec5aa" type="application/x-dendrogeo-module" defer></script>
+<script src="src/adapters/parks/fetch-grid-measurement-candidates.js?v=207097a2" type="application/x-dendrogeo-module" defer></script>
+<script src="src/domain/parks/grid-options.js?v=be7bd3d6" type="application/x-dendrogeo-module" defer></script>
+<script src="src/domain/parks/grid-bounds.js?v=0734138e" type="application/x-dendrogeo-module" defer></script>
+<script src="src/domain/parks/grid-cell-shape.js?v=daaa8d61" type="application/x-dendrogeo-module" defer></script>
+<script src="src/ui/grid-build-completion.js?v=abca95fb" type="application/x-dendrogeo-module" defer></script>
+<script src="src/ui/grid-build-controller.js?v=994f552d" type="application/x-dendrogeo-module" defer></script>
+<script src="src/application/parks/build-grid.js?v=4a393e96" type="application/x-dendrogeo-module" defer></script>
+<script src="src/application/parks/create-grid-waypoints.js?v=31c8c9bf" type="application/x-dendrogeo-module" defer></script>
+<script src="src/ui/grid-waypoint-controller.js?v=85d953ad" type="application/x-dendrogeo-module" defer></script>
+<script src="src/ui/grid-waypoint-completion.js?v=6aa08bbe" type="application/x-dendrogeo-module" defer></script>
+<script src="src/ui/grid-layer.js?v=a504afca" type="application/x-dendrogeo-module" defer></script>
+<script src="src/ui/grid-reset.js?v=42c27456" type="application/x-dendrogeo-module" defer></script>
+<script src="src/ui/map-layer-visibility.js?v=23140454" type="application/x-dendrogeo-module" defer></script>
+<script src="src/ui/grid-selection.js?v=5b14a0c9" type="application/x-dendrogeo-module" defer></script>
+<script src="src/ui/grid-summary.js?v=bbc1ab1f" type="application/x-dendrogeo-module" defer></script>
+<script src="src/ui/grid-waypoint-layer.js?v=5e8850f0" type="application/x-dendrogeo-module" defer></script>
+<script src="src/services/grid-engine.js?v=1014d4c2" type="application/x-dendrogeo-module" defer></script>
+<script src="src/ui/editor-ui.js?v=f34c256a" type="application/x-dendrogeo-module" defer></script>
+<script src="src/ui/park-reference-area.js?v=8d1395df" type="application/x-dendrogeo-module" defer></script>
+<script src="src/ui/park-mode-controller.js?v=d99a95f7" type="application/x-dendrogeo-module" defer></script>
+<script src="src/ui/park-click-controller.js?v=67963de2" type="application/x-dendrogeo-module" defer></script>
+<script src="src/ui/choose-new-park-controller.js?v=92dd416a" type="application/x-dendrogeo-module" defer></script>
+<script src="src/ui/park-reset-controller.js?v=e22bb3e4" type="application/x-dendrogeo-module" defer></script>
+<script src="src/ui/park-boundary-layer.js?v=47ec8d0c" type="application/x-dendrogeo-module" defer></script>
+<script src="src/ui/park-candidate-select.js?v=92ba65a3" type="application/x-dendrogeo-module" defer></script>
+<script src="src/ui/park-info-panel.js?v=dcae36a0" type="application/x-dendrogeo-module" defer></script>
+<script src="src/ui/park-menu-ui.js?v=1f34d284" type="application/x-dendrogeo-module" defer></script>
+<script src="src/domain/parks/normalize-drawn-park-geometry.js?v=89191f5f" type="application/x-dendrogeo-module" defer></script>
+<script src="src/application/parks/draw-selected-park.js?v=04648fc8" type="application/x-dendrogeo-module" defer></script>
+<script src="src/ui/present-drawn-park.js?v=2f7f00aa" type="application/x-dendrogeo-module" defer></script>
+<script src="src/ui/park-panel.js?v=df66ce1c" type="application/x-dendrogeo-module" defer></script>
+<script src="src/ui/park-image-geometry.js?v=b1d2d320" type="application/x-dendrogeo-module" defer></script>
+<script src="src/ui/park-export-layout.js?v=35456272" type="application/x-dendrogeo-module" defer></script>
+<script src="src/domain/parks/park-export-formats.js?v=e113156d" type="application/x-dendrogeo-module" defer></script>
+<script src="src/ui/park-export-canvas.js?v=528fe267" type="application/x-dendrogeo-module" defer></script>
+<script src="src/ui/park-landcover-analysis.js?v=97b0e928" type="application/x-dendrogeo-module" defer></script>
+<script src="src/adapters/export/download-blob.js?v=18d8e0db" type="application/x-dendrogeo-module" defer></script>
+<script src="src/ui/park-export.js?v=326a6d96" type="application/x-dendrogeo-module" defer></script>
+<script src="src/domain/users/record-status-meta.js?v=4727cb68" type="application/x-dendrogeo-module" defer></script>
+<script src="src/domain/users/group-own-records.js?v=5c9085bc" type="application/x-dendrogeo-module" defer></script>
+<script src="src/ui/record-item.js?v=b31d34d7" type="application/x-dendrogeo-module" defer></script>
+<script src="src/ui/record-project.js?v=3cac9109" type="application/x-dendrogeo-module" defer></script>
+<script src="src/adapters/users/own-records-store.js?v=77a96d56" type="application/x-dendrogeo-module" defer></script>
+<script src="src/domain/users/summarize-tree-analysis.js?v=c3285927" type="application/x-dendrogeo-module" defer></script>
+<script src="src/ui/tree-analysis.js?v=ab770785" type="application/x-dendrogeo-module" defer></script>
+<script src="src/adapters/world/world-stats-store.js?v=695e7c3d" type="application/x-dendrogeo-module" defer></script>
+<script src="src/ui/world-stats-tables.js?v=c77d9c69" type="application/x-dendrogeo-module" defer></script>
+<script src="src/ui/world-error.js?v=0987e0ae" type="application/x-dendrogeo-module" defer></script>
+<script src="src/ui/load-own-records.js?v=f31e58b4" type="application/x-dendrogeo-module" defer></script>
+<script src="src/application/dashboard/delete-own-record.js?v=c1b969fa" type="application/x-dendrogeo-module" defer></script>
+<script src="src/application/dashboard/load-owner-dashboard.js?v=ecc5391f" type="application/x-dendrogeo-module" defer></script>
+<script src="src/ui/dashboard-chart.js?v=90798e1f" type="application/x-dendrogeo-module" defer></script>
+<script src="src/application/dashboard/load-world-dashboard.js?v=e087a891" type="application/x-dendrogeo-module" defer></script>
+<script src="src/application/dashboard/load-shell-view-data.js?v=b51e1de2" type="application/x-dendrogeo-module" defer></script>
+<script src="src/services/dash.js?v=fcd3226d" type="application/x-dendrogeo-module" defer></script>
+<link rel="stylesheet" href="css/park-panel.css?v=82e3b09f">
 <!-- TASARIM SİSTEMİ (2026-09-27, 2. deneme): ui-standard.css geri BAĞLANDI
      ama ARTIK eleman seviyesi kuralları yalnız .dg-page (alt sayfalar) altında
      geçerli; kabuk (body.dg-app) yalnız sınıf-bazlı bileşenleri ve sekme
      başlığı ölçeğini alır → Park Karşılaştırma kartı kıpırdamaz. -->
-<link rel="stylesheet" href="css/ui-standard.css?v=fc1385e2">
-<link rel="stylesheet" href="css/academic-profile.css?v=fb5d59ec">
+<link rel="stylesheet" href="css/ui-standard.css?v=4c918cd4">
+<link rel="stylesheet" href="css/academic-profile.css?v=aad323df">
 <!-- GIS workspace: scoped presentation, keeps locked engine and theme untouched. -->
-<link rel="stylesheet" href="css/surface-drawing.css?v=a6431ad3">
-<link rel="stylesheet" href="css/gis-workspace.css?v=6cf27c87">
+<link rel="stylesheet" href="css/surface-drawing.css?v=03efbefa">
+<link rel="stylesheet" href="css/gis-workspace.css?v=ecb81c63">
 </head>
 <body class="dg-app">
 <div id="dgStartupScreen" role="status" aria-live="polite"><div>DendroGeo<p>Giriş kontrol ediliyor…</p></div></div>
@@ -942,7 +942,7 @@
 <span class="brand"><img class="brand-logo" src="logo.png" alt="DendroGeo">DendroGeo</span>
  <button type="button" class="navtoggle" id="navToggle" aria-expanded="false" aria-controls="navLinks" aria-label="Bölüm menüsü" onclick="dgNavToggle()">☰</button>
  <div class="links" id="navLinks"><a href="#sistem">Sistem</a><a href="#yontem">Yöntem</a><a href="#veri">Veri &amp; Harita</a><a href="#istatistik">İstatistik</a><a href="#bilgi-merkezi">Bilgi Merkezi &amp; Kaynaklar</a></div>
- <button type="button" class="btn sm ghost dg-lang-toggle" onclick="dgToggleLang()" aria-label="Switch to English">EN</button>
+ <button type="button" class="btn sm ghost dg-lang-toggle" onclick="dgToggleLang()" aria-label="EN · Switch to English">EN</button>
  <button class="btn sm" onclick="showAuth()">Giriş / Kayıt</button>
 </div></div>
 
@@ -1197,8 +1197,8 @@
   <div class="card" style="margin-top:20px;border-left:4px solid var(--green)">
   <div class="shead" style="margin-bottom:12px"><span class="no">🌍</span><h2 style="font-size:1.15rem">Bölgesel Dağılım</h2><span class="rule"></span></div>
   <div class="grid g2">
-   <div class="tblwrap"><table id="tblCountry"><thead><tr><th scope="col">Ülke</th><th scope="col">Kayıt</th><th scope="col">Karbon(t)</th><th scope="col">Ort.DBH</th><th scope="col">Ort.Yükseklik(m)</th></tr></thead><tbody></tbody></table></div>
-   <div class="tblwrap"><table id="tblCity"><thead><tr><th scope="col">Şehir</th><th scope="col">Kayıt</th><th scope="col">Karbon(t)</th></tr></thead><tbody></tbody></table></div>
+   <div tabindex="0" class="tblwrap"><table id="tblCountry"><thead><tr><th scope="col">Ülke</th><th scope="col">Kayıt</th><th scope="col">Karbon(t)</th><th scope="col">Ort.DBH</th><th scope="col">Ort.Yükseklik(m)</th></tr></thead><tbody></tbody></table></div>
+   <div tabindex="0" class="tblwrap"><table id="tblCity"><thead><tr><th scope="col">Şehir</th><th scope="col">Kayıt</th><th scope="col">Karbon(t)</th></tr></thead><tbody></tbody></table></div>
   </div>
  </div>
 </div></section>
@@ -1286,7 +1286,7 @@
       fotoğraf işleniyor; yurt dışı altyapı (Supabase/Google/Cloudflare) kullanılıyor.
       Rıza olmadan kayıt engellenir; rıza zaman damgası auth metadata'sına yazılır
       (doRegister → kvkk_consent_at) yani SONRADAN İNKÂR EDİLEMEZ KAYIT oluşur. -->
- <label class="dg-consent" for="rgConsent"><input type="checkbox" id="rgConsent">
+ <label class="dg-consent" for="rgConsent"><input type="checkbox" class="dg-switch" id="rgConsent">
   <span><a href="/aydinlatma/" target="_blank" rel="noopener">KVKK Aydınlatma Metni</a>&#39;ni ve <a href="/gizlilik/" target="_blank" rel="noopener">Gizlilik Politikası</a>&#39;nı okudum. Ad, e-posta, kurum bilgilerimin; saha ölçümlerimde <b>konum verimin</b> ve yüklersem <b>fotoğrafımın</b> bu belgelerde belirtilen amaçlarla işlenmesini, onaylanan ölçümlerin CC BY-NC 4.0 ile kamuya açık veri setinde yayımlanmasını ve hizmet sağlayıcılarının (Supabase, Google, Cloudflare) <b>yurt dışı altyapısında barındırılmasını</b> onaylıyorum. Rızamı dilediğim zaman geri çekebilirim.</span></label>
  <button type="button" class="btn" style="width:100%;margin-top:16px" onclick="doRegister()">Hesap Oluştur</button></form>
 <form id="fReset" style="display:none" onsubmit="return false;"><label class="lbl" for="rsEmail">E‑posta</label><input id="rsEmail" type="email" required><div id="tsReset" style="margin-top:14px;min-height:65px"></div><button type="button" class="btn" style="width:100%;margin-top:16px" onclick="sendResetEmail()">Sıfırlama Gönder</button></form>
@@ -1348,7 +1348,7 @@
   <button class="btn sm ghost" id="installBtn" style="display:none" onclick="dgInstallApp()">📲 Uygulayı Kur</button>
   <span class="mono" id="whoami" style="font-size:.8rem;color:var(--mut)"></span>
   <span class="badge admin" id="roleBadge" style="display:none">ADMIN</span>
-  <button type="button" class="btn sm ghost dg-lang-toggle" onclick="dgToggleLang()" aria-label="Switch to English">EN</button>
+  <button type="button" class="btn sm ghost dg-lang-toggle" onclick="dgToggleLang()" aria-label="EN · Switch to English">EN</button>
   <button class="btn sm red" onclick="logout()">Çıkış</button>
  </div>
 </div>
@@ -1406,7 +1406,7 @@
     <div class="measure-fields measure-identity"><div><label class="lbl" for="mPoint">Nokta ID</label><div class="measure-query"><input id="mPoint" type="number" min="1" step="1" inputmode="numeric" oninput="manualPoint=true" aria-describedby="pointHelp"><button class="btn sm ghost" onclick="queryPointId()">🔍 Sorgula</button></div><p class="measure-help" id="pointHelp">Otomatik önerilir; gerekirse değiştirin.</p></div><div><label class="lbl" for="mNo">Ölçüm No</label><input id="mNo" type="number" min="1" step="1" inputmode="numeric" value="1"><p class="measure-help">Aynı noktadaki ölçüm sırası.</p></div></div>
     <div id="pointQueryResult" class="alert info" style="display:none"></div>
     <div class="measure-fields"><div><label class="lbl" for="mGroup">Ağaç grubu</label><select id="mGroup" onchange="fillSpecies();liveCalc()"><option value="">Grup seçin</option><option value="İBRELİ">İBRELİ</option><option value="YAPRAKLI">YAPRAKLI</option></select></div><div><label class="lbl" for="mSpecies">Ağaç türü</label><select id="mSpecies" disabled onchange="showLatin();liveCalc()"><option value="">Önce grup seçin</option></select><div id="latinName" class="mono measure-help"></div></div></div>
-    <div class="measure-fields measure-dimensions"><div><label class="lbl measure-label-help" for="mDbh"><span>Göğüs çevresi <span>(cm)</span></span><button type="button" class="dg-field-help" aria-label="Göğüs çevresi nasıl ölçülür?" data-tip="Mezurayı gövdenin etrafına, yerden 1,30 m yüksekte sarın. Sistem DBH çapını otomatik olarak çevre ÷ π ile hesaplar.">?</button></label><input id="mDbh" type="number" min="0.1" max="1256.6" step="0.1" inputmode="decimal" oninput="liveCalc()" placeholder="Örn. 110"></div><div><label class="lbl measure-label-help" for="mHeight"><span>Ağaç boyu <span>(m)</span></span><button type="button" class="dg-field-help" aria-label="Ağaç boyu nasıl girilir?" data-tip="Ağacın zeminden tepe noktasına kadar olan toplam yüksekliğini metre cinsinden girin.">?</button></label><input id="mHeight" type="number" min="0.1" max="100" step="0.1" inputmode="decimal" oninput="liveCalc()" placeholder="Örn. 7,2"></div></div>
+    <div class="measure-fields measure-dimensions"><div><label class="lbl measure-label-help" for="mDbh"><span>Göğüs çevresi <span>(cm)</span></span><button type="button" class="dg-field-help" aria-label="Göğüs çevresi nasıl ölçülür?" data-tip="Mezurayı gövdenin etrafına, yerden 1,30 m yüksekte sarın. Sistem DBH çapını otomatik olarak çevre ÷ π ile hesaplar.">?</button></label><input id="mDbh" name="girth_cm" data-measurement-field="girth_cm" type="number" min="0.1" max="1256.6" step="0.1" inputmode="decimal" oninput="liveCalc()" placeholder="Örn. 110"></div><div><label class="lbl measure-label-help" for="mHeight"><span>Ağaç boyu <span>(m)</span></span><button type="button" class="dg-field-help" aria-label="Ağaç boyu nasıl girilir?" data-tip="Ağacın zeminden tepe noktasına kadar olan toplam yüksekliğini metre cinsinden girin.">?</button></label><input id="mHeight" type="number" min="0.1" max="100" step="0.1" inputmode="decimal" oninput="liveCalc()" placeholder="Örn. 7,2"></div></div>
     <div class="measure-photo"><div><h4>Fotoğraf <span class="measure-optional">İsteğe bağlı</span></h4><p class="measure-help">Ağacı ve gövdesini kadraja alın.</p></div><span class="dg-file btn ghost">📸 <span>Fotoğraf ekle</span><input type="file" id="mPhoto" aria-label="Fotoğraf (canlı çekim)" accept="image/*" capture="environment" onchange="checkPhoto(event)"></span><span class="dg-file-name mono" id="mPhotoName"></span><button type="button" class="btn sm ghost" id="mPhotoRemove" style="display:none" onclick="dgClearMeasurePhoto()">Fotoğrafı kaldır</button></div>
     <div id="photoCheck" class="alert info" role="status" style="display:none"></div>
    </section>
@@ -1473,7 +1473,7 @@
 <div class="live-map-tools" style="display:flex;gap:10px;align-items:center;margin-bottom:10px;flex-wrap:wrap">
  <button class="btn sm blue" id="parkModeBtn" onclick="window.dgToggleParkMode()">🌳 Park Analizi Modu: KAPALI</button>
  <label style="font-size:.82rem;margin-left:8px">Harita:</label>
- <select id="baseLayerSelect" onchange="switchBaseLayer(this.value)" style="font-size:.82rem;padding:4px 8px;border-radius:6px;border:1px solid var(--line)">
+ <select aria-label="Harita altlığı" id="baseLayerSelect" onchange="switchBaseLayer(this.value)" style="font-size:.82rem;padding:4px 8px;border-radius:6px;border:1px solid var(--line)">
   <option value="osm">🗺️ Sokak</option>
   <option value="sat">🛰️ Uydu</option>
   <option value="topo">🏔️ Topoğrafik</option>
@@ -1647,8 +1647,8 @@
       <div class="card" style="border-left:4px solid var(--green)">
     <div class="shead" style="margin-bottom:12px"><span class="no">🌍</span><h2 style="font-size:1.15rem">Bölgesel Dağılım</h2><span class="rule"></span></div>
     <div class="grid g2">
-     <div class="tblwrap dg-cards"><table><thead><tr><th scope="col">Ülke</th><th scope="col">Kayıt</th><th scope="col">Karbon(t)</th><th scope="col">Ort.DBH</th><th scope="col">Ort.Yükseklik(m)</th></tr></thead><tbody id="wCountryT"></tbody></table></div>
-     <div class="tblwrap dg-cards"><table><thead><tr><th scope="col">Şehir</th><th scope="col">Kayıt</th><th scope="col">Karbon(t)</th></tr></thead><tbody id="wCityT"></tbody></table></div>
+     <div tabindex="0" class="tblwrap dg-cards"><table><thead><tr><th scope="col">Ülke</th><th scope="col">Kayıt</th><th scope="col">Karbon(t)</th><th scope="col">Ort.DBH</th><th scope="col">Ort.Yükseklik(m)</th></tr></thead><tbody id="wCountryT"></tbody></table></div>
+     <div tabindex="0" class="tblwrap dg-cards"><table><thead><tr><th scope="col">Şehir</th><th scope="col">Kayıt</th><th scope="col">Karbon(t)</th></tr></thead><tbody id="wCityT"></tbody></table></div>
     </div>
       </div>
    <div class="card" style="margin-top:18px;border-left:4px solid var(--blue)">
@@ -1738,7 +1738,7 @@
    </div>
       <div class="card" style="margin-bottom:18px;border-left:4px solid var(--blue)">
     <div class="shead" style="margin-bottom:12px"><span class="no">✉️</span><h2 style="font-size:1.2rem">Aktif Talepler</h2><span class="rule"></span><span class="mono" style="font-size:.78rem;color:var(--amber-ink)">Bekleyen: <b id="aReqPendingMini">0</b></span></div>
-    <div class="tblwrap dg-cards"><table><thead><tr><th scope="col">Kullanıcı</th><th scope="col">E‑posta</th><th scope="col">Filtre</th><th scope="col">Tarih</th><th scope="col">Durum</th><th scope="col">İşlem</th></tr></thead><tbody id="aReqT"></tbody></table></div>
+    <div tabindex="0" class="tblwrap dg-cards"><table><thead><tr><th scope="col">Kullanıcı</th><th scope="col">E‑posta</th><th scope="col">Filtre</th><th scope="col">Tarih</th><th scope="col">Durum</th><th scope="col">İşlem</th></tr></thead><tbody id="aReqT"></tbody></table></div>
    </div>
    <div class="card" id="closedRequestsWrap" style="margin-bottom:18px;border-left:4px solid var(--mut);display:none">
     <div class="shead" style="margin-bottom:12px;cursor:pointer" onclick="document.getElementById('closedReqBody').style.display=document.getElementById('closedReqBody').style.display==='none'?'block':'none'">
@@ -1748,7 +1748,7 @@
      <span class="mono" style="font-size:.78rem;color:var(--mut)">Arşiv: <b id="aReqClosed">0</b> · Aç/Kapat ▼</span>
     </div>
     <div id="closedReqBody" style="display:none">
-     <div class="tblwrap dg-cards"><table><thead><tr><th scope="col">Kullanıcı</th><th scope="col">E‑posta</th><th scope="col">Filtre</th><th scope="col">Talep</th><th scope="col">Kapanış</th><th scope="col">Durum</th></tr></thead><tbody id="closedReqT"></tbody></table></div>
+     <div tabindex="0" class="tblwrap dg-cards"><table><thead><tr><th scope="col">Kullanıcı</th><th scope="col">E‑posta</th><th scope="col">Filtre</th><th scope="col">Talep</th><th scope="col">Kapanış</th><th scope="col">Durum</th></tr></thead><tbody id="closedReqT"></tbody></table></div>
     </div>
    </div>
    <!-- ÖLÇÜM ONAY & MODERASYON — TEK KART (2026-09-24)
@@ -1773,7 +1773,7 @@
     <details class="dg-flat" style="margin-top:14px">
      <summary>📄 Düz liste (tüm kayıtlar · ilk 300 satır)</summary>
      <input type="text" id="adminMeasSearch" aria-label="Kayıtlarda ara" placeholder="🔍 Ara..." oninput="filterAdminMeas()" style="max-width:100%;margin:10px 0">
-     <div class="tblwrap dg-cards"><table><thead><tr><th scope="col">Kullanıcı</th><th scope="col">Nokta</th><th scope="col">Tür</th><th scope="col">DBH</th><th scope="col">Boy</th><th scope="col">Karbon</th><th scope="col">Foto</th><th scope="col">Durum</th><th scope="col">İşlem</th></tr></thead><tbody id="aMeasT"></tbody></table></div>
+     <div tabindex="0" class="tblwrap dg-cards"><table><thead><tr><th scope="col">Kullanıcı</th><th scope="col">Nokta</th><th scope="col">Tür</th><th scope="col">DBH</th><th scope="col">Boy</th><th scope="col">Karbon</th><th scope="col">Foto</th><th scope="col">Durum</th><th scope="col">İşlem</th></tr></thead><tbody id="aMeasT"></tbody></table></div>
     </details>
    </div>
   </div>
@@ -1796,7 +1796,7 @@
      <div><label class="lbl" for="userStatusFilter">Durum</label><select id="userStatusFilter" onchange="filterUsers()"><option value="">Tümü</option><option value="active">Aktif</option><option value="passive">Pasif</option></select></div>
     </div>
     <div class="admin-users-list-head"><h3 id="adminUsersListTitle">Hesap listesi</h3><span class="mono" id="aUsersVisible">0 kullanıcı</span></div>
-    <div class="tblwrap dg-cards admin-users-table">
+    <div tabindex="0" class="tblwrap dg-cards admin-users-table">
      <table><thead><tr><th scope="col">Kullanıcı</th><th scope="col">Rol</th><th scope="col">Durum</th><th scope="col">İşlem</th></tr></thead><tbody id="aUsersT"></tbody></table>
     </div>
    </section>
@@ -1840,7 +1840,7 @@
    </section>
    <section class="card visitor-activity-card">
     <div class="visitor-card-head"><div><div class="dg-kicker">GEÇMİŞ</div><h3>Son etkinlik</h3></div><button class="btn sm ghost" id="visActToggle" aria-expanded="true" aria-controls="visActivityWrap" onclick="dgVisActToggle()">⬆ Gizle</button></div>
-    <div id="visActivityWrap"><div id="visActivity" class="tblwrap">⏳</div></div>
+    <div id="visActivityWrap"><div id="visActivity" tabindex="0" class="tblwrap">⏳</div></div>
    </section>
   </div>
 
@@ -1860,76 +1860,76 @@
 </div>
 <div id="previewModal"><div class="card" style="max-width:960px;width:100%;max-height:82vh;display:flex;flex-direction:column">
  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px"><b id="pvTitle">Önizleme</b><button class="btn sm red" onclick="closePreview()">✕ Kapat</button></div>
- <div id="pvBody" class="tblwrap" style="overflow:auto;flex:1"></div>
+ <div id="pvBody" tabindex="0" class="tblwrap" style="overflow:auto;flex:1"></div>
  <button class="btn" style="margin-top:12px" id="pvDownload">📥 İndir</button>
 </div></div>
-<script src="src/ui/state.js?v=119d757f" type="application/x-dendrogeo-module" defer></script>
-<script src="src/ui/toast.js?v=526d3c5f" type="application/x-dendrogeo-module" defer></script>
-<script src="src/application/world/load-landing-statistics.js?v=927d549e" type="application/x-dendrogeo-module" defer></script>
-<script src="src/ui/landing-totals.js?v=28e0bd73" type="application/x-dendrogeo-module" defer></script>
-<script src="src/ui/landing-country-table.js?v=921489f4" type="application/x-dendrogeo-module" defer></script>
-<script src="src/ui/landing-city-table.js?v=98921064" type="application/x-dendrogeo-module" defer></script>
-<script src="src/ui/landing-entry-controller.js?v=98ea8ace" type="application/x-dendrogeo-module" defer></script>
-<script src="src/ui/landing.js?v=fcd5b662" type="application/x-dendrogeo-module" defer></script>
-<script src="src/adapters/auth/initialize-shell-platform.js?v=2c4ec007" type="application/x-dendrogeo-module" defer></script>
-<script src="src/application/auth/resolve-shell-session.js?v=31b289b2" type="application/x-dendrogeo-module" defer></script>
-<script src="src/ui/shell-boot-controller.js?v=dc939268" type="application/x-dendrogeo-module" defer></script>
-<script src="src/ui/shell-view-effects.js?v=770fe8ab" type="application/x-dendrogeo-module" defer></script>
-<script src="src/ui/shell-navigation-controller.js?v=ede139ba" type="application/x-dendrogeo-module" defer></script>
-<script src="src/ui/shell.js?v=2fba93a2" type="application/x-dendrogeo-module" defer></script>
+<script src="src/ui/state.js?v=a9449665" type="application/x-dendrogeo-module" defer></script>
+<script src="src/ui/toast.js?v=b783221e" type="application/x-dendrogeo-module" defer></script>
+<script src="src/application/world/load-landing-statistics.js?v=f7468801" type="application/x-dendrogeo-module" defer></script>
+<script src="src/ui/landing-totals.js?v=99cd2d03" type="application/x-dendrogeo-module" defer></script>
+<script src="src/ui/landing-country-table.js?v=13661c0e" type="application/x-dendrogeo-module" defer></script>
+<script src="src/ui/landing-city-table.js?v=78e20767" type="application/x-dendrogeo-module" defer></script>
+<script src="src/ui/landing-entry-controller.js?v=53a8254a" type="application/x-dendrogeo-module" defer></script>
+<script src="src/ui/landing.js?v=daef11e0" type="application/x-dendrogeo-module" defer></script>
+<script src="src/adapters/auth/initialize-shell-platform.js?v=6e54792b" type="application/x-dendrogeo-module" defer></script>
+<script src="src/application/auth/resolve-shell-session.js?v=6a34b8a2" type="application/x-dendrogeo-module" defer></script>
+<script src="src/ui/shell-boot-controller.js?v=3e94b762" type="application/x-dendrogeo-module" defer></script>
+<script src="src/ui/shell-view-effects.js?v=e90f471b" type="application/x-dendrogeo-module" defer></script>
+<script src="src/ui/shell-navigation-controller.js?v=0e9a7a06" type="application/x-dendrogeo-module" defer></script>
+<script src="src/ui/shell.js?v=496137ff" type="application/x-dendrogeo-module" defer></script>
 <!-- Presentation helpers for the existing analysis summary cards. -->
-<script src="src/ui/gis-workspace-analysis-layout.js?v=c2e6f582" type="application/x-dendrogeo-module" defer></script>
+<script src="src/ui/gis-workspace-analysis-layout.js?v=53286cf5" type="application/x-dendrogeo-module" defer></script>
 <!-- Viewport-aware positioning for existing GIS menu panels. -->
-<script src="src/ui/gis-workspace-menu-position.js?v=af2793a6" type="application/x-dendrogeo-module" defer></script>
+<script src="src/ui/gis-workspace-menu-position.js?v=46826e01" type="application/x-dendrogeo-module" defer></script>
 <!-- Existing map-tool menu controls; handlers remain in the workspace. -->
-<script src="src/ui/gis-workspace-map-tools-view.js?v=bd27f918" type="application/x-dendrogeo-module" defer></script>
+<script src="src/ui/gis-workspace-map-tools-view.js?v=950c6887" type="application/x-dendrogeo-module" defer></script>
 <!-- Accessible GIS workspace controls; presentation-only module. -->
-<script src="src/ui/gis-workspace.js?v=fb3da0e8" type="application/x-dendrogeo-module" defer></script>
+<script src="src/ui/gis-workspace.js?v=3301e21b" type="application/x-dendrogeo-module" defer></script>
 <!-- Account-backed park surface drafts: preserve pending-water evidence. -->
-<script src="src/ui/gis-project-draft.js?v=43cc1f80" type="application/x-dendrogeo-module" defer></script>
+<script src="src/ui/gis-project-draft.js?v=fc20647a" type="application/x-dendrogeo-module" defer></script>
 <!-- Wait for reviewed park-relative vegetation polygons before PNG export. -->
-<script src="src/ui/gis-export-vegetation.js?v=ab1ea685" type="application/x-dendrogeo-module" defer></script>
+<script src="src/ui/gis-export-vegetation.js?v=6fc4d459" type="application/x-dendrogeo-module" defer></script>
 <!-- Standard GIS PNG bounds and canvas sizing. -->
-<script src="src/ui/gis-export-layout.js?v=0e6755f3" type="application/x-dendrogeo-module" defer></script>
+<script src="src/ui/gis-export-layout.js?v=9e480a4e" type="application/x-dendrogeo-module" defer></script>
 <!-- GIS PNG legend and source notes; loaded before the canvas API bridge. -->
-<script src="src/ui/gis-export-canvas-legend.js?v=4f59b42f" type="application/x-dendrogeo-module" defer></script>
+<script src="src/ui/gis-export-canvas-legend.js?v=74a897b4" type="application/x-dendrogeo-module" defer></script>
 <!-- Standard and verified waypoint markers; loaded before the canvas API bridge. -->
-<script src="src/ui/gis-export-canvas-waypoints.js?v=3f99b99b" type="application/x-dendrogeo-module" defer></script>
+<script src="src/ui/gis-export-canvas-waypoints.js?v=465b5e42" type="application/x-dendrogeo-module" defer></script>
 <!-- Standard and verified grid outlines; loaded before the canvas API bridge. -->
-<script src="src/ui/gis-export-canvas-grids.js?v=7dfc1f89" type="application/x-dendrogeo-module" defer></script>
+<script src="src/ui/gis-export-canvas-grids.js?v=f4da1d0d" type="application/x-dendrogeo-module" defer></script>
 <!-- Leaflet polygon ring renderer, loaded before the canvas API bridge. -->
-<script src="src/ui/gis-export-canvas-leaflet.js?v=70dcf513" type="application/x-dendrogeo-module" defer></script>
+<script src="src/ui/gis-export-canvas-leaflet.js?v=143000f5" type="application/x-dendrogeo-module" defer></script>
 <!-- Raw surface patch rings, loaded before the canvas API bridge. -->
-<script src="src/ui/gis-export-canvas-patches.js?v=905b5010" type="application/x-dendrogeo-module" defer></script>
+<script src="src/ui/gis-export-canvas-patches.js?v=858ed5fa" type="application/x-dendrogeo-module" defer></script>
 <!-- Canvas ring renderers used by the verified-map PNG adapter. -->
-<script src="src/ui/gis-export-canvas.js?v=bbd39668" type="application/x-dendrogeo-module" defer></script>
+<script src="src/ui/gis-export-canvas.js?v=8acc82d2" type="application/x-dendrogeo-module" defer></script>
 <!-- Legacy PNG button and dialog bridge into the modular exporter. -->
-<script src="src/ui/gis-export-events.js?v=2cc7cb56" type="application/x-dendrogeo-module" defer></script>
+<script src="src/ui/gis-export-events.js?v=9d424b4e" type="application/x-dendrogeo-module" defer></script>
 <!-- Read-only readiness gate for publication of the verified park map. -->
-<script src="src/application/surface/prepare-verified-map-export.js?v=eb51a4ac" type="application/x-dendrogeo-module" defer></script>
+<script src="src/application/surface/prepare-verified-map-export.js?v=cdac038a" type="application/x-dendrogeo-module" defer></script>
 <!-- Shared PNG Blob download and object-URL cleanup. -->
-<script src="src/ui/gis-export-download.js?v=03ad75ab" type="application/x-dendrogeo-module" defer></script>
+<script src="src/ui/gis-export-download.js?v=62b1c807" type="application/x-dendrogeo-module" defer></script>
 <!-- Branded header and attribution frame for verified GIS PNGs. -->
-<script src="src/ui/gis-export-verified-frame.js?v=364a1672" type="application/x-dendrogeo-module" defer></script>
+<script src="src/ui/gis-export-verified-frame.js?v=7bf67c08" type="application/x-dendrogeo-module" defer></script>
 <!-- Verified-map area and relative-NDVI summary panel. -->
-<script src="src/ui/gis-export-verified-summary.js?v=e34b4ade" type="application/x-dendrogeo-module" defer></script>
+<script src="src/ui/gis-export-verified-summary.js?v=8d582211" type="application/x-dendrogeo-module" defer></script>
 <!-- Compose clipped surface, NDVI, grid and waypoint layers on verified GIS PNGs. -->
-<script src="src/ui/gis-export-verified-layers.js?v=a2bfcd9b" type="application/x-dendrogeo-module" defer></script>
+<script src="src/ui/gis-export-verified-layers.js?v=c8652546" type="application/x-dendrogeo-module" defer></script>
 <!-- Draw the reviewed surface and NDVI tiers on verified GIS PNGs. -->
-<script src="src/ui/gis-export-verified-canvas.js?v=732cd2a5" type="application/x-dendrogeo-module" defer></script>
+<script src="src/ui/gis-export-verified-canvas.js?v=20131108" type="application/x-dendrogeo-module" defer></script>
 <!-- Compose clipped park layers for the standard GIS PNG canvas. -->
-<script src="src/ui/gis-export-standard-layers.js?v=9b766f69" type="application/x-dendrogeo-module" defer></script>
+<script src="src/ui/gis-export-standard-layers.js?v=2feb5486" type="application/x-dendrogeo-module" defer></script>
 <!-- PNG vector output adapter: captures current reviewed geometry and relative NDVI. -->
-<script src="src/ui/gis-export-standard-canvas.js?v=16d80744" type="application/x-dendrogeo-module" defer></script>
-<script src="src/ui/gis-export-bootstrap.js?v=9361de48" type="application/x-dendrogeo-module" defer></script>
-<script src="src/ui/gis-export-presentation.js?v=9c055c50" type="application/x-dendrogeo-module" defer></script>
-<script src="src/ui/gis-export-platform.js?v=71b29858" type="application/x-dendrogeo-module" defer></script>
-<script src="src/ui/gis-export-sources.js?v=5b0d0968" type="application/x-dendrogeo-module" defer></script>
-<script src="src/ui/gis-export-workflow.js?v=65c5b9e0" type="application/x-dendrogeo-module" defer></script>
-<script src="src/ui/gis-export-verified-workflow.js?v=5eaf5827" type="application/x-dendrogeo-module" defer></script>
-<script src="src/bootstrap/gis-export.js?v=952aeeeb" type="application/x-dendrogeo-module" defer></script>
-<script src="src/ui/gis-export.js?v=633508a8" type="application/x-dendrogeo-module" defer></script>
+<script src="src/ui/gis-export-standard-canvas.js?v=535c6bd8" type="application/x-dendrogeo-module" defer></script>
+<script src="src/ui/gis-export-bootstrap.js?v=265e7795" type="application/x-dendrogeo-module" defer></script>
+<script src="src/ui/gis-export-presentation.js?v=375ac792" type="application/x-dendrogeo-module" defer></script>
+<script src="src/ui/gis-export-platform.js?v=7707251d" type="application/x-dendrogeo-module" defer></script>
+<script src="src/ui/gis-export-sources.js?v=49c16111" type="application/x-dendrogeo-module" defer></script>
+<script src="src/ui/gis-export-workflow.js?v=21ca63f7" type="application/x-dendrogeo-module" defer></script>
+<script src="src/ui/gis-export-verified-workflow.js?v=e21e5a40" type="application/x-dendrogeo-module" defer></script>
+<script src="src/bootstrap/gis-export.js?v=a385f29e" type="application/x-dendrogeo-module" defer></script>
+<script src="src/ui/gis-export.js?v=643671a3" type="application/x-dendrogeo-module" defer></script>
 
-<script src="/src/bootstrap/app-runtime.js?v=03baf32f" defer></script>
+<script src="/src/bootstrap/app-runtime.js?v=c67aae16" defer></script>
 </body>
 </html>

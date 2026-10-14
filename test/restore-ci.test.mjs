@@ -31,8 +31,9 @@ describe('0013 · iade SQL sözleşmesi', () => {
 
 describe('0013 · CI kuyruk tetiği (schedule bağımlılığı bitti)', () => {
   const ci = read('.github/workflows/ci.yml');
-  test('kuyruk isi her main pushunda dogrula ile paralel kosar', () => {
-    assert.match(ci, /kuyruk:/, 'ayrı iş (paralellik)');
+  test('kuyruk isi her main pushunda kaynak ve telefon kapılarını bekler', () => {
+    assert.match(ci, /kuyruk:/, 'ayrı kuyruk işi');
+    assert.match(ci, /needs: \[dogrula, telefon\]/, 'yayın testleri bekler');
     assert.match(ci, /github\.event_name == 'push'/);
     assert.match(ci, /refs\/heads\/main/);
   });

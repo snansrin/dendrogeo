@@ -6,13 +6,14 @@ on:
   pull_request:
 
 jobs:
-  # 0013 (2026-09-28 · kullanıcı: "GitHub'ın keyfini bekleyemem"): schedule
-  # pratikte düzensiz tetikleniyor (20 saatte 4 koşu gözlendi) → yayın/geri
-  # çekme kuyruğu HER PUSH'TA da boşaltılır. dogrula ile PARALEL koşar (test
-  # sonucunu BEKLEMEZ: kuyruk işi kendi başına buyruktur, rapor-yayin.yml
-  # ile aynı concurrency grubunda sıraya girer → çift koşu çakışmaz).
+  # Publication waits for source, phone and accessibility validation.
+  telefon:
+    name: Telefon ve erişilebilirlik
+    uses: ./.github/workflows/mobile-smoke.yml
+
   kuyruk:
     name: Rapor kuyruğu (push tetiği)
+    needs: [dogrula, telefon]
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
     env:
       DG_REPORT_READER: oidc
@@ -111,36 +112,8 @@ jobs:
       - name: Bağımlılıklar (npm ci)
         run: npm ci
 
-      - name: Değişmez çekirdek kaynak kilidi
-        run: npm run check:core-foundation
-
-      - name: Mimari katman sınırları
-        run: npm run check:architecture
-
-      - name: Sözdizimi denetimi (tarayıcı semantiği)
-        run: npm run check:syntax
-
-      # ?v= numaraları içerik hash'i olmalı; elle artırma unutulan/kaçan
-      # numaralar yüzünden repo ile canlı site iki kez ayrıştı.
-      - name: Sürüm numarası tutarlılığı
-        run: npm run check:versions
-
-      # index.html bir ARTİFAKTTIR: partials/{head,landing,shell,boot}.html
-      # birleşiminden üretilir. Elle index.html düzenlenirse bu adım yakalar
-      # (düzeltme: npm run build ya da build-index.mjs --split).
-      - name: Derleme tutarlılığı (index.html == partials)
-        run: npm run build:check
-
-      # Koda yeni dış servis eklenip CSP güncellenmezse istek tarayıcı
-      # tarafından sessizce kesilir. Bu daha önce planetarycomputer.microsoft.com
-      # ve titiler.terrascope.be ile yaşandı (a5dabbc ile düzeltildi).
-      - name: CSP tutarlılığı
-        run: npm run check:csp
-
-      # Allometri, geometri, LULC motoru (UTM + alan korunumu) ve SW cache
-      # stratejisi; modül sınırları değişirken sayısal regresyonları yakalar.
-      - name: Birim testler
-        run: npm test
+      - name: Tam kaynak, SQL ve regresyon kapısı
+        run: npm run check
 
       # Yayındaki dosyalar depoyla aynı mı? Elle ?v= artırma + doğrudan main→Pages
       # akışında canlı sürüm ile depo iki kez ayrıştı (?v=90 vs ?v=84, ?v=97 vs

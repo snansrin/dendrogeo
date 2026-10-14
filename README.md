@@ -62,3 +62,15 @@ DGR, DendroGeo park raporunun kalıcı iç kimliğidir. Yayımlanan rapor sessiz
   doi     = {10.5281/zenodo.22948643},
   license = {CC-BY-NC-4.0}
 }
+
+## UI değişiklikleri için kabul listesi
+
+- Ham ölçüm `girth_cm`; DBH yalnız `girth_cm / π`. `measurement-protocol-lock.js` ve fingerprint bilimsel tek referanstır. UI `dbh_cm_display` 1 ondalık gösterir; kayıt/payload tam hassasiyeti taşır. `mDbh` yalnız eski DOM API uyumluluk kimliğidir, input adı `girth_cm`dir.
+- Native `input.dg-switch`, anlamlı label, doğal tab sırası ve görünür odak kullanılır. Range kontrolleri `dg-range` ile sıfır padding ve en az 44 px dokunma alanına sahiptir.
+- Mevcut tema değişkenleri ve font hiyerarşisi korunur. Görsel opacity/yumuşatma ham raster, alan ve kabul edilmiş snapshot’ı değiştirmez.
+- Konum yalnız izin ve park paylaşım koşullarıyla geçicidir; yönetici filtreleri yetki veya RLS erişimi açmaz.
+- `npm run check` kaynak/SQL/regresyon; `npm run check:phone` gerçek telefon etkileşimleri; `npm run check:accessibility` axe ve klavye/focus/range kontrolleridir. `npm run check:release` hepsini sırayla çalıştırır. Chromium bir kez `npx --yes --package=playwright@1.62.1 playwright install chromium` ile kurulur.
+- Her PR CI kaynak ve telefon/erişilebilirlik kapılarını geçer. Rapor/DOI üretimi ve commit/push bu kabul kapısından sonra yapılır. Yayında runtime ve SW sürümü doğrulanır.
+- DB değişikliği yeni, idempotent migration’dır; mevcut dosya veya tarihsel ölçümler değiştirilmez. SQL kontratı izole PostgreSQL’de çalıştırılır.
+
+Kullanıcı tablosunun satır bazlı kanıtı: [Mimari kabul tablosu](docs/USER-ARCHITECTURE-TABLE-2026-10-14.md).

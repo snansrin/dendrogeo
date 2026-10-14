@@ -140,3 +140,6 @@ section.blk{padding:40px 0}
 .info-feature-grid .feature ul{margin-bottom:0}
 .info-feature-grid .feature:hover{transform:translateY(-3px)}
 @media(max-width:900px){.info-feature-grid{grid-template-columns:1fr}}
+
+/* Footer text inherits its existing light theme color, not the body muted color. */
+#landing footer .footer-cols p{color:inherit}

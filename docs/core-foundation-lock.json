@@ -893,15 +893,34 @@
       "scripts/lib/dependency-layer-policy.mjs",
       "scripts/lib/dependency-direct-persistence.mjs",
       "scripts/lib/dependency-module-index.mjs",
-      "scripts/lib/dependency-rules.mjs"
+      "scripts/lib/dependency-rules.mjs",
+      "src/config/i18n.js",
+      "src/services/auth.js",
+      "src/ui/toast.js",
+      "test/user-architecture-table.test.mjs",
+      "test/measurement-postgres-contract.test.mjs",
+      "scripts/check-phone.mjs",
+      "scripts/check-accessibility.mjs",
+      "scripts/lib/browser-acceptance-fixture.mjs",
+      "supabase/migrations/20261014190000_measurement_protocol_guard.sql",
+      ".github/workflows/ci.yml",
+      ".github/workflows/mobile-smoke.yml",
+      ".github/workflows/rapor.yml",
+      ".github/workflows/rapor-yayin.yml",
+      ".github/workflows/doi.yml",
+      "css/landing.css",
+      "package.json",
+      "package-lock.json",
+      "test/form-qa.test.mjs",
+      "test/measurement-preview-point-modules.test.mjs"
     ]
   },
   "sha256": {
-    "css/park-panel.css": "6103ff16194182137ec39361519da853588df0713682fd3808abe1a628a93958",
-    "css/style.css": "f78df8b4fa78ead3e6eca25eccbe9b02792b302605bbca098210ecc505f1e144",
+    "css/park-panel.css": "f1fd888a4e91c7f87c0640d76d3d5165f723f5dc200a269ac6802a5380cc77d4",
+    "css/style.css": "3bd4ed1087f3766ed93a98e4c2ffe97c0412c2a5d836ecd55f842c198c491d5f",
     "css/ui-standard.css": "cf5fc000e24f988fddb04da907b2bdc168a4575c36bc8554c1b2e22ccf527b9b",
     "docs/surface-scientific-contract.json": "ad98bde39dc2e8dfd80d36d8f287349cf0ab8a91cd7a9f728e6dd533a844ffa3",
-    "partials/shell.html": "4b0c951de70a9d89e26340751295a965bcc144424d1eab85088c4f16a7e972e8",
+    "partials/shell.html": "ce213710502c4686cb813e1e58fec3649a5e08a8d32c9e72d5b3a17c3a5044ec",
     "scripts/lulc-qa.mjs": "60a322b640c2a4bca447785bdeb056097c38e5094c10292b28049d31968ab827",
     "scripts/val-qa.mjs": "5da2d66337bf44092148bff6801867ac937bb61dcf9b4a8a5a008acf98a5f7c8",
     "scripts/verify-osm-water-live.mjs": "6465ba97904d88347aec388478ecf807cfbd495cdb2b4db0e2a957d985d365d7",
@@ -1163,7 +1182,7 @@
     "src/ui/grid-waypoint-controller.js": "eb4f58d30fd59a46840f58f2b428b79d8afc9e1211d48d26ea2cfb74ba2b3531",
     "src/ui/grid-waypoint-layer.js": "0c6db2a4329704ec9106735cc0a26b7ce01803666ee4b19d356c976d298eba2f",
     "src/ui/lc-report.js": "f8182bce9b5dbd8dcecceaa7afee69b52d12e7883badc65e27fb93e94ca2abf9",
-    "src/ui/lc-sens.js": "de8334b645792c4208142ed248db35f375c2f3c615cdce822efbf1cc590a699f",
+    "src/ui/lc-sens.js": "8e976b528c61c94e7a5dce4a6f09a04455c7722e03bc14d01939e5192e194ed6",
     "src/ui/map-layer-visibility.js": "50d033fba51e90f49ae39254e0700b510938be4d271aada8a9a400be727c1a60",
     "src/ui/map-measurement-markers.js": "cedd193f2786604f84044f2ecf020144b5cba20c86160b729891b7d4f3668a67",
     "src/ui/mount-surface-review-map-host.js": "2ef1e62e2607084c3909016e324b09dba2eaaf13dfba25b0b8bcb82086e7986d",
@@ -1180,7 +1199,7 @@
     "src/ui/park-export.js": "66ae59513b6cb06b8720867b902a09907bdb979ea7561e7bbeeb0cc2dbb7b6a7",
     "src/ui/park-identity.js": "32676d666b9e4f1e859f136fb895cf258246244306f4eeb53a7df865f9602018",
     "src/ui/park-image-geometry.js": "723a2870bf5c854824a074177c789ad75c566e93f04e3f2c0cc4cd5cf7a60e45",
-    "src/ui/park-info-panel.js": "d6a2d300be362640e9c813cee839d7cd510e9c36d59e30ee77dc664844cd7153",
+    "src/ui/park-info-panel.js": "023948305726bcb9130f99a8b13fa8db8443d645c2910221810730f6bb146fe2",
     "src/ui/park-landcover-analysis.js": "4d6d9970af0be40287ef9bbb44be333dd2ede933554d1c5afed07895f339d3b9",
     "src/ui/park-measurement-gate.js": "4772a5fb077f43b4e0f9369366816ad68da36aace791b2b55a3fe98541ac6119",
     "src/ui/park-menu-ui.js": "9b645342c5beb2df56901cacad4f785a08575ac1d70c1d9515758a8950e5e1ee",
@@ -1206,7 +1225,7 @@
     "src/workers/surface-worker.js": "af6477f104a06342cf69ef7f702a3e95ed27cd390c5aae36a2fbe5dfd68ed2fe",
     "test/base-map-layer-modules.test.mjs": "5399d699e74ffd66e92df312b4301202add7352b2b6c0be24fd51cda63e7baff",
     "test/critical-fixes.test.mjs": "38cecf8eca4cf3a7b48209e8ff950305e57c85a0b6564ce4b388164712b50154",
-    "test/dbh-qa.test.mjs": "d3bbd29d292aa1214ede27a21ecb99315bc24a6346e2b0119f8c04eb8b532b95",
+    "test/dbh-qa.test.mjs": "21a2468530232751c1c675caaf2d8b955284de32761ac52d3bb3cffc4e031cef",
     "test/field-data-safety.test.mjs": "b8b9e8fc20bbbc59cf9562d60f87bdc5eb07c0106f8c71253731974fb08c0280",
     "test/fix-0045.test.mjs": "f2fd7bea2d7a43b1ca31a218bafa8af8d3e5a7fdd7d49823f8c48096ad009a68",
     "test/fixtures/goksu-park.json": "96dd15fd11cddcc4015fd8bd00a61a7b12cfcf26f29a694b977f6b7b8850edff",
@@ -1334,7 +1353,7 @@
     "src/ui/park-backfill-apply-feedback.js": "c038e1ca3a4387fcc493a14b8629081aa641a2d8b2fbb4bc8fba06eb3e021737",
     "src/domain/trees/build-live-measurement-preview-input.js": "333ef80a906316cbd052cef5da71eb871fc9ecf5395e17051bfbc342c6183bfd",
     "src/application/trees/calculate-live-measurement-preview.js": "e5ee1356be6d708b479ada479bc0d0dc74894e2d087737bae30a18ddbca4213e",
-    "src/ui/render-live-measurement-preview.js": "c3e2047ece841cc486e940092a94ff02c8671a7f7054a492f042f277e8a39006",
+    "src/ui/render-live-measurement-preview.js": "23dc2a11ed39f10c33395618453efb26ad1cc27f2ebe56da4421e71117204884",
     "src/domain/trees/resolve-measurement-point-query.js": "4c439864134b9f13f461f5c5895672c11f9346589dbaf0c5c895898ad658a22d",
     "src/application/trees/query-measurement-point.js": "0f80310f85fde4732b9c5700b959406bfc067a046fb498559dfbb4cd87ca8fd3",
     "src/domain/map/build-waypoint-navigation-header.js": "eedcbd28179f4521be81f585b2efaa8d34cbffdfd04bff741f8ede6dfc5746a6",
@@ -1641,7 +1660,7 @@
     "src/ui/render-surface-review-actions.js": "37ac6cc9726b11c474fb3a7a92caacc9a2a33f43569a395609df8fb946cd7fa2",
     "src/ui/render-surface-scan-audit.js": "eae39ff562d14c50d0b58b56bb9887d814342c583af3e470999ab3c03466d220",
     "src/ui/render-surface-scan-panel.js": "e1a17bf0af37a600e4f57643d5fb2667b355ce89ecbf5272db997b415fcd1e03",
-    "src/ui/render-surface-sensitivity-controls.js": "93a4e4d62aa71b1dff5da1dde3def3b00f0dbe750d4645349bea325e28922aae",
+    "src/ui/render-surface-sensitivity-controls.js": "750d7fe5432f6601c1c36c48fe82db6b1a4acd1e3fb7a27df2db89ff70dbeab7",
     "src/ui/render-surface-vegetation-features.js": "a7d1f0bc6124ed46408a20f9852be24492a933cdbfbf4d455b2bf010dd964411",
     "src/ui/reset-measurement-entry-fields.js": "f0bfe878d5882aeddc871f5c861e2d3b2a0033897e9a21d255cb777a48a2e19f",
     "src/ui/set-measurement-save-button.js": "1386e1897d67cbe13323f10a7f29d0c79cc2baa39c2520134044dc1ce2b74d5e",
@@ -1761,7 +1780,26 @@
     "scripts/lib/dependency-layer-policy.mjs": "534487184438ac01d5c862ab685d4721d6ad00550dba2944ebb2e3151883c0d1",
     "scripts/lib/dependency-direct-persistence.mjs": "302f77c0fc103848d69ecb0930c880b9d43082eb90bc3f4d2f10632fdc0f5c7c",
     "scripts/lib/dependency-module-index.mjs": "92decc5c77167417462188dd3cebb63e8071bdeb71b487e295740d23dd0dda12",
-    "scripts/lib/dependency-rules.mjs": "c315894d7b28fa0650ff46e5648d2c82de1dc696364a5ac45499c8f5e6d19ad6"
+    "scripts/lib/dependency-rules.mjs": "c315894d7b28fa0650ff46e5648d2c82de1dc696364a5ac45499c8f5e6d19ad6",
+    "src/config/i18n.js": "0602cb4e853c4723f42a4483929d4440c1f58f5f539128c8a9af38a2221f376a",
+    "src/services/auth.js": "301abe78068e22e4d61431e996993558892c055a8c74d4aa03f0d471deb28f07",
+    "src/ui/toast.js": "c4a947eaad22357656eba2b3058581ae7d6ddbee2de8fcd0b2ef4e0b4fe2c37b",
+    "test/user-architecture-table.test.mjs": "21b35801343fda3e0a2604fbc18622aac05af5c6f0b13ab6771066c93725c045",
+    "test/measurement-postgres-contract.test.mjs": "02cb794265e621e850a5d703c62fbdd1c0b7ccff635a4a87a5c72447682df245",
+    "scripts/check-phone.mjs": "9761d87d6bb8801011a79bce7ef44c862bc6d4ae4c4e4a8db9e2c6e73cfeb014",
+    "scripts/check-accessibility.mjs": "4f8064156a8b0ab8f9ac53a205999b648d3e286cd36eec50aefa106bf4007961",
+    "scripts/lib/browser-acceptance-fixture.mjs": "56993ac50e7c868027e0a8a07c4f807dea419736f0d8829f9d3b5ceba251b8f5",
+    "supabase/migrations/20261014190000_measurement_protocol_guard.sql": "4af663598c34bcffd0a768e60e0961aebab0a53a9f224dda651514ddbbc9bed8",
+    ".github/workflows/ci.yml": "56f81781759fc606679b1da99145fb6a640028b1ded920e49a479869ee0d7e87",
+    ".github/workflows/mobile-smoke.yml": "d1ae73335d7b1490b0249a51e42fd9ca4f695e8e3ab3328e80504abd9acb8750",
+    ".github/workflows/rapor.yml": "be836bdd0631a268744b2454216bb64848022d4146afe80663ec69a32a9c06f6",
+    ".github/workflows/rapor-yayin.yml": "266e192e8c4d4dd5e75b0de95f87f703185500e9c6c9ce58889f6483f5c9e638",
+    ".github/workflows/doi.yml": "508dc7c97cb20940bc22d5b978e8e3e6dabf018045cccadc7046ed4063c5b5bd",
+    "css/landing.css": "2557d139e9a28dbb979d02b7c3d7029a429df2b01eaab16e4708356b5bc9b4f0",
+    "package.json": "455549edb21524a99f356a47519d216dd856d3f5b4dee2632450f865a3472ece",
+    "package-lock.json": "37b76dd4d390030854e921d5b61a936989d1bc86cd36b7666ce5b08168a52926",
+    "test/form-qa.test.mjs": "dcb96d59ca412b8f445005705e8ac3169ba4ca44f3433ff5ef312e8e92505182",
+    "test/measurement-preview-point-modules.test.mjs": "94d9913ae41eb0a50dad3c8fdb16b500e3fd210f048ddcc93769786ddee5be2e"
   },
   "authorized_modularizations": [
     {
@@ -4041,6 +4079,86 @@
         "scripts/lib/dependency-direct-persistence.mjs",
         "scripts/lib/dependency-module-index.mjs",
         "scripts/lib/dependency-rules.mjs"
+      ]
+    },
+    {
+      "date": "2026-10-14",
+      "request": "User supplied 16-row target architecture table: enforce native switch/range/keyboard accessibility, canonical raw girth/read-only DBH names, source/phone/axe/SQL release gates, guarded report/DOI publication and new idempotent full-precision measurement migration. Only contradictory old parallel-queue test is updated to assert required dependencies; numerical/scientific locked regressions unchanged.",
+      "files": [
+        {
+          "path": "css/park-panel.css",
+          "previous_sha256": "6103ff16194182137ec39361519da853588df0713682fd3808abe1a628a93958",
+          "sha256": "f1fd888a4e91c7f87c0640d76d3d5165f723f5dc200a269ac6802a5380cc77d4"
+        },
+        {
+          "path": "css/style.css",
+          "previous_sha256": "f78df8b4fa78ead3e6eca25eccbe9b02792b302605bbca098210ecc505f1e144",
+          "sha256": "3bd4ed1087f3766ed93a98e4c2ffe97c0412c2a5d836ecd55f842c198c491d5f"
+        },
+        {
+          "path": "partials/shell.html",
+          "previous_sha256": "4b0c951de70a9d89e26340751295a965bcc144424d1eab85088c4f16a7e972e8",
+          "sha256": "ce213710502c4686cb813e1e58fec3649a5e08a8d32c9e72d5b3a17c3a5044ec"
+        },
+        {
+          "path": "src/ui/lc-sens.js",
+          "previous_sha256": "de8334b645792c4208142ed248db35f375c2f3c615cdce822efbf1cc590a699f",
+          "sha256": "8e976b528c61c94e7a5dce4a6f09a04455c7722e03bc14d01939e5192e194ed6"
+        },
+        {
+          "path": "src/ui/park-info-panel.js",
+          "previous_sha256": "d6a2d300be362640e9c813cee839d7cd510e9c36d59e30ee77dc664844cd7153",
+          "sha256": "023948305726bcb9130f99a8b13fa8db8443d645c2910221810730f6bb146fe2"
+        },
+        {
+          "path": "src/ui/render-live-measurement-preview.js",
+          "previous_sha256": "c3e2047ece841cc486e940092a94ff02c8671a7f7054a492f042f277e8a39006",
+          "sha256": "23dc2a11ed39f10c33395618453efb26ad1cc27f2ebe56da4421e71117204884"
+        },
+        {
+          "path": "src/ui/render-surface-sensitivity-controls.js",
+          "previous_sha256": "93a4e4d62aa71b1dff5da1dde3def3b00f0dbe750d4645349bea325e28922aae",
+          "sha256": "750d7fe5432f6601c1c36c48fe82db6b1a4acd1e3fb7a27df2db89ff70dbeab7"
+        }
+      ],
+      "added_protected_files": [
+        "src/config/i18n.js",
+        "src/services/auth.js",
+        "src/ui/toast.js",
+        "test/user-architecture-table.test.mjs",
+        "test/measurement-postgres-contract.test.mjs",
+        "scripts/check-phone.mjs",
+        "scripts/check-accessibility.mjs",
+        "scripts/lib/browser-acceptance-fixture.mjs",
+        "supabase/migrations/20261014190000_measurement_protocol_guard.sql",
+        ".github/workflows/ci.yml",
+        ".github/workflows/mobile-smoke.yml",
+        ".github/workflows/rapor.yml",
+        ".github/workflows/rapor-yayin.yml",
+        ".github/workflows/doi.yml",
+        "css/landing.css",
+        "package.json",
+        "package-lock.json"
+      ]
+    },
+    {
+      "date": "2026-10-14",
+      "request": "User table explicitly permits a new numbered protocol migration and requires readonly DBH output. Extend only migration filename whitelist in two historical UI-only guards; preserve CSV, formulas and legacy data assertions. Preview assertion checks the identical numerical text plus readonly output markup; PostgreSQL fixture verifies authenticated trigger execution.",
+      "files": [
+        {
+          "path": "test/dbh-qa.test.mjs",
+          "previous_sha256": "d3bbd29d292aa1214ede27a21ecb99315bc24a6346e2b0119f8c04eb8b532b95",
+          "sha256": "21a2468530232751c1c675caaf2d8b955284de32761ac52d3bb3cffc4e031cef"
+        },
+        {
+          "path": "test/measurement-postgres-contract.test.mjs",
+          "previous_sha256": "b975863892f66f71de5bc9bdac42b63b88d196c9ce563ea8027af19bea789a0f",
+          "sha256": "02cb794265e621e850a5d703c62fbdd1c0b7ccff635a4a87a5c72447682df245"
+        }
+      ],
+      "added_protected_files": [
+        "test/form-qa.test.mjs",
+        "test/measurement-preview-point-modules.test.mjs"
       ]
     }
   ]

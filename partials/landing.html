@@ -3,7 +3,7 @@
 <span class="brand"><img class="brand-logo" src="logo.png" alt="DendroGeo">DendroGeo</span>
  <button type="button" class="navtoggle" id="navToggle" aria-expanded="false" aria-controls="navLinks" aria-label="Bölüm menüsü" onclick="dgNavToggle()">☰</button>
  <div class="links" id="navLinks"><a href="#sistem">Sistem</a><a href="#yontem">Yöntem</a><a href="#veri">Veri &amp; Harita</a><a href="#istatistik">İstatistik</a><a href="#bilgi-merkezi">Bilgi Merkezi &amp; Kaynaklar</a></div>
- <button type="button" class="btn sm ghost dg-lang-toggle" onclick="dgToggleLang()" aria-label="Switch to English">EN</button>
+ <button type="button" class="btn sm ghost dg-lang-toggle" onclick="dgToggleLang()" aria-label="EN · Switch to English">EN</button>
  <button class="btn sm" onclick="showAuth()">Giriş / Kayıt</button>
 </div></div>
 
@@ -258,8 +258,8 @@
   <div class="card" style="margin-top:20px;border-left:4px solid var(--green)">
   <div class="shead" style="margin-bottom:12px"><span class="no">🌍</span><h2 style="font-size:1.15rem">Bölgesel Dağılım</h2><span class="rule"></span></div>
   <div class="grid g2">
-   <div class="tblwrap"><table id="tblCountry"><thead><tr><th scope="col">Ülke</th><th scope="col">Kayıt</th><th scope="col">Karbon(t)</th><th scope="col">Ort.DBH</th><th scope="col">Ort.Yükseklik(m)</th></tr></thead><tbody></tbody></table></div>
-   <div class="tblwrap"><table id="tblCity"><thead><tr><th scope="col">Şehir</th><th scope="col">Kayıt</th><th scope="col">Karbon(t)</th></tr></thead><tbody></tbody></table></div>
+   <div tabindex="0" class="tblwrap"><table id="tblCountry"><thead><tr><th scope="col">Ülke</th><th scope="col">Kayıt</th><th scope="col">Karbon(t)</th><th scope="col">Ort.DBH</th><th scope="col">Ort.Yükseklik(m)</th></tr></thead><tbody></tbody></table></div>
+   <div tabindex="0" class="tblwrap"><table id="tblCity"><thead><tr><th scope="col">Şehir</th><th scope="col">Kayıt</th><th scope="col">Karbon(t)</th></tr></thead><tbody></tbody></table></div>
   </div>
  </div>
 </div></section>
@@ -347,7 +347,7 @@
       fotoğraf işleniyor; yurt dışı altyapı (Supabase/Google/Cloudflare) kullanılıyor.
       Rıza olmadan kayıt engellenir; rıza zaman damgası auth metadata'sına yazılır
       (doRegister → kvkk_consent_at) yani SONRADAN İNKÂR EDİLEMEZ KAYIT oluşur. -->
- <label class="dg-consent" for="rgConsent"><input type="checkbox" id="rgConsent">
+ <label class="dg-consent" for="rgConsent"><input type="checkbox" class="dg-switch" id="rgConsent">
   <span><a href="/aydinlatma/" target="_blank" rel="noopener">KVKK Aydınlatma Metni</a>&#39;ni ve <a href="/gizlilik/" target="_blank" rel="noopener">Gizlilik Politikası</a>&#39;nı okudum. Ad, e-posta, kurum bilgilerimin; saha ölçümlerimde <b>konum verimin</b> ve yüklersem <b>fotoğrafımın</b> bu belgelerde belirtilen amaçlarla işlenmesini, onaylanan ölçümlerin CC BY-NC 4.0 ile kamuya açık veri setinde yayımlanmasını ve hizmet sağlayıcılarının (Supabase, Google, Cloudflare) <b>yurt dışı altyapısında barındırılmasını</b> onaylıyorum. Rızamı dilediğim zaman geri çekebilirim.</span></label>
  <button type="button" class="btn" style="width:100%;margin-top:16px" onclick="doRegister()">Hesap Oluştur</button></form>
 <form id="fReset" style="display:none" onsubmit="return false;"><label class="lbl" for="rsEmail">E‑posta</label><input id="rsEmail" type="email" required><div id="tsReset" style="margin-top:14px;min-height:65px"></div><button type="button" class="btn" style="width:100%;margin-top:16px" onclick="sendResetEmail()">Sıfırlama Gönder</button></form>

@@ -22,7 +22,8 @@ test('live preview parses form values, validates before calculation, and preserv
   assert.deepEqual(events.map(x=>x[0]),['validate','calculate']);
   assert.equal(element.style.display,'block');assert.equal(hint.style.display,'none');
   assert.match(element.innerHTML,/Tahmini karbon · 18\.3 kg/);
-  assert.match(element.innerHTML,/35\.5 cm → DBH 11\.3 cm/);
+  assert.match(element.innerHTML.replace(/<[^>]*>/g,''),/35\.5 cm → DBH 11\.3 cm/);
+  assert.match(element.innerHTML,/<output name="dbh_cm_display" for="mDbh">11\.3<\/output>/);
   assert.match(element.innerHTML,/Hacim 0\.045 m³/);
 });
 

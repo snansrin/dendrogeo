@@ -79,7 +79,7 @@ function dgApplyI18n(root){
 function dgUpdateLangToggles(){
  document.querySelectorAll(".dg-lang-toggle").forEach(b=>{
   b.textContent=DG_LANG==="en"?"TR":"EN";
-  b.setAttribute("aria-label",DG_LANG==="en"?"Türkçe'ye geç":"Switch to English");
+  b.setAttribute("aria-label",DG_LANG==="en"?"TR · Türkçe'ye geç":"EN · Switch to English");
  });
 }
 

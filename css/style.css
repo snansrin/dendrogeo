@@ -1100,3 +1100,14 @@ label.lbl{display:block}
  #v-visitors .dg-vis-tools .measure-share{min-height:44px}
  #v-visitors #visMap{height:300px}
 }
+
+/* Shared controls: preserve native keyboard semantics and existing theme. */
+input.dg-range{display:block;width:100%;max-width:100%;min-width:0;min-height:44px;padding:0;margin:0;border:0;background:transparent;box-sizing:border-box;accent-color:var(--green)}
+input.dg-range:focus-visible,input.dg-switch:focus-visible{outline:2px solid var(--green);outline-offset:3px}
+label:has(input.dg-switch){min-height:44px}
+
+.toast button.x{font:inherit;color:inherit;background:transparent;border:0;padding:4px;cursor:pointer}
+
+/* Accessible text contrast; keep the existing status fills, borders and palette. */
+.btn.amber{color:var(--ink)}
+.alert.err{color:color-mix(in srgb,var(--red) 80%,var(--ink))}

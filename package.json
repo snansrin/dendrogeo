@@ -15,7 +15,11 @@
     "check:architecture": "node scripts/check-architecture.mjs",
     "check:dependencies": "node scripts/check-dependency-rules.mjs",
     "check": "npm run check:core-foundation && npm run check:architecture && npm run check:dependencies && npm run check:modules && npm run check:syntax && npm run check:versions && npm run build:check && npm run check:csp && npm test",
-    "check:modules": "node scripts/check-module-integration.mjs"
+    "check:modules": "node scripts/check-module-integration.mjs",
+    "check:phone": "node scripts/check-phone.mjs",
+    "check:accessibility": "node scripts/check-accessibility.mjs",
+    "check:sql": "node --test test/measurement-postgres-contract.test.mjs",
+    "check:release": "npm run check && npm run check:phone && npm run check:accessibility"
   },
   "engines": {
     "node": ">=20"
@@ -23,6 +27,8 @@
   "license": "CC-BY-NC-4.0",
   "author": "Nagihan ŞİRİN & Sinan ŞİRİN",
   "devDependencies": {
+    "@electric-sql/pglite": "0.5.10",
+    "axe-core": "4.14.0",
     "jose": "6.1.0",
     "playwright-core": "1.62.1",
     "polygon-clipping": "0.15.7",

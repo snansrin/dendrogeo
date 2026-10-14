@@ -17,7 +17,7 @@ function toast(msg,type="ok",icon="",duration=4500){
  const t=document.createElement("div");
  t.className="toast "+(type==="err"||type==="warn"||type==="info"?type:"");
  const ic=icon||(type==="err"?"❌":type==="warn"?"⚠":type==="info"?"ℹ":"✓");
- t.innerHTML=`<span class="icon">${ic}</span><span class="msg">${msg}</span><span class="x" onclick="this.parentNode.classList.add('bye');setTimeout(()=>this.parentNode.remove(),300)">✕</span>`;
+ t.innerHTML=`<span class="icon">${ic}</span><span class="msg">${msg}</span><button type="button" class="x" aria-label="Bildirimi kapat" onclick="this.parentNode.classList.add('bye');setTimeout(()=>this.parentNode?.remove(),300)">✕</button>`;
  wrap.appendChild(t);
  const ms=Math.max(1800,Math.min(15000,Number(duration)||4500));
  setTimeout(()=>{if(t.parentNode){t.classList.add("bye");setTimeout(()=>t.remove(),300);}},ms);

@@ -7,7 +7,7 @@
   <button class="btn sm ghost" id="installBtn" style="display:none" onclick="dgInstallApp()">📲 Uygulayı Kur</button>
   <span class="mono" id="whoami" style="font-size:.8rem;color:var(--mut)"></span>
   <span class="badge admin" id="roleBadge" style="display:none">ADMIN</span>
-  <button type="button" class="btn sm ghost dg-lang-toggle" onclick="dgToggleLang()" aria-label="Switch to English">EN</button>
+  <button type="button" class="btn sm ghost dg-lang-toggle" onclick="dgToggleLang()" aria-label="EN · Switch to English">EN</button>
   <button class="btn sm red" onclick="logout()">Çıkış</button>
  </div>
 </div>
@@ -65,7 +65,7 @@
     <div class="measure-fields measure-identity"><div><label class="lbl" for="mPoint">Nokta ID</label><div class="measure-query"><input id="mPoint" type="number" min="1" step="1" inputmode="numeric" oninput="manualPoint=true" aria-describedby="pointHelp"><button class="btn sm ghost" onclick="queryPointId()">🔍 Sorgula</button></div><p class="measure-help" id="pointHelp">Otomatik önerilir; gerekirse değiştirin.</p></div><div><label class="lbl" for="mNo">Ölçüm No</label><input id="mNo" type="number" min="1" step="1" inputmode="numeric" value="1"><p class="measure-help">Aynı noktadaki ölçüm sırası.</p></div></div>
     <div id="pointQueryResult" class="alert info" style="display:none"></div>
     <div class="measure-fields"><div><label class="lbl" for="mGroup">Ağaç grubu</label><select id="mGroup" onchange="fillSpecies();liveCalc()"><option value="">Grup seçin</option><option value="İBRELİ">İBRELİ</option><option value="YAPRAKLI">YAPRAKLI</option></select></div><div><label class="lbl" for="mSpecies">Ağaç türü</label><select id="mSpecies" disabled onchange="showLatin();liveCalc()"><option value="">Önce grup seçin</option></select><div id="latinName" class="mono measure-help"></div></div></div>
-    <div class="measure-fields measure-dimensions"><div><label class="lbl measure-label-help" for="mDbh"><span>Göğüs çevresi <span>(cm)</span></span><button type="button" class="dg-field-help" aria-label="Göğüs çevresi nasıl ölçülür?" data-tip="Mezurayı gövdenin etrafına, yerden 1,30 m yüksekte sarın. Sistem DBH çapını otomatik olarak çevre ÷ π ile hesaplar.">?</button></label><input id="mDbh" type="number" min="0.1" max="1256.6" step="0.1" inputmode="decimal" oninput="liveCalc()" placeholder="Örn. 110"></div><div><label class="lbl measure-label-help" for="mHeight"><span>Ağaç boyu <span>(m)</span></span><button type="button" class="dg-field-help" aria-label="Ağaç boyu nasıl girilir?" data-tip="Ağacın zeminden tepe noktasına kadar olan toplam yüksekliğini metre cinsinden girin.">?</button></label><input id="mHeight" type="number" min="0.1" max="100" step="0.1" inputmode="decimal" oninput="liveCalc()" placeholder="Örn. 7,2"></div></div>
+    <div class="measure-fields measure-dimensions"><div><label class="lbl measure-label-help" for="mDbh"><span>Göğüs çevresi <span>(cm)</span></span><button type="button" class="dg-field-help" aria-label="Göğüs çevresi nasıl ölçülür?" data-tip="Mezurayı gövdenin etrafına, yerden 1,30 m yüksekte sarın. Sistem DBH çapını otomatik olarak çevre ÷ π ile hesaplar.">?</button></label><input id="mDbh" name="girth_cm" data-measurement-field="girth_cm" type="number" min="0.1" max="1256.6" step="0.1" inputmode="decimal" oninput="liveCalc()" placeholder="Örn. 110"></div><div><label class="lbl measure-label-help" for="mHeight"><span>Ağaç boyu <span>(m)</span></span><button type="button" class="dg-field-help" aria-label="Ağaç boyu nasıl girilir?" data-tip="Ağacın zeminden tepe noktasına kadar olan toplam yüksekliğini metre cinsinden girin.">?</button></label><input id="mHeight" type="number" min="0.1" max="100" step="0.1" inputmode="decimal" oninput="liveCalc()" placeholder="Örn. 7,2"></div></div>
     <div class="measure-photo"><div><h4>Fotoğraf <span class="measure-optional">İsteğe bağlı</span></h4><p class="measure-help">Ağacı ve gövdesini kadraja alın.</p></div><span class="dg-file btn ghost">📸 <span>Fotoğraf ekle</span><input type="file" id="mPhoto" aria-label="Fotoğraf (canlı çekim)" accept="image/*" capture="environment" onchange="checkPhoto(event)"></span><span class="dg-file-name mono" id="mPhotoName"></span><button type="button" class="btn sm ghost" id="mPhotoRemove" style="display:none" onclick="dgClearMeasurePhoto()">Fotoğrafı kaldır</button></div>
     <div id="photoCheck" class="alert info" role="status" style="display:none"></div>
    </section>
@@ -132,7 +132,7 @@
 <div class="live-map-tools" style="display:flex;gap:10px;align-items:center;margin-bottom:10px;flex-wrap:wrap">
  <button class="btn sm blue" id="parkModeBtn" onclick="window.dgToggleParkMode()">🌳 Park Analizi Modu: KAPALI</button>
  <label style="font-size:.82rem;margin-left:8px">Harita:</label>
- <select id="baseLayerSelect" onchange="switchBaseLayer(this.value)" style="font-size:.82rem;padding:4px 8px;border-radius:6px;border:1px solid var(--line)">
+ <select aria-label="Harita altlığı" id="baseLayerSelect" onchange="switchBaseLayer(this.value)" style="font-size:.82rem;padding:4px 8px;border-radius:6px;border:1px solid var(--line)">
   <option value="osm">🗺️ Sokak</option>
   <option value="sat">🛰️ Uydu</option>
   <option value="topo">🏔️ Topoğrafik</option>
@@ -306,8 +306,8 @@
       <div class="card" style="border-left:4px solid var(--green)">
     <div class="shead" style="margin-bottom:12px"><span class="no">🌍</span><h2 style="font-size:1.15rem">Bölgesel Dağılım</h2><span class="rule"></span></div>
     <div class="grid g2">
-     <div class="tblwrap dg-cards"><table><thead><tr><th scope="col">Ülke</th><th scope="col">Kayıt</th><th scope="col">Karbon(t)</th><th scope="col">Ort.DBH</th><th scope="col">Ort.Yükseklik(m)</th></tr></thead><tbody id="wCountryT"></tbody></table></div>
-     <div class="tblwrap dg-cards"><table><thead><tr><th scope="col">Şehir</th><th scope="col">Kayıt</th><th scope="col">Karbon(t)</th></tr></thead><tbody id="wCityT"></tbody></table></div>
+     <div tabindex="0" class="tblwrap dg-cards"><table><thead><tr><th scope="col">Ülke</th><th scope="col">Kayıt</th><th scope="col">Karbon(t)</th><th scope="col">Ort.DBH</th><th scope="col">Ort.Yükseklik(m)</th></tr></thead><tbody id="wCountryT"></tbody></table></div>
+     <div tabindex="0" class="tblwrap dg-cards"><table><thead><tr><th scope="col">Şehir</th><th scope="col">Kayıt</th><th scope="col">Karbon(t)</th></tr></thead><tbody id="wCityT"></tbody></table></div>
     </div>
       </div>
    <div class="card" style="margin-top:18px;border-left:4px solid var(--blue)">
@@ -397,7 +397,7 @@
    </div>
       <div class="card" style="margin-bottom:18px;border-left:4px solid var(--blue)">
     <div class="shead" style="margin-bottom:12px"><span class="no">✉️</span><h2 style="font-size:1.2rem">Aktif Talepler</h2><span class="rule"></span><span class="mono" style="font-size:.78rem;color:var(--amber-ink)">Bekleyen: <b id="aReqPendingMini">0</b></span></div>
-    <div class="tblwrap dg-cards"><table><thead><tr><th scope="col">Kullanıcı</th><th scope="col">E‑posta</th><th scope="col">Filtre</th><th scope="col">Tarih</th><th scope="col">Durum</th><th scope="col">İşlem</th></tr></thead><tbody id="aReqT"></tbody></table></div>
+    <div tabindex="0" class="tblwrap dg-cards"><table><thead><tr><th scope="col">Kullanıcı</th><th scope="col">E‑posta</th><th scope="col">Filtre</th><th scope="col">Tarih</th><th scope="col">Durum</th><th scope="col">İşlem</th></tr></thead><tbody id="aReqT"></tbody></table></div>
    </div>
    <div class="card" id="closedRequestsWrap" style="margin-bottom:18px;border-left:4px solid var(--mut);display:none">
     <div class="shead" style="margin-bottom:12px;cursor:pointer" onclick="document.getElementById('closedReqBody').style.display=document.getElementById('closedReqBody').style.display==='none'?'block':'none'">
@@ -407,7 +407,7 @@
      <span class="mono" style="font-size:.78rem;color:var(--mut)">Arşiv: <b id="aReqClosed">0</b> · Aç/Kapat ▼</span>
     </div>
     <div id="closedReqBody" style="display:none">
-     <div class="tblwrap dg-cards"><table><thead><tr><th scope="col">Kullanıcı</th><th scope="col">E‑posta</th><th scope="col">Filtre</th><th scope="col">Talep</th><th scope="col">Kapanış</th><th scope="col">Durum</th></tr></thead><tbody id="closedReqT"></tbody></table></div>
+     <div tabindex="0" class="tblwrap dg-cards"><table><thead><tr><th scope="col">Kullanıcı</th><th scope="col">E‑posta</th><th scope="col">Filtre</th><th scope="col">Talep</th><th scope="col">Kapanış</th><th scope="col">Durum</th></tr></thead><tbody id="closedReqT"></tbody></table></div>
     </div>
    </div>
    <!-- ÖLÇÜM ONAY & MODERASYON — TEK KART (2026-09-24)
@@ -432,7 +432,7 @@
     <details class="dg-flat" style="margin-top:14px">
      <summary>📄 Düz liste (tüm kayıtlar · ilk 300 satır)</summary>
      <input type="text" id="adminMeasSearch" aria-label="Kayıtlarda ara" placeholder="🔍 Ara..." oninput="filterAdminMeas()" style="max-width:100%;margin:10px 0">
-     <div class="tblwrap dg-cards"><table><thead><tr><th scope="col">Kullanıcı</th><th scope="col">Nokta</th><th scope="col">Tür</th><th scope="col">DBH</th><th scope="col">Boy</th><th scope="col">Karbon</th><th scope="col">Foto</th><th scope="col">Durum</th><th scope="col">İşlem</th></tr></thead><tbody id="aMeasT"></tbody></table></div>
+     <div tabindex="0" class="tblwrap dg-cards"><table><thead><tr><th scope="col">Kullanıcı</th><th scope="col">Nokta</th><th scope="col">Tür</th><th scope="col">DBH</th><th scope="col">Boy</th><th scope="col">Karbon</th><th scope="col">Foto</th><th scope="col">Durum</th><th scope="col">İşlem</th></tr></thead><tbody id="aMeasT"></tbody></table></div>
     </details>
    </div>
   </div>
@@ -455,7 +455,7 @@
      <div><label class="lbl" for="userStatusFilter">Durum</label><select id="userStatusFilter" onchange="filterUsers()"><option value="">Tümü</option><option value="active">Aktif</option><option value="passive">Pasif</option></select></div>
     </div>
     <div class="admin-users-list-head"><h3 id="adminUsersListTitle">Hesap listesi</h3><span class="mono" id="aUsersVisible">0 kullanıcı</span></div>
-    <div class="tblwrap dg-cards admin-users-table">
+    <div tabindex="0" class="tblwrap dg-cards admin-users-table">
      <table><thead><tr><th scope="col">Kullanıcı</th><th scope="col">Rol</th><th scope="col">Durum</th><th scope="col">İşlem</th></tr></thead><tbody id="aUsersT"></tbody></table>
     </div>
    </section>
@@ -499,7 +499,7 @@
    </section>
    <section class="card visitor-activity-card">
     <div class="visitor-card-head"><div><div class="dg-kicker">GEÇMİŞ</div><h3>Son etkinlik</h3></div><button class="btn sm ghost" id="visActToggle" aria-expanded="true" aria-controls="visActivityWrap" onclick="dgVisActToggle()">⬆ Gizle</button></div>
-    <div id="visActivityWrap"><div id="visActivity" class="tblwrap">⏳</div></div>
+    <div id="visActivityWrap"><div id="visActivity" tabindex="0" class="tblwrap">⏳</div></div>
    </section>
   </div>
 
@@ -519,6 +519,6 @@
 </div>
 <div id="previewModal"><div class="card" style="max-width:960px;width:100%;max-height:82vh;display:flex;flex-direction:column">
  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px"><b id="pvTitle">Önizleme</b><button class="btn sm red" onclick="closePreview()">✕ Kapat</button></div>
- <div id="pvBody" class="tblwrap" style="overflow:auto;flex:1"></div>
+ <div id="pvBody" tabindex="0" class="tblwrap" style="overflow:auto;flex:1"></div>
  <button class="btn" style="margin-top:12px" id="pvDownload">📥 İndir</button>
 </div></div>

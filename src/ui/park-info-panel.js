@@ -30,7 +30,7 @@
         `<div class="dg-png-fields">`+
           `<div class="dg-png-field">`+
             `<label class="dg-png-label">PROJE</label>`+
-            `<select id="gridProject" class="dg-png-select">`+
+            `<select aria-label="Çalışma projesi" id="gridProject" class="dg-png-select">`+
               /* Yalnız bu parka bağlı projeler: waypoint/grid yanlış parka
                * yazılmasın. Parkın projesi yoksa eski liste yedek olarak
                * gösterilir (şema eski/park bağı yokken araç kilitlenmesin). */
@@ -40,7 +40,7 @@
 
           `<div class="dg-png-field">`+
             `<label class="dg-png-label">GRID BOYUTU</label>`+
-            `<select id="gridSize" class="dg-png-select">`+
+            `<select aria-label="Grid boyutu" id="gridSize" class="dg-png-select">`+
               `<option value="10">10 × 10 m · Hassas</option>`+
               `<option value="20" selected>20 × 20 m · Standart</option>`+
               `<option value="50">50 × 50 m · Hızlı</option>`+
@@ -49,7 +49,7 @@
 
           `<div class="dg-png-field">`+
             `<label class="dg-png-label">REFERANS ALAN (HA)</label>`+
-            `<input id="refHa" type="number" step="0.1" placeholder="örn. 50.8" class="dg-png-input" onchange="setRefHa(this.value)">`+
+            `<input aria-label="Referans alan (ha)" id="refHa" type="number" step="0.1" placeholder="örn. 50.8" class="dg-png-input" onchange="setRefHa(this.value)">`+
           `</div>`+
         `</div>`+
 
@@ -59,7 +59,7 @@
             `<strong>Sadece yeşil alan</strong>`+
             `<span>Grid'i arazi örtüsü analizinin yeşil alanlarıyla kısıtla</span>`+
           `</span>`+
-          `<input type="checkbox" id="chkGreenOnly" checked onchange="setGreenOnly(this.checked)">`+
+          `<input type="checkbox" class="dg-switch" id="chkGreenOnly" checked onchange="setGreenOnly(this.checked)">`+
           `<span class="dg-png-switch"></span>`+
         `</label>`+
 
@@ -104,7 +104,7 @@
               `<strong>Grid hücreleri</strong>`+
               `<span>Harita üzerinde göster</span>`+
             `</span>`+
-            `<input type="checkbox" id="togGrid" checked onchange="toggleGridVis()">`+
+            `<input type="checkbox" class="dg-switch" id="togGrid" checked onchange="toggleGridVis()">`+
             `<span class="dg-png-switch"></span>`+
           `</label>`+
 
@@ -114,7 +114,7 @@
               `<strong>Waypoint'ler</strong>`+
               `<span>Ölçüm noktalarını göster</span>`+
             `</span>`+
-            `<input type="checkbox" id="togWp" checked onchange="toggleWpVis()">`+
+            `<input type="checkbox" class="dg-switch" id="togWp" checked onchange="toggleWpVis()">`+
             `<span class="dg-png-switch"></span>`+
           `</label>`+
 

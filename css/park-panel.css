@@ -55,7 +55,7 @@
   font-size:.68rem;
   font-weight:700;
   background:rgba(34,197,94,.12);
-  color:#16a34a;
+  color:var(--green);
   white-space:nowrap;
 }
 
