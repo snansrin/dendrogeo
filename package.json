@@ -14,7 +14,8 @@
     "check:core-foundation": "node scripts/check-core-foundation.mjs",
     "check:architecture": "node scripts/check-architecture.mjs",
     "check:dependencies": "node scripts/check-dependency-rules.mjs",
-    "check": "npm run check:core-foundation && npm run check:architecture && npm run check:dependencies && npm run check:syntax && npm run check:versions && npm run build:check && npm run check:csp && npm test"
+    "check": "npm run check:core-foundation && npm run check:architecture && npm run check:dependencies && npm run check:modules && npm run check:syntax && npm run check:versions && npm run build:check && npm run check:csp && npm test",
+    "check:modules": "node scripts/check-module-integration.mjs"
   },
   "engines": {
     "node": ">=20"

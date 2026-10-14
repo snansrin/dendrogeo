@@ -22,6 +22,8 @@
 | Çekirdek davranış özeti | [Tek yüzey analiz motoru](ANALIZ-TEK-MOTOR-2026-10-04.md) |
 | Kurtarma ve doğrulama | [Kurtarma kılavuzu](KURTARMA.md) |
 
+14 Ekim 2026 tam kullanıcı onayıyla ölçüm/analiz tamamlanması: park ve analiz workflow sorumlulukları iki beşli grupta tamamlandı (PR #489/#490). Yeni modüllerin etkilenmemesi için 315 kritik modül ve 13 koruma/test dosyası çekirdek manifestine eklendi; eski korunan hashler son koruma grubunda değiştirilmedi. `check:modules` eksik yükleme, precache, dosya ve çift classic script değerlendirmesi için CI kapısıdır.
+
 ## Kırmızı çizgiler
 
 - `npm run check:core-foundation` değişmez dosyaların hash'lerini ve kilit manifestinin kendi hash'ini doğrular. Değişiklik CI'ı düşürür; kilit manifesti baseline `867c7566645b43cf7a5a7caf56bac6c44c39ef79` commit'idir.

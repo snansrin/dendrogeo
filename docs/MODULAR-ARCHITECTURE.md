@@ -1417,3 +1417,7 @@ The collaborator map renderer now separates peer selection, display-model deriva
 - `application/admin/admin-tree-state.js` filtre seçimini ve açık park/proje/kullanıcı düğümlerini yönetim ağacına ait tek store'da tutar.
 - Filtre, bekleyenleri açma, toplu genişletme ve düğüm aç/kapat akışları aynı store snapshot'ını kullanır; eski `DG_TREE_STATUS`, `DG_TREE_QUERY` ve `DG_TREE_OPEN` değişkenleri servis içindeki uyumluluk görünümü olarak kalır.
 - Yetki kapısı, sorgu ve çizim sırası ile satır moderasyonu değişmedi. Store, uygulama script sırasına ve çevrimdışı precache'e eklendi.
+
+## 14 Ekim 2026 tamamlanma ve koruma denetimi
+
+[Ölçüm/analiz tamamlanma envanteri](MODULE-COMPLETION-2026-10-14.md), üç grubun kapsamını ve kanıtını kaydeder. `check:modules`, bütün fiziksel runtime modüllerinin yükleme ve çevrimdışı zincirini denetler; kritik modüllerin hash kilidine alınması zorunludur. Aynı klasik modülün başlangıç/lazy zincirinde tekrar değerlendirilmesi reddedilir. Gerçek Chromium açılış, fırça, çizim ve cleanup kontrolleri CI Mobile smoke akışındadır.

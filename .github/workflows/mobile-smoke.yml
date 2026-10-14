@@ -7,6 +7,11 @@ on:
       - 'index.html'
       - 'partials/**'
       - 'scripts/mobile-smoke.mjs'
+      - 'scripts/startup-smoke.mjs'
+      - 'scripts/brush-smoke.mjs'
+      - 'scripts/drawing-smoke.mjs'
+      - 'scripts/osm-map-recovery-smoke.mjs'
+      - 'scripts/lib/playwright-runtime.mjs'
       - 'scripts/lib/report-snapshot-application.mjs'
       - 'scripts/gis-mobile-qa.mjs'
       - 'css/gis-workspace.css'
@@ -26,6 +31,12 @@ jobs:
       - run: npm ci
       - name: Chromium
         run: npx --yes --package=playwright@1.62.1 playwright install --with-deps chromium
+      - name: Measurement and analysis workflow regression
+        run: |
+          node scripts/startup-smoke.mjs
+          node scripts/brush-smoke.mjs
+          node scripts/drawing-smoke.mjs
+          node scripts/osm-map-recovery-smoke.mjs
       - name: 360, 390 ve 430 px
         run: |
           python3 -m http.server 8765 --bind 127.0.0.1 >/tmp/mobile-server.log 2>&1 &

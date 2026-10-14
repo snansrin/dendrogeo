@@ -1,0 +1,2 @@
+import {readFileSync} from 'node:fs';import {join} from 'node:path';
+export function collectRuntimePrecache(root){const sw=readFileSync(join(root,'sw.js'),'utf8'),start=sw.indexOf('const CORE_ASSETS'),end=sw.indexOf('];',start);if(start<0||end<0)throw Error('Service Worker CORE_ASSETS listesi bulunamadı');return new Set([...sw.slice(start,end).matchAll(/["']\/(src\/[^"'?]+\.js|vendor\/[^"'?]+\.js)["']/g)].map(m=>m[1]));}

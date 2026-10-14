@@ -1,0 +1,4 @@
+import {dirname,join,resolve} from 'node:path';import {fileURLToPath} from 'node:url';import {collectRuntimeModules} from './lib/runtime-module-inventory.mjs';import {collectRuntimePrecache} from './lib/runtime-precache-inventory.mjs';import {validateRuntimeModules} from './lib/validate-runtime-modules.mjs';
+const root=join(dirname(fileURLToPath(import.meta.url)),'..');
+export function checkModuleIntegration(directory=root){return validateRuntimeModules(collectRuntimeModules(directory),collectRuntimePrecache(directory));}
+if(process.argv[1]&&resolve(process.argv[1])===fileURLToPath(import.meta.url)){const result=checkModuleIntegration();for(const error of result.errors)console.error('🔴 '+error);if(result.errors.length)process.exitCode=1;else console.log('✅ '+result.checked+' runtime modülü: yükleme/offline zinciri ve '+result.protected+' kritik modül kilidi tutarlı');}
