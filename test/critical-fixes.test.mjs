@@ -142,9 +142,9 @@ describe('kaldığın yerden devam (sekme + kaydırma) — 2026-09-27', () => {
     assert.match(shell, /dgSaveView\(v\)/, 'go() her sekme değişiminde yazar');
     assert.match(shell, /localStorage\.setItem\("dg_last_view"/, 'anahtar dg_last_view');
   });
-  test('startShell yenilemede son sekmeyi geri açar', () => {
-    assert.match(shell, /const lv=dgLastView\(\);/, 'son sekme okunur');
-    assert.match(shell, /if\(lv&&lv!=="dash"&&\$\("v-"\+lv\)\)/, 'geçersiz sekme adında patlamaz');
+  test('startShell girişte temiz panelle açılır (14 Ekim kullanıcı kararı)', () => {
+    assert.match(shell, /DG_STARTUP_SCREEN\?\.dashboard/, 'başlangıç paneli UI modülünden hazırlanır');
+    assert.doesNotMatch(shell, /const lv=dgLastView\(\);/, 'önceki sekme otomatik geri açılmaz');
   });
   test('kaydırma konumu sekme bazında saklanır ve geri gelir', () => {
     assert.match(shell, /localStorage\.setItem\("dg_scroll_"\+DG_CUR_VIEW/, 'kaydırma yazma');

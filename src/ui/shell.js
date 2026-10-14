@@ -53,6 +53,7 @@ async function boot(){
     if(typeof dgIsOAuthCallback==="function"&&dgIsOAuthCallback()){
         const oauthErr=(typeof dgOAuthError==="function")?dgOAuthError():null;
         if(oauthErr){
+            window.DG_STARTUP_SCREEN?.finish();
             dgShowOAuthWait("⚠ Google girişi iptal edildi veya başarısız: "+oauthErr);
             initLanding();
             setTimeout(()=>{toast(dgCf("Google girişi tamamlanamadı: ")+oauthErr,"err","🔵");},400);
@@ -73,14 +74,16 @@ async function boot(){
     }
 const isRecovery=/type=recovery/.test(INITIAL_HASH);
 if(isRecovery&&!session){
+window.DG_STARTUP_SCREEN?.finish();
 initLanding();
 setTimeout(()=>{toast("Bu sıfırlama bağlantısı kullanılmış veya süresi dolmuş. Yeni bir sıfırlama maili isteyin.","warn","🔑");showAuth();authTab("reset");},400);
 return;
 }
-if(!session){initLanding();return;}
+if(!session){window.DG_STARTUP_SCREEN?.finish();initLanding();return;}
 USER=session.user;
 // 🔑 Şifre sıfırlama linkinden geldiyse → yeni parola ekranını aç
 if(isRecovery){
+window.DG_STARTUP_SCREEN?.finish();
 $("recoveryModal").style.display="flex";
 return;
 }
@@ -120,13 +123,13 @@ function dgApplyShellProfile(){
 }
 
 async function startShell(){
+window.DG_STARTUP_SCREEN?.dashboard({setView:view=>{DG_CUR_VIEW=view;},saveView:dgSaveView});
 $("landing").style.display="none";$("shell").style.display="block";
  dgApplyShellProfile();
  if(PROFILE){$("whoami").textContent=PROFILE.full_name;
   if(PROFILE.role==="admin"||PROFILE.role==="owner"){$("roleBadge").style.display="inline";$("roleBadge").textContent=PROFILE.role==="owner"?"KURUCU":"ADMIN";$("roleBadge").className=PROFILE.role==="owner"?"badge on":"badge admin";$("adminSec").style.display="block";$("miAdmin").style.display="flex";$("miUsers").style.display="flex";
    /* 0038: Ziyaretçi & Canlı sekmesi YALNIZ KURUCUYA açıktır (kullanıcı isteği). */
    if(PROFILE.role==="owner"&&$("miVisitors"))$("miVisitors").style.display="flex";}}
-initMaps();
  /* 0036 (T4): canlı varlık kanalını aç (Realtime yoksa sessiz). */
  if(typeof dgPresenceStart==="function"){try{dgPresenceStart();}catch(e){}}
  /* kaydırma konumunu sekme bazında hatırla */
@@ -147,10 +150,7 @@ if(window.DG_SHELL_VIEW_DATA){
  await Promise.allSettled([loadProjects(),loadWaypoints()]);
  loadDash();loadRecords();loadWorld();loadMyRequests();loadRequestOptions();
 }
- /* KALDIĞIN YERDEN DEVAM: yenilemede son açık sekme geri gelir.
-  * OAuth/recovery akışlarında bu satıra gelinmez (yukarıda return var). */
- const lv=dgLastView();
- if(lv&&lv!=="dash"&&$("v-"+lv))setTimeout(()=>go(lv),250);
+ /* Every login/reload starts on the dashboard; saved views are not resumed. */
  /* Yöneticiyse yan menüdeki 🔐 Ölçüm Yönetimi rozeti baştan güncel olsun
   * (onay bekleyen sayısı). Sekmeyi açmadan da "iş var" görünsün. */
  if(PROFILE&&(PROFILE.role==="admin"||PROFILE.role==="owner")&&typeof dgRefreshPendingBadge==="function")dgRefreshPendingBadge();
@@ -166,6 +166,7 @@ let DG_CUR_VIEW="dash";
 function dgSaveView(v){try{localStorage.setItem("dg_last_view",v);}catch(e){}}
 function dgLastView(){try{return localStorage.getItem("dg_last_view")||"";}catch(e){return "";}}
 function go(v){
+ if(["map","nav","world"].includes(v)&&typeof initMaps==="function")initMaps();
  DG_CUR_VIEW=v;dgSaveView(v);
  if(typeof dgPresenceView==="function"){try{dgPresenceView(v);}catch(e){}}
  /* 0040: sekme geçişi sırasında kaydırma koruması devre dışı (eski sekmenin
@@ -220,7 +221,7 @@ if(v==="export"){if(window._dgShellViewData)window._dgShellViewData.load(v);else
   if(scw>0)window.scrollTo(0,scw);},180);
 }
 
-boot();
+boot().catch(error=>{window.DG_STARTUP_SCREEN?.finish();initLanding();console.error("DENDROGEO · Giriş başlatılamadı:",error);toast(dgCf("Giriş başlatılamadı. Lütfen tekrar deneyin."),"err");});
 
 /* 0035d: DİL DEĞİŞİNCE aktif görünümü YENİDEN ÇİZ — dil düğmesine basıldığında
  * daha önce render edilmiş dinamik içerik (tablolar, waypoint satırı, park

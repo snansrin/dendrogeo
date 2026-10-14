@@ -1,0 +1,7 @@
+/* A visible, non-interactive startup surface until session routing is ready. */
+#dgStartupScreen{position:fixed;inset:0;z-index:10000;background:#f7f6f2;color:#14532d;display:grid;place-items:center;font:600 16px/1.6 system-ui,sans-serif;text-align:center;padding:24px}
+#dgStartupScreen[hidden]{display:none}
+#dgStartupScreen p{color:#5f6d65;font-size:14px;margin-top:8px}
+/* Confine transparent file inputs even before the rest of the theme arrives. */
+.dg-file{position:relative;overflow:hidden}
+#shell{display:none}

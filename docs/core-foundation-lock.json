@@ -792,7 +792,7 @@
     "src/utils/lazylibs.js": "9f78f3c8cd6bd1e4c702ef334ae05dbbfc404319c3a9489e3b52330050d68652",
     "src/workers/surface-worker.js": "af6477f104a06342cf69ef7f702a3e95ed27cd390c5aae36a2fbe5dfd68ed2fe",
     "test/base-map-layer-modules.test.mjs": "5399d699e74ffd66e92df312b4301202add7352b2b6c0be24fd51cda63e7baff",
-    "test/critical-fixes.test.mjs": "3a2e62104763110bc734b3dc54a37cbf57c15b0038a78fdce35d56d9639c1989",
+    "test/critical-fixes.test.mjs": "38cecf8eca4cf3a7b48209e8ff950305e57c85a0b6564ce4b388164712b50154",
     "test/dbh-qa.test.mjs": "d3bbd29d292aa1214ede27a21ecb99315bc24a6346e2b0119f8c04eb8b532b95",
     "test/field-data-safety.test.mjs": "b8b9e8fc20bbbc59cf9562d60f87bdc5eb07c0106f8c71253731974fb08c0280",
     "test/fix-0045.test.mjs": "f2fd7bea2d7a43b1ca31a218bafa8af8d3e5a7fdd7d49823f8c48096ad009a68",
@@ -2444,6 +2444,17 @@
           "path": "test/lc-validate.test.mjs",
           "previous_sha256": "8c44cf8393d1ec7c36ecba9f066a058b5ce8302b3c851e2c55c4c50dfdc0eb7f",
           "sha256": "2af88dd3da11fc13e9237ab97292f3ade32ae8f3cf2fee8bd1d79111d0b44160"
+        }
+      ]
+    },
+    {
+      "date": "2026-10-14",
+      "scope": "Explicit user request: always start on a clean dashboard after login/reload, replacing the former saved-view restore requirement. Update only the conflicting startup assertion; retain all other locked regressions.",
+      "files": [
+        {
+          "path": "test/critical-fixes.test.mjs",
+          "previous_sha256": "3a2e62104763110bc734b3dc54a37cbf57c15b0038a78fdce35d56d9639c1989",
+          "sha256": "38cecf8eca4cf3a7b48209e8ff950305e57c85a0b6564ce4b388164712b50154"
         }
       ]
     }

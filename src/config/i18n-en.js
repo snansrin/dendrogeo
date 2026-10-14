@@ -2,6 +2,7 @@
 /* English dictionary data for the runtime translator in i18n.js. */
 /* ---- EN sözlüğü: anahtar = TR dizenin trim'lenmiş hâli ---- */
 const DG_I18N_EN={
+"Giriş başlatılamadı. Lütfen tekrar deneyin.":"Sign-in could not start. Please try again.",
 "Kayıtlar yüklenemedi: ":"Records could not be loaded: ",
 "Bağlantı hatası":"Connection error",
 "Başarısız üretimler en fazla 3 kez otomatik yeniden denenir. Başarılı rapor üretildikten sonra Zenodo DOI kaydı otomatik başlatılır.":"Failed publication attempts are retried automatically up to 3 times. Zenodo DOI registration starts automatically after a successful report is produced.",

@@ -1,5 +1,7 @@
 # DendroGeo ana çekirdek ve kırmızı çizgiler
 
+14 Ekim 2026'da kullanıcı, ilk giriş ve yenilemede önceki sekme yerine temiz panelin açılmasını açıkça istedi. Yalnız `test/critical-fixes.test.mjs` içindeki bu kararla çelişen otomatik sekme geri yükleme beklentisi güncellendi; önceki/yeni SHA değerleri kilit manifestinde kayıtlıdır. Bilimsel motor, park taslakları ve veri erişim kapıları aynı kalır.
+
 ## Ürün kararı
 
 4 Ekim 2026 itibarıyla saha, yüzey analizi ve canlı harita sistemi DendroGeo'nun ana ürün çekirdeğidir. Bu sürüm, yeni geliştirmelerin davranış tabanıdır. Kurtarma dalı `recovery/core-2026-10-04`, kullanıcı onayıyla ana dalda çalışan çekirdeğe ilerletilmiştir.
