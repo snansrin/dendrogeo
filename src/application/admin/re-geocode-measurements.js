@@ -1,5 +1,17 @@
 "use strict";
 (function(root){
+ async function execute({authorized,confirm,loadRows,isValidCoordinate,reverse,update,wait,onDenied,onComplete,refresh}){
+  if(!authorized()){
+   onDenied();
+   return 0;
+  }
+  if(!confirm())return 0;
+  const done=await run(await loadRows(),{isValidCoordinate,reverse,update,wait});
+  onComplete(done);
+  refresh();
+  return done;
+ }
+
  async function run(rows,{isValidCoordinate,reverse,update,wait}){
   let done=0;
   for(const row of (rows||[])){
@@ -13,5 +25,5 @@
   }
   return done;
  }
- root.DG_RE_GEOCODE_MEASUREMENTS=Object.freeze({run});
+ root.DG_RE_GEOCODE_MEASUREMENTS=Object.freeze({run,execute});
 })(window);

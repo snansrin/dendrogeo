@@ -172,10 +172,30 @@ async function cleanOrphans(){
 }
 
 async function reGeocodeAll(){
+ const flow=window.DG_RE_GEOCODE_MEASUREMENTS;
+ const store=window.DG_ADMIN_RE_GEOCODE_STORE&&window.DG_ADMIN_RE_GEOCODE_STORE.create(()=>sb);
+ const confirmation=window.DG_CONFIRM_ADMIN_RE_GEOCODE;
+ const feedback=window.DG_ADMIN_RE_GEOCODE_FEEDBACK;
+ if(flow?.execute&&store&&confirmation&&feedback){
+  await flow.execute({
+  authorized:()=>!!PROFILE&&(PROFILE.role==="admin"||PROFILE.role==="owner"),
+  confirm:()=>confirmation.ask(message=>confirm(message),message=>dgCf(message)),
+  loadRows:()=>store.loadMeasurements(),
+  isValidCoordinate:(lat,lon)=>Number.isFinite(+lat)&&Number.isFinite(+lon),
+  reverse:(lat,lon)=>reverseGeocode(lat,lon),
+  update:(id,fields)=>store.updatePlace(id,fields),
+  wait:ms=>new Promise(resolve=>setTimeout(resolve,ms)),
+  onDenied:()=>feedback.denied(toast),
+  onComplete:count=>feedback.completed(toast,_tadf,count),
+  refresh:()=>{loadWorld();loadAdmin();}
+ });
+  return;
+ }
+ /* Keep the original inline path as a compatibility fallback for partial script caches. */
  if(!PROFILE||(PROFILE.role!=="admin"&&PROFILE.role!=="owner"))return toast("Yetki yok.");
  if(!confirm(dgCf("Tüm kayıtların şehir/ülke bilgisi GPS koordinatından yeniden algılansın mı? (Nominatim limiti ~1 istek/sn)")))return;
  const{data}=await sb.from("measurements").select("id,lat,lon,city,country");
- const done=await window.DG_RE_GEOCODE_MEASUREMENTS.run(data||[],{
+ const done=await flow.run(data||[],{
   isValidCoordinate:(lat,lon)=>Number.isFinite(+lat)&&Number.isFinite(+lon),
   reverse:(lat,lon)=>reverseGeocode(lat,lon),
   update:(id,fields)=>sb.from("measurements").update(fields).eq("id",id),

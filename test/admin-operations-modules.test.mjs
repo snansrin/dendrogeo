@@ -9,6 +9,9 @@ const files=[
  'src/ui/admin-storage-usage.js',
  'src/application/admin/clean-orphan-photos.js',
  'src/application/admin/re-geocode-measurements.js',
+ 'src/adapters/admin/re-geocode-store.js',
+ 'src/ui/confirm-admin-re-geocode.js',
+ 'src/ui/admin-re-geocode-feedback.js',
  'src/domain/admin/measurement-geojson.js'
 ];
 function app(){
@@ -59,6 +62,77 @@ test('re-geocoding skips invalid coordinates, updates changed places and paces v
   update:async(id,fields)=>updates.push([id,fields]),wait:async ms=>waits.push(ms)
  });
  assert.equal(count,1);assert.deepEqual(reverse,[[10,20],[11,21]]);assert.deepEqual(JSON.parse(JSON.stringify(updates)),[[1,{city:'New',country:'TR'}]]);assert.deepEqual(waits,[1100,1100]);
+});
+
+test('re-geocoding adapter preserves the measurement projection and id-scoped update',async()=>{
+ const window=app(),calls=[];
+ const client={from(table){calls.push(['from',table]);return{
+  select(fields){calls.push(['select',fields]);return Promise.resolve({data:[{id:7,lat:1,lon:2,city:'A',country:'B'}]});},
+  update(fields){calls.push(['update',fields]);return{eq:(key,value)=>{calls.push(['eq',key,value]);return Promise.resolve({error:null});}};}
+ };}};
+ const store=window.DG_ADMIN_RE_GEOCODE_STORE.create(()=>client);
+ assert.deepEqual(JSON.parse(JSON.stringify(await store.loadMeasurements())),[{id:7,lat:1,lon:2,city:'A',country:'B'}]);
+ await store.updatePlace(7,{city:'C',country:'D'});
+ assert.deepEqual(JSON.parse(JSON.stringify(calls)),[
+  ['from','measurements'],['select','id,lat,lon,city,country'],
+  ['from','measurements'],['update',{city:'C',country:'D'}],['eq','id',7]
+ ]);
+});
+
+test('re-geocoding use case gates access and confirmation before reads, then reports and refreshes in order',async()=>{
+ const window=app(),events=[];
+ const ports={
+  authorized:()=>false,confirm:()=>{events.push('confirm');return true;},loadRows:async()=>{events.push('load');return[];},
+  isValidCoordinate:()=>true,reverse:async()=>null,update:async()=>{},wait:async()=>{},
+  onDenied:()=>events.push('denied'),onComplete:count=>events.push(['complete',count]),refresh:()=>events.push('refresh')
+ };
+ assert.equal(await window.DG_RE_GEOCODE_MEASUREMENTS.execute(ports),0);
+ assert.deepEqual(events,['denied']);
+ events.length=0;
+ assert.equal(await window.DG_RE_GEOCODE_MEASUREMENTS.execute({...ports,authorized:()=>true,confirm:()=>false}),0);
+ assert.deepEqual(events,[]);
+ events.length=0;
+ assert.equal(await window.DG_RE_GEOCODE_MEASUREMENTS.execute({...ports,authorized:()=>true,confirm:()=>{events.push('confirm');return true;}}),0);
+ assert.deepEqual(events,['confirm','load',['complete',0],'refresh']);
+});
+
+test('re-geocoding confirmation and feedback keep their current Turkish copy',()=>{
+ const window=app(),messages=[];
+ assert.equal(window.DG_CONFIRM_ADMIN_RE_GEOCODE.ask(message=>{messages.push(message);return false;},value=>value),false);
+ window.DG_ADMIN_RE_GEOCODE_FEEDBACK.denied((...args)=>messages.push(args));
+ window.DG_ADMIN_RE_GEOCODE_FEEDBACK.completed((...args)=>messages.push(args),(text,values)=>text.replace('{n}',values.n),3);
+ assert.deepEqual(JSON.parse(JSON.stringify(messages)),[
+  'Tüm kayıtların şehir/ülke bilgisi GPS koordinatından yeniden algılansın mı? (Nominatim limiti ~1 istek/sn)',
+  ['Yetki yok.','err'],['✓ 3 kaydın şehri güncellendi','ok','🌍']
+ ]);
+});
+
+test('re-geocoding modules load before admin facade and remain in the offline precache',()=>{
+ const head=readFileSync(new URL('../partials/head.html',import.meta.url),'utf8');
+ const sw=readFileSync(new URL('../sw.js',import.meta.url),'utf8');
+ const service=head.indexOf('src/services/admin.js');
+ for(const path of ['src/application/admin/re-geocode-measurements.js','src/adapters/admin/re-geocode-store.js','src/ui/confirm-admin-re-geocode.js','src/ui/admin-re-geocode-feedback.js']){
+  assert.ok(head.indexOf(path)>=0&&head.indexOf(path)<service,path+' must load before the facade');
+  assert.ok(sw.includes('/'+path),path+' must be precached');
+ }
+});
+
+test('admin re-geocoding facade wires the use case, adapter and presentation ports',async()=>{
+ const window=app(),calls=[];
+ const client={from(table){assert.equal(table,'measurements');return{
+  select:()=>Promise.resolve({data:[{id:1,lat:10,lon:20,city:'Old',country:'TR'}]}),
+  update:fields=>({eq:(key,id)=>{calls.push(['update',key,id,fields]);return Promise.resolve({error:null});}})
+ };}};
+ window.DG_ADMIN_RE_GEOCODE_STORE=window.DG_ADMIN_RE_GEOCODE_STORE;
+ const context=vm.createContext({window,PROFILE:{role:'owner'},sb:client,confirm:message=>{calls.push(['confirm',message]);return true;},dgCf:value=>value,
+  toast:(...args)=>calls.push(['toast',...args]),_tadf:(text,values)=>text.replace('{n}',values.n),reverseGeocode:async()=>({city:'New',country:'TR'}),
+  setTimeout:callback=>{callback();return 1;},loadWorld:()=>calls.push(['world']),loadAdmin:()=>calls.push(['admin'])});
+ const service=readFileSync(new URL('../src/services/admin.js',import.meta.url),'utf8');
+ const start=service.indexOf('async function reGeocodeAll(){'),end=service.indexOf('\nasync function delMeas',start);
+ vm.runInContext(service.slice(start,end),context,{filename:'src/services/admin.js'});
+ await vm.runInContext('reGeocodeAll()',context);
+ assert.deepEqual(calls.map(entry=>entry[0]),['confirm','update','toast','world','admin']);
+ assert.equal(calls[1][1],'id');assert.equal(calls[1][2],1);
 });
 
 test('GeoJSON retains point coordinates, property names and one-decimal DBH',()=>{
