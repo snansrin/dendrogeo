@@ -565,7 +565,7 @@
     "src/application/parks/detect-park.js": "214a59a9e7990d62c173bd9cf12931c9913c88f508417824095090b42a6f3991",
     "src/application/parks/evaluate-measurement-park-gate.js": "9067413d70dcae8de655690e4b842a0ad12364deb556654baa2c4d8d8aa17dab",
     "src/application/parks/fail-park-live-share.js": "43393e3ef92a117df87aab40b8fe75b690b915fad9ed5d1a9e61c4ae006e2e36",
-    "src/application/parks/fetch-detailed-coverage.js": "11b0d76cf27040bcf0a478d3eeb12c42c6b69b94ab91324d5e0a39b630393cf7",
+    "src/application/parks/fetch-detailed-coverage.js": "a55570029ad384ea790f10693d4a5579b67e9a6c471586d619f2877748ffa7e0",
     "src/application/parks/find-nominatim-boundary.js": "f038af233913e251de4a3a46e5f4cd133f8bf1c60ee4915e07578f8b4c1099e2",
     "src/application/parks/find-park-candidates.js": "1f0f6cd93417eb60c0a6bc7cb966f182df6b9114785eefab9979c8c96711914e",
     "src/application/parks/grid-review-signature.js": "a2d65ee731ac9965e4b77266bcfece60ba201ef59ef2243dca44a78cd66fa6e6",
@@ -727,7 +727,7 @@
     "src/services/map.js": "7176931050f0334e339fd38d71b62c966a597dba3b3dafdb6c3622a26f38845e",
     "src/services/measure.js": "4e90e357417802724a46853df5652199354e9491cf11bc97af64f0c00060d6a4",
     "src/services/offline.js": "a1555235bf0e0e17ecea63e90b7347e7288295b6d7cf237ac0804ddc00d50e3f",
-    "src/services/osm-client.js": "2e5eeaa735bf05a603a0db142619f60747b9696f506e666d7df992454a56814f",
+    "src/services/osm-client.js": "99e7854075b8e5313268273cb787165c3240f4faf34520c403193c7d7d549af7",
     "src/services/osm-water-backup.js": "b3429cdc9bfe0f84bd7b6644a1221d4daadc374ac046b036abf15b3b5ee7d269",
     "src/services/park-geometry.js": "ae89879b98ed8d9f3928d17b7258389c7a7c1abdabdd63dba1aac934aacc6f83",
     "src/services/park-query.js": "b0ddd9f7fb7d99b95e29dbe78c392c472ee149e60f7e941aca91d562c826cd7e",
@@ -750,7 +750,7 @@
     "src/ui/grid-waypoint-controller.js": "eb4f58d30fd59a46840f58f2b428b79d8afc9e1211d48d26ea2cfb74ba2b3531",
     "src/ui/grid-waypoint-layer.js": "0c6db2a4329704ec9106735cc0a26b7ce01803666ee4b19d356c976d298eba2f",
     "src/ui/lc-report.js": "f8182bce9b5dbd8dcecceaa7afee69b52d12e7883badc65e27fb93e94ca2abf9",
-    "src/ui/lc-sens.js": "54211280a011880e11cc062cf125c28d3be5e34d22003a2fc194e2855f86b703",
+    "src/ui/lc-sens.js": "6c0a0051a25b44cc934b0b4d777428e2c0e7249d2889126d8797a71829ae9884",
     "src/ui/map-layer-visibility.js": "50d033fba51e90f49ae39254e0700b510938be4d271aada8a9a400be727c1a60",
     "src/ui/map-measurement-markers.js": "cedd193f2786604f84044f2ecf020144b5cba20c86160b729891b7d4f3668a67",
     "src/ui/mount-surface-review-map-host.js": "2ef1e62e2607084c3909016e324b09dba2eaaf13dfba25b0b8bcb82086e7986d",
@@ -844,7 +844,7 @@
     "test/park-cell-validity-domain.test.mjs": "16eb554a6a3cd8829fb83d0a35150594af6559d93b500820f25517655cfa77fd",
     "test/park-click-controller-ui.test.mjs": "22bfe2434b991b0aacfd4758e3d2ac752ded55aa00d7e34ecf5d5f5d83d6e7e5",
     "test/park-containment-domain.test.mjs": "f33c640711c18240105de2ec93a32f403d849928709d68f1e82d5b28d32c0ee9",
-    "test/park-coverage-application.test.mjs": "f184a3d037fb7fdffd91048527657eb65c350bc0c8834a42ad9417191b1129d6",
+    "test/park-coverage-application.test.mjs": "fff34ce0a748ba056787b6f9c110bf74fcb7803dea675d583b2b9ab3fb68e788",
     "test/park-coverage-elements-application.test.mjs": "5e7a2f99ccf02340158de1859a35ef2a8bb653024e543e2604b0af07ef4f96c1",
     "test/park-detection-application.test.mjs": "6fd5cce5ccc35b3b8822d56448f67c5960ccbbcd3ff5630725eefa79ca3c3d96",
     "test/park-export-canvas.test.mjs": "132ed55d41c40150e60131fc0bda0deb144d16e492e5c9e031f4d1e97ed63c70",
@@ -864,7 +864,7 @@
     "test/park-line-distance-domain.test.mjs": "ac3b2fa1b303de5fc82271f690dd41b45dc14ddd57c9da544882c890d82883d8",
     "test/park-menu-ui.test.mjs": "3c6eae61eb960b7895ec25bd21782060b382df0175cd23eca110fc51f6260d43",
     "test/park-mode-controller-ui.test.mjs": "5bce7ee0757d2a4fe2a5e9fe79331c4b193c3da678b098d3d9f87083f504900f",
-    "test/park-network-recovery.test.mjs": "3e92b71987594bd56c96829594910095011b1716ea2524eb81048ff56d801157",
+    "test/park-network-recovery.test.mjs": "edeb7c1a545d0463d0cc6459e256ccccdfb106bba6796c9f39fce1f62b6363a6",
     "test/park-nominatim-boundary-application.test.mjs": "36c3a54b90f3b869350f5cfb51ced98c6330e7010f2c5796203c4ee266786fa7",
     "test/park-nominatim-client-adapter.test.mjs": "6c41300f6c3df379cc7902d26d8498bb5698442dbdb028d25cb5cf544f4d982d",
     "test/park-osm-rings-domain.test.mjs": "461baf403c0839dbca9c808e78f05903acbe471a56bfeec9e046b3afc22529da",
@@ -2466,6 +2466,37 @@
           "path": "src/ui/lc-sens.js",
           "previous_sha256": "725d9c49f5df1f1cc49a2d8e2dae1af2c3beacd47739bef6ffcb3d2eb65e3155",
           "sha256": "54211280a011880e11cc062cf125c28d3be5e34d22003a2fc194e2855f86b703"
+        }
+      ]
+    },
+    {
+      "date": "2026-10-14",
+      "scope": "Explicit user request to diagnose and fix intermittent missing OSM building/water evidence within modular architecture. Align Overpass query/client budgets, recover every tag family, cache only complete scoped evidence, expose partial coverage and block acceptance of incomplete OSM-assisted drafts. Keep raw raster and accepted snapshots unchanged.",
+      "files": [
+        {
+          "path": "src/application/parks/fetch-detailed-coverage.js",
+          "previous_sha256": "11b0d76cf27040bcf0a478d3eeb12c42c6b69b94ab91324d5e0a39b630393cf7",
+          "sha256": "a55570029ad384ea790f10693d4a5579b67e9a6c471586d619f2877748ffa7e0"
+        },
+        {
+          "path": "src/services/osm-client.js",
+          "previous_sha256": "2e5eeaa735bf05a603a0db142619f60747b9696f506e666d7df992454a56814f",
+          "sha256": "99e7854075b8e5313268273cb787165c3240f4faf34520c403193c7d7d549af7"
+        },
+        {
+          "path": "src/ui/lc-sens.js",
+          "previous_sha256": "54211280a011880e11cc062cf125c28d3be5e34d22003a2fc194e2855f86b703",
+          "sha256": "6c0a0051a25b44cc934b0b4d777428e2c0e7249d2889126d8797a71829ae9884"
+        },
+        {
+          "path": "test/park-coverage-application.test.mjs",
+          "previous_sha256": "f184a3d037fb7fdffd91048527657eb65c350bc0c8834a42ad9417191b1129d6",
+          "sha256": "fff34ce0a748ba056787b6f9c110bf74fcb7803dea675d583b2b9ab3fb68e788"
+        },
+        {
+          "path": "test/park-network-recovery.test.mjs",
+          "previous_sha256": "3e92b71987594bd56c96829594910095011b1716ea2524eb81048ff56d801157",
+          "sha256": "edeb7c1a545d0463d0cc6459e256ccccdfb106bba6796c9f39fce1f62b6363a6"
         }
       ]
     }

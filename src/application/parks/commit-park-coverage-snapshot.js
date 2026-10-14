@@ -8,7 +8,7 @@
     return true;
   }
   function commit({elements,bbox,pad,boundary,fetchedAt}){
-    return {elements:elements||[],bbox:{minLat:bbox.minLat-pad,minLon:bbox.minLon-pad,maxLat:bbox.maxLat+pad,maxLon:bbox.maxLon+pad},boundary,fetchedAt};
+    return {elements:elements||[],bbox:{minLat:bbox.minLat-pad,minLon:bbox.minLon-pad,maxLat:bbox.maxLat+pad,maxLon:bbox.maxLon+pad},boundary,fetchedAt,complete:true};
   }
   root.DG_COMMIT_PARK_COVERAGE_SNAPSHOT=Object.freeze({clearForChangedBoundary,commit});
 })(window);

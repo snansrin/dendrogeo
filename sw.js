@@ -4,7 +4,7 @@
 // NOT: Senkronizasyon artık Ana Thread (Supabase JS SDK) tarafından yapılıyor
 // ============================================================
 
-const CACHE_VERSION = 'dendrogeo-sw-v2-r417';
+const CACHE_VERSION = 'dendrogeo-sw-v2-r418';
 
 /* İKİ AYRI STATİK CACHE — bu ayrım bilinçli ve önemli.
  *
@@ -34,6 +34,8 @@ const MAX_API_CACHE = 150;   // Nominatim vb. API yanıtları
 const MAX_RUNTIME = 400;     // ?v=NNN sürümlü script/style kopyaları
 
 const CORE_ASSETS = [
+    '/src/domain/parks/build-osm-surface-query.js',
+    '/src/ui/surface-osm-evidence-status.js',
     '/src/bootstrap/app-runtime.js',
     '/src/ui/startup-screen.js', '/css/startup.css',
     '/', '/index.html', '/manifest.json', '/icon.png', '/apple-touch-icon.png', '/social-preview.jpg', '/css/style.css',

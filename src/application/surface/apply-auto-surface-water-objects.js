@@ -3,7 +3,8 @@
 /* Replace stale automatic OSM surface evidence and roll back if repartition fails. */
 window.DG_APPLY_AUTO_SURFACE_WATER_OBJECTS={
   async apply({record,objects,epoch,getEpoch,getRecord,repartition,dirty}){
-    if(!objects.length)return 0;
+    if(record.osmCoverage&&record.osmCoverage.status!=="complete")return 0;
+    if(!objects.length&&record.osmCoverage?.objectCount!==0)return 0;
     const managed=feature=>["building","hard","water","pool"].includes(feature.type)&&feature.method==="osm-boundary";
     const ids=new Set(objects.map(feature=>feature.osmId)),existing=record.objectFeatures||[],next=[...existing.filter(feature=>!managed(feature)),...objects];
     const changed=JSON.stringify(existing.filter(managed).map(feature=>[feature.type,feature.osmId,feature.geometry]))!==JSON.stringify(objects.map(feature=>[feature.type,feature.osmId,feature.geometry]));

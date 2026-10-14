@@ -2,6 +2,7 @@
 /* English dictionary data for the runtime translator in i18n.js. */
 /* ---- EN sözlüğü: anahtar = TR dizenin trim'lenmiş hâli ---- */
 const DG_I18N_EN={
+"OSM bina, yol ve su verisi eksik. OSM destekli sonucu kabul etmeden önce Yeniden Tara ile veriyi tamamlayın.":"OSM building, road and water data is incomplete. Scan again to complete the evidence before accepting the OSM-supported result.",
 "Giriş başlatılamadı. Lütfen tekrar deneyin.":"Sign-in could not start. Please try again.",
 "Kayıtlar yüklenemedi: ":"Records could not be loaded: ",
 "Bağlantı hatası":"Connection error",

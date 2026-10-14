@@ -432,7 +432,7 @@ function dgSensUpdateSummary(){
  const el=document.getElementById("dgSensSummary");if(el)el.textContent=_tvs(DG_SENS.editing?"Önizleme":"Kayıtlı sonuç")+" · "+Object.keys(visibleAreas).filter(k=>visibleAreas[k]>0).map(k=>_tvs(window.DG_SURFACE_REVIEW.types[k]?.label||k)+": "+dgSensHa(visibleAreas[k])+" ha").join(" · ");
  const density=document.getElementById("dgSensVegetationSummary");if(density){const d=dgSensVegetationTiers(),cut=d.cutoffs?" · "+_tvs("terciller")+": "+d.cutoffs.map(v=>v.toFixed(2)).join(" / "):"";density.textContent=_tvs("Mevsimsel medyan NDVI · uygun hücre")+": "+d.count+" / "+d.eligible+cut+" · "+_tvs("Her hücrede en az 3 açık uydu gözlemi; park içi göreli sınıflar, taç örtüsü ölçümü değildir.");}
 }
-function dgSensUpdateStatus(){const el=document.getElementById("dgSensStatus");if(el)el.textContent=DG_SENS.status||(DG_SENS.mergeBusy?_tvs("Çizim güncelleniyor…"):_tvs(DG_SENS.record?.acceptedAt&&!DG_SENS.editing?"Kayıtlı sonuç korunuyor. Kaydırıcıyı değiştirerek yeni önizleme yapabilirsiniz.":"Önizleme henüz hesap kaydına yazılmadı."));}
+function dgSensUpdateStatus(){const evidence=window.DG_SURFACE_OSM_EVIDENCE_STATUS?.text(DG_SENS.record,_tvs)||"";const el=document.getElementById("dgSensStatus");if(el)el.textContent=DG_SENS.status||(DG_SENS.mergeBusy?_tvs("Çizim güncelleniyor…"):_tvs(DG_SENS.record?.acceptedAt&&!DG_SENS.editing?"Kayıtlı sonuç korunuyor. Kaydırıcıyı değiştirerek yeni önizleme yapabilirsiniz.":"Önizleme henüz hesap kaydına yazılmadı."))+(evidence?" "+evidence:"");}
 /* Scan refreshes water footprints; map object picking is not required.
  * Manual boundaries and published snapshots remain untouched. */
 async function dgSensAutoWaterOnMount(rec,epoch){
@@ -441,7 +441,7 @@ async function dgSensAutoWaterOnMount(rec,epoch){
  if(n){
   DG_SENS.status=_tvs("OSM bina, yol ve su geometrileri önizlemeye uygulandı. Ham raster korunuyor; sınırları doğrulayıp sonucu kabul edin.");
   await dgSensSave();
- }else if(!(rec.objectFeatures||[]).some(f=>f.type==="water"||f.type==="pool")){
+ }else if(rec.osmCoverage?.status!=="complete"&&!(rec.objectFeatures||[]).some(f=>f.type==="water"||f.type==="pool")){
   DG_SENS.status=_tvs("OSM su geometrisine erişilemedi. Bu 10 m raster önizlemesidir; kıyı sınırını doğrulanmış kabul etmeyin. Yeniden Tara'yı deneyin.");
  }
  dgSensUpdateStatus();
@@ -450,7 +450,7 @@ async function dgSensAutoWaterOnScan(rec,epoch,fromMount=false){
  const loader=window.DG_LOAD_SURFACE_WATER_OBJECTS,apply=window.DG_APPLY_AUTO_SURFACE_WATER_OBJECTS;
  if(loader&&apply){
   if(rec.useObjects===false||typeof dgLcOsmData!=="function"||typeof dgSurfaceObjects!=="function")return 0;
-  const objects=await loader.load({enabled:true,loadOsmData:dgLcOsmData,bbox:dgLcBboxFromGeometry(PARK_POLY,PARK_HOLES||[]),buildObjects:dgSurfaceObjects,epsg:DG_SENS.epsg,validFeature:window.DG_SURFACE_REVIEW.validFeature,isCurrent:()=>epoch===DG_SENS.epoch&&DG_SENS.record===rec,fromMount,isUnavailable:()=>DG_SENS.busy||DG_SENS.saving||DG_SENS.exporting});
+  const objects=await loader.load({enabled:true,loadOsmData:dgLcOsmData,bbox:dgLcBboxFromGeometry(PARK_POLY,PARK_HOLES||[]),buildObjects:dgSurfaceObjects,epsg:DG_SENS.epsg,validFeature:window.DG_SURFACE_REVIEW.validFeature,isCurrent:()=>epoch===DG_SENS.epoch&&DG_SENS.record===rec,fromMount,isUnavailable:()=>DG_SENS.busy||DG_SENS.saving||DG_SENS.exporting,onEvidence:evidence=>{rec.osmCoverage=evidence;dgSensUpdateStatus();}});
   return apply.apply({record:rec,objects,epoch,getEpoch:()=>DG_SENS.epoch,getRecord:()=>DG_SENS.record,repartition:features=>dgSensRepartition(features),dirty:dgSensDirty});
  }
  if(rec.useObjects===false||typeof dgLcOsmData!=="function"||typeof dgSurfaceObjects!=="function")return 0;

@@ -7,10 +7,10 @@
 
 // Global kapsamlı servisler; aynı altyapıya giden kumi takma adı kullanılmaz.
 const OVERPASS_URLS=[
-  "https://maps.mail.ru/osm/tools/overpass/api/interpreter",
   "https://overpass-api.de/api/interpreter",
   "https://lz4.overpass-api.de/api/interpreter",
-  "https://z.overpass-api.de/api/interpreter"
+  "https://z.overpass-api.de/api/interpreter",
+  "https://maps.mail.ru/osm/tools/overpass/api/interpreter"
 ];
 
 const OVERPASS_CACHE=new Map();
@@ -106,6 +106,10 @@ async function overpassRun(query,label="OSM"){
             console.log("✓ Overpass:",label,item.url,data.elements.length);
             return data;
           }
+          LAST_OVERPASS_ERROR=label+" · "+(data?.remark||"Eksik OSM yanıtı");
+          console.warn("Overpass eksik yanıt:",item.url,LAST_OVERPASS_ERROR);
+          OVERPASS_HEALTH.set(item.url,{lastOk:item.lastOk,badUntil:Date.now()+60000});
+          continue;
         }
 
         const status=res.status;

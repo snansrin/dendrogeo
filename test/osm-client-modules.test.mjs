@@ -25,7 +25,7 @@ test('cache key, request coalescing, mirror selection, budgets and health retain
   const urls=context.DG_SELECT_OVERPASS_MIRRORS.select(['a','b','c'],health,10);
   assert.deepEqual(JSON.parse(JSON.stringify(urls)),[{url:'a',index:0,badUntil:0,lastOk:8},{url:'c',index:2,badUntil:0,lastOk:0}]);
   assert.equal(context.DG_OVERPASS_REQUEST_BUDGET.deadline('park',()=>100),15100);
-  assert.equal(context.DG_OVERPASS_REQUEST_BUDGET.deadline('yüzey+su',()=>100),20100);
+  assert.equal(context.DG_OVERPASS_REQUEST_BUDGET.deadline('yüzey+su',()=>100),75100);
   assert.equal(context.DG_OVERPASS_REQUEST_BUDGET.timeout('park',15100,()=>1000),7500);
   assert.equal(context.DG_OVERPASS_REQUEST_BUDGET.timeout('yüzey+su',20100,()=>12000),8100);
   context.DG_OVERPASS_MIRROR_HEALTH.quarantine(health,'a',8,30000,()=>50);

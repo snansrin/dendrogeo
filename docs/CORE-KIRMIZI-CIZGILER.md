@@ -1,5 +1,7 @@
 # DendroGeo ana çekirdek ve kırmızı çizgiler
 
+14 Ekim 2026 OSM hata giderme talebi: istemci zaman aşımı sunucu sorgusu/kuyruk süresiyle uyumlu hale getirildi; tüm tag aileleri ortak domain sorgu politikasından üretilir. Bölünmüş kurtarma yalnız tüm gruplar başarıyla alınırsa tam kapsam sayılır. Kısmi yanıtlar ve su yedeği tam veri olarak önbelleğe yazılmaz; aynı kimliğin yeni geometrisi eski kaydı yeniler. Kısmi güncelleme önceki bina/yol nesnelerini silemez. Yeni önizlemelerde OSM kapsam durumu görünürdür ve eksik OSM destekli taslak kabul edilemez; ham raster ve önceden kabul edilmiş snapshot korunur. İlgili kilitli giriş ve bağımlılık testlerinin eski/yeni SHA değerleri manifestte kayıtlıdır.
+
 14 Ekim 2026 yüzey fırçası düzeltmesi: kullanıcının açık hata giderme talebiyle kilitli `src/ui/lc-sens.js` içinde yalnız çap ayarı use-case'ine mevcut `dgSensBrushToggle` portu eklendi. Sınıf seçimi, açık fırçanın çap değişiminden sonra sürmesi ve menüde aç/kapat kontrolü ilgili modüllerde düzenlendi. Önceki/yeni UI hashleri manifestte kayıtlıdır; fare, dokunma, hücre kararı, geri alma ve ham sınıfın korunması gerçek Leaflet/Chromium testiyle doğrulanır.
 
 14 Ekim 2026'da kullanıcı, ilk giriş ve yenilemede önceki sekme yerine temiz panelin açılmasını açıkça istedi. Yalnız `test/critical-fixes.test.mjs` içindeki bu kararla çelişen otomatik sekme geri yükleme beklentisi güncellendi; önceki/yeni SHA değerleri kilit manifestinde kayıtlıdır. Bilimsel motor, park taslakları ve veri erişim kapıları aynı kalır.

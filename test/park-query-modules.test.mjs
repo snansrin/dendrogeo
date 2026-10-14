@@ -32,7 +32,7 @@ test('boundary reset, padded snapshot, collection, and park clipping preserve ge
   assert.equal(context.DG_COMMIT_PARK_COVERAGE_SNAPSHOT.clearForChangedBoundary('new',{getCoverage:()=>coverage,clearCoverage:()=>{coverage=null;},clearGeometry:()=>{clears++;}}),true);
   assert.equal(clears,1);
   const snapshot=context.DG_COMMIT_PARK_COVERAGE_SNAPSHOT.commit({elements:null,bbox:{minLat:1,minLon:2,maxLat:3,maxLon:4},pad:.5,boundary:'new',fetchedAt:'then'});
-  assert.deepEqual(JSON.parse(JSON.stringify(snapshot)),{elements:[],bbox:{minLat:.5,minLon:1.5,maxLat:3.5,maxLon:4.5},boundary:'new',fetchedAt:'then'});
+  assert.deepEqual(JSON.parse(JSON.stringify(snapshot)),{elements:[],bbox:{minLat:.5,minLon:1.5,maxLat:3.5,maxLon:4.5},boundary:'new',fetchedAt:'then',complete:true});
   const waterRing=[[1,2],[1,3],[2,3]];const waterLine=[[1,2],[2,3]];const rings=[];const lines=[];let pedestrian=0,impervious=0;
   context.DG_COLLECT_PARK_COVERAGE_ELEMENTS.collect([
     {element:{type:'relation'},water:true,skip:false},
@@ -55,7 +55,7 @@ test('locked park-query service delegates concurrent coverage calls to the modul
   });
   context.window=context;
   for(const path of MODULES)vm.runInContext(read(path),context,{filename:path});
-  for(const path of ['src/application/parks/find-park-candidates.js','src/application/parks/fetch-detailed-coverage.js','src/application/parks/classify-coverage-elements.js','src/application/parks/find-nominatim-boundary.js','src/adapters/parks/nominatim-client.js'])vm.runInContext(read(path),context,{filename:path});
+  for(const path of ['src/domain/parks/build-osm-surface-query.js','src/application/parks/find-park-candidates.js','src/application/parks/fetch-detailed-coverage.js','src/application/parks/classify-coverage-elements.js','src/application/parks/find-nominatim-boundary.js','src/adapters/parks/nominatim-client.js'])vm.runInContext(read(path),context,{filename:path});
   vm.runInContext(read('src/services/park-query.js'),context,{filename:'src/services/park-query.js'});
   const first=vm.runInContext('queryDetailedCoverage()',context);
   const second=vm.runInContext('queryDetailedCoverage()',context);

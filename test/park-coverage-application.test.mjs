@@ -7,6 +7,7 @@ const source=readFileSync(new URL('../src/application/parks/fetch-detailed-cover
 
 function create(getParkPolygon,queryOsm){
   const context=vm.createContext({window:{}});
+  vm.runInContext(readFileSync(new URL('../src/domain/parks/build-osm-surface-query.js',import.meta.url),'utf8'),context);
   vm.runInContext(source,context);
   return context.window.DG_PARK_COVERAGE_FETCH_APPLICATION.create({getParkPolygon,queryOsm});
 }
@@ -19,8 +20,8 @@ test('detailed coverage fetch uses one combined OSM query with the padded park b
 
   assert.equal(calls.length,1);
   assert.equal(calls[0][1],'yüzey+su');
-  assert.ok(calls[0][0].startsWith('[out:json][timeout:45];('));
-  for(const clause of ['nwr["natural"="water"]','nwr["building:part"]','way["highway"]','way["area:highway"]','nwr["amenity"~"fountain|parking','nwr["leisure"~"swimming_pool|pitch|track|playground"]','nwr["surface"~"asphalt','nwr["man_made"~"pier|bridge"]']){
+  assert.ok(calls[0][0].startsWith('[out:json][timeout:20];('));
+  for(const clause of ['nwr["natural"="water"]','nwr["building:part"]','way["highway"]','way["area:highway"]','nwr["amenity"="fountain"]','nwr["amenity"~"parking','nwr["leisure"="swimming_pool"]','nwr["leisure"~"pitch|track|playground"]','nwr["surface"~"asphalt','nwr["man_made"~"pier|bridge"]']){
     assert.ok(calls[0][0].includes(clause),`missing query clause ${clause}`);
   }
   assert.deepEqual(JSON.parse(JSON.stringify(result.bbox)),{minLat:39,minLon:32,maxLat:40,maxLon:33});
@@ -41,9 +42,9 @@ test('late coverage data is marked stale when park selection changes during the 
   assert.equal(result.json,null);
 });
 
-test('failed detailed coverage retries a smaller building, road, and water request',async()=>{
+test('failed detailed coverage retries all tag families as smaller complete queries',async()=>{
  const park=[[[39,32],[39,33],[40,33]]],calls=[];const fetch=create(()=>park,async(query,label)=>{calls.push({query,label});return calls.length===1?null:{elements:[{type:'way',id:3,tags:{highway:'service'}}]};});
- const result=await fetch();assert.equal(calls.length,2);assert.ok(calls[1].query.includes('["building"]'));assert.ok(calls[1].query.includes('["highway"]'));assert.equal(calls[1].label,'yüzey+su');assert.equal(result.json.elements[0].id,3);
+ const result=await fetch();assert.equal(calls.length,4);assert.ok(calls[1].query.includes('["water"]'));assert.ok(calls[2].query.includes('["building"]'));assert.ok(calls[3].query.includes('["highway"]'));assert.equal(calls[1].label,'yüzey+su');assert.equal(result.json.elements[0].id,3);
 });
 
 test('coverage fetch skips network access when there is no selected park',async()=>{
