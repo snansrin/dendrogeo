@@ -36,3 +36,7 @@ Kullanıcı önceki üç grubun kapsamından sonra kalan tüm karma sorumlulukla
 
 - Açılış/navigasyon: platform adapter’ı, oturum application akışı, açılış UI controller’ı, DOM aktivasyonu ve sekme veri yenilemeleri beş modüle ayrıldı. Tam check, oturum/OAuth ve harita geçişi Chromium testleri geçti.
 - Sonraki grup: park çizme/kart orkestrasyonu, park geometri girdisi, indirme adapter’ı ve koordinat dönüşümleri.
+
+Park/indirme grubu: geometri normalizasyonu, seçili park çizme application akışı, park kartı UI sunumu, Blob indirme adapter’ı ve Web Mercator domain dönüşümü beş modüle ayrıldı. Eski dönüşüm sonuçları birebir korundu. Aktif drawPark girişinde epoch ve geometri referansı, geç OSM/kayıt yanıtının yeni kartı güncellemesini engeller. 360/390/430/1280 px gerçek Leaflet, delikli sınır ve native indirme testleri CI’a eklendi. Tam check ve mevcut açılış/çizim regresyonları geçti.
+
+Geniş taramadaki son karma giriş: landing açılışı, public özet yükleme ve ülke/şehir istatistik tablolarının sunumu. Bu grup da ayrı katmanlara bağlanacak.

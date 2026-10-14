@@ -816,7 +816,14 @@
       "src/ui/shell-view-effects.js",
       "src/ui/shell-navigation-controller.js",
       "test/shell-workflow-modules.test.mjs",
-      "src/ui/shell.js"
+      "src/ui/shell.js",
+      "src/domain/map/web-mercator-coordinates.js",
+      "src/domain/parks/normalize-drawn-park-geometry.js",
+      "src/application/parks/draw-selected-park.js",
+      "src/ui/present-drawn-park.js",
+      "src/adapters/export/download-blob.js",
+      "test/park-drawing-export-modules.test.mjs",
+      "scripts/park-draw-smoke.mjs"
     ]
   },
   "sha256": {
@@ -1101,7 +1108,7 @@
     "src/ui/park-click-controller.js": "892c0434a0df19b6f0f219678447a4ab863ac3f71b4b28299a2fc0a3b482a119",
     "src/ui/park-export-canvas.js": "6e17ecbad2d5fbefa2abf336e7623450a7288254b2e013a2a8b875acb31813e3",
     "src/ui/park-export-layout.js": "5da6094c9d5b3dcd2d43fb16ca6b55d99eca9b9c14274b0cbad4e40f2ecf70e8",
-    "src/ui/park-export.js": "170fadbb94207665373337138321deb73694f2e7bb9c552d06c2ad6ea77d5357",
+    "src/ui/park-export.js": "66ae59513b6cb06b8720867b902a09907bdb979ea7561e7bbeeb0cc2dbb7b6a7",
     "src/ui/park-identity.js": "32676d666b9e4f1e859f136fb895cf258246244306f4eeb53a7df865f9602018",
     "src/ui/park-image-geometry.js": "723a2870bf5c854824a074177c789ad75c566e93f04e3f2c0cc4cd5cf7a60e45",
     "src/ui/park-info-panel.js": "d6a2d300be362640e9c813cee839d7cd510e9c36d59e30ee77dc664844cd7153",
@@ -1109,7 +1116,7 @@
     "src/ui/park-measurement-gate.js": "4772a5fb077f43b4e0f9369366816ad68da36aace791b2b55a3fe98541ac6119",
     "src/ui/park-menu-ui.js": "9b645342c5beb2df56901cacad4f785a08575ac1d70c1d9515758a8950e5e1ee",
     "src/ui/park-mode-controller.js": "28813b53bde214a8ab212bcffb26158c3a6117ebd1aaa2600d348b802293d0f1",
-    "src/ui/park-panel.js": "af9503066873e7c7fa8c2766187cec76730c350b2201c516713c0abee5b3d47f",
+    "src/ui/park-panel.js": "0da5e4357e45b1840d38460946fb7de41469adecf40eb2855f2f04607a262224",
     "src/ui/park-project-options.js": "3fc782c75f07579bcaed4ff5da52eab229b95c76a8da32376b22df1d7ac5c93a",
     "src/ui/park-reference-area.js": "0c92ee89fb6ec4a53b0969bc6b6f8b4cfe9753ff8c64012704ed043110c27a05",
     "src/ui/park-reset-controller.js": "dcedd8228664445be500dbe59235fb3f685d03990d3a05c73d5ff87497a1628f",
@@ -1125,7 +1132,7 @@
     "src/ui/state.js": "5feada9bc2052655d9be405043ffb6f71f39d51fcb58e189089c3d7d3fc8bafc",
     "src/ui/sync-base-map-layer-selection.js": "2f93018846abac13f83486a1fc2b9df0cbb7f330cae202a0e91ef902c8263eeb",
     "src/ui/waypoint-gps-overlay.js": "4f4396cf19bacb0e1f3e026b6a331c37db26631b7282f5b0267a2042a6226d1e",
-    "src/utils/geo.js": "3e796768b3d55a3f07c4be3281c9437f1602b6d5e68151b2af7b101707baf294",
+    "src/utils/geo.js": "19dd61e811e49dc6f654e3f6e95aae404c1213327b3ef3ef059141c9c62f85eb",
     "src/utils/lazylibs.js": "66d1685035af0952f9aa2d9fa974711c35683e093e87fc7920e109c020599f8d",
     "src/workers/surface-worker.js": "af6477f104a06342cf69ef7f702a3e95ed27cd390c5aae36a2fbe5dfd68ed2fe",
     "test/base-map-layer-modules.test.mjs": "5399d699e74ffd66e92df312b4301202add7352b2b6c0be24fd51cda63e7baff",
@@ -1607,7 +1614,14 @@
     "src/ui/shell-view-effects.js": "f85d2ed54e29126ede3e54e02c8567d109270e43e987c6176eb2c35f09217780",
     "src/ui/shell-navigation-controller.js": "80d4c679a1a4ff43d997146b80827d7f5f2f277349b25f75f66a73e30b768166",
     "test/shell-workflow-modules.test.mjs": "a7ddfd75981251c43f420908f53d1a1b4c25a7c667264c55f7799f6eb26fb3a7",
-    "src/ui/shell.js": "74cb4d81db2f33d92fc64aed84c0ebfcfafce75f3383290065326cf730fae938"
+    "src/ui/shell.js": "74cb4d81db2f33d92fc64aed84c0ebfcfafce75f3383290065326cf730fae938",
+    "src/domain/map/web-mercator-coordinates.js": "e4f9fd53b0f88d55f1eb0c158f3d4546e4f405c878c6310a3096ed4217dba1ce",
+    "src/domain/parks/normalize-drawn-park-geometry.js": "b8e9bd215dadd99e6405fb6c684dcdd8acac9ca5005a33ac60110f04fd96fe19",
+    "src/application/parks/draw-selected-park.js": "f27052ec1a46bf77fc158a04eefea01fcf28b159d2a1563f02e858e960c9847a",
+    "src/ui/present-drawn-park.js": "d9c91ea78fb6fe073f22da4feb05eaa210ef66a3a5aaa6cabe317854a0fa3464",
+    "src/adapters/export/download-blob.js": "ba23b37f623d7f272c9840ad65c3a6501d5bcc8f6d512342f335a9fc16fb462c",
+    "test/park-drawing-export-modules.test.mjs": "0555360c205fc4283a192de854eaab1ab0064435d8f1805b8c9ee6f63e746de4",
+    "scripts/park-draw-smoke.mjs": "6131752c8dccdc79068bea840cb25943dcac00c908e20ac505f9d5a5bacc71af"
   },
   "authorized_modularizations": [
     {
@@ -3614,6 +3628,36 @@
       "request": "Protect the newly modularized startup/navigation composition root as explicitly requested by user",
       "added_protected_files": [
         "src/ui/shell.js"
+      ]
+    },
+    {
+      "date": "2026-10-14",
+      "request": "Continuation of explicit user request: isolate actual park drawing orchestration, input geometry, UI result, Blob download and exact Mercator math; guard discarded async work and add real browser draw/download regression",
+      "files": [
+        {
+          "path": "src/ui/park-export.js",
+          "previous_sha256": "170fadbb94207665373337138321deb73694f2e7bb9c552d06c2ad6ea77d5357",
+          "sha256": "66ae59513b6cb06b8720867b902a09907bdb979ea7561e7bbeeb0cc2dbb7b6a7"
+        },
+        {
+          "path": "src/ui/park-panel.js",
+          "previous_sha256": "af9503066873e7c7fa8c2766187cec76730c350b2201c516713c0abee5b3d47f",
+          "sha256": "0da5e4357e45b1840d38460946fb7de41469adecf40eb2855f2f04607a262224"
+        },
+        {
+          "path": "src/utils/geo.js",
+          "previous_sha256": "3e796768b3d55a3f07c4be3281c9437f1602b6d5e68151b2af7b101707baf294",
+          "sha256": "19dd61e811e49dc6f654e3f6e95aae404c1213327b3ef3ef059141c9c62f85eb"
+        }
+      ],
+      "added_protected_files": [
+        "src/domain/map/web-mercator-coordinates.js",
+        "src/domain/parks/normalize-drawn-park-geometry.js",
+        "src/application/parks/draw-selected-park.js",
+        "src/ui/present-drawn-park.js",
+        "src/adapters/export/download-blob.js",
+        "test/park-drawing-export-modules.test.mjs",
+        "scripts/park-draw-smoke.mjs"
       ]
     }
   ]

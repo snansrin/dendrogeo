@@ -17,6 +17,7 @@ function downloadBlob(
   mime,
   text
 ){
+  if(window.DG_DOWNLOAD_BLOB)return window.DG_DOWNLOAD_BLOB.download(name,mime,text,{BlobCtor:Blob,urlApi:URL,document,schedule:(fn,delay)=>setTimeout(fn,delay)});
   const b=
     new Blob(
       [text],

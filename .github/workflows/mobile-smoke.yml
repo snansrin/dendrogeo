@@ -10,6 +10,7 @@ on:
       - 'scripts/startup-smoke.mjs'
       - 'scripts/brush-smoke.mjs'
       - 'scripts/drawing-smoke.mjs'
+      - 'scripts/park-draw-smoke.mjs'
       - 'scripts/osm-map-recovery-smoke.mjs'
       - 'scripts/lib/playwright-runtime.mjs'
       - 'scripts/lib/report-snapshot-application.mjs'
@@ -36,6 +37,7 @@ jobs:
           node scripts/startup-smoke.mjs
           node scripts/brush-smoke.mjs
           node scripts/drawing-smoke.mjs
+          node scripts/park-draw-smoke.mjs
           node scripts/osm-map-recovery-smoke.mjs
       - name: 360, 390 ve 430 px
         run: |

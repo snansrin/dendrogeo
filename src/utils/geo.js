@@ -26,6 +26,7 @@ function brg(a,b,c,d){
 }
 
 function dgLonLatToWebMercator(lat,lon){
+  if(window.DG_WEB_MERCATOR_COORDINATES)return window.DG_WEB_MERCATOR_COORDINATES.forward(lat,lon);
   const la=Math.max(
     -85.0511287798,
     Math.min(85.0511287798,Number(lat))
@@ -49,6 +50,7 @@ function dgLonLatToWebMercator(lat,lon){
 }
 
 function dgWebMercatorToLonLat(x,y){
+  if(window.DG_WEB_MERCATOR_COORDINATES)return window.DG_WEB_MERCATOR_COORDINATES.reverse(x,y);
   const X=Number(x);
   const Y=Number(y);
 
