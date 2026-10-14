@@ -1789,7 +1789,7 @@
     "scripts/check-phone.mjs": "9761d87d6bb8801011a79bce7ef44c862bc6d4ae4c4e4a8db9e2c6e73cfeb014",
     "scripts/check-accessibility.mjs": "4f8064156a8b0ab8f9ac53a205999b648d3e286cd36eec50aefa106bf4007961",
     "scripts/lib/browser-acceptance-fixture.mjs": "56993ac50e7c868027e0a8a07c4f807dea419736f0d8829f9d3b5ceba251b8f5",
-    "supabase/migrations/20261014190000_measurement_protocol_guard.sql": "4af663598c34bcffd0a768e60e0961aebab0a53a9f224dda651514ddbbc9bed8",
+    "supabase/migrations/20261014190000_measurement_protocol_guard.sql": "fb27e57a956f5886cc01798d571a799251ccdb6941a667545d09073edbdc5097",
     ".github/workflows/ci.yml": "56f81781759fc606679b1da99145fb6a640028b1ded920e49a479869ee0d7e87",
     ".github/workflows/mobile-smoke.yml": "d1ae73335d7b1490b0249a51e42fd9ca4f695e8e3ab3328e80504abd9acb8750",
     ".github/workflows/rapor.yml": "be836bdd0631a268744b2454216bb64848022d4146afe80663ec69a32a9c06f6",
@@ -4159,6 +4159,17 @@
       "added_protected_files": [
         "test/form-qa.test.mjs",
         "test/measurement-preview-point-modules.test.mjs"
+      ]
+    },
+    {
+      "date": "2026-10-14",
+      "request": "Recover failed connector DDL request with narrower additive idempotent trigger installation: create only when absent, never drop/recreate; full authenticated PostgreSQL contract still passes.",
+      "files": [
+        {
+          "path": "supabase/migrations/20261014190000_measurement_protocol_guard.sql",
+          "previous_sha256": "4af663598c34bcffd0a768e60e0961aebab0a53a9f224dda651514ddbbc9bed8",
+          "sha256": "fb27e57a956f5886cc01798d571a799251ccdb6941a667545d09073edbdc5097"
+        }
       ]
     }
   ]

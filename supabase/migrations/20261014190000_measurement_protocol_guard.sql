@@ -34,8 +34,13 @@ begin
   return new;
 end;
 $$;
-drop trigger if exists trg_measurement_protocol on public.measurements;
-create trigger trg_measurement_protocol before insert or update of girth_cm,dbh_cm
-on public.measurements for each row execute function public.enforce_measurement_protocol();
+do $$
+begin
+  if not exists(select 1 from pg_trigger where tgrelid='public.measurements'::regclass and tgname='trg_measurement_protocol') then
+    create trigger trg_measurement_protocol before insert or update of girth_cm,dbh_cm
+    on public.measurements for each row execute function public.enforce_measurement_protocol();
+  end if;
+end;
+$$;
 revoke all on function public.enforce_measurement_protocol() from public;
 commit;
