@@ -1,6 +1,6 @@
 {
   "schema": "dendrogeo-publish-queue/1",
-  "updated_at": "2026-10-15T18:56:27.260Z",
+  "updated_at": "2026-10-15T19:23:18.989Z",
   "production_started_at": "2026-10-04T08:26:48.034Z",
   "test_archive_ref": "archive/test-publications-2026-10-04",
   "retired_report_ids": [
@@ -224,6 +224,26 @@
       "doi_url": "https://doi.org/10.5281/zenodo.23403425",
       "doi_record_url": "https://zenodo.org/records/23403425",
       "doi_registered_at": "2026-10-15T18:56:25.882Z"
+    },
+    {
+      "report_id": "DGR-2026-0025",
+      "park_id": 25,
+      "park_name": "Göksu Parkı",
+      "city": "Ankara",
+      "n": 36,
+      "version": 1,
+      "status": "Yayınlandı",
+      "report_hash": "sha256:2b7fde8c2438d9ad17b46b7e4415c18e733ea9ae6eb772342d45289251d77d63",
+      "url_path": "/rapor/DGR-2026-0025/",
+      "finished_at": "2026-10-15T19:23:18.989Z",
+      "with_lulc": true,
+      "surface_snapshot": true,
+      "carbon_txt": "5,23 t [%95 GA 2,87–7,40]",
+      "lulc": "dahil (Kullanıcının kabul ettiği son analiz · uydu / OSM / çizim)",
+      "correction_of": "DGR-2026-0024",
+      "correction_kind": "map-path-resolution-v1",
+      "correction_note": "Harita sunumu düzeltmesi: ince yol sınırları korunmuş, PNG çözünürlüğü artırılmıştır. Ölçümler, kabul edilmiş yüzey geometrileri ve bilimsel sonuçlar değiştirilmemiştir.",
+      "doi_status": "Bekliyor"
     }
   ],
   "archived_request_ids": [
