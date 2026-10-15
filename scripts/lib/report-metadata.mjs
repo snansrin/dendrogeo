@@ -100,7 +100,7 @@ export function createReportMetadata(snap, { id, hash, version = '1.0', meta = n
     doiNote: doi ? 'Raporun dış kalıcı kimliği.' : 'DOI atanmadı; DGR raporun yerel kimliğidir.',
     history: [
       ...(history || []).map((h) => ({ id: h.id, version: '1.0', date: h.date || null, status: h.retracted ? 'Geri çekildi' : 'Yerine bu rapor yayımlandı', note: h.note || '' })),
-      { id, version: String(version), date: snap.generated_at.slice(0, 10), status: 'Geçerli', note: 'İlk yayımlama' },
+      { id, version: String(version), date: snap.generated_at.slice(0, 10), status: 'Geçerli', note: snap.presentation_correction?.note || 'İlk yayımlama' },
     ],
   };
 }

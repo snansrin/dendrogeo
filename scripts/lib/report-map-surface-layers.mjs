@@ -7,7 +7,7 @@ import { fillSurfacePolygon } from './report-map-surface-fill.mjs';
 export function drawReportMapSurfaceLayers({
   canvas, outer, outers = null, surfaceFeatures = [], holes = [], wruns = [],
   project, classFor, contextTone, noDataTone, frameTone,
-  padding, top, mapHeight
+  padding, top, mapHeight, frameInset=12
 }) {
   const ring = outer.map(([lat, lon]) => project(lon, lat));
   fillRing(canvas, ring, noDataTone);                       /* base: no-data tone */
@@ -31,8 +31,8 @@ export function drawReportMapSurfaceLayers({
 
   /* The thin frame follows clipping so the context repaint cannot erase it. */
   const frame = {
-    left: padding - 12, top: top - 12,
-    right: canvas.w - padding + 12, bottom: top + mapHeight + 12
+    left: padding - frameInset, top: top - frameInset,
+    right: canvas.w - padding + frameInset, bottom: top + mapHeight + frameInset
   };
   canvas.line(frame.left, frame.top, frame.right, frame.top, frameTone);
   canvas.line(frame.left, frame.bottom, frame.right, frame.bottom, frameTone);
