@@ -12,10 +12,49 @@
   "acceptance": "user-accepted; not independent accuracy assessment",
   "sourceData": {
     "path": "assets/landing/goksu-example.json",
-    "sha256": "4865453ce30d2c0ae1f1720c3d0415babb1ac5561d4cc2bc90bf28907f18dad6"
+    "sha256": "f8067d468fcfbc304c5b1ab12915d295753e83ce4e9dab6341e6266e082910bc"
   },
   "ndvi": {
-    "status": "no-saved-cell-observations"
+    "status": "real-observations",
+    "acquiredAt": "2026-10-15T14:55:11.937Z",
+    "scenes": [
+      {
+        "id": "S2B_MSIL2A_20260912T083559_R064_T36TVK_20260912T125638",
+        "cloud": 0,
+        "datetime": "2026-09-12",
+        "usedCells": 2129
+      },
+      {
+        "id": "S2C_MSIL2A_20260420T083651_R064_T36TVK_20260420T140925",
+        "cloud": 16.8,
+        "datetime": "2026-04-20",
+        "usedCells": 1162
+      },
+      {
+        "id": "S2A_MSIL2A_20260701T084501_R064_T36TVK_20260701T134111",
+        "cloud": 0,
+        "datetime": "2026-07-01",
+        "usedCells": 2129
+      },
+      {
+        "id": "S2C_MSIL2A_20260808T083601_R064_T36TVK_20260808T140216",
+        "cloud": 3.5,
+        "datetime": "2026-08-08",
+        "usedCells": 2129
+      },
+      {
+        "id": "S2A_MSIL2A_20261009T083801_R064_T36TVK_20261009T140005",
+        "cloud": 0,
+        "datetime": "2026-10-09",
+        "usedCells": 2129
+      },
+      {
+        "id": "S2A_MSIL2A_20260721T083741_R064_T36TVK_20260721T135509",
+        "cloud": 0.2,
+        "datetime": "2026-07-21",
+        "usedCells": 2129
+      }
+    ]
   },
   "reportStatus": "unpublished-preview; no DGR identifier or DOI assigned",
   "images": [
@@ -36,7 +75,7 @@
     },
     {
       "path": "assets/landing/goksu-ndvi.jpg",
-      "sha256": "fb2d11b0e6633f8fc9581ea6d33c92ec5f1d696b696007e2cda2365276d4a67e",
+      "sha256": "7af6f3524b84444817e04a2366c44fd188727e12e9612f85ded1e843ac8d6be9",
       "capturePage": "ornekler/goksu-parki/?view=ndvi"
     },
     {

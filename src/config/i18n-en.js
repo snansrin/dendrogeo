@@ -1228,9 +1228,9 @@ Object.assign(DG_I18N_EN,{
  "GÖRELİ NDVI · UYDU GÖZLEMLERİ": "RELATIVE NDVI · SATELLITE OBSERVATIONS",
  "Yeşil alanın park içindeki göreli dağılımını inceleyin.": "Examine relative vegetation patterns within the park.",
  "Yeterli açık uydu gözlemi bulunan yeşil hücreleri, park içindeki NDVI dağılımına göre değerlendirin. Seyrek, orta ve yoğun görünümü aynı park içindeki göreli sınıflardır; taç örtüsü ölçümü olarak yorumlanmaz.": "Assess green cells with sufficient clear satellite observations against the park's NDVI distribution. Sparse, moderate and dense are relative classes within the same park and should not be interpreted as canopy-cover measurements.",
- "Sentinel‑2 L2A · en az 3 ayrı tarihte geçerli gözlem": "Sentinel‑2 L2A · valid observations on at least 3 separate dates",
+ "Sentinel‑2 L2A · 2.129 hücre · 2026 gerçek gözlemleri": "Sentinel‑2 L2A · 2,129 cells · actual 2026 observations",
  "NDVI görünümünü inceleyin ↗": "Explore the NDVI view ↗",
- "Gösterilen veri ve gözlem durumu, örnek sayfasında açıklanır.": "The data and observation availability are explained on the example page.",
+ "15 Ekim 2026 uydu edinimi · kabul edilmiş yeşil alan içinde 10 m örnekleme.": "Satellite data acquired 15 October 2026 · 10 m sampling within the accepted green area.",
  "BİLİMSEL RAPORLAMA · İZLENEBİLİR KAYIT": "SCIENTIFIC REPORTING · TRACEABLE RECORD",
  "Kayıtlı veriyi, kaynakları görünen bir raporda sunun.": "Present saved data in a report with visible sources.",
  "Kabul edilmiş yüzey sonucunu tarih, kaynak ve sınıf alanlarıyla rapor görünümünde inceleyin. DGR yayınları için ayrı kimlik, sürüm ve içerik doğrulama akışı kullanılır. Gösterilen gerçek kayıt önizlemesi henüz yayımlanmış bir DGR raporu değildir.": "Review an accepted surface result in report form with its date, sources and class areas. DGR publications use a separate identity, version and content-verification workflow. This preview of a real record is not a published DGR report.",
@@ -1249,7 +1249,7 @@ Object.assign(DG_I18N_EN,{
  "Göksu Parkı gerçek kayıtlı yüzey geometrileri ve sınıf alanlarını gösteren DendroGeo ekranı": "DendroGeo view of actual saved surface geometries and class areas for Göksu Park",
  "Göksu Parkı yüzey analizinde gerçek sınıf alanları, kaynak ve yöntem bilgileri": "Actual class areas, sources and methods in the Göksu Park surface analysis",
  "Gerçek Göksu Parkı haritası üzerinde DendroGeo sınır çizim araçları ve kaydedilmeyen çizim gösterimi": "DendroGeo boundary tools and an unsaved drawing on the real Göksu Park map",
- "Göksu Parkı NDVI araç görünümü ve gerçek gözlem verisinin kullanılabilirlik durumu": "Göksu Park NDVI tools and the availability of actual observation data",
+ "Göksu Parkı gerçek Sentinel‑2 gözlemlerinden üretilen göreli NDVI haritası": "Göksu Park relative NDVI map derived from actual Sentinel‑2 observations",
  "Gerçek Göksu Parkı yüzey kaydının yayımlanmamış rapor önizlemesi": "Unpublished report preview of the real Göksu Park surface record"
 });
 

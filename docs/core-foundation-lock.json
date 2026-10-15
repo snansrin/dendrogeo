@@ -7514,6 +7514,24 @@
           "sha256": "36aae15bf4fcdaa240913d4a634c5ee96157ed5d36487ff66578fb5523c0339b"
         }
       ]
+    },
+    {
+      "id": "landing-showcase-ndvi-20261015",
+      "date": "2026-10-15",
+      "scope": "User-authorized modularization: complete the isolated landing showcase with explicitly authorized real Sentinel-2 NDVI acquisition and a browser capture; update only presentation copy and generated index. Scientific engines and accepted result unchanged.",
+      "audit_chain": "sha256-v1",
+      "files": [
+        {
+          "path": "index.html",
+          "previous_sha256": "7c2ae43b650688e661a18529254a10402ca1bbccea4c7f1a150ddd06229d8401",
+          "sha256": "72f3cdc74d834a48d897b1b5ed5ee8aa5c3ef204857e374f9e8dc02deae0ad80"
+        },
+        {
+          "path": "partials/landing.html",
+          "previous_sha256": "5c921de2561bc23228dd173a9846d5143940c700d066a9af1a4f882807f9cb8a",
+          "sha256": "9a74251a367dd67edeee7806b18bff1127c5105f3287c50f8e062e56a54eb7f0"
+        }
+      ]
     }
   ]
 }
