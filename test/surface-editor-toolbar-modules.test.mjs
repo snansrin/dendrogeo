@@ -43,8 +43,10 @@ test('toolbar rail keeps accessible action names, no-point draw guard, and order
  const shell=rail.compose({menus:'<details></details>',mode:'Haritayı kaydır',translate:identity,escape:identity});assert.ok(shell.indexOf('<nav')<shell.indexOf('dg-editor-status'));assert.ok(shell.includes('ESC iptal'));
 });
 
-test('toolbar modules and event adapter load before locked UI, are precached, and service delegates when available',()=>{
+test('toolbar modules and event adapter load before locked UI, are precached, and exclusively own the toolbar markup',()=>{
  const chain=read('src/utils/lazylibs.js'),sw=read('sw.js'),ui=read('src/ui/lc-sens.js');
  for(const path of modules){assert.ok(chain.includes(`"${path}"`),`${path} lazy load`);assert.ok(sw.includes(`'/${path}'`),`${path} precache`);assert.ok(chain.indexOf(`"${path}"`)<chain.indexOf('"src/ui/lc-sens.js"'),`${path} precedes UI`);}
  for(const key of ['DG_BUILD_SURFACE_TOOLBAR_MODEL','DG_RENDER_SURFACE_EDITOR_MENU_LABEL','DG_RENDER_SURFACE_EDITOR_PANEL_HEAD','DG_RENDER_SURFACE_EDITOR_MENUS','DG_RENDER_SURFACE_EDITOR_TOOL_RAIL','DG_BIND_SURFACE_EDITOR_EVENTS'])assert.ok(ui.includes(key),key);
+ assert.match(ui,/if\(!modelBuilder\|\|!menusRenderer\|\|!toolbar\)throw new Error/);
+ assert.doesNotMatch(ui,/data-menu-order=/,'the controller must not keep a second copy of the editor menu markup');
 });

@@ -49,8 +49,11 @@ test('opacity remains clamped, debounced, and reflected in every display path',(
  assert.equal(result,100);assert.equal(state.record.displayOpacity,100);assert.deepEqual(cleared,[123]);assert.equal(scheduled[0][1],900);assert.equal(output.textContent,'%100');assert.equal(fills.length,2);assert.ok(fills.every(value=>value.fillOpacity===1));
 });
 
-test('five interaction modules load before locked UI, are precached, and have service delegations',()=>{
+test('five interaction modules load before locked UI, are precached, and exclusively own editor interactions',()=>{
  const chain=read('src/utils/lazylibs.js'),sw=read('sw.js'),ui=read('src/ui/lc-sens.js');
  for(const path of modules){assert.ok(chain.includes(`"${path}"`),`${path} lazy load`);assert.ok(sw.includes(`'/${path}'`),`${path} precache`);assert.ok(chain.indexOf(`"${path}"`)<chain.indexOf('"src/ui/lc-sens.js"'),`${path} precedes UI`);}
  for(const key of ['DG_SURFACE_RIGHT_PAN_SESSION','DG_SELECT_SURFACE_DRAW_TYPE','DG_SELECT_SURFACE_BRUSH_TYPE','DG_RETURN_SURFACE_TO_HAND_MODE','DG_UPDATE_SURFACE_OPACITY'])assert.ok(ui.includes(key),key);
+ assert.match(ui,/function dgSensBindRightPan\(\)\{return window\.DG_SURFACE_RIGHT_PAN_SESSION\.bind/);
+ assert.match(ui,/function dgSensOpacity\(value\)\{return window\.DG_UPDATE_SURFACE_OPACITY\.update/);
+ assert.doesNotMatch(ui,/container\.addEventListener\(name,fn,true\)/,'pointer lifecycle stays in its adapter');
 });

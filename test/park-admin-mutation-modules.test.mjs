@@ -59,13 +59,13 @@ test('park-admin UI keeps confirmation wording and result feedback',()=>{
 });
 
 test('service routes park identity writes exclusively through the mutation adapter',()=>{
-  const service=read('src/services/park-registry.js');
+  const service=read('src/services/park-registry.js'),controller=read('src/bootstrap/park-admin-controller.js'),composition=service+'\n'+controller;
   const head=read('partials/head.html'),sw=read('sw.js');
-  for(const token of ['DG_PARK_ADMIN_MUTATION_STORE','DG_PARK_ADMIN_MUTATION_UI','DG_PARK_ADMIN_RENAME','DG_PARK_ADMIN_MERGE','DG_PARK_ADMIN_DELETE'])assert.ok(service.includes(token),token);
+  for(const token of ['DG_PARK_ADMIN_MUTATION_STORE','DG_PARK_ADMIN_MUTATION_UI','DG_PARK_ADMIN_RENAME','DG_PARK_ADMIN_MERGE','DG_PARK_ADMIN_DELETE'])assert.ok(composition.includes(token),token);
   for(const path of ['src/adapters/parks/park-admin-mutation-store.js','src/ui/park-admin-mutation.js']){assert.ok(head.indexOf(path)<head.indexOf('src/services/park-registry.js'),`${path} load order`);assert.ok(sw.includes(`'/${path}'`),`${path} precache`);}
   assert.ok(head.indexOf('src/ui/guard-park-rename-feedback.js')>head.indexOf('src/services/park-registry.js'));
   assert.ok(sw.includes("'/src/ui/guard-park-rename-feedback.js'"));
-  for(const call of ['updatePark(id,patch)','moveProjects(srcId,dstId)','moveMeasurements(srcId,dstId)','deletePark(id)'])assert.ok(service.includes(`DG_PARK_ADMIN_MUTATION_STORE.${call}`),call);
-  const adminWrites=service.slice(service.indexOf('const DG_PARK_ADMIN_RENAME'),service.indexOf('async function dgAfterParkAdminChange'));
+  for(const call of ['mutationStore.updatePark(parkId,patch)','mutationStore.moveProjects(source,destination)','mutationStore.moveMeasurements(source,destination)','mutationStore.deletePark(parkId)'])assert.ok(controller.includes(call),call);
+  const adminWrites=controller;
   assert.doesNotMatch(adminWrites,/sb\.from\("(?:parks|projects|measurements)"\)\.(?:update|delete)/,'park rename, merge and deletion cannot bypass the guarded adapter');
 });

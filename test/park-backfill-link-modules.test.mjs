@@ -54,9 +54,10 @@ test('backfill feedback keeps escaped error reporting and refresh order',()=>{
 });
 
 test('five backfill modules load before locked park service and are precached',()=>{
- const head=read('partials/head.html'),sw=read('sw.js'),service=read('src/services/park-registry.js');
+ const head=read('partials/head.html'),sw=read('sw.js'),controller=read('src/bootstrap/park-backfill-controller.js'),service=read('src/services/park-registry.js');
  for(const path of ['src/domain/parks/identity.js','src/domain/parks/build-backfill-project-link.js','src/application/parks/link-backfill-project-to-park.js','src/ui/park-backfill-link-feedback.js','src/application/parks/refresh-after-park-backfill.js']){
   assert.ok(head.indexOf(path)<head.indexOf('src/services/park-registry.js'));assert.ok(sw.includes('/'+path));
  }
- for(const api of ['DG_BUILD_BACKFILL_PROJECT_LINK','DG_LINK_BACKFILL_PROJECT_TO_PARK','DG_PARK_BACKFILL_LINK_FEEDBACK_UI','DG_REFRESH_AFTER_PARK_BACKFILL'])assert.ok(service.includes(api));
+ for(const api of ['DG_BUILD_BACKFILL_PROJECT_LINK','DG_LINK_BACKFILL_PROJECT_TO_PARK','DG_REFRESH_AFTER_PARK_BACKFILL'])assert.ok(service.includes(api));
+ assert.ok(controller.includes('DG_PARK_BACKFILL_LINK_FEEDBACK_UI'));
 });

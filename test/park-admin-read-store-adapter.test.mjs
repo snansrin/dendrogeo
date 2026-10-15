@@ -42,7 +42,7 @@ test('park project adapter preserves coordinate limits and the backfill projecti
     ['from','measurements'],['select','lat,lon'],['eq','project_id',13],['limit',1000],
     ['from','projects'],['select','id,name,owner,park_id,park_name,label,city,country']
   ]);
-  const head=read('partials/head.html'),sw=read('sw.js'),service=read('src/services/park-registry.js'),path='src/adapters/parks/park-project-read-store.js';
+  const head=read('partials/head.html'),sw=read('sw.js'),service=read('src/services/park-registry.js'),controller=read('src/bootstrap/park-backfill-controller.js'),path='src/adapters/parks/park-project-read-store.js';
   assert.ok(head.indexOf(path)<head.indexOf('src/services/park-registry.js'));assert.ok(sw.includes(`'/${path}'`));
-  assert.match(service,/DG_PARK_PROJECT_READ_STORE\.fetchMeasurements/);assert.match(service,/DG_PARK_PROJECT_READ_STORE\.fetchBackfillProjects/);
+  assert.match(service,/DG_PARK_PROJECT_READ_STORE\.fetchMeasurements/);assert.match(controller,/DG_PARK_PROJECT_READ_STORE\.fetchBackfillProjects/);
 });

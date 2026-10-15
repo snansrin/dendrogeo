@@ -30,6 +30,8 @@ test('editor panel composer keeps scan, control, then review sections in sequenc
   const compose=setup().DG_COMPOSE_SURFACE_EDITOR_PANEL.render({scanPanel:'scan',sensitivityControls:'controls',reviewActions:'actions'});assert.equal(compose,'scancontrolsactions');
 });
 
-test('five editor panel modules are lazy loaded and precached before the legacy renderer',()=>{
+test('five editor panel modules are lazy loaded, precached, and exclusively own panel markup',()=>{
   const chain=read('src/utils/lazylibs.js'),sw=read('sw.js'),ui=read('src/ui/lc-sens.js');for(const path of modules){assert.ok(chain.includes(`"${path}"`));assert.ok(sw.includes(`'/${path}'`));assert.ok(chain.indexOf(`"${path}"`)<chain.indexOf('"src/ui/lc-sens.js"'));}for(const name of ['DG_BUILD_SURFACE_EDITOR_VIEW_MODEL','DG_RENDER_SURFACE_SCAN_PANEL','DG_RENDER_SURFACE_SENSITIVITY_CONTROLS','DG_RENDER_SURFACE_REVIEW_ACTIONS','DG_COMPOSE_SURFACE_EDITOR_PANEL'])assert.ok(ui.includes(name));
+  assert.match(ui,/if\(!viewModel\|\|!scanPanel\|\|!controls\|\|!actions\|\|!compose\)throw new Error/);
+  assert.doesNotMatch(ui,/id="dgSensScanBtn"/,'panel HTML belongs to the dedicated renderer modules');
 });

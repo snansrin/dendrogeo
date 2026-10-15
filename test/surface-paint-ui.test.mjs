@@ -8,6 +8,7 @@ const shell = readFileSync(new URL('../partials/shell.html', import.meta.url), '
 const css = readFileSync(new URL('../css/park-panel.css', import.meta.url), 'utf8');
 const toolbarRail = readFileSync(new URL('../src/ui/render-surface-editor-tool-rail.js', import.meta.url), 'utf8');
 const editorMenus = readFileSync(new URL('../src/ui/render-surface-editor-menus.js', import.meta.url), 'utf8');
+const rightPan = readFileSync(new URL('../src/adapters/surface/surface-right-pan-session.js', import.meta.url), 'utf8');
 
 function editorContext() {
   const pans = [], handlers = new Map();
@@ -23,17 +24,15 @@ function editorContext() {
     map: { getContainer: () => container, panBy: (delta) => pans.push(Array.from(delta)) },
   });
   vm.runInContext(source, context);
+  vm.runInContext(rightPan, context);
   return { context, pans, handlers };
 }
 
 test('brush toolbar is placed below marker refresh and exposes the established cell brush', () => {
   assert.ok(shell.indexOf('loadLiveMap()') < shell.indexOf('id="surfaceBrushTools"'));
-  assert.match(source, /function dgSensBrushCellKeys\(points,diameter\)/);
-  assert.match(source, /function dgSensSetCellDecision\(cell,toCls/);
-  assert.match(source, /DG_SURFACE_CELL_DECISION\.create/);
-  assert.match(source, /DG_COMMIT_SURFACE_BRUSH_STROKE\.commit/);
-  assert.match(source, /onCommit:dgSensBrushCommit/);
-  assert.match(source, /Sol tuş: fırça · Sağ tuş: haritayı kaydır/);
+  assert.match(toolbarRail, /data-dg-click="brushToggle"/);
+  assert.match(editorMenus, /const brushTypes=\["hard","green","water","building","bare"\]/);
+  assert.match(editorMenus, /Sol tuş: fırça · Sağ tuş: haritayı kaydır/);
   assert.match(css, /\.dg-editor-tool\.is-active/);
   assert.match(source, /dgSensSetDrawType\(type\)/);
   assert.match(toolbarRail, /data-dg-click="drawStart" aria-pressed/);
@@ -44,7 +43,7 @@ test('brush toolbar is placed below marker refresh and exposes the established c
   assert.match(css, /\.dg-vegetation-legend/);
   assert.match(shell, /id="surfaceMapWorkspace"[\s\S]*id="surfaceMapTools"[\s\S]*id="map"/);
   assert.doesNotMatch(source, /dg-editor-palette|dg-boundary-palette/);
-  assert.match(source, /dgSensDataDetails[\s\S]*?dg-editor-menu/);
+  assert.match(editorMenus, /dgSensDataDetails[\s\S]*?dg-editor-menu/);
 });
 
 test('right-button drag pans map without replacing the existing left-button brush handlers', () => {

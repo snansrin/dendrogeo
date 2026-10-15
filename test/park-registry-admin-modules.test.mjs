@@ -11,7 +11,9 @@ const modules=[
   'src/adapters/parks/sync-park-project-names.js',
   'src/ui/render-park-admin.js',
   'src/application/parks/refresh-park-admin-views.js',
-  'src/application/parks/toggle-park-admin-empty.js'
+  'src/application/parks/toggle-park-admin-empty.js',
+  'src/bootstrap/park-admin-controller.js',
+  'src/bootstrap/park-backfill-controller.js'
 ];
 function setup(){const window={};const context=vm.createContext({window});for(const path of modules)vm.runInContext(read(path),context,{filename:path});return{window,context};}
 
@@ -51,6 +53,37 @@ test('empty-park toggle stores state and rerenders last known project/measuremen
   assert.equal(state.getState().showEmpty,true);assert.deepEqual(renders,[[[1],[2]]]);
 });
 
+test('park admin controller fetches fresh data per invocation and keeps rows in its feature state',async()=>{
+  const{window}=setup();let loads=0;
+  window.DG_PARK_ADMIN_MUTATION_STORE={create:()=>({})};
+  window.DG_SYNC_PARK_PROJECT_NAMES_ADAPTER={create:()=>async()=>({})};
+  const controller=window.DG_PARK_ADMIN_CONTROLLER.create({
+    window,getClient:()=>({}),isAdmin:()=>true,element:()=>null,escape:String,toast(){},
+    loadApplication:async()=>({status:'ok',parks:[{id:++loads}],projects:[],measurements:[]}),
+    loadProjects:null,loadWorld:null,loadAdminTree:null,normalizeLoose:String,normalizeName:String,
+    formatHectares:String,distance:()=>0,translate:String,translateFormat:String,translateCommon:String,
+    translatePlain:String,prompt(){},confirm(){},clearParkSession(){},backfillGeometry(){}
+  });
+  await controller.loadParkAdmin();await controller.loadParkAdmin();
+  assert.equal(loads,2);assert.deepEqual(JSON.parse(JSON.stringify(controller.state.getState().rows)),[{id:2}]);
+});
+
+test('park backfill controller stores the latest plan and delegates its rendering',async()=>{
+  const{window}=setup(),events=[];
+  window.DG_OSM_PARK_NAME_SEARCH_ADAPTER={create:()=>async()=>[]};
+  window.DG_BACKFILL_PARK_DETECTION_APPLICATION={create:()=>async()=>null};
+  window.DG_PARK_BACKFILL_PROGRESS_UI={render:()=>{}};
+  window.DG_PARK_BACKFILL_PLAN_APPLICATION={create:()=>async()=>({status:'ready',plan:[{project:{id:3}}]})};
+  window.DG_PARK_BACKFILL_APPLY_APPLICATION={create:()=>async()=>({status:'cancelled'})};
+  window.DG_PARK_BACKFILL_MANUAL_APPLICATION={create:()=>async()=>({status:'cancelled'})};
+  window.DG_PARK_BACKFILL_PLAN_UI={render:input=>events.push(['render',input.plan[0].project.id]),close:()=>events.push(['close'])};
+  const controller=window.DG_PARK_BACKFILL_CONTROLLER.create({window,document:{},setTimeout,element:()=>({}),escape:String,toast(){},translateFormat:String,translateCommon:String,isAdmin:()=>true,isOnline:()=>true,getClient:()=>({}),queryPark:async()=>null,warn(){},normalizeLoose:String,overpassRequest:async()=>({}),extractRings:()=>[],polyArea:()=>0,formatArea:String,suggestParkName:String,projectName:String,labelFromLegacy:String,registerPark:async()=>null,linkBackfillProject:null,updateBackfillProject:async()=>({}),backfillMeasurements:async()=>({}),confirm:()=>false,refreshAfterWrites(){}});
+  await controller.backfillParks();
+  assert.deepEqual(JSON.parse(JSON.stringify(controller.getPlan())),[{project:{id:3}}]);
+  assert.deepEqual(events,[['render',3]]);
+  controller.closePlan();assert.equal(controller.getPlan(),null);assert.deepEqual(events.at(-1),['close']);
+});
+
 test('backfill close clears and hides the plan container through its UI module',()=>{
   const{window}=setup(),box={style:{display:'block'},innerHTML:'plan'},document={getElementById:id=>id==='backfillBox'?box:null};
   window.DG_PARK_BACKFILL_PLAN_UI.close(document);
@@ -70,8 +103,11 @@ test('backfill plan uses declarative controls and renderer-owned current callbac
   assert.equal(called,'latest-9');
 });
 
-test('park admin modules load and are precached before park-registry',()=>{
+test('park admin and backfill controllers load and are precached before park-registry',()=>{
   const head=read('partials/head.html'),sw=read('sw.js'),service=head.indexOf('src/services/park-registry.js');
   for(const path of modules){assert.ok(head.indexOf(path)>=0&&head.indexOf(path)<service,`${path} load order`);assert.ok(sw.includes(`'/${path}'`),`${path} precache`);}
-  for(const name of ['DG_PARK_ADMIN_STATE','DG_SYNC_PARK_PROJECT_NAMES_ADAPTER','DG_RENDER_PARK_ADMIN_UI','DG_REFRESH_PARK_ADMIN_VIEWS','DG_TOGGLE_PARK_ADMIN_EMPTY'])assert.ok(registry.includes(name),`${name} service composition`);
+  const controller=read('src/bootstrap/park-admin-controller.js');
+  for(const name of ['DG_PARK_ADMIN_STATE','DG_SYNC_PARK_PROJECT_NAMES_ADAPTER','DG_RENDER_PARK_ADMIN_UI','DG_REFRESH_PARK_ADMIN_VIEWS','DG_TOGGLE_PARK_ADMIN_EMPTY'])assert.ok(controller.includes(name),`${name} controller composition`);
+  assert.ok(registry.includes('DG_PARK_ADMIN_CONTROLLER.create'),'legacy facade delegates to the park admin controller');
+  assert.ok(registry.includes('DG_PARK_BACKFILL_CONTROLLER.create'),'legacy facade delegates to the backfill controller');
 });

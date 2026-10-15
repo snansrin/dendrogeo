@@ -207,6 +207,9 @@ Bu ayrım raster sınıflandırma kodlarını, kaynak eşlemesini, eşikleri, Se
 - `application/parks/rename-park-identity.js`, park adını ve kanonik ad anahtarını güncelleyip bağlı proje adlarını eşitleme akışını yürütür; `park-registry.js` Supabase, istem ve bildirim bağlayıcılarını korur.
 
 - `application/parks/delete-park-identity.js`, park kimliği silme yetkisini, uyarı onayını ve başarılı silme sonrası oturum temizliğini yönetir; DB işlemi ve bildirimler serviste kalır.
+- `bootstrap/park-admin-controller.js`, park kimlikleri yönetim ekranının state, okuma use-case'i, renderer, isim eşitleme ve rename/merge/delete akışlarını mevcut adapter/UI/use-case modüllerine bağlar. `park-registry.js` yalnızca eski `loadParkAdmin`/`dgPark*` adlarını koruyup bu controller'a delege eder; yönetim verisi her yükleme çağrısında yeniden alınır.
+- `bootstrap/park-backfill-controller.js`, eski projeler için park bulma/planlama, yönetici onayıyla uygulama, manuel park oluşturma ve görünüm yenileme bağlarını taşır. `park-registry.js` eski `backfillParks` ve `dgBackfill*` isimlerini koruyan ince köprüdür; query/search, plan, apply, mutation store ve UI sahipliği kendi modüllerindedir.
+- `lc-sens.js`, yüzey editörünün panel ve araç çubuğu HTML'ini artık üretmez; view-model, panel, menü ve toolbar modülleri tek kaynak sahibidir. Harita sağ-tuş pan, çizim/fırça türü, el modu ve opacity davranışları da kendi interaction modüllerine zorunlu olarak delege edilir. Runtime zinciri bu modülleri lazy-load ve offline precache kapılarında denetler.
 
 ## Güvenli geçiş sırası
 

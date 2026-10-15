@@ -70,7 +70,6 @@ const DG_PARK_SESSION=new Map();
 let DG_MANUAL_PENDING=null;
 
 /* Admin "Parkları Geri Doldur" aracının önizleme planı (yazmadan önce gösterilir). */
-let DG_BACKFILL_PLAN=null;
 
 /* 0004_parks.sql uygulanmamışsa (parks tablosu / v_park_compare yok) uygulama
  * çökmesin: park kimliği devre dışı kalır, eski proje bazlı akış yedek olarak
@@ -512,175 +511,26 @@ function dgProjectOptionsForPark(parkId,fallbackAll){
  *   · hiç eşleşmeyen proje için satırda "✍️ Elle park kimliği aç":
  *     ölçüm merkezinde, proje adıyla manuel park kimliği açar. Böylece
  *     OSM'de park olmayan yerler de park bazlı karşılaştırmaya girer. */
-const dgSleep=ms=>new Promise(r=>setTimeout(r,ms));
-
-async function dgQueryParkSafe(lat,lon,radius){
-  if(window.DG_QUERY_PARK_SAFELY)return window.DG_QUERY_PARK_SAFELY.query(lat,lon,radius,{queryPark,warn:(radius,error)=>console.warn("DENDROGEO · park sorgusu ("+radius+" m) başarısız:",error)});
-  try{
-    return await queryPark(lat,lon,radius);
-  }catch(e){
-    console.warn("DENDROGEO · park sorgusu ("+radius+" m) başarısız:",e);
-    return null;
-  }
-}
-
-/* Eski dg* çağrıları uyumluluk facade'ı olarak kalır; arama adapter/use-case'te. */
-const DG_BACKFILL_PARK_NAME_SEARCH=window.DG_OSM_PARK_NAME_SEARCH_ADAPTER.create({
-  normalizeName:name=>dgNormParkLoose(name),
-  request:(query,label)=>overpassRequest(query,label),
-  extractRings:element=>extractRings(element),
-  polyArea:rings=>polyArea(rings)
+const DG_PARK_BACKFILL_CONTROLLER=window.DG_PARK_BACKFILL_CONTROLLER.create({
+  window,document:typeof document==="undefined"?null:document,setTimeout:(...args)=>setTimeout(...args),element:id=>$(id),escape:value=>esc(value),toast:(...args)=>toast(...args),
+  translateFormat:(...args)=>_tprf(...args),translateCommon:value=>dgCf(value),
+  isAdmin:()=>!!PROFILE&&(PROFILE.role==="admin"||PROFILE.role==="owner"),isOnline:()=>navigator.onLine,getClient:()=>sb,
+  queryPark:(...args)=>queryPark(...args),warn:(...args)=>console.warn(...args),
+  normalizeLoose:name=>dgNormParkLoose(name),overpassRequest:(...args)=>overpassRequest(...args),extractRings:element=>extractRings(element),polyArea:rings=>polyArea(rings),
+  formatArea:area=>dgFmtHa(area),suggestParkName:name=>dgSuggestParkName(name),projectName:(name,label)=>dgProjectName(name,label),labelFromLegacy:(name,parkName)=>dgLabelFromLegacy(name,parkName),registerPark:(candidate,options)=>dgRegisterPark(candidate,options),
+  linkBackfillProject:DG_PARK_BACKFILL_PROJECT_LINK?(project,park)=>DG_PARK_BACKFILL_PROJECT_LINK(project,park):null,
+  updateBackfillProject:(id,patch)=>DG_PARK_PROJECT_LINK_STORE.updateBackfillProject(id,patch),backfillMeasurements:(projectId,parkId)=>DG_PARK_PROJECT_LINK_STORE.backfillMeasurements(projectId,parkId),
+  confirm:(...args)=>confirm(...args),refreshAfterWrites:()=>dgAfterBackfillWrites()
 });
-async function dgQueryParkByName(lat,lon,projName){
-  return DG_BACKFILL_PARK_NAME_SEARCH(lat,lon,projName);
-}
-
-const DG_BACKFILL_PARK_DETECT=window.DG_BACKFILL_PARK_DETECTION_APPLICATION.create({
-  queryNear:(lat,lon,radius)=>dgQueryParkSafe(lat,lon,radius),
-  queryByName:(lat,lon,name)=>dgQueryParkByName(lat,lon,name),
-  sleep:ms=>dgSleep(ms)
-});
-async function dgDetectParkForProject(lat,lon,projName){
-  return DG_BACKFILL_PARK_DETECT(lat,lon,projName);
-}
-
-function dgBackfillProgress(i,n,label){
-  return window.DG_PARK_BACKFILL_PROGRESS_UI.render({box:$("backfillBox"),index:i,total:n,label,escape:esc});
-}
-
-const DG_PARK_BACKFILL_PLAN=window.DG_PARK_BACKFILL_PLAN_APPLICATION.create({
-  isAdmin:()=>!!PROFILE&&(PROFILE.role==="admin"||PROFILE.role==="owner"),
-  isOnline:()=>navigator.onLine,
-  fetchProjects:()=>window.DG_PARK_PROJECT_READ_STORE.fetchBackfillProjects(sb),
-  fetchMeasurements:id=>window.DG_PARK_PROJECT_READ_STORE.fetchMeasurements({client:sb,projectId:id,limit:1000}),
-  detectPark:(lat,lon,name)=>dgDetectParkForProject(lat,lon,name),
-  sleep:ms=>dgSleep(ms),
-  suggestParkName:name=>dgSuggestParkName(name),
-  projectName:(name,label)=>dgProjectName(name,label),
-  labelFromLegacy:(name,parkName)=>dgLabelFromLegacy(name,parkName),
-  onProgress:(i,n,name)=>dgBackfillProgress(i,n,name)
-});
-
-async function backfillParks(){
-  const result=await DG_PARK_BACKFILL_PLAN();
-  const box=$("backfillBox");
-  if(result.status==="forbidden")return toast("Yetki yok.","err");
-  if(result.status==="offline"){
-    window.DG_PARK_ADMIN_STATUS_UI.backfillOffline(box);
-    return toast("Çevrimdışı: park geri doldurma çalışmaz.","err","📴");
-  }
-  if(result.status==="projects-load-failed"){
-    window.DG_PARK_ADMIN_STATUS_UI.backfillLoadFailed(box,result.error,esc);
-    return toast(dgCf("Projeler okunamadı: ")+esc(result.error.message),"err");
-  }
-  if(result.status==="no-targets"){
-    window.DG_PARK_ADMIN_STATUS_UI.backfillNoTargets(box);
-    return toast("Park bağı eksik proje yok ✓","ok","🌳");
-  }
-  DG_BACKFILL_PLAN=result.plan;
-  dgRenderBackfillPlan();
-}
-
-function dgRenderBackfillPlan(){
-  return window.DG_PARK_BACKFILL_PLAN_UI.render({box:$("backfillBox"),plan:DG_BACKFILL_PLAN||[],escape:esc,formatArea:dgFmtHa,translateFormat:_tprf});
-}
-
-function dgCloseBackfill(){
-  window.DG_PARK_BACKFILL_PLAN_UI.close(document);
-  DG_BACKFILL_PLAN=null;
-}
-
-const DG_PARK_BACKFILL_APPLY=window.DG_PARK_BACKFILL_APPLY_APPLICATION.create({
-  isAdmin:()=>!!PROFILE&&(PROFILE.role==="admin"||PROFILE.role==="owner"),
-
-  confirmApply:count=>confirm(_tprf("{n} proje parkla eşleşecek ve adları yeniden kurulacak. Devam?",{n:count})),
-  onProgress:(i,n,label)=>dgBackfillProgress(i,n,label),
-  registerPark:(candidate,options)=>dgRegisterPark(candidate,options),
-  linkProject:(project,park)=>dgLinkProjectToPark(project,park)
-});
-
-async function dgApplyBackfill(){
-  const result=await DG_PARK_BACKFILL_APPLY(DG_BACKFILL_PLAN);
-  if(result.status==="forbidden")return toast("Yetki yok.","err");
-  if(result.status==="empty-plan")return toast("Uygulanacak eşleşme yok","warn");
-  if(result.status==="cancelled")return;
-
-  if(window.DG_COMPLETE_PARK_BACKFILL_APPLY&&window.DG_PARK_BACKFILL_APPLY_FEEDBACK_UI){
-    window.DG_COMPLETE_PARK_BACKFILL_APPLY.complete({
-      result,
-      showResult:value=>window.DG_PARK_BACKFILL_APPLY_FEEDBACK_UI.show({result:value,translateFormat:_tprf,notify:toast}),
-      clearPlan:()=>{DG_BACKFILL_PLAN=null;},
-      closePlan:dgCloseBackfill,
-      refresh:dgAfterBackfillWrites
-    });
-    return;
-  }
-
-  toast(_tprf("✓ {n} proje parkla eşleştirildi{f}",{n:result.successes,f:result.failures?_tprf(" · {n} hata",{n:result.failures}):""}),result.failures?"warn":"ok","🌳");
-  DG_BACKFILL_PLAN=null;
-  dgCloseBackfill();
-  dgAfterBackfillWrites();
-}
-
-/* Tek proje için ortak bağlama adımları (geri doldurma + elle oluşturma). */
-async function dgLinkProjectToPark(proj,park){
-  if(!DG_PARK_BACKFILL_PROJECT_LINK){
-    const label=dgLabelFromLegacy(proj.name,park.name);
-    const{error}=await DG_PARK_PROJECT_LINK_STORE.updateBackfillProject(proj.id,{park_id:park.id,label});
-    if(error){console.warn("DENDROGEO · backfill proje hatası:",error.message);toast(dgCf("Bağlanamadı (")+esc(proj.name)+"): "+esc(error.message),"err");return false;}
-    try{await DG_PARK_PROJECT_LINK_STORE.backfillMeasurements(proj.id,park.id);}catch(e){}
-    return true;
-  }
-  const result=await DG_PARK_BACKFILL_PROJECT_LINK(proj,park);
-  if(result.status==="write-failed"){
-    window.DG_PARK_BACKFILL_LINK_FEEDBACK_UI.failed({project:proj,error:result.error,escape:esc,translate:dgCf,warn:(...args)=>console.warn(...args),notify:toast});
-    return false;
-  }
-  return result.status==="linked";
-}
-
-/* OSM'de park bulunamayan proje: ölçüm merkezinde, proje adıyla MANUEL park
- * kimliği aç ve bağla. Böylece "Ülkü", "Dikmen Vadisi" gibi yerler de park
- * bazlı karşılaştırmaya girer. */
-const DG_PARK_BACKFILL_MANUAL=window.DG_PARK_BACKFILL_MANUAL_APPLICATION.create({
-  isAdmin:()=>!!PROFILE&&(PROFILE.role==="admin"||PROFILE.role==="owner"),
-  getPlanRow:id=>(DG_BACKFILL_PLAN||[]).find(row=>row.project.id===id),
-  confirmCreate:({name,lat,lon})=>confirm(_tprf('"{name}" adıyla elle park kimliği oluşturulsun ve proje bağlansın mı?\nKonum: ölçümlerin merkezi ({la}, {lo})',{name,la:lat.toFixed(5),lo:lon.toFixed(5)})),
-  createPark:(name,row)=>dgRegisterPark({name,source:"manual",area:null},{manual:true,lat:row.lat,lon:row.lon,source:"manual"}),
-  linkProject:(project,park)=>dgLinkProjectToPark(project,park)
-});
-
-async function dgBackfillManual(projectId){
-  const result=await DG_PARK_BACKFILL_MANUAL(projectId);
-  if(result.status==="forbidden")return toast("Yetki yok.","err");
-  if(result.status==="measurement-center-missing")return toast("Bu proje için ölçüm merkezi yok.","err");
-  if(result.status==="cancelled"||result.status==="project-link-failed")return;
-  if(result.status==="park-create-failed")return toast("Park kimliği oluşturulamadı.","err","🌳");
-
-  if(window.DG_COMPLETE_MANUAL_BACKFILL_PARK&&window.DG_BUILD_MANUAL_BACKFILL_PARK_UPDATE&&window.DG_PARK_BACKFILL_MANUAL_FEEDBACK_UI){
-    window.DG_COMPLETE_MANUAL_BACKFILL_PARK.complete({
-      result,
-      buildUpdate:(row,createdPark)=>window.DG_BUILD_MANUAL_BACKFILL_PARK_UPDATE.build({row,park:createdPark,projectName:dgProjectName,labelFromLegacy:dgLabelFromLegacy}),
-      updateRow:(row,patch)=>Object.assign(row,patch),
-      showSuccess:createdPark=>window.DG_PARK_BACKFILL_MANUAL_FEEDBACK_UI.show({park:createdPark,escape:esc,notify:toast}),
-      renderPlan:dgRenderBackfillPlan,
-      refresh:dgAfterBackfillWrites
-    });
-    return;
-  }
-
-  const x=result.row,park=result.park;
-
-  /* Plan satırını "eşleşti"ye çevir ki liste güncel kalsın */
-  x.durum="eşleşti";x.parkName=park.name;x.yol="elle oluşturuldu";
-  x.newName=dgProjectName(park.name,dgLabelFromLegacy(x.project.name,park.name));
-  x.cand={name:park.name,area:park.area_m2};
-
-  toast("✓ "+esc(park.name)+" oluşturuldu ve bağlandı","ok","🌳");
-  dgRenderBackfillPlan();
-  dgAfterBackfillWrites();
-}
-
+async function dgQueryParkSafe(lat,lon,radius){return DG_PARK_BACKFILL_CONTROLLER.queryParkSafe(lat,lon,radius);}
+async function dgQueryParkByName(lat,lon,name){return DG_PARK_BACKFILL_CONTROLLER.queryParkByName(lat,lon,name);}
+async function dgDetectParkForProject(lat,lon,name){return DG_PARK_BACKFILL_CONTROLLER.detectParkForProject(lat,lon,name);}
+async function backfillParks(){return DG_PARK_BACKFILL_CONTROLLER.backfillParks();}
+function dgRenderBackfillPlan(){return DG_PARK_BACKFILL_CONTROLLER.renderPlan();}
+function dgCloseBackfill(){return DG_PARK_BACKFILL_CONTROLLER.closePlan();}
+async function dgApplyBackfill(){return DG_PARK_BACKFILL_CONTROLLER.applyBackfill();}
+async function dgLinkProjectToPark(project,park){return DG_PARK_BACKFILL_CONTROLLER.linkProjectToPark(project,park);}
+async function dgBackfillManual(projectId){return DG_PARK_BACKFILL_CONTROLLER.backfillManual(projectId);}
 function dgAfterBackfillWrites(){
   if(!window.DG_REFRESH_AFTER_PARK_BACKFILL){if(typeof loadProjects==="function")loadProjects();if(typeof loadWorld==="function")loadWorld();if(typeof loadAdmin==="function")loadAdmin();return;}
   return window.DG_REFRESH_AFTER_PARK_BACKFILL.refresh({loadProjects:typeof loadProjects==="function"?loadProjects:null,loadWorld:typeof loadWorld==="function"?loadWorld:null,loadAdmin:typeof loadAdmin==="function"?loadAdmin:null});
@@ -697,111 +547,36 @@ function dgAfterBackfillWrites(){
  * Otomatik birleştirme BİLEREK yapılmıyor: iki ayrı park aynı adı taşıyabilir
  * ("Cumhuriyet Parkı" ×2). Karar yöneticide; araç yalnız ölçüyü gösterir
  * (ad + mesafe + alan) ve tek tıkla taşır. */
-let DG_PARK_ADMIN_ROWS=[];
-let DG_PARK_ADMIN_SHOW_EMPTY=false;   /* 2026-09-27: boş parkları göster/gizle */
-let DG_PARK_ADMIN_LAST=null;          /* son projects/measurements bağlamı */
-const DG_PARK_ADMIN_STATE=window.DG_PARK_ADMIN_STATE.create();
-DG_PARK_ADMIN_STATE.subscribe(state=>{DG_PARK_ADMIN_ROWS=state.rows;DG_PARK_ADMIN_SHOW_EMPTY=state.showEmpty;DG_PARK_ADMIN_LAST=state.lastContext;});
-
-/* 0040: kaydırma koruma sarmalı — yeniden çizimde #main scrollTop korunur. */
+const DG_PARK_ADMIN_CONTROLLER=window.DG_PARK_ADMIN_CONTROLLER.create({
+  window,getClient:()=>sb,isAdmin:dgIsAdmin,element:id=>$(id),escape:value=>esc(value),toast:(...args)=>toast(...args),
+  keepScroll:typeof dgScrollKeep==="function"?dgScrollKeep:null,
+  restoreScroll:typeof dgScrollRestore==="function"?dgScrollRestore:null,
+  loadApplication:()=>window.DG_PARK_ADMIN_LOAD_APPLICATION.create({
+    isAdmin:()=>!!PROFILE&&(PROFILE.role==="admin"||PROFILE.role==="owner"),
+    showLoading:()=>window.DG_PARK_ADMIN_STATUS_UI.parkLoading($("parkAdminBox")),
+    fetchParks:()=>window.DG_PARK_ADMIN_READ_STORE.fetchParks(sb),
+    fetchProjects:()=>window.DG_PARK_ADMIN_READ_STORE.fetchProjects(sb),
+    fetchMeasurements:()=>window.DG_PARK_ADMIN_READ_STORE.fetchMeasurements(sb)
+  })(),
+  loadProjects:typeof loadProjects==="function"?loadProjects:null,
+  loadWorld:typeof loadWorld==="function"?loadWorld:null,
+  loadAdminTree:typeof loadAdminTree==="function"?loadAdminTree:null,
+  normalizeLoose:value=>dgNormParkLoose(value),normalizeName:value=>dgNormParkName(value),formatHectares:value=>dgFmtHa(value),distance:(...args)=>hav(...args),
+  translate:value=>_tpr(value),translateFormat:(...args)=>_tprf(...args),translateCommon:value=>dgCf(value),translatePlain:value=>typeof dgT==="function"?dgT(value):value,
+  prompt:(...args)=>prompt(...args),confirm:(...args)=>confirm(...args),clearParkSession:()=>DG_PARK_SESSION.clear(),backfillGeometry:id=>dgBackfillGeom(id)
+});
+const DG_PARK_ADMIN_STATE=DG_PARK_ADMIN_CONTROLLER.state;
+const DG_PARK_ADMIN_MUTATION_STORE=DG_PARK_ADMIN_CONTROLLER.mutationStore;
+const DG_PARK_PROJECT_NAME_SYNC=DG_PARK_ADMIN_CONTROLLER.syncProjectNames;
 async function loadParkAdmin(){const _y=(typeof dgScrollKeep==="function"?dgScrollKeep():null);try{return await loadParkAdmin__scroll.apply(this,arguments);}finally{if(typeof dgScrollRestore==="function")dgScrollRestore(_y);}}
-async function loadParkAdmin__scroll(){
-  const result=await DG_PARK_ADMIN_LOAD();
-  if(result.status==="forbidden")return toast("Yetki yok.","err");
-  const box=$("parkAdminBox");
-  if(result.status==="park-load-failed"){
-    window.DG_PARK_ADMIN_STATUS_UI.parkLoadFailed(box,result.error,esc);
-    return;
-  }
-  DG_PARK_ADMIN_STATE.setState({rows:result.parks});
-  dgRenderParkAdmin(result.projects,result.measurements);
-}
-
-const DG_PARK_ADMIN_LOAD=window.DG_PARK_ADMIN_LOAD_APPLICATION.create({
-  isAdmin:()=>!!PROFILE&&(PROFILE.role==="admin"||PROFILE.role==="owner"),
-  showLoading:()=>window.DG_PARK_ADMIN_STATUS_UI.parkLoading($("parkAdminBox")),
-  fetchParks:()=>window.DG_PARK_ADMIN_READ_STORE.fetchParks(sb),
-  fetchProjects:()=>window.DG_PARK_ADMIN_READ_STORE.fetchProjects(sb),
-  fetchMeasurements:()=>window.DG_PARK_ADMIN_READ_STORE.fetchMeasurements(sb)
-});
-
-function dgRenderParkAdmin(projects,measurements){
-  const box=$("parkAdminBox");
-  if(!box)return;
-  /* Legacy lexical assignments remain a supported compatibility view. */
-  const state=DG_PARK_ADMIN_STATE.getState();
-  if(state.rows!==DG_PARK_ADMIN_ROWS||state.showEmpty!==DG_PARK_ADMIN_SHOW_EMPTY)DG_PARK_ADMIN_STATE.setState({rows:DG_PARK_ADMIN_ROWS,showEmpty:DG_PARK_ADMIN_SHOW_EMPTY});
-  return window.DG_RENDER_PARK_ADMIN_UI.render({state:DG_PARK_ADMIN_STATE,element:$,projects,measurements,
-    buildOverview:input=>window.DG_PARK_ADMIN_OVERVIEW.build(input),renderRows:input=>window.DG_PARK_ADMIN_RENDERER.render({...input,actions:{
-      mergeInto:element=>dgParkMergeInto(Number(element.dataset.sourceId),Number(element.dataset.targetId)),
-      toggleEmpty:()=>dgParkAdminToggleEmpty(),rename:element=>dgParkRename(Number(element.dataset.parkId)),
-      backfillGeometry:element=>dgBackfillGeom(Number(element.dataset.parkId)),
-      mergeFromSelect:element=>dgParkMergeFromSelect(Number(element.dataset.parkId)),
-      delete:element=>dgParkDelete(Number(element.dataset.parkId))
-    }}),
-    normalizeLoose:dgNormParkLoose,normalizeName:dgNormParkName,formatHectares:dgFmtHa,distance:hav,escapeHTML:esc,
-    translate:_tpr,translateFormat:_tprf,translatePlain:value=>typeof dgT==="function"?dgT(value):value});
-}
-
-const DG_PARK_PROJECT_NAME_SYNC=window.DG_SYNC_PARK_PROJECT_NAMES_ADAPTER.create({getClient:()=>sb});
-const DG_PARK_ADMIN_MUTATION_STORE=window.DG_PARK_ADMIN_MUTATION_STORE.create({getClient:()=>sb});
-async function dgResyncProjectNames(parkId,knownName){
-  return DG_PARK_PROJECT_NAME_SYNC(parkId,knownName);
-}
-
-const DG_PARK_ADMIN_RENAME=window.DG_PARK_ADMIN_RENAME_APPLICATION.create({
-  isAdmin:dgIsAdmin,
-  getParks:()=>DG_PARK_ADMIN_ROWS,
-  promptName:park=>window.DG_PARK_ADMIN_MUTATION_UI.promptRename(park,{prompt,translate:_tpr}),
-  normalizeName:dgNormParkName,
-  updatePark:(id,patch)=>DG_PARK_ADMIN_MUTATION_STORE.updatePark(id,patch),
-  resyncProjectNames:dgResyncProjectNames
-});
-
-async function dgParkRename(id){
-  const result=await DG_PARK_ADMIN_RENAME(id);
-  if(window.DG_PARK_ADMIN_MUTATION_UI.renameResult(result,{translate:_tpr,translateCommon:dgCf,escape:esc,toast}))await dgAfterParkAdminChange();
-}
-
-function dgParkMergeFromSelect(id){
-  const sel=$("parkMergeSel"+id);
-  const dst=sel?+sel.value:0;
-  if(!dst)return toast("Önce hedef park seç","err","🔀");
-  dgParkMergeInto(id,dst);
-}
-
-const DG_PARK_ADMIN_MERGE=window.DG_PARK_ADMIN_MERGE_APPLICATION.create({
-  isAdmin:dgIsAdmin,
-  getParks:()=>DG_PARK_ADMIN_ROWS,
-  confirmMerge:(src,dst)=>window.DG_PARK_ADMIN_MUTATION_UI.confirmMerge(src,dst,{confirm,translateFormat:_tprf}),
-  moveProjects:(srcId,dstId)=>DG_PARK_ADMIN_MUTATION_STORE.moveProjects(srcId,dstId),
-  moveMeasurements:(srcId,dstId)=>DG_PARK_ADMIN_MUTATION_STORE.moveMeasurements(srcId,dstId),
-  resyncProjectNames:dgResyncProjectNames,
-  deletePark:id=>DG_PARK_ADMIN_MUTATION_STORE.deletePark(id),
-  clearSession:()=>DG_PARK_SESSION.clear()
-});
-
-async function dgParkMergeInto(srcId,dstId){
-  const result=await DG_PARK_ADMIN_MERGE(srcId,dstId);
-  if(window.DG_PARK_ADMIN_MUTATION_UI.mergeResult(result,{translate:_tpr,translateCommon:dgCf,translateFormat:_tprf,escape:esc,toast}))await dgAfterParkAdminChange();
-}
-
-const DG_PARK_ADMIN_DELETE=window.DG_PARK_ADMIN_DELETE_APPLICATION.create({
-  isAdmin:dgIsAdmin,
-  getPark:id=>DG_PARK_ADMIN_ROWS.find(park=>park.id===id),
-  confirmDelete:park=>window.DG_PARK_ADMIN_MUTATION_UI.confirmDelete(park,{confirm}),
-  deletePark:id=>DG_PARK_ADMIN_MUTATION_STORE.deletePark(id),
-  clearSession:()=>DG_PARK_SESSION.clear()
-});
-
-async function dgParkDelete(id){
-  const result=await DG_PARK_ADMIN_DELETE(id);
-  if(window.DG_PARK_ADMIN_MUTATION_UI.deleteResult(result,{escape:esc,toast}))await dgAfterParkAdminChange();
-}
-
-async function dgAfterParkAdminChange(){
-  return window.DG_REFRESH_PARK_ADMIN_VIEWS.refresh({loadParkAdmin,loadProjects:typeof loadProjects==="function"?loadProjects:null,loadWorld:typeof loadWorld==="function"?loadWorld:null,loadAdminTree:typeof loadAdminTree==="function"?loadAdminTree:null});
-}
+async function loadParkAdmin__scroll(){return DG_PARK_ADMIN_CONTROLLER.loadParkAdmin();}
+function dgRenderParkAdmin(projects,measurements){return DG_PARK_ADMIN_CONTROLLER.renderParkAdmin(projects,measurements);}
+async function dgResyncProjectNames(parkId,knownName){return DG_PARK_PROJECT_NAME_SYNC(parkId,knownName);}
+function dgParkRename(id){return DG_PARK_ADMIN_CONTROLLER.parkRename(id);}
+function dgParkMergeFromSelect(id){return DG_PARK_ADMIN_CONTROLLER.parkMergeFromSelect(id);}
+function dgParkMergeInto(sourceId,destinationId){return DG_PARK_ADMIN_CONTROLLER.parkMergeInto(sourceId,destinationId);}
+function dgParkDelete(id){return DG_PARK_ADMIN_CONTROLLER.parkDelete(id);}
+function dgAfterParkAdminChange(){return DG_PARK_ADMIN_CONTROLLER.afterChange();}
 
 /* =========================================================
    9. TEMİZLİK + KÖPRÜLER
@@ -929,10 +704,7 @@ async function dgBackfillGeom(parkId){
 }
 window.dgBackfillGeom=dgBackfillGeom;
 function dgParkAdminToggleEmpty(){
- if(window.DG_TOGGLE_PARK_ADMIN_EMPTY)return window.DG_TOGGLE_PARK_ADMIN_EMPTY.toggle(DG_PARK_ADMIN_STATE,dgRenderParkAdmin);
- DG_PARK_ADMIN_SHOW_EMPTY=!DG_PARK_ADMIN_SHOW_EMPTY;
- const ctx=DG_PARK_ADMIN_LAST||{projects:[],measurements:[]};
- dgRenderParkAdmin(ctx.projects,ctx.measurements);
+ return DG_PARK_ADMIN_CONTROLLER.toggleEmpty();
 }
 window.dgParkAdminToggleEmpty=dgParkAdminToggleEmpty;
 window.dgCreateManualPark=dgCreateManualPark;

@@ -331,9 +331,9 @@ test('midpoint label styling does not capture map clicks or alter GIS core prese
 
 test('surface brush omits pool/fountain but retains water and all historical science classes',()=>{
  const ui=load('src/ui/gis-workspace.js');
- const core=load('src/ui/lc-sens.js');
- assert.match(core,/const types=\["hard","green","water","building","bare"\]/);
- assert.doesNotMatch(core,/"building","pool","bare"/);
+ const menus=load('src/ui/render-surface-editor-menus.js');
+ assert.match(menus,/const brushTypes=\["hard","green","water","building","bare"\]/);
+ assert.doesNotMatch(menus,/const brushTypes=\[[^\]]*"pool"/);
  assert.match(ui,/function syncBrushChoices\(\)/);
  assert.match(ui,/select\.querySelector\('option\[value="pool"\]'\)/);
  assert.match(ui,/legacyPool\.remove\(\)/);

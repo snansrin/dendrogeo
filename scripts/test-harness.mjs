@@ -248,6 +248,8 @@ export function loadApp({ sadece } = {}) {
     'src/ui/park-admin-mutation.js',
     'src/ui/render-park-admin.js',
     'src/adapters/parks/sync-park-project-names.js',
+    'src/bootstrap/park-admin-controller.js',
+    'src/bootstrap/park-backfill-controller.js',
     'src/services/park-registry.js',
     'src/application/parks/build-grid-waypoint-rows.js',
     'src/application/parks/count-grid-cell-measurements.js',

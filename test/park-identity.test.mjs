@@ -345,7 +345,7 @@ describe('park kimlikleri yönetim aracı (yeniden adlandır · birleştir · si
     assert.match(parkMergeApplication, /moveMeasurements\(sourceId,destinationId\)/);
     assert.match(parkMergeApplication, /resyncProjectNames\(destinationId\)/, 'proje adları hedef park adına göre kurulmalı');
     assert.match(parkMergeApplication, /deletePark\(sourceId\)/);
-    assert.match(registry, /confirmMerge:/, 'silme öncesi UI onayı adapter üzerinden istenmeli');
+    assert.match(readFileSync(join(ROOT, 'src/bootstrap/park-admin-controller.js'), 'utf8'), /confirmMerge:/, 'silme öncesi UI onayı adapter üzerinden istenmeli');
   });
 
   test('yeniden adlandırma name_norm’u da günceller (eşleştirme bozulmasın)', () => {

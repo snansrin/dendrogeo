@@ -6,6 +6,10 @@
 
 14 Ekim 2026 yüzey fırçası düzeltmesi: kullanıcının açık hata giderme talebiyle kilitli `src/ui/lc-sens.js` içinde yalnız çap ayarı use-case'ine mevcut `dgSensBrushToggle` portu eklendi. Sınıf seçimi, açık fırçanın çap değişiminden sonra sürmesi ve menüde aç/kapat kontrolü ilgili modüllerde düzenlendi. Önceki/yeni UI hashleri manifestte kayıtlıdır; fare, dokunma, hücre kararı, geri alma ve ham sınıfın korunması gerçek Leaflet/Chromium testiyle doğrulanır.
 
+15 Ekim 2026 kullanıcı yetkili modülerleştirme: yüzey editörünün panel/toolbar için kopya HTML yedeği kaldırıldı; renderer modülleri zorunlu sahip olarak sabitlendi. Sağ tuş pan, çizim/fırça seçimi, el modu ve opacity iş akışlarının servis içi kopyaları kaldırılıp mevcut modüllere doğrudan delege edildi. Analiz, fırça, çizim, kabul ve ham raster davranışları değişmedi; korunan dosya ve test hash zinciri manifestte kayıtlıdır.
+
+15 Ekim 2026 aynı açık mimari talimatıyla park yönetimindeki eski proje backfill planı, uygulaması ve manuel park akışının composition kodu `bootstrap/park-backfill-controller.js` içine alındı. Eski `backfillParks`/`dgBackfill*` girişleri korunur; plan ve write işleri mevcut application/adapter/UI modüllerinde kalır. Park arama sırası, proje ölçüm limitleri, iki aşamalı onay ve refresh sırası regresyon testleriyle korundu.
+
 14 Ekim 2026'da kullanıcı, ilk giriş ve yenilemede önceki sekme yerine temiz panelin açılmasını açıkça istedi. Yalnız `test/critical-fixes.test.mjs` içindeki bu kararla çelişen otomatik sekme geri yükleme beklentisi güncellendi; önceki/yeni SHA değerleri kilit manifestinde kayıtlıdır. Bilimsel motor, park taslakları ve veri erişim kapıları aynı kalır.
 
 ## Ürün kararı

@@ -672,9 +672,10 @@ describe('entegrasyon zinciri kilitleri (0054 · lc-sens)', () => {
   });
 
   test('mobil sözleşme: kaydırıcı ≥44px + dg-png ailesi + animasyon YOK', () => {
+    const controls = rd('src/ui/render-surface-sensitivity-controls.js');
     assert.match(css, /\.dg-sens-slider\{[^}]*min-height:44px/);
     assert.match(sens, /dg-png-btn/);
-    assert.match(sens, /type="range"/);
+    assert.match(controls, /type="range" class="dg-sens-slider dg-range"/);
     assert.ok(!/dg-sens[^{]*\{[^}]*animation/.test(css), 'sens CSS animasyon ekleyemez');
     assert.ok(!/\.dg-valw-[\w-]+\s*\{/.test(css), 'ölü .dg-valw-* kuralları css’te kalmamalı (0054)');
     assert.match(css, /\.dg-sens-chip\{/, '0056 mod çipi stili tanımlı olmalı');
@@ -739,8 +740,9 @@ describe('entegrasyon zinciri kilitleri (0054 · lc-sens)', () => {
 
 describe("0058 · Doğrulanmış Harita PNG (kullanıcının refactor'ü üstüne ek)", () => {
   const sens = rd('src/ui/lc-sens.js');
+  const menus = rd('src/ui/render-surface-editor-menus.js');
   test('düğme + üretici mevcut ve onların kancalarını kullanır', () => {
-    assert.match(sens, /data-dg-click="exportPng"/);
+    assert.match(menus, /data-dg-click="exportPng"/);
     assert.match(sens, /function dgSensExportPng\(\)\{/);
     const exportUi = rd('src/ui/render-verified-surface-map-export.js');
     const layers = rd('src/ui/draw-surface-export-map-layers.js');

@@ -619,6 +619,8 @@ const CORE_ASSETS = [
     '/src/application/parks/handle-park-project-change.js',
     '/src/application/parks/handle-park-drawn.js',
     '/src/application/parks/park-admin-state.js',
+    '/src/bootstrap/park-admin-controller.js',
+    '/src/bootstrap/park-backfill-controller.js',
     '/src/adapters/parks/sync-park-project-names.js',
     '/src/ui/render-park-admin.js',
     '/src/application/parks/refresh-park-admin-views.js',

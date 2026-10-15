@@ -7135,6 +7135,202 @@
           "sha256": "a62bea43a14142cb246596466b6cc79eb97bd87482a6fb3c9ac446c162c68155"
         }
       ]
+    },
+    {
+      "date": "2026-10-15",
+      "scope": "User-authorized architecture completion: move park identity administration composition into a bootstrap controller while preserving legacy calls, script order, offline precache and park CRUD behavior; update focused controller/regression fixtures.",
+      "audit_chain": "sha256-v1",
+      "files": [
+        {
+          "path": "index.html",
+          "previous_sha256": "40e5932a6bd5117e51da46a88f8c042276a79fe8de25b5624cc68b7a3090b2a2",
+          "sha256": "fb94c92e7a6628277fce02af3c3614240310e4bc82a9719fb68edad13aff692e"
+        },
+        {
+          "path": "partials/head.html",
+          "previous_sha256": "3c07ea072218d5da469f27c7f2a61d6ad56825888bb6b450269d535c326160cb",
+          "sha256": "3902ce057014a5193ea56becf69a93c931bc75fa31925bfe38186cf6730b76ba"
+        },
+        {
+          "path": "src/services/park-registry.js",
+          "previous_sha256": "8c5062da8b724fec34ddf28dffb9231150c84945785f25064275670494f006a6",
+          "sha256": "9a88e3a717bb0250fabe2a8a80c36d55f6da2fab44b2ed54e1cd5cb204e366f8"
+        },
+        {
+          "path": "sw.js",
+          "previous_sha256": "60bc3644adff392b44428adf43bf9a33930eb870bbeb68a90693b0cab97d2f42",
+          "sha256": "fb73718b3bc15b0a405c9e2f946cdd643b804b932f3d4903b158b7e9f98144c9"
+        },
+        {
+          "path": "test/park-admin-mutation-modules.test.mjs",
+          "previous_sha256": "f0499f4586a3b3204efbb081ad2c613e1e16320c619dc5f4d4c8f5d512543976",
+          "sha256": "84be1f5bcdacef2e308189d9559f00740c94aaf1d395ab47d298efef1ffdfa55"
+        },
+        {
+          "path": "test/park-network-recovery.test.mjs",
+          "previous_sha256": "f1bad4205dc5e5ac6a12476063d2c7f32409bd0fb2cf6541fb85bfd9f67b9a72",
+          "sha256": "4ffd72e4df2131c19fecc05eebd507d491e6a689ae7fb9ddf0b9da29c178ccb7"
+        }
+      ]
+    },
+    {
+      "date": "2026-10-15",
+      "scope": "Load the park administration bootstrap controller in the canonical regression harness before park-registry so runtime dependency order matches the shipped page.",
+      "audit_chain": "sha256-v1",
+      "files": [
+        {
+          "path": "scripts/test-harness.mjs",
+          "previous_sha256": "ed7a987a55cc854216e645ae67a048a60da1b5b320060fc50f92f1309c11fe5e",
+          "sha256": "5fb02da896bec2601a72c905f8d1d1a097feee996da48943d3fdba5cb12ee77b"
+        }
+      ]
+    },
+    {
+      "date": "2026-10-15",
+      "scope": "User-authorized modularization: preserve the legacy park-admin scroll wrapper and update protected regression assertions for controller ownership.",
+      "audit_chain": "sha256-v1",
+      "files": [
+        {
+          "path": "src/services/park-registry.js",
+          "previous_sha256": "9a88e3a717bb0250fabe2a8a80c36d55f6da2fab44b2ed54e1cd5cb204e366f8",
+          "sha256": "0a059fe4b9aedc3f6f38eae87a2cf388a972e3764cd1a8b37d8b3b2a4b10dcf6"
+        },
+        {
+          "path": "test/park-identity.test.mjs",
+          "previous_sha256": "833653621e80281dce5f43ad873855ae4f601a8af8c8502cc43c143c7f54b731",
+          "sha256": "edc3789220681b9d9c52209126a3c05d7a533e24ca355238879b469c59110e93"
+        },
+        {
+          "path": "test/landing-claims.test.mjs",
+          "previous_sha256": "17ee299d3a9c3ba28e61e17def3ceeba18c82a51c03b17248599132a4c424820",
+          "sha256": "17ee299d3a9c3ba28e61e17def3ceeba18c82a51c03b17248599132a4c424820"
+        }
+      ]
+    },
+    {
+      "date": "2026-10-15",
+      "scope": "User-authorized modularization: regenerate the shipped page so the newly added park controller has a content-synchronized runtime version.",
+      "audit_chain": "sha256-v1",
+      "files": [
+        {
+          "path": "index.html",
+          "previous_sha256": "fb94c92e7a6628277fce02af3c3614240310e4bc82a9719fb68edad13aff692e",
+          "sha256": "e1f49d34a0f9db12e61748d6f6a37d362a8c32f0bd351d8d98e591160ef18b81"
+        }
+      ]
+    },
+    {
+      "date": "2026-10-15",
+      "scope": "User-authorized modularization: make the loaded surface panel, toolbar and interaction modules exclusive owners; remove duplicated controller fallbacks and update protected UI fixtures.",
+      "audit_chain": "sha256-v1",
+      "files": [
+        {
+          "path": "src/ui/lc-sens.js",
+          "previous_sha256": "0ae789779899517fcb6d413ef0bac06e32a543626fa699b69931c90bfe82ef39",
+          "sha256": "432c214c8488e5ba4c57f1ac4a7350ed1d3170ea594581e483543bb75cc4555a"
+        },
+        {
+          "path": "test/surface-review.test.mjs",
+          "previous_sha256": "e19186c334471ee25f2f72d5ba89b29085cc7c44b2c9cb36866d2c29448bc538",
+          "sha256": "b1c13d39595f7e979f832c861754eb67238e657cd2bd4d5889dad4649f85bc99"
+        },
+        {
+          "path": "test/surface-editor-interaction-modules.test.mjs",
+          "previous_sha256": "49085b3b6ff2d04970df3d70bcb520ca4a3ddcc7aa256366bc77999fcf3f4388",
+          "sha256": "fd414000e43a6a1d6aeb1620e4e84d39d137f8e238215e395284c6cc5c313b6c"
+        },
+        {
+          "path": "index.html",
+          "previous_sha256": "e1f49d34a0f9db12e61748d6f6a37d362a8c32f0bd351d8d98e591160ef18b81",
+          "sha256": "646b4a1776597b0d2330847ba1c56c18b505db7042153a12c76c898dabca7ef3"
+        }
+      ]
+    },
+    {
+      "date": "2026-10-15",
+      "scope": "User-authorized modularization: move legacy park backfill composition into its feature bootstrap controller while retaining old actions, script order, offline assets and approved park workflow behavior.",
+      "audit_chain": "sha256-v1",
+      "files": [
+        {
+          "path": "index.html",
+          "previous_sha256": "646b4a1776597b0d2330847ba1c56c18b505db7042153a12c76c898dabca7ef3",
+          "sha256": "199080619e8022ba8103675caca3e94a7e26d81a1a2e88d16a8656aaf1808f77"
+        },
+        {
+          "path": "partials/head.html",
+          "previous_sha256": "3902ce057014a5193ea56becf69a93c931bc75fa31925bfe38186cf6730b76ba",
+          "sha256": "ec3356d4188733c101065e63effcf514c22df9a320d2fefbd3238ab5a7166634"
+        },
+        {
+          "path": "src/services/park-registry.js",
+          "previous_sha256": "0a059fe4b9aedc3f6f38eae87a2cf388a972e3764cd1a8b37d8b3b2a4b10dcf6",
+          "sha256": "dbc22092763cfc5db28acbf3b53747e8049e56b193de100d7ae0279cf020cdf8"
+        },
+        {
+          "path": "sw.js",
+          "previous_sha256": "fb73718b3bc15b0a405c9e2f946cdd643b804b932f3d4903b158b7e9f98144c9",
+          "sha256": "9bb403b4234f49012afab3b823e0777b15105f91876f14ba1dca24185fdd70c8"
+        },
+        {
+          "path": "scripts/test-harness.mjs",
+          "previous_sha256": "5fb02da896bec2601a72c905f8d1d1a097feee996da48943d3fdba5cb12ee77b",
+          "sha256": "b901daeff9579fa6ee94957cc4450b909aeb6defbdae380ddefc272034966b00"
+        },
+        {
+          "path": "test/park-network-recovery.test.mjs",
+          "previous_sha256": "4ffd72e4df2131c19fecc05eebd507d491e6a689ae7fb9ddf0b9da29c178ccb7",
+          "sha256": "8e62d5e20d57dbd7271e5a24dccd442322191299d0fee6ff9796220f9103aa1f"
+        }
+      ]
+    },
+    {
+      "date": "2026-10-15",
+      "scope": "User-authorized modularization: drawing smoke now loads the canonical lazy right-pan adapter during editor lifecycle verification.",
+      "audit_chain": "sha256-v1",
+      "files": [
+        {
+          "path": "scripts/drawing-smoke.mjs",
+          "previous_sha256": "4550f1b4771b6bba4cfa7726c543e20528163764b90ff84ef262a24c9887462a",
+          "sha256": "74ee8114ce09a38df9abade424404b8c573d4099d9a618626d6711eb3de191f3"
+        }
+      ]
+    },
+    {
+      "date": "2026-10-15",
+      "scope": "User-authorized modularization: refresh architecture regression ownership to match extracted surface and park controllers; normalize test harness line endings.",
+      "audit_chain": "sha256-v1",
+      "files": [
+        {
+          "path": "scripts/test-harness.mjs",
+          "previous_sha256": "b901daeff9579fa6ee94957cc4450b909aeb6defbdae380ddefc272034966b00",
+          "sha256": "1871005aabdd226844e5aa6385eec16375cdc347ceb1b4e52e0996f00c6e3b08"
+        },
+        {
+          "path": "test/lc-validate.test.mjs",
+          "previous_sha256": "7f4011bf852198674b2924066e07570d66e6903fdece516f3bb2a546fb876efa",
+          "sha256": "eaaf2e8361e981716752d48baa5d693f1a50a50cfed4fff85fac3537d0a00934"
+        },
+        {
+          "path": "test/park-admin-read-store-adapter.test.mjs",
+          "previous_sha256": "f6db8fd51a6c05d8f71d1a2ee6578e8fe69a9e7992b5a36a3fa52cf3bea08891",
+          "sha256": "400cd439d119f7ec8ca2af35b43502731208488e5a1b51190572eb756cdd390c"
+        },
+        {
+          "path": "test/park-backfill-link-modules.test.mjs",
+          "previous_sha256": "d6b9b7bde4c81c3b7ee8e5c0d312f0e32e99db4408400e825686f3ce993596f7",
+          "sha256": "776cfba51cbadc907bed2aadd5b3c3b985fd4176e3e0727657afcc1551d9cc60"
+        },
+        {
+          "path": "test/park-workflow-completion.test.mjs",
+          "previous_sha256": "a3f66f6f268c7b7d133234aa1b93120c5d760d487489bf7275132262fca819b7",
+          "sha256": "9e2cc39fad34e3b43bf325f5e1530065f7860b45f51230074dcc32f0a2e65368"
+        },
+        {
+          "path": "test/user-architecture-table.test.mjs",
+          "previous_sha256": "21b35801343fda3e0a2604fbc18622aac05af5c6f0b13ab6771066c93725c045",
+          "sha256": "968f304339281817f95cfea7165366f13426393c6ea1264536ce3debf96952e2"
+        }
+      ]
     }
   ]
 }

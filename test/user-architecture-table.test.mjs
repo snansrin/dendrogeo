@@ -10,7 +10,10 @@ test('all source switches and ranges use the shared native control classes',()=>
   const tag=match[0];if(/type=["']checkbox["']/.test(tag)){switches++;assert.match(tag,/\bdg-switch\b/,file);}
   if(/type=["']range["']/.test(tag)){ranges++;assert.match(tag,/\bdg-range\b/,file);}
  }
- assert.ok(switches>=10);assert.ok(ranges>=4);
+ assert.ok(switches>=10);assert.ok(ranges>=2);
+ const sensitivity=read('src/ui/render-surface-sensitivity-controls.js');
+ assert.match(sensitivity,/for\(const key of classes\)/);assert.match(sensitivity,/type="range" class="dg-sens-slider dg-range"/);
+ assert.match(read('src/ui/lc-sens.js'),/DG_SENS_CLASSES=\["green","water","hard","bare"\]/);
  assert.match(read('css/style.css'),/input\.dg-range\{[^}]*min-height:44px[^}]*padding:0/);
 });
 test('raw field naming and read-only DBH display keep full precision outside the view',()=>{
