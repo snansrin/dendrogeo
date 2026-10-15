@@ -12,9 +12,16 @@ test('popup model retains area, current class, five choices and undo presence',(
   const model=window.DG_SURFACE_CELL_DECISION_POPUP_MODEL.build({cell,key:'2:7',currentClass:'water',decision:{to:'water'},meta});assert.equal(model.areaM2,12.34);assert.equal(model.options.length,5);assert.equal(model.options[3].classKey,'water');assert.equal(model.options[3].selected,true);assert.equal(model.canUndo,true);assert.ok(!model.options.some(option=>option.classKey==='pool'));
 });
 
-test('popup view keeps the legacy class order, handlers and escaped text',()=>{
+test('popup view keeps the legacy class order and delegates escaped actions',()=>{
   const window=setup(),model=window.DG_SURFACE_CELL_DECISION_POPUP_MODEL.build({cell:{areaM2:12.34},key:'2:7',currentClass:'water',decision:{},meta:key=>({emoji:'•',tr:`<${key}>`})}),html=window.DG_SURFACE_CELL_DECISION_POPUP_VIEW.render({model,escape:value=>value.replaceAll('<','&lt;').replaceAll('>','&gt;'),translate:value=>value});
-  assert.match(html,/12\.3 m²/);assert.match(html,/onclick="dgSensDecide\('2:7','green'\)"/);assert.match(html,/onclick="dgSensUndo\('2:7'\)"/);assert.ok(html.indexOf("'green'")<html.indexOf("'hard'")&&html.indexOf("'hard'")<html.indexOf("'building'")&&html.indexOf("'building'")<html.indexOf("'water'")&&html.indexOf("'water'")<html.indexOf("'bare'"));assert.doesNotMatch(html,/pool|Havuz/);assert.match(html,/&lt;water&gt;/);
+  assert.match(html,/12\.3 m²/);assert.match(html,/data-surface-cell-action="decide" data-cell-key="2:7" data-class-key="green"/);assert.match(html,/data-surface-cell-action="undo" data-cell-key="2:7"/);assert.ok(html.indexOf('data-class-key="green"')<html.indexOf('data-class-key="hard"')&&html.indexOf('data-class-key="hard"')<html.indexOf('data-class-key="building"')&&html.indexOf('data-class-key="building"')<html.indexOf('data-class-key="water"')&&html.indexOf('data-class-key="water"')<html.indexOf('data-class-key="bare"'));assert.doesNotMatch(html,/pool|Havuz|\bonclick\s*=/i);assert.match(html,/&lt;water&gt;/);
+});
+
+test('surface popup delegation forwards class decisions and undo keys',()=>{
+  const window=setup(),listeners={},calls=[],document={addEventListener:(name,handler)=>{listeners[name]=handler;},contains:()=>true},model=window.DG_SURFACE_CELL_DECISION_POPUP_MODEL.build({cell:{areaM2:12},key:'2:7',currentClass:'green',decision:{},meta:key=>({emoji:'•',tr:key})});
+  window.DG_SURFACE_CELL_DECISION_POPUP_VIEW.render({model,escape:String,translate:String,document,actions:{decide:(key,type)=>calls.push(['decide',key,type]),undo:key=>calls.push(['undo',key])}});
+  for(const [action,type] of [['decide','water'],['undo',undefined]]){const button={dataset:{surfaceCellAction:action,cellKey:'2:7',classKey:type}};listeners.click({target:{closest:selector=>selector==='[data-surface-cell-action]'?button:null}});}
+  assert.deepEqual(calls,[['decide','2:7','water'],['undo','2:7']]);
 });
 
 test('single decision previews immediately after applying the correction',()=>{

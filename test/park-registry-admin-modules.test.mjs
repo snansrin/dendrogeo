@@ -57,6 +57,19 @@ test('backfill close clears and hides the plan container through its UI module',
   assert.equal(box.style.display,'none');assert.equal(box.innerHTML,'');
 });
 
+test('backfill plan uses declarative controls and renderer-owned current callbacks',()=>{
+  const{window}=setup(),listeners={};let called='';
+  const box={style:{},innerHTML:'',addEventListener:(name,listener)=>{listeners[name]=listener;},contains:()=>true};
+  window.DG_PARK_BACKFILL_PLAN_UI.render({box,plan:[{durum:'OSM parkı bulundu',project:{id:9,name:'Proje'},lat:40,lon:32}],escape:String,formatArea:()=> '1 ha',translateFormat:value=>value});
+  assert.match(box.innerHTML,/data-park-backfill-action="manual" data-project-id="9"/);
+  assert.match(box.innerHTML,/data-park-backfill-action="close"/);
+  assert.doesNotMatch(box.innerHTML,/onclick=/);
+  window.DG_PARK_BACKFILL_PLAN_UI.bind(box,{manual:control=>{called='old-'+control.dataset.projectId;}});
+  window.DG_PARK_BACKFILL_PLAN_UI.bind(box,{manual:control=>{called='latest-'+control.dataset.projectId;}});
+  listeners.click({target:{closest:()=>({dataset:{parkBackfillAction:'manual',projectId:'9'}})}});
+  assert.equal(called,'latest-9');
+});
+
 test('park admin modules load and are precached before park-registry',()=>{
   const head=read('partials/head.html'),sw=read('sw.js'),service=head.indexOf('src/services/park-registry.js');
   for(const path of modules){assert.ok(head.indexOf(path)>=0&&head.indexOf(path)<service,`${path} load order`);assert.ok(sw.includes(`'/${path}'`),`${path} precache`);}

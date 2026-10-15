@@ -85,7 +85,7 @@ async function loadApprovedMarkers(m,limit,done){
 async function loadLiveMap(){
  const app=window.DG_LOAD_LIVE_MEASUREMENTS_MAP,status=window.DG_RENDER_LIVE_MAP_LOAD_STATUS;
  const format=typeof dgTf==="function"?dgTf:(_t,v)=>_t.replace(/\{(\w+)\}/g,(match,key)=>v[key]);
- return app.load({element:$("mapLoad"),loadMarkers:callback=>loadApprovedMarkers(map,3000,callback),markLoaded:ok=>dgMarkLiveLoaded(ok),status,escapeHTML:esc,format,setTimer:setTimeout,clusterDegraded:()=>map&&map._clusterDegraded,renderAnalysis});
+ return app.load({element:$("mapLoad"),loadMarkers:callback=>loadApprovedMarkers(map,3000,callback),markLoaded:ok=>dgMarkLiveLoaded(ok),status,escapeHTML:esc,format,setTimer:setTimeout,clusterDegraded:()=>map&&map._clusterDegraded,renderAnalysis,retry:()=>loadLiveMap()});
 }
 /* liveLoaded/DG_LIVE_DIRTY ui/state.js'te (body sonunda) bildiriliyor; bu
  * fonksiyon yalnız ÇAĞRI ANINDA dokunduğu için yükleme sırası sorun değil.
@@ -153,7 +153,8 @@ function renderWaypointList(){
   getElement:$,waypoints:WP,gps:GPS,projectId:$("nProject").value,
   search:$("wpSearch")?.value,filter:$("wpFilter")?.value||"all",sort:$("wpSort")?.value||"id",
   page:DG_WP_PAGE,signature:DG_WP_QUERY,selectedId:navTarget?.id,
-  distance:hav,setPage:value=>{DG_WP_PAGE=value;},setSignature:value=>{DG_WP_QUERY=value;}
+  distance:hav,setPage:value=>{DG_WP_PAGE=value;},setSignature:value=>{DG_WP_QUERY=value;},
+  actions:{page:dgWaypointPage,select:selectWaypoint}
  });
 }
 

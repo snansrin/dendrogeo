@@ -34,11 +34,12 @@ test('project cards escape names and preserve owner/shared action differences',(
   const{window}=setup(),escape=value=>String(value).replaceAll('<','&lt;').replaceAll('>','&gt;');
   const api=window.DG_MEASUREMENT_PROJECT_CARD,project={id:4,name:'<Park>',park_id:2,parks:{name:'<Park>',area_m2:10000},city:'<City>',created_at:'2026-10-13'};
   const owner=api.render(project,false,{formatArea:()=> '1.0 ha',escape,isAdmin:()=>false});
-  assert.match(owner,/&lt;Park&gt;/);assert.doesNotMatch(owner,/startParkScan/);assert.match(owner,/dgUserPubOpen/);
+  assert.match(owner,/&lt;Park&gt;/);assert.doesNotMatch(owner,/data-project-action="startParkScan"/);assert.match(owner,/data-project-action="publish"/);
   const unlinkedAdmin=api.render({...project,park_id:null,parks:null},false,{formatArea:()=>'',escape,isAdmin:()=>true});
-  assert.match(unlinkedAdmin,/startParkScan/);assert.doesNotMatch(unlinkedAdmin,/dgUserPubOpen/);
+  assert.match(unlinkedAdmin,/data-project-action="startParkScan"/);assert.doesNotMatch(unlinkedAdmin,/data-project-action="publish"/);
   const shared=api.render({...project,shared:true},true,{formatArea:()=> '1.0 ha',escape,isAdmin:()=>false});
-  assert.match(shared,/is-shared/);assert.match(shared,/Ölçüme geç/);assert.match(shared,/proje sahibinde/);assert.doesNotMatch(shared,/dgUserPubOpen/);
+  assert.match(shared,/is-shared/);assert.match(shared,/Ölçüme geç/);assert.match(shared,/proje sahibinde/);assert.doesNotMatch(shared,/data-project-action="publish"/);
+  assert.doesNotMatch(owner,/\bon(?:click|input|change|toggle)=/);
 });
 
 test('park context updates only default city/country and still refreshes the name preview',()=>{
@@ -46,7 +47,13 @@ test('park context updates only default city/country and still refreshes the nam
   window.DG_MEASUREMENT_PROJECT_PARK_BOX.render({box,park:{name:'Göksu',area_m2:30000,osm_key:'way/2',city:'Bolu',country:'Türkiye'},escape:value=>String(value),formatArea:()=> '3.0 ha',getElement:id=>elements[id],previewName:()=>events.push('preview')});
   assert.equal(box.className,'alert ok');assert.equal(elements.pCity.value,'Bolu');assert.equal(elements.pCountry.value,'Türkiye');assert.ok(box.innerHTML.includes('3.0 ha'));assert.deepEqual(events,['preview']);
   window.DG_MEASUREMENT_PROJECT_PARK_BOX.render({box,park:null,escape:String,formatArea:()=>'',getElement:id=>elements[id],previewName:()=>events.push('empty-preview')});
-  assert.equal(box.className,'alert err');assert.ok(box.innerHTML.includes('Park algılanmadı'));assert.equal(events[1],'empty-preview');
+  assert.equal(box.className,'alert err');assert.ok(box.innerHTML.includes('Park algılanmadı'));assert.doesNotMatch(box.innerHTML,/\bonclick\s*=/i);assert.equal(events[1],'empty-preview');
+});
+
+test('project park box delegates park-scan navigation',()=>{
+  const{window}=setup(),listeners={},calls=[],box={addEventListener:(name,handler)=>{listeners[name]=handler;},contains:()=>true};
+  window.DG_MEASUREMENT_PROJECT_PARK_BOX.render({box,park:null,escape:String,formatArea:()=>'',getElement:()=>null,previewName:()=>{},actions:{scan:()=>calls.push('scan')}});
+  const button={};listeners.click({target:{closest:selector=>selector==='[data-project-park-action="scan"]'?button:null}});assert.deepEqual(calls,['scan']);
 });
 
 test('canonical project-name preview preserves empty and populated states',()=>{

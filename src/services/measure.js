@@ -176,13 +176,13 @@ async function loadProjects__scroll(){
   fetchShared:owned=>window.DG_SHARED_MEASUREMENT_PROJECTS.fetch({client:sb,ownedProjects:owned,listMyParks:typeof dgMyParks==="function"?dgMyParks:undefined}),
   merge:(owned,shared)=>window.DG_MERGE_MEASUREMENT_PROJECTS.merge(owned,shared),
   onState:state=>{PROJ_LIST=state.projects;},
-  render:projects=>window.DG_MEASUREMENT_PROJECT_DIRECTORY_UI.render({projects,element:$,escape:esc,optionLabel:dgProjectOptionLabel,restore:dgProjectRestore,renderCard:dgProjectCard,editing:EDIT_PROJ}),
+  render:projects=>window.DG_MEASUREMENT_PROJECT_DIRECTORY_UI.render({projects,element:$,escape:esc,optionLabel:dgProjectOptionLabel,restore:dgProjectRestore,renderCard:dgProjectCard,editing:EDIT_PROJ,actions:{openMeasure:dgProjectOpenMeasure,publish:id=>window.dgUserPubOpen?.(id),startParkScan:id=>startParkScan({projectId:id,returnTo:"projects"}),edit:editProject,delete:deleteProject}}),
   afterRender:projects=>{dgRenderProjectParkBox();dgParkGate();if(typeof dgUserPubSync==="function")dgUserPubSync(projects);}
  });
 }/* Projeler sekmesindeki "park" kutusu: hangi park algılanmış, ad nasıl olacak. */
 function dgRenderProjectParkBox(){
  const park=EDIT_PROJ?EDIT_PROJ_PARK:DG_PARK;
- return window.DG_MEASUREMENT_PROJECT_PARK_BOX.render({box:$("projParkBox"),park,escape:esc,formatArea:dgFmtHa,getElement:$,previewName:dgProjectNamePreview});
+ return window.DG_MEASUREMENT_PROJECT_PARK_BOX.render({box:$("projParkBox"),park,escape:esc,formatArea:dgFmtHa,getElement:$,previewName:dgProjectNamePreview,actions:{scan:()=>startParkScan({returnTo:"projects"})}});
 }function dgProjectNamePreview(){
  const park=EDIT_PROJ?EDIT_PROJ_PARK:DG_PARK,label=($("pLabel")?$("pLabel").value:"").trim();
  return window.DG_MEASUREMENT_PROJECT_NAME_PREVIEW.render({element:$("pNamePreview"),park,label,projectName:dgProjectName});
@@ -234,7 +234,7 @@ async function queryPointId(){
   read:target=>window.DG_FETCH_MEASUREMENT_AT_PROJECT_POINT.fetch({client:sb,projectId:target.projectId,pointId:target.pointId}),
   isCurrent:target=>+$("mProject").value===target.projectId&&+$("mPoint").value===target.pointId,
   hide:()=>window.DG_MEASUREMENT_POINT_QUERY_RESULT.hide(result),
-  render:(record,pointId)=>window.DG_MEASUREMENT_POINT_QUERY_RESULT.render({element:result,record,pointId,escape:esc,translate:_tms,translateFormat:_tmsf,circumferenceFromDiameter:value=>typeof circumferenceCmFromDiameter==="function"?circumferenceCmFromDiameter(+value):null})
+  render:(record,pointId)=>window.DG_MEASUREMENT_POINT_QUERY_RESULT.render({element:result,record,pointId,escape:esc,translate:_tms,translateFormat:_tmsf,circumferenceFromDiameter:value=>typeof circumferenceCmFromDiameter==="function"?circumferenceCmFromDiameter(+value):null,actions:{edit:id=>editRec(id),delete:id=>delRec(id)}})
  });
 }/* --- 7. KAYDET (EN BÜYÜK) --- */
 /* CANLI BUTON (2026-09-27 · kullanıcı isteği): 💾 Hesapla ve Kaydet, 🌿 ve 📡

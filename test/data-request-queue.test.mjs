@@ -30,7 +30,7 @@ test('queue service preserves query, counters, active/closed rendering and scrol
  const a=app([{id:1,status:'Beklemede',created_at:'2026-10-12T12:00:00Z'},{id:2,status:'Tamamlandı',created_at:'2026-10-12T12:00:00Z'}]);await a.run();
  assert.deepEqual(a.calls,[['from','data_requests'],['select','*,profiles(full_name)'],['order','created_at',{ascending:false}],['restore',12]]);
  assert.equal(a.elements.get('aReqPending').textContent,1);assert.equal(a.elements.get('aReqPendingMini').textContent,1);assert.equal(a.elements.get('aReqClosed').textContent,1);
- assert.match(a.elements.get('aReqT').innerHTML,/fulfillRequest\(1\)/);assert.match(a.elements.get('closedReqT').innerHTML,/Tamamlandı/);assert.equal(a.elements.get('closedRequestsWrap').style.display,'block');
+ assert.match(a.elements.get('aReqT').innerHTML,/data-pending-request-action="fulfill" data-request-id="1"/);assert.match(a.elements.get('closedReqT').innerHTML,/Tamamlandı/);assert.equal(a.elements.get('closedRequestsWrap').style.display,'block');
 });
 
 test('queue service retains null-data empty state and hides closed section',async()=>{

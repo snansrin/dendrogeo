@@ -395,14 +395,17 @@ describe('parka bağlama YALNIZ yönetici (0006 + kullanıcı isteği 2026-09-24
   });
 
   test('⭐ karşılaştırmadaki onarım düğmesi yalnız yöneticiye', () => {
-    assert.match(worldSrc, /const admin=\(typeof dgIsAdmin==="function"\)\?dgIsAdmin\(\):false;/);
-    assert.match(worldSrc, /admin[\s\S]{0,60}\?`<button class="btn sm ghost[^"]*" onclick="startParkScan/);
-    assert.match(worldSrc, /yönetici bağlayacak/, 'normal kullanıcıya açıklama gösterilmeli');
+    assert.match(worldSrc, /renderPending:dgPendingParksHTML/);
+    assert.match(worldSrc, /isAdmin:typeof dgIsAdmin==="function"&&dgIsAdmin\(\)/);
+    const pendingUi=readFileSync(join(ROOT,'src/ui/park-comparison-pending.js'),'utf8');
+    assert.match(pendingUi, /data-park-comparison-action="scan"/);
+    assert.match(pendingUi, /isAdmin\?`<button/);
+    assert.match(pendingUi, /yönetici bağlayacak/, 'normal kullanıcıya açıklama gösterilmeli');
   });
 
   test('projeler tablosundaki 🌳 Bağla düğmesi yalnız yöneticiye', () => {
     assert.match(measurementProjectCard, /!isShared&&!project\.park_id&&ui\.isAdmin\(\)/);
-    assert.match(measurementProjectCard, /startParkScan\(\{projectId:/);
+    assert.match(measurementProjectCard, /data-project-action="startParkScan" data-project-id="\$\{projectId\}"/);
     assert.match(measurementProjectCard, /yönetici bağlayacak/);
   });
 

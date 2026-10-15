@@ -11,11 +11,12 @@ window.DG_MEASUREMENT_PROJECT_CARD={
     const parkState=project.park_id
       ? `<span>🌳 ${ui.escape(park)}${area?" · "+area:""}</span>`
       : `<span class="project-warning">⛔ park yok</span><small>${ui.isAdmin()?"Yönetici olarak bu eski projeyi parka bağlayabilirsin.":"🔐 yönetici bağlayacak"}</small>`;
-    const reportButton=project.park_id?`<button class="btn sm ghost" onclick="dgUserPubOpen(${project.id})">📄 Rapor</button>`:"";
-    const linkButton=!isShared&&!project.park_id&&ui.isAdmin()?`<button class="btn sm ghost" onclick="startParkScan({projectId:${project.id},returnTo:'projects'})">🌳 Parka bağla</button>`:"";
+    const projectId=Number(project.id);
+    const reportButton=project.park_id?`<button type="button" class="btn sm ghost" data-project-action="publish" data-project-id="${projectId}">📄 Rapor</button>`:"";
+    const linkButton=!isShared&&!project.park_id&&ui.isAdmin()?`<button type="button" class="btn sm ghost" data-project-action="startParkScan" data-project-id="${projectId}">🌳 Parka bağla</button>`:"";
     const actions=isShared
-      ? `<button class="btn sm" onclick="dgProjectOpenMeasure(${project.id})">📏 Ölçüme geç</button><span class="project-access-note">Düzenleme ve ekip yönetimi proje sahibinde</span>`
-      : `<button class="btn sm" onclick="dgProjectOpenMeasure(${project.id})">📏 Ölçüm</button>${reportButton}${linkButton}<button class="btn sm ghost" onclick="editProject(${project.id})">✏️ Düzenle</button><button class="btn sm ghost project-danger" onclick="deleteProject(${project.id})">🗑 Sil</button>`;
+      ? `<button type="button" class="btn sm" data-project-action="openMeasure" data-project-id="${projectId}">📏 Ölçüme geç</button><span class="project-access-note">Düzenleme ve ekip yönetimi proje sahibinde</span>`
+      : `<button type="button" class="btn sm" data-project-action="openMeasure" data-project-id="${projectId}">📏 Ölçüm</button>${reportButton}${linkButton}<button type="button" class="btn sm ghost" data-project-action="edit" data-project-id="${projectId}">✏️ Düzenle</button><button type="button" class="btn sm ghost project-danger" data-project-action="delete" data-project-id="${projectId}">🗑 Sil</button>`;
     return `<article class="project-card ${isShared?"is-shared":"is-owned"}"><div class="project-card-top"><div><div class="project-card-park">${parkState}</div><h4>${ui.escape(project.name||("Proje #"+project.id))}</h4></div>${role}</div><div class="project-card-meta"><span>📍 ${location}</span><span>📅 ${date}</span><span class="mono">#${project.id}</span></div><div class="project-card-actions">${actions}</div></article>`;
   }
 };

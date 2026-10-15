@@ -94,10 +94,11 @@ test('world error UI escapes the database detail and keeps the retry action', ()
   const api = runtime();
   const html = api.DG_WORLD_ERROR_UI.render('<script>alert(1)</script>', (value) => String(value).replaceAll('<', '&lt;').replaceAll('>', '&gt;'));
   assert.match(html, /&lt;script&gt;/);
-  assert.match(html, /onclick="loadWorld\(\)"/);
+  assert.match(html, /data-world-error-action="retry"/);assert.doesNotMatch(html,/\bonclick\s*=/i);
   assert.match(html, /Dünya verisi yüklenemedi/);
-  const box={style:{},className:'',innerHTML:''},document={getElementById:id=>id==='worldErr'?box:null};
-  assert.equal(api.DG_WORLD_ERROR_UI.show(document,'<unsafe>',value=>String(value).replaceAll('<','&lt;').replaceAll('>','&gt;')),true);
+  const listeners={},calls=[],box={style:{},className:'',innerHTML:'',addEventListener:(name,handler)=>{listeners[name]=handler;},contains:()=>true},document={getElementById:id=>id==='worldErr'?box:null};
+  assert.equal(api.DG_WORLD_ERROR_UI.show(document,'<unsafe>',value=>String(value).replaceAll('<','&lt;').replaceAll('>','&gt;'),{retry:()=>calls.push('retry')}),true);
   assert.equal(box.className,'alert err');assert.match(box.innerHTML,/&lt;unsafe&gt;/);
+  const button={};listeners.click({target:{closest:selector=>selector==='[data-world-error-action="retry"]'?button:null}});assert.deepEqual(calls,['retry']);
   api.DG_WORLD_ERROR_UI.hide(document);assert.equal(box.style.display,'none');
 });

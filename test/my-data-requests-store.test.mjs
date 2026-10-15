@@ -13,7 +13,7 @@ function app({user={id:'qa'},data=[],error=null,reject=false}={}){
 test('my request list preserves user-scoped newest-first query and escaped disclosure output',async()=>{
  const a=app({data:[{id:7,country:'TR',city:'Ankara',project_name:'<Park>',note:'<note>',status:'Tamamlandı',created_at:'2026-10-12T12:00:00Z'}]});await a.run();
  assert.deepEqual(a.calls,[['keep'],['from','data_requests'],['select','*'],['eq','user_id','qa'],['order','created_at',{ascending:false}],['restore',42]]);
- assert.match(a.box.innerHTML,/class="export-my-requests"/);assert.match(a.box.innerHTML,/&lt;Park&gt;/);assert.match(a.box.innerHTML,/&lt;note&gt;/);assert.match(a.box.innerHTML,/badge on/);assert.match(a.box.innerHTML,/deleteMyRequest\(7\)/);
+ assert.match(a.box.innerHTML,/class="export-my-requests"/);assert.match(a.box.innerHTML,/&lt;Park&gt;/);assert.match(a.box.innerHTML,/&lt;note&gt;/);assert.match(a.box.innerHTML,/badge on/);assert.match(a.box.innerHTML,/data-request-list-action="delete" data-request-id="7"/);assert.doesNotMatch(a.box.innerHTML,/\bonclick\s*=/i);
 });
 
 test('my request list retains signed-out gate, empty state and API error message',async()=>{

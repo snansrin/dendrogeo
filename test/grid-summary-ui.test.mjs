@@ -19,21 +19,32 @@ test('grid summary keeps percentages, action visibility, translations, and metad
   assert.match(element.innerHTML, /tr:Ölçülmüş:<\/span>|tr:Ölçülmüş:/);
   assert.match(element.innerHTML, /%33/);
   assert.match(element.innerHTML, /%67/);
-  assert.match(element.innerHTML, /createWaypointsFromGrid\('auto'\)/);
-  assert.match(element.innerHTML, /createWaypointsFromGrid\('manual'\)/);
-  assert.match(element.innerHTML, /clearCellSelection\(\)/);
+  assert.match(element.innerHTML, /data-grid-summary-action="createAuto"/);
+  assert.match(element.innerHTML, /data-grid-summary-action="createManual"/);
+  assert.match(element.innerHTML, /data-grid-summary-action="clearSelection"/);
+  assert.doesNotMatch(element.innerHTML,/\bon(?:click|input|change|toggle)=/);
   assert.ok(element.innerHTML.endsWith('<p>meta</p>'));
 });
 
 test('empty selection hides waypoint actions while retaining exports', () => {
   const element = { style: {}, innerHTML: '' };
   render({ element, size: 20, total: 4, measured: 4, empty: 0, selected: 0, meta: '', translate: x => x, translateFormat: format });
-  assert.doesNotMatch(element.innerHTML, /createWaypointsFromGrid/);
-  assert.doesNotMatch(element.innerHTML, /clearCellSelection/);
-  assert.match(element.innerHTML, /downloadGridGeoJSON/);
-  assert.match(element.innerHTML, /downloadWaypointsCSV/);
+  assert.doesNotMatch(element.innerHTML, /data-grid-summary-action="create(Auto|Manual)"/);
+  assert.doesNotMatch(element.innerHTML, /data-grid-summary-action="clearSelection"/);
+  assert.match(element.innerHTML, /data-grid-summary-action="downloadGeoJson"/);
+  assert.match(element.innerHTML, /data-grid-summary-action="downloadCsv"/);
 });
 
 test('missing summary element is a no-op', () => {
   assert.doesNotThrow(() => render({ element: null }));
+});
+
+test('grid summary delegates controls through the current injected action map',()=>{
+  const events={},calls=[],element={style:{},innerHTML:'',addEventListener:(name,handler)=>{events[name]=handler;},contains:()=>true};
+  const base={element,size:10,total:3,measured:1,empty:2,selected:1,meta:'',translate:x=>x,translateFormat:format};
+  render({...base,actions:{createAuto:()=>calls.push('old')}});
+  render({...base,actions:{createAuto:()=>calls.push('new')}});
+  const control={dataset:{gridSummaryAction:'createAuto'},disabled:false};
+  events.click({target:{closest:()=>control}});
+  assert.deepEqual(calls,['new']);
 });

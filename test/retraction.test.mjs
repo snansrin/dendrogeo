@@ -301,9 +301,9 @@ describe('istemci: yönetici kartı 🗑 (vm)', () => {
     ui.run('dgPubRender()');
     const h = ui.adminHtml();
     assert.match(h, /badge on">Yayınlandı/);
-    assert.match(h, /dgReportRetract\('DGR-2026-0002',5\)/, '🗑 düğmesi kimlik+park ile');
+    assert.match(h, /data-publication-park-action="retract" data-report-id="DGR-2026-0002" data-park-id="5"/, '🗑 düğmesi kimlik+park ile');
     assert.match(h, /🗑 Geri çek/);
-    assert.match(h, /dgReportOpen\('DGR-2026-0002'\)/);
+    assert.match(h, /data-publication-park-action="open" data-report-id="DGR-2026-0002"/);
     assert.match(h, /📄 Yeni sürüm/);
   });
   test('⭐ geri çekilen rapor: rozet döner, BAĞLANTI ÜRETİLMEZ', () => {
@@ -318,7 +318,7 @@ describe('istemci: yönetici kartı 🗑 (vm)', () => {
     assert.match(h, /kazayla/, 'gerekçe görünür');
     assert.ok(!h.includes('https://dendrogeo.org/rapor/DGR-2026-0002/'), 'bağlantı yok');
     assert.ok(!/dgReportRetract/.test(h), 'zaten çekilmişe ikinci 🗑 yok');
-    assert.match(h, /onclick="dgPublishReport\(5\)"/, 'yeni DGR yolu açık');
+    assert.match(h, /data-publication-park-action="publish" data-park-id="5"/, 'yeni DGR yolu açık');
     assert.equal(ui.run('dgPubPublishedInPark(DG_PUB_STATE.queue,5)'), null, 'saf filtre: yayınlanmış sayılmaz');
     assert.match(ui.run('dgPubRetractedInPark(DG_PUB_STATE.queue,5).report_id'), /DGR-2026-0002/);
   });
@@ -333,7 +333,7 @@ describe('istemci: yönetici kartı 🗑 (vm)', () => {
     const h = ui.adminHtml();
     assert.match(h, /badge admin">Geri çekiliyor/);
     assert.ok(!/dgReportRetract/.test(h), 'ikinci istek düğmesi yok');
-    assert.ok(!/onclick="dgPublishReport/.test(h), 'kuyruk varken yeni yayın düğmesi yok');
+    assert.ok(!/data-publication-park-action="publish"/.test(h), 'kuyruk varken yeni yayın düğmesi yok');
   });
   test('günlük şeridi geri çekmeyi 🗑 ile gösterir', () => {
     const ui = bootRet({ parks: [PARK] });
@@ -405,7 +405,7 @@ describe('istemci: kullanıcı paneli 🗑 (vm)', () => {
     await ui.run('dgUserPubOpen(11)');
     const h = ui.userHtml();
     assert.match(h, /badge on">Yayınlandı/);
-    assert.match(h, /dgReportRetract\('DGR-2026-0007',6\)/);
+    assert.match(h, /data-user-publication-action="retract" data-report-id="DGR-2026-0007" data-park-id="6"/);
     assert.match(h, /🗑 Geri çek/);
   });
   test('geri çekilmiş park: rozet + bağlantı yok + 📄 Yayınla açık', async () => {
@@ -414,7 +414,7 @@ describe('istemci: kullanıcı paneli 🗑 (vm)', () => {
     const h = ui.userHtml();
     assert.match(h, /badge off">Geri çekildi/);
     assert.ok(!h.includes('https://dendrogeo.org/rapor/DGR-2026-0007/'));
-    assert.match(h, /onclick="dgUserPublish\(6\)"/);
+    assert.match(h, /data-user-publication-action="publish" data-park-id="6"/);
   });
   test('bekleyen geri çekme: "Geri çekiliyor" + 📄/🗑 gizli', async () => {
     const ui = bootRet({
@@ -428,7 +428,7 @@ describe('istemci: kullanıcı paneli 🗑 (vm)', () => {
     assert.ok(!/dgUserPublish/.test(h));
   });
   test('yeni CSS yok: 🗑 düğmesi mevcut sınıflarla (btn sm red)', () => {
-    assert.match(read('src/ui/render-publication-park-row.js'), /class="btn sm red" onclick="dgReportRetract/);
+    assert.match(read('src/ui/render-publication-park-row.js'), /data-publication-park-action="retract"/);
     assert.ok(!/dg-retract|retraction\.css/.test(UI), 'yeni sınıf ailesi yok');
     assert.ok(!existsSync(join(ROOT, 'css/retraction.css')));
   });

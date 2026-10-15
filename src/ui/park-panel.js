@@ -57,7 +57,7 @@ async function drawPark(park){
    setSelectedArea:value=>{PARK_SELECTED_AREA_M2=Number.isFinite(Number(value?.area))?Number(value.area):null;},clearPark,clearGrid,registerPark:value=>typeof dgOnParkDrawn==="function"?dgOnParkDrawn(value):Promise.resolve(null),normalize:window.DG_NORMALIZE_DRAWN_PARK_GEOMETRY.normalize,
    invalidGeometry:value=>{console.error("DENDROGEO · Geçersiz park geometrisi:",value);return toast("Park geometrisi geçersiz veya eksik.","err","🌳");},setGeometry:(outer,holes)=>{PARK_POLY=outer;PARK_HOLES=holes;},renderBoundary:(outer,holes)=>window.DG_PARK_BOUNDARY_LAYER_UI.render({leaflet:L,map,outer,holes,onCreated:layer=>{PARK_LAYER=layer;}}),loadCoverage:queryDetailedCoverage,isCurrent:outer=>drawEpoch===DG_PARK_DRAW_EPOCH&&PARK_POLY===outer,
    coverageUnavailable:()=>{console.warn("DENDROGEO QC: OSM detailed coverage could not be loaded.");toast("⚠ OSM bina/yol/su geometrisi alınamadı; grid bilimsel olarak eksik olabilir.","warn","🗺️");},fitBoundary:(outer,holes)=>window.DG_PARK_BOUNDARY_LAYER_UI.fit({leaflet:L,map,outer,holes}),areaHa:parkAreaHa,
-   present:value=>window.DG_PRESENT_DRAWN_PARK.present(value,{element:$,escape:esc,translate:text=>typeof dgCf==="function"?dgCf(text):text,renderAlternates:selected=>window.DG_PARK_CANDIDATE_SELECT_UI.render({candidates:PARK_CANDS,selected,escape:esc,formatArea:value=>value.toFixed(1)}),renderPanel:window.DG_PARK_INFO_PANEL_UI.render,idChip:dgParkIdChip,projectOptions:dgProjectOptionsForPark,mountMenus:dgParkMountMenus,renderReference:renderRefBadge,notify:toast})
+   present:value=>window.DG_PRESENT_DRAWN_PARK.present(value,{element:$,escape:esc,translate:text=>typeof dgCf==="function"?dgCf(text):text,renderAlternates:selected=>window.DG_PARK_CANDIDATE_SELECT_UI.render({candidates:PARK_CANDS,selected,escape:esc,formatArea:value=>value.toFixed(1),document,actions:{select:index=>switchPark(index)}}),renderPanel:window.DG_PARK_INFO_PANEL_UI.render,idChip:dgParkIdChip,projectOptions:dgProjectOptionsForPark,mountMenus:dgParkMountMenus,renderReference:renderRefBadge,notify:toast})
   });
   PARK_SELECTED_AREA_M2=Number.isFinite(Number(park?.area)) ? Number(park.area) : null;
 
@@ -138,7 +138,7 @@ async function drawPark(park){
     : [];
 
   const alt=window.DG_PARK_CANDIDATE_SELECT_UI.render({
-    candidates:PARK_CANDS,selected:park,escape:esc,formatArea:value=>value.toFixed(1)
+    candidates:PARK_CANDS,selected:park,escape:esc,formatArea:value=>value.toFixed(1),document,actions:{select:index=>switchPark(index)}
   });
 
   $("parkInfo").style.display="block";

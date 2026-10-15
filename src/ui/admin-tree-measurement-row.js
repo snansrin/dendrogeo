@@ -4,8 +4,8 @@ window.DG_ADMIN_TREE_MEASUREMENT_ROW = (() => {
   function render(row, ports) {
     const status = row.status || "Beklemede";
     const actions = status === "Onaylı"
-      ? `<button class="btn sm red" onclick="rejectMeas(${row.id})">🚫 Reddet</button>`
-      : `<button class="btn sm" onclick="approveMeas(${row.id})">✓ Onayla</button>`;
+      ? `<button type="button" class="btn sm red" data-admin-measurement-action="reject" data-measurement-id="${ports.escape(row.id)}">🚫 Reddet</button>`
+      : `<button type="button" class="btn sm" data-admin-measurement-action="approve" data-measurement-id="${ports.escape(row.id)}">✓ Onayla</button>`;
     const created = row.created_at ? new Date(row.created_at) : null;
     return `<tr data-mid="${ports.escape(row.id)}">` +
       `<td data-label="Nokta"><b>P${ports.escape(row.point_id)}</b>${row.measurement_no > 1 ? `<span class="mono dg-sub"> /M${row.measurement_no}</span>` : ""}</td>` +
@@ -17,7 +17,7 @@ window.DG_ADMIN_TREE_MEASUREMENT_ROW = (() => {
       `<td data-label="Foto">${ports.thumbnail(row.photo_url)}</td>` +
       `<td data-label="Durum">${ports.badge(status)}</td>` +
       `<td data-label="Tarih" class="mono dg-sub">${created ? created.toLocaleDateString("tr-TR") : "—"}</td>` +
-      `<td data-label="İşlem"><div class="dg-act">${actions}<button class="btn sm red" onclick="delMeas(${row.id})">🗑️</button></div></td></tr>`;
+      `<td data-label="İşlem"><div class="dg-act">${actions}<button type="button" class="btn sm red" data-admin-measurement-action="delete" data-measurement-id="${ports.escape(row.id)}">🗑️</button></div></td></tr>`;
   }
   return Object.freeze({ render });
 })();

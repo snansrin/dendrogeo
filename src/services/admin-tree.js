@@ -81,9 +81,8 @@ const dgDurumOzet=o=>window.DG_ADMIN_TREE_FORMATTERS.statusSummary(o);
 const dgBadge=st=>window.DG_ADMIN_TREE_FORMATTERS.badge(st,esc);
 
 function dgTreeRowHTML(r){
-  /* Source-level compatibility contract for older locked checks; markup lives in src/ui/admin-tree-measurement-row.js:
-   * onclick="approveMeas(, onclick="rejectMeas(, onclick="delMeas(;
-   * (+r.dbh_cm).toFixed(1); çevre: ${(+r.girth_cm).toFixed(1)} cm; Sahada ölçülen ham göğüs çevresi. */
+  /* Measurement actions use the same delegated data contract as the flat admin table.
+   * UI contract: (+r.dbh_cm).toFixed(1); çevre: ${(+r.girth_cm).toFixed(1)} cm; Sahada ölçülen ham göğüs çevresi. */
   return window.DG_ADMIN_TREE_MEASUREMENT_ROW.render(r,{escape:esc,latin:typeof LATIN!=="undefined"?LATIN:{},thumbnail:dgThumb,badge:dgBadge});
 }
 
@@ -172,6 +171,11 @@ function dgTreeRender(tree){
    * <div class="dg-act">; view keeps DG_TREE_ERR, "Ölçümler okunamadı", mode:"join"/mode:"fail" details. */
   window.DG_ADMIN_TREE_VIEW.render({element:el,tree,rows:DG_TREE_ROWS,status:DG_TREE_STATUS,query:DG_TREE_QUERY,
     error:DG_TREE_ERR,escape:esc,translate:_ta,tons:dgTon,parkHTML:dgTreeParkHTML});
+  window.DG_ADMIN_MEASUREMENT_ROW_UI.bind(el,{
+    approve:control=>approveMeas(Number(control.dataset.measurementId)),
+    reject:control=>rejectMeas(Number(control.dataset.measurementId)),
+    delete:control=>delMeas(Number(control.dataset.measurementId))
+  });
 }
 
 /* =========================================================

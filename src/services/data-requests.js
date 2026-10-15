@@ -43,7 +43,7 @@ async function loadMyRequests__scroll(){
   getTarget:()=>$("myRequests"),
   onFailure:el=>window.DG_MY_DATA_REQUESTS_UI.failure(el),
   onEmpty:el=>window.DG_MY_DATA_REQUESTS_UI.clear(el),
-  render:(el,data)=>window.DG_MY_DATA_REQUESTS_UI.render(el,data,{escape:esc})
+  render:(el,data)=>window.DG_MY_DATA_REQUESTS_UI.render(el,data,{escape:esc,actions:{delete:id=>deleteMyRequest(id)}})
  });
 }
 async function deleteMyRequest(id){
@@ -84,7 +84,10 @@ async function loadRequests__scroll(){
   load:()=>window.DG_DATA_REQUEST_QUEUE_STORE.load(sb),
   partition:rows=>window.DG_DATA_REQUEST_QUEUE.partition(rows),
   updateCounts:pending=>window.DG_DATA_REQUEST_PENDING_TABLE_UI.updateCounts(document,pending),
-  renderPending:pending=>window.DG_DATA_REQUEST_PENDING_TABLE_UI.render($("aReqT"),pending,{escape:esc}),
+  renderPending:pending=>window.DG_DATA_REQUEST_PENDING_TABLE_UI.render($("aReqT"),pending,{escape:esc,actions:{
+   fulfill:control=>fulfillRequest(Number(control.dataset.requestId)),
+   reject:control=>rejectRequest(Number(control.dataset.requestId))
+  }}),
   renderClosed:closed=>window.DG_DATA_REQUEST_CLOSED_TABLE_UI.renderSection(document,closed,{escape:esc})
  });
 }

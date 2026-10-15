@@ -49,11 +49,12 @@ function dgLcClearLayer(){
 function dgLcRenderReport(rep,result,parkAreaM2,extra){
   if(!rep)return;
   const reportModel=window.DG_LANDCOVER_REPORT_MODEL,reportRows=window.DG_LANDCOVER_REPORT_ROWS,reportMetadata=window.DG_LANDCOVER_REPORT_METADATA,reportComposer=window.DG_LANDCOVER_REPORT_COMPOSER;
+  const reportActions={classCsv:()=>downloadLandCoverClassCSV(),cellsGeojson:()=>downloadLandCoverCellsGeoJSON()};
   if(reportModel&&reportRows&&reportMetadata&&reportComposer){
     const last=(typeof DG_LC_LAST!=="undefined"&&DG_LC_LAST&&DG_LC_LAST.report)?DG_LC_LAST.report:null;
     const model=reportModel.build({result,extra,last,parkAreaM2,classes:DG_LC_CLASSES});
     const metadata=reportMetadata.render(model),rows=reportRows.render(model.rows);
-    rep.innerHTML=reportComposer.compose({metadata,rows});return;
+    rep.innerHTML=reportComposer.compose({metadata,rows});reportComposer.bind(rep,reportActions);return;
   }
   const R=result.groupAreas?result:{
     groupCounts:result.groupCounts||{},
@@ -147,7 +148,8 @@ function dgLcRenderReport(rep,result,parkAreaM2,extra){
       (ex.crossError?" · çapraz kaynak atlandı":"")+
     "</div>"+
     "<div style='display:flex;gap:7px;flex-wrap:wrap;margin-top:10px'>"+
-      "<button class='btn sm ghost' onclick='downloadLandCoverClassCSV()'>📥 Sınıf CSV</button>"+
-      "<button class='btn sm ghost' onclick='downloadLandCoverCellsGeoJSON()'>📍 Hücre GeoJSON</button>"+
+      "<button class='btn sm ghost' data-landcover-report-action='classCsv'>📥 Sınıf CSV</button>"+
+      "<button class='btn sm ghost' data-landcover-report-action='cellsGeojson'>📍 Hücre GeoJSON</button>"+
     "</div>";
+  reportComposer?.bind(rep,reportActions);
 }

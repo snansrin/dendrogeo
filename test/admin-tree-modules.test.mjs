@@ -81,9 +81,9 @@ test('row, user, project, park, and tree renderers preserve the hierarchy and mo
   };
   const row = modules.DG_ADMIN_TREE_MEASUREMENT_ROW.render({ id: 1, point_id: 3, species: 'Çam', grp: 'İBRELİ', status: 'Beklemede',
     dbh_cm: 12, height_m: 4, carbon_kg: 2 }, ports);
-  assert.ok(row.includes('approveMeas(1)') && row.includes('delMeas(1)') && row.includes('Pinus'));
+  assert.ok(row.includes('data-admin-measurement-action="approve"') && row.includes('data-admin-measurement-action="delete"') && row.includes('Pinus'));
   const user = modules.DG_ADMIN_TREE_USER.render({ key: 'u1', name: 'Araştırmacı', beklemede: 1, n: 1, c: 100, rows: [] }, ports);
-  assert.ok(user.includes('ontoggle="dgTreeToggle(\'u1\',this.open)"') && user.includes(' open'));
+  assert.ok(user.includes('data-dg-admin-tree-node="u1"') && user.includes(' open'));
   const project = modules.DG_ADMIN_TREE_PROJECT.render({ key: 'j4', name: 'Proje', project_id: 4, beklemede: 1, users: [], n: 1, c: 100 }, ports);
   assert.ok(project.includes('data-dg-admin-tree-action="delete-project"')&&project.includes('data-project-id="4"'));
   const park = modules.DG_ADMIN_TREE_PARK.render({ key: 'p9', name: 'Park', city: 'Ankara', area_m2: 10000, pending: false,
@@ -94,4 +94,11 @@ test('row, user, project, park, and tree renderers preserve the hierarchy and mo
     error: null, escape: String, translate: value => value, tons: () => '1.00 t', parkHTML: () => '<details class="dg-tree-park"></details>' });
   assert.ok(element.innerHTML.includes('data-dg-admin-tree-action="expand-all"') && element.innerHTML.includes('dg-tree-park'));
   assert.doesNotMatch(element.innerHTML,/\bonclick\s*=/i);
+});
+
+test('admin tree node state uses delegated capture for non-bubbling details toggles',()=>{
+  const calls=[],listeners={},document={addEventListener:(name,handler,capture)=>{listeners[name]={handler,capture};},getElementById:()=>null},window={dgTreeToggle:(key,open)=>calls.push([key,open])};
+  const context=vm.createContext({window,document});vm.runInContext(readFileSync(new URL('../src/ui/admin-tree-actions.js',import.meta.url),'utf8'),context);
+  const node={dataset:{dgAdminTreeNode:'park-9'},open:true,closest:selector=>selector==='details[data-dg-admin-tree-node]'?node:null};
+  assert.equal(listeners.toggle.capture,true);listeners.toggle.handler({target:node});assert.deepEqual(calls,[['park-9',true]]);
 });

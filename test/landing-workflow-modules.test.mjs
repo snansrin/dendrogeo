@@ -4,4 +4,19 @@ test('partial public statistics preserve successful panels and disclose errors o
 test('unexpected statistics errors are handled locally and do not reject the landing entry',async()=>{const w=setup(),error=Error('offline'),events=[];assert.equal(await w.DG_LOAD_LANDING_STATISTICS.load({load:async()=>{throw error},onError:errors=>events.push(errors[0])}),null);assert.equal(events[0],error);});
 test('public totals use existing fields and preserve zero fallbacks without calculations',()=>{const w=setup(),elements={};for(const key of ['statRec','statCountry','statCity','statCarbon'])elements[key]={};w.DG_RENDER_LANDING_TOTALS.render(Object.freeze({records:12,countries:2,cities:3,carbon_t:4}),id=>elements[id]);assert.equal(elements.statRec.textContent,12);assert.equal(elements.statCarbon.textContent,4);w.DG_RENDER_LANDING_TOTALS.render({},id=>elements[id]);assert.equal(elements.statCity.textContent,0);});
 test('country/city tables retain row limit, DBH display, keyboard links and escaped labels',()=>{const w=setup(),countries={innerHTML:''},cities={innerHTML:''},element=id=>({querySelector:()=>id==='tblCountry'?countries:cities}),escape=s=>String(s).replace(/</g,'&lt;'),rows=Array.from({length:25},(_,i)=>Object.freeze({country:'<Country>',city:'<City>',records:i,carbon_t:i,avg_dbh:12.345,avg_height:5})),input=Object.freeze({data:Object.freeze(rows)});w.DG_RENDER_LANDING_COUNTRY_TABLE.render(input,{element,escape});w.DG_RENDER_LANDING_CITY_TABLE.render(input,{element,escape});assert.equal((countries.innerHTML.match(/<tr /g)||[]).length,20);assert.ok(countries.innerHTML.includes('12.3'));assert.ok(countries.innerHTML.includes('tabindex="0"'));assert.ok(countries.innerHTML.includes('&lt;Country>'));assert.ok(cities.innerHTML.includes('&lt;City>'));w.DG_RENDER_LANDING_COUNTRY_TABLE.render({data:[]},{element,escape});assert.ok(countries.innerHTML.includes('Henüz veri yok'));});
+test('country/city rows delegate click and keyboard actions without inline handlers',()=>{
+ const w=setup(),handlers={country:{},city:{}},calls=[],bodies={
+  country:{innerHTML:'',addEventListener:(name,handler)=>{handlers.country[name]=handler;},contains:()=>true},
+  city:{innerHTML:'',addEventListener:(name,handler)=>{handlers.city[name]=handler;},contains:()=>true}
+ },element=id=>({querySelector:()=>id==='tblCountry'?bodies.country:bodies.city}),escape=String;
+ const actions={zoomCountry:name=>calls.push(['country',name]),zoomCity:name=>calls.push(['city',name])};
+ w.DG_RENDER_LANDING_COUNTRY_TABLE.render({data:[{country:'Norway'}]},{element,escape,actions});
+ w.DG_RENDER_LANDING_CITY_TABLE.render({data:[{city:'Ankara'}]},{element,escape,actions});
+ assert.ok(!/\bon(?:click|keydown)=/i.test(bodies.country.innerHTML+bodies.city.innerHTML));
+ for(const [kind,value] of [['country','Norway'],['city','Ankara']]){
+  const control={dataset:{landingPlace:value}},event={target:{closest:selector=>selector.includes(kind==='country'?'zoomCountry':'zoomCity')?control:null},key:'Enter',preventDefault(){this.prevented=true;}};
+  handlers[kind].click(event);handlers[kind].keydown(event);assert.equal(event.prevented,true);
+ }
+ assert.deepEqual(calls,[['country','Norway'],['country','Norway'],['city','Ankara'],['city','Ankara']]);
+});
 test('all landing modules are registered before the legacy entry and available offline',()=>{const boot=read('partials/boot.html'),sw=read('sw.js');for(const path of paths){assert.ok(boot.indexOf(path)<boot.indexOf('src/ui/landing.js'));assert.ok(sw.includes('/'+path));}});

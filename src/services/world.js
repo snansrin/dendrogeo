@@ -51,10 +51,8 @@ function dgParkRowHTML(p,i,max){
 }
 
 function dgPendingParksHTML(pending){
- /* Locked source contract: PARK ALGILANMAMIŞ KAYITLAR; const admin=(typeof dgIsAdmin==="function")?dgIsAdmin():false;
-  * admin?`<button class="btn sm ghost dg-pend-act" onclick="startParkScan({returnTo:'world'})";
-  * normal users see "🔐 yönetici bağlayacak" and never get the scan action. */
- return window.DG_PARK_COMPARISON_PENDING.render(pending,{isAdmin:typeof dgIsAdmin==="function"&&dgIsAdmin(),escape:esc});
+ /* Pending park repair stays admin-only; the UI delegates to the established scan workflow. */
+ return window.DG_PARK_COMPARISON_PENDING.render(pending,{isAdmin:typeof dgIsAdmin==="function"&&dgIsAdmin(),escape:esc,document:typeof document!=="undefined"?document:null,actions:{scan:()=>startParkScan({returnTo:"world"})}});
 }
 
 function dgFillReportOptions(linked,pending){
@@ -71,6 +69,7 @@ function dgParkCompareDenied__scroll(error){
   isAdmin:()=>typeof dgIsAdmin==="function"&&dgIsAdmin(),
   log:(code,message)=>console.warn("DENDROGEO · park karşılaştırma okunamadı (şema değil, yetki/ağ):",code,message),
   getElement:()=>$("parkCompare"),render:window.DG_PARK_COMPARISON_ERROR_UI.render,escape:esc,
+  bind:window.DG_PARK_COMPARISON_ERROR_UI.bind,actions:{retry:()=>loadParkCompare()},
   toast,translate:dgCf
  });
 }

@@ -68,6 +68,18 @@ test('profil mount görünüm çıktısını verilen elemana yazar',()=>{
   assert.equal(element.innerHTML,modules.DG_RENDER_ACADEMIC_PROFILE.render(profile,ports));
 });
 
+test('profil gezinme ve kayıt eylemleri kapsayıcıdan delege edilir',()=>{
+  const modules=loadModules(),listeners={},calls=[],element={innerHTML:'',addEventListener:(name,handler)=>{listeners[name]=handler;},contains:()=>true};
+  const profile={name:'Ada',values:{orcid:'',institution:'',department:''},fields:[]};
+  modules.DG_RENDER_ACADEMIC_PROFILE.mount(element,profile,{escape:String,orcidValid:()=>false,input:()=>'',navigate:view=>calls.push(['navigate',view]),save:event=>calls.push(['save',event])});
+  assert.doesNotMatch(element.innerHTML,/\bon(?:click|submit)\s*=/i);
+  for(const action of ['measure','projects']){const button={dataset:{academicProfileAction:action}};listeners.click({target:{closest:selector=>selector==='[data-academic-profile-action]'?button:null}});}
+  const form={matches:selector=>selector==='[data-academic-profile-form]'},event={target:form,preventDefault(){this.prevented=true;}};
+  listeners.submit(event);
+  assert.equal(event.prevented,true);assert.deepEqual(calls.map(call=>call[0]),['navigate','navigate','save']);
+  assert.deepEqual(calls.slice(0,2),[['navigate','measure'],['navigate','projects']]);
+});
+
 test('profil kaydetme doğrulama, başarı ve hata durumlarını portlara aktarır', async () => {
   const modules = loadModules();
   const calls = [];

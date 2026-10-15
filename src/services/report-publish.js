@@ -120,6 +120,7 @@ function dgPubRender__scroll(){
  const st=DG_PUB_STATE;
  const pubByPark=dgPubPublishedByPark();
  const card=window.DG_RENDER_PUBLICATION_ADMIN_CARD;
+ const parkRow=window.DG_RENDER_PUBLICATION_PARK_ROW;
  card.updateClock($("dgPubClock"),st.queueAt?(dgCf("son kontrol")+" "+new Date(st.queueAt).toLocaleTimeString("tr-TR")):"—");
  if(st.error==="SCHEMA"){card.mount(box,card.schemaWarning());return;}
  const rows=st.parks.map(park=>{
@@ -134,7 +135,7 @@ function dgPubRender__scroll(){
    isDoi:value=>DG_PUB_DOI.test(String(value||"")),
    isReportId:value=>DG_PUB_ID.test(String(value||""))
   });
-  return window.DG_RENDER_PUBLICATION_PARK_ROW.render(park,view,{
+  return parkRow.render(park,view,{
    url:dgPubUrl,escape:esc,translate:dgCf,
    isDoi:value=>DG_PUB_DOI.test(String(value||"")),
    area:value=>typeof dgFmtHa==="function"?dgFmtHa(value):"—"
@@ -151,6 +152,13 @@ function dgPubRender__scroll(){
   escape:esc
  });
  card.mount(box,card.render({summary,rows,history,error:st.error,queueMissing:st.queue===null,escape:esc,translate:dgCf}));
+ parkRow.bind(box,{
+  cancel:control=>dgPublishCancel(control.dataset.requestId),
+  open:control=>dgReportOpen(control.dataset.reportId),
+  share:control=>dgReportShare(control.dataset.reportId),
+  retract:control=>dgReportRetract(control.dataset.reportId,Number(control.dataset.parkId)),
+  publish:control=>dgPublishReport(Number(control.dataset.parkId))
+ });
 }
 /* ---------- yazma (ortak çekirdek: yönetici kartı + kullanıcı paneli) ---------- */
 /* RLS-safe insert (trackVisit ile aynı desen): "Prefer: return=minimal" —
@@ -328,7 +336,15 @@ function dgUserPubRender(){
  const box=$("dgUserPubBox");if(!box)return;
  const st=DG_USER_PUB;
  const card=window.DG_RENDER_USER_PUBLICATION_CARD;
- const close="<button class=\"btn sm ghost\" onclick=\"dgUserPubClose()\" title=\"Paneli kapat\">✖ Kapat</button>";
+ window.DG_RENDER_USER_PUBLICATION_CONTROLS.bind(box,{
+  close:()=>dgUserPubClose(),
+  open:control=>dgReportOpen(control.dataset.reportId),
+  share:control=>dgReportShare(control.dataset.reportId),
+  retract:control=>dgReportRetract(control.dataset.reportId,Number(control.dataset.parkId)),
+  cancel:control=>dgUserCancel(control.dataset.requestId),
+  publish:control=>dgUserPublish(Number(control.dataset.parkId))
+ });
+ const close="<button type=\"button\" class=\"btn sm ghost\" data-user-publication-action=\"close\" title=\"Paneli kapat\">✖ Kapat</button>";
  if(st.error==="SCHEMA"){card.mount(box,card.schemaWarning(close));return;}
  const mine=(typeof USER!=="undefined"&&USER&&USER.id)||"";
  const view=window.DG_RESOLVE_USER_PUBLICATION_VIEW.resolve(st,mine,{

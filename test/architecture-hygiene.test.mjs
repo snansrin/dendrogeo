@@ -22,5 +22,6 @@ test('generated markup event handlers do not exceed the reviewed migration basel
   const current=collectGeneratedMarkupHandlers(root);
   const baseline=JSON.parse(readFileSync(join(root,'docs/generated-markup-handler-baseline.json'),'utf8'));
   assert.deepEqual(compareGeneratedMarkupHandlers(current,baseline).errors,[]);
-  assert.ok(current.total>0,'existing dynamic handler debt stays visible until migrated');
+  assert.equal(current.total,0,'all generated markup actions must be owned by delegated UI modules');
+  assert.deepEqual(current.files,{},'no source file should retain generated markup handlers');
 });

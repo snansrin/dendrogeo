@@ -38,13 +38,25 @@ test('domain merge keeps owner-first order without mutating either collection',(
 });
 
 test('directory UI preserves selector restore, owner/shared cards, counts and empty state',()=>{
-  const{window}=setup(),elements=Object.fromEntries(['mProject','nProject','projOwnCount','projSharedCount','projOwnList','projSharedList','projSharedSection','projTable','projCreateDetails'].map(id=>[id,{innerHTML:'',textContent:'',style:{},open:false}]));
+  const{window}=setup(),elements=Object.fromEntries(['mProject','nProject','projOwnCount','projSharedCount','projOwnList','projSharedList','projSharedSection','projTable','projCreateDetails'].map(id=>[id,{innerHTML:'',textContent:'',style:{},open:false,addEventListener(){}}]));
   const events=[];
   window.DG_MEASUREMENT_PROJECT_DIRECTORY_UI.render({projects:[{id:1,name:'Oak'},{id:2,name:'Shared',shared:true}],element:id=>elements[id],escape:String,optionLabel:project=>project.name,restore:()=>events.push('restore'),renderCard:(project,isShared)=>`${isShared?'S':'O'}${project.id}`,editing:false});
   assert.deepEqual(events,['restore']);assert.match(elements.mProject.innerHTML,/Oak/);assert.equal(elements.projOwnCount.textContent,'1');assert.equal(elements.projSharedCount.textContent,'1');
   assert.equal(elements.projOwnList.innerHTML,'O1');assert.equal(elements.projSharedList.innerHTML,'S2');assert.equal(elements.projSharedSection.style.display,'');assert.equal(elements.projTable.innerHTML,'O1S2');assert.equal(elements.projCreateDetails.open,false);
   window.DG_MEASUREMENT_PROJECT_DIRECTORY_UI.render({projects:[],element:id=>elements[id],escape:String,optionLabel:project=>project.name,restore:()=>{},renderCard:()=>'',editing:false});
   assert.equal(elements.mProject.innerHTML,"<option value=''>Önce park algıla → proje oluştur</option>");assert.match(elements.projOwnList.innerHTML,/Henüz kendi projen yok/);assert.equal(elements.projSharedSection.style.display,'none');assert.equal(elements.projCreateDetails.open,true);
+});
+
+test('directory UI delegates project actions and refreshes the injected callbacks',()=>{
+  const{window}=setup(),events={},calls=[];
+  const list={innerHTML:'',addEventListener:(name,handler)=>{events[name]=handler;},contains:()=>true};
+  const elements={mProject:null,nProject:null,projOwnCount:null,projSharedCount:null,projOwnList:list,projSharedList:null,projSharedSection:null,projTable:null,projCreateDetails:null};
+  const options={projects:[{id:42,name:'Oak'}],element:id=>elements[id],escape:String,optionLabel:project=>project.name,restore(){},renderCard:()=>'<button data-project-action="edit" data-project-id="42">Edit</button>',editing:true};
+  window.DG_MEASUREMENT_PROJECT_DIRECTORY_UI.render({...options,actions:{edit:id=>calls.push(['old',id])}});
+  window.DG_MEASUREMENT_PROJECT_DIRECTORY_UI.render({...options,actions:{edit:id=>calls.push(['new',id])}});
+  const control={dataset:{projectAction:'edit',projectId:'42'},disabled:false};
+  events.click({target:{closest:()=>control}});
+  assert.deepEqual(calls,[['new',42]]);
 });
 
 test('application loads, merges, stores and renders in order',async()=>{

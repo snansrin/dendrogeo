@@ -5580,6 +5580,1334 @@
           "sha256": "eee579fe4f2323e9a9540cccb5e45758cfed5fade7c613c87641f9039fcc9273"
         }
       ]
+    },
+    {
+      "scope": "User-authorized modularization: delegate owner/shared project-card actions through the project-directory UI and injected measurement workflows.",
+      "date": "2026-10-15",
+      "audit_chain": "sha256-v1",
+      "files": [
+        {
+          "path": "index.html",
+          "previous_sha256": "271cdf171002706e1c514c2563a9b1febb9121de2be30c2bff78cd4071514674",
+          "sha256": "339cfd466836f42b1d1b9c3b1d6161603e2f98651f3cfaa771883e2a923f10a3"
+        },
+        {
+          "path": "src/services/measure.js",
+          "previous_sha256": "37dd6177bb9a5c4f9d729b109630952e95e178eff7917e36637f8ddc9d34bd78",
+          "sha256": "9ad7d833a0a3963a7a7ed5bc444eb50c6221a59aec5b7533038dc2938d787c73"
+        },
+        {
+          "path": "src/ui/measurement-project-card.js",
+          "previous_sha256": "f1c052d9c170e4da3031cf91bdcb09a078fbcc64cddad32ea97ae48d400ef2f0",
+          "sha256": "0c8b16e6a03ce88ac323967cae2851a60d369353d7b350d1619c4e1c312764fe"
+        },
+        {
+          "path": "test/measurement-project-modules.test.mjs",
+          "previous_sha256": "3fdcab1b09265b2bdb4dec43c0ca8c9d4aa6aaeb3c899d5b1bbac704fb7ce942",
+          "sha256": "984789fe35ccb87a8b68fdbaf9cbda865153278fa2e5d5b7dbea1faefe52301e"
+        },
+        {
+          "path": "test/park-flow.test.mjs",
+          "previous_sha256": "eee579fe4f2323e9a9540cccb5e45758cfed5fade7c613c87641f9039fcc9273",
+          "sha256": "fb503908e52e145f4017d7675eae12551dbc876b78e35c9663ece2043c08f80e"
+        },
+        {
+          "path": "docs/generated-markup-handler-baseline.json",
+          "previous_sha256": "313ee77ac6fcb733e49b3e0ec59d19d59420887e6eda378ef76e1482e7c7d1c8",
+          "sha256": "e4cf7f134df7f999562afbeace618902c892d11219dad36ca07ee47295ba683d"
+        }
+      ]
+    },
+    {
+      "scope": "User-authorized modularization: extract delegated owner/shared project-card actions into the measurement project directory UI.",
+      "date": "2026-10-15",
+      "audit_chain": "sha256-v1",
+      "files": [
+        {
+          "path": "src/ui/render-measurement-project-directory.js",
+          "previous_sha256": "53ab3b1a5da66c2ec143d14ed61457dbcef1a92c8521ae6f5dafe6a12d1958c5",
+          "sha256": "826492053f2cdc65607c35c3a7e2198858bb956f16a4d1bacdad529f9364752b"
+        }
+      ]
+    },
+    {
+      "scope": "User-authorized modularization: delegate park-identity admin row and duplicate-merge actions through the park-admin renderer.",
+      "date": "2026-10-15",
+      "audit_chain": "sha256-v1",
+      "files": [
+        {
+          "path": "index.html",
+          "previous_sha256": "339cfd466836f42b1d1b9c3b1d6161603e2f98651f3cfaa771883e2a923f10a3",
+          "sha256": "8ef4bc2bb15bd46ea71b12448375798ad705dc59e7a77d8a1d246914ca9e018f"
+        },
+        {
+          "path": "src/services/park-registry.js",
+          "previous_sha256": "93823fcecefef134b1001a7839de98ac0af2833bde31f0988043d8ca2f8779dc",
+          "sha256": "74ead59eedb32130cdb3922f52bdb5a558fed79d42016b8c9e8a078488a1f4e5"
+        },
+        {
+          "path": "src/ui/park-admin-renderer.js",
+          "previous_sha256": "7a4ce3606df653784f63ef4055f64d5d66ab57bd5ae749f26aa1851487297111",
+          "sha256": "5e9be5fef26ba3302763f4057321db79b27697a893056cd5dc16d6193bb9b633"
+        },
+        {
+          "path": "test/park-admin-renderer-ui.test.mjs",
+          "previous_sha256": "983410b5f5207a1276f97f3f33bf898452a8f2d749a7690193cba798d569e6fe",
+          "sha256": "48f34a4629f4123109518951adba3ab7761dbd535cf6ca67d0b4872e9f4ec9a1"
+        },
+        {
+          "path": "test/park-flow.test.mjs",
+          "previous_sha256": "fb503908e52e145f4017d7675eae12551dbc876b78e35c9663ece2043c08f80e",
+          "sha256": "d8d15a92d3908e62049f1765a79d8d91a8f637a4ddd3dd9cc980202979c7489b"
+        },
+        {
+          "path": "docs/generated-markup-handler-baseline.json",
+          "previous_sha256": "e4cf7f134df7f999562afbeace618902c892d11219dad36ca07ee47295ba683d",
+          "sha256": "2dba1cb9cd32af4b0c68047ec3f621f4691ea28543b85fe9fe6be4d37a7f6dde"
+        }
+      ]
+    },
+    {
+      "scope": "User-authorized modularization: move publication park-row and user publication controls from inline handlers to renderer-owned delegated events.",
+      "date": "2026-10-15",
+      "audit_chain": "sha256-v1",
+      "files": [
+        {
+          "path": "index.html",
+          "previous_sha256": "8ef4bc2bb15bd46ea71b12448375798ad705dc59e7a77d8a1d246914ca9e018f",
+          "sha256": "0e2fe0376094106a215c05dacff7a776fb4c586120989a4ea7f9fe5b0913b5a3"
+        },
+        {
+          "path": "src/services/grid-engine.js",
+          "previous_sha256": "92e9122dc34ed798e807a04ceb55a12cf24f4f85e9c0b5f110dbef3407f8a773",
+          "sha256": "60e691fa0c999077c2438c709b17e16c6232bb6753055a53b0508286583f2cf0"
+        },
+        {
+          "path": "src/ui/grid-summary.js",
+          "previous_sha256": "da67b19fa3a21f4c24b1313ede8a5903ed90aeceb8490bf34f81f8bfe7e1fc84",
+          "sha256": "99e6993e3cd175ab96fcc60cbbb9f4adec45ce6794c28aed28a6138051898326"
+        },
+        {
+          "path": "src/ui/render-publication-park-row.js",
+          "previous_sha256": "0aca9dd66e02e80150efb0364bd076a23987966be5053bb0dedff872a23bf9d4",
+          "sha256": "681dbc7479848dc1890db2f98a210438ffdcfc3ef7dfb7861e8f031d4d098131"
+        },
+        {
+          "path": "test/grid-summary-ui.test.mjs",
+          "previous_sha256": "53c1986ebc2e9dd5a5e88edc6caa0bf5802e5725aee2243e891eb7f9793979cb",
+          "sha256": "5ca21311b4c5be894cbd656610fbe97d982ac63b4df077c212fbbf2566dbd7df"
+        },
+        {
+          "path": "test/report-publish.test.mjs",
+          "previous_sha256": "b83b5c112f81db529985310191930f58c6f8cf26ba34a74cda0c542e998f66dd",
+          "sha256": "d024d3432adb8c974ef183473b850c6f8a61a6ef09258fec73ec91f8b8e37bd9"
+        },
+        {
+          "path": "test/retraction.test.mjs",
+          "previous_sha256": "c2156819fec611ad9deb7cfecdb260560836d98e7afb938e8a57ade246c1f490",
+          "sha256": "596e6a116bff9747af3fbaf8523cc6af685e3e00506062fe7bb326a75d251e0c"
+        },
+        {
+          "path": "test/user-publish.test.mjs",
+          "previous_sha256": "1d5f248aeab184a08ee7ee7ed9a2f65b651c15be455bae9f5dc4421cfff92556",
+          "sha256": "c1d23c6fdead430522cfbade842fab4bbc83bebf5ff899e837df6672a2ae4d89"
+        }
+      ]
+    },
+    {
+      "scope": "User-authorized modularization: lower the protected generated-markup inline-handler baseline after delegated event migration.",
+      "date": "2026-10-15",
+      "audit_chain": "sha256-v1",
+      "files": [
+        {
+          "path": "docs/generated-markup-handler-baseline.json",
+          "previous_sha256": "2dba1cb9cd32af4b0c68047ec3f621f4691ea28543b85fe9fe6be4d37a7f6dde",
+          "sha256": "c049dccc30c5f350667d268f013968dfbb5ae05d3d98591d7ce3cf7150069b39"
+        }
+      ]
+    },
+    {
+      "scope": "User-authorized modularization: update the locked park identity regression assertion to the project-card delegated action contract.",
+      "date": "2026-10-15",
+      "audit_chain": "sha256-v1",
+      "files": [
+        {
+          "path": "test/park-identity.test.mjs",
+          "previous_sha256": "b6c13521da6eb1e0115b439cec3f1cf389e7276eebf6ae8b04c6d4d0a981dcc3",
+          "sha256": "8197a8c8edb97ae718c3ec92363810db4f29e406f8f7d51fb50bd414adf69998"
+        }
+      ]
+    },
+    {
+      "scope": "User-authorized modularization: delegate flat admin measurement approve, reject, geofence override and delete actions from the row renderer.",
+      "date": "2026-10-15",
+      "audit_chain": "sha256-v1",
+      "files": [
+        {
+          "path": "index.html",
+          "previous_sha256": "0e2fe0376094106a215c05dacff7a776fb4c586120989a4ea7f9fe5b0913b5a3",
+          "sha256": "0e4b5a18eaf9065fa73d367bd284885667c66bfc9e8a67a0f7d4fd76b4651dd4"
+        },
+        {
+          "path": "src/ui/admin-measurement-row.js",
+          "previous_sha256": "3385a86131a1849a882a486c39502f0059fbbf46f52052b09626932549984817",
+          "sha256": "baf4acef2370d68428f09eca7f23a5d3bda46ce348405b5f1b8fccc043f67ab4"
+        },
+        {
+          "path": "src/ui/admin-measurement-table.js",
+          "previous_sha256": "384c3d8886e0c0b9dc148d9990271be7c99052163a38bd75a349780f92ac20ed",
+          "sha256": "3be50d010a3171fee0dbc5d03e492ea03395eaff1177e846b8f59de5834cf5e5"
+        },
+        {
+          "path": "docs/generated-markup-handler-baseline.json",
+          "previous_sha256": "c049dccc30c5f350667d268f013968dfbb5ae05d3d98591d7ce3cf7150069b39",
+          "sha256": "5ffb827029b6ec1befa3bc0178924f01ea2b3cd166cbbeb75d6661a1caecce22"
+        }
+      ]
+    },
+    {
+      "scope": "User-authorized modularization: route admin tree moderation actions through the shared delegated measurement-row UI contract.",
+      "date": "2026-10-15",
+      "audit_chain": "sha256-v1",
+      "files": [
+        {
+          "path": "index.html",
+          "previous_sha256": "0e4b5a18eaf9065fa73d367bd284885667c66bfc9e8a67a0f7d4fd76b4651dd4",
+          "sha256": "3d27dbc55d4407e67956ce184a64aafe86313b2a77493d6b5653f7817bf6cc16"
+        },
+        {
+          "path": "src/ui/admin-tree-measurement-row.js",
+          "previous_sha256": "13f54b45253fffdeaa332410c6cdfde29448833998b18dafc32bdd25542341a4",
+          "sha256": "706613632a87e9c6848a4938044e6af4527c653bec8cb1fbdd4fd3644a86e844"
+        },
+        {
+          "path": "test/admin-tree.test.mjs",
+          "previous_sha256": "dc650c56cbfc9b3090547b9f25e2181d532a3a8fed9615074b807e03c70293c0",
+          "sha256": "d08a9b1fc910f2dc4b5570a2f06210045b41b8db6ac3394cbc43f46796b72495"
+        },
+        {
+          "path": "test/park-flow.test.mjs",
+          "previous_sha256": "d8d15a92d3908e62049f1765a79d8d91a8f637a4ddd3dd9cc980202979c7489b",
+          "sha256": "05c106b3743968e477f98b68d21ea54dd860473d60da4fc0fdafbf5b07c7cb4c"
+        },
+        {
+          "path": "docs/generated-markup-handler-baseline.json",
+          "previous_sha256": "5ffb827029b6ec1befa3bc0178924f01ea2b3cd166cbbeb75d6661a1caecce22",
+          "sha256": "b3e51035d484136298d831fa28b05c9c185ebe0746abfdb1b5c307757bb478a1"
+        }
+      ]
+    },
+    {
+      "scope": "User-authorized modularization: refresh the generated entrypoint asset hash after delegated admin tree event binding.",
+      "date": "2026-10-15",
+      "audit_chain": "sha256-v1",
+      "files": [
+        {
+          "path": "index.html",
+          "previous_sha256": "3d27dbc55d4407e67956ce184a64aafe86313b2a77493d6b5653f7817bf6cc16",
+          "sha256": "46f773c17e1601e492a60c068722cf4e4166f657825f0be83a5ad78800bcc8bf"
+        }
+      ]
+    },
+    {
+      "scope": "User-authorized modularization: update the geofence regression assertion to the delegated admin measurement action contract.",
+      "date": "2026-10-15",
+      "audit_chain": "sha256-v1",
+      "files": [
+        {
+          "path": "test/geofence.test.mjs",
+          "previous_sha256": "a5ac585049d0fa04aae7156cf9b4391693192004f10a785cd84b6ce7559edf4c",
+          "sha256": "d50ba506c2b1b3d5ae7142bff3a7303b9ebfe155d66ba7a6f0f39fcc267077d3"
+        }
+      ]
+    },
+    {
+      "scope": "User-authorized modularization: delegate park backfill plan and waypoint list actions from their UI renderers.",
+      "date": "2026-10-15",
+      "audit_chain": "sha256-v1",
+      "files": [
+        {
+          "path": "index.html",
+          "previous_sha256": "46f773c17e1601e492a60c068722cf4e4166f657825f0be83a5ad78800bcc8bf",
+          "sha256": "822bb100d8e58d4247546555d612b3717e7d14c8b8c12d7e2a0bf08bc350fbf4"
+        },
+        {
+          "path": "src/services/map.js",
+          "previous_sha256": "e4fd10ce1823d446a55972a8b465fe8e837670d9257d3c4dbcb1f88f8f7695a3",
+          "sha256": "924d5cccf9d409141dbe95cc86c939f985651ca9343fa3f7ee1b04a19cffd2d7"
+        },
+        {
+          "path": "src/ui/park-backfill-plan.js",
+          "previous_sha256": "c02f5ee386638b4d029e8365cdcc707abf8d8cdae37beb736cf8eff5a1495b13",
+          "sha256": "728238784bd743237f08ccc7b418749b3be0217d1fde3f0b149b0b26e3cd0756"
+        },
+        {
+          "path": "src/ui/waypoint-list.js",
+          "previous_sha256": "b5cf7a3a3b9ed825c905e089086b2e5cb6857bc3b5e2c2c6fbaa328aaa9a448a",
+          "sha256": "146c4670a9f995436822a6eb193b43058a948f30bbae32bd5fe8c7e7421fa8e7"
+        },
+        {
+          "path": "docs/generated-markup-handler-baseline.json",
+          "previous_sha256": "b3e51035d484136298d831fa28b05c9c185ebe0746abfdb1b5c307757bb478a1",
+          "sha256": "03625befdf48f11cc2a1e24c66c0118f29df0c048eb215851fb8d174fc7641a3"
+        }
+      ]
+    },
+    {
+      "scope": "User-authorized modularization: use unique classic-script helper names for backfill and waypoint delegated event bindings.",
+      "date": "2026-10-15",
+      "audit_chain": "sha256-v1",
+      "files": [
+        {
+          "path": "index.html",
+          "previous_sha256": "822bb100d8e58d4247546555d612b3717e7d14c8b8c12d7e2a0bf08bc350fbf4",
+          "sha256": "b2d29a0f8dc835cda6ff85468cf96b5abf9d16450f5aaa547db58038f6a045eb"
+        },
+        {
+          "path": "src/ui/park-backfill-plan.js",
+          "previous_sha256": "728238784bd743237f08ccc7b418749b3be0217d1fde3f0b149b0b26e3cd0756",
+          "sha256": "36ae0a804261fb085550c2f4bf38eae5582190a0733efdeb4b5df83b35182fe8"
+        },
+        {
+          "path": "src/ui/waypoint-list.js",
+          "previous_sha256": "146c4670a9f995436822a6eb193b43058a948f30bbae32bd5fe8c7e7421fa8e7",
+          "sha256": "de71786643ef5bbdf852adb6bd4e844d2335ef70210638835c84cddb0e42e73b"
+        }
+      ]
+    },
+    {
+      "scope": "User-authorized modularization: delegate pending data-request queue actions from the table renderer and lower the protected handler baseline.",
+      "date": "2026-10-15",
+      "audit_chain": "sha256-v1",
+      "files": [
+        {
+          "path": "index.html",
+          "previous_sha256": "b2d29a0f8dc835cda6ff85468cf96b5abf9d16450f5aaa547db58038f6a045eb",
+          "sha256": "922eaa9c9a6090933c136d57aef8a707deb79dae944d8924d95cee815559b487"
+        },
+        {
+          "path": "docs/generated-markup-handler-baseline.json",
+          "previous_sha256": "03625befdf48f11cc2a1e24c66c0118f29df0c048eb215851fb8d174fc7641a3",
+          "sha256": "cc65413caff13cce326f9adcd95e7e042131dd75f238c0e1a2f4198cabb3efc9"
+        }
+      ]
+    },
+    {
+      "date": "2026-10-15",
+      "scope": "User-authorized modularization: finish declarative UI event ownership while preserving established behavior and protected service contracts.",
+      "audit_chain": "sha256-v1",
+      "files": [
+        {
+          "path": "docs/generated-markup-handler-baseline.json",
+          "previous_sha256": "cc65413caff13cce326f9adcd95e7e042131dd75f238c0e1a2f4198cabb3efc9",
+          "sha256": "f1afa17bac7b2b0cc6a9581485036d1a059d49593b7e0f22fff45dd623922d78"
+        },
+        {
+          "path": "index.html",
+          "previous_sha256": "922eaa9c9a6090933c136d57aef8a707deb79dae944d8924d95cee815559b487",
+          "sha256": "ecdee6f8d813ada444047ec839cdcb1fc16565c9889a8709c03e1ceb0af6a488"
+        },
+        {
+          "path": "src/services/grid-engine.js",
+          "previous_sha256": "60e691fa0c999077c2438c709b17e16c6232bb6753055a53b0508286583f2cf0",
+          "sha256": "60e691fa0c999077c2438c709b17e16c6232bb6753055a53b0508286583f2cf0"
+        },
+        {
+          "path": "src/services/map.js",
+          "previous_sha256": "924d5cccf9d409141dbe95cc86c939f985651ca9343fa3f7ee1b04a19cffd2d7",
+          "sha256": "924d5cccf9d409141dbe95cc86c939f985651ca9343fa3f7ee1b04a19cffd2d7"
+        },
+        {
+          "path": "src/services/measure.js",
+          "previous_sha256": "9ad7d833a0a3963a7a7ed5bc444eb50c6221a59aec5b7533038dc2938d787c73",
+          "sha256": "9ad7d833a0a3963a7a7ed5bc444eb50c6221a59aec5b7533038dc2938d787c73"
+        },
+        {
+          "path": "src/services/park-registry.js",
+          "previous_sha256": "74ead59eedb32130cdb3922f52bdb5a558fed79d42016b8c9e8a078488a1f4e5",
+          "sha256": "13ae4511b3935d75172fe54d1cf91e0b1219d1644343109b1e49685f4929dced"
+        },
+        {
+          "path": "src/ui/admin-measurement-row.js",
+          "previous_sha256": "baf4acef2370d68428f09eca7f23a5d3bda46ce348405b5f1b8fccc043f67ab4",
+          "sha256": "baf4acef2370d68428f09eca7f23a5d3bda46ce348405b5f1b8fccc043f67ab4"
+        },
+        {
+          "path": "src/ui/admin-measurement-table.js",
+          "previous_sha256": "3be50d010a3171fee0dbc5d03e492ea03395eaff1177e846b8f59de5834cf5e5",
+          "sha256": "3be50d010a3171fee0dbc5d03e492ea03395eaff1177e846b8f59de5834cf5e5"
+        },
+        {
+          "path": "src/ui/admin-tree-measurement-row.js",
+          "previous_sha256": "706613632a87e9c6848a4938044e6af4527c653bec8cb1fbdd4fd3644a86e844",
+          "sha256": "706613632a87e9c6848a4938044e6af4527c653bec8cb1fbdd4fd3644a86e844"
+        },
+        {
+          "path": "src/ui/grid-summary.js",
+          "previous_sha256": "99e6993e3cd175ab96fcc60cbbb9f4adec45ce6794c28aed28a6138051898326",
+          "sha256": "99e6993e3cd175ab96fcc60cbbb9f4adec45ce6794c28aed28a6138051898326"
+        },
+        {
+          "path": "src/ui/landing-city-table.js",
+          "previous_sha256": "a851070241782bc44677cfe78e125d23e95a50c5370d115e39756a87ff44a8b6",
+          "sha256": "5b794e6b4d618552da4a70afbc45c1c58efb1afcf9a75cfea9ba0093b0b60dee"
+        },
+        {
+          "path": "src/ui/landing-country-table.js",
+          "previous_sha256": "6a171487670f5d4f393cd914b03ba8cde07a794016cf45c57612c9d3ce19f945",
+          "sha256": "21d7c4ee6a34f2bcc7a2d2a31d6ebebf9dea4ab537d5f18321dba4af42abdbce"
+        },
+        {
+          "path": "src/ui/landing.js",
+          "previous_sha256": "df6fc01a2379528121242c645cc1f8295c9f9999547af895a2e83f44aa30b132",
+          "sha256": "b15ed12c1227ea896a8df00d923c886cf11fa8f0b861ea35f95bcbbddfea9ee7"
+        },
+        {
+          "path": "src/ui/measurement-project-card.js",
+          "previous_sha256": "0c8b16e6a03ce88ac323967cae2851a60d369353d7b350d1619c4e1c312764fe",
+          "sha256": "0c8b16e6a03ce88ac323967cae2851a60d369353d7b350d1619c4e1c312764fe"
+        },
+        {
+          "path": "src/ui/park-admin-renderer.js",
+          "previous_sha256": "5e9be5fef26ba3302763f4057321db79b27697a893056cd5dc16d6193bb9b633",
+          "sha256": "5e9be5fef26ba3302763f4057321db79b27697a893056cd5dc16d6193bb9b633"
+        },
+        {
+          "path": "src/ui/park-backfill-plan.js",
+          "previous_sha256": "36ae0a804261fb085550c2f4bf38eae5582190a0733efdeb4b5df83b35182fe8",
+          "sha256": "36ae0a804261fb085550c2f4bf38eae5582190a0733efdeb4b5df83b35182fe8"
+        },
+        {
+          "path": "src/ui/park-measurement-gate.js",
+          "previous_sha256": "4772a5fb077f43b4e0f9369366816ad68da36aace791b2b55a3fe98541ac6119",
+          "sha256": "81076373a09f2ed2eabc778e019ba2c710682e84ad8b181c00eb932d9ec9b421"
+        },
+        {
+          "path": "src/ui/render-measurement-project-directory.js",
+          "previous_sha256": "826492053f2cdc65607c35c3a7e2198858bb956f16a4d1bacdad529f9364752b",
+          "sha256": "826492053f2cdc65607c35c3a7e2198858bb956f16a4d1bacdad529f9364752b"
+        },
+        {
+          "path": "src/ui/render-publication-park-row.js",
+          "previous_sha256": "681dbc7479848dc1890db2f98a210438ffdcfc3ef7dfb7861e8f031d4d098131",
+          "sha256": "681dbc7479848dc1890db2f98a210438ffdcfc3ef7dfb7861e8f031d4d098131"
+        },
+        {
+          "path": "src/ui/waypoint-list.js",
+          "previous_sha256": "de71786643ef5bbdf852adb6bd4e844d2335ef70210638835c84cddb0e42e73b",
+          "sha256": "de71786643ef5bbdf852adb6bd4e844d2335ef70210638835c84cddb0e42e73b"
+        },
+        {
+          "path": "test/academic-profile-modules.test.mjs",
+          "previous_sha256": "92d721bec44aa1239ec2729f32deb141a484067fb418891e6efeb5f58ae412d9",
+          "sha256": "96d625ff5842bec8291856c4ab1a55ecefa4a3df0e37481a2d2896fb4776dbb7"
+        },
+        {
+          "path": "test/admin-tree.test.mjs",
+          "previous_sha256": "d08a9b1fc910f2dc4b5570a2f06210045b41b8db6ac3394cbc43f46796b72495",
+          "sha256": "d08a9b1fc910f2dc4b5570a2f06210045b41b8db6ac3394cbc43f46796b72495"
+        },
+        {
+          "path": "test/geofence.test.mjs",
+          "previous_sha256": "d50ba506c2b1b3d5ae7142bff3a7303b9ebfe155d66ba7a6f0f39fcc267077d3",
+          "sha256": "d50ba506c2b1b3d5ae7142bff3a7303b9ebfe155d66ba7a6f0f39fcc267077d3"
+        },
+        {
+          "path": "test/grid-summary-ui.test.mjs",
+          "previous_sha256": "5ca21311b4c5be894cbd656610fbe97d982ac63b4df077c212fbbf2566dbd7df",
+          "sha256": "5ca21311b4c5be894cbd656610fbe97d982ac63b4df077c212fbbf2566dbd7df"
+        },
+        {
+          "path": "test/landing-workflow-modules.test.mjs",
+          "previous_sha256": "03fa24bcca838abbfccd5bf71c61dcbf20a8904df8901af9acbadc197b03028b",
+          "sha256": "4f15fcb87fa1fba440eece95310272921624d4cf63e31ac76c70165c0faeb958"
+        },
+        {
+          "path": "test/measurement-project-modules.test.mjs",
+          "previous_sha256": "984789fe35ccb87a8b68fdbaf9cbda865153278fa2e5d5b7dbea1faefe52301e",
+          "sha256": "984789fe35ccb87a8b68fdbaf9cbda865153278fa2e5d5b7dbea1faefe52301e"
+        },
+        {
+          "path": "test/park-admin-renderer-ui.test.mjs",
+          "previous_sha256": "48f34a4629f4123109518951adba3ab7761dbd535cf6ca67d0b4872e9f4ec9a1",
+          "sha256": "48f34a4629f4123109518951adba3ab7761dbd535cf6ca67d0b4872e9f4ec9a1"
+        },
+        {
+          "path": "test/park-flow.test.mjs",
+          "previous_sha256": "05c106b3743968e477f98b68d21ea54dd860473d60da4fc0fdafbf5b07c7cb4c",
+          "sha256": "05c106b3743968e477f98b68d21ea54dd860473d60da4fc0fdafbf5b07c7cb4c"
+        },
+        {
+          "path": "test/park-identity.test.mjs",
+          "previous_sha256": "8197a8c8edb97ae718c3ec92363810db4f29e406f8f7d51fb50bd414adf69998",
+          "sha256": "8197a8c8edb97ae718c3ec92363810db4f29e406f8f7d51fb50bd414adf69998"
+        },
+        {
+          "path": "test/report-publish.test.mjs",
+          "previous_sha256": "d024d3432adb8c974ef183473b850c6f8a61a6ef09258fec73ec91f8b8e37bd9",
+          "sha256": "d024d3432adb8c974ef183473b850c6f8a61a6ef09258fec73ec91f8b8e37bd9"
+        },
+        {
+          "path": "test/retraction.test.mjs",
+          "previous_sha256": "596e6a116bff9747af3fbaf8523cc6af685e3e00506062fe7bb326a75d251e0c",
+          "sha256": "596e6a116bff9747af3fbaf8523cc6af685e3e00506062fe7bb326a75d251e0c"
+        },
+        {
+          "path": "test/user-publish.test.mjs",
+          "previous_sha256": "c1d23c6fdead430522cfbade842fab4bbc83bebf5ff899e837df6672a2ae4d89",
+          "sha256": "c1d23c6fdead430522cfbade842fab4bbc83bebf5ff899e837df6672a2ae4d89"
+        }
+      ]
+    },
+    {
+      "date": "2026-10-15",
+      "scope": "User-authorized modularization: complete generated-markup UI event ownership through module-owned delegation and preserve protected service behavior.",
+      "audit_chain": "sha256-v1",
+      "files": [
+        {
+          "path": "docs/generated-markup-handler-baseline.json",
+          "previous_sha256": "f1afa17bac7b2b0cc6a9581485036d1a059d49593b7e0f22fff45dd623922d78",
+          "sha256": "6eb4c1d95fcc0fe00953ef01940b9c20cc7a852b70d6dbb0e143d070e4f0fac4"
+        },
+        {
+          "path": "index.html",
+          "previous_sha256": "ecdee6f8d813ada444047ec839cdcb1fc16565c9889a8709c03e1ceb0af6a488",
+          "sha256": "b9f8e32d794cc9fa8025e550fde91e7ddd4f91d15c1a29f6429402b66f387863"
+        },
+        {
+          "path": "src/application/map/load-live-measurements-map.js",
+          "previous_sha256": "1446b2e749d316a8121cb5a0efbbf5bc366f75f9d27e4562b2808c99e5b472a1",
+          "sha256": "c07fdee64043f20f06468f0a5f02222b9b3f8ebe737f8e43dcdc4f9b118da492"
+        },
+        {
+          "path": "src/services/grid-engine.js",
+          "previous_sha256": "60e691fa0c999077c2438c709b17e16c6232bb6753055a53b0508286583f2cf0",
+          "sha256": "60e691fa0c999077c2438c709b17e16c6232bb6753055a53b0508286583f2cf0"
+        },
+        {
+          "path": "src/services/map.js",
+          "previous_sha256": "924d5cccf9d409141dbe95cc86c939f985651ca9343fa3f7ee1b04a19cffd2d7",
+          "sha256": "26642848c4e079030c79741eaeb4094971b67bcd5a7275d92990e3727f33b555"
+        },
+        {
+          "path": "src/services/measure.js",
+          "previous_sha256": "9ad7d833a0a3963a7a7ed5bc444eb50c6221a59aec5b7533038dc2938d787c73",
+          "sha256": "f1cf832bab09f23290cc5886dd2a9cef2da9268d87995911bec616ebfcb8bca3"
+        },
+        {
+          "path": "src/services/park-registry.js",
+          "previous_sha256": "13ae4511b3935d75172fe54d1cf91e0b1219d1644343109b1e49685f4929dced",
+          "sha256": "8c5062da8b724fec34ddf28dffb9231150c84945785f25064275670494f006a6"
+        },
+        {
+          "path": "src/ui/admin-measurement-row.js",
+          "previous_sha256": "baf4acef2370d68428f09eca7f23a5d3bda46ce348405b5f1b8fccc043f67ab4",
+          "sha256": "baf4acef2370d68428f09eca7f23a5d3bda46ce348405b5f1b8fccc043f67ab4"
+        },
+        {
+          "path": "src/ui/admin-measurement-table.js",
+          "previous_sha256": "3be50d010a3171fee0dbc5d03e492ea03395eaff1177e846b8f59de5834cf5e5",
+          "sha256": "3be50d010a3171fee0dbc5d03e492ea03395eaff1177e846b8f59de5834cf5e5"
+        },
+        {
+          "path": "src/ui/admin-tree-actions.js",
+          "previous_sha256": "e9d4985d705a964e788bd533910fe5bf3a300438240502ae62ed012d258737c6",
+          "sha256": "89aacf1c996f9fcac92a7bd16402b488e77e119f52d8d1f0af7f1e7b35e04b43"
+        },
+        {
+          "path": "src/ui/admin-tree-measurement-row.js",
+          "previous_sha256": "706613632a87e9c6848a4938044e6af4527c653bec8cb1fbdd4fd3644a86e844",
+          "sha256": "706613632a87e9c6848a4938044e6af4527c653bec8cb1fbdd4fd3644a86e844"
+        },
+        {
+          "path": "src/ui/compose-landcover-report.js",
+          "previous_sha256": "ceb7c22c0da6ba2549455a13f5a9b5461b06db239497312eabde277c5fe9eac1",
+          "sha256": "e67996468f6cd4d8d7c44bc7a1fec0e0324d11ba22f7470b138a4728d3585605"
+        },
+        {
+          "path": "src/ui/grid-summary.js",
+          "previous_sha256": "99e6993e3cd175ab96fcc60cbbb9f4adec45ce6794c28aed28a6138051898326",
+          "sha256": "99e6993e3cd175ab96fcc60cbbb9f4adec45ce6794c28aed28a6138051898326"
+        },
+        {
+          "path": "src/ui/landing-city-table.js",
+          "previous_sha256": "5b794e6b4d618552da4a70afbc45c1c58efb1afcf9a75cfea9ba0093b0b60dee",
+          "sha256": "5b794e6b4d618552da4a70afbc45c1c58efb1afcf9a75cfea9ba0093b0b60dee"
+        },
+        {
+          "path": "src/ui/landing-country-table.js",
+          "previous_sha256": "21d7c4ee6a34f2bcc7a2d2a31d6ebebf9dea4ab537d5f18321dba4af42abdbce",
+          "sha256": "21d7c4ee6a34f2bcc7a2d2a31d6ebebf9dea4ab537d5f18321dba4af42abdbce"
+        },
+        {
+          "path": "src/ui/landing.js",
+          "previous_sha256": "b15ed12c1227ea896a8df00d923c886cf11fa8f0b861ea35f95bcbbddfea9ee7",
+          "sha256": "b15ed12c1227ea896a8df00d923c886cf11fa8f0b861ea35f95bcbbddfea9ee7"
+        },
+        {
+          "path": "src/ui/lc-report.js",
+          "previous_sha256": "f8182bce9b5dbd8dcecceaa7afee69b52d12e7883badc65e27fb93e94ca2abf9",
+          "sha256": "b6bad3a0ffc96947b7a409e8fd08e80268ed9fb6e88d40cb27dc855df3cba5b0"
+        },
+        {
+          "path": "src/ui/lc-sens.js",
+          "previous_sha256": "cf857784cac85dc152d45d83acc60d2984b25024d8703af688ee2ad202bf00b7",
+          "sha256": "f9517be8bd1fc84bd27bcb00fb74d1a58d8eb55f6890d1ae6cc7c6197e39389d"
+        },
+        {
+          "path": "src/ui/load-own-records.js",
+          "previous_sha256": "0718dec7f93d81b42d097e8d4ee7d0b269b3ba8a363a0f3062c069a7133e1fc5",
+          "sha256": "bb021ba28fcdf6cc04bf9ef7bfc8c55c5c5c30e1f647e8c1146e683e1c98ffbf"
+        },
+        {
+          "path": "src/ui/measurement-point-query-result.js",
+          "previous_sha256": "eabf1ebdaf600620c10e471f662b4c0c59991c958011ba6fb4f801ce6ac41a5a",
+          "sha256": "c8ef214085010a2544205d9dad1440ecb58f3434e3462536fa453a5451c59594"
+        },
+        {
+          "path": "src/ui/measurement-project-card.js",
+          "previous_sha256": "0c8b16e6a03ce88ac323967cae2851a60d369353d7b350d1619c4e1c312764fe",
+          "sha256": "0c8b16e6a03ce88ac323967cae2851a60d369353d7b350d1619c4e1c312764fe"
+        },
+        {
+          "path": "src/ui/measurement-project-park-box.js",
+          "previous_sha256": "9532c1d6f0b8afeefcb0f70f2c7694cded5cda3beadc539392270d909d60e6e8",
+          "sha256": "cc0ed9aeb915012de184ba378c92c4324c936e9c0eb389516552c664fd5ff2dd"
+        },
+        {
+          "path": "src/ui/park-admin-renderer.js",
+          "previous_sha256": "5e9be5fef26ba3302763f4057321db79b27697a893056cd5dc16d6193bb9b633",
+          "sha256": "5e9be5fef26ba3302763f4057321db79b27697a893056cd5dc16d6193bb9b633"
+        },
+        {
+          "path": "src/ui/park-backfill-plan.js",
+          "previous_sha256": "36ae0a804261fb085550c2f4bf38eae5582190a0733efdeb4b5df83b35182fe8",
+          "sha256": "36ae0a804261fb085550c2f4bf38eae5582190a0733efdeb4b5df83b35182fe8"
+        },
+        {
+          "path": "src/ui/park-candidate-select.js",
+          "previous_sha256": "2fbc07138a0f919801ffa4155ceaa84b43dc937350150442f31c14bbd21e04cf",
+          "sha256": "2227208061a38cce0e3827c7b2201b02348ccc91ca9015ce860b282bf72641f4"
+        },
+        {
+          "path": "src/ui/park-comparison-error.js",
+          "previous_sha256": "8e3a54865a57ff24a6fec95ba8ed754d6d5665e1741b5806b0f2a4c6d5050566",
+          "sha256": "ce2f254f29081fbf5e48317d116f3f4b88e76791be1fe8b56210a71485c54b80"
+        },
+        {
+          "path": "src/ui/park-comparison-pending.js",
+          "previous_sha256": "2a8e987b6e4a72343062a4140f6914407e972116dc3ccec75bdcb600375003ab",
+          "sha256": "606bf262ddc649cc8780829d64a8ec99f344e7ce34fd8b53211a8797eede0d04"
+        },
+        {
+          "path": "src/ui/park-identity.js",
+          "previous_sha256": "32676d666b9e4f1e859f136fb895cf258246244306f4eeb53a7df865f9602018",
+          "sha256": "f54d58db4050605f98981ffbfef64aae83e84a78d0e66f52039d46f3116028c9"
+        },
+        {
+          "path": "src/ui/park-measurement-gate.js",
+          "previous_sha256": "81076373a09f2ed2eabc778e019ba2c710682e84ad8b181c00eb932d9ec9b421",
+          "sha256": "81076373a09f2ed2eabc778e019ba2c710682e84ad8b181c00eb932d9ec9b421"
+        },
+        {
+          "path": "src/ui/park-panel.js",
+          "previous_sha256": "69db94a1c4872a573733fb0b9d465c9989b1be6820100de1e4bce30c5f6fce9b",
+          "sha256": "c4f3194e2558680320d22c8b856ec42e508f6d1d1b55e5c2a72a3b94bddad062"
+        },
+        {
+          "path": "src/ui/render-live-map-load-status.js",
+          "previous_sha256": "29c5b4b9df9b28aed806f915212a22bfa2ef31dd0e1d7dcc431a724a65e91d4a",
+          "sha256": "8f5b938eb6fbaba6cccbf69dd8caf813a847b65ff22e0f4cf1ab236b95af0674"
+        },
+        {
+          "path": "src/ui/render-measurement-project-directory.js",
+          "previous_sha256": "826492053f2cdc65607c35c3a7e2198858bb956f16a4d1bacdad529f9364752b",
+          "sha256": "826492053f2cdc65607c35c3a7e2198858bb956f16a4d1bacdad529f9364752b"
+        },
+        {
+          "path": "src/ui/render-publication-park-row.js",
+          "previous_sha256": "681dbc7479848dc1890db2f98a210438ffdcfc3ef7dfb7861e8f031d4d098131",
+          "sha256": "681dbc7479848dc1890db2f98a210438ffdcfc3ef7dfb7861e8f031d4d098131"
+        },
+        {
+          "path": "src/ui/render-surface-scan-audit.js",
+          "previous_sha256": "eae39ff562d14c50d0b58b56bb9887d814342c583af3e470999ab3c03466d220",
+          "sha256": "853d95b73e47877a4ddc828a6c3dff34c87677ade2887e4f097413cac951776f"
+        },
+        {
+          "path": "src/ui/show-park-comparison-denied.js",
+          "previous_sha256": "5b0665352be5a8cce2e80850b87a5a473ad07711e5b96d68561ce6861f4131e2",
+          "sha256": "3ab5738301383735983baeda84bc1004b185dfeba7e1ebc17a47b670fb3f68b3"
+        },
+        {
+          "path": "src/ui/toast.js",
+          "previous_sha256": "c4a947eaad22357656eba2b3058581ae7d6ddbee2de8fcd0b2ef4e0b4fe2c37b",
+          "sha256": "0f22fc12b4e51d1aeb4b9c6e4bd0093073d36b4e98ab503b195f3dc38ba6f26f"
+        },
+        {
+          "path": "src/ui/waypoint-list.js",
+          "previous_sha256": "de71786643ef5bbdf852adb6bd4e844d2335ef70210638835c84cddb0e42e73b",
+          "sha256": "de71786643ef5bbdf852adb6bd4e844d2335ef70210638835c84cddb0e42e73b"
+        },
+        {
+          "path": "test/academic-profile-modules.test.mjs",
+          "previous_sha256": "96d625ff5842bec8291856c4ab1a55ecefa4a3df0e37481a2d2896fb4776dbb7",
+          "sha256": "96d625ff5842bec8291856c4ab1a55ecefa4a3df0e37481a2d2896fb4776dbb7"
+        },
+        {
+          "path": "test/admin-tree.test.mjs",
+          "previous_sha256": "d08a9b1fc910f2dc4b5570a2f06210045b41b8db6ac3394cbc43f46796b72495",
+          "sha256": "d08a9b1fc910f2dc4b5570a2f06210045b41b8db6ac3394cbc43f46796b72495"
+        },
+        {
+          "path": "test/dashboard-workflow-modules.test.mjs",
+          "previous_sha256": "deb31bae820ffe17ee01dab0935a785b733109744b4cfa31ebf6e011a6515b87",
+          "sha256": "f2e6ad91c9664ca54b64d96b7abbaa9725e2b170a772a727c55f4352ff501001"
+        },
+        {
+          "path": "test/geofence.test.mjs",
+          "previous_sha256": "d50ba506c2b1b3d5ae7142bff3a7303b9ebfe155d66ba7a6f0f39fcc267077d3",
+          "sha256": "d50ba506c2b1b3d5ae7142bff3a7303b9ebfe155d66ba7a6f0f39fcc267077d3"
+        },
+        {
+          "path": "test/grid-summary-ui.test.mjs",
+          "previous_sha256": "5ca21311b4c5be894cbd656610fbe97d982ac63b4df077c212fbbf2566dbd7df",
+          "sha256": "5ca21311b4c5be894cbd656610fbe97d982ac63b4df077c212fbbf2566dbd7df"
+        },
+        {
+          "path": "test/landing-workflow-modules.test.mjs",
+          "previous_sha256": "4f15fcb87fa1fba440eece95310272921624d4cf63e31ac76c70165c0faeb958",
+          "sha256": "4f15fcb87fa1fba440eece95310272921624d4cf63e31ac76c70165c0faeb958"
+        },
+        {
+          "path": "test/map-live-load-modules.test.mjs",
+          "previous_sha256": "199482d8b88f50aaafe883d56f8702df1eaf092e58bfde77c485ac6848c307d6",
+          "sha256": "cd957f083e3dc91dc0c35f6864606ca0980d5cbbb4929c35fdfdf9f5e7ae75fc"
+        },
+        {
+          "path": "test/measurement-project-modules.test.mjs",
+          "previous_sha256": "984789fe35ccb87a8b68fdbaf9cbda865153278fa2e5d5b7dbea1faefe52301e",
+          "sha256": "3c840e59047e4077c03cfdddb7eab7df4ac09e014b927174d08582125c5389b4"
+        },
+        {
+          "path": "test/park-admin-renderer-ui.test.mjs",
+          "previous_sha256": "48f34a4629f4123109518951adba3ab7761dbd535cf6ca67d0b4872e9f4ec9a1",
+          "sha256": "48f34a4629f4123109518951adba3ab7761dbd535cf6ca67d0b4872e9f4ec9a1"
+        },
+        {
+          "path": "test/park-candidate-select-ui.test.mjs",
+          "previous_sha256": "6f44b28ca2f6ebea0f322026cb0f32277877e1250f7287cd124fe8c5d5020d45",
+          "sha256": "53c08b628463e3d9c078b28e550b0daa951ec4f2810bd89bd1d4d17a1c86a2b1"
+        },
+        {
+          "path": "test/park-flow.test.mjs",
+          "previous_sha256": "05c106b3743968e477f98b68d21ea54dd860473d60da4fc0fdafbf5b07c7cb4c",
+          "sha256": "05b7c2daf5babed20d3e818a6fc1b514faa2b3763d3ba599296a57d5666f6165"
+        },
+        {
+          "path": "test/park-identity.test.mjs",
+          "previous_sha256": "8197a8c8edb97ae718c3ec92363810db4f29e406f8f7d51fb50bd414adf69998",
+          "sha256": "8197a8c8edb97ae718c3ec92363810db4f29e406f8f7d51fb50bd414adf69998"
+        },
+        {
+          "path": "test/report-publish.test.mjs",
+          "previous_sha256": "d024d3432adb8c974ef183473b850c6f8a61a6ef09258fec73ec91f8b8e37bd9",
+          "sha256": "d024d3432adb8c974ef183473b850c6f8a61a6ef09258fec73ec91f8b8e37bd9"
+        },
+        {
+          "path": "test/retraction.test.mjs",
+          "previous_sha256": "596e6a116bff9747af3fbaf8523cc6af685e3e00506062fe7bb326a75d251e0c",
+          "sha256": "596e6a116bff9747af3fbaf8523cc6af685e3e00506062fe7bb326a75d251e0c"
+        },
+        {
+          "path": "test/user-publish.test.mjs",
+          "previous_sha256": "c1d23c6fdead430522cfbade842fab4bbc83bebf5ff899e837df6672a2ae4d89",
+          "sha256": "c1d23c6fdead430522cfbade842fab4bbc83bebf5ff899e837df6672a2ae4d89"
+        },
+        {
+          "path": "test/world-render-modules.test.mjs",
+          "previous_sha256": "53b379e060a6e7019d6215fd39301a677226eed43b5984db8e2ee39343fd232b",
+          "sha256": "cfd72a49f5a7957d1b3c693beaa52173831b47c8c1697d38e07c9d212756e5f7"
+        }
+      ]
+    },
+    {
+      "date": "2026-10-15",
+      "scope": "User-authorized modularization: final compatibility corrections after release regression run.",
+      "audit_chain": "sha256-v1",
+      "files": [
+        {
+          "path": "docs/generated-markup-handler-baseline.json",
+          "previous_sha256": "6eb4c1d95fcc0fe00953ef01940b9c20cc7a852b70d6dbb0e143d070e4f0fac4",
+          "sha256": "6eb4c1d95fcc0fe00953ef01940b9c20cc7a852b70d6dbb0e143d070e4f0fac4"
+        },
+        {
+          "path": "index.html",
+          "previous_sha256": "b9f8e32d794cc9fa8025e550fde91e7ddd4f91d15c1a29f6429402b66f387863",
+          "sha256": "113c1975165d55c241046630de8ab2d602e3cbc84235d5ace1592fd5a847cffa"
+        },
+        {
+          "path": "src/application/map/load-live-measurements-map.js",
+          "previous_sha256": "c07fdee64043f20f06468f0a5f02222b9b3f8ebe737f8e43dcdc4f9b118da492",
+          "sha256": "c07fdee64043f20f06468f0a5f02222b9b3f8ebe737f8e43dcdc4f9b118da492"
+        },
+        {
+          "path": "src/services/grid-engine.js",
+          "previous_sha256": "60e691fa0c999077c2438c709b17e16c6232bb6753055a53b0508286583f2cf0",
+          "sha256": "60e691fa0c999077c2438c709b17e16c6232bb6753055a53b0508286583f2cf0"
+        },
+        {
+          "path": "src/services/map.js",
+          "previous_sha256": "26642848c4e079030c79741eaeb4094971b67bcd5a7275d92990e3727f33b555",
+          "sha256": "26642848c4e079030c79741eaeb4094971b67bcd5a7275d92990e3727f33b555"
+        },
+        {
+          "path": "src/services/measure.js",
+          "previous_sha256": "f1cf832bab09f23290cc5886dd2a9cef2da9268d87995911bec616ebfcb8bca3",
+          "sha256": "f1cf832bab09f23290cc5886dd2a9cef2da9268d87995911bec616ebfcb8bca3"
+        },
+        {
+          "path": "src/services/park-registry.js",
+          "previous_sha256": "8c5062da8b724fec34ddf28dffb9231150c84945785f25064275670494f006a6",
+          "sha256": "8c5062da8b724fec34ddf28dffb9231150c84945785f25064275670494f006a6"
+        },
+        {
+          "path": "src/ui/admin-measurement-row.js",
+          "previous_sha256": "baf4acef2370d68428f09eca7f23a5d3bda46ce348405b5f1b8fccc043f67ab4",
+          "sha256": "baf4acef2370d68428f09eca7f23a5d3bda46ce348405b5f1b8fccc043f67ab4"
+        },
+        {
+          "path": "src/ui/admin-measurement-table.js",
+          "previous_sha256": "3be50d010a3171fee0dbc5d03e492ea03395eaff1177e846b8f59de5834cf5e5",
+          "sha256": "3be50d010a3171fee0dbc5d03e492ea03395eaff1177e846b8f59de5834cf5e5"
+        },
+        {
+          "path": "src/ui/admin-tree-actions.js",
+          "previous_sha256": "89aacf1c996f9fcac92a7bd16402b488e77e119f52d8d1f0af7f1e7b35e04b43",
+          "sha256": "89aacf1c996f9fcac92a7bd16402b488e77e119f52d8d1f0af7f1e7b35e04b43"
+        },
+        {
+          "path": "src/ui/admin-tree-measurement-row.js",
+          "previous_sha256": "706613632a87e9c6848a4938044e6af4527c653bec8cb1fbdd4fd3644a86e844",
+          "sha256": "706613632a87e9c6848a4938044e6af4527c653bec8cb1fbdd4fd3644a86e844"
+        },
+        {
+          "path": "src/ui/compose-landcover-report.js",
+          "previous_sha256": "e67996468f6cd4d8d7c44bc7a1fec0e0324d11ba22f7470b138a4728d3585605",
+          "sha256": "e67996468f6cd4d8d7c44bc7a1fec0e0324d11ba22f7470b138a4728d3585605"
+        },
+        {
+          "path": "src/ui/grid-summary.js",
+          "previous_sha256": "99e6993e3cd175ab96fcc60cbbb9f4adec45ce6794c28aed28a6138051898326",
+          "sha256": "99e6993e3cd175ab96fcc60cbbb9f4adec45ce6794c28aed28a6138051898326"
+        },
+        {
+          "path": "src/ui/landing-city-table.js",
+          "previous_sha256": "5b794e6b4d618552da4a70afbc45c1c58efb1afcf9a75cfea9ba0093b0b60dee",
+          "sha256": "5b794e6b4d618552da4a70afbc45c1c58efb1afcf9a75cfea9ba0093b0b60dee"
+        },
+        {
+          "path": "src/ui/landing-country-table.js",
+          "previous_sha256": "21d7c4ee6a34f2bcc7a2d2a31d6ebebf9dea4ab537d5f18321dba4af42abdbce",
+          "sha256": "21d7c4ee6a34f2bcc7a2d2a31d6ebebf9dea4ab537d5f18321dba4af42abdbce"
+        },
+        {
+          "path": "src/ui/landing.js",
+          "previous_sha256": "b15ed12c1227ea896a8df00d923c886cf11fa8f0b861ea35f95bcbbddfea9ee7",
+          "sha256": "b15ed12c1227ea896a8df00d923c886cf11fa8f0b861ea35f95bcbbddfea9ee7"
+        },
+        {
+          "path": "src/ui/lc-report.js",
+          "previous_sha256": "b6bad3a0ffc96947b7a409e8fd08e80268ed9fb6e88d40cb27dc855df3cba5b0",
+          "sha256": "b6bad3a0ffc96947b7a409e8fd08e80268ed9fb6e88d40cb27dc855df3cba5b0"
+        },
+        {
+          "path": "src/ui/lc-sens.js",
+          "previous_sha256": "f9517be8bd1fc84bd27bcb00fb74d1a58d8eb55f6890d1ae6cc7c6197e39389d",
+          "sha256": "f9517be8bd1fc84bd27bcb00fb74d1a58d8eb55f6890d1ae6cc7c6197e39389d"
+        },
+        {
+          "path": "src/ui/load-own-records.js",
+          "previous_sha256": "bb021ba28fcdf6cc04bf9ef7bfc8c55c5c5c30e1f647e8c1146e683e1c98ffbf",
+          "sha256": "bb021ba28fcdf6cc04bf9ef7bfc8c55c5c5c30e1f647e8c1146e683e1c98ffbf"
+        },
+        {
+          "path": "src/ui/measurement-point-query-result.js",
+          "previous_sha256": "c8ef214085010a2544205d9dad1440ecb58f3434e3462536fa453a5451c59594",
+          "sha256": "c8ef214085010a2544205d9dad1440ecb58f3434e3462536fa453a5451c59594"
+        },
+        {
+          "path": "src/ui/measurement-project-card.js",
+          "previous_sha256": "0c8b16e6a03ce88ac323967cae2851a60d369353d7b350d1619c4e1c312764fe",
+          "sha256": "0c8b16e6a03ce88ac323967cae2851a60d369353d7b350d1619c4e1c312764fe"
+        },
+        {
+          "path": "src/ui/measurement-project-park-box.js",
+          "previous_sha256": "cc0ed9aeb915012de184ba378c92c4324c936e9c0eb389516552c664fd5ff2dd",
+          "sha256": "cc0ed9aeb915012de184ba378c92c4324c936e9c0eb389516552c664fd5ff2dd"
+        },
+        {
+          "path": "src/ui/park-admin-renderer.js",
+          "previous_sha256": "5e9be5fef26ba3302763f4057321db79b27697a893056cd5dc16d6193bb9b633",
+          "sha256": "5e9be5fef26ba3302763f4057321db79b27697a893056cd5dc16d6193bb9b633"
+        },
+        {
+          "path": "src/ui/park-backfill-plan.js",
+          "previous_sha256": "36ae0a804261fb085550c2f4bf38eae5582190a0733efdeb4b5df83b35182fe8",
+          "sha256": "36ae0a804261fb085550c2f4bf38eae5582190a0733efdeb4b5df83b35182fe8"
+        },
+        {
+          "path": "src/ui/park-candidate-select.js",
+          "previous_sha256": "2227208061a38cce0e3827c7b2201b02348ccc91ca9015ce860b282bf72641f4",
+          "sha256": "2227208061a38cce0e3827c7b2201b02348ccc91ca9015ce860b282bf72641f4"
+        },
+        {
+          "path": "src/ui/park-comparison-error.js",
+          "previous_sha256": "ce2f254f29081fbf5e48317d116f3f4b88e76791be1fe8b56210a71485c54b80",
+          "sha256": "ce2f254f29081fbf5e48317d116f3f4b88e76791be1fe8b56210a71485c54b80"
+        },
+        {
+          "path": "src/ui/park-comparison-pending.js",
+          "previous_sha256": "606bf262ddc649cc8780829d64a8ec99f344e7ce34fd8b53211a8797eede0d04",
+          "sha256": "606bf262ddc649cc8780829d64a8ec99f344e7ce34fd8b53211a8797eede0d04"
+        },
+        {
+          "path": "src/ui/park-identity.js",
+          "previous_sha256": "f54d58db4050605f98981ffbfef64aae83e84a78d0e66f52039d46f3116028c9",
+          "sha256": "f54d58db4050605f98981ffbfef64aae83e84a78d0e66f52039d46f3116028c9"
+        },
+        {
+          "path": "src/ui/park-measurement-gate.js",
+          "previous_sha256": "81076373a09f2ed2eabc778e019ba2c710682e84ad8b181c00eb932d9ec9b421",
+          "sha256": "81076373a09f2ed2eabc778e019ba2c710682e84ad8b181c00eb932d9ec9b421"
+        },
+        {
+          "path": "src/ui/park-panel.js",
+          "previous_sha256": "c4f3194e2558680320d22c8b856ec42e508f6d1d1b55e5c2a72a3b94bddad062",
+          "sha256": "c4f3194e2558680320d22c8b856ec42e508f6d1d1b55e5c2a72a3b94bddad062"
+        },
+        {
+          "path": "src/ui/render-live-map-load-status.js",
+          "previous_sha256": "8f5b938eb6fbaba6cccbf69dd8caf813a847b65ff22e0f4cf1ab236b95af0674",
+          "sha256": "8f5b938eb6fbaba6cccbf69dd8caf813a847b65ff22e0f4cf1ab236b95af0674"
+        },
+        {
+          "path": "src/ui/render-measurement-project-directory.js",
+          "previous_sha256": "826492053f2cdc65607c35c3a7e2198858bb956f16a4d1bacdad529f9364752b",
+          "sha256": "826492053f2cdc65607c35c3a7e2198858bb956f16a4d1bacdad529f9364752b"
+        },
+        {
+          "path": "src/ui/render-publication-park-row.js",
+          "previous_sha256": "681dbc7479848dc1890db2f98a210438ffdcfc3ef7dfb7861e8f031d4d098131",
+          "sha256": "681dbc7479848dc1890db2f98a210438ffdcfc3ef7dfb7861e8f031d4d098131"
+        },
+        {
+          "path": "src/ui/render-surface-scan-audit.js",
+          "previous_sha256": "853d95b73e47877a4ddc828a6c3dff34c87677ade2887e4f097413cac951776f",
+          "sha256": "853d95b73e47877a4ddc828a6c3dff34c87677ade2887e4f097413cac951776f"
+        },
+        {
+          "path": "src/ui/show-park-comparison-denied.js",
+          "previous_sha256": "3ab5738301383735983baeda84bc1004b185dfeba7e1ebc17a47b670fb3f68b3",
+          "sha256": "3ab5738301383735983baeda84bc1004b185dfeba7e1ebc17a47b670fb3f68b3"
+        },
+        {
+          "path": "src/ui/toast.js",
+          "previous_sha256": "0f22fc12b4e51d1aeb4b9c6e4bd0093073d36b4e98ab503b195f3dc38ba6f26f",
+          "sha256": "0f22fc12b4e51d1aeb4b9c6e4bd0093073d36b4e98ab503b195f3dc38ba6f26f"
+        },
+        {
+          "path": "src/ui/waypoint-list.js",
+          "previous_sha256": "de71786643ef5bbdf852adb6bd4e844d2335ef70210638835c84cddb0e42e73b",
+          "sha256": "de71786643ef5bbdf852adb6bd4e844d2335ef70210638835c84cddb0e42e73b"
+        },
+        {
+          "path": "test/academic-profile-modules.test.mjs",
+          "previous_sha256": "96d625ff5842bec8291856c4ab1a55ecefa4a3df0e37481a2d2896fb4776dbb7",
+          "sha256": "96d625ff5842bec8291856c4ab1a55ecefa4a3df0e37481a2d2896fb4776dbb7"
+        },
+        {
+          "path": "test/admin-tree.test.mjs",
+          "previous_sha256": "d08a9b1fc910f2dc4b5570a2f06210045b41b8db6ac3394cbc43f46796b72495",
+          "sha256": "d08a9b1fc910f2dc4b5570a2f06210045b41b8db6ac3394cbc43f46796b72495"
+        },
+        {
+          "path": "test/dashboard-workflow-modules.test.mjs",
+          "previous_sha256": "f2e6ad91c9664ca54b64d96b7abbaa9725e2b170a772a727c55f4352ff501001",
+          "sha256": "f2e6ad91c9664ca54b64d96b7abbaa9725e2b170a772a727c55f4352ff501001"
+        },
+        {
+          "path": "test/geofence.test.mjs",
+          "previous_sha256": "d50ba506c2b1b3d5ae7142bff3a7303b9ebfe155d66ba7a6f0f39fcc267077d3",
+          "sha256": "d50ba506c2b1b3d5ae7142bff3a7303b9ebfe155d66ba7a6f0f39fcc267077d3"
+        },
+        {
+          "path": "test/grid-summary-ui.test.mjs",
+          "previous_sha256": "5ca21311b4c5be894cbd656610fbe97d982ac63b4df077c212fbbf2566dbd7df",
+          "sha256": "5ca21311b4c5be894cbd656610fbe97d982ac63b4df077c212fbbf2566dbd7df"
+        },
+        {
+          "path": "test/landing-workflow-modules.test.mjs",
+          "previous_sha256": "4f15fcb87fa1fba440eece95310272921624d4cf63e31ac76c70165c0faeb958",
+          "sha256": "4f15fcb87fa1fba440eece95310272921624d4cf63e31ac76c70165c0faeb958"
+        },
+        {
+          "path": "test/map-live-load-modules.test.mjs",
+          "previous_sha256": "cd957f083e3dc91dc0c35f6864606ca0980d5cbbb4929c35fdfdf9f5e7ae75fc",
+          "sha256": "cd957f083e3dc91dc0c35f6864606ca0980d5cbbb4929c35fdfdf9f5e7ae75fc"
+        },
+        {
+          "path": "test/map-refresh.test.mjs",
+          "previous_sha256": "6fd71e75dd6331f94e05104871a2547b6fab002a4a7fbd5577f857686ca6bf07",
+          "sha256": "178e93a78f902a56ef8130951ea2ee43586519265a8ce7db065f5bf8f3fbfaf5"
+        },
+        {
+          "path": "test/measurement-project-modules.test.mjs",
+          "previous_sha256": "3c840e59047e4077c03cfdddb7eab7df4ac09e014b927174d08582125c5389b4",
+          "sha256": "3c840e59047e4077c03cfdddb7eab7df4ac09e014b927174d08582125c5389b4"
+        },
+        {
+          "path": "test/park-admin-renderer-ui.test.mjs",
+          "previous_sha256": "48f34a4629f4123109518951adba3ab7761dbd535cf6ca67d0b4872e9f4ec9a1",
+          "sha256": "48f34a4629f4123109518951adba3ab7761dbd535cf6ca67d0b4872e9f4ec9a1"
+        },
+        {
+          "path": "test/park-candidate-select-ui.test.mjs",
+          "previous_sha256": "53c08b628463e3d9c078b28e550b0daa951ec4f2810bd89bd1d4d17a1c86a2b1",
+          "sha256": "53c08b628463e3d9c078b28e550b0daa951ec4f2810bd89bd1d4d17a1c86a2b1"
+        },
+        {
+          "path": "test/park-flow.test.mjs",
+          "previous_sha256": "05b7c2daf5babed20d3e818a6fc1b514faa2b3763d3ba599296a57d5666f6165",
+          "sha256": "05b7c2daf5babed20d3e818a6fc1b514faa2b3763d3ba599296a57d5666f6165"
+        },
+        {
+          "path": "test/park-identity.test.mjs",
+          "previous_sha256": "8197a8c8edb97ae718c3ec92363810db4f29e406f8f7d51fb50bd414adf69998",
+          "sha256": "8197a8c8edb97ae718c3ec92363810db4f29e406f8f7d51fb50bd414adf69998"
+        },
+        {
+          "path": "test/report-publish.test.mjs",
+          "previous_sha256": "d024d3432adb8c974ef183473b850c6f8a61a6ef09258fec73ec91f8b8e37bd9",
+          "sha256": "d024d3432adb8c974ef183473b850c6f8a61a6ef09258fec73ec91f8b8e37bd9"
+        },
+        {
+          "path": "test/retraction.test.mjs",
+          "previous_sha256": "596e6a116bff9747af3fbaf8523cc6af685e3e00506062fe7bb326a75d251e0c",
+          "sha256": "596e6a116bff9747af3fbaf8523cc6af685e3e00506062fe7bb326a75d251e0c"
+        },
+        {
+          "path": "test/user-publish.test.mjs",
+          "previous_sha256": "c1d23c6fdead430522cfbade842fab4bbc83bebf5ff899e837df6672a2ae4d89",
+          "sha256": "c1d23c6fdead430522cfbade842fab4bbc83bebf5ff899e837df6672a2ae4d89"
+        },
+        {
+          "path": "test/world-render-modules.test.mjs",
+          "previous_sha256": "cfd72a49f5a7957d1b3c693beaa52173831b47c8c1697d38e07c9d212756e5f7",
+          "sha256": "cfd72a49f5a7957d1b3c693beaa52173831b47c8c1697d38e07c9d212756e5f7"
+        }
+      ]
+    },
+    {
+      "date": "2026-10-15",
+      "scope": "User-authorized modularization: update cache-busting asset versions and protected hashes for final test corrections.",
+      "audit_chain": "sha256-v1",
+      "files": [
+        {
+          "path": "docs/generated-markup-handler-baseline.json",
+          "previous_sha256": "6eb4c1d95fcc0fe00953ef01940b9c20cc7a852b70d6dbb0e143d070e4f0fac4",
+          "sha256": "6eb4c1d95fcc0fe00953ef01940b9c20cc7a852b70d6dbb0e143d070e4f0fac4"
+        },
+        {
+          "path": "index.html",
+          "previous_sha256": "113c1975165d55c241046630de8ab2d602e3cbc84235d5ace1592fd5a847cffa",
+          "sha256": "d3154b4d11ac42fed12845744405a3ddbd03c538c93c811cd6f0639fb365121a"
+        },
+        {
+          "path": "src/application/map/load-live-measurements-map.js",
+          "previous_sha256": "c07fdee64043f20f06468f0a5f02222b9b3f8ebe737f8e43dcdc4f9b118da492",
+          "sha256": "c07fdee64043f20f06468f0a5f02222b9b3f8ebe737f8e43dcdc4f9b118da492"
+        },
+        {
+          "path": "src/services/grid-engine.js",
+          "previous_sha256": "60e691fa0c999077c2438c709b17e16c6232bb6753055a53b0508286583f2cf0",
+          "sha256": "60e691fa0c999077c2438c709b17e16c6232bb6753055a53b0508286583f2cf0"
+        },
+        {
+          "path": "src/services/map.js",
+          "previous_sha256": "26642848c4e079030c79741eaeb4094971b67bcd5a7275d92990e3727f33b555",
+          "sha256": "26642848c4e079030c79741eaeb4094971b67bcd5a7275d92990e3727f33b555"
+        },
+        {
+          "path": "src/services/measure.js",
+          "previous_sha256": "f1cf832bab09f23290cc5886dd2a9cef2da9268d87995911bec616ebfcb8bca3",
+          "sha256": "f1cf832bab09f23290cc5886dd2a9cef2da9268d87995911bec616ebfcb8bca3"
+        },
+        {
+          "path": "src/services/park-registry.js",
+          "previous_sha256": "8c5062da8b724fec34ddf28dffb9231150c84945785f25064275670494f006a6",
+          "sha256": "8c5062da8b724fec34ddf28dffb9231150c84945785f25064275670494f006a6"
+        },
+        {
+          "path": "src/ui/admin-measurement-row.js",
+          "previous_sha256": "baf4acef2370d68428f09eca7f23a5d3bda46ce348405b5f1b8fccc043f67ab4",
+          "sha256": "baf4acef2370d68428f09eca7f23a5d3bda46ce348405b5f1b8fccc043f67ab4"
+        },
+        {
+          "path": "src/ui/admin-measurement-table.js",
+          "previous_sha256": "3be50d010a3171fee0dbc5d03e492ea03395eaff1177e846b8f59de5834cf5e5",
+          "sha256": "3be50d010a3171fee0dbc5d03e492ea03395eaff1177e846b8f59de5834cf5e5"
+        },
+        {
+          "path": "src/ui/admin-tree-actions.js",
+          "previous_sha256": "89aacf1c996f9fcac92a7bd16402b488e77e119f52d8d1f0af7f1e7b35e04b43",
+          "sha256": "89aacf1c996f9fcac92a7bd16402b488e77e119f52d8d1f0af7f1e7b35e04b43"
+        },
+        {
+          "path": "src/ui/admin-tree-measurement-row.js",
+          "previous_sha256": "706613632a87e9c6848a4938044e6af4527c653bec8cb1fbdd4fd3644a86e844",
+          "sha256": "706613632a87e9c6848a4938044e6af4527c653bec8cb1fbdd4fd3644a86e844"
+        },
+        {
+          "path": "src/ui/compose-landcover-report.js",
+          "previous_sha256": "e67996468f6cd4d8d7c44bc7a1fec0e0324d11ba22f7470b138a4728d3585605",
+          "sha256": "e67996468f6cd4d8d7c44bc7a1fec0e0324d11ba22f7470b138a4728d3585605"
+        },
+        {
+          "path": "src/ui/grid-summary.js",
+          "previous_sha256": "99e6993e3cd175ab96fcc60cbbb9f4adec45ce6794c28aed28a6138051898326",
+          "sha256": "99e6993e3cd175ab96fcc60cbbb9f4adec45ce6794c28aed28a6138051898326"
+        },
+        {
+          "path": "src/ui/landing-city-table.js",
+          "previous_sha256": "5b794e6b4d618552da4a70afbc45c1c58efb1afcf9a75cfea9ba0093b0b60dee",
+          "sha256": "5b794e6b4d618552da4a70afbc45c1c58efb1afcf9a75cfea9ba0093b0b60dee"
+        },
+        {
+          "path": "src/ui/landing-country-table.js",
+          "previous_sha256": "21d7c4ee6a34f2bcc7a2d2a31d6ebebf9dea4ab537d5f18321dba4af42abdbce",
+          "sha256": "21d7c4ee6a34f2bcc7a2d2a31d6ebebf9dea4ab537d5f18321dba4af42abdbce"
+        },
+        {
+          "path": "src/ui/landing.js",
+          "previous_sha256": "b15ed12c1227ea896a8df00d923c886cf11fa8f0b861ea35f95bcbbddfea9ee7",
+          "sha256": "b15ed12c1227ea896a8df00d923c886cf11fa8f0b861ea35f95bcbbddfea9ee7"
+        },
+        {
+          "path": "src/ui/lc-report.js",
+          "previous_sha256": "b6bad3a0ffc96947b7a409e8fd08e80268ed9fb6e88d40cb27dc855df3cba5b0",
+          "sha256": "b6bad3a0ffc96947b7a409e8fd08e80268ed9fb6e88d40cb27dc855df3cba5b0"
+        },
+        {
+          "path": "src/ui/lc-sens.js",
+          "previous_sha256": "f9517be8bd1fc84bd27bcb00fb74d1a58d8eb55f6890d1ae6cc7c6197e39389d",
+          "sha256": "f9517be8bd1fc84bd27bcb00fb74d1a58d8eb55f6890d1ae6cc7c6197e39389d"
+        },
+        {
+          "path": "src/ui/load-own-records.js",
+          "previous_sha256": "bb021ba28fcdf6cc04bf9ef7bfc8c55c5c5c30e1f647e8c1146e683e1c98ffbf",
+          "sha256": "bb021ba28fcdf6cc04bf9ef7bfc8c55c5c5c30e1f647e8c1146e683e1c98ffbf"
+        },
+        {
+          "path": "src/ui/measurement-point-query-result.js",
+          "previous_sha256": "c8ef214085010a2544205d9dad1440ecb58f3434e3462536fa453a5451c59594",
+          "sha256": "c8ef214085010a2544205d9dad1440ecb58f3434e3462536fa453a5451c59594"
+        },
+        {
+          "path": "src/ui/measurement-project-card.js",
+          "previous_sha256": "0c8b16e6a03ce88ac323967cae2851a60d369353d7b350d1619c4e1c312764fe",
+          "sha256": "0c8b16e6a03ce88ac323967cae2851a60d369353d7b350d1619c4e1c312764fe"
+        },
+        {
+          "path": "src/ui/measurement-project-park-box.js",
+          "previous_sha256": "cc0ed9aeb915012de184ba378c92c4324c936e9c0eb389516552c664fd5ff2dd",
+          "sha256": "cc0ed9aeb915012de184ba378c92c4324c936e9c0eb389516552c664fd5ff2dd"
+        },
+        {
+          "path": "src/ui/park-admin-renderer.js",
+          "previous_sha256": "5e9be5fef26ba3302763f4057321db79b27697a893056cd5dc16d6193bb9b633",
+          "sha256": "5e9be5fef26ba3302763f4057321db79b27697a893056cd5dc16d6193bb9b633"
+        },
+        {
+          "path": "src/ui/park-backfill-plan.js",
+          "previous_sha256": "36ae0a804261fb085550c2f4bf38eae5582190a0733efdeb4b5df83b35182fe8",
+          "sha256": "36ae0a804261fb085550c2f4bf38eae5582190a0733efdeb4b5df83b35182fe8"
+        },
+        {
+          "path": "src/ui/park-candidate-select.js",
+          "previous_sha256": "2227208061a38cce0e3827c7b2201b02348ccc91ca9015ce860b282bf72641f4",
+          "sha256": "2227208061a38cce0e3827c7b2201b02348ccc91ca9015ce860b282bf72641f4"
+        },
+        {
+          "path": "src/ui/park-comparison-error.js",
+          "previous_sha256": "ce2f254f29081fbf5e48317d116f3f4b88e76791be1fe8b56210a71485c54b80",
+          "sha256": "ce2f254f29081fbf5e48317d116f3f4b88e76791be1fe8b56210a71485c54b80"
+        },
+        {
+          "path": "src/ui/park-comparison-pending.js",
+          "previous_sha256": "606bf262ddc649cc8780829d64a8ec99f344e7ce34fd8b53211a8797eede0d04",
+          "sha256": "606bf262ddc649cc8780829d64a8ec99f344e7ce34fd8b53211a8797eede0d04"
+        },
+        {
+          "path": "src/ui/park-identity.js",
+          "previous_sha256": "f54d58db4050605f98981ffbfef64aae83e84a78d0e66f52039d46f3116028c9",
+          "sha256": "6f2889cc5680489f5f1bb49cdfcf9b4be1d4e02d25d3cade76481488b897693b"
+        },
+        {
+          "path": "src/ui/park-measurement-gate.js",
+          "previous_sha256": "81076373a09f2ed2eabc778e019ba2c710682e84ad8b181c00eb932d9ec9b421",
+          "sha256": "81076373a09f2ed2eabc778e019ba2c710682e84ad8b181c00eb932d9ec9b421"
+        },
+        {
+          "path": "src/ui/park-panel.js",
+          "previous_sha256": "c4f3194e2558680320d22c8b856ec42e508f6d1d1b55e5c2a72a3b94bddad062",
+          "sha256": "c4f3194e2558680320d22c8b856ec42e508f6d1d1b55e5c2a72a3b94bddad062"
+        },
+        {
+          "path": "src/ui/render-live-map-load-status.js",
+          "previous_sha256": "8f5b938eb6fbaba6cccbf69dd8caf813a847b65ff22e0f4cf1ab236b95af0674",
+          "sha256": "8f5b938eb6fbaba6cccbf69dd8caf813a847b65ff22e0f4cf1ab236b95af0674"
+        },
+        {
+          "path": "src/ui/render-measurement-project-directory.js",
+          "previous_sha256": "826492053f2cdc65607c35c3a7e2198858bb956f16a4d1bacdad529f9364752b",
+          "sha256": "826492053f2cdc65607c35c3a7e2198858bb956f16a4d1bacdad529f9364752b"
+        },
+        {
+          "path": "src/ui/render-publication-park-row.js",
+          "previous_sha256": "681dbc7479848dc1890db2f98a210438ffdcfc3ef7dfb7861e8f031d4d098131",
+          "sha256": "681dbc7479848dc1890db2f98a210438ffdcfc3ef7dfb7861e8f031d4d098131"
+        },
+        {
+          "path": "src/ui/render-surface-scan-audit.js",
+          "previous_sha256": "853d95b73e47877a4ddc828a6c3dff34c87677ade2887e4f097413cac951776f",
+          "sha256": "853d95b73e47877a4ddc828a6c3dff34c87677ade2887e4f097413cac951776f"
+        },
+        {
+          "path": "src/ui/show-park-comparison-denied.js",
+          "previous_sha256": "3ab5738301383735983baeda84bc1004b185dfeba7e1ebc17a47b670fb3f68b3",
+          "sha256": "3ab5738301383735983baeda84bc1004b185dfeba7e1ebc17a47b670fb3f68b3"
+        },
+        {
+          "path": "src/ui/toast.js",
+          "previous_sha256": "0f22fc12b4e51d1aeb4b9c6e4bd0093073d36b4e98ab503b195f3dc38ba6f26f",
+          "sha256": "0f22fc12b4e51d1aeb4b9c6e4bd0093073d36b4e98ab503b195f3dc38ba6f26f"
+        },
+        {
+          "path": "src/ui/waypoint-list.js",
+          "previous_sha256": "de71786643ef5bbdf852adb6bd4e844d2335ef70210638835c84cddb0e42e73b",
+          "sha256": "de71786643ef5bbdf852adb6bd4e844d2335ef70210638835c84cddb0e42e73b"
+        },
+        {
+          "path": "test/academic-profile-modules.test.mjs",
+          "previous_sha256": "96d625ff5842bec8291856c4ab1a55ecefa4a3df0e37481a2d2896fb4776dbb7",
+          "sha256": "96d625ff5842bec8291856c4ab1a55ecefa4a3df0e37481a2d2896fb4776dbb7"
+        },
+        {
+          "path": "test/admin-tree.test.mjs",
+          "previous_sha256": "d08a9b1fc910f2dc4b5570a2f06210045b41b8db6ac3394cbc43f46796b72495",
+          "sha256": "d08a9b1fc910f2dc4b5570a2f06210045b41b8db6ac3394cbc43f46796b72495"
+        },
+        {
+          "path": "test/dashboard-workflow-modules.test.mjs",
+          "previous_sha256": "f2e6ad91c9664ca54b64d96b7abbaa9725e2b170a772a727c55f4352ff501001",
+          "sha256": "f2e6ad91c9664ca54b64d96b7abbaa9725e2b170a772a727c55f4352ff501001"
+        },
+        {
+          "path": "test/geofence.test.mjs",
+          "previous_sha256": "d50ba506c2b1b3d5ae7142bff3a7303b9ebfe155d66ba7a6f0f39fcc267077d3",
+          "sha256": "d50ba506c2b1b3d5ae7142bff3a7303b9ebfe155d66ba7a6f0f39fcc267077d3"
+        },
+        {
+          "path": "test/grid-summary-ui.test.mjs",
+          "previous_sha256": "5ca21311b4c5be894cbd656610fbe97d982ac63b4df077c212fbbf2566dbd7df",
+          "sha256": "5ca21311b4c5be894cbd656610fbe97d982ac63b4df077c212fbbf2566dbd7df"
+        },
+        {
+          "path": "test/landing-workflow-modules.test.mjs",
+          "previous_sha256": "4f15fcb87fa1fba440eece95310272921624d4cf63e31ac76c70165c0faeb958",
+          "sha256": "4f15fcb87fa1fba440eece95310272921624d4cf63e31ac76c70165c0faeb958"
+        },
+        {
+          "path": "test/map-live-load-modules.test.mjs",
+          "previous_sha256": "cd957f083e3dc91dc0c35f6864606ca0980d5cbbb4929c35fdfdf9f5e7ae75fc",
+          "sha256": "cd957f083e3dc91dc0c35f6864606ca0980d5cbbb4929c35fdfdf9f5e7ae75fc"
+        },
+        {
+          "path": "test/map-refresh.test.mjs",
+          "previous_sha256": "178e93a78f902a56ef8130951ea2ee43586519265a8ce7db065f5bf8f3fbfaf5",
+          "sha256": "178e93a78f902a56ef8130951ea2ee43586519265a8ce7db065f5bf8f3fbfaf5"
+        },
+        {
+          "path": "test/measurement-project-modules.test.mjs",
+          "previous_sha256": "3c840e59047e4077c03cfdddb7eab7df4ac09e014b927174d08582125c5389b4",
+          "sha256": "3c840e59047e4077c03cfdddb7eab7df4ac09e014b927174d08582125c5389b4"
+        },
+        {
+          "path": "test/park-admin-renderer-ui.test.mjs",
+          "previous_sha256": "48f34a4629f4123109518951adba3ab7761dbd535cf6ca67d0b4872e9f4ec9a1",
+          "sha256": "48f34a4629f4123109518951adba3ab7761dbd535cf6ca67d0b4872e9f4ec9a1"
+        },
+        {
+          "path": "test/park-candidate-select-ui.test.mjs",
+          "previous_sha256": "53c08b628463e3d9c078b28e550b0daa951ec4f2810bd89bd1d4d17a1c86a2b1",
+          "sha256": "53c08b628463e3d9c078b28e550b0daa951ec4f2810bd89bd1d4d17a1c86a2b1"
+        },
+        {
+          "path": "test/park-flow.test.mjs",
+          "previous_sha256": "05b7c2daf5babed20d3e818a6fc1b514faa2b3763d3ba599296a57d5666f6165",
+          "sha256": "05b7c2daf5babed20d3e818a6fc1b514faa2b3763d3ba599296a57d5666f6165"
+        },
+        {
+          "path": "test/park-identity.test.mjs",
+          "previous_sha256": "8197a8c8edb97ae718c3ec92363810db4f29e406f8f7d51fb50bd414adf69998",
+          "sha256": "8197a8c8edb97ae718c3ec92363810db4f29e406f8f7d51fb50bd414adf69998"
+        },
+        {
+          "path": "test/report-publish.test.mjs",
+          "previous_sha256": "d024d3432adb8c974ef183473b850c6f8a61a6ef09258fec73ec91f8b8e37bd9",
+          "sha256": "d024d3432adb8c974ef183473b850c6f8a61a6ef09258fec73ec91f8b8e37bd9"
+        },
+        {
+          "path": "test/retraction.test.mjs",
+          "previous_sha256": "596e6a116bff9747af3fbaf8523cc6af685e3e00506062fe7bb326a75d251e0c",
+          "sha256": "596e6a116bff9747af3fbaf8523cc6af685e3e00506062fe7bb326a75d251e0c"
+        },
+        {
+          "path": "test/user-publish.test.mjs",
+          "previous_sha256": "c1d23c6fdead430522cfbade842fab4bbc83bebf5ff899e837df6672a2ae4d89",
+          "sha256": "c1d23c6fdead430522cfbade842fab4bbc83bebf5ff899e837df6672a2ae4d89"
+        },
+        {
+          "path": "test/world-render-modules.test.mjs",
+          "previous_sha256": "cfd72a49f5a7957d1b3c693beaa52173831b47c8c1697d38e07c9d212756e5f7",
+          "sha256": "cfd72a49f5a7957d1b3c693beaa52173831b47c8c1697d38e07c9d212756e5f7"
+        }
+      ]
+    },
+    {
+      "date": "2026-10-15",
+      "scope": "User-authorized modular UI event ownership completion: update the protected park identity regression assertions to verify the delegated renderer contract.",
+      "audit_chain": "sha256-v1",
+      "files": [
+        {
+          "path": "test/park-identity.test.mjs",
+          "previous_sha256": "8197a8c8edb97ae718c3ec92363810db4f29e406f8f7d51fb50bd414adf69998",
+          "sha256": "e73ac7d1fc4406a2d6626eaaf7c37de93a0d88f14ad65128e931ede557568656"
+        }
+      ]
+    },
+    {
+      "date": "2026-10-15",
+      "scope": "User-authorized architecture status reporting: describe the completed zero-inline-markup-handler state accurately in the generated status report.",
+      "audit_chain": "sha256-v1",
+      "files": [
+        {
+          "path": "scripts/architecture-status.mjs",
+          "previous_sha256": "d7aa01883ec52094495f8830e5084421ecb161a05a77973e8b65e77361eec816",
+          "sha256": "cd32192b07c6081c2fddd271a352b0b1d4069795989575b21adaa3269548db56"
+        }
+      ]
     }
   ]
 }

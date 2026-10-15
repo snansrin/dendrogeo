@@ -23,6 +23,7 @@ const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const read = (p) => readFileSync(join(ROOT, p), 'utf8');
 const idx = read('index.html');
 const sw = read('sw.js');
+const adminMeasurementRow = read('src/ui/admin-measurement-row.js');
 const MIG = join(ROOT, 'supabase/migrations/0007_geo_fence.sql');
 
 /* Kare park: 39.90–39.92 enlem, 32.70–32.80 boylam (~2.2 km × 8.5 km).
@@ -150,7 +151,8 @@ describe('istemci kancaları yerinde (atlama yok)', () => {
     const a = read('src/services/admin.js');
     assert.match(a, /async function dgGeoOverride/, 'istisna fonksiyonu olmalı');
     assert.match(a, /geo_override_by:USER\.id/, 'audit izi yazılmalı');
-    assert.match(a, /onclick="dgGeoOverride\(/, 'tabloda düğme olmalı');
+    assert.match(adminMeasurementRow, /data-admin-measurement-action="geoOverride"/, 'tablo eylemi UI satırında tanımlı olmalı');
+    assert.doesNotMatch(adminMeasurementRow, /onclick=/, 'tablo satırı inline handler üretmemeli');
     assert.match(a, /role!=="admin"&&PROFILE\.role!=="owner"/, 'yetki kontrolü istemcide de olmalı');
   });
 

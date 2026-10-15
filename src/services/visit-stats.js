@@ -229,7 +229,7 @@ function renderVisitorsLive(){
   renderPanel:(rows,allCount)=>window.DG_VISITOR_LIVE_PANEL_UI.render({
    statusElement:$("visStatus"),state:dgPresenceState(),rows,allCount,rosterElement:$("visLive"),
    viewLabels:DG_VIEW_LABELS,actionLabels:DG_ACT_LABELS,hasLocation:dgVisHasLocation,
-   deviceLabel:row=>row.p.dev,translate:value=>typeof dgCf==="function"?dgCf(value):value,escape:esc,
+   deviceLabel:row=>row.p.dev,translate:value=>typeof dgCf==="function"?dgCf(value):value,escape:esc,focus:(lat,lon)=>dgVisFocus(lat,lon),
    connectionStatus:DG_VISITOR_CONNECTION_STATUS_UI,roster:DG_VISITOR_ROSTER_UI
   }),
   renderFeed:rows=>{if($("visLive"))dgVisFeed(rows);},

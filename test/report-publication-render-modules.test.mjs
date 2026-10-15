@@ -39,7 +39,7 @@ test('park status resolves retry, retraction and published states with existing 
   assert.equal(ctx.DG_RESOLVE_PUBLICATION_PARK_STATUS.resolve(park, state, ports).status, 'published');
 });
 
-test('park row preserves status actions, DOI and escaped park metadata', () => {
+test('park row preserves status actions, DOI and escaped park metadata without inline handlers', () => {
   const html = ctx.DG_RENDER_PUBLICATION_PARK_ROW.render(
     { park_id: 7, park_name: '<Park>', city: 'Ankara', records: 2, carbon_kg: 1234, area_m2: 10000 },
     { status: 'published', reportId: 'DGR-2026-0001', publication: { doi: '10.5281/zenodo.12' }, note: 'canlı' },
@@ -47,9 +47,23 @@ test('park row preserves status actions, DOI and escaped park metadata', () => {
   );
   assert.match(html, /&lt;Park&gt;/);
   assert.match(html, /badge on/);
-  assert.match(html, /dgReportOpen\('DGR-2026-0001'\)/);
+  assert.match(html, /data-publication-park-action="open" data-report-id="DGR-2026-0001"/);
   assert.match(html, /https:\/\/doi\.org\/10\.5281\/zenodo\.12/);
-  assert.match(html, /dgReportRetract\('DGR-2026-0001',7\)/);
+  assert.match(html, /data-publication-park-action="retract" data-report-id="DGR-2026-0001" data-park-id="7"/);
+  assert.doesNotMatch(html, /onclick=/);
+});
+
+test('publication park-row delegation uses latest injected actions and reads control data', () => {
+  const listeners = {};
+  const root = {
+    addEventListener: (name, listener) => { listeners[name] = listener; },
+    contains: () => true,
+  };
+  let called = '';
+  ctx.DG_RENDER_PUBLICATION_PARK_ROW.bind(root, { publish: control => { called = control.dataset.parkId; } });
+  ctx.DG_RENDER_PUBLICATION_PARK_ROW.bind(root, { publish: control => { called = 'latest-' + control.dataset.parkId; } });
+  listeners.click({ target: { closest: () => ({ dataset: { publicationParkAction: 'publish', parkId: '7' } }) } });
+  assert.equal(called, 'latest-7');
 });
 
 test('history hides malformed IDs and retired links while keeping safe retraction history', () => {

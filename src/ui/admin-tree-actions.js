@@ -39,6 +39,10 @@
    const element=event.target?.closest?.('[data-dg-admin-tree-action="status"]');
    if(element)root.dgTreeSetStatus(element.value);
   });
+  document.addEventListener("toggle",event=>{
+   const element=event.target?.closest?.("details[data-dg-admin-tree-node]");
+   if(element)root.dgTreeToggle(element.dataset.dgAdminTreeNode,element.open);
+  },true);
  }
  root.DG_ADMIN_TREE_ACTIONS=Object.freeze({bind,getElement,hasTree,showLoading,showLoadError,updateBadge,setStatusValue});
 })(window);

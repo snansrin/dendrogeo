@@ -26,6 +26,7 @@ const idx = readFileSync(join(ROOT, 'index.html'), 'utf8');
 const sw = readFileSync(join(ROOT, 'sw.js'), 'utf8');
 const adminTreeView = readFileSync(join(ROOT, 'src/ui/admin-tree-view.js'), 'utf8');
 const tree = readFileSync(join(ROOT, 'src/services/admin-tree.js'), 'utf8');
+const measurementRow = readFileSync(join(ROOT, 'src/ui/admin-tree-measurement-row.js'), 'utf8');
 
 /* ---------- örnek veri: 2 kullanıcı, 2 proje, TEK park + 1 parksız ---------- */
 const GOKSU = { id: 7, name: 'Göksu Parkı', area_m2: 423000, city: 'Ankara', country: 'Türkiye' };
@@ -189,9 +190,10 @@ describe('kabuk kaydı ve hata görünürlüğü', () => {
   });
 
   test('onay/red/silme düğmeleri mevcut fonksiyonları kullanır', () => {
-    assert.match(tree, /onclick="approveMeas\(/);
-    assert.match(tree, /onclick="rejectMeas\(/);
-    assert.match(tree, /onclick="delMeas\(/);
+    assert.match(measurementRow, /data-admin-measurement-action="approve"/);
+    assert.match(measurementRow, /data-admin-measurement-action="reject"/);
+    assert.match(measurementRow, /data-admin-measurement-action="delete"/);
+    assert.match(tree, /DG_ADMIN_MEASUREMENT_ROW_UI\.bind\(el/);
   });
 
   test('⭐ tek kart: düz liste katlanır <details> içinde (kalabalık değil)', () => {

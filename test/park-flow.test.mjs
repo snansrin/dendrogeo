@@ -673,7 +673,7 @@ describe('yönetim ağacı tüm veriyi hiyerarşik gösterir', () => {
     assert.ok(h.includes('Göksu Parkı'), 'park düğümü yok');
     assert.ok(h.includes('Göksu Parkı - deneme') && h.includes('Göksu Parkı - kuzey'), 'projeler yok');
     assert.ok(h.includes('Ayşe Yılmaz') && h.includes('Burak Demir'), 'kullanıcılar yok');
-    assert.ok(h.includes('approveMeas(1)') || h.includes('rejectMeas(1)'), 'satır işlem düğmeleri yok');
+    assert.ok(h.includes('data-admin-measurement-action="approve"') || h.includes('data-admin-measurement-action="reject"'), 'satır işlem düğmeleri yok');
     assert.ok(h.includes('50.8 ha'), 'park alanı yok');
     assert.ok(h.includes('t/ha'), 'karbon yoğunluğu yok');
   });
@@ -743,7 +743,7 @@ describe('yönetim ağacı tüm veriyi hiyerarşik gösterir', () => {
     assert.ok(open.some((k) => k.startsWith('p')), 'park düğümü açıldı');
     assert.ok(open.some((k) => k.startsWith('j')), 'proje düğümü açıldı');
     assert.ok(open.some((k) => k.startsWith('u')), 'kullanıcı düğümü açıldı');
-    assert.ok(el('adminTree').innerHTML.includes('approveMeas(2)'), 'bekleyen satırın onay düğmesi görünür oldu');
+    assert.ok(el('adminTree').innerHTML.includes('data-admin-measurement-action="approve"'), 'bekleyen satırın onay düğmesi görünür oldu');
   });
 
   test('⭐ sorgu JS istisnası fırlatırsa "yükleniyor"da ASILI KALMAZ', async () => {
@@ -849,7 +849,7 @@ describe('park kimlikleri: çift kimlik birleştirme + yeniden adlandırma', () 
     assert.ok(h.includes('çift kimlik adayı'), 'uyarı yok');
     assert.ok(h.includes('aradaki mesafe'), 'mesafe gösterilmeli (karar için ölçü)');
     /* OSM kimliği hedef olmalı (canonical), elle oluşturulan kaynak */
-    assert.ok(h.includes('dgParkMergeInto(1,2)'), 'öneri: #1 → #2 (OSM). İçerik: ' + (h.match(/dgParkMergeInto\([^)]*\)/g) || []).join(','));
+    assert.ok(h.includes('data-park-admin-action="mergeInto" data-source-id="1" data-target-id="2"'), 'öneri: #1 → #2 (OSM)');
     assert.ok(h.includes('#1') && h.includes('#2'), 'iki kimlik de listelenmeli');
   });
 
@@ -992,12 +992,12 @@ describe('parka bağlama yalnız yönetici — normal kullanıcı kilitli', () =
       return { data: [], error: null };
     });
     await run('loadProjects()');
-    assert.ok(el('projTable').innerHTML.includes('startParkScan({projectId:2'), 'yönetici bağlayabilmeli');
+    assert.ok(el('projTable').innerHTML.includes('data-project-action="startParkScan" data-project-id="2"'), 'yönetici bağlayabilmeli');
     el('mProject').value = '2';
     run('dgParkGate()');
     assert.ok(el('parkGate').innerHTML.includes('Park Kimlikleri'), 'yönetici kapıda Park Kimlikleri yolunu görür');
     await run('loadParkCompare()');
-    assert.ok(el('parkCompare').innerHTML.includes("startParkScan({returnTo:'world'})"), 'yönetici onarım düğmesini görür');
+    assert.ok(el('parkCompare').innerHTML.includes('data-park-comparison-action="scan"'), 'yönetici onarım düğmesini görür');
     assert.ok(!el('parkCompare').innerHTML.includes('🔐 yönetici bağlayacak'), 'yöneticiye "yönetici bağlayacak" denmez');
   });
 

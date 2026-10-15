@@ -221,3 +221,25 @@ Seksen sekizinci grup (batch #88), yönetim ağacının filtre seçimi ile açı
 2026-10-15'te yüzey düzenleyicisinin kilitli `lc-sens.js` UI fallback'larındaki 48 `onclick`/`oninput`/`onchange`/`ontoggle` niteliği mevcut deklaratif `data-dg-*` olay bağlayıcısına taşındı. Tarama, duyarlılık, yüzey sınıfı, sınır ve araç çubuğu etkileşimleri aynı callback'lere delegasyon yapar. Ham/geçerli yüzey verisi ve hesap motoru değişmedi; regresyon testleri yeni markup sözleşmesine güncellendi. Handler baseline 147'den 99'a, dosya sayısı 40'tan 39'a indirildi; kalan borç hash kilidinde, yeni artış kapalıdır.
 
 2026-10-15'te park keşif kartının 8 eylemi ve grid/yüzey park bilgi panelinin 9 eylemi deklaratif data nitelikleri ve kapsayıcı bazlı delegasyona taşındı. Kart eylemleri servis katmanından enjekte edilir; panel eylemleri park paneli bağlayıcısında tek kez bağlanır. Park/grid/analiz işlevleri ve kimlik değerleri korunur. Handler baseline 99'dan 82'ye, dosya sayısı 39'dan 35'e indirildi; sonraki düşüşler aynı kilit ve test kapılarından geçer.
+
+2026-10-15'te sahip olunan ve ortak projelerin kartındaki 6 eylem deklaratif `data-project-action` sözleşmesine taşındı. Proje dizini UI'si eylemleri servis katmanından alır, kapsayıcı başına bir kez bağlar ve yeniden çizimde güncel callback'leri kullanır. Proje kartı artık doğrudan global eylem adı üretmez. Handler baseline 82'den 76'ya, dosya sayısı 35'ten 34'e indi.
+
+2026-10-15'te park kimliği yönetim tablosundaki altı eylem deklaratif `data-park-admin-action` sözleşmesine taşındı. Park yönetim renderer'ı callback'leri servis katmanından alır ve liste köküne bir kez bağlar; yeniden çizimde yeni action map'i kullanır. Yeniden adlandırma, geometri geri doldurma, birleştirme, silme ve boş park görünürlüğü aynı akışlarda kalır. Handler baseline 76'dan 70'e, dosya sayısı 34'ten 33'e indi.
+
+2026-10-15'te grid özetindeki beş eylem `data-grid-summary-action` ile renderer'ın kapsayıcı delegasyonuna taşındı; üretim, seçim temizleme ve GeoJSON/CSV indirme callback'leri `grid-engine.js` tarafından enjekte edilir.
+
+Aynı gün yönetici park yayın satırı ile kullanıcı rapor panelindeki toplam 11 eylem renderer sahipliğinde delegasyona taşındı. `report-publish.js` yalnızca yayın, paylaşım, açma, iptal, geri çekme ve kapatma callback'lerini bağlar; markup artık inline handler üretmez. Handler baseline 54 niteliğe ve 29 UI/service dosyasına indi; yayın regresyon testleri ve core-lock SHA zinciri güncellendi.
+
+Düz yönetici ölçüm tablosundaki onayla, reddet, konum istisnası ve silme eylemleri de `data-admin-measurement-action` ile tablo kökünde tek seferlik delegasyona alındı. `admin.js` callback'leri UI renderer'a sağlar. Handler baseline 50 niteliğe ve 28 dosyaya indi; measurement row/table kilitleri ve üretilmiş HTML güncellendi.
+
+Yönetim ağacı ölçüm satırları aynı `data-admin-measurement-action` sözleşmesini kullanır; `admin-tree.js` mevcut ağaç kökünde onay, ret ve silme callback'lerini bağlar. Düz tablo ve ağaç tek renderer olay sahipliğini paylaşır. Handler baseline 47 niteliğe ve 27 dosyaya indi.
+
+Park backfill planı manual/apply/close kontrolleri `park-backfill-plan.js` renderer'ında bağlanır. Waypoint sayfalama ve hedef seçimi `waypoint-list.js` tarafından `wpPager`/`wpListTable` köklerinde tek kez delegasyonla yürütülür; callback'ler `map.js` composition sınırından gelir. Handler baseline 41 niteliğe ve 25 dosyaya indi.
+
+Yönetici veri talebi kuyruğunda indir/yanıtla ve ret düğmeleri `data-pending-request-action` ile tablo renderer'ında bağlanır; `data-requests.js` mevcut use-case callback'lerini sağlar. Satır sırası, RLS sorgusu, cevap ve kuyruk yenileme sırası korunur. Handler baseline 39 niteliğe ve 24 dosyaya indi.
+
+
+2026-10-15'te landing ülke/şehir tablolarının 8 tıklama/klavye niteliği, ölçüm park kapısının 4 tarama/yönetim eylemi ve akademik profilin 3 gezinme/kayıt eylemi kapsayıcı delegasyonuna taşındı. Callback’ler UI sahiplerine port olarak veriliyor; mevcut ekran metinleri, park yönlendirme seçenekleri, profil kaydetme ve klavye erişimi korunuyor. Odak regresyonları geçti; generated markup baseline 147/40'tan 0/0'a indi.
+
+
+2026-10-15'te kalan dinamik markup eylemleri de modül sahipliğindeki kapsayıcı event delegasyonuna taşındı: kayıtlarım, nokta sorgusu, yüzey raporu ve hücre kararı, admin ağacı toggle'ı, park seçim/kimlik/karşılaştırma kontrolleri, canlı harita retry, ziyaretçi odağı, toast kapatma ve tarama kanıt paneli. UI markup’ında inline event niteliği kalmadığı kaynak taraması ve `check:generated-events` (0/0) ile doğrulandı. Sahip callback’leri service/adapter sınırında enjekte ediliyor; Supabase/RLS sorguları ve analiz veri modeli değiştirilmedi.

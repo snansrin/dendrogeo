@@ -186,7 +186,7 @@ describe('2) loadApprovedMarkers hatayı YUTMAMALI (sahte yeşil yok)', () => {
     await ctx.loadLiveMap();
     assert.match(els.mapLoad.className, /err/, 'hata kırmızı sınıfla gösterilmeli');
     assert.match(els.mapLoad.innerHTML, /yüklenemedi/, 'kullanıcıya başarısızlık söylenmeli');
-    assert.match(els.mapLoad.innerHTML, /loadLiveMap\(\)/, '↻ Yeniden dene düğmesi olmalı');
+    assert.match(els.mapLoad.innerHTML, /data-live-map-action="retry"/, '↻ Yeniden dene düğmesi olmalı');
     assert.doesNotMatch(els.mapLoad.textContent + els.mapLoad.innerHTML, /✓ 0 onaylı/, 'sahte başarı metni geri gelmemeli');
   });
 });

@@ -75,7 +75,7 @@ document.addEventListener("click",e=>{
 function initLanding(){
  if(window.DG_LANDING_ENTRY_CONTROLLER&&window.DG_LOAD_LANDING_STATISTICS&&window.DG_RENDER_LANDING_TOTALS&&window.DG_RENDER_LANDING_COUNTRY_TABLE&&window.DG_RENDER_LANDING_CITY_TABLE)return window.DG_LANDING_ENTRY_CONTROLLER.activate({
   element:$,mapWhenVisible:dgLandingMapWhenVisible,hasMap:()=>!!worldMapL,loadMarkers:dgLandingMarkers,markMarkersPending:()=>{DG_LANDING_MARKERS_PENDING=true;},trackVisit,
-  refreshStatistics:()=>window.DG_LOAD_LANDING_STATISTICS.load({load:()=>DG_WORLD_STATS_STORE.loadForLanding(sb),renderTotals:data=>window.DG_RENDER_LANDING_TOTALS.render(data,$),renderCountries:data=>window.DG_RENDER_LANDING_COUNTRY_TABLE.render(data,{element:$,escape:esc}),renderCities:data=>window.DG_RENDER_LANDING_CITY_TABLE.render(data,{element:$,escape:esc}),onError:errors=>{console.error("DENDROGEO · landing verisi kısmen yüklenemedi:",errors);toast("⚠ Genel istatistikler yüklenemedi (ağ/oturum). Sayfayı yenileyin.","warn","🌍");}})
+  refreshStatistics:()=>window.DG_LOAD_LANDING_STATISTICS.load({load:()=>DG_WORLD_STATS_STORE.loadForLanding(sb),renderTotals:data=>window.DG_RENDER_LANDING_TOTALS.render(data,$),renderCountries:data=>window.DG_RENDER_LANDING_COUNTRY_TABLE.render(data,{element:$,escape:esc,actions:{zoomCountry:name=>zoomToCountry(name)}}),renderCities:data=>window.DG_RENDER_LANDING_CITY_TABLE.render(data,{element:$,escape:esc,actions:{zoomCity:name=>zoomToCity(name)}}),onError:errors=>{console.error("DENDROGEO · landing verisi kısmen yüklenemedi:",errors);toast("⚠ Genel istatistikler yüklenemedi (ağ/oturum). Sayfayı yenileyin.","warn","🌍");}})
  });
  $("landing").style.display="block";$("shell").style.display="none";
  dgLandingMapWhenVisible();
@@ -86,8 +86,8 @@ function initLanding(){
  (async()=>{
   const result=await DG_WORLD_STATS_STORE.loadForLanding(sb);
   if(result.global?.data){const g=result.global.data;$("statRec").textContent=g.records||0;$("statCountry").textContent=g.countries||0;$("statCity").textContent=g.cities||0;$("statCarbon").textContent=g.carbon_t||0;}
-  if(result.countries){const body=$("tblCountry")?.querySelector?.("tbody");if(body)body.innerHTML=(result.countries.data||[]).slice(0,20).map(r=>`<tr class="clickable-row" tabindex="0" role="link" onkeydown="dgKeyActivate(event,this)" onclick="zoomToCountry('${esc(r.country)}')"><td>${esc(r.country)}</td><td>${r.records}</td><td>${r.carbon_t}</td><td>${Number.isFinite(+r.avg_dbh)?(+r.avg_dbh).toFixed(1):"—"}</td><td>${r.avg_height||"—"}</td></tr>`).join("")||"<tr><td colspan=5>Henüz veri yok</td></tr>";}
-  if(result.cities){const body=$("tblCity")?.querySelector?.("tbody");if(body)body.innerHTML=(result.cities.data||[]).slice(0,20).map(r=>`<tr class="clickable-row" tabindex="0" role="link" onkeydown="dgKeyActivate(event,this)" onclick="zoomToCity('${esc(r.city)}')"><td>${esc(r.city)}</td><td>${r.records}</td><td>${r.carbon_t}</td></tr>`).join("")||"<tr><td colspan=3>Henüz veri yok</td></tr>";}
+  if(result.countries)window.DG_RENDER_LANDING_COUNTRY_TABLE.render(result.countries,{element:$,escape:esc,actions:{zoomCountry:name=>zoomToCountry(name)}});
+  if(result.cities)window.DG_RENDER_LANDING_CITY_TABLE.render(result.cities,{element:$,escape:esc,actions:{zoomCity:name=>zoomToCity(name)}});
   const errors=result.errors;
   if(errors.length){
    /* Üç bağımsız panelden biri aksasa bile diğer ikisi görünür kalır. */

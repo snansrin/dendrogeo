@@ -79,7 +79,9 @@ function updateGridSummary(
     selected:DG_GRID_SESSION.getSelection().size,
     meta:DG_GRID_SESSION.getMeta(),
     translate:_tgr,
-    translateFormat:_tgrf
+    translateFormat:_tgrf,
+    actions:{createAuto:()=>createWaypointsFromGrid("auto"),createManual:()=>createWaypointsFromGrid("manual"),
+      clearSelection:clearCellSelection,downloadGeoJson:downloadGridGeoJSON,downloadCsv:downloadWaypointsCSV}
   });
 }
 

@@ -125,7 +125,7 @@ describe('arayüz kablolaması: 📄 düğmesi + panel kutusu', () => {
 
   test('📄 düğmesi yalnız parkı bağlı projede + panel senkronu typeof korumalı', () => {
     assert.match(PROJECT_CARD, /reportButton=project\.park_id\?/, 'parksız projede düğme yok');
-    assert.match(PROJECT_CARD, /dgUserPubOpen\(\$\{project\.id\}\)/, 'satır düğmesi paneli açar');
+    assert.match(PROJECT_CARD, /data-project-action="publish" data-project-id="\$\{projectId\}"/, 'satır düğmesi rapor paneli eylemini taşır');
     assert.match(MEAS, /afterRender:projects=>\{dgRenderProjectParkBox\(\);dgParkGate\(\);if\(typeof dgUserPubSync==="function"\)dgUserPubSync\(projects\);\}/, 'proje dizini değişince panel seçili proje ile eşitlenir');
   });
 
@@ -268,14 +268,14 @@ describe('kullanıcı paneli davranışı (vm)', () => {
     await ui.run('dgUserPubOpen(11)');
     const h = ui.html();
     assert.match(h, /badge off">Yayın yok/);
-    assert.match(h, /dgUserPublish\(6\)/, 'yayınla düğmesi park kimliğiyle');
+    assert.match(h, /data-user-publication-action="publish" data-park-id="6"/, 'yayınla düğmesi park kimliğiyle');
     assert.match(h, /📄 Yayınla/);
     assert.match(h, /id="dgUserPubLulc" checked/, '§5 tercihi varsayılan açık');
     assert.match(h, /park düzeyindedir/, 'raporun kapsamı kullanıcıya söylenir');
     assert.match(h, /tüm onaylı ölçümleri/, 'yalnız kendi projesi değil');
     assert.match(h, /24 saatte en fazla 3 istek/, 'kota şeffaf');
     assert.match(h, /2 onaylı ölçümün var/, 'kendi onaylı veri sayısı');
-    assert.match(h, /dgUserPubClose\(\)/, 'kapat düğmesi');
+    assert.match(h, /data-user-publication-action="close"/, 'kapat düğmesi');
   });
 
   test('kendi bekleyen isteği: rozet + süre + ✖ Vazgeç; yayın düğmesi yok', async () => {
@@ -285,7 +285,7 @@ describe('kullanıcı paneli davranışı (vm)', () => {
     assert.match(h, /badge admin">Beklemede/);
     assert.match(h, /3 dk önce kuyruğa alındı/);
     assert.match(h, /yayın işi 5 dakikada bir çalışır/);
-    assert.match(h, /dgUserCancel\('r1'\)/, 'kendi isteğini iptal edebilir');
+    assert.match(h, /data-user-publication-action="cancel" data-request-id="r1"/, 'kendi isteğini iptal edebilir');
     assert.ok(!/dgUserPublish/.test(h), 'beklerken ikinci istek düğmesi yok');
     assert.ok(!/dgUserPubLulc/.test(h), 'beklerken tercih de yok');
   });
@@ -294,7 +294,7 @@ describe('kullanıcı paneli davranışı (vm)', () => {
     const ui = bootUser({ requests: [REQ('r9', 6, 'Beklemede', 'u-9', 5)] });
     await ui.run('dgUserPubOpen(11)');
     const h = ui.html();
-    assert.ok(!/dgUserCancel/.test(h), 'başkasının isteğini iptal düğmesi çizilmez');
+    assert.ok(!/data-user-publication-action="cancel"/.test(h), 'başkasının isteğini iptal düğmesi çizilmez');
     assert.match(h, /başka bir katkıda bulunan/, 'kimin isteği şeffaf');
     /* düğme çizilmese bile fonksiyon sunucu/istemci kapısıyla korunur */
     await ui.run('dgUserCancel("r9")');
@@ -321,8 +321,8 @@ describe('kullanıcı paneli davranışı (vm)', () => {
     await ui.run('dgUserPubOpen(11)');
     const h = ui.html();
     assert.match(h, /badge on">Yayınlandı/);
-    assert.match(h, /dgReportOpen\('DGR-2026-0007'\)/);
-    assert.match(h, /dgReportShare\('DGR-2026-0007'\)/);
+    assert.match(h, /data-user-publication-action="open" data-report-id="DGR-2026-0007"/);
+    assert.match(h, /data-user-publication-action="share" data-report-id="DGR-2026-0007"/);
     assert.match(h, /📄 Yeni sürüm/, 'yeni çözümleme yeni kimlik');
     assert.ok(h.includes('https://dendrogeo.org/rapor/DGR-2026-0007/'), 'bağlantı kimlikten kuruldu');
     assert.ok(!/dgUserCancel/.test(h), 'sonuçlanmış istekte iptal yok');
@@ -351,7 +351,7 @@ describe('kullanıcı paneli davranışı (vm)', () => {
     const h = ui.html();
     assert.match(h, /badge off">Başarısız/);
     assert.match(h, /OSM\/Overpass erişilemedi/, 'günlükteki neden görünür');
-    assert.match(h, /dgUserPublish\(6\)/, 'yeniden istek açılabilir');
+    assert.match(h, /data-user-publication-action="publish" data-park-id="6"/, 'yeniden istek açılabilir');
   });
 
   test('⭐ insert gövdesi: park, LULC, requested_by=USER.id, proje notu, RLS-safe başlıklar', async () => {
@@ -403,7 +403,7 @@ describe('kullanıcı paneli davranışı (vm)', () => {
     const h = ui.html();
     assert.match(h, /alert warn/, 'uyarı kutusu');
     assert.match(h, /onaylı ölçümün görünmüyor/);
-    assert.match(h, /dgUserPublish\(6\)/, 'düğme kalır: başka projesindeki onaylı veri de yeter');
+      assert.match(h, /data-user-publication-action="publish" data-park-id="6"/, 'düğme kalır: başka projesindeki onaylı veri de yeter');
   });
 
   test('yönetici kartının kapısı değişmedi: kullanıcı dgPublishReport çağıramaz', async () => {

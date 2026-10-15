@@ -16,18 +16,18 @@ test('park comparison row keeps ranking, translated counts, carbon and mobile cl
  assert.match(html,/class="dg-cmp-row lead"/);assert.match(html,/&lt;Göksu&gt;/);assert.match(html,/1\.25 t/);assert.match(html,/1\.25 t\/ha/);assert.match(html,/width:50%/);
 });
 
-test('pending park panel reveals scan only to admins and report options escape values',()=>{
+test('pending park panel reveals delegated scan only to admins and report options escape values',()=>{
  const w=app(),pending=[{park_name:'Old <Park>',city:'Ankara',records:2,carbon_kg:1000}];
  const admin=w.DG_PARK_COMPARISON_PENDING.render(pending,{isAdmin:true,escape});
  const user=w.DG_PARK_COMPARISON_PENDING.render(pending,{isAdmin:false,escape});
- assert.match(admin,/startParkScan/);assert.doesNotMatch(user,/startParkScan/);assert.match(user,/yalnız yönetici/);
+ assert.match(admin,/data-park-comparison-action="scan"/);assert.doesNotMatch(admin,/\bonclick\s*=/i);assert.doesNotMatch(user,/data-park-comparison-action="scan"/);assert.match(user,/yalnız yönetici/);
  const element={};w.DG_PARK_REPORT_OPTIONS_UI.render(element,[{park_id:7,park_name:'Göksu'}],pending,escape);
  assert.match(element.innerHTML,/value="7"/);assert.match(element.innerHTML,/proj:Old &lt;Park&gt;/);assert.doesNotMatch(element.innerHTML,/Old <Park>/);
 });
 
 test('comparison errors escape database details and never need schema-state changes',()=>{
  const html=app().DG_PARK_COMPARISON_ERROR_UI.render({code:'<42501>',message:'<denied>',isAdmin:false,escape});
- assert.match(html,/&lt;42501&gt;/);assert.match(html,/&lt;denied&gt;/);assert.match(html,/loadParkCompare\(\)/);
+ assert.match(html,/&lt;42501&gt;/);assert.match(html,/&lt;denied&gt;/);assert.match(html,/data-park-comparison-action="retry"/);assert.doesNotMatch(html,/\bonclick\s*=/i);
 });
 
 test('map fitting filters invalid coordinates and preserves the 0.25 bounds pad',()=>{

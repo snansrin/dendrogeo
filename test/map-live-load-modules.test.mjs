@@ -46,10 +46,16 @@ test('marker application preserves no-map, success and failed-read callback cont
 test('live map status preserves escaped errors, degraded rendering and timeout',()=>{
   const status=setup().DG_RENDER_LIVE_MAP_LOAD_STATUS,element={style:{},textContent:'',innerHTML:''};let timer;
   status.loading(element);assert.deepEqual(element.style,{display:''});assert.equal(element.className,'alert info');
-  status.error(element,'<denied>',value=>value.replaceAll('<','&lt;').replaceAll('>','&gt;'));
-  assert.equal(element.className,'alert err');assert.match(element.innerHTML,/&lt;denied&gt;/);assert.match(element.innerHTML,/onclick="loadLiveMap\(\)"/);
+  status.error(element,'<denied>',value=>value.replaceAll('<','&lt;').replaceAll('>','&gt;'),()=>{});
+  assert.equal(element.className,'alert err');assert.match(element.innerHTML,/&lt;denied&gt;/);assert.match(element.innerHTML,/data-live-map-action="retry"/);assert.doesNotMatch(element.innerHTML,/\bonclick\s*=/i);
   status.loaded(element,4,true,(text,values)=>text.replace('{n}',values.n).replace('{t}',values.t),(...args)=>{timer=args;});
   assert.equal(element.className,'alert warn');assert.match(element.textContent,/4 onaylı kayıt yüklendi/);assert.equal(timer[1],6000);timer[0]();assert.equal(element.style.display,'none');
+});
+
+test('live map retry is handled by the status container',()=>{
+  const status=setup().DG_RENDER_LIVE_MAP_LOAD_STATUS,listeners={},calls=[],element={style:{},addEventListener:(name,handler)=>{listeners[name]=handler;},contains:()=>true};
+  status.error(element,'offline',String,()=>calls.push('retry'));
+  const button={};listeners.click({target:{closest:selector=>selector==='[data-live-map-action="retry"]'?button:null}});assert.deepEqual(calls,['retry']);
 });
 
 test('live map application marks load result and only renders analysis on success',async()=>{

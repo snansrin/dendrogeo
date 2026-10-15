@@ -54,8 +54,19 @@ test('record item escapes content and preserves measurement values and actions',
   assert.match(html, /&lt;script&gt;/);
   assert.match(html, /20\.0 cm/);
   assert.match(html, /6\.4 cm/);
-  assert.match(html, /onclick="editRec\(7\)"/);
-  assert.match(html, /onclick="delRec\(7\)"/);
+  assert.match(html, /data-record-action="edit" data-record-id="7"/);
+  assert.match(html, /data-record-action="delete" data-record-id="7"/);
+  assert.doesNotMatch(html,/\bonclick\s*=/i);
+});
+
+test('record action delegation validates ids and invokes edit/delete ports',()=>{
+  const api=runtime(),listeners={},calls=[],element={addEventListener:(name,handler)=>{listeners[name]=handler;},contains:()=>true};
+  api.DG_RECORD_ITEM_UI.bind(element,{edit:id=>calls.push(['edit',id]),delete:id=>calls.push(['delete',id])});
+  for(const [action,id] of [['edit','7'],['delete','8'],['edit','0']]){
+    const button={dataset:{recordAction:action,recordId:id}};
+    listeners.click({target:{closest:selector=>selector==='[data-record-action]'?button:null}});
+  }
+  assert.deepEqual(calls,[['edit',7],['delete',8]]);
 });
 
 test('project renderer escapes the name and includes totals, statuses, and rows', () => {

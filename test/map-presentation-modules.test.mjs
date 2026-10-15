@@ -79,6 +79,19 @@ test('waypoint UI and target modules preserve filtering, ordering, paging and no
   ctx.GPS={latitude:40,longitude:32,accuracy:5};
   ctx.dgNearestWaypoint();
   assert.equal(ctx.navTarget.wp_id,12);
+  assert.match($('wpPager').innerHTML,/data-waypoint-action="page"/);
+  assert.match($('wpListTable').innerHTML,/data-waypoint-action="select" data-waypoint-id="1"/);
+  assert.doesNotMatch($('wpListTable').innerHTML,/onclick=/);
+});
+
+test('waypoint list delegation uses the latest injected action callbacks',()=>{
+  const {ctx}=fixture(),listeners={};
+  const root={addEventListener:(name,listener)=>{listeners[name]=listener;},contains:()=>true};
+  let called='';
+  ctx.DG_WAYPOINT_LIST_UI.bind(root,{page:control=>{called=control.dataset.pageDelta;}});
+  ctx.DG_WAYPOINT_LIST_UI.bind(root,{page:control=>{called='latest-'+control.dataset.pageDelta;}});
+  listeners.click({target:{closest:()=>({dataset:{waypointAction:'page',pageDelta:'-1'}})}});
+  assert.equal(called,'latest--1');
 });
 
 test('waypoint header and guidance presentation stay in UI modules',()=>{

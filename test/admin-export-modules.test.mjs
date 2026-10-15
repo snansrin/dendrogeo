@@ -29,10 +29,21 @@ test('admin measurement row and table preserve moderation markup, escaping and p
  const html=window.DG_ADMIN_MEASUREMENT_TABLE_UI.render(rows,{renderRow});
  assert.ok(html.indexOf('data-mid="1"')<html.indexOf('data-mid="2"'));
  assert.match(html,/&lt;Ada&gt;/);
- assert.match(html,/onclick="approveMeas\(2\)"/);
- assert.match(html,/onclick="rejectMeas\(1\)"/);
+ assert.match(html,/data-admin-measurement-action="approve" data-measurement-id="2"/);
+ assert.match(html,/data-admin-measurement-action="reject" data-measurement-id="1"/);
+ assert.doesNotMatch(html,/onclick=/);
  assert.match(html,/12\.3/);
  assert.match(window.DG_ADMIN_MEASUREMENT_TABLE_UI.render([],{renderRow}),/Kayıt yok/);
+});
+
+test('admin measurement row delegates through the table root and keeps the latest callbacks',()=>{
+ const {window}=app(),listeners={};
+ const root={addEventListener:(name,listener)=>{listeners[name]=listener;},contains:()=>true};
+ let called='';
+ window.DG_ADMIN_MEASUREMENT_ROW_UI.bind(root,{approve:control=>{called=control.dataset.measurementId;}});
+ window.DG_ADMIN_MEASUREMENT_ROW_UI.bind(root,{approve:control=>{called='latest-'+control.dataset.measurementId;}});
+ listeners.click({target:{closest:()=>({dataset:{adminMeasurementAction:'approve',measurementId:'12'}})}});
+ assert.equal(called,'latest-12');
 });
 
 test('admin export options merge project and measurement locations and retain cascading filters',()=>{

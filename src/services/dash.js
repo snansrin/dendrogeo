@@ -14,7 +14,7 @@ function dgRecordProjectGroup(name,rows){
  return window.DG_RECORD_PROJECT_UI.render(name,rows,{escape:esc,renderItem:dgRecordItemHTML});
 }
 async function loadRecords__scroll(){
- return window.DG_LOAD_OWN_RECORDS_VIEW.execute(USER.id,{load:userId=>window.DG_OWN_RECORDS_STORE.load(sb,userId),group:rows=>window.DG_GROUP_OWN_RECORDS.group(rows),container:()=>$('recGroups'),renderGroup:(name,rows)=>dgRecordProjectGroup(name,rows),empty:()=>`<div class="card records-empty">${typeof dgCf==="function"?dgCf("Kayıt yok"):"Kayıt yok"}</div>`,failed:error=>`<div class="card records-empty records-error">${esc(dgCf("Kayıtlar yüklenemedi: "))}${esc(error?.message||dgCf("Bağlantı hatası"))}</div>`});
+ return window.DG_LOAD_OWN_RECORDS_VIEW.execute(USER.id,{load:userId=>window.DG_OWN_RECORDS_STORE.load(sb,userId),group:rows=>window.DG_GROUP_OWN_RECORDS.group(rows),container:()=>$('recGroups'),renderGroup:(name,rows)=>dgRecordProjectGroup(name,rows),afterRender:element=>window.DG_RECORD_ITEM_UI.bind(element,{edit:id=>editRec(id),delete:id=>delRec(id)}),empty:()=>`<div class="card records-empty">${typeof dgCf==="function"?dgCf("Kayıt yok"):"Kayıt yok"}</div>`,failed:error=>`<div class="card records-empty records-error">${esc(dgCf("Kayıtlar yüklenemedi: "))}${esc(error?.message||dgCf("Bağlantı hatası"))}</div>`});
 }
 // 2. Kayıt sil
 async function delRec(id){
@@ -71,5 +71,5 @@ async function loadWorld(){
 }
 function dgWorldError(msg){
  console.error("DENDROGEO · loadWorld:",msg);
- return window.DG_WORLD_ERROR_UI.show(document,msg,esc);
+ return window.DG_WORLD_ERROR_UI.show(document,msg,esc,{retry:()=>loadWorld()});
 }

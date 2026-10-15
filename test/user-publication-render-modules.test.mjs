@@ -32,7 +32,8 @@ test('user view preserves another contributor ownership and publication status p
   view = ctx.DG_RESOLVE_USER_PUBLICATION_VIEW.resolve(state, 'u1', ports);
   assert.equal(view.pendingOwn, true);
   let html = ctx.DG_RENDER_USER_PUBLICATION_CONTROLS.render(view, state, { escape: String });
-  assert.match(html, /dgUserCancel\('r1'\)/);
+  assert.match(html, /data-user-publication-action="cancel" data-request-id="r1"/);
+  assert.doesNotMatch(html, /onclick=/);
   assert.doesNotMatch(html, /dgUserPublish/);
   assert.doesNotMatch(html, /dgUserPubLulc/);
 });
@@ -48,12 +49,26 @@ test('published and retracted view controls preserve valid links and hide unavai
   const view = ctx.DG_RESOLVE_USER_PUBLICATION_VIEW.resolve(state, 'u1', ports);
   assert.match(view.badge, /badge on/);
   const controls = ctx.DG_RENDER_USER_PUBLICATION_CONTROLS.render(view, state, { escape: String });
-  assert.match(controls, /dgReportShare/);
-  assert.match(controls, /dgReportRetract\('DGR-2026-0006',6\)/);
-  assert.match(controls, /dgUserPublish\(6\)/);
+  assert.match(controls, /data-user-publication-action="share" data-report-id="DGR-2026-0006"/);
+  assert.match(controls, /data-user-publication-action="retract" data-report-id="DGR-2026-0006" data-park-id="6"/);
+  assert.match(controls, /data-user-publication-action="publish" data-park-id="6"/);
+  assert.doesNotMatch(controls, /onclick=/);
   const header = ctx.DG_RENDER_USER_PUBLICATION_HEADER.render(state, view, '<button>close</button>', value => String(value).replaceAll('<', '&lt;').replaceAll('>', '&gt;'));
   assert.match(header, /&lt;Park&gt;/);
   assert.match(header, /Kalıcı bağlant/);
+});
+
+test('user publication control delegation binds once and uses current action ports', () => {
+  const listeners = {};
+  const root = {
+    addEventListener: (name, listener) => { listeners[name] = listener; },
+    contains: () => true,
+  };
+  let called = '';
+  ctx.DG_RENDER_USER_PUBLICATION_CONTROLS.bind(root, { publish: control => { called = control.dataset.parkId; } });
+  ctx.DG_RENDER_USER_PUBLICATION_CONTROLS.bind(root, { publish: control => { called = 'latest-' + control.dataset.parkId; } });
+  listeners.click({ target: { closest: () => ({ dataset: { userPublicationAction: 'publish', parkId: '6' } }) } });
+  assert.equal(called, 'latest-6');
 });
 
 test('notices and card keep the own-measurement, offline and schema guidance', () => {

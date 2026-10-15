@@ -2,8 +2,11 @@
 
 /* Render the transient visitor roster; access, filtering and map state stay in the service. */
 (function(root){
- function render(box,rows,{state="idle",allCount=rows.length,viewLabels={},actionLabels={},hasLocation=()=>false,deviceLabel=row=>row.p.dev,translate=value=>value,escape=value=>String(value)}={}){
+ const bindings=new WeakSet(),actionsByBox=new WeakMap();
+ function bind(box,actions){if(!box||typeof box.addEventListener!=="function")return;actionsByBox.set(box,actions||{});if(bindings.has(box))return;bindings.add(box);const activate=(event,keyboard)=>{const row=event.target?.closest?.("[data-visitor-lat][data-visitor-lon]");if(!row||!box.contains(row))return;if(keyboard&&!['Enter',' ','Spacebar'].includes(event.key))return;if(keyboard)event.preventDefault();const lat=Number(row.dataset.visitorLat),lon=Number(row.dataset.visitorLon);if(Number.isFinite(lat)&&Number.isFinite(lon))actionsByBox.get(box)?.focus?.(lat,lon);};box.addEventListener("click",event=>activate(event,false));box.addEventListener("keydown",event=>activate(event,true));}
+ function render(box,rows,{state="idle",allCount=rows.length,viewLabels={},actionLabels={},hasLocation=()=>false,deviceLabel=row=>row.p.dev,translate=value=>value,escape=value=>String(value),focus}={}){
   if(!box)return;
+  bind(box,{focus});
   if(!rows.length){
    const stt=state;
    box.textContent=stt==="on"?translate(allCount?"Seçili filtrelere uyan kullanıcı yok. Filtreleri temizleyebilirsiniz.":"Şu an bağlı kullanıcı yok.")
@@ -21,7 +24,7 @@
     const chain=(Array.isArray(r.p.vh)?r.p.vh:[]).slice(-3).map(h=>escape(translate(viewLabels[h.v]||h.v))).join(" → ");
     const actTxt=r.p.act?translate(actionLabels[r.p.act.k]||r.p.act.k)+(r.p.act.d?" · "+escape(r.p.act.d):""):"";
     return '<div class="dg-vis-person" style="padding:6px 0;border-bottom:1px solid var(--line)'+(hasLoc?";cursor:pointer":"")+'"'+
-     (hasLoc?' onclick="dgVisFocus('+Number(r.p.la)+','+Number(r.p.lo)+')" title="'+translate("Haritada odaklan")+'"':'')+'>'+
+     (hasLoc?' data-visitor-lat="'+Number(r.p.la)+'" data-visitor-lon="'+Number(r.p.lo)+'" role="button" tabindex="0" title="'+translate("Haritada odaklan")+'"':'')+'>'+
      '<div style="display:flex;gap:8px;align-items:center">'+
      '<span style="width:9px;height:9px;border-radius:50%;background:var(--green);flex:0 0 auto"></span>'+
      '<b>'+escape(r.p.n||"?")+'</b>'+(r.p.hidden||r.age>120?'<span class="badge off">ARKA PLAN</span>':'')+

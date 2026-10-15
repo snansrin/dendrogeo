@@ -16,12 +16,17 @@ const _tadf=(t,v)=>(typeof dgTfs==="function"?dgTfs(t,v):String(t).replace(/\{(\
  * kayıt kimliğiyle bulmayı sağlar (hedefli güncelleme/hata ayıklama). */
 function dgFlatRowHTML(x){
   /* Locked markup contracts retained in src/ui/admin-measurement-row.js:
-   * (+x.dbh_cm).toFixed(1); dgThumb(x.photo_url); onclick="dgGeoOverride(. */
+   * (+x.dbh_cm).toFixed(1); dgThumb(x.photo_url); data-admin-measurement-action="geoOverride". */
   return window.DG_ADMIN_MEASUREMENT_ROW_UI.render(x,{escape:esc,latin:LATIN,thumbnail:dgThumb});
 }
 function dgRenderFlatTable(rows){
   /* Locked contract retained: sort((a,b)=>((+a.project_id||0)-(+b.project_id||0))||((+a.point_id||0)-(+b.point_id||0))). */
-  window.DG_ADMIN_MEASUREMENT_TABLE_UI.mount(document,rows,{renderRow:dgFlatRowHTML});
+  window.DG_ADMIN_MEASUREMENT_TABLE_UI.mount(document,rows,{renderRow:dgFlatRowHTML,bindRows:table=>window.DG_ADMIN_MEASUREMENT_ROW_UI.bind(table,{
+    approve:control=>approveMeas(Number(control.dataset.measurementId)),
+    reject:control=>rejectMeas(Number(control.dataset.measurementId)),
+    geoOverride:control=>dgGeoOverride(Number(control.dataset.measurementId)),
+    delete:control=>delMeas(Number(control.dataset.measurementId))
+  })});
 }
 
 /* 0043 · SEKMELİ (debounced) ARKA PLAN MUTABAKAT

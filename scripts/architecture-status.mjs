@@ -34,12 +34,12 @@ Bu dosya mimari kapılardan güncel sayıları üretir.
 | Runtime envanteri | ${runtime.physical.length} fiziksel · ${runtime.initial.length} ilk yükleme · ${runtime.lazy.length} lazy · ${runtime.protected.size} SHA korumalı | Ölçüldü |
 | Legacy servis sınır borcu | ${debt} DOM/Supabase/ağ erişimi | ${debt?'Açık':'Geçti; yeni ihlal kapalı'} |
 | Statik HTML satır içi olay | ${inlineEvents.length} | ${inlineEvents.length?'Hata':'Geçti'} |
-| Dinamik HTML olay borcu | ${generatedHandlers.total} nitelik · ${Object.keys(generatedHandlers.files).length} UI/service dosyası | Bilinen baseline; yeni artış CI'da engellenir |
+| Dinamik HTML olay borcu | ${generatedHandlers.total} nitelik · ${Object.keys(generatedHandlers.files).length} UI/service dosyası | ${generatedHandlers.total===0?'Tamamlandı':'Baseline ile sınırlı'}; yeni artış CI'da engellenir |
 | İlk yükleme script bildirimi | ${initialScripts} modül | Sıra ve çevrimdışı manifesti açıkça korunuyor |
 
 ## Tamamlanan mimari kapıları
 
-- Katman ve dependency kuralları AST ile doğrulanıyor; global facade sağlayıcıları ve bağımlılık yönü denetleniyor. Dinamik HTML inline handler sayısı ayrıca baseline'a karşı denetleniyor ve artırılamıyor.
+- Katman ve dependency kuralları AST ile doğrulanıyor; global facade sağlayıcıları ve bağımlılık yönü denetleniyor. Dinamik HTML inline handler borcu sıfır ve CI'da artışa kapalı.
 - Servis katmanında DOM, Supabase ve ağ erişimi yok; sınır borcunun artması CI'ı durduruyor.
 - Build, sürüm, CSP, Service Worker/lazy modül entegrasyonu, çekirdek hash ve HTML olay kapıları \`npm run check\` içinde.
 - Tam test paketi, Chromium mobil iş akışları ve erişilebilirlik kontrolleri yerel release doğrulamasından geçti.

@@ -14,10 +14,11 @@
  * yanlışlıkla verilen çok küçük değerler 1,8 saniyeyi aşamaz. */
 function toast(msg,type="ok",icon="",duration=4500){
  const wrap=$("toastWrap");if(!wrap)return;
+ if(!wrap._dgToastActionsBound&&typeof wrap.addEventListener==="function"){wrap._dgToastActionsBound=true;wrap.addEventListener("click",event=>{const button=event.target?.closest?.("button.dg-toast-close");if(!button||!wrap.contains(button))return;const toastElement=button.parentNode;toastElement?.classList.add("bye");setTimeout(()=>toastElement?.remove(),300);});}
  const t=document.createElement("div");
  t.className="toast "+(type==="err"||type==="warn"||type==="info"?type:"");
  const ic=icon||(type==="err"?"❌":type==="warn"?"⚠":type==="info"?"ℹ":"✓");
- t.innerHTML=`<span class="icon">${ic}</span><span class="msg">${msg}</span><button type="button" class="x" aria-label="Bildirimi kapat" onclick="this.parentNode.classList.add('bye');setTimeout(()=>this.parentNode?.remove(),300)">✕</button>`;
+ t.innerHTML=`<span class="icon">${ic}</span><span class="msg">${msg}</span><button type="button" class="x dg-toast-close" aria-label="Bildirimi kapat">✕</button>`;
  wrap.appendChild(t);
  const ms=Math.max(1800,Math.min(15000,Number(duration)||4500));
  setTimeout(()=>{if(t.parentNode){t.classList.add("bye");setTimeout(()=>t.remove(),300);}},ms);

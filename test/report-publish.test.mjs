@@ -364,7 +364,7 @@ describe('report-publish.js davranışı (vm)', () => {
     const h = ui.html();
     assert.match(h, /badge admin">Beklemede/);
     assert.match(h, /3 dk önce kuyruğa alındı/);
-    assert.match(h, /dgPublishCancel\('r1'\)/, '✖ Vazgeç');
+    assert.match(h, /data-publication-park-action="cancel" data-request-id="r1"/, '✖ Vazgeç');
     assert.match(h, /yayın işi 5 dakikada bir çalışır/i);
     assert.ok(!/dgReportOpen/.test(h), 'yayınlanmadan bağlantı düğmesi yok');
   });
@@ -380,8 +380,8 @@ describe('report-publish.js davranışı (vm)', () => {
     ui.run('dgPubRender()');
     const h = ui.html();
     assert.match(h, /badge on">Yayınlandı/);
-    assert.match(h, /dgReportOpen\('DGR-2026-0002'\)/);
-    assert.match(h, /dgReportShare\('DGR-2026-0002'\)/);
+    assert.match(h, /data-publication-park-action="open" data-report-id="DGR-2026-0002"/);
+    assert.match(h, /data-publication-park-action="share" data-report-id="DGR-2026-0002"/);
     assert.match(h, /📄 Yeni sürüm/, 'yeni çözümleme yeni kimlik');
     assert.match(h, /DGR-2026-0002/, 'kimlik görünür');
   });

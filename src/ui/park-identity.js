@@ -1,7 +1,10 @@
 "use strict";
 /* Present park identity and manual-entry controls from supplied state. */
 (function(root){
-function renderManualParkForm({open,point:pt}){
+const bindings=new WeakSet(),actionsByDocument=new WeakMap();
+function bindParkIdentityCreateAction(document,actions){if(!document||typeof document.addEventListener!=="function")return;actionsByDocument.set(document,actions||{});if(bindings.has(document))return;bindings.add(document);document.addEventListener("click",event=>{const button=event.target?.closest?.('[data-park-identity-action="create"]');if(button&&document.contains(button))actionsByDocument.get(document)?.create?.();});}
+function renderManualParkForm({open,point:pt,document,actions}){
+  bindParkIdentityCreateAction(document,actions);
   return `<div id="manualParkBox" style="display:${open?"block":"none"};margin-top:12px;border-top:1px solid var(--line);padding-top:12px">`+
     `<div class="lbl">ELLE PARK OLUŞTUR</div>`+
     `<div class="alert info" style="margin:6px 0;font-size:.8rem">OSM'de park sınırı yoksa buradan kimlik aç. `+
@@ -10,7 +13,7 @@ function renderManualParkForm({open,point:pt}){
       `<div><div class="lbl">PARK ADI</div><input id="manualParkName" class="dg-png-input" placeholder="örn. Göksu Parkı"></div>`+
       `<div><div class="lbl">ALAN (HA, opsiyonel)</div><input id="manualParkArea" class="dg-png-input" type="number" step="0.1" placeholder="örn. 42.5"></div>`+
     `</div>`+
-    `<button class="btn sm amber" style="margin-top:10px" onclick="dgCreateManualPark()">✓ Parkı Oluştur</button>`+
+    `<button class="btn sm amber" style="margin-top:10px" data-park-identity-action="create">✓ Parkı Oluştur</button>`+
   `</div>`;
 }
 
@@ -22,5 +25,5 @@ function renderParkIdentityChip({parkRow,escape:esc}){
   return `<span class="dg-png-badge" title="${esc(parkRow.osm_key||"")}">kimlik #${parkRow.id} · ${esc(src)}</span>`;
 }
 
-  root.DG_PARK_IDENTITY_UI=Object.freeze({manualForm:renderManualParkForm,chip:renderParkIdentityChip});
+  root.DG_PARK_IDENTITY_UI=Object.freeze({manualForm:renderManualParkForm,chip:renderParkIdentityChip,bind:bindParkIdentityCreateAction});
 })(window);

@@ -584,7 +584,7 @@ async function dgSensRepartition(featureOverride=null){
 
 function dgSensPopup(key){
  const modelModule=window.DG_SURFACE_CELL_DECISION_POPUP_MODEL,viewModule=window.DG_SURFACE_CELL_DECISION_POPUP_VIEW;
- if(modelModule&&viewModule){const cell=dgSensCells()?.find(item=>dgSensCellKey(item)===key);if(!cell)return;const currentClass=dgSensEffective(cell),model=modelModule.build({cell,key,currentClass,decision:DG_SENS.record.corrections[key],meta:dgSensMeta});L.popup({maxWidth:280}).setLatLng([cell.center.lat,cell.center.lon]).setContent(viewModule.render({model,escape:esc,translate:_tvs})).openOn(map);return;}
+ if(modelModule&&viewModule){const cell=dgSensCells()?.find(item=>dgSensCellKey(item)===key);if(!cell)return;const currentClass=dgSensEffective(cell),model=modelModule.build({cell,key,currentClass,decision:DG_SENS.record.corrections[key],meta:dgSensMeta});L.popup({maxWidth:280}).setLatLng([cell.center.lat,cell.center.lon]).setContent(viewModule.render({model,escape:esc,translate:_tvs,document,actions:{decide:(cellKey,classKey)=>dgSensDecide(cellKey,classKey),undo:cellKey=>dgSensUndo(cellKey)}})).openOn(map);return;}
  const c=dgSensCells()?.find(c=>dgSensCellKey(c)===key);if(!c)return;
  const cls=dgSensEffective(c),dec=DG_SENS.record.corrections[key];
  let html=`<div class="dg-sens-popup"><b>${esc(_tvs(dgSensMeta(cls).tr))}</b> · ${Number(c.areaM2).toFixed(1)} m²<p>${esc(_tvs("Görüntüdeki sınıfı seçerek bu hücreyi düzeltin."))}</p><div class="dg-sens-actions">`;

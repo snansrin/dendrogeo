@@ -302,7 +302,7 @@ function dgScanPreviewName(){
 
 function dgManualFormHTML(open){
   const point=window.DG_RESOLVE_MANUAL_PARK_COORDINATE.resolve({pending:DG_MANUAL_PENDING,anchor:DG_PARK_ANCHOR,gps:GPS});
-  return window.DG_PARK_IDENTITY_UI.manualForm({open,point});
+  return window.DG_PARK_IDENTITY_UI.manualForm({open,point,document,actions:{create:()=>dgCreateManualPark()}});
 }
 
 function dgShowManualParkForm(){
@@ -459,7 +459,8 @@ function dgParkGate(auto){
   const save=$("saveBtn");
   const result=DG_PARK_MEASUREMENT_GATE(auto);
   const view=DG_PARK_MEASUREMENT_GATE_UI.render({
-    result,box,save,escape:esc,formatArea:dgFmtHa,schemaWarningHTML:dgSchemaWarnHTML
+    result,box,save,escape:esc,formatArea:dgFmtHa,schemaWarningHTML:dgSchemaWarnHTML,
+    actions:{scan:options=>startParkScan(options),admin:()=>go('admin')}
   });
   if(view.redirect)startParkScan(view.redirect);
   return view.allowed;
@@ -731,7 +732,13 @@ function dgRenderParkAdmin(projects,measurements){
   const state=DG_PARK_ADMIN_STATE.getState();
   if(state.rows!==DG_PARK_ADMIN_ROWS||state.showEmpty!==DG_PARK_ADMIN_SHOW_EMPTY)DG_PARK_ADMIN_STATE.setState({rows:DG_PARK_ADMIN_ROWS,showEmpty:DG_PARK_ADMIN_SHOW_EMPTY});
   return window.DG_RENDER_PARK_ADMIN_UI.render({state:DG_PARK_ADMIN_STATE,element:$,projects,measurements,
-    buildOverview:input=>window.DG_PARK_ADMIN_OVERVIEW.build(input),renderRows:input=>window.DG_PARK_ADMIN_RENDERER.render(input),
+    buildOverview:input=>window.DG_PARK_ADMIN_OVERVIEW.build(input),renderRows:input=>window.DG_PARK_ADMIN_RENDERER.render({...input,actions:{
+      mergeInto:element=>dgParkMergeInto(Number(element.dataset.sourceId),Number(element.dataset.targetId)),
+      toggleEmpty:()=>dgParkAdminToggleEmpty(),rename:element=>dgParkRename(Number(element.dataset.parkId)),
+      backfillGeometry:element=>dgBackfillGeom(Number(element.dataset.parkId)),
+      mergeFromSelect:element=>dgParkMergeFromSelect(Number(element.dataset.parkId)),
+      delete:element=>dgParkDelete(Number(element.dataset.parkId))
+    }}),
     normalizeLoose:dgNormParkLoose,normalizeName:dgNormParkName,formatHectares:dgFmtHa,distance:hav,escapeHTML:esc,
     translate:_tpr,translateFormat:_tprf,translatePlain:value=>typeof dgT==="function"?dgT(value):value});
 }

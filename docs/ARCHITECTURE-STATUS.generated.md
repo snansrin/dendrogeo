@@ -10,12 +10,12 @@ Bu dosya mimari kapılardan güncel sayıları üretir.
 | Runtime envanteri | 992 fiziksel · 735 ilk yükleme · 254 lazy · 954 SHA korumalı | Ölçüldü |
 | Legacy servis sınır borcu | 0 DOM/Supabase/ağ erişimi | Geçti; yeni ihlal kapalı |
 | Statik HTML satır içi olay | 0 | Geçti |
-| Dinamik HTML olay borcu | 82 nitelik · 35 UI/service dosyası | Bilinen baseline; yeni artış CI'da engellenir |
+| Dinamik HTML olay borcu | 0 nitelik · 0 UI/service dosyası | Tamamlandı; yeni artış CI'da engellenir |
 | İlk yükleme script bildirimi | 735 modül | Sıra ve çevrimdışı manifesti açıkça korunuyor |
 
 ## Tamamlanan mimari kapıları
 
-- Katman ve dependency kuralları AST ile doğrulanıyor; global facade sağlayıcıları ve bağımlılık yönü denetleniyor. Dinamik HTML inline handler sayısı ayrıca baseline'a karşı denetleniyor ve artırılamıyor.
+- Katman ve dependency kuralları AST ile doğrulanıyor; global facade sağlayıcıları ve bağımlılık yönü denetleniyor. Dinamik HTML inline handler borcu sıfır ve CI'da artışa kapalı.
 - Servis katmanında DOM, Supabase ve ağ erişimi yok; sınır borcunun artması CI'ı durduruyor.
 - Build, sürüm, CSP, Service Worker/lazy modül entegrasyonu, çekirdek hash ve HTML olay kapıları `npm run check` içinde.
 - Tam test paketi, Chromium mobil iş akışları ve erişilebilirlik kontrolleri yerel release doğrulamasından geçti.

@@ -26,10 +26,11 @@ test('renderer keeps duplicate, unnamed, empty-park, and row actions', () => {
   assert.match(html, /Alpha &lt;Park&gt;/);
   assert.match(html, /parkın adı yok/);
   assert.match(html, /Boş parkları göster \(1\)/);
-  assert.match(html, /dgParkMergeInto\(2,1\)/);
-  assert.match(html, /dgParkRename\(1\)/);
-  assert.match(html, /dgBackfillGeom\(1\)/);
-  assert.match(html, /dgParkDelete\(1\)/);
+  assert.match(html, /data-park-admin-action="mergeInto" data-source-id="2" data-target-id="1"/);
+  assert.match(html, /data-park-admin-action="rename" data-park-id="1"/);
+  assert.match(html, /data-park-admin-action="backfillGeometry" data-park-id="1"/);
+  assert.match(html, /data-park-admin-action="delete" data-park-id="1"/);
+  assert.doesNotMatch(html,/\bon(?:click|input|change|toggle)=/);
 });
 
 test('visible-empty mode changes the toggle label and omits the hidden-row note', () => {
@@ -42,4 +43,12 @@ test('empty park table retains its create-park empty state', () => {
   const element = { innerHTML: '' };
   render({ element, rows: [], overview: { projByPark: {}, measByPark: {}, emptyRows: [], shown: [], dupGroups: [], unnamed: [] }, showEmpty: false, formatHectares: () => '', distance: () => 0, escapeHTML, translate: x => x, translateFormat: fmt, translatePlain: x => x });
   assert.match(element.innerHTML, /Henüz park kimliği yok/);
+});
+
+test('admin renderer delegates row controls through the injected action map',()=>{
+  const events={},calls=[],element={innerHTML:'',addEventListener:(name,handler)=>{events[name]=handler;},contains:()=>true};
+  render({element,rows:parks,overview,showEmpty:false,formatHectares:value=>`${value/10000} ha`,distance:()=>120,escapeHTML,translate:value=>value,translateFormat:fmt,translatePlain:value=>value,actions:{rename:control=>calls.push(Number(control.dataset.parkId))}});
+  const control={dataset:{parkAdminAction:'rename',parkId:'2'},disabled:false};
+  events.click({target:{closest:()=>control}});
+  assert.deepEqual(calls,[2]);
 });

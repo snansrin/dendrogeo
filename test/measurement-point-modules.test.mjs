@@ -49,7 +49,14 @@ test('point query result escapes external text and keeps the empty-state copy',(
   window.DG_MEASUREMENT_POINT_QUERY_RESULT.render({element,pointId:5,record:null,escape:String,translate:value=>value,translateFormat:(value,data)=>value.replace('{p}',data.p),circumferenceFromDiameter:()=>null});
   assert.equal(element.innerHTML,'ℹ P5 için kayıt yok · Yeni kayıt oluşturulacak.');
   window.DG_MEASUREMENT_POINT_QUERY_RESULT.render({element,record:{id:4,point_id:5,species:'<oak>',girth_cm:50,dbh_cm:10,height_m:8,carbon_kg:3,status:'<pending>',photo_url:'<img>'},escape:value=>String(value).replaceAll('<','&lt;').replaceAll('>','&gt;'),translate:value=>value,translateFormat:value=>value,circumferenceFromDiameter:()=>null});
-  assert.match(element.innerHTML,/&lt;oak&gt;/);assert.match(element.innerHTML,/&lt;img&gt;/);assert.doesNotMatch(element.innerHTML,/<img>/);
+  assert.match(element.innerHTML,/&lt;oak&gt;/);assert.match(element.innerHTML,/&lt;img&gt;/);assert.doesNotMatch(element.innerHTML,/<img>/);assert.match(element.innerHTML,/data-point-query-action="edit" data-record-id="4"/);assert.doesNotMatch(element.innerHTML,/\bonclick\s*=/i);
+});
+
+test('point query edit/delete buttons use owner callbacks through delegated events',()=>{
+  const{window}=setup(),listeners={},calls=[],element={innerHTML:'',className:'',style:{},addEventListener:(name,handler)=>{listeners[name]=handler;},contains:()=>true};
+  window.DG_MEASUREMENT_POINT_QUERY_RESULT.render({element,record:{id:4,point_id:5,species:'Oak',dbh_cm:10,height_m:8,carbon_kg:3},escape:String,translate:value=>value,translateFormat:value=>value,circumferenceFromDiameter:()=>null,actions:{edit:id=>calls.push(['edit',id]),delete:id=>calls.push(['delete',id])}});
+  for(const action of ['edit','delete']){const button={dataset:{pointQueryAction:action,recordId:'4'}};listeners.click({target:{closest:selector=>selector==='[data-point-query-action]'?button:null}});}
+  assert.deepEqual(calls,[['edit',4],['delete',4]]);
 });
 
 test('five point-workflow modules load before measure.js and are precached',()=>{

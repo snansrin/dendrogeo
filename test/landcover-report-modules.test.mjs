@@ -25,6 +25,15 @@ test('legacy raw result shape normalizes established area and coverage fallbacks
   assert.equal(model.result.groupAreas.green,125);assert.equal(model.analysisArea,250);assert.equal(model.rows[0].pct,50);assert.equal(model.qa.passed,true);
 });
 
+test('landcover report downloads use container event delegation',()=>{
+  const context=app(true),composer=context.window.DG_LANDCOVER_REPORT_COMPOSER,listeners={},calls=[],element={addEventListener:(name,handler)=>{listeners[name]=handler;},contains:()=>true};
+  const html=composer.compose({metadata:{heading:'',mask:'',coverage:'',sources:''},rows:''});
+  assert.match(html,/data-landcover-report-action='classCsv'/);assert.match(html,/data-landcover-report-action='cellsGeojson'/);assert.doesNotMatch(html,/\bonclick\s*=/i);
+  composer.bind(element,{classCsv:()=>calls.push('csv'),cellsGeojson:()=>calls.push('geojson')});
+  for(const action of ['classCsv','cellsGeojson']){const button={dataset:{landcoverReportAction:action}};listeners.click({target:{closest:selector=>selector==='[data-landcover-report-action]'?button:null}});}
+  assert.deepEqual(calls,['csv','geojson']);
+});
+
 test('all five report modules load and are precached before lc-report',()=>{
   const chain=read('src/utils/lazylibs.js'),sw=read('sw.js');
   for(const path of modules){assert.ok(chain.includes(`"${path}"`));assert.ok(sw.includes(`'/${path}'`));assert.ok(chain.indexOf(`"${path}"`)<chain.indexOf('"src/ui/lc-report.js"'));}
