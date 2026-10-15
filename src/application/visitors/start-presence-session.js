@@ -1,6 +1,6 @@
 "use strict";
 
-/* Start Presence immediately, guard callbacks by generation, and upgrade auth later. */
+/* Prepare the channel immediately, then join only after authorization succeeds. */
 window.DG_START_VISITOR_PRESENCE_SESSION={
  start({state,user,sessionId,channelAdapter,authUpgrade,authPorts,timers,emit,ping,stop,fail,getView}){
   try{
@@ -21,9 +21,13 @@ window.DG_START_VISITOR_PRESENCE_SESSION={
    };
    const channel=channelAdapter.open(String(user.id),sessionId,onSync);
    state.channel=channel;
-   channelAdapter.subscribe(channel,onStatus);
    state.watchTimer=timers.setTimeout(()=>{if(generation===state.generation&&state.status==="connecting")fail("WATCHDOG");},20000);
-   if(authUpgrade&&authPorts)authUpgrade.run(authPorts,generation,value=>value===state.generation);
+   const authorize=authUpgrade&&authPorts?authUpgrade.run(authPorts,generation,value=>value===state.generation):Promise.resolve(false);
+   Promise.resolve(authorize).then(authorized=>{
+    if(generation!==state.generation)return;
+    if(!authorized){fail("AUTH_REQUIRED");return;}
+    channelAdapter.subscribe(channel,onStatus);
+   }).catch(()=>{if(generation===state.generation)fail("AUTH_FAILED");});
    return true;
   }catch(e){
    state.ready=false;state.status="error";emit();

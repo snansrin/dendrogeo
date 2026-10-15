@@ -14,7 +14,7 @@ test('presence payload builder keeps bounded transient session and GPS history',
  assert.deepEqual(events.locations,[[39,32,3]]);
 });
 
-test('presence channel is prepared and subscribed through separate ordered calls',()=>{
+test('presence channel is private and subscribed through separate ordered calls',()=>{
  const events=[];
  const channel={on(...args){events.push(['on',...args]);return this;},subscribe(callback){events.push(['subscribe',callback]);}};
  const client={channel(topic,options){events.push(['channel',topic,options]);return channel;}};
@@ -25,14 +25,14 @@ test('presence channel is prepared and subscribed through separate ordered calls
  assert.deepEqual(events.map(event=>event[0]),['channel','on']);
  api.subscribe(channel,onStatus);
  assert.equal(events[2][0],'subscribe');assert.equal(events[2][1],onStatus);
- assert.equal(JSON.stringify(events[0][2]),JSON.stringify({config:{presence:{key:'user:session'}}}));
+ assert.equal(JSON.stringify(events[0][2]),JSON.stringify({config:{private:true,presence:{key:'user:session'}}}));
 });
 
-test('presence auth upgrades only the current connection after subscribe setup',async()=>{
+test('presence auth is installed before a private channel joins and stale sessions are rejected',async()=>{
  const api=load('src/application/visitors/upgrade-presence-auth.js').DG_UPGRADE_VISITOR_PRESENCE_AUTH.create();
  const events=[],ports={async getSession(){events.push('session');return{data:{session:{access_token:'jwt'}}};},async setRealtimeAuth(token){events.push(token);}};
- await api.run(ports,4,generation=>generation===4);
- await api.run(ports,5,generation=>generation===4);
+ assert.equal(await api.run(ports,4,generation=>generation===4),true);
+ assert.equal(await api.run(ports,5,generation=>generation===4),false);
  assert.deepEqual(events,['session','jwt','session']);
 });
 
@@ -51,7 +51,7 @@ test('presence cleanup isolates a rejected Supabase removal',async()=>{
  await new Promise(resolve=>setTimeout(resolve,0));
 });
 
-test('visit service composes presence modules without waiting for JWT before subscribe',async()=>{
+test('visit service authenticates before subscribing to private presence',async()=>{
  const events=[],window={addEventListener(){},DG_VISITOR_TRACK_VISIT_ADAPTER:{create:()=>({record(){}})},
   DG_VISITOR_ADMIN_VISIT_COUNTS_STORE:{create:()=>({})},DG_VISITOR_SESSION_ID_STORE:{load:()=>'sid'},
   DG_VISITOR_DEVICE_LABEL:{build:()=>'desktop'},DG_VISITOR_ACTIVITY_APPLICATION:{create:()=>({})},
@@ -75,16 +75,18 @@ test('visit service composes presence modules without waiting for JWT before sub
  let notify;
  const channel={on(){return this;},subscribe(callback){events.push('subscribe');notify=callback;return this;},
   track:async payload=>{events.push(['track',payload]);return'ok';},presenceState:()=>({})};
- context.sb={channel(topic){events.push(['channel',topic]);return channel;},removeChannel:async()=>{},
+ context.sb={channel(topic,options){events.push(['channel',topic,options]);return channel;},removeChannel:async()=>{},
   auth:{async getSession(){events.push('auth');return{data:{session:{access_token:'jwt'}}};}},
   realtime:{async setAuth(token){events.push(['auth-token',token]);}}};
  vm.runInContext(source('src/services/visit-stats.js'),context);
  vm.runInContext('dgPresenceStart()',context);
- assert.deepEqual(events.slice(0,2),[['channel','dg-presence'],'subscribe']);
+ assert.equal(events[0][0],'channel');assert.equal(events[0][1],'dg-presence');
+ assert.deepEqual(JSON.parse(JSON.stringify(events.find(event=>Array.isArray(event)&&event[0]==='channel')[2])),{config:{private:true,presence:{key:'u1:sid'}}});
+ await new Promise(resolve=>setTimeout(resolve,0));
+ assert.ok(events.indexOf('auth')<events.indexOf('subscribe'));
  notify('SUBSCRIBED');
  await new Promise(resolve=>setTimeout(resolve,0));
  const sent=events.find(event=>Array.isArray(event)&&event[0]==='track');
  assert.equal(sent[1].sid,'sid');assert.equal(sent[1].la,39);assert.equal(sent[1].v,'map');
- assert.ok(events.indexOf('auth')>events.indexOf('subscribe'));
  vm.runInContext('dgPresenceStop()',context);
 });

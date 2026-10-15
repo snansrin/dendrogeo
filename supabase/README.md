@@ -26,6 +26,7 @@ Supabase kontrol panelinde yaşıyordu; artık her değişiklik version control'
 | `migrations/0015_report_data_owner.sql` | **Yazar = veri sahibi**: `dg_park_author(park)` SECURITY DEFINER fonksiyonu — parkın onaylı kayıtlarının en çok katkı veren sahibinin `full_name/organization` değerini döndürür (e-posta SIZMAZ; anon'a yalnız bu iki alan). Rapor motoru öncelik zinciri: **dg_park_author → v_report_authors (0012) → kurumsal**. DGR-2026-0004 dersi: istek Sinan'dan gelince künyede Sinan yazdı; ölçen kişi (Nagihan) öncelikli olmalı. Idempotent. |
 | `migrations/0025_park_invites.sql` | **Park çalışma arkadaşı (0025)**: `park_invites` + `park_collaborators` + `v_my_parks`; davet/kabul/red/iptal YALNIZ SECURITY DEFINER RPC ile (`dg_invite_send/dg_invite_respond/dg_invite_revoke` — tablolarda yazma grant'i YOK). Kabul = `auth.uid()` ↔ `profiles.email` (e-posta kimlik doğrulamaz). `meas_select` OR-ile genişler: park sahibi+ortaklar ortak parkın bekleyen kayıtlarını görür (onay akışı). 0006 park-bağı ve 0007 konum çiti AYNEN geçerli. Idempotent. |
 | `migrations/20261004165219_profile_privilege_guard.sql` | Profil kimliği değişmez; normal kullanıcı kendi rolünü/aktifliğini değiştiremez. Kurucu rol/aktiflik yönetimine ve kullanıcı ad/okul düzenlemesine devam eder. SECURITY INVOKER tetikleyici; mevcut kayıtlar ve RLS kapsamı değişmez. |
+| `migrations/20261015073309_realtime_presence_authorization.sql` | Canlı ziyaretçi Presence kanalını yalnız aktif kullanıcıların yayımlamasına ve yalnız kurucunun okumasına; park Presence kanalını ise yalnız aktif park üyelerinin görüp yayımlamasına sınırlar. İstemciler özel kanala JWT kurulduktan sonra katılır. Dört imtiyazlı davet fonksiyonunun `search_path` değeri sabitlenir. Ölçüm/yüzey/rapor tabloları ve Realtime mesaj saklama yapısı değiştirilmez. Idempotent. |
 | `dump-schema.sh` | Canlı şemayı `supabase db dump` ile yeniden dökmek için yardımcı |
 | `audit/rls-probe.sh` | Anon key ile 13 saldırı denemesi (yetki yükseltme dahil) |
 | `audit/RLS-DENETIM.md` | Denetim listesi + sonuç tablosu (doldurulacak) |
@@ -59,7 +60,8 @@ Supabase SQL Editor'da sırayla:
    `select * from dg_park_author(25);` → 'Nagihan Şirin')
 16. `0025_park_invites.sql` → Run (👥 park çalışma arkadaşı: davet/kabul +
    ortak park görünürlüğü; doğrulama: `select * from v_my_parks;`)
-17. (Önerilir) `audit/rls-probe.sh`'i kendi makinenden çalıştır → sonuçları
+17. `20261015073309_realtime_presence_authorization.sql` → Run (özel Presence: kurucu/aktif kullanıcı/park üyeliği politikaları; Realtime kanalına JWT sonrası katılım)
+18. (Önerilir) `audit/rls-probe.sh`'i kendi makinenden çalıştır → sonuçları
    `audit/RLS-DENETIM.md` tablosuna işle
 
 > ⚠️ **Sıra önemli:** `0004` uygulanmadan site çökmez ama park kimliği devre

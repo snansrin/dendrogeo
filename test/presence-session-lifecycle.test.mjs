@@ -43,22 +43,32 @@ test('presence failure exposes the error and schedules stop/start with backoff',
  assert.equal(stateBefore.retryTimer,null);
 });
 
-test('starting a session subscribes before auth and guards stale callbacks',()=>{
+test('starting a session installs auth before subscribing and guards stale callbacks',async()=>{
  const api=load().DG_START_VISITOR_PRESENCE_SESSION,clock=timers(),events=[],stateBefore=state({channel:null,ready:false,status:'idle',watchTimer:null,heartbeatTimer:null,user:null});
  let onStatus;
  const channel={};
  const result=api.start({state:stateBefore,user:{id:'u1'},sessionId:'sid',
   channelAdapter:{open(userId,sid,onSync){events.push(['open',userId,sid]);return channel;},subscribe(value,callback){events.push('subscribe');onStatus=callback;}},
-  authPorts:{},authUpgrade:{run(ports,generation,isCurrent){events.push(['auth',generation,isCurrent(generation)]);}},
+  authPorts:{},authUpgrade:{run(ports,generation,isCurrent){events.push(['auth',generation,isCurrent(generation)]);return Promise.resolve(true);}},
   timers:clock.api,emit:()=>events.push('emit'),ping:(...args)=>events.push(['ping',...args]),stop:()=>{},fail:reason=>events.push(['fail',reason]),getView:()=>'map'});
- assert.equal(result,true);assert.deepEqual(events.slice(0,3),['emit',['open','u1','sid'],'subscribe']);
- assert.ok(events.findIndex(event=>Array.isArray(event)&&event[0]==='auth')>events.indexOf('subscribe'));
+ assert.equal(result,true);assert.deepEqual(events.slice(0,2),['emit',['open','u1','sid']]);
+ await new Promise(resolve=>setImmediate(resolve));
+ assert.ok(events.findIndex(event=>Array.isArray(event)&&event[0]==='auth')<events.indexOf('subscribe'));
  assert.equal(stateBefore.status,'connecting');assert.ok(stateBefore.watchTimer);
  onStatus('SUBSCRIBED');
  assert.equal(stateBefore.status,'on');assert.equal(stateBefore.ready,true);assert.equal(stateBefore.retryCount,0);
  assert.ok(events.some(event=>Array.isArray(event)&&event[0]==='ping'&&event[1]==='map'&&event[2]===true));
  const count=events.length;stateBefore.generation++;
  onStatus('CHANNEL_ERROR');assert.equal(events.length,count);
+});
+
+test('private presence never subscribes without an authenticated session',async()=>{
+ const api=load().DG_START_VISITOR_PRESENCE_SESSION,clock=timers(),events=[],stateBefore=state({channel:null,ready:false,status:'idle',watchTimer:null,heartbeatTimer:null,user:null});
+ let resolveAuth;
+ api.start({state:stateBefore,user:{id:'u1'},sessionId:'sid',channelAdapter:{open:()=>({}),subscribe:()=>events.push('subscribe')},
+  authPorts:{},authUpgrade:{run:()=>new Promise(resolve=>{resolveAuth=resolve;})},timers:clock.api,emit(){},ping(){},stop(){},fail:reason=>events.push(reason),getView:()=> 'dash'});
+ assert.deepEqual(events,[]);resolveAuth(false);await new Promise(resolve=>setImmediate(resolve));
+ assert.deepEqual(events,['AUTH_REQUIRED']);
 });
 
 test('presence watchdog fails only the same generation still connecting',()=>{

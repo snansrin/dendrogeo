@@ -313,13 +313,15 @@ describe('0036 · özellik ve EN bütünlük kilitleri', () => {
     assert.match(rd('src/ui/shell.js'), /dgPresenceStart\(\)/, 'startShell kancası');
     assert.match(rd('src/ui/shell.js'), /dgPresencePing\(v\)/, 'go() kancası');
   });
-  test('⭐ 0038 presence subscribe-önce + watchdog + konum alanı (connecting takılması kökten bitti)', () => {
+  test('⭐ 0038 private presence auth-before-subscribe + watchdog + transient GPS payload', () => {
     const vs = rd('src/services/visit-stats.js');
-    /* kanal, getSession await'inden ÖNCE kurulmalı (takılma kök nedeni buydu) */
+    /* Channel construction is immediate; private subscription waits for auth. */
     const presenceAdapter = rd('src/adapters/visitors/presence-channel.js');
     const startPresence = rd('src/application/visitors/start-presence-session.js');
     assert.match(presenceAdapter, /client\.channel\("dg-presence"/);
-    assert.match(startPresence, /channelAdapter\.subscribe\(channel,onStatus\)/, 'kanal auth yükseltmesinden önce abone olur');
+    assert.match(presenceAdapter, /private:true/);
+    assert.match(startPresence, /channelAdapter\.subscribe\(channel,onStatus\)/, 'özel kanal yetkilendirmeden sonra abone olur');
+    assert.ok(startPresence.indexOf('authorize')<startPresence.indexOf('channelAdapter.subscribe'));
     assert.match(startPresence, /WATCHDOG/, 'bağlantı watchdog use-case içinde');
     assert.match(startPresence, /20000/, 'watchdog süresi 20 saniyedir');
     assert.match(rd('src/domain/visitors/build-presence-payload.js'), /gps\.latitude/, 'konum payload domain modülünde');
@@ -328,9 +330,10 @@ describe('0036 · özellik ve EN bütünlük kilitleri', () => {
     assert.match(mp, /presence=window\.DG_PARK_PRESENCE_CHANNEL_ADAPTER/);
     assert.match(mp, /presence\.join\(/, 'service Presence adapter’ını çağırır');
     const presence = rd('src/adapters/parks/park-presence-channel.js');
-    assert.ok(presence.indexOf('channel.subscribe(onStatus)') < presence.indexOf('client.auth.getSession()'), 'kanal önce kurulur, auth arka planda alınır');
+    assert.ok(presence.indexOf('client.auth.getSession()') < presence.indexOf('channel.subscribe(onStatus)'), 'JWT kanala katılmadan önce kurulur');
+    assert.match(presence,/private:true/);
     assert.match(presence, /setTimer\(onWatchdog,8000\)/, '8 sn watchdog adapter’da');
-    assert.match(presence, /client\.realtime\?\.setAuth/, 'JWT güncellemesi adapter sınırında kalır');
+    assert.match(presence, /await client\.realtime\.setAuth\(token\)/, 'JWT güncellemesi adapter sınırında kalır');
     assert.match(mp, /DG_PARK_CH_WATCH/, 'park kanalı watchdog');
     assert.match(mp, /DG_PARK_CH_LIVE/, 'track yalnız SUBSCRIBED sonrası');
   });

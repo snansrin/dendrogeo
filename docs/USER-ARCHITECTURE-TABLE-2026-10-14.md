@@ -12,9 +12,9 @@ Kapsam: 14 Ekim 2026'da eklenen 16 satırlı kullanıcı tablosu. Önceki r427 k
 | Range | Ortak dg-range ve native focus eklendi; eski scoped slider stili korundu | 0/100 Home/End, 44 px yükseklik, sıfır padding, 360/390/430 px sınır denetimi |
 | Tema/buton/font | Root palette/font değişkenleri aynı; eksik kontrast mevcut renk ailesi/var ile düzeltildi | Durum dolguları/border ve hiyerarşi korunur; axe contrast ve browser layout |
 | Önizleme/kayıt ayrımı | Görsel opacity testi raw class/area ve accepted geometry snapshot'ını aynı tutar | user-architecture-table opacity regression + mevcut surface/grid/GIS immutable snapshot testleri |
-| Canlı konum/gizlilik | Park paylaşımı disclosure'ında geçici/veritabanına yazılmayan kapsam açıklaması mevcut | Mevcut GPS/park collaborator/RLS kapıları korunur; visitors presence/location policy ve park-live-share testleri |
+| Canlı konum/gizlilik | İki Presence adapter'ı private kanala geçirildi ve subscribe öncesi JWT kuruyor; canlı migration dört RLS politikasını ekledi, katalogdan doğrulandı. | Supabase `Allow public access` ayarı hâlâ kapatılmadı; bu ayar değişmeden public konulardan RLS atlanabilir. Kurucu/normal kullanıcı/anonim çapraz-park gerçek oturum testi ayrıca gerekir. |
 | Surface/core | Domain/application/adapters/UI sınırları, DTO'lar ve workers hash/runtime kapısında | CORE-KIRMIZI-CIZGILER geçerli; raw raster, sınıf eşikleri ve kabul snapshot'ı değişmedi |
-| Supabase/migration | Yeni idempotent protokol guard migration; izole PostgreSQL'de iki uygulama testi | Tarihsel data rewrite yok; boyutları değiştirmeyen update korunur; canlı katalog/float/RLS checksum kontrolü son kabul adımı |
+| Supabase/migration | Ölçüm protokolü ve Realtime Presence migration'ları canlıda; dört Presence policy ve dört `search_path=''` ayarı katalogda doğrulandı. | Realtime public-access ayarı, leaked-password protection ve gerçek çoklu kullanıcı Presence kabulü ayrı adımlar. Dört davet RPC SECURITY DEFINER uyarısı mevcut yetki/yetkilendirme nedeniyle hâlâ var. |
 | Rapor/yayın | CI kuyruğu test job'larını bekler; manual rapor/kuyruk/DOI check:release kapılı | Test fail → queue/DOI işlemi yapılmaz; always commit adımı validation success şartını taşır |
 | Test/regresyon | PGlite gerçek PostgreSQL kontratı, yeni kaynak/UI/yayın kontrat testleri eklendi | Tam check + phone + axe; koşul kapıları bilerek bozulduğunda test reddeder |
 | Erişilebilirlik | Dil adları, altlık/park select etiketleri, footer kontrastı, tablo odağı ve toast native kapatma düzeltildi | 13 görünüm × 3 genişlik axe WCAG 2/2.1 A/AA; native klavye disclosure/switch/focus/slider; manuel inceleme ayrıca gerekir |
@@ -31,7 +31,7 @@ Kapsam: 14 Ekim 2026'da eklenen 16 satırlı kullanıcı tablosu. Önceki r427 k
 
 ## Yayın kabulü
 
-UI/SQL odaklı testler ve yerel erişilebilirlik geçti. 15 Ekim'de tam yerel release kapısı da tekrar çalıştırıldı; PR CI run'ı ve canlı saha kabulü ayrı doğrulama adımlarıdır. Bu kapılar geçmeden tablonun tamamı bitmiş olarak bildirilmez.
+UI/SQL odaklı testler, telefon Chromium akışları ve yerel erişilebilirlik geçti. PR CI run'ı ve canlı saha kabulü ayrı doğrulama adımlarıdır. Realtime public-access ayarı yapılmadığı için gizlilik satırı hâlâ açık; mimari bütünüyle tamamlandı diye işaretlenmiyor.
 
 Canlı migration `20261014201828_measurement_protocol_guard` uygulandı. RLS aktif kaldı; politika checksum’ı önce/sonra `0bdf1e3fc7610f12ef1565c12a1f7a3a`; dört eski trigger korundu, yalnız yeni protocol trigger eklendi. Kullanıcı satırı yazılmadan saf DB dönüşümü ve katalog doğrulandı.
 
@@ -53,13 +53,13 @@ Mobil Chromium akışları 360/390/430 px genişliklerinde giriş, OAuth, anonim
 | 6 | Range/slider | `.dg-range`, 44 px hedef ve 0/100 uçları mevcut; 360/390/430 px ve Home/End kontrolleri geçti. | Manuel dokunmatik cihaz testi yapılmadı. |
 | 7 | Tema/değişken/buton | Mevcut tema token/font hiyerarşisi korunuyor; otomatik erişilebilirlik taraması geçti. | Görsel tasarım sahibi kabulü alınmadı. |
 | 8 | Surface preview ve kaydedilmiş veri ayrımı | Opacity/preview testleri ham sınıf, alan ve kabul edilmiş snapshot değişmediğini kanıtlıyor. | Yok; davranış/regresyon kapısı geçti. |
-| 9 | Canlı konum ve gizlilik | Canlı Supabase sorgusunda `realtime.messages` için **0 RLS politikası**; iki Presence adapter'ında da `private: true` yok. | Yüksek öncelikli açık. Gerçek kurucu/normal kullanıcı/anonim istemciyle çapraz park okuma-yazma testi yapılmadan private-channel/RLS geçişi güvenle kabul edilemez. |
+| 9 | Canlı konum ve gizlilik | İstemciler private Presence kanalına JWT ile giriyor; canlı `realtime.messages` üzerinde 4 aktif Presence RLS politikası ve park üyelik kontrolü var. | Dashboard `Allow public access` kapalı değil ve gerçek çoklu oturum testi yok. Bu iki kabul adımı tamamlanmadan konum akışı güvenli/bitmiş sayılmaz. |
 | 10 | Surface analiz çekirdeği | Domain/application/adapter/UI ayrımı, bilimsel hash, worker/runtime ve kabul snapshot kapıları geçti. | Gerçek park bazında bilimsel saha QA'sı otomatik testin dışında. |
-| 11 | Supabase şema/migration | Ölçüm protokol migration'ı daha önce canlı katalog ve izole PostgreSQL'de doğrulanmış; bu turda prod veri yazılmadı. | Bu turda canlı protokol checksum'ı yeniden alınmadı. Advisor: yedek tabloda beklenen erişimsiz RLS, 4 güvenlik kapılı SECURITY DEFINER invite RPC uyarısı ve kapalı sızmış parola koruması. Auth ayarı dashboard işidir. |
+| 11 | Supabase şema/migration | Ölçüm protokol migration'ı ve Presence yetkilendirme migration'ı canlı; policy katalogu ve imtiyazlı RPC `search_path` doğrulandı. | Advisor hâlâ yedek tabloda beklenen erişimsiz RLS, yetkilendirilmiş 4 SECURITY DEFINER davet RPC uyarısı ve kapalı sızmış parola koruması gösteriyor. Auth ayarı henüz değiştirilmedi. |
 | 12 | Raporlama/yayın | Publish/DOI akışları `check:release` sonrasına bağlı; yerel release kapısı geçti. | Bu commit'e ait remote CI sonucu yok. |
 | 13 | Test/regresyon | `npm run check` geçti; PGlite migration kontratı ve regresyon grupları yeşil. | Remote CI ve canlı kullanıcı kabulü ayrı. |
 | 14 | Erişilebilirlik | 13 görünüm × 360/390/430 px; otomatik kurallar, klavye switch'i, görünür odak ve slider uçları geçti. | Manuel ekran okuyucu/uzman incelemesi yapılmadı. |
 | 15 | Map/GIS/export | Yerel OSM kurtarma, sınır/fırça/çizim smoke ve PNG/GeoJSON kontratları geçti. | Gerçek park başına OSM/uydu doğruluğu ve dış servis sürekliliği garanti edilemez; saha QA gerekir. |
-| 16 | Dokümantasyon/kaynak doğrusu | README UI checklist ve bu 16 maddelik kabul tablosu kaynak/test kanıtıyla eşlendi. | 3, 9, 11 ve 15. satırlardaki açıklar kapanmadan tüm mimari tamamen bitmiş sayılmaz. |
+| 16 | Dokümantasyon/kaynak doğrusu | README, migration rehberi, core-lock değişiklik zinciri ve bu 16 maddelik kabul tablosu güncel kanıtla eşlendi. | 3, 9, 11 ve 15. satırlardaki açıklar kapanmadan tüm mimari tamamen bitmiş sayılmaz. |
 
-Supabase Realtime yetkilendirmesi politika ve istemcide `private: true` birlikte gerektirir; ayar kapalıysa mevcut public channel istemcileri reddedilir. Realtime ayarı ve gerçek kullanıcı oturumları olmadan güvenli geçişi doğrulamak mümkün değildir. Resmî gereksinimler: [Realtime Authorization](https://supabase.com/docs/guides/realtime/authorization), [Realtime Settings](https://supabase.com/docs/guides/realtime/settings).
+Supabase Realtime'da `private: true` ve RLS policy tek başına yetmez; global `Allow public access` ayarı da kapatılmalıdır. Bu ayar tüm bağlı Realtime istemcilerini kesip yeniden başlatır. Resmî gereksinimler: [Realtime Authorization](https://supabase.com/docs/guides/realtime/authorization), [Realtime Settings](https://supabase.com/docs/guides/realtime/settings).

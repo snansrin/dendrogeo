@@ -6,7 +6,7 @@ window.DG_VISITOR_PRESENCE_CHANNEL_ADAPTER={
   return Object.freeze({
    open(userId,sessionId,onSync){
     const client=getClient();
-    const channel=client.channel("dg-presence",{config:{presence:{key:String(userId)+":"+sessionId}}});
+    const channel=client.channel("dg-presence",{config:{private:true,presence:{key:String(userId)+":"+sessionId}}});
     channel.on("presence",{event:"sync"},onSync);
     return channel;
    },

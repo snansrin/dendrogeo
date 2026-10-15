@@ -5430,6 +5430,48 @@
         "test/surface-editor-event-binding.test.mjs",
         "docs/generated-markup-handler-baseline.json"
       ]
+    },
+    {
+      "scope": "User-authorized modularization and security hardening: require JWT-authenticated private Presence channels and add active-user/park-membership RLS for transient location streams; pin SECURITY DEFINER RPC search_path and update migration allowlists.",
+      "date": "2026-10-15",
+      "audit_chain": "sha256-v1",
+      "files": [
+        {
+          "path": "index.html",
+          "previous_sha256": "16c9fd1707144e1af39b18b3e702c25c0a216921eea42788d62c1fafcac3c58d",
+          "sha256": "d353d7e49e83a20f406b743871e9c7b3d64246b526903eeaf264ea416925032b"
+        },
+        {
+          "path": "src/adapters/parks/park-presence-channel.js",
+          "previous_sha256": "e1987b261ee6fa733d6b088c0e0a9ed571ad56e7c8c1b284932d7d5fbc5c2d7d",
+          "sha256": "f44d0f6577239975d92cefa05608ebf46ebe9f6b3d0c2e7cf744b6f1d565eb74"
+        },
+        {
+          "path": "src/application/parks/join-live-share-park.js",
+          "previous_sha256": "242472dc247b42e799afa27873feda9fdf76d6bb43a1669b06cc36ce805f50f2",
+          "sha256": "a6f2bd9ed7a97c717108150f147c0857c2e5dcdc41cbec6f5038670e9b859a16"
+        },
+        {
+          "path": "test/landing-claims.test.mjs",
+          "previous_sha256": "2a40f1ad7cc3abd456b47eb0fe4ef86701a22137f449a3009188d7aef315b516",
+          "sha256": "17ee299d3a9c3ba28e61e17def3ceeba18c82a51c03b17248599132a4c424820"
+        },
+        {
+          "path": "test/park-presence-channel-modules.test.mjs",
+          "previous_sha256": "785779ff355e6d905b9c0bc32fa039f3d4dfcc6e673f257b668d041256546944",
+          "sha256": "e6047dccfdf720208ecc9e7487210b7051ea76eaf916b8a896c5819ed5f38d50"
+        },
+        {
+          "path": "test/dbh-qa.test.mjs",
+          "previous_sha256": "1844170ac46df759538ad0a0199e56cfa6197abf533a0fe6ffc60d470f8a813b",
+          "sha256": "724c9c90585cc276b92ab42ae2f9e72261d8850d935ae83a4b5dc0bb88131fd8"
+        },
+        {
+          "path": "test/form-qa.test.mjs",
+          "previous_sha256": "e0f9ea35e3a636a97df4122a960ddeb93909bd530d918885512fb5e73565f328",
+          "sha256": "75941e8c6a6167bd31dc59ab64576a648abeee93c3233d0d1944f0f5d8ccb25f"
+        }
+      ]
     }
   ]
 }

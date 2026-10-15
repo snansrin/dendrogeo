@@ -25,18 +25,18 @@ test('collaborator colors are stable and selected from the supplied palette',()=
   assert.equal(color('user-a',palette),color('user-a',palette));assert.ok(palette.includes(color('user-b',palette)));assert.equal(color('',palette),color('?',palette));
 });
 
-test('Presence channel subscribes before session auth and installs its watchdog',async()=>{
-  const join=setup().DG_PARK_PRESENCE_CHANNEL_ADAPTER.join,events=[],channel={on(...args){events.push(['on',...args]);return this;},subscribe(callback){events.push('subscribe');callback('SUBSCRIBED');return this;}},client={channel:(topic,options)=>{events.push(['channel',topic,options]);return channel;},auth:{getSession:async()=>{events.push('session');return{data:{session:{access_token:'jwt'}}};}},realtime:{setAuth:token=>events.push(['auth',token])}};
+test('private park Presence authenticates before joining and installs its watchdog',async()=>{
+  const join=setup().DG_PARK_PRESENCE_CHANNEL_ADAPTER.join,events=[],channel={on(...args){events.push(['on',...args]);return this;},subscribe(callback){events.push('subscribe');callback('SUBSCRIBED');return this;}},client={channel:(topic,options)=>{events.push(['channel',topic,options]);return channel;},auth:{getSession:async()=>{events.push('session');return{data:{session:{access_token:'jwt'}}};}},realtime:{setAuth:async token=>events.push(['auth',token])}};
   let currentChannel=null,watch=null;
-  const result=join({client,parkId:9,userId:3,onSync:()=>{},onStatus:()=>{},setChannel:value=>{currentChannel=value;events.push('set-channel');},getWatch:()=>watch,setWatch:value=>{watch=value;},clearTimer:value=>events.push(['clear',value]),setTimer:(fn,ms)=>{events.push(['timer',ms]);return 77;},onWatchdog:()=>{}});
+  const result=await join({client,parkId:9,userId:3,onSync:()=>{},onStatus:()=>{},setChannel:value=>{currentChannel=value;events.push('set-channel');},getWatch:()=>watch,setWatch:value=>{watch=value;},clearTimer:value=>events.push(['clear',value]),setTimer:(fn,ms)=>{events.push(['timer',ms]);return 77;},onWatchdog:()=>{}});
   await new Promise(resolve=>setTimeout(resolve,0));
-  assert.equal(result,channel);assert.equal(currentChannel,channel);assert.equal(watch,77);assert.deepEqual(events.slice(0,4).map(e=>Array.isArray(e)?e[0]:e),['channel','set-channel','on','subscribe']);assert.ok(events.indexOf('subscribe')<events.indexOf('session'));assert.ok(events.some(e=>Array.isArray(e)&&e[0]==='auth'&&e[1]==='jwt'));assert.ok(events.some(e=>Array.isArray(e)&&e[0]==='timer'&&e[1]===8000));
+  assert.equal(result,channel);assert.equal(currentChannel,channel);assert.equal(watch,77);assert.deepEqual(events.filter(e=>Array.isArray(e)).map(e=>e[0]).slice(0,4),['auth','channel','on','timer']);assert.ok(events.indexOf('auth')<events.indexOf('subscribe'));assert.deepEqual(JSON.parse(JSON.stringify(events.find(e=>Array.isArray(e)&&e[0]==='channel')[2])),{config:{private:true,presence:{key:'3'}}});assert.ok(events.some(e=>Array.isArray(e)&&e[0]==='timer'&&e[1]===8000));
 });
 
 test('Realtime client details stay inside the channel adapter',()=>{
   const adapter=read('src/adapters/parks/park-presence-channel.js'),map=read('src/services/map.js');
   assert.match(adapter,/presence\(\{channel\}\)/);
-  assert.match(adapter,/client\.realtime\?\.setAuth/);
+  assert.match(adapter,/await client\.realtime\.setAuth\(token\)/);
   assert.doesNotMatch(map,/\.presenceState\s*\(|\.realtime\s*\./);
   assert.doesNotMatch(map,/function dgLiveMatesDraw\(\)[\s\S]*?L\.marker/);
 });

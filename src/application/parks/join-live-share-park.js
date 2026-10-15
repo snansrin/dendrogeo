@@ -14,7 +14,7 @@ window.DG_JOIN_LIVE_SHARE_PARK={
     leave();
     setParkId(plan.parkId);
     showConnecting();
-    subscribe({parkId:plan.parkId,userId:user.id,onSync,onStatus});
+    await subscribe({parkId:plan.parkId,userId:user.id,onSync,onStatus});
     return{status:"joined",parkId:plan.parkId};
   }
 };
