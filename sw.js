@@ -717,6 +717,7 @@ const CORE_ASSETS = [
     '/src/ui/landing-city-table.js',
     '/src/ui/landing-entry-controller.js',
     '/src/ui/landing.js',
+    '/src/ui/landing-showcase.js',
     '/src/ui/landing-actions.js',
     '/src/adapters/auth/initialize-shell-platform.js',
     '/src/application/auth/resolve-shell-session.js',

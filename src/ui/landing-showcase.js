@@ -1,0 +1,28 @@
+"use strict";
+/* Landing-only carousel: copy, animation and real-record captures travel together.
+ * Native scroll snapping supplies touch gestures; this module owns navigation and accessibility. */
+(function(root){
+ function mount(element){
+  if(!element||element.dataset.showcaseReady)return null;
+  const track=element.querySelector('[data-showcase-track]'),panels=Array.from(element.querySelectorAll('[data-showcase-panel]')),buttons=Array.from(element.querySelectorAll('[data-showcase-index]')),status=element.querySelector('[data-showcase-status]');
+  if(!track||!panels.length||buttons.length!==panels.length)return null;
+  element.dataset.showcaseReady='true';let current=0,frame=0,requested=null;
+  function update(index){
+   current=Math.max(0,Math.min(panels.length-1,index));
+   panels.forEach((panel,i)=>{panel.classList.toggle('is-active',i===current);panel.setAttribute('aria-hidden',String(i!==current));panel.inert=i!==current;});
+   buttons.forEach((button,i)=>button.setAttribute('aria-pressed',String(i===current)));
+   if(status)status.textContent=String(current+1).padStart(2,'0')+' / '+String(panels.length).padStart(2,'0');
+  }
+  function go(index){const next=(index+panels.length)%panels.length;requested=next;update(next);track.scrollTo({left:next*track.clientWidth,behavior:root.matchMedia?.('(prefers-reduced-motion: reduce)').matches?'auto':'smooth'});}
+  buttons.forEach((button,i)=>button.addEventListener('click',()=>go(i)));
+  element.querySelector('[data-showcase-prev]')?.addEventListener('click',()=>go(current-1));
+  element.querySelector('[data-showcase-next]')?.addEventListener('click',()=>go(current+1));
+  for(const event of ['pointerdown','touchstart','wheel'])track.addEventListener(event,()=>{requested=null;},{passive:true});
+  track.addEventListener('scroll',()=>{if(frame)return;frame=root.requestAnimationFrame(()=>{frame=0;if(!track.clientWidth)return;if(requested!==null&&Math.abs(track.scrollLeft-requested*track.clientWidth)>1)return;requested=null;update(Math.round(track.scrollLeft/track.clientWidth));});},{passive:true});
+  element.addEventListener('keydown',event=>{if(event.ctrlKey||event.metaKey||event.altKey||!['ArrowLeft','ArrowRight','Home','End'].includes(event.key))return;event.preventDefault();go(event.key==='Home'?0:event.key==='End'?panels.length-1:current+(event.key==='ArrowLeft'?-1:1));buttons[current].focus({preventScroll:true});});
+  root.addEventListener('resize',()=>{requested=null;track.scrollTo({left:current*track.clientWidth,behavior:'auto'});},{passive:true});
+  update(0);return Object.freeze({go,index:()=>current});
+ }
+ root.DG_LANDING_SHOWCASE=Object.freeze({mount});
+ if(typeof document!=='undefined')document.querySelectorAll('[data-dg-showcase]').forEach(mount);
+})(window);

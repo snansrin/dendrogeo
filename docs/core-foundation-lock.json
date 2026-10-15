@@ -7448,6 +7448,72 @@
           "sha256": "93a08515f7444d1a7bcb47737ae10a314d25424cd44a85ee6e875a908cbb090a"
         }
       ]
+    },
+    {
+      "id": "landing-refresh-45d8716",
+      "date": "2026-10-15",
+      "scope": "Record the previous explicitly user-authorized landing copy/style refresh and generated index from 45d8716; measurement and surface engine behavior unchanged.",
+      "audit_chain": "sha256-v1",
+      "files": [
+        {
+          "path": "css/landing.css",
+          "previous_sha256": "2557d139e9a28dbb979d02b7c3d7029a429df2b01eaab16e4708356b5bc9b4f0",
+          "sha256": "5ebd6570a893736fbdf3b0e3cae15d113c716b073a3d4a6b086a3fd8914f87dc"
+        },
+        {
+          "path": "partials/landing.html",
+          "previous_sha256": "ea2eff0c57961bc541e91078ac153e60d01a3caa0e816549641dc98cdd425a0c",
+          "sha256": "1f636f038bb988815fc7e4730b46c1de5481ff4a0d1f8d2c7c580508a88aa2f1"
+        },
+        {
+          "path": "partials/head.html",
+          "previous_sha256": "ec3356d4188733c101065e63effcf514c22df9a320d2fefbd3238ab5a7166634",
+          "sha256": "a88a90fc7e53b56d33139a3c7d2455c9a1dcc31742f4fc65ea5d37ea6410b5e5"
+        },
+        {
+          "path": "index.html",
+          "previous_sha256": "65c8a8592723de31f93abd5dc65e29a3a88db72c06c1db1e512a2e74292b1a70",
+          "sha256": "4e086d0c7166f085a733a20bc5afd600a96fe600529023c96d87e8889d2c305f"
+        }
+      ]
+    },
+    {
+      "id": "landing-showcase-20261015",
+      "date": "2026-10-15",
+      "scope": "User-authorized modularization: replace the whole homepage hero with accessible sliding copy/animation and real-record captures; register one isolated landing UI module and its precache entry. Accepted scientific data and all analysis/measurement engines remain unchanged.",
+      "audit_chain": "sha256-v1",
+      "files": [
+        {
+          "path": "css/landing.css",
+          "previous_sha256": "5ebd6570a893736fbdf3b0e3cae15d113c716b073a3d4a6b086a3fd8914f87dc",
+          "sha256": "bce0fdd6544d634280f808b6d2cefe815cdc2ac590661407d30bd0b2f0dc6f38"
+        },
+        {
+          "path": "index.html",
+          "previous_sha256": "4e086d0c7166f085a733a20bc5afd600a96fe600529023c96d87e8889d2c305f",
+          "sha256": "7c2ae43b650688e661a18529254a10402ca1bbccea4c7f1a150ddd06229d8401"
+        },
+        {
+          "path": "package.json",
+          "previous_sha256": "31dd71de680b00a25323ced33477d6d7b9ff5ab2c6d0fcc1ec8f81467de2f6a1",
+          "sha256": "7c42ca86c59471975d31196edd4d1a80cef85dbeaad8373bb81024de641c9931"
+        },
+        {
+          "path": "partials/boot.html",
+          "previous_sha256": "d9959a7c00c92185f9b085564370ecdc5b2e539c6becad0d80687410096c8fef",
+          "sha256": "8a1c11b934a5d45a4762aaa9f2fc1e0c8f065973ca49d4d3d0ab34f8f2a87dca"
+        },
+        {
+          "path": "partials/landing.html",
+          "previous_sha256": "1f636f038bb988815fc7e4730b46c1de5481ff4a0d1f8d2c7c580508a88aa2f1",
+          "sha256": "5c921de2561bc23228dd173a9846d5143940c700d066a9af1a4f882807f9cb8a"
+        },
+        {
+          "path": "sw.js",
+          "previous_sha256": "9374e0dda132bd6bdef31bf0d78c54a97fab2d7b6022bd3ef93f646e3df9ff62",
+          "sha256": "36aae15bf4fcdaa240913d4a634c5ee96157ed5d36487ff66578fb5523c0339b"
+        }
+      ]
     }
   ]
 }

@@ -1,0 +1,48 @@
+{
+  "schema": "dendrogeo-landing-evidence/1",
+  "captureDate": "2026-10-15",
+  "park": {
+    "name": "Göksu Parkı",
+    "city": "Ankara",
+    "country": "Türkiye",
+    "osmKey": "way/423602737"
+  },
+  "acceptedAt": "2026-10-14T19:03:34.592Z",
+  "revision": 26,
+  "acceptance": "user-accepted; not independent accuracy assessment",
+  "sourceData": {
+    "path": "assets/landing/goksu-example.json",
+    "sha256": "4865453ce30d2c0ae1f1720c3d0415babb1ac5561d4cc2bc90bf28907f18dad6"
+  },
+  "ndvi": {
+    "status": "no-saved-cell-observations"
+  },
+  "reportStatus": "unpublished-preview; no DGR identifier or DOI assigned",
+  "images": [
+    {
+      "path": "assets/landing/goksu-map.jpg",
+      "sha256": "fdc8378f699b4f7783ea8e881dee2a58caa8d7d785edfd17bb763253bfa80e1b",
+      "capturePage": "ornekler/goksu-parki/?view=map"
+    },
+    {
+      "path": "assets/landing/goksu-analysis.jpg",
+      "sha256": "322d8c4e0e311db9ae79e28ec3687facb77948ad3018dc0388484cc587dc5496",
+      "capturePage": "ornekler/goksu-parki/?view=analysis"
+    },
+    {
+      "path": "assets/landing/goksu-drawing.jpg",
+      "sha256": "6bd8c557e13901df2327744eacef61cc58217fa9ec4ff3bd8a4260197e1c83c1",
+      "capturePage": "ornekler/goksu-parki/?view=drawing"
+    },
+    {
+      "path": "assets/landing/goksu-ndvi.jpg",
+      "sha256": "fb2d11b0e6633f8fc9581ea6d33c92ec5f1d696b696007e2cda2365276d4a67e",
+      "capturePage": "ornekler/goksu-parki/?view=ndvi"
+    },
+    {
+      "path": "assets/landing/goksu-report.jpg",
+      "sha256": "e71cd1bafe0c3a9d337da1c9213144e98b13ce7422ab09c3421fbc5c7bc4b75b",
+      "capturePage": "ornekler/goksu-parki/?view=report"
+    }
+  ]
+}

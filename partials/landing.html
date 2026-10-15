@@ -4,21 +4,10 @@
  <button type="button" class="navtoggle" id="navToggle" aria-expanded="false" aria-controls="navLinks" aria-label="Bölüm menüsü" data-dg-landing-action="nav-toggle">☰</button>
  <div class="links" id="navLinks"><a href="#ozellikler">Yetenekler</a><a href="#sistem">Sistem</a><a href="#yontem">Yöntem</a><a href="#veri">Veri &amp; Harita</a><a href="#istatistik">İstatistik</a><a href="#bilgi-merkezi">Bilgi Merkezi &amp; Kaynaklar</a></div>
  <button type="button" class="btn sm ghost dg-lang-toggle" data-dg-landing-action="toggle-language" aria-label="EN · Switch to English">EN</button>
- <button type="button" class="btn sm" data-dg-landing-action="show-auth">Giriş / Kayıt</button>
+ <button type="button" class="btn sm dg-nav-auth" data-dg-landing-action="show-auth" aria-label="Giriş / Kayıt"><span class="dg-nav-auth-full">Giriş / Kayıt</span><span class="dg-nav-auth-short">Giriş</span></button>
 </div></div>
 
-<div class="hero"><div class="wrap">
- <div class="hero-grid">
-  <div class="hero-copy">
-   <div class="kick"><span class="live-dot"></span>AĞAÇ ENVANTERİ · PARK ANALİZİ · BİLİMSEL VERİ</div>
-   <h1>Ağaçları ölçün, parkları mekânsal verilerle inceleyin.</h1>
-   <p class="lead">DendroGeo; sahadaki ağaç ölçümlerini, allometrik biyokütle ve karbon tahminlerini, park sınırlarını ve arazi örtüsü kanıtlarını ortak bir web GIS çalışma alanında yönetir. Her veri kaynağı ve kullanıcı düzeltmesi kendi kapsamı içinde değerlendirilir.</p>
-   <div style="display:flex;gap:12px;flex-wrap:wrap;margin-top:28px">
-    <a href="#sistem" class="btn">🔬 Sistemi Keşfet</a>
-   <button class="btn ghost" data-dg-landing-action="show-auth" data-dg-auth-mode="reg">🌲 Hemen Başla</button>
-   </div>
-  </div>
-    <div class="hero-art" aria-hidden="true">
+<section class="hero dg-showcase" id="ozellikler" data-dg-showcase aria-label="DendroGeo çalışma alanları" aria-roledescription="carousel"><div class="wrap"><div class="dg-showcase-controls"><div class="dg-showcase-arrow-group"><button type="button" class="btn sm ghost" data-showcase-prev aria-label="Önceki tanıtım slaytı">←</button><span data-showcase-status aria-live="polite" aria-atomic="true">01 / 06</span><button type="button" class="btn sm ghost" data-showcase-next aria-label="Sonraki tanıtım slaytı">→</button></div><nav class="dg-showcase-tabs" aria-label="Tanıtım konusu seçin"><button type="button" data-showcase-index="0" aria-pressed="true"><span>01</span>Ağaç envanteri</button><button type="button" data-showcase-index="1" aria-pressed="false"><span>02</span>Park haritası</button><button type="button" data-showcase-index="2" aria-pressed="false"><span>03</span>Yüzey analizi</button><button type="button" data-showcase-index="3" aria-pressed="false"><span>04</span>Çizim araçları</button><button type="button" data-showcase-index="4" aria-pressed="false"><span>05</span>Göreli NDVI</button><button type="button" data-showcase-index="5" aria-pressed="false"><span>06</span>Raporlama</button></nav></div><div class="dg-showcase-track" data-showcase-track tabindex="0" aria-label="Tanıtım slaytları"><article class="dg-showcase-slide is-active" data-showcase-panel data-showcase-name="tree" aria-label="Ağaç envanteri"><div class="dg-showcase-copy"><div class="kick">AĞAÇ ENVANTERİ · PARK ANALİZİ · BİLİMSEL VERİ</div><h1>Ağaçları ölçün, parkları mekânsal verilerle inceleyin.</h1><p class="lead">DendroGeo; sahadaki ağaç ölçümlerini, allometrik biyokütle ve karbon tahminlerini, park sınırlarını ve arazi örtüsü kanıtlarını ortak bir web GIS çalışma alanında yönetir. Her veri kaynağı ve kullanıcı düzeltmesi kendi kapsamı içinde değerlendirilir.</p><p class="dg-showcase-detail">Saha ölçümü → kalite kontrolü → hesaplama → kayıt</p><div class="dg-showcase-actions"><button type="button" class="btn" data-dg-landing-action="show-auth" data-dg-auth-mode="reg">Çalışmaya başlayın</button><a class="btn ghost" href="#yontem">Bilimsel yöntem</a></div></div><figure class="dg-showcase-media dg-showcase-animation">    <div class="hero-art" aria-hidden="true">
    <svg viewBox="0 0 800 300" fill="none">
     <path d="M0 228 Q200 222 400 226 T800 226" stroke="#9cc39c" stroke-width="3" stroke-linecap="round"/>
     <path d="M20 236 C200 232 400 238 780 234" stroke="#e6e3d9" stroke-width="4" stroke-linecap="round" stroke-dasharray=".5 11"/>
@@ -158,59 +147,15 @@
       </g>
      </g>
     </g>
-   </svg>   </svg>   </svg>   </svg>
+   </svg>
    <div class="chip c1" data-circumference="45"><span style="color:var(--amber)">●</span> DBH 14.3 cm</div>
    <div class="chip c2"><span style="color:var(--green)">●</span> C 40.0 kg</div>
    <div class="chip c3"><span style="color:var(--blue)">●</span> H 13 m</div>
-  </div>
- </div>
-</div></div>
-<section class="landing-capability" id="ozellikler" aria-labelledby="landingCapabilityTitle">
- <div class="wrap">
-  <div class="landing-capability-heading">
-   <div><span class="landing-capability-kicker">DENDROGEO · ÇALIŞMA AKIŞI</span><h2 id="landingCapabilityTitle">Ağaçtan parka, kanıta dayalı analiz</h2>
-    <p>Öne çıkan çalışma alanlarını yatay kaydırarak inceleyin. Kartlar, platformdaki ölçüm ve analiz adımlarını özetler.</p></div>
-   <a class="btn sm ghost" href="#bilgi-merkezi">Yöntem ve kaynakları inceleyin</a>
-  </div>
-  <nav class="landing-capability-tabs" aria-label="DendroGeo çalışma alanları">
-   <a href="#landing-capability-tree">01 · Ağaç ölçümü</a>
-   <a href="#landing-capability-park">02 · Park analizi</a>
-   <a href="#landing-capability-drawing">03 · Sınır çizimi</a>
-   <a href="#landing-capability-ndvi">04 · Göreli NDVI</a>
-  </nav>
-  <div class="landing-capability-track" aria-label="Yatay kaydırılabilir çalışma alanları">
-   <article class="landing-capability-slide" id="landing-capability-tree" tabindex="0" aria-label="Ağaç ölçümü ve karbon tahmini">
-    <div class="landing-capability-copy"><span class="landing-capability-index">01 / SAHA ENVANTERİ</span><h3>Ağaç ölçümü ve karbon tahmini</h3>
-     <p>GPS konumu ve doğruluk bilgisiyle saha kaydı oluşturun. 1,30 m'de ölçülen göğüs çevresi DBH çapına dönüştürülür; boy ve tür/grup bilgisiyle biyokütle ve karbon tahmini hesaplanır.</p>
-     <div class="landing-capability-note"><b>Ölçüm zinciri</b><span>Göğüs çevresi ÷ π → DBH → allometrik tahmin</span></div>
-    </div>
-    <div class="landing-capability-visual tree-visual" aria-hidden="true"><div class="tree-visual-canopy">🌳</div><div class="tree-visual-trunk"></div><div class="tree-visual-tape"><span>1,30 m · göğüs çevresi</span></div><div class="tree-visual-equation">C / π = DBH</div><div class="tree-visual-coordinate">⌖ GPS · saha kaydı</div></div>
-   </article>
-   <article class="landing-capability-slide" id="landing-capability-park" tabindex="0" aria-label="Park ölçeğinde yüzey analizi">
-    <div class="landing-capability-copy"><span class="landing-capability-index">02 / PARK ÖLÇEĞİ</span><h3>Park yüzey analizi</h3>
-     <p>Park poligonu içinde 10 m ESA WorldCover rasterını, uygun güncel Sentinel‑2 görüntülerini ve OSM geometrilerini ayrı kanıt kaynakları olarak inceleyin. Ham raster ile kabul edilmiş son yüzey özeti birbirinden ayrıdır.</p>
-     <div class="landing-capability-note"><b>Yüzey sınıfları</b><span>Yeşil alan · sert zemin · bina · su · çıplak zemin</span></div>
-    </div>
-    <div class="landing-capability-visual park-visual" aria-hidden="true"><div class="park-visual-map"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><b>Park poligonu</b></div><div class="park-visual-source">ESA WorldCover · 10 m</div><div class="park-visual-legend"><span>● Yeşil</span><span>● Sert zemin</span><span>● Su</span></div></div>
-   </article>
-   <article class="landing-capability-slide" id="landing-capability-drawing" tabindex="0" aria-label="Park sınırı çizimi ve düzenleme">
-    <div class="landing-capability-copy"><span class="landing-capability-index">03 / GEOMETRİ DÜZENLEME</span><h3>Park sınırı ve çizim motoru</h3>
-     <p>Harita üzerinde çokgen, dikdörtgen veya daire tabanlı sınır taslakları oluşturun; köşeleri düzenleyin ve park sınırı içindeki alanı inceleyin. Taslak, siz kabul edip kaydedene kadar önizleme olarak kalır.</p>
-     <div class="landing-capability-note"><b>Kontrollü iş akışı</b><span>Çizim · geometri kontrolü · park sınırına kırpma · kullanıcı kararı</span></div>
-    </div>
-    <div class="landing-capability-visual drawing-visual" aria-hidden="true"><svg viewBox="0 0 360 230" role="presentation"><path class="drawing-park" d="M31 42 306 26 331 166 249 205 43 181Z"/><path class="drawing-boundary" d="m82 78 88-23 87 27-20 72-108 14-57-39Z"/><g class="drawing-nodes"><circle cx="82" cy="78" r="6"/><circle cx="170" cy="55" r="6"/><circle cx="257" cy="82" r="6"/><circle cx="237" cy="154" r="6"/><circle cx="129" cy="168" r="6"/><circle cx="72" cy="129" r="6"/></g></svg><div class="drawing-visual-label">Park sınırı içinde düzenlenebilir geometri</div></div>
-   </article>
-   <article class="landing-capability-slide" id="landing-capability-ndvi" tabindex="0" aria-label="Park içi göreceli NDVI görünümü">
-    <div class="landing-capability-copy"><span class="landing-capability-index">04 / UYDU GÖRÜNÜMÜ</span><h3>Park içi göreceli NDVI</h3>
-     <p>Yeterli uydu gözlemi bulunan yeşil hücreleri aynı park içindeki NDVI dağılımına göre seyrek, orta ve yoğun sınıflarda görselleştirin. Bu görünüm bitki örtüsü yoğunluğu için göreceli bir göstergedir; taç örtüsü ölçümü veya ham arazi sınıfı değildir.</p>
-     <div class="landing-capability-note"><b>Yorum sınırı</b><span>Görselleştirme ve inceleme içindir; ham raster sınıfını ve alan hesabını değiştirmez.</span></div>
-    </div>
-    <div class="landing-capability-visual ndvi-visual" aria-hidden="true"><div class="ndvi-visual-title">Park içi göreli dağılım</div><div class="ndvi-visual-map"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div><div class="ndvi-visual-scale"><span>Seyrek</span><i></i><span>Yoğun</span></div><div class="ndvi-visual-source">NDVI · uygun uydu gözlemleri</div></div>
-   </article>
-  </div>
-  <p class="landing-capability-hint">Kartları kaydırın veya yukarıdaki bölüm adlarını seçin. Görselleştirmeler yöntem açıklamasıdır; parkınıza ait analiz sonucu değildir.</p>
- </div>
-</section>
+  </div><figcaption>Ölçüm akışının animasyonu · çevre ÷ π ile türetilen DBH</figcaption></figure></article><article class="dg-showcase-slide" data-showcase-panel data-showcase-name="map" aria-label="PARKIN TAMAMI · KAYITLI GEOMETRİ"><div class="dg-showcase-copy"><div class="kick">PARKIN TAMAMI · KAYITLI GEOMETRİ</div><h2>Parkı, gerçek yüzey kaydı üzerinden inceleyin.</h2><p class="lead">Göksu Parkı’nda yeşil alan, su, sert zemin, bina ve çıplak zemin geometrilerini aynı haritada görün. Bu örnek, 14 Ekim 2026 tarihinde kullanıcı tarafından kabul edilmiş kayıtlı yüzey sonucudur.</p><p class="dg-showcase-detail">Göksu Parkı · Ankara, Türkiye · Revizyon 26</p><div class="dg-showcase-actions"><a class="btn" href="ornekler/goksu-parki/?view=map">Gerçek kaydı inceleyin ↗</a></div></div><figure class="dg-showcase-media"><a href="ornekler/goksu-parki/?view=map" tabindex="-1" aria-hidden="true"><img src="assets/landing/goksu-map.jpg?v=fdc8378f" alt="Göksu Parkı gerçek kayıtlı yüzey geometrileri ve sınıf alanlarını gösteren DendroGeo ekranı" width="1440" height="960" loading="lazy" decoding="async"></a><figcaption><span class="dg-showcase-source-dot"></span>Kullanıcı kabulü · bağımsız doğruluk değerlendirmesi değildir.</figcaption></figure></article>
+<article class="dg-showcase-slide" data-showcase-panel data-showcase-name="analysis" aria-label="PARK ANALİZİ · KAYNAK ŞEFFAFLIĞI"><div class="dg-showcase-copy"><div class="kick">PARK ANALİZİ · KAYNAK ŞEFFAFLIĞI</div><h2>Yüzey sınıflarını, alanları ve kaynaklarıyla değerlendirin.</h2><p class="lead">ESA WorldCover rasterını, Sentinel‑2 gözlemlerini ve OSM bina, yol ve su geometrilerini ayrı kanıt kaynakları olarak kullanın. Kayıtlı sonuçta her sınıfın alanını ve park içindeki payını izleyin.</p><p class="dg-showcase-detail">Gerçek sınıf alanları · 6 kayıtlı Sentinel‑2 sahnesi</p><div class="dg-showcase-actions"><a class="btn" href="ornekler/goksu-parki/?view=analysis">Analiz görünümünü açın ↗</a></div></div><figure class="dg-showcase-media"><a href="ornekler/goksu-parki/?view=analysis" tabindex="-1" aria-hidden="true"><img src="assets/landing/goksu-analysis.jpg?v=322d8c4e" alt="Göksu Parkı yüzey analizinde gerçek sınıf alanları, kaynak ve yöntem bilgileri" width="1440" height="960" loading="lazy" decoding="async"></a><figcaption><span class="dg-showcase-source-dot"></span>14 Ekim 2026 kaydı · ham raster ve kabul edilmiş sonuç ayrıdır.</figcaption></figure></article>
+<article class="dg-showcase-slide" data-showcase-panel data-showcase-name="drawing" aria-label="ÇİZİM MOTORU · GEOMETRİ KONTROLÜ"><div class="dg-showcase-copy"><div class="kick">ÇİZİM MOTORU · GEOMETRİ KONTROLÜ</div><h2>Sınırları, harita üzerinde kontrollü biçimde düzenleyin.</h2><p class="lead">Çokgen, dikdörtgen ve daire araçlarıyla yüzey sınırlarını çizin; köşeleri gözden geçirin ve alanı park sınırına kırpın. Fırça ve sınır kararları, kabul edilene kadar inceleme akışının parçasıdır.</p><p class="dg-showcase-detail">Çokgen · dikdörtgen · daire · park sınırına kırpma</p><div class="dg-showcase-actions"><a class="btn" href="ornekler/goksu-parki/?view=drawing">Çizim araçlarını inceleyin ↗</a></div></div><figure class="dg-showcase-media"><a href="ornekler/goksu-parki/?view=drawing" tabindex="-1" aria-hidden="true"><img src="assets/landing/goksu-drawing.jpg?v=6bd8c557" alt="Gerçek Göksu Parkı haritası üzerinde DendroGeo sınır çizim araçları ve kaydedilmeyen çizim gösterimi" width="1440" height="960" loading="lazy" decoding="async"></a><figcaption><span class="dg-showcase-source-dot"></span>Gerçek harita üzerinde geçici araç gösterimi · kayıt değiştirilmez.</figcaption></figure></article>
+<article class="dg-showcase-slide" data-showcase-panel data-showcase-name="ndvi" aria-label="GÖRELİ NDVI · UYDU GÖZLEMLERİ"><div class="dg-showcase-copy"><div class="kick">GÖRELİ NDVI · UYDU GÖZLEMLERİ</div><h2>Yeşil alanın park içindeki göreli dağılımını inceleyin.</h2><p class="lead">Yeterli açık uydu gözlemi bulunan yeşil hücreleri, park içindeki NDVI dağılımına göre değerlendirin. Seyrek, orta ve yoğun görünümü aynı park içindeki göreli sınıflardır; taç örtüsü ölçümü olarak yorumlanmaz.</p><p class="dg-showcase-detail">Sentinel‑2 L2A · en az 3 ayrı tarihte geçerli gözlem</p><div class="dg-showcase-actions"><a class="btn" href="ornekler/goksu-parki/?view=ndvi">NDVI görünümünü inceleyin ↗</a></div></div><figure class="dg-showcase-media"><a href="ornekler/goksu-parki/?view=ndvi" tabindex="-1" aria-hidden="true"><img src="assets/landing/goksu-ndvi.jpg?v=fb2d11b0" alt="Göksu Parkı NDVI araç görünümü ve gerçek gözlem verisinin kullanılabilirlik durumu" width="1440" height="960" loading="lazy" decoding="async"></a><figcaption><span class="dg-showcase-source-dot"></span>Gösterilen veri ve gözlem durumu, örnek sayfasında açıklanır.</figcaption></figure></article>
+<article class="dg-showcase-slide" data-showcase-panel data-showcase-name="report" aria-label="BİLİMSEL RAPORLAMA · İZLENEBİLİR KAYIT"><div class="dg-showcase-copy"><div class="kick">BİLİMSEL RAPORLAMA · İZLENEBİLİR KAYIT</div><h2>Kayıtlı veriyi, kaynakları görünen bir raporda sunun.</h2><p class="lead">Kabul edilmiş yüzey sonucunu tarih, kaynak ve sınıf alanlarıyla rapor görünümünde inceleyin. DGR yayınları için ayrı kimlik, sürüm ve içerik doğrulama akışı kullanılır. Gösterilen gerçek kayıt önizlemesi henüz yayımlanmış bir DGR raporu değildir.</p><p class="dg-showcase-detail">Göksu Parkı · gerçek veriyle rapor önizlemesi</p><div class="dg-showcase-actions"><a class="btn" href="ornekler/goksu-parki/?view=report">Rapor önizlemesini açın ↗</a><a class="btn ghost" href="rapor/">Yayın dizini</a></div></div><figure class="dg-showcase-media"><a href="ornekler/goksu-parki/?view=report" tabindex="-1" aria-hidden="true"><img src="assets/landing/goksu-report.jpg?v=e71cd1ba" alt="Gerçek Göksu Parkı yüzey kaydının yayımlanmamış rapor önizlemesi" width="1440" height="960" loading="lazy" decoding="async"></a><figcaption><span class="dg-showcase-source-dot"></span>Yayın durumu açıkça belirtilir · aktif raporlar yayın dizinindedir.</figcaption></figure></article></div><p class="dg-showcase-caption">Kaydırın, okları kullanın veya bir konu seçin. Harita ve rapor görselleri gerçek kayıtların salt okunur gösterimleridir.</p></div></section>
 <section class="blk" id="sistem"><div class="wrap">
  <div class="shead"><span class="no">01</span><h2>Sistemin Üç Temel Direği</h2><span class="rule"></span></div>
 <div class="cols cols-3">
