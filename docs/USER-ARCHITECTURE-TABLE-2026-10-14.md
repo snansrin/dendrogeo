@@ -31,6 +31,27 @@ Kapsam: 14 Ekim 2026'da eklenen 16 satırlı kullanıcı tablosu. Önceki r427 k
 
 ## Yayın kabulü
 
-UI/SQL odaklı testler ve yerel erişilebilirlik geçti. Tam release, PR CI/Mobile/GIS, canlı r428 ve migration katalog doğrulaması son kabul kapılarıdır. Bu kapılar geçmeden tablonun tamamı bitmiş olarak bildirilmez.
+UI/SQL odaklı testler ve yerel erişilebilirlik geçti. 15 Ekim'de tam yerel release kapısı da tekrar çalıştırıldı; PR CI run'ı ve canlı saha kabulü ayrı doğrulama adımlarıdır. Bu kapılar geçmeden tablonun tamamı bitmiş olarak bildirilmez.
 
 Canlı migration `20261014201828_measurement_protocol_guard` uygulandı. RLS aktif kaldı; politika checksum’ı önce/sonra `0bdf1e3fc7610f12ef1565c12a1f7a3a`; dört eski trigger korundu, yalnız yeni protocol trigger eklendi. Kullanıcı satırı yazılmadan saf DB dönüşümü ve katalog doğrulandı.
+
+## 15 Ekim 2026 satır satır yeniden kabul
+
+`npm run check:release` bu çalışma ağacında başarıyla tamamlandı. AST katman kontrolü 802 domain/application/UI modülünü, bağımlılık kontrolü 938 modülü, runtime ve çevrimdışı zinciri 992 modülü (616 kritik hash kilidiyle), sözdizimi kontrolü 999 JavaScript dosyasını denetledi. HTML partial'larında satır içi olay niteliği yok; üretilen HTML'de 40 dosyaya yayılmış 147 handler niteliği mevcut ve bu sayı CI'de artamaz. Bu handler'lar ve büyük eski servis/facade dosyaları temizlenmiş değildir.
+
+Mobil Chromium akışları 360/390/430 px genişliklerinde giriş, OAuth, anonim açılış, fırça (fare/dokunma), çizim araçları, park sınırı/OSM kurtarma ve taşma kontrolünü geçti; çizim sınırı 1280 px'te de geçti. Erişilebilirlik akışı 13 görünümü üç telefon genişliğinde taradı; otomatik erişilebilirlik, klavye switch'i, görünür odak ve slider uçları geçti. Bunlar yerel otomatik kabul kanıtlarıdır; canlı kullanıcılarla saha kabulünün yerine geçmez.
+
+### Güncel 16 satırın durumu
+
+| Satır | 15 Ekim sonucu | Açık kalan kabul şartı |
+|---|---|---|
+| Proje/veri kuralları; ölçüm formu | Yerel kabul geçti: `girth_cm` ham veri, tam hassasiyetli DBH ve salt-okunur 1 ondalık görünüm testli. | Yok; canlı saha kaydı yazılmadı. |
+| Paket/build/CI; rapor/yayın | Yerel release kapısı geçti; PR ve yayın iş akışları `check:release` kapılı. | Önceki push'un güncel GitHub Actions durumu bu oturumdaki commit için alınamadı; yerel başarı CI run'ı sayılmaz. |
+| UI modülleri; yüzey/core; tema ve kontroller | Katman/bağımlılık/çekirdek/hash/yükleme kapıları geçti; yüzey önizlemesinin kabul edilmiş veri ve ham alanı değiştirmediği testli. Switch, range, renk ve form kuralları tarandı. | 147 üretilen HTML handler'ı ve büyük legacy facade/controller'lar açık teknik borç. |
+| Canlı konum ve gizlilik | Canlı Supabase katalog sorgusunda `realtime.messages` için **0 RLS politikası** bulundu; iki Presence adapter'ı da `private: true` kullanmıyor. Mevcut yayın bu kanal yetkilendirmesini sunucu tarafında kanıtlamıyor. | Gerçek kurucu/normal kullanıcı/anonim istemciyle çapraz park okuma-yazma testleri yapılmalı; Realtime private-channel/RLS geçişi bu kanıt olmadan uygulanmamalı. |
+| Supabase şema/migrations | Ölçüm protokol migration'ı ve ölçüm SQL kontratı daha önce canlı katalog + izole PostgreSQL'de doğrulanmış; bu çalışma `realtime.messages` politikalarını salt-okunur sorguladı. | Canlı ölçüm/protokol katalog kontrolü bu turda yeniden koşulmadı. Advisor ayrıca `dg_archive.measurements_bak_0011` için politikasız RLS (arşiv tablosuna erişim kapalı), 4 imtiyazlı park davet RPC'si uyarısı ve kapalı sızmış-parola koruması bildirdi. RPC'ler admin/sahip/kimlik kapılarını içeriyor; advisor bulgusu tek başına yetki aşımı kanıtı değildir. |
+| Test/regresyon ve erişilebilirlik | `check:release` tamamen geçti; gerçek Chromium yerel smoke testleri ve klavye/axe kontrolleri dahil. | Manuel ekran okuyucu ve gerçek saha/cihaz kabulü otomatik testin kapsamı dışındadır. |
+| Map/GIS/export | Modül ve regresyon testleri, OSM kurtarma ve PNG/GeoJSON sözleşmeleri geçti. | Harici OSM/uydu kaynakları ve gerçek park başına canlı bilimsel doğruluk garanti edilemez; saha QA gerekir. |
+| Dokümantasyon/kaynak doğrusu | README UI checklist ve bu kabul tablosu güncel kanıt/sınırlamalarla eşlendi. | Bütün mimari teknik borcun sıfır olduğu iddia edilmez. |
+
+Supabase Realtime yetkilendirmesi politika ve istemcide `private: true` birlikte gerektirir; ayar kapalıysa mevcut public channel istemcileri reddedilir. Realtime ayarı ve gerçek kullanıcı oturumları olmadan güvenli geçişi doğrulamak mümkün değildir. Resmî gereksinimler: [Realtime Authorization](https://supabase.com/docs/guides/realtime/authorization), [Realtime Settings](https://supabase.com/docs/guides/realtime/settings).
