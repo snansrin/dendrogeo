@@ -66,7 +66,7 @@ test('campaign selector enforces owner and fingerprint when migrating the legacy
 test('validation campaign modules load before lc-validate, are precached and back service/UI delegation',()=>{
   const chain=read('src/utils/lazylibs.js'),sw=read('sw.js'),service=read('src/services/lc-validate.js'),ui=read('src/ui/lc-sens.js'),serviceIndex=chain.indexOf('"src/services/lc-validate.js"'),uiIndex=chain.indexOf('"src/ui/lc-sens.js"');
   for(const path of modules){const index=chain.indexOf('"'+path+'"');assert.ok(index>=0&&index<serviceIndex,`${path} load order`);assert.ok(sw.includes(`'/${path}'`),`${path} precache`);}
-  assert.ok(service.includes('DG_VAL_CAMPAIGN_ARCHIVE.saveCampaign(campaign)'));assert.ok(service.includes('async function dgValSaveCampaign(campaign)'));
+  assert.ok(service.includes('DG_VAL_CAMPAIGN_ARCHIVE.saveCampaign(campaign)'));assert.ok(service.includes('function dgValSaveCampaign(campaign)'));
   assert.ok(ui.includes('DG_VALIDATION_CAMPAIGN_SAVE_QUEUE.create()'));assert.ok(ui.includes('DG_SELECT_VALIDATION_CAMPAIGN.select'));
   assert.ok(chain.indexOf('"src/ui/lc-sens.js"')===uiIndex&&uiIndex>serviceIndex);
 });

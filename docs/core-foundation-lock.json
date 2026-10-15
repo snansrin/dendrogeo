@@ -6908,6 +6908,84 @@
           "sha256": "cd32192b07c6081c2fddd271a352b0b1d4069795989575b21adaa3269548db56"
         }
       ]
+    },
+    {
+      "date": "2026-10-15",
+      "scope": "User-authorized surface-validation facade cleanup: remove duplicate scientific algorithm and persistence fallbacks; retain DG_LC_VALIDATE compatibility API and load domain/application/adapter modules first.",
+      "audit_chain": "sha256-v1",
+      "files": [
+        {
+          "path": "index.html",
+          "previous_sha256": "d3154b4d11ac42fed12845744405a3ddbd03c538c93c811cd6f0639fb365121a",
+          "sha256": "0c007db1bbe888164ea1de747744203b80ff140db12bb8ca9e1d4bb6b875cf37"
+        },
+        {
+          "path": "scripts/test-harness.mjs",
+          "previous_sha256": "c9332ad42bbef8f1392d32c0cf6cdf9b343716c873155a70a04e5ef4db6098d7",
+          "sha256": "ed7a987a55cc854216e645ae67a048a60da1b5b320060fc50f92f1309c11fe5e"
+        },
+        {
+          "path": "src/services/lc-validate.js",
+          "previous_sha256": "b4d8327c62940b1af1a53ddb087188816ff2359c8456c2755c7c853c5919f42b",
+          "sha256": "7275b8642c6080cb6562b30b58cd4e9aeb68f7eb35355692c7b3a88c35c892d8"
+        },
+        {
+          "path": "test/lc-validate.test.mjs",
+          "previous_sha256": "f18c72c26d30d198577f4c0c7bab3aa96051144c774280285d089ce779ac1f87",
+          "sha256": "d7696fbfc643b0a6e782a9cb29de0f8c7581c9bcc9b86e5be3771650e4468df3"
+        }
+      ]
+    },
+    {
+      "date": "2026-10-15",
+      "scope": "User-authorized validation facade integration: preserve optional service initialization for isolated legacy consumers while requiring delegating validation modules for calculation and campaign features; update integration harnesses to load dependencies.",
+      "audit_chain": "sha256-v1",
+      "files": [
+        {
+          "path": "src/services/lc-validate.js",
+          "previous_sha256": "7275b8642c6080cb6562b30b58cd4e9aeb68f7eb35355692c7b3a88c35c892d8",
+          "sha256": "8ba71722dd215837d916ee9ad115e97ddf187662aa88bcedeed15ad81a9df837"
+        },
+        {
+          "path": "test/lc-validation-campaign-export-modules.test.mjs",
+          "previous_sha256": "568a76922fbe715e71f0d828a56aa9ab11c32a5ef47b4c360a89b513d3f89af1",
+          "sha256": "7a2109811419319126cd6bc9aa853860e4efdbbc35a6b072a24da8ce250d6159"
+        },
+        {
+          "path": "test/surface-review.test.mjs",
+          "previous_sha256": "4208d2ae0eda99846c6de7f6c195e984a22ea1bd02b0a72099861b676040e8eb",
+          "sha256": "15d496e08578878ae86b762afb5a793ecfed1f78faf3197654b34736b5af902a"
+        },
+        {
+          "path": "test/verified-water-footprint.test.mjs",
+          "previous_sha256": "42de1bc1fa91998c7de9447ca14d93718916b16242beb73c8f56a073db1cc52d",
+          "sha256": "034f1fc60ee1b92db55e5afc820eb8910de9004545dba900ba6e465822c3dbd1"
+        }
+      ]
+    },
+    {
+      "date": "2026-10-15",
+      "scope": "User-authorized modularization: regenerate the source-built classic-script entry after validation facade delegation; preserve declared script order and lazy/offline integration.",
+      "audit_chain": "sha256-v1",
+      "files": [
+        {
+          "path": "index.html",
+          "previous_sha256": "0c007db1bbe888164ea1de747744203b80ff140db12bb8ca9e1d4bb6b875cf37",
+          "sha256": "4ca21600a33dd5d6c4b26604134e751b01d0a94fd6e41788e1557a3daceef17d"
+        }
+      ]
+    },
+    {
+      "date": "2026-10-15",
+      "scope": "User-authorized modularization: align park identity regression assertions with the extracted pending-comparison UI module while preserving runtime behavior.",
+      "audit_chain": "sha256-v1",
+      "files": [
+        {
+          "path": "test/park-identity.test.mjs",
+          "previous_sha256": "e73ac7d1fc4406a2d6626eaaf7c37de93a0d88f14ad65128e931ede557568656",
+          "sha256": "833653621e80281dce5f43ad873855ae4f601a8af8c8502cc43c143c7f54b731"
+        }
+      ]
     }
   ]
 }

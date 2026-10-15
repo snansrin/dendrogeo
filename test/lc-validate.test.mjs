@@ -26,6 +26,23 @@ const app = loadApp({ sadece: ['src/config/constants.js', 'src/utils/geo.js',
   'src/adapters/surface/process-landcover-tile.js',
   'src/services/lc-engine.js',
   'src/services/lc-osm.js', 'src/domain/surface/patch-geometry.js', 'src/domain/surface/group-patch-cells.js', 'src/domain/surface/measure-patch-components.js', 'src/domain/surface/query-green-patches.js', 'src/services/lc-patches.js',
+  'src/domain/surface/validation-sampling.js',
+  'src/domain/surface/build-validation-confusion-matrix.js',
+  'src/domain/surface/build-validation-stratum-weights.js',
+  'src/domain/surface/calculate-validation-class-proportions.js',
+  'src/domain/surface/calculate-validation-area-estimates.js',
+  'src/domain/surface/calculate-validation-class-accuracy.js',
+  'src/domain/surface/validation-accuracy-metrics.js',
+  'src/domain/surface/validation-spectral-rules.js',
+  'src/application/surface/build-validation-agreement.js',
+  'src/domain/surface/build-validation-campaign-csv-rows.js',
+  'src/application/surface/serialize-validation-campaign-csv.js',
+  'src/application/surface/serialize-validation-campaign-json.js',
+  'src/domain/surface/apply-validation-campaign-corrections.js',
+  'src/domain/surface/build-validation-corrected-geojson.js',
+  'src/application/surface/serialize-validation-campaign.js',
+  'src/adapters/surface/validation-campaign-store.js',
+  'src/application/surface/validation-campaign-archive.js',
   'src/services/lc-validate.js', 'src/services/lc-s2.js',
   'src/ui/lc-report.js', 'src/services/landcover.js'] });
 const {
@@ -592,6 +609,18 @@ describe('entegrasyon zinciri kilitleri (0054 · lc-sens)', () => {
   const i18n = rd('src/config/i18n-en.js') + '\n' + rd('src/config/i18n.js');
   const sens = rd('src/ui/lc-sens.js');
   const css = rd('css/park-panel.css');
+
+  test('legacy validation service is a facade; domain calculations and IndexedDB remain single-owned', () => {
+    const facade=rd('src/services/lc-validate.js');
+    assert.match(facade,/DG_VALIDATION_SAMPLING\.stratified/);
+    assert.match(facade,/DG_VALIDATION_ACCURACY_METRICS\.metrics/);
+    assert.match(facade,/DG_VALIDATION_SPECTRAL_RULES\.predict/);
+    assert.match(facade,/DG_BUILD_VALIDATION_AGREEMENT\.agreement/);
+    assert.match(facade,/DG_SERIALIZE_VALIDATION_CAMPAIGN\.correctedGeoJson/);
+    assert.match(facade,/DG_VAL_CAMPAIGN_ARCHIVE\.saveCampaign/);
+    assert.doesNotMatch(facade,/if\(window\.DG_VALIDATION_(?:SAMPLING|ACCURACY_METRICS|SPECTRAL_RULES)/);
+    assert.doesNotMatch(facade,/indexedDB\.open\(/);
+  });
 
   test('⭐ zincir sırası: validate → s2 → lc-report → lc-sens → facade', () => {
     const idx = ['src/services/lc-validate.js', 'src/services/lc-s2.js',

@@ -134,24 +134,29 @@ export function loadApp({ sadece } = {}) {
     'src/adapters/surface/project-surface-review-feature-geometry.js',
     'src/application/surface/build-surface-review-summary.js',
     'src/services/lc-patches.js',
-    /* UYDU HASSASİYET (0054): validate çekirdeği saf matematiktir (eşikler,
-     * hassasiyet, Olofsson metrikleri, düzeltme katmanı) — birim testleri
-     * buradan yüklenir. lc-s2 ağ/GeoTIFF katmanıdır; sabitleri ve saf
-     * yardımcıları (dgS2Median, dgS2SeasonRange) test edilir.
+    /* UYDU HASSASİYET (0054): validation domain/application/adapter
+     * modülleri legacy lc-validate facade'ından önce yüklenir. lc-s2
+     * ağ/GeoTIFF katmanıdır; sabitleri ve saf yardımcıları
+     * (dgS2Median, dgS2SeasonRange) test edilir.
      * ui/lc-sens BİLEREK yok (DOM'a yapışır; park-panel gibi statik
      * denetimden geçer). */
+    'src/domain/surface/validation-sampling.js',
     'src/domain/surface/build-validation-confusion-matrix.js',
     'src/domain/surface/build-validation-stratum-weights.js',
     'src/domain/surface/calculate-validation-class-proportions.js',
     'src/domain/surface/calculate-validation-area-estimates.js',
     'src/domain/surface/calculate-validation-class-accuracy.js',
     'src/domain/surface/validation-accuracy-metrics.js',
+    'src/domain/surface/validation-spectral-rules.js',
+    'src/application/surface/build-validation-agreement.js',
     'src/domain/surface/build-validation-campaign-csv-rows.js',
     'src/application/surface/serialize-validation-campaign-csv.js',
     'src/application/surface/serialize-validation-campaign-json.js',
     'src/domain/surface/apply-validation-campaign-corrections.js',
     'src/domain/surface/build-validation-corrected-geojson.js',
     'src/application/surface/serialize-validation-campaign.js',
+    'src/adapters/surface/validation-campaign-store.js',
+    'src/application/surface/validation-campaign-archive.js',
     'src/services/lc-validate.js',
     'src/domain/surface/build-sentinel-profile-bbox.js',
     'src/domain/surface/select-sentinel-profile-epsg.js',

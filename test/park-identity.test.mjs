@@ -564,7 +564,7 @@ describe('akış: karşılaştırma park bazlı, ölçüm kapalı, park kaydedil
 
   test('karşılaştırma park_pending kayıtlarını AYRI bölümde tutar (veri kaybolmaz)', () => {
     assert.match(world, /dgPendingParksHTML/);
-    assert.match(world, /PARK ALGILANMAMIŞ KAYITLAR/);
+    assert.match(readFileSync(join(ROOT, 'src/ui/park-comparison-pending.js'), 'utf8'), /PARK ALGILANMAMIŞ KAYITLAR/);
   });
 
   test('şema eskiyse proje bazlı yedeğe düşer + migration’ı söyler', () => {

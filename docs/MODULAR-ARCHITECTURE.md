@@ -978,7 +978,7 @@ Her modülün tek bir dış API'si, sahibi olduğu açık durumu ve kendi testle
 - `application/surface/serialize-validation-campaign.js`, kampanyayı CSV/JSON'a aktarır ve insan kararlarından doğrulanmış alan/GeoJSON üretir.
 - CSV satır modeli `domain/surface/build-validation-campaign-csv-rows.js` içinde kurulur; BOM/yeni satır biçimini `application/surface/serialize-validation-campaign-csv.js` korur. JSON şema biçimi ayrı `serialize-validation-campaign-json.js` modülündedir.
 - `domain/surface/apply-validation-campaign-corrections.js` sınıf alanı geçişlerini, `build-validation-corrected-geojson.js` ise insan kararları ve spektral bulgular için denetim özelliklerini üretir.
-- `services/lc-validate.js`, dış global API'yi ve IndexedDB kampanya kalıcılığını koruyan uyumluluk adapter'ıdır; modüller lazy zincirde ve service-worker precache'te ondan önce yüklenir.
+- `services/lc-validate.js`, eski `DG_LC_VALIDATE` API'si ve bilimsel politika sabitlerini sunan uyumluluk facade'ıdır; örnekleme/metrik/sınıflandırma `domain/surface`, uzlaşma ve serileştirme `application/surface`, kampanya saklama `adapters/surface` sahipliğindedir. Modüller lazy zincirde ve Service Worker precache'te facade'dan önce yüklenir.
 
 ## Sentinel-2 kanıt modülleri — 13 Ekim 2026
 
@@ -1049,7 +1049,7 @@ Her modülün tek bir dış API'si, sahibi olduğu açık durumu ve kendi testle
 - `adapters/surface/validation-campaign-store.js`, `DendroGeoValidate` IndexedDB veritabanının `campaigns` object store işlemlerini ve park kapsamlı okumayı taşır.
 - `application/surface/validation-campaign-archive.js`, servis API'sini adapter üzerinden kurar; `validation-campaign-save-queue.js` başarısız kayıt sonrasında da yerel taslak sırasını sürdürür.
 - `application/surface/handle-validation-campaign-save-failure.js`, yalnız hâlâ etkin kampanyanın cihaz yazma hatasını gösterir.
-- `domain/surface/select-validation-campaign.js`, owner ve fingerprint eşleşmesiyle geçerli park kampanyasını veya taşınabilir eski cihaz taslağını seçer. `lc-validate.js` eski global API ve bağımsız bilimsel hesapları korur.
+- `domain/surface/select-validation-campaign.js`, owner ve fingerprint eşleşmesiyle geçerli park kampanyasını veya taşınabilir eski cihaz taslağını seçer. `lc-validate.js` eski global API'yi korur ve hesaplama/kalıcılık yedeği taşımaz; modül eksik yüklenirse ilgili sahip API'de net hata alınır.
 
 ## LULC yüzey fırçası — 13 Ekim 2026
 

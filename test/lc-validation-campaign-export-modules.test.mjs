@@ -5,6 +5,7 @@ import {loadApp} from '../scripts/test-harness.mjs';
 
 const read=path=>readFileSync(new URL('../'+path,import.meta.url),'utf8');
 const modules=[
+  'src/domain/surface/validation-spectral-rules.js',
   'src/domain/surface/build-validation-campaign-csv-rows.js',
   'src/application/surface/serialize-validation-campaign-csv.js',
   'src/application/surface/serialize-validation-campaign-json.js',
@@ -14,7 +15,7 @@ const modules=[
 const same=(actual,expected)=>assert.equal(JSON.stringify(actual),JSON.stringify(expected));
 
 test('campaign export and adjudication modules preserve the compatibility API',()=>{
-  const legacy=loadApp({sadece:['src/application/surface/serialize-validation-campaign.js','src/services/lc-validate.js']}).DG_LC_VALIDATE;
+  const legacy=loadApp({sadece:[...modules,'src/application/surface/serialize-validation-campaign.js','src/services/lc-validate.js']}).DG_LC_VALIDATE;
   const current=loadApp({sadece:[...modules,'src/application/surface/serialize-validation-campaign.js','src/services/lc-validate.js']}).DG_LC_VALIDATE;
   const campaign={id:'c-1',parkName:'Park "A"',parkId:'p1',seed:42,engineVersion:'3.0',createdAt:'2026-10-13',samples:[{id:'S001',lat:41.1,lon:29.1,row:2,col:3,mapClass:'green',refClass:'water',areaM2:100}],spectral:{cells:{'2:3':{ndvi:.4567,mndwi:.1,ndbi:-.2,mndwiMaxYear:.6,ndviMax:.7,predict:'water'}}},metrics:{n:1,nAmbiguous:0,oa:.8,oaCi95:.1,kappa:.5,perClass:{green:{n:1,correct:0,ua:0,uaCi95:.1,pa:.2,adjustedAreaHa:1,adjustedCi95Ha:.3,weight:.4}}},gate:{state:'REVIEW',label:'review',reasons:['verify']},corrections:{'2:3':{from:'green',to:'water',ts:'today'}},rasterAreas:{green:100,water:0},correctedAreas:{green:0,water:100}};
   const classes=['green','water','hard','bare'];
