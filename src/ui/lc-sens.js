@@ -24,28 +24,11 @@ function dgSensParkId(){try{if(typeof DG_PARK!=="undefined"&&DG_PARK?.id)return{
 function dgSensCells(){return typeof DG_LC_LAST!=="undefined"&&Array.isArray(DG_LC_LAST?.result?.cells)?DG_LC_LAST.result.cells:null;}
 function dgSensGroupAreas(){return typeof DG_LC_LAST!=="undefined"?DG_LC_LAST?.result?.groupAreas||{}:{};}
 function dgSensEditSummary(rec=DG_SENS.record,cells=dgSensCells()||[]){
- const module=window.DG_SUMMARIZE_SURFACE_EDIT_IMPACT;if(module)return module.summarize({record:rec,currentRecord:DG_SENS.record,cells,rawView:DG_SENS.rawView,classes:DG_SENS_CLASSES,cellKey:dgSensCellKey,effective:dgSensEffective});
- if(DG_SENS.rawView||!rec)return{total:0,manualCells:0,sensitivityCells:0,boundaries:0,thresholds:0,appearance:0};
- const manualCells=Object.values(rec.corrections||{}).filter(d=>d.method==="visual-cell").length;
- const sensitivityCells=cells.filter(c=>{const d=rec.corrections?.[dgSensCellKey(c)];if(d?.method==="visual-cell")return false;const type=rec===DG_SENS.record?dgSensEffective(c):(d?.to||c.rasterClassKey||c.classKey);return type!==(c.rasterClassKey||c.classKey);}).length;
- const boundaries=(rec.features||[]).length,thresholds=DG_SENS_CLASSES.filter(k=>Number(rec.sens?.[k]??50)!==50).length,appearance=Number(rec.displayOpacity??45)!==45?1:0;
- return{manualCells,sensitivityCells,boundaries,thresholds,appearance,total:manualCells+sensitivityCells+boundaries+thresholds+appearance};
+ return window.DG_SUMMARIZE_SURFACE_EDIT_IMPACT.summarize({record:rec,currentRecord:DG_SENS.record,cells,rawView:DG_SENS.rawView,classes:DG_SENS_CLASSES,cellKey:dgSensCellKey,effective:dgSensEffective});
 }
 function dgSensMeta(k){return window.DG_LC_VALIDATE?.labels?.[k]||{tr:window.DG_SURFACE_REVIEW?.types?.[k]?.label||k,emoji:""};}
 function dgSensScanAudit(rec=DG_SENS.record){
- const module=window.DG_CLASSIFY_SURFACE_SCAN_AUDIT;if(module)return module.build({cells:dgSensCells()||[],profile:rec?.profile,classes:DG_SENS_CLASSES,cellKey:dgSensCellKey,spectralPredict:(e,s)=>window.DG_LC_VALIDATE.spectralPredict(e,s)});
- const cells=dgSensCells()||[],profile=rec?.profile;if(!profile?.cells)return null;
- const classes=DG_SENS_CLASSES,transitions=new Map();let usable=0,matched=0,ambiguous=0,missing=0;
- for(const cell of cells){
-  const e=profile.cells[dgSensCellKey(cell)];if(!e){missing++;continue;}
-  const prediction=window.DG_LC_VALIDATE.spectralPredict(e,{green:50,water:50,hard:50,bare:50});
-  if(prediction==="nodata"){missing++;continue;}if(!classes.includes(prediction)){ambiguous++;continue;}
-  const original=classes.includes(cell.rasterClassKey||cell.classKey)?(cell.rasterClassKey||cell.classKey):"other";
-  usable++;if(original===prediction)matched++;
-  const pair=original+"→"+prediction,entry=transitions.get(pair)||{from:original,to:prediction,cells:0,areaM2:0};entry.cells++;entry.areaM2+=Number(cell.areaM2)||0;transitions.set(pair,entry);
- }
- const scenes=(profile.scenes||[]).filter(s=>Number(s.usedCells)>0).sort((a,b)=>String(a.datetime).localeCompare(String(b.datetime)));
- return{total:cells.length,profiled:Number(profile.stats?.nProfiled)||0,usable,matched,ambiguous,missing,transitions:[...transitions.values()].filter(x=>x.from!==x.to).sort((a,b)=>b.areaM2-a.areaM2),scenes,skipped:(profile.skipped||[]).length,range:profile.range||null};
+ return window.DG_CLASSIFY_SURFACE_SCAN_AUDIT.build({cells:dgSensCells()||[],profile:rec?.profile,classes:DG_SENS_CLASSES,cellKey:dgSensCellKey,spectralPredict:(e,s)=>window.DG_LC_VALIDATE.spectralPredict(e,s)});
 }
 function dgSensScanAuditHtml(rec=DG_SENS.record){
  const module=window.DG_RENDER_SURFACE_SCAN_AUDIT;if(module)return module.render({audit:dgSensScanAudit(rec),translate:_tvs,escape:esc,meta:dgSensMeta,hectares:dgSensHa,sectionsOpen:DG_SENS.sections?.dgSensEvidenceDetails});
@@ -59,23 +42,7 @@ function dgSensScanAuditHtml(rec=DG_SENS.record){
  * green class. They are a display aid, not canopy cover, a new raster class,
  * or an area adjustment. Require three distinct observations per cell. */
 function dgSensVegetationTiers(){
- const module=window.DG_CLASSIFY_SURFACE_VEGETATION_TIERS;if(module)return module.build({cells:dgSensCells()||[],profile:DG_SENS.record?.profile?.cells,cellKey:dgSensCellKey,effectiveClass:dgSensEffective});
- const cells=dgSensCells()||[],profile=DG_SENS.record?.profile?.cells;
- if(!profile)return{tiers:new Map(),count:0,eligible:0,cutoffs:null};
- const candidates=[];
- for(const cell of cells){
-  if(dgSensEffective(cell)!=="green")continue;
-  const e=profile[dgSensCellKey(cell)],value=e?.ndviMedianYear==null?NaN:Number(e.ndviMedianYear),obs=Number(e?.ndviObs??e?.yearObs??e?.obs??0);
-  if(Number.isFinite(value)&&obs>=3)candidates.push({key:dgSensCellKey(cell),value});
- }
- candidates.sort((a,b)=>a.value-b.value||a.key.localeCompare(b.key));
- const tiers=new Map(),n=candidates.length;let cutoffs=null;
- if(n>=9){
-  const quantile=q=>{const at=(n-1)*q,lo=Math.floor(at),hi=Math.ceil(at);return candidates[lo].value+(candidates[hi].value-candidates[lo].value)*(at-lo);};
-  cutoffs=[quantile(1/3),quantile(2/3)];
-  for(const item of candidates)tiers.set(item.key,item.value<=cutoffs[0]?"sparse":item.value<=cutoffs[1]?"moderate":"dense");
- }
- return{tiers,count:n,eligible:cells.filter(c=>dgSensEffective(c)==="green").length,cutoffs};
+ return window.DG_CLASSIFY_SURFACE_VEGETATION_TIERS.build({cells:dgSensCells()||[],profile:DG_SENS.record?.profile?.cells,cellKey:dgSensCellKey,effectiveClass:dgSensEffective});
 }
 function dgSensToggleVegetation(on){DG_SENS.vegetationView=!!on;DG_SENS.vegetationRenderKey=null;DG_SENS.vegetationLayer?.clearLayers();dgSensRefreshLayer();dgSensUpdateSummary();dgSensRenderPaintTools();}
 async function dgSensRenderVegetation(){
@@ -85,8 +52,7 @@ async function dgSensRenderVegetation(){
  if(DG_SENS.vegetationRenderKey===key||DG_SENS.vegetationRenderBusy)return;
  DG_SENS.vegetationRenderBusy=true;const epoch=DG_SENS.epoch;
  try{
-  const cells=dgSensCells()||[],parts=window.DG_BUILD_SURFACE_VEGETATION_PARTS?window.DG_BUILD_SURFACE_VEGETATION_PARTS.build({cells,tiers:result.tiers,geometry:DG_SENS.geometry,cellKey:dgSensCellKey}):[];
-  if(!window.DG_BUILD_SURFACE_VEGETATION_PARTS)for(const c of cells){const tier=result.tiers.get(dgSensCellKey(c)),geom=DG_SENS.geometry[dgSensCellKey(c)];if(tier&&geom?.length)parts.push({type:tier,geom,areaM2:Number(c.areaM2)||0});}
+  const cells=dgSensCells()||[],parts=window.DG_BUILD_SURFACE_VEGETATION_PARTS.build({cells,tiers:result.tiers,geometry:DG_SENS.geometry,cellKey:dgSensCellKey});
   const job=await dgSurfaceWorkerJob({job:"merge",parts,epsg:DG_SENS.epsg,display:true,park:DG_SENS.parkGeometry});
   if(epoch!==DG_SENS.epoch||!DG_SENS.vegetationView||key!==[DG_SENS.epoch,DG_SENS.partitionVersion,DG_SENS.visualVersion,result.count,DG_SENS.vegetationView].join(":"))return;
   const features=job?.displayFeatures||dgSurfaceDisplaySync(parts,DG_SENS.epsg,DG_SENS.parkGeometry,job?.features||dgSurfaceMergeSync(parts,DG_SENS.epsg));

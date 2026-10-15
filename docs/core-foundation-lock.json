@@ -7008,6 +7008,35 @@
           "sha256": "323a162c325ad9c53eaf8da35b96e2a58bf43fbbca3c60f39efa1bdbaba07a5f"
         }
       ]
+    },
+    {
+      "date": "2026-10-15",
+      "scope": "User-authorized modularization: delegate surface edit summaries, scan audit, vegetation tiers and vegetation geometry entirely to their domain modules; verify with module-backed review fixtures.",
+      "audit_chain": "sha256-v1",
+      "files": [
+        {
+          "path": "src/ui/lc-sens.js",
+          "previous_sha256": "5ba55c434d412555eeb0e92acfa69a116840a0ccbe2e0733a71f563440c179aa",
+          "sha256": "6f2283211abc8ebd86ef4c427fd3565e38deeade4e59d0eaa1565a6d4cf2c8f3"
+        },
+        {
+          "path": "test/surface-review.test.mjs",
+          "previous_sha256": "323a162c325ad9c53eaf8da35b96e2a58bf43fbbca3c60f39efa1bdbaba07a5f",
+          "sha256": "c8c15a75cf4ec9ba78f940d031618edbd6d7d39da4ac80e0c95d9da1d8e3d22f"
+        }
+      ]
+    },
+    {
+      "date": "2026-10-15",
+      "scope": "User-authorized modularization: regenerate the classic-script shell after surface UI facade delegation and synchronize lazy runtime fingerprints.",
+      "audit_chain": "sha256-v1",
+      "files": [
+        {
+          "path": "index.html",
+          "previous_sha256": "883a1d3de459e388816793b17829871bbab079478525bea199cdb9dc22d626da",
+          "sha256": "df69315b07ccc45a2ee9c40492c44d8ce769e58b00fd5c5067f834277bce051b"
+        }
+      ]
     }
   ]
 }
