@@ -4,7 +4,7 @@ import {readFileSync} from 'node:fs';
 import vm from 'node:vm';
 const read=path=>readFileSync(new URL('../'+path,import.meta.url),'utf8');
 const queryPath='src/domain/parks/build-osm-surface-query.js',fetchPath='src/application/parks/fetch-detailed-coverage.js';
-function env(paths){const window={},context=vm.createContext({window,Date,Map,AbortController,setTimeout,clearTimeout,encodeURIComponent});for(const path of paths)vm.runInContext(read(path),context);return window;}
+function env(paths){const window={},context=vm.createContext({window,Date,Map,AbortController,setTimeout,clearTimeout,encodeURIComponent});for(const path of ['src/adapters/parks/post-overpass-query.js','src/adapters/surface/load-osm-landcover-evidence.js',...paths])vm.runInContext(read(path),context);return window;}
 const park=[[[39,32],[39,33],[40,33],[39,32]]],bbox={minLat:39,minLon:32,maxLat:40,maxLon:33};
 
 test('split recovery covers exactly every selector in the full query, including fountains and parking',()=>{
@@ -65,6 +65,7 @@ test('partial refresh cannot erase previous building/road geometries, while a co
 test('HTTP 200 partial responses retain the actual Overpass error and rotate mirrors without reading an already-used body',async()=>{
  let calls=0,textReads=0;const warnings=[];
  const context=vm.createContext({window:null,Map,Date,Promise,AbortController,setTimeout,clearTimeout,console:{log(){},warn:(...args)=>warnings.push(args.join(' '))},fetch:async()=>({ok:true,status:200,json:async()=>++calls===1?{elements:[],remark:'runtime error: server timeout'}:{elements:[]},text:async()=>{textReads++;throw Error('body already read');}})});context.window=context;
+ vm.runInContext(read('src/adapters/parks/post-overpass-query.js'),context);
  vm.runInContext(read('src/domain/parks/overpass-request-budget.js'),context);vm.runInContext(read('src/services/osm-client.js'),context);
  const data=await vm.runInContext('overpassRequest("coverage", "yüzey+su")',context);
  assert.equal(data.elements.length,0);assert.equal(calls,2);assert.equal(textReads,0);assert.ok(warnings.some(message=>message.includes('server timeout')));

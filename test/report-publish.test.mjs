@@ -251,8 +251,9 @@ describe('arayüz bağlantısı: kart, modül kaydı, çevrimdışı paket', () 
   });
 
   test('istemci insert RLS-safe desenle (return=minimal, oturum anahtarı)', () => {
-    assert.match(UI, /"Prefer":"return=minimal"/);
-    assert.match(UI, /await sb\.auth\.getSession\(\)/, 'anon istek açamaz');
+    const insertStore = read('src/adapters/reports/publication-request-insert-store.js');
+    assert.match(insertStore, /Prefer:\s*"return=minimal"/);
+    assert.match(insertStore, /await client\.auth\.getSession\(\)/, 'anon istek açamaz');
     assert.match(UI, /function dgPubAdmin\(\)/, 'yönetici kapısı');
   });
 });

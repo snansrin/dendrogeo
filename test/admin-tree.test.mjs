@@ -24,7 +24,7 @@ const { dgTreeGroup, dgTreeFilterRows } = loadApp();
 
 const idx = readFileSync(join(ROOT, 'index.html'), 'utf8');
 const sw = readFileSync(join(ROOT, 'sw.js'), 'utf8');
-const admin = readFileSync(join(ROOT, 'src/services/admin.js'), 'utf8');
+const adminTreeView = readFileSync(join(ROOT, 'src/ui/admin-tree-view.js'), 'utf8');
 const tree = readFileSync(join(ROOT, 'src/services/admin-tree.js'), 'utf8');
 
 /* ---------- örnek veri: 2 kullanıcı, 2 proje, TEK park + 1 parksız ---------- */
@@ -159,8 +159,8 @@ describe('dgTreeFilterRows — durum + arama filtresi', () => {
 describe('kabuk kaydı ve hata görünürlüğü', () => {
   test('ağaç kartı + filtre kontrolleri sayfada', () => {
     assert.match(idx, /id="adminTree"/);
-    assert.match(idx, /id="treeStatus" onchange="dgTreeSetStatus\(this\.value\)"/);
-    assert.match(idx, /id="treeSearch"[^>]*oninput="dgTreeSetQuery\(this\.value\)"/);
+    assert.match(idx, /id="treeStatus" data-dg-admin-tree-action="status"/);
+    assert.match(idx, /id="treeSearch"[^>]*data-dg-admin-tree-action="query"/);
     assert.match(idx, /Park → Proje → Kullanıcı/);
   });
 
@@ -176,9 +176,9 @@ describe('kabuk kaydı ve hata görünürlüğü', () => {
   });
 
   test('⭐ sorgu hatası sessizce "Kayıt yok."a dönüşmüyor', () => {
-    assert.match(admin, /if\(mRes\.error\)\{/, 'loadAdmin hatayı ekrana yazmalı');
-    assert.match(admin, /veri silinmedi/, 'kullanıcıya veri kaybı olmadığı söylenmeli');
-    assert.match(admin, /loadAdminTree\(\)/, 'ağaç loadAdmin sonundan tetiklenmeli');
+    assert.match(adminTreeView, /Ölçümler okunamadı/, 'hata UI modülünde görünür olmalı');
+    assert.match(tree, /DG_TREE_ERR/, 'use case hata durumunu saklamalı');
+    assert.match(tree, /loadAdminTree\(\)/, 'ağaç yükleyicisi açıkça çağrılmalı');
   });
 
   test('ağaç kendi hatasını da gösteriyor + yedek sorgu zinciri var', () => {
@@ -213,8 +213,8 @@ describe('kabuk kaydı ve hata görünürlüğü', () => {
   });
 
   test('bekleyenlere kısayol: sadece bekleyenler + bekleyen düğümleri aç', () => {
-    assert.match(idx, /onclick="dgTreeOnlyPending\(\)"/);
-    assert.match(idx, /onclick="dgTreeOpenPending\(\)"/);
+    assert.match(idx, /data-dg-admin-tree-action="only-pending"/);
+    assert.match(idx, /data-dg-admin-tree-action="open-pending"/);
     assert.match(tree, /function dgTreeOnlyPending/);
     assert.match(tree, /function dgTreeOpenPending/);
   });

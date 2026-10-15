@@ -95,3 +95,11 @@ test('all five offline modules load before the service and are precached',()=>{
     assert.ok(worker.includes(`/${path}`),`${path} missing from service-worker precache`);
   }
 });
+
+test('offline service delegates storage, DOM, and queue orchestration to modules',()=>{
+  const source=readFileSync(new URL('../src/services/offline.js',import.meta.url),'utf8');
+  assert.match(source,/DG_OFFLINE_MEASUREMENT_QUEUE\.save/);
+  assert.match(source,/DG_DRAIN_OFFLINE_MEASUREMENT_QUEUE\.run/);
+  assert.match(source,/DG_COORDINATE_OFFLINE_MEASUREMENT_SYNC\.run/);
+  assert.doesNotMatch(source,/indexedDB|\.from\(|\.storage\.|\.innerHTML|\.textContent|\.classList|\.style\s*\.|document\.getElementById|window\.addEventListener/);
+});

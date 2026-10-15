@@ -14,5 +14,6 @@
    modal.showModal();modal.querySelector('input')?.focus();
   });
  }
- root.DG_RUN_REPORT_QUESTION_DIALOG=Object.freeze({run});
+ function reportError(modal,text){const element=modal.querySelector('#dgReportQuestionErrors');if(element)element.textContent=text;}
+ root.DG_RUN_REPORT_QUESTION_DIALOG=Object.freeze({run,reportError});
 })(window);

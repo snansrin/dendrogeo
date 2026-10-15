@@ -10,7 +10,7 @@ window.DG_ADMIN_TREE_PARK = (() => {
     return `<details class="dg-tree-park${park.pending ? " pending" : ""}"${open} ontoggle="dgTreeToggle('${park.key}',this.open)">` +
       `<summary>${park.pending ? "⚠" : "🌳"} <b>${ports.escape(park.name)}</b>${ports.pendingBadge(park.beklemede)}` +
       `<span class="dg-tree-meta">${ports.escape(park.city || "")}${hectares} · ${projectCount} ${ports.translate("proje")} · ${userCount} ${ports.translate("kullanıcı")} · ${park.n} ${ports.translate("kayıt")} · ${ports.tons(park.c)}${carbonPerHa}</span>` +
-      (park.pending ? `<button class="btn sm ghost dg-tree-act" onclick="dgTreePendingScan(event)">🌳 Park Algıla</button>` : "") +
+      (park.pending ? `<button class="btn sm ghost dg-tree-act" data-dg-admin-tree-action="scan-park">🌳 Park Algıla</button>` : "") +
       `</summary><div class="dg-tree-body">${park.projects.map(ports.projectHTML).join("")}</div></details>`;
   }
   return Object.freeze({ render });

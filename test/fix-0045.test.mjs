@@ -35,7 +35,8 @@ describe('0045 · form ipucu kaldırıldı', () => {
     assert.ok(!i18n.includes('"denetim: yeşil'), 'sözlük girdisi de silinmeli');
     /* fotoğraf kutusu ve kanca yerinde (denetim çalışmaya devam eder) */
     assert.match(shell, /id="photoCheck"/);
-    assert.match(shell, /onchange="checkPhoto\(event\)"/);
+    assert.match(shell, /data-dg-measure-action="photo-check"/);
+    assert.match(rd('src/ui/measurement-form-actions.js'), /checkPhoto\(event\)/);
   });
 });
 
@@ -44,26 +45,28 @@ describe('0045 · park/proje hafızası (yenilemede sıfırlanmaz)', () => {
     assert.match(meas, /const DG_LAST_PROJ_KEY="dg_last_proj"/, 'cihaz belleği anahtarı');
     assert.match(meas, /function dgProjectRemember/, 'yazıcı');
     assert.match(meas, /function dgProjectRestore/, 'okuyucu');
-    assert.match(meas, /dgProjectRestore\(\);/, 'liste çizilince geri yüklenir');
-    assert.match(meas, /dgProjectRemember\(pid\);/, 'kaydettiğinde hatırlar');
-    assert.match(rd('src/services/park-registry.js'), /dgProjectRemember\(\$\("mProject"\)\.value\)/, 'seçim değişince hatırlar');
+    assert.match(rd('src/adapters/trees/project-selection-memory.js'), /remember\(storage,key,id\)/, 'tercih adapter üzerinden yazılır');
+    assert.match(rd('src/adapters/trees/project-selection-memory.js'), /restore\(storage,key,projects\)/, 'tercih adapter üzerinden ve proje listesiyle doğrulanır');
+    assert.match(meas, /restore:dgProjectRestore/, 'liste renderer proje seçimini geri yükler');
+    assert.match(meas, /rememberProject:dgProjectRemember/, 'kaydettiğinde hatırlar');
+    assert.match(rd('src/services/park-registry.js'), /rememberProject:value=>\{if\(typeof dgProjectRemember==="function"\)dgProjectRemember\(value\);\}/, 'seçim değişince hatırlar');
   });
   test('⭐ KOŞULLU geri yükleme: silinmiş proje hortlamaz', () => {
-    assert.match(meas, /some\(p=>String\(p\.id\)===last\)/, 'id PROJ_LISTte yoksa seçilmez');
+    assert.match(rd('src/adapters/trees/project-selection-memory.js'), /projects\|\|\[\]\)\.every\(project=>String\(project\.id\)!==last\)/, 'id PROJ_LISTte yoksa seçilmez');
   });
   test('⭐ davranış (vm): geçerli id geri gelir, geçersiz id dokunmaz', () => {
-    const stub = new Proxy(function () {}, { get: (t, p) => (p === Symbol.toPrimitive ? () => '' : stub), apply: () => stub, construct: () => stub, set: () => true });
     const els = { mProject: { value: '' }, nProject: { value: '' } };
     const store = { dg_last_proj: '7' };
     const ctx = {
-      window: stub, document: stub, navigator: stub,
+      window: {},
       localStorage: { getItem: (k) => (k in store ? store[k] : null), setItem: (k, v) => { store[k] = v; } },
-      console: { log() {}, warn() {}, error() {} },
       $: (id) => els[id] || null,
       PROJ_LIST: [{ id: 7 }, { id: 9 }],
     };
     vm.createContext(ctx);
-    vm.runInContext(meas + ';this.R=dgProjectRestore;this.W=dgProjectRemember;', ctx);
+    vm.runInContext(rd('src/adapters/trees/project-selection-memory.js'), ctx);
+    const start=meas.indexOf('const DG_LAST_PROJ_KEY='),end=meas.indexOf('function dgProjectOpenMeasure(',start);
+    vm.runInContext(meas.slice(start,end)+';this.R=dgProjectRestore;this.W=dgProjectRemember;', ctx);
     ctx.R();
     assert.equal(els.mProject.value, '7', 'hatırlanan proje seçilmeli');
     assert.equal(els.nProject.value, '7', 'nav seçimi de eşitlenmeli');
@@ -81,8 +84,8 @@ describe('0045 · Son Etkinlik açılır-kapanır', () => {
     assert.match(shell, /id="visActToggle"/, 'toggle düğmesi');
     assert.match(shell, /aria-controls="visActivityWrap"/, 'erişilebilirlik bağı');
     assert.match(shell, /id="visActivityWrap"/, 'sarmal');
-    assert.match(vs, /function dgVisActToggle/, 'aç/kapa');
-    assert.match(vs, /function dgVisActRestore/, 'durum geri yükleme');
+    assert.match(vs, /function dgVisActToggle/, 'aç/kapa facade');
+    assert.match(vs, /function dgVisActRestore/, 'durum geri yükleme facade');
     assert.match(vs, /localStorage\.setItem\("dg_vis_act_open"/, 'durum cihazda');
     assert.match(vs, /dgVisActRestore\(\);/, 'sekme açılışında uygulanır');
   });
@@ -101,7 +104,10 @@ describe('0045 · gelişmiş canlı izleme — GEÇİCİ (DB yok)', () => {
   });
   test('⭐ aksiyonlar gerçek iş akışına bağlı (kaydet/park/export/yayın)', () => {
     assert.match(meas, /dgPresenceAct\(wasEdit\?"edit":"save"/, 'ölçüm kaydı (2 yol)');
-    assert.match(rd('src/services/park-registry.js'), /dgPresenceAct\("park"/, 'park kimliği');
+    const parkRegistry = rd('src/services/park-registry.js');
+    const parkRetry = rd('src/application/parks/retry-park-registration.js');
+    assert.match(parkRegistry, /recordPresence:\(action,name\)=>\{if\(typeof dgPresenceAct==="function"/, 'park kimliği presence portu');
+    assert.match(parkRetry, /ports\.recordPresence\("park",row\.name\)/, 'park kimliği kaydı');
     const ex = rd('src/services/export.js');
     for (const k of ['"export","CSV"', '"export","QGIS"', '"export","GeoJSON"']) assert.match(ex, new RegExp(k.replace(/[,"]/g, (m) => '\\' + m)), 'export ' + k);
     assert.match(rd('src/services/report-publish.js'), /dgPresenceAct\("publish"/, 'rapor yayını');
@@ -117,11 +123,12 @@ describe('0045 · gelişmiş canlı izleme — GEÇİCİ (DB yok)', () => {
   });
   test('⭐ kurucu yüzeyi: 📡 akış kartı + zengin satır + iz polizgisi', () => {
     assert.match(shell, /id="visFeed"/, 'aksiyon akışı kutusu');
-    assert.match(shell, /Canlı aksiyonlar/, 'kart başlığı');
-    assert.match(vs, /function dgVisFeed/, 'akış çizici');
-    assert.match(vs, /L\.polyline\(r\.p\.lh\.filter/, 'haritada geçici iz');
-    assert.match(vs, /r\.p\.dev/, 'satırda cihaz');
-    assert.match(vs, /DG_ACT_LABELS/, 'aksiyon etiketleri');
+    assert.match(shell, /id="visActivityWrap"/, 'son etkinlik sarmalı');
+    assert.match(vs, /function dgVisFeed/, 'akış facade');
+    assert.match(rd('src/ui/visitor-live-map.js'), /buildTrail/, 'harita görünümü iz adapterını kullanır');
+    assert.match(rd('src/ui/visitor-activity-feed.js'), /events\.map/, 'akış UI modülü olayları çizer');
+    assert.match(rd('src/ui/visitor-roster.js'), /deviceLabel/, 'satırda cihaz bilgisi UI portundan gelir');
+    assert.match(rd('src/ui/visitor-action-labels.js'), /DG_VISITOR_ACTION_LABELS/, 'aksiyon etiketleri UI sözlüğündedir');
   });
   test('⭐ kullanıcıya duyuru YOK (silent karar): toast/landing/docs temiz', () => {
     const a = shell.indexOf('id="v-visitors"'), b = shell.indexOf('id="visFeed"');

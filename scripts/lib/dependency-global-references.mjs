@@ -1,12 +1,19 @@
 import {isForbiddenLayerDependency,KNOWN_LEGACY_REFERENCES} from './dependency-layer-policy.mjs';
+import {walkAst,memberPath} from './javascript-ast.mjs';
 
 export function findForbiddenModuleReferences(modules,providers){
   const violations=new Map(),knownDebt=new Map();
-  const expression=/\b(?:window|globalThis|root)\s*\.\s*(DG_[A-Z0-9_]+)\b|\b(DG_[A-Z0-9_]+)\s*\./g;
   for(const module of modules){
     if(!['domain','application','adapters'].includes(module.layer))continue;
-    for(const match of module.source.matchAll(expression)){
-      const name=match[1]||match[2];
+    const names=new Set();
+    walkAst(module.ast,node=>{
+      if(node.type!=='MemberExpression')return;
+      const path=memberPath(node);if(!path)return;
+      const global=/^(?:window|globalThis|root)\.(DG_[A-Z0-9_]+)(?:\.|$)/.exec(path);
+      if(global)names.add(global[1]);
+      else if(/^DG_[A-Z0-9_]+\./.test(path))names.add(path.split('.')[0]);
+    });
+    for(const name of names){
       for(const provider of providers.get(name)||[]){
         if(provider.path===module.path||!isForbiddenLayerDependency(module.layer,provider.layer))continue;
         const debtKey=`${module.relativePath}:${name}`;

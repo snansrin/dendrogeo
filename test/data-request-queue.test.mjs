@@ -6,7 +6,7 @@ import {readFileSync} from 'node:fs';
 const window={};
 vm.runInNewContext(readFileSync(new URL('../src/domain/data-requests/partition-queue.js',import.meta.url),'utf8'),{window});
 vm.runInNewContext(readFileSync(new URL('../src/ui/data-request-pending-table.js',import.meta.url),'utf8'),{window,Date});
-for(const file of ['src/adapters/data-requests/queue-store.js','src/ui/data-request-closed-table.js','src/application/data-requests/load-queue.js'])vm.runInNewContext(readFileSync(new URL('../'+file,import.meta.url),'utf8'),{window,Date});
+for(const file of ['src/adapters/data-requests/queue-store.js','src/ui/data-request-closed-table.js','src/ui/my-data-requests.js','src/application/data-requests/load-queue.js'])vm.runInNewContext(readFileSync(new URL('../'+file,import.meta.url),'utf8'),{window,Date});
 const partition=window.DG_DATA_REQUEST_QUEUE.partition;
 
 test('request queue preserves exact closed statuses, order and row identities',()=>{
@@ -20,7 +20,8 @@ test('request queue preserves exact closed statuses, order and row identities',(
 
 function app(data){
  const elements=new Map(),calls=[];for(const id of ['aReqPending','aReqPendingMini','aReqClosed','aReqT','closedReqT','closedRequestsWrap'])elements.set(id,{style:{},innerHTML:'old'});
- const ctx=vm.createContext({window,Date,esc:value=>value==null?'':String(value),$:id=>elements.get(id),dgScrollKeep:()=>12,dgScrollRestore:y=>calls.push(['restore',y]),sb:{from(table){calls.push(['from',table]);return{select(columns){calls.push(['select',columns]);return this;},order(column,options){calls.push(['order',column,JSON.parse(JSON.stringify(options))]);return Promise.resolve({data});}};}}});
+ const document={getElementById:id=>elements.get(id)};
+ const ctx=vm.createContext({window,document,Date,esc:value=>value==null?'':String(value),$:id=>elements.get(id),dgScrollKeep:()=>12,dgScrollRestore:y=>calls.push(['restore',y]),sb:{from(table){calls.push(['from',table]);return{select(columns){calls.push(['select',columns]);return this;},order(column,options){calls.push(['order',column,JSON.parse(JSON.stringify(options))]);return Promise.resolve({data});}};}}});
  vm.runInContext(readFileSync(new URL('../src/services/data-requests.js',import.meta.url),'utf8'),ctx);
  return{elements,calls,run:()=>vm.runInContext('loadRequests()',ctx)};
 }

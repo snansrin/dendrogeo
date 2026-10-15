@@ -5,8 +5,12 @@ import {readFileSync} from 'node:fs';
 
 const files=[
  'src/adapters/world/park-comparison-store.js',
+ 'src/domain/parks/resolve-park-comparison-read.js',
  'src/domain/parks/prepare-park-comparison.js',
  'src/domain/parks/group-legacy-park-comparison.js',
+ 'src/application/world/load-park-comparison.js',
+ 'src/application/world/load-legacy-park-comparison.js',
+ 'src/ui/render-primary-park-comparison.js',
  'src/ui/legacy-park-comparison.js',
  'src/application/world/zoom-to-location.js'
 ];

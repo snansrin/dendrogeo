@@ -13,9 +13,11 @@ describe('DBH sunum standardı',()=>{
   const map=rd('src/services/map.js');
   const admin=rd('src/services/admin.js');
   const tree=rd('src/services/admin-tree.js');
-  assert.match(measure,/r\.dbh_cm\.toFixed\(1\)/);
+  assert.match(measure,/DG_RENDER_LIVE_MEASUREMENT_PREVIEW\.render\(/);
+  assert.match(rd('src/ui/render-live-measurement-preview.js'),/r\.dbh_cm\.toFixed\(1\)/);
   assert.match(dash,/\(\+r\.dbh_cm\)\.toFixed\(1\)/);
-  assert.match(map,/\(\+r\.dbh_cm\)\.toFixed\(1\)/);
+  assert.match(map,/DG_MAP_MEASUREMENT_POPUP\.render\(/);
+  assert.match(rd('src/ui/map-measurement-popup.js'),/\(\+row\.dbh_cm\)\.toFixed\(1\)/);
   assert.match(admin,/\(\+x\.dbh_cm\)\.toFixed\(1\)/);
   assert.match(tree,/\(\+r\.dbh_cm\)\.toFixed\(1\)/);
  });
@@ -55,7 +57,9 @@ describe('Kayıtlarım kademeli görünüm',()=>{
 });
 
 test('çevrimdışı senkronizasyon ham çevreyi kaybetmez',()=>{
- assert.match(rd('src/services/offline.js'),/"girth_cm","dbh_cm"/);
+ const payload=rd('src/domain/offline/prepare-measurement-sync-payload.js');
+ assert.match(payload,/const payload=\{\.\.\.data\}/);
+ assert.doesNotMatch(payload,/delete payload\.(girth_cm|dbh_cm)/);
 });
 
 
@@ -70,7 +74,10 @@ describe('Dışa Aktar tema standardı',()=>{
  });
  test('mevcut dışa aktarım işlevleri korunur; tekrar eden yöntem metni arayüzde gösterilmez',()=>{
   const sh=rd('partials/shell.html');
-  for(const fn of ['exportCSV()','previewCSV()','exportGeo()','previewGeo()','exportQgis()','sendDataRequest()']) assert.ok(sh.includes(fn),fn+' korunmalı');
+  const actions=rd('src/ui/export-view-actions.js');
+  for(const fn of ['exportCSV()','previewCSV()','exportGeo()','previewGeo()','exportQgis()']) assert.ok(actions.includes(fn),fn+' korunmalı');
+  assert.match(sh,/data-dg-export-action="csv-download"/);assert.match(sh,/data-dg-export-action="geo-download"/);
+  assert.match(sh,/data-dg-data-request-action="submit"/,'veri talebi eylemi UI modülüne bağlı');
   assert.ok(!sh.includes('C → DBH = C/π · DBH 0,1 cm'));
   assert.ok(!sh.includes('Ölçüm protokolü korunur:'));
   assert.ok(!sh.includes('export-method-note'));

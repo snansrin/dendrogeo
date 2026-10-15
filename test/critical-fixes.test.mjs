@@ -75,10 +75,12 @@ describe('QGIS rehberi içerik temizliği', () => {
 describe('PGRST201 çoklu ilişki: measurements→profiles gömüsü FK adıyla', () => {
   const adm = readFileSync(join(ROOT, 'src/services/admin.js'), 'utf8');
   const tree = readFileSync(join(ROOT, 'src/services/admin-tree.js'), 'utf8');
+  const adminOverviewStore = readFileSync(join(ROOT, 'src/adapters/admin/admin-overview-store.js'), 'utf8');
+  const adminOverviewUi = readFileSync(join(ROOT, 'src/ui/admin-overview-measurements.js'), 'utf8');
   const dreq = readFileSync(join(ROOT, 'src/adapters/data-requests/queue-store.js'), 'utf8');
 
   test('⭐ admin.js ölçüm sorgusu profiles!measurements_owner_fkey kullanıyor', () => {
-    assert.match(adm, /measurements"\)\.select\("\*,profiles!measurements_owner_fkey\(full_name\)"\)/);
+    assert.match(adminOverviewStore, /measurements"\)\.select\("\*,profiles!measurements_owner_fkey\(full_name\)"\)/);
   });
 
   test('⭐ admin-tree.js aynı FK adını kullanıyor', () => {
@@ -97,8 +99,8 @@ describe('PGRST201 çoklu ilişki: measurements→profiles gömüsü FK adıyla'
   });
 
   test('⭐ sorgu hatası sessizce "Kayıt yok."a dönüşmüyor', () => {
-    assert.match(adm, /if\(mRes\.error\)\{/, 'hata dalı olmalı');
-    assert.match(adm, /veri silinmedi/, 'kullanıcıya güvence');
+    assert.match(adminOverviewUi, /response\.error/, 'hata UI modülünde gösterilmeli');
+    assert.match(adminOverviewUi, /veri silinmedi/, 'kullanıcıya güvence');
     assert.match(tree, /Ölçümler okunamadı/, 'ağaçta hata kutusu');
     assert.match(tree, /mode:"join"/, 'gömüsüz yedek sorgu');
   });
@@ -172,19 +174,24 @@ describe('uzaktan proje + canlı kaydet butonu — 2026-09-27', () => {
   });
   test('ölçüm kapısı DURUYOR: saveMeas hâlâ konum doğruluyor', () => {
     const m = read2('src/services/measure.js');
-    assert.match(m, /dgVerifyAtPark\(pk\.data,"measure"\)/, 'uzak parkta ölçüm hâlâ engelli');
+    assert.match(m, /DG_SUBMIT_MEASUREMENT\.run/, 'ölçüm servisi modüler gönderim akışına delege eder');
+    const verify=read2('src/application/trees/verify-measurement-submission-location.js');
+    assert.match(verify, /ports\.loadPark\(draft\.gate\.project\.park_id\)/, 'uzak parkta ölçüm aynı parkı adapter üzerinden yükleyip doğrular');
+    assert.match(verify, /ports\.verifyAtPark\(park\)/, 'park geofence kararı gönderim akışında uygulanır');
   });
   test('⭐ Hesapla ve Kaydet CANLI buton (aynı desen: disabled + ⏳ + finally)', () => {
     const m = read2('src/services/measure.js');
     assert.match(m, /function dgSaveBusy\(on\)/, 'canlı yardımcı');
-    assert.match(m, /"⏳ Hesaplanıyor ve kaydediliyor…"/, '⏳ metni');
-    assert.match(m, /finally\{dgSaveBusy\(false\);\}/, 'her çıkış yolunda geri gelir');
     assert.match(m, /async function dgSaveMeasInner/, 'iç gövde ayrı, sarmalayıcı dışta');
+    const save=read2('src/application/trees/run-measurement-save.js');
+    assert.match(save, /ports\.setBusy\(true\)/, 'başlangıçta buton kilitlenir');
+    assert.match(save, /finally\{ports\.setBusy\(false\);\}/, 'başarı/hata/erken dönüşte buton geri gelir');
+    assert.match(read2('src/ui/set-measurement-save-button.js'), /Hesaplanıyor ve kaydediliyor/, 'mevcut bekleme metni UI modülünde kalır');
   });
   test('tam genişlik CTA' + '\u2019' + 'lar tek ailede (dg-png-btn)', () => {
     const sh = read2('partials/shell.html');
     assert.match(sh, /id="saveBtn"[^>]*class="dg-png-btn primary"|class="dg-png-btn primary" id="saveBtn"/, 'kaydet butonu ailede');
-    assert.match(sh, /class="dg-png-btn primary"[^>]*onclick="arriveWp\(\)"|onclick="arriveWp\(\)"[^>]*class="dg-png-btn primary"/, 'vardım butonu aynı CTA ailesinde');
+    assert.match(sh, /class="dg-png-btn primary"[^>]*data-dg-waypoint-action="arrive"|data-dg-waypoint-action="arrive"[^>]*class="dg-png-btn primary"/, 'vardım butonu aynı CTA ailesinde');
     assert.doesNotMatch(sh, /class="btn" style="width:100%/, 'eski dağınık desen kalmamalı');
   });
 });

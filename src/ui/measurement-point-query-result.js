@@ -2,6 +2,7 @@
 
 /* Render an escaped point record preview or the existing empty-result message. */
 window.DG_MEASUREMENT_POINT_QUERY_RESULT={
+  hide(element){if(element)element.style.display="none";},
   render({element,record,pointId,escape,translate,translateFormat,circumferenceFromDiameter}){
     if(!record){
       element.style.display="block";element.className="alert info";

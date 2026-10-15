@@ -6,8 +6,14 @@ import {readFileSync} from 'node:fs';
 const files=[
  'src/domain/park-invites/access-policy.js',
  'src/adapters/park-invites/store.js',
+ 'src/application/park-invites/park-invite-state.js',
+ 'src/application/park-invites/load-owned-parks.js',
+ 'src/application/park-invites/load-recipient-invites.js',
  'src/ui/park-invite-inbox.js',
  'src/ui/park-collaboration-panel.js',
+ 'src/ui/owner-park-options.js',
+ 'src/ui/load-owner-collaborations.js',
+ 'src/ui/refresh-collaborations.js',
  'src/application/park-invites/manage-invites.js'
 ];
 function load(extra={}){
@@ -45,9 +51,9 @@ test('park invite views escape untrusted labels and preserve existing inbox and 
  const banner=window.DG_PARK_INVITE_INBOX_UI.sharedBanner([{name:'<Park>',city:'<City>'}],escape);
  const inbox=window.DG_PARK_INVITE_INBOX_UI.invites([{id:'i1',park_id:5,created_at:'2026-10-12',parks:{name:'<Park>',city:'<City>'},note:'<note>'}],escape);
  assert.match(banner,/&lt;Park&gt;/);assert.match(banner,/&lt;City&gt;/);
- assert.match(inbox,/&lt;note&gt;/);assert.match(inbox,/dgInviteRespond\('i1',true\)/);
+ assert.match(inbox,/&lt;note&gt;/);assert.match(inbox,/data-dg-park-invites-action="respond" data-invite-id="i1" data-accept="true"/);
  const panel=window.DG_PARK_COLLABORATION_PANEL_UI.render({selected:true,canManage:true,escape,invites:[{id:'i1',email:'<mail>',status:'Beklemede',note:'<note>',created_at:'2026-10-12'}],collabs:[{user_id:'u1',added_at:'2026-10-12',profiles:{full_name:'<Ada>',email:'a@example.test'}}]});
- assert.match(panel,/&lt;mail&gt;/);assert.match(panel,/&lt;Ada&gt;/);assert.match(panel,/dgInviteRevoke\('u1','collab'\)/);assert.match(panel,/dgInviteRevoke\('i1','invite'\)/);
+ assert.match(panel,/&lt;mail&gt;/);assert.match(panel,/&lt;Ada&gt;/);assert.match(panel,/data-dg-park-invites-action="revoke" data-target="u1" data-kind="collab"/);assert.match(panel,/data-dg-park-invites-action="revoke" data-target="i1" data-kind="invite"/);
  assert.match(window.DG_PARK_COLLABORATION_PANEL_UI.render({selected:true,canManage:false,invites:[],collabs:[],escape}),/proje sahibine özeldir/);
 });
 
@@ -76,7 +82,7 @@ test('park invite service uses the extracted policy and collaboration view when 
   assert.equal((elements.get('dgInvBox').innerHTML.match(/Sana gelen davetler/g)||[]).length,1);
   vm.runInContext(`DG_INV.mine=[{id:5,role:'owner'},{id:6,role:'collaborator'}];DG_INV.invites=[{id:'i1',email:'<guest>',status:'Beklemede',created_at:'2026-10-12'}];DG_INV.collabs=[{user_id:'u1',added_at:'2026-10-12',profiles:{full_name:'Ada'}}];`,context);
   assert.equal(vm.runInContext('dgCanManagePark(5)',context),true);assert.equal(vm.runInContext('dgCanManagePark(6)',context),false);vm.runInContext('dgCollabRender()',context);
-  assert.match(elements.get('dgInvList').innerHTML,/&lt;guest&gt;/);assert.match(elements.get('dgInvList').innerHTML,/dgInviteRevoke\('u1','collab'\)/);
+  assert.match(elements.get('dgInvList').innerHTML,/&lt;guest&gt;/);assert.match(elements.get('dgInvList').innerHTML,/data-dg-park-invites-action="revoke" data-target="u1" data-kind="collab"/);
   assert.equal(vm.runInContext('!!DG_PARK_INVITE_MODULE_STORE',context),true);
  });
 });

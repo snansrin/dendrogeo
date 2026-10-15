@@ -59,7 +59,8 @@ test('visit service composes presence modules without waiting for JWT before sub
   DG_VISITOR_LIVE_VISIT_COUNTS_STORE:{create:()=>({})},DG_VISITOR_ROSTER_APPLICATION:{create:()=>({})},
   DG_AUTH_SESSION_STORE:{create:()=>({getSession:async()=>{events.push('auth');return{data:{session:{access_token:'jwt'}}};},setRealtimeAuth:async token=>events.push(['auth-token',token])})}};
  for(const name of ['setTimeout','clearTimeout','setInterval','clearInterval'])window[name]=function(...args){if(this!==window)throw new TypeError('Illegal invocation');return globalThis[name](...args);};
- for(const path of ['src/domain/visitors/build-presence-payload.js','src/application/visitors/record-live-session-events.js',
+ for(const path of ['src/domain/visitors/resolve-admin-visit-windows.js','src/application/visitors/load-admin-visit-statistics.js','src/ui/visitor-admin-counts.js','src/ui/visitor-connection-status.js',
+  'src/domain/visitors/build-presence-payload.js','src/application/visitors/record-live-session-events.js',
   'src/adapters/visitors/presence-channel.js','src/adapters/visitors/remove-presence-channel.js',
   'src/adapters/visitors/track-presence.js','src/application/visitors/upgrade-presence-auth.js',
   'src/domain/visitors/presence-retry-delay.js','src/application/visitors/stop-presence-session.js',

@@ -3,6 +3,12 @@ import assert from 'node:assert/strict';
 import vm from 'node:vm';
 import { readFileSync } from 'node:fs';
 const source=readFileSync(new URL('../src/services/offline.js',import.meta.url),'utf8');
+const modules=['src/adapters/offline/create-client-id.js','src/domain/offline/same-measurement.js','src/adapters/offline/idb-promises.js',
+ 'src/adapters/offline/measurement-queue.js','src/domain/offline/prepare-measurement-sync-payload.js','src/adapters/offline/find-saved-measurement.js',
+ 'src/adapters/offline/upload-queued-measurement-photo.js','src/adapters/offline/persist-queued-measurement.js','src/application/offline/sync-queued-measurement.js',
+ 'src/application/offline/drain-measurement-queue.js','src/application/offline/coordinate-measurement-sync.js',
+ 'src/application/offline/refresh-after-measurement-sync.js','src/ui/offline-sync-feedback.js','src/ui/offline-sync-badge.js',
+ 'src/ui/dashboard-view-state.js'];
 const draft=(extra={})=>({id:1,data:{owner:'a',client_id:'client-1',project_id:2,point_id:1,measurement_no:1,dbh_cm:42,height_m:8,species:'Karaçam',grp:'İBRELİ',carbon_kg:123,...extra}});
 function fixture(records=[draft()],options={}){
  const events=[],toasts=[],remote=new Map(options.remote||[]);
@@ -26,8 +32,12 @@ function fixture(records=[draft()],options={}){
  };},storage:{from(){return {async upload(){uploads++;return {error:options.photoError||null};},getPublicUrl(){return {data:{publicUrl:'https://example.org/photo.jpg'}};}};}}};
  const ctx={window:null,document:{getElementById(){return null;}},navigator:{onLine:true},USER:{id:'a'},sb,
   setTimeout,clearTimeout,queueMicrotask,console:{log(){},warn(){},error(){}},
-  $:()=>null,toast:(...x)=>toasts.push(x),dgMarkLiveDirty:()=>events.push('refresh')};
- ctx.window=ctx;ctx.addEventListener=()=>{};vm.createContext(ctx);vm.runInContext(source,ctx);ctx.openOfflineDB=async()=>db;
+  $:()=>null,toast:(...x)=>toasts.push(x),dgMarkLiveDirty:()=>events.push('refresh'),
+  loadDash(){},loadRecords(){},loadAdmin(){},loadWorld(){},loadLiveMap(){}};
+ ctx.window=ctx;ctx.addEventListener=()=>{};vm.createContext(ctx);
+ for(const path of modules)vm.runInContext(readFileSync(new URL('../'+path,import.meta.url),'utf8'),ctx,{filename:path});
+ ctx.DG_OFFLINE_MEASUREMENT_QUEUE={open:async()=>db,remove:async(database,id)=>{const tx=database.transaction('measurements','readwrite');const done=new Promise((resolve,reject)=>{tx.oncomplete=resolve;tx.onabort=()=>reject(tx.error||new Error('IDB abort'));tx.onerror=()=>reject(tx.error||new Error('IDB error'));});tx.objectStore('measurements').delete(id);await done;}};
+ vm.runInContext(source,ctx);
  return {ctx,records,events,toasts,counts:()=>({inserts,updates,uploads,closed})};
 }
 test('concurrent login/online sync drains a draft only once and awaits IDB commit',async()=>{

@@ -1,5 +1,6 @@
 import {readFileSync,readdirSync,statSync} from 'node:fs';
 import {join,relative} from 'node:path';
+import {parseJavaScript,walkAst,memberPath} from './javascript-ast.mjs';
 
 const LAYERS=['domain','application','adapters','ui'];
 
@@ -19,11 +20,16 @@ export function collectDependencyModuleIndex(root){
     const directory=join(root,'src',layer);
     for(const path of javascriptFiles(directory)){
       const source=readFileSync(path,'utf8');
-      const module={path,relativePath:relative(root,path).replaceAll('\\','/'),layer,source};
+      const relativePath=relative(root,path).replaceAll('\\','/');
+      const ast=parseJavaScript(source,{filename:relativePath});
+      const module={path,relativePath,layer,source,ast};
       modules.push(module);
       const exported=new Set();
-      const expression=/\b(?:window|globalThis|root)\s*\.\s*(DG_[A-Z0-9_]+)\s*=/g;
-      for(const match of source.matchAll(expression))exported.add(match[1]);
+      walkAst(ast,node=>{
+        if(node.type!=='AssignmentExpression')return;
+        const match=/^(?:window|globalThis|root)\.(DG_[A-Z0-9_]+)$/.exec(memberPath(node.left)||'');
+        if(match)exported.add(match[1]);
+      });
       module.exports=[...exported];
       for(const name of exported){if(!providers.has(name))providers.set(name,[]);providers.get(name).push(module);}
     }

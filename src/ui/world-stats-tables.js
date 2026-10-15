@@ -6,5 +6,12 @@
  function cities(rows,escape){
   return(rows||[]).slice(0,30).map(row=>`<tr><td data-label="Şehir">${escape(row.city)}</td><td data-label="Kayıt">${row.records}</td><td data-label="Karbon(t)">${row.carbon_t}</td></tr>`).join("")||"<tr><td colspan=3>—</td></tr>";
  }
- root.DG_WORLD_STATS_TABLES=Object.freeze({countries,cities});
+ function update(document,data){
+  for(const [id,key] of [["wRec","records"],["wCountry","countries"],["wCity","cities"],["wCarbon","carbon_t"]]){
+   const element=document.getElementById(id);if(element)element.textContent=data?.[key]||0;
+  }
+ }
+ function mountCountries(document,rows,escape){const element=document.getElementById("wCountryT");if(element)element.innerHTML=countries(rows,escape);}
+ function mountCities(document,rows,escape){const element=document.getElementById("wCityT");if(element)element.innerHTML=cities(rows,escape);}
+ root.DG_WORLD_STATS_TABLES=Object.freeze({countries,cities,update,mountCountries,mountCities});
 })(window);

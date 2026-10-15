@@ -25,6 +25,7 @@
     if(error)throw error;
    },
    countPendingMeasurements(){return getClient().from("measurements").select("*",{count:"exact",head:true}).eq("status","Beklemede");},
+   deleteProject(id){return getClient().from("projects").delete().eq("id",id);},
    buildMeasurementExportQuery(filters){
     let query=getClient().from("measurements").select("*,projects(name)");
     if(filters.country)query=query.eq("country",filters.country);

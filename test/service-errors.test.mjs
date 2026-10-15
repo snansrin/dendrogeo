@@ -8,7 +8,8 @@ test('unavailable OSM mirrors remain quarantined across different queries',async
  let calls=0,time=0;
  class Clock extends Date{static now(){return time;}}
  const ctx=vm.createContext({Date:Clock,Map,AbortController,setTimeout,clearTimeout,
-  console:{log(){},warn(){}},fetch:async()=>{calls++;throw new TypeError('Failed to fetch');}});
+  console:{log(){},warn(){}},fetch:async()=>{calls++;throw new TypeError('Failed to fetch');}});ctx.window=ctx;
+ for(const path of ['src/adapters/parks/post-overpass-query.js','src/adapters/parks/overpass-mirror-health.js','src/domain/parks/select-overpass-mirrors.js','src/domain/parks/overpass-request-budget.js'])vm.runInContext(source(path),ctx);
  vm.runInContext(source('src/services/osm-client.js'),ctx);
  assert.equal(await vm.runInContext('overpassRequest("first","park")',ctx),null);
  const first=calls;
@@ -25,7 +26,8 @@ test('OSM success after a failed mirror is cached without another request',async
  let calls=0;
  const ctx=vm.createContext({Date,Map,AbortController,setTimeout,clearTimeout,
   console:{log(){},warn(){}},fetch:async()=>++calls===1?{ok:false,status:406}:
-   {ok:true,status:200,json:async()=>({elements:[{id:123}]})}});
+   {ok:true,status:200,json:async()=>({elements:[{id:123}]})}});ctx.window=ctx;
+ for(const path of ['src/adapters/parks/post-overpass-query.js','src/adapters/parks/overpass-mirror-health.js','src/domain/parks/select-overpass-mirrors.js','src/domain/parks/overpass-request-budget.js'])vm.runInContext(source(path),ctx);
  vm.runInContext(source('src/services/osm-client.js'),ctx);
  const first=await vm.runInContext('overpassRequest("park","park")',ctx);
  assert.equal(first.elements[0].id,123);
@@ -36,11 +38,16 @@ test('OSM success after a failed mirror is cached without another request',async
 test('Turnstile renders only the selected form and removes the previous widget',()=>{
  const rendered=[],removed=[],scripts=[];
  const elements=Object.fromEntries(['erisim','tsLogin','tsReg','tsReset','fLogin','fReg','fReset'].map(id=>[id,{id,style:{}}]));
- const window={};
- const ctx=vm.createContext({window,$:id=>elements[id],sb:{auth:{onAuthStateChange(){}}},
+ const ctx=vm.createContext({$:id=>elements[id],sb:{auth:{onAuthStateChange(){return{};}}},
   document:{readyState:'loading',addEventListener(){},getElementById:id=>elements[id],
    createElement:()=>({remove(){}}),head:{appendChild:s=>scripts.push(s)}},
   console,setTimeout:()=>{throw Error('no background polling');}});
+ ctx.window=ctx;
+ for(const path of ['src/adapters/auth/session-store.js','src/domain/auth/resolve-turnstile-form.js',
+  'src/adapters/auth/load-turnstile-script.js','src/ui/turnstile-widget.js','src/ui/turnstile-controller.js',
+  'src/domain/auth/read-turnstile-token.js','src/ui/show-password-recovery.js','src/ui/show-auth-panel.js',
+  'src/ui/select-auth-tab.js','src/ui/render-auth-message.js'])
+  vm.runInContext(source(path),ctx);
  const auth=source('src/services/auth.js');
  vm.runInContext(auth.slice(0,auth.indexOf('/* --- BLOK 3')),ctx);
  vm.runInContext('initTurnstile()',ctx);

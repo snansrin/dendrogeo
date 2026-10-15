@@ -3,10 +3,31 @@ import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 import {verifyCoreFoundation} from '../scripts/check-core-foundation.mjs';
 
-test('measurement, park detection, park analysis and live map baseline stays byte-identical',()=>{
+test('measurement, park detection, park analysis and live map remain within the authorized foundation',()=>{
   const result=verifyCoreFoundation();
   assert.deepEqual(result.errors,[]);
   assert.ok(result.checked>=250,`expected broad immutable baseline, checked ${result.checked}`);
+});
+
+test('authorized modularization history records scoped, hash-linked changes',()=>{
+  const manifest=JSON.parse(readFileSync(new URL('../docs/core-foundation-lock.json',import.meta.url),'utf8'));
+  assert.ok(manifest.authorized_modularizations.length,'missing authorized migration history');
+  for(const migration of manifest.authorized_modularizations){
+    assert.ok(migration.date&&(migration.scope||migration.request),'incomplete migration record');
+    for(const file of migration.files||[]){
+      if(migration.audit_chain==='sha256-v1')
+        assert.ok(Object.hasOwn(manifest.sha256,file.path),`new chained path is outside baseline: ${file.path}`);
+      assert.match(file.sha256,/^[a-f0-9]{64}$/,`invalid migration hash: ${file.path}`);
+      if(file.previous_sha256!==undefined&&file.previous_sha256!==null)
+        assert.match(file.previous_sha256,/^[a-f0-9]{64}$/,`invalid previous hash: ${file.path}`);
+    }
+  }
+  const current=manifest.authorized_modularizations.at(-1);
+  assert.equal(current.audit_chain,'sha256-v1');
+  assert.match(current.scope,/user-authorized modularization/i);
+  assert.ok(current.files.length>0);
+  assert.ok(current.files.every(file=>/^[a-f0-9]{64}$/.test(file.previous_sha256||'')),
+    'latest migration must link every change to its previous hash');
 });
 
 test('foundation manifest names the current baseline and additive-only policy',()=>{

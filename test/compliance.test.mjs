@@ -34,6 +34,7 @@ const mapjs = rd('src/services/map.js');
 const landingjs = rd('src/ui/landing.js');
 const parkExport = rd('src/ui/park-export.js') + '\n' + rd('src/ui/park-export-canvas.js');
 const auth = rd('src/services/auth.js');
+const registerAccount = rd('src/ui/register-account.js');
 
 /* =========================================================
    1) HARİTA ATFI (ODbL / CC-BY-SA / Esri)
@@ -80,7 +81,7 @@ describe('harita atfı — OSM ODbL ve diğer altlık lisansları', () => {
   });
 
   test('altlık değiştirme artık DG_ATTR’den besleniyor (kopya metin yok)', () => {
-    assert.match(mapjs, /const attr=DG_ATTR;/);
+    assert.match(mapjs, /configuration\.resolve\(value,DG_ATTR\)/);
     assert.ok(!/'© OpenStreetMap',/.test(mapjs), 'eksik eski atıf metni kalmamalı');
   });
 
@@ -104,11 +105,11 @@ describe('KVKK: açık rıza ve aydınlatma', () => {
   });
 
   test('rıza yoksa kayıt ENGELLENİYOR', () => {
-    const fn = auth.slice(auth.indexOf('async function doRegister'), auth.indexOf('async function sendResetEmail') > -1 ? auth.indexOf('async function sendResetEmail') : auth.length);
-    assert.match(fn, /consentEl&&!consentEl\.checked/, 'onay kontrolü yok');
-    assert.match(fn, /kvkk_consent:true/, 'rıza metadata’ya yazılmalı');
-    assert.match(fn, /kvkk_consent_at:new Date\(\)\.toISOString\(\)/, 'zaman damgası şart (inkâr edilemez kayıt)');
-    assert.match(fn, /kvkk_consent_version/, 'hangi metin sürümü onaylandı');
+    assert.match(auth, /consent:\$\("rgConsent"\)/, 'onay alanı kayıt akışına iletilmiyor');
+    assert.match(registerAccount, /consent&&!consent\.checked/, 'onay kontrolü yok');
+    assert.match(registerAccount, /kvkk_consent:true/, 'rıza metadata’ya yazılmalı');
+    assert.match(registerAccount, /kvkk_consent_at:now\(\)/, 'zaman damgası şart (inkâr edilemez kayıt)');
+    assert.match(registerAccount, /kvkk_consent_version/, 'hangi metin sürümü onaylandı');
   });
 
   test('aydınlatma metni KVKK m.10 unsurlarını içeriyor', () => {

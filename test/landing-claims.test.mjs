@@ -148,14 +148,33 @@ describe('P1 · WCAG ve token disiplini', () => {
 
 describe('P1 · erişilebilirlik sözleşmesi', () => {
   test('⭐ sol menü öğeleri klavyeyle etkinleştirilebilir', () => {
-    const items = shell.match(/<div class="item[^"]*"[^>]*onclick="go\(/g) || [];
+    const items = shell.match(/<div class="item[^"]*"[^>]*data-dg-view="[^"]+"/g) || [];
     assert.ok(items.length >= 9, 'menü öğeleri bulunmalı');
     for (const it of items) {
       assert.match(it, /role="button"/, 'role eksik: ' + it);
       assert.match(it, /tabindex="0"/, 'tabindex eksik: ' + it);
-      assert.match(it, /onkeydown="dgKeyActivate/, 'keydown eksik: ' + it);
+      assert.doesNotMatch(it, /on(?:click|keydown)=/, 'menü eylemi markup içinde çalıştırılmamalı: ' + it);
     }
-    assert.match(rd('src/ui/state.js'), /function dgKeyActivate/, 'dgKeyActivate tanımlı');
+    const actions=rd('src/ui/shell-nav-actions.js');
+    assert.match(actions,/document\.addEventListener\("click"/);
+    assert.match(actions,/document\.addEventListener\("keydown"/);
+    assert.match(actions,/event\.key!=="Enter"&&event\.key!==" "/);
+    assert.match(actions,/event\.preventDefault\(\);navigate\(item\.dataset\.dgView\)/);
+    assert.match(rd('partials/boot.html'),/shell\.js[\s\S]*shell-nav-actions\.js/);
+    assert.match(rd('sw.js'),/'\/src\/ui\/shell-nav-actions\.js'/);
+  });
+
+  test('landing eylemleri modül üzerinden yönlendirilir ve giriş formu gezinmeyi engeller', () => {
+    assert.doesNotMatch(landing, /\son(?:click|submit)\s*=/i);
+    for(const action of ['nav-toggle','toggle-language','show-auth','google-sign-in','auth-tab','login','register','send-reset'])
+      assert.match(landing,new RegExp(`data-dg-landing-action="${action}"`));
+    assert.equal((landing.match(/data-dg-auth-form/g)||[]).length,3);
+    const actions=rd('src/ui/landing-actions.js');
+    assert.match(actions,/addEventListener\("click"/);
+    assert.match(actions,/addEventListener\("submit"/);
+    assert.match(actions,/root\.showAuth\(element\.dataset\.dgAuthMode/);
+    assert.match(rd('partials/boot.html'),/landing\.js[\s\S]*landing-actions\.js/);
+    assert.match(rd('sw.js'),/'\/src\/ui\/landing-actions\.js'/);
   });
   test('⭐ form alanlarının erişilebilir adı var (label for / aria-label)', () => {
     const birlesim = landing + shell;
@@ -195,8 +214,8 @@ describe('P1 · SEO/çok dillilik', () => {
     assert.match(sm, /rapor\/DGR-\d{4}-\d{4}\//);
   });
   test('dil düğmesi landing topnav VE uygulama üst barında (EN↔TR)', () => {
-    assert.match(landing, /class="btn sm ghost dg-lang-toggle" onclick="dgToggleLang\(\)"/);
-    assert.match(shell, /class="btn sm ghost dg-lang-toggle" onclick="dgToggleLang\(\)"/);
+    assert.match(landing, /class="btn sm ghost dg-lang-toggle" data-dg-landing-action="toggle-language"/);
+    assert.match(shell, /class="btn sm ghost dg-lang-toggle" data-dg-chrome-action="toggle-language"/);
   });
 });
 
@@ -237,12 +256,15 @@ describe('0036 · özellik ve EN bütünlük kilitleri', () => {
   });
   test('fillSpecies: ters sözlük savunması + alfabetik sıralama (T1)', () => {
     const m = rd('src/services/measure.js');
-    assert.match(m, /DG_I18N_TR/, 'EN grup değeri TR kanoniğe çözülüyor');
-    assert.match(m, /localeCompare\(String\(b\.tr\),"tr"\)/, 'tür listesi alfabetik (tr yereli)');
+    const selector = rd('src/ui/measurement-species-selector.js');
+    assert.match(m, /DG_MEASUREMENT_SPECIES_SELECTOR\.fill\(/, 'ölçüm facade’ı sahip UI modülüne delege ediyor');
+    assert.match(selector, /turkishLabels&&turkishLabels\[groupValue\]/, 'EN grup değeri TR kanoniğe çözülüyor');
+    assert.match(selector, /localeCompare\(String\(b\.tr\),"tr"\)/, 'tür listesi alfabetik (tr yereli)');
   });
   test('Kayıtlarım point sırası: proje alfabetik + point numerik (T1)', () => {
-    assert.match(rd('src/services/dash.js'), /localeCompare\(String\(pb\),"tr"\)/);
-    assert.match(rd('src/services/dash.js'), /point_id/, );
+    const grouping = rd('src/domain/users/group-own-records.js');
+    assert.match(grouping, /localeCompare\(String\(pb\),"tr"\)/);
+    assert.match(grouping, /point_id/);
   });
   test('"Kayıt" çakışması giderildi: sekme "Kayıt Ol", tablo "Record"', () => {
     const i18nSrc = i18nSource();
@@ -261,17 +283,19 @@ describe('0036 · özellik ve EN bütünlük kilitleri', () => {
     const b = rd('src/services/backup.js');
     assert.match(b, /function dgRestorePick/);
     assert.match(b, /function dgRestoreSQL/);
-    assert.match(b, /OVERRIDING SYSTEM VALUE/, 'identity kolonlarına özgün id yazımı');
-    assert.match(b, /ON CONFLICT DO NOTHING/, 'idempotent');
+    const restoreSql = rd('src/domain/backup/build-restore-sql.js');
+    assert.match(restoreSql, /OVERRIDING SYSTEM VALUE/, 'identity kolonlarına özgün id yazımı');
+    assert.match(restoreSql, /ON CONFLICT DO NOTHING/, 'idempotent');
     assert.match(rd('src/domain/backup/build-snapshot.js'), /zenodo\.22948643/, 'yedek künyesinde güncel DOI');
     assert.match(b, /DG_BACKUP_SNAPSHOT\.build\(/, 'servis güncel yedek künyesini kullanır');
-    assert.match(sh, /dgRestorePick/, 'kabukta giriş noktası');
+    assert.match(sh, /data-dg-backup-action="restore-file"/, 'kabuk seçim eylemini bildirmeli');
+    assert.match(rd('src/ui/backup-actions.js'), /root\.dgRestorePick\(event\)/, 'UI modülü restore girişine yönlendirmeli');
   });
   test('T4/0038 kurucuya özel Ziyaretçi & Canlı sekmesi (açılır kartlar KALDIRILDI)', () => {
     /* kullanıcı kararı: özet kartlar açılır OLMAYACAK; canlı izleme ayrı sekme */
     assert.ok(!sh.includes('dgAdminExpand'), 'açılır kart kablolaması kalktı');
     assert.ok(!sh.includes('admExpand'), 'admExpand kabuğu kalktı');
-    assert.ok(!rd('src/services/admin.js').includes('dgAdminExpand'), 'admin.js temiz');
+    assert.ok(!rd('src/ui/admin-panel-actions.js').includes('dgAdminExpand'), 'admin UI modülü temiz');
     assert.match(sh, /id="miVisitors"[^>]*style="display:none"/, 'sekme varsayılan gizli');
     assert.match(sh, /id="v-visitors"/);
     assert.match(sh, /id="visLive"/); assert.match(sh, /id="visMap"/); assert.match(sh, /id="visActivity"/);
@@ -285,20 +309,28 @@ describe('0036 · özellik ve EN bütünlük kilitleri', () => {
     assert.match(vs, /function renderVisitorsLive/);
     assert.match(vs, /function dgVisMapDraw/);
     assert.match(vs, /function dgPresenceStart/);
-    assert.match(vs, /dg-presence/, 'presence kanalı');
+    assert.match(rd('src/adapters/visitors/presence-channel.js'), /dg-presence/, 'presence kanalı adapterda');
     assert.match(rd('src/ui/shell.js'), /dgPresenceStart\(\)/, 'startShell kancası');
     assert.match(rd('src/ui/shell.js'), /dgPresencePing\(v\)/, 'go() kancası');
   });
   test('⭐ 0038 presence subscribe-önce + watchdog + konum alanı (connecting takılması kökten bitti)', () => {
     const vs = rd('src/services/visit-stats.js');
     /* kanal, getSession await'inden ÖNCE kurulmalı (takılma kök nedeni buydu) */
-    assert.ok(vs.indexOf('sb.channel("dg-presence"') < vs.lastIndexOf('await sb.auth.getSession()'),
-      'channel önce, auth arka planda');
-    assert.match(vs, /WATCHDOG/, '8 sn bekçi köpeği');
-    assert.match(vs, /p\.la=GPS\.latitude/, 'konum yalnız DG_LIVE_ON + GPS varsa');
-    assert.match(rd('src/services/map.js'), /DG_LIVE_ON/, 'park ORTAK kanalı anahtara bağlı kalır (0040: kurucu görünümü anahtarsız)');
+    const presenceAdapter = rd('src/adapters/visitors/presence-channel.js');
+    const startPresence = rd('src/application/visitors/start-presence-session.js');
+    assert.match(presenceAdapter, /client\.channel\("dg-presence"/);
+    assert.match(startPresence, /channelAdapter\.subscribe\(channel,onStatus\)/, 'kanal auth yükseltmesinden önce abone olur');
+    assert.match(startPresence, /WATCHDOG/, 'bağlantı watchdog use-case içinde');
+    assert.match(startPresence, /20000/, 'watchdog süresi 20 saniyedir');
+    assert.match(rd('src/domain/visitors/build-presence-payload.js'), /gps\.latitude/, 'konum payload domain modülünde');
     const mp = rd('src/services/map.js');
-    assert.ok(mp.indexOf('sb.channel("dg-park-"') < mp.indexOf('await sb.auth.getSession()'), 'park kanalı da subscribe-önce');
+    assert.match(mp, /DG_LIVE_ON/, 'park ORTAK kanalı anahtara bağlı kalır (0040: kurucu görünümü anahtarsız)');
+    assert.match(mp, /presence=window\.DG_PARK_PRESENCE_CHANNEL_ADAPTER/);
+    assert.match(mp, /presence\.join\(/, 'service Presence adapter’ını çağırır');
+    const presence = rd('src/adapters/parks/park-presence-channel.js');
+    assert.ok(presence.indexOf('channel.subscribe(onStatus)') < presence.indexOf('client.auth.getSession()'), 'kanal önce kurulur, auth arka planda alınır');
+    assert.match(presence, /setTimer\(onWatchdog,8000\)/, '8 sn watchdog adapter’da');
+    assert.match(presence, /client\.realtime\?\.setAuth/, 'JWT güncellemesi adapter sınırında kalır');
     assert.match(mp, /DG_PARK_CH_WATCH/, 'park kanalı watchdog');
     assert.match(mp, /DG_PARK_CH_LIVE/, 'track yalnız SUBSCRIBED sonrası');
   });
@@ -307,11 +339,12 @@ describe('0036 · özellik ve EN bütünlük kilitleri', () => {
     assert.match(mp, /function dgLiveShareJoinCurrent/);
     assert.match(mp, /function dgLiveSharePing/);
     assert.match(mp, /function dgLiveMatesDraw/);
-    assert.match(mp, /dg-park-/, 'park başına kanal');
+    assert.match(rd('src/adapters/parks/park-presence-channel.js'), /dg-park-/, 'park başına kanal');
     assert.match(mp, /DG_MATE_COLORS/, 'ortak başına renk');
-    assert.match(mp, /bindTooltip/, 'üstüne gelince kimlik');
-    assert.ok(!/\.insert\(|\.upsert\(/.test(mp.slice(mp.indexOf('0036 (T5)'))), 'canlı konum DB\'ye YAZMAZ');
-    assert.match(sh, /dgLiveShareToggle/, 'kabukta anahtar');
+    assert.match(rd('src/ui/render-park-live-collaborator-marker.js'), /bindTooltip/, 'üstüne gelince kimlik');
+    assert.doesNotMatch(mp, /\bsb\s*\.\s*(?:from|insert|upsert)\s*\(/, 'canlı konum DB\'ye YAZMAZ');
+    assert.match(sh, /data-dg-measure-action="live-share"/, 'kabukta anahtar');
+    assert.match(rd('src/ui/measurement-form-actions.js'), /dgLiveShareToggle\(element\.checked\)/);
     assert.match(sh, /id="dgLiveShare"/);
     assert.match(sh, /id="dgMatesNote"/);
     assert.match(rd('src/services/park-registry.js'), /dgLiveShareJoinCurrent/, 'proje değişince kanal taşınır');
@@ -327,12 +360,12 @@ describe('0036 · özellik ve EN bütünlük kilitleri', () => {
   });
   test('⭐ 0037 presence sertleştirme + durum görünürlüğü', () => {
     const vs = rd('src/services/visit-stats.js');
-    assert.match(vs, /setAuth/, 'realtime JWT açıkça veriliyor');
-    assert.match(vs, /Math\.min\(30000/, 'yeniden deneme aralığı sınırlı');
-    assert.match(vs, /DG_PRES_GENERATION/, 'eski kanal olayları yeni bağlantıyı etkileyemez');
+    assert.match(rd('src/application/visitors/upgrade-presence-auth.js'), /setRealtimeAuth/, 'realtime JWT açıkça veriliyor');
+    assert.match(rd('src/domain/visitors/presence-retry-delay.js'), /30000/, 'yeniden deneme aralığı sınırlı');
+    assert.match(rd('src/application/visitors/start-presence-session.js'), /generation===state\.generation/, 'eski kanal olayları yeni bağlantıyı etkileyemez');
     assert.match(vs, /function dgPresenceState/, 'durum dışa açık');
     const vs2 = rd('src/services/visit-stats.js');
-    assert.match(vs2, /dgPresenceState\(\)/, 'canlı kart durumu gösteriyor');
+    assert.match(rd('src/ui/visitor-live-panel.js'), /state/, 'canlı kart bağlantı durumunu gösteriyor');
     const mp = rd('src/services/map.js');
     assert.match(mp, /DG_PARK_CH_RETRY/, 'canlı konum kanalı da yeniden dener');
     assert.match(rd('css/style.css'), /\.dg-switch/, 'temalı anahtar stili');
@@ -475,7 +508,8 @@ describe('0040 · kaydırma koruması + ziyaretçi sekmesi zenginleştirme', () 
   });
   test('⭐ ziyaretçi sekmesi: yenile düğmesi + 10 sn tik + zengin satır + odaklanma', () => {
     const sh = rd2('partials/shell.html');
-    assert.match(sh, /onclick="dgVisRefresh\(\)"/, 'yenile düğmesi');
+    assert.match(sh, /data-dg-visitor-action="refresh"/, 'yenile eylemi UI modülüne bağlı');
+    assert.match(rd2('src/ui/visitor-actions.js'), /case "refresh":root\.dgVisRefresh\(\)/, 'UI modülü yenileme akışına yönlendirir');
     const vs = rd2('src/services/visit-stats.js');
     assert.match(vs, /function dgVisRefresh/);
     assert.match(vs, /function dgVisTickStart/);
@@ -514,7 +548,8 @@ describe('0041 · kaydırma window kök düzeltmesi + 0044 soket kaldırma', () 
     assert.ok(!mj.includes('dgAiOnPhoto'), 'fotoğraf kancası izi kalmamalı');
     assert.ok(!i18nSource().includes('AI Ağaç Algılama'), 'sözlük izi kalmamalı');
     /* Fotoğraf denetimi SAHADA ve TEK yerde: Yeni Ölçüm sekmesi, fotoğraf düğmesi. */
-    assert.match(shell, /onchange="checkPhoto\(event\)"/, 'denetim fotoğraf düğmesine bağlı');
+    assert.match(shell, /data-dg-measure-action="photo-check"/, 'denetim fotoğraf düğmesine bağlı');
+    assert.match(rd('src/ui/measurement-form-actions.js'), /checkPhoto\(event\)/);
     assert.match(shell, /id="photoCheck"/, 'sonuç kutusu ölçüm formunda');
     assert.match(mj, /function dgPhotoScan/, 'çok sınıflı tarayıcı (saf fonksiyon)');
     assert.match(mj, /function dgPhotoGate/, 'kalibre kapı');

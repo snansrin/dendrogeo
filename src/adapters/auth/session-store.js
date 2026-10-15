@@ -10,6 +10,7 @@
    resetPasswordForEmail(email,options){return getClient().auth.resetPasswordForEmail(email,options);},
    signOut(){return getClient().auth.signOut({scope:"local"});},
    updatePassword(password){return getClient().auth.updateUser({password});},
+   updateProfileMetadata(profile){return getClient().auth.updateUser({data:{dendrogeo_profile:profile}});},
    signInWithOAuth(options){return getClient().auth.signInWithOAuth(options);},
    loadProfile(id){return getClient().from("profiles").select("*").eq("id",id).single();}
   });

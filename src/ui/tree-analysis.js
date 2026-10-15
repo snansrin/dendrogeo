@@ -36,5 +36,9 @@
     </div>`).join("")}
   </div>`;
  }
- root.DG_TREE_ANALYSIS_UI=Object.freeze({render});
+ function mount(document,elementId,html){
+  const element=document.getElementById(elementId);if(!element)return false;
+  element.innerHTML=html;return true;
+ }
+ root.DG_TREE_ANALYSIS_UI=Object.freeze({render,mount});
 })(window);

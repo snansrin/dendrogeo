@@ -34,11 +34,12 @@ test('auth adapter keeps session, auth commands, realtime auth and profile resul
  assert.equal(await store.resetPasswordForEmail(credentials.email,resetOptions),authResult);
  assert.equal(await store.signOut(),authResult);
  assert.equal(await store.updatePassword('new-secret'),authResult);
+ const profileMetadata={institution:'Example University'};assert.equal(await store.updateProfileMetadata(profileMetadata),authResult);
  assert.equal(await store.signInWithOAuth(oauthOptions),authResult);
  await store.setRealtimeAuth('jwt');
  assert.equal(await store.loadProfile('u1'),profile);
  const plainCalls=JSON.parse(JSON.stringify(calls,(key,value)=>typeof value==='function'?'callback':value));
- assert.deepEqual(plainCalls,[['listen','callback'],['password',credentials],['signup',credentials],['reset',credentials.email,resetOptions],['signout',{scope:'local'}],['update',{password:'new-secret'}],['oauth',oauthOptions],['auth','jwt'],['from','profiles'],['select','*'],['eq','id','u1']]);
+ assert.deepEqual(plainCalls,[['listen','callback'],['password',credentials],['signup',credentials],['reset',credentials.email,resetOptions],['signout',{scope:'local'}],['update',{password:'new-secret'}],['update',{data:{dendrogeo_profile:profileMetadata}}],['oauth',oauthOptions],['auth','jwt'],['from','profiles'],['select','*'],['eq','id','u1']]);
 });
 
 test('persistence boundary rejects direct queries in both application and UI layers',()=>{

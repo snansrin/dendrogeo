@@ -11,5 +11,11 @@ window.DG_RENDER_USER_PUBLICATION_CARD = (() => {
     return (error ? '<div class="alert err">⚠ ' + escape(error) + "</div>" : "") + header + controls + notices;
   }
 
-  return Object.freeze({ schemaWarning, render });
+  function mount(box, html) {
+    if (!box) return false;
+    box.innerHTML = html;
+    return true;
+  }
+
+  return Object.freeze({ schemaWarning, render, mount });
 })();

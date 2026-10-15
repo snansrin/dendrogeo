@@ -43,6 +43,7 @@ const idx = readFileSync(join(ROOT, 'index.html'), 'utf8');
 const sw = readFileSync(join(ROOT, 'sw.js'), 'utf8');
 const world = readFileSync(join(ROOT, 'src/services/world.js'), 'utf8');
 const measure = readFileSync(join(ROOT, 'src/services/measure.js'), 'utf8');
+const measurementProjectCard = readFileSync(join(ROOT, 'src/ui/measurement-project-card.js'), 'utf8');
 const registry = readFileSync(join(ROOT, 'src/services/park-registry.js'), 'utf8');
 const measurementParkGate = readFileSync(join(ROOT, 'src/application/parks/evaluate-measurement-park-gate.js'), 'utf8');
 const measurementParkGateUi = readFileSync(join(ROOT, 'src/ui/park-measurement-gate.js'), 'utf8');
@@ -331,7 +332,7 @@ describe('migration 0005: park adı yazım düzeni (Türkçe duyarlı)', () => {
 describe('park kimlikleri yönetim aracı (yeniden adlandır · birleştir · sil)', () => {
   test('kart + kontroller sayfada', () => {
     assert.match(idx, /id="parkAdminBox"/);
-    assert.match(idx, /onclick="loadParkAdmin\(\)"/);
+    assert.match(idx, /data-dg-admin-panel-action="reload-parks"/);
     assert.match(idx, /<h2 style="font-size:1\.2rem">Park Kimlikleri<\/h2>/);
   });
 
@@ -400,8 +401,9 @@ describe('parka bağlama YALNIZ yönetici (0006 + kullanıcı isteği 2026-09-24
   });
 
   test('projeler tablosundaki 🌳 Bağla düğmesi yalnız yöneticiye', () => {
-    assert.match(measure, /dgIsAdmin\(\)[\s\S]{0,120}startParkScan\(\{projectId:/);
-    assert.match(measure, /yönetici bağlayacak/);
+    assert.match(measurementProjectCard, /!isShared&&!project\.park_id&&ui\.isAdmin\(\)/);
+    assert.match(measurementProjectCard, /startParkScan\(\{projectId:/);
+    assert.match(measurementProjectCard, /yönetici bağlayacak/);
   });
 
   test('ölçüm kapısı yönetici olmayanı "yeni proje" yoluna yönlendirir', () => {
@@ -497,12 +499,13 @@ describe('kabuk: park algılama ekranı + ölçüm kapısı id’leri', () => {
   });
 
   test('yönetimde geri doldurma aracı var', () => {
-    assert.match(idx, /onclick="backfillParks\(\)"/);
+    assert.match(idx, /data-dg-maintenance-action="backfill-parks"/);
     assert.match(idx, /id="backfillBox"/);
   });
 
   test('proje seçimi değişince kapı tazelenir', () => {
-    assert.match(idx, /id="mProject" onchange="dgProjectChanged\(\)"/);
+    assert.match(idx, /id="mProject" data-dg-measure-action="project-change"/);
+    assert.match(readFileSync(new URL('../src/ui/measurement-form-actions.js',import.meta.url),'utf8'), /dgProjectChanged\(\)/);
   });
 
   test('proje kartları park bağını ve rol ayrımını görünür tutuyor', () => {
@@ -510,7 +513,8 @@ describe('kabuk: park algılama ekranı + ölçüm kapısı id’leri', () => {
     assert.match(idx, /id="projSharedList"/);
     assert.match(idx, /PROJE SAHİBİ/);
     assert.match(idx, /ORTAK/);
-    assert.match(measure, /project-card-park/);
+    assert.match(measure, /DG_MEASUREMENT_PROJECT_CARD\.render/);
+    assert.match(measurementProjectCard, /project-card-park/);
   });
 
   test('⭐ park-registry.js yükleme sırası: park-query → registry → grid-engine', () => {
@@ -546,12 +550,13 @@ describe('kabuk: park algılama ekranı + ölçüm kapısı id’leri', () => {
 ========================================================= */
 describe('akış: karşılaştırma park bazlı, ölçüm kapalı, park kaydediliyor', () => {
   test('⭐ loadParkCompare v_park_compare’den okuyor (proje adı değil)', () => {
-    assert.match(world, /sb\.from\("v_park_compare"\)/);
+    const store = readFileSync(join(ROOT, 'src/adapters/world/park-comparison-store.js'), 'utf8');
+    assert.match(store, /from\("v_park_compare"\)/);
     /* Sıralama artık ham ölçüm satırlarından proje adına göre yapılmıyor:
      * eski kod `const name=r.projects?.name` ile gruplardı. */
     const fn = world.slice(world.indexOf('async function loadParkCompare'), world.indexOf('function dgParkRowHTML'));
     assert.ok(!/r\.projects\?\.name/.test(fn), 'ana yol hâlâ proje adına göre grupluyor');
-    assert.match(world, /contributors/, 'katılımcı sayısı gösterilmeli');
+    assert.match(readFileSync(join(ROOT, 'src/ui/park-comparison-row.js'), 'utf8'), /contributors/, 'katılımcı sayısı gösterilmeli');
   });
 
   test('karşılaştırma park_pending kayıtlarını AYRI bölümde tutar (veri kaybolmaz)', () => {
@@ -570,18 +575,20 @@ describe('akış: karşılaştırma park bazlı, ölçüm kapalı, park kaydedil
   });
 
   test('⭐ saveMeas parkı olmayan projede ölçümü reddedip algılamaya yönlendirir', () => {
-    assert.match(measure, /if\(DG_PARK_SCHEMA_OK&&!EDIT_ID&&\(!gateProj\|\|!gateProj\.park_id\)\)/);
-    assert.match(measure, /startParkScan\(\{projectId:pid\|\|null,returnTo:"measure"\}\)/);
+    assert.match(measure, /startParkScan\(\{projectId:form\.projectId\|\|null,returnTo:"measure"\}\)/);
+    assert.match(readFileSync(join(ROOT,'src/application/trees/resolve-measurement-save-gates.js'),'utf8'), /parkSchemaOk&&!editId&&\(!project\|\|!project\.park_id\)/);
+    assert.match(readFileSync(join(ROOT,'src/application/trees/validate-measurement-submission.js'),'utf8'), /if\(gate\.reason\)return\{ok:false,reason:gate\.reason/);
   });
 
   test('ölçüm satırına park_id yazılır (denormalize)', () => {
-    assert.match(measure, /if\(DG_PARK_SCHEMA_OK\)base\.park_id=\(gateProj&&gateProj\.park_id\)\|\|null;/);
+    assert.match(readFileSync(join(ROOT,'src/domain/trees/build-measurement-record.js'),'utf8'), /if\(parkSchemaOk\)record\.park_id=parkId\|\|null/);
   });
 
   test('proje oluşturma park olmadan engellenir', () => {
     const fn = measure.slice(measure.indexOf('async function createProject'), measure.indexOf('async function deleteProject'));
-    assert.match(fn, /const park=DG_PARK;/);
-    assert.match(fn, /park olmadan proje açılamaz/);
+    assert.match(fn, /DG_SAVE_MEASUREMENT_PROJECT\.save/);
+    assert.match(fn, /park:DG_PARK/);
+    assert.match(fn, /Önce park algıla — park olmadan proje açılamaz/);
     assert.match(fn, /startParkScan\(\{returnTo:"projects"\}\)/);
   });
 

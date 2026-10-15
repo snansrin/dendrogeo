@@ -14,7 +14,7 @@ function app({failAt=-1,counts=[500,12,88],apiError=false}={}){
    return (index===failAt?Promise.reject(Error('offline')):Promise.resolve({count:counts[index],...(apiError?{error:{message:'denied'}}:{})})).then(resolve,reject);
   }};
  }}});
- for(const file of ['src/adapters/visitors/track-visit.js','src/adapters/visitors/admin-visit-counts-store.js'])vm.runInContext(readFileSync(new URL('../'+file,import.meta.url),'utf8'),ctx);
+ for(const file of ['src/adapters/visitors/track-visit.js','src/adapters/visitors/admin-visit-counts-store.js','src/domain/visitors/resolve-admin-visit-windows.js','src/application/visitors/load-admin-visit-statistics.js','src/ui/visitor-admin-counts.js'])vm.runInContext(readFileSync(new URL('../'+file,import.meta.url),'utf8'),ctx);
  const service=readFileSync(new URL('../src/services/visit-stats.js',import.meta.url),'utf8');
  vm.runInContext(service.slice(0,service.indexOf('/* ═══════════')),ctx);
  return{calls,updates,now,run:()=>vm.runInContext('loadVisitStats()',ctx)};

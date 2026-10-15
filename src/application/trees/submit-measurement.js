@@ -1,6 +1,6 @@
 "use strict";
 
-/* Compose the five measurement-save phases while the service keeps its legacy fallback. */
+/* Compose the five measurement-save phases exposed by the legacy service facade. */
 window.DG_SUBMIT_MEASUREMENT={
   async run(input,ports){
     const validated=window.DG_VALIDATE_MEASUREMENT_SUBMISSION.validate(input,ports.validation);

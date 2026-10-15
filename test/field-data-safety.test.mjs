@@ -4,10 +4,13 @@ import vm from 'node:vm';
 import { readFileSync } from 'node:fs';
 const root=new URL('../',import.meta.url);
 function deleteFixture(result){
- const events=[];const ctx={window:null,confirm:()=>true,dgCf:s=>s,console,
+ const events=[];const ctx={window:null,document:{getElementById:()=>({classList:{contains:()=>false}})},confirm:()=>true,dgCf:s=>s,console,
  sb:{from(){return {delete(){events.push('delete');return this;},eq(){return this;},select(){return Promise.resolve(result);}};}},
  removePhoto:async u=>events.push('photo:'+u),toast:()=>events.push('error'),$:()=>null,dgMarkLiveDirty:()=>events.push('dirty')};
- ctx.window=ctx;vm.createContext(ctx);vm.runInContext(readFileSync(new URL('src/services/dash.js',root),'utf8'),ctx);
+ ctx.window=ctx;vm.createContext(ctx);
+ for(const path of ['src/ui/dashboard-view-state.js','src/adapters/users/delete-own-record-store.js','src/application/dashboard/delete-own-record.js'])
+  vm.runInContext(readFileSync(new URL(path,root),'utf8'),ctx);
+ vm.runInContext(readFileSync(new URL('src/services/dash.js',root),'utf8'),ctx);
  ctx.loadRecords=()=>events.push('records');ctx.loadDash=()=>events.push('dash');return {ctx,events};
 }
 test('failed or zero-row deletion retains photo and UI records',async()=>{
@@ -20,10 +23,13 @@ test('confirmed deletion removes its returned photo and refreshes live data',asy
  assert.deepEqual(f.events,['delete','photo:saved.jpg','records','dash','dirty']);
 });
 test('restore SQL quotes untrusted column identifiers and contains metadata line breaks',()=>{
- let output;const ctx={window:null,confirm:()=>true,dgCf:s=>s,dgTfs:()=>'',toast(){},
+ let output;const ctx={window:null,confirm:()=>true,dgCf:s=>s,dgTfs:()=> 'restore',toast(){},
  Blob:class{constructor(parts){output=parts.join('');}},URL:{createObjectURL:()=>'',revokeObjectURL(){}},
  setTimeout(){},document:{createElement:()=>({click(){},remove(){}}),body:{appendChild(){}}}};
- ctx.window=ctx;vm.createContext(ctx);vm.runInContext(readFileSync(new URL('src/services/backup.js',root),'utf8'),ctx);
+ ctx.window=ctx;vm.createContext(ctx);
+ for(const path of ['src/domain/backup/sql-value.js','src/domain/backup/build-restore-sql.js','src/application/backup/restore-backup.js','src/adapters/backup/download-restore-sql.js','src/ui/restore-backup-prompt.js'])
+  vm.runInContext(readFileSync(new URL(path,root),'utf8'),ctx);
+ vm.runInContext(readFileSync(new URL('src/services/backup.js',root),'utf8'),ctx);
  const key='id) VALUES (1); DROP TABLE public.parks; --';
  ctx.dgRestoreSQL({counts:{},exported_by:'Field\nCOMMIT;\n-- injected',exported_at:'2026-10-04\r\nSELECT 1;',projects:[{[key]:1,name:"Park O'Name"}]});
  assert.ok(output.includes('("'+key+'", "name")'));assert.ok(output.includes("'Park O''Name'"));

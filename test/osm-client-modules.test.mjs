@@ -10,6 +10,7 @@ const MODULES=[
   'src/domain/parks/select-overpass-mirrors.js',
   'src/domain/parks/overpass-request-budget.js',
   'src/adapters/parks/overpass-mirror-health.js',
+  'src/adapters/parks/post-overpass-query.js',
 ];
 
 test('cache key, request coalescing, mirror selection, budgets and health retain their contracts',async()=>{
@@ -52,7 +53,7 @@ test('locked OSM service delegates same-query concurrency and retains response c
   assert.equal(calls,1);
 });
 
-test('all five OSM modules load before osm-client and are precached',()=>{
+test('OSM modules load before osm-client and are precached',()=>{
   const head=read('partials/head.html');const sw=read('sw.js');
   const service=head.indexOf('src/services/osm-client.js');
   const core=sw.slice(sw.indexOf('const CORE_ASSETS'),sw.indexOf('];',sw.indexOf('const CORE_ASSETS')));
@@ -60,4 +61,5 @@ test('all five OSM modules load before osm-client and are precached',()=>{
     assert.ok(head.indexOf(path)>=0&&head.indexOf(path)<service,`${path} must load before the service`);
     assert.ok(core.includes(`/${path}`),`${path} must be in the service-worker cache`);
   }
+  assert.doesNotMatch(read('src/services/osm-client.js'),/\bfetch\s*\(/);
 });

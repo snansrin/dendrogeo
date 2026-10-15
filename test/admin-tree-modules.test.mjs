@@ -85,12 +85,13 @@ test('row, user, project, park, and tree renderers preserve the hierarchy and mo
   const user = modules.DG_ADMIN_TREE_USER.render({ key: 'u1', name: 'Araştırmacı', beklemede: 1, n: 1, c: 100, rows: [] }, ports);
   assert.ok(user.includes('ontoggle="dgTreeToggle(\'u1\',this.open)"') && user.includes(' open'));
   const project = modules.DG_ADMIN_TREE_PROJECT.render({ key: 'j4', name: 'Proje', project_id: 4, beklemede: 1, users: [], n: 1, c: 100 }, ports);
-  assert.ok(project.includes('dgTreeDeleteProject(event,4)'));
+  assert.ok(project.includes('data-dg-admin-tree-action="delete-project"')&&project.includes('data-project-id="4"'));
   const park = modules.DG_ADMIN_TREE_PARK.render({ key: 'p9', name: 'Park', city: 'Ankara', area_m2: 10000, pending: false,
     beklemede: 1, projects: [{ users: [] }], n: 1, c: 1000 }, ports);
   assert.ok(park.includes('1.00 ha') && park.includes('1.00 t/ha'));
   const element = { innerHTML: '' };
   modules.DG_ADMIN_TREE_VIEW.render({ element, tree: [{ pending: false, projects: [], n: 1, c: 1000 }], rows: [], status: '', query: '',
     error: null, escape: String, translate: value => value, tons: () => '1.00 t', parkHTML: () => '<details class="dg-tree-park"></details>' });
-  assert.ok(element.innerHTML.includes('dgTreeExpand(true)') && element.innerHTML.includes('dg-tree-park'));
+  assert.ok(element.innerHTML.includes('data-dg-admin-tree-action="expand-all"') && element.innerHTML.includes('dg-tree-park'));
+  assert.doesNotMatch(element.innerHTML,/\bonclick\s*=/i);
 });

@@ -18,5 +18,12 @@ function forPark({parkId,fallbackAll,projects,escape:esc}){
   return `<option value="0">Bu park için proje yok — algılama kartından oluştur</option>`;
 }
 
-root.DG_PARK_PROJECT_OPTIONS_UI=Object.freeze({label,forPark});
+function readSelected(document){return document.getElementById("mProject")?.value||"";}
+function clearPointSuggestion(document){
+  const point=document.getElementById("mPoint"),result=document.getElementById("pointQueryResult");
+  if(point)point.value="";
+  if(result)result.style.display="none";
+}
+
+root.DG_PARK_PROJECT_OPTIONS_UI=Object.freeze({label,forPark,readSelected,clearPointSuggestion});
 })(window);

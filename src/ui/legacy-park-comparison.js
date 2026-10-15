@@ -14,5 +14,7 @@
   </div>`).join(""):'<div style="color:var(--mut);font-size:.85rem">Henüz onaylı kayıt yok.</div>');
  }
  function reportOptions(parks,escape){return parks.map(park=>`<option>proj:${escape(park.name)}</option>`).join("")||'<option value="">—</option>';}
- root.DG_LEGACY_PARK_COMPARISON_UI=Object.freeze({render,reportOptions});
+ function renderInto(element,parks,max,ports){if(element)element.innerHTML=render(parks,max,ports);}
+ function renderOptions(element,parks,escape){if(element)element.innerHTML=reportOptions(parks,escape);}
+ root.DG_LEGACY_PARK_COMPARISON_UI=Object.freeze({render,reportOptions,renderInto,renderOptions});
 })(window);

@@ -6,5 +6,6 @@
   getElement("aProj").textContent=summary.projects;
   getElement("aCarbon").textContent=summary.carbon;
  }
- root.DG_ADMIN_OVERVIEW_METRICS_UI=Object.freeze({render});
+ function updateCarbon(value,getElement){getElement("aCarbon").textContent=value||0;}
+ root.DG_ADMIN_OVERVIEW_METRICS_UI=Object.freeze({render,updateCarbon});
 })(window);

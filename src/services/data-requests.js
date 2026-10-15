@@ -41,8 +41,8 @@ async function loadMyRequests__scroll(){
  return await window.DG_LOAD_OWN_DATA_REQUESTS.execute(USER,{
   load:userId=>window.DG_MY_DATA_REQUESTS_STORE.load(sb,userId),
   getTarget:()=>$("myRequests"),
-  onFailure:el=>{el.innerHTML='<div class="alert err">Talepler yüklenemedi.</div>';},
-  onEmpty:el=>{el.innerHTML="";},
+  onFailure:el=>window.DG_MY_DATA_REQUESTS_UI.failure(el),
+  onEmpty:el=>window.DG_MY_DATA_REQUESTS_UI.clear(el),
   render:(el,data)=>window.DG_MY_DATA_REQUESTS_UI.render(el,data,{escape:esc})
  });
 }
@@ -83,22 +83,9 @@ async function loadRequests__scroll(){
  return await window.DG_LOAD_DATA_REQUEST_QUEUE.execute({
   load:()=>window.DG_DATA_REQUEST_QUEUE_STORE.load(sb),
   partition:rows=>window.DG_DATA_REQUEST_QUEUE.partition(rows),
-  updateCounts:(pending,closed)=>{
-   $("aReqPending").textContent=pending.length;
-   $("aReqPendingMini").textContent=pending.length;
-   $("aReqClosed").textContent=closed.length;
-  },
+  updateCounts:pending=>window.DG_DATA_REQUEST_PENDING_TABLE_UI.updateCounts(document,pending),
   renderPending:pending=>window.DG_DATA_REQUEST_PENDING_TABLE_UI.render($("aReqT"),pending,{escape:esc}),
-  renderClosed:closed=>{
-   const closedWrap=$("closedRequestsWrap");
-   if(closed.length>0){
-    closedWrap.style.display="block";
-    $("aReqClosed").textContent=closed.length;
-    window.DG_DATA_REQUEST_CLOSED_TABLE_UI.render($("closedReqT"),closed,{escape:esc});
-   }else{
-    closedWrap.style.display="none";
-   }
-  }
+  renderClosed:closed=>window.DG_DATA_REQUEST_CLOSED_TABLE_UI.renderSection(document,closed,{escape:esc})
  });
 }
 

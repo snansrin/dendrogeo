@@ -25,8 +25,8 @@ describe('Kullanıcı yönetimi · kompakt DendroGeo tema sözleşmesi',()=>{
  });
  test('rol ve aktiflik yetkileri korunur',()=>{
   assert.match(js,/if\(PROFILE\.role!=="owner"\)return toast/);
-  assert.match(view,/updateRole\('/);
-  assert.match(view,/toggleU\('/);
+  assert.match(view,/data-dg-admin-user-action="role"/);
+  assert.match(view,/data-dg-admin-user-action="toggle"/);
   assert.match(view,/ownerRow/);
   assert.match(js,/DG_ADMIN_USER_TABLE_UI\.render\(/);
   assert.match(view,/🛡 Korunuyor/);

@@ -49,6 +49,14 @@ test('wake-lock adapter avoids duplicate requests and allows a released lock to 
   await window.DG_MEASUREMENT_WAKE_LOCK_ADAPTER.create({getNavigator:()=>({})}).acquire();
 });
 
+test('wake-lock adapter owns visibility subscription and ignores hidden transitions',()=>{
+  const{window}=setup();let listener,removals=0,visible=0;
+  const document={visibilityState:'hidden',addEventListener:(name,callback)=>{assert.equal(name,'visibilitychange');listener=callback;},removeEventListener:()=>removals++};
+  const api=window.DG_MEASUREMENT_WAKE_LOCK_ADAPTER.create({getNavigator:()=>({}),getDocument:()=>document});
+  const dispose=api.bindVisibility(()=>visible++);listener();document.visibilityState='visible';listener();dispose();
+  assert.equal(visible,1);assert.equal(removals,1);
+});
+
 test('GPS activation preserves permission/status/busy order and updates each live fix',async()=>{
   const{window}=setup();const events=[];let firstFix,liveFix,options;
   const geolocation={isAvailable:()=>true,permissionState:async()=> 'prompt',getCurrentPosition:(success,error,value)=>{firstFix=success;options=value;events.push('request');},watchPosition:(success)=>{liveFix=success;events.push('watch');}};
@@ -60,10 +68,11 @@ test('GPS activation preserves permission/status/busy order and updates each liv
   liveFix({coords:{latitude:41}});assert.equal(events.at(-4)[0],'gps');assert.equal(events.at(-4)[1],41);
 });
 
-test('GPS modules load before measure and service keeps the locked inline compatibility path',()=>{
+test('GPS modules load before measure and the service composes the modular GPS use case',()=>{
   const head=read('partials/head.html'),sw=read('sw.js'),measure=head.indexOf('src/services/measure.js');
   for(const path of modules){assert.ok(head.indexOf(path)>=0&&head.indexOf(path)<measure,`${path} load order`);assert.ok(sw.includes(`'/${path}'`),`${path} precache`);}
   assert.ok(service.includes('DG_START_MEASUREMENT_GPS.start'));
   assert.ok(service.includes('iPhone kullanıcısı mısınız?'));
-  assert.ok(service.includes('navigator.geolocation.watchPosition'));
+  assert.ok(service.includes('DG_MEASUREMENT_GEOLOCATION_ADAPTER.create'));
+  assert.ok(!service.includes('navigator.geolocation.watchPosition'));
 });

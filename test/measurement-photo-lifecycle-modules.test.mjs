@@ -25,6 +25,13 @@ test('pixel adapter draws the fixed square, revokes its URL and returns sampled 
   assert.equal(result,pixels);assert.deepEqual(events.map(event=>event[0]),['width','height','draw','revoke','pixels']);assert.equal(events[2][1].id,'photo');assert.deepEqual(events[4].slice(1),[0,0,120,120]);
 });
 
+test('pixel adapter factory owns document and object-URL access for the measurement service',()=>{
+  const{window}=setup(),events=[],pixels=new Uint8ClampedArray([4]);
+  const canvas={getContext:()=>({drawImage(){events.push('draw');},getImageData:()=>({data:pixels})})};
+  const api=window.DG_READ_MEASUREMENT_PHOTO_PIXELS_ADAPTER.create({getDocument:()=>({createElement:name=>{assert.equal(name,'canvas');return canvas;}}),getURL:()=>({revokeObjectURL:url=>events.push(url)})});
+  assert.equal(api.read({image:{},url:'blob:owned'},16),pixels);assert.deepEqual(events,['draw','blob:owned']);
+});
+
 test('photo file UI selects a name and clears file, feedback and remove control',()=>{
   const{window}=setup(),elements={mPhoto:{value:'selected'},mPhotoName:{textContent:'tree.jpg'},photoCheck:{style:{display:'block'}},mPhotoRemove:{style:{display:'inline-flex'}}},element=id=>elements[id];
   window.DG_MEASUREMENT_PHOTO_FILE_UI.select({name:'new-tree.jpg'},element);assert.equal(elements.mPhotoName.textContent,'new-tree.jpg');assert.equal(elements.mPhotoRemove.style.display,'inline-flex');
@@ -40,8 +47,10 @@ test('photo check gates valid photos, rejects non-images and ignores a check aft
   const stale=check({target:{files:[{name:'slow.jpg',type:'image/jpeg'}]}});state.invalidate();imageResolve({image:{},url:'blob:stale'});await stale;assert.ok(events.some(event=>Array.isArray(event)&&event[0]==='revoke'&&event[1]==='blob:stale'));assert.equal(events.some(event=>Array.isArray(event)&&event[0]==='passed'),false);
 });
 
-test('photo lifecycle modules load before measure, are precached and service retains its legacy fallback',()=>{
+test('photo lifecycle modules load before measure, are precached and service requires the photo use case',()=>{
   const head=read('partials/head.html'),sw=read('sw.js'),service=read('src/services/measure.js'),measure=head.indexOf('src/services/measure.js');
   for(const path of modules){assert.ok(head.indexOf(path)>=0&&head.indexOf(path)<measure,`${path} load order`);assert.ok(sw.includes(`'/${path}'`),`${path} precache`);}
-  assert.ok(service.includes('DG_CHECK_MEASUREMENT_PHOTO_USE_CASE(e)'));assert.ok(service.includes('async function checkPhoto(e)'));assert.ok(service.includes('dgPhotoScan'));assert.ok(service.includes('dgPhotoGate'));
+  assert.match(service,/window\.DG_MEASUREMENT_PHOTO_CHECK_STATE\.create\(\)/);assert.match(service,/window\.DG_CHECK_MEASUREMENT_PHOTO\.create\(/);
+  assert.match(service,/async function checkPhoto\(e\)\{return DG_CHECK_MEASUREMENT_PHOTO_USE_CASE\(e\);\}/);
+  assert.ok(service.includes('dgPhotoScan'));assert.ok(service.includes('dgPhotoGate'));
 });

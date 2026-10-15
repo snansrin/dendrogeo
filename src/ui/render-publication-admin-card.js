@@ -25,5 +25,22 @@ window.DG_RENDER_PUBLICATION_ADMIN_CARD = (() => {
       <details class="admin-publish-help"><summary>Yayın akışı ve değişmezlik kuralları</summary><div class="admin-publish-help-body">📄 Yayınla isteği kuyruğa yazar; rapor üretildiğinde DGR kimliği ve içerik hash'i dondurulur. Aktif üretim raporu için Zenodo DOI kaydı otomatik yürür. Eski rapor değiştirilmez; yeni çözümleme yeni DGR kimliği alır. 🗑 Geri çekme veri dosyalarını kaldırır ve kimliği yeniden kullandırmaz.</div></details>`;
   }
 
-  return Object.freeze({ schemaWarning, render });
+  function mount(box, html) {
+    if (!box) return false;
+    box.innerHTML = html;
+    return true;
+  }
+
+  function updateClock(clock, value) {
+    if (!clock) return false;
+    clock.textContent = value || "—";
+    return true;
+  }
+
+  function showLoading(document) {
+    const box = document?.getElementById("dgPubBox");
+    return mount(box, '<div class="dg-tree-meta">⏳ Kuyruk yükleniyor…</div>');
+  }
+
+  return Object.freeze({ schemaWarning, render, mount, updateClock, showLoading });
 })();

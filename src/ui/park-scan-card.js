@@ -1,6 +1,12 @@
 "use strict";
 /* Draw park discovery and project controls from the supplied view state. */
 (function(root){
+function prepare({document}){
+  const element=document.getElementById("parkScanCard");
+  if(!element||!element.style)return null;
+  if(document.getElementById("v-map")?.classList.contains("surface-review-active")){element.style.display="none";return null;}
+  return element;
+}
 function renderParkScanCard({element:el,park,candidate:cand,showManual,scanActive,schemaWarning,step,isAdmin,targetProjectId,projects,returnTo,escape:esc,formatArea:dgFmtHa,manualForm:dgManualFormHTML,labelFromLegacy:dgLabelFromLegacy,projectName:dgProjectName}){
 
   if(!scanActive&&!park&&!cand&&!showManual){
@@ -93,5 +99,5 @@ function renderParkScanCard({element:el,park,candidate:cand,showManual,scanActiv
     `</div>`;
 }
 
-root.DG_PARK_SCAN_CARD_UI=Object.freeze({render:renderParkScanCard});
+  root.DG_PARK_SCAN_CARD_UI=Object.freeze({prepare,render:renderParkScanCard});
 })(window);

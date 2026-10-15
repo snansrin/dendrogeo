@@ -65,6 +65,13 @@ function boot(o = {}) {
   };
   ctx.window = ctx;
   vm.createContext(ctx);
+  for(const file of [
+    'src/domain/park-invites/access-policy.js','src/adapters/park-invites/store.js',
+    'src/application/park-invites/park-invite-state.js','src/application/park-invites/load-owned-parks.js',
+    'src/application/park-invites/load-recipient-invites.js','src/application/park-invites/manage-invites.js',
+    'src/ui/park-invite-inbox.js','src/ui/park-collaboration-panel.js','src/ui/owner-park-options.js',
+    'src/ui/load-owner-collaborations.js','src/ui/refresh-collaborations.js'
+  ])vm.runInContext(read(file),ctx,{filename:file});
   vm.runInContext(read('src/services/park-invites.js'), ctx, { filename: 'park-invites.js' });
   return { ctx, els, calls };
 }
@@ -115,7 +122,7 @@ describe('0025 · park-invites modülü (vm)', () => {
     const h = els.dgInvBox.innerHTML;
     assert.ok(h.includes('Göksu Parkı'), 'kendi daveti görünür');
     assert.ok(!h.includes('Başka Park'), 'başkasının daveti SIZMAZ');
-    assert.ok(h.includes("dgInviteRespond('i1',true)"), 'kabul düğmesi');
+    assert.ok(h.includes('data-dg-park-invites-action="respond" data-invite-id="i1" data-accept="true"'), 'kabul düğmesi');
     assert.equal(els.dgInvBox.style.display, '', 'kart görünür');
   });
 
@@ -155,8 +162,8 @@ describe('0025 · park-invites modülü (vm)', () => {
     const h = els.dgInvList.innerHTML;
     assert.ok(h.includes('ark@ornek.com'), 'davet satırı');
     assert.ok(h.includes('Ayşe Y.'), 'ortak satırı');
-    assert.ok(h.includes("dgInviteRevoke('u2','collab')"), 'ortak kaldırma düğmesi');
-    assert.ok(h.includes("dgInviteRevoke('i1','invite')"), 'davet geri alma düğmesi');
+    assert.ok(h.includes('data-dg-park-invites-action="revoke" data-target="u2" data-kind="collab"'), 'ortak kaldırma düğmesi');
+    assert.ok(h.includes('data-dg-park-invites-action="revoke" data-target="i1" data-kind="invite"'), 'davet geri alma düğmesi');
   });
 
   test('davet gönder: boş e-posta gitmez; RPC doğru argümanla', async () => {
@@ -253,7 +260,7 @@ describe('0025 · kablolama (index.html + shell + partials)', () => {
     assert.match(sh, /id="projSharedList"/, 'paylaşılan projeler ayrı kart listesinde');
     /* 0027: waypoint tablosu — kullanıcı bildirimi "içeride sağa-sola kayıyor" */
     assert.match(sh, /<ul id="wpListTable" class="waypoint-points"/, 'waypoint listesi kompakt nokta kartları kullanır');
-    const mp = read('src/services/map.js');
+    const mp = read('src/ui/waypoint-list.js');
     assert.match(mp, /class="waypoint-point /, 'waypoint satırları mobil nokta kartı');
     assert.match(mp, /waypoint-state /, 'waypoint durum rozeti görünür');
     assert.match(mp, /✓ Yapıldı/, 'tamamlanan waypoint açıkça işaretli');
@@ -262,7 +269,7 @@ describe('0025 · kablolama (index.html + shell + partials)', () => {
     assert.match(read('src/services/user-admin.js'), /DG_ADMIN_USER_TABLE_UI\.render\(/, 'servis tablo modülünü kullanır');
     const dr = read('src/ui/data-request-closed-table.js');
     assert.match(dr, /data-label="Kapanış"/, 'talep tabloları etiketli');
-    assert.match(read('src/services/data-requests.js'), /DG_DATA_REQUEST_CLOSED_TABLE_UI\.render\(/, 'servis etiketli kapalı tablo modülünü kullanır');
+    assert.match(read('src/services/data-requests.js'), /DG_DATA_REQUEST_CLOSED_TABLE_UI\.renderSection\(/, 'servis etiketli kapalı tablo modülünü kullanır');
     const css = read('css/style.css');
     /* yorum satırları çıkarılır (belgeleme amaçlı alıntılar kural sayılmasın) */
     const cssKod = css.split('\n').filter((l) => !l.trim().startsWith('/*') && !l.trim().startsWith('*')).join('\n');
@@ -270,20 +277,23 @@ describe('0025 · kablolama (index.html + shell + partials)', () => {
     assert.match(css, /\.tblwrap\{overflow-x:auto/, 'yalnız tablo kabı kayar (mobilde)');
     assert.match(css, /#installBtn\{display:none!important\}/, 'üst bar mobilde sade');
     const m = read('src/services/measure.js');
-    assert.match(m, /function dgProjectCard\(/, 'proje kart render yardımcısı');
-    assert.match(m, /PROJE SAHİBİ/, 'sahip projesi rol rozeti');
-    assert.match(m, /ORTAK/, 'paylaşılan proje rol rozeti');
+    const card=read('src/ui/measurement-project-card.js');
+    assert.match(m, /function dgProjectCard\(/, 'servis kart renderer’ına delege eder');
+    assert.match(card, /PROJE SAHİBİ/, 'sahip projesi rol rozeti');
+    assert.match(card, /ORTAK/, 'paylaşılan proje rol rozeti');
     const d = read('src/services/dash.js');
     assert.match(d, /class="record-metrics"/, 'kayıt kartı metrik grubu var');
     assert.match(d, />Karbon<\/span>/, 'kayıt kartında karbon metriği etiketli');
   });
   test('loadProjects paylaşım birleşimi: ortak projeleri dropdown’a ekler', () => {
     const m = read('src/services/measure.js');
-    assert.match(m, /dgMyParks/, 'v_my_parks okunur');
-    assert.match(m, /role==="collaborator"|role === "collaborator"/);
-    assert.match(m, /q\.shared=true/, 'paylaşılan proje işaretlenir');
-    assert.match(m, /Düzenleme ve ekip yönetimi proje sahibinde/, 'ortak kartında sahiplik sınırı açık');
-    assert.match(m, /const own=PROJ_LIST\.filter\(p=>!p\.shared\), shared=PROJ_LIST\.filter\(p=>p\.shared\)/, 'sahip/paylaşılan projeler ayrı render edilir');
+    assert.match(m, /DG_LOAD_MEASUREMENT_PROJECT_DIRECTORY/, 'proje dizini use-case kullanılır');
+    assert.match(m, /DG_SHARED_MEASUREMENT_PROJECTS\.fetch/, 'paylaşılan park projeleri adapter ile okunur');
+    assert.match(m, /DG_MERGE_MEASUREMENT_PROJECTS\.merge/, 'sahip ve ortak projeler domain kuralıyla birleştirilir');
+    assert.match(read('src/adapters/trees/fetch-shared-measurement-projects.js'), /role\s*===?\s*["']collaborator["']/, 'yalnız kabul edilmiş ortak parklar eklenir');
+    assert.match(read('src/adapters/trees/fetch-shared-measurement-projects.js'), /project\.shared=true/, 'ortak proje görünürlüğü korunur');
+    assert.match(read('src/ui/measurement-project-card.js'), /Düzenleme ve ekip yönetimi proje sahibinde/, 'ortak kartında sahiplik sınırı açık');
+    assert.match(m, /DG_MEASUREMENT_PROJECT_DIRECTORY_UI\.render/, 'sahip/paylaşılan projeler ayrı render edilir');
     assert.match(m, /owner:USER\.id/, 'ölçüm sahipliği değişmedi (kim ölçtü belli)');
   });
 });

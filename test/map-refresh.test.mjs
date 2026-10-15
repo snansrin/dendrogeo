@@ -95,6 +95,16 @@ function loadMapModule({ queryError = null, rows = null, noClusterPlugin = false
   };
   ctx.window = ctx; ctx.self = ctx;
   vm.createContext(ctx);
+  vm.runInContext(read('src/adapters/map/fetch-approved-map-measurements.js'), ctx, { filename: 'fetch-approved-map-measurements.js' });
+  for (const module of [
+    'src/domain/map/is-valid-coordinate.js',
+    'src/domain/map/prepare-approved-map-measurements.js',
+    'src/ui/map-measurement-popup.js',
+    'src/ui/map-measurement-markers.js',
+    'src/application/map/load-approved-measurement-markers.js',
+    'src/ui/render-live-map-load-status.js',
+    'src/application/map/load-live-measurements-map.js',
+  ]) vm.runInContext(read(module), ctx, { filename: module });
   vm.runInContext(read('src/services/map.js'), ctx, { filename: 'map.js' });
   return { ctx, els, clusterCalls, clusterChildren, markersMade, fakeCluster };
 }
@@ -211,9 +221,11 @@ describe('3) canlı harita onaydan sonra tazelenmeli (liveLoaded kapısı)', () 
 
   test('çevrimdışı senkronizasyon da haritayı tazeliyor', () => {
     const i = off.indexOf('async function syncOfflineData');
-    const govde = off.slice(i, off.indexOf('/* ---- PWA', i));
-    assert.match(govde, /dgMarkLiveDirty\(\)/, 'senkron sonrası bayrak düşmeli');
-    assert.match(govde, /loadLiveMap\(\)/, 'sekme açıksa doğrudan tazelemeli');
+    const govde = off.slice(i, off.indexOf('async function dgOfflineRequest', i));
+    const refresh = read('src/application/offline/refresh-after-measurement-sync.js');
+    assert.match(govde, /DG_REFRESH_AFTER_OFFLINE_MEASUREMENT_SYNC\.run/, 'senkron sonrası görünür panelleri use-case tazelemeli');
+    assert.match(refresh, /markMapDirty\(\)/, 'senkron sonrası harita bayat işaretlenmeli');
+    assert.match(refresh, /if\(isVisible\('v-map'\)\)loadLiveMap\(\)/, 'yalnız açık harita doğrudan tazelenmeli');
   });
 
   test('dgMarkLiveDirty / dgMarkLiveLoaded state yoksa patlamaz (try/catch)', () => {
@@ -222,7 +234,7 @@ describe('3) canlı harita onaydan sonra tazelenmeli (liveLoaded kapısı)', () 
   });
 
   test('↻ elle tazeleme düğmesi arayüzde var', () => {
-    assert.match(idx, /onclick="loadLiveMap\(\)"/, 'Canlı Harita kartında ↻ düğmesi olmalı');
+    assert.match(idx, /data-dg-map-action="refresh"/, 'Canlı Harita kartında ↻ düğmesi modül eylemine bağlı olmalı');
     assert.match(idx, /İşaretçileri tazele/, 'düğme etiketi bulunamadı');
   });
 });
@@ -237,7 +249,8 @@ describe('4) loadWorld sessiz başarısızlık içermemeli', () => {
     assert.match(govde, /dgWorldError\(/, 'hata kullanıcıya gösterilmeli');
   });
   test('işaretçi hatası analiz bloğuna sızdırılmıyor', () => {
-    assert.match(dash, /if\(err\)return dgWorldError\(/, 'loadApprovedMarkers hatası kontrol edilmeli');
+    const worldDashboard = read('src/application/dashboard/load-world-dashboard.js');
+    assert.match(worldDashboard, /if\(error\)return ports\.showError\([\s\S]*?ports\.renderAnalysis\(rows/, 'loadApprovedMarkers hata kolu analiz çiziminden önce durmalı');
   });
   test('#worldErr kutusu index.html\'de var', () => {
     assert.match(idx, /id="worldErr"/, 'Dünya sekmesinde hata kutusu olmalı');
@@ -286,11 +299,13 @@ describe('5) YETKİ hatası ŞEMA eksiği sanılmamalı (ölçüm kapısı kapan
   });
 
   test('loadParkCompare yetki hatasında ayrı yol izliyor', () => {
-    const w = read('src/services/world.js');
-    assert.match(w, /if\(!dgIsSchemaError\(error\)\)\{\s*dgParkCompareDenied\(error\);/, '42501 → dgParkCompareDenied');
-    assert.match(w, /function dgParkCompareDenied/, 'dgParkCompareDenied tanımlı olmalı');
-    const i = w.indexOf('function dgParkCompareDenied');
-    const govde = w.slice(i, w.indexOf('\n/*', i + 10));
+    const w = read('src/application/world/load-park-comparison.js');
+    assert.match(w, /if\(path==="denied"\)\{onDenied\(error\);/, '42501 → denied portuna gider');
+    const s = read('src/services/world.js');
+    assert.match(s, /onDenied:dgParkCompareDenied/, 'servis denied portunu görünüm mesajına bağlamalı');
+    assert.match(s, /function dgParkCompareDenied/, 'dgParkCompareDenied tanımlı olmalı');
+    const i = s.indexOf('function dgParkCompareDenied');
+    const govde = s.slice(i, s.indexOf('\n/*', i + 10));
     assert.doesNotMatch(govde, /DG_PARK_SCHEMA_OK\s*=\s*false/, 'dgParkCompareDenied şema bayrağına dokunmamalı');
   });
 });
@@ -298,19 +313,10 @@ describe('5) YETKİ hatası ŞEMA eksiği sanılmamalı (ölçüm kapısı kapan
 describe('6) offline.js ölü kod düzeltmesi', () => {
   test('updateSyncBadge() return\'den ÖNCE çağrılıyor', () => {
     const off = read('src/services/offline.js');
-    const i = off.indexOf('async function syncOfflineData');
-    assert.ok(i > -1, 'syncOfflineData bulunamadı');
-    /* Yalnız !USER bloğuna bak: fonksiyonun başındaki `if (!navigator.onLine)
-     * return;` satırı ilk `return;` olduğu için tüm gövdeyi kesmek yanlış
-     * pozitife düşürüyordu. */
-    const b = off.indexOf('if (!USER)', i);
-    assert.ok(b > -1, 'if (!USER) bloğu bulunamadı');
-    const blog = off.slice(b, off.indexOf('\n}', b));
-    const badge = blog.indexOf('updateSyncBadge();');
-    const ret = blog.indexOf('return;');
-    assert.ok(badge > -1, 'rozet güncellemesi !USER bloğunda olmalı');
-    assert.ok(ret > -1, 'return bulunmalı');
-    assert.ok(badge < ret, '⭐ rozet güncellemesi return\'den sonra kalmamalı (ulaşılmaz kod)');
+    const sync = off.slice(off.indexOf('async function syncOfflineData'), off.indexOf('async function dgOfflineRequest'));
+    const coordinator = read('src/application/offline/coordinate-measurement-sync.js');
+    assert.match(sync, /updateBadge:updateSyncBadge/, 'sync rozet güncelleme portunu vermeli');
+    assert.match(coordinator, /if\(!user\)\{await updateBadge\(\);return;\}/, 'kullanıcı yokken erken dönüşten önce rozet güncellenmeli');
   });
 });
 
@@ -367,10 +373,12 @@ describe('8) markercluster eklentisi YOKSA noktalar yine çizilmeli ("listede va
   });
 
   test('kaynak kodu yedeği içeriyor (geri kaybolmasın)', () => {
-    const m = read('src/services/map.js');
-    assert.match(m, /typeof L\.markerClusterGroup==="function"/, 'eklenti varlık kontrolü olmalı');
-    assert.match(m, /m\._cluster=L\.layerGroup\(\)/, 'düz katman yedeği olmalı');
-    assert.match(m, /m\._clusterDegraded=true/, 'degrade bayrağı set edilmeli');
+    const service = read('src/services/map.js');
+    const markers = read('src/ui/map-measurement-markers.js');
+    assert.match(service, /DG_MAP_MEASUREMENT_MARKERS\.add/, 'service marker UI modülüne delege etmeli');
+    assert.match(markers, /typeof leaflet\.markerClusterGroup==="function"/, 'eklenti varlık kontrolü olmalı');
+    assert.match(markers, /map\._cluster=leaflet\.layerGroup\(\)/, 'düz katman yedeği olmalı');
+    assert.match(markers, /map\._clusterDegraded=true/, 'degrade bayrağı set edilmeli');
   });
 });
 

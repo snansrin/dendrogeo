@@ -16,12 +16,12 @@ import { loadApp } from '../scripts/test-harness.mjs';
 const app = loadApp({ sadece: ['src/config/constants.js', 'src/utils/geo.js',
   'src/services/lc-config.js', 'src/domain/surface/classify-landcover-code.js',
   'src/domain/surface/compare-source-class-areas.js',
-  'src/services/lc-geo.js', 'src/services/lc-stac.js',
+  'src/services/lc-geo.js', 'src/adapters/surface/stac-fetch-policy.js', 'src/adapters/surface/open-raster-range.js', 'src/services/lc-stac.js',
   'src/domain/surface/merge-tile-results.js', 'src/adapters/surface/result-exports.js',
   'src/application/surface/analyze-source.js',
   'src/adapters/surface/process-landcover-tile.js',
   'src/services/lc-engine.js',
-  'src/services/lc-osm.js', 'src/domain/surface/patch-geometry.js', 'src/domain/surface/group-patch-cells.js', 'src/domain/surface/measure-patch-components.js', 'src/domain/surface/query-green-patches.js', 'src/services/lc-patches.js',
+  'src/adapters/surface/load-osm-landcover-evidence.js', 'src/services/lc-osm.js', 'src/domain/surface/patch-geometry.js', 'src/domain/surface/group-patch-cells.js', 'src/domain/surface/measure-patch-components.js', 'src/domain/surface/query-green-patches.js', 'src/services/lc-patches.js',
   'src/ui/lc-report.js', 'src/services/landcover.js'] });
 const {
   dgLcEnsureCcw, dgLcClipPolygonConvex, dgLcIntersectionAreaConvex, dgLcQuadBBox,

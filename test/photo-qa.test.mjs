@@ -40,13 +40,14 @@ function yukle() {
     apply: () => stub, construct: () => stub, set: () => true,
   });
   const ctx = {
-    window: {addEventListener(){},DG_TREE_MEASUREMENT_APPLICATION:{createTreeMeasurementValidator:()=>({validateBiometrics:()=>({valid:false}),validateNewMeasurement:()=>({valid:false})})}}, document: stub, navigator: stub,
+    window: {addEventListener(){},DG_MEASUREMENT_PHOTO_CHECK_STATE:{create:()=>({invalidate(){}})},DG_READ_MEASUREMENT_PHOTO_PIXELS_ADAPTER:{create:()=>({read:()=>new Uint8ClampedArray(0)})},DG_CHECK_MEASUREMENT_PHOTO:{create:()=>async()=>{}},DG_MEASUREMENT_PHOTO_FILE_UI:{clear(){}},DG_TREE_MEASUREMENT_APPLICATION:{createTreeMeasurementValidator:()=>({validateBiometrics:()=>({valid:false}),validateNewMeasurement:()=>({valid:false})})}}, $:()=>stub, document: stub, navigator: stub,
     localStorage: { getItem: () => null, setItem() {} },
     console: { log() {}, warn() {}, error() {} },
     URL: { createObjectURL: () => '', revokeObjectURL() {} },
   };
   vm.createContext(ctx);
   vm.runInContext(photoDomain, ctx);
+  vm.runInContext(rd('src/ui/measurement-photo-summary.js'), ctx);
   vm.runInContext(meas + ';this.__scan=dgPhotoScan;this.__gate=dgPhotoGate;this.__label=dgPhotoLabel;', ctx);
   return ctx;
 }
@@ -143,8 +144,10 @@ describe('0044 · statik kilitler', () => {
   });
 
   test('⭐ kaydetme kapısı DURUYOR (photoOk sözleşmesi bozulmadı)', () => {
-    assert.match(meas, /photoOk=ok/, 'kapı durumu hesaplanır');
-    assert.match(meas, /if\(f&&!photoOk\)/, 'saveMeas teknik kapıyı uygular');
+    assert.match(meas, /setPhotoOk:value=>\{photoOk=value;\}/, 'kapı sonucu ölçüm durumuna bağlanır');
+    assert.match(rd('src/ui/check-measurement-photo.js'), /ports\.setPhotoOk\(valid\)/, 'geçerlilik sınıfı aynı fotoğraf iş akışında hesaplanır');
+    assert.match(meas, /photoValid:!\(\$\("mPhoto"\)\.files\[0\]&&!photoOk\)/, 'fotoğraf sonucu submission kapısına aktarılır');
+    assert.match(rd('src/application/trees/resolve-measurement-save-gates.js'), /if\(!photoValid\)return\{allowed:false,reason:"photo-invalid"/, 'geçersiz fotoğraf kaydı engeller');
   });
 
   test('⭐ harici model soketi + 🤖 kart: HİÇBİR İZ KALMADI (kullanıcı kararı)', () => {
@@ -166,7 +169,8 @@ describe('0044 · statik kilitler', () => {
 
   test('⭐ fotoğraf denetimi TEK YERDE: Yeni Ölçüm sekmesi, fotoğraf düğmesi', () => {
     const sh = rd('partials/shell.html');
-    assert.match(sh, /onchange="checkPhoto\(event\)"/, 'düğme kancası');
+    assert.match(sh, /data-dg-measure-action="photo-check"/, 'düğme kancası');
+    assert.match(rd('src/ui/measurement-form-actions.js'), /checkPhoto\(event\)/);
     assert.match(sh, /id="photoCheck"/, 'sonuç kutusu formda');
     const a = sh.indexOf('id="photoCheck"'), b = sh.indexOf('id="v-nav"');
     assert.ok(a > 0 && a < b, 'kutu ölçüm görünümünde (nav\'dan önce)');

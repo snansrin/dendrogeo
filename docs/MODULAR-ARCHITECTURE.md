@@ -1,5 +1,18 @@
 # DendroGeo modüler mimari
 
+## 15 Ekim 2026 · geçiş durumu
+
+| Yol haritası fazı | Mevcut durum | Kanıt / sıradaki iş |
+|---|---|---|
+| 0 · Referans ve davranış koruması | Tamam; sürekli kapı | Çekirdek kilidi 950 dosyayı denetliyor; harita/ölçüm/yüzey, geofence, fotoğraf, OSM, fırça, çizim, waypoint, proje, export ve yönetim regresyonları korunuyor. `npm run check` geçti. |
+| 1 · Mimari kapıları | Tamam | Katman kapısı Acorn AST ile 800 domain/application/UI modülünü; global API sağlayıcı/yön bağımlılık kapısı AST ile 936 modülü denetliyor. Servis borcu 0 DOM/Supabase/ağ erişimi. Runtime classic script olduğu için ES `import` grafiği yok; gerçek `window.DG_*` sağlayıcı/yön grafiği denetleniyor. |
+| 2 · Facade sınırları | Tamam; geriye uyumlu köprüler korunuyor | Legacy facade'lar DOM/Supabase/ağ işini sahiplenmiyor; `map.js`, `measure.js`, `admin-tree.js` ve `park-invites.js` modül orkestrasyon ve eski API bağlama noktası olarak kalıyor. Sıfır servis sınır borcu CI'da zorunlu. |
+| 3 · İlk yükleme | Ölçüldü | Chromium mock akışında anonim panel 220–223 ms, oturum paneli çoğunlukla 258–287 ms açıldı; ölçüm gerçek CDN veya canlı Supabase gecikmesini kapsamaz. 735 ilk yükleme / 252 lazy modül sırası korundu; kanıtlanmış kullanıcı kazancı olmadan paket bölünmedi. |
+| 4 · HTML ve olay sahipliği | Tamam | Tüm `partials/*.html` ve davet ekranının dinamik HTML üreticilerinde 0 satır içi olay niteliği var; eylemler UI modüllerinde. 735 ilk yükleme/252 lazy classic script girdisi, Service Worker ve build zinciriyle doğrulanıyor. |
+| 5 · Okunabilirlik ve yönetişim | Tamamlanan kapılar; iyileştirme alanları açıkça ayrıldı | Versiyon/build, CSP, offline modül zinciri, çekirdek SHA, AST, servis borcu ve erişilebilirlik kapıları zorunlu. `docs/ARCHITECTURE-STATUS.generated.md` ölçümleri üretir ve check eder. Toplu formatter dönüşümü ve tek kaynaklı script manifesti mimari kabul için gerekli değil; ileride ayrı, ölçülü çalışma olarak değerlendirilebilir. |
+
+**Sonuç:** Tanımlı mimari geçiş yerel kabul kapılarında tamamlandı. Uygulanan model alan bazlı katmanlı hibrit mimaridir (`domain → application → adapters`, UI sahipliği, açık portlar ve geriye uyumlu `window.DG_*` facade'ları). Düşük riskli script sırası/çevrimdışı paket denetimleri korunuyor; global facade köprüsünü tamamen kaldırmak veya her dosyayı aynı biçime sokmak bu geçişin hedefi değil. Tam `npm run check`, Chromium mobil/fırça/çizim ve erişilebilirlik akışları geçti. Üretim yayını ve GitHub CI sonucu bu yerel doğrulama kapsamına dahil değil. Güncel metrikler üretilmiş [durum raporunda](ARCHITECTURE-STATUS.generated.md), kabul kanıtı [tamamlama tablosunda](ARCHITECTURE-COMPLETION-2026-10-14.md) tutulur.
+
 ## Mevcut sistem ve karar
 
 Kod tabanı zaten alanlara göre ayrılmış `domain/`, `application/`, `adapters/` ve `ui/` katmanlarına sahip. Kaynakların büyük bölümü bundler kullanmayan klasik tarayıcı script'leri; `partials/head.html` yükleme sırasını, `index.html` üretilmiş sayfayı, `sw.js` ise çevrimdışı paket listesini belirliyor. Modüller çoğunlukla `window.DG_*` API'si yayımlıyor ve testler bu script'leri VM bağlamında yüklüyor. Bu çalışma modelinde önerilen `features/`, `ports/`, `platform/` ve `compatibility/` klasörleri henüz gerçek sınırlar değil.

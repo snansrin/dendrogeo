@@ -710,7 +710,7 @@ describe('yönetim ağacı tüm veriyi hiyerarşik gösterir', () => {
     assert.ok(h.includes('Ölçümler okunamadı'), 'hata kutusu yok');
     assert.ok(h.includes('veri silinmedi'), 'kullanıcıya güvence verilmeli');
     assert.ok(h.includes('could not find a relationship'), 'hatanın kendisi görünmeli');
-    assert.ok(h.includes('loadAdminTree()'), 'yeniden dene düğmesi');
+    assert.ok(h.includes('data-dg-admin-tree-action="load"'), 'yeniden dene düğmesi UI aksiyon modülüne yönlenmeli');
   });
 
 
@@ -753,7 +753,7 @@ describe('yönetim ağacı tüm veriyi hiyerarşik gösterir', () => {
     const h = el('adminTree').innerHTML;
     assert.ok(!h.includes('Ölçümler yükleniyor'), 'kutuda hâlâ yükleniyor yazıyor → asılı kaldı');
     assert.ok(h.includes('beklenmedik sorgu hatası') && h.includes('ağ koptu'), h.slice(0, 220));
-    assert.ok(h.includes('loadAdminTree()'), 'yeniden dene düğmesi olmalı');
+    assert.ok(h.includes('data-dg-admin-tree-action="load"'), 'yeniden dene düğmesi UI aksiyon modülüne yönlenmeli');
   });
 
   test('bekleyen yoksa özet kutusu ve rozet gizlenir', async () => {

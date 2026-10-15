@@ -1,7 +1,10 @@
 "use strict";
 
-/* Render active requests; queue loading, counters and actions belong to the service. */
+/* Render active requests and their visible queue counters. */
 (function(root){
+ function updateCounts(document,pending){
+  for(const id of ["aReqPending","aReqPendingMini"]){const element=document.getElementById(id);if(element)element.textContent=pending.length;}
+ }
  function render(element,pending,{escape=value=>String(value)}={}){
  element.innerHTML=pending.length?pending.map(r=>{
   const filt=[escape(r.country),escape(r.city),escape(r.project_name)].filter(Boolean).join(" / ")||"Tüm Veri";
@@ -20,5 +23,5 @@
  }).join(""):"<tr><td colspan=6 style='text-align:center;color:var(--mut)'>Bekleyen talep yok</td></tr>";
  
  }
- root.DG_DATA_REQUEST_PENDING_TABLE_UI=Object.freeze({render});
+ root.DG_DATA_REQUEST_PENDING_TABLE_UI=Object.freeze({render,updateCounts});
 })(window);

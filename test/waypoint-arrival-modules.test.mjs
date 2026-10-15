@@ -53,5 +53,5 @@ test('arrival use case exits safely for no target, cancellation and write failur
 test('arrival modules load before the locked map service and are cached offline',()=>{
   const head=read('partials/head.html'),sw=read('sw.js'),service=read('src/services/map.js');
   for(const path of modules){assert.ok(head.includes(`src="${path}?v=`));assert.ok(sw.includes(`'/${path}'`));assert.ok(head.indexOf(`src="${path}?v=`)<head.indexOf('src="src/services/map.js?'));}
-  assert.match(service,/DG_ARRIVE_AT_WAYPOINT/);assert.match(service,/\.eq\("id",w\.id\)/);
+  assert.match(service,/DG_ARRIVE_AT_WAYPOINT/);assert.match(service,/DG_MARK_WAYPOINT_VISITED\.mark\(\{client:sb,id:w\.id\}\)/);
 });

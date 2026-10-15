@@ -54,10 +54,11 @@ test('dialog lifecycle closes on cancel and returns validated submit data once',
  activeModal.listeners['form:submit']({preventDefault(){},currentTarget:activeModal.form});assert.equal((await pendingSubmit).schema,'ok');assert.equal(submitted,activeModal.form);assert.equal(current,null);assert.equal(restored,2);
 });
 
-test('academic profile service delegates to all five question modules and keeps its compatibility path',()=>{
+test('academic profile service delegates the complete question flow to its modules',()=>{
  const source=readFileSync(new URL('../src/services/academic-profile.js',import.meta.url),'utf8');
  for(const api of ['DG_RESOLVE_REPORT_QUESTION_VALUES','DG_REPORT_QUESTION_FIELDS','DG_REPORT_QUESTION_CONFIRMATIONS','DG_VALIDATE_REPORT_QUESTION_ANSWER','DG_RUN_REPORT_QUESTION_DIALOG'])assert.ok(source.includes('window.'+api));
- assert.ok(source.includes("function dgReportQuestions(parkId,projectName)"));assert.ok(source.includes("modal.showModal()"));
+ assert.ok(source.includes("function dgReportQuestions(parkId,projectName)"));assert.ok(source.includes("DG_RUN_REPORT_QUESTION_DIALOG.run("));
+ assert.doesNotMatch(source,/document\.createElement|modal\.showModal\(/);
 });
 
 test('academic profile service runs the extracted report question path end to end',async()=>{

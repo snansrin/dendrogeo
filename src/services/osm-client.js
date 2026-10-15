@@ -86,16 +86,8 @@ async function overpassRun(query,label="OSM"){
       try{
         console.log("→ Overpass:",label,item.url);
 
-        const res=await fetch(item.url,{
-          method:"POST",
-          headers:{
-            "Content-Type":"application/x-www-form-urlencoded;charset=UTF-8",
-            "Accept":"application/json"
-          },
-          body:"data="+encodeURIComponent(query),
-          signal:controller.signal,
-          cache:"no-store"
-        });
+        if(!window.DG_POST_OVERPASS_QUERY)throw new Error("Overpass transport adapter yüklenemedi.");
+        const res=await window.DG_POST_OVERPASS_QUERY.post(item.url,query,{signal:controller.signal,fetchImpl:fetch});
 
         if(res.ok){
           const data=await res.json();

@@ -7,88 +7,18 @@
 
 /* Retry only transient transport failures. One 30 s budget covers attempts,
  * backoff AND response decoding; cancellation is never swallowed. */
-function dgLcRetryable(status){if(typeof window!=="undefined"&&window.DG_STAC_FETCH_POLICY)return window.DG_STAC_FETCH_POLICY.retryable(status);return [408,429,500,502,503,504].includes(status);}
-function dgLcRetryWait(attempt,signal,response){
- if(typeof window!=="undefined"&&window.DG_STAC_FETCH_POLICY)return window.DG_STAC_FETCH_POLICY.retryWait(attempt,signal,response);
- const value=response?.headers?.get?.("Retry-After");
- const seconds=Number(value),date=Date.parse(value);
- const requested=value?(Number.isFinite(seconds)?seconds*1000:date-Date.now()):0;
- const delay=Math.min(2000,Math.max(0,requested||500*Math.pow(2,attempt)+Math.random()*200));
- return new Promise((resolve,reject)=>{
-  let timer;
-  const abort=()=>{clearTimeout(timer);signal?.removeEventListener('abort',abort);reject(Object.assign(new Error("İstek iptal edildi."),{name:"AbortError"}));};
-  if(signal?.aborted){abort();return;}
-  signal?.addEventListener('abort',abort,{once:true});
-  timer=setTimeout(()=>{signal?.removeEventListener('abort',abort);resolve();},delay);
- });
-}
+function dgLcRetryable(status){if(!window.DG_STAC_FETCH_POLICY)throw new Error("STAC fetch adapter yüklenemedi.");return window.DG_STAC_FETCH_POLICY.retryable(status);}
+function dgLcRetryWait(attempt,signal,response){if(!window.DG_STAC_FETCH_POLICY)throw new Error("STAC fetch adapter yüklenemedi.");return window.DG_STAC_FETCH_POLICY.retryWait(attempt,signal,response);}
 async function dgLcFetchJson(url,options){
- if(typeof window!=="undefined"&&window.DG_STAC_FETCH_POLICY)return window.DG_STAC_FETCH_POLICY.fetchJson(url,options,fetch);
- const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),30000);
- const parent=options?.signal,abort=()=>controller.abort();
- if(parent?.aborted)controller.abort();else parent?.addEventListener('abort',abort,{once:true});
- try{
-  for(let attempt=0;attempt<3;attempt++){
-   if(controller.signal.aborted)throw Object.assign(new Error("İstek iptal edildi."),{name:"AbortError"});
-   const child=new AbortController(),relay=()=>child.abort();
-   controller.signal.addEventListener('abort',relay,{once:true});
-   const limit=setTimeout(relay,10000);
-   let response,transport=false;
-   try{
-    try{response=await fetch(url,{cache:"no-store",headers:{Accept:"application/json"},...options,signal:child.signal});}
-    catch(e){transport=true;throw e;}
-    if(!response.ok){
-     const err=new Error("HTTP "+response.status);
-     err.transient=dgLcRetryable(response.status);
-     await response.body?.cancel();
-     throw err;
-    }
-    return await response.json();
-   }catch(e){
-    if(controller.signal.aborted||attempt===2||(!transport&&!child.signal.aborted&&!e.transient))throw e;
-   }finally{clearTimeout(limit);controller.signal.removeEventListener('abort',relay);}
-   await dgLcRetryWait(attempt,controller.signal,response);
-  }
- }finally{clearTimeout(timer);parent?.removeEventListener('abort',abort);}
+ if(!window.DG_STAC_FETCH_POLICY)throw new Error("STAC fetch adapter yüklenemedi.");
+ return window.DG_STAC_FETCH_POLICY.fetchJson(url,options,fetch);
 }
 
 /* Bound every HTTP range, including image-directory reads which GeoTIFF 2.1
  * does not pass a readRasters signal to. Keep Range headers and COG semantics. */
 function dgLcOpenRaster(href,sourceSignal){
- if(typeof window!=="undefined"&&window.DG_OPEN_RASTER_RANGE_ADAPTER)return window.DG_OPEN_RASTER_RANGE_ADAPTER.open(href,sourceSignal,{GeoTIFF,fetchImpl:fetch,retryable:dgLcRetryable,retryWait:dgLcRetryWait});
- if(!GeoTIFF.fromCustomClient||!GeoTIFF.BaseClient||!GeoTIFF.BaseResponse)return GeoTIFF.fromUrl(href,{},sourceSignal);
- class RangeResponse extends GeoTIFF.BaseResponse{
-  constructor(response,done){super();this.response=response;this.done=done;}
-  get ok(){return this.response.ok;}get status(){return this.response.status;}
-  getHeader(name){return this.response.headers.get(name);}
-  async getData(){try{return await this.response.arrayBuffer();}finally{this.done();}}
- }
- class RangeClient extends GeoTIFF.BaseClient{
-  async request({headers,signal}={}){
-   const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),30000);
-   const signals=[signal,sourceSignal].filter(Boolean);
-   const abort=()=>controller.abort(),done=()=>{clearTimeout(timer);for(const s of signals)s.removeEventListener('abort',abort);};
-   for(const s of signals){if(s.aborted)controller.abort();else s.addEventListener('abort',abort,{once:true});}
-   try{
-   for(let attempt=0;attempt<3;attempt++){
-     const child=new AbortController(),relay=()=>child.abort();
-     controller.signal.addEventListener('abort',relay,{once:true});
-     const attemptTimer=setTimeout(relay,10000);let response,keepAttempt=false;
-     try{
-      response=await fetch(this.url,{headers,signal:child.signal});
-      if(response.ok){keepAttempt=true;return new RangeResponse(response,()=>{clearTimeout(attemptTimer);controller.signal.removeEventListener('abort',relay);done();});}
-      await response.body?.cancel();
-      if(!dgLcRetryable(response.status)||attempt===2)throw new Error("Raster HTTP "+response.status);
-     }catch(e){
-      if(controller.signal.aborted||attempt===2||(response&&!dgLcRetryable(response.status))){done();throw e;}
-     }finally{if(!keepAttempt){clearTimeout(attemptTimer);controller.signal.removeEventListener('abort',relay);}}
-     await dgLcRetryWait(attempt,controller.signal,response);
-    }
-   }
-   catch(e){done();throw e;}
-  }
- }
- return GeoTIFF.fromCustomClient(new RangeClient(href));
+ if(!window.DG_OPEN_RASTER_RANGE_ADAPTER)throw new Error("COG range adapter yüklenemedi.");
+ return window.DG_OPEN_RASTER_RANGE_ADAPTER.open(href,sourceSignal,{GeoTIFF,fetchImpl:fetch,retryable:dgLcRetryable,retryWait:dgLcRetryWait});
 }
 
 function dgLcSignedHref(href,token){

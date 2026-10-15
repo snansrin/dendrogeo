@@ -271,6 +271,7 @@ function bootRet(opts) {
     'src/ui/render-user-publication-header.js',
     'src/ui/render-user-publication-notices.js',
     'src/ui/render-user-publication-card.js',
+    'src/ui/publication-view-state.js',
     'src/application/reports/load-publication-queue.js',
     'src/application/reports/schedule-publication-queue-poll.js',
     'src/application/reports/request-report-retraction.js',

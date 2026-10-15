@@ -22,8 +22,8 @@ test('boundary checker rejects infrastructure globals but permits injected ports
     const result=checkArchitecture(root);
     assert.equal(result.checked,3);
     assert.equal(result.errors.length,2);
-    assert.match(result.errors.join('\n'),/domain\/bad\.js: global network access/);
-    assert.match(result.errors.join('\n'),/application\/bad\.js: direct Supabase access/);
+    assert.match(result.errors.join('\n'),/domain\/bad\.js:\d+: global network access/);
+    assert.match(result.errors.join('\n'),/application\/bad\.js:\d+: direct Supabase access/);
   }finally{
     rmSync(root,{recursive:true,force:true});
   }

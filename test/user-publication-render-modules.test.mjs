@@ -66,10 +66,18 @@ test('notices and card keep the own-measurement, offline and schema guidance', (
   assert.equal(ctx.DG_RENDER_USER_PUBLICATION_CARD.render(state, 'SCHEMA', 'header', 'controls', 'notices', String), '<div class="alert err">⚠ SCHEMA</div>headercontrolsnotices');
 });
 
+test('user publication UI owns mounting the rendered panel', () => {
+  const box = { innerHTML: '' };
+  assert.equal(ctx.DG_RENDER_USER_PUBLICATION_CARD.mount(box, '<section>panel</section>'), true);
+  assert.equal(box.innerHTML, '<section>panel</section>');
+  assert.equal(ctx.DG_RENDER_USER_PUBLICATION_CARD.mount(null, 'ignored'), false);
+});
+
 test('report service delegates user publication view and card rendering to modules', () => {
   const service = read('src/services/report-publish.js');
   for (const name of ['DG_RESOLVE_USER_PUBLICATION_VIEW', 'DG_RENDER_USER_PUBLICATION_CONTROLS',
     'DG_RENDER_USER_PUBLICATION_HEADER', 'DG_RENDER_USER_PUBLICATION_NOTICES', 'DG_RENDER_USER_PUBLICATION_CARD']) {
     assert.ok(service.includes('window.' + name), name);
   }
+  assert.doesNotMatch(service, /\.innerHTML|\.textContent|\.classList|\.style\s*\./, 'servis DOM yazmaz veya görünüm durumunu okumaz');
 });

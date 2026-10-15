@@ -1,7 +1,7 @@
 "use strict";
 /* === BÖLGE A  === */
 const FULL_HEAD="POINT_ID,MEASUREMENT_NO,DATE,TIME_TR,LATITUDE,LONGITUDE,GPS_ALTITUDE_M,GPS_ALTITUDE_MEDIAN_M,SATELLITES,HDOP,EST_ERROR_M,SLOPE_DEG,TREE_GROUP,TREE_SPECIES,LATIN_NAME,CIRCUMFERENCE_CM,DBH_CM,TREE_HEIGHT_M,CALC_AREA_M2,HORIZONTAL_AREA_M2,CALC_VOLUME_M3,AGB_KG,BHB_KG,TOTAL_BIOMASS_KG,CARBON_KG,AGB_CARBON_KG,BHB_CARBON_KG,PHOTO_FILE,PHOTO_URL,DATE_ISO";
-const DG_EXPORT_MEASUREMENT_MODULE_STORE=window.DG_EXPORT_MEASUREMENT_STORE?window.DG_EXPORT_MEASUREMENT_STORE.create(()=>sb,()=>USER.id):null;
+const DG_EXPORT_MEASUREMENT_MODULE_STORE=window.DG_EXPORT_MEASUREMENT_STORE.create(()=>sb,()=>USER.id);
 function fullRow(r){
  if(window.DG_EXPORT_MEASUREMENT_ROW)return window.DG_EXPORT_MEASUREMENT_ROW.build(r,{calculate:calc,latin:LATIN});
  const c=calc(r.dbh_cm,r.height_m,r.species,r.grp);
@@ -19,15 +19,7 @@ function fullRow(r){
 function fullCSV(rows){return window.DG_BUILD_MEASUREMENT_CSV?window.DG_BUILD_MEASUREMENT_CSV.build(rows,FULL_HEAD,fullRow):("\uFEFF"+FULL_HEAD+"\n"+rows.map(fullRow).join("\n")+"\n");}
 /* === BÖLGE B  === */
 async function getMine(){
-if(DG_EXPORT_MEASUREMENT_MODULE_STORE)return await DG_EXPORT_MEASUREMENT_MODULE_STORE.load();
-let out=[],from=0,step=1000;
-for(;;){
-const{data}=await sb.from("measurements").select("*,projects(name)").eq("owner",USER.id).order("created_at",{ascending:false}).range(from,from+step-1);
-out=out.concat(data||[]);
-if(!data||data.length<step)break;
-from+=step;
-}
-return out;
+return await DG_EXPORT_MEASUREMENT_MODULE_STORE.load();
 }
 function dgSerializeUserExport(format,rows,preview=false){
  if(window.DG_SERIALIZE_MEASUREMENT_EXPORT)return window.DG_SERIALIZE_MEASUREMENT_EXPORT.serialize(format,rows,{
@@ -59,21 +51,12 @@ async function exportGeo(){
  const gj=window.DG_BUILD_MEASUREMENT_GEOJSON?window.DG_BUILD_MEASUREMENT_GEOJSON.build(d,LATIN):{type:"FeatureCollection",features:d.map(r=>({type:"Feature",geometry:{type:"Point",coordinates:[r.lon,r.lat]},properties:{point:r.point_id,species:r.species,latin:LATIN[r.species]||"",circumference_cm:(Number.isFinite(+r.girth_cm)?+r.girth_cm:null),dbh:(Number.isFinite(+r.dbh_cm)?+(+r.dbh_cm).toFixed(1):null),height:r.height_m,carbon:r.carbon_kg,photo:r.photo_url||""}}))};
  dl(JSON.stringify(gj,null,2),"dendrogeo.geojson");
 }
-function dl(content,name){if(window.DG_EXPORT_FILE_DOWNLOAD)return window.DG_EXPORT_FILE_DOWNLOAD.download(content,name,{document,URL,Blob});const a=document.createElement("a");a.href=URL.createObjectURL(new Blob([content],{type:"text/csv;charset=utf-8;"}));a.download=name;a.click();}
+function dl(content,name){return window.DG_EXPORT_FILE_DOWNLOAD.download(content,name,{document,URL,Blob});}
 
 function openPreview(title,content,isCSV,fname){
- if(window.DG_EXPORT_PREVIEW_UI)return window.DG_EXPORT_PREVIEW_UI.render(title,content,isCSV,fname,{title:()=>$("pvTitle"),body:()=>$("pvBody"),downloadButton:()=>$("pvDownload"),modal:()=>$("previewModal"),escape:esc,download:dl});
- $("pvTitle").textContent=title;
- if(isCSV){
-  const lines=content.replace(/^\uFEFF/,"").split("\n").filter(Boolean).slice(0,100);
-  let html="<table><thead><tr>"+lines[0].split(",").map(h=>`<th scope='col'>${h}</th>`).join("")+"</tr></thead><tbody>";
-  for(let i=1;i<lines.length;i++)html+="<tr>"+lines[i].split(",").map(c=>`<td>${esc(c)}</td>`).join("")+"</tr>";
-  $("pvBody").innerHTML=html+"</tbody></table>";
- }else{$("pvBody").innerHTML=`<pre style="font-size:.75rem;white-space:pre-wrap">${esc(content.slice(0,20000))}</pre>`;}
- $("pvDownload").onclick=()=>dl(content,fname);
- $("previewModal").classList.add("on");
+ return window.DG_EXPORT_PREVIEW_UI.render(title,content,isCSV,fname,{document,escape:esc,download:dl});
 }
-function closePreview(){$("previewModal").classList.remove("on");}
+function closePreview(){return window.DG_EXPORT_PREVIEW_UI.close(document);}
 async function previewCSV(){if(window.DG_PREPARE_USER_MEASUREMENT_PREVIEW){const preview=await window.DG_PREPARE_USER_MEASUREMENT_PREVIEW.execute("csv",dgUserExportPorts());return openPreview(preview.title,preview.content,preview.isCSV,preview.fileName);}const d=await getMine();openPreview("CSV Önizleme (ilk 100 satır)",fullCSV(d),true,"dendrogeo.csv");}
 async function previewGeo(){if(window.DG_PREPARE_USER_MEASUREMENT_PREVIEW){const preview=await window.DG_PREPARE_USER_MEASUREMENT_PREVIEW.execute("geojson",dgUserExportPorts());return openPreview(preview.title,preview.content,preview.isCSV,preview.fileName);}const d=await getMine();const gj=window.DG_BUILD_MEASUREMENT_GEOJSON?window.DG_BUILD_MEASUREMENT_GEOJSON.build(d,LATIN,{preview:true}):{type:"FeatureCollection",features:d.map(r=>({type:"Feature",geometry:{type:"Point",coordinates:[r.lon,r.lat]},properties:{point:r.point_id,species:r.species,carbon:r.carbon_kg}}))};openPreview("GeoJSON Önizleme",JSON.stringify(gj,null,2),false,"dendrogeo.geojson");}
 

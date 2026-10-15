@@ -113,38 +113,29 @@ function dgTreeParkHTML(P){
  * (park/proje/kullanıcı summary'sinde 🔴 N); buradaki kutu genel özet +
  * kısayollar, yan menüdeki 🔐 Ölçüm Yönetimi öğesinde de sayı rozeti yanar. */
 function dgRenderPendingSummary(){
-  return window.DG_ADMIN_TREE_PENDING_SUMMARY.render({box:$("adminPending"),rows:DG_TREE_ROWS,
+  return window.DG_ADMIN_TREE_PENDING_SUMMARY.render({box:window.DG_ADMIN_TREE_ACTIONS.getElement("adminPending"),rows:DG_TREE_ROWS,
     group:dgTreeGroup,updateSidebarBadge:dgUpdateSidebarBadge,translate:_ta});
 }
 
 function dgUpdateSidebarBadge(n){
-  const b=$("adminPendingBadge");
-  if(!b||!b.style)return;
-  if(n>0){
-    b.style.display="inline-block";
-    b.textContent=n>99?"99+":String(n);
-  }else{
-    b.style.display="none";
-    b.textContent="";
-  }
+  return window.DG_ADMIN_TREE_ACTIONS.updateBadge(n);
 }
 
 /* Yan menü rozeti, yönetim sekmesi AÇILMADAN da güncel olsun diye ayrı bir
  * hafif sorgu (head:true → yalnız sayı, satır çekilmez). */
 async function dgRefreshPendingBadge(){
-  if(window.DG_REFRESH_ADMIN_TREE_PENDING_BADGE)return window.DG_REFRESH_ADMIN_TREE_PENDING_BADGE.execute(window.DG_ADMIN_PERSISTENCE_STORE.create(()=>sb),dgUpdateSidebarBadge);
+  const store=window.DG_ADMIN_PERSISTENCE_STORE.create(()=>sb);
+  if(window.DG_REFRESH_ADMIN_TREE_PENDING_BADGE)return window.DG_REFRESH_ADMIN_TREE_PENDING_BADGE.execute(store,dgUpdateSidebarBadge);
   try{
-    const{count,error}=await sb.from("measurements")
-      .select("*",{count:"exact",head:true}).eq("status","Beklemede");
+    const{count,error}=await store.countPendingMeasurements();
     if(!error)dgUpdateSidebarBadge(count||0);
   }catch(e){}
 }
 
 function dgTreeOnlyPending(){
-  if(window.DG_UPDATE_ADMIN_TREE_FILTER)return window.DG_UPDATE_ADMIN_TREE_FILTER.onlyPending(DG_TREE_STATE_STORE.getState(),{setStatus:value=>dgTreeStateUpdate({status:value}),updateStatusControl:value=>{const sel=$("treeStatus");if(sel)sel.value=value;},draw:dgTreeDraw});
+  if(window.DG_UPDATE_ADMIN_TREE_FILTER)return window.DG_UPDATE_ADMIN_TREE_FILTER.onlyPending(DG_TREE_STATE_STORE.getState(),{setStatus:value=>dgTreeStateUpdate({status:value}),updateStatusControl:value=>window.DG_ADMIN_TREE_ACTIONS.setStatusValue(value),draw:dgTreeDraw});
   dgTreeStateUpdate({status:"Beklemede"});
-  const sel=$("treeStatus");
-  if(sel)sel.value="Beklemede";
+  window.DG_ADMIN_TREE_ACTIONS.setStatusValue("Beklemede");
   dgTreeDraw();
 }
 
@@ -172,7 +163,7 @@ function dgTreeOpenPending(){
 }
 
 function dgTreeRender(tree){
-  const el=$("adminTree");
+  const el=window.DG_ADMIN_TREE_ACTIONS.getElement("adminTree");
   if(!el)return;
 
   dgRenderPendingSummary();
@@ -190,9 +181,9 @@ function dgTreeRender(tree){
 async function loadAdminTree(){
   if(window.DG_LOAD_ADMIN_TREE)return window.DG_LOAD_ADMIN_TREE.execute({
     authorized:()=>!!PROFILE&&(PROFILE.role==="admin"||PROFILE.role==="owner"),
-    getBox:()=>$("adminTree"),
-    hasTree:box=>box.querySelector&&box.querySelector(".dg-tree-park,.dg-tree-sum,.alert.err,.alert.info"),
-    showLoading:box=>{box.innerHTML=`<div class="alert info">⏳ ${_ta("Ölçümler yükleniyor…")}</div>`;},
+    getBox:()=>window.DG_ADMIN_TREE_ACTIONS.getElement("adminTree"),
+    hasTree:window.DG_ADMIN_TREE_ACTIONS.hasTree,
+    showLoading:box=>window.DG_ADMIN_TREE_ACTIONS.showLoading(box,_ta("Ölçümler yükleniyor…")),
     keepScroll:()=>typeof dgScrollKeep==="function"?dgScrollKeep():null,
     restoreScroll:value=>{if(typeof dgScrollRestore==="function")dgScrollRestore(value);},
     fetch:dgTreeFetch,
@@ -202,12 +193,10 @@ async function loadAdminTree(){
     warnFallback:error=>toast(dgCf("⚠ Gömülü sorgu başarısız, yedek birleştirme kullanıldı: ")+esc(error),"warn","🌳"),
     draw:dgTreeDraw,
     renderError:error=>_ta("çizim hatası: ")+((error&&error.message)||String(error)),
-    showRenderError:(box,message)=>{if(box)box.innerHTML=`<div class="alert err"><b>⚠ Ağaç çizilemedi</b> `+
-      `<span class="mono" style="font-size:.72rem">${esc(message)}</span> `+
-      `<button class="btn sm blue" onclick="loadAdminTree()">🔄 Yeniden dene</button></div>`;}
+    showRenderError:(box,message)=>window.DG_ADMIN_TREE_ACTIONS.showLoadError(box,message,esc)
   });
   if(!PROFILE||(PROFILE.role!=="admin"&&PROFILE.role!=="owner"))return;
-  const box=$("adminTree");
+  const box=window.DG_ADMIN_TREE_ACTIONS.getElement("adminTree");
   /* ═══ 0043 · KAYDIRMA SIÇRAMASININ KÖK NEDENİ BURADAYDI ═══
    * ESKİ davranış: her yenilemede (onay/red sonrası loadAdmin→loadAdminTree,
    * sekme açılışı, 🔄 Yenile) ağaç KOŞULSUZ tek satır "⏳ Ölçümler yükleniyor…"
@@ -221,8 +210,8 @@ async function loadAdminTree(){
    * mevcut ağaç ekranda KALIR → yükseklik çökmez → kırpma yok → sıçrama yok.
    * Yeni veri gelince dgTreeDraw onu YERİNDE çizer. Ek güvence: kaydırma
    * konumu işlemin BAŞINDA yakalanıp SONUNDA (çizimden sonra) geri yazılır. */
-  const hasTree=box&&box.querySelector&&box.querySelector(".dg-tree-park,.dg-tree-sum,.alert.err,.alert.info");
-  if(box&&!hasTree)box.innerHTML=`<div class="alert info">⏳ ${_ta("Ölçümler yükleniyor…")}</div>`;
+  const hasTree=window.DG_ADMIN_TREE_ACTIONS.hasTree(box);
+  if(box&&!hasTree)window.DG_ADMIN_TREE_ACTIONS.showLoading(box,_ta("Ölçümler yükleniyor…"));
   const _y=(typeof dgScrollKeep==="function"?dgScrollKeep():null);
 
   /* ⚠ "YÜKLENIYOR"DA ASILI KALMA KORUMASI (canlıda yaşandı 2026-09-24):
@@ -251,9 +240,7 @@ async function loadAdminTree(){
     dgTreeDraw();
   }catch(e){
     DG_TREE_ERR=_ta("çizim hatası: ")+((e&&e.message)||String(e));
-    if(box)box.innerHTML=`<div class="alert err"><b>⚠ Ağaç çizilemedi</b> `+
-      `<span class="mono" style="font-size:.72rem">${esc(DG_TREE_ERR)}</span> `+
-      `<button class="btn sm blue" onclick="loadAdminTree()">🔄 Yeniden dene</button></div>`;
+    window.DG_ADMIN_TREE_ACTIONS.showLoadError(box,DG_TREE_ERR,esc);
   }
   /* 0043: çizim bittikten SONRA kaydırmayı geri koy (ağaç yenilenirken bel
    * yüksekliği değişmiş olabilir; sarmal tek başına yetmez, çünkü yükleniyor
@@ -379,10 +366,11 @@ window.dgTreeRows=dgTreeRows;
  * FK'ler on delete cascade → projenin ölçümleri ve waypoint'leri birlikte gider.
  * Park kimliği (parks) SİLİNMEZ — karşılaştırma bütünlüğü korunur. */
 async function dgTreeDeleteProject(ev,pid){
+ const store=window.DG_ADMIN_PERSISTENCE_STORE.create(()=>sb);
  if(window.DG_DELETE_ADMIN_TREE_PROJECT)return window.DG_DELETE_ADMIN_TREE_PROJECT.execute(ev,pid,{
   confirmation:_ta("Proje TÜM ölçüm ve waypoint'leriyle kalıcı olarak silinsin mi? Bu işlem geri alınamaz (park kimliği kalır)."),
   confirm:message=>confirm(message),
-  deleteProject:id=>sb.from("projects").delete().eq("id",id),
+  deleteProject:id=>store.deleteProject(id),
   markLiveDirty:()=>{DG_LIVE_DIRTY=true;},
   success:()=>toast(_ta("✓ Proje silindi (ölçümler + waypoint'ler cascade ile kaldırıldı)"),"ok","🗑"),
   failure:error=>toast(_ta("Proje silinemedi: ")+(error&&error.message||error),"err","🗑"),
@@ -393,7 +381,7 @@ async function dgTreeDeleteProject(ev,pid){
  const msg=_ta("Proje TÜM ölçüm ve waypoint'leriyle kalıcı olarak silinsin mi? Bu işlem geri alınamaz (park kimliği kalır).");
  if(!confirm(msg))return;
  try{
-  const{error}=await sb.from("projects").delete().eq("id",pid);
+  const{error}=await store.deleteProject(pid);
   if(error){toast(_ta("Proje silinemedi: ")+error.message,"err","🗑");return;}
   try{DG_LIVE_DIRTY=true;}catch(e){}
   toast(_ta("✓ Proje silindi (ölçümler + waypoint'ler cascade ile kaldırıldı)"),"ok","🗑");

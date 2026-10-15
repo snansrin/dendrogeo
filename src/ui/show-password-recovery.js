@@ -6,5 +6,11 @@
   if(modal)modal.style.display="flex";
   return !!modal;
  }
- root.DG_SHOW_PASSWORD_RECOVERY=Object.freeze({show});
+ function hide(getModal){
+  const modal=getModal();
+  if(!modal)return false;
+  modal.style.display="none";
+  return true;
+ }
+ root.DG_SHOW_PASSWORD_RECOVERY=Object.freeze({show,hide});
 })(window);

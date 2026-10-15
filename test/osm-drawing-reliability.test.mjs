@@ -11,10 +11,10 @@ test('all native park dialogs use the browser window as receiver',()=>{
 });
 test('provider recovery reaches an independent backend after a primary 504 and a short park abort does not poison surface requests',async()=>{
  const urls=[];let aborted=false;
- const c=environment(['src/domain/parks/select-overpass-mirrors.js','src/domain/parks/overpass-request-budget.js','src/services/osm-client.js'],{fetch:async url=>{urls.push(url);if(!aborted){aborted=true;const e=Error('park deadline');e.name='AbortError';throw e;}return {ok:true,json:async()=>({elements:[{type:'way',id:1}]})};}});
+ const c=environment(['src/adapters/parks/post-overpass-query.js','src/adapters/parks/overpass-mirror-health.js','src/domain/parks/select-overpass-mirrors.js','src/domain/parks/overpass-request-budget.js','src/services/osm-client.js'],{fetch:async url=>{urls.push(url);if(!aborted){aborted=true;const e=Error('park deadline');e.name='AbortError';throw e;}return {ok:true,json:async()=>({elements:[{type:'way',id:1}]})};}});
  assert.ok(await c.overpassRequest('park-query','park'));assert.equal(vm.runInContext('OVERPASS_HEALTH.get(OVERPASS_URLS[0])',c),undefined);
  assert.ok(await c.overpassRequest('surface-query','yüzey+su'));assert.ok(urls.some(url=>url.includes('maps.mail.ru')));
- const d=environment(['src/services/osm-client.js'],{fetch:async url=>url.includes('overpass-api.de')?{ok:false,status:504}:{ok:true,json:async()=>({elements:[]})}});
+ const d=environment(['src/adapters/parks/post-overpass-query.js','src/adapters/parks/overpass-mirror-health.js','src/domain/parks/select-overpass-mirrors.js','src/domain/parks/overpass-request-budget.js','src/services/osm-client.js'],{fetch:async url=>url.includes('overpass-api.de')?{ok:false,status:504}:{ok:true,json:async()=>({elements:[]})}});
  assert.ok(await d.overpassRequest('surface-query','yüzey+su'));assert.ok(vm.runInContext('OVERPASS_HEALTH.get(OVERPASS_URLS[0]).badUntil>Date.now()',d));
 });
 test('metric rectangle and 96-vertex circle preserve deterministic area and valid coordinates',()=>{

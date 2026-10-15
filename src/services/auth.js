@@ -3,220 +3,53 @@
 Giriş / kayıt / şifre sıfırlama / Turnstile / recovery modal */
 
 /* --- BLOK 1: Şifre kurtarma dinleyicisi --- */
-sb.auth.onAuthStateChange((event)=>{
-if(window.DG_SHOW_PASSWORD_RECOVERY){window.DG_SHOW_PASSWORD_RECOVERY.show(event,()=>document.getElementById("recoveryModal"));return;}
-if(event==="PASSWORD_RECOVERY"){
-const m=document.getElementById("recoveryModal");
-if(m)m.style.display="flex";
-}
-});
+window.DG_AUTH_SESSION_STORE.create(()=>sb).onAuthStateChange(event=>
+ window.DG_SHOW_PASSWORD_RECOVERY.show(event,()=>$('recoveryModal'))
+);
 
 /* --- BLOK 2: Form görünürlüğü + Turnstile --- */
 function showAuth(tab){
- if(window.DG_SHOW_AUTH_PANEL)return window.DG_SHOW_AUTH_PANEL.show($("erisim"),$("authBox"),tab,{selectTab:authTab,schedule:(callback,delay)=>window.setTimeout(callback,delay)});
-const el=$("erisim");if(!el)return;
-el.scrollIntoView({behavior:"smooth"});authTab(tab||"login");
-const box=$("authBox");box.classList.remove("auth-glow");void box.offsetWidth;box.classList.add("auth-glow");
-setTimeout(()=>box.classList.remove("auth-glow"),3000);
+ return window.DG_SHOW_AUTH_PANEL.show($("erisim"),$("authBox"),tab,{selectTab:authTab,schedule:(callback,delay)=>window.setTimeout(callback,delay)});
 }
 function authTab(t){
- if(window.DG_SELECT_AUTH_TAB)return window.DG_SELECT_AUTH_TAB.select(t,{getElement:$,setTab:value=>{DG_AUTH_TAB=value;},markVisible:()=>{window._tsVisible=true;},loadCaptcha:loadTurnstileScript,initializeCaptcha:initTurnstile});
-["login","reg","reset"].forEach(x=>{
-const id="f"+x[0].toUpperCase()+x.slice(1);
-if($(id))$(id).style.display=(x===t?"block":"none");
-});
-DG_AUTH_TAB=t==="reg"?"reg":t==="reset"?"reset":"login";
-window._tsVisible=true;
-loadTurnstileScript();
-initTurnstile();
+ return window.DG_SELECT_AUTH_TAB.select(t,{getElement:$,setTab:value=>{DG_AUTH_TAB=value;},markVisible:()=>{window._tsVisible=true;},loadCaptcha:loadTurnstileScript,initializeCaptcha:initTurnstile});
 }
 const TS = window.TS = {};
 let DG_AUTH_TAB="login";
 function loadTurnstileScript(){
- if(window.DG_TURNSTILE_SCRIPT_LOADER){window.DG_TURNSTILE_SCRIPT_LOADER.load({window,document,available:typeof turnstile!=="undefined",onLoad:initTurnstile});return;}
- if(typeof turnstile!=="undefined"){initTurnstile();return;}
- if(window._tsLoadStarted)return;
- window._tsLoadStarted=true;
- const s=document.createElement("script");
- s.src="https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit";
- s.onload=initTurnstile;
- s.onerror=()=>{window._tsLoadStarted=false;s.remove();};
- s.async=true;
- document.head.appendChild(s);
+ return window.DG_TURNSTILE_SCRIPT_LOADER.load({window,document,available:typeof turnstile!=="undefined",onLoad:initTurnstile});
 }
 function scheduleTurnstile(){
- if(window.DG_TURNSTILE_CONTROLLER){window.DG_TURNSTILE_CONTROLLER.schedule({window,document,load:loadTurnstileScript});return;}
- const el=document.getElementById("erisim");
- if(!el)return;
- if(!("IntersectionObserver" in window)){window._tsVisible=true;loadTurnstileScript();return;}
- const io=new IntersectionObserver(es=>{
-  if(es.some(e=>e.isIntersecting)){window._tsVisible=true;loadTurnstileScript();io.disconnect();}
- },{rootMargin:"300px"});
- io.observe(el);
+ return window.DG_TURNSTILE_CONTROLLER.schedule({window,document,load:loadTurnstileScript});
 }
 function initTurnstile(){
- if(window.DG_TURNSTILE_CONTROLLER){window.DG_TURNSTILE_CONTROLLER.initialize({window,api:typeof turnstile==="undefined"?null:turnstile,tab:DG_AUTH_TAB,widgets:TS,getElement:$,activateWidget:input=>window.DG_TURNSTILE_WIDGET.activate(input)});return;}
-if(!window._tsVisible||typeof turnstile==="undefined")return;
-const activeId=DG_AUTH_TAB==="reg"?"tsReg":DG_AUTH_TAB==="reset"?"tsReset":"tsLogin";
-["tsLogin","tsReg","tsReset"].forEach(id=>{
- if(id!==activeId&&TS[id]!==undefined){
-  try{turnstile.remove(TS[id]);delete TS[id];}catch(e){console.warn("TS remove error",id,e);}
- }
-});
-const el=$(activeId);
-if(el&&TS[activeId]===undefined){
- try{TS[activeId]=turnstile.render(el,{sitekey:"0x4AAAAAAEkJfXuFvNgUrwUb",theme:"light"});}
- catch(e){console.warn("TS render error",activeId,e);}
+ return window.DG_TURNSTILE_CONTROLLER.initialize({window,api:typeof turnstile==="undefined"?null:turnstile,tab:DG_AUTH_TAB,widgets:TS,getElement:$,activateWidget:input=>window.DG_TURNSTILE_WIDGET.activate(input)});
 }
-}
-if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",scheduleTurnstile);
-else scheduleTurnstile();
+window.DG_TURNSTILE_CONTROLLER.bindReady({document,schedule:scheduleTurnstile});
 function tsToken(id){
-if(window.DG_TURNSTILE_TOKEN)return window.DG_TURNSTILE_TOKEN.read(id,{api:typeof turnstile==="undefined"?null:turnstile,widgets:TS});
-if(typeof turnstile==="undefined"||!TS[id])return null;
-try{return turnstile.getResponse(TS[id])||null;}catch(e){return null;}
+return window.DG_TURNSTILE_TOKEN.read(id,{api:typeof turnstile==="undefined"?null:turnstile,widgets:TS});
 }
-function amsg(t,e){if(window.DG_RENDER_AUTH_MESSAGE)return window.DG_RENDER_AUTH_MESSAGE.render(t,e,$("authMsg"));const m=$("authMsg");if(m){m.textContent=t;m.style.color=e?"var(--red)":"var(--green-dk)";}}
+function amsg(t,e){return window.DG_RENDER_AUTH_MESSAGE.render(t,e,$("authMsg"));}
 
 /* --- BLOK 3: Giriş / kayıt / sıfırlama / çıkış --- */
 async function doLogin(){
-if(window.DG_LOGIN_WITH_PASSWORD)return window.DG_LOGIN_WITH_PASSWORD.execute({email:$('liEmail').value,password:$('liPass').value,token:tsToken,wait:ms=>new Promise(r=>setTimeout(r,ms)),showMessage:amsg,auth:window.DG_AUTH_SESSION_STORE.create(()=>sb),resetWidget:id=>turnstile.reset(TS[id]),setUser:user=>{USER=user;},setProfile:profile=>{PROFILE=profile;},loadProfile:id=>window.DG_AUTH_SESSION_STORE.create(()=>sb).loadProfile(id),startShell,isOnline:()=>navigator.onLine,schedule:setTimeout,syncOffline:syncOfflineData});
-const email = $("liEmail").value;
-const pass = $("liPass").value;
-if(!email || !pass){
-amsg("E-posta ve parola gerekli.", 1);
-return;
-}
-amsg("Giriş yapılıyor...", 0);
-let tok = tsToken("tsLogin");
-if(!tok){
-await new Promise(r => setTimeout(r, 2500));
-tok = tsToken("tsLogin");
-}
-if(!tok){
-amsg("Doğrulama widget'ı hazır değil. Sayfayı yenileyip tekrar deneyin.", 1);
-return;
-}
-const r = await sb.auth.signInWithPassword({
-email: email,
-password: pass,
-options: { captchaToken: tok }
-});
-if(r.error){
-amsg(r.error.message, 1);
-try { turnstile.reset(TS.tsLogin); } catch(e){}
-return;
-}
-try { turnstile.reset(TS.tsLogin); } catch(e){}
-USER = r.data.user;
-const { data: p } = await window.DG_AUTH_SESSION_STORE.create(()=>sb).loadProfile(USER.id);
-PROFILE = p;
-startShell();
-if (navigator.onLine) {
-setTimeout(() => syncOfflineData(), 2000);
-}
+return window.DG_LOGIN_WITH_PASSWORD.execute({email:$('liEmail').value,password:$('liPass').value,token:tsToken,wait:ms=>new Promise(r=>setTimeout(r,ms)),showMessage:amsg,auth:window.DG_AUTH_SESSION_STORE.create(()=>sb),resetWidget:id=>turnstile.reset(TS[id]),setUser:user=>{USER=user;},setProfile:profile=>{PROFILE=profile;},loadProfile:id=>window.DG_AUTH_SESSION_STORE.create(()=>sb).loadProfile(id),startShell,isOnline:()=>navigator.onLine,schedule:setTimeout,syncOffline:syncOfflineData});
 }
 async function doRegister(){
-if(window.DG_REGISTER_ACCOUNT)return window.DG_REGISTER_ACCOUNT.execute({name:$('rgName').value,email:$('rgEmail').value,password:$('rgPass').value,organization:$('rgOrg').value,consent:$('rgConsent'),token:tsToken,wait:ms=>new Promise(r=>setTimeout(r,ms)),showMessage:amsg,auth:window.DG_AUTH_SESSION_STORE.create(()=>sb),resetWidget:id=>turnstile.reset(TS[id]),redirectTo:window.location.origin+window.location.pathname.replace(/\/+$/,'')+'/',now:()=>new Date().toISOString()});
-const name=$("rgName").value;
-const email=$("rgEmail").value;
-const pass=$("rgPass").value;
-if(!name||!email||!pass){
-amsg("Tüm alanları doldurun.",1);
-return;
-}
-if(pass.length<6){
-amsg("Parola en az 6 karakter olmalı.",1);
-return;
-}
-/* ⛔ KVKK AÇIK RIZA (2026-09-24): onay kutusu işaretlenmeden hesap açılamaz.
- * Rıza yalnız UI'da kontrol edilmiyor; zaman damgasıyla auth metadata'sına da
- * yazılıyor → sonradan "ben onaylamadım" tartışmasında kayıt vardır. */
-const consentEl=$("rgConsent");
-if(consentEl&&!consentEl.checked){
-amsg("Devam etmek için KVKK Aydınlatma Metni ve Gizlilik Politikası onay kutusunu işaretleyin.",1);
-if(consentEl.focus)consentEl.focus();
-return;
-}
-amsg("Hesap oluşturuluyor...",0);
-let tok=tsToken("tsReg");
-if(!tok){
-await new Promise(r=>setTimeout(r,2500));
-tok=tsToken("tsReg");
-}
-if(!tok){
-amsg("Doğrulama widget'ı hazır değil. Sayfayı yenileyip tekrar deneyin.",1);
-return;
-}
-const redirectURL = window.location.origin + window.location.pathname.replace(/\/+$/,"") + "/";
-const r=await sb.auth.signUp({
-email:email,
-password:pass,
-options:{
-data:{
-full_name:name,
-organization:$("rgOrg").value,
-/* KVKK rıza kaydı (denetim izi): neyi, ne zaman, hangi sürümü onayladı */
-kvkk_consent:true,
-kvkk_consent_at:new Date().toISOString(),
-kvkk_consent_version:"1.0",
-kvkk_consent_source:"kayit-formu"
-},
-captchaToken:tok,
-redirectTo:redirectURL
-}
-});
-if(r.error){
-amsg(r.error.message,1);
-return;
-}
-try{turnstile.reset(TS.tsReg);}catch(e){}
-amsg(r.data.session?"Hesap oluşturuldu.":"✓ Doğrulama e‑postası gönderildi — maildeki linke tıklayın.",0);
+ return window.DG_REGISTER_ACCOUNT.execute({name:$("rgName").value,email:$("rgEmail").value,password:$("rgPass").value,organization:$("rgOrg").value,consent:$("rgConsent"),token:tsToken,wait:ms=>new Promise(r=>setTimeout(r,ms)),showMessage:amsg,auth:window.DG_AUTH_SESSION_STORE.create(()=>sb),resetWidget:id=>turnstile.reset(TS[id]),redirectTo:window.location.origin+window.location.pathname.replace(/\/+$/,'')+"/",now:()=>new Date().toISOString()});
 }
 async function sendResetEmail(){
-if(window.DG_SEND_PASSWORD_RESET_EMAIL)return window.DG_SEND_PASSWORD_RESET_EMAIL.execute({email:$('rsEmail').value,token:tsToken,wait:ms=>new Promise(r=>setTimeout(r,ms)),showMessage:amsg,auth:window.DG_AUTH_SESSION_STORE.create(()=>sb),resetWidget:id=>turnstile.reset(TS[id]),redirectTo:window.location.origin+window.location.pathname.replace(/\/+$/,'')+'/' });
-const email=$("rsEmail").value;
-if(!email){amsg("Lütfen e-posta adresinizi girin.",1);return;}
-let tok=tsToken("tsReset");
-if(!tok){
-amsg("Widget yükleniyor, lütfen bekleyin...",0);
-await new Promise(r=>setTimeout(r,2500));
-tok=tsToken("tsReset");
+ return window.DG_SEND_PASSWORD_RESET_EMAIL.execute({email:$("rsEmail").value,token:tsToken,wait:ms=>new Promise(r=>setTimeout(r,ms)),showMessage:amsg,auth:window.DG_AUTH_SESSION_STORE.create(()=>sb),resetWidget:id=>turnstile.reset(TS[id]),redirectTo:window.location.origin+window.location.pathname.replace(/\/+$/,'')+"/"});
 }
-if(!tok){amsg("Doğrulama widget'ı hazır değil. Sayfayı yenileyip tekrar deneyin.",1);return;}
-amsg("Şifre sıfırlama talebi gönderiliyor...",0);
-const redirectURL=window.location.origin+window.location.pathname.replace(/\/+$/,"")+"/";
-try{
-const r=await sb.auth.resetPasswordForEmail(email,{captchaToken:tok,redirectTo:redirectURL});
-if(r&&r.error){
-amsg("Hata: "+r.error.message,1);
-try{turnstile.reset(TS.tsReset);}catch(e){}
-return;
-}
-try{turnstile.reset(TS.tsReset);}catch(e){}
-amsg("✓ Sıfırlama bağlantısı e-postanıza gönderildi. Spam klasörünü de kontrol edin.",0);
-}catch(e){
-amsg("Beklenmeyen hata: "+(e&&e.message?e.message:String(e)),1);
-try{turnstile.reset(TS.tsReset);}catch(e2){}
-}
-}
-async function logout(){if(window.DG_SIGN_OUT)return window.DG_SIGN_OUT.execute({stopPresence:typeof dgPresenceStop==="function"?dgPresenceStop:null,signOut:()=>window.DG_AUTH_SESSION_STORE.create(()=>sb).signOut(),reload:()=>location.reload()});if(typeof dgPresenceStop==="function")dgPresenceStop();await sb.auth.signOut();location.reload();}
+async function logout(){return window.DG_SIGN_OUT.execute({stopPresence:typeof dgPresenceStop==="function"?dgPresenceStop:null,signOut:()=>window.DG_AUTH_SESSION_STORE.create(()=>sb).signOut(),reload:()=>location.reload()});}
 
 /* --- BLOK 4: Recovery modal --- */
 function cancelRecovery(){
-$("recoveryModal").style.display="none";
+window.DG_SHOW_PASSWORD_RECOVERY.hide(()=>$('recoveryModal'));
 location.assign(window.location.pathname);
 }
 async function saveNewPassword(){
-if(window.DG_SAVE_NEW_PASSWORD)return window.DG_SAVE_NEW_PASSWORD.execute({password:$('rcPass').value,confirmation:$('rcPass2').value,updatePassword:password=>window.DG_AUTH_SESSION_STORE.create(()=>sb).updatePassword(password),setMessage:(message,error)=>{const m=$('rcMsg');m.textContent=message;m.style.color=error?'var(--red)':'var(--green-dk)';},toast,replaceHistory:()=>history.replaceState(null,"",window.location.pathname),reload:()=>location.reload()});
-const p1=$("rcPass").value,p2=$("rcPass2").value,m=$("rcMsg");
-if(p1.length<6){m.textContent="Parola en az 6 karakter olmalı.";m.style.color="var(--red)";return;}
-if(p1!==p2){m.textContent="Parololar eşleşmiyor.";m.style.color="var(--red)";return;}
-const{error}=await sb.auth.updateUser({password:p1});
-if(error){m.textContent="Hata: "+error.message;m.style.color="var(--red)";return;}
-toast("✓ Parola güncellendi — yeni parolanızla giriş yapın","ok","🔑");
-history.replaceState(null,"",window.location.pathname);
-location.reload();
+ return window.DG_SAVE_NEW_PASSWORD.execute({password:$("rcPass").value,confirmation:$("rcPass2").value,updatePassword:password=>window.DG_AUTH_SESSION_STORE.create(()=>sb).updatePassword(password),setMessage:(message,error)=>window.DG_RENDER_AUTH_MESSAGE.render(message,error,$("rcMsg")),toast,replaceHistory:()=>history.replaceState(null,"",window.location.pathname),reload:()=>location.reload()});
 }
 
 /* --- BLOK 5: GOOGLE İLE GİRİŞ (Supabase OAuth) ---
@@ -230,17 +63,11 @@ location.reload();
  * Turnstile BİLEREK yok: doğrulama Google'ın kendi ekranında yapılıyor.
  * (Turnstile yalnız parola formunda bot koruması için gerekli.) */
 function dgIsOAuthCallback(){
- if(window.DG_AUTH_OAUTH_CALLBACK)return window.DG_AUTH_OAUTH_CALLBACK.isCallback(window.location);
- const s=(typeof window!=="undefined"&&window.location&&window.location.search)||"";
- const h=(typeof window!=="undefined"&&window.location&&window.location.hash)||"";
- return /[?&]code=/.test(s)||/access_token=/.test(h)||/[?&]error=/.test(s);
+ return window.DG_AUTH_OAUTH_CALLBACK.isCallback(window.location);
 }
 
 function dgOAuthError(){
- if(window.DG_AUTH_OAUTH_ERROR)return window.DG_AUTH_OAUTH_ERROR.read(window.location.search);
- const s=(typeof window!=="undefined"&&window.location&&window.location.search)||"";
- const m=/[?&]error=([^&]+)/.exec(s);
- return m?decodeURIComponent(m[1]):null;
+ return window.DG_AUTH_OAUTH_ERROR.read(window.location.search);
 }
 
 /* OAuth geri dönüşünde supabase-js URL'deki ?code=… değerini ARKA PLANDA takas
@@ -248,101 +75,29 @@ function dgOAuthError(){
  * düşersek kullanıcı "giriş olmadı" sanır → oturum gelene kadar beklenir.
  * INITIAL_SESSION boş gelirse (takas hâlâ sürebilir) kısa bir ek süre tanınır. */
 function dgWaitForOAuthSession(timeoutMs){
- if(window.DG_AUTH_OAUTH_SESSION)return window.DG_AUTH_OAUTH_SESSION.wait(window.DG_AUTH_SESSION_STORE.create(()=>sb),timeoutMs);
- const ms=Number(timeoutMs)||9000;
- return new Promise(resolve=>{
-  let done=false,sub=null,grace=null;
-  const finish=s=>{
-   if(done)return;
-   done=true;
-   if(grace)clearTimeout(grace);
-   try{if(sub&&sub.subscription&&sub.subscription.unsubscribe)sub.subscription.unsubscribe();}catch(e){}
-   resolve(s||null);
-  };
-  try{
-   const r=sb.auth.onAuthStateChange((event,sess)=>{
-    if(event==="SIGNED_IN"||event==="USER_UPDATED"){finish(sess);return;}
-    if(event==="INITIAL_SESSION"){
-     if(sess){finish(sess);return;}
-     if(!grace)grace=setTimeout(()=>finish(null),1500);
-    }
-   });
-   sub=(r&&r.data)||null;
-  }catch(e){}
-  /* Yarış koruması: takas zaten bittiyse getSession dolu döner */
-  try{
-   Promise.resolve(sb.auth.getSession()).then(r=>{
-    const ses=r&&r.data?r.data.session:null;
-    if(ses)finish(ses);
-   }).catch(()=>{});
-  }catch(e){}
-  setTimeout(()=>finish(null),ms);
- });
+ return window.DG_AUTH_OAUTH_SESSION.wait(window.DG_AUTH_SESSION_STORE.create(()=>sb),timeoutMs);
 }
 
 /* Adres çubuğundaki ?code=… kalıntısını temizle: yenilemede takas tekrar
  * denenmesin, ekran görüntüsünde/paylaşılan bağlantıda kod görünmesin. */
 function dgCleanOAuthUrl(){
- if(window.DG_CLEAN_OAUTH_URL){window.DG_CLEAN_OAUTH_URL.clean(window);return;}
- try{
-  if(window.history&&window.history.replaceState){
-   history.replaceState(null,"",window.location.pathname);
-  }
- }catch(e){}
+ return window.DG_CLEAN_OAUTH_URL.clean(window);
 }
 
 function dgShowOAuthWait(msg){
- if(window.DG_AUTH_OAUTH_WAIT_UI){window.DG_AUTH_OAUTH_WAIT_UI.show($,msg);return;}
- const el=$("oauthWait");
- if(el){
-  el.style.display="block";
-  el.textContent=msg||"⏳ Google girişi tamamlanıyor…";
- }
+ return window.DG_AUTH_OAUTH_WAIT_UI.show($,msg);
 }
 function dgHideOAuthWait(){
- if(window.DG_AUTH_OAUTH_WAIT_UI){window.DG_AUTH_OAUTH_WAIT_UI.hide($);return;}
- const el=$("oauthWait");
- if(el)el.style.display="none";
+ return window.DG_AUTH_OAUTH_WAIT_UI.hide($);
 }
 
 async function dgGoogleSignIn(){
- if(window.DG_START_GOOGLE_SIGN_IN)return window.DG_START_GOOGLE_SIGN_IN.start({
+ return window.DG_START_GOOGLE_SIGN_IN.start({
   setButtonDisabled:value=>{const button=$("googleBtn");if(button)button.disabled=value;},
   showMessage:(message,isError)=>amsg(message,isError?1:0),showWait:dgShowOAuthWait,hideWait:dgHideOAuthWait,
-  redirectTo:()=>window.location.origin+window.location.pathname.replace(/\/+$/,"")+"/",
+  redirectTo:()=>window.location.origin+window.location.pathname.replace(/\/+$/,'')+"/",
   signIn:options=>window.DG_AUTH_SESSION_STORE.create(()=>sb).signInWithOAuth(options)
  });
- const btn=$("googleBtn");
- if(btn){btn.disabled=true;}
- amsg("Google'a yönlendiriliyorsun…",0);
- dgShowOAuthWait("🔵 Google'a yönlendiriliyorsun…");
-
- /* prompt=select_account: sahada ortak tablet kullanılıyor olabilir, kullanıcı
-  * hangi Google hesabıyla gireceğini seçebilsin. */
- const redirectTo=window.location.origin+window.location.pathname.replace(/\/+$/,"")+"/";
- let error=null;
- try{
-  const r=await sb.auth.signInWithOAuth({
-   provider:"google",
-   options:{
-    redirectTo,
-    queryParams:{prompt:"select_account"}
-   }
-  });
-  error=r&&r.error?r.error:null;
- }catch(e){error=e;}
-
- if(error){
-  if(btn){btn.disabled=false;}
-  dgHideOAuthWait();
-  const m=String(error.message||error);
-  /* Sağlayıcı kapalıysa Supabase bunu söyler; kullanıcıya anlaşılır çevirisi */
-  amsg(/provider.*not|disabled|not enabled/i.test(m)
-   ? "Google girişi bu projede henüz etkin değil. Supabase → Authentication → Providers → Google → Enable (bkz. docs/google-giris.md)."
-   : "Google girişi başlatılamadı: "+m,1);
-  return;
- }
- /* Yönlendirme başladı; sayfa değişene kadar bekleme ekranı kalır. */
 }
 
 window.showAuth=showAuth;

@@ -40,6 +40,13 @@ test('admin photo adapters reject failed or incomplete reference and Storage rea
  await assert.rejects(storageStore.listPhotoFiles('dendro-photos','',100),/listesi doğrulanamadı/);
 });
 
+test('admin project deletion keeps its filter in the persistence adapter',async()=>{
+ const calls=[],query={eq(column,value){calls.push(['eq',column,value]);return Promise.resolve({error:null});}};
+ const store=load().create(()=>({from(table){calls.push(['from',table]);return{delete(){calls.push(['delete']);return query;}};}}));
+ await store.deleteProject(42);
+ assert.deepEqual(calls,[['from','projects'],['delete'],['eq','id',42]]);
+});
+
 test('application persistence boundary rejects direct Supabase clients',()=>{
  const modules=[
   {layer:'application',relativePath:'src/application/example.js',source:'client.from("measurements"); storage.from("photos");'},

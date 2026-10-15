@@ -16,22 +16,12 @@ Harita init, marker yönetimi, waypoint CRUD, navigasyon çizimi */
  * Artık boş değer reddedilir ve küresel sınır kontrolü yapılır. Tam (0,0)
  * da reddedilir: gerçek bir envanter noktası olması fiilen imkânsız. */
 function dgValidCoord(lat,lon){
- if(window.DG_MAP_COORDINATE)return window.DG_MAP_COORDINATE.isValid(lat,lon);
- if(lat===null||lat===undefined||lat==="")return false;
- if(lon===null||lon===undefined||lon==="")return false;
- const a=Number(lat),o=Number(lon);
- if(!Number.isFinite(a)||!Number.isFinite(o))return false;
- if(a<-90||a>90||o<-180||o>180)return false;
- return !(a===0&&o===0);
+ return window.DG_MAP_COORDINATE.isValid(lat,lon);
 }
 
 // 1. Marker HTML üretici
 function popupHtml(r){
- if(window.DG_MAP_MEASUREMENT_POPUP)return window.DG_MAP_MEASUREMENT_POPUP.render(r,{escapeHTML:esc,translate:s=>typeof dgT==="function"?dgT(s):s});
- /* 0035b: balon etiketleri dgT() ile çevrilir (EN modu). Tür adı da sözlükte
-  * (tam eşleşme) — balon her açılışta yeniden kurulduğu için dil anında yansır. */
- const _t=(s)=>(typeof dgT==="function"?dgT(s):s);
- return `<div style="min-width:140px"><b>P${r.point_id}</b> · ${esc(_t(r.species))}<br><span style="font-size:.75rem;color:#5f6d65">DBH: ${Number.isFinite(+r.dbh_cm)?(+r.dbh_cm).toFixed(1):"—"} cm · ${_t("Boy")}: ${r.height_m||"—"} m<br>${_t("Karbon")}: ${(r.carbon_kg||0).toFixed(1)} kg</span>`+(r.photo_url?`<br><img src="${esc(r.photo_url)}" style="width:160px;border-radius:8px;margin-top:6px">`:"")+`</div>`;
+ return window.DG_MAP_MEASUREMENT_POPUP.render(r,{escapeHTML:esc,translate:s=>typeof dgT==="function"?dgT(s):s});
 }
 // 2. Marker yükleme (chunked)
 /* İDEMPOTENT (2026-09-26 · canlı tarayıcıda ölçüldü): küme zaten varsa ÖNCE
@@ -52,64 +42,12 @@ function popupHtml(r){
  * eklenmeye devam ederdi. Her yükleme m._markerToken'ı artırır; bayat tur
  * ilk adımında kendini iptal eder. */
 function addMarkersChunked(m,rows,chunk=150){
- if(window.DG_MAP_MEASUREMENT_MARKERS)return window.DG_MAP_MEASUREMENT_MARKERS.add(m,rows,chunk,{leaflet:L,popupHTML:popupHtml,log:console,setTimer:setTimeout,ensureLayer:window.DG_ENSURE_MEASUREMENT_MARKER_LAYER,clusterIcon:window.DG_MEASUREMENT_MARKER_CLUSTER_ICON,createMarker:window.DG_CREATE_MEASUREMENT_MAP_MARKER,schedule:window.DG_SCHEDULE_MEASUREMENT_MARKER_CHUNKS});
- let i=0;
- if(!m._cluster){
-  /* YEDEK KATMAN (2026-09-26 · kullanıcı bildirimi: "listede var, haritada yok").
-   * vendor/leaflet.markercluster-1.5.3.js HERHANGİ bir nedenle yüklenemezse
-   * (ağ filtresi/ reklam-engelleyici kuralı, önbellekte 404 gövdesi, SW'de
-   * bayat karma) L.markerClusterGroup TANIMSIZ kalıyordu. Eski kod o anda
-   * fırlatıyor, loadApprovedMarkers hatayı yutup "✓ 0 kayıt" basıyor ve
-   * KULLANICI LİSTELERİ DOLUYKEN BOŞ HARİTA görüyordu.
-   * Artık eklenti yoksa DÜZ L.layerGroup()'a düşülür: kümeleme olmaz ama
-   * noktalar TEK TEK çizilir — veri asla görünmez kalmaz. Bayrak, kullanıcıya
-   * amber bir not göstermek için kullanılır. */
-  if(typeof L.markerClusterGroup==="function"){
-   m._cluster=L.markerClusterGroup({
-    maxClusterRadius:80,
-    spiderfyOnMaxZoom:true,
-    showCoverageOnHover:false,
-    disableClusteringAtZoom:15,
-    iconCreateFunction:c=>{
-     const n=c.getChildCount();
-     const cls=n<10?"small":n<50?"medium":"large";
-     return L.divIcon({html:`<div>${n}</div>`,className:`marker-cluster marker-cluster-${cls}`,iconSize:[40,40]});
-    }
-   });
-   m._clusterDegraded=false;
-  }else{
-   console.warn("DENDROGEO · markercluster eklentisi yok → noktalar kümelenmeden çiziliyor");
-   m._cluster=L.layerGroup();
-   m._clusterDegraded=true;
-  }
-  m.addLayer(m._cluster);
- }else{
-  m._cluster.clearLayers();
- }
- const token=m._markerToken=(m._markerToken||0)+1;
- (function step(){
-  if(token!==m._markerToken)return;   /* bayat tur: daha yeni bir yükleme başladı */
-  const end=Math.min(i+chunk,rows.length);
-  for(;i<end;i++){
-   const r=rows[i];
-   const mk=L.marker([r.lat,r.lon],{
-    icon:L.divIcon({
-     className:'tree-marker',
-     html:`<div style="width:14px;height:14px;border-radius:50%;background:#1e6f4b;border:2px solid #fff;box-shadow:0 2px 6px rgba(0,0,0,.35)"></div>`,
-     iconSize:[18,18],
-     iconAnchor:[9,9]
-    })
-   });
-   mk.bindPopup(popupHtml(r));
-   m._cluster.addLayer(mk);
-  }
-  if(i<rows.length)setTimeout(step,16);
- })();
+ return window.DG_MAP_MEASUREMENT_MARKERS.add(m,rows,chunk,{leaflet:L,popupHTML:popupHtml,log:console,setTimer:setTimeout});
 }
 // 3. Onaylı marker'ları getir
 /* HATA ARTIK SESSİZ DEĞİL (2026-09-26).
  *
- * ESKİ KOD:  const{data,count}=await sb.from(...)...   ← error YOKSAYILIYORDU
+ * ESKİ KOD: doğrudan veri sorgusunun hatası YOKSAYILIYORDU
  *            ...
  *            }catch(e){done&&done(0,[]);}
  *
@@ -128,24 +66,7 @@ function addMarkersChunked(m,rows,chunk=150){
  * (loadLiveMap, loadWorld, initLanding) güncellendi. */
 async function loadApprovedMarkers(m,limit,done){
  const app=window.DG_LOAD_APPROVED_MEASUREMENT_MARKERS,adapter=window.DG_FETCH_APPROVED_MAP_MEASUREMENTS,prepare=window.DG_PREPARE_APPROVED_MAP_MEASUREMENTS;
- if(app&&adapter&&prepare){await app.load({map:m,limit,done,readRows:()=>adapter.fetch({client:sb,limit,warnIfTruncated:dgWarnIfTruncated}),prepare:rows=>prepare.prepare(rows,dgValidCoord),draw:(target,rows)=>addMarkersChunked(target,rows),log:console});return;}
- if(!m){done&&done(-1,[],"Harita henüz kurulmadı (initMaps çağrılmadı)");return;}
- try{
-  const{data,count,error}=await sb.from("measurements")
-   .select("lat,lon,point_id,species,dbh_cm,height_m,carbon_kg,photo_url,grp",{count:"exact"})
-   .eq("status","Onaylı").limit(limit);
-  if(error)throw new Error((error.code?error.code+": ":"")+error.message);
-  /* Limit aşımında UYAR: işaretçiler ve bu satırlardan hesaplanan toplam karbon
-   * kesilmiş kümeye dayanır. Bkz. src/utils/truncation.js */
-  dgWarnIfTruncated(data,limit,"Canlı harita",count);
-  const rows=(data||[]).filter(r=>dgValidCoord(r.lat,r.lon));
-  addMarkersChunked(m,rows);
-  done&&done(rows.length,rows,null);
- }catch(e){
-  const msg=(e&&(e.message||e))+"";
-  console.error("DENDROGEO · onaylı işaretçiler yüklenemedi:",msg);
-  done&&done(-1,[],msg);
- }
+ return app.load({map:m,limit,done,readRows:()=>adapter.fetch({client:sb,limit,warnIfTruncated:dgWarnIfTruncated}),prepare:rows=>prepare.prepare(rows,dgValidCoord),draw:(target,rows)=>addMarkersChunked(target,rows),log:console});
 }
 // 4. Canlı harita
 /* İDEMPOTENT + TAZELENEBİLİR (2026-09-26).
@@ -163,30 +84,8 @@ async function loadApprovedMarkers(m,limit,done){
  * yeniden çeker. Elle tazelemek için karta ↻ düğmesi kondu (partials/shell.html). */
 async function loadLiveMap(){
  const app=window.DG_LOAD_LIVE_MEASUREMENTS_MAP,status=window.DG_RENDER_LIVE_MAP_LOAD_STATUS;
- if(app&&status){const format=typeof dgTf==="function"?dgTf:(_t,v)=>_t.replace(/\{(\w+)\}/g,(match,key)=>v[key]);await app.load({element:$("mapLoad"),loadMarkers:callback=>loadApprovedMarkers(map,3000,callback),markLoaded:ok=>dgMarkLiveLoaded(ok),status,escapeHTML:esc,format,setTimer:setTimeout,clusterDegraded:()=>map&&map._clusterDegraded,renderAnalysis});return;}
- const el=$("mapLoad");
- if(el){el.style.display="";el.className="alert info";el.textContent="⏳ Onaylı kayıtlar yükleniyor…";}
- await loadApprovedMarkers(map,3000,(n,rows,err)=>{
-  dgMarkLiveLoaded(!err);
-  if(!el)return;
-  if(err){
-   el.style.display="";
-   el.className="alert err";
-   el.innerHTML=`<b>⚠ Onaylı kayıtlar yüklenemedi</b> — harita bu yüzden boş. Veri silinmedi: `+
-    `<span class="mono" style="font-size:.74rem">${esc(err)}</span> `+
-    `<button class="btn sm" style="margin-left:6px" onclick="loadLiveMap()">↻ Yeniden dene</button>`;
-   return;
-  }
-  /* Kümeleme eklentisi yüklenemediyse kullanıcıya SÖYLE (sessiz kalite kaybı
-   * olmasın): noktalar tek tek çizilir, balon yerine nokta görür. */
-  const deg=map&&map._clusterDegraded;
-  el.className=deg?"alert warn":"alert ok";
-  /* 0035c: durum satırı dgTf şablonuyla çevrilir (EN modunda Türkçe kalmaz). */
-  const _tf=(typeof dgTf==="function"?dgTf:(_t,v)=>_t.replace(/\{(\w+)\}/g,(m,k)=>v[k]));
-  el.textContent=_tf(deg?"⚠ {n} onaylı kayıt yüklendi · {t} · kümeleme eklentisi yüklenemedi, noktalar tek tek çizildi.":"✓ {n} onaylı kayıt yüklendi · {t} · noktaya dokun → bilgi + fotoğraf.",{n:n,t:new Date().toLocaleTimeString("tr-TR")});
-  setTimeout(()=>el.style.display="none",6000);
-  renderAnalysis(rows,"liveAnalysis");
- });
+ const format=typeof dgTf==="function"?dgTf:(_t,v)=>_t.replace(/\{(\w+)\}/g,(match,key)=>v[key]);
+ return app.load({element:$("mapLoad"),loadMarkers:callback=>loadApprovedMarkers(map,3000,callback),markLoaded:ok=>dgMarkLiveLoaded(ok),status,escapeHTML:esc,format,setTimer:setTimeout,clusterDegraded:()=>map&&map._clusterDegraded,renderAnalysis});
 }
 /* liveLoaded/DG_LIVE_DIRTY ui/state.js'te (body sonunda) bildiriliyor; bu
  * fonksiyon yalnız ÇAĞRI ANINDA dokunduğu için yükleme sırası sorun değil.
@@ -221,8 +120,7 @@ async function uploadWpCsv(){
    const c=lines[i].split(",").map(v=>v.trim().replace(/^"|"$/g,""));
    const lon=Number(c[0]),lat=Number(c[1]),id=Number(c[2]);
    if(c.length<3||!c[0]||!c[1]||!Number.isInteger(id)||id<=0||!Number.isFinite(lat)||!Number.isFinite(lon)||Math.abs(lat)>90||Math.abs(lon)>180){invalid++;continue;}
-   const{error}=await sb.from("waypoints").upsert({owner:USER.id,project_id:pid,wp_id:id,lat,lon},{onConflict:"project_id,wp_id"});
-   if(error)throw error;
+   await window.DG_UPSERT_PROJECT_WAYPOINT.upsert({client:sb,command:{row:{owner:USER.id,project_id:pid,wp_id:id,lat,lon},options:{onConflict:"project_id,wp_id"}}});
    n++;
   }
   toast("✓ "+n+" waypoint kaydedildi."+(invalid?" "+invalid+" geçersiz satır atlandı.":""),invalid?"warn":"ok");
@@ -239,7 +137,7 @@ async function loadWaypoints__scroll(){
  WP=[];navTarget=null;drawNav();
  if(!pid){renderWaypointList();return;}
  try{
-  const{data,error}=await sb.from("waypoints").select("*").eq("project_id",pid).order("wp_id",{ascending:true});
+  const{data,error}=await window.DG_FETCH_PROJECT_WAYPOINTS.fetch({client:sb,projectId:pid});
   if(+$("nProject").value!==pid)return;
   if(error)throw error;
   WP=data||[];
@@ -251,31 +149,12 @@ let DG_WP_PAGE=0,DG_WP_QUERY="";
 const DG_WP_PAGE_SIZE=8;
 function dgWaypointPage(delta){DG_WP_PAGE+=delta;renderWaypointList();}
 function renderWaypointList(){
- if(window.DG_WAYPOINT_LIST_UI){
-  const result=window.DG_WAYPOINT_LIST_UI.render({
-   waypoints:WP,gps:GPS,projectId:$("nProject").value,
-   search:$("wpSearch")?.value,filter:$("wpFilter")?.value||"all",sort:$("wpSort")?.value||"id",
-   page:DG_WP_PAGE,signature:DG_WP_QUERY,selectedId:navTarget?.id,
-   distance:hav,setPage:value=>{DG_WP_PAGE=value;},setSignature:value=>{DG_WP_QUERY=value;}
-  });
-  $("dWp").textContent=WP.length;$("dVisit").textContent=result.done;$("navInfo").textContent=result.info;
-  const pager=$("wpPager");if(pager)pager.innerHTML=result.pager;
-  $("wpListTable").innerHTML=result.html;
-  return;
- }
- const done=WP.filter(w=>w.visited).length;
- $("dWp").textContent=WP.length;$("dVisit").textContent=done;
- $("navInfo").textContent=WP.length+" nokta · "+(WP.length-done)+" bekleyen · "+done+" tamamlanan";
- const query=($("wpSearch")?.value||"").trim().toLowerCase().replace(/^p/,"");
- const filter=$("wpFilter")?.value||"all";
- const rows=WP.filter(w=>String(w.wp_id).includes(query)&&(filter==="all"||(filter==="done"?w.visited:!w.visited)));
- if($("wpSort")?.value==="distance"&&GPS)rows.sort((a,b)=>hav(GPS.latitude,GPS.longitude,a.lat,a.lon)-hav(GPS.latitude,GPS.longitude,b.lat,b.lon)||a.wp_id-b.wp_id);
- else rows.sort((a,b)=>a.wp_id-b.wp_id);
- const signature=String($("nProject").value)+":"+query+":"+filter+":"+($("wpSort")?.value||"id");if(signature!==DG_WP_QUERY){DG_WP_PAGE=0;DG_WP_QUERY=signature;}
- const pages=Math.max(1,Math.ceil(rows.length/DG_WP_PAGE_SIZE));DG_WP_PAGE=Math.max(0,Math.min(pages-1,DG_WP_PAGE));
- const visible=rows.slice(DG_WP_PAGE*DG_WP_PAGE_SIZE,(DG_WP_PAGE+1)*DG_WP_PAGE_SIZE);
- const pager=$("wpPager");if(pager)pager.innerHTML=`<button class="btn sm ghost" onclick="dgWaypointPage(-1)" ${DG_WP_PAGE===0?"disabled":""}>←</button><span>${rows.length?DG_WP_PAGE*DG_WP_PAGE_SIZE+1:0}–${Math.min(rows.length,(DG_WP_PAGE+1)*DG_WP_PAGE_SIZE)} / ${rows.length}</span><button class="btn sm ghost" onclick="dgWaypointPage(1)" ${DG_WP_PAGE===pages-1?"disabled":""}>→</button>`;
- $("wpListTable").innerHTML=rows.length?visible.map(w=>`<li class="waypoint-point ${w.visited?'done':''}"${navTarget?.id===w.id?' aria-current="true"':''}><div class="waypoint-point-main"><b>P${Number(w.wp_id)}</b><span class="mono waypoint-distance">${GPS?Math.round(hav(GPS.latitude,GPS.longitude,w.lat,w.lon))+" m":"—"}</span></div><div class="waypoint-point-actions"><span class="waypoint-state ${w.visited?'done':'pending'}">${w.visited?'✓ Yapıldı':'Bekliyor'}</span>${w.visited?'':`<button class="btn sm blue waypoint-target-btn" onclick="selectWaypoint(${Number(w.id)})">🎯 Hedef</button>`}</div></li>`).join(""):'<li class="waypoint-empty">'+(WP.length?"Aramaya uygun nokta yok.":(+$("nProject").value?"Bu projede waypoint yok. CSV yükleyin.":"Önce proje seçin."))+"</li>";
+ return window.DG_WAYPOINT_LIST_UI.renderTo({
+  getElement:$,waypoints:WP,gps:GPS,projectId:$("nProject").value,
+  search:$("wpSearch")?.value,filter:$("wpFilter")?.value||"all",sort:$("wpSort")?.value||"id",
+  page:DG_WP_PAGE,signature:DG_WP_QUERY,selectedId:navTarget?.id,
+  distance:hav,setPage:value=>{DG_WP_PAGE=value;},setSignature:value=>{DG_WP_QUERY=value;}
+ });
 }
 
 async function deleteAllWaypoints(){
@@ -284,7 +163,7 @@ async function deleteAllWaypoints(){
  if(app&&selected&&confirmation&&store&&completion){await app.execute({projectId:pid,isSelected:selected.isSelected,confirmDeletion:()=>confirmation.confirm({confirm,translate:dgCf}),remove:projectId=>store.delete({client:sb,projectId}),showError:error=>toast("Hata: "+error.message,"err"),complete:()=>completion.clear({setTarget:value=>{navTarget=value;},setWaypoints:value=>{WP=value;},notify:toast,refresh:loadWaypoints}),notify:toast});return;}
  if(!pid)return toast("Proje seç");
  if(!confirm(dgCf("⚠ Bu projedeki TÜM waypoint'ler kalıcı olarak silinsin mi? Yanlış liste ise sonra yeniden yükleyebilirsiniz.")))return;
- const{error}=await sb.from("waypoints").delete().eq("project_id",pid);
+ const{error}=await window.DG_DELETE_PROJECT_WAYPOINTS.delete({client:sb,projectId:pid});
  if(error)return toast("Hata: "+error.message,"err");
  navTarget=null;WP=[];
  toast("✓ Liste tamamen silindi. Yeni CSV yükleyebilirsiniz.");
@@ -336,12 +215,10 @@ function dgFitWaypoints(showMap=false){
  navMap.fitBounds(points,{padding:[36,36],maxZoom:18});
 }
 function dgWaypointGuidance(){
- const el=$("navGuidance");if(!el)return;
- if(window.DG_WAYPOINT_GUIDANCE){el.textContent=window.DG_WAYPOINT_GUIDANCE.resolve({target:navTarget,gps:GPS,distance:hav,translate:s=>typeof dgCf==="function"?dgCf(s):s});return;}
- if(!navTarget||navTarget.visited){el.textContent=dgCf("Hedef seçerek navigasyona başlayın.");return;}
- if(!GPS){el.textContent=dgCf("Hedef seçildi. Mesafe ve yön için konumu etkinleştirin.");return;}
- const distance=hav(GPS.latitude,GPS.longitude,navTarget.lat,navTarget.lon);
- el.textContent=distance<=GPS.accuracy?dgCf("Hedef GPS belirsizlik alanında. Noktayı sahada doğrulayın."):distance<=50?dgCf("Hedefe yaklaştınız. Noktayı doğrulayıp Vardım düğmesine basın."):dgCf("Kesikli çizgi hedefe kuş uçuşu yönü gösterir; yürüyüş rotası değildir.");
+ return window.DG_RENDER_WAYPOINT_NAVIGATION_HEADER.renderGuidance({
+  target:navTarget,gps:GPS,distance:hav,translate:dgCf,
+  resolve:input=>window.DG_WAYPOINT_GUIDANCE.resolve(input),getElement:$
+ });
 }
 // 7. Navigasyon çizimi
 /* "🎯 Vardım → Ölçüme Geç" butonu (index.html:563) daha önce TANIMSIZ bir
@@ -366,7 +243,7 @@ async function arriveWp(){
     const d=hav(GPS.latitude,GPS.longitude,w.lat,w.lon);
     if(d>50&&!confirm(dgTfs("Hedeften {d} m uzaktasın.\nYine de 'vardım' işaretlensin mi?",{d:d.toFixed(0)})))return;
   }
-  const{error}=await sb.from("waypoints").update({visited:true}).eq("id",w.id);
+  const{error}=await window.DG_MARK_WAYPOINT_VISITED.mark({client:sb,id:w.id});
   if(error)return toast("Hata: "+error.message,"err","🎯");
   w.visited=true;
   navTarget=null;
@@ -383,55 +260,13 @@ async function arriveWp(){
 window.arriveWp=arriveWp;
 
 function drawNav(){
- if(window.DG_BUILD_WAYPOINT_NAVIGATION_HEADER&&window.DG_RENDER_WAYPOINT_NAVIGATION_HEADER){
-  const model=window.DG_BUILD_WAYPOINT_NAVIGATION_HEADER.build({gps:GPS,target:navTarget});
-  window.DG_RENDER_WAYPOINT_NAVIGATION_HEADER.render({model,getElement:$});
- }else if(!GPS){
-  $("navDist").textContent="—";
-  $("navTarget").textContent=navTarget?"Hedef: P"+navTarget.wp_id:"Listeden veya haritadan hedef seçin.";
-  $("navArrow").style.transform="rotate(0)";
- }
- if(!(window.DG_BUILD_WAYPOINT_NAVIGATION_HEADER&&window.DG_RENDER_WAYPOINT_NAVIGATION_HEADER)&&$("navGps"))$("navGps").textContent=GPS?"GPS doğruluğu: "+(Number.isFinite(GPS.accuracy)?"±"+Math.round(GPS.accuracy)+" m":"bilinmiyor"):"GPS konumu bekleniyor; hedef seçebilirsiniz.";
+ const model=window.DG_BUILD_WAYPOINT_NAVIGATION_HEADER.build({gps:GPS,target:navTarget});
+ window.DG_RENDER_WAYPOINT_NAVIGATION_HEADER.render({model,getElement:$});
  renderWaypointList();
  dgWaypointGuidance();
  if(!navMap)return;
- if(window.DG_WAYPOINT_MAP_MARKERS){
-  window.DG_WAYPOINT_MAP_MARKERS.draw({map:navMap,waypoints:WP,leaflet:L,translate:s=>typeof dgCf==="function"?dgCf(s):s,onSelect:id=>selectWaypoint(id)});
- }else{
- navMap.eachLayer(l=>{if(l._wp)navMap.removeLayer(l);});
- WP.forEach(w=>{
-  const done=w.visited;
-  const icon=L.divIcon({
-   className:"",
-   html:`<div class="wp-badge2 ${done?"done":""}" style="--wpbg:${done?"#16a34a":"#e11d48"}"><span>${w.wp_id}</span></div>`,
-   iconSize:[28,28],iconAnchor:[14,24]
-  });
-  const m=L.marker([w.lat,w.lon],{icon}).addTo(navMap);m._wp=1;
-  const _tm=(s)=>(typeof dgCf==="function"?dgCf(s):s);m.bindPopup(done?"<s>P"+w.wp_id+"</s> "+_tm("✓ Yapıldı"):"P"+w.wp_id+" · "+_tm("Hedef yapmak için tıkla"));
-  m.on("click",()=>{selectWaypoint(w.id);});
- });
- }
- if(GPS){
-  if(window.DG_WAYPOINT_GPS_OVERLAY){
-   navTarget=window.DG_WAYPOINT_GPS_OVERLAY.draw({map:navMap,waypoints:WP,target:navTarget,gps:GPS,leaflet:L,distance:hav,bearing:brg,getElement:$,translate:s=>typeof dgCf==="function"?dgCf(s):s,setTarget:point=>{navTarget=point;}});
-  }else{
-  const b=(navTarget&&!navTarget.visited)?brg(GPS.latitude,GPS.longitude,navTarget.lat,navTarget.lon):null;
-  const me=L.marker([GPS.latitude,GPS.longitude],{
-   icon:L.divIcon({
-    className:"",
-    html:`<div class="loc-marker">${b!=null?`<svg class="nav-arrow-svg" viewBox="0 0 100 100" style="transform:rotate(${b}deg)"><path d="M50 5 L70 70 L50 55 L30 70 Z" fill="#2b6cb0" stroke="#fff" stroke-width="4"/></svg>`:""}<div class="dot"></div></div>`,
-    iconSize:[48,48],iconAnchor:[24,24]
-   }),
-   zIndexOffset:1000
-  }).addTo(navMap);me._wp=1;
-  if(!navTarget){const ts=WP.filter(w=>!w.visited);if(ts.length)navTarget=ts.sort((a,b)=>hav(GPS.latitude,GPS.longitude,a.lat,a.lon)-hav(GPS.latitude,GPS.longitude,b.lat,b.lon))[0];}
-  if(navTarget&&!navTarget.visited){const d=hav(GPS.latitude,GPS.longitude,navTarget.lat,navTarget.lon),bearing=brg(GPS.latitude,GPS.longitude,navTarget.lat,navTarget.lon);
-   $("navDist").textContent=Math.round(d)+" m";$("navTarget").textContent=(typeof dgCf==="function"?dgCf("Hedef:"):"Hedef:")+" P"+navTarget.wp_id+" · "+Math.round(bearing)+"°";
-   $("navArrow").style.transform="rotate("+bearing+"deg)";
-   const ln=L.polyline([[GPS.latitude,GPS.longitude],[navTarget.lat,navTarget.lon]],{color:"#c2452d",dashArray:"5,8",weight:2}).addTo(navMap);ln._wp=1;
-  }else{$("navDist").textContent="—";$("navTarget").textContent=(typeof dgCf==="function"?dgCf("Hedef seç / tamamlandı"):"Hedef seç / tamamlandı");$("navArrow").style.transform="rotate(0)";}
-  }
- }
+ window.DG_WAYPOINT_MAP_MARKERS.draw({map:navMap,waypoints:WP,leaflet:L,translate:dgCf,onSelect:id=>selectWaypoint(id)});
+ if(GPS)navTarget=window.DG_WAYPOINT_GPS_OVERLAY.draw({map:navMap,waypoints:WP,target:navTarget,gps:GPS,leaflet:L,distance:hav,bearing:brg,getElement:$,translate:dgCf,setTarget:point=>{navTarget=point;}});
  renderWaypointList();
  dgWaypointGuidance();
 }
@@ -441,29 +276,7 @@ function drawNav(){
 
 function switchBaseLayer(type){
  const app=window.DG_SWITCH_BASE_MAP_LAYER,configuration=window.DG_RESOLVE_BASE_MAP_LAYER,selection=window.DG_SYNC_BASE_MAP_LAYER_SELECTION,layers=window.DG_MANAGE_BASE_MAP_LAYERS,create=window.DG_CREATE_BASE_MAP_LAYER;
- if(app&&configuration&&selection&&layers&&create){app.switch({map,type,resolve:value=>configuration.resolve(value,DG_ATTR),syncSelection:value=>selection.sync({type:value,getElement:id=>document.getElementById(id),setSurfaceBase:base=>{if(window.DG_LC_SENS?.state)window.DG_LC_SENS.state.base=base;}}),hasCurrent:(target,value)=>layers.hasCurrent(target,value),removeTileLayers:target=>layers.removeTileLayers(target),createLayer:(target,value)=>create.create({leaflet:L,map:target,configuration:value}),notify:toast});return;}
- if(!map)return;
- if(!["osm","sat","topo"].includes(type))return;
- for(const id of ["baseLayerSelect","dgSensBaseSelect","dgPendingBaseSelect"]){const el=document.getElementById(id);if(el)el.value=type;}
- if(window.DG_LC_SENS?.state)window.DG_LC_SENS.state.base=type;
- let current=null;map.eachLayer(l=>{if(l._dgBase===type)current=l;});if(current)return;
- // Mevcut tile layer'ı bul ve kaldır
- map.eachLayer(l=>{
-  if(l._url)map.removeLayer(l);
- });
- 
- const urls={
-  osm:"https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
-  sat:"https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
-  topo:"https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png"
- };
- /* Atıf metinleri tek kaynaktan (constants.js DG_ATTR): lisansların istediği
-  * tam biçim orada tutuluyor, burada kopya tutulmaz. */
- const attr=DG_ATTR;
- 
- const layer=L.tileLayer(urls[type],{attribution:attr[type],maxZoom:22,maxNativeZoom:type==="topo"?17:type==="sat"?19:19,keepBuffer:1,updateWhenIdle:true,updateWhenZooming:false});
- layer._dgBase=type;layer.addTo(map);
- toast("✓ Harita: "+(type==="osm"?"Sokak":(type==="sat"?"Uydu":"Topoğrafik")),"ok","🗺️");
+ return app.switch({map,type,resolve:value=>configuration.resolve(value,DG_ATTR),syncSelection:value=>selection.sync({type:value,getElement:$,setSurfaceBase:base=>{if(window.DG_LC_SENS?.state)window.DG_LC_SENS.state.base=base;}}),hasCurrent:(target,value)=>layers.hasCurrent(target,value),removeTileLayers:target=>layers.removeTileLayers(target),createLayer:(target,value)=>create.create({leaflet:L,map:target,configuration:value}),notify:toast});
 }
 
 /* ═══════════ 0036 (T5) · PARK ORTAK CANLI KONUM ═══════════
@@ -476,16 +289,10 @@ function switchBaseLayer(type){
  * kapalıysa özellik sessizce devre dışı kalır, ölçüm akışı etkilenmez. */
 let DG_PARK_CH=null,DG_PARK_CH_ID=0,DG_LIVE_ON=true,DG_MATES_LAYER=null,DG_LAST_PING=0,DG_PARK_CH_RETRY=0,DG_PARK_CH_WATCH=null,DG_PARK_CH_LIVE=false;
 function dgParkShareFail(){
- if(window.DG_FAIL_PARK_LIVE_SHARE)return window.DG_FAIL_PARK_LIVE_SHARE.fail({setLive:value=>{DG_PARK_CH_LIVE=value;},retries:()=>DG_PARK_CH_RETRY,setRetries:value=>{DG_PARK_CH_RETRY=value;},note:$('dgMatesNote'),translate:_tmf,setTimer:setTimeout,removeChannel:()=>{if(DG_PARK_CH&&sb&&sb.removeChannel)sb.removeChannel(DG_PARK_CH);},resetChannel:()=>{DG_PARK_CH=null;DG_PARK_CH_ID=0;},isEnabled:()=>DG_LIVE_ON,join:dgLiveShareJoinCurrent});
- DG_PARK_CH_LIVE=false;
- const nx=$("dgMatesNote");
- if(nx)nx.textContent=_tmf("⚠ Gerçek zamanlı katman kapalı — canlı konum gösterilemiyor (Supabase → Dashboard → Realtime).");
- if(DG_PARK_CH_RETRY<2){DG_PARK_CH_RETRY++;
-  setTimeout(()=>{try{if(DG_PARK_CH&&sb&&sb.removeChannel)sb.removeChannel(DG_PARK_CH);}catch(e){}
-   DG_PARK_CH=null;DG_PARK_CH_ID=0;if(DG_LIVE_ON)dgLiveShareJoinCurrent();},3000);}
+ return window.DG_FAIL_PARK_LIVE_SHARE.fail({setLive:value=>{DG_PARK_CH_LIVE=value;},retries:()=>DG_PARK_CH_RETRY,setRetries:value=>{DG_PARK_CH_RETRY=value;},note:$('dgMatesNote'),translate:_tmf,setTimer:setTimeout,removeChannel:()=>window.DG_PARK_PRESENCE_CHANNEL_ADAPTER.remove({client:sb,channel:DG_PARK_CH}),resetChannel:()=>{DG_PARK_CH=null;DG_PARK_CH_ID=0;},isEnabled:()=>DG_LIVE_ON,join:dgLiveShareJoinCurrent});
 }
 const DG_MATE_COLORS=["#c2452d","#2b6cb0","#7c3aed","#0f766e","#be185d","#4d7c0f","#b45309","#0e7490"];
-function dgMateColor(id){if(window.DG_PARK_LIVE_MEMBER_COLOR)return window.DG_PARK_LIVE_MEMBER_COLOR.color(id,DG_MATE_COLORS);let h=0;const s=String(id||"?");for(let i=0;i<s.length;i++)h=(h*31+s.charCodeAt(i))>>>0;return DG_MATE_COLORS[h%DG_MATE_COLORS.length];}
+function dgMateColor(id){return window.DG_PARK_LIVE_MEMBER_COLOR.color(id,DG_MATE_COLORS);}
 function dgLiveShareToggle(on){
  DG_LIVE_ON=!!on;
  if(!DG_LIVE_ON)dgLiveShareLeave();else dgLiveShareJoinCurrent();
@@ -493,93 +300,37 @@ function dgLiveShareToggle(on){
 }
 async function dgLiveShareJoinCurrent(){
  const join=window.DG_JOIN_LIVE_SHARE_PARK,resolve=window.DG_RESOLVE_LIVE_SHARE_JOIN,store=window.DG_FETCH_LIVE_SHARE_PROJECT_PARK,connection=window.DG_PARK_LIVE_SHARE_CONNECTION_UI,status=window.DG_HANDLE_LIVE_SHARE_CHANNEL_STATUS,presence=window.DG_PARK_PRESENCE_CHANNEL_ADAPTER;
- if(join&&resolve&&store&&connection&&status&&presence){
-  try{return await join.join({enabled:DG_LIVE_ON,user:typeof USER!=="undefined"?USER:null,client:typeof sb!=="undefined"?sb:null,projectId:(()=>{const selected=$("mProject");return selected&&selected.value?+selected.value:0;})(),currentParkId:DG_PARK_CH_ID,channel:DG_PARK_CH,resolve:input=>resolve.resolve(input),readParkId:projectId=>store.fetch({client:sb,projectId}),leave:dgLiveShareLeave,setParkId:value=>{DG_PARK_CH_ID=value;},showConnecting:()=>connection.connecting({element:$("dgMatesNote"),translate:_tmf}),subscribe:({parkId,userId,onSync,onStatus})=>presence.join({client:sb,parkId,userId,onSync,setChannel:value=>{DG_PARK_CH=value;},getWatch:()=>DG_PARK_CH_WATCH,setWatch:value=>{DG_PARK_CH_WATCH=value;},clearTimer:clearTimeout,setTimer:setTimeout,onWatchdog:()=>dgParkShareFail(),setAuth:token=>{if(sb.realtime&&sb.realtime.setAuth)sb.realtime.setAuth(token);},onStatus}),onSync:()=>dgLiveMatesDraw(),onStatus:st=>status.handle(st,{getWatch:()=>DG_PARK_CH_WATCH,setWatch:value=>{DG_PARK_CH_WATCH=value;},clearTimer:clearTimeout,setLive:value=>{DG_PARK_CH_LIVE=value;},setLastPing:value=>{DG_LAST_PING=value;},ping:dgLiveSharePing,draw:dgLiveMatesDraw,fail:dgParkShareFail})});}catch(e){DG_PARK_CH=null;DG_PARK_CH_ID=0;return;}
- }
- try{
-  if(!DG_LIVE_ON||typeof USER==="undefined"||!USER||typeof sb==="undefined")return;
-  const sel=$("mProject");const pid=sel&&sel.value?+sel.value:0;
-  if(!pid){dgLiveShareLeave();return;}
-  const{data}=await sb.from("projects").select("park_id").eq("id",pid).maybeSingle();
-  const park=(data&&data.park_id)||0;
-  if(!park){dgLiveShareLeave();return;}
-  if(DG_PARK_CH_ID===park&&DG_PARK_CH)return;
-  dgLiveShareLeave();
-  DG_PARK_CH_ID=park;
-  const note0=$("dgMatesNote");if(note0)note0.textContent=_tmf("⏳ gerçek zamanlı katmana bağlanılıyor…");
-  if(window.DG_PARK_PRESENCE_CHANNEL_ADAPTER){
-   window.DG_PARK_PRESENCE_CHANNEL_ADAPTER.join({client:sb,parkId:park,userId:USER.id,onSync:()=>dgLiveMatesDraw(),setChannel:value=>{DG_PARK_CH=value;},getWatch:()=>DG_PARK_CH_WATCH,setWatch:value=>{DG_PARK_CH_WATCH=value;},clearTimer:clearTimeout,setTimer:setTimeout,onWatchdog:()=>dgParkShareFail(),setAuth:token=>{if(sb.realtime&&sb.realtime.setAuth)sb.realtime.setAuth(token);},onStatus:st=>{
-    if(st==="SUBSCRIBED"){
-     if(DG_PARK_CH_WATCH){clearTimeout(DG_PARK_CH_WATCH);DG_PARK_CH_WATCH=null;}
-     DG_PARK_CH_LIVE=true;DG_LAST_PING=0;dgLiveSharePing();dgLiveMatesDraw();
-    }else if(st==="CHANNEL_ERROR"||st==="TIMED_OUT"||st==="CLOSED"){dgParkShareFail();}
-   }});
-   return;
-  }
-  /* 0038: SUBSCRIBE ÖNCE (presence anon apikey ile çalışır — canlı WS
-   * probuyla doğrulandı), JWT arka planda; 8 sn watchdog takılı düşürür. */
-  DG_PARK_CH=sb.channel("dg-park-"+park,{config:{presence:{key:String(USER.id)}}});
-  DG_PARK_CH.on("presence",{event:"sync"},()=>dgLiveMatesDraw());
-  DG_PARK_CH.subscribe(st=>{
-   if(st==="SUBSCRIBED"){
-    if(DG_PARK_CH_WATCH){clearTimeout(DG_PARK_CH_WATCH);DG_PARK_CH_WATCH=null;}
-    DG_PARK_CH_LIVE=true;DG_LAST_PING=0;dgLiveSharePing();dgLiveMatesDraw();
-   }
-   else if(st==="CHANNEL_ERROR"||st==="TIMED_OUT"||st==="CLOSED"){dgParkShareFail();}
-  });
-  if(DG_PARK_CH_WATCH)clearTimeout(DG_PARK_CH_WATCH);
-  DG_PARK_CH_WATCH=setTimeout(()=>{dgParkShareFail();},8000);
-  (async()=>{try{
-   const{data}=await sb.auth.getSession();
-   const tok=data&&data.session&&data.session.access_token;
-   if(tok&&sb.realtime&&sb.realtime.setAuth)sb.realtime.setAuth(tok);
-  }catch(e){}})();
- }catch(e){DG_PARK_CH=null;DG_PARK_CH_ID=0;}
+ try{return await join.join({
+  enabled:DG_LIVE_ON,user:typeof USER!=="undefined"?USER:null,client:typeof sb!=="undefined"?sb:null,
+  projectId:(()=>{const selected=$("mProject");return selected&&selected.value?+selected.value:0;})(),
+  currentParkId:DG_PARK_CH_ID,channel:DG_PARK_CH,
+  resolve:input=>resolve.resolve(input),readParkId:projectId=>store.fetch({client:sb,projectId}),leave:dgLiveShareLeave,
+  setParkId:value=>{DG_PARK_CH_ID=value;},
+  showConnecting:()=>connection.connecting({element:$("dgMatesNote"),translate:_tmf}),
+  subscribe:({parkId,userId,onSync,onStatus})=>presence.join({
+   client:sb,parkId,userId,onSync,setChannel:value=>{DG_PARK_CH=value;},
+   getWatch:()=>DG_PARK_CH_WATCH,setWatch:value=>{DG_PARK_CH_WATCH=value;},clearTimer:clearTimeout,
+   setTimer,onWatchdog:()=>dgParkShareFail(),onStatus
+  }),
+  onSync:()=>dgLiveMatesDraw(),
+  onStatus:st=>status.handle(st,{getWatch:()=>DG_PARK_CH_WATCH,setWatch:value=>{DG_PARK_CH_WATCH=value;},clearTimer:clearTimeout,setLive:value=>{DG_PARK_CH_LIVE=value;},setLastPing:value=>{DG_LAST_PING=value;},ping:dgLiveSharePing,draw:dgLiveMatesDraw,fail:dgParkShareFail})
+ });}catch(error){DG_PARK_CH=null;DG_PARK_CH_ID=0;return;}
 }
 function dgLiveShareLeave(){
- if(window.DG_LEAVE_PARK_PRESENCE_CHANNEL)return window.DG_LEAVE_PARK_PRESENCE_CHANNEL.leave({channel:DG_PARK_CH,client:typeof sb!=="undefined"?sb:null,layer:DG_MATES_LAYER,map:typeof map!=="undefined"?map:null,setChannel:value=>{DG_PARK_CH=value;},setParkId:value=>{DG_PARK_CH_ID=value;},setLayer:value=>{DG_MATES_LAYER=value;},note:$("dgMatesNote")});
- try{if(DG_PARK_CH&&sb&&sb.removeChannel)sb.removeChannel(DG_PARK_CH);}catch(e){}
- DG_PARK_CH=null;DG_PARK_CH_ID=0;
- if(DG_MATES_LAYER&&typeof map!=="undefined"&&map){try{map.removeLayer(DG_MATES_LAYER);}catch(e){}}
- DG_MATES_LAYER=null;
- const note=$("dgMatesNote");if(note)note.textContent="";
+ return window.DG_LEAVE_PARK_PRESENCE_CHANNEL.leave({channel:DG_PARK_CH,client:typeof sb!=="undefined"?sb:null,layer:DG_MATES_LAYER,map:typeof map!=="undefined"?map:null,setChannel:value=>{DG_PARK_CH=value;},setParkId:value=>{DG_PARK_CH_ID=value;},setLayer:value=>{DG_MATES_LAYER=value;},note:$("dgMatesNote")});
 }
 function dgLiveSharePing(){
- if(window.DG_TRACK_PARK_LIVE_POSITION)return window.DG_TRACK_PARK_LIVE_POSITION.ping({channel:DG_PARK_CH,live:DG_PARK_CH_LIVE,enabled:DG_LIVE_ON,gps:typeof GPS!=="undefined"?GPS:null,userId:typeof USER!=="undefined"?USER?.id:null,name:typeof PROFILE!=="undefined"&&PROFILE?PROFILE.full_name:null,lastPing:DG_LAST_PING,now:Date.now(),setLastPing:value=>{DG_LAST_PING=value;}});
- try{
-  if(!DG_PARK_CH||!DG_PARK_CH_LIVE||typeof DG_PARK_CH.track!=="function"||!DG_LIVE_ON)return;
-  if(typeof GPS==="undefined"||!GPS||GPS.latitude==null)return;
-  const now=Date.now();if(now-DG_LAST_PING<10000)return;DG_LAST_PING=now;
-  DG_PARK_CH.track({id:String(USER.id),n:(typeof PROFILE!=="undefined"&&PROFILE&&PROFILE.full_name)||"?",la:GPS.latitude,lo:GPS.longitude,t:now});
- }catch(e){}
+ return window.DG_TRACK_PARK_LIVE_POSITION.ping({channel:DG_PARK_CH,live:DG_PARK_CH_LIVE,enabled:DG_LIVE_ON,gps:typeof GPS!=="undefined"?GPS:null,userId:typeof USER!=="undefined"?USER?.id:null,name:typeof PROFILE!=="undefined"&&PROFILE?PROFILE.full_name:null,lastPing:DG_LAST_PING,now:Date.now(),setLastPing:value=>{DG_LAST_PING=value;}});
 }
 function dgLiveMatesDraw(){
- const modules=[window.DG_SELECT_PARK_LIVE_COLLABORATORS,window.DG_BUILD_PARK_LIVE_COLLABORATOR_VIEW,window.DG_PREPARE_PARK_LIVE_COLLABORATOR_LAYER,window.DG_RENDER_PARK_LIVE_COLLABORATOR_MARKER,window.DG_RENDER_PARK_LIVE_COLLABORATOR_COUNT];
- if(modules.every(Boolean)){try{
-  if(typeof map==="undefined"||!map||!DG_PARK_CH||typeof L==="undefined")return;
-  const layer=modules[2].prepare({layer:DG_MATES_LAYER,map,leaflet:L,setLayer:value=>{DG_MATES_LAYER=value;}});
-  const members=modules[0].select({presence:DG_PARK_CH.presenceState(),currentUserId:USER.id});
-  const now=Date.now();
-  for(const member of members){const view=modules[1].build({member,color:id=>dgMateColor(id),now,format:dgCf});modules[3].render({layer,leaflet:L,member,view,escape:esc,translate:_tmf});}
-  modules[4].render({element:$("dgMatesNote"),count:members.length,translate:_tmff});
- }catch(e){}return;}
- try{
-  if(typeof map==="undefined"||!map||!DG_PARK_CH||typeof L==="undefined")return;
-  if(!DG_MATES_LAYER){DG_MATES_LAYER=L.layerGroup().addTo(map);}
-  DG_MATES_LAYER.clearLayers();
-  const st=DG_PARK_CH.presenceState();let n=0;
-  for(const k in st){const arr=st[k]||[];for(const p of arr){
-   if(!p||String(p.id)===String(USER.id)||p.la==null||p.lo==null)continue;
-   n++;
-   const col=dgMateColor(p.id);
-   const ini=String(p.n||"?").trim().slice(0,1).toLocaleUpperCase("tr-TR");
-   const ic=L.divIcon({className:"",html:'<div style="width:18px;height:18px;border-radius:50%;background:'+col+';border:2px solid #fff;box-shadow:0 1px 4px rgba(0,0,0,.45);display:flex;align-items:center;justify-content:center;color:#fff;font-size:10px;font-weight:800">'+esc(ini)+'</div>',iconSize:[18,18],iconAnchor:[9,9]});
-   const age=Math.max(0,Math.round((Date.now()-(p.t||Date.now()))/1000));
-   const ageTxt=age<60?age+" "+dgCf("sn"):Math.round(age/60)+" "+dgCf("dk");
-   L.marker([p.la,p.lo],{icon:ic,interactive:true,keyboard:false,zIndexOffset:600}).addTo(DG_MATES_LAYER)
-    .bindTooltip("<b>"+esc(p.n||"?")+"</b><br>"+_tmf("son konum")+": "+ageTxt+" "+_tmf("önce"),{direction:"top",offset:[0,-11]});
-  }}
-  const box=$("dgMatesNote");
-  if(box)box.textContent=n?_tmff("👥 {n} ortak bu parkta çevrimiçi — konumlar canlı görünüyor (üstüne gel: kimlik).",{n:n}):"";
- }catch(e){}
+ if(typeof map==="undefined"||!map||!DG_PARK_CH||typeof L==="undefined")return;
+ const presence=window.DG_PARK_PRESENCE_CHANNEL_ADAPTER.presence({channel:DG_PARK_CH});
+ const layer=window.DG_PREPARE_PARK_LIVE_COLLABORATOR_LAYER.prepare({layer:DG_MATES_LAYER,map,leaflet:L,setLayer:value=>{DG_MATES_LAYER=value;}});
+ const members=window.DG_SELECT_PARK_LIVE_COLLABORATORS.select({presence,currentUserId:USER.id});
+ const now=Date.now();
+ for(const member of members){
+  const view=window.DG_BUILD_PARK_LIVE_COLLABORATOR_VIEW.build({member,color:id=>dgMateColor(id),now,format:dgCf});
+  window.DG_RENDER_PARK_LIVE_COLLABORATOR_MARKER.render({layer,leaflet:L,member,view,escape:esc,translate:_tmf});
+ }
+ window.DG_RENDER_PARK_LIVE_COLLABORATOR_COUNT.render({element:$("dgMatesNote"),count:members.length,translate:_tmff});
 }

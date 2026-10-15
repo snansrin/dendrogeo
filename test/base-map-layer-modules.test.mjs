@@ -48,5 +48,5 @@ test('switch use case preserves early exits, selection order, current-layer reus
 test('base-layer modules load before the locked map service and are precached',()=>{
   const head=read('partials/head.html'),sw=read('sw.js'),service=read('src/services/map.js');
   for(const path of modules){assert.ok(head.includes(`src="${path}?v=`));assert.ok(sw.includes(`'/${path}'`));assert.ok(head.indexOf(`src="${path}?v=`)<head.indexOf('src="src/services/map.js?'));}
-  assert.match(service,/DG_SWITCH_BASE_MAP_LAYER/);assert.match(service,/const attr=DG_ATTR/);
+  assert.match(service,/DG_SWITCH_BASE_MAP_LAYER/);assert.match(service,/configuration\.resolve\(value,DG_ATTR\)/);
 });

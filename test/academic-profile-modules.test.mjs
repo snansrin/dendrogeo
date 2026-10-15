@@ -61,6 +61,13 @@ test('profil görünümü ORCID ve kaçırılmış kullanıcı alanlarıyla üre
   assert.ok(html.includes('id="dgAcademicProfileForm"'));
 });
 
+test('profil mount görünüm çıktısını verilen elemana yazar',()=>{
+  const modules=loadModules(),element={innerHTML:''},profile={name:'Ada',values:{orcid:'',institution:'',department:''},fields:[]};
+  const ports={escape:String,orcidValid:()=>false,input:()=>''};
+  modules.DG_RENDER_ACADEMIC_PROFILE.mount(element,profile,ports);
+  assert.equal(element.innerHTML,modules.DG_RENDER_ACADEMIC_PROFILE.render(profile,ports));
+});
+
 test('profil kaydetme doğrulama, başarı ve hata durumlarını portlara aktarır', async () => {
   const modules = loadModules();
   const calls = [];

@@ -56,6 +56,9 @@ test('tree analysis UI renders accessible group colors and escaped species label
   assert.match(html, /Pinus/);
   assert.match(html, /Ort\. Çap/);
   assert.match(html, /width:50\.0%/);
+  const element={innerHTML:''},document={getElementById:id=>id==='analysis'?element:null};
+  assert.equal(api.DG_TREE_ANALYSIS_UI.mount(document,'analysis',html),true);
+  assert.equal(element.innerHTML,html);
 });
 
 test('world store reads global, country, and city views in the existing order', async () => {
@@ -93,4 +96,8 @@ test('world error UI escapes the database detail and keeps the retry action', ()
   assert.match(html, /&lt;script&gt;/);
   assert.match(html, /onclick="loadWorld\(\)"/);
   assert.match(html, /Dünya verisi yüklenemedi/);
+  const box={style:{},className:'',innerHTML:''},document={getElementById:id=>id==='worldErr'?box:null};
+  assert.equal(api.DG_WORLD_ERROR_UI.show(document,'<unsafe>',value=>String(value).replaceAll('<','&lt;').replaceAll('>','&gt;')),true);
+  assert.equal(box.className,'alert err');assert.match(box.innerHTML,/&lt;unsafe&gt;/);
+  api.DG_WORLD_ERROR_UI.hide(document);assert.equal(box.style.display,'none');
 });

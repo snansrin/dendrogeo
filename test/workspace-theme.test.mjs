@@ -23,7 +23,7 @@ test('Kayıtlarım proje bazında kapalı disclosure olarak gruplanır',()=>{
 });
 
 test('Waypoint saha odaklı ana tema ve telefon düzenini kullanır',()=>{
- const shell=rd('partials/shell.html'),map=rd('src/services/map.js'),css=rd('css/style.css');
+ const shell=rd('partials/shell.html'),waypoints=rd('src/ui/waypoint-list.js'),css=rd('css/style.css');
  const a=shell.indexOf('<div class="view" id="v-nav">');
  const b=shell.indexOf('<div class="view"',a+30);
  const nav=shell.slice(a,b);
@@ -31,8 +31,8 @@ test('Waypoint saha odaklı ana tema ve telefon düzenini kullanır',()=>{
  assert.match(nav,/id="wpMapPanel" class="card waypoint-map"/);
  assert.equal((nav.match(/<details\b/g)||[]).length,1,'yalnız harita katlanır olmalı');
  assert.match(nav,/class="card waypoint-files"/);
- assert.match(map,/✓ Yapıldı/);
- assert.match(map,/waypoint-state/);
+ assert.match(waypoints,/✓ Yapıldı/);
+ assert.match(waypoints,/waypoint-state/);
  assert.match(css,/@media\(max-width:430px\)/);
 });
 
@@ -87,7 +87,7 @@ test('panel sade, kullanıcı yönetimi ana tema standardında',()=>{
  assert.match(shell,/class="admin-users-summary"/);
  assert.match(shell,/id="userRoleFilter"/);
  assert.match(shell,/id="userStatusFilter"/);
- assert.match(ua,/aUsersVisible/);
+ assert.match(ua,/DG_ADMIN_USER_FILTER_UI\.updateVisible\(document,visible\)/);
  assert.match(rd('src/ui/admin-user-table.js'),/class="admin-user-person"/);
  assert.match(rd('src/ui/admin-user-table.js'),/data-label="Kullanıcı"/);
  assert.match(rd('src/ui/admin-user-filter.js'),/dataset\.role/);

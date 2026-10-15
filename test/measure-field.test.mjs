@@ -31,13 +31,13 @@ function field() {
     sb:{from:db,storage:{from:()=>({upload:async()=>({error:Error('upload failed')})})}},
     toast:(...args)=>messages.push(args), esc:s=>String(s),
     fetch:async()=>{throw Error('offline');}, uuidv4:()=> 'test-client',
-    dgVerifyAtPark:async()=>({ok:true,verified:false}), dgGeoStamp() {},
+    dgVerifyAtPark:async()=>({ok:true,verified:false}), dgGeoStamp() {}, dgPresenceAct() {},
     loadDash() {},loadRecords() {},loadWaypoints() {}, dgParkGate() {},
     saveOfflineMeasurement:async row=>writes.push({table:'offline',row}),
     dgCf:s=>s,dgT:s=>s,map:null,drawNav() {}, console
   });
   function $(id) { return el(id); }
-  for (const path of ['src/config/measurement-protocol-lock.js','src/config/wood-density-lock.js','src/config/species.js','src/domain/trees/photo-quality.js','src/domain/trees/allometry.js','src/application/trees/calculate-tree-carbon.js','src/application/trees/calculate-tree-carbon-from-circumference.js','src/application/trees/validate-measurement.js','src/services/allometry.js','src/services/measure.js']) {
+  for (const path of ['src/config/measurement-protocol-lock.js','src/config/wood-density-lock.js','src/config/species.js','src/domain/trees/photo-quality.js','src/domain/trees/allometry.js','src/application/trees/calculate-tree-carbon.js','src/application/trees/calculate-tree-carbon-from-circumference.js','src/application/trees/validate-measurement.js','src/services/allometry.js','src/adapters/trees/reverse-geocode.js','src/application/trees/measurement-photo-check-state.js','src/adapters/trees/read-measurement-photo-pixels.js','src/ui/measurement-photo-check.js','src/ui/measurement-photo-file.js','src/ui/check-measurement-photo.js','src/adapters/trees/load-measurement-photo.js','src/ui/measurement-photo-summary.js','src/ui/measurement-species-selector.js','src/ui/show-measurement-validation-error.js','src/ui/reset-measurement-entry-fields.js','src/domain/trees/build-live-measurement-preview-input.js','src/application/trees/calculate-live-measurement-preview.js','src/ui/render-live-measurement-preview.js','src/adapters/trees/fetch-measurement-park.js','src/adapters/trees/fetch-unvisited-measurement-waypoints.js','src/adapters/trees/fetch-latest-measurement-point.js','src/application/trees/suggest-next-measurement-point.js','src/adapters/trees/upload-measurement-photo.js','src/adapters/trees/persist-measurement-record.js','src/adapters/trees/project-selection-memory.js','src/ui/cancel-measurement-edit.js','src/application/trees/run-measurement-save.js','src/ui/set-measurement-save-button.js','src/ui/validate-measurement-save-form.js','src/application/trees/resolve-measurement-save-gates.js','src/domain/trees/build-measurement-record.js','src/adapters/trees/fetch-measurement-park.js','src/domain/trees/build-measurement-location-fields.js','src/domain/trees/build-offline-measurement-record.js','src/application/trees/record-measurement-presence-action.js','src/application/trees/refresh-measurement-after-save.js','src/application/trees/validate-measurement-submission.js','src/application/trees/prepare-measurement-submission.js','src/application/trees/verify-measurement-submission-location.js','src/application/trees/persist-measurement-submission.js','src/application/trees/persist-measurement-submission.js','src/application/trees/submit-measurement.js','src/application/trees/prepare-measurement-photo.js','src/domain/trees/build-measurement-photo-file-name.js','src/ui/cancel-measurement-edit.js','src/services/measure.js']) {
     vm.runInContext(readFileSync(new URL('../'+path,import.meta.url),'utf8'),ctx,{filename:path});
   }
   for (const [id,value] of Object.entries({mProject:'1',mPoint:'5',mNo:'1',mGroup:'YAPRAKLI',mSpecies:'IHLAMUR',mDbh:'52',mHeight:'7.2'})) el(id).value=value;
@@ -97,7 +97,7 @@ test('photo upload failure does not silently create a measurement without its se
 
 test('late photo check cannot overwrite a newly cleared photo',async()=>{
   const f=field();let resolveImage;
-  f.ctx.loadImg=()=>new Promise(resolve=>{resolveImage=resolve;});
+  f.ctx.window.DG_MEASUREMENT_PHOTO_IMAGE.load=()=>new Promise(resolve=>{resolveImage=resolve;});
   const check=f.ctx.checkPhoto({target:{files:[{name:'tree.jpg',type:'image/jpeg'}]}});
   f.run('dgClearMeasurePhoto()');resolveImage({i:{},u:'blob:test'});await check;
   assert.equal(f.ctx.photoOk,false);assert.equal(f.el('photoCheck').style.display,'none');

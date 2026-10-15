@@ -6,6 +6,7 @@ import vm from 'node:vm';
 const read=path=>readFileSync(new URL('../'+path,import.meta.url),'utf8');
 const registry=read('src/services/park-registry.js');
 const modules=[
+  'src/ui/park-backfill-plan.js',
   'src/application/parks/park-admin-state.js',
   'src/adapters/parks/sync-park-project-names.js',
   'src/ui/render-park-admin.js',
@@ -50,7 +51,13 @@ test('empty-park toggle stores state and rerenders last known project/measuremen
   assert.equal(state.getState().showEmpty,true);assert.deepEqual(renders,[[[1],[2]]]);
 });
 
-test('all five park admin modules load and are precached before park-registry',()=>{
+test('backfill close clears and hides the plan container through its UI module',()=>{
+  const{window}=setup(),box={style:{display:'block'},innerHTML:'plan'},document={getElementById:id=>id==='backfillBox'?box:null};
+  window.DG_PARK_BACKFILL_PLAN_UI.close(document);
+  assert.equal(box.style.display,'none');assert.equal(box.innerHTML,'');
+});
+
+test('park admin modules load and are precached before park-registry',()=>{
   const head=read('partials/head.html'),sw=read('sw.js'),service=head.indexOf('src/services/park-registry.js');
   for(const path of modules){assert.ok(head.indexOf(path)>=0&&head.indexOf(path)<service,`${path} load order`);assert.ok(sw.includes(`'/${path}'`),`${path} precache`);}
   for(const name of ['DG_PARK_ADMIN_STATE','DG_SYNC_PARK_PROJECT_NAMES_ADAPTER','DG_RENDER_PARK_ADMIN_UI','DG_REFRESH_PARK_ADMIN_VIEWS','DG_TOGGLE_PARK_ADMIN_EMPTY'])assert.ok(registry.includes(name),`${name} service composition`);

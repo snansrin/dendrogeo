@@ -12,7 +12,8 @@
    const measurementCount=await client.from("measurements").select("*",{count:"exact",head:true});
    return{users,measurements,projects,global,measurementCount};
   }
-  return Object.freeze({load});
+  async function loadGlobal(){return getClient().from("v_global").select("*").single();}
+  return Object.freeze({load,loadGlobal});
  }
  root.DG_ADMIN_OVERVIEW_STORE=Object.freeze({create});
 })(window);

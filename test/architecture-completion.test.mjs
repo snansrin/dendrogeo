@@ -28,6 +28,13 @@ test('injected operations and UI presentation remain permitted',()=>fixture((roo
  write('ui','view.js','window.DG_VIEW={run(element){element.textContent="x";}};');
  assert.deepEqual(checkArchitecture(root).errors,[]);
 }));
+test('AST gates ignore source-like comments and strings but inspect computed platform access',()=>fixture((root,write)=>{
+ write('application','docs.js','const example="map.fitBounds and element.innerHTML"; /* document.querySelector(\'.x\') */');
+ write('application','computed.js','function run(map){return map["fitBounds"]([]);}');
+ const errors=checkArchitecture(root).errors;
+ assert.equal(errors.filter(error=>error.includes('docs.js')).length,0);
+ assert.ok(errors.some(error=>error.includes('computed.js')&&error.includes('DOM or map interaction')));
+}));
 test('bare globals and adapter-to-UI dependencies cannot bypass direction gates',()=>fixture((root,write)=>{
  write('ui','view.js','window.DG_VIEW={render(){}};');
  write('domain','bad.js','window.DG_DOMAIN={run(){DG_VIEW.render();}};');

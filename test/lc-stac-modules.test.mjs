@@ -13,7 +13,7 @@ const modules = [
 ];
 function env(modular) {
   const context = vm.createContext({ window: {}, console: { warn() {} }, AbortController, setTimeout, clearTimeout, URLSearchParams, Date, Map });
-  if (modular) for (const path of modules) vm.runInContext(read(path), context);
+  for (const path of modules) vm.runInContext(read(path), context);
   vm.runInContext(read('src/services/lc-config.js'), context);
   vm.runInContext(read('src/services/lc-stac.js'), context);
   return context;
@@ -83,7 +83,7 @@ test('COG range adapter keeps Range headers, response metadata and body lifetime
   }
 });
 
-test('five STAC modules load before the service and are precached offline', () => {
+test('STAC adapters and domain modules load before the service and are precached offline', () => {
   const loader = read('src/utils/lazylibs.js'), worker = read('sw.js'), service = loader.indexOf('"src/services/lc-stac.js"');
   for (const path of modules) {
     assert.ok(loader.indexOf('"' + path + '"') >= 0 && loader.indexOf('"' + path + '"') < service, path);

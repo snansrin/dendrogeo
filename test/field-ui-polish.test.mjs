@@ -18,9 +18,12 @@ describe('Saha ekranı · mobil sadeleştirme sözleşmesi',()=>{
   assert.doesNotMatch(seg,/doğruluk \(m\)/);
   assert.match(seg,/id="gpsRing" hidden/);
   assert.match(seg,/id="gpsState"[^>]*hidden/);
-  assert.match(measure,/btn\.textContent="GPS aktif"/);
-  assert.match(measure,/bd\.textContent="GPS aktif · ±"\+Math\.round\(a\)\+" m · "\+q/);
-  assert.match(measure,/a<20\?"":a<40\?" amber":" red"/);
+  assert.match(measure,/DG_MEASUREMENT_GPS_ACTIVE_STATE_UI\.render\(/);
+  const gpsUI=readFileSync(new URL('../src/ui/measurement-gps-active-state.js',import.meta.url),'utf8');
+  const gpsReadout=readFileSync(new URL('../src/domain/trees/format-measurement-gps-readout.js',import.meta.url),'utf8');
+  assert.match(gpsUI,/textContent="GPS aktif"/);
+  assert.match(gpsUI,/badge\.textContent=view\.badgeText/);
+  assert.match(gpsReadout,/accuracy<20\?"":accuracy<40\?" amber":" red"/);
  });
  test('çevre ve boy uzun açıklama yerine erişilebilir soru işareti yardımı kullanır',()=>{
   assert.match(shell,/aria-label="Göğüs çevresi nasıl ölçülür\?"/);
@@ -50,9 +53,9 @@ describe('Ziyaretçi & Canlı · tema ve hızlı izleme',()=>{
  test('ana tema başlığı, canlı bağlantı rozeti ve hızlı filtreler vardır',()=>{
   assert.match(shell,/class="visitor-heading"/);
   assert.match(shell,/class="visitor-connection"/);
-  assert.match(shell,/dgVisQuick\('measure',false\)/);
-  assert.match(shell,/dgVisQuick\('nav',false\)/);
-  assert.match(shell,/dgVisQuick\('',true\)/);
+  assert.match(shell,/data-dg-visitor-action="quick-filter" data-dg-visitor-view="measure"/);
+  assert.match(shell,/data-dg-visitor-action="quick-filter" data-dg-visitor-view="nav"/);
+  assert.match(shell,/data-dg-visitor-action="quick-located"/);
   assert.match(css,/#v-visitors\{max-width:1120px/);
   assert.match(css,/\.visitor-layout\{display:grid/);
  });

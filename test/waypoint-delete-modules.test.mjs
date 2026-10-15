@@ -48,5 +48,5 @@ test('use case handles missing project, cancellation, delete error and success s
 test('delete modules are loaded before map service and offline-pre-cached',()=>{
   const head=read('partials/head.html'),sw=read('sw.js'),service=read('src/services/map.js');
   for(const path of modules){assert.ok(head.includes(`src="${path}?v=`));assert.ok(sw.includes(`'/${path}'`));assert.ok(head.indexOf(`src="${path}?v=`)<head.indexOf('src="src/services/map.js?'));}
-  assert.match(service,/DG_DELETE_PROJECT_WAYPOINTS_USE_CASE/);assert.match(service,/\.eq\("project_id",pid\)/);
+  assert.match(service,/DG_DELETE_PROJECT_WAYPOINTS_USE_CASE/);assert.match(service,/DG_DELETE_PROJECT_WAYPOINTS\.delete\(\{client:sb,projectId:pid\}\)/);
 });

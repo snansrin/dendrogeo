@@ -31,6 +31,7 @@ const UI = read('src/services/report-publish.js');
 const USER_PANEL_UI = ['src/application/reports/resolve-user-publication-view.js','src/ui/render-user-publication-controls.js','src/ui/render-user-publication-header.js',
   'src/ui/render-user-publication-notices.js','src/ui/render-user-publication-card.js'].map(read).join('\n');
 const MEAS = read('src/services/measure.js');
+const PROJECT_CARD = read('src/ui/measurement-project-card.js');
 const SHELL = read('partials/shell.html');
 const SW = read('sw.js');
 const DOCS = read('docs/rapor-yayini.md');
@@ -123,9 +124,9 @@ describe('arayüz kablolaması: 📄 düğmesi + panel kutusu', () => {
   });
 
   test('📄 düğmesi yalnız parkı bağlı projede + panel senkronu typeof korumalı', () => {
-    assert.match(MEAS, /const repBtn=p\.park_id/, 'parksız projede düğme yok');
-    assert.match(MEAS, /dgUserPubOpen\(\$\{p\.id\}\)/, 'satır düğmesi paneli açar');
-    assert.match(MEAS, /if\(typeof dgUserPubSync==="function"\)dgUserPubSync\(PROJ_LIST\);/, 'proje silinirse panel kapanır');
+    assert.match(PROJECT_CARD, /reportButton=project\.park_id\?/, 'parksız projede düğme yok');
+    assert.match(PROJECT_CARD, /dgUserPubOpen\(\$\{project\.id\}\)/, 'satır düğmesi paneli açar');
+    assert.match(MEAS, /afterRender:projects=>\{dgRenderProjectParkBox\(\);dgParkGate\(\);if\(typeof dgUserPubSync==="function"\)dgUserPubSync\(projects\);\}/, 'proje dizini değişince panel seçili proje ile eşitlenir');
   });
 
   test('yeni CSS yok: panel mevcut bileşen ailelerini kullanıyor', () => {
@@ -230,6 +231,7 @@ function bootUser(opts) {
     'src/ui/render-user-publication-header.js',
     'src/ui/render-user-publication-notices.js',
     'src/ui/render-user-publication-card.js',
+    'src/ui/publication-view-state.js',
     'src/application/reports/load-publication-queue.js',
     'src/application/reports/schedule-publication-queue-poll.js',
     'src/application/reports/request-report-retraction.js',

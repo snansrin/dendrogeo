@@ -7,5 +7,12 @@
    selected:keep?String(selected):null
   };
  }
- root.DG_OWNER_PARK_OPTIONS_UI=Object.freeze({render});
+ function setVisibility(element,visible){if(element)element.style.display=visible?"":"none";}
+ function setEmpty(select,label){if(select)select.innerHTML=`<option value="">${label}</option>`;}
+ function setOptions(select,parks,selected,escape){
+  if(!select)return;
+  const options=render(parks,selected,escape);select.innerHTML=options.html;
+  if(options.selected!=null)select.value=options.selected;
+ }
+ root.DG_OWNER_PARK_OPTIONS_UI=Object.freeze({render,setVisibility,setEmpty,setOptions});
 })(window);

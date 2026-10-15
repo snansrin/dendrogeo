@@ -227,13 +227,14 @@
 <!-- FONT RENDER'I BLOKLAMASIN: stylesheet media="print" ile gelir, onload'da
      all'a döner → ilk çizim font CSS'ini beklemez; preload öncelikli indirir. -->
 <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=Manrope:wght@400;600;700;800&family=IBM+Plex+Mono:wght@400;600;700&display=swap">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=Manrope:wght@400;600;700;800&family=IBM+Plex+Mono:wght@400;600;700&display=swap" media="print" onload="this.media='all'">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=Manrope:wght@400;600;700;800&family=IBM+Plex+Mono:wght@400;600;700&display=swap" media="print" data-dg-async-stylesheet>
 <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=Manrope:wght@400;600;700;800&family=IBM+Plex+Mono:wght@400;600;700&display=swap"></noscript>
 <link rel="stylesheet" href="vendor/leaflet-1.9.4.css">
 <link rel="stylesheet" href="css/startup.css?v=00000000">
 <link rel="stylesheet" href="css/style.css?v=3de99117">
 <link rel="stylesheet" href="css/landing.css?v=3ca7da13">
 <script src="src/ui/startup-screen.js?v=00000000" defer></script>
+<script src="src/ui/activate-async-stylesheets.js?v=00000000" defer></script>
 <script src="vendor/leaflet-1.9.4.js" defer></script>
 <link rel="stylesheet" href="vendor/MarkerCluster-1.5.3.css">
 <link rel="stylesheet" href="vendor/MarkerCluster.Default-1.5.3.css">
@@ -254,6 +255,7 @@
      src/utils/lazylibs.js ihtiyaç anında enjekte eder (LULC analizi / panel grafiği). -->
 <script id="dgRuntimeBuild" type="application/json">"__DG_RUNTIME_BUILD__"</script>
 <!-- Verified fallback OSM water geometry, independent of the lazy raster engine. -->
+<script src="src/adapters/parks/fetch-nominatim-osm-way.js?v=00000000" defer></script>
 <script src="src/services/osm-water-backup.js?v=98050cf7" defer></script>
 <script src="src/utils/lazylibs.js?v=80a933fa" defer></script>
 <script src="src/domain/trees/photo-quality.js?v=6e9dbba6" defer></script>
@@ -451,6 +453,7 @@
 <script src="src/ui/admin-measurement-filter.js?v=00000000" defer></script>
 <script src="src/ui/fill-admin-export-select.js?v=00000000" defer></script>
 <script src="src/application/admin/load-admin-export-filters.js?v=00000000" defer></script>
+<script src="src/adapters/admin/admin-export-filter-store.js?v=00000000" defer></script>
 <script src="src/application/admin/update-admin-export-filter-options.js?v=00000000" defer></script>
 <script src="src/application/admin/download-admin-measurements.js?v=00000000" defer></script>
 <script src="src/application/admin/read-photo-storage-usage.js?v=00000000" defer></script>
@@ -549,6 +552,7 @@
 <script src="src/ui/render-user-publication-header.js?v=00000000" defer></script>
 <script src="src/ui/render-user-publication-notices.js?v=00000000" defer></script>
 <script src="src/ui/render-user-publication-card.js?v=00000000" defer></script>
+<script src="src/ui/publication-view-state.js?v=00000000" defer></script>
 <script src="src/adapters/reports/publication-request-insert-store.js?v=00000000" defer></script>
 <script src="src/application/reports/publication-queue-state.js?v=00000000" defer></script>
 <script src="src/domain/reports/has-pending-publication-work.js?v=00000000" defer></script>
@@ -618,6 +622,7 @@
 <script src="src/ui/validate-measurement-save-form.js?v=00000000" defer></script>
 <script src="src/application/trees/resolve-measurement-save-gates.js?v=00000000" defer></script>
 <script src="src/domain/trees/build-measurement-record.js?v=00000000" defer></script>
+<script src="src/adapters/trees/fetch-measurement-park.js?v=00000000" defer></script>
 <script src="src/adapters/trees/persist-measurement-record.js?v=00000000" defer></script>
 <script src="src/domain/trees/build-measurement-location-fields.js?v=00000000" defer></script>
 <script src="src/domain/trees/build-offline-measurement-record.js?v=00000000" defer></script>
@@ -730,6 +735,7 @@
 <script src="src/domain/parks/select-overpass-mirrors.js?v=00000000" defer></script>
 <script src="src/domain/parks/overpass-request-budget.js?v=00000000" defer></script>
 <script src="src/adapters/parks/overpass-mirror-health.js?v=00000000" defer></script>
+<script src="src/adapters/parks/post-overpass-query.js?v=00000000" defer></script>
 <script src="src/services/osm-client.js?v=08a22faf" defer></script>
 <script src="src/domain/parks/road-half-width.js?v=00000000" defer></script>
 <script src="src/domain/parks/classify-surface-tags.js?v=00000000" defer></script>
@@ -799,6 +805,8 @@
 <script src="src/application/parks/merge-park-identities.js?v=00000000" defer></script>
 <script src="src/application/parks/rename-park-identity.js?v=00000000" defer></script>
 <script src="src/application/parks/delete-park-identity.js?v=00000000" defer></script>
+<script src="src/adapters/parks/park-admin-read-store.js?v=00000000" defer></script>
+<script src="src/adapters/parks/park-project-read-store.js?v=00000000" defer></script>
 <script src="src/adapters/parks/park-admin-mutation-store.js?v=00000000" defer></script>
 <script src="src/ui/park-admin-mutation.js?v=00000000" defer></script>
 <script src="src/application/parks/load-admin-park-identities.js?v=00000000" defer></script>
@@ -912,11 +920,15 @@
 <script src="src/adapters/users/own-records-store.js?v=00000000" defer></script>
 <script src="src/domain/users/summarize-tree-analysis.js?v=00000000" defer></script>
 <script src="src/ui/tree-analysis.js?v=00000000" defer></script>
+<script src="src/ui/owner-dashboard-view.js?v=00000000" defer></script>
+<script src="src/ui/dashboard-view-state.js?v=00000000" defer></script>
+<script src="src/adapters/users/owner-dashboard-store.js?v=00000000" defer></script>
 <script src="src/adapters/world/world-stats-store.js?v=00000000" defer></script>
 <script src="src/ui/world-stats-tables.js?v=00000000" defer></script>
 <script src="src/ui/world-error.js?v=00000000" defer></script>
 <script src="src/ui/load-own-records.js?v=00000000" defer></script>
 <script src="src/application/dashboard/delete-own-record.js?v=00000000" defer></script>
+<script src="src/adapters/users/delete-own-record-store.js?v=00000000" defer></script>
 <script src="src/application/dashboard/load-owner-dashboard.js?v=00000000" defer></script>
 <script src="src/ui/dashboard-chart.js?v=00000000" defer></script>
 <script src="src/application/dashboard/load-world-dashboard.js?v=00000000" defer></script>

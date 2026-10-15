@@ -6,7 +6,6 @@
 (()=>{
  "use strict";
  const WAY_ID=423602740;
- const ENDPOINT="https://nominatim.openstreetmap.org/lookup";
  let cached=null,expires=0,pending=null;
 
  function bboxValid(b){
@@ -39,16 +38,12 @@
   if(cached&&now<expires)return intersects(cached.bounds,bbox)?{elements:[cached.element],source:"nominatim-osm-way"}:null;
   if(!pending){
    pending=(async()=>{
-    const controller=new AbortController(),timeout=setTimeout(()=>controller.abort(),6500);
     try{
-     const url=ENDPOINT+"?osm_ids=W"+WAY_ID+"&format=jsonv2&polygon_geojson=1";
-     const response=await fetch(url,{method:"GET",headers:{Accept:"application/json"},signal:controller.signal,cache:"no-store"});
-     if(!response.ok)return null;
-     const records=await response.json();
+     if(!window.DG_FETCH_NOMINATIM_OSM_WAY)throw new Error("Nominatim transport adapter yüklenemedi.");
+     const records=await window.DG_FETCH_NOMINATIM_OSM_WAY.lookup(WAY_ID,{fetchImpl:fetch});
      if(!Array.isArray(records)||records.length!==1)return null;
      return parse(records[0]);
     }catch(error){return null;}
-    finally{clearTimeout(timeout);}
    })().then(value=>{cached=value;expires=Date.now()+(value?10*60*1000:90*1000);return value;}).finally(()=>{pending=null;});
   }
   const candidate=await pending;

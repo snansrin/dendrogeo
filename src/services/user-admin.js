@@ -12,12 +12,7 @@ async function loadUsers__scroll(){
   onFailure:error=>toast("Kullanıcı listesi alınamadı: "+error.message,"err"),
   apply:users=>{USERS_CACHE=users;},
   summarize:users=>window.DG_USER_ADMIN_SUMMARY.summarize(users),
-  updateCounts:counts=>{
-   if($("aUsersTotal"))$("aUsersTotal").textContent=counts.total;
-   if($("aUsersActive"))$("aUsersActive").textContent=counts.active;
-   if($("aUsersAdmin"))$("aUsersAdmin").textContent=counts.admins;
-   if($("aUsersPassive"))$("aUsersPassive").textContent=counts.passive;
-  },
+  updateCounts:counts=>window.DG_ADMIN_USER_TABLE_UI.updateCounts(document,counts),
   render:(users,isOwner)=>window.DG_ADMIN_USER_TABLE_UI.render($("aUsersT"),users,{isOwner,escape:esc}),
   filter:()=>filterUsers()
  });
@@ -29,7 +24,7 @@ function filterUsers(){
   role:$("userRoleFilter")?.value||"",
   status:$("userStatusFilter")?.value||""
  });
- if($("aUsersVisible"))$("aUsersVisible").textContent=visible+" kullanıcı";
+ window.DG_ADMIN_USER_FILTER_UI.updateVisible(document,visible);
 }
 
 async function updateRole(id,role){

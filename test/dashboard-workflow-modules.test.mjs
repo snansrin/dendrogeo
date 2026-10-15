@@ -8,7 +8,11 @@ const files=[
  'src/application/dashboard/delete-own-record.js',
  'src/application/dashboard/load-owner-dashboard.js',
  'src/ui/dashboard-chart.js',
- 'src/application/dashboard/load-world-dashboard.js'
+ 'src/application/dashboard/load-world-dashboard.js',
+ 'src/ui/owner-dashboard-view.js',
+ 'src/ui/dashboard-view-state.js',
+ 'src/adapters/users/delete-own-record-store.js',
+ 'src/adapters/users/owner-dashboard-store.js'
 ];
 function load(){
  const window={},context=vm.createContext({window,Promise,Object,Array,Number});
@@ -77,4 +81,15 @@ test('dashboard service delegates all five workflows and retains compatibility i
  const source=readFileSync(new URL('../src/services/dash.js',import.meta.url),'utf8');
  for(const api of ['DG_LOAD_OWN_RECORDS_VIEW','DG_DELETE_OWN_RECORD','DG_LOAD_OWNER_DASHBOARD','DG_DASHBOARD_CHART','DG_LOAD_WORLD_DASHBOARD'])assert.ok(source.includes('window.'+api));
  for(const entry of ['async function loadRecords__scroll','async function delRec','async function loadDash','async function drawChart','async function loadWorld'])assert.ok(source.includes(entry));
+ for(const api of ['DG_OWNER_DASHBOARD_STORE','DG_OWNER_DASHBOARD_VIEW','DG_DELETE_OWN_RECORD_STORE','DG_DASHBOARD_VIEW_STATE','DG_WORLD_STATS_TABLES','DG_WORLD_ERROR_UI'])assert.ok(source.includes('window.'+api));
+ assert.doesNotMatch(source,/\.innerHTML|\.textContent|\.classList|\.style\s*\.|\.from\(/,'dashboard service does not cross UI or persistence boundaries');
+});
+
+test('owner dashboard UI updates metrics and active-view state through the DOM adapter',()=>{
+ const api=load(),values={};
+ const document={getElementById:id=>values[id]||(values[id]={textContent:'',classList:{contains:()=>id==='v-map'}})};
+ api.DG_OWNER_DASHBOARD_VIEW.update(document,{records:3,carbon:'125'});
+ assert.equal(values.dMy.textContent,3);assert.equal(values.dCarbon.textContent,'125');
+ assert.equal(api.DG_DASHBOARD_VIEW_STATE.create(document).isActive('v-map'),true);
+ assert.equal(api.DG_DASHBOARD_VIEW_STATE.create(document).isActive('v-records'),false);
 });

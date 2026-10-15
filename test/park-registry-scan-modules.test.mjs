@@ -6,8 +6,10 @@ import vm from 'node:vm';
 const read=path=>readFileSync(new URL('../'+path,import.meta.url),'utf8');
 const registry=read('src/services/park-registry.js');
 const modules=[
+  'src/ui/park-scan-card.js',
   'src/ui/start-park-scan.js',
   'src/ui/focus-park-scan-target.js',
+  'src/adapters/parks/park-project-read-store.js',
   'src/domain/parks/select-park-scan-step.js',
   'src/ui/preview-park-project-name.js',
   'src/application/parks/cancel-park-scan.js'
@@ -22,6 +24,16 @@ function addFunction(context,start,end){
   assert.ok(from>=0&&to>from,`${start} function boundary is present`);
   vm.runInContext(registry.slice(from,to),context,{filename:'src/services/park-registry.js'});
 }
+
+test('scan card UI hides the card only during surface review and tolerates missing shell',()=>{
+  const card={style:{display:'block'}},elements={'parkScanCard':card,'v-map':{classList:{contains:value=>value==='surface-review-active'}}};
+  const{window}=setup({document:{getElementById:id=>elements[id]}});
+  assert.equal(window.DG_PARK_SCAN_CARD_UI.prepare({document:{getElementById:id=>elements[id]}}),null);
+  assert.equal(card.style.display,'none');
+  elements['v-map'].classList.contains=()=>false;
+  assert.equal(window.DG_PARK_SCAN_CARD_UI.prepare({document:{getElementById:id=>elements[id]}}),card);
+  assert.equal(window.DG_PARK_SCAN_CARD_UI.prepare({document:{getElementById:()=>null}}),null);
+});
 
 test('scan start module preserves state, map setup, focus, render and notice order',()=>{
   const events=[],card={scrollIntoView:options=>events.push(['scroll',options])};

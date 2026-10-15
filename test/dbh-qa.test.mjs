@@ -311,9 +311,10 @@ describe('FINAL · saha çevresi → türetilmiş DBH protokolü', () => {
     const protocol=read('src/config/measurement-protocol-lock.js');
     assert.match(protocol,/return Number\.isFinite\(c\)&&c>0\?c\/Math\.PI:null/);
     const measure=read('src/services/measure.js');
-    assert.match(measure,/calcFromCircumference\(circumference,h,sp,grp\)/);
-    assert.match(measure,/girth_cm:circumference/);
-    assert.match(measure,/dbh_cm:c\.dbh_cm/);
+    assert.match(measure,/calculate:value=>calcFromCircumference\(value\.circumferenceCm,value\.heightM,value\.species,value\.group\)/);
+    const record=read('src/domain/trees/build-measurement-record.js');
+    assert.match(record,/girth_cm:circumferenceCm/);
+    assert.match(record,/dbh_cm:dbhCm/);
   });
   test('içe aktarma ham çevreyi zorunlu tutar ve DBHyi türetir', () => {
     const t=read('scripts/import-measurements.mjs');

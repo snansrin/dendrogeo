@@ -123,14 +123,14 @@ describe('halka sadeleştirme (jsonb boyutu)', () => {
 describe('istemci kancaları yerinde (atlama yok)', () => {
   test('saveMeas: fotoğraf/yükleme ÖNCESİ dgVerifyAtPark + damga', () => {
     const m = read('src/services/measure.js');
-    const i = m.indexOf('async function saveMeas');
-    const govde = m.slice(i, m.indexOf('// 3. OFFLINE KONTROLÜ', i));
-    assert.match(govde, /dgVerifyAtPark\(pk\.data,"measure"\)/, 'ölçüm kaydı konum doğrulamalı');
-    assert.match(govde, /dgGeoStamp\(base,dec\)/, 'doğrulama damgası satıra yazılmalı');
-    const vi = govde.indexOf('dgVerifyAtPark');
-    const up = m.indexOf('storage.from', i);
-    assert.ok(vi > -1 && up > -1, 'kanca ve upload bulunmalı');
-    assert.match(govde, /if\(!dec\.ok\)return toast/, 'reddedilirse yükleme başlamamalı');
+    assert.match(m, /DG_SUBMIT_MEASUREMENT\.run/, 'servis modüler gönderim use-case’ini çağırmalı');
+    const submit=read('src/application/trees/submit-measurement.js');
+    assert.ok(submit.indexOf('DG_VERIFY_MEASUREMENT_SUBMISSION_LOCATION.verify')<submit.indexOf('DG_PERSIST_MEASUREMENT_SUBMISSION.persist'), 'park doğrulaması dosya yükleme/yazımdan önce çalışmalı');
+    const location=read('src/application/trees/verify-measurement-submission-location.js');
+    assert.match(location, /ports\.loadPark\(draft\.gate\.project\.park_id\)/, 'park geometrisi aynı park adapter’ından okunmalı');
+    assert.match(location, /ports\.verifyAtPark\(park\)/, 'GPS park geofence kararından geçmeli');
+    assert.match(location, /ports\.stamp\(draft\.record,decision\)/, 'doğrulama damgası satıra yazılmalı');
+    assert.match(location, /if\(!decision\.ok\)return\{ok:false/, 'reddedilirse upload ve kayıt başlamamalı');
   });
 
   test('doğrulama YALNIZ ölçümde; proje açılışında konum bloğu YOK (2026-09-27 kesin)', () => {

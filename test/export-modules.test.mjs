@@ -47,16 +47,17 @@ test('measurement store pages in 1000-row chunks and retains owner/order query',
 });
 
 test('export preview renders bounded CSV rows or escaped truncated GeoJSON and calls existing download',()=>{
- const{window}=load(),calls=[],title={},body={innerHTML:''},button={},modal={classList:{add:value=>calls.push(['modal',value])}};
+ const{window}=load(),calls=[],title={textContent:''},body={innerHTML:''},button={},modal={classList:{add:value=>calls.push(['modal',value]),remove:value=>calls.push(['close',value])}},elements=new Map([['pvTitle',title],['pvBody',body],['pvDownload',button],['previewModal',modal]]),document={getElementById:id=>elements.get(id)};
  const lines=['a,b',...Array.from({length:120},(_,index)=>`${index},<row>`)].join('\n');
- window.DG_EXPORT_PREVIEW_UI.render('CSV',lines,true,'report.csv',{title:()=>title,body:()=>body,downloadButton:()=>button,modal:()=>modal,escape:value=>String(value).replaceAll('<','&lt;'),download:(...args)=>calls.push(['download',...args])});
+ window.DG_EXPORT_PREVIEW_UI.render('CSV',lines,true,'report.csv',{document,escape:value=>String(value).replaceAll('<','&lt;'),download:(...args)=>calls.push(['download',...args])});
  assert.equal(title.textContent,'CSV');assert.equal((body.innerHTML.match(/<tr>/g)||[]).length,100);assert.match(body.innerHTML,/&lt;row>/);button.onclick();assert.equal(calls.find(call=>call[0]==='download')[0],'download');
- window.DG_EXPORT_PREVIEW_UI.render('GeoJSON','<x>'.repeat(7000),false,'report.geojson',{title:()=>title,body:()=>body,downloadButton:()=>button,modal:()=>modal,escape:value=>String(value).replaceAll('<','&lt;'),download:()=>{}});
- assert.equal((body.innerHTML.match(/&lt;/g)||[]).length,6667);assert.match(body.innerHTML,/<pre/);assert.equal(calls.at(-1)[1],'on');
+ window.DG_EXPORT_PREVIEW_UI.render('GeoJSON','<x>'.repeat(7000),false,'report.geojson',{document,escape:value=>String(value).replaceAll('<','&lt;'),download:()=>{}});
+ assert.equal((body.innerHTML.match(/&lt;/g)||[]).length,6667);assert.match(body.innerHTML,/<pre/);assert.equal(calls.at(-1)[1],'on');window.DG_EXPORT_PREVIEW_UI.close(document);assert.deepEqual(calls.at(-1),['close','on']);
 });
 
 test('export service delegates CSV, GeoJSON, paging and preview through the registered modules',async()=>{
  const{context,window}=load(),elements=new Map([['pvTitle',{textContent:''}],['pvBody',{innerHTML:''}],['pvDownload',{}],['previewModal',{classList:{add(value){this.value=value;}}}]]);
+ context.document={getElementById:id=>elements.get(id)};
  Object.assign(context,{USER:{id:'owner-1'},LATIN:{Oak:'Quercus'},calc:()=>({agb:10,bhb:2}),esc:value=>String(value).replaceAll('<','&lt;'),$:id=>elements.get(id),
   sb:{from(){return{select(){return this;},eq(){return this;},order(){return this;},range(){return Promise.resolve({data:[{point_id:1,created_at:'2026-10-12T00:00:00Z',lat:39,lon:32,species:'Oak',dbh_cm:28.647,girth_cm:90,height_m:12,carbon_kg:5}]});}};}}});
  for(const file of files)vm.runInContext(readFileSync(new URL('../'+file,import.meta.url),'utf8'),context);

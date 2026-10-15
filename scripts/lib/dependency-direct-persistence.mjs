@@ -1,24 +1,23 @@
-const SDK_CLIENT="(?:sb|client|supabase|supabaseClient)";
-const DIRECT_CLIENT_ACCESS=new RegExp(`\\b(?:${SDK_CLIENT})\\s*\\.\\s*from\\s*\\(|\\b(?:${SDK_CLIENT})\\s*\\.\\s*storage\\s*\\.\\s*from\\s*\\(|\\bstorage\\s*\\.\\s*from\\s*\\(`,"g");
-const DIRECT_AUTH_ACCESS=new RegExp(`\\b${SDK_CLIENT}\\s*\\.\\s*auth\\s*\\.`,"g");
-const DIRECT_CHANNEL_ACCESS=new RegExp(`\\b${SDK_CLIENT}\\s*\\.\\s*channel\\s*\\(`,"g");
+import {parseJavaScript,walkAst,calledPath} from './javascript-ast.mjs';
+const SDK_CLIENT=new Set(['sb','client','supabase','supabaseClient']);
 
 export function findDirectPersistenceAccess(modules){
  const violations=[];
  for(const module of modules){
   if(!["application","ui"].includes(module.layer))continue;
-  for(const match of module.source.matchAll(DIRECT_CLIENT_ACCESS)){
-   const line=module.source.slice(0,match.index).split("\n").length;
-   violations.push(`${module.relativePath}:${line}: application must access Supabase through an adapter port`);
-  }
-  for(const match of module.source.matchAll(DIRECT_AUTH_ACCESS)){
-   const line=module.source.slice(0,match.index).split("\n").length;
-   violations.push(`${module.relativePath}:${line}: application must access Supabase Auth through an adapter port`);
-  }
-  for(const match of module.source.matchAll(DIRECT_CHANNEL_ACCESS)){
-   const line=module.source.slice(0,match.index).split("\n").length;
-   violations.push(`${module.relativePath}:${line}: application must access Supabase Realtime through an adapter port`);
-  }
+  const ast=module.ast||parseJavaScript(module.source,{filename:module.relativePath});
+  walkAst(ast,node=>{
+   if(node.type!=='CallExpression')return;
+   const parts=calledPath(node)?.split('.');if(!parts)return;
+   const directClient=SDK_CLIENT.has(parts[0])&&['from','channel','rpc'].includes(parts.at(-1));
+   const directStorage=SDK_CLIENT.has(parts[0])&&parts[1]==='storage'&&parts.at(-1)==='from';
+   const directStorageAlias=parts[0]==='storage'&&parts.at(-1)==='from';
+   const directAuth=SDK_CLIENT.has(parts[0])&&parts[1]==='auth'&&parts.length>=3;
+   const directChannel=SDK_CLIENT.has(parts[0])&&parts[1]==='channel';
+   if(directClient||directStorage||directStorageAlias||directAuth||directChannel){
+    violations.push(`${module.relativePath}:${node.loc?.start.line||1}: application must access Supabase through an adapter port`);
+   }
+  });
  }
  return violations;
 }

@@ -34,7 +34,7 @@ const admin = rd('src/services/admin.js');
 describe('0043 · onay/red kaydırma sıçraması kök düzeltmesi', () => {
   test('⭐ loadAdminTree yenilemede ağacı ÇÖKERTMİYOR (yükleniyor yalnız ilk yüklemde)', () => {
     const fn = tree.slice(tree.indexOf('async function loadAdminTree'), tree.indexOf('/* Filtrelenmiş ağacı çiz'));
-    assert.match(fn, /const hasTree=box&&box\.querySelector/, 'kutuda zaten ağaç var mı diye bakılmalı');
+    assert.match(fn, /const hasTree=window\.DG_ADMIN_TREE_ACTIONS\.hasTree\(box\)/, 'ağaç varlığı UI aksiyon modülünden sorgulanmalı');
     assert.match(fn, /if\(box&&!hasTree\)/, 'yükleniyor mesajı YALNIZ kutu boşken (koşullu)');
     /* ESKİ kök neden: koşulsuz çökertme. Geri gelmemeli. */
     assert.ok(!/if\(box\)box\.innerHTML=`<div class="alert info">⏳ Ölçümler yükleniyor/.test(tree),

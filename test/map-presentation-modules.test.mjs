@@ -6,9 +6,14 @@ import {readFileSync} from 'node:fs';
 const modules=[
   '../src/domain/map/is-valid-coordinate.js',
   '../src/domain/map/select-waypoint-target.js',
+  '../src/domain/map/build-waypoint-navigation-header.js',
+  '../src/domain/map/resolve-waypoint-guidance.js',
   '../src/ui/map-measurement-popup.js',
   '../src/ui/map-measurement-markers.js',
-  '../src/ui/waypoint-list.js'
+  '../src/ui/waypoint-list.js',
+  '../src/ui/render-waypoint-navigation-header.js',
+  '../src/ui/waypoint-map-markers.js',
+  '../src/ui/waypoint-gps-overlay.js'
 ];
 function fixture(){
   const elements=new Map();
@@ -74,6 +79,15 @@ test('waypoint UI and target modules preserve filtering, ordering, paging and no
   ctx.GPS={latitude:40,longitude:32,accuracy:5};
   ctx.dgNearestWaypoint();
   assert.equal(ctx.navTarget.wp_id,12);
+});
+
+test('waypoint header and guidance presentation stay in UI modules',()=>{
+  const {ctx,$}=fixture();
+  ctx.GPS=null;
+  ctx.drawNav();
+  assert.match($('navTarget').textContent,/Listeden veya haritadan hedef seçin/);
+  assert.match($('navGps').textContent,/GPS konumu bekleniyor/);
+  assert.match($('navGuidance').textContent,/Hedef seçerek navigasyona başlayın/);
 });
 
 test('five map modules load before the locked service and are precached',()=>{

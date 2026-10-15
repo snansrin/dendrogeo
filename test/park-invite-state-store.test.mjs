@@ -4,6 +4,7 @@ import vm from 'node:vm';
 import { readFileSync } from 'node:fs';
 
 const paths = [
+  'src/adapters/park-invites/store.js',
   'src/application/park-invites/park-invite-state.js',
   'src/application/park-invites/load-owned-parks.js',
   'src/application/park-invites/load-recipient-invites.js',

@@ -119,10 +119,9 @@ function dgPubRender__scroll(){
  const box=$("dgPubBox");if(!box)return;
  const st=DG_PUB_STATE;
  const pubByPark=dgPubPublishedByPark();
- const clock=$("dgPubClock");
- if(clock)clock.textContent=st.queueAt?(dgCf("son kontrol")+" "+new Date(st.queueAt).toLocaleTimeString("tr-TR")):"—";
  const card=window.DG_RENDER_PUBLICATION_ADMIN_CARD;
- if(st.error==="SCHEMA"){box.innerHTML=card.schemaWarning();return;}
+ card.updateClock($("dgPubClock"),st.queueAt?(dgCf("son kontrol")+" "+new Date(st.queueAt).toLocaleTimeString("tr-TR")):"—");
+ if(st.error==="SCHEMA"){card.mount(box,card.schemaWarning());return;}
  const rows=st.parks.map(park=>{
   const view=window.DG_RESOLVE_PUBLICATION_PARK_STATUS.resolve(park,st,{
    entryFor:dgPubEntryFor,
@@ -151,12 +150,12 @@ function dgPubRender__scroll(){
   isDoi:value=>DG_PUB_DOI.test(String(value||"")),
   escape:esc
  });
- box.innerHTML=card.render({summary,rows,history,error:st.error,queueMissing:st.queue===null,escape:esc,translate:dgCf});
+ card.mount(box,card.render({summary,rows,history,error:st.error,queueMissing:st.queue===null,escape:esc,translate:dgCf}));
 }
 /* ---------- yazma (ortak çekirdek: yönetici kartı + kullanıcı paneli) ---------- */
 /* RLS-safe insert (trackVisit ile aynı desen): "Prefer: return=minimal" —
  * return=representation olsaydı RETURNING satırı politikaya takılıp istek
- * sessizce ölebilirdi. Adapter `"Prefer":"return=minimal"` ve `await sb.auth.getSession()` desenini korur. */
+ * sessizce ölebilirdi. Oturum anahtarı adapter tarafından eklenir. */
 async function dgPubInsertRequest(parkId,lulc,note){
  return window.DG_REPORT_PUBLICATION_REQUEST_INSERT_STORE.insert(sb,{
   fetch,supabaseUrl:SB_URL,anonKey:SB_KEY,parkId,includeLandCover:lulc,
@@ -330,7 +329,7 @@ function dgUserPubRender(){
  const st=DG_USER_PUB;
  const card=window.DG_RENDER_USER_PUBLICATION_CARD;
  const close="<button class=\"btn sm ghost\" onclick=\"dgUserPubClose()\" title=\"Paneli kapat\">✖ Kapat</button>";
- if(st.error==="SCHEMA"){box.innerHTML=card.schemaWarning(close);return;}
+ if(st.error==="SCHEMA"){card.mount(box,card.schemaWarning(close));return;}
  const mine=(typeof USER!=="undefined"&&USER&&USER.id)||"";
  const view=window.DG_RESOLVE_USER_PUBLICATION_VIEW.resolve(st,mine,{
   entryFor:dgPubEntryIn,
@@ -343,7 +342,7 @@ function dgUserPubRender(){
  const header=window.DG_RENDER_USER_PUBLICATION_HEADER.render(st,view,close,esc);
  const controls=window.DG_RENDER_USER_PUBLICATION_CONTROLS.render(view,st,{escape:esc});
  const notices=window.DG_RENDER_USER_PUBLICATION_NOTICES.render(st,esc);
- box.innerHTML=card.render(st,st.error,header,controls,notices,esc);
+ card.mount(box,card.render(st,st.error,header,controls,notices,esc));
 }
 async function dgUserPublish(parkId){
  if(typeof USER==="undefined"||!USER)return toast("Önce giriş yap.","err","📄");
@@ -381,6 +380,7 @@ async function dgUserCancel(id){
 /* Kendi bekleyen isteği varken ve panel görünürken 25 sn'de bir sessiz tazeleme
  * (yönetici kartındaki dgPubSchedulePoll ile aynı desen ve sınırlar). */
 function dgUserPubSchedulePoll(){
+ const viewState=window.DG_PUBLICATION_VIEW_STATE.create(document);
  return window.DG_SCHEDULE_USER_PUBLICATION_POLL.execute(DG_USER_PUB,{
   clearTimer:clearInterval,
   userId:()=>typeof USER!=="undefined"&&USER&&USER.id,
@@ -389,9 +389,9 @@ function dgUserPubSchedulePoll(){
   maxPolls:DG_PUB_POLL_MAX,
   setInterval,
   intervalMs:DG_PUB_POLL_MS,
-  isProjectsTabActive:()=>{const tab=$("v-projects");return !tab||tab.classList.contains("on");},
-  isDocumentHidden:()=>document.hidden,
-  isPanelVisible:()=>{const box=$("dgUserPubBox");return !!box&&box.style.display!=="none";},
+  isProjectsTabActive:()=>viewState.isActive("v-projects"),
+  isDocumentHidden:viewState.isDocumentHidden,
+  isPanelVisible:()=>viewState.isVisible("dgUserPubBox"),
   refresh:dgUserPubRefresh
  });
 }
@@ -429,9 +429,10 @@ function dgReportOpen(reportId){
 
 /* ---------- yükleme + kendiliğinden tazeleme ---------- */
 async function dgLoadPublishQueue(opts){
+ const card=window.DG_RENDER_PUBLICATION_ADMIN_CARD;
  return window.DG_LOAD_PUBLICATION_QUEUE.execute(DG_PUB_QUEUE_STORE||DG_PUB_STATE,opts,{
   hasView:()=>!!$("dgPubBox"),
-  showLoading:()=>{$("dgPubBox").innerHTML='<div class="dg-tree-meta">⏳ Kuyruk yükleniyor…</div>';},
+  showLoading:()=>card.showLoading(document),
   loadParks:dgPubFetchParks,
   loadRequests:dgPubFetchRequests,
   loadQueue:dgPubFetchQueue,
@@ -445,6 +446,7 @@ async function dgLoadPublishQueue(opts){
 /* Bekleyen istek varken ve yönetici sekmesi görünürken 25 sn'de bir sessiz
  * tazeleme → kullanıcı F5'e basmadan bağlantının belirdiğini görür. */
 function dgPubSchedulePoll(){
+ const viewState=window.DG_PUBLICATION_VIEW_STATE.create(document);
  return window.DG_SCHEDULE_PUBLICATION_QUEUE_POLL.execute(DG_PUB_QUEUE_STORE||DG_PUB_STATE,{
   clearTimer:clearInterval,
   hasPending:state=>window.DG_HAS_PENDING_PUBLICATION_WORK
@@ -456,8 +458,8 @@ function dgPubSchedulePoll(){
   maxPolls:DG_PUB_POLL_MAX,
   setInterval,
   intervalMs:DG_PUB_POLL_MS,
-  isAdminViewActive:()=>{const view=$("v-admin");return !view||view.classList.contains("on");},
-  isDocumentHidden:()=>document.hidden,
+  isAdminViewActive:()=>viewState.isActive("v-admin"),
+  isDocumentHidden:viewState.isDocumentHidden,
   refresh:()=>dgLoadPublishQueue({silent:true})
  });
 }

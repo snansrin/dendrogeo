@@ -94,11 +94,7 @@ function dgRestoreSQL(bk){
   }
   sql+="\nCOMMIT;\n";
   if(!n){toast(dgCf("Yedek dosyası okunamadı."),"err","📥");return;}
-  const a=document.createElement("a");
-  a.href=URL.createObjectURL(new Blob([sql],{type:"application/sql"}));
-  a.download="dendrogeo_geri_yukleme_"+new Date().toISOString().slice(0,10)+".sql";
-  document.body.appendChild(a);a.click();a.remove();
-  setTimeout(()=>URL.revokeObjectURL(a.href),5000);
+  window.DG_BACKUP_RESTORE_SQL_DOWNLOAD.download(window,sql,"dendrogeo_geri_yukleme_"+new Date().toISOString().slice(0,10)+".sql");
   toast(dgCf("✓ Geri yükleme SQL'i indirildi — Supabase → SQL Editor'da çalıştırın. Satırlar korunur, çakışanlar atlanır."),"ok","📥");
  }catch(e){toast(dgCf("Geri yükleme hazırlanamadı: ")+(e&&e.message||e),"err","📥");}
 }

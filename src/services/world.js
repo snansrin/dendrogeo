@@ -19,70 +19,26 @@ const _tw=(s)=>(typeof dgT==="function"?dgT(s):s);
  * eşleştirip ana listeye taşır. */
 let PARK_DATA=[];   /* seçili parkın ham ölçüm satırları (rapor için) */
 let PARK_ROWS=[];   /* v_park_compare satırları */
-const DG_WORLD_PARK_COMPARISON_MODULE_STORE=window.DG_WORLD_PARK_COMPARISON_STORE?window.DG_WORLD_PARK_COMPARISON_STORE.create(()=>sb):null;
+const DG_WORLD_PARK_COMPARISON_MODULE_STORE=window.DG_WORLD_PARK_COMPARISON_STORE.create(()=>sb);
 
 /* 0040: kaydırma koruma sarmalı — yeniden çizimde #main scrollTop korunur. */
 async function loadParkCompare(){const _y=(typeof dgScrollKeep==="function"?dgScrollKeep():null);try{return await loadParkCompare__scroll.apply(this,arguments);}finally{if(typeof dgScrollRestore==="function")dgScrollRestore(_y);}}
 async function loadParkCompare__scroll(){
- if(window.DG_LOAD_PARK_COMPARISON)return window.DG_LOAD_PARK_COMPARISON.execute({
-  read:()=>DG_WORLD_PARK_COMPARISON_MODULE_STORE?DG_WORLD_PARK_COMPARISON_MODULE_STORE.primary():sb.from("v_park_compare").select("*").order("carbon_kg",{ascending:false}),
+ return window.DG_LOAD_PARK_COMPARISON.execute({
+  read:()=>DG_WORLD_PARK_COMPARISON_MODULE_STORE.primary(),
   resolve:error=>window.DG_RESOLVE_PARK_COMPARISON_READ.resolve(error,dgIsSchemaError),
   onDenied:dgParkCompareDenied,
   onSchemaMissing:error=>dgParkSchemaMissing("v_park_compare: "+error.message),
-  loadLegacy:()=>loadParkCompareLegacy($("parkCompare")),
+  loadLegacy:()=>loadParkCompareLegacy(),
   render:rows=>window.DG_RENDER_PRIMARY_PARK_COMPARISON.render(rows,{
    setRows:value=>{PARK_ROWS=value;},
-   prepare:value=>window.DG_PREPARE_PARK_COMPARISON?window.DG_PREPARE_PARK_COMPARISON.prepare(value):{
-    linked:value.filter(row=>Number(row.park_id)>0),pending:value.filter(row=>!(Number(row.park_id)>0)),
-    max:value.length?Math.max(...value.map(row=>Number(row.carbon_kg)||0)):1
-   },
+   prepare:value=>window.DG_PREPARE_PARK_COMPARISON.prepare(value),
    element:$("parkCompare"),
    renderLinked:(linked,max)=>linked.map((park,index)=>dgParkRowHTML(park,index,max)).join(""),
    renderPending:dgPendingParksHTML,
    renderReportOptions:dgFillReportOptions
   })
  });
- /* v_park_compare supplies park-level contributors; the primary path stays park-keyed. */
- const el=$("parkCompare");
- const{data,error}=await(DG_WORLD_PARK_COMPARISON_MODULE_STORE?DG_WORLD_PARK_COMPARISON_MODULE_STORE.primary():sb.from("v_park_compare").select("*").order("carbon_kg",{ascending:false}));
-
- /* Şema eski (0004 çalıştırılmamış) → sayfa boş kalmasın diye proje bazlı
-  * eski toplama yedek olarak çalışır ve kullanıcıyı migration'a yönlendirir.
-  *
-  * ⚠ HATA SINIFLANDIRMASI (2026-09-26): her hata "şema eski" DEĞİLDİR.
-  * v_park_compare bilinçli olarak YALNIZ authenticated'a açık
-  * (0004_parks.sql: "revoke select on public.v_park_compare from anon").
-  * Oturum yokken, JWT tazelenirken ya da token süresi dolmuşken 401/42501
-  * döner; eskiden bu da dgParkSchemaMissing'e gidiyordu. Sonuçları ağırdı:
-  *   · yönetici ZATEN UYGULANMIŞ bir migration'ı yeniden çalıştırmaya
-  *     yönlendiriliyordu ("0004_parks.sql çalıştırılmalı"),
-  *   · dgParkSchemaMissing DG_PARK_SCHEMA_OK=false yaptığı için ÖLÇÜM KAPISI
-  *     kapanıyor ve yeni kayıtlar park_id'siz yazılıyordu
-  *     (measure.js:278 gate, measure.js:318 park_id=null).
-  * Yetki/ağ hataları artık ayrı ele alınır; şema bayrağına DOKUNMAZ. */
- if(error){
-  if(!dgIsSchemaError(error)){
-   dgParkCompareDenied(error);
-   return;
-  }
-  dgParkSchemaMissing("v_park_compare: "+error.message);
-  return loadParkCompareLegacy(el);
- }
-
- PARK_ROWS=data||[];
- const prepared=window.DG_PREPARE_PARK_COMPARISON?window.DG_PREPARE_PARK_COMPARISON.prepare(PARK_ROWS):null;
- const linked=prepared?prepared.linked:PARK_ROWS.filter(r=>Number(r.park_id)>0);
- const pending=prepared?prepared.pending:PARK_ROWS.filter(r=>!(Number(r.park_id)>0));
- const max=prepared?prepared.max:(linked.length?Math.max(...linked.map(r=>Number(r.carbon_kg)||0)):1);
-
- if(!el)return;
-
- el.innerHTML=
-  (linked.length?linked.map((p,i)=>dgParkRowHTML(p,i,max)).join("")
-   :'<div style="color:var(--mut);font-size:.85rem">Henüz park kimliğine bağlı onaylı kayıt yok. Ölçüm girmeden önce park algıla: Canlı Harita → 🌳 Park Algılama.</div>')
-  +dgPendingParksHTML(pending);
-
- dgFillReportOptions(linked,pending);
 }
 
 /* Karşılaştırma satırı — MOBİL UYUMLU (2026-09-24): eskiden tümü satır içi
@@ -111,73 +67,29 @@ function dgFillReportOptions(linked,pending){
 /* 0040: kaydırma koruma sarmalı. */
 function dgParkCompareDenied(){const _y=(typeof dgScrollKeep==="function"?dgScrollKeep():null);try{return dgParkCompareDenied__scroll.apply(this,arguments);}finally{if(typeof dgScrollRestore==="function")dgScrollRestore(_y);}}
 function dgParkCompareDenied__scroll(error){
- if(window.DG_SHOW_PARK_COMPARISON_DENIED)return window.DG_SHOW_PARK_COMPARISON_DENIED.show(error,{
+ return window.DG_SHOW_PARK_COMPARISON_DENIED.show(error,{
   isAdmin:()=>typeof dgIsAdmin==="function"&&dgIsAdmin(),
   log:(code,message)=>console.warn("DENDROGEO · park karşılaştırma okunamadı (şema değil, yetki/ağ):",code,message),
   getElement:()=>$("parkCompare"),render:window.DG_PARK_COMPARISON_ERROR_UI.render,escape:esc,
   toast,translate:dgCf
  });
- const code=(error&&(error.code||error.status))||"";
- const msg=(error&&error.message)||String(error||"bilinmeyen hata");
- console.warn("DENDROGEO · park karşılaştırma okunamadı (şema değil, yetki/ağ):",code,msg);
- const el=$("parkCompare");
- const adm=(typeof dgIsAdmin==="function")?dgIsAdmin():false;
- /* Hata kullanıcıya gösterilir; şema durumu burada değiştirilmez. */
- if(el)el.innerHTML=window.DG_PARK_COMPARISON_ERROR_UI.render({code,message:msg,isAdmin:adm,escape:esc});
- toast(dgCf("Park karşılaştırması yüklenemedi: ")+(code||msg),"warn","🌳");
 }
 
 /* Şema eskiyse (migration 0004 uygulanmamış) karşılaştırma proje bazlı eski
  * davranışa düşer — sayfa boş kalmasın, ama kullanıcı sebebini bilsin. */
 /* 0040: kaydırma koruma sarmalı — yeniden çizimde #main scrollTop korunur. */
 async function loadParkCompareLegacy(){const _y=(typeof dgScrollKeep==="function"?dgScrollKeep():null);try{return await loadParkCompareLegacy__scroll.apply(this,arguments);}finally{if(typeof dgScrollRestore==="function")dgScrollRestore(_y);}}
-async function loadParkCompareLegacy__scroll(el){
- let data,count,legacyGrouped=null;
- if(window.DG_LOAD_LEGACY_PARK_COMPARISON){
-  const result=await window.DG_LOAD_LEGACY_PARK_COMPARISON.execute({
-   load:()=>DG_WORLD_PARK_COMPARISON_MODULE_STORE?DG_WORLD_PARK_COMPARISON_MODULE_STORE.legacy():sb.from("measurements").select("carbon_kg,dbh_cm,height_m,species,grp,projects(name,city)",{count:"exact"}).eq("status","Onaylı").limit(5000),
-   warnIfTruncated:dgWarnIfTruncated,setRows:rows=>{PARK_DATA=rows;},
-   group:rows=>window.DG_GROUP_LEGACY_PARK_COMPARISON?window.DG_GROUP_LEGACY_PARK_COMPARISON.group(rows):null
-  });
-  data=result.rows;legacyGrouped=result.grouped;
- }else{
-  const result=await(DG_WORLD_PARK_COMPARISON_MODULE_STORE?DG_WORLD_PARK_COMPARISON_MODULE_STORE.legacy():sb.from("measurements").select("carbon_kg,dbh_cm,height_m,species,grp,projects(name,city)",{count:"exact"}).eq("status","Onaylı").limit(5000));
-  data=result.data;count=result.count;
-  dgWarnIfTruncated(data,5000,"Park karşılaştırma",count);
- }
- PARK_DATA=data||[];
- const grouped=legacyGrouped||(window.DG_GROUP_LEGACY_PARK_COMPARISON?window.DG_GROUP_LEGACY_PARK_COMPARISON.group(PARK_DATA):null);
- if(grouped&&window.DG_LEGACY_PARK_COMPARISON_UI){
-  const list=grouped.parks;
-  if(!el)return;
-  el.innerHTML=window.DG_LEGACY_PARK_COMPARISON_UI.render(list,grouped.max,{escape:esc,translate:_tw});
-  const rep=$("repProject");if(rep)rep.innerHTML=window.DG_LEGACY_PARK_COMPARISON_UI.reportOptions(list,esc);
-  return;
- }
- const by={};
- PARK_DATA.forEach(r=>{
-  const name=r.projects?.name||"—";
-  const p=by[name]=by[name]||{name,city:r.projects?.city||"—",n:0,c:0,dbh:0,h:0};
-  p.n++;p.c+=(r.carbon_kg||0);p.dbh+=(r.dbh_cm||0);p.h+=(r.height_m||0);
+async function loadParkCompareLegacy__scroll(){
+ const result=await window.DG_LOAD_LEGACY_PARK_COMPARISON.execute({
+  load:()=>DG_WORLD_PARK_COMPARISON_MODULE_STORE.legacy(),
+  warnIfTruncated:dgWarnIfTruncated,
+  setRows:rows=>{PARK_DATA=rows;},
+  group:rows=>window.DG_GROUP_LEGACY_PARK_COMPARISON.group(rows)
  });
- const list=Object.values(by).sort((a,b)=>b.c-a.c);
- const max=list.length?list[0].c:1;
- if(!el)return;
- el.innerHTML=
-  `<div class="alert warn" style="margin-bottom:10px"><b>⚠ Veritabanı şeması eski:</b> park kimliği tabloları yok, liste geçici olarak <b>proje adı</b> bazında. `+
-  `Kalıcı çözüm: <span class="mono">supabase/migrations/0004_parks.sql</span> Supabase SQL Editor'da çalıştırılmalı.</div>`
-  +(list.length?list.map((p,i)=>`
-  <div style="display:flex;align-items:center;gap:12px;margin-bottom:10px;padding:8px 12px;background:var(--bg);border-radius:10px">
-   <div class="mono" style="width:26px;height:26px;border-radius:50%;background:${i===0?"var(--green)":"var(--line)"};color:${i===0?"#fff":"var(--mut)"};display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.75rem;flex:0 0 auto">${i+1}</div>
-   <div style="flex:1;min-width:0">
-    <div style="font-size:.85rem;font-weight:700">${esc(p.name)} ${i===0?'<span class="badge on">🏆 En İyi</span>':""}</div>
-    <div style="font-size:.7rem;color:var(--mut)">${esc(p.city)} · ${p.n} ${_tw("kayıt")} · ${_tw("ort. çap")} ${(p.dbh/p.n).toFixed(1)} cm · ${_tw("ort. boy")} ${(p.h/p.n).toFixed(1)} m</div>
-   </div>
-   <div style="width:120px;background:var(--line);border-radius:4px;height:8px;overflow:hidden;flex:0 0 auto"><div style="height:100%;width:${(p.c/max*100).toFixed(0)}%;background:var(--green)"></div></div>
-   <div class="mono" style="width:70px;text-align:right;font-weight:600;flex:0 0 auto">${(p.c/1000).toFixed(2)} t</div>
-  </div>`).join(""):'<div style="color:var(--mut);font-size:.85rem">Henüz onaylı kayıt yok.</div>');
- const rep=$("repProject");
- if(rep)rep.innerHTML=list.map(p=>`<option>proj:${esc(p.name)}</option>`).join("")||'<option value="">—</option>';
+ const grouped=result.grouped;if(!grouped)return result;
+ window.DG_LEGACY_PARK_COMPARISON_UI.renderInto($("parkCompare"),grouped.parks,grouped.max,{escape:esc,translate:_tw});
+ window.DG_LEGACY_PARK_COMPARISON_UI.renderOptions($("repProject"),grouped.parks,esc);
+ return result;
 }
 
 /* Park raporu: seçili PARKIN tüm ölçümleri (tüm kullanıcılar, tüm projeler).
@@ -206,18 +118,12 @@ function dgRenderParkReport(name,rows,count,row){
 }
 /* Click-to-zoom */
 async function zoomToCountry(country){
-const m=worldMapL||worldMap;if(!m)return;
-if(window.DG_WORLD_ZOOM_TO_LOCATION&&DG_WORLD_PARK_COMPARISON_MODULE_STORE)return window.DG_WORLD_ZOOM_TO_LOCATION.run(m,"country",country,country,"🌍",{load:(column,value)=>DG_WORLD_PARK_COMPARISON_MODULE_STORE.location(column,value),warnIfTruncated:dgWarnIfTruncated,fit:fitRows});
-const{data,count}=await sb.from("measurements").select("lat,lon",{count:"exact"}).eq("status","Onaylı").eq("country",country).limit(2000);
-dgWarnIfTruncated(data,2000,country+" (ülke yakınlaşma)",count);
-fitRows(m,data,country,"🌍");
+ const m=worldMapL||worldMap;if(!m)return;
+ return window.DG_WORLD_ZOOM_TO_LOCATION.run(m,"country",country,country,"🌍",{load:(column,value)=>DG_WORLD_PARK_COMPARISON_MODULE_STORE.location(column,value),warnIfTruncated:dgWarnIfTruncated,fit:fitRows});
 }
 async function zoomToCity(city){
-const m=worldMapL||worldMap;if(!m)return;
-if(window.DG_WORLD_ZOOM_TO_LOCATION&&DG_WORLD_PARK_COMPARISON_MODULE_STORE)return window.DG_WORLD_ZOOM_TO_LOCATION.run(m,"city",city,city,"🏙",{load:(column,value)=>DG_WORLD_PARK_COMPARISON_MODULE_STORE.location(column,value),warnIfTruncated:dgWarnIfTruncated,fit:fitRows});
-const{data,count}=await sb.from("measurements").select("lat,lon",{count:"exact"}).eq("status","Onaylı").eq("city",city).limit(2000);
-dgWarnIfTruncated(data,2000,city+" (şehir yakınlaşma)",count);
-fitRows(m,data,city,"🏙");
+ const m=worldMapL||worldMap;if(!m)return;
+ return window.DG_WORLD_ZOOM_TO_LOCATION.run(m,"city",city,city,"🏙",{load:(column,value)=>DG_WORLD_PARK_COMPARISON_MODULE_STORE.location(column,value),warnIfTruncated:dgWarnIfTruncated,fit:fitRows});
 }
 function fitRows(m,rows,label,icon){
 /* dgValidCoord same guard: const pts=(rows||[]).filter(r=>dgValidCoord(r.lat,r.lon)); */

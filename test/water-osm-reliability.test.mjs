@@ -16,7 +16,9 @@ function env(options={}){
   overpassRequest:async()=>null};
  ctx.window.window=ctx.window;
  vm.createContext(ctx);
+ vm.runInContext(load('src/adapters/parks/fetch-nominatim-osm-way.js'),ctx,{filename:'fetch-nominatim-osm-way.js'});
  vm.runInContext(load('src/services/osm-water-backup.js'),ctx,{filename:'osm-water-backup.js'});
+ vm.runInContext(load('src/adapters/surface/load-osm-landcover-evidence.js'),ctx,{filename:'load-osm-landcover-evidence.js'});
  vm.runInContext(load('src/services/lc-osm.js'),ctx,{filename:'lc-osm.js'});
  return {ctx,requests};
 }
@@ -82,7 +84,9 @@ test('Initial surface analysis requests water automatically and preserves raw ce
 
 test('The verified water fallback is ordered and precached for offline map loads',()=>{
  const h=load('partials/head.html'),sw=load('sw.js');
+ assert.ok(h.indexOf('fetch-nominatim-osm-way.js')<h.indexOf('osm-water-backup.js'));
  assert.match(h,/src\/services\/osm-water-backup\.js/);
+ assert.match(sw,/\/src\/adapters\/parks\/fetch-nominatim-osm-way\.js/);
  assert.ok(h.indexOf('osm-water-backup.js')<h.indexOf('src/utils/lazylibs.js?v'));
  assert.match(sw,/\/src\/services\/osm-water-backup\.js/);
 });

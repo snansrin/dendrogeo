@@ -71,6 +71,7 @@ test('park invite service delegates inbox and owner collaboration flows to the l
  context.window=context;
  const serviceFiles=[
   'src/domain/park-invites/access-policy.js','src/adapters/park-invites/store.js',
+  'src/application/park-invites/park-invite-state.js',
   'src/ui/park-invite-inbox.js','src/ui/park-collaboration-panel.js','src/application/park-invites/manage-invites.js',
   'src/application/park-invites/load-owned-parks.js','src/application/park-invites/load-recipient-invites.js',
   'src/ui/load-owner-collaborations.js','src/ui/refresh-collaborations.js',
@@ -78,7 +79,7 @@ test('park invite service delegates inbox and owner collaboration flows to the l
  ];
  for(const file of serviceFiles)vm.runInContext(readFileSync(new URL('../'+file,import.meta.url),'utf8'),context,{filename:file});
  await vm.runInContext('dgInvitesLoadMine()',context);
- assert.equal(element('projInviteCount').textContent,'1');assert.match(element('dgInvBox').innerHTML,/dgInviteRespond\('i1',true\)/);
+ assert.equal(element('projInviteCount').textContent,'1');assert.match(element('dgInvBox').innerHTML,/data-dg-park-invites-action="respond" data-invite-id="i1" data-accept="true"/);
  await vm.runInContext('dgCollabLoad()',context);
- assert.match(select.innerHTML,/&lt;Owned Park&gt;/);assert.match(element('dgInvList').innerHTML,/dgInviteRevoke\('u2','collab'\)/);
+ assert.match(select.innerHTML,/&lt;Owned Park&gt;/);assert.match(element('dgInvList').innerHTML,/data-dg-park-invites-action="revoke" data-target="u2" data-kind="collab"/);
 });

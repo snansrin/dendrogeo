@@ -6,8 +6,10 @@ function field(){
  const els=new Map(),writes=[],messages=[];
  const $=id=>{if(!els.has(id))els.set(id,{value:'',textContent:'',innerHTML:'',style:{},files:[]});return els.get(id);};
  $('nProject').value='7';
- const ctx=vm.createContext({$,window:{},WP:[{id:1,wp_id:12,lat:40,lon:32,project_id:7,visited:false},{id:2,wp_id:20,lat:40,lon:33,project_id:7,visited:true}],navTarget:null,navMap:null,GPS:null,manualPoint:false,USER:{id:'u'},hav:()=>25,toast:(...a)=>messages.push(a),confirm:()=>true,dgCf:s=>s,dgTfs:(s,v)=>s,go:v=>ctx.view=v,sb:{from:()=>({upsert:async r=>{writes.push(r);return {error:ctx.fail?Error('network'):null};},update:r=>({eq:async()=>{writes.push(r);return {error:null};}})})}});
- vm.runInContext(readFileSync(new URL('../src/services/map.js',import.meta.url),'utf8'),ctx);
+ const window={};
+ const ctx=vm.createContext({$,window,WP:[{id:1,wp_id:12,lat:40,lon:32,project_id:7,visited:false},{id:2,wp_id:20,lat:40,lon:33,project_id:7,visited:true}],navTarget:null,navMap:null,GPS:null,manualPoint:false,USER:{id:'u'},hav:()=>25,toast:(...a)=>messages.push(a),confirm:()=>true,dgCf:s=>s,dgTfs:(s,v)=>s,go:v=>ctx.view=v,sb:{from:()=>({upsert:async r=>{writes.push(r);return {error:ctx.fail?Error('network'):null};},update:r=>({eq:async()=>{writes.push(r);return {error:null};}})})}});
+ const modules=['src/domain/parks/parse-waypoint-csv.js','src/domain/parks/validate-waypoint-csv-row.js','src/application/parks/build-waypoint-upsert-command.js','src/adapters/parks/upsert-project-waypoint.js','src/application/parks/upload-waypoint-csv.js','src/domain/map/select-waypoint-arrival-target.js','src/domain/map/build-waypoint-navigation-header.js','src/domain/map/resolve-waypoint-guidance.js','src/ui/waypoint-list.js','src/ui/render-waypoint-navigation-header.js','src/ui/waypoint-map-markers.js','src/ui/waypoint-gps-overlay.js','src/ui/confirm-waypoint-arrival-distance.js','src/adapters/map/mark-waypoint-visited.js','src/application/map/complete-waypoint-arrival.js','src/application/map/arrive-at-waypoint.js','src/services/map.js'];
+ for(const path of modules)vm.runInContext(readFileSync(new URL('../'+path,import.meta.url),'utf8'),ctx,{filename:path});
  return {ctx,$,writes,messages,run:s=>vm.runInContext(s,ctx)};
 }
 test('search and status filter combine without changing waypoint state',()=>{const f=field();f.$('wpSearch').value='P12';f.$('wpFilter').value='pending';f.run('renderWaypointList()');assert.match(f.$('wpListTable').innerHTML,/P12/);assert.doesNotMatch(f.$('wpListTable').innerHTML,/P20/);assert.equal(f.ctx.WP.length,2);assert.match(f.$('navInfo').textContent,/1 bekleyen/);});
@@ -48,6 +50,8 @@ test('waypoint UI keeps only the map collapsible and all field controls visible'
  assert.match(nav,/id="wpFilter"/);
  assert.match(nav,/id="wpSort"/);
  assert.match(nav,/class="card waypoint-files"/);
+ assert.doesNotMatch(nav,/\son(?:click|change|input|toggle)\s*=/i);
+ assert.match(nav,/data-dg-waypoint-action="map-panel"/);
  assert.doesNotMatch(nav,/waypoint-coordinates/);
 });
 test('all-points action can open the map without changing waypoint data',()=>{const f=field();const panel=f.$('wpMapPanel');panel.open=false;let fit=0;f.ctx.navMap={fitBounds:()=>fit++,invalidateSize:()=>{}};f.run('dgFitWaypoints(true)');assert.equal(panel.open,true);assert.equal(fit,1);assert.equal(f.writes.length,0);});

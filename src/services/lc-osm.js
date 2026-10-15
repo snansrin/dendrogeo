@@ -13,51 +13,14 @@
 const DG_LC_OSM_CACHE=new Map();
 function dgLcIsWaterElement(el){const t=el.tags||{};return t.natural==="water"||t.waterway==="riverbank"||t.leisure==="swimming_pool"||t.landuse==="basin";}
 function dgLcCachedOsm(bbox){
- if(window.DG_LOAD_OSM_LANDCOVER_EVIDENCE)return window.DG_LOAD_OSM_LANDCOVER_EVIDENCE.cached(bbox);
- const cached=window.DG_SURFACE_OSM,b=cached?.bbox;
- if(!b||!Array.isArray(cached.elements)||Date.now()-Date.parse(cached.fetchedAt)>600000||!Number.isFinite(Date.parse(cached.fetchedAt)))return null;
- return b.minLat<=bbox.minLat&&b.minLon<=bbox.minLon&&b.maxLat>=bbox.maxLat&&b.maxLon>=bbox.maxLon?cached:null;
+ if(!window.DG_LOAD_OSM_LANDCOVER_EVIDENCE)throw new Error("OSM yüzey adapterı yüklenemedi.");
+ return window.DG_LOAD_OSM_LANDCOVER_EVIDENCE.cached(bbox);
 }
 async function dgLcOsmData(bbox){
- if(window.DG_LOAD_OSM_LANDCOVER_EVIDENCE)return window.DG_LOAD_OSM_LANDCOVER_EVIDENCE.load(bbox,{cache:DG_LC_OSM_CACHE,boundary:JSON.stringify(typeof PARK_POLY==="undefined"?null:PARK_POLY),isWaterElement:dgLcIsWaterElement,waterBackup:typeof window.DG_OSM_WATER_BACKUP?.lookup==="function"?window.DG_OSM_WATER_BACKUP.lookup.bind(window.DG_OSM_WATER_BACKUP):null,overpassRequest:typeof overpassRequest==="function"?overpassRequest:null,fetchImpl:fetch});
- const boundary=JSON.stringify(typeof PARK_POLY==="undefined"?null:PARK_POLY);
- const pending=window.DG_SURFACE_OSM_PENDING;
- const detailedAlreadyAttempted=pending?.boundary===boundary;
- if(detailedAlreadyAttempted)await pending.promise.catch(()=>false);
- // Keep the last valid same-park geometry when a refresh is offline.
+ if(!window.DG_LOAD_OSM_LANDCOVER_EVIDENCE)throw new Error("OSM yüzey adapterı yüklenemedi.");
  const coverage=dgLcCachedOsm(bbox);
  if(coverage?.elements?.some(dgLcIsWaterElement))return coverage;
- const b=[bbox.minLat,bbox.minLon,bbox.maxLat,bbox.maxLon].join(","),old=DG_LC_OSM_CACHE.get(b);
- if(old&&Date.now()-old.time<600000)return old.promise;
- const promise=(async()=>{
-  // Independent small backup source. Never synthesize a lake from 10 m pixels.
-  const fallback=typeof window.DG_OSM_WATER_BACKUP?.lookup==="function"
-   ?await window.DG_OSM_WATER_BACKUP.lookup(bbox).catch(()=>null):null;
-  if(fallback?.elements?.length){
-   const existing=(coverage?.elements||[]).filter(el=>el.type+"/"+el.id!=="way/423602740");
-   const result={elements:[...existing,...fallback.elements],bbox,boundary,fetchedAt:new Date().toISOString(),source:fallback.source};
-   if(boundary===JSON.stringify(typeof PARK_POLY==="undefined"?null:PARK_POLY))window.DG_SURFACE_OSM=result;
-   return result;
-  }
-  if(coverage)return coverage;
-  // Do not repeat a failed detailed Overpass request inside the same
-  // workflow: the independent OSM lookup above is the bounded recovery.
-  if(detailedAlreadyAttempted)return null;
-  // Detailed OSM may fail or time out; a smaller independent query must
-  // still be attempted (previous code returned null without trying).
-  const query='[out:json][timeout:25];(nwr["natural"="water"]('+b+');nwr["waterway"="riverbank"]('+b+');nwr["leisure"="swimming_pool"]('+b+');nwr["landuse"~"reservoir|basin"]('+b+');way["highway"]('+b+');way["area:highway"]('+b+'););out geom;';
-  let result=null;
-  if(typeof overpassRequest==="function")result=await overpassRequest(query,"su+yol");
-  else{
-   const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),15000);
-   try{
-    const res=await fetch("https://lz4.overpass-api.de/api/interpreter",{method:"POST",headers:{"Content-Type":"application/x-www-form-urlencoded",Accept:"application/json"},body:"data="+encodeURIComponent(query),signal:controller.signal});
-    if(res.ok){const data=await res.json();if(Array.isArray(data?.elements)&&!data.remark)result=data;}
-   }catch(error){}finally{clearTimeout(timer);}
-  }
-  return result;
- })().catch(()=>null).then(data=>{if(!data)DG_LC_OSM_CACHE.delete(b);return data;});
- DG_LC_OSM_CACHE.set(b,{time:Date.now(),promise});return promise;
+ return window.DG_LOAD_OSM_LANDCOVER_EVIDENCE.load(bbox,{cache:DG_LC_OSM_CACHE,boundary:JSON.stringify(typeof PARK_POLY==="undefined"?null:PARK_POLY),isWaterElement:dgLcIsWaterElement,waterBackup:typeof window.DG_OSM_WATER_BACKUP?.lookup==="function"?window.DG_OSM_WATER_BACKUP.lookup.bind(window.DG_OSM_WATER_BACKUP):null,overpassRequest:typeof overpassRequest==="function"?overpassRequest:null,fetchImpl:typeof fetch==="function"?fetch:null});
 }
 
 async function dgLcFetchWaterPolygons(bbox){

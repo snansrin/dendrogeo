@@ -45,8 +45,10 @@ describe('tembel vendor yükleme (Faz 7)', () => {
     assert.match(facade,/ensureRaster:\(\)=>window\.dgEnsureGeoTIFF\?window\.dgEnsureGeoTIFF\(\):Promise\.resolve\(\)/);
     assert.match(application,/await ensureRaster\(\)/);
     const dash = read('src/services/dash.js');
-    assert.match(dash, /async function drawChart\(/);
-    assert.match(dash, /if\(window\.dgEnsureChart\)await window\.dgEnsureChart\(\);/);
+    const chart = read('src/ui/dashboard-chart.js');
+    assert.match(dash, /DG_DASHBOARD_CHART\.render\(/);
+    assert.match(dash, /ensure:window\.dgEnsureChart\?\(\)=>window\.dgEnsureChart\(\):null/);
+    assert.match(chart, /if\(ports\.ensure\)await ports\.ensure\(\)/);
   });
 
   test('sw.js PRECACHE vendor kütüphaneleri tutuyor (çevrimdışı bozulmaz)', () => {

@@ -15,8 +15,7 @@ async function trackVisit(){
 }
 
 const DG_VISITOR_ADMIN_VISIT_COUNTS_STORE=window.DG_VISITOR_ADMIN_VISIT_COUNTS_STORE.create();
-const DG_ADMIN_VISIT_STATISTICS=window.DG_LOAD_ADMIN_VISIT_STATISTICS&&window.DG_RESOLVE_ADMIN_VISIT_WINDOWS&&window.DG_VISITOR_ADMIN_COUNTS_UI
- ?window.DG_LOAD_ADMIN_VISIT_STATISTICS.create({
+const DG_ADMIN_VISIT_STATISTICS=window.DG_LOAD_ADMIN_VISIT_STATISTICS.create({
   loadTotal:()=>DG_VISITOR_ADMIN_VISIT_COUNTS_STORE.total(sb),
   loadSince:date=>DG_VISITOR_ADMIN_VISIT_COUNTS_STORE.since(sb,date),
   resolveWindows:()=>window.DG_RESOLVE_ADMIN_VISIT_WINDOWS.resolve(Date.now()),
@@ -24,26 +23,16 @@ const DG_ADMIN_VISIT_STATISTICS=window.DG_LOAD_ADMIN_VISIT_STATISTICS&&window.DG
   setToday:value=>window.DG_VISITOR_ADMIN_COUNTS_UI.today($("aVisitToday"),value),
   setSevenDays:value=>window.DG_VISITOR_ADMIN_COUNTS_UI.sevenDays($("aVisit7"),value),
   fail:()=>window.DG_VISITOR_ADMIN_COUNTS_UI.failed($("aVisitTotal"))
- }):null;
+ });
 async function loadVisitStats(){
- if(DG_ADMIN_VISIT_STATISTICS)return DG_ADMIN_VISIT_STATISTICS();
- try{
-  const total=await DG_VISITOR_ADMIN_VISIT_COUNTS_STORE.total(sb);
-  $("aVisitTotal").textContent=total.count??0;
-  const today=new Date();today.setHours(0,0,0,0);
-  const t=await DG_VISITOR_ADMIN_VISIT_COUNTS_STORE.since(sb,today.toISOString());
-  $("aVisitToday").textContent=t.count??0;
-  const d7=new Date(Date.now()-7*86400000);
-  const w=await DG_VISITOR_ADMIN_VISIT_COUNTS_STORE.since(sb,d7.toISOString());
-  $("aVisit7").textContent=w.count??0;
- }catch(e){$("aVisitTotal").textContent="—";}
+ return DG_ADMIN_VISIT_STATISTICS();
 }
 
 /* ═══════════ 0038 · CANLI VARLIK + ZİYARETÇİ SEKMESİ ═══════════
  * İKİ KÖK DÜZELTME (kullanıcı bildirimi: "connecting'de takılı, ortakları
  * göremiyorum"):
- *  1) SUBSCRIBE ÖNCE, AUTH ARKA PLANDA: eskiden sb.channel'dan ÖNCE
- *     `await sb.auth.getSession()` çağrılıyordu; getSession kilit/önbellek
+ *  1) SUBSCRIBE ÖNCE, AUTH ARKA PLANDA: eskiden presence kanalından ÖNCE
+ *     `getSession()` çağrılıyordu; oturum kilit/önbellek
  *     nedeniyle takılırsa kanal HİÇ kurulmuyor, durum "connecting"de
  *     kalıyordu. Presence anon apikey ile çalışır (canlı WS probuyla
  *     doğrulandı: phx_join → ok). JWT sonra, bloklamadan yükseltilir.
@@ -53,11 +42,11 @@ async function loadVisitStats(){
  * ve GPS varsa payload'a girer; GEÇİCİDİR — veritabanına yazılmaz. */
 const DG_VIEW_LABELS=window.DG_VISITOR_VIEW_LABELS||{dash:"Panel",measure:"Yeni Ölçüm",nav:"Waypoint",map:"Canlı Harita",projects:"Projeler",records:"Kayıtlarım",export:"Dışa Aktar",world:"Dünya Verisi",admin:"Ölçüm Yönetimi",users:"Kullanıcılar",visitors:"Ziyaretçi & Canlı"};
 let DG_PRES=null,DG_PRES_OK=false,DG_PRES_STATE="idle",DG_PRES_RETRY=0,DG_PRES_LAST=0,DG_PRES_WATCH=null,DG_PRES_HEARTBEAT=null,DG_PRES_TIMER=null,DG_PRES_USER=null,DG_PRES_GENERATION=0;
-const DG_VISITOR_PRESENCE_CHANNEL_ADAPTER=window.DG_VISITOR_PRESENCE_CHANNEL_ADAPTER?.create?.(()=>sb)||null;
-const DG_VISITOR_REMOVE_PRESENCE_CHANNEL=window.DG_VISITOR_REMOVE_PRESENCE_CHANNEL?.create?.()||null;
-const DG_UPGRADE_VISITOR_PRESENCE_AUTH=window.DG_UPGRADE_VISITOR_PRESENCE_AUTH?.create?.()||null;
-const DG_AUTH_SESSION_PORTS=window.DG_AUTH_SESSION_STORE?.create?.(()=>sb)||null;
-const DG_VISITOR_TRACK_PRESENCE=window.DG_VISITOR_TRACK_PRESENCE?.create?.()||null;
+const DG_VISITOR_PRESENCE_CHANNEL_ADAPTER=window.DG_VISITOR_PRESENCE_CHANNEL_ADAPTER.create(()=>sb);
+const DG_VISITOR_REMOVE_PRESENCE_CHANNEL=window.DG_VISITOR_REMOVE_PRESENCE_CHANNEL.create();
+const DG_UPGRADE_VISITOR_PRESENCE_AUTH=window.DG_UPGRADE_VISITOR_PRESENCE_AUTH.create();
+const DG_AUTH_SESSION_PORTS=window.DG_AUTH_SESSION_STORE.create(()=>sb);
+const DG_VISITOR_TRACK_PRESENCE=window.DG_VISITOR_TRACK_PRESENCE.create();
 const DG_VISITOR_PRESENCE_LIFECYCLE_STATE={
  get channel(){return DG_PRES;},set channel(value){DG_PRES=value;},
  get ready(){return DG_PRES_OK;},set ready(value){DG_PRES_OK=value;},
@@ -82,32 +71,19 @@ function dgPresenceState(){return DG_PRES_STATE;}
 function dgPresenceReady(){return !!DG_PRES_OK;}
 function dgPresenceEmit(){try{if(typeof DG_CUR_VIEW!=="undefined"&&DG_CUR_VIEW!=="visitors")return;if(typeof renderVisitorsLive==="function")renderVisitorsLive();}catch(e){}}
 function dgPresenceStop(){
- if(window.DG_STOP_VISITOR_PRESENCE_SESSION)return window.DG_STOP_VISITOR_PRESENCE_SESSION.stop(DG_VISITOR_PRESENCE_LIFECYCLE_STATE,DG_VISITOR_PRESENCE_TIMERS,old=>{
-  if(typeof sb==="undefined")return;
-  if(DG_VISITOR_REMOVE_PRESENCE_CHANNEL)DG_VISITOR_REMOVE_PRESENCE_CHANNEL.remove(sb,old);
-  else Promise.resolve(sb.removeChannel(old)).catch(()=>{});
+ return window.DG_STOP_VISITOR_PRESENCE_SESSION.stop(DG_VISITOR_PRESENCE_LIFECYCLE_STATE,DG_VISITOR_PRESENCE_TIMERS,old=>{
+  if(typeof sb!=="undefined")DG_VISITOR_REMOVE_PRESENCE_CHANNEL.remove(sb,old);
  });
- ++DG_PRES_GENERATION;clearTimeout(DG_PRES_TIMER);clearTimeout(DG_PRES_WATCH);clearInterval(DG_PRES_HEARTBEAT);
- DG_PRES_TIMER=DG_PRES_WATCH=DG_PRES_HEARTBEAT=null;const old=DG_PRES;DG_PRES=null;DG_PRES_USER=null;DG_PRES_OK=false;DG_PRES_STATE="idle";
- if(old&&typeof sb!=="undefined"){
-  if(DG_VISITOR_REMOVE_PRESENCE_CHANNEL)DG_VISITOR_REMOVE_PRESENCE_CHANNEL.remove(sb,old);
-  else Promise.resolve(sb.removeChannel(old)).catch(()=>{});
- }
 }
 function dgPresenceFail(why){
- if(window.DG_FAIL_VISITOR_PRESENCE_SESSION)return window.DG_FAIL_VISITOR_PRESENCE_SESSION.fail(DG_VISITOR_PRESENCE_LIFECYCLE_STATE,why,{
+ return window.DG_FAIL_VISITOR_PRESENCE_SESSION.fail(DG_VISITOR_PRESENCE_LIFECYCLE_STATE,why,{
   timers:DG_VISITOR_PRESENCE_TIMERS,emit:dgPresenceEmit,
   retryDelay:attempt=>window.DG_VISITOR_PRESENCE_RETRY_DELAY.resolve(attempt),
   stop:dgPresenceStop,start:dgPresenceStart
  });
- if(!DG_PRES||DG_PRES_TIMER)return;
- clearTimeout(DG_PRES_WATCH);clearInterval(DG_PRES_HEARTBEAT);DG_PRES_WATCH=DG_PRES_HEARTBEAT=null;
- DG_PRES_OK=false;DG_PRES_STATE="error";dgPresenceEmit();
- const delay=Math.min(30000,1500*2**Math.min(DG_PRES_RETRY++,4));
- DG_PRES_TIMER=setTimeout(()=>{DG_PRES_TIMER=null;dgPresenceStop();dgPresenceStart();},delay);
 }
 function dgPresenceStart(){
- if(window.DG_START_VISITOR_PRESENCE_SESSION)return window.DG_START_VISITOR_PRESENCE_SESSION.start({
+ return window.DG_START_VISITOR_PRESENCE_SESSION.start({
   state:DG_VISITOR_PRESENCE_LIFECYCLE_STATE,
   user:typeof USER!=="undefined"?USER:null,sessionId:DG_SID,
   channelAdapter:DG_VISITOR_PRESENCE_CHANNEL_ADAPTER,authUpgrade:DG_UPGRADE_VISITOR_PRESENCE_AUTH,authPorts:DG_AUTH_SESSION_PORTS,
@@ -115,43 +91,15 @@ function dgPresenceStart(){
   stop:dgPresenceStop,fail:dgPresenceFail,
   getView:()=>typeof DG_CUR_VIEW!=="undefined"?DG_CUR_VIEW:"dash"
  });
- try{
-  if(typeof USER==="undefined"||!USER||typeof sb==="undefined"||!sb||typeof sb.channel!=="function")return;
-  if(DG_PRES&&DG_PRES_USER===String(USER.id))return;
-  if(DG_PRES)dgPresenceStop();
-  const generation=++DG_PRES_GENERATION;DG_PRES_USER=String(USER.id);DG_PRES_STATE="connecting";dgPresenceEmit();
-  const onSync=()=>{if(generation===DG_PRES_GENERATION)dgPresenceEmit();};
-  const onStatus=st=>{
-   if(generation!==DG_PRES_GENERATION)return;
-   if(st==="SUBSCRIBED"){
-    DG_PRES_OK=true;DG_PRES_STATE="on";DG_PRES_RETRY=0;
-    clearTimeout(DG_PRES_WATCH);DG_PRES_WATCH=null;
-    clearInterval(DG_PRES_HEARTBEAT);DG_PRES_HEARTBEAT=setInterval(()=>dgPresencePing(null,true),30000);
-    DG_PRES_LAST=0;dgPresencePing(typeof DG_CUR_VIEW!=="undefined"?DG_CUR_VIEW:"dash",true);dgPresenceEmit();
-   }else if(st==="CHANNEL_ERROR"||st==="TIMED_OUT"||st==="CLOSED")dgPresenceFail(st);
-  };
-  const channel=DG_PRES=DG_VISITOR_PRESENCE_CHANNEL_ADAPTER
-   ?DG_VISITOR_PRESENCE_CHANNEL_ADAPTER.open(String(USER.id),DG_SID,onSync)
-   :sb.channel("dg-presence",{config:{presence:{key:String(USER.id)+":"+DG_SID}}});
-  if(DG_VISITOR_PRESENCE_CHANNEL_ADAPTER)DG_VISITOR_PRESENCE_CHANNEL_ADAPTER.subscribe(channel,onStatus);
-  else{channel.on("presence",{event:"sync"},onSync);channel.subscribe(onStatus);}
-  DG_PRES_WATCH=setTimeout(()=>{if(generation===DG_PRES_GENERATION&&DG_PRES_STATE==="connecting")dgPresenceFail("WATCHDOG");},20000);
-  if(DG_UPGRADE_VISITOR_PRESENCE_AUTH&&DG_AUTH_SESSION_PORTS)DG_UPGRADE_VISITOR_PRESENCE_AUTH.run(DG_AUTH_SESSION_PORTS,generation,value=>value===DG_PRES_GENERATION);
-  else (async()=>{try{const{data}=await sb.auth.getSession();const tok=data?.session?.access_token;
-   if(generation===DG_PRES_GENERATION&&tok&&sb.realtime?.setAuth)await sb.realtime.setAuth(tok);
-  }catch(e){}})();
- }catch(e){DG_PRES_OK=false;DG_PRES_STATE="error";dgPresenceEmit();if(DG_PRES)dgPresenceFail("START");}
 }
 function dgPresenceResume(){
- if(window.DG_RESUME_VISITOR_PRESENCE_SESSION)return window.DG_RESUME_VISITOR_PRESENCE_SESSION.resume({
+ return window.DG_RESUME_VISITOR_PRESENCE_SESSION.resume({
   user:typeof USER!=="undefined"?USER:null,ready:DG_PRES_OK,
   stop:dgPresenceStop,start:dgPresenceStart,ping:dgPresencePing
  });
- if(typeof USER==="undefined"||!USER)return;
- if(!DG_PRES_OK){dgPresenceStop();dgPresenceStart();}else dgPresencePing(null,true);
 }
 if(typeof window.addEventListener==="function")window.addEventListener("online",dgPresenceResume);
-if(typeof document.addEventListener==="function")document.addEventListener("visibilitychange",()=>{if(!document.hidden)dgPresenceResume();});
+window.DG_VISITOR_CONNECTION_STATUS_UI.bindVisibilityResume(document,dgPresenceResume);
 /* 0045 · GELİŞMİŞ CANLI İZLEME (kullanıcı: "gerçek bir izleme olsun, daha
  * detaylı olsun"). VERİTABANINA YAZMAZ: tüm alanlar presence payload'ında
  * taşınır (geçici) — kanal düşince/sekmeler kapanınca buharlaşır. Yeni tablo/
@@ -226,23 +174,19 @@ let DG_VIS_MAP=null,DG_VIS_LAYER=null,DG_VIS_PAUSED=false,DG_VIS_FIT=false,DG_VI
 function dgVisActToggle(){
  const w=$("visActivityWrap"),b=$("visActToggle");if(!w)return;
  const T=(x)=>(typeof dgCf==="function"?dgCf(x):x);
- const open=w.style.display!=="none";
- if(window.DG_TOGGLE_VISITOR_ACTIVITY_DISCLOSURE)return window.DG_TOGGLE_VISITOR_ACTIVITY_DISCLOSURE.toggle(open,{
+ const open=DG_VISITOR_ACTIVITY_DISCLOSURE_UI.isOpen(w);
+ return window.DG_TOGGLE_VISITOR_ACTIVITY_DISCLOSURE.toggle(open,{
   render:value=>DG_VISITOR_ACTIVITY_DISCLOSURE_UI.render(w,b,value,{translate:T}),
   persist:value=>{try{localStorage.setItem("dg_vis_act_open",value?"1":"0");}catch(e){}}
  });
- DG_VISITOR_ACTIVITY_DISCLOSURE_UI.render(w,b,!open,{translate:T});
- try{localStorage.setItem("dg_vis_act_open",open?"0":"1");}catch(e){}
 }
 function dgVisActRestore(){
  const w=$("visActivityWrap"),b=$("visActToggle");if(!w)return;
  const T=(x)=>(typeof dgCf==="function"?dgCf(x):x);
- if(window.DG_RESTORE_VISITOR_ACTIVITY_DISCLOSURE)return window.DG_RESTORE_VISITOR_ACTIVITY_DISCLOSURE.restore({
+ return window.DG_RESTORE_VISITOR_ACTIVITY_DISCLOSURE.restore({
   read:()=>localStorage.getItem("dg_vis_act_open"),
   render:value=>DG_VISITOR_ACTIVITY_DISCLOSURE_UI.render(w,b,value,{translate:T})
  });
- let open=true;try{open=localStorage.getItem("dg_vis_act_open")!=="0";}catch(e){}
- DG_VISITOR_ACTIVITY_DISCLOSURE_UI.render(w,b,open,{translate:T});
 }
 async function loadVisitors(){
  if(typeof PROFILE==="undefined"||!PROFILE||PROFILE.role!=="owner")return;
@@ -253,14 +197,7 @@ async function loadVisitors(){
  dgVisTickStart();
 }
 async function dgVisCounts(){
- if(window.DG_LOAD_OWNER_VISITOR_COUNTS){return window.DG_LOAD_OWNER_VISITOR_COUNTS.execute(dgVisAllowed,{load:()=>DG_VISITOR_LIVE_VISIT_COUNTS_STORE.load(sb),update:(id,value)=>{const el=$(id);if(el)el.textContent=value;}});}
- if(!dgVisAllowed())return;
- try{
-  const counts=await DG_VISITOR_LIVE_VISIT_COUNTS_STORE.load(sb);
-  if($("vzTotal"))$("vzTotal").textContent=counts.total;
-  if($("vzToday"))$("vzToday").textContent=counts.today;
-  if($("vz7"))$("vz7").textContent=counts.sevenDays;
- }catch(e){}
+ return window.DG_LOAD_OWNER_VISITOR_COUNTS.execute(dgVisAllowed,{load:()=>DG_VISITOR_LIVE_VISIT_COUNTS_STORE.load(sb),update:(id,value)=>DG_VISITOR_ADMIN_COUNTS_UI.update(document,id,value)});
 }
 function dgVisAllowed(){return typeof PROFILE!=="undefined"&&PROFILE?.role==="owner";}
 const DG_VISITOR_ROSTER=window.DG_VISITOR_ROSTER_APPLICATION.create();
@@ -283,12 +220,12 @@ function dgVisQuick(view,located){
 function dgVisPause(on){DG_VIS_PAUSED=!!on;if(window.DG_SET_LIVE_VISITOR_PAUSE)return window.DG_SET_LIVE_VISITOR_PAUSE.set(DG_VIS_PAUSED,{render:renderVisitorsLive,showPaused:()=>DG_VISITOR_CONNECTION_STATUS_UI.paused($("visStatus"))});if(!on)renderVisitorsLive();else DG_VISITOR_CONNECTION_STATUS_UI.paused($("visStatus"));}
 function dgVisFit(){if(window.DG_FIT_LIVE_VISITOR_MAP)return window.DG_FIT_LIVE_VISITOR_MAP.fit(value=>{DG_VIS_FIT=value;},dgVisFilter,dgVisRows(),dgVisMapDraw);DG_VIS_FIT=false;dgVisMapDraw(dgVisFilter(dgVisRows()));}
 function renderVisitorsLive(){
- if(window.DG_RENDER_OWNER_LIVE_VISITOR_VIEW)return window.DG_RENDER_OWNER_LIVE_VISITOR_VIEW.render({
+ return window.DG_RENDER_OWNER_LIVE_VISITOR_VIEW.render({
   allowed:dgVisAllowed(),paused:DG_VIS_PAUSED,hidden:document.hidden,
   view:typeof DG_CUR_VIEW!=="undefined"?DG_CUR_VIEW:"visitors",
   readRows:dgVisRows,filterRows:dgVisFilter,hasLocation:dgVisHasLocation,
   summarize:(rows,hasLocation)=>window.DG_SUMMARIZE_LIVE_VISITOR_COUNTS.summarize(rows,hasLocation),
-  updateCounts:counts=>{if($("vzOnline"))$("vzOnline").textContent=counts.online;if($("vzLocated"))$("vzLocated").textContent=counts.located;},
+  updateCounts:counts=>{DG_VISITOR_ADMIN_COUNTS_UI.update(document,"vzOnline",counts.online);DG_VISITOR_ADMIN_COUNTS_UI.update(document,"vzLocated",counts.located);},
   renderPanel:(rows,allCount)=>window.DG_VISITOR_LIVE_PANEL_UI.render({
    statusElement:$("visStatus"),state:dgPresenceState(),rows,allCount,rosterElement:$("visLive"),
    viewLabels:DG_VIEW_LABELS,actionLabels:DG_ACT_LABELS,hasLocation:dgVisHasLocation,
@@ -298,18 +235,6 @@ function renderVisitorsLive(){
   renderFeed:rows=>{if($("visLive"))dgVisFeed(rows);},
   drawMap:dgVisMapDraw
  });
- if(!dgVisAllowed()||DG_VIS_PAUSED||document.hidden||(typeof DG_CUR_VIEW!=="undefined"&&DG_CUR_VIEW!=="visitors"))return;
- const box=$("visLive");
- const all=dgVisRows(),rows=dgVisFilter(all);
- if($("vzOnline"))$("vzOnline").textContent=all.length;
- if($("vzLocated"))$("vzLocated").textContent=all.filter(r=>dgVisHasLocation(r.p)).length;
- if($("visStatus"))DG_VISITOR_CONNECTION_STATUS_UI.render($("visStatus"),dgPresenceState(),rows.length,all.length);
- if(box){
-  const T=(s)=>(typeof dgCf==="function"?dgCf(s):s);
-  DG_VISITOR_ROSTER_UI.render(box,rows,{state:dgPresenceState(),allCount:all.length,viewLabels:DG_VIEW_LABELS,actionLabels:DG_ACT_LABELS,hasLocation:dgVisHasLocation,deviceLabel:r=>r.p.dev,translate:T,escape:esc});
-  dgVisFeed(rows);
- }
- dgVisMapDraw(rows);
 }
 /* 0045: 📡 CANLI AKSİYON AKIŞI — presence'teki oturum/gezinti/aksiyon
  * olaylarından anlık akış (geçici; DB sorgusu YOK). */
@@ -368,15 +293,14 @@ function dgVisMapDraw(rows){
  }catch(e){}
 }
 async function dgVisActivity(){
- if(window.DG_LOAD_OWNER_VISITOR_ACTIVITY){const T=(s)=>(typeof dgCf==="function"?dgCf(s):s);return window.DG_LOAD_OWNER_VISITOR_ACTIVITY.execute(typeof PROFILE==="undefined"?null:PROFILE,{container:()=>$("visActivity"),load:()=>DG_VISITOR_STORED_ACTIVITY_STORE.load(sb),build:(data,options)=>DG_VISITOR_STORED_ACTIVITY.build(data,options),locale:()=>typeof DG_LANG!=="undefined"&&DG_LANG==="en"?"en-GB":"tr-TR",translate:T,translateValue:value=>typeof dgT==="function"?dgT(value||""):value,escape:esc,render:(box,rows,options)=>DG_VISITOR_DATABASE_ACTIVITY_UI.render(box,rows,options)});}
- if(!dgVisAllowed())return;
- const box=$("visActivity");if(!box)return;
- const T=(s)=>(typeof dgCf==="function"?dgCf(s):s);
- const loc=(typeof DG_LANG!=="undefined"&&DG_LANG==="en")?"en-GB":"tr-TR";
- const datasets=await DG_VISITOR_STORED_ACTIVITY_STORE.load(sb);
- const translateValue=value=>typeof dgT==="function"?dgT(value||""):value;
- const rows=DG_VISITOR_STORED_ACTIVITY.build(datasets,{translate:T,translateValue});
- DG_VISITOR_DATABASE_ACTIVITY_UI.render(box,rows,{locale:loc,translate:T,escape:esc});
+ const translate=(value)=>(typeof dgCf==="function"?dgCf(value):value);
+ return window.DG_LOAD_OWNER_VISITOR_ACTIVITY.execute(typeof PROFILE==="undefined"?null:PROFILE,{
+  container:()=>$("visActivity"),load:()=>DG_VISITOR_STORED_ACTIVITY_STORE.load(sb),
+  build:(data,options)=>DG_VISITOR_STORED_ACTIVITY.build(data,options),
+  locale:()=>typeof DG_LANG!=="undefined"&&DG_LANG==="en"?"en-GB":"tr-TR",
+  translate,translateValue:value=>typeof dgT==="function"?dgT(value||""):value,escape:esc,
+  render:(box,rows,options)=>DG_VISITOR_DATABASE_ACTIVITY_UI.render(box,rows,options)
+ });
 }
 
 /* 0040: elle yenileme + 10 sn otomatik tik (yalnız sekme açıkken) + odaklanma */

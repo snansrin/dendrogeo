@@ -7,6 +7,7 @@ const read=path=>readFileSync(new URL('../'+path,import.meta.url),'utf8');
 const registry=read('src/services/park-registry.js');
 const modules=[
   'src/domain/parks/select-park-project.js',
+  'src/ui/park-project-options.js',
   'src/adapters/parks/park-scan-redirect-memory.js',
   'src/ui/complete-park-project-link.js',
   'src/application/parks/handle-park-project-change.js',
@@ -28,6 +29,14 @@ test('selected project uses the current dropdown value and exact project ID',()=
   addFunction(context,'function dgSelectedProject(){','/* Ölçüm sekmesine OTOMATİK');
   assert.equal(vm.runInContext('dgSelectedProject().name',context),'B');
   assert.equal(window.DG_SELECT_PARK_PROJECT.resolve('0',context.PROJ_LIST),null);
+});
+
+test('park project UI reads the selected project and clears only suggestion fields',()=>{
+  const elements={mProject:{value:'42'},mPoint:{value:'P08'},pointQueryResult:{style:{display:'block'}}};
+  const{window}=setup();const document={getElementById:id=>elements[id]};
+  assert.equal(window.DG_PARK_PROJECT_OPTIONS_UI.readSelected(document),'42');
+  window.DG_PARK_PROJECT_OPTIONS_UI.clearPointSuggestion(document);
+  assert.equal(elements.mPoint.value,'');assert.equal(elements.pointQueryResult.style.display,'none');
 });
 
 test('park-scan redirect memory redirects once and fails closed when storage is unavailable',()=>{
@@ -75,5 +84,5 @@ test('drawn-park flow registers online, warns offline, updates state and refresh
 test('all five project transition modules load before park-registry and are precached/delegated',()=>{
   const head=read('partials/head.html'),sw=read('sw.js'),service=head.indexOf('src/services/park-registry.js');
   for(const path of modules){assert.ok(head.indexOf(path)>=0&&head.indexOf(path)<service,`${path} load order`);assert.ok(sw.includes(`'/${path}'`),`${path} precache`);}
-  for(const name of ['DG_SELECT_PARK_PROJECT','DG_PARK_SCAN_REDIRECT_MEMORY','DG_COMPLETE_PARK_PROJECT_LINK','DG_HANDLE_PARK_PROJECT_CHANGE','DG_HANDLE_PARK_DRAWN'])assert.ok(registry.includes(name),`${name} service delegation`);
+  for(const name of ['DG_SELECT_PARK_PROJECT','DG_PARK_PROJECT_OPTIONS_UI','DG_PARK_SCAN_REDIRECT_MEMORY','DG_COMPLETE_PARK_PROJECT_LINK','DG_HANDLE_PARK_PROJECT_CHANGE','DG_HANDLE_PARK_DRAWN'])assert.ok(registry.includes(name),`${name} service delegation`);
 });

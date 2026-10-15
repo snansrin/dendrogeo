@@ -25,11 +25,11 @@
         let data=await overpassRequest(query,"su+yol").catch(()=>null);
         if((!Array.isArray(data?.elements)||data.remark)&&root.DG_LOAD_OSM_MAP_COVERAGE)data=await root.DG_LOAD_OSM_MAP_COVERAGE.load(bounds).catch(()=>null);
         if(Array.isArray(data?.elements)&&!data.remark){const result={elements:mergeElements(root.DG_OSM_SURFACE_QUERY?[]:seedElements,data.elements),bbox,boundary,fetchedAt:new Date().toISOString(),complete:!!root.DG_OSM_SURFACE_QUERY};if(boundary===JSON.stringify(typeof PARK_POLY==="undefined"?null:PARK_POLY))root.DG_SURFACE_OSM=result;return result;}
-        return seedElements.length?{elements:seedElements,bbox,boundary,fetchedAt:coverage?.fetchedAt||new Date().toISOString(),source:coverage?.source||fallback?.source,complete:false}:null;
+        if(seedElements.length){const result={elements:seedElements,bbox,boundary,fetchedAt:coverage?.fetchedAt||new Date().toISOString(),source:coverage?.source||fallback?.source,complete:false};if(boundary===JSON.stringify(typeof PARK_POLY==="undefined"?null:PARK_POLY))root.DG_SURFACE_OSM=result;return result;}return null;
       }
       const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),40000);
       try{const response=await fetchImpl("https://lz4.overpass-api.de/api/interpreter",{method:"POST",headers:{"Content-Type":"application/x-www-form-urlencoded",Accept:"application/json"},body:"data="+encodeURIComponent(query),signal:controller.signal});if(response.ok){const data=await response.json();if(Array.isArray(data?.elements)&&!data.remark){const result={...data,elements:mergeElements(root.DG_OSM_SURFACE_QUERY?[]:seedElements,data.elements),bbox,boundary,fetchedAt:new Date().toISOString(),complete:!!root.DG_OSM_SURFACE_QUERY};if(boundary===JSON.stringify(typeof PARK_POLY==="undefined"?null:PARK_POLY))root.DG_SURFACE_OSM=result;return result;}}}catch(error){}finally{clearTimeout(timer);}
-      return seedElements.length?{elements:seedElements,bbox,boundary,fetchedAt:coverage?.fetchedAt||new Date().toISOString(),source:coverage?.source||fallback?.source,complete:false}:null;
+      if(seedElements.length){const result={elements:seedElements,bbox,boundary,fetchedAt:coverage?.fetchedAt||new Date().toISOString(),source:coverage?.source||fallback?.source,complete:false};if(boundary===JSON.stringify(typeof PARK_POLY==="undefined"?null:PARK_POLY))root.DG_SURFACE_OSM=result;return result;}return null;
     })().catch(()=>null).then(data=>{if(!data?.complete)cache.delete(bounds);return data;});
     cache.set(bounds,{time:Date.now(),promise});return promise;
   }

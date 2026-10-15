@@ -226,6 +226,7 @@ export function loadApp({ sadece } = {}) {
     'src/application/parks/apply-park-backfill.js',
     'src/application/parks/create-backfill-park.js',
     'src/application/parks/backfill-park-geometry.js',
+    'src/adapters/parks/park-geometry-backfill-store.js',
     'src/adapters/parks/fetch-osm-park-ring.js',
     'src/application/parks/detect-backfill-park.js',
     'src/adapters/parks/search-osm-park-by-name.js',
@@ -234,6 +235,14 @@ export function loadApp({ sadece } = {}) {
     'src/ui/park-identity.js',
     'src/ui/park-backfill-plan.js',
     'src/ui/park-backfill-progress.js',
+    'src/adapters/parks/park-admin-read-store.js',
+    'src/adapters/parks/park-project-read-store.js',
+    'src/adapters/parks/park-admin-mutation-store.js',
+    'src/application/parks/park-admin-state.js',
+    'src/application/parks/refresh-park-admin-views.js',
+    'src/ui/park-admin-mutation.js',
+    'src/ui/render-park-admin.js',
+    'src/adapters/parks/sync-park-project-names.js',
     'src/services/park-registry.js',
     'src/application/parks/build-grid-waypoint-rows.js',
     'src/application/parks/count-grid-cell-measurements.js',
@@ -336,6 +345,15 @@ export function loadApp({ sadece } = {}) {
     secim.add('src/ui/map-layer-visibility.js');
   }
   if (secim && secim.has('src/services/park-registry.js')) {
+    secim.add('src/adapters/parks/park-geometry-backfill-store.js');
+    secim.add('src/adapters/parks/park-admin-read-store.js');
+    secim.add('src/adapters/parks/park-project-read-store.js');
+    secim.add('src/adapters/parks/park-admin-mutation-store.js');
+    secim.add('src/application/parks/park-admin-state.js');
+    secim.add('src/application/parks/refresh-park-admin-views.js');
+    secim.add('src/ui/park-admin-mutation.js');
+    secim.add('src/ui/render-park-admin.js');
+    secim.add('src/adapters/parks/sync-park-project-names.js');
     secim.add('src/ui/park-scan-card.js');
     secim.add('src/ui/park-identity.js');
     secim.add('src/ui/park-backfill-plan.js');

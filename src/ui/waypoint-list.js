@@ -17,5 +17,14 @@
     const html=rows.length?visible.map(point=>`<li class="waypoint-point ${point.visited?'done':''}"${selectedId===point.id?' aria-current="true"':''}><div class="waypoint-point-main"><b>P${Number(point.wp_id)}</b><span class="mono waypoint-distance">${gps?Math.round(distance(gps.latitude,gps.longitude,point.lat,point.lon))+" m":"—"}</span></div><div class="waypoint-point-actions"><span class="waypoint-state ${point.visited?'done':'pending'}">${point.visited?'✓ Yapıldı':'Bekliyor'}</span>${point.visited?'':`<button class="btn sm blue waypoint-target-btn" onclick="selectWaypoint(${Number(point.id)})">🎯 Hedef</button>`}</div></li>`).join(""):'<li class="waypoint-empty">'+(waypoints.length?"Aramaya uygun nokta yok.":(Number(projectId)?"Bu projede waypoint yok. CSV yükleyin.":"Önce proje seçin."))+"</li>";
     return{done,info:waypoints.length+" nokta · "+(waypoints.length-done)+" bekleyen · "+done+" tamamlanan",pager,html,page,signature:nextSignature};
   }
-  root.DG_WAYPOINT_LIST_UI=Object.freeze({render});
+  function renderTo({getElement,...input}){
+    const result=render(input),waypoints=input.waypoints;
+    getElement("dWp").textContent=waypoints.length;
+    getElement("dVisit").textContent=result.done;
+    getElement("navInfo").textContent=result.info;
+    const pager=getElement("wpPager");if(pager)pager.innerHTML=result.pager;
+    getElement("wpListTable").innerHTML=result.html;
+    return result;
+  }
+  root.DG_WAYPOINT_LIST_UI=Object.freeze({render,renderTo});
 })(window);

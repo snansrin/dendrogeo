@@ -15,8 +15,8 @@ window.DG_ADMIN_TREE_PENDING_SUMMARY = (() => {
     box.className = "alert warn";
     box.innerHTML = `<b>⏳ ${wait} ${translate("kayıt onay bekliyor")}</b> · 🌳 ${parkCount} ${translate("park")} · 📁 ${projectCount} ${translate("proje")} · 👤 ${userCount} ${translate("kullanıcı")}` +
       `<div style="margin-top:8px;display:flex;gap:8px;flex-wrap:wrap">` +
-      `<button class="btn sm amber" onclick="dgTreeOnlyPending()">🔴 Sadece bekleyenler</button>` +
-      `<button class="btn sm ghost" onclick="dgTreeOpenPending()">Bekleyen düğümleri aç</button></div>`;
+      `<button class="btn sm amber" data-dg-admin-tree-action="only-pending">🔴 Sadece bekleyenler</button>` +
+      `<button class="btn sm ghost" data-dg-admin-tree-action="open-pending">Bekleyen düğümleri aç</button></div>`;
   }
   return Object.freeze({ render });
 })();

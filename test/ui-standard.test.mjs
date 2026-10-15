@@ -120,7 +120,7 @@ describe('11 alt sayfa + kabuk: standart bağlama sözleşmesi', () => {
 
 describe('GPS butonu canlı UI dilinde (🌿 Yüzey Örtüsü Analizi kartıyla birebir)', () => {
   test('buton LULC ile aynı aileden: .dg-png-btn.primary + id gpsBtn', () => {
-    const m = shell.match(/<button[^>]*onclick="startGps\(\)"[^>]*>/);
+    const m = shell.match(/<button[^>]*data-dg-measure-action="gps"[^>]*>/);
     assert.ok(m, 'GPS butonu bulunmalı');
     assert.match(m[0], /id="gpsBtn"/, 'canlı durum için id şart');
     assert.match(m[0], /class="dg-png-btn primary"/, 'LULC butonuyla aynı aile');
@@ -137,13 +137,14 @@ describe('GPS butonu canlı UI dilinde (🌿 Yüzey Örtüsü Analizi kartıyla 
 
   test('canlı durum LULC deseniyle birebir: disabled + ⏳ + oldText + opacity', () => {
     const m = read('src/services/measure.js');
+    const button = read('src/ui/measurement-gps-button.js');
     assert.match(m, /function dgGpsBtnBusy\(on\)/, 'canlı buton yardımcısı');
-    assert.match(m, /"⏳ Konum alınıyor…"/, 'LULC ile aynı ⏳ kalıbı');
-    assert.match(m, /b\.dataset\.oldText=b\.innerHTML/, 'eski metni sakla');
-    assert.match(m, /b\.style\.opacity="\.65"/, 'aynı solukluk');
-    assert.match(m, /b\.style\.cursor="wait"/, 'aynı imleç');
-    assert.match(m, /const onOk=p=>\{dgGpsBtnBusy\(false\);/, 'başarıda buton geri gelir');
-    assert.match(m, /if\(e\)dgGpsBtnBusy\(false\);/, 'hatada buton geri gelir');
+    assert.match(m, /DG_MEASUREMENT_GPS_BUTTON\.setBusy\(on,\$\)/, 'servis UI sahibine delege eder');
+    assert.match(button, /"⏳ Konum alınıyor…"/, 'LULC ile aynı ⏳ kalıbı');
+    assert.match(button, /button\.dataset\.oldText=button\.innerHTML/, 'eski metni sakla');
+    assert.match(button, /button\.style\.opacity="\.65"/, 'aynı solukluk');
+    assert.match(button, /button\.style\.cursor="wait"/, 'aynı imleç');
+    assert.match(m, /setBusy:dgGpsBtnBusy/, 'başarı ve hata callbackleri aynı buton portunu kullanır');
   });
 
   test("yeni tema/animasyon YOK: css'e keyframes/spin eklenmedi", () => {
@@ -156,7 +157,7 @@ describe('GPS butonu canlı UI dilinde (🌿 Yüzey Örtüsü Analizi kartıyla 
   test('durum satırı ve rozet standart ailelerden', () => {
     assert.match(shell, /id="gpsState" class="alert info"/, 'gpsState alert ailesinde');
     assert.match(shell, /id="gpsBadge"/, 'canlı rozet');
-    const m = read('src/services/measure.js');
-    assert.match(m, /bd\.className="dg-png-badge"\+\(a<20\?"":a<40\?" amber":" red"\)/, 'rozet kaliteye göre ortak badge ailesini kullanır');
+    const formatter = read('src/domain/trees/format-measurement-gps-readout.js');
+    assert.match(formatter, /badgeClass:"dg-png-badge"\+\(accuracy<20\?"":accuracy<40\?" amber":" red"\)/, 'rozet kaliteye göre ortak badge ailesini kullanır');
   });
 });

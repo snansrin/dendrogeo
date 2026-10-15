@@ -6,19 +6,7 @@ const _tmsf=(t,v)=>(typeof dgTfs==="function"?dgTfs(t,v):String(t).replace(/\{(\
 /* TÜRKİYE'de il adı "state" alanındadır (admin_level=4); ilçe "city/town"a düşer.
    TR için KESİN çözüm: önce state oku → ilçe asla gelmez. */
 async function reverseGeocode(lat,lon){
- if(typeof window!=="undefined"&&window.DG_MEASUREMENT_REVERSE_GEOCODE)return window.DG_MEASUREMENT_REVERSE_GEOCODE.resolve(fetch,lat,lon);
- try{
-  const r=await fetch("https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat="+lat+"&lon="+lon+"&accept-language=tr",{headers:{Accept:"application/json"}});
-  if(!r.ok)return null;
-  const j=await r.json();const a=j.address||{};
-  const cc=(a.country_code||"").toLowerCase();
-  const city=cc==="tr"
-   ?(a.state||a.province||a.city||null)
-   :(a.city||a.town||a.village||a.municipality||a.state||null);
-  const country=a.country||null;
-  if(!city&&!country)return null;
-  return{city:city||"Bilinmiyor",country:country||"Bilinmiyor"};
- }catch(e){return null;}
+ return window.DG_MEASUREMENT_REVERSE_GEOCODE.resolve(fetch,lat,lon);
 }
 /* --- 2. FOTOĞRAF DENETİMİ (0044 · ÇOK SINIFLI BİTKİ/DAL SEZGİSİ) ---
  * KULLANICI (0044): "%25'i kırmızı yapraklı ağaçlar sağlamıyor ve önümüz kış,
@@ -43,7 +31,7 @@ async function reverseGeocode(lat,lon){
  *
  * dgPhotoScan SAF fonksiyondur (canvas verisi alır) → node'da testsiz
  * tarayıcı olmadan doğrulanabilir. */
-function loadImg(file){if(typeof window!=="undefined"&&window.DG_MEASUREMENT_PHOTO_IMAGE)return window.DG_MEASUREMENT_PHOTO_IMAGE.load(file);return new Promise((res,rej)=>{const u=URL.createObjectURL(file);const i=new Image();i.onload=()=>res({i,u});i.onerror=()=>{URL.revokeObjectURL(u);rej(new Error("image"));};i.src=u;});}
+function loadImg(file){return window.DG_MEASUREMENT_PHOTO_IMAGE.load(file);}
 function dgPhotoScan(d,S){return window.DG_TREE_PHOTO_QUALITY.scan(d,S);}
 /* KAPI (0044 · kalibre): pozlama teknik eşikleri + en az BİR bitki/dal kanıtı.
  *   foliage ≥ %5  VEYA  gövde/dal ≥ %5  VEYA  kış kadrajı
@@ -53,61 +41,22 @@ function dgPhotoGate(m){
  return window.DG_TREE_PHOTO_QUALITY.gate(m);
 }
 /* Kullanıcıya NEYİ gördüğümüzü söyler (uyarı anlaşılır olsun, ezbere değil). */
-function dgPhotoLabel(m){
- if(typeof window!=="undefined"&&window.DG_MEASUREMENT_PHOTO_SUMMARY)return window.DG_MEASUREMENT_PHOTO_SUMMARY.format(m,_tms);
- const p=(x)=>"%"+Math.round(x*100);
- const t=[];
- if(m.green>=0.05)t.push(_tms("yeşil örtü")+" "+p(m.green));
- if(m.purple>=0.05)t.push(_tms("kızıl/mor yaprak")+" "+p(m.purple));
- if(m.warm>=0.05)t.push(_tms("sonbahar rengi")+" "+p(m.warm));
- if(m.woody>=0.05)t.push(_tms("gövde/dal")+" "+p(m.woody));
- if(m.blue>=0.25&&(m.struct>=0.025||m.dark>=0.03))t.push(_tms("kış kadrajı (dal silüeti)"));
- return t.join(" · ");
-}
-let dgPhotoCheckVersion=0;
-const DG_MEASUREMENT_PHOTO_CHECK_STATE=window.DG_MEASUREMENT_PHOTO_CHECK_STATE?window.DG_MEASUREMENT_PHOTO_CHECK_STATE.create(value=>{dgPhotoCheckVersion=value;}):null;
-const DG_CHECK_MEASUREMENT_PHOTO_USE_CASE=window.DG_CHECK_MEASUREMENT_PHOTO?window.DG_CHECK_MEASUREMENT_PHOTO.create({
+function dgPhotoLabel(m){return window.DG_MEASUREMENT_PHOTO_SUMMARY.format(m,_tms);}
+const DG_MEASUREMENT_PHOTO_CHECK_STATE=window.DG_MEASUREMENT_PHOTO_CHECK_STATE.create();
+const DG_MEASUREMENT_PHOTO_PIXELS=window.DG_READ_MEASUREMENT_PHOTO_PIXELS_ADAPTER.create({getDocument:()=>document,getURL:()=>URL});
+const DG_CHECK_MEASUREMENT_PHOTO_USE_CASE=window.DG_CHECK_MEASUREMENT_PHOTO.create({
  state:DG_MEASUREMENT_PHOTO_CHECK_STATE,element:$,setPhotoOk:value=>{photoOk=value;},selectFile:file=>window.DG_MEASUREMENT_PHOTO_FILE_UI.select(file,$),
  showInvalidType:box=>window.DG_MEASUREMENT_PHOTO_CHECK_UI.invalidType(box,_tms),showPending:box=>window.DG_MEASUREMENT_PHOTO_CHECK_UI.pending(box,_tms),
- loadImage:loadImg,readPixels:(loaded,size)=>window.DG_READ_MEASUREMENT_PHOTO_PIXELS_ADAPTER.read({image:loaded.i,url:loaded.u},size,{createCanvas:()=>document.createElement("canvas"),revokeObjectURL:url=>URL.revokeObjectURL(url)}),
+ loadImage:loadImg,readPixels:(loaded,size)=>DG_MEASUREMENT_PHOTO_PIXELS.read({image:loaded.i,url:loaded.u},size),
  scan:dgPhotoScan,gate:dgPhotoGate,label:dgPhotoLabel,showPassed:(box,metrics,label)=>window.DG_MEASUREMENT_PHOTO_CHECK_UI.passed(box,metrics,label,_tms),
  showFailed:(box,metrics)=>window.DG_MEASUREMENT_PHOTO_CHECK_UI.failed(box,metrics,_tms),showUnreadable:box=>window.DG_MEASUREMENT_PHOTO_CHECK_UI.unreadable(box,_tms),
  revokeObjectURL:url=>URL.revokeObjectURL(url)
-}):null;
+});
 function dgClearMeasurePhoto(){
- if(DG_MEASUREMENT_PHOTO_CHECK_STATE&&window.DG_MEASUREMENT_PHOTO_FILE_UI){DG_MEASUREMENT_PHOTO_CHECK_STATE.invalidate();photoOk=false;return window.DG_MEASUREMENT_PHOTO_FILE_UI.clear($);}
- dgPhotoCheckVersion++;photoOk=false;
- $("mPhoto").value="";$("mPhotoName").textContent="";$("photoCheck").style.display="none";
- const remove=$("mPhotoRemove");if(remove)remove.style.display="none";
+ DG_MEASUREMENT_PHOTO_CHECK_STATE.invalidate();photoOk=false;
+ return window.DG_MEASUREMENT_PHOTO_FILE_UI.clear($);
 }
-async function checkPhoto(e){
- if(DG_CHECK_MEASUREMENT_PHOTO_USE_CASE)return DG_CHECK_MEASUREMENT_PHOTO_USE_CASE(e);
- const version=++dgPhotoCheckVersion;photoOk=false;
- const f=e.target.files[0],box=$("photoCheck");
- {const fn=$("mPhotoName");if(fn)fn.textContent=f?f.name:"";}
- const remove=$("mPhotoRemove");if(remove)remove.style.display=f?"inline-flex":"none";
- if(!f){photoOk=false;box.style.display="none";return;}
- if(!f.type.startsWith("image/")){photoOk=false;box.className="alert err";box.style.display="block";box.innerHTML="⚠ "+_tms("Yalnızca görsel dosyası yükleyin.");return;}
- box.style.display="block";box.className="alert info";box.innerHTML="⏳ "+_tms("Fotoğraf denetleniyor…");
- try{
-  const{i,u}=await loadImg(f);
-  if(version!==dgPhotoCheckVersion){URL.revokeObjectURL(u);return;}
-  const S=120,c=document.createElement("canvas");c.width=S;c.height=S;
-  const x=c.getContext("2d",{willReadFrequently:true});x.drawImage(i,0,0,S,S);URL.revokeObjectURL(u);
-  const m=dgPhotoScan(x.getImageData(0,0,S,S).data,S);
-  const ok=dgPhotoGate(m);
-  photoOk=ok;
-  if(ok){
-   const lbl=dgPhotoLabel(m);
-   box.className="alert ok";box.innerHTML=`✓ <b>${_tms("Fotoğraf uygun")}</b> · ${lbl||_tms("bitki/dal kanıtı yeterli")} · ${_tms("Pozlama:")} ${m.lum.toFixed(0)}/255`;
-  }else{
-   const why=(m.lum>25&&m.lum<245)
-    ?_tms("Karede ağaç/dal/bitki örtüsü kanıtı bulunamadı.")
-    :_tms("Pozlama uygun değil (çok karanlık veya patlak).");
-   box.className="alert err";box.innerHTML=`⚠ <b>${_tms("Fotoğraf uygun değil")}</b> · ${why}<br>${_tms("Ağacı, gövdesini veya dallarını kadraja alıp yeniden çekin.")}`;
-  }
- }catch(err){if(version!==dgPhotoCheckVersion)return;photoOk=false;box.className="alert err";box.innerHTML="⚠ "+_tms("Fotoğraf okunamadı, tekrar deneyin.");}
-}
+async function checkPhoto(e){return DG_CHECK_MEASUREMENT_PHOTO_USE_CASE(e);}
 /* --- 3. GPS --- */
 /* Ekran kilidi: saha ölçümü sırasında ekranın kararmasını engeller.
  * iOS Safari ekran kilitlendiğinde konum izlemeyi kestiği için bu, ölçümün
@@ -116,7 +65,7 @@ async function checkPhoto(e){
  * Desteklemeyen tarayıcılarda sessizce yok sayılır; ölçüm akışını etkilemez. */
 let WAKE_LOCK=null;
 const DG_MEASUREMENT_GEOLOCATION=window.DG_MEASUREMENT_GEOLOCATION_ADAPTER?window.DG_MEASUREMENT_GEOLOCATION_ADAPTER.create({getNavigator:()=>navigator}):null;
-const DG_MEASUREMENT_WAKE_LOCK=window.DG_MEASUREMENT_WAKE_LOCK_ADAPTER?window.DG_MEASUREMENT_WAKE_LOCK_ADAPTER.create({getNavigator:()=>navigator}):null;
+const DG_MEASUREMENT_WAKE_LOCK=window.DG_MEASUREMENT_WAKE_LOCK_ADAPTER?window.DG_MEASUREMENT_WAKE_LOCK_ADAPTER.create({getNavigator:()=>navigator,getDocument:()=>document}):null;
 async function acquireWakeLock(){
  if(DG_MEASUREMENT_WAKE_LOCK)return DG_MEASUREMENT_WAKE_LOCK.acquire();
  if(!("wakeLock" in navigator))return;
@@ -128,9 +77,7 @@ async function acquireWakeLock(){
 }
 if(!window._wakeLockHooked){
  window._wakeLockHooked=true;
- document.addEventListener("visibilitychange",()=>{
-  if(document.visibilityState==="visible"&&GPS)acquireWakeLock();
- });
+ DG_MEASUREMENT_WAKE_LOCK?.bindVisibility(()=>{if(GPS)acquireWakeLock();});
 }
 
 /* CANLI BUTON (2026-09-26 · kullanıcı isteği): 📡 Konumu Etkinleştir, 🌿 Yüzey
@@ -139,13 +86,10 @@ if(!window._wakeLockHooked){
  * opacity .65 + cursor wait; sonuçta eski metnine döner. Yeni tema/animasyon
  * YOK — aynı sınıf (.dg-png-btn primary) ve aynı mekanizma. */
 function dgGpsBtnBusy(on){
- if(typeof window!=="undefined"&&window.DG_MEASUREMENT_GPS_BUTTON)return window.DG_MEASUREMENT_GPS_BUTTON.setBusy(on,$);
- const b=$("gpsBtn");if(!b)return;
- if(on){b.dataset.oldText=b.innerHTML;b.innerHTML="⏳ Konum alınıyor…";b.disabled=true;b.style.opacity=".65";b.style.cursor="wait";}
- else{b.disabled=false;b.innerHTML=b.dataset.oldText||"📡 Konumu Etkinleştir";b.style.opacity="";b.style.cursor="";}
+ return window.DG_MEASUREMENT_GPS_BUTTON.setBusy(on,$);
 }
 async function startGps(){
- if(typeof window!=="undefined"&&window.DG_START_MEASUREMENT_GPS&&DG_MEASUREMENT_GEOLOCATION&&window.DG_MEASUREMENT_GPS_STATUS_UI&&window.DG_HANDLE_MEASUREMENT_GPS_ERROR)return window.DG_START_MEASUREMENT_GPS.start({
+ return window.DG_START_MEASUREMENT_GPS.start({
   geolocation:DG_MEASUREMENT_GEOLOCATION,
   isIOS:()=>/iPhone|iPad|iPod/.test(navigator.userAgent)||(navigator.platform==="MacIntel"&&navigator.maxTouchPoints>1),
   showIOSHint:()=>toast("<b>"+_tms("iPhone kullanıcısı mısınız?")+"</b><br>"+_tms("Ayarlar → Gizlilik ve Güvenlik → Konum Servisleri → Safari Siteleri → Uygulamayı Kullanırken."),"info","📍",12000),
@@ -154,72 +98,18 @@ async function startGps(){
   liveSharePing:()=>{if(typeof dgLiveSharePing==="function")dgLiveSharePing();},presencePing:()=>{if(typeof dgPresencePing==="function")dgPresencePing();},
   acquireWakeLock,handleError:(error,ports)=>window.DG_HANDLE_MEASUREMENT_GPS_ERROR.handle(error,ports)
  });
- const gpsMsg=(t,e)=>{const g=$("gpsState");if(g){g.textContent=t;g.className="alert "+(e?"err":"info");}if(e)dgGpsBtnBusy(false);if(e){const b=$("gpsBtn");if(b){b.classList.remove("is-active");b.textContent="📡 Konumu Tekrar Dene";b.dataset.oldText=b.textContent;}const bd=$("gpsBadge");if(bd){bd.textContent="konum kapalı";bd.className="dg-png-badge ";}if(typeof toast==="function")toast(t,"err","📍");}};
- if(!navigator.geolocation)return gpsMsg("Tarayıcı konum desteklemiyor.",1);
- if(/iPhone|iPad|iPod/.test(navigator.userAgent)||(navigator.platform==="MacIntel"&&navigator.maxTouchPoints>1))toast("<b>"+_tms("iPhone kullanıcısı mısınız?")+"</b><br>"+_tms("Ayarlar → Gizlilik ve Güvenlik → Konum Servisleri → Safari Siteleri → Uygulamayı Kullanırken."),"info","📍",12000);
- try{if(navigator.permissions&&navigator.permissions.query){const p=await navigator.permissions.query({name:"geolocation"});if(p.state==="denied")return gpsMsg("Konum izni reddedildi. Ayarlar→Safari→Konum.",1);}}catch(e){}
- gpsMsg("Konum alınıyor…",0);
- dgGpsBtnBusy(true);
- const opts={enableHighAccuracy:true,timeout:15000,maximumAge:0};
- const onOk=p=>{dgGpsBtnBusy(false);GPS=p.coords;updGps();if(typeof dgLiveSharePing==="function")dgLiveSharePing();if(typeof dgPresencePing==="function")dgPresencePing();acquireWakeLock();navigator.geolocation.watchPosition(p2=>{GPS=p2.coords;updGps();if(typeof dgLiveSharePing==="function")dgLiveSharePing();if(typeof dgPresencePing==="function")dgPresencePing();},()=>{},{...opts,maximumAge:1000});};
- const onErr=e=>{
-  if(e.code===1)return gpsMsg("İzin reddedildi. iPhone: Ayarlar→Safari→Konum→Kullanırken İzin Ver.",1);
-  if(e.code===3){try{navigator.geolocation.getCurrentPosition(onOk,()=>gpsMsg("GPS başarısız: dışarıda tekrar deneyin.",1),opts);}catch(err){gpsMsg("GPS hatası.",1);}return;}
-  gpsMsg("GPS hatası: "+e.message,1);
- };
- try{navigator.geolocation.getCurrentPosition(onOk,onErr,opts);}catch(e){gpsMsg("Konum başlatılamadı.",1);}
 }
 function updGps(){
- if(typeof window!=="undefined"&&window.DG_REFRESH_MEASUREMENT_GPS_VIEW&&window.DG_FORMAT_MEASUREMENT_GPS_READOUT&&window.DG_MEASUREMENT_GPS_READOUT_UI&&window.DG_MEASUREMENT_GPS_ACTIVE_STATE_UI&&window.DG_UPDATE_MEASUREMENT_GPS_MAP_MARKER)return window.DG_REFRESH_MEASUREMENT_GPS_VIEW.refresh({
+ return window.DG_REFRESH_MEASUREMENT_GPS_VIEW.refresh({
   getGPS:()=>GPS,format:coords=>window.DG_FORMAT_MEASUREMENT_GPS_READOUT.format(coords),
   renderReadout:view=>window.DG_MEASUREMENT_GPS_READOUT_UI.render(view,$),renderActive:view=>window.DG_MEASUREMENT_GPS_ACTIVE_STATE_UI.render(view,$),
   updateMarker:coords=>window.DG_UPDATE_MEASUREMENT_GPS_MAP_MARKER.update(map,coords,{getCurrentMarker:()=>window._me,setCurrentMarker:marker=>{window._me=marker;},createMarker:(...args)=>L.circleMarker(...args)}),
   drawNavigation:drawNav,suggestPoint:autoFillPointId
  });
- const a=GPS.accuracy;
- const acc=$("gpsAcc"),lat=$("gLat"),lon=$("gLon"),alt=$("gAlt"),quality=$("gQ"),ring=$("gpsRing"),state=$("gpsState"),btn=$("gpsBtn");
- if(acc)acc.textContent=a.toFixed(0);
- if(lat)lat.textContent=GPS.latitude.toFixed(6);
- if(lon)lon.textContent=GPS.longitude.toFixed(6);
- if(alt)alt.textContent=Number.isFinite(GPS.altitude)?GPS.altitude.toFixed(0)+" m":"—";
- const q=a<10?"ÇOK İYİ":a<20?"İYİ":a<40?"ORTA":"ZAYIF";
- if(quality)quality.textContent=q;
- if(ring)ring.className="gpsring "+(a<10?"good":a<30?"mid":"bad");
- /* Ana ekranda doğruluk sayısı/kalite cümlesi gösterilmez; ayrıntılar açılır
-  * panelde kalır. Konum alınınca tek bakışta buton durum değiştirir. */
- if(state){state.textContent="GPS aktif";state.className="alert ok";}
- if(btn){btn.textContent="GPS aktif";btn.dataset.oldText="GPS aktif";btn.classList.add("is-active");}
- const bd=$("gpsBadge");
- if(bd){
-  bd.textContent="GPS aktif · ±"+Math.round(a)+" m · "+q;
-  bd.className="dg-png-badge"+(a<20?"":a<40?" amber":" red");
- }
- if(map&&GPS){if(window._me)map.removeLayer(window._me);window._me=L.circleMarker([GPS.latitude,GPS.longitude],{radius:7,color:"#2b6cb0",weight:3,fillOpacity:.9}).addTo(map).bindPopup("Konumun");}
- drawNav();autoFillPointId();
 }
 /* --- 4. FORM YARDIMCILARI --- */
-function fillSpecies(){
- if(typeof window!=="undefined"&&window.DG_MEASUREMENT_SPECIES_SELECTOR)return window.DG_MEASUREMENT_SPECIES_SELECTOR.fill({getElement:$,speciesData:typeof SPECIES_DATA!=="undefined"?SPECIES_DATA:null,turkishLabels:typeof DG_I18N_TR!=="undefined"?DG_I18N_TR:null,translate:value=>typeof dgT==="function"?dgT(value):value});
- const gv=$("mGroup").value,s=$("mSpecies");
- $("latinName").textContent="";
- /* 0036: EN modunda option GÖRÜNÜMÜ çevrilir; value kanonik TR kalmalıdır
-  * (shell'de value="İBRELİ" açık yazıldı). Bayat DOM/önbellek için ters
-  * sözlükten çöz → "CONIFER" gelirse "İBRELİ"ye dön. */
- const g=(typeof SPECIES_DATA!=="undefined"&&SPECIES_DATA[gv])?gv
-        :((typeof DG_I18N_TR!=="undefined"&&DG_I18N_TR[gv])||gv);
- if(!g||!(typeof SPECIES_DATA!=="undefined"&&SPECIES_DATA[g])){s.disabled=true;s.innerHTML=`<option value="">${_tms("Önce grup seçin")}</option>`;$("latinName").textContent="";return;}
- s.disabled=false;
- /* 0035b: GÖRÜNEN tür adı dgT() ile çevrilir (EN modu); option VALUE her
-  * zaman kanonik TR adıdır — veritabanına yazılan değer DEĞİŞMEZ. */
- /* 0036 (T1): tür listesi ALFABETİK (tr yereli) — SPECIES_DATA sırasına dokunulmaz. */
- s.innerHTML='<option value="">Seç</option>'+(SPECIES_DATA[g]||[]).slice().sort((a,b)=>String(a.tr).localeCompare(String(b.tr),"tr")).map(x=>`<option value="${x.tr}">${(typeof dgT==="function"?dgT(x.tr):x.tr)}${x.lat && x.lat!=="—"?" · "+x.lat:""}</option>`).join("");
- $("latinName").textContent="";
-}
-function showLatin(){
- if(typeof window!=="undefined"&&window.DG_MEASUREMENT_SPECIES_SELECTOR)return window.DG_MEASUREMENT_SPECIES_SELECTOR.showLatin({getElement:$,latinNames:typeof LATIN!=="undefined"?LATIN:{}});
- const sp=$("mSpecies").value;
- $("latinName").textContent=(LATIN[sp]&&LATIN[sp]!=="—")?("🔬 "+LATIN[sp]):"";
-}
+function fillSpecies(){return window.DG_MEASUREMENT_SPECIES_SELECTOR.fill({getElement:$,speciesData:typeof SPECIES_DATA!=="undefined"?SPECIES_DATA:null,turkishLabels:typeof DG_I18N_TR!=="undefined"?DG_I18N_TR:null,translate:value=>typeof dgT==="function"?dgT(value):value});}
+function showLatin(){return window.DG_MEASUREMENT_SPECIES_SELECTOR.showLatin({getElement:$,latinNames:typeof LATIN!=="undefined"?LATIN:{}});}
 const DG_TREE_MEASUREMENT_VALIDATOR=window.DG_TREE_MEASUREMENT_APPLICATION.createTreeMeasurementValidator({
  measurementGroups:typeof MEASUREMENT_GROUPS!=="undefined"?MEASUREMENT_GROUPS:[],
  resolveDensity:(species,group)=>(typeof densityKgFor==="function")?densityKgFor(species,group):null,
@@ -237,35 +127,15 @@ const DG_TREE_MEASUREMENT_ERRORS=Object.freeze({
  HEIGHT_INVALID:["mHeight","Boy 0’dan büyük, en fazla 100 m olmalı."]
 });
 function liveCalc(){
- if(window.DG_CALCULATE_LIVE_MEASUREMENT_PREVIEW&&window.DG_BUILD_LIVE_MEASUREMENT_PREVIEW_INPUT&&window.DG_RENDER_LIVE_MEASUREMENT_PREVIEW){
-  const preview=window.DG_CALCULATE_LIVE_MEASUREMENT_PREVIEW.calculate({
-   input:()=>window.DG_BUILD_LIVE_MEASUREMENT_PREVIEW_INPUT.build({circumference:$("mDbh").value,height:$("mHeight").value,species:$("mSpecies").value,group:$("mGroup").value}),
-   validate:request=>DG_TREE_MEASUREMENT_VALIDATOR.validateBiometrics({group:request.group,species:request.species,circumferenceCm:request.circumferenceCm,heightM:request.heightM}),
-   calculate:request=>calcFromCircumference(request.circumferenceCm,request.heightM,request.species,request.group)
-  });
-  return window.DG_RENDER_LIVE_MEASUREMENT_PREVIEW.render({preview,element:$("liveCalc"),getHint:()=>$("measureSaveHint"),translate:_tms});
- }
- const c=+$("mDbh").value,h=+$("mHeight").value,s=$("mSpecies").value,g=$("mGroup").value;
- const check=DG_TREE_MEASUREMENT_VALIDATOR.validateBiometrics({group:g,species:s,circumferenceCm:c,heightM:h});
- const valid=check.valid;
- $("liveCalc").style.display=valid?"block":"none";
- const hint=$("measureSaveHint");if(hint)hint.style.display=valid?"none":"block";
- if(!valid)return;
- const r=calcFromCircumference(c,h,s,g);
- if(!r.valid)return;
- $("liveCalc").innerHTML=`<b>${_tms("Tahmini karbon")} · ${r.total_carbon.toFixed(1)} kg</b><br><small>${_tms("Göğüs çevresi")} ${c.toFixed(1)} cm → DBH ${r.dbh_cm.toFixed(1)} cm · AGB ${r.agb.toFixed(1)} · BHB ${r.bhb.toFixed(1)} kg · ${_tms("Hacim")} ${r.vol.toFixed(3)} m³ · ρ ${r.density_kg_m3} kg/m³</small>`;
+ const preview=window.DG_CALCULATE_LIVE_MEASUREMENT_PREVIEW.calculate({
+  input:()=>window.DG_BUILD_LIVE_MEASUREMENT_PREVIEW_INPUT.build({circumference:$("mDbh").value,height:$("mHeight").value,species:$("mSpecies").value,group:$("mGroup").value}),
+  validate:request=>DG_TREE_MEASUREMENT_VALIDATOR.validateBiometrics({group:request.group,species:request.species,circumferenceCm:request.circumferenceCm,heightM:request.heightM}),
+  calculate:request=>calcFromCircumference(request.circumferenceCm,request.heightM,request.species,request.group)
+ });
+ return window.DG_RENDER_LIVE_MEASUREMENT_PREVIEW.render({preview,element:$("liveCalc"),getHint:()=>$("measureSaveHint"),translate:_tms});
 }
-function dgMeasureInvalid(id,message){
- if(typeof window!=="undefined"&&Object.prototype.hasOwnProperty.call(window,"DG_SHOW_MEASUREMENT_VALIDATION_ERROR"))return window.DG_SHOW_MEASUREMENT_VALIDATION_ERROR.show({fieldId:id,message,element:$,notify:toast});
- const el=$(id);if(el){el.setAttribute("aria-invalid","true");el.focus();}
- toast(message,"err");
-}
-function dgResetMeasureFields(){
- if(typeof window!=="undefined"&&Object.prototype.hasOwnProperty.call(window,"DG_RESET_MEASUREMENT_ENTRY_FIELDS"))return window.DG_RESET_MEASUREMENT_ENTRY_FIELDS.reset({element:$,clearPhoto:dgClearMeasurePhoto,setManualPoint:value=>{manualPoint=value;},liveCalc});
- for(const id of ["mPoint","mDbh","mHeight"])$(id).value="";
- dgClearMeasurePhoto();$("pointQueryResult").style.display="none";
- manualPoint=false;liveCalc();
-}
+function dgMeasureInvalid(id,message){return window.DG_SHOW_MEASUREMENT_VALIDATION_ERROR.show({fieldId:id,message,element:$,notify:toast});}
+function dgResetMeasureFields(){return window.DG_RESET_MEASUREMENT_ENTRY_FIELDS.reset({element:$,clearPhoto:dgClearMeasurePhoto,setManualPoint:value=>{manualPoint=value;},liveCalc});}
 
 /* --- 5. PROJE CRUD --- */
 /* PROJE = PARK + ETİKET (2026-09-24).
@@ -283,165 +153,45 @@ let EDIT_PROJ_PARK=null;
  * Geri yükleme KOŞULLU: id hâlâ PROJ_LIST'te varsa seçilir — silinmiş/paylaşımdan
  * çıkmış proje hortlamaz; düzenleme modu (EDIT_ID) değeri zaten kendisi yazar. */
 const DG_LAST_PROJ_KEY="dg_last_proj";
-function dgProjectRemember(id){if(typeof window!=="undefined"&&Object.prototype.hasOwnProperty.call(window,"DG_PROJECT_SELECTION_MEMORY"))return window.DG_PROJECT_SELECTION_MEMORY.remember(localStorage,DG_LAST_PROJ_KEY,id);try{if(id)localStorage.setItem(DG_LAST_PROJ_KEY,String(id));}catch(e){}}
+function dgProjectRemember(id){return window.DG_PROJECT_SELECTION_MEMORY.remember(localStorage,DG_LAST_PROJ_KEY,id);}
 function dgProjectRestore(){
- if(typeof window!=="undefined"&&Object.prototype.hasOwnProperty.call(window,"DG_PROJECT_SELECTION_MEMORY")){const last=window.DG_PROJECT_SELECTION_MEMORY.restore(localStorage,DG_LAST_PROJ_KEY,PROJ_LIST);if(!last)return;for(const id of ["mProject","nProject"]){const s=$(id);if(s)s.value=last;}return;}
- let last=null;try{last=localStorage.getItem(DG_LAST_PROJ_KEY);}catch(e){}
+ const last=window.DG_PROJECT_SELECTION_MEMORY.restore(localStorage,DG_LAST_PROJ_KEY,PROJ_LIST);
  if(!last)return;
- if(!(PROJ_LIST||[]).some(p=>String(p.id)===last))return;
- for(const id of ["mProject","nProject"]){const s=$(id);if(s)s.value=last;}
+ for(const id of ["mProject","nProject"]){const select=$(id);if(select)select.value=last;}
 }
 function dgProjectOpenMeasure(id){
- if(typeof window!=="undefined"&&window.DG_OPEN_PROJECT_FOR_MEASUREMENT)return window.DG_OPEN_PROJECT_FOR_MEASUREMENT.open(id,{
+ return window.DG_OPEN_PROJECT_FOR_MEASUREMENT.open(id,{
   projects:()=>PROJ_LIST,remember:dgProjectRemember,go, schedule:(fn,delay)=>setTimeout(fn,delay),measureSelect:()=>$("mProject"),
   projectChanged:()=>{if(typeof dgProjectChanged==="function")dgProjectChanged();},parkGate:()=>{if(typeof dgParkGate==="function")dgParkGate();}
  });
- const p=(PROJ_LIST||[]).find(x=>Number(x.id)===Number(id));if(!p)return;
- dgProjectRemember(id);
- go("measure");
- setTimeout(()=>{
-  const sel=$("mProject");if(sel)sel.value=String(id);
-  if(typeof dgProjectChanged==="function")dgProjectChanged();
-  if(typeof dgParkGate==="function")dgParkGate();
- },80);
 }
 function dgProjectCard(p,isShared){
- if(typeof window!=="undefined"&&window.DG_MEASUREMENT_PROJECT_CARD)return window.DG_MEASUREMENT_PROJECT_CARD.render(p,isShared,{formatArea:dgFmtHa,escape:esc,isAdmin:dgIsAdmin});
- const park=p.parks&&p.parks.name?p.parks.name:(p.park_name||"Park bağlantısı yok");
- const area=p.parks&&p.parks.area_m2?dgFmtHa(p.parks.area_m2):"";
- const loc=[p.city,p.country].filter(Boolean).map(esc).join(" · ")||"Konum belirtilmedi";
- const date=p.created_at?new Date(p.created_at).toLocaleDateString("tr-TR"):"—";
- const role=isShared?'<span class="badge admin">ORTAK</span>':'<span class="badge on">PROJE SAHİBİ</span>';
- const parkState=p.park_id
-  ? `<span>🌳 ${esc(park)}${area?" · "+area:""}</span>`
-  : `<span class="project-warning">⛔ park yok</span><small>${dgIsAdmin()?"Yönetici olarak bu eski projeyi parka bağlayabilirsin.":"🔐 yönetici bağlayacak"}</small>`;
- const repBtn=p.park_id?`<button class="btn sm ghost" onclick="dgUserPubOpen(${p.id})">📄 Rapor</button>`:"";
- const linkBtn=!isShared&&!p.park_id&&dgIsAdmin()?`<button class="btn sm ghost" onclick="startParkScan({projectId:${p.id},returnTo:'projects'})">🌳 Parka bağla</button>`:"";
- const actions=isShared
-  ? `<button class="btn sm" onclick="dgProjectOpenMeasure(${p.id})">📏 Ölçüme geç</button><span class="project-access-note">Düzenleme ve ekip yönetimi proje sahibinde</span>`
-  : `<button class="btn sm" onclick="dgProjectOpenMeasure(${p.id})">📏 Ölçüm</button>${repBtn}${linkBtn}<button class="btn sm ghost" onclick="editProject(${p.id})">✏️ Düzenle</button><button class="btn sm ghost project-danger" onclick="deleteProject(${p.id})">🗑 Sil</button>`;
- return `<article class="project-card ${isShared?"is-shared":"is-owned"}"><div class="project-card-top"><div><div class="project-card-park">${parkState}</div><h4>${esc(p.name||("Proje #"+p.id))}</h4></div>${role}</div><div class="project-card-meta"><span>📍 ${loc}</span><span>📅 ${date}</span><span class="mono">#${p.id}</span></div><div class="project-card-actions">${actions}</div></article>`;
+ return window.DG_MEASUREMENT_PROJECT_CARD.render(p,isShared,{formatArea:dgFmtHa,escape:esc,isAdmin:dgIsAdmin});
 }
 async function loadProjects(){const _y=(typeof dgScrollKeep==="function"?dgScrollKeep():null);try{return await loadProjects__scroll.apply(this,arguments);}finally{if(typeof dgScrollRestore==="function")dgScrollRestore(_y);}}
 async function loadProjects__scroll(){
  if(!USER)return;
- if(typeof window!=="undefined"&&Object.prototype.hasOwnProperty.call(window,"DG_LOAD_MEASUREMENT_PROJECT_DIRECTORY")){await window.DG_LOAD_MEASUREMENT_PROJECT_DIRECTORY.load({
+ await window.DG_LOAD_MEASUREMENT_PROJECT_DIRECTORY.load({
   fetchOwned:()=>window.DG_OWNED_MEASUREMENT_PROJECTS.fetch({client:sb,userId:USER.id,onRelationError:dgParkSchemaMissing}),
   fetchShared:owned=>window.DG_SHARED_MEASUREMENT_PROJECTS.fetch({client:sb,ownedProjects:owned,listMyParks:typeof dgMyParks==="function"?dgMyParks:undefined}),
   merge:(owned,shared)=>window.DG_MERGE_MEASUREMENT_PROJECTS.merge(owned,shared),
   onState:state=>{PROJ_LIST=state.projects;},
   render:projects=>window.DG_MEASUREMENT_PROJECT_DIRECTORY_UI.render({projects,element:$,escape:esc,optionLabel:dgProjectOptionLabel,restore:dgProjectRestore,renderCard:dgProjectCard,editing:EDIT_PROJ}),
   afterRender:projects=>{dgRenderProjectParkBox();dgParkGate();if(typeof dgUserPubSync==="function")dgUserPubSync(projects);}
- });return;}
- /* parks gömüsü: projenin park kimliği + alanı (kapı kartı ve tablo için).
-  * Şema eskiyse (0004 uygulanmamış) PostgREST ilişkiyi bulamaz ve hata döner;
-  * o zaman düz select'e düşülür ki proje listesi tamamen boş kalmasın. */
- let{data,error}=await sb.from("projects").select("*,parks(id,name,city,country,area_m2)").eq("owner",USER.id);
- if(error){
-  dgParkSchemaMissing("projects↔parks: "+error.message);
-  const fb=await sb.from("projects").select("*").eq("owner",USER.id);
-  data=fb.data||[];
- }
- PROJ_LIST=data||[];
- /* 0025 · PAYLAŞILAN PARKLAR: kabul edilmiş park ortağıysan, o parkın
-  * SAHİBİ OLMADIĞIN projeleri de listeye eklenir → aynı projeye birlikte
-  * ölçü girilir. Kayıtlar her zamanki gibi owner=sen (saveMeas) ile gider;
-  * konum çiti (0007) ve park bağı kilidi (0006) değişmez. v_my_parks/RPC
-  * yoksa (0025 SQL uygulanmamış) sessizce eski davranış. */
- try{
-  if(typeof dgMyParks==="function"){
-   const shared=(await dgMyParks()).filter(x=>x.role==="collaborator");
-   const ownParkIds=new Set((PROJ_LIST||[]).map(x=>Number(x.park_id)).filter(Boolean));
-   const ids=shared.map(x=>Number(x.id)).filter(id=>id&&!ownParkIds.has(id));
-   if(ids.length){
-    const{data:sp,error:es}=await sb.from("projects").select("*,parks(id,name,city,country,area_m2)").in("park_id",ids);
-    for(const q of (es?[]:(sp||[]))){
-     const pk=shared.find(x=>Number(x.id)===Number(q.park_id));
-     q.shared=true;
-     if(pk&&!q.parks)q.parks={id:pk.id,name:pk.name,city:pk.city,country:pk.country,area_m2:pk.area_m2};
-     PROJ_LIST.push(q);
-    }
-   }
-  }
- }catch(e){/* 0025 yok → eski davranış */}
- const opts=PROJ_LIST.map(p=>`<option value="${p.id}">${esc(dgProjectOptionLabel(p))}</option>`).join("");
- const empty="<option value=''>Önce park algıla → proje oluştur</option>";
- $("mProject").innerHTML=opts||empty;
- $("nProject").innerHTML=opts||empty;
- dgProjectRestore();
-
- const own=PROJ_LIST.filter(p=>!p.shared), shared=PROJ_LIST.filter(p=>p.shared);
- const ownCount=$("projOwnCount"), sharedCount=$("projSharedCount");
- if(ownCount)ownCount.textContent=String(own.length);
- if(sharedCount)sharedCount.textContent=String(shared.length);
- const ownList=$("projOwnList"), sharedList=$("projSharedList"), sharedSection=$("projSharedSection");
- if(ownList)ownList.innerHTML=own.length?own.map(p=>dgProjectCard(p,false)).join(""):'<div class="project-empty"><b>Henüz kendi projen yok.</b><span>Canlı Harita’dan bir park algılayıp ilk çalışma alanını oluştur.</span></div>';
- if(sharedList)sharedList.innerHTML=shared.map(p=>dgProjectCard(p,true)).join("");
- if(sharedSection)sharedSection.style.display=shared.length?"":"none";
- const compat=$("projTable");if(compat)compat.innerHTML=own.map(p=>dgProjectCard(p,false)).join("")+shared.map(p=>dgProjectCard(p,true)).join("");
- const create=$("projCreateDetails");if(create&&!EDIT_PROJ)create.open=own.length===0;
- dgRenderProjectParkBox();
- dgParkGate();
- /* Rapor paneli açıksa ve projesi listeden düştüyse paneli kapat (0009). */
- if(typeof dgUserPubSync==="function")dgUserPubSync(PROJ_LIST);
-}
-
-/* Projeler sekmesindeki "park" kutusu: hangi park algılanmış, ad nasıl olacak. */
+ });
+}/* Projeler sekmesindeki "park" kutusu: hangi park algılanmış, ad nasıl olacak. */
 function dgRenderProjectParkBox(){
- if(typeof window!=="undefined"&&window.DG_MEASUREMENT_PROJECT_PARK_BOX){const park=EDIT_PROJ?EDIT_PROJ_PARK:DG_PARK;return window.DG_MEASUREMENT_PROJECT_PARK_BOX.render({box:$("projParkBox"),park,escape:esc,formatArea:dgFmtHa,getElement:$,previewName:dgProjectNamePreview});}
- const box=$("projParkBox");
- if(!box)return;
  const park=EDIT_PROJ?EDIT_PROJ_PARK:DG_PARK;
- if(park&&park.name){
-  box.className="alert ok";
-  box.innerHTML=`<b>🌳 Algılanan park: ${esc(park.name)}</b>${park.area_m2?" · "+dgFmtHa(park.area_m2):""}${park.osm_key?` · <span class="mono" style="font-size:.72rem">${esc(park.osm_key)}</span>`:""}`+
-   `<br><span style="font-size:.8rem">Proje adı otomatik "<b>${esc(park.name)}</b> - <i>etiket</i>" olacak. Aynı parkı başkaları da algıladığında veriler karşılaştırmada tek satırda birleşir.</span>`;
-  /* Park başka şehirdeyse ülke/şehir varsayılanlarını parkınkiyle tazele
-   * (kayıttan önce elle değiştirilebilir). */
-  if(park.city&&$("pCity")&&$("pCity").value==="Ankara")$("pCity").value=park.city;
-  if(park.country&&$("pCountry")&&$("pCountry").value==="Türkiye")$("pCountry").value=park.country;
- }else{
-  box.className="alert err";
-  box.innerHTML=`<b>⛔ Park algılanmadı — proje oluşturulamaz.</b>`+
-   `<br><span style="font-size:.8rem">Önce Canlı Harita → Park Algılama ekranında parkın içine tıkla. OSM'de park yoksa "elle oluştur" ile kimlik açabilirsin.</span>`+
-   `<div style="margin-top:10px"><button class="btn sm blue" onclick="startParkScan({returnTo:'projects'})">🌳 Park Algılama Ekranına Git</button></div>`;
- }
- dgProjectNamePreview();
-}
-
-function dgProjectNamePreview(){
- if(typeof window!=="undefined"&&window.DG_MEASUREMENT_PROJECT_NAME_PREVIEW){const park=EDIT_PROJ?EDIT_PROJ_PARK:DG_PARK;const label=($("pLabel")?$("pLabel").value:"").trim();return window.DG_MEASUREMENT_PROJECT_NAME_PREVIEW.render({element:$("pNamePreview"),park,label,projectName:dgProjectName});}
- const el=$("pNamePreview");
- if(!el)return;
- const park=EDIT_PROJ?EDIT_PROJ_PARK:DG_PARK;
- const label=($("pLabel")?$("pLabel").value:"").trim();
- if(!park||!park.name){el.textContent="— (önce park algıla)";el.style.color="var(--mut)";return;}
- el.textContent=dgProjectName(park.name,label);
- el.style.color="var(--ink)";
-}
-
-function editProject(id){
- if(typeof window!=="undefined"&&Object.prototype.hasOwnProperty.call(window,"DG_MEASUREMENT_PROJECT_EDIT_FORM")){window.DG_MEASUREMENT_PROJECT_EDIT_FORM.begin(id,{projects:()=>PROJ_LIST,element:$,setEditing:(projectId,park)=>{EDIT_PROJ=projectId;EDIT_PROJ_PARK=park;},labelFromLegacy:dgLabelFromLegacy,renderParkBox:dgRenderProjectParkBox});return;}
- const p=PROJ_LIST.find(x=>x.id===id&&!x.shared);if(!p)return;
- const panel=$("projCreateDetails");if(panel)panel.open=true;
- EDIT_PROJ=id;
- EDIT_PROJ_PARK=p.park_id
-  ? {id:p.park_id,name:(p.parks&&p.parks.name)||p.park_name||"",area_m2:(p.parks&&p.parks.area_m2)||null}
-  : null;
- $("pLabel").value=p.label!=null?p.label:dgLabelFromLegacy(p.name,EDIT_PROJ_PARK?EDIT_PROJ_PARK.name:"");
- $("pCountry").value=p.country||"";$("pCity").value=p.city||"";
- $("projSaveBtn").textContent="💾 Projeyi Güncelle";$("projCancelBtn").style.display="inline-block";
- dgRenderProjectParkBox();
-}
-function cancelProjectEdit(){
- if(typeof window!=="undefined"&&Object.prototype.hasOwnProperty.call(window,"DG_MEASUREMENT_PROJECT_EDIT_FORM"))return window.DG_MEASUREMENT_PROJECT_EDIT_FORM.cancel({projects:()=>PROJ_LIST,element:$,setEditing:(id,park)=>{EDIT_PROJ=id;EDIT_PROJ_PARK=park;},renderParkBox:dgRenderProjectParkBox});
- EDIT_PROJ=null;EDIT_PROJ_PARK=null;
- $("pLabel").value="";$("projSaveBtn").textContent="+ Proje Oluştur";$("projCancelBtn").style.display="none";
- const panel=$("projCreateDetails");if(panel&&(PROJ_LIST||[]).some(p=>!p.shared))panel.open=false;
- dgRenderProjectParkBox();
-}
-async function createProject(){
- if(typeof window!=="undefined"&&Object.prototype.hasOwnProperty.call(window,"DG_SAVE_MEASUREMENT_PROJECT"))return window.DG_SAVE_MEASUREMENT_PROJECT.save({
+ return window.DG_MEASUREMENT_PROJECT_PARK_BOX.render({box:$("projParkBox"),park,escape:esc,formatArea:dgFmtHa,getElement:$,previewName:dgProjectNamePreview});
+}function dgProjectNamePreview(){
+ const park=EDIT_PROJ?EDIT_PROJ_PARK:DG_PARK,label=($("pLabel")?$("pLabel").value:"").trim();
+ return window.DG_MEASUREMENT_PROJECT_NAME_PREVIEW.render({element:$("pNamePreview"),park,label,projectName:dgProjectName});
+}function editProject(id){
+ return window.DG_MEASUREMENT_PROJECT_EDIT_FORM.begin(id,{projects:()=>PROJ_LIST,element:$,setEditing:(projectId,park)=>{EDIT_PROJ=projectId;EDIT_PROJ_PARK=park;},labelFromLegacy:dgLabelFromLegacy,renderParkBox:dgRenderProjectParkBox});
+}function cancelProjectEdit(){
+ return window.DG_MEASUREMENT_PROJECT_EDIT_FORM.cancel({projects:()=>PROJ_LIST,element:$,setEditing:(id,park)=>{EDIT_PROJ=id;EDIT_PROJ_PARK=park;},renderParkBox:dgRenderProjectParkBox});
+}async function createProject(){
+ await window.DG_SAVE_MEASUREMENT_PROJECT.save({
   label:()=>$("pLabel").value,
   form:()=>({editId:EDIT_PROJ,editPark:EDIT_PROJ_PARK,park:DG_PARK,userId:USER.id,country:$("pCountry").value,city:$("pCity").value,composeName:dgProjectName}),
   build:form=>window.DG_BUILD_MEASUREMENT_PROJECT_WRITE.build(form),
@@ -451,145 +201,55 @@ async function createProject(){
   updated:()=>{toast("✓ Proje güncellendi","ok","📁");cancelProjectEdit();},
   created:command=>{toast(dgCf("✓ Proje oluşturuldu: ")+command.name,"ok","📁");$("pLabel").value="";},
   refresh:()=>loadProjects()
- }).then(()=>undefined);
- const label=($("pLabel").value||"").trim();
-
- if(EDIT_PROJ){
-  if(!EDIT_PROJ_PARK){
-   toast("Bu proje parka bağlı değil — önce park algıla.","err","🌳");
-   startParkScan({projectId:EDIT_PROJ,returnTo:"projects"});
-   return;
-  }
-  const{error}=await sb.from("projects").update({label,park_id:EDIT_PROJ_PARK.id,country:$("pCountry").value,city:$("pCity").value}).eq("id",EDIT_PROJ);
-  if(error)return toast("Hata: "+error.message,"err");
-  toast("✓ Proje güncellendi","ok","📁");
-  cancelProjectEdit();
- }else{
-  const park=DG_PARK;
-  if(!park){
-   toast("Önce park algıla — park olmadan proje açılamaz.","err","🌳");
-   startParkScan({returnTo:"projects"});
-   return;
-  }
-  const{error}=await sb.from("projects").insert({
-   owner:USER.id,
-   park_id:park.id,
-   label,
-   /* DB trigger'ı aynı adı kurar; istemci de gönderir ki eski şemada da ad tutarlı kalsın. */
-   name:dgProjectName(park.name,label),
-   country:$("pCountry").value||park.country||"",
-   city:$("pCity").value||park.city||""
-  });
-  if(error)return toast("Hata: "+error.message,"err");
-  toast(dgCf("✓ Proje oluşturuldu: ")+dgProjectName(park.name,label),"ok","📁");
-  $("pLabel").value="";
- }
- loadProjects();
+ });
 }
 async function deleteProject(id){
- if(typeof window!=="undefined"&&Object.prototype.hasOwnProperty.call(window,"DG_DELETE_MEASUREMENT_PROJECT"))return window.DG_DELETE_MEASUREMENT_PROJECT.remove(id,{
+ return window.DG_DELETE_MEASUREMENT_PROJECT.remove(id,{
   count:projectId=>window.DG_MEASUREMENT_PROJECT_DELETION_STORE.countMeasurements({client:sb,projectId}),
   confirm:count=>window.DG_CONFIRM_MEASUREMENT_PROJECT_DELETE.confirm({count,format:dgTfs,confirm}),
   delete:projectId=>window.DG_MEASUREMENT_PROJECT_DELETION_STORE.delete({client:sb,projectId}),
   refresh:loadProjects
  });
- const{count}=await sb.from("measurements").select("*",{count:"exact",head:true}).eq("project_id",id);
- if(!confirm(dgTfs("Proje silinsin mi? Bağlı {n} ölçüm ve waypoint'ler de silinebilir.\n(Park kimliği silinmez — aynı parktaki diğer projelerin karşılaştırması devam eder.)",{n:(count||0)})))return;
- await sb.from("waypoints").delete().eq("project_id",id);
- await sb.from("projects").delete().eq("id",id);
- loadProjects();
-}
-/* --- 6. NOKTA YÖNETİMİ --- */
+}/* --- 6. NOKTA YÖNETİMİ --- */
 let manualPoint=false;
 let dgPointRequest=0;
 async function autoFillPointId(){
-if(typeof window!=="undefined"&&Object.prototype.hasOwnProperty.call(window,"DG_SUGGEST_NEXT_MEASUREMENT_POINT"))return window.DG_SUGGEST_NEXT_MEASUREMENT_POINT.suggest({
- canStart:()=>!manualPoint&&!EDIT_ID,
- projectId:()=>+$("mProject").value,
- pointValue:()=>$("mPoint").value,
- gps:()=>GPS,
- canSuggest:pid=>!manualPoint&&!EDIT_ID&&+$("mProject").value===pid&&!$("mPoint").value,
- fetchWaypoints:projectId=>window.DG_FETCH_UNVISITED_MEASUREMENT_WAYPOINTS.fetch({client:sb,projectId}),
- fetchLatest:projectId=>window.DG_FETCH_LATEST_MEASUREMENT_POINT.fetch({client:sb,projectId}),
- distance:(lat1,lon1,lat2,lon2)=>hav(lat1,lon1,lat2,lon2),
- setPoint:value=>{$("mPoint").value=value;}
-});
-const request=++dgPointRequest;
-if(manualPoint||EDIT_ID)return;
-const pid=+$("mProject").value;
-if(!pid)return;
-if($("mPoint").value)return;
-try{
-// 1) GPS açık + ziyaret edilmemiş waypoint varsa → en yakın waypoint
-if(GPS){
-const{data}=await sb.from("waypoints").select("*").eq("project_id",pid).eq("visited",false);
-if(data&&data.length){
-const nearest=data.sort((a,b)=>hav(GPS.latitude,GPS.longitude,a.lat,a.lon)-hav(GPS.latitude,GPS.longitude,b.lat,b.lon))[0];
-if(request===dgPointRequest&&!manualPoint&&!EDIT_ID&&+$("mProject").value===pid&&!$("mPoint").value)$("mPoint").value=nearest.wp_id;
-return;
+ return window.DG_SUGGEST_NEXT_MEASUREMENT_POINT.suggest({
+  canStart:()=>!manualPoint&&!EDIT_ID,
+  projectId:()=>+$("mProject").value,
+  pointValue:()=>$("mPoint").value,
+  gps:()=>GPS,
+  canSuggest:pid=>!manualPoint&&!EDIT_ID&&+$("mProject").value===pid&&!$("mPoint").value,
+  fetchWaypoints:projectId=>window.DG_FETCH_UNVISITED_MEASUREMENT_WAYPOINTS.fetch({client:sb,projectId}),
+  fetchLatest:projectId=>window.DG_FETCH_LATEST_MEASUREMENT_POINT.fetch({client:sb,projectId}),
+  distance:(lat1,lon1,lat2,lon2)=>hav(lat1,lon1,lat2,lon2),
+  setPoint:value=>{$("mPoint").value=value;}
+ });
 }
-}
-// 2) Waypoint yoksa → projedeki son point_id + 1 (proje boşsa 1)
-const{data}=await sb.from("measurements").select("point_id").eq("project_id",pid).order("point_id",{ascending:false}).limit(1);
-if(request===dgPointRequest&&!manualPoint&&!EDIT_ID&&+$("mProject").value===pid&&!$("mPoint").value)$("mPoint").value=(data&&data.length)?((data[0].point_id||0)+1):1;
-}catch(e){}
-}
-
 async function queryPointId(){
- const pid=+$("mProject").value,pt=+$("mPoint").value,res=$("pointQueryResult");
- if(window.DG_QUERY_MEASUREMENT_POINT&&window.DG_RESOLVE_MEASUREMENT_POINT_QUERY&&window.DG_FETCH_MEASUREMENT_AT_PROJECT_POINT&&window.DG_MEASUREMENT_POINT_QUERY_RESULT){
-  return window.DG_QUERY_MEASUREMENT_POINT.query({
-   projectId:pid,pointId:pt,
-   resolve:(projectId,pointId)=>window.DG_RESOLVE_MEASUREMENT_POINT_QUERY.resolve(projectId,pointId),
-   read:target=>window.DG_FETCH_MEASUREMENT_AT_PROJECT_POINT.fetch({client:sb,projectId:target.projectId,pointId:target.pointId}),
-   isCurrent:target=>+$("mProject").value===target.projectId&&+$("mPoint").value===target.pointId,
-   hide:()=>{res.style.display="none";},
-   render:(record,pointId)=>window.DG_MEASUREMENT_POINT_QUERY_RESULT.render({element:res,record,pointId,escape:esc,translate:_tms,translateFormat:_tmsf,circumferenceFromDiameter:value=>typeof circumferenceCmFromDiameter==="function"?circumferenceCmFromDiameter(+value):null})
-  });
- }
- if(!pid||!pt){res.style.display="none";return;}
- if(typeof window!=="undefined"&&Object.prototype.hasOwnProperty.call(window,"DG_FETCH_MEASUREMENT_AT_PROJECT_POINT")){
-  const record=await window.DG_FETCH_MEASUREMENT_AT_PROJECT_POINT.fetch({client:sb,projectId:pid,pointId:pt});
-  if(+$("mProject").value!==pid||+$("mPoint").value!==pt)return;
-  return window.DG_MEASUREMENT_POINT_QUERY_RESULT.render({element:res,record,pointId:pt,escape:esc,translate:_tms,translateFormat:_tmsf,circumferenceFromDiameter:value=>typeof circumferenceCmFromDiameter==="function"?circumferenceCmFromDiameter(+value):null});
- }
- const{data}=await sb.from("measurements").select("*").eq("project_id",pid).eq("point_id",pt).order("created_at",{ascending:false}).limit(1);
- if(+$("mProject").value!==pid||+$("mPoint").value!==pt)return;
- if(data&&data.length>0){
-  const r=data[0];
-  res.style.display="block";res.className="alert info";
-  const rawCirc=Number.isFinite(+r.girth_cm)&&+r.girth_cm>0?+r.girth_cm:((typeof circumferenceCmFromDiameter==="function")?circumferenceCmFromDiameter(+r.dbh_cm):null);
-  res.innerHTML=`✓ <b>P${r.point_id}</b> · ${esc(_tms(r.species))} · ${_tms("Göğüs çevresi")} ${rawCirc?rawCirc.toFixed(1):"—"} cm · DBH ${(+r.dbh_cm).toFixed(1)} cm · ${_tms("Boy")} ${r.height_m} m · ${_tms("Karbon")} ${(r.carbon_kg||0).toFixed(1)} kg · ${_tms("Durum")}: <b>${r.status?_tms(r.status):_tms("Beklemede")}</b>`+
-   (r.photo_url?`<br><img src="${esc(r.photo_url)}" style="width:140px;border-radius:8px;margin-top:6px">`:"")+
-   `<br><button class="btn sm blue" onclick="editRec(${r.id})" style="margin-top:8px">✏️ Düzenle & Güncelle</button> <button class="btn sm red" onclick="delRec(${r.id})" style="margin-top:8px">🗑️ Tamamen Sil</button>`;
- }else{
-  res.style.display="block";res.className="alert info";
-  res.innerHTML=_tmsf("ℹ P{p} için kayıt yok · Yeni kayıt oluşturulacak.",{p:pt});
- }
-}
-/* --- 7. KAYDET (EN BÜYÜK) --- */
+ const result=$("pointQueryResult");
+ return window.DG_QUERY_MEASUREMENT_POINT.query({
+  projectId:+$("mProject").value,pointId:+$("mPoint").value,
+  resolve:(projectId,pointId)=>window.DG_RESOLVE_MEASUREMENT_POINT_QUERY.resolve(projectId,pointId),
+  read:target=>window.DG_FETCH_MEASUREMENT_AT_PROJECT_POINT.fetch({client:sb,projectId:target.projectId,pointId:target.pointId}),
+  isCurrent:target=>+$("mProject").value===target.projectId&&+$("mPoint").value===target.pointId,
+  hide:()=>window.DG_MEASUREMENT_POINT_QUERY_RESULT.hide(result),
+  render:(record,pointId)=>window.DG_MEASUREMENT_POINT_QUERY_RESULT.render({element:result,record,pointId,escape:esc,translate:_tms,translateFormat:_tmsf,circumferenceFromDiameter:value=>typeof circumferenceCmFromDiameter==="function"?circumferenceCmFromDiameter(+value):null})
+ });
+}/* --- 7. KAYDET (EN BÜYÜK) --- */
 /* CANLI BUTON (2026-09-27 · kullanıcı isteği): 💾 Hesapla ve Kaydet, 🌿 ve 📡
  * butonlarıyla BİREBİR aynı deseni kullanır: basınca disabled + "⏳ …" +
  * soluk + wait imleci; her çıkış yolunda (başarı/hata/erken return) finally
  * ile geri gelir. Yeni tema yok — aynı aile, aynı mekanizma. */
 function dgSaveBusy(on){
  dgMeasureSaving=!!on;
- if(typeof window!=="undefined"&&Object.prototype.hasOwnProperty.call(window,"DG_SET_MEASUREMENT_SAVE_BUTTON"))return window.DG_SET_MEASUREMENT_SAVE_BUTTON.setBusy(on,{button:$("saveBtn"),editing:!!EDIT_ID,parkGate:dgParkGate});
- const b=$("saveBtn");if(!b)return;
- if(on){b.dataset.oldText=b.innerHTML;b.innerHTML="⏳ Hesaplanıyor ve kaydediliyor…";b.disabled=true;b.style.opacity=".65";b.style.cursor="wait";}
- else{b.disabled=false;b.textContent=EDIT_ID?"💾 Kaydı Güncelle":"💾 Hesapla ve Kaydet";b.style.opacity="";b.style.cursor="";if(typeof dgParkGate==="function")dgParkGate();}
+ return window.DG_SET_MEASUREMENT_SAVE_BUTTON.setBusy(on,{button:$("saveBtn"),editing:!!EDIT_ID,parkGate:dgParkGate});
 }
 let dgMeasureSaving=false;
 async function saveMeas(){
- if(typeof window!=="undefined"&&Object.prototype.hasOwnProperty.call(window,"DG_RUN_MEASUREMENT_SAVE"))return window.DG_RUN_MEASUREMENT_SAVE.run({isBusy:()=>dgMeasureSaving,setBusy:dgSaveBusy,save:dgSaveMeasInner,failed:()=>toast(_tms("Kayıt tamamlanamadı. Bilgileriniz formda duruyor; yeniden deneyin."),"err")});
- if(dgMeasureSaving)return;
- dgSaveBusy(true);
- try{return await dgSaveMeasInner();}
- catch(err){toast(_tms("Kayıt tamamlanamadı. Bilgileriniz formda duruyor; yeniden deneyin."),"err");}
- finally{dgSaveBusy(false);}
+ return window.DG_RUN_MEASUREMENT_SAVE.run({isBusy:()=>dgMeasureSaving,setBusy:dgSaveBusy,save:dgSaveMeasInner,failed:()=>toast(_tms("Kayıt tamamlanamadı. Bilgileriniz formda duruyor; yeniden deneyin."),"err")});
 }
 async function dgSaveMeasInner(){
-    if(window.DG_SUBMIT_MEASUREMENT&&window.DG_VALIDATE_MEASUREMENT_SUBMISSION&&window.DG_PREPARE_MEASUREMENT_SUBMISSION&&window.DG_VERIFY_MEASUREMENT_SUBMISSION_LOCATION&&window.DG_PERSIST_MEASUREMENT_SUBMISSION){
       const form={projectId:+$("mProject").value,pointId:+$("mPoint").value,measurementNo:+$("mNo").value,group:$("mGroup").value,species:$("mSpecies").value,circumferenceCm:+$("mDbh").value,heightM:+$("mHeight").value};
       return window.DG_SUBMIT_MEASUREMENT.run({form,editId:EDIT_ID},{
         validation:{
@@ -615,7 +275,7 @@ async function dgSaveMeasInner(){
           buildLocationFields:({fix,geocode})=>{if(geocode)toast(dgCf("📍 Konum algılandı: ")+esc(geocode.city)+" / "+esc(geocode.country),"info","🗺️");return window.DG_BUILD_MEASUREMENT_LOCATION_FIELDS.build({fix,geocode});}
         },
         location:{
-          loadPark:async id=>{const result=await sb.from("parks").select("*").eq("id",id).maybeSingle();return result.data||null;},
+          loadPark:id=>window.DG_FETCH_MEASUREMENT_PARK.fetch({client:sb,id}),
           verifyAtPark:park=>dgVerifyAtPark(park,"measure"),stamp:dgGeoStamp
         },
         locationRejected:({decision})=>toast("⛔ "+esc(decision.message||_tmsf("Konum doğrulanamadı ({r})",{r:decision.reason})),"err","🛰"),
@@ -645,144 +305,15 @@ async function dgSaveMeasInner(){
           return window.DG_REFRESH_MEASUREMENT_AFTER_SAVE.online({wasEdit,reset:dgResetMeasureFields,autoFill:autoFillPointId,loadDashboard:loadDash,loadRecords,loadWaypoints});
         }
       });
-    }
-    const pid=+$("mProject").value,pt=+$("mPoint").value,sp=$("mSpecies").value,circumference=+$("mDbh").value,h=+$("mHeight").value,grp=$("mGroup").value;
-    const measurementNo=+$("mNo").value;
-    const validation=typeof window!=="undefined"&&Object.prototype.hasOwnProperty.call(window,"DG_VALIDATE_MEASUREMENT_SAVE_FORM")
-      ?window.DG_VALIDATE_MEASUREMENT_SAVE_FORM.validate({form:{projectId:pid,pointId:pt,measurementNo,group:grp,species:sp,circumferenceCm:circumference,heightM:h},element:$,validator:DG_TREE_MEASUREMENT_VALIDATOR,errors:DG_TREE_MEASUREMENT_ERRORS,translate:_tms})
-      :(()=>{for(const id of ["mProject","mPoint","mNo","mGroup","mSpecies","mDbh","mHeight"])$(id).setAttribute("aria-invalid","false");const result=DG_TREE_MEASUREMENT_VALIDATOR.validateNewMeasurement({projectId:pid,pointId:pt,measurementNo,group:grp,species:sp,circumferenceCm:circumference,heightM:h});if(!result.valid){const issue=DG_TREE_MEASUREMENT_ERRORS[result.reason];return{valid:false,focusId:issue[0],message:_tms(issue[1])};}return{valid:true};})();
-    if(!validation.valid)return dgMeasureInvalid(validation.focusId,validation.message);
 
-    /* ⛔ PARK KAPISI: park algılanmamış projeye ölçüm girilemez. Düzenleme
-     * (EDIT_ID) mevcut kaydı günceller, yeni ölçüm değildir → kapı uygulanmaz.
-     * Aynı kural sunucuda trg_enforce_park_link ile de zorlanır (PARK_REQUIRED). */
-    const gateResult=typeof window!=="undefined"&&Object.prototype.hasOwnProperty.call(window,"DG_RESOLVE_MEASUREMENT_SAVE_GATES")?window.DG_RESOLVE_MEASUREMENT_SAVE_GATES.resolve({projectId:pid,editId:EDIT_ID,projects:PROJ_LIST,parkSchemaOk:DG_PARK_SCHEMA_OK,gps:GPS,photoValid:!($("mPhoto").files[0]&&!photoOk)}):null;
-    const gateProj=gateResult?gateResult.project:(PROJ_LIST||[]).find(p=>p.id===pid);
-    if(DG_PARK_SCHEMA_OK&&!EDIT_ID&&(!gateProj||!gateProj.park_id)){
-        toast("⛔ Bu projede park algılanmadı — ölçüm giremezsin. Park algılama ekranına yönlendiriliyorsun.","err","🌳");
-        startParkScan({projectId:pid||null,returnTo:"measure"});
-        return;
-    }
-    if(gateResult?gateResult.reason==="gps-required":(!EDIT_ID&&!GPS))return toast("Önce 📡 Konumu Etkinleştir butonuna basın","err");
-
-    
-    const f=$("mPhoto").files[0];
-    if(f&&!photoOk)return toast("Fotoğraf denetimi başarısız — uygun bir çekim yapın","err");
-    dgProjectRemember(pid);
-    
-    const wasEdit=!!EDIT_ID;
-    const c=calcFromCircumference(circumference,h,sp,grp);
-    if(!c.valid)return dgMeasureInvalid("mSpecies",_tms("Kilitli yoğunluk tablosu bu ölçüm için karbon hesabına izin vermiyor."));
-    
-    // 1. Fotoğrafı sıkıştır (henüz upload etme, sadece Blob olarak hazırla)
-    let photoBlob = null;
-    let photoFile = null;
-    if(f){
-        if(typeof window!=="undefined"&&Object.prototype.hasOwnProperty.call(window,"DG_PREPARE_MEASUREMENT_PHOTO")){
-          const prepared=await window.DG_PREPARE_MEASUREMENT_PHOTO.prepare({file:f,pointId:pt,measurementNo,compress,buildFileName:parts=>window.DG_BUILD_MEASUREMENT_PHOTO_FILE_NAME.build(parts)});
-          photoBlob=prepared.blob;photoFile=prepared.fileName;
-        }else{photoBlob=await compress(f);photoFile="P"+String(pt).padStart(3,"0")+"_M"+measurementNo+".JPG";}
-    }
-    
-    // 2. base objesini oluştur
-    const base=typeof window!=="undefined"&&Object.prototype.hasOwnProperty.call(window,"DG_BUILD_MEASUREMENT_RECORD")
-      ?window.DG_BUILD_MEASUREMENT_RECORD.build({owner:USER.id,projectId:pid,pointId:pt,measurementNo,group:grp,species:sp,circumferenceCm:circumference,dbhCm:c.dbh_cm,heightM:h,volumeM3:c.vol,carbonKg:c.total_carbon,parkSchemaOk:DG_PARK_SCHEMA_OK,parkId:gateProj&&gateProj.park_id})
-      :{owner:USER.id,project_id:pid,point_id:pt,measurement_no:measurementNo,grp,species:sp,girth_cm:circumference,dbh_cm:c.dbh_cm,height_m:h,volume_m3:c.vol,carbon_kg:c.total_carbon,slope_deg:0,shared:true,status:"Beklemede"};
-    if(DG_PARK_SCHEMA_OK)base.park_id=(gateProj&&gateProj.park_id)||null;
-
-    // 5. Supabase insert/update
-// ⭐ EKLENEN: Her insert'te client_id ekle (duplicate koruması)
-if (!base.client_id) base.client_id = uuidv4();
-    if(!EDIT_ID){
-        const geo=await reverseGeocode(GPS.latitude,GPS.longitude);
-        if(typeof window!=="undefined"&&Object.prototype.hasOwnProperty.call(window,"DG_BUILD_MEASUREMENT_LOCATION_FIELDS"))Object.assign(base,window.DG_BUILD_MEASUREMENT_LOCATION_FIELDS.build({fix:GPS,geocode:geo}));
-        else{base.lat=GPS.latitude;base.lon=GPS.longitude;base.accuracy_m=GPS.accuracy;base.altitude_m=GPS.altitude;base.country=geo?geo.country:"Bilinmiyor";base.city=geo?geo.city:"Bilinmiyor";}
-        if(geo)toast(dgCf("📍 Konum algılandı: ")+esc(geo.city)+" / "+esc(geo.country),"info","🗺️");
-    }
-
-    /* 🛰 KONUM DOĞRULAMASI (0007 · kullanıcı isteği 2026-09-26): yeni ölçüm ve
-     * fotoğraf, projenin parkının DIŞINDAN girilemez. Taze GPS fix'i alınır,
-     * park poligonu (yoksa alan-yarıçaplı daire) ile karşılaştırılır; eşik
-     * dışındaysa yükleme HİÇ BAŞLAMAZ (fotoğraf sunucuya gitmez).
-     * Sunucu garantisi: trg_geo_fence (0007) — istemci atlatılsa bile park
-     * dışı INSERT/UPDATE reddedilir. Düzenleme (EDIT_ID) mevcut kaydı
-     * günceller → sahada olmayı gerektirmez. */
-    if(!EDIT_ID&&gateProj&&gateProj.park_id&&typeof dgVerifyAtPark==="function"){
-      const pk=await sb.from("parks").select("*").eq("id",gateProj.park_id).maybeSingle();
-      if(pk.data){
-        const dec=await dgVerifyAtPark(pk.data,"measure");
-        if(!dec.ok)return toast("⛔ "+esc(dec.message||_tmsf("Konum doğrulanamadı ({r})",{r:dec.reason})),"err","🛰");
-        dgGeoStamp(base,dec);
-        if(dec.verified)toast(dgCf("🛰 Konum doğrulandı: ")+esc(pk.data.name)+
-          (dec.reason==="margin"?" ("+_tms("kenar payı")+")":"")+" · ±"+Math.round(dec.fix.acc)+" m","ok","🛰");
-      }
-    }
-    
-     // 3. OFFLINE KONTROLÜ (Fotoğraf ve veriyi IndexedDB'ye kaydet)
-    if(!navigator.onLine){
-        if(typeof window!=="undefined"&&Object.prototype.hasOwnProperty.call(window,"DG_BUILD_OFFLINE_MEASUREMENT_RECORD"))Object.assign(base,window.DG_BUILD_OFFLINE_MEASUREMENT_RECORD.build({record:base,photoBlob,photoFile,editId:EDIT_ID,clientId:uuidv4()}));
-        else{if(photoBlob)base.photoBlob=photoBlob;if(photoFile)base.photo_file=photoFile;base.client_id=uuidv4();if(EDIT_ID)base._editId=EDIT_ID;}
-        
-        await saveOfflineMeasurement(base);
-        toast('Çevrimdışı kaydedildi — internet gelince senkronize','info','📴');
-        if(typeof window!=="undefined"&&Object.prototype.hasOwnProperty.call(window,"DG_RECORD_MEASUREMENT_PRESENCE_ACTION"))window.DG_RECORD_MEASUREMENT_PRESENCE_ACTION.record(wasEdit?"edit":"save","P"+String(pt).padStart(3,"0"),dgPresenceAct);
-        else if(typeof dgPresenceAct==="function"){try{dgPresenceAct(wasEdit?"edit":"save","P"+String(pt).padStart(3,"0"));}catch(e){}}
-        
-        // ✅ Background Sync register KALDIRILDI (artık ana thread yönetiyor)
-        
-        if(wasEdit)cancelEdit();
-        if(typeof window!=="undefined"&&Object.prototype.hasOwnProperty.call(window,"DG_REFRESH_MEASUREMENT_AFTER_SAVE"))window.DG_REFRESH_MEASUREMENT_AFTER_SAVE.offline({wasEdit,reset:dgResetMeasureFields,autoFill:autoFillPointId,loadDashboard:loadDash,loadRecords});
-        else{dgResetMeasureFields();if(!wasEdit)autoFillPointId();loadDash();loadRecords();}
-        return;
-    }
-    
-    // 4. ONLINE: Fotoğrafı Supabase Storage'a yükle
-    let photoUrl = null;
-    if(photoBlob){
-        if(typeof window!=="undefined"&&Object.prototype.hasOwnProperty.call(window,"DG_UPLOAD_MEASUREMENT_PHOTO"))photoUrl=(await window.DG_UPLOAD_MEASUREMENT_PHOTO.upload({client:sb,userId:USER.id,blob:photoBlob})).publicUrl;
-        else{
-          const path=USER.id+"/"+Date.now()+".jpg";
-          const{error}=await sb.storage.from("dendro-photos").upload(path,photoBlob,{contentType:"image/jpeg"});
-          if(error)throw error;
-          photoUrl=sb.storage.from("dendro-photos").getPublicUrl(path).data.publicUrl;
-        }
-    }
-    if(photoUrl){
-        base.photo_url = photoUrl;
-        base.photo_file = photoFile;
-    }
-    
-    // 5. Supabase insert/update
-    if(EDIT_ID){
-        const write=typeof window!=="undefined"&&Object.prototype.hasOwnProperty.call(window,"DG_PERSIST_MEASUREMENT_RECORD")
-          ?await window.DG_PERSIST_MEASUREMENT_RECORD.persist({client:sb,record:base,editId:EDIT_ID})
-          :await sb.from("measurements").update(base).eq("id",EDIT_ID);
-        const{error}=write;
-        if(error)return toast("Hata: "+error.message,"err");
-        toast("Kayıt güncellendi — onaya gönderildi","ok","✓");
-        cancelEdit();
-    }else{
-        let write;
-        if(typeof window!=="undefined"&&Object.prototype.hasOwnProperty.call(window,"DG_PERSIST_MEASUREMENT_RECORD"))write=await window.DG_PERSIST_MEASUREMENT_RECORD.persist({client:sb,record:base,editId:null});
-        else{let{error}=await sb.from("measurements").insert(base);if(error){delete base.altitude_m;delete base.photo_file;({error}=await sb.from("measurements").insert(base));}write={error};}
-        const{error}=write;
-        if(error)return toast("Hata: "+error.message,"err");
-        toast("Kaydedildi — "+c.total_carbon.toFixed(1)+" kg karbon","ok","🌱");
-      if(typeof window!=="undefined"&&Object.prototype.hasOwnProperty.call(window,"DG_RECORD_MEASUREMENT_PRESENCE_ACTION"))window.DG_RECORD_MEASUREMENT_PRESENCE_ACTION.record(wasEdit?"edit":"save","P"+String(pt).padStart(3,"0"),dgPresenceAct);
-      else if(typeof dgPresenceAct==="function"){try{dgPresenceAct(wasEdit?"edit":"save","P"+String(pt).padStart(3,"0"));}catch(e){}}
-    }
-    
-    if(typeof window!=="undefined"&&Object.prototype.hasOwnProperty.call(window,"DG_REFRESH_MEASUREMENT_AFTER_SAVE"))window.DG_REFRESH_MEASUREMENT_AFTER_SAVE.online({wasEdit,reset:dgResetMeasureFields,autoFill:autoFillPointId,loadDashboard:loadDash,loadRecords,loadWaypoints});
-    else{dgResetMeasureFields();loadDash();loadRecords();loadWaypoints();if(!wasEdit)autoFillPointId();}
 }
 
 /* --- 8. DÜZENLEME --- */
 function cancelEdit(){
- if(typeof window!=="undefined"&&Object.prototype.hasOwnProperty.call(window,"DG_CANCEL_MEASUREMENT_EDIT"))return window.DG_CANCEL_MEASUREMENT_EDIT.cancel({setEditing:id=>{EDIT_ID=id;},setManualPoint:value=>{manualPoint=value;},element:$,parkGate:dgParkGate});
- EDIT_ID=null;manualPoint=false;$("editBanner").style.display="none";$("saveBtn").textContent="💾 Hesapla ve Kaydet";dgParkGate();
+ return window.DG_CANCEL_MEASUREMENT_EDIT.cancel({setEditing:id=>{EDIT_ID=id;},setManualPoint:value=>{manualPoint=value;},element:$,parkGate:dgParkGate});
 }
 async function editRec(id){
- if(typeof window!=="undefined"&&Object.prototype.hasOwnProperty.call(window,"DG_EDIT_MEASUREMENT_RECORD"))return window.DG_EDIT_MEASUREMENT_RECORD.edit(id,{
+ return window.DG_EDIT_MEASUREMENT_RECORD.edit(id,{
   fetch:recordId=>window.DG_FETCH_MEASUREMENT_FOR_EDIT.fetch({client:sb,id:recordId}),
   clearPhoto:dgClearMeasurePhoto,
   setEditing:value=>{EDIT_ID=value;},
@@ -792,40 +323,13 @@ async function editRec(id){
   navigate:go,
   projectChanged:dgProjectChanged
  });
- const{data}=await sb.from("measurements").select("*").eq("id",id).single();
- if(!data)return;
- dgClearMeasurePhoto();
- EDIT_ID=id;
- $("mProject").value=data.project_id;
- $("mPoint").value=data.point_id;$("mNo").value=data.measurement_no||1;
- $("mGroup").value=data.grp||"";fillSpecies();$("mSpecies").value=data.species;showLatin();
- $("mDbh").value=(data.girth_cm!=null?data.girth_cm:((typeof circumferenceCmFromDiameter==="function")?circumferenceCmFromDiameter(data.dbh_cm):data.dbh_cm));$("mHeight").value=data.height_m;
- $("editBanner").style.display="block";$("saveBtn").textContent="💾 Kaydı Güncelle";
- liveCalc();go("measure");dgProjectChanged();
-}
-/* --- 9. FOTOĞRAF İŞLEME --- */
+}/* --- 9. FOTOĞRAF İŞLEME --- */
 async function compress(f){
- if(typeof window!=="undefined"&&Object.prototype.hasOwnProperty.call(window,"DG_COMPRESS_MEASUREMENT_PHOTO"))return window.DG_COMPRESS_MEASUREMENT_PHOTO.compress(f,{loadImage:loadImg,document,URL});
- const{i,u}=await loadImg(f);
- try{
-  const m=1024,sc=Math.min(1,m/Math.max(i.width,i.height)),c=document.createElement("canvas");
-  c.width=i.width*sc;c.height=i.height*sc;c.getContext("2d").drawImage(i,0,0,c.width,c.height);
-  return await new Promise((resolve,reject)=>c.toBlob(b=>b?resolve(b):reject(new Error("image compression")),"image/jpeg",.7));
- }finally{URL.revokeObjectURL(u);}
+ return window.DG_COMPRESS_MEASUREMENT_PHOTO.compress(f,{loadImage:loadImg,document,URL});
 }
 async function removePhoto(url){
- if(typeof window!=="undefined"&&Object.prototype.hasOwnProperty.call(window,"DG_REMOVE_MEASUREMENT_PHOTO"))return window.DG_REMOVE_MEASUREMENT_PHOTO.remove({client:sb,url});
- if(!url)return;
- try{
-  let p=url.split("/dendro-photos/")[1];
-  if(p){await sb.storage.from("dendro-photos").remove([p]);}
- }catch(e){}
- try{
-  const p2=decodeURIComponent(url.split("/dendro-photos/")[1]||"");
-  if(p2)await sb.storage.from("dendro-photos").remove([p2]);
- }catch(e){}
+ return window.DG_REMOVE_MEASUREMENT_PHOTO.remove({client:sb,url});
 }
-
 /* 0035b: dil değişince tür listesi yeniden doldurulur (görünen adlar çevrilir,
  * value'lar kanonik TR kalır). */
 window.addEventListener("dg:lang",()=>{try{const g=$("mGroup");if(g&&g.value&&$("mSpecies")){const sp=$("mSpecies").value;fillSpecies();$("mSpecies").value=sp;showLatin();}if(typeof liveCalc==="function")liveCalc();}catch(e){}});

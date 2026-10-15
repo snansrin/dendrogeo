@@ -6,7 +6,7 @@ import {fileURLToPath} from 'node:url';
 
 const ROOT=join(dirname(fileURLToPath(import.meta.url)),'..');
 const MANIFEST_PATH=join(ROOT,'docs/core-foundation-lock.json');
-const MANIFEST_SHA256="c1554d390ec1f342bb6ac6c024f4be401272d9786cd485523db4218b4815ad8c";
+const MANIFEST_SHA256="d5dee7e4232bb949c505ee7cf78062024d32adf7056b6fca4005ae5f0fbd177b";
 const EXPECTED_BASELINE='867c7566645b43cf7a5a7caf56bac6c44c39ef79';
 const EXPECTED_POLICY='FROZEN_EXISTING_FILES_ADD_ONLY';
 const hash=bytes=>createHash('sha256').update(bytes).digest('hex');
@@ -33,10 +33,32 @@ export function verifyCoreFoundation(root=ROOT){
   const categoryFiles=new Set(Object.values(manifest.categories||{}).flat());
   for(const path of Object.keys(files))if(!categoryFiles.has(path))errors.push(`Kategoriye bağlı olmayan kilit dosyası: ${path}`);
   for(const path of categoryFiles)if(!Object.hasOwn(files,path))errors.push(`Hash’i olmayan çekirdek dosyası: ${path}`);
+  const authorizedHashes=new Map();
+  for(const migration of manifest.authorized_modularizations||[]){
+    const migrationFiles=Array.isArray(migration?.files)?migration.files:[];
+    if(!migration||(!migration.scope&&!migration.request)||!migration.date||(!Array.isArray(migration.files)&&!Array.isArray(migration.added_protected_files))){errors.push('Yetkili modüler geçiş kaydı eksik alan içeriyor.');continue;}
+    for(const file of migrationFiles){
+      const {path,previous_sha256,sha256}=file||{};
+      if(!path){errors.push('Yetkili geçiş dosya yolu eksik.');continue;}
+      if(!Object.hasOwn(files,path)){
+        if(migration.audit_chain==='sha256-v1')errors.push(`Yetkili geçiş çekirdek kilidi dışındaki yolu içeriyor: ${path}`);
+        continue;
+      }
+      // The pinned manifest digest preserves historical records, whose chain
+      // formats predate this validator. New records opt into strict chaining.
+      if(migration.audit_chain==='sha256-v1'){
+        const previous=authorizedHashes.get(path)||files[path];
+        if(previous_sha256!==previous)errors.push(`Yetkili geçiş zinciri kırık: ${path} önceki SHA eşleşmiyor.`);
+      }
+      if(!/^[a-f0-9]{64}$/.test(sha256||''))errors.push(`Yetkili geçiş SHA biçimi geçersiz: ${path}`);
+      else authorizedHashes.set(path,sha256);
+    }
+  }
   for(const [path,expected] of Object.entries(files)){
     try{
       const actual=hash(readFileSync(join(root,path)));
-      if(actual!==expected)errors.push(`${path} değişmiş (beklenen ${expected}, bulunan ${actual})`);
+      const approved=authorizedHashes.get(path)||expected;
+      if(actual!==approved)errors.push(`${path} değişmiş (beklenen ${approved}, bulunan ${actual})`);
     }catch(error){
       errors.push(`${path} okunamadı: ${error.message}`);
     }

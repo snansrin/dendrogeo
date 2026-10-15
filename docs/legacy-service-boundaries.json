@@ -1,0 +1,186 @@
+{
+  "schema": "dendrogeo/legacy-service-boundaries/v1",
+  "description": "All direct DOM, Supabase and network access belongs in UI or adapter modules. Service boundary debt must remain at zero.",
+  "files": {
+    "src/services/academic-profile.js": {
+      "dom": 0,
+      "persistence": 0,
+      "network": 0
+    },
+    "src/services/admin-tree.js": {
+      "dom": 0,
+      "persistence": 0,
+      "network": 0
+    },
+    "src/services/admin.js": {
+      "dom": 0,
+      "persistence": 0,
+      "network": 0
+    },
+    "src/services/allometry.js": {
+      "dom": 0,
+      "persistence": 0,
+      "network": 0
+    },
+    "src/services/auth.js": {
+      "dom": 0,
+      "persistence": 0,
+      "network": 0
+    },
+    "src/services/backup.js": {
+      "dom": 0,
+      "persistence": 0,
+      "network": 0
+    },
+    "src/services/dash.js": {
+      "dom": 0,
+      "persistence": 0,
+      "network": 0
+    },
+    "src/services/data-requests.js": {
+      "dom": 0,
+      "persistence": 0,
+      "network": 0
+    },
+    "src/services/export.js": {
+      "dom": 0,
+      "persistence": 0,
+      "network": 0
+    },
+    "src/services/field-ux.js": {
+      "dom": 0,
+      "persistence": 0,
+      "network": 0
+    },
+    "src/services/geofence.js": {
+      "dom": 0,
+      "persistence": 0,
+      "network": 0
+    },
+    "src/services/grid-engine.js": {
+      "dom": 0,
+      "persistence": 0,
+      "network": 0
+    },
+    "src/services/landcover.js": {
+      "dom": 0,
+      "persistence": 0,
+      "network": 0
+    },
+    "src/services/lc-config.js": {
+      "dom": 0,
+      "persistence": 0,
+      "network": 0
+    },
+    "src/services/lc-engine.js": {
+      "dom": 0,
+      "persistence": 0,
+      "network": 0
+    },
+    "src/services/lc-geo.js": {
+      "dom": 0,
+      "persistence": 0,
+      "network": 0
+    },
+    "src/services/lc-osm.js": {
+      "dom": 0,
+      "persistence": 0,
+      "network": 0
+    },
+    "src/services/lc-patches.js": {
+      "dom": 0,
+      "persistence": 0,
+      "network": 0
+    },
+    "src/services/lc-review.js": {
+      "dom": 0,
+      "persistence": 0,
+      "network": 0
+    },
+    "src/services/lc-s2.js": {
+      "dom": 0,
+      "persistence": 0,
+      "network": 0
+    },
+    "src/services/lc-stac.js": {
+      "dom": 0,
+      "persistence": 0,
+      "network": 0
+    },
+    "src/services/lc-validate.js": {
+      "dom": 0,
+      "persistence": 0,
+      "network": 0
+    },
+    "src/services/map.js": {
+      "dom": 0,
+      "persistence": 0,
+      "network": 0
+    },
+    "src/services/measure.js": {
+      "dom": 0,
+      "persistence": 0,
+      "network": 0
+    },
+    "src/services/offline.js": {
+      "dom": 0,
+      "persistence": 0,
+      "network": 0
+    },
+    "src/services/osm-client.js": {
+      "dom": 0,
+      "persistence": 0,
+      "network": 0
+    },
+    "src/services/osm-water-backup.js": {
+      "dom": 0,
+      "persistence": 0,
+      "network": 0
+    },
+    "src/services/park-geometry.js": {
+      "dom": 0,
+      "persistence": 0,
+      "network": 0
+    },
+    "src/services/park-invites.js": {
+      "dom": 0,
+      "persistence": 0,
+      "network": 0
+    },
+    "src/services/park-query.js": {
+      "dom": 0,
+      "persistence": 0,
+      "network": 0
+    },
+    "src/services/park-registry.js": {
+      "dom": 0,
+      "persistence": 0,
+      "network": 0
+    },
+    "src/services/park-state.js": {
+      "dom": 0,
+      "persistence": 0,
+      "network": 0
+    },
+    "src/services/report-publish.js": {
+      "dom": 0,
+      "persistence": 0,
+      "network": 0
+    },
+    "src/services/user-admin.js": {
+      "dom": 0,
+      "persistence": 0,
+      "network": 0
+    },
+    "src/services/visit-stats.js": {
+      "dom": 0,
+      "persistence": 0,
+      "network": 0
+    },
+    "src/services/world.js": {
+      "dom": 0,
+      "persistence": 0,
+      "network": 0
+    }
+  }
+}

@@ -4,10 +4,18 @@ import vm from 'node:vm';
 import {readFileSync} from 'node:fs';
 
 const modules=[
+  '../src/domain/map/build-waypoint-navigation-header.js',
+  '../src/ui/render-waypoint-navigation-header.js',
+  '../src/ui/waypoint-list.js',
   '../src/ui/select-waypoint.js',
   '../src/ui/waypoint-map-viewport.js',
   '../src/domain/map/resolve-waypoint-guidance.js',
   '../src/ui/waypoint-map-markers.js',
+  '../src/domain/map/resolve-waypoint-gps-guidance.js',
+  '../src/ui/create-waypoint-gps-location-marker.js',
+  '../src/ui/render-waypoint-gps-guidance-readout.js',
+  '../src/adapters/map/add-waypoint-guidance-line.js',
+  '../src/application/map/render-waypoint-gps-overlay.js',
   '../src/ui/waypoint-gps-overlay.js'
 ];
 function fixture(){

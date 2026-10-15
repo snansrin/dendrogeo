@@ -10,5 +10,10 @@ window.DG_RENDER_WAYPOINT_NAVIGATION_HEADER={
     }
     const gps=getElement("navGps");
     if(gps)gps.textContent=model.gpsText;
+  },
+  renderGuidance({target,gps,distance,translate,resolve,getElement}){
+    const text=resolve({target,gps,distance,translate});
+    getElement("navGuidance").textContent=text;
+    return text;
   }
 };

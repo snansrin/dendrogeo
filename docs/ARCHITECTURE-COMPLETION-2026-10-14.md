@@ -25,14 +25,14 @@ contracts: sınır doğrulaması; workers: ağır raster/geometri işleri
 | Dış erişim | Supabase/HTTP/IndexedDB adapter'ları vardı; STAC retry ve UUID domain'deydi | Dış kaynaklar adapter'da; adapter UI/application globaline bağımlı olmaz | Tamamlandı; STAC/UUID adapter'a taşındı, ters yön kapısı eklendi |
 | Durum sahipliği | Feature store'ları ve eski lexical uyumluluk değişkenleri birlikte bulunuyordu | Paylaşılan feature state kendi store'unda; kalan legacy durumun sahibi/composition sınırı açık | Korundu; grid, ölçüm proje dizini, yayın kuyruğu, davetler ve admin tree store'ları mevcut; shell/map/GPS uyumluluk durumu ui/state.js ve ilgili facade sahibinde |
 | API ve DTO | Legacy DG_* girişleri, callback portları ve worker sözleşmeleri vardı | Eski giriş korunur, sınır DTO'ları doğrulanır; yeni bilimsel mantık serviste büyümez | Korundu; künye köprüsü saat girdisini bağlar, saf kural API'si ayrı kalır |
-| Yükleme ve PWA | 959 modülün yükleme/precache denetimi vardı | Her modül yüklenir, çift değerlendirme yoktur; yazma/Auth cache'e alınmaz; açık iş reload ile kesilmez | 959 runtime modülü tutarlı; seçici cache ve açık iş davranışı korundu |
-| Mimari CI | Bağımlılık/hash kapıları vardı; DOM/örtük saat/bare global kapsamı eksikti | Katman kaçakları ve yeniden oluşan borç build'i durdurur | 777 domain/application/UI ve 905 katman modülü denetlendi; geçiş borcu sıfır |
-| Çekirdek koruması | 802 dosya kilitliydi | Yeni sınır kontrolcüleri ve testleri de hash kilidinde olur | 865 dosya ve 606 kritik runtime modülü korumalı |
-| Yayın kabulü | Önceki akış grupları CI ve browser'dan geçmişti | Bu katman değişikliği ayrıca tam check, mobil, GIS ve canlı sürüm kontrolünden geçer | Son PR/CI ve canlı yayın sonucu aşağıdaki kabul kaydında tutulur |
+| Yükleme ve PWA | 990 modülün yükleme/precache denetimi vardı | Her modül yüklenir, çift değerlendirme yoktur; yazma/Auth cache'e alınmaz; açık iş reload ile kesilmez | 990 runtime modülü tutarlı; seçici cache ve açık iş davranışı korunuyor |
+| Mimari CI | Bağımlılık/hash kapıları vardı; DOM/örtük saat/bare global kapsamı eksikti | Katman kaçakları ve yeniden oluşan borç build'i durdurur | AST katman kapısı 800, AST bağımlılık kapısı 936 modül; legacy servis DOM/Supabase/ağ borcu 0 |
+| Çekirdek koruması | 802 dosya kilitliydi | Yeni sınır kontrolcüleri ve testleri de hash kilidinde olur | 950 dosya ve 612 kritik runtime modülü korumalı |
+| Yerel yayın kabulü | Önceki akış grupları CI ve browser'dan geçmişti | Bu katman değişikliği ayrıca tam check, mobil, GIS ve erişilebilirlik kapılarından geçer | `npm run check`, `npm run check:phone` ve `npm run check:accessibility` geçti; 360/390/430 px, çizim/fırça, OSM kurtarma ve 13 görünüm doğrulandı |
 
 ## Seviye
 
-Bu projeye ait kabul ölçeği: **1 dosyalara ayrılma → 2 katman/port sınırları → 3 davranış ve çevrimdışı entegrasyonu → 4 CI ile korunan, yayını doğrulanmış mimari**. Kaynak düzeltmeleri 4. seviyenin şartlarını tamamlar; yayın doğrulaması son kapıdır. Bu ölçek sektör standardı veya yüzde hesabı değildir.
+Bu projeye ait kabul ölçeği: **1 dosyalara ayrılma → 2 katman/port sınırları → 3 davranış ve çevrimdışı entegrasyonu → 4 CI ile korunan mimari**. Kaynak ve yerel yayın-kabul kapıları 4. seviyeyi geçti. Bu ölçek sektör standardı veya yüzde hesabı değildir.
 
 ## Kanıt
 
@@ -44,4 +44,4 @@ Bu projeye ait kabul ölçeği: **1 dosyalara ayrılma → 2 katman/port sınır
 
 ## Kabul kaydı
 
-Kaynakta açık tablo işi kalmadı. Son tam check ve yerel Chromium akışları başarılı. Main yayını ancak PR CI/Mobile/GIS kontrolleri ve canlı r427/runtime doğrulaması da başarılı olduktan sonra kullanıcıya tamamlandı olarak bildirilecektir. Git/CI yayımlama kayıtları son commit/PR üzerinden izlenir.
+15 Ekim 2026 yerel kabulü: mimari geçişin tanımlı katman, dependency, servis sınırı, script/offline, sürüm/build, CSP, regresyon, mobil Chromium ve erişilebilirlik kapıları tamamlandı. 950 korumalı dosya ve 614 kritik runtime modülü doğrulandı. Format/lint eklenmedi; depo genelinde biçim standardı olmadan toplu biçimlendirme mimari tamamlanma şartı sayılmadı. Script sırasını doğrulayan mevcut build ve runtime manifestleri korundu; bunları tek kaynağa indirmek ayrı ve davranış riski taşıyan bir iyileştirme olduğu için bu kabulün dışında bırakıldı. Bu çalışma yerel kaynak kabulüdür; GitHub CI, commit/push ve canlı production sürümü doğrulanmış değildir.

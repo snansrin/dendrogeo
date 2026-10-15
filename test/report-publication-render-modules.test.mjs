@@ -92,10 +92,23 @@ test('queue summary deduplicates request failures and the card renders status, t
   assert.match(ctx.DG_RENDER_PUBLICATION_ADMIN_CARD.schemaWarning(), /0008_report_publish\.sql/);
 });
 
+test('admin publication UI owns mounting, clock updates and loading feedback', () => {
+  const card = ctx.DG_RENDER_PUBLICATION_ADMIN_CARD;
+  const box = { innerHTML: '' }, clock = { textContent: '' };
+  assert.equal(card.mount(box, '<section>card</section>'), true);
+  assert.equal(box.innerHTML, '<section>card</section>');
+  assert.equal(card.updateClock(clock, 'son kontrol'), true);
+  assert.equal(clock.textContent, 'son kontrol');
+  const document = { getElementById: id => id === 'dgPubBox' ? box : null };
+  assert.equal(card.showLoading(document), true);
+  assert.match(box.innerHTML, /Kuyruk yükleniyor/);
+});
+
 test('report service delegates the admin card render into five modules', () => {
   const service = read('src/services/report-publish.js');
   for (const name of ['DG_RESOLVE_PUBLICATION_PARK_STATUS', 'DG_RENDER_PUBLICATION_PARK_ROW',
     'DG_RENDER_PUBLICATION_HISTORY', 'DG_SUMMARIZE_PUBLICATION_QUEUE', 'DG_RENDER_PUBLICATION_ADMIN_CARD']) {
     assert.ok(service.includes('window.' + name), name);
   }
+  assert.doesNotMatch(service, /\.innerHTML|\.textContent|\.classList|\.style\s*\./, 'servis DOM yazmaz veya görünüm durumunu okumaz');
 });

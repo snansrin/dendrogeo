@@ -46,8 +46,9 @@ test('GPS view refresh retains DOM, marker, navigation and point-suggestion orde
   assert.equal(window.DG_REFRESH_MEASUREMENT_GPS_VIEW.refresh({getGPS:()=>null}),undefined);
 });
 
-test('GPS view modules load before measure, are precached and preserve the legacy updater',()=>{
+test('GPS view modules load before measure, are precached and own the legacy updater presentation',()=>{
   const head=read('partials/head.html'),sw=read('sw.js'),service=read('src/services/measure.js'),measure=head.indexOf('src/services/measure.js');
   for(const path of modules){assert.ok(head.indexOf(path)>=0&&head.indexOf(path)<measure,`${path} load order`);assert.ok(sw.includes(`'/${path}'`),`${path} precache`);}
-  assert.ok(service.includes('DG_REFRESH_MEASUREMENT_GPS_VIEW.refresh'));assert.ok(service.includes('function updGps(){'));assert.ok(service.includes('const q=a<10?"ÇOK İYİ":a<20?"İYİ":a<40?"ORTA":"ZAYIF"'));
+  assert.ok(service.includes('DG_REFRESH_MEASUREMENT_GPS_VIEW.refresh'));assert.ok(service.includes('function updGps(){'));
+  assert.ok(read('src/domain/trees/format-measurement-gps-readout.js').includes('accuracy<10'));
 });

@@ -20,9 +20,8 @@ function dgFlatRowHTML(x){
   return window.DG_ADMIN_MEASUREMENT_ROW_UI.render(x,{escape:esc,latin:LATIN,thumbnail:dgThumb});
 }
 function dgRenderFlatTable(rows){
-  const t=$("aMeasT");if(!t)return;
   /* Locked contract retained: sort((a,b)=>((+a.project_id||0)-(+b.project_id||0))||((+a.point_id||0)-(+b.point_id||0))). */
-  t.innerHTML=window.DG_ADMIN_MEASUREMENT_TABLE_UI.render(rows,{renderRow:dgFlatRowHTML});
+  window.DG_ADMIN_MEASUREMENT_TABLE_UI.mount(document,rows,{renderRow:dgFlatRowHTML});
 }
 
 /* 0043 · SEKMELİ (debounced) ARKA PLAN MUTABAKAT
@@ -41,17 +40,17 @@ function dgAdminSyncSoon(){
   DG_ADMIN_SYNC_T=setTimeout(async()=>{
     DG_ADMIN_SYNC_T=null;
     try{
-      const g=await sb.from("v_global").select("*").single();
-      if(g&&g.data&&$("aCarbon"))$("aCarbon").textContent=g.data.carbon_t||0;
-    }catch(e){}
-    try{loadWorld();}catch(e){}
+      const global=await window.DG_ADMIN_OVERVIEW_STORE.create(()=>sb).loadGlobal();
+      if(global?.data)window.DG_ADMIN_OVERVIEW_METRICS_UI.updateCarbon(global.data.carbon_t,$);
+      await loadWorld();
+    }catch(error){console.warn("DENDROGEO · yönetici özeti arka plan yenilemesi başarısız:",error?.message||error);}
   },1000);
 }
 
 /* 0040: kaydırma koruma sarmalı — yeniden çizimde #main scrollTop korunur. */
 async function loadAdmin(){const _y=(typeof dgScrollKeep==="function"?dgScrollKeep():null);try{return await loadAdmin__scroll.apply(this,arguments);}finally{if(typeof dgScrollRestore==="function")dgScrollRestore(_y);}}
 async function loadAdmin__scroll(){
- if(window.DG_LOAD_ADMIN_OVERVIEW)return window.DG_LOAD_ADMIN_OVERVIEW.execute(PROFILE,{
+ return window.DG_LOAD_ADMIN_OVERVIEW.execute(PROFILE,{
   load:()=>window.DG_ADMIN_OVERVIEW_STORE.create(()=>sb).load(),
   summarize:window.DG_ADMIN_OVERVIEW_SUMMARY.summarize,
   updateMetrics:summary=>window.DG_ADMIN_OVERVIEW_METRICS_UI.render(summary,$),
@@ -61,44 +60,6 @@ async function loadAdmin__scroll(){
   refreshParkAdmin:()=>{if(typeof loadParkAdmin==="function")loadParkAdmin();},
   refreshPublicationQueue:()=>{if(typeof dgLoadPublishQueue==="function")dgLoadPublishQueue();}
  });
- if(!PROFILE||(PROFILE.role!=="admin"&&PROFILE.role!=="owner"))return;
- const[uRes,mRes,pRes,gRes]=await Promise.all([
-  sb.from("profiles").select("*"),
-  /* ⚠ PGRST201 DÜZELTMESİ (2026-09-24, canlıda yakalandı): 0003 ile
-   * measurements'a reviewed_by FK'sı eklendi → profiles'a İKİ ilişki var
-   * (owner + reviewed_by). Çıplak "profiles(...)" gömüsü bu yüzden
-   * "Could not embed because more than one relationship was found" hatası
-   * veriyordu ve tablo sessizce "Kayıt yok." basıyordu (veri silinmemişti).
-   * FK adı açıkça belirtilir: profiles!measurements_owner_fkey. */
-  sb.from("measurements").select("*,profiles!measurements_owner_fkey(full_name)").order("created_at",{ascending:false}),
-  sb.from("projects").select("*"),
-  sb.from("v_global").select("*").single()
- ]);
- const users=uRes.data||[],meas=mRes.data||[],projs=pRes.data||[],global=gRes.data||{};
-
-const cnt=await sb.from("measurements").select("*",{count:"exact",head:true});
-$("aUsers").textContent=users.length;$("aRec").textContent=cnt.count??meas.length;$("aProj").textContent=projs.length;$("aCarbon").textContent=global.carbon_t||0;
- /* ⚠ SESSİZ "KAYIT YOK" TUZAĞI KAPANDI (2026-09-24): sorgu hata verirse
-  * tablo "Kayıt yok." diyordu ve kullanıcı verisinin silindiğini sanıyordu.
-  * Artık hatanın kendisi ekrana yazılır (ayrıntı: admin-tree.js dgTreeFetch). */
- if(mRes.error){
-  $("aMeasT").innerHTML=`<tr><td colspan=9><div class="alert err"><b>⚠ Ölçümler okunamadı (veri silinmedi, sorgu hata veriyor):</b> <span class="mono" style="font-size:.72rem">${esc(mRes.error.message)}</span><br><span style="font-size:.8rem">Şema değişikliğinden sonra PostgREST önbelleği bayatlamış olabilir → Supabase'de birkaç dakika bekleyip 🔄 Yenile, ya da üstteki "Park → Proje → Kullanıcı" ağacının hata kutusundaki adımları izle.</span></div></td></tr>`;
- }else dgRenderFlatTable(meas);
- loadStorageStats();
- checkBackupReminder();
- loadVisitStats();
- loadRequests();
- loadAdminExportFilters();
- /* Park → proje → kullanıcı ağacı (admin-tree.js). Onay/red/silme sonrası
-  * loadAdmin() yeniden çağrıldığı için ağaç da kendiliğinden tazelenir. */
- if(typeof loadAdminTree==="function")loadAdminTree();
- /* Park kimlikleri (park-registry.js): çift kimlik/adı olmayan park uyarıları
-  * burada görünür; birleştir/yeniden adlandır/sil araçları aynı kartta. */
- if(typeof loadParkAdmin==="function")loadParkAdmin();
- /* Bilimsel rapor yayın kuyruğu (report-publish.js, 0008): yönetici sekmesi
-  * her açıldığında istekler + yayın günlüğü tazelenir; bekleyen istek varken
-  * modül kendi 25 sn'lik yoklamasını kurar. */
- if(typeof dgLoadPublishQueue==="function")dgLoadPublishQueue();
 }
 
 async function approveMeas(id){
@@ -157,7 +118,7 @@ async function loadStorageStats(){
   const adminStore=window.DG_ADMIN_PERSISTENCE_STORE.create(()=>sb);
   const usage=await window.DG_READ_PHOTO_STORAGE_USAGE.read(adminStore);
   window.DG_ADMIN_STORAGE_USAGE_UI.render($("storeBar"),$("storeInfo"),{...usage,quota:QUOTA_MB,format:_tadf});
- }catch(e){$("storeInfo").textContent=_tad("Depolama bilgisi alınamadı.");}
+ }catch(e){window.DG_ADMIN_STORAGE_USAGE_UI.unavailable($("storeInfo"),_tad("Depolama bilgisi alınamadı."));}
 }
 
 async function cleanOrphans(){
@@ -176,8 +137,7 @@ async function reGeocodeAll(){
  const store=window.DG_ADMIN_RE_GEOCODE_STORE&&window.DG_ADMIN_RE_GEOCODE_STORE.create(()=>sb);
  const confirmation=window.DG_CONFIRM_ADMIN_RE_GEOCODE;
  const feedback=window.DG_ADMIN_RE_GEOCODE_FEEDBACK;
- if(flow?.execute&&store&&confirmation&&feedback){
-  await flow.execute({
+ return flow.execute({
   authorized:()=>!!PROFILE&&(PROFILE.role==="admin"||PROFILE.role==="owner"),
   confirm:()=>confirmation.ask(message=>confirm(message),message=>dgCf(message)),
   loadRows:()=>store.loadMeasurements(),
@@ -189,20 +149,6 @@ async function reGeocodeAll(){
   onComplete:count=>feedback.completed(toast,_tadf,count),
   refresh:()=>{loadWorld();loadAdmin();}
  });
-  return;
- }
- /* Keep the original inline path as a compatibility fallback for partial script caches. */
- if(!PROFILE||(PROFILE.role!=="admin"&&PROFILE.role!=="owner"))return toast("Yetki yok.");
- if(!confirm(dgCf("Tüm kayıtların şehir/ülke bilgisi GPS koordinatından yeniden algılansın mı? (Nominatim limiti ~1 istek/sn)")))return;
- const{data}=await sb.from("measurements").select("id,lat,lon,city,country");
- const done=await flow.run(data||[],{
-  isValidCoordinate:(lat,lon)=>Number.isFinite(+lat)&&Number.isFinite(+lon),
-  reverse:(lat,lon)=>reverseGeocode(lat,lon),
-  update:(id,fields)=>sb.from("measurements").update(fields).eq("id",id),
-  wait:ms=>new Promise(resolve=>setTimeout(resolve,ms))
- });
- toast(_tadf("✓ {n} kaydın şehri güncellendi",{n:done}),"ok","🌍");
- loadWorld();loadAdmin();
 }
 
 async function delMeas(id){
@@ -220,9 +166,7 @@ async function delMeas(id){
 }
 
 function filterAdminMeas(){
- if(window.DG_ADMIN_MEASUREMENT_FILTER)return window.DG_ADMIN_MEASUREMENT_FILTER.apply($("adminMeasSearch").value,$("aMeasT"));
- const q=$("adminMeasSearch").value.toLowerCase();
- $("aMeasT").querySelectorAll("tr").forEach(r=>{r.style.display=r.textContent.toLowerCase().includes(q)?"":"none";});
+ return window.DG_ADMIN_MEASUREMENT_FILTER.apply($("adminMeasSearch").value,$("aMeasT"));
 }
 
 /* ============ GERÇEK ZAMANLI BAĞIMLI FİLTRELER (Ülke→Şehir→Proje) ============ */
@@ -241,29 +185,12 @@ function listProjects(projects,country,city,withId){
 }
 
 function fillSelect(sel,opts){
- if(window.DG_FILL_ADMIN_EXPORT_SELECT)return window.DG_FILL_ADMIN_EXPORT_SELECT.render(sel,opts,esc);
- if(!sel)return;
- const cur=sel.value;
- sel.innerHTML='<option value="">Tümü</option>'+opts.map(o=>{
-  const isObj=typeof o==="object";
-  const v=isObj?o.v:o,label=isObj?o.label:o;
-  return `<option value="${esc(v)}"${v===cur?" selected":""}>${esc(label)}</option>`;
- }).join("");
- if(sel.value!==cur)sel.value="";
+ return window.DG_FILL_ADMIN_EXPORT_SELECT.render(sel,opts,esc);
 }
 
 /* --- Yönetici paneli --- */
 async function loadAdminExportFilters(){
- if(window.DG_LOAD_ADMIN_EXPORT_FILTERS)return window.DG_LOAD_ADMIN_EXPORT_FILTERS.execute({load:()=>Promise.all([sb.from("measurements").select("country,city"),sb.from("projects").select("id,name,country,city").order("name")]),apply:(m,p)=>{ADM_ROWS=m.data||[];ADM_PROJECTS=p.data||[];fillSelect($("admExpCountry"),listCountries(ADM_ROWS,ADM_PROJECTS));admCountryChanged();}});
- try{
-  const [m,p]=await Promise.all([
-   sb.from("measurements").select("country,city"),
-   sb.from("projects").select("id,name,country,city").order("name")
-  ]);
-  ADM_ROWS=m.data||[];ADM_PROJECTS=p.data||[];
-  fillSelect($("admExpCountry"),listCountries(ADM_ROWS,ADM_PROJECTS));
-  admCountryChanged();
- }catch(e){}
+ return window.DG_LOAD_ADMIN_EXPORT_FILTERS.execute({load:()=>window.DG_ADMIN_EXPORT_FILTER_STORE.create(()=>sb).load(),apply:(m,p)=>{ADM_ROWS=m.data||[];ADM_PROJECTS=p.data||[];fillSelect($("admExpCountry"),listCountries(ADM_ROWS,ADM_PROJECTS));admCountryChanged();}});
 }
 
 function admCountryChanged(){

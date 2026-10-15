@@ -13,7 +13,7 @@ const paths = [
 ];
 function env(modular) {
   const context = vm.createContext({ window: {}, console, Date, AbortController, setTimeout, clearTimeout, fetch: async () => ({ ok: false }), encodeURIComponent });
-  if (modular) for (const path of paths) vm.runInContext(read(path), context);
+  for (const path of paths) vm.runInContext(read(path), context);
   vm.runInContext(read('src/services/lc-osm.js'), context);
   context.PARK_POLY = [[[41, 29], [42, 29], [42, 30], [41, 30], [41, 29]]];
   context.dgLcPointInRing = (lat, lon, ring) => lat >= 0 && lon >= 0 && ring.length > 0;

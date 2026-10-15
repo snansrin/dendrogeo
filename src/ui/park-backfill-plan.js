@@ -38,5 +38,6 @@ function renderBackfillPlan({box,plan=[],escape:esc,formatArea:dgFmtHa,translate
     (ok.length?``:`<div class="alert warn" style="margin-top:8px">OSM'de eşleşen park çıkmadı. Satırlardaki <b>✍️ Elle park oluştur ve bağla</b> düğmesi, ölçüm merkezinde o proje adıyla bir park kimliği açar — karşılaştırma yine park bazlı çalışır.</div>`);
 }
 
-  root.DG_PARK_BACKFILL_PLAN_UI=Object.freeze({render:renderBackfillPlan});
+  function close(document){const box=document.getElementById("backfillBox");if(box){box.style.display="none";box.innerHTML="";}}
+  root.DG_PARK_BACKFILL_PLAN_UI=Object.freeze({render:renderBackfillPlan,close});
 })(window);

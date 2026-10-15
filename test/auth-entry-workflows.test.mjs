@@ -52,8 +52,8 @@ test('Google OAuth keeps account-selection redirect and restores the button on p
  assert.equal(failure.status,'failed');assert.match(failure.message,/Supabase.*Google.*Enable/);assert.deepEqual(failureEvents.slice(0,4),[['disabled',true],['message','Google\'a yönlendiriliyorsun…',false],'wait',['disabled',false]]);assert.equal(failureEvents[4],'hide');
 });
 
-test('auth service delegates the five entry workflows and keeps the OAuth compatibility fallback',()=>{
+test('auth service delegates entry workflows and leaves provider handling in the application module',()=>{
  const source=readFileSync(new URL('../src/services/auth.js',import.meta.url),'utf8');
  for(const api of ['DG_SHOW_PASSWORD_RECOVERY','DG_SHOW_AUTH_PANEL','DG_SELECT_AUTH_TAB','DG_RENDER_AUTH_MESSAGE','DG_START_GOOGLE_SIGN_IN'])assert.ok(source.includes('window.'+api));
- assert.match(source,/async function dgGoogleSignIn\(/);assert.match(source,/sb\.auth\.signInWithOAuth\(\{/);assert.match(source,/window\.dgGoogleSignIn=dgGoogleSignIn;/);
+ assert.match(source,/async function dgGoogleSignIn\(/);assert.match(source,/window\.DG_START_GOOGLE_SIGN_IN\.start\(/);assert.doesNotMatch(source,/sb\.auth\.signInWithOAuth\(/);assert.match(source,/window\.dgGoogleSignIn=dgGoogleSignIn;/);
 });
