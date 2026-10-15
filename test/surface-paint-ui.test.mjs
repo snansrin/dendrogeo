@@ -30,8 +30,9 @@ test('brush toolbar is placed below marker refresh and exposes the established c
   assert.ok(shell.indexOf('loadLiveMap()') < shell.indexOf('id="surfaceBrushTools"'));
   assert.match(source, /function dgSensBrushCellKeys\(points,diameter\)/);
   assert.match(source, /function dgSensSetCellDecision\(cell,toCls/);
-  assert.match(source, /method:"visual-cell"/);
-  assert.match(source, /dgSensBrushCommit\(points,b\.type,b\.diameter\)/);
+  assert.match(source, /DG_SURFACE_CELL_DECISION\.create/);
+  assert.match(source, /DG_COMMIT_SURFACE_BRUSH_STROKE\.commit/);
+  assert.match(source, /onCommit:dgSensBrushCommit/);
   assert.match(source, /Sol tuş: fırça · Sağ tuş: haritayı kaydır/);
   assert.match(css, /\.dg-editor-tool\.is-active/);
   assert.match(source, /dgSensSetDrawType\(type\)/);

@@ -876,51 +876,19 @@ async function dgSensRawView(on){
  if(epoch===DG_SENS.epoch&&DG_SENS.record===rec)dgSensUpdateSummary();
 }
 function dgSensBrushStop(){
- const module=window.DG_SURFACE_BRUSH_POINTER_SESSION;if(module)return module.stop({state:DG_SENS,map});
- const b=DG_SENS.brush;if(!b)return;DG_SENS.brush=null;
- for(const [event,fn] of b.handlers)b.container.removeEventListener(event,fn,true);
- try{if(b.stroke)b.container.releasePointerCapture(b.stroke.pointerId);}catch(e){}
- if(b.preview)map.removeLayer(b.preview);
- b.container.classList.remove('dg-paint-brush-active');b.container.style.touchAction=b.touchAction;b.container.style.cursor=b.cursor;
- if(b.dragging)map.dragging.enable();
- if(b.zoom)map.doubleClickZoom.enable();
+ return window.DG_SURFACE_BRUSH_POINTER_SESSION.stop({state:DG_SENS,map});
 }
 function dgSensBrushCellKeys(points,diameter){
- const module=window.DG_SURFACE_BRUSH_CELL_SELECTION;
- if(module)return module.select({points,diameter,epsg:DG_SENS.epsg,polygonClipping:window.polygonClipping,parkGeometry:DG_SENS.parkGeometry,geometry:DG_SENS.geometry,cells:dgSensCells(),cellKey:dgSensCellKey,gridLineMask:dgGridLineMask,bounds:dgSurfaceBounds,overlap:dgSurfaceOverlap,area:dgSurfaceArea});
- const pc=window.polygonClipping;if(!pc||!DG_SENS.parkGeometry||!DG_SENS.geometry)return[];
- const masks=dgGridLineMask({pts:points,w:diameter/2},DG_SENS.epsg);if(!masks.length)return[];
- const brush=pc.intersection(pc.union(...masks),DG_SENS.parkGeometry);if(!brush.length)return[];
- const bounds=dgSurfaceBounds(brush),keys=[];
- for(const c of dgSensCells()||[]){const key=dgSensCellKey(c),cell=DG_SENS.geometry[key];if(!cell?.length)continue;const cb=dgSurfaceBounds(cell);if(!dgSurfaceOverlap(bounds,cb))continue;
-  if(dgSurfaceArea(pc.intersection(cell,brush))>.01)keys.push(key);
- }
- return keys;
+ return window.DG_SURFACE_BRUSH_CELL_SELECTION.select({points,diameter,epsg:DG_SENS.epsg,polygonClipping:window.polygonClipping,parkGeometry:DG_SENS.parkGeometry,geometry:DG_SENS.geometry,cells:dgSensCells(),cellKey:dgSensCellKey,gridLineMask:dgGridLineMask,bounds:dgSurfaceBounds,overlap:dgSurfaceOverlap,area:dgSurfaceArea});
 }
 function dgSensSetCellDecision(cell,toCls,ts=new Date().toISOString(),strokeId=null){
- const module=window.DG_SURFACE_CELL_DECISION;
- if(module){const applied=module.create({cell,toClass:toCls,types:window.DG_SURFACE_REVIEW.types,timestamp:ts,strokeId,cellKey:dgSensCellKey});if(applied)DG_SENS.record.corrections[applied.key]=applied.decision;return applied;}
- if(!cell||!window.DG_SURFACE_REVIEW.types[toCls])return null;
- const key=dgSensCellKey(cell),decision={from:cell.classKey,to:toCls,method:"visual-cell",ts};if(strokeId)decision.brushStrokeId=strokeId;
- DG_SENS.record.corrections[key]=decision;return{key,decision};
+ const applied=window.DG_SURFACE_CELL_DECISION.create({cell,toClass:toCls,types:window.DG_SURFACE_REVIEW.types,timestamp:ts,strokeId,cellKey:dgSensCellKey});
+ if(applied)DG_SENS.record.corrections[applied.key]=applied.decision;
+ return applied;
 }
-function dgSensPushBrushHistory(rec,stroke){const module=window.DG_SURFACE_BRUSH_HISTORY;if(module)return module.append(rec,stroke);if(!Array.isArray(rec.brushHistory))rec.brushHistory=[];rec.brushHistory.push(stroke);if(rec.brushHistory.length>20)rec.brushHistory.splice(0,rec.brushHistory.length-20);}
+function dgSensPushBrushHistory(rec,stroke){return window.DG_SURFACE_BRUSH_HISTORY.append(rec,stroke);}
 function dgSensMigrateBrushMasks(rec,cells,geometries,park,epsg){
- const module=window.DG_LEGACY_BRUSH_MASK_MIGRATION;
- if(module)return module.migrate({record:rec,cells,geometries,park,epsg,polygonClipping:window.polygonClipping,featureGeometry:dgSurfaceFeatureGeometry,bounds:dgSurfaceBounds,area:dgSurfaceArea,overlap:dgSensOverlapBounds,cellKey:dgSensCellKey,timestamp:()=>new Date().toISOString(),createDecision:({cell,toClass,timestamp,strokeId})=>window.DG_SURFACE_CELL_DECISION?.create({cell,toClass,types:window.DG_SURFACE_REVIEW.types,timestamp,strokeId,cellKey:dgSensCellKey}),appendHistory:dgSensPushBrushHistory});
- const old=Array.isArray(rec?.features)?rec.features:[];if(!old.some(f=>f.method==="visual-brush"))return false;
- const pc=window.polygonClipping,keep=[];rec.corrections=rec.corrections&&typeof rec.corrections==="object"?rec.corrections:{};let migrated=false;
- for(let i=0;i<old.length;i++){const f=old[i];if(f.method!=="visual-brush"){keep.push(f);continue;}
-  let mask=[];try{mask=pc.intersection(dgSurfaceFeatureGeometry(f,epsg),park);}catch(e){}
-  if(!mask.length){keep.push(f);continue;}
-  const bounds=dgSurfaceBounds(mask),ts=f.ts||new Date().toISOString(),strokeId="legacy-"+ts+"-"+i,changes=[];
-  for(const c of cells||[]){const key=dgSensCellKey(c),cell=geometries[key];if(!cell?.length||!dgSensOverlapBounds(bounds,cell))continue;
-   if(dgSurfaceArea(pc.intersection(cell,mask))<=.01)continue;
-   const previous=rec.corrections?.[key]?{...rec.corrections[key]}:null,decision={from:c.classKey,to:f.type,method:"visual-cell",ts,brushStrokeId:strokeId};rec.corrections[key]=decision;changes.push({key,before:previous,strokeId});
-  }
-  if(changes.length){dgSensPushBrushHistory(rec,{id:strokeId,changes,ts});migrated=true;}else keep.push(f);
- }
- if(migrated)rec.features=keep;return migrated;
+ return window.DG_LEGACY_BRUSH_MASK_MIGRATION.migrate({record:rec,cells,geometries,park,epsg,polygonClipping:window.polygonClipping,featureGeometry:dgSurfaceFeatureGeometry,bounds:dgSurfaceBounds,area:dgSurfaceArea,overlap:dgSensOverlapBounds,cellKey:dgSensCellKey,timestamp:()=>new Date().toISOString(),createDecision:({cell,toClass,timestamp,strokeId})=>window.DG_SURFACE_CELL_DECISION.create({cell,toClass,types:window.DG_SURFACE_REVIEW.types,timestamp,strokeId,cellKey:dgSensCellKey}),appendHistory:dgSensPushBrushHistory});
 }
 function dgSensOverlapBounds(a,geometry){const module=window.DG_SURFACE_GEOMETRY_OVERLAP;if(module)return module.bounds(a,geometry,dgSurfaceBounds,dgSurfaceOverlap);if(!geometry?.length)return false;const b=dgSurfaceBounds(geometry);return dgSurfaceOverlap(a,b);}
 function dgSensBrushToggle(){
@@ -931,47 +899,13 @@ function dgSensBrushToggle(){
  const diameter=Number(document.getElementById('dgSensBrushSize')?.value||DG_SENS.brushDiameter);
  if(!window.DG_SURFACE_REVIEW.types[type]||![5,10,20,40].includes(diameter))return;
  DG_SENS.brushType=type;DG_SENS.brushDiameter=diameter;container.classList.add('dg-paint-brush-active');
- const session=window.DG_SURFACE_BRUSH_POINTER_SESSION;
- if(session)return session.start({state:DG_SENS,map,leaflet:L,container,type,diameter,colors:DG_SENS_COLORS,forward:dgLcUtmForward,onCommit:dgSensBrushCommit,onError:error=>{DG_SENS.status=String(error.message||error);dgSensUpdateStatus();},render:dgSensRender});
- const b=DG_SENS.brush={container,type,diameter,epoch:DG_SENS.epoch,record:DG_SENS.record,dragging:map.dragging.enabled(),zoom:map.doubleClickZoom.enabled(),touchAction:container.style.touchAction,cursor:container.style.cursor,handlers:[]};
- map.dragging.disable();map.doubleClickZoom.disable();container.style.touchAction='none';container.style.cursor='crosshair';
- const point=e=>{const p=map.mouseEventToLatLng(e);return[p.lat,p.lng];};
- const stop=e=>{e.preventDefault();e.stopImmediatePropagation();};
- const add=e=>{
-  const p=point(e),last=b.stroke.points.at(-1),q=dgLcUtmForward(p[0],p[1],DG_SENS.epsg);
-  if(last){const prev=dgLcUtmForward(last[0],last[1],DG_SENS.epsg);if(Math.hypot(q.x-prev.x,q.y-prev.y)<b.diameter/6)return;}
-  if(b.stroke.points.length<300)b.stroke.points.push(p);
-  if(b.preview)map.removeLayer(b.preview);b.preview=L.layerGroup().addTo(map);
-  if(b.stroke.points.length>1)L.polyline(b.stroke.points,{color:DG_SENS_COLORS[b.type],weight:4,interactive:false}).addTo(b.preview);
-  L.circle(p,{radius:b.diameter/2,color:DG_SENS_COLORS[b.type],fillOpacity:.2,interactive:false}).addTo(b.preview);
- };
- const down=e=>{if(e.target?.closest?.('.leaflet-control')||e.button!==0||!e.isPrimary||DG_SENS.busy||DG_SENS.saving||b.stroke)return;stop(e);b.stroke={pointerId:e.pointerId,points:[]};container.setPointerCapture(e.pointerId);add(e);};
- const move=e=>{if(b.stroke?.pointerId!==e.pointerId)return;stop(e);add(e);};
- const finish=e=>{if(b.stroke?.pointerId!==e.pointerId)return;stop(e);if(e.type==='pointerup')add(e);const points=b.stroke.points;b.stroke=null;if(b.preview)map.removeLayer(b.preview);b.preview=null;try{container.releasePointerCapture(e.pointerId);}catch(err){}
-  if(e.type==='pointerup'&&b.epoch===DG_SENS.epoch&&b.record===DG_SENS.record)dgSensBrushCommit(points,b.type,b.diameter).catch(err=>{DG_SENS.status=String(err.message||err);dgSensUpdateStatus();});
- };
- for(const [event,fn] of [['pointerdown',down],['pointermove',move],['pointerup',finish],['pointercancel',finish],['lostpointercapture',finish]]){container.addEventListener(event,fn,true);b.handlers.push([event,fn]);}
- dgSensRender();
+ return window.DG_SURFACE_BRUSH_POINTER_SESSION.start({state:DG_SENS,map,leaflet:L,container,type,diameter,colors:DG_SENS_COLORS,forward:dgLcUtmForward,onCommit:dgSensBrushCommit,onError:error=>{DG_SENS.status=String(error.message||error);dgSensUpdateStatus();},render:dgSensRender});
 }
 async function dgSensBrushCommit(points,type,diameter){
- const module=window.DG_COMMIT_SURFACE_BRUSH_STROKE;
- if(module)return module.commit({points,type,diameter,state:DG_SENS,types:window.DG_SURFACE_REVIEW.types,allowed:[5,10,20,40],validate:input=>window.DG_VALIDATE_SURFACE_BRUSH_STROKE.valid(input),selectCells:dgSensBrushCellKeys,cells:dgSensCells,cellKey:dgSensCellKey,createDecision:(cell,classKey,ts,strokeId)=>dgSensSetCellDecision(cell,classKey,ts,strokeId),appendHistory:dgSensPushBrushHistory,timestamp:()=>new Date().toISOString(),strokeId:()=>Date.now().toString(36)+"-"+(++DG_SENS.strokeSeq).toString(36),dirty:dgSensDirty,previewCells:dgSensPreviewCells,refresh:dgSensRefreshLayer,summary:dgSensUpdateSummary,status:dgSensUpdateStatus,save:dgSensSave});
- if(!points.length||points.length>300||!points.every(p=>Array.isArray(p)&&p.length===2&&p.every(Number.isFinite)&&Math.abs(p[0])<=90&&Math.abs(p[1])<=180)||!window.DG_SURFACE_REVIEW.types[type]||![5,10,20,40].includes(diameter)||!DG_SENS.record||DG_SENS.rawView||DG_SENS.busy||DG_SENS.saving)return;
- const rec=DG_SENS.record;
- const keys=dgSensBrushCellKeys(points,diameter);if(!keys.length)return;
- const ts=new Date().toISOString(),strokeId=Date.now().toString(36)+"-"+(++DG_SENS.strokeSeq).toString(36),changes=[],previews=[],cellByKey=new Map((dgSensCells()||[]).map(c=>[dgSensCellKey(c),c]));
- for(const key of keys){const cell=cellByKey.get(key);if(!cell)continue;const before=rec.corrections?.[key]?{...rec.corrections[key]}:null,applied=dgSensSetCellDecision(cell,type,ts,strokeId);if(applied){changes.push({key,before,strokeId});previews.push({cell,type});}}
- if(!changes.length)return;dgSensPushBrushHistory(rec,{id:strokeId,changes,ts,type,diameter_m:diameter});
- dgSensDirty();dgSensPreviewCells(previews);dgSensRefreshLayer();dgSensUpdateSummary();dgSensUpdateStatus();if(DG_SENS.record===rec)await dgSensSave();
+ return window.DG_COMMIT_SURFACE_BRUSH_STROKE.commit({points,type,diameter,state:DG_SENS,types:window.DG_SURFACE_REVIEW.types,allowed:[5,10,20,40],validate:input=>window.DG_VALIDATE_SURFACE_BRUSH_STROKE.valid(input),selectCells:dgSensBrushCellKeys,cells:dgSensCells,cellKey:dgSensCellKey,createDecision:(cell,classKey,ts,strokeId)=>dgSensSetCellDecision(cell,classKey,ts,strokeId),appendHistory:dgSensPushBrushHistory,timestamp:()=>new Date().toISOString(),strokeId:()=>Date.now().toString(36)+"-"+(++DG_SENS.strokeSeq).toString(36),dirty:dgSensDirty,previewCells:dgSensPreviewCells,refresh:dgSensRefreshLayer,summary:dgSensUpdateSummary,status:dgSensUpdateStatus,save:dgSensSave});
 }
 function dgSensBrushUndo(){
- const module=window.DG_UNDO_SURFACE_BRUSH_STROKE;
- if(module)return module.undo({record:DG_SENS.record,rawView:DG_SENS.rawView,busy:DG_SENS.busy,saving:DG_SENS.saving,historyModule:window.DG_SURFACE_BRUSH_HISTORY,dirty:dgSensDirty,refresh:dgSensRefreshLayer,summary:dgSensUpdateSummary,status:dgSensUpdateStatus,save:dgSensSave});
- if(!DG_SENS.record||DG_SENS.rawView||DG_SENS.busy||DG_SENS.saving)return;
- const historyModule=window.DG_SURFACE_BRUSH_HISTORY;if(historyModule){if(historyModule.undoLatest(DG_SENS.record)){dgSensDirty();dgSensRefreshLayer();dgSensUpdateSummary();dgSensUpdateStatus();dgSensSave();}return;}
- const rec=DG_SENS.record,history=Array.isArray(rec.brushHistory)?rec.brushHistory:[],stroke=history.pop();rec.brushHistory=history;if(!stroke)return;let changed=false;
- for(const entry of [...stroke.changes].reverse()){const current=rec.corrections?.[entry.key];if(current?.brushStrokeId!==entry.strokeId)continue;if(entry.before)rec.corrections[entry.key]=entry.before;else delete rec.corrections[entry.key];changed=true;}
- if(changed){dgSensDirty();dgSensRefreshLayer();dgSensUpdateSummary();dgSensUpdateStatus();dgSensSave();}
+ return window.DG_UNDO_SURFACE_BRUSH_STROKE.undo({record:DG_SENS.record,rawView:DG_SENS.rawView,busy:DG_SENS.busy,saving:DG_SENS.saving,historyModule:window.DG_SURFACE_BRUSH_HISTORY,dirty:dgSensDirty,refresh:dgSensRefreshLayer,summary:dgSensUpdateSummary,status:dgSensUpdateStatus,save:dgSensSave});
 }
 
 function dgSensBrushConfig(){

@@ -6986,6 +6986,28 @@
           "sha256": "833653621e80281dce5f43ad873855ae4f601a8af8c8502cc43c143c7f54b731"
         }
       ]
+    },
+    {
+      "date": "2026-10-15",
+      "scope": "User-authorized modularization: remove duplicate surface brush pointer, cell selection, decision, persistence and undo implementations from the lc-sens UI facade; verify actual domain/application/adapter modules in regression fixtures.",
+      "audit_chain": "sha256-v1",
+      "files": [
+        {
+          "path": "index.html",
+          "previous_sha256": "4ca21600a33dd5d6c4b26604134e751b01d0a94fd6e41788e1557a3daceef17d",
+          "sha256": "883a1d3de459e388816793b17829871bbab079478525bea199cdb9dc22d626da"
+        },
+        {
+          "path": "src/ui/lc-sens.js",
+          "previous_sha256": "f9517be8bd1fc84bd27bcb00fb74d1a58d8eb55f6890d1ae6cc7c6197e39389d",
+          "sha256": "5ba55c434d412555eeb0e92acfa69a116840a0ccbe2e0733a71f563440c179aa"
+        },
+        {
+          "path": "test/surface-review.test.mjs",
+          "previous_sha256": "15d496e08578878ae86b762afb5a793ecfed1f78faf3197654b34736b5af902a",
+          "sha256": "323a162c325ad9c53eaf8da35b96e2a58bf43fbbca3c60f39efa1bdbaba07a5f"
+        }
+      ]
     }
   ]
 }

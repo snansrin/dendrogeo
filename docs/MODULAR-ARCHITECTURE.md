@@ -1107,6 +1107,7 @@ Her modülün tek bir dış API'si, sahibi olduğu açık durumu ve kendi testle
 ## LULC yüzey fırçası etkileşimi — 13 Ekim 2026
 
 - `adapters/surface/surface-brush-pointer-session.js`, birincil pointer capture, geçici çizgi/daire önizlemesi ve harita sürükleme/zoom kilidini yönetir.
+- `lc-sens.js` fırça girişleri artık hücre seçimi, karar üretimi, eski maske geçişi, pointer oturumu, stroke kaydı ve undo işlemlerini doğrudan domain/application/adapter modüllerine delege eder; aynı fırça algoritmalarının UI dosyasındaki gölge kopyaları kaldırılmıştır. Yüzey regresyon düzeneği gerçek modülleri yükleyerek bu sözleşmeyi doğrular.
 - `domain/surface/validate-surface-brush-stroke.js`, WGS84 noktaları, 300 nokta sınırı, desteklenen sınıf ve çapları doğrular.
 - `application/surface/commit-surface-brush-stroke.js`, seçilen hücre kararlarını provenance ve sınırlı geçmişle kaydeder; `undo-surface-brush-stroke.js` yalnız hâlâ kendi darbelerine ait hücreleri geri alır.
 - `application/surface/update-surface-brush-config.js`, geçerli sınıf/çap seçimini güncelleyip etkin pointer oturumunu kapatır. Kilitli UI globali orkestrasyon uyumluluğunu korur.
