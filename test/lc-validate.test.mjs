@@ -682,7 +682,7 @@ describe('entegrasyon zinciri kilitleri (0054 · lc-sens)', () => {
   });
 
   test('harita kullanıcının seçimine bağlıdır; tarama uyduya zorla geçmez', () => {
-    assert.match(sens, /onchange="dgSensBase\(this.value\)"/);
+    assert.match(rd('src/ui/render-surface-editor-menus.js'), /data-dg-change="base"/);
     assert.match(sens, /switchBaseLayer\(DG_SENS.base\)/);
     assert.ok(!sens.includes('switchBaseLayer("sat");DG_SENS.base="sat";'));
   });
@@ -709,7 +709,7 @@ describe('entegrasyon zinciri kilitleri (0054 · lc-sens)', () => {
 describe("0058 · Doğrulanmış Harita PNG (kullanıcının refactor'ü üstüne ek)", () => {
   const sens = rd('src/ui/lc-sens.js');
   test('düğme + üretici mevcut ve onların kancalarını kullanır', () => {
-    assert.match(sens, /onclick="dgSensExportPng\(\)"/);
+    assert.match(sens, /data-dg-click="exportPng"/);
     assert.match(sens, /function dgSensExportPng\(\)\{/);
     const exportUi = rd('src/ui/render-verified-surface-map-export.js');
     const layers = rd('src/ui/draw-surface-export-map-layers.js');

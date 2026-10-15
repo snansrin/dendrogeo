@@ -5472,6 +5472,114 @@
           "sha256": "75941e8c6a6167bd31dc59ab64576a648abeee93c3233d0d1944f0f5d8ccb25f"
         }
       ]
+    },
+    {
+      "scope": "User-authorized modularization: move the remaining surface-editor UI fallback events to declarative data-dg delegation without changing review or analysis behavior; reduce the generated-markup handler baseline.",
+      "date": "2026-10-15",
+      "audit_chain": "sha256-v1",
+      "files": [
+        {
+          "path": "src/ui/lc-sens.js",
+          "previous_sha256": "ef31339a6b0dae5211dd9bf1a9d8d855754dbd87ba2b094613b3f890ee6a8af8",
+          "sha256": "cf857784cac85dc152d45d83acc60d2984b25024d8703af688ee2ad202bf00b7"
+        },
+        {
+          "path": "test/surface-review.test.mjs",
+          "previous_sha256": "e3ea1ad2b8c47988c8f20ea4461f6fbd51a59ea4736bc4d5f590de37e2a2358f",
+          "sha256": "4208d2ae0eda99846c6de7f6c195e984a22ea1bd02b0a72099861b676040e8eb"
+        },
+        {
+          "path": "docs/generated-markup-handler-baseline.json",
+          "previous_sha256": "d366816ca1bb301cd6aa122caeb221dbeca891bb59e7205db434aaf40d363cf5",
+          "sha256": "759f57468f080306f81def7923990c79bfbeb802dc647e010430fb31f099247e"
+        }
+      ]
+    },
+    {
+      "scope": "User-authorized modularization: delegate park discovery and park information panel controls through component-owned actions while preserving park/grid/analysis behavior; reduce generated markup handler debt.",
+      "date": "2026-10-15",
+      "audit_chain": "sha256-v1",
+      "files": [
+        {
+          "path": "index.html",
+          "previous_sha256": "d353d7e49e83a20f406b743871e9c7b3d64246b526903eeaf264ea416925032b",
+          "sha256": "271cdf171002706e1c514c2563a9b1febb9121de2be30c2bff78cd4071514674"
+        },
+        {
+          "path": "src/services/park-registry.js",
+          "previous_sha256": "e0b80b6ed7db09505d06940e83334147f95b3b5144a666642fd6e27a298bb1fe",
+          "sha256": "93823fcecefef134b1001a7839de98ac0af2833bde31f0988043d8ca2f8779dc"
+        },
+        {
+          "path": "src/ui/park-info-panel.js",
+          "previous_sha256": "023948305726bcb9130f99a8b13fa8db8443d645c2910221810730f6bb146fe2",
+          "sha256": "70728fe37410f2c1d298a8c9ad2d2f62d040770fe9f4d6e7ef651b070033e9f8"
+        },
+        {
+          "path": "src/ui/park-panel.js",
+          "previous_sha256": "0da5e4357e45b1840d38460946fb7de41469adecf40eb2855f2f04607a262224",
+          "sha256": "69db94a1c4872a573733fb0b9d465c9989b1be6820100de1e4bce30c5f6fce9b"
+        },
+        {
+          "path": "src/ui/park-scan-card.js",
+          "previous_sha256": "4f42b0c3b02ae3e8fc21c3d4a99ea4773da16dcbb4872a293df90dfe4312e0f2",
+          "sha256": "5f4ee0a1d2dbed0d29c8f771a6e83eb769b8b3557d625531dc58dae04ad9dde8"
+        },
+        {
+          "path": "src/ui/present-drawn-park.js",
+          "previous_sha256": "d9c91ea78fb6fe073f22da4feb05eaa210ef66a3a5aaa6cabe317854a0fa3464",
+          "sha256": "78f948ef6b36de6d6e826d8eee2fbf6a7e4fa3a3329121970f5168875fd8b4a7"
+        },
+        {
+          "path": "test/park-info-panel-ui.test.mjs",
+          "previous_sha256": "10673da99d53f4682454cf0443b171816aab9669b1cf889c0ec5af3978d4004d",
+          "sha256": "f1d863b4b117be50f670dc9ed22f433fbe277b0dee46eb9bf901314bd3d4812f"
+        },
+        {
+          "path": "test/park-registry-scan-modules.test.mjs",
+          "previous_sha256": "955534bf5e1c591e0c24dd50932755d6fa38c1fba2db57575c558d47007536a8",
+          "sha256": "be757246a01e3292294707fe6606f66cb1344e0885f873d8c8704afad8517017"
+        },
+        {
+          "path": "docs/generated-markup-handler-baseline.json",
+          "previous_sha256": "759f57468f080306f81def7923990c79bfbeb802dc647e010430fb31f099247e",
+          "sha256": "313ee77ac6fcb733e49b3e0ec59d19d59420887e6eda378ef76e1482e7c7d1c8"
+        }
+      ]
+    },
+    {
+      "scope": "User-authorized modularization: update regression assertions to verify declarative park and surface-editor controls while preserving existing workflow expectations.",
+      "date": "2026-10-15",
+      "audit_chain": "sha256-v1",
+      "files": [
+        {
+          "path": "test/landcover-v4.test.mjs",
+          "previous_sha256": "dfbe50ddae9e11825587dbc121c45e619cb9276bf5fa72bbfe81a37400f50c04",
+          "sha256": "4aba560828a3f3131e4a416cc8c552c7857e8d36a082c8a6b6d0a8fedd75bfb5"
+        },
+        {
+          "path": "test/lc-validate.test.mjs",
+          "previous_sha256": "0c7b129fd73a49c6a8daabb7a233d8b35fab876bbab0ea80df010e4d1649537e",
+          "sha256": "f18c72c26d30d198577f4c0c7bab3aa96051144c774280285d089ce779ac1f87"
+        }
+      ]
+    },
+    {
+      "scope": "User-authorized modularization: update park-flow regression assertions for delegated discovery and retry actions.",
+      "date": "2026-10-15",
+      "audit_chain": "sha256-v1",
+      "files": [
+        {
+          "path": "test/park-drawing-export-modules.test.mjs",
+          "previous_sha256": "0555360c205fc4283a192de854eaab1ab0064435d8f1805b8c9ee6f63e746de4",
+          "sha256": "4b27b36eb9289c1de1c6c789215338799e2761274202cf11e1867977a2f67a53"
+        },
+        {
+          "path": "test/park-flow.test.mjs",
+          "previous_sha256": "74572c034db1a85b2c911f21e7ef46e7280188ef60f94ca741ffa5841c864bf7",
+          "sha256": "eee579fe4f2323e9a9540cccb5e45758cfed5fade7c613c87641f9039fcc9273"
+        }
+      ]
     }
   ]
 }

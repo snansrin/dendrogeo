@@ -146,7 +146,7 @@ async function drawPark(park){
   $("parkInfo").innerHTML=window.DG_PARK_INFO_PANEL_UI.render({
     name:park.name,escape:esc,hectares:haTotal,
     parkIdChip:dgParkIdChip(parkRow),
-    registerRetryMarkup:!parkRow?`<div class="dg-png-card"><button class="dg-png-btn red sm" onclick="dgRetryRegister()">🔄 Yeniden dene</button></div>`:"",
+    registerRetryMarkup:!parkRow?`<div class="dg-png-card"><button class="dg-png-btn red sm" data-park-action="retryRegister">🔄 Yeniden dene</button></div>`:"",
     alternateSelector:alt,
     projectOptionsMarkup:dgProjectOptionsForPark(parkRow?parkRow.id:null,true)
   });
@@ -212,8 +212,28 @@ async function dgChooseNewPark(){return DG_CHOOSE_NEW_PARK_CONTROLLER();}
 function _tgrSafeNewPark(){return typeof dgCf==="function"?dgCf("Haritada yeni parkın içine dokunun."):"Haritada yeni parkın içine dokunun.";}
 window.dgChooseNewPark=dgChooseNewPark;
 
-/* Relocate the existing controls, keeping their IDs, values and event handlers. */
+/* Relocate the existing controls and bind their declared actions once. */
+const DG_PARK_INFO_EVENTS_BOUND=new WeakSet();
+function dgBindParkInfoEvents(container){
+ if(!container||DG_PARK_INFO_EVENTS_BOUND.has(container))return;
+ DG_PARK_INFO_EVENTS_BOUND.add(container);
+ container.addEventListener("click",event=>{
+  const control=event.target?.closest?.("[data-park-action]");
+  if(!control||!container.contains(control)||control.disabled)return;
+  const actions={buildGrid,landCoverAnalysis:()=>window.runLandCoverAnalysis?.(),clearGrid,
+   retryRegister:()=>window.dgRetryRegister?.()};
+  actions[control.dataset.parkAction]?.(control,event);
+ });
+ container.addEventListener("change",event=>{
+  const control=event.target?.closest?.("[data-park-change]");
+  if(!control||!container.contains(control)||control.disabled)return;
+  const actions={referenceArea:()=>setRefHa(control.value),greenOnly:()=>setGreenOnly(control.checked),
+   gridVisibility:()=>window.toggleGridVis?.(),waypointVisibility:()=>window.toggleWpVis?.()};
+  actions[control.dataset.parkChange]?.(control,event);
+ });
+}
 function dgParkMountMenus(){
+ dgBindParkInfoEvents(document.getElementById("parkInfo"));
  return window.DG_PARK_MENU_UI.mount({
   document,clearMenus:dgEditorClearMenus,arrangeMenus:dgEditorArrangeMenus,
   translate:value=>typeof dgCf==="function"?dgCf(value):value,

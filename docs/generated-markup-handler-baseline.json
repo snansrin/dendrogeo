@@ -13,7 +13,6 @@
     "src/ui/landing-country-table.js": 2,
     "src/ui/landing.js": 4,
     "src/ui/lc-report.js": 2,
-    "src/ui/lc-sens.js": 48,
     "src/ui/measurement-point-query-result.js": 2,
     "src/ui/measurement-project-card.js": 6,
     "src/ui/measurement-project-park-box.js": 1,
@@ -24,11 +23,7 @@
     "src/ui/park-comparison-error.js": 1,
     "src/ui/park-comparison-pending.js": 1,
     "src/ui/park-identity.js": 1,
-    "src/ui/park-info-panel.js": 7,
     "src/ui/park-measurement-gate.js": 4,
-    "src/ui/park-panel.js": 1,
-    "src/ui/park-scan-card.js": 8,
-    "src/ui/present-drawn-park.js": 1,
     "src/ui/record-item.js": 2,
     "src/ui/render-academic-profile.js": 3,
     "src/ui/render-cell-decision-popup.js": 2,
@@ -42,5 +37,5 @@
     "src/ui/world-error.js": 1,
     "src/services/report-publish.js": 1
   },
-  "total": 147
+  "total": 82
 }

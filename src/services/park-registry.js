@@ -285,7 +285,10 @@ function dgRenderScanCard__scroll(forceManual){
     schemaWarning:dgSchemaWarnHTML(),step:dgScanStep(),isAdmin:dgIsAdmin(),
     targetProjectId:DG_PARK_TARGET_PROJ,projects:PROJ_LIST,returnTo:DG_PARK_RETURN_TO,
     escape:esc,formatArea:dgFmtHa,manualForm:dgManualFormHTML,
-    labelFromLegacy:dgLabelFromLegacy,projectName:dgProjectName
+    labelFromLegacy:dgLabelFromLegacy,projectName:dgProjectName,
+    actions:{toggleParkMode:dgToggleParkModeFromScan,detectAtLocation:dgDetectAtMyLocation,findByName:dgScanSearchByName,
+      showManualForm:dgShowManualParkForm,retryRegister:dgRetryRegister,previewName:dgScanPreviewName,
+      createProject:dgScanCreateProject,cancelScan:dgCancelScan}
   });
 }
 

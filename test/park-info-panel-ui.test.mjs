@@ -12,9 +12,10 @@ test('park panel keeps identity, hectares, selector and project markup in their 
  assert.ok(html.indexOf('<span id="park-id">#8</span>')<html.indexOf('<select id="parkAlt">'));
  assert.ok(html.indexOf('<select id="gridProject"')<html.indexOf('<option value="p">Proje</option>'));
  for(const id of ['parkGridTools','parkSurfaceAction','parkLayerTools','landCoverReport','lcSens','gridSummary'])assert.ok(html.includes(`id="${id}"`),`missing ${id}`);
- for(const handler of ['buildGrid()','runLandCoverAnalysis()','clearGrid()'])assert.ok(html.includes(`onclick="${handler}"`),`missing ${handler}`);
+ for(const action of ['buildGrid','landCoverAnalysis','clearGrid'])assert.ok(html.includes(`data-park-action="${action}"`),`missing ${action}`);
  assert.doesNotMatch(html,/parkRasterExport|pngBg|chkPngGrid|downloadParkImage/);
- for(const handler of ['toggleGridVis()','toggleWpVis()'])assert.ok(html.includes(`onchange="${handler}"`),`missing ${handler}`);
+ for(const action of ['gridVisibility','waypointVisibility','referenceArea','greenOnly'])assert.ok(html.includes(`data-park-change="${action}"`),`missing ${action}`);
+ assert.doesNotMatch(html,/\bon(?:click|input|change|toggle)=/);
 });
 
 test('park panel keeps the registration retry slot optional and the menu control IDs stable',()=>{

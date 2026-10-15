@@ -548,7 +548,7 @@ describe('v8: grid yeşil-alan kapısı + PNG dışa aktarım (canary)', () => {
   });
 
   test('UI: chkGreenOnly anahtarı var ve varsayılan AÇIK', () => {
-    assert.match(src, /id="chkGreenOnly" checked onchange="setGreenOnly\(this\.checked\)"/);
+    assert.match(src, /id="chkGreenOnly" checked data-park-change="greenOnly"/);
     assert.match(src, /function setGreenOnly\(v\)/);
   });
 

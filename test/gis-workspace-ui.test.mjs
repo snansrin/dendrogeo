@@ -45,7 +45,7 @@ test('Grid and layer controls remain wired while the post-analysis PNG card stay
   assert.match(parkSurface,new RegExp('id="'+id+'"'));
  }
  assert.doesNotMatch(parkSurface,/parkRasterExport|pngBg|chkPngGrid|chkPngWp|chkPngCover|downloadParkImage/);
- assert.match(parkSurface,/onclick="buildGrid\(\)"/);
+ assert.match(parkSurface,/data-park-action="buildGrid"/);
  assert.doesNotMatch(ui,/exportCard|pngFields|makeOutput/);
  assert.doesNotMatch(ui,/cloneNode\(/);
  assert.doesNotMatch(ui,/menu\.dataset\.menuOrder="45"/);

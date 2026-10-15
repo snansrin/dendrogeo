@@ -35,6 +35,21 @@ test('scan card UI hides the card only during surface review and tolerates missi
   assert.equal(window.DG_PARK_SCAN_CARD_UI.prepare({document:{getElementById:()=>null}}),null);
 });
 
+test('scan card delegates controls to injected actions without inline handlers',()=>{
+  const listeners={},calls=[];
+  const element={style:{},innerHTML:'',addEventListener:(name,fn)=>{listeners[name]=fn;},contains:()=>true,
+    querySelector:()=>({value:'Göksu Parkı'})};
+  const{window}=setup();
+  window.DG_PARK_SCAN_CARD_UI.render({element,park:null,candidate:null,showManual:false,scanActive:true,schemaWarning:'',step:1,
+    isAdmin:false,targetProjectId:null,projects:[],returnTo:null,escape:String,formatArea:String,manualForm:()=>'',
+    labelFromLegacy:()=>'',projectName:()=>'',actions:{toggleParkMode:()=>calls.push('mode'),findByName:name=>calls.push(name)}});
+  assert.doesNotMatch(element.innerHTML,/\bon(?:click|input|change|toggle)=/);
+  assert.match(element.innerHTML,/data-park-scan-action="toggleParkMode"/);
+  listeners.click({target:{closest:()=>({dataset:{parkScanAction:'toggleParkMode'},disabled:false})}});
+  listeners.click({target:{closest:()=>({dataset:{parkScanAction:'findByName'},disabled:false})}});
+  assert.deepEqual(calls,['mode','Göksu Parkı']);
+});
+
 test('scan start module preserves state, map setup, focus, render and notice order',()=>{
   const events=[],card={scrollIntoView:options=>events.push(['scroll',options])};
   const map={invalidateSize:()=>events.push('invalidate')};

@@ -6,6 +6,8 @@ import vm from 'node:vm';
 const source = readFileSync(new URL('../src/ui/lc-sens.js', import.meta.url), 'utf8');
 const shell = readFileSync(new URL('../partials/shell.html', import.meta.url), 'utf8');
 const css = readFileSync(new URL('../css/park-panel.css', import.meta.url), 'utf8');
+const toolbarRail = readFileSync(new URL('../src/ui/render-surface-editor-tool-rail.js', import.meta.url), 'utf8');
+const editorMenus = readFileSync(new URL('../src/ui/render-surface-editor-menus.js', import.meta.url), 'utf8');
 
 function editorContext() {
   const pans = [], handlers = new Map();
@@ -33,8 +35,8 @@ test('brush toolbar is placed below marker refresh and exposes the established c
   assert.match(source, /Sol tuş: fırça · Sağ tuş: haritayı kaydır/);
   assert.match(css, /\.dg-editor-tool\.is-active/);
   assert.match(source, /dgSensSetDrawType\(type\)/);
-  assert.match(source, /onclick="dgSensDrawStart\(\)"[\s\S]*?aria-pressed/);
-  assert.match(source, /onclick="dgSensDrawFinish\(\)"/);
+  assert.match(toolbarRail, /data-dg-click="drawStart" aria-pressed/);
+  assert.match(editorMenus, /data-dg-click="drawFinish"/);
   assert.match(source, /dgSensUndoBoundary/);
   assert.match(source, /e\.key==="Escape"\)\{if\(DG_SENS\.draw\)/);
   assert.match(readFileSync(new URL('../src/domain/surface/build-surface-export-data.js', import.meta.url), 'utf8'), /vegetation_ndvi_relative_class/);

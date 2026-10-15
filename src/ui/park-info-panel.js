@@ -49,7 +49,7 @@
 
           `<div class="dg-png-field">`+
             `<label class="dg-png-label">REFERANS ALAN (HA)</label>`+
-            `<input aria-label="Referans alan (ha)" id="refHa" type="number" step="0.1" placeholder="örn. 50.8" class="dg-png-input" onchange="setRefHa(this.value)">`+
+          `<input aria-label="Referans alan (ha)" id="refHa" type="number" step="0.1" placeholder="örn. 50.8" class="dg-png-input" data-park-change="referenceArea">`+
           `</div>`+
         `</div>`+
 
@@ -59,11 +59,11 @@
             `<strong>Sadece yeşil alan</strong>`+
             `<span>Grid'i arazi örtüsü analizinin yeşil alanlarıyla kısıtla</span>`+
           `</span>`+
-          `<input type="checkbox" class="dg-switch" id="chkGreenOnly" checked onchange="setGreenOnly(this.checked)">`+
+          `<input type="checkbox" class="dg-switch" id="chkGreenOnly" checked data-park-change="greenOnly">`+
           `<span class="dg-png-switch"></span>`+
         `</label>`+
 
-        `<div class="dg-png-field"><label class="dg-png-label" for="gridClearance">SU / SERT ZEMİN MESAFESİ (M)</label><input id="gridClearance" class="dg-png-input" type="number" min="1" max="20" step="1" value="3"></div><button id="gridBuildBtn" class="dg-png-btn primary" onclick="buildGrid()">`+
+        `<div class="dg-png-field"><label class="dg-png-label" for="gridClearance">SU / SERT ZEMİN MESAFESİ (M)</label><input id="gridClearance" class="dg-png-input" type="number" min="1" max="20" step="1" value="3"></div><button id="gridBuildBtn" class="dg-png-btn primary" data-park-action="buildGrid">`+
           `🔲 Grid Oluştur`+
         `</button>`+
       `</div>`+
@@ -78,7 +78,7 @@
           `<span class="dg-png-badge blue">10 m WorldCover 2021 · IO LULC çapraz</span>`+
         `</div>`+
 
-        `<button id="landCoverBtn" class="dg-png-btn primary" onclick="runLandCoverAnalysis()">`+
+        `<button id="landCoverBtn" class="dg-png-btn primary" data-park-action="landCoverAnalysis">`+
           `🌿 Yüzey Örtüsü Analizi`+
         `</button>`+
 
@@ -104,7 +104,7 @@
               `<strong>Grid hücreleri</strong>`+
               `<span>Harita üzerinde göster</span>`+
             `</span>`+
-            `<input type="checkbox" class="dg-switch" id="togGrid" checked onchange="toggleGridVis()">`+
+            `<input type="checkbox" class="dg-switch" id="togGrid" checked data-park-change="gridVisibility">`+
             `<span class="dg-png-switch"></span>`+
           `</label>`+
 
@@ -114,13 +114,13 @@
               `<strong>Waypoint'ler</strong>`+
               `<span>Ölçüm noktalarını göster</span>`+
             `</span>`+
-            `<input type="checkbox" class="dg-switch" id="togWp" checked onchange="toggleWpVis()">`+
+            `<input type="checkbox" class="dg-switch" id="togWp" checked data-park-change="waypointVisibility">`+
             `<span class="dg-png-switch"></span>`+
           `</label>`+
 
         `</div>`+
 
-        `<button class="dg-png-btn red sm" onclick="clearGrid()">`+
+        `<button class="dg-png-btn red sm" data-park-action="clearGrid">`+
           `✕ Tümünü Temizle`+
         `</button>`+
       `</div>`+

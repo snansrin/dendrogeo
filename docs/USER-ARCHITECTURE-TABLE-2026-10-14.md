@@ -37,7 +37,7 @@ Canlı migration `20261014201828_measurement_protocol_guard` uygulandı. RLS akt
 
 ## 15 Ekim 2026 satır satır yeniden kabul
 
-`npm run check:release` bu çalışma ağacında başarıyla tamamlandı. AST katman kontrolü 802 domain/application/UI modülünü, bağımlılık kontrolü 938 modülü, runtime ve çevrimdışı zinciri 992 modülü (616 kritik hash kilidiyle), sözdizimi kontrolü 999 JavaScript dosyasını denetledi. HTML partial'larında satır içi olay niteliği yok; üretilen HTML'de 40 dosyaya yayılmış 147 handler niteliği mevcut ve bu sayı CI'de artamaz. Bu handler'lar ve büyük eski servis/facade dosyaları temizlenmiş değildir.
+`npm run check:release` son doğrulanmış gönderimde başarıyla tamamlandı. AST katman kontrolü 802 domain/application/UI modülünü, bağımlılık kontrolü 938 modülü, runtime ve çevrimdışı zinciri 992 modülü (616 kritik hash kilidiyle), sözdizimi kontrolü 999 JavaScript dosyasını denetledi. HTML partial'larında satır içi olay niteliği yok; yüzey düzenleyicisindeki 48 fallback handler, park algılama kartındaki 8 ve park bilgi panelindeki 9 handler deklaratif delegasyona taşındı. Üretilen HTML borcu 40 dosyadaki 147 nitelikten 35 dosyada 82 niteliğe indi; CI yeni artışı engelliyor. Diğer handler'lar ve büyük eski servis/facade dosyaları hâlâ açık borçtur.
 
 Mobil Chromium akışları 360/390/430 px genişliklerinde giriş, OAuth, anonim açılış, fırça (fare/dokunma), çizim araçları, park sınırı/OSM kurtarma ve taşma kontrolünü geçti; çizim sınırı 1280 px'te de geçti. Erişilebilirlik akışı 13 görünümü üç telefon genişliğinde taradı; otomatik erişilebilirlik, klavye switch'i, görünür odak ve slider uçları geçti. Bunlar yerel otomatik kabul kanıtlarıdır; canlı kullanıcılarla saha kabulünün yerine geçmez.
 
@@ -47,7 +47,7 @@ Mobil Chromium akışları 360/390/430 px genişliklerinde giriş, OAuth, anonim
 |---:|---|---|---|
 | 1 | Proje özeti ve veri kuralları | `girth_cm` ham alanı, `dbh_cm = girth_cm / π`, hassasiyet ve fingerprint mevcut; SQL/istemci kontratı testli. | Canlı saha girdisiyle ek kullanıcı kabulü yapılmadı. |
 | 2 | Paket/build/test/CI | `check:release` yerelde geçti; CI workflow kaynak ve telefon/erişilebilirlik kapılarına bağlı. | Bu push için GitHub Actions check sonucu connector'da görünmedi; remote CI doğrulanmış değil. |
-| 3 | Frontend dosya düzeni/modülerlik | Katman AST'si 802 modülü; dependency kapısı 938 modülü taradı; servis DOM/Supabase/ağ borcu 0. | 147 dinamik markup handler niteliği ve büyük legacy facade/controller dosyaları kaldı; “borçsuz” değil. |
+| 3 | Frontend dosya düzeni/modülerlik | Katman AST'si 802 modülü; dependency kapısı 938 modülü taradı; servis DOM/Supabase/ağ borcu 0; yüzey, park keşfi ve park bilgi panelindeki 65 handler delegasyona taşındı. | 82 dinamik markup handler niteliği ve büyük legacy facade/controller dosyaları kaldı; “borçsuz” değil. |
 | 4 | Measurement entry | Form `girth_cm`, ayrı readonly `dbh_cm_display` kullanıyor; ondalık sunumun hesap verisini değiştirmediği testli. | Yok; tarayıcı form smoke testi geçti. |
 | 5 | Switch/checkbox | Kaynak checkbox'ları ortak native `.dg-switch`, label ve odak stiliyle taranıyor; klavye testi geçti. | Manuel ekran okuyucu kabulü yapılmadı. |
 | 6 | Range/slider | `.dg-range`, 44 px hedef ve 0/100 uçları mevcut; 360/390/430 px ve Home/End kontrolleri geçti. | Manuel dokunmatik cihaz testi yapılmadı. |

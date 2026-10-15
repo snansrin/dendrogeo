@@ -550,8 +550,8 @@ describe('park algılama ekranı: yönlendirme → kimlik → proje', () => {
     assert.equal(el('parkScanCard').style.display, 'block');
     const card = el('parkScanCard').innerHTML;
     assert.ok(card.includes('parkın içine tıkla'), 'adım 1 açıklaması yok');
-    assert.ok(card.includes('dgDetectAtMyLocation()'), 'konumdan algılama butonu yok');
-    assert.ok(card.includes('dgShowManualParkForm()'), 'elle oluşturma çıkışı yok');
+    assert.ok(card.includes('data-park-scan-action="detectAtLocation"'), 'konumdan algılama butonu yok');
+    assert.ok(card.includes('data-park-scan-action="showManualForm"'), 'elle oluşturma çıkışı yok');
   });
 
   test('⭐ GPS’ten algılama parkı kimliğe yazar (yeni satır açmaz)', async () => {
@@ -569,7 +569,7 @@ describe('park algılama ekranı: yönlendirme → kimlik → proje', () => {
     assert.equal((card.match(/dg-scan-step on/g) || []).length, 3, 'üç adım da açık olmalı');
     assert.ok(card.includes('way/123') && card.includes('42.3 ha') && card.includes('DB #7'), card.slice(0, 300));
     assert.ok(!card.includes('dgScanLinkTarget'), 'bağlama butonu GERİ GELMEMELİ');
-    assert.ok(card.includes('dgScanCreateProject()'), 'tek yol: yeni proje');
+    assert.ok(card.includes('data-park-scan-action="createProject"'), 'tek yol: yeni proje');
     assert.ok(card.includes('value="Eski Proje"'), 'etiket eski adı önermeli (ad kaybolmasın)');
   });
 
