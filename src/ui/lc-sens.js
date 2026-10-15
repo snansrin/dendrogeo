@@ -122,31 +122,7 @@ function dgSensHasVerifiedWaterBoundary(rec=DG_SENS.record){
 function dgSensHasWaterFootprint(rec=DG_SENS.record){return window.DG_SURFACE_WATER_FOOTPRINT_POLICY.hasFootprint(rec,f=>window.DG_SURFACE_REVIEW.validFeature(f));}
 
 function dgSensWaterOutsideClass(c,rec=DG_SENS.record){
- const classifier=window.DG_CLASSIFY_SURFACE_WATER_OUTSIDE_CELL;if(classifier)return classifier.classify({cell:c,record:rec,cells:dgSensCells()||[],cellKey:dgSensCellKey,landPredict:window.DG_LC_VALIDATE?.spectralLandPredict,editing:DG_SENS.editing});
- const key=dgSensCellKey(c),decision=rec?.corrections?.[key],land=new Set(["green","hard","bare"]);
- if(decision&&land.has(decision.to)&&(decision.method==="visual-cell"||(!DG_SENS.editing&&decision.method==="sensitivity")))return decision.to;
- const evidence=rec?.profile?.cells?.[key],predict=window.DG_LC_VALIDATE?.spectralLandPredict;
- const result=typeof predict==="function"?predict(evidence,{green:50,water:50,hard:50,bare:50}):"nodata";
- if(land.has(result))return result;
- // A verified shoreline says the remainder of this raster-water cell is
- // land. When a mixed 10 m pixel has no decisive spectrum at its centre,
- // transfer the nearest observed non-water land class from the same raster
- // grid. This uses local park evidence and never invents a fixed class.
- const cells=dgSensCells()||[],row=Number(c.row),col=Number(c.col);let best=null;
- for(const neighbor of cells){
-  const dr=Number(neighbor.row)-row,dc=Number(neighbor.col)-col;if(!dr&&!dc)continue;
-  const distance=Math.hypot(dr,dc);if(best&&distance>best.distance)continue;
-  let cls=neighbor.rasterClassKey||neighbor.classKey;
-  if(cls==="water"){
-   const sp=rec?.profile?.cells?.[dgSensCellKey(neighbor)],pred=typeof predict==="function"?predict(sp,{green:50,water:50,hard:50,bare:50}):"nodata";
-   if(land.has(pred))cls=pred;
-  }
-  if(!land.has(cls))continue;
-  if(!best||distance<best.distance)best={distance,weights:{green:0,hard:0,bare:0}};
-  if(Math.abs(distance-best.distance)<1e-9)best.weights[cls]++;
- }
- if(!best)return"other";
- return ["green","hard","bare"].sort((a,b)=>best.weights[b]-best.weights[a]||["green","hard","bare"].indexOf(a)-["green","hard","bare"].indexOf(b))[0];
+ return window.DG_CLASSIFY_SURFACE_WATER_OUTSIDE_CELL.classify({cell:c,record:rec,cells:dgSensCells()||[],cellKey:dgSensCellKey,landPredict:window.DG_LC_VALIDATE?.spectralLandPredict,editing:DG_SENS.editing});
 }
 function dgSensWaterOutsideParts(){return window.DG_SELECT_SURFACE_WATER_OUTSIDE_PARTS.select(dgSensParts());}
 function dgSensWaterBoundaryUnresolved(){return window.DG_COUNT_UNRESOLVED_SURFACE_WATER_PARTS.count(dgSensWaterOutsideParts());}

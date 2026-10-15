@@ -7064,6 +7064,33 @@
           "sha256": "375c851add5de56ffef5b1c70e75d13aa0bb5687c544f609212442a7720beaec"
         }
       ]
+    },
+    {
+      "date": "2026-10-15",
+      "scope": "User-authorized modularization: delegate raster-water outside-footprint classification to the domain module and load that owner in geometry regression fixtures.",
+      "audit_chain": "sha256-v1",
+      "files": [
+        {
+          "path": "index.html",
+          "previous_sha256": "bf727ad98d130a92a147b437932f654dcbf59edf6005c7ce81af8791a10a679b",
+          "sha256": "1108a5665d86e46318b33e870cc09223c332aa57039a7e3585ea461f0841978a"
+        },
+        {
+          "path": "src/ui/lc-sens.js",
+          "previous_sha256": "afe12952bd71e1e163c928b74babbfdb59eceb84a9c7fafd07e238d770dcb9c2",
+          "sha256": "c889215fe33749d715719fbf8823846b4a04a2a50aa09b8fccf4bd91ace7531c"
+        },
+        {
+          "path": "test/surface-review.test.mjs",
+          "previous_sha256": "2555b926546893bb0e926e8c8d795947ef5b4532a49bdb017c735ff5a5251800",
+          "sha256": "a7642af8acbe29852b65963a1b3d24c3e65692cb3fddb664b768b91454f42a7d"
+        },
+        {
+          "path": "test/verified-water-footprint.test.mjs",
+          "previous_sha256": "375c851add5de56ffef5b1c70e75d13aa0bb5687c544f609212442a7720beaec",
+          "sha256": "f85c35e05035b6d5e4f3bf7cc8e8cf43a51b6e3418dac0bbb5569998dfbb6185"
+        }
+      ]
     }
   ]
 }
