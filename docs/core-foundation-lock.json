@@ -7721,6 +7721,29 @@
           "sha256": "f1168c3ea2c136b247e171a4b247f00dee071998fc46ed5f14d7c67d8320bc14"
         }
       ]
+    },
+    {
+      "id": "branded-academic-footer-20261015",
+      "date": "2026-10-15",
+      "scope": "User-authorized modularization: customize the themed footer with the DendroGeo copyright signature, distinct development credit, one canonical software DOI link, and selected references verified against primary publication records; preserve citation invariants through visible-text assertions. Analysis, account permissions and report archives are unchanged. Treat official reference hyperlinks as navigation-only in the existing CSP checker allowlist; the browser CSP is not broadened.",
+      "audit_chain": "sha256-v1",
+      "files": [
+        {
+          "path": "css/landing.css",
+          "previous_sha256": "4b990518480d0bc5de6c38eb608473171d033043d2c02d821d2f4f6956079e2e",
+          "sha256": "3b7a773219944c04a85a0dc7634f6f86698a09a32bb55ee961dd1e2dadd13e2a"
+        },
+        {
+          "path": "index.html",
+          "previous_sha256": "c9f4649f9a4143da2bf8677b3d6f06a5b87a550961c89569a9c2d02827b447f8",
+          "sha256": "0eade7ef518c261fcdb5c7246d6cc82e690dde01d9346c74519d4fcfc1082666"
+        },
+        {
+          "path": "partials/landing.html",
+          "previous_sha256": "f5dbe93ac03a968d2b34011a7b31d85757271c9627af0df9ef650b1c5de64f76",
+          "sha256": "0b99a841036b1f65ad98b388ff30e8d78396ac88dee0f2cd45a99bffa8af1fac"
+        }
+      ]
     }
   ]
 }

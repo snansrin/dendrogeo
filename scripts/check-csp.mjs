@@ -24,6 +24,8 @@ const BEYAZ_LISTE = new Set([
   'dendrogeo.org',          // canonical / og:url
   'www.dendrogeo.org',
   'doi.org',                // atıf bağlantısı
+  'www.ipcc-nggip.iges.or.jp', // footer: IPCC yayın kaydına gezinme bağlantısı
+  'www.ogm.gov.tr',         // footer: resmi tebliğe gezinme bağlantısı
   'zenodo.org',             // DOI rozeti
   'creativecommons.org',    // lisans bağlantısı
   'opendatacommons.org',    // ODbL lisans bağlantısı (JSON-LD isBasedOn + atıf metni)
