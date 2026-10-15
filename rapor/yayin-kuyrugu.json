@@ -1,6 +1,6 @@
 {
   "schema": "dendrogeo-publish-queue/1",
-  "updated_at": "2026-10-15T19:23:18.989Z",
+  "updated_at": "2026-10-15T19:27:18.939Z",
   "production_started_at": "2026-10-04T08:26:48.034Z",
   "test_archive_ref": "archive/test-publications-2026-10-04",
   "retired_report_ids": [
@@ -243,7 +243,12 @@
       "correction_of": "DGR-2026-0024",
       "correction_kind": "map-path-resolution-v1",
       "correction_note": "Harita sunumu düzeltmesi: ince yol sınırları korunmuş, PNG çözünürlüğü artırılmıştır. Ölçümler, kabul edilmiş yüzey geometrileri ve bilimsel sonuçlar değiştirilmemiştir.",
-      "doi_status": "Bekliyor"
+      "doi_status": "Kayıtlı",
+      "doi_last_attempt_at": "2026-10-15T19:27:13.262Z",
+      "doi": "10.5281/zenodo.23403892",
+      "doi_url": "https://doi.org/10.5281/zenodo.23403892",
+      "doi_record_url": "https://zenodo.org/records/23403892",
+      "doi_registered_at": "2026-10-15T19:27:17.496Z"
     }
   ],
   "archived_request_ids": [
