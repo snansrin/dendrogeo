@@ -52,12 +52,15 @@ test('Taleplerim kapalı disclosure olur ve kullanıcı kendi talebini silebilir
  assert.match(mig,/auth\.uid\(\).*user_id/s);
 });
 
-test('landing hero yalnız yuvarlanmış DBHyi gösterir; yöntem kaynağı gizli test verisinde korunur',()=>{
+test('landing hero ölçüm alanlarını ağaç animasyonunun yanında erişilebilir gösterir',()=>{
  const landing=rd('partials/landing.html'),css=rd('css/landing.css');
- assert.match(landing,/class="chip c1" data-circumference="45"[^>]*>[\s\S]*?DBH 14\.3 cm/);
+ assert.match(landing,/class="chip c1" data-circumference="45"[^>]*>[\s\S]*?data-i18n="Çap"[\s\S]*?14\.3 cm/);
+ assert.match(landing,/data-i18n="Tahmini karbon"[\s\S]*?40\.0 kg C/);
+ assert.match(landing,/data-i18n="Ağaç boyu"[\s\S]*?13 m/);
+ assert.match(landing,/aria-label="Örnek saha ölçümü"/);
  assert.ok(!landing.includes('ÇEVRE 45 cm → DBH 14.3 cm'));
- assert.match(css,/\.chip\.c1\{top:38%/);
- assert.match(css,/\.chip\.c3\{top:42%/);
+ assert.match(rd('css/landing-scenes.css'),/\.hero-art \.chip\.c1\{top:43%/);
+ assert.match(rd('css/landing-scenes.css'),/\.hero-art \.chip\.c3\{top:54%/);
 });
 
 test('yayın öncesi form gerekli alanlarda örnek yardım balonları taşır',()=>{

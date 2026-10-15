@@ -5,7 +5,7 @@
  const report={
   results:{title:'1 · Analiz Özeti',subtitle:'5 · Nicel Sonuçlar',body:'Onaylı ağaç ölçümleri; tür dağılımı, biyokütle ve karbon tahminiyle birlikte sunulur. Monte Carlo model ve girdi belirsizliği ayrıca raporlanır.',items:['Ağaç envanteri','Karbon · %95 model aralığı','Yüzey örtüsü bağlamı']},
   quality:{title:'7 · Kalite Kontrol ve Doğrulama',subtitle:'Kritik hata · inceleme · geçerli',body:'Konum çiti, moderasyon, ölçüm tutarlılığı ve alan dengesi kontrolleri raporda görünür. Kritik hata ile inceleme uyarısı ayrı değerlendirilir.',items:['Konum ve moderasyon','Ölçüm tutarlılığı','Raster · park alan dengesi']},
-  identity:{title:'10 · Tekrar Üretilebilirlik',subtitle:'11 · Analiz Parmak İzi',body:'Yayın anındaki veri ve yöntem sürümü sabitlenir. DGR kimliği, içerik hash’i, yayın geçmişi ve atıf bilgisi birlikte sunulur; yeni çözümleme yeni kimlik alır.',items:['DGR kimliği · sürüm','SHA-256 · kalıcı bağlantı','13 · Atıf']}
+  identity:{title:'10 · Tekrar Üretilebilirlik',subtitle:'11 · Analiz Parmak İzi',body:'Yayın anındaki veri ve yöntem sürümü sabitlenir. DGR kimliği ve SHA-256 özeti kayda bağlanır; yayın zincirinde Zenodo DOI’si ile kalıcı atıf sağlanır. Yeni çözümleme yeni kimlik alır.',items:['DGR kimliği · sürüm','DOI · Zenodo kalıcı kayıt','SHA-256 · içerik doğrulama','13 · Atıf']}
  };
  const translate=text=>typeof root.dgT==='function'?root.dgT(text):text;
  const source=url=>root.DG_PUBLIC_LANDING_SCENE.load(url);

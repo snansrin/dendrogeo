@@ -7593,6 +7593,96 @@
           "sha256": "5c34b1fc4ea7d58638b9c7a28ac8f799b7d9b04d7bb64ba64448aa97e4b289de"
         }
       ]
+    },
+    {
+      "id": "integrated-tree-measurements-and-landing-editorial-20261015",
+      "date": "2026-10-15",
+      "scope": "User-authorized modularization: keep DBH, carbon and height readouts integrated with the field animation; simplify landing resource navigation and academic/policy footer; show the report DOI workflow and remove revision-specific landing copy. Bind injected fetch calls to the browser context. Scientific calculations, measurements, report archive and authorization rules are unchanged. Update the locked hero evidence assertion to match the labeled measurement readouts.",
+      "audit_chain": "sha256-v1",
+      "files": [
+        {
+          "path": "css/landing.css",
+          "previous_sha256": "b5b14599f6990608f54c4514e0de4c7a42b781511951d500479650c2efe59760",
+          "sha256": "4b990518480d0bc5de6c38eb608473171d033043d2c02d821d2f4f6956079e2e"
+        },
+        {
+          "path": "index.html",
+          "previous_sha256": "fb220b77cd6ee1b51f2a873857cf008674388645180a0e00944e8297e31f623d",
+          "sha256": "c6d6051f7d32cc9b620362b2f595868d72932ed0813105dc2433e5ed7265480b"
+        },
+        {
+          "path": "partials/landing.html",
+          "previous_sha256": "ef0720b3c58797e9c8e2718d6d7abe5e18bbb5bac9b2aba09b737003be2832a3",
+          "sha256": "c7df6054e69b96a3296f8872524c8d9b86a4b3fcd823fafd051b0300a193c6e0"
+        },
+        {
+          "path": "test/landing-claims.test.mjs",
+          "previous_sha256": "17ee299d3a9c3ba28e61e17def3ceeba18c82a51c03b17248599132a4c424820",
+          "sha256": "de161456f67d21bad518b170e54e0e19ea3bb7f52a357b8a37404d23ca6f9633"
+        }
+      ]
+    },
+    {
+      "id": "landing-citation-and-version-contract-20261015",
+      "date": "2026-10-15",
+      "scope": "Preserve the canonical Zenodo software citation author order and formal version format while consolidating the landing footer.",
+      "audit_chain": "sha256-v1",
+      "files": [
+        {
+          "path": "partials/landing.html",
+          "previous_sha256": "c7df6054e69b96a3296f8872524c8d9b86a4b3fcd823fafd051b0300a193c6e0",
+          "sha256": "d96d71f1a69c3cf341aedd8bb4005dc75f9c08ba2437e9c4a984b46d5110519a"
+        }
+      ]
+    },
+    {
+      "id": "regenerate-landing-after-citation-update-20261015",
+      "date": "2026-10-15",
+      "scope": "User-authorized modularization: regenerate the compiled landing page after preserving the canonical Zenodo citation and platform version display.",
+      "audit_chain": "sha256-v1",
+      "files": [
+        {
+          "path": "index.html",
+          "previous_sha256": "c6d6051f7d32cc9b620362b2f595868d72932ed0813105dc2433e5ed7265480b",
+          "sha256": "b2e3e6bad04af220f9de5ca5177ee7befdb34224c2b6f4944b2cd5e73a046b63"
+        }
+      ]
+    },
+    {
+      "id": "finalize-canonical-footer-doi-link-20261015",
+      "date": "2026-10-15",
+      "scope": "User-authorized modularization: keep the canonical software citation fully visible and clickable, then regenerate the compiled landing page.",
+      "audit_chain": "sha256-v1",
+      "files": [
+        {
+          "path": "partials/landing.html",
+          "previous_sha256": "d96d71f1a69c3cf341aedd8bb4005dc75f9c08ba2437e9c4a984b46d5110519a",
+          "sha256": "36e7bc921490f145eda53f9fb0b2b7c5e9176cc5239c383568de797b000ce067"
+        },
+        {
+          "path": "index.html",
+          "previous_sha256": "b2e3e6bad04af220f9de5ca5177ee7befdb34224c2b6f4944b2cd5e73a046b63",
+          "sha256": "5822b99940ee2d433c8f4b35afcbc1cd07c706010ad70df1ccf7d081d24532e1"
+        }
+      ]
+    },
+    {
+      "id": "preserve-canonical-doi-as-visible-plain-url-20261015",
+      "date": "2026-10-15",
+      "scope": "User-authorized modularization: retain the DOI as visible citation text and provide a separate DOI link, then regenerate the landing page.",
+      "audit_chain": "sha256-v1",
+      "files": [
+        {
+          "path": "partials/landing.html",
+          "previous_sha256": "36e7bc921490f145eda53f9fb0b2b7c5e9176cc5239c383568de797b000ce067",
+          "sha256": "f5dbe93ac03a968d2b34011a7b31d85757271c9627af0df9ef650b1c5de64f76"
+        },
+        {
+          "path": "index.html",
+          "previous_sha256": "5822b99940ee2d433c8f4b35afcbc1cd07c706010ad70df1ccf7d081d24532e1",
+          "sha256": "050fd640705963684e1f267646cd156758d0237e6b7c914da4ca0cfcc912aacc"
+        }
+      ]
     }
   ]
 }

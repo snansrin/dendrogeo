@@ -9,7 +9,7 @@ window.DG_REPORT_RETRACTION_INSERT_STORE = (() => {
     } catch (_error) {}
 
     try {
-      const response = await fetcher(supabaseUrl + "/rest/v1/report_retractions", {
+      const response = await fetcher.call(globalThis, supabaseUrl + "/rest/v1/report_retractions", {
         method: "POST",
         headers: {
           apikey: anonKey,

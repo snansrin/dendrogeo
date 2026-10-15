@@ -81,11 +81,11 @@ describe('P0 · bilimsel iddialar kaynağıyla birebir', () => {
     assert.match(rd('docs/methods.md'), new RegExp(`${def}/${total}`), 'methods.md ρ\'sız/toplam sayısını söylemeli');
   });
 
-  test('⭐ hero çipleri çevre→DBH→karbon zinciriyle birebir', () => {
+  test('⭐ hero ölçüm alanları çevre→DBH→karbon zinciriyle birebir', () => {
     const circumference = +landing.match(/class="chip c1" data-circumference="(\d+(?:[.,]\d+)?)"/)[1].replace(',', '.');
-    const shownD = +landing.match(/class="chip c1"[^>]*>[\s\S]*?DBH (\d+(?:[.,]\d+)?) cm/)[1].replace(',', '.');
-    const H = +landing.match(/H (\d+(?:[.,]\d+)?) m/)[1].replace(',', '.');
-    const C = +landing.match(/C (\d+(?:[.,]\d+)?) kg/)[1].replace(',', '.');
+    const shownD = +landing.match(/data-i18n="Çap"[^>]*>[\s\S]*?(\d+(?:[.,]\d+)?) cm/)[1].replace(',', '.');
+    const H = +landing.match(/data-i18n="Ağaç boyu"[^>]*>[\s\S]*?(\d+(?:[.,]\d+)?) m/)[1].replace(',', '.');
+    const C = +landing.match(/data-i18n="Tahmini karbon"[^>]*>[\s\S]*?(\d+(?:[.,]\d+)?) kg C/)[1].replace(',', '.');
     const D=circumference/Math.PI;
     assert.equal(shownD,+D.toFixed(1),`gösterilen DBH ${shownD}, çevre/π bir ondalık ${D.toFixed(1)}`);
     const rhoCtx = {};

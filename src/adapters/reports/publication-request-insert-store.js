@@ -9,7 +9,7 @@ window.DG_REPORT_PUBLICATION_REQUEST_INSERT_STORE = (() => {
     } catch (error) { /* fall back to anon key; RLS still decides whether insert is allowed */ }
 
     try {
-      const response = await options.fetch(options.supabaseUrl + "/rest/v1/report_requests", {
+      const response = await options.fetch.call(globalThis, options.supabaseUrl + "/rest/v1/report_requests", {
         method: "POST",
         headers: {
           apikey: options.anonKey,
