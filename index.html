@@ -247,14 +247,14 @@
 <script src="src/config/wood-density-lock.js?v=9572e1df" type="application/x-dendrogeo-module" defer></script>
 <script src="src/config/species.js?v=554298a8" type="application/x-dendrogeo-module" defer></script>
 <!-- DİL KATMANI (0035): sözlük verisi çalışma zamanı çeviricisinden önce yüklenir. -->
-<script src="src/config/i18n-en.js?v=ffac938a" type="application/x-dendrogeo-module" defer></script>
+<script src="src/config/i18n-en.js?v=a2fe5226" type="application/x-dendrogeo-module" defer></script>
 <script src="src/config/i18n.js?v=f99a371a" type="application/x-dendrogeo-module" defer></script>
 <script src="src/domain/map/web-mercator-coordinates.js?v=44109250" type="application/x-dendrogeo-module" defer></script>
 <script src="src/utils/geo.js?v=1e469255" type="application/x-dendrogeo-module" defer></script>
 <script src="src/utils/truncation.js?v=d9710c30" type="application/x-dendrogeo-module" defer></script>
 <!-- Faz 7: geotiff (317 KB) ve chart.js (208 KB) artık SENKRON yüklenmiyor;
      src/utils/lazylibs.js ihtiyaç anında enjekte eder (LULC analizi / panel grafiği). -->
-<script id="dgRuntimeBuild" type="application/json">"c044552f94b32975"</script>
+<script id="dgRuntimeBuild" type="application/json">"463171713e9b7efd"</script>
 <!-- Verified fallback OSM water geometry, independent of the lazy raster engine. -->
 <script src="src/adapters/parks/fetch-nominatim-osm-way.js?v=9f2730dd" type="application/x-dendrogeo-module" defer></script>
 <script src="src/services/osm-water-backup.js?v=4c9fbc03" type="application/x-dendrogeo-module" defer></script>
@@ -507,7 +507,7 @@
 <script src="src/core/surface-display.js?v=b8f84d44" type="application/x-dendrogeo-module" defer></script>
 <script src="src/domain/reports/normalize-report-orcid.js?v=979ee8ce" type="application/x-dendrogeo-module" defer></script>
 <script src="src/domain/reports/clean-report-context.js?v=c7fa400b" type="application/x-dendrogeo-module" defer></script>
-<script src="src/domain/reports/validate-report-context.js?v=1dedf56e" type="application/x-dendrogeo-module" defer></script>
+<script src="src/domain/reports/validate-report-context.js?v=47058651" type="application/x-dendrogeo-module" defer></script>
 <script src="src/domain/reports/decode-report-context.js?v=2824fde8" type="application/x-dendrogeo-module" defer></script>
 <script src="src/domain/reports/report-context.js?v=d5a28430" type="application/x-dendrogeo-module" defer></script>
 <script src="src/core/report-context.js?v=955bb725" type="application/x-dendrogeo-module" defer></script>
@@ -518,11 +518,11 @@
 <script src="src/ui/save-academic-profile.js?v=d5741237" type="application/x-dendrogeo-module" defer></script>
 <script src="src/application/reports/create-academic-report-collector.js?v=8611d81e" type="application/x-dendrogeo-module" defer></script>
 <script src="src/application/reports/resolve-report-question-values.js?v=306935c4" type="application/x-dendrogeo-module" defer></script>
-<script src="src/ui/report-question-fields.js?v=7ca6792b" type="application/x-dendrogeo-module" defer></script>
-<script src="src/ui/report-question-confirmations.js?v=525a6275" type="application/x-dendrogeo-module" defer></script>
-<script src="src/ui/validate-report-question-answer.js?v=95efc1e4" type="application/x-dendrogeo-module" defer></script>
-<script src="src/ui/run-report-question-dialog.js?v=7ad51bd4" type="application/x-dendrogeo-module" defer></script>
-<script src="src/services/academic-profile.js?v=a07bd9f5" type="application/x-dendrogeo-module" defer></script>
+<script src="src/ui/report-question-fields.js?v=d6c656cb" type="application/x-dendrogeo-module" defer></script>
+<script src="src/ui/report-question-confirmations.js?v=7ccde754" type="application/x-dendrogeo-module" defer></script>
+<script src="src/ui/validate-report-question-answer.js?v=770e861c" type="application/x-dendrogeo-module" defer></script>
+<script src="src/ui/run-report-question-dialog.js?v=36472f47" type="application/x-dendrogeo-module" defer></script>
+<script src="src/services/academic-profile.js?v=18769af2" type="application/x-dendrogeo-module" defer></script>
 <script src="src/domain/reports/publication-link.js?v=b415189b" type="application/x-dendrogeo-module" defer></script>
 <script src="src/adapters/reports/publication-log-store.js?v=fc310a53" type="application/x-dendrogeo-module" defer></script>
 <script src="src/adapters/reports/publication-request-store.js?v=245352a4" type="application/x-dendrogeo-module" defer></script>
@@ -943,7 +943,7 @@
      geçerli; kabuk (body.dg-app) yalnız sınıf-bazlı bileşenleri ve sekme
      başlığı ölçeğini alır → Park Karşılaştırma kartı kıpırdamaz. -->
 <link rel="stylesheet" href="css/ui-standard.css?v=aeed9305">
-<link rel="stylesheet" href="css/academic-profile.css?v=88afcec0">
+<link rel="stylesheet" href="css/academic-profile.css?v=04ab0c78">
 <!-- GIS workspace: scoped presentation, keeps locked engine and theme untouched. -->
 <link rel="stylesheet" href="css/surface-drawing.css?v=a5cbf351">
 <link rel="stylesheet" href="css/gis-workspace.css?v=57a47ea5">
@@ -1900,6 +1900,6 @@
 <script src="src/bootstrap/gis-export.js?v=31cdf97c" type="application/x-dendrogeo-module" defer></script>
 <script src="src/ui/gis-export.js?v=85048551" type="application/x-dendrogeo-module" defer></script>
 
-<script src="/src/bootstrap/app-runtime.js?v=a7acf7d7" defer></script>
+<script src="/src/bootstrap/app-runtime.js?v=76dd263c" defer></script>
 </body>
 </html>

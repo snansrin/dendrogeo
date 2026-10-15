@@ -7683,6 +7683,44 @@
           "sha256": "050fd640705963684e1f267646cd156758d0237e6b7c914da4ca0cfcc912aacc"
         }
       ]
+    },
+    {
+      "id": "optional-stationary-publication-form-20261015",
+      "date": "2026-10-15",
+      "scope": "User-authorized modularization: simplify publication metadata into optional fields and collapsed details, preserve explicit publication consent on submit, fix dialog and background scroll, and align regression and phone checks with the requested behavior. Scientific analysis and publication authorization remain enforced.",
+      "audit_chain": "sha256-v1",
+      "files": [
+        {
+          "path": "index.html",
+          "previous_sha256": "050fd640705963684e1f267646cd156758d0237e6b7c914da4ca0cfcc912aacc",
+          "sha256": "c9f4649f9a4143da2bf8677b3d6f06a5b87a550961c89569a9c2d02827b447f8"
+        },
+        {
+          "path": "scripts/check-phone.mjs",
+          "previous_sha256": "9761d87d6bb8801011a79bce7ef44c862bc6d4ae4c4e4a8db9e2c6e73cfeb014",
+          "sha256": "084e4cd43ff07fecc8659f102e33ae96745e8ce1e0b6e9faae0069edd9425905"
+        },
+        {
+          "path": "src/ui/run-report-question-dialog.js",
+          "previous_sha256": "0154dcedf87265d3e579186fdb778651afa2ddf5d978f79f617ee0a867012f7e",
+          "sha256": "03e53e974634bbeb45cb78dde023be0b1c95b2d75730f5f0ef319473f463d28a"
+        },
+        {
+          "path": "src/ui/validate-report-question-answer.js",
+          "previous_sha256": "2779c2f8ae5245ccb2e8906cc27394c165d960b95959914f53c96c1a1758cbb9",
+          "sha256": "47ae88ff078ba0de507493980b6a4979e44fb82d6647a240b8ccf621b492a705"
+        },
+        {
+          "path": "test/academic-profile.test.mjs",
+          "previous_sha256": "e7204893fa66a5b56376b1c2a56c04da4bc71adce4af8e83a3af41121a9f74f9",
+          "sha256": "071cac4455dda489fc9a95880e1248bc2f5dfdb254c6b8efa8e0e7da67b7b2f2"
+        },
+        {
+          "path": "test/report-question-modules.test.mjs",
+          "previous_sha256": "5150e9f927e5e40bb2f15ce52ecd3ba23d48bd90a8962e3a69cc6adcb4d7528f",
+          "sha256": "f1168c3ea2c136b247e171a4b247f00dee071998fc46ed5f14d7c67d8320bc14"
+        }
+      ]
     }
   ]
 }

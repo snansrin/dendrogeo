@@ -24,11 +24,11 @@ test('report question values preserve park precedence and reusable per-user park
  assert.equal(fallback.parkName,'Park #4');assert.equal(fallback.values.author_name,'Researcher');assert.equal(fallback.values.title,'Park #4 ağaç envanteri ve karbon stoku analizi');
 });
 
-test('report question field and confirmation renderers preserve required disclosure and controls',()=>{
+test('report form keeps all fields optional, groups extra details and explains publication on submit',()=>{
  const modules=load(),fields=modules.DG_REPORT_QUESTION_FIELDS.render({author_name:'A',project_name:'P',title:'T',purpose:'Research',sampling:'<plan>',instruments:'<device>'},[['institution','Institution'],['project_name','Project']],{purpose:'<purpose>',sampling:'<sampling>',instruments:'<instruments>'},{input:(...args)=>`<input data-field="${args[0]}">`,label:(key,text)=>`<span>${text}</span>`,escape:value=>String(value).replaceAll('<','&lt;').replaceAll('>','&gt;')});
- assert.match(fields,/name="purpose" rows="3" required minlength="20" maxlength="1600"/);assert.match(fields,/&lt;plan&gt;/);assert.match(fields,/name="independent"/);assert.match(fields,/name="study_type"/);
+ assert.doesNotMatch(fields,/\brequired\b|\bminlength=/);assert.match(fields,/&lt;plan&gt;/);assert.match(fields,/name="independent"/);assert.match(fields,/name="study_type"/);assert.match(fields,/<details class="dg-report-extra">/);assert.match(fields,/Tüm alanlar isteğe bağlıdır/);
  const confirmations=modules.DG_REPORT_QUESTION_CONFIRMATIONS.render();
- assert.match(confirmations,/Rapor kapsamı ve DOI/);assert.match(confirmations,/name="publication_consent" required/);assert.match(confirmations,/name="review_confirmed" required/);assert.match(confirmations,/dgReportQuestionErrors/);assert.match(confirmations,/data-close/);
+ assert.match(confirmations,/Rapor kapsamı ve DOI/);assert.doesNotMatch(confirmations,/\brequired\b|type="checkbox"/);assert.match(confirmations,/açık yayımlanmasını onaylarsınız/);assert.match(confirmations,/dgReportQuestionErrors/);assert.match(confirmations,/data-close/);
 });
 
 test('answer validation keeps native validity, context errors, draft and confirmation result',()=>{
@@ -40,16 +40,16 @@ test('answer validation keeps native validity, context errors, draft and confirm
 
 test('dialog lifecycle closes on cancel and returns validated submit data once',async()=>{
  const api=load().DG_RUN_REPORT_QUESTION_DIALOG;let activeModal,restored=0,current=null,submitted;
- const previous={focus(){restored++;}},document={activeElement:previous,body:{appendChild(modal){activeModal=modal;}}};
+ const previous={focus(options){assert.equal(options.preventScroll,true);restored++;}},document={activeElement:previous,documentElement:{style:{overflow:'auto'}},body:{style:{overflow:''},appendChild(modal){activeModal=modal;}}};
  function makeModal(){
   const listeners={},form={addEventListener:(name,fn)=>{listeners['form:'+name]=fn;}};
   const closeButton={addEventListener:(name,fn)=>{listeners['button:'+name]=fn;}};
-  const select={value:''},input={focus(){}};
+  const select={value:''},input={focus(options){assert.equal(options.preventScroll,true);}};
   return{listeners,form,closeButton,select,input,innerHTML:'',setAttribute(){},addEventListener(name,fn){listeners[name]=fn;},querySelectorAll:()=>[closeButton],querySelector(selector){return selector==='form'?form:selector==='[name=study_type]'?select:input;},showModal(){},close(){listeners.close?.({});},remove(){}};
  }
  const documentWithModal={...document,createElement:()=>makeModal()};
  const pending=api.run('<form></form>',{document:documentWithModal,setCurrent:value=>{current=value;},studyType:'Research',submit:form=>{submitted=form;return{schema:'ok'};}});
- assert.equal(current,activeModal);activeModal.listeners.cancel({preventDefault(){}});assert.equal(await pending,null);assert.equal(current,null);assert.equal(restored,1);
+ assert.equal(current,activeModal);assert.equal(document.documentElement.style.overflow,'hidden');assert.equal(document.body.style.overflow,'hidden');activeModal.listeners.cancel({preventDefault(){}});assert.equal(await pending,null);assert.equal(current,null);assert.equal(restored,1);assert.equal(document.documentElement.style.overflow,'auto');assert.equal(document.body.style.overflow,'');
  const pendingSubmit=api.run('<form></form>',{document:documentWithModal,setCurrent:value=>{current=value;},studyType:'Research',submit:form=>{submitted=form;return{schema:'ok'};}});
  activeModal.listeners['form:submit']({preventDefault(){},currentTarget:activeModal.form});assert.equal((await pendingSubmit).schema,'ok');assert.equal(submitted,activeModal.form);assert.equal(current,null);assert.equal(restored,2);
 });
@@ -74,7 +74,7 @@ test('academic profile service runs the extracted report question path end to en
  vm.runInContext(readFileSync(new URL('../src/application/reports/create-academic-report-collector.js',import.meta.url),'utf8'),context);
  vm.runInContext(readFileSync(new URL('../src/services/academic-profile.js',import.meta.url),'utf8'),context);
  const pending=vm.runInContext('dgReportQuestions(12,"Project")',context);
- assert.match(activeModal.innerHTML,/Park &lt;A&gt;/);assert.match(activeModal.innerHTML,/publication_consent/);assert.equal(current,null);
+ assert.match(activeModal.innerHTML,/Park &lt;A&gt;/);assert.match(activeModal.innerHTML,/dgReportPublicationNotice/);assert.equal(current,null);
  listeners['form:submit']({preventDefault(){},currentTarget:form});
  const result=await pending;assert.equal(result.schema,'dendrogeo-report-context/1');assert.equal(result.study.independent,true);assert.equal(result.study.purpose,'A sufficiently long research purpose');
 });

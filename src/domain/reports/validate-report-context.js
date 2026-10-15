@@ -4,10 +4,7 @@
   function validate(input,today) {
     const value = root.DG_CLEAN_REPORT_CONTEXT.clean(input);
     const errors = {};
-    for (const [key, label] of Object.entries({
-      author_name: "Yazar adı ve soyadı", project_name: "Proje adı", title: "Rapor başlığı", purpose: "Çalışmanın amacı",
-    })) if (!value[key]) errors[key] = label + " gereklidir.";
-    if (value.purpose && value.purpose.length < 20) errors.purpose = "Çalışmanın amacını en az 20 karakterle açıklayın.";
+    // Bibliographic fields are optional; validate only information that is supplied.
     for (const key of ["start_date", "end_date"]) {
       const date = value[key];
       if (date && (!/^\d{4}-\d{2}-\d{2}$/.test(date) || !Number.isFinite(Date.parse(date))

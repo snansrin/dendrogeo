@@ -8,3 +8,21 @@
 .dg-field-help:hover::after,.dg-field-help:focus::after{opacity:1;visibility:visible;transform:translate(-50%,0)}
 .dg-academic-dialog textarea{width:100%;box-sizing:border-box;background:var(--surface);border:1px solid var(--line);border-radius:10px;color:var(--ink);padding:11px 12px;font:inherit;resize:vertical}
 .dg-academic-dialog textarea:focus{outline:2px solid var(--green);border-color:var(--green)}
+
+/* Keep publication controls stationary while optional details scroll inside. */
+.dg-academic-dialog{position:fixed;inset:16px 0 auto;margin:0 auto;width:min(620px,calc(100% - 24px));height:min(600px,calc(100dvh - 32px));max-height:calc(100dvh - 32px);overflow:hidden;animation:none;transition:none;transform:none}
+#dgReportQuestionForm{height:100%;min-height:0;display:flex;flex-direction:column;gap:12px}
+.dg-report-dialog-heading{flex:none;align-items:flex-start;margin:0;padding-bottom:12px;border-bottom:1px solid var(--line)}
+.dg-report-dialog-heading .btn{flex:none;min-width:40px;min-height:40px}
+.dg-report-dialog-heading h2{font-size:1.25rem;margin:4px 0 8px}
+.dg-report-dialog-body{flex:1;min-height:0;overflow:auto;overscroll-behavior:contain;scrollbar-gutter:stable;padding:0 6px 8px 0}
+.dg-report-dialog-body>.dg-meta{margin:0 0 8px}
+.dg-report-extra{border-top:1px solid var(--line);margin-top:12px;padding-top:4px}
+.dg-report-extra>summary{min-height:44px;display:list-item;align-content:center}
+.dg-report-dialog-footer{flex:none;border-top:1px solid var(--line);padding-top:12px}
+.dg-report-dialog-footer>.dg-meta{margin:0;font-size:.72rem;line-height:1.6}
+.dg-report-dialog-footer a{color:var(--green)}
+.dg-report-dialog-footer .dg-profile-actions{justify-content:flex-end;margin:12px 0 0}
+#dgReportQuestionErrors:empty{display:none}
+#dgReportQuestionErrors:not(:empty){margin-top:8px}
+@media(max-width:600px){.dg-academic-dialog{inset:10px 0 auto;height:min(600px,calc(100dvh - 20px));max-height:calc(100dvh - 20px)}.dg-report-dialog-heading h2{font-size:1.1rem}.dg-report-dialog-footer .btn{min-height:44px}}

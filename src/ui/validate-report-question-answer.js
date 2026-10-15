@@ -6,7 +6,9 @@
   const result=ports.validate(value);
   if(!result.valid){
    ports.showErrors(Object.values(result.errors).join(' '));
-   form.elements[Object.keys(result.errors)[0]]?.focus();
+   const field=form.elements[Object.keys(result.errors)[0]];
+   const details=field?.closest?.('details');if(details)details.open=true;
+   field?.focus();
    return null;
   }
   ports.saveDraft(result.value);

@@ -6,6 +6,7 @@ const render=createReportStudyPresentation({esc:v=>String(v??'').replaceAll('&',
 
 test('missing study emits no context and optional empty fields stay absent',()=>{
   assert.equal(render({}),'');
+  assert.equal(render({study:{}}),'');
   const html=render({study:{purpose:'Amaç',institution:'',sampling:'',instruments:''}});
   assert.match(html,/Çalışmanın amacı ve kapsamı/);
   assert.doesNotMatch(html,/Üniversite \/ kurum|Örnekleme tasarımı|Saha yöntemi ve ölçüm cihazları|Bağımsız çalışma/);
