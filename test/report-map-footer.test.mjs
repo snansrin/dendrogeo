@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { drawReportMapFooter } from '../scripts/lib/report-map-footer.mjs';
+import { drawReportMapFooter,reportMapFooterLayout } from '../scripts/lib/report-map-footer.mjs';
 
 function createCanvas() {
   return { lines: [], texts: [],
@@ -43,8 +43,21 @@ test('report map footer uses defaults and omits analysis detail when metadata is
   });
 
   assert.deepEqual(canvas.texts.map(([x, y, value]) => [x, y, value]), [
-    [26, 122, 'DENDROGEO - BILIMSEL ANALIZ HARITASI'],
-    [26, 142, 'VERI: ESA WORLDCOVER 2021 V200 / COZUNURLUK: 10 M']
+    [26, 122, 'DENDROGEO - BILIMSEL ANALIZ'],
+    [26, 132, 'HARITASI'],
+    [26, 142, 'VERI: ESA WORLDCOVER 2021'],
+    [26, 152, 'V200 / COZUNURLUK: 10 M']
   ]);
-  assert.deepEqual(canvas.texts.map(([, , , , size]) => size), [2, 1]);
+  assert.deepEqual(canvas.texts.map(([, , , , size]) => size), [1, 1, 1, 1]);
+});
+
+test('long accepted-analysis metadata wraps without losing projection or crossing the footer',()=>{
+ for(const width of [220,420,526,1000]){
+  const layout=reportMapFooterLayout({width,padding:26,dataset:'ESA WORLDCOVER',meta:{id:'DGR-2026-0026',source:'UYDU / OSM / KULLANICI KARARI',resolution:'UYDU 10/20 M; VEKTOR SINIR',epsg:32636,dateStr:'14.10.2026'}});
+  assert.match(layout.rows.map(r=>r.text).join(' '),/PROJEKSIYON: EPSG:32636/);
+  for(const row of layout.rows){
+   assert.ok(row.text.length*6*row.scale<=width-52,'text fits horizontally');
+   assert.ok(12+row.y+7*row.scale<layout.height,'text fits vertically');
+  }
+ }
 });

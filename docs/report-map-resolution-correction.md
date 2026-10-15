@@ -35,3 +35,12 @@ Canlı analiz/saha verisi sorgulanmaz. Normal CI hattı PDF, arşiv ve DOI'yi ü
 silmediğini; `report-map-module.test.mjs` PNG boyutunu ve girdi değişmezliğini;
 `report-presentation-correction.test.mjs` bilimsel alanların korunmasını ve kaynak
 hash'i bozuksa işlemin reddedilmesini denetler.
+
+## Altbilgi taşması düzeltmesi
+
+Uzun kaynak ve çözünürlük metinleri en küçük yazı ölçeğinde dahi tek satıra
+sığmadığında projeksiyon bilgisi PNG kenarında kesiliyordu. `report-map-text-wrap`
+bitmap yazının gerçek karakter genişliğiyle satırları böler; `reportMapFooterLayout`
+gerekli altbilgi yüksekliğini hesaplar. Çizimden önce bu yükseklik tuvale ayrılır.
+526 piksel park haritası ve daha dar/geniş çıktılar için yatay/dikey sınır testleri
+projeksiyon metninin eksiksiz kaldığını doğrular. Sunum düzeltmesi kimliği v2'dir.

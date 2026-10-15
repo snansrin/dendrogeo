@@ -8,7 +8,7 @@ import { drawReportMapSurfaceLayers } from './report-map-surface-layers.mjs';
 import { drawReportMapHeading } from './report-map-heading.mjs';
 import { drawReportMapScaleAndNorth } from './report-map-scale-orientation.mjs';
 import { drawReportMapLegend } from './report-map-legend.mjs';
-import { drawReportMapFooter } from './report-map-footer.mjs';
+import { drawReportMapFooter,reportMapFooterLayout } from './report-map-footer.mjs';
 
 export const DATASET_ASCII = 'ESA WORLDCOVER 2021 V200';
 
@@ -21,11 +21,12 @@ export const DATASET_ASCII = 'ESA WORLDCOVER 2021 V200';
 export const MAP_TONES = { out: [238, 240, 238], nodata: [212, 212, 208], ink: [24, 36, 32], mut: [104, 118, 110], halo: [255, 255, 255] };
 
 export function mapCanvas({ outer, outers = null, surfaceFeatures = [], holes = [], wruns = [], classes = {}, parkName = '', sub = '', sub2 = '', maskHa = 0, points = [], pointStat = null, meta = null, pixelRatio = 1 }) {
-  const PAD = 26, TOP = 96, MAPH = 540, FOOT = 70;
+  const PAD = 26, TOP = 96, MAPH = 540;
   const { width: W, scale: k, x: X, y: Y } = createReportMapProjection({
     outer, outers, padding: PAD, top: TOP, mapHeight: MAPH
   });
   const { classFor: pngClass, rows: legRows } = createReportMapClassPresentation({ classes, maskHa });
+  const FOOT=reportMapFooterLayout({width:W,padding:PAD,dataset:DATASET_ASCII,meta}).height;
   const H = TOP + MAPH + 16 + legRows.length * 28 + 18 + FOOT;
   const {canvas:cv,view,ratio}=createReportMapCanvas({width:W,height:H,background:MAP_TONES.out,pixelRatio});
   const FR = [206, 210, 206];

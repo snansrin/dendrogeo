@@ -1,7 +1,7 @@
 import {canonicalHash} from './canonical-hash.mjs';
 
-export const MAP_PRESENTATION_CORRECTION='map-path-resolution-v1';
-export const MAP_CORRECTION_NOTE='Harita sunumu düzeltmesi: ince yol sınırları korunmuş, PNG çözünürlüğü artırılmıştır. Ölçümler, kabul edilmiş yüzey geometrileri ve bilimsel sonuçlar değiştirilmemiştir.';
+export const MAP_PRESENTATION_CORRECTION='map-path-resolution-footer-v2';
+export const MAP_CORRECTION_NOTE='Harita sunumu düzeltmesi: ince yol sınırları korunmuş, PNG çözünürlüğü artırılmış ve altbilgideki kaynak/çözünürlük/projeksiyon satırlarının taşması giderilmiştir. Ölçümler, kabul edilmiş yüzey geometrileri ve bilimsel sonuçlar değiştirilmemiştir.';
 
 /* A correction derives only from a verified frozen snapshot, never live analysis. */
 export function correctReportPresentation({source,metadata,id,generatedAt,gitCommit}){
