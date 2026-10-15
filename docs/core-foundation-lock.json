@@ -7532,6 +7532,24 @@
           "sha256": "9a74251a367dd67edeee7806b18bff1127c5105f3287c50f8e062e56a54eb7f0"
         }
       ]
+    },
+    {
+      "id": "landing-showcase-contrast-20261015",
+      "date": "2026-10-15",
+      "scope": "User-authorized modularization: preserve readable contrast throughout landing entrance animation by animating position only; update only landing styles and generated index. Scientific engines and accepted result unchanged.",
+      "audit_chain": "sha256-v1",
+      "files": [
+        {
+          "path": "css/landing.css",
+          "previous_sha256": "bce0fdd6544d634280f808b6d2cefe815cdc2ac590661407d30bd0b2f0dc6f38",
+          "sha256": "b5b14599f6990608f54c4514e0de4c7a42b781511951d500479650c2efe59760"
+        },
+        {
+          "path": "index.html",
+          "previous_sha256": "72f3cdc74d834a48d897b1b5ed5ee8aa5c3ef204857e374f9e8dc02deae0ad80",
+          "sha256": "67be4191d383092208c2b3aa8d840a39dd5933189f1b149658a3b3d90d9a03f8"
+        }
+      ]
     }
   ]
 }
