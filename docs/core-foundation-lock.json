@@ -955,7 +955,11 @@
       "test/visitor-view-modules.test.mjs",
       "test/waypoint-navigation-modules.test.mjs",
       "test/world-park-comparison-workflows.test.mjs",
-      "test/world-render-modules.test.mjs"
+      "test/world-render-modules.test.mjs",
+      "src/ui/render-verified-surface-map-export.js",
+      "src/ui/bind-surface-editor-events.js",
+      "test/surface-editor-event-binding.test.mjs",
+      "docs/generated-markup-handler-baseline.json"
     ],
     "modular_shell_action_safeguards": [
       "index.html",
@@ -1946,7 +1950,11 @@
     "test/world-render-modules.test.mjs": "53b379e060a6e7019d6215fd39301a677226eed43b5984db8e2ee39343fd232b",
     "vendor/geotiff-2.1.3.js": "cb5c9731bfee1f8bff1728e54e4436ada81ea3258b178a3d6603c61b58d99e6c",
     "vendor/leaflet-1.9.4.js": "db49d009c841f5ca34a888c96511ae936fd9f5533e90d8b2c4d57596f4e5641a",
-    "vendor/polygon-clipping-0.15.7.js": "7f8619e84a86ce8dd400c9b50430e9c8cf8f26027b19eeb479f109f5c1a9d688"
+    "vendor/polygon-clipping-0.15.7.js": "7f8619e84a86ce8dd400c9b50430e9c8cf8f26027b19eeb479f109f5c1a9d688",
+    "src/ui/render-verified-surface-map-export.js": "0b0a994bbb5169810437e44fa2c400963c4d16c7cf56b1040c927012932b8541",
+    "src/ui/bind-surface-editor-events.js": "1865b71c94ed332e6b4a4c6630d71a3d6373b6669df64a4bdb615c35fd42477e",
+    "test/surface-editor-event-binding.test.mjs": "25d2813d9d575da97cdf35e4c45faff60983dd6ced54f017fb4c47b15cb24540",
+    "docs/generated-markup-handler-baseline.json": "d366816ca1bb301cd6aa122caeb221dbeca891bb59e7205db434aaf40d363cf5"
   },
   "authorized_modularizations": [
     {
@@ -5284,6 +5292,144 @@
         }
       ],
       "audit_chain": "sha256-v1"
+    },
+    {
+      "scope": "User-authorized modularization architecture audit follow-up: generate Service Worker runtime precache from the page/lazy-loader source graph, track dynamic markup handler debt, and reconcile architecture status evidence without changing product workflows.",
+      "date": "2026-10-15",
+      "files": [
+        {
+          "path": "index.html",
+          "previous_sha256": "36a5a4ef229c2d2461aa678d70c70d39b7901549c83a0512c279efca6ffc2d94",
+          "sha256": "a581458d98a0ce3acf434230d445f2884fe844baffd53dcd2ac57cf563baf09c"
+        },
+        {
+          "path": "package.json",
+          "previous_sha256": "7acc377c195644a0a14ac05ce09ffb20a5fc11a15f7cb0c192f951e9f2e62fc3",
+          "sha256": "31dd71de680b00a25323ced33477d6d7b9ff5ab2c6d0fcc1ec8f81467de2f6a1"
+        },
+        {
+          "path": "scripts/architecture-status.mjs",
+          "previous_sha256": "4c26b7a21ac629cbba0f0b5678337da0a1fcb3d624828b2b153e5516f6f011d1",
+          "sha256": "d7aa01883ec52094495f8830e5084421ecb161a05a77973e8b65e77361eec816"
+        },
+        {
+          "path": "sw.js",
+          "previous_sha256": "12027661e29d67fbfac06ed7e4a93d2672156f5825a40c2231a90ea6471285f8",
+          "sha256": "e417b40c56b7f0539f20cd7a28463f6aec9b8c6b1589e839400af080ebcbe1d1"
+        }
+      ],
+      "audit_chain": "sha256-v1"
+    },
+    {
+      "scope": "User-authorized modularization of runtime precache generation while preserving legacy Service Worker literal-quote compatibility.",
+      "date": "2026-10-15",
+      "audit_chain": "sha256-v1",
+      "files": [
+        {
+          "path": "sw.js",
+          "previous_sha256": "e417b40c56b7f0539f20cd7a28463f6aec9b8c6b1589e839400af080ebcbe1d1",
+          "sha256": "b29b8da6842fc1e1c6b003055a3cb230690510bd793eecbbca2c287bd79afefb"
+        }
+      ]
+    },
+    {
+      "scope": "User-authorized modularization: extract verified surface-map PNG dialog and canvas composition into an isolated UI module, preserve entry-point behavior, register and precache the module.",
+      "date": "2026-10-15",
+      "audit_chain": "sha256-v1",
+      "files": [
+        {
+          "path": "index.html",
+          "previous_sha256": "a581458d98a0ce3acf434230d445f2884fe844baffd53dcd2ac57cf563baf09c",
+          "sha256": "e9c3f46a6958954ffd03cc917c38f5e56241304c0f8857f519cf8f6b958c61ee"
+        },
+        {
+          "path": "src/ui/lc-sens.js",
+          "previous_sha256": "8e976b528c61c94e7a5dce4a6f09a04455c7722e03bc14d01939e5192e194ed6",
+          "sha256": "6a06553e017757070695548055ed0e9b0b767e61942bf5ab371e585e8ff74a6a"
+        },
+        {
+          "path": "src/utils/lazylibs.js",
+          "previous_sha256": "0ed9a571621f16ac661e82ede43951548b29bdf6030f779e3d34da80b6767b27",
+          "sha256": "ed4a69673536df6691bd38cda4c9e629e1316c8117d256dd5d2622dceddf5a66"
+        },
+        {
+          "path": "sw.js",
+          "previous_sha256": "b29b8da6842fc1e1c6b003055a3cb230690510bd793eecbbca2c287bd79afefb",
+          "sha256": "59d113fa8d8de318900fdc726bc16b5297a3c659923a7a125725680f1ce571b6"
+        }
+      ],
+      "added_protected_files": [
+        "src/ui/render-verified-surface-map-export.js"
+      ]
+    },
+    {
+      "scope": "User-authorized modularization: update regression checks to assert the extracted verified surface-map export through its UI/application ports; remove a time-sensitive test race.",
+      "date": "2026-10-15",
+      "audit_chain": "sha256-v1",
+      "files": [
+        {
+          "path": "test/lc-validate.test.mjs",
+          "previous_sha256": "2af88dd3da11fc13e9237ab97292f3ade32ae8f3cf2fee8bd1d79111d0b44160",
+          "sha256": "0c7b129fd73a49c6a8daabb7a233d8b35fab876bbab0ea80df010e4d1649537e"
+        }
+      ]
+    },
+    {
+      "scope": "User-authorized modularization: replace surface-editor generated inline handlers with a declarative UI event binder and injected callbacks; reduce reviewed dynamic markup debt.",
+      "date": "2026-10-15",
+      "audit_chain": "sha256-v1",
+      "files": [
+        {
+          "path": "index.html",
+          "previous_sha256": "e9c3f46a6958954ffd03cc917c38f5e56241304c0f8857f519cf8f6b958c61ee",
+          "sha256": "16c9fd1707144e1af39b18b3e702c25c0a216921eea42788d62c1fafcac3c58d"
+        },
+        {
+          "path": "src/ui/lc-sens.js",
+          "previous_sha256": "6a06553e017757070695548055ed0e9b0b767e61942bf5ab371e585e8ff74a6a",
+          "sha256": "ef31339a6b0dae5211dd9bf1a9d8d855754dbd87ba2b094613b3f890ee6a8af8"
+        },
+        {
+          "path": "src/ui/render-surface-editor-menus.js",
+          "previous_sha256": "6e6fa8398797971faa4cc7a396da7c9f21eb77a56e7f3ce17d5548ca462ec962",
+          "sha256": "372eb5d40c0c0ef6a4c80cfe700672e665822dc95c83c1458ede82b9b09119a2"
+        },
+        {
+          "path": "src/ui/render-surface-editor-tool-rail.js",
+          "previous_sha256": "97a276942ec510d8026a988ca14e822a7596609ecc4bdd3a8fd6b58cc35d5066",
+          "sha256": "db277e2ced10bdab99a3eccdfd714b7cf8466462f7fbf676bb83f7670f80eea4"
+        },
+        {
+          "path": "src/ui/render-surface-review-actions.js",
+          "previous_sha256": "37ac6cc9726b11c474fb3a7a92caacc9a2a33f43569a395609df8fb946cd7fa2",
+          "sha256": "4a6b32efa078c517cfcc50143e5dc7f647a81720389f39e9bd0c3062c8807467"
+        },
+        {
+          "path": "src/ui/render-surface-scan-panel.js",
+          "previous_sha256": "e1a17bf0af37a600e4f57643d5fb2667b355ce89ecbf5272db997b415fcd1e03",
+          "sha256": "92277cd2b681c3d50479eef4a4e13f0fdead2be101638af087d11f2105334c96"
+        },
+        {
+          "path": "src/ui/render-surface-sensitivity-controls.js",
+          "previous_sha256": "750d7fe5432f6601c1c36c48fe82db6b1a4acd1e3fb7a27df2db89ff70dbeab7",
+          "sha256": "f81d2c0f5741323cd24aefdc3050084ed32c234c0033eab6cb67303ba6dd8ddb"
+        },
+        {
+          "path": "src/utils/lazylibs.js",
+          "previous_sha256": "ed4a69673536df6691bd38cda4c9e629e1316c8117d256dd5d2622dceddf5a66",
+          "sha256": "5d8478288789dae1d79d7e3db273687bc2f0b149956acab4af671e1fd8a1e6e4"
+        },
+        {
+          "path": "sw.js",
+          "previous_sha256": "59d113fa8d8de318900fdc726bc16b5297a3c659923a7a125725680f1ce571b6",
+          "sha256": "60bc3644adff392b44428adf43bf9a33930eb870bbeb68a90693b0cab97d2f42"
+        }
+      ],
+      "added_protected_files": [
+        "src/ui/bind-surface-editor-events.js",
+        "test/surface-editor-event-binding.test.mjs",
+        "docs/generated-markup-handler-baseline.json"
+      ]
     }
   ]
 }

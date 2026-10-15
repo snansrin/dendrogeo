@@ -203,7 +203,8 @@ test('verified map export remains available while the redundant post-analysis PN
  assert.match(workspace,/verified\.textContent="🖼️ Doğrulanmış Harita"/);
  assert.doesNotMatch(workspace,/legacy\.hidden=false|parkRasterExport|downloadParkImage/);
  assert.match(locked,/function dgSensExportPng\(\)/);
- assert.match(locked,/dialog\.showModal\(\)/);
+ assert.match(load('src/ui/render-verified-surface-map-export.js'),/dialog\.showModal\(\)/);
+ assert.match(locked,/DG_RENDER_VERIFIED_SURFACE_MAP_EXPORT/);
  assert.match(load('src/bootstrap/gis-export.js'),/DG_GIS_EXPORT_BOOTSTRAP\.install/);
  assert.match(events,/const exportAction=event\.target\?\.closest\?\.\("#dgExportDownload"\)/);
  assert.match(events,/if\(exportAction&&sens\?\.vegetationView&&!sens\.rawView\)/);

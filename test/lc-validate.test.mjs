@@ -484,10 +484,10 @@ describe('lc-s2 · Sentinel-2 sabitleri ve saf yardımcılar', () => {
     assert.match(g.label, /güncel/i);
   });
   test('güncel yıl modu 1 Ocak–bugün aralığını kullanır; 2021 referansını değiştirmez', () => {
-    const now = Date.now(), year = new Date().getUTCFullYear();
+    const year = new Date().getUTCFullYear();
     const ytd = dgS2SeasonRange(2021, 'ytd');
     assert.equal(ytd.start, `${year}-01-01T00:00:00.000Z`);
-    assert.ok(Date.parse(ytd.end) <= now);
+    assert.ok(Date.parse(ytd.end) <= Date.now());
     assert.match(ytd.label, new RegExp(String(year)));
     const ref = dgS2SeasonRange(2021, 'ref');
     assert.equal(ref.start, '2021-06-01T00:00:00Z');
@@ -711,16 +711,18 @@ describe("0058 · Doğrulanmış Harita PNG (kullanıcının refactor'ü üstün
   test('düğme + üretici mevcut ve onların kancalarını kullanır', () => {
     assert.match(sens, /onclick="dgSensExportPng\(\)"/);
     assert.match(sens, /function dgSensExportPng\(\)\{/);
-    /* onların kabul hattı: dgSensAreas (polygon-clipping summarize) + dgSensEffective */
-    assert.match(sens, /const areas=dgSensAreas\(\)\|\|dgSensGroupAreas\(\);/);
-    assert.match(sens, /COL\[feature.properties.class\]/);
-    assert.match(sens, /g.fill\("evenodd"\)/);
-    assert.match(sens, /rec\.features\|\|\[\]/);
+    const exportUi = rd('src/ui/render-verified-surface-map-export.js');
+    const layers = rd('src/ui/draw-surface-export-map-layers.js');
+    assert.match(sens, /getAreas:dgSensAreas,getRasterAreas:dgSensGroupAreas/);
+    assert.match(exportUi, /const areas=getAreas\(\)\|\|getRasterAreas\(\)/);
+    assert.match(layers, /colors\[feature\.properties\.class\]/);
+    assert.match(layers, /g.fill\("evenodd"\)/);
+    assert.match(exportUi, /record\.features\?\.length/);
   });
   test("künye dürüst: parmak izi + dönem + ÖNİZLEME/KABUL damgası canvas'ta", () => {
-    assert.match(sens, /parmak izi/);
-    assert.match(sens, /DG_SENS\.editing\?"ÖNİZLEME":"KABUL EDİLMİŞ v"/);
-    assert.match(sens, /DOĞRULANMIŞ PARK HARİTASI/);
+    assert.match(rd('src/ui/render-surface-export-infographic.js'), /parmak izi/);
+    assert.match(rd('src/ui/render-verified-surface-map-export.js'), /state\.editing\?'ÖNİZLEME':'KABUL EDİLMİŞ v'/);
+    assert.match(rd('src/ui/render-surface-export-infographic.js'), /DOĞRULANMIŞ PARK HARİTASI/);
   });
   test('kırmızı çizgi: PNG yalnız okur (DG_LC_LAST/groupAreas ataması yok)', () => {
     assert.ok(!/DG_LC_LAST\s*=[^=]/.test(sens));

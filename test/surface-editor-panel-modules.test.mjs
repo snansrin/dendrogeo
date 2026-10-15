@@ -19,11 +19,11 @@ test('scan panel keeps its status button, profile range, audit and source hint',
 
 test('sensitivity controls preserve class order, slider callbacks and raw/brush gates',()=>{
   const window=setup(),html=window.DG_RENDER_SURFACE_SENSITIVITY_CONTROLS.render({model:{scanned:true,disabled:false},record:{sens:{green:50,water:40,hard:60,bare:30}},classes:['green','water','hard','bare'],meta:key=>({emoji:'•',tr:key}),focus:'water',rawView:true,brush:null,sectionsOpen:true,opacity:45,translate:tr,escape});
-  assert.ok(html.indexOf("dgSensFocus('green')")<html.indexOf("dgSensFocus('water')"));assert.ok(html.indexOf("dgSensFocus('water')")<html.indexOf("dgSensFocus('hard')"));assert.ok(html.indexOf("dgSensFocus('hard')")<html.indexOf("dgSensFocus('bare')"));assert.match(html,/dgSensSlide\('water',this.value\)/);assert.match(html,/id="dgSensOpacityValue">%45/);assert.match(html,/aria-pressed="true"/);assert.match(html,/value="40"[^>]*disabled/);
+  assert.ok(html.indexOf('data-dg-class="green"')<html.indexOf('data-dg-class="water"'));assert.ok(html.indexOf('data-dg-class="water"')<html.indexOf('data-dg-class="hard"'));assert.ok(html.indexOf('data-dg-class="hard"')<html.indexOf('data-dg-class="bare"'));assert.match(html,/data-dg-input="sensitivity"/);assert.match(html,/id="dgSensOpacityValue">%45/);assert.match(html,/aria-pressed="true"/);assert.match(html,/value="40"[^>]*disabled/);
 });
 
 test('review actions preserve accepted summary IDs and gate acceptance on raw or brush',()=>{
-  const html=setup().DG_RENDER_SURFACE_REVIEW_ACTIONS.render({record:{objectFeatures:[{},{}]},disabled:false,rawView:false,brush:{},showCandidates:true,translate:tr,escape});assert.match(html,/dgSensAcceptBtn/);assert.match(html,/dgSensToggleCand/);assert.match(html,/id="dgSensSummary"/);assert.match(html,/id="dgSensStatus"/);assert.match(html,/id="dgSensVegetationSummary"/);assert.match(html,/OSM: 2/);assert.match(html,/dgSensAccept\(\).*disabled/);
+  const html=setup().DG_RENDER_SURFACE_REVIEW_ACTIONS.render({record:{objectFeatures:[{},{}]},disabled:false,rawView:false,brush:{},showCandidates:true,translate:tr,escape});assert.match(html,/dgSensAcceptBtn/);assert.match(html,/data-dg-click="candidatesToggle"/);assert.match(html,/id="dgSensSummary"/);assert.match(html,/id="dgSensStatus"/);assert.match(html,/id="dgSensVegetationSummary"/);assert.match(html,/OSM: 2/);assert.match(html,/data-dg-click="accept" disabled/);
 });
 
 test('editor panel composer keeps scan, control, then review sections in sequence',()=>{

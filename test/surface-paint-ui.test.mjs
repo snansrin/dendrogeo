@@ -37,7 +37,7 @@ test('brush toolbar is placed below marker refresh and exposes the established c
   assert.match(source, /onclick="dgSensDrawFinish\(\)"/);
   assert.match(source, /dgSensUndoBoundary/);
   assert.match(source, /e\.key==="Escape"\)\{if\(DG_SENS\.draw\)/);
-  assert.match(source, /vegetation_ndvi_relative_class/);
+  assert.match(readFileSync(new URL('../src/domain/surface/build-surface-export-data.js', import.meta.url), 'utf8'), /vegetation_ndvi_relative_class/);
   assert.match(css, /\.dg-vegetation-legend/);
   assert.match(shell, /id="surfaceMapWorkspace"[\s\S]*id="surfaceMapTools"[\s\S]*id="map"/);
   assert.doesNotMatch(source, /dg-editor-palette|dg-boundary-palette/);

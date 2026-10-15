@@ -5,16 +5,17 @@ Bu dosya mimari kapılardan güncel sayıları üretir.
 
 | Alan | Mevcut ölçüm | Durum |
 |---|---:|---|
-| JavaScript AST katman denetimi | 800 modül · 0 ihlal | Geçti |
-| AST bağımlılık yönü | 936 modül · 0 ihlal · 0 istisna | Geçti |
-| Runtime envanteri | 990 fiziksel · 735 ilk yükleme · 252 lazy · 950 SHA korumalı | Ölçüldü |
+| JavaScript AST katman denetimi | 802 modül · 0 ihlal | Geçti |
+| AST bağımlılık yönü | 938 modül · 0 ihlal · 0 istisna | Geçti |
+| Runtime envanteri | 992 fiziksel · 735 ilk yükleme · 254 lazy · 954 SHA korumalı | Ölçüldü |
 | Legacy servis sınır borcu | 0 DOM/Supabase/ağ erişimi | Geçti; yeni ihlal kapalı |
-| HTML satır içi olay | 0 | Geçti |
+| Statik HTML satır içi olay | 0 | Geçti |
+| Dinamik HTML olay borcu | 147 nitelik · 40 UI/service dosyası | Bilinen baseline; yeni artış CI'da engellenir |
 | İlk yükleme script bildirimi | 735 modül | Sıra ve çevrimdışı manifesti açıkça korunuyor |
 
 ## Tamamlanan mimari kapıları
 
-- Katman ve dependency kuralları AST ile doğrulanıyor; global facade sağlayıcıları ve bağımlılık yönü denetleniyor.
+- Katman ve dependency kuralları AST ile doğrulanıyor; global facade sağlayıcıları ve bağımlılık yönü denetleniyor. Dinamik HTML inline handler sayısı ayrıca baseline'a karşı denetleniyor ve artırılamıyor.
 - Servis katmanında DOM, Supabase ve ağ erişimi yok; sınır borcunun artması CI'ı durduruyor.
 - Build, sürüm, CSP, Service Worker/lazy modül entegrasyonu, çekirdek hash ve HTML olay kapıları `npm run check` içinde.
 - Tam test paketi, Chromium mobil iş akışları ve erişilebilirlik kontrolleri yerel release doğrulamasından geçti.

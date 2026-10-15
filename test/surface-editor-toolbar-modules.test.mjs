@@ -9,7 +9,8 @@ const modules=[
  'src/ui/render-surface-editor-menu-label.js',
  'src/ui/render-surface-editor-panel-head.js',
  'src/ui/render-surface-editor-menus.js',
- 'src/ui/render-surface-editor-tool-rail.js'
+ 'src/ui/render-surface-editor-tool-rail.js',
+ 'src/ui/bind-surface-editor-events.js'
 ];
 function setup(){const window={DG_SURFACE_REVIEW:{types:Object.fromEntries(['green','water','hard','bare','building','pool'].map(key=>[key,{label:key.toUpperCase()}]))}};const context=vm.createContext({window,Math,Number,String,Object,Array});for(const path of modules)vm.runInContext(read(path),context,{filename:path});return window;}
 const identity=value=>value;
@@ -31,18 +32,19 @@ test('menu label and panel heading keep the accessible fallback and injected UI 
 test('editor menus keep control IDs, class order, export actions, and review guards',()=>{
  const render=setup().DG_RENDER_SURFACE_EDITOR_MENUS.render,model={disabled:true,viewDisabled:true,rawView:true,brush:null,base:'sat',drawType:'building',objectPick:false,objectPreview:null,activeType:'hard',brushDiameter:10};
  const html=render({record:{features:[{type:'water'}],useObjects:true,period:'ytd'},model,types:setup().DG_SURFACE_REVIEW.types,menuLabel:(_icon,label)=>label,panelHead:(_icon,title)=>title,translate:identity,escape:identity});
- for(const value of ['dgSensBaseSelect','dgSensDrawType','dgSensBrushType','dgSensBrushSize','dgSensPeriod','dgSensFeatures','dgSensExportPng()','dgSensObjectPickStart()','dgSensUndoBoundary()'])assert.ok(html.includes(value),value);
- assert.ok(html.indexOf('value="building"')<html.indexOf('value="water"'));assert.doesNotMatch(html,/value="pool"|Havuz/);assert.ok(html.includes('dgSensPeriod(this.value)'));
+ for(const value of ['dgSensBaseSelect','dgSensDrawType','dgSensBrushType','dgSensBrushSize','dgSensPeriod','dgSensFeatures','data-dg-click="exportPng"','data-dg-click="objectPick"','data-dg-click="undoBoundary"'])assert.ok(html.includes(value),value);
+ assert.ok(html.indexOf('value="building"')<html.indexOf('value="water"'));assert.doesNotMatch(html,/value="pool"|Havuz/);assert.ok(html.includes('data-dg-change="period"'));
 });
 
 test('toolbar rail keeps accessible action names, no-point draw guard, and ordered shell',()=>{
  const rail=setup().DG_RENDER_SURFACE_EDITOR_TOOL_RAIL,model={disabled:false,brush:null,draw:{ring:[]},objectPreview:null,vegetationView:false,vegetationReady:false};
- const controls=rail.renderRail({model,translate:identity,escape:identity,icon:(_name,fallback)=>fallback});assert.ok(controls.includes('id="dgSensBrushBtn"'));assert.ok(controls.includes('aria-label="Son fırça izini geri al"'));assert.match(controls,/dgSensDrawFinish\(\).*disabled/);
+ const controls=rail.renderRail({model,translate:identity,escape:identity,icon:(_name,fallback)=>fallback});assert.ok(controls.includes('id="dgSensBrushBtn"'));assert.ok(controls.includes('aria-label="Son fırça izini geri al"'));assert.match(controls,/data-dg-click="drawFinish".*disabled/);
+ const object=rail.renderRail({model:{...model,objectPreview:{osmId:'way/1'}},translate:identity,escape:identity,icon:(_name,fallback)=>fallback});assert.match(object,/data-dg-click="objectApply"/);
  const shell=rail.compose({menus:'<details></details>',mode:'Haritayı kaydır',translate:identity,escape:identity});assert.ok(shell.indexOf('<nav')<shell.indexOf('dg-editor-status'));assert.ok(shell.includes('ESC iptal'));
 });
 
-test('five toolbar modules load before locked UI, are precached, and service delegates when available',()=>{
+test('toolbar modules and event adapter load before locked UI, are precached, and service delegates when available',()=>{
  const chain=read('src/utils/lazylibs.js'),sw=read('sw.js'),ui=read('src/ui/lc-sens.js');
  for(const path of modules){assert.ok(chain.includes(`"${path}"`),`${path} lazy load`);assert.ok(sw.includes(`'/${path}'`),`${path} precache`);assert.ok(chain.indexOf(`"${path}"`)<chain.indexOf('"src/ui/lc-sens.js"'),`${path} precedes UI`);}
- for(const key of ['DG_BUILD_SURFACE_TOOLBAR_MODEL','DG_RENDER_SURFACE_EDITOR_MENU_LABEL','DG_RENDER_SURFACE_EDITOR_PANEL_HEAD','DG_RENDER_SURFACE_EDITOR_MENUS','DG_RENDER_SURFACE_EDITOR_TOOL_RAIL'])assert.ok(ui.includes(key),key);
+ for(const key of ['DG_BUILD_SURFACE_TOOLBAR_MODEL','DG_RENDER_SURFACE_EDITOR_MENU_LABEL','DG_RENDER_SURFACE_EDITOR_PANEL_HEAD','DG_RENDER_SURFACE_EDITOR_MENUS','DG_RENDER_SURFACE_EDITOR_TOOL_RAIL','DG_BIND_SURFACE_EDITOR_EVENTS'])assert.ok(ui.includes(key),key);
 });

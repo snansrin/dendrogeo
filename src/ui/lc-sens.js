@@ -313,13 +313,29 @@ async function dgSensVisualResult(parts=dgSensParts()){
 }
 function dgSensAdjusted(){const builder=window.DG_BUILD_ADJUSTED_SURFACE_SUMMARY,a=dgSensAreas();if(builder)return builder.build({areas:a,rasterAreas:dgSensGroupAreas(),record:DG_SENS.record});if(!a)return null;const rec=DG_SENS.record,n=Object.keys(rec.corrections).length;return{raster:dgSensGroupAreas(),corrected:a,n,nCorrected:n,nConfirmed:0};}
 function dgSensRememberSection(el){DG_SENS.sections=DG_SENS.sections||{};DG_SENS.sections[el.id]=el.open;}
+function dgSensBindEditorEvents(container){
+ const module=window.DG_BIND_SURFACE_EDITOR_EVENTS;if(!module)return;
+ module.bind(container,{
+  menu:dgSensMenuToggle,rememberSection:dgSensRememberSection,
+  modePark:dgSensModePark,modeAnalysis:dgSensModeAnalysis,exportPng:dgSensExportPng,exportGeoJson:dgSensExportGeoJson,exportCsv:dgSensExportCsv,reset:dgSensReset,
+  base:element=>dgSensBase(element.value),newPark:dgChooseNewPark,rawToggle:()=>dgSensRawView(!DG_SENS.rawView),
+  drawType:element=>dgSensSetDrawType(element.value),objectApply:dgSensObjectApplyAndAccept,objectCancel:()=>{dgSensObjectCancel();dgSensRenderPaintTools();},objectPick:dgSensObjectPickStart,
+  drawStart:dgSensDrawStart,drawFinish:dgSensDrawFinish,drawBack:dgSensDrawBack,drawEnd:dgSensDrawEnd,undoBoundary:dgSensUndoBoundary,
+  removeFeature:element=>dgSensRemoveFeature(Number(element.dataset.dgIndex)),objects:element=>dgSensObjects(element.checked),period:element=>dgSensPeriod(element.value),
+  brushType:element=>dgSensBrushChoose(element.value),brushConfig:dgSensBrushConfig,brushToggle:dgSensBrushToggle,
+  hand:dgSensHandMode,openBrushMenu:()=>dgSensOpenMenu("dgSensBrushDetails"),vegetationToggle:()=>dgSensToggleVegetation(!DG_SENS.vegetationView),
+  cancelDrawing:()=>{dgSensDrawCancel();DG_SENS.status=_tvs("Çizim iptal edildi.");dgSensRenderPaintTools();dgSensUpdateStatus();},brushUndo:dgSensBrushUndo,
+  focusAll:()=>dgSensFocus(null),candidatesToggle:()=>dgSensToggleCand(!DG_SENS.showCand),accept:dgSensAccept,scan:dgSensScan,
+  focusClass:element=>dgSensFocus(element.dataset.dgClass),sensitivity:element=>dgSensSlide(element.dataset.dgClass,element.value),opacity:element=>dgSensOpacity(element.value)
+ });
+}
 function dgSensRender(){
  const host=document.getElementById("lcSens"),rec=DG_SENS.record;if(!host||!rec)return;
  const viewModel=window.DG_BUILD_SURFACE_EDITOR_VIEW_MODEL,scanPanel=window.DG_RENDER_SURFACE_SCAN_PANEL,controls=window.DG_RENDER_SURFACE_SENSITIVITY_CONTROLS,actions=window.DG_RENDER_SURFACE_REVIEW_ACTIONS,compose=window.DG_COMPOSE_SURFACE_EDITOR_PANEL;
  if(viewModel&&scanPanel&&controls&&actions&&compose){
   const model=viewModel.build({record:rec,busy:DG_SENS.busy,saving:DG_SENS.saving,exporting:DG_SENS.exporting,vegetationCount:rec.profile?.cells?dgSensVegetationTiers().count:0}),translate=_tvs,escape=esc;
   const html=compose.render({scanPanel:scanPanel.render({model,record:rec,busy:DG_SENS.busy,rawView:DG_SENS.rawView,brush:DG_SENS.brush,cellCount:(dgSensCells()||[]).length,auditHtml:dgSensScanAuditHtml,translate,escape}),sensitivityControls:controls.render({model,record:rec,classes:DG_SENS_CLASSES,meta:dgSensMeta,focus:DG_SENS.focus,rawView:DG_SENS.rawView,brush:DG_SENS.brush,sectionsOpen:!!DG_SENS.sections?.dgSensThresholdDetails,opacity:DG_SENS.opacity,translate,escape}),reviewActions:actions.render({record:rec,disabled:model.disabled,rawView:DG_SENS.rawView,brush:DG_SENS.brush,showCandidates:DG_SENS.showCand,translate,escape})});
-  host.innerHTML=html;dgSensRenderPaintTools();dgSensBindRightPan();dgSensUpdateSummary();dgSensUpdateStatus();return;
+  host.innerHTML=html;dgSensBindEditorEvents(host);dgSensRenderPaintTools();dgSensBindRightPan();dgSensUpdateSummary();dgSensUpdateStatus();return;
  }
  const scanned=!!rec.profile?.cells,vegReady=scanned&&dgSensVegetationTiers().count>=9,disabled=DG_SENS.busy||DG_SENS.saving||DG_SENS.exporting;
  let h=`<div class="dg-sens-head"><div><div class="dg-png-kicker">🛰 ${esc(_tvs("Yüzey düzenleme"))}</div><p class="dg-sens-hint">${esc(_tvs("Tara, haritada ayarla, doğru gördüğün sonucu kaydet."))}</p></div><button id="dgSensScanBtn" type="button" class="dg-png-btn ${scanned?"ghost":"primary"} sm" onclick="dgSensScan()" ${disabled||DG_SENS.rawView||DG_SENS.brush?"disabled":""}>${DG_SENS.busy?"⏳":scanned?"🔁":"🔍"} ${esc(_tvs(scanned?"Yeniden Tara":"Tara"))}</button></div>`;
@@ -337,7 +353,7 @@ function dgSensRender(){
  h+=`<div class="dg-sens-actions"><button type="button" class="dg-png-btn ghost sm" onclick="dgSensRawView(!DG_SENS.rawView)" aria-pressed="${DG_SENS.rawView}" ${disabled?"disabled":""}>${esc(_tvs(DG_SENS.rawView?"Düzenlemeye dön":"Ham analizi göster"))}</button></div>`;
  h+=`<p class="dg-sens-hint">${esc(_tvs(DG_SENS.rawView?"Ham kaynak görüntüleniyor; kayıtlı düzeltmeler korunur. Düzenlemek veya kaydetmek için düzenlemeye dönün.":"Tarama isteğe bağlıdır. Ham analizi doğrudan inceleyebilir veya tarayıp hassasiyet barlarıyla ayarlayabilirsiniz."))}</p>`;
 
- host.innerHTML=h;
+ host.innerHTML=h;dgSensBindEditorEvents(host);
  dgSensRenderPaintTools();dgSensBindRightPan();dgSensUpdateSummary();dgSensUpdateStatus();
 }
 function dgSensRenderPaintTools(){
@@ -349,7 +365,7 @@ function dgSensRenderPaintTools(){
  if(modelBuilder&&menusRenderer&&toolbar){
   const model=modelBuilder.build({record:rec,busy:DG_SENS.busy,saving:DG_SENS.saving,exporting:DG_SENS.exporting,rawView:DG_SENS.rawView,brush:DG_SENS.brush,draw:DG_SENS.draw,objectPick:DG_SENS.objectPick,objectPreview:DG_SENS.objectPreview,vegetationCount:rec.profile?.cells?dgSensVegetationTiers().count:0,brushType:DG_SENS.brushType,brushDiameter:DG_SENS.brushDiameter,drawType:DG_SENS.drawType,base:DG_SENS.base,sections:DG_SENS.sections,showCand:DG_SENS.showCand,vegetationView:DG_SENS.vegetationView,translate:_tvs,format:_tvst});
   const menus=menusRenderer.render({record:rec,model,types:window.DG_SURFACE_REVIEW.types,menuLabel:dgSensMenuLabel,panelHead:dgSensPanelHead,translate:_tvs,escape:esc});
-  host.innerHTML=toolbar.compose({menus,mode:model.mode,escape:esc,translate:_tvs});const rail=document.getElementById("surfaceMapTools");if(rail)rail.innerHTML=toolbar.renderRail({model,escape:esc,translate:_tvs,icon:dgSensToolbarIcon});
+  host.innerHTML=toolbar.compose({menus,mode:model.mode,escape:esc,translate:_tvs});dgSensBindEditorEvents(host);const rail=document.getElementById("surfaceMapTools");if(rail){rail.innerHTML=toolbar.renderRail({model,escape:esc,translate:_tvs,icon:dgSensToolbarIcon});dgSensBindEditorEvents(rail);}
   if(typeof dgEditorArrangeMenus==="function")dgEditorArrangeMenus();return;
  }
  const viewDisabled=DG_SENS.busy||DG_SENS.saving||DG_SENS.exporting;
@@ -772,55 +788,18 @@ function dgSensExportGeoJson(){
  * clipping dahil), alt bantta parmak izi + dönem + lisans künyesi.
  * Raster salt okunur kalır (kırmızı çizgi): tüm sayılar record/areas'tan. */
 function dgSensExportPng(){
- if(document.getElementById("dgSurfaceExportDialog"))return;
- const dialog=document.createElement("dialog");dialog.id="dgSurfaceExportDialog";dialog.className="dg-export-dialog card";
  const grid=typeof DG_GRID_SESSION!=="undefined"&&DG_GRID_SESSION.getCells().length>0;
  const points=[...(typeof LAST_WP_ROWS!=="undefined"?LAST_WP_ROWS:[]),...(typeof WP!=="undefined"?WP:[])];
  const pid=Number(document.getElementById("gridProject")?.value);
  const waypoints=[...new Map(points.filter(w=>Number.isFinite(Number(w.lat))&&Number.isFinite(Number(w.lon))&&(!w.project_id||Number(w.project_id)===pid)).map(w=>[String(w.project_id||pid)+":"+String(w.wp_id??w.id),w])).values()];
- dialog.innerHTML=window.DG_RENDER_SURFACE_EXPORT_LAYER_DIALOG.render({grid,waypoints:waypoints.length>0,escape:esc,translate:_tvs});
- document.body.append(dialog);dialog.addEventListener('close',()=>dialog.remove());dialog.querySelector('#dgExportCancel').onclick=()=>dialog.close();
- dialog.querySelector('#dgExportDownload').onclick=()=>{const layers=Object.fromEntries(['park','surface','grid','waypoints'].map(k=>[k,dialog.querySelector('[name="'+k+'"]').checked]));if(!Object.values(layers).some(Boolean)){dialog.querySelector('#dgExportError').textContent=_tvs("En az bir katman seçin.");return;}dialog.close();dgSensRenderPng(layers,waypoints);};dialog.showModal();
+ const exporter=window.DG_RENDER_VERIFIED_SURFACE_MAP_EXPORT;
+ if(!exporter)return;
+ exporter.openDialog({document,grid,waypoints,escape:esc,translate:_tvs,renderDialog:window.DG_RENDER_SURFACE_EXPORT_LAYER_DIALOG.render,renderPng:dgSensRenderPng});
 }
 async function dgSensRenderPng(layers={park:true,surface:true},waypoints=[]){
-  const rec=DG_SENS.record,cells=dgSensCells();
-  if(!rec||!cells||!cells.length||DG_SENS.busy||DG_SENS.saving||!DG_SENS.geometry){toast(_tvs("Önce arazi örtüsü analizini çalıştırın."),"warn","🖼️");return;}
-  const edits=dgSensEditSummary(rec),nDec=edits.total;
-  if(layers.surface&&!nDec&&!rec.acceptedAt&&!dgSensFeatures().length){toast(_tvs("Önce en az bir hücre kararı ver — doğrulanmış harita kararlarını gösterir."),"warn","🖼️");return;}
-  const areas=dgSensAreas()||dgSensGroupAreas();
-  const epsg=DG_SENS.epsg||dgLcUtmEpsgForLatLon(cells[0].center.lat,cells[0].center.lon);
-  if(DG_SENS.exporting)return;
-  const epoch=DG_SENS.epoch;DG_SENS.exporting=true;dgSensRender();
-  try{
-  const parts=dgSensParts();
-  const displayJob=await dgSensVisualResult(parts);
-  const displayFeatures=displayJob?.displayFeatures||dgSurfaceDisplaySync(parts,epsg,DG_SENS.parkGeometry);
-  if(epoch!==DG_SENS.epoch)return;
-  /* UTM zarfı */
-  const frame=window.DG_PREPARE_SURFACE_EXPORT_MAP_FRAME.prepare({cells,parkRings:[...(typeof PARK_POLY!=="undefined"&&PARK_POLY?PARK_POLY:[]),...(typeof PARK_HOLES!=="undefined"&&PARK_HOLES?PARK_HOLES:[])],epsg,forward:dgLcUtmForward});
-  const CW=1240,CH=1560,cv=document.createElement("canvas");
-  cv.width=CW;cv.height=CH;
-  const g=cv.getContext("2d");
-  const GREEN="#14532d",MUT="#5c6a63",INK="#182420",BGc="#f7f6f2";
-  const COL=Object.assign({green:"#4ade80",water:"#3b82f6",hard:"#64748b",bare:"#8b5a2b",other:"#94a3b8"},DG_SENS_COLORS);
-  g.fillStyle=BGc;g.fillRect(0,0,CW,CH);
-  const pk=dgSensParkId();
-  const MX=40,MY=240,MW=760,MH=1180;
-  g.fillStyle="#fff";g.fillRect(MX,MY,MW,MH);
-  g.strokeStyle="#dfe5df";g.lineWidth=2;g.strokeRect(MX,MY,MW,MH);
-  const project=(lat,lon)=>frame.canvasProject(lat,lon,{x:MX,y:MY,width:MW,height:MH,margin:20});
-  /* Preserved export contract: COL[feature.properties.class], g.fill("evenodd"), rec.features||[], vegetation_ndvi_relative_class, DG_SENS.editing?"ÖNİZLEME":"KABUL EDİLMİŞ v", DOĞRULANMIŞ PARK HARİTASI and parmak izi. */
-  window.DG_DRAW_SURFACE_EXPORT_MAP_LAYERS.draw({context:g,layers,displayFeatures,project,parkRings:[...(typeof PARK_POLY!=="undefined"&&PARK_POLY?PARK_POLY:[]),...(typeof PARK_HOLES!=="undefined"&&PARK_HOLES?PARK_HOLES:[])],gridCells:typeof DG_GRID_SESSION!=="undefined"?DG_GRID_SESSION.getCells():[],waypoints,colors:COL,ink:INK});
-  window.DG_RENDER_SURFACE_EXPORT_INFOGRAPHIC.render({context:g,width:CW,height:CH,green:GREEN,muted:MUT,ink:INK,colors:COL,park:pk,parkDate:new Date().toISOString().slice(0,10),decisionCount:nDec,viewLabel:DG_SENS.editing?"ÖNİZLEME":"KABUL EDİLMİŞ v"+(rec.serverRevision||1),parkAreaLabel:typeof parkAreaHa==="function"?parkAreaHa().toFixed(1):"—",edits,layers,areas,ha:dgSensHa,labelForClass:key=>window.DG_SURFACE_REVIEW?.types[key]?.label||key,fingerprint:rec.fingerprint});
-  cv.toBlob(b=>{
-    if(!b){toast(_tvs("PNG üretilemedi."),"err","🖼️");return;}
-    const u=URL.createObjectURL(b),a=document.createElement("a");
-    a.href=u;a.download="dendrogeo_dogrulanmis_harita_"+(pk.id||"park")+".png";
-    a.click();setTimeout(()=>URL.revokeObjectURL(u),1500);
-    toast(_tvs("✓ Doğrulanmış harita PNG indirildi."),"ok","🖼️");
-  },"image/png");
-  }catch(e){if(epoch===DG_SENS.epoch)toast(esc(String(e.message||e)),"err","🖼️");}
-  finally{if(epoch===DG_SENS.epoch){DG_SENS.exporting=false;dgSensRender();}}
+ const module=window.DG_RENDER_VERIFIED_SURFACE_MAP_EXPORT;
+ if(!module)return;
+ return module.render({layers,waypoints,state:DG_SENS,record:DG_SENS.record,cells:dgSensCells(),editSummary:dgSensEditSummary,toast,translate:_tvs,escape:esc,getAreas:dgSensAreas,getRasterAreas:dgSensGroupAreas,resolveEpsg:dgLcUtmEpsgForLatLon,getParkRings:()=>[...(typeof PARK_POLY!=="undefined"&&PARK_POLY?PARK_POLY:[]),...(typeof PARK_HOLES!=="undefined"&&PARK_HOLES?PARK_HOLES:[])],getGridCells:()=>typeof DG_GRID_SESSION!=="undefined"?DG_GRID_SESSION.getCells():[],getPark:dgSensParkId,parkAreaLabel:()=>typeof parkAreaHa==="function"?parkAreaHa().toFixed(1):"—",getParts:dgSensParts,visualResult:dgSensVisualResult,displaySync:dgSurfaceDisplaySync,prepareFrame:input=>window.DG_PREPARE_SURFACE_EXPORT_MAP_FRAME.prepare({...input,forward:dgLcUtmForward}),drawLayers:input=>window.DG_DRAW_SURFACE_EXPORT_MAP_LAYERS.draw(input),renderInfo:input=>window.DG_RENDER_SURFACE_EXPORT_INFOGRAPHIC.render(input),colors:DG_SENS_COLORS,ha:dgSensHa,labelForClass:key=>window.DG_SURFACE_REVIEW?.types[key]?.label||key,document,redraw:dgSensRender});
 }
 
 function dgSensExportCsv(){const a=dgSensAreas();if(!a)return;const rec=DG_SENS.record,view=DG_SENS.rawView?"raw":DG_SENS.editing?"preview":"accepted",csv=window.DG_BUILD_SURFACE_EXPORT_DATA.csv({areas:a,view,fingerprint:rec.fingerprint});downloadBlob("dendrogeo_surface_"+rec.parkId+".csv","text/csv;charset=utf-8",csv);}
