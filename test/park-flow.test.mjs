@@ -843,19 +843,18 @@ describe('park kimlikleri: çift kimlik birleştirme + yeniden adlandırma', () 
     });
   });
 
-  test('⭐ çift kimlik otomatik bulunuyor: ad + mesafe + tek tık öneri', async () => {
+  test('⭐ benzer kimlikler ad ve mesafeyle sunulur; birleştirme ayrı işlemde kalır', async () => {
     await run('loadParkAdmin()');
     const h = el('parkAdminBox').innerHTML;
-    assert.ok(h.includes('çift kimlik adayı'), 'uyarı yok');
-    assert.ok(h.includes('aradaki mesafe'), 'mesafe gösterilmeli (karar için ölçü)');
-    /* OSM kimliği hedef olmalı (canonical), elle oluşturulan kaynak */
-    assert.ok(h.includes('data-park-admin-action="mergeInto" data-source-id="1" data-target-id="2"'), 'öneri: #1 → #2 (OSM)');
+    assert.ok(h.includes('benzer park adı'), 'inceleme bilgisi yok');
+    assert.ok(h.includes('m uzaklık'), 'mesafe gösterilmeli (karar için ölçü)');
+    assert.ok(h.includes('data-park-admin-action="mergeFromSelect" data-park-id="1"'), 'birleştirme yönetici hedef seçtikten sonra yapılmalı');
     assert.ok(h.includes('#1') && h.includes('#2'), 'iki kimlik de listelenmeli');
   });
 
   test('adı olmayan park işaretleniyor (İsimsiz Park)', async () => {
     const h = el('parkAdminBox').innerHTML;
-    assert.ok(h.includes('parkın adı yok'), 'adsız park uyarısı yok');
+    assert.ok(h.includes('Ad bekliyor'), 'adsız park işareti yok');
     assert.ok(h.includes('#7'), 'adsız park id’si gösterilmeli');
   });
 
@@ -1218,7 +1217,7 @@ describe('Park Kimlikleri listesi: boş parklar düşmez (2026-09-27)', () => {
     assert.ok(html.includes('Dolu Park'), 'dolu park listede');
     assert.ok(!html.includes('Bos Sorgu Parki'), '⭐ boş park listede OLMAMALI');
     assert.match(html, /Boş parkları göster \(1\)/, 'sayaçlı toggle görünür');
-    assert.match(html, /1 boş park .* gizlendi/, 'gizleme notu');
+    assert.match(html, /1 \/ 2 park/, 'gösterilen ve toplam park sayısı');
   });
   test('toggle açınca boş park görünür (veri silinmez)', async () => {
     await run('dgParkAdminToggleEmpty()');

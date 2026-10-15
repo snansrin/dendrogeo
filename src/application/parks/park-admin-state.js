@@ -3,7 +3,7 @@
 /* Observable state scoped to the park-identity administration screen. */
 window.DG_PARK_ADMIN_STATE={
   create(initial={}){
-    let state=Object.freeze({rows:[],showEmpty:false,lastContext:null,...initial});
+    let state=Object.freeze({rows:[],showEmpty:false,lastContext:null,query:'',sort:'name-asc',...initial});
     const listeners=new Set();
     return Object.freeze({
       getState(){return state;},

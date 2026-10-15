@@ -233,7 +233,7 @@
 <link rel="stylesheet" href="css/startup.css?v=de5b3c30">
 <link rel="stylesheet" href="css/style.css?v=086bc6b6">
 <link rel="stylesheet" href="css/landing.css?v=2785a25a">
-<link rel="stylesheet" href="css/landing-scenes.css?v=d06f42f1">
+<link rel="stylesheet" href="css/landing-scenes.css?v=9ea8c1c1">
 <script src="src/ui/startup-screen.js?v=6628a8ef" type="application/x-dendrogeo-module" defer></script>
 <script src="src/ui/activate-async-stylesheets.js?v=d4056efc" type="application/x-dendrogeo-module" defer></script>
 <script src="vendor/leaflet-1.9.4.js" defer></script>
@@ -247,14 +247,14 @@
 <script src="src/config/wood-density-lock.js?v=9572e1df" type="application/x-dendrogeo-module" defer></script>
 <script src="src/config/species.js?v=554298a8" type="application/x-dendrogeo-module" defer></script>
 <!-- DİL KATMANI (0035): sözlük verisi çalışma zamanı çeviricisinden önce yüklenir. -->
-<script src="src/config/i18n-en.js?v=13582a8e" type="application/x-dendrogeo-module" defer></script>
+<script src="src/config/i18n-en.js?v=90f553c3" type="application/x-dendrogeo-module" defer></script>
 <script src="src/config/i18n.js?v=f99a371a" type="application/x-dendrogeo-module" defer></script>
 <script src="src/domain/map/web-mercator-coordinates.js?v=44109250" type="application/x-dendrogeo-module" defer></script>
 <script src="src/utils/geo.js?v=1e469255" type="application/x-dendrogeo-module" defer></script>
 <script src="src/utils/truncation.js?v=d9710c30" type="application/x-dendrogeo-module" defer></script>
 <!-- Faz 7: geotiff (317 KB) ve chart.js (208 KB) artık SENKRON yüklenmiyor;
      src/utils/lazylibs.js ihtiyaç anında enjekte eder (LULC analizi / panel grafiği). -->
-<script id="dgRuntimeBuild" type="application/json">"b23486eff5196d91"</script>
+<script id="dgRuntimeBuild" type="application/json">"c60532fa41db7c5d"</script>
 <!-- Verified fallback OSM water geometry, independent of the lazy raster engine. -->
 <script src="src/adapters/parks/fetch-nominatim-osm-way.js?v=9f2730dd" type="application/x-dendrogeo-module" defer></script>
 <script src="src/services/osm-water-backup.js?v=4c9fbc03" type="application/x-dendrogeo-module" defer></script>
@@ -801,12 +801,12 @@
      projeyi parka bağlar, ölçüm kapısını (park algılanmadan ölçüm yok) kurar.
      Sıra ÖNEMLİ: park-query'den sonra, grid-engine'den önce (grid panelindeki
      proje listesi bu modülden beslenir). -->
-<script src="src/application/parks/build-park-admin-overview.js?v=dea647f8" type="application/x-dendrogeo-module" defer></script>
-<script src="src/ui/park-admin-renderer.js?v=74e7fdc4" type="application/x-dendrogeo-module" defer></script>
+<script src="src/application/parks/build-park-admin-overview.js?v=c4672fb5" type="application/x-dendrogeo-module" defer></script>
+<script src="src/ui/park-admin-renderer.js?v=11964474" type="application/x-dendrogeo-module" defer></script>
 <script src="src/application/parks/merge-park-identities.js?v=3f0556e1" type="application/x-dendrogeo-module" defer></script>
 <script src="src/application/parks/rename-park-identity.js?v=fa0fb0b1" type="application/x-dendrogeo-module" defer></script>
 <script src="src/application/parks/delete-park-identity.js?v=037af627" type="application/x-dendrogeo-module" defer></script>
-<script src="src/adapters/parks/park-admin-read-store.js?v=e7e90997" type="application/x-dendrogeo-module" defer></script>
+<script src="src/adapters/parks/park-admin-read-store.js?v=fdaf83c4" type="application/x-dendrogeo-module" defer></script>
 <script src="src/adapters/parks/park-project-read-store.js?v=5f22bb0b" type="application/x-dendrogeo-module" defer></script>
 <script src="src/adapters/parks/park-admin-mutation-store.js?v=256297a1" type="application/x-dendrogeo-module" defer></script>
 <script src="src/ui/park-admin-mutation.js?v=bd3b9e49" type="application/x-dendrogeo-module" defer></script>
@@ -846,11 +846,11 @@
 <script src="src/ui/complete-park-project-link.js?v=052fe191" type="application/x-dendrogeo-module" defer></script>
 <script src="src/application/parks/handle-park-project-change.js?v=50bffe47" type="application/x-dendrogeo-module" defer></script>
 <script src="src/application/parks/handle-park-drawn.js?v=ecfa380c" type="application/x-dendrogeo-module" defer></script>
-<script src="src/application/parks/park-admin-state.js?v=60acf181" type="application/x-dendrogeo-module" defer></script>
-<script src="src/bootstrap/park-admin-controller.js?v=6a3fe9a0" type="application/x-dendrogeo-module" defer></script>
+<script src="src/application/parks/park-admin-state.js?v=a00b6a07" type="application/x-dendrogeo-module" defer></script>
+<script src="src/bootstrap/park-admin-controller.js?v=171d4f5d" type="application/x-dendrogeo-module" defer></script>
 <script src="src/bootstrap/park-backfill-controller.js?v=5d4a6d10" type="application/x-dendrogeo-module" defer></script>
 <script src="src/adapters/parks/sync-park-project-names.js?v=0bb5cd70" type="application/x-dendrogeo-module" defer></script>
-<script src="src/ui/render-park-admin.js?v=049fc26f" type="application/x-dendrogeo-module" defer></script>
+<script src="src/ui/render-park-admin.js?v=0593c476" type="application/x-dendrogeo-module" defer></script>
 <script src="src/application/parks/refresh-park-admin-views.js?v=7c67ed67" type="application/x-dendrogeo-module" defer></script>
 <script src="src/application/parks/toggle-park-admin-empty.js?v=191f8c8d" type="application/x-dendrogeo-module" defer></script>
 <script src="src/domain/parks/resolve-manual-park-coordinate.js?v=7d8facc3" type="application/x-dendrogeo-module" defer></script>
@@ -944,6 +944,7 @@
      başlığı ölçeğini alır → Park Karşılaştırma kartı kıpırdamaz. -->
 <link rel="stylesheet" href="css/ui-standard.css?v=aeed9305">
 <link rel="stylesheet" href="css/academic-profile.css?v=04ab0c78">
+<link rel="stylesheet" href="css/park-admin.css?v=97486bd0">
 <!-- GIS workspace: scoped presentation, keeps locked engine and theme untouched. -->
 <link rel="stylesheet" href="css/surface-drawing.css?v=a5cbf351">
 <link rel="stylesheet" href="css/gis-workspace.css?v=57a47ea5">
@@ -1640,9 +1641,9 @@
         da "İsimsiz Park" kalıyordu. Otomatik birleştirme BİLEREK yok: iki ayrı
         park aynı adı taşıyabilir, karar yöneticide. -->
    <div class="card" style="margin-bottom:18px;border-left:4px solid var(--green)">
-    <div class="shead" style="margin-bottom:12px"><span class="no">🌳</span><h2 style="font-size:1.2rem">Park Kimlikleri</h2><span class="rule"></span><span class="mono" style="font-size:.75rem;color:var(--mut)">yeniden adlandır · birleştir · sil</span></div>
-    <p style="color:var(--mut);font-size:.8rem;margin-bottom:10px">Aynı park iki kimlikle kayıtlıysa karşılaştırma <b>bölünür</b> — 🔀 ile birleştir. OSM'de adı olmayan park "İsimsiz Park" gelir, ✏️ ile ad ver (proje adları otomatik yeniden kurulur).</p>
-    <button class="btn sm blue" style="margin-bottom:10px" data-dg-admin-panel-action="reload-parks">🔄 Parkları Yükle</button>
+    <div class="shead" style="margin-bottom:12px"><span class="no">🌳</span><h2 style="font-size:1.2rem">Park Kimlikleri</h2><span class="rule"></span></div>
+    <p class="dg-meta">Parkları arayın, sıralayın ve oluşturan kişiyi inceleyin. Düzenleme seçenekleri her parkın İşlemler menüsündedir.</p>
+    <button class="btn sm ghost" style="margin:10px 0" data-dg-admin-panel-action="reload-parks">Listeyi yenile</button>
     <div id="parkAdminBox"></div>
    </div>
    <!-- BİLİMSEL RAPOR YAYINI (2026-09-27 · kullanıcı isteği: "raporu site
@@ -1898,6 +1899,6 @@
 <script src="src/bootstrap/gis-export.js?v=31cdf97c" type="application/x-dendrogeo-module" defer></script>
 <script src="src/ui/gis-export.js?v=85048551" type="application/x-dendrogeo-module" defer></script>
 
-<script src="/src/bootstrap/app-runtime.js?v=8c304345" defer></script>
+<script src="/src/bootstrap/app-runtime.js?v=b39740a3" defer></script>
 </body>
 </html>

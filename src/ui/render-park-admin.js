@@ -9,7 +9,7 @@ window.DG_RENDER_PARK_ADMIN_UI={
     const rows=current.rows;
     const context={projects:projects||[],measurements:measurements||[]};
     state.setState({lastContext:context});
-    const overview=buildOverview({rows,projects,measurements,showEmpty:current.showEmpty,normalizeLoose,normalizeName});
+    const overview=buildOverview({rows,projects,measurements,showEmpty:current.showEmpty,query:current.query,sort:current.sort,normalizeLoose,normalizeName});
     renderRows({element:box,rows,overview,showEmpty:current.showEmpty,formatHectares,distance,escapeHTML,translate,translateFormat,translatePlain});
   }
 };

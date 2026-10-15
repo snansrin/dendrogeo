@@ -355,7 +355,7 @@ describe('park kimlikleri yönetim aracı (yeniden adlandır · birleştir · si
 
   test('⭐ otomatik birleştirme YOK (aynı adlı iki ayrı park olabilir)', () => {
     assert.ok(!/dgAutoMerge|autoMergeParks/.test(registry), 'sessiz birleştirme eklenmemeli');
-    assert.match(parkAdminRenderer, /çift kimlik adayı var/i, 'araç yalnız ÖNERİR, kararı yönetici verir');
+    assert.match(parkAdminRenderer, /Benzer adlar farklı parkları gösterebilir/, 'araç yalnız ÖNERİR, kararı yönetici verir');
   });
 });
 
@@ -449,10 +449,10 @@ describe('mobil düzen (kullanıcı: "telefondan güzel gözükmüyor")', () => 
   });
 
   test('park kimlikleri tablosu kart düzenini kullanıyor + etiketler var', () => {
-    assert.match(parkAdminRenderer, /<table class="dg-cards">/);
-    for (const l of ['ID', 'Park Adı', 'Kimlik', 'Şehir', 'Alan', 'Proje', 'Kayıt', 'Kaynak', 'İşlem']) {
-      assert.match(parkAdminRenderer, new RegExp('data-label="' + l + '"'), l + ' etiketi yok');
-    }
+    const element={innerHTML:''};
+    app.DG_PARK_ADMIN_RENDERER.render({element,rows:[{id:1,name:'Park'}],overview:{projByPark:{},measByPark:{},emptyRows:[],shown:[{id:1,name:'Park'}],dupGroups:[],unnamed:[]},showEmpty:false,formatHectares:()=>'',distance:()=>0,escapeHTML:String,translate:x=>x,translateFormat:x=>x});
+    assert.match(element.innerHTML, /<table class="dg-cards dg-parkadmin-table">/);
+    for (const label of ['Park','Konum','Oluşturan','Kapsam','İşlemler'])assert.ok(element.innerHTML.includes('data-label="'+label+'"'),label+' etiketi yok');
   });
 
   test('ağaçtaki ölçüm tablosu da kart düzeninde', () => {
@@ -475,7 +475,8 @@ describe('mobil düzen (kullanıcı: "telefondan güzel gözükmüyor")', () => 
 
   test('işlem düğmeleri mobilde sarar (dg-act flex-wrap)', () => {
     assert.match(css, /\.dg-act\{display:flex;gap:4px;flex-wrap:wrap/);
-    assert.match(parkAdminRenderer, /<div class="dg-act">/);
+    assert.match(parkAdminRenderer, /data-park-admin-menu/);
+    assert.match(readFileSync(join(ROOT,'css/park-admin.css'),'utf8'),/\.dg-parkadmin-actionpanel\{display:grid/);
     assert.match(treeSrc, /<div class="dg-act">/);
   });
 });

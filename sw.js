@@ -1047,6 +1047,7 @@ const CORE_ASSETS = [
     '/css/landing.css',
     '/css/landing-scenes.css',
     '/css/academic-profile.css',
+    '/css/park-admin.css',
     '/css/park-panel.css',
     '/css/ui-standard.css',
     '/css/surface-drawing.css',

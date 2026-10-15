@@ -2,7 +2,7 @@
 
 /* Keep the park registry's three admin reads in the Supabase adapter layer. */
 window.DG_PARK_ADMIN_READ_STORE={
-  fetchParks(client){return client.from("parks").select("*").order("name");},
+  fetchParks(client){return client.from("parks").select("*,creator:profiles!parks_created_by_fkey(full_name)").order("name");},
   fetchProjects(client){return client.from("projects").select("id,name,park_id");},
   fetchMeasurements(client){return client.from("measurements").select("park_id").limit(5000);}
 };

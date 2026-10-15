@@ -21,12 +21,14 @@ const renderHTML = overrides => {
 
 test('renderer keeps duplicate, unnamed, empty-park, and row actions', () => {
   const html = renderHTML({});
-  assert.match(html, /çift kimlik adayı var/);
-  assert.match(html, /mesafe <b>120 m<\/b>/);
+  assert.match(html, /benzer park adı · İncele/);
+  assert.match(html, /120 m uzaklık/);
   assert.match(html, /Alpha &lt;Park&gt;/);
-  assert.match(html, /parkın adı yok/);
+  assert.match(html, /Ad bekliyor/);
   assert.match(html, /Boş parkları göster \(1\)/);
-  assert.match(html, /data-park-admin-action="mergeInto" data-source-id="2" data-target-id="1"/);
+  assert.match(html, /data-park-admin-action="mergeFromSelect" data-park-id="1"/);
+  assert.doesNotMatch(html, /<option value="2">/);
+  assert.match(html, /Oluşturan bilgisi yok/);
   assert.match(html, /data-park-admin-action="rename" data-park-id="1"/);
   assert.match(html, /data-park-admin-action="backfillGeometry" data-park-id="1"/);
   assert.match(html, /data-park-admin-action="delete" data-park-id="1"/);

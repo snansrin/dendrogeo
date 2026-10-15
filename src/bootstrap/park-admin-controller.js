@@ -38,6 +38,8 @@
     renderRows:input=>deps.window.DG_PARK_ADMIN_RENDERER.render({...input,actions:{
      mergeInto:element=>api.parkMergeInto(Number(element.dataset.sourceId),Number(element.dataset.targetId)),
      toggleEmpty:()=>api.toggleEmpty(),
+     search:value=>api.updateView({query:value}),
+     sort:value=>api.updateView({sort:value}),
      rename:element=>api.parkRename(Number(element.dataset.parkId)),
      backfillGeometry:element=>deps.backfillGeometry(Number(element.dataset.parkId)),
      mergeFromSelect:element=>api.parkMergeFromSelect(Number(element.dataset.parkId)),
@@ -90,11 +92,16 @@
   }
 
   async function afterChange(){return refresh();}
+  function updateView(patch){
+   state.setState(patch);
+   const context=state.getState().lastContext||{projects:[],measurements:[]};
+   return renderParkAdmin(context.projects,context.measurements);
+  }
   function toggleEmpty(){
    if(deps.window.DG_TOGGLE_PARK_ADMIN_EMPTY)return deps.window.DG_TOGGLE_PARK_ADMIN_EMPTY.toggle(state,renderParkAdmin);
    showEmpty=!showEmpty;const context=lastContext||{projects:[],measurements:[]};return renderParkAdmin(context.projects,context.measurements);
   }
-  const api={state,mutationStore,syncProjectNames,loadParkAdmin,renderParkAdmin,parkRename,parkMergeFromSelect,parkMergeInto,parkDelete,afterChange,toggleEmpty};
+  const api={state,mutationStore,syncProjectNames,loadParkAdmin,renderParkAdmin,parkRename,parkMergeFromSelect,parkMergeInto,parkDelete,afterChange,toggleEmpty,updateView};
   return Object.freeze(api);
  }
  root.DG_PARK_ADMIN_CONTROLLER=Object.freeze({create});

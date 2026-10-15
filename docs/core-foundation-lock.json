@@ -7744,6 +7744,89 @@
           "sha256": "0b99a841036b1f65ad98b388ff30e8d78396ac88dee0f2cd45a99bffa8af1fac"
         }
       ]
+    },
+    {
+      "id": "park-directory-and-transparent-readouts-20261015",
+      "date": "2026-10-15",
+      "scope": "User-authorized modularization: simplify park administration into a searchable sortable directory, display recorded creator names and dates via the existing parks profile FK, lazily show merge destinations, retain mutation authorization and confirmations, and make measurement animation readouts transparent. Read-only data access only; no database schema or stored park/measurement changes. Update related regression and phone checks.",
+      "audit_chain": "sha256-v1",
+      "files": [
+        {
+          "path": "index.html",
+          "previous_sha256": "0eade7ef518c261fcdb5c7246d6cc82e690dde01d9346c74519d4fcfc1082666",
+          "sha256": "11e7a53a670f914922db2264a3958bcbf769a23e3e881761f7d00a317591630a"
+        },
+        {
+          "path": "partials/head.html",
+          "previous_sha256": "e8a1d12d87d1c9f6c3087d79f65a8f1b4f070657784629f2d505a6fe3bcc64f0",
+          "sha256": "9e277a630458f5bfc8b9e2d4d17d07ebc1cd3f9ec56a8d0c6bbf3f4a1a529134"
+        },
+        {
+          "path": "partials/shell.html",
+          "previous_sha256": "c7e8980ab002e0408b4d120a67b10c8bb445310f9ea6ec3f5f0d9ff2b7a34a41",
+          "sha256": "e690202420429b8202a00f3cfdeb4d6e15ff9103f954570a502582d379c64126"
+        },
+        {
+          "path": "scripts/check-phone.mjs",
+          "previous_sha256": "084e4cd43ff07fecc8659f102e33ae96745e8ce1e0b6e9faae0069edd9425905",
+          "sha256": "e805af4b8cd13dcb31388817c838e93086c1f82633a72c1d26ec9def4d8d0777"
+        },
+        {
+          "path": "src/adapters/parks/park-admin-read-store.js",
+          "previous_sha256": "7cc1e5f31168b3db34213367ddbad3e10986f21b2a3a1bb3868ebac850b38185",
+          "sha256": "84ad67edab897d989c5ae09a52da882879f9e8e037f7aa55889ed55a67a67e3c"
+        },
+        {
+          "path": "src/application/parks/build-park-admin-overview.js",
+          "previous_sha256": "af51e2a0a4a43ac851be6238c723a6d538cea4760a353c8f197314bebe67e221",
+          "sha256": "b87b80513c7a9039cf8b51e496ac5fe38b589b47a00b5aaa7e569327a86656ca"
+        },
+        {
+          "path": "src/application/parks/park-admin-state.js",
+          "previous_sha256": "3f278384611219a73f6745a132f30ce46bd49fba37493755c128275f6704b6c3",
+          "sha256": "4379004c4eaa4723db6b026afa061c3d4a9aa74d61e5228741484a533b2e6a7f"
+        },
+        {
+          "path": "src/ui/park-admin-renderer.js",
+          "previous_sha256": "5e9be5fef26ba3302763f4057321db79b27697a893056cd5dc16d6193bb9b633",
+          "sha256": "22d57e60f2c42e6d27acbcc6334dca4d5063648eb2fc1a1115b3a035c07ec2cf"
+        },
+        {
+          "path": "src/ui/render-park-admin.js",
+          "previous_sha256": "306b11eefc8edeea960ad65023e5d8f3b92b6cbd3ee22089ab42b3752dc72070",
+          "sha256": "e2d054232a92af650dbc4707b6c8034eab1cb7c948528b1bfa801a9820f3633a"
+        },
+        {
+          "path": "sw.js",
+          "previous_sha256": "5c34b1fc4ea7d58638b9c7a28ac8f799b7d9b04d7bb64ba64448aa97e4b289de",
+          "sha256": "a875c1b04c3b3ad23a1fe214be7fe4bdd2b3511b2b2b1ee5ae80d98dcd6f9919"
+        },
+        {
+          "path": "test/park-admin-overview-application.test.mjs",
+          "previous_sha256": "49e8b060f47a79d1a638176b3ca0df1a024d72686d2c368b6b7ec1285e6666ed",
+          "sha256": "a5040ab69052b950e87bca8005894bceac4c993740dd0a7e2dfb061c8da385d0"
+        },
+        {
+          "path": "test/park-admin-read-store-adapter.test.mjs",
+          "previous_sha256": "400cd439d119f7ec8ca2af35b43502731208488e5a1b51190572eb756cdd390c",
+          "sha256": "78ede629b26ce2ecfaace8226afd735537aadc146368425cac48046ee830c145"
+        },
+        {
+          "path": "test/park-admin-renderer-ui.test.mjs",
+          "previous_sha256": "48f34a4629f4123109518951adba3ab7761dbd535cf6ca67d0b4872e9f4ec9a1",
+          "sha256": "6bf8eaae898dd53d28fd151727f5d44ec4c4b2da0dfa931d124d0d9976ad765b"
+        },
+        {
+          "path": "test/park-flow.test.mjs",
+          "previous_sha256": "05b7c2daf5babed20d3e818a6fc1b514faa2b3763d3ba599296a57d5666f6165",
+          "sha256": "8fb3ce03521bbba0d6d1e5592faa87a95b5ef929a09ba27c81327ec5dc412ad3"
+        },
+        {
+          "path": "test/park-identity.test.mjs",
+          "previous_sha256": "edc3789220681b9d9c52209126a3c05d7a533e24ca355238879b469c59110e93",
+          "sha256": "de2823554c13b06db907da8d0d33c089e19496376fc39b7026155fd2c1cff4f5"
+        }
+      ]
     }
   ]
 }

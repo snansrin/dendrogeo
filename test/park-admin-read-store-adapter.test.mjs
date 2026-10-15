@@ -16,7 +16,7 @@ test('park admin adapter preserves all three existing read shapes and result ide
   const store=window.DG_PARK_ADMIN_READ_STORE;
   for(const [method,table] of [['fetchParks','parks'],['fetchProjects','projects'],['fetchMeasurements','measurements']])assert.equal(await store[method](client),responses.get(table));
   assert.deepEqual(JSON.parse(JSON.stringify(calls)),[
-    ['from','parks'],['select','*'],['order','name'],
+    ['from','parks'],['select','*,creator:profiles!parks_created_by_fkey(full_name)'],['order','name'],
     ['from','projects'],['select','id,name,park_id'],
     ['from','measurements'],['select','park_id'],['limit',5000]
   ]);

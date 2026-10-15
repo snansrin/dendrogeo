@@ -41,3 +41,17 @@ test('duplicate and unnamed groups use the existing normalized-name rules', () =
   assert.deepEqual(JSON.parse(JSON.stringify(overview.dupGroups.map(group => group.map(park => park.id)))), [[1, 2]]);
   assert.deepEqual(overview.unnamed.map(park => park.id), [3]);
 });
+
+test('search matches recorded creators, city and identity without mutating park records',()=>{
+ const rows=[{id:1,name:'Göksu',city:'Ankara',osm_key:'way/123',creator:{full_name:'Nagihan Şirin'}},{id:2,name:'Diğer',city:'Bursa',created_by:'user-id'}];
+ const before=JSON.stringify(rows);
+ for(const query of ['Nagihan','Ankara','way/123'])assert.deepEqual(result({rows,query,showEmpty:true}).shown.map(park=>park.id),[1]);
+ assert.equal(result({rows,query:'olmayan',showEmpty:true}).shown.length,0);
+ assert.equal(JSON.stringify(rows),before);
+});
+
+test('all displayed sort choices use values, stable ties and missing dates safely',()=>{
+ const rows=[{id:1,name:'B',created_at:'2026-01-01',creator:{full_name:'Z'},area_m2:30},{id:2,name:'A',created_at:'2026-10-01',creator:{full_name:'A'},area_m2:10},{id:3,name:'C'}];
+ for(const [sort,expected] of [['name-asc',[2,1,3]],['name-desc',[3,1,2]],['created-desc',[2,1,3]],['created-asc',[3,1,2]],['area-desc',[1,2,3]],['measurements-desc',[2,1,3]],['projects-desc',[1,3,2]]])assert.deepEqual(result({rows,sort,showEmpty:true}).shown.map(park=>park.id),expected);
+ assert.deepEqual(result({rows,sort:'creator-asc',showEmpty:true}).shown.map(park=>park.id),[3,2,1]);
+});
