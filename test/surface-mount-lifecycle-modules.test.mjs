@@ -55,4 +55,8 @@ test('mount lifecycle modules load before locked UI and are precached',()=>{
   const chain=read('src/utils/lazylibs.js'),sw=read('sw.js'),ui=read('src/ui/lc-sens.js');
   for(const path of modules){assert.ok(chain.includes(`"${path}"`),`${path} lazy load`);assert.ok(sw.includes(`'/${path}'`),`${path} precache`);assert.ok(chain.indexOf(`"${path}"`)<chain.indexOf('"src/ui/lc-sens.js"'),`${path} precedes UI`);}
   for(const name of ['DG_CLASSIFY_SURFACE_REVIEW_DATA_CHANGE','DG_RESET_SURFACE_REVIEW_DATA_CHANGE','DG_PREPARE_SURFACE_REVIEW_SESSION','DG_MOUNT_SURFACE_REVIEW_MAP_HOST','DG_FINISH_SURFACE_REVIEW_MOUNT'])assert.ok(ui.includes(name));
+  const mount=ui.slice(ui.indexOf('async function dgSensMount'),ui.indexOf('function dgSensParts'));
+  assert.match(mount,/if\(!lifecycle\.every\(Boolean\)\)throw/,'mount must fail clearly when required modules are missing');
+  assert.doesNotMatch(mount,/if\(lifecycle\.every\(Boolean\)\)/,'mount has a single lifecycle owner');
+  assert.equal((mount.match(/dgSensRepartition/g)||[]).length,1,'partitioning remains in the mount finalizer');
 });

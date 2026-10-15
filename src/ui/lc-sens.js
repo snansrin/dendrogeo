@@ -63,38 +63,7 @@ function dgSensNewRecord(){const pk=dgSensParkId(),owner=typeof USER!=="undefine
 function dgSensResetScanState(rec){if(!rec)return;rec.sens={green:50,water:50,hard:50,bare:50};rec.spectralEnabled=false;rec.profile=null;if(rec.period==="latest"&&!rec.periodExplicit)rec.period="ytd";}
 function dgSensMigrateOsmObjects(rec){if(!rec)return false;const stale=(!!rec.objectVersion&&rec.objectVersion!=="footprints-v5-osm-all")||((rec.objectFeatures||[]).length>0&&rec.objectVersion!=="footprints-v5-osm-all");if(!stale)return false;rec.objectFeatures=null;rec.objectVersion=null;rec.draftDirty=true;return true;}
 async function dgSensLoadRecord(){
- const loader=window.DG_LOAD_SURFACE_REVIEW_RECORD;
- if(loader)return loader.load({createFresh:dgSensNewRecord,loadLocal:fresh=>window.DG_LOAD_LOCAL_SURFACE_REVIEW_DRAFT.load({fresh,loadCampaigns:parkId=>window.DG_LC_VALIDATE.loadCampaigns(parkId),selectCampaign:window.DG_SELECT_VALIDATION_CAMPAIGN,fingerprint:(...args)=>window.DG_SURFACE_REVIEW.fingerprint(...args),cells:dgSensCells(),outer:PARK_POLY,holes:PARK_HOLES||[],year:DG_LC_LAST.report?.year,engine:DG_LC_ENGINE_VERSION}),loadRemote:fresh=>fresh.owner&&fresh.parkId&&typeof sb!=="undefined"?window.DG_SURFACE_REVIEW.load(fresh.parkId,fresh.owner):null,selectSource:window.DG_SELECT_SURFACE_REVIEW_SOURCE.select,normalize:args=>window.DG_NORMALIZE_SURFACE_REVIEW_RECORD.normalize({...args,classes:DG_SENS_CLASSES,validFeature:feature=>window.DG_SURFACE_REVIEW.validFeature(feature)}),setStatus:value=>{DG_SENS.status=value;},translate:_tvs});
- const fresh=dgSensNewRecord();let local=null,remote=null;
- try{
-  const rows=await window.DG_LC_VALIDATE.loadCampaigns(fresh.parkId);
-  if(window.DG_SELECT_VALIDATION_CAMPAIGN)local=window.DG_SELECT_VALIDATION_CAMPAIGN.select(rows,fresh);
-  else local=rows.find(r=>r.id===fresh.id&&r.owner===fresh.owner);
-  if(!local&&fresh.parkId){
-   const drafts=await window.DG_LC_VALIDATE.loadCampaigns(null),fp=await window.DG_SURFACE_REVIEW.fingerprint(dgSensCells(),PARK_POLY,PARK_HOLES||[],{year:DG_LC_LAST.report?.year,engine:DG_LC_ENGINE_VERSION});
-   if(window.DG_SELECT_VALIDATION_CAMPAIGN)local=window.DG_SELECT_VALIDATION_CAMPAIGN.select(drafts,{...fresh,fingerprint:fp});
-   else{const old=drafts.find(r=>r.id==="surface-"+fresh.owner+"-x"&&r.owner===fresh.owner&&r.fingerprint===fp);if(old)local={...old,id:fresh.id,parkId:fresh.parkId,parkName:fresh.parkName};}
-  }
- }catch(e){}
- let revision=0;
- if(fresh.owner&&fresh.parkId&&typeof sb!=="undefined"){
-  try{const r=await window.DG_SURFACE_REVIEW.load(fresh.parkId,fresh.owner);if(r){remote=r.payload;remote.fingerprint=r.source_fingerprint;revision=r.revision;}}
-  catch(e){DG_SENS.status=_tvs("Hesap kaydı yüklenemedi; cihaz taslağı kullanılıyor.");}
- }
- // Supabase is authoritative for accepted results. A newer device timestamp
- // may only reflect display settings or an old IndexedDB write; let it replace
- // the account snapshot only when it is an explicitly dirty, newer draft.
- const newerLocalDraft=!!(local?.draftDirty&&(!remote||String(local.modifiedAt||"")>String(remote.modifiedAt||"")));
- const chosen=newerLocalDraft?local:remote||local||fresh;
- const safe=chosen.owner===fresh.owner&&String(chosen.parkId)===String(fresh.parkId)?chosen:fresh;
- const sens={...fresh.sens};for(const k of DG_SENS_CLASSES){const n=Number(safe.sens?.[k]);sens[k]=Number.isFinite(n)?Math.max(0,Math.min(100,n)):50;}
- const record={...fresh,...safe,serverRevision:revision,sens,corrections:safe.corrections&&typeof safe.corrections==="object"&&!Array.isArray(safe.corrections)?safe.corrections:{},features:Array.isArray(safe.features)?safe.features.filter(f=>window.DG_SURFACE_REVIEW.validFeature(f)):[]};
- const accepted=record.acceptedResult,areas=record.acceptedAreas,acceptedAreas=accepted?.areas;
- if(accepted&&(!areas||accepted.schema!=="dendrogeo-surface/2"||String(accepted.parkId)!==String(record.parkId)||accepted.fingerprint!==record.fingerprint||!Array.isArray(accepted.features)||!Array.isArray(accepted.displayFeatures)||!acceptedAreas||Object.keys({...areas,...acceptedAreas}).some(k=>Math.abs(Number(areas[k]||0)-Number(acceptedAreas[k]||0))>Math.max(.1,Math.abs(Number(areas[k]||0))*.00001)))){
-  record.acceptedResult=null;record.draftDirty=true;
-  DG_SENS.status=_tvs("Kayıtlı sınır ile analiz özeti uyuşmadı. Eski sonuç gösterilmiyor; önizlemeyi kontrol edip yeniden kabul edin.");
- }
- return record;
+ return window.DG_LOAD_SURFACE_REVIEW_RECORD.load({createFresh:dgSensNewRecord,loadLocal:fresh=>window.DG_LOAD_LOCAL_SURFACE_REVIEW_DRAFT.load({fresh,loadCampaigns:parkId=>window.DG_LC_VALIDATE.loadCampaigns(parkId),selectCampaign:window.DG_SELECT_VALIDATION_CAMPAIGN,fingerprint:(...args)=>window.DG_SURFACE_REVIEW.fingerprint(...args),cells:dgSensCells(),outer:PARK_POLY,holes:PARK_HOLES||[],year:typeof DG_LC_LAST!=="undefined"?DG_LC_LAST?.report?.year:null,engine:DG_LC_ENGINE_VERSION}),loadRemote:fresh=>fresh.owner&&fresh.parkId&&typeof sb!=="undefined"?window.DG_SURFACE_REVIEW.load(fresh.parkId,fresh.owner):null,selectSource:window.DG_SELECT_SURFACE_REVIEW_SOURCE.select,normalize:args=>window.DG_NORMALIZE_SURFACE_REVIEW_RECORD.normalize({...args,classes:DG_SENS_CLASSES,validFeature:feature=>window.DG_SURFACE_REVIEW.validFeature(feature)}),setStatus:value=>{DG_SENS.status=value;},translate:_tvs});
 }
 function dgSensSave(){
  if(!DG_SENS.record)return Promise.resolve(false);
@@ -123,21 +92,7 @@ function dgSensWaterOutsideParts(){return window.DG_SELECT_SURFACE_WATER_OUTSIDE
 function dgSensWaterBoundaryUnresolved(){return window.DG_COUNT_UNRESOLVED_SURFACE_WATER_PARTS.count(dgSensWaterOutsideParts());}
 function dgSensNeedsWaterScan(){const hasFootprint=dgSensHasWaterFootprint();if(!hasFootprint)return false;return window.DG_REQUIRES_SURFACE_WATER_SCAN.requires({hasFootprint,parts:dgSensWaterOutsideParts(),profile:DG_SENS.record?.profile});}
 function dgSensEffective(c){
- const original=c.rasterClassKey||c.classKey;
- if(DG_SENS.rawView)return original;
- const dec=DG_SENS.record?.corrections?.[dgSensCellKey(c)];
- // A user water polygon is authoritative for water. Outside it, raster-water
- // cells use non-water spectral evidence; inadequate evidence stays review-only.
- if(original==="water"&&dgSensHasWaterFootprint())return dgSensWaterOutsideClass(c);
- // Manual cells and accepted decisions take precedence over optional spectral review.
- if(dec&&(dec.method==="visual-cell"||!DG_SENS.editing))return window.DG_SURFACE_REVIEW.types[dec.to]?(dec.to==="pool"?"water":dec.to):original;
- if(!DG_SENS.editing||!DG_SENS.record?.spectralEnabled||Number(c.areaM2)<window.DG_LC_VALIDATE.defaults.edgeAreaM2)return original;
- const sens=DG_SENS.record.sens;
- if(!DG_SENS_CLASSES.some(k=>Number(sens[k])!==50))return original;
- const pred=dgSensPredict(DG_SENS.record.profile?.cells?.[dgSensCellKey(c)]);
- if(!DG_SENS_CLASSES.includes(pred))return original;
- // A slider cannot silently relabel unrelated classes at their default thresholds.
- return Number(sens[pred])!==50||Number(sens[original])!==50?pred:original;
+ return window.DG_CLASSIFY_EFFECTIVE_SURFACE_CELL.classify({cell:c,rawView:DG_SENS.rawView,record:DG_SENS.record,editing:DG_SENS.editing,hasWaterFootprint:dgSensHasWaterFootprint(),waterOutsideClass:dgSensWaterOutsideClass,classes:DG_SENS_CLASSES,types:window.DG_SURFACE_REVIEW.types,cellKey:dgSensCellKey,edgeAreaM2:window.DG_LC_VALIDATE.defaults.edgeAreaM2,predict:dgSensPredict});
 }
 function dgSensCandidates(cls){return(dgSensCells()||[]).filter(c=>dgSensEffective(c)===cls&&c.classKey!==cls).map(cell=>({cell,pred:cls,sp:DG_SENS.record?.profile?.cells?.[dgSensCellKey(cell)]}));}
 async function dgSensMount(hostId){
@@ -147,45 +102,16 @@ async function dgSensMount(hostId){
  const R=window.DG_SURFACE_REVIEW;
  const fingerprint=await R.fingerprint(cells,PARK_POLY,PARK_HOLES||[],{year:DG_LC_LAST.report?.year,engine:DG_LC_ENGINE_VERSION});if(epoch!==DG_SENS.epoch)return;
  const lifecycle=[window.DG_CLASSIFY_SURFACE_REVIEW_DATA_CHANGE,window.DG_RESET_SURFACE_REVIEW_DATA_CHANGE,window.DG_PREPARE_SURFACE_REVIEW_SESSION,window.DG_MOUNT_SURFACE_REVIEW_MAP_HOST,window.DG_FINISH_SURFACE_REVIEW_MOUNT];
- if(lifecycle.every(Boolean)){
-  if(lifecycle[0].changed({savedFingerprint:rec.fingerprint,nextFingerprint:fingerprint})){lifecycle[1].reset(rec);DG_SENS.status=_tvs("Park sınırı veya veri değişti; eski kararlar yeni veriye uygulanmadı.");}
-  rec.fingerprint=fingerprint;dgSensResetScanState(rec);
-  const rebuildOsmObjects=dgSensMigrateOsmObjects(rec);
-  if(rebuildOsmObjects)DG_SENS.status=_tvs("OSM yüzey geometrileri yeni alan kurallarıyla yeniden hesaplanıyor; önceki kabul edilmiş rapor korunuyor.");
-  lifecycle[2].prepare({state:DG_SENS,record:rec,cells,status:value=>{DG_SENS.status=_tvs(value);}});
-  lifecycle[3].mount({host,document,map,state:DG_SENS,baselineLayer:typeof DG_LC_LAYER!=="undefined"?DG_LC_LAYER:null,switchBaseLayer:typeof switchBaseLayer==="function"?switchBaseLayer:null,ResizeObserverCtor:typeof ResizeObserver!=="undefined"?ResizeObserver:null});
-  dgSensGuard(true);
-  const pending=document.getElementById("surfacePendingTools");
-  await lifecycle[4].finish({record:rec,epoch,isCurrent:(record,currentEpoch)=>currentEpoch===DG_SENS.epoch&&DG_SENS.record===record,repartition:dgSensRepartition,canRenderAccepted:()=>!DG_SENS.editing,renderAccepted:dgSensRenderAccepted,hidePending:()=>{if(pending)pending.style.display="none";},scrollHost:()=>host.scrollIntoView({block:"nearest"}),autoWater:dgSensAutoWaterOnMount});
-  return;
- }
- if(rec.fingerprint&&rec.fingerprint!==fingerprint){Object.assign(rec,{corrections:{},features:[],objectFeatures:null,profile:null,acceptedAt:null,acceptedAreas:null,acceptedResult:null});DG_SENS.status=_tvs("Park sınırı veya veri değişti; eski kararlar yeni veriye uygulanmadı.");}
- rec.fingerprint=fingerprint;
- // A new park analysis always starts with a fresh optional scan and neutral thresholds.
- // Accepted publication snapshots remain immutable in acceptedResult.
- dgSensResetScanState(rec);
+ if(!lifecycle.every(Boolean))throw new Error("Surface editor lifecycle modules are not loaded");
+ if(lifecycle[0].changed({savedFingerprint:rec.fingerprint,nextFingerprint:fingerprint})){lifecycle[1].reset(rec);DG_SENS.status=_tvs("Park sınırı veya veri değişti; eski kararlar yeni veriye uygulanmadı.");}
+ rec.fingerprint=fingerprint;dgSensResetScanState(rec);
  const rebuildOsmObjects=dgSensMigrateOsmObjects(rec);
  if(rebuildOsmObjects)DG_SENS.status=_tvs("OSM yüzey geometrileri yeni alan kurallarıyla yeniden hesaplanıyor; önceki kabul edilmiş rapor korunuyor.");
- DG_SENS.record=rec;DG_SENS.opacity=rec.displayOpacity??45;DG_SENS.revision=rec.serverRevision||0;DG_SENS.editing=!!rec.draftDirty||!rec.acceptedAt||!rec.acceptedResult;
- if(rec.acceptedAt&&!rec.acceptedResult)DG_SENS.status=_tvs("Önceki kabul alanları hesabınızda korunuyor. Bu yeni harita önizlemesini kontrol edip kaydedin.");DG_SENS.focus=null;DG_SENS.showCand=true;
- DG_SENS.epsg=cells[0].epsg;
- DG_SENS.hostParent=host.parentNode;DG_SENS.hostNext=host.nextSibling;
- const mapEl=document.getElementById("map");
- if(mapEl){(document.getElementById("surfaceMapWorkspace")||mapEl).after(host);mapEl.classList.add("surface-review-map");}
- host.style.display="block";
+ lifecycle[2].prepare({state:DG_SENS,record:rec,cells,status:value=>{DG_SENS.status=_tvs(value);}});
+ lifecycle[3].mount({host,document,map,state:DG_SENS,baselineLayer:typeof DG_LC_LAYER!=="undefined"?DG_LC_LAYER:null,switchBaseLayer:typeof switchBaseLayer==="function"?switchBaseLayer:null,ResizeObserverCtor:typeof ResizeObserver!=="undefined"?ResizeObserver:null});
  dgSensGuard(true); /* 0056: analiz başladı — park algılama duraklatıldı */
- if(typeof DG_LC_LAYER!=="undefined"&&DG_LC_LAYER&&map.hasLayer(DG_LC_LAYER)){DG_SENS.baselineShown=true;map.removeLayer(DG_LC_LAYER);}
- DG_SENS.base=document.getElementById("baseLayerSelect")?.value||DG_SENS.base;
- if(typeof switchBaseLayer==="function")switchBaseLayer(DG_SENS.base);
- document.getElementById("v-map")?.classList.add("surface-review-active");
- map.invalidateSize({pan:false});
- if(typeof ResizeObserver!=="undefined"){DG_SENS.resizeObserver?.disconnect();DG_SENS.resizeObserver=new ResizeObserver(()=>map.invalidateSize({pan:false}));DG_SENS.resizeObserver.observe(mapEl);}
- // Leaflet canvas handles pan/zoom without recomputing or restyling geometry.
- const partitioned=await dgSensRepartition();if(epoch!==DG_SENS.epoch||!partitioned)return;if(rec.acceptedResult&&!DG_SENS.editing)dgSensRenderAccepted();
- const pending=document.getElementById("surfacePendingTools");if(pending)pending.style.display="none";
- host.scrollIntoView({block:"nearest"});
- // The initial analysis also discovers water; Tara is not a prerequisite.
- if(rec.useObjects!==false&&!(rec.objectFeatures||[]).some(f=>f.type==="water"||f.type==="pool"))void dgSensAutoWaterOnMount(rec,epoch);
+ const pending=document.getElementById("surfacePendingTools");
+ await lifecycle[4].finish({record:rec,epoch,isCurrent:(record,currentEpoch)=>currentEpoch===DG_SENS.epoch&&DG_SENS.record===record,repartition:dgSensRepartition,canRenderAccepted:()=>!DG_SENS.editing,renderAccepted:dgSensRenderAccepted,hidePending:()=>{if(pending)pending.style.display="none";},scrollHost:()=>host.scrollIntoView({block:"nearest"}),autoWater:dgSensAutoWaterOnMount});
 }
 function dgSensParts(){
  const builder=window.DG_BUILD_SURFACE_REVIEW_PARTS;if(builder){const result=builder.build({record:DG_SENS.record,geometry:DG_SENS.geometry,park:DG_SENS.parkGeometry,cells:dgSensCells(),epoch:DG_SENS.epoch,partitionVersion:DG_SENS.partitionVersion,visualVersion:DG_SENS.visualVersion,editing:DG_SENS.editing,features:dgSensFeatures(),sens:DG_SENS.record?.sens,corrections:DG_SENS.record?.corrections,profile:DG_SENS.record?.profile,epsg:DG_SENS.epsg,memo:DG_SENS.partsMemo,resolved:(...args)=>window.DG_SURFACE_REVIEW.resolved(...args),effective:dgSensEffective});DG_SENS.partsMemo=result.memo;return result.parts;}
@@ -335,34 +261,9 @@ async function dgSensAutoWaterOnMount(rec,epoch){
 }
 async function dgSensAutoWaterOnScan(rec,epoch,fromMount=false){
  const loader=window.DG_LOAD_SURFACE_WATER_OBJECTS,apply=window.DG_APPLY_AUTO_SURFACE_WATER_OBJECTS;
- if(loader&&apply){
-  if(rec.useObjects===false||typeof dgLcOsmData!=="function"||typeof dgSurfaceObjects!=="function")return 0;
-  const objects=await loader.load({enabled:true,loadOsmData:dgLcOsmData,bbox:dgLcBboxFromGeometry(PARK_POLY,PARK_HOLES||[]),buildObjects:dgSurfaceObjects,epsg:DG_SENS.epsg,validFeature:window.DG_SURFACE_REVIEW.validFeature,isCurrent:()=>epoch===DG_SENS.epoch&&DG_SENS.record===rec,fromMount,isUnavailable:()=>DG_SENS.busy||DG_SENS.saving||DG_SENS.exporting,onEvidence:evidence=>{rec.osmCoverage=evidence;dgSensUpdateStatus();}});
-  return apply.apply({record:rec,objects,epoch,getEpoch:()=>DG_SENS.epoch,getRecord:()=>DG_SENS.record,repartition:features=>dgSensRepartition(features),dirty:dgSensDirty});
- }
- if(rec.useObjects===false||typeof dgLcOsmData!=="function"||typeof dgSurfaceObjects!=="function")return 0;
- const bbox=dgLcBboxFromGeometry(PARK_POLY,PARK_HOLES||[]);
- const data=await dgLcOsmData(bbox).catch(()=>null);
- if(!data?.elements?.length||epoch!==DG_SENS.epoch||DG_SENS.record!==rec||(fromMount&&(DG_SENS.busy||DG_SENS.saving||DG_SENS.exporting)))return 0;
- const objects=dgSurfaceObjects(data.elements,DG_SENS.epsg).filter(f=>(f.type==="building"||f.type==="hard"||f.type==="water"||f.type==="pool")&&window.DG_SURFACE_REVIEW.validFeature(f));
- if(!objects.length)return 0;
- const ids=new Set(objects.map(f=>f.osmId));
- const existing=rec.objectFeatures||[];
- const managed=f=>["building","hard","water","pool"].includes(f.type)&&f.method==="osm-boundary";
- const next=[...existing.filter(f=>!managed(f)),...objects];
- const changed=JSON.stringify(existing.filter(managed).map(f=>[f.type,f.osmId,f.geometry]))!==
-  JSON.stringify(objects.map(f=>[f.type,f.osmId,f.geometry]));
- const superseded=(rec.features||[]).filter(f=>f.method==="visual-boundary"&&f.source==="osm-selected"&&ids.has(f.osmId));
- if(!changed&&!superseded.length)return objects.length;
- const previous=rec.objectFeatures,previousFeatures=rec.features;
- rec.objectFeatures=next;
- const features=(rec.features||[]).filter(f=>!superseded.includes(f));
- const ok=await dgSensRepartition(features);
- if(!ok){rec.objectFeatures=previous;rec.features=previousFeatures;return 0;}
- if(epoch!==DG_SENS.epoch||DG_SENS.record!==rec)return 0;
- rec.objectVersion="footprints-v5-osm-all";
- dgSensDirty();
- return objects.length;
+ if(!loader||!apply||rec.useObjects===false||typeof dgLcOsmData!=="function"||typeof dgSurfaceObjects!=="function")return 0;
+ const objects=await loader.load({enabled:true,loadOsmData:dgLcOsmData,bbox:dgLcBboxFromGeometry(PARK_POLY,PARK_HOLES||[]),buildObjects:dgSurfaceObjects,epsg:DG_SENS.epsg,validFeature:window.DG_SURFACE_REVIEW.validFeature,isCurrent:()=>epoch===DG_SENS.epoch&&DG_SENS.record===rec,fromMount,isUnavailable:()=>DG_SENS.busy||DG_SENS.saving||DG_SENS.exporting,onEvidence:evidence=>{rec.osmCoverage=evidence;dgSensUpdateStatus();}});
+ return apply.apply({record:rec,objects,epoch,getEpoch:()=>DG_SENS.epoch,getRecord:()=>DG_SENS.record,repartition:features=>dgSensRepartition(features),dirty:dgSensDirty});
 }
 async function dgSensScan(){
  const runner=window.DG_RUN_SURFACE_SCAN,complete=window.DG_COMPLETE_SURFACE_SCAN,summary=window.DG_BUILD_SURFACE_SCAN_SUMMARY;
@@ -514,38 +415,7 @@ async function dgSensAccept(){
 }
 function dgSensReset(){const module=window.DG_RESET_SURFACE_CORRECTIONS;if(module)return module.reset({rawView:DG_SENS.rawView,busy:DG_SENS.busy,saving:DG_SENS.saving,confirmReset:()=>confirm(_tvs("Tüm kullanıcı düzeltmeleri silinsin mi? Ham raster korunur.")),record:DG_SENS.record,dirty:dgSensDirty,repartition:dgSensRepartition,save:dgSensSave});if(DG_SENS.rawView||DG_SENS.busy||DG_SENS.saving||!confirm(_tvs("Tüm kullanıcı düzeltmeleri silinsin mi? Ham raster korunur.")))return;DG_SENS.record.corrections={};DG_SENS.record.features=[];DG_SENS.record.brushHistory=[];dgSensDirty();dgSensRepartition().then(ok=>ok&&dgSensSave());}
 function dgSensFindObjectAt(latlng,elements=window.DG_SURFACE_OSM?.elements||[]){
- const module=window.DG_SURFACE_OBJECT_PICKER;
- if(module)return module.find({latlng,elements,storedFeatures:DG_SENS.record?.objectFeatures||[],epsg:DG_SENS.epsg,parkGeometry:DG_SENS.parkGeometry,cellGeometry:DG_SENS.geometry,project:dgSurfaceProject,unproject:dgSurfaceUnproject,forward:dgLcUtmForward,featureGeometry:dgSurfaceFeatureGeometry,bounds:dgSurfaceBounds,pointDistance:dgGridPointDistance,clip:dgSurfaceClip,area:dgSurfaceArea,objects:dgSurfaceObjects,validFeature:window.DG_SURFACE_REVIEW.validFeature});
- // Retain access to already-validated OSM polygons during a network outage.
- if(!elements.length&&DG_SENS.record?.objectFeatures?.length&&latlng){
-  const pt=dgLcUtmForward(latlng.lat,latlng.lng,DG_SENS.epsg);
-  for(const f of DG_SENS.record.objectFeatures){
-   if(!window.DG_SURFACE_REVIEW.validFeature(f))continue;
-   for(const poly of dgSurfaceFeatureGeometry(f,DG_SENS.epsg)){
-    const box=dgSurfaceBounds([poly]);
-    if(pt.x<box[0]||pt.x>box[2]||pt.y<box[1]||pt.y>box[3])continue;
-    if(dgGridPointDistance([pt.x,pt.y],[poly])>=0)return{type:f.type,geometry:f.geometry,osmId:f.osmId||"OSM"};
-   }
-  }
- }
-
- if(!latlng||!Array.isArray(elements)||!DG_SENS.geometry||!DG_SENS.parkGeometry||typeof dgSurfaceObjects!=="function")return null;
- const point=dgLcUtmForward(latlng.lat,latlng.lng,DG_SENS.epsg),candidates=dgSurfaceObjects(elements,DG_SENS.epsg);let best=null;
- for(const feature of candidates){
-  const geom=feature.geometry?.type==="MultiPolygon"?feature.geometry.coordinates.map(poly=>poly.map(ring=>dgSurfaceProject(ring,DG_SENS.epsg))):[];
-  for(const poly of geom){
-   const bounds=dgSurfaceBounds([poly]);if(point.x<bounds[0]-8||point.x>bounds[2]+8||point.y<bounds[1]-8||point.y>bounds[3]+8)continue;
-   const distance=dgGridPointDistance([point.x,point.y],[poly]);if(distance< -8)continue;
-   const area=dgSurfaceArea([poly]),score=distance>=0?area/1e9:8+Math.abs(distance);
-   if(!best||score<best.score)best={feature,geometry:[poly],score};
-  }
- }
- if(!best)return null;
- const clipped=dgSurfaceClip("intersection",best.geometry,DG_SENS.parkGeometry);
- if(!clipped.length||dgSurfaceArea(clipped)<.1)return null;
- const geometry={type:"MultiPolygon",coordinates:dgSurfaceUnproject(clipped,DG_SENS.epsg)};
- if(!window.DG_SURFACE_REVIEW.validFeature({type:best.feature.type,geometry}))return null;
- return{type:best.feature.type,geometry,osmId:best.feature.osmId||"OSM"};
+ return window.DG_SURFACE_OBJECT_PICKER.find({latlng,elements,storedFeatures:DG_SENS.record?.objectFeatures||[],epsg:DG_SENS.epsg,parkGeometry:DG_SENS.parkGeometry,cellGeometry:DG_SENS.geometry,project:dgSurfaceProject,unproject:dgSurfaceUnproject,forward:dgLcUtmForward,featureGeometry:dgSurfaceFeatureGeometry,bounds:dgSurfaceBounds,pointDistance:dgGridPointDistance,clip:dgSurfaceClip,area:dgSurfaceArea,objects:dgSurfaceObjects,validFeature:window.DG_SURFACE_REVIEW.validFeature});
 }
 function dgSensObjectPickStart(){
  const module=window.DG_START_SURFACE_OBJECT_PICK;if(module)return module.start({state:DG_SENS,data:window.DG_SURFACE_OSM,boundary:JSON.stringify(PARK_POLY),hasStored:(DG_SENS.record?.objectFeatures||[]).length>0,guard:dgSensGuard,stopBrush:dgSensBrushStop,cancelDraw:dgSensDrawCancel,cancelObject:dgSensObjectCancel,map,onPick:dgSensObjectPickAt,renderTools:dgSensRenderPaintTools,updateStatus:dgSensUpdateStatus,toast,unavailableMessage:_tvs("OSM nesneleri henüz yüklenemedi. Su sınırı otomatik aranır; çevrimiçi olduğunuzda Yeniden Tara’yı deneyin."),promptMessage:_tvs("Sınırını seçeceğiniz OSM nesnesine dokunun.")});

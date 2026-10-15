@@ -21,8 +21,8 @@ Başlangıç: `092d01dd5508dc9bc94e5f76db75ed2812533b73` (r420). Kullanıcı kal
 
 ## Kalıcı korumalar
 
-- `npm run check:modules`: 944 fiziksel runtime modülünü başlangıç/lazy/worker yükleme zinciri ve Service Worker precache ile karşılaştırır. Eksik dosya, unutulan modül, iki kez değerlendirme ve kritik modülün kilit dışı kalması CI hatasıdır. Worker relative importları gerçek dosyalara çözülür.
-- Kritik 600 runtime modülünün hepsi hash kilidinde; 315 mevcut modül ve 13 test/koruma aracı daha eklendi. Temel kilit 453 dosyadan 781 dosyaya genişledi. Önceden korunan hashler bu son grupta değiştirilmedi.
+- `npm run check:modules`: 995 fiziksel runtime modülünü başlangıç/lazy/worker yükleme zinciri ve Service Worker precache ile karşılaştırır. Eksik dosya, unutulan modül, iki kez değerlendirme ve kritik modülün kilit dışı kalması CI hatasıdır. Worker relative importları gerçek dosyalara çözülür.
+- 617 kritik runtime modülü ve toplam 956 çekirdek/test/koruma dosyası hash kilidindedir; yeni korumalı dosyalar ve değişiklikler yetkili SHA zinciriyle doğrulanır.
 - Başlangıç/OAuth, fırça, sabit çizim araçları, açık çizimle cleanup ve OSM XML/ilişki/cache/hata kurtarma tarayıcı kontrolleri artık Mobile smoke CI adımıdır. Fixtureler sahte oturum ve portlarla çalışır; gerçek kullanıcı kaydı yazmaz/silmez.
 - Yeni başarısızlık testleri yükleme/precache/kilit eksiklerini ve çift script değerlendirmesini bilerek oluşturarak koruma kapılarının gerçekten durdurduğunu doğrular.
 
@@ -43,7 +43,10 @@ Landing grubu tamamlandı: giriş controller’ı, public istatistik application
 
 ## Son kapsam denetimi
 
-- Devam talebiyle 15 runtime modülü daha tamamlandı; toplam 959 fiziksel runtime modülü yükleme/lazy/worker/precache kontrolünü geçer. 603 kritik runtime modülü ve toplam 802 dosya hash kilidindedir.
-- services/ui/core/utils altında 279 dosyanın AST taraması yapıldı. Modüle delegasyon içermeyen 15 satır üzeri üst seviye işlevler yalnız `dgRenderGridSummary` ve `dgRenderParkAdminHTML`: ikisi de bağımsız UI renderer dosyasında, veri erişimi veya bilimsel hesap orkestrasyonu üstlenmez. Kısa saf yardımcılar ve legacy fallbackler eksik karma modül sayılmaz.
+- 15 Ekim devamında yüzey nesnesi seçimi, kayıt/snapshot yükleme, OSM geometri uygulaması ve mount yaşam döngüsü tekil modül sahiplerine indirildi; hücre etkin sınıf kuralı UI'dan saf domain modülüne taşındı. Yeni domain modülü runtime ve offline precache zincirine eklendi.
+- Bu değişiklikten sonra 995 fiziksel runtime modülü yükleme/lazy/worker/precache kontrolündedir; 617 kritik runtime modülü ve toplam 956 dosya hash kilidindedir. AST katman/dependency denetimleri sırasıyla 803 ve 939 modül tarar.
+- services/ui/core/utils kapsamındaki önceki üst-seviye AST denetiminde modüle delegasyonsuz uzun fonksiyon olarak yalnız bağımsız `dgRenderGridSummary` ve `dgRenderParkAdminHTML` renderer'ları kalmıştı. Yeni yüzey düzenlemesi sınıf kararını domain'e aldı ve mount/OSM/kayıt çift uygulamalarını kaldırdı; kalan compatibility/composition dosyaları yükleme ve katman kapılarıyla izlenir.
 - Yeni fixture testleri gerçek kullanıcı kaydı değiştirmeden oturum/OAuth/anonim giriş, park sınırı ve delikler, bayat asenkron yanıt, native dosya indirme ve tablo sunumunu kapsar.
 - İlk tam check sırasında mevcut kilitli Sentinel tarih testi, Date.now ölçümüyle yeni Date çağrısı arasında milisaniye geçmesi nedeniyle bir kez başarısız oldu; 91 testlik odaklı tekrar geçti. Bilimsel dönem politikası ve kilitli test değiştirilmedi; son tam check ayrıca çalıştırıldı.
+
+89. grup (batch #89), yüzey editörünün beş sorumluluğunu tek sahipli hale getirdi: OSM nesnesi seçme, kayıt/snapshot yükleme, başlangıç OSM geometri uygulama, harita mount yaşam döngüsü ve etkin hücre sınıfı kararı. Dört application/adapter akışı içindeki eski paralel fallback'ler kaldırıldı; etkin sınıf kararı `src/domain/surface/classify-effective-surface-cell.js` modülüne taşındı. Yeni modül lazy/runtime/offline zincirine ve SHA kilidine eklendi. Ham raster, kullanıcı kararı ve kabul snapshot öncelikleri korundu. 114 hedefli regresyon ve 3.023 tam test geçti; mimari, build, CSP, modül sınırları, telefon tarayıcı smoke ve erişilebilirlik kapıları da doğrulandı.

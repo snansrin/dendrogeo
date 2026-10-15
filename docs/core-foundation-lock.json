@@ -205,6 +205,7 @@
       "src/domain/surface/calculate-validation-area-estimates.js",
       "src/domain/surface/calculate-validation-class-accuracy.js",
       "src/domain/surface/calculate-validation-class-proportions.js",
+      "src/domain/surface/classify-effective-surface-cell.js",
       "src/domain/surface/classify-landcover-code.js",
       "src/domain/surface/classify-surface-review-data-change.js",
       "src/domain/surface/clean-grid-geometry.js",
@@ -516,6 +517,7 @@
       ".github/workflows/rapor-yayin.yml",
       ".github/workflows/rapor.yml",
       "css/landing.css",
+      "docs/generated-markup-handler-baseline.json",
       "docs/legacy-service-boundaries.json",
       "index.html",
       "package-lock.json",
@@ -780,6 +782,7 @@
       "src/ui/admin-measurement-table.js",
       "src/ui/admin-overview-measurements.js",
       "src/ui/admin-tree-measurement-row.js",
+      "src/ui/bind-surface-editor-events.js",
       "src/ui/cancel-measurement-edit.js",
       "src/ui/check-measurement-photo.js",
       "src/ui/close-user-publication-panel.js",
@@ -866,6 +869,7 @@
       "src/ui/render-surface-scan-panel.js",
       "src/ui/render-surface-sensitivity-controls.js",
       "src/ui/render-surface-vegetation-features.js",
+      "src/ui/render-verified-surface-map-export.js",
       "src/ui/reset-measurement-entry-fields.js",
       "src/ui/run-report-question-dialog.js",
       "src/ui/save-academic-profile.js",
@@ -914,6 +918,7 @@
       "test/critical-fixes.test.mjs",
       "test/dashboard-workflow-modules.test.mjs",
       "test/dependency-rules.test.mjs",
+      "test/effective-surface-cell-domain.test.mjs",
       "test/form-qa.test.mjs",
       "test/geofence.test.mjs",
       "test/landing-workflow-modules.test.mjs",
@@ -945,6 +950,7 @@
       "test/retraction.test.mjs",
       "test/shell-workflow-modules.test.mjs",
       "test/surface-boundary-drawing-modules.test.mjs",
+      "test/surface-editor-event-binding.test.mjs",
       "test/surface-editor-interaction-modules.test.mjs",
       "test/surface-layer-rendering-modules.test.mjs",
       "test/turnstile-modules.test.mjs",
@@ -955,11 +961,7 @@
       "test/visitor-view-modules.test.mjs",
       "test/waypoint-navigation-modules.test.mjs",
       "test/world-park-comparison-workflows.test.mjs",
-      "test/world-render-modules.test.mjs",
-      "src/ui/render-verified-surface-map-export.js",
-      "src/ui/bind-surface-editor-events.js",
-      "test/surface-editor-event-binding.test.mjs",
-      "docs/generated-markup-handler-baseline.json"
+      "test/world-render-modules.test.mjs"
     ],
     "modular_shell_action_safeguards": [
       "index.html",
@@ -1954,7 +1956,9 @@
     "src/ui/render-verified-surface-map-export.js": "0b0a994bbb5169810437e44fa2c400963c4d16c7cf56b1040c927012932b8541",
     "src/ui/bind-surface-editor-events.js": "1865b71c94ed332e6b4a4c6630d71a3d6373b6669df64a4bdb615c35fd42477e",
     "test/surface-editor-event-binding.test.mjs": "25d2813d9d575da97cdf35e4c45faff60983dd6ced54f017fb4c47b15cb24540",
-    "docs/generated-markup-handler-baseline.json": "d366816ca1bb301cd6aa122caeb221dbeca891bb59e7205db434aaf40d363cf5"
+    "docs/generated-markup-handler-baseline.json": "d366816ca1bb301cd6aa122caeb221dbeca891bb59e7205db434aaf40d363cf5",
+    "src/domain/surface/classify-effective-surface-cell.js": "43bb692b51b49b0a1750727af6a031130735a8e30423cb8bef41bca65c8b5e6a",
+    "test/effective-surface-cell-domain.test.mjs": "beb44ed2ec17b70e0e026e623a6a0f94e2ddb55ac4189cd1ea3ebcb8ddbbb32c"
   },
   "authorized_modularizations": [
     {
@@ -7329,6 +7333,119 @@
           "path": "test/user-architecture-table.test.mjs",
           "previous_sha256": "21b35801343fda3e0a2604fbc18622aac05af5c6f0b13ab6771066c93725c045",
           "sha256": "968f304339281817f95cfea7165366f13426393c6ea1264536ce3debf96952e2"
+        }
+      ]
+    },
+    {
+      "date": "2026-10-15",
+      "scope": "User-authorized modularization: move effective surface class decisions into the domain, route record and OSM evidence through their single feature modules, remove duplicate mount fallback orchestration, and refresh offline asset versions.",
+      "audit_chain": "sha256-v1",
+      "files": [
+        {
+          "path": "index.html",
+          "previous_sha256": "199080619e8022ba8103675caca3e94a7e26d81a1a2e88d16a8656aaf1808f77",
+          "sha256": "40f8ef49cc12ec1c8d5ecca575a1c8ca676a3dab834f72a5a2451ccef98352df"
+        },
+        {
+          "path": "src/ui/lc-sens.js",
+          "previous_sha256": "432c214c8488e5ba4c57f1ac4a7350ed1d3170ea594581e483543bb75cc4555a",
+          "sha256": "a1084d487f2bf27e82dc2a088a1ed07a6019f33ba6b1c831c8939b825f7284fc"
+        },
+        {
+          "path": "src/utils/lazylibs.js",
+          "previous_sha256": "5d8478288789dae1d79d7e3db273687bc2f0b149956acab4af671e1fd8a1e6e4",
+          "sha256": "9a29064fb8a4b6a63fc5e722ec5b1a9aa71fce9d05a4c063e943aefc12f83aa5"
+        },
+        {
+          "path": "sw.js",
+          "previous_sha256": "9bb403b4234f49012afab3b823e0777b15105f91876f14ba1dca24185fdd70c8",
+          "sha256": "9374e0dda132bd6bdef31bf0d78c54a97fab2d7b6022bd3ef93f646e3df9ff62"
+        },
+        {
+          "path": "test/surface-mount-lifecycle-modules.test.mjs",
+          "previous_sha256": "db9f479034142c1c7531b012ae509d8df069efba723e71b71e490fa110bba12e",
+          "sha256": "ffcf559f0e8016d0ecb0e29109c3a5dae1b0c5991ce520d35b2cf48bd9a7e94a"
+        },
+        {
+          "path": "test/surface-review.test.mjs",
+          "previous_sha256": "b1c13d39595f7e979f832c861754eb67238e657cd2bd4d5889dad4649f85bc99",
+          "sha256": "eac386884e2c064836e0d9b667dd7115c8f43900d3c74291d93aa3b34953eff5"
+        }
+      ],
+      "added_protected_files": [
+        "src/domain/surface/classify-effective-surface-cell.js",
+        "test/effective-surface-cell-domain.test.mjs"
+      ]
+    },
+    {
+      "date": "2026-10-15",
+      "scope": "User-authorized modularization: update the base-layer regression assertion to verify its new canonical surface mount module owner.",
+      "audit_chain": "sha256-v1",
+      "files": [
+        {
+          "path": "test/lc-validate.test.mjs",
+          "previous_sha256": "eaaf2e8361e981716752d48baa5d693f1a50a50cfed4fff85fac3537d0a00934",
+          "sha256": "8f3f80683437f9078ceecf18d641c1fe47454918bee70863a190e2379d833bcf"
+        }
+      ]
+    },
+    {
+      "date": "2026-10-15",
+      "scope": "User-authorized modularization: retain the park-detection guard marker at the canonical surface mount entry point.",
+      "audit_chain": "sha256-v1",
+      "files": [
+        {
+          "path": "src/ui/lc-sens.js",
+          "previous_sha256": "a1084d487f2bf27e82dc2a088a1ed07a6019f33ba6b1c831c8939b825f7284fc",
+          "sha256": "66c6b636bc5fa51b15d52981509f6f3e41377ba022561412c20272f429b2f465"
+        }
+      ]
+    },
+    {
+      "date": "2026-10-15",
+      "scope": "User-authorized modularization: regenerate the served runtime bundle and index after updating the canonical surface guard marker and asset revision.",
+      "audit_chain": "sha256-v1",
+      "files": [
+        {
+          "path": "index.html",
+          "previous_sha256": "40f8ef49cc12ec1c8d5ecca575a1c8ca676a3dab834f72a5a2451ccef98352df",
+          "sha256": "65c8a8592723de31f93abd5dc65e29a3a88db72c06c1db1e512a2e74292b1a70"
+        }
+      ]
+    },
+    {
+      "date": "2026-10-15",
+      "scope": "User-authorized modularization: load effective surface classification in the verified water footprint fixture, matching the production domain-module order.",
+      "audit_chain": "sha256-v1",
+      "files": [
+        {
+          "path": "test/verified-water-footprint.test.mjs",
+          "previous_sha256": "9afccd88a1868ba7583e53594230e6ccb226c5a7a564ecc7146ac38e55e1ba1a",
+          "sha256": "3195617580e2887f6ea77e1de964ec10bf4f2bf1f783ac54f8ca20794d6ed6ea"
+        }
+      ]
+    },
+    {
+      "date": "2026-10-15",
+      "scope": "User-authorized modularization: verify automatic OSM water discovery delegates object construction and application to their canonical loaded modules.",
+      "audit_chain": "sha256-v1",
+      "files": [
+        {
+          "path": "test/water-osm-reliability.test.mjs",
+          "previous_sha256": "c15334ab5059ceeb1cf88e181db294a29ba81197c3d4c16bf2b56dfb6d16cc90",
+          "sha256": "7ad63b96af388c483721af4bdc20fcbe17c84c3fe116a74602c1a3fab7f25243"
+        }
+      ]
+    },
+    {
+      "date": "2026-10-15",
+      "scope": "User-authorized modularization: align scientific water policy assertion with the new domain classifier owner.",
+      "audit_chain": "sha256-v1",
+      "files": [
+        {
+          "path": "test/surface-scientific-contract.test.mjs",
+          "previous_sha256": "a62bea43a14142cb246596466b6cc79eb97bd87482a6fb3c9ac446c162c68155",
+          "sha256": "93a08515f7444d1a7bcb47737ae10a314d25424cd44a85ee6e875a908cbb090a"
         }
       ]
     }

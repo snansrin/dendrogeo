@@ -96,7 +96,7 @@ test('water identity, automatic first analysis, failure behavior and uncertainty
  assert.match(review,/dgSensAutoWaterOnMount\(rec,epoch\)/);
  assert.match(review,/function dgSensHasVerifiedWaterBoundary/);
  assert.match(review,/dgSensWaterBoundaryUnresolved\(\)>0/);
- assert.match(review,/if\(original==="water"&&dgSensHasWaterFootprint\(\)\)/);
+ assert.match(load('src/domain/surface/classify-effective-surface-cell.js'),/if\(original==="water"&&hasWaterFootprint\)/);
  assert.match(qa,/node scripts\/verify-osm-water-live\.mjs/);
 });
 test('verified loader, accepted snapshot and no forced changes to published reports',()=>{

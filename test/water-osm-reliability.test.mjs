@@ -73,7 +73,9 @@ test('Initial surface analysis requests water automatically and preserves raw ce
  const ui=load('src/ui/lc-sens.js'),park=load('src/services/park-query.js'),coverage=load('src/application/parks/fetch-detailed-coverage.js'),baseline=load('src/services/landcover.js'),application=load('src/application/surface/run-analysis.js');
  assert.match(ui,/dgSensAutoWaterOnMount\(rec,epoch\)/);
  assert.match(ui,/async function dgSensAutoWaterOnScan/);
- assert.match(ui,/dgSurfaceObjects\(data\.elements,DG_SENS\.epsg\)/);
+ assert.match(ui,/DG_LOAD_SURFACE_WATER_OBJECTS/);
+ assert.match(ui,/DG_APPLY_AUTO_SURFACE_WATER_OBJECTS/);
+ assert.doesNotMatch(ui,/dgSurfaceObjects\(data\.elements,DG_SENS\.epsg\)/,'OSM objects are built only by the loaded adapter');
  assert.match(park,/if\(window\.DG_SURFACE_OSM\?\.boundary!==boundary\)/);
  assert.match(coverage,/if \(boundary !== JSON\.stringify\(getParkPolygon\(\)\)\)/);
  assert.match(baseline,/DG_RUN_SURFACE_ANALYSIS\.run\(params\)/);

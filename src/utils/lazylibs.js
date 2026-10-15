@@ -241,6 +241,7 @@ const DG_LULC_CHAIN=[
   "src/domain/surface/select-surface-water-outside-parts.js",
   "src/domain/surface/count-unresolved-surface-water-parts.js",
   "src/domain/surface/requires-surface-water-scan.js",
+  "src/domain/surface/classify-effective-surface-cell.js",
   "src/application/surface/build-surface-review-parts.js",
   "src/domain/surface/summarize-surface-review-areas.js",
   "src/domain/surface/build-adjusted-surface-summary.js",

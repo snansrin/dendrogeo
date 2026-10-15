@@ -1,10 +1,10 @@
 // ============================================================ 
-// 🌲 DendroGeo Service Worker v2.12 (Cache-Only, Production-Ready)
+// 🌲 DendroGeo Service Worker v2.13 (Cache-Only, Production-Ready)
 // Harita tile cache, fotoğraf cache, LRU temizliği
 // NOT: Senkronizasyon artık Ana Thread (Supabase JS SDK) tarafından yapılıyor
 // ============================================================
 
-const CACHE_VERSION = 'dendrogeo-sw-v2-r434';
+const CACHE_VERSION = 'dendrogeo-sw-v2-r435';
 
 /* İKİ AYRI STATİK CACHE — bu ayrım bilinçli ve önemli.
  *
@@ -964,6 +964,7 @@ const CORE_ASSETS = [
     '/src/domain/surface/select-surface-water-outside-parts.js',
     '/src/domain/surface/count-unresolved-surface-water-parts.js',
     '/src/domain/surface/requires-surface-water-scan.js',
+    '/src/domain/surface/classify-effective-surface-cell.js',
     '/src/application/surface/build-surface-review-parts.js',
     '/src/domain/surface/summarize-surface-review-areas.js',
     '/src/domain/surface/build-adjusted-surface-summary.js',

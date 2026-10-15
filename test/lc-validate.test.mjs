@@ -713,7 +713,7 @@ describe('entegrasyon zinciri kilitleri (0054 · lc-sens)', () => {
 
   test('harita kullanıcının seçimine bağlıdır; tarama uyduya zorla geçmez', () => {
     assert.match(rd('src/ui/render-surface-editor-menus.js'), /data-dg-change="base"/);
-    assert.match(sens, /switchBaseLayer\(DG_SENS.base\)/);
+    assert.match(rd('src/ui/mount-surface-review-map-host.js'), /switchBaseLayer\(state\.base\)/);
     assert.ok(!sens.includes('switchBaseLayer("sat");DG_SENS.base="sat";'));
   });
 
