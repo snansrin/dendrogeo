@@ -43,15 +43,23 @@ Mobil Chromium akışları 360/390/430 px genişliklerinde giriş, OAuth, anonim
 
 ### Güncel 16 satırın durumu
 
-| Satır | 15 Ekim sonucu | Açık kalan kabul şartı |
-|---|---|---|
-| Proje/veri kuralları; ölçüm formu | Yerel kabul geçti: `girth_cm` ham veri, tam hassasiyetli DBH ve salt-okunur 1 ondalık görünüm testli. | Yok; canlı saha kaydı yazılmadı. |
-| Paket/build/CI; rapor/yayın | Yerel release kapısı geçti; PR ve yayın iş akışları `check:release` kapılı. | Önceki push'un güncel GitHub Actions durumu bu oturumdaki commit için alınamadı; yerel başarı CI run'ı sayılmaz. |
-| UI modülleri; yüzey/core; tema ve kontroller | Katman/bağımlılık/çekirdek/hash/yükleme kapıları geçti; yüzey önizlemesinin kabul edilmiş veri ve ham alanı değiştirmediği testli. Switch, range, renk ve form kuralları tarandı. | 147 üretilen HTML handler'ı ve büyük legacy facade/controller'lar açık teknik borç. |
-| Canlı konum ve gizlilik | Canlı Supabase katalog sorgusunda `realtime.messages` için **0 RLS politikası** bulundu; iki Presence adapter'ı da `private: true` kullanmıyor. Mevcut yayın bu kanal yetkilendirmesini sunucu tarafında kanıtlamıyor. | Gerçek kurucu/normal kullanıcı/anonim istemciyle çapraz park okuma-yazma testleri yapılmalı; Realtime private-channel/RLS geçişi bu kanıt olmadan uygulanmamalı. |
-| Supabase şema/migrations | Ölçüm protokol migration'ı ve ölçüm SQL kontratı daha önce canlı katalog + izole PostgreSQL'de doğrulanmış; bu çalışma `realtime.messages` politikalarını salt-okunur sorguladı. | Canlı ölçüm/protokol katalog kontrolü bu turda yeniden koşulmadı. Advisor ayrıca `dg_archive.measurements_bak_0011` için politikasız RLS (arşiv tablosuna erişim kapalı), 4 imtiyazlı park davet RPC'si uyarısı ve kapalı sızmış-parola koruması bildirdi. RPC'ler admin/sahip/kimlik kapılarını içeriyor; advisor bulgusu tek başına yetki aşımı kanıtı değildir. |
-| Test/regresyon ve erişilebilirlik | `check:release` tamamen geçti; gerçek Chromium yerel smoke testleri ve klavye/axe kontrolleri dahil. | Manuel ekran okuyucu ve gerçek saha/cihaz kabulü otomatik testin kapsamı dışındadır. |
-| Map/GIS/export | Modül ve regresyon testleri, OSM kurtarma ve PNG/GeoJSON sözleşmeleri geçti. | Harici OSM/uydu kaynakları ve gerçek park başına canlı bilimsel doğruluk garanti edilemez; saha QA gerekir. |
-| Dokümantasyon/kaynak doğrusu | README UI checklist ve bu kabul tablosu güncel kanıt/sınırlamalarla eşlendi. | Bütün mimari teknik borcun sıfır olduğu iddia edilmez. |
+| # | Alan | 15 Ekim sonucu | Açık kalan kabul şartı |
+|---:|---|---|---|
+| 1 | Proje özeti ve veri kuralları | `girth_cm` ham alanı, `dbh_cm = girth_cm / π`, hassasiyet ve fingerprint mevcut; SQL/istemci kontratı testli. | Canlı saha girdisiyle ek kullanıcı kabulü yapılmadı. |
+| 2 | Paket/build/test/CI | `check:release` yerelde geçti; CI workflow kaynak ve telefon/erişilebilirlik kapılarına bağlı. | Bu push için GitHub Actions check sonucu connector'da görünmedi; remote CI doğrulanmış değil. |
+| 3 | Frontend dosya düzeni/modülerlik | Katman AST'si 802 modülü; dependency kapısı 938 modülü taradı; servis DOM/Supabase/ağ borcu 0. | 147 dinamik markup handler niteliği ve büyük legacy facade/controller dosyaları kaldı; “borçsuz” değil. |
+| 4 | Measurement entry | Form `girth_cm`, ayrı readonly `dbh_cm_display` kullanıyor; ondalık sunumun hesap verisini değiştirmediği testli. | Yok; tarayıcı form smoke testi geçti. |
+| 5 | Switch/checkbox | Kaynak checkbox'ları ortak native `.dg-switch`, label ve odak stiliyle taranıyor; klavye testi geçti. | Manuel ekran okuyucu kabulü yapılmadı. |
+| 6 | Range/slider | `.dg-range`, 44 px hedef ve 0/100 uçları mevcut; 360/390/430 px ve Home/End kontrolleri geçti. | Manuel dokunmatik cihaz testi yapılmadı. |
+| 7 | Tema/değişken/buton | Mevcut tema token/font hiyerarşisi korunuyor; otomatik erişilebilirlik taraması geçti. | Görsel tasarım sahibi kabulü alınmadı. |
+| 8 | Surface preview ve kaydedilmiş veri ayrımı | Opacity/preview testleri ham sınıf, alan ve kabul edilmiş snapshot değişmediğini kanıtlıyor. | Yok; davranış/regresyon kapısı geçti. |
+| 9 | Canlı konum ve gizlilik | Canlı Supabase sorgusunda `realtime.messages` için **0 RLS politikası**; iki Presence adapter'ında da `private: true` yok. | Yüksek öncelikli açık. Gerçek kurucu/normal kullanıcı/anonim istemciyle çapraz park okuma-yazma testi yapılmadan private-channel/RLS geçişi güvenle kabul edilemez. |
+| 10 | Surface analiz çekirdeği | Domain/application/adapter/UI ayrımı, bilimsel hash, worker/runtime ve kabul snapshot kapıları geçti. | Gerçek park bazında bilimsel saha QA'sı otomatik testin dışında. |
+| 11 | Supabase şema/migration | Ölçüm protokol migration'ı daha önce canlı katalog ve izole PostgreSQL'de doğrulanmış; bu turda prod veri yazılmadı. | Bu turda canlı protokol checksum'ı yeniden alınmadı. Advisor: yedek tabloda beklenen erişimsiz RLS, 4 güvenlik kapılı SECURITY DEFINER invite RPC uyarısı ve kapalı sızmış parola koruması. Auth ayarı dashboard işidir. |
+| 12 | Raporlama/yayın | Publish/DOI akışları `check:release` sonrasına bağlı; yerel release kapısı geçti. | Bu commit'e ait remote CI sonucu yok. |
+| 13 | Test/regresyon | `npm run check` geçti; PGlite migration kontratı ve regresyon grupları yeşil. | Remote CI ve canlı kullanıcı kabulü ayrı. |
+| 14 | Erişilebilirlik | 13 görünüm × 360/390/430 px; otomatik kurallar, klavye switch'i, görünür odak ve slider uçları geçti. | Manuel ekran okuyucu/uzman incelemesi yapılmadı. |
+| 15 | Map/GIS/export | Yerel OSM kurtarma, sınır/fırça/çizim smoke ve PNG/GeoJSON kontratları geçti. | Gerçek park başına OSM/uydu doğruluğu ve dış servis sürekliliği garanti edilemez; saha QA gerekir. |
+| 16 | Dokümantasyon/kaynak doğrusu | README UI checklist ve bu 16 maddelik kabul tablosu kaynak/test kanıtıyla eşlendi. | 3, 9, 11 ve 15. satırlardaki açıklar kapanmadan tüm mimari tamamen bitmiş sayılmaz. |
 
 Supabase Realtime yetkilendirmesi politika ve istemcide `private: true` birlikte gerektirir; ayar kapalıysa mevcut public channel istemcileri reddedilir. Realtime ayarı ve gerçek kullanıcı oturumları olmadan güvenli geçişi doğrulamak mümkün değildir. Resmî gereksinimler: [Realtime Authorization](https://supabase.com/docs/guides/realtime/authorization), [Realtime Settings](https://supabase.com/docs/guides/realtime/settings).
