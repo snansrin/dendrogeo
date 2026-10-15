@@ -2,7 +2,7 @@
 <div id="topnav"><div class="wrap">
 <span class="brand"><img class="brand-logo" src="logo.png" alt="DendroGeo">DendroGeo</span>
  <button type="button" class="navtoggle" id="navToggle" aria-expanded="false" aria-controls="navLinks" aria-label="Bölüm menüsü" data-dg-landing-action="nav-toggle">☰</button>
- <div class="links" id="navLinks"><a href="#sistem">Sistem</a><a href="#yontem">Yöntem</a><a href="#veri">Veri &amp; Harita</a><a href="#istatistik">İstatistik</a><a href="#bilgi-merkezi">Bilgi Merkezi &amp; Kaynaklar</a></div>
+ <div class="links" id="navLinks"><a href="#ozellikler">Yetenekler</a><a href="#sistem">Sistem</a><a href="#yontem">Yöntem</a><a href="#veri">Veri &amp; Harita</a><a href="#istatistik">İstatistik</a><a href="#bilgi-merkezi">Bilgi Merkezi &amp; Kaynaklar</a></div>
  <button type="button" class="btn sm ghost dg-lang-toggle" data-dg-landing-action="toggle-language" aria-label="EN · Switch to English">EN</button>
  <button type="button" class="btn sm" data-dg-landing-action="show-auth">Giriş / Kayıt</button>
 </div></div>
@@ -10,9 +10,9 @@
 <div class="hero"><div class="wrap">
  <div class="hero-grid">
   <div class="hero-copy">
-   <div class="kick"><span class="live-dot"></span>SAHADAN VERİTABANINA · BİLİMSEL KARBON ENVANTERİ</div>
-   <h1>Bir ağacın tahmini karbon stoğunu<br>saniyeler içinde hesaplayın.</h1>
-   <p class="lead">DendroGeo; sahadaki GPS konumunu, ağaç çapı ve boy ölçümünü, tür/grup bilgisini ve isteğe bağlı fotoğraf kalite kontrolünü tek bir veri akışında birleştirir. Ölçümden biyokütle ve karbon tahminine geçilir; onaylanan kayıtlar harita ve istatistik katmanlarında yayımlanır. Park analizinde 10 m arazi örtüsü verisi ayrı bir veri kaynağı olarak işlenir.</p>
+   <div class="kick"><span class="live-dot"></span>AĞAÇ ENVANTERİ · PARK ANALİZİ · BİLİMSEL VERİ</div>
+   <h1>Ağaçları ölçün, parkları mekânsal verilerle inceleyin.</h1>
+   <p class="lead">DendroGeo; sahadaki ağaç ölçümlerini, allometrik biyokütle ve karbon tahminlerini, park sınırlarını ve arazi örtüsü kanıtlarını ortak bir web GIS çalışma alanında yönetir. Her veri kaynağı ve kullanıcı düzeltmesi kendi kapsamı içinde değerlendirilir.</p>
    <div style="display:flex;gap:12px;flex-wrap:wrap;margin-top:28px">
     <a href="#sistem" class="btn">🔬 Sistemi Keşfet</a>
    <button class="btn ghost" data-dg-landing-action="show-auth" data-dg-auth-mode="reg">🌲 Hemen Başla</button>
@@ -165,6 +165,52 @@
   </div>
  </div>
 </div></div>
+<section class="landing-capability" id="ozellikler" aria-labelledby="landingCapabilityTitle">
+ <div class="wrap">
+  <div class="landing-capability-heading">
+   <div><span class="landing-capability-kicker">DENDROGEO · ÇALIŞMA AKIŞI</span><h2 id="landingCapabilityTitle">Ağaçtan parka, kanıta dayalı analiz</h2>
+    <p>Öne çıkan çalışma alanlarını yatay kaydırarak inceleyin. Kartlar, platformdaki ölçüm ve analiz adımlarını özetler.</p></div>
+   <a class="btn sm ghost" href="#bilgi-merkezi">Yöntem ve kaynakları inceleyin</a>
+  </div>
+  <nav class="landing-capability-tabs" aria-label="DendroGeo çalışma alanları">
+   <a href="#landing-capability-tree">01 · Ağaç ölçümü</a>
+   <a href="#landing-capability-park">02 · Park analizi</a>
+   <a href="#landing-capability-drawing">03 · Sınır çizimi</a>
+   <a href="#landing-capability-ndvi">04 · Göreli NDVI</a>
+  </nav>
+  <div class="landing-capability-track" aria-label="Yatay kaydırılabilir çalışma alanları">
+   <article class="landing-capability-slide" id="landing-capability-tree" tabindex="0" aria-label="Ağaç ölçümü ve karbon tahmini">
+    <div class="landing-capability-copy"><span class="landing-capability-index">01 / SAHA ENVANTERİ</span><h3>Ağaç ölçümü ve karbon tahmini</h3>
+     <p>GPS konumu ve doğruluk bilgisiyle saha kaydı oluşturun. 1,30 m'de ölçülen göğüs çevresi DBH çapına dönüştürülür; boy ve tür/grup bilgisiyle biyokütle ve karbon tahmini hesaplanır.</p>
+     <div class="landing-capability-note"><b>Ölçüm zinciri</b><span>Göğüs çevresi ÷ π → DBH → allometrik tahmin</span></div>
+    </div>
+    <div class="landing-capability-visual tree-visual" aria-hidden="true"><div class="tree-visual-canopy">🌳</div><div class="tree-visual-trunk"></div><div class="tree-visual-tape"><span>1,30 m · göğüs çevresi</span></div><div class="tree-visual-equation">C / π = DBH</div><div class="tree-visual-coordinate">⌖ GPS · saha kaydı</div></div>
+   </article>
+   <article class="landing-capability-slide" id="landing-capability-park" tabindex="0" aria-label="Park ölçeğinde yüzey analizi">
+    <div class="landing-capability-copy"><span class="landing-capability-index">02 / PARK ÖLÇEĞİ</span><h3>Park yüzey analizi</h3>
+     <p>Park poligonu içinde 10 m ESA WorldCover rasterını, uygun güncel Sentinel‑2 görüntülerini ve OSM geometrilerini ayrı kanıt kaynakları olarak inceleyin. Ham raster ile kabul edilmiş son yüzey özeti birbirinden ayrıdır.</p>
+     <div class="landing-capability-note"><b>Yüzey sınıfları</b><span>Yeşil alan · sert zemin · bina · su · çıplak zemin</span></div>
+    </div>
+    <div class="landing-capability-visual park-visual" aria-hidden="true"><div class="park-visual-map"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><b>Park poligonu</b></div><div class="park-visual-source">ESA WorldCover · 10 m</div><div class="park-visual-legend"><span>● Yeşil</span><span>● Sert zemin</span><span>● Su</span></div></div>
+   </article>
+   <article class="landing-capability-slide" id="landing-capability-drawing" tabindex="0" aria-label="Park sınırı çizimi ve düzenleme">
+    <div class="landing-capability-copy"><span class="landing-capability-index">03 / GEOMETRİ DÜZENLEME</span><h3>Park sınırı ve çizim motoru</h3>
+     <p>Harita üzerinde çokgen, dikdörtgen veya daire tabanlı sınır taslakları oluşturun; köşeleri düzenleyin ve park sınırı içindeki alanı inceleyin. Taslak, siz kabul edip kaydedene kadar önizleme olarak kalır.</p>
+     <div class="landing-capability-note"><b>Kontrollü iş akışı</b><span>Çizim · geometri kontrolü · park sınırına kırpma · kullanıcı kararı</span></div>
+    </div>
+    <div class="landing-capability-visual drawing-visual" aria-hidden="true"><svg viewBox="0 0 360 230" role="presentation"><path class="drawing-park" d="M31 42 306 26 331 166 249 205 43 181Z"/><path class="drawing-boundary" d="m82 78 88-23 87 27-20 72-108 14-57-39Z"/><g class="drawing-nodes"><circle cx="82" cy="78" r="6"/><circle cx="170" cy="55" r="6"/><circle cx="257" cy="82" r="6"/><circle cx="237" cy="154" r="6"/><circle cx="129" cy="168" r="6"/><circle cx="72" cy="129" r="6"/></g></svg><div class="drawing-visual-label">Park sınırı içinde düzenlenebilir geometri</div></div>
+   </article>
+   <article class="landing-capability-slide" id="landing-capability-ndvi" tabindex="0" aria-label="Park içi göreceli NDVI görünümü">
+    <div class="landing-capability-copy"><span class="landing-capability-index">04 / UYDU GÖRÜNÜMÜ</span><h3>Park içi göreceli NDVI</h3>
+     <p>Yeterli uydu gözlemi bulunan yeşil hücreleri aynı park içindeki NDVI dağılımına göre seyrek, orta ve yoğun sınıflarda görselleştirin. Bu görünüm bitki örtüsü yoğunluğu için göreceli bir göstergedir; taç örtüsü ölçümü veya ham arazi sınıfı değildir.</p>
+     <div class="landing-capability-note"><b>Yorum sınırı</b><span>Görselleştirme ve inceleme içindir; ham raster sınıfını ve alan hesabını değiştirmez.</span></div>
+    </div>
+    <div class="landing-capability-visual ndvi-visual" aria-hidden="true"><div class="ndvi-visual-title">Park içi göreli dağılım</div><div class="ndvi-visual-map"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div><div class="ndvi-visual-scale"><span>Seyrek</span><i></i><span>Yoğun</span></div><div class="ndvi-visual-source">NDVI · uygun uydu gözlemleri</div></div>
+   </article>
+  </div>
+  <p class="landing-capability-hint">Kartları kaydırın veya yukarıdaki bölüm adlarını seçin. Görselleştirmeler yöntem açıklamasıdır; parkınıza ait analiz sonucu değildir.</p>
+ </div>
+</section>
 <section class="blk" id="sistem"><div class="wrap">
  <div class="shead"><span class="no">01</span><h2>Sistemin Üç Temel Direği</h2><span class="rule"></span></div>
 <div class="cols cols-3">
