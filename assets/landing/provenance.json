@@ -56,7 +56,11 @@
       }
     ]
   },
-  "reportStatus": "unpublished-preview; no DGR identifier or DOI assigned",
+  "reportStatus": "interactive explanation of actual DGR production sections; not a published report",
+  "sceneData": {
+    "path": "assets/landing/goksu-scenes.json",
+    "sha256": "0b609daf9311342deec40869ba96f8265c756fa62abc51f742ad6a90c7cbb918"
+  },
   "images": [
     {
       "path": "assets/landing/goksu-map.jpg",
@@ -77,11 +81,6 @@
       "path": "assets/landing/goksu-ndvi.jpg",
       "sha256": "7af6f3524b84444817e04a2366c44fd188727e12e9612f85ded1e843ac8d6be9",
       "capturePage": "ornekler/goksu-parki/?view=ndvi"
-    },
-    {
-      "path": "assets/landing/goksu-report.jpg",
-      "sha256": "e71cd1bafe0c3a9d337da1c9213144e98b13ce7422ab09c3421fbc5c7bc4b75b",
-      "capturePage": "ornekler/goksu-parki/?view=report"
     }
   ]
 }

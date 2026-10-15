@@ -11,6 +11,8 @@
    current=Math.max(0,Math.min(panels.length-1,index));
    panels.forEach((panel,i)=>{panel.classList.toggle('is-active',i===current);panel.setAttribute('aria-hidden',String(i!==current));panel.inert=i!==current;});
    buttons.forEach((button,i)=>button.setAttribute('aria-pressed',String(i===current)));
+   if(root.CustomEvent)element.dispatchEvent?.(new root.CustomEvent('dg:showcase-change',{detail:{index:current}}));
+   const active=buttons[current],nav=active.parentElement;if(nav&&nav.scrollWidth>nav.clientWidth){const left=active.offsetLeft-nav.offsetLeft;if(left<nav.scrollLeft||left+active.offsetWidth>nav.scrollLeft+nav.clientWidth)nav.scrollTo({left:Math.max(0,left-nav.clientWidth/2+active.offsetWidth/2),behavior:'auto'});}
    if(status)status.textContent=String(current+1).padStart(2,'0')+' / '+String(panels.length).padStart(2,'0');
   }
   function go(index){const next=(index+panels.length)%panels.length;requested=next;update(next);track.scrollTo({left:next*track.clientWidth,behavior:root.matchMedia?.('(prefers-reduced-motion: reduce)').matches?'auto':'smooth'});}

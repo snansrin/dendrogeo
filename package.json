@@ -6,8 +6,8 @@
   "type": "module",
   "scripts": {
     "test": "node scripts/run-tests.mjs",
-    "build": "node scripts/sync-runtime-precache.mjs --write && node scripts/landing-evidence.mjs --write && node scripts/build-index.mjs --write",
-    "build:check": "node scripts/sync-runtime-precache.mjs --check && node scripts/landing-evidence.mjs --check && node scripts/build-index.mjs --check",
+    "build": "node scripts/sync-runtime-precache.mjs --write && node scripts/landing-scene-data.mjs --write && node scripts/landing-evidence.mjs --write && node scripts/build-index.mjs --write",
+    "build:check": "node scripts/sync-runtime-precache.mjs --check && node scripts/landing-scene-data.mjs --check && node scripts/landing-evidence.mjs --check && node scripts/build-index.mjs --check",
     "check:csp": "node scripts/check-csp.mjs",
     "check:syntax": "node scripts/check-syntax.mjs",
     "check:versions": "node scripts/version-sync.mjs --check",
