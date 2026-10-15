@@ -7091,6 +7091,50 @@
           "sha256": "f85c35e05035b6d5e4f3bf7cc8e8cf43a51b6e3418dac0bbb5569998dfbb6185"
         }
       ]
+    },
+    {
+      "date": "2026-10-15",
+      "scope": "User-authorized modularization: move review-record construction and scan-audit markup ownership entirely to their canonical domain/UI modules; preserve output and test module-backed consumers.",
+      "audit_chain": "sha256-v1",
+      "files": [
+        {
+          "path": "index.html",
+          "previous_sha256": "1108a5665d86e46318b33e870cc09223c332aa57039a7e3585ea461f0841978a",
+          "sha256": "40e5932a6bd5117e51da46a88f8c042276a79fe8de25b5624cc68b7a3090b2a2"
+        },
+        {
+          "path": "src/ui/lc-sens.js",
+          "previous_sha256": "c889215fe33749d715719fbf8823846b4a04a2a50aa09b8fccf4bd91ace7531c",
+          "sha256": "0ae789779899517fcb6d413ef0bac06e32a543626fa699b69931c90bfe82ef39"
+        },
+        {
+          "path": "test/surface-review.test.mjs",
+          "previous_sha256": "a7642af8acbe29852b65963a1b3d24c3e65692cb3fddb664b768b91454f42a7d",
+          "sha256": "e19186c334471ee25f2f72d5ba89b29085cc7c44b2c9cb36866d2c29448bc538"
+        },
+        {
+          "path": "test/verified-water-footprint.test.mjs",
+          "previous_sha256": "f85c35e05035b6d5e4f3bf7cc8e8cf43a51b6e3418dac0bbb5569998dfbb6185",
+          "sha256": "9afccd88a1868ba7583e53594230e6ccb226c5a7a564ecc7146ac38e55e1ba1a"
+        }
+      ]
+    },
+    {
+      "date": "2026-10-15",
+      "scope": "User-authorized modularization: update scientific and persistence regression locks to assert canonical surface-record ownership after removing the UI construction fallback.",
+      "audit_chain": "sha256-v1",
+      "files": [
+        {
+          "path": "test/lc-validate.test.mjs",
+          "previous_sha256": "d7696fbfc643b0a6e782a9cb29de0f8c7581c9bcc9b86e5be3771650e4468df3",
+          "sha256": "7f4011bf852198674b2924066e07570d66e6903fdece516f3bb2a546fb876efa"
+        },
+        {
+          "path": "test/surface-scientific-contract.test.mjs",
+          "previous_sha256": "2ce6d55ad171284c1b199b64b4ddaa8fc288b6403fda411d3f2fdf2b9461ddd2",
+          "sha256": "a62bea43a14142cb246596466b6cc79eb97bd87482a6fb3c9ac446c162c68155"
+        }
+      ]
     }
   ]
 }

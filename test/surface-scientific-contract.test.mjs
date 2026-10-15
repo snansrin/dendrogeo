@@ -86,7 +86,7 @@ test('spectral thresholds and sensitivity bar slopes match recorded analysis con
   NDVI_BARE_MAX:m.bare_thresholds.ndvi_max
  })) assert.equal(obj[prop],v,prop);
  assert.deepEqual(literal(validate,'DG_VAL_SENS_K'),m.slider_coefficients);
- assert.match(review,/sens:\{green:50,water:50,hard:50,bare:50\}/);
+ assert.match(load('src/domain/surface/create-surface-review-record.js'),/sens:\{green:50,water:50,hard:50,bare:50\}/);
  assert.match(review,/function dgSensResetScanState\(rec\).*rec\.sens=\{green:50,water:50,hard:50,bare:50\}/);
 });
 test('water identity, automatic first analysis, failure behavior and uncertainty guard',()=>{

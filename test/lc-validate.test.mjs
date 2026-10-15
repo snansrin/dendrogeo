@@ -727,11 +727,13 @@ describe('entegrasyon zinciri kilitleri (0054 · lc-sens)', () => {
   });
 
   test('kalıcılık sözleşmesi: hesap ve park başına kayıt + profil önbelleği', () => {
-    assert.match(sens, /id:"surface-"\+\(owner\|\|"guest"\)\+"-"\+\(pk\.id\|\|"x"\)/);
+    const record = readFileSync(new URL('../src/domain/surface/create-surface-review-record.js', import.meta.url), 'utf8');
+    assert.match(sens, /DG_CREATE_SURFACE_REVIEW_RECORD\.create/);
+    assert.match(record, /id:"surface-"\+\(owner\|\|"guest"\)\+"-"\+\(park\.id\|\|"x"\)/);
     assert.match(sens, /dgSensSave\(\)/);
     assert.match(sens, /loadCampaigns/);
     assert.match(sens, /rec\.profile=profile/);
-    assert.match(sens, /analysisEngine:"esa-raster-manual-v1"/);
+    assert.match(record, /analysisEngine:"esa-raster-manual-v1"/);
   });
 });
 

@@ -31,12 +31,7 @@ function dgSensScanAudit(rec=DG_SENS.record){
  return window.DG_CLASSIFY_SURFACE_SCAN_AUDIT.build({cells:dgSensCells()||[],profile:rec?.profile,classes:DG_SENS_CLASSES,cellKey:dgSensCellKey,spectralPredict:(e,s)=>window.DG_LC_VALIDATE.spectralPredict(e,s)});
 }
 function dgSensScanAuditHtml(rec=DG_SENS.record){
- const module=window.DG_RENDER_SURFACE_SCAN_AUDIT;if(module)return module.render({audit:dgSensScanAudit(rec),translate:_tvs,escape:esc,meta:dgSensMeta,hectares:dgSensHa,sectionsOpen:DG_SENS.sections?.dgSensEvidenceDetails});
- const a=dgSensScanAudit(rec);if(!a)return"";
- const dates=a.scenes.map(s=>s.datetime).filter(Boolean),from=dates[0]?.slice(0,10)||a.range?.start||"—",to=dates.at(-1)?.slice(0,10)||a.range?.end||"—";
- const transitions=a.transitions.length?a.transitions.slice(0,8).map(x=>`<li>${esc(_tvs(dgSensMeta(x.from).tr))} → ${esc(_tvs(dgSensMeta(x.to).tr))}: ${x.cells} ${esc(_tvs("hücre"))} · ${dgSensHa(x.areaM2)} ha</li>`).join(""):`<li>${esc(_tvs("Yeterli verili hücrelerde sınıf farkı görülmedi."))}</li>`;
- const agreement=a.usable?`%${(100*a.matched/a.usable).toFixed(1)}`:"—";
- return `<details id="dgSensEvidenceDetails" class="dg-sens-details dg-sens-evidence" data-dg-toggle="rememberSection" ${DG_SENS.sections?.dgSensEvidenceDetails===false?"":"open"}><summary>${esc(_tvs("Uydu tarama analizi"))}<span class="dg-paint-chevron" aria-hidden="true">⌄</span></summary><div class="dg-sens-evidence-body"><p><b>Sentinel‑2 L2A · ${esc(from)} – ${esc(to)}</b> · ${a.scenes.length} ${esc(_tvs("kullanılan sahne"))}${a.skipped?` · ${a.skipped} ${esc(_tvs("atlanan sahne"))}`:""}</p><p>${esc(_tvs("Analiz kapsamı"))}: ${a.profiled} / ${a.total} ${esc(_tvs("hücrede yeterli gözlem"))} · ${a.usable} ${esc(_tvs("karşılaştırılabilir tahmin"))} · ${a.ambiguous} ${esc(_tvs("belirsiz"))} · ${a.missing} ${esc(_tvs("yetersiz/verisiz"))}</p><p>${esc(_tvs("2021 ham sınıfıyla spektral eşleşme"))}: ${agreement} (${a.matched}/${a.usable})</p><p><b>${esc(_tvs("Fark görülen sınıflar"))}</b></p><ul>${transitions}</ul><p class="dg-sens-hint">${esc(_tvs("Bu eşleşme bağımsız doğruluk ölçümü değildir: uydu indeksi, ham 2021 sınıfıyla karşılaştırılır. Tarama sınıfları otomatik değiştirmez; harita sınıfı için sınır/hücre düzeltmesini inceleyip Kabul et ve kaydet kullanın."))}</p></div></details>`;
+ return window.DG_RENDER_SURFACE_SCAN_AUDIT.render({audit:dgSensScanAudit(rec),translate:_tvs,escape:esc,meta:dgSensMeta,hectares:dgSensHa,sectionsOpen:DG_SENS.sections?.dgSensEvidenceDetails});
 }
 /* Park-relative NDVI terciles describe spectral greenness within the mapped
  * green class. They are a display aid, not canopy cover, a new raster class,
@@ -64,7 +59,7 @@ async function dgSensRenderVegetation(){
  finally{DG_SENS.vegetationRenderBusy=false;if(DG_SENS.vegetationView&&DG_SENS.geometry&&key!==[DG_SENS.epoch,DG_SENS.partitionVersion,DG_SENS.visualVersion,dgSensVegetationTiers().count,DG_SENS.vegetationView].join(":"))setTimeout(dgSensRenderVegetation,0);}
 }
 function dgSensHa(a){return(Number(a||0)/10000).toFixed(3);}
-function dgSensNewRecord(){const pk=dgSensParkId(),owner=typeof USER!=="undefined"?USER?.id:null,module=window.DG_CREATE_SURFACE_REVIEW_RECORD;if(module)return module.create({park:pk,owner,createdAt:new Date().toISOString()});return{id:"surface-"+(owner||"guest")+"-"+(pk.id||"x"),owner,parkId:pk.id,parkName:pk.name,sens:{green:50,water:50,hard:50,bare:50},corrections:{},features:[],useObjects:true,spectralEnabled:false,analysisEngine:"esa-raster-manual-v1",profile:null,period:"ytd",createdAt:new Date().toISOString()};}
+function dgSensNewRecord(){const pk=dgSensParkId(),owner=typeof USER!=="undefined"?USER?.id:null;return window.DG_CREATE_SURFACE_REVIEW_RECORD.create({park:pk,owner,createdAt:new Date().toISOString()});}
 function dgSensResetScanState(rec){if(!rec)return;rec.sens={green:50,water:50,hard:50,bare:50};rec.spectralEnabled=false;rec.profile=null;if(rec.period==="latest"&&!rec.periodExplicit)rec.period="ytd";}
 function dgSensMigrateOsmObjects(rec){if(!rec)return false;const stale=(!!rec.objectVersion&&rec.objectVersion!=="footprints-v5-osm-all")||((rec.objectFeatures||[]).length>0&&rec.objectVersion!=="footprints-v5-osm-all");if(!stale)return false;rec.objectFeatures=null;rec.objectVersion=null;rec.draftDirty=true;return true;}
 async function dgSensLoadRecord(){
