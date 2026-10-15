@@ -7037,6 +7037,33 @@
           "sha256": "df69315b07ccc45a2ee9c40492c44d8ce769e58b00fd5c5067f834277bce051b"
         }
       ]
+    },
+    {
+      "date": "2026-10-15",
+      "scope": "User-authorized modularization: centralize verified water-footprint gating, residual raster-water selection and scan requirements in domain modules; retain output and validate water-area workflows.",
+      "audit_chain": "sha256-v1",
+      "files": [
+        {
+          "path": "index.html",
+          "previous_sha256": "df69315b07ccc45a2ee9c40492c44d8ce769e58b00fd5c5067f834277bce051b",
+          "sha256": "bf727ad98d130a92a147b437932f654dcbf59edf6005c7ce81af8791a10a679b"
+        },
+        {
+          "path": "src/ui/lc-sens.js",
+          "previous_sha256": "6f2283211abc8ebd86ef4c427fd3565e38deeade4e59d0eaa1565a6d4cf2c8f3",
+          "sha256": "afe12952bd71e1e163c928b74babbfdb59eceb84a9c7fafd07e238d770dcb9c2"
+        },
+        {
+          "path": "test/surface-review.test.mjs",
+          "previous_sha256": "c8c15a75cf4ec9ba78f940d031618edbd6d7d39da4ac80e0c95d9da1d8e3d22f",
+          "sha256": "2555b926546893bb0e926e8c8d795947ef5b4532a49bdb017c735ff5a5251800"
+        },
+        {
+          "path": "test/verified-water-footprint.test.mjs",
+          "previous_sha256": "034f1fc60ee1b92db55e5afc820eb8910de9004545dba900ba6e465822c3dbd1",
+          "sha256": "375c851add5de56ffef5b1c70e75d13aa0bb5687c544f609212442a7720beaec"
+        }
+      ]
     }
   ]
 }
