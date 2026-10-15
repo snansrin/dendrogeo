@@ -117,3 +117,34 @@ body.dg-page{background:var(--bg);color:var(--ink);font:15px/1.65 var(--f-ui)}
 .dg-profile-card{margin-bottom:22px}.dg-profile-heading{display:flex;gap:16px;align-items:center}.dg-profile-avatar{display:grid;place-items:center;width:64px;height:64px;flex-shrink:0;border-radius:50%;background:var(--green);color:white;font-size:1.4rem}.dg-profile-fields{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;margin:16px 0}.dg-profile-fields label{min-width:0;display:block}.dg-profile-fields input,.dg-profile-fields textarea,.dg-profile-fields select{display:block;width:100%;margin-top:6px}.dg-publication-dialog{max-width:740px;width:calc(100% - 24px);max-height:90dvh;overflow:auto;margin:auto;color:var(--ink);background:var(--bg)}.dg-publication-dialog::backdrop{background:rgba(0,0,0,.5)}.dg-publication-dialog h2{margin-bottom:12px}@media(max-width:600px){.dg-profile-fields{grid-template-columns:1fr}.dg-profile-heading{align-items:flex-start}.dg-profile-heading h2{overflow-wrap:anywhere}}
 
 .dg-profile-fields textarea{background:var(--surface);border:1px solid var(--line);border-radius:10px;color:var(--ink);padding:11px 12px;font:inherit;resize:vertical}.dg-profile-fields textarea:focus{outline:2px solid var(--green);border-color:var(--green)}
+
+/* Shared disclosure affordance. Native details retains keyboard and touch behaviour. */
+#shell #main .view details>summary{
+ display:flex;align-items:center;gap:10px;min-height:44px;
+ list-style:none;cursor:pointer;font-family:var(--f-ui);color:var(--green);
+ border-radius:8px;overflow-wrap:anywhere;
+ transition:background-color .15s,color .15s;
+}
+#shell #main .view details>summary::-webkit-details-marker{display:none}
+#shell #main .view details>summary::marker{content:""}
+#shell #main .view details>summary::before{content:none}
+#shell #main .view details>summary::after{
+ content:"";display:block;flex:0 0 7px;width:7px;height:7px;margin-left:auto;
+ border:0;border-right:2px solid currentColor;border-bottom:2px solid currentColor;
+ background:none;order:99;transform:rotate(45deg);transition:transform .15s;
+}
+#shell #main .view details[open]>summary::after{transform:rotate(225deg)}
+#shell #main .view details>summary:hover{background-color:var(--tint)}
+#shell #main .view details>summary .dg-editor-menu-chevron,
+#shell #main .view details>summary .dg-paint-chevron,
+#parkAdminBox .dg-parkadmin-actions>summary>span[aria-hidden="true"]{display:none}
+#shell :is(button,[role="button"],summary,a,input,select,textarea):focus-visible{
+ outline:2px solid var(--green);outline-offset:3px;
+}
+#shell :is(button,[role="button"]):disabled{cursor:not-allowed;opacity:.45;transform:none}
+#shell :is(.btn,.dg-png-btn){font-family:var(--f-ui);min-height:44px;line-height:1.4;white-space:normal}
+#shell button.dg-field-help{width:44px;height:44px;flex:0 0 44px;color:var(--green);border-color:var(--line);background:var(--tint)}
+#shell :is(.btn,.dg-png-btn):active{transform:translateY(0);box-shadow:none}
+@media(prefers-reduced-motion:reduce){
+ #shell #main .view details>summary,#shell #main .view details>summary::after{transition:none}
+}

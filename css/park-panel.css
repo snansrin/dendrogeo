@@ -237,19 +237,20 @@
 }
 
 .dg-png-btn.primary{
-  background:linear-gradient(180deg, #16a34a, #15803d);
+  background:var(--green);
   color:#fff;
 }
+.dg-png-btn.primary:hover{background:var(--green-dk)}
 
 .dg-png-btn.blue{
-  background:linear-gradient(180deg, #3b82f6, #1d4ed8);
+  background:var(--blue);
   color:#fff;
 }
 
 .dg-png-btn.ghost{
   background:transparent;
-  color:inherit;
-  border-color:var(--line);
+  color:var(--green);
+  border-color:var(--green);
 }
 
 .dg-png-btn.ghost:hover{
@@ -257,7 +258,7 @@
 }
 
 .dg-png-btn.red{
-  background:linear-gradient(180deg, #ef4444, #b91c1c);
+  background:var(--red);
   color:#fff;
 }
 
@@ -503,7 +504,7 @@
 .dg-editor-menu[open]>summary,.dg-editor-menu>summary:hover{background:var(--tint);color:var(--green-dk)}
 .dg-editor-menu-body{position:absolute;top:100%;left:0;z-index:1101;box-sizing:border-box;width:min(430px,100%);max-height:min(58vh,520px);overflow:auto;padding:12px;background:var(--surface);border:1px solid var(--line);border-radius:8px;box-shadow:0 10px 24px #18242024;color:var(--ink);font-size:.78rem}
 .dg-editor-menu-body .dg-sens-actions{display:flex;flex-direction:column;gap:4px;margin:8px 0}
-.dg-editor-menu-body .dg-png-btn{width:100%;min-height:40px;justify-content:flex-start;text-align:left;font-size:.76rem}
+.dg-editor-menu-body .dg-png-btn{width:100%;min-height:44px;justify-content:flex-start;text-align:left;font-size:.76rem}
 .dg-editor-menu-body .dg-sens-hint{font-size:.72rem;margin:8px 0;line-height:1.5}
 .dg-editor-menu-body select{display:block;box-sizing:border-box;width:100%;min-height:42px;margin:4px 0 12px;padding:6px;border:1px solid var(--line);border-radius:5px;background:var(--bg);color:var(--ink);font:inherit}
 .dg-editor-menu-body .measure-share{font-size:.76rem;line-height:1.5}
@@ -569,7 +570,7 @@
 #surfaceMenuBar .dg-editor-menu-section-label{display:block;margin:0 0 7px;color:var(--mut);font-size:.64rem;font-weight:700;letter-spacing:.07em}
 #surfaceMenuBar .dg-editor-action-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px}
 #surfaceMenuBar .dg-editor-action-grid .dg-png-btn{width:100%;min-height:44px;justify-content:flex-start;text-align:left}
-#surfaceMenuBar .dg-editor-menu-danger .dg-png-btn{width:100%;min-height:42px}
+#surfaceMenuBar .dg-editor-menu-danger .dg-png-btn{width:100%;min-height:44px}
 #surfaceMenuBar .dg-editor-wide-action{width:100%;justify-content:flex-start;text-align:left}
 #surfaceMenuBar .dg-sens-map-tools{margin:0;align-items:center}
 #surfaceMenuBar .dg-sens-map-tools label{flex:0 0 auto;color:var(--mut);font-size:.72rem;font-weight:600}
@@ -578,7 +579,7 @@
 #surfaceMenuBar .dg-editor-menu-body .dg-png-title{font-size:.9rem}
 #surfaceMenuBar .dg-editor-menu-body .dg-png-sub{font-size:.72rem;line-height:1.5}
 #surfaceMenuBar .dg-editor-menu-body .dg-png-label{margin:10px 0 5px;font-size:.68rem;font-weight:700;letter-spacing:.035em}
-#surfaceMenuBar .dg-editor-menu-body .dg-png-btn{min-height:42px;border-radius:6px;padding:9px 11px}
+#surfaceMenuBar .dg-editor-menu-body .dg-png-btn{min-height:44px;border-radius:6px;padding:9px 11px}
 #surfaceMenuBar .dg-editor-file .dg-sens-actions{gap:5px;margin:0}
 #surfaceMenuBar .dg-editor-file .dg-png-btn.red{margin-top:9px;border-top:1px solid var(--line)}
 .dg-editor-menu-shell .dg-editor-status{display:flex;align-items:center;min-height:30px;padding:5px 12px;background:var(--bg);border-radius:0 0 8px 8px;line-height:1.5}

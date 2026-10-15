@@ -457,7 +457,7 @@
     font-size:.7rem;line-height:1.45;
   }
   #v-map #parkInfo #parkSurfaceAction{
-    flex-direction:column;align-items:stretch;gap:8px;
+    flex-direction:column;flex-wrap:nowrap;align-items:stretch;gap:8px;
   }
   #v-map #parkInfo #parkSurfaceAction>.dg-png-head{
     flex:0 1 auto;width:100%;
@@ -668,6 +668,7 @@
     max-width:100%;white-space:normal;overflow-wrap:anywhere;
   }
   #v-map #parkInfo #parkSurfaceAction .dg-png-sub{font-size:.71rem;line-height:1.55}
+  #v-map #parkInfo #parkSurfaceAction>.dg-png-sub:last-child{flex:0 1 auto}
   #v-map #liveAnalysis .dg-ux-species-row{padding:9px 7px}
   #v-map #liveAnalysis .dg-ux-group-summary{gap:4px 10px}
 }
@@ -924,14 +925,7 @@
   list-style:none;
 }
 #v-map #liveAnalysis details.dg-ux-species-collapse>summary::-webkit-details-marker{display:none}
-#v-map #liveAnalysis details.dg-ux-species-collapse>summary:after{
-  content:"⌄";
-  margin-left:12px;
-  font-size:1.1rem;
-  color:var(--mut);
-  transition:transform .15s;
-}
-#v-map #liveAnalysis details.dg-ux-species-collapse[open]>summary:after{transform:rotate(180deg)}
+/* Disclosure arrow is owned by ui-standard.css, like every other app section. */
 #v-map #liveAnalysis details.dg-ux-species-collapse>summary:focus-visible{
   outline:2px solid var(--green);outline-offset:-2px;
 }

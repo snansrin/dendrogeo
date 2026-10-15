@@ -15,7 +15,7 @@ export async function isolateAccount(page,authenticated=true){
  await page.addInitScript(value=>{window.__dgAnonymous=!value;},authenticated);
  await page.route('**/vendor/supabase-js-2.116.0.js',route=>route.fulfill({contentType:'text/javascript',body:`window.supabase={createClient(){
  const session=window.__dgAnonymous?null:{user:{id:'acceptance-fixture',email:'fixture@example.test'},access_token:'fixture'};
- const query=table=>{let chain;chain=new Proxy({}, {get(_target,key){if(key==='then')return resolve=>resolve({data:table==='profiles'?{full_name:'Test',role:'user'}:[],error:null,count:0});return()=>chain;}});return chain;};
+ const query=table=>{let chain,singular=false;chain=new Proxy({}, {get(_target,key){if(key==='then')return resolve=>resolve({data:table==='profiles'&&singular?{full_name:'Test',role:'user'}:[],error:null,count:0});return()=>{if(key==='single'||key==='maybeSingle')singular=true;return chain;};}});return chain;};
  const channel={on(){return this;},subscribe(){return this;},track:async()=>{},unsubscribe:async()=>{},presenceState:()=>({})};
  return{auth:{getSession:async()=>({data:{session}}),onAuthStateChange(callback){setTimeout(()=>callback('INITIAL_SESSION',session),0);return{data:{subscription:{unsubscribe(){}}}};}},from:query,rpc:()=>query('rpc'),channel:()=>channel,removeChannel:async()=>{},realtime:{setAuth:async()=>{}}};
  }};`}));
