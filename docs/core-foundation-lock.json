@@ -8022,6 +8022,64 @@
           "sha256": "044084ae0db5d337aedae1c71f5f0ac5af056d87cee68a216618080070f6ebad"
         }
       ]
+    },
+    {
+      "id": "personal-panel-appearance-2026-10-16",
+      "date": "2026-10-16",
+      "scope": "User-authorized modularization: personal profile/settings panel, removal of panel scientific report wording, device-local light/dark/system appearance using domain/adapter/UI modules, eager theme startup and browser regression coverage. Profile save toast expectation follows the requested wording. Scientific calculations, map data, accepted geometry and published DOI artifacts are unchanged.",
+      "audit_chain": "sha256-v1",
+      "files": [
+        {
+          "path": ".github/workflows/mobile-smoke.yml",
+          "previous_sha256": "52a85fb988ceb0a5b5f02af6176830c713e331d69bcc2b4383e67e66dca696bc",
+          "sha256": "2fcbe2ebc1f55c5b8c4023f23ed99a9e534f93ef1c645b3ff7e6a18301f49e6c"
+        },
+        {
+          "path": "index.html",
+          "previous_sha256": "8af8aa468db8fb54bd62cc4a128a9d44905636fef084895e86713605c0878235",
+          "sha256": "ef217ad0adcefa64f6d3cd8a33c358cd9bf3a7b525aca856e89c5cf61744f611"
+        },
+        {
+          "path": "partials/head.html",
+          "previous_sha256": "16001b65c34a76344535fe2d22bee5008b443f226f27284892bc5993ca3975ee",
+          "sha256": "8dec8807db0c939cefe102fcac2f204b137055434e540d6d125e21dea2526d0e"
+        },
+        {
+          "path": "partials/shell.html",
+          "previous_sha256": "972d41ba3bd4c9ccaba976d5eb6c703e380733a50f13ef3123ba063efadbd06e",
+          "sha256": "97014541d8417efe950531d355721a908f55034f8bfb448a122e18537094478b"
+        },
+        {
+          "path": "scripts/check-phone.mjs",
+          "previous_sha256": "097aed9c7f214346fdbfff867728b989538d5080b0e3497484e07017dac6391f",
+          "sha256": "e01d6e739dda5d8dcbd84274cb9e9eff475fa1045060e26a8f0f10ec95241fad"
+        },
+        {
+          "path": "scripts/startup-smoke.mjs",
+          "previous_sha256": "4495d5c818ecc09ade0ae33c0247f91265cef09ceb968fd68b524d5b34d7c7c2",
+          "sha256": "71fbb7cb7372d24f0a519e6d92a3349fc61f579f02d1ce4d4069636b766498c4"
+        },
+        {
+          "path": "src/ui/save-academic-profile.js",
+          "previous_sha256": "5cd1ba858cd289795d744c32bd0963e2a5cdb01bf183b7f3e2e2c83b3695f05c",
+          "sha256": "7df0d2df8b1f17ad5ab3b2652c4084f8a4d345cc6d94d61c50b0348c8e3065c8"
+        },
+        {
+          "path": "sw.js",
+          "previous_sha256": "e138c02b5901f1f564ecd387d4619a568614bf20772451304e8c3cb0e0cbfefb",
+          "sha256": "1270cb07ff4cc17589128dc8a8ebc138417e040e8f01ffe0dc38da5554c00265"
+        },
+        {
+          "path": "test/academic-profile-modules.test.mjs",
+          "previous_sha256": "4d0cc2d2d1a56554fc7c399a5af91637ecc7a68e45e8ef7f367d6b253c1b965b",
+          "sha256": "4df61f8106779276d76ff7956a6dc3c8caed6b9359db88e7d4e5ff5a0a3656a8"
+        },
+        {
+          "path": "test/ui-audit.test.mjs",
+          "previous_sha256": "106ae2d5510454f100541b96fc7a56031b80831ac11a79d39e19f3f026031e29",
+          "sha256": "efc906b24063bae87e532ad074424e0e33890f6f17f52a529e6cfd79cc187d19"
+        }
+      ]
     }
   ]
 }

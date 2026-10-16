@@ -23,10 +23,11 @@ test('published index downloads one app package and retains original module orde
  const html=readFileSync(new URL('../index.html',import.meta.url),'utf8');
  const tags=[...html.matchAll(/<script\s+src="([^"]+)"([^>]*)>/g)];
  const executable=tags.filter(tag=>!tag[2].includes('application/x-dendrogeo-module'));
- assert.equal(executable.length,4);assert.equal(executable.filter(tag=>tag[1].includes('app-runtime.js')).length,1);
+ const eager=executable.filter(tag=>tag[2].includes('data-dg-eager'));
+ assert.equal(eager.length,3);assert.equal(executable.length,4+eager.length);assert.equal(executable.filter(tag=>tag[1].includes('app-runtime.js')).length,1);
  const modules=tags.filter(tag=>tag[2].includes('application/x-dendrogeo-module'));
  assert.ok(modules.length>600);
  const inputs=['head','landing','shell','boot'].map(name=>readFileSync(new URL('../partials/'+name+'.html',import.meta.url),'utf8')).join('');
- const expected=[...inputs.matchAll(/<script\s+src="(src\/[^"?]+)[^>]*>/g)].map(tag=>tag[1]);
+ const expected=[...inputs.matchAll(/<script\s+src="(src\/[^"?]+)([^>]*)>/g)].filter(tag=>!tag[2].includes('data-dg-eager')).map(tag=>tag[1]);
  assert.deepEqual(modules.map(tag=>tag[1].split('?')[0]),expected);
 });

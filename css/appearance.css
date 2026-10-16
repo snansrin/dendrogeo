@@ -1,0 +1,44 @@
+/* Presentation tokens only. Raster classes, map tiles and exported reports retain their colours. */
+html[data-theme="dark"]{
+ --bg:#121b17;--surface:#1b2821;--ink:#e9f1eb;--mut:#b1c1b7;--line:#405247;
+ --green:#91d8ad;--green-dk:#bde9cd;--tint:#243e30;--amber:#e1a355;--amber-ink:#f5c58d;
+ --amber-tint:#3c3020;--red:#ffb3a6;--blue:#a4ccff;--sh:0 1px 3px #0003,0 10px 28px #0002;
+ --dg-action:#1e6f4b;--dg-action-hover:#145b3b;
+}
+html[data-theme="dark"] :is(#apptop,#topnav){background:color-mix(in srgb,var(--bg) 95%,transparent)}
+html[data-theme="dark"] #side{background:var(--surface)}
+html[data-theme="dark"] :is(input:not(.dg-switch):not([type="range"]),select,textarea,.gpsring){background:var(--surface);color:var(--ink)}
+html[data-theme="dark"] input::placeholder{color:var(--mut);opacity:1}
+html[data-theme="dark"] .btn:not(.ghost):not(.red):not(.blue):not(.amber),
+html[data-theme="dark"] :is(.dg-png-btn.primary,#side .item.on,.dg-profile-avatar){background:var(--dg-action);color:#fff}
+html[data-theme="dark"] .btn:not(.ghost):not(.red):not(.blue):not(.amber):hover{background:var(--dg-action-hover)}
+html[data-theme="dark"] .btn.red{background:#943a2a;color:#fff}
+html[data-theme="dark"] .btn.blue{background:#245b93;color:#fff}
+html[data-theme="dark"] .btn.amber{background:#885000;color:#fff}
+html[data-theme="dark"] :is(.btn.ghost,.dg-png-btn:not(.primary)){background:transparent;color:var(--green);border-color:var(--line)}
+html[data-theme="dark"] .btn.ghost:hover{background:var(--tint)}
+html[data-theme="dark"] .dg-png-badge.blue{color:var(--blue)}
+html[data-theme="dark"] .dg-png-badge.amber{color:var(--amber-ink)}
+html[data-theme="dark"] .dg-png-btn.danger{color:var(--red)}
+html[data-theme="dark"] :is(.alert.info,.alert.err,.alert.warn){background:var(--surface);color:var(--ink)}
+html[data-theme="dark"] .alert.ok{background:var(--tint);color:var(--green-dk)}
+html[data-theme="dark"] :is(.badge.off,.dg-google){background:var(--surface);color:var(--ink)}
+html[data-theme="dark"] :is(.leaflet-popup-content-wrapper,.leaflet-popup-tip,.leaflet-control-layers){background:var(--surface);color:var(--ink)}
+html[data-theme="dark"] :is(.leaflet-bar a,.leaflet-container .leaflet-control-attribution){background:var(--surface);color:var(--ink)}
+html[data-theme="dark"] .leaflet-control-attribution a{color:var(--blue)}
+html[data-theme="dark"] #shell [style*="background:#fff"]{background:var(--surface)!important}
+html[data-theme="dark"] :is(.dg-showcase-media figcaption,.dg-showcase-media>a){background:var(--surface)}
+html[data-theme="dark"] :is(.dg-scene-controls .btn[aria-pressed="true"]){background:var(--dg-action);color:#fff}
+html[data-theme="dark"] :is(footer,.credit){background:#132e20}
+html[data-theme="dark"] .dg-field-help::after{background:var(--surface);color:var(--ink)}
+html[data-theme="dark"] :is(.dg-report-page,.hero-art){--ink:#182420;--mut:#5f6d65;--green:#1e6f4b;--green-dk:#14532d;color:var(--ink)}
+#dgStartupScreen{background:var(--bg);color:var(--green-dk)}
+#dgStartupScreen p{color:var(--mut)}
+.dg-personal-setting{display:flex;gap:12px;align-items:center;min-height:48px;cursor:pointer;width:100%}
+.dg-personal-setting>span{display:grid;gap:3px;font-weight:700}
+.dg-personal-setting small{font-size:.75rem;color:var(--mut);font-weight:400}
+.dg-personal-account{display:grid;gap:6px;min-width:0}
+.dg-personal-account a{overflow-wrap:anywhere}
+[data-personal-summary]{margin-top:18px}
+[data-personal-summary]>summary{margin-bottom:16px}
+@media print{html[data-theme="dark"]{--bg:#fff;--surface:#fff;--ink:#182420;--mut:#5f6d65;--line:#e6e3d9;--green:#1e6f4b;--green-dk:#14532d;--tint:#eaf3ec}}

@@ -102,7 +102,7 @@ test('profil kaydetme doğrulama, başarı ve hata durumlarını portlara aktar�
 
   ports.orcidValid = () => true;
   await modules.DG_SAVE_ACADEMIC_PROFILE.execute(event, ports);
-  assert.deepEqual(calls.slice(-3), [{ id: 'u2' }, 'render', ['Akademik profiliniz hesabınıza kaydedildi.', 'ok', '👤']]);
+  assert.deepEqual(calls.slice(-3), [{ id: 'u2' }, 'render', ['Profiliniz hesabınıza kaydedildi.', 'ok', '👤']]);
   assert.equal(savedStatus.textContent, 'Profil hesabınıza kaydedildi.');
   assert.equal(button.disabled, false);
 

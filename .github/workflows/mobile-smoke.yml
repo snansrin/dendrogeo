@@ -43,4 +43,5 @@ jobs:
           DG_UI_BROWSER: webkit
         run: |
           node scripts/profile-smoke.mjs
+          node scripts/appearance-smoke.mjs
           node scripts/ui-consistency-smoke.mjs

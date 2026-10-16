@@ -41,7 +41,7 @@ try{
   assert.equal(state.view,'v-dash');assert.equal(state.cover,true);assert.equal(state.scroll,0);
   assert.equal(state.file,false);assert.ok(state.width<=state.viewport);assert.equal(tiles.length,0);
   assert.deepEqual(errors,[]);
-  assert.deepEqual(appScripts,['/src/bootstrap/app-runtime.js','/src/services/field-ux.js']);
+  assert.deepEqual(appScripts,['/src/domain/settings/appearance-policy.js','/src/adapters/settings/appearance-preference.js','/src/ui/appearance.js','/src/bootstrap/app-runtime.js','/src/services/field-ux.js']);
   if(mode==='oauth')assert.equal(new URL(page.url()).search,'');
   const elapsed=Date.now()-started;
   const startup=await page.evaluate(()=>{const app=performance.getEntriesByType('resource').find(entry=>new URL(entry.name).pathname==='/src/bootstrap/app-runtime.js');const tasks=window.__dgStartupLongTasks||[];return{runtimeDecodedBytes:app?.decodedBodySize||0,runtimeTransferBytes:app?.transferSize||0,runtimeRequestMs:Math.round(app?.duration||0),longTaskCount:tasks.length,longTaskTotalMs:Math.round(tasks.reduce((sum,value)=>sum+value,0)),longTaskMaxMs:Math.round(Math.max(0,...tasks))};});

@@ -3,6 +3,7 @@ export const runtimePath='src/bootstrap/app-runtime.js';
 export function packageApplication(html,readSource){
  const modules=[];
  const manifest=html.replace(/<script\s+src="(src\/[^"?]+\.js(?:\?[^" ]+)?)"([^>]*)><\/script>/g,(tag,url,attributes)=>{
+  if(/\bdata-dg-eager\b/.test(attributes))return tag;
   modules.push([url,readSource(url.split('?')[0])]);
   return '<script src="'+url+'" type="application/x-dendrogeo-module"'+attributes+'></script>';
  });

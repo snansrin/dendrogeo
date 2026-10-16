@@ -24,7 +24,7 @@ function dgAcademicInput(key,label,value,required=false){return window.DG_ACADEM
 function dgAcademicProfileRender(){
  const box=$("dgAcademicProfile");if(!box||typeof USER==="undefined"||!USER)return;
  const values=dgAcademicDefaults(),name=PROFILE?.full_name||USER.user_metadata?.full_name||'Araştırmacı';
- window.DG_RENDER_ACADEMIC_PROFILE.mount(box,{values,name,fields:DG_ACADEMIC_FIELDS},{escape:esc,orcidValid:DG_REPORT_CONTEXT.orcidValid,input:dgAcademicInput,navigate:view=>go(view),save:event=>dgAcademicProfileSave(event)});
+ window.DG_RENDER_ACADEMIC_PROFILE.mount(box,{values,name,email:USER.email||'',fields:DG_ACADEMIC_FIELDS},{escape:esc,orcidValid:DG_REPORT_CONTEXT.orcidValid,input:dgAcademicInput,navigate:view=>go(view),save:event=>dgAcademicProfileSave(event)});
 }
 async function dgAcademicProfileSave(event){
  return window.DG_SAVE_ACADEMIC_PROFILE.execute(event,{

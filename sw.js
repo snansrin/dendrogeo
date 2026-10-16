@@ -35,6 +35,9 @@ const MAX_RUNTIME = 400;     // ?v=NNN sürümlü script/style kopyaları
 
 const CORE_ASSETS = [
     // Runtime modules are generated from the page and lazy-loader source lists.
+    '/src/domain/settings/appearance-policy.js',
+    '/src/adapters/settings/appearance-preference.js',
+    '/src/ui/appearance.js',
     '/src/ui/startup-screen.js',
     '/src/ui/activate-async-stylesheets.js',
     '/src/config/supabase.js',
@@ -1048,6 +1051,7 @@ const CORE_ASSETS = [
     '/css/landing.css',
     '/css/landing-scenes.css',
     '/css/academic-profile.css',
+    '/css/appearance.css',
     '/css/park-admin.css',
     '/css/park-panel.css',
     '/css/ui-standard.css',
@@ -1066,6 +1070,8 @@ const CORE_ASSETS = [
 ];
 
 const INSTALL_ASSETS = [
+    '/src/domain/settings/appearance-policy.js', '/src/adapters/settings/appearance-preference.js',
+    '/src/ui/appearance.js', '/css/appearance.css',
     '/src/bootstrap/app-runtime.js', '/css/startup.css', '/vendor/leaflet.markercluster-1.5.3.js',
     '/', '/index.html', '/manifest.json', '/icon.png', '/apple-touch-icon.png',
     '/css/style.css', '/css/landing.css', '/css/park-panel.css', '/css/ui-standard.css',

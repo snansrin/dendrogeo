@@ -55,3 +55,5 @@
 #dgReportQuestionErrors:empty{display:none}
 #dgReportQuestionErrors:not(:empty){margin-top:8px}
 @media(max-width:600px){.dg-academic-dialog{inset:10px 0 auto;height:min(600px,calc(100dvh - 20px));max-height:calc(100dvh - 20px)}.dg-report-dialog-heading h2{font-size:1.1rem}.dg-report-dialog-footer .btn{min-height:44px}}
+
+#dgAcademicProfile .dg-profile-overview>section:last-child{grid-column:1/-1}

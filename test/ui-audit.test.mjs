@@ -96,7 +96,7 @@ describe('eski format koruması (kullanıcı tercihi 2026-09-20)', () => {
   });
 
   test('panel kullanıcı tercihiyle sade ana tema yapısındadır; ölçüm başlığı korunur', () => {
-    assert.match(html, /<h2 style="font-size:1\.6rem">Genel Bakış<\/h2>/);
+    assert.match(html, /<h2 style="font-size:1\.6rem">Profil ve ayarlar<\/h2>/);
     assert.match(html, /id="dgAcademicProfile"/);
     assert.match(html, /Kişisel Ağaç Analizi/);
     assert.match(html, /Karbon Trendi/);

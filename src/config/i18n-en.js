@@ -1489,3 +1489,23 @@ Object.assign(DG_I18N_EN,{
  "⚠ Son veri yedeğinin üzerinden {n} gün geçti — bugünkü yedeği alın":"⚠ Your last data backup was {n} days ago — export today's backup",
  "Veri yedeği, bu oturumun erişebildiği ölçüm, proje, waypoint, talep, park ve yüzey kayıtlarını içerir. Fotoğraf dosyaları, hesaplar ve cihazdaki çevrimdışı kayıtlar ayrıca korunmalıdır.":"The data backup includes measurements, projects, waypoints, requests, parks and surface records accessible to this session. Photo files, accounts and offline records on the device require separate protection."
 });
+
+Object.assign(DG_I18N_EN,{
+ "PROFİLİM": "MY PROFILE",
+ "Profil ve ayarlar": "Profile and settings",
+ "Profil ve kişisel ayarlar": "Profile and personal settings",
+ "Hesabınız, kişisel tercihleriniz ve çalışma bilgileriniz.": "Your account, personal preferences and work details.",
+ "Hesap bilgileri": "Account details",
+ "Görünüm": "Appearance",
+ "Koyu mod": "Dark mode",
+ "Açık ve koyu görünüm arasında geçiş yapın.": "Switch between light and dark appearance.",
+ "Cihaz temasını kullan": "Use device theme",
+ "Görünüm tercihi yalnız bu cihazda saklanır.": "Appearance is saved only on this device.",
+ "Çalışma bilgilerim": "My work details",
+ "Kurum ve çalışma bilgilerinizi isteğe bağlı ekleyebilirsiniz.": "You can optionally add institution and work details.",
+ "Profil bilgilerimi düzenle": "Edit my profile details",
+ "Bu bilgiler hesabınıza özeldir. Tüm alanlar isteğe bağlıdır.": "These details are private to your account. All fields are optional.",
+ "Kimlik ve çalışma bilgileri": "Identity and work details",
+ "Kayıt ve çalışma özetim": "My records and work summary",
+ "Profiliniz hesabınıza kaydedildi.": "Your profile has been saved to your account."
+});

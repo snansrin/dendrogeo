@@ -106,12 +106,15 @@ describe('tam sayfa yükleme sırası (vm smoke)', () => {
     assert.deepEqual(hatalar, [], 'yükleme hatası: ' + hatalar.join(' | '));
   });
 
-  test('⭐ tüm script etiketleri defer ile yükleniyor (ilk çizimi bloklamasın)', () => {
+  test('⭐ uygulama defer yüklenir; yalnız küçük cihaz teması ilk çizimden önce çalışır', () => {
     const html = readFileSync(join(ROOT, 'index.html'), 'utf8');
     const etiketler = [...html.matchAll(/<script\s+src="(?:src|vendor)\/[^"]+"[^>]*>/g)].map((m) => m[0]);
     assert.ok(etiketler.length >= 30, 'script etiketi bulunamadı: ' + etiketler.length);
-    const defersiz = etiketler.filter((t) => !/\bdefer\b/.test(t));
+    const early=['src/domain/settings/appearance-policy.js','src/adapters/settings/appearance-preference.js','src/ui/appearance.js'];
+    const defersiz = etiketler.filter((t) => !/\bdefer\b/.test(t)&&!early.some(path=>t.includes('src="'+path+'?')&&/\bdata-dg-eager\b/.test(t)));
     assert.deepEqual(defersiz, [], 'defer eksik (senkron script HTML ayrıştırmayı durdurur): ' + defersiz.join(' | '));
+    assert.equal(etiketler.filter(t=>/\bdata-dg-eager\b/.test(t)).length,early.length);
+    assert.ok(early.reduce((bytes,path)=>bytes+readFileSync(join(ROOT,path)).length,0)<8192,'early theme must stay small');
   });
 
   test('⭐ LULC zinciri index.html’de DEĞİL (tembel) ama dgEnsureLulc’de sıralı', () => {

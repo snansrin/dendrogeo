@@ -230,6 +230,9 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=Manrope:wght@400;600;700;800&family=IBM+Plex+Mono:wght@400;600;700&display=swap" media="print" data-dg-async-stylesheet>
 <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=Manrope:wght@400;600;700;800&family=IBM+Plex+Mono:wght@400;600;700&display=swap"></noscript>
 <link rel="stylesheet" href="vendor/leaflet-1.9.4.css">
+<script src="src/domain/settings/appearance-policy.js?v=52b11ee5" data-dg-eager></script>
+<script src="src/adapters/settings/appearance-preference.js?v=1a455f88" data-dg-eager></script>
+<script src="src/ui/appearance.js?v=773a6b2b" data-dg-eager></script>
 <link rel="stylesheet" href="css/startup.css?v=de5b3c30">
 <link rel="stylesheet" href="css/style.css?v=086bc6b6">
 <link rel="stylesheet" href="css/landing.css?v=2785a25a">
@@ -247,14 +250,14 @@
 <script src="src/config/wood-density-lock.js?v=9572e1df" type="application/x-dendrogeo-module" defer></script>
 <script src="src/config/species.js?v=554298a8" type="application/x-dendrogeo-module" defer></script>
 <!-- DİL KATMANI (0035): sözlük verisi çalışma zamanı çeviricisinden önce yüklenir. -->
-<script src="src/config/i18n-en.js?v=05294c75" type="application/x-dendrogeo-module" defer></script>
+<script src="src/config/i18n-en.js?v=acbfe1c4" type="application/x-dendrogeo-module" defer></script>
 <script src="src/config/i18n.js?v=f99a371a" type="application/x-dendrogeo-module" defer></script>
 <script src="src/domain/map/web-mercator-coordinates.js?v=44109250" type="application/x-dendrogeo-module" defer></script>
 <script src="src/utils/geo.js?v=1e469255" type="application/x-dendrogeo-module" defer></script>
 <script src="src/utils/truncation.js?v=d9710c30" type="application/x-dendrogeo-module" defer></script>
 <!-- Faz 7: geotiff (317 KB) ve chart.js (208 KB) artık SENKRON yüklenmiyor;
      src/utils/lazylibs.js ihtiyaç anında enjekte eder (LULC analizi / panel grafiği). -->
-<script id="dgRuntimeBuild" type="application/json">"dd9ae1d3ef77d2e3"</script>
+<script id="dgRuntimeBuild" type="application/json">"c0948fbcfbd26613"</script>
 <!-- Verified fallback OSM water geometry, independent of the lazy raster engine. -->
 <script src="src/adapters/parks/fetch-nominatim-osm-way.js?v=9f2730dd" type="application/x-dendrogeo-module" defer></script>
 <script src="src/services/osm-water-backup.js?v=4c9fbc03" type="application/x-dendrogeo-module" defer></script>
@@ -515,15 +518,15 @@
 <script src="src/application/reports/resolve-academic-profile-defaults.js?v=1d117cb5" type="application/x-dendrogeo-module" defer></script>
 <script src="src/ui/academic-profile-fields.js?v=b5e40862" type="application/x-dendrogeo-module" defer></script>
 <script src="src/ui/academic-profile-interactions.js?v=b28b1ec8" type="application/x-dendrogeo-module" defer></script>
-<script src="src/ui/render-academic-profile.js?v=34afc7f3" type="application/x-dendrogeo-module" defer></script>
-<script src="src/ui/save-academic-profile.js?v=5b9562de" type="application/x-dendrogeo-module" defer></script>
+<script src="src/ui/render-academic-profile.js?v=bafdb634" type="application/x-dendrogeo-module" defer></script>
+<script src="src/ui/save-academic-profile.js?v=4f893015" type="application/x-dendrogeo-module" defer></script>
 <script src="src/application/reports/create-academic-report-collector.js?v=8611d81e" type="application/x-dendrogeo-module" defer></script>
 <script src="src/application/reports/resolve-report-question-values.js?v=306935c4" type="application/x-dendrogeo-module" defer></script>
 <script src="src/ui/report-question-fields.js?v=d6c656cb" type="application/x-dendrogeo-module" defer></script>
 <script src="src/ui/report-question-confirmations.js?v=7ccde754" type="application/x-dendrogeo-module" defer></script>
 <script src="src/ui/validate-report-question-answer.js?v=770e861c" type="application/x-dendrogeo-module" defer></script>
 <script src="src/ui/run-report-question-dialog.js?v=36472f47" type="application/x-dendrogeo-module" defer></script>
-<script src="src/services/academic-profile.js?v=0cedfe27" type="application/x-dendrogeo-module" defer></script>
+<script src="src/services/academic-profile.js?v=2bb7689d" type="application/x-dendrogeo-module" defer></script>
 <script src="src/domain/reports/publication-link.js?v=b415189b" type="application/x-dendrogeo-module" defer></script>
 <script src="src/adapters/reports/publication-log-store.js?v=fc310a53" type="application/x-dendrogeo-module" defer></script>
 <script src="src/adapters/reports/publication-request-store.js?v=245352a4" type="application/x-dendrogeo-module" defer></script>
@@ -934,7 +937,7 @@
 <script src="src/application/dashboard/delete-own-record.js?v=d9948015" type="application/x-dendrogeo-module" defer></script>
 <script src="src/adapters/users/delete-own-record-store.js?v=21ad9c70" type="application/x-dendrogeo-module" defer></script>
 <script src="src/application/dashboard/load-owner-dashboard.js?v=57464ea2" type="application/x-dendrogeo-module" defer></script>
-<script src="src/ui/dashboard-chart.js?v=b87de80b" type="application/x-dendrogeo-module" defer></script>
+<script src="src/ui/dashboard-chart.js?v=6bc317c7" type="application/x-dendrogeo-module" defer></script>
 <script src="src/application/dashboard/load-world-dashboard.js?v=4a1a25b9" type="application/x-dendrogeo-module" defer></script>
 <script src="src/application/dashboard/load-shell-view-data.js?v=68e471a7" type="application/x-dendrogeo-module" defer></script>
 <script src="src/services/dash.js?v=90f8846a" type="application/x-dendrogeo-module" defer></script>
@@ -944,11 +947,12 @@
      geçerli; kabuk (body.dg-app) yalnız sınıf-bazlı bileşenleri ve sekme
      başlığı ölçeğini alır → Park Karşılaştırma kartı kıpırdamaz. -->
 <link rel="stylesheet" href="css/ui-standard.css?v=17b522ad">
-<link rel="stylesheet" href="css/academic-profile.css?v=467c5e5e">
+<link rel="stylesheet" href="css/academic-profile.css?v=e456e559">
 <link rel="stylesheet" href="css/park-admin.css?v=97486bd0">
 <!-- GIS workspace: scoped presentation, keeps locked engine and theme untouched. -->
 <link rel="stylesheet" href="css/surface-drawing.css?v=a5cbf351">
 <link rel="stylesheet" href="css/gis-workspace.css?v=bbcb9590">
+<link rel="stylesheet" href="css/appearance.css?v=327717c7">
 </head>
 <body class="dg-app">
 <div id="dgStartupScreen" role="status" aria-live="polite"><div>DendroGeo<p>Giriş kontrol ediliyor…</p></div></div>
@@ -1318,8 +1322,9 @@
  <div id="main">
 
    <div class="view on" id="v-dash">
-   <div class="shead" style="margin-bottom:18px"><span class="no">📊</span><h2 style="font-size:1.6rem">Genel Bakış</h2><span class="rule"></span></div>
-   <section id="dgAcademicProfile" class="card" style="margin-bottom:18px" aria-label="Araştırmacı profili"></section>
+   <div class="shead" style="margin-bottom:18px"><span class="no">📊</span><h2 style="font-size:1.6rem">Profil ve ayarlar</h2><span class="rule"></span></div>
+   <section id="dgAcademicProfile" class="card" style="margin-bottom:18px" aria-label="Profil ve kişisel ayarlar"></section>
+   <details class="card" data-personal-summary><summary>Kayıt ve çalışma özetim</summary>
    <div class="grid g4" style="margin-bottom:22px">
     <div class="stat" style="border-left:3px solid var(--green);padding-left:18px"><div class="lbl">📋 Kayıtlarım</div><div class="val" id="dMy">0</div></div>
     <div class="stat" style="border-left:3px solid var(--amber);padding-left:18px"><div class="lbl">🌱 Karbonum</div><div class="val" id="dCarbon">0</div><div style="font-size:.72rem;color:var(--mut);margin-top:4px">kg C (saf karbon)</div></div>
@@ -1334,6 +1339,7 @@
     <div class="shead" style="margin-bottom:12px"><span class="no">📈</span><h2 style="font-size:1.15rem">Karbon Trendi</h2><span class="rule"></span><span class="mono" style="font-size:.72rem;color:var(--mut)">son 10 kayıt · kg</span></div>
     <canvas id="chCarbon" height="110"></canvas>
    </div>
+   </details>
   </div>
 
   <div class="view" id="v-measure">
@@ -1901,6 +1907,6 @@
 <script src="src/bootstrap/gis-export.js?v=31cdf97c" type="application/x-dendrogeo-module" defer></script>
 <script src="src/ui/gis-export.js?v=85048551" type="application/x-dendrogeo-module" defer></script>
 
-<script src="/src/bootstrap/app-runtime.js?v=554fd2e2" defer></script>
+<script src="/src/bootstrap/app-runtime.js?v=fcf9a963" defer></script>
 </body>
 </html>

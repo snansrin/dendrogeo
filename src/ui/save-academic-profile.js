@@ -24,7 +24,7 @@ window.DG_SAVE_ACADEMIC_PROFILE = (() => {
       ports.render();
       const saved=ports.savedStatus();saved.textContent = 'Profil hesabınıza kaydedildi.';
       saved.focus?.({preventScroll:true});
-      ports.toast('Akademik profiliniz hesabınıza kaydedildi.', 'ok', '👤');
+      ports.toast('Profiliniz hesabınıza kaydedildi.', 'ok', '👤');
     } catch (error) {
       status.textContent = 'Kaydedilemedi: ' + String(error.message || error);
       ports.toast('Profil kaydedilemedi. Girdiğiniz bilgiler formda korunuyor.', 'err', '👤');

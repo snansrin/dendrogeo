@@ -31,8 +31,9 @@
  <div id="main">
 
    <div class="view on" id="v-dash">
-   <div class="shead" style="margin-bottom:18px"><span class="no">📊</span><h2 style="font-size:1.6rem">Genel Bakış</h2><span class="rule"></span></div>
-   <section id="dgAcademicProfile" class="card" style="margin-bottom:18px" aria-label="Araştırmacı profili"></section>
+   <div class="shead" style="margin-bottom:18px"><span class="no">📊</span><h2 style="font-size:1.6rem">Profil ve ayarlar</h2><span class="rule"></span></div>
+   <section id="dgAcademicProfile" class="card" style="margin-bottom:18px" aria-label="Profil ve kişisel ayarlar"></section>
+   <details class="card" data-personal-summary><summary>Kayıt ve çalışma özetim</summary>
    <div class="grid g4" style="margin-bottom:22px">
     <div class="stat" style="border-left:3px solid var(--green);padding-left:18px"><div class="lbl">📋 Kayıtlarım</div><div class="val" id="dMy">0</div></div>
     <div class="stat" style="border-left:3px solid var(--amber);padding-left:18px"><div class="lbl">🌱 Karbonum</div><div class="val" id="dCarbon">0</div><div style="font-size:.72rem;color:var(--mut);margin-top:4px">kg C (saf karbon)</div></div>
@@ -47,6 +48,7 @@
     <div class="shead" style="margin-bottom:12px"><span class="no">📈</span><h2 style="font-size:1.15rem">Karbon Trendi</h2><span class="rule"></span><span class="mono" style="font-size:.72rem;color:var(--mut)">son 10 kayıt · kg</span></div>
     <canvas id="chCarbon" height="110"></canvas>
    </div>
+   </details>
   </div>
 
   <div class="view" id="v-measure">
