@@ -18,6 +18,7 @@ import { writeFile } from 'node:fs/promises';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import vm from 'node:vm';
+import {surfaceRuntimeModules} from './lib/surface-runtime-modules.mjs';
 
 // Bound CLI lookups too; Node needs --use-env-proxy in proxied environments.
 const nativeFetch=globalThis.fetch;
@@ -113,44 +114,7 @@ shimIsci(ctx);
 ctx.window = ctx; ctx.self = ctx;
 vm.createContext(ctx);
 vm.runInContext(readFileSync(join(ROOT, 'vendor/geotiff-2.1.3.js'), 'utf8'), ctx, { filename: 'geotiff.js' });
-for (const f of ['src/config/constants.js',
-  'src/services/lc-config.js', 'src/domain/surface/classify-landcover-code.js',
-  'src/domain/surface/compare-source-class-areas.js',
-  'src/services/lc-geo.js', 'src/services/lc-stac.js',
-  'src/domain/surface/merge-tile-results.js', 'src/adapters/surface/result-exports.js',
-  'src/application/surface/analyze-source.js',
-  'src/adapters/surface/process-landcover-tile.js',
-  'src/services/lc-engine.js',
-  'src/services/lc-osm.js', 'src/domain/surface/patch-geometry.js', 'src/domain/surface/group-patch-cells.js', 'src/domain/surface/measure-patch-components.js', 'src/domain/surface/query-green-patches.js', 'src/services/lc-patches.js',
-  'src/domain/surface/validation-sampling.js',
-  'src/domain/surface/build-validation-confusion-matrix.js',
-  'src/domain/surface/build-validation-stratum-weights.js',
-  'src/domain/surface/calculate-validation-class-proportions.js',
-  'src/domain/surface/calculate-validation-area-estimates.js',
-  'src/domain/surface/calculate-validation-class-accuracy.js',
-  'src/domain/surface/validation-accuracy-metrics.js',
-  'src/domain/surface/validation-spectral-rules.js',
-  'src/application/surface/build-validation-agreement.js',
-  'src/domain/surface/build-validation-campaign-csv-rows.js',
-  'src/application/surface/serialize-validation-campaign-csv.js',
-  'src/application/surface/serialize-validation-campaign-json.js',
-  'src/domain/surface/apply-validation-campaign-corrections.js',
-  'src/domain/surface/build-validation-corrected-geojson.js',
-  'src/application/surface/serialize-validation-campaign.js',
-  'src/services/lc-validate.js',
-  'src/adapters/surface/load-sentinel-scene-bands.js',
-  'src/application/surface/read-sentinel-scene-windows.js',
-  'src/domain/surface/index-sentinel-scene-cells.js',
-  'src/application/surface/collect-sentinel-scene-observations.js',
-  'src/domain/surface/merge-sentinel-annual-evidence.js',
-  'src/application/surface/prepare-sentinel-annual-evidence.js',
-  'src/application/surface/find-sentinel-annual-scenes.js',
-  'src/application/surface/read-sentinel-annual-scene-windows.js',
-  'src/domain/surface/index-sentinel-annual-scene-cells.js',
-  'src/application/surface/collect-sentinel-annual-evidence.js',
-  'src/services/lc-s2.js',
-  'src/ui/lc-report.js', 'src/domain/surface/quality-gates.js', 'src/contracts/surface-analysis.js',
-  'src/application/surface/run-analysis.js', 'src/services/landcover.js']) {
+for (const f of ['src/config/constants.js',...surfaceRuntimeModules(path=>readFileSync(join(ROOT,path),'utf8'))]) {
   vm.runInContext(readFileSync(join(ROOT, f), 'utf8'), ctx, { filename: f });
 }
 

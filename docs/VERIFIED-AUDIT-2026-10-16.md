@@ -12,6 +12,7 @@ Kapsam: kullanıcının mevcut inceleme bulgularını doğrulama ve hataları gi
 | Yedek kapsamı | “Tam yedek” ifadesi sistem kurtarması izlenimi veriyordu | Araç “Veri Yedeği” olarak adlandırıldı; sürüm 1.1.0 manifestinde RLS kapsamı ve hariç tutulan kaynaklar açık. Eski 1.0.0 dosyalarının SQL üretimi desteklenir. |
 | Çevrimdışı düzenleme | Yalnız id + owner ile başka oturumdaki değişikliğin üzerine yazabiliyordu | Form açılırken sunucu satırının kopyası tutulur. Çevrimdışı kayıt bu başlangıcı taşır; tek UPDATE bütün başlangıç alanlarını ve owner filtresini karşılaştırır. Değişmiş/erişilemeyen satır ve eski başlangıçsız kuyruk korunur; otomatik üzerine yazılmaz. `audit-reliability-regressions` gerçek PostgreSQL uyumlu motor testi. |
 | Sürekli GIS QA | Yeni yüzey modülleri path filtresinin dışında kalabiliyordu | application/domain/adapters surface yolları PR ve main push tetiklerine eklendi. |
+| CLI yükleme zinciri | Canlı GIS QA ve rapor CLI eski elle tutulan modül listelerinde eksik adaptörlerle açılıyordu | AST ile tarayıcının kanonik DG_LULC_CHAIN listesini okuyan ortak yükleyici kullanılır. Gerçek modüllerle açılış, projeksiyon ve STAC taşıma testi eklendi; bilimsel hesaplara dokunulmadı. |
 | Tarayıcı kapsamı | WebKit yalnız yerelde çalıştırılıyordu | Profil ve sekme/tema kontrolleri WebKit CI işi oldu. Chromium tam telefon paketi sürer. |
 | Erişilebilirlik | Otomatik tarama WCAG 2.1 etiketlerinde kalmıştı | WCAG 2.2 AA etiketi eklendi. Bu otomatik tarama, elle ekran okuyucu denetimi veya tam uygunluk sertifikası değildir. |
 | Yayın dokümanı | İsteğe bağlı künye alanlarını zorunlu diyordu | Gerçek form sözleşmesiyle uyumlu hale getirildi; doldurulan ORCID denetlenir, yayın/veri kapsamı onayı korunur. |
@@ -75,7 +76,7 @@ bu çalışmada değiştirilmez.
 
 ## Yayın öncesi yerel doğrulama
 
-- `npm run check`: 3.048 test; mimari, yükleme, CSP, sürüm ve 956 dosyalık
+- `npm run check`: 3.050 test; mimari, yükleme, CSP, sürüm ve 956 dosyalık
   çekirdek kilidi geçti.
 - `npm run check:phone`: başlangıç, profil, 11 sekme, açma/kapama kontrolleri,
   yayın formu, park yönetimi, fırça, çizim, OSM kurtarma ve telefon yerleşimi.
@@ -83,3 +84,9 @@ bu çalışmada değiştirilmez.
   tarama, klavye, odak, switch ve slider uçları geçti.
 - WebKit: profil 360/390/430/1280 px; sekme/tema/açma kapama kontrolleri
   320/360/390/430/768/1280 px geçti.
+- Canlı WorldCover verisiyle kayıtlı Göksu sınırında 7.864 hücre işlendi,
+  60 görsel doğrulama noktası dışa aktarıldı. Referans sınıfları insan tarafından
+  doldurulmadığından bu çıktı bağımsız doğruluk kanıtı değildir.
+- CI ilk çalıştırmasında workflow UTF-8 park adı kodlaması ve Linux WebKit
+  animasyon zamanlaması yakalandı. Park adlarına tam eşleşme regresyonu eklendi;
+  ok testi sabit bekleme yerine gerçek dönüş durumunu bekler.

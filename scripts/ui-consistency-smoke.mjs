@@ -23,9 +23,14 @@ try{for(const width of [320,360,390,430,768,1280]){
  let disclosures=0,buttons=0;
  const disclosure=async node=>{
   const summary=node.locator(':scope > summary');if(!await summary.isVisible())return;
-  if(await node.getAttribute('open')!==null){await summary.click();await page.waitForTimeout(180);}
+  const arrowState=async open=>page.waitForFunction(({element,open})=>{
+   const matrix=new DOMMatrix(getComputedStyle(element,'::after').transform);
+   return open?matrix.a<-.6&&matrix.b<-.6:matrix.a>.6&&matrix.b>.6;
+  },{element:await summary.elementHandle(),open},{timeout:5000});
+  if(await node.getAttribute('open')!==null)await summary.click();
+  await arrowState(false);
   const closed=await summary.evaluate(e=>getComputedStyle(e,'::after').transform);
-  await summary.click();await page.waitForTimeout(180);
+  await summary.click();await arrowState(true);
   assert.notEqual(await node.getAttribute('open'),null);
   const style=await summary.evaluate(e=>({height:e.getBoundingClientRect().height,arrow:getComputedStyle(e,'::after').transform,content:getComputedStyle(e,'::after').content,font:getComputedStyle(e).fontFamily}));
   assert.ok(style.height>=43.5,'touch disclosure height');

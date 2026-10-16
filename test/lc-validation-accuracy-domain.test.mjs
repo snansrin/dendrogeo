@@ -1,3 +1,4 @@
+import {surfaceRuntimeModules} from '../scripts/lib/surface-runtime-modules.mjs';
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
@@ -33,5 +34,5 @@ test('five accuracy domain modules preserve Olofsson matrix, weights, area and c
 test('accuracy domain modules load before the stable facade and enter live QA and offline cache',()=>{
   const loader=read('src/utils/lazylibs.js'),worker=read('sw.js'),qa=read('scripts/val-qa.mjs');
   const facade='src/domain/surface/validation-accuracy-metrics.js',facadeIndex=loader.indexOf('"'+facade+'"');
-  for(const path of modulePaths){const position=loader.indexOf('"'+path+'"');assert.ok(position>=0&&position<facadeIndex,`${path} loader order`);assert.ok(worker.includes("'/"+path+"'"),`${path} precache`);assert.ok(qa.includes("'"+path+"'"),`${path} live QA`);}
+  for(const path of modulePaths){const position=loader.indexOf('"'+path+'"');assert.ok(position>=0&&position<facadeIndex,`${path} loader order`);assert.ok(worker.includes("'/"+path+"'"),`${path} precache`);assert.ok(qa.includes('surfaceRuntimeModules(')&&surfaceRuntimeModules(read).includes(path),`${path} live QA`);}
 });

@@ -1,32 +1,17 @@
 import vm from 'node:vm';
+import {surfaceRuntimeModules} from './surface-runtime-modules.mjs';
 
 /* Build the isolated browser-like runtime used by immutable report land-cover
  * analysis. Application source and classification remain the single source of
  * truth; this loader only wires the existing runtime dependencies. */
 const MODS = [
-  'src/utils/geo.js', 'src/services/park-state.js',
+  'src/utils/geo.js', 'src/application/parks/grid-session-state.js', 'src/services/park-state.js',
   'src/domain/parks/area.js', 'src/domain/parks/segment-intersection.js',
   'src/domain/parks/point-in-polygon.js', 'src/domain/parks/bounds.js',
   'src/domain/parks/park-containment.js', 'src/domain/parks/line-distance.js',
   'src/domain/parks/osm-rings.js', 'src/domain/parks/rect-intersection.js',
   'src/domain/parks/cell-in-park.js', 'src/domain/parks/park-overlap.js',
-  'src/services/park-geometry.js', 'src/services/lc-config.js',
-  'src/domain/surface/classify-landcover-code.js',
-  'src/domain/surface/compare-source-class-areas.js',
-  'src/services/lc-geo.js', 'src/services/lc-stac.js',
-  'src/domain/surface/merge-tile-results.js',
-  'src/adapters/surface/result-exports.js',
-  'src/application/surface/analyze-source.js',
-  'src/adapters/surface/process-landcover-tile.js',
-  'src/services/lc-engine.js', 'src/services/lc-osm.js',
-  'src/domain/surface/patch-geometry.js',
-  'src/domain/surface/group-patch-cells.js',
-  'src/domain/surface/measure-patch-components.js',
-  'src/domain/surface/query-green-patches.js',
-  'src/services/lc-patches.js', 'src/ui/lc-report.js',
-  'src/domain/surface/quality-gates.js',
-  'src/contracts/surface-analysis.js',
-  'src/application/surface/run-analysis.js', 'src/services/landcover.js'
+  'src/services/park-geometry.js'
 ];
 
 export function createReportLandcoverRuntime({read}) {
@@ -46,7 +31,7 @@ export function createReportLandcoverRuntime({read}) {
     if (!ctx.URL.createObjectURL) ctx.URL.createObjectURL = () => 'blob:rapor';
     vm.createContext(ctx);
     vm.runInContext(read('vendor/geotiff-2.1.3.js'), ctx, { filename: 'geotiff' });
-    for (const m of MODS) vm.runInContext(read(m), ctx, { filename: m });
+    for (const m of [...MODS,...surfaceRuntimeModules(read)]) vm.runInContext(read(m), ctx, { filename: m });
     vm.runInContext('globalThis.__dgLast=function(){return typeof DG_LC_LAST!=="undefined"?DG_LC_LAST:null;};', ctx);
     return ctx;
   };

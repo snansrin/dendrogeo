@@ -7976,6 +7976,39 @@
           "sha256": "e30a601264dc72a827238ad4751719d876c8aa2891cf64035e3530ff77f9d7fa"
         }
       ]
+    },
+    {
+      "id": "verified-audit-cli-runtime-2026-10-16",
+      "date": "2026-10-16",
+      "scope": "User-authorized modularization and verification fixes: live GIS QA and report CLI consume the canonical browser surface module chain instead of stale manual dependency lists. Existing scientific module load-order regressions now assert the same paths through the shared loader; numerical expectations are unchanged. Browser production sources and immutable DOI publications are unchanged.",
+      "audit_chain": "sha256-v1",
+      "files": [
+        {
+          "path": "scripts/val-qa.mjs",
+          "previous_sha256": "5da2d66337bf44092148bff6801867ac937bb61dcf9b4a8a5a008acf98a5f7c8",
+          "sha256": "c6fc91a1abc084c1d59d8ca108bbc68d91982bf3621844297c799515f013213b"
+        },
+        {
+          "path": "test/lc-s2-annual-modules.test.mjs",
+          "previous_sha256": "ace3751b8a25e57f3aae2257d4704e03bcf0bbf6a44afad55b36bcaa51ee5020",
+          "sha256": "f92dedb355b06ee75c57ae5246cbff732f4d38846295d6d59168cb92b795db7d"
+        },
+        {
+          "path": "test/lc-validation-accuracy-domain.test.mjs",
+          "previous_sha256": "6de28dd2dffdc1141122f2d466c8d7a5c904b759ae4ff64c1c364fdcbd5cb60b",
+          "sha256": "9002ac245e5c960c7c87c9e94863d2cd1ac2862050c20b6975f90c890784d29b"
+        },
+        {
+          "path": "test/lc-validation-campaign-export-modules.test.mjs",
+          "previous_sha256": "7a2109811419319126cd6bc9aa853860e4efdbbc35a6b072a24da8ce250d6159",
+          "sha256": "1517be3d8c7f4f189c853d89eccaf55d24d2b1437a8735bfcaf673530ef9d74c"
+        },
+        {
+          "path": ".github/workflows/mobile-smoke.yml",
+          "previous_sha256": "5a89a92bf19b66753cbb9cac269d4f76c4794f9ae25654ff7c7cf2805d533e14",
+          "sha256": "52a85fb988ceb0a5b5f02af6176830c713e331d69bcc2b4383e67e66dca696bc"
+        }
+      ]
     }
   ]
 }

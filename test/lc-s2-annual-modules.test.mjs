@@ -1,3 +1,4 @@
+import {surfaceRuntimeModules} from '../scripts/lib/surface-runtime-modules.mjs';
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
 import vm from 'node:vm';
@@ -56,5 +57,5 @@ test('annual collector applies SCL, nodata and distinct-day gates before seasona
 
 test('five annual Sentinel-2 modules load before lc-s2 and are precached',()=>{
   const loader=read('src/utils/lazylibs.js'),worker=read('sw.js'),service=loader.indexOf('"src/services/lc-s2.js"');
-  for(const path of modules){const position=loader.indexOf('"'+path+'"');assert.ok(position>=0&&position<service,`${path} load order`);assert.ok(worker.includes("'/"+path+"'"),`${path} precache`);assert.ok(read('scripts/val-qa.mjs').includes("'"+path+"'"),`${path} live QA load order`);}
+  for(const path of modules){const position=loader.indexOf('"'+path+'"');assert.ok(position>=0&&position<service,`${path} load order`);assert.ok(worker.includes("'/"+path+"'"),`${path} precache`);assert.ok(read('scripts/val-qa.mjs').includes('surfaceRuntimeModules(')&&surfaceRuntimeModules(read).includes(path),`${path} live QA load order`);}
 });

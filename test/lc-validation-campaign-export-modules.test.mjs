@@ -1,3 +1,4 @@
+import {surfaceRuntimeModules} from '../scripts/lib/surface-runtime-modules.mjs';
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
@@ -36,6 +37,6 @@ test('campaign export modules load before the service in lazy, live-QA and offli
   for(const path of modules){
     assert.ok(loader.indexOf('"'+path+'"')>=0&&loader.indexOf('"'+path+'"')<serviceIndex,path+' loader order');
     assert.ok(worker.includes("'/"+path+"'"),path+' offline precache');
-    assert.ok(qa.includes("'"+path+"'"),path+' live QA loader');
+    assert.ok(qa.includes('surfaceRuntimeModules(')&&surfaceRuntimeModules(read).includes(path),path+' live QA loader');
   }
 });
