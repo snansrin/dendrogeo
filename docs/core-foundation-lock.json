@@ -8391,6 +8391,49 @@
           "sha256": "f3e4037db1c24144ed24ebd0ceec5d7b3d6cf9bf29586a189a55c61429ce436c"
         }
       ]
+    },
+    {
+      "id": "projects-workspace-theme-2026-10-16",
+      "date": "2026-10-16",
+      "scope": "User-authorized modularization: refine project workspace layout and project card presentation using existing theme tokens, shared disclosure chevrons and delegated owner workflows. Keep project forms full width, group metadata and secondary actions in native details, preserve collaborator permissions, and complete project headings in English. Add real browser phone and theme coverage.",
+      "audit_chain": "sha256-v1",
+      "files": [
+        {
+          "path": ".github/workflows/mobile-smoke.yml",
+          "previous_sha256": "13d1d57900ee7b5f42fd3b0edeef3c325fbc1ab6741c205464d921ef167ebb17",
+          "sha256": "b63f7d024118310b34227f7b72826871e45c3993bf8280fb25908802f69afd59"
+        },
+        {
+          "path": "css/style.css",
+          "previous_sha256": "3bd4ed1087f3766ed93a98e4c2ffe97c0412c2a5d836ecd55f842c198c491d5f",
+          "sha256": "991cc1ace1b0ad3cf80d08c3f7c9c604d6048ea21a7a0ef65aec704e765b0ab3"
+        },
+        {
+          "path": "index.html",
+          "previous_sha256": "cdf7a7839eb5059e782ba035c3c3a4d48a99a3fe99b0fac660ca9b187ac5f3eb",
+          "sha256": "87bbfc1d9aae08fce8625a943144f4f40a43b1b2860397d217ca3299e34b7240"
+        },
+        {
+          "path": "partials/shell.html",
+          "previous_sha256": "97014541d8417efe950531d355721a908f55034f8bfb448a122e18537094478b",
+          "sha256": "b8e4d8848ce23e16b022fb5a8955f045f6112cc3c117be0b66c701524a339e7e"
+        },
+        {
+          "path": "scripts/check-phone.mjs",
+          "previous_sha256": "6455359fe021f12270949b49d470d46556f88bc10a44c5e86f3520de7bef0004",
+          "sha256": "a6d6ba1a7b96cd6ecd1ed0f8b753b9a50f280cf2ba6548cbb13da9a981fd2f33"
+        },
+        {
+          "path": "src/ui/measurement-project-card.js",
+          "previous_sha256": "95c0528faf4e1b393a0f2024125462c39715bb20173482a613e2abf0ebbd779e",
+          "sha256": "7bf2e9b449ade4139218ce4b97c3f32ca4396dbe7fc57562a1b737d09b642300"
+        },
+        {
+          "path": "src/ui/park-invite-inbox.js",
+          "previous_sha256": "6bfa6051546bc3f6e8f673a9e04c8b9dd561277547aecfc1e1fb57663873233b",
+          "sha256": "43ba818b8e268129ed5f0425f30d342b36ff2f7b39161a20f2f3042409e0e4e1"
+        }
+      ]
     }
   ]
 }

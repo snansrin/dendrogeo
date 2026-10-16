@@ -9,16 +9,15 @@
  }
  function hide(element){if(element)element.style.display="none";}
  function show(element){if(element)element.style.display="";}
- function setCount(getElement,id,value){const element=getElement(id);if(element)element.textContent=String(Number(value)||0);}
+ function setCount(getElement,id,value){const element=getElement(id);if(element&&!element.hasAttribute?.("data-project-count"))element.textContent=String(Number(value)||0);}
  function resetRecipient(getElement){
   hide(getElement("dgInvBox"));hide(getElement("dgSharedBox"));
-  for(const id of ["projInviteCount","projSharedCount"]){const count=getElement(id);if(count)count.textContent="0";}
+  for(const id of ["projInviteCount","projSharedCount"])setCount(getElement,id,0);
  }
  function presentRecipient({getElement,rows,shared,escape}){
   const inviteBox=getElement("dgInvBox"),sharedBox=getElement("dgSharedBox");
-  const inviteCount=getElement("projInviteCount"),sharedCount=getElement("projSharedCount");
-  if(inviteCount)inviteCount.textContent=String(rows.length);
-  if(sharedCount)sharedCount.textContent=String(shared.length);
+  setCount(getElement,"projInviteCount",rows.length);
+  setCount(getElement,"projSharedCount",shared.length);
   hide(inviteBox);
   if(sharedBox){if(shared.length){show(sharedBox);sharedBox.innerHTML=sharedBanner(shared,escape);}else hide(sharedBox);}
   if(inviteBox&&rows.length){show(inviteBox);inviteBox.innerHTML=invites(rows,escape);}

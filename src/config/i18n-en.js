@@ -549,6 +549,11 @@ const DG_I18N_EN={
 "Onayladığın kayıt hemen görünmüyorsa bu düğmeye bas.":"Press this button if a record you approved doesn't appear right away.",
 "🟢 Noktalara dokunun → onaylı ölçüm bilgisi + varsa fotoğraf.":"🟢 Tap points → approved measurement info + photo if available.",
 /* === projeler === */
+"Projelerim":"My projects",
+"ÇALIŞMA ALANI":"WORKSPACE",
+"Proje bilgileri ve işlemler":"Project details and actions",
+"Oluşturulma tarihi":"Created on",
+"Proje kimliği":"Project ID",
 "Projeler":"Projects","Proje Etiketi":"Project Label","Proje Adı (otomatik)":"Project Name (automatic)",
 "+ Proje Oluştur":"+ Create Project","Park":"Park","Proje Adı":"Project Name","Tarih":"Date",
 "Park Çalışma Arkadaşları":"Park Collaborators","davet · ortak ölçüm · onay sende":"invite · joint measurement · approval stays with you",
