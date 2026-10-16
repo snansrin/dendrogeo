@@ -8803,7 +8803,7 @@
     {
       "id": "landing-resource-icons-dark-theme-contrast-2026-10-17",
       "date": "2026-10-17",
-      "scope": "User-authorized correction of dark-theme landing resource icon contrast; preserve landing content, app behavior and analysis outputs.",
+      "scope": "User-authorized modularization: correct dark-theme landing resource icon contrast while preserving landing content, app behavior and analysis outputs.",
       "audit_chain": "sha256-v1",
       "added_protected_files": [],
       "files": [
