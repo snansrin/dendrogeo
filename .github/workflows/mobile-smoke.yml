@@ -45,3 +45,4 @@ jobs:
           node scripts/profile-smoke.mjs
           node scripts/appearance-smoke.mjs
           node scripts/ui-consistency-smoke.mjs
+          node scripts/mobile-tools-language-smoke.mjs

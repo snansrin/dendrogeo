@@ -4,7 +4,7 @@
 window.DG_MEASUREMENT_PROJECT_NAME_PREVIEW={
   render({element,park,label,projectName}){
     if(!element)return;
-    if(!park||!park.name){element.textContent="— (önce park algıla)";element.style.color="var(--mut)";return;}
-    element.textContent=projectName(park.name,label||"");element.style.color="var(--ink)";
+    if(!park||!park.name){element.removeAttribute?.("translate");element.textContent="— (önce park algıla)";element.style.color="var(--mut)";return;}
+    element.setAttribute?.("translate","no");element.textContent=projectName(park.name,label||"");element.style.color="var(--ink)";
   }
 };

@@ -9,8 +9,8 @@ window.DG_MEASUREMENT_PROJECT_PARK_BOX=(()=>{
     bind(box,actions);
     if(park&&park.name){
       box.className="alert ok";
-      box.innerHTML=`<b>🌳 Algılanan park: ${escape(park.name)}</b>${park.area_m2?" · "+formatArea(park.area_m2):""}${park.osm_key?` · <span class="mono" style="font-size:.72rem">${escape(park.osm_key)}</span>`:""}`+
-        `<br><span style="font-size:.8rem">Proje adı otomatik "<b>${escape(park.name)}</b> - <i>etiket</i>" olacak. Aynı parkı başkaları da algıladığında veriler karşılaştırmada tek satırda birleşir.</span>`;
+      box.innerHTML=`<b><span>🌳 Algılanan park:</span> <span translate="no">${escape(park.name)}</span></b>${park.area_m2?" · "+formatArea(park.area_m2):""}${park.osm_key?` · <span class="mono" style="font-size:.72rem">${escape(park.osm_key)}</span>`:""}`+
+        `<br><span style="font-size:.8rem"><span>Proje adı:</span> <b translate="no">${escape(park.name)}</b> · <i>etiket</i><br><span>Aynı parkın çalışmaları ortak park kimliğiyle karşılaştırılır.</span></span>`;
       if(park.city&&getElement("pCity")&&getElement("pCity").value==="Ankara")getElement("pCity").value=park.city;
       if(park.country&&getElement("pCountry")&&getElement("pCountry").value==="Türkiye")getElement("pCountry").value=park.country;
     }else{

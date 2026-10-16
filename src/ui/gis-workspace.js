@@ -14,7 +14,7 @@
  const mapToolsView=window.DG_GIS_WORKSPACE_MAP_TOOLS_VIEW.create({getElement:$,el,getMapTool:()=>mapTool,activateTool,closeTool,setStatus,focusPark,coordinateQuery,copyCoordinate});
  const view=()=> $("v-map");
  const editorActive=()=>!!view()?.classList.contains("surface-review-active");
- function txt(node,s){if(node&&node.textContent!==s)node.textContent=s;}
+ function txt(node,s){const value=typeof dgT==="function"?dgT(s):s;if(node&&node.textContent!==value)node.textContent=value;}
  function el(tag,cls,content){
   const n=document.createElement(tag);if(cls)n.className=cls;
   if(content!=null)n.textContent=content;return n;
@@ -56,7 +56,7 @@
   bar.querySelector(".dg-ux-output-menu")?.remove();
   if(coreFile){
    const verified=coreFile.querySelector('button[onclick*="dgSensExportPng"]');
-   if(verified&&verified.textContent!=="🖼️ Doğrulanmış Harita")verified.textContent="🖼️ Doğrulanmış Harita";
+   txt(verified,"🖼️ Doğrulanmış Harita");
   }
   for(const id of ["gridProject","gridSize","refHa","gridClearance"]){
    const input=$(id),label=input?.parentElement?.querySelector(".dg-png-label");
@@ -88,7 +88,7 @@
  function coords(latlng){
   return latlng.lat.toFixed(6)+", "+latlng.lng.toFixed(6);
  }
- function setStatus(message){txt($("dgUxMapStatus"),message);}
+ function setStatus(message,values={}){const node=$("dgUxMapStatus");if(!node)return;node.setAttribute?.("data-i18n-text",message);node.setAttribute?.("data-i18n-values",JSON.stringify(values));txt(node,typeof dgTf==="function"?dgTf(message,values):message.replace(/\{(\w+)\}/g,(_,key)=>values[key]??""));}
  function closeTool(){
   if(mapInstance&&clickHandler)mapInstance.off("click",clickHandler);
   if(captureTarget&&captureClick)captureTarget.removeEventListener("click",captureClick,true);
@@ -118,7 +118,7 @@
   }
   if(mapTool==="area"&&drawPoints.length>2)L.polygon(drawPoints,{...style,fillOpacity:.1}).addTo(drawLayer);
   const length=pathLength(drawPoints);
-  setStatus(drawPoints.length+" köşe · "+(mapTool==="area"?(drawPoints.length>=3?unit(areaMeters(drawPoints),true):"Alan için en az 3 köşe seç"):"Mesafe: "+unit(length)));
+  setStatus(mapTool==="area"?(drawPoints.length>=3?"{n} köşe · Alan: {value}":"{n} köşe · Alan için en az 3 köşe seç"):"{n} köşe · Mesafe: {value}",{n:drawPoints.length,value:mapTool==="area"?unit(areaMeters(drawPoints),true):unit(length)});
  }
  function activateTool(mode){
   const m=getMap();
@@ -126,7 +126,13 @@
   // Measurement is a transient read-only map operation. The surface editor
   // may remain open, but its cell-popup and park-pick handlers must not fire.
   if(mapTool===mode){closeTool();setStatus("Ölçüm kapatıldı.");return;}
-  closeTool();mapInstance=m;mapTool=mode;drawLayer=L.layerGroup().addTo(m);
+  closeTool();
+  // Release edit pointer capture before entering read-only inspection.
+  if(window.DG_LC_SENS?.state?.brush&&typeof dgSensBrushStop==="function")dgSensBrushStop();
+  if(window.DG_LC_SENS?.state?.draw&&typeof dgSensDrawCancel==="function")dgSensDrawCancel();
+  if(window.DG_LC_SENS?.state?.objectPick&&typeof dgSensObjectCancel==="function")dgSensObjectCancel();
+  $("surfaceMenuBar")?.querySelectorAll(":scope > details[open]").forEach(menu=>{menu.open=false;});
+  mapInstance=m;mapTool=mode;drawLayer=L.layerGroup().addTo(m);
   clickHandler=e=>{if(e?.latlng){drawPoints.push(e.latlng);redraw();}};
   // Leaflet surface polygons handle a path's click and stop propagation.
   // Capture map clicks BEFORE Leaflet's SVG/canvas delegation (and PARK_MODE).
@@ -167,7 +173,7 @@
   const lat=Number(match[1].replace(",",".")),lon=Number(match[2].replace(",","."));
   if(!Number.isFinite(lat)||!Number.isFinite(lon)||Math.abs(lat)>90||Math.abs(lon)>180){setStatus("Geçerli WGS84 enlem/boylam girin.");return;}
   m.setView([lat,lon],Math.max(m.getZoom(),16));
-  setStatus("Konum: "+coords({lat,lng:lon}));
+  setStatus("Konum: {value}",{value:coords({lat,lng:lon})});
  }
  async function copyCoordinate(){
   const value=$("dgUxCoordInput")?.value.trim()||"";
@@ -306,6 +312,14 @@
   },true);
   window.addEventListener("resize",()=>{bar.querySelectorAll(":scope > details[open]").forEach(menuLayout.position);},{passive:true});
   window.visualViewport?.addEventListener("resize",()=>{bar.querySelectorAll(":scope > details[open]").forEach(menuLayout.position);},{passive:true});
+  document.addEventListener("scroll",()=>{bar.querySelectorAll(":scope > details[open]").forEach(menuLayout.position);},{passive:true,capture:true});
+  // Release the map after selecting an editing tool from its phone panel.
+  document.addEventListener("click",event=>{
+   const button=event.target?.closest?.('#v-map [data-dg-click="brushToggle"],#v-map [data-dg-click="drawStart"],#v-map [data-dg-click="objectPick"],#v-map [data-dg-click="hand"]');
+   if(!button||button.disabled)return;
+   closeTool();
+   setTimeout(()=>{const state=window.DG_LC_SENS?.state;if(state?.brush||state?.draw||state?.objectPick)bar.querySelectorAll(":scope > details[open]").forEach(menu=>{menu.open=false;});},0);
+  },true);
   document.addEventListener("keydown",e=>{if(e.key==="Escape"&&mapTool){closeTool();setStatus("Geçici ölçüm kapatıldı.");}});
   document.addEventListener("input",e=>{
    const input=e.target;

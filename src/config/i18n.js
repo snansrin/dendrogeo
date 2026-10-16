@@ -53,7 +53,7 @@ function dgApplyI18n(root){
  const w=document.createTreeWalker(root,NodeFilter.SHOW_TEXT|NodeFilter.SHOW_ELEMENT);
  let n=w.currentNode=root;
  const nodes=[];
- if(root.nodeType===3)nodes.push(root);
+ if(root.nodeType===3||root.nodeType===1)nodes.push(root);
  while((n=w.nextNode()))nodes.push(n);
  for(const nd of nodes){
   if(nd.nodeType===3){
@@ -68,6 +68,15 @@ function dgApplyI18n(root){
    }
   }else if(nd.nodeType===1){
    if(nd.closest&&nd.closest(DG_I18N_SKIP)&&nd!==root)continue;
+   // Retain the original template across language switches and count changes.
+   for(const target of ["text","aria-label"]){
+    const template=nd.getAttribute("data-i18n-"+target);
+    if(!template)continue;
+    let values={};try{values=JSON.parse(nd.getAttribute("data-i18n-values")||"{}");}catch(e){}
+    const value=dgTf(template,values);
+    if(target==="text"){if(nd.textContent!==value)nd.textContent=value;}
+    else if(nd.getAttribute(target)!==value)nd.setAttribute(target,value);
+   }
    for(const at of ["placeholder","title","aria-label","data-label","alt"]){
     const v=nd.getAttribute&&nd.getAttribute(at);
     if(v){const tv=dgT(v); if(tv!==v)nd.setAttribute(at,tv);}
@@ -100,6 +109,8 @@ function dgToggleLang(){ dgSetLang(DG_LANG==="en"?"tr":"en"); }
 if(typeof window!=="undefined"&&"MutationObserver" in window){
  const mo=new MutationObserver(muts=>{
   for(const m of muts){
+   if(m.type==="characterData"){dgApplyI18n(m.target);continue;}
+   if(m.type==="attributes"){dgApplyI18n(m.target);continue;}
    for(const nd of m.addedNodes){
     if(nd.nodeType===1){ if(nd.closest&&nd.closest(DG_I18N_SKIP))continue; dgApplyI18n(nd); }
     else if(nd.nodeType===3){
@@ -111,7 +122,7 @@ if(typeof window!=="undefined"&&"MutationObserver" in window){
    }
   }
  });
- const startMo=()=>{ if(document.body)mo.observe(document.body,{childList:true,subtree:true}); };
+ const startMo=()=>{ if(document.body)mo.observe(document.body,{childList:true,characterData:true,attributes:true,attributeFilter:["placeholder","title","aria-label","data-label","alt","data-i18n-values"],subtree:true}); };
  if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",startMo);else startMo();
 }
 

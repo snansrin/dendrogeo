@@ -17,7 +17,7 @@ function bindProjectActions(container,actions){
 window.DG_MEASUREMENT_PROJECT_DIRECTORY_UI={
   render({projects,element,escape,optionLabel,restore,renderCard,editing,actions}){
     const rows=projects||[];
-    const options=rows.map(project=>`<option value="${project.id}">${escape(optionLabel(project))}</option>`).join("");
+    const options=rows.map(project=>`<option value="${project.id}" ${project.park_id?'translate="no"':`data-i18n-text="⛔ {name} (park yok)" data-i18n-values="${escape(JSON.stringify({name:project.name||""}))}"`}>${escape(optionLabel(project))}</option>`).join("");
     const empty="<option value=''>Önce park algıla → proje oluştur</option>";
     for(const id of ["mProject","nProject"]){const select=element(id);if(select)select.innerHTML=options||empty;}
     restore();

@@ -8093,6 +8093,69 @@
           "sha256": "36bc5ae7e4e4c407344f9340454071a146098ec8262c1c8224d1fee1c1e65e3b"
         }
       ]
+    },
+    {
+      "id": "mobile-map-tools-runtime-language-2026-10-16",
+      "date": "2026-10-16",
+      "scope": "User-authorized modularization: mobile GIS tool reliability and English UI corrections: dismiss transient tool pickers, prevent brush/inspection capture conflicts, keep viewport positioning aligned on scroll, preserve user data while translating dynamic templates and inserted attributes. Real touch regressions cover distance, area, brush, rectangle/circle/polygon and bilingual populated records/projects. Scientific computations, accepted geometries, RLS and publication snapshots remain unchanged.",
+      "audit_chain": "sha256-v1",
+      "files": [
+        {
+          "path": ".github/workflows/mobile-smoke.yml",
+          "previous_sha256": "2fcbe2ebc1f55c5b8c4023f23ed99a9e534f93ef1c645b3ff7e6a18301f49e6c",
+          "sha256": "c6ef7c36b5e3c478dc824ce7c0a849a8e19899766d225ad382ec167a4f3c730d"
+        },
+        {
+          "path": "index.html",
+          "previous_sha256": "ef217ad0adcefa64f6d3cd8a33c358cd9bf3a7b525aca856e89c5cf61744f611",
+          "sha256": "458be183a5cf4b17ce39457e0622f2a4065c63d3ea3a774f7e7ba8d9db49f663"
+        },
+        {
+          "path": "scripts/check-phone.mjs",
+          "previous_sha256": "e01d6e739dda5d8dcbd84274cb9e9eff475fa1045060e26a8f0f10ec95241fad",
+          "sha256": "22b147c9abe73f79ffd7d9bfbf442c909b44a27570bd95cada6a6b551876d11e"
+        },
+        {
+          "path": "scripts/drawing-smoke.mjs",
+          "previous_sha256": "74ee8114ce09a38df9abade424404b8c573d4099d9a618626d6711eb3de191f3",
+          "sha256": "c93aec619d579dc56bd57dc650591e6a040d9de33924a1aa4a31760232a9396b"
+        },
+        {
+          "path": "src/config/i18n.js",
+          "previous_sha256": "0602cb4e853c4723f42a4483929d4440c1f58f5f539128c8a9af38a2221f376a",
+          "sha256": "8e6e15fb223a550bef94b5bc0814c5a8a8cdd0fef2ced2c297245e28b1eab430"
+        },
+        {
+          "path": "src/ui/measurement-project-card.js",
+          "previous_sha256": "0c8b16e6a03ce88ac323967cae2851a60d369353d7b350d1619c4e1c312764fe",
+          "sha256": "95c0528faf4e1b393a0f2024125462c39715bb20173482a613e2abf0ebbd779e"
+        },
+        {
+          "path": "src/ui/measurement-project-name-preview.js",
+          "previous_sha256": "ed5f289c5d1a7ef6060552510f677c98dcbacfbca29ec92874440f7b86ad462f",
+          "sha256": "8d202f02603c5b34005ae352decd140a93c685f14bd6bd6c854be1a511cf23e4"
+        },
+        {
+          "path": "src/ui/measurement-project-park-box.js",
+          "previous_sha256": "cc0ed9aeb915012de184ba378c92c4324c936e9c0eb389516552c664fd5ff2dd",
+          "sha256": "cb355960e7f42d060082b03b690c39c13f43fc06274de2f06b4598e98966b5be"
+        },
+        {
+          "path": "src/ui/park-collaboration-panel.js",
+          "previous_sha256": "c1ac2a2b143c1eef0df4f61c1368b2be853ffc62a8954e234b6c8857395ee2c5",
+          "sha256": "5806f4a866b4eff594acffa46c211bfae139fbcc7475cd46129a4ab609548c19"
+        },
+        {
+          "path": "src/ui/park-invite-inbox.js",
+          "previous_sha256": "11e2be513fd2a0fe85e2014344bc618a8ce7fc5f243a208ba2b76cca2689dd98",
+          "sha256": "6bfa6051546bc3f6e8f673a9e04c8b9dd561277547aecfc1e1fb57663873233b"
+        },
+        {
+          "path": "src/ui/render-measurement-project-directory.js",
+          "previous_sha256": "826492053f2cdc65607c35c3a7e2198858bb956f16a4d1bacdad529f9364752b",
+          "sha256": "7a8f070a697a7135850447d46da28cb58870d4c190ca3e7eae3b0779690011e1"
+        }
+      ]
     }
   ]
 }

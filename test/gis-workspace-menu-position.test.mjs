@@ -18,7 +18,15 @@ test('mobile menu panel stays within the visible viewport',()=>{
  const windowRef={innerWidth:390,innerHeight:844,visualViewport:{width:390,height:844,offsetTop:0,offsetLeft:0}};
  const panelNode=panel(300),place=position(windowRef);
  place(menu(panelNode,{bottom:70}));
- assert.deepEqual({...panelNode.style},{position:'fixed',left:'10px',right:'auto',top:'76px',width:'calc(100vw - 20px)',maxHeight:'756px'});
+ assert.deepEqual({...panelNode.style},{position:'fixed',left:'10px',right:'auto',top:'76px',width:'370px',maxHeight:'756px'});
+});
+
+test('phone menus use the visible width and offsets when the viewport is zoomed',()=>{
+ const panelNode=panel(300),place=position({innerWidth:390,innerHeight:844,visualViewport:{width:300,height:600,offsetTop:40,offsetLeft:15}});
+ place(menu(panelNode,{bottom:70}));
+ assert.equal(panelNode.style.left,'25px');assert.equal(panelNode.style.width,'280px');
+ assert.ok(parseFloat(panelNode.style.top)>=48);
+ assert.ok(parseFloat(panelNode.style.top)+parseFloat(panelNode.style.maxHeight)<=640);
 });
 
 test('desktop menu near the lower edge opens above the edge',()=>{

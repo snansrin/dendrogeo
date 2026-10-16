@@ -10,7 +10,7 @@
   if(status)status.textContent=changed?'Kaydedilmemiş değişiklikleriniz var.':'Bilgileriniz güncel. Tüm alanlar isteğe bağlıdır.';
   const count=fields.filter(input=>input.value.trim()).length;
   const progress=element.querySelector('[data-profile-progress]');if(progress)progress.value=count;
-  const label=element.querySelector('[data-profile-count]');if(label)label.textContent=count+' / '+fields.length+' bilgi';
+  const label=element.querySelector('[data-profile-count]');if(label){label.setAttribute('data-i18n-text','{filled} / {total} bilgi');label.setAttribute('data-i18n-values',JSON.stringify({filled:count,total:fields.length}));label.textContent=typeof dgTf==='function'?dgTf('{filled} / {total} bilgi',{filled:count,total:fields.length}):count+' / '+fields.length+' bilgi';}
  }
  function edit(element,key){
   const details=element.querySelector('[data-profile-editor]');if(!details)return;

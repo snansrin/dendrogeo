@@ -200,7 +200,8 @@ test('verified map export remains available while the redundant post-analysis PN
  const events=load('src/ui/gis-export-events.js');
  const workspace=load('src/ui/gis-workspace.js');
  const locked=load('src/ui/lc-sens.js');
- assert.match(workspace,/verified\.textContent="🖼️ Doğrulanmış Harita"/);
+ assert.match(workspace,/txt\(verified,"🖼️ Doğrulanmış Harita"\)/);
+ assert.match(workspace,/typeof dgT==="function"\?dgT\(s\):s/);
  assert.doesNotMatch(workspace,/legacy\.hidden=false|parkRasterExport|downloadParkImage/);
  assert.match(locked,/function dgSensExportPng\(\)/);
  assert.match(load('src/ui/render-verified-surface-map-export.js'),/dialog\.showModal\(\)/);

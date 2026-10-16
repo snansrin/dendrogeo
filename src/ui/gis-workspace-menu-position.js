@@ -17,7 +17,7 @@
     panel.style.left=(offsetLeft+10)+"px";
     panel.style.right="auto";
     panel.style.top=top+"px";
-    panel.style.width="calc(100vw - 20px)";
+    panel.style.width=Math.max(0,width-20)+"px";
     panel.style.maxHeight=Math.max(120,height+offsetTop-top-12)+"px";
     return;
    }
