@@ -8875,6 +8875,20 @@
           "sha256": "fbb990d93f460e40798c63ddce3f9f6148f5abe1f9746f926523818d372a940b"
         }
       ]
+    },
+    {
+      "id": "landing-license-link-contrast-2026-10-17",
+      "date": "2026-10-17",
+      "scope": "User-authorized modularization: preserve the dark publication-footer theme while making software and data license links accessible and visibly focused.",
+      "audit_chain": "sha256-v1",
+      "added_protected_files": [],
+      "files": [
+        {
+          "path": "index.html",
+          "previous_sha256": "596dad2cbfe5fc9527cfb16c4849bacf40e3d3413af5b377820d5937a9d90165",
+          "sha256": "d4e198b232c7c6b2e7f9b766c98bdcbd682cc3c5c58ad22f6764076dddf0eaf9"
+        }
+      ]
     }
   ]
 }
