@@ -160,12 +160,11 @@ describe('KVKK: açık rıza ve aydınlatma', () => {
 /* =========================================================
    3) LİSANS TUTARLILIĞI
 ========================================================= */
-describe('lisans tutarlılığı (CC BY-NC 4.0)', () => {
-  test('⭐ LICENSE artık CC BY-NC 4.0 (MIT değil)', () => {
-    const t = rd('LICENSE');
-    assert.match(t, /Attribution-NonCommercial 4\.0 International/);
-    assert.ok(!/MIT License/.test(t), 'MIT metni kalmamalı — çelişki yaratır');
-    assert.ok(t.length > 10000, 'tam lisans metni olmalı, kısaltma değil');
+describe('ikili lisans tutarlılığı (yazılım MIT, veri CC BY-NC 4.0)', () => {
+  test('yazılım ve veri için ayrı, tam lisans metinleri vardır', () => {
+    assert.match(rd('LICENSE'), /MIT License/);
+    assert.match(rd('LICENSE-DATA'), /Attribution-NonCommercial 4\.0 International/);
+    assert.ok(rd('LICENSE-DATA').length > 10000, 'tam CC BY-NC lisans metni olmalı');
   });
 
   test('NOTICE: telif sahipleri + atıf biçimi + üçüncü taraf lisansları', () => {
@@ -179,7 +178,8 @@ describe('lisans tutarlılığı (CC BY-NC 4.0)', () => {
 
   test('package.json lisans alanı tutarlı', () => {
     const pkg = JSON.parse(rd('package.json'));
-    assert.equal(pkg.license, 'CC-BY-NC-4.0');
+    assert.equal(pkg.license, 'MIT');
+    assert.match(rd('package-lock.json'), /"license": "MIT"/);
   });
 
   test('README, kullanım koşulları ve JSON-LD aynı lisansı söylüyor', () => {
@@ -187,8 +187,12 @@ describe('lisans tutarlılığı (CC BY-NC 4.0)', () => {
     assert.match(rd('kullanim-kosullari/index.html'), /CC BY-NC 4\.0/);
     assert.match(rd('kullanim-kosullari/index.html'), /LICENSE/, 'kullanıcı LICENSE dosyasına yönlendirilmeli');
     const head = rd('partials/head.html');
-    assert.match(head, /"license": "https:\/\/creativecommons\.org\/licenses\/by-nc\/4\.0\/"/);
-    assert.ok(!/MIT/.test(rd('kullanim-kosullari/index.html')), 'eski MIT ifadesi kalmamalı');
+    assert.match(head, /"@type": "WebApplication"[\s\S]*?"license": "https:\/\/opensource\.org\/license\/mit\//);
+    assert.match(head, /"@type": "Dataset"[\s\S]*?"license": "https:\/\/creativecommons\.org\/licenses\/by-nc\/4\.0\//);
+    assert.match(head, /"url": "https:\/\/dendrogeo\.org\/veri\/"/);
+    assert.ok(!/"identifier": "https:\/\/doi\.org\/10\.5281\/zenodo\.22948643"/.test(head), 'yazılım DOI veri kümesine bağlanmamalı');
+    assert.match(rd('kullanim-kosullari/index.html'), /MIT/);
+    assert.match(rd('kullanim-kosullari/index.html'), /LICENSE-DATA/);
   });
 });
 
@@ -207,8 +211,9 @@ describe('JSON-LD: Dataset, atıf ve yasal belge bağlantıları', () => {
     assert.equal(nodes.filter((n) => n['@type'] === 'Dataset').length, 1);
   });
 
-  test('⭐ Dataset DOI + lisans + gerçek kişi yaratıcılar', () => {
-    assert.equal(ds.identifier, 'https://doi.org/10.5281/zenodo.22948643');
+  test('Dataset lisansı + gerçek kişi yaratıcılar; yazılım DOI’si veri DOI’si değildir', () => {
+    assert.equal(ds.url, 'https://dendrogeo.org/veri/');
+    assert.equal(ds.identifier, undefined);
     assert.match(ds.license, /by-nc\/4\.0/);
     assert.ok(Array.isArray(ds.creator) && ds.creator.length === 2, 'creator kişi listesi olmalı');
     assert.equal(ds.creator[0]['@type'], 'Person');

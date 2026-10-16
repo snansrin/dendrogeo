@@ -5,7 +5,8 @@
 🌐 [DendroGeo sitesi](https://dendrogeo.org/) · [Ağaç envanteri](https://dendrogeo.org/agac-envanteri/) · [Karbon hesabı](https://dendrogeo.org/karbon-hesaplama/) · [Arazi örtüsü](https://dendrogeo.org/arazi-ortusu/) · [Kent parkları](https://dendrogeo.org/kent-parklari/) · [Yöntem](https://dendrogeo.org/yontem/) · [Rapor arşivi](https://dendrogeo.org/rapor/)
 
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.22948643.svg)](https://doi.org/10.5281/zenodo.22948643)
-[![License: CC BY-NC 4.0](https://img.shields.io/badge/License-CC%20BY--NC%204.0-lightgrey.svg)](https://creativecommons.org/licenses/by-nc/4.0/)
+[![Software License: MIT](https://img.shields.io/badge/Software-MIT-blue.svg)](LICENSE)
+[![Data License: CC BY-NC 4.0](https://img.shields.io/badge/Data-CC%20BY--NC%204.0-lightgrey.svg)](LICENSE-DATA)
 [![CI](https://github.com/snansrin/dendrogeo/actions/workflows/ci.yml/badge.svg)](https://github.com/snansrin/dendrogeo/actions/workflows/ci.yml)
 
 ---
@@ -50,7 +51,14 @@ Kök biyokütlesi `AGB × 0,26` olarak; toplam karbon stoğu ise toplam biyoküt
 
 DGR, DendroGeo park raporunun kalıcı iç kimliğidir. Yayımlanan rapor sessizce değiştirilmez; düzeltme ve geri çekmeler kayıtlı, şeffaf bir yayın süreciyle yürütülür. Yayımlanan raporlar ve durumları [Rapor Arşivi](https://dendrogeo.org/rapor/) sayfasından izlenebilir.
 
-> ⚠️ **ÖNEMLİ UYARI:** README başlığındaki Zenodo DOI, **yalnızca DendroGeo v3.0.0 yazılım sürüm kaydına** aittir. Bir park raporunun DOI'si, ancak o rapor için ayrıca atanmış ve yayımlanmışsa kullanılır; yazılım DOI'si, DGR rapor DOI'si veya saha verisi DOI'si olarak gösterilemez.
+> ⚠️ **ÖNEMLİ UYARI:** README başlığındaki Zenodo DOI, **yalnızca DendroGeo v3.0.0 yazılım sürüm kaydına** aittir. Bir park raporunun/veri kümesinin DOI'si, o yayın için ayrıca atanır; yazılım DOI'si veri DOI'si olarak gösterilemez.
+
+## Lisanslar
+
+- **Yazılım kodu** (DendroGeo kaynak kodu, testler ve yazılım betikleri): [MIT](LICENSE).
+- **DendroGeo tarafından yayımlanma yetkisi bulunan ve açıkça onaylanmış veri kümeleri/çıktıları:** [CC BY-NC 4.0](LICENSE-DATA). Kullanıcı kayıtları, izin ve yayın onayları kapsamında lisanslanır.
+- **Belgeler ve özgün editoryal/görsel içerik:** CC BY-NC 4.0. DendroGeo adı, logosu ve işaretleri ayrıca izin verilmedikçe kullanım lisansı kapsamında değildir.
+- Üçüncü taraf kodu, harita/raster kaynakları ve hizmetler kendi lisans ve atıf koşullarına tabidir: [üçüncü taraf envanteri](docs/THIRD_PARTY_LICENSES.md).
 
 ### Yazılım Atfı (BibTeX)
 ```bibtex
@@ -60,7 +68,7 @@ DGR, DendroGeo park raporunun kalıcı iç kimliğidir. Yayımlanan rapor sessiz
   year    = {2026},
   version = {3.0.0},
   doi     = {10.5281/zenodo.22948643},
-  license = {CC-BY-NC-4.0}
+  license = {MIT}
 }
 
 ## UI değişiklikleri için kabul listesi

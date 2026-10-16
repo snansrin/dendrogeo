@@ -24,8 +24,10 @@ abstract: >-
   park kimliği bazlı toplulaştırmalarla ve 10 m çözünürlüklü arazi örtüsü
   analizleriyle (ESA WorldCover 2021 v200 birincil, IO LULC 2020 çapraz
   doğrulama) birleştiren, çevrimdışı çalışabilen, kaynak kodu GitHub'da yayımlanan bir web GIS
-  uygulamasıdır. Ölçümler yönetici onayından geçerek CC BY-NC 4.0 lisanslı,
-  DOI ile sürümlenmiş kamuya açık bir veri setine dönüşür. Park sınırları
+  uygulamasıdır. Yazılım MIT lisanslıdır. Yalnızca hak sahiplerinin lisanslama
+  yetkisine sahip olduğu ve yayımlanması açıkça onaylanan veri kümeleri CC BY-NC
+  4.0 koşullarıyla paylaşılır; her veri yayını ayrı kapsam ve DOI bilgisi taşır.
+  Kullanıcı kayıtları ilgili izin ve yayın onaylarıyla sınırlıdır. Park sınırları
   OpenStreetMap geometrisinden türetilir ve her park tek bir kimlikte
   toplanır; böylece aynı parkta çalışan farklı kullanıcıların verileri
   karşılaştırmada tek satırda birleşir.
@@ -49,14 +51,14 @@ identifiers:
   - type: doi
     value: 10.5281/zenodo.22646300
     description: "Önceki sürüm (v1.0.0, 2026-09-07)"
-license: CC-BY-NC-4.0
+license: MIT
 version: "3.0.0"
 date-released: "2026-09-24"
 
 repository-code: "https://github.com/snansrin/dendrogeo"
 url: "https://dendrogeo.org/"
 issue-tracker: "https://github.com/snansrin/dendrogeo/issues"
-license-url: "https://creativecommons.org/licenses/by-nc/4.0/"
+license-url: "https://opensource.org/license/mit/"
 
 keywords:
   - tree inventory

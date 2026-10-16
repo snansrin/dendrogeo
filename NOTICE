@@ -1,30 +1,36 @@
 DendroGeo — Küresel Ağaç Envanteri ve Karbon Veri Sistemi
 Copyright (c) 2026 Nagihan ŞİRİN & Sinan ŞİRİN
 
-## DendroGeo içeriği
+## DendroGeo çift lisans kapsamı
 
-DendroGeo hak sahiplerinin yayımlama yetkisine sahip olduğu özgün kaynak kodu,
-arayüz, belge ve yazılım sürüm kaydı Creative Commons
-Attribution-NonCommercial 4.0 International (CC BY-NC 4.0) lisansı
-altındadır. Lisansın tam metni LICENSE dosyasında ve şu adreste bulunur:
-https://creativecommons.org/licenses/by-nc/4.0/
+- **Yazılım kodu:** DendroGeo tarafından yazılmış kaynak kodu, testler ve
+  yazılım/build betikleri kök dizindeki [LICENSE](LICENSE) uyarınca MIT'tir.
+- **Veri:** yalnızca DendroGeo hak sahiplerinin lisanslama yetkisine sahip
+  olduğu, yayımlanmak üzere açıkça onaylanmış DendroGeo veri kümeleri ve
+  bunların veri çıktıları [LICENSE-DATA](LICENSE-DATA) uyarınca CC BY-NC 4.0'tır.
+  Kullanıcıların kendi kayıtları, izin ve yayın onaylarıyla sınırlıdır.
+- **Belgeler ve özgün editoryal/görsel içerik:** CC BY-NC 4.0 kapsamındadır.
+- **Marka:** DendroGeo adı, logosu ve işaretleri MIT lisansıyla verilmiş
+  değildir; bu bildirim marka kullanım hakkı tanımaz.
 
-Bu bildirim üçüncü taraf yazılımı, harita/raster verisini, hizmet içeriğini,
-saha kullanıcısının yüklediği kayıtları veya kişisel verileri DendroGeo
-lisansı altına almaz. Her içerik kaynağının lisansı, atfı ve yayımlama izni
-ayrı değerlendirilir. Ticari kullanım izni için hak sahiplerine
-sinan@dendrogeo.org adresinden ulaşılabilir. Ayrıntılı ve sürüm bazlı kayıt:
-docs/THIRD_PARTY_LICENSES.md
+MIT lisans metni kaynak kodunun kopyalarında korunmalıdır. CC BY-NC 4.0
+ile paylaşılan materyal yeniden kullanılırken atıf, lisans bağlantısı ve
+değişiklik bildirimi korunmalı; ticari kullanım için ayrıca izin alınmalıdır.
+Üçüncü taraf yazılımı, harita/raster verisi ve hizmetler DendroGeo
+lisanslarına dahil değildir. Lisans ve atıf envanteri:
+docs/THIRD_PARTY_LICENSES.md.
 
 Önerilen yazılım atfı:
 "DendroGeo: Küresel Ağaç Envanteri ve Karbon Veri Sistemi.
 N. Şirin & S. Şirin (2026). https://github.com/snansrin/dendrogeo
-Lisans: CC BY-NC 4.0"
+Lisans: MIT"
 
-Zenodo DOI 10.5281/zenodo.22948643 DendroGeo yazılım sürüm kaydına aittir.
-Bu DOI bir park raporuna veya kullanıcı kaynaklı veri setine aitmiş gibi
-gösterilmemelidir. Her rapor/veri yayını kendi DOI'sine ve veri lisansına
-sahipse bunları ayrıca belirtmelidir.
+Zenodo DOI 10.5281/zenodo.22948643, yayımlanmış v3.0.0 yazılım sürüm
+kaydına aittir; bir park raporu veya veri kümesi DOI'si değildir. Bu
+deponun yeni sürüm lisans beyanı MIT olarak güncellenmiştir. Önceden
+yayımlanmış Zenodo kayıtlarının metadata/lisansı bu depo değişikliğiyle
+geriye dönük değiştirilmez. Her veri yayını kendi kapsamını, lisansını ve
+DOI'sini ayrıca belirtir.
 
 ## Başlıca üçüncü taraf bileşen ve kaynaklar
 

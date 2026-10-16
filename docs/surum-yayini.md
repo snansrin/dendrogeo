@@ -113,7 +113,7 @@ Release yayımlandıktan birkaç dakika sonra:
    (başlık, yazarlar, lisans, anahtar kelimeler, sürüm, tarih)
 3. Kontrol edin:
    * **Upload type:** Software
-   * **License:** CC BY-NC 4.0
+   * **License:** MIT (software release; `CITATION.cff` is authoritative)
    * **Authors:** Nagihan ŞİRİN, Sinan ŞİRİN (+ ORCID varsa profiller eşleşir)
    * **Related identifiers:** DOI (kavram DOI'si), repository URL
    * **Description:** `CITATION.cff`'teki `abstract`

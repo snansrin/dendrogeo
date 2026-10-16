@@ -8,13 +8,13 @@ Bu envanter, repoda veya çalışan sitede kullanılan üçüncü taraf yazılı
 
 ## DendroGeo içeriğinin kapsamı
 
-DendroGeo'nun hak sahiplerinin yayımlama yetkisine sahip olduğu özgün kodu, arayüzü, belgeleri ve sürümlenmiş yazılım yayını, kök dizindeki [LICENSE](../LICENSE) uyarınca CC BY-NC 4.0 koşullarına tabidir. Bu bildirim:
+DendroGeo tarafından yazılmış yazılım kodu, testler ve yazılım betikleri kök dizindeki [LICENSE](../LICENSE) uyarınca MIT lisanslıdır. Hak sahiplerinin lisanslama yetkisine sahip olduğu, yayımlanmak üzere açıkça onaylanmış DendroGeo veri kümeleri ve çıktıları [LICENSE-DATA](../LICENSE-DATA) uyarınca CC BY-NC 4.0 lisanslıdır. Özgün belgeler ve editoryal/görsel içerik CC BY-NC 4.0 kapsamındadır. DendroGeo marka ve logosu bu lisanslardan kullanım hakkı almaz. Bu bildirim:
 
 - üçüncü taraf yazılımı, harita karolarını, raster verisini veya uzaktan sunulan hizmetleri yeniden lisanslamaz;
 - saha kullanıcılarının yüklediği ölçüm, fotoğraf, konum veya kişisel veriye kendiliğinden açık lisans vermez;
 - bir parka, araştırmaya, katılımcıya ya da ölçüm kaydına ilişkin yayın izni oluşturmaz.
 
-Kullanıcı kaynaklı verinin yayımlanması için ilgili hak, izin, aydınlatma ve onaylar ayrıca değerlendirilmelidir. DendroGeo raporlarının her biri kendi veri kaynağını, kapsamını, atıflarını ve varsa yayın/DOI kaydını belirtir.
+Kullanıcı kaynaklı verinin yayımlanması için ilgili hak, izin, aydınlatma ve onaylar ayrıca değerlendirilmelidir. DendroGeo raporlarının her biri kendi veri kaynağını, kapsamını, atıflarını, lisansını ve varsa yayın/DOI kaydını belirtir. Zenodo `10.5281/zenodo.22948643` v3.0.0 yazılım kaydıdır; veri yayınına ait değildir. Yeni kaynak sürümleri için [CITATION.cff](../CITATION.cff) yazılımı MIT olarak bildirir; bu repo değişikliği eski Zenodo kayıtlarının metadata'sını değiştirmez.
 
 ## Siteye dağıtılan yazılım
 

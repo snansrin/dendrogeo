@@ -508,9 +508,10 @@ const DG_I18N_EN={
 "Ağaç envanteri, karbon hesabı, harita ve park ölçeğinde arazi örtüsü analizi.":"Tree inventory, carbon computation, mapping and park-scale land-cover analysis.",
 "Referanslar":"References","KVKK Aydınlatma":"KVKK Disclosure (TR)","Gizlilik Politikası":"Privacy Policy (TR)",
 "Kullanım Koşulları":"Terms of Use (TR)","Künye & İletişim":"Imprint & Contact (TR)","Hakkımızda":"About",
-"🔒 Bu site izleme çerezi, reklam ve üçüncü taraf analitik kullanmaz. Kod CC BY-NC 4.0 · veri DOI: 10.5281/zenodo.22948643":"🔒 This site uses no tracking cookies, ads or third-party analytics. Code CC BY-NC 4.0 · data DOI: 10.5281/zenodo.22948643",
+"🔒 Bu site izleme çerezi, reklam ve üçüncü taraf analitik kullanmaz. Yazılım MIT · veri CC BY-NC 4.0 · yazılım DOI: 10.5281/zenodo.22948643":"🔒 This site uses no tracking cookies, ads or third-party analytics. Software MIT · data CC BY-NC 4.0 · software DOI: 10.5281/zenodo.22948643",
 "📚 Kaynakça":"📚 Bibliography","📝 Atıf & Lisans":"📝 Citation & License",
 "Veri Lisansı:":"Data License:","CC BY-NC 4.0 — Ticari olmayan kullanımda, kaynak gösterilerek serbestçe paylaşılabilir.":"CC BY-NC 4.0 — freely shareable for non-commercial use with attribution.",
+"Yazılım kodu":"Software code","Yayımlanan veri":"Published data","Yayımlanması onaylanmış DendroGeo verisi":"DendroGeo data approved for publication","Üçüncü taraf içerikler kendi lisanslarına tabidir.":"Third-party content remains under its own license.","yazılım DOI":"software DOI",
 "⚖️ Politikalar":"⚖️ Policies","Veri Doğruluk Politikası":"Data Accuracy Policy",
 "Üretici · Sinan ŞİRİN":"Producer · Sinan ŞİRİN",
 /* === uygulama kabuğu: üst bar + menü === */
