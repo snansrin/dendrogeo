@@ -66,4 +66,3 @@ ${renderReportDocumentBackmatter({renderProvenancePresentation, provenance: {eng
 </html>`;
 };
 }
-

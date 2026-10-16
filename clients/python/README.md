@@ -10,4 +10,3 @@ Read-only Python client for public, immutable DendroGeo reports. It uses the Pyt
 The default endpoint is https://dendrogeo.org/rapor/. A test server or mirror can be supplied with DendroGeoClient(base_url=...). Only names listed in the report manifest can be downloaded. The client is read-only and cannot publish, edit, or access private data.
 
 Client code is MIT licensed. Each report states its own data license and source terms in metadata.json.
-

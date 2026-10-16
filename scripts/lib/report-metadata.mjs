@@ -107,4 +107,3 @@ export function createReportMetadata(snap, { id, hash, version = '1.0', meta = n
     ],
   };
 }
-

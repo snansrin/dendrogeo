@@ -53,4 +53,3 @@ test('open-review schema, policy, and tests are present and publication is opt-i
   assert.match(read('scripts/lib/report-document-composition.mjs'),/renderPublicPeerReview/);
   assert.match(read('scripts/lib/report-metadata.mjs'),/peerReviewContributors/);
 });
-

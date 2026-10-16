@@ -88,4 +88,3 @@ export function renderPublicPeerReview(record, esc) {
   }).join("");
   return '<section class="report-open-review" aria-labelledby="open-review-title"><h2 id="open-review-title">Açık hakem değerlendirmesi</h2><p>Bu kayıt DendroGeo raporuna ait şeffaflık bilgisidir; dergi değerlendirmesi veya dergi kabulü anlamına gelmez.</p>' + events + '</section>';
 }
-

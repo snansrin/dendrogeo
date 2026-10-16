@@ -26,4 +26,3 @@ Install with R CMD INSTALL clients/r/dendrogeo. Requires R 4.1 or later and httr
 ## Stability
 
 The DGR identifier format and report metadata schema are versioned separately from the client packages. The clients reject malformed identifiers, unknown artifact paths, mismatched report IDs, and SHA-256 mismatches. The public Pages URL is a read-only distribution endpoint, not a general-purpose API or service-level agreement.
-

@@ -23,4 +23,3 @@ Separate observed measurements, external source data, derived values, and editor
 Use GitHub Issues for reproducible software problems and feature requests. For security issues, follow SECURITY.md and avoid posting exploitable details publicly.
 
 By participating, you agree to follow CODE_OF_CONDUCT.md.
-

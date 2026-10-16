@@ -76,4 +76,3 @@ dgr_artifact <- function(report_id, name, base_url = "https://dendrogeo.org/rapo
   tryCatch(jsonlite::fromJSON(rawToChar(raw), simplifyVector = FALSE),
     error = function(e) stop(sprintf("Invalid JSON in %s: %s", label, conditionMessage(e)), call. = FALSE))
 }
-

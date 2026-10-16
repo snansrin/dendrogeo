@@ -44,4 +44,3 @@ jobs:
           extra-packages: any::rcmdcheck
       - name: Check R package
         run: Rscript -e 'rcmdcheck::rcmdcheck("clients/r/dendrogeo", args = c("--no-manual"), error_on = "error")'
-

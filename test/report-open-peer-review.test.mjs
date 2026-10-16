@@ -53,4 +53,3 @@ test('review text is escaped in the public report renderer',()=>{
   assert.doesNotMatch(html,/<script>/);
   assert.match(html,/DendroGeo raporuna ait şeffaflık bilgisi/);
 });
-

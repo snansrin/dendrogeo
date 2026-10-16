@@ -7,4 +7,3 @@ test_that("DGR identifiers are strictly validated", {
 test_that("artifact names cannot traverse paths", {
   expect_error(dendrogeo::dgr_artifact("DGR-2026-0026", "../private.json"), "Invalid artifact name")
 })
-

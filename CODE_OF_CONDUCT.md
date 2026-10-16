@@ -24,4 +24,3 @@ Report concerns privately to sinan@dendrogeo.org. Reports will be handled as con
 ## Attribution
 
 Adapted from Contributor Covenant version 2.1. This governance text does not alter the software or dataset licenses.
-

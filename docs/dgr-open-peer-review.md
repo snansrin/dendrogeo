@@ -22,4 +22,3 @@ The machine-readable contract is docs/schemas/dgr-open-peer-review-v1.schema.jso
 ## Governance
 
 Reviewers must disclose relevant conflicts of interest. Editors should record assignment and disposition decisions. Authors remain responsible for the data and response. The record identifies review policy and limitations. This schema and renderer do not assign reviewers or grant database access.
-

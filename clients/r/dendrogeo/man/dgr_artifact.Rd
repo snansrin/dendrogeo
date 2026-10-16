@@ -10,4 +10,3 @@
   \item{timeout}{Per-request timeout in seconds.}
 }
 \value{Raw bytes for the verified artifact.}
-

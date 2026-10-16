@@ -10,4 +10,3 @@
 }
 \value{A list containing \code{manifest}, \code{metadata}, and \code{data}.}
 \details{Read-only. No account, private data, or Supabase access is used.}
-

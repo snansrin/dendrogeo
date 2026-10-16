@@ -64,4 +64,3 @@ QGIS Development Team. (2026). *QGIS Geographic Information System*. https://qgi
 U.S. Forest Service. (2026). *i-Tree Eco*. https://www.itreetools.org/tools/i-tree-eco
 
 Şirin, N. & Şirin, S. (2026). *DendroGeo: Küresel Ağaç Envanteri ve Karbon Veri Sistemi* (Version 3.0.0) [Software]. Zenodo. https://doi.org/10.5281/zenodo.22948643
-

@@ -88,4 +88,3 @@ DendroGeo source code is available at https://github.com/snansrin/dendrogeo and 
 Chave, J. et al. Improved allometric models to estimate the aboveground biomass of tropical trees. *Global Change Biology* 20, 3177–3190 (2014). https://doi.org/10.1111/gcb.12629
 
 ESA WorldCover team. *ESA WorldCover 10 m 2021 v200*. https://doi.org/10.5281/zenodo.7254221
-

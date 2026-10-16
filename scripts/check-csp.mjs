@@ -120,4 +120,3 @@ const kullanilmayan = [...izinli].filter(
 if (kullanilmayan.length) {
   console.log(`ℹ️  Kodda geçmeyen ama izin verilen origin'ler (daraltılabilir): ${kullanilmayan.join(', ')}`);
 }
-

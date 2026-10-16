@@ -292,4 +292,3 @@ describe('depoda kişisel e-posta sızıntısı yok', () => {
     assert.match(rd('SECURITY.md'), /security@dendrogeo\.org/);
   });
 });
-

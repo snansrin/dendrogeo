@@ -94,4 +94,3 @@ class DendroGeoClient:
         if result["metadata"].get("identifier") != report_id:
             raise DendroGeoError("metadata identifier does not match the requested report")
         return result
-
