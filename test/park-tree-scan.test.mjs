@@ -38,3 +38,8 @@ test('imagery failure cannot become a complete park count',async()=>{const value
 
 test('unsupported model labels are an integration error, not a zero-tree result',()=>{const chip=planner.plan(park).chips[0];assert.throws(()=>results.collect(raw([{...row(),class:'unknown-class'}]),chip),/model_labels_mismatch/);});
 test('park readiness is explicit before scanning and cleared when the park disappears',()=>{const value=app();value.controller.contextChanged();assert.equal(value.states.at(-1).parkReady,true);value.changePark(null);value.controller.contextChanged();assert.equal(value.states.at(-1).parkReady,false);assert.equal(value.states.at(-1).result,null);});
+
+test('scale trials retain native pixels, overlap and budgets; changing scale never runs inference',()=>{
+ for(const size of[768,1024,1536]){const plan=planner.plan(park,{size});assert.equal(plan.windowPixels,size);assert.equal(plan.overlapPixels,128);assert.ok(plan.chips.every(c=>c.width===size&&c.height===size&&c.zoom===19));assert.equal(plan.sourceResolutionM,null);}
+ assert.throws(()=>planner.plan(park,{size:2048}),/park_required/);const value=app();value.controller.setWindowPixels(768);assert.equal(value.api.calls,0);assert.equal(value.states.at(-1).windowPixels,768);assert.equal(value.states.at(-1).result,null);
+});

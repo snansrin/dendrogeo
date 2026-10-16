@@ -10,7 +10,7 @@
  const translate=text=>typeof root.dgT==='function'?root.dgT(text):text;
  const source=url=>root.DG_PUBLIC_LANDING_SCENE.load(url);
  function mount(host){
-  const mode=host.dataset.landingScene,canvas=host.querySelector('[data-scene-canvas]'),output=host.querySelector('[data-scene-output]');let data=null,loading=false,points=[],shape='polygon',selected='all';
+  const mode=host.dataset.landingScene,canvas=host.querySelector('[data-scene-canvas]'),output=host.querySelector('[data-scene-output]');let data=null,loading=false,points=[],shape='polygon',selected='all',zoom=1;
   function showText(selector,text){const node=host.querySelector(selector);if(node)node.textContent=translate(text);}
   function selectReport(key){const section=report[key];if(!section)return;
    showText('[data-report-title]',section.title);showText('[data-report-subtitle]',section.subtitle);showText('[data-report-body]',section.body);
@@ -21,11 +21,11 @@
   if(mode==='report'){host.addEventListener('click',event=>{const button=event.target.closest('[data-report-pick]');if(button)selectReport(button.dataset.reportPick);});selectReport('results');return;}
   const controls=host.querySelectorAll('[data-scene-pick],[data-scene-shape],[data-scene-clear]');controls.forEach(button=>{button.disabled=true;});
   function pick(key){if(!data)return;selected=key;
-   canvas.querySelectorAll('[data-scene-class]').forEach(path=>{path.classList.toggle('is-muted',key!=='all'&&path.dataset.sceneClass!==key);path.classList.toggle('is-selected',key!=='all'&&path.dataset.sceneClass===key);});
+   canvas.querySelectorAll('[data-scene-class]').forEach(path=>{if(mode!=='drawing')path.setAttribute('aria-pressed',String(key===path.dataset.sceneClass));path.classList.toggle('is-muted',key!=='all'&&path.dataset.sceneClass!==key);path.classList.toggle('is-selected',key!=='all'&&path.dataset.sceneClass===key);});
    host.querySelectorAll('[data-scene-pick]').forEach(button=>button.setAttribute('aria-pressed',String(button.dataset.scenePick===key)));
    const total=Object.values(data.areas).reduce((a,b)=>a+b,0),value=key==='all'?total:data.areas[key];
    if(mode==='ndvi'){const template=translate(key==='all'?'{n} hücre · en az 3 ayrı tarih':labels[key]+' · park içi göreli sınıf');output.textContent=template.replace('{n}',data.ndvi.count.toLocaleString(document.documentElement.lang==='en'?'en-GB':'tr-TR'));}
-   else if(value!==undefined){output.textContent=translate(labels[key])+' · '+(value/10000).toLocaleString('tr-TR',{minimumFractionDigits:3,maximumFractionDigits:3})+' ha';showText('[data-scene-share]',key==='all'?'14 Ekim 2026 · kabul edilmiş kayıt':(100*value/total).toLocaleString('tr-TR',{maximumFractionDigits:1})+'%');}
+   else if(value!==undefined){output.textContent=translate(labels[key])+' · '+(value/10000).toLocaleString(document.documentElement.lang==='en'?'en-GB':'tr-TR',{minimumFractionDigits:3,maximumFractionDigits:3})+' ha';showText('[data-scene-share]',key==='all'?new Date(data.acceptedAt).toLocaleDateString(document.documentElement.lang==='en'?'en-GB':'tr-TR')+' · '+translate('Kayıtlı analiz sonucu'):(100*value/total).toLocaleString(document.documentElement.lang==='en'?'en-GB':'tr-TR',{maximumFractionDigits:1})+'%');}
   }
   function renderSketch(){const target=canvas.querySelector('[data-scene-sketch]');if(!target)return;target.replaceChildren();if(!points.length)return;
    const svg=target.ownerSVGElement,ns='http://www.w3.org/2000/svg';let node;
@@ -35,14 +35,20 @@
    for(const point of points){const dot=document.createElementNS(ns,'circle');dot.setAttribute('cx',point[0]);dot.setAttribute('cy',point[1]);dot.setAttribute('r',4);dot.setAttribute('class','dg-scene-vertex');target.append(dot);}
    svg.classList.add('has-sketch');
   }
+  function zoomMap(amount){zoom=Math.max(1,Math.min(3,zoom+amount));const svg=canvas.querySelector('svg');if(svg){const w=600/zoom,h=460/zoom;svg.setAttribute('viewBox',[(600-w)/2,(460-h)/2,w,h].join(' '));}}
   function addPoint(point){if(shape!=='polygon'&&points.length===2)points=[];points.push(point);renderSketch();showText('[data-scene-output]','Geçici çizim · park sınırına kırpılan görünüm');}
   async function ensure(){if(data||loading)return;loading=true;host.setAttribute('aria-busy','true');
    try{data=await source(host.dataset.source);canvas.innerHTML=root.DG_RENDER_LANDING_SPATIAL_SCENE.render({data,mode,id:'landing-clip-'+mode});host.dataset.sceneReady='true';pick('all');
-    if(mode==='drawing'){showText('[data-scene-output]','Şekli seçin, haritada köşelere dokunun.');canvas.tabIndex=0;canvas.setAttribute('role','button');canvas.setAttribute('aria-label','Çizim alanı · Enter ile örnek köşe ekleyin');canvas.addEventListener('click',event=>{const svg=canvas.querySelector('svg'),matrix=svg.getScreenCTM();if(!matrix)return;const point=svg.createSVGPoint();point.x=event.clientX;point.y=event.clientY;const local=point.matrixTransform(matrix.inverse());addPoint([local.x,local.y]);});canvas.addEventListener('keydown',event=>{if(event.key==='Enter'||event.key===' '){event.preventDefault();const sample=shape==='polygon'?[[230,180],[350,170],[340,270],[245,285]]:[[230,180],[350,280]];addPoint(sample[points.length%sample.length]);}});}
+    canvas.addEventListener('click',event=>{if(mode==='drawing')return;const path=event.target.closest('[data-scene-class]');if(path)pick(path.dataset.sceneClass);});
+    canvas.addEventListener('keydown',event=>{if(mode==='drawing'||!['Enter',' '].includes(event.key))return;const path=event.target.closest('[data-scene-class]');if(path){event.preventDefault();event.stopPropagation();pick(path.dataset.sceneClass);}});
+    if(mode==='drawing'){canvas.querySelectorAll('[data-scene-class]').forEach(path=>{path.removeAttribute('tabindex');path.removeAttribute('role');path.removeAttribute('aria-pressed');path.removeAttribute('aria-label');});showText('[data-scene-output]','Şekli seçin, haritada köşelere dokunun.');canvas.tabIndex=0;canvas.setAttribute('role','button');canvas.setAttribute('aria-label','Çizim alanı · Enter ile örnek köşe ekleyin');canvas.addEventListener('click',event=>{const svg=canvas.querySelector('svg'),matrix=svg.getScreenCTM();if(!matrix)return;const point=svg.createSVGPoint();point.x=event.clientX;point.y=event.clientY;const local=point.matrixTransform(matrix.inverse());addPoint([local.x,local.y]);});canvas.addEventListener('keydown',event=>{if(event.key==='Enter'||event.key===' '){event.preventDefault();const sample=shape==='polygon'?[[230,180],[350,170],[340,270],[245,285]]:[[230,180],[350,280]];addPoint(sample[points.length%sample.length]);}});}
    }catch(error){data=null;showText('[data-scene-output]','Örnek yüklenemedi. Yeniden dene düğmesini kullanın.');host.dataset.sceneError='true';}finally{loading=false;controls.forEach(button=>{button.disabled=!data;});host.setAttribute('aria-busy','false');}
   }
   host.addEventListener('click',event=>{const button=event.target.closest('button');if(!button)return;
    if(button.dataset.scenePick)pick(button.dataset.scenePick);
+   if(button.dataset.sceneZoom){if(button.dataset.sceneZoom==='reset'){zoom=1;zoomMap(0);pick('all');}else zoomMap(Number(button.dataset.sceneZoom));}
+   if(button.hasAttribute('data-scene-undo')){points.pop();renderSketch();}
+   if(button.hasAttribute('data-scene-finish')){canvas.querySelector('[data-scene-sketch]')?.classList.toggle('is-finished',points.length>=3);showText('[data-scene-output]',points.length>=3?'Geçici çizim · park sınırına kırpılan görünüm':'Şekli seçin, haritada köşelere dokunun.');}
    if(button.dataset.sceneShape){shape=button.dataset.sceneShape;points=[];renderSketch();host.querySelectorAll('[data-scene-shape]').forEach(node=>node.setAttribute('aria-pressed',String(node===button)));showText('[data-scene-output]','Şekli seçin, haritada köşelere dokunun.');}
    if(button.hasAttribute('data-scene-clear')){points=[];renderSketch();showText('[data-scene-output]','Şekli seçin, haritada köşelere dokunun.');}
    if(button.hasAttribute('data-scene-retry')){delete host.dataset.sceneError;void ensure();}

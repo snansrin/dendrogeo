@@ -974,7 +974,11 @@
       "src/domain/trees/park-tree-scan-plan.js",
       "src/domain/trees/park-tree-scan-results.js",
       "src/adapters/trees/park-tree-imagery.js",
-      "src/ui/park-tree-candidate-layer.js"
+      "src/ui/park-tree-candidate-layer.js",
+      "scripts/lib/tree-detection-evaluation.mjs",
+      "scripts/evaluate-tree-detection.mjs",
+      "test/tree-detection-evaluation.test.mjs",
+      "scripts/landing-showcase-smoke.mjs"
     ],
     "modular_shell_action_safeguards": [
       "index.html",
@@ -1984,7 +1988,11 @@
     "src/domain/trees/park-tree-scan-plan.js": "128ba7ef654a5dd303788e72aaae060d5e4e03b58158b3c8ea8da870eb848c74",
     "src/domain/trees/park-tree-scan-results.js": "7993b6dcd642f9a273cc1e5d576d724676318613c1ee351b2ab914e8fc5403a1",
     "src/adapters/trees/park-tree-imagery.js": "a9e5f8a7b7357d2d1036cd58afe0051ebb117f70395941ce534b802b30110287",
-    "src/ui/park-tree-candidate-layer.js": "279fbd6ec43561fed83ff6becfba2e17b21c4b4891d08e6f231eb649a97586f3"
+    "src/ui/park-tree-candidate-layer.js": "279fbd6ec43561fed83ff6becfba2e17b21c4b4891d08e6f231eb649a97586f3",
+    "scripts/lib/tree-detection-evaluation.mjs": "a56ad6a599690675b8cc69f47e45888b1f969b1db901387d1d15917a42769ed0",
+    "scripts/evaluate-tree-detection.mjs": "910e090551f322fe7ac3131a11e167c1cebefc00844ed5558189ec975c0aa5fa",
+    "test/tree-detection-evaluation.test.mjs": "c76424138a4c42fb11573cb3517047b6953d8d70bc4438813bc8fdf36cb9b071",
+    "scripts/landing-showcase-smoke.mjs": "67695a1f1dc6b05ff7e3340125fde37f0f7f50d7c8d4a9631d6d13d42f29a33a"
   },
   "authorized_modularizations": [
     {
@@ -8732,6 +8740,70 @@
           "path": "src/ui/tree-detection-panel.js",
           "previous_sha256": "3e8b08dcf83324528e927db202ded95b34f5f01b6dc9d2d753a2b847c35ff71d",
           "sha256": "ec4844ef430b720f6622bf0fed9e17e5df18dab9f0a85407be0d53745d5805b6"
+        }
+      ]
+    },
+    {
+      "id": "landing-saved-goksu-tree-validation-2026-10-16",
+      "date": "2026-10-16",
+      "scope": "User-authorized modularization: update the public landing exhibit to the latest administrator-approved Goksu surface snapshot, preserve independent NDVI source context, layer measurement labels behind students on a full-width route, improve accessible landing picking/zoom/sketch interactions, add bounded image-scale trials and offline held-out tree validation. Update exhibit revision assertions and preserve all measurement, surface engine, account, accepted-data and publication behavior.",
+      "audit_chain": "sha256-v1",
+      "added_protected_files": [
+        "scripts/lib/tree-detection-evaluation.mjs",
+        "scripts/evaluate-tree-detection.mjs",
+        "test/tree-detection-evaluation.test.mjs",
+        "scripts/landing-showcase-smoke.mjs"
+      ],
+      "files": [
+        {
+          "path": "scripts/evaluate-tree-detection.mjs",
+          "previous_sha256": "910e090551f322fe7ac3131a11e167c1cebefc00844ed5558189ec975c0aa5fa",
+          "sha256": "7c99f8d589473a66ef4ac3e67655b125285e9871e5016eff167b309823c8f9d2"
+        },
+        {
+          "path": ".github/workflows/mobile-smoke.yml",
+          "previous_sha256": "638b936cb2682b13a4aca1d92d615c0dfd2f1166fd31ea95cf57f8ac23982d7b",
+          "sha256": "97d9843f6487fc2ae821a07876827e4b1b05670c7885dca20fb25d56adfcfc6c"
+        },
+        {
+          "path": "index.html",
+          "previous_sha256": "c44ab9128a541dd3f5fb8784aa4d048502064c54fa0bec3fc7292b77df015218",
+          "sha256": "40846a8def6f6d8080a6a2a6488e0757584b6ef19b70a49a308b01ee88372700"
+        },
+        {
+          "path": "partials/landing.html",
+          "previous_sha256": "0b99a841036b1f65ad98b388ff30e8d78396ac88dee0f2cd45a99bffa8af1fac",
+          "sha256": "bbca6a50d0ec06c90471337d9da5452e8025d0260f52d50d49545820bb2c7d1f"
+        },
+        {
+          "path": "scripts/check-phone.mjs",
+          "previous_sha256": "7323fd1f9a71a82c16c36cfa906bae319d2cb9157eba0b92009f53e25c1fd7d1",
+          "sha256": "f6900cf956a048bd1cf164227015f9881bc96a5c01319bc2a3e6125d9296db3d"
+        },
+        {
+          "path": "src/application/trees/detect-tree-candidates.js",
+          "previous_sha256": "1361a8e3378644fcc6f7aab6b9f5664b20d50fdad0a351ce50cb9f7d36e2475c",
+          "sha256": "d23af8f404637db9d6a2d5b0f9b7fe924e21328b6f6bebf0729c31905df6c207"
+        },
+        {
+          "path": "src/domain/trees/park-tree-scan-plan.js",
+          "previous_sha256": "128ba7ef654a5dd303788e72aaae060d5e4e03b58158b3c8ea8da870eb848c74",
+          "sha256": "a302b7459948622ec25d60edc14190c820000301c6edd7fa98d18b77034b1efb"
+        },
+        {
+          "path": "src/domain/trees/park-tree-scan-results.js",
+          "previous_sha256": "de4403cdf04c4cfe63c7a766498f0d0174d9c150b6122d64ab702bc62ef671cd",
+          "sha256": "ca973684ff3223c680bafbe1113830019a235bc2ba601b1794bc43138344b1f3"
+        },
+        {
+          "path": "src/ui/tree-detection-panel.js",
+          "previous_sha256": "ec4844ef430b720f6622bf0fed9e17e5df18dab9f0a85407be0d53745d5805b6",
+          "sha256": "015cdaa5479301d068e78e30a79b172518faee7c4ac9b05a26d5ad48ed83bb6d"
+        },
+        {
+          "path": "test/fix-0045.test.mjs",
+          "previous_sha256": "512e60ffacaeff8feac4aa0c62298b5b2208e76f95eac32d05404afac6d8db22",
+          "sha256": "ddacf38c73f50b10e152845fb2f69fdfda4cbdd9fea073a4b4ca285b687552a2"
         }
       ]
     }

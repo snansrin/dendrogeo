@@ -14,3 +14,5 @@
 .dg-tree-candidate span{overflow-wrap:anywhere;min-width:0;font-size:.82rem}
 .dg-tree-candidate button{flex-shrink:0}
 .dg-tree-body [data-tree-list]>summary{padding:8px 0}
+
+.dg-tree-quality{border-inline-start:3px solid var(--amber-ink);padding:8px 12px;background:var(--bg);border-radius:6px}

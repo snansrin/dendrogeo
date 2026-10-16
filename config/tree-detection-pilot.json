@@ -40,6 +40,17 @@
       0,
       100
     ],
-    "inferenceEvidence": "Authenticated scan requests returned HTTP 200 after the cloud-v0 transport fix on 2026-10-16; local detection/crown accuracy remains unvalidated."
+    "inferenceEvidence": "Authenticated scan requests returned HTTP 200 after the cloud-v0 transport fix on 2026-10-16; local detection/crown accuracy remains unvalidated.",
+    "windowPixels": [
+      768,
+      1024,
+      1536
+    ]
+  },
+  "localValidation": {
+    "status": "required",
+    "referenceDatasetAvailable": false,
+    "evaluationScript": "scripts/evaluate-tree-detection.mjs",
+    "plan": "docs/TREE-DETECTION-ACCURACY-2026-10-16.md"
   }
 }

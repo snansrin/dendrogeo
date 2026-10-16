@@ -1,17 +1,18 @@
 "use strict";
 (function(root){
  function create({getPark,plan,readImage,clearImages,infer,collect,summarize,present,makeAbortController,clock,yieldFrame}){
-  let epoch=0,pending=null,scan=null,rows=[],completed=0,result=null,state='empty',error=null,confidence=.5,startedAt=null;
+  let epoch=0,pending=null,scan=null,rows=[],completed=0,result=null,state='empty',error=null,confidence=.5,startedAt=null,windowPixels=1024;
   const samePark=()=>scan&&JSON.stringify(getPark())===scan.key;
-  function display(){if(scan)result=summarize(rows,scan,confidence,{completed,total:scan.chips.length,startedAt});present({state,error,result,confidence,parkReady:!!getPark()?.outer?.length,completed,total:scan?.chips.length||0});}
+  function display(){if(scan)result=summarize(rows,scan,confidence,{completed,total:scan.chips.length,startedAt});present({state,error,result,confidence,parkReady:!!getPark()?.outer?.length,windowPixels,completed,total:scan?.chips.length||0});}
   function clear(){epoch++;pending?.abort();pending=null;clearImages();scan=null;rows=[];completed=0;result=null;error=null;state='empty';display();}
   function contextChanged(){if(scan&&!samePark())clear();else if(!scan)display();}
   function setThreshold(value){if(!Number.isFinite(value)||value<0||value>1)return;confidence=value;display();}
+  function setWindowPixels(value){if(![768,1024,1536].includes(value)||value===windowPixels)return;windowPixels=value;clear();}
   function cancel(){epoch++;pending?.abort();pending=null;clearImages();error='cancelled';state=scan?'cancelled':'empty';display();}
   async function run(){
    if(pending)return;
    clear();const job=epoch;startedAt=clock();
-   try{scan=plan(getPark());}catch(e){state='error';error=e.message;display();return;}
+   try{scan=plan(getPark(),{size:windowPixels});}catch(e){state='error';error=e.message;display();return;}
    pending=makeAbortController();state='running';display();const signal=pending.signal;
    try{for(const chip of scan.chips){
     if(job!==epoch)return;if(!samePark()){clear();return;}
@@ -24,7 +25,7 @@
    }catch(e){if(job===epoch){state='error';error=e.name==='AbortError'?'cancelled':e.message;display();}}
    finally{if(job===epoch){pending=null;clearImages();}}
   }
-  return Object.freeze({run,cancel,clear,setThreshold,contextChanged});
+  return Object.freeze({run,cancel,clear,setThreshold,setWindowPixels,contextChanged});
  }
  root.DG_DETECT_TREE_CANDIDATES=Object.freeze({create});
 })(window);

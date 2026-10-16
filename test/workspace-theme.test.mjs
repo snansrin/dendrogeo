@@ -59,8 +59,10 @@ test('landing hero ölçüm alanlarını ağaç animasyonunun yanında erişileb
  assert.match(landing,/data-i18n="Ağaç boyu"[\s\S]*?13 m/);
  assert.match(landing,/aria-label="Örnek saha ölçümü"/);
  assert.ok(!landing.includes('ÇEVRE 45 cm → DBH 14.3 cm'));
- assert.match(rd('css/landing-scenes.css'),/\.hero-art \.chip\.c1\{top:43%/);
- assert.match(rd('css/landing-scenes.css'),/\.hero-art \.chip\.c3\{top:54%/);
+ assert.match(landing,/<foreignObject x="735" y="157"/);
+ assert.match(rd('css/landing-scenes.css'),/\.dg-svg-reading \.chip\{position:static/);
+ assert.match(landing,/<foreignObject x="735" y="211"/);
+ assert.ok(landing.indexOf('class="dg-tree-readouts"')<landing.indexOf('class="walkerA"'));
 });
 
 test('yayın öncesi form gerekli alanlarda örnek yardım balonları taşır',()=>{

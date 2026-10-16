@@ -31,3 +31,11 @@ test('report scene describes actual DGR sections instead of publishing a surface
  assert.match(controller,/7 · Kalite Kontrol ve Doğrulama/);assert.match(controller,/10 · Tekrar Üretilebilirlik/);assert.match(controller,/11 · Analiz Parmak İzi/);
  assert.doesNotMatch(controller,/sb\.|localStorage|sessionStorage|DG_LANDCOVER|DG_LC_S2/);
 });
+
+test('saved public surface is current while NDVI retains its original source context',()=>{
+ const data=JSON.parse(read('assets/landing/goksu-example.json')),scene=JSON.parse(read('assets/landing/goksu-scenes.json'));
+ assert.equal(data.source.acceptedAt,'2026-10-16T14:21:35.805Z');assert.equal(data.source.publicRpc,'dg_accepted_park_surface');assert.equal(data.source.snapshotSha256.length,64);
+ assert.deepEqual(scene.areas,data.areas);assert.equal(data.areas.hard,140542.2600498222);assert.ok(data.displayFeatures.length===5);
+ assert.equal(data.ndvi.surfaceContext.revision,26);assert.ok(data.ndvi.outer.length);assert.ok(scene.ndvi.outline);assert.notEqual(scene.ndvi.outline,scene.outline);
+ const html=read('partials/landing.html').toString();assert.ok(html.indexOf('class="dg-tree-readouts"')<html.indexOf('class="walkerA"'));assert.match(html,/foreignObject/);
+});

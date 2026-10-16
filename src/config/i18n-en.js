@@ -1722,3 +1722,9 @@ Object.assign(DG_I18N_EN,{
  "Kayıt ve çalışma özetim": "My records and work summary",
  "Profiliniz hesabınıza kaydedildi.": "Your profile has been saved to your account."
 });
+
+Object.assign(DG_I18N_EN,{"Görünümü sıfırla": "Reset scene view",
+"Haritaya veya sınıf düğmelerine dokunarak kayıtlı yüzeyleri inceleyin; alan değerleri son kabul edilmiş kayıttan okunur.": "Tap the map or class buttons to explore saved surfaces; areas come from the latest accepted record.",
+"16 Ekim 2026 · kabul edilmiş kayıt": "16 October 2026 · accepted record"});
+
+Object.assign(DG_I18N_EN,{"Örnek saha değerleri: çap 14,3 cm; tahmini karbon 40 kg C; ağaç boyu 13 m.":"Example field values: diameter 14.3 cm; estimated carbon 40 kg C; tree height 13 m."});

@@ -141,11 +141,13 @@ describe('0045 · gelişmiş canlı izleme — GEÇİCİ (DB yok)', () => {
 
 describe('Hero öğrenciler: 2026-10-02 kullanıcı isteğiyle yenilenen yüzler, korunan sahne', () => {
   test('öğrenci çizimleri aynı SVG içinde; dış görsel veya yeni yükleyici yok', () => {
-    const scene = landing.slice(landing.indexOf('<div class="hero-art"'), landing.indexOf('<div class="chip c1"'));
-    assert.match(scene, /viewBox="0 0 800 300"/);
+    const scene = landing.slice(landing.indexOf('<div class="hero-art"'), landing.indexOf('</svg>',landing.indexOf('<div class="hero-art"')));
+    assert.match(scene, /viewBox="0 0 900 300"/);
     assert.equal((scene.match(/class="walkerA"/g) || []).length, 1);
     assert.equal((scene.match(/class="walkerB"/g) || []).length, 1);
-    assert.doesNotMatch(scene, /<image\b|<foreignObject\b|<script\b/);
+    assert.doesNotMatch(scene, /<image\b|<script\b/);
+    assert.equal((scene.match(/<foreignObject\b/g)||[]).length,3);
+    assert.ok(scene.indexOf('class="dg-tree-readouts"')<scene.indexOf('class="walkerA"'));
     const ids = new Set([...scene.matchAll(/id="([^"]+)"/g)].map(m => m[1]));
     for (const m of scene.matchAll(/url\(#([^)]+)\)/g))
       assert.ok(ids.has(m[1]), 'eksik SVG boya tanımı: ' + m[1]);
