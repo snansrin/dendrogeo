@@ -6,7 +6,7 @@ import {fileURLToPath} from 'node:url';
 
 const ROOT=join(dirname(fileURLToPath(import.meta.url)),'..');
 const MANIFEST_PATH=join(ROOT,'docs/core-foundation-lock.json');
-const MANIFEST_SHA256="4abd9f3ef8640b25bb0dbea2e9c2e7ffbf82d9cf6782b54e318ad607ab3a5b50";
+const MANIFEST_SHA256="1d45281922cf120f130a3a84193163e5bd627f697171351a2d82064b28205df6";
 const EXPECTED_BASELINE='867c7566645b43cf7a5a7caf56bac6c44c39ef79';
 const EXPECTED_POLICY='FROZEN_EXISTING_FILES_ADD_ONLY';
 const hash=bytes=>createHash('sha256').update(bytes).digest('hex');
@@ -76,4 +76,3 @@ if(process.argv[1]&&resolve(process.argv[1])===fileURLToPath(import.meta.url)){
     console.log(`✅ Değişmez çekirdek doğrulandı (${result.checked} dosya; baseline ${EXPECTED_BASELINE}).`);
   }
 }
-

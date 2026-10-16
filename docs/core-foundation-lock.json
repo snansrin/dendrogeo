@@ -8861,6 +8861,20 @@
           "sha256": "a29f72db6a128ba25b9806328b68baeefde5ce3268927e7d096965675440072e"
         }
       ]
+    },
+    {
+      "id": "landing-theme-state-smoke-2026-10-17",
+      "date": "2026-10-17",
+      "scope": "User-authorized modularization: wait for the explicit light or dark theme state before comparing the landing appearance tokens.",
+      "audit_chain": "sha256-v1",
+      "added_protected_files": [],
+      "files": [
+        {
+          "path": "scripts/landing-showcase-smoke.mjs",
+          "previous_sha256": "a29f72db6a128ba25b9806328b68baeefde5ce3268927e7d096965675440072e",
+          "sha256": "fbb990d93f460e40798c63ddce3f9f6148f5abe1f9746f926523818d372a940b"
+        }
+      ]
     }
   ]
 }
