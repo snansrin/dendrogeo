@@ -42,6 +42,7 @@ jobs:
         env:
           DG_UI_BROWSER: webkit
         run: |
+          node scripts/landing-showcase-smoke.mjs
           node scripts/tree-detection-smoke.mjs
           node scripts/profile-smoke.mjs
           node scripts/projects-workspace-smoke.mjs

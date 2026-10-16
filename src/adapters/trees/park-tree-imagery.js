@@ -20,7 +20,8 @@
     const blobs=await Promise.all(columns.map(x=>tile(x,y,chip.zoom,signal)));
     for(let i=0;i<blobs.length;i++){const bitmap=await createImageBitmap(blobs[i]);try{if(bitmap.width!==256||bitmap.height!==256)throw Error('imagery_unavailable');context.drawImage(bitmap,columns[i]*256-chip.x,y*256-chip.y);}finally{bitmap.close();}}
    }
-   return{dataUrl:canvas.toDataURL('image/jpeg',.95),width:chip.width,height:chip.height,imageId:String(chip.id)};
+   const dataUrl=canvas.toDataURL('image/jpeg',.95),bytes=Uint8Array.from(atob(dataUrl.split(',')[1]),char=>char.charCodeAt(0)),digest=await root.crypto.subtle.digest('SHA-256',bytes),imageSha256=Array.from(new Uint8Array(digest),value=>value.toString(16).padStart(2,'0')).join('');
+   return{dataUrl,imageSha256,width:chip.width,height:chip.height,imageId:String(chip.id)};
    }catch(error){if(error.name==='AbortError')throw error;throw Error(error.message==='park_too_large'?'park_too_large':'imagery_unavailable');}finally{canvas.width=canvas.height=1;}
   }
   return Object.freeze({read,clear:()=>cache.clear()});

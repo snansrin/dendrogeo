@@ -5,7 +5,7 @@
  function pixel(lat,lon,zoom){const p=root.DG_WEB_MERCATOR_COORDINATES.forward(lat,lon),scale=256*2**zoom;return[(p.x/circumference+.5)*scale,(.5-p.y/circumference)*scale];}
  function coordinate(x,y,zoom){const scale=256*2**zoom,p=root.DG_WEB_MERCATOR_COORDINATES.reverse((x/scale-.5)*circumference,(.5-y/scale)*circumference);return[p.lat,p.lon];}
  function plan(park,{zoom=19,size=1024,overlap=128,maxChips=64}={}){
-  if(!park?.outer?.length||!Number.isInteger(zoom)||zoom<17||zoom>19||size!==1024||overlap!==128)throw Error('park_required');
+  if(!park?.outer?.length||!Number.isInteger(zoom)||zoom<17||zoom>19||![768,1024,1536].includes(size)||overlap!==128)throw Error('park_required');
   const copy=JSON.parse(JSON.stringify({outer:park.outer,inner:park.inner||[]}));
   for(const ring of [...copy.outer,...copy.inner])if(!Array.isArray(ring)||ring.length<4||ring.some(p=>!Array.isArray(p)||p.length!==2||!p.every(Number.isFinite)||Math.abs(p[0])>80||Math.abs(p[1])>180))throw Error('invalid_park');
   const boxes=copy.outer.map(ring=>{const points=ring.map(([lat,lon])=>pixel(lat,lon,zoom));return[Math.min(...points.map(p=>p[0])),Math.min(...points.map(p=>p[1])),Math.max(...points.map(p=>p[0])),Math.max(...points.map(p=>p[1]))];});
@@ -19,7 +19,7 @@
    if(chips.length>maxChips)throw Error('park_too_large');if(x+size>=bounds[2])break;
   }if(y+size>=bounds[3])break;}
   if(!chips.length)throw Error('invalid_park');
-  return{key:JSON.stringify(copy),park:copy,zoom,chips,bounds,source:'Esri World Imagery',sourceResolutionM:null,attribution:'© Esri, Vantor, Earthstar Geographics, and the GIS User Community'};
+  return{key:JSON.stringify(copy),park:copy,zoom,chips,bounds,windowPixels:size,overlapPixels:overlap,source:'Esri World Imagery',sourceResolutionM:null,attribution:'© Esri, Vantor, Earthstar Geographics, and the GIS User Community'};
  }
  root.DG_PARK_TREE_SCAN_PLAN=Object.freeze({plan,pixel,coordinate});
 })(window);

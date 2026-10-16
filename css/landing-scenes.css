@@ -4,17 +4,7 @@
 [data-dg-return-workspace]{position:fixed;right:18px;bottom:18px;z-index:110;background:var(--surface)!important;box-shadow:var(--sh)}
 #landing .dg-showcase-media{background:transparent;border:0;border-radius:0;box-shadow:none;overflow:visible}
 #landing .dg-showcase-media figcaption{background:transparent;border:0;padding:10px 0;min-height:40px}
-#landing .dg-showcase .hero-art{background:transparent;border:0;height:390px}
-/* Field values stay anchored to the animated tree, with the tape reading on the left. */
-#landing .dg-showcase-animation .hero-art .chip{z-index:2;display:flex;align-items:center;gap:8px;min-width:146px;max-width:calc(34% - 8px);padding:8px 11px;background:transparent;border-color:transparent;box-shadow:none;backdrop-filter:none;border-radius:9px;white-space:normal;text-align:left;animation:dg-measurement-readout 12s ease-in-out infinite}
-#landing .dg-showcase-animation .hero-art .chip.c1{top:43%;left:14%;right:auto;bottom:auto}
-#landing .dg-showcase-animation .hero-art .chip.c2{top:32%;left:54%;right:auto;bottom:auto;animation-delay:4s}
-#landing .dg-showcase-animation .hero-art .chip.c3{top:54%;left:54%;right:auto;bottom:auto;animation-delay:8s}
-.dg-showcase-animation .chip-indicator{flex:0 0 auto;font-size:.72rem}
-.dg-showcase-animation .chip-reading{display:grid;gap:2px;min-width:0}
-.dg-showcase-animation .chip-label{font:500 .52rem/1.35 var(--f-mono);color:var(--mut);text-transform:uppercase;letter-spacing:.045em}
-.dg-showcase-animation .chip-reading strong{font:600 .7rem/1.35 var(--f-mono);color:var(--green-dk);white-space:nowrap}
-@keyframes dg-measurement-readout{0%,18%,38%,100%{transform:translateY(0);opacity:.85}24%,32%{transform:translateY(-2px);opacity:1}}
+
 .dg-landing-scene{position:relative;min-height:450px;width:100%;isolation:isolate}
 .dg-landing-scene::before{content:"";position:absolute;inset:7% 0 12%;border-radius:50%;background:radial-gradient(ellipse,rgba(204,225,198,.45),transparent 70%);z-index:-1}
 .dg-scene-label{display:flex;align-items:center;justify-content:space-between;gap:10px;font:500 .62rem/1.7 var(--f-mono);color:var(--green-dk);border-bottom:1px solid #cbd9c7;padding:0 0 10px}
@@ -74,11 +64,38 @@
  .dg-landing-scene{min-height:410px}.dg-scene-canvas{min-height:300px}.dg-scene-map{height:300px}.dg-scene-output{font-size:.62rem;margin-top:-15px;align-items:flex-start;flex-direction:column;gap:0}
  .dg-scene-label{font-size:.56rem}.dg-scene-label span:last-child{font-size:.52rem}.dg-scene-controls .btn{min-height:40px;font-size:.62rem;padding:8px}
  .dg-report-stage{padding:8px 20px 20px 12px}.dg-report-page{padding:20px;min-height:335px}.dg-report-page h3{font-size:1.1rem}.dg-report-controls,.dg-report-caption{margin-left:0}
- #landing .dg-showcase .hero-art{height:300px}
- #landing .dg-showcase-animation .hero-art .chip{min-width:0;max-width:none;width:40%;padding:7px 9px;gap:6px}
- #landing .dg-showcase-animation .hero-art .chip.c1{left:2%;top:42%}
- #landing .dg-showcase-animation .hero-art .chip.c2{left:57%;top:29%}
- #landing .dg-showcase-animation .hero-art .chip.c3{left:57%;top:53%}
- .dg-showcase-animation .chip-label{font-size:.48rem}.dg-showcase-animation .chip-reading strong{font-size:.63rem}
 }
 @media(prefers-reduced-motion:reduce){.dg-landing-scene *{animation:none!important;transition:none!important}#landing .dg-showcase-animation .hero-art .chip{animation:none!important}.dg-scene-crosshair{transform:translate(245px,190px)}.dg-report-page,.dg-report-stage:hover .dg-report-page{transform:none}}
+
+/* Shared SVG coordinates make the walking route continuous and paint students last. */
+#landing [data-showcase-name="tree"]{position:relative;grid-template-columns:minmax(0,1fr);align-content:start;gap:0;min-height:640px;padding-bottom:230px;box-sizing:border-box}
+#landing [data-showcase-name="tree"] .dg-showcase-copy{position:relative;z-index:1;max-width:65%}
+#landing [data-showcase-name="tree"] h1{max-width:28ch}
+#landing [data-showcase-name="tree"] .dg-showcase-animation{position:absolute;left:0;right:0;bottom:0;width:100%;margin:0;pointer-events:none}
+#landing .dg-showcase .hero-art{background:transparent;border:0;height:360px}
+#landing .dg-showcase .hero-art svg{transform:none;position:relative}
+#landing .dg-svg-reading .chip{position:static;display:flex;align-items:center;gap:5px;min-width:0;max-width:none;width:auto;padding:0;background:transparent;border:0;box-shadow:none;backdrop-filter:none;white-space:normal;text-align:left;animation:none}
+.dg-svg-reading .chip-indicator{flex:0 0 auto;font-size:8px}
+.dg-svg-reading .chip-reading{display:grid;gap:2px;min-width:0}
+#landing .dg-svg-reading .chip-label{font:500 8px/1.35 var(--f-mono);color:var(--mut);text-transform:uppercase;letter-spacing:.045em}
+#landing .dg-svg-reading .chip-reading strong{font:600 11px/1.35 var(--f-mono);color:var(--green-dk);white-space:nowrap}
+.dg-showcase-track{overflow-y:hidden;align-items:flex-start;transition:height .2s ease}
+.dg-scene-canvas{overflow:hidden}
+#landing .dg-scene-controls .btn{min-height:44px}
+.dg-scene-geometries [data-scene-class]{cursor:pointer}
+.dg-scene-geometries [data-scene-class]:focus-visible{outline:none;stroke:var(--amber-ink);stroke-width:2}
+.dg-scene-analysis-bars>.dg-scene-bar-button{display:grid;grid-template-columns:92px 1fr 48px;gap:10px;align-items:center;border:0;border-radius:6px;background:transparent;color:inherit;font:inherit;text-align:left;padding:8px;min-height:44px;cursor:pointer}
+.dg-scene-bar-button[aria-pressed="true"]{box-shadow:inset 3px 0 var(--green);background:var(--tint)}
+.dg-scene-bar-button:focus-visible{outline:2px solid var(--amber-ink);outline-offset:2px}
+@media(max-width:800px){
+ #landing [data-showcase-name="tree"]{gap:12px;min-height:0;padding-bottom:20px}
+ #landing [data-showcase-name="tree"] .dg-showcase-copy{max-width:100%}
+ #landing [data-showcase-name="tree"] .dg-showcase-animation{position:relative;inset:auto}
+ #landing [data-showcase-name="tree"] .hero-art{height:230px}
+ #landing .dg-showcase .hero-art svg{width:180%;max-width:none;transform:translateX(-42%);transform-origin:0 0}
+}
+@media(prefers-reduced-motion:reduce){
+ .dg-showcase-track{transition:none}
+ #landing .hero-art .walkerA,#landing .hero-art .walkerB{animation:none!important;transform:translateX(0);opacity:1}
+ #landing .hero-art .legA,#landing .hero-art .legB,#landing .hero-art .legC,#landing .hero-art .legD{animation:none!important;transform:none}
+}

@@ -1,20 +1,25 @@
 {
   "schema": "dendrogeo-landing-evidence/1",
-  "captureDate": "2026-10-15",
+  "captureDate": "2026-10-16",
   "park": {
     "name": "Göksu Parkı",
     "city": "Ankara",
     "country": "Türkiye",
     "osmKey": "way/423602737"
   },
-  "acceptedAt": "2026-10-14T19:03:34.592Z",
-  "revision": 26,
+  "acceptedAt": "2026-10-16T14:21:35.805Z",
+  "revision": 32,
   "acceptance": "user-accepted; not independent accuracy assessment",
   "sourceData": {
     "path": "assets/landing/goksu-example.json",
-    "sha256": "f8067d468fcfbc304c5b1ab12915d295753e83ce4e9dab6341e6266e082910bc"
+    "sha256": "7fed76761fc1fa535bb5ca4669a83350ed6feeccfc293e19b924db143739632b"
   },
   "ndvi": {
+    "surfaceContext": {
+      "acceptedAt": "2026-10-14T19:03:34.592Z",
+      "revision": 26,
+      "note": "Independent 15 October observation exhibit; not reclassified by the updated accepted surface."
+    },
     "status": "real-observations",
     "acquiredAt": "2026-10-15T14:55:11.937Z",
     "scenes": [
@@ -59,27 +64,27 @@
   "reportStatus": "interactive explanation of actual DGR production sections; not a published report",
   "sceneData": {
     "path": "assets/landing/goksu-scenes.json",
-    "sha256": "0b609daf9311342deec40869ba96f8265c756fa62abc51f742ad6a90c7cbb918"
+    "sha256": "4731a1a15145e184258143d8ec91de298d7307bbbf7cf8dd9081c287392566b7"
   },
   "images": [
     {
       "path": "assets/landing/goksu-map.jpg",
-      "sha256": "fdc8378f699b4f7783ea8e881dee2a58caa8d7d785edfd17bb763253bfa80e1b",
+      "sha256": "ba1e926180819e11ba29bb78d427b2aedf59e5d066eb33e439bc196c4412fe74",
       "capturePage": "ornekler/goksu-parki/?view=map"
     },
     {
       "path": "assets/landing/goksu-analysis.jpg",
-      "sha256": "322d8c4e0e311db9ae79e28ec3687facb77948ad3018dc0388484cc587dc5496",
+      "sha256": "a40c5b5fdd0c594da62bbeaac84a62c0a3b73cd090c8c3611de57b8e8a837681",
       "capturePage": "ornekler/goksu-parki/?view=analysis"
     },
     {
       "path": "assets/landing/goksu-drawing.jpg",
-      "sha256": "6bd8c557e13901df2327744eacef61cc58217fa9ec4ff3bd8a4260197e1c83c1",
+      "sha256": "5784602990bd97e9949b18fd42fe778e30c377004efa930d30829188b2bc9707",
       "capturePage": "ornekler/goksu-parki/?view=drawing"
     },
     {
       "path": "assets/landing/goksu-ndvi.jpg",
-      "sha256": "7af6f3524b84444817e04a2366c44fd188727e12e9612f85ded1e843ac8d6be9",
+      "sha256": "bf93b3559a8612b9dc8ea374985959f4dd56381db8dde7398fd985a8c02d720f",
       "capturePage": "ornekler/goksu-parki/?view=ndvi"
     }
   ]

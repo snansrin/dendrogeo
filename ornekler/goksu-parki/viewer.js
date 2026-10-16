@@ -10,7 +10,7 @@
  el('exampleTotal').textContent=ha(total)+' ha · sınıf alanları toplamı';
  const map=L.map('exampleMap',{scrollWheelZoom:false,attributionControl:true,zoomSnap:.1});map.attributionControl.addAttribution('Geometri: © OpenStreetMap contributors · DendroGeo kullanıcı kabulü');
  const empty=document.createElement('div');empty.className='example-ndvi-empty';empty.hidden=true;empty.innerHTML='<b>Gerçek gözlem verisi gerekli</b>Kayıtlı analizde NDVI hücre gözlemleri saklanmamış. Veri olmadan yoğunluk haritası üretilmez.';el('exampleMap').append(empty);
- const sourceLayer=L.geoJSON(data.features,{style:f=>({color:colors[f.properties.class],weight:.25,fillColor:colors[f.properties.class],fillOpacity:.92})});const bounds=sourceLayer.getBounds();map.fitBounds(bounds,{padding:[25,25]});
+ const sourceLayer=L.geoJSON(data.displayFeatures||data.features,{style:f=>({color:colors[f.properties.class],weight:.25,fillColor:colors[f.properties.class],fillOpacity:.92})});const bounds=sourceLayer.getBounds();map.fitBounds(bounds,{padding:[25,25]});
  const outline=L.polygon(data.outer,{color:'#14532d',weight:2,fill:false,dashArray:'6 4'}).addTo(map);let layer=sourceLayer.addTo(map),drawing=null,drawLayer=null,points=[],shape='polygon',view='map';
  const railModel={brush:false,draw:null,disabled:false,objectPreview:null,vegetationView:false,vegetationReady:!!data.ndvi};
  el('surfaceMapTools').innerHTML=window.DG_RENDER_SURFACE_EDITOR_TOOL_RAIL.renderRail({model:railModel,escape,translate:s=>s,icon:(_name,fallback)=>fallback});

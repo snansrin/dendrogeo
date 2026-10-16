@@ -27,7 +27,7 @@ test('rapid navigation ignores intermediate smooth-scroll positions and preserve
  const f=fixture();f.next.fire('click');f.next.fire('click');f.track.scrollLeft=1000;f.track.fire('scroll');f.frames.shift()();assert.equal(f.controller.index(),2);let prevented=false;f.host.fire('keydown',{key:'Home',ctrlKey:true,preventDefault(){prevented=true;}});assert.equal(prevented,false);assert.equal(f.controller.index(),2);
 });
 test('public park exhibit contains actual accepted geometries and no account or user payload',()=>{
- const data=JSON.parse(readFileSync(new URL('../assets/landing/goksu-example.json',import.meta.url),'utf8'));assert.equal(data.park.osmKey,'way/423602737');assert.equal(data.source.status,'user-accepted');assert.equal(data.source.revision,26);assert.equal(data.source.scenes.length,6);assert.ok(data.features.every(f=>f.geometry.type==='MultiPolygon'));assert.ok(data.areas.building>0&&data.areas.water>0);assert.equal(Object.hasOwn(data.areas,'pool'),false);
+ const data=JSON.parse(readFileSync(new URL('../assets/landing/goksu-example.json',import.meta.url),'utf8'));assert.equal(data.park.osmKey,'way/423602737');assert.equal(data.source.status,'user-accepted');assert.equal(data.source.revision,32);assert.equal(data.source.publicRpc,'dg_accepted_park_surface');assert.ok(data.features.every(f=>f.geometry.type==='MultiPolygon'));assert.ok(data.areas.building>0&&data.areas.water>0);assert.equal(Object.hasOwn(data.areas,'pool'),false);
  const visit=value=>{if(!value||typeof value!=='object')return;for(const [key,child]of Object.entries(value)){assert.ok(!['owner','email','user_id','access_token','refresh_token','requested_by','created_by'].includes(key));visit(child);}};visit(data);
 });
 test('NDVI exhibit keeps actual observations, sample-grid provenance and production tercile thresholds',()=>{
@@ -37,5 +37,5 @@ test('NDVI exhibit keeps actual observations, sample-grid provenance and product
  assert.equal(values.length,ndvi.count);assert.equal(ndvi.count,2129);assert.equal(ndvi.stats.nInsufficient,0);assert.equal(ndvi.scenes.length,6);
  for(const [index,q]of [1/3,2/3].entries()){const at=(values.length-1)*q,lo=Math.floor(at),hi=Math.ceil(at);assert.equal(ndvi.cutoffs[index],values[lo]+(values[hi]-values[lo])*(at-lo));}
  assert.deepEqual(ndvi.features.map(f=>f.properties.class),['sparse','moderate','dense']);assert.ok(ndvi.features.every(f=>f.geometry.type==='MultiPolygon'&&f.geometry.coordinates.length));
- assert.ok(!JSON.stringify(ndvi).includes('sig='));assert.ok(ndvi.acquiredAt>data.source.acceptedAt);
+ assert.ok(!JSON.stringify(ndvi).includes('sig='));assert.ok(ndvi.acquiredAt>ndvi.surfaceContext.acceptedAt);
 });
