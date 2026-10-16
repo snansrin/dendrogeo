@@ -1,0 +1,47 @@
+name: Research client packages
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "clients/**"
+      - ".github/workflows/research-clients.yml"
+  pull_request:
+    paths:
+      - "clients/**"
+      - ".github/workflows/research-clients.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  python:
+    name: Python DGR client
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.x"
+      - name: Install package
+        run: python -m pip install ./clients/python
+      - name: Run client tests
+        run: python -m unittest discover -s clients/python/tests -v
+
+  r:
+    name: R DGR client
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: r-lib/actions/setup-r@v2
+        with:
+          r-version: release
+          use-public-rspm: true
+      - uses: r-lib/actions/setup-r-dependencies@v2
+        with:
+          working-directory: clients/r/dendrogeo
+          extra-packages: any::rcmdcheck
+      - name: Check R package
+        run: Rscript -e 'rcmdcheck::rcmdcheck("clients/r/dendrogeo", args = c("--no-manual"), error_on = "error")'
+

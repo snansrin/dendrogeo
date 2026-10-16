@@ -7,6 +7,7 @@ import {prepareReportDocumentContext} from './report-document-context.mjs';
 import {renderReportDiscussionSections} from './report-discussion-sections.mjs';
 import {renderReportDocumentOpening} from './report-document-opening.mjs';
 import {renderReportFindingsSections} from './report-findings-sections.mjs';
+import {createPublicPeerReview, renderPublicPeerReview} from './report-open-peer-review.mjs';
 /* Report HTML composition. The injected presentation functions keep this layer
  * independent from data access, snapshot calculation, and publication I/O. */
 export function createReportDocumentRenderer(dependencies) {
@@ -54,6 +55,8 @@ ${renderReportFindingsSections({
 
 ${renderReportVerificationSection({QA_ST_LABEL, QA_BLOCKED, QA_WHY, QA_REVIEW, AGAC_DEGER_TEMIZ, qaStates, qaRows, id, verTxt, hash, snap})}
 
+${renderPublicPeerReview(createPublicPeerReview(M.public_peer_review, {id, hash}), esc)}
+
 ${discussionSections}
 
 ${renderReportDocumentBackmatter({renderProvenancePresentation, provenance: {engine, engineVer, appVer, dataset, resolutionLabel, P, git, L, dataYear, id, epsg, snap, hash, doi}, histRows, citePlain, bib, L, renderReferencesPresentation, renderReportDataAccess, M, DGR_TITLE_DEF, esc})}
@@ -63,3 +66,4 @@ ${renderReportDocumentBackmatter({renderProvenancePresentation, provenance: {eng
 </html>`;
 };
 }
+

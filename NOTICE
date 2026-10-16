@@ -1,5 +1,6 @@
 DendroGeo — Küresel Ağaç Envanteri ve Karbon Veri Sistemi
 Copyright (c) 2026 Nagihan ŞİRİN & Sinan ŞİRİN
+Lisans iletişimi: sinan@dendrogeo.org
 
 ## DendroGeo çift lisans kapsamı
 
@@ -53,3 +54,4 @@ DOI'sini ayrıca belirtir.
 Bu kısa liste tam envanter değildir. Bağımlılık sürümleri, atıf biçimleri,
 servis şartları ve kaynak lisansları için
 docs/THIRD_PARTY_LICENSES.md dosyasına bakın.
+

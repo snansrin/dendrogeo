@@ -14,9 +14,9 @@
  *   2) KVKK AÇIK RIZA — kayıt formunda onay kutusu + aydınlatma bağlantısı;
  *      rıza olmadan hesap açılamaz; rıza zaman damgası auth metadata'sına
  *      yazılır (sonradan inkâr edilemez kayıt).
- *   3) LİSANS TUTARLILIĞI — LICENSE, NOTICE, package.json, README, kullanım
- *      koşulları ve JSON-LD aynı lisansı söylemeli (CC BY-NC 4.0). Eskiden
- *      LICENSE=MIT iken rozet/DOI=CC BY-NC idi → çelişki.
+ *   3) LİSANS TUTARLILIĞI — yazılımın MIT lisansı ile yayımlanabilir veri
+ *      kümelerinin CC BY-NC 4.0 lisansı ayrı ve doğru kapsamda belirtilmeli.
+ *      README, kullanım koşulları, NOTICE ve JSON-LD bu ayrımı korumalı.
  *   4) BULUNABİLİRLİK/ŞEFFAFLIK — yasal sayfalar yayında ve bağlı, JSON-LD'de
  *      Dataset (DOI) + kaynak atıfları (isBasedOn) + privacyPolicy var.
  */
@@ -292,3 +292,4 @@ describe('depoda kişisel e-posta sızıntısı yok', () => {
     assert.match(rd('SECURITY.md'), /security@dendrogeo\.org/);
   });
 });
+

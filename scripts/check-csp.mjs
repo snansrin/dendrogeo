@@ -28,6 +28,7 @@ const BEYAZ_LISTE = new Set([
   'www.ogm.gov.tr',         // footer: resmi tebliğe gezinme bağlantısı
   'zenodo.org',             // DOI rozeti
   'creativecommons.org',    // lisans bağlantısı
+  'opensource.org',          // JSON-LD MIT lisans tanımı (ağ kaynağı yüklenmez)
   'opendatacommons.org',    // ODbL lisans bağlantısı (JSON-LD isBasedOn + atıf metni)
   'schema.org',             // JSON-LD @context (ağ isteği üretmez)
   'www.w3.org',             // XML ad alanları (sitemap, SVG)
@@ -119,3 +120,4 @@ const kullanilmayan = [...izinli].filter(
 if (kullanilmayan.length) {
   console.log(`ℹ️  Kodda geçmeyen ama izin verilen origin'ler (daraltılabilir): ${kullanilmayan.join(', ')}`);
 }
+

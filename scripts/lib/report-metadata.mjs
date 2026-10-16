@@ -4,6 +4,7 @@
  * explicit dependencies so this module cannot access the filesystem, network,
  * snapshot storage, or mutable global state.
  */
+import {createPublicPeerReview, peerReviewContributors} from './report-open-peer-review.mjs';
 export function createReportMetadata(snap, { id, hash, version = '1.0', meta = null, history = null }, policy) {
   const {
     datasetDefault,
@@ -19,6 +20,7 @@ export function createReportMetadata(snap, { id, hash, version = '1.0', meta = n
   const L = (snap.lulc && !snap.lulc.error) ? snap.lulc : null;
   const P = snap.park, t = snap.totals;
   const doi = /^10\.\d{4,9}\/[-._;()/:A-Za-z0-9]+$/.test(String(M.doi || '')) ? String(M.doi) : null;
+  const peerReview = createPublicPeerReview(M.public_peer_review, {id, hash});
   const resolutionLabel = L?.review ? "Uydu 10/20 m + vektör sınır" : L?.accepted ? "Kayıtlı alan toplamları" : "10 m";
   const dataset = (L && L.source) || datasetDefault;
   const related = [
@@ -52,7 +54,8 @@ export function createReportMetadata(snap, { id, hash, version = '1.0', meta = n
     creatorsNote: (snap.author && snap.author.name)
       ? 'Rapor, yayını isteyen kullanıcının (veri katkısı sahibinin) adıyla yayımlanır.'
       : 'Bireysel yazar bilgisi bulunmadığından kurumsal yazarlık kullanılmıştır.',
-    contributors: [...(snap.study?.advisor ? [{name:snap.study.advisor,nameType:'Personal',contributorType:'Supervisor'}] : []), { name: 'Şirin, Nagihan', contributorType: 'Founder', nameType: 'Personal' }, { name: 'Şirin, Sinan', contributorType: 'Founder', nameType: 'Personal' }],
+    contributors: [...(snap.study?.advisor ? [{name:snap.study.advisor,nameType:'Personal',contributorType:'Supervisor'}] : []), { name: 'Şirin, Nagihan', contributorType: 'Founder', nameType: 'Personal' }, { name: 'Şirin, Sinan', contributorType: 'Founder', nameType: 'Personal' }, ...peerReviewContributors(peerReview)],
+    peerReview,
     subjects: [{ subject: 'tree inventory' }, { subject: 'carbon stock' }, { subject: 'land cover' }, { subject: 'urban forestry' }],
     spatialCoverage: `${P.city}, ${P.country}`,
     temporalCoverage: String((L && L.year) || 2021),
@@ -104,3 +107,4 @@ export function createReportMetadata(snap, { id, hash, version = '1.0', meta = n
     ],
   };
 }
+

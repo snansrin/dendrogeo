@@ -1,0 +1,56 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://dendrogeo.org/schemas/dgr-open-peer-review-v1.schema.json",
+  "title": "DendroGeo public open peer-review record",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema", "reportId", "resultHash", "policy", "events"],
+  "properties": {
+    "schema": { "const": "dendrogeo-open-peer-review/1" },
+    "reportId": { "type": "string", "pattern": "^DGR-[0-9]{4}-[0-9]{4}$" },
+    "resultHash": { "type": "string", "pattern": "^sha256:[a-f0-9]{64}$" },
+    "policy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "version", "identityDisclosure", "conflictDisclosureRequired"],
+      "properties": {
+        "name": { "const": "DendroGeo Open Review" },
+        "version": { "type": "string", "minLength": 1, "maxLength": 40 },
+        "identityDisclosure": { "enum": ["open", "anonymous", "mixed"] },
+        "conflictDisclosureRequired": { "type": "boolean", "const": true }
+      }
+    },
+    "events": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["eventId", "role", "eventType", "publishedAt", "public", "text", "identityDisclosure"],
+        "properties": {
+          "eventId": { "type": "string", "format": "uuid" },
+          "role": { "enum": ["Reviewer", "HandlingEditor", "DataCurator", "AuthorResponse"] },
+          "eventType": { "enum": ["review", "editor_decision", "curation_check", "author_response", "correction"] },
+          "publishedAt": { "type": "string", "format": "date-time" },
+          "public": { "const": true },
+          "text": { "type": "string", "minLength": 1, "maxLength": 30000 },
+          "identityDisclosure": { "enum": ["open", "anonymous"] },
+          "displayName": { "type": "string", "minLength": 1, "maxLength": 200 },
+          "orcid": { "type": "string", "pattern": "^0000-000[0-9]-[0-9]{4}-[0-9]{3}[0-9X]$" },
+          "conflictOfInterest": { "type": "string", "maxLength": 4000 },
+          "respondsTo": { "type": "string", "format": "uuid" }
+        },
+        "allOf": [
+          {
+            "if": { "properties": { "identityDisclosure": { "const": "open" } }, "required": ["identityDisclosure"] },
+            "then": { "required": ["displayName"] }
+          },
+          {
+            "if": { "properties": { "identityDisclosure": { "const": "anonymous" } }, "required": ["identityDisclosure"] },
+            "then": { "not": { "anyOf": [{ "required": ["displayName"] }, { "required": ["orcid"] }] } }
+          }
+        ]
+      }
+    }
+  }
+}
+

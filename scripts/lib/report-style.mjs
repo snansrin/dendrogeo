@@ -56,6 +56,12 @@ table.qa tbody tr:nth-child(even) td{background:#fcfbf8}
 .verify{border:1px dashed var(--amber);background:#fdf7ee;border-radius:10px;padding:12px 16px;margin:14px 0;font-family:system-ui,sans-serif;font-size:.8rem}
 .verify code{font-family:ui-monospace,monospace;font-size:.72rem;word-break:break-all}
 .cite{background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:14px 16px;font-size:.86rem;margin:10px 0}
+.report-open-review{margin:24px 0;padding:16px 18px;border:1px solid var(--line);border-left:4px solid var(--green);border-radius:0 10px 10px 0;background:var(--bg);font-family:system-ui,-apple-system,'Segoe UI',sans-serif}
+.report-open-review>p{font-family:Georgia,'Times New Roman',serif;color:var(--mut);font-size:.86rem}
+.review-event{margin:12px 0 0;padding:12px 14px;border:1px solid var(--line);border-radius:8px;background:#fff;break-inside:avoid}
+.review-event h3{font-size:.9rem;line-height:1.4;color:var(--gd);font-weight:650}
+.review-event time{display:block;margin-top:3px;color:var(--mut);font-size:.72rem;font-family:ui-monospace,Consolas,monospace}
+.review-event p{margin:8px 0 0;font-family:Georgia,'Times New Roman',serif;font-size:.88rem;overflow-wrap:anywhere}
 pre{background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:10px;font-family:ui-monospace,Consolas,monospace;font-size:.7rem;overflow:auto;margin:8px 0}
 .fig{border:1px solid var(--line);border-radius:10px;padding:10px;margin:12px 0;background:var(--bg);break-inside:avoid}
 .fig .cap{font-family:system-ui,sans-serif;font-size:.74rem;color:var(--mut);margin-top:8px}
@@ -100,6 +106,8 @@ pre{background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:
  .btnrow .btn{flex:1 1 100%}
  .kick{font-size:.64rem}
  .verify{font-size:.76rem}
+ .report-open-review{padding:12px}
+ .review-event{padding:10px}
 }
 @media print{
  /* 0027 · PDF/print dostu (kullanıcı isteği): 🖨 Yazdır / PDF düğmesi zaten
@@ -127,6 +135,7 @@ pre{background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:
  table.qa td.qst{white-space:normal;font-size:8.4pt}
  table.qa tbody tr:nth-child(even) td{background:#fcfbf8}
  .fig{break-inside:avoid;page-break-inside:avoid}
+ .report-open-review,.review-event{break-inside:avoid;page-break-inside:avoid}
  /* 0028 · harita TEK sayfaya sığsın: eskiden figür sayfalara bölünüp yarım
   * boş sayfa bırakıyordu (canlı PDF kanıtı). 182mm + başlık A4'e sığar. */
  .fig img{max-width:100%!important;max-height:182mm!important;width:auto!important;height:auto!important;display:block;margin:0 auto}
@@ -137,3 +146,4 @@ pre{background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:
 }
 `;
 }
+

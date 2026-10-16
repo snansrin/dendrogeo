@@ -131,7 +131,7 @@ describe('CITATION.cff — Zenodo künyesi', () => {
   test('özet (abstract) dolu ve park kimliğini anlatıyor', () => {
     assert.match(cff, /abstract: >-/);
     assert.match(cff, /park kimliği/i);
-    assert.match(cff, /CC BY-NC 4\.0/);
+    assert.match(cff, /CC BY-NC\s+4\.0/);
   });
 });
 
@@ -207,3 +207,4 @@ describe('satır sonu normalizasyonu (yama taşınabilirliği)', () => {
     assert.ok(v.includes(Buffer.from('\r\n')), 'vendor içeriği değişmiş — .gitattributes kapsamı yanlış');
   });
 });
+
