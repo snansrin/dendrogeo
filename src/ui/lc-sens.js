@@ -209,6 +209,8 @@ function dgSensRenderPaintTools(){
  host.innerHTML=toolbar.compose({menus,mode:model.mode,escape:esc,translate:_tvs});dgSensBindEditorEvents(host);
  const rail=document.getElementById("surfaceMapTools");if(rail){rail.innerHTML=toolbar.renderRail({model,escape:esc,translate:_tvs,icon:dgSensToolbarIcon});dgSensBindEditorEvents(rail);}
  if(typeof dgEditorArrangeMenus==="function")dgEditorArrangeMenus();
+ // Menus are reparented out of surfaceBrushTools; delegate from their live host too.
+ dgSensBindEditorEvents(document.getElementById("surfaceMenuBar"));
 }
 function dgSensMenuLabel(icon,label){
  const module=window.DG_RENDER_SURFACE_EDITOR_MENU_LABEL;if(module)return module.render({icon,label,ui:window.DG_EDITOR_UI,translate:_tvs,escape:esc});

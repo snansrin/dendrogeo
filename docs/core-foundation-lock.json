@@ -8363,6 +8363,34 @@
           "sha256": "512fb2a9bc83d4e9ff6242a05b1a45d8551bd392a90bdc7ef2e59827b56a80bc"
         }
       ]
+    },
+    {
+      "id": "surface-menu-event-ownership-2026-10-16",
+      "date": "2026-10-16",
+      "scope": "User-authorized modularization: bind existing surface-editor declarative actions to the live shared menu bar after DOM reparenting, restoring object selection, class inputs and boundary drawing. Existing owner modules, single binding, raw raster, accepted data, map behavior and theme are preserved; add real-application moved-menu phone coverage.",
+      "audit_chain": "sha256-v1",
+      "files": [
+        {
+          "path": ".github/workflows/mobile-smoke.yml",
+          "previous_sha256": "f7d255fe63ac1f36f3261b205284a216d5cf28e4511f25c9f95fe71d972f46ca",
+          "sha256": "13d1d57900ee7b5f42fd3b0edeef3c325fbc1ab6741c205464d921ef167ebb17"
+        },
+        {
+          "path": "index.html",
+          "previous_sha256": "512fb2a9bc83d4e9ff6242a05b1a45d8551bd392a90bdc7ef2e59827b56a80bc",
+          "sha256": "cdf7a7839eb5059e782ba035c3c3a4d48a99a3fe99b0fac660ca9b187ac5f3eb"
+        },
+        {
+          "path": "scripts/check-phone.mjs",
+          "previous_sha256": "482a6db406495221b5a5e0ad5f0bb405a42da69fd3aa509bf96caa06ecac6f74",
+          "sha256": "6455359fe021f12270949b49d470d46556f88bc10a44c5e86f3520de7bef0004"
+        },
+        {
+          "path": "src/ui/lc-sens.js",
+          "previous_sha256": "04c8ff1fbdbe931624665beb8e0284c7559f6ecf57aa090b7e0a9674bec738a6",
+          "sha256": "f3e4037db1c24144ed24ebd0ceec5d7b3d6cf9bf29586a189a55c61429ce436c"
+        }
+      ]
     }
   ]
 }

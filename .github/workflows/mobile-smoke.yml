@@ -48,3 +48,4 @@ jobs:
           node scripts/mobile-tools-language-smoke.mjs
           node scripts/measurement-save-smoke.mjs
           node scripts/park-analysis-interaction-smoke.mjs
+          node scripts/surface-menu-smoke.mjs
