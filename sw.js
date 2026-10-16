@@ -1075,8 +1075,8 @@ const INSTALL_ASSETS = [
     '/src/bootstrap/app-runtime.js', '/css/startup.css', '/vendor/leaflet.markercluster-1.5.3.js',
     '/', '/index.html', '/manifest.json', '/icon.png', '/apple-touch-icon.png',
     '/css/style.css', '/css/landing.css', '/css/park-panel.css', '/css/ui-standard.css',
-    '/src/config/supabase.js', '/src/config/constants.js', '/src/ui/state.js',
-    '/src/ui/toast.js', '/src/ui/landing.js', '/src/ui/landing-actions.js', '/src/ui/shell.js', '/src/ui/shell-nav-actions.js', '/src/ui/shell-chrome-actions.js',
+    // Config, state and toast already live inside app-runtime; do not download them twice at install.
+    '/src/ui/landing.js', '/src/ui/landing-actions.js', '/src/ui/shell.js', '/src/ui/shell-nav-actions.js', '/src/ui/shell-chrome-actions.js',
     '/vendor/supabase-js-2.116.0.js', '/vendor/leaflet-1.9.4.css', '/vendor/leaflet-1.9.4.js'
 ];
 

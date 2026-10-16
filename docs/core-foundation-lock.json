@@ -8080,6 +8080,19 @@
           "sha256": "efc906b24063bae87e532ad074424e0e33890f6f17f52a529e6cfd79cc187d19"
         }
       ]
+    },
+    {
+      "id": "personal-panel-install-budget-2026-10-16",
+      "date": "2026-10-16",
+      "scope": "User-authorized modularization: retain the existing 24-asset install budget with the new offline appearance modules by deferring redundant individual config/state/toast downloads already contained in app-runtime. Those files remain in the complete precache inventory. Cache separation tests and scientific/data behaviour are unchanged.",
+      "audit_chain": "sha256-v1",
+      "files": [
+        {
+          "path": "sw.js",
+          "previous_sha256": "1270cb07ff4cc17589128dc8a8ebc138417e040e8f01ffe0dc38da5554c00265",
+          "sha256": "36bc5ae7e4e4c407344f9340454071a146098ec8262c1c8224d1fee1c1e65e3b"
+        }
+      ]
     }
   ]
 }
