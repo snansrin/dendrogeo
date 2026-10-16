@@ -1019,7 +1019,7 @@
     "css/ui-standard.css": "cf5fc000e24f988fddb04da907b2bdc168a4575c36bc8554c1b2e22ccf527b9b",
     "docs/legacy-service-boundaries.json": "a42273d82bef00247d48bca5f6edf3e05dc41e70bb950f13382b362342067e17",
     "docs/surface-scientific-contract.json": "ad98bde39dc2e8dfd80d36d8f287349cf0ab8a91cd7a9f728e6dd533a844ffa3",
-    "index.html": "9ae0e371dd921f517d77937246ccf0982acd7d640bc65243fc472c30c97bcd6d",
+    "index.html": "34768f3c5bd000f08bab55fe5d95697160c04dac8691b181e9d16a02d8c3908f",
     "package-lock.json": "7c911eebd0849bccd565d0e56935035c7d187b57d310feebbe837843cdefd913",
     "package.json": "7acc377c195644a0a14ac05ce09ffb20a5fc11a15f7cb0c192f951e9f2e62fc3",
     "partials/boot.html": "d9959a7c00c92185f9b085564370ecdc5b2e539c6becad0d80687410096c8fef",
@@ -8797,6 +8797,20 @@
           "path": "scripts/landing-showcase-smoke.mjs",
           "previous_sha256": "055ab5a37602f97b019102ad223c8d51382fe83fda2b2cba710df85e458ea917",
           "sha256": "df5a11fe34cf45f6913d88ba3e91f015eaddb7293b38fd6825ae52185bd01e8f"
+        }
+      ]
+    },
+    {
+      "id": "landing-resource-icons-dark-theme-contrast-2026-10-17",
+      "date": "2026-10-17",
+      "scope": "User-authorized correction of dark-theme landing resource icon contrast; preserve landing content, app behavior and analysis outputs.",
+      "audit_chain": "sha256-v1",
+      "added_protected_files": [],
+      "files": [
+        {
+          "path": "index.html",
+          "previous_sha256": "fc498e1e2adac714d3a86c65d795d3696de4aeb936524d7063c58b4d9fa5e384",
+          "sha256": "34768f3c5bd000f08bab55fe5d95697160c04dac8691b181e9d16a02d8c3908f"
         }
       ]
     }

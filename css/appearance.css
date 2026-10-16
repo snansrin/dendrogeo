@@ -5,6 +5,7 @@ html[data-theme="dark"]{
  --amber-tint:#3c3020;--red:#ffb3a6;--blue:#a4ccff;--sh:0 1px 3px #0003,0 10px 28px #0002;
  --dg-action:#1e6f4b;--dg-action-hover:#145b3b;
 }
+html[data-theme="dark"] .dg-resource-icon{color:var(--green)}
 html[data-theme="dark"] :is(#apptop,#topnav){background:color-mix(in srgb,var(--bg) 95%,transparent)}
 html[data-theme="dark"] #side{background:var(--surface)}
 html[data-theme="dark"] :is(input:not(.dg-switch):not([type="range"]),select,textarea,.gpsring){background:var(--surface);color:var(--ink)}
