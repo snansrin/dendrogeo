@@ -7898,6 +7898,84 @@
           "sha256": "4d0cc2d2d1a56554fc7c399a5af91637ecc7a68e45e8ef7f367d6b253c1b965b"
         }
       ]
+    },
+    {
+      "id": "verified-audit-reliability-2026-10-16",
+      "date": "2026-10-16",
+      "scope": "User-authorized modularization and reliability fixes: scoped backup with parks/surface JSON recovery; atomic offline edit comparison and queue retention; modular GIS and WebKit CI coverage. The zero-row regression now supplies the required baseline while retaining its write and queue assertions; a separate test proves legacy edits are retained before writes. Scientific calculations, raster and accepted geometry unchanged.",
+      "audit_chain": "sha256-v1",
+      "files": [
+        {
+          "path": ".github/workflows/mobile-smoke.yml",
+          "previous_sha256": "d1ae73335d7b1490b0249a51e42fd9ca4f695e8e3ab3328e80504abd9acb8750",
+          "sha256": "5a89a92bf19b66753cbb9cac269d4f76c4794f9ae25654ff7c7cf2805d533e14"
+        },
+        {
+          "path": "index.html",
+          "previous_sha256": "ea7902b49ba42e4e5386327ed8151e59bd15a7c0f7347132d884ab3f31708b01",
+          "sha256": "8af8aa468db8fb54bd62cc4a128a9d44905636fef084895e86713605c0878235"
+        },
+        {
+          "path": "partials/shell.html",
+          "previous_sha256": "e690202420429b8202a00f3cfdeb4d6e15ff9103f954570a502582d379c64126",
+          "sha256": "972d41ba3bd4c9ccaba976d5eb6c703e380733a50f13ef3123ba063efadbd06e"
+        },
+        {
+          "path": "scripts/check-accessibility.mjs",
+          "previous_sha256": "4f8064156a8b0ab8f9ac53a205999b648d3e286cd36eec50aefa106bf4007961",
+          "sha256": "451345e56956ace19b70d3c868dac6be658f8ffd75dcbb38a7456560f4fe5eda"
+        },
+        {
+          "path": "src/adapters/offline/persist-queued-measurement.js",
+          "previous_sha256": "3f42c1337ef8f7631022184edcff8995775c3f9f62a5d4db934843e60b231825",
+          "sha256": "d2e4c047e098ab6cc5917df2c21da7f5aab1e70f867d0f471b832a662a0e30ba"
+        },
+        {
+          "path": "src/application/offline/sync-queued-measurement.js",
+          "previous_sha256": "be3e4aec187455aaa5490fa77b93244303c75c539820f115e5ec7524c50971a3",
+          "sha256": "3cb433a49e045d9ee4b3e4aaeb460bbe920d1c3c0fbf886012d51728da3e762c"
+        },
+        {
+          "path": "src/application/trees/edit-measurement-record.js",
+          "previous_sha256": "8683e8b512465039d0c2b89f35c7b2e15843749a42b28c3ce51304217b671179",
+          "sha256": "38d277eeefc093912249d0560530c10d78a470674e1c83b9ee74e18c30720414"
+        },
+        {
+          "path": "src/domain/offline/prepare-measurement-sync-payload.js",
+          "previous_sha256": "2e2e8a9bb06015417bb2b10cb66a8f17c20f1cc5e368e271a2acb6962e3a3b5d",
+          "sha256": "345a9ad395b9c3529416e7f66a8e37d2aba0e7157e7f01cbc0cfa38e3830cf70"
+        },
+        {
+          "path": "src/domain/trees/build-offline-measurement-record.js",
+          "previous_sha256": "c21a9f98fccabd05f9a2ae0a2e37a47f1afc95a7647f693d23bf223df2107c86",
+          "sha256": "1336f8ed92b582aa628747c668af0804b1a613074f54d6d7dfe19e5ba686c58a"
+        },
+        {
+          "path": "src/services/measure.js",
+          "previous_sha256": "f1cf832bab09f23290cc5886dd2a9cef2da9268d87995911bec616ebfcb8bca3",
+          "sha256": "e7994a9381068feac2c0825e4db80c71cc84eda868c11a9fa86ec3d3b885529d"
+        },
+        {
+          "path": "src/services/offline.js",
+          "previous_sha256": "aca5c78e105e0d3a4a7836263ed36fb40523349562bad848acd0128f7b4cd3d7",
+          "sha256": "84de4d8146c5dadf6d345e9b43ea3ea93969e24fd08d234231c68cb2727838a4"
+        },
+        {
+          "path": "test/measurement-persistence-modules.test.mjs",
+          "previous_sha256": "b2feca9c3acd5996ba5aa46b471811259faea5dd381c88a9311b5d2f78fc3783",
+          "sha256": "feea09278b1939403638337dd33b6bb0c9c06e4543b1fad00ec54246196b7384"
+        },
+        {
+          "path": "test/offline-safety.test.mjs",
+          "previous_sha256": "7ee4ec896b99f30768ab67d87e1b9b172579c07dab22c4985074cb6670671aa1",
+          "sha256": "c7835315ea6c61c4677ae64da7f0719052551669e1d73b6f2d33215e98722fbe"
+        },
+        {
+          "path": "test/offline-sync-modules.test.mjs",
+          "previous_sha256": "ea0638ccffe6f1f153e5cfbcf9e855649856b5d6950f9c29a06a8fe1ac081a2f",
+          "sha256": "e30a601264dc72a827238ad4751719d876c8aa2891cf64035e3530ff77f9d7fa"
+        }
+      ]
     }
   ]
 }

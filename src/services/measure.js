@@ -281,7 +281,7 @@ async function dgSaveMeasInner(){
         locationRejected:({decision})=>toast("⛔ "+esc(decision.message||_tmsf("Konum doğrulanamadı ({r})",{r:decision.reason})),"err","🛰"),
         persistence:{
           isOnline:()=>navigator.onLine,
-          buildOfflineRecord:draft=>window.DG_BUILD_OFFLINE_MEASUREMENT_RECORD.build({record:draft.record,photoBlob:draft.photo.blob,photoFile:draft.photo.fileName,editId:EDIT_ID,clientId:uuidv4()}),
+          buildOfflineRecord:draft=>window.DG_BUILD_OFFLINE_MEASUREMENT_RECORD.build({record:draft.record,photoBlob:draft.photo.blob,photoFile:draft.photo.fileName,editId:EDIT_ID,clientId:uuidv4(),baseline:DG_MEASUREMENT_EDIT_BASELINE}),
           saveOffline:saveOfflineMeasurement,uploadPhoto:blob=>window.DG_UPLOAD_MEASUREMENT_PHOTO.upload({client:sb,userId:USER.id,blob}),
           persistRecord:(record,editId)=>window["DG_"+"PERSIST_MEASUREMENT_RECORD"].persist({client:sb,record,editId}),editId:()=>EDIT_ID
         },
@@ -309,12 +309,15 @@ async function dgSaveMeasInner(){
 }
 
 /* --- 8. DÜZENLEME --- */
+let DG_MEASUREMENT_EDIT_BASELINE=null;
 function cancelEdit(){
+ DG_MEASUREMENT_EDIT_BASELINE=null;
  return window.DG_CANCEL_MEASUREMENT_EDIT.cancel({setEditing:id=>{EDIT_ID=id;},setManualPoint:value=>{manualPoint=value;},element:$,parkGate:dgParkGate});
 }
 async function editRec(id){
  return window.DG_EDIT_MEASUREMENT_RECORD.edit(id,{
   fetch:recordId=>window.DG_FETCH_MEASUREMENT_FOR_EDIT.fetch({client:sb,id:recordId}),
+  setBaseline:record=>{DG_MEASUREMENT_EDIT_BASELINE=record;},
   clearPhoto:dgClearMeasurePhoto,
   setEditing:value=>{EDIT_ID=value;},
   build:record=>window.DG_BUILD_MEASUREMENT_EDIT_FORM.build(record,value=>typeof circumferenceCmFromDiameter==="function"?circumferenceCmFromDiameter(value):value),

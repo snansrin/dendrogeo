@@ -6,6 +6,7 @@ window.DG_PREPARE_MEASUREMENT_SYNC_PAYLOAD={
     const payload={...data};
     delete payload.photoBlob;
     delete payload._editId;
+    delete payload._editBaseline;
     return payload;
   }
 };

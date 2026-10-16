@@ -6,12 +6,12 @@ function app({role='owner',failTable=null}={}){
  return{ctx,events,store,backup:()=>backup};
 }
 test('full backup service composes all modules with original schema and download/storage order',async()=>{
- const a=app();await a.ctx.fullBackup();assert.deepEqual(a.events.filter(e=>Array.isArray(e)&&e[0]==='query').map(e=>e[1]),['measurements','projects','waypoints','data_requests']);assert.equal(a.backup().exported_by,'Ada');assert.equal(a.backup().exported_at,'2026-10-12T12:00:00.000Z');assert.equal(a.backup().counts.measurements,1);assert.equal(a.store.dg_lastBackup,'2026-10-12T12:00:00.000Z');assert.ok(a.events.indexOf('download')<a.events.indexOf('remember'));
+ const a=app();await a.ctx.fullBackup();assert.deepEqual(a.events.filter(e=>Array.isArray(e)&&e[0]==='query').map(e=>e[1]),['measurements','projects','waypoints','data_requests','parks','surface_reviews']);assert.equal(a.backup().exported_by,'Ada');assert.equal(a.backup().exported_at,'2026-10-12T12:00:00.000Z');assert.equal(a.backup().counts.measurements,1);assert.equal(a.store.dg_lastBackup,'2026-10-12T12:00:00.000Z');assert.ok(a.events.indexOf('download')<a.events.indexOf('remember'));
 });
-test('full backup service keeps unauthorized/required-query failures and optional request fallback',async()=>{
+test('full backup service keeps unauthorized/required-query failures and failure on every required dataset',async()=>{
  const denied=app({role:'user'});await denied.ctx.fullBackup();assert.equal(denied.backup(),undefined);assert.equal(denied.events.length,1);
  const failed=app({failTable:'projects'});await failed.ctx.fullBackup();assert.equal(failed.backup(),undefined);assert.equal(failed.events.at(-1)[2],'err');
- const optional=app({failTable:'data_requests'});await optional.ctx.fullBackup();assert.equal(optional.backup().counts.data_requests,0);assert.equal(optional.events.at(-1)[2],'ok');
+ const optional=app({failTable:'data_requests'});await optional.ctx.fullBackup();assert.equal(optional.backup(),undefined);assert.equal(optional.events.at(-1)[2],'err');
 });
 test('backup reminder service preserves missing-backup warning and newly backed-up quiet state',async()=>{
  const a=app();a.ctx.checkBackupReminder();assert.match(a.events.at(-1)[1],/999 gün/);await a.ctx.fullBackup();const count=a.events.length;a.ctx.checkBackupReminder();assert.equal(a.events.length,count);

@@ -37,7 +37,7 @@ return window.DG_SYNC_QUEUED_MEASUREMENT.run({record,owner,isCurrent:()=>!!USER&
 findSaved:value=>window.DG_FIND_SAVED_OFFLINE_MEASUREMENT.find({client:sb,data:value,sameMeasurement:dgOfflineSameMeasurement}),
 preparePayload:value=>window.DG_PREPARE_MEASUREMENT_SYNC_PAYLOAD.build(value),
 uploadPhoto:({data:value,recordId})=>window.DG_UPLOAD_QUEUED_MEASUREMENT_PHOTO.upload({client:sb,data:value,recordId}),
-persist:({payload,editId:recordEditId,owner:recordOwner})=>window.DG_PERSIST_QUEUED_MEASUREMENT.save({client:sb,payload,editId:recordEditId,owner:recordOwner})});
+persist:({payload,editId:recordEditId,owner:recordOwner,baseline})=>window.DG_PERSIST_QUEUED_MEASUREMENT.save({client:sb,payload,editId:recordEditId,owner:recordOwner,baseline})});
 }
 async function dgSyncOfflineBatch(owner){
  const viewState=window.DG_DASHBOARD_VIEW_STATE.create(document);

@@ -374,7 +374,7 @@ const DG_I18N_EN={
 "🔐 Ölçüm Yönetimi & Onay":"🔐 Measurement Admin & Approval",
 "👁 Toplam Ziyaretçi":"👁 Total Visitors","👁 Bugün":"👁 Today","👁 Son 7 Gün":"👁 Last 7 Days",
 "✉️ Bekleyen Talep":"✉️ Pending Requests","💽 Depolama Kullanımı":"💽 Storage Usage","Hesaplanıyor…":"Computing…",
-"🧹 Yetim Dosyaları Temizle":"🧹 Clean Orphan Files","🌍 Şehirleri Yeniden Algıla":"🌍 Re-detect Cities","🌳 Parkları Geri Doldur":"🌳 Backfill Parks","💾 Tam Yedek İndir (JSON)":"💾 Full Backup (JSON)",
+"🧹 Yetim Dosyaları Temizle":"🧹 Clean Orphan Files","🌍 Şehirleri Yeniden Algıla":"🌍 Re-detect Cities","🌳 Parkları Geri Doldur":"🌳 Backfill Parks","💾 Veri Yedeği İndir (JSON)":"💾 Export data backup (JSON)","📥 Geri Yükleme SQL’i Hazırla":"📥 Prepare restore SQL",
 "Park Kimlikleri":"Park Identities","yeniden adlandır · birleştir · sil":"rename · merge · delete",
 "🔄 Parkları Yükle":"🔄 Load Parks",
 "Bilimsel Rapor Yayını":"Scientific Report Publishing","site içinden · DGR kimlikli · değişmez":"in-site · DGR identity · immutable",
@@ -1484,5 +1484,8 @@ Object.assign(DG_I18N_EN,{
  "Kurum ve çalışma alanı":"Institution and research area",
  "Araştırmacı kimliği ve proje":"Researcher identifier and project",
  "Bu bilgiler hesabınıza özeldir. Rapor yayımlarken hangi bilgilerin herkese açılacağını ayrıca seçersiniz.":"These details are private to your account. You choose which details to publish when submitting a report.",
- "Yayımlanan bilimsel raporları inceleyin ↗":"Browse published scientific reports ↗"
+ "Yayımlanan bilimsel raporları inceleyin ↗":"Browse published scientific reports ↗",
+ "✓ Veri yedeği indirildi: {f} ({n} ölçüm). Fotoğraf dosyaları ve cihazdaki kuyruk ayrı yedeklenir.":"✓ Data backup downloaded: {f} ({n} measurements). Photo files and the device queue need separate backups.",
+ "⚠ Son veri yedeğinin üzerinden {n} gün geçti — bugünkü yedeği alın":"⚠ Your last data backup was {n} days ago — export today's backup",
+ "Veri yedeği, bu oturumun erişebildiği ölçüm, proje, waypoint, talep, park ve yüzey kayıtlarını içerir. Fotoğraf dosyaları, hesaplar ve cihazdaki çevrimdışı kayıtlar ayrıca korunmalıdır.":"The data backup includes measurements, projects, waypoints, requests, parks and surface records accessible to this session. Photo files, accounts and offline records on the device require separate protection."
 });

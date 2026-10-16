@@ -21,13 +21,13 @@ DOI bağlantısı doğrulanmadan kayıt tamamlandı olarak işaretlenmez. Hazır
 
 ## Kullanıcının beyan ettiği akademik künye
 
-Yayınla düğmesi, doğrudan yayın isteği oluşturmaz. Yazar adı, proje adı, rapor başlığı ve çalışma amacı zorunludur. Kuruma bağlı çalışmalarda kurum adı; tez/bitirme çalışmalarında danışman bilgisi gereklidir. Bağımsız çalışma seçilebilir. Bölüm, program, ORCID ve destek/proje numarası isteğe bağlıdır. ORCID kontrol basamağı denetlenir. Kullanıcı, künyenin açık yayımlanmasını ve veri kapsamını ayrıca onaylar. İptal edilen form yayın isteği oluşturmaz.
+Yayınla düğmesi, doğrudan yayın isteği oluşturmaz. Akademik künye alanlarının tamamı isteğe bağlıdır: yazar, proje, başlık, amaç, kurum, danışman, bölüm, program, ORCID ve destek/proje numarası boş bırakılabilir. Bağımsız çalışma seçilebilir. ORCID yalnız girildiğinde kontrol basamağıyla denetlenir. Kullanıcı, künyenin açık yayımlanmasını ve veri kapsamını ayrıca onaylar. İptal edilen form yayın isteği oluşturmaz.
 
 Akademik profil, kullanıcının kendi hesap üst verisinde saklanır; rol ve yetki kararlarına katılmaz. Yayın öncesi onaylanan alanlar, istek notunda sürümlü JSON olarak dondurulur; kuyruk bu künyeyi veri özeti, HTML, JSON-LD, atıf ve üst veriye aktarır. Profilin sonradan değiştirilmesi yayımlanmış raporun künyesini değiştirmez.
 
 ## Harita sunumu
 
-Doğal çizim, ortak sınıf kenarlarını birlikte genelleştirir. Bina, havuz, OSM nesnesi, kullanıcı çizimi ve park sınırı korunur. Görsel geometri, kabul edilen hesap geometrisinden ayrıdır. Harita ve PNG aynı görsel geometriyi kullanır; kabul kaydı kesin geometrileri ve görsel geometrileri ayrı saklar. Alan, sınıf toplamı, karbon hesabı ve örnekleme gridinin geometrisi değiştirilmez. Görsel toplam alan ve sınıfların örtüşme kontrolü başarısızsa kesin geometri çizilir. Bu işlem uydu verisinin 10/20 m çözünürlüğünü artırmaz veya yeni yapı algılaması sağlamaz.
+Doğal çizim, ortak sınıf kenarlarını birlikte genelleştirir. Bina, su öğeleri, OSM nesnesi, kullanıcı çizimi ve park sınırı korunur. Görsel geometri, kabul edilen hesap geometrisinden ayrıdır. Harita ve PNG aynı görsel geometriyi kullanır; kabul kaydı kesin geometrileri ve görsel geometrileri ayrı saklar. Alan, sınıf toplamı, karbon hesabı ve örnekleme gridinin geometrisi değiştirilmez. Görsel toplam alan ve sınıfların örtüşme kontrolü başarısızsa kesin geometri çizilir. Bu işlem uydu verisinin 10/20 m çözünürlüğünü artırmaz veya yeni yapı algılaması sağlamaz.
 
 ## Yetkili DOI tescili
 

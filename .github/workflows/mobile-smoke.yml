@@ -16,9 +16,9 @@ jobs:
       - run: npm ci
       - name: Chromium
         run: npx --yes --package=playwright@1.62.1 playwright install --with-deps chromium
-      - name: Telefon, çizim ve OSM regresyonları
+      - name: Telefon, Ã§izim ve OSM regresyonlarÄ±
         run: npm run check:phone
-      - name: Klavye, odak ve erişilebilirlik
+      - name: Klavye, odak ve eriÅŸilebilirlik
         run: npm run check:accessibility
       - uses: actions/upload-artifact@v4
         if: always()
@@ -26,3 +26,21 @@ jobs:
           name: mobile-smoke
           path: /tmp/dendrogeo-mobile/
           retention-days: 7
+
+  webkit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - run: npm ci
+      - name: WebKit
+        run: npx --yes --package=playwright@1.62.1 playwright install --with-deps webkit
+      - name: WebKit profil ve sekme regresyonları
+        env:
+          DG_UI_BROWSER: webkit
+        run: |
+          node scripts/profile-smoke.mjs
+          node scripts/ui-consistency-smoke.mjs

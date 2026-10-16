@@ -42,7 +42,7 @@ test('location fields preserve GPS accuracy, altitude and reverse-geocode fallba
 test('offline record builder retains photo evidence, a fresh client id and edit marker',()=>{
   const{window}=setup(),record={owner:'u',project_id:4,point_id:2,client_id:'online-id'},blob={size:10};
   const offline=window.DG_BUILD_OFFLINE_MEASUREMENT_RECORD.build({record,photoBlob:blob,photoFile:'P002_M1.JPG',editId:9,clientId:'offline-id'});
-  assert.equal(JSON.stringify(offline),JSON.stringify({...record,photoBlob:blob,photo_file:'P002_M1.JPG',client_id:'offline-id',_editId:9}));assert.equal(record.client_id,'online-id');
+  assert.equal(JSON.stringify(offline),JSON.stringify({...record,photoBlob:blob,photo_file:'P002_M1.JPG',client_id:'offline-id',_editId:9,_editBaseline:null}));assert.equal(record.client_id,'online-id');
   const withoutPhoto=window.DG_BUILD_OFFLINE_MEASUREMENT_RECORD.build({record,photoBlob:null,photoFile:null,editId:null,clientId:'new-id'});assert.equal(Object.hasOwn(withoutPhoto,'photoBlob'),false);assert.equal(Object.hasOwn(withoutPhoto,'_editId'),false);
 });
 

@@ -16,7 +16,7 @@ try{for(const width of [360,390,430]){
  for(const view of views){
   await page.evaluate(id=>{document.querySelectorAll('.view').forEach(e=>e.classList.toggle('on',e.id===id));},view);
   await page.waitForFunction(()=>{const v=document.querySelector('.view.on');return !v||Number(getComputedStyle(v).opacity)===1;});
-  const result=await page.evaluate(async()=>{const result=await axe.run(document,{runOnly:{type:'tag',values:['wcag2a','wcag2aa','wcag21a','wcag21aa']}});return result.violations.map(v=>({id:v.id,nodes:v.nodes.map(n=>({target:n.target,summary:n.failureSummary}))}));});
+  const result=await page.evaluate(async()=>{const result=await axe.run(document,{runOnly:{type:'tag',values:['wcag2a','wcag2aa','wcag21a','wcag21aa','wcag22aa']}});return result.violations.map(v=>({id:v.id,nodes:v.nodes.map(n=>({target:n.target,summary:n.failureSummary}))}));});
   if(result.length)failures.push({width,view,violations:result});
  }
  // Actual dynamic surface renderer: no raster/record mutations or network analysis.
@@ -26,9 +26,9 @@ try{for(const width of [360,390,430]){
   const geometry=await slider.evaluate(e=>{const r=e.getBoundingClientRect(),s=getComputedStyle(e);return{left:r.left,right:r.right,height:r.height,padding:s.paddingTop,focus:e.matches(':focus-visible'),outline:s.outlineWidth};});assert.ok(geometry.left>=0&&geometry.right<=width);assert.ok(geometry.height>=44);assert.equal(geometry.padding,'0px');assert.ok(geometry.focus&&geometry.outline!=='0px');
  }
  await page.waitForFunction(()=>Number(getComputedStyle(document.getElementById('v-map')).opacity)===1);
- const surface=await page.evaluate(async()=>{const r=await axe.run(document,{runOnly:{type:'tag',values:['wcag2a','wcag2aa','wcag21a','wcag21aa']}});return r.violations.map(v=>({id:v.id,nodes:v.nodes.map(n=>({target:n.target,summary:n.failureSummary}))}));});if(surface.length)failures.push({width,view:'surface-controls',violations:surface});
+ const surface=await page.evaluate(async()=>{const r=await axe.run(document,{runOnly:{type:'tag',values:['wcag2a','wcag2aa','wcag21a','wcag21aa','wcag22aa']}});return r.violations.map(v=>({id:v.id,nodes:v.nodes.map(n=>({target:n.target,summary:n.failureSummary}))}));});if(surface.length)failures.push({width,view:'surface-controls',violations:surface});
  await page.evaluate(()=>{document.getElementById('shell').style.display='none';document.getElementById('landing').style.display='block';});
- const landing=await page.evaluate(async()=>{const r=await axe.run(document,{runOnly:{type:'tag',values:['wcag2a','wcag2aa','wcag21a','wcag21aa']}});return r.violations.map(v=>({id:v.id,nodes:v.nodes.map(n=>({target:n.target,summary:n.failureSummary}))}));});if(landing.length)failures.push({width,view:'landing',violations:landing});
+ const landing=await page.evaluate(async()=>{const r=await axe.run(document,{runOnly:{type:'tag',values:['wcag2a','wcag2aa','wcag21a','wcag21aa','wcag22aa']}});return r.violations.map(v=>({id:v.id,nodes:v.nodes.map(n=>({target:n.target,summary:n.failureSummary}))}));});if(landing.length)failures.push({width,view:'landing',violations:landing});
  await page.evaluate(()=>{showAuth();authTab('reg');});
  await page.locator('#rgConsent').focus();await page.keyboard.press('Space');assert.equal(await page.locator('#rgConsent').isChecked(),true);assert.deepEqual(errors,[]);
  console.log(JSON.stringify({width,views:views.length+2,automatedAccessibility:true,keyboardSwitch:true,visibleFocus:true,sliderEndpoints:true}));await page.close();

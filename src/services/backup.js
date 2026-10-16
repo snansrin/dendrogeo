@@ -15,7 +15,7 @@ async function fullBackup(){
   remember:()=>localStorage.setItem("dg_lastBackup",new Date().toISOString()),
   onDenied:()=>toast("Yetki yok.","err"),
   onStart:()=>toast("Yedek hazırlanıyor…","info","💾"),
-  onSuccess:(name,count)=>toast((typeof dgTfs==="function"?dgTfs("✓ Yedek indirildi: {f} ({n} ölçüm)",{f:name,n:count}):("✓ Yedek indirildi: "+name+" ("+count+" ölçüm)")),"ok","💾"),
+  onSuccess:(name,count)=>toast((typeof dgTfs==="function"?dgTfs("✓ Veri yedeği indirildi: {f} ({n} ölçüm). Fotoğraf dosyaları ve cihazdaki kuyruk ayrı yedeklenir.",{f:name,n:count}):("✓ Yedek indirildi: "+name+" ("+count+" ölçüm)")),"ok","💾"),
   onFailure:error=>toast(dgCf("Yedek hatası: ")+error.message,"err","❌")
  });
 }
@@ -23,7 +23,7 @@ async function fullBackup(){
 function checkBackupReminder(){
   const last=localStorage.getItem("dg_lastBackup");
   const state=window.DG_BACKUP_REMINDER_STATE.evaluate(last,Date.now());
-  if(state.overdue) toast(dgTfs("⚠ Son tam yedeğin üzerinden {n} gün geçti — bugünkü yedeği alın",{n:state.elapsedDays}),"warn","💾");
+  if(state.overdue) toast(dgTfs("⚠ Son veri yedeğinin üzerinden {n} gün geçti — bugünkü yedeği alın",{n:state.elapsedDays}),"warn","💾");
 }
 
 /* ═══════════ 0036 (T3) · YEDEKTEN YÜKLE ═══════════

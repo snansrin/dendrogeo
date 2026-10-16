@@ -22,7 +22,67 @@ on:
       - 'src/ui/park-menu-ui.js'
       - 'src/ui/park-image-geometry.js'
       - 'src/ui/gis-export.js'
-      - 'src/application/surface/prepare-verified-map-export.js'
+      - 'src/application/surface/**'
+      - 'src/domain/surface/**'
+      - 'src/adapters/surface/**'
+      - 'src/ui/gis-export-download.js'
+      - 'src/ui/gis-export-verified-canvas.js'
+      - 'src/ui/gis-export-layout.js'
+      - 'src/ui/park-export-layout.js'
+      - 'src/ui/park-export-canvas.js'
+      - 'src/ui/park-landcover-analysis.js'
+      - 'src/domain/parks/park-export-formats.js'
+      - 'src/ui/gis-export-canvas.js'
+      - 'src/ui/gis-export-canvas-*.js'
+      - 'src/ui/gis-export-standard-*.js'
+      - 'src/ui/gis-export-events.js'
+      - 'src/ui/gis-export-vegetation.js'
+      - 'docs/surface-engine-lock.json'
+      - 'docs/surface-scientific-contract.json'
+      - 'test/surface-scientific-contract.test.mjs'
+      - 'vendor/geotiff-2.1.3.js'
+      - 'vendor/polygon-clipping-0.15.7.js'
+      - 'src/services/osm-water-backup.js'
+      - 'src/services/visit-stats.js'
+      - 'src/config/i18n-en.js'
+      - 'src/config/i18n.js'
+      - 'src/services/park-registry.js'
+      - 'src/ui/park-project-options.js'
+      - 'src/ui/park-admin-status.js'
+      - 'src/ui/park-schema-warning.js'
+      - 'src/ui/park-measurement-gate.js'
+      - 'src/application/visitors/**'
+      - 'src/application/parks/**'
+      - 'src/adapters/parks/**'
+      - 'src/services/grid-engine.js'
+      - 'src/domain/parks/**'
+      - 'scripts/verify-osm-water-live.mjs'
+      - '.github/workflows/gis-three-park-qa.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'scripts/val-qa.mjs'
+      - 'scripts/lib/report-snapshot-application.mjs'
+      - 'scripts/lib/report-park-geometry-source.mjs'
+      - 'scripts/lib/report-landcover-analysis.mjs'
+      - 'scripts/lib/report-landcover-runtime.mjs'
+      - 'src/services/lc-*.js'
+      - 'src/ui/lc-sens.js'
+      - 'src/ui/park-panel.js'
+      - 'src/ui/park-reference-area.js'
+      - 'src/ui/park-mode-controller.js'
+      - 'src/ui/park-click-controller.js'
+      - 'src/ui/choose-new-park-controller.js'
+      - 'src/ui/park-reset-controller.js'
+      - 'src/ui/park-boundary-layer.js'
+      - 'src/ui/park-candidate-select.js'
+      - 'src/ui/park-info-panel.js'
+      - 'src/ui/park-menu-ui.js'
+      - 'src/ui/park-image-geometry.js'
+      - 'src/ui/gis-export.js'
+      - 'src/application/surface/**'
+      - 'src/domain/surface/**'
+      - 'src/adapters/surface/**'
       - 'src/ui/gis-export-download.js'
       - 'src/ui/gis-export-verified-canvas.js'
       - 'src/ui/gis-export-layout.js'
@@ -63,7 +123,7 @@ permissions:
 
 jobs:
   parks:
-    name: 2026 Sentinel-2 · Ankara parks
+    name: 2026 Sentinel-2 Â· Ankara parks
     runs-on: ubuntu-latest
     timeout-minutes: 45
     steps:
@@ -80,9 +140,9 @@ jobs:
         run: |
           set -euo pipefail
           mkdir -p /tmp/dendrogeo-park-qa
-          node scripts/val-qa.mjs --park "Göksu Parkı" --city Ankara --s2-mode ytd 2>&1 | tee /tmp/dendrogeo-park-qa/goksu.log
-          node scripts/val-qa.mjs --park "Başkent Millet Bahçesi" --city Ankara --s2-mode ytd 2>&1 | tee /tmp/dendrogeo-park-qa/baskent.log
-          node scripts/val-qa.mjs --park "Kuğulu Parkı" --city Ankara --s2-mode ytd 2>&1 | tee /tmp/dendrogeo-park-qa/kugulu.log
+          node scripts/val-qa.mjs --park "GÃ¶ksu ParkÄ±" --city Ankara --s2-mode ytd 2>&1 | tee /tmp/dendrogeo-park-qa/goksu.log
+          node scripts/val-qa.mjs --park "BaÅŸkent Millet BahÃ§esi" --city Ankara --s2-mode ytd 2>&1 | tee /tmp/dendrogeo-park-qa/baskent.log
+          node scripts/val-qa.mjs --park "KuÄŸulu ParkÄ±" --city Ankara --s2-mode ytd 2>&1 | tee /tmp/dendrogeo-park-qa/kugulu.log
       - uses: actions/upload-artifact@v4
         if: always()
         with:

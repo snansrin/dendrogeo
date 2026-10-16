@@ -11,7 +11,7 @@ test('missing history still renders the current report with publication date and
   assert.equal((html.match(/<tr/g)||[]).length,1);
   assert.match(html,/<tr style="font-weight:700"/);
   assert.match(html,/2026-10-11/);
-  assert.match(html,/İlk yayımlama \(bu rapor · geçerli sürüm\)/);
+  assert.match(html,/İlk yayımlama \(bu raporun yayımlanan anlık görüntüsü\)/);
 });
 
 test('history preserves order and fallbacks, escapes values and leaves stored entries intact',()=>{

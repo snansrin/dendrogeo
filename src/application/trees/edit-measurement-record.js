@@ -5,6 +5,7 @@ window.DG_EDIT_MEASUREMENT_RECORD={
   async edit(id,ports){
     const record=await ports.fetch(id);
     if(!record)return;
+    if(ports.setBaseline)ports.setBaseline({...record});
     ports.clearPhoto();
     ports.setEditing(id);
     const form=ports.build(record);
