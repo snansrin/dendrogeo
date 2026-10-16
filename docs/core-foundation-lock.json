@@ -7860,6 +7860,44 @@
           "sha256": "3e79c3a00cfe4f321e24784df756379acf9158f71517524a35a6e938b89a2751"
         }
       ]
+    },
+    {
+      "id": "interactive-private-profile-2026-10-15",
+      "date": "2026-10-15",
+      "scope": "User-authorized modularization: enhance the private dashboard profile using shared theme controls; isolate local edit/cancel interactions, preserve non-edited metadata and validate delegated save events. No scientific or authorization changes.",
+      "audit_chain": "sha256-v1",
+      "files": [
+        {
+          "path": "index.html",
+          "previous_sha256": "5271596fdce526040e9321750f8a1a7d874aceb7554503f518095c4090c41fcf",
+          "sha256": "ea7902b49ba42e4e5386327ed8151e59bd15a7c0f7347132d884ab3f31708b01"
+        },
+        {
+          "path": "partials/head.html",
+          "previous_sha256": "9e277a630458f5bfc8b9e2d4d17d07ebc1cd3f9ec56a8d0c6bbf3f4a1a529134",
+          "sha256": "16001b65c34a76344535fe2d22bee5008b443f226f27284892bc5993ca3975ee"
+        },
+        {
+          "path": "scripts/check-phone.mjs",
+          "previous_sha256": "e3cafde7fc61d78f005acbac2092e71e80de8c6848bd59cb091eafd465666093",
+          "sha256": "097aed9c7f214346fdbfff867728b989538d5080b0e3497484e07017dac6391f"
+        },
+        {
+          "path": "src/ui/save-academic-profile.js",
+          "previous_sha256": "311b3acfbc1b6b3134faecd30b10708ab04b3a477e389442c58f877d932c0dcf",
+          "sha256": "5cd1ba858cd289795d744c32bd0963e2a5cdb01bf183b7f3e2e2c83b3695f05c"
+        },
+        {
+          "path": "sw.js",
+          "previous_sha256": "a875c1b04c3b3ad23a1fe214be7fe4bdd2b3511b2b2b1ee5ae80d98dcd6f9919",
+          "sha256": "e138c02b5901f1f564ecd387d4619a568614bf20772451304e8c3cb0e0cbfefb"
+        },
+        {
+          "path": "test/academic-profile-modules.test.mjs",
+          "previous_sha256": "96d625ff5842bec8291856c4ab1a55ecefa4a3df0e37481a2d2896fb4776dbb7",
+          "sha256": "4d0cc2d2d1a56554fc7c399a5af91637ecc7a68e45e8ef7f367d6b253c1b965b"
+        }
+      ]
     }
   ]
 }

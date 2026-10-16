@@ -8,6 +8,7 @@ function loadModules() {
   for (const file of [
     '../src/application/reports/resolve-academic-profile-defaults.js',
     '../src/ui/academic-profile-fields.js',
+    '../src/ui/academic-profile-interactions.js',
     '../src/ui/render-academic-profile.js',
     '../src/ui/save-academic-profile.js',
     '../src/application/reports/create-academic-report-collector.js',
@@ -121,4 +122,23 @@ test('akademik rapor collector kullanıcı ve park anahtarı ile mevcut factorye
   assert.equal(await collector(42, true), 'collected');
   assert.equal(args.getRequestKey(42), 'user-1:42');
   assert.equal(args.getProjectName(), 'Park projesi');
+});
+
+test('profil özeti isteğe bağlı alanları sayar; kaynak veriyi değiştirmez',()=>{
+ const modules=loadModules(),profile={values:{institution:'Kurum',orcid:'',project_name:'Proje'},fields:[['institution','Kurum'],['orcid','ORCID'],['project_name','Proje']]};
+ const before=JSON.stringify(profile),summary=modules.DG_RESOLVE_ACADEMIC_PROFILE_DEFAULTS.summarize(profile);
+ assert.equal(summary.filled,2);assert.equal(summary.total,3);assert.equal(summary.project,'Proje');
+ assert.equal(JSON.stringify(profile),before);
+});
+
+test('delege edilen gerçek form kaydı görünmeyen araştırma bilgilerini korur',async()=>{
+ const modules=loadModules(),button={disabled:false},status={};let sent;
+ const form={matches:()=>true,querySelector:()=>button};
+ await modules.DG_SAVE_ACADEMIC_PROFILE.execute({target:form,currentTarget:{},preventDefault(){}},{
+  getStatus:()=>status,isAuthenticated:()=>true,clean:value=>value,
+  defaults:()=>({title:'Mevcut araştırma başlığı',sampling:'Mevcut yöntem',institution:'Eski'}),
+  formData:target=>{assert.equal(target,form);return[['institution','Yeni'],['orcid','']];},orcidValid:()=>true,
+  update:async value=>{sent=value;return{data:{user:{id:'u'}}};},acceptUser(){},render(){},savedStatus:()=>({}),toast(){}
+ });
+ assert.equal(sent.institution,'Yeni');assert.equal(sent.title,'Mevcut araştırma başlığı');assert.equal(sent.sampling,'Mevcut yöntem');
 });

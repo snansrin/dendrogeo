@@ -9,6 +9,35 @@
 .dg-academic-dialog textarea{width:100%;box-sizing:border-box;background:var(--surface);border:1px solid var(--line);border-radius:10px;color:var(--ink);padding:11px 12px;font:inherit;resize:vertical}
 .dg-academic-dialog textarea:focus{outline:2px solid var(--green);border-color:var(--green)}
 
+/* Dashboard profile: account-scoped overview and progressive editing. */
+#dgAcademicProfile .dg-profile-heading{flex-wrap:wrap}
+#dgAcademicProfile .dg-profile-heading>button{flex:0 0 auto}
+#dgAcademicProfile .dg-profile-overview{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+#dgAcademicProfile .dg-profile-overview>section{display:flex;flex-direction:column;align-items:flex-start;gap:8px;padding:16px;border:1px solid var(--line);border-radius:12px;background:var(--bg);min-width:0}
+#dgAcademicProfile .dg-profile-overview h3{font:700 1rem/1.5 var(--f-ui);color:var(--green-dk);overflow-wrap:anywhere}
+#dgAcademicProfile .dg-profile-overview p{margin:0}
+#dgAcademicProfile .dg-profile-overview .btn{margin-top:auto}
+#dgAcademicProfile .dg-profile-orcid{display:flex;flex-direction:column;gap:6px}
+#dgAcademicProfile a{color:var(--green);overflow-wrap:anywhere}
+#dgAcademicProfile .dg-profile-completion{margin:16px 0;padding:12px 0;border-bottom:1px solid var(--line)}
+#dgAcademicProfile .dg-profile-completion>div{display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap}
+#dgAcademicProfile progress{display:block;width:100%;height:6px;margin:10px 0;border:0;border-radius:9px;overflow:hidden;appearance:none;background:var(--tint);accent-color:var(--green)}
+#dgAcademicProfile progress::-webkit-progress-bar{background:var(--tint)}
+#dgAcademicProfile progress::-webkit-progress-value{background:var(--green)}
+#dgAcademicProfile progress::-moz-progress-bar{background:var(--green)}
+#dgAcademicProfile .dg-profile-actions{display:grid;grid-template-columns:repeat(4,minmax(0,1fr))}
+#dgAcademicProfile .dg-profile-fieldset{min-width:0;border:0;padding:12px 0;margin:0}
+#dgAcademicProfile legend{font:700 .85rem/1.5 var(--f-ui);color:var(--green-dk);padding:0}
+#dgAcademicProfile .dg-profile-form-actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:12px}
+#dgAcademicProfile .dg-profile-publications{margin-top:16px;font-size:.8rem}
+#dgAcademicSavedStatus:empty{display:none}
+@media(max-width:600px){
+ #dgAcademicProfile .dg-profile-heading>button{flex:1 1 100%}
+ #dgAcademicProfile .dg-profile-overview{grid-template-columns:minmax(0,1fr)}
+ #dgAcademicProfile .dg-profile-actions{grid-template-columns:repeat(2,minmax(0,1fr))}
+ #dgAcademicProfile .dg-profile-form-actions>*{flex:1 1 auto}
+}
+
 /* Keep publication controls stationary while optional details scroll inside. */
 .dg-academic-dialog{position:fixed;inset:16px 0 auto;margin:0 auto;width:min(620px,calc(100% - 24px));height:min(600px,calc(100dvh - 32px));max-height:calc(100dvh - 32px);overflow:hidden;animation:none;transition:none;transform:none}
 #dgReportQuestionForm{height:100%;min-height:0;display:flex;flex-direction:column;gap:12px}

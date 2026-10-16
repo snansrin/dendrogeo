@@ -298,6 +298,7 @@ const CORE_ASSETS = [
     '/src/application/reports/collect-publication-request.js',
     '/src/application/reports/resolve-academic-profile-defaults.js',
     '/src/ui/academic-profile-fields.js',
+    '/src/ui/academic-profile-interactions.js',
     '/src/ui/render-academic-profile.js',
     '/src/ui/save-academic-profile.js',
     '/src/application/reports/create-academic-report-collector.js',

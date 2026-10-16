@@ -13,5 +13,9 @@ window.DG_RESOLVE_ACADEMIC_PROFILE_DEFAULTS = (() => {
     });
   }
 
-  return Object.freeze({ resolve });
+  function summarize({values,fields}){
+    const total=fields.length,filled=fields.filter(([key])=>String(values[key]||'').trim()).length;
+    return{total,filled,institution:values.institution||'',department:values.department||'',project:values.project_name||'',program:values.program||''};
+  }
+  return Object.freeze({ resolve, summarize });
 })();

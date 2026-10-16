@@ -1468,5 +1468,21 @@ Object.assign(DG_I18N_EN,{
  "Sonuçlar": "Report results",
  "Kalite kontrolü": "Quality control",
  "Yeniden dene": "Retry loading",
- "Sert zemin": "Hard surface"
+ "Sert zemin": "Hard surface",
+ "Profili düzenle":"Edit profile",
+ "Araştırma / proje":"Research / project",
+ "Çalışma adınızı ekleyin":"Add your study name",
+ "Çalışma alanınızı profilinizde tanımlayabilirsiniz.":"You can describe your research area in your profile.",
+ "Çalışma bilgileri":"Study details",
+ "Araştırmacı kimliği":"Researcher identifier",
+ "ORCID kimliğinizi ekleyerek araştırmacı künyenizi tamamlayabilirsiniz.":"Add your ORCID identifier to your researcher details.",
+ "Kimlik bilgileri":"Identifier details",
+ "İsteğe bağlı profil bilgileri":"Optional profile details",
+ "Doldurulan isteğe bağlı profil bilgileri":"Completed optional profile details",
+ "Bilgileriniz güncel. Tüm alanlar isteğe bağlıdır.":"Your details are up to date. All fields are optional.",
+ "Kaydedilmemiş değişiklikleriniz var.":"You have unsaved changes.",
+ "Kurum ve çalışma alanı":"Institution and research area",
+ "Araştırmacı kimliği ve proje":"Researcher identifier and project",
+ "Bu bilgiler hesabınıza özeldir. Rapor yayımlarken hangi bilgilerin herkese açılacağını ayrıca seçersiniz.":"These details are private to your account. You choose which details to publish when submitting a report.",
+ "Yayımlanan bilimsel raporları inceleyin ↗":"Browse published scientific reports ↗"
 });

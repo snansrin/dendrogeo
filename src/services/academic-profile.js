@@ -29,6 +29,7 @@ function dgAcademicProfileRender(){
 async function dgAcademicProfileSave(event){
  return window.DG_SAVE_ACADEMIC_PROFILE.execute(event,{
   getStatus:()=>$("dgAcademicProfileStatus"),isAuthenticated:()=>!!USER,clean:DG_REPORT_CONTEXT.clean,
+  defaults:dgAcademicDefaults,
   formData:form=>new FormData(form),orcidValid:DG_REPORT_CONTEXT.orcidValid,
   update:value=>window.DG_AUTH_SESSION_STORE.create(()=>sb).updateProfileMetadata(value),
   acceptUser:user=>{USER=user;},render:dgAcademicProfileRender,
