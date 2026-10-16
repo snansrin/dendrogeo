@@ -8350,6 +8350,19 @@
           "sha256": "4b23521015946b200dc094986ce8f6fca2c4b1642957a94ca58f27f985022e7e"
         }
       ]
+    },
+    {
+      "id": "neutral-near-black-dark-theme-2026-10-16",
+      "date": "2026-10-16",
+      "scope": "User-authorized modularization: replace green-tinted dark presentation backgrounds, text neutrals, borders and footer with near-black neutral tokens in the existing appearance CSS module. Brand accent colors, light mode, map tiles, science and printed reports are preserved.",
+      "audit_chain": "sha256-v1",
+      "files": [
+        {
+          "path": "index.html",
+          "previous_sha256": "0ec7d74c24dc1aeb77ae74bf561bee4ccafbc742770b7cba0fc439c5f534f8a6",
+          "sha256": "512fb2a9bc83d4e9ff6242a05b1a45d8551bd392a90bdc7ef2e59827b56a80bc"
+        }
+      ]
     }
   ]
 }
