@@ -1,27 +1,30 @@
 "use strict";
 (function(root){
- function create({prepare,infer,normalize,present,makeAbortController}){
-  let image=null,result=null,epoch=0,pending=null;
-  const display=(state,error)=>present({state,error,image,result});
-  function clear(){epoch++;pending?.abort();pending=null;image=null;result=null;display('empty');}
-  async function select(file){
-   clear();const job=epoch;display('preparing');
-   try{const prepared=await prepare(file);if(job!==epoch)return;image=prepared;display('ready');}
-   catch(error){if(job===epoch)display('error',error.message==='image_too_large'?'image_too_large':'invalid_image');}
+ function create({getPark,plan,readImage,clearImages,infer,collect,summarize,present,makeAbortController,clock,yieldFrame}){
+  let epoch=0,pending=null,scan=null,rows=[],completed=0,result=null,state='empty',error=null,confidence=.5,startedAt=null;
+  const samePark=()=>scan&&JSON.stringify(getPark())===scan.key;
+  function display(){if(scan)result=summarize(rows,scan,confidence,{completed,total:scan.chips.length,startedAt});present({state,error,result,confidence,completed,total:scan?.chips.length||0});}
+  function clear(){epoch++;pending?.abort();pending=null;clearImages();scan=null;rows=[];completed=0;result=null;error=null;state='empty';display();}
+  function contextChanged(){if(scan&&!samePark())clear();}
+  function setThreshold(value){if(!Number.isFinite(value)||value<0||value>1)return;confidence=value;display();}
+  function cancel(){epoch++;pending?.abort();pending=null;clearImages();error='cancelled';state=scan?'cancelled':'empty';display();}
+  async function run(){
+   if(pending)return;
+   clear();const job=epoch;startedAt=clock();
+   try{scan=plan(getPark());}catch(e){state='error';error=e.message;display();return;}
+   pending=makeAbortController();state='running';display();const signal=pending.signal;
+   try{for(const chip of scan.chips){
+    if(job!==epoch)return;if(!samePark()){clear();return;}
+    const image=await readImage(chip,signal);if(job!==epoch)return;
+    // Fetch all model confidences once; the slider filters locally without a new request.
+    const raw=await infer(image,0,signal);if(job!==epoch)return;if(!samePark()){clear();return;}
+    const additions=collect(raw,chip);if(rows.length+additions.length>12000)throw Error('too_many_candidates');rows.push(...additions);completed++;display();await yieldFrame();
+   }
+   if(job===epoch){state='complete';display();}
+   }catch(e){if(job===epoch){state='error';error=e.name==='AbortError'?'cancelled':e.message;display();}}
+   finally{if(job===epoch){pending=null;clearImages();}}
   }
-  async function run(confidence){
-   if(!image||pending)return;
-   const job=epoch;pending=makeAbortController();result=null;display('running');
-   try{
-    const response=await infer(image,confidence,pending.signal);
-    if(job!==epoch)return;
-    result=normalize(response,{width:image.width,height:image.height,imageId:image.imageId,modelId:response.modelId},{confidence,nmsIou:.5});
-    display('complete');
-   }catch(error){if(job===epoch)display('error',error.name==='AbortError'?'cancelled':error.message);}
-   finally{if(job===epoch)pending=null;}
-  }
-  function cancel(){epoch++;pending?.abort();pending=null;result=null;display(image?'ready':'empty');}
-  return Object.freeze({select,run,cancel,clear});
+  return Object.freeze({run,cancel,clear,setThreshold,contextChanged});
  }
  root.DG_DETECT_TREE_CANDIDATES=Object.freeze({create});
 })(window);

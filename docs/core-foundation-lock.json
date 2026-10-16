@@ -970,7 +970,11 @@
       "src/application/trees/detect-tree-candidates.js",
       "src/adapters/trees/tree-detection-client.js",
       "src/ui/tree-detection-panel.js",
-      "src/bootstrap/tree-detection-controller.js"
+      "src/bootstrap/tree-detection-controller.js",
+      "src/domain/trees/park-tree-scan-plan.js",
+      "src/domain/trees/park-tree-scan-results.js",
+      "src/adapters/trees/park-tree-imagery.js",
+      "src/ui/park-tree-candidate-layer.js"
     ],
     "modular_shell_action_safeguards": [
       "index.html",
@@ -1976,7 +1980,11 @@
     "src/application/trees/detect-tree-candidates.js": "1e710c400ec0d3f6c45364aefcc0a978c8c726d9477d4a3a81c3c215c449a6e6",
     "src/adapters/trees/tree-detection-client.js": "248f2330a2bc74e1b21e833fb1412a486f23e1c1c71099997125d8a76243725b",
     "src/ui/tree-detection-panel.js": "9e8466290af59d683459c7ae00d718558a7aaf584384a6c40b525d31960db562",
-    "src/bootstrap/tree-detection-controller.js": "2c12c4cd9cd2e6c7b070b621dad80dfbc65a5cee16d489c61f54ff3d34241ca1"
+    "src/bootstrap/tree-detection-controller.js": "2c12c4cd9cd2e6c7b070b621dad80dfbc65a5cee16d489c61f54ff3d34241ca1",
+    "src/domain/trees/park-tree-scan-plan.js": "128ba7ef654a5dd303788e72aaae060d5e4e03b58158b3c8ea8da870eb848c74",
+    "src/domain/trees/park-tree-scan-results.js": "7993b6dcd642f9a273cc1e5d576d724676318613c1ee351b2ab914e8fc5403a1",
+    "src/adapters/trees/park-tree-imagery.js": "a9e5f8a7b7357d2d1036cd58afe0051ebb117f70395941ce534b802b30110287",
+    "src/ui/park-tree-candidate-layer.js": "279fbd6ec43561fed83ff6becfba2e17b21c4b4891d08e6f231eb649a97586f3"
   },
   "authorized_modularizations": [
     {
@@ -8641,6 +8649,55 @@
           "path": "sw.js",
           "previous_sha256": "9a6f0067048deb3181b4109e8367b7747f8891a985a13cf6fe655de06b8701fa",
           "sha256": "3ff94235eef86091c9f7833f007c92ef648ae869cf7cc663f54a63d42d032f2f"
+        }
+      ]
+    },
+    {
+      "id": "park-tree-scan-slider-extents-2026-10-16",
+      "date": "2026-10-16",
+      "scope": "User-authorized modularization: replace file upload with selected-park imagery scanning, overlapping georeferenced windows, park/hole filtering and cross-window deduplication. Add a local confidence slider and explicitly unvalidated detection-box crown extent estimates. Render candidates on one pointer-transparent canvas; cancel on park/account changes. Preserve existing map tools, raw and accepted surface results, tree measurements, carbon and reports.",
+      "audit_chain": "sha256-v1",
+      "added_protected_files": [
+        "src/domain/trees/park-tree-scan-plan.js",
+        "src/domain/trees/park-tree-scan-results.js",
+        "src/adapters/trees/park-tree-imagery.js",
+        "src/ui/park-tree-candidate-layer.js"
+      ],
+      "files": [
+        {
+          "path": "index.html",
+          "previous_sha256": "426de690217f7cd5b75710245c54ec0d13df1cc2f879a96525dcc77a315ee1b4",
+          "sha256": "c4e40403bcf0dfa4afaf1768673d531b0dfe7fd8e4ece86b09364f89f7f18946"
+        },
+        {
+          "path": "partials/head.html",
+          "previous_sha256": "97bbd64bbf3e7f46febced155adef2ae03d98af6170815bc53d12fd49b0e616a",
+          "sha256": "1f7c1189cc0dc37833846ef37f64fa8f0fa0a388ff049ba0825382f795247820"
+        },
+        {
+          "path": "src/adapters/trees/tree-detection-client.js",
+          "previous_sha256": "248f2330a2bc74e1b21e833fb1412a486f23e1c1c71099997125d8a76243725b",
+          "sha256": "c69bca4bd4204f04b2ef5318cb692a01310e6fdcbec6ad98cfd8ea0a7281ac0a"
+        },
+        {
+          "path": "src/application/trees/detect-tree-candidates.js",
+          "previous_sha256": "1e710c400ec0d3f6c45364aefcc0a978c8c726d9477d4a3a81c3c215c449a6e6",
+          "sha256": "55846a5df2750a83021c0510aa533a800658d76b097b0e1bcd3f337ae5fe4e66"
+        },
+        {
+          "path": "src/bootstrap/tree-detection-controller.js",
+          "previous_sha256": "2c8ca8f5b0c6088434ca4a6938c75703f4275ebb06fdd462b971a04ffa1d3724",
+          "sha256": "5b44b8732855d98b25d322a60150d95e36db7c48ab77da984cdcd03f5009511f"
+        },
+        {
+          "path": "src/ui/tree-detection-panel.js",
+          "previous_sha256": "3077cd005a8148b33946865ef4d5f0517851aa17ab7f347ba0f9ba8a5466ab45",
+          "sha256": "3e8b08dcf83324528e927db202ded95b34f5f01b6dc9d2d753a2b847c35ff71d"
+        },
+        {
+          "path": "sw.js",
+          "previous_sha256": "3ff94235eef86091c9f7833f007c92ef648ae869cf7cc663f54a63d42d032f2f",
+          "sha256": "ae13e841388c6b3a9b1731549df99ef745e43c1e670c3ae6c0f23234edc14fe6"
         }
       ]
     }

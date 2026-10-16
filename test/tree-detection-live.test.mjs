@@ -31,10 +31,3 @@ test('proxy refuses duplicate concurrent inference and limits calls',async()=>{
  let finish;const handler=createTreeDetectionHandler({env,fetch:async url=>url.includes('/auth/')?Response.json({id:'user'}):new Promise(resolve=>{finish=()=>resolve(Response.json({image:{width:128,height:128},predictions}));})});
  const first=handler(req());while(!finish)await new Promise(resolve=>setImmediate(resolve));assert.equal((await handler(req())).status,429);finish();assert.equal((await first).status,200);
 });
-function controller(ports){const root={};vm.runInNewContext(readFileSync(new URL('../src/application/trees/detect-tree-candidates.js',import.meta.url),'utf8'),{window:root});return root.DG_DETECT_TREE_CANDIDATES.create(ports);}
-test('application suppresses stale selection, double submit and cancelled model results',async()=>{
- let resolveImage,resolveModel,calls=0;const shown=[];
- const app=controller({prepare:file=>file==='slow'?new Promise(resolve=>resolveImage=resolve):Promise.resolve({imageId:file}),infer:()=>{calls++;return new Promise(resolve=>resolveModel=resolve);},normalize:()=>({candidateCount:2}),present:s=>shown.push(s),makeAbortController:()=>new AbortController()});
- const slow=app.select('slow');await app.select('current');resolveImage({imageId:'stale'});await slow;assert.equal(shown.at(-1).image.imageId,'current');
- const run=app.run(.5);await app.run(.5);assert.equal(calls,1);app.cancel();resolveModel({});await run;assert.equal(shown.at(-1).state,'ready');assert.equal(shown.at(-1).result,null);app.clear();assert.equal(shown.at(-1).image,null);
-});

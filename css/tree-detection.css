@@ -8,3 +8,9 @@
 .dg-tree-actions .btn{min-height:44px;white-space:normal}
 .dg-tree-body canvas{width:100%;height:auto;display:block;border-radius:8px;background:var(--bg)}
 .dg-tree-panel [hidden]{display:none!important}
+.dg-tree-threshold{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px;min-width:0}
+.dg-tree-threshold input[type="range"]{grid-column:1/-1;display:block;box-sizing:border-box;width:100%;min-width:0;min-height:44px;margin:0;padding:0;accent-color:var(--green);touch-action:pan-y}
+.dg-tree-candidate{display:flex;align-items:center;gap:10px;border-top:1px solid var(--line);padding:8px 0;min-width:0}
+.dg-tree-candidate span{overflow-wrap:anywhere;min-width:0;font-size:.82rem}
+.dg-tree-candidate button{flex-shrink:0}
+.dg-tree-body [data-tree-list]>summary{padding:8px 0}

@@ -15,7 +15,8 @@
     "speciesIdentification": false,
     "crownSegmentation": false,
     "dbhFromImagery": false,
-    "heightFromSingleRgbImage": false
+    "heightFromSingleRgbImage": false,
+    "crownExtentBoxProxy": true
   },
   "cardMetricsObserved": {
     "observedOn": "2026-10-16",
@@ -31,8 +32,13 @@
   "livePreview": {
     "enabled": true,
     "route": "Canlı Harita → Ağaç Algılama",
-    "scope": "Single selected image; unvalidated box candidates only",
+    "scope": "Selected park imagery; overlapping georeferenced windows, center-in-park candidates and unvalidated box-based crown extent proxies",
     "acceptedDataWrites": false,
-    "realInferenceVerified": false
+    "realInferenceVerified": false,
+    "fileUpload": false,
+    "confidenceSlider": [
+      0,
+      100
+    ]
   }
 }

@@ -1,46 +1,37 @@
 "use strict";
 (function(root){
  const words={
-  title:['🌳 Ağaç Algılama','🌳 Tree Detection'],intro:['Üstten çekilmiş bir görüntüde ağaç adaylarını inceleyin.','Inspect tree candidates in an overhead image.'],
-  file:['Görüntü seç (JPG, PNG, WebP · en fazla 10 MB)','Choose image (JPG, PNG, WebP · up to 10 MB)'],threshold:['Güven eşiği','Confidence threshold'],
-  transfer:['Algılamayı başlattığınızda seçtiğiniz görüntü Roboflow’a gönderilir. Konum ve hesap bilgileri gönderilmez. Görüntü en fazla 2048 piksele ölçeklenir; dosya üst verileri aktarılmaz.','Starting detection sends your selected image to Roboflow. Location and account details are not sent. Images are resized to at most 2048 pixels; file metadata is removed.'],
-  run:['Ağaçları algıla','Detect trees'],clear:['Temizle','Clear'],cancel:['İptal','Cancel'],download:['Adayları indir (JSON)','Download candidates (JSON)'],
-  note:['Deneysel · Aday sayısı, doğrulanmış ağaç sayısı veya park toplamı değildir. Bu model taç maskesi, tür, DBH ve boy üretmez. Harita ve kayıtlı analiz değiştirilmez.','Experimental · Candidate count is not a confirmed tree count or park total. This model does not produce crown masks, species, DBH or height. The map and saved analysis remain unchanged.'],
-  empty:['Bir uydu, ortofoto veya drone görüntüsü seçin.','Choose a satellite, orthophoto or drone image.'],ready:['Görüntü hazır. İnceledikten sonra algılamayı başlatın.','Image ready. Review it before starting detection.'],preparing:['Görüntü hazırlanıyor…','Preparing image…'],running:['Model çalışıyor…','Running model…'],complete:['ağaç adayı','tree candidates'],
-  invalid_image:['Görüntü okunamadı. JPG, PNG veya WebP seçin.','Could not read image. Choose JPG, PNG or WebP.'],image_too_large:['Görüntü çok büyük. Daha küçük bir görüntü seçin.','Image is too large. Choose a smaller image.'],sign_in_required:['Algılama için giriş yapın.','Sign in to run detection.'],configuration_missing:['Model bağlantısı henüz yapılandırılmamış.','Model connection is not configured yet.'],rate_limited:['Kısa sürede çok istek gönderildi. Bir dakika sonra yeniden deneyin.','Too many requests. Try again in a minute.'],provider_quota:['Model sağlayıcısının kullanım sınırına ulaşıldı.','The model provider usage limit has been reached.'],model_timeout:['Model zaman aşımına uğradı. Yeniden deneyebilirsiniz.','Model timed out. You can try again.'],cancelled:['İstek iptal edildi.','Request cancelled.'],model_unavailable:['Model yanıtı alınamadı. Lütfen daha sonra yeniden deneyin.','Could not get a model response. Please try again later.']
+  title:['🌳 Ağaç Algılama','🌳 Tree Detection'],intro:['Seçili parkı uydu görüntüsü üzerinden tarayın. Adaylar haritada ayrı katmanda gösterilir.','Scan the selected park using satellite imagery. Candidates appear in a separate map layer.'],threshold:['Güven eşiği','Confidence threshold'],
+  transfer:['Parkın uydu görüntüsü Esri’den alınır ve Roboflow modeline gönderilir. Hesap ve oturum bilgileri modele gönderilmez.','Satellite imagery of the park is read from Esri and sent to the Roboflow model. Account and session details are not sent to the model.'],run:['Seçili parkı tara','Scan selected park'],clear:['Temizle','Clear'],cancel:['İptal','Cancel'],download:['Sonucu indir (JSON)','Download result (JSON)'],
+  note:['Deneysel · Taç genişliği tahmini, algılama kutusunun doğu–batı ve kuzey–güney boyutlarından türetilir; doğrulanmış taç sınırı veya saha ölçümü değildir. Görüntü tarihi ve kaynak çözünürlüğü doğrulanmadı. Taç alanı hesaplanmaz; ölçüm ve yüzey kayıtları değiştirilmez.','Experimental · Crown extent estimates use east–west and north–south detection-box dimensions; they are not validated crown boundaries or field measurements. Imagery acquisition date and native resolution are unverified. Crown area is not computed; inventory and surface records are unchanged.'],
+  empty:['Önce haritada bir park seçin veya sınırını çizin. Sonra taramayı başlatın.','Select a park or draw its boundary on the map, then start scanning.'],running:['Park taranıyor','Scanning park'],complete:['Tarama tamamlandı','Scan complete'],cancelled:['Tarama iptal edildi; sonuç eksik.','Scan cancelled; results are incomplete.'],incomplete:['Eksik tarama · park toplamı değildir.','Incomplete scan · not a park total.'],candidates:['Ağaç adayı','Tree candidates'],mean:['Ortalama taç eni tahmini','Mean estimated crown extent'],extent:['Taç eni tahmini (kutu)','Crown extent estimate (box)'],partial:['Sınırda · ölçü verilmedi','At an edge · no extent estimate'],list:['Adayları incele','Inspect candidates'],limit:['Haritada en fazla 2.000, listede ilk 100 aday gösterilir. İndirilen sonuç tüm adayları içerir.','The map shows up to 2,000 candidates and the list shows the first 100. The download includes all candidates.'],
+  park_required:['Önce bir park seçin veya sınır çizin.','Select a park or draw its boundary first.'],invalid_park:['Park sınırı bu tarama için uygun değil.','The park boundary is not supported for this scan.'],park_too_large:['Bu park tek tarama için çok geniş. Daha küçük bir sınır seçin.','This park is too large for one scan. Select a smaller boundary.'],too_many_candidates:['Çok fazla aday üretildi. Güven eşiğini yükseltin veya daha küçük bir alan seçin.','Too many candidates. Increase the confidence threshold or select a smaller area.'],imagery_unavailable:['Uydu görüntüsü tam alınamadı. Eksik görüntüden park toplamı üretilmedi.','Satellite imagery could not be read completely. No park total was produced from missing imagery.'],sign_in_required:['Algılama için giriş yapın.','Sign in to run detection.'],configuration_missing:['Model bağlantısı henüz yapılandırılmamış.','Model connection is not configured yet.'],rate_limited:['İstek sınırına ulaşıldı. Bir dakika sonra yeni tarama başlatabilirsiniz.','Request limit reached. You can start a new scan in a minute.'],provider_quota:['Model sağlayıcısının kullanım sınırına ulaşıldı.','The model provider usage limit has been reached.'],model_timeout:['Model zaman aşımına uğradı; tarama tamamlanmadı.','Model timed out; the scan is incomplete.'],model_unavailable:['Model yanıtı alınamadı; tarama tamamlanmadı.','Could not get a model response; the scan is incomplete.']
  };
- function create({host,english,download}){
-  const text=key=>(words[key]||words.model_unavailable)[english()?1:0];
-  let latest={state:'empty'},actions;
+ function create({host,english,download,focus}){
+  const text=key=>(words[key]||words.model_unavailable)[english()?1:0];let latest={state:'empty',confidence:.5},actions;
+  const number=value=>Number(value).toLocaleString(english()?'en-GB':'tr-TR',{maximumFractionDigits:1});
   function render(){
-   const file=host.querySelector('[data-tree-file]');
-   if(!file){
+   if(!host.querySelector('[data-tree-run]')){
     host.querySelector('summary span').dataset.treeWord='title';
-    host.insertAdjacentHTML('beforeend','<div class="dg-tree-body"><p data-tree-word="intro"></p><label class="lbl"><span data-tree-word="file"></span><input data-tree-file type="file" accept="image/jpeg,image/png,image/webp"></label><label class="lbl"><span data-tree-word="threshold"></span><select data-tree-confidence><option value="0.3">0.30</option><option value="0.5" selected>0.50</option><option value="0.7">0.70</option></select></label><p class="dg-meta" data-tree-word="transfer"></p><div class="dg-tree-actions"><button type="button" class="btn sm" data-tree-run data-tree-word="run" disabled></button><button type="button" class="btn sm ghost" data-tree-cancel data-tree-word="cancel" hidden></button><button type="button" class="btn sm ghost" data-tree-clear data-tree-word="clear"></button><button type="button" class="btn sm ghost" data-tree-download data-tree-word="download" hidden></button></div><p role="status" aria-live="polite" data-tree-status></p><canvas data-tree-preview role="img" hidden></canvas><p class="dg-meta" data-tree-word="note"></p></div>');
-    host.querySelector('[data-tree-file]').addEventListener('change',event=>actions.select(event.target.files[0]));
-    host.querySelector('[data-tree-run]').addEventListener('click',()=>actions.run(Number(host.querySelector('[data-tree-confidence]').value)));
-    host.querySelector('[data-tree-cancel]').addEventListener('click',()=>actions.cancel());
-    host.querySelector('[data-tree-clear]').addEventListener('click',()=>{host.querySelector('[data-tree-file]').value='';actions.clear();});
+    host.insertAdjacentHTML('beforeend','<div class="dg-tree-body"><p data-tree-word="intro"></p><div class="dg-tree-threshold"><label class="lbl" for="treeConfidence" data-tree-word="threshold"></label><output for="treeConfidence" data-tree-value></output><input id="treeConfidence" class="dg-range dg-sens-slider" data-tree-confidence type="range" min="0" max="100" step="1" value="50"></div><p class="dg-meta" data-tree-word="transfer"></p><div class="dg-tree-actions"><button type="button" class="btn sm" data-tree-run data-tree-word="run"></button><button type="button" class="btn sm ghost" data-tree-cancel data-tree-word="cancel" hidden></button><button type="button" class="btn sm ghost" data-tree-clear data-tree-word="clear"></button><button type="button" class="btn sm ghost" data-tree-download data-tree-word="download" hidden></button></div><p role="status" aria-live="polite" data-tree-status></p><div data-tree-metrics></div><details data-tree-list hidden><summary><span data-tree-word="list"></span></summary><div data-tree-rows></div><p class="dg-meta" data-tree-word="limit"></p></details><p class="dg-meta" data-tree-word="note"></p></div>');
+    host.querySelector('[data-tree-run]').addEventListener('click',()=>actions.run());host.querySelector('[data-tree-cancel]').addEventListener('click',()=>actions.cancel());host.querySelector('[data-tree-clear]').addEventListener('click',()=>actions.clear());
     host.querySelector('[data-tree-download]').addEventListener('click',()=>{if(latest.result)download(latest.result);});
-    host.querySelector('[data-tree-confidence]').addEventListener('change',()=>actions.cancel());
+    host.querySelector('[data-tree-confidence]').addEventListener('input',event=>actions.setThreshold(Number(event.target.value)/100));
+    host.querySelector('[data-tree-rows]').addEventListener('click',event=>{const button=event.target.closest('[data-tree-focus]');if(button)focus(latest.result?.candidates[Number(button.dataset.treeFocus)]);});
    }
    host.querySelectorAll('[data-tree-word]').forEach(node=>node.textContent=text(node.dataset.treeWord));
-   const busy=['running','preparing'].includes(latest.state);
-   host.querySelector('[data-tree-run]').disabled=busy||!latest.image;
-   host.querySelector('[data-tree-confidence]').disabled=busy;
-   host.querySelector('[data-tree-cancel]').hidden=!busy;
-   host.querySelector('[data-tree-download]').hidden=!latest.result;
-   host.setAttribute('aria-busy',String(busy));
-   host.querySelector('[data-tree-status]').textContent=latest.state==='complete'?latest.result.candidateCount+' '+text('complete'):text(latest.state==='error'?latest.error:latest.state);
-   const canvas=host.querySelector('[data-tree-preview]');canvas.hidden=!latest.image;
-   canvas.setAttribute('aria-label',latest.result?latest.result.candidateCount+' '+text('complete'):text('ready'));
-   if(latest.image){
-    const snapshot=latest,image=new Image();image.onload=()=>{
-     if(latest!==snapshot)return;
-     canvas.width=snapshot.image.width;canvas.height=snapshot.image.height;const ctx=canvas.getContext('2d');ctx.drawImage(image,0,0);
-     ctx.strokeStyle='#fbbf24';ctx.lineWidth=Math.max(2,canvas.width/500);
-     for(const candidate of snapshot.result?.candidates||[]){const [x,y,right,bottom]=candidate.boxPixels;ctx.strokeRect(x,y,right-x,bottom-y);}
-    };image.src=latest.image.dataUrl;
+   const busy=latest.state==='running',result=latest.result;
+   host.querySelector('[data-tree-run]').disabled=busy;host.querySelector('[data-tree-cancel]').hidden=!busy;
+   host.querySelector('[data-tree-download]').hidden=!result?.completed;host.querySelector('[data-tree-confidence]').value=String(Math.round(latest.confidence*100));host.querySelector('[data-tree-value]').textContent='%'+Math.round(latest.confidence*100);
+   const state=latest.state==='error'?text(latest.error):text(latest.state);
+   host.querySelector('[data-tree-status]').textContent=state+(result?' · '+result.completed+'/'+result.total:'')+(result?.status==='incomplete'?' · '+text('incomplete'):'');
+   const metrics=host.querySelector('[data-tree-metrics]');metrics.replaceChildren();
+   if(result){const count=document.createElement('strong');count.textContent=text('candidates')+': '+result.candidateCount;metrics.append(count);if(result.meanCrownWidthEstimateM!==null){const mean=document.createElement('p');mean.textContent=text('mean')+': '+number(result.meanCrownWidthEstimateM)+' m · '+result.crownExtentEstimateCount+' '+text('candidates');metrics.append(mean);}}
+   host.querySelector('[data-tree-list]').hidden=!result?.candidates.length;
+   const rows=host.querySelector('[data-tree-rows]');rows.replaceChildren();
+   for(const [index,candidate] of (result?.candidates||[]).slice(0,100).entries()){
+    const row=document.createElement('div');row.className='dg-tree-candidate';const button=document.createElement('button');button.type='button';button.className='btn sm ghost';button.dataset.treeFocus=String(index);button.textContent='#'+candidate.id+' · %'+Math.round(candidate.confidence*100);row.append(button);
+    const label=document.createElement('span'),estimate=candidate.crownEstimate;label.textContent=estimate?text('extent')+': '+number(estimate.eastWestM)+' × '+number(estimate.northSouthM)+' m':text('partial');row.append(label);rows.append(row);
    }
   }
   return Object.freeze({bind(value){actions=value;render();},present(value){latest=value;render();},refresh:render});

@@ -257,7 +257,7 @@
 <script src="src/utils/truncation.js?v=d9710c30" type="application/x-dendrogeo-module" defer></script>
 <!-- Faz 7: geotiff (317 KB) ve chart.js (208 KB) artık SENKRON yüklenmiyor;
      src/utils/lazylibs.js ihtiyaç anında enjekte eder (LULC analizi / panel grafiği). -->
-<script id="dgRuntimeBuild" type="application/json">"dce161a5122874f0"</script>
+<script id="dgRuntimeBuild" type="application/json">"00b4bc4eacf398d6"</script>
 <!-- Verified fallback OSM water geometry, independent of the lazy raster engine. -->
 <script src="src/adapters/parks/fetch-nominatim-osm-way.js?v=9f2730dd" type="application/x-dendrogeo-module" defer></script>
 <script src="src/services/osm-water-backup.js?v=4c9fbc03" type="application/x-dendrogeo-module" defer></script>
@@ -917,10 +917,14 @@
 <script src="src/ui/present-drawn-park.js?v=8c260714" type="application/x-dendrogeo-module" defer></script>
 <script src="src/ui/park-panel.js?v=b7ffdf32" type="application/x-dendrogeo-module" defer></script>
 <script src="src/domain/trees/tree-detection-results.js?v=7421d671" type="application/x-dendrogeo-module" defer></script>
-<script src="src/application/trees/detect-tree-candidates.js?v=f8cddd8b" type="application/x-dendrogeo-module" defer></script>
-<script src="src/adapters/trees/tree-detection-client.js?v=5e94555e" type="application/x-dendrogeo-module" defer></script>
-<script src="src/ui/tree-detection-panel.js?v=5fa764d2" type="application/x-dendrogeo-module" defer></script>
-<script src="src/bootstrap/tree-detection-controller.js?v=2c9dca06" type="application/x-dendrogeo-module" defer></script>
+<script src="src/application/trees/detect-tree-candidates.js?v=f79a5f46" type="application/x-dendrogeo-module" defer></script>
+<script src="src/adapters/trees/tree-detection-client.js?v=47d3c183" type="application/x-dendrogeo-module" defer></script>
+<script src="src/ui/tree-detection-panel.js?v=51e0e3f4" type="application/x-dendrogeo-module" defer></script>
+<script src="src/domain/trees/park-tree-scan-plan.js?v=50f527ac" type="application/x-dendrogeo-module" defer></script>
+<script src="src/domain/trees/park-tree-scan-results.js?v=2bc255ab" type="application/x-dendrogeo-module" defer></script>
+<script src="src/adapters/trees/park-tree-imagery.js?v=6f3a391b" type="application/x-dendrogeo-module" defer></script>
+<script src="src/ui/park-tree-candidate-layer.js?v=3b3ae1a3" type="application/x-dendrogeo-module" defer></script>
+<script src="src/bootstrap/tree-detection-controller.js?v=b6e97738" type="application/x-dendrogeo-module" defer></script>
 <script src="src/ui/park-image-geometry.js?v=2d170f55" type="application/x-dendrogeo-module" defer></script>
 <script src="src/ui/park-export-layout.js?v=9a9ae427" type="application/x-dendrogeo-module" defer></script>
 <script src="src/domain/parks/park-export-formats.js?v=c2298046" type="application/x-dendrogeo-module" defer></script>
@@ -950,7 +954,7 @@
 <script src="src/application/dashboard/load-shell-view-data.js?v=68e471a7" type="application/x-dendrogeo-module" defer></script>
 <script src="src/services/dash.js?v=90f8846a" type="application/x-dendrogeo-module" defer></script>
 <link rel="stylesheet" href="css/park-panel.css?v=2a259f4a">
-<link rel="stylesheet" href="css/tree-detection.css?v=865aa93a">
+<link rel="stylesheet" href="css/tree-detection.css?v=d6ce6559">
 <!-- TASARIM SİSTEMİ (2026-09-27, 2. deneme): ui-standard.css geri BAĞLANDI
      ama ARTIK eleman seviyesi kuralları yalnız .dg-page (alt sayfalar) altında
      geçerli; kabuk (body.dg-app) yalnız sınıf-bazlı bileşenleri ve sekme
@@ -1918,6 +1922,6 @@
 <script src="src/bootstrap/gis-export.js?v=31cdf97c" type="application/x-dendrogeo-module" defer></script>
 <script src="src/ui/gis-export.js?v=85048551" type="application/x-dendrogeo-module" defer></script>
 
-<script src="/src/bootstrap/app-runtime.js?v=d674186a" defer></script>
+<script src="/src/bootstrap/app-runtime.js?v=1de567de" defer></script>
 </body>
 </html>

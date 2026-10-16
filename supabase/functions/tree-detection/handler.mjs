@@ -27,7 +27,7 @@ export function createTreeDetectionHandler({env,fetch:request=globalThis.fetch,n
   const time=now();
   for(const [id,value] of users)if(!value.busy&&time-value.since>60000)users.delete(id);
   const budget=users.get(user.id)||{since:time,count:0,busy:false};
-  if(budget.busy||budget.count>=6||users.size>=1000)return reply(429,{error:'rate_limited'});
+  if(budget.busy||budget.count>=90||users.size>=1000)return reply(429,{error:'rate_limited'});
   users.set(user.id,budget);budget.busy=true;
   try{
    if(!req.headers.get('content-type')?.startsWith('application/json'))return reply(415,{error:'invalid_image'});
@@ -38,7 +38,7 @@ export function createTreeDetectionHandler({env,fetch:request=globalThis.fetch,n
    const bytes=new Uint8Array(size);let offset=0;for(const chunk of chunks){bytes.set(chunk,offset);offset+=chunk.length;}
    let body;try{body=JSON.parse(new TextDecoder().decode(bytes));}catch{return reply(400,{error:'invalid_image'});}
    const {image,width,height,confidence}=body;
-   if(typeof image!=='string'||!/^\/9j\/[A-Za-z0-9+/]*={0,2}$/.test(image)||image.length<80||image.length%4!==0||!Number.isSafeInteger(width)||!Number.isSafeInteger(height)||width<1||height<1||width>2048||height>2048||!Number.isFinite(confidence)||confidence<.1||confidence>.9)return reply(400,{error:'invalid_image'});
+   if(typeof image!=='string'||!/^\/9j\/[A-Za-z0-9+/]*={0,2}$/.test(image)||image.length<80||image.length%4!==0||!Number.isSafeInteger(width)||!Number.isSafeInteger(height)||width<1||height<1||width>2048||height>2048||!Number.isFinite(confidence)||confidence<0||confidence>1)return reply(400,{error:'invalid_image'});
    budget.count++;
    let response;
    try{response=await request('https://serverless.roboflow.com/infer/object_detection',{method:'POST',headers:{'Content-Type':'application/json',Authorization:'Bearer '+key},body:JSON.stringify({model_id:MODEL_ID,image:{type:'base64',value:image},confidence,iou_threshold:.5}),signal:AbortSignal.timeout(55000)});}catch(error){return reply(error.name==='TimeoutError'?504:502,{error:error.name==='TimeoutError'?'model_timeout':'model_unavailable'});}
