@@ -55,7 +55,7 @@
   });
   const panel=host.closest('[data-showcase-panel]'),showcase=host.closest('[data-dg-showcase]');
   const activate=()=>{if(panel.classList.contains('is-active'))void ensure();};showcase.addEventListener('dg:showcase-change',activate);activate();
-  root.addEventListener('dg:lang',()=>{if(data&&mode!=='drawing')pick(selected);});
+  root.addEventListener('dg:lang',()=>{if(data&&mode!=='drawing'){pick(selected);canvas.querySelectorAll('[data-scene-class]').forEach(path=>path.setAttribute('aria-label',translate(labels[path.dataset.sceneClass])));}const svg=canvas.querySelector('.dg-scene-map');if(svg)svg.setAttribute('aria-label',translate('Göksu Parkı gerçek kayıt geometrisi'));});
  }
  root.DG_LANDING_SCENE_CONTROLLER=Object.freeze({mount});if(typeof document!=='undefined')document.querySelectorAll('[data-landing-scene]').forEach(mount);
 })(window);

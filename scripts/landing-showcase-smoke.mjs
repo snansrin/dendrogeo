@@ -22,5 +22,6 @@ try{for(const width of[360,390,430,1440]){
   const violations=await page.evaluate(async selector=>(await axe.run(document.querySelector(selector),{runOnly:{type:'tag',values:['wcag2a','wcag2aa','wcag21aa']}})).violations.map(v=>({id:v.id,targets:v.nodes.map(n=>n.target)})),'[data-landing-scene="'+mode+'"]');assert.deepEqual(violations,[],mode+' accessibility');
   if(output)await host.screenshot({path:output+'/'+mode+'-'+width+'.png'});
  }
+ await page.evaluate(()=>dgSetLang('en'));await page.waitForFunction(()=>document.querySelector('[data-landing-scene="map"] [data-scene-pick="water"]').textContent==='Water');assert.equal(await page.locator('.dg-tree-readouts [data-i18n="Ağaç boyu"]').textContent(),'Tree height');assert.equal(await page.locator('[data-landing-scene="map"] [data-scene-class="water"]').getAttribute('aria-label'),'Water');await page.evaluate(()=>dgSetLang('tr'));
  assert.deepEqual(errors,[]);assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1),true);console.log(JSON.stringify({engine:engine.name(),width,fullWidthScene:true,studentsForeground:true,spatialPicking:true,zoomReset:true,sketchUndo:true,accessibility:true}));await page.close();
 }}finally{await browser.close();await server.close();}

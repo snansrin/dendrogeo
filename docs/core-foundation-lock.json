@@ -8806,6 +8806,25 @@
           "sha256": "ddacf38c73f50b10e152845fb2f69fdfda4cbdd9fea073a4b4ca285b687552a2"
         }
       ]
+    },
+    {
+      "id": "landing-scene-language-regression-2026-10-16",
+      "date": "2026-10-16",
+      "scope": "User-authorized modularization: finish bilingual SVG measurement readouts, map class accessible labels and Water translation; preserve independent observations, source areas, all model inference and accepted-data behavior.",
+      "audit_chain": "sha256-v1",
+      "added_protected_files": [],
+      "files": [
+        {
+          "path": "index.html",
+          "previous_sha256": "40846a8def6f6d8080a6a2a6488e0757584b6ef19b70a49a308b01ee88372700",
+          "sha256": "76768be5b1dc853f23c47646f80047363ef7cee038f5fe403fe191696da96401"
+        },
+        {
+          "path": "scripts/landing-showcase-smoke.mjs",
+          "previous_sha256": "67695a1f1dc6b05ff7e3340125fde37f0f7f50d7c8d4a9631d6d13d42f29a33a",
+          "sha256": "055ab5a37602f97b019102ad223c8d51382fe83fda2b2cba710df85e458ea917"
+        }
+      ]
     }
   ]
 }

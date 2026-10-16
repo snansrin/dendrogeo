@@ -1728,3 +1728,5 @@ Object.assign(DG_I18N_EN,{"Görünümü sıfırla": "Reset scene view",
 "16 Ekim 2026 · kabul edilmiş kayıt": "16 October 2026 · accepted record"});
 
 Object.assign(DG_I18N_EN,{"Örnek saha değerleri: çap 14,3 cm; tahmini karbon 40 kg C; ağaç boyu 13 m.":"Example field values: diameter 14.3 cm; estimated carbon 40 kg C; tree height 13 m."});
+
+Object.assign(DG_I18N_EN,{"Su":"Water","Göksu Parkı gerçek kayıt geometrisi":"Goksu Park saved record geometry","Çizim alanı · Enter ile örnek köşe ekleyin":"Drawing area · press Enter to add a sample vertex"});
