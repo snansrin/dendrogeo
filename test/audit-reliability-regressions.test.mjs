@@ -61,6 +61,7 @@ test('CI covers modular surface paths on pull requests and main and keeps WebKit
  const workflow=read('.github/workflows/gis-three-park-qa.yml');
  for(const path of ['src/application/surface/**','src/domain/surface/**','src/adapters/surface/**'])assert.equal(workflow.split("'"+path+"'").length-1,2);
  assert.match(workflow,/push:\s+branches: \[main\]/);
+ for(const park of ['Göksu Parkı','Başkent Millet Bahçesi','Kuğulu Parkı'])assert.ok(workflow.includes('--park "'+park+'"'),park+' must keep its exact UTF-8 lookup name');
  const mobile=read('.github/workflows/mobile-smoke.yml');
  for(const value of ['install --with-deps webkit','DG_UI_BROWSER: webkit','node scripts/profile-smoke.mjs','node scripts/ui-consistency-smoke.mjs'])assert.ok(mobile.includes(value));
  assert.equal(read('scripts/check-accessibility.mjs').split("'wcag22aa'").length-1,3);

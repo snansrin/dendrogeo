@@ -123,7 +123,7 @@ permissions:
 
 jobs:
   parks:
-    name: 2026 Sentinel-2 Â· Ankara parks
+    name: 2026 Sentinel-2 · Ankara parks
     runs-on: ubuntu-latest
     timeout-minutes: 45
     steps:
@@ -140,9 +140,9 @@ jobs:
         run: |
           set -euo pipefail
           mkdir -p /tmp/dendrogeo-park-qa
-          node scripts/val-qa.mjs --park "GÃ¶ksu ParkÄ±" --city Ankara --s2-mode ytd 2>&1 | tee /tmp/dendrogeo-park-qa/goksu.log
-          node scripts/val-qa.mjs --park "BaÅŸkent Millet BahÃ§esi" --city Ankara --s2-mode ytd 2>&1 | tee /tmp/dendrogeo-park-qa/baskent.log
-          node scripts/val-qa.mjs --park "KuÄŸulu ParkÄ±" --city Ankara --s2-mode ytd 2>&1 | tee /tmp/dendrogeo-park-qa/kugulu.log
+          node scripts/val-qa.mjs --park "Göksu Parkı" --city Ankara --s2-mode ytd 2>&1 | tee /tmp/dendrogeo-park-qa/goksu.log
+          node scripts/val-qa.mjs --park "Başkent Millet Bahçesi" --city Ankara --s2-mode ytd 2>&1 | tee /tmp/dendrogeo-park-qa/baskent.log
+          node scripts/val-qa.mjs --park "Kuğulu Parkı" --city Ankara --s2-mode ytd 2>&1 | tee /tmp/dendrogeo-park-qa/kugulu.log
       - uses: actions/upload-artifact@v4
         if: always()
         with:
