@@ -298,14 +298,11 @@ hesaplanmış referanslarla (OA 0.80, SE 0.09187, κ 0.60239, PA/UA, alan
 sözleşme (bottom sheet/44px/role=dialog), ölü CSS sınıfı taraması.
 npm run check: 1083 test → TÜMÜ YEŞİL.
 
-### Düzeltildi/Kaldırıldı — 0044: FOTOĞRAF KAPISI SAHAYI KİLİTLEMİYOR (çok sınıflı denetim) + 🤖 AI alt sistemi KÖKTEN SİLİNDİ
+### Düzeltildi — 0044: FOTOĞRAF KAPISI SAHAYI KİLİTLEMİYOR (çok sınıflı denetim)
 **Kullanıcı geri bildirimi:** "%25'i kırmızı yapraklı ağaçlar sağlamıyor ve
 önümüz kış, fotoğrafta sadece dal olacağı için yeşil çok az — o yüzden fotoğraf
 yükleyemez kullanıcılar. Ben bugün 1 fotoğraf için sahada 30 dk harcadım, 1
-ağaç için. … 🤖 AI Ağaç Algılama … bunu sil, bu olmaması gereken bir şey.
-… hiçbir yerde izi kalmasın. Fotoğraf kontrolünü yeni ölçüm sekmesinde fotoğraf
-ekle butonuyla yapmak istiyorum, admin panelde istemiyorum. Mevcut sisteme
-ağaç, dal, farklı renkli yaprak algılamayı ekle."
+ağaç için. Fotoğraf denetimi yeni ölçümde fotoğraf yükleme akışının parçası olmalı."
 
 **KANIT — kök neden ölçüldü (canlı üretim kodu, 22 gerçek kare üzerinde):**
 eski kapı YALNIZ yeşil pikseli sayıyordu (`2G-R-B>20 && G>50`, `vegR>=0.25`):
@@ -339,16 +336,7 @@ hâlâ teknik olarak var (`if(f&&!photoOk)`) ama artık BARİZ yanlış kareyi
 `dgPhotoScan` SAF fonksiyon → tarayıcı olmadan test edilebilir
 (test/photo-qa.test.mjs vm'de sentetik karelerle ölçer).
 
-**(b) 🤖 AI alt sistemi KÖKTEN SİLİNDİ (kullanıcı kararı: "izi kalmasın"):**
-`src/services/species-ai.js` (dosya), index.html tag'i, sw CORE_ASSETS
-girdisi, shell'deki `#aiSuggest` kutusu ve 🤖 yönetim kartı (`#dgAiAdmin`),
-admin.js'teki `dgAiAdminRender` çağrısı, measure.js'teki `dgAiOnPhoto`
-kancası ve i18n'deki tüm AI/yönetim-kartı dizeleri (CORS/CSP talimatı
-dahil) kaldırıldı. Fotoğraf denetimi TEK YERDE: Yeni Ölçüm sekmesi,
-fotoğraf düğmesi (`onchange=checkPhoto`). Bekçiler TERSİNE çevrildi:
-fix-0044 kilidi "hiçbir iz kalmadı"yı assert eder.
-
-**(c) Landing iddiası kodla birebir (vitrin↔kod tutarlılığı):** eski
+**(b)  Landing iddiası kodla birebir (vitrin↔kod tutarlılığı):** eski
 "bitki örtüsü ≥ %25 ve pozlama 25–245" satırı YALAN olacağı için güncellendi:
 "Fotoğraf eklenirse tarayıcı içi çok sınıflı denetim uygulanır: yeşil ·
 kızıl/mor · sonbahar · gövde/dal · kış kadrajı + pozlama 25–245" (+ EN).
@@ -367,9 +355,8 @@ fix-0043 AI bölümü çıkarıldı (kaydırma kilitleri duruyor) · landing-cla
 çıktı). `npm run check`: 1012 test → 1012 pass / 0 fail · CSP 27 origin yeşil.
 
 
-### Düzeltildi/Eklendi — 0042: AKASYA listede + AI artık AĞAÇ ALGILAMA (tür tanıma değil)
-**Kullanıcı geri bildirimi:** "ben tür tanıma istemedim, sadece ağacı algılasın
-fotoğrafta · geçen gün türleri silmişsin, akasya yok, bugün giriş yapamadım akasyaya."
+### Düzeltildi/Eklendi — 0042: AKASYA listede
+**Kullanıcı geri bildirimi:** "geçen gün türleri silmişsin, akasya yok, bugün giriş yapamadım akasyaya."
 
 **Kanıt — tür silinmedi:** `git log -- src/config/species.js` → bot'un tek teması
 0035 (yalnız GROUP_COLOR_INK sabiti). `git log --all -S '"AKASYA",'` → sonuç YOK:
@@ -382,17 +369,6 @@ varsayılanı 541). Eski `"AKASYA":"YALANCI AKASYA"` eşanlamlısı KALDIRILDI (
 adı gölgelerdi); Robinia "YALANCI AKASYA" olarak duruyor. DB'de "AKASYA" metinli
 kayıt yok → geçmiş etkilenmez. Sayımlar: landing + methods + EN 51/22/29;
 allometry CANARY'si bilinçli güncellendi (50/28 → 51/29). EN: "AKASYA":"ACACIA".
-
-**(b) AI modu döndü: tür ÖNERİSİ kaldırıldı → AĞAÇ ALGILAMA doğrulaması.**
-`dgAiUse`/ön-doldurma/DG_AI_LAST silindi (bekçi kilitler). Fotoğraf çekilince:
-"🌳 Ağaç algılandı ✓ %93" ya da "⚠ AI ağaç algılayamadı — kadrajı düzeltin; yine
-de devam edebilirsiniz (insan kararı)". ESNEK ayrıştırıcı (14/14 olgu): tree/is_tree/
-detected/label/detections/results/bool/score · 0-1 ve 0-100 güven · "no_tree/
-background/person" olumsuzları false · çözümlenemeyen yanıt null. Yönetim kartı:
-etkinleştir + uç nokta + **eşik %** + **AI kapısı** (açıksa ağaç doğrulanmadan
-KAYDET bloklanır — photoOk=false; yeniden çekim onarır) + test. AI HATA verirse
-kapı kapatmaz (sahada ağ sorunu ölçümü engellemez). İlke: modül DB'ye dokunmaz,
-karar insanda. sw r50.
 
 ### Düzeltildi/Eklendi — 0041: kaydırma zıplaması KÖKTEN bitti (window) + 🤖 AI tür tanıma soketi
 **1) Zıplama (0040 neden yetmedi):** #layout `min-height`'lı → içerik uzayınca

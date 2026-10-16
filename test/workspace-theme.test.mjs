@@ -61,8 +61,17 @@ test('landing hero ölçüm alanlarını ağaç animasyonunun yanında erişileb
  assert.ok(!landing.includes('ÇEVRE 45 cm → DBH 14.3 cm'));
  assert.match(landing,/<foreignObject x="735" y="157"/);
  assert.match(rd('css/landing-scenes.css'),/\.dg-svg-reading \.chip\{position:static/);
- assert.match(landing,/<foreignObject x="735" y="211"/);
+ assert.match(landing,/<foreignObject x="500" y="50"/);
+ assert.match(landing,/<foreignObject x="500" y="50"[^>]*>[\s\S]*?data-i18n="Ağaç boyu"/);
  assert.ok(landing.indexOf('class="dg-tree-readouts"')<landing.indexOf('class="walkerA"'));
+});
+
+test('yöntem kartlarının ikonları koyu temada da görünür vektör çizimlerdir',()=>{
+ const landing=rd('partials/landing.html'),css=rd('css/landing.css');
+ const cards=landing.slice(landing.indexOf('<div class="dg-resource-grid">'),landing.indexOf('</div>',landing.indexOf('<div class="dg-resource-grid">')));
+ assert.equal((cards.match(/class="dg-resource-icon"[^>]*><svg/g)||[]).length,5);
+ assert.match(css,/\.dg-resource-icon\{[^}]*background:var\(--tint\)[^}]*color:var\(--green-dk\)/);
+ assert.match(css,/\.dg-resource-icon svg\{[^}]*stroke:currentColor/);
 });
 
 test('yayın öncesi form gerekli alanlarda örnek yardım balonları taşır',()=>{

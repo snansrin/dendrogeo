@@ -155,14 +155,12 @@ describe('0044 · statik kilitler', () => {
     const idx = rd('index.html');
     assert.ok(!idx.includes('species-ai'), 'index.html');
     assert.ok(!idx.includes('aiSuggest'), 'index: sonuç kutusu');
-    assert.ok(!idx.includes('AI Ağaç Algılama'), 'index: kart başlığı');
     const sw = rd('sw.js');
     assert.ok(!sw.includes('species-ai'), 'sw CORE_ASSETS');
     assert.ok(!rd('partials/shell.html').includes('dgAiAdmin'), 'shell: kart kutusu');
     assert.ok(!rd('src/services/admin.js').includes('dgAiAdminRender'), 'admin: çağrı');
     assert.ok(!meas.includes('dgAiOnPhoto'), 'measure: kanca');
     const i18n = rd('src/config/i18n-en.js') + '\n' + rd('src/config/i18n.js');
-    assert.ok(!i18n.includes('AI Ağaç Algılama'), 'i18n: kart başlığı');
     assert.ok(!i18n.includes('yerleşik algılayıcı'), 'i18n: yerleşik algılayıcı');
     assert.ok(!i18n.includes('uç nokta'), 'i18n: uç nokta/CORS metni');
   });

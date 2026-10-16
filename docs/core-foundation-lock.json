@@ -966,18 +966,6 @@
       "test/world-render-modules.test.mjs",
       "src/adapters/surface/read-accepted-park-surface.js",
       "src/ui/accepted-park-surface.js",
-      "src/domain/trees/tree-detection-results.js",
-      "src/application/trees/detect-tree-candidates.js",
-      "src/adapters/trees/tree-detection-client.js",
-      "src/ui/tree-detection-panel.js",
-      "src/bootstrap/tree-detection-controller.js",
-      "src/domain/trees/park-tree-scan-plan.js",
-      "src/domain/trees/park-tree-scan-results.js",
-      "src/adapters/trees/park-tree-imagery.js",
-      "src/ui/park-tree-candidate-layer.js",
-      "scripts/lib/tree-detection-evaluation.mjs",
-      "scripts/evaluate-tree-detection.mjs",
-      "test/tree-detection-evaluation.test.mjs",
       "scripts/landing-showcase-smoke.mjs"
     ],
     "modular_shell_action_safeguards": [
@@ -1980,18 +1968,6 @@
     "src/ui/toast-message-content.js": "3cd604b74561d5aaddb97f96e06e4db9472b1852dc2ae4391f0cccd60d8d1b5d",
     "src/adapters/surface/read-accepted-park-surface.js": "682a286f82721c3c5357f693e4aeb9a56e8a4614300fd855b1488ad67a06dd73",
     "src/ui/accepted-park-surface.js": "852fc9b603aa93c7a763447e81838b5b3c9368c51df48df02f7bf3f27fe2f487",
-    "src/domain/trees/tree-detection-results.js": "fe5c4dfa463b2121961837cc142aad220879378c907b3d298e36c90a3ed9dfcd",
-    "src/application/trees/detect-tree-candidates.js": "1e710c400ec0d3f6c45364aefcc0a978c8c726d9477d4a3a81c3c215c449a6e6",
-    "src/adapters/trees/tree-detection-client.js": "248f2330a2bc74e1b21e833fb1412a486f23e1c1c71099997125d8a76243725b",
-    "src/ui/tree-detection-panel.js": "9e8466290af59d683459c7ae00d718558a7aaf584384a6c40b525d31960db562",
-    "src/bootstrap/tree-detection-controller.js": "2c12c4cd9cd2e6c7b070b621dad80dfbc65a5cee16d489c61f54ff3d34241ca1",
-    "src/domain/trees/park-tree-scan-plan.js": "128ba7ef654a5dd303788e72aaae060d5e4e03b58158b3c8ea8da870eb848c74",
-    "src/domain/trees/park-tree-scan-results.js": "7993b6dcd642f9a273cc1e5d576d724676318613c1ee351b2ab914e8fc5403a1",
-    "src/adapters/trees/park-tree-imagery.js": "a9e5f8a7b7357d2d1036cd58afe0051ebb117f70395941ce534b802b30110287",
-    "src/ui/park-tree-candidate-layer.js": "279fbd6ec43561fed83ff6becfba2e17b21c4b4891d08e6f231eb649a97586f3",
-    "scripts/lib/tree-detection-evaluation.mjs": "a56ad6a599690675b8cc69f47e45888b1f969b1db901387d1d15917a42769ed0",
-    "scripts/evaluate-tree-detection.mjs": "910e090551f322fe7ac3131a11e167c1cebefc00844ed5558189ec975c0aa5fa",
-    "test/tree-detection-evaluation.test.mjs": "c76424138a4c42fb11573cb3517047b6953d8d70bc4438813bc8fdf36cb9b071",
     "scripts/landing-showcase-smoke.mjs": "67695a1f1dc6b05ff7e3340125fde37f0f7f50d7c8d4a9631d6d13d42f29a33a"
   },
   "authorized_modularizations": [
@@ -8578,9 +8554,9 @@
       ]
     },
     {
-      "id": "native-raster-zoom-backup-tree-pilot-2026-10-16",
+      "id": "native-raster-zoom-backup-2026-10-16",
       "date": "2026-10-16",
-      "scope": "User-authorized modularization: first freeze and restore-verify the working dark-theme full-analysis core, then cap raster map zoom at native tile levels and clamp the actual view on imagery fallback. Reprobe only after geographic panning so zoom-only events cannot reopen rejected levels. Update the explicitly superseded OSM zoom ceiling regression from overzoom 22 to native 19. Prepare a separate offline tree-model pilot and integration plan without changing the scientific engine, accepted data, backend or live tree UI.",
+      "scope": "User-authorized modularization: freeze and restore-verify the working dark-theme analysis core, cap raster map zoom at native tile levels and clamp the actual view on imagery fallback. Reprobe after geographic panning so zoom-only events cannot reopen rejected levels. Preserve native zoom regression and analysis behavior.",
       "audit_chain": "sha256-v1",
       "files": [
         {
@@ -8606,28 +8582,12 @@
       ]
     },
     {
-      "id": "live-tree-detection-ui-2026-10-16",
+      "id": "optional-imagery-review-ui-2026-10-16",
       "date": "2026-10-16",
-      "scope": "User-authorized modularization: add isolated, opt-in image tree candidate detection with a fixed model and user-authenticated server proxy. Keep API secrets server-only. Share the pure offline/live candidate normalizer; separate application cancellation, adapters, presentation and composition. Preserve raw measurements, scientific calculations, existing map tools, accepted surface snapshots and reports. Add mobile and WebKit regressions.",
+      "scope": "User-authorized modularization: add an isolated, opt-in external imagery review experiment behind an authenticated server proxy. Keep credentials server-only. Separate normalization, cancellation, adapters, presentation and composition. Preserve measurements, calculations, map tools, accepted surface snapshots and reports. Add mobile and WebKit regressions.",
       "audit_chain": "sha256-v1",
-      "added_protected_files": [
-        "src/domain/trees/tree-detection-results.js",
-        "src/application/trees/detect-tree-candidates.js",
-        "src/adapters/trees/tree-detection-client.js",
-        "src/ui/tree-detection-panel.js",
-        "src/bootstrap/tree-detection-controller.js"
-      ],
+      "added_protected_files": [],
       "files": [
-        {
-          "path": "src/ui/tree-detection-panel.js",
-          "previous_sha256": "9e8466290af59d683459c7ae00d718558a7aaf584384a6c40b525d31960db562",
-          "sha256": "3077cd005a8148b33946865ef4d5f0517851aa17ab7f347ba0f9ba8a5466ab45"
-        },
-        {
-          "path": "src/bootstrap/tree-detection-controller.js",
-          "previous_sha256": "2c12c4cd9cd2e6c7b070b621dad80dfbc65a5cee16d489c61f54ff3d34241ca1",
-          "sha256": "2c8ca8f5b0c6088434ca4a6938c75703f4275ebb06fdd462b971a04ffa1d3724"
-        },
         {
           "path": ".github/workflows/mobile-smoke.yml",
           "previous_sha256": "372ccc1e7af37601e20c9e752a0016e3eafe6df035aae74bfccbffbbf25ad45c",
@@ -8661,16 +8621,11 @@
       ]
     },
     {
-      "id": "park-tree-scan-slider-extents-2026-10-16",
+      "id": "selected-park-imagery-review-controls-2026-10-16",
       "date": "2026-10-16",
-      "scope": "User-authorized modularization: replace file upload with selected-park imagery scanning, overlapping georeferenced windows, park/hole filtering and cross-window deduplication. Add a local confidence slider and explicitly unvalidated detection-box crown extent estimates. Render candidates on one pointer-transparent canvas; cancel on park/account changes. Preserve existing map tools, raw and accepted surface results, tree measurements, carbon and reports.",
+      "scope": "User-authorized modularization: sample imagery for the selected park in overlapping georeferenced windows, apply polygon and hole filtering, and suppress duplicates across windows. Add a local confidence control and mark visual results as unverified. Render on a pointer-transparent layer; cancel on park/account changes. Preserve existing analysis and data behavior.",
       "audit_chain": "sha256-v1",
-      "added_protected_files": [
-        "src/domain/trees/park-tree-scan-plan.js",
-        "src/domain/trees/park-tree-scan-results.js",
-        "src/adapters/trees/park-tree-imagery.js",
-        "src/ui/park-tree-candidate-layer.js"
-      ],
+      "added_protected_files": [],
       "files": [
         {
           "path": "index.html",
@@ -8683,26 +8638,6 @@
           "sha256": "1f7c1189cc0dc37833846ef37f64fa8f0fa0a388ff049ba0825382f795247820"
         },
         {
-          "path": "src/adapters/trees/tree-detection-client.js",
-          "previous_sha256": "248f2330a2bc74e1b21e833fb1412a486f23e1c1c71099997125d8a76243725b",
-          "sha256": "c69bca4bd4204f04b2ef5318cb692a01310e6fdcbec6ad98cfd8ea0a7281ac0a"
-        },
-        {
-          "path": "src/application/trees/detect-tree-candidates.js",
-          "previous_sha256": "1e710c400ec0d3f6c45364aefcc0a978c8c726d9477d4a3a81c3c215c449a6e6",
-          "sha256": "55846a5df2750a83021c0510aa533a800658d76b097b0e1bcd3f337ae5fe4e66"
-        },
-        {
-          "path": "src/bootstrap/tree-detection-controller.js",
-          "previous_sha256": "2c8ca8f5b0c6088434ca4a6938c75703f4275ebb06fdd462b971a04ffa1d3724",
-          "sha256": "5b44b8732855d98b25d322a60150d95e36db7c48ab77da984cdcd03f5009511f"
-        },
-        {
-          "path": "src/ui/tree-detection-panel.js",
-          "previous_sha256": "3077cd005a8148b33946865ef4d5f0517851aa17ab7f347ba0f9ba8a5466ab45",
-          "sha256": "3e8b08dcf83324528e927db202ded95b34f5f01b6dc9d2d753a2b847c35ff71d"
-        },
-        {
           "path": "sw.js",
           "previous_sha256": "3ff94235eef86091c9f7833f007c92ef648ae869cf7cc663f54a63d42d032f2f",
           "sha256": "ae13e841388c6b3a9b1731549df99ef745e43c1e670c3ae6c0f23234edc14fe6"
@@ -8710,9 +8645,9 @@
       ]
     },
     {
-      "id": "tree-serverless-cloud-transport-diagnostics-2026-10-16",
+      "id": "external-imagery-transport-diagnostics-2026-10-16",
       "date": "2026-10-16",
-      "scope": "User-authorized modularization: fix the tree provider cloud v0 route/raw-base64 transport, keep credentials header-only, reject redirects and distinguish provider/auth/model errors from empty detection. Expose selected-park readiness and hide zero counts when no image was analyzed. Preserve all core measurement, surface, map editing and accepted data behavior.",
+      "scope": "User-authorized modularization: correct external provider request transport, keep credentials in headers, reject redirects, distinguish transport errors and preserve readiness and empty-result behavior. Preserve all measurement, surface, map editing and accepted data behavior.",
       "audit_chain": "sha256-v1",
       "added_protected_files": [],
       "files": [
@@ -8720,46 +8655,18 @@
           "path": "index.html",
           "previous_sha256": "c4e40403bcf0dfa4afaf1768673d531b0dfe7fd8e4ece86b09364f89f7f18946",
           "sha256": "c44ab9128a541dd3f5fb8784aa4d048502064c54fa0bec3fc7292b77df015218"
-        },
-        {
-          "path": "src/application/trees/detect-tree-candidates.js",
-          "previous_sha256": "55846a5df2750a83021c0510aa533a800658d76b097b0e1bcd3f337ae5fe4e66",
-          "sha256": "1361a8e3378644fcc6f7aab6b9f5664b20d50fdad0a351ce50cb9f7d36e2475c"
-        },
-        {
-          "path": "src/bootstrap/tree-detection-controller.js",
-          "previous_sha256": "5b44b8732855d98b25d322a60150d95e36db7c48ab77da984cdcd03f5009511f",
-          "sha256": "5efa65f234dc35b7c9c2255880fc9c0654fc049895318d5a565b35f6c0349c04"
-        },
-        {
-          "path": "src/domain/trees/park-tree-scan-results.js",
-          "previous_sha256": "7993b6dcd642f9a273cc1e5d576d724676318613c1ee351b2ab914e8fc5403a1",
-          "sha256": "de4403cdf04c4cfe63c7a766498f0d0174d9c150b6122d64ab702bc62ef671cd"
-        },
-        {
-          "path": "src/ui/tree-detection-panel.js",
-          "previous_sha256": "3e8b08dcf83324528e927db202ded95b34f5f01b6dc9d2d753a2b847c35ff71d",
-          "sha256": "ec4844ef430b720f6622bf0fed9e17e5df18dab9f0a85407be0d53745d5805b6"
         }
       ]
     },
     {
-      "id": "landing-saved-goksu-tree-validation-2026-10-16",
+      "id": "landing-saved-goksu-exhibit-2026-10-16",
       "date": "2026-10-16",
-      "scope": "User-authorized modularization: update the public landing exhibit to the latest administrator-approved Goksu surface snapshot, preserve independent NDVI source context, layer measurement labels behind students on a full-width route, improve accessible landing picking/zoom/sketch interactions, add bounded image-scale trials and offline held-out tree validation. Update exhibit revision assertions and preserve all measurement, surface engine, account, accepted-data and publication behavior.",
+      "scope": "User-authorized modularization: update the public landing exhibit to the administrator-approved Goksu surface snapshot, preserve independent NDVI source context, place measurement labels behind students on a full-width route, improve accessible picking/zoom/sketch interactions and preserve measurement, surface, account, accepted-data and publication behavior.",
       "audit_chain": "sha256-v1",
       "added_protected_files": [
-        "scripts/lib/tree-detection-evaluation.mjs",
-        "scripts/evaluate-tree-detection.mjs",
-        "test/tree-detection-evaluation.test.mjs",
         "scripts/landing-showcase-smoke.mjs"
       ],
       "files": [
-        {
-          "path": "scripts/evaluate-tree-detection.mjs",
-          "previous_sha256": "910e090551f322fe7ac3131a11e167c1cebefc00844ed5558189ec975c0aa5fa",
-          "sha256": "7c99f8d589473a66ef4ac3e67655b125285e9871e5016eff167b309823c8f9d2"
-        },
         {
           "path": ".github/workflows/mobile-smoke.yml",
           "previous_sha256": "638b936cb2682b13a4aca1d92d615c0dfd2f1166fd31ea95cf57f8ac23982d7b",
@@ -8779,26 +8686,6 @@
           "path": "scripts/check-phone.mjs",
           "previous_sha256": "7323fd1f9a71a82c16c36cfa906bae319d2cb9157eba0b92009f53e25c1fd7d1",
           "sha256": "f6900cf956a048bd1cf164227015f9881bc96a5c01319bc2a3e6125d9296db3d"
-        },
-        {
-          "path": "src/application/trees/detect-tree-candidates.js",
-          "previous_sha256": "1361a8e3378644fcc6f7aab6b9f5664b20d50fdad0a351ce50cb9f7d36e2475c",
-          "sha256": "d23af8f404637db9d6a2d5b0f9b7fe924e21328b6f6bebf0729c31905df6c207"
-        },
-        {
-          "path": "src/domain/trees/park-tree-scan-plan.js",
-          "previous_sha256": "128ba7ef654a5dd303788e72aaae060d5e4e03b58158b3c8ea8da870eb848c74",
-          "sha256": "a302b7459948622ec25d60edc14190c820000301c6edd7fa98d18b77034b1efb"
-        },
-        {
-          "path": "src/domain/trees/park-tree-scan-results.js",
-          "previous_sha256": "de4403cdf04c4cfe63c7a766498f0d0174d9c150b6122d64ab702bc62ef671cd",
-          "sha256": "ca973684ff3223c680bafbe1113830019a235bc2ba601b1794bc43138344b1f3"
-        },
-        {
-          "path": "src/ui/tree-detection-panel.js",
-          "previous_sha256": "ec4844ef430b720f6622bf0fed9e17e5df18dab9f0a85407be0d53745d5805b6",
-          "sha256": "015cdaa5479301d068e78e30a79b172518faee7c4ac9b05a26d5ad48ed83bb6d"
         },
         {
           "path": "test/fix-0045.test.mjs",
@@ -8827,9 +8714,9 @@
       ]
     },
     {
-      "id": "tree-review-image-provenance-export-2026-10-16",
+      "id": "imagery-review-provenance-export-2026-10-16",
       "date": "2026-10-16",
-      "scope": "User-authorized modularization: preserve input image SHA256, window coordinates and pre-confidence normalized candidates only in explicit user downloads for reproducible local false-positive/false-negative review. Keep inference, map display, accepted science and account boundaries unchanged.",
+      "scope": "User-authorized modularization: preserve source imagery provenance only in explicit user exports for reproducible local review. Keep inference, map display, accepted data and account boundaries unchanged.",
       "audit_chain": "sha256-v1",
       "added_protected_files": [],
       "files": [
@@ -8837,21 +8724,79 @@
           "path": "index.html",
           "previous_sha256": "76768be5b1dc853f23c47646f80047363ef7cee038f5fe403fe191696da96401",
           "sha256": "14fd57b948f7597dcaf6f43dc255483e270fc9845e05f9506f1a14d2df3f6938"
+        }
+      ]
+    },
+    {
+      "id": "landing-module-retirement-and-theme-clarity-2026-10-16",
+      "date": "2026-10-16",
+      "scope": "User-authorized modularization: retire an optional external imagery experiment, remove its runtime and offline resources, and refine landing resource illustrations and measurement-label layout. Preserve the measurement, surface, park, map, report and account workflows.",
+      "audit_chain": "sha256-v1",
+      "added_protected_files": [],
+      "files": [
+        {
+          "path": "index.html",
+          "previous_sha256": "14fd57b948f7597dcaf6f43dc255483e270fc9845e05f9506f1a14d2df3f6938",
+          "sha256": "fc498e1e2adac714d3a86c65d795d3696de4aeb936524d7063c58b4d9fa5e384"
         },
         {
-          "path": "src/adapters/trees/park-tree-imagery.js",
-          "previous_sha256": "a9e5f8a7b7357d2d1036cd58afe0051ebb117f70395941ce534b802b30110287",
-          "sha256": "1d43b3f43ce29cada90ef5e8aec995209e6f640fce4da1b40bb9368ac420e7fe"
+          "path": "partials/head.html",
+          "previous_sha256": "1f7c1189cc0dc37833846ef37f64fa8f0fa0a388ff049ba0825382f795247820",
+          "sha256": "9194e21c23f9d5af3116f767944b31dc74db4045b6e1d6d9bf9cd874fcf192b1"
         },
         {
-          "path": "src/application/trees/detect-tree-candidates.js",
-          "previous_sha256": "d23af8f404637db9d6a2d5b0f9b7fe924e21328b6f6bebf0729c31905df6c207",
-          "sha256": "cce2df9238794a6f1951ed5845793d99b3315ed5c57da6f7940ba3f51ed6aff3"
+          "path": "partials/shell.html",
+          "previous_sha256": "e4ad4299c903ee78331ee0faa432d10cdbfe3fb7e53f4b162ac5d3d970f924bd",
+          "sha256": "b8e4d8848ce23e16b022fb5a8955f045f6112cc3c117be0b66c701524a339e7e"
         },
         {
-          "path": "src/ui/tree-detection-panel.js",
-          "previous_sha256": "015cdaa5479301d068e78e30a79b172518faee7c4ac9b05a26d5ad48ed83bb6d",
-          "sha256": "53ceb56535f6f83aedb37693a6d08c1cd738e4fc940214b5353a1531d37c89b3"
+          "path": "partials/landing.html",
+          "previous_sha256": "bbca6a50d0ec06c90471337d9da5452e8025d0260f52d50d49545820bb2c7d1f",
+          "sha256": "11c8c8ff3acab7399b23d41b5e16779242680fa570bfae5de2b1eb51fa3e9253"
+        },
+        {
+          "path": "css/landing.css",
+          "previous_sha256": "3b7a773219944c04a85a0dc7634f6f86698a09a32bb55ee961dd1e2dadd13e2a",
+          "sha256": "689202f08c3d7e0102e3d605349e353387dd469b94bbae86135d35daf9c48543"
+        },
+        {
+          "path": "sw.js",
+          "previous_sha256": "ae13e841388c6b3a9b1731549df99ef745e43c1e670c3ae6c0f23234edc14fe6",
+          "sha256": "d51fcd2d58aedc898e2d9455b6d1ece536927d0d586a8c3b3a7cba66e986acd0"
+        },
+        {
+          "path": "scripts/check-phone.mjs",
+          "previous_sha256": "f6900cf956a048bd1cf164227015f9881bc96a5c01319bc2a3e6125d9296db3d",
+          "sha256": "4eefa114312846d02adda8e5f310f330fcfaa8d34dfe74a5bfcd565818377657"
+        },
+        {
+          "path": ".github/workflows/mobile-smoke.yml",
+          "previous_sha256": "97d9843f6487fc2ae821a07876827e4b1b05670c7885dca20fb25d56adfcfc6c",
+          "sha256": "3dd7b20cc456f06813e46bc80a7910186537a4d97e929c15737c25d665cdf3d1"
+        },
+        {
+          "path": "test/photo-qa.test.mjs",
+          "previous_sha256": "d516413bd86cfaffb5992252452ad969e83140d1ae22f9e6291cbfd9d84f9055",
+          "sha256": "c6d14b985567b8e776527ab152bfef1c95cb8bb0746eb331ecb8812e0717b380"
+        },
+        {
+          "path": "test/landing-claims.test.mjs",
+          "previous_sha256": "de161456f67d21bad518b170e54e0e19ea3bb7f52a357b8a37404d23ca6f9633",
+          "sha256": "2be78b187895bd899791863215d3c1d04589c142b29668bc4df2984a22084c7a"
+        }
+      ]
+    },
+    {
+      "id": "landing-dark-resource-icon-regression-2026-10-16",
+      "date": "2026-10-16",
+      "scope": "User-authorized visual regression coverage for theme-aware landing resource icons and tree-height label placement.",
+      "audit_chain": "sha256-v1",
+      "added_protected_files": [],
+      "files": [
+        {
+          "path": "scripts/landing-showcase-smoke.mjs",
+          "previous_sha256": "055ab5a37602f97b019102ad223c8d51382fe83fda2b2cba710df85e458ea917",
+          "sha256": "df5a11fe34cf45f6913d88ba3e91f015eaddb7293b38fd6825ae52185bd01e8f"
         }
       ]
     }

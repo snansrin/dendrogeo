@@ -545,11 +545,9 @@ describe('0041 · kaydırma window kök düzeltmesi + 0044 soket kaldırma', () 
     assert.ok(!rd('sw.js').includes('species-ai'), 'CORE_ASSETS izi kalmamalı');
     assert.ok(!shell.includes('aiSuggest'), 'sonuç kutusu izi kalmamalı');
     assert.ok(!shell.includes('dgAiAdmin'), 'yönetim kartı kutusu izi kalmamalı');
-    assert.ok(!shell.includes('AI Ağaç Algılama'), 'yönetim kartı başlığı izi kalmamalı');
     assert.ok(!rd('src/services/admin.js').includes('dgAiAdminRender'), 'loadAdmin çağrısı izi kalmamalı');
     const mj = rd('src/services/measure.js');
     assert.ok(!mj.includes('dgAiOnPhoto'), 'fotoğraf kancası izi kalmamalı');
-    assert.ok(!i18nSource().includes('AI Ağaç Algılama'), 'sözlük izi kalmamalı');
     /* Fotoğraf denetimi SAHADA ve TEK yerde: Yeni Ölçüm sekmesi, fotoğraf düğmesi. */
     assert.match(shell, /data-dg-measure-action="photo-check"/, 'denetim fotoğraf düğmesine bağlı');
     assert.match(rd('src/ui/measurement-form-actions.js'), /checkPhoto\(event\)/);

@@ -4,7 +4,7 @@
 // NOT: Senkronizasyon artık Ana Thread (Supabase JS SDK) tarafından yapılıyor
 // ============================================================
 
-const CACHE_VERSION = 'dendrogeo-sw-v2-r435';
+const CACHE_VERSION = 'dendrogeo-sw-v2-r436';
 
 /* İKİ AYRI STATİK CACHE — bu ayrım bilinçli ve önemli.
  *
@@ -688,15 +688,6 @@ const CORE_ASSETS = [
     '/src/application/parks/draw-selected-park.js',
     '/src/ui/present-drawn-park.js',
     '/src/ui/park-panel.js',
-    '/src/domain/trees/tree-detection-results.js',
-    '/src/application/trees/detect-tree-candidates.js',
-    '/src/adapters/trees/tree-detection-client.js',
-    '/src/ui/tree-detection-panel.js',
-    '/src/domain/trees/park-tree-scan-plan.js',
-    '/src/domain/trees/park-tree-scan-results.js',
-    '/src/adapters/trees/park-tree-imagery.js',
-    '/src/ui/park-tree-candidate-layer.js',
-    '/src/bootstrap/tree-detection-controller.js',
     '/src/ui/park-image-geometry.js',
     '/src/ui/park-export-layout.js',
     '/src/domain/parks/park-export-formats.js',
@@ -1067,7 +1058,6 @@ const CORE_ASSETS = [
     '/css/appearance.css',
     '/css/park-admin.css',
     '/css/park-panel.css',
-    '/css/tree-detection.css',
     '/css/ui-standard.css',
     '/css/surface-drawing.css',
     '/css/gis-workspace.css',
