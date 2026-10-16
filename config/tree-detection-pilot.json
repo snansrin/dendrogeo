@@ -34,11 +34,12 @@
     "route": "Canlı Harita → Ağaç Algılama",
     "scope": "Selected park imagery; overlapping georeferenced windows, center-in-park candidates and unvalidated box-based crown extent proxies",
     "acceptedDataWrites": false,
-    "realInferenceVerified": false,
+    "realInferenceVerified": true,
     "fileUpload": false,
     "confidenceSlider": [
       0,
       100
-    ]
+    ],
+    "inferenceEvidence": "Authenticated scan requests returned HTTP 200 after the cloud-v0 transport fix on 2026-10-16; local detection/crown accuracy remains unvalidated."
   }
 }

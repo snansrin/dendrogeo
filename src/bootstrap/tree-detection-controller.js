@@ -13,7 +13,7 @@
    const url=URL.createObjectURL(new Blob([JSON.stringify(result,null,2)],{type:'application/json'}));const anchor=document.createElement('a');anchor.href=url;anchor.download='dendrogeo-park-tree-candidates.json';anchor.click();setTimeout(()=>URL.revokeObjectURL(url),1000);
   }});
   controller=root.DG_DETECT_TREE_CANDIDATES.create({getPark:()=>typeof PARK_POLY==='undefined'||!PARK_POLY?null:{outer:PARK_POLY,inner:typeof PARK_HOLES==='undefined'?[]:PARK_HOLES},plan:root.DG_PARK_TREE_SCAN_PLAN.plan,readImage:imagery.read,clearImages:imagery.clear,infer:root.DG_TREE_DETECTION_CLIENT.create({client:sb,url:SB_URL,publicKey:SB_KEY,fetch:root.fetch.bind(root)}),collect:root.DG_PARK_TREE_SCAN_RESULTS.collect,summarize:root.DG_PARK_TREE_SCAN_RESULTS.summarize,present:value=>{view.present(value);layer.show(value.result);},makeAbortController:()=>new AbortController(),clock:()=>new Date().toISOString(),yieldFrame:()=>new Promise(resolve=>requestAnimationFrame(resolve))});
-  view.bind(controller);root.addEventListener('dg:lang',view.refresh);
+  view.bind(controller);controller.contextChanged();root.addEventListener('dg:lang',view.refresh);
   let account;sb.auth.onAuthStateChange((_event,session)=>{const next=session?.user?.id||null;if(account!==undefined&&account!==next)controller.clear();account=next;});
   new MutationObserver(()=>controller.contextChanged()).observe(document.getElementById('parkInfo'),{childList:true,subtree:true,attributes:true,attributeFilter:['style']});
  });

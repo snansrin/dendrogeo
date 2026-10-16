@@ -70,3 +70,11 @@ Güven çubuğu %0–100 arasında yalnız önceden alınan adayları süzer. Pa
 **Taç eni tahmini**, algılama kutusunun WGS84 üzerinde doğu–batı ve kuzey–güney boyutlarından türetilen bir proxy'dir. Ortalama yalnız sınır/parça kenarı dışında kalan tahminlerden hesaplanır; örnek sayısı gösterilir. Kutu alanı taç alanı yapılmaz. crownWidthM/crownAreaM2 null, crownEstimate.validated=false kalır. Gerçek taç maskesi, kaynak GSD/çekim tarihi ve bağımsız saha doğrulaması olmadan doğrulanmış taç ölçüsü yayımlanmaz.
 
 UI, application, domain, imagery adapter ve bootstrap ayrıdır. Kabul edilmiş yüzey, ham raster, saha çevresi/DBH/karbon ve rapor servislerinde değişiklik yoktur. Gerçek model/görüntü doğruluk denemesini kullanıcı kendisi yapmayı seçti. Otomatik testler taklit sağlayıcı çıktılarıyla yazılım davranışını sınar; model doğruluğu kanıtı değildir.
+
+## Bulut bağlantısı hata giderme · 16 Ekim 2026
+
+Canlı istek kayıtlarında dört tarama POST isteği 502 döndü. Önceki `/infer/object_detection` + JSON görüntü biçimi, Roboflow SDK tarafından bulut hostu için seçilen v0 taşımasıyla eşleşmiyordu. Bulut isteği sabit `/tree-detection-fuytu/4` yoluna ham base64 olarak gönderilir; güven yüzdelik parametredir, anahtar yalnız Authorization başlığındadır. Yönlendirmeler reddedilir ve aktif öğrenme aktarımı kapatılır. [SDK taşıma seçimi](https://github.com/roboflow/inference/blob/main/inference_sdk/http/client.py) ve [gövde biçimi](https://github.com/roboflow/inference/blob/main/inference_sdk/http/utils/request_building.py).
+
+Sağlayıcı 401/403, 404, 400/422 ve kota hataları ayrıdır. Güvenli günlük yalnız sabit model adı, taşıma ve HTTP durum kodunu içerir; anahtar, URL, görüntü veya üst servis gövdesi kaydedilmez. Hiç parça tamamlanmamışken aday sayısı gösterilmez. Park seçimi hazır durumu açıkça sunulur. Bütün sınıflar beklenenden farklıysa sıfır aday yerine etiket eşleşme hatası oluşur.
+
+Düzeltme sonrası kullanıcının normal oturumundan başlattığı beş gerçek tarama isteği 16 Ekim 2026 18:25–18:26 UTC aralığında HTTP 200 döndü. Bu, sağlayıcı bağlantısı ve yanıt biçimi kapısının geçtiğini gösterir; aday sayısı/konumu veya taç doğruluğunun bağımsız doğrulaması değildir. Taklit yanıt testleri gerçek inference başarısı sayılmaz.

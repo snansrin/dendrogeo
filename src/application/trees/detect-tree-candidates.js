@@ -3,9 +3,9 @@
  function create({getPark,plan,readImage,clearImages,infer,collect,summarize,present,makeAbortController,clock,yieldFrame}){
   let epoch=0,pending=null,scan=null,rows=[],completed=0,result=null,state='empty',error=null,confidence=.5,startedAt=null;
   const samePark=()=>scan&&JSON.stringify(getPark())===scan.key;
-  function display(){if(scan)result=summarize(rows,scan,confidence,{completed,total:scan.chips.length,startedAt});present({state,error,result,confidence,completed,total:scan?.chips.length||0});}
+  function display(){if(scan)result=summarize(rows,scan,confidence,{completed,total:scan.chips.length,startedAt});present({state,error,result,confidence,parkReady:!!getPark()?.outer?.length,completed,total:scan?.chips.length||0});}
   function clear(){epoch++;pending?.abort();pending=null;clearImages();scan=null;rows=[];completed=0;result=null;error=null;state='empty';display();}
-  function contextChanged(){if(scan&&!samePark())clear();}
+  function contextChanged(){if(scan&&!samePark())clear();else if(!scan)display();}
   function setThreshold(value){if(!Number.isFinite(value)||value<0||value>1)return;confidence=value;display();}
   function cancel(){epoch++;pending?.abort();pending=null;clearImages();error='cancelled';state=scan?'cancelled':'empty';display();}
   async function run(){

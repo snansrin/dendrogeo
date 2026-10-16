@@ -1,7 +1,7 @@
 /* User-authenticated inference proxy. No persistence, arbitrary hosts or model selection. */
 export const MODEL_ID='tree-detection-fuytu/4';
 const MAX_BODY=6*1024*1024;
-export function createTreeDetectionHandler({env,fetch:request=globalThis.fetch,now=Date.now}){
+export function createTreeDetectionHandler({env,fetch:request=globalThis.fetch,now=Date.now,report=()=>{}}){
  const users=new Map();
  return async function handle(req){
   const origin=req.headers.get('origin');
@@ -40,9 +40,17 @@ export function createTreeDetectionHandler({env,fetch:request=globalThis.fetch,n
    const {image,width,height,confidence}=body;
    if(typeof image!=='string'||!/^\/9j\/[A-Za-z0-9+/]*={0,2}$/.test(image)||image.length<80||image.length%4!==0||!Number.isSafeInteger(width)||!Number.isSafeInteger(height)||width<1||height<1||width>2048||height>2048||!Number.isFinite(confidence)||confidence<0||confidence>1)return reply(400,{error:'invalid_image'});
    budget.count++;
+   // Cloud v0 uses a model/version route and raw base64. The API key
+   // stays in the Authorization header; never log upstream bodies.
+   const provider=new URL('https://serverless.roboflow.com/'+MODEL_ID);
+   provider.search=new URLSearchParams({confidence:String(Math.round(confidence*100)),overlap:'50',format:'json',disable_active_learning:'true'}).toString();
    let response;
-   try{response=await request('https://serverless.roboflow.com/infer/object_detection',{method:'POST',headers:{'Content-Type':'application/json',Authorization:'Bearer '+key},body:JSON.stringify({model_id:MODEL_ID,image:{type:'base64',value:image},confidence,iou_threshold:.5}),signal:AbortSignal.timeout(55000)});}catch(error){return reply(error.name==='TimeoutError'?504:502,{error:error.name==='TimeoutError'?'model_timeout':'model_unavailable'});}
-   if(!response.ok)return reply(response.status===429?429:502,{error:response.status===429?'provider_quota':'model_unavailable'});
+   try{response=await request(provider.toString(),{method:'POST',redirect:'error',headers:{'Content-Type':'application/x-www-form-urlencoded',Authorization:'Bearer '+key},body:image,signal:AbortSignal.timeout(55000)});}catch(error){return reply(error.name==='TimeoutError'?504:502,{error:error.name==='TimeoutError'?'model_timeout':'model_unavailable'});}
+   if(!response.ok){
+    const status=response.status,error=[401,403].includes(status)?'model_access_denied':status===404?'model_not_found':[400,422].includes(status)?'model_request_rejected':[402,429].includes(status)?'provider_quota':'model_unavailable';
+    report({stage:'roboflow',transport:'serverless-v0',model:MODEL_ID,status});
+    return reply([402,429].includes(status)?429:502,{error,providerStatus:status});
+   }
    let result=await response.json();if(Array.isArray(result)&&result.length===1)result=result[0];
    if(result?.image?.width!==width||result?.image?.height!==height||!Array.isArray(result.predictions)||result.predictions.length>5000)return reply(502,{error:'invalid_model_result'});
    const predictions=result.predictions.map(row=>({x:row.x,y:row.y,width:row.width,height:row.height,confidence:row.confidence,class:row.class}));

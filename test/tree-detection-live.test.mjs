@@ -1,7 +1,5 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {readFileSync} from 'node:fs';
-import vm from 'node:vm';
 import {createTreeDetectionHandler,MODEL_ID} from '../supabase/functions/tree-detection/handler.mjs';
 const image='/9j/'+('A'.repeat(100));
 const body={image,width:128,height:128,confidence:.5};
@@ -10,7 +8,7 @@ const req=(data=body,extra={})=>new Request('https://edge.test',{method:'POST',h
 const predictions=[{x:50,y:50,width:20,height:20,confidence:.8,class:'Tree',secret:'omit'}];
 test('proxy authenticates user, pins provider/model, uses header secret and sanitizes result',async()=>{
  const calls=[];const handle=createTreeDetectionHandler({env,fetch:async(url,options)=>{calls.push({url,options});return calls.length===1?Response.json({id:'user'}):Response.json({image:{width:128,height:128},predictions,api_key:'never expose'});}});
- const response=await handle(req());const result=await response.json();assert.equal(response.status,200);assert.equal(result.modelId,MODEL_ID);assert.equal(calls[1].url,'https://serverless.roboflow.com/infer/object_detection');assert.equal(calls[1].options.headers.Authorization,'Bearer server-only-secret');assert.equal(JSON.parse(calls[1].options.body).model_id,MODEL_ID);assert.equal(calls[0].options.headers.Authorization,'Bearer user-session');assert.equal(result.predictions[0].secret,undefined);assert.equal(JSON.stringify(result).includes('secret'),false);assert.equal(response.headers.get('Access-Control-Allow-Origin'),'https://dendrogeo.org');
+ const response=await handle(req());const result=await response.json();assert.equal(response.status,200);assert.equal(result.modelId,MODEL_ID);const provider=new URL(calls[1].url);assert.equal(provider.origin+provider.pathname,'https://serverless.roboflow.com/'+MODEL_ID);assert.equal(provider.searchParams.get('confidence'),'50');assert.equal(provider.searchParams.has('api_key'),false);assert.equal(calls[1].url.includes('secret'),false);assert.equal(provider.searchParams.get('disable_active_learning'),'true');assert.equal(calls[1].options.redirect,'error');assert.equal(calls[1].options.headers['Content-Type'],'application/x-www-form-urlencoded');assert.equal(calls[1].options.headers.Authorization,'Bearer server-only-secret');assert.equal(calls[1].options.body,image);assert.equal(calls[0].options.headers.Authorization,'Bearer user-session');assert.equal(result.predictions[0].secret,undefined);assert.equal(JSON.stringify(result).includes('secret'),false);assert.equal(response.headers.get('Access-Control-Allow-Origin'),'https://dendrogeo.org');
 });
 test('proxy refuses bad origin, signed-out, anonymous, invalid image and oversized input',async()=>{
  let calls=0;const handle=createTreeDetectionHandler({env,fetch:async()=>{calls++;return Response.json({id:'user'});}});
@@ -23,11 +21,18 @@ test('proxy refuses bad origin, signed-out, anonymous, invalid image and oversiz
 });
 test('proxy returns safe configuration, quota, timeout and size mismatch errors',async()=>{
  for(const [upstream,status,error] of [[()=>new Response('secret upstream error',{status:429}),429,'provider_quota'],[()=>{throw new DOMException('secret','TimeoutError');},504,'model_timeout'],[()=>Response.json({image:{width:64,height:64},predictions}),502,'invalid_model_result']]){
-  const handler=createTreeDetectionHandler({env,fetch:async url=>url.includes('/auth/')?Response.json({id:'user'}):upstream()});const response=await handler(req());assert.equal(response.status,status);assert.deepEqual(await response.json(),{error});
+  const handler=createTreeDetectionHandler({env,fetch:async url=>url.includes('/auth/')?Response.json({id:'user'}):upstream()});const response=await handler(req());assert.equal(response.status,status);assert.deepEqual(await response.json(),error==='provider_quota'?{error,providerStatus:429}:{error});
  }
  const handler=createTreeDetectionHandler({env:name=>name==='ROBOFLOW_API_KEY'?undefined:env(name),fetch:async()=>Response.json({id:'user'})});assert.equal((await handler(req())).status,503);
 });
 test('proxy refuses duplicate concurrent inference and limits calls',async()=>{
  let finish;const handler=createTreeDetectionHandler({env,fetch:async url=>url.includes('/auth/')?Response.json({id:'user'}):new Promise(resolve=>{finish=()=>resolve(Response.json({image:{width:128,height:128},predictions}));})});
  const first=handler(req());while(!finish)await new Promise(resolve=>setImmediate(resolve));assert.equal((await handler(req())).status,429);finish();assert.equal((await first).status,200);
+});
+
+test('cloud failures remain distinct and safe instead of being presented as zero trees',async()=>{
+ for(const [status,error] of [[401,'model_access_denied'],[403,'model_access_denied'],[404,'model_not_found'],[422,'model_request_rejected'],[500,'model_unavailable']]){
+  const reported=[],handler=createTreeDetectionHandler({env,report:item=>reported.push(item),fetch:async url=>url.includes('/auth/')?Response.json({id:'user'}):new Response('server-only-secret and private response',{status})});
+  const response=await handler(req());assert.deepEqual(await response.json(),{error,providerStatus:status});assert.equal(JSON.stringify(reported).includes('secret'),false);assert.equal(reported[0].transport,'serverless-v0');
+ }
 });

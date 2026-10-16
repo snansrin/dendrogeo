@@ -8700,6 +8700,40 @@
           "sha256": "ae13e841388c6b3a9b1731549df99ef745e43c1e670c3ae6c0f23234edc14fe6"
         }
       ]
+    },
+    {
+      "id": "tree-serverless-cloud-transport-diagnostics-2026-10-16",
+      "date": "2026-10-16",
+      "scope": "User-authorized modularization: fix the tree provider cloud v0 route/raw-base64 transport, keep credentials header-only, reject redirects and distinguish provider/auth/model errors from empty detection. Expose selected-park readiness and hide zero counts when no image was analyzed. Preserve all core measurement, surface, map editing and accepted data behavior.",
+      "audit_chain": "sha256-v1",
+      "added_protected_files": [],
+      "files": [
+        {
+          "path": "index.html",
+          "previous_sha256": "c4e40403bcf0dfa4afaf1768673d531b0dfe7fd8e4ece86b09364f89f7f18946",
+          "sha256": "c44ab9128a541dd3f5fb8784aa4d048502064c54fa0bec3fc7292b77df015218"
+        },
+        {
+          "path": "src/application/trees/detect-tree-candidates.js",
+          "previous_sha256": "55846a5df2750a83021c0510aa533a800658d76b097b0e1bcd3f337ae5fe4e66",
+          "sha256": "1361a8e3378644fcc6f7aab6b9f5664b20d50fdad0a351ce50cb9f7d36e2475c"
+        },
+        {
+          "path": "src/bootstrap/tree-detection-controller.js",
+          "previous_sha256": "5b44b8732855d98b25d322a60150d95e36db7c48ab77da984cdcd03f5009511f",
+          "sha256": "5efa65f234dc35b7c9c2255880fc9c0654fc049895318d5a565b35f6c0349c04"
+        },
+        {
+          "path": "src/domain/trees/park-tree-scan-results.js",
+          "previous_sha256": "7993b6dcd642f9a273cc1e5d576d724676318613c1ee351b2ab914e8fc5403a1",
+          "sha256": "de4403cdf04c4cfe63c7a766498f0d0174d9c150b6122d64ab702bc62ef671cd"
+        },
+        {
+          "path": "src/ui/tree-detection-panel.js",
+          "previous_sha256": "3e8b08dcf83324528e927db202ded95b34f5f01b6dc9d2d753a2b847c35ff71d",
+          "sha256": "ec4844ef430b720f6622bf0fed9e17e5df18dab9f0a85407be0d53745d5805b6"
+        }
+      ]
     }
   ]
 }

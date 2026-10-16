@@ -5,6 +5,7 @@
  function overlap(a,b){const intersection=Math.max(0,Math.min(a[2],b[2])-Math.max(a[0],b[0]))*Math.max(0,Math.min(a[3],b[3])-Math.max(a[1],b[1]));const area=x=>(x[2]-x[0])*(x[3]-x[1]);return{union:intersection/(area(a)+area(b)-intersection||1),smaller:intersection/(Math.min(area(a),area(b))||1)};}
  function collect(raw,chip){
   const normalized=root.DG_TREE_DETECTION_RESULTS.build(raw,{width:chip.width,height:chip.height,imageId:String(chip.id),modelId:raw.modelId},{confidence:0,nmsIou:.5});
+  if(raw.predictions.length&&normalized.counts.unknownLabels===raw.predictions.length)throw Error('model_labels_mismatch');
   return normalized.candidates.map(candidate=>({...candidate,chipId:chip.id,edge:candidate.partial||candidate.boxPixels[0]<=2||candidate.boxPixels[1]<=2||candidate.boxPixels[2]>=chip.width-2||candidate.boxPixels[3]>=chip.height-2,globalBox:candidate.boxPixels.map((v,i)=>v+(i%2?chip.y:chip.x))}));
  }
  function summarize(rows,plan,confidence,{completed,total,startedAt}){
