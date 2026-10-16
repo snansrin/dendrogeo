@@ -8272,6 +8272,84 @@
           "sha256": "f100f890960074244b3dc3148be2ed69ac76382a021f792bab1e4045d4bbd7e5"
         }
       ]
+    },
+    {
+      "id": "park-analysis-latency-object-pick-2026-10-16",
+      "date": "2026-10-16",
+      "scope": "User-authorized modularization: bounded shared OSM recovery budget and first-mirror fallback, timeout degradation hint, prevent repeated full failed queries during analysis, concurrent lazy download lookahead with sequential execution, immediate single-click analysis UI and safe async object selection recovery with consistent touch hit tolerance. Raw raster, scientific calculations, stored geometry, RLS and DOI artifacts are preserved.",
+      "audit_chain": "sha256-v1",
+      "files": [
+        {
+          "path": ".github/workflows/mobile-smoke.yml",
+          "previous_sha256": "d6ecdbc250fb3bf0cbdcb6e58fb661d91dd9cc5c796146dd6065155b49e87852",
+          "sha256": "f7d255fe63ac1f36f3261b205284a216d5cf28e4511f25c9f95fe71d972f46ca"
+        },
+        {
+          "path": "index.html",
+          "previous_sha256": "d042754a6e2a35e495b0a01b125e1ae2ef067078776cf0edcd1d3c845d5e3e94",
+          "sha256": "0ec7d74c24dc1aeb77ae74bf561bee4ccafbc742770b7cba0fc439c5f534f8a6"
+        },
+        {
+          "path": "scripts/check-phone.mjs",
+          "previous_sha256": "43203589e2e9880aa0146af9a3c53fc453bbd9f53d9faf849d420890714b156e",
+          "sha256": "482a6db406495221b5a5e0ad5f0bb405a42da69fd3aa509bf96caa06ecac6f74"
+        },
+        {
+          "path": "src/adapters/surface/load-osm-landcover-evidence.js",
+          "previous_sha256": "65cb716a3d64b7a856d0a91363d5eae41b726bed93b88b8ea4ed3aae0adfb182",
+          "sha256": "2560b03053308d02a8260b9c916d4ab2b61182ff5e0ac37e11da40a70d344539"
+        },
+        {
+          "path": "src/application/parks/fetch-detailed-coverage.js",
+          "previous_sha256": "6f69e96a610b6a2e7e9d5319ac621588d05ac3d4ae2371d15aa2719b5bd68338",
+          "sha256": "a7cfcd35eea840c0e1ecd4d52c0c2721aa0f1e14f371955980334ef960bba026"
+        },
+        {
+          "path": "src/application/surface/start-surface-object-pick.js",
+          "previous_sha256": "0031b6e920a92ea0f59202285d56dc908bd3185e7cd89c90855982c40d7d63e1",
+          "sha256": "2a75bcc147d4dbcc635922fbcba3dccfa1e307d45cda485a09d6363cad716c2a"
+        },
+        {
+          "path": "src/domain/surface/find-surface-object-at-point.js",
+          "previous_sha256": "1756b72aae21a8a18afbfd01be251780f8cbd17933ae1c45882bbe29f1d5bbd9",
+          "sha256": "61c749992d4b32ecb231639e74d36c9376d00079afa16e93699c3d6238d5653b"
+        },
+        {
+          "path": "src/services/osm-client.js",
+          "previous_sha256": "f907697354a25ca985ac42cb054c917a08c3f4028c18960b7da8a878084b2be2",
+          "sha256": "af40b7898bf1b485da24f3217bf70c61969110a0bb464a031120f53e3ab1c3e6"
+        },
+        {
+          "path": "src/services/park-query.js",
+          "previous_sha256": "d149b1a6a7982374cf42837f86f8eeb96c6e70affe3de5d2b37b169287f3a3a3",
+          "sha256": "f5dadd4817353fd1af0be075e5341c1bab052285ea2142289af96f242e580009"
+        },
+        {
+          "path": "src/ui/lc-sens.js",
+          "previous_sha256": "66c6b636bc5fa51b15d52981509f6f3e41377ba022561412c20272f429b2f465",
+          "sha256": "04c8ff1fbdbe931624665beb8e0284c7559f6ecf57aa090b7e0a9674bec738a6"
+        },
+        {
+          "path": "src/ui/park-landcover-analysis.js",
+          "previous_sha256": "4d6d9970af0be40287ef9bbb44be333dd2ede933554d1c5afed07895f339d3b9",
+          "sha256": "54738fa5f8d5a3097b4c28e99fa621e70ec0965a529ad1672536b0a83354f54b"
+        },
+        {
+          "path": "src/utils/lazylibs.js",
+          "previous_sha256": "9a29064fb8a4b6a63fc5e722ec5b1a9aa71fce9d05a4c063e943aefc12f83aa5",
+          "sha256": "069e17105582aae242f71365c0fc5e12ce07af5a2accd9b0f8b0b0c76ae29016"
+        },
+        {
+          "path": "test/osm-drawing-reliability.test.mjs",
+          "previous_sha256": "41f43a8f9b3b296d423a8b67a0a52f9c195989c92e70d958082e591efdd3bd47",
+          "sha256": "753aeb457bf9ff8e0445d061957cefe4239e4514591716e939b25bdb1cbfaf03"
+        },
+        {
+          "path": "test/park-landcover-analysis.test.mjs",
+          "previous_sha256": "202ec7457f1e926f91bcbb69dbeb9b029c2bb89ad654ea34cae1347632d2d28f",
+          "sha256": "4b23521015946b200dc094986ce8f6fca2c4b1642957a94ca58f27f985022e7e"
+        }
+      ]
     }
   ]
 }

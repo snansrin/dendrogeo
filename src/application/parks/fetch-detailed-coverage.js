@@ -10,6 +10,8 @@ window.DG_PARK_COVERAGE_FETCH_APPLICATION = {
       if (!parkPolygon || !parkPolygon.length) return null;
 
       const boundary = JSON.stringify(parkPolygon);
+      // The combined query and split recovery share one deadline.
+      const deadline=Date.now()+75000;
       let minLat = 90;
       let maxLat = -90;
       let minLon = 180;
@@ -28,13 +30,13 @@ window.DG_PARK_COVERAGE_FETCH_APPLICATION = {
       let json=previous&&Date.now()-previous.time<600000?previous.json:null;
       let triedFallback=false;
       if(!json&&queryFallback&&preferFallback()){triedFallback=true;try{json=await queryFallback(bbox);}catch(error){}}
-      if(!valid(json))try{json=await queryOsm(policy.build(bbox),"yüzey+su");}catch(error){}
+      if(!valid(json))try{json=await queryOsm(policy.build(bbox),"yüzey+su",{maxAttempts:1,deadline});}catch(error){}
       if(!valid(json)&&queryFallback&&!triedFallback)try{json=await queryFallback(bbox);}catch(error){}
       if(!valid(json)){
         json=null;const elements=new Map();
         for(const group of policy.groups){
-          if(boundary!==JSON.stringify(getParkPolygon()))break;
-          let part=null;try{part=await queryOsm(policy.build(bbox,group),"yüzey+su");}catch(error){}
+          if(boundary!==JSON.stringify(getParkPolygon())||Date.now()>=deadline)break;
+          let part=null;try{part=await queryOsm(policy.build(bbox,group),"yüzey+su",{maxAttempts:1,deadline});}catch(error){}
           if(!valid(part)){elements.clear();break;}
           for(const element of part.elements)elements.set(element.type+"/"+element.id,element);
           if(group===policy.groups.at(-1))json={elements:[...elements.values()],complete:true};

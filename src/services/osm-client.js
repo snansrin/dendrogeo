@@ -27,15 +27,15 @@ function overpassCacheKey(query){
   return query.replace(/\s+/g," ").trim();
 }
 
-function overpassRequest(query,label="OSM"){
-  if(typeof window!=="undefined"&&window.DG_COALESCE_OVERPASS_REQUESTS)return window.DG_COALESCE_OVERPASS_REQUESTS.request(query,label,{keyOf:overpassCacheKey,pending:OVERPASS_PENDING,run:overpassRun});
+function overpassRequest(query,label="OSM",options={}){
+  if(typeof window!=="undefined"&&window.DG_COALESCE_OVERPASS_REQUESTS)return window.DG_COALESCE_OVERPASS_REQUESTS.request(query,label,{keyOf:overpassCacheKey,pending:OVERPASS_PENDING,run:(query,label)=>overpassRun(query,label,options)});
   const key=overpassCacheKey(query);
   if(OVERPASS_PENDING.has(key))return OVERPASS_PENDING.get(key);
-  const job=overpassRun(query,label).finally(()=>OVERPASS_PENDING.delete(key));
+  const job=overpassRun(query,label,options).finally(()=>OVERPASS_PENDING.delete(key));
   OVERPASS_PENDING.set(key,job);return job;
 }
 
-async function overpassRun(query,label="OSM"){
+async function overpassRun(query,label="OSM",options={}){
   const key=overpassCacheKey(query);
   const cached=OVERPASS_CACHE.get(key);
 
@@ -69,11 +69,12 @@ async function overpassRun(query,label="OSM"){
       LAST_OVERPASS_ERROR=label+" · OSM sunucuları geçici olarak kullanılamıyor";
       return null;
     }
-    const pool=ordered;
+    const pool=ordered.slice(0,options.maxAttempts||ordered.length);
 
-    const deadline=typeof window!=="undefined"&&window.DG_OVERPASS_REQUEST_BUDGET
+    const requestDeadline=typeof window!=="undefined"&&window.DG_OVERPASS_REQUEST_BUDGET
       ?window.DG_OVERPASS_REQUEST_BUDGET.deadline(label,Date.now)
       :Date.now()+(label==="park"?15000:20000);
+    const deadline=Math.min(requestDeadline,options.deadline||Infinity);
     for(const item of pool){
       if((OVERPASS_HEALTH.get(item.url)?.badUntil||0)>Date.now())continue;
       if(Date.now()>=deadline){LAST_OVERPASS_ERROR=label+" bağlantı süresi aşıldı";break;}
@@ -131,6 +132,7 @@ async function overpassRun(query,label="OSM"){
         const msg=err?.name==="AbortError" ? `timeout (${timeoutMs/1000}s)` : (err?.message||String(err));
         LAST_OVERPASS_ERROR=label+" "+msg;
         // A short client park deadline does not prove the provider is unavailable.
+        if(err?.name==="AbortError")OVERPASS_HEALTH.set(item.url,{...(OVERPASS_HEALTH.get(item.url)||{}),lastOk:item.lastOk,degradedUntil:Date.now()+60000});
         const quarantine=!(err?.name==="AbortError"&&(label==="park"||timeoutMs<2000));
         if(quarantine){
           if(typeof window!=="undefined"&&window.DG_OVERPASS_MIRROR_HEALTH)window.DG_OVERPASS_MIRROR_HEALTH.quarantine(OVERPASS_HEALTH,item.url,item.lastOk,60000,Date.now);

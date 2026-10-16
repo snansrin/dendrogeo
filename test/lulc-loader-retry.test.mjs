@@ -5,7 +5,8 @@ import { readFileSync } from 'node:fs';
 const root=new URL('../',import.meta.url);
 test('interrupted classic-script chain resumes without redeclaring loaded const/let modules',async()=>{
  const loaded=[],executed=new Set();let fail=true;
- const ctx={window:null,document:{readyState:'loading',getElementById(){return null;},addEventListener(){},createElement(){return {};},head:{appendChild(s){
+ const ctx={window:null,document:{readyState:'loading',getElementById(){return null;},addEventListener(){},createElement(tag){return {tag,remove(){}};},head:{appendChild(s){
+  if(s.tag==='link')return;
   queueMicrotask(()=>{
    const path=s.src.split('?')[0];loaded.push(path);
    if(path==='src/services/lc-engine.js'&&fail){fail=false;s.onerror();return;}

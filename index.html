@@ -250,18 +250,18 @@
 <script src="src/config/wood-density-lock.js?v=9572e1df" type="application/x-dendrogeo-module" defer></script>
 <script src="src/config/species.js?v=554298a8" type="application/x-dendrogeo-module" defer></script>
 <!-- DİL KATMANI (0035): sözlük verisi çalışma zamanı çeviricisinden önce yüklenir. -->
-<script src="src/config/i18n-en.js?v=d95905d6" type="application/x-dendrogeo-module" defer></script>
+<script src="src/config/i18n-en.js?v=4682dd0c" type="application/x-dendrogeo-module" defer></script>
 <script src="src/config/i18n.js?v=9edc1ead" type="application/x-dendrogeo-module" defer></script>
 <script src="src/domain/map/web-mercator-coordinates.js?v=44109250" type="application/x-dendrogeo-module" defer></script>
 <script src="src/utils/geo.js?v=1e469255" type="application/x-dendrogeo-module" defer></script>
 <script src="src/utils/truncation.js?v=d9710c30" type="application/x-dendrogeo-module" defer></script>
 <!-- Faz 7: geotiff (317 KB) ve chart.js (208 KB) artık SENKRON yüklenmiyor;
      src/utils/lazylibs.js ihtiyaç anında enjekte eder (LULC analizi / panel grafiği). -->
-<script id="dgRuntimeBuild" type="application/json">"bc47b5affa193845"</script>
+<script id="dgRuntimeBuild" type="application/json">"ff8d661f25c299dc"</script>
 <!-- Verified fallback OSM water geometry, independent of the lazy raster engine. -->
 <script src="src/adapters/parks/fetch-nominatim-osm-way.js?v=9f2730dd" type="application/x-dendrogeo-module" defer></script>
 <script src="src/services/osm-water-backup.js?v=4c9fbc03" type="application/x-dendrogeo-module" defer></script>
-<script src="src/utils/lazylibs.js?v=e17067c9" type="application/x-dendrogeo-module" defer></script>
+<script src="src/utils/lazylibs.js?v=e4dd2a35" type="application/x-dendrogeo-module" defer></script>
 <script src="src/domain/trees/photo-quality.js?v=7ce5cf3a" type="application/x-dendrogeo-module" defer></script>
 <script src="src/domain/trees/allometry.js?v=e8a22ad4" type="application/x-dendrogeo-module" defer></script>
 <script src="src/domain/trees/build-live-measurement-preview-input.js?v=9ddadf41" type="application/x-dendrogeo-module" defer></script>
@@ -742,7 +742,7 @@
 <script src="src/domain/parks/overpass-request-budget.js?v=6786027d" type="application/x-dendrogeo-module" defer></script>
 <script src="src/adapters/parks/overpass-mirror-health.js?v=cf346b2c" type="application/x-dendrogeo-module" defer></script>
 <script src="src/adapters/parks/post-overpass-query.js?v=49071dd9" type="application/x-dendrogeo-module" defer></script>
-<script src="src/services/osm-client.js?v=860b2549" type="application/x-dendrogeo-module" defer></script>
+<script src="src/services/osm-client.js?v=b4a31ad4" type="application/x-dendrogeo-module" defer></script>
 <script src="src/domain/parks/road-half-width.js?v=76a7a8c4" type="application/x-dendrogeo-module" defer></script>
 <script src="src/domain/parks/classify-surface-tags.js?v=f9517268" type="application/x-dendrogeo-module" defer></script>
 <script src="src/domain/parks/impervious-geometry.js?v=4244da1c" type="application/x-dendrogeo-module" defer></script>
@@ -775,7 +775,7 @@
 <script src="src/ui/surface-osm-evidence-status.js?v=ffa8064c" type="application/x-dendrogeo-module" defer></script>
 <script src="src/domain/parks/decode-osm-map-geometry.js?v=041cd30a" type="application/x-dendrogeo-module" defer></script>
 <script src="src/adapters/parks/load-osm-map-coverage.js?v=5d9abd80" type="application/x-dendrogeo-module" defer></script>
-<script src="src/application/parks/fetch-detailed-coverage.js?v=84e9d5eb" type="application/x-dendrogeo-module" defer></script>
+<script src="src/application/parks/fetch-detailed-coverage.js?v=ecbfcfbf" type="application/x-dendrogeo-module" defer></script>
 <script src="src/application/parks/classify-coverage-elements.js?v=0713ef53" type="application/x-dendrogeo-module" defer></script>
 <script src="src/application/parks/find-nominatim-boundary.js?v=f40bb61f" type="application/x-dendrogeo-module" defer></script>
 <script src="src/adapters/parks/nominatim-client.js?v=6cc5ae22" type="application/x-dendrogeo-module" defer></script>
@@ -784,7 +784,7 @@
 <script src="src/application/parks/collect-park-coverage-elements.js?v=2af603cf" type="application/x-dendrogeo-module" defer></script>
 <script src="src/domain/parks/filter-park-coverage-to-boundary.js?v=a7d67f2c" type="application/x-dendrogeo-module" defer></script>
 <script src="src/ui/park-water-layer-renderer.js?v=e55c62d3" type="application/x-dendrogeo-module" defer></script>
-<script src="src/services/park-query.js?v=7564f591" type="application/x-dendrogeo-module" defer></script>
+<script src="src/services/park-query.js?v=9de42491" type="application/x-dendrogeo-module" defer></script>
 <script src="src/domain/parks/identity.js?v=cf203a73" type="application/x-dendrogeo-module" defer></script>
 <script src="src/adapters/parks/park-store.js?v=8acc0e41" type="application/x-dendrogeo-module" defer></script>
 <script src="src/application/parks/register-park.js?v=3d3c6644" type="application/x-dendrogeo-module" defer></script>
@@ -918,7 +918,7 @@
 <script src="src/ui/park-export-layout.js?v=9a9ae427" type="application/x-dendrogeo-module" defer></script>
 <script src="src/domain/parks/park-export-formats.js?v=c2298046" type="application/x-dendrogeo-module" defer></script>
 <script src="src/ui/park-export-canvas.js?v=5788b8fb" type="application/x-dendrogeo-module" defer></script>
-<script src="src/ui/park-landcover-analysis.js?v=ebe98bca" type="application/x-dendrogeo-module" defer></script>
+<script src="src/ui/park-landcover-analysis.js?v=3a86fb7d" type="application/x-dendrogeo-module" defer></script>
 <script src="src/adapters/export/download-blob.js?v=39ddbed2" type="application/x-dendrogeo-module" defer></script>
 <script src="src/ui/park-export.js?v=6c4dc6e2" type="application/x-dendrogeo-module" defer></script>
 <script src="src/domain/users/record-status-meta.js?v=665184b1" type="application/x-dendrogeo-module" defer></script>
@@ -1909,6 +1909,6 @@
 <script src="src/bootstrap/gis-export.js?v=31cdf97c" type="application/x-dendrogeo-module" defer></script>
 <script src="src/ui/gis-export.js?v=85048551" type="application/x-dendrogeo-module" defer></script>
 
-<script src="/src/bootstrap/app-runtime.js?v=e6841242" defer></script>
+<script src="/src/bootstrap/app-runtime.js?v=096ae20b" defer></script>
 </body>
 </html>

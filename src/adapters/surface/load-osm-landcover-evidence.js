@@ -10,6 +10,10 @@
   async function load(bbox,{cache,boundary,isWaterElement,waterBackup,overpassRequest,fetchImpl}){
     const pending=root.DG_SURFACE_OSM_PENDING,detailedAlreadyAttempted=pending?.boundary===boundary;
     if(detailedAlreadyAttempted)await pending.promise.catch(()=>false);
+    const failed=root.DG_SURFACE_OSM_FAILURE;
+    const f=failed?.bbox;
+    const coversFailedScope=f&&bbox.minLat<=f.minLat&&bbox.minLon<=f.minLon&&bbox.maxLat>=f.maxLat&&bbox.maxLon>=f.maxLon;
+    const fullQueryFailed=failed?.boundary===boundary&&Date.now()-failed.time<30000&&coversFailedScope;
     const coverage=cached(bbox);
     if(coverage?.complete===true)return coverage;
     const bounds=[bbox.minLat,bbox.minLon,bbox.maxLat,bbox.maxLon].join(","),old=cache.get(bounds);
@@ -22,8 +26,9 @@
        * still refine the 10 m preview. */
       const query=root.DG_OSM_SURFACE_QUERY?.build(bounds)||'[out:json][timeout:25];(nwr["natural"="water"]('+bounds+');nwr["waterway"="riverbank"]('+bounds+');nwr["leisure"="swimming_pool"]('+bounds+');nwr["landuse"~"reservoir|basin"]('+bounds+');nwr["building"]('+bounds+');nwr["building:part"]('+bounds+');way["highway"]('+bounds+');way["area:highway"]('+bounds+'););out geom;';
       if(typeof overpassRequest==="function"){
-        let data=await overpassRequest(query,"su+yol").catch(()=>null);
-        if((!Array.isArray(data?.elements)||data.remark)&&root.DG_LOAD_OSM_MAP_COVERAGE)data=await root.DG_LOAD_OSM_MAP_COVERAGE.load(bounds).catch(()=>null);
+        // A shared full-park failure already exhausted full and split recovery.
+        let data=fullQueryFailed?null:await overpassRequest(query,"su+yol").catch(()=>null);
+        if(!fullQueryFailed&&(!Array.isArray(data?.elements)||data.remark)&&root.DG_LOAD_OSM_MAP_COVERAGE)data=await root.DG_LOAD_OSM_MAP_COVERAGE.load(bounds).catch(()=>null);
         if(Array.isArray(data?.elements)&&!data.remark){const result={elements:mergeElements(root.DG_OSM_SURFACE_QUERY?[]:seedElements,data.elements),bbox,boundary,fetchedAt:new Date().toISOString(),complete:!!root.DG_OSM_SURFACE_QUERY};if(boundary===JSON.stringify(typeof PARK_POLY==="undefined"?null:PARK_POLY))root.DG_SURFACE_OSM=result;return result;}
         if(seedElements.length){const result={elements:seedElements,bbox,boundary,fetchedAt:coverage?.fetchedAt||new Date().toISOString(),source:coverage?.source||fallback?.source,complete:false};if(boundary===JSON.stringify(typeof PARK_POLY==="undefined"?null:PARK_POLY))root.DG_SURFACE_OSM=result;return result;}return null;
       }

@@ -16,10 +16,11 @@ function fixture(overrides={}){
  const elements={'v-map':map,surfacePendingTools:pending,dgPendingBaseSelect:base,baseLayerSelect:{value:'satellite'}};
  let busy=false;
  let landcover=overrides.landcover||null;
+ const outer=[[40,32],[40,32.01]];
  const deps={
   isBusy:()=>busy,setBusy:value=>{busy=value;},getLandcover:()=>landcover,
   ensureLulc:async()=>{calls.push(['ensure']);landcover=overrides.loadedLandcover||{analyze:args=>{calls.push(['analyze',args]);return Promise.resolve({classes:[]});}};},
-  getOuter:()=>[[40,32],[40,32.01]],getHoles:()=>[],parkAreaM2:()=>2500,
+  getOuter:()=>outer,getHoles:()=>[],parkAreaM2:()=>2500,
   getElement:id=>elements[id]||null,getButton:()=>button,getReport:()=>report,
   getReportRenderer:()=>((...args)=>calls.push(['render',...args])),
   getSensitivity:()=>({mount:async id=>calls.push(['mount',id]),state:{record:null}}),
@@ -84,4 +85,15 @@ test('busy, failed lazy load and missing park retain early-exit behavior',async(
  await noPark.ui.run();
  assert.equal(noPark.busy,false);
  assert.ok(noPark.calls.some(x=>x[0]==='toast'&&x[1]==='Önce park seç'));
+});
+
+test('first click locks controls during cold module download and continues automatically exactly once',async()=>{
+ let release,analyzes=0,loaded=null;
+ const f=fixture({deps:{getLandcover:()=>loaded,ensureLulc:()=>new Promise(resolve=>release=()=>{loaded={analyze:async()=>{analyzes++;return{};}};resolve();})}});
+ const pending=f.ui.run();assert.equal(f.busy,true);assert.equal(f.button.disabled,true);assert.equal(f.report.style.display,'block');
+ await f.ui.run();assert.equal(analyzes,0);release();await pending;
+ assert.equal(analyzes,1);assert.equal(f.busy,false);assert.equal(f.button.disabled,false);
+});
+test('synchronous engine failure restores button and allows retry without a stuck busy flag',async()=>{
+ const f=fixture({landcover:{analyze(){throw Error('sync failure');}}});await f.ui.run();assert.equal(f.busy,false);assert.equal(f.button.disabled,false);assert.match(f.report.innerHTML,/sync failure/);
 });

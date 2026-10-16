@@ -41,9 +41,9 @@ async function dgParkBoundaryFallback(lat,lon,radius){return DG_NOMINATIM_BOUNDA
 
 const DG_PARK_COVERAGE_FETCH=window.DG_PARK_COVERAGE_FETCH_APPLICATION.create({
   getParkPolygon:()=>PARK_POLY,
-  queryOsm:(query,label)=>overpassRequest(query,label),
+  queryOsm:(query,label,options)=>overpassRequest(query,label,options),
   queryFallback:window.DG_LOAD_OSM_MAP_COVERAGE?.load,
-  preferFallback:()=>[...OVERPASS_HEALTH.values()].some(health=>health.badUntil>Date.now())
+  preferFallback:()=>[...OVERPASS_HEALTH.values()].some(health=>Math.max(health.badUntil||0,health.degradedUntil||0)>Date.now())
 });
 
 function queryDetailedCoverage(){
@@ -88,6 +88,7 @@ async function dgQueryDetailedCoverage(){
   const {minLat,maxLat,minLon,maxLon}=coverageBbox;
 
   if(!json){
+    window.DG_SURFACE_OSM_FAILURE={boundary,bbox:coverageBbox,time:Date.now()};
     console.warn(
       "Detaylı yüzey sorgusu başarısız:",
       LAST_OVERPASS_ERROR
@@ -95,6 +96,7 @@ async function dgQueryDetailedCoverage(){
     return false;
   }
 
+  window.DG_SURFACE_OSM_FAILURE=null;
   IMP_RINGS=[];IMP_LINES=[];GRID_BLOCK_LINES=[];WATER_RINGS=[];WATER_LINES=[];
   window.DG_SURFACE_OSM=window.DG_COMMIT_PARK_COVERAGE_SNAPSHOT
     ?window.DG_COMMIT_PARK_COVERAGE_SNAPSHOT.commit({elements:json.elements,bbox:coverageBbox,pad,boundary:fetchedBoundary,fetchedAt:new Date().toISOString()})

@@ -18,10 +18,12 @@ window.DG_SURFACE_OBJECT_PICKER=(function(){
         if(!validFeature(feature))continue;
         for(const item of projected(feature,epsg,featureGeometry,project)){
           const polygon=item.geom,box=item.bounds||(item.bounds=bounds([polygon]));
-          if(point.x<box[0]||point.x>box[2]||point.y<box[1]||point.y>box[3])continue;
-          if(pointDistance([point.x,point.y],[polygon])<0)continue;
+          if(point.x<box[0]-8||point.x>box[2]+8||point.y<box[1]-8||point.y>box[3]+8)continue;
+          const distance=pointDistance([point.x,point.y],[polygon]);if(distance< -8)continue;
           const size=item.area??(item.area=area([polygon]));
-          if(!best||size<best.size)best={feature,size};
+          // Match live OSM hit tolerance for thin cached road polygons on touch screens.
+          const score=distance>=0?size/1e9:8+Math.abs(distance);
+          if(!best||score<best.score)best={feature,score};
         }
       }
       if(best)return{type:best.feature.type,geometry:best.feature.geometry,osmId:best.feature.osmId||"OSM"};

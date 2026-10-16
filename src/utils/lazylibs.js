@@ -322,12 +322,17 @@ function dgLoadScriptOrdered(src){
 function dgEnsureLulc(){
   if(window.DG_LANDCOVER)return Promise.resolve();
   if(!DG_LULC_PROMISE){
-    DG_LULC_PROMISE=DG_LULC_CHAIN.slice(DG_LULC_LOADED)
-      .reduce((z,src)=>z.then(()=>dgLoadScriptOrdered(src)).then(()=>{DG_LULC_LOADED++;}),Promise.resolve())
+    // Download a small lookahead concurrently; execute in the original order.
+    const remaining=DG_LULC_CHAIN.slice(DG_LULC_LOADED),preloads=new Map();
+    const preload=index=>{const src=remaining[index];if(!src||preloads.has(src))return;const link=document.createElement("link");link.rel="preload";link.as="script";link.href=dgRuntimeScriptUrl(src);document.head.appendChild(link);preloads.set(src,link);};
+    remaining.slice(0,8).forEach((_,index)=>preload(index));
+    DG_LULC_PROMISE=remaining
+      .reduce((z,src,index)=>z.then(()=>{preload(index+8);return dgLoadScriptOrdered(src);}).then(()=>{DG_LULC_LOADED++;preloads.get(src)?.remove();preloads.delete(src);}),Promise.resolve())
       .then(()=>{
         if(!window.DG_LANDCOVER)throw new Error("LULC zinciri yüklendi ama DG_LANDCOVER facade oluşmadı");
       })
-      .catch(err=>{DG_LULC_PROMISE=null;throw err;});
+      .catch(err=>{DG_LULC_PROMISE=null;throw err;})
+      .finally(()=>{for(const link of preloads.values())link.remove();});
   }
   return DG_LULC_PROMISE;
 }

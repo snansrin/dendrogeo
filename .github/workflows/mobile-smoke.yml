@@ -47,3 +47,4 @@ jobs:
           node scripts/ui-consistency-smoke.mjs
           node scripts/mobile-tools-language-smoke.mjs
           node scripts/measurement-save-smoke.mjs
+          node scripts/park-analysis-interaction-smoke.mjs

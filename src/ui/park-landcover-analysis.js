@@ -4,16 +4,8 @@
   function create(deps){
     async function run(){
       if(deps.isBusy())return deps.toast("Arazi örtüsü analizi zaten çalışıyor.","info","🛰️");
-      if(!deps.getLandcover()&&deps.ensureLulc){
-        deps.toast("🛰️ Arazi örtüsü modülü yükleniyor…","info");
-        try{await deps.ensureLulc();}
-        catch(err){return deps.toast(deps.cf("Arazi örtüsü modülü yüklenemedi: ")+((err&&err.message)||err),"err","🛰️");}
-      }
-      const landcover=deps.getLandcover();
-      if(!landcover||typeof landcover.analyze!=="function")return deps.toast("10 m arazi örtüsü modülü yüklenmedi.","err","🗺️");
       const outer=deps.getOuter();
       if(!outer||!outer.length)return deps.toast("Önce park seç","warn","🌳");
-
       deps.setBusy(true);
       const map=deps.getElement("v-map");
       map?.classList.add("surface-review-active");
@@ -29,9 +21,19 @@
           "10 m raster verisi park polygonu ile kesiştiriliyor. Bu işlem bağlantıya göre biraz sürebilir; sonuç tamamlanmadan rapor yazılmayacak."+
           "</div>";
       }
-      deps.toast("Arazi örtüsü analizi başladı. 10 m raster verisi okunuyor…","info","🛰️");
-      const parkArea=deps.parkAreaM2();
-      return landcover.analyze({outer,holes:deps.getHoles()||[],parkAreaM2:parkArea}).then(async result=>{
+      try{
+        if(!deps.getLandcover()&&deps.ensureLulc){
+          deps.toast("🛰️ Arazi örtüsü modülü yükleniyor…","info");
+          try{await deps.ensureLulc();}
+          catch(err){throw new Error(deps.cf("Arazi örtüsü modülü yüklenemedi: ")+((err&&err.message)||err));}
+        }
+        const landcover=deps.getLandcover();
+        if(!landcover||typeof landcover.analyze!=="function")throw new Error("10 m arazi örtüsü modülü yüklenmedi.");
+        if(outer!==deps.getOuter())return;
+        deps.toast("Arazi örtüsü analizi başladı. 10 m raster verisi okunuyor…","info","🛰️");
+        const parkArea=deps.parkAreaM2();
+        const result=await landcover.analyze({outer,holes:deps.getHoles()||[],parkAreaM2:parkArea});
+        if(outer!==deps.getOuter())return;
         const render=deps.getReportRenderer();if(render)render(rep,result,parkArea);
         const sensitivity=deps.getSensitivity();
         if(sensitivity&&typeof sensitivity.mount==="function"){
@@ -39,18 +41,19 @@
           catch(e){console.warn("DENDROGEO · hassasiyet paneli monte edilemedi:",e);deps.toast(deps.cf("Yüzey düzenleme açılamadı: ")+String(e.message||e),"err");}
         }
         deps.toast("✓ 10 m arazi örtüsü analizi tamamlandı (ESA WorldCover 2021 + çapraz IO LULC 2020).","ok","🗺️");
-      }).catch(err=>{
+      }catch(err){
+        if(outer!==deps.getOuter())return;
         console.error("DENDROGEO · Arazi örtüsü analizi:",err);
         if(rep){rep.style.display="block";rep.innerHTML="<b>❌ 10 m arazi örtüsü analizi tamamlanamadı.</b>"+
           "<div style='font-size:.74rem;color:var(--red);margin-top:7px'>"+deps.escape(err?.message||String(err))+"</div>"+
           "<div style='font-size:.68rem;color:var(--mut);margin-top:7px'>Geçersiz veya eksik sonuç rapora yazılmadı.</div>";}
         deps.toast(deps.cf("Arazi örtüsü analizi hatası: ")+(err?.message||String(err)),"err","🗺️");
-      }).finally(()=>{
+      }finally{
         deps.setBusy(false);
         if(pending)pending.style.display="none";
         if(!deps.hasSensitivityRecord())deps.getElement("v-map")?.classList.remove("surface-review-active");
         if(btn){btn.disabled=false;btn.innerHTML=btn.dataset.oldText||"🌿 Yüzey Örtüsü Analizi";btn.style.opacity="";btn.style.cursor="";}
-      });
+      }
     }
     return {run};
   }
