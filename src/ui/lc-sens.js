@@ -95,10 +95,11 @@ function dgSensEffective(c){
  return window.DG_CLASSIFY_EFFECTIVE_SURFACE_CELL.classify({cell:c,rawView:DG_SENS.rawView,record:DG_SENS.record,editing:DG_SENS.editing,hasWaterFootprint:dgSensHasWaterFootprint(),waterOutsideClass:dgSensWaterOutsideClass,classes:DG_SENS_CLASSES,types:window.DG_SURFACE_REVIEW.types,cellKey:dgSensCellKey,edgeAreaM2:window.DG_LC_VALIDATE.defaults.edgeAreaM2,predict:dgSensPredict});
 }
 function dgSensCandidates(cls){return(dgSensCells()||[]).filter(c=>dgSensEffective(c)===cls&&c.classKey!==cls).map(cell=>({cell,pred:cls,sp:DG_SENS.record?.profile?.cells?.[dgSensCellKey(cell)]}));}
-async function dgSensMount(hostId){
+async function dgSensMount(hostId,options={}){
  const host=document.getElementById(hostId||"lcSens"),cells=dgSensCells();if(!host||!cells?.length)return;
  dgSensBrushStop();dgSensClearCellPreviews();DG_SENS.rawView=false;const epoch=++DG_SENS.epoch;DG_SENS.status="";dgSensGuard(true);
- const rec=await dgSensLoadRecord();if(epoch!==DG_SENS.epoch)return;
+ const loaded=await dgSensLoadRecord();if(epoch!==DG_SENS.epoch)return;
+ const rec=options.freshAnalysis?window.DG_CREATE_SURFACE_REVIEW_RECORD.freshAnalysis(loaded,dgSensNewRecord()):loaded;
  const R=window.DG_SURFACE_REVIEW;
  const fingerprint=await R.fingerprint(cells,PARK_POLY,PARK_HOLES||[],{year:DG_LC_LAST.report?.year,engine:DG_LC_ENGINE_VERSION});if(epoch!==DG_SENS.epoch)return;
  const lifecycle=[window.DG_CLASSIFY_SURFACE_REVIEW_DATA_CHANGE,window.DG_RESET_SURFACE_REVIEW_DATA_CHANGE,window.DG_PREPARE_SURFACE_REVIEW_SESSION,window.DG_MOUNT_SURFACE_REVIEW_MAP_HOST,window.DG_FINISH_SURFACE_REVIEW_MOUNT];

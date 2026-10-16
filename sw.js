@@ -681,6 +681,8 @@ const CORE_ASSETS = [
     '/src/ui/park-boundary-layer.js',
     '/src/ui/park-candidate-select.js',
     '/src/ui/park-info-panel.js',
+    '/src/adapters/surface/read-accepted-park-surface.js',
+    '/src/ui/accepted-park-surface.js',
     '/src/ui/park-menu-ui.js',
     '/src/domain/parks/normalize-drawn-park-geometry.js',
     '/src/application/parks/draw-selected-park.js',

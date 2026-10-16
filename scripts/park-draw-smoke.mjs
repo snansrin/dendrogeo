@@ -5,9 +5,10 @@ import {resolve,extname} from 'node:path';
 import {loadChromium} from './lib/playwright-runtime.mjs';
 const root=resolve('.'),panel=readFileSync('src/ui/park-panel.js','utf8'),exports=readFileSync('src/ui/park-export.js','utf8');
 const draw=panel.slice(panel.indexOf('async function drawPark('),panel.indexOf('const DG_PARK_RESET_CONTROLLER=')),download=exports.slice(exports.indexOf('function downloadBlob('),exports.indexOf('function downloadGridGeoJSON('));
-const paths=['vendor/leaflet-1.9.4.js','src/domain/parks/normalize-drawn-park-geometry.js','src/application/parks/draw-selected-park.js','src/ui/present-drawn-park.js','src/ui/park-boundary-layer.js','src/ui/park-candidate-select.js','src/ui/park-info-panel.js','src/adapters/export/download-blob.js'];
+const paths=['vendor/leaflet-1.9.4.js','src/domain/parks/normalize-drawn-park-geometry.js','src/application/parks/draw-selected-park.js','src/ui/present-drawn-park.js','src/ui/park-boundary-layer.js','src/ui/park-candidate-select.js','src/ui/park-info-panel.js','src/ui/accepted-park-surface.js','src/adapters/export/download-blob.js'];
 const fixture='<!doctype html><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><link rel="stylesheet" href="/vendor/leaflet-1.9.4.css"><link rel="stylesheet" href="/css/style.css"><link rel="stylesheet" href="/css/park-panel.css"><style>body{margin:0}#map{height:450px}#parkInfo{padding:10px;box-sizing:border-box}</style><div id="map"></div><div id="parkInfo"></div>'+paths.map(p=>'<script src="/'+p+'"></script>').join('')+`<script>
 const map=L.map('map').setView([39.99,32.65],16),$=id=>document.getElementById(id),esc=s=>String(s).replace(/</g,'&lt;');
+const DG_ACCEPTED_PARK_SURFACE=DG_ACCEPTED_PARK_SURFACE_UI.create({load:async()=>null,getMap:()=>map,leaflet:L,escape:esc,translate:x=>x});
 let PARK_SELECTED_AREA_M2=null,PARK_POLY=null,PARK_HOLES=[],PARK_LAYER=null,PARK_CANDS=[],DG_PARK_DRAW_EPOCH=0,pendingCoverage=null;const messages=[];
 function clearPark(){if(PARK_LAYER)map.removeLayer(PARK_LAYER);PARK_LAYER=null;PARK_POLY=null;PARK_HOLES=[]}function clearGrid(){}
 function dgOnParkDrawn(park){return Promise.resolve({id:7,name:park.name})}function queryDetailedCoverage(){return pendingCoverage||Promise.resolve(true)}function parkAreaHa(){return 56.9}

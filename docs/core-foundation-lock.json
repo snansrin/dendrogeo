@@ -963,7 +963,9 @@
       "test/visitor-view-modules.test.mjs",
       "test/waypoint-navigation-modules.test.mjs",
       "test/world-park-comparison-workflows.test.mjs",
-      "test/world-render-modules.test.mjs"
+      "test/world-render-modules.test.mjs",
+      "src/adapters/surface/read-accepted-park-surface.js",
+      "src/ui/accepted-park-surface.js"
     ],
     "modular_shell_action_safeguards": [
       "index.html",
@@ -1962,7 +1964,9 @@
     "src/domain/surface/classify-effective-surface-cell.js": "43bb692b51b49b0a1750727af6a031130735a8e30423cb8bef41bca65c8b5e6a",
     "test/effective-surface-cell-domain.test.mjs": "beb44ed2ec17b70e0e026e623a6a0f94e2ddb55ac4189cd1ea3ebcb8ddbbb32c",
     "src/adapters/trees/update-measurement-if-current.js": "da2737f09eaa227e6bed109cc6162077ac3f28b54afeec640be7ab70b190a814",
-    "src/ui/toast-message-content.js": "3cd604b74561d5aaddb97f96e06e4db9472b1852dc2ae4391f0cccd60d8d1b5d"
+    "src/ui/toast-message-content.js": "3cd604b74561d5aaddb97f96e06e4db9472b1852dc2ae4391f0cccd60d8d1b5d",
+    "src/adapters/surface/read-accepted-park-surface.js": "682a286f82721c3c5357f693e4aeb9a56e8a4614300fd855b1488ad67a06dd73",
+    "src/ui/accepted-park-surface.js": "852fc9b603aa93c7a763447e81838b5b3c9368c51df48df02f7bf3f27fe2f487"
   },
   "authorized_modularizations": [
     {
@@ -8432,6 +8436,118 @@
           "path": "src/ui/park-invite-inbox.js",
           "previous_sha256": "6bfa6051546bc3f6e8f673a9e04c8b9dd561277547aecfc1e1fb57663873233b",
           "sha256": "43ba818b8e268129ed5f0425f30d342b36ff2f7b39161a20f2f3042409e0e4e1"
+        }
+      ]
+    },
+    {
+      "id": "shared-park-access-basemap-2026-10-16",
+      "date": "2026-10-16",
+      "scope": "User-authorized modularization: add self-only park collaboration departure with confirmed RPC, expose only trusted accepted cartographic snapshots through a read-only public endpoint, display saved park maps separately from fresh raster analysis, bound initial Overpass attempts before independent fallback, and enable native imagery levels through 23 with missing-tile fallback. Preserve scientific calculations, immutable accepted snapshots, user records and owner access boundaries; update the former level-19 imagery regression expectation to the newly authorized level.",
+      "audit_chain": "sha256-v1",
+      "added_protected_files": [
+        "src/adapters/surface/read-accepted-park-surface.js",
+        "src/ui/accepted-park-surface.js"
+      ],
+      "files": [
+        {
+          "path": ".github/workflows/mobile-smoke.yml",
+          "previous_sha256": "b63f7d024118310b34227f7b72826871e45c3993bf8280fb25908802f69afd59",
+          "sha256": "372ccc1e7af37601e20c9e752a0016e3eafe6df035aae74bfccbffbbf25ad45c"
+        },
+        {
+          "path": "index.html",
+          "previous_sha256": "87bbfc1d9aae08fce8625a943144f4f40a43b1b2860397d217ca3299e34b7240",
+          "sha256": "d47daabcef79c34ab3e45f45aa356ca8d7d4210537d58e9a0415969e5f6ca870"
+        },
+        {
+          "path": "partials/head.html",
+          "previous_sha256": "e25fbecd39fefd6d9adb3dd04589657d1acc9fbcf804696dc31bc48bec7e19ab",
+          "sha256": "9194e21c23f9d5af3116f767944b31dc74db4045b6e1d6d9bf9cd874fcf192b1"
+        },
+        {
+          "path": "scripts/check-phone.mjs",
+          "previous_sha256": "a6d6ba1a7b96cd6ecd1ed0f8b753b9a50f280cf2ba6548cbb13da9a981fd2f33",
+          "sha256": "0dac8b576863ec9ab45bfc24b9741aee3eadaddedf937f99e12e710310205e0e"
+        },
+        {
+          "path": "scripts/park-draw-smoke.mjs",
+          "previous_sha256": "6131752c8dccdc79068bea840cb25943dcac00c908e20ac505f9d5a5bacc71af",
+          "sha256": "4c9a29e048e7710f2a2ab028a79ef1569656ceb848d59e77eb36be07a4107416"
+        },
+        {
+          "path": "src/adapters/map/create-base-map-layer.js",
+          "previous_sha256": "ccf410d1a78eea7a7a062ce86b69dad57d774cfa3c922822df6d308392c640f2",
+          "sha256": "910dfec8931245200e759b152b432e8a457441a32fbfbc671fdc72ad2d516830"
+        },
+        {
+          "path": "src/domain/map/resolve-base-map-layer.js",
+          "previous_sha256": "4b9498394fb62cdd1ab71ea5e461b1d85b5a5c77e5d5afcd281c430e522cc92f",
+          "sha256": "782684084be387c4fb17220fe624f9dd3b9ffc4faf49f5961cde165a4e9eb56b"
+        },
+        {
+          "path": "src/domain/surface/create-surface-review-record.js",
+          "previous_sha256": "486b1ef47adaaa121a19ef5f817d90c5399e5e3f2557c9f6e395f053bf77a930",
+          "sha256": "4035ffcb8a228e4499890d02b7b928f229a5fe23bec64dcdde2f851a6c91e573"
+        },
+        {
+          "path": "src/services/measure.js",
+          "previous_sha256": "b3cc898c6614282edd4bb85682ef318aafef57b8a3711ccabc31ba517b1b8e6e",
+          "sha256": "51bc964b3b5b785aab5994d13ec6903696d6769598a19bab1bf708f99640846b"
+        },
+        {
+          "path": "src/services/park-invites.js",
+          "previous_sha256": "d2b55d73d82c90cc3ecf6aade1c96f80d69684fc41f66e3608b9745f1c79ff7b",
+          "sha256": "7e9ea0aed696581924d2bbbc3b9330ec901328e18fcb32d0444897b238d6b92b"
+        },
+        {
+          "path": "src/services/park-query.js",
+          "previous_sha256": "f5dadd4817353fd1af0be075e5341c1bab052285ea2142289af96f242e580009",
+          "sha256": "f7f9aa68b9c64adace0c1569fe31eb3e0b7f36b2107b16f9061f0ccf05166010"
+        },
+        {
+          "path": "src/ui/lc-sens.js",
+          "previous_sha256": "f3e4037db1c24144ed24ebd0ceec5d7b3d6cf9bf29586a189a55c61429ce436c",
+          "sha256": "1466e0e9e4bb93bb20ff9b8b8fe449f94c5aecae9515b6d77bd1c65f801059ac"
+        },
+        {
+          "path": "src/ui/measurement-project-card.js",
+          "previous_sha256": "7bf2e9b449ade4139218ce4b97c3f32ca4396dbe7fc57562a1b737d09b642300",
+          "sha256": "32240c1e2fc05122e8ee5b81e7514576fa931fd96a934cc2e11ab83f6163bb21"
+        },
+        {
+          "path": "src/ui/park-export.js",
+          "previous_sha256": "66ae59513b6cb06b8720867b902a09907bdb979ea7561e7bbeeb0cc2dbb7b6a7",
+          "sha256": "ef08e973fcfb03ac190b4fd3023394682729462ad979e9155ac1bf8bef72fba9"
+        },
+        {
+          "path": "src/ui/park-info-panel.js",
+          "previous_sha256": "70728fe37410f2c1d298a8c9ad2d2f62d040770fe9f4d6e7ef651b070033e9f8",
+          "sha256": "ba90b0ba0f62a8ce24b25ac26b285a382b4a4829e1b0ec793aef2c1c5c49aaaa"
+        },
+        {
+          "path": "src/ui/park-panel.js",
+          "previous_sha256": "c4f3194e2558680320d22c8b856ec42e508f6d1d1b55e5c2a72a3b94bddad062",
+          "sha256": "33d093d085ea8a6365d5c58eeebbeae1c074963ac4f2e5596b2a8e6c254105e7"
+        },
+        {
+          "path": "sw.js",
+          "previous_sha256": "96d4615b4de5f4c5bd76bc305b20f53df911aaa695f829c5f87da28a3d5c609d",
+          "sha256": "9a6f0067048deb3181b4109e8367b7747f8891a985a13cf6fe655de06b8701fa"
+        },
+        {
+          "path": "test/base-map-layer-modules.test.mjs",
+          "previous_sha256": "132ae87b14aa45aa02f73273ee3bcd12724afd7f53ac80b444745da41595aaf8",
+          "sha256": "0e113a1eaf42b95a4dd3111fe3ee5698430dcd453bf587fd2cce9740b9142e52"
+        },
+        {
+          "path": "test/dbh-qa.test.mjs",
+          "previous_sha256": "724c9c90585cc276b92ab42ae2f9e72261d8850d935ae83a4b5dc0bb88131fd8",
+          "sha256": "bfcbed79b10b002f82979052a6fb99185fe9b2c699523a6c200ec630407bdb71"
+        },
+        {
+          "path": "test/form-qa.test.mjs",
+          "previous_sha256": "75941e8c6a6167bd31dc59ab64576a648abeee93c3233d0d1944f0f5d8ccb25f",
+          "sha256": "6ecfcecb5e1a4fa9c644696d8df41b1117781efcfd25c9e1166c8db2700121b0"
         }
       ]
     }

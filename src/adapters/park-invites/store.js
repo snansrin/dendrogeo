@@ -10,7 +10,8 @@
    ]),
    respond:(id,accept)=>getClient().rpc("dg_invite_respond",{p_invite:id,p_accept:!!accept}),
    send:(parkId,email,note)=>getClient().rpc("dg_invite_send",{p_park:parkId,p_email:email,p_note:note}),
-   revoke:(parkId,target,kind)=>getClient().rpc("dg_invite_revoke",{p_park:parkId,p_target:target,p_kind:kind})
+   revoke:(parkId,target,kind)=>getClient().rpc("dg_invite_revoke",{p_park:parkId,p_target:target,p_kind:kind}),
+   leave:parkId=>getClient().rpc("dg_leave_park",{p_park:parkId})
   });
  }
  root.DG_PARK_INVITE_STORE=Object.freeze({create});

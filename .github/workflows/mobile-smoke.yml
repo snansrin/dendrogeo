@@ -44,6 +44,7 @@ jobs:
         run: |
           node scripts/profile-smoke.mjs
           node scripts/projects-workspace-smoke.mjs
+          node scripts/shared-park-surface-smoke.mjs
           node scripts/appearance-smoke.mjs
           node scripts/ui-consistency-smoke.mjs
           node scripts/mobile-tools-language-smoke.mjs

@@ -1,5 +1,25 @@
 "use strict";
 
 window.DG_CREATE_BASE_MAP_LAYER={
-  create({leaflet,map,configuration}){const layer=leaflet.tileLayer(configuration.url,{attribution:configuration.attribution,maxZoom:configuration.maxZoom,maxNativeZoom:configuration.maxNativeZoom,keepBuffer:configuration.keepBuffer,updateWhenIdle:configuration.updateWhenIdle,updateWhenZooming:configuration.updateWhenZooming});layer._dgBase=configuration.type;layer.addTo(map);return layer;}
+  create({leaflet,map,configuration}){
+   const layer=leaflet.tileLayer(configuration.url,{attribution:configuration.attribution,maxZoom:configuration.maxZoom,maxNativeZoom:configuration.maxNativeZoom,keepBuffer:configuration.keepBuffer,updateWhenIdle:configuration.updateWhenIdle,updateWhenZooming:configuration.updateWhenZooming});
+   layer._dgBase=configuration.type;
+   // Imagery coverage varies geographically. Missing high-level tiles fall back
+   // through native levels; a stale tile error cannot keep reducing the level.
+   if(configuration.type==="sat"){
+    const retryCoverage=()=>{
+     if(layer.options.maxNativeZoom>=configuration.maxNativeZoom)return;
+     layer.options.maxNativeZoom=configuration.maxNativeZoom;layer.redraw();
+    };
+    map.on?.("moveend",retryCoverage);
+    layer.on("remove",()=>map.off?.("moveend",retryCoverage));
+    layer.on("tileerror",event=>{
+    const zoom=event.coords?.z;
+    if(!Number.isInteger(zoom)||zoom<=19||zoom>layer.options.maxNativeZoom||(Number.isFinite(layer._tileZoom)&&zoom!==layer._tileZoom))return;
+    layer.options.maxNativeZoom=zoom-1;
+    layer.redraw();
+    });
+   }
+   layer.addTo(map);return layer;
+  }
 };

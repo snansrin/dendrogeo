@@ -128,3 +128,15 @@ function dgInvitesNote(msg){
  const box=$("dgInvList");
   window.DG_PARK_COLLABORATION_PANEL_UI.prependNotice(box,msg,esc);
 }
+
+async function dgParkLeaveProject(projectId){
+ const project=(typeof PROJ_LIST!=="undefined"?PROJ_LIST:[]).find(row=>row.shared&&Number(row.id)===Number(projectId));
+ if(!project?.park_id)return;
+ return window.DG_MANAGE_PARK_INVITES.leave(Number(project.park_id),{
+  authenticated:()=>!!USER,store:DG_PARK_INVITE_MODULE_STORE,
+  confirm:()=>window.confirm(_tinv("Bu parkın ortak çalışmasından ayrılmak istiyor musunuz? Parktaki tüm paylaşılan projelere erişiminiz kapanır. Kendi ölçümleriniz silinmez; yeniden katılmak için yeni davet gerekir.")),
+  onUnauthenticated:()=>toast(_tinv("Önce giriş yap."),"err"),
+  onFailure:error=>toast(_tinv("Ortak çalışmadan ayrılamadınız: ")+String(error.message||error),"err"),
+  onSuccess:async()=>{dgInviteStateUpdate({mine:null});await loadProjects();await dgInvitesLoadMine();await dgCollabLoad();toast(_tinv("Ortak çalışmadan ayrıldınız. Ölçümleriniz korunuyor."),"ok");}
+ });
+}

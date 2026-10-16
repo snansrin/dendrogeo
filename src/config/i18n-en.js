@@ -549,6 +549,13 @@ const DG_I18N_EN={
 "Onayladığın kayıt hemen görünmüyorsa bu düğmeye bas.":"Press this button if a record you approved doesn't appear right away.",
 "🟢 Noktalara dokunun → onaylı ölçüm bilgisi + varsa fotoğraf.":"🟢 Tap points → approved measurement info + photo if available.",
 /* === projeler === */
+"Ortak çalışmadan ayrıl":"Leave shared work",
+"Bu parkın ortak çalışmasından ayrılmak istiyor musunuz? Parktaki tüm paylaşılan projelere erişiminiz kapanır. Kendi ölçümleriniz silinmez; yeniden katılmak için yeni davet gerekir.":"Leave this park collaboration? Access to all shared projects in this park will end. Your measurements are preserved; rejoining requires a new invitation.",
+"Ortak çalışmadan ayrılamadınız: ":"Could not leave shared work: ",
+"Ortak çalışmadan ayrıldınız. Ölçümleriniz korunuyor.":"You have left shared work. Your measurements are preserved.",
+"Kayıtlı park haritası":"Saved park map",
+"Yetkili incelemesiyle kaydedilmiş yüzey haritası. Yeni analiz ayrı bir önizleme oluşturur.":"Surface map saved after administrator review. A new analysis creates a separate preview.",
+"Kayıtlı park haritası yüklenemedi. Yeni analiz başlatabilirsiniz.":"The saved park map could not be loaded. You can start a new analysis.",
 "Projelerim":"My projects",
 "ÇALIŞMA ALANI":"WORKSPACE",
 "Proje bilgileri ve işlemler":"Project details and actions",

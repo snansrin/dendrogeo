@@ -113,7 +113,7 @@ async function runLandCoverAnalysis(){
 
 const dgParkLandCoverUi=window.DG_PARK_LANDCOVER_UI.create({
   isBusy:()=>window._dgLandCoverBusy,
-  setBusy:value=>{window._dgLandCoverBusy=value;},
+  setBusy:value=>{window._dgLandCoverBusy=value;if(value)DG_ACCEPTED_PARK_SURFACE.clear();},
   getLandcover:()=>window.DG_LANDCOVER,
   ensureLulc:typeof dgEnsureLulc==="function"?()=>dgEnsureLulc():null,
   getOuter:()=>PARK_POLY,
@@ -123,7 +123,7 @@ const dgParkLandCoverUi=window.DG_PARK_LANDCOVER_UI.create({
   getButton:()=>$("landCoverBtn"),
   getReport:()=>$("landCoverReport"),
   getReportRenderer:()=>window.DG_LANDCOVER_RENDER_REPORT,
-  getSensitivity:()=>window.DG_LC_SENS,
+  getSensitivity:()=>window.DG_LC_SENS?{mount:host=>window.DG_LC_SENS.mount(host,{freshAnalysis:true})}:null,
   hasSensitivityRecord:()=>Boolean(window.DG_LC_SENS?.state?.record),
   toast:(...args)=>toast(...args),
   cf:value=>dgCf(value),

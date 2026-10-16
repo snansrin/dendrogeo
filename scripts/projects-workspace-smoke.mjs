@@ -18,7 +18,7 @@ try{for(const width of [360,390,430,1280]){
    {id:2,name:'Uzun proje adı ile ortak saha çalışması',shared:true,park_id:36,parks:{name:'Gençlik Parkı'},city:'Ankara'}];
   window.__projectActions=[];
   DG_MEASUREMENT_PROJECT_DIRECTORY_UI.render({projects,element:id=>document.getElementById(id),escape:esc,optionLabel:p=>p.name,restore(){},renderCard:dgProjectCard,editing:false,
-   actions:Object.fromEntries(['openMeasure','edit','publish','delete'].map(action=>[action,id=>window.__projectActions.push([action,id])]))});
+   actions:Object.fromEntries(['openMeasure','edit','publish','delete','leave'].map(action=>[action,id=>window.__projectActions.push([action,id])]))});
  });
  const own=page.locator('#projOwnList .project-card'),shared=page.locator('#projSharedList .project-card');
  assert.equal(await own.locator('[data-project-action="edit"]').isVisible(),false);
@@ -44,6 +44,8 @@ try{for(const width of [360,390,430,1280]){
  await own.locator('summary').click();await own.locator('[data-project-action="edit"]').click();
  assert.deepEqual(await page.evaluate(()=>window.__projectActions),[['openMeasure',1],['edit',1]]);
  assert.equal(await shared.locator('[data-project-action="delete"],[data-project-action="edit"],[data-project-action="publish"]').count(),0);
+ await shared.locator('summary').click();await shared.locator('[data-project-action="leave"]').click();
+ assert.deepEqual(await page.evaluate(()=>window.__projectActions.at(-1)),['leave',2]);
  await page.evaluate(()=>document.getElementById('toastWrap')?.replaceChildren());
  await page.locator('#v-projects').screenshot({path:join(out,engine.name()+'-'+width+'.png')});
  assert.deepEqual(errors,[]);console.log(JSON.stringify({engine:engine.name(),width,bilingual:true,themes:true,disclosureKeyboard:true,delegatedActions:true,sharedPermissions:true}));await page.close();

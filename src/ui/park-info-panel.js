@@ -132,6 +132,7 @@
      * (park-export.js) buraya lc-sens'i monte eder — rapor barlarının
      * hemen altında sınıf başına hassasiyet kaydırıcıları + uydu görüntüsü
      * üzerinde aday işaretleme + tek dokunuşla kalıcı onay. */
+    `<div id="acceptedParkSurface" class="dg-png-result" hidden></div>`+
     `<div id="lcSens" class="dg-png-result" style="display:none"></div>`+
     `<div id="gridSummary" class="dg-png-result" style="display:none"></div>`
   );

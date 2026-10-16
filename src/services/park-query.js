@@ -11,7 +11,7 @@
 ========================================================= */
 
 const DG_PARK_CANDIDATE_SEARCH=window.DG_PARK_CANDIDATE_SEARCH_APPLICATION.create({
-  queryOsm:query=>overpassRequest(query,"park"),
+  queryOsm:query=>overpassRequest(query,"park",{maxAttempts:1}),
   boundaryFallback:(lat,lon,radius)=>dgParkBoundaryFallback(lat,lon,radius),
   extractRings:element=>extractRings(element),
   areaOf:rings=>polyArea(rings),

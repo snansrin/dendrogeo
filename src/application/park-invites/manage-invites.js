@@ -19,5 +19,15 @@
   ports.onSuccess(kind);
   ports.onComplete();
  }
- root.DG_MANAGE_PARK_INVITES=Object.freeze({respond,send,revoke});
+ const leaving=new Set();
+ async function leave(parkId,ports){
+  if(!ports.authenticated())return ports.onUnauthenticated();
+  if(!Number.isSafeInteger(parkId)||parkId<=0||leaving.has(parkId))return;
+  if(!ports.confirm())return;
+  leaving.add(parkId);
+  try{const{error}=await ports.store.leave(parkId);if(error)throw error;await ports.onSuccess();}
+  catch(error){ports.onFailure(error);}
+  finally{leaving.delete(parkId);}
+ }
+ root.DG_MANAGE_PARK_INVITES=Object.freeze({respond,send,revoke,leave});
 })(window);
