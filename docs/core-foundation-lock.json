@@ -8789,7 +8789,7 @@
     {
       "id": "landing-dark-resource-icon-regression-2026-10-16",
       "date": "2026-10-16",
-      "scope": "User-authorized visual regression coverage for theme-aware landing resource icons and tree-height label placement.",
+      "scope": "User-authorized modularization: add theme-aware landing resource icon and tree-height label placement regression coverage.",
       "audit_chain": "sha256-v1",
       "added_protected_files": [],
       "files": [

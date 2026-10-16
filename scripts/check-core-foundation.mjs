@@ -6,7 +6,7 @@ import {fileURLToPath} from 'node:url';
 
 const ROOT=join(dirname(fileURLToPath(import.meta.url)),'..');
 const MANIFEST_PATH=join(ROOT,'docs/core-foundation-lock.json');
-const MANIFEST_SHA256="a24044bfb73412f4153ebd42e8ffcc135eb05b9961ff83d381f82fff1b36cf0f";
+const MANIFEST_SHA256="97bd437d197fe299fbd9fe8bd51f31592ff8779040ae5bb17f05cab6a34e5bb8";
 const EXPECTED_BASELINE='867c7566645b43cf7a5a7caf56bac6c44c39ef79';
 const EXPECTED_POLICY='FROZEN_EXISTING_FILES_ADD_ONLY';
 const hash=bytes=>createHash('sha256').update(bytes).digest('hex');
