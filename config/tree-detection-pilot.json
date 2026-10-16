@@ -5,7 +5,11 @@
   "modelId": "tree-detection-fuytu/4",
   "task": "object-detection",
   "modelFamilyReported": "RF-DETR Nano",
-  "labelsReported": ["Tree", "objects-tree", "tree-top"],
+  "labelsReported": [
+    "Tree",
+    "objects-tree",
+    "tree-top"
+  ],
   "capabilities": {
     "treeCandidates": true,
     "speciesIdentification": false,
@@ -23,5 +27,12 @@
   "datasetLicenseReported": "CC BY 4.0",
   "weightsAndServiceTerms": "Verify deployment permissions, plan quota and model-version metrics before production",
   "imageryPolicy": "Use separately licensed georeferenced overhead imagery; map display zoom is not a ground-resolution measurement",
-  "productionEnabled": false
+  "productionEnabled": false,
+  "livePreview": {
+    "enabled": true,
+    "route": "Canlı Harita → Ağaç Algılama",
+    "scope": "Single selected image; unvalidated box candidates only",
+    "acceptedDataWrites": false,
+    "realInferenceVerified": false
+  }
 }

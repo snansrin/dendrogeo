@@ -965,7 +965,12 @@
       "test/world-park-comparison-workflows.test.mjs",
       "test/world-render-modules.test.mjs",
       "src/adapters/surface/read-accepted-park-surface.js",
-      "src/ui/accepted-park-surface.js"
+      "src/ui/accepted-park-surface.js",
+      "src/domain/trees/tree-detection-results.js",
+      "src/application/trees/detect-tree-candidates.js",
+      "src/adapters/trees/tree-detection-client.js",
+      "src/ui/tree-detection-panel.js",
+      "src/bootstrap/tree-detection-controller.js"
     ],
     "modular_shell_action_safeguards": [
       "index.html",
@@ -1966,7 +1971,12 @@
     "src/adapters/trees/update-measurement-if-current.js": "da2737f09eaa227e6bed109cc6162077ac3f28b54afeec640be7ab70b190a814",
     "src/ui/toast-message-content.js": "3cd604b74561d5aaddb97f96e06e4db9472b1852dc2ae4391f0cccd60d8d1b5d",
     "src/adapters/surface/read-accepted-park-surface.js": "682a286f82721c3c5357f693e4aeb9a56e8a4614300fd855b1488ad67a06dd73",
-    "src/ui/accepted-park-surface.js": "852fc9b603aa93c7a763447e81838b5b3c9368c51df48df02f7bf3f27fe2f487"
+    "src/ui/accepted-park-surface.js": "852fc9b603aa93c7a763447e81838b5b3c9368c51df48df02f7bf3f27fe2f487",
+    "src/domain/trees/tree-detection-results.js": "fe5c4dfa463b2121961837cc142aad220879378c907b3d298e36c90a3ed9dfcd",
+    "src/application/trees/detect-tree-candidates.js": "1e710c400ec0d3f6c45364aefcc0a978c8c726d9477d4a3a81c3c215c449a6e6",
+    "src/adapters/trees/tree-detection-client.js": "248f2330a2bc74e1b21e833fb1412a486f23e1c1c71099997125d8a76243725b",
+    "src/ui/tree-detection-panel.js": "9e8466290af59d683459c7ae00d718558a7aaf584384a6c40b525d31960db562",
+    "src/bootstrap/tree-detection-controller.js": "2c12c4cd9cd2e6c7b070b621dad80dfbc65a5cee16d489c61f54ff3d34241ca1"
   },
   "authorized_modularizations": [
     {
@@ -8576,6 +8586,61 @@
           "path": "test/base-map-layer-modules.test.mjs",
           "previous_sha256": "0e113a1eaf42b95a4dd3111fe3ee5698430dcd453bf587fd2cce9740b9142e52",
           "sha256": "fc690f0910c830e32ea3f1515bb2d0317e700b562bfea7d34303d41b877f8297"
+        }
+      ]
+    },
+    {
+      "id": "live-tree-detection-ui-2026-10-16",
+      "date": "2026-10-16",
+      "scope": "User-authorized modularization: add isolated, opt-in image tree candidate detection with a fixed model and user-authenticated server proxy. Keep API secrets server-only. Share the pure offline/live candidate normalizer; separate application cancellation, adapters, presentation and composition. Preserve raw measurements, scientific calculations, existing map tools, accepted surface snapshots and reports. Add mobile and WebKit regressions.",
+      "audit_chain": "sha256-v1",
+      "added_protected_files": [
+        "src/domain/trees/tree-detection-results.js",
+        "src/application/trees/detect-tree-candidates.js",
+        "src/adapters/trees/tree-detection-client.js",
+        "src/ui/tree-detection-panel.js",
+        "src/bootstrap/tree-detection-controller.js"
+      ],
+      "files": [
+        {
+          "path": "src/ui/tree-detection-panel.js",
+          "previous_sha256": "9e8466290af59d683459c7ae00d718558a7aaf584384a6c40b525d31960db562",
+          "sha256": "3077cd005a8148b33946865ef4d5f0517851aa17ab7f347ba0f9ba8a5466ab45"
+        },
+        {
+          "path": "src/bootstrap/tree-detection-controller.js",
+          "previous_sha256": "2c12c4cd9cd2e6c7b070b621dad80dfbc65a5cee16d489c61f54ff3d34241ca1",
+          "sha256": "2c8ca8f5b0c6088434ca4a6938c75703f4275ebb06fdd462b971a04ffa1d3724"
+        },
+        {
+          "path": ".github/workflows/mobile-smoke.yml",
+          "previous_sha256": "372ccc1e7af37601e20c9e752a0016e3eafe6df035aae74bfccbffbbf25ad45c",
+          "sha256": "638b936cb2682b13a4aca1d92d615c0dfd2f1166fd31ea95cf57f8ac23982d7b"
+        },
+        {
+          "path": "index.html",
+          "previous_sha256": "5677e98d3b05b03aee3a0bcddfc705e585b802700301c51fd9811ca03f5e3116",
+          "sha256": "426de690217f7cd5b75710245c54ec0d13df1cc2f879a96525dcc77a315ee1b4"
+        },
+        {
+          "path": "partials/head.html",
+          "previous_sha256": "9194e21c23f9d5af3116f767944b31dc74db4045b6e1d6d9bf9cd874fcf192b1",
+          "sha256": "97bbd64bbf3e7f46febced155adef2ae03d98af6170815bc53d12fd49b0e616a"
+        },
+        {
+          "path": "partials/shell.html",
+          "previous_sha256": "b8e4d8848ce23e16b022fb5a8955f045f6112cc3c117be0b66c701524a339e7e",
+          "sha256": "e4ad4299c903ee78331ee0faa432d10cdbfe3fb7e53f4b162ac5d3d970f924bd"
+        },
+        {
+          "path": "scripts/check-phone.mjs",
+          "previous_sha256": "0dac8b576863ec9ab45bfc24b9741aee3eadaddedf937f99e12e710310205e0e",
+          "sha256": "7323fd1f9a71a82c16c36cfa906bae319d2cb9157eba0b92009f53e25c1fd7d1"
+        },
+        {
+          "path": "sw.js",
+          "previous_sha256": "9a6f0067048deb3181b4109e8367b7747f8891a985a13cf6fe655de06b8701fa",
+          "sha256": "3ff94235eef86091c9f7833f007c92ef648ae869cf7cc663f54a63d42d032f2f"
         }
       ]
     }

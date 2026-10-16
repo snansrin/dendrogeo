@@ -257,7 +257,7 @@
 <script src="src/utils/truncation.js?v=d9710c30" type="application/x-dendrogeo-module" defer></script>
 <!-- Faz 7: geotiff (317 KB) ve chart.js (208 KB) artık SENKRON yüklenmiyor;
      src/utils/lazylibs.js ihtiyaç anında enjekte eder (LULC analizi / panel grafiği). -->
-<script id="dgRuntimeBuild" type="application/json">"998cbb93dabd39df"</script>
+<script id="dgRuntimeBuild" type="application/json">"dce161a5122874f0"</script>
 <!-- Verified fallback OSM water geometry, independent of the lazy raster engine. -->
 <script src="src/adapters/parks/fetch-nominatim-osm-way.js?v=9f2730dd" type="application/x-dendrogeo-module" defer></script>
 <script src="src/services/osm-water-backup.js?v=4c9fbc03" type="application/x-dendrogeo-module" defer></script>
@@ -916,6 +916,11 @@
 <script src="src/application/parks/draw-selected-park.js?v=74d44e87" type="application/x-dendrogeo-module" defer></script>
 <script src="src/ui/present-drawn-park.js?v=8c260714" type="application/x-dendrogeo-module" defer></script>
 <script src="src/ui/park-panel.js?v=b7ffdf32" type="application/x-dendrogeo-module" defer></script>
+<script src="src/domain/trees/tree-detection-results.js?v=7421d671" type="application/x-dendrogeo-module" defer></script>
+<script src="src/application/trees/detect-tree-candidates.js?v=f8cddd8b" type="application/x-dendrogeo-module" defer></script>
+<script src="src/adapters/trees/tree-detection-client.js?v=5e94555e" type="application/x-dendrogeo-module" defer></script>
+<script src="src/ui/tree-detection-panel.js?v=5fa764d2" type="application/x-dendrogeo-module" defer></script>
+<script src="src/bootstrap/tree-detection-controller.js?v=2c9dca06" type="application/x-dendrogeo-module" defer></script>
 <script src="src/ui/park-image-geometry.js?v=2d170f55" type="application/x-dendrogeo-module" defer></script>
 <script src="src/ui/park-export-layout.js?v=9a9ae427" type="application/x-dendrogeo-module" defer></script>
 <script src="src/domain/parks/park-export-formats.js?v=c2298046" type="application/x-dendrogeo-module" defer></script>
@@ -945,6 +950,7 @@
 <script src="src/application/dashboard/load-shell-view-data.js?v=68e471a7" type="application/x-dendrogeo-module" defer></script>
 <script src="src/services/dash.js?v=90f8846a" type="application/x-dendrogeo-module" defer></script>
 <link rel="stylesheet" href="css/park-panel.css?v=2a259f4a">
+<link rel="stylesheet" href="css/tree-detection.css?v=865aa93a">
 <!-- TASARIM SİSTEMİ (2026-09-27, 2. deneme): ui-standard.css geri BAĞLANDI
      ama ARTIK eleman seviyesi kuralları yalnız .dg-page (alt sayfalar) altında
      geçerli; kabuk (body.dg-app) yalnız sınıf-bazlı bileşenleri ve sekme
@@ -1453,6 +1459,7 @@
 <div id="surfaceBrushTools" aria-live="polite"></div>
 </div>
 <div id="surfacePendingTools" class="dg-sens-map-tools" style="display:none"><label for="dgPendingBaseSelect">Harita</label><select id="dgPendingBaseSelect" data-dg-map-action="base-layer"><option value="osm">Sokak</option><option value="sat">Uydu</option><option value="topo">Topoğrafik</option></select><button class="dg-png-btn ghost sm" disabled>📍 Yeni konum</button><span class="measure-help" role="status">⏳ Yüzey analizi hazırlanıyor…</span></div>
+<details id="treeDetectionPanel" class="dg-tree-panel notranslate" translate="no"><summary><span data-tree-title>🌳 Ağaç Algılama</span></summary></details>
 <div id="surfaceMapWorkspace" class="dg-editor-workspace"><div id="surfaceMapTools"></div><div id="map" class="notranslate" translate="no"></div></div>
 <div id="parkInfo" class="card" style="display:none;margin-top:12px;border-left:4px solid var(--blue)"></div><p style="color:var(--mut);font-size:.8rem;margin-top:8px">🟢 Noktalara dokunun → onaylı ölçüm bilgisi + varsa fotoğraf.</p><div id="liveAnalysis" style="margin-top:18px"></div></div>
 
@@ -1911,6 +1918,6 @@
 <script src="src/bootstrap/gis-export.js?v=31cdf97c" type="application/x-dendrogeo-module" defer></script>
 <script src="src/ui/gis-export.js?v=85048551" type="application/x-dendrogeo-module" defer></script>
 
-<script src="/src/bootstrap/app-runtime.js?v=f7592c07" defer></script>
+<script src="/src/bootstrap/app-runtime.js?v=d674186a" defer></script>
 </body>
 </html>

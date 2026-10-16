@@ -23,11 +23,11 @@ Model ağaç adayı kutuları için pilot adaydır. Sayfada örnek bölütleme m
 | 2 · Model incelemesi | Kamusal model bilgileri sabitlendi; yetenek dosyası `config/tree-detection-pilot.json` | Sürüm grafikleri, girdi boyutu/normalizasyonu, çıktı koordinatları, test ayrımı ve etiket anlamları doğrulanır. |
 | 3 · Bağımsız ilk prototip | Ağ kullanmayan Roboflow JSON okuyucu ve aday süzme/tek görüntü tekrar eleme prototipi hazır | Gerçek model çıktısı + özgün görüntü metadata'sı ile çalıştırılır; yeniden boyutlandırılmış/letterbox koordinatları düzeltilmeden kabul edilmez. Çıktı yalnız doğrulanmamış aday JSON'udur. |
 | 4 · Görüntü girdisi | Canlı uydu altlığı görüntüleme içindir | İşlemeye izinli, çekim tarihi/CRS/GSD/jeoreferansı bilinen üstten ortofoto sağlanır. Ekran yakınlaşması GSD kabul edilmez. |
-| 5 · Model çalıştırma adaptörü | Canlı inference veya yeni dış veri aktarımı açılmadı | Önce yerel/izole worker ya da Roboflow serverless seçilir. Gizli anahtar tarayıcıya/loga girmez; hesap kotası ve veri aktarımı açıkça yapılandırılır. İstek iptali, timeout ve boyut sınırı olur. |
+| 5 · Model çalıştırma adaptörü | Bağımsız, kullanıcı oturumu doğrulayan Edge Function ve Roboflow adaptörü eklendi | Anahtar sunucu sırrında; yalnız seçilen görüntü açık eylemle gönderilir. Boyut/55 saniye süre/eşzamanlılık sınırları var. Gerçek görüntüyle son denemeyi kullanıcı yapacak. |
 | 6 · Park ölçeğinde sayım | Tek görüntü prototipi park toplamı vermez | Jeoreferans dönüşümü, örtüşen karo tekrarları, park sınırı/delik kırpması ve görüntü kapsamı yönetilir. Eksik görüntüde park toplamı gösterilmez. |
 | 7 · Taç bölütleme | Verilen modelde taç maskesi doğrulanmadı | Ayrı instance-segmentation adaptörü poligon/maskeler verir. Yerel metrik CRS'de alan, eşdeğer çap ve uygun genişlik ölçülür; kutu ölçüleri ayrı isim taşır. |
 | 8 · Bağımsız doğrulama | Yerel park doğruluğu henüz ölçülmedi | Model seçimine kullanılmayan saha/uzman etiketli park kesitleri: precision, recall, F1, sayım hatası, taç IoU ve genişlik/alan hatası. Yoğun, seyrek, genç ağaç ve gölge örnekleri ayrı değerlendirilir. Kabul eşiği pilot öncesinde belirlenir. |
-| 9 · Arayüz ve kayıt | Canlı AI paneli açılmadı | Ayrı, isteğe bağlı aday katmanı; insan kabul/ret/birleştir/böl düzeltmesi. Görüntü/model sürümü, zaman, güven puanı, kapsama ve doğrulama kapsamı görünür. Telefon/tema/TR-EN kontrolleri geçer. |
+| 9 · Arayüz ve kayıt | Canlı Harita’da Ağaç Algılama paneli, görüntü üzerinde aday kutuları ve JSON indirme eklendi | Jeoreferanslı aday katmanı ve insan kabul/ret/birleştir/böl akışı sonraki aşamadır. Bu sürüm önizlemede kalır; envanter, karbon veya taç metriği üretmez. |
 | 10 · Yayın | Mevcut ölçüm/yüzey/rapor akışları korunur | Açık kullanıcı kabulüyle ayrı sürümlü ağaç-analizi kaydı. Yüzey sınıfı, saha ölçümü, DBH, boy, karbon veya dondurulmuş DOI raporu otomatik değiştirilmez. |
 
 ## Modül sınırları
@@ -58,3 +58,13 @@ Tek bir servise “her parkta en doğru” denemez. Önce verilen model, gerekir
 ```
 
 Bu eşikler yalnız çalıştırma biçimini gösteren **örnektir**; üretim için kalibre edilmemiştir. Çıktıda `candidateCount` bulunur; `confirmedTreeCount`, `crownAreaM2`, `crownDiameterM` ve `species` boş kalır. Prototip ağ isteği yapmaz, görüntü/model indirmez, mevcut dosyanın üstüne yazmaz ve canlı veri tabanına bağlanmaz. Gerçek model henüz çağrılmadı. Koordinat/etiket/ölçek incelemesinden önce bu çıktı park envanteri sayılmaz.
+
+## Canlı görüntü pilotu · 16 Ekim 2026
+
+Canlı Harita → Ağaç Algılama → görüntü seç → Ağaçları algıla. JPG/PNG/WebP, en fazla 10 MB; EXIF üst verileri çıkarılarak en uzun kenar 2048 piksele küçültülür. Görüntü seçimi tek başına aktarım yapmaz. Konumlandırılmamış görüntü haritaya gerilmez. JSON çıktısı model sürümü, işlenen görüntü boyutu, eşik, kutular ve sınırlılıkları içerir.
+
+Bağımsız modüller: domain aday normalleştirme; application iptal/eski istek koruması; adapter görüntü/oturumlu HTTP; UI görünüm; bootstrap bağlantı. Mevcut yüzey, fırça, çizim, kabul edilmiş sonuç ve rapor servislerine yazma portu yoktur.
+
+Edge Function gerçek kullanıcıyı Supabase Auth ile doğrular; istemci model/URL/anahtar seçemez. İşlev örneği başına kullanıcı başına dakikada en fazla altı istek ve tek eşzamanlı istek kabul edilir. Bu limit dağıtık harcama kotası değildir; hesap genelindeki kullanım limiti Roboflow hesabında yönetilir. Sağlayıcıya otomatik yeniden deneme yapılmaz. Supabase sırrı: `ROBOFLOW_API_KEY`.
+
+Doğrulama: yerel sahte sağlayıcı yanıtlarıyla güvenlik/iptal/tekrarlar, Chromium ve WebKit telefon görünümü; canlı uçta oturumsuz istek reddi. Kullanıcı son gerçek görüntü/model denemesini kendisi yapmayı seçti; model doğruluğu veya gerçek inference başarısı bu testlerden çıkarılamaz.
