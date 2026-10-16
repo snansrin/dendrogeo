@@ -7,7 +7,9 @@ window.DG_SYNC_QUEUED_MEASUREMENT={
     const editId=data._editId||null;
     const baseline=data._editBaseline;
     if(editId&&(!baseline||String(baseline.id)!==String(editId)||String(baseline.owner)!==String(owner)))throw new Error("Düzenlemenin başlangıç kaydı yok; kayıt kuyrukta korundu. Güncel sunucu kaydını açıp değişiklikleri karşılaştırın.");
-    let saved=!editId?await findSaved(data):null;
+    const replayableEdit=editId&&data.client_id&&data.client_id!==baseline.client_id;
+    let saved=(!editId||replayableEdit)?await findSaved(editId?{...baseline,...data}:data):null;
+    if(saved&&editId&&String(saved.id)!==String(editId))throw new Error("Çevrimdışı düzenleme kimliği başka bir kayda ait; kuyruk korundu.");
     if(!isCurrent())return{stopped:true};
     if(!saved){
       const payload=preparePayload(data);

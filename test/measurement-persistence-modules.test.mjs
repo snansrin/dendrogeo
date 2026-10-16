@@ -6,6 +6,7 @@ import vm from 'node:vm';
 const read=path=>readFileSync(new URL('../'+path,import.meta.url),'utf8');
 const modules=[
   'src/adapters/trees/fetch-measurement-park.js',
+  'src/adapters/trees/update-measurement-if-current.js',
   'src/adapters/trees/persist-measurement-record.js',
   'src/domain/trees/build-measurement-location-fields.js',
   'src/domain/trees/build-offline-measurement-record.js',
@@ -23,14 +24,11 @@ test('measurement park adapter preserves the primary-key lookup and missing-row 
   assert.equal(await window.DG_FETCH_MEASUREMENT_PARK.fetch({client,id:404}),null);
 });
 
-test('measurement adapter preserves RLS update scope and insert old-schema retry',async()=>{
-  const{window}=setup(),calls=[],record={id:1,client_id:'c',altitude_m:4,photo_file:'P001_M1.JPG'};let fail=true;
-  const client={from:table=>({update:row=>({eq:(field,id)=>{calls.push(['update',table,row,field,id]);return{error:null};}}),insert:row=>{calls.push(['insert',table,{...row}]);if(fail){fail=false;return{error:{message:'old schema'}};}return{error:null};}})};
-  assert.deepEqual(JSON.parse(JSON.stringify(await window.DG_PERSIST_MEASUREMENT_RECORD.persist({client,record,editId:7}))),{error:null});
-  const result=await window.DG_PERSIST_MEASUREMENT_RECORD.persist({client,record,editId:null});
-  assert.equal(JSON.stringify(calls[0]),JSON.stringify(['update','measurements',record,'id',7]));
-  assert.equal(JSON.stringify(calls.slice(1)),JSON.stringify([['insert','measurements',{id:1,client_id:'c',altitude_m:4,photo_file:'P001_M1.JPG'}],['insert','measurements',{id:1,client_id:'c'}]]));
-  assert.equal(Object.hasOwn(record,'altitude_m'),false);assert.equal(Object.hasOwn(record,'photo_file'),false);assert.equal(result.error,null);
+test('measurement adapter requires the written row, keeps owner scope, and retries only named optional columns',async()=>{
+  const{window}=setup(),calls=[],record={owner:'u1',client_id:'c',altitude_m:4,photo_file:'P001_M1.JPG'};let fail=true;
+  const client={from:table=>{let kind,row;const chain={update:value=>{kind='update';row=value;return chain;},insert:value=>{kind='insert';row={...value};return chain;},eq:(field,id)=>{calls.push(['eq',field,id]);return chain;},is:()=>chain,select:async()=>{calls.push([kind,table,row]);if(kind==='insert'&&fail){fail=false;return{error:{code:'PGRST204',message:"Could not find the 'photo_file' column of 'measurements' in the schema cache"}};}return{error:null,data:[{id:7}]};}};return chain;}};
+  const updated=await window.DG_PERSIST_MEASUREMENT_RECORD.persist({client,record,editId:7,baseline:{id:7,owner:'u1',client_id:'c'}});assert.equal(updated.error,null);assert.ok(calls.some(c=>c[0]==='eq'&&c[1]==='owner'&&c[2]==='u1'));
+  const result=await window.DG_PERSIST_MEASUREMENT_RECORD.persist({client,record,editId:null});assert.equal(result.error,null);const inserts=calls.filter(c=>c[0]==='insert');assert.equal(inserts.length,2);assert.equal(inserts[1][2].altitude_m,4);assert.equal(Object.hasOwn(inserts[1][2],'photo_file'),false);assert.equal(record.photo_file,'P001_M1.JPG');
 });
 
 test('location fields preserve GPS accuracy, altitude and reverse-geocode fallbacks',()=>{

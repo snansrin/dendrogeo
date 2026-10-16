@@ -2,6 +2,12 @@
 /* English dictionary data for the runtime translator in i18n.js. */
 /* ---- EN sözlüğü: anahtar = TR dizenin trim'lenmiş hâli ---- */
 const DG_I18N_EN={
+"Kayıt başka bir oturumda değişmiş, silinmiş veya erişim kapanmış olabilir. Değişiklikleriniz formda korundu; güncel kaydı açıp karşılaştırın.":"The record may have changed in another session, been deleted or become inaccessible. Your edits remain in the form; open the current record and compare.",
+"Sunucu kaydı doğrulanamadı. Bilgileriniz formda korundu; Kayıtlarım ekranından kontrol edin.":"The server write could not be confirmed. Your information remains in the form; check My Records.",
+"Kayıt alanları sunucu şemasıyla uyuşmuyor; bilgileriniz formda korundu.":"The record fields do not match the server schema; your information remains in the form.",
+"Güvenli düzenleme için başlangıç kaydı gerekli.":"The original record snapshot is required for a safe edit.",
+"Başlangıç kaydının alanları doğrulanamadı.":"The original record fields could not be validated.",
+"Kayıt sahibi düzenleme sırasında değiştirilemez.":"The record owner cannot change during editing.",
 "⛔ {name} (park yok)":"⛔ {name} (no park)",
 "Kaydedilmemiş değişiklikleriniz var.":"You have unsaved changes.",
 "Kayıt ve çalışma özetim":"My records and study summary",

@@ -7,7 +7,7 @@ const files=[
   '../src/domain/offline/prepare-measurement-sync-payload.js',
   '../src/adapters/offline/find-saved-measurement.js',
   '../src/adapters/offline/upload-queued-measurement-photo.js',
-  '../src/adapters/offline/persist-queued-measurement.js',
+  '../src/adapters/trees/update-measurement-if-current.js','../src/adapters/offline/persist-queued-measurement.js',
   '../src/application/offline/sync-queued-measurement.js'
 ];
 function setup(){const window={};const context=vm.createContext({window});for(const path of files)vm.runInContext(readFileSync(new URL(path,import.meta.url),'utf8'),context);return window;}

@@ -1,6 +1,7 @@
 import { existsSync, readdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import {syncReportSitemap} from './report-sitemap.mjs';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..', '..');
 const REPORT_DIR = join(ROOT, 'rapor');
@@ -25,7 +26,7 @@ function renderIndex(list) {
 }
 
 /* Filesystem adapter for the immutable report archive. */
-export function rebuildIndex(dir = REPORT_DIR) {
+export function readReportIndex(dir = REPORT_DIR) {
   if (!existsSync(dir)) return [];
   const list = readdirSync(dir).filter((name) => DGR_ID_RE.test(name)).sort().map((name) => {
     try {
@@ -39,7 +40,14 @@ export function rebuildIndex(dir = REPORT_DIR) {
       };
     } catch (error) { return null; }
   }).filter(Boolean);
-  writeFileSync(join(dir, 'index.html'), renderIndex(list));
+  return list;
+}
+
+export function rebuildIndex(dir = REPORT_DIR) {
+  if(!existsSync(dir))return [];
+  const list=readReportIndex(dir);
+  writeFileSync(join(dir,'index.html'),renderIndex(list));
+  syncReportSitemap(join(dirname(dir),'sitemap.xml'),list,{write:true});
   return list;
 }
 

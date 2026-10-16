@@ -250,14 +250,14 @@
 <script src="src/config/wood-density-lock.js?v=9572e1df" type="application/x-dendrogeo-module" defer></script>
 <script src="src/config/species.js?v=554298a8" type="application/x-dendrogeo-module" defer></script>
 <!-- DİL KATMANI (0035): sözlük verisi çalışma zamanı çeviricisinden önce yüklenir. -->
-<script src="src/config/i18n-en.js?v=35579dd4" type="application/x-dendrogeo-module" defer></script>
+<script src="src/config/i18n-en.js?v=d95905d6" type="application/x-dendrogeo-module" defer></script>
 <script src="src/config/i18n.js?v=9edc1ead" type="application/x-dendrogeo-module" defer></script>
 <script src="src/domain/map/web-mercator-coordinates.js?v=44109250" type="application/x-dendrogeo-module" defer></script>
 <script src="src/utils/geo.js?v=1e469255" type="application/x-dendrogeo-module" defer></script>
 <script src="src/utils/truncation.js?v=d9710c30" type="application/x-dendrogeo-module" defer></script>
 <!-- Faz 7: geotiff (317 KB) ve chart.js (208 KB) artık SENKRON yüklenmiyor;
      src/utils/lazylibs.js ihtiyaç anında enjekte eder (LULC analizi / panel grafiği). -->
-<script id="dgRuntimeBuild" type="application/json">"8b073fc721717b50"</script>
+<script id="dgRuntimeBuild" type="application/json">"bc47b5affa193845"</script>
 <!-- Verified fallback OSM water geometry, independent of the lazy raster engine. -->
 <script src="src/adapters/parks/fetch-nominatim-osm-way.js?v=9f2730dd" type="application/x-dendrogeo-module" defer></script>
 <script src="src/services/osm-water-backup.js?v=4c9fbc03" type="application/x-dendrogeo-module" defer></script>
@@ -343,8 +343,9 @@
 <script src="src/domain/offline/prepare-measurement-sync-payload.js?v=dcf8940d" type="application/x-dendrogeo-module" defer></script>
 <script src="src/adapters/offline/find-saved-measurement.js?v=4587b2eb" type="application/x-dendrogeo-module" defer></script>
 <script src="src/adapters/offline/upload-queued-measurement-photo.js?v=ecb42150" type="application/x-dendrogeo-module" defer></script>
-<script src="src/adapters/offline/persist-queued-measurement.js?v=22d9aba3" type="application/x-dendrogeo-module" defer></script>
-<script src="src/application/offline/sync-queued-measurement.js?v=8215b859" type="application/x-dendrogeo-module" defer></script>
+<script src="src/adapters/trees/update-measurement-if-current.js?v=858c8fd2" type="application/x-dendrogeo-module" defer></script>
+<script src="src/adapters/offline/persist-queued-measurement.js?v=1c18771b" type="application/x-dendrogeo-module" defer></script>
+<script src="src/application/offline/sync-queued-measurement.js?v=b3e2296f" type="application/x-dendrogeo-module" defer></script>
 <script src="src/application/offline/drain-measurement-queue.js?v=5115eea7" type="application/x-dendrogeo-module" defer></script>
 <script src="src/application/offline/coordinate-measurement-sync.js?v=d9eb4f49" type="application/x-dendrogeo-module" defer></script>
 <script src="src/application/offline/refresh-after-measurement-sync.js?v=aa694a07" type="application/x-dendrogeo-module" defer></script>
@@ -628,7 +629,7 @@
 <script src="src/application/trees/resolve-measurement-save-gates.js?v=2a05c241" type="application/x-dendrogeo-module" defer></script>
 <script src="src/domain/trees/build-measurement-record.js?v=9377ad54" type="application/x-dendrogeo-module" defer></script>
 <script src="src/adapters/trees/fetch-measurement-park.js?v=874757f4" type="application/x-dendrogeo-module" defer></script>
-<script src="src/adapters/trees/persist-measurement-record.js?v=7c9ec790" type="application/x-dendrogeo-module" defer></script>
+<script src="src/adapters/trees/persist-measurement-record.js?v=64f9c8a1" type="application/x-dendrogeo-module" defer></script>
 <script src="src/domain/trees/build-measurement-location-fields.js?v=ab9a6f65" type="application/x-dendrogeo-module" defer></script>
 <script src="src/domain/trees/build-offline-measurement-record.js?v=aed380ae" type="application/x-dendrogeo-module" defer></script>
 <script src="src/application/trees/record-measurement-presence-action.js?v=b42d49f0" type="application/x-dendrogeo-module" defer></script>
@@ -648,7 +649,7 @@
 <script src="src/ui/confirm-measurement-project-delete.js?v=35d411fb" type="application/x-dendrogeo-module" defer></script>
 <script src="src/adapters/trees/measurement-project-deletion-store.js?v=57740014" type="application/x-dendrogeo-module" defer></script>
 <script src="src/application/trees/delete-measurement-project.js?v=2c497430" type="application/x-dendrogeo-module" defer></script>
-<script src="src/services/measure.js?v=4213b2e4" type="application/x-dendrogeo-module" defer></script>
+<script src="src/services/measure.js?v=e5d5d074" type="application/x-dendrogeo-module" defer></script>
 <script src="src/domain/map/is-valid-coordinate.js?v=d99a0a89" type="application/x-dendrogeo-module" defer></script>
 <script src="src/domain/map/select-waypoint-target.js?v=de6f1987" type="application/x-dendrogeo-module" defer></script>
 <script src="src/domain/map/build-waypoint-navigation-header.js?v=26f8e220" type="application/x-dendrogeo-module" defer></script>
@@ -1817,7 +1818,8 @@
  <button class="btn" style="margin-top:12px" id="pvDownload">📥 İndir</button>
 </div></div>
 <script src="src/ui/state.js?v=f2a0b270" type="application/x-dendrogeo-module" defer></script>
-<script src="src/ui/toast.js?v=a2239530" type="application/x-dendrogeo-module" defer></script>
+<script src="src/ui/toast-message-content.js?v=3bc72911" type="application/x-dendrogeo-module" defer></script>
+<script src="src/ui/toast.js?v=f0c6ff27" type="application/x-dendrogeo-module" defer></script>
 <script src="src/application/world/load-landing-statistics.js?v=9cbca6b1" type="application/x-dendrogeo-module" defer></script>
 <script src="src/ui/landing-totals.js?v=51246381" type="application/x-dendrogeo-module" defer></script>
 <script src="src/ui/landing-country-table.js?v=2348035b" type="application/x-dendrogeo-module" defer></script>
@@ -1907,6 +1909,6 @@
 <script src="src/bootstrap/gis-export.js?v=31cdf97c" type="application/x-dendrogeo-module" defer></script>
 <script src="src/ui/gis-export.js?v=85048551" type="application/x-dendrogeo-module" defer></script>
 
-<script src="/src/bootstrap/app-runtime.js?v=49dfecfc" defer></script>
+<script src="/src/bootstrap/app-runtime.js?v=e6841242" defer></script>
 </body>
 </html>

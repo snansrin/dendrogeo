@@ -5,7 +5,7 @@ import { readFileSync } from 'node:fs';
 const source=readFileSync(new URL('../src/services/offline.js',import.meta.url),'utf8');
 const modules=['src/adapters/offline/create-client-id.js','src/domain/offline/same-measurement.js','src/adapters/offline/idb-promises.js',
  'src/adapters/offline/measurement-queue.js','src/domain/offline/prepare-measurement-sync-payload.js','src/adapters/offline/find-saved-measurement.js',
- 'src/adapters/offline/upload-queued-measurement-photo.js','src/adapters/offline/persist-queued-measurement.js','src/application/offline/sync-queued-measurement.js',
+ 'src/adapters/offline/upload-queued-measurement-photo.js','src/adapters/trees/update-measurement-if-current.js','src/adapters/offline/persist-queued-measurement.js','src/application/offline/sync-queued-measurement.js',
  'src/application/offline/drain-measurement-queue.js','src/application/offline/coordinate-measurement-sync.js',
  'src/application/offline/refresh-after-measurement-sync.js','src/ui/offline-sync-feedback.js','src/ui/offline-sync-badge.js',
  'src/ui/dashboard-view-state.js'];
@@ -26,7 +26,7 @@ function fixture(records=[draft()],options={}){
    if(op==='insert')inserts++;if(op==='update')updates++;
    if(options.beforeWrite)await options.beforeWrite();
    const r=options.writeResult||{data:[{id:42}],error:null};
-   if(!r.error&&op==='insert')remote.set(payload.client_id,{...payload,id:42});
+   if(!r.error&&r.data?.length&&(op==='insert'||op==='update'))remote.set(payload.client_id,{...payload,id:filters.id||42});
    events.push('server');return resolve(r);
   }catch(e){return reject(e);}}
  };},storage:{from(){return {async upload(){uploads++;return {error:options.photoError||null};},getPublicUrl(){return {data:{publicUrl:'https://example.org/photo.jpg'}};}};}}};
@@ -76,4 +76,15 @@ test('write and photo failures retain queue and release the sync lock',async()=>
 });
 test('aborted local deletion never reports a completed sync',async()=>{
  const f=fixture(undefined,{deleteFails:true});await f.ctx.syncOfflineData();assert.equal(f.records.length,1);assert.equal(f.events.includes('refresh'),false);assert.ok(f.toasts.some(x=>x[1]==='err'));
+});
+
+test('an acknowledged edit survives an aborted IDB delete and replays without another write or upload',async()=>{
+ const options={deleteFails:true},data=draft({_editId:42,_editBaseline:{id:42,owner:'a',client_id:'previous-write'},photoBlob:{size:1}}),f=fixture([data],options);
+ await f.ctx.syncOfflineData();assert.equal(f.records.length,1);assert.equal(f.counts().updates,1);assert.equal(f.counts().uploads,1);
+ options.deleteFails=false;await f.ctx.syncOfflineData();assert.equal(f.records.length,0);assert.equal(f.counts().updates,1);assert.equal(f.counts().uploads,1);
+});
+
+test('a matching edit nonce on a different row never removes the local edit',async()=>{
+ const data=draft({_editId:42,_editBaseline:{id:42,owner:'a',client_id:'previous-write'}}),saved={...data.data,id:99};
+ const f=fixture([data],{remote:[['client-1',saved]]});await f.ctx.syncOfflineData();assert.equal(f.records.length,1);assert.equal(f.counts().updates,0);
 });

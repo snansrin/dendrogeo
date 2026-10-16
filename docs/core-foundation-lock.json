@@ -9,6 +9,7 @@
       "src/adapters/offline/persist-queued-measurement.js",
       "src/adapters/offline/upload-queued-measurement-photo.js",
       "src/adapters/trees/fetch-measurement-park.js",
+      "src/adapters/trees/update-measurement-if-current.js",
       "src/application/offline/sync-queued-measurement.js",
       "src/application/trees/calculate-live-measurement-preview.js",
       "src/application/trees/calculate-tree-carbon-from-circumference.js",
@@ -31,7 +32,8 @@
       "src/services/allometry.js",
       "src/services/measure.js",
       "src/services/offline.js",
-      "src/ui/render-live-measurement-preview.js"
+      "src/ui/render-live-measurement-preview.js",
+      "src/ui/toast-message-content.js"
     ],
     "park_detection": [
       "src/adapters/parks/fetch-grid-measurement-candidates.js",
@@ -1958,7 +1960,9 @@
     "test/surface-editor-event-binding.test.mjs": "25d2813d9d575da97cdf35e4c45faff60983dd6ced54f017fb4c47b15cb24540",
     "docs/generated-markup-handler-baseline.json": "d366816ca1bb301cd6aa122caeb221dbeca891bb59e7205db434aaf40d363cf5",
     "src/domain/surface/classify-effective-surface-cell.js": "43bb692b51b49b0a1750727af6a031130735a8e30423cb8bef41bca65c8b5e6a",
-    "test/effective-surface-cell-domain.test.mjs": "beb44ed2ec17b70e0e026e623a6a0f94e2ddb55ac4189cd1ea3ebcb8ddbbb32c"
+    "test/effective-surface-cell-domain.test.mjs": "beb44ed2ec17b70e0e026e623a6a0f94e2ddb55ac4189cd1ea3ebcb8ddbbb32c",
+    "src/adapters/trees/update-measurement-if-current.js": "da2737f09eaa227e6bed109cc6162077ac3f28b54afeec640be7ab70b190a814",
+    "src/ui/toast-message-content.js": "3cd604b74561d5aaddb97f96e06e4db9472b1852dc2ae4391f0cccd60d8d1b5d"
   },
   "authorized_modularizations": [
     {
@@ -8154,6 +8158,118 @@
           "path": "src/ui/render-measurement-project-directory.js",
           "previous_sha256": "826492053f2cdc65607c35c3a7e2198858bb956f16a4d1bacdad529f9364752b",
           "sha256": "7a8f070a697a7135850447d46da28cb58870d4c190ca3e7eae3b0779690011e1"
+        }
+      ]
+    },
+    {
+      "id": "full-system-audit-write-confirmation-2026-10-16",
+      "date": "2026-10-16",
+      "scope": "User-authorized modularization: comprehensive system audit fixes for confirmed online measurement writes, shared atomic snapshot update for online/offline edits, narrowly scoped old-schema fallback, escaped server error text, and report sitemap synchronization. Existing scientific calculations, RLS and immutable DOI artifacts remain unchanged; PostgreSQL, phone and publication regressions are maintained.",
+      "audit_chain": "sha256-v1",
+      "added_protected_files": [
+        "src/adapters/trees/update-measurement-if-current.js",
+        "src/ui/toast-message-content.js"
+      ],
+      "files": [
+        {
+          "path": ".github/workflows/ci.yml",
+          "previous_sha256": "56f81781759fc606679b1da99145fb6a640028b1ded920e49a479869ee0d7e87",
+          "sha256": "7c0298be9101f0739ab204ce033f58d620183262ec46f295c7c9c3344f1a6333"
+        },
+        {
+          "path": ".github/workflows/mobile-smoke.yml",
+          "previous_sha256": "c6ef7c36b5e3c478dc824ce7c0a849a8e19899766d225ad382ec167a4f3c730d",
+          "sha256": "d6ecdbc250fb3bf0cbdcb6e58fb661d91dd9cc5c796146dd6065155b49e87852"
+        },
+        {
+          "path": ".github/workflows/rapor-yayin.yml",
+          "previous_sha256": "266e192e8c4d4dd5e75b0de95f87f703185500e9c6c9ce58889f6483f5c9e638",
+          "sha256": "b44c20560e67fc1c81af23284b58de04fa537f92ff936fe53c4fcb7668a88b95"
+        },
+        {
+          "path": ".github/workflows/rapor.yml",
+          "previous_sha256": "be836bdd0631a268744b2454216bb64848022d4146afe80663ec69a32a9c06f6",
+          "sha256": "8260732f649e0adcb195a49d79e2dfc34bb8e41b67bcd7ad1c32828b9f29ffbc"
+        },
+        {
+          "path": "index.html",
+          "previous_sha256": "458be183a5cf4b17ce39457e0622f2a4065c63d3ea3a774f7e7ba8d9db49f663",
+          "sha256": "d042754a6e2a35e495b0a01b125e1ae2ef067078776cf0edcd1d3c845d5e3e94"
+        },
+        {
+          "path": "package.json",
+          "previous_sha256": "addb2f890e020d0f3bdcf460ceb062fedb7d820276a7d574ada031b5d84318aa",
+          "sha256": "73d260a6139ba8a353e9aeaa1c39a9531df4bb8b1d7ebceb8e936f47d40cf6f8"
+        },
+        {
+          "path": "partials/boot.html",
+          "previous_sha256": "0b56d8ac8fb69ed2a5868d5f482f047f2578cfb37121b4d7431abfd6f6182b96",
+          "sha256": "de72f942b4f91bd1ba177c9430ba4b0b405816ac50316c668ddafaabcd132fed"
+        },
+        {
+          "path": "partials/head.html",
+          "previous_sha256": "8dec8807db0c939cefe102fcac2f204b137055434e540d6d125e21dea2526d0e",
+          "sha256": "e25fbecd39fefd6d9adb3dd04589657d1acc9fbcf804696dc31bc48bec7e19ab"
+        },
+        {
+          "path": "scripts/check-phone.mjs",
+          "previous_sha256": "22b147c9abe73f79ffd7d9bfbf442c909b44a27570bd95cada6a6b551876d11e",
+          "sha256": "43203589e2e9880aa0146af9a3c53fc453bbd9f53d9faf849d420890714b156e"
+        },
+        {
+          "path": "src/adapters/offline/persist-queued-measurement.js",
+          "previous_sha256": "d2e4c047e098ab6cc5917df2c21da7f5aab1e70f867d0f471b832a662a0e30ba",
+          "sha256": "a334f8be86bc4c671ef4dfe1c792ab87afc88c0ea6a0abde649e59502022199f"
+        },
+        {
+          "path": "src/adapters/trees/persist-measurement-record.js",
+          "previous_sha256": "976dec9bd328d4dd7b6b6ee7820bf8f67945095af5d767e023de1b452b0070af",
+          "sha256": "23293d7e831fa20b0783383edb69c8f0fcc83c2bb85b7506756c486b39f58aae"
+        },
+        {
+          "path": "src/adapters/trees/update-measurement-if-current.js",
+          "previous_sha256": "da2737f09eaa227e6bed109cc6162077ac3f28b54afeec640be7ab70b190a814",
+          "sha256": "2bd0dfb0444dc8a6b41a24f51b41d1763f7831ad085d31c472ee92ca5d2bb9eb"
+        },
+        {
+          "path": "src/application/offline/sync-queued-measurement.js",
+          "previous_sha256": "3cb433a49e045d9ee4b3e4aaeb460bbe920d1c3c0fbf886012d51728da3e762c",
+          "sha256": "64ec0f5b492dddf4b9ab8eaeb09f0221461995dff634c6bc863446255770b400"
+        },
+        {
+          "path": "src/services/measure.js",
+          "previous_sha256": "e7994a9381068feac2c0825e4db80c71cc84eda868c11a9fa86ec3d3b885529d",
+          "sha256": "b3cc898c6614282edd4bb85682ef318aafef57b8a3711ccabc31ba517b1b8e6e"
+        },
+        {
+          "path": "src/ui/toast.js",
+          "previous_sha256": "0f22fc12b4e51d1aeb4b9c6e4bd0093073d36b4e98ab503b195f3dc38ba6f26f",
+          "sha256": "36a352148c83fc3350bbdc8aa40e707df9f1964093997ab785f0cae90435eaee"
+        },
+        {
+          "path": "sw.js",
+          "previous_sha256": "36bc5ae7e4e4c407344f9340454071a146098ec8262c1c8224d1fee1c1e65e3b",
+          "sha256": "96d4615b4de5f4c5bd76bc305b20f53df911aaa695f829c5f87da28a3d5c609d"
+        },
+        {
+          "path": "test/measure-field.test.mjs",
+          "previous_sha256": "7c6dff88184525e28206efe576741a00f4d5ed5101463b2f0c9788f95536b9b8",
+          "sha256": "481e42abeecee332c59eb66779e39763979994e0a7bcda391388a0bd1736273d"
+        },
+        {
+          "path": "test/measurement-persistence-modules.test.mjs",
+          "previous_sha256": "feea09278b1939403638337dd33b6bb0c9c06e4543b1fad00ec54246196b7384",
+          "sha256": "baa598ba165c143a45278ef283129f73244df53c4c300d9a2b59d6dbde918c98"
+        },
+        {
+          "path": "test/offline-safety.test.mjs",
+          "previous_sha256": "c7835315ea6c61c4677ae64da7f0719052551669e1d73b6f2d33215e98722fbe",
+          "sha256": "c3503bc119698671e0f0c90d00b0fc8b3aa371ea6f90c713171a99168df063e3"
+        },
+        {
+          "path": "test/offline-sync-modules.test.mjs",
+          "previous_sha256": "e30a601264dc72a827238ad4751719d876c8aa2891cf64035e3530ff77f9d7fa",
+          "sha256": "f100f890960074244b3dc3148be2ed69ac76382a021f792bab1e4045d4bbd7e5"
         }
       ]
     }

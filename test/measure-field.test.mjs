@@ -15,11 +15,12 @@ function field() {
     return elements.get(id);
   };
   const db = table => {
+    let written=false;
     const q = { select() { return q; }, eq() { return q; }, order() { return q; }, limit() { return q; },
       maybeSingle() { return Promise.resolve({data:{id:7,name:'Test Park'},error:null}); },
-      insert(row) { writes.push({table,row}); return Promise.resolve({error:null}); },
+      insert(row) { writes.push({table,row}); written=true;return q; },
       update(row) { writes.push({table,row}); return q; },
-      then(resolve,reject) { return Promise.resolve({data:[],error:null}).then(resolve,reject); }
+      then(resolve,reject) { return Promise.resolve({data:written?[{id:1}]:[],error:null}).then(resolve,reject); }
     };return q;
   };
   const ctx = vm.createContext({

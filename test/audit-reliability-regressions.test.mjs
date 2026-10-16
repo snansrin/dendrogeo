@@ -7,7 +7,7 @@ import {PGlite} from '@electric-sql/pglite';
 const read=p=>readFileSync(new URL('../'+p,import.meta.url),'utf8');
 function runtime(){
  const window={};
- for(const file of ['src/adapters/offline/persist-queued-measurement.js','src/application/offline/sync-queued-measurement.js','src/domain/offline/prepare-measurement-sync-payload.js','src/domain/trees/build-offline-measurement-record.js','src/domain/backup/sql-value.js','src/domain/backup/build-restore-sql.js'])vm.runInNewContext(read(file),{window});
+ for(const file of ['src/adapters/trees/update-measurement-if-current.js','src/adapters/offline/persist-queued-measurement.js','src/application/offline/sync-queued-measurement.js','src/domain/offline/prepare-measurement-sync-payload.js','src/domain/trees/build-offline-measurement-record.js','src/domain/backup/sql-value.js','src/domain/backup/build-restore-sql.js'])vm.runInNewContext(read(file),{window});
  return window;
 }
 

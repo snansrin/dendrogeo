@@ -283,9 +283,9 @@ async function dgSaveMeasInner(){
           isOnline:()=>navigator.onLine,
           buildOfflineRecord:draft=>window.DG_BUILD_OFFLINE_MEASUREMENT_RECORD.build({record:draft.record,photoBlob:draft.photo.blob,photoFile:draft.photo.fileName,editId:EDIT_ID,clientId:uuidv4(),baseline:DG_MEASUREMENT_EDIT_BASELINE}),
           saveOffline:saveOfflineMeasurement,uploadPhoto:blob=>window.DG_UPLOAD_MEASUREMENT_PHOTO.upload({client:sb,userId:USER.id,blob}),
-          persistRecord:(record,editId)=>window["DG_"+"PERSIST_MEASUREMENT_RECORD"].persist({client:sb,record,editId}),editId:()=>EDIT_ID
+          persistRecord:(record,editId)=>window["DG_"+"PERSIST_MEASUREMENT_RECORD"].persist({client:sb,record,editId,baseline:DG_MEASUREMENT_EDIT_BASELINE}),editId:()=>EDIT_ID
         },
-        writeFailed:error=>toast("Hata: "+error.message,"err"),
+        writeFailed:error=>toast(esc(_tms("Hata: "))+esc(_tms(error.message)),"err"),
         complete:({draft,location,mode})=>{
           const wasEdit=draft.wasEdit,point=draft.form.pointId;
           if(location.decision?.verified)toast(dgCf("🛰 Konum doğrulandı: ")+esc(location.park.name)+(location.decision.reason==="margin"?" ("+_tms("kenar payı")+")":"")+" · ±"+Math.round(location.decision.fix.acc)+" m","ok","🛰");
