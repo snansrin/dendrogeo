@@ -31,4 +31,3 @@ try{for(const width of[360,390,430,1440]){
  await page.evaluate(()=>dgSetLang('en'));await page.waitForFunction(()=>document.querySelector('[data-landing-scene="map"] [data-scene-pick="water"]').textContent==='Water');assert.equal(await page.locator('.dg-tree-readouts [data-i18n="Ağaç boyu"]').textContent(),'Tree height');assert.equal(await page.locator('[data-landing-scene="map"] [data-scene-class="water"]').getAttribute('aria-label'),'Water');await page.evaluate(()=>dgSetLang('tr'));
  assert.deepEqual(errors,[]);assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1),true);console.log(JSON.stringify({engine:engine.name(),width,fullWidthScene:true,studentsForeground:true,spatialPicking:true,zoomReset:true,sketchUndo:true,accessibility:true}));await page.close();
 }}finally{await browser.close();await server.close();}
-
