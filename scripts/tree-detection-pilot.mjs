@@ -1,0 +1,11 @@
+import {readFileSync,writeFileSync,existsSync} from 'node:fs';
+import {resolve} from 'node:path';
+import {buildTreeDetectionPilot} from './lib/tree-detection-pilot.mjs';
+const [predictionPath,metadataPath,outputPath]=process.argv.slice(2);
+if(!predictionPath||!metadataPath||!outputPath)throw Error('Usage: node scripts/tree-detection-pilot.mjs predictions.json metadata.json new-output.json');
+const output=resolve(outputPath);
+if(output===resolve(predictionPath)||output===resolve(metadataPath)||existsSync(output))throw Error('Choose a new output path; existing files are never overwritten.');
+const metadata=JSON.parse(readFileSync(metadataPath,'utf8'));
+const result=buildTreeDetectionPilot(JSON.parse(readFileSync(predictionPath,'utf8')),metadata,{confidence:metadata.confidence,nmsIou:metadata.nmsIou});
+writeFileSync(output,JSON.stringify(result,null,2)+'\n',{flag:'wx'});
+console.log(JSON.stringify({status:result.status,candidateCount:result.candidateCount,confirmedTreeCount:null,output}));

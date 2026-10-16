@@ -8550,6 +8550,34 @@
           "sha256": "6ecfcecb5e1a4fa9c644696d8df41b1117781efcfd25c9e1166c8db2700121b0"
         }
       ]
+    },
+    {
+      "id": "native-raster-zoom-backup-tree-pilot-2026-10-16",
+      "date": "2026-10-16",
+      "scope": "User-authorized modularization: first freeze and restore-verify the working dark-theme full-analysis core, then cap raster map zoom at native tile levels and clamp the actual view on imagery fallback. Reprobe only after geographic panning so zoom-only events cannot reopen rejected levels. Update the explicitly superseded OSM zoom ceiling regression from overzoom 22 to native 19. Prepare a separate offline tree-model pilot and integration plan without changing the scientific engine, accepted data, backend or live tree UI.",
+      "audit_chain": "sha256-v1",
+      "files": [
+        {
+          "path": "index.html",
+          "previous_sha256": "d47daabcef79c34ab3e45f45aa356ca8d7d4210537d58e9a0415969e5f6ca870",
+          "sha256": "5677e98d3b05b03aee3a0bcddfc705e585b802700301c51fd9811ca03f5e3116"
+        },
+        {
+          "path": "src/adapters/map/create-base-map-layer.js",
+          "previous_sha256": "910dfec8931245200e759b152b432e8a457441a32fbfbc671fdc72ad2d516830",
+          "sha256": "73b85aca449b629f09e461cce96566998318dfe82ae3888ca958c4fa09d4d66e"
+        },
+        {
+          "path": "src/domain/map/resolve-base-map-layer.js",
+          "previous_sha256": "782684084be387c4fb17220fe624f9dd3b9ffc4faf49f5961cde165a4e9eb56b",
+          "sha256": "2d8aa9f5450697f5be567714185b36c3c0c39af8ebb505b8be947d092ce405ee"
+        },
+        {
+          "path": "test/base-map-layer-modules.test.mjs",
+          "previous_sha256": "0e113a1eaf42b95a4dd3111fe3ee5698430dcd453bf587fd2cce9740b9142e52",
+          "sha256": "fc690f0910c830e32ea3f1515bb2d0317e700b562bfea7d34303d41b877f8297"
+        }
+      ]
     }
   ]
 }

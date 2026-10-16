@@ -1,0 +1,22 @@
+{
+  "name": "Koyu tema · Tam analiz",
+  "date": "2026-10-16",
+  "commit": "4e7647dc9e1b1e62a95b28bb25709490792cdf0c",
+  "tag": "recovery/koyu-tema-tam-analiz-2026-10-16",
+  "tree": "41a5569bcd6e1aa5fbc91fa5162f8a4b3bab8bc7",
+  "artifacts": [
+    {
+      "name": "dendrogeo-koyu-tema-tam-analiz.bundle",
+      "bytes": 32885857,
+      "sha256": "f339177ab67c38ee7b3ce7087392cf8fa25a8fc2edc03726b1752e39f5f3c37d"
+    },
+    {
+      "name": "dendrogeo-koyu-tema-tam-analiz.zip",
+      "bytes": 16124776,
+      "sha256": "85b4cc845f1e7147259a77d71e28269e0f8b18d8ee9bdfb48aadd546ab66aa96"
+    }
+  ],
+  "restoredFileCount": 1930,
+  "restoreVerified": true,
+  "scope": "Complete tracked core source, built assets, dependencies lockfiles, migrations and main history. Excludes live database rows, Auth, Storage files, credentials and device IndexedDB."
+}

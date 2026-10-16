@@ -39,6 +39,9 @@ try{for(const width of [360,390,430]){
  await page.locator('#side [data-dg-view="map"]').click();
  await page.evaluate(()=>{switchBaseLayer('sat');map.setView([39.99,32.62],20);});
  await page.waitForFunction(()=>{let fallback=false;map.eachLayer(layer=>{if(layer._dgBase==='sat'&&layer.options.maxNativeZoom===19)fallback=true;});return fallback;});
+ assert.equal(await page.evaluate(()=>map.getMaxZoom()),19);
+ await page.evaluate(()=>map.setZoom(22));assert.equal(await page.evaluate(()=>map.getZoom()),19,'unavailable imagery cannot be enlarged');
+ await page.waitForFunction(()=>document.querySelector('#map .leaflet-control-zoom-in').getAttribute('aria-disabled')==='true');
  assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1),true);
  assert.deepEqual(errors,[]);console.log(JSON.stringify({engine:engine.name(),width,savedMapReadOnly:true,analysisClearsSavedLayer:true,leaveCancel:true,leaveRpcSelfOnly:true,sharedListRefresh:true,imageryFallback:true}));await page.close();
 }}finally{await browser.close();await server.close();}

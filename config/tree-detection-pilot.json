@@ -1,0 +1,27 @@
+{
+  "schema": "dendrogeo/tree-model-pilot/1",
+  "status": "pilot-not-validated",
+  "projectUrl": "https://universe.roboflow.com/nagihans/tree-detection-fuytu",
+  "modelId": "tree-detection-fuytu/4",
+  "task": "object-detection",
+  "modelFamilyReported": "RF-DETR Nano",
+  "labelsReported": ["Tree", "objects-tree", "tree-top"],
+  "capabilities": {
+    "treeCandidates": true,
+    "speciesIdentification": false,
+    "crownSegmentation": false,
+    "dbhFromImagery": false,
+    "heightFromSingleRgbImage": false
+  },
+  "cardMetricsObserved": {
+    "observedOn": "2026-10-16",
+    "scope": "Public project overview; not independent validation on DendroGeo parks",
+    "map50": 0.676,
+    "precision": 0.687,
+    "recall": 0.631
+  },
+  "datasetLicenseReported": "CC BY 4.0",
+  "weightsAndServiceTerms": "Verify deployment permissions, plan quota and model-version metrics before production",
+  "imageryPolicy": "Use separately licensed georeferenced overhead imagery; map display zoom is not a ground-resolution measurement",
+  "productionEnabled": false
+}
