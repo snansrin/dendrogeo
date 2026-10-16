@@ -8009,6 +8009,19 @@
           "sha256": "52a85fb988ceb0a5b5f02af6176830c713e331d69bcc2b4383e67e66dca696bc"
         }
       ]
+    },
+    {
+      "id": "verified-audit-publication-test-isolation-2026-10-16",
+      "date": "2026-10-16",
+      "scope": "User-authorized modularization and verification fixes: isolate the REST pagination unit fixture from inherited production OIDC environment while preserving date filtering, processed-row skipping and pagination assertions. Production reader authorization and negative OIDC security tests are unchanged.",
+      "audit_chain": "sha256-v1",
+      "files": [
+        {
+          "path": "test/academic-profile.test.mjs",
+          "previous_sha256": "071cac4455dda489fc9a95880e1248bc2f5dfdb254c6b8efa8e0e7da67b7b2f2",
+          "sha256": "044084ae0db5d337aedae1c71f5f0ac5af056d87cee68a216618080070f6ebad"
+        }
+      ]
     }
   ]
 }

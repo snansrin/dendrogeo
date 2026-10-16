@@ -17,6 +17,7 @@ Kapsam: kullanıcının mevcut inceleme bulgularını doğrulama ve hataları gi
 | Erişilebilirlik | Otomatik tarama WCAG 2.1 etiketlerinde kalmıştı | WCAG 2.2 AA etiketi eklendi. Bu otomatik tarama, elle ekran okuyucu denetimi veya tam uygunluk sertifikası değildir. |
 | Yayın dokümanı | İsteğe bağlı künye alanlarını zorunlu diyordu | Gerçek form sözleşmesiyle uyumlu hale getirildi; doldurulan ORCID denetlenir, yayın/veri kapsamı onayı korunur. |
 | Rapor geçmişi | Her donmuş rapor kendisini “geçerli sürüm” ilan ediyordu | Yeni raporların geçmişinde yalnız o raporun yayımlanan anlık görüntüsü olduğu yazılır. Önceki DOI arşivleri değiştirilmez. |
+| Zamanlanmış yayın kabul testi | Üretimin OIDC ortam ayarı REST sayfalama unit fixture'ına sızıp yayını test adımında durduruyordu | Fixture ortamı açıkça kurar ve geri yükler. Gerçek OIDC yetkili kimlik ve PR/fork/bozuk token ret testleri ayrıca korunur. |
 
 ## Canlı veritabanında salt okunur doğrulama
 
@@ -73,6 +74,15 @@ operasyonel izleme ve tüm kampanyaların bulut senkronizasyonu ayrı işlerdir.
 Otomatik yüzey QA sonucu bağımsız saha doğruluğu olarak sunulmaz. Ham raster,
 karbon katsayıları, bilimsel eşikler, kabul edilmiş geometri ve DOI dosyaları
 bu çalışmada değiştirilmez.
+
+16 Ekim canlı üç park koşusu tamamlandı; veri hattı ve STAC/Sentinel kapsamı
+çalıştı. Ancak ham WorldCover 2021 ile 2026 spektral adaylarının otomatik
+karşılaştırması Göksu'da 3, Başkent'te 2, Kuğulu'da 4 nedenle **KRİTİK** kapısı
+üretti. Bu koşu insan etiketli bağımsız referans kullanmaz. Tarih farkı,
+spektral sınırlılıklar, gerçek arazi değişimi ve insan referans örnekleri
+incelenmeden kesin doğruluk yüzdesi veya motor hatası sonucu çıkarılamaz.
+Çıktı eşikleri yumuşatılmadı ve mevcut kabul kayıtları değiştirilmedi.
+[Canlı veri hattı kanıtı](https://github.com/snansrin/dendrogeo/actions/runs/38844793403).
 
 ## Yayın öncesi yerel doğrulama
 
