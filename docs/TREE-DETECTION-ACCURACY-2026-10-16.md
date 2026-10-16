@@ -26,6 +26,7 @@ Kullanıcı bu inceleme sırasında hem ağaç olmayan nesnelerin seçildiğini 
 - Pencere değiştiğinde eski adaylar temizlenir; güven eşiği mevcut sonuçları yerelde süzer. Sonuç JSON'u pencere, örtüşme, örnekleme aralığı ve doğrulama durumunu içerir.
 - Panel güven skorunu doğruluk yüzdesi olarak sunmaz; doğrulanmış ağaç toplamı ve gerçek taç alanı boş kalır.
 - Bağımsız referansla çevrimdışı değerlendirme modülü: kutu IoU eşleştirmesi, TP/FP/FN, precision, recall, F1, görüntü başına sayım MAE ve yanlılık. Kalibrasyon parkı test parkıyla aynı olamaz; eşik yalnız kalibrasyondan seçilir. Bu araç COCO mAP veya maske doğruluğu iddiasında bulunmaz.
+- Kullanıcının gerçek tarama dosyasındaki kısmi hata incelemesinden sonra dışa aktarma izlenebilirliği geliştirildi: kullanıcı JSON indirince her giriş JPEG'inin SHA-256 özeti, piksel penceresi, indirilme zamanı ve görünür güven eşiğinden önceki normalize adaylar da eklenir. Bunlar yalnız indirmede derlenir; model yanıtının ham kopyası veya referans etiketi değildir. Eski dosyalardaki eksik adaylar/hashler geriye doğru uydurulmaz. Görüntü dosyası başka bir servise otomatik aktarılmaz.
 - Landing yalnız kamuya açık `dg_accepted_park_surface(25)` sonucunun 16 Ekim kabul edilmiş geometrisini gösterir. NDVI, önceki yüzey bağlamı/sınırı ve gerçek 15 Ekim gözlemleriyle ayrı tutulur. Kaynak kabul tarihi ve hash saklanır; hesap/oturum verisi dışa aktarılmaz.
 
 ## Doğru model seçimi için kalan gerçek veri işi
@@ -66,3 +67,8 @@ Girdi sözleşmesi (`box`: özgün görüntü piksellerinde `[sol, üst, sağ, a
 - [Restor TCD](https://github.com/restor-foundation/tcd)
 - [SAHI: örtüşen pencere yaklaşımı](https://github.com/obss/sahi)
 - [Esri: görüntü tarihi, kaynak ve çözünürlük metadatası](https://www.esri.com/arcgis-blog/products/arcgis-living-atlas/imagery/wayback-with-world-imagery-metadata)
+- [Uydu/aerial taç segmentasyonunda yapraksız ağaçlar ve hata analizi](https://link.springer.com/article/10.1007/s00521-022-07640-4)
+
+## Görüntü mevsimi
+
+Genel taç segmentasyonu literatüründe yapraksız ağaçlarda geri çağırım kaybı bildiriliyor. Yerel incelemede de çok sayıda yapraksız ağaç görüldü. Bu, modelin kaçırmalarının olası nedenlerinden biridir; tek başına neden-sonuç veya eğitim kümesinin tamamının yapraklı olduğu kanıtı değildir. Uygun lisanslı yapraklı dönem görüntüsü ve kış görüntüleri ayrı değerlendirme gruplarında sınanmalı. Daha yeni tarih otomatik olarak daha iyi algılama anlamına gelmez.

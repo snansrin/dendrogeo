@@ -8825,6 +8825,35 @@
           "sha256": "055ab5a37602f97b019102ad223c8d51382fe83fda2b2cba710df85e458ea917"
         }
       ]
+    },
+    {
+      "id": "tree-review-image-provenance-export-2026-10-16",
+      "date": "2026-10-16",
+      "scope": "User-authorized modularization: preserve input image SHA256, window coordinates and pre-confidence normalized candidates only in explicit user downloads for reproducible local false-positive/false-negative review. Keep inference, map display, accepted science and account boundaries unchanged.",
+      "audit_chain": "sha256-v1",
+      "added_protected_files": [],
+      "files": [
+        {
+          "path": "index.html",
+          "previous_sha256": "76768be5b1dc853f23c47646f80047363ef7cee038f5fe403fe191696da96401",
+          "sha256": "14fd57b948f7597dcaf6f43dc255483e270fc9845e05f9506f1a14d2df3f6938"
+        },
+        {
+          "path": "src/adapters/trees/park-tree-imagery.js",
+          "previous_sha256": "a9e5f8a7b7357d2d1036cd58afe0051ebb117f70395941ce534b802b30110287",
+          "sha256": "1d43b3f43ce29cada90ef5e8aec995209e6f640fce4da1b40bb9368ac420e7fe"
+        },
+        {
+          "path": "src/application/trees/detect-tree-candidates.js",
+          "previous_sha256": "d23af8f404637db9d6a2d5b0f9b7fe924e21328b6f6bebf0729c31905df6c207",
+          "sha256": "cce2df9238794a6f1951ed5845793d99b3315ed5c57da6f7940ba3f51ed6aff3"
+        },
+        {
+          "path": "src/ui/tree-detection-panel.js",
+          "previous_sha256": "015cdaa5479301d068e78e30a79b172518faee7c4ac9b05a26d5ad48ed83bb6d",
+          "sha256": "53ceb56535f6f83aedb37693a6d08c1cd738e4fc940214b5353a1531d37c89b3"
+        }
+      ]
     }
   ]
 }

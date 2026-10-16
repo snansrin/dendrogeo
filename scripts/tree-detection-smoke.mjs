@@ -1,5 +1,6 @@
 import assert from 'node:assert/strict';
 import axe from 'axe-core';
+import {readFileSync} from 'node:fs';
 import {loadChromium} from './lib/playwright-runtime.mjs';
 import {serveFixture,isolateAccount} from './lib/browser-acceptance-fixture.mjs';
 const server=await serveFixture(),chromium=await loadChromium();
@@ -30,7 +31,7 @@ try{for(const width of [360,390,430]){
  await page.evaluate(()=>dgSetLang('en'));assert.match(await panel.innerText(),/Scan selected park/);await page.evaluate(()=>dgSetLang('tr'));
  await page.addScriptTag({content:axe.source});
  for(const mode of ['light','dark']){await page.evaluate(async value=>{document.documentElement.setAttribute('data-theme',value);await new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)));await Promise.all(document.getElementById('treeDetectionPanel').getAnimations({subtree:true}).map(a=>a.finished.catch(()=>{})));},mode);const violations=await page.evaluate(async()=>(await axe.run(document.getElementById('treeDetectionPanel'),{runOnly:{type:'tag',values:['wcag2a','wcag2aa','wcag21aa']}})).violations.map(v=>({id:v.id,targets:v.nodes.map(n=>n.target)})));assert.deepEqual(violations,[],mode+' panel accessibility');}
- const download=page.waitForEvent('download');await panel.locator('[data-tree-download]').click();assert.equal((await download).suggestedFilename(),'dendrogeo-park-tree-candidates.json');
+ const download=page.waitForEvent('download');await panel.locator('[data-tree-download]').click();const downloaded=await download;assert.equal(downloaded.suggestedFilename(),'dendrogeo-park-tree-candidates.json');const exported=JSON.parse(readFileSync(await downloaded.path(),'utf8'));assert.equal(exported.reviewData.independentlyValidated,false);assert.match(exported.reviewData.windows[0].imageSha256,/^[a-f0-9]{64}$/);assert.equal(exported.reviewData.normalizedCandidatesBeforeConfidence.length,2);assert.equal(Object.hasOwn(exported,'access_token'),false);
  windowPixels=1536;const previousCalls=calls;await panel.locator('[data-tree-window]').selectOption('1536');assert.equal(calls,previousCalls);assert.equal((await panel.locator('[data-tree-metrics]').innerText()).trim(),'');await panel.locator('[data-tree-run]').click();await page.waitForFunction(()=>document.querySelector('[data-tree-status]').textContent.includes('Tarama tamamlandı'));assert.equal(calls,previousCalls+1);assert.match(await panel.locator('[data-tree-metrics]').innerText(),/1536 px/);
  fail=true;await panel.locator('[data-tree-run]').click();await page.waitForFunction(()=>document.querySelector('[data-tree-status]').textContent.includes('yapılandırılmamış'));assert.match(await panel.locator('[data-tree-status]').innerText(),/Eksik tarama/);assert.equal((await panel.locator('[data-tree-metrics]').innerText()).trim(),'','transport failure must not look like a zero-tree count');
  fail=false;tileFail=true;const before=calls;await panel.locator('[data-tree-run]').click();await page.waitForFunction(()=>document.querySelector('[data-tree-status]').textContent.includes('Uydu görüntüsü tam alınamadı'));assert.equal(calls,before,'missing imagery cannot be inferred');
