@@ -16,7 +16,7 @@
     "scope": "Automated checks and selected keyboard behaviors; not complete WCAG conformance certification"
   },
   "new_regressions": {
-    "tests": 9,
+    "tests": 10,
     "passed": true,
     "areas": [
       "verified invitation identity",
