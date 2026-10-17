@@ -16,7 +16,7 @@
   <div class="sec">Saha</div>
   <div class="item on" role="button" tabindex="0" data-dg-view="dash">📊 Panel</div>
   <div class="item" role="button" tabindex="0" data-dg-view="measure">📏 Yeni Ölçüm</div>
-  <div class="item" role="button" tabindex="0" data-dg-view="nav">🧭 Waypoint</div>
+  <div class="item" role="button" tabindex="0" data-dg-view="nav">🧭 Ölçüm noktaları</div>
   <div class="item" role="button" tabindex="0" data-dg-view="map">🗺️ Canlı Harita</div>
   <div class="sec">Veri</div>
   <div class="item" role="button" tabindex="0" data-dg-view="projects">📁 Projeler</div>
@@ -37,7 +37,7 @@
    <div class="grid g4" style="margin-bottom:22px">
     <div class="stat" style="border-left:3px solid var(--green);padding-left:18px"><div class="lbl">📋 Kayıtlarım</div><div class="val" id="dMy">0</div></div>
     <div class="stat" style="border-left:3px solid var(--amber);padding-left:18px"><div class="lbl">🌱 Karbonum</div><div class="val" id="dCarbon">0</div><div style="font-size:.72rem;color:var(--mut);margin-top:4px">kg C (saf karbon)</div></div>
-    <div class="stat" style="border-left:3px solid var(--blue);padding-left:18px"><div class="lbl">📍 Waypoint</div><div class="val" id="dWp">0</div></div>
+    <div class="stat" style="border-left:3px solid var(--blue);padding-left:18px"><div class="lbl">📍 Ölçüm noktaları</div><div class="val" id="dWp">0</div></div>
     <div class="stat" style="border-left:3px solid var(--red);padding-left:18px"><div class="lbl">✅ Tamamlanan</div><div class="val" id="dVisit">0</div></div>
    </div>
    <div class="card" style="margin-bottom:18px;border-left:4px solid var(--green)">
@@ -76,10 +76,10 @@
 
   <div class="view" id="v-nav">
    <div class="waypoint-heading">
-    <div><div class="dg-kicker">SAHA NAVİGASYONU</div><h2 class="disp">Waypoint</h2></div>
+    <div><div class="dg-kicker">SAHA NAVİGASYONU</div><h2 class="disp">Ölçüm noktaları</h2></div>
    </div>
 
-   <section class="card waypoint-project" aria-label="Waypoint projesi">
+   <section class="card waypoint-project" aria-label="Ölçüm noktalarının projesi">
     <div class="waypoint-project-select"><label class="lbl" for="nProject">Proje</label><select id="nProject" data-dg-waypoint-action="load"></select></div>
     <div id="navInfo" class="waypoint-project-status" role="status">Proje seçin.</div>
    </section>
@@ -105,24 +105,24 @@
    <details id="wpMapPanel" class="card waypoint-map" data-dg-waypoint-action="map-panel">
     <summary><span>🗺 Harita</span><small>hedef · konum · tamamlananlar</small></summary>
     <div id="navMap" class="notranslate" translate="no"></div>
-    <div class="waypoint-map-legend"><span><i class="wp-legend-dot pending"></i>Waypoint</span><span><i class="wp-legend-dot done"></i>Tamamlandı</span><span><i class="wp-legend-dot me"></i>Konumun</span></div>
+    <div class="waypoint-map-legend"><span><i class="wp-legend-dot pending"></i>Ölçüm noktası</span><span><i class="wp-legend-dot done"></i>Tamamlandı</span><span><i class="wp-legend-dot me"></i>Konumun</span></div>
    </details>
 
    <section class="card waypoint-list" aria-labelledby="waypointListTitle">
-    <div class="project-section-head"><div><div class="dg-kicker">SAHA SIRASI</div><h3 id="waypointListTitle">Waypoint listesi</h3></div></div>
+    <div class="project-section-head"><div><div class="dg-kicker">SAHA SIRASI</div><h3 id="waypointListTitle">Ölçüm noktaları listesi</h3></div></div>
     <div class="waypoint-toolbar">
      <div><label class="lbl" for="wpSearch">Nokta ara</label><input id="wpSearch" type="search" placeholder="P12" data-dg-waypoint-action="render"></div>
      <div><label class="lbl" for="wpFilter">Durum</label><select id="wpFilter" data-dg-waypoint-action="render"><option value="all">Tümü</option><option value="pending">Bekleyen</option><option value="done">Tamamlanan</option></select></div>
      <div><label class="lbl" for="wpSort">Sıralama</label><select id="wpSort" data-dg-waypoint-action="render"><option value="id">Nokta numarası</option><option value="distance">En yakından</option></select></div>
     </div>
-    <ul id="wpListTable" class="waypoint-points" aria-label="Waypoint noktaları"></ul>
+    <ul id="wpListTable" class="waypoint-points" aria-label="Ölçüm noktaları"></ul>
     <div id="wpPager" class="waypoint-pager"></div>
    </section>
 
    <section class="card waypoint-files" aria-labelledby="waypointFileTitle">
-    <div class="project-section-head"><div><div class="dg-kicker">LİSTE YÖNETİMİ</div><h3 id="waypointFileTitle">Waypoint dosyası</h3></div></div>
+    <div class="project-section-head"><div><div class="dg-kicker">LİSTE YÖNETİMİ</div><h3 id="waypointFileTitle">Ölçüm noktaları dosyası</h3></div></div>
     <div class="waypoint-file-row">
-     <span class="dg-file btn sm ghost">📂 <span>CSV seç</span><input type="file" id="nCsv" aria-label="Waypoints.csv dosyası seç (X,Y,id)" accept=".csv" data-dg-waypoint-action="file-name" style="position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:pointer"></span>
+     <span class="dg-file btn sm ghost">📂 <span>CSV seç</span><input type="file" id="nCsv" aria-label="Ölçüm noktaları CSV dosyası seç (X,Y,id)" accept=".csv" data-dg-waypoint-action="file-name" style="position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:pointer"></span>
      <span class="dg-file-name mono" id="nCsvName"></span>
      <button type="button" class="btn blue sm" data-dg-waypoint-action="upload">⬆ Yükle</button>
      <button type="button" class="btn red sm waypoint-delete-all" data-dg-waypoint-action="delete-all">🗑 Tümünü Sil</button>
@@ -479,13 +479,13 @@
    <section class="card visitor-control" aria-label="Canlı izleme filtreleri">
     <div class="visitor-quick">
      <button type="button" class="btn sm ghost" data-dg-visitor-action="quick-filter" data-dg-visitor-view="measure">📏 Ölçümdekiler</button>
-     <button type="button" class="btn sm ghost" data-dg-visitor-action="quick-filter" data-dg-visitor-view="nav">📍 Waypointtekiler</button>
+     <button type="button" class="btn sm ghost" data-dg-visitor-action="quick-filter" data-dg-visitor-view="nav">📍 Ölçüm noktaları ekranındakiler</button>
      <button type="button" class="btn sm ghost" data-dg-visitor-action="quick-located">🛰 Konum paylaşanlar</button>
      <button type="button" class="btn sm ghost" data-dg-visitor-action="reset-filters">Tümünü göster</button>
     </div>
     <div class="dg-vis-tools">
      <div><label class="lbl" for="visSearch">Kullanıcı ara</label><input id="visSearch" type="search" placeholder="İsim veya cihaz" data-dg-visitor-action="render"></div>
-     <div><label class="lbl" for="visViewFilter">Ekran</label><select id="visViewFilter" data-dg-visitor-action="render"><option value="">Tüm ekranlar</option><option value="measure">Yeni Ölçüm</option><option value="nav">Waypoint</option><option value="map">Canlı Harita</option><option value="projects">Projeler</option></select></div>
+     <div><label class="lbl" for="visViewFilter">Ekran</label><select id="visViewFilter" data-dg-visitor-action="render"><option value="">Tüm ekranlar</option><option value="measure">Yeni Ölçüm</option><option value="nav">Ölçüm noktaları</option><option value="map">Canlı Harita</option><option value="projects">Projeler</option></select></div>
      <label class="measure-share"><input class="dg-switch" id="visLocated" type="checkbox" data-dg-visitor-action="render"><span>Yalnız konum paylaşanlar</span></label>
      <label class="measure-share"><input class="dg-switch" type="checkbox" data-dg-visitor-action="pause"><span>Görünümü duraklat</span></label>
      <p class="dg-meta visitor-control-note">Konum paylaşan: <b id="vzLocated">0</b> · Arka planda kalan oturumlar ayrıca işaretlenir.</p>

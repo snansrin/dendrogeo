@@ -2,7 +2,13 @@
 
 /* Keep the usual result; recover SweepLine round-off on the same millimetre lattice. */
 window.DG_CLIP_GRID_GEOMETRY={
-  clip(operation,geometries,{run,clean}){
+  create({run,clean}){
+    let integerMode=false;
+    return(operation,...geometries)=>integerMode
+      ?clean(window.DG_INTEGER_GRID_CLIP.clip(operation,geometries.map(clean),{library:window.ClipperLib}))
+      :window.DG_CLIP_GRID_GEOMETRY.clip(operation,geometries,{run,clean,onFallback:()=>{integerMode=true;}});
+  },
+  clip(operation,geometries,{run,clean,onFallback}){
     const inputs=geometries.map(value=>clean(value));
     try{return clean(run(operation,...inputs));}
     catch(error){
@@ -15,7 +21,12 @@ window.DG_CLIP_GRID_GEOMETRY={
         if(!Number.isSafeInteger(integer))throw error;
         return integer;
       }));
-      return clean(map(run(operation,...integers),value=>value/1000));
+      try{return clean(map(run(operation,...integers),value=>value/1000));}
+      catch(retryError){
+        if(!/Unable to find segment[\s\S]*SweepLine tree/.test(String(retryError?.message))||!window.DG_INTEGER_GRID_CLIP||!window.ClipperLib)throw retryError;
+        onFallback?.();
+        return clean(window.DG_INTEGER_GRID_CLIP.clip(operation,inputs,{library:window.ClipperLib}));
+      }
     }
   }
 };

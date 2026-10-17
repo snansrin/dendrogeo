@@ -1053,6 +1053,15 @@
       "test/recover-park-boundary.test.mjs",
       "test/fixtures/harikalar-diyari-park.json",
       "scripts/park-boundary-recovery-smoke.mjs"
+    ],
+    "grid_sweepline_recovery_2026_10_17": [
+      "src/adapters/surface/integer-grid-clip.js",
+      "vendor/clipper-lib-6.4.2.js",
+      "vendor/clipper-lib-LICENSE.txt",
+      "test/grid-precision-recovery.test.mjs",
+      "test/fixtures/harikalar-grid-surface.json.gz",
+      "scripts/harikalar-grid-smoke.mjs",
+      "test/measurement-points-labels.test.mjs"
     ]
   },
   "sha256": {
@@ -2062,7 +2071,14 @@
     "test/complete-raster-cell-coverage.test.mjs": "006c62566c7c6dd04e45c5461b89201b089ce47d9af866103c6cc2be6f95c507",
     "test/recover-park-boundary.test.mjs": "c2ef143bfb1bb498079ea40654fda092ec92711a73456341d7615b6b3da7db95",
     "test/fixtures/harikalar-diyari-park.json": "d414a85c2a45d5fb3587944308a9c70871801f329465eca0086e8e20becceda8",
-    "scripts/park-boundary-recovery-smoke.mjs": "9b070b2a9b9944c6d2b71b211ccf41487cc89ece8234b76ad5885623d0f5a575"
+    "scripts/park-boundary-recovery-smoke.mjs": "9b070b2a9b9944c6d2b71b211ccf41487cc89ece8234b76ad5885623d0f5a575",
+    "src/adapters/surface/integer-grid-clip.js": "97f9a5effe096011b80518293a2713bd7de41302c60c8b85c4bde8a004e5682e",
+    "vendor/clipper-lib-6.4.2.js": "a650c6946682edc1a64016f6553eeb5c32ce45eb7ca0ad5d8221961af011d97c",
+    "vendor/clipper-lib-LICENSE.txt": "08da9ce2a865781993261cc086310beadce4fe293b6ee9529255229c2f8fd47b",
+    "test/grid-precision-recovery.test.mjs": "de35bf3a837ec3aeca8bb35cda5db48cf7d8aceea3efcdd7b7de51075df96064",
+    "test/fixtures/harikalar-grid-surface.json.gz": "c5ff174c0ede17979996c372542a39efb55a97142cb8efa25b4adb2fcae02342",
+    "scripts/harikalar-grid-smoke.mjs": "822cc5de594b1b2c1f73fce77c1535288e2fbc2020e52188b89d7664f1490355",
+    "test/measurement-points-labels.test.mjs": "f97ba4b257a8346d5451c494b3fae1bf1ec0dedfcb98a30239f306801d4457fa"
   },
   "authorized_modularizations": [
     {
@@ -9378,6 +9394,93 @@
           "path": "docs/SCIENTIFIC-CORE-FREEZE.md",
           "previous_sha256": "1d9068574301fbc677022e62678daf917d0f719ad2a0dc8d3fb93c1c59dea73b",
           "sha256": "80ec71c0e9b1d5b5bb0a91b8aa9edf81aa917c4bed6f4c1b28993290d138a909"
+        }
+      ]
+    },
+    {
+      "id": "harikalar-independent-integer-grid-recovery-and-point-labels-2026-10-17",
+      "date": "2026-10-17",
+      "scope": "User-authorized modularization: resolve repeated Harikalar Diyari grid SweepLine failures using a separately pinned grid-only integer Boolean adapter after both existing attempts fail. Recovery is private to one grid job; verify every point against original park and obstacle clearance. Preserve normal successful geometry operations, allometry, species/density, park detection, raw surface classification and accepted records. Add real 12031-cell Harikalar Worker regression with forced double failure, vendor licences and cache revision. User also requests renaming the Waypoint screen to Olcum noktalari; only presentation labels and English translations change, routes/IDs/storage contracts remain intact. Mark the compressed public regression fixture as binary; preserve text line-ending checks for all text files.",
+      "audit_chain": "sha256-v1",
+      "added_protected_files": [
+        "src/adapters/surface/integer-grid-clip.js",
+        "vendor/clipper-lib-6.4.2.js",
+        "vendor/clipper-lib-LICENSE.txt",
+        "test/grid-precision-recovery.test.mjs",
+        "test/fixtures/harikalar-grid-surface.json.gz",
+        "scripts/harikalar-grid-smoke.mjs",
+        "test/measurement-points-labels.test.mjs"
+      ],
+      "files": [
+        {
+          "path": "index.html",
+          "previous_sha256": "2d5ecad8fb9fdfb4da5c87f672e8b2a40e841af1b1d36fd09ec9ef136aa2b49d",
+          "sha256": "09a51ef8088294457a81ce30d4e7bc91ca42bbd466b54a59179738657c29cae7"
+        },
+        {
+          "path": "package-lock.json",
+          "previous_sha256": "85e5e84cdb17633601016f36ab41fb054a0c9038006be94989533983956f328f",
+          "sha256": "7186e5429ed1b272e5c25416466b82e13e27f26fec87234a61ae7bae1cd3d149"
+        },
+        {
+          "path": "package.json",
+          "previous_sha256": "902df7cd9c354cb776993e64a4f09810ddfeb09a41a7f7711da6ab9cc947467c",
+          "sha256": "6567d97e634a63c822c683c38dadcd1b28fb07e54922c593d8c85960742f2eea"
+        },
+        {
+          "path": "partials/shell.html",
+          "previous_sha256": "ed8284b0ede1bda5280159cbef56afdd62816c9ef703374152aa12ec771b6943",
+          "sha256": "8788c5923cbe7567639b821522ef85b529dce3c7d8924ae1f4dfc3ae84629a01"
+        },
+        {
+          "path": "scripts/check-phone.mjs",
+          "previous_sha256": "db79fbe7547ff173de6d2574d20bef4f925e8f00f78eba50b169ed543179426e",
+          "sha256": "c5dd830db4254c8cdc5a769b63d47c5577111d5172880f8250f82a03b2d2145e"
+        },
+        {
+          "path": "src/adapters/surface/clip-grid-geometry.js",
+          "previous_sha256": "7b71799328613143776221b9ddaabd3b7ada087ce350bfaecc7f8dec5b3c6f90",
+          "sha256": "c8cbf28813360186bff1911be29d1d4c4ee836dcab662888cef95f6819250d86"
+        },
+        {
+          "path": "src/utils/lazylibs.js",
+          "previous_sha256": "069e17105582aae242f71365c0fc5e12ce07af5a2accd9b0f8b0b0c76ae29016",
+          "sha256": "347d7d21a4c5edf40fbc15d34c1d59d83d75c253294327fb3eae451868831733"
+        },
+        {
+          "path": "src/workers/surface-worker.js",
+          "previous_sha256": "af6477f104a06342cf69ef7f702a3e95ed27cd390c5aae36a2fbe5dfd68ed2fe",
+          "sha256": "036f18fa9d08120a6bd5b873868562b9dd35b7c7d5dbdfbcdaea757d767de2ea"
+        },
+        {
+          "path": "sw.js",
+          "previous_sha256": "974ceb9012d389d0afc941ca79d3fddab693d2ed7106618c588d26e0f7e1475d",
+          "sha256": "df7a83362fe4ea04538976037b7a091f66873236a36b1a30bac154f2b847ea35"
+        },
+        {
+          "path": "docs/SCIENTIFIC-CORE-FREEZE.md",
+          "previous_sha256": "80ec71c0e9b1d5b5bb0a91b8aa9edf81aa917c4bed6f4c1b28993290d138a909",
+          "sha256": "bacefcbda2690cda357caed23865d677eb103b087110b3ec16fd0e59b190e5bd"
+        },
+        {
+          "path": "src/services/lc-review.js",
+          "previous_sha256": "03579a67ccd6cef3e56424d0a2d1bcb6e912a480fdcf6acdfaac734ae004dcb6",
+          "sha256": "f8df21a0a00ebd15b50e0ecad409e4a7474bab6548c5de05d00fda5de83f9101"
+        },
+        {
+          "path": "src/application/surface/prepare-surface-grid-domain.js",
+          "previous_sha256": "ef673ea7b35a8226f96b0d096a32a0ed5d54ed33c348f6ece9cd6fb270c28bd6",
+          "sha256": "d30944f02b35623463bf4fc7f4ee55f00943ef5b342bf3c29c75540794b8707c"
+        },
+        {
+          "path": "src/application/surface/build-surface-sampling-grid-cells.js",
+          "previous_sha256": "b6997cf98a13258b97dbbcd193a45f21e0950fba639b7379d6659a369d28533e",
+          "sha256": "0231caade6464ce54e16dc910a22692b4ce904b254154c2ae36dac5fec7325be"
+        },
+        {
+          "path": "src/application/surface/run-surface-sampling-grid.js",
+          "previous_sha256": "98ef9d7ed0f1b49005a7c7b606662d473f32c58bfbe09f3ff2b1af2bd024dcf4",
+          "sha256": "54dab14775578365e2eb6c8f1949365d964879c77a2f7fcad41aaaf129e38bb0"
         }
       ]
     }

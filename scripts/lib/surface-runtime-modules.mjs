@@ -8,7 +8,7 @@ export function surfaceRuntimeModules(read){
   if(node.type!=='VariableDeclarator'||node.id?.name!=='DG_LULC_CHAIN')return;
   if(node.init?.type!=='ArrayExpression')throw Error('Surface runtime chain must be a literal array.');
   paths=node.init.elements.map(item=>{
-   if(item?.type!=='Literal'||typeof item.value!=='string'||(!/^src\/[a-z0-9_/-]+\.js$/.test(item.value)&&item.value!=='vendor/polygon-clipping-0.15.7.js'))throw Error('Invalid surface runtime module path.');
+   if(item?.type!=='Literal'||typeof item.value!=='string'||(!/^src\/[a-z0-9_/-]+\.js$/.test(item.value)&&!['vendor/polygon-clipping-0.15.7.js','vendor/clipper-lib-6.4.2.js'].includes(item.value)))throw Error('Invalid surface runtime module path.');
    return item.value;
   });
  });

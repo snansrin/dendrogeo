@@ -26,6 +26,7 @@ Kullanıcı kaynaklı verinin yayımlanması için ilgili hak, izin, aydınlatma
 | Chart.js | 4.5.1 | `vendor/chart.js-4.5.1.js` | MIT | [Upstream](https://github.com/chartjs/Chart.js/tree/v4.5.1) |
 | GeoTIFF.js | 2.1.3 | `vendor/geotiff-2.1.3.js` | MIT | [Upstream](https://github.com/geotiffjs/geotiff.js/tree/v2.1.3) |
 | polygon-clipping | 0.15.7 | `vendor/polygon-clipping-0.15.7.js` | MIT; bundle içinde ayrıca lisans başlıkları bulunur | [Repodaki MIT metni](../vendor/polygon-clipping-LICENSE.md) · [upstream](https://github.com/mfogel/polygon-clipping/tree/v0.15.7) |
+| JavaScript Clipper | npm 6.4.2 · JS 6.4.2.2 | `vendor/clipper-lib-6.4.2.js`; yalnız grid kesişimindeki sayısal hata için bağımsız yedek | BSL-1.0; gömülü JSBN bildirimi korunur | [Lisans metni](../vendor/clipper-lib-LICENSE.txt) · [upstream](https://github.com/junmer/clipper-lib) |
 
 Leaflet'in BSD koşulları, paketlerin MIT lisans bildirimleri ve polygon-clipping bundle'ındaki gömülü üçüncü taraf bildirimleri dağıtılan dosyalarda korunmalıdır. polygon-clipping bundle'ı splaytree 3.1.2 için MIT bildirimi ve Microsoft kaynaklı TypeScript yardımcı kodu için Apache-2.0 bildirimi içerir. Bağımlılıkların sürümleri ve kaynak dosyaları ayrıca [vendor/VERSIONS.md](../vendor/VERSIONS.md) içinde izlenir.
 

@@ -4,7 +4,7 @@
 // NOT: Senkronizasyon artık Ana Thread (Supabase JS SDK) tarafından yapılıyor
 // ============================================================
 
-const CACHE_VERSION = 'dendrogeo-sw-v2-r436';
+const CACHE_VERSION = 'dendrogeo-sw-v2-r437';
 
 /* İKİ AYRI STATİK CACHE — bu ayrım bilinçli ve önemli.
  *
@@ -910,6 +910,7 @@ const CORE_ASSETS = [
     '/src/domain/surface/build-grid-line-mask.js',
     '/src/domain/surface/clean-grid-geometry.js',
     '/src/adapters/surface/clip-grid-geometry.js',
+    '/src/adapters/surface/integer-grid-clip.js',
     '/src/domain/surface/validate-surface-grid-options.js',
     '/src/application/surface/prepare-surface-grid-domain.js',
     '/src/application/surface/erode-surface-grid-domain.js',
@@ -1051,6 +1052,7 @@ const CORE_ASSETS = [
     '/src/workers/surface-worker.js',
     '/src/workers/surface-worker-bootstrap.js',
     '/vendor/polygon-clipping-0.15.7.js',
+    '/vendor/clipper-lib-6.4.2.js',
     '/css/startup.css',
     '/',
     '/index.html',

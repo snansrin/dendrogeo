@@ -29,6 +29,8 @@ Harikalar Diyarı (OSM way/205225595) gerçek veri kontrolü: 88 sınır köşes
 
 ## Yerel push koruması
 
+17 Ekim ikinci grid hata bildirimi: yalnız ölçek değiştirerek yeniden deneme Harikalar Diyarı için yeterli olmadı. İki SweepLine denemesi de başarısızsa grid adaptörü, aynı 0,001 m koordinat hassasiyetinde bağımsız Clipper tam sayı Boolean yedeğini kullanır. Kurtarma seçimi yalnız o grid işinde saklanır; sonraki grid olağan motorla başlar. Yedek yalnız grid işlemlerinde çağrılır; sınıflandırma, allometri, kayıtlı geometri ve olağan başarılı kesişimler değişmez. İç delikler, adacıklar, çoklu engeller ve güvenlik mesafesi regresyonla korunur. Her aday noktanın mesafesi ayrıca özgün park sınırı ve engellerle doğrulanır; Boolean çıktısı tek güvenlik kanıtı sayılmaz. `harikalar-grid-smoke.mjs`, gerçek kamuya açık WorldCover hücre geometrileriyle iki hata denemesini kontrollü olarak üretir; bu fikstür OSM iyileştirmesi veya kullanıcı düzeltmesi içermez. Kullanıcının ek talebiyle yalnız gezinme etiketleri “Ölçüm noktaları” olarak Türkçeleştirilmiştir; `nav` rotası, kontrol kimlikleri ve kayıt şeması korunur.
+
 Bu çalışma kopyasında `npm run core:lock` ile `.githooks/pre-push` etkinleştirilir. Normal `git push`, çekirdek hash denetimi başarısızsa durur. Yeni bir klonda da aynı komutla etkinleştirilmelidir; yalnız hook dosyasının Git'te bulunması kanca kurmaz.
 
 Kilitli kaynaklar sonraki arayüz işleri sırasında değiştirilmez. Kullanıcı açıkça belirli bir çekirdek düzeltmesi isterse değişiklik kapsamı, önceki/yeni SHA-256 değerleri ve ilgili regresyon kanıtı yeni bir yetkili kayıtla belgelenir. Hash'leri kendiliğinden yenileyen bir komut bulunmaz.

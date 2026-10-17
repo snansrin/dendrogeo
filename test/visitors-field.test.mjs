@@ -103,7 +103,7 @@ test('visitor map renderer keeps location gate, presentation, trails and follow 
  const marker=events.find(e=>e.kind==='marker');
  assert.deepEqual(Array.from(marker.coords),[39,32]);assert.equal(marker.options.keyboard,false);assert.equal(marker.options.zIndexOffset,700);
  assert.match(events.find(e=>e.kind==='icon').options.html,/background:#123456/);
- assert.match(events.find(e=>e.kind==='tooltip').html,/<b>Ada<\/b><br>Waypoint/);
+ assert.match(events.find(e=>e.kind==='tooltip').html,/<b>Ada<\/b><br>Ölçüm noktaları/);
  assert.equal(events.filter(e=>e.kind==='view').length,1);assert.equal(a.run('DG_VIS_FIT'),true);
  a.run('dgVisMapDraw(rows)');assert.equal(events.filter(e=>e.kind==='view').length,1);
  a.els.get('visFollow').checked=true;a.run('dgVisMapDraw(rows)');assert.equal(events.filter(e=>e.kind==='view').length,2);

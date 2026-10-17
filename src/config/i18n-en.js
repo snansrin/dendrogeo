@@ -1776,3 +1776,15 @@ Object.assign(DG_I18N_EN,{
  "Diğer işlemler":"More actions",
  "Park adını düzenleyin veya yanlış kimliği kaldırın. Birleştirme ve sınır güncelleme için Diğer işlemler seçeneğini kullanın.":"Edit park names or remove incorrect identities. Use More actions to merge parks or refresh boundaries."
 });
+
+Object.assign(DG_I18N_EN,{
+ "🧭 Ölçüm noktaları": "🧭 Sampling points",
+ "📍 Ölçüm noktaları": "📍 Sampling points",
+ "Ölçüm noktaları": "Sampling points",
+ "Ölçüm noktası": "Sampling point",
+ "Ölçüm noktalarının projesi": "Sampling-point project",
+ "Ölçüm noktaları listesi": "Sampling-point list",
+ "Ölçüm noktaları dosyası": "Sampling-point file",
+ "Ölçüm noktaları CSV dosyası seç (X,Y,id)": "Select sampling-points CSV file (X,Y,id)",
+ "📍 Ölçüm noktaları ekranındakiler": "📍 On the sampling-points screen"
+});

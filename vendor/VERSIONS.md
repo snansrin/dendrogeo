@@ -31,6 +31,7 @@ Bu dosyalar **depoya alınmış** üçüncü taraf kütüphanelerdir. Daha önce
 | `supabase-js-2.116.0.js` | **2.116.0** | `https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2` |
 | `geotiff-2.1.3.js` | 2.1.3 | `https://cdn.jsdelivr.net/npm/geotiff@2.1.3/dist-browser/geotiff.js` |
 | `chart.js-4.5.1.js` | **4.5.1** | `https://cdn.jsdelivr.net/npm/chart.js@4` |
+| `clipper-lib-6.4.2.js` | npm **6.4.2**, JS 6.4.2.2 | `https://registry.npmjs.org/clipper-lib/-/clipper-lib-6.4.2.tgz` · BSL-1.0 · grid sayısal hata yedeği |
 
 ### `images/` alt dizini
 

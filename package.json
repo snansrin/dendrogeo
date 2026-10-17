@@ -36,6 +36,7 @@
     "@electric-sql/pglite": "0.5.10",
     "acorn": "8.19.0",
     "axe-core": "4.14.0",
+    "clipper-lib": "6.4.2",
     "jose": "6.1.0",
     "playwright-core": "1.62.1",
     "polygon-clipping": "0.15.7",

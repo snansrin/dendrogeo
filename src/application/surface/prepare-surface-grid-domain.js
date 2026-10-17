@@ -14,6 +14,8 @@ window.DG_PREPARE_SURFACE_GRID_DOMAIN={
     for(const line of data.blockLines||[])if(line.pts?.length>=2)obstacles.push(local(lineMask(line,epsg)));
     if(obstacles.length)domain=clip('difference',domain,...obstacles);
     domain=clip('intersection',domain,park);
-    return{globalPark,origin,local,global,park,domain,size,clearance,epsg};
+    const sourceObstacles=data.greenOnly?[...obstacles,...(data.parts||[]).filter(part=>part.type!=='green'&&part.geom?.length).map(part=>local(part.geom))]:obstacles;
+    const constraints={park,obstacles:sourceObstacles.filter(geometry=>geometry.length).map(geometry=>({geometry,bounds:bounds(geometry)}))};
+    return{globalPark,origin,local,global,park,domain,constraints,size,clearance,epsg};
   }
 };

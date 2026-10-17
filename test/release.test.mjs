@@ -184,7 +184,7 @@ describe('satır sonu normalizasyonu (yama taşınabilirliği)', () => {
   });
 
   test('⭐ birinci taraf metin dosyalarında CRLF yok', () => {
-    const IKILI = /\.(png|jpe?g|gif|ico|webp|woff2?|ttf|eot|pdf|zip|mp3)$/i;
+    const IKILI = /\.(png|jpe?g|gif|ico|webp|woff2?|ttf|eot|pdf|zip|gz|mp3)$/i;
     const dosyalar = [];
     const yuru = (d) => {
       for (const a of readdirSync(d)) {

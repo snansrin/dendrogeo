@@ -170,6 +170,8 @@ const DG_LULC_CHAIN=[
   "src/domain/surface/build-grid-line-mask.js",
   "src/domain/surface/clean-grid-geometry.js",
   "src/adapters/surface/clip-grid-geometry.js",
+  "vendor/clipper-lib-6.4.2.js",
+  "src/adapters/surface/integer-grid-clip.js",
   "src/domain/surface/validate-surface-grid-options.js",
   "src/application/surface/prepare-surface-grid-domain.js",
   "src/application/surface/erode-surface-grid-domain.js",

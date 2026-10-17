@@ -27,3 +27,4 @@ vendor/** -text
 *.webp binary
 *.woff binary
 *.woff2 binary
+*.gz binary
