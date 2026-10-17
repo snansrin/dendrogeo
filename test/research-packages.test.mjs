@@ -32,7 +32,7 @@ test('JOSS draft contains current required substantive sections and marks author
     assert.ok(paper.includes('# '+heading),'Missing JOSS section: '+heading);
   }
   assert.match(paper,/Ankara University/);
-  assert.match(paper,/Final author review and declarations remain required/);
+  assert.match(read('papers/joss/README.md'),/Final author review and declarations remain required/);
   assert.match(paper,/No external adoption or peer-reviewed publication/);
 });
 
@@ -53,4 +53,19 @@ test('open-review schema, policy, and tests are present and publication is opt-i
   assert.match(read('docs/dgr-open-peer-review.md'),/does not imply journal review/);
   assert.match(read('scripts/lib/report-document-composition.mjs'),/renderPublicPeerReview/);
   assert.match(read('scripts/lib/report-metadata.mjs'),/peerReviewContributors/);
+});
+
+
+test('JOSS manuscript explains landscape architecture, park geometry and relative NDVI with bounded claims',()=>{
+  const paper=read('papers/joss/paper.md');
+  assert.match(paper,/title: "DendroGeo: An integrated Web GIS/);
+  assert.match(paper,/Department of Landscape Architecture, Faculty of Agriculture, Ankara University/);
+  assert.doesNotMatch(paper,/Department of Forest|Forestry Engineering|\[Confirm|\[Institution/);
+  for(const phrase of ['actual polygon geometries','polygon, rectangle, or circle','three distinct valid observation dates','at least nine eligible cells','one-third and two-thirds quantiles','do not alter categorical classes or area totals']) assert.ok(paper.includes(phrase),phrase);
+  assert.match(paper,/accuracy or execution-time advantages.*require a common benchmark/);
+  const body=paper.split('---').slice(2).join('---');
+  const words=body.trim().split(/\s+/).length;
+  assert.ok(words>=750&&words<=1750,`JOSS body word count: ${words}`);
+  const bib=read('papers/joss/references.bib');
+  for(const citation of paper.matchAll(/(?<![A-Za-z0-9_.])@([A-Za-z][A-Za-z0-9]+)/g)) assert.ok(bib.includes('{'+citation[1]+','),'Unresolved citation: '+citation[1]);
 });
