@@ -24,7 +24,12 @@ try {
   assert.equal(await dialog.locator('[required]').count(),0);
   const before=await dialog.boundingBox();
   await dialog.locator('.dg-field-protocol summary').click();
-  if(lang==='en')await page.waitForFunction(()=>document.querySelector('.dg-field-protocol summary').textContent==='Field validation details (optional)');
+  if(lang==='en'){
+   await page.waitForFunction(()=>document.querySelector('.dg-field-protocol summary').textContent==='Field validation details (optional)');
+   assert.equal(await dialog.locator('h2').innerText(),'Scientific report details');
+   assert.match(await dialog.locator('[type=submit]').innerText(),/Publish report/);
+   assert.match(await dialog.locator('.dg-report-dialog-heading .dg-meta').innerText(),/Measurements and the accepted analysis are transferred automatically/);
+  }
   await dialog.locator('[name=inventory_scope]').selectOption('partial');
   await dialog.locator('[name=observers]').fill('Fixture team');
   await dialog.locator('[name=calibration]').fill('Not documented');

@@ -8937,6 +8937,20 @@
           "sha256": "8fff90aaf6524cc572624a3d7a5349038fedfc0232f0bfff950dc9a6ac7c1368"
         }
       ]
+    },
+    {
+      "id": "report-dialog-language-completion-2026-10-17",
+      "date": "2026-10-17",
+      "scope": "User-authorized modularization maintenance: complete report dialog heading, action and description translations while preserving raw park names, field values, formulas and all analysis engines; generated index asset fingerprints only.",
+      "audit_chain": "sha256-v1",
+      "added_protected_files": [],
+      "files": [
+        {
+          "path": "index.html",
+          "previous_sha256": "e62a0387bfbd7f293e54e44f2d0dfa54152b4429ad224ffd7fc015eda2d6d6bf",
+          "sha256": "3a2366a9a930f31feadae6c049f82d737891ee94c85285b750d8675ae7331de8"
+        }
+      ]
     }
   ]
 }

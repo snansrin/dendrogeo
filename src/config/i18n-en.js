@@ -1745,7 +1745,12 @@ Object.assign(DG_I18N_EN,{
  "Tekrar ölçüm ve bağımsız kontrol":"Repeat measurements and independent checks",
  "Kontrol tarihi, referans ve sapma; yapılmadıysa belirtin.":"Check date, reference and deviation; state if no check was performed.",
  "Yeniden ölçülen ağaç sayısı, eşleştirme ve kontrol yöntemi; yapılmadıysa belirtin.":"Number of remeasured trees, matching and check method; state if not performed.",
- "Geçerli envanter kapsamı seçin.":"Select a valid inventory scope."
+ "Geçerli envanter kapsamı seçin.":"Select a valid inventory scope.",
+ "YAYIN ÖNCESİ KÜNYE":"PUBLICATION DETAILS",
+ "Bilimsel rapor bilgileri":"Scientific report details",
+ "Raporu yayımla":"Publish report",
+ "📄 Raporu yayımla":"📄 Publish report",
+ "Formu kapat":"Close form"
 });
 Object.assign(DG_I18N_EN,{
  "İçeriğe atla":"Skip to content",

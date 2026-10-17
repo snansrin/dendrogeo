@@ -3,13 +3,14 @@
   "date": "2026-10-17",
   "baseline_commit": "a5498b6e75bb1f6c9d2fe67a7d10d2fcb7db23f5",
   "preservation": {
-    "sourceFilesCompared": 688,
+    "sourceFilesCompared": 687,
     "unchanged": true,
     "publishedReportFilesCompared": 69,
     "publishedReportsUnchanged": true,
     "excludedChanges": [
       "optional report context field whitelist",
-      "optional inventory-scope validation"
+      "optional inventory-scope validation",
+      "report-dialog presentation markup: protect park name and separately translate description"
     ],
     "protectedCoreCheck": "961 files; only generated index/landing asset hashes and added phone-test entry authorized"
   },
@@ -35,6 +36,7 @@
     "new_node_tests": 6,
     "field_ui_scenarios": 12,
     "report_phone_scenarios": 3,
-    "no_authenticated_production_writes": true
+    "no_authenticated_production_writes": true,
+    "report_dialog_header_actions_bilingual": true
   }
 }
