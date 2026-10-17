@@ -5,7 +5,7 @@ import axe from 'axe-core';
 import {join,relative} from 'node:path';
 import {loadChromium} from './lib/playwright-runtime.mjs';
 import {serveFixture} from './lib/browser-acceptance-fixture.mjs';
-const server=await serveFixture(),browser=await(await loadChromium()).launch({headless:true});
+const server=await serveFixture(),browser=await(await loadChromium()).launch({headless:true,ignoreDefaultArgs:['--hide-scrollbars']});
 const pages=[];
 function collect(dir){for(const e of readdirSync(dir,{withFileTypes:true})){const p=join(dir,e.name);if(e.isDirectory()&&!['node_modules','.git','vendor'].includes(e.name))collect(p);else if(e.isFile()&&p.endsWith('.html')&&readFileSync(p,'utf8').includes('<!-- dg-public-theme -->'))pages.push('/'+relative('.',p).replaceAll('\\','/'));}}
 collect('.');
@@ -31,8 +31,8 @@ try{
   await page.goto(server.url+'/rapor/gorunum/?id=DGR-2026-0026');
   await page.locator('#readerPrint').waitFor({state:'visible'});
   await page.waitForFunction(()=>!document.getElementById('readerPrint').disabled);
-  const geometry=await page.locator('#reportFrame').evaluate(f=>({height:f.clientHeight,content:f.contentDocument.documentElement.scrollHeight,style:f.getAttribute('style')}));
-  assert.ok(geometry.content<=geometry.height+2,'nested report scroll: '+JSON.stringify(geometry));
+  const geometry=await page.locator('#reportFrame').evaluate(f=>({height:f.contentDocument.documentElement.clientHeight,content:f.contentDocument.documentElement.scrollHeight,style:f.getAttribute('style')}));
+  assert.ok(geometry.content<=geometry.height+1,'nested report scroll: '+JSON.stringify(geometry));
   const frame=page.frameLocator('#reportFrame');
   assert.equal(await frame.locator('html').getAttribute('data-theme'),'dark');
   assert.match(await frame.locator('#dgVerify').textContent(),/İçerik bütünlüğü doğrulandı/);

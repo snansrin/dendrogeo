@@ -1,5 +1,6 @@
 /* Screen presentation only; immutable source, figures and print styling are retained. */
 @media screen{
+ html{overflow-x:hidden}
  html[data-theme="dark"]{--bg:#101113;--ink:#f0f1f2;--mut:#b9bdc4;--line:#41454c;--green:#91d8ad;--gd:#bde9cd;--tint:#25282d;--amber:#f5c58d;color-scheme:dark}
  html[data-theme="dark"] .wrap{background:#191b1e}
  html[data-theme="dark"] :is(.verify,.review-event,table.qa tbody tr:nth-child(even) td){background:#25282d}

@@ -14,7 +14,7 @@
   const inner=frame.contentDocument;
   if(!inner?.querySelector('#dgVerify')){frame.hidden=true;doc.getElementById('readerActions').hidden=true;status.textContent='Bu kimlik için yayımlanmış rapor bulunamadı. Rapor dizininden geçerli bir yayın seçin.';return;}
   const resize=()=>{frame.style.height=(Math.ceil(inner.body.getBoundingClientRect().height)+8)+'px';};
-  for(const path of ['assets/public-pages/report-reader.css?v=2']){const link=inner.createElement('link');link.rel='stylesheet';link.href=new URL('../../'+path,root.location.href).href;link.addEventListener('load',resize,{once:true});inner.head.append(link);}
+  for(const path of ['assets/public-pages/report-reader.css?v=3']){const link=inner.createElement('link');link.rel='stylesheet';link.href=new URL('../../'+path,root.location.href).href;link.addEventListener('load',resize,{once:true});inner.head.append(link);}
   const fonts=doc.querySelector('link[href$="assets/public-pages/style.css"]');
   // Fonts are loaded by the outer public page; use the same families in the report.
   if(fonts){const link=inner.createElement('link');link.rel='stylesheet';link.href='https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600&family=Manrope:wght@400;600;700;800&display=swap';link.addEventListener('load',()=>inner.fonts?.ready.then(resize),{once:true});inner.head.append(link);}
