@@ -35,6 +35,11 @@ const MAX_RUNTIME = 400;     // ?v=NNN sürümlü script/style kopyaları
 
 const CORE_ASSETS = [
     // Runtime modules are generated from the page and lazy-loader source lists.
+    '/assets/public-pages/style.css',
+    '/assets/public-pages/report-reader.css',
+    '/assets/public-pages/appearance.js',
+    '/assets/public-pages/report-reader.js',
+    '/rapor/gorunum/index.html',
     '/src/domain/settings/appearance-policy.js',
     '/src/adapters/settings/appearance-preference.js',
     '/src/ui/appearance.js',

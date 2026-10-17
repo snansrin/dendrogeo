@@ -6,8 +6,8 @@
   "type": "module",
   "scripts": {
     "test": "node scripts/run-tests.mjs",
-    "build": "node scripts/sync-runtime-precache.mjs --write && node scripts/landing-scene-data.mjs --write && node scripts/landing-evidence.mjs --write && node scripts/build-index.mjs --write && node scripts/sync-report-sitemap.mjs --write",
-    "build:check": "node scripts/sync-runtime-precache.mjs --check && node scripts/landing-scene-data.mjs --check && node scripts/landing-evidence.mjs --check && node scripts/build-index.mjs --check && node scripts/sync-report-sitemap.mjs --check",
+    "build": "node scripts/sync-runtime-precache.mjs --write && node scripts/landing-scene-data.mjs --write && node scripts/landing-evidence.mjs --write && node scripts/build-index.mjs --write && node scripts/sync-report-sitemap.mjs --write && node scripts/sync-public-page-themes.mjs --write",
+    "build:check": "node scripts/sync-runtime-precache.mjs --check && node scripts/landing-scene-data.mjs --check && node scripts/landing-evidence.mjs --check && node scripts/build-index.mjs --check && node scripts/sync-report-sitemap.mjs --check && node scripts/sync-public-page-themes.mjs --check",
     "check:csp": "node scripts/check-csp.mjs",
     "check:syntax": "node scripts/check-syntax.mjs",
     "check:versions": "node scripts/version-sync.mjs --check",

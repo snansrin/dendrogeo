@@ -1,0 +1,12 @@
+/* Screen presentation only; immutable source, figures and print styling are retained. */
+@media screen{
+ html[data-theme="dark"]{--bg:#101113;--ink:#f0f1f2;--mut:#b9bdc4;--line:#41454c;--green:#91d8ad;--gd:#bde9cd;--tint:#25282d;--amber:#f5c58d;color-scheme:dark}
+ html[data-theme="dark"] .wrap{background:#191b1e}
+ html[data-theme="dark"] :is(.verify,.review-event,table.qa tbody tr:nth-child(even) td){background:#25282d}
+ html[data-theme="dark"] :is(.st-warn,.st-bad){background:#25282d;color:var(--amber)}
+ html[data-theme="dark"] :is(a,td.qinfo){color:#a4ccff}
+ body{font-family:Manrope,system-ui,sans-serif}
+ h1,h2{font-family:Fraunces,Georgia,serif}
+ .wrap{max-width:100%;margin:0;border-radius:14px}
+ @media(max-width:600px){.wrap{padding:22px 14px}h1{font-size:1.5rem}.tscroll{overflow-x:auto}table{min-width:500px}p{text-align:start}}
+}

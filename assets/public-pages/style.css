@@ -1,0 +1,30 @@
+/* Public document shell uses the application typography and appearance tokens. */
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=Manrope:wght@400;600;700;800&family=IBM+Plex+Mono:wght@400;600;700&display=swap');
+html{--card:var(--surface)}
+html[data-theme="dark"]{--card:var(--surface)}
+html[data-theme="dark"] .dg-page{--gd:var(--green-dk)}
+.dg-page .nav{display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap}
+.dg-page main{padding:42px 0 60px;min-width:0}
+.dg-page .hero{padding:20px 0}
+.dg-page .kick{font-family:var(--f-mono);color:var(--amber-ink)}
+.dg-page .links{display:flex;flex-wrap:wrap;align-items:center;gap:14px}
+.dg-page footer{padding:24px 0;background:var(--surface)}
+.dg-page .btn.alt{background:var(--surface)}
+.dg-public-appearance{display:flex;align-items:center;flex-wrap:wrap;gap:10px;font:600 .78rem/1.4 var(--f-ui);color:var(--ink)}
+.dg-public-appearance label{display:flex;align-items:center;gap:8px;min-height:44px;cursor:pointer}
+.dg-public-appearance input.dg-switch{width:42px;flex:none;margin:0}
+.dg-public-appearance .btn{margin:0;min-height:44px}
+@media(prefers-reduced-motion:reduce){.dg-page .btn{transition:none}}
+.dg-table-scroll{max-width:100%;overflow-x:auto;overscroll-behavior-x:contain;border:1px solid var(--line);border-radius:var(--r);margin:16px 0}
+.dg-table-scroll table{margin:0;border:0}
+.dg-page :is(a,button,input,.dg-table-scroll):focus-visible{outline:2px solid var(--green);outline-offset:3px}
+html[data-theme="dark"] .dg-page :is(.top,header,footer,table,.card){background:var(--surface)}
+html[data-theme="dark"] .dg-page :is(.wrap,.box,.foot){background:var(--surface);color:var(--ink)}
+html[data-theme="dark"] .dg-page :is(.note,.callout,blockquote){background:var(--tint);color:var(--ink);border-color:var(--line)}
+html[data-theme="dark"] .dg-page .btn.alt{color:var(--green);border-color:var(--line)}
+.dg-report-reader{width:100%;border:0;display:block;min-height:75dvh;background:var(--surface);border-radius:var(--r)}
+.dg-report-reader[hidden],.dg-report-reader-actions[hidden]{display:none}
+.dg-report-reader-actions{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px}
+.dg-report-reader-status{color:var(--mut);margin:12px 0}
+@media(max-width:600px){.dg-page .wrap{padding-inline:16px}.dg-page main{padding-top:24px}.dg-page .nav{gap:8px}.dg-public-appearance{width:100%}.dg-page .top{position:static}.dg-report-reader-actions .btn{padding:10px 14px}}
+@media print{.dg-public-appearance,.dg-report-reader-actions{display:none}.dg-table-scroll{overflow:visible;border:0}body.dg-page{background:white;color:#182420}}

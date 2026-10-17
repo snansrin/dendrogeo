@@ -8975,6 +8975,39 @@
           "sha256": "26a5014b139c55256878b738684c0f8f73df3cd8bed1e716fae5d44a3d38bc57"
         }
       ]
+    },
+    {
+      "id": "public-document-theme-and-immutable-reader-2026-10-17",
+      "date": "2026-10-17",
+      "scope": "User-authorized modularization presentation update: share existing appearance preference and theme tokens across public information pages and report directory; add an isolated same-origin themed reader for immutable published reports. Original report artifacts, manifests, scientific values, calculation engines and map behavior are preserved. Build and mobile checks cover public page presentation.",
+      "audit_chain": "sha256-v1",
+      "added_protected_files": [],
+      "files": [
+        {
+          "path": "package.json",
+          "previous_sha256": "e663397a7902d07bdac56f00253babb962355f72a239d83b2edc7f85fabdb4ea",
+          "sha256": "56e2888a09ba0901fd8d9009f0bf58b53a6b571c5635acf98e3830ede5090764"
+        },
+        {
+          "path": "scripts/check-phone.mjs",
+          "previous_sha256": "8fff90aaf6524cc572624a3d7a5349038fedfc0232f0bfff950dc9a6ac7c1368",
+          "sha256": "790c5822e306d7566d4438c8c74e9b7ff630eeb24d1dd2072d99876ac1e0cde9"
+        }
+      ]
+    },
+    {
+      "id": "public-document-theme-source-sync-2026-10-17",
+      "date": "2026-10-17",
+      "scope": "User-authorized modularization presentation source synchronization: cache isolated public-page theme assets and preserve report identity verification while routing report index links through the themed reader. No published artifacts or analysis engines changed.",
+      "audit_chain": "sha256-v1",
+      "added_protected_files": [],
+      "files": [
+        {
+          "path": "sw.js",
+          "previous_sha256": "d51fcd2d58aedc898e2d9455b6d1ece536927d0d586a8c3b3a7cba66e986acd0",
+          "sha256": "7f3654f4843bf1085c734c448299787211f2d1f2fcad2f06295c29d376e10cdf"
+        }
+      ]
     }
   ]
 }

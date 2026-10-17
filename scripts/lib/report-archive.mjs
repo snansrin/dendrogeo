@@ -2,6 +2,7 @@ import { existsSync, readdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import {syncReportSitemap} from './report-sitemap.mjs';
+import {publicPageThemeHead} from './public-page-theme.mjs';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..', '..');
 const REPORT_DIR = join(ROOT, 'rapor');
@@ -11,12 +12,12 @@ const escapeHtml = (value) => String(value ?? '').replace(/[&<>\"]/g, (char) => 
 const formatTonnes = (kg) => Number(kg / 1000).toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
 function renderIndex(list) {
-  const rows = list.map((r) => `<tr><td><a href="${r.id}/">${r.id}</a></td><td class="tr">${escapeHtml(r.park)}</td><td>${r.n}</td><td>${r.carbon}</td><td>${r.date}</td><td><span class="badge on">Geçerli</span></td></tr>`).join('');
+  const rows = list.map((r) => `<tr><td><a href="gorunum/?id=${r.id}">${r.id}</a></td><td class="tr">${escapeHtml(r.park)}</td><td>${r.n}</td><td>${r.carbon}</td><td>${r.date}</td><td><span class="badge on">Geçerli</span></td></tr>`).join('');
   return `<!doctype html><html lang="tr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Yayınlanmış Raporlar — DendroGeo</title>
 <meta name="description" content="DendroGeo tarafından yayınlanmış, içerik hash'i ile dondurulmuş park ölçekli bilimsel raporların dizini.">
 <link rel="canonical" href="https://dendrogeo.org/rapor/">
-<link rel="stylesheet" href="../css/style.css"><link rel="stylesheet" href="../css/ui-standard.css">
+${publicPageThemeHead('..')}
 </head><body class="dg-page"><header class="top"><div class="wrap nav"><a class="brand" href="../">🌲 DendroGeo</a><nav class="links"><a href="../">Uygulama</a><a href="../yontem/">Yöntem</a></nav></div></header>
 <main><div class="wrap"><div class="hero"><div class="tag">BİLİMSEL RAPOR DİZİNİ</div><h1>Yayınlanmış Park Raporları</h1>
 <p class="lead">Her rapor yayın anında dondurulur; kimlik (DGR — DendroGeo Bilimsel Analiz Raporu), sürüm ve SHA-256 içerik hash'i ile atanır. Bir raporun verisi değişmez; yeni çözümleme yeni rapor kimliği olarak yayınlanır.</p></div>
