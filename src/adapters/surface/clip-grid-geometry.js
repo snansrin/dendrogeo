@@ -1,8 +1,21 @@
 "use strict";
 
-/* Apply polygon-clipping with millimetre normalization at every edge. */
+/* Keep the usual result; recover SweepLine round-off on the same millimetre lattice. */
 window.DG_CLIP_GRID_GEOMETRY={
   clip(operation,geometries,{run,clean}){
-    return clean(run(operation,...geometries.map(value=>clean(value))));
+    const inputs=geometries.map(value=>clean(value));
+    try{return clean(run(operation,...inputs));}
+    catch(error){
+      if(!/Unable to find segment[\s\S]*SweepLine tree/.test(String(error?.message)))throw error;
+      // Inputs are already rounded to 0.001 m. Changing units does not move a
+      // boundary or relax an exclusion. Never return the uncut input on failure.
+      const map=(geometry,convert)=>geometry.map(polygon=>polygon.map(ring=>ring.map(point=>point.map(convert))));
+      const integers=inputs.map(geometry=>map(geometry,value=>{
+        const integer=Math.round(value*1000);
+        if(!Number.isSafeInteger(integer))throw error;
+        return integer;
+      }));
+      return clean(map(run(operation,...integers),value=>value/1000));
+    }
   }
 };

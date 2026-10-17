@@ -25,6 +25,8 @@ Bu düzeltmede allometri, tür/yoğunluk girdileri ve raster sınıflandırma/al
 
 Harikalar Diyarı (OSM way/205225595) gerçek veri kontrolü: 88 sınır köşesi, WorldCover 2021 v200 verisinde 12.031 hücre, 766.644,602 m² düzenlenebilir hücre alanı ve aynı sınıflandırılmış alan. Önceki kod son 2.031 hücreyi aktarmazdı. `node scripts/lulc-qa.mjs --fixture harikalar` bu kamuya açık sınırla kontrolü yeniden çalıştırır. Karo birleştirme regresyonu ikinci karonun hücrelerinin de kaybolmamasını doğrular.
 
+17 Ekim ek kullanıcı hata bildirimi: yeşil alan anahtarı kapalıyken `SweepLine tree` hatasıyla duran grid kesişimine, yalnız bu hata için tam sayı milimetre koordinatlarıyla bir yeniden deneme eklendi. Normal başarılı hesap aynı kalır. Aynı 0,001 m giriş hassasiyeti, engeller, park sınırı ve güvenlik mesafesi korunur; ikinci deneme de başarısızsa işlem hata verir, kesilmemiş parkı grid olarak sunmaz. `test/grid-precision-recovery.test.mjs` kurtarma ve hata kapılarını, kayıtlı Göksu geometrisinde iki anahtar durumunu ve veri değişmezliğini kontrol eder.
+
 ## Yerel push koruması
 
 Bu çalışma kopyasında `npm run core:lock` ile `.githooks/pre-push` etkinleştirilir. Normal `git push`, çekirdek hash denetimi başarısızsa durur. Yeni bir klonda da aynı komutla etkinleştirilmelidir; yalnız hook dosyasının Git'te bulunması kanca kurmaz.

@@ -9356,6 +9356,30 @@
           "sha256": "74fc8ad679cc103dbd78e729a7209a120e24b2129abbd794787c3499e97303c7"
         }
       ]
+    },
+    {
+      "id": "grid-sweepline-integer-recovery-2026-10-17",
+      "date": "2026-10-17",
+      "scope": "User-authorized modularization bug fix: recover the reported grid SweepLine tree failure with one integer-millimetre retry on the existing 0.001 m lattice. Normal successful operations, all exclusions, park containment, clearance, accepted surface data, allometry and species remain unchanged. Unrelated errors and failed recovery still throw. Generated runtime build fingerprint updated for browser and worker cache invalidation.",
+      "audit_chain": "sha256-v1",
+      "added_protected_files": [],
+      "files": [
+        {
+          "path": "src/adapters/surface/clip-grid-geometry.js",
+          "previous_sha256": "5b068a4b27d0ffff036ab8e79f3e4f76de13f7b6768f73e29dc4e6065dd849ef",
+          "sha256": "7b71799328613143776221b9ddaabd3b7ada087ce350bfaecc7f8dec5b3c6f90"
+        },
+        {
+          "path": "index.html",
+          "previous_sha256": "fdaa8646492f9d2592e2224d7496de39603bee72c67311a805ce10f217679153",
+          "sha256": "2d5ecad8fb9fdfb4da5c87f672e8b2a40e841af1b1d36fd09ec9ef136aa2b49d"
+        },
+        {
+          "path": "docs/SCIENTIFIC-CORE-FREEZE.md",
+          "previous_sha256": "1d9068574301fbc677022e62678daf917d0f719ad2a0dc8d3fb93c1c59dea73b",
+          "sha256": "80ec71c0e9b1d5b5bb0a91b8aa9edf81aa917c4bed6f4c1b28993290d138a909"
+        }
+      ]
     }
   ]
 }
