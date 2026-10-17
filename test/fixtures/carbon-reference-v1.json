@@ -1,0 +1,2801 @@
+{
+  "schema": "dendrogeo-carbon-reference-fixture/1",
+  "scope": "Synthetic unit vectors; not field measurements, not ecological validation",
+  "rows": [
+    {
+      "id": "synthetic-1-1",
+      "species": "GÖKNAR",
+      "grp": "İBRELİ",
+      "girth_cm": 14.3,
+      "height_m": 3
+    },
+    {
+      "id": "synthetic-1-2",
+      "species": "GÖKNAR",
+      "grp": "İBRELİ",
+      "girth_cm": 100,
+      "height_m": 15
+    },
+    {
+      "id": "synthetic-1-3",
+      "species": "GÖKNAR",
+      "grp": "İBRELİ",
+      "girth_cm": 1256.6370614359173,
+      "height_m": 40
+    },
+    {
+      "id": "synthetic-2-1",
+      "species": "SEDİR",
+      "grp": "İBRELİ",
+      "girth_cm": 14.3,
+      "height_m": 3
+    },
+    {
+      "id": "synthetic-2-2",
+      "species": "SEDİR",
+      "grp": "İBRELİ",
+      "girth_cm": 100,
+      "height_m": 15
+    },
+    {
+      "id": "synthetic-2-3",
+      "species": "SEDİR",
+      "grp": "İBRELİ",
+      "girth_cm": 1256.6370614359173,
+      "height_m": 40
+    },
+    {
+      "id": "synthetic-3-1",
+      "species": "HİMALAYA SEDİRİ",
+      "grp": "İBRELİ",
+      "girth_cm": 14.3,
+      "height_m": 3
+    },
+    {
+      "id": "synthetic-3-2",
+      "species": "HİMALAYA SEDİRİ",
+      "grp": "İBRELİ",
+      "girth_cm": 100,
+      "height_m": 15
+    },
+    {
+      "id": "synthetic-3-3",
+      "species": "HİMALAYA SEDİRİ",
+      "grp": "İBRELİ",
+      "girth_cm": 1256.6370614359173,
+      "height_m": 40
+    },
+    {
+      "id": "synthetic-4-1",
+      "species": "ATLAS SEDİRİ",
+      "grp": "İBRELİ",
+      "girth_cm": 14.3,
+      "height_m": 3
+    },
+    {
+      "id": "synthetic-4-2",
+      "species": "ATLAS SEDİRİ",
+      "grp": "İBRELİ",
+      "girth_cm": 100,
+      "height_m": 15
+    },
+    {
+      "id": "synthetic-4-3",
+      "species": "ATLAS SEDİRİ",
+      "grp": "İBRELİ",
+      "girth_cm": 1256.6370614359173,
+      "height_m": 40
+    },
+    {
+      "id": "synthetic-5-1",
+      "species": "ARDIÇ",
+      "grp": "İBRELİ",
+      "girth_cm": 14.3,
+      "height_m": 3
+    },
+    {
+      "id": "synthetic-5-2",
+      "species": "ARDIÇ",
+      "grp": "İBRELİ",
+      "girth_cm": 100,
+      "height_m": 15
+    },
+    {
+      "id": "synthetic-5-3",
+      "species": "ARDIÇ",
+      "grp": "İBRELİ",
+      "girth_cm": 1256.6370614359173,
+      "height_m": 40
+    },
+    {
+      "id": "synthetic-6-1",
+      "species": "LADİN",
+      "grp": "İBRELİ",
+      "girth_cm": 14.3,
+      "height_m": 3
+    },
+    {
+      "id": "synthetic-6-2",
+      "species": "LADİN",
+      "grp": "İBRELİ",
+      "girth_cm": 100,
+      "height_m": 15
+    },
+    {
+      "id": "synthetic-6-3",
+      "species": "LADİN",
+      "grp": "İBRELİ",
+      "girth_cm": 1256.6370614359173,
+      "height_m": 40
+    },
+    {
+      "id": "synthetic-7-1",
+      "species": "MAVİ LADİN",
+      "grp": "İBRELİ",
+      "girth_cm": 14.3,
+      "height_m": 3
+    },
+    {
+      "id": "synthetic-7-2",
+      "species": "MAVİ LADİN",
+      "grp": "İBRELİ",
+      "girth_cm": 100,
+      "height_m": 15
+    },
+    {
+      "id": "synthetic-7-3",
+      "species": "MAVİ LADİN",
+      "grp": "İBRELİ",
+      "girth_cm": 1256.6370614359173,
+      "height_m": 40
+    },
+    {
+      "id": "synthetic-8-1",
+      "species": "KIZILÇAM",
+      "grp": "İBRELİ",
+      "girth_cm": 14.3,
+      "height_m": 3
+    },
+    {
+      "id": "synthetic-8-2",
+      "species": "KIZILÇAM",
+      "grp": "İBRELİ",
+      "girth_cm": 100,
+      "height_m": 15
+    },
+    {
+      "id": "synthetic-8-3",
+      "species": "KIZILÇAM",
+      "grp": "İBRELİ",
+      "girth_cm": 1256.6370614359173,
+      "height_m": 40
+    },
+    {
+      "id": "synthetic-9-1",
+      "species": "KARAÇAM",
+      "grp": "İBRELİ",
+      "girth_cm": 14.3,
+      "height_m": 3
+    },
+    {
+      "id": "synthetic-9-2",
+      "species": "KARAÇAM",
+      "grp": "İBRELİ",
+      "girth_cm": 100,
+      "height_m": 15
+    },
+    {
+      "id": "synthetic-9-3",
+      "species": "KARAÇAM",
+      "grp": "İBRELİ",
+      "girth_cm": 1256.6370614359173,
+      "height_m": 40
+    },
+    {
+      "id": "synthetic-10-1",
+      "species": "SARIÇAM",
+      "grp": "İBRELİ",
+      "girth_cm": 14.3,
+      "height_m": 3
+    },
+    {
+      "id": "synthetic-10-2",
+      "species": "SARIÇAM",
+      "grp": "İBRELİ",
+      "girth_cm": 100,
+      "height_m": 15
+    },
+    {
+      "id": "synthetic-10-3",
+      "species": "SARIÇAM",
+      "grp": "İBRELİ",
+      "girth_cm": 1256.6370614359173,
+      "height_m": 40
+    },
+    {
+      "id": "synthetic-11-1",
+      "species": "FISTIK ÇAMI",
+      "grp": "İBRELİ",
+      "girth_cm": 14.3,
+      "height_m": 3
+    },
+    {
+      "id": "synthetic-11-2",
+      "species": "FISTIK ÇAMI",
+      "grp": "İBRELİ",
+      "girth_cm": 100,
+      "height_m": 15
+    },
+    {
+      "id": "synthetic-11-3",
+      "species": "FISTIK ÇAMI",
+      "grp": "İBRELİ",
+      "girth_cm": 1256.6370614359173,
+      "height_m": 40
+    },
+    {
+      "id": "synthetic-12-1",
+      "species": "HALEP ÇAMI",
+      "grp": "İBRELİ",
+      "girth_cm": 14.3,
+      "height_m": 3
+    },
+    {
+      "id": "synthetic-12-2",
+      "species": "HALEP ÇAMI",
+      "grp": "İBRELİ",
+      "girth_cm": 100,
+      "height_m": 15
+    },
+    {
+      "id": "synthetic-12-3",
+      "species": "HALEP ÇAMI",
+      "grp": "İBRELİ",
+      "girth_cm": 1256.6370614359173,
+      "height_m": 40
+    },
+    {
+      "id": "synthetic-13-1",
+      "species": "GÜMÜŞ LADİN",
+      "grp": "İBRELİ",
+      "girth_cm": 14.3,
+      "height_m": 3
+    },
+    {
+      "id": "synthetic-13-2",
+      "species": "GÜMÜŞ LADİN",
+      "grp": "İBRELİ",
+      "girth_cm": 100,
+      "height_m": 15
+    },
+    {
+      "id": "synthetic-13-3",
+      "species": "GÜMÜŞ LADİN",
+      "grp": "İBRELİ",
+      "girth_cm": 1256.6370614359173,
+      "height_m": 40
+    },
+    {
+      "id": "synthetic-14-1",
+      "species": "MAVİ SEDİR",
+      "grp": "İBRELİ",
+      "girth_cm": 14.3,
+      "height_m": 3
+    },
+    {
+      "id": "synthetic-14-2",
+      "species": "MAVİ SEDİR",
+      "grp": "İBRELİ",
+      "girth_cm": 100,
+      "height_m": 15
+    },
+    {
+      "id": "synthetic-14-3",
+      "species": "MAVİ SEDİR",
+      "grp": "İBRELİ",
+      "girth_cm": 1256.6370614359173,
+      "height_m": 40
+    },
+    {
+      "id": "synthetic-15-1",
+      "species": "SERVİ",
+      "grp": "İBRELİ",
+      "girth_cm": 14.3,
+      "height_m": 3
+    },
+    {
+      "id": "synthetic-15-2",
+      "species": "SERVİ",
+      "grp": "İBRELİ",
+      "girth_cm": 100,
+      "height_m": 15
+    },
+    {
+      "id": "synthetic-15-3",
+      "species": "SERVİ",
+      "grp": "İBRELİ",
+      "girth_cm": 1256.6370614359173,
+      "height_m": 40
+    },
+    {
+      "id": "synthetic-16-1",
+      "species": "MAZI (YALANCI SERVİ)",
+      "grp": "İBRELİ",
+      "girth_cm": 14.3,
+      "height_m": 3
+    },
+    {
+      "id": "synthetic-16-2",
+      "species": "MAZI (YALANCI SERVİ)",
+      "grp": "İBRELİ",
+      "girth_cm": 100,
+      "height_m": 15
+    },
+    {
+      "id": "synthetic-16-3",
+      "species": "MAZI (YALANCI SERVİ)",
+      "grp": "İBRELİ",
+      "girth_cm": 1256.6370614359173,
+      "height_m": 40
+    },
+    {
+      "id": "synthetic-17-1",
+      "species": "PORSUK",
+      "grp": "İBRELİ",
+      "girth_cm": 14.3,
+      "height_m": 3
+    },
+    {
+      "id": "synthetic-17-2",
+      "species": "PORSUK",
+      "grp": "İBRELİ",
+      "girth_cm": 100,
+      "height_m": 15
+    },
+    {
+      "id": "synthetic-17-3",
+      "species": "PORSUK",
+      "grp": "İBRELİ",
+      "girth_cm": 1256.6370614359173,
+      "height_m": 40
+    },
+    {
+      "id": "synthetic-18-1",
+      "species": "KRİPTOMERYA",
+      "grp": "İBRELİ",
+      "girth_cm": 14.3,
+      "height_m": 3
+    },
+    {
+      "id": "synthetic-18-2",
+      "species": "KRİPTOMERYA",
+      "grp": "İBRELİ",
+      "girth_cm": 100,
+      "height_m": 15
+    },
+    {
+      "id": "synthetic-18-3",
+      "species": "KRİPTOMERYA",
+      "grp": "İBRELİ",
+      "girth_cm": 1256.6370614359173,
+      "height_m": 40
+    },
+    {
+      "id": "synthetic-19-1",
+      "species": "DİĞER İBRELİ",
+      "grp": "İBRELİ",
+      "girth_cm": 14.3,
+      "height_m": 3
+    },
+    {
+      "id": "synthetic-19-2",
+      "species": "DİĞER İBRELİ",
+      "grp": "İBRELİ",
+      "girth_cm": 100,
+      "height_m": 15
+    },
+    {
+      "id": "synthetic-19-3",
+      "species": "DİĞER İBRELİ",
+      "grp": "İBRELİ",
+      "girth_cm": 1256.6370614359173,
+      "height_m": 40
+    },
+    {
+      "id": "synthetic-20-1",
+      "species": "MEŞE",
+      "grp": "YAPRAKLI",
+      "girth_cm": 14.3,
+      "height_m": 3
+    },
+    {
+      "id": "synthetic-20-2",
+      "species": "MEŞE",
+      "grp": "YAPRAKLI",
+      "girth_cm": 100,
+      "height_m": 15
+    },
+    {
+      "id": "synthetic-20-3",
+      "species": "MEŞE",
+      "grp": "YAPRAKLI",
+      "girth_cm": 1256.6370614359173,
+      "height_m": 40
+    },
+    {
+      "id": "synthetic-21-1",
+      "species": "GÜRGEN",
+      "grp": "YAPRAKLI",
+      "girth_cm": 14.3,
+      "height_m": 3
+    },
+    {
+      "id": "synthetic-21-2",
+      "species": "GÜRGEN",
+      "grp": "YAPRAKLI",
+      "girth_cm": 100,
+      "height_m": 15
+    },
+    {
+      "id": "synthetic-21-3",
+      "species": "GÜRGEN",
+      "grp": "YAPRAKLI",
+      "girth_cm": 1256.6370614359173,
+      "height_m": 40
+    },
+    {
+      "id": "synthetic-22-1",
+      "species": "KAYIN",
+      "grp": "YAPRAKLI",
+      "girth_cm": 14.3,
+      "height_m": 3
+    },
+    {
+      "id": "synthetic-22-2",
+      "species": "KAYIN",
+      "grp": "YAPRAKLI",
+      "girth_cm": 100,
+      "height_m": 15
+    },
+    {
+      "id": "synthetic-22-3",
+      "species": "KAYIN",
+      "grp": "YAPRAKLI",
+      "girth_cm": 1256.6370614359173,
+      "height_m": 40
+    },
+    {
+      "id": "synthetic-23-1",
+      "species": "DİŞBUDAK",
+      "grp": "YAPRAKLI",
+      "girth_cm": 14.3,
+      "height_m": 3
+    },
+    {
+      "id": "synthetic-23-2",
+      "species": "DİŞBUDAK",
+      "grp": "YAPRAKLI",
+      "girth_cm": 100,
+      "height_m": 15
+    },
+    {
+      "id": "synthetic-23-3",
+      "species": "DİŞBUDAK",
+      "grp": "YAPRAKLI",
+      "girth_cm": 1256.6370614359173,
+      "height_m": 40
+    },
+    {
+      "id": "synthetic-24-1",
+      "species": "SIĞLA",
+      "grp": "YAPRAKLI",
+      "girth_cm": 14.3,
+      "height_m": 3
+    },
+    {
+      "id": "synthetic-24-2",
+      "species": "SIĞLA",
+      "grp": "YAPRAKLI",
+      "girth_cm": 100,
+      "height_m": 15
+    },
+    {
+      "id": "synthetic-24-3",
+      "species": "SIĞLA",
+      "grp": "YAPRAKLI",
+      "girth_cm": 1256.6370614359173,
+      "height_m": 40
+    },
+    {
+      "id": "synthetic-25-1",
+      "species": "KAVAK",
+      "grp": "YAPRAKLI",
+      "girth_cm": 14.3,
+      "height_m": 3
+    },
+    {
+      "id": "synthetic-25-2",
+      "species": "KAVAK",
+      "grp": "YAPRAKLI",
+      "girth_cm": 100,
+      "height_m": 15
+    },
+    {
+      "id": "synthetic-25-3",
+      "species": "KAVAK",
+      "grp": "YAPRAKLI",
+      "girth_cm": 1256.6370614359173,
+      "height_m": 40
+    },
+    {
+      "id": "synthetic-26-1",
+      "species": "KIZILAĞAÇ",
+      "grp": "YAPRAKLI",
+      "girth_cm": 14.3,
+      "height_m": 3
+    },
+    {
+      "id": "synthetic-26-2",
+      "species": "KIZILAĞAÇ",
+      "grp": "YAPRAKLI",
+      "girth_cm": 100,
+      "height_m": 15
+    },
+    {
+      "id": "synthetic-26-3",
+      "species": "KIZILAĞAÇ",
+      "grp": "YAPRAKLI",
+      "girth_cm": 1256.6370614359173,
+      "height_m": 40
+    },
+    {
+      "id": "synthetic-27-1",
+      "species": "ÇINAR",
+      "grp": "YAPRAKLI",
+      "girth_cm": 14.3,
+      "height_m": 3
+    },
+    {
+      "id": "synthetic-27-2",
+      "species": "ÇINAR",
+      "grp": "YAPRAKLI",
+      "girth_cm": 100,
+      "height_m": 15
+    },
+    {
+      "id": "synthetic-27-3",
+      "species": "ÇINAR",
+      "grp": "YAPRAKLI",
+      "girth_cm": 1256.6370614359173,
+      "height_m": 40
+    },
+    {
+      "id": "synthetic-28-1",
+      "species": "DOĞU ÇINARI",
+      "grp": "YAPRAKLI",
+      "girth_cm": 14.3,
+      "height_m": 3
+    },
+    {
+      "id": "synthetic-28-2",
+      "species": "DOĞU ÇINARI",
+      "grp": "YAPRAKLI",
+      "girth_cm": 100,
+      "height_m": 15
+    },
+    {
+      "id": "synthetic-28-3",
+      "species": "DOĞU ÇINARI",
+      "grp": "YAPRAKLI",
+      "girth_cm": 1256.6370614359173,
+      "height_m": 40
+    },
+    {
+      "id": "synthetic-29-1",
+      "species": "SÖĞÜT",
+      "grp": "YAPRAKLI",
+      "girth_cm": 14.3,
+      "height_m": 3
+    },
+    {
+      "id": "synthetic-29-2",
+      "species": "SÖĞÜT",
+      "grp": "YAPRAKLI",
+      "girth_cm": 100,
+      "height_m": 15
+    },
+    {
+      "id": "synthetic-29-3",
+      "species": "SÖĞÜT",
+      "grp": "YAPRAKLI",
+      "girth_cm": 1256.6370614359173,
+      "height_m": 40
+    },
+    {
+      "id": "synthetic-30-1",
+      "species": "SALKIM SÖĞÜT",
+      "grp": "YAPRAKLI",
+      "girth_cm": 14.3,
+      "height_m": 3
+    },
+    {
+      "id": "synthetic-30-2",
+      "species": "SALKIM SÖĞÜT",
+      "grp": "YAPRAKLI",
+      "girth_cm": 100,
+      "height_m": 15
+    },
+    {
+      "id": "synthetic-30-3",
+      "species": "SALKIM SÖĞÜT",
+      "grp": "YAPRAKLI",
+      "girth_cm": 1256.6370614359173,
+      "height_m": 40
+    },
+    {
+      "id": "synthetic-31-1",
+      "species": "AKÇAAĞAÇ",
+      "grp": "YAPRAKLI",
+      "girth_cm": 14.3,
+      "height_m": 3
+    },
+    {
+      "id": "synthetic-31-2",
+      "species": "AKÇAAĞAÇ",
+      "grp": "YAPRAKLI",
+      "girth_cm": 100,
+      "height_m": 15
+    },
+    {
+      "id": "synthetic-31-3",
+      "species": "AKÇAAĞAÇ",
+      "grp": "YAPRAKLI",
+      "girth_cm": 1256.6370614359173,
+      "height_m": 40
+    },
+    {
+      "id": "synthetic-32-1",
+      "species": "IHLAMUR",
+      "grp": "YAPRAKLI",
+      "girth_cm": 14.3,
+      "height_m": 3
+    },
+    {
+      "id": "synthetic-32-2",
+      "species": "IHLAMUR",
+      "grp": "YAPRAKLI",
+      "girth_cm": 100,
+      "height_m": 15
+    },
+    {
+      "id": "synthetic-32-3",
+      "species": "IHLAMUR",
+      "grp": "YAPRAKLI",
+      "girth_cm": 1256.6370614359173,
+      "height_m": 40
+    },
+    {
+      "id": "synthetic-33-1",
+      "species": "AT KESTANESİ",
+      "grp": "YAPRAKLI",
+      "girth_cm": 14.3,
+      "height_m": 3
+    },
+    {
+      "id": "synthetic-33-2",
+      "species": "AT KESTANESİ",
+      "grp": "YAPRAKLI",
+      "girth_cm": 100,
+      "height_m": 15
+    },
+    {
+      "id": "synthetic-33-3",
+      "species": "AT KESTANESİ",
+      "grp": "YAPRAKLI",
+      "girth_cm": 1256.6370614359173,
+      "height_m": 40
+    },
+    {
+      "id": "synthetic-34-1",
+      "species": "KESTANE",
+      "grp": "YAPRAKLI",
+      "girth_cm": 14.3,
+      "height_m": 3
+    },
+    {
+      "id": "synthetic-34-2",
+      "species": "KESTANE",
+      "grp": "YAPRAKLI",
+      "girth_cm": 100,
+      "height_m": 15
+    },
+    {
+      "id": "synthetic-34-3",
+      "species": "KESTANE",
+      "grp": "YAPRAKLI",
+      "girth_cm": 1256.6370614359173,
+      "height_m": 40
+    },
+    {
+      "id": "synthetic-35-1",
+      "species": "HUŞ",
+      "grp": "YAPRAKLI",
+      "girth_cm": 14.3,
+      "height_m": 3
+    },
+    {
+      "id": "synthetic-35-2",
+      "species": "HUŞ",
+      "grp": "YAPRAKLI",
+      "girth_cm": 100,
+      "height_m": 15
+    },
+    {
+      "id": "synthetic-35-3",
+      "species": "HUŞ",
+      "grp": "YAPRAKLI",
+      "girth_cm": 1256.6370614359173,
+      "height_m": 40
+    },
+    {
+      "id": "synthetic-36-1",
+      "species": "KARAAĞAÇ",
+      "grp": "YAPRAKLI",
+      "girth_cm": 14.3,
+      "height_m": 3
+    },
+    {
+      "id": "synthetic-36-2",
+      "species": "KARAAĞAÇ",
+      "grp": "YAPRAKLI",
+      "girth_cm": 100,
+      "height_m": 15
+    },
+    {
+      "id": "synthetic-36-3",
+      "species": "KARAAĞAÇ",
+      "grp": "YAPRAKLI",
+      "girth_cm": 1256.6370614359173,
+      "height_m": 40
+    },
+    {
+      "id": "synthetic-37-1",
+      "species": "DUT",
+      "grp": "YAPRAKLI",
+      "girth_cm": 14.3,
+      "height_m": 3
+    },
+    {
+      "id": "synthetic-37-2",
+      "species": "DUT",
+      "grp": "YAPRAKLI",
+      "girth_cm": 100,
+      "height_m": 15
+    },
+    {
+      "id": "synthetic-37-3",
+      "species": "DUT",
+      "grp": "YAPRAKLI",
+      "girth_cm": 1256.6370614359173,
+      "height_m": 40
+    },
+    {
+      "id": "synthetic-38-1",
+      "species": "CEVİZ",
+      "grp": "YAPRAKLI",
+      "girth_cm": 14.3,
+      "height_m": 3
+    },
+    {
+      "id": "synthetic-38-2",
+      "species": "CEVİZ",
+      "grp": "YAPRAKLI",
+      "girth_cm": 100,
+      "height_m": 15
+    },
+    {
+      "id": "synthetic-38-3",
+      "species": "CEVİZ",
+      "grp": "YAPRAKLI",
+      "girth_cm": 1256.6370614359173,
+      "height_m": 40
+    },
+    {
+      "id": "synthetic-39-1",
+      "species": "AKASYA",
+      "grp": "YAPRAKLI",
+      "girth_cm": 14.3,
+      "height_m": 3
+    },
+    {
+      "id": "synthetic-39-2",
+      "species": "AKASYA",
+      "grp": "YAPRAKLI",
+      "girth_cm": 100,
+      "height_m": 15
+    },
+    {
+      "id": "synthetic-39-3",
+      "species": "AKASYA",
+      "grp": "YAPRAKLI",
+      "girth_cm": 1256.6370614359173,
+      "height_m": 40
+    },
+    {
+      "id": "synthetic-40-1",
+      "species": "YALANCI AKASYA",
+      "grp": "YAPRAKLI",
+      "girth_cm": 14.3,
+      "height_m": 3
+    },
+    {
+      "id": "synthetic-40-2",
+      "species": "YALANCI AKASYA",
+      "grp": "YAPRAKLI",
+      "girth_cm": 100,
+      "height_m": 15
+    },
+    {
+      "id": "synthetic-40-3",
+      "species": "YALANCI AKASYA",
+      "grp": "YAPRAKLI",
+      "girth_cm": 1256.6370614359173,
+      "height_m": 40
+    },
+    {
+      "id": "synthetic-41-1",
+      "species": "MANOLYA",
+      "grp": "YAPRAKLI",
+      "girth_cm": 14.3,
+      "height_m": 3
+    },
+    {
+      "id": "synthetic-41-2",
+      "species": "MANOLYA",
+      "grp": "YAPRAKLI",
+      "girth_cm": 100,
+      "height_m": 15
+    },
+    {
+      "id": "synthetic-41-3",
+      "species": "MANOLYA",
+      "grp": "YAPRAKLI",
+      "girth_cm": 1256.6370614359173,
+      "height_m": 40
+    },
+    {
+      "id": "synthetic-42-1",
+      "species": "SÜS ELMASI",
+      "grp": "YAPRAKLI",
+      "girth_cm": 14.3,
+      "height_m": 3
+    },
+    {
+      "id": "synthetic-42-2",
+      "species": "SÜS ELMASI",
+      "grp": "YAPRAKLI",
+      "girth_cm": 100,
+      "height_m": 15
+    },
+    {
+      "id": "synthetic-42-3",
+      "species": "SÜS ELMASI",
+      "grp": "YAPRAKLI",
+      "girth_cm": 1256.6370614359173,
+      "height_m": 40
+    },
+    {
+      "id": "synthetic-43-1",
+      "species": "SÜS ERİĞİ",
+      "grp": "YAPRAKLI",
+      "girth_cm": 14.3,
+      "height_m": 3
+    },
+    {
+      "id": "synthetic-43-2",
+      "species": "SÜS ERİĞİ",
+      "grp": "YAPRAKLI",
+      "girth_cm": 100,
+      "height_m": 15
+    },
+    {
+      "id": "synthetic-43-3",
+      "species": "SÜS ERİĞİ",
+      "grp": "YAPRAKLI",
+      "girth_cm": 1256.6370614359173,
+      "height_m": 40
+    },
+    {
+      "id": "synthetic-44-1",
+      "species": "KATALPA",
+      "grp": "YAPRAKLI",
+      "girth_cm": 14.3,
+      "height_m": 3
+    },
+    {
+      "id": "synthetic-44-2",
+      "species": "KATALPA",
+      "grp": "YAPRAKLI",
+      "girth_cm": 100,
+      "height_m": 15
+    },
+    {
+      "id": "synthetic-44-3",
+      "species": "KATALPA",
+      "grp": "YAPRAKLI",
+      "girth_cm": 1256.6370614359173,
+      "height_m": 40
+    },
+    {
+      "id": "synthetic-45-1",
+      "species": "GLEDİÇYA",
+      "grp": "YAPRAKLI",
+      "girth_cm": 14.3,
+      "height_m": 3
+    },
+    {
+      "id": "synthetic-45-2",
+      "species": "GLEDİÇYA",
+      "grp": "YAPRAKLI",
+      "girth_cm": 100,
+      "height_m": 15
+    },
+    {
+      "id": "synthetic-45-3",
+      "species": "GLEDİÇYA",
+      "grp": "YAPRAKLI",
+      "girth_cm": 1256.6370614359173,
+      "height_m": 40
+    },
+    {
+      "id": "synthetic-46-1",
+      "species": "JAPON SOFORASI",
+      "grp": "YAPRAKLI",
+      "girth_cm": 14.3,
+      "height_m": 3
+    },
+    {
+      "id": "synthetic-46-2",
+      "species": "JAPON SOFORASI",
+      "grp": "YAPRAKLI",
+      "girth_cm": 100,
+      "height_m": 15
+    },
+    {
+      "id": "synthetic-46-3",
+      "species": "JAPON SOFORASI",
+      "grp": "YAPRAKLI",
+      "girth_cm": 1256.6370614359173,
+      "height_m": 40
+    },
+    {
+      "id": "synthetic-47-1",
+      "species": "DEFNE",
+      "grp": "YAPRAKLI",
+      "girth_cm": 14.3,
+      "height_m": 3
+    },
+    {
+      "id": "synthetic-47-2",
+      "species": "DEFNE",
+      "grp": "YAPRAKLI",
+      "girth_cm": 100,
+      "height_m": 15
+    },
+    {
+      "id": "synthetic-47-3",
+      "species": "DEFNE",
+      "grp": "YAPRAKLI",
+      "girth_cm": 1256.6370614359173,
+      "height_m": 40
+    },
+    {
+      "id": "synthetic-48-1",
+      "species": "AMBERAĞACI",
+      "grp": "YAPRAKLI",
+      "girth_cm": 14.3,
+      "height_m": 3
+    },
+    {
+      "id": "synthetic-48-2",
+      "species": "AMBERAĞACI",
+      "grp": "YAPRAKLI",
+      "girth_cm": 100,
+      "height_m": 15
+    },
+    {
+      "id": "synthetic-48-3",
+      "species": "AMBERAĞACI",
+      "grp": "YAPRAKLI",
+      "girth_cm": 1256.6370614359173,
+      "height_m": 40
+    },
+    {
+      "id": "synthetic-49-1",
+      "species": "DİĞER YAPRAKLI",
+      "grp": "YAPRAKLI",
+      "girth_cm": 14.3,
+      "height_m": 3
+    },
+    {
+      "id": "synthetic-49-2",
+      "species": "DİĞER YAPRAKLI",
+      "grp": "YAPRAKLI",
+      "girth_cm": 100,
+      "height_m": 15
+    },
+    {
+      "id": "synthetic-49-3",
+      "species": "DİĞER YAPRAKLI",
+      "grp": "YAPRAKLI",
+      "girth_cm": 1256.6370614359173,
+      "height_m": 40
+    }
+  ],
+  "expected": [
+    {
+      "dbh_cm": 4.551831372428207,
+      "density_kg_m3": 350,
+      "density_source": "species",
+      "agb": 1.3598005539182074,
+      "bhb": 0.35354814401873397,
+      "bio": 1.7133486979369414,
+      "c_agb": 0.6391062603415575,
+      "c_bhb": 0.16616762768880494,
+      "total_carbon": 0.8052738880303625,
+      "vol": 0.002440919573464627
+    },
+    {
+      "dbh_cm": 31.830988618379067,
+      "density_kg_m3": 350,
+      "density_source": "species",
+      "agb": 291.37614479958796,
+      "bhb": 75.75779764789287,
+      "bio": 367.1339424474808,
+      "c_agb": 136.94678805580634,
+      "c_bhb": 35.60616489450965,
+      "total_carbon": 172.55295295031598,
+      "vol": 0.5968310365946076
+    },
+    {
+      "dbh_cm": 400.0,
+      "density_kg_m3": 350,
+      "density_source": "species",
+      "agb": 106134.63485900378,
+      "bhb": 27595.005063340985,
+      "bio": 133729.63992234477,
+      "c_agb": 49883.27838373178,
+      "c_bhb": 12969.652379770261,
+      "total_carbon": 62852.93076350204,
+      "vol": 251.32741228718345
+    },
+    {
+      "dbh_cm": 4.551831372428207,
+      "density_kg_m3": 430,
+      "density_source": "species",
+      "agb": 1.6623788893218736,
+      "bhb": 0.43221851122368715,
+      "bio": 2.0945974005455605,
+      "c_agb": 0.7813180779812805,
+      "c_bhb": 0.20314270027513295,
+      "total_carbon": 0.9844607782564134,
+      "vol": 0.002440919573464627
+    },
+    {
+      "dbh_cm": 31.830988618379067,
+      "density_kg_m3": 430,
+      "density_source": "species",
+      "agb": 356.2122037464355,
+      "bhb": 92.61517297407323,
+      "bio": 448.8273767205087,
+      "c_agb": 167.41973576082466,
+      "c_bhb": 43.529131297814416,
+      "total_carbon": 210.94886705863908,
+      "vol": 0.5968310365946076
+    },
+    {
+      "dbh_cm": 400.0,
+      "density_kg_m3": 430,
+      "density_source": "species",
+      "agb": 129751.36383574821,
+      "bhb": 33735.354597294536,
+      "bio": 163486.71843304276,
+      "c_agb": 60983.141002801654,
+      "c_bhb": 15855.61666072843,
+      "total_carbon": 76838.7576635301,
+      "vol": 251.32741228718345
+    },
+    {
+      "dbh_cm": 4.551831372428207,
+      "density_kg_m3": 430,
+      "density_source": "species",
+      "agb": 1.6623788893218736,
+      "bhb": 0.43221851122368715,
+      "bio": 2.0945974005455605,
+      "c_agb": 0.7813180779812805,
+      "c_bhb": 0.20314270027513295,
+      "total_carbon": 0.9844607782564134,
+      "vol": 0.002440919573464627
+    },
+    {
+      "dbh_cm": 31.830988618379067,
+      "density_kg_m3": 430,
+      "density_source": "species",
+      "agb": 356.2122037464355,
+      "bhb": 92.61517297407323,
+      "bio": 448.8273767205087,
+      "c_agb": 167.41973576082466,
+      "c_bhb": 43.529131297814416,
+      "total_carbon": 210.94886705863908,
+      "vol": 0.5968310365946076
+    },
+    {
+      "dbh_cm": 400.0,
+      "density_kg_m3": 430,
+      "density_source": "species",
+      "agb": 129751.36383574821,
+      "bhb": 33735.354597294536,
+      "bio": 163486.71843304276,
+      "c_agb": 60983.141002801654,
+      "c_bhb": 15855.61666072843,
+      "total_carbon": 76838.7576635301,
+      "vol": 251.32741228718345
+    },
+    {
+      "dbh_cm": 4.551831372428207,
+      "density_kg_m3": 446,
+      "density_source": "group",
+      "agb": 1.7227236845114797,
+      "bhb": 0.4479081579729847,
+      "bio": 2.1706318424844646,
+      "c_agb": 0.8096801317203954,
+      "c_bhb": 0.2105168342473028,
+      "total_carbon": 1.0201969659676984,
+      "vol": 0.002440919573464627
+    },
+    {
+      "dbh_cm": 31.830988618379067,
+      "density_kg_m3": 446,
+      "density_source": "group",
+      "agb": 369.142801347976,
+      "bhb": 95.97712835047376,
+      "bio": 465.11992969844977,
+      "c_agb": 173.4971166335487,
+      "c_bhb": 45.109250324722666,
+      "total_carbon": 218.60636695827137,
+      "vol": 0.5968310365946076
+    },
+    {
+      "dbh_cm": 400.0,
+      "density_kg_m3": 446,
+      "density_source": "group",
+      "agb": 134461.37280333939,
+      "bhb": 34959.95692886824,
+      "bio": 169421.32973220764,
+      "c_agb": 63196.845217569506,
+      "c_bhb": 16431.17975656807,
+      "total_carbon": 79628.02497413759,
+      "vol": 251.32741228718345
+    },
+    {
+      "dbh_cm": 4.551831372428207,
+      "density_kg_m3": 460,
+      "density_source": "species",
+      "agb": 1.775482704976957,
+      "bhb": 0.46162550329400887,
+      "bio": 2.237108208270966,
+      "c_agb": 0.8344768713391698,
+      "c_bhb": 0.21696398654818416,
+      "total_carbon": 1.051440857887354,
+      "vol": 0.002440919573464627
+    },
+    {
+      "dbh_cm": 31.830988618379067,
+      "density_kg_m3": 460,
+      "density_source": "species",
+      "agb": 380.4479298407814,
+      "bhb": 98.91646175860316,
+      "bio": 479.3643915993846,
+      "c_agb": 178.81052702516726,
+      "c_bhb": 46.490737026543485,
+      "total_carbon": 225.30126405171075,
+      "vol": 0.5968310365946076
+    },
+    {
+      "dbh_cm": 400.0,
+      "density_kg_m3": 460,
+      "density_source": "species",
+      "agb": 138579.29977173725,
+      "bhb": 36030.61794065169,
+      "bio": 174609.91771238894,
+      "c_agb": 65132.2708927165,
+      "c_bhb": 16934.390432106295,
+      "total_carbon": 82066.6613248228,
+      "vol": 251.32741228718345
+    },
+    {
+      "dbh_cm": 4.551831372428207,
+      "density_kg_m3": 358,
+      "density_source": "species",
+      "agb": 1.3901275053650506,
+      "bhb": 0.36143315139491317,
+      "bio": 1.7515606567599638,
+      "c_agb": 0.6533599275215738,
+      "c_bhb": 0.1698735811556092,
+      "total_carbon": 0.8232335086771829,
+      "vol": 0.002440919573464627
+    },
+    {
+      "dbh_cm": 31.830988618379067,
+      "density_kg_m3": 358,
+      "density_source": "species",
+      "agb": 297.87456118178693,
+      "bhb": 77.4473859072646,
+      "bio": 375.32194708905155,
+      "c_agb": 140.00104375543984,
+      "c_bhb": 36.40027137641436,
+      "total_carbon": 176.4013151318542,
+      "vol": 0.5968310365946076
+    },
+    {
+      "dbh_cm": 400.0,
+      "density_kg_m3": 358,
+      "density_source": "species",
+      "agb": 108501.70252118609,
+      "bhb": 28210.442655508385,
+      "bio": 136712.14517669447,
+      "c_agb": 50995.80018495746,
+      "c_bhb": 13258.90804808894,
+      "total_carbon": 64254.708233046396,
+      "vol": 251.32741228718345
+    },
+    {
+      "dbh_cm": 4.551831372428207,
+      "density_kg_m3": 446,
+      "density_source": "group",
+      "agb": 1.7227236845114797,
+      "bhb": 0.4479081579729847,
+      "bio": 2.1706318424844646,
+      "c_agb": 0.8096801317203954,
+      "c_bhb": 0.2105168342473028,
+      "total_carbon": 1.0201969659676984,
+      "vol": 0.002440919573464627
+    },
+    {
+      "dbh_cm": 31.830988618379067,
+      "density_kg_m3": 446,
+      "density_source": "group",
+      "agb": 369.142801347976,
+      "bhb": 95.97712835047376,
+      "bio": 465.11992969844977,
+      "c_agb": 173.4971166335487,
+      "c_bhb": 45.109250324722666,
+      "total_carbon": 218.60636695827137,
+      "vol": 0.5968310365946076
+    },
+    {
+      "dbh_cm": 400.0,
+      "density_kg_m3": 446,
+      "density_source": "group",
+      "agb": 134461.37280333939,
+      "bhb": 34959.95692886824,
+      "bio": 169421.32973220764,
+      "c_agb": 63196.845217569506,
+      "c_bhb": 16431.17975656807,
+      "total_carbon": 79628.02497413759,
+      "vol": 251.32741228718345
+    },
+    {
+      "dbh_cm": 4.551831372428207,
+      "density_kg_m3": 478,
+      "density_source": "species",
+      "agb": 1.8432592820977185,
+      "bhb": 0.4792474133454068,
+      "bio": 2.3225066954431255,
+      "c_agb": 0.8663318625859276,
+      "c_bhb": 0.2252462842723412,
+      "total_carbon": 1.0915781468582688,
+      "vol": 0.002440919573464627
+    },
+    {
+      "dbh_cm": 31.830988618379067,
+      "density_kg_m3": 478,
+      "density_source": "species",
+      "agb": 394.9709991925736,
+      "bhb": 102.69245979006914,
+      "bio": 497.66345898264274,
+      "c_agb": 185.63636962050956,
+      "c_bhb": 48.26545610133249,
+      "total_carbon": 233.90182572184207,
+      "vol": 0.5968310365946076
+    },
+    {
+      "dbh_cm": 400.0,
+      "density_kg_m3": 478,
+      "density_source": "species",
+      "agb": 143869.37135170354,
+      "bhb": 37406.03655144292,
+      "bio": 181275.40790314646,
+      "c_agb": 67618.60453530066,
+      "c_bhb": 17580.837179178172,
+      "total_carbon": 85199.44171447883,
+      "vol": 251.32741228718345
+    },
+    {
+      "dbh_cm": 4.551831372428207,
+      "density_kg_m3": 470,
+      "density_source": "species",
+      "agb": 1.8131440611654077,
+      "bhb": 0.47141745590300604,
+      "bio": 2.284561517068414,
+      "c_agb": 0.8521777087477416,
+      "c_bhb": 0.22156620427441281,
+      "total_carbon": 1.0737439130221544,
+      "vol": 0.002440919573464627
+    },
+    {
+      "dbh_cm": 31.830988618379067,
+      "density_kg_m3": 470,
+      "density_source": "species",
+      "agb": 388.5179521263989,
+      "bhb": 101.01466755286371,
+      "bio": 489.5326196792626,
+      "c_agb": 182.60343749940748,
+      "c_bhb": 47.47689374984594,
+      "total_carbon": 230.08033124925342,
+      "vol": 0.5968310365946076
+    },
+    {
+      "dbh_cm": 400.0,
+      "density_kg_m3": 470,
+      "density_source": "species",
+      "agb": 141518.82959898908,
+      "bhb": 36794.89569573716,
+      "bio": 178313.72529472623,
+      "c_agb": 66513.84991152486,
+      "c_bhb": 17293.600976996466,
+      "total_carbon": 83807.45088852133,
+      "vol": 251.32741228718345
+    },
+    {
+      "dbh_cm": 4.551831372428207,
+      "density_kg_m3": 426,
+      "density_source": "species",
+      "agb": 1.6472843452472676,
+      "bhb": 0.4282939297642896,
+      "bio": 2.0755782750115572,
+      "c_agb": 0.7742236422662158,
+      "c_bhb": 0.2012981469892161,
+      "total_carbon": 0.9755217892554319,
+      "vol": 0.002440919573464627
+    },
+    {
+      "dbh_cm": 31.830988618379067,
+      "density_kg_m3": 426,
+      "density_source": "species",
+      "agb": 352.97776613182134,
+      "bhb": 91.77421919427356,
+      "bio": 444.7519853260949,
+      "c_agb": 165.89955008195602,
+      "c_bhb": 43.13388302130857,
+      "total_carbon": 209.03343310326457,
+      "vol": 0.5968310365946076
+    },
+    {
+      "dbh_cm": 400.0,
+      "density_kg_m3": 426,
+      "density_source": "species",
+      "agb": 128573.21023145293,
+      "bhb": 33429.034660177764,
+      "bio": 162002.2448916307,
+      "c_agb": 60429.40880878288,
+      "c_bhb": 15711.646290283548,
+      "total_carbon": 76141.05509906642,
+      "vol": 251.32741228718345
+    },
+    {
+      "dbh_cm": 4.551831372428207,
+      "density_kg_m3": 470,
+      "density_source": "species",
+      "agb": 1.8131440611654077,
+      "bhb": 0.47141745590300604,
+      "bio": 2.284561517068414,
+      "c_agb": 0.8521777087477416,
+      "c_bhb": 0.22156620427441281,
+      "total_carbon": 1.0737439130221544,
+      "vol": 0.002440919573464627
+    },
+    {
+      "dbh_cm": 31.830988618379067,
+      "density_kg_m3": 470,
+      "density_source": "species",
+      "agb": 388.5179521263989,
+      "bhb": 101.01466755286371,
+      "bio": 489.5326196792626,
+      "c_agb": 182.60343749940748,
+      "c_bhb": 47.47689374984594,
+      "total_carbon": 230.08033124925342,
+      "vol": 0.5968310365946076
+    },
+    {
+      "dbh_cm": 400.0,
+      "density_kg_m3": 470,
+      "density_source": "species",
+      "agb": 141518.82959898908,
+      "bhb": 36794.89569573716,
+      "bio": 178313.72529472623,
+      "c_agb": 66513.84991152486,
+      "c_bhb": 17293.600976996466,
+      "total_carbon": 83807.45088852133,
+      "vol": 251.32741228718345
+    },
+    {
+      "dbh_cm": 4.551831372428207,
+      "density_kg_m3": 480,
+      "density_source": "species",
+      "agb": 1.850786189464417,
+      "bhb": 0.4812044092607485,
+      "bio": 2.3319905987251657,
+      "c_agb": 0.869869509048276,
+      "c_bhb": 0.22616607235255176,
+      "total_carbon": 1.0960355814008278,
+      "vol": 0.002440919573464627
+    },
+    {
+      "dbh_cm": 31.830988618379067,
+      "density_kg_m3": 480,
+      "density_source": "species",
+      "agb": 396.58385428698625,
+      "bhb": 103.11180211461642,
+      "bio": 499.69565640160266,
+      "c_agb": 186.39441151488353,
+      "c_bhb": 48.462546993869715,
+      "total_carbon": 234.85695850875325,
+      "vol": 0.5968310365946076
+    },
+    {
+      "dbh_cm": 400.0,
+      "density_kg_m3": 480,
+      "density_source": "species",
+      "agb": 144456.85865833846,
+      "bhb": 37558.783251168,
+      "bio": 182015.64190950646,
+      "c_agb": 67894.72356941907,
+      "c_bhb": 17652.62812804896,
+      "total_carbon": 85547.35169746804,
+      "vol": 251.32741228718345
+    },
+    {
+      "dbh_cm": 4.551831372428207,
+      "density_kg_m3": 446,
+      "density_source": "group",
+      "agb": 1.7227236845114797,
+      "bhb": 0.4479081579729847,
+      "bio": 2.1706318424844646,
+      "c_agb": 0.8096801317203954,
+      "c_bhb": 0.2105168342473028,
+      "total_carbon": 1.0201969659676984,
+      "vol": 0.002440919573464627
+    },
+    {
+      "dbh_cm": 31.830988618379067,
+      "density_kg_m3": 446,
+      "density_source": "group",
+      "agb": 369.142801347976,
+      "bhb": 95.97712835047376,
+      "bio": 465.11992969844977,
+      "c_agb": 173.4971166335487,
+      "c_bhb": 45.109250324722666,
+      "total_carbon": 218.60636695827137,
+      "vol": 0.5968310365946076
+    },
+    {
+      "dbh_cm": 400.0,
+      "density_kg_m3": 446,
+      "density_source": "group",
+      "agb": 134461.37280333939,
+      "bhb": 34959.95692886824,
+      "bio": 169421.32973220764,
+      "c_agb": 63196.845217569506,
+      "c_bhb": 16431.17975656807,
+      "total_carbon": 79628.02497413759,
+      "vol": 251.32741228718345
+    },
+    {
+      "dbh_cm": 4.551831372428207,
+      "density_kg_m3": 446,
+      "density_source": "group",
+      "agb": 1.7227236845114797,
+      "bhb": 0.4479081579729847,
+      "bio": 2.1706318424844646,
+      "c_agb": 0.8096801317203954,
+      "c_bhb": 0.2105168342473028,
+      "total_carbon": 1.0201969659676984,
+      "vol": 0.002440919573464627
+    },
+    {
+      "dbh_cm": 31.830988618379067,
+      "density_kg_m3": 446,
+      "density_source": "group",
+      "agb": 369.142801347976,
+      "bhb": 95.97712835047376,
+      "bio": 465.11992969844977,
+      "c_agb": 173.4971166335487,
+      "c_bhb": 45.109250324722666,
+      "total_carbon": 218.60636695827137,
+      "vol": 0.5968310365946076
+    },
+    {
+      "dbh_cm": 400.0,
+      "density_kg_m3": 446,
+      "density_source": "group",
+      "agb": 134461.37280333939,
+      "bhb": 34959.95692886824,
+      "bio": 169421.32973220764,
+      "c_agb": 63196.845217569506,
+      "c_bhb": 16431.17975656807,
+      "total_carbon": 79628.02497413759,
+      "vol": 251.32741228718345
+    },
+    {
+      "dbh_cm": 4.551831372428207,
+      "density_kg_m3": 446,
+      "density_source": "group",
+      "agb": 1.7227236845114797,
+      "bhb": 0.4479081579729847,
+      "bio": 2.1706318424844646,
+      "c_agb": 0.8096801317203954,
+      "c_bhb": 0.2105168342473028,
+      "total_carbon": 1.0201969659676984,
+      "vol": 0.002440919573464627
+    },
+    {
+      "dbh_cm": 31.830988618379067,
+      "density_kg_m3": 446,
+      "density_source": "group",
+      "agb": 369.142801347976,
+      "bhb": 95.97712835047376,
+      "bio": 465.11992969844977,
+      "c_agb": 173.4971166335487,
+      "c_bhb": 45.109250324722666,
+      "total_carbon": 218.60636695827137,
+      "vol": 0.5968310365946076
+    },
+    {
+      "dbh_cm": 400.0,
+      "density_kg_m3": 446,
+      "density_source": "group",
+      "agb": 134461.37280333939,
+      "bhb": 34959.95692886824,
+      "bio": 169421.32973220764,
+      "c_agb": 63196.845217569506,
+      "c_bhb": 16431.17975656807,
+      "total_carbon": 79628.02497413759,
+      "vol": 251.32741228718345
+    },
+    {
+      "dbh_cm": 4.551831372428207,
+      "density_kg_m3": 446,
+      "density_source": "group",
+      "agb": 1.7227236845114797,
+      "bhb": 0.4479081579729847,
+      "bio": 2.1706318424844646,
+      "c_agb": 0.8096801317203954,
+      "c_bhb": 0.2105168342473028,
+      "total_carbon": 1.0201969659676984,
+      "vol": 0.002440919573464627
+    },
+    {
+      "dbh_cm": 31.830988618379067,
+      "density_kg_m3": 446,
+      "density_source": "group",
+      "agb": 369.142801347976,
+      "bhb": 95.97712835047376,
+      "bio": 465.11992969844977,
+      "c_agb": 173.4971166335487,
+      "c_bhb": 45.109250324722666,
+      "total_carbon": 218.60636695827137,
+      "vol": 0.5968310365946076
+    },
+    {
+      "dbh_cm": 400.0,
+      "density_kg_m3": 446,
+      "density_source": "group",
+      "agb": 134461.37280333939,
+      "bhb": 34959.95692886824,
+      "bio": 169421.32973220764,
+      "c_agb": 63196.845217569506,
+      "c_bhb": 16431.17975656807,
+      "total_carbon": 79628.02497413759,
+      "vol": 251.32741228718345
+    },
+    {
+      "dbh_cm": 4.551831372428207,
+      "density_kg_m3": 446,
+      "density_source": "group",
+      "agb": 1.7227236845114797,
+      "bhb": 0.4479081579729847,
+      "bio": 2.1706318424844646,
+      "c_agb": 0.8096801317203954,
+      "c_bhb": 0.2105168342473028,
+      "total_carbon": 1.0201969659676984,
+      "vol": 0.002440919573464627
+    },
+    {
+      "dbh_cm": 31.830988618379067,
+      "density_kg_m3": 446,
+      "density_source": "group",
+      "agb": 369.142801347976,
+      "bhb": 95.97712835047376,
+      "bio": 465.11992969844977,
+      "c_agb": 173.4971166335487,
+      "c_bhb": 45.109250324722666,
+      "total_carbon": 218.60636695827137,
+      "vol": 0.5968310365946076
+    },
+    {
+      "dbh_cm": 400.0,
+      "density_kg_m3": 446,
+      "density_source": "group",
+      "agb": 134461.37280333939,
+      "bhb": 34959.95692886824,
+      "bio": 169421.32973220764,
+      "c_agb": 63196.845217569506,
+      "c_bhb": 16431.17975656807,
+      "total_carbon": 79628.02497413759,
+      "vol": 251.32741228718345
+    },
+    {
+      "dbh_cm": 4.551831372428207,
+      "density_kg_m3": 446,
+      "density_source": "group",
+      "agb": 1.7227236845114797,
+      "bhb": 0.4479081579729847,
+      "bio": 2.1706318424844646,
+      "c_agb": 0.8096801317203954,
+      "c_bhb": 0.2105168342473028,
+      "total_carbon": 1.0201969659676984,
+      "vol": 0.002440919573464627
+    },
+    {
+      "dbh_cm": 31.830988618379067,
+      "density_kg_m3": 446,
+      "density_source": "group",
+      "agb": 369.142801347976,
+      "bhb": 95.97712835047376,
+      "bio": 465.11992969844977,
+      "c_agb": 173.4971166335487,
+      "c_bhb": 45.109250324722666,
+      "total_carbon": 218.60636695827137,
+      "vol": 0.5968310365946076
+    },
+    {
+      "dbh_cm": 400.0,
+      "density_kg_m3": 446,
+      "density_source": "group",
+      "agb": 134461.37280333939,
+      "bhb": 34959.95692886824,
+      "bio": 169421.32973220764,
+      "c_agb": 63196.845217569506,
+      "c_bhb": 16431.17975656807,
+      "total_carbon": 79628.02497413759,
+      "vol": 251.32741228718345
+    },
+    {
+      "dbh_cm": 4.551831372428207,
+      "density_kg_m3": 446,
+      "density_source": "group",
+      "agb": 1.7227236845114797,
+      "bhb": 0.4479081579729847,
+      "bio": 2.1706318424844646,
+      "c_agb": 0.8096801317203954,
+      "c_bhb": 0.2105168342473028,
+      "total_carbon": 1.0201969659676984,
+      "vol": 0.002440919573464627
+    },
+    {
+      "dbh_cm": 31.830988618379067,
+      "density_kg_m3": 446,
+      "density_source": "group",
+      "agb": 369.142801347976,
+      "bhb": 95.97712835047376,
+      "bio": 465.11992969844977,
+      "c_agb": 173.4971166335487,
+      "c_bhb": 45.109250324722666,
+      "total_carbon": 218.60636695827137,
+      "vol": 0.5968310365946076
+    },
+    {
+      "dbh_cm": 400.0,
+      "density_kg_m3": 446,
+      "density_source": "group",
+      "agb": 134461.37280333939,
+      "bhb": 34959.95692886824,
+      "bio": 169421.32973220764,
+      "c_agb": 63196.845217569506,
+      "c_bhb": 16431.17975656807,
+      "total_carbon": 79628.02497413759,
+      "vol": 251.32741228718345
+    },
+    {
+      "dbh_cm": 4.551831372428207,
+      "density_kg_m3": 570,
+      "density_source": "species",
+      "agb": 2.1887626121342607,
+      "bhb": 0.5690782791549078,
+      "bio": 2.7578408912891685,
+      "c_agb": 1.0287184277031025,
+      "c_bhb": 0.26746679120280664,
+      "total_carbon": 1.296185218905909,
+      "vol": 0.002440919573464627
+    },
+    {
+      "dbh_cm": 31.830988618379067,
+      "density_kg_m3": 570,
+      "density_source": "species",
+      "agb": 469.0049654469532,
+      "bhb": 121.94129101620783,
+      "bio": 590.946256463161,
+      "c_agb": 220.432333760068,
+      "c_bhb": 57.312406777617674,
+      "total_carbon": 277.7447405376857,
+      "vol": 0.5968310365946076
+    },
+    {
+      "dbh_cm": 400.0,
+      "density_kg_m3": 570,
+      "density_source": "species",
+      "agb": 170836.46565853822,
+      "bhb": 44417.48107121994,
+      "bio": 215253.94672975817,
+      "c_agb": 80293.13885951295,
+      "c_bhb": 20876.21610347337,
+      "total_carbon": 101169.35496298634,
+      "vol": 251.32741228718345
+    },
+    {
+      "dbh_cm": 4.551831372428207,
+      "density_kg_m3": 630,
+      "density_source": "species",
+      "agb": 2.4133548233847635,
+      "bhb": 0.6274722540800385,
+      "bio": 3.040827077464802,
+      "c_agb": 1.1342767669908387,
+      "c_bhb": 0.29491195941761805,
+      "total_carbon": 1.4291887264084568,
+      "vol": 0.002440919573464627
+    },
+    {
+      "dbh_cm": 31.830988618379067,
+      "density_kg_m3": 630,
+      "density_source": "species",
+      "agb": 517.1302677036856,
+      "bhb": 134.45386960295826,
+      "bio": 651.5841373066439,
+      "c_agb": 243.0512258207322,
+      "c_bhb": 63.19331871339038,
+      "total_carbon": 306.2445445341226,
+      "vol": 0.5968310365946076
+    },
+    {
+      "dbh_cm": 400.0,
+      "density_kg_m3": 630,
+      "density_source": "species",
+      "agb": 188366.25137936536,
+      "bhb": 48975.225358635,
+      "bio": 237341.47673800035,
+      "c_agb": 88532.13814830172,
+      "c_bhb": 23018.35591855845,
+      "total_carbon": 111550.49406686016,
+      "vol": 251.32741228718345
+    },
+    {
+      "dbh_cm": 4.551831372428207,
+      "density_kg_m3": 530,
+      "density_source": "species",
+      "agb": 2.03872219596778,
+      "bhb": 0.5300677709516228,
+      "bio": 2.568789966919403,
+      "c_agb": 0.9581994321048566,
+      "c_bhb": 0.2491318523472627,
+      "total_carbon": 1.2073312844521193,
+      "vol": 0.002440919573464627
+    },
+    {
+      "dbh_cm": 31.830988618379067,
+      "density_kg_m3": 530,
+      "density_source": "species",
+      "agb": 436.8545166912567,
+      "bhb": 113.58217433972675,
+      "bio": 550.4366910309834,
+      "c_agb": 205.32162284489064,
+      "c_bhb": 53.38362193967157,
+      "total_carbon": 258.7052447845622,
+      "vol": 0.5968310365946076
+    },
+    {
+      "dbh_cm": 400.0,
+      "density_kg_m3": 530,
+      "density_source": "species",
+      "agb": 159125.56824932864,
+      "bhb": 41372.64774482545,
+      "bio": 200498.2159941541,
+      "c_agb": 74789.01707718446,
+      "c_bhb": 19445.14444006796,
+      "total_carbon": 94234.16151725242,
+      "vol": 251.32741228718345
+    },
+    {
+      "dbh_cm": 4.551831372428207,
+      "density_kg_m3": 562,
+      "density_source": "species",
+      "agb": 2.158775330283152,
+      "bhb": 0.5612815858736195,
+      "bio": 2.7200569161567714,
+      "c_agb": 1.0146244052330813,
+      "c_bhb": 0.26380234536060115,
+      "total_carbon": 1.2784267505936824,
+      "vol": 0.002440919573464627
+    },
+    {
+      "dbh_cm": 31.830988618379067,
+      "density_kg_m3": 562,
+      "density_source": "species",
+      "agb": 462.5793329866503,
+      "bhb": 120.27062657652908,
+      "bio": 582.8499595631794,
+      "c_agb": 217.41228650372562,
+      "c_bhb": 56.52719449096867,
+      "total_carbon": 273.9394809946943,
+      "vol": 0.5968310365946076
+    },
+    {
+      "dbh_cm": 400.0,
+      "density_kg_m3": 562,
+      "density_source": "species",
+      "agb": 168495.90975825512,
+      "bhb": 43808.936537146335,
+      "bio": 212304.84629540145,
+      "c_agb": 79193.0775863799,
+      "c_bhb": 20590.200172458775,
+      "total_carbon": 99783.27775883868,
+      "vol": 251.32741228718345
+    },
+    {
+      "dbh_cm": 4.551831372428207,
+      "density_kg_m3": 541,
+      "density_source": "group",
+      "agb": 2.0800095703681047,
+      "bhb": 0.5408024882957072,
+      "bio": 2.620812058663812,
+      "c_agb": 0.9776044980730092,
+      "c_bhb": 0.2541771694989824,
+      "total_carbon": 1.2317816675719915,
+      "vol": 0.002440919573464627
+    },
+    {
+      "dbh_cm": 31.830988618379067,
+      "density_kg_m3": 541,
+      "density_source": "group",
+      "agb": 445.7015170450951,
+      "bhb": 115.88239443172473,
+      "bio": 561.5839114768198,
+      "c_agb": 209.4797130111947,
+      "c_bhb": 54.46472538291062,
+      "total_carbon": 263.9444383941053,
+      "vol": 0.5968310365946076
+    },
+    {
+      "dbh_cm": 400.0,
+      "density_kg_m3": 541,
+      "density_source": "group",
+      "agb": 162348.1146688303,
+      "bhb": 42210.50981389588,
+      "bio": 204558.62448272618,
+      "c_agb": 76303.61389435023,
+      "c_bhb": 19838.939612531063,
+      "total_carbon": 96142.5535068813,
+      "vol": 251.32741228718345
+    },
+    {
+      "dbh_cm": 4.551831372428207,
+      "density_kg_m3": 350,
+      "density_source": "species",
+      "agb": 1.3598005539182074,
+      "bhb": 0.35354814401873397,
+      "bio": 1.7133486979369414,
+      "c_agb": 0.6391062603415575,
+      "c_bhb": 0.16616762768880494,
+      "total_carbon": 0.8052738880303625,
+      "vol": 0.002440919573464627
+    },
+    {
+      "dbh_cm": 31.830988618379067,
+      "density_kg_m3": 350,
+      "density_source": "species",
+      "agb": 291.37614479958796,
+      "bhb": 75.75779764789287,
+      "bio": 367.1339424474808,
+      "c_agb": 136.94678805580634,
+      "c_bhb": 35.60616489450965,
+      "total_carbon": 172.55295295031598,
+      "vol": 0.5968310365946076
+    },
+    {
+      "dbh_cm": 400.0,
+      "density_kg_m3": 350,
+      "density_source": "species",
+      "agb": 106134.63485900378,
+      "bhb": 27595.005063340985,
+      "bio": 133729.63992234477,
+      "c_agb": 49883.27838373178,
+      "c_bhb": 12969.652379770261,
+      "total_carbon": 62852.93076350204,
+      "vol": 251.32741228718345
+    },
+    {
+      "dbh_cm": 4.551831372428207,
+      "density_kg_m3": 407,
+      "density_source": "species",
+      "agb": 1.5755382307020072,
+      "bhb": 0.40963993998252185,
+      "bio": 1.985178170684529,
+      "c_agb": 0.7405029684299433,
+      "c_bhb": 0.19253077179178527,
+      "total_carbon": 0.9330337402217286,
+      "vol": 0.002440919573464627
+    },
+    {
+      "dbh_cm": 31.830988618379067,
+      "density_kg_m3": 407,
+      "density_source": "species",
+      "agb": 337.6041098994346,
+      "bhb": 87.777068573853,
+      "bio": 425.3811784732876,
+      "c_agb": 158.67393165273427,
+      "c_bhb": 41.25522222971091,
+      "total_carbon": 199.92915388244515,
+      "vol": 0.5968310365946076
+    },
+    {
+      "dbh_cm": 400.0,
+      "density_kg_m3": 407,
+      "density_source": "species",
+      "agb": 122973.30982850639,
+      "bhb": 31973.060555411663,
+      "bio": 154946.37038391805,
+      "c_agb": 57797.455619398,
+      "c_bhb": 15027.33846104348,
+      "total_carbon": 72824.79408044148,
+      "vol": 251.32741228718345
+    },
+    {
+      "dbh_cm": 4.551831372428207,
+      "density_kg_m3": 541,
+      "density_source": "group",
+      "agb": 2.0800095703681047,
+      "bhb": 0.5408024882957072,
+      "bio": 2.620812058663812,
+      "c_agb": 0.9776044980730092,
+      "c_bhb": 0.2541771694989824,
+      "total_carbon": 1.2317816675719915,
+      "vol": 0.002440919573464627
+    },
+    {
+      "dbh_cm": 31.830988618379067,
+      "density_kg_m3": 541,
+      "density_source": "group",
+      "agb": 445.7015170450951,
+      "bhb": 115.88239443172473,
+      "bio": 561.5839114768198,
+      "c_agb": 209.4797130111947,
+      "c_bhb": 54.46472538291062,
+      "total_carbon": 263.9444383941053,
+      "vol": 0.5968310365946076
+    },
+    {
+      "dbh_cm": 400.0,
+      "density_kg_m3": 541,
+      "density_source": "group",
+      "agb": 162348.1146688303,
+      "bhb": 42210.50981389588,
+      "bio": 204558.62448272618,
+      "c_agb": 76303.61389435023,
+      "c_bhb": 19838.939612531063,
+      "total_carbon": 96142.5535068813,
+      "vol": 251.32741228718345
+    },
+    {
+      "dbh_cm": 4.551831372428207,
+      "density_kg_m3": 541,
+      "density_source": "group",
+      "agb": 2.0800095703681047,
+      "bhb": 0.5408024882957072,
+      "bio": 2.620812058663812,
+      "c_agb": 0.9776044980730092,
+      "c_bhb": 0.2541771694989824,
+      "total_carbon": 1.2317816675719915,
+      "vol": 0.002440919573464627
+    },
+    {
+      "dbh_cm": 31.830988618379067,
+      "density_kg_m3": 541,
+      "density_source": "group",
+      "agb": 445.7015170450951,
+      "bhb": 115.88239443172473,
+      "bio": 561.5839114768198,
+      "c_agb": 209.4797130111947,
+      "c_bhb": 54.46472538291062,
+      "total_carbon": 263.9444383941053,
+      "vol": 0.5968310365946076
+    },
+    {
+      "dbh_cm": 400.0,
+      "density_kg_m3": 541,
+      "density_source": "group",
+      "agb": 162348.1146688303,
+      "bhb": 42210.50981389588,
+      "bio": 204558.62448272618,
+      "c_agb": 76303.61389435023,
+      "c_bhb": 19838.939612531063,
+      "total_carbon": 96142.5535068813,
+      "vol": 251.32741228718345
+    },
+    {
+      "dbh_cm": 4.551831372428207,
+      "density_kg_m3": 541,
+      "density_source": "group",
+      "agb": 2.0800095703681047,
+      "bhb": 0.5408024882957072,
+      "bio": 2.620812058663812,
+      "c_agb": 0.9776044980730092,
+      "c_bhb": 0.2541771694989824,
+      "total_carbon": 1.2317816675719915,
+      "vol": 0.002440919573464627
+    },
+    {
+      "dbh_cm": 31.830988618379067,
+      "density_kg_m3": 541,
+      "density_source": "group",
+      "agb": 445.7015170450951,
+      "bhb": 115.88239443172473,
+      "bio": 561.5839114768198,
+      "c_agb": 209.4797130111947,
+      "c_bhb": 54.46472538291062,
+      "total_carbon": 263.9444383941053,
+      "vol": 0.5968310365946076
+    },
+    {
+      "dbh_cm": 400.0,
+      "density_kg_m3": 541,
+      "density_source": "group",
+      "agb": 162348.1146688303,
+      "bhb": 42210.50981389588,
+      "bio": 204558.62448272618,
+      "c_agb": 76303.61389435023,
+      "c_bhb": 19838.939612531063,
+      "total_carbon": 96142.5535068813,
+      "vol": 251.32741228718345
+    },
+    {
+      "dbh_cm": 4.551831372428207,
+      "density_kg_m3": 541,
+      "density_source": "group",
+      "agb": 2.0800095703681047,
+      "bhb": 0.5408024882957072,
+      "bio": 2.620812058663812,
+      "c_agb": 0.9776044980730092,
+      "c_bhb": 0.2541771694989824,
+      "total_carbon": 1.2317816675719915,
+      "vol": 0.002440919573464627
+    },
+    {
+      "dbh_cm": 31.830988618379067,
+      "density_kg_m3": 541,
+      "density_source": "group",
+      "agb": 445.7015170450951,
+      "bhb": 115.88239443172473,
+      "bio": 561.5839114768198,
+      "c_agb": 209.4797130111947,
+      "c_bhb": 54.46472538291062,
+      "total_carbon": 263.9444383941053,
+      "vol": 0.5968310365946076
+    },
+    {
+      "dbh_cm": 400.0,
+      "density_kg_m3": 541,
+      "density_source": "group",
+      "agb": 162348.1146688303,
+      "bhb": 42210.50981389588,
+      "bio": 204558.62448272618,
+      "c_agb": 76303.61389435023,
+      "c_bhb": 19838.939612531063,
+      "total_carbon": 96142.5535068813,
+      "vol": 251.32741228718345
+    },
+    {
+      "dbh_cm": 4.551831372428207,
+      "density_kg_m3": 541,
+      "density_source": "group",
+      "agb": 2.0800095703681047,
+      "bhb": 0.5408024882957072,
+      "bio": 2.620812058663812,
+      "c_agb": 0.9776044980730092,
+      "c_bhb": 0.2541771694989824,
+      "total_carbon": 1.2317816675719915,
+      "vol": 0.002440919573464627
+    },
+    {
+      "dbh_cm": 31.830988618379067,
+      "density_kg_m3": 541,
+      "density_source": "group",
+      "agb": 445.7015170450951,
+      "bhb": 115.88239443172473,
+      "bio": 561.5839114768198,
+      "c_agb": 209.4797130111947,
+      "c_bhb": 54.46472538291062,
+      "total_carbon": 263.9444383941053,
+      "vol": 0.5968310365946076
+    },
+    {
+      "dbh_cm": 400.0,
+      "density_kg_m3": 541,
+      "density_source": "group",
+      "agb": 162348.1146688303,
+      "bhb": 42210.50981389588,
+      "bio": 204558.62448272618,
+      "c_agb": 76303.61389435023,
+      "c_bhb": 19838.939612531063,
+      "total_carbon": 96142.5535068813,
+      "vol": 251.32741228718345
+    },
+    {
+      "dbh_cm": 4.551831372428207,
+      "density_kg_m3": 541,
+      "density_source": "group",
+      "agb": 2.0800095703681047,
+      "bhb": 0.5408024882957072,
+      "bio": 2.620812058663812,
+      "c_agb": 0.9776044980730092,
+      "c_bhb": 0.2541771694989824,
+      "total_carbon": 1.2317816675719915,
+      "vol": 0.002440919573464627
+    },
+    {
+      "dbh_cm": 31.830988618379067,
+      "density_kg_m3": 541,
+      "density_source": "group",
+      "agb": 445.7015170450951,
+      "bhb": 115.88239443172473,
+      "bio": 561.5839114768198,
+      "c_agb": 209.4797130111947,
+      "c_bhb": 54.46472538291062,
+      "total_carbon": 263.9444383941053,
+      "vol": 0.5968310365946076
+    },
+    {
+      "dbh_cm": 400.0,
+      "density_kg_m3": 541,
+      "density_source": "group",
+      "agb": 162348.1146688303,
+      "bhb": 42210.50981389588,
+      "bio": 204558.62448272618,
+      "c_agb": 76303.61389435023,
+      "c_bhb": 19838.939612531063,
+      "total_carbon": 96142.5535068813,
+      "vol": 251.32741228718345
+    },
+    {
+      "dbh_cm": 4.551831372428207,
+      "density_kg_m3": 541,
+      "density_source": "group",
+      "agb": 2.0800095703681047,
+      "bhb": 0.5408024882957072,
+      "bio": 2.620812058663812,
+      "c_agb": 0.9776044980730092,
+      "c_bhb": 0.2541771694989824,
+      "total_carbon": 1.2317816675719915,
+      "vol": 0.002440919573464627
+    },
+    {
+      "dbh_cm": 31.830988618379067,
+      "density_kg_m3": 541,
+      "density_source": "group",
+      "agb": 445.7015170450951,
+      "bhb": 115.88239443172473,
+      "bio": 561.5839114768198,
+      "c_agb": 209.4797130111947,
+      "c_bhb": 54.46472538291062,
+      "total_carbon": 263.9444383941053,
+      "vol": 0.5968310365946076
+    },
+    {
+      "dbh_cm": 400.0,
+      "density_kg_m3": 541,
+      "density_source": "group",
+      "agb": 162348.1146688303,
+      "bhb": 42210.50981389588,
+      "bio": 204558.62448272618,
+      "c_agb": 76303.61389435023,
+      "c_bhb": 19838.939612531063,
+      "total_carbon": 96142.5535068813,
+      "vol": 251.32741228718345
+    },
+    {
+      "dbh_cm": 4.551831372428207,
+      "density_kg_m3": 541,
+      "density_source": "group",
+      "agb": 2.0800095703681047,
+      "bhb": 0.5408024882957072,
+      "bio": 2.620812058663812,
+      "c_agb": 0.9776044980730092,
+      "c_bhb": 0.2541771694989824,
+      "total_carbon": 1.2317816675719915,
+      "vol": 0.002440919573464627
+    },
+    {
+      "dbh_cm": 31.830988618379067,
+      "density_kg_m3": 541,
+      "density_source": "group",
+      "agb": 445.7015170450951,
+      "bhb": 115.88239443172473,
+      "bio": 561.5839114768198,
+      "c_agb": 209.4797130111947,
+      "c_bhb": 54.46472538291062,
+      "total_carbon": 263.9444383941053,
+      "vol": 0.5968310365946076
+    },
+    {
+      "dbh_cm": 400.0,
+      "density_kg_m3": 541,
+      "density_source": "group",
+      "agb": 162348.1146688303,
+      "bhb": 42210.50981389588,
+      "bio": 204558.62448272618,
+      "c_agb": 76303.61389435023,
+      "c_bhb": 19838.939612531063,
+      "total_carbon": 96142.5535068813,
+      "vol": 251.32741228718345
+    },
+    {
+      "dbh_cm": 4.551831372428207,
+      "density_kg_m3": 541,
+      "density_source": "group",
+      "agb": 2.0800095703681047,
+      "bhb": 0.5408024882957072,
+      "bio": 2.620812058663812,
+      "c_agb": 0.9776044980730092,
+      "c_bhb": 0.2541771694989824,
+      "total_carbon": 1.2317816675719915,
+      "vol": 0.002440919573464627
+    },
+    {
+      "dbh_cm": 31.830988618379067,
+      "density_kg_m3": 541,
+      "density_source": "group",
+      "agb": 445.7015170450951,
+      "bhb": 115.88239443172473,
+      "bio": 561.5839114768198,
+      "c_agb": 209.4797130111947,
+      "c_bhb": 54.46472538291062,
+      "total_carbon": 263.9444383941053,
+      "vol": 0.5968310365946076
+    },
+    {
+      "dbh_cm": 400.0,
+      "density_kg_m3": 541,
+      "density_source": "group",
+      "agb": 162348.1146688303,
+      "bhb": 42210.50981389588,
+      "bio": 204558.62448272618,
+      "c_agb": 76303.61389435023,
+      "c_bhb": 19838.939612531063,
+      "total_carbon": 96142.5535068813,
+      "vol": 251.32741228718345
+    },
+    {
+      "dbh_cm": 4.551831372428207,
+      "density_kg_m3": 541,
+      "density_source": "group",
+      "agb": 2.0800095703681047,
+      "bhb": 0.5408024882957072,
+      "bio": 2.620812058663812,
+      "c_agb": 0.9776044980730092,
+      "c_bhb": 0.2541771694989824,
+      "total_carbon": 1.2317816675719915,
+      "vol": 0.002440919573464627
+    },
+    {
+      "dbh_cm": 31.830988618379067,
+      "density_kg_m3": 541,
+      "density_source": "group",
+      "agb": 445.7015170450951,
+      "bhb": 115.88239443172473,
+      "bio": 561.5839114768198,
+      "c_agb": 209.4797130111947,
+      "c_bhb": 54.46472538291062,
+      "total_carbon": 263.9444383941053,
+      "vol": 0.5968310365946076
+    },
+    {
+      "dbh_cm": 400.0,
+      "density_kg_m3": 541,
+      "density_source": "group",
+      "agb": 162348.1146688303,
+      "bhb": 42210.50981389588,
+      "bio": 204558.62448272618,
+      "c_agb": 76303.61389435023,
+      "c_bhb": 19838.939612531063,
+      "total_carbon": 96142.5535068813,
+      "vol": 251.32741228718345
+    },
+    {
+      "dbh_cm": 4.551831372428207,
+      "density_kg_m3": 541,
+      "density_source": "group",
+      "agb": 2.0800095703681047,
+      "bhb": 0.5408024882957072,
+      "bio": 2.620812058663812,
+      "c_agb": 0.9776044980730092,
+      "c_bhb": 0.2541771694989824,
+      "total_carbon": 1.2317816675719915,
+      "vol": 0.002440919573464627
+    },
+    {
+      "dbh_cm": 31.830988618379067,
+      "density_kg_m3": 541,
+      "density_source": "group",
+      "agb": 445.7015170450951,
+      "bhb": 115.88239443172473,
+      "bio": 561.5839114768198,
+      "c_agb": 209.4797130111947,
+      "c_bhb": 54.46472538291062,
+      "total_carbon": 263.9444383941053,
+      "vol": 0.5968310365946076
+    },
+    {
+      "dbh_cm": 400.0,
+      "density_kg_m3": 541,
+      "density_source": "group",
+      "agb": 162348.1146688303,
+      "bhb": 42210.50981389588,
+      "bio": 204558.62448272618,
+      "c_agb": 76303.61389435023,
+      "c_bhb": 19838.939612531063,
+      "total_carbon": 96142.5535068813,
+      "vol": 251.32741228718345
+    },
+    {
+      "dbh_cm": 4.551831372428207,
+      "density_kg_m3": 541,
+      "density_source": "group",
+      "agb": 2.0800095703681047,
+      "bhb": 0.5408024882957072,
+      "bio": 2.620812058663812,
+      "c_agb": 0.9776044980730092,
+      "c_bhb": 0.2541771694989824,
+      "total_carbon": 1.2317816675719915,
+      "vol": 0.002440919573464627
+    },
+    {
+      "dbh_cm": 31.830988618379067,
+      "density_kg_m3": 541,
+      "density_source": "group",
+      "agb": 445.7015170450951,
+      "bhb": 115.88239443172473,
+      "bio": 561.5839114768198,
+      "c_agb": 209.4797130111947,
+      "c_bhb": 54.46472538291062,
+      "total_carbon": 263.9444383941053,
+      "vol": 0.5968310365946076
+    },
+    {
+      "dbh_cm": 400.0,
+      "density_kg_m3": 541,
+      "density_source": "group",
+      "agb": 162348.1146688303,
+      "bhb": 42210.50981389588,
+      "bio": 204558.62448272618,
+      "c_agb": 76303.61389435023,
+      "c_bhb": 19838.939612531063,
+      "total_carbon": 96142.5535068813,
+      "vol": 251.32741228718345
+    },
+    {
+      "dbh_cm": 4.551831372428207,
+      "density_kg_m3": 541,
+      "density_source": "group",
+      "agb": 2.0800095703681047,
+      "bhb": 0.5408024882957072,
+      "bio": 2.620812058663812,
+      "c_agb": 0.9776044980730092,
+      "c_bhb": 0.2541771694989824,
+      "total_carbon": 1.2317816675719915,
+      "vol": 0.002440919573464627
+    },
+    {
+      "dbh_cm": 31.830988618379067,
+      "density_kg_m3": 541,
+      "density_source": "group",
+      "agb": 445.7015170450951,
+      "bhb": 115.88239443172473,
+      "bio": 561.5839114768198,
+      "c_agb": 209.4797130111947,
+      "c_bhb": 54.46472538291062,
+      "total_carbon": 263.9444383941053,
+      "vol": 0.5968310365946076
+    },
+    {
+      "dbh_cm": 400.0,
+      "density_kg_m3": 541,
+      "density_source": "group",
+      "agb": 162348.1146688303,
+      "bhb": 42210.50981389588,
+      "bio": 204558.62448272618,
+      "c_agb": 76303.61389435023,
+      "c_bhb": 19838.939612531063,
+      "total_carbon": 96142.5535068813,
+      "vol": 251.32741228718345
+    },
+    {
+      "dbh_cm": 4.551831372428207,
+      "density_kg_m3": 541,
+      "density_source": "group",
+      "agb": 2.0800095703681047,
+      "bhb": 0.5408024882957072,
+      "bio": 2.620812058663812,
+      "c_agb": 0.9776044980730092,
+      "c_bhb": 0.2541771694989824,
+      "total_carbon": 1.2317816675719915,
+      "vol": 0.002440919573464627
+    },
+    {
+      "dbh_cm": 31.830988618379067,
+      "density_kg_m3": 541,
+      "density_source": "group",
+      "agb": 445.7015170450951,
+      "bhb": 115.88239443172473,
+      "bio": 561.5839114768198,
+      "c_agb": 209.4797130111947,
+      "c_bhb": 54.46472538291062,
+      "total_carbon": 263.9444383941053,
+      "vol": 0.5968310365946076
+    },
+    {
+      "dbh_cm": 400.0,
+      "density_kg_m3": 541,
+      "density_source": "group",
+      "agb": 162348.1146688303,
+      "bhb": 42210.50981389588,
+      "bio": 204558.62448272618,
+      "c_agb": 76303.61389435023,
+      "c_bhb": 19838.939612531063,
+      "total_carbon": 96142.5535068813,
+      "vol": 251.32741228718345
+    },
+    {
+      "dbh_cm": 4.551831372428207,
+      "density_kg_m3": 541,
+      "density_source": "group",
+      "agb": 2.0800095703681047,
+      "bhb": 0.5408024882957072,
+      "bio": 2.620812058663812,
+      "c_agb": 0.9776044980730092,
+      "c_bhb": 0.2541771694989824,
+      "total_carbon": 1.2317816675719915,
+      "vol": 0.002440919573464627
+    },
+    {
+      "dbh_cm": 31.830988618379067,
+      "density_kg_m3": 541,
+      "density_source": "group",
+      "agb": 445.7015170450951,
+      "bhb": 115.88239443172473,
+      "bio": 561.5839114768198,
+      "c_agb": 209.4797130111947,
+      "c_bhb": 54.46472538291062,
+      "total_carbon": 263.9444383941053,
+      "vol": 0.5968310365946076
+    },
+    {
+      "dbh_cm": 400.0,
+      "density_kg_m3": 541,
+      "density_source": "group",
+      "agb": 162348.1146688303,
+      "bhb": 42210.50981389588,
+      "bio": 204558.62448272618,
+      "c_agb": 76303.61389435023,
+      "c_bhb": 19838.939612531063,
+      "total_carbon": 96142.5535068813,
+      "vol": 251.32741228718345
+    },
+    {
+      "dbh_cm": 4.551831372428207,
+      "density_kg_m3": 541,
+      "density_source": "group",
+      "agb": 2.0800095703681047,
+      "bhb": 0.5408024882957072,
+      "bio": 2.620812058663812,
+      "c_agb": 0.9776044980730092,
+      "c_bhb": 0.2541771694989824,
+      "total_carbon": 1.2317816675719915,
+      "vol": 0.002440919573464627
+    },
+    {
+      "dbh_cm": 31.830988618379067,
+      "density_kg_m3": 541,
+      "density_source": "group",
+      "agb": 445.7015170450951,
+      "bhb": 115.88239443172473,
+      "bio": 561.5839114768198,
+      "c_agb": 209.4797130111947,
+      "c_bhb": 54.46472538291062,
+      "total_carbon": 263.9444383941053,
+      "vol": 0.5968310365946076
+    },
+    {
+      "dbh_cm": 400.0,
+      "density_kg_m3": 541,
+      "density_source": "group",
+      "agb": 162348.1146688303,
+      "bhb": 42210.50981389588,
+      "bio": 204558.62448272618,
+      "c_agb": 76303.61389435023,
+      "c_bhb": 19838.939612531063,
+      "total_carbon": 96142.5535068813,
+      "vol": 251.32741228718345
+    },
+    {
+      "dbh_cm": 4.551831372428207,
+      "density_kg_m3": 541,
+      "density_source": "group",
+      "agb": 2.0800095703681047,
+      "bhb": 0.5408024882957072,
+      "bio": 2.620812058663812,
+      "c_agb": 0.9776044980730092,
+      "c_bhb": 0.2541771694989824,
+      "total_carbon": 1.2317816675719915,
+      "vol": 0.002440919573464627
+    },
+    {
+      "dbh_cm": 31.830988618379067,
+      "density_kg_m3": 541,
+      "density_source": "group",
+      "agb": 445.7015170450951,
+      "bhb": 115.88239443172473,
+      "bio": 561.5839114768198,
+      "c_agb": 209.4797130111947,
+      "c_bhb": 54.46472538291062,
+      "total_carbon": 263.9444383941053,
+      "vol": 0.5968310365946076
+    },
+    {
+      "dbh_cm": 400.0,
+      "density_kg_m3": 541,
+      "density_source": "group",
+      "agb": 162348.1146688303,
+      "bhb": 42210.50981389588,
+      "bio": 204558.62448272618,
+      "c_agb": 76303.61389435023,
+      "c_bhb": 19838.939612531063,
+      "total_carbon": 96142.5535068813,
+      "vol": 251.32741228718345
+    },
+    {
+      "dbh_cm": 4.551831372428207,
+      "density_kg_m3": 541,
+      "density_source": "group",
+      "agb": 2.0800095703681047,
+      "bhb": 0.5408024882957072,
+      "bio": 2.620812058663812,
+      "c_agb": 0.9776044980730092,
+      "c_bhb": 0.2541771694989824,
+      "total_carbon": 1.2317816675719915,
+      "vol": 0.002440919573464627
+    },
+    {
+      "dbh_cm": 31.830988618379067,
+      "density_kg_m3": 541,
+      "density_source": "group",
+      "agb": 445.7015170450951,
+      "bhb": 115.88239443172473,
+      "bio": 561.5839114768198,
+      "c_agb": 209.4797130111947,
+      "c_bhb": 54.46472538291062,
+      "total_carbon": 263.9444383941053,
+      "vol": 0.5968310365946076
+    },
+    {
+      "dbh_cm": 400.0,
+      "density_kg_m3": 541,
+      "density_source": "group",
+      "agb": 162348.1146688303,
+      "bhb": 42210.50981389588,
+      "bio": 204558.62448272618,
+      "c_agb": 76303.61389435023,
+      "c_bhb": 19838.939612531063,
+      "total_carbon": 96142.5535068813,
+      "vol": 251.32741228718345
+    },
+    {
+      "dbh_cm": 4.551831372428207,
+      "density_kg_m3": 541,
+      "density_source": "group",
+      "agb": 2.0800095703681047,
+      "bhb": 0.5408024882957072,
+      "bio": 2.620812058663812,
+      "c_agb": 0.9776044980730092,
+      "c_bhb": 0.2541771694989824,
+      "total_carbon": 1.2317816675719915,
+      "vol": 0.002440919573464627
+    },
+    {
+      "dbh_cm": 31.830988618379067,
+      "density_kg_m3": 541,
+      "density_source": "group",
+      "agb": 445.7015170450951,
+      "bhb": 115.88239443172473,
+      "bio": 561.5839114768198,
+      "c_agb": 209.4797130111947,
+      "c_bhb": 54.46472538291062,
+      "total_carbon": 263.9444383941053,
+      "vol": 0.5968310365946076
+    },
+    {
+      "dbh_cm": 400.0,
+      "density_kg_m3": 541,
+      "density_source": "group",
+      "agb": 162348.1146688303,
+      "bhb": 42210.50981389588,
+      "bio": 204558.62448272618,
+      "c_agb": 76303.61389435023,
+      "c_bhb": 19838.939612531063,
+      "total_carbon": 96142.5535068813,
+      "vol": 251.32741228718345
+    },
+    {
+      "dbh_cm": 4.551831372428207,
+      "density_kg_m3": 541,
+      "density_source": "group",
+      "agb": 2.0800095703681047,
+      "bhb": 0.5408024882957072,
+      "bio": 2.620812058663812,
+      "c_agb": 0.9776044980730092,
+      "c_bhb": 0.2541771694989824,
+      "total_carbon": 1.2317816675719915,
+      "vol": 0.002440919573464627
+    },
+    {
+      "dbh_cm": 31.830988618379067,
+      "density_kg_m3": 541,
+      "density_source": "group",
+      "agb": 445.7015170450951,
+      "bhb": 115.88239443172473,
+      "bio": 561.5839114768198,
+      "c_agb": 209.4797130111947,
+      "c_bhb": 54.46472538291062,
+      "total_carbon": 263.9444383941053,
+      "vol": 0.5968310365946076
+    },
+    {
+      "dbh_cm": 400.0,
+      "density_kg_m3": 541,
+      "density_source": "group",
+      "agb": 162348.1146688303,
+      "bhb": 42210.50981389588,
+      "bio": 204558.62448272618,
+      "c_agb": 76303.61389435023,
+      "c_bhb": 19838.939612531063,
+      "total_carbon": 96142.5535068813,
+      "vol": 251.32741228718345
+    },
+    {
+      "dbh_cm": 4.551831372428207,
+      "density_kg_m3": 541,
+      "density_source": "group",
+      "agb": 2.0800095703681047,
+      "bhb": 0.5408024882957072,
+      "bio": 2.620812058663812,
+      "c_agb": 0.9776044980730092,
+      "c_bhb": 0.2541771694989824,
+      "total_carbon": 1.2317816675719915,
+      "vol": 0.002440919573464627
+    },
+    {
+      "dbh_cm": 31.830988618379067,
+      "density_kg_m3": 541,
+      "density_source": "group",
+      "agb": 445.7015170450951,
+      "bhb": 115.88239443172473,
+      "bio": 561.5839114768198,
+      "c_agb": 209.4797130111947,
+      "c_bhb": 54.46472538291062,
+      "total_carbon": 263.9444383941053,
+      "vol": 0.5968310365946076
+    },
+    {
+      "dbh_cm": 400.0,
+      "density_kg_m3": 541,
+      "density_source": "group",
+      "agb": 162348.1146688303,
+      "bhb": 42210.50981389588,
+      "bio": 204558.62448272618,
+      "c_agb": 76303.61389435023,
+      "c_bhb": 19838.939612531063,
+      "total_carbon": 96142.5535068813,
+      "vol": 251.32741228718345
+    },
+    {
+      "dbh_cm": 4.551831372428207,
+      "density_kg_m3": 541,
+      "density_source": "group",
+      "agb": 2.0800095703681047,
+      "bhb": 0.5408024882957072,
+      "bio": 2.620812058663812,
+      "c_agb": 0.9776044980730092,
+      "c_bhb": 0.2541771694989824,
+      "total_carbon": 1.2317816675719915,
+      "vol": 0.002440919573464627
+    },
+    {
+      "dbh_cm": 31.830988618379067,
+      "density_kg_m3": 541,
+      "density_source": "group",
+      "agb": 445.7015170450951,
+      "bhb": 115.88239443172473,
+      "bio": 561.5839114768198,
+      "c_agb": 209.4797130111947,
+      "c_bhb": 54.46472538291062,
+      "total_carbon": 263.9444383941053,
+      "vol": 0.5968310365946076
+    },
+    {
+      "dbh_cm": 400.0,
+      "density_kg_m3": 541,
+      "density_source": "group",
+      "agb": 162348.1146688303,
+      "bhb": 42210.50981389588,
+      "bio": 204558.62448272618,
+      "c_agb": 76303.61389435023,
+      "c_bhb": 19838.939612531063,
+      "total_carbon": 96142.5535068813,
+      "vol": 251.32741228718345
+    },
+    {
+      "dbh_cm": 4.551831372428207,
+      "density_kg_m3": 541,
+      "density_source": "group",
+      "agb": 2.0800095703681047,
+      "bhb": 0.5408024882957072,
+      "bio": 2.620812058663812,
+      "c_agb": 0.9776044980730092,
+      "c_bhb": 0.2541771694989824,
+      "total_carbon": 1.2317816675719915,
+      "vol": 0.002440919573464627
+    },
+    {
+      "dbh_cm": 31.830988618379067,
+      "density_kg_m3": 541,
+      "density_source": "group",
+      "agb": 445.7015170450951,
+      "bhb": 115.88239443172473,
+      "bio": 561.5839114768198,
+      "c_agb": 209.4797130111947,
+      "c_bhb": 54.46472538291062,
+      "total_carbon": 263.9444383941053,
+      "vol": 0.5968310365946076
+    },
+    {
+      "dbh_cm": 400.0,
+      "density_kg_m3": 541,
+      "density_source": "group",
+      "agb": 162348.1146688303,
+      "bhb": 42210.50981389588,
+      "bio": 204558.62448272618,
+      "c_agb": 76303.61389435023,
+      "c_bhb": 19838.939612531063,
+      "total_carbon": 96142.5535068813,
+      "vol": 251.32741228718345
+    }
+  ]
+}

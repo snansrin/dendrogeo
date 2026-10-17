@@ -4,6 +4,9 @@
   function validate(input,today) {
     const value = root.DG_CLEAN_REPORT_CONTEXT.clean(input);
     const errors = {};
+    if (value.inventory_scope && !['census', 'partial', 'probability_sample'].includes(value.inventory_scope)) {
+      errors.inventory_scope = "Geçerli envanter kapsamı seçin.";
+    }
     // Bibliographic fields are optional; validate only information that is supplied.
     for (const key of ["start_date", "end_date"]) {
       const date = value[key];

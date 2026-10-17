@@ -46,8 +46,8 @@
 .dg-report-dialog-heading h2{font-size:1.25rem;margin:4px 0 8px}
 .dg-report-dialog-body{flex:1;min-height:0;overflow:auto;overscroll-behavior:contain;scrollbar-gutter:stable;padding:0 6px 8px 0}
 .dg-report-dialog-body>.dg-meta{margin:0 0 8px}
-.dg-report-extra{border-top:1px solid var(--line);margin-top:12px;padding-top:4px}
-.dg-report-extra>summary{min-height:44px;display:list-item;align-content:center}
+.dg-report-extra,.dg-field-protocol{border-top:1px solid var(--line);margin-top:12px;padding-top:4px}
+.dg-report-extra>summary,.dg-field-protocol>summary{min-height:44px;display:list-item;align-content:center}
 .dg-report-dialog-footer{flex:none;border-top:1px solid var(--line);padding-top:12px}
 .dg-report-dialog-footer>.dg-meta{margin:0;font-size:.72rem;line-height:1.6}
 .dg-report-dialog-footer a{color:var(--green)}

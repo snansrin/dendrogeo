@@ -1,0 +1,40 @@
+{
+  "schema": "dendrogeo-scientific-validation-evidence/1",
+  "date": "2026-10-17",
+  "baseline_commit": "a5498b6e75bb1f6c9d2fe67a7d10d2fcb7db23f5",
+  "preservation": {
+    "sourceFilesCompared": 688,
+    "unchanged": true,
+    "publishedReportFilesCompared": 69,
+    "publishedReportsUnchanged": true,
+    "excludedChanges": [
+      "optional report context field whitelist",
+      "optional inventory-scope validation"
+    ],
+    "protectedCoreCheck": "961 files; only generated index/landing asset hashes and added phone-test entry authorized"
+  },
+  "reference": {
+    "schema": "dendrogeo-carbon-reference-check/1",
+    "cases": 147,
+    "species": 49,
+    "comparisons": 3822,
+    "maxRelativeError": 4.677484647021211e-16,
+    "tolerance": 1e-12,
+    "productionFilesModified": false,
+    "scope": "Synthetic arithmetic/unit/density-policy regression; not local field validation"
+  },
+  "local_field_validation": "NOT PERFORMED; no independent local dry-biomass references or repeated measurements supplied",
+  "new_ui": "All fields optional; existing theme, fonts and disclosure styles; TR/EN and light/dark tested",
+  "flow_artifacts_removed": 5,
+  "production_database_writes": false,
+  "validation": {
+    "source_build_csp_regressions": "npm run check: passed",
+    "phone_workflows": "npm run check:phone: passed",
+    "accessibility": "npm run check:accessibility: passed",
+    "python_research_tests": 7,
+    "new_node_tests": 6,
+    "field_ui_scenarios": 12,
+    "report_phone_scenarios": 3,
+    "no_authenticated_production_writes": true
+  }
+}

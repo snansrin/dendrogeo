@@ -26,6 +26,8 @@ Göreceli kademeler mutlak bitki sağlığı, taç yoğunluğu, ağaç sayısı 
 
 ## Belirsizlik ve doğrulama
 
+[Saha doğrulaması ve bağımsız referans araçları](../research/carbon/README.md), üretim motorundan ayrı çalışır. Yeni rapor formunda kapsam, ekip, cihaz kontrolü ve tekrar ölçüm beyanı isteğe bağlıdır. Yeni raporların HTML ve üst verisinde ölçüm, yoğunluk, model ve örnekleme kapsamı ayrı açıklanır; eksik bilgi doğrulanmış sayılmaz. Mevcut yoğunluklar, formüller ve Monte Carlo hesabı değiştirilmedi.
+
 Karbon Monte Carlo aralığı kaydedilmiş varsayımlara koşulludur; örnekleme, yerel model yanlılığı ve tüm konum/yoğunluk belirsizliğini otomatik kapsamaz. Spektral kaynak uyumu bağımsız saha doğruluğu değildir. Kullanıcı tarafından kabul edilmiş harita, bağımsız referansla doğrulanmış ürün olarak adlandırılamaz.
 
 DGR hash'i dosyanın aynı olduğunu gösterir. Aynı hesabın tekrar üretimi için girdiler, yöntem/ortam sürümleri ve çalıştırılabilir analiz de gereklidir. DOI kalıcı kimliktir; hakemlik veya bilimsel doğruluk sertifikası değildir.

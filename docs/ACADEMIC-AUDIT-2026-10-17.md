@@ -14,7 +14,7 @@ DendroGeo, saha çevre/çap ve boy ölçümlerini allometrik karbon tahminine ba
 - Bu, bütün kaynakların otomatik envanter ve AST taramasıdır. Her satırın insan gibi tek tek anlaşılıp bütün kombinasyonların canlı denenmiş olduğu iddia edilmez. Bilimsel hesap, geometri, kimlik/yetki, yedek, yayın ve dil akışları ayrıca kaynak üzerinden incelendi.
 - Canlı landing'in altı sahnesi, TR/EN geçişi, kamu haritası ve istatistik, yöntem bağlantıları ve giriş görünümü incelendi. Başlangıçta giriş yapılmamıştı. Gerçek hesapla ölçüm yazma, davet kabul etme, yayın gönderme veya üretim verisi silme yapılmadı.
 - Supabase'de yalnız şema, politika, fonksiyon ve danışman metadatası okundu. Açıkta bulunan davet kimliği zafiyeti izole PostgreSQL testlerinden sonra tek migration ile düzeltildi; gerçek üyelikler ve gözlemler değiştirilmedi.
-- Dinamik bağımlılık enjeksiyonu nedeniyle statik çağrı dizini kesin çalışma zamanı çağrı grafiği değildir. İşlev akışları [24 diyagramla](SYSTEM-FLOWS-2026-10-17.md), 11 uygulama görünümünün tamamını kapsar.
+- Dinamik bağımlılık enjeksiyonu nedeniyle statik çağrı dizini kesin çalışma zamanı çağrı grafiği değildir. Akış diyagramı çıktıları kullanıcı talebiyle kaldırılmıştır.
 
 ## Mevcut durum / olması gereken / yapılacak işlem
 
@@ -62,6 +62,20 @@ Bu plan yeni, kaldırılmış ağaç algılama/taç çapı modelini geri getirme
 
 ## En yüksek araştırma değeri taşıyan geliştirmeler
 
+### 17 Ekim 2026 — onaylanan saha ve karbon hedeflerinin uygulanması
+
+[Bağımsız araştırma araçları ve kullanım rehberi](../research/carbon/README.md) eklendi. Üretim allometrisi, 49 tür, 16 özel yoğunluk, iki grup değeri, park algılama/yüzey motoru ve mevcut Monte Carlo değişmedi.
+
+| Hedef | Uygulanan | Açık kalan gerçek veri gereksinimi |
+|---|---|---|
+| Saha bağlamı | Yayın formunda isteğe bağlı kapsam, ekip, kalibrasyon ve tekrar ölçüm; mevcut örnekleme/cihaz/tarih alanları korunur | Araştırmacının gerçek cihaz ve saha beyanları |
+| Belirsizlik ayrımı | Yeni rapor HTML/metadata açıklaması; bağımsız ölçüm, yoğunluk, model ve desteklenen SRS tasarım tanısı | Yoğunluk CV'si ve örnekleme tasarımı bilinmiyorsa hesaplanmadı |
+| Bağımsız referans hesap | Ayrı Python uygulaması; 49 tür × 3 senaryo; tarayıcı ve raporla karşılaştırma; CI kapısı | Aritmetik eşitlik ekolojik uygunluk kanıtı değildir |
+| Tekrar ölçüm | Tek ağaç/çift eşleştirme; bias, MAE, RMSE, teknik ölçüm hatası | Gerçek eşleştirilmiş tekrar ölçümleri |
+| Yerel allometri uygunluğu | Bağımsız kuru AGB/yapısal referans karşılaştırması ve kaynak/grup ayrımı | Gerçek yerel bağımsız biyokütle referansı; otomatik doğrulandı kararı verilmez |
+
+Bu ekler önceki bulguları otomatik kapatmaz; hangi araçların tamamlandığını ve hangi bilimsel kanıtın henüz sağlanmadığını ayırır. Önceden yayımlanmış raporların dosyaları ve sonuçları değiştirilmedi.
+
 1. **Tekrar ölçüm ve zaman serisi:** Kalıcı ağaç kimliğiyle farklı tarihlerde ölçümü ilişkilendir; büyüme, ölüm ve protokol değişimini ayrı olaylar olarak tut. Değişim belirsizliği olmadan karbon artışı iddiası yapma.
 2. **Denklem karşılaştırma laboratuvarı:** Kanonik üretim hesabına dokunmadan, aynı hak-sahibi veri kesitinde alternatif yayımlanmış denklemler ve katsayı senaryolarını yan yana incele.
 3. **Araştırma doğrulama çalışma alanı:** Kör örnek ataması, referans etiketçi, uyuşmazlık çözümü ve kilitli test seti; üretim düzeltmeleriyle bağımsız doğrulama verisini ayır.
@@ -80,7 +94,7 @@ Bu plan yeni, kaldırılmış ağaç algılama/taç çapı modelini geri getirme
 
 ## Kanıt çıktıları
 
-- [İşlev diyagramları](SYSTEM-FLOWS-2026-10-17.md), [çevrimdışı etkileşimli akış gezgini](academic/2026-10-17/flow-explorer.html), [akış kaynak verisi](academic/2026-10-17/workflows.json).
+- [Saha doğrulaması ve bağımsız karbon referans araçları](../research/carbon/README.md).
 - Kaynak/fonksiyon/çağrı dizini: `node scripts/academic-audit.mjs --baseline <GitHub-tree.json> --output <çıktı-klasörü>`.
 - Başlangıç sayıları yeni dosyalar eklendikçe artar. Eski sayılar aynı baseline ve kapsamla değerlendirilmelidir.
 - `papers/evidence/dgr-2026-0026-audit.json` kaynak rapor bütünlüğünü belgeler; sınıflandırma veya allometri doğruluğu sertifikası değildir.

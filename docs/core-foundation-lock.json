@@ -8913,6 +8913,30 @@
           "sha256": "ab87a6a4d9d28198ed3029fd8785b2b183b758a1812d88b7bfc986227c907a5c"
         }
       ]
+    },
+    {
+      "id": "optional-field-methods-disclosure-2026-10-17",
+      "date": "2026-10-17",
+      "scope": "User-authorized modularization maintenance: optional research declarations, bilingual report-form presentation and new phone regression coverage; generated landing/index asset hashes only. No scientific assertions, species/densities, allometry/Monte Carlo or park/surface engines changed.",
+      "audit_chain": "sha256-v1",
+      "added_protected_files": [],
+      "files": [
+        {
+          "path": "index.html",
+          "previous_sha256": "513100af107f18367d7796c925e957b54a1dcbdba52228aded79557d5a888a86",
+          "sha256": "e62a0387bfbd7f293e54e44f2d0dfa54152b4429ad224ffd7fc015eda2d6d6bf"
+        },
+        {
+          "path": "partials/landing.html",
+          "previous_sha256": "c7dbdca3dc6076fba27d29684d05e2d50dc7aa9c2f94b9d46cad4628dc613152",
+          "sha256": "4a05396e0ae3d5ea04e42b762b6ef266ce14eec0550fbacde457c89328626785"
+        },
+        {
+          "path": "scripts/check-phone.mjs",
+          "previous_sha256": "4eefa114312846d02adda8e5f310f330fcfaa8d34dfe74a5bfcd565818377657",
+          "sha256": "8fff90aaf6524cc572624a3d7a5349038fedfc0232f0bfff950dc9a6ac7c1368"
+        }
+      ]
     }
   ]
 }

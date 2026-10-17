@@ -1734,6 +1734,20 @@ Object.assign(DG_I18N_EN,{"Su":"Water","Göksu Parkı gerçek kayıt geometrisi"
 
 /* Public academic copy: complete text-node matches preserve formula/data nodes. */
 Object.assign(DG_I18N_EN,{
+ "Saha doğrulama bilgileri (isteğe bağlı)":"Field validation details (optional)",
+ "Yalnız bilinen bilgileri girin. Boş alanlar doğrulanmış kabul edilmez; hesaplama katsayıları değişmez.":"Enter only known information. Empty fields are not treated as verified; calculation coefficients remain unchanged.",
+ "Envanter kapsamı":"Inventory scope",
+ "Tam sayım (araştırmacı beyanı)":"Complete census (researcher declaration)",
+ "Kısmi envanter":"Partial inventory",
+ "Olasılıklı örnekleme":"Probability sampling",
+ "Ölçümü yapan kişi / ekip":"Observer / field team",
+ "Cihaz kontrolü ve kalibrasyon":"Instrument checks and calibration",
+ "Tekrar ölçüm ve bağımsız kontrol":"Repeat measurements and independent checks",
+ "Kontrol tarihi, referans ve sapma; yapılmadıysa belirtin.":"Check date, reference and deviation; state if no check was performed.",
+ "Yeniden ölçülen ağaç sayısı, eşleştirme ve kontrol yöntemi; yapılmadıysa belirtin.":"Number of remeasured trees, matching and check method; state if not performed.",
+ "Geçerli envanter kapsamı seçin.":"Select a valid inventory scope."
+});
+Object.assign(DG_I18N_EN,{
  "İçeriğe atla":"Skip to content",
  "Bölüm menüsü":"Section menu",
  "Örnek saha değerleri · çevre ÷ π ile türetilen DBH · ölçüm animasyonuyla aynı sahne":"Example field values · DBH derived as circumference ÷ π · part of the measurement animation",

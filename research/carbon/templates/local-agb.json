@@ -1,0 +1,9 @@
+{
+  "mode": "local_agb",
+  "status": "EMPTY TEMPLATE; supply real independent reference evidence before use",
+  "rows": [{
+    "id": "", "species": "", "grp": "", "girth_cm": null, "height_m": null,
+    "reference_agb_kg": null, "independent": false, "reference_kind": "", "reference_source": "",
+    "measurement_date": "", "reference_date": "", "reference_uncertainty": "", "site_conditions": ""
+  }]
+}

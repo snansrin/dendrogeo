@@ -1,3 +1,4 @@
+import {scriptSafeJson} from './script-safe-json.mjs';
 /* Browser-only behavior embedded in immutable report documents. */
 export function renderReportDocumentClientScript({hash, snapshot, shareScript}) {
   return `
@@ -5,8 +6,8 @@ export function renderReportDocumentClientScript({hash, snapshot, shareScript}) 
 let dgPrintText=[];
 window.addEventListener('beforeprint',()=>{const root=document.querySelector('.wrap');if(!root)return;const walker=document.createTreeWalker(root,NodeFilter.SHOW_TEXT);let node;while(node=walker.nextNode()){if(['SCRIPT','STYLE'].includes(node.parentElement?.tagName))continue;const clean=node.textContent.replace(/[\u{1F300}-\u{1FAFF}\u2600-\u27BF\uFE0F]/gu,'');if(clean!==node.textContent){dgPrintText.push([node,node.textContent]);node.textContent=clean;}}});
 window.addEventListener('afterprint',()=>{for(const [node,text]of dgPrintText)node.textContent=text;dgPrintText=[];});
-const DG_HASH=${JSON.stringify(hash)};
-const DG_DATA=${JSON.stringify(snapshot)};
+const DG_HASH=${scriptSafeJson(hash)};
+const DG_DATA=${scriptSafeJson(snapshot)};
 (async()=>{
   try{
     const buf=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(JSON.stringify(DG_DATA,(k,v)=>(v&&typeof v==='object'&&!Array.isArray(v))?Object.keys(v).sort().reduce((o,key)=>(o[key]=v[key],o),{}):v)));

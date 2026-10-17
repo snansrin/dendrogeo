@@ -64,7 +64,7 @@
   "reportStatus": "interactive explanation of actual DGR production sections; not a published report",
   "sceneData": {
     "path": "assets/landing/goksu-scenes.json",
-    "sha256": "4731a1a15145e184258143d8ec91de298d7307bbbf7cf8dd9081c287392566b7"
+    "sha256": "d50adcf58f32fe62ef57b95f6e5e5d324a1dc6f73eed1961a661f68bda2183f9"
   },
   "images": [
     {

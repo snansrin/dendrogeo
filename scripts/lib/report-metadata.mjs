@@ -5,6 +5,7 @@
  * snapshot storage, or mutable global state.
  */
 import {createPublicPeerReview, peerReviewContributors} from './report-open-peer-review.mjs';
+import {createScientificDisclosure} from './report-scientific-disclosure.mjs';
 export function createReportMetadata(snap, { id, hash, version = '1.0', meta = null, history = null }, policy) {
   const {
     datasetDefault,
@@ -41,6 +42,7 @@ export function createReportMetadata(snap, { id, hash, version = '1.0', meta = n
     identifierDescription: reportTitle + ' (iç/alan kimliği)',
     title: snap.study?.title || `${P.name} (${P.city}): Bireysel Ağaç Envanteri ve Toprak Üstü / Toprak Altı Karbon Stoku Analizi`,
     study: snap.study || null,
+    scientificDisclosure: createScientificDisclosure(snap),
     publicationYear: Number(snap.generated_at.slice(0, 4)),
     resourceType: 'Scientific Analysis Report',
     resourceTypeGeneral: 'Report',

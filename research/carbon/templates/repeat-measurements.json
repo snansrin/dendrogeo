@@ -1,0 +1,10 @@
+{
+  "mode": "repeat_measurements",
+  "status": "EMPTY TEMPLATE; replace nulls with actual paired field measurements",
+  "rows": [{
+    "id": "",
+    "initial": {"girth_cm": null, "height_m": null, "date": "", "observer": "", "instrument": ""},
+    "repeat": {"girth_cm": null, "height_m": null, "date": "", "observer": "", "instrument": ""},
+    "calibration_reference": ""
+  }]
+}

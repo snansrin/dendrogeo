@@ -5,10 +5,28 @@ on:
     branches: [main]
     paths:
       - "clients/**"
+      - "research/**"
+      - "scripts/check-carbon-reference.mjs"
+      - "test/fixtures/carbon-reference-v1.json"
+      - "src/config/species.js"
+      - "src/config/wood-density-lock.js"
+      - "src/config/measurement-protocol-lock.js"
+      - "src/domain/trees/allometry.js"
+      - "src/application/trees/calculate-tree-carbon*.js"
+      - "scripts/lib/mc.mjs"
       - ".github/workflows/research-clients.yml"
   pull_request:
     paths:
       - "clients/**"
+      - "research/**"
+      - "scripts/check-carbon-reference.mjs"
+      - "test/fixtures/carbon-reference-v1.json"
+      - "src/config/species.js"
+      - "src/config/wood-density-lock.js"
+      - "src/config/measurement-protocol-lock.js"
+      - "src/domain/trees/allometry.js"
+      - "src/application/trees/calculate-tree-carbon*.js"
+      - "scripts/lib/mc.mjs"
       - ".github/workflows/research-clients.yml"
   workflow_dispatch:
 
@@ -16,6 +34,25 @@ permissions:
   contents: read
 
 jobs:
+  scientific-reference:
+    name: Independent carbon reference and uncertainty diagnostics
+    runs-on: ubuntu-latest
+    env:
+      PYTHONDONTWRITEBYTECODE: "1"
+      PYTHONIOENCODING: utf-8
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Compare production arithmetic with independent Python reference
+        run: node scripts/check-carbon-reference.mjs
+      - name: Check paired validation and separated uncertainty diagnostics
+        run: python -m unittest discover -s research/tests -v
+
   python:
     name: Python DGR client
     runs-on: ubuntu-latest

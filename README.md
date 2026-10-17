@@ -70,6 +70,7 @@ DGR, DendroGeo park raporunun kalıcı iç kimliğidir. Yayımlanan rapor sessiz
   doi     = {10.5281/zenodo.22948643},
   license = {MIT}
 }
+```
 
 ## UI değişiklikleri için kabul listesi
 
@@ -82,3 +83,14 @@ DGR, DendroGeo park raporunun kalıcı iç kimliğidir. Yayımlanan rapor sessiz
 - DB değişikliği yeni, idempotent migration’dır; mevcut dosya veya tarihsel ölçümler değiştirilmez. SQL kontratı izole PostgreSQL’de çalıştırılır.
 
 Kullanıcı tablosunun satır bazlı kanıtı: [Mimari kabul tablosu](docs/USER-ARCHITECTURE-TABLE-2026-10-14.md).
+
+## Saha doğrulaması ve bağımsız bilimsel hesap
+
+[Araştırma araçları](research/carbon/README.md), üretim motorunu değiştirmeden isteğe bağlı saha beyanı, dört belirsizlik kaynağının ayrılması, tekrar ölçüm ve yerel AGB karşılaştırması için kullanılır. Bağımsız Python hesabı, 49 türün 147 sentetik senaryosunda tarayıcı ve rapor aritmetiğiyle karşılaştırılır:
+
+```sh
+node scripts/check-carbon-reference.mjs
+python -m unittest discover -s research/tests -v
+```
+
+Aritmetik eşitlik yerel saha doğruluğu değildir. Gerçek kalibrasyon, tekrar ölçüm ve bağımsız biyokütle referansı araştırmacı tarafından sağlanmalıdır.

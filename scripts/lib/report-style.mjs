@@ -79,6 +79,10 @@ pre{background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:
 .btnrow{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0;font-family:system-ui,sans-serif}
 .btn{background:var(--green);color:#fff;border:0;border-radius:8px;padding:9px 16px;font-size:.8rem;font-weight:700;cursor:pointer;text-decoration:none;display:inline-block}
 .btn.g{background:#fff;color:var(--green);border:1.5px solid var(--green)}
+table.uncertainty{table-layout:fixed;min-width:0;width:100%}
+table.uncertainty th{letter-spacing:normal;text-transform:none;font-size:.76rem;overflow-wrap:normal;word-break:normal;vertical-align:top}
+table.uncertainty th:first-child{width:28%}
+table.uncertainty td{overflow-wrap:break-word;word-break:normal;vertical-align:top}
 @media (max-width:640px){
  /* 0024 · MOBİL v2 (0021'in dersi): tabloyu display:block'a çevirmek
   * thead/tbody'yi AYRI kutulara bölüp kolonları kaydırıyordu; overflow-x:
