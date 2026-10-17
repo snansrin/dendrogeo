@@ -7,7 +7,7 @@ Bu dosya mimari kapılardan güncel sayıları üretir.
 |---|---:|---|
 | JavaScript AST katman denetimi | 814 modül · 0 ihlal | Geçti |
 | AST bağımlılık yönü | 955 modül · 0 ihlal · 0 istisna | Geçti |
-| Runtime envanteri | 1011 fiziksel · 752 ilk yükleme · 256 lazy · 1014 SHA korumalı | Ölçüldü |
+| Runtime envanteri | 1011 fiziksel · 752 ilk yükleme · 256 lazy · 1015 SHA korumalı | Ölçüldü |
 | Legacy servis sınır borcu | 0 DOM/Supabase/ağ erişimi | Geçti; yeni ihlal kapalı |
 | Statik HTML satır içi olay | 0 | Geçti |
 | Dinamik HTML olay borcu | 0 nitelik · 0 UI/service dosyası | Tamamlandı; yeni artış CI'da engellenir |

@@ -6,6 +6,8 @@ import polygonClipping from 'polygon-clipping';
 import ClipperLib from 'clipper-lib';
 
 const read=path=>readFileSync(new URL('../'+path,import.meta.url),'utf8');
+const sweepFailure='Unable to find segment #117295 in SweepLine tree.';
+const ringFailure='Unable to complete output ring starting at [977347, 734605]. Last matching segment found ends at [1159519, 683435].';
 function engine(){
  const context=vm.createContext({window:{polygonClipping},setTimeout,console});
  const files=[
@@ -65,6 +67,22 @@ test('integer recovery remains private to one grid job and avoids repeated faile
  const next=e.context.window.DG_CLIP_GRID_GEOMETRY.create({clean,run:(op,...g)=>{nextAttempts++;return polygonClipping[op](...g);}});
  assert.ok(next('union',geometry).length);assert.equal(nextAttempts,1,'a new grid retains the original successful backend');
 });
+
+for(const messages of [[sweepFailure,ringFailure],[ringFailure,sweepFailure],[ringFailure,ringFailure]]){
+ test('grid recovers mixed numerical failures: '+messages.map(message=>message.split(' ').slice(0,4).join(' ')).join(' → '),()=>{
+  const e=engine();e.context.window.ClipperLib=ClipperLib;vm.runInContext(read('src/adapters/surface/integer-grid-clip.js'),e.context);
+  const square=(x,y,size)=>[[[[x,y],[x+size,y],[x+size,y+size],[x,y+size],[x,y]]]],subject=square(0,0,20),obstacle=square(5,5,10);
+  const before=JSON.stringify([subject,obstacle]);let attempts=0;
+  const session=e.context.window.DG_CLIP_GRID_GEOMETRY.create({clean:g=>g,run:()=>{throw Error(messages[attempts++]);}});
+  const result=session('difference',subject,obstacle);
+  assert.equal(attempts,2);
+  assert.equal(e.run(`dgSurfaceArea(${JSON.stringify(result)})`),300);
+  assert.equal(e.run(`dgGridPointDistance([10,10],${JSON.stringify(result)})>0`),false,'the exclusion remains a hole');
+  assert.ok(session('intersection',result,subject).length);
+  assert.equal(attempts,2,'the rest of this job uses the independent backend');
+  assert.equal(JSON.stringify([subject,obstacle]),before);
+ });
+}
 
 test('bounded integer unions retain every raster piece across batch boundaries',()=>{
  const e=engine();vm.runInContext(read('src/adapters/surface/integer-grid-clip.js'),e.context);

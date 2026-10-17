@@ -1062,6 +1062,9 @@
       "test/fixtures/harikalar-grid-surface.json.gz",
       "scripts/harikalar-grid-smoke.mjs",
       "test/measurement-points-labels.test.mjs"
+    ],
+    "surface_png_preview_export_2026_10_17": [
+      "scripts/surface-map-download-smoke.mjs"
     ]
   },
   "sha256": {
@@ -2078,7 +2081,8 @@
     "test/grid-precision-recovery.test.mjs": "de35bf3a837ec3aeca8bb35cda5db48cf7d8aceea3efcdd7b7de51075df96064",
     "test/fixtures/harikalar-grid-surface.json.gz": "c5ff174c0ede17979996c372542a39efb55a97142cb8efa25b4adb2fcae02342",
     "scripts/harikalar-grid-smoke.mjs": "822cc5de594b1b2c1f73fce77c1535288e2fbc2020e52188b89d7664f1490355",
-    "test/measurement-points-labels.test.mjs": "f97ba4b257a8346d5451c494b3fae1bf1ec0dedfcb98a30239f306801d4457fa"
+    "test/measurement-points-labels.test.mjs": "f97ba4b257a8346d5451c494b3fae1bf1ec0dedfcb98a30239f306801d4457fa",
+    "scripts/surface-map-download-smoke.mjs": "9a1f470315c973b6ccd0ce4f3355b5e35986e51e76355598b739de84fa5a61d7"
   },
   "authorized_modularizations": [
     {
@@ -9481,6 +9485,86 @@
           "path": "src/application/surface/run-surface-sampling-grid.js",
           "previous_sha256": "98ef9d7ed0f1b49005a7c7b606662d473f32c58bfbe09f3ff2b1af2bd024dcf4",
           "sha256": "54dab14775578365e2eb6c8f1949365d964879c77a2f7fcad41aaaf129e38bb0"
+        }
+      ]
+    },
+    {
+      "id": "grid-output-ring-numerical-recovery-2026-10-17",
+      "date": "2026-10-17",
+      "scope": "User-authorized modularization bug fix: classify the reported polygon-clipping output-ring completion failure as recoverable in both primary and scaled grid attempts, including mixed SweepLine/output-ring sequences. Reuse the existing private integer grid backend, original obstacle and park clearance checks. Successful geometry operations, unrelated errors, allometry/species, park lookup, raster classification, accepted records and UI style remain unchanged. Extend unit and real Harikalar Worker regressions; increment cache revision to invalidate old page/Worker assets.",
+      "audit_chain": "sha256-v1",
+      "added_protected_files": [],
+      "files": [
+        {
+          "path": "src/adapters/surface/clip-grid-geometry.js",
+          "previous_sha256": "c8cbf28813360186bff1911be29d1d4c4ee836dcab662888cef95f6819250d86",
+          "sha256": "f42ce916c9905666359edae7f9f5b0a7ed461037595d91a8fb9d3108508f113a"
+        },
+        {
+          "path": "test/grid-precision-recovery.test.mjs",
+          "previous_sha256": "de35bf3a837ec3aeca8bb35cda5db48cf7d8aceea3efcdd7b7de51075df96064",
+          "sha256": "d7eaeeddd72e8d59c205a9c379fd56ec3b3dc88e3b8f8cf294fad8775cf44f0a"
+        },
+        {
+          "path": "scripts/harikalar-grid-smoke.mjs",
+          "previous_sha256": "822cc5de594b1b2c1f73fce77c1535288e2fbc2020e52188b89d7664f1490355",
+          "sha256": "41afea9408c3067999a7458215680bd287d96a667b39fc5b1391be34f0b1c231"
+        },
+        {
+          "path": "sw.js",
+          "previous_sha256": "df7a83362fe4ea04538976037b7a091f66873236a36b1a30bac154f2b847ea35",
+          "sha256": "6792525816d13b36c41afd798e91f845d2f3e6e53583d7cc18b8f28c366f50d3"
+        },
+        {
+          "path": "index.html",
+          "previous_sha256": "09a51ef8088294457a81ce30d4e7bc91ca42bbd466b54a59179738657c29cae7",
+          "sha256": "6c5b8ba831142b49e7a07d720b9e96d522918c5eb1483f9569dd7d947bce1249"
+        }
+      ]
+    },
+    {
+      "id": "surface-png-preview-without-fabricated-cell-edits-2026-10-17",
+      "date": "2026-10-17",
+      "scope": "User-authorized modularization bug fix: remove the artificial cell-edit requirement from standard surface PNG export. Unsaved or edited analysis downloads with explicit preview title, status note and separate filename; only accepted unchanged records retain the existing verified-map title. No accept/save/publication or source-data mutation. Preserve canvas styling, surface geometries/areas, NDVI data sufficiency and publication gates, and allometry/species/park engines. Add real Harikalar PNG download regression without cell edits.",
+      "audit_chain": "sha256-v1",
+      "added_protected_files": [
+        "scripts/surface-map-download-smoke.mjs"
+      ],
+      "files": [
+        {
+          "path": "src/ui/render-verified-surface-map-export.js",
+          "previous_sha256": "74fc8ad679cc103dbd78e729a7209a120e24b2129abbd794787c3499e97303c7",
+          "sha256": "8979754647d4c1652ab57b4d8512894acbb15c9933c5716fe528791913e4c7ba"
+        },
+        {
+          "path": "src/ui/render-surface-export-infographic.js",
+          "previous_sha256": "a126ba1d1168ac8c479156c157d4fb2649ebcf870190388587002b628ce6c3b7",
+          "sha256": "a64873cd701ea6002765ca73577ab4a6f8c43f68c2cfbdc6ca1457c0667e7d8f"
+        },
+        {
+          "path": "scripts/check-phone.mjs",
+          "previous_sha256": "c5dd830db4254c8cdc5a769b63d47c5577111d5172880f8250f82a03b2d2145e",
+          "sha256": "c38e826c3c2054c69f08babf5510962e34c8b0f9b3ddb0b134fee2ac19455eba"
+        },
+        {
+          "path": "test/lc-validate.test.mjs",
+          "previous_sha256": "8f3f80683437f9078ceecf18d641c1fe47454918bee70863a190e2379d833bcf",
+          "sha256": "5334cc2dca71cbc6358c24aa1a76d90bbee56ff94b084200ed6aa062099a7501"
+        },
+        {
+          "path": "docs/SCIENTIFIC-CORE-FREEZE.md",
+          "previous_sha256": "bacefcbda2690cda357caed23865d677eb103b087110b3ec16fd0e59b190e5bd",
+          "sha256": "bf26e23b63e8a4bd73ea6fd80a3b649218cfa4d6b8de607ddbf91858a8a67f44"
+        },
+        {
+          "path": "index.html",
+          "previous_sha256": "6c5b8ba831142b49e7a07d720b9e96d522918c5eb1483f9569dd7d947bce1249",
+          "sha256": "f3302e526aca1617201cb5487f6b2c2f33422b98c80e07d05a9102d0c57ce5f1"
+        },
+        {
+          "path": "test/verified-surface-map-export.test.mjs",
+          "previous_sha256": "f2871459c3ca56ffc45ca5aa3803957e7958fa34be6c5f59f35381b35c478e4d",
+          "sha256": "4735b0768ad084b97b28cfcf96df280f23e74fff735d3f17f65381308e8911d5"
         }
       ]
     }

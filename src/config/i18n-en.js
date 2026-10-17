@@ -1788,3 +1788,5 @@ Object.assign(DG_I18N_EN,{
  "Ölçüm noktaları CSV dosyası seç (X,Y,id)": "Select sampling-points CSV file (X,Y,id)",
  "📍 Ölçüm noktaları ekranındakiler": "📍 On the sampling-points screen"
 });
+
+Object.assign(DG_I18N_EN,{"✓ Analiz önizlemesi PNG indirildi.":"✓ Analysis preview PNG downloaded."});

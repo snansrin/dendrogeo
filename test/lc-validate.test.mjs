@@ -750,11 +750,12 @@ describe("0058 · Doğrulanmış Harita PNG (kullanıcının refactor'ü üstün
     assert.match(exportUi, /const areas=getAreas\(\)\|\|getRasterAreas\(\)/);
     assert.match(layers, /colors\[feature\.properties\.class\]/);
     assert.match(layers, /g.fill\("evenodd"\)/);
-    assert.match(exportUi, /record\.features\?\.length/);
+    assert.match(exportUi, /const accepted=!!record\.acceptedAt&&!state\.editing&&!state\.rawView&&!record\.draftDirty/);
   });
   test("künye dürüst: parmak izi + dönem + ÖNİZLEME/KABUL damgası canvas'ta", () => {
     assert.match(rd('src/ui/render-surface-export-infographic.js'), /parmak izi/);
-    assert.match(rd('src/ui/render-verified-surface-map-export.js'), /state\.editing\?'ÖNİZLEME':'KABUL EDİLMİŞ v'/);
+    assert.match(rd('src/ui/render-verified-surface-map-export.js'), /accepted\?'KABUL EDİLMİŞ v'/);
+    assert.match(rd('src/ui/render-verified-surface-map-export.js'), /ÖNİZLEME · HENÜZ KAYDEDİLMEDİ/);
     assert.match(rd('src/ui/render-surface-export-infographic.js'), /DOĞRULANMIŞ PARK HARİTASI/);
   });
   test('kırmızı çizgi: PNG yalnız okur (DG_LC_LAST/groupAreas ataması yok)', () => {

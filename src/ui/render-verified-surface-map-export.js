@@ -18,7 +18,7 @@
   async function render({layers={park:true,surface:true},waypoints=[],state,record,cells,editSummary,toast,translate,escape,getAreas,getRasterAreas,resolveEpsg,getParkRings,getGridCells,getPark,parkAreaLabel,getParts,visualResult,displaySync,prepareFrame,drawLayers,renderInfo,colors,ha,labelForClass,document,redraw}){
     if(!record||!cells?.length||state.busy||state.saving||!state.geometry){toast(translate('Önce arazi örtüsü analizini çalıştırın.'),'warn','🖼️');return;}
     const edits=editSummary(record),decisionCount=edits.total;
-    if(layers.surface&&!decisionCount&&!record.acceptedAt&&!record.features?.length){toast(translate('Önce en az bir hücre kararı ver — doğrulanmış harita kararlarını gösterir.'),'warn','🖼️');return;}
+    const accepted=!!record.acceptedAt&&!state.editing&&!state.rawView&&!record.draftDirty;
     const areas=getAreas()||getRasterAreas(),epsg=state.epsg||resolveEpsg(cells[0].center.lat,cells[0].center.lon);
     if(state.exporting)return;
     const epoch=state.epoch;state.exporting=true;redraw();
@@ -37,10 +37,10 @@
       context.strokeStyle='#dfe5df';context.lineWidth=2;context.strokeRect(x,y,mapWidth,mapHeight);
       const project=(lat,lon)=>frame.canvasProject(lat,lon,{x,y,width:mapWidth,height:mapHeight,margin:20});
       drawLayers({context,layers,displayFeatures,project,parkRings,gridCells:getGridCells(),waypoints,colors:palette,ink});
-      renderInfo({context,width,height,green,muted,ink,colors:palette,park,parkDate:new Date().toISOString().slice(0,10),decisionCount,viewLabel:state.editing?'ÖNİZLEME':'KABUL EDİLMİŞ v'+(record.serverRevision||1),parkAreaLabel:typeof parkAreaLabel==="function"?parkAreaLabel():parkAreaLabel,edits,layers,areas,ha,labelForClass,fingerprint:record.fingerprint});
+      renderInfo({context,width,height,green,muted,ink,colors:palette,park,parkDate:new Date().toISOString().slice(0,10),decisionCount,viewLabel:accepted?'KABUL EDİLMİŞ v'+(record.serverRevision||1):'ÖNİZLEME · HENÜZ KAYDEDİLMEDİ',mapTitle:accepted?'DOĞRULANMIŞ PARK HARİTASI':'PARK ANALİZİ ÖNİZLEMESİ',areasTitle:accepted?'DOĞRULANMIŞ ALANLAR':'ANALİZ ALANLARI',footerNote:accepted?'Kesin hücre geometrisi ve doğrulanmış yüzey sınıfları.':'Kabul edilmemiş analiz önizlemesi; saha doğrulaması değildir.',parkAreaLabel:typeof parkAreaLabel==="function"?parkAreaLabel():parkAreaLabel,edits,layers,areas,ha,labelForClass,fingerprint:record.fingerprint});
       canvas.toBlob(blob=>{
         if(!blob){toast(translate('PNG üretilemedi.'),'err','🖼️');return;}
-        const url=URL.createObjectURL(blob),anchor=document.createElement('a');anchor.href=url;anchor.download='dendrogeo_dogrulanmis_harita_'+(park.id||'park')+'.png';anchor.click();setTimeout(()=>URL.revokeObjectURL(url),1500);toast(translate('✓ Doğrulanmış harita PNG indirildi.'),'ok','🖼️');
+        const url=URL.createObjectURL(blob),anchor=document.createElement('a');anchor.href=url;anchor.download=(accepted?'dendrogeo_dogrulanmis_harita_':'dendrogeo_analiz_onizlemesi_')+(park.id||'park')+'.png';anchor.click();setTimeout(()=>URL.revokeObjectURL(url),1500);toast(translate(accepted?'✓ Doğrulanmış harita PNG indirildi.':'✓ Analiz önizlemesi PNG indirildi.'),'ok','🖼️');
       },'image/png');
     }catch(error){if(epoch===state.epoch)toast(escape(String(error.message||error)),'err','🖼️');}
     finally{if(epoch===state.epoch){state.exporting=false;redraw();}}
