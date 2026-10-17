@@ -13,7 +13,7 @@ Reviewed 17 October 2026. This note supports manuscript editing; it is not an in
 | Reflectance offset handling and temporal summaries | src/domain/surface/sentinel-spectral-evidence.js; src/application/surface/build-sentinel-profile.js | Temporal composites depend on scene availability and valid observations. |
 | Park-relative vegetation tiers | src/domain/surface/classify-surface-vegetation-tiers.js | Green cells only; at least three dates per cell and nine eligible cells; tercile cutoffs; no raster-class or area modification. |
 | Layered architecture and dependency boundaries | docs/adr/0005-incremental-layered-architecture.md | Incremental layered classic-script architecture; do not describe an ES-module or bundler migration. |
-| Published park-surface example with five surface features and eight artifacts | papers/evidence/dgr-2026-0026-audit.json; papers/tools/audit_public_report.py | Historical snapshot; surface outputs support this manuscript; integrity is not classification validation. |
+| Published research example with 36 records and eight artifacts | papers/evidence/dgr-2026-0026-audit.json; papers/tools/audit_public_report.py | Fixed snapshot; ongoing fieldwork; integrity is not scientific validation. |
 
 ## Comparative claims
 
@@ -22,7 +22,3 @@ No controlled QGIS timing, boundary-accuracy or classification-accuracy comparis
 NDVI is a spectral index, whereas park-boundary retrieval and surface interpretation are different operations. Park-relative tiers are a distribution-based display of temporal NDVI evidence, not a validated replacement for NDVI or a new absolute vegetation-health metric. Tied quantiles can yield uneven tier sizes; the paper does not promise equal populations or cross-park comparability.
 
 The corresponding-author designation, affiliations and declarations use author-supplied information. Final joint text approval and complete historical AI disclosure are submission gates recorded in README.md and ../SUBMISSION-STATUS.md.
-
-## Manuscript scope correction
-
-The JOSS manuscript is scoped to park delineation, surface review, relative NDVI and publication. Tree inventory, stem measurements, allometric estimation and automated tree detection are not presented as contributions of this paper. This editorial scope correction does not modify the application or historical report artifacts.

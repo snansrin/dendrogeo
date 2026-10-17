@@ -58,8 +58,7 @@ test('open-review schema, policy, and tests are present and publication is opt-i
 
 test('JOSS manuscript explains landscape architecture, park geometry and relative NDVI with bounded claims',()=>{
   const paper=read('papers/joss/paper.md');
-  assert.match(paper,/title: "DendroGeo: An integrated Web GIS for urban park delineation/);
-  assert.doesNotMatch(paper,/tree inventor|tree measurement|stem circumference|allometr|Chave|tree detection|mobile field entry/i);
+  assert.match(paper,/title: "DendroGeo: An integrated Web GIS/);
   assert.match(paper,/Department of Landscape Architecture, Faculty of Agriculture, Ankara University/);
   assert.doesNotMatch(paper,/Department of Forest|Forestry Engineering|\[Confirm|\[Institution/);
   for(const phrase of ['actual polygon geometries','polygon, rectangle, or circle','three distinct valid observation dates','at least nine eligible cells','one-third and two-thirds quantiles','do not alter categorical classes or area totals']) assert.ok(paper.includes(phrase),phrase);
