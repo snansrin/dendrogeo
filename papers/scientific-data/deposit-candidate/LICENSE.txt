@@ -1,0 +1,5 @@
+CC BY 4.0 applies to the newly staged tree-observations.csv, derived-estimates.csv, data-dictionary.csv and their new documentation only.
+Rights-holder authorization supplied 17 October 2026. Attribution, a link to the licence and indication of changes are required.
+Licence terms: https://creativecommons.org/licenses/by/4.0/
+Legal code: https://creativecommons.org/licenses/by/4.0/legalcode.en
+This does not relicense the original CC BY-NC report or any third-party imagery, maps or spatial databases.

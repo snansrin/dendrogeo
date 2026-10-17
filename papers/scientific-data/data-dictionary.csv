@@ -1,0 +1,14 @@
+column,definition,unit,source_kind,notes
+NOKTA,Point identifier within the source report,,identifier,Not evidence of persistent biological identity across unrelated projects
+TUR,Recorded Turkish tree name,,field_label,Not independently taxonomically verified
+GRUP,Recorded broadleaf or conifer group,,field_label,May determine density fallback
+GOGUS_CEVRESI_CM,Stem circumference at the documented 1.30 m protocol height,cm,observation,Actual field instrument requires author confirmation
+DBH_CM,Diameter derived as circumference divided by pi,cm,derived,CSV rounded to one decimal place; use data.json for full precision
+BOY_M,Recorded tree height,m,observation,Actual field instrument and acquisition method require author confirmation
+KARBON_KG,Model-dependent total carbon estimate,kg C,derived,Includes fixed root and carbon multipliers; not directly measured carbon
+KARBON_CI_LO_KG,Lower bound of the conditional per-tree Monte Carlo interval,kg C,derived,Not a sampling uncertainty interval for all park trees
+KARBON_CI_HI_KG,Upper bound of the conditional per-tree Monte Carlo interval,kg C,derived,Not an independent accuracy assessment
+ENLEM,Geographic latitude,decimal degrees,location,Latitude-longitude columns differ from GeoJSON coordinate order
+BOYLAM,Geographic longitude,decimal degrees,location,GeoJSON uses longitude-latitude
+GPS_DOGRULUK_M,Reported positional accuracy where available,m,location_metadata,13 missing values; missing does not mean zero error
+TARIH,Exported record date,YYYY-MM-DD,record_metadata,Full source timestamps retained in data.json

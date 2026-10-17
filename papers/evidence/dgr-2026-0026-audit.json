@@ -1,0 +1,113 @@
+{
+  "schema": "dendrogeo-manuscript-evidence/1",
+  "source_report": "DGR-2026-0026",
+  "source_doi": "10.5281/zenodo.23404310",
+  "source_generated_at": "2026-10-15T19:48:19.002Z",
+  "source_code_commit": "4c199515035e6bdc8dfb56b84687751ebc4332a5",
+  "source_license": "CC-BY-NC-4.0",
+  "integrity_passed": true,
+  "errors": [],
+  "verified_artifacts": [
+    {
+      "name": "rapor.pdf",
+      "bytes": 522781,
+      "sha256": "84b4f8f39d6e396db0438c1a9ff0b6e64ce5303b75e4ad50a41676b5a1f35933"
+    },
+    {
+      "name": "index.html",
+      "bytes": 1816095,
+      "sha256": "048d584502b8cf6be5304c0d2e36489fa33399d92a06d3cfe454d88cf60b88a9"
+    },
+    {
+      "name": "data.json",
+      "bytes": 1762222,
+      "sha256": "3dce167193372e2b2f0f6e506ef4477425cee397bfa10a950513ff8c6b87fd26"
+    },
+    {
+      "name": "metadata.json",
+      "bytes": 7465,
+      "sha256": "6080f80bf7e97ec7807e284501fd14091c7ed4d51a7d5f6a0ba2f03aea630c72"
+    },
+    {
+      "name": "olcum.csv",
+      "bytes": 3954,
+      "sha256": "0141e89bf7af5157ffbcd2b812b98375a5dd852c3e7f8b2392ced8bb2208dce7"
+    },
+    {
+      "name": "park.geojson",
+      "bytes": 15257,
+      "sha256": "a50bcd579e6446085fb55c47a0f6db29371ee59c6eaae2c85bc9274967520e91"
+    },
+    {
+      "name": "harita.png",
+      "bytes": 73353,
+      "sha256": "2d503ab7873185fd1d0f2762eb2a8ebbec1f362a03b0aa1dd6473472f66d82d6"
+    },
+    {
+      "name": "surface.geojson",
+      "bytes": 863427,
+      "sha256": "887b7607761c88200146aab7376a68e62709c43b1db547fc8f8a6b953f5380c0"
+    }
+  ],
+  "records": 36,
+  "csv_records": 36,
+  "period": {
+    "from": "2026-09-28T10:22:16.065273+00:00",
+    "to": "2026-10-01T14:36:01.51072+00:00"
+  },
+  "gps_accuracy_present": 23,
+  "gps_accuracy_missing": 13,
+  "max_dbh_formula_residual_cm": 4.973799150320701e-14,
+  "geometry_structure": {
+    "park.geojson": {
+      "features": 36,
+      "point_features": 36,
+      "rings": 0
+    },
+    "surface.geojson": {
+      "features": 5,
+      "point_features": 0,
+      "rings": 761
+    }
+  },
+  "boundary_location": "data.json: lulc.review.outer and lulc.review.holes; latitude-longitude pairs",
+  "geojson_coordinate_order": "longitude-latitude; the EPSG:32636 metadata describes analysis, not these stored geographic coordinates",
+  "reported_geofence_outside": 0,
+  "reported_qa": "GECERLI",
+  "reported_density_lookup": {
+    "n": 36,
+    "tur": 7,
+    "grup": 29,
+    "grup_farkli": []
+  },
+  "satellite_scene_ids": [
+    "S2B_MSIL2A_20260912T083559_R064_T36TVK_20260912T125638",
+    "S2C_MSIL2A_20260420T083651_R064_T36TVK_20260420T140925",
+    "S2A_MSIL2A_20260701T084501_R064_T36TVK_20260701T134111",
+    "S2C_MSIL2A_20260808T083601_R064_T36TVK_20260808T140216",
+    "S2A_MSIL2A_20261009T083801_R064_T36TVK_20261009T140005",
+    "S2A_MSIL2A_20260721T083741_R064_T36TVK_20260721T135509"
+  ],
+  "revision_deduplication": [
+    {
+      "report": "DGR-2026-0024",
+      "same_measurement_csv": true
+    },
+    {
+      "report": "DGR-2026-0025",
+      "same_measurement_csv": true
+    }
+  ],
+  "limitations": [
+    "These checks do not establish sampling representativeness or field accuracy.",
+    "The source QA label is an internal report status, not independent ground truth.",
+    "Revisions 0024, 0025 and 0026 are not independent surveys.",
+    "Pantropical allometry is not locally calibrated for Ankara urban trees."
+  ],
+  "missing_source_protocol": [
+    "sampling",
+    "instruments"
+  ],
+  "journal_submission_ready": false,
+  "readiness_note": "Author declarations, journal eligibility, data licensing, deposit scope and field-method confirmation require separate review. File integrity is not submission approval."
+}

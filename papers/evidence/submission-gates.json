@@ -1,0 +1,39 @@
+{
+  "checked_at": "2026-10-17",
+  "submitted": false,
+  "journal_tracking_numbers": [],
+  "repository": {
+    "url": "https://github.com/snansrin/dendrogeo",
+    "created_at": "2026-08-30T16:38:07Z",
+    "visibility_when_checked": "public",
+    "continuous_public_since_creation_verified": false
+  },
+  "joss": {
+    "ready": false,
+    "public_history_requirement_met": false,
+    "reassess_no_earlier_than": "2027-03-01",
+    "date_condition": "Only if sustained public development from repository creation can be demonstrated; creation date alone does not prove publication date.",
+    "other_requirements": [
+      "author affiliations and agreement",
+      "complete AI tool inventory and human review confirmation",
+      "field-use evidence and final manuscript validation"
+    ],
+    "policy": "https://joss.readthedocs.io/en/latest/submitting.html"
+  },
+  "scientific_data": {
+    "ready": false,
+    "candidate_source_report": "DGR-2026-0026",
+    "source_report_license": "CC-BY-NC-4.0",
+    "new_dataset_deposit_created": false,
+    "new_dataset_doi": null,
+    "compatible_primary_data_licensing_authorized": true,
+    "pending": [
+      "joint final manuscript approval and detailed contributions",
+      "field details beyond documented tape/height/GNSS protocol",
+      "repository deposit and reviewer access",
+      "submission account access"
+    ],
+    "policy": "https://www.nature.com/sdata/policies/repositories",
+    "license_authorization_scope": "New rights-owned primary tree tables and documentation only; excludes original report, photographs and third-party spatial material"
+  }
+}

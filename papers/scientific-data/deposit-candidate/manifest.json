@@ -1,0 +1,30 @@
+{
+  "schema": "dendrogeo-primary-data-candidate/1",
+  "source_report": "DGR-2026-0026",
+  "files": [
+    {
+      "name": "tree-observations.csv",
+      "sha256": "3fe673954ae2b8d8815a6e29ea5a339a20182b49da98c0dc3bc648fd0c62ce75"
+    },
+    {
+      "name": "derived-estimates.csv",
+      "sha256": "bc87ca60d004de5db6e0c78818fec1d8eb0a5711c14a16d2b7933ff9fc91cec5"
+    },
+    {
+      "name": "data-dictionary.csv",
+      "sha256": "d960dbae073dbdf00430362997482642b92abaea815cfd626b1ac747cf187f05"
+    },
+    {
+      "name": "metadata.json",
+      "sha256": "f89fa18a27412563dfe789f0e6638e0e1200b6762b2101c57d390206391e5d17"
+    },
+    {
+      "name": "LICENSE.txt",
+      "sha256": "a7545987789ed86fe0b9ad4b462ff103df2557a88d930ed643d3f95e1219cc3c"
+    },
+    {
+      "name": "README.md",
+      "sha256": "3a9aa88da3fa2a464a1c09d4733c438d021ab7ff1cefcbc47def4870a100d44b"
+    }
+  ]
+}

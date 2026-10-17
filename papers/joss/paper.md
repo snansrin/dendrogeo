@@ -1,66 +1,71 @@
 ---
-title: "DendroGeo: a reproducible web GIS for tree inventories and urban park analysis"
+title: "DendroGeo: traceable tree inventories and reviewed park surface evidence in a browser"
+tags:
+  - JavaScript
+  - urban forestry
+  - tree inventory
+  - geographic information systems
+  - research data provenance
 authors:
   - name: "Nagihan Şirin"
-    orcid: "0009-0009-6303-5140"
+    orcid: "0009-0003-7372-0973"
     affiliation: 1
   - name: "Sinan Şirin"
+    orcid: "0009-0009-6303-5140"
     affiliation: 2
 affiliations:
-  - name: "[Institution and department to confirm before submission]"
+  - name: "Department of Landscape Architecture, Faculty of Agriculture, Ankara University, Türkiye"
     index: 1
-  - name: "[Institution or independent affiliation to confirm]"
+  - name: "Independent software development for DendroGeo, Türkiye"
     index: 2
-date: 2026-10-17
+date: 17 October 2026
 bibliography: references.bib
 ---
 
 # Summary
 
-DendroGeo is an open-source, browser-based geographic information system for collecting tree measurements and examining urban parks. It connects georeferenced tree records, tree-level attributes, allometric biomass and carbon estimates, park boundaries, land-cover evidence, and quality-control notes in one workflow. Field teams can collect records in the browser, continue when connectivity is interrupted, and synchronize later. Analysts can inspect a park, review its surface classification, and create a frozen report package containing data, maps, metadata, source references, and a cryptographic content manifest.
+DendroGeo is an open-source web application for collecting tree measurements and examining their spatial context in urban parks. A field record connects a tree's location, name or group, stem circumference and height with derived diameter, biomass and carbon estimates. A separate park workflow combines boundaries, remotely sensed land-cover evidence and reviewed surface geometries. Researchers can inspect source evidence, record corrections and publish a frozen DendroGeo report (DGR) containing the data, methods, spatial outputs and file checksums.
 
-The software distinguishes field observations from model-derived values and externally sourced spatial layers. A report preserves its input snapshot, analysis provenance, uncertainty summaries, and SHA-256 file checksums. Corrections to accepted analyses produce a new report identity rather than silently replacing an earlier publication. The browser application is designed for researchers and field teams who need an auditable connection between tree-level observations and park-scale spatial context.
+The application supports fieldwork on mobile devices, local storage during interrupted connectivity and later synchronization. Its research purpose is to preserve the connection between observations and the version of an analysis used in a report. Field observations, model estimates and externally sourced spatial evidence remain identifiable. A published package can be inspected independently of a user's account, while the application provides a shared workspace for preparing and reviewing the underlying records.
 
 # Statement of need
 
-Urban tree inventories often combine field measurements, spatial boundaries, species or functional-group information, and derived biomass estimates. These components may be held in separate spreadsheets and GIS projects, making it difficult to trace which observations contributed to a park-level summary or to reproduce a published result after corrections. Field teams also work in settings with unreliable network access, while public datasets and map services can change independently of field records.
+An urban-park inventory may begin with field sheets, acquire coordinates and taxonomic labels, incorporate a boundary from a mapping service, and end with a spreadsheet of carbon estimates. When these steps are maintained separately, a corrected measurement or boundary can become detached from the result already reported. Changing remote services and unstable connectivity further complicate the work of distributed field teams.
 
-DendroGeo addresses this workflow problem by keeping each observation linked to its location and review state, applying explicitly documented allometric calculations, and recording the analysis snapshot used for each report. It is intended for urban forestry researchers, landscape and ecology students, park managers, and collaborators who need a shared map-based inventory and a clear account of data status. It does not replace field verification, a full-featured GIS, or ecological inference from plot sampling; it supplies a traceable collection and reporting workflow.
+DendroGeo addresses this problem through explicit observation, review and publication states. Its intended users include urban-forestry researchers, landscape researchers and teaching teams collecting georeferenced tree data. The field protocol stores circumference measured at 1.30 m above ground as the primary stem measurement and derives diameter as circumference divided by pi. Derived quantities are labeled as estimates rather than additional observations. A park's sampled trees remain distinct from its complete area: the sum over recorded trees is not evidence of a complete park inventory or a representative population estimate.
 
 # State of the field
 
-Desktop GIS software such as QGIS supports broad spatial analysis and cartographic production [@qgis2026], while tree-inventory platforms such as i-Tree Eco support structured urban-forest accounting [@itreeeco2026]. These tools address important parts of the workflow. DendroGeo is complementary: it focuses on browser-based field capture, park-linked collaboration, offline synchronization, review of contributed records, and the preservation of a report snapshot that joins tree records with separately identified park and land-cover evidence. Users can export spatial data for analysis in general GIS software rather than treating the browser as a replacement for it.
+QGIS provides general spatial analysis, data editing and cartographic production [@qgis2026]. i-Tree Eco provides an established workflow for urban-forest assessment and ecosystem-service accounting [@itreeeco2026]. DendroGeo focuses on a narrower combination: browser-based field capture, offline synchronization, project-linked review and preservation of accepted evidence in a portable report package.
 
-The contribution is therefore an integrated, auditable workflow rather than a new biomass equation or a claim of superior ecological accuracy. Biomass estimates depend on the selected allometric model, wood-density source, measurement quality, and assumptions documented in each report. Land-cover summaries depend on source resolution, acquisition date, raster-cell intersection, and any reviewed corrections. These products remain distinguishable in report metadata so that downstream users can select the evidence appropriate to their question.
+The implementation was developed as a connected collection-and-publication workflow because field entry, review status and the precise report snapshot need to share identifiers and provenance. A general GIS export alone does not supply that lifecycle. CSV and GeoJSON exports allow users to continue analysis in other tools. Biomass calculations reference existing allometry [@chave2014]; the software's contribution concerns workflow traceability and implementation, rather than a new biomass model. The system does not claim the analytic breadth of a desktop GIS or equivalence to the ecological methods of i-Tree.
 
 # Software design
 
-The application separates domain calculations, application workflows, data adapters, user-interface modules, and report-generation tools. This structure lets validation and transformations be exercised without a live database or map, while adapters retain responsibility for external services and storage. Regression checks guard key scientific calculations, report hashes, geometry handling, data-access boundaries, generated assets, and mobile interaction.
+Domain modules implement numerical and geometric rules. Application modules coordinate tasks such as saving a measurement, accepting a surface correction and requesting publication. Adapters manage browser facilities, storage and external data services. Presentation modules render controls and report sections. Explicitly supplied dependencies make the numerical rules and workflow decisions testable without requiring a real account, a live map service or a writable production database.
 
-The client application uses a browser-first delivery model so that field teams can use standard devices without installing desktop GIS software. Offline queues support delayed synchronization, but the system reports synchronization outcomes instead of treating a local draft as a server-accepted observation. Published DGR artifacts are static files with a manifest, making a report portable and independently checkable. The read-only R and Python clients retrieve public artifacts and verify their manifest hashes; they do not access accounts or private records.
+This separation addresses a practical research risk: a change to a drawing tool or network retry must not silently change an accepted scientific record. The application distinguishes source classifications, provisional edits and accepted geometries. Remote-service failures are represented as unavailable evidence; incomplete geometry is not converted into an observation of zero buildings or water. Reviewed classifications are decisions with provenance, not independent accuracy assessments of the remote-sensing product. ESA WorldCover supplies baseline categorical evidence [@worldcover2021], while OpenStreetMap supplies separately attributed spatial context [@osm2026].
 
-This design has trade-offs. Browser delivery reduces installation friction but depends on browser capabilities and network availability for remote map and data services. Offline editing requires explicit conflict and review handling. A static public report is easy to archive and mirror but is not a general query API. The software preserves these boundaries and documents source dates, resolution, missing inputs, and uncertainty instead of converting unavailable evidence into zero-valued results.
+Browser delivery reduces installation requirements for field users, but map imagery and remote data still depend on network services. Local records and server-accepted records therefore have different states, and synchronization outcomes are surfaced to the user. Public reports use static files so that reading a frozen result does not require a database session. A manifest records SHA-256 checksums for individual artifacts; integrity checks establish whether those artifacts have changed, not whether the field observations are scientifically correct.
+
+The report stores the analysis code revision, measurement period, source descriptions, model settings and review geometry. Published revisions are traceable by DGR identity and, where registered, a report DOI. The R and Python clients retrieve public manifest-listed files and check their hashes before returning the data. Their purpose is access and integrity verification; the research software described here is the complete DendroGeo system rather than the thin clients in isolation.
+
+Automated checks cover module dependencies, generated assets, measurement transformations, review-state transitions, geometric operations and report integrity. Browser acceptance checks exercise mobile layouts, drawing, brush interaction, keyboard behavior and accessibility. These checks support maintainability across presentation and service changes. They do not replace local calibration of allometric equations or independent validation of park classifications. Applying a pantropical biomass equation to urban trees in Ankara requires an explicit statement of model-domain limitations.
 
 # Research impact statement
 
-DendroGeo is being used in a doctoral research workflow on the carbon-storage performance of urban parks. Public DGR report packages provide concrete examples of the software's output and can be downloaded with the repository's read-only clients. These materials support near-term reuse and technical inspection. No external adoption or peer-reviewed publication enabled by the software is claimed in this draft; the authors should update this statement with verifiable citations, integrations, or independent use before submitting to JOSS.
+The software supports a doctoral research workflow examining the carbon-storage performance of urban parks. A concrete public research output is the frozen Göksu Park report DGR-2026-0026, registered as DOI 10.5281/zenodo.23404310 [@sirinGoksu2026]. Its package contains 36 tree records, a machine-readable snapshot, a measurement CSV, spatial files, a rendered map, a report and a checksum manifest. The recorded measurement period is 28 September to 1 October 2026. Archived provenance identifies application version 3.0.0 and land-cover engine version 4.3.0, distinguishing the historical analysis environment from the current source tree.
+
+The accompanying manuscript audit verified the eight manifest-listed artifacts and checked agreement among JSON and CSV record identities and counts. This provides a bounded, reproducible example for inspecting the observation-to-report connection. Earlier report revisions contain the same measurement CSV and are not additional independent surveys. No external adoption or peer-reviewed publication enabled by DendroGeo is asserted here. The public report demonstrates an implemented research workflow; it is not independent ecological validation or evidence of broad community uptake.
 
 # AI usage disclosure
 
-Generative AI tools assisted with software implementation, documentation, and preparation of this manuscript draft. The authors remain responsible for the software, scientific claims, citations, data permissions, and final manuscript. They should verify all generated content and disclose any additional AI use according to the journal's current policy before submission.
+Generative AI tools assisted software implementation, refactoring, test preparation, documentation and manuscript drafting. OpenAI Codex, using GPT-6 for this manuscript revision, assisted with source inspection, editing and preparation of a read-only report audit. Automated regression and file-integrity checks provide technical evidence for specific behaviors; they do not substitute for human evaluation of scientific claims, authorship, data permissions or the manuscript. A complete historical tool inventory and the authors' confirmation of their review remain outstanding requirements in the submission preparation record.
 
 # Acknowledgements
 
-The authors acknowledge the maintainers of the open-source software, spatial datasets, and public data services cited in the repository's third-party license and data-source inventory. Specific financial support should be added only when confirmed by the authors.
+The work uses open-source software and attributed public spatial data. The authors report no external funding; development was supported through their own resources. Nagihan Şirin is a doctoral student in Landscape Architecture at Ankara University. Sinan Şirin developed the platform independently of his unrelated employment. Final author review and declarations remain required before submission.
 
 # References
 
-Chave, J., Réjou-Méchain, M., Búrquez, A., et al. (2014). Improved allometric models to estimate the aboveground biomass of tropical trees. *Global Change Biology*, 20, 3177–3190. https://doi.org/10.1111/gcb.12629
-
-ESA WorldCover team. (2021). *ESA WorldCover 10 m 2021 v200*. https://doi.org/10.5281/zenodo.7254221
-
-QGIS Development Team. (2026). *QGIS Geographic Information System*. https://qgis.org/
-
-U.S. Forest Service. (2026). *i-Tree Eco*. https://www.itreetools.org/tools/i-tree-eco
-
-Şirin, N. & Şirin, S. (2026). *DendroGeo: Küresel Ağaç Envanteri ve Karbon Veri Sistemi* (Version 3.0.0) [Software]. Zenodo. https://doi.org/10.5281/zenodo.22948643
+<!-- Author-confirmed preparation record: corresponding author Sinan Şirin (sinan@dendrogeo.org). No reported sponsorship, patents, commercial income, paid consultancy or other influencing relationships. Sinan is the platform developer. Final joint manuscript approval is pending. -->

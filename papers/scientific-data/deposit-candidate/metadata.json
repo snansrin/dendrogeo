@@ -1,0 +1,75 @@
+{
+  "title": "Georeferenced tree measurements for Goksu Park in Ankara September to October 2026 snapshot",
+  "version": "0.1.0-author-review",
+  "publication_status": "local deposit candidate; not submitted or deposited",
+  "doi": null,
+  "rights_holder_authorization": {
+    "date": "2026-10-17",
+    "license": "CC-BY-4.0",
+    "scope": "New tables derived from rights-holder-owned field observations and estimates only",
+    "source_report_unchanged": true
+  },
+  "license": {
+    "id": "CC-BY-4.0",
+    "url": "https://creativecommons.org/licenses/by/4.0/"
+  },
+  "proposed_creators": [
+    {
+      "name": "Nagihan Şirin",
+      "orcid": "https://orcid.org/0009-0003-7372-0973",
+      "country": "Türkiye",
+      "email": "nagihan@dendrogeo.org",
+      "affiliation": "Department of Landscape Architecture, Faculty of Agriculture, Ankara University",
+      "role": "doctoral researcher",
+      "authorship_agreement_reported": true
+    },
+    {
+      "name": "Sinan Şirin",
+      "orcid": "https://orcid.org/0009-0009-6303-5140",
+      "country": "Türkiye",
+      "email": "sinan@dendrogeo.org",
+      "affiliation": "Independent software development for DendroGeo",
+      "role": "system developer"
+    }
+  ],
+  "author_order_affiliations_and_contributions_confirmed": false,
+  "funding": "No external funding; supported through the authors own resources",
+  "corresponding_author": {
+    "name": "Sinan Şirin",
+    "email": "sinan@dendrogeo.org"
+  },
+  "competing_interests": "No influencing relationships reported; Sinan Şirin is the platform developer",
+  "source_report": "DGR-2026-0026",
+  "source_report_doi": "10.5281/zenodo.23404310",
+  "source_snapshot_sha256": "3dce167193372e2b2f0f6e506ef4477425cee397bfa10a950513ff8c6b87fd26",
+  "source_report_orcid_note": "Authors supplied corrected ORCID ownership on 17 October 2026; the frozen source report is preserved unchanged.",
+  "records": 36,
+  "measurement_period": {
+    "from": "2026-09-28T10:22:16.065273+00:00",
+    "to": "2026-10-01T14:36:01.51072+00:00"
+  },
+  "ongoing_collection": true,
+  "coverage_note": "Fixed snapshot of 36 public records; Göksu fieldwork continues. This is not a complete park census.",
+  "transformations": [
+    "Select documented source fields",
+    "Rename columns with explicit source mapping",
+    "Separate observations and model outputs",
+    "No filtering or taxonomic harmonization",
+    "No numeric rerounding"
+  ],
+  "excluded": [
+    "photographs",
+    "photo paths",
+    "database row IDs",
+    "OSM geometries",
+    "reviewed surface geometries",
+    "map imagery",
+    "original report artifacts"
+  ],
+  "pending": [
+    "author institutions and declarations",
+    "field instrument details beyond published protocol",
+    "reviewer access and actual deposit identifier",
+    "human manuscript approval"
+  ]
+}

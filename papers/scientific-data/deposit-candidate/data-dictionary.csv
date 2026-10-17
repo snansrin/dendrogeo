@@ -1,0 +1,14 @@
+table,field,source_json_field,definition,unit,kind
+tree-observations.csv,point_id,rows[].point_id,Local point identifier,,identifier
+tree-observations.csv,species_label,rows[].species,Recorded Turkish tree label,,field label
+tree-observations.csv,tree_group,rows[].grp,Recorded broadleaf or conifer group,,field label
+tree-observations.csv,girth_cm,rows[].girth_cm,Circumference under the documented 1.30 m tape protocol,cm,observation
+tree-observations.csv,height_m,rows[].height_m,Recorded tree height; source report records 0.1 m resolution,m,observation
+tree-observations.csv,latitude,rows[].lat,Latitude recorded with civilian GNSS according to source report,decimal degrees,location
+tree-observations.csv,longitude,rows[].lon,Longitude recorded with civilian GNSS according to source report,decimal degrees,location
+tree-observations.csv,horizontal_accuracy_m,rows[].acc_m,Source-reported accuracy where present; blank is unknown,m,location metadata
+tree-observations.csv,record_date,rows[].date,Date stored in the public source row,YYYY-MM-DD,record metadata
+derived-estimates.csv,point_id,rows[].point_id,Join key to tree-observations.csv,,identifier
+derived-estimates.csv,dbh_cm,rows[].dbh_cm,Full-precision stored diameter derived as girth divided by pi,cm,derived
+derived-estimates.csv,carbon_kg,rows[].carbon_kg,Stored allometric carbon estimate; not a direct measurement,kg C,derived
+derived-estimates.csv,volume_m3,rows[].volume_m3,Stored volume estimate using a fixed form factor,m3,derived

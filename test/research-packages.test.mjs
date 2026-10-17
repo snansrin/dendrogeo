@@ -31,7 +31,8 @@ test('JOSS draft contains current required substantive sections and marks author
   for(const heading of ['Summary','Statement of need','State of the field','Software design','Research impact statement','AI usage disclosure','Acknowledgements','References']) {
     assert.ok(paper.includes('# '+heading),'Missing JOSS section: '+heading);
   }
-  assert.match(paper,/Institution and department to confirm/);
+  assert.match(paper,/Ankara University/);
+  assert.match(paper,/Final author review and declarations remain required/);
   assert.match(paper,/No external adoption or peer-reviewed publication/);
 });
 
