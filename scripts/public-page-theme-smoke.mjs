@@ -10,7 +10,7 @@ const pages=[];
 function collect(dir){for(const e of readdirSync(dir,{withFileTypes:true})){const p=join(dir,e.name);if(e.isDirectory()&&!['node_modules','.git','vendor'].includes(e.name))collect(p);else if(e.isFile()&&p.endsWith('.html')&&readFileSync(p,'utf8').includes('<!-- dg-public-theme -->'))pages.push('/'+relative('.',p).replaceAll('\\','/'));}}
 collect('.');
 try{
- for(const width of [360,390,430]){
+ for(const width of [311,360,390,430]){
   const page=await browser.newPage({viewport:{width,height:840},reducedMotion:'reduce'}),errors=[];
   page.on('pageerror',error=>errors.push(error.message));
   await page.route(/^https?:\/\/(?!127\.0\.0\.1)/,route=>route.abort());
@@ -31,6 +31,8 @@ try{
   await page.goto(server.url+'/rapor/gorunum/?id=DGR-2026-0026');
   await page.locator('#readerPrint').waitFor({state:'visible'});
   await page.waitForFunction(()=>!document.getElementById('readerPrint').disabled);
+  const geometry=await page.locator('#reportFrame').evaluate(f=>({height:f.clientHeight,content:f.contentDocument.documentElement.scrollHeight,style:f.getAttribute('style')}));
+  assert.ok(geometry.content<=geometry.height+2,'nested report scroll: '+JSON.stringify(geometry));
   const frame=page.frameLocator('#reportFrame');
   assert.equal(await frame.locator('html').getAttribute('data-theme'),'dark');
   assert.match(await frame.locator('#dgVerify').textContent(),/İçerik bütünlüğü doğrulandı/);
@@ -47,5 +49,5 @@ try{
   const path=join('rapor',name,'manifest.json');if(!existsSync(path))continue;
   for(const file of JSON.parse(readFileSync(path,'utf8')).files||[]){assert.equal(createHash('sha256').update(readFileSync(join('rapor',name,file.name))).digest('hex'),file.sha256,`${name}/${file.name}`);}
  }
- console.log(`✅ ${pages.length} public pages: dark/light at 360/390/430px, theme-aware report reader and immutable artifact hashes.`);
+ console.log(`✅ ${pages.length} public pages: dark/light at 311/360/390/430px, theme-aware report reader and immutable artifact hashes.`);
 }finally{await browser.close();await server.close();}

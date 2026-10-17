@@ -17,6 +17,6 @@ okuyucusu orijinal belgeyi aynı kökenli bir çerçevede açar, yalnız ekran
 stillerini ekler ve üst sayfanın temasını izler. Orijinal içerik doğrulaması
 çalışmaya devam eder. PDF, veri dosyaları, kalıcı bağlantı ve baskı biçimi korunur.
 
-`scripts/public-page-theme-smoke.mjs`, 360/390/430 piksel görünümünde tema
+`scripts/public-page-theme-smoke.mjs`, 311/360/390/430 piksel görünümünde tema
 kalıcılığını, kaydırmayı, açık/koyu kontrastını, okuyucu bütünlük göstergesini ve
 rapor manifestlerindeki dosya hash'lerini doğrular. Telefon CI zincirine dahildir.
