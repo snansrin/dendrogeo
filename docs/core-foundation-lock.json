@@ -8951,6 +8951,30 @@
           "sha256": "3a2366a9a930f31feadae6c049f82d737891ee94c85285b750d8675ae7331de8"
         }
       ]
+    },
+    {
+      "id": "explicit-license-badges-and-tree-height-proximity-2026-10-17",
+      "date": "2026-10-17",
+      "scope": "User-authorized presentation update: use direct License: MIT and Data License: CC BY-NC 4.0 labels in the repository and landing footer; move the first-animation tree-height readout adjacent to the canopy frame. No license terms, analysis behavior or scientific methods changed.",
+      "audit_chain": "sha256-v1",
+      "added_protected_files": [],
+      "files": [
+        {
+          "path": "partials/landing.html",
+          "previous_sha256": "4a05396e0ae3d5ea04e42b762b6ef266ce14eec0550fbacde457c89328626785",
+          "sha256": "0558ff9119a58e4c1055911048c83c9a7fd7a2b195cdbfe48701916e6d00a835"
+        },
+        {
+          "path": "index.html",
+          "previous_sha256": "3a2366a9a930f31feadae6c049f82d737891ee94c85285b750d8675ae7331de8",
+          "sha256": "47fe5a2849d108161f91e1b69fe9a379cc556cce3abb5e4675e58678efaa73e7"
+        },
+        {
+          "path": "scripts/landing-showcase-smoke.mjs",
+          "previous_sha256": "fbb990d93f460e40798c63ddce3f9f6148f5abe1f9746f926523818d372a940b",
+          "sha256": "26a5014b139c55256878b738684c0f8f73df3cd8bed1e716fae5d44a3d38bc57"
+        }
+      ]
     }
   ]
 }

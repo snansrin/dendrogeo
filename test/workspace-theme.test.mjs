@@ -61,8 +61,8 @@ test('landing hero ölçüm alanlarını ağaç animasyonunun yanında erişileb
  assert.ok(!landing.includes('ÇEVRE 45 cm → DBH 14.3 cm'));
  assert.match(landing,/<foreignObject x="735" y="157"/);
  assert.match(rd('css/landing-scenes.css'),/\.dg-svg-reading \.chip\{position:static/);
- assert.match(landing,/<foreignObject x="500" y="50"/);
- assert.match(landing,/<foreignObject x="500" y="50"[^>]*>[\s\S]*?data-i18n="Ağaç boyu"/);
+ assert.match(landing,/<foreignObject x="560" y="50"/);
+ assert.match(landing,/<foreignObject x="560" y="50"[^>]*>[\s\S]*?data-i18n="Ağaç boyu"/);
  assert.ok(landing.indexOf('class="dg-tree-readouts"')<landing.indexOf('class="walkerA"'));
 });
 

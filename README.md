@@ -5,8 +5,8 @@
 🌐 [DendroGeo sitesi](https://dendrogeo.org/) · [Ağaç envanteri](https://dendrogeo.org/agac-envanteri/) · [Karbon hesabı](https://dendrogeo.org/karbon-hesaplama/) · [Arazi örtüsü](https://dendrogeo.org/arazi-ortusu/) · [Kent parkları](https://dendrogeo.org/kent-parklari/) · [Yöntem](https://dendrogeo.org/yontem/) · [Rapor arşivi](https://dendrogeo.org/rapor/)
 
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.22948643.svg)](https://doi.org/10.5281/zenodo.22948643)
-[![Software License: MIT](https://img.shields.io/badge/Software-MIT-blue.svg)](LICENSE)
-[![Data License: CC BY-NC 4.0](https://img.shields.io/badge/Data-CC%20BY--NC%204.0-lightgrey.svg)](LICENSE-DATA)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+[![Data License: CC BY-NC 4.0](https://img.shields.io/badge/Data%20License-CC%20BY--NC%204.0-lightgrey.svg)](LICENSE-DATA)
 [![CI](https://github.com/snansrin/dendrogeo/actions/workflows/ci.yml/badge.svg)](https://github.com/snansrin/dendrogeo/actions/workflows/ci.yml)
 
 ---
