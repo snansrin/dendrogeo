@@ -8889,6 +8889,30 @@
           "sha256": "d4e198b232c7c6b2e7f9b766c98bdcbd682cc3c5c58ad22f6764076dddf0eaf9"
         }
       ]
+    },
+    {
+      "id": "academic-audit-landing-language-2026-10-17",
+      "date": "2026-10-17",
+      "scope": "User-authorized modularization maintenance and academic audit: refresh generated presentation hashes, complete English copy, and acknowledge the reviewed verified-invitation migration in filename allowlists; numerical and scientific assertions unchanged.",
+      "audit_chain": "sha256-v1",
+      "added_protected_files": [],
+      "files": [
+        {
+          "path": "index.html",
+          "previous_sha256": "d4e198b232c7c6b2e7f9b766c98bdcbd682cc3c5c58ad22f6764076dddf0eaf9",
+          "sha256": "513100af107f18367d7796c925e957b54a1dcbdba52228aded79557d5a888a86"
+        },
+        {
+          "path": "test/dbh-qa.test.mjs",
+          "previous_sha256": "bfcbed79b10b002f82979052a6fb99185fe9b2c699523a6c200ec630407bdb71",
+          "sha256": "09d47ceb45a396bfe40f111e043698c04f31c935fe2c3e38c5a1ed48c11bd2a2"
+        },
+        {
+          "path": "test/form-qa.test.mjs",
+          "previous_sha256": "6ecfcecb5e1a4fa9c644696d8df41b1117781efcfd25c9e1166c8db2700121b0",
+          "sha256": "ab87a6a4d9d28198ed3029fd8785b2b183b758a1812d88b7bfc986227c907a5c"
+        }
+      ]
     }
   ]
 }

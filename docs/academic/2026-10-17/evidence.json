@@ -1,0 +1,55 @@
+{
+  "date": "2026-10-17",
+  "baseline_commit": "793c90b26e142669d2056ac910bec4875c888a0c",
+  "coverage": {
+    "static_inventory": "All 1977 initial local files matched remote main; AST is not a runtime call trace or manual line-by-line certification",
+    "live_browser": "Anonymous landing, six showcase panels, language switch, public map and statistics; authenticated production mutations not exercised",
+    "database": "Read-only schema/advisor/function/policy checks, followed by the tested verified-invitation-identity migration"
+  },
+  "security_before": {
+    "lints": [
+      {
+        "name": "rls_enabled_no_policy",
+        "level": "INFO",
+        "count": 1,
+        "remediation": "https://supabase.com/docs/guides/database/database-linter?lint=0008_rls_enabled_no_policy"
+      },
+      {
+        "name": "authenticated_security_definer_function_executable",
+        "level": "WARN",
+        "count": 4,
+        "remediation": "https://supabase.com/docs/guides/database/database-linter?lint=0029_authenticated_security_definer_function_executable"
+      },
+      {
+        "name": "auth_leaked_password_protection",
+        "level": "WARN",
+        "count": 1,
+        "remediation": "https://supabase.com/docs/guides/auth/password-security#password-strength-and-leaked-password-protection"
+      }
+    ]
+  },
+  "performance_advisor": {
+    "lints": [
+      {
+        "name": "unused_index",
+        "level": "INFO",
+        "count": 11,
+        "remediation": "https://supabase.com/docs/guides/database/database-linter?lint=0005_unused_index"
+      }
+    ]
+  },
+  "applied_database_fix": {
+    "migration": "20261017062202_verified_invite_identity.sql",
+    "production_applied": true,
+    "production_definition_verified": true,
+    "anonymous_helper_execute": false,
+    "authenticated_helper_execute": true,
+    "production_user_rows_mutated": false,
+    "tests": "Isolated PostgreSQL denial and legitimate-recipient scenarios"
+  },
+  "limitations": [
+    "No full disaster-recovery restore performed.",
+    "No new independent field validation or local allometry calibration performed.",
+    "No guarantee of a complete-system security audit."
+  ]
+}

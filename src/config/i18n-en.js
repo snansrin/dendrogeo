@@ -1731,3 +1731,27 @@ Object.assign(DG_I18N_EN,{"Görünümü sıfırla": "Reset scene view",
 Object.assign(DG_I18N_EN,{"Örnek saha değerleri: çap 14,3 cm; tahmini karbon 40 kg C; ağaç boyu 13 m.":"Example field values: diameter 14.3 cm; estimated carbon 40 kg C; tree height 13 m."});
 
 Object.assign(DG_I18N_EN,{"Su":"Water","Göksu Parkı gerçek kayıt geometrisi":"Goksu Park saved record geometry","Çizim alanı · Enter ile örnek köşe ekleyin":"Drawing area · press Enter to add a sample vertex"});
+
+/* Public academic copy: complete text-node matches preserve formula/data nodes. */
+Object.assign(DG_I18N_EN,{
+ "İçeriğe atla":"Skip to content",
+ "Bölüm menüsü":"Section menu",
+ "Örnek saha değerleri · çevre ÷ π ile türetilen DBH · ölçüm animasyonuyla aynı sahne":"Example field values · DBH derived as circumference ÷ π · part of the measurement animation",
+ "Chave et al. 2014 (çevre ÷ π → DBH + boy + ρ)":"Chave et al. 2014 (circumference ÷ π → DBH + height + ρ)",
+ "Özel tür ρ değeri yoksa yalnız kendi grup geneli":"If species-specific ρ is unavailable, only the corresponding group default is used",
+ "CC BY‑NC 4.0 paylaşım lisansı":"CC BY‑NC 4.0 data-sharing licence",
+ "GPS konumunu alın, waypoint pusulasıyla ağaca yönelin; 1,30 m yükseklikte göğüs çevresini mezurayla ölçün, boy ve grup/tür bilgilerini girin.":"Record the GPS position and navigate using the waypoint compass; measure stem circumference with a tape at 1.30 m and enter height and group/species information.",
+ "GPS · ÇEVRE · BOY · FOTOĞRAF":"GPS · CIRCUMFERENCE · HEIGHT · PHOTO",
+ "Fotoğraf eklenirse tarayıcı içi QA/QC uygulanır. Ölçülen göğüs çevresi önce π’ye bölünerek gerçek DBH çapına dönüştürülür; ardından Chave et al. (2014) modeliyle AGB, kök biyokütlesi ve karbon hesaplanır.":"If a photo is added, in-browser QA/QC is applied. Measured stem circumference is divided by π to derive DBH; the Chave et al. (2014) model is then used to estimate aboveground biomass, root biomass and carbon.",
+ "AGB · BHB · C · m³":"AGB · BGB · C · m³",
+ "DBH = göğüs çevresi ÷ π · C/π (cm)":"DBH = stem circumference ÷ π · C/π (cm)",
+ "Ölçüm kataloğunda 49 tür bulunur; 16 tür kilitli özel ρ kullanır, 33 tür yalnız kendi grup genelini kullanır. Ölçüm grubu yalnız İBRELİ veya YAPRAKLI olabilir.":"The measurement catalogue contains 49 species; 16 use fixed species-specific ρ values and 33 use only their corresponding group default. The measurement group must be CONIFER or BROADLEAF.",
+ "Türetilmiş DBH ≤ 400 cm, boy ≤ 100 m":"Derived DBH ≤ 400 cm, height ≤ 100 m",
+ "{n} onaylı kayıt":"{n} approved records",
+ "Bilimsel Raporlar":"Scientific Reports",
+ "Ağaç envanteri, allometrik karbon değerlendirmesi ve kent parkı verilerini ortak bir bilimsel GIS çalışma alanında bir araya getirir.":"Combines tree inventories, allometric carbon assessment and urban park data in a shared scientific GIS workspace.",
+ "Allometrik biyokütle yöntemleri · IPCC rehberleri · Türkiye odun yoğunluğu kaynakları.":"Allometric biomass methods · IPCC guidelines · wood-density references for Türkiye.",
+ "Yayımlanan bilimsel raporlar DGR kimliği ve kendilerine ait DOI kaydıyla kalıcı olarak izlenir.":"Published scientific reports are persistently identified by their DGR identifier and individual DOI record.",
+ "· ticari olmayan kullanımda atıf zorunludur. Üçüncü taraf içerikler kendi lisanslarına tabidir.":"· attribution is required for non-commercial use. Third-party content remains subject to its own licences.",
+ "Yöntem ve veri kaynaklarını inceleyin ↗":"Explore methods and data sources ↗"
+});

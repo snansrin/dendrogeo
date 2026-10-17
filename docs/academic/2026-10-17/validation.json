@@ -1,0 +1,43 @@
+{
+  "date": "2026-10-17",
+  "source_check": {
+    "command": "npm run check",
+    "exit_code": 0,
+    "log": "outputs/academic-audit/final-source-check.log"
+  },
+  "phone": {
+    "command": "npm run check:phone",
+    "exit_code": 0,
+    "scope": "Local Chromium acceptance fixtures, including 360/390/430 px; not authenticated production write testing"
+  },
+  "accessibility": {
+    "command": "npm run check:accessibility",
+    "exit_code": 0,
+    "scope": "Automated checks and selected keyboard behaviors; not complete WCAG conformance certification"
+  },
+  "new_regressions": {
+    "tests": 9,
+    "passed": true,
+    "areas": [
+      "verified invitation identity",
+      "static source inventory",
+      "English academic copy",
+      "all shell views covered by functional diagrams",
+      "generated flow artifact consistency"
+    ]
+  },
+  "live_checks": {
+    "landing_panels": 6,
+    "language_issue_reproduced": true,
+    "database_fix_verified": true,
+    "account_signed_in": false
+  },
+  "remaining": [
+    "Independent field/reference validation",
+    "Local allometry applicability study",
+    "Complete disaster-recovery restore drill",
+    "Authenticated real-device acceptance session"
+  ],
+  "scientific_engine_changed": false,
+  "published_reports_changed": false
+}

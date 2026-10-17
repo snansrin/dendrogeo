@@ -3,8 +3,9 @@
  function render(summary,{groupColor,groupColorInk,escape,latin}){
   const{groups,total,averageDbh,averageHeight,percent,topSpecies}=summary;
   const ib=groups["İBRELİ"],ya=groups["YAPRAKLI"];
+  const countValues=escape(JSON.stringify({n:total})).replaceAll('"','&quot;');
   return `<div class="card">
-   <div class="shead" style="margin-bottom:14px"><span class="no">🌳</span><h2 style="font-size:1.15rem">Ağaç Çeşitliliği & Yapısal Analiz</h2><span class="rule"></span><span class="mono" style="font-size:.78rem;color:var(--mut)">${total} onaylı kayıt</span></div>
+   <div class="shead" style="margin-bottom:14px"><span class="no">🌳</span><h2 style="font-size:1.15rem">Ağaç Çeşitliliği & Yapısal Analiz</h2><span class="rule"></span><span class="mono" style="font-size:.78rem;color:var(--mut)" data-i18n-text="{n} onaylı kayıt" data-i18n-values="${countValues}">${total} onaylı kayıt</span></div>
    <div style="margin-bottom:18px">
     <div class="lbl" style="margin-bottom:8px">Grup Dağılımı</div>
     <div style="display:flex;justify-content:space-between;font-size:.78rem;margin-bottom:6px;color:var(--mut)">

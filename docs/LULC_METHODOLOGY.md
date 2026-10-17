@@ -1,5 +1,7 @@
 # DendroGeo — 10 m Arazi Örtüsü / 2020 Yöntemi
 
+> **Tarihsel belge:** IO LULC 2020 tabanlı eski iş akışını ve önceki doğrulama arayüzlerini kaydeder. Güncel sistemde birincil raster ESA WorldCover 2021 v200, IO LULC 2020 ise çapraz kontroldür. Güncel yüzey editörü beş sınıfı ve kabul edilmiş geometriyi ayrı tutar. Bu dosyadaki eski dört sınıf/UI açıklamaları güncel ürün sözleşmesi değildir. Önce [güncel yöntem kapsamını](SCIENTIFIC-METHODS-CURRENT.md) ve [ayrıntılı yöntem belgesini](methods.md) okuyun.
+
 ## 1. Amaç
 
 DendroGeo park analizinde sınıflandırma sonucu seçilen park polygonu ile 10 m çözünürlüklü kategorik arazi örtüsü rasterının hücre-kesişimlerinden hesaplanır.
