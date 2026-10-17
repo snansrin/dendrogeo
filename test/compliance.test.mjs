@@ -117,7 +117,7 @@ describe('KVKK: açık rıza ve aydınlatma', () => {
     assert.ok(existsSync(join(ROOT, p)), 'sayfa yok');
     const t = rd(p);
     assert.match(t, /Nagihan ŞİRİN &amp; Sinan ŞİRİN/, 'veri sorumlusu KİMLİĞİ yazılmalı');
-    assert.match(t, /sinan@dendrogeo\.org/);
+    assert.match(t, /security@dendrogeo\.org/);
     assert.match(t, /m\.5\/2-a/, 'hukuki sebep');
     assert.match(t, /meşru menfaat/);
     assert.match(t, /yurt dışına aktarım/i);
@@ -274,9 +274,9 @@ describe('depoda kişisel e-posta sızıntısı yok', () => {
     assert.deepEqual(sizen, [], 'kişisel e-posta içeren dosyalar: ' + sizen.join(', '));
   });
 
-  test('⭐ iletişim adresi alan adı üzerinden (sinan@dendrogeo.org)', () => {
+  test('⭐ genel iletişim adresi güvenlik alan adı üzerinden (security@dendrogeo.org)', () => {
     for (const f of ['kunye/index.html', 'gizlilik/index.html', 'aydinlatma/index.html', 'kullanim-kosullari/index.html', 'NOTICE']) {
-      assert.match(rd(f), /sinan@dendrogeo\.org/, f + ' alan adı adresi kullanmalı');
+      assert.match(rd(f), /security@dendrogeo\.org/, f + ' güvenlik alan adı iletişim adresi kullanmalı');
     }
   });
 

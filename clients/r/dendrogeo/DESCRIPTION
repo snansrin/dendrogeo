@@ -1,7 +1,7 @@
 Package: dendrogeo
 Title: Read and Verify Public DendroGeo Scientific Reports
 Version: 0.1.0
-Authors@R: person("DendroGeo", "Contributors", role = c("aut", "cre"), email = "sinan@dendrogeo.org")
+Authors@R: person("DendroGeo", "Contributors", role = c("aut", "cre"), email = "security@dendrogeo.org")
 Description: Read-only access to publicly released DendroGeo report metadata and
     analysis artifacts, with SHA-256 verification against immutable report manifests.
 License: MIT + file LICENSE

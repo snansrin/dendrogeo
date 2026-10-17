@@ -190,7 +190,6 @@ async function dgSurfaceGrid(data){
  if(data.greenOnly&&!greens.length)throw Error('Yeşil alan bulunamadı. Yüzey analizini kontrol edin.');
  let domain=data.greenOnly?pc.union(...greens):park;
  const obstacles=(data.blockRings||[]).filter(r=>r.length>=3).map(r=>local([[dgSurfaceProject(r.map(p=>[p[1],p[0]]),epsg)]]));
- if(!data.greenOnly)for(const p of data.parts||[])if(p.type!=='green')obstacles.push(local(p.geom));
  for(const line of data.blockLines||[])if(line.pts?.length>=2)obstacles.push(local(dgGridLineMask(line,epsg)));
  if(obstacles.length)domain=pc.difference(domain,...obstacles);
  domain=pc.intersection(domain,park);

@@ -10,7 +10,6 @@ window.DG_PREPARE_SURFACE_GRID_DOMAIN={
     if(data.greenOnly&&!greens.length)throw Error('Yeşil alan bulunamadı. Yüzey analizini kontrol edin.');
     let domain=data.greenOnly?clip('union',...greens):park;
     const obstacles=(data.blockRings||[]).filter(ring=>ring.length>=3).map(ring=>local([[project(ring.map(point=>[point[1],point[0]]),epsg)]]));
-    if(!data.greenOnly)for(const part of data.parts||[])if(part.type!=='green')obstacles.push(local(part.geom));
     for(const line of data.blockLines||[])if(line.pts?.length>=2)obstacles.push(local(lineMask(line,epsg)));
     if(obstacles.length)domain=clip('difference',domain,...obstacles);
     domain=clip('intersection',domain,park);

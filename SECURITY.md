@@ -76,4 +76,4 @@ DendroGeo implements:
 ---
 
 Last updated: 2026-09-11
-Contact: sinan@dendrogeo.org
+Contact: security@dendrogeo.org

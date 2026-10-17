@@ -9567,6 +9567,50 @@
           "sha256": "4735b0768ad084b97b28cfcf96df280f23e74fff735d3f17f65381308e8911d5"
         }
       ]
+    },
+    {
+      "id": "grid-green-only-switch-and-contact-address-2026-10-17",
+      "date": "2026-10-17",
+      "scope": "User-authorized modularization bug fix: when the green-only grid switch is off, preserve the entire park domain and do not subtract non-green raster classes; keep park bounds, explicit line exclusions, and safe-point checks. Apply the same behavior in modular worker preparation and legacy fallback. Update general communication endpoints to security@dendrogeo.org, including public legal/contact pages, SECURITY.md, CODE_OF_CONDUCT.md, NOTICE, and the R client maintainer contact; preserve manuscript author identities and corresponding-author contacts. Keep allometry, species, accepted surface data, park detection and surface classification unchanged.",
+      "audit_chain": "sha256-v1",
+      "added_protected_files": [],
+      "files": [
+        {
+          "path": "src/application/surface/prepare-surface-grid-domain.js",
+          "previous_sha256": "d30944f02b35623463bf4fc7f4ee55f00943ef5b342bf3c29c75540794b8707c",
+          "sha256": "3f79dcdd653f9194024caa777bd0113b9f716355a97790f034230ea742228a68"
+        },
+        {
+          "path": "src/services/lc-review.js",
+          "previous_sha256": "f8df21a0a00ebd15b50e0ecad409e4a7474bab6548c5de05d00fda5de83f9101",
+          "sha256": "72c38dae92b2018410a9000ccc64969b506e8be435f955a287427a04e9a66f36"
+        },
+        {
+          "path": "test/grid-precision-recovery.test.mjs",
+          "previous_sha256": "d7eaeeddd72e8d59c205a9c379fd56ec3b3dc88e3b8f8cf294fad8775cf44f0a",
+          "sha256": "692895c9c253b68f61085a1429134b99e14f8296abced93e6147cb886e4993a0"
+        },
+        {
+          "path": "sw.js",
+          "previous_sha256": "6792525816d13b36c41afd798e91f845d2f3e6e53583d7cc18b8f28c366f50d3",
+          "sha256": "7a1421f150221e268e6bc15324e81ed43f75cd09a1011c1c77a80909ceb1798d"
+        },
+        {
+          "path": "index.html",
+          "previous_sha256": "f3302e526aca1617201cb5487f6b2c2f33422b98c80e07d05a9102d0c57ce5f1",
+          "sha256": "85eefb04a6f4523cf51c560cae8fb5bcd1c0f99d67cf7645e3e22a5d419604c2"
+        },
+        {
+          "path": "docs/SCIENTIFIC-CORE-FREEZE.md",
+          "previous_sha256": "bf26e23b63e8a4bd73ea6fd80a3b649218cfa4d6b8de607ddbf91858a8a67f44",
+          "sha256": "d728a78c3bba506c818b83abb3fd72b99343ed05f098f22636e941198ce8f003"
+        },
+        {
+          "path": "scripts/harikalar-grid-smoke.mjs",
+          "previous_sha256": "41afea9408c3067999a7458215680bd287d96a667b39fc5b1391be34f0b1c231",
+          "sha256": "63897b6a781a761a79690c0b283c47338aa99a0b04f12916135f9a5e5b1dcc6d"
+        }
+      ]
     }
   ]
 }

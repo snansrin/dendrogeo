@@ -131,5 +131,6 @@ for(const greenOnly of [false,true])test(`accepted Göksu surface builds a safe 
  assert.ok(result.cells.length>0);
  assert.equal(JSON.stringify(sample),before,'accepted source geometry remains unchanged');
  e.context.result=result;
- assert.equal(e.run(`result.cells.every(c=>{const p=dgLcUtmForward(c.lat,c.lon,input.epsg);return dgGridPointDistance([p.x,p.y],dgSurfacePark(input.outer,input.holes,input.epsg))>0&&input.parts.filter(s=>s.type!=='green').every(s=>dgGridPointDistance([p.x,p.y],s.geom)<0)})`),true,'waypoints remain inside the park and outside all excluded classes');
+ assert.equal(e.run(`result.cells.every(c=>{const p=dgLcUtmForward(c.lat,c.lon,input.epsg);return dgGridPointDistance([p.x,p.y],dgSurfacePark(input.outer,input.holes,input.epsg))>0&&(!input.greenOnly||input.parts.filter(s=>s.type!=='green').every(s=>dgGridPointDistance([p.x,p.y],s.geom)<0))})`),true,'waypoints remain inside the park; green-only mode excludes non-green classes');
+ if(!greenOnly)assert.equal(e.run(`result.cells.some(c=>{const p=dgLcUtmForward(c.lat,c.lon,input.epsg);return input.parts.filter(s=>s.type!=='green').some(s=>dgGridPointDistance([p.x,p.y],s.geom)>0)})`),true,'turning green-only off must place grid points in non-green surface classes');
 });

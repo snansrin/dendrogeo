@@ -31,7 +31,7 @@ try{
     const p=dgLcUtmForward(cell.lat,cell.lon,input.epsg),point=[p.x,p.y];
     const parkDistance=dgGridPointDistance(point,park);
     if(parkDistance<input.clearance-.002){violations.push({point,parkDistance,cellClearance:cell.clearanceM});return false;}
-    return exclusions.every(({geom,bounds:b})=>{
+    return !input.greenOnly||exclusions.every(({geom,bounds:b})=>{
       if(p.x<b[0]-input.clearance||p.x>b[2]+input.clearance||p.y<b[1]-input.clearance||p.y>b[3]+input.clearance)return true;
       const distance=dgGridPointDistance(point,geom);
       if(distance>-input.clearance+.002){violations.push({point,exclusionDistance:distance,cellClearance:cell.clearanceM});return false;}
@@ -40,7 +40,7 @@ try{
    });
    return{count:result.cells.length,safe,violations,unchanged:before===JSON.stringify(input)};
   },{...input,greenOnly});
-  assert.ok(outcome.count>0);assert.ok(outcome.safe,'Points retain clearance from the park boundary and excluded classes: '+JSON.stringify(outcome.violations));assert.ok(outcome.unchanged);
+  assert.ok(outcome.count>0);assert.ok(outcome.safe,'Points retain park-boundary clearance and, when green-only is enabled, non-green-class clearance: '+JSON.stringify(outcome.violations));assert.ok(outcome.unchanged);
   console.log(JSON.stringify({engine:engine.name(),park:'Harikalar Diyarı',realRasterCells:input.meta.cellCount,greenOnly,elapsedMs:Date.now()-started,forcedDoubleNumericalFailure:true,failureSequence:process.env.DG_GRID_FAULT_SEQUENCE||'mixed',...outcome}));
  }
  assert.ok(injected>=3,'Page and both grid Workers loaded the failing primary library');
