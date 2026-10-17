@@ -255,7 +255,7 @@
 <script src="src/utils/truncation.js?v=7ff0d643" type="application/x-dendrogeo-module" defer></script>
 <!-- Faz 7: geotiff (317 KB) ve chart.js (208 KB) artık SENKRON yüklenmiyor;
      src/utils/lazylibs.js ihtiyaç anında enjekte eder (LULC analizi / panel grafiği). -->
-<script id="dgRuntimeBuild" type="application/json">"7ab87a169b8ebf7d"</script>
+<script id="dgRuntimeBuild" type="application/json">"e5cf4cbba7178d8b"</script>
 <!-- Verified fallback OSM water geometry, independent of the lazy raster engine. -->
 <script src="src/adapters/parks/fetch-nominatim-osm-way.js?v=e3100530" type="application/x-dendrogeo-module" defer></script>
 <script src="src/services/osm-water-backup.js?v=17797a8d" type="application/x-dendrogeo-module" defer></script>
@@ -1910,7 +1910,9 @@
 <script src="src/ui/gis-export-verified-workflow.js?v=e1aae306" type="application/x-dendrogeo-module" defer></script>
 <script src="src/bootstrap/gis-export.js?v=7434749b" type="application/x-dendrogeo-module" defer></script>
 <script src="src/ui/gis-export.js?v=036aa5ad" type="application/x-dendrogeo-module" defer></script>
+<!-- Resolve the lazily loaded class list for the legacy, read-only park PNG path. -->
+<script src="src/ui/park-export-lazy-class-bridge.js?v=119d1de7" type="application/x-dendrogeo-module" defer></script>
 
-<script src="/src/bootstrap/app-runtime.js?v=ceeaa607" defer></script>
+<script src="/src/bootstrap/app-runtime.js?v=2ac937dd" defer></script>
 </body>
 </html>

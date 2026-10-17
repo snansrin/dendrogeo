@@ -510,7 +510,8 @@
       "test/waypoint-field.test.mjs",
       "test/waypoint-gps-overlay-modules.test.mjs",
       "test/waypoint-load-modules.test.mjs",
-      "test/waypoint-navigation-actions.test.mjs"
+      "test/waypoint-navigation-actions.test.mjs",
+      "test/park-export-lazy-class-bridge.test.mjs"
     ],
     "modular_measurement_analysis_safeguards": [
       ".github/workflows/ci.yml",
@@ -1052,7 +1053,8 @@
       "test/complete-raster-cell-coverage.test.mjs",
       "test/recover-park-boundary.test.mjs",
       "test/fixtures/harikalar-diyari-park.json",
-      "scripts/park-boundary-recovery-smoke.mjs"
+      "scripts/park-boundary-recovery-smoke.mjs",
+      "src/ui/park-export-lazy-class-bridge.js"
     ],
     "grid_sweepline_recovery_2026_10_17": [
       "src/adapters/surface/integer-grid-clip.js",
@@ -2082,7 +2084,9 @@
     "test/fixtures/harikalar-grid-surface.json.gz": "c5ff174c0ede17979996c372542a39efb55a97142cb8efa25b4adb2fcae02342",
     "scripts/harikalar-grid-smoke.mjs": "822cc5de594b1b2c1f73fce77c1535288e2fbc2020e52188b89d7664f1490355",
     "test/measurement-points-labels.test.mjs": "f97ba4b257a8346d5451c494b3fae1bf1ec0dedfcb98a30239f306801d4457fa",
-    "scripts/surface-map-download-smoke.mjs": "9a1f470315c973b6ccd0ce4f3355b5e35986e51e76355598b739de84fa5a61d7"
+    "scripts/surface-map-download-smoke.mjs": "9a1f470315c973b6ccd0ce4f3355b5e35986e51e76355598b739de84fa5a61d7",
+    "src/ui/park-export-lazy-class-bridge.js": "da3706cebb84d663669d479a89459e5a3e9817fc1c62b97533c38e721e76ce75",
+    "test/park-export-lazy-class-bridge.test.mjs": "9d75ab63c349cd6a7288e57c50a50637551935548aebf0417043719c4dd7ac65"
   },
   "authorized_modularizations": [
     {
@@ -9609,6 +9613,62 @@
           "path": "scripts/harikalar-grid-smoke.mjs",
           "previous_sha256": "41afea9408c3067999a7458215680bd287d96a667b39fc5b1391be34f0b1c231",
           "sha256": "63897b6a781a761a79690c0b283c47338aa99a0b04f12916135f9a5e5b1dcc6d"
+        }
+      ]
+    },
+    {
+      "id": "legacy-park-png-lazy-class-lookup-2026-10-17",
+      "date": "2026-10-17",
+      "scope": "User-authorized modularization: additive UI compatibility fix: the legacy park PNG renderer may capture the analysis function before the land-cover class catalogue is loaded. Add a read-only lookup bridge that resolves the current class array only when the renderer calls find; do not run analysis from the fallback or change surface classes, accepted data, areas, allometry, park detection, or the modular GIS exporter. Add focused regression tests and update the generated runtime/offline assets.",
+      "audit_chain": "sha256-v1",
+      "added_protected_files": [
+        "src/ui/park-export-lazy-class-bridge.js",
+        "test/park-export-lazy-class-bridge.test.mjs"
+      ],
+      "files": [
+        {
+          "path": "partials/boot.html",
+          "previous_sha256": "de72f942b4f91bd1ba177c9430ba4b0b405816ac50316c668ddafaabcd132fed",
+          "sha256": "713b937c654f8013fc5d8f6a343e96fa6fce66d82eefbf17bfb8d7115f4d85ac"
+        },
+        {
+          "path": "index.html",
+          "previous_sha256": "85eefb04a6f4523cf51c560cae8fb5bcd1c0f99d67cf7645e3e22a5d419604c2",
+          "sha256": "314187f5a33c8d10d4dd2d9a18eda5608bd613cb9401025e67e40eb766856982"
+        },
+        {
+          "path": "sw.js",
+          "previous_sha256": "7a1421f150221e268e6bc15324e81ed43f75cd09a1011c1c77a80909ceb1798d",
+          "sha256": "0ba72bd00cf8e7b2a054d51fd6955dfc443f0a4a093bbdbb2611ae2cff2f4f29"
+        },
+        {
+          "path": "docs/SCIENTIFIC-CORE-FREEZE.md",
+          "previous_sha256": "d728a78c3bba506c818b83abb3fd72b99343ed05f098f22636e941198ce8f003",
+          "sha256": "28ea01fc9b84a1bfeae5edb7c0aef3e5575379817beadcaa94877dd76b9d9acd"
+        }
+      ]
+    },
+    {
+      "id": "playwright-download-smoke-compatibility-2026-10-17",
+      "date": "2026-10-17",
+      "scope": "User-authorized modularization: update only browser smoke-test harnesses to validate generated Blob contents, MIME type and filename without relying on unsupported or Chromium-version-sensitive Download stream/path behavior. No application download flow or scientific engine changes.",
+      "audit_chain": "sha256-v1",
+      "added_protected_files": [],
+      "files": [
+        {
+          "path": "scripts/park-draw-smoke.mjs",
+          "previous_sha256": "4c9a29e048e7710f2a2ab028a79ef1569656ceb848d59e77eb36be07a4107416",
+          "sha256": "1f046175c9eaa1311546106e1ae3d7a10221f413996013ded1c0e1ff4c87e4b8"
+        },
+        {
+          "path": "scripts/surface-map-download-smoke.mjs",
+          "previous_sha256": "9a1f470315c973b6ccd0ce4f3355b5e35986e51e76355598b739de84fa5a61d7",
+          "sha256": "cdaf7a40bc436a5d66a63487115b96653703d4e8397ce111490e5c5c195219fb"
+        },
+        {
+          "path": "docs/SCIENTIFIC-CORE-FREEZE.md",
+          "previous_sha256": "28ea01fc9b84a1bfeae5edb7c0aef3e5575379817beadcaa94877dd76b9d9acd",
+          "sha256": "b8c875d8b1f21ed5c7c42f27b548e060f3c4b2c42f842b42f0893c184e5a8f57"
         }
       ]
     }

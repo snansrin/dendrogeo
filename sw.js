@@ -792,6 +792,7 @@ const CORE_ASSETS = [
     '/src/ui/gis-export-verified-workflow.js',
     '/src/bootstrap/gis-export.js',
     '/src/ui/gis-export.js',
+    '/src/ui/park-export-lazy-class-bridge.js',
     '/src/services/lc-config.js',
     '/src/domain/surface/classify-landcover-code.js',
     '/src/domain/surface/compare-source-class-areas.js',

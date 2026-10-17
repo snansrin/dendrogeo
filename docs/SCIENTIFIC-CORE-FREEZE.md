@@ -37,6 +37,10 @@ Harikalar Diyarı (OSM way/205225595) gerçek veri kontrolü: 88 sınır köşes
 
 17 Ekim iletişim adresi güncellemesi: genel iletişim, güvenlik bildirimi, KVKK/gizlilik talepleri, lisans izni ve R istemci bakım adresleri `security@dendrogeo.org` kullanır. Akademik makale ve veri kümesi künyelerindeki yazar/sorumlu yazar e-postaları yazar iletişim bilgisi olarak korunur.
 
+17 Ekim eski park PNG yolundaki geç yüklenen sınıf kataloğu düzeltmesi: `park-export.js` başlangıçta sınıf listesini yakalayamadığında analiz fonksiyonunu geçici yedek olarak tutuyordu; PNG çizicisi bu değerde `.find()` çağırınca çıktı hata verebiliyordu. Yeni UI köprüsü yalnız eksik `.find()` erişimini ekler ve sınıf listesini çağrı anında okur. Analiz fonksiyonunu çalıştırmaz; sınıflandırma, kabul edilmiş alanlar, hesaplama, harita araçları ve yeni GIS PNG akışı değişmez. Kilit ve üç hedefli regresyon testi bu modüler eklemeyi izler.
+
+17 Ekim Playwright tarayıcı uyumluluğu: harita PNG/CSV duman testleri, `Download.createReadStream()` veya geçici dosya akışına bağlı kalmak yerine üretilen Blob içeriğini, MIME türünü ve dosya adını doğrular. Bu, Chromium headless sürümleri arasındaki indirme yaşam döngüsü farkını kaldırır; uygulama indirme kodunu ya da harita çıktısını değiştirmez.
+
 Bu çalışma kopyasında `npm run core:lock` ile `.githooks/pre-push` etkinleştirilir. Normal `git push`, çekirdek hash denetimi başarısızsa durur. Yeni bir klonda da aynı komutla etkinleştirilmelidir; yalnız hook dosyasının Git'te bulunması kanca kurmaz.
 
 Kilitli kaynaklar sonraki arayüz işleri sırasında değiştirilmez. Kullanıcı açıkça belirli bir çekirdek düzeltmesi isterse değişiklik kapsamı, önceki/yeni SHA-256 değerleri ve ilgili regresyon kanıtı yeni bir yetkili kayıtla belgelenir. Hash'leri kendiliğinden yenileyen bir komut bulunmaz.
