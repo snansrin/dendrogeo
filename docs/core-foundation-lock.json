@@ -8955,7 +8955,7 @@
     {
       "id": "explicit-license-badges-and-tree-height-proximity-2026-10-17",
       "date": "2026-10-17",
-      "scope": "User-authorized presentation update: use direct License: MIT and Data License: CC BY-NC 4.0 labels in the repository and landing footer; move the first-animation tree-height readout adjacent to the canopy frame. No license terms, analysis behavior or scientific methods changed.",
+      "scope": "User-authorized modularization presentation update: use direct License: MIT and Data License: CC BY-NC 4.0 labels in the repository and landing footer; move the first-animation tree-height readout adjacent to the canopy frame. No license terms, analysis behavior or scientific methods changed.",
       "audit_chain": "sha256-v1",
       "added_protected_files": [],
       "files": [
