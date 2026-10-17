@@ -1124,3 +1124,7 @@ label:has(input.dg-switch){min-height:44px}
 /* Accessible text contrast; keep the existing status fills, borders and palette. */
 .btn.amber{color:var(--ink)}
 .alert.err{color:color-mix(in srgb,var(--red) 80%,var(--ink))}
+
+/* Scientific names retain their existing inline layout. */
+.dg-latin-name,#latinName{font-style:italic}
+#mSpecies option:not([value=""]){font-style:italic}

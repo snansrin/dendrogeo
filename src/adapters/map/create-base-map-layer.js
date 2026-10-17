@@ -13,8 +13,8 @@ window.DG_CREATE_BASE_MAP_LAYER={
     const retryCoverage=()=>{
      const nextCenter=centerKey();if(nextCenter===coverageCenter)return;coverageCenter=nextCenter;
      if(layer.options.maxNativeZoom>=configuration.maxNativeZoom)return;
-     layer.options.maxNativeZoom=configuration.maxNativeZoom;layer.options.maxZoom=configuration.maxNativeZoom;
-     map.setMaxZoom?.(configuration.maxNativeZoom);layer.redraw();
+     layer.options.maxNativeZoom=configuration.maxNativeZoom;
+     layer.redraw();
     };
     map.on?.("moveend",retryCoverage);
     layer.on("remove",()=>map.off?.("moveend",retryCoverage));
@@ -22,10 +22,7 @@ window.DG_CREATE_BASE_MAP_LAYER={
     const zoom=event.coords?.z;
     if(!Number.isInteger(zoom)||zoom<=19||zoom>layer.options.maxNativeZoom||(Number.isFinite(layer._tileZoom)&&zoom!==layer._tileZoom))return;
     layer.options.maxNativeZoom=zoom-1;
-    layer.options.maxZoom=zoom-1;
-    // Leaflet clamps the actual view as well as disabling further zoom-in.
-    // A zoom-only moveend must not reopen the rejected levels.
-    map.setMaxZoom?.(zoom-1);
+    // Keep the requested view and interaction ceiling; scale the best available tile.
     layer.redraw();
     });
    }

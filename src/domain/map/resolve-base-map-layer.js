@@ -8,6 +8,6 @@ window.DG_RESOLVE_BASE_MAP_LAYER={
       topo:{url:"https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png",label:"Topoğrafik",maxNativeZoom:17}
     };
     const layer=layers[type];
-    return layer?{...layer,type,attribution:attribution[type],maxZoom:layer.maxNativeZoom,keepBuffer:1,updateWhenIdle:true,updateWhenZooming:false}:null;
+    return layer?{...layer,type,attribution:attribution[type],maxZoom:type==="sat"?23:22,keepBuffer:1,updateWhenIdle:true,updateWhenZooming:false}:null;
   }
 };

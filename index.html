@@ -232,7 +232,7 @@
 <script src="src/adapters/settings/appearance-preference.js?v=7f1a9d95" data-dg-eager></script>
 <script src="src/ui/appearance.js?v=421dc410" data-dg-eager></script>
 <link rel="stylesheet" href="css/startup.css?v=1191b97f">
-<link rel="stylesheet" href="css/style.css?v=1a4742b5">
+<link rel="stylesheet" href="css/style.css?v=c411f997">
 <link rel="stylesheet" href="css/landing.css?v=95abedf0">
 <link rel="stylesheet" href="css/landing-scenes.css?v=318d9104">
 <script src="src/ui/startup-screen.js?v=fe4901f1" type="application/x-dendrogeo-module" defer></script>
@@ -255,7 +255,7 @@
 <script src="src/utils/truncation.js?v=e605b259" type="application/x-dendrogeo-module" defer></script>
 <!-- Faz 7: geotiff (317 KB) ve chart.js (208 KB) artık SENKRON yüklenmiyor;
      src/utils/lazylibs.js ihtiyaç anında enjekte eder (LULC analizi / panel grafiği). -->
-<script id="dgRuntimeBuild" type="application/json">"7026633674d232d8"</script>
+<script id="dgRuntimeBuild" type="application/json">"0967aafec73a21f1"</script>
 <!-- Verified fallback OSM water geometry, independent of the lazy raster engine. -->
 <script src="src/adapters/parks/fetch-nominatim-osm-way.js?v=2dcb3b63" type="application/x-dendrogeo-module" defer></script>
 <script src="src/services/osm-water-backup.js?v=0ed25e15" type="application/x-dendrogeo-module" defer></script>
@@ -447,7 +447,7 @@
 <script src="src/adapters/backup/download-restore-sql.js?v=11144433" type="application/x-dendrogeo-module" defer></script>
 <script src="src/application/backup/restore-backup.js?v=ae2c1841" type="application/x-dendrogeo-module" defer></script>
 <script src="src/services/backup.js?v=7047a328" type="application/x-dendrogeo-module" defer></script>
-<script src="src/ui/admin-measurement-row.js?v=c24eb66a" type="application/x-dendrogeo-module" defer></script>
+<script src="src/ui/admin-measurement-row.js?v=28f99953" type="application/x-dendrogeo-module" defer></script>
 <script src="src/ui/admin-measurement-table.js?v=dc9d62f6" type="application/x-dendrogeo-module" defer></script>
 <script src="src/domain/admin/export-filter-options.js?v=56c33482" type="application/x-dendrogeo-module" defer></script>
 <script src="src/adapters/admin/admin-persistence-store.js?v=c082304c" type="application/x-dendrogeo-module" defer></script>
@@ -484,7 +484,7 @@
 <script src="src/domain/admin/filter-measurement-tree.js?v=d8c5cc75" type="application/x-dendrogeo-module" defer></script>
 <script src="src/ui/admin-tree-formatters.js?v=4733a56c" type="application/x-dendrogeo-module" defer></script>
 <script src="src/ui/admin-tree-pending-summary.js?v=9792c38c" type="application/x-dendrogeo-module" defer></script>
-<script src="src/ui/admin-tree-measurement-row.js?v=c7832f50" type="application/x-dendrogeo-module" defer></script>
+<script src="src/ui/admin-tree-measurement-row.js?v=0d1cf241" type="application/x-dendrogeo-module" defer></script>
 <script src="src/ui/admin-tree-user.js?v=e60e0552" type="application/x-dendrogeo-module" defer></script>
 <script src="src/ui/admin-tree-project.js?v=90cdc3bb" type="application/x-dendrogeo-module" defer></script>
 <script src="src/ui/admin-tree-park.js?v=429305d7" type="application/x-dendrogeo-module" defer></script>
@@ -718,10 +718,10 @@
 <script src="src/ui/add-osm-map-layer.js?v=9dcb6a38" type="application/x-dendrogeo-module" defer></script>
 <script src="src/application/map/initialize-map-instance.js?v=24789bff" type="application/x-dendrogeo-module" defer></script>
 <script src="src/application/map/initialize-workspace-maps.js?v=5b2bd463" type="application/x-dendrogeo-module" defer></script>
-<script src="src/domain/map/resolve-base-map-layer.js?v=f7e994d7" type="application/x-dendrogeo-module" defer></script>
+<script src="src/domain/map/resolve-base-map-layer.js?v=f2d5eaaa" type="application/x-dendrogeo-module" defer></script>
 <script src="src/ui/sync-base-map-layer-selection.js?v=3084cd5d" type="application/x-dendrogeo-module" defer></script>
 <script src="src/adapters/map/manage-base-map-layers.js?v=e43490cf" type="application/x-dendrogeo-module" defer></script>
-<script src="src/adapters/map/create-base-map-layer.js?v=035857b1" type="application/x-dendrogeo-module" defer></script>
+<script src="src/adapters/map/create-base-map-layer.js?v=437799dd" type="application/x-dendrogeo-module" defer></script>
 <script src="src/application/map/switch-base-map-layer.js?v=e9548a0a" type="application/x-dendrogeo-module" defer></script>
 <script src="src/services/map.js?v=c2054748" type="application/x-dendrogeo-module" defer></script>
 <!-- LULC ZİNCİRİ ARTIK TEMBEL (2026-09-25 · Faz 8): 8 dosya ilk yüklemede
@@ -1358,7 +1358,7 @@
     <div class="dg-png-kicker">2 · AĞAÇ</div><h3 id="measureTreeTitle">Ağaç bilgileri</h3>
     <div class="measure-fields measure-identity"><div><label class="lbl" for="mPoint">Nokta ID</label><div class="measure-query"><input id="mPoint" type="number" min="1" step="1" inputmode="numeric" data-dg-measure-action="manual-point" aria-describedby="pointHelp"><button type="button" class="btn sm ghost" data-dg-measure-action="query-point">🔍 Sorgula</button></div><p class="measure-help" id="pointHelp">Otomatik önerilir; gerekirse değiştirin.</p></div><div><label class="lbl" for="mNo">Ölçüm No</label><input id="mNo" type="number" min="1" step="1" inputmode="numeric" value="1"><p class="measure-help">Aynı noktadaki ölçüm sırası.</p></div></div>
     <div id="pointQueryResult" class="alert info" style="display:none"></div>
-    <div class="measure-fields"><div><label class="lbl" for="mGroup">Ağaç grubu</label><select id="mGroup" data-dg-measure-action="group-change"><option value="">Grup seçin</option><option value="İBRELİ">İBRELİ</option><option value="YAPRAKLI">YAPRAKLI</option></select></div><div><label class="lbl" for="mSpecies">Ağaç türü</label><select id="mSpecies" disabled data-dg-measure-action="species-change"><option value="">Önce grup seçin</option></select><div id="latinName" class="mono measure-help"></div></div></div>
+    <div class="measure-fields"><div><label class="lbl" for="mGroup">Ağaç grubu</label><select id="mGroup" data-dg-measure-action="group-change"><option value="">Grup seçin</option><option value="İBRELİ">İBRELİ</option><option value="YAPRAKLI">YAPRAKLI</option></select></div><div><label class="lbl" for="mSpecies">Ağaç türü</label><select id="mSpecies" disabled data-dg-measure-action="species-change"><option value="">Önce grup seçin</option></select><div id="latinName" class="mono measure-help dg-latin-name" lang="la"></div></div></div>
     <div class="measure-fields measure-dimensions"><div><label class="lbl measure-label-help" for="mDbh"><span>Göğüs çevresi <span>(cm)</span></span><button type="button" class="dg-field-help" aria-label="Göğüs çevresi nasıl ölçülür?" data-tip="Mezurayı gövdenin etrafına, yerden 1,30 m yüksekte sarın. Sistem DBH çapını otomatik olarak çevre ÷ π ile hesaplar.">?</button></label><input id="mDbh" name="girth_cm" data-measurement-field="girth_cm" type="number" min="0.1" max="1256.6" step="0.1" inputmode="decimal" data-dg-measure-action="live-calc" placeholder="Örn. 110"></div><div><label class="lbl measure-label-help" for="mHeight"><span>Ağaç boyu <span>(m)</span></span><button type="button" class="dg-field-help" aria-label="Ağaç boyu nasıl girilir?" data-tip="Ağacın zeminden tepe noktasına kadar olan toplam yüksekliğini metre cinsinden girin.">?</button></label><input id="mHeight" type="number" min="0.1" max="100" step="0.1" inputmode="decimal" data-dg-measure-action="live-calc" placeholder="Örn. 7,2"></div></div>
     <div class="measure-photo"><div><h4>Fotoğraf <span class="measure-optional">İsteğe bağlı</span></h4><p class="measure-help">Ağacı ve gövdesini kadraja alın.</p></div><span class="dg-file btn ghost">📸 <span>Fotoğraf ekle</span><input type="file" id="mPhoto" aria-label="Fotoğraf (canlı çekim)" accept="image/*" capture="environment" data-dg-measure-action="photo-check"></span><span class="dg-file-name mono" id="mPhotoName"></span><button type="button" class="btn sm ghost" id="mPhotoRemove" style="display:none" data-dg-measure-action="clear-photo">Fotoğrafı kaldır</button></div>
     <div id="photoCheck" class="alert info" role="status" style="display:none"></div>
@@ -1909,6 +1909,6 @@
 <script src="src/bootstrap/gis-export.js?v=7c768c08" type="application/x-dendrogeo-module" defer></script>
 <script src="src/ui/gis-export.js?v=4f57f55c" type="application/x-dendrogeo-module" defer></script>
 
-<script src="/src/bootstrap/app-runtime.js?v=596b745b" defer></script>
+<script src="/src/bootstrap/app-runtime.js?v=db43a0d7" defer></script>
 </body>
 </html>

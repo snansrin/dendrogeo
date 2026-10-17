@@ -9008,6 +9008,55 @@
           "sha256": "7f3654f4843bf1085c734c448299787211f2d1f2fcad2f06295c29d376e10cdf"
         }
       ]
+    },
+    {
+      "id": "restore-basemap-zoom-scientific-name-presentation-2026-10-17",
+      "date": "2026-10-17",
+      "scope": "User-authorized modularization presentation correction: restore historical basemap interaction ceilings while retaining native tile fallback, italicize scientific names without changing species labels or layout. Calculation, species data and park/surface engines remain unchanged.",
+      "audit_chain": "sha256-v1",
+      "added_protected_files": [],
+      "files": [
+        {
+          "path": "css/style.css",
+          "previous_sha256": "991cc1ace1b0ad3cf80d08c3f7c9c604d6048ea21a7a0ef65aec704e765b0ab3",
+          "sha256": "e58f6b0c449c1cadbce4b8225041b6957850493f64a4e8d129871f32885aaf4f"
+        },
+        {
+          "path": "index.html",
+          "previous_sha256": "47fe5a2849d108161f91e1b69fe9a379cc556cce3abb5e4675e58678efaa73e7",
+          "sha256": "a190971861ad68a872620f9ae45b2de977a94d6353d3213907258dc2ea66a19a"
+        },
+        {
+          "path": "partials/shell.html",
+          "previous_sha256": "b8e4d8848ce23e16b022fb5a8955f045f6112cc3c117be0b66c701524a339e7e",
+          "sha256": "64a1b82c58037c276b7f2acd6bebc647bde0b93e038156cb9aaf80f3f5619a94"
+        },
+        {
+          "path": "src/adapters/map/create-base-map-layer.js",
+          "previous_sha256": "73b85aca449b629f09e461cce96566998318dfe82ae3888ca958c4fa09d4d66e",
+          "sha256": "f19f25ab280f8803a45f46ad01e6e93fac44484cc49aa3907c87afe27d04cb68"
+        },
+        {
+          "path": "src/domain/map/resolve-base-map-layer.js",
+          "previous_sha256": "2d8aa9f5450697f5be567714185b36c3c0c39af8ebb505b8be947d092ce405ee",
+          "sha256": "782684084be387c4fb17220fe624f9dd3b9ffc4faf49f5961cde165a4e9eb56b"
+        },
+        {
+          "path": "src/ui/admin-measurement-row.js",
+          "previous_sha256": "baf4acef2370d68428f09eca7f23a5d3bda46ce348405b5f1b8fccc043f67ab4",
+          "sha256": "dbf2bac166ef4d07aedc574ae64c1409f191027db5c334006aa6ed2b765590f3"
+        },
+        {
+          "path": "src/ui/admin-tree-measurement-row.js",
+          "previous_sha256": "706613632a87e9c6848a4938044e6af4527c653bec8cb1fbdd4fd3644a86e844",
+          "sha256": "8527ca6e472a047ab394aa521746c045be73cfb918aa807490087aba93792d0a"
+        },
+        {
+          "path": "test/base-map-layer-modules.test.mjs",
+          "previous_sha256": "fc690f0910c830e32ea3f1515bb2d0317e700b562bfea7d34303d41b877f8297",
+          "sha256": "0e113a1eaf42b95a4dd3111fe3ee5698430dcd453bf587fd2cce9740b9142e52"
+        }
+      ]
     }
   ]
 }
