@@ -7,6 +7,9 @@ import {loadChromium} from './lib/playwright-runtime.mjs';
 import {serveFixture} from './lib/browser-acceptance-fixture.mjs';
 const server=await serveFixture(),browser=await(await loadChromium()).launch({headless:true,ignoreDefaultArgs:['--hide-scrollbars']});
 const pages=[];
+// Select an existing sealed artifact; report retraction must not invalidate the reader test.
+const readerSample=readdirSync('rapor').filter(name=>existsSync(join('rapor',name,'manifest.json'))&&readFileSync(join('rapor',name,'index.html'),'utf8').includes('id="dgVerify"')).sort().at(-1);
+assert.ok(readerSample,'A sealed report fixture is required for the reader regression');
 function collect(dir){for(const e of readdirSync(dir,{withFileTypes:true})){const p=join(dir,e.name);if(e.isDirectory()&&!['node_modules','.git','vendor'].includes(e.name))collect(p);else if(e.isFile()&&p.endsWith('.html')&&readFileSync(p,'utf8').includes('<!-- dg-public-theme -->'))pages.push('/'+relative('.',p).replaceAll('\\','/'));}}
 collect('.');
 try{
@@ -28,7 +31,7 @@ try{
    if(width===390){await page.addScriptTag({content:axe.source});const contrast=await page.evaluate(async()=> (await axe.run(document,{runOnly:{type:'rule',values:['color-contrast']}})).violations.map(v=>({id:v.id,nodes:v.nodes.map(n=>({target:n.target,summary:n.failureSummary}))})));assert.deepEqual(contrast,[],path+' light contrast');}
    await page.locator('[data-dg-dark-mode]').check();
   }
-  await page.goto(server.url+'/rapor/gorunum/?id=DGR-2026-0026');
+  await page.goto(server.url+'/rapor/gorunum/?id='+readerSample);
   await page.locator('#readerPrint').waitFor({state:'visible'});
   await page.waitForFunction(()=>!document.getElementById('readerPrint').disabled);
   const geometry=await page.locator('#reportFrame').evaluate(f=>({height:f.contentDocument.documentElement.clientHeight,content:f.contentDocument.documentElement.scrollHeight,style:f.getAttribute('style')}));

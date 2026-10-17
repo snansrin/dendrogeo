@@ -255,7 +255,7 @@
 <script src="src/utils/truncation.js?v=e605b259" type="application/x-dendrogeo-module" defer></script>
 <!-- Faz 7: geotiff (317 KB) ve chart.js (208 KB) artık SENKRON yüklenmiyor;
      src/utils/lazylibs.js ihtiyaç anında enjekte eder (LULC analizi / panel grafiği). -->
-<script id="dgRuntimeBuild" type="application/json">"d6da1e96090bdf86"</script>
+<script id="dgRuntimeBuild" type="application/json">"58134136e650ba35"</script>
 <!-- Verified fallback OSM water geometry, independent of the lazy raster engine. -->
 <script src="src/adapters/parks/fetch-nominatim-osm-way.js?v=2dcb3b63" type="application/x-dendrogeo-module" defer></script>
 <script src="src/services/osm-water-backup.js?v=0ed25e15" type="application/x-dendrogeo-module" defer></script>
@@ -769,11 +769,12 @@
 <script src="src/domain/parks/stamp-geofence-decision.js?v=f3753a7b" type="application/x-dendrogeo-module" defer></script>
 <script src="src/application/parks/verify-at-park.js?v=40f849cb" type="application/x-dendrogeo-module" defer></script>
 <script src="src/services/geofence.js?v=7897d1b0" type="application/x-dendrogeo-module" defer></script>
+<script src="src/application/parks/recover-park-boundary.js?v=ab995b15" type="application/x-dendrogeo-module" defer></script>
 <script src="src/application/parks/find-park-candidates.js?v=f1967466" type="application/x-dendrogeo-module" defer></script>
 <script src="src/domain/parks/build-osm-surface-query.js?v=a2e40d86" type="application/x-dendrogeo-module" defer></script>
 <script src="src/ui/surface-osm-evidence-status.js?v=9d2d1a29" type="application/x-dendrogeo-module" defer></script>
 <script src="src/domain/parks/decode-osm-map-geometry.js?v=4ec915b8" type="application/x-dendrogeo-module" defer></script>
-<script src="src/adapters/parks/load-osm-map-coverage.js?v=a934f2c5" type="application/x-dendrogeo-module" defer></script>
+<script src="src/adapters/parks/load-osm-map-coverage.js?v=0f0ccbb5" type="application/x-dendrogeo-module" defer></script>
 <script src="src/application/parks/fetch-detailed-coverage.js?v=b6d4d3d9" type="application/x-dendrogeo-module" defer></script>
 <script src="src/application/parks/classify-coverage-elements.js?v=48f8a920" type="application/x-dendrogeo-module" defer></script>
 <script src="src/application/parks/find-nominatim-boundary.js?v=ee684a35" type="application/x-dendrogeo-module" defer></script>
@@ -783,7 +784,7 @@
 <script src="src/application/parks/collect-park-coverage-elements.js?v=61197627" type="application/x-dendrogeo-module" defer></script>
 <script src="src/domain/parks/filter-park-coverage-to-boundary.js?v=e6a30c19" type="application/x-dendrogeo-module" defer></script>
 <script src="src/ui/park-water-layer-renderer.js?v=f48e0612" type="application/x-dendrogeo-module" defer></script>
-<script src="src/services/park-query.js?v=5f0eef9a" type="application/x-dendrogeo-module" defer></script>
+<script src="src/services/park-query.js?v=74ab95de" type="application/x-dendrogeo-module" defer></script>
 <script src="src/domain/parks/identity.js?v=24816af6" type="application/x-dendrogeo-module" defer></script>
 <script src="src/adapters/parks/park-store.js?v=28c8ee31" type="application/x-dendrogeo-module" defer></script>
 <script src="src/application/parks/register-park.js?v=fc251137" type="application/x-dendrogeo-module" defer></script>
@@ -910,11 +911,11 @@
 <script src="src/ui/park-info-panel.js?v=b6a63f45" type="application/x-dendrogeo-module" defer></script>
 <script src="src/adapters/surface/read-accepted-park-surface.js?v=e5e84b06" type="application/x-dendrogeo-module" defer></script>
 <script src="src/ui/accepted-park-surface.js?v=9c0b7ee4" type="application/x-dendrogeo-module" defer></script>
-<script src="src/ui/park-menu-ui.js?v=62b076e5" type="application/x-dendrogeo-module" defer></script>
+<script src="src/ui/park-menu-ui.js?v=4a32a88c" type="application/x-dendrogeo-module" defer></script>
 <script src="src/domain/parks/normalize-drawn-park-geometry.js?v=b14a46dc" type="application/x-dendrogeo-module" defer></script>
 <script src="src/application/parks/draw-selected-park.js?v=8f9130a7" type="application/x-dendrogeo-module" defer></script>
 <script src="src/ui/present-drawn-park.js?v=34acedb4" type="application/x-dendrogeo-module" defer></script>
-<script src="src/ui/park-panel.js?v=24fd4bb5" type="application/x-dendrogeo-module" defer></script>
+<script src="src/ui/park-panel.js?v=5b143d13" type="application/x-dendrogeo-module" defer></script>
 <script src="src/ui/park-image-geometry.js?v=b2d9c13a" type="application/x-dendrogeo-module" defer></script>
 <script src="src/ui/park-export-layout.js?v=bca03e67" type="application/x-dendrogeo-module" defer></script>
 <script src="src/domain/parks/park-export-formats.js?v=f58272f2" type="application/x-dendrogeo-module" defer></script>
@@ -1910,6 +1911,6 @@
 <script src="src/bootstrap/gis-export.js?v=7c768c08" type="application/x-dendrogeo-module" defer></script>
 <script src="src/ui/gis-export.js?v=4f57f55c" type="application/x-dendrogeo-module" defer></script>
 
-<script src="/src/bootstrap/app-runtime.js?v=a1a88fd9" defer></script>
+<script src="/src/bootstrap/app-runtime.js?v=10c89ef1" defer></script>
 </body>
 </html>

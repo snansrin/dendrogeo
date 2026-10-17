@@ -234,7 +234,7 @@ function dgBindParkInfoEvents(container){
  });
 }
 function dgParkMountMenus(){
- dgBindParkInfoEvents(document.getElementById("parkInfo"));
+ dgBindParkInfoEvents(document.getElementById("v-map")||document.getElementById("parkInfo"));
  return window.DG_PARK_MENU_UI.mount({
   document,clearMenus:dgEditorClearMenus,arrangeMenus:dgEditorArrangeMenus,
   translate:value=>typeof dgCf==="function"?dgCf(value):value,

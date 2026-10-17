@@ -200,6 +200,9 @@ export function loadApp({ sadece } = {}) {
     /* KONUM DOĞRULAMASI (0007): saf karar fonksiyonu dgGeoDecide birim testleri
      * bu zincirden yüklenir (DOM/ağ yok). */
     'src/services/geofence.js',
+    'src/application/parks/recover-park-boundary.js',
+    'src/domain/parks/decode-osm-map-geometry.js',
+    'src/adapters/parks/load-osm-map-coverage.js',
     'src/application/parks/find-park-candidates.js',
     'src/application/parks/fetch-detailed-coverage.js',
     'src/application/parks/classify-coverage-elements.js',
@@ -331,6 +334,9 @@ export function loadApp({ sadece } = {}) {
   }
   if (secim && secim.has('src/services/park-query.js')) {
     secim.add('src/application/parks/find-park-candidates.js');
+    secim.add('src/application/parks/recover-park-boundary.js');
+    secim.add('src/domain/parks/decode-osm-map-geometry.js');
+    secim.add('src/adapters/parks/load-osm-map-coverage.js');
     secim.add('src/application/parks/fetch-detailed-coverage.js');
     secim.add('src/application/parks/classify-coverage-elements.js');
     secim.add('src/application/parks/find-nominatim-boundary.js');

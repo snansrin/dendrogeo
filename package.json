@@ -24,7 +24,8 @@
     "check:phone": "node scripts/check-phone.mjs",
     "check:accessibility": "node scripts/check-accessibility.mjs",
     "check:sql": "node --test test/measurement-postgres-contract.test.mjs",
-    "check:release": "npm run check && npm run check:phone && npm run check:accessibility"
+    "check:release": "npm run check && npm run check:phone && npm run check:accessibility",
+    "core:lock": "node scripts/install-core-guard.mjs"
   },
   "engines": {
     "node": ">=20"

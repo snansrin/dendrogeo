@@ -40,3 +40,13 @@ test('verified map export module keeps canvas rendering isolated behind injected
   const lazy=readFileSync(join(root,'src/utils/lazylibs.js'),'utf8');
   assert.ok(lazy.indexOf('src/ui/render-verified-surface-map-export.js')<lazy.indexOf('src/ui/lc-sens.js'));
 });
+
+test('verified map infographic evaluates the area provider instead of printing function source',async()=>{
+ const window={},texts=[];
+ vm.runInNewContext(source,{window,URL,Date,setTimeout});
+ vm.runInNewContext(readFileSync(join(root,'src/ui/render-surface-export-infographic.js'),'utf8'),{window});
+ const context={fillRect(){},strokeRect(){},fillText:value=>texts.push(String(value)),beginPath(){},moveTo(){},lineTo(){},stroke(){}};
+ const state={epoch:1,geometry:{},epsg:32636},areas={green:501000};let calls=0;
+ await window.DG_RENDER_VERIFIED_SURFACE_MAP_EXPORT.render({state,record:{acceptedAt:'now'},cells:[{}],editSummary:()=>({total:0}),toast:message=>assert.fail(message),translate:String,escape:String,getAreas:()=>areas,getRasterAreas:()=>({}),getParkRings:()=>[],getGridCells:()=>[],getPark:()=>({id:25,name:'Göksu Parkı'}),parkAreaLabel:()=>{calls++;return '50.1';},getParts:()=>[],visualResult:async()=>({displayFeatures:[]}),prepareFrame:()=>({canvasProject:()=>[0,0]}),drawLayers(){},renderInfo:window.DG_RENDER_SURFACE_EXPORT_INFOGRAPHIC.render,colors:{},ha:n=>(n/10000).toFixed(1),labelForClass:String,document:{createElement:()=>({getContext:()=>context,toBlob(){}})},redraw(){}});
+ assert.equal(calls,1);assert.ok(texts.includes('50.1 ha'));assert.ok(texts.every(text=>!text.includes('=>')&&!text.includes('typeof park')));assert.equal(areas.green,501000);assert.equal(state.exporting,false);
+});

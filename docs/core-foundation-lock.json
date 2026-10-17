@@ -1005,6 +1005,54 @@
       "test/park-invites.test.mjs",
       "test/project-edit-actions.test.mjs",
       "test/remaining-shell-actions.test.mjs"
+    ],
+    "scientific_tools_freeze_2026_10_17": [
+      "src/bootstrap/gis-export.js",
+      "src/bootstrap/park-admin-controller.js",
+      "src/bootstrap/park-backfill-controller.js",
+      "src/ui/gis-export-bootstrap.js",
+      "src/ui/gis-export-canvas-grids.js",
+      "src/ui/gis-export-canvas-leaflet.js",
+      "src/ui/gis-export-canvas-legend.js",
+      "src/ui/gis-export-canvas-patches.js",
+      "src/ui/gis-export-canvas.js",
+      "src/ui/gis-export-download.js",
+      "src/ui/gis-export-events.js",
+      "src/ui/gis-export-layout.js",
+      "src/ui/gis-export-platform.js",
+      "src/ui/gis-export-presentation.js",
+      "src/ui/gis-export-sources.js",
+      "src/ui/gis-export-standard-canvas.js",
+      "src/ui/gis-export-standard-layers.js",
+      "src/ui/gis-export-vegetation.js",
+      "src/ui/gis-export-verified-canvas.js",
+      "src/ui/gis-export-verified-frame.js",
+      "src/ui/gis-export-verified-layers.js",
+      "src/ui/gis-export-verified-summary.js",
+      "src/ui/gis-export-verified-workflow.js",
+      "src/ui/gis-export-workflow.js",
+      "src/ui/gis-export.js",
+      "src/ui/gis-project-draft.js",
+      "src/ui/gis-workspace-analysis-layout.js",
+      "src/ui/gis-workspace-map-tools-view.js",
+      "src/ui/gis-workspace-menu-position.js",
+      "src/ui/gis-workspace.js",
+      "src/ui/scientific-species-select.js",
+      ".githooks/pre-push",
+      "scripts/install-core-guard.mjs",
+      "scripts/grid-menu-smoke.mjs",
+      "test/scientific-tool-freeze.test.mjs",
+      "test/verified-surface-map-export.test.mjs",
+      "docs/SCIENTIFIC-CORE-FREEZE.md",
+      "AGENTS.md",
+      "css/gis-workspace.css",
+      "css/park-admin.css",
+      "css/surface-drawing.css",
+      "src/application/parks/recover-park-boundary.js",
+      "test/complete-raster-cell-coverage.test.mjs",
+      "test/recover-park-boundary.test.mjs",
+      "test/fixtures/harikalar-diyari-park.json",
+      "scripts/park-boundary-recovery-smoke.mjs"
     ]
   },
   "sha256": {
@@ -1968,7 +2016,53 @@
     "src/ui/toast-message-content.js": "3cd604b74561d5aaddb97f96e06e4db9472b1852dc2ae4391f0cccd60d8d1b5d",
     "src/adapters/surface/read-accepted-park-surface.js": "682a286f82721c3c5357f693e4aeb9a56e8a4614300fd855b1488ad67a06dd73",
     "src/ui/accepted-park-surface.js": "852fc9b603aa93c7a763447e81838b5b3c9368c51df48df02f7bf3f27fe2f487",
-    "scripts/landing-showcase-smoke.mjs": "67695a1f1dc6b05ff7e3340125fde37f0f7f50d7c8d4a9631d6d13d42f29a33a"
+    "scripts/landing-showcase-smoke.mjs": "67695a1f1dc6b05ff7e3340125fde37f0f7f50d7c8d4a9631d6d13d42f29a33a",
+    "src/bootstrap/gis-export.js": "1efc829fd8bd3625733f0bd45e65b6aeb221b7ccd539fe22ea81b158d027807a",
+    "src/bootstrap/park-admin-controller.js": "0edee558c7b102e9c66414c74d500bf60e40ac24214bbea72b00444fbd34409a",
+    "src/bootstrap/park-backfill-controller.js": "5b42f4b47be92fc95b8cec8074d48f60de312b4a07cf05627f168b776b493f16",
+    "src/ui/gis-export-bootstrap.js": "631371f82bd153098331739c642497d8f1d850a63039de766d65b41bf4f7ad0a",
+    "src/ui/gis-export-canvas-grids.js": "b2eb1fd509cfd610edb306fd754021f125ef1f8a9aa7ba3b6298634543a5f247",
+    "src/ui/gis-export-canvas-leaflet.js": "69ffd2bc21e4588786cab3cbcf8a85c5b5d07c227bdca512fbdbb34624254a74",
+    "src/ui/gis-export-canvas-legend.js": "4262db061e0dd45a17bdb3ac5081ba62ff85b7d97ceefdeef84d858822afbf76",
+    "src/ui/gis-export-canvas-patches.js": "379f879952d7e8e3118c9a259b2f4addf8dedeced166b65cbecb6a2b47df0656",
+    "src/ui/gis-export-canvas.js": "31af69ddc6ee6144c80feb8fee7d852c940006dea0b09e29959312e33bbd088b",
+    "src/ui/gis-export-download.js": "4b975d393a9bea291f68e511b0a8826062a4d43073f8e9092c8b75edb4f272e9",
+    "src/ui/gis-export-events.js": "6fb6f172049e8f512022da08a5c2f44e7e660979587ba2fbfd01bea90bf9d39a",
+    "src/ui/gis-export-layout.js": "0d8d565870f9e0ed56692c28e3a42ad853581c7a1147eea77ef28aff434bd15a",
+    "src/ui/gis-export-platform.js": "b03f0a01e08d18d27a1222917e21cfe23def76899495274f46dff4d769454b60",
+    "src/ui/gis-export-presentation.js": "298833f251a7ad20576bf8e676341429a26da7ebe5fc6ecb75fe55459b922054",
+    "src/ui/gis-export-sources.js": "4304886154ee8777c000b9ffafb516fbf96a46dd1d5470b52c92642f272631bd",
+    "src/ui/gis-export-standard-canvas.js": "46c6cf820c4692a62ecbaa03fb6d6dd7eb501603498993b16b4f97212e6bfe32",
+    "src/ui/gis-export-standard-layers.js": "a91e76e13aa303de6e00fac20acf454b623362442654448ed06f93339dfaffeb",
+    "src/ui/gis-export-vegetation.js": "b97fa40ec47f1a6387fd93bbe927c39bac9e15e66e3c3e8f53201168c215b565",
+    "src/ui/gis-export-verified-canvas.js": "8b3389d99e4fcb532ff84ae08d61b5fa53ece33170ce1171adc661734a5d0cd9",
+    "src/ui/gis-export-verified-frame.js": "f563b69c42f516d759c2a617d2bb840488e0f10aea2a7ab2a321b817407eed87",
+    "src/ui/gis-export-verified-layers.js": "9530d0be49cfb14b0156604710d446d9be8cd879627947dc69b4496898f07857",
+    "src/ui/gis-export-verified-summary.js": "8416154bd5411fe493d8fab0ba09bdb0897357fcb496be2ed0394fdc904fc662",
+    "src/ui/gis-export-verified-workflow.js": "be9267c87cfb6346103c9f6a3a2fb97422d46b7b3369b27892933106c3cd8068",
+    "src/ui/gis-export-workflow.js": "4a30c9d48ce3fa4652409d632fb741fc64e4a81ce517eac9543f9872fc21c9c0",
+    "src/ui/gis-export.js": "e27293dfd3e83cb70c56fa4252b228f2ed71a6dde038b3723017c9e485a9e629",
+    "src/ui/gis-project-draft.js": "68e34e4e8a163755b48424581bd4079a5e2279b7d2d270219eefa23a22c61535",
+    "src/ui/gis-workspace-analysis-layout.js": "66da861cf3225b3fe055a0d6c14f2046fa89096068160f8f55545802f94ed786",
+    "src/ui/gis-workspace-map-tools-view.js": "c4dbd063c4386cb3f001522d3b2f1b15ec2f1facdbc28865d2f70b76bd062c2f",
+    "src/ui/gis-workspace-menu-position.js": "f66ec71b7df94352e8b77164093ac6e8cd63c5915f09f25e60bffa6f864242f9",
+    "src/ui/gis-workspace.js": "04ffb6c96a875e17bd835b9770a10a04dc03566b95e6d3b8bdbb798badcd66b1",
+    "src/ui/scientific-species-select.js": "f97c83a63eede301226b2e9127d6973c5e0585d7dae8e6d0a6aa2a487d5af491",
+    ".githooks/pre-push": "3a1e202bfec6232a84d08d877794d8369ea631099693990c0ea3cd92b115e8c2",
+    "scripts/install-core-guard.mjs": "6f140bcb0afcef9c14a838e84146b5c2196a6f74c4563dfc0702b7cc57bcc02a",
+    "scripts/grid-menu-smoke.mjs": "0a817e09aa08edb35feab6929ec7d2f25a1bbaa9bf608189e1ad06cb88ab7ee7",
+    "test/scientific-tool-freeze.test.mjs": "0505442d86274b229ecedbcdf70ab6a206f9c8355fb04cc73d4b09b6192bcd82",
+    "test/verified-surface-map-export.test.mjs": "f2871459c3ca56ffc45ca5aa3803957e7958fa34be6c5f59f35381b35c478e4d",
+    "docs/SCIENTIFIC-CORE-FREEZE.md": "1d9068574301fbc677022e62678daf917d0f719ad2a0dc8d3fb93c1c59dea73b",
+    "AGENTS.md": "25668805906e6b2a458f1acc0cf7e3d12c64ea6087ba172d34b1895a66c88cbd",
+    "css/gis-workspace.css": "9f358b3fe6235325d816f9833ba74f080182ceb65788a57c1f171ea50118e87f",
+    "css/park-admin.css": "22f08b674b6e2e13bbedae99c30e3d07dd098e0ce41f4e7230b87c7a8845baac",
+    "css/surface-drawing.css": "52dc8f7e4afbe9b3fb84399316a8645698f8be044d983577ac2e8c969f9d822a",
+    "src/application/parks/recover-park-boundary.js": "6211c1231ec6b523e6c186dafbee30acc9e371c09ce7f07f799b82ecc094bc8c",
+    "test/complete-raster-cell-coverage.test.mjs": "006c62566c7c6dd04e45c5461b89201b089ce47d9af866103c6cc2be6f95c507",
+    "test/recover-park-boundary.test.mjs": "c2ef143bfb1bb498079ea40654fda092ec92711a73456341d7615b6b3da7db95",
+    "test/fixtures/harikalar-diyari-park.json": "d414a85c2a45d5fb3587944308a9c70871801f329465eca0086e8e20becceda8",
+    "scripts/park-boundary-recovery-smoke.mjs": "9b070b2a9b9944c6d2b71b211ccf41487cc89ece8234b76ad5885623d0f5a575"
   },
   "authorized_modularizations": [
     {
@@ -9124,6 +9218,142 @@
           "path": "test/base-map-layer-modules.test.mjs",
           "previous_sha256": "0e113a1eaf42b95a4dd3111fe3ee5698430dcd453bf587fd2cce9740b9142e52",
           "sha256": "132ae87b14aa45aa02f73273ee3bcd12724afd7f53ac80b444745da41595aaf8"
+        }
+      ]
+    },
+    {
+      "id": "freeze-scientific-tools-grid-menu-export-fixes-2026-10-17",
+      "date": "2026-10-17",
+      "scope": "User-authorized modularization bug fixes and freeze: bind relocated grid/layer menu actions to their stable map ancestor, retain controls across menu remounts, evaluate park area label in verified PNG. Extend SHA-256 guard to GIS and scientific tools and their regression checks, with a local pre-push guard. Allometry, species/density inputs, park containment/area rules, raster class/area math and sampling algorithms remain unchanged. Additional user-authorized corrections: remove silent 10000-cell truncation in tile transport and tile merge, retain every classified cell without changing class or area math; recover park boundaries through complete native OSM API geometry when Overpass and Nominatim are unavailable. Real Harikalar Diyarı QA confirms all 12031 cells and equal editable/classified area. Published accepted snapshots remain unchanged.",
+      "audit_chain": "sha256-v1",
+      "added_protected_files": [
+        "src/bootstrap/gis-export.js",
+        "src/bootstrap/park-admin-controller.js",
+        "src/bootstrap/park-backfill-controller.js",
+        "src/ui/gis-export-bootstrap.js",
+        "src/ui/gis-export-canvas-grids.js",
+        "src/ui/gis-export-canvas-leaflet.js",
+        "src/ui/gis-export-canvas-legend.js",
+        "src/ui/gis-export-canvas-patches.js",
+        "src/ui/gis-export-canvas.js",
+        "src/ui/gis-export-download.js",
+        "src/ui/gis-export-events.js",
+        "src/ui/gis-export-layout.js",
+        "src/ui/gis-export-platform.js",
+        "src/ui/gis-export-presentation.js",
+        "src/ui/gis-export-sources.js",
+        "src/ui/gis-export-standard-canvas.js",
+        "src/ui/gis-export-standard-layers.js",
+        "src/ui/gis-export-vegetation.js",
+        "src/ui/gis-export-verified-canvas.js",
+        "src/ui/gis-export-verified-frame.js",
+        "src/ui/gis-export-verified-layers.js",
+        "src/ui/gis-export-verified-summary.js",
+        "src/ui/gis-export-verified-workflow.js",
+        "src/ui/gis-export-workflow.js",
+        "src/ui/gis-export.js",
+        "src/ui/gis-project-draft.js",
+        "src/ui/gis-workspace-analysis-layout.js",
+        "src/ui/gis-workspace-map-tools-view.js",
+        "src/ui/gis-workspace-menu-position.js",
+        "src/ui/gis-workspace.js",
+        "src/ui/scientific-species-select.js",
+        ".githooks/pre-push",
+        "scripts/install-core-guard.mjs",
+        "scripts/grid-menu-smoke.mjs",
+        "test/scientific-tool-freeze.test.mjs",
+        "test/verified-surface-map-export.test.mjs",
+        "docs/SCIENTIFIC-CORE-FREEZE.md",
+        "AGENTS.md",
+        "css/gis-workspace.css",
+        "css/park-admin.css",
+        "css/surface-drawing.css",
+        "src/application/parks/recover-park-boundary.js",
+        "test/complete-raster-cell-coverage.test.mjs",
+        "test/recover-park-boundary.test.mjs",
+        "test/fixtures/harikalar-diyari-park.json",
+        "scripts/park-boundary-recovery-smoke.mjs"
+      ],
+      "files": [
+        {
+          "path": "index.html",
+          "previous_sha256": "b78e6607564bd51f8349a5806027b701f6aeb4768b2e32701c953bfc83715611",
+          "sha256": "fdaa8646492f9d2592e2224d7496de39603bee72c67311a805ce10f217679153"
+        },
+        {
+          "path": "package.json",
+          "previous_sha256": "56e2888a09ba0901fd8d9009f0bf58b53a6b571c5635acf98e3830ede5090764",
+          "sha256": "902df7cd9c354cb776993e64a4f09810ddfeb09a41a7f7711da6ab9cc947467c"
+        },
+        {
+          "path": "partials/head.html",
+          "previous_sha256": "28add44f1cd214ddd324b43326e8eaa097dd0fe28a27e42ec930400d1dd4782d",
+          "sha256": "344b9282e26b144fab98b09d49b1ccdfb0aed467edf70126ffddb9f0b9ff2c44"
+        },
+        {
+          "path": "scripts/check-phone.mjs",
+          "previous_sha256": "180745095fb1095334fedd1f995d700c3a296ea223a5a8b880e3753bd9cfdc3e",
+          "sha256": "db79fbe7547ff173de6d2574d20bef4f925e8f00f78eba50b169ed543179426e"
+        },
+        {
+          "path": "scripts/lib/runtime-module-inventory.mjs",
+          "previous_sha256": "5ee784562381435b5732d10f8e917eaec2da64c5ae99562b7491eda2585a22d4",
+          "sha256": "b35a982afa88099f5f18e88f921a7d2dc0ccd65b54fedf4970b986e83d678848"
+        },
+        {
+          "path": "scripts/lulc-qa.mjs",
+          "previous_sha256": "60a322b640c2a4bca447785bdeb056097c38e5094c10292b28049d31968ab827",
+          "sha256": "f66ed08ab2edf9400054b44d65ee5cbc6739b06225774db61caa917da523ee40"
+        },
+        {
+          "path": "scripts/test-harness.mjs",
+          "previous_sha256": "1871005aabdd226844e5aa6385eec16375cdc347ceb1b4e52e0996f00c6e3b08",
+          "sha256": "019d0425b34e5d755197f5d6f2b9168c6501247d0a9319af91ffbdda6ce5fd5e"
+        },
+        {
+          "path": "src/adapters/parks/load-osm-map-coverage.js",
+          "previous_sha256": "11f68d1bcfac7c69b490c166045c9a2a10fa84d2c7f87d2f0fd0e7378e919e72",
+          "sha256": "8fbb0ca15f33901ec356af8ced42f7047d4688bdda0928f8eb7a655b037fbc49"
+        },
+        {
+          "path": "src/adapters/surface/process-landcover-tile.js",
+          "previous_sha256": "bca73635599935803c8d6dae4bc092e1704c052baa86eb7772dbb7aab1de9ed0",
+          "sha256": "8879e74a8e6e5b712002459815a880cac5a820a44ed296d69275d6b1454902de"
+        },
+        {
+          "path": "src/domain/surface/merge-tile-results.js",
+          "previous_sha256": "b390cc3166bab54b0249fef7339ff7699a2fc3fd0bcd77242ab7da338b767cef",
+          "sha256": "e829003011a6a9a4e6c67623b64ca4128741a1b344295ff8e9958f94819b614e"
+        },
+        {
+          "path": "src/services/park-query.js",
+          "previous_sha256": "f7f9aa68b9c64adace0c1569fe31eb3e0b7f36b2107b16f9061f0ccf05166010",
+          "sha256": "c534f8d6d1f82f8e7b10643f86c4d1c9eefd89c0f94602706b6918d66134a434"
+        },
+        {
+          "path": "src/ui/park-menu-ui.js",
+          "previous_sha256": "9b645342c5beb2df56901cacad4f785a08575ac1d70c1d9515758a8950e5e1ee",
+          "sha256": "f64c05af2ee722a3efffe8ae5c1557b0cf6ea27135dd65bf932700b6a873a61a"
+        },
+        {
+          "path": "src/ui/park-panel.js",
+          "previous_sha256": "33d093d085ea8a6365d5c58eeebbeae1c074963ac4f2e5596b2a8e6c254105e7",
+          "sha256": "40d1b38a750bc2190d7565c67b499630c91c648b5c5a1f6c3b01169c2564ae99"
+        },
+        {
+          "path": "sw.js",
+          "previous_sha256": "c93a3f559a0acc0ce68410c9bdb1113639133fd0ea003266a747f1acefa38fe7",
+          "sha256": "974ceb9012d389d0afc941ca79d3fddab693d2ed7106618c588d26e0f7e1475d"
+        },
+        {
+          "path": "test/park-network-recovery.test.mjs",
+          "previous_sha256": "8e62d5e20d57dbd7271e5a24dccd442322191299d0fee6ff9796220f9103aa1f",
+          "sha256": "639612a6fc56ecbec148e18268006c1ede328cdc13df137c1c127b999df95ea3"
+        },
+        {
+          "path": "src/ui/render-verified-surface-map-export.js",
+          "previous_sha256": "0b0a994bbb5169810437e44fa2c400963c4d16c7cf56b1040c927012932b8541",
+          "sha256": "74fc8ad679cc103dbd78e729a7209a120e24b2129abbd794787c3499e97303c7"
         }
       ]
     }

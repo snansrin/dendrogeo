@@ -1,5 +1,5 @@
 import {readFileSync,readdirSync,statSync,existsSync} from 'node:fs';import {join,posix} from 'node:path';
-export const isCriticalRuntimeModule=path=>/^src\/(?:domain|application|adapters)\/(?:trees|surface|parks|map|offline|waypoints)\//.test(path)||/^src\/(?:contracts|workers)\//.test(path)||(/^src\/ui\//.test(path)&&/(?:surface|measurement|park-|waypoint|grid-|landcover|lc-)/.test(path));
+export const isCriticalRuntimeModule=path=>/^src\/(?:ui|bootstrap)\/(?:gis-|park-|scientific-species-select)/.test(path)||/^src\/(?:domain|application|adapters)\/(?:trees|surface|parks|map|offline|waypoints)\//.test(path)||/^src\/(?:contracts|workers)\//.test(path)||(/^src\/ui\//.test(path)&&/(?:surface|measurement|park-|waypoint|grid-|landcover|lc-)/.test(path));
 const paths=text=>[...text.matchAll(/["'](\/?src\/[^"'\s?]+\.js)(?:\?[^"']*)?["']/g)].map(m=>m[1].replace(/^\//,''));
 function walk(root,directory){return readdirSync(join(root,directory),{withFileTypes:true}).flatMap(e=>e.isDirectory()?walk(root,directory+'/'+e.name):e.name.endsWith('.js')?[directory+'/'+e.name]:[]);}
 export function collectRuntimeModules(root){

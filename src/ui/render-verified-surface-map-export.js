@@ -37,7 +37,7 @@
       context.strokeStyle='#dfe5df';context.lineWidth=2;context.strokeRect(x,y,mapWidth,mapHeight);
       const project=(lat,lon)=>frame.canvasProject(lat,lon,{x,y,width:mapWidth,height:mapHeight,margin:20});
       drawLayers({context,layers,displayFeatures,project,parkRings,gridCells:getGridCells(),waypoints,colors:palette,ink});
-      renderInfo({context,width,height,green,muted,ink,colors:palette,park,parkDate:new Date().toISOString().slice(0,10),decisionCount,viewLabel:state.editing?'ÖNİZLEME':'KABUL EDİLMİŞ v'+(record.serverRevision||1),parkAreaLabel,edits,layers,areas,ha,labelForClass,fingerprint:record.fingerprint});
+      renderInfo({context,width,height,green,muted,ink,colors:palette,park,parkDate:new Date().toISOString().slice(0,10),decisionCount,viewLabel:state.editing?'ÖNİZLEME':'KABUL EDİLMİŞ v'+(record.serverRevision||1),parkAreaLabel:typeof parkAreaLabel==="function"?parkAreaLabel():parkAreaLabel,edits,layers,areas,ha,labelForClass,fingerprint:record.fingerprint});
       canvas.toBlob(blob=>{
         if(!blob){toast(translate('PNG üretilemedi.'),'err','🖼️');return;}
         const url=URL.createObjectURL(blob),anchor=document.createElement('a');anchor.href=url;anchor.download='dendrogeo_dogrulanmis_harita_'+(park.id||'park')+'.png';anchor.click();setTimeout(()=>URL.revokeObjectURL(url),1500);toast(translate('✓ Doğrulanmış harita PNG indirildi.'),'ok','🖼️');

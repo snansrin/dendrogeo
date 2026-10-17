@@ -9,7 +9,7 @@
    if(element.type==="node"){if(!node.hasAttribute("lat")||!node.hasAttribute("lon"))throw Error("OSM düğüm koordinatı eksik");element.lat=Number(node.getAttribute("lat"));element.lon=Number(node.getAttribute("lon"));}return element;
   });
  }
- function create({fetch,relevant,decode}){const cache=new Map(),pending=new Map();
+ function create({fetch=(...args)=>globalThis.fetch(...args),relevant,decode}){const cache=new Map(),pending=new Map();
   return function load(bounds){const coords=String(bounds).split(",").map(Number),[south,west,north,east]=coords,key=coords.join(",");
    if(coords.length!==4||!coords.every(Number.isFinite)||south>=north||west>=east||(north-south)*(east-west)>.005)return Promise.resolve(null);
    const saved=cache.get(key);if(saved&&Date.now()-saved.time<600000)return Promise.resolve(saved.data);if(pending.has(key))return pending.get(key);

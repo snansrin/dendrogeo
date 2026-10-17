@@ -552,6 +552,7 @@ const CORE_ASSETS = [
     '/src/domain/parks/stamp-geofence-decision.js',
     '/src/application/parks/verify-at-park.js',
     '/src/services/geofence.js',
+    '/src/application/parks/recover-park-boundary.js',
     '/src/application/parks/find-park-candidates.js',
     '/src/domain/parks/build-osm-surface-query.js',
     '/src/ui/surface-osm-evidence-status.js',

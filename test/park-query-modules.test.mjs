@@ -47,7 +47,7 @@ test('boundary reset, padded snapshot, collection, and park clipping preserve ge
 test('locked park-query service delegates concurrent coverage calls to the modules',async()=>{
   let resolve,calls=0;
   const context=vm.createContext({
-    window:null,Map,Date,Promise,URLSearchParams,console:{warn(){},log(){}},PARK_POLY:[[[39,32],[39,33],[40,33]]],PARK_HOLES:[],
+    window:null,OVERPASS_HEALTH:new Map(),Map,Date,Promise,URLSearchParams,console:{warn(){},log(){}},PARK_POLY:[[[39,32],[39,33],[40,33]]],PARK_HOLES:[],
     IMP_RINGS:[],IMP_LINES:[],GRID_BLOCK_LINES:[],WATER_RINGS:[],WATER_LINES:[],IMP_CLEARANCE_M:5,
     overpassRequest:()=>{calls++;return new Promise(done=>{resolve=done;});},dgParkBoundaryFallback:async()=>[],extractRings:()=>null,
     polyArea:()=>1,pointInPark:()=>true,ringTouchesPark:()=>true,lineTouchesPark:()=>true,isWater:()=>false,isImpervious:()=>false,
@@ -56,6 +56,9 @@ test('locked park-query service delegates concurrent coverage calls to the modul
   context.window=context;
   for(const path of MODULES)vm.runInContext(read(path),context,{filename:path});
   for(const path of ['src/domain/parks/build-osm-surface-query.js','src/application/parks/find-park-candidates.js','src/application/parks/fetch-detailed-coverage.js','src/application/parks/classify-coverage-elements.js','src/application/parks/find-nominatim-boundary.js','src/adapters/parks/nominatim-client.js'])vm.runInContext(read(path),context,{filename:path});
+  vm.runInContext(read('src/application/parks/recover-park-boundary.js'),context,{filename:'src/application/parks/recover-park-boundary.js'});
+  vm.runInContext(read('src/domain/parks/decode-osm-map-geometry.js'),context,{filename:'src/domain/parks/decode-osm-map-geometry.js'});
+  vm.runInContext(read('src/adapters/parks/load-osm-map-coverage.js'),context,{filename:'src/adapters/parks/load-osm-map-coverage.js'});
   vm.runInContext(read('src/services/park-query.js'),context,{filename:'src/services/park-query.js'});
   const first=vm.runInContext('queryDetailedCoverage()',context);
   const second=vm.runInContext('queryDetailedCoverage()',context);

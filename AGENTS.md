@@ -9,3 +9,5 @@
 - Canlı kullanıcı konumu mevcut GPS izni ve paylaşım koşullarıyla, geçici olarak gösterilir. Kurucu ekranı mevcut yetkileri korumalı; filtreler yeni veri erişimi açmamalı.
 - Yayından önce ilgili regresyon testleri, `npm run check`, telefon görünümü, CI ve canlı dosya sürümleri doğrulansın.
 - Yüzey analiz motoru ve canlı harita DendroGeo ana çekirdeğidir; kapsam/izolasyon/test şartları için [`docs/CORE-KIRMIZI-CIZGILER.md`](docs/CORE-KIRMIZI-CIZGILER.md) kurallarını uygulayın.
+
+- 17 Ekim çekirdek kilidi: allometri, tür/odun yoğunluğu girdileri, park algılama, yüzey analizi/tarama ve harita araçlarını kullanıcı açıkça bu kapsamda değişiklik istemedikçe değiştirmeyin. Hashleri otomatik yenilemeyin. Koruma ve push kancası: `docs/SCIENTIFIC-CORE-FREEZE.md`.

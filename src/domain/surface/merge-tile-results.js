@@ -21,7 +21,7 @@ function dgSurfaceMergeTileResults(parts){
     for(const [k,v] of Object.entries(p.rawCounts||{}))outRawCounts[k]=(outRawCounts[k]||0)+v;
     for(const [k,v] of Object.entries(p.rawAreas||{}))outRawAreas[k]=(outRawAreas[k]||0)+v;
     runs.push(...(p.runs||[]));
-    if(cells.length<10000)cells.push(...(p.cells||[]));
+    for(const cell of p.cells||[])cells.push(cell);
   }
   return{
     assignedAreaM2:assigned,

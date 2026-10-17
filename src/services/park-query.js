@@ -33,7 +33,9 @@ const DG_NOMINATIM_BOUNDARY=window.DG_NOMINATIM_BOUNDARY_APPLICATION.create({
  containsPoint:(lat,lon,rings)=>pointInPark(lat,lon,rings)
 });
 function dgParkGeojsonCandidate(item){return DG_NOMINATIM_BOUNDARY.geojsonCandidate(item);}
-async function dgParkBoundaryFallback(lat,lon,radius){return DG_NOMINATIM_BOUNDARY.findBoundary(lat,lon,radius);}
+const DG_PARK_BOUNDARY_MAP=window.DG_LOAD_OSM_MAP_COVERAGE.create({relevant:window.DG_RECOVER_PARK_BOUNDARY.relevant,decode:window.DG_DECODE_OSM_MAP_GEOMETRY.decode});
+const DG_PARK_BOUNDARY_RECOVERY=window.DG_RECOVER_PARK_BOUNDARY.create({findGeocoded:(lat,lon,radius)=>DG_NOMINATIM_BOUNDARY.findBoundary(lat,lon,radius),loadMap:DG_PARK_BOUNDARY_MAP,extractRings:element=>extractRings(element),areaOf:rings=>polyArea(rings),containsPoint:(lat,lon,rings)=>pointInPark(lat,lon,rings),cache:DG_PARK_BOUNDARY_CACHE});
+async function dgParkBoundaryFallback(lat,lon,radius){return DG_PARK_BOUNDARY_RECOVERY(lat,lon,radius);}
 
 /* =========================================================
    DETAILED COVERAGE QUERY

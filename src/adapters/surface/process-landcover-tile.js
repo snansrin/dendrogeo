@@ -169,7 +169,7 @@ function dgProcessLandcoverTile(item,href,geometryWgs,source,signal){
           runStart=globalCol;runCls=classKey;
         }
 
-        if(cells.length<10000){
+        { // Preserve every classified cell; the raster read window is already bounded.
           const cx=(quad[0].x+quad[1].x+quad[2].x+quad[3].x)/4;
           const cy=(quad[0].y+quad[1].y+quad[2].y+quad[3].y)/4;
           const inv=p=>dgLcUtmInverse(p.x,p.y,analysisEpsg);

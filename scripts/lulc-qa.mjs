@@ -148,6 +148,11 @@ function baglam() {
     'src/domain/surface/classify-landcover-code.js',
     'src/domain/surface/compare-source-class-areas.js',
     'src/services/lc-geo.js',
+    'src/adapters/surface/stac-fetch-policy.js',
+    'src/adapters/surface/open-raster-range.js',
+    'src/adapters/surface/sign-stac-assets.js',
+    'src/domain/surface/select-stac-tiles.js',
+    'src/domain/surface/resolve-raster-window.js',
     'src/services/lc-stac.js',
     'src/domain/surface/merge-tile-results.js',
     'src/adapters/surface/result-exports.js',
@@ -156,6 +161,11 @@ function baglam() {
     'src/services/lc-engine.js',
     'src/services/lc-osm.js',
     'src/domain/surface/patch-geometry.js', 'src/domain/surface/group-patch-cells.js', 'src/domain/surface/measure-patch-components.js', 'src/domain/surface/query-green-patches.js',
+    'src/domain/surface/scale-area-preserving-patch-ring.js',
+    'src/domain/surface/smooth-patch-ring.js',
+    'src/domain/surface/build-patch-display-rings.js',
+    'src/application/surface/build-surface-patch.js',
+    'src/application/surface/detect-surface-patches.js',
     'src/services/lc-patches.js',
     'src/ui/lc-report.js',
     'src/domain/surface/quality-gates.js',
@@ -187,8 +197,9 @@ function shoelaceHa(ring) {
 /* ---------- ana akış ---------- */
 let src;
 if(FIXTURE){
-  if(FIXTURE!=='goksu')throw new Error('Desteklenmeyen park QA fixtureı: '+FIXTURE);
-  src=JSON.parse(readFileSync(join(ROOT,'test/fixtures/goksu-park.json'),'utf8'));
+  const fixtures={goksu:'test/fixtures/goksu-park.json',harikalar:'test/fixtures/harikalar-diyari-park.json'};
+  if(!Object.hasOwn(fixtures,FIXTURE))throw new Error('Desteklenmeyen park QA fixtureı: '+FIXTURE);
+  src=JSON.parse(readFileSync(join(ROOT,fixtures[FIXTURE]),'utf8'));
 }else src=PARK?await overpassPark(PARK):daireAOI(LAT,LON,R);
 console.log(`\n🌳 AOI: ${src.meta.name} (${src.meta.osm}) · ${src.ring.length} köşe · yaklaşık ${shoelaceHa(src.ring).toFixed(2)} ha`);
 
@@ -226,6 +237,11 @@ const ctx2 = (() => {
     'src/domain/surface/classify-landcover-code.js',
     'src/domain/surface/compare-source-class-areas.js',
     'src/services/lc-geo.js',
+    'src/adapters/surface/stac-fetch-policy.js',
+    'src/adapters/surface/open-raster-range.js',
+    'src/adapters/surface/sign-stac-assets.js',
+    'src/domain/surface/select-stac-tiles.js',
+    'src/domain/surface/resolve-raster-window.js',
     'src/services/lc-stac.js',
     'src/domain/surface/merge-tile-results.js',
     'src/adapters/surface/result-exports.js',
@@ -234,6 +250,11 @@ const ctx2 = (() => {
     'src/services/lc-engine.js',
     'src/services/lc-osm.js',
     'src/domain/surface/patch-geometry.js', 'src/domain/surface/group-patch-cells.js', 'src/domain/surface/measure-patch-components.js', 'src/domain/surface/query-green-patches.js',
+    'src/domain/surface/scale-area-preserving-patch-ring.js',
+    'src/domain/surface/smooth-patch-ring.js',
+    'src/domain/surface/build-patch-display-rings.js',
+    'src/application/surface/build-surface-patch.js',
+    'src/application/surface/detect-surface-patches.js',
     'src/services/lc-patches.js',
     'src/ui/lc-report.js',
     'src/services/landcover.js'
@@ -332,13 +353,15 @@ const analyzeScript = `
   const parkAreaM2 = dgLcProjectedArea(geom);
   const rep = await dgLcAnalyze({ outer, holes, parkAreaM2 });
   const last = window.DG_LANDCOVER.getLast();
-  return { parkAreaM2, rep, runs: last.result.runs.length, cells: last.result.cells.length };
+  return { parkAreaM2, rep, runs: last.result.runs.length, cells: last.result.cells.length, editableAreaM2:last.result.cells.reduce((sum,c)=>sum+c.areaM2,0),classifiedAreaM2:last.result.classifiedAreaM2 };
 })()
 `;
 console.log('\n════════ UÇTAN UCA ANALİZ (dgLcAnalyze) ════════');
 try {
-  const { parkAreaM2, rep, runs, cells } = await vm.runInContext(analyzeScript, ctx2, { filename: 'qa-analyze.js' });
-  console.log(`  görsel katman: ${runs} run bandı · ${cells} hücre (render limiti şu an 2500)`);
+  const { parkAreaM2, rep, runs, cells,editableAreaM2,classifiedAreaM2 } = await vm.runInContext(analyzeScript, ctx2, { filename: 'qa-analyze.js' });
+  console.log(`  görsel katman: ${runs} run bandı · ${cells} hücre`);
+  if(Math.abs(editableAreaM2-classifiedAreaM2)>Math.max(.01,classifiedAreaM2*1e-8))throw Error('Düzenlenebilir hücre kapsamı sınıflandırılmış alanla eşleşmiyor');
+  console.log(`  hücre kapsamı: ${editableAreaM2.toFixed(3)} m² = ${classifiedAreaM2.toFixed(3)} m² sınıflandırılmış alan`);
   console.log(`  park polygonu : ${(parkAreaM2 / 10000).toFixed(2)} ha`);
   console.log(`  analiz alanı  : ${(rep.rasterCoverageAreaM2 / 10000).toFixed(2)} ha  (QA farkı %${rep.areaDeltaPct.toFixed(3)})`);
   console.log(`  kaynak        : ${rep.primaryLabel} · karolar: ${rep.primaryItems.join(', ')}`);
