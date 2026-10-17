@@ -9057,6 +9057,75 @@
           "sha256": "0e113a1eaf42b95a4dd3111fe3ee5698430dcd453bf587fd2cce9740b9142e52"
         }
       ]
+    },
+    {
+      "id": "exact-october14-map-restore-and-latin-only-selector-2026-10-17",
+      "date": "2026-10-17",
+      "scope": "User-authorized modularization correction: restore both basemap modules byte for byte from 7d0ad29 (14 October); restore satellite native level 19 and interaction level 22 without blankTile query or adaptive tile retries. Isolated species selector presentation uses normal common names and italic Latin names together in both selected and expanded states. Canonical values, formulas, wood density, species catalog and analysis engines are preserved. User-authorized park administration presentation: directly visible rename/delete controls, secondary merge/boundary menu, and search includes hidden empty identities. Existing confirmation, permissions and mutation services are unchanged.",
+      "audit_chain": "sha256-v1",
+      "added_protected_files": [],
+      "files": [
+        {
+          "path": "css/style.css",
+          "previous_sha256": "e58f6b0c449c1cadbce4b8225041b6957850493f64a4e8d129871f32885aaf4f",
+          "sha256": "a88da8f3e333f615766a5be254f5802e1cfaf505acdca43e3b87cb175367b44e"
+        },
+        {
+          "path": "index.html",
+          "previous_sha256": "a190971861ad68a872620f9ae45b2de977a94d6353d3213907258dc2ea66a19a",
+          "sha256": "b78e6607564bd51f8349a5806027b701f6aeb4768b2e32701c953bfc83715611"
+        },
+        {
+          "path": "partials/head.html",
+          "previous_sha256": "392b8f877ed453f7e18447f27a955b501e14fdddd4839a9c1aa73ed58c51fe1d",
+          "sha256": "28add44f1cd214ddd324b43326e8eaa097dd0fe28a27e42ec930400d1dd4782d"
+        },
+        {
+          "path": "partials/shell.html",
+          "previous_sha256": "64a1b82c58037c276b7f2acd6bebc647bde0b93e038156cb9aaf80f3f5619a94",
+          "sha256": "ed8284b0ede1bda5280159cbef56afdd62816c9ef703374152aa12ec771b6943"
+        },
+        {
+          "path": "scripts/check-phone.mjs",
+          "previous_sha256": "790c5822e306d7566d4438c8c74e9b7ff630eeb24d1dd2072d99876ac1e0cde9",
+          "sha256": "180745095fb1095334fedd1f995d700c3a296ea223a5a8b880e3753bd9cfdc3e"
+        },
+        {
+          "path": "src/adapters/map/create-base-map-layer.js",
+          "previous_sha256": "f19f25ab280f8803a45f46ad01e6e93fac44484cc49aa3907c87afe27d04cb68",
+          "sha256": "ccf410d1a78eea7a7a062ce86b69dad57d774cfa3c922822df6d308392c640f2"
+        },
+        {
+          "path": "src/application/parks/build-park-admin-overview.js",
+          "previous_sha256": "b87b80513c7a9039cf8b51e496ac5fe38b589b47a00b5aaa7e569327a86656ca",
+          "sha256": "4b3198f8869288e1dc17e812ec0ac460d9dd7759b66b673662690b7641f86586"
+        },
+        {
+          "path": "src/domain/map/resolve-base-map-layer.js",
+          "previous_sha256": "782684084be387c4fb17220fe624f9dd3b9ffc4faf49f5961cde165a4e9eb56b",
+          "sha256": "4b9498394fb62cdd1ab71ea5e461b1d85b5a5c77e5d5afcd281c430e522cc92f"
+        },
+        {
+          "path": "src/ui/measurement-species-selector.js",
+          "previous_sha256": "bc059b2de0aa8ed4906e8f6326f35f5f6eebcbf0e313abf560d5a2f59d5965a1",
+          "sha256": "73e7f2931445eb4267bfccce83d7353e0ad085991987e56bf76af342ff2074e0"
+        },
+        {
+          "path": "src/ui/park-admin-renderer.js",
+          "previous_sha256": "22d57e60f2c42e6d27acbcc6334dca4d5063648eb2fc1a1115b3a035c07ec2cf",
+          "sha256": "639456dd4dfabcea9e348fa90d7aa298461b761810382b65dd01882a3e2d302d"
+        },
+        {
+          "path": "sw.js",
+          "previous_sha256": "7f3654f4843bf1085c734c448299787211f2d1f2fcad2f06295c29d376e10cdf",
+          "sha256": "c93a3f559a0acc0ce68410c9bdb1113639133fd0ea003266a747f1acefa38fe7"
+        },
+        {
+          "path": "test/base-map-layer-modules.test.mjs",
+          "previous_sha256": "0e113a1eaf42b95a4dd3111fe3ee5698430dcd453bf587fd2cce9740b9142e52",
+          "sha256": "132ae87b14aa45aa02f73273ee3bcd12724afd7f53ac80b444745da41595aaf8"
+        }
+      ]
     }
   ]
 }

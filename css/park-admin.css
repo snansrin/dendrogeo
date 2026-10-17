@@ -25,3 +25,9 @@
 #parkAdminBox .dg-parkadmin-candidates summary{cursor:pointer;font-size:.8rem;font-weight:600;color:var(--green)}
 #parkAdminBox summary:focus-visible{outline:2px solid var(--green);outline-offset:3px}
 @media(max-width:760px){#parkAdminBox .dg-parkadmin-toolbar{grid-template-columns:1fr}#parkAdminBox .dg-parkadmin-table thead{display:none}#parkAdminBox .dg-parkadmin-table tbody{display:grid;gap:12px}#parkAdminBox .dg-parkadmin-table tr{display:block;padding:14px;border:1px solid var(--line);border-radius:12px;background:var(--surface)}#parkAdminBox .dg-parkadmin-table td{display:block;position:relative;min-height:34px;padding:8px 0 8px 100px;border:0;box-sizing:border-box}#parkAdminBox .dg-parkadmin-table td::before{content:attr(data-label);position:absolute;left:0;top:10px;width:90px;padding:0;font-size:.68rem;color:var(--mut);font-weight:500;letter-spacing:0;text-transform:none}#parkAdminBox .dg-parkadmin-table td small{margin-top:0}#parkAdminBox .dg-parkadmin-table td:first-child{padding:0 0 8px}#parkAdminBox .dg-parkadmin-table td:first-child::before{display:none}#parkAdminBox .dg-parkadmin-actions{min-width:0}#parkAdminBox .dg-parkadmin-actionpanel{padding:10px}#parkAdminBox .dg-parkadmin-table td[colspan]{padding:8px 0}}
+
+#parkAdminBox .dg-parkadmin-primary{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px}
+#parkAdminBox .dg-parkadmin-primary .btn{flex:1 1 auto;min-height:44px;padding:8px 10px;text-align:center;white-space:normal}
+#parkAdminBox .dg-parkadmin-delete{border-color:var(--red);color:var(--red)}
+#parkAdminBox .dg-parkadmin-actions>summary{font-size:.72rem;box-shadow:none}
+@media(max-width:760px){#parkAdminBox .dg-parkadmin-table td:last-child{padding:10px 0 0}#parkAdminBox .dg-parkadmin-table td:last-child::before{display:none}}

@@ -1127,4 +1127,18 @@ label:has(input.dg-switch){min-height:44px}
 
 /* Scientific names retain their existing inline layout. */
 .dg-latin-name,#latinName{font-style:italic}
-#mSpecies option:not([value=""]){font-style:italic}
+
+
+.dg-species-select{position:relative;min-width:0}
+.dg-species-native{position:absolute!important;width:1px!important;height:1px!important;min-height:0!important;padding:0!important;clip-path:inset(50%);overflow:hidden;pointer-events:none}
+.dg-species-trigger{position:relative;display:block;width:100%;min-height:48px;border:1px solid var(--line);border-radius:10px;padding:11px 30px 11px 12px;background:var(--surface);color:var(--ink);font:inherit;font-size:16px;text-align:left;font-style:normal;line-height:1.5;overflow-wrap:anywhere}
+.dg-species-trigger:focus-visible{outline:2px solid var(--green);outline-offset:2px}
+.dg-species-trigger:disabled{cursor:default;opacity:.65}
+.dg-species-caret{position:absolute;right:10px;top:11px;color:var(--mut);font-style:normal}
+.dg-species-options{position:absolute;z-index:100;top:calc(100% + 4px);left:0;width:100%;max-height:min(280px,40vh);overflow-y:auto;overscroll-behavior:contain;border:1px solid var(--line);border-radius:10px;background:var(--surface);color:var(--ink);box-shadow:var(--sh)}
+.dg-species-options[hidden]{display:none}
+.dg-species-options [role="option"]{min-height:44px;padding:10px 12px;cursor:pointer;overflow-wrap:anywhere;font-style:normal}
+.dg-species-options [role="option"]:hover,.dg-species-options .is-active,.dg-species-options [aria-selected="true"]{background:var(--tint);color:var(--green)}
+@media(max-width:600px){.dg-species-trigger{min-height:44px;padding:8px 26px 8px 8px}.dg-species-caret{top:8px}}
+
+.dg-species-options.opens-up{top:auto;bottom:calc(100% + 4px)}

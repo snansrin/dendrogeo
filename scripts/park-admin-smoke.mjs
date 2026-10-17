@@ -27,7 +27,11 @@ try{
   const box=page.locator('#parkAdminBox'),rows=box.locator('tbody tr'),search=box.locator('[data-park-admin-search]');
   assert.equal(await rows.count(),3);assert.match(await rows.first().innerText(),/Atatürk/);
   assert.match(await box.innerText(),/Nagihan Şirin/);
-  await search.pressSequentially('Nagihan');assert.equal(await rows.count(),1);assert.match(await rows.first().innerText(),/Göksu/);
+  assert.equal(await rows.first().locator('[data-park-admin-action="rename"]').isVisible(),true,'rename is directly visible');
+  assert.equal(await rows.first().locator('[data-park-admin-action="delete"]').isVisible(),true,'delete is directly visible');
+  await search.fill('Boş Park');assert.equal(await rows.count(),1);assert.match(await rows.first().innerText(),/Boş Park/);
+  await cancelDialog(()=>rows.first().locator('[data-park-admin-action="delete"]').click());
+  await search.fill('');await search.pressSequentially('Nagihan');assert.equal(await rows.count(),1);assert.match(await rows.first().innerText(),/Göksu/);
   assert.equal(await search.evaluate(element=>element===document.activeElement),true);
   await box.locator('[data-park-admin-menu]>summary').click();
   await box.locator('[data-park-admin-merge]>summary').click();

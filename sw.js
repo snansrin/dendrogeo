@@ -96,6 +96,7 @@ const CORE_ASSETS = [
     '/src/adapters/trees/update-measurement-gps-map-marker.js',
     '/src/ui/measurement-gps-active-state.js',
     '/src/application/trees/refresh-measurement-gps-view.js',
+    '/src/ui/scientific-species-select.js',
     '/src/ui/measurement-species-selector.js',
     '/src/domain/auth/resolve-turnstile-form.js',
     '/src/adapters/auth/load-turnstile-script.js',

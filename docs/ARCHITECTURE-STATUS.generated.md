@@ -5,13 +5,13 @@ Bu dosya mimari kapılardan güncel sayıları üretir.
 
 | Alan | Mevcut ölçüm | Durum |
 |---|---:|---|
-| JavaScript AST katman denetimi | 812 modül · 0 ihlal | Geçti |
-| AST bağımlılık yönü | 952 modül · 0 ihlal · 0 istisna | Geçti |
-| Runtime envanteri | 1008 fiziksel · 750 ilk yükleme · 255 lazy · 961 SHA korumalı | Ölçüldü |
+| JavaScript AST katman denetimi | 813 modül · 0 ihlal | Geçti |
+| AST bağımlılık yönü | 953 modül · 0 ihlal · 0 istisna | Geçti |
+| Runtime envanteri | 1009 fiziksel · 751 ilk yükleme · 255 lazy · 961 SHA korumalı | Ölçüldü |
 | Legacy servis sınır borcu | 0 DOM/Supabase/ağ erişimi | Geçti; yeni ihlal kapalı |
 | Statik HTML satır içi olay | 0 | Geçti |
 | Dinamik HTML olay borcu | 0 nitelik · 0 UI/service dosyası | Tamamlandı; yeni artış CI'da engellenir |
-| İlk yükleme script bildirimi | 750 modül | Sıra ve çevrimdışı manifesti açıkça korunuyor |
+| İlk yükleme script bildirimi | 751 modül | Sıra ve çevrimdışı manifesti açıkça korunuyor |
 
 ## Tamamlanan mimari kapıları
 

@@ -1,24 +1,11 @@
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
+import {createHash} from 'node:crypto';
 import vm from 'node:vm';
 const read=p=>readFileSync(new URL('../'+p,import.meta.url),'utf8');
-test('basemaps preserve historical interaction ceilings and provider native resolution',()=>{
+test('basemap configuration and adapter exactly match the working 14 October version',()=>{
+ for(const [path,digest] of Object.entries({"src/domain/map/resolve-base-map-layer.js":"4b9498394fb62cdd1ab71ea5e461b1d85b5a5c77e5d5afcd281c430e522cc92f","src/adapters/map/create-base-map-layer.js":"ccf410d1a78eea7a7a062ce86b69dad57d774cfa3c922822df6d308392c640f2"}))assert.equal(createHash('sha256').update(read(path)).digest('hex'),digest,'14 October reference 7d0ad29: '+path);
  const window={};vm.runInNewContext(read('src/domain/map/resolve-base-map-layer.js'),{window});
- for(const [type,zoom] of [['osm',19],['sat',23],['topo',17]]){
-  const config=window.DG_RESOLVE_BASE_MAP_LAYER.resolve(type,{});
-  assert.equal(config.maxNativeZoom,zoom);assert.equal(config.maxZoom,type==="sat"?23:22);
- }
-});
-test('missing imagery preserves the view and zoom ceiling; only a new area retries native tiles',()=>{
- const window={};vm.runInNewContext(read('src/adapters/map/create-base-map-layer.js'),{window});
- let center={lat:39.99,lng:32.62},zoom=20,ceiling=23,move,off=false;const events={};
- const map={getCenter:()=>center,on:(_,handler)=>{move=handler;},off:()=>{off=true;},setMaxZoom:value=>{ceiling=value;if(zoom>ceiling){zoom=ceiling;move?.();}}};
- const leaflet={tileLayer:(_url,options)=>({options,on:(event,handler)=>{events[event]=handler;},redraw(){},addTo(){}})};
- const layer=window.DG_CREATE_BASE_MAP_LAYER.create({leaflet,map,configuration:{url:'sat',type:'sat',maxZoom:23,maxNativeZoom:23}});
- events.tileerror({coords:{z:20}});
- assert.equal(zoom,20);assert.equal(ceiling,23);assert.equal(layer.options.maxZoom,23);
- move();assert.equal(ceiling,23);assert.equal(layer.options.maxNativeZoom,19);
- center={lat:40.1,lng:32.62};move();assert.equal(ceiling,23);assert.equal(zoom,20);
- events.remove();assert.equal(off,true);
+ for(const [type,native] of [['osm',19],['sat',19],['topo',17]]){const configuration=window.DG_RESOLVE_BASE_MAP_LAYER.resolve(type,{});assert.equal(configuration.maxNativeZoom,native);assert.equal(configuration.maxZoom,22);assert.ok(!configuration.url.includes('blankTile'));}
 });

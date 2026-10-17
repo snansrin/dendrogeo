@@ -1,7 +1,7 @@
 import {spawnSync} from 'node:child_process';
 import {serveFixture} from './lib/browser-acceptance-fixture.mjs';
 // Each interaction script owns its server; layout scripts share one afterwards.
-for(const script of ['public-page-theme-smoke','landing-showcase-smoke','startup-smoke','profile-smoke','projects-workspace-smoke','shared-park-surface-smoke','appearance-smoke','ui-consistency-smoke','report-form-smoke','field-methods-smoke','park-admin-smoke','brush-smoke','drawing-smoke','park-draw-smoke','osm-map-recovery-smoke','park-analysis-interaction-smoke','surface-menu-smoke','mobile-tools-language-smoke','measurement-save-smoke']){
+for(const script of ['scientific-species-select-smoke','public-page-theme-smoke','landing-showcase-smoke','startup-smoke','profile-smoke','projects-workspace-smoke','shared-park-surface-smoke','appearance-smoke','ui-consistency-smoke','report-form-smoke','field-methods-smoke','park-admin-smoke','brush-smoke','drawing-smoke','park-draw-smoke','osm-map-recovery-smoke','park-analysis-interaction-smoke','surface-menu-smoke','mobile-tools-language-smoke','measurement-save-smoke']){
  const result=spawnSync(process.execPath,['scripts/'+script+'.mjs'],{stdio:'inherit'});if(result.status!==0)process.exit(result.status||1);
 }
 const server=await serveFixture(8765);

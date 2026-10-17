@@ -11,7 +11,7 @@ function dgBuildParkAdminOverview({ rows, projects, measurements, showEmpty, nor
   });
   const isEmpty = park => !(projByPark[park.id] > 0) && !(measByPark[park.id] > 0);
   const emptyRows = rows.filter(isEmpty);
-  const visible = rows.filter(park => !isEmpty(park) || showEmpty);
+  const visible = rows.filter(park => !isEmpty(park) || showEmpty || !!normalizeName(query));
   const byName = {};
   visible.forEach(park => {
     const key = normalizeLoose(park.name) || ("#" + park.id);

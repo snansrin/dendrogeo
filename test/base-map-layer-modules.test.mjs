@@ -16,7 +16,7 @@ function setup(){const window={};const context=vm.createContext({window});for(co
 test('layer policy keeps all providers, licensing inputs, labels and zoom constraints',()=>{
   const resolve=setup().DG_RESOLVE_BASE_MAP_LAYER.resolve,attribution={osm:'© OSM',sat:'© Esri',topo:'© OpenTopoMap'};
   assert.deepEqual(JSON.parse(JSON.stringify(resolve('osm',attribution))),{url:'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',label:'Sokak',maxNativeZoom:19,type:'osm',attribution:'© OSM',maxZoom:22,keepBuffer:1,updateWhenIdle:true,updateWhenZooming:false});
-  assert.equal(resolve('sat',attribution).label,'Uydu');assert.equal(resolve('sat',attribution).maxNativeZoom,23);assert.match(resolve('topo',attribution).url,/opentopomap/);assert.equal(resolve('topo',attribution).maxNativeZoom,17);assert.equal(resolve('invalid',attribution),null);
+  assert.equal(resolve('sat',attribution).label,'Uydu');assert.equal(resolve('sat',attribution).maxNativeZoom,19);assert.match(resolve('topo',attribution).url,/opentopomap/);assert.equal(resolve('topo',attribution).maxNativeZoom,17);assert.equal(resolve('invalid',attribution),null);
 });
 
 test('selection adapter updates all three controls before the surface base state',()=>{

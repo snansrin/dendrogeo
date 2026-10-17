@@ -1772,5 +1772,7 @@ Object.assign(DG_I18N_EN,{
  "Allometrik biyokütle yöntemleri · IPCC rehberleri · Türkiye odun yoğunluğu kaynakları.":"Allometric biomass methods · IPCC guidelines · wood-density references for Türkiye.",
  "Yayımlanan bilimsel raporlar DGR kimliği ve kendilerine ait DOI kaydıyla kalıcı olarak izlenir.":"Published scientific reports are persistently identified by their DGR identifier and individual DOI record.",
  "· ticari olmayan kullanımda atıf zorunludur. Üçüncü taraf içerikler kendi lisanslarına tabidir.":"· attribution is required for non-commercial use. Third-party content remains subject to its own licences.",
- "Yöntem ve veri kaynaklarını inceleyin ↗":"Explore methods and data sources ↗"
+ "Yöntem ve veri kaynaklarını inceleyin ↗":"Explore methods and data sources ↗",
+ "Diğer işlemler":"More actions",
+ "Park adını düzenleyin veya yanlış kimliği kaldırın. Birleştirme ve sınır güncelleme için Diğer işlemler seçeneğini kullanın.":"Edit park names or remove incorrect identities. Use More actions to merge parks or refresh boundaries."
 });

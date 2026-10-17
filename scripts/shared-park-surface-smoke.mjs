@@ -32,16 +32,18 @@ try{for(const width of [360,390,430]){
  page.once('dialog',dialog=>dialog.dismiss());await shared.locator('[data-project-action="leave"]').click();assert.equal(await page.evaluate(()=>__leaveCalls.length),0);
  page.once('dialog',dialog=>dialog.accept());await shared.locator('[data-project-action="leave"]').click();await page.waitForFunction(()=>__leaveCalls.length===1);await page.locator('#projSharedSection').waitFor({state:'hidden'});
  assert.deepEqual(await page.evaluate(()=>__leaveCalls),[{p_park:25}]);
- await page.route('https://server.arcgisonline.com/**',route=>{
+ const tileLevels=[];await page.route('https://server.arcgisonline.com/**',route=>{
   const zoom=Number(new URL(route.request().url()).pathname.match(/\/tile\/(\d+)/)?.[1]);
-  return zoom>=20?route.fulfill({status:404,body:''}):route.fulfill({contentType:'image/png',body:Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+aU4cAAAAASUVORK5CYII=','base64')});
+  tileLevels.push(zoom);return zoom>=20?route.fulfill({status:404,body:''}):route.fulfill({contentType:'image/png',body:Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+aU4cAAAAASUVORK5CYII=','base64')});
  });
  await page.locator('#side [data-dg-view="map"]').click();
  await page.evaluate(()=>{switchBaseLayer('sat');map.setView([39.99,32.62],20);});
  await page.waitForFunction(()=>{let fallback=false;map.eachLayer(layer=>{if(layer._dgBase==='sat'&&layer.options.maxNativeZoom===19)fallback=true;});return fallback;});
- assert.equal(await page.evaluate(()=>map.getMaxZoom()),23);
+ assert.equal(await page.evaluate(()=>map.getMaxZoom()),22);
  await page.evaluate(()=>map.setZoom(22));await page.waitForFunction(()=>map.getZoom()===22);assert.equal(await page.evaluate(()=>map.getZoom()),22,'native tile fallback preserves the requested zoom');
- await page.waitForFunction(()=>document.querySelector('#map .leaflet-control-zoom-in').getAttribute('aria-disabled')!=='true');
+ await page.waitForFunction(()=>document.querySelector('#map .leaflet-control-zoom-in').getAttribute('aria-disabled')==='true');
+ const nativeLevels=await page.evaluate(()=>Object.values(map._layers).filter(layer=>layer._dgBase==='sat').map(layer=>layer._tileZoom));
+ assert.deepEqual(nativeLevels,[19]);assert.ok(tileLevels.every(level=>level<=19),'historical imagery never requests unavailable higher levels');
  assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1),true);
  assert.deepEqual(errors,[]);console.log(JSON.stringify({engine:engine.name(),width,savedMapReadOnly:true,analysisClearsSavedLayer:true,leaveCancel:true,leaveRpcSelfOnly:true,sharedListRefresh:true,imageryFallback:true}));await page.close();
 }}finally{await browser.close();await server.close();}

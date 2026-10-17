@@ -48,13 +48,12 @@ test('departure cancel, failure and overlapping requests cannot remove membershi
  ports.confirm=()=>true;const first=window.DG_MANAGE_PARK_INVITES.leave(25,ports);await window.DG_MANAGE_PARK_INVITES.leave(25,ports);assert.equal(calls,1);resolve({error:null});await first;
  ports.store.leave=async()=>({error:Error('offline')});let failed=false;ports.onFailure=()=>{failed=true;};await window.DG_MANAGE_PARK_INVITES.leave(25,ports);assert.equal(failed,true);
 });
-test('missing high-resolution imagery falls back once per level and ignores stale errors',()=>{
- const window={};vm.runInNewContext(read('src/adapters/map/create-base-map-layer.js'),{window});let handler,redraws=0;
- const layer={options:{maxNativeZoom:23},on:(_,fn)=>{handler=fn;},addTo(){},redraw(){redraws++;}};
- window.DG_CREATE_BASE_MAP_LAYER.create({leaflet:{tileLayer:()=>layer},map:{},configuration:{type:'sat'}});
- handler({coords:{z:23}});handler({coords:{z:23}});assert.equal(layer.options.maxNativeZoom,22);assert.equal(redraws,1);
- for(const z of [22,21,20,19])handler({coords:{z}});assert.equal(layer.options.maxNativeZoom,19);assert.equal(redraws,4);
- layer.options.maxNativeZoom=23;handler({coords:{z:20}});assert.equal(layer.options.maxNativeZoom,19,'a level-20 view falls back even when the source ceiling is 23');
+test('historical imagery adapter passes native level 19 without adaptive zoom handlers',()=>{
+ const window={};vm.runInNewContext(read('src/adapters/map/create-base-map-layer.js'),{window});let handlers=0,received;
+ const layer={on(){handlers++;},addTo(){}};
+ const configuration={type:'sat',url:'tiles',maxZoom:22,maxNativeZoom:19};
+ window.DG_CREATE_BASE_MAP_LAYER.create({leaflet:{tileLayer:(_url,options)=>{received=options;return layer;}},map:{},configuration});
+ assert.equal(received.maxNativeZoom,19);assert.equal(received.maxZoom,22);assert.equal(handlers,0);
 });
 test('late saved-map responses and changed boundaries cannot replace the current map',async()=>{
  const window={};vm.runInNewContext(read('src/ui/accepted-park-surface.js'),{window});let release,drawn=0;
