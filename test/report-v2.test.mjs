@@ -339,7 +339,7 @@ describe('repo kanıtı: yayımlanmış rapor dizini tutarlı (şablondan bağı
   test('dizin satırı doğru parkı gösterir (kimlik çakışması kilidi)', () => {
     assert.ok(dirs.length > 0, 'rapor/ altında yayın var');
     const idx = readFileSync(join(RAP, 'index.html'), 'utf8');
-    const rows = [...idx.matchAll(/<tr><td><a href="(?:gorunum\/\?id=)?(DGR-\d{4}-\d{4})\/?">[^<]*<\/a><\/td><td class="tr">([^<]*)<\/td>/g)];
+    const rows = [...idx.matchAll(/<tr><td><a href="(?:gorunum\/\?id=)?(DGR-\d{4}-\d{4})(?:&amp;v=\d+)?\/?">[^<]*<\/a><\/td><td class="tr">([^<]*)<\/td>/g)];
     assert.equal(rows.length, live.length, 'liste = data.json taşıyan yayınlar');
     for (const [, id, parkName] of rows) {
       const data = JSON.parse(readFileSync(join(RAP, id, 'data.json'), 'utf8'));

@@ -12,7 +12,7 @@ const escapeHtml = (value) => String(value ?? '').replace(/[&<>\"]/g, (char) => 
 const formatTonnes = (kg) => Number(kg / 1000).toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
 function renderIndex(list) {
-  const rows = list.map((r) => `<tr><td><a href="gorunum/?id=${r.id}">${r.id}</a></td><td class="tr">${escapeHtml(r.park)}</td><td>${r.n}</td><td>${r.carbon}</td><td>${r.date}</td><td><span class="badge on">Geçerli</span></td></tr>`).join('');
+  const rows = list.map((r) => `<tr><td><a href="gorunum/?id=${r.id}&amp;v=3">${r.id}</a></td><td class="tr">${escapeHtml(r.park)}</td><td>${r.n}</td><td>${r.carbon}</td><td>${r.date}</td><td><span class="badge on">Geçerli</span></td></tr>`).join('');
   return `<!doctype html><html lang="tr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Yayınlanmış Raporlar — DendroGeo</title>
 <meta name="description" content="DendroGeo tarafından yayınlanmış, içerik hash'i ile dondurulmuş park ölçekli bilimsel raporların dizini.">
