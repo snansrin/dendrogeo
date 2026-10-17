@@ -1,4 +1,5 @@
 import { fmtDateTr } from './report-formatting.mjs';
+import { applyPublicPageTheme } from './public-page-theme.mjs';
 
 const esc = (value) => String(value ?? '').replace(/[&<>"]/g, (char) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[char]));
 
@@ -7,7 +8,7 @@ export function createRetractionNotice({ siteOrigin, reportTitle }) {
   const DGR_TITLE_DEF = reportTitle;
   return function renderRetractionNotice({ id, parkName = '', reason = '', retractedAt = null }) {
     const date = retractedAt ? fmtDateTr(retractedAt) : '—';
-    return `<!doctype html>
+    return applyPublicPageTheme(`<!doctype html>
 <html lang="tr">
 <head>
 <meta charset="utf-8">
@@ -30,7 +31,7 @@ code{font-family:ui-monospace,Consolas,monospace;font-size:.78rem;word-break:bre
 a{color:var(--green)}
 </style>
 </head>
-<body>
+<body class="dg-page">
 <div class="wrap">
 <div class="kick">DendroGeo Bilimsel Analiz Raporu · ${esc(id)}</div>
 <h1>Bu rapor geri çekilmiştir</h1>
@@ -47,6 +48,6 @@ a{color:var(--green)}
 <div class="foot">DendroGeo · ${DGR_TITLE_DEF} · © DendroGeo · CC BY-NC 4.0</div>
 </div>
 </body>
-</html>`;
+</html>`, '../..');
   }
 }

@@ -2,6 +2,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { createRetractionNotice } from '../scripts/lib/report-retraction.mjs';
 import { renderRetractionNotice } from '../scripts/make-report.mjs';
+import { applyPublicPageTheme } from '../scripts/lib/public-page-theme.mjs';
 
 test('retraction module produces escaped, noindex notices and make-report keeps its API', () => {
   assert.equal(typeof renderRetractionNotice, 'function');
@@ -18,4 +19,10 @@ test('retraction module produces escaped, noindex notices and make-report keeps 
   assert.match(html, /&lt;img src=x onerror=alert\(1\)&gt;/);
   assert.match(html, /28 Eylül 2026/);
   assert.match(html, /DGR test title/);
+  assert.match(html, /<body class="dg-page">/);
+  assert.match(html, /src="\.\.\/\.\.\/assets\/public-pages\/appearance\.js"/);
+  assert.match(html, /href="\.\.\/\.\.\/css\/appearance\.css"/);
+  assert.equal((html.match(/<!-- dg-public-theme -->/g) || []).length, 1);
+  assert.equal(applyPublicPageTheme(html, '../..'), html,
+    'A newly generated retraction notice must pass the next build theme check unchanged');
 });
