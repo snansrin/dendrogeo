@@ -43,6 +43,9 @@ try{
    await page.waitForFunction(()=>document.getElementById('reportFrame').contentDocument.documentElement.dataset.theme==='light');
    assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1));
   }
+  const appearanceToggle=page.locator('[data-dg-dark-mode]');
+  if(await appearanceToggle.isChecked())await appearanceToggle.uncheck();
+  await page.waitForFunction(()=>document.documentElement.dataset.theme==='light');
   await page.goto(server.url+'/yontem/');
   assert.equal(await page.locator('html').getAttribute('data-theme'),'light','appearance persists between documents');
   await page.goto(server.url+'/rapor/gorunum/?id=../../invalid');

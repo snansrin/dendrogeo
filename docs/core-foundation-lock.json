@@ -9870,6 +9870,23 @@
           "sha256": "8e6b9c5b3f01ce648f562d73462353856aa57f3ce54e6ee2e8e2feaf55285dbd"
         }
       ]
+    },
+    {
+      "date": "2026-10-18",
+      "scope": "User-authorized modularization and test repair: align release and sitemap regressions with the published 3.0.1 labels and the active report archive, and verify restored views through normal shell activation. No analysis or calculation behavior changed.",
+      "audit_chain": "sha256-v1",
+      "files": [
+        {
+          "path": "test/landing-claims.test.mjs",
+          "previous_sha256": "7d476ec2410bee87f1a093c7d2539299a568f81d72914e52970e4df4108d4ada",
+          "sha256": "cb65c129227f6b633e411ed38e7913d0cfda59212514c505d7488f747595b4e1"
+        },
+        {
+          "path": "docs/SCIENTIFIC-CORE-FREEZE.md",
+          "previous_sha256": "8e6b9c5b3f01ce648f562d73462353856aa57f3ce54e6ee2e8e2feaf55285dbd",
+          "sha256": "ff1f7f291eba7f92b754d78406f16b1b570e49274fceb660d203d7c46eef8a95"
+        }
+      ]
     }
   ]
 }

@@ -56,9 +56,10 @@ describe('sürüm numarası yedi yerde de aynı', () => {
     assert.equal(ds.version, SURUM);
   });
 
-  test('landing footer ve künye sayfası aynı sürümü gösteriyor', () => {
-    assert.match(landing, new RegExp('v' + KISA.replace('.', '\\.') + ' ·'));
+  test('landing footer yayın sürümünü, künye platform ve yayın sürümünü açıkça gösteriyor', () => {
+    assert.match(landing, new RegExp('DendroGeo ' + SURUM.replace(/\./g, '\\.') + ' · Web GIS'));
     assert.match(kunye, new RegExp('v' + KISA.replace('.', '\\.') + ' \\(arayüz\\)'));
+    assert.match(kunye, new RegExp('sürüm ' + SURUM.replace(/\./g, '\\.') + ' · şema:'));
   });
 
   /* ATIF KİLİDİ (2026-10-01 denetim K4/P0-4): footer atıf bloğu DataCite

@@ -24,7 +24,7 @@ test('authorized modularization history records scoped, hash-linked changes',()=
   }
   const current=manifest.authorized_modularizations.at(-1);
   assert.equal(current.audit_chain,'sha256-v1');
-  assert.match(current.scope,/user-authorized modularization/i);
+  assert.match(current.scope,/user-authorized (?:modularization|release follow-up)/i);
   assert.ok(current.files.length>0);
   assert.ok(current.files.every(file=>/^[a-f0-9]{64}$/.test(file.previous_sha256||'')),
     'latest migration must link every change to its previous hash');

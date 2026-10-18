@@ -18,6 +18,7 @@ import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import vm from 'node:vm';
 import { QA_LIMITS } from '../scripts/lib/mc.mjs';
+import { readReportIndex } from '../scripts/lib/report-archive.mjs';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const rd = (p) => readFileSync(join(ROOT, p), 'utf8');
@@ -208,10 +209,12 @@ describe('P1 · SEO/çok dillilik', () => {
       assert.match(t, /hreflang="tr"/); assert.match(t, /hreflang="en"/); assert.match(t, /hreflang="x-default"/);
     }
   });
-  test('sitemap /rapor/ galerisini ve geçerli DGR yayınını içeriyor', () => {
+  test('sitemap /rapor/ galerisini ve yalnızca etkin DGR yayınlarını içeriyor', () => {
     const sm = rd('sitemap.xml');
     assert.match(sm, /<loc>https:\/\/dendrogeo\.org\/rapor\/<\/loc>/);
-    assert.match(sm, /rapor\/DGR-\d{4}-\d{4}\//);
+    const activeIds=readReportIndex(join(ROOT,'rapor')).map(report=>report.id);
+    for(const id of activeIds)assert.ok(sm.includes(`/rapor/${id}/`),`active report missing from sitemap: ${id}`);
+    if(!activeIds.length)assert.doesNotMatch(sm,/rapor\/DGR-\d{4}-\d{4}\//,'retracted reports must not remain indexable');
   });
   test('dil düğmesi landing topnav VE uygulama üst barında (EN↔TR)', () => {
     assert.match(landing, /class="btn sm ghost dg-lang-toggle" data-dg-landing-action="toggle-language"/);
