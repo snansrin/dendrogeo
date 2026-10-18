@@ -12,7 +12,7 @@ function walk(dir){
   const path=join(dir,entry.name);if(entry.isDirectory()){walk(path);continue;}
   if(!entry.name.endsWith('.html'))continue;
   let html=readFileSync(path,'utf8');
-  if(!html.includes('dg-page')&&!relative(root,path).replaceAll('\\','/').startsWith('rapor/'))continue;
+  if(!html.includes('dg-page')&&!html.includes('data-dg-public-page')&&!relative(root,path).replaceAll('\\','/').startsWith('rapor/'))continue;
   html=html.replace('<body>','<body class="dg-page">');
   const prefix=relative(dirname(path),root).replaceAll('\\','/')||'.';
   const next=applyPublicPageTheme(html,prefix);count++;
