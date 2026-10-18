@@ -12,7 +12,6 @@ const readerSample=readdirSync('rapor').filter(name=>existsSync(join('rapor',nam
 assert.ok(readerSample,'A sealed report fixture is required for the reader regression');
 function collect(dir){for(const e of readdirSync(dir,{withFileTypes:true})){const p=join(dir,e.name);if(e.isDirectory()&&!['node_modules','.git','vendor'].includes(e.name))collect(p);else if(e.isFile()&&p.endsWith('.html')&&readFileSync(p,'utf8').includes('<!-- dg-public-theme -->'))pages.push('/'+relative('.',p).replaceAll('\\','/'));}}
 collect('.');
-assert.ok(pages.includes('/ornekler/goksu-parki/index.html'),'The interactive Göksu example must participate in shared public appearance checks');
 try{
  for(const width of [311,360,390,430]){
   const page=await browser.newPage({viewport:{width,height:840},reducedMotion:'reduce'}),errors=[];
@@ -21,9 +20,6 @@ try{
   await page.addInitScript(()=>{if(!localStorage.getItem('dg_appearance'))localStorage.setItem('dg_appearance','dark');});
   for(const path of pages.filter(p=>!p.includes('/gorunum/'))){
    await page.goto(server.url+path,{waitUntil:'load'});
-   const example=path==='/ornekler/goksu-parki/index.html';
-   if(example)await page.waitForFunction(()=>document.documentElement.dataset.exampleReady==='true',null,{timeout:30000});
-   const exampleGeometry=example?await page.locator('#exampleMap svg path').evaluateAll(nodes=>nodes.map(n=>[n.getAttribute('d'),n.getAttribute('fill')])):null;
    assert.equal(await page.locator('html').getAttribute('data-theme'),'dark',path);
    assert.equal(await page.locator('body').evaluate(e=>getComputedStyle(e).backgroundColor),'rgb(16, 17, 19)',path);
    assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1),`overflow ${width} ${path}`);
@@ -32,21 +28,6 @@ try{
    await page.locator('[data-dg-dark-mode]').uncheck();
    await page.evaluate(()=>new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve))));
    assert.equal(await page.locator('html').getAttribute('data-theme'),'light',path);
-   if(example){
-    assert.deepEqual(await page.locator('#exampleMap svg path').evaluateAll(nodes=>nodes.map(n=>[n.getAttribute('d'),n.getAttribute('fill')])),exampleGeometry,'Theme switching preserves accepted map geometry and class colours');
-    for(const theme of ['light','dark']){
-     await page.locator('[data-dg-dark-mode]').setChecked(theme==='dark');
-     for(const view of ['map','analysis','drawing','ndvi']){
-      const tab=page.locator(`[data-example-view="${view}"]`);await tab.click();
-      assert.equal(await tab.getAttribute('aria-pressed'),'true');
-      assert.equal(await page.locator('html').getAttribute('data-theme'),theme);
-      assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1),`${width} Göksu ${theme} ${view} overflow`);
-      if(view==='drawing')assert.equal(await page.locator('.dg-drawing-cursor-menu').evaluate(e=>getComputedStyle(e).backgroundColor),theme==='dark'?'rgb(25, 27, 30)':'rgb(255, 255, 255)');
-     }
-    }
-    await page.locator('[data-example-view="map"]').click();
-    await page.locator('[data-dg-dark-mode]').uncheck();
-   }
    if(width===390){await page.addScriptTag({content:axe.source});const contrast=await page.evaluate(async()=> (await axe.run(document,{runOnly:{type:'rule',values:['color-contrast']}})).violations.map(v=>({id:v.id,nodes:v.nodes.map(n=>({target:n.target,summary:n.failureSummary}))})));assert.deepEqual(contrast,[],path+' light contrast');}
    await page.locator('[data-dg-dark-mode]').check();
   }

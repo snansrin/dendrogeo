@@ -70,22 +70,22 @@
     {
       "path": "assets/landing/goksu-map.jpg",
       "sha256": "ba1e926180819e11ba29bb78d427b2aedf59e5d066eb33e439bc196c4412fe74",
-      "capturePage": "ornekler/goksu-parki/?view=map"
+      "scene": "map"
     },
     {
       "path": "assets/landing/goksu-analysis.jpg",
       "sha256": "a40c5b5fdd0c594da62bbeaac84a62c0a3b73cd090c8c3611de57b8e8a837681",
-      "capturePage": "ornekler/goksu-parki/?view=analysis"
+      "scene": "analysis"
     },
     {
       "path": "assets/landing/goksu-drawing.jpg",
       "sha256": "5784602990bd97e9949b18fd42fe778e30c377004efa930d30829188b2bc9707",
-      "capturePage": "ornekler/goksu-parki/?view=drawing"
+      "scene": "drawing"
     },
     {
       "path": "assets/landing/goksu-ndvi.jpg",
       "sha256": "bf93b3559a8612b9dc8ea374985959f4dd56381db8dde7398fd985a8c02d720f",
-      "capturePage": "ornekler/goksu-parki/?view=ndvi"
+      "scene": "ndvi"
     }
   ]
 }

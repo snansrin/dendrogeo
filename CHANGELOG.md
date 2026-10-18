@@ -11,7 +11,9 @@ Yeni sürüm yayımlama adımları: [`docs/surum-yayini.md`](docs/surum-yayini.m
 
 ### Düzeltildi
 
-- Göksu Parkı etkileşimli örnek sayfası ortak açık/koyu tema modülüne bağlandı. Cihaz tercihi ve sayfa içi tema/sistem kontrolleri desteklenir; harita geometrileri ve bilimsel sınıf renkleri korunur. Tema üretimi ile örnek varlık sürümleme adımları birlikte tekrar üretilebilir hale getirildi.
+- İngilizce yöntem sayfasına doğru belge dili eklendi; ortak tema kontrolleri ve gezinme etiketleri artık İngilizce görünür, Türkçe hedefler açıkça işaretlenir.
+- Göksu Parkı etkileşimli örneği ana sayfa sahnelerinde bırakıldı; ayrı örnek rotası ve sahnelerden ona giden bağlantılar kaldırıldı.
+- Sürüm bilgisi `DendroGeo 3.0.1 · Web GIS` biçiminde birleştirildi.
 
 ## [3.0.1] — 2026-10-18
 

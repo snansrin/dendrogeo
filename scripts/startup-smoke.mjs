@@ -32,13 +32,13 @@ try{
   page.on('request',request=>{if(request.url().includes('tile.openstreetmap.org'))tiles.push(request.url());if(request.resourceType()==='script'&&new URL(request.url()).pathname.startsWith('/src/'))appScripts.push(new URL(request.url()).pathname);});
   await page.route('**/vendor/supabase-js-2.116.0.js',route=>route.fulfill({contentType:'text/javascript',body:authFixture}));
   await page.route(/^https?:\/\/(?!127\.0\.0\.1)/,route=>route.abort());
-  await page.addInitScript(anonymous=>{window.__dgAnonymous=anonymous;localStorage.setItem('dg_last_view','nav');localStorage.setItem('dg_scroll_dash','1000');localStorage.setItem('dg_scrollw_dash','1800');},mode==='anonymous');
+  await page.addInitScript(anonymous=>{window.__dgAnonymous=anonymous;localStorage.setItem('dg_last_view','records');localStorage.setItem('dg_scroll_dash','1000');localStorage.setItem('dg_scrollw_dash','1800');},mode==='anonymous');
   const started=Date.now();
   await page.goto('http://127.0.0.1:8765/index.html'+(mode==='oauth'?'?code=startup-fixture':''),{waitUntil:'domcontentloaded'});
   if(mode==='anonymous'){await page.locator('#landing').waitFor({state:'visible'});await page.waitForFunction(()=>document.getElementById('tblCountry')?.querySelector('tbody')?.textContent.includes('Henüz veri yok'));assert.equal(await page.evaluate(()=>document.getElementById('dgStartupScreen').hidden),true);assert.equal(await page.evaluate(()=>document.getElementById('statRec').textContent),'0');assert.deepEqual(errors,[]);assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),true);const startup=await page.evaluate(()=>{const app=performance.getEntriesByType('resource').find(entry=>new URL(entry.name).pathname==='/src/bootstrap/app-runtime.js');const tasks=window.__dgStartupLongTasks||[];return{runtimeDecodedBytes:app?.decodedBodySize||0,runtimeTransferBytes:app?.transferSize||0,runtimeRequestMs:Math.round(app?.duration||0),longTaskCount:tasks.length,longTaskTotalMs:Math.round(tasks.reduce((sum,value)=>sum+value,0)),longTaskMaxMs:Math.round(Math.max(0,...tasks))};});console.log(JSON.stringify({width,mode,startupMs:Date.now()-started,...startup,publicLanding:true,independentStatistics:true,noPageErrors:true}));await page.close();continue;}
   await page.locator('#shell').waitFor({state:'visible'});
   const state=await page.evaluate(()=>({view:document.querySelector('.view.on')?.id,cover:document.getElementById('dgStartupScreen').hidden,scroll:scrollY,width:document.documentElement.scrollWidth,viewport:innerWidth,file:!!document.getElementById('mPhoto').getClientRects().length}));
-  assert.equal(state.view,'v-dash');assert.equal(state.cover,true);assert.equal(state.scroll,0);
+  assert.equal(state.view,'v-records');assert.equal(state.cover,true);assert.equal(state.scroll,0);
   assert.equal(state.file,false);assert.ok(state.width<=state.viewport);assert.equal(tiles.length,0);
   assert.deepEqual(errors,[]);
   assert.deepEqual(appScripts,['/src/domain/settings/appearance-policy.js','/src/adapters/settings/appearance-preference.js','/src/ui/appearance.js','/src/bootstrap/app-runtime.js','/src/services/field-ux.js']);

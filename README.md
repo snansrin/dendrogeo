@@ -8,7 +8,7 @@
 
 Sahadan haritaya, kayıtlı analizden izlenebilir araştırma çıktısına.
 
-[**Platformu açın ↗**](https://dendrogeo.org/) · [**Gerçek park örneği**](https://dendrogeo.org/ornekler/goksu-parki/) · [**Yöntem**](https://dendrogeo.org/yontem/) · [**Rapor arşivi**](https://dendrogeo.org/rapor/)
+[**Platformu açın ↗**](https://dendrogeo.org/) · [**Yöntem**](https://dendrogeo.org/yontem/) · [**Rapor arşivi**](https://dendrogeo.org/rapor/)
 
 [![Release](https://img.shields.io/github/v/release/snansrin/dendrogeo?label=release&color=167b59)](https://github.com/snansrin/dendrogeo/releases)
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.22948773.svg)](https://doi.org/10.5281/zenodo.22948773)
@@ -26,13 +26,13 @@ DendroGeo; GPS konumlu saha ağaç ölçümlerini, biyokütle ve karbon tahminle
 
 <table>
 <tr>
-<td width="50%"><a href="https://dendrogeo.org/ornekler/goksu-parki/"><img src="assets/landing/goksu-map.jpg" alt="Göksu Parkı kayıtlı yüzey haritası"></a></td>
-<td width="50%"><a href="https://dendrogeo.org/ornekler/goksu-parki/?view=ndvi"><img src="assets/landing/goksu-ndvi.jpg" alt="Göksu Parkı göreli NDVI örneği"></a></td>
+<td width="50%"><img src="assets/landing/goksu-map.jpg" alt="Göksu Parkı kayıtlı yüzey haritası"></td>
+<td width="50%"><img src="assets/landing/goksu-ndvi.jpg" alt="Göksu Parkı göreli NDVI örneği"></td>
 </tr>
 <tr><td><strong>Kayıtlı park haritası</strong><br>Park sınırı ve kabul edilmiş yüzey geometrileri.</td><td><strong>Göreli NDVI</strong><br>Gerçek uydu gözlemlerinin aynı park içindeki göreli dağılımı.</td></tr>
 </table>
 
-Görseller Göksu Parkı örneğidir; kaynaklar ve tarihler kendi kapsamıyla sunulur. Etkileşimli sınıf, yakınlaştırma ve NDVI kontrolleri için görsellere dokunun.
+Görseller, ana sayfadaki etkileşimli Göksu Parkı tanıtım sahnelerinden alınmıştır. Sınıf, yakınlaştırma ve NDVI kontrolleri ana sayfanın özellikler bölümündedir.
 
 ## Çalışma alanları
 
@@ -41,7 +41,7 @@ Görseller Göksu Parkı örneğidir; kaynaklar ve tarihler kendi kapsamıyla su
 | **Saha envanteri** | Konum, tür/grup, göğüs çevresi, boy ve isteğe bağlı fotoğraf; çevrimdışı kuyruk ve senkronizasyon | [Ağaç envanteri](https://dendrogeo.org/agac-envanteri/) |
 | **Allometri ve karbon** | Çevreden DBH türetme; kayıtlı tür veya grup yoğunluğuyla biyokütle ve karbon tahmini | [Hesaplama yöntemi](https://dendrogeo.org/karbon-hesaplama/) |
 | **Park ve yüzey analizi** | OSM park sınırı; WorldCover rasterı, kullanılabilir spektral kanıt ve OSM geometrileri; beş son yüzey sınıfı | [Arazi örtüsü](https://dendrogeo.org/arazi-ortusu/) |
-| **Harita düzenleme** | Hücre kararı, yüzey fırçası, nesne/sınır düzenleme ve şekil çizimi; kabul edilen sonucu kaydetme | [Park örneği](https://dendrogeo.org/ornekler/goksu-parki/) |
+| **Harita düzenleme** | Hücre kararı, yüzey fırçası, nesne/sınır düzenleme ve şekil çizimi; kabul edilen sonucu kaydetme | Ana sayfada etkileşimli Göksu Parkı tanıtım sahnesi |
 | **Saha planı** | Yeşil alanla sınırlı veya parkın tamamında grid; ölçüm noktaları ve saha navigasyonu | [Veri ve dışa aktarım](https://dendrogeo.org/veri/) |
 | **Projeler** | Park bağlamında kişisel/ortak projeler, üyelik ve ölçüm yönetimi | Platformun Projeler sekmesi |
 | **Raporlama** | DGR kimliği, dondurulmuş dosyalar, SHA-256, kalıcı bağlantı ve ayrı DOI kaydı | [Yayın arşivi](https://dendrogeo.org/rapor/) |

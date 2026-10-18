@@ -3,7 +3,7 @@ import {join,relative,dirname} from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {applyPublicPageTheme} from './lib/public-page-theme.mjs';
 const root=fileURLToPath(new URL('..',import.meta.url)),write=process.argv.includes('--write');
-const sections=['agac-envanteri','arazi-ortusu','aydinlatma','en','gizlilik','hakkimizda','karbon-hesaplama','kent-parklari','kullanim-kosullari','kunye','ornekler','rapor','veri','yontem'];
+const sections=['agac-envanteri','arazi-ortusu','aydinlatma','en','gizlilik','hakkimizda','karbon-hesaplama','kent-parklari','kullanim-kosullari','kunye','rapor','veri','yontem'];
 let changed=0,count=0;
 function walk(dir){
  // The HTML file is part of each published report manifest. Never rewrite it.

@@ -9826,6 +9826,38 @@
           "sha256": "7d476ec2410bee87f1a093c7d2539299a568f81d72914e52970e4df4108d4ada"
         }
       ]
+    },
+    {
+      "date": "2026-10-18",
+      "scope": "User-authorized modularization and publication: restore the last authenticated workspace module after refresh through standard module activation hooks, defer privileged modules until profile authorization, and complete the previously requested English methods and interactive-only Goksu landing edits. Preserve anonymous/OAuth/recovery flows and all scientific, park, surface, grid and map zoom behavior.",
+      "audit_chain": "sha256-v1",
+      "files": [
+        {
+          "path": "index.html",
+          "previous_sha256": "3afcdce791e8a7bb00d406b9a1fd3e205d4d1ff83a9fe9f52d334c5e4f1a703a",
+          "sha256": "1545736c87cb816d173264a358013724ab55006b8e45e3b6d452714cc796b9ae"
+        },
+        {
+          "path": "partials/landing.html",
+          "previous_sha256": "8b4c7c533873bbe0376aafb44df118b76dd3b46c664dcd5bafd3f6f367f8f66d",
+          "sha256": "a724a9e119f3b032bd4606842a00e31a74ba893c2a94414578c05025ca163f47"
+        },
+        {
+          "path": "scripts/startup-smoke.mjs",
+          "previous_sha256": "71fbb7cb7372d24f0a519e6d92a3349fc61f579f02d1ce4d4069636b766498c4",
+          "sha256": "e75d548ad566d159757ef0cb543f30c5132ea454a2972b3f61c2629f4f33c415"
+        },
+        {
+          "path": "src/ui/shell.js",
+          "previous_sha256": "74cb4d81db2f33d92fc64aed84c0ebfcfafce75f3383290065326cf730fae938",
+          "sha256": "aaad18a7a92f0062b49fd2b19491b0b686fe7a44ca6ff8ec5280619db1460c4f"
+        },
+        {
+          "path": "docs/SCIENTIFIC-CORE-FREEZE.md",
+          "previous_sha256": "4e88d47d54c3f2b8375964c1536afb714f5b4bce4177abb318858dde2d5b1a61",
+          "sha256": "9775e3c01dfca48e48c622d65daedf46468309e932b3bf1974b554367271f6f0"
+        }
+      ]
     }
   ]
 }

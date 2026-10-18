@@ -121,16 +121,20 @@ return;
 function dgApplyShellProfile(){
  if(!PROFILE)return;
  $("whoami").textContent=PROFILE.full_name||PROFILE.email||"";
- if(PROFILE.role!=="admin"&&PROFILE.role!=="owner")return;
+ if(PROFILE.role!=="admin"&&PROFILE.role!=="owner"){dgResumePendingView();return;}
  $("roleBadge").style.display="inline";
  $("roleBadge").textContent=PROFILE.role==="owner"?"KURUCU":"ADMIN";
  $("roleBadge").className=PROFILE.role==="owner"?"badge on":"badge admin";
  $("adminSec").style.display="block";$("miAdmin").style.display="flex";$("miUsers").style.display="flex";
  if(PROFILE.role==="owner"&&$("miVisitors"))$("miVisitors").style.display="flex";
+ dgResumePendingView();
 }
 
 async function startShell(){
-window.DG_STARTUP_SCREEN?.dashboard({setView:view=>{DG_CUR_VIEW=view;},saveView:dgSaveView});
+ const requestedView=dgLastView();
+ const initialView=dgResolveRestorableView(requestedView);
+ if(requestedView&&initialView!==requestedView&&["admin","users","visitors"].includes(requestedView)&&!PROFILE)DG_PENDING_VIEW_RESTORE=requestedView;
+ window.DG_STARTUP_SCREEN?.dashboard({view:initialView,setView:view=>{DG_CUR_VIEW=view;}});
 $("landing").style.display="none";$("shell").style.display="block";
  dgApplyShellProfile();
  if(PROFILE){$("whoami").textContent=PROFILE.full_name;
@@ -157,7 +161,8 @@ if(window.DG_SHELL_VIEW_DATA){
  await Promise.allSettled([loadProjects(),loadWaypoints()]);
  loadDash();loadRecords();loadWorld();loadMyRequests();loadRequestOptions();
 }
- /* Every login/reload starts on the dashboard; saved views are not resumed. */
+ /* Resume the selected module through normal navigation hooks after initial data. */
+ if(initialView!=="dash")go(initialView);
  /* Yöneticiyse yan menüdeki 🔐 Ölçüm Yönetimi rozeti baştan güncel olsun
   * (onay bekleyen sayısı). Sekmeyi açmadan da "iş var" görünsün. */
  if(PROFILE&&(PROFILE.role==="admin"||PROFILE.role==="owner")&&typeof dgRefreshPendingBadge==="function")dgRefreshPendingBadge();
@@ -165,6 +170,22 @@ autoFillPointId();
 }
 
 let DG_CUR_VIEW="dash";
+let DG_PENDING_VIEW_RESTORE="";
+function dgResolveRestorableView(view){
+ const allowed=["dash","measure","nav","map","projects","records","export","world","admin","users","visitors"];
+ if(!allowed.includes(view)||!$("v-"+view))return"dash";
+ if(["admin","users","visitors"].includes(view)){
+  if(!PROFILE)return"dash";
+  if(PROFILE.role!=="admin"&&PROFILE.role!=="owner")return"dash";
+  if(view==="visitors"&&PROFILE.role!=="owner")return"dash";
+ }
+ return view;
+}
+function dgResumePendingView(){
+ if(!DG_PENDING_VIEW_RESTORE)return;
+ const view=DG_PENDING_VIEW_RESTORE;DG_PENDING_VIEW_RESTORE="";
+ if(dgResolveRestorableView(view)===view)go(view);
+}
 /* KALDIĞIN YERDEN DEVAM (2026-09-27 · kullanıcı isteği): sayfa yenilenince
  * son açık sekme ve o sekmedeki kaydırma konumu geri gelir. localStorage
  * yerine sessionStorage DEĞİL: yenileme dışında tarayıcıyı kapat-aç da
