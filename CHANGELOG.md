@@ -9,7 +9,9 @@ Yeni sürüm yayımlama adımları: [`docs/surum-yayini.md`](docs/surum-yayini.m
 
 ## [Yayımlanmadı]
 
-Henüz yeni değişiklik kaydı yok.
+### Düzeltildi
+
+- Göksu Parkı etkileşimli örnek sayfası ortak açık/koyu tema modülüne bağlandı. Cihaz tercihi ve sayfa içi tema/sistem kontrolleri desteklenir; harita geometrileri ve bilimsel sınıf renkleri korunur. Tema üretimi ile örnek varlık sürümleme adımları birlikte tekrar üretilebilir hale getirildi.
 
 ## [3.0.1] — 2026-10-18
 
