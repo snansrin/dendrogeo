@@ -1,143 +1,45 @@
-# 📦 Yeni sürüm yayımlama (GitHub Release + Zenodo)
+# Sürüm yayımlama: GitHub Release ve Zenodo
 
-DendroGeo'nun bilimsel atıf alabilmesi için her anlamlı sürüm **Zenodo'da
-arşivlenir** ve kendi DOI'sini alır. Zenodo bunu GitHub Release'lerinden
-**otomatik** üretir — yani asıl iş GitHub'da bir Release yayımlamaktır.
+Güncel yazılım: **3.0.1** · sürüm DOI: **10.5281/zenodo.22948773** · kavram DOI: **10.5281/zenodo.22646299**. Önceki sürüm 3.0.0: 10.5281/zenodo.22948643. Kavram DOI, Zenodo'daki aynı sürüm ailesinin bütün sürümlerini temsil eder; tam tekrar üretme için sürüm DOI'si kullanılır.
 
-> Süre: ~10 dakika · Ücret: yok · Kod değişikliği: yok (yalnız sürüm numaraları)
+## 1. Hazırlık
 
----
+- Kapsamı ve tüm değişiklikleri `CHANGELOG.md` ve `docs/releases/` içinde kaydedin. Tag aralığındaki commit listesini ekleyin.
+- `package.json`, `package-lock.json`, `manifest.json`, `CITATION.cff`, `partials/head.html` JSON-LD ve güncel site atıflarını eşitleyin. Patch numarası dahil tam sürümü gösterin.
+- `CITATION.cff` yazar sırası, ORCID, başlık, MIT yazılım lisansı ve yayın tarihini taşımalıdır. Ayrı `.zenodo.json` varsa Zenodo onun metadata'sını kullanır; iki kaynağı farkında olmadan birlikte sürdürmeyin.
+- Dondurulmuş DGR raporlarını ve tarihsel kaynak sürümü atıflarını topluca değiştirmeyin. Yazılım DOI'si veri DOI'si değildir.
 
-## 0) Ön koşul (bir kez yapılır)
+## 2. DOI ayırma ve dosyalar
 
-Zenodo ↔ GitHub entegrasyonu açık olmalı:
+Tercih edilen, dosyaların kendi DOI'sini içerebildiği akış:
 
-1. <https://zenodo.org/> → **Log in with GitHub**
-2. Üst menü → **GitHub** → listede `snansrin/dendrogeo` → **ON**
-   (Zenodo, depoya release webhook'u eklemek için yetki ister)
-3. Her release için Zenodo bir **sürüm DOI**'si üretir: `10.5281/zenodo.XXXXXXX`
+1. Zenodo'da mevcut yazılım kaydını açın → **Manage record → New version**.
+2. **Get a DOI now!** ile yeni DOI'yi ayırın. Ayrılmış DOI yayına kadar tescil edilmez.
+3. Yeni DOI'yi güncel README/BibTeX, CITATION.cff, landing, JSON-LD, künye, NOTICE ve güncel yazılım atfı üreten modüllere işleyin. Kavram DOI'yi ayrı belirtin.
+4. Eski sürüm dosyasını içeri aktarmak yerine yeni doğrulanmış sürümün kaynak arşivini yükleyin. Arşiv kimliği, kaynak commit, SHA-256 ve sürüm notları birlikte kaydedilsin.
+5. Yeni kaydın türü Software, sürümü tam SemVer, yayın tarihi ve yazarları doğru olmalı. Yazılım lisansı MIT; paketteki veri/özgün içerik ve üçüncü tarafların kapsamı NOTICE ile açıklanmalı.
 
-> ⚠ **DendroGeo'da kavram (concept) DOI YOK.** v1.0.0 kaydı
-> (`10.5281/zenodo.22646300`) bağımsız oluşturulmuş; `conceptdoi: null`.
-> v3.0.0 (`10.5281/zenodo.22948643`) da ayrı bir kayıt. İki kayıt arasındaki bağ
-> Zenodo'da **Related works → "Is new version of"** ile kurulur.
->
-> Sonuç: repodaki atıf referansları (README, CITATION.cff, JSON-LD, NOTICE,
-> künye) **her sürümde güncellenmek zorundadır** — `test/release.test.mjs`
-> DOI'nin tutarlı olduğunu kilitler. Yeni sürüm yayımlayınca:
-> 1. Zenodo'nun verdiği yeni sürüm DOI'sini al
-> 2. Depoda `grep -rn "<eski DOI>"` ile geçen yerleri değiştir
-> 3. `CITATION.cff`'e eski DOI'yi `identifiers` altında "önceki sürüm" olarak ekle
+GitHub entegrasyonu da kullanılabilir: **Releases → Draft a new release** ile yayımlanan release, entegrasyon açıksa otomatik arşivlenir. Elle oluşturulan aynı sürüm taslağı varken ikinci bir otomatik Zenodo kaydı üretmeyin. Entegrasyon durumunu kontrol edin; ihtiyaç varsa mevcut taslağı tamamlayın. Tag ile arşiv dosyalarının aynı içeriğe ait olduğunu doğrulayın.
 
----
+## 3. Kabul ve yayın
 
-## 1) Sürüm numarasını belirle (SemVer)
-
-| Değişiklik | Artış |
-|---|---|
-| Veri tabanı şeması değişti, lisans değişti, geriye dönük uyumsuz API | **MAJOR** (3.0.0 → 4.0.0) |
-| Yeni özellik, geriye uyumlu | **MINOR** (3.0.0 → 3.1.0) |
-| Hata düzeltmesi | **PATCH** (3.0.0 → 3.0.1) |
-
-## 2) Sürüm numaralarını TEK KOMUTLA güncelle
-
-Sürüm yedi yerde geçiyor; `test/release.test.mjs` hepsinin **aynı** olduğunu
-kilitliyor (biri unutulursa CI kırmızı yanar):
-
-| Dosya | Alan |
-|---|---|
-| `package.json` | `version` |
-| `manifest.json` | `version` |
-| `CITATION.cff` | `version` + `date-released` |
-| `partials/head.html` | JSON-LD `softwareVersion` + `dateModified` |
-| `partials/landing.html` | footer `vXX.X` |
-| `SECURITY.md` | Supported Versions tablosu |
-| `kunye/index.html` | Künye tablosundaki Sürüm satırı |
-
-```bash
-# örn. 3.1.0'a geçiş (yedi dosyayı birden günceller)
-NEW=3.1.0; OLD=3.0.0; TODAY=$(date +%F)
-sed -i "s/\"version\": \"$OLD\"/\"version\": \"$NEW\"/" package.json manifest.json
-sed -i "s/^version: \"$OLD\"/version: \"$NEW\"/; s/^date-released: .*/date-released: \"$TODAY\"/" CITATION.cff
-sed -i "s/\"softwareVersion\": \"${OLD%.*}\"/\"softwareVersion\": \"${NEW%.*}\"/" partials/head.html
-sed -i "s/v${OLD%.*} ·/v${NEW%.*} ·/" partials/landing.html
-sed -i "s/| ${OLD%%.*}\.0\.x  | ✅ Current         |/| ${NEW%%.*}.0.x  | ✅ Current         |/" SECURITY.md
-sed -i "s/v${OLD%.*} (arayüz)/v${NEW%.*} (arayüz)/" kunye/index.html
-npm run build && npm run check
+```sh
+npm ci
+npm run build
+npm run check
+npm run check:phone
+npm run check:accessibility
 ```
 
-> `partials/head.html`'deki `dateModified` alanını da güncelleyin
-> (`"dateModified": "YYYY-AA-GG"`).
+`test/release.test.mjs` sürüm ve DOI tutarlılığını sınar. Çekirdek kilitli dosyalarda yalnız yetkili sürüm/atıf/generasyon değişiklikleri varsa kapsam ve önceki/yeni hash zinciri ayrıca kaydedilir; hesaplama motorları bu iş için değiştirilmez.
 
-## 3) CHANGELOG.md
+PR/CI başarılı olduktan sonra main'e birleştirin. `vX.Y.Z` tag'i aynı doğrulanmış kaynak commit'ine bağlanmalı. GitHub Release notlarına `docs/releases/` özeti ve tam değişiklik bağlantıları ekleyin. Zenodo'ya aynı tag'in arşivini yükleyip yayımlayın.
 
-`## [XX.YY.Z] — YYYY-AA-GG` başlığı altında **Eklendi / Değişti / Düzeltildi /
-Güvenlik** bölümleriyle yazın. Zenodo sürüm açıklaması olarak GitHub Release
-notlarını kullanacağı için, release gövdesine CHANGELOG'un ilgili bölümünü
-yapıştırmak en pratik yol.
+## 4. Yayın sonrası
 
-## 4) Migration varsa
+- DOI çözümleyicisi ve Zenodo kaydında sürüm, dosyalar, lisans ve yazarları doğrulayın.
+- GitHub Release/tag ve kaynak arşivini eşleştirin.
+- Canlı `index.html`, runtime, site atfı ve service worker'ın beklenen sürümle eşleştiğini kontrol edin.
+- Bir sürüm için DOI ayırmak tek başına yayını tamamlamaz. Yayın engeli varsa taslak/yayın durumu açıkça bildirilir.
 
-1. `supabase/migrations/000N_*.sql` — **idempotent** yazın
-   (`create … if not exists`, `drop … if exists`, `create or replace`)
-2. `supabase/README.md` tablosuna satır ekleyin + "Nasıl uygulanır" sırasını güncelleyin
-3. Tam kurulum dosyasını yeniden üretin (0001→000N tek parça):
-   `dendrogeo-tam-kurulum.sql`
-4. Yerel PostgreSQL'de doğrulayın (Supabase stub'larıyla): zincir iki kez
-   hatasız çalışmalı, RLS gerçek rollerle test edilmeli
-
-## 5) Kontrol
-
-```bash
-npm run check      # sözdizimi + ?v= hash + index.html==partials + CSP + tüm testler
-```
-
-## 6) GitHub Release
-
-1. `git push origin main` → CI'ın yeşil olduğunu görün
-   (<https://github.com/snansrin/dendrogeo/actions>)
-2. GitHub → **Releases** → **Draft a new release**
-3. **Choose a tag** → `v3.0.0` yazın → **Create new tag on publish**
-4. **Release title:** `DendroGeo v3.0.0 — park kimliği, Google girişi, yasal uyum`
-5. **Describe this release:** `CHANGELOG.md`'nin ilgili bölümünü yapıştırın
-   (veya **Generate release notes** ile otomatik commit listesi)
-6. ✅ **Set as the latest release** · ☐ Pre-release (normal sürümde işaretleme)
-7. **Publish release**
-
-## 7) Zenodo tarafı
-
-Release yayımlandıktan birkaç dakika sonra:
-
-1. <https://zenodo.org/> → **Upload** → `snansrin/dendrogeo` deposunu görün
-2. Yeni sürüm otomatik oluşur; **metadata `CITATION.cff`'ten alınır**
-   (başlık, yazarlar, lisans, anahtar kelimeler, sürüm, tarih)
-3. Kontrol edin:
-   * **Upload type:** Software
-   * **License:** MIT (software release; `CITATION.cff` is authoritative)
-   * **Authors:** Nagihan ŞİRİN, Sinan ŞİRİN (+ ORCID varsa profiller eşleşir)
-   * **Related identifiers:** DOI (kavram DOI'si), repository URL
-   * **Description:** `CITATION.cff`'teki `abstract`
-4. Eksik varsa düzenleyin → **Save** → sürüm yayımlanır ve **yeni sürüm DOI'si**
-   görünür (`10.5281/zenodo.XXXXXXX`)
-
-## 8) Yayım sonrası
-
-- [ ] Yeni sürüm DOI'sini `CHANGELOG.md` ve (isterseniz) README'ye ekleyin
-- [ ] Canlı sitede `Ctrl+Shift+R` ile sürümün geldiğini doğrulayın
-      (footer'da `vXX.X`, `sw.js` yeni CACHE_VERSION)
-- [ ] Yeni migration varsa Supabase'de çalıştırın ve doğrulama sorgularını koşun
-- [ ] Zenodo'nun kavram DOI'sinin en güncel sürüme çözümlendiğini kontrol edin:
-      <https://doi.org/10.5281/zenodo.22948643> (yeni sürüm DOI'si)
-
----
-
-## Sık yapılan hatalar
-
-| Hata | Sonuç | Çözüm |
-|---|---|---|
-| Zenodo entegrasyonu kapalıyken release yayımlamak | Arşiv oluşmaz | Release'i silip entegrasyonu açın, yeniden yayımlayın |
-| Sürüm numaralarının bir kısmı güncellenmemiş | `test/release.test.mjs` CI'da kırmızı | 2. adımdaki komutu kullanın |
-| `index.html` elle düzenlenmiş | `build:check` kırmızı | `npm run build` (veya `--split`) |
-| `sw.js` CACHE_VERSION artırılmamış | Kullanıcılar eski önbelleği görebilir | Modül kümesi değiştiyse sürümü artırın |
-| `CITATION.cff` bozuk YAML | Zenodo metadata'yı alamaz | <https://citation-file-format.github.io/validate.html> |
-| Tag ile `CITATION.cff` sürümü farklı | Atıflarda sürüm karışıklığı | İkisini aynı adımda güncelleyin |
+Resmi kaynaklar: [Zenodo sürümleme](https://help.zenodo.org/docs/deposit/manage-versions/), [DOI ayırma](https://help.zenodo.org/docs/deposit/describe-records/reserve-doi/), [CITATION.cff desteği](https://help.zenodo.org/docs/github/describe-software/citation-file/).

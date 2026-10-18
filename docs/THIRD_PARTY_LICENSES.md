@@ -14,7 +14,7 @@ DendroGeo tarafından yazılmış yazılım kodu, testler ve yazılım betikleri
 - saha kullanıcılarının yüklediği ölçüm, fotoğraf, konum veya kişisel veriye kendiliğinden açık lisans vermez;
 - bir parka, araştırmaya, katılımcıya ya da ölçüm kaydına ilişkin yayın izni oluşturmaz.
 
-Kullanıcı kaynaklı verinin yayımlanması için ilgili hak, izin, aydınlatma ve onaylar ayrıca değerlendirilmelidir. DendroGeo raporlarının her biri kendi veri kaynağını, kapsamını, atıflarını, lisansını ve varsa yayın/DOI kaydını belirtir. Zenodo `10.5281/zenodo.22948643` v3.0.0 yazılım kaydıdır; veri yayınına ait değildir. Yeni kaynak sürümleri için [CITATION.cff](../CITATION.cff) yazılımı MIT olarak bildirir; bu repo değişikliği eski Zenodo kayıtlarının metadata'sını değiştirmez.
+Kullanıcı kaynaklı verinin yayımlanması için ilgili hak, izin, aydınlatma ve onaylar ayrıca değerlendirilmelidir. DendroGeo raporlarının her biri kendi veri kaynağını, kapsamını, atıflarını, lisansını ve varsa yayın/DOI kaydını belirtir. Zenodo `10.5281/zenodo.22948773` v3.0.1 yazılım kaydıdır; veri yayınına ait değildir. Yeni kaynak sürümleri için [CITATION.cff](../CITATION.cff) yazılımı MIT olarak bildirir; bu repo değişikliği eski Zenodo kayıtlarının metadata'sını değiştirmez.
 
 ## Siteye dağıtılan yazılım
 
@@ -67,7 +67,7 @@ OpenStreetMap, OpenTopoMap, Esri, ESA, Impact Observatory ve Copernicus katmanla
 
 ## DOI ve sürüm ayrımı
 
-README'deki `10.5281/zenodo.22948643` DOI'si DendroGeo yazılım sürümüne aittir. ESA WorldCover'un `10.5281/zenodo.7254221` DOI'si ESA veri kümesine aittir. Bir DendroGeo park raporu veya kullanıcı veri yayını, yalnızca kendisi için ayrı bir yayın kaydı ve DOI oluşturulduğunda bu DOI ile atıf alır.
+README'deki `10.5281/zenodo.22948773` DOI'si DendroGeo yazılım sürümüne aittir. ESA WorldCover'un `10.5281/zenodo.7254221` DOI'si ESA veri kümesine aittir. Bir DendroGeo park raporu veya kullanıcı veri yayını, yalnızca kendisi için ayrı bir yayın kaydı ve DOI oluşturulduğunda bu DOI ile atıf alır.
 
 ## Gözden geçirme
 

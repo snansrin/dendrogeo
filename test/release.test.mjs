@@ -62,13 +62,13 @@ describe('sürüm numarası yedi yerde de aynı', () => {
   });
 
   /* ATIF KİLİDİ (2026-10-01 denetim K4/P0-4): footer atıf bloğu DataCite
-   * kaydıyla (10.5281/zenodo.22948643 → v3.0.0, Software, Türkçe başlık,
+   * kaydıyla (10.5281/zenodo.22948773 → v3.0.1, Software, Türkçe başlık,
    * creators Nagihan önce) ve CITATION.cff ile birebir olmalı. */
   test('⭐ footer atıfı: DataCite kaydıyla birebir (sürüm + tür + başlık + yazar sırası)', () => {
     assert.match(landing, /ŞİRİN, N\. &amp; ŞİRİN, S\. \(\d{4}\)/, 'CITATION.cff sırası: Nagihan önce');
     const citation=landing.match(/<p class="dg-footer-citation">([\s\S]*?)<\/p>/)?.[1]||'';
     assert.match(citation.replace(/<[^>]+>/g,''), new RegExp('\\(Version ' + SURUM.replace(/\./g, '\\.') + '\\) \\[Software\\]\\. Zenodo\\. https://doi\\.org/10\\.5281/zenodo\\.'), 'atıf sürümü + türü DataCite ile aynı olmalı');
-    assert.equal((citation.match(/href="https:\/\/doi\.org\/10\.5281\/zenodo\.22948643"/g)||[]).length,1,'yazılım DOI kaydı tek bağlantıyla sunulmalı');
+    assert.equal((citation.match(/href="https:\/\/doi\.org\/10\.5281\/zenodo\.22948773"/g)||[]).length,1,'yazılım DOI kaydı tek bağlantıyla sunulmalı');
     assert.match(landing, /<i>DendroGeo: Küresel Ağaç Envanteri ve Karbon Veri Sistemi<\/i>/, 'başlık Zenodo kaydındaki Türkçe başlık olmalı');
     assert.ok(!landing.includes('(Version 1.0.0)'), 'eski sürüm atıfta kalmamalı');
     assert.ok(!landing.includes('[Dataset]. Zenodo'), 'DataCite türü Software; [Dataset] kalmamalı');
@@ -95,7 +95,7 @@ describe('CITATION.cff — Zenodo künyesi', () => {
   });
 
   test('⭐ kavram DOI ve lisans diğer kaynaklarla tutarlı', () => {
-    assert.match(cff, /^doi: "10\.5281\/zenodo\.22948643"$/m);
+    assert.match(cff, /^doi: "10\.5281\/zenodo\.22948773"$/m);
     assert.match(cff, /^license: MIT$/m);
     assert.equal(pkg.license, 'MIT');
     assert.equal(ds.license, 'https://creativecommons.org/licenses/by-nc/4.0/');
@@ -113,8 +113,9 @@ describe('CITATION.cff — Zenodo künyesi', () => {
     assert.match(cff, /given-names: "Sinan"/);
   });
 
-  test('ORCID için yer ayrılmış (doldurulmayı bekliyor)', () => {
-    assert.ok((cff.match(/#\s*orcid:/g) || []).length >= 1, 'orcid yorum satırı yok');
+  test('ORCID her iki yazar için teyit edilmiş kimliklerle dolu', () => {
+    assert.match(cff, /orcid: "https:\/\/orcid\.org\/0009-0003-7372-0973"/);
+    assert.match(cff, /orcid: "https:\/\/orcid\.org\/0009-0009-6303-5140"/);
   });
 
   test('⭐ künyede kişisel e-posta YOK', () => {
@@ -155,14 +156,14 @@ describe('yayım süreci belgelenmiş', () => {
     const r = rd('README.md');
     assert.match(r, /\\c\{S\}irin, Nagihan and \\c\{S\}irin, Sinan/);
     assert.match(r, /license\s*=\s*\{MIT\}/);
-    assert.match(r, /10\.5281\/zenodo\.22948643/);
+    assert.match(r, /10\.5281\/zenodo\.22948773/);
   });
 
   test('LICENSE + LICENSE-DATA + NOTICE ikili lisansı açıklıyor', () => {
     assert.match(rd('LICENSE'), /MIT License/);
     assert.match(rd('LICENSE-DATA'), /Attribution-NonCommercial 4\.0 International/);
     assert.match(rd('NOTICE'), /CC BY-NC 4\.0/);
-    assert.match(rd('NOTICE'), /10\.5281\/zenodo\.22948643/);
+    assert.match(rd('NOTICE'), /10\.5281\/zenodo\.22948773/);
   });
 });
 

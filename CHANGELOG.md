@@ -9,6 +9,31 @@ Yeni sürüm yayımlama adımları: [`docs/surum-yayini.md`](docs/surum-yayini.m
 
 ## [Yayımlanmadı]
 
+Henüz yeni değişiklik kaydı yok.
+
+## [3.0.1] — 2026-10-18
+
+Yazılım DOI: [10.5281/zenodo.22948773](https://doi.org/10.5281/zenodo.22948773) · [Tüm sürümler](https://doi.org/10.5281/zenodo.22646299).
+
+### Sürüm özeti
+
+- Domain/application/adapter/UI modülleri, üretilen runtime, bağımlılık kuralları ve çekirdek hash koruması tamamlandı.
+- Ham çevre, türetilmiş DBH ve tür/odun yoğunluğu protokolü kilitlendi; bağımsız Python hesabı, 49 tür/147 sentetik senaryo ve saha doğrulama araçları eklendi.
+- Hücre kararları, yüzey fırçası, bina sınıfı ve nesne/sınır düzenleme düzeltildi; havuz/süs havuzu Su altında birleştirildi.
+- OSM istek bütçesi, önbellek ve eksik veri davranışı; çok parçalı parklar ve sayısal geometri kurtarması geliştirildi.
+- Yeşil alan/parkın tamamı grid kapsamı, Harikalar Diyarı grid hataları, ölçüm noktaları ve doğrulanmış PNG çıktısı düzeltildi.
+- Seka gibi alanlarda eksik yakın zoom uydu karosu için kullanılabilir üst karonun doğru coğrafi kırpması eklendi; zoom ayarları korundu.
+- Harita menüleri başlıklara sabitlendi; telefon çizim/fırça araçları, ortak proje üyeliği, kayıtlar ve park yönetimi iyileştirildi.
+- İlk yükleme, OAuth dönüşü, giriş/çıkış, native fetch/confirm bağlamları ve yayın formu düzeltildi.
+- Koyu/açık tema, Türkçe/İngilizce, mobil taşmalar ve yalnız Latince tür adlarının italik sunumu düzenlendi.
+- Landing gerçek Göksu geometrileri ve göreli NDVI örnekleriyle yenilendi; kaynak ve lisans metinleri sadeleştirildi.
+- Yazılım MIT / yetkili veri CC BY-NC 4.0 kapsamı, katkı/davranış kuralları, R/Python istemcileri ve makale taslakları eklendi.
+- Deneysel uydu ağaç/taç algılama entegrasyonu kaldırıldı; saha envanteri ve allometri korunur.
+- v3.0.1 atıfları, yazar ORCID’leri, README görselleri, doğrulanabilir rozetler ve yayın kılavuzu güncellendi.
+
+Aşağıdaki ayrıntılı kayıtlar v3.0.1 kapsamındadır. Tüm commitler, yeniden düzeltmeler dahil, [sürüm dosyasında](docs/releases/v3.0.1.md) listelenir. Deneysel olarak eklenip kaldırılmış bir işlev son sürümde mevcut özellik sayılmaz.
+
+
 ### İyileştirildi — geçici canlı oturum olayları
 Sekme geçmişi, son eylem ve konum izinin sınırlı bellekte tutulması ayrı application modülüne taşındı; presence payload'ı ve geçici saklama davranışı korundu.
 

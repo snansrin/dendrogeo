@@ -286,7 +286,7 @@ describe('0036 · özellik ve EN bütünlük kilitleri', () => {
     const restoreSql = rd('src/domain/backup/build-restore-sql.js');
     assert.match(restoreSql, /OVERRIDING SYSTEM VALUE/, 'identity kolonlarına özgün id yazımı');
     assert.match(restoreSql, /ON CONFLICT DO NOTHING/, 'idempotent');
-    assert.match(rd('src/domain/backup/build-snapshot.js'), /zenodo\.22948643/, 'yedek künyesinde güncel DOI');
+    assert.match(rd('src/domain/backup/build-snapshot.js'), /zenodo\.22948773/, 'yedek künyesinde güncel DOI');
     assert.match(b, /DG_BACKUP_SNAPSHOT\.build\(/, 'servis güncel yedek künyesini kullanır');
     assert.match(sh, /data-dg-backup-action="restore-file"/, 'kabuk seçim eylemini bildirmeli');
     assert.match(rd('src/ui/backup-actions.js'), /root\.dgRestorePick\(event\)/, 'UI modülü restore girişine yönlendirmeli');
@@ -470,7 +470,7 @@ describe('i18n katmanı sözleşmesi (0035)', () => {
     assert.match(rd('src/ui/shell.js'), /addEventListener\("dg:lang"/, 're-render kancası');
     const dr = rd('src/ui/data-request-reply-content.js');
     assert.match(dr, /ŞİRİN, N\. & ŞİRİN, S\./, 'e-posta atfında doğru yazar sırası');
-    assert.match(dr, /Version 3\.0\.0/, 'e-posta atfında güncel sürüm');
+    assert.match(dr, /Version 3\.0\.1/, 'e-posta atfında güncel sürüm');
     assert.ok(!dr.includes('(Version 1.0.0)'), 'eski sürüm atfı kalmamalı');
     assert.match(rd('src/services/data-requests.js'), /DG_DATA_REQUEST_REPLY_CONTENT_UI\.build\(/, 'servis güncel künye modülünü kullanır');
   });

@@ -138,7 +138,7 @@ describe('KVKK: açık rıza ve aydınlatma', () => {
   test('künye sayfası: sorumlu, atıf, içerik kaldırma süreci, erişilebilirlik', () => {
     const t = rd('kunye/index.html');
     assert.match(t, /Nagihan ŞİRİN &amp; Sinan ŞİRİN/);
-    assert.match(t, /10\.5281\/zenodo\.22948643/);
+    assert.match(t, /10\.5281\/zenodo\.22948773/);
     assert.match(t, /İçerik bildirimi ve kaldırma talebi/);
     assert.match(t, /7 gün/, 'bildirim değerlendirme süresi');
     assert.match(t, /Erişilebilirlik beyanı/);
@@ -171,7 +171,7 @@ describe('ikili lisans tutarlılığı (yazılım MIT, veri CC BY-NC 4.0)', () =
     const t = rd('NOTICE');
     assert.match(t, /Nagihan ŞİRİN & Sinan ŞİRİN/);
     assert.match(t, /CC BY-NC 4\.0/);
-    assert.match(t, /10\.5281\/zenodo\.22948643/);
+    assert.match(t, /10\.5281\/zenodo\.22948773/);
     assert.match(t, /OpenStreetMap verisi\s+ODbL/, 'ODbL atfı NOTICE’ta');
     assert.match(t, /Leaflet/, 'üçüncü taraf bileşenler kendi lisansıyla ayrışmalı');
   });
@@ -190,7 +190,7 @@ describe('ikili lisans tutarlılığı (yazılım MIT, veri CC BY-NC 4.0)', () =
     assert.match(head, /"@type": "WebApplication"[\s\S]*?"license": "https:\/\/opensource\.org\/license\/mit\//);
     assert.match(head, /"@type": "Dataset"[\s\S]*?"license": "https:\/\/creativecommons\.org\/licenses\/by-nc\/4\.0\//);
     assert.match(head, /"url": "https:\/\/dendrogeo\.org\/veri\/"/);
-    assert.ok(!/"identifier": "https:\/\/doi\.org\/10\.5281\/zenodo\.22948643"/.test(head), 'yazılım DOI veri kümesine bağlanmamalı');
+    assert.ok(!/"identifier": "https:\/\/doi\.org\/10\.5281\/zenodo\.22948773"/.test(head), 'yazılım DOI veri kümesine bağlanmamalı');
     assert.match(rd('kullanim-kosullari/index.html'), /MIT/);
     assert.match(rd('kullanim-kosullari/index.html'), /LICENSE-DATA/);
   });

@@ -44,3 +44,5 @@ Harikalar Diyarı (OSM way/205225595) gerçek veri kontrolü: 88 sınır köşes
 Bu çalışma kopyasında `npm run core:lock` ile `.githooks/pre-push` etkinleştirilir. Normal `git push`, çekirdek hash denetimi başarısızsa durur. Yeni bir klonda da aynı komutla etkinleştirilmelidir; yalnız hook dosyasının Git'te bulunması kanca kurmaz.
 
 Kilitli kaynaklar sonraki arayüz işleri sırasında değiştirilmez. Kullanıcı açıkça belirli bir çekirdek düzeltmesi isterse değişiklik kapsamı, önceki/yeni SHA-256 değerleri ve ilgili regresyon kanıtı yeni bir yetkili kayıtla belgelenir. Hash'leri kendiliğinden yenileyen bir komut bulunmaz.
+
+2026-10-18: Kullanıcı v3.0.1 Zenodo yayını, yeni DOI’nin güncel atıflara işlenmesi, README ve rozet/lisans düzenlemesini açıkça istedi. Yetkili geçiş yalnız paket sürümleri, JSON-LD/landing atfı, üretilen index ve r441 önbellek sürümüdür. Eski/yeni SHA zinciri manifestte kaydedildi. Allometri, tür/odun yoğunluğu, park/yüzey/grid hesapları ve harita zoom ayarları değiştirilmedi; dondurulmuş raporlar korundu.
