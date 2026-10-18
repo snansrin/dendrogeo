@@ -312,7 +312,6 @@
   },true);
   window.addEventListener("resize",()=>{bar.querySelectorAll(":scope > details[open]").forEach(menuLayout.position);},{passive:true});
   window.visualViewport?.addEventListener("resize",()=>{bar.querySelectorAll(":scope > details[open]").forEach(menuLayout.position);},{passive:true});
-  document.addEventListener("scroll",()=>{bar.querySelectorAll(":scope > details[open]").forEach(menuLayout.position);},{passive:true,capture:true});
   // Release the map after selecting an editing tool from its phone panel.
   document.addEventListener("click",event=>{
    const button=event.target?.closest?.('#v-map [data-dg-click="brushToggle"],#v-map [data-dg-click="drawStart"],#v-map [data-dg-click="objectPick"],#v-map [data-dg-click="hand"]');

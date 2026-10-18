@@ -350,7 +350,8 @@
       "src/ui/waypoint-gps-overlay.js",
       "src/ui/waypoint-navigation-feedback.js",
       "src/utils/geo.js",
-      "vendor/leaflet-1.9.4.js"
+      "vendor/leaflet-1.9.4.js",
+      "src/adapters/map/recover-imagery-tiles.js"
     ],
     "scientific_contract_and_inputs": [
       "css/park-panel.css",
@@ -1081,7 +1082,7 @@
     "css/ui-standard.css": "cf5fc000e24f988fddb04da907b2bdc168a4575c36bc8554c1b2e22ccf527b9b",
     "docs/legacy-service-boundaries.json": "a42273d82bef00247d48bca5f6edf3e05dc41e70bb950f13382b362342067e17",
     "docs/surface-scientific-contract.json": "ad98bde39dc2e8dfd80d36d8f287349cf0ab8a91cd7a9f728e6dd533a844ffa3",
-    "index.html": "34768f3c5bd000f08bab55fe5d95697160c04dac8691b181e9d16a02d8c3908f",
+    "index.html": "314187f5a33c8d10d4dd2d9a18eda5608bd613cb9401025e67e40eb766856982",
     "package-lock.json": "7c911eebd0849bccd565d0e56935035c7d187b57d310feebbe837843cdefd913",
     "package.json": "7acc377c195644a0a14ac05ce09ffb20a5fc11a15f7cb0c192f951e9f2e62fc3",
     "partials/boot.html": "d9959a7c00c92185f9b085564370ecdc5b2e539c6becad0d80687410096c8fef",
@@ -2086,7 +2087,8 @@
     "test/measurement-points-labels.test.mjs": "f97ba4b257a8346d5451c494b3fae1bf1ec0dedfcb98a30239f306801d4457fa",
     "scripts/surface-map-download-smoke.mjs": "9a1f470315c973b6ccd0ce4f3355b5e35986e51e76355598b739de84fa5a61d7",
     "src/ui/park-export-lazy-class-bridge.js": "da3706cebb84d663669d479a89459e5a3e9817fc1c62b97533c38e721e76ce75",
-    "test/park-export-lazy-class-bridge.test.mjs": "9d75ab63c349cd6a7288e57c50a50637551935548aebf0417043719c4dd7ac65"
+    "test/park-export-lazy-class-bridge.test.mjs": "9d75ab63c349cd6a7288e57c50a50637551935548aebf0417043719c4dd7ac65",
+    "src/adapters/map/recover-imagery-tiles.js": "22662e817241aad091a9f67a990ece0fe43e63e20ee76148d8bca6f2e43e12d0"
   },
   "authorized_modularizations": [
     {
@@ -9670,6 +9672,112 @@
           "previous_sha256": "28ea01fc9b84a1bfeae5edb7c0aef3e5575379817beadcaa94877dd76b9d9acd",
           "sha256": "b8c875d8b1f21ed5c7c42f27b548e060f3c4b2c42f842b42f0893c184e5a8f57"
         }
+      ]
+    },
+    {
+      "date": "2026-10-18",
+      "scope": "User-authorized modularization of live-map usability: keep map tool panels anchored to their trigger while scrolling; make the green-only grid switch off cover the entire park, including road and water geometries. No analysis or park-detection engine changed.",
+      "audit_chain": "sha256-v1",
+      "files": [
+        {
+          "path": "index.html",
+          "previous_sha256": "314187f5a33c8d10d4dd2d9a18eda5608bd613cb9401025e67e40eb766856982",
+          "sha256": "7081687a093d62579f0245dca5fe65f3a8097dff2e45cccf3864771db31f5f45"
+        },
+        {
+          "path": "src/application/parks/build-grid-request.js",
+          "previous_sha256": "30ecb483efe7a67a3ae0c12a34bdf0cc8db9227d3d684f63d0a3a36495a8d86e",
+          "sha256": "c0ba3f1faad413fef4e3334843c53abc7f3be133aa4bafb9e798ccc9c062dc17"
+        },
+        {
+          "path": "src/ui/gis-workspace-menu-position.js",
+          "previous_sha256": "f66ec71b7df94352e8b77164093ac6e8cd63c5915f09f25e60bffa6f864242f9",
+          "sha256": "102b08f1f4fcb4ba64c6d9f3e19fc54e1ca615ca8bf245ca232ee47ec6d6df88"
+        },
+        {
+          "path": "src/ui/gis-workspace.js",
+          "previous_sha256": "04ffb6c96a875e17bd835b9770a10a04dc03566b95e6d3b8bdbb798badcd66b1",
+          "sha256": "b0890fac05700aa603a981dcec5a2ed9d7061a5d10ccfda8dd6d02d8ea81ad7b"
+        }
+      ]
+    },
+    {
+      "date": "2026-10-18",
+      "scope": "User-authorized modularization follow-up: explicitly anchor mobile map dropdown panels to each trigger so they remain in the same coordinate system and are tappable after page scrolling. No analysis or park-detection engine changed.",
+      "audit_chain": "sha256-v1",
+      "files": [
+        {
+          "path": "index.html",
+          "previous_sha256": "7081687a093d62579f0245dca5fe65f3a8097dff2e45cccf3864771db31f5f45",
+          "sha256": "2cb7b23c799b956890bc7bde78b6d93362090ffb3cffd8bfdd2be6c878bce85b"
+        },
+        {
+          "path": "src/ui/gis-workspace-menu-position.js",
+          "previous_sha256": "102b08f1f4fcb4ba64c6d9f3e19fc54e1ca615ca8bf245ca232ee47ec6d6df88",
+          "sha256": "22af41bd0dc0237a1b7136010176ce408c0e56f7f145e74ed214ad12a01dc159"
+        }
+      ]
+    },
+    {
+      "date": "2026-10-18",
+      "scope": "user-authorized modularization: surface-review robustness fix. On known polygon-clipping sweep-line topology failures, retry the identical geometry operation with the existing 1 mm integer clipping adapter; preserve the existing safe-stop if recovery fails. No surface classes, scientific area method, park detection, or analysis classification changed.",
+      "audit_chain": "sha256-v1",
+      "files": [
+        {
+          "path": "src/application/surface/clip-surface-review-geometry.js",
+          "previous_sha256": "cdf081c02317177ac06516daf367aeb65561abc8ecc7f7700e7a7b61f5ae19d5",
+          "sha256": "e432caac5b40337586697ff1111c3d74e1930f2da950c162fd4119faf3c849fb"
+        },
+        {
+          "path": "src/services/lc-review.js",
+          "previous_sha256": "72c38dae92b2018410a9000ccc64969b506e8be435f955a287427a04e9a66f36",
+          "sha256": "189e0b83d2e3d235717537dc5dd9076b5bfbc1372fd2d39af59f27e1f862abea"
+        },
+        {
+          "path": "test/surface-review-clipping-modules.test.mjs",
+          "previous_sha256": "50eba2da2d0ad57f8d4de21e50f865ea2f258e6c71877566930426bc6340d05f",
+          "sha256": "262e3e850c330c5caecaaccef092cac873e33cad4fa4da100fc3c6a00cdf245f"
+        },
+        {
+          "path": "index.html",
+          "previous_sha256": "2cb7b23c799b956890bc7bde78b6d93362090ffb3cffd8bfdd2be6c878bce85b",
+          "sha256": "5ec6cf47742aeba4d456621580ef705761ecd5108197a339173e5d740b67a2d2"
+        }
+      ]
+    },
+    {
+      "date": "2026-10-18",
+      "scope": "User-authorized modularization: restore unavailable Seka satellite tiles with the nearest available parent imagery, cropped to the exact requested extent. Preserve the existing 19 native / 22 display zoom policy and all scientific layers. Add display-only recovery adapter, phone coverage and r440 offline assets. User requested deployment to the live site.",
+      "audit_chain": "sha256-v1",
+      "files": [
+        {
+          "path": "partials/head.html",
+          "previous_sha256": "344b9282e26b144fab98b09d49b1ccdfb0aed467edf70126ffddb9f0b9ff2c44",
+          "sha256": "3dcf53dc621fec6e153618a66cd8bb10217a7d79c057a45d79cf6aa5a30fe188"
+        },
+        {
+          "path": "src/adapters/map/create-base-map-layer.js",
+          "previous_sha256": "ccf410d1a78eea7a7a062ce86b69dad57d774cfa3c922822df6d308392c640f2",
+          "sha256": "deae346e8c48e8b12c6a24ac84fa30b928751cc2a6cb8b42e4f7db5e4d8b5c4d"
+        },
+        {
+          "path": "scripts/check-phone.mjs",
+          "previous_sha256": "c38e826c3c2054c69f08babf5510962e34c8b0f9b3ddb0b134fee2ac19455eba",
+          "sha256": "608718d2395afb50b7c078e006dc28645305efd9fad78a1eeb76396cc90c683f"
+        },
+        {
+          "path": "sw.js",
+          "previous_sha256": "0ba72bd00cf8e7b2a054d51fd6955dfc443f0a4a093bbdbb2611ae2cff2f4f29",
+          "sha256": "a3d823a4d794f5628d070bfc5943d0196a187a38662d8947a7dd95beeeb088aa"
+        },
+        {
+          "path": "index.html",
+          "previous_sha256": "5ec6cf47742aeba4d456621580ef705761ecd5108197a339173e5d740b67a2d2",
+          "sha256": "477a0b89e0dfa32c523db935d9b8037da11eef3302c5cbaeb66f4352c6e34ca4"
+        }
+      ],
+      "added_protected_files": [
+        "src/adapters/map/recover-imagery-tiles.js"
       ]
     }
   ]
