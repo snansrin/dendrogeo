@@ -48,12 +48,12 @@ test('departure cancel, failure and overlapping requests cannot remove membershi
  ports.confirm=()=>true;const first=window.DG_MANAGE_PARK_INVITES.leave(25,ports);await window.DG_MANAGE_PARK_INVITES.leave(25,ports);assert.equal(calls,1);resolve({error:null});await first;
  ports.store.leave=async()=>({error:Error('offline')});let failed=false;ports.onFailure=()=>{failed=true;};await window.DG_MANAGE_PARK_INVITES.leave(25,ports);assert.equal(failed,true);
 });
-test('historical imagery adapter passes native level 19 without adaptive zoom handlers',()=>{
- const window={};vm.runInNewContext(read('src/adapters/map/create-base-map-layer.js'),{window});let handlers=0,received;
- const layer={on(){handlers++;},addTo(){}};
+test('imagery recovery preserves native level 19 and installs no adaptive zoom handlers',()=>{
+ const window={setTimeout,clearTimeout};vm.runInNewContext(read('src/adapters/map/recover-imagery-tiles.js'),{window});vm.runInNewContext(read('src/adapters/map/create-base-map-layer.js'),{window});const handlers=[];let received;
+ const layer={on(event){handlers.push(event);},addTo(){}};
  const configuration={type:'sat',url:'tiles',maxZoom:22,maxNativeZoom:19};
  window.DG_CREATE_BASE_MAP_LAYER.create({leaflet:{tileLayer:(_url,options)=>{received=options;return layer;}},map:{},configuration});
- assert.equal(received.maxNativeZoom,19);assert.equal(received.maxZoom,22);assert.equal(handlers,0);
+ assert.equal(received.maxNativeZoom,19);assert.equal(received.maxZoom,22);assert.deepEqual(handlers,['tileunload']);
 });
 test('late saved-map responses and changed boundaries cannot replace the current map',async()=>{
  const window={};vm.runInNewContext(read('src/ui/accepted-park-surface.js'),{window});let release,drawn=0;

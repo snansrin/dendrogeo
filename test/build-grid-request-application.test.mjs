@@ -25,14 +25,27 @@ test('resolved surface parts replace legacy water and impervious blockers', () =
   assert.equal(request.blockLines[2], 'path-line');
 });
 
-test('without resolved surface parts the worker receives legacy ring blockers', () => {
+test('green-only mode keeps legacy ring and line exclusions when no resolved parts exist', () => {
   const water = [[1, 2]], hard = [[3, 4]];
   const request = build({
-    size: 10, clearance: 1, epsg: 32636, outer: [], greenOnly: false,
+    size: 10, clearance: 1, epsg: 32636, outer: [], greenOnly: true,
     waterRings: [water], imperviousRings: [hard], waterLines: [], imperviousLines: [], gridBlockLines: []
   });
   assert.equal(request.job, 'grid');
   assert.deepEqual(Array.from(request.holes), []);
   assert.deepEqual(Array.from(request.blockRings), [water, hard]);
   assert.deepEqual(Array.from(request.parts), []);
+});
+
+test('whole-park mode passes no water, road, or hard-surface blockers to grid generation', () => {
+  const request = build({
+    size: 20, clearance: 3, epsg: 32636, outer: ['park'], greenOnly: false,
+    parts: [{ type: 'green', geom: ['green'] }, { type: 'hard', geom: ['road'] }],
+    waterRings: ['water-ring'], imperviousRings: ['hard-ring'],
+    waterLines: ['water-line'], imperviousLines: [{ pts: 'road-line', w: 4 }], gridBlockLines: ['path-line']
+  });
+  assert.deepEqual(Array.from(request.blockRings), []);
+  assert.deepEqual(Array.from(request.blockLines), []);
+  assert.equal(request.greenOnly, false);
+  assert.equal(request.parts.length, 2, 'source evidence is retained without excluding whole-park cells');
 });

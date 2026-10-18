@@ -4,7 +4,7 @@
 // NOT: Senkronizasyon artık Ana Thread (Supabase JS SDK) tarafından yapılıyor
 // ============================================================
 
-const CACHE_VERSION = 'dendrogeo-sw-v2-r439';
+const CACHE_VERSION = 'dendrogeo-sw-v2-r440';
 
 /* İKİ AYRI STATİK CACHE — bu ayrım bilinçli ve önemli.
  *
@@ -513,6 +513,7 @@ const CORE_ASSETS = [
     '/src/domain/map/resolve-base-map-layer.js',
     '/src/ui/sync-base-map-layer-selection.js',
     '/src/adapters/map/manage-base-map-layers.js',
+    '/src/adapters/map/recover-imagery-tiles.js',
     '/src/adapters/map/create-base-map-layer.js',
     '/src/application/map/switch-base-map-layer.js',
     '/src/services/map.js',
