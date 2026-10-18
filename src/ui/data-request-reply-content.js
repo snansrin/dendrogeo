@@ -43,7 +43,7 @@
         "Bu veri CC BY-NC 4.0 lisansı altındadır. Ticari olmayan amaçlarla, kaynak gösterilerek serbestçe kullanılabilir.",
         "",
         "Atıf önerisi:",
-"ŞİRİN, N. & ŞİRİN, S. (2026). DendroGeo: Küresel Ağaç Envanteri ve Karbon Veri Sistemi (Version 3.0.0) [Software] [Dataset]. Zenodo. https://doi.org/10.5281/zenodo.22646300",
+"ŞİRİN, N. & ŞİRİN, S. (2026). DendroGeo: Küresel Ağaç Envanteri ve Karbon Veri Sistemi (Version 3.0.1) [Software]. Zenodo. https://doi.org/10.5281/zenodo.22948773",
 "",
         "Herhangi bir sorunuz olursa bu e-postayı yanıtlayarak bize ulaşabilirsiniz.",
         "",
@@ -51,7 +51,7 @@
 	"DendroGeo Ekibi",
 	"Nagihan ŞİRİN — Doktora Öğrencisi · Sinan ŞİRİN — Sistem Geliştirici",
 	"Küresel Ağaç Envanteri ve Karbon Veri Sistemi",
-	"https://dendrogeo.org · DOI: 10.5281/zenodo.22646300",
+	"https://dendrogeo.org · DOI: 10.5281/zenodo.22948773",
     ];
     
     const bodyTxt = bodyLines.filter(l => l !== null).join("\n");

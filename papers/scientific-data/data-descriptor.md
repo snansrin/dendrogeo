@@ -123,7 +123,7 @@ The frozen source package is available through DGR-2026-0026 and its recorded re
 
 ## Code Availability
 
-DendroGeo source code is available at https://github.com/snansrin/dendrogeo under the MIT licence. The archived analysis identifies revision 4c199515035e6bdc8dfb56b84687751ebc4332a5. The software archive is separately identified by DOI 10.5281/zenodo.22948643 [5]; this software DOI is not a data accession.
+DendroGeo source code is available at https://github.com/snansrin/dendrogeo under the MIT licence. The archived analysis identifies revision 4c199515035e6bdc8dfb56b84687751ebc4332a5. The current software release (3.0.1) is separately archived at DOI 10.5281/zenodo.22948773 [5]; this software DOI is not a data accession.
 
 The manuscript audit is papers/tools/audit_public_report.py and uses the Python standard library. Run it from the repository root with the source report directory and an output evidence path. It reads frozen files and writes only editorial evidence. It does not access user accounts, modify measurements or publish data. R/Python access clients are distributed under clients/.
 
@@ -133,7 +133,7 @@ The manuscript audit is papers/tools/audit_public_report.py and uses the Python 
 2. Chave, J. et al. Improved allometric models to estimate the aboveground biomass of tropical trees. Global Change Biology 20, 3177–3190. https://doi.org/10.1111/gcb.12629 (2014).
 3. Zanaga, D. et al. ESA WorldCover 10 m 2021 v200. Zenodo. https://doi.org/10.5281/zenodo.7254221 (2022).
 4. OpenStreetMap contributors. OpenStreetMap copyright and licence. https://www.openstreetmap.org/copyright (accessed 17 October 2026).
-5. Şirin, N. & Şirin, S. DendroGeo: Küresel Ağaç Envanteri ve Karbon Veri Sistemi, version 3.0.0. Zenodo. https://doi.org/10.5281/zenodo.22948643 (2026).
+5. Şirin, N. & Şirin, S. DendroGeo: Küresel Ağaç Envanteri ve Karbon Veri Sistemi, version 3.0.1. Zenodo. https://doi.org/10.5281/zenodo.22948773 (2026).
 
 ## Author Contributions
 

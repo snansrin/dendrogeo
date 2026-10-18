@@ -9779,6 +9779,53 @@
       "added_protected_files": [
         "src/adapters/map/recover-imagery-tiles.js"
       ]
+    },
+    {
+      "date": "2026-10-18",
+      "scope": "User-authorized modularization: User explicitly requested v3.0.1 publication, current Zenodo DOI throughout active citations, README and attribution cleanup, and verified badges. Update version metadata, JSON-LD/footer attribution, generated index and r441 cache revision only. Allometry, species/density sources, park detection, surface/grid algorithms and map zoom/tile settings remain byte-identical to ad3e89b. Published report archives are preserved.",
+      "audit_chain": "sha256-v1",
+      "files": [
+        {
+          "path": "index.html",
+          "previous_sha256": "477a0b89e0dfa32c523db935d9b8037da11eef3302c5cbaeb66f4352c6e34ca4",
+          "sha256": "3afcdce791e8a7bb00d406b9a1fd3e205d4d1ff83a9fe9f52d334c5e4f1a703a"
+        },
+        {
+          "path": "package-lock.json",
+          "previous_sha256": "7186e5429ed1b272e5c25416466b82e13e27f26fec87234a61ae7bae1cd3d149",
+          "sha256": "16a575055f5072f20ce0dd96db4e2c69f942813661604fa87a9d252ec23a4b5f"
+        },
+        {
+          "path": "package.json",
+          "previous_sha256": "6567d97e634a63c822c683c38dadcd1b28fb07e54922c593d8c85960742f2eea",
+          "sha256": "0578b2b932de836d0275e358227df63daffaede67d4e15b525c561e04daf6ade"
+        },
+        {
+          "path": "partials/head.html",
+          "previous_sha256": "3dcf53dc621fec6e153618a66cd8bb10217a7d79c057a45d79cf6aa5a30fe188",
+          "sha256": "ba632857d403faf45bc3d26c5fdfa422a2048e5e0bcb1cef49b40f4c19e9be84"
+        },
+        {
+          "path": "partials/landing.html",
+          "previous_sha256": "0558ff9119a58e4c1055911048c83c9a7fd7a2b195cdbfe48701916e6d00a835",
+          "sha256": "8b4c7c533873bbe0376aafb44df118b76dd3b46c664dcd5bafd3f6f367f8f66d"
+        },
+        {
+          "path": "sw.js",
+          "previous_sha256": "a3d823a4d794f5628d070bfc5943d0196a187a38662d8947a7dd95beeeb088aa",
+          "sha256": "0908543197f0eade85ae4696a20d8e2e7ef7d93eb7fc96d5730231f7a12ab538"
+        },
+        {
+          "path": "docs/SCIENTIFIC-CORE-FREEZE.md",
+          "previous_sha256": "b8c875d8b1f21ed5c7c42f27b548e060f3c4b2c42f842b42f0893c184e5a8f57",
+          "sha256": "4e88d47d54c3f2b8375964c1536afb714f5b4bce4177abb318858dde2d5b1a61"
+        },
+        {
+          "path": "test/landing-claims.test.mjs",
+          "previous_sha256": "2be78b187895bd899791863215d3c1d04589c142b29668bc4df2984a22084c7a",
+          "sha256": "7d476ec2410bee87f1a093c7d2539299a568f81d72914e52970e4df4108d4ada"
+        }
+      ]
     }
   ]
 }
