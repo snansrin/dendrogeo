@@ -9858,6 +9858,18 @@
           "sha256": "9775e3c01dfca48e48c622d65daedf46468309e932b3bf1974b554367271f6f0"
         }
       ]
+    },
+    {
+      "date": "2026-10-18",
+      "scope": "User-authorized release follow-up: keep theme and report-reader smoke validation consistent with the report retraction queue. Run immutable-reader checks when a sealed report exists; when the active directory is empty, preserve empty-index and invalid-link checks without inventing a report fixture or changing publication artifacts.",
+      "audit_chain": "sha256-v1",
+      "files": [
+        {
+          "path": "docs/SCIENTIFIC-CORE-FREEZE.md",
+          "previous_sha256": "9775e3c01dfca48e48c622d65daedf46468309e932b3bf1974b554367271f6f0",
+          "sha256": "8e6b9c5b3f01ce648f562d73462353856aa57f3ce54e6ee2e8e2feaf55285dbd"
+        }
+      ]
     }
   ]
 }
